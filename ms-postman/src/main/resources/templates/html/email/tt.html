@@ -1,0 +1,505 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+<head>
+    <!-- If you delete this meta tag, the ground will open and swallow you. -->
+    <meta name="viewport" content="width=device-width"/>
+
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <title><span th:text="${_tu.prop('company.name')}" th:remove="tag"></span></title>
+
+    <style type="text/css">
+        /* -------------------------------------
+		GLOBAL
+------------------------------------- */
+        .htmlHead *, * {
+            margin:0;
+            padding:0;
+        }
+        .htmlHead *,* { font-family: Optima,Times, sans-serif, Arial; }
+
+        .htmlHead img {
+            max-width: 100%;
+            border:0 none;
+        }
+        .htmlHead .collapse {
+            margin:0;
+            padding:0;
+        }
+        body, .body {
+            -webkit-font-smoothing:antialiased;
+            -webkit-text-size-adjust:none;
+            width: 100%!important;
+            height: 100%;
+        }
+
+
+        /* -------------------------------------
+                ELEMENTS
+        ------------------------------------- */
+        .htmlHead a { color: #2BA6CB;}
+
+        .htmlHead .btn {
+            text-decoration:none;
+            color: #FFF;
+            background-color: #666;
+            padding:10px 16px;
+            font-weight:bold;
+            margin-right:10px;
+            text-align:center;
+            cursor:pointer;
+            display: inline-block;
+        }
+
+        .htmlHead p.callout {
+            padding:0 30px 0;
+        }
+        .htmlHead .callout a {
+            font-weight:bold;
+            color: #2BA6CB;
+        }
+
+       
+        .htmlHead .social .soc-btn {
+            padding: 7px 4px 0;
+            font-size:12px;
+            margin-bottom:10px;
+            text-decoration:none;
+            color: #FFF;font-weight:bold;
+            text-align:center;
+        }
+        .htmlHead .social .soc-btn img{
+            vertical-align: middle;
+        }
+        .htmlHead .sidebar .soc-btn {
+            display:block;
+            width:100%;
+        }
+
+        /* -------------------------------------
+                HEADER
+        ------------------------------------- */
+        .htmlHead table.head-wrap { width: 100%;}
+
+        .htmlHead .header.container table td.logo { padding: 15px; }
+        .htmlHead .header.container table td.label { padding: 15px; padding-left:0px;}
+
+
+        /* -------------------------------------
+                BODY
+        ------------------------------------- */
+       .htmlHead  table.body-wrap { width: 100%; }
+
+
+        /* -------------------------------------
+                FOOTER
+        ------------------------------------- */
+        .htmlHead table.footer-wrap { width: 100%;	clear:both!important;
+        }
+        .htmlHead .footer-wrap .container td.content  p { border-top: 1px solid rgb(215,215,215); padding-top:15px;}
+        .htmlHead .footer-wrap .container td.content p {
+            font-size:10px;
+            font-weight: bold;
+
+        }
+
+
+        /* -------------------------------------
+                TYPOGRAPHY
+        ------------------------------------- */
+      
+        .htmlHead h1 small, .htmlHead h2 small, .htmlHead h3 small, .htmlHead h4 small, .htmlHead h5 small, .htmlHead h6 small { font-size: 60%; color: #000000; text-transform: none;     padding-bottom: 8px;
+            display: inline-block; margin-top: 0;  }
+
+        .htmlHead h1 { font-weight:200; font-size: 44px;}
+        .htmlHead h2 { font-weight:200; font-size: 37px;}
+        .htmlHead h3 { font-weight:500; font-size: 27px;}
+        .htmlHead h4 { font-weight:500; font-size: 24px; color: #376a97;}
+        .htmlHead h5 { font-weight:bold; font-size: 18px; color: #21ba5e;}
+        .htmlHead h6 { font-weight:bold; font-size: 14px; text-transform: uppercase; color:#444;}
+
+        .htmlHead .collapse { margin:0!important;}
+
+        .htmlHead p, #htmlHead ul {
+            margin-bottom: 10px;
+            font-weight: normal;
+            font-size:14px;
+        }
+        .htmlHead p.lead { font-size:18px; }
+        .htmlHead p.last { margin-bottom:0px;}
+
+        .htmlHead ul li {
+            margin-left:5px;
+            list-style-position: inside;
+        }
+
+        /* -------------------------------------
+                SIDEBAR
+        ------------------------------------- */
+        .htmlHead ul.sidebar {
+            background:#ebebeb;
+            display:block;
+            list-style-type: none;
+        }
+        .htmlHead ul.sidebar li { display: block; margin:0;}
+        .htmlHead ul.sidebar li a {
+            text-decoration:none;
+            color: #666;
+            padding:10px 16px;
+            /* 	font-weight:bold; */
+            margin-right:10px;
+            /* 	text-align:center; */
+            cursor:pointer;
+            border-bottom: 1px solid #777777;
+            border-top: 1px solid #FFFFFF;
+            display:block;
+            margin:0;
+        }
+        .htmlHead ul.sidebar li a.last { border-bottom-width:0px;}
+        .htmlHead ul.sidebar li a h1,#htmlHead ul.sidebar li a h2,#htmlHead ul.sidebar li a h3,#htmlHead ul.sidebar li a h4,#htmlHead ul.sidebar li a h5,#htmlHead ul.sidebar li a h6,#htmlHead ul.sidebar li a p { margin-bottom:0!important;}
+
+
+
+        /* ---------------------------------------------------
+                RESPONSIVENESS
+                Nuke it from orbit. It's the only way to be sure.
+        ------------------------------------------------------ */
+
+        /* Set a max-width, and make it display as block so it will automatically stretch to that width, but will also shrink down on a phone or something */
+        .htmlHead .container {
+            display:block!important;
+            max-width:600px!important;
+            margin:0 auto!important; /* makes it centered */
+            clear:both!important;
+            border-radius: 20px;
+        }
+
+        /* This should also be a block element, so that it will fill 100% of the .container */
+
+
+        /* Odds and ends */
+        .htmlHead .column {
+            width: 300px;
+            float:left;
+        }
+        .htmlHead .column tr td { padding: 0 15px; }
+        .htmlHead .column-wrap {
+            padding:0!important;
+            margin:0 auto;
+            max-width:600px!important;
+        }
+        .htmlHead .column table { width:100%;}
+        .htmlHead .social .column {
+            width: 280px;
+            min-width: 279px;
+            float:left;
+        }
+
+        /* Be sure to place a .clear element after each set of columns, just to be safe */
+        .htmlHead .clear { display: block; clear: both; }
+		.htmlHead .points{
+			width: 240px;
+			float: left;
+			padding-right:30px;
+			padding-bottom:30px;
+		}
+        .htmlHead .btn-primary {
+            text-decoration: none;
+            color: #FFF;
+            background-color: #348eda;
+            border: solid #348eda;
+            border-width: 5px 10px;
+            line-height: 2em;
+            font-weight: bold;
+            text-align: center;
+            cursor: pointer;
+            display: inline-block;
+            border-radius: 5px;
+            text-transform: capitalize;
+            font-size: 18px;
+        }
+        /* -------------------------------------------
+                PHONE
+                For clients that support media queries.
+                Nothing fancy.
+        -------------------------------------------- */
+        @media only screen and (max-width: 600px) {
+
+            .htmlHead a[class="btn"] { display:block!important; margin-bottom:10px!important; background-image:none!important; margin-right:0!important;}
+
+            .htmlHead div[class="column"] { width: auto!important; float:none!important;}
+
+            .htmlHead table.social div[class="column"] {
+                width:auto!important;
+            }
+            .htmlHead .points{
+				width: 100%;
+				float: left;
+				padding-right:30px;
+				padding-bottom:30px;
+			}
+
+        }
+    </style>
+
+</head>
+
+<body class="body"  style="margin: 0;padding: 0; background: #f4f4f4">
+<table class="body htmlHead" width="100%" style="margin: 0;padding: 0; background: #f4f4f4; width: 100%">
+    <tr>
+        <td>
+            <!-- HEADER -->
+            <table class="head-wrap" bgcolor="#f4f4f4" width="100%">
+                <tr>
+                    <td class="header container" align="center">
+
+                        <!-- /content -->
+                        <div class="content" style="padding:15px;  max-width:600px; margin:0 auto; display:block;">
+                            <table bgcolor="#f4f4f4" width="100%">
+                                <tr>
+                                    <td align="center"><img th:attr="src=${'cid:' + _tu.prop('company.logob.path')}" /></td>
+                                </tr>
+                            </table>
+                        </div><!-- /content -->
+
+                    </td>
+                </tr>
+            </table><!-- /HEADER -->
+
+            <!-- BODY -->
+            <table class="body-wrap" width="100%">
+                <tr>
+                    <td class="container" width="100%" >
+                    <div  style="max-width:600px; border-radius: 20px; margin: 0 auto; background: #ffffff">
+
+                        <!-- content -->
+                        <div class="content" style="padding:30px 30px 0;  max-width:600px; margin:0 auto; display:block;">
+                            <table width="100%" style="width: 100%">
+                                <tr>
+                                    <td>
+                                  		<h5>Dear <span th:text="${data.customer}" th:remove="tag"></span>,</h5><br/>
+                                  		<p class="lead">Greetings from <span th:text="${_tu.prop('company.name')}" th:remove="tag"></span> !</p> <br/>
+                                  		<p class="lead">Your transaction with us dated <strong th:text="${data.date}"></strong> having Trans Ref No: <strong th:text="${data.refno}"></strong> for <strong th:text="${data.currency}"></strong> <strong th:text="${data.amount}"></strong>   has been successfully processed and made available to the bank of the beneficiary.Thank you for your continued patronage.</p>
+                                        <p class="lead">We are now available <a th:href="${_tu.prop('company.app.url')}"><span >online</span></a> and on App's for <a th:href="${_tu.prop('company.ios.url')}"><span>IOS</span></a> and <a th:href="${_tu.prop('company.android.url')}"><span>Android</span>.</a></p>
+                                        <p class="lead" th:if="${data.verifylink}">Please click the Verify your email button below to confirm that you want to use this email ID for all communication from Al Mulla Exchange.</p>
+										<p align="center" th:if="${data.verifylink}"><a th:href="${_tu.prop('company.app.url')+ '/pub/verify/email/' + data.verifylink.id +'/'+data.verifylink.verificationCode}" style="width:200px" class="btn-primary" target="_blank">Verify Email</a></p>
+                                   		<br/>
+              							<p align="center"><a th:href="${_tu.prop('company.app.url') + '/pub/rating/REMIT/' + data.tranxId + '/' + data.verCode }" style="width:200px" class="btn-primary" target="_blank">Rate this transaction</a></p>
+                                   		
+                                   		
+                                   		<!-- A Real Hero (and a real human being) -->
+                                        <p style="padding:40px 0" align="center"><img src="cid:images/product-1.png"/></p><!-- /hero -->
+                                        <h4 align="center">There are a lot of reasons to continue transacting with <span th:text="${_tu.prop('company.name')}" th:remove="tag"></span> and few of these are:</h4>
+                                     </td>
+                                </tr>
+                            </table>
+                        </div><!-- /content -->
+						<div style="margin:30px 30px 0;">
+	                        <!-- content -->
+	                        <div class="content points" style="  max-width:600px; margin:0 auto; display:block;">
+	                            <table width="100%">
+	                                <tr>
+	                                    <td class="small" width="66" style="vertical-align: top; padding-right:10px;"><img width="66" height="66"
+	                                                                                                                       src="cid:images/product-6.png"/></td>
+	                                    <td>
+	                                        <h6>Instant Credit</h6>
+	                                        <p>Immediate credit to your beneficiary accounts</p>
+	                                    </td>
+	                                </tr>
+	                            </table>
+	
+	                        </div><!-- /content -->
+	
+	                        <!-- content -->
+	                       <div th:if="${_tu.prop('dynamic.pricing.enable')}  == 'true'" class="content points" style="  max-width:600px; margin:0 auto; display:block;">
+	                            <table width="100%" style="width: 100%">
+	                                <tr>
+	                                    <td class="small" width="66" style="vertical-align: top; padding-right:10px;"><img width="66" height="66"
+	                                                                                                                       src="cid:images/product-5.png"/></td>
+	                                    <td>
+	                                        <h6>Dynamic Pricing</h6>
+	                                        <p>You are special. Get automated and customized better rates instantaneously.</p>
+	                                    </td>
+	                                </tr>
+	                            </table>
+	                        </div><!-- /content -->
+							<div style="clear:both;"></div>
+	
+	                        <!-- content -->
+	                        <div th:if="${_tu.prop('insurance.enable')}  == 'true'" class="content points" style="max-width:600px; margin:0 auto; display:block;">
+	                            <table style="width: 100%" width="100%">
+	                                <tr>
+	                                    <td class="small" width="66" style="vertical-align: top; padding-right:10px;"><img width="66" height="66"
+	                                                                                                                       src="cid:images/product-2.png"/></td>
+	                                    <td>
+	                                        <h6>Life Insurance Coverage</h6>
+	                                        <p>Free life insurance coverage for every transactions. No premiums to pay, no policies to fill. KD 1,000 worth of coverage for 30 days.</p>
+	                                    </td>
+	                                </tr>
+	                            </table>
+                            </div>
+                            <!-- /content -->
+	
+	                        <!-- content -->
+	                        <div class="content points" style="  max-width:600px; margin:0 auto; display:block;">
+	                            <table width="100%" style="width: 100%">
+	                                <tr>
+	                                    <td class="small" width="66" style="vertical-align: top; padding-right:10px;"><img width="66" height="66"
+	                                                                                                                       src="cid:images/product-3.png"/></td>
+	                                    <td>
+	                                        <h6>World Class Events</h6>
+	                                        <p>Invitation to world class events</p>
+	                                    </td>
+	                                </tr>
+	                            </table>
+	                        </div><!-- /content -->
+							<div style="clear:both;"></div>
+	                        <!-- content -->
+	                        <div class="content points" style="  max-width:600px; margin:0 auto; display:block;">
+	                            <table width="100%" style="width: 100%">
+	                                <tr>
+	                                    <td class="small" width="66" style="vertical-align: top; padding-right:10px;"><img width="66" height="66"
+	                                                                                                                       src="cid:images/product-4.png"/></td>
+	                                    <td>
+	                                        <h6>Marketing Promotions</h6>
+	                                        <p>Exciting marketing promotions</p>
+	                                    </td>
+	                                </tr>
+	                            </table>
+	                        </div><!-- /content -->
+	                        
+	                        <!-- content -->
+	                        <div class="content points" style="  max-width:600px; margin:0 auto; display:block;">
+	                            <table width="100%" style="width: 100%">
+	                                <tr>
+	                                    <td class="small" style="vertical-align: top; padding-right:10px;">
+	                                        <p>* Terms and Conditions apply</p>
+	                                    </td>
+	                                </tr>
+	                            </table>
+	                        </div><!-- /content -->
+	                         <div style="clear:both;"></div>
+                        </div>
+                       
+                        <!-- content -->
+                        <div class="content" style="  max-width:600px; margin:0 auto; display:block;">
+                            <table width="100%" style="width: 100%">
+                                <tr>
+                                    <td>
+
+                                        <!-- Callout Panel -->
+                                        <p class="callout">Our online solution <a th:href="@{'https://' +${_tu.prop('company.website.url')}}"><span th:text="${_tu.prop('company.website.url')}"></span></a>
+                                            provides even finer rates.<span th:if="${_tu.prop('dynamic.pricing.enable')}  == 'true'">Also with our dynamic pricing systems capability, get automated customized discounts on your transactions instantaneously .</span><br /><br />
+                                            Follow us on social media, facebook, twitter and instagram for our latest
+                                            updates, product roll outs, special offers and events.<br /><br />
+                                            We would love to hear your opinion and suggestions to make us better. You can write to
+                                            us on <a th:href="@{'mailto:' + ${_tu.prop('support.contact.from')}}" th:text="${_tu.prop('support.contact.from')}"></a>
+                                            and give us your valuable feedback.</p><!-- /callout panel -->
+                                    </td>
+                                </tr>
+                            </table>
+                        </div><!-- /content -->
+
+                     
+
+                        <!-- content -->
+                        <div class="content" style="padding:15px;  max-width:600px; margin:0 auto; display:block;">
+                            <table width="100%" style="width: 100%">
+                                <tr>
+                                    <td>
+
+                                        <!-- social & contact -->
+                                        <table bgcolor="" class="social" width="100%" dir="ltr">
+                                            <tr>
+                                                <td>
+
+                                                    <!--- column 1 -->
+                                                    <div class="column">
+                                                        <table bgcolor="" cellpadding="" align="left" >
+                                                            <tr>
+                                                                <td>
+																<h4 style="margin-top:8px;"> <small>Warm Regards,</small>
+																 <h6><span th:text="${_tu.prop('company.name')}" th:remove="tag"></span> Team</h6></h4><!-- /callout panel -->
+                                                                    
+
+
+                                                                </td>
+                                                            </tr>
+                                                        </table><!-- /column 1 -->
+                                                    </div>
+
+                                                    <!--- column 2 -->
+                                                    <div class="column">
+                                                        <table bgcolor="" cellpadding="" align="left">
+                                                            <tr>
+                                                                <td align="right">
+
+                                                                   <h6 style="padding-bottom:10px;">Connect with Us:</h6>
+                                                                   <p class="">
+                                                                    <a th:if="${_tu.prop('company.facebook.url') != 'false'}"
+                                                                        th:href="${_tu.prop('company.facebook.url')}"
+                                                                        class="soc-btn fb" style="text-decoration: none;"><img src="cid:images/facebook.png" width="28" height="28" /></a> 
+                                                                    <a  th:if="${_tu.prop('company.twitter.url') != 'false'}"
+                                                                        th:href="${_tu.prop('company.twitter.url')}"
+                                                                        class="soc-btn tw" style="text-decoration: none;"><img src="cid:images/twitter.png" width="28" height="28" /></a> 
+                                                                    <a  th:if="${_tu.prop('company.instagram.url') != 'false'}"
+                                                                        th:href="${_tu.prop('company.instagram.url')}"
+                                                                        class="soc-btn in" style="text-decoration: none;"><img src="cid:images/instagram.png" width="28" height="28" /></a>
+                                                                    <a  th:if="${_tu.prop('company.youtube.url') != 'false'}"
+                                                                        th:href="${_tu.prop('company.youtube.url')}"
+                                                                        class="soc-btn gp" style="text-decoration: none;"><img src="cid:images/youtube.png" width="28" height="28" /></a>
+                                                                </p>
+
+                                                                </td>
+                                                            </tr>
+                                                        </table><!-- /column 2 -->
+                                                    </div>
+
+                                                    <div class="clear"></div>
+
+                                                </td>
+                                            </tr>
+                                        </table><!-- /social & contact -->
+
+                                    </td>
+                                </tr>
+                            </table>
+                        </div><!-- /content -->
+
+					</div>
+                    </td>
+                </tr>
+            </table><!-- /BODY -->
+
+            <!-- FOOTER -->
+            <table class="footer-wrap" width="100%" style="width: 100%">
+                <tr>
+                    <td></td>
+                    <td class="container">
+
+                        <!-- content -->
+                        <div class="content" style="padding:15px;  max-width:600px; margin:0 auto; display:block;">
+                            <table width="100%" style="width: 100%">
+                                <tr>
+                                    <td align="center">
+                                      <p style="color:#000000; font-size: 12px;">Phone: <strong th:text="${_tu.prop('company.telephone')}"></strong> &nbsp;&nbsp;&nbsp;
+                                                                        <span style="white-space: nowrap">Email: <strong><a th:href="@{'mailto:' + ${_tu.prop('support.contact.from')}}" th:text="${_tu.prop('support.contact.from')}"></a></strong>&nbsp;&nbsp;&nbsp;</span> 
+                                                                        Time: <strong th:text="${_tu.prop('company.time')}"></strong><br/>
+                                      </p>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div><!-- /content -->
+
+                    </td>
+                    <td></td>
+                </tr>
+            </table><!-- /FOOTER -->
+
+        </td>
+    </tr>
+</table>
+
+</body>
+</html>

@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<artifactId>mehery</artifactId>
+	<name>mehery</name>
+	<packaging>pom</packaging>
+	<url>http://maven.apache.org</url>
+
+	<parent>
+		<groupId>com.boot.jx</groupId>
+		<artifactId>boot-jx-parent</artifactId>
+		<version>0.0.1-SNAPSHOT</version>
+		<relativePath>boot-jx-parent/pom.xml</relativePath>
+	</parent>
+
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<jax.version>0.0.1-SNAPSHOT</jax.version>
+		<java.version>1.8</java.version>
+		<vzn>0.0.1-SNAPSHOT</vzn>
+		<sonar.issuesReport.html.enable>true</sonar.issuesReport.html.enable>
+		<!-- <sonar.analysis.mode>preview</sonar.analysis.mode> <sonar.host.url>http://10.28.42.5:9000</sonar.host.url> -->
+	</properties>
+
+	<dependencyManagement>
+		<dependencies>
+
+			<dependency>
+				<groupId>com.boot.jx</groupId>
+				<artifactId>boot-jx-parent</artifactId>
+				<version>${jax.version}</version>
+			</dependency>
+
+		</dependencies>
+
+	</dependencyManagement>
+
+	<dependencies>
+
+	</dependencies>
+
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<source>1.8</source>
+					<target>1.8</target>
+				</configuration>
+			</plugin>
+
+			<plugin>
+				<groupId>org.sonarsource.scanner.maven</groupId>
+				<artifactId>sonar-maven-plugin</artifactId>
+				<version>3.3.0.603</version>
+			</plugin>
+		</plugins>
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>net.ju-n.maven.plugins</groupId>
+					<artifactId>checksum-maven-plugin</artifactId>
+					<version>1.2</version>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+	</build>
+
+	<pluginRepositories>
+		<pluginRepository>
+			<id>sonatype-snapshots</id>
+			<name>Sonatype Snapshots</name>
+			<url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+		</pluginRepository>
+	</pluginRepositories>
+
+	<modules>
+		<module>boot-jx-parent</module>
+		<module>ms-bot</module>		
+		<module>ms-postman</module>
+		<module>server-agent</module>
+	</modules>
+</project>
+

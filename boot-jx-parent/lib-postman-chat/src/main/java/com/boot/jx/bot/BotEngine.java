@@ -1,0 +1,238 @@
+package com.boot.jx.bot;
+
+import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.regex.Pattern;
+
+import javax.annotation.PostConstruct;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.aop.framework.AopProxyUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.stereotype.Component;
+
+import com.boot.jx.chat.ChatService;
+import com.boot.jx.postman.doc.ChatPromise;
+import com.boot.jx.postman.doc.ChatPromise.State;
+import com.boot.jx.postman.model.InboxMessage;
+import com.boot.jx.utils.PostManUtil;
+import com.boot.utils.ArgUtil;
+import com.boot.utils.ClazzUtil;
+import com.boot.utils.EntityDtoUtil;
+import com.boot.utils.StringUtils.StringMatcher;
+
+@Component
+public class BotEngine {
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(BotEngine.class);
+
+	@Autowired
+	List<ChatController> chatControllers;
+
+	protected final Map<String, MethodWrapper> eventToMethodsMap = new HashMap<>();
+
+	private final Map<String, MethodWrapper> methodNameMap = new HashMap<>();
+	/**
+	 * A List of names of the methods which are part of any conversation.
+	 */
+	private final Map<String, ChatController> filtersMap = new HashMap<String, ChatController>();
+
+	@Autowired
+	private ChatService botService;
+	
+	private boolean chatBotDefined;
+
+	public boolean isChatBotDefined() {
+		return chatBotDefined;
+	}
+
+	@PostConstruct
+	public void mapping() {
+		for (ChatController chatController : chatControllers) {
+			chatBotDefined = true;
+			Class<?> c = AopProxyUtils.ultimateTargetClass(chatController);
+			String controllerName = c.getName();
+
+			BotController botControllerAnnot = ClazzUtil.getAnnotation(c, BotController.class);
+
+			filtersMap.put(controllerName, chatController);
+			Method[] methods = c.getMethods();
+			for (Method method : methods) {
+				if (method.isAnnotationPresent(ChatMapping.class)) {
+					ChatMapping controller = method.getAnnotation(ChatMapping.class);
+					String key = controller.key();
+					String[] patternStr = controller.pattern();
+					int patternFlags = controller.patternFlags();
+					String next = controller.next();
+
+					MethodWrapper methodWrapper = new MethodWrapper();
+					methodWrapper.setMethod(method);
+
+					Pattern[] patterns = new Pattern[patternStr.length];
+
+					for (int i = 0; i < patternStr.length; i++) {
+						patterns[i] = Pattern.compile(patternStr[i], patternFlags);
+					}
+
+					methodWrapper.setPattern(patterns);
+					methodWrapper.setNext(next);
+					methodWrapper.setController(controllerName);
+					methodWrapper.setKey(key);
+					methodWrapper.setLane(botControllerAnnot.lane());
+
+					// for (String event : events) {
+					eventToMethodsMap.put(key, methodWrapper);
+					// }
+					methodNameMap.put(method.getName(), methodWrapper);
+				}
+			}
+		}
+	}
+
+	/**
+	 * Search for a method whose {@link ChatMapping#pattern()} match with the
+	 * {@code Event} text or payload received from Slack/Facebook and also filter
+	 * out the methods in {@code methodWrappers} whose {@link ChatMapping#pattern()}
+	 * do not match.
+	 *
+	 * @param text           is the message from the user
+	 * @param methodWrappers
+	 * @return the MethodWrapper whose method pattern match with that of the slack
+	 *         message received, {@code null} if no such method is found.
+	 */
+	protected MethodWrapper getMethodWithMatchingPatternAndFilterUnmatchedMethods(InboxMessage event) {
+
+		if (ArgUtil.isEmpty(event.getMessage())) {
+			return null;
+		}
+
+		StringMatcher matcher = new StringMatcher(event.getMessage().toUpperCase());
+
+		for (Entry<String, MethodWrapper> methodWrapperEntry : eventToMethodsMap.entrySet()) {
+			MethodWrapper methodWrapper = methodWrapperEntry.getValue();
+			Pattern[] patterns = methodWrapper.getPattern();
+			if (patterns.length > 0) {
+				for (int i = 0; i < patterns.length; i++) {
+					if (ArgUtil.areEmpty(event.getLane(), methodWrapper.getLane())
+							|| ArgUtil.areEqual(event.getLane(), methodWrapper.getLane())) {
+						if (matcher.isMatch(patterns[i]) && ArgUtil.is(ArgUtil.parseAsString(patterns[i]))) {
+							event.setMatcher(matcher);
+							return methodWrapper;
+						}
+					}
+				}
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Invoke the methods with matching {@link ChatMapping#events()} and
+	 * {@link ChatMapping#pattern()} in events received from Slack/Facebook.
+	 *
+	 * @param event received from facebook
+	 */
+	@Async
+	public void invokeMethodsAsync(InboxMessage inboxMessageOriginal) {
+		invokeMethods(inboxMessageOriginal);
+	}
+
+	public void invokeMethods(InboxMessage inboxMessageOriginal) {
+		String contactId = PostManUtil.createContactId(inboxMessageOriginal);
+		InboxMessage inboxMessage = EntityDtoUtil.entityToDto(inboxMessageOriginal, new InboxMessage());
+
+		ChatContext chatContext = botService.loadChatContext(contactId, inboxMessage);
+
+		if (!botService.beforeMessageHandler()) {
+			return;
+		}
+
+		String nextHandler = chatContext.getNextHandler();
+		chatContext.setNextHandler(null);
+		invokeMethods(contactId, inboxMessage, nextHandler);
+
+		int limit = 10;
+
+		ChatPromise promise = nextPromise();
+		while (ArgUtil.is(promise) && limit > -1) {
+			if (State.CREATED.equals(promise.getState())) {
+				promise.setState(State.TRIGGERED);
+				InboxMessage inboxMessageTriggered = EntityDtoUtil.entityToDto(inboxMessageOriginal,
+						new InboxMessage());
+				nextHandler = invokeMethods(contactId, inboxMessageTriggered, promise.getTarget());
+			} else if (State.CAPTURED.equals(promise.getState())) {
+				promise.setState(State.RETURNED);
+				InboxMessage inboxMessageCompleted = EntityDtoUtil.entityToDto(inboxMessageOriginal,
+						new InboxMessage());
+				inboxMessageCompleted.setMessage(promise.getMessage());
+				inboxMessageCompleted.setMessageId(promise.getMessageId());
+				nextHandler = invokeMethods(contactId, inboxMessageCompleted, promise.getSource());
+			} else if (State.COMPLETED.equals(promise.getState())) {
+				botService.getChatContext().getMeta().getPromise().remove(promise.getTarget());
+				botService.commitChatContext(contactId, nextHandler, inboxMessageOriginal);
+			}
+			limit--;
+			promise = nextPromise();
+		}
+
+	}
+
+	private ChatPromise nextPromise() {
+		Map<String, ChatPromise> promises = botService.getChatContext().getMeta().getPromise();
+
+		if (ArgUtil.is(promises)) {
+			for (Entry<String, ChatPromise> promiseEntry : promises.entrySet()) {
+				ChatPromise promise = promiseEntry.getValue();
+				if (State.CREATED.equals(promise.getState())) {
+					return promise;
+				}
+			}
+
+			for (Entry<String, ChatPromise> promiseEntry : promises.entrySet()) {
+				ChatPromise promise = promiseEntry.getValue();
+				if (State.CAPTURED.equals(promise.getState())) {
+					return promise;
+				}
+			}
+		}
+		return null;
+	}
+
+	private String invokeMethods(String contactId, InboxMessage inboxMessage, String nextHandler) {
+		try {
+
+			MethodWrapper matchedMethod = null;
+
+			if (ArgUtil.is(nextHandler)) {
+				matchedMethod = eventToMethodsMap.get(nextHandler);
+			}
+			if (ArgUtil.isEmpty(matchedMethod)) {
+				matchedMethod = getMethodWithMatchingPatternAndFilterUnmatchedMethods(inboxMessage);
+			}
+			if (ArgUtil.is(matchedMethod)) {
+				nextHandler = matchedMethod.getKey();
+				LOGGER.info("Handler: " + nextHandler);
+				botService.getChatContext().setCurrentHandler(nextHandler);
+				Method method = matchedMethod.getMethod();
+				ChatController controller = filtersMap.get(matchedMethod.getController());
+				if (Arrays.asList(method.getParameterTypes()).contains(StringMatcher.class)) {
+					method.invoke(controller, inboxMessage, inboxMessage.getMatcher());
+				} else {
+					method.invoke(controller, inboxMessage);
+				}
+			}
+		} catch (ChatException ce) {
+			LOGGER.info("Target Handler : " + ce.getTargetHandler());
+		} catch (Exception e) {
+			LOGGER.error("Error invoking controller: ", e);
+		}
+		botService.commitChatContext(contactId, nextHandler, inboxMessage);
+		return nextHandler;
+	}
+}

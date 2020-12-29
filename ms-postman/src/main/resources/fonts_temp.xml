@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+ <fontFamilies>
+	<fontFamily name="Arial">
+       <normal><![CDATA[fonts/all/arial.ttf]]></normal>
+       <bold><![CDATA[fonts/all/arialbd.ttf]]></bold>
+       <italic><![CDATA[fonts/all/ariali.ttf]]></italic>
+       <boldItalic><![CDATA[fonts/all/arialbi.ttf]]></boldItalic>
+       <pdfFontName><![CDATA[arial.ttf]]></pdfFontName>
+       <pdfEncoding><![CDATA[Identity-H]]></pdfEncoding>
+       <pdfEmbedded><![CDATA[true]]></pdfEmbedded>
+       <exportFonts>
+      		<export key="net.sf.jasperreports.html">'DejaVu Sans', Arial, Helvetica, sans-serif</export>
+    	   </exportFonts>
+    	    <!--
+	    <locales>
+	      <locale>en_US</locale>
+	      <locale>de_DE</locale>
+	      <locale>en</locale>
+	      <locale>ar</locale>
+	    </locales>
+	    -->
+   </fontFamily>
+   
+   	<fontFamily name="Arial Unicode MS">
+       <normal><![CDATA[fonts/all/arialuni.ttf]]></normal>
+       <bold><![CDATA[fonts/all/arialuni.ttf]]></bold>
+       <italic><![CDATA[fonts/all/arialuni.ttf]]></italic>
+       <pdfFontName><![CDATA[arialuni.ttf]]></pdfFontName>
+       <pdfEncoding>Identity-H</pdfEncoding>
+       <pdfEmbedded><![CDATA[true]]></pdfEmbedded>
+   </fontFamily>
+   
+   <fontFamily name="SansSerif">
+    <exportFonts>
+        <export key="net.sf.jasperreports.html">Arial, Helvetica, sans-serif</export>
+        <export key="net.sf.jasperreports.xhtml">Arial, Helvetica, sans-serif</export>
+    </exportFonts>
+	</fontFamily>
+	
+	<fontFamily name="Serif">
+	    <exportFonts>
+	        <export key="net.sf.jasperreports.html">'Times New Roman', Times, serif</export>
+	        <export key="net.sf.jasperreports.xhtml">'Times New Roman', Times, serif</export>
+	    </exportFonts>
+	</fontFamily>
+	
+	<fontFamily name="Monospaced">
+	    <exportFonts>
+	        <export key="net.sf.jasperreports.html">'Courier New', Courier, monospace</export>
+	        <export key="net.sf.jasperreports.xhtml">'Courier New', Courier, monospace</export>
+	    </exportFonts>
+	</fontFamily>
+   
+</fontFamilies>

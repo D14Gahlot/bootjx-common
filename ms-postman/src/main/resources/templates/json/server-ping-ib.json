@@ -1,0 +1,5 @@
+{
+	"_subject": "Server Ping IB",
+	"_message": "Your message : [[${data.msg}]]",
+	"url": "[[${_tu.prop('company.app.url') + '/appib/landing/remittance'}]]"
+}

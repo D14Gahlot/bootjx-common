@@ -1,0 +1,52 @@
+{
+	"name" : "Rabil Mir Uddin",
+	"country" : "IN",
+	"region" : "MH",
+	"city" : "Mumbai",
+	"customerId" : "234",
+	"logmap" : {
+		"desc": "LOGIN:COMPLETED:DONE",
+		"ms": "SERVER-UI",
+		"catg": "CAuthEvent",
+		"type": "LOGIN",
+		"rslt": "DONE",
+		"ts": 1573732662603,
+		"actorId": "C:239",
+		"client": {
+			"ip": "10.28.42.101",
+			"fp": "141474d6b3b6e561f14161aa3fba2298",
+			"cn": "ONLINE",
+			"dt": "COMPUTER",
+			"at": "WEB",
+			"ct": "ONLINE_WEB"
+		},
+		"step": "COMPLETED",
+		"customerId": 239,
+		"actor": {
+			"type": "C",
+			"id": "239"
+		},
+		"cust": {
+			"id": 239
+		},
+		"identiy": "285061506787",
+		"userId": "239",
+		"agent": {
+			"operatingSystem": "MAC_OS_X",
+			"browser": "CHROME",
+			"id": 50990849,
+			"browserVersion": {
+				"version": "77.0.3865.90",
+				"majorVersion": "77",
+				"minorVersion": "0"
+			}
+		},
+		"flow": "LGN_V2",
+		"trxTym": 736,
+		"trcTym": 738,
+		"evtTym": 0,
+		"trcId": "QQC-14147-7RBkRq8NoJG-000000-lgn-7RBkRq8NoJH",
+		"trxId": null,
+		"tnt": "KWT"
+	}
+}

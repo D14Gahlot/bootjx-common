@@ -1,0 +1,181 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<artifactId>boot-ext-jar</artifactId>
+	<packaging>pom</packaging>
+	<name>boot-ext-jar</name>
+	<description>Common lib for  db</description>
+	<url>http://maven.apache.org</url>
+
+	<parent>
+		<groupId>com.boot.jax</groupId>
+		<artifactId>boot-jax-parent</artifactId>
+		<version>0.0.1-SNAPSHOT</version>
+		<relativePath>../boot-jax-parent/pom.xml</relativePath>
+	</parent>
+
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	</properties>
+
+	<!-- <modules> <module>masking</module> </modules> -->
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-install-plugin</artifactId>
+				<executions>
+
+					<execution>
+						<id>bouncycastle</id>
+						<phase>package</phase>
+						<goals>
+							<goal>install-file</goal>
+						</goals>
+						<configuration>
+							<groupId>bouncycastle-1.20</groupId>
+							<artifactId>bouncycastle-1.20</artifactId>
+							<version>1.0</version>
+							<packaging>jar</packaging>
+							<file>${basedir}/lib/bouncycastle-1.20.jar</file>
+							<generatePom>true</generatePom>
+						</configuration>
+					</execution>
+
+					<execution>
+						<id>bcpkix-jdk15on-1-48</id>
+						<phase>package</phase>
+						<goals>
+							<goal>install-file</goal>
+						</goals>
+						<configuration>
+							<groupId>org.bouncycastle</groupId>
+							<artifactId>bcpkix-jdk15on</artifactId>
+							<version>1.48</version>
+							<packaging>jar</packaging>
+							<file>${basedir}/lib/itext-2.3/bcpkix-jdk15on-1.48.jar</file>
+							<generatePom>true</generatePom>
+						</configuration>
+					</execution>
+
+					<execution>
+						<id>bcprov-jdk15-145</id>
+						<phase>package</phase>
+						<goals>
+							<goal>install-file</goal>
+						</goals>
+						<configuration>
+							<groupId>bcprov-jdk15-145</groupId>
+							<artifactId>bcprov-jdk15-145</artifactId>
+							<version>1.0</version>
+							<packaging>jar</packaging>
+							<file>${basedir}/lib/bcprov-jdk15-145.jar</file>
+							<generatePom>true</generatePom>
+						</configuration>
+					</execution>
+
+					<execution>
+						<id>htmlcomponent</id>
+						<phase>package</phase>
+						<goals>
+							<goal>install-file</goal>
+						</goals>
+						<configuration>
+							<groupId>jasperreports</groupId>
+							<artifactId>htmlcomponent</artifactId>
+							<version>5.0.1</version>
+							<packaging>jar</packaging>
+							<file>${basedir}/lib/jasper/jasperreports-htmlcomponent-5.0.1.jar</file>
+							<generatePom>true</generatePom>
+						</configuration>
+					</execution>
+
+					<execution>
+						<id>itext218</id>
+						<phase>package</phase>
+						<goals>
+							<goal>install-file</goal>
+						</goals>
+						<configuration>
+							<groupId>com.lowagie</groupId>
+							<artifactId>itext</artifactId>
+							<version>2.1.8</version>
+							<packaging>jar</packaging>
+							<file>${basedir}/lib/itext-4.2.0.jar</file>
+							<generatePom>true</generatePom>
+						</configuration>
+					</execution>
+
+					<execution>
+						<id>itext-asian</id>
+						<phase>package</phase>
+						<goals>
+							<goal>install-file</goal>
+						</goals>
+						<configuration>
+							<groupId>com.lowagie</groupId>
+							<artifactId>itext-asian</artifactId>
+							<version>2.3</version>
+							<packaging>jar</packaging>
+							<file>${basedir}/lib/itext-2.3/itext-asian.jar</file>
+							<generatePom>true</generatePom>
+						</configuration>
+					</execution>
+
+					<execution>
+						<id>itext-hyph-xml</id>
+						<phase>package</phase>
+						<goals>
+							<goal>install-file</goal>
+						</goals>
+						<configuration>
+							<groupId>com.lowagie</groupId>
+							<artifactId>itext-hyph-xml</artifactId>
+							<version>2.3</version>
+							<packaging>jar</packaging>
+							<file>${basedir}/lib/itext-2.3/itext-hyph-xml.jar</file>
+							<generatePom>true</generatePom>
+						</configuration>
+					</execution>
+
+					<!-- aiml-chatbot -->
+					<execution>
+						<id>aiml-chatbot</id>
+						<phase>package</phase>
+						<goals>
+							<goal>install-file</goal>
+						</goals>
+						<configuration>
+							<groupId>com.google</groupId>
+							<artifactId>programab</artifactId>
+							<version>0.0.4.3</version>
+							<packaging>jar</packaging>
+							<file>${basedir}/lib/com.google.programab/Ab.jar</file>
+							<generatePom>true</generatePom>
+						</configuration>
+					</execution>
+
+					<execution>
+						<id>aiml-chatbot-shaded</id>
+						<phase>package</phase>
+						<goals>
+							<goal>install-file</goal>
+						</goals>
+						<configuration>
+							<groupId>com.google</groupId>
+							<artifactId>programab</artifactId>
+							<version>0.0.4.3.shaded</version>
+							<packaging>jar</packaging>
+							<file>${basedir}/lib/com.google.programab/ab-shaded.jar</file>
+							<generatePom>true</generatePom>
+						</configuration>
+					</execution>
+
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+</project>

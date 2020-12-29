@@ -1,0 +1,56 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<artifactId>original</artifactId>
+	<packaging>jar</packaging>
+	<name>original</name>
+	<description>copy benefit original to local maven repo</description>
+	<url>http://maven.apache.org</url>
+
+	<parent>
+		<groupId>com.boot.jax</groupId>
+		<artifactId>masking</artifactId>
+		<version>0.0.1-SNAPSHOT</version>
+		<relativePath>../pom.xml</relativePath> <!-- lookup parent from repository -->
+	</parent>
+
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	</properties>
+
+	<dependencies>
+
+	</dependencies>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-install-plugin</artifactId>
+				<version>2.5.2</version>
+				<executions>
+					<!-- aiml-chatbot -->
+					<execution>
+						<id>install-jar-aiml-chatbot</id>
+						<phase>validate</phase>
+						<goals>
+							<goal>install-file</goal>
+						</goals>
+						<configuration>
+							<groupId>com.google</groupId>
+							<artifactId>Ab</artifactId>
+							<version>0.0.4.3.original</version>
+							<packaging>jar</packaging>
+							<file>${basedir}/../../lib/com.google.ab/Ab.jar</file>
+							<generatePom>true</generatePom>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+
+		</plugins>
+	</build>
+
+</project>

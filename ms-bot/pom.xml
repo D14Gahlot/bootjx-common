@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<artifactId>ms-bot</artifactId>
+	<packaging>jar</packaging>
+	<name>ms-bot</name>
+	<url>http://maven.apache.org</url>
+	<description>Jobs to be running</description>
+
+	<parent>
+		<groupId>com.boot.jx</groupId>
+		<artifactId>mehery</artifactId>
+		<version>0.0.1-SNAPSHOT</version>
+		<relativePath>../pom.xml</relativePath> <!-- lookup parent from repository -->
+	</parent>
+
+	<properties>
+		<java.version>1.8</java.version>
+		<es.version>6.3.0</es.version>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<thymeleaf.version>3.0.2.RELEASE</thymeleaf.version>
+		<thymeleaf-layout-dialect.version>2.1.1</thymeleaf-layout-dialect.version>
+		<javacpp.version>1.3</javacpp.version>
+		<opencv-platform.version>3.2.0-${javacpp.version}</opencv-platform.version>
+		<tesseract-platform.version>3.04.01-${javacpp.version}</tesseract-platform.version>
+	</properties>
+
+
+	<dependencies>
+
+
+		<!-- thymeleaf dependencies -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-thymeleaf</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.thymeleaf.extras</groupId>
+			<artifactId>thymeleaf-extras-springsecurity4</artifactId>
+			<version>3.0.0.RELEASE</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.boot.jx</groupId>
+			<artifactId>common-lib</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>junit</groupId>
+					<artifactId>junit</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.springframework.boot</groupId>
+					<artifactId>spring-boot-starter-test</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+
+		<dependency>
+			<groupId>com.boot.jx</groupId>
+			<artifactId>common-mongo</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>com.boot.jx</groupId>
+			<artifactId>common-tmpl</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>com.boot.jx</groupId>
+			<artifactId>lib-postman</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>com.boot.jx</groupId>
+			<artifactId>lib-postman-store</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>com.boot.jx</groupId>
+			<artifactId>lib-postman-chat</artifactId>
+		</dependency>
+
+
+		<dependency>
+			<groupId>com.googlecode.libphonenumber</groupId>
+			<artifactId>libphonenumber</artifactId>
+			<version>8.10.5</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-test</artifactId>
+		</dependency>
+
+
+		<dependency>
+			<groupId>com.google</groupId>
+			<artifactId>Ab</artifactId>
+			<version>0.0.4.3.shaded</version>
+		</dependency>
+
+	</dependencies>
+
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+				<configuration>
+					<executable>true</executable>
+				</configuration>
+				<executions>
+					<execution>
+						<goals>
+							<goal>build-info</goal>
+						</goals>
+						<configuration>
+							<additionalProperties>
+								<version>${vzn}</version>
+							</additionalProperties>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+
+	<repositories>
+		<repository>
+			<id>jcenter</id>
+			<url>https://jcenter.bintray.com/</url>
+		</repository>
+	</repositories>
+
+</project>
+
