@@ -1,5 +1,7 @@
 package com.boot.jx.utils;
 
+import java.security.NoSuchAlgorithmException;
+
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 
@@ -7,7 +9,9 @@ import com.boot.jx.dict.ContactType;
 import com.boot.jx.postman.model.File;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.Message;
+import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
+import com.boot.utils.CryptoUtil;
 
 public class PostManUtil {
 
@@ -39,4 +43,18 @@ public class PostManUtil {
 		return createContactId(outMessage.getContactType(), CollectionUtil.getOne(outMessage.getTo()));
 	}
 
+	public static String generateCheckSum(InboxMessage inboxMessage) {
+		String checkString = inboxMessage.getContactId() + inboxMessage.getSessionId() + inboxMessage.getMessageId()
+				+ inboxMessage.getMessage();
+		try {
+			return CryptoUtil.getMD5Hash(checkString);
+		} catch (NoSuchAlgorithmException e) {
+			e.printStackTrace();
+			return e.getMessage();
+		}
+	}
+
+	public static boolean hasValidCheckSum(InboxMessage inboxMessage) {
+		return ArgUtil.areEqual(inboxMessage.getChecksum(), generateCheckSum(inboxMessage));
+	}
 }

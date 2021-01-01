@@ -4,5 +4,5 @@ import com.boot.jx.postman.model.InboxMessage;
 
 public interface InBoundHandler {
 
-	public InboxMessage onMessage(InboxMessage inboxMessage);
+	public InboxMessage onHandle(InboxMessage inboxMessage);
 }

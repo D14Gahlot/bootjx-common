@@ -18,13 +18,14 @@ import com.boot.jx.postman.gupshup.GupShupInboundV2;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.service.ContactCleanerService;
 import com.boot.jx.rest.RestService;
+import com.boot.jx.utils.PostManUtil;
 import com.boot.jx.vendor.VendorContext.ApiVendorHeaders;
 
 @RestController
 public class InBoundController {
 
 	@Autowired
-	private InBoundService inBoundEngine;
+	private InBoundService inBoundService;
 
 	@Autowired
 	private GupShupChatClient gupShupChatClient;
@@ -43,7 +44,9 @@ public class InBoundController {
 	public InboxMessage onInboundCallback(@RequestBody InboxMessage inboxMessage,
 			@RequestParam(required = false, defaultValue = "false") boolean routed) throws InterruptedException {
 		// botService.arhive(inbound);
-		inBoundEngine.invokeMethods(inboxMessage);
+		if (PostManUtil.hasValidCheckSum(inboxMessage)) {
+			inBoundService.invokeMethods(inboxMessage);
+		}
 		return inboxMessage;
 	}
 
@@ -59,7 +62,7 @@ public class InBoundController {
 		} else {
 			// botService.arhive(inbound);
 			InboxMessage event = gupShupChatClient.parseAsInboxMessage(inboundV2);
-			inBoundEngine.invokeMethods(event);
+			inBoundService.invokeMethods(event);
 		}
 		return inbound;
 	}
@@ -84,7 +87,7 @@ public class InBoundController {
 		request.getEntry().forEach(e -> {
 			e.getMessaging().forEach(m -> {
 				InboxMessage event = facebookConnector.toInboxMessage(m, lane);
-				inBoundEngine.invokeMethods(event);
+				inBoundService.invokeMethods(event);
 			});
 		});
 		return request;
@@ -97,7 +100,7 @@ public class InBoundController {
 		request.getEntry().forEach(e -> {
 			e.getMessaging().forEach(m -> {
 				InboxMessage event = facebookConnector.toInboxMessage(m, lane);
-				inBoundEngine.invokeMethods(event);
+				inBoundService.invokeMethods(event);
 			});
 		});
 		return request;

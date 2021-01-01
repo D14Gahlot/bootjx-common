@@ -19,9 +19,11 @@ public class InboxMessage implements Serializable {
 	private String to;
 	private String from;
 	private String fromName;
+	private String sessionId;
 
 	private String message;
 	private ContactType contactType;
+	private String contactId;
 	private String channel;
 
 	private WAMessage.Channel waChannel;
@@ -29,6 +31,8 @@ public class InboxMessage implements Serializable {
 	private BigDecimal queue;
 	private String lane;
 	private StringMatcher matcher;
+
+	private String checksum;
 
 	public String getTo() {
 		return to;
@@ -193,5 +197,29 @@ public class InboxMessage implements Serializable {
 
 	public void setMessageIdExt(String messageIdExt) {
 		this.messageIdExt = messageIdExt;
+	}
+
+	public String getSessionId() {
+		return sessionId;
+	}
+
+	public void setSessionId(String sessionId) {
+		this.sessionId = sessionId;
+	}
+
+	public String getContactId() {
+		return contactId;
+	}
+
+	public void setContactId(String contactId) {
+		this.contactId = contactId;
+	}
+
+	public String getChecksum() {
+		return checksum;
+	}
+
+	public void setChecksum(String checksum) {
+		this.checksum = checksum;
 	}
 }

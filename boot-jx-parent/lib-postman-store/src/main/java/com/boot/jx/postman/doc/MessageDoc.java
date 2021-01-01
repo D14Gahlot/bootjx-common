@@ -13,6 +13,8 @@ public class MessageDoc implements Serializable {
 
 	@Id
 	private String messageId;
+	private String sessionId;
+
 	private String id;
 	private String collapseId;
 	private long timestamp;
@@ -112,6 +114,14 @@ public class MessageDoc implements Serializable {
 
 	public void setContactId(String contactId) {
 		this.contactId = contactId;
+	}
+
+	public String getSessionId() {
+		return sessionId;
+	}
+
+	public void setSessionId(String sessionId) {
+		this.sessionId = sessionId;
 	}
 
 }

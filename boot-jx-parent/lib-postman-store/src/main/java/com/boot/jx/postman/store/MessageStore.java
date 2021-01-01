@@ -1,6 +1,7 @@
 package com.boot.jx.postman.store;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Component;
 
@@ -18,6 +19,9 @@ public class MessageStore {
 
 	@Autowired
 	MongoTemplate mongoTemplate;
+
+	@Value("${postman.chat.session.timeout}")
+	String chatSessionTimeout;
 
 	private String getCollectionName(ContactType contactType) {
 		return (MessageDoc.COLLECTION_NAME + "_" + ArgUtil.parseAsString(contactType, "OTHERS"));
@@ -49,7 +53,7 @@ public class MessageStore {
 	}
 
 	public MessageDoc create(InboxMessage inboxMessage) {
-		MessageDoc doc = createMessageDoc(inboxMessage);
+		MessageDoc doc = create(inboxMessage);
 		mongoTemplate.save(doc, getCollectionName(inboxMessage.getContactType()));
 		inboxMessage.setMessageId(doc.getMessageId());
 		return doc;

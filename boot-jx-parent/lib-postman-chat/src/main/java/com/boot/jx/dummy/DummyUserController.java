@@ -39,7 +39,7 @@ public class DummyUserController {
 	public InboxMessage onReceiveMessage(@RequestParam String message, @RequestParam String number)
 			throws InterruptedException {
 		InboxMessage event = new InboxMessage();
-		event.setContactType(ContactType.EMPTY);
+		event.setContactType(ContactType.DUMMY);
 		event.setWaChannel(Channel.DUMMY);
 		event.setLane("DUMMY");
 		event.from(number);

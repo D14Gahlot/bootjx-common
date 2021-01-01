@@ -11,6 +11,7 @@ public enum ContactType {
 	@Deprecated
 	MOBILE(SMS),
 	// Default Null Value
+	DUMMY("dummy"),
 	EMPTY("");
 
 	ContactType contactType;

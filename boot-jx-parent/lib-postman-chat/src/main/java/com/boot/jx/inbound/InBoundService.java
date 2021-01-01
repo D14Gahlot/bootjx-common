@@ -9,7 +9,9 @@ import org.springframework.stereotype.Component;
 import com.boot.jx.bot.BotEngine;
 import com.boot.jx.bot.ChatMapping;
 import com.boot.jx.chat.ChatService;
+import com.boot.jx.postman.client.PostManClient;
 import com.boot.jx.postman.model.InboxMessage;
+import com.boot.jx.postman.store.SessionStore;
 import com.boot.utils.ArgUtil;
 
 @Component
@@ -29,6 +31,12 @@ public class InBoundService {
 	@Autowired
 	private ChatService chatService;
 
+	@Autowired
+	private SessionStore sessionStore;
+
+	@Autowired
+	PostManClient postManClient;
+
 	/**
 	 * Invoke the methods with matching {@link ChatMapping#events()} and
 	 * {@link ChatMapping#pattern()} in events received from Slack/Facebook.
@@ -41,10 +49,15 @@ public class InBoundService {
 	}
 
 	public InboxMessage invokeMethods(InboxMessage inboxMessageOriginal) {
+
+		if (ArgUtil.isEmpty(inboxMessageOriginal.getSessionId())) {
+			sessionStore.createSession(inboxMessageOriginal);
+		}
+
 		if (ArgUtil.isEmpty(inBoundFilter) || inBoundFilter.onFilter(inboxMessageOriginal)) {
 			if (ArgUtil.is(inBoundHandler)) {
-				inBoundHandler.onMessage(inboxMessageOriginal);
-			} else if (botEngine.isChatBotDefined()) {
+				inBoundHandler.onHandle(inboxMessageOriginal);
+			} else if (botEngine.isChatBotDefined() || postManClient.isChatDummyBotEnabled()) {
 				botEngine.invokeMethodsAsync(inboxMessageOriginal);
 			} else {
 				chatService.forward(inboxMessageOriginal);

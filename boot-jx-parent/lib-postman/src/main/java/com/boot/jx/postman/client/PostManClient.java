@@ -26,9 +26,12 @@ import com.boot.jx.postman.model.Notipy;
 import com.boot.jx.postman.model.SMS;
 import com.boot.jx.postman.model.SupportEmail;
 import com.boot.jx.rest.RestService;
+import com.boot.jx.utils.PostManUtil;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
 import com.boot.utils.ContextUtil;
+import com.boot.utils.CryptoUtil;
+import com.boot.utils.JsonUtil;
 
 @Component
 @PropertySource("classpath:application-postman.properties")
@@ -51,8 +54,15 @@ public class PostManClient implements PostManService {
 	@Value("${postman.chat.dummy.user.enabled}")
 	boolean chatDummyUserEnabled;
 
+	@Value("${postman.chat.dummy.bot.enabled}")
+	boolean chatDummyBotEnabled;
+
 	public boolean isChatDummyUserEnabled() {
 		return chatDummyUserEnabled;
+	}
+
+	public boolean isChatDummyBotEnabled() {
+		return chatDummyBotEnabled;
 	}
 
 	public String getPostmapURL() {
@@ -199,6 +209,7 @@ public class PostManClient implements PostManService {
 	public ApiResponse<InboxMessage, Object> forward(InboxMessage inboxMessage) {
 		LOGGER.debug("Forwarding InboxMessage to other Service ");
 		try {
+			inboxMessage.setChecksum(PostManUtil.generateCheckSum(inboxMessage));
 			return restService.ajax(inboundForwardUrl).post(inboxMessage)
 					.as(new ParameterizedTypeReference<ApiResponse<InboxMessage, Object>>() {
 					});

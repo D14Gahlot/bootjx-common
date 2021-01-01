@@ -79,7 +79,7 @@
 
 		<dependency>
 			<groupId>com.boot.jx</groupId>
-			<artifactId>lib-postman</artifactId>
+			<artifactId>lib-postman-chat</artifactId>
 		</dependency>
 
 		<!-- <dependency> <groupId>net.rossillo.mvc.cache</groupId> <artifactId>spring-mvc-cache-control</artifactId> 
