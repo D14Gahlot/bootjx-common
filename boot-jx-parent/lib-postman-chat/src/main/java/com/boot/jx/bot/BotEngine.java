@@ -32,7 +32,7 @@ public class BotEngine {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(BotEngine.class);
 
-	@Autowired
+	@Autowired(required = false)
 	List<ChatController> chatControllers;
 
 	protected final Map<String, MethodWrapper> eventToMethodsMap = new HashMap<>();
@@ -45,7 +45,7 @@ public class BotEngine {
 
 	@Autowired
 	private ChatService botService;
-	
+
 	private boolean chatBotDefined;
 
 	public boolean isChatBotDefined() {
@@ -54,6 +54,10 @@ public class BotEngine {
 
 	@PostConstruct
 	public void mapping() {
+		if (ArgUtil.isEmpty(chatControllers)) {
+			return;
+		}
+
 		for (ChatController chatController : chatControllers) {
 			chatBotDefined = true;
 			Class<?> c = AopProxyUtils.ultimateTargetClass(chatController);

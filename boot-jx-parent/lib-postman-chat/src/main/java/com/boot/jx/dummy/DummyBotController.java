@@ -1,5 +1,7 @@
 package com.boot.jx.dummy;
 
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+
 import com.boot.jx.bot.BotController;
 import com.boot.jx.bot.ChatController;
 import com.boot.jx.bot.ChatMapping;
@@ -8,6 +10,7 @@ import com.boot.jx.postman.model.InboxMessage;
 import com.boot.utils.StringUtils.StringMatcher;
 
 @BotController(lane = "DUMMY")
+@ConditionalOnProperty(prefix = "postman.chat", name = "dummy.bot.enabled", havingValue = "true")
 public class DummyBotController extends ChatController {
 
 	@ChatMapping(key = DummyBotConstants.KEY.CONFIRM_GENDER)
