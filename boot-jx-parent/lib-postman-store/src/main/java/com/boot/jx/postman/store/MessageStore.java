@@ -53,7 +53,7 @@ public class MessageStore {
 	}
 
 	public MessageDoc create(InboxMessage inboxMessage) {
-		MessageDoc doc = create(inboxMessage);
+		MessageDoc doc = createMessageDoc(inboxMessage);
 		mongoTemplate.save(doc, getCollectionName(inboxMessage.getContactType()));
 		inboxMessage.setMessageId(doc.getMessageId());
 		return doc;

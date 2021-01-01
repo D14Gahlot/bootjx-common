@@ -84,8 +84,8 @@ public class InBoundController {
 	@RequestMapping(value = "/ext/inbound/fb/callback", method = RequestMethod.POST)
 	public FacebookHookRequest onReceiveMessage(@RequestBody FacebookHookRequest request,
 			@RequestParam(required = false) String lane) throws InterruptedException {
-		request.getEntry().forEach(e -> {
-			e.getMessaging().forEach(m -> {
+		request.getEntry().forEach(pageEntry -> {
+			pageEntry.getMessaging().forEach(m -> {
 				InboxMessage event = facebookConnector.toInboxMessage(m, lane);
 				inBoundService.invokeMethods(event);
 			});
@@ -97,8 +97,8 @@ public class InBoundController {
 	@RequestMapping(value = "/ext/inbound/fb/callback/{lane}", method = RequestMethod.POST)
 	public FacebookHookRequest onReceiveMessageLane(@RequestBody FacebookHookRequest request, @PathVariable String lane)
 			throws InterruptedException {
-		request.getEntry().forEach(e -> {
-			e.getMessaging().forEach(m -> {
+		request.getEntry().forEach(pageEntry -> {
+			pageEntry.getMessaging().forEach(m -> {
 				InboxMessage event = facebookConnector.toInboxMessage(m, lane);
 				inBoundService.invokeMethods(event);
 			});

@@ -26,7 +26,7 @@ public class AppRequestUtil {
 	private static final int MAX_BODY_SIZE_PRINT = 200;
 
 	private static final boolean LOCAL_LOGGER = false;
-	
+
 	public static boolean isLocal() {
 		return LOCAL_LOGGER || true;
 	}
@@ -46,7 +46,7 @@ public class AppRequestUtil {
 	}
 
 	public static HttpServletRequest printIfDebug(HttpServletRequest req) {
-		if (LOGGER.isDebugEnabled()) {
+		if (LOGGER.isDebugEnabled() || isLocal()) {
 			LinkedMultiValueMap<String, String> headerMap = getHeader(req);
 			LOGGER.debug(">>>>> RQT-IN-HEDR =====: {}", headerMap.toString());
 		}
@@ -64,7 +64,7 @@ public class AppRequestUtil {
 	}
 
 	public static HttpServletResponse printIfDebug(HttpServletResponse resp) {
-		if (LOGGER.isDebugEnabled()) {
+		if (LOGGER.isDebugEnabled() || isLocal()) {
 			LinkedMultiValueMap<String, String> headerMap = getHeader(resp);
 			LOGGER.debug("<<<<< RSP-OUT-HEDR =====: {}", headerMap.toString());
 		}
@@ -77,8 +77,7 @@ public class AppRequestUtil {
 			StringBuilder inputStringBuilder = new StringBuilder();
 			BufferedReader bufferedReader = null;
 			try {
-				bufferedReader = new BufferedReader(
-						new InputStreamReader(responseWrapper.getBody(), "UTF-8"));
+				bufferedReader = new BufferedReader(new InputStreamReader(responseWrapper.getBody(), "UTF-8"));
 				String line = bufferedReader.readLine();
 				while (line != null) {
 					inputStringBuilder.append(line);
