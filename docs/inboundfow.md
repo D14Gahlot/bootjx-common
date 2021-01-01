@@ -1,6 +1,6 @@
 # InBoundFlow
 
-![alt text](diag/svg/inboundfow.uml.svg "Title")
+![alt text](docs/diag/svg/inboundflow.uml.svg "Title")
 
 ## InBoundService
 This is resposnible for recieving incoming user messages from thirdparty services and converting them to readable messages so that framework can consume and process it.
