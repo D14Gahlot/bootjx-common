@@ -30,74 +30,10 @@ public class MsgController {
 
 	@ResponseBody
 	@RequestMapping(value = "/api/sessions/assigned", method = { RequestMethod.GET })
-	public SampleSenderReply postVote(@RequestParam String xyz) {
+	public String postVote(@RequestParam String xyz) {
 
-		return new SampleSenderReply();
+		return "hi";
 	}
 
-	@ResponseBody
-	@RequestMapping(value = "/api/test", method = { RequestMethod.POST, RequestMethod.GET })
-	public SampleSenderReply apiVote(@RequestParam String xyz) {
-		return new SampleSenderReply();
-	}
-
-	@RequestMapping(value = "/app/home", method = { RequestMethod.POST, RequestMethod.GET })
-	public String home() {
-		return "whatsweb";
-	}
-
-	@RequestMapping(value = "/auth/login", method = { RequestMethod.POST, RequestMethod.GET })
-	public String login(Model model) {
-		model.addAttribute("APP_CONTEXT", appConfig.getAppPrefix());
-		return "login";
-	}
-
-	@Autowired
-	AgentAuthProvider agentAuthProvider;
-
-	@ResponseBody
-	@RequestMapping(value = "/auth/login/submit", method = { RequestMethod.POST })
-	public ApiResponse<String, String> login(@RequestParam String username, @RequestParam String password,
-			HttpServletRequest request) {
-		ApiResponse<String, String> x = ApiResponse.buildData("success", "success");
-
-		if (ArgUtil.isEqual("agent1", username, password)) {
-			x.redirectUrl(appConfig.getAppPrefix() + "/app/home");
-			UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(username, password);
-			token.setDetails(new WebAuthenticationDetails(request));
-			Authentication authentication = agentAuthProvider.authenticate(token);
-			SecurityContextHolder.getContext().setAuthentication(authentication);
-		} else {
-			x.setData("error");
-			x.setMeta("error");
-			x.redirectUrl(appConfig.getAppPrefix() + "/auth/login?error");
-		}
-
-		return x;
-	}
-
-	@JsonIgnoreProperties(ignoreUnknown = true)
-	public static class SampleSenderReply {
-		Map<String, String> channel;
-		public SampleSender sender;
-
-		public Map<String, String> getChannel() {
-			return channel;
-		}
-
-		public void setChannel(Map<String, String> channel) {
-			this.channel = channel;
-		}
-	}
-
-	public static class SampleSender {
-		public SampleName name;
-	}
-
-	public static class SampleName {
-		public String nameType;
-		public String firstName;
-		public String lastName;
-	}
 
 }

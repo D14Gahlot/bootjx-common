@@ -91,6 +91,7 @@ public class InBoundController {
 			pageEntry.getMessaging().forEach(m -> {
 				InboxMessage event = facebookConnector.toInboxMessage(m, pageEntry.getId());
 				inBoundService.invokeMethods(event);
+				//facebooClient.sendReply(event.getContactId(), "Helo", pageEntry.getId());
 			});
 		});
 		return request;

@@ -57,7 +57,7 @@ public class InBoundService {
 		if (ArgUtil.isEmpty(inBoundFilter) || inBoundFilter.onFilter(inboxMessageOriginal)) {
 			if (ArgUtil.is(inBoundHandler)) {
 				inBoundHandler.onHandle(inboxMessageOriginal);
-			} else if (botEngine.isChatBotDefined() || postManClient.isChatDummyBotEnabled()) {
+			} else if (botEngine.isChatBotDefined() || postManClient.isChatDummyBotEnabled() || true) {
 				botEngine.invokeMethodsAsync(inboxMessageOriginal);
 			} else {
 				chatService.forward(inboxMessageOriginal);
