@@ -3,6 +3,7 @@ package com.boot.jx.inbound;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -75,7 +76,8 @@ public class InBoundController {
 
 	@RequestMapping(value = "/ext/inbound/fb/callback", method = RequestMethod.GET)
 	public String get(@RequestParam(name = "hub.verify_token") String token,
-			@RequestParam(name = "hub.challenge") String challenge, @RequestParam(required = false) String lane) {
+			@RequestParam(name = "hub.challenge") String challenge, @RequestParam(required = false) String lane,
+			@RequestHeader(required = false, value = "X-Hub-Signature") String signature) {
 		return facebooClient.registerWebhook(token, challenge, lane);
 	}
 
@@ -83,10 +85,11 @@ public class InBoundController {
 	@ApiVendorHeaders
 	@RequestMapping(value = "/ext/inbound/fb/callback", method = RequestMethod.POST)
 	public FacebookHookRequest onReceiveMessage(@RequestBody FacebookHookRequest request,
-			@RequestParam(required = false) String lane) throws InterruptedException {
+			@RequestParam(required = false) String lane,
+			@RequestHeader(required = false, value = "X-Hub-Signature") String signature) throws InterruptedException {
 		request.getEntry().forEach(pageEntry -> {
 			pageEntry.getMessaging().forEach(m -> {
-				InboxMessage event = facebookConnector.toInboxMessage(m, lane);
+				InboxMessage event = facebookConnector.toInboxMessage(m, pageEntry.getId());
 				inBoundService.invokeMethods(event);
 			});
 		});
@@ -99,7 +102,7 @@ public class InBoundController {
 			throws InterruptedException {
 		request.getEntry().forEach(pageEntry -> {
 			pageEntry.getMessaging().forEach(m -> {
-				InboxMessage event = facebookConnector.toInboxMessage(m, lane);
+				InboxMessage event = facebookConnector.toInboxMessage(m, pageEntry.getId());
 				inBoundService.invokeMethods(event);
 			});
 		});

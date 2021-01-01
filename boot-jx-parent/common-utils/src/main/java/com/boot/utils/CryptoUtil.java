@@ -7,9 +7,14 @@ import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.security.InvalidKeyException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
+
+import javax.crypto.Mac;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
 
 import org.jasypt.util.text.BasicTextEncryptor;
 import org.slf4j.Logger;
@@ -92,8 +97,8 @@ public final class CryptoUtil {
 	public static boolean validateHMAC(long currentTime, long interval, long tolerance, String secretKey,
 			String message, String hash) {
 
-		LOGGER.debug("validateHMAC C:{} I:{} T:{} S:{} M:{} H:{}", currentTime, interval, tolerance, secretKey,
-				message, hash);
+		LOGGER.debug("validateHMAC C:{} I:{} T:{} S:{} M:{} H:{}", currentTime, interval, tolerance, secretKey, message,
+				hash);
 
 		if (generateHMAC(interval, secretKey, message, currentTime).equals(hash)) {
 			return true;
@@ -108,16 +113,16 @@ public final class CryptoUtil {
 	public static boolean validateNumHMAC(long currentTime, long interval, long tolerance, String secretKey,
 			String message, String numHash, int length) {
 
-		LOGGER.debug("validateHMAC C:{} I:{} T:{} S:{} M:{} H:{}", currentTime, interval, tolerance, secretKey,
-				message, numHash);
+		LOGGER.debug("validateHMAC C:{} I:{} T:{} S:{} M:{} H:{}", currentTime, interval, tolerance, secretKey, message,
+				numHash);
 
 		if (toNumeric(length, generateHMAC(interval, secretKey, message, currentTime)).equals(numHash)) {
 			return true;
-		} else if (toNumeric(length,
-				generateHMAC(interval, secretKey, message, currentTime - tolerance * 1000)).equals(numHash)) {
+		} else if (toNumeric(length, generateHMAC(interval, secretKey, message, currentTime - tolerance * 1000))
+				.equals(numHash)) {
 			return true;
-		} else if (toNumeric(length,
-				generateHMAC(interval, secretKey, message, currentTime + tolerance * 1000)).equals(numHash)) {
+		} else if (toNumeric(length, generateHMAC(interval, secretKey, message, currentTime + tolerance * 1000))
+				.equals(numHash)) {
 			return true;
 		}
 		return false;
@@ -131,16 +136,16 @@ public final class CryptoUtil {
 	public static boolean validateComplexHMAC(long currentTime, long interval, long tolerance, String secretKey,
 			String message, String complexHash, int length) {
 
-		LOGGER.debug("validateHMAC C:{} I:{} T:{} S:{} M:{} H:{}", currentTime, interval, tolerance, secretKey,
-				message, complexHash);
+		LOGGER.debug("validateHMAC C:{} I:{} T:{} S:{} M:{} H:{}", currentTime, interval, tolerance, secretKey, message,
+				complexHash);
 
 		if (toComplex(length, generateHMAC(interval, secretKey, message, currentTime)).equals(complexHash)) {
 			return true;
-		} else if (toComplex(length,
-				generateHMAC(interval, secretKey, message, currentTime - tolerance * 1000)).equals(complexHash)) {
+		} else if (toComplex(length, generateHMAC(interval, secretKey, message, currentTime - tolerance * 1000))
+				.equals(complexHash)) {
 			return true;
-		} else if (toComplex(length,
-				generateHMAC(interval, secretKey, message, currentTime + tolerance * 1000)).equals(complexHash)) {
+		} else if (toComplex(length, generateHMAC(interval, secretKey, message, currentTime + tolerance * 1000))
+				.equals(complexHash)) {
 			return true;
 		}
 		return false;
@@ -357,6 +362,27 @@ public final class CryptoUtil {
 
 	}
 
+	/**
+	 * hash_hmac in java
+	 * 
+	 * @param byteArray
+	 * @param algorithm
+	 * @return
+	 * @throws NoSuchAlgorithmException
+	 * @throws InvalidKeyException
+	 */
+	public static String getHashHmac(String baseString, String keyString)
+			throws NoSuchAlgorithmException, InvalidKeyException {
+		SecretKey secretKey = null;
+		byte[] keyBytes = keyString.getBytes();
+		secretKey = new SecretKeySpec(keyBytes, "HmacSHA1");
+		Mac mac = Mac.getInstance("HmacSHA1");
+		mac.init(secretKey);
+		byte[] text = baseString.getBytes();
+		return new String(Base64.getEncoder().encode(mac.doFinal(text))).trim();
+
+	}
+
 	public static class HashBuilder implements Serializable {
 		private static final long serialVersionUID = 3866060536613924880L;
 		private long interval;
@@ -504,12 +530,10 @@ public final class CryptoUtil {
 			// this.currentTime, hash);
 			if (isToleranceSet) {
 				return CryptoUtil.validateHMAC(this.currentTime, this.interval, this.tolerance, this.secret,
-						this.message,
-						hash);
+						this.message, hash);
 			} else {
 				return CryptoUtil.validateHMAC(this.currentTime, this.interval, this.interval, this.secret,
-						this.message,
-						hash);
+						this.message, hash);
 			}
 		}
 
