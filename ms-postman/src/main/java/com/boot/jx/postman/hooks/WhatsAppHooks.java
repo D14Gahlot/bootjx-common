@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.boot.jx.AppConfig;
-import com.boot.jx.api.AmxApiResponse;
+import com.boot.jx.api.ApiResponse;
 import com.boot.jx.logger.LoggerService;
 import com.boot.jx.postman.service.ApiWhaService;
 import com.boot.utils.JsonUtil;
@@ -31,7 +31,7 @@ public class WhatsAppHooks {
 	private ApiWhaService apiWhaService;
 
 	@RequestMapping(value = "/postman/webhook/apiwha/{secret}/update", method = { RequestMethod.POST })
-	public AmxApiResponse<Object, Object> onAPIWHAMessage(@RequestParam(required = false) String secret,
+	public ApiResponse<Object, Object> onAPIWHAMessage(@RequestParam(required = false) String secret,
 			@RequestParam String data) {
 		try {
 			Map<String, Object> dataMap = JsonUtil.getMapFromJsonString(data);
@@ -39,7 +39,7 @@ public class WhatsAppHooks {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		return AmxApiResponse.build();
+		return ApiResponse.build();
 	}
 
 }

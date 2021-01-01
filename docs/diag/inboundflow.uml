@@ -1,0 +1,60 @@
+skinparam monochrome true
+skinparam ranksep 20
+skinparam dpi 150
+skinparam arrowThickness 0.7
+skinparam packageTitleAlignment left
+skinparam usecaseBorderThickness 0.4
+skinparam defaultFontSize 10
+skinparam rectangleBorderThickness 1
+
+
+rectangle "PostMan" {
+  (InboundService) as pm.InboundService
+  (InBoundFilter) as pm.InBoundFilter
+  (InBoundRouter) as pm.InBoundRouter
+  (InBoundHandler) as pm.InBoundHandler
+  (BotEngine)  as pm.BotEngine
+  (InBoundForward)   as pm.InBoundForward
+}
+rectangle "AgentService" {
+  (InboundService) as ag.InboundService
+  (InBoundFilter) as ag.InBoundFilter
+  (InBoundRouter) as ag.InBoundRouter
+  (InBoundHandler) as ag.InBoundHandler
+  (BotEngine)  as ag.BotEngine
+  (InBoundForward)   as ag.InBoundForward
+}
+rectangle "ChatBot" {
+  (InboundService) as cb.InboundService
+  (InBoundFilter) as cb.InBoundFilter
+  (InBoundRouter) as cb.InBoundRouter
+  (InBoundHandler) as cb.InBoundHandler
+  (BotEngine)  as cb.BotEngine
+  (InBoundForward)   as cb.InBoundForward
+}
+
+rectangle "<b>IncomingMessage</b>" as IncomingMessage
+actor "Customer" as c
+c --> IncomingMessage
+IncomingMessage ==> (pm.InboundService)
+(pm.InboundService) --> (pm.InBoundFilter)
+(pm.InBoundFilter) --> (pm.InBoundRouter)
+(pm.InBoundRouter) ...> (pm.InBoundHandler)
+(pm.InBoundRouter) ...> (pm.BotEngine)
+(pm.InBoundRouter) ...> (pm.InBoundForward)
+(pm.InBoundForward) --> (ag.InboundService)
+
+(ag.InboundService) --> (ag.InBoundFilter)
+(ag.InBoundFilter) --> (ag.InBoundRouter)
+(ag.InBoundRouter) ...> (ag.InBoundHandler)
+(ag.InBoundRouter) ...> (ag.BotEngine)
+(ag.InBoundRouter) ...> (ag.InBoundForward)
+(ag.InBoundForward) --> (cb.InboundService)
+
+
+(cb.InboundService) --> (cb.InBoundFilter)
+(cb.InBoundFilter) --> (cb.InBoundRouter)
+(cb.InBoundRouter) ...> (cb.InBoundHandler)
+(cb.InBoundRouter) ...> (cb.BotEngine)
+(cb.InBoundRouter) ...> (cb.InBoundForward)
+(cb.InBoundForward) --> (external.InboundService)

@@ -10,7 +10,7 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Component;
 
 import com.boot.jx.AppConfig;
-import com.boot.jx.api.AmxApiResponse;
+import com.boot.jx.api.ApiResponse;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.postman.IPushNotifyService;
 import com.boot.jx.postman.PostManException;
@@ -31,13 +31,13 @@ public class PushNotifyClient implements IPushNotifyService {
 	AppConfig appConfig;
 
 	@Override
-	public AmxApiResponse<PushMessage, Object> sendDirect(PushMessage msg) throws PostManException {
+	public ApiResponse<PushMessage, Object> sendDirect(PushMessage msg) throws PostManException {
 		LOGGER.info("Sending Push Notifications");
 		try {
 			return restService.ajax(appConfig.getPostmapURL()).path(PostManUrls.NOTIFY_PUSH)
 					.priority(ContactType.FBPUSH.getShortCode(), msg.getPriority())
 					.post(msg)
-					.as(new ParameterizedTypeReference<AmxApiResponse<PushMessage, Object>>() {
+					.as(new ParameterizedTypeReference<ApiResponse<PushMessage, Object>>() {
 					});
 		} catch (Exception e) {
 			throw new PostManException(e);
@@ -51,12 +51,12 @@ public class PushNotifyClient implements IPushNotifyService {
 	 * @return
 	 * @throws PostManException
 	 */
-	public AmxApiResponse<PushMessage, Object> send(PushMessage msg) throws PostManException {
+	public ApiResponse<PushMessage, Object> send(PushMessage msg) throws PostManException {
 		return this.send(Arrays.asList(msg));
 	}
 
 	@Override
-	public AmxApiResponse<PushMessage, Object> send(List<PushMessage> msgs) throws PostManException {
+	public ApiResponse<PushMessage, Object> send(List<PushMessage> msgs) throws PostManException {
 		LOGGER.info("Sending Push Notifications");
 		try {
 			PushMessage msg = CollectionUtil.getOne(msgs);
@@ -70,7 +70,7 @@ public class PushNotifyClient implements IPushNotifyService {
 	}
 
 	@Override
-	public AmxApiResponse<String, Object> subscribe(String token, String topic) throws PostManException {
+	public ApiResponse<String, Object> subscribe(String token, String topic) throws PostManException {
 		LOGGER.info("Subscribing for Push Notifications on web");
 		try {
 			return restService.ajax(appConfig.getPostmapURL()).path(PostManUrls.NOTIFY_PUSH_SUBSCRIBE)

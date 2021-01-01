@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.boot.jx.api.AmxApiResponse;
+import com.boot.jx.api.ApiResponse;
 import com.boot.jx.api.ListRequestModel;
 import com.boot.jx.logger.AuditEvent.Result;
 import com.boot.jx.logger.AuditService;
@@ -39,14 +39,14 @@ public class WhatsAppController {
 	AuditService auditService;
 
 	@RequestMapping(value = PostManUrls.WHATS_APP_SEND_BULK, method = RequestMethod.POST)
-	public AmxApiResponse<WAMessage, Object> sendWhatsAppBulk(@RequestBody List<WAMessage> msgs)
+	public ApiResponse<WAMessage, Object> sendWhatsAppBulk(@RequestBody List<WAMessage> msgs)
 			throws PostManException {
-		return AmxApiResponse.buildList(whatsAppService.send(msgs));
+		return ApiResponse.buildList(whatsAppService.send(msgs));
 	}
 
 	@RequestMapping(value = PostManUrls.WHATS_APP_SEND, method = RequestMethod.POST)
-	public AmxApiResponse<WAMessage, Object> sendWhatsApp(@RequestBody WAMessage msg) throws PostManException {
-		return AmxApiResponse.build(whatsAppService.send(msg));
+	public ApiResponse<WAMessage, Object> sendWhatsApp(@RequestBody WAMessage msg) throws PostManException {
+		return ApiResponse.build(whatsAppService.send(msg));
 	}
 
 	@RequestMapping(value = PostManUrls.WHATS_APP_SEND, method = RequestMethod.GET)
@@ -91,7 +91,7 @@ public class WhatsAppController {
 	}
 
 	@RequestMapping(value = PostManUrls.WHATS_APP_RESEND, method = RequestMethod.POST)
-	public AmxApiResponse<WAMessage, Object> resendWhatsApp(@RequestBody WAMessage msg, @RequestParam BigDecimal q)
+	public ApiResponse<WAMessage, Object> resendWhatsApp(@RequestBody WAMessage msg, @RequestParam BigDecimal q)
 			throws PostManException {
 		long ageOfMessage = System.currentTimeMillis() - msg.getTimestamp();
 
@@ -102,11 +102,11 @@ public class WhatsAppController {
 			msg.setStatus(Status.FAILED);
 			return statusWhatsApp(msg, "TIMEOUT");
 		}
-		return AmxApiResponse.build(msg);
+		return ApiResponse.build(msg);
 	}
 
 	@RequestMapping(value = PostManUrls.WHATS_APP_STATUS, method = RequestMethod.POST)
-	public AmxApiResponse<WAMessage, Object> statusWhatsApp(@RequestBody WAMessage msg,
+	public ApiResponse<WAMessage, Object> statusWhatsApp(@RequestBody WAMessage msg,
 			@RequestParam(required = false) String reason) throws PostManException {
 		PMGaugeEvent pMGaugeEvent = new PMGaugeEvent(PMGaugeEvent.Type.SEND_WHATSAPP).set(msg);
 		;
@@ -119,7 +119,7 @@ public class WhatsAppController {
 			pMGaugeEvent.setResult(Result.FAIL);
 		}
 		auditService.log(pMGaugeEvent);
-		return AmxApiResponse.build(msg);
+		return ApiResponse.build(msg);
 	}
 
 }

@@ -1,4 +1,4 @@
-package com.boot.jx.test;
+package com.boot.jx.agent;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -15,10 +15,10 @@ import org.springframework.scheduling.annotation.EnableAsync;
  */
 @ServletComponentScan
 @SpringBootApplication(exclude = DataSourceAutoConfiguration.class)
-@ComponentScan("com.amx.jax")
+@ComponentScan("com.boot.jx")
 @EnableAsync
 @EnableCaching
-public class TestOWS extends SpringBootServletInitializer {
+public class AgentOWS extends SpringBootServletInitializer {
 
 	/**
 	 * The main method.
@@ -26,7 +26,7 @@ public class TestOWS extends SpringBootServletInitializer {
 	 * @param args the arguments
 	 */
 	public static void main(String[] args) {
-		SpringApplication.run(TestOWS.class, args);
+		SpringApplication.run(AgentOWS.class, args);
 	}
 
 	/*
@@ -37,7 +37,7 @@ public class TestOWS extends SpringBootServletInitializer {
 	 * org.springframework.boot.builder.SpringApplicationBuilder)
 	 */
 	protected SpringApplicationBuilder configure(SpringApplicationBuilder applicationBuilder) {
-		return applicationBuilder.sources(TestOWS.class);
+		return applicationBuilder.sources(AgentOWS.class);
 	}
 
 }

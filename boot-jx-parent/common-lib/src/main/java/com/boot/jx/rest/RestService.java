@@ -39,7 +39,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import com.boot.jx.AppConfig;
 import com.boot.jx.AppConstants;
-import com.boot.jx.api.AmxApiResponse;
+import com.boot.jx.api.ApiResponse;
 import com.boot.jx.filter.AppClientInterceptor;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.ClazzUtil;
@@ -418,17 +418,17 @@ public class RestService {
 			});
 		}
 
-		public AmxApiResponse<Object, Object> asApiResponse() {
+		public ApiResponse<Object, Object> asApiResponse() {
 			return this.asApiResponse(Object.class);
 		}
 
-		public AmxApiResponse<Map<String, Object>, Object> asAmxApiResponseOfMap() {
-			return this.as(new ParameterizedTypeReference<AmxApiResponse<Map<String, Object>, Object>>() {
+		public ApiResponse<Map<String, Object>, Object> asAmxApiResponseOfMap() {
+			return this.as(new ParameterizedTypeReference<ApiResponse<Map<String, Object>, Object>>() {
 			});
 		}
 
-		public AmxApiResponse<Object, Object> asAmxApiResponseOfObject() {
-			return this.as(new ParameterizedTypeReference<AmxApiResponse<Object, Object>>() {
+		public ApiResponse<Object, Object> asAmxApiResponseOfObject() {
+			return this.as(new ParameterizedTypeReference<ApiResponse<Object, Object>>() {
 			});
 		}
 
@@ -440,7 +440,7 @@ public class RestService {
 		 * @return
 		 */
 		@Deprecated
-		public <T> AmxApiResponse<T, Object> asApiResponse(Class<T> resultType) {
+		public <T> ApiResponse<T, Object> asApiResponse(Class<T> resultType) {
 			return this.asApiResponse(resultType, Object.class);
 		}
 
@@ -452,8 +452,8 @@ public class RestService {
 		 * @return
 		 */
 		@Deprecated
-		public <T, M> AmxApiResponse<T, M> asApiResponse(Class<T> resultType, Class<M> metaType) {
-			return this.as(new ParameterizedTypeReference<AmxApiResponse<T, M>>() {
+		public <T, M> ApiResponse<T, M> asApiResponse(Class<T> resultType, Class<M> metaType) {
+			return this.as(new ParameterizedTypeReference<ApiResponse<T, M>>() {
 			});
 		}
 

@@ -23,7 +23,7 @@ import com.boot.jx.AppConfig;
 import com.boot.jx.AppParam;
 import com.boot.jx.AppSharedConfig;
 import com.boot.jx.AppTenantConfig;
-import com.boot.jx.api.AmxApiResponse;
+import com.boot.jx.api.ApiResponse;
 import com.boot.jx.api.AmxApiResponseUtil;
 import com.boot.jx.api.BoolRespModel;
 import com.boot.jx.def.IndicatorListner;
@@ -124,20 +124,20 @@ public class AppParamController {
 	private List<AppSharedConfig> listAppSharedConfig;
 
 	@RequestMapping(value = "/pub/amx/config/shared/clear", method = RequestMethod.GET)
-	public AmxApiResponse<BoolRespModel, Object> clearSharedConfig() {
+	public ApiResponse<BoolRespModel, Object> clearSharedConfig() {
 		if (ArgUtil.is(listAppSharedConfig)) {
 			for (AppSharedConfig appSharedConfig : listAppSharedConfig) {
 				appSharedConfig.clear(null);
 			}
 		}
-		return AmxApiResponse.build(new BoolRespModel(true));
+		return ApiResponse.build(new BoolRespModel(true));
 	}
 
 	@Autowired(required = false)
 	VendorAuthService appVendorConfigForAuth;
 
 	@RequestMapping(value = "/pub/amx/device", method = { RequestMethod.GET, RequestMethod.POST })
-	public AmxApiResponse<UserDevice, Map<String, Object>> userDevice(@RequestParam(required = false) String key,
+	public ApiResponse<UserDevice, Map<String, Object>> userDevice(@RequestParam(required = false) String key,
 			@RequestParam(required = false) String vendor, HttpSession httpSession,
 			HttpServletRequest request) {
 		Map<String, Object> map = new HashMap<String, Object>();
@@ -167,7 +167,7 @@ public class AppParamController {
 		}
 
 		AmxApiResponseUtil.addWarning("THis is a warning for no reason");
-		AmxApiResponse<UserDevice, Map<String, Object>> resp = new AmxApiResponse<UserDevice, Map<String, Object>>();
+		ApiResponse<UserDevice, Map<String, Object>> resp = new ApiResponse<UserDevice, Map<String, Object>>();
 		resp.setMeta(map);
 		resp.setData(commonHttpRequest.getUserDevice().toSanitized());
 		return resp;
@@ -239,19 +239,19 @@ public class AppParamController {
 	}
 
 	@RequestMapping(value = "/ext/pub/ping", method = RequestMethod.GET)
-	public AmxApiResponse<Object, Object> extPubPing() {
-		return AmxApiResponse.build().message("pong");
+	public ApiResponse<Object, Object> extPubPing() {
+		return ApiResponse.build().message("pong");
 	}
 
 	@RequestMapping(value = EXT_PUB_CONFIG_CLIENT, method = RequestMethod.GET)
-	public AmxApiResponse<Map<String, Object>, Object> extPubConfig() {
+	public ApiResponse<Map<String, Object>, Object> extPubConfig() {
 		Map<String, Object> config = new HashMap<String, Object>();
 		if (ArgUtil.is(listAppSharedConfig)) {
 			for (AppSharedConfig appSharedConfig : listAppSharedConfig) {
 				appSharedConfig.getExternalConfig(config);
 			}
 		}
-		return AmxApiResponse.buildData(config);
+		return ApiResponse.buildData(config);
 	}
 
 }

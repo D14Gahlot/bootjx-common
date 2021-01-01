@@ -12,7 +12,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 import com.boot.jx.AppConfig;
-import com.boot.jx.api.AmxApiResponse;
+import com.boot.jx.api.ApiResponse;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.postman.PostManException;
 import com.boot.jx.postman.PostManService;
@@ -70,7 +70,7 @@ public class PostManClient implements PostManService {
 		return ArgUtil.parseAsString(ContextUtil.map().get(PARAM_LANG));
 	}
 
-	public AmxApiResponse<SMS, Object> sendSMS(SMS sms, Boolean async) throws PostManException {
+	public ApiResponse<SMS, Object> sendSMS(SMS sms, Boolean async) throws PostManException {
 		try {
 			return restService.ajax(getPostmapURL()).path(PostManUrls.SEND_SMS).queryParam(PARAM_LANG, getLang())
 					.queryParam(PARAM_ASYNC, async).priority(ContactType.SMS.getShortCode(), sms.getPriority())
@@ -81,16 +81,16 @@ public class PostManClient implements PostManService {
 	}
 
 	@Override
-	public AmxApiResponse<SMS, Object> sendSMS(SMS sms) throws PostManException {
+	public ApiResponse<SMS, Object> sendSMS(SMS sms) throws PostManException {
 		return sendSMS(sms, Boolean.FALSE);
 	}
 
 	@Override
-	public AmxApiResponse<SMS, Object> sendSMSAsync(SMS sms) throws PostManException {
+	public ApiResponse<SMS, Object> sendSMSAsync(SMS sms) throws PostManException {
 		return sendSMS(sms, Boolean.TRUE);
 	}
 
-	public AmxApiResponse<Email, Object> sendEmail(Email email, Boolean async) throws PostManException {
+	public ApiResponse<Email, Object> sendEmail(Email email, Boolean async) throws PostManException {
 		try {
 			return restService.ajax(getPostmapURL()).path(PostManUrls.SEND_EMAIL).queryParam(PARAM_LANG, getLang())
 					.queryParam(PARAM_ASYNC, async).priority(ContactType.EMAIL.getShortCode(), email.getPriority())
@@ -101,12 +101,12 @@ public class PostManClient implements PostManService {
 	}
 
 	@Override
-	public AmxApiResponse<Email, Object> sendEmail(Email email) throws PostManException {
+	public ApiResponse<Email, Object> sendEmail(Email email) throws PostManException {
 		return sendEmail(email, Boolean.FALSE);
 	}
 
 	@Override
-	public AmxApiResponse<Email, Object> sendEmailAsync(Email email) throws PostManException {
+	public ApiResponse<Email, Object> sendEmailAsync(Email email) throws PostManException {
 		return sendEmail(email, Boolean.TRUE);
 	}
 
@@ -117,7 +117,7 @@ public class PostManClient implements PostManService {
 	 * @see
 	 * com.amx.jax.postman.PostManService#sendEmailBulkForTemplate(java.util.List)
 	 */
-	public AmxApiResponse<Email, Object> sendEmailBulk(List<Email> emailList) {
+	public ApiResponse<Email, Object> sendEmailBulk(List<Email> emailList) {
 		LOGGER.info("Sending bulk Email for Notification Service ");
 		Email email = CollectionUtil.getOne(emailList);
 		try {
@@ -130,12 +130,12 @@ public class PostManClient implements PostManService {
 	}
 
 	@Override
-	public AmxApiResponse<MessageBox, Object> send(MessageBox messageBox) {
+	public ApiResponse<MessageBox, Object> send(MessageBox messageBox) {
 		LOGGER.info("Sending bulk messages for Notification Service ");
 		try {
 			return restService.ajax(getPostmapURL()).path(PostManUrls.SEND_MESSAGE_BOX)
 					.priority(messageBox.getPriorityType(), messageBox.getPriorityOrder()).post(messageBox)
-					.as(new ParameterizedTypeReference<AmxApiResponse<MessageBox, Object>>() {
+					.as(new ParameterizedTypeReference<ApiResponse<MessageBox, Object>>() {
 					});
 		} catch (Exception e) {
 			throw new PostManException(e);
@@ -143,7 +143,7 @@ public class PostManClient implements PostManService {
 	}
 
 	@Override
-	public AmxApiResponse<Email, Object> sendEmailToSupprt(SupportEmail email) throws PostManException {
+	public ApiResponse<Email, Object> sendEmailToSupprt(SupportEmail email) throws PostManException {
 		LOGGER.info("Sending support email from {}", email.getVisitorName());
 		try {
 			return restService.ajax(getPostmapURL()).path(PostManUrls.SEND_EMAIL_SUPPORT)
@@ -156,7 +156,7 @@ public class PostManClient implements PostManService {
 
 	@Override
 	@Async
-	public AmxApiResponse<Notipy, Object> notifySlack(Notipy msg) throws PostManException {
+	public ApiResponse<Notipy, Object> notifySlack(Notipy msg) throws PostManException {
 		try {
 			return restService.ajax(getPostmapURL()).path(PostManUrls.NOTIFY_SLACK).queryParam(PARAM_LANG, getLang())
 					.post(msg).asApiResponse(Notipy.class);
@@ -166,9 +166,9 @@ public class PostManClient implements PostManService {
 	}
 
 	@Override
-	public AmxApiResponse<File, Object> processTemplate(File file) throws PostManException {
+	public ApiResponse<File, Object> processTemplate(File file) throws PostManException {
 		try {
-			return AmxApiResponse.build(restService.ajax(getPostmapURL()).path(PostManUrls.PROCESS_TEMPLATE_FILE)
+			return ApiResponse.build(restService.ajax(getPostmapURL()).path(PostManUrls.PROCESS_TEMPLATE_FILE)
 					.queryParam(PARAM_LANG, getLang()).contentTypeJson().acceptJson().post(file).as(File.class));
 		} catch (Exception e) {
 			throw new PostManException(e);
@@ -178,7 +178,7 @@ public class PostManClient implements PostManService {
 
 	@Override
 	@Async
-	public AmxApiResponse<ExceptionReport, Object> notifyException(ExceptionReport e) {
+	public ApiResponse<ExceptionReport, Object> notifyException(ExceptionReport e) {
 		LOGGER.info("Sending exception = {} : {}", e.getTitle(), e.getClass().getName());
 		try {
 			return restService.ajax(getPostmapURL()).path(PostManUrls.NOTIFY_SLACK_EXCEP_REPORT).contentTypeJson()
@@ -192,15 +192,15 @@ public class PostManClient implements PostManService {
 
 	@Override
 	@Async
-	public AmxApiResponse<ExceptionReport, Object> notifyException(String title, Exception exc) {
+	public ApiResponse<ExceptionReport, Object> notifyException(String title, Exception exc) {
 		return this.notifyException(new ExceptionReport(title, exc));
 	}
 
-	public AmxApiResponse<InboxMessage, Object> forward(InboxMessage inboxMessage) {
+	public ApiResponse<InboxMessage, Object> forward(InboxMessage inboxMessage) {
 		LOGGER.debug("Forwarding InboxMessage to other Service ");
 		try {
 			return restService.ajax(inboundForwardUrl).post(inboxMessage)
-					.as(new ParameterizedTypeReference<AmxApiResponse<InboxMessage, Object>>() {
+					.as(new ParameterizedTypeReference<ApiResponse<InboxMessage, Object>>() {
 					});
 		} catch (Exception e) {
 			throw new PostManException(e);

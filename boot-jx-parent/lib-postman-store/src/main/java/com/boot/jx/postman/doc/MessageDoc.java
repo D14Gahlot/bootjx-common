@@ -21,7 +21,7 @@ public class MessageDoc implements Serializable {
 	private String handler;
 	private String message;
 	private String status;
-	private ContactDto contact;
+	private ContactDoc contact;
 
 	@Indexed
 	private String contactId;
@@ -90,11 +90,11 @@ public class MessageDoc implements Serializable {
 		this.status = status;
 	}
 
-	public ContactDto getContact() {
+	public ContactDoc getContact() {
 		return contact;
 	}
 
-	public void setContact(ContactDto contact) {
+	public void setContact(ContactDoc contact) {
 		this.contact = contact;
 	}
 

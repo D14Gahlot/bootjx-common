@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.boot.jx.AppContextUtil;
-import com.boot.jx.api.AmxApiResponse;
+import com.boot.jx.api.ApiResponse;
 import com.boot.jx.dict.Language;
 import com.boot.jx.postman.PostManException;
 import com.boot.jx.postman.PostManUrls;
@@ -69,21 +69,21 @@ public class DocServiceController {
 	}
 
 	@RequestMapping(value = PostManUrls.DOC_UPLOAD_FILE, method = { RequestMethod.POST })
-	public AmxApiResponse<DocResult, Object> uploadServiceProviderFile(
+	public ApiResponse<DocResult, Object> uploadServiceProviderFile(
 			@RequestParam Language lang,
 			@RequestParam String dir, @RequestParam String type,
 			@RequestParam String docid,
 			@RequestParam MultipartFile file,
 			@RequestParam(required = false) MultipartFile fileback) throws Exception {
-		return AmxApiResponse
+		return ApiResponse
 				.buildResults(documentService.scan(AppContextUtil.getTraceId(), dir, type, docid, file, fileback));
 	}
 
 	@RequestMapping(value = PostManUrls.DOC_IMAGE_BY_ID, method = { RequestMethod.GET })
-	public AmxApiResponse<DocResult, Object> uploadServiceProviderFile(
+	public ApiResponse<DocResult, Object> uploadServiceProviderFile(
 			@PathVariable(value = "image_id") String imageId,
 			@PathVariable(value = "ext") String ext) throws Exception {
-		return AmxApiResponse
+		return ApiResponse
 				.buildResults(documentService.imageJson(imageId));
 	}
 }

@@ -40,7 +40,7 @@ import com.boot.jx.AppConfig;
 import com.boot.jx.AppConstants;
 import com.boot.jx.AppContextUtil;
 import com.boot.jx.api.AResponse;
-import com.boot.jx.api.AmxApiResponse;
+import com.boot.jx.api.ApiResponse;
 import com.boot.jx.api.AmxApiResponseUtil;
 import com.boot.jx.api.AmxFieldError;
 import com.boot.jx.exception.ApiHttpExceptions.ApiHttpArgException;
@@ -55,7 +55,7 @@ import com.boot.utils.HttpUtils;
 import com.fasterxml.jackson.databind.JsonMappingException.Reference;
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 
-public abstract class AmxAdvice implements ResponseBodyAdvice<AmxApiResponse<?, ?>> {
+public abstract class AmxAdvice implements ResponseBodyAdvice<ApiResponse<?, ?>> {
 
 	private Logger logger = LoggerService.getLogger(AmxAdvice.class);
 
@@ -255,7 +255,7 @@ public abstract class AmxAdvice implements ResponseBodyAdvice<AmxApiResponse<?, 
 	}
 
 	@Override
-	public AmxApiResponse<?, ?> beforeBodyWrite(AmxApiResponse<?, ?> body, MethodParameter returnType,
+	public ApiResponse<?, ?> beforeBodyWrite(ApiResponse<?, ?> body, MethodParameter returnType,
 			MediaType selectedContentType, Class<? extends HttpMessageConverter<?>> selectedConverterType,
 			ServerHttpRequest request, ServerHttpResponse response) {
 		for (AmxFieldError warning : AmxApiResponseUtil.getWarnings()) {

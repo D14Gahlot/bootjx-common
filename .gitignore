@@ -42,3 +42,4 @@ ext-resources
 *.sha1
 /dump.rdb
 .sts4-cache
+.sass-cache

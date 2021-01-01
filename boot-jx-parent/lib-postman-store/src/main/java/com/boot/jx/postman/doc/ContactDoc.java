@@ -8,7 +8,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import com.boot.jx.dict.ContactType;
 
 @Document(collection = "CONTACT")
-public class ContactDto implements Serializable {
+public class ContactDoc implements Serializable {
 	private static final long serialVersionUID = -6046846959629225232L;
 	private String mobile;
 	private String userid;

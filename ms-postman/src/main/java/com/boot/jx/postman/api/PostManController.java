@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.boot.jx.AppParam;
-import com.boot.jx.api.AmxApiResponse;
+import com.boot.jx.api.ApiResponse;
 import com.boot.jx.dict.Language;
 import com.boot.jx.postman.PostManConfig;
 import com.boot.jx.postman.PostManException;
@@ -89,7 +89,7 @@ public class PostManController {
 	 */
 	@SuppressWarnings("unchecked")
 	@RequestMapping(value = PostManUrls.PROCESS_TEMPLATE, method = RequestMethod.POST)
-	public AmxApiResponse<File, Object> processTemplate(@RequestParam TemplatesMX template,
+	public ApiResponse<File, Object> processTemplate(@RequestParam TemplatesMX template,
 			@RequestParam(required = false) String data, @RequestParam(required = false) String fileName,
 			@RequestParam(required = false) File.Type fileType) {
 
@@ -125,7 +125,7 @@ public class PostManController {
 	 * @throws PostManException the post man exception
 	 */
 	@RequestMapping(value = PostManUrls.SEND_SMS, method = RequestMethod.POST)
-	public AmxApiResponse<SMS, Object> sendSMS(@RequestBody SMS sms,
+	public ApiResponse<SMS, Object> sendSMS(@RequestBody SMS sms,
 			@RequestParam(required = false, defaultValue = "false") Boolean async) throws PostManException {
 
 		if (AppParam.DEBUG_INFO.isEnabled()) {
@@ -142,7 +142,7 @@ public class PostManController {
 	}
 
 	@RequestMapping(value = PostManUrls.SEND_SMS, method = RequestMethod.GET)
-	public AmxApiResponse<SMS, Object> sendSMSGet(@RequestParam String to, @RequestParam String message)
+	public ApiResponse<SMS, Object> sendSMSGet(@RequestParam String to, @RequestParam String message)
 			throws PostManException {
 		SMS sms = new SMS();
 		sms.addTo(to);
@@ -151,7 +151,7 @@ public class PostManController {
 	}
 
 	@RequestMapping(value = PostManUrls.SEND_EMAIL, method = RequestMethod.POST)
-	public AmxApiResponse<Email, Object> sendEmail(@RequestBody Email email,
+	public ApiResponse<Email, Object> sendEmail(@RequestBody Email email,
 			@RequestParam(required = false, defaultValue = "false") Boolean async) throws PostManException {
 
 		getLang(email);
@@ -168,12 +168,12 @@ public class PostManController {
 	}
 
 	@RequestMapping(value = PostManUrls.SEND_EMAIL_BULK, method = RequestMethod.POST)
-	public AmxApiResponse<Email, Object> sendEmailBulk(@RequestBody List<Email> emailList) throws PostManException {
+	public ApiResponse<Email, Object> sendEmailBulk(@RequestBody List<Email> emailList) throws PostManException {
 		return postManService.sendEmailBulk(emailList);
 	}
 
 	@RequestMapping(value = PostManUrls.SEND_MESSAGE_BOX, method = RequestMethod.POST)
-	public AmxApiResponse<MessageBox, Object> send(@RequestBody MessageBox messageBox) throws PostManException {
+	public ApiResponse<MessageBox, Object> send(@RequestBody MessageBox messageBox) throws PostManException {
 		return postManService.send(messageBox);
 	}
 
@@ -185,7 +185,7 @@ public class PostManController {
 	 * @throws PostManException the post man exception
 	 */
 	@RequestMapping(value = PostManUrls.SEND_EMAIL_SUPPORT, method = RequestMethod.POST)
-	public AmxApiResponse<Email, Object> sendEmail(@RequestBody SupportEmail email) throws PostManException {
+	public ApiResponse<Email, Object> sendEmail(@RequestBody SupportEmail email) throws PostManException {
 		getLang(email);
 		return postManService.sendEmailToSupprt(email);
 	}
@@ -198,7 +198,7 @@ public class PostManController {
 	 * @throws PostManException the post man exception
 	 */
 	@RequestMapping(value = PostManUrls.NOTIFY_SLACK, method = RequestMethod.POST)
-	public AmxApiResponse<Notipy, Object> notifySlack(@RequestBody Notipy msg) throws PostManException {
+	public ApiResponse<Notipy, Object> notifySlack(@RequestBody Notipy msg) throws PostManException {
 		return postManService.notifySlack(msg);
 	}
 
@@ -213,14 +213,14 @@ public class PostManController {
 	 * @throws PostManException the post man exception
 	 */
 	@RequestMapping(value = PostManUrls.NOTIFY_SLACK_EXCEP, method = RequestMethod.POST)
-	public AmxApiResponse<ExceptionReport, Object> notifySlack(@RequestBody Exception eMsg,
+	public ApiResponse<ExceptionReport, Object> notifySlack(@RequestBody Exception eMsg,
 			@RequestParam(required = false) String title, @RequestParam(required = false) String appname,
 			@RequestParam(required = false) String exception) throws PostManException {
 		return postManService.notifyException(appname, title, exception, new ExceptionReport(eMsg));
 	}
 
 	@RequestMapping(value = PostManUrls.NOTIFY_SLACK_EXCEP_REPORT, method = RequestMethod.POST)
-	public AmxApiResponse<ExceptionReport, Object> notifySlackReport(@RequestBody ExceptionReport eMsg,
+	public ApiResponse<ExceptionReport, Object> notifySlackReport(@RequestBody ExceptionReport eMsg,
 			@RequestParam(required = false) String title, @RequestParam(required = false) String appname,
 			@RequestParam(required = false) String exception) throws PostManException {
 		if (eMsg.getEmail() != null) {

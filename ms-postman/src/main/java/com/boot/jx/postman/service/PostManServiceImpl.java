@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 import com.boot.jx.AppConfig;
 import com.boot.jx.AppContextUtil;
 import com.boot.jx.AppParam;
-import com.boot.jx.api.AmxApiResponse;
+import com.boot.jx.api.ApiResponse;
 import com.boot.jx.async.ExecutorConfig;
 import com.boot.jx.postman.PostManException;
 import com.boot.jx.postman.PostManService;
@@ -78,8 +78,8 @@ public class PostManServiceImpl implements PostManService {
 	 * com.amx.jax.postman.PostManService#sendEmail(com.amx.jax.postman.model.Email)
 	 */
 	@Override
-	public AmxApiResponse<Email, Object> sendEmail(Email email) throws PostManException {
-		return AmxApiResponse.build(emailService.sendEmail(supportService.filterMessageType(email)));
+	public ApiResponse<Email, Object> sendEmail(Email email) throws PostManException {
+		return ApiResponse.build(emailService.sendEmail(supportService.filterMessageType(email)));
 	}
 
 	/*
@@ -91,16 +91,16 @@ public class PostManServiceImpl implements PostManService {
 	 */
 	@Override
 
-	public AmxApiResponse<Email, Object> sendEmailAsync(Email email) throws PostManException {
+	public ApiResponse<Email, Object> sendEmailAsync(Email email) throws PostManException {
 		return this.sendEmail(email);
 	}
 
 	@Override
-	public AmxApiResponse<Email, Object> sendEmailBulk(List<Email> emailList) {
+	public ApiResponse<Email, Object> sendEmailBulk(List<Email> emailList) {
 		for (Email email : emailList) {
 			this.sendEmail(email);
 		}
-		return AmxApiResponse.buildList(emailList);
+		return ApiResponse.buildList(emailList);
 	}
 
 	/*
@@ -111,8 +111,8 @@ public class PostManServiceImpl implements PostManService {
 	 * File)
 	 */
 	@Override
-	public AmxApiResponse<File, Object> processTemplate(File file) {
-		return AmxApiResponse.build(fileService.create(file));
+	public ApiResponse<File, Object> processTemplate(File file) {
+		return ApiResponse.build(fileService.create(file));
 	}
 
 	/**
@@ -138,7 +138,7 @@ public class PostManServiceImpl implements PostManService {
 	 * com.amx.jax.postman.PostManService#sendSMS(com.amx.jax.postman.model.SMS)
 	 */
 	@Override
-	public AmxApiResponse<SMS, Object> sendSMS(SMS sms) throws PostManException {
+	public ApiResponse<SMS, Object> sendSMS(SMS sms) throws PostManException {
 
 		if (AppParam.DEBUG_INFO.isEnabled()) {
 			LOGGER.info("{}:START", "sendSMS");
@@ -148,7 +148,7 @@ public class PostManServiceImpl implements PostManService {
 		if (AppParam.DEBUG_INFO.isEnabled()) {
 			LOGGER.info("{}:END", "sendSMS");
 		}
-		return AmxApiResponse.build(sms);
+		return ApiResponse.build(sms);
 	}
 
 	/*
@@ -160,9 +160,9 @@ public class PostManServiceImpl implements PostManService {
 	 */
 	@Override
 	@Async(ExecutorConfig.EXECUTER_BRONZE)
-	public AmxApiResponse<Notipy, Object> notifySlack(Notipy msg) throws PostManException {
+	public ApiResponse<Notipy, Object> notifySlack(Notipy msg) throws PostManException {
 		try {
-			return AmxApiResponse.build(slackService.sendNotification(msg));
+			return ApiResponse.build(slackService.sendNotification(msg));
 		} catch (Exception e) {
 			throw new PostManException(e);
 		}
@@ -176,7 +176,7 @@ public class PostManServiceImpl implements PostManService {
 	 * ExceptionReport)
 	 */
 	@Override
-	public AmxApiResponse<ExceptionReport, Object> notifyException(ExceptionReport e) {
+	public ApiResponse<ExceptionReport, Object> notifyException(ExceptionReport e) {
 		return this.notifyException(appConfig.getAppName(), e.getTitle(), e.getException(), e);
 	}
 
@@ -189,9 +189,9 @@ public class PostManServiceImpl implements PostManService {
 	 * @param e         the e
 	 * @return the exception report
 	 */
-	public AmxApiResponse<ExceptionReport, Object> notifyException(String appname, String title, String exception,
+	public ApiResponse<ExceptionReport, Object> notifyException(String appname, String title, String exception,
 			ExceptionReport e) {
-		return AmxApiResponse.build(slackService.sendException(appname, title, exception, e));
+		return ApiResponse.build(slackService.sendException(appname, title, exception, e));
 	}
 
 	/*
@@ -201,7 +201,7 @@ public class PostManServiceImpl implements PostManService {
 	 * java.lang.Exception)
 	 */
 	@Override
-	public AmxApiResponse<ExceptionReport, Object> notifyException(String title, Exception exc) {
+	public ApiResponse<ExceptionReport, Object> notifyException(String title, Exception exc) {
 		return this.notifyException(new ExceptionReport(title, exc));
 	}
 
@@ -214,7 +214,7 @@ public class PostManServiceImpl implements PostManService {
 	 */
 	@Override
 	@Async(ExecutorConfig.EXECUTER_PLATINUM)
-	public AmxApiResponse<SMS, Object> sendSMSAsync(SMS sms) throws PostManException {
+	public ApiResponse<SMS, Object> sendSMSAsync(SMS sms) throws PostManException {
 		if (AppParam.DEBUG_INFO.isEnabled()) {
 			LOGGER.info("{}:START", "sendSMSAsync");
 		}
@@ -230,7 +230,7 @@ public class PostManServiceImpl implements PostManService {
 	 */
 	@Override
 	@Async(ExecutorConfig.EXECUTER_BRONZE)
-	public AmxApiResponse<Email, Object> sendEmailToSupprt(SupportEmail supportEmail) throws PostManException {
+	public ApiResponse<Email, Object> sendEmailToSupprt(SupportEmail supportEmail) throws PostManException {
 		Email email = this.sendEmail(supportService.createContactUsEmail(supportEmail)).getResult();
 		Notipy msg = new Notipy();
 		msg.setMessage(supportEmail.getSubject());
@@ -242,11 +242,11 @@ public class PostManServiceImpl implements PostManService {
 		msg.setSubject(supportEmail.getSubject());
 		msg.setIChannel(Notipy.ChannelType.INQUIRY);
 		this.notifySlack(msg);
-		return AmxApiResponse.build(email);
+		return ApiResponse.build(email);
 	}
 
 	@Override
-	public AmxApiResponse<MessageBox, Object> send(MessageBox messageBox) {
+	public ApiResponse<MessageBox, Object> send(MessageBox messageBox) {
 
 		LOGGER.debug("messageBox with Ex{} Sx{} Wx{} Tx{} Px{}",
 				messageBox.getEmailBucket().size(),
@@ -275,7 +275,7 @@ public class PostManServiceImpl implements PostManService {
 			fbPushService.sendDirect(pushMessage);
 		}
 
-		return AmxApiResponse.build(messageBox);
+		return ApiResponse.build(messageBox);
 	}
 
 }

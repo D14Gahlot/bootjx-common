@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.boot.jx.api.AmxApiResponse;
+import com.boot.jx.api.ApiResponse;
 import com.boot.jx.dict.BranchesBHR;
 import com.boot.jx.dict.BranchesKWT;
 import com.boot.jx.dict.Nations;
@@ -96,7 +96,7 @@ public class NotifyController {
 	 * @throws PostManException the post man exception
 	 */
 	@RequestMapping(value = "/postman/notify/all", method = RequestMethod.POST)
-	public AmxApiResponse<PushMessage, Object> notifyAll(
+	public ApiResponse<PushMessage, Object> notifyAll(
 			@ApiParam(required = true, allowableValues = "KWT,BHR",
 					value = "Select Tenant") @RequestParam Tenant tenant,
 			@RequestParam String message, @RequestParam String title) throws PostManException {
@@ -118,7 +118,7 @@ public class NotifyController {
 	 * @throws PostManException the post man exception
 	 */
 	@RequestMapping(value = "/postman/notify/nationality", method = RequestMethod.POST)
-	public AmxApiResponse<PushMessage, Object> notifyNational(
+	public ApiResponse<PushMessage, Object> notifyNational(
 			@ApiParam(required = true, allowableValues = "KWT,BHR",
 					value = "Select Tenant") @RequestParam Tenant tenant,
 			@RequestParam Nations nationality, @RequestParam String message, @RequestParam String title)

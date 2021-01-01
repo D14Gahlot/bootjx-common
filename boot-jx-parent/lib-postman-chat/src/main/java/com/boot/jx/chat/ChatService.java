@@ -141,4 +141,8 @@ public class ChatService {
 	public InboxMessage forward() {
 		return postManClient.forward(getInboxMessage()).getResult();
 	}
+
+	public InboxMessage forward(InboxMessage inboxMessage) {
+		return postManClient.forward(inboxMessage).getResult();
+	}
 }

@@ -5,7 +5,7 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Component;
 
 import com.boot.jx.dict.ContactType;
-import com.boot.jx.postman.doc.ContactDto;
+import com.boot.jx.postman.doc.ContactDoc;
 import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.Message;
@@ -28,7 +28,7 @@ public class MessageStore {
 		doc.setContactId(PostManUtil.createContactId(inboxMessage));
 		doc.setType("I");
 		doc.setTimestamp(System.currentTimeMillis());
-		ContactDto contact = new ContactDto();
+		ContactDoc contact = new ContactDoc();
 		contact.setMobile(inboxMessage.getFrom());
 		contact.setContactType(inboxMessage.getContactType());
 		doc.setContact(contact);
@@ -76,7 +76,7 @@ public class MessageStore {
 		doc.setContactId(PostManUtil.createContactId(outMessage));
 		doc.setType("O");
 		doc.setTimestamp(System.currentTimeMillis());
-		ContactDto contact = new ContactDto();
+		ContactDoc contact = new ContactDoc();
 		contact.setMobile(to);
 		contact.setContactType(outMessage.getContactType());
 		doc.setContact(contact);

@@ -1,9 +1,5 @@
 package com.boot.jx.inbound;
 
-import java.util.concurrent.TimeUnit;
-
-import org.redisson.api.RedissonClient;
-import org.redisson.api.RBlockingQueue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,9 +8,8 @@ import org.springframework.stereotype.Component;
 
 import com.boot.jx.bot.BotEngine;
 import com.boot.jx.bot.ChatMapping;
-import com.boot.jx.postman.PostManException;
+import com.boot.jx.chat.ChatService;
 import com.boot.jx.postman.model.InboxMessage;
-import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.utils.ArgUtil;
 
 @Component
@@ -25,8 +20,14 @@ public class InBoundService {
 	@Autowired(required = false)
 	private InBoundHandler inBoundHandler;
 
+	@Autowired(required = false)
+	private InBoundFilter inBoundFilter;
+
 	@Autowired
 	private BotEngine botEngine;
+
+	@Autowired
+	private ChatService chatService;
 
 	/**
 	 * Invoke the methods with matching {@link ChatMapping#events()} and
@@ -40,13 +41,16 @@ public class InBoundService {
 	}
 
 	public InboxMessage invokeMethods(InboxMessage inboxMessageOriginal) {
-		if (ArgUtil.is(inBoundHandler)) {
-			inBoundHandler.onMessage(inboxMessageOriginal);
-		} else if (botEngine.isChatBotDefined()) {
-			botEngine.invokeMethodsAsync(inboxMessageOriginal);
+		if (ArgUtil.isEmpty(inBoundFilter) || inBoundFilter.onFilter(inboxMessageOriginal)) {
+			if (ArgUtil.is(inBoundHandler)) {
+				inBoundHandler.onMessage(inboxMessageOriginal);
+			} else if (botEngine.isChatBotDefined()) {
+				botEngine.invokeMethodsAsync(inboxMessageOriginal);
+			} else {
+				chatService.forward(inboxMessageOriginal);
+			}
 		}
 		return inboxMessageOriginal;
 	}
-
 
 }

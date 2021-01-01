@@ -17,7 +17,7 @@ import com.boot.jx.AppConfig;
 import com.boot.jx.AppConstants;
 import com.boot.jx.AppContext;
 import com.boot.jx.AppContextUtil;
-import com.boot.jx.api.AmxApiResponse;
+import com.boot.jx.api.ApiResponse;
 import com.boot.jx.dict.PayGServiceCode;
 import com.boot.jx.exception.AmxApiException;
 import com.boot.jx.payg.PayGParams.PayGConstants;
@@ -210,7 +210,7 @@ public class PayGService {
 				.toHMAC().output();
 	}
 
-	public AmxApiResponse<PaymentResponseDto, Object> savePayMentDetails(PayGParams params,
+	public ApiResponse<PaymentResponseDto, Object> savePayMentDetails(PayGParams params,
 			PaymentResponseDto paymentResponseDto)
 			throws Exception {
 		try {
@@ -229,7 +229,7 @@ public class PayGService {
 			if (ArgUtil.isEmpty(params.getProduct())) {
 				return restService.ajax(appConfig.getJaxURL() + "/remit/save-remittance/")
 						.post(new HttpEntity<PaymentResponseDto>(paymentResponseDto, headers))
-						.as(new ParameterizedTypeReference<AmxApiResponse<PaymentResponseDto, Object>>() {
+						.as(new ParameterizedTypeReference<ApiResponse<PaymentResponseDto, Object>>() {
 						});
 			} else {
 				LOGGER.info("paymentResponseDto :" + JsonUtil.toJson(paymentResponseDto));
@@ -237,7 +237,7 @@ public class PayGService {
 						.queryParam(PayGParams.PayGConstants.PRODUCT, params.getProduct())
 						.queryParam(PayGParams.PayGConstants.CHANNEL, params.getChannel())
 						.post(new HttpEntity<PaymentResponseDto>(paymentResponseDto, headers))
-						.as(new ParameterizedTypeReference<AmxApiResponse<PaymentResponseDto, Object>>() {
+						.as(new ParameterizedTypeReference<ApiResponse<PaymentResponseDto, Object>>() {
 						});
 			}
 
@@ -248,7 +248,7 @@ public class PayGService {
 
 	}
 	
-	public AmxApiResponse<PaymentResponseDto, Object> savePayMentFailureDetails(PaymentResponseDto paymentResponseDto)
+	public ApiResponse<PaymentResponseDto, Object> savePayMentFailureDetails(PaymentResponseDto paymentResponseDto)
 			throws Exception {
 		try {
 			CommonRequestMetaInfo metaInfo = new CommonRequestMetaInfo();
@@ -262,7 +262,7 @@ public class PayGService {
 			
 			return restService.ajax(appConfig.getJaxURL()).path(PaymentResponseDto.PAYMENT_IPOS_FAIL_URL)
 					.post(new HttpEntity<PaymentResponseDto>(paymentResponseDto, headers))
-					.as(new ParameterizedTypeReference<AmxApiResponse<PaymentResponseDto, Object>>() {
+					.as(new ParameterizedTypeReference<ApiResponse<PaymentResponseDto, Object>>() {
 					});
 			
 		} catch (Exception e) {

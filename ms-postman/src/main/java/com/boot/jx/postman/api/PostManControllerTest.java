@@ -26,7 +26,7 @@ import org.springframework.web.servlet.LocaleResolver;
 
 import com.boot.jx.AppConfig;
 import com.boot.jx.AppContextUtil;
-import com.boot.jx.api.AmxApiResponse;
+import com.boot.jx.api.ApiResponse;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.dict.Tenant;
 import com.boot.jx.postman.PostManException;
@@ -242,7 +242,7 @@ public class PostManControllerTest {
 			file = postManClient.processTemplate(file).getResult();
 			return file.getContent();
 		} else if ("html".equals(ext)) {
-			AmxApiResponse<File, Object> resp = postManClient.processTemplate(file);
+			ApiResponse<File, Object> resp = postManClient.processTemplate(file);
 			file = resp.getResult();
 			if (email != null) {
 				Email eml = new Email();

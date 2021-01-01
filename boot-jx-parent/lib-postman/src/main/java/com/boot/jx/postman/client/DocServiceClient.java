@@ -13,7 +13,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.boot.jx.AppConfig;
 import com.boot.jx.AppContextUtil;
-import com.boot.jx.api.AmxApiResponse;
+import com.boot.jx.api.ApiResponse;
 import com.boot.jx.postman.PostManException;
 import com.boot.jx.postman.PostManUrls;
 import com.boot.jx.postman.model.DocResult;
@@ -86,11 +86,11 @@ public class DocServiceClient {
 				.queryParam("type", type).getURL();
 	}
 
-	public AmxApiResponse<DocResult, Object> validate(String docid) {
+	public ApiResponse<DocResult, Object> validate(String docid) {
 		try {
 			return restService.ajax(appConfig.getPostmapURL()).path(PostManUrls.DOC_VALIDATE_ID).field("docid", docid)
 					.postForm()
-					.as(new ParameterizedTypeReference<AmxApiResponse<DocResult, Object>>() {
+					.as(new ParameterizedTypeReference<ApiResponse<DocResult, Object>>() {
 					});
 		} catch (Exception e) {
 			throw new PostManException(e);

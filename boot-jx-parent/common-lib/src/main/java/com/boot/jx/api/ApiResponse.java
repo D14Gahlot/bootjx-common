@@ -12,7 +12,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class AmxApiResponse<T, M> extends AResponse<M>
+public class ApiResponse<T, M> extends AResponse<M>
 		implements ApiDataMetaResponse<T, M>, ApiResultsMetaResponse<T, M>, Serializable {
 
 	private static final long serialVersionUID = 2026047322050489651L;
@@ -23,7 +23,7 @@ public class AmxApiResponse<T, M> extends AResponse<M>
 	/** The data. */
 	protected List<T> results = null;
 
-	public AmxApiResponse() {
+	public ApiResponse() {
 		super();
 		this.data = null;
 		this.results = new ArrayList<T>();
@@ -34,7 +34,7 @@ public class AmxApiResponse<T, M> extends AResponse<M>
 	 *
 	 * @param resultList the result list
 	 */
-	public AmxApiResponse(List<T> resultList) {
+	public ApiResponse(List<T> resultList) {
 		super();
 		this.data = null;
 		this.results = resultList;
@@ -46,7 +46,7 @@ public class AmxApiResponse<T, M> extends AResponse<M>
 	 * @param resultList the result list
 	 * @param meta       the meta
 	 */
-	public AmxApiResponse(List<T> resultList, M meta) {
+	public ApiResponse(List<T> resultList, M meta) {
 		super();
 		this.data = null;
 		this.results = resultList;
@@ -99,18 +99,18 @@ public class AmxApiResponse<T, M> extends AResponse<M>
 		this.results.add(result);
 	}
 
-	public AmxApiResponse<T, M> result(T result) {
+	public ApiResponse<T, M> result(T result) {
 		this.addResult(result);
 		return this;
 	}
 
-	public AmxApiResponse<T, M> results(List<T> resultList) {
+	public ApiResponse<T, M> results(List<T> resultList) {
 		this.setResults(results);
 		return this;
 	}
 
-	public static <TS, MS> AmxApiResponse<TS, MS> build() {
-		return new AmxApiResponse<TS, MS>();
+	public static <TS, MS> ApiResponse<TS, MS> build() {
+		return new ApiResponse<TS, MS>();
 	}
 
 	/**
@@ -122,8 +122,8 @@ public class AmxApiResponse<T, M> extends AResponse<M>
 	 * @return
 	 */
 	@Deprecated
-	public static <TS> AmxApiResponse<TS, Object> build(TS result) {
-		AmxApiResponse<TS, Object> resp = new AmxApiResponse<TS, Object>();
+	public static <TS> ApiResponse<TS, Object> build(TS result) {
+		ApiResponse<TS, Object> resp = new ApiResponse<TS, Object>();
 		resp.addResult(result);
 		return resp;
 	}
@@ -137,7 +137,7 @@ public class AmxApiResponse<T, M> extends AResponse<M>
 	 * @return
 	 */
 	@Deprecated
-	public static <TS, MS> AmxApiResponse<TS, MS> build(TS result, MS meta) {
+	public static <TS, MS> ApiResponse<TS, MS> build(TS result, MS meta) {
 		return buildResult(result, meta);
 	}
 
@@ -152,24 +152,24 @@ public class AmxApiResponse<T, M> extends AResponse<M>
 	 * @return the amx api response
 	 */
 	@Deprecated
-	public static <TS> AmxApiResponse<List<TS>, HashMap<String, Object>> build(List<TS> resultList) {
+	public static <TS> ApiResponse<List<TS>, HashMap<String, Object>> build(List<TS> resultList) {
 		return buildResult(resultList, new HashMap<String, Object>());
 	}
 
-	public static <MS> AmxApiResponse<Object, MS> buildMeta(MS meta) {
-		AmxApiResponse<Object, MS> resp = new AmxApiResponse<Object, MS>();
+	public static <MS> ApiResponse<Object, MS> buildMeta(MS meta) {
+		ApiResponse<Object, MS> resp = new ApiResponse<Object, MS>();
 		resp.setMeta(meta);
 		return resp;
 	}
 
-	public static <TS> AmxApiResponse<TS, Object> buildData(TS data) {
-		AmxApiResponse<TS, Object> resp = new AmxApiResponse<TS, Object>();
+	public static <TS> ApiResponse<TS, Object> buildData(TS data) {
+		ApiResponse<TS, Object> resp = new ApiResponse<TS, Object>();
 		resp.setData(data);
 		return resp;
 	}
 
-	public static <TS, MS> AmxApiResponse<TS, MS> buildData(TS data, MS meta) {
-		AmxApiResponse<TS, MS> resp = new AmxApiResponse<TS, MS>();
+	public static <TS, MS> ApiResponse<TS, MS> buildData(TS data, MS meta) {
+		ApiResponse<TS, MS> resp = new ApiResponse<TS, MS>();
 		resp.setData(data);
 		resp.setMeta(meta);
 		return resp;
@@ -182,7 +182,7 @@ public class AmxApiResponse<T, M> extends AResponse<M>
 	 * @param resultList the result list
 	 * @return the amx api response
 	 */
-	public static <TS> AmxApiResponse<TS, Object> buildList(List<TS> resultList) {
+	public static <TS> ApiResponse<TS, Object> buildList(List<TS> resultList) {
 		return buildList(resultList, new HashMap<String, Object>());
 	}
 
@@ -195,24 +195,24 @@ public class AmxApiResponse<T, M> extends AResponse<M>
 	 * @param meta       the meta
 	 * @return the amx api response
 	 */
-	public static <TS, MS> AmxApiResponse<TS, MS> buildList(List<TS> resultList, MS meta) {
+	public static <TS, MS> ApiResponse<TS, MS> buildList(List<TS> resultList, MS meta) {
 		return buildResults(resultList, meta);
 	}
 
-	public static <TS> AmxApiResponse<TS, Object> buildResults(TS resultList) {
+	public static <TS> ApiResponse<TS, Object> buildResults(TS resultList) {
 		return buildResult(resultList, new HashMap<String, Object>());
 	}
 
-	public static <TS, MS> AmxApiResponse<TS, MS> buildResults(TS resultList, MS meta) {
+	public static <TS, MS> ApiResponse<TS, MS> buildResults(TS resultList, MS meta) {
 		return buildResult(resultList, meta);
 	}
 
-	public static <TS> AmxApiResponse<TS, Object> buildResults(List<TS> resultList) {
+	public static <TS> ApiResponse<TS, Object> buildResults(List<TS> resultList) {
 		return buildResults(resultList, new HashMap<String, Object>());
 	}
 
-	public static <TS, MS> AmxApiResponse<TS, MS> buildResults(List<TS> resultList, MS meta) {
-		AmxApiResponse<TS, MS> resp = new AmxApiResponse<TS, MS>();
+	public static <TS, MS> ApiResponse<TS, MS> buildResults(List<TS> resultList, MS meta) {
+		ApiResponse<TS, MS> resp = new ApiResponse<TS, MS>();
 		// ArrayList<TS> listOfStrings = new ArrayList<TS>(resultList.size());
 		// listOfStrings.addAll(resultList);
 		resp.setResults(resultList);
@@ -220,36 +220,36 @@ public class AmxApiResponse<T, M> extends AResponse<M>
 		return resp;
 	}
 
-	public static <TS, MS> AmxApiResponse<TS, MS> buildResult(TS result, MS meta) {
-		AmxApiResponse<TS, MS> resp = new AmxApiResponse<TS, MS>();
+	public static <TS, MS> ApiResponse<TS, MS> buildResult(TS result, MS meta) {
+		ApiResponse<TS, MS> resp = new ApiResponse<TS, MS>();
 		resp.addResult(result);
 		resp.setMeta(meta);
 		return resp;
 	}
 
-	public static <TS, MS> AmxApiResponse<TS, MS> buildResult(TS result) {
-		AmxApiResponse<TS, MS> resp = new AmxApiResponse<TS, MS>();
+	public static <TS, MS> ApiResponse<TS, MS> buildResult(TS result) {
+		ApiResponse<TS, MS> resp = new ApiResponse<TS, MS>();
 		resp.addResult(result);
 		return resp;
 	}
 
 	@JsonIgnore
-	public AmxApiResponse<T, M> redirectUrl(String redirectUrl) {
+	public ApiResponse<T, M> redirectUrl(String redirectUrl) {
 		this.redirectUrl = redirectUrl;
 		return this;
 	}
 
-	public AmxApiResponse<T, M> statusKey(String status) {
+	public ApiResponse<T, M> statusKey(String status) {
 		this.setStatus(status);
 		return this;
 	}
 
-	public AmxApiResponse<T, M> statusEnum(IExceptionEnum statusEnum) {
+	public ApiResponse<T, M> statusEnum(IExceptionEnum statusEnum) {
 		this.setStatusEnum(statusEnum);
 		return this;
 	}
 
-	public AmxApiResponse<T, M> message(String message) {
+	public ApiResponse<T, M> message(String message) {
 		this.message = message;
 		return this;
 	}

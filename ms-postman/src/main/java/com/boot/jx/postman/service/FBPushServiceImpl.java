@@ -17,7 +17,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
-import com.boot.jx.api.AmxApiResponse;
+import com.boot.jx.api.ApiResponse;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.logger.AuditEvent.Result;
 import com.boot.jx.logger.LoggerService;
@@ -127,7 +127,7 @@ public class FBPushServiceImpl implements IPushNotifyService {
 	 */
 	@Async
 	@Override
-	public AmxApiResponse<PushMessage, Object> sendDirect(PushMessage msg) {
+	public ApiResponse<PushMessage, Object> sendDirect(PushMessage msg) {
 		try {
 
 			if (ArgUtil.isEmpty(msg.getTo()) && ArgUtil.isEmpty(msg.getContacts())) {
@@ -300,7 +300,7 @@ public class FBPushServiceImpl implements IPushNotifyService {
 					LOGGER, e);
 		}
 
-		return AmxApiResponse.build(msg);
+		return ApiResponse.build(msg);
 	}
 
 	/**
@@ -413,7 +413,7 @@ public class FBPushServiceImpl implements IPushNotifyService {
 	 * java.lang.String)
 	 */
 	@Override
-	public AmxApiResponse<String, Object> subscribe(String token, String topic) {
+	public ApiResponse<String, Object> subscribe(String token, String topic) {
 		PMGaugeEvent pMGaugeEvent = new PMGaugeEvent();
 		pMGaugeEvent.setType(PMGaugeEvent.Type.NOTIFCATION_SUBSCRIPTION);
 		try {
@@ -427,7 +427,7 @@ public class FBPushServiceImpl implements IPushNotifyService {
 			// Slack Exception Handling should be for specific cases
 			// slackService.sendException(topic, e);
 		}
-		return AmxApiResponse.build(token);
+		return ApiResponse.build(token);
 	}
 
 	@Override
@@ -523,8 +523,8 @@ public class FBPushServiceImpl implements IPushNotifyService {
 	}
 
 	@Override
-	public AmxApiResponse<PushMessage, Object> send(List<PushMessage> msgs) throws PostManException {
-		return AmxApiResponse.buildList(msgs);
+	public ApiResponse<PushMessage, Object> send(List<PushMessage> msgs) throws PostManException {
+		return ApiResponse.buildList(msgs);
 	}
 
 }
