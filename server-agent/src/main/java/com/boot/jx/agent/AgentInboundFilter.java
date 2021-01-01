@@ -11,16 +11,10 @@ import com.boot.jx.postman.store.MessageStore;
 @Component
 public class AgentInboundFilter implements InBoundFilter {
 
-	@Autowired
-	private MessageStore messageStore;
-
 	@Override
 	public boolean onFilter(InboxMessage inboxMessage) {
-		MessageDoc messageDoc = messageStore.create(inboxMessage);
 
-		messageDoc.getContactId();
-
-		return false;
+		return true;
 	}
 
 }
