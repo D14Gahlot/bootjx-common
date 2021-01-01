@@ -27,7 +27,7 @@ public class ChatService {
 	private ChatContext chatContext;
 
 	@Autowired
-	PostManClient postManClient;
+	private PostManClient postManClient;
 
 	@Autowired
 	private MessageStore messageStore;

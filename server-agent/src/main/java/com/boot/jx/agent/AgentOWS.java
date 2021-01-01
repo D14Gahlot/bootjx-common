@@ -16,7 +16,7 @@ import org.springframework.scheduling.annotation.EnableAsync;
 @ServletComponentScan
 @SpringBootApplication(exclude = DataSourceAutoConfiguration.class)
 @ComponentScan("com.boot.jx")
-@EnableAsync
+@EnableAsync(proxyTargetClass = true)
 @EnableCaching
 public class AgentOWS extends SpringBootServletInitializer {
 

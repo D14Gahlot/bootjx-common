@@ -30,8 +30,6 @@ import com.boot.jx.utils.PostManUtil;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
 import com.boot.utils.ContextUtil;
-import com.boot.utils.CryptoUtil;
-import com.boot.utils.JsonUtil;
 
 @Component
 @PropertySource("classpath:application-postman.properties")
