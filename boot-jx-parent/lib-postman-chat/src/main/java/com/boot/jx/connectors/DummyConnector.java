@@ -77,8 +77,9 @@ public class DummyConnector implements DefaultConnector {
 	}
 
 	@Override
-	public void assignToAgent(InboxMessage inboxMessage, String deptName) {
+	public InboxMessage assignToAgent(InboxMessage inboxMessage) {
 		this.sendReply(inboxMessage, new OutboxMessage().message("Call us @ " + gupShupConfig.getGupShupWaNumber()));
+		return inboxMessage;
 	}
 
 	@Autowired(required = false)

@@ -5,7 +5,6 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.collections.iterators.ArrayListIterator;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
@@ -24,7 +23,7 @@ public class ConnectorHandlerFactory extends ScopedBeanFactory<String, Connector
 	public interface ConnectorHandler {
 		public void sendReply(InboxMessage inboxMessage, OutboxMessage outboxMessage);
 
-		public void assignToAgent(InboxMessage inboxMessage, String deptName);
+		public InboxMessage assignToAgent(InboxMessage inboxMessage);
 	}
 
 	public interface DefaultConnector extends ConnectorHandler {

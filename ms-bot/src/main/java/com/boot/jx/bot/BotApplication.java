@@ -28,18 +28,18 @@ public class BotApplication {
 
 	public static void main(String[] args) throws Exception {
 
-		String javaHomePath = System.getProperty("java.home");
-		String keystore = javaHomePath + "/lib/security/cacerts";
-		String storepass = "changeit";
-		String storetype = "JKS";
-		
-		System.out.println(keystore);
-
-		String[][] props = { { "javax.net.ssl.trustStore", keystore, }, { "javax.net.ssl.keyStore", keystore, },
-				{ "javax.net.ssl.keyStorePassword", storepass, }, { "javax.net.ssl.keyStoreType", storetype, }, };
-		for (int i = 0; i < props.length; i++) {
-			System.getProperties().setProperty(props[i][0], props[i][1]);
-		}
+//		String javaHomePath = System.getProperty("java.home");
+//		String keystore = javaHomePath + "/lib/security/cacerts";
+//		String storepass = "changeit";
+//		String storetype = "JKS";
+//		
+//		System.out.println(keystore);
+//
+//		String[][] props = { { "javax.net.ssl.trustStore", keystore, }, { "javax.net.ssl.keyStore", keystore, },
+//				{ "javax.net.ssl.keyStorePassword", storepass, }, { "javax.net.ssl.keyStoreType", storetype, }, };
+//		for (int i = 0; i < props.length; i++) {
+//			System.getProperties().setProperty(props[i][0], props[i][1]);
+//		}
 
 		ConfigurableApplicationContext ctx = new SpringApplicationBuilder(BotApplication.class).run(args);
 	}

@@ -20,13 +20,11 @@ import com.boot.jx.postman.PostManUrls;
 import com.boot.jx.postman.model.Email;
 import com.boot.jx.postman.model.ExceptionReport;
 import com.boot.jx.postman.model.File;
-import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.MessageBox;
 import com.boot.jx.postman.model.Notipy;
 import com.boot.jx.postman.model.SMS;
 import com.boot.jx.postman.model.SupportEmail;
 import com.boot.jx.rest.RestService;
-import com.boot.jx.utils.PostManUtil;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
 import com.boot.utils.ContextUtil;
@@ -45,23 +43,6 @@ public class PostManClient implements PostManService {
 
 	@Value("${postman.service.url}")
 	private String serviceUrl;
-
-	@Value("${postman.inbound.forward.url}")
-	private String inboundForwardUrl;
-
-	@Value("${postman.chat.dummy.user.enabled}")
-	boolean chatDummyUserEnabled;
-
-	@Value("${postman.chat.dummy.bot.enabled}")
-	boolean chatDummyBotEnabled;
-
-	public boolean isChatDummyUserEnabled() {
-		return chatDummyUserEnabled;
-	}
-
-	public boolean isChatDummyBotEnabled() {
-		return chatDummyBotEnabled;
-	}
 
 	public String getPostmapURL() {
 		if (ArgUtil.is(serviceUrl)) {
@@ -202,21 +183,6 @@ public class PostManClient implements PostManService {
 	@Async
 	public ApiResponse<ExceptionReport, Object> notifyException(String title, Exception exc) {
 		return this.notifyException(new ExceptionReport(title, exc));
-	}
-
-	public ApiResponse<InboxMessage, Object> forward(InboxMessage inboxMessage) {
-		LOGGER.debug("Forwarding InboxMessage to other Service ");
-		try {
-			if (ArgUtil.is(inboundForwardUrl)) {
-				inboxMessage.setChecksum(PostManUtil.generateCheckSum(inboxMessage));
-				return restService.ajax(inboundForwardUrl).post(inboxMessage)
-						.as(new ParameterizedTypeReference<ApiResponse<InboxMessage, Object>>() {
-						});
-			}
-		} catch (Exception e) {
-			throw new PostManException(e);
-		}
-		return ApiResponse.buildResult(inboxMessage);
 	}
 
 }

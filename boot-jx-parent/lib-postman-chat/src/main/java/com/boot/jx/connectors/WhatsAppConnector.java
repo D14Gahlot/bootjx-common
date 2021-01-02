@@ -54,15 +54,17 @@ public class WhatsAppConnector implements ConnectorHandler {
 	}
 
 	@Override
-	public void assignToAgent(InboxMessage inboxMessage, String deptName) {
+	public InboxMessage assignToAgent(InboxMessage inboxMessage) {
 		if (ArgUtil.isEqual(inboxMessage.getChannel(), Channel.GUPSHUP.toString())) {
-			gupShupChatClient.assignToAgent(inboxMessage.getTo(), inboxMessage.getFrom(), deptName);
+			gupShupChatClient.assignToAgent(inboxMessage.getTo(), inboxMessage.getFrom(),
+					inboxMessage.getAssignedToDept());
 		} else if (ArgUtil.isEqual(inboxMessage.getChannel(), Channel.DEFAULT.toString())) {
 			Message<?> reply = inboxMessage.replyMessage("Call us @ " + gupShupConfig.getGupShupWaNumber());
 			MessageBox mb = new MessageBox();
 			mb.push(reply);
 			postManClient.send(mb);
 		}
+		return inboxMessage;
 	}
 
 }

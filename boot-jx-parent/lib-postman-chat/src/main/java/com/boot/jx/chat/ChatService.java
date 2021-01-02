@@ -4,15 +4,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Component;
 
+import com.boot.jx.api.ApiResponse;
 import com.boot.jx.bot.ChatContext;
 import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorHandler;
 import com.boot.jx.chat.ConnectorHandlerFactory.DefaultConnector;
-import com.boot.jx.connectors.MessageQueue;
-import com.boot.jx.postman.client.PostManClient;
 import com.boot.jx.postman.doc.ChatContextDoc;
 import com.boot.jx.postman.doc.ChatMeta;
 import com.boot.jx.postman.model.InboxMessage;
-import com.boot.jx.postman.model.Message;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.store.MessageStore;
 import com.boot.utils.ArgUtil;
@@ -28,12 +26,10 @@ public class ChatService {
 	private ChatContext chatContext;
 
 	@Autowired
-	private PostManClient postManClient;
+	private ChatClient chatClient;
 
 	@Autowired
 	private MessageStore messageStore;
-
-	private MessageQueue messageQueue = new MessageQueue(100);
 
 	public InboxMessage getInboxMessage() {
 		return chatContext.getInboxMessage();
@@ -41,6 +37,9 @@ public class ChatService {
 
 	@Autowired
 	private ConnectorHandlerFactory connectorHandlerFactory;
+
+	@Autowired(required = false)
+	private ChatAssigner chatAssigner;
 
 	@Autowired(required = false)
 	private DefaultConnector defaultConnector;
@@ -71,29 +70,11 @@ public class ChatService {
 		sendIntenal(outboxMessage);
 	}
 
-	public void assignToAgent(String deptName) throws InterruptedException {
-		InboxMessage inboxMessage = chatContext.getInboxMessage();
-		if (ArgUtil.is(inboxMessage)) {
-			ConnectorHandler connector = connectorHandlerFactory.get(inboxMessage.getContactType(),
-					inboxMessage.getChannel());
-			if (ArgUtil.is(connector)) {
-				connector.assignToAgent(inboxMessage, deptName);
-			} else if (ArgUtil.is(defaultConnector)) {
-				chatContext.meta().setAgentEnabled(true);
-				defaultConnector.assignToAgent(inboxMessage, deptName);
-			}
-		}
-	}
-
 	public boolean beforeMessageHandler() {
 		InboxMessage inboxMessage = chatContext.getInboxMessage();
 		if (ArgUtil.is(inboxMessage)) {
 		}
 		return true;
-	}
-
-	public Message<?> lastMessage() throws InterruptedException {
-		return messageQueue.dequeue();
 	}
 
 	public ChatContext loadChatContext(String contactId, InboxMessage inboxMessage) {
@@ -113,7 +94,7 @@ public class ChatService {
 			chatContext.getStore().loadSession(null);
 			chatContext.setMeta(new ChatMeta());
 		}
-		chatContext.setInboxMessage(inboxMessage);
+		// chatContext.setInboxMessage(inboxMessage);
 		messageStore.create(inboxMessage);
 		return chatContext;
 	}
@@ -140,10 +121,35 @@ public class ChatService {
 	}
 
 	public InboxMessage forward() {
-		return postManClient.forward(getInboxMessage()).getResult();
+		return chatClient.forward(getInboxMessage()).getResult();
 	}
 
 	public InboxMessage forward(InboxMessage inboxMessage) {
-		return postManClient.forward(inboxMessage).getResult();
+		return chatClient.forward(inboxMessage).getResult();
+	}
+
+	public ApiResponse<InboxMessage, Object> assignToAgent(InboxMessage inboxMessage) {
+		if (ArgUtil.is(chatAssigner) && chatAssigner.isSupported(inboxMessage)) {
+			return ApiResponse.buildResult(chatAssigner.onAssign(inboxMessage));
+		} else if (ArgUtil.is(chatClient.getAgentUrl())) {
+			return chatClient.assignToAgent(inboxMessage);
+		} else {
+			ConnectorHandler connector = connectorHandlerFactory.get(inboxMessage.getContactType(),
+					inboxMessage.getChannel());
+			if (ArgUtil.is(connector)) {
+				connector.assignToAgent(inboxMessage);
+			} else if (ArgUtil.is(defaultConnector)) {
+				chatContext.meta().setAgentEnabled(true);
+				defaultConnector.assignToAgent(inboxMessage);
+			}
+			return ApiResponse.buildResult(inboxMessage);
+		}
+	}
+
+	public void assignToAgent(String deptName) throws InterruptedException {
+		InboxMessage inboxMessage = chatContext.getInboxMessage();
+		if (ArgUtil.is(inboxMessage)) {
+			inboxMessage.setAssignedToDept(deptName);
+		}
 	}
 }

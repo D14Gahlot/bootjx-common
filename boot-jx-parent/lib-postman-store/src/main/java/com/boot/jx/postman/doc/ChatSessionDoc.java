@@ -22,6 +22,8 @@ public class ChatSessionDoc implements Serializable {
 
 	private long lastInComingStamp;
 
+	private boolean active;
+
 	public long getLastInComingStamp() {
 		return lastInComingStamp;
 	}
@@ -52,6 +54,14 @@ public class ChatSessionDoc implements Serializable {
 
 	public void setAssignedTo(String assignedTo) {
 		this.assignedTo = assignedTo;
+	}
+
+	public boolean isActive() {
+		return active;
+	}
+
+	public void setActive(boolean active) {
+		this.active = active;
 	}
 
 }

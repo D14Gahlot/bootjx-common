@@ -34,6 +34,9 @@ public class InboxMessage implements Serializable {
 
 	private String checksum;
 
+	private String assignedToDept;
+	private String assignedToAgent;
+
 	public String getTo() {
 		return to;
 	}
@@ -221,5 +224,21 @@ public class InboxMessage implements Serializable {
 
 	public void setChecksum(String checksum) {
 		this.checksum = checksum;
+	}
+
+	public String getAssignedToDept() {
+		return assignedToDept;
+	}
+
+	public void setAssignedToDept(String assignedToDept) {
+		this.assignedToDept = assignedToDept;
+	}
+
+	public String getAssignedToAgent() {
+		return assignedToAgent;
+	}
+
+	public void setAssignedToAgent(String assignedToAgent) {
+		this.assignedToAgent = assignedToAgent;
 	}
 }

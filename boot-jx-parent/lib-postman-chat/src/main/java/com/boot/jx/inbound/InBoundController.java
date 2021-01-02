@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.boot.jx.AppConfig;
+import com.boot.jx.api.ApiResponse;
+import com.boot.jx.chat.ChatClient;
 import com.boot.jx.connectors.FacebookConnector;
 import com.boot.jx.postman.client.GupShupChatClient;
 import com.boot.jx.postman.fb.FacebooClient;
@@ -49,6 +51,13 @@ public class InBoundController {
 			inBoundService.invokeMethods(inboxMessage);
 		}
 		return inboxMessage;
+	}
+
+	@ApiVendorHeaders
+	@RequestMapping(value = ChatClient.PATH.ASSIGN_TO_AGENT, method = RequestMethod.POST)
+	public ApiResponse<InboxMessage, ?> assignToAgent(@RequestBody InboxMessage inboxMessage)
+			throws InterruptedException {
+		return inBoundService.assignToAgent(inboxMessage);
 	}
 
 	// @ApiRequest(feature = "WA_GUPSHUP_INBOUND")
@@ -91,7 +100,7 @@ public class InBoundController {
 			pageEntry.getMessaging().forEach(m -> {
 				InboxMessage event = facebookConnector.toInboxMessage(m, pageEntry.getId());
 				inBoundService.invokeMethods(event);
-				//facebooClient.sendReply(event.getContactId(), "Helo", pageEntry.getId());
+				// facebooClient.sendReply(event.getContactId(), "Helo", pageEntry.getId());
 			});
 		});
 		return request;

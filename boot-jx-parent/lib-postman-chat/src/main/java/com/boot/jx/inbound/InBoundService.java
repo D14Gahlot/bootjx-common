@@ -6,11 +6,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
+import com.boot.jx.api.ApiResponse;
 import com.boot.jx.bot.BotEngine;
 import com.boot.jx.bot.ChatMapping;
+import com.boot.jx.chat.ChatClient;
 import com.boot.jx.chat.ChatService;
-import com.boot.jx.postman.client.PostManClient;
-import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.store.MessageStore;
 import com.boot.jx.postman.store.SessionStore;
@@ -31,6 +31,9 @@ public class InBoundService {
 	private BotEngine botEngine;
 
 	@Autowired
+	private ChatClient chatClient;
+
+	@Autowired
 	private ChatService chatService;
 
 	@Autowired
@@ -38,9 +41,6 @@ public class InBoundService {
 
 	@Autowired
 	private MessageStore messageStore;
-
-	@Autowired
-	private PostManClient postManClient;
 
 	/**
 	 * Invoke the methods with matching {@link ChatMapping#events()} and
@@ -66,13 +66,16 @@ public class InBoundService {
 		if (ArgUtil.isEmpty(inBoundFilter) || inBoundFilter.onFilter(inboxMessageOriginal)) {
 			if (ArgUtil.is(inBoundHandler)) {
 				inBoundHandler.onHandle(inboxMessageOriginal);
-			} else if (botEngine.isChatBotDefined() || postManClient.isChatDummyBotEnabled()) {
+			} else if (botEngine.isChatBotDefined() || chatClient.isChatDummyBotEnabled()) {
 				botEngine.invokeMethodsAsync(inboxMessageOriginal);
 			} else {
-				chatService.forward(inboxMessageOriginal);
+				chatClient.forward(inboxMessageOriginal);
 			}
 		}
 		return inboxMessageOriginal;
 	}
 
+	public ApiResponse<InboxMessage, ?> assignToAgent(InboxMessage inboxMessageOriginal) {
+		return chatService.assignToAgent(inboxMessageOriginal);
+	}
 }

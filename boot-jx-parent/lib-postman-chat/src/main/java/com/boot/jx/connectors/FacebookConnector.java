@@ -29,9 +29,10 @@ public class FacebookConnector implements ConnectorHandler {
 	}
 
 	@Override
-	public void assignToAgent(InboxMessage inboxMessage, String deptName) {
+	public InboxMessage assignToAgent(InboxMessage inboxMessage) {
 		facebooClient.sendReply(inboxMessage.getFrom(), "Call us @ " + gupShupConfig.getGupShupWaNumber(),
 				inboxMessage.getLane());
+		return inboxMessage;
 	}
 
 	public InboxMessage toInboxMessage(FacebookMessaging m, String lane) {
