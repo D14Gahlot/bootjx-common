@@ -32,6 +32,8 @@ public class BotApplication {
 		String keystore = javaHomePath + "/lib/security/cacerts";
 		String storepass = "changeit";
 		String storetype = "JKS";
+		
+		System.out.println(keystore);
 
 		String[][] props = { { "javax.net.ssl.trustStore", keystore, }, { "javax.net.ssl.keyStore", keystore, },
 				{ "javax.net.ssl.keyStorePassword", storepass, }, { "javax.net.ssl.keyStoreType", storetype, }, };
