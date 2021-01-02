@@ -1,4 +1,4 @@
-package com.boot.jx.chat;
+package com.boot.jx.connectors;
 
 import java.util.LinkedList;
 import java.util.List;

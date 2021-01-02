@@ -1,4 +1,4 @@
-package com.boot.jax.bot.alex;
+package com.boot.jx.bot.alex;
 
 public class AlexBotConstants {
 
@@ -11,6 +11,10 @@ public class AlexBotConstants {
 		public static final String ROUTE_NUMBER = "route/number/v1";
 		public static final String SERVICE_SELECTOR = "account/service/select";
 
+		public static final String SAVE_NAME_ONENTER = "save/name/onenter";
+		public static final String SAVE_NAME_CONFIRM = "save/name/confirm";
+		public static final String SAVE_NAME_CONFIRM_ONSELECT = "save/name/confirm/onselect";
+		
 		public static final String CONFIRM_GENDER = "confirm/gender/menu";
 		public static final String CONFIRM_GENDER_ONSELECT = "confirm/gender/onselect";
 

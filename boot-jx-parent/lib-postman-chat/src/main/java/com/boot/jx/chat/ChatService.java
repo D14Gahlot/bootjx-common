@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 import com.boot.jx.bot.ChatContext;
 import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorHandler;
 import com.boot.jx.chat.ConnectorHandlerFactory.DefaultConnector;
+import com.boot.jx.connectors.MessageQueue;
 import com.boot.jx.postman.client.PostManClient;
 import com.boot.jx.postman.doc.ChatContextDoc;
 import com.boot.jx.postman.doc.ChatMeta;

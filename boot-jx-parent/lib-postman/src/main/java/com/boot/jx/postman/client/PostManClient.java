@@ -207,13 +207,16 @@ public class PostManClient implements PostManService {
 	public ApiResponse<InboxMessage, Object> forward(InboxMessage inboxMessage) {
 		LOGGER.debug("Forwarding InboxMessage to other Service ");
 		try {
-			inboxMessage.setChecksum(PostManUtil.generateCheckSum(inboxMessage));
-			return restService.ajax(inboundForwardUrl).post(inboxMessage)
-					.as(new ParameterizedTypeReference<ApiResponse<InboxMessage, Object>>() {
-					});
+			if (ArgUtil.is(inboundForwardUrl)) {
+				inboxMessage.setChecksum(PostManUtil.generateCheckSum(inboxMessage));
+				return restService.ajax(inboundForwardUrl).post(inboxMessage)
+						.as(new ParameterizedTypeReference<ApiResponse<InboxMessage, Object>>() {
+						});
+			}
 		} catch (Exception e) {
 			throw new PostManException(e);
 		}
+		return ApiResponse.buildResult(inboxMessage);
 	}
 
 }

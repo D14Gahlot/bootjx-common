@@ -1,4 +1,4 @@
-package com.boot.jax.bot.alex;
+package com.boot.jx.bot.alex;
 
 import org.springframework.stereotype.Component;
 

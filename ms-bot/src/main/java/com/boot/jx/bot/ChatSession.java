@@ -1,4 +1,4 @@
-package com.boot.jax.bot;
+package com.boot.jx.bot;
 
 import java.io.Serializable;
 import java.math.BigDecimal;

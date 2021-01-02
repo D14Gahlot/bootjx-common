@@ -1,4 +1,4 @@
-package com.boot.jax.bot;
+package com.boot.jx.bot;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -1,5 +1,6 @@
 package com.boot.jx.bot;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -133,6 +134,22 @@ public class BotEngine {
 				}
 			}
 		}
+
+		for (Entry<String, MethodWrapper> methodWrapperEntry : eventToMethodsMap.entrySet()) {
+			MethodWrapper methodWrapper = methodWrapperEntry.getValue();
+			Pattern[] patterns = methodWrapper.getPattern();
+			if (patterns.length > 0) {
+				for (int i = 0; i < patterns.length; i++) {
+					if (ArgUtil.areEmpty(methodWrapper.getLane())
+							|| ArgUtil.areEqual(event.getLane(), methodWrapper.getLane())) {
+						if (matcher.isMatch(patterns[i]) && ArgUtil.is(ArgUtil.parseAsString(patterns[i]))) {
+							event.setMatcher(matcher);
+							return methodWrapper;
+						}
+					}
+				}
+			}
+		}
 		return null;
 	}
 
@@ -221,11 +238,13 @@ public class BotEngine {
 			}
 			if (ArgUtil.is(matchedMethod)) {
 				nextHandler = matchedMethod.getKey();
-				LOGGER.info("Handler: " + nextHandler);
+				LOGGER.debug("Handler: " + nextHandler);
 				botService.getChatContext().setCurrentHandler(nextHandler);
 				Method method = matchedMethod.getMethod();
 				ChatController controller = filtersMap.get(matchedMethod.getController());
-				if (Arrays.asList(method.getParameterTypes()).contains(StringMatcher.class)) {
+				// LOGGER.info("Target Handler : " + method.getName());
+				List<Class<?>> prmTyps = Arrays.asList(method.getParameterTypes());
+				if (prmTyps.contains(InboxMessage.class) && prmTyps.contains(StringMatcher.class)) {
 					method.invoke(controller, inboxMessage, inboxMessage.getMatcher());
 				} else {
 					method.invoke(controller, inboxMessage);
@@ -233,6 +252,8 @@ public class BotEngine {
 			}
 		} catch (ChatException ce) {
 			LOGGER.info("Target Handler : " + ce.getTargetHandler());
+		} catch (InvocationTargetException e) {
+			LOGGER.error("Error invoking controller: ", e.getCause());
 		} catch (Exception e) {
 			LOGGER.error("Error invoking controller: ", e);
 		}

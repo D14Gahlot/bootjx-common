@@ -43,6 +43,7 @@ $(function(){
 
 
 function pollMessage(){
+	//return
 	 $.getJSON(window.CONST.CONTEXT + "/dummy/messages",{number:MOBILE}).done(function(rsp){
 		 onRcvMsg((rsp.message || "").replace(/(?:\r\n|\r|\n)/g, '<br>'),rsp.files);
 	 }).always(function(rsp){
