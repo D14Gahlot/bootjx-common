@@ -1,18 +1,19 @@
-package com.boot.jx.agent;
+package com.boot.jx.agent.doc;
 
-import org.springframework.context.annotation.Scope;
-import org.springframework.context.annotation.ScopedProxyMode;
-import org.springframework.stereotype.Component;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
 
-@Component
-@Scope(value = "session", proxyMode = ScopedProxyMode.TARGET_CLASS)
-public class AgentSession {
+@Document
+public class AgentSessionDoc {
 
+	@Id
 	private String agentCode;
 
 	private boolean isLoggedIn;
 
 	private boolean isOnline;
+
+	private long lastOnlineStamp;
 
 	public String getAgentCode() {
 		return agentCode;
@@ -36,5 +37,13 @@ public class AgentSession {
 
 	public void setOnline(boolean isOnline) {
 		this.isOnline = isOnline;
+	}
+
+	public long getLastOnlineStamp() {
+		return lastOnlineStamp;
+	}
+
+	public void setLastOnlineStamp(long lastOnlineStamp) {
+		this.lastOnlineStamp = lastOnlineStamp;
 	}
 }

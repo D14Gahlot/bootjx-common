@@ -6,11 +6,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
+import com.boot.jx.agent.AgentService;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.bot.BotEngine;
 import com.boot.jx.bot.ChatMapping;
 import com.boot.jx.chat.ChatClient;
-import com.boot.jx.chat.ChatService;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.store.MessageStore;
 import com.boot.jx.postman.store.SessionStore;
@@ -34,7 +34,7 @@ public class InBoundService {
 	private ChatClient chatClient;
 
 	@Autowired
-	private ChatService chatService;
+	private AgentService agentService;
 
 	@Autowired
 	private SessionStore sessionStore;
@@ -76,6 +76,6 @@ public class InBoundService {
 	}
 
 	public ApiResponse<InboxMessage, ?> assignToAgent(InboxMessage inboxMessageOriginal) {
-		return chatService.assignToAgent(inboxMessageOriginal);
+		return agentService.assignToAgent(inboxMessageOriginal);
 	}
 }

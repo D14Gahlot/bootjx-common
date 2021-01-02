@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.boot.jx.AppConfig;
 import com.boot.jx.agent.AgentAuthProvider;
-import com.boot.jx.agent.AgentSession;
+import com.boot.jx.agent.AgentSessionBean;
 import com.boot.jx.api.ApiResponse;
 import com.boot.utils.ArgUtil;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -56,7 +56,7 @@ public class AuthController {
 	private AgentAuthProvider agentAuthProvider;
 
 	@Autowired
-	private AgentSession agentSession;
+	private AgentSessionBean agentSession;
 
 	@ResponseBody
 	@RequestMapping(value = "/auth/login/submit", method = { RequestMethod.POST })
@@ -72,6 +72,7 @@ public class AuthController {
 			SecurityContextHolder.getContext().setAuthentication(authentication);
 			agentSession.setLoggedIn(true);
 			agentSession.setAgentCode(username);
+			agentSession.update();
 		} else {
 			x.setData("error");
 			x.setMeta("error");

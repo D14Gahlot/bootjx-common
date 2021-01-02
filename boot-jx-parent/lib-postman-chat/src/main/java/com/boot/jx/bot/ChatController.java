@@ -2,9 +2,8 @@ package com.boot.jx.bot;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.boot.jx.agent.AgentService;
 import com.boot.jx.chat.ChatService;
-import com.boot.jx.postman.client.GupShupChatClient;
-import com.boot.jx.postman.client.GupShupNotifyClient;
 import com.boot.jx.postman.doc.ChatPromise;
 import com.boot.jx.postman.doc.ChatPromise.PromiseCondition;
 import com.boot.jx.postman.doc.ChatPromise.Result;
@@ -15,20 +14,17 @@ import com.boot.utils.ArgUtil;
 public class ChatController {
 
 	@Autowired
-	ChatService botService;
+	private ChatService chatService;
 
 	@Autowired
-	GupShupChatClient gupShupChatClient;
+	private ChatContext chatContext;
 
 	@Autowired
-	GupShupNotifyClient gupShupNotifyClient;
-
-	@Autowired
-	ChatContext chatContext;
+	private AgentService agentService;
 
 	public void reply(String message) {
 		try {
-			botService.reply(new OutboxMessage().message(message));
+			chatService.reply(new OutboxMessage().message(message));
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
@@ -36,7 +32,7 @@ public class ChatController {
 
 	public void reply(OutboxMessage message) {
 		try {
-			botService.reply(message);
+			chatService.reply(message);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
@@ -44,7 +40,7 @@ public class ChatController {
 
 	public void send(OutboxMessage waMessage) {
 		try {
-			botService.send(waMessage);
+			chatService.send(waMessage);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
@@ -52,7 +48,7 @@ public class ChatController {
 
 	public void assignToAgent(String deptName) {
 		try {
-			botService.assignToAgent(deptName);
+			agentService.assignToAgent(deptName);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
@@ -63,11 +59,11 @@ public class ChatController {
 	}
 
 	public void next(String key) {
-		botService.getChatContext().setNextHandler(key);
+		chatService.getChatContext().setNextHandler(key);
 	}
 
 	public boolean previous(String key) {
-		return ArgUtil.areEqual(botService.getChatContext().getPrevHandler(), key);
+		return ArgUtil.areEqual(chatService.getChatContext().getPrevHandler(), key);
 	}
 
 	public ChatPromise require(String key, ChatPromise.PromiseCondition... conditions) {

@@ -1,8 +1,8 @@
-package com.boot.jx.chat;
+package com.boot.jx.agent;
 
 import com.boot.jx.postman.model.InboxMessage;
 
-public interface ChatAssigner {
+public interface AgentAssigner {
 
 	public boolean isSupported(InboxMessage inboxMessage);
 

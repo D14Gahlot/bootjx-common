@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.boot.jx.AppConfig;
-import com.boot.jx.agent.AgentSession;
+import com.boot.jx.agent.AgentSessionBean;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.store.SessionStore;
 
@@ -23,7 +23,7 @@ public class MsgController {
 	SessionStore sessionStore;
 
 	@Autowired
-	AgentSession agentSession;
+	AgentSessionBean agentSession;
 
 	@ResponseBody
 	@RequestMapping(value = "/api/sessions/assigned", method = { RequestMethod.GET })
