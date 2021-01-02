@@ -52,6 +52,7 @@ public class AgentService {
 		InboxMessage inboxMessage = chatContext.getInboxMessage();
 		if (ArgUtil.is(inboxMessage)) {
 			inboxMessage.setAssignedToDept(deptName);
+			this.assignToAgent(inboxMessage);
 		}
 	}
 }

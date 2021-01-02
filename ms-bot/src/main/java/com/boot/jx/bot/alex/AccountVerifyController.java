@@ -51,7 +51,7 @@ public class AccountVerifyController extends ChatController {
 
 	@ChatMapping(key = AlexBotConstants.KEY.INITIATE, pattern = "^HI$")
 	public void greet(InboxMessage inboxMessage, StringMatcher matcher) {
-		String name = ArgUtil.parseAsString(defaultChatContextStore.getSession().get("name"));
+		String name = ArgUtil.parseAsString(defaultChatContextStore.getUser().get("name"));
 		if (ArgUtil.is(name)) {
 			reply("Hello " + name);
 			reply("Type menu to see options");
@@ -93,7 +93,7 @@ public class AccountVerifyController extends ChatController {
 		switch (inboxMessage.getMessage().toUpperCase()) {
 		case "YES":
 			String _name = ArgUtil.parseAsString(defaultChatContextStore.getSession().get("_name"));
-			defaultChatContextStore.getSession().put("name", _name);
+			defaultChatContextStore.getUser().put("name", _name);
 			reply("Hello " + _name + "! Your name has been updated");
 			resolve(AlexBotConstants.KEY.SAVE_NAME_CONFIRM);
 			resolve(AlexBotConstants.KEY.SAVE_NAME_CONFIRM_ONSELECT);
