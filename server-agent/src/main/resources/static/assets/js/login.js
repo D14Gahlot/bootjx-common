@@ -37,7 +37,7 @@ $( document ).ready(function() {
  	   		 username :   $("#login-username").val(),
 			 password :  $("#login-password").val(),
 		 }).done(function(rsp){
-			 //location.href = window.CONST.CONTEXT + "/app/home"
+			 location.href = window.CONST.CONTEXT + "/app/home"
 		 });
     });
 
