@@ -85,8 +85,12 @@ public class ChatController {
 		} else {
 			promise = new ChatPromise();
 			promise.setSource(chatContext.getCurrentHandler());
-			promise.setMessage(chatContext.getInboxMessage().getMessage());
-			promise.setMessageId(chatContext.getInboxMessage().getMessageId());
+			
+			if(ArgUtil.is(chatContext.getInboxMessage())) {
+				promise.setMessage(chatContext.getInboxMessage().getMessage());
+				promise.setMessageId(chatContext.getInboxMessage().getMessageId());
+			}
+			
 			promise.setResult(Result.NONE);
 			promise.setState(State.CREATED);
 			promise.setTarget(key);

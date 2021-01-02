@@ -90,8 +90,8 @@ public class ChatService {
 			chatContext.getStore().loadSession(null);
 			chatContext.setMeta(new ChatMeta());
 		}
-		// chatContext.setInboxMessage(inboxMessage);
-		messageStore.create(inboxMessage);
+		chatContext.setInboxMessage(inboxMessage);
+		//messageStore.create(inboxMessage);
 		return chatContext;
 	}
 
