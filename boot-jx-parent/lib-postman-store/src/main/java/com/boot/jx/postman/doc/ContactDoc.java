@@ -3,11 +3,13 @@ package com.boot.jx.postman.doc;
 import java.io.Serializable;
 import java.util.Map;
 
+import org.springframework.data.annotation.TypeAlias;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import com.boot.jx.dict.ContactType;
 
 @Document(collection = "CONTACT")
+@TypeAlias("ContactDoc")
 public class ContactDoc implements Serializable {
 	private static final long serialVersionUID = -6046846959629225232L;
 	private String mobile;

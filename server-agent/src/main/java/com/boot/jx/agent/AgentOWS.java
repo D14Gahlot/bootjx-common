@@ -10,6 +10,8 @@ import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.scheduling.annotation.EnableAsync;
 
+import io.github.kaiso.relmongo.config.EnableRelMongo;
+
 /**
  * The Class WebApplication.
  */
@@ -18,6 +20,7 @@ import org.springframework.scheduling.annotation.EnableAsync;
 @ComponentScan("com.boot.jx")
 @EnableAsync(proxyTargetClass = true)
 @EnableCaching
+@EnableRelMongo
 public class AgentOWS extends SpringBootServletInitializer {
 
 	/**

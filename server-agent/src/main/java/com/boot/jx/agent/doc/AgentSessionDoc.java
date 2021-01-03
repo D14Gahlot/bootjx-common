@@ -1,9 +1,11 @@
 package com.boot.jx.agent.doc;
 
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.TypeAlias;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-@Document
+@Document(collection = "AGENT_SESSION")
+@TypeAlias("AgentSessionDoc")
 public class AgentSessionDoc {
 
 	@Id

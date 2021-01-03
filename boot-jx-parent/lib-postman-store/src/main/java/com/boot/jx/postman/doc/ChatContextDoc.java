@@ -3,12 +3,14 @@ package com.boot.jx.postman.doc;
 import java.io.Serializable;
 
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.TypeAlias;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import com.boot.jx.swagger.ApiMockModelProperty;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 @Document(collection = "CHAT_CONTEXT")
+@TypeAlias("ChatContextDoc")
 public class ChatContextDoc implements Serializable {
 
 	private static final long serialVersionUID = 1L;

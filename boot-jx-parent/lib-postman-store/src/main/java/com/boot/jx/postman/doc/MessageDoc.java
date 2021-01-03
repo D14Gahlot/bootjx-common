@@ -3,10 +3,12 @@ package com.boot.jx.postman.doc;
 import java.io.Serializable;
 
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.TypeAlias;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 @Document(collection = MessageDoc.COLLECTION_NAME)
+@TypeAlias("MessageDoc")
 public class MessageDoc implements Serializable {
 	private static final long serialVersionUID = -7003453286628859075L;
 	public static final String COLLECTION_NAME = "MESSAGE";
@@ -24,6 +26,7 @@ public class MessageDoc implements Serializable {
 	private String message;
 	private String status;
 	private ContactDoc contact;
+	private String agent;
 
 	@Indexed
 	private String contactId;
@@ -122,6 +125,14 @@ public class MessageDoc implements Serializable {
 
 	public void setSessionId(String sessionId) {
 		this.sessionId = sessionId;
+	}
+
+	public String getAgent() {
+		return this.agent;
+	}
+
+	public void setAgent(String agent) {
+		this.agent = agent;
 	}
 
 }

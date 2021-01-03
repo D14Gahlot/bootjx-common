@@ -64,14 +64,16 @@ public class AuthController {
 			HttpServletRequest request) {
 		ApiResponse<String, String> x = ApiResponse.buildData("success", "success");
 
-		if (ArgUtil.isEqual("agent1", username, password)) {
+		if (ArgUtil.isEqual(username, password) && username.startsWith("agent")) {
 			x.redirectUrl(appConfig.getAppPrefix() + "/app/home");
 			UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(username, password);
 			token.setDetails(new WebAuthenticationDetails(request));
 			Authentication authentication = agentAuthProvider.authenticate(token);
 			SecurityContextHolder.getContext().setAuthentication(authentication);
 			agentSession.setLoggedIn(true);
+			agentSession.setOnline(true);
 			agentSession.setAgentCode(username);
+			agentSession.setLastOnlineStamp(System.currentTimeMillis());
 			agentSession.update();
 		} else {
 			x.setData("error");
