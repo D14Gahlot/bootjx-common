@@ -20,7 +20,6 @@ import io.github.kaiso.relmongo.config.EnableRelMongo;
 @ComponentScan("com.boot.jx")
 @EnableAsync(proxyTargetClass = true)
 @EnableCaching
-@EnableRelMongo
 public class AgentOWS extends SpringBootServletInitializer {
 
 	/**
