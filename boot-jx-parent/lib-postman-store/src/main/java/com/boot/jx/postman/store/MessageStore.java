@@ -37,6 +37,7 @@ public class MessageStore {
 		contact.setContactType(inboxMessage.getContactType());
 		doc.setContact(contact);
 		doc.setMessage(inboxMessage.getMessage());
+		doc.setSessionId(inboxMessage.getSessionId());
 		return doc;
 	}
 
