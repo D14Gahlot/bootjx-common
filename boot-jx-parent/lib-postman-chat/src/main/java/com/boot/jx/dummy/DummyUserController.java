@@ -40,7 +40,6 @@ public class DummyUserController {
 			throws InterruptedException {
 		InboxMessage event = new InboxMessage();
 		event.setContactType(ContactType.DUMMY);
-		event.setWaChannel(Channel.DUMMY);
 		event.setLane("DUMMY");
 		event.from(number);
 		event.setMessage(message);

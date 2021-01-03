@@ -28,10 +28,8 @@ public class GupShupChatClient extends AbstractGupShupClient {
 
 	@Override
 	public GupShupResp sendMessage(String phoneNumber, String message) {
-		return post(
-				new GupShupReq(GupShupConstants.Method.SendMessage)
-						.sendTo(phoneNumber).messageType(GupShupConstants.MessageType.TEXT)
-						.message(message));
+		return post(new GupShupReq(GupShupConstants.Method.SendMessage).sendTo(phoneNumber)
+				.messageType(GupShupConstants.MessageType.TEXT).message(message));
 	}
 
 	public Map<String, Object> sendViaAgent(GupShupInbound innbound, String message) {
@@ -42,8 +40,7 @@ public class GupShupChatClient extends AbstractGupShupClient {
 		gupShupAgentReq.setType(GupShupConstants.MessageType.text);
 		gupShupAgentReq.setMsg(message);
 		return this.restService.ajax(gupShupConfig.getGupShupAgentUrl()).path("/WhatsAppConnector/api")
-				.header("type", "BotRequest")
-				.post(gupShupAgentReq).asMap();
+				.header("type", "BotRequest").post(gupShupAgentReq).asMap();
 	}
 
 	public Map<String, Object> sendViaAgent(InboxMessage inboxMessage, String message) {
@@ -54,8 +51,7 @@ public class GupShupChatClient extends AbstractGupShupClient {
 		gupShupAgentReq.setType(GupShupConstants.MessageType.text);
 		gupShupAgentReq.setMsg(message);
 		return this.restService.ajax(gupShupConfig.getGupShupAgentUrl()).path("/WhatsAppConnector/api")
-				.header("type", "BotRequest")
-				.post(gupShupAgentReq).asMap();
+				.header("type", "BotRequest").post(gupShupAgentReq).asMap();
 	}
 
 	public Map<String, Object> agentArchive(GupShupInbound innbound) {
@@ -66,26 +62,20 @@ public class GupShupChatClient extends AbstractGupShupClient {
 		gupShupAgentReq.setType(innbound.getType());
 		gupShupAgentReq.setName(innbound.getName());
 		return this.restService.ajax(gupShupConfig.getGupShupAgentUrl()).path("/WhatsAppConnector/api")
-				.header("type", "BotRequest")
-				.post(gupShupAgentReq).asMap();
+				.header("type", "BotRequest").post(gupShupAgentReq).asMap();
 	}
 
 	public Map<String, Object> getToken(String waNumber, String mobile) {
 		return this.restService.ajax(gupShupConfig.getGupShupAgentUrl()).path("/WhatsAppConnector/api")
-				.header("type", "getToken")
-				.field("userId", gupShupConfig.getGupShupChatId())
-				.field("password", gupShupConfig.getGupShupChatPass())
-				.field("phoneNo", mobile)
-				.field("waNumber", waNumber)
-				.postForm().asMap();
+				.header("type", "getToken").field("userId", gupShupConfig.getGupShupChatId())
+				.field("password", gupShupConfig.getGupShupChatPass()).field("phoneNo", mobile)
+				.field("waNumber", waNumber).postForm().asMap();
 	}
 
 	public Map<String, Object> assignToAgent(String waNumber, String mobile, String deptName) {
 		String token = ArgUtil.parseAsString(this.getToken(waNumber, mobile).get("token"));
 		Ajax x = this.restService.ajax(gupShupConfig.getGupShupAgentUrl()).path("/WhatsAppConnector/api")
-				.header("type", "TransferRequestToAgent")
-				.field("token", token)
-				.field("phoneNo", mobile)
+				.header("type", "TransferRequestToAgent").field("token", token).field("phoneNo", mobile)
 				.field("waNumber", waNumber);
 		if (ArgUtil.is(deptName)) {
 			x.field("deptName", deptName);
@@ -108,7 +98,7 @@ public class GupShupChatClient extends AbstractGupShupClient {
 	public InboxMessage parseAsInboxMessage(GupShupInboundV2 inboundV2) {
 		InboxMessage inboxMessage = new InboxMessage();
 		inboxMessage.setContactType(ContactType.WHATSAPP);
-		inboxMessage.setWaChannel(Channel.GUPSHUP);
+		inboxMessage.setChannel(Channel.GUPSHUP.toString());
 		inboxMessage.from(inboundV2.getMessages().get(0).getFrom());
 		inboxMessage.setFromName(inboundV2.getContacts().get(0).getProfile().getName());
 		inboxMessage.setMessage(inboundV2.getMessages().get(0).getText().getBody());

@@ -38,7 +38,7 @@ public class FacebookConnector implements ConnectorHandler {
 	public InboxMessage toInboxMessage(FacebookMessaging m, String lane) {
 		String id = m.getSender().get("id");
 		InboxMessage event = new InboxMessage();
-		event.setWaChannel(Channel.GUPSHUP);
+		event.setChannel(Channel.GUPSHUP.toString());
 		event.from(id);
 		event.setMessage(m.getMessage().getText());
 		event.setTo(m.getRecipient().get("id"));
