@@ -20,6 +20,7 @@ import com.boot.jx.api.ApiResponse;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.MessageDoc;
+import com.boot.jx.postman.store.MessageStore;
 import com.boot.jx.postman.store.SessionStore;
 import com.boot.utils.ArgUtil;
 
@@ -31,6 +32,9 @@ public class MsgController {
 
 	@Autowired
 	SessionStore sessionStore;
+
+	@Autowired
+	MessageStore messageStore;
 
 	@Autowired
 	AgentSessionBean agentSession;
@@ -49,14 +53,12 @@ public class MsgController {
 
 			// Populate
 			ChatSessionDto chatSessionDto = new ChatSessionDto();
-			chatSessionDto.setSessionId(contact.getContactId());
+			chatSessionDto.setSessionId(contact.getSessionId());
 			chatSessionDto.setContactType(contact.getContactType());
 			chatSessionDto.setLastInComingStamp(chatSessionDoc.getLastInComingStamp());
 			chatSessionDto.setName(contact.getContactId());
 
-			Query query2 = new Query();
-			query2.addCriteria(Criteria.where("sessionId").is(contact.getSessionId()));
-			List<MessageDoc> messages = mongoTemplate.find(query2, MessageDoc.class);
+			List<MessageDoc> messages = messageStore.findBySessionId(contact.getSessionId(), contact.getContactType());
 			List<ChatMessageDto> messageDtos = new ArrayList<ChatMessageDto>();
 			for (MessageDoc messageDoc : messages) {
 				ChatMessageDto messageDto = new ChatMessageDto();

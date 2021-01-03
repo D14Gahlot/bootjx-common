@@ -1,8 +1,12 @@
 package com.boot.jx.postman.store;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Component;
 
 import com.boot.jx.dict.ContactType;
@@ -23,7 +27,7 @@ public class MessageStore {
 	@Value("${postman.chat.session.timeout}")
 	String chatSessionTimeout;
 
-	private String getCollectionName(ContactType contactType) {
+	private String getCollectionName(Object contactType) {
 		return (MessageDoc.COLLECTION_NAME + "_" + ArgUtil.parseAsString(contactType, "OTHERS"));
 	}
 
@@ -125,4 +129,12 @@ public class MessageStore {
 		mongoTemplate.save(messageDoc, getCollectionName(messageDoc.getContact().getContactType()));
 		return messageDoc;
 	}
+
+	public List<MessageDoc> findBySessionId(String sessionId, String contactType) {
+		Query query2 = new Query();
+		query2.addCriteria(Criteria.where("sessionId").is(sessionId));
+		List<MessageDoc> messages = mongoTemplate.find(query2, MessageDoc.class, getCollectionName(contactType));
+		return messages;
+	}
+
 }

@@ -143,6 +143,14 @@ i {
     border-radius: 50%;
 }
 
+.contact span.profilpicture, .active-contact span.profilpicture, .new-message-contact span.profilpicture {
+    width: 50px;
+    height: 50px;
+    margin: 10px;
+    border-radius: 50%;
+    font-size : 45px;
+}
+
 .active-contact {
     background-color: #ebebeb;
 }
@@ -304,7 +312,7 @@ i {
 }
 
 .me {
-    background: #dcf8c6;
+    background: #f8f0c6;
     margin: 0px 0px 10px auto;
 }
 
@@ -321,7 +329,7 @@ i {
 .my-mouth {
     width: 0;
     height: 0;
-    border-bottom: 10px solid #dcf8c6;
+    border-bottom: 10px solid #f8f0c6;
     border-right: 10px solid transparent;
     position: absolute;
     bottom: 10px;
@@ -439,7 +447,7 @@ body::-webkit-scrollbar-thumb, .contact-list::-webkit-scrollbar-thumb, .chat::-w
 		<div class="wrap">
 				<section class="left">
 						<div class="profile">
-								<img src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/1089577/user.jpg">
+								<img src="/agent/assets/images/profile.png">
 								<div class="icons">
 										<i class="fa fa-commenting fa-lg" aria-hidden="true"></i>
 										<i class="fa fa-bars fa-lg" aria-hidden="true"></i>
@@ -456,7 +464,7 @@ body::-webkit-scrollbar-thumb, .contact-list::-webkit-scrollbar-thumb, .chat::-w
 
 				<section class="right">
 						<div class="chat-head">
-								<img alt="profilepicture">
+								<img alt="profilepicture" src="/agent/assets/images/profile.png">
 								<div class="chat-name">
 										<h1 class="font-name"></h1>
 										<p class="font-online"></p>
@@ -484,6 +492,7 @@ body::-webkit-scrollbar-thumb, .contact-list::-webkit-scrollbar-thumb, .chat::-w
     <script src="https://static.codepen.io/assets/common/stopExecutionOnTimeout-157cd5b220a5c80d4ff8e0e70ac069bffd87a61252088146915e8726e5d9f147.js"></script>
 
   <script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js'></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.5.1/moment.min.js"></script>
   
       <script id="rendered-js" >
 //contacts
@@ -591,11 +600,13 @@ var WhatsApp = function ToDoModel(app) {
 
   var Model = {
     start: function () {
-      $.getJSON("https://s3-us-west-2.amazonaws.com/s.cdpn.io/1089577/contacts2.json", function (data) {
-        for (var i = 0; i < data.elements.length; i++) {if (window.CP.shouldStopExecution(0)) break;
-          var e = data.elements[i];
+    	//https://s3-us-west-2.amazonaws.com/s.cdpn.io/1089577/contacts2.json
+    	//
+      $.getJSON("/agent/api/sessions/assigned.json", function (data) {
+        for (var i = 0; i < data.results.length; i++) {if (window.CP.shouldStopExecution(0)) break;
+          var e = data.results[i];
 
-          if (e.online == undefined) {
+          if (e.online == undefined && false) {
             var group = new appGroups(e.name, e.img);
             for (var j = 0; j < e.members.length; j++) {if (window.CP.shouldStopExecution(1)) break;
               group.addMember(contactList[e.members[j].contact]);
@@ -608,9 +619,13 @@ var WhatsApp = function ToDoModel(app) {
             }window.CP.exitedLoop(2);
           } else
           {
+        	e.online = moment(e.lastInComingStamp).format('LT');
+        	e.img = "/agent/assets/images/profile.png";
             var contact = new appContacts(e.name, e.img, e.online);
+            contact.contactType = e.contactType;
             for (var j = 0; j < e.messages.length; j++) {if (window.CP.shouldStopExecution(3)) break;
               var m = e.messages[j];
+              m.time = moment(m.timestamp).format('LT')
               var message = new appMessages(m.text, m.name, m.time, m.type, false);
               contact.addMessage(message);
             }window.CP.exitedLoop(3);
@@ -664,12 +679,17 @@ var WhatsApp = function ToDoModel(app) {
  */
 var first = true;
 
+PP_ICONS = {
+ "FACEBOOK" : "fa-facebook"
+}
+
 var WhatsApp = function ToDoView(app) {
   var view = {
     printContact: function (c) {
       $("#" + c.id).remove();
       var lastmsg = c.messages[c.messages.length - 1];
 
+      console.log("C==", c)
       if (c.newmsg == 0) {
         var html = $("<div class='contact' id='" + c.id + "'><img src='" + c.img + "' alt='profilpicture'><div class='contact-preview'><div class='contact-text'><h1 class='font-name'>" + c.name + "</h1><p class='font-preview'>" + lastmsg.text + "</p></div></div><div class='contact-time'><p>" + lastmsg.time + "</p></div></div>");
       } else
