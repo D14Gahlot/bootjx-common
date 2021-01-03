@@ -6,6 +6,8 @@ import java.util.concurrent.TimeUnit;
 
 import org.redisson.api.RBlockingQueue;
 import org.redisson.api.RedissonClient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -22,6 +24,7 @@ import com.boot.utils.ArgUtil;
 @ConnectorMapping(ContactType.EMPTY)
 public class DummyConnector implements DefaultConnector {
 
+	private static final Logger LOGGER = LoggerFactory.getLogger(DummyConnector.class);
 	@Autowired
 	protected GupShupConfig gupShupConfig;
 
@@ -68,6 +71,7 @@ public class DummyConnector implements DefaultConnector {
 					e.printStackTrace();
 				}
 			} else {
+				LOGGER.info("sendReply to " + inboxMessage.getFrom());
 				RBlockingQueue<OutboxMessage> messageQueue = redisson
 						.getBlockingQueue("DUMMY_USER" + "_" + inboxMessage.getFrom());
 				messageQueue.add(outboxMessage);
