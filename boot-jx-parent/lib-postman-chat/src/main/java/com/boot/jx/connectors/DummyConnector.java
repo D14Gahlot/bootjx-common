@@ -17,8 +17,6 @@ import com.boot.jx.dict.ContactType;
 import com.boot.jx.postman.gupshup.GupShupConfig;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.OutboxMessage;
-import com.boot.jx.postman.model.WAMessage.Channel;
-import com.boot.utils.ArgUtil;
 
 @Component
 @ConnectorMapping(ContactType.EMPTY)
@@ -63,20 +61,17 @@ public class DummyConnector implements DefaultConnector {
 
 	@Override
 	public void sendReply(InboxMessage inboxMessage, OutboxMessage outboxMessage) {
-		if (ArgUtil.isEqual(inboxMessage.getChannel(), Channel.DUMMY)) {
-			if (redisson == null) {
-				try {
-					messageQueue.enqueue(outboxMessage);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
-			} else {
-				LOGGER.info("sendReply to " + inboxMessage.getFrom());
-				RBlockingQueue<OutboxMessage> messageQueue = redisson
-						.getBlockingQueue("DUMMY_USER" + "_" + inboxMessage.getFrom());
-				messageQueue.add(outboxMessage);
+		if (redisson == null) {
+			try {
+				messageQueue.enqueue(outboxMessage);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
 			}
-
+		} else {
+			LOGGER.debug("sendReply to " + inboxMessage.getFrom());
+			RBlockingQueue<OutboxMessage> messageQueue = redisson
+					.getBlockingQueue("DUMMY_USER" + "_" + inboxMessage.getFrom());
+			messageQueue.add(outboxMessage);
 		}
 	}
 

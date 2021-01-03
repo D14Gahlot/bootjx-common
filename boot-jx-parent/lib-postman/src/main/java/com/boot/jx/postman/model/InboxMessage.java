@@ -26,8 +26,6 @@ public class InboxMessage implements Serializable {
 	private String contactId;
 	private String channel;
 
-	private WAMessage.Channel waChannel;
-	private TGMessage.Channel tgChannel;
 	private BigDecimal queue;
 	private String lane;
 	private StringMatcher matcher;
@@ -61,17 +59,6 @@ public class InboxMessage implements Serializable {
 		this.message = message;
 	}
 
-	@JsonIgnore
-	public WAMessage.Channel getWaChannel() {
-		return waChannel;
-	}
-
-	@JsonIgnore
-	public void setWaChannel(WAMessage.Channel waChannel) {
-		this.waChannel = waChannel;
-		this.channel = ArgUtil.parseAsString(waChannel);
-	}
-
 	public BigDecimal getQueue() {
 		return queue;
 	}
@@ -83,21 +70,20 @@ public class InboxMessage implements Serializable {
 	public WAMessage replyWAMessage(String message) {
 		WAMessage reply = new WAMessage();
 		reply.setQueue(this.getQueue());
-		reply.setIChannel(this.getWaChannel());
 		reply.addTo(this.getFrom());
 		reply.setMessage(message);
 		return reply;
 	}
 
 	public Message<?> replyMessage(String message) {
-		if (ArgUtil.is(this.getWaChannel()) || ContactType.WHATSAPP.equals(this.contactType)) {
+		if (ArgUtil.is(ContactType.WHATSAPP.equals(this.contactType))) {
 			WAMessage reply = new WAMessage();
 			reply.setQueue(this.getQueue());
 			reply.setChannel(this.getChannel());
 			reply.addTo(this.getFrom());
 			reply.setMessage(message);
 			return reply;
-		} else if (ArgUtil.is(this.getTgChannel()) || ContactType.TELEGRAM.equals(this.contactType)) {
+		} else if (ArgUtil.is(ContactType.TELEGRAM.equals(this.contactType))) {
 			TGMessage reply = new TGMessage();
 			reply.setQueue(this.getQueue());
 			reply.setChannel(this.getChannel());
@@ -128,22 +114,6 @@ public class InboxMessage implements Serializable {
 	public InboxMessage message(String message) {
 		this.setMessage(message);
 		return this;
-	}
-
-	public InboxMessage waChannel(WAMessage.Channel waChannel) {
-		this.setWaChannel(waChannel);
-		return this;
-	}
-
-	@JsonIgnore
-	public TGMessage.Channel getTgChannel() {
-		return tgChannel;
-	}
-
-	@JsonIgnore
-	public void setTgChannel(TGMessage.Channel tgChannel) {
-		this.tgChannel = tgChannel;
-		this.channel = ArgUtil.parseAsString(waChannel);
 	}
 
 	public StringMatcher getMatcher() {
