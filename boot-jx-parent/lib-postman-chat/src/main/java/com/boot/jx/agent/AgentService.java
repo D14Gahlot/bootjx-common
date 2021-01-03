@@ -16,7 +16,7 @@ import com.boot.utils.ArgUtil;
 public class AgentService {
 
 	@Autowired(required = false)
-	private AgentAssigner agentAssigner;
+	private AgentChatHandler agentChatHandler;
 
 	@Autowired
 	private ChatClient chatClient;
@@ -31,8 +31,8 @@ public class AgentService {
 	private ChatContext chatContext;
 
 	public ApiResponse<InboxMessage, Object> assignToAgent(InboxMessage inboxMessage) {
-		if (ArgUtil.is(agentAssigner) && agentAssigner.isSupported(inboxMessage)) {
-			return ApiResponse.buildResult(agentAssigner.onAssign(inboxMessage));
+		if (ArgUtil.is(agentChatHandler) && agentChatHandler.onAssignSupported(inboxMessage)) {
+			return ApiResponse.buildResult(agentChatHandler.onAssign(inboxMessage));
 		} else if (ArgUtil.is(chatClient.getAgentUrl())) {
 			return chatClient.assignToAgent(inboxMessage);
 		} else {
@@ -54,5 +54,13 @@ public class AgentService {
 			inboxMessage.setAssignedToDept(deptName);
 			this.assignToAgent(inboxMessage);
 		}
+	}
+
+	public boolean onMessageSupported(InboxMessage inboxMessage) {
+		return (ArgUtil.is(agentChatHandler) && agentChatHandler.onMessageSupported(inboxMessage));
+	}
+
+	public boolean onMessage(InboxMessage inboxMessage) {
+		return agentChatHandler.onMessageSupported(inboxMessage);
 	}
 }

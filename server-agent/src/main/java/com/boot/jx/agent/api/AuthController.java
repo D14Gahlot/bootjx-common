@@ -20,6 +20,7 @@ import com.boot.jx.AppConfig;
 import com.boot.jx.agent.AgentAuthProvider;
 import com.boot.jx.agent.AgentSessionBean;
 import com.boot.jx.api.ApiResponse;
+import com.boot.jx.stomp.StompTunnelSessionManager;
 import com.boot.utils.ArgUtil;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
@@ -42,7 +43,8 @@ public class AuthController {
 	}
 
 	@RequestMapping(value = "/app/home", method = { RequestMethod.POST, RequestMethod.GET })
-	public String home() {
+	public String home(Model model) {
+		model.addAttribute("APP_CONTEXT", appConfig.getAppPrefix());
 		return "whatsweb";
 	}
 
@@ -57,6 +59,9 @@ public class AuthController {
 
 	@Autowired
 	private AgentSessionBean agentSession;
+
+	@Autowired
+	private StompTunnelSessionManager stompTunnelSessionManager;
 
 	@ResponseBody
 	@RequestMapping(value = "/auth/login/submit", method = { RequestMethod.POST })
@@ -75,6 +80,7 @@ public class AuthController {
 			agentSession.setAgentCode(username);
 			agentSession.setLastOnlineStamp(System.currentTimeMillis());
 			agentSession.update();
+			stompTunnelSessionManager.registerUser(username);
 		} else {
 			x.setData("error");
 			x.setMeta("error");

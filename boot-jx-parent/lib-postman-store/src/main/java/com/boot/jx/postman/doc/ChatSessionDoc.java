@@ -20,7 +20,8 @@ public class ChatSessionDoc implements Serializable {
 	@ApiMockModelProperty(example = "wa919930104050", required = false)
 	private String contactId;
 
-	private String assignedTo;
+	private String assignedToDept;
+	private String assignedToAgent;
 
 	private long lastInComingStamp;
 
@@ -50,20 +51,28 @@ public class ChatSessionDoc implements Serializable {
 		this.contactId = contactId;
 	}
 
-	public String getAssignedTo() {
-		return assignedTo;
-	}
-
-	public void setAssignedTo(String assignedTo) {
-		this.assignedTo = assignedTo;
-	}
-
 	public boolean isActive() {
 		return active;
 	}
 
 	public void setActive(boolean active) {
 		this.active = active;
+	}
+
+	public String getAssignedToDept() {
+		return assignedToDept;
+	}
+
+	public void setAssignedToDept(String assignedToDept) {
+		this.assignedToDept = assignedToDept;
+	}
+
+	public String getAssignedToAgent() {
+		return assignedToAgent;
+	}
+
+	public void setAssignedToAgent(String assignedToAgent) {
+		this.assignedToAgent = assignedToAgent;
 	}
 
 }

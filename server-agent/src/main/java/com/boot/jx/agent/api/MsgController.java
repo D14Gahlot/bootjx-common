@@ -22,6 +22,7 @@ import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.store.MessageStore;
 import com.boot.jx.postman.store.SessionStore;
+import com.boot.jx.stomp.StompTunnelService;
 import com.boot.utils.ArgUtil;
 
 @Controller
@@ -41,6 +42,9 @@ public class MsgController {
 
 	@Autowired
 	MongoTemplate mongoTemplate;
+
+	@Autowired
+	private StompTunnelService stompTunnelService;
 
 	@ResponseBody
 	@RequestMapping(value = "/api/sessions/assigned", method = { RequestMethod.GET })

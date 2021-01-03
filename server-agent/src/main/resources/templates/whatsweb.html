@@ -2,9 +2,9 @@
 <html lang="en" >
 
 <head>
-
+<base th:href="${APP_CONTEXT} + '/'" />
 <meta charset="UTF-8">
-<title>WhatsApp - Web HTML Template</title>
+<title>Multi-Agent Dashboard</title>
 <link rel="shortcut icon" type="image/x-icon" href="#" />  
 <style>
 /* ------ GENERAl LAYOUT ------ */
@@ -421,6 +421,9 @@ body::-webkit-scrollbar-thumb, .contact-list::-webkit-scrollbar-thumb, .chat::-w
 
   <script>
   window.console = window.console || function(t) {};
+  window.CONST = {
+		CONTEXT: '[[${APP_CONTEXT}]]'
+  }
 </script>
 
   
@@ -489,8 +492,6 @@ body::-webkit-scrollbar-thumb, .contact-list::-webkit-scrollbar-thumb, .chat::-w
 		</div>
 </body>
 </html>
-    <script src="https://static.codepen.io/assets/common/stopExecutionOnTimeout-157cd5b220a5c80d4ff8e0e70ac069bffd87a61252088146915e8726e5d9f147.js"></script>
-
   <script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js'></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.5.1/moment.min.js"></script>
   
@@ -611,12 +612,12 @@ var WhatsApp = function ToDoModel(app) {
             for (var j = 0; j < e.members.length; j++) {if (window.CP.shouldStopExecution(1)) break;
               group.addMember(contactList[e.members[j].contact]);
               contactList[e.members[j].contact].addGroup(group);
-            }window.CP.exitedLoop(1);
+            }
             for (var j = 0; j < e.messages.length; j++) {if (window.CP.shouldStopExecution(2)) break;
               var m = e.messages[j];
               var message = new appMessages(m.text, m.name, m.time, m.type, true);
               group.addMessage(message);
-            }window.CP.exitedLoop(2);
+            }
           } else
           {
         	e.online = moment(e.lastInComingStamp).format('LT');
@@ -628,9 +629,9 @@ var WhatsApp = function ToDoModel(app) {
               m.time = moment(m.timestamp).format('LT')
               var message = new appMessages(m.text, m.name, m.time, m.type, false);
               contact.addMessage(message);
-            }window.CP.exitedLoop(3);
+            }
           }
-        }window.CP.exitedLoop(0);
+        }
         subject.notifyObservers();
       });
     },
@@ -711,7 +712,7 @@ var WhatsApp = function ToDoView(app) {
         $(".chat-bubble").remove();
         for (var i = 0; i < cg.messages.length; i++) {if (window.CP.shouldStopExecution(4)) break;
           WhatsApp.View.printMessage(cg.messages[i]);
-        }window.CP.exitedLoop(4);
+        }
         currentChat = cg;
       } else
       {
@@ -721,13 +722,13 @@ var WhatsApp = function ToDoView(app) {
           if (i < cg.members.length - 1) {
             listMembers += ", ";
           }
-        }window.CP.exitedLoop(5);
+        }
         $(".chat-name p").text(listMembers);
         // Nachrichten konfigurieren
         $(".chat-bubble").remove();
         for (var i = 0; i < cg.messages.length; i++) {if (window.CP.shouldStopExecution(6)) break;
           WhatsApp.View.printMessage(cg.messages[i]);
-        }window.CP.exitedLoop(6);
+        }
         currentChat = cg;
       }
     },
@@ -765,9 +766,9 @@ var WhatsApp = function ToDoView(app) {
                 $("#" + contactList[i].id).addClass("active-contact");
                 WhatsApp.Groups.printChat(contactList[i]);
               }
-            }window.CP.exitedLoop(8);
+            }
           });
-        }window.CP.exitedLoop(7);
+        }
       } else
       {
         $(".information").append("<img src='" + currentChat.img + "'><div><h1>Name:</h1><p>" + currentChat.name + "</p></div><div id='listGroups'><h1>Mitglieder:</h1></div>");
@@ -781,9 +782,9 @@ var WhatsApp = function ToDoView(app) {
                 $("#" + contactList[i].id).addClass("active-contact");
                 WhatsApp.Contacts.printChat(contactList[i]);
               }
-            }window.CP.exitedLoop(10);
+            }
           });
-        }window.CP.exitedLoop(9);
+        }
       }
     },
     closeContactInformation: function () {
@@ -800,7 +801,7 @@ var WhatsApp = function ToDoView(app) {
         for (var i = 0; i < contactList.length; i++) {if (window.CP.shouldStopExecution(11)) break;
           WhatsApp.View.printContact(contactList[i]);
           currentChat = contactList[i];
-        }window.CP.exitedLoop(11);
+        }
         first = false;
       } else
       {
@@ -866,9 +867,12 @@ var WhatsApp = function ToDoCtrl(app) {
 WhatsApp.Model.register(WhatsApp.View, WhatsApp.Ctrl);
 //# sourceURL=pen.js
     </script>
-
   
-
+	<script src="js/jquery.min.js"></script>
+	<script src="js/sockjs.min.js"></script>
+	<script src="js/stomp.min.js"></script>
+	<script src="js/tunnel.client.js"></script>
+	
 </body>
 
 </html>

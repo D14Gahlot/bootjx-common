@@ -6,7 +6,6 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
-import org.springframework.data.domain.Sort.Order;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
@@ -15,21 +14,18 @@ import org.springframework.stereotype.Component;
 import com.boot.jx.agent.doc.AgentSessionDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.model.InboxMessage;
-import com.boot.jx.postman.store.SessionStore;
+import com.boot.jx.stomp.StompTunnelService;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
 
 @Component
-public class AgentChatAssigner implements AgentAssigner {
+public class AgentChatHandlerImpl implements AgentChatHandler {
 
 	@Autowired
 	private MongoTemplate mongoTemplate;
 
-	@Autowired
-	private SessionStore sessionStore;
-
 	@Override
-	public boolean isSupported(InboxMessage inboxMessage) {
+	public boolean onAssignSupported(InboxMessage inboxMessage) {
 		return true;
 	}
 
@@ -49,11 +45,21 @@ public class AgentChatAssigner implements AgentAssigner {
 
 		if (ArgUtil.is(avaialbleAgent)) {
 			ChatSessionDoc chatSessionDoc = mongoTemplate.findById(inboxMessage.getSessionId(), ChatSessionDoc.class);
-			chatSessionDoc.setAssignedTo(avaialbleAgent.getAgentCode());
+			chatSessionDoc.setAssignedToAgent(avaialbleAgent.getAgentCode());
+			chatSessionDoc.setAssignedToDept(inboxMessage.getAssignedToDept());
 			mongoTemplate.save(chatSessionDoc);
 			inboxMessage.setAssignedToAgent(avaialbleAgent.getAgentCode());
 		}
 
+		return inboxMessage;
+	}
+
+	@Autowired
+	private StompTunnelService stompTunnelService;
+
+	@Override
+	public InboxMessage onMessage(InboxMessage inboxMessage) {
+		stompTunnelService.sendTo(inboxMessage.getAssignedToAgent(), "/agent/onmessage", inboxMessage);
 		return inboxMessage;
 	}
 

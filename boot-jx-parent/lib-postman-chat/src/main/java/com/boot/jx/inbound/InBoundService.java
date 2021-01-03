@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
+import com.boot.jx.agent.AgentChatHandler;
 import com.boot.jx.agent.AgentService;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.bot.BotEngine;
@@ -26,6 +27,9 @@ public class InBoundService {
 
 	@Autowired(required = false)
 	private InBoundFilter inBoundFilter;
+
+	@Autowired(required = false)
+	private AgentChatHandler agentChatHandler;
 
 	@Autowired
 	private BotEngine botEngine;
@@ -66,6 +70,8 @@ public class InBoundService {
 		if (ArgUtil.isEmpty(inBoundFilter) || inBoundFilter.onFilter(inboxMessageOriginal)) {
 			if (ArgUtil.is(inBoundHandler)) {
 				inBoundHandler.onHandle(inboxMessageOriginal);
+			} else if (agentService.onMessageSupported(inboxMessageOriginal)) {
+				agentService.onMessage(inboxMessageOriginal);
 			} else if (botEngine.isChatBotDefined() || chatClient.isChatDummyBotEnabled()) {
 				botEngine.invokeMethodsAsync(inboxMessageOriginal);
 			} else {
