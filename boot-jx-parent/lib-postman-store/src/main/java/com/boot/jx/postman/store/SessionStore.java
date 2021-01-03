@@ -112,7 +112,7 @@ public class SessionStore {
 
 	public List<ChatSessionDoc> findChatSessionDocByAgent(String agentCode) {
 		Query query2 = new Query();
-		query2.addCriteria(Criteria.where("assignedTo").is(agentCode).and("active").is(true));
+		query2.addCriteria(Criteria.where("assignedToAgent").is(agentCode).and("active").is(true));
 		return mongoTemplate.find(query2, ChatSessionDoc.class);
 	}
 }

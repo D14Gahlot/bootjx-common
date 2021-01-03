@@ -9,7 +9,6 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Component;
 
-import com.boot.jx.dict.ContactType;
 import com.boot.jx.postman.doc.ContactDoc;
 import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.model.InboxMessage;
@@ -76,6 +75,10 @@ public class MessageStore {
 		doc.setHandler(handler);
 		mongoTemplate.save(doc, getCollectionName(inboxMessage.getContactType()));
 		inboxMessage.setMessageId(doc.getMessageId());
+	}
+
+	public MessageDoc find(InboxMessage inboxMessage) {
+		return findOrCreateMessageDoc(inboxMessage);
 	}
 
 	// Out Going Messages

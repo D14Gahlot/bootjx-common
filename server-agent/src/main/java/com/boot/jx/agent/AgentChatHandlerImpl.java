@@ -12,8 +12,11 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Component;
 
 import com.boot.jx.agent.doc.AgentSessionDoc;
+import com.boot.jx.agent.dto.ChatMessageDto;
 import com.boot.jx.postman.doc.ChatSessionDoc;
+import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.model.InboxMessage;
+import com.boot.jx.postman.store.MessageStore;
 import com.boot.jx.stomp.StompTunnelService;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
@@ -57,9 +60,18 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 	@Autowired
 	private StompTunnelService stompTunnelService;
 
+	@Autowired
+	MessageStore messageStore;
+
 	@Override
 	public InboxMessage onMessage(InboxMessage inboxMessage) {
-		stompTunnelService.sendTo(inboxMessage.getAssignedToAgent(), "/agent/onmessage", inboxMessage);
+		MessageDoc messageDoc = messageStore.find(inboxMessage);
+		ChatMessageDto messageDto = new ChatMessageDto();
+		messageDto.setType(false);
+		messageDto.setName(messageDoc.getContactId());
+		messageDto.setText(ArgUtil.nonEmpty(messageDoc.getTemplate(), messageDoc.getMessage()));
+		messageDto.setTimestamp(messageDoc.getTimestamp());
+		stompTunnelService.sendTo(inboxMessage.getAssignedToAgent(), "/agent/onmessage", messageDto);
 		return inboxMessage;
 	}
 

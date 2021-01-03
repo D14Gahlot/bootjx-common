@@ -422,7 +422,7 @@ body::-webkit-scrollbar-thumb, .contact-list::-webkit-scrollbar-thumb, .chat::-w
   <script>
   window.console = window.console || function(t) {};
   window.CONST = {
-		CONTEXT: '[[${APP_CONTEXT}]]'
+		CONTEXT: '[[${APP_CONTEXT}]]', "APP_USER" : '[[${APP_USER}]]'
   }
 </script>
 
@@ -495,6 +495,11 @@ body::-webkit-scrollbar-thumb, .contact-list::-webkit-scrollbar-thumb, .chat::-w
   <script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js'></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.5.1/moment.min.js"></script>
   
+  	<!-- <script src="js/jquery.min.js"></script> -->
+	<script src="js/sockjs.min.js"></script>
+	<script src="js/stomp.min.js"></script>
+	<script src="js/tunnel.client.js"></script>
+	
       <script id="rendered-js" >
 //contacts
 var WhatsApp = function (app) {
@@ -604,16 +609,16 @@ var WhatsApp = function ToDoModel(app) {
     	//https://s3-us-west-2.amazonaws.com/s.cdpn.io/1089577/contacts2.json
     	//
       $.getJSON("/agent/api/sessions/assigned.json", function (data) {
-        for (var i = 0; i < data.results.length; i++) {if (window.CP.shouldStopExecution(0)) break;
+        for (var i = 0; i < data.results.length; i++) {
           var e = data.results[i];
 
           if (e.online == undefined && false) {
             var group = new appGroups(e.name, e.img);
-            for (var j = 0; j < e.members.length; j++) {if (window.CP.shouldStopExecution(1)) break;
+            for (var j = 0; j < e.members.length; j++) {
               group.addMember(contactList[e.members[j].contact]);
               contactList[e.members[j].contact].addGroup(group);
             }
-            for (var j = 0; j < e.messages.length; j++) {if (window.CP.shouldStopExecution(2)) break;
+            for (var j = 0; j < e.messages.length; j++) {
               var m = e.messages[j];
               var message = new appMessages(m.text, m.name, m.time, m.type, true);
               group.addMessage(message);
@@ -624,7 +629,7 @@ var WhatsApp = function ToDoModel(app) {
         	e.img = "/agent/assets/images/profile.png";
             var contact = new appContacts(e.name, e.img, e.online);
             contact.contactType = e.contactType;
-            for (var j = 0; j < e.messages.length; j++) {if (window.CP.shouldStopExecution(3)) break;
+            for (var j = 0; j < e.messages.length; j++) {
               var m = e.messages[j];
               m.time = moment(m.timestamp).format('LT')
               var message = new appMessages(m.text, m.name, m.time, m.type, false);
@@ -642,6 +647,15 @@ var WhatsApp = function ToDoModel(app) {
       $(".input-message").val("");
       $("#" + currentChat.id).addClass("active-contact");
       subject.notifyObservers();
+    },
+    readMessage: function (m) {
+    	console.log(m)
+      for(var id in contactList){
+    	  if(m.name == contactList[id].name){
+    		  this.getMessage(m.text,id,null);
+    		  break;
+    	  }
+      }
     },
     getMessage: function (text, id, name) {
       if (name == undefined) {
@@ -710,14 +724,14 @@ var WhatsApp = function ToDoView(app) {
         $(".chat-name p").text("zuletzt online um " + cg.online);
         // Nachrichten konfigurieren
         $(".chat-bubble").remove();
-        for (var i = 0; i < cg.messages.length; i++) {if (window.CP.shouldStopExecution(4)) break;
+        for (var i = 0; i < cg.messages.length; i++) {
           WhatsApp.View.printMessage(cg.messages[i]);
         }
         currentChat = cg;
       } else
       {
         var listMembers = "";
-        for (var i = 0; i < cg.members.length; i++) {if (window.CP.shouldStopExecution(5)) break;
+        for (var i = 0; i < cg.members.length; i++) {
           listMembers += cg.members[i].name;
           if (i < cg.members.length - 1) {
             listMembers += ", ";
@@ -726,7 +740,7 @@ var WhatsApp = function ToDoView(app) {
         $(".chat-name p").text(listMembers);
         // Nachrichten konfigurieren
         $(".chat-bubble").remove();
-        for (var i = 0; i < cg.messages.length; i++) {if (window.CP.shouldStopExecution(6)) break;
+        for (var i = 0; i < cg.messages.length; i++) {
           WhatsApp.View.printMessage(cg.messages[i]);
         }
         currentChat = cg;
@@ -756,11 +770,11 @@ var WhatsApp = function ToDoView(app) {
       $("#close-contact-information").show();
       if (currentChat.members == undefined) {
         $(".information").append("<img src='" + currentChat.img + "'><div><h1>Name:</h1><p>" + currentChat.name + "</p></div><div id='listGroups'><h1>Gemeinsame Gruppen:</h1></div>");
-        for (var i = 0; i < currentChat.groups.length; i++) {if (window.CP.shouldStopExecution(7)) break;
+        for (var i = 0; i < currentChat.groups.length; i++) {
           html = $("<div class='listGroups'><img src='" + currentChat.groups[i].img + "'><p>" + currentChat.groups[i].name + "</p></div>");
           $("#listGroups").append(html);
           $(html).click(function (e) {
-            for (var i = 0; i < contactList.length; i++) {if (window.CP.shouldStopExecution(8)) break;
+            for (var i = 0; i < contactList.length; i++) {
               if ($(currentChat).find("p").text() == contactList[i].name) {
                 $(".active-contact").removeClass("active-contact");
                 $("#" + contactList[i].id).addClass("active-contact");
@@ -772,11 +786,11 @@ var WhatsApp = function ToDoView(app) {
       } else
       {
         $(".information").append("<img src='" + currentChat.img + "'><div><h1>Name:</h1><p>" + currentChat.name + "</p></div><div id='listGroups'><h1>Mitglieder:</h1></div>");
-        for (var i = 0; i < currentChat.members.length; i++) {if (window.CP.shouldStopExecution(9)) break;
+        for (var i = 0; i < currentChat.members.length; i++) {
           html = $("<div class='listGroups'><img src='" + currentChat.members[i].img + "'><p>" + currentChat.members[i].name + "</p></div>");
           $("#listGroups").append(html);
           $(html).click(function (e) {
-            for (var i = 0; i < contactList.length; i++) {if (window.CP.shouldStopExecution(10)) break;
+            for (var i = 0; i < contactList.length; i++) {
               if ($(currentChat).find("p").text() == contactList[i].name) {
                 $(".active-contact").removeClass("active-contact");
                 $("#" + contactList[i].id).addClass("active-contact");
@@ -798,7 +812,7 @@ var WhatsApp = function ToDoView(app) {
     notify: function () {
       if (first) {
         first = false;
-        for (var i = 0; i < contactList.length; i++) {if (window.CP.shouldStopExecution(11)) break;
+        for (var i = 0; i < contactList.length; i++) {
           WhatsApp.View.printContact(contactList[i]);
           currentChat = contactList[i];
         }
@@ -866,12 +880,18 @@ var WhatsApp = function ToDoCtrl(app) {
 
 WhatsApp.Model.register(WhatsApp.View, WhatsApp.Ctrl);
 //# sourceURL=pen.js
+
+	tunnelClient.config({
+		user : '[[${APP_USER}]]',
+		context : "/agent"
+	}).instance().on("/agent/onmessage", function(testresponse){
+		WhatsApp.Model.readMessage(testresponse);
+	}).on("/branch-user/customer-call-session/0", function(testresponse){
+		console.log("===testresponse0",testresponse)
+	});
+	
     </script>
   
-	<script src="js/jquery.min.js"></script>
-	<script src="js/sockjs.min.js"></script>
-	<script src="js/stomp.min.js"></script>
-	<script src="js/tunnel.client.js"></script>
 	
 </body>
 

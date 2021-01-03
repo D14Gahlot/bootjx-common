@@ -60,7 +60,7 @@ public class AgentService {
 		return (ArgUtil.is(agentChatHandler) && agentChatHandler.onMessageSupported(inboxMessage));
 	}
 
-	public boolean onMessage(InboxMessage inboxMessage) {
-		return agentChatHandler.onMessageSupported(inboxMessage);
+	public InboxMessage onMessage(InboxMessage inboxMessage) {
+		return agentChatHandler.onMessage(inboxMessage);
 	}
 }
