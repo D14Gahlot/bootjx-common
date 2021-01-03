@@ -54,6 +54,7 @@ public class Message<T extends Message<T>> implements Serializable, MessageOptio
 	private String id;
 	private String messageId;
 	private String messageIdExt;
+	private String sessionId;
 
 	private String collapseId;
 	public int priority;
@@ -395,6 +396,14 @@ public class Message<T extends Message<T>> implements Serializable, MessageOptio
 
 	public void setMessageIdExt(String messageIdExt) {
 		this.messageIdExt = messageIdExt;
+	}
+
+	public String getSessionId() {
+		return sessionId;
+	}
+
+	public void setSessionId(String sessionId) {
+		this.sessionId = sessionId;
 	}
 
 }

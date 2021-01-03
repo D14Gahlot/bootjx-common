@@ -46,6 +46,7 @@ public class ChatService {
 			outboxMessage.setContactType(inboxMessage.getContactType());
 			outboxMessage.setQueue(inboxMessage.getQueue());
 			outboxMessage.addTo(inboxMessage.getFrom());
+			outboxMessage.setSessionId(inboxMessage.getSessionId());
 			ConnectorHandler connector = connectorHandlerFactory.get(outboxMessage.getContactType(),
 					outboxMessage.getChannel());
 			if (ArgUtil.is(connector)) {

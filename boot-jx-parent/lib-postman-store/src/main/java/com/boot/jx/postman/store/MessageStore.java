@@ -91,6 +91,7 @@ public class MessageStore {
 		} else {
 			doc.setMessage(outMessage.getMessage());
 		}
+		doc.setSessionId(outMessage.getSessionId());
 		return doc;
 	}
 
