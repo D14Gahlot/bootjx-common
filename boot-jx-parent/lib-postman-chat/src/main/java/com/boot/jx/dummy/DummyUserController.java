@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.boot.jx.AppConfig;
-import com.boot.jx.connectors.DummyConnector;
+import com.boot.jx.connectors.WebConnector;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.inbound.InBoundService;
 import com.boot.jx.postman.model.InboxMessage;
@@ -23,7 +23,7 @@ public class DummyUserController {
 	private InBoundService inBoundEngine;
 
 	@Autowired(required = false)
-	private DummyConnector dummyConnector;
+	private WebConnector dummyConnector;
 
 	@Autowired
 	AppConfig appConfig;
@@ -39,7 +39,7 @@ public class DummyUserController {
 	public InboxMessage onReceiveMessage(@RequestParam String message, @RequestParam String number)
 			throws InterruptedException {
 		InboxMessage event = new InboxMessage();
-		event.setContactType(ContactType.DUMMY);
+		event.setContactType(ContactType.WEBSITE);
 		event.setLane("DUMMY");
 		event.from(number);
 		event.setMessage(message);

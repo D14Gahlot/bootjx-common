@@ -7,6 +7,7 @@ public enum ContactType {
 	FACEBOOK("fb", "Facebook Id"),
 	TELEGRAM("tg", "Telegram No."),
 	NOTP_APP("notpapp"),
+	WEBSITE("web"),
 	// Deprecated
 	@Deprecated
 	MOBILE(SMS),

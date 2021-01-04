@@ -19,10 +19,10 @@ import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.OutboxMessage;
 
 @Component
-@ConnectorMapping(ContactType.EMPTY)
-public class DummyConnector implements DefaultConnector {
+@ConnectorMapping(ContactType.WEBSITE)
+public class WebConnector implements DefaultConnector {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(DummyConnector.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(WebConnector.class);
 	@Autowired
 	protected GupShupConfig gupShupConfig;
 
@@ -70,7 +70,7 @@ public class DummyConnector implements DefaultConnector {
 		} else {
 			LOGGER.debug("sendReply to " + inboxMessage.getFrom());
 			RBlockingQueue<OutboxMessage> messageQueue = redisson
-					.getBlockingQueue("DUMMY_USER" + "_" + inboxMessage.getFrom());
+					.getBlockingQueue("WEB_USER_MESSAGE" + "_" + inboxMessage.getFrom());
 			messageQueue.add(outboxMessage);
 		}
 	}
@@ -92,7 +92,7 @@ public class DummyConnector implements DefaultConnector {
 				e.printStackTrace();
 			}
 		}
-		RBlockingQueue<OutboxMessage> messageQueue = redisson.getBlockingQueue("DUMMY_USER" + "_" + number);
+		RBlockingQueue<OutboxMessage> messageQueue = redisson.getBlockingQueue("WEB_USER_MESSAGE" + "_" + number);
 		return messageQueue.poll(5, TimeUnit.SECONDS);
 	}
 
