@@ -49,6 +49,13 @@ public class AuthController {
 		return "whatsweb";
 	}
 
+	@RequestMapping(value = "/pub/customer/{page}", method = { RequestMethod.POST, RequestMethod.GET })
+	public String customertest(Model model, @RequestParam String page) {
+		model.addAttribute("APP_CONTEXT", appConfig.getAppPrefix());
+		model.addAttribute("APP_USER", agentSession.getAgentCode());
+		return "customer." + page;
+	}
+
 	@RequestMapping(value = "/auth/login", method = { RequestMethod.POST, RequestMethod.GET })
 	public String login(Model model) {
 		model.addAttribute("APP_CONTEXT", appConfig.getAppPrefix());

@@ -14,7 +14,6 @@ import com.boot.jx.dict.ContactType;
 import com.boot.jx.inbound.InBoundService;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.OutboxMessage;
-import com.boot.jx.postman.model.WAMessage.Channel;
 
 @Controller
 public class DummyUserController {
