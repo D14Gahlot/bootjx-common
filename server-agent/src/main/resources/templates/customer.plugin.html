@@ -30,70 +30,13 @@
 		<div class="panel-collapse collapse in" id="collapseOne">
 			<div class="panel-body botbox">
 				<ul class="chat">
-					<li class="left clearfix"><span class="chat-img pull-left">
-							<img src="http://placehold.it/50/55C1E7/fff&text=U"
-							alt="User Avatar" class="img-circle" />
-					</span>
-						<div class="chat-body clearfix">
-							<div class="header">
-								<strong class="primary-font">Jack Sparrow</strong> <small
-									class="pull-right text-muted"> <span
-									class="glyphicon glyphicon-time"></span>12 mins ago
-								</small>
-							</div>
-							<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-								Curabitur bibendum ornare dolor, quis ullamcorper ligula
-								sodales.</p>
-						</div></li>
-					<li class="right clearfix"><span class="chat-img pull-right">
-							<img src="http://placehold.it/50/FA6F57/fff&text=ME"
-							alt="User Avatar" class="img-circle" />
-					</span>
-						<div class="chat-body clearfix">
-							<div class="header">
-								<small class=" text-muted"><span
-									class="glyphicon glyphicon-time"></span>13 mins ago</small> <strong
-									class="pull-right primary-font">Bhaumik Patel</strong>
-							</div>
-							<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-								Curabitur bibendum ornare dolor, quis ullamcorper ligula
-								sodales.</p>
-						</div></li>
-					<li class="left clearfix"><span class="chat-img pull-left">
-							<img src="http://placehold.it/50/55C1E7/fff&text=U"
-							alt="User Avatar" class="img-circle" />
-					</span>
-						<div class="chat-body clearfix">
-							<div class="header">
-								<strong class="primary-font">Jack Sparrow</strong> <small
-									class="pull-right text-muted"> <span
-									class="glyphicon glyphicon-time"></span>14 mins ago
-								</small>
-							</div>
-							<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-								Curabitur bibendum ornare dolor, quis ullamcorper ligula
-								sodales.</p>
-						</div></li>
-					<li class="right clearfix"><span class="chat-img pull-right">
-							<img src="http://placehold.it/50/FA6F57/fff&text=ME"
-							alt="User Avatar" class="img-circle" />
-					</span>
-						<div class="chat-body clearfix">
-							<div class="header">
-								<small class=" text-muted"><span
-									class="glyphicon glyphicon-time"></span>15 mins ago</small> <strong
-									class="pull-right primary-font">Bhaumik Patel</strong>
-							</div>
-							<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-								Curabitur bibendum ornare dolor, quis ullamcorper ligula
-								sodales.</p>
-						</div></li>
+
 				</ul>
 			</div>
 			<div class="panel-footer">
 				<div class="input-group">
 					<input id="btn-input" type="text" class="form-control input-sm"
-						placeholder="Type your message here..." /> <span
+						placeholder="Type your message here..." autocomplete="off" /> <span
 						class="input-group-btn">
 						<button class="btn btn-warning btn-sm" id="btn-chat">
 							Send</button>
@@ -141,11 +84,13 @@ var initFingerprintJS = function initFingerprintJS() {
 	            isSendClick = e.type == "click" && id == "btn-chat";
 
 	        if( notEmpty && (isEnterKeypress || isSendClick) ) {
-	        	onSendMsg($SEND_TEXT.val());
+	        	 var msg = $SEND_TEXT.val();
+				 var stamp = onSendMsg(msg);
+				 $SEND_TEXT.val("");
 		  	   	 return $.post(window.CONST.CONTEXT + "/dummy/messages",{
-					 message :   $SEND_TEXT.val(), number:MOBILE
+					 message :   msg, number:MOBILE
 				 }).done(function(rsp){
-					 $SEND_TEXT.val("");
+					 $("#"+stamp).removeClass("blink_me") 
 				 });
 	        }
 	    }
@@ -175,6 +120,7 @@ var initFingerprintJS = function initFingerprintJS() {
 		if(files && files[0] && files[0].url){
 			url = '<a href="'+files[0].url+'" target="_blank" >Download</a>'
 		}
+		var stamp = new Date().getTime();
 		$(".chat").append(
 				$('<li class="right clearfix"></li>').append(
 	   				$('<span class="chat-img pull-right">').append(
@@ -183,12 +129,13 @@ var initFingerprintJS = function initFingerprintJS() {
 	   					$('<div class="header"></div>').append(
 	   						$('<small class="text-muted"><span class="glyphicon glyphicon-time"></span>12 mins ago</small>'),
 	   						$('<strong class="pull-right primary-font">Me</strong>')),
-	   					$('<p/>').append(msg),
+	   					$('<p id='+stamp+' class="pull-right blink_me" />').append(msg),
 	   					url
 	   				)
 				)
 			);
 		scrollToBottom()
+		return stamp;
 	}
 	function onRcvMsg(msg,files){
 		var url = "";
