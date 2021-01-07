@@ -19,7 +19,11 @@ public class ChatContactDoc implements Serializable {
 	@JsonProperty("contactId")
 	private String contactId;
 
+	private String csid;
+
 	private String contactType;
+	private String channelType;
+	private String lane;
 
 	private long lastInComingStamp;
 
@@ -93,6 +97,30 @@ public class ChatContactDoc implements Serializable {
 
 	public void setEmail(String email) {
 		this.email = email;
+	}
+
+	public String getCsid() {
+		return csid;
+	}
+
+	public void setCsid(String csid) {
+		this.csid = csid;
+	}
+
+	public String getLane() {
+		return lane;
+	}
+
+	public void setLane(String lane) {
+		this.lane = lane;
+	}
+
+	public String getChannelType() {
+		return channelType;
+	}
+
+	public void setChannelType(String channelType) {
+		this.channelType = channelType;
 	}
 
 }

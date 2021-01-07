@@ -7,6 +7,8 @@ import org.springframework.stereotype.Component;
 import com.boot.jx.bot.ChatContext;
 import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorHandler;
 import com.boot.jx.chat.ConnectorHandlerFactory.DefaultConnector;
+import com.boot.jx.dict.ContactType;
+import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatContextDoc;
 import com.boot.jx.postman.doc.ChatMeta;
 import com.boot.jx.postman.doc.ChatSessionDoc;
@@ -45,7 +47,7 @@ public class ChatService {
 	@Autowired(required = false)
 	private DefaultConnector defaultConnector;
 
-	private void sendIntenal(OutboxMessage outboxMessage) throws InterruptedException {
+	private void replyIntenal(OutboxMessage outboxMessage) throws InterruptedException {
 		InboxMessage inboxMessage = chatContext.getInboxMessage();
 		if (ArgUtil.is(inboxMessage)) {
 			outboxMessage.setContactType(inboxMessage.getContactType());
@@ -55,9 +57,9 @@ public class ChatService {
 			ConnectorHandler connector = connectorHandlerFactory.get(outboxMessage.getContactType(),
 					outboxMessage.getChannel());
 			if (ArgUtil.is(connector)) {
-				connector.sendReply(inboxMessage, outboxMessage);
+				connector.reply(inboxMessage, outboxMessage);
 			} else if (ArgUtil.is(defaultConnector)) {
-				defaultConnector.sendReply(inboxMessage, outboxMessage);
+				defaultConnector.reply(inboxMessage, outboxMessage);
 			}
 		}
 		messageStore.create(outboxMessage);
@@ -65,7 +67,23 @@ public class ChatService {
 
 	public void reply(OutboxMessage outboxMessage) throws InterruptedException {
 		outboxMessage.option("isViaAgent", "true");
-		sendIntenal(outboxMessage);
+		replyIntenal(outboxMessage);
+	}
+
+	private void sendIntenal(OutboxMessage outboxMessage) throws InterruptedException {
+		ChatContactDoc chatContactDoc = sessionStore.getContact(outboxMessage);
+		if (ArgUtil.is(chatContactDoc)) {
+			outboxMessage.setContactType(ArgUtil.parseAsEnumT(chatContactDoc.getContactType(), ContactType.class));
+			outboxMessage.setSessionId(outboxMessage.getSessionId());
+			ConnectorHandler connector = connectorHandlerFactory.get(outboxMessage.getContactType(),
+					outboxMessage.getChannel());
+			if (ArgUtil.is(connector)) {
+				connector.send(chatContactDoc, outboxMessage);
+			} else if (ArgUtil.is(defaultConnector)) {
+				defaultConnector.send(chatContactDoc, outboxMessage);
+			}
+		}
+		messageStore.create(outboxMessage);
 	}
 
 	public void send(OutboxMessage outboxMessage) throws InterruptedException {

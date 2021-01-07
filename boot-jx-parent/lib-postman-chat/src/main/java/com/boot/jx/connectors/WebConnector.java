@@ -68,9 +68,7 @@ public class WebConnector implements DefaultConnector {
 	@Autowired
 	private TmplClient tmplClient;
 
-	@Override
-	public void sendReply(InboxMessage inboxMessage, OutboxMessage outboxMessage) {
-
+	private void sendMessage(String csid, OutboxMessage outboxMessage) {
 		if (ArgUtil.is(outboxMessage.getTemplate())) {
 			File file = new File();
 			file.setModel(outboxMessage.getModel());
@@ -87,16 +85,20 @@ public class WebConnector implements DefaultConnector {
 				e.printStackTrace();
 			}
 		} else {
-			LOGGER.debug("sendReply to " + inboxMessage.getFrom());
-			RBlockingQueue<OutboxMessage> messageQueue = redisson
-					.getBlockingQueue("WEB_USER_MESSAGE" + "_" + inboxMessage.getFrom());
+			LOGGER.debug("sendReply to " + csid);
+			RBlockingQueue<OutboxMessage> messageQueue = redisson.getBlockingQueue("WEB_USER_MESSAGE" + "_" + csid);
 			messageQueue.add(outboxMessage);
 		}
 	}
 
 	@Override
+	public void reply(InboxMessage inboxMessage, OutboxMessage outboxMessage) {
+		sendMessage(inboxMessage.getFrom(), outboxMessage);
+	}
+
+	@Override
 	public InboxMessage assignToAgent(InboxMessage inboxMessage) {
-		this.sendReply(inboxMessage, new OutboxMessage().message("Call us @ " + gupShupConfig.getGupShupWaNumber()));
+		this.reply(inboxMessage, new OutboxMessage().message("Call us @ " + gupShupConfig.getGupShupWaNumber()));
 		return inboxMessage;
 	}
 
@@ -133,16 +135,21 @@ public class WebConnector implements DefaultConnector {
 		}
 
 		if (ArgUtil.isEmpty(contact.getName())) {
-			sendReply(inboxMessage, (OutboxMessage) inboxMessage.replyMessage(null).template("pm-user-login-form"));
+			reply(inboxMessage, (OutboxMessage) inboxMessage.replyMessage(null).template("pm-user-login-form"));
 			return false;
 		}
 
 		if (ArgUtil.isEmpty(contact.getEmail())) {
-			sendReply(inboxMessage, (OutboxMessage) inboxMessage.replyMessage(null).template("pm-user-login-form"));
+			reply(inboxMessage, (OutboxMessage) inboxMessage.replyMessage(null).template("pm-user-login-form"));
 			return false;
 		}
 
 		return true;
+	}
+
+	@Override
+	public void send(ChatContactDoc chatContactDoc, OutboxMessage outboxMessage) {
+		sendMessage(chatContactDoc.getCsid(), outboxMessage);
 	}
 
 }

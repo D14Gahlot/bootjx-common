@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.model.InboxMessage;
+import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.TimeUtils;
@@ -38,9 +39,19 @@ public class SessionStore {
 		return chatContactDoc;
 	}
 
+	public ChatContactDoc getContact(OutboxMessage outboxMessage) {
+		String contactId = PostManUtil.createContactId(outboxMessage);
+		ChatContactDoc chatContactDoc = mongoTemplate.findById(contactId, ChatContactDoc.class);
+		return chatContactDoc;
+	}
+
 	public ChatContactDoc save(ChatContactDoc chatContactDoc) {
 		mongoTemplate.save(chatContactDoc);
 		return chatContactDoc;
+	}
+
+	public ChatSessionDoc getSession(String sessionId) {
+		return mongoTemplate.findById(sessionId, ChatSessionDoc.class);
 	}
 
 	public ChatSessionDoc createSession(InboxMessage inboxMessage) {
@@ -82,6 +93,8 @@ public class SessionStore {
 				chatContactDoc = new ChatContactDoc();
 				chatContactDoc.setContactId(contactId);
 				chatContactDoc.setContactType(ArgUtil.parseAsString(inboxMessage.getContactType()));
+				chatContactDoc.setCsid(inboxMessage.getFrom());
+				chatContactDoc.setLane(inboxMessage.getLane());
 			}
 			// CONTACT UPDATE
 			chatContactDoc.setSessionId(chatSessionDoc.getSessionId());
@@ -134,4 +147,5 @@ public class SessionStore {
 		mongoTemplate.updateMulti(query2, update, ChatSessionDoc.class);
 		return chatSessionDoc;
 	}
+
 }

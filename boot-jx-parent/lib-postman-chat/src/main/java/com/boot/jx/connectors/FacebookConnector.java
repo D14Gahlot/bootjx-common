@@ -14,7 +14,6 @@ import com.boot.jx.postman.fb.FacebookUserProfile;
 import com.boot.jx.postman.gupshup.GupShupConfig;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.OutboxMessage;
-import com.boot.jx.postman.model.WAMessage.Channel;
 import com.boot.jx.postman.store.SessionStore;
 
 @Component
@@ -31,7 +30,7 @@ public class FacebookConnector implements ConnectorHandler {
 	private SessionStore sessionStore;
 
 	@Override
-	public void sendReply(InboxMessage inboxMessage, OutboxMessage outboxMessage) {
+	public void reply(InboxMessage inboxMessage, OutboxMessage outboxMessage) {
 		facebooClient.sendReply(inboxMessage.getFrom(), outboxMessage.getMessage(), inboxMessage.getLane());
 	}
 
@@ -58,13 +57,15 @@ public class FacebookConnector implements ConnectorHandler {
 	public boolean initSession(InboxMessage inboxMessage, ChatSessionDoc session) {
 		ChatContactDoc contact = sessionStore.getContact(inboxMessage);
 		FacebookUserProfile profile = facebooClient.getUserProfile(inboxMessage.getFrom(), inboxMessage.getLane());
-
 		contact.setProfilePic(profile.getProfilePic());
 		contact.setName(profile.getFirstName() + " " + profile.getLastName());
-
 		sessionStore.save(contact);
-
 		return true;
+	}
+
+	@Override
+	public void send(ChatContactDoc chatContactDoc, OutboxMessage outboxMessage) {
+		facebooClient.sendReply(chatContactDoc.getCsid(), outboxMessage.getMessage(), chatContactDoc.getLane());
 	}
 
 }

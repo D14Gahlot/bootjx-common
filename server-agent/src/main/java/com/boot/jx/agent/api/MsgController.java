@@ -85,13 +85,19 @@ public class MsgController {
 	}
 
 	@Autowired
-	ChatService chatService;
+	private ChatService chatService;
 
 	@ResponseBody
 	@RequestMapping(value = "/api/sessions/message/send", method = { RequestMethod.POST })
-	public ApiResponse<ChatSessionDto, Object> sendSessionMessage(@RequestBody OutboxMessage outbox)
+	public ApiResponse<ChatMessageDto, Object> sendSessionMessage(@RequestBody OutboxMessage outbox)
 			throws InterruptedException {
-		chatService.send(outbox);
+		ChatSessionDoc sessionDoc = sessionStore.getSession(outbox.getSessionId());
+		if (ArgUtil.areEqual(sessionDoc.getAssignedToAgent(), agentSession.getAgentCode())) {
+			ChatMessageDto messageDto = new ChatMessageDto();
+			messageDto.setType(true);
+			messageDto.setName(agentSession.getAgentCode());
+			return ApiResponse.buildResult(messageDto);
+		}
 		return null;
 	}
 

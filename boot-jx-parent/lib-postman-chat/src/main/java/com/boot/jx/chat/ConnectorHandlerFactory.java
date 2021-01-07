@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 import com.boot.common.ScopedBeanFactory;
 import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorHandler;
 import com.boot.jx.dict.ContactType;
+import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.OutboxMessage;
@@ -22,7 +23,9 @@ public class ConnectorHandlerFactory extends ScopedBeanFactory<String, Connector
 	private static final long serialVersionUID = 4007091611441725719L;
 
 	public interface ConnectorHandler {
-		public void sendReply(InboxMessage inboxMessage, OutboxMessage outboxMessage);
+		public void reply(InboxMessage inboxMessage, OutboxMessage outboxMessage);
+
+		public void send(ChatContactDoc chatContactDoc, OutboxMessage outboxMessage);
 
 		public InboxMessage assignToAgent(InboxMessage inboxMessage);
 

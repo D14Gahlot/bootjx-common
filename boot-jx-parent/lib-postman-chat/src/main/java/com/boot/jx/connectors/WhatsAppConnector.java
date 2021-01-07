@@ -9,6 +9,7 @@ import com.boot.jx.dict.ContactType;
 import com.boot.jx.postman.client.GupShupChatClient;
 import com.boot.jx.postman.client.GupShupNotifyClient;
 import com.boot.jx.postman.client.PostManClient;
+import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.gupshup.GupShupConfig;
 import com.boot.jx.postman.model.InboxMessage;
@@ -35,7 +36,7 @@ public class WhatsAppConnector implements ConnectorHandler {
 	protected GupShupConfig gupShupConfig;
 
 	@Override
-	public void sendReply(InboxMessage inboxMessage, OutboxMessage outboxMessage) {
+	public void reply(InboxMessage inboxMessage, OutboxMessage outboxMessage) {
 		outboxMessage.setChannel(inboxMessage.getChannel());
 		if (ArgUtil.isEqual(inboxMessage.getChannel(), Channel.GUPSHUP.toString())) {
 			if (outboxMessage.isViaAgent() && ArgUtil.isEmpty(outboxMessage.getFiles())) {
@@ -71,6 +72,24 @@ public class WhatsAppConnector implements ConnectorHandler {
 	@Override
 	public boolean initSession(InboxMessage inboxMessage, ChatSessionDoc session) {
 		return true;
+	}
+
+	@Override
+	public void send(ChatContactDoc chatContactDoc, OutboxMessage outboxMessage) {
+		outboxMessage.setChannel(chatContactDoc.getChannelType());
+		if (ArgUtil.isEqual(outboxMessage.getChannel(), Channel.GUPSHUP.toString())) {
+			if (outboxMessage.isViaAgent() && ArgUtil.isEmpty(outboxMessage.getFiles())) {
+				gupShupChatClient.sendMessage(chatContactDoc.getCsid(), outboxMessage.getMessage());
+			} else if (outboxMessage.isTemplate() || outboxMessage.isQRButtons()) {
+				gupShupNotifyClient.sendMessage(outboxMessage);
+			} else {
+				gupShupChatClient.sendMessage(outboxMessage);
+			}
+		} else if (ArgUtil.isEqual(outboxMessage.getChannel(), Channel.DEFAULT.toString())) {
+			MessageBox mb = new MessageBox();
+			mb.push(outboxMessage);
+			postManClient.send(mb);
+		}
 	}
 
 }
