@@ -62,6 +62,8 @@ public class FacebookConnector implements ConnectorHandler {
 		contact.setProfilePic(profile.getProfilePic());
 		contact.setName(profile.getFirstName() + " " + profile.getLastName());
 
+		sessionStore.save(contact);
+
 		return true;
 	}
 

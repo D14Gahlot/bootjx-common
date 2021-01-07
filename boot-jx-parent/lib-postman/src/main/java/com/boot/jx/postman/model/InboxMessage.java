@@ -2,6 +2,8 @@ package com.boot.jx.postman.model;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.util.HashMap;
+import java.util.Map;
 
 import com.boot.jx.dict.ContactType;
 import com.boot.utils.ArgUtil;
@@ -34,6 +36,8 @@ public class InboxMessage implements Serializable {
 
 	private String assignedToDept;
 	private String assignedToAgent;
+
+	protected Map<String, Object> form = new HashMap<String, Object>();
 
 	public String getTo() {
 		return to;
@@ -212,4 +216,18 @@ public class InboxMessage implements Serializable {
 		this.assignedToAgent = assignedToAgent;
 	}
 
+	public Map<String, Object> getForm() {
+		return form;
+	}
+
+	public void setForm(Map<String, Object> form) {
+		this.form = form;
+	}
+
+	public Map<String, Object> form() {
+		if (form == null) {
+			this.form = new HashMap<String, Object>();
+		}
+		return this.form;
+	}
 }

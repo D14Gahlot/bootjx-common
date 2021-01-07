@@ -19,7 +19,6 @@ import com.boot.jx.postman.PostManService;
 import com.boot.jx.postman.PostManUrls;
 import com.boot.jx.postman.model.Email;
 import com.boot.jx.postman.model.ExceptionReport;
-import com.boot.jx.postman.model.File;
 import com.boot.jx.postman.model.MessageBox;
 import com.boot.jx.postman.model.Notipy;
 import com.boot.jx.postman.model.SMS;
@@ -152,17 +151,6 @@ public class PostManClient implements PostManService {
 		} catch (Exception e) {
 			throw new PostManException(e);
 		}
-	}
-
-	@Override
-	public ApiResponse<File, Object> processTemplate(File file) throws PostManException {
-		try {
-			return ApiResponse.build(restService.ajax(getPostmapURL()).path(PostManUrls.PROCESS_TEMPLATE_FILE)
-					.queryParam(PARAM_LANG, getLang()).contentTypeJson().acceptJson().post(file).as(File.class));
-		} catch (Exception e) {
-			throw new PostManException(e);
-		}
-
 	}
 
 	@Override

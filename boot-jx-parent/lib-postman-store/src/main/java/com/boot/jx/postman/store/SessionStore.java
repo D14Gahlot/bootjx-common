@@ -38,6 +38,11 @@ public class SessionStore {
 		return chatContactDoc;
 	}
 
+	public ChatContactDoc save(ChatContactDoc chatContactDoc) {
+		mongoTemplate.save(chatContactDoc);
+		return chatContactDoc;
+	}
+
 	public ChatSessionDoc createSession(InboxMessage inboxMessage) {
 		String contactId = PostManUtil.createContactId(inboxMessage);
 		inboxMessage.setContactId(contactId);

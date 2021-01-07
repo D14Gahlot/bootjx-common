@@ -35,6 +35,7 @@ public class InBoundService {
 	@Autowired
 	private ChatClient chatClient;
 
+	@Autowired
 	private ChatService chatService;
 
 	@Autowired

@@ -12,7 +12,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.MessageSource;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.InputStreamSource;
 import org.springframework.stereotype.Controller;
@@ -32,7 +31,6 @@ import com.boot.jx.dict.Tenant;
 import com.boot.jx.postman.PostManException;
 import com.boot.jx.postman.PostManUrls;
 import com.boot.jx.postman.client.GeoLocationClient;
-import com.boot.jx.postman.client.PostManClient;
 import com.boot.jx.postman.client.PushNotifyClient;
 import com.boot.jx.postman.model.DefaultMessage;
 import com.boot.jx.postman.model.Email;
@@ -71,15 +69,11 @@ public class PostManControllerTest {
 
 	/** The post man client. */
 	@Autowired
-	PostManClient postManClient;
+	private PostManServiceImpl postManClient;
 
 	/** The fb push client. */
 	@Autowired
-	PushNotifyClient pushNotifyClient;
-
-	/** The post man service impl. */
-	@Autowired
-	PostManServiceImpl postManServiceImpl;
+	private PushNotifyClient pushNotifyClient;
 
 	/** The context. */
 	@Autowired
@@ -89,17 +83,13 @@ public class PostManControllerTest {
 	@Autowired
 	private HttpServletRequest request;
 
-	/** The message source. */
-	@Autowired
-	private MessageSource messageSource;
-
 	/** The locale resolver. */
 	@Autowired
 	private LocaleResolver localeResolver;
 
 	/** The geo location client. */
 	@Autowired
-	GeoLocationClient geoLocationClient;
+	private GeoLocationClient geoLocationClient;
 
 	/** The Constant LOGGER. */
 	private static final Logger LOGGER = LoggerFactory.getLogger(PostManControllerTest.class);

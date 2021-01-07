@@ -5,7 +5,6 @@ import java.util.List;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.postman.model.Email;
 import com.boot.jx.postman.model.ExceptionReport;
-import com.boot.jx.postman.model.File;
 import com.boot.jx.postman.model.MessageBox;
 import com.boot.jx.postman.model.Notipy;
 import com.boot.jx.postman.model.SMS;
@@ -31,8 +30,6 @@ public interface PostManService {
 	public ApiResponse<Email, Object> sendEmailAsync(Email email) throws PostManException;
 
 	public ApiResponse<SMS, Object> sendSMSAsync(SMS sms) throws PostManException;
-
-	public ApiResponse<File, Object> processTemplate(File file) throws PostManException;
 
 	public ApiResponse<Email, Object> sendEmailBulk(List<Email> emailList);
 

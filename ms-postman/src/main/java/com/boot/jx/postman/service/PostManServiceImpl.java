@@ -20,6 +20,7 @@ import com.boot.jx.postman.model.Email;
 import com.boot.jx.postman.model.ExceptionReport;
 import com.boot.jx.postman.model.File;
 import com.boot.jx.postman.model.File.Type;
+import com.boot.utils.ContextUtil;
 import com.boot.jx.postman.model.MessageBox;
 import com.boot.jx.postman.model.Notipy;
 import com.boot.jx.postman.model.PushMessage;
@@ -71,6 +72,10 @@ public class PostManServiceImpl implements PostManService {
 	@Autowired
 	private AppConfig appConfig;
 
+	public void setLang(String lang) {
+		ContextUtil.map().put(PARAM_LANG, lang);
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -110,7 +115,6 @@ public class PostManServiceImpl implements PostManService {
 	 * com.amx.jax.postman.PostManService#processTemplate(com.amx.jax.postman.model.
 	 * File)
 	 */
-	@Override
 	public ApiResponse<File, Object> processTemplate(File file) {
 		return ApiResponse.build(fileService.create(file));
 	}
@@ -248,11 +252,8 @@ public class PostManServiceImpl implements PostManService {
 	@Override
 	public ApiResponse<MessageBox, Object> send(MessageBox messageBox) {
 
-		LOGGER.debug("messageBox with Ex{} Sx{} Wx{} Tx{} Px{}",
-				messageBox.getEmailBucket().size(),
-				messageBox.getSmsBucket().size(),
-				messageBox.getWaBucket().size(),
-				messageBox.getTgBucket().size(),
+		LOGGER.debug("messageBox with Ex{} Sx{} Wx{} Tx{} Px{}", messageBox.getEmailBucket().size(),
+				messageBox.getSmsBucket().size(), messageBox.getWaBucket().size(), messageBox.getTgBucket().size(),
 				messageBox.getPushBucket().size());
 
 		for (Email email : messageBox.getEmailBucket()) {

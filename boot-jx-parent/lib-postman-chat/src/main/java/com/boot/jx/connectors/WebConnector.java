@@ -14,10 +14,15 @@ import org.springframework.stereotype.Component;
 import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorMapping;
 import com.boot.jx.chat.ConnectorHandlerFactory.DefaultConnector;
 import com.boot.jx.dict.ContactType;
+import com.boot.jx.postman.client.TmplClient;
+import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.gupshup.GupShupConfig;
+import com.boot.jx.postman.model.File;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.OutboxMessage;
+import com.boot.jx.postman.store.SessionStore;
+import com.boot.utils.ArgUtil;
 
 @Component
 @ConnectorMapping(ContactType.WEBSITE)
@@ -60,8 +65,20 @@ public class WebConnector implements DefaultConnector {
 
 	private MessageQueue<OutboxMessage> messageQueue = new MessageQueue<OutboxMessage>(100);
 
+	@Autowired
+	private TmplClient tmplClient;
+
 	@Override
 	public void sendReply(InboxMessage inboxMessage, OutboxMessage outboxMessage) {
+
+		if (ArgUtil.is(outboxMessage.getTemplate())) {
+			File file = new File();
+			file.setModel(outboxMessage.getModel());
+			file.setITemplate(outboxMessage.getITemplate());
+			file = tmplClient.process(file, outboxMessage.getContactType()).getResult();
+			outboxMessage.setMessage(file.getContent());
+		}
+
 		if (redisson == null) {
 			try {
 				messageQueue.enqueue(outboxMessage);
@@ -97,8 +114,16 @@ public class WebConnector implements DefaultConnector {
 		return messageQueue.poll(5, TimeUnit.SECONDS);
 	}
 
+	@Autowired
+	private SessionStore sessionStore;
+
 	@Override
 	public boolean initSession(InboxMessage inboxMessage, ChatSessionDoc session) {
+		ChatContactDoc contact = sessionStore.getContact(inboxMessage);
+		if (ArgUtil.isEmpty(contact.getName())) {
+			sendReply(inboxMessage, new OutboxMessage().template("pm-user-login-form"));
+			return false;
+		}
 		return true;
 	}
 
