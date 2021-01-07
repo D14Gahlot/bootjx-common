@@ -18,6 +18,16 @@ function scrollToBottom(){
 	$('.msg_card_body')[0].scrollTop =  $('.msg_card_body')[0].scrollHeight
 }
 
+function sendMessage(data){
+	return $.ajax({
+	      type: 'POST',
+	      dataType: "json",
+	      contentType: 'application/json',
+	      url: window.CONST.CONTEXT + "/api/sessions/message/send",
+	      data: JSON.stringify(data),
+	});
+}
+
 //contacts
 var WhatsApp = function (app) {
   function Contact(name, img, online) {
@@ -159,6 +169,12 @@ var WhatsApp = function ToDoModel(app) {
     },
     writeMessage: function () {
       var msg = new appMessages($(".input-message").val(), "", new Date().getHours() + ":" + new Date().getMinutes(), true);
+      
+      sendMessage({
+    	  message : msg,
+    	  sessionId : currentChat.sessionId
+      });
+      
       WhatsApp.View.printMessage(msg);
       currentChat.addMessage(msg);
       $(".input-message").val("");
