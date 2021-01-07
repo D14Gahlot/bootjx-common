@@ -27,6 +27,9 @@ public class ChatContactDoc implements Serializable {
 
 	private String sessionId;
 
+	private String name;
+	private String profilePic;
+
 	public String getContactId() {
 		return contactId;
 	}
@@ -65,6 +68,22 @@ public class ChatContactDoc implements Serializable {
 
 	public void setSessionId(String sessionId) {
 		this.sessionId = sessionId;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public String getProfilePic() {
+		return profilePic;
+	}
+
+	public void setProfilePic(String profilePic) {
+		this.profilePic = profilePic;
 	}
 
 }

@@ -6,12 +6,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
-import com.boot.jx.agent.AgentChatHandler;
 import com.boot.jx.agent.AgentService;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.bot.BotEngine;
 import com.boot.jx.bot.ChatMapping;
 import com.boot.jx.chat.ChatClient;
+import com.boot.jx.chat.ChatService;
+import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.store.MessageStore;
 import com.boot.jx.postman.store.SessionStore;
@@ -28,14 +29,13 @@ public class InBoundService {
 	@Autowired(required = false)
 	private InBoundFilter inBoundFilter;
 
-	@Autowired(required = false)
-	private AgentChatHandler agentChatHandler;
-
 	@Autowired
 	private BotEngine botEngine;
 
 	@Autowired
 	private ChatClient chatClient;
+
+	private ChatService chatService;
 
 	@Autowired
 	private AgentService agentService;
@@ -59,12 +59,20 @@ public class InBoundService {
 
 	public InboxMessage invokeMethods(InboxMessage inboxMessageOriginal) {
 
+		ChatSessionDoc session = null;
+		boolean locallySessionAssigned = false;
 		if (ArgUtil.isEmpty(inboxMessageOriginal.getSessionId())) {
-			sessionStore.createSession(inboxMessageOriginal);
+			session = sessionStore.createSession(inboxMessageOriginal);
+			locallySessionAssigned = true;
 		}
-
 		if (ArgUtil.isEmpty(inboxMessageOriginal.getMessageId())) {
 			messageStore.create(inboxMessageOriginal);
+		}
+
+		if (locallySessionAssigned && ArgUtil.is(session)) {
+			if (!chatService.initSession(inboxMessageOriginal, session)) {
+				return inboxMessageOriginal;
+			}
 		}
 
 		if (ArgUtil.isEmpty(inBoundFilter) || inBoundFilter.onFilter(inboxMessageOriginal)) {

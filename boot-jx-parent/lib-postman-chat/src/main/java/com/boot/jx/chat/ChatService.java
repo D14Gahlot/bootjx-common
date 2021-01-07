@@ -9,9 +9,11 @@ import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorHandler;
 import com.boot.jx.chat.ConnectorHandlerFactory.DefaultConnector;
 import com.boot.jx.postman.doc.ChatContextDoc;
 import com.boot.jx.postman.doc.ChatMeta;
+import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.store.MessageStore;
+import com.boot.jx.postman.store.SessionStore;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.TimeUtils;
 
@@ -29,6 +31,9 @@ public class ChatService {
 
 	@Autowired
 	private MessageStore messageStore;
+
+	@Autowired
+	private SessionStore sessionStore;
 
 	public InboxMessage getInboxMessage() {
 		return chatContext.getInboxMessage();
@@ -92,7 +97,7 @@ public class ChatService {
 			chatContext.setMeta(new ChatMeta());
 		}
 		chatContext.setInboxMessage(inboxMessage);
-		//messageStore.create(inboxMessage);
+		// messageStore.create(inboxMessage);
 		return chatContext;
 	}
 
@@ -125,4 +130,20 @@ public class ChatService {
 		return chatClient.forward(inboxMessage).getResult();
 	}
 
+	public boolean initSession(InboxMessage inboxMessage, ChatSessionDoc session) {
+		boolean initd = session.isInitd();
+		if (initd) {
+			return true;
+		}
+		ConnectorHandler connector = connectorHandlerFactory.get(inboxMessage.getContactType(),
+				inboxMessage.getChannel());
+
+		if (ArgUtil.is(connector)) {
+			initd = connector.initSession(inboxMessage, session);
+		}
+		if (initd) {
+			sessionStore.initSession(session);
+		}
+		return session.isInitd();
+	}
 }

@@ -211,4 +211,5 @@ public class InboxMessage implements Serializable {
 	public void setAssignedToAgent(String assignedToAgent) {
 		this.assignedToAgent = assignedToAgent;
 	}
+
 }

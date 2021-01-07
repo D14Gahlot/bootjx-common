@@ -46,4 +46,13 @@ public class FacebooClient {
 		LOGGER.info("Message result to {} : {}", id, result);
 
 	}
+
+	public FacebookUserProfile getUserProfile(String psid, String lane) {
+		lane = ArgUtil.nonEmpty(lane, "default").toLowerCase();
+		String accessToken = environment.getProperty("facebook.lane." + lane + ".accessToken");
+		return restService.ajax("https://graph.facebook.com").path("/{psid}").pathParam("psid", psid)
+				.queryParam("fields", "first_name,last_name,profile_pic").queryParam("access_token", accessToken).get()
+				.as(FacebookUserProfile.class);
+
+	}
 }

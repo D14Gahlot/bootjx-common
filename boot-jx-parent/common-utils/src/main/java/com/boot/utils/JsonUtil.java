@@ -276,6 +276,18 @@ public final class JsonUtil {
 		});
 	}
 
+	public static <T> T parse(Object json, Class<T> toValueType) {
+		if (json == null) {
+			return null;
+		} else if (json instanceof Map) {
+			return instance.toType(json, toValueType);
+		} else if (json instanceof String) {
+			return instance.toType(json, toValueType);
+		} else {
+			return instance.toType(json, toValueType);
+		}
+	}
+
 	/**
 	 * This will remove any Object binding, final map will contain only primitive
 	 * types at leaf node level

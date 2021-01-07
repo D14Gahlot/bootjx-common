@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorMapping;
 import com.boot.jx.chat.ConnectorHandlerFactory.DefaultConnector;
 import com.boot.jx.dict.ContactType;
+import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.gupshup.GupShupConfig;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.OutboxMessage;
@@ -94,6 +95,11 @@ public class WebConnector implements DefaultConnector {
 		}
 		RBlockingQueue<OutboxMessage> messageQueue = redisson.getBlockingQueue("WEB_USER_MESSAGE" + "_" + number);
 		return messageQueue.poll(5, TimeUnit.SECONDS);
+	}
+
+	@Override
+	public boolean initSession(InboxMessage inboxMessage, ChatSessionDoc session) {
+		return true;
 	}
 
 }

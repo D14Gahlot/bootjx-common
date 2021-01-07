@@ -9,6 +9,7 @@ import com.boot.jx.dict.ContactType;
 import com.boot.jx.postman.client.GupShupChatClient;
 import com.boot.jx.postman.client.GupShupNotifyClient;
 import com.boot.jx.postman.client.PostManClient;
+import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.gupshup.GupShupConfig;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.Message;
@@ -65,6 +66,11 @@ public class WhatsAppConnector implements ConnectorHandler {
 			postManClient.send(mb);
 		}
 		return inboxMessage;
+	}
+
+	@Override
+	public boolean initSession(InboxMessage inboxMessage, ChatSessionDoc session) {
+		return true;
 	}
 
 }

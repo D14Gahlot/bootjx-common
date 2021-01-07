@@ -26,6 +26,7 @@ public class ChatSessionDoc implements Serializable {
 	private long lastInComingStamp;
 
 	private boolean active;
+	private boolean initd;
 
 	public long getLastInComingStamp() {
 		return lastInComingStamp;
@@ -73,6 +74,14 @@ public class ChatSessionDoc implements Serializable {
 
 	public void setAssignedToAgent(String assignedToAgent) {
 		this.assignedToAgent = assignedToAgent;
+	}
+
+	public boolean isInitd() {
+		return initd;
+	}
+
+	public void setInitd(boolean initd) {
+		this.initd = initd;
 	}
 
 }

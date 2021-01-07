@@ -32,6 +32,12 @@ public class SessionStore {
 	@Value("${postman.chat.session.timeout}")
 	String chatSessionTimeout;
 
+	public ChatContactDoc getContact(InboxMessage inboxMessage) {
+		String contactId = PostManUtil.createContactId(inboxMessage);
+		ChatContactDoc chatContactDoc = mongoTemplate.findById(contactId, ChatContactDoc.class);
+		return chatContactDoc;
+	}
+
 	public ChatSessionDoc createSession(InboxMessage inboxMessage) {
 		String contactId = PostManUtil.createContactId(inboxMessage);
 		inboxMessage.setContactId(contactId);
@@ -114,5 +120,13 @@ public class SessionStore {
 		Query query2 = new Query();
 		query2.addCriteria(Criteria.where("assignedToAgent").is(agentCode).and("active").is(true));
 		return mongoTemplate.find(query2, ChatSessionDoc.class);
+	}
+
+	public ChatSessionDoc initSession(ChatSessionDoc chatSessionDoc) {
+		Query query2 = new Query();
+		query2.addCriteria(Criteria.where("sessionId").is(chatSessionDoc.getSessionId()));
+		Update update = Update.update("initd", true);
+		mongoTemplate.updateMulti(query2, update, ChatSessionDoc.class);
+		return chatSessionDoc;
 	}
 }
