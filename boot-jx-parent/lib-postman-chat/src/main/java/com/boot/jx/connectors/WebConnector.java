@@ -77,6 +77,7 @@ public class WebConnector implements DefaultConnector {
 			file.setITemplate(outboxMessage.getITemplate());
 			file = tmplClient.process(file, outboxMessage.getContactType()).getResult();
 			outboxMessage.setMessage(file.getContent());
+			outboxMessage.options().putAll(file.getOptions());
 		}
 
 		if (redisson == null) {
@@ -120,10 +121,27 @@ public class WebConnector implements DefaultConnector {
 	@Override
 	public boolean initSession(InboxMessage inboxMessage, ChatSessionDoc session) {
 		ChatContactDoc contact = sessionStore.getContact(inboxMessage);
+
+		if (ArgUtil.is(inboxMessage.getForm())) {
+			if (ArgUtil.is(inboxMessage.getForm().get("name"))) {
+				contact.setName(ArgUtil.parseAsString(inboxMessage.getForm().get("name")));
+			}
+			if (ArgUtil.is(inboxMessage.getForm().get("email"))) {
+				contact.setEmail(ArgUtil.parseAsString(inboxMessage.getForm().get("email")));
+			}
+			sessionStore.save(contact);
+		}
+
 		if (ArgUtil.isEmpty(contact.getName())) {
-			sendReply(inboxMessage, new OutboxMessage().template("pm-user-login-form"));
+			sendReply(inboxMessage, (OutboxMessage) inboxMessage.replyMessage(null).template("pm-user-login-form"));
 			return false;
 		}
+
+		if (ArgUtil.isEmpty(contact.getEmail())) {
+			sendReply(inboxMessage, (OutboxMessage) inboxMessage.replyMessage(null).template("pm-user-login-form"));
+			return false;
+		}
+
 		return true;
 	}
 

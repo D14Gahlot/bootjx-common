@@ -80,14 +80,14 @@ public class InboxMessage implements Serializable {
 	}
 
 	public Message<?> replyMessage(String message) {
-		if (ArgUtil.is(ContactType.WHATSAPP.equals(this.contactType))) {
+		if (ContactType.WHATSAPP.equals(this.contactType)) {
 			WAMessage reply = new WAMessage();
 			reply.setQueue(this.getQueue());
 			reply.setChannel(this.getChannel());
 			reply.addTo(this.getFrom());
 			reply.setMessage(message);
 			return reply;
-		} else if (ArgUtil.is(ContactType.TELEGRAM.equals(this.contactType))) {
+		} else if (ContactType.TELEGRAM.equals(this.contactType)) {
 			TGMessage reply = new TGMessage();
 			reply.setQueue(this.getQueue());
 			reply.setChannel(this.getChannel());
@@ -100,6 +100,7 @@ public class InboxMessage implements Serializable {
 			reply.setChannel(this.getChannel());
 			reply.addTo(this.getFrom());
 			reply.setMessage(message);
+			reply.setContactType(this.contactType);
 			return reply;
 		}
 	}

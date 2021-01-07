@@ -59,11 +59,11 @@ public class ChatController {
 	}
 
 	public void next(String key) {
-		chatService.getChatContext().setNextHandler(key);
+		chatService.getChatContext().meta().setNextHandler(key);
 	}
 
 	public boolean previous(String key) {
-		return ArgUtil.areEqual(chatService.getChatContext().getPrevHandler(), key);
+		return ArgUtil.areEqual(chatService.getChatContext().meta().getPrevHandler(), key);
 	}
 
 	public ChatPromise require(String key, ChatPromise.PromiseCondition... conditions) {
@@ -85,12 +85,12 @@ public class ChatController {
 		} else {
 			promise = new ChatPromise();
 			promise.setSource(chatContext.getCurrentHandler());
-			
-			if(ArgUtil.is(chatContext.getInboxMessage())) {
+
+			if (ArgUtil.is(chatContext.getInboxMessage())) {
 				promise.setMessage(chatContext.getInboxMessage().getMessage());
 				promise.setMessageId(chatContext.getInboxMessage().getMessageId());
 			}
-			
+
 			promise.setResult(Result.NONE);
 			promise.setState(State.CREATED);
 			promise.setTarget(key);

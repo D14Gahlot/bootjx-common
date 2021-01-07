@@ -56,8 +56,41 @@
 				</div>
 			</div>
 		</div>
+		
+
+		<script type="text/template" id="onRcvMsgFormat">
+
+<div class="d-flex justify-content-start mb-4">
+	<div class="img_cont_msg">
+		<img src="https://static.turbosquid.com/Preview/001292/481/WV/_D.jpg" class="rounded-circle user_img_msg">
+	</div>
+	<div class="msg_cotainer">
+		<%=im._message%>
+		<% if(im._inputs && im._inputs.length>0) {%>
+<form class="cmxform" id="commentForm" method="get" action="">
+		<hr/>
+			<% for(var i in im._inputs) {%>
+			<div class="input-group">
+				<input 
+					type="<%=(im._inputs[i].type||"").toLowerCase()%>" 
+					placeholder="<%=im._inputs[i].label%>" 
+					name="<%=im._inputs[i].name%>" 
+				class="form-control" aria-describedby="id-<%=im.timestamp%>-<%=i%>">
+				<br/><small class="help-block error text-muted w-100" id="id-<%=im.timestamp%>-<%=i%>"></small>
+			</div><br>
+			<% } %>
+		<div class="input-group">
+			<input type="button" value="Send" name="" class="form-control form-submit btn btn-info">
+		</div>
+	<hr/>
+</form>
+		<% } %>
+		<span class="msg_time"><%=im._timestamp%></span>
+	</div>
+</div>
+		</script>
 	</body>
-<script src="//code.jquery.com/jquery-1.11.1.min.js"></script>
+	
 <script>
 function formatTime(timestamp){
 	const NOW = new Date();
@@ -71,6 +104,17 @@ function formatTime(timestamp){
 		return moment(DATE).format('MMM Do YY');
 	}
 }
+
+function sendMessage(data){
+	return $.ajax({
+	      type: 'POST',
+	      dataType: "json",
+	      contentType: 'application/json',
+	      url: window.CONST.CONTEXT + "/ext/inbound/web/callback",
+	      data: JSON.stringify(data),
+	});
+}
+
 var initFingerprintJS = function initFingerprintJS() {
     FingerprintJS.load().then(fp => {
       // The FingerprintJS agent is ready.
@@ -115,8 +159,8 @@ var initFingerprintJS = function initFingerprintJS() {
 	        	
 				 var stamp = onSendMsg(msg);
 				 $SEND_TEXT.val("");
-		  	   	 return $.post(window.CONST.CONTEXT + "/dummy/messages",{
-					 message :   msg, number:MOBILE
+		  	   	 return sendMessage({
+					 message :   msg, from:MOBILE
 				 }).done(function(rsp){
 					 $("#"+stamp).removeClass("blink_me") 
 				 });
@@ -132,8 +176,8 @@ var initFingerprintJS = function initFingerprintJS() {
 
 	function pollMessage(){
 		//return
-		 $.getJSON(window.CONST.CONTEXT + "/dummy/messages",{number:MOBILE}).done(function(rsp){
-			 onRcvMsg((rsp.message || "").replace(/(?:\r\n|\r|\n)/g, '<br>'),rsp.files);
+		 $.getJSON(window.CONST.CONTEXT + "/ext/outbound/web/callback",{number:MOBILE}).done(function(rsp){
+			 onRcvMsg(rsp);
 		 }).always(function(rsp){
 			 setTimeout(pollMessage,2000);
 		 });;
@@ -164,24 +208,46 @@ var initFingerprintJS = function initFingerprintJS() {
 		scrollToBottom()
 		return stamp;
 	}
-	function onRcvMsg(msg,files){
+	function onRcvMsg(im){
 		var url = "";
-		if(files && files[0] && files[0].url){
+		if(im.files && im.files[0] && im.files[0].url){
 			url = '<a href="'+files[0].url+'" target="_blank" >Download</a>'
 		}
-		var stamp = new Date().getTime();
-		$(".msg_card_body").append(
-			$('<div class="d-flex justify-content-start mb-4">').append(
-	   			$('<div class="img_cont_msg">').append(
-	    			'<img src="https://static.turbosquid.com/Preview/001292/481/WV/_D.jpg" class="rounded-circle user_img_msg">'),
-				$('<div class="msg_cotainer">').append(
-					msg,
-					$('<span class="msg_time">'+formatTime(stamp)+'</span>'),
-					url
-				)
-			)
-		);
+		var $formttdHtml = $(formatMessage(im));
+		$(".msg_card_body").append($formttdHtml);
+		$formttdHtml.find(".cmxform").validate({errorElement: "small"});
+		
+		$formttdHtml.find(".form-submit").click(function(e){
+			var form= {};
+			$formttdHtml.find('.cmxform').serializeArray().map(function(field,i){
+				form[field.name] = field.value;
+			});
+			 sendMessage({
+				 message : "", from : MOBILE, form : form
+			 }).done(function(rsp){
+				 $formttdHtml.find('.cmxform').hide(); 
+			 });
+		});
 		scrollToBottom()
+	}
+	//form-input-name:Name|TEXT;
+	//form-input-email:EMAIL|EMAIL;
+	function formatMessage(im){
+		var inputs = [];		
+		for(var key in im.options){
+			if(key.indexOf("form-input-") == 0){
+				var params = im.options[key].split("|");	
+				inputs.push({   
+					name : 	key.replace("form-input-",""),
+					label : params[0],
+					type : params[1]
+				})
+			}
+		}	
+	  im._message = (im.message || "").replace(/(?:\r\n|\r|\n)/g, '<br>');
+	  im._inputs = inputs;
+	  im._timestamp = formatTime(im.timestamp)
+      return $(quikr.tmpl("onRcvMsgFormat",{im : im }));
 	}
       
 /////////////      
@@ -192,7 +258,8 @@ var initFingerprintJS = function initFingerprintJS() {
 <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 <script src="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js"></script>
 <script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.5.1/moment.min.js"></script>
-
+<script src="//cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.2/jquery.validate.min.js"></script>
 	
 <script async src="//cdn.jsdelivr.net/npm/@fingerprintjs/fingerprintjs@3/dist/fp.min.js"
   onload="initFingerprintJS()"></script>
+ <script src="assets/js/quikr.js"></script>

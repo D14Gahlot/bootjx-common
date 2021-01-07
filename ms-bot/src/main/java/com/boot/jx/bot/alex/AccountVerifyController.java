@@ -7,13 +7,10 @@ import com.boot.jx.bot.BotController;
 import com.boot.jx.bot.ChatContext;
 import com.boot.jx.bot.ChatController;
 import com.boot.jx.bot.ChatMapping;
-import com.boot.jx.dummy.DummyBotConstants;
 import com.boot.jx.postman.doc.ChatPromise;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.service.ContactCleanerService;
-import com.boot.jx.postman.store.DefaultChatContextStore;
-import com.boot.jx.postman.store.MessageStore;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.StringUtils.StringMatcher;
 
@@ -21,16 +18,10 @@ import com.boot.utils.StringUtils.StringMatcher;
 public class AccountVerifyController extends ChatController {
 
 	@Autowired
-	ChatContext chatContext;
+	private ChatContext chatContext;
 
 	@Autowired
-	MessageStore messageStore;
-
-	@Autowired
-	ContactCleanerService contactCleanerService;
-
-	@Autowired
-	DefaultChatContextStore defaultChatContextStore;
+	private ContactCleanerService contactCleanerService;
 
 	@ChatMapping(key = AlexBotConstants.KEY.VERIFY_CIVIL_ID)
 	public void verifyCivilIdPlain(InboxMessage inboxMessage, StringMatcher matcher) {
@@ -51,7 +42,7 @@ public class AccountVerifyController extends ChatController {
 
 	@ChatMapping(key = AlexBotConstants.KEY.INITIATE, pattern = "^HI$")
 	public void greet(InboxMessage inboxMessage, StringMatcher matcher) {
-		String name = ArgUtil.parseAsString(defaultChatContextStore.getUser().get("name"));
+		String name = chatContext.getContact().getName();
 		if (ArgUtil.is(name)) {
 			reply("Hello " + name);
 			reply("Type menu to see options");
@@ -64,7 +55,7 @@ public class AccountVerifyController extends ChatController {
 	@ChatMapping(key = AlexBotConstants.KEY.SAVE_NAME_ONENTER)
 	public void saveNameOnConfirm(InboxMessage inboxMessage, StringMatcher matcher) {
 		String name = inboxMessage.getMessage();
-		defaultChatContextStore.getSession().put("_name", name);
+		chatContext.getSession().put("_name", name);
 
 		ChatPromise x = require(AlexBotConstants.KEY.SAVE_NAME_CONFIRM);
 		switch (x.getResult()) {
@@ -83,7 +74,7 @@ public class AccountVerifyController extends ChatController {
 
 	@ChatMapping(key = AlexBotConstants.KEY.SAVE_NAME_CONFIRM)
 	public void savenameOCnifmr(InboxMessage inboxMessage, StringMatcher matcher) {
-		String name = ArgUtil.parseAsString(defaultChatContextStore.getSession().get("_name"));
+		String name = ArgUtil.parseAsString(chatContext.getSession().get("_name"));
 		reply("Is your name '" + name + "' ? 'YES' to confirm. 'NO' to exit. or You can just type your name");
 		next(AlexBotConstants.KEY.SAVE_NAME_CONFIRM_ONSELECT);
 	}
@@ -92,8 +83,9 @@ public class AccountVerifyController extends ChatController {
 	public void confirmName(InboxMessage inboxMessage, StringMatcher matcher) {
 		switch (inboxMessage.getMessage().toUpperCase()) {
 		case "YES":
-			String _name = ArgUtil.parseAsString(defaultChatContextStore.getSession().get("_name"));
-			defaultChatContextStore.getUser().put("name", _name);
+			String _name = ArgUtil.parseAsString(chatContext.getSession().get("_name"));
+			chatContext.getContact().setName(_name);
+			chatContext.getUser().put("name", _name);
 			reply("Hello " + _name + "! Your name has been updated");
 			resolve(AlexBotConstants.KEY.SAVE_NAME_CONFIRM);
 			resolve(AlexBotConstants.KEY.SAVE_NAME_CONFIRM_ONSELECT);
@@ -103,7 +95,7 @@ public class AccountVerifyController extends ChatController {
 			resolve(AlexBotConstants.KEY.SAVE_NAME_CONFIRM_ONSELECT);
 			break;
 		default:
-			defaultChatContextStore.getSession().put("_name", inboxMessage.getMessage());
+			chatContext.getSession().put("_name", inboxMessage.getMessage());
 			reply("Is your name '" + inboxMessage.getMessage()
 					+ "' ? 'YES' to confirm. 'NO' to exit. or You can just type your name");
 			next(AlexBotConstants.KEY.SAVE_NAME_CONFIRM_ONSELECT);

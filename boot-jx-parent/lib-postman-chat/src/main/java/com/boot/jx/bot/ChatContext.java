@@ -3,10 +3,14 @@ package com.boot.jx.bot;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatMeta;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.store.DefaultChatContextStore;
 import com.boot.jx.postman.store.IChatContextStore;
+import com.boot.jx.postman.store.SessionStore;
+import com.boot.jx.postman.store.IChatContextStore.BasicChatContextSession;
+import com.boot.jx.postman.store.IChatContextStore.BasicChatContextUser;
 import com.boot.jx.postman.store.IChatContextStore.ChatContextStore;
 import com.boot.jx.scope.ThreadScoped;
 import com.boot.utils.ArgUtil;
@@ -17,13 +21,15 @@ public class ChatContext {
 
 	String currentHandler;
 
-	Object session;
-	Object user;
 	ChatMeta meta;
 	InboxMessage inboxMessage;
+	ChatContactDoc chatContactDoc;
 
 	@Autowired(required = false)
 	ChatContextStore<?, ?> store;
+
+	@Autowired
+	private SessionStore sessionStore;
 
 	@Autowired
 	DefaultChatContextStore defaultChatContextStore;
@@ -35,22 +41,36 @@ public class ChatContext {
 		return store;
 	}
 
-	@Deprecated
-	public void loadSession(Object session) {
-		getStore().loadSession(session);
-	}
-
-	@Deprecated
-	public void loadUser(Object user) {
-		getStore().loadSession(user);
-	}
-
 	public InboxMessage getInboxMessage() {
 		return inboxMessage;
 	}
 
 	public void setInboxMessage(InboxMessage inboxMessage) {
 		this.inboxMessage = inboxMessage;
+	}
+
+	public ChatContactDoc getContact() {
+		if (chatContactDoc == null) {
+			chatContactDoc = sessionStore.getContact(inboxMessage);
+		}
+		return chatContactDoc;
+	}
+
+	@SuppressWarnings("unchecked")
+	public <T extends BasicChatContextUser> T getUser() {
+		return (T) getStore().getUser();
+	}
+
+	@SuppressWarnings("unchecked")
+	public <T extends BasicChatContextSession> T getSession() {
+		return (T) getStore().getSession();
+	}
+
+	public ChatContactDoc commitContact() {
+		if (chatContactDoc != null) {
+			sessionStore.save(chatContactDoc);
+		}
+		return null;
 	}
 
 	public ChatMeta meta() {
@@ -66,26 +86,6 @@ public class ChatContext {
 
 	public void setMeta(ChatMeta meta) {
 		this.meta = meta;
-	}
-
-	@Deprecated
-	public String getNextHandler() {
-		return this.meta().getNextHandler();
-	}
-
-	@Deprecated
-	public void setNextHandler(String nextHandler) {
-		this.meta().setNextHandler(nextHandler);
-	}
-
-	@Deprecated
-	public String getPrevHandler() {
-		return this.meta().getPrevHandler();
-	}
-
-	@Deprecated
-	public void setPrevHandler(String prevHandler) {
-		this.meta().setPrevHandler(prevHandler);
 	}
 
 	public String getCurrentHandler() {

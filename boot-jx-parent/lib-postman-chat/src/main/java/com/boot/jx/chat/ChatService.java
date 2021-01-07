@@ -86,7 +86,6 @@ public class ChatService {
 			if (ArgUtil.is(doc.getMeta()) && !TimeUtils.isExpired(doc.getMeta().getUpdateStamp(), "5min")) {
 				chatContext.setMeta(doc.getMeta());
 				chatContext.getStore().loadSession(doc.getSession());
-				chatContext.getNextHandler();
 			} else {
 				chatContext.getStore().loadSession(null);
 				chatContext.setMeta(new ChatMeta());
@@ -114,8 +113,8 @@ public class ChatService {
 		if (ArgUtil.is(prevHandler)) {
 			messageStore.setHandler(inboxMessage, prevHandler);
 		}
-
 		mongoTemplate.save(doc);
+		chatContext.commitContact();
 	}
 
 	public ChatContext getChatContext() {

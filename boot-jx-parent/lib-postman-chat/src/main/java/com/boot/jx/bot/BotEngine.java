@@ -174,8 +174,8 @@ public class BotEngine {
 			return;
 		}
 
-		String nextHandler = chatContext.getNextHandler();
-		chatContext.setNextHandler(null);
+		String nextHandler = chatContext.meta().getNextHandler();
+		chatContext.meta().setNextHandler(null);
 		invokeMethods(contactId, inboxMessage, nextHandler);
 
 		int limit = 10;
