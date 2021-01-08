@@ -62,6 +62,7 @@ public class MsgController {
 			chatSessionDto.setContactType(contact.getContactType());
 			chatSessionDto.setLastInComingStamp(chatSessionDoc.getLastInComingStamp());
 			chatSessionDto.setName(contact.getName());
+			chatSessionDto.setProfilePic(contact.getProfilePic());
 
 			List<MessageDoc> messages = messageStore.findBySessionId(contact.getSessionId(), contact.getContactType());
 			List<ChatMessageDto> messageDtos = new ArrayList<ChatMessageDto>();

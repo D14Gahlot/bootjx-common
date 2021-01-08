@@ -153,7 +153,7 @@ var WhatsApp = function ToDoModel(app) {
           } else
           {
         	e.online = formatTime(e.lastInComingStamp);
-        	e.img = (e.img | "/agent/assets/images/profile.png");
+        	e.img = (e.img || "/agent/assets/images/profile.png");
             var contact = new appContacts(e.name, e.img, e.online);
             contact.contactType = e.contactType;
             contact.sessionId = e.sessionId;

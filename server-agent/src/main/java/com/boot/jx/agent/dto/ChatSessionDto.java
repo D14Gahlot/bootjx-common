@@ -13,6 +13,7 @@ public class ChatSessionDto implements Serializable {
 	private String sessionId;
 	private String name;
 	private String contactType;
+	private String profilePic;
 	private long lastInComingStamp;
 
 	private List<ChatMessageDto> messages;
@@ -55,5 +56,13 @@ public class ChatSessionDto implements Serializable {
 
 	public void setMessages(List<ChatMessageDto> messages) {
 		this.messages = messages;
+	}
+
+	public String getProfilePic() {
+		return profilePic;
+	}
+
+	public void setProfilePic(String profilePic) {
+		this.profilePic = profilePic;
 	}
 }
