@@ -9,6 +9,7 @@ public class ChatMessageDto implements Serializable {
 	private static final long serialVersionUID = 7766790295486098869L;
 	private String text;
 	private String name;
+	private String sessionId;
 	private long timestamp;
 	private boolean type;
 
@@ -42,5 +43,13 @@ public class ChatMessageDto implements Serializable {
 
 	public void setType(boolean type) {
 		this.type = type;
+	}
+
+	public String getSessionId() {
+		return sessionId;
+	}
+
+	public void setSessionId(String sessionId) {
+		this.sessionId = sessionId;
 	}
 }

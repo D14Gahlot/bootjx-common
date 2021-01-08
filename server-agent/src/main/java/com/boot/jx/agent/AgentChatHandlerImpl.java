@@ -76,6 +76,7 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 		messageDto.setName(messageDoc.getContactId());
 		messageDto.setText(ArgUtil.nonEmpty(messageDoc.getTemplate(), messageDoc.getMessage()));
 		messageDto.setTimestamp(messageDoc.getTimestamp());
+		messageDto.setSessionId(messageDoc.getSessionId());
 		stompTunnelService.sendTo(inboxMessage.getAssignedToAgent(), "/agent/onmessage", messageDto);
 		return inboxMessage;
 	}
