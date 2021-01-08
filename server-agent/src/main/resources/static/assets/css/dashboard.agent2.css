@@ -356,3 +356,11 @@ padding: 5px;
 .card.card_contact_profile {
 	color : #FFF!important;
 }
+.new-message{
+	  border-radius: 50%;
+    background-color: #62d138;
+    height: 15px;
+    width: 15px;
+    text-align: center;
+}
+  

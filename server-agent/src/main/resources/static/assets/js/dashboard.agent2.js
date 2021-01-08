@@ -137,15 +137,16 @@ var WhatsApp = function ToDoModel(app) {
     	//https://s3-us-west-2.amazonaws.com/s.cdpn.io/1089577/contacts2.json
       $.getJSON("/agent/api/sessions/assigned.json", function (data) {
         for (var i = 0; i < data.results.length; i++) {
-        	app.Model._addChats(data.results[i]);
+        	app.Model._addChat(data.results[i]);
         }
         subject.notifyObservers();
       });
     },
-    _addChats : function(e){
+    _addChat : function(e){
        	e.online = formatTime(e.lastInComingStamp);
     	e.img = (e.profilePic || "/agent/assets/images/profile.png");
         var contact = new appContacts(e.name, e.img, e.online);
+        console.log("addedContact",contact);
         contact.contactType = e.contactType;
         contact.sessionId = e.sessionId;
         for (var j = 0; j < e.messages.length; j++) {
@@ -155,10 +156,18 @@ var WhatsApp = function ToDoModel(app) {
           contact.addMessage(message);
         }
         contactListNew.push(contact);
+        return contact;
     },
     addChat : function(e){
-    	app.Model._addChats(e);
-    	 subject.notifyObservers();
+    	for(var i in contactList){
+    		if(contactList[i].sessionId == e.sessionId){
+    			e = null;
+    		}
+    	}
+    	if(e){
+    		app.Model._addChat(e);
+    	}
+    	subject.notifyObservers();
     },
     writeMessage: function () {
       var msg = new appMessages($(".input-message").val(), "", new Date().getHours() + ":" + new Date().getMinutes(), true);
