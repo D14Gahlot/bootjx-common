@@ -1,5 +1,6 @@
 package com.boot.jx.agent;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
@@ -13,6 +14,8 @@ import org.springframework.stereotype.Component;
 
 import com.boot.jx.agent.doc.AgentSessionDoc;
 import com.boot.jx.agent.dto.ChatMessageDto;
+import com.boot.jx.agent.dto.ChatSessionDto;
+import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.model.InboxMessage;
@@ -52,6 +55,8 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 			chatSessionDoc.setAssignedToDept(inboxMessage.getAssignedToDept());
 			mongoTemplate.save(chatSessionDoc);
 			inboxMessage.setAssignedToAgent(avaialbleAgent.getAgentCode());
+			stompTunnelService.sendTo(inboxMessage.getAssignedToAgent(), "/agent/onassign",
+					getChatSessionDto(chatSessionDoc));
 		}
 
 		return inboxMessage;
@@ -75,4 +80,33 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 		return inboxMessage;
 	}
 
+	public ChatSessionDto getChatSessionDto(ChatSessionDoc chatSessionDoc) {
+		ChatContactDoc contact = mongoTemplate.findById(chatSessionDoc.getContactId(), ChatContactDoc.class);
+
+		// Populate
+		ChatSessionDto chatSessionDto = new ChatSessionDto();
+		chatSessionDto.setSessionId(contact.getSessionId());
+		chatSessionDto.setContactType(contact.getContactType());
+		chatSessionDto.setLastInComingStamp(chatSessionDoc.getLastInComingStamp());
+		chatSessionDto.setName(contact.getName());
+		chatSessionDto.setProfilePic(contact.getProfilePic());
+
+		List<MessageDoc> messages = messageStore.findBySessionId(contact.getSessionId(), contact.getContactType());
+		List<ChatMessageDto> messageDtos = new ArrayList<ChatMessageDto>();
+		for (MessageDoc messageDoc : messages) {
+			ChatMessageDto messageDto = new ChatMessageDto();
+			if (ArgUtil.areEqual(messageDoc.getType(), "I")) {
+				messageDto.setType(false);
+				messageDto.setName(chatSessionDto.getName());
+			} else {
+				messageDto.setType(true);
+				messageDto.setName(messageDoc.getAgent());
+			}
+			messageDto.setText(ArgUtil.nonEmpty(messageDoc.getTemplate(), messageDoc.getMessage()));
+			messageDto.setTimestamp(messageDoc.getTimestamp());
+			messageDtos.add(messageDto);
+		}
+		chatSessionDto.setMessages(messageDtos);
+		return chatSessionDto;
+	}
 }

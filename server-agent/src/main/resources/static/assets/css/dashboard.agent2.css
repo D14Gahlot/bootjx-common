@@ -325,6 +325,14 @@ padding: 5px;
 	color: #4cd137;
 }
 
+.information img {
+    width: 200px;
+    height: 200px;
+    margin: 20px auto;
+    border-radius: 50%;
+    float: left;
+}
+
 #mySidebar {
 	color : #FFF!important;
 	background-color: transparent!important
@@ -344,4 +352,7 @@ padding: 5px;
 #mySidebar a:hover{
 	color : #FFF!important;
 	background-color: rgb(0 0 0 / 50%) !important;
+}
+.card.card_contact_profile {
+	color : #FFF!important;
 }

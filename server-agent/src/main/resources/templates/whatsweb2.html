@@ -35,40 +35,42 @@
 
 		<div class="container-fluid h-100">
 			<div class="row h-100">
-				<div class="col-md-4 col-xl-3 chat"><div class="card mb-sm-3 mb-md-0 contacts_card">
-					<div class="card-header">
-						<div class="input-group">
-							<div class="input-group-prepend">
-								<span class="input-group-text menu_btn"><i class="fas fa-bars"></i></span>
-								<div class="action_menu menu_btn_menu">
-									<ul>
-										<li><i class="fas fa-user-circle"></i> View profile</li>
-										<li><i class="fas fa-users"></i> Add to close friends</li>
-										<li><i class="fas fa-plus"></i> Add to group</li>
-										<li><i class="fas fa-ban"></i> Block</li>
-									</ul>
+				<div class="col-md-4 col-xl-3 chat">
+					<div class="card mb-sm-3 mb-md-0 contacts_card">
+						<div class="card-header">
+							<div class="input-group">
+								<div class="input-group-prepend">
+									<span class="input-group-text menu_btn"><i class="fas fa-bars"></i></span>
+									<div class="action_menu menu_btn_menu">
+										<ul>
+											<li><i class="fas fa-user-circle"></i> View profile</li>
+											<li><i class="fas fa-users"></i> Add to close friends</li>
+											<li><i class="fas fa-plus"></i> Add to group</li>
+											<li><i class="fas fa-ban"></i> Block</li>
+										</ul>
+									</div>
+								</div>
+								<input type="text" placeholder="Search..." name="" class="form-control search">
+								<div class="input-group-prepend">
+									<span class="input-group-text search_btn"><i class="fas fa-search"></i></span>
 								</div>
 							</div>
-							<input type="text" placeholder="Search..." name="" class="form-control search">
-							<div class="input-group-prepend">
-								<span class="input-group-text search_btn"><i class="fas fa-search"></i></span>
-							</div>
+						</div>
+						<div class="card-body contacts_body">
+							<ui class="contacts contact-list">
+								
+							</ui>
+						</div>
+						<div class="card-footer">
+							&nbsp;<span class="contact_type fa fa-facebook"></span>
+							<span class="contact_type fa fa-whatsapp"></span>
+							<span class="contact_type fa fa-twitter"></span>
+							<span class="contact_type fa fa-telegram"></span>
+							<span class="contact_type fa fa-chrome"></span>
+							<span class="online-toggle fa fa-toggle-on"></span>
 						</div>
 					</div>
-					<div class="card-body contacts_body">
-						<ui class="contacts contact-list">
-							
-						</ui>
-					</div>
-					<div class="card-footer">
-						&nbsp;<span class="contact_type fa fa-facebook"></span>
-						<span class="contact_type fa fa-whatsapp"></span>
-						<span class="contact_type fa fa-twitter"></span>
-						<span class="contact_type fa fa-telegram"></span>
-						<span class="contact_type fa fa-chrome"></span>
-						<span class="online-toggle fa fa-toggle-on"></span>
-					</div>
-				</div></div>
+				</div>
 				<div class="col-md-8 col-xl-6 chat">
 					<div class="card">
 						<div class="card-header msg_head chat-head">
@@ -111,9 +113,35 @@
 						</div>
 					</div>
 				</div>
+				
+				
+				<div class="col-md-4 col-xl-3 chat">
+					<div class="card mb-sm-3 mb-md-0 card_contact_profile">
+
+					</div>
+				</div>
+				
+				
 			</div>
 		</div>
 
+
+<script type="text/tmpl" id="temp_contact_profile">
+	<div class="card-header"></div>
+	<div class="card-body">
+		<div class="information" style="display: flex;">
+			<img src="<%=c.img%>">
+		</div>
+    </div>
+	<div class="card-footer">
+			<div>
+				<p><%=c.name%></p>
+			</div>
+			<div id="listGroups">
+				<h1></h1>
+			</div>
+	</div>
+</script>
 
 
 <script type="text/tmpl" id="temp_contact">
@@ -122,7 +150,7 @@
 			<div class="img_cont">
 				<img src="<%=c.img%>" class="rounded-circle user_img" alt="profilpicture">
 					<span class="online_icon"></span>
-<span class="contact_type fa fa-facebook"></span>
+<span class="contact_type fa <%=contactIcon%>"></span>
 			</div>
 			<div class="user_info contact-text">
 				<span class="font-name" ><%=c.name%></span>
