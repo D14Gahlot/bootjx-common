@@ -61,7 +61,7 @@ public class MsgController {
 			chatSessionDto.setSessionId(contact.getSessionId());
 			chatSessionDto.setContactType(contact.getContactType());
 			chatSessionDto.setLastInComingStamp(chatSessionDoc.getLastInComingStamp());
-			chatSessionDto.setName(contact.getContactId());
+			chatSessionDto.setName(contact.getName());
 
 			List<MessageDoc> messages = messageStore.findBySessionId(contact.getSessionId(), contact.getContactType());
 			List<ChatMessageDto> messageDtos = new ArrayList<ChatMessageDto>();
@@ -96,7 +96,8 @@ public class MsgController {
 			ChatMessageDto messageDto = new ChatMessageDto();
 			messageDto.setType(true);
 			messageDto.setName(agentSession.getAgentCode());
-			chatService.send(outboxMessage);
+			sessionDoc.getContactId();
+			chatService.send(sessionDoc, outboxMessage);
 			return ApiResponse.buildResult(messageDto);
 		}
 		return null;

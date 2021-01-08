@@ -22,6 +22,15 @@
   }
 </script>
 </head>
+
+<!-- Sidebar -->
+<div class="w3-sidebar w3-bar-block w3-white w3-card w3-animate-left" style="display:none" id="mySidebar">
+<div class="mySidebar-container">
+  <button class="w3-bar-item w3-large menu_btn_close fas fa-arrow-left">&nbsp;</button>
+  <a href="auth/login?logout" class="w3-bar-item w3-button"><i class="fas fa-sign-out-alt"></i> Logout</a>
+</div>
+</div>
+
 <body class="bcdesgin">
 
 		<div class="container-fluid h-100">
@@ -30,7 +39,7 @@
 					<div class="card-header">
 						<div class="input-group">
 							<div class="input-group-prepend">
-								<span class="input-group-text menu_btn"><i class="fas fa-ellipsis-v"></i></span>
+								<span class="input-group-text menu_btn"><i class="fas fa-bars"></i></span>
 								<div class="action_menu menu_btn_menu">
 									<ul>
 										<li><i class="fas fa-user-circle"></i> View profile</li>

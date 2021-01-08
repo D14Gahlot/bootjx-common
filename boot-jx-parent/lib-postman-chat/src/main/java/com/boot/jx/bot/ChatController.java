@@ -39,11 +39,7 @@ public class ChatController {
 	}
 
 	public void send(OutboxMessage waMessage) {
-		try {
-			chatService.send(waMessage);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
+		chatService.send(chatContext.getContact(), waMessage);
 	}
 
 	public void assignToAgent(String deptName) {

@@ -314,14 +314,14 @@ public class AppRequestFilter implements Filter {
 			if (reqType.isTrack() || AuditServiceClient.isDebugEnabled()) {
 				// AuditServiceClient.trackStatic(new
 				// RequestTrackEvent(req).debug(reqType.isDebugOnly()));
-				AppRequestUtil.printIfDebug(req);
+				req = AppRequestUtil.printIfDebug(req);
 			}
 			try {
 				if (isRequestValid(localCommonHttpRequest, apiRequest, req, resp, traceId)) {
 					if (ArgUtil.is(apiRequest.getDeprecated())) {
 						AmxApiResponseUtil.addWarning(apiRequest.getDeprecated());
 					}
-					chain.doFilter(request, new AppResponseWrapper(resp));
+					chain.doFilter(req, new AppResponseWrapper(resp));
 				} else {
 					resp.setStatus(HttpServletResponse.SC_FORBIDDEN);
 				}

@@ -2,12 +2,14 @@ package com.boot.jx.filter;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.util.Collection;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Map.Entry;
+import java.lang.StringBuilder;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -16,6 +18,7 @@ import org.slf4j.Logger;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.StreamUtils;
 
 import com.boot.jx.logger.LoggerService;
 
@@ -28,7 +31,7 @@ public class AppRequestUtil {
 	private static final boolean LOCAL_LOGGER = false;
 
 	public static boolean isLocal() {
-		return LOCAL_LOGGER;
+		return LOCAL_LOGGER | false;
 	}
 
 	public static LinkedMultiValueMap<String, String> getHeader(HttpServletRequest req) {
@@ -45,10 +48,23 @@ public class AppRequestUtil {
 		return headerMap;
 	}
 
-	public static HttpServletRequest printIfDebug(HttpServletRequest req) {
+	public static HttpServletRequest printIfDebug(HttpServletRequest req) throws IOException {
 		if (LOGGER.isDebugEnabled() || isLocal()) {
 			LinkedMultiValueMap<String, String> headerMap = getHeader(req);
-			LOGGER.debug(">>>>> RQT-IN-HEDR =====: {}", headerMap.toString());
+			log(">>>>> RQT-IN-HEDR =====: {}", headerMap.toString());
+			
+			StringBuilder sb = new StringBuilder();
+			Enumeration params = req.getParameterNames();
+			while (params.hasMoreElements()) {
+				String paramName = (String) params.nextElement();
+				sb.append(paramName + " = " + req.getParameter(paramName) + ";");
+			}
+			log(">>>>> RQT-IN-PRMS =====: {}", sb.toString());
+			req = new AppRequestWrapper(req);
+			InputStream inputStream = req.getInputStream();
+			byte[] body = StreamUtils.copyToByteArray(inputStream);
+			log(">>>>> RQT-IN-BODY =====: {}", new String(body));
+			return req;
 		}
 		return req;
 	}

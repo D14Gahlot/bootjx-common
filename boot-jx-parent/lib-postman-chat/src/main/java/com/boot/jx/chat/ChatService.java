@@ -70,8 +70,7 @@ public class ChatService {
 		replyIntenal(outboxMessage);
 	}
 
-	private void sendIntenal(OutboxMessage outboxMessage) throws InterruptedException {
-		ChatContactDoc chatContactDoc = sessionStore.getContact(outboxMessage);
+	private void sendIntenal(ChatContactDoc chatContactDoc, OutboxMessage outboxMessage) {
 		if (ArgUtil.is(chatContactDoc)) {
 			outboxMessage.setContactType(ArgUtil.parseAsEnumT(chatContactDoc.getContactType(), ContactType.class));
 			outboxMessage.setSessionId(outboxMessage.getSessionId());
@@ -86,8 +85,13 @@ public class ChatService {
 		messageStore.create(outboxMessage);
 	}
 
-	public void send(OutboxMessage outboxMessage) throws InterruptedException {
-		sendIntenal(outboxMessage);
+	public void send(ChatSessionDoc sessionDoc, OutboxMessage outboxMessage) {
+		ChatContactDoc chatContactDoc = sessionStore.getContact(sessionDoc.getContactId());
+		sendIntenal(chatContactDoc, outboxMessage);
+	}
+
+	public void send(ChatContactDoc chatContactDoc, OutboxMessage outboxMessage) {
+		sendIntenal(chatContactDoc, outboxMessage);
 	}
 
 	public boolean beforeMessageHandler() {
@@ -163,4 +167,5 @@ public class ChatService {
 		}
 		return session.isInitd();
 	}
+
 }

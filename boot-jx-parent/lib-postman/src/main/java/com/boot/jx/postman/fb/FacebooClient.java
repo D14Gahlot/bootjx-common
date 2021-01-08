@@ -26,7 +26,7 @@ public class FacebooClient {
 
 	public String registerWebhook(String token, String challenge, String lane) {
 		lane = ArgUtil.nonEmpty(lane, "default").toLowerCase();
-		String verifyToken = environment.getProperty("facebook." + lane + ".verifyToken");
+		String verifyToken = environment.getProperty("facebook.lane." + lane + ".verifyToken");
 		if (token != null && !token.isEmpty() && token.equals(verifyToken)) {
 			return challenge;
 		} else {

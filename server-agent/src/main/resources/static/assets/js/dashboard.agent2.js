@@ -153,9 +153,10 @@ var WhatsApp = function ToDoModel(app) {
           } else
           {
         	e.online = formatTime(e.lastInComingStamp);
-        	e.img = "/agent/assets/images/profile.png";
+        	e.img = (e.img | "/agent/assets/images/profile.png");
             var contact = new appContacts(e.name, e.img, e.online);
             contact.contactType = e.contactType;
+            contact.sessionId = e.sessionId;
             for (var j = 0; j < e.messages.length; j++) {
               var m = e.messages[j];
               m.time = formatTime(m.timestamp);
@@ -170,8 +171,9 @@ var WhatsApp = function ToDoModel(app) {
     writeMessage: function () {
       var msg = new appMessages($(".input-message").val(), "", new Date().getHours() + ":" + new Date().getMinutes(), true);
       
+      console.log("currentChat",currentChat);
       sendMessage({
-    	  message : msg,
+    	  message : msg.text,
     	  sessionId : currentChat.sessionId
       });
       
@@ -359,6 +361,11 @@ var WhatsApp = function ToDoCtrl(app) {
         $('.menu_btn').click(function(){
         	//$('.menu_btn_menu').toggle();
         	document.getElementById("mySidebar").style.display = "block";
+        });
+        
+        $('.menu_btn_close').click(function(){
+        	//$('.menu_btn_menu').toggle();
+        	document.getElementById("mySidebar").style.display = "none";
         });
         
         start = false;
