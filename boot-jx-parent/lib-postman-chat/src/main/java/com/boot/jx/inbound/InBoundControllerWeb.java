@@ -17,7 +17,7 @@ import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.OutboxMessage;
 
 @Controller
-public class InBoundWebController {
+public class InBoundControllerWeb {
 
 	@Autowired
 	private InBoundService inBoundEngine;
