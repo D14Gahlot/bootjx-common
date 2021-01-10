@@ -1,9 +1,15 @@
+const isToday = (someDate) => {
+  const today = new Date()
+  return someDate.getDate() == today.getDate() &&
+    someDate.getMonth() == today.getMonth() &&
+    someDate.getFullYear() == today.getFullYear()
+}
 function formatTime(timestamp){
 	const NOW = new Date();
 	const DATE = new Date(timestamp);
 	const DIFF = moment(NOW).diff(DATE, 'day');
 	
-	if(DIFF < 1 ){
+	if(DIFF < 1 && isToday(DATE)){
 		return moment(DATE).format('h:mm A');
 	} else if(DIFF < 3 ){
 		return moment(DATE).format('hh:mm A ddd');
@@ -381,6 +387,10 @@ var WhatsApp = function ToDoCtrl(app) {
         $('.menu_btn_close').click(function(){
         	//$('.menu_btn_menu').toggle();
         	document.getElementById("mySidebar").style.display = "none";
+        });
+        $('span[theme]').click(function(){
+        	document.cookie=("theme="+$(this).attr("theme"));
+        	window.location.reload()
         });
         
         start = false;

@@ -20,6 +20,7 @@ import com.boot.jx.AppConfig;
 import com.boot.jx.agent.AgentAuthProvider;
 import com.boot.jx.agent.AgentSessionBean;
 import com.boot.jx.api.ApiResponse;
+import com.boot.jx.http.CommonHttpRequest;
 import com.boot.jx.stomp.StompTunnelSessionManager;
 import com.boot.utils.ArgUtil;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -29,6 +30,9 @@ public class AuthController {
 
 	@Autowired
 	private AppConfig appConfig;
+
+	@Autowired
+	CommonHttpRequest commonHttpRequest;
 
 	@ResponseBody
 	@RequestMapping(value = "/pub/test", method = { RequestMethod.POST, RequestMethod.GET })
@@ -43,12 +47,19 @@ public class AuthController {
 	}
 
 	@RequestMapping(value = "/app/home", method = { RequestMethod.POST, RequestMethod.GET })
-	public String home(Model model) {
+	public String home(Model model, @RequestParam(required = false) String theme) {
 		model.addAttribute("APP_CONTEXT", appConfig.getAppPrefix());
 		model.addAttribute("APP_USER", agentSession.getAgentCode());
-		return "whatsweb2";
+
+		theme = commonHttpRequest.get("theme");
+
+		if (ArgUtil.is(theme)) {
+			return theme;
+		}
+		
+		return "dashboard.agent.indigo";
 	}
-	
+
 	@RequestMapping(value = "/app/home1", method = { RequestMethod.POST, RequestMethod.GET })
 	public String home2(Model model) {
 		model.addAttribute("APP_CONTEXT", appConfig.getAppPrefix());
