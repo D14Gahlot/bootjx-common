@@ -89,6 +89,7 @@ public class TelegramConnector implements ConnectorHandler {
 
 	@Override
 	public void send(ChatContactDoc chatContactDoc, OutboxMessage outboxMessage) {
+		telegramClient.sendReply(chatContactDoc.getCsid(), outboxMessage.getMessage(),chatContactDoc.getLane());
 	}
 
 	@Scheduled(fixedDelay = 5000)
