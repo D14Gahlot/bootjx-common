@@ -1,26 +1,28 @@
-package com.boot.jx.mcq;
+package com.boot.jx.inbound;
 
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Component;
 
 import com.boot.jx.AppConfig;
 import com.boot.jx.logger.LoggerService;
+import com.boot.jx.mcq.shedlock.SchedulerLock;
 
 //@Configuration
-@EnableScheduling
-@Component
-public class SampleTask2 {
+//@EnableScheduling
+//@Component
+//@Service
+public class InBoundPoller {
 
-	private static final Logger LOGGER = LoggerService.getLogger(SampleTask2.class);
+	private static final Logger LOGGER = LoggerService.getLogger(InBoundPoller.class);
 
 	@Autowired
 	AppConfig appConfig;
 
+	@SchedulerLock(lockMaxAge = 60000, name = "someTask")
 	@Scheduled(fixedDelay = 5000)
 	public void doTask() throws InterruptedException {
+		Thread.sleep(3000);
 		LOGGER.info("======= I am doing my Task @ {}", appConfig.getSpringAppName());
 	}
 
