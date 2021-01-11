@@ -238,7 +238,7 @@ var WhatsApp = function ToDoModel(app) {
 var first = true;
 
 PP_ICONS = {
- "FACEBOOK" : "fa-facebook", "WEBSITE" : "fa-chrome"
+ "FACEBOOK" : "fa-facebook", "WEBSITE" : "fa-chrome", "TELEGRAM" : "fa-telegram"
 }
 
 var WhatsApp = function ToDoView(app) {
