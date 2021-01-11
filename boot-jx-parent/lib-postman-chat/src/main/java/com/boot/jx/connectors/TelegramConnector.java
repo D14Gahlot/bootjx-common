@@ -19,6 +19,9 @@ import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.store.SessionStore;
 import com.boot.jx.postman.tg.TelegramClient;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.JsonUtil;
+
+import springfox.documentation.spring.web.json.Json;
 
 @Component
 @ConnectorMapping(ContactType.TELEGRAM)
@@ -34,6 +37,7 @@ public class TelegramConnector implements ConnectorHandler {
 
 	@Override
 	public void reply(InboxMessage inboxMessage, OutboxMessage outboxMessage) {
+		telegramClient.sendReply(inboxMessage.getFrom(), outboxMessage.getMessage(), inboxMessage.getLane());
 	}
 
 	@Override
@@ -51,11 +55,8 @@ public class TelegramConnector implements ConnectorHandler {
 			inboxMessage.setMessage(update.getMessage().getText());
 		}
 
-		if (ArgUtil.is(update.getMessage().getContact())) {
-			Contact contact = update.getMessage().getContact();
-			inboxMessage.data().put("contact", contact);
-		}
 		inboxMessage.setOriginalMessage(update);
+		inboxMessage.setContactType(ContactType.TELEGRAM);
 		return inboxMessage;
 	}
 
@@ -63,23 +64,23 @@ public class TelegramConnector implements ConnectorHandler {
 	public boolean initSession(InboxMessage inboxMessage, ChatSessionDoc session) {
 		ChatContactDoc contact = sessionStore.getContact(inboxMessage);
 
-		if (ArgUtil.is(inboxMessage.getForm())) {
-			if (ArgUtil.is(inboxMessage.getForm().get("name"))) {
-				contact.setName(ArgUtil.parseAsString(inboxMessage.getForm().get("name")));
+		Update update = JsonUtil.parse(inboxMessage.getOriginalMessage(), Update.class);
+
+		if (ArgUtil.is(update) && ArgUtil.is(update.getMessage()) && ArgUtil.is(update.getMessage().getFrom())
+				&& ArgUtil.is(update.getMessage().getContact())) {
+
+			if (ArgUtil.isEqual(update.getMessage().getFrom().getId(), update.getMessage().getContact().getUserID())) {
+				contact.setName(update.getMessage().getFrom().getFirstName() + " "
+						+ update.getMessage().getFrom().getLastName());
+				contact.setPhone(update.getMessage().getContact().getPhoneNumber());
+				sessionStore.save(contact);
 			}
-			if (ArgUtil.is(inboxMessage.getForm().get("email"))) {
-				contact.setEmail(ArgUtil.parseAsString(inboxMessage.getForm().get("email")));
-			}
-			sessionStore.save(contact);
+
 		}
 
-		if (ArgUtil.isEmpty(contact.getName())) {
-			reply(inboxMessage, (OutboxMessage) inboxMessage.replyMessage(null).template("pm-user-login-form"));
-			return false;
-		}
-
-		if (ArgUtil.isEmpty(contact.getEmail())) {
-			reply(inboxMessage, (OutboxMessage) inboxMessage.replyMessage(null).template("pm-user-login-form"));
+		if (ArgUtil.isEmpty(contact.getPhone())) {
+			telegramClient.promptShareNumber(inboxMessage.getContactId(), "Share your number >",
+					inboxMessage.getLane());
 			return false;
 		}
 

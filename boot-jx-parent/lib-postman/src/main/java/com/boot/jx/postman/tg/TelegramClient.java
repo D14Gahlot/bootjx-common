@@ -50,7 +50,7 @@ public class TelegramClient {
 	private Environment environment;
 
 	private String getAccessToken(String lane) {
-		lane = ArgUtil.nonEmpty(lane, "default").toLowerCase();
+		lane = ArgUtil.nonEmpty(lane, defaultLane).toLowerCase();
 		String accessToken = environment.getProperty("postman.telegram.lane." + lane + ".accessToken");
 		return accessToken;
 	}
@@ -64,15 +64,18 @@ public class TelegramClient {
 	}
 
 	public void sendReply(String id, String text, String lane) {
+		SendMessage message = new SendMessage() // Create a SendMessage object with mandatory fields
+				.setChatId(id)
+				.setText(text);
 		restService.ajax(PATH.URL).path(PATH.BOT_SEND_MESSAGE).pathParam("accessToken", getAccessToken(lane))
-				.field("chat_id", id).field("text", text).post().asString();
+				.post(message).asString();
 
 	}
 
-	public String pomptShareNumber(String id, String text, String lane) {
+	public String promptShareNumber(String id, String text, String lane) {
 		SendMessage message = new SendMessage() // Create a SendMessage object with mandatory fields
 				.setChatId(id);
-		message.setText("Share your number >");
+		message.setText(text);
 
 		// create keyboard
 		ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
@@ -87,7 +90,7 @@ public class TelegramClient {
 		// first keyboard line
 		KeyboardRow keyboardFirstRow = new KeyboardRow();
 		KeyboardButton keyboardButton = new KeyboardButton();
-		keyboardButton.setText("Share your number >").setRequestContact(true);
+		keyboardButton.setText(text).setRequestContact(true);
 		keyboardFirstRow.add(keyboardButton);
 		// add array to list
 		keyboard.add(keyboardFirstRow);

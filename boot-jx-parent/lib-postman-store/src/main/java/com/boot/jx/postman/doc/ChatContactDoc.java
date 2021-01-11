@@ -33,6 +33,7 @@ public class ChatContactDoc implements Serializable {
 
 	private String name;
 	private String email;
+	private String phone;
 	private String profilePic;
 
 	public String getContactId() {
@@ -121,6 +122,14 @@ public class ChatContactDoc implements Serializable {
 
 	public void setChannelType(String channelType) {
 		this.channelType = channelType;
+	}
+
+	public String getPhone() {
+		return phone;
+	}
+
+	public void setPhone(String phone) {
+		this.phone = phone;
 	}
 
 }
