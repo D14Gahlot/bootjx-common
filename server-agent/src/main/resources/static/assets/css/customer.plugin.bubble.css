@@ -1,0 +1,16 @@
+.bcdesgin {
+       background: transparent!important;
+}
+.cmxform {
+	/* Firefox */
+	width: -moz-calc(100vw - 165px);
+	/* WebKit */
+	width: -webkit-calc(100vw - 165px);
+	/* Opera */
+	width: -o-calc(100vw - 165px);
+	/* Standard */
+	width: calc(100vw - 165px)
+}
+.form-submit {
+	cursor: pointer;
+}
