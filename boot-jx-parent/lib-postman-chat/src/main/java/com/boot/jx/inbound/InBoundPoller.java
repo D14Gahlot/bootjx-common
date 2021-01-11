@@ -20,7 +20,7 @@ public class InBoundPoller {
 
 	@Scheduled(fixedDelay = 5000)
 	public void doTask() throws InterruptedException {
-		LOGGER.info("======= I am doing my Task @ {}", appConfig.getSpringAppName());
+		//LOGGER.info("======= I am doing my Task @ {}", appConfig.getSpringAppName());
 	}
 
 }
