@@ -57,7 +57,7 @@ public class AuthController {
 			return theme;
 		}
 		
-		return "dashboard.agent.indigo";
+		return "dashboard.agent.bubble";
 	}
 
 	@RequestMapping(value = "/app/home1", method = { RequestMethod.POST, RequestMethod.GET })
