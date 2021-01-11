@@ -31,6 +31,8 @@ public class PostManUtil {
 			return "wa" + id;
 		} else if (ContactType.FACEBOOK.equals(contactType)) {
 			return "fb" + id;
+		}else if(ContactType.TWITTER.equals(contactType)) {
+			return "tw" + id;
 		}
 		return id;
 	}

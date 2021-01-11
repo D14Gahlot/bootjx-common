@@ -8,6 +8,7 @@ public enum ContactType {
 	TELEGRAM("tg", "Telegram No."),
 	NOTP_APP("notpapp"),
 	WEBSITE("web"),
+	TWITTER("tw","Twitter"),
 	// Deprecated
 	@Deprecated
 	MOBILE(SMS),
