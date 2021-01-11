@@ -35,7 +35,10 @@ public class InboxMessage implements Serializable {
 	private String assignedToDept;
 	private String assignedToAgent;
 
+	private Object originalMessage;
+
 	protected Map<String, Object> form = new HashMap<String, Object>();
+	protected Map<String, Object> data = new HashMap<String, Object>();
 
 	public String getTo() {
 		return to;
@@ -229,4 +232,28 @@ public class InboxMessage implements Serializable {
 		}
 		return this.form;
 	}
+
+	public Map<String, Object> getData() {
+		return data;
+	}
+
+	public void setData(Map<String, Object> data) {
+		this.data = data;
+	}
+
+	public Map<String, Object> data() {
+		if (data == null) {
+			this.data = new HashMap<String, Object>();
+		}
+		return this.data;
+	}
+
+	public Object getOriginalMessage() {
+		return originalMessage;
+	}
+
+	public void setOriginalMessage(Object originalMessage) {
+		this.originalMessage = originalMessage;
+	}
+
 }

@@ -7,7 +7,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
-import com.boot.jx.postman.tg.TelegramClient;
+import com.boot.jx.connectors.TelegramConnector;
+import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.vendor.VendorContext.ApiVendorHeaders;
 
 @RestController
@@ -17,12 +18,13 @@ public class InBoundControllerTG {
 	private InBoundService inBoundService;
 
 	@Autowired
-	private TelegramClient telegramClient;
+	private TelegramConnector telegramConnector;
 
 	@ApiVendorHeaders
 	@RequestMapping(value = "/ext/inbound/tg/callback", method = RequestMethod.POST)
 	public Update onReceiveMessage(@RequestBody Update update) throws InterruptedException {
-
+		InboxMessage event = telegramConnector.toInboxMessage(update);
+		inBoundService.invokeMethods(event);
 		return update;
 	}
 

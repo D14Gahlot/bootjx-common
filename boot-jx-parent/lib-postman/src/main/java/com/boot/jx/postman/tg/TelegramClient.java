@@ -1,6 +1,7 @@
 package com.boot.jx.postman.tg;
 
-import javax.annotation.PostConstruct;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,6 +10,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
+import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 
 import com.boot.jx.rest.RestService;
 import com.boot.utils.ArgUtil;
@@ -18,6 +23,8 @@ import com.ulisesbocchio.jasyptspringboot.annotation.EnableEncryptableProperties
 @PropertySource("classpath:application-telegram.properties")
 @EnableEncryptableProperties
 public class TelegramClient {
+
+	boolean isRegistered;
 
 	@Value("${postman.telegram.webhook.url}")
 	private String telegramWebhookUrl;
@@ -31,8 +38,9 @@ public class TelegramClient {
 
 	public static class PATH {
 		public static final String URL = "https://api.telegram.org";
-		public static final String BOT = "/bot/{accessToken}";
+		public static final String BOT = "/bot{accessToken}";
 		public static final String BOT_SET_WEBHOOK = BOT + "/setWebHook";
+		public static final String BOT_SEND_MESSAGE = BOT + "/sendMessage";
 	}
 
 	@Autowired
@@ -41,24 +49,65 @@ public class TelegramClient {
 	@Autowired
 	private Environment environment;
 
+	private String getAccessToken(String lane) {
+		lane = ArgUtil.nonEmpty(lane, "default").toLowerCase();
+		String accessToken = environment.getProperty("postman.telegram.lane." + lane + ".accessToken");
+		return accessToken;
+	}
+
 	public String registerWebhook(String callbackURL, String lane) {
 		lane = ArgUtil.nonEmpty(lane, "default").toLowerCase();
 		String accessToken = environment.getProperty("postman.telegram.lane." + lane + ".accessToken");
 		return restService.ajax(PATH.URL).path(PATH.BOT_SET_WEBHOOK).pathParam("accessToken", accessToken)
-				.field("url", callbackURL + telegramWebhooPath).post().asString();
+				.field("url", callbackURL + telegramWebhooPath).queryParam("url", callbackURL + telegramWebhooPath)
+				.post().asString();
 	}
 
 	public void sendReply(String id, String text, String lane) {
-		lane = ArgUtil.nonEmpty(lane, "default").toLowerCase();
-		String accessToken = environment.getProperty("postman.telegram.lane." + lane + ".accessToken");
-		LOGGER.info("Message result to {} : {}", id, lane);
+		restService.ajax(PATH.URL).path(PATH.BOT_SEND_MESSAGE).pathParam("accessToken", getAccessToken(lane))
+				.field("chat_id", id).field("text", text).post().asString();
 
 	}
 
-	@PostConstruct
-	public void init() {
-		if (ArgUtil.is(telegramWebhookUrl)) {
-			LOGGER.info("WebHook registered to {}", registerWebhook(telegramWebhookUrl, defaultLane));
+	public String pomptShareNumber(String id, String text, String lane) {
+		SendMessage message = new SendMessage() // Create a SendMessage object with mandatory fields
+				.setChatId(id);
+		message.setText("Share your number >");
+
+		// create keyboard
+		ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
+		message.setReplyMarkup(replyKeyboardMarkup);
+		replyKeyboardMarkup.setSelective(true);
+		replyKeyboardMarkup.setResizeKeyboard(true);
+		replyKeyboardMarkup.setOneTimeKeyboard(true);
+
+		// new list
+		List<KeyboardRow> keyboard = new ArrayList<>();
+
+		// first keyboard line
+		KeyboardRow keyboardFirstRow = new KeyboardRow();
+		KeyboardButton keyboardButton = new KeyboardButton();
+		keyboardButton.setText("Share your number >").setRequestContact(true);
+		keyboardFirstRow.add(keyboardButton);
+		// add array to list
+		keyboard.add(keyboardFirstRow);
+		// add list to our keyboard
+		replyKeyboardMarkup.setKeyboard(keyboard);
+
+		return restService.ajax(PATH.URL).path(PATH.BOT_SEND_MESSAGE).pathParam("accessToken", getAccessToken(lane))
+				.post(message).asString();
+
+	}
+
+	public void initWebhook() {
+		try {
+			if (!isRegistered && ArgUtil.is(telegramWebhookUrl)) {
+				LOGGER.info("WebHook registered to {}", registerWebhook(telegramWebhookUrl, defaultLane));
+				isRegistered = true;
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 	}
+
 }
