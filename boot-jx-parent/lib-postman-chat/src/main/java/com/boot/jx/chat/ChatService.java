@@ -163,7 +163,7 @@ public class ChatService {
 			initd = connector.initSession(inboxMessage, session);
 		}
 		if (initd) {
-			sessionStore.initSession(session);
+			session = sessionStore.initSession(session);
 		}
 		return session.isInitd();
 	}

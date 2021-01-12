@@ -144,6 +144,7 @@ public class SessionStore {
 		query2.addCriteria(Criteria.where("sessionId").is(chatSessionDoc.getSessionId()));
 		Update update = Update.update("initd", true);
 		mongoTemplate.updateMulti(query2, update, ChatSessionDoc.class);
+		chatSessionDoc.setInitd(true);
 		return chatSessionDoc;
 	}
 
