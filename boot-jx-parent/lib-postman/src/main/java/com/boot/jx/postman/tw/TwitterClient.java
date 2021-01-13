@@ -15,6 +15,7 @@ import com.boot.jx.rest.RestService;
 import com.boot.utils.ArgUtil;
 import com.ulisesbocchio.jasyptspringboot.annotation.EnableEncryptableProperties;
 import twitter4j.Twitter;
+import twitter4j.TwitterException;
 import twitter4j.TwitterFactory;
 import twitter4j.conf.ConfigurationBuilder;
 
@@ -66,16 +67,17 @@ public class TwitterClient {
 		}
 	}
 
-	public void sendReply(String id, String text, String lane) {
+	public void sendReply(String id, String text, String lane) throws NumberFormatException, TwitterException {
 		lane = ArgUtil.nonEmpty(lane, "default").toLowerCase();
-		String accessToken = environment.getProperty("facebook.lane." + lane + ".accessToken");
-		FacebookMessageResponse response = new FacebookMessageResponse();
-		response.setMessageType("text");
-		response.getRecipient().put("id", id);
-		response.getMessage().put("text", text);
-		String result = restService.ajax("https://graph.facebook.com/v2.6/me/messages?access_token=" + accessToken)
-				.post(response).asString();
-		LOGGER.info("Message result to {} : {}", id, result);
+		//String accessToken = environment.getProperty("facebook.lane." + lane + ".accessToken");
+		//FacebookMessageResponse response = new FacebookMessageResponse();
+		//response.setMessageType("text");
+		//response.getRecipient().put("id", id);
+		//response.getMessage().put("text", text);
+		//String result = restService.ajax("https://graph.facebook.com/v2.6/me/messages?access_token=" + accessToken)
+		//		.post(response).asString();
+		 twitter.sendDirectMessage(Long.parseLong(id), text);
+		LOGGER.info("Message result to {} : {}", id);
 
 	}
 	public Twitter getTwitter() {
