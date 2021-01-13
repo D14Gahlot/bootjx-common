@@ -22,7 +22,7 @@
 		<thymeleaf.version>3.0.2.RELEASE</thymeleaf.version>
 		<thymeleaf-layout-dialect.version>2.1.1</thymeleaf-layout-dialect.version>
 	</properties>
-	
+
 
 
 	<dependencies>
@@ -85,6 +85,13 @@
 			<artifactId>telegrambots-meta</artifactId>
 			<version>4.5</version>
 		</dependency>
+
+		<dependency>
+			<groupId>org.apache.httpcomponents</groupId>
+			<artifactId>httpclient</artifactId>
+			<version>4.5.12</version>
+		</dependency>
+
 	</dependencies>
 
 
@@ -100,7 +107,6 @@
 			<id>jcenter</id>
 			<url>https://jcenter.bintray.com/</url>
 		</repository>
-		
 	</repositories>
 
 </project>
