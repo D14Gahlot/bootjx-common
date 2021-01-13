@@ -79,6 +79,11 @@
 			</dependency>
 			<dependency>
 				<groupId>com.boot.jx</groupId>
+				<artifactId>lib-postman-nlp</artifactId>
+				<version>${boot.jx.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.boot.jx</groupId>
 				<artifactId>boot-ext-jar</artifactId>
 				<version>${boot.jx.version}</version>
 				<type>pom</type>
@@ -149,6 +154,7 @@
 		<module>lib-postman</module>
 		<module>lib-postman-store</module>
 		<module>lib-postman-chat</module>
+		<module>lib-postman-nlp</module>
 		<module>lib-monitor</module>
 		<!-- Common Servers -->
 

@@ -29,13 +29,13 @@ public abstract class AuditEvent<T extends AuditEvent<T>> extends AbstractEvent 
 	protected String errorCode;
 
 	@JsonProperty("trxTym")
-	protected long tranxTime;
+	protected Long tranxTime;
 
 	@JsonProperty("trcTym")
-	protected long traceTime;
+	protected Long traceTime;
 
 	@JsonProperty("evtTym")
-	protected long eventTime;
+	protected Long eventTime;
 
 	@JsonProperty(PROP_DESC)
 	protected String description = null;
@@ -52,7 +52,11 @@ public abstract class AuditEvent<T extends AuditEvent<T>> extends AbstractEvent 
 	protected String actorId;
 
 	protected Object data;
+
 	protected UserDeviceClient client;
+
+	@JsonProperty("client_")
+	protected String clientStr;
 
 	@JsonIgnore
 	boolean success;
@@ -103,19 +107,19 @@ public abstract class AuditEvent<T extends AuditEvent<T>> extends AbstractEvent 
 		this.description = description;
 	}
 
-	public long getTranxTime() {
+	public Long getTranxTime() {
 		return tranxTime;
 	}
 
-	public void setTranxTime(long tranxTime) {
+	public void setTranxTime(Long tranxTime) {
 		this.tranxTime = tranxTime;
 	}
 
-	public long getTraceTime() {
+	public Long getTraceTime() {
 		return traceTime;
 	}
 
-	public void setTraceTime(long traceTime) {
+	public void setTraceTime(Long traceTime) {
 		this.traceTime = traceTime;
 	}
 
@@ -153,11 +157,11 @@ public abstract class AuditEvent<T extends AuditEvent<T>> extends AbstractEvent 
 		this.actorId = actorId;
 	}
 
-	public long getEventTime() {
+	public Long getEventTime() {
 		return eventTime;
 	}
 
-	public void setEventTime(long eventTime) {
+	public void setEventTime(Long eventTime) {
 		this.eventTime = eventTime;
 	}
 
@@ -247,6 +251,14 @@ public abstract class AuditEvent<T extends AuditEvent<T>> extends AbstractEvent 
 
 	public void setDetails(Map<String, String> details) {
 		this.details = details;
+	}
+
+	public String getClientStr() {
+		return clientStr;
+	}
+
+	public void setClientStr(String clientStr) {
+		this.clientStr = clientStr;
 	}
 
 }

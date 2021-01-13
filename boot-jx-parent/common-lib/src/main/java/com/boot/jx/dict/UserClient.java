@@ -3,6 +3,7 @@ package com.boot.jx.dict;
 import java.io.Serializable;
 
 import com.boot.utils.ArgUtil;
+import com.boot.utils.Constants;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -134,8 +135,7 @@ public class UserClient {
 
 		// branch cleints
 		BRANCH_WEB_OLD(DeviceType.COMPUTER, Channel.BRANCH), BRANCH_WEB(DeviceType.COMPUTER, Channel.BRANCH),
-		SIGNATURE_PAD(DeviceType.TABLET,
-				Channel.BRANCH),
+		SIGNATURE_PAD(DeviceType.TABLET, Channel.BRANCH),
 		BRANCH_ADAPTER(DeviceType.COMPUTER, Channel.BRANCH, MapOption.TERMINAL, ClientOption.FIRSTREGISTER),
 
 		// Other Channels
@@ -420,6 +420,13 @@ public class UserClient {
 		public void setLang(Language lang) {
 			this.lang = lang;
 		}
+
+		public String toString() {
+			return String.format("%s=%s/%s=%s/%s=%s", this.deviceType, this.ip, this.appType,
+					ArgUtil.parseAsString(this.fingerprint, Constants.BLANK), this.clientType,
+					ArgUtil.parseAsString(this.clientVersion, Constants.BLANK));
+		}
+
 	}
 
 	public static boolean isAuthSystem(ClientType clientType, AuthSystem authSystem) {

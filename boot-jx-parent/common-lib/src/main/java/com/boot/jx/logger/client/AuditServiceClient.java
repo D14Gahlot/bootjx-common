@@ -165,7 +165,7 @@ public class AuditServiceClient implements AuditService {
 	public static AuditLoggerResponse logAuditEvent(Marker marker, AuditEvent<?> event, boolean capture) {
 		try {
 			captureDetails(event);
-			event.setClient(AppContextUtil.getUserClient());
+			event.setClientStr(AppContextUtil.getUserClient().toString());
 			event.setTranxId(AppContextUtil.getTranxId());
 			return logAbstractEvent(marker, event, capture);
 		} catch (Exception e) {

@@ -18,4 +18,13 @@ public class UtilityModels {
 	public interface JsonIgnoreUnknown extends Serializable {
 	}
 
+	public interface JsonStringify {
+		String toJsonString();
+	}
+
+	public interface JsonObject {
+		default Object jsonObject() {
+			return this;
+		}
+	}
 }

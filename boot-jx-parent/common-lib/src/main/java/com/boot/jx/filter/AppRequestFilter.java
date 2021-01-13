@@ -312,8 +312,7 @@ public class AppRequestFilter implements Filter {
 			// Actual Request Handling
 			AppContextUtil.setTraceTime(startTime);
 			if (reqType.isTrack() || AuditServiceClient.isDebugEnabled()) {
-				// AuditServiceClient.trackStatic(new
-				// RequestTrackEvent(req).debug(reqType.isDebugOnly()));
+				AuditServiceClient.trackStatic(new RequestTrackEvent(req).debug(reqType.isDebugOnly()));
 				req = AppRequestUtil.printIfDebug(req);
 			}
 			try {
@@ -327,10 +326,8 @@ public class AppRequestFilter implements Filter {
 				}
 			} finally {
 				if (reqType.isTrack() || AuditServiceClient.isDebugEnabled()) {
-					AuditServiceClient
-							.trackStatic(new RequestTrackEvent(Type.HTTP_IN).inbound(resp, req)
-									.responseTime(System.currentTimeMillis() - startTime)
-									.debug(reqType.isDebugOnly()));
+					AuditServiceClient.trackStatic(new RequestTrackEvent(Type.RESP_OUT).inbound(resp, req)
+							.responseTime(System.currentTimeMillis() - startTime).debug(reqType.isDebugOnly()));
 					AppRequestUtil.printIfDebug(resp);
 				}
 			}

@@ -16,9 +16,11 @@ import org.springframework.http.client.ClientHttpResponse;
 
 import com.boot.jx.AppConstants;
 import com.boot.jx.AppContext;
+import com.boot.jx.logger.AbstractEvent;
 import com.boot.jx.logger.AuditEvent;
 import com.boot.jx.tunnel.TunnelEventXchange;
 import com.boot.jx.tunnel.TunnelMessage;
+import com.boot.model.UtilityModels.JsonObject;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.ContextUtil;
 import com.boot.utils.HttpUtils;
@@ -27,16 +29,34 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 @JsonInclude(Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class RequestTrackEvent extends AuditEvent<RequestTrackEvent> {
+@JsonPropertyOrder({ AuditEvent.PROP_DESC, "status", AuditEvent.PROP_MSG, AbstractEvent.PROP_TYPE,
+		AuditEvent.PROP_RESULT, AbstractEvent.PROP_TIMSTAMP })
+public class RequestTrackEvent extends AuditEvent<RequestTrackEvent> implements JsonObject {
 
 	private static final long serialVersionUID = -8735500343787196557L;
 	private static final Logger LOGGER = LoggerFactory.getLogger(RequestTrackEvent.class);
 
 	public static enum Type implements EventType {
-		REQT_IN, RESP_OUT, REQT_OUT, RESP_IN, PUB_OUT, SUB_IN, HTTP_IN, HTTP_OUT;
+		REQT_IN(">="), RESP_OUT("<="), REQT_OUT("=>"), RESP_IN("=<"), PUB_OUT("P="), SUB_IN("S="), HTTP_IN("≡>"),
+		HTTP_OUT(">≡");
+
+		String shortCode;
+
+		Type() {
+			this.shortCode = this.name();
+		}
+
+		Type(String shortcode) {
+			this.shortCode = shortcode;
+		}
+
+		public String toString() {
+			return this.shortCode;
+		}
 
 		@Override
 		public EventMarker marker() {
@@ -48,10 +68,11 @@ public class RequestTrackEvent extends AuditEvent<RequestTrackEvent> {
 	private AppContext context;
 
 	@JsonProperty("rspTym")
-	private long responseTime;
+	private Long responseTime;
 
 	private String ip;
 	private String status;
+	private String uri;
 
 	private Map<String, String> topic;
 
@@ -103,7 +124,8 @@ public class RequestTrackEvent extends AuditEvent<RequestTrackEvent> {
 	 */
 	@Deprecated
 	public RequestTrackEvent track(HttpServletResponse response, HttpServletRequest request) {
-		this.description = String.format("%s %s=%s", this.type, response.getStatus(), request.getRequestURI());
+		this.uri = request.getRequestURI();
+		this.description = String.format("%s%s=%s", this.type, response.getStatus(), this.uri);
 
 		ApiAuditEvent apiEventObject = (ApiAuditEvent) ContextUtil.map().getOrDefault("api_event", null);
 
@@ -122,19 +144,22 @@ public class RequestTrackEvent extends AuditEvent<RequestTrackEvent> {
 
 	@Deprecated
 	public RequestTrackEvent track(HttpServletRequest request) {
-		this.description = String.format("%s %s=%s", this.type, request.getMethod(), request.getRequestURI());
+		this.uri = request.getRequestURI();
+		this.description = String.format("%s%s=%s", this.type, request.getMethod(), this.uri);
 		this.ip = HttpUtils.getIPAddress(request);
 		return this;
 	}
 
 	@Deprecated
 	public RequestTrackEvent track(HttpRequest request) {
-		this.description = String.format("%s %s=%s", this.type, request.getMethod(), request.getURI());
+		this.uri = ArgUtil.parseAsString(request.getURI());
+		this.description = String.format("%s%s=%s", this.type, request.getMethod(), this.uri);
 		return this;
 	}
 
 	@Deprecated
 	public RequestTrackEvent track(ClientHttpResponse response, URI uri) {
+		this.uri = ArgUtil.parseAsString(uri);
 		String statusCode = "000";
 
 		try {
@@ -157,17 +182,16 @@ public class RequestTrackEvent extends AuditEvent<RequestTrackEvent> {
 		try {
 			HttpStatus status = response.getStatusCode();
 			statusCode = ArgUtil.parseAsString(status);
-			if (ArgUtil.is(status) && (status.is5xxServerError() ||
-					status.is4xxClientError())) {
+			if (ArgUtil.is(status) && (status.is5xxServerError() || status.is4xxClientError())) {
 				this.result = Result.ERROR;
 			}
 
 		} catch (IOException e) {
 			LOGGER.error("RequestTrackEvent.track while logging response in", e);
-			this.description = String.format("%s %s=%s", this.type, "EXCEPTION", uri);
+			this.description = String.format("%s%s=%s", this.type, "EXCEPTION", this.uri);
 		}
 
-		this.description = String.format("%s %s=%s", this.type, statusCode, uri);
+		this.description = String.format("%s%s=%s", this.type, statusCode, this.uri);
 		return this;
 	}
 
@@ -180,11 +204,11 @@ public class RequestTrackEvent extends AuditEvent<RequestTrackEvent> {
 		}
 	}
 
-	public long getResponseTime() {
+	public Long getResponseTime() {
 		return responseTime;
 	}
 
-	public void setResponseTime(long responseTime) {
+	public void setResponseTime(Long responseTime) {
 		this.responseTime = responseTime;
 	}
 
@@ -233,9 +257,28 @@ public class RequestTrackEvent extends AuditEvent<RequestTrackEvent> {
 		this.status = status;
 	}
 
+	// Ignore Porps
+	@Override
+	public String getCategory() {
+		return null;
+	}
+
+	@Override
+	public String getComponent() {
+		return null;
+	}
+
+	@Override
+	public String getFlow() {
+		if (ArgUtil.areEqual(this.flow, this.uri)) {
+			return null;
+		}
+		return this.flow;
+	}
+
 	public RequestTrackEvent inbound(HttpServletResponse response, HttpServletRequest request) {
-		this.description = String.format("%s %s=%s", this.type, request.getMethod(),
-				request.getRequestURI());
+		this.uri = request.getRequestURI();
+		this.description = String.format("%s%s=%s", this.type, request.getMethod(), this.uri);
 		this.ip = HttpUtils.getIPAddress(request);
 		this.status = ArgUtil.parseAsString(response.getStatus());
 
@@ -254,7 +297,8 @@ public class RequestTrackEvent extends AuditEvent<RequestTrackEvent> {
 	}
 
 	public RequestTrackEvent outbound(ClientHttpResponse response, HttpRequest request) {
-		this.description = String.format("%s %s=%s", this.type, request.getMethod(), request.getURI());
+		this.uri = ArgUtil.parseAsString(request.getURI());
+		this.description = String.format("%s%s=%s", this.type, request.getMethod(), this.uri);
 
 		this.status = "000";
 
@@ -278,14 +322,35 @@ public class RequestTrackEvent extends AuditEvent<RequestTrackEvent> {
 		try {
 			HttpStatus status = response.getStatusCode();
 			this.status = ArgUtil.parseAsString(status);
-			if (ArgUtil.is(status) && (status.is5xxServerError() ||
-					status.is4xxClientError())) {
+			if (ArgUtil.is(status) && (status.is5xxServerError() || status.is4xxClientError())) {
 				this.result = Result.ERROR;
 			}
 		} catch (IOException e) {
 			LOGGER.error("RequestTrackEvent.track while logging response in", e);
 		}
 
+		return this;
+	}
+
+	@Override
+	public Object jsonObject() {
+		this.setCategory(null);
+		this.setResult(Result.DONE.equals(this.result) ? null : this.result);
+		if (Type.REQT_IN.equals(this.type) || Type.REQT_OUT.equals(this.type)) {
+			RequestTrackEvent re = new RequestTrackEvent((Type) this.type);
+			re.setResult(null);
+			re.setCategory(null);
+			re.setTimestamp(this.timestamp);
+			re.setDescription(this.description);
+			return re;
+		} else if (Type.RESP_IN.equals(this.type)) {
+			RequestTrackEvent re = new RequestTrackEvent((Type) this.type);
+			re.setResult(null);
+			re.setCategory(null);
+			re.setTimestamp(this.timestamp);
+			re.setDescription(this.description);
+			return re;
+		}
 		return this;
 	}
 

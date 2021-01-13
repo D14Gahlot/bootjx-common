@@ -405,3 +405,6 @@ padding: 5px;
          -o-transform:skew(8deg) rotate(3deg);
             transform:skew(8deg) rotate(3deg);
 }
+.customer-chat-logo.icon-my-agent {
+    font-weight: bold;
+}

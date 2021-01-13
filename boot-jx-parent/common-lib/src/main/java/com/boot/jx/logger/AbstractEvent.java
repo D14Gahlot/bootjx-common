@@ -71,7 +71,7 @@ public abstract class AbstractEvent implements Serializable {
 	public interface EventType extends EnumType {
 		EventMarker marker();
 	}
-	
+
 	@JsonProperty(PROP_COMPONENT)
 	protected String component;
 
@@ -95,6 +95,7 @@ public abstract class AbstractEvent implements Serializable {
 
 	public AbstractEvent() {
 		this.timestamp = System.currentTimeMillis();
+		this.isCatureClient = true;
 	}
 
 	public AbstractEvent(EventType type) {
@@ -168,6 +169,19 @@ public abstract class AbstractEvent implements Serializable {
 	@JsonIgnore
 	public void setDebugEvent(boolean debugEvent) {
 		this.debugEvent = debugEvent;
+	}
+
+	@JsonIgnore
+	protected boolean isCatureClient;
+
+	@JsonIgnore
+	public boolean isCatureClient() {
+		return isCatureClient;
+	}
+
+	@JsonIgnore
+	public void setCatureClient(boolean isCatureClient) {
+		this.isCatureClient = isCatureClient;
 	}
 
 	public String getFlow() {

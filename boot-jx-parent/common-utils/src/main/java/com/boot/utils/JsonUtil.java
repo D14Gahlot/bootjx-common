@@ -14,6 +14,7 @@ import com.boot.json.CommonSerilizers.EnumByIdSerializer;
 import com.boot.json.CommonSerilizers.EnumTypeSerializer;
 import com.boot.json.JsonSerializerType;
 import com.boot.json.JsonSerializerTypeSerializer;
+import com.boot.model.UtilityModels.JsonObject;
 import com.boot.utils.ArgUtil.EnumById;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.core.JsonParser.Feature;
@@ -106,6 +107,9 @@ public final class JsonUtil {
 		 */
 		public String toJson(Object object) {
 			try {
+				if (object instanceof JsonObject) {
+					object = ((JsonObject) object).jsonObject();
+				}
 				return getMapper().writeValueAsString(object);
 			} catch (IOException e) {
 				LOG.warn("error converting to json", e);
