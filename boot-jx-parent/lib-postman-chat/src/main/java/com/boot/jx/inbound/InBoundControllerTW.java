@@ -58,8 +58,8 @@ public class InBoundControllerTW {
 		if (tmr != null && !tmr.isEmpty()) {
 			for (InboxMessage event : tmr) {
 				inBoundService.invokeMethods(event);
-				// twitterClient.getContext(lane).getTwitter()
-				// .destroyDirectMessage(Long.parseLong(event.getMessageIdExt()));
+				twitterClient.getContext(lane).getTwitter()
+						.destroyDirectMessage(Long.parseLong(event.getMessageIdExt()));
 			}
 		}
 		return tmr;

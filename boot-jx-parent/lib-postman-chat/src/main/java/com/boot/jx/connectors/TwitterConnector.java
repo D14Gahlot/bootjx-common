@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorHandler;
@@ -96,4 +97,11 @@ public class TwitterConnector implements ConnectorHandler {
 		return messageConverter(dml, lane);
 	}
 
+	@Scheduled(fixedDelay = 5000)
+	public void registerService() {
+		
+		
+		
+		telegramClient.initWebhook();
+	}
 }
