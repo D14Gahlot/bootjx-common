@@ -1,5 +1,7 @@
 package com.boot.jx.postman.tw;
 
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -13,6 +15,8 @@ import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
 import com.boot.utils.ArgUtil;
+import com.boot.utils.CryptoUtil;
+import com.boot.utils.CryptoUtil.HashBuilder;
 import com.ulisesbocchio.jasyptspringboot.annotation.EnableEncryptableProperties;
 
 import twitter4j.DirectMessageList;
@@ -32,6 +36,12 @@ public class TwitterClient {
 
 	@Value("${postman.twitter.default.lane}")
 	private String defaultLane;
+
+	@Value("${postman.twitter.webhook.url}")
+	private String webhookUrl;
+
+	@Value("${postman.twitter.webhook.path}")
+	private String webhookPath;
 
 	@Autowired
 	private Environment environment;
@@ -57,19 +67,13 @@ public class TwitterClient {
 			TwitterFactory tf = new TwitterFactory(cb.build());
 			Twitter tw = tf.getInstance();
 			ctx = new TwitterClientContext(tw);
+			if (ArgUtil.is(envName)) {
+				WebhookManager manager = new WebhookManager(tw.getConfiguration(), envName);
+				ctx.setWebhookManager(manager);
+			}
 			CLIENTS.put(lane, ctx);
 		}
 		return ctx;
-	}
-
-	public String registerWebhook(String token, String challenge, String lane) {
-		lane = ArgUtil.nonEmpty(lane, "default").toLowerCase();
-		String verifyToken = environment.getProperty("twitter." + lane + ".verifyToken");
-		if (token != null && !token.isEmpty() && token.equals(verifyToken)) {
-			return challenge;
-		} else {
-			return "Wrong Token";
-		}
 	}
 
 	public void sendReply(String id, String text, String lane) throws NumberFormatException, TwitterException {
@@ -81,6 +85,45 @@ public class TwitterClient {
 	public DirectMessageList pollDirectMessagesReceived(String lane) throws TwitterException {
 		TwitterClientContext ctx = getContext(lane);
 		return ctx.getDirectMessagesReceived(5);
+	}
+
+	public StatusCode registerWebhook(String lane, String callbackURL) {
+		lane = ArgUtil.nonEmpty(lane, defaultLane).toLowerCase();
+		TwitterClientContext ctx = getContext(lane);
+		return ctx.registerWebhook(callbackURL + webhookPath + "/" + lane);
+	}
+
+	public StatusCode registerWebhook(String lane) {
+		if (ArgUtil.is(webhookUrl)) {
+			return registerWebhook(lane, webhookUrl);
+		}
+		return null;
+	}
+
+	/**
+	 * Registers is only once if valid webhook is not registered
+	 * 
+	 * @param lane
+	 * @return
+	 */
+	public StatusCode registerWebhookOnce(String lane) {
+		TwitterClientContext ctx = getContext(lane);
+		WebhookInfo webhookInfo = ctx.getWebhookInfo();
+		if (ArgUtil.isEmpty(webhookInfo) || !webhookInfo.isValid()) {
+			return registerWebhook(lane);
+		}
+		return null;
+	}
+
+	public Map<String, String> verifyCRC(String lane, String crcToken)
+			throws InvalidKeyException, NoSuchAlgorithmException {
+		TwitterClientContext ctx = getContext(lane);
+		Map<String, String> map = new HashMap<String, String>();
+		map.put("response_token",
+				"sha256=" + new HashBuilder().secret(ctx.getTwitter().getConfiguration().getOAuthConsumerSecret())
+						.message(crcToken).toHashHmac("HmacSHA256").hash());
+		return map;
+
 	}
 
 }

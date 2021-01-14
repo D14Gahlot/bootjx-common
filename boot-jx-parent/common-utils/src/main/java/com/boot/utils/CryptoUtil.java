@@ -380,7 +380,17 @@ public final class CryptoUtil {
 		mac.init(secretKey);
 		byte[] text = baseString.getBytes();
 		return new String(Base64.getEncoder().encode(mac.doFinal(text))).trim();
+	}
 
+	public static String getHashHmac(String algo, String data, String key)
+			throws NoSuchAlgorithmException, InvalidKeyException {
+		SecretKey secretKey = null;
+		byte[] keyBytes = key.getBytes();
+		secretKey = new SecretKeySpec(keyBytes, algo);
+		Mac mac = Mac.getInstance(algo);
+		mac.init(secretKey);
+		byte[] text = data.getBytes();
+		return new String(Base64.getEncoder().encode(mac.doFinal(text))).trim();
 	}
 
 	public static class HashBuilder implements Serializable {
@@ -473,6 +483,11 @@ public final class CryptoUtil {
 		 */
 		public HashBuilder toHMAC() {
 			this.hash = CryptoUtil.generateHMAC(this.interval, this.secret, this.message, this.currentTime);
+			return this;
+		}
+
+		public HashBuilder toHashHmac(String algo) throws InvalidKeyException, NoSuchAlgorithmException {
+			this.hash = CryptoUtil.getHashHmac(algo, this.message, this.secret);
 			return this;
 		}
 

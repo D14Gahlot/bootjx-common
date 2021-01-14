@@ -1,4 +1,4 @@
-package com.abhaybd.twitter4jwebhook;
+package com.boot.jx.postman.tw;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -81,7 +81,7 @@ public class WebhookManager {
         try {
             WebhookInfo info = getWebhookInfo();
             if (info == null) return StatusCode.createError("Error: No webhook for which to trigger CRC!");
-            long id = info.getID();
+            long id = info.idAsLong();
             // Send a PUT request to the API endpoint
             String endpoint = String.format(SPECIFIC_HOOK_ENDPOINT, env, id);
             HttpPut request = new HttpPut(endpoint);
@@ -153,7 +153,7 @@ public class WebhookManager {
             WebhookInfo info = getWebhookInfo();
             if (info == null) return StatusCode.OK;
 
-            long id = info.getID();
+            long id = info.idAsLong();
             // Send a DELETE request to the API endpoint
             String endpoint = String.format(SPECIFIC_HOOK_ENDPOINT, env, id);
             HttpDelete request = new HttpDelete(endpoint);

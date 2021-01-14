@@ -1,4 +1,4 @@
-package com.abhaybd.twitter4jwebhook;
+package com.boot.jx.postman.tw;
 
 public class StatusCode {
     public static final StatusCode OK = createSuccess(-1, null);

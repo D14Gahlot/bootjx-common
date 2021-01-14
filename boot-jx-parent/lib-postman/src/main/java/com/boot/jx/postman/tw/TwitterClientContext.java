@@ -17,6 +17,8 @@ public class TwitterClientContext {
 	private long lastAccessStamp;
 	RateLimitStatus rateLimit;
 	private int lastLotSize;
+	private WebhookManager webhookManager;
+	private WebhookInfo webhookInfo;
 
 	public TwitterClientContext(Twitter twitter) {
 		super();
@@ -96,5 +98,33 @@ public class TwitterClientContext {
 		} else {
 			return retainCursor(removeDMsNotSentToMe(this.getTwitter().getDirectMessages(i, this.dmCursor)));
 		}
+	}
+
+	public WebhookManager getWebhookManager() {
+		return webhookManager;
+	}
+
+	public void setWebhookManager(WebhookManager webhookManager) {
+		this.webhookManager = webhookManager;
+	}
+
+	public void setWebhookInfo(WebhookInfo webhookInfo) {
+		this.webhookInfo = webhookInfo;
+	}
+
+	public WebhookInfo getWebhookInfo() {
+		return webhookInfo;
+	}
+
+	public StatusCode registerWebhook(String webhookUrl) {
+		this.webhookInfo = this.webhookManager.getWebhookInfo();
+		if (ArgUtil.is(this.webhookInfo) && this.webhookInfo.isValid()
+				&& webhookUrl.equals(this.webhookInfo.getUrl())) {
+			return StatusCode.OK;
+		}
+		webhookManager.removeWebhook();
+		StatusCode statusCode = webhookManager.addWebhook(java.net.URI.create(webhookUrl));
+		webhookManager.registerCurrentUser();
+		return statusCode;
 	}
 }

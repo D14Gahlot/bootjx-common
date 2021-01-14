@@ -33,11 +33,20 @@
 			<artifactId>telegrambots-meta</artifactId>
 			<version>4.5</version>
 		</dependency>
+
+		<!-- TWITTER LIBS start -->
 		<dependency>
 			<groupId>org.twitter4j</groupId>
 			<artifactId>twitter4j-core</artifactId>
 			<version>4.0.7</version>
 		</dependency>
+		<dependency>
+			<groupId>org.apache.httpcomponents</groupId>
+			<artifactId>httpclient</artifactId>
+		</dependency>
+		<!-- TWITTER LIBS ends -->
+
+
 	</dependencies>
 	<repositories>
 		<repository>

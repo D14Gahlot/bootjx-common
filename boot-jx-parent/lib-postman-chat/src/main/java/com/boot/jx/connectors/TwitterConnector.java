@@ -2,7 +2,9 @@ package com.boot.jx.connectors;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
+import org.hibernate.validator.internal.util.privilegedactions.GetConstraintValidatorList;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -17,10 +19,12 @@ import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.model.WAMessage.Channel;
 import com.boot.jx.postman.store.SessionStore;
 import com.boot.jx.postman.tw.TwitterClient;
+import com.boot.jx.postman.tw.TwitterClientContext;
 import com.boot.utils.ArgUtil;
 
 import twitter4j.DirectMessage;
 import twitter4j.DirectMessageList;
+import twitter4j.DirectMessageLocalImpl;
 import twitter4j.ResponseList;
 import twitter4j.TwitterException;
 
@@ -97,11 +101,11 @@ public class TwitterConnector implements ConnectorHandler {
 		return messageConverter(dml, lane);
 	}
 
-	@Scheduled(fixedDelay = 5000)
-	public void registerService() {
-		
-		
-		
-		telegramClient.initWebhook();
+	public List<InboxMessage> process(String lane, Map<String, Object> update) throws TwitterException {
+		TwitterClientContext ctx = twitterClient.getContext(lane);
+		DirectMessageList dml = DirectMessageLocalImpl.createDirectMessageList(update,
+				ctx.getTwitter().getConfiguration());
+		return messageConverter(dml, lane);
 	}
+
 }

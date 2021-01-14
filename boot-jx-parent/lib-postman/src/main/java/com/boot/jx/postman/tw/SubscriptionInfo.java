@@ -1,4 +1,4 @@
-package com.abhaybd.twitter4jwebhook;
+package com.boot.jx.postman.tw;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.Arrays;
