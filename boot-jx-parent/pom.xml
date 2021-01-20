@@ -150,6 +150,7 @@
 		<module>common-lib</module>
 		<module>common-mongo</module>
 		<module>common-tmpl</module>
+		<module>../boot-ext-jar</module>
 		<module>lib-mcq</module>
 		<module>lib-postman</module>
 		<module>lib-postman-store</module>

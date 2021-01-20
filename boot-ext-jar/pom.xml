@@ -11,9 +11,9 @@
 
 	<parent>
 		<groupId>com.boot.jax</groupId>
-		<artifactId>boot-jax-parent</artifactId>
+		<artifactId>boot-jx-parent</artifactId>
 		<version>0.0.1-SNAPSHOT</version>
-		<relativePath>../boot-jax-parent/pom.xml</relativePath>
+		<relativePath>../boot-jx-parent/pom.xml</relativePath>
 	</parent>
 
 	<properties>
