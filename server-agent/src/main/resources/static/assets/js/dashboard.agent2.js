@@ -155,6 +155,7 @@ var WhatsApp = function ToDoModel(app) {
         console.log("addedContact",contact);
         contact.contactType = e.contactType;
         contact.sessionId = e.sessionId;
+        contact.o  = e;
         for (var j = 0; j < e.messages.length; j++) {
           var m = e.messages[j];
           m.time = formatTime(m.timestamp);
@@ -253,7 +254,11 @@ var WhatsApp = function ToDoView(app) {
        }));
 
       var that = c;
-      $(".contact-list").prepend(html);
+      if(that.o.assigned){
+    	  $(".contact-list").prepend(html);    	  
+      } else {
+    	  $(".contact-list-unassigned").prepend(html);
+      }
       console.log("printContact")
       WhatsApp.Ctrl.addClick(html, that);
     },

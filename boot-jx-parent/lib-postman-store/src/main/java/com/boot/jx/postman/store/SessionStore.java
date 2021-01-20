@@ -3,6 +3,8 @@ package com.boot.jx.postman.store;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -25,6 +27,8 @@ import com.mongodb.DBObject;
 
 @Component
 public class SessionStore {
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(SessionStore.class);
 
 	@Autowired
 	MongoTemplate mongoTemplate;
@@ -73,8 +77,7 @@ public class SessionStore {
 
 		if ((ArgUtil.isEmpty(chatSessionDoc)
 				|| TimeUtils.isExpired(chatSessionDoc.getLastInComingStamp(), chatSessionTimeout)
-				|| !chatSessionDoc.isActive())
-				) {
+				|| !chatSessionDoc.isActive())) {
 
 			closeActiveSessionsMulty(contactId);
 
@@ -136,6 +139,13 @@ public class SessionStore {
 	public List<ChatSessionDoc> findChatSessionDocByAgent(String agentCode) {
 		Query query2 = new Query();
 		query2.addCriteria(Criteria.where("assignedToAgent").is(agentCode).and("active").is(true));
+		return mongoTemplate.find(query2, ChatSessionDoc.class);
+	}
+
+	public List<ChatSessionDoc> findChatSessionDocByAgentAndUnAssigned(String agentCode) {
+		Query query2 = new Query();
+		query2.addCriteria(Criteria.where("assignedToAgent").in(agentCode, null).and("active").is(true));
+		LOGGER.info(query2.toString());
 		return mongoTemplate.find(query2, ChatSessionDoc.class);
 	}
 

@@ -19,6 +19,7 @@ import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.model.InboxMessage;
+import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.store.MessageStore;
 import com.boot.jx.stomp.StompTunnelService;
 import com.boot.utils.ArgUtil;
@@ -49,17 +50,29 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 
 		AgentSessionDoc avaialbleAgent = CollectionUtil.getOne(agents);
 
+		// PUBLISH
+		ChatSessionDoc chatSessionDoc = mongoTemplate.findById(inboxMessage.getSessionId(), ChatSessionDoc.class);
+		chatSessionDoc.setAssignedToDept(inboxMessage.getAssignedToDept());
+
 		if (ArgUtil.is(avaialbleAgent)) {
-			ChatSessionDoc chatSessionDoc = mongoTemplate.findById(inboxMessage.getSessionId(), ChatSessionDoc.class);
 			chatSessionDoc.setAssignedToAgent(avaialbleAgent.getAgentCode());
-			chatSessionDoc.setAssignedToDept(inboxMessage.getAssignedToDept());
-			mongoTemplate.save(chatSessionDoc);
 			inboxMessage.setAssignedToAgent(avaialbleAgent.getAgentCode());
-			stompTunnelService.sendTo(inboxMessage.getAssignedToAgent(), "/agent/onassign",
-					getChatSessionDto(chatSessionDoc));
 		}
+		mongoTemplate.save(chatSessionDoc);
+		stompTunnelService.sendTo(inboxMessage.getAssignedToDept(), "/dept/onassign",
+				getChatSessionDto(chatSessionDoc, inboxMessage.getAssignedToAgent()));
 
 		return inboxMessage;
+	}
+
+	public void onAssign(AgentSessionDoc avaialbleAgent, ChatSessionDoc chatSessionDoc) {
+
+		if (ArgUtil.is(avaialbleAgent)) {
+			chatSessionDoc.setAssignedToAgent(avaialbleAgent.getAgentCode());
+		}
+
+		stompTunnelService.sendTo(avaialbleAgent.getAgentDept(), "/dept/onassign",
+				getChatSessionDto(chatSessionDoc, avaialbleAgent.getAgentCode()));
 	}
 
 	@Autowired
@@ -81,7 +94,7 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 		return inboxMessage;
 	}
 
-	public ChatSessionDto getChatSessionDto(ChatSessionDoc chatSessionDoc) {
+	public ChatSessionDto getChatSessionDto(ChatSessionDoc chatSessionDoc, String agentCode) {
 		ChatContactDoc contact = mongoTemplate.findById(chatSessionDoc.getContactId(), ChatContactDoc.class);
 
 		// Populate
@@ -91,6 +104,9 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 		chatSessionDto.setLastInComingStamp(chatSessionDoc.getLastInComingStamp());
 		chatSessionDto.setName(contact.getName());
 		chatSessionDto.setProfilePic(contact.getProfilePic());
+		chatSessionDto.setEmail(contact.getEmail());
+		chatSessionDto.setPhone(contact.getPhone());
+		chatSessionDto.setAssigned(ArgUtil.areEqual(chatSessionDoc.getAssignedToAgent(), agentCode));
 
 		List<MessageDoc> messages = messageStore.findBySessionId(contact.getSessionId(), contact.getContactType());
 		List<ChatMessageDto> messageDtos = new ArrayList<ChatMessageDto>();

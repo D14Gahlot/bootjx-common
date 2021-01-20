@@ -64,6 +64,9 @@
 							<ui class="contacts contact-list">
 								
 							</ui>
+							<ui class="contacts contact-list-unassigned">
+								
+							</ui>
 						</div>
 						<div class="card-footer">
 							&nbsp;<span class="contact_type fa fa-facebook"></span>
@@ -141,6 +144,15 @@
 			<div>
 				<p><%=c.name%></p>
 			</div>
+			
+			<%if(c.o.email){%><div>
+				<p><span class="fa fa-envelope"/> <%=c.o.email%></p>
+			</div><%}%>
+
+			<%if(c.o.phone){%><div>
+				<p><span class="fa fa-phone"/> <%=c.o.phone%></p>
+			</div><%}%>
+
 			<div id="listGroups">
 				<h1></h1>
 			</div>
@@ -149,7 +161,7 @@
 
 
 <script type="text/tmpl" id="temp_contact">
-	<li class="" id="<%=c.id%>">
+	<li class="<%=(c.o.assigned ? "data_assigned" : "data_unassigned")%>  " id="<%=c.id%>">
 		<div class="d-flex bd-highlight contact-preview">
 			<div class="img_cont">
 				<img src="<%=c.img%>" class="rounded-circle user_img" alt="profilpicture">

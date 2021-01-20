@@ -14,11 +14,13 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.boot.jx.AppConfig;
 import com.boot.jx.agent.AgentChatHandlerImpl;
 import com.boot.jx.agent.AgentSessionBean;
+import com.boot.jx.agent.doc.AgentSessionDoc;
 import com.boot.jx.agent.dto.ChatMessageDto;
 import com.boot.jx.agent.dto.ChatSessionDto;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.chat.ChatService;
 import com.boot.jx.postman.doc.ChatSessionDoc;
+import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.store.MessageStore;
 import com.boot.jx.postman.store.SessionStore;
@@ -48,11 +50,13 @@ public class MsgController {
 	@ResponseBody
 	@RequestMapping(value = "/api/sessions/assigned", method = { RequestMethod.GET })
 	public ApiResponse<ChatSessionDto, Object> getSessionsAssignedToMe() {
-		List<ChatSessionDoc> sessions = sessionStore.findChatSessionDocByAgent(agentSession.getAgentCode());
+		List<ChatSessionDoc> sessions = sessionStore
+				.findChatSessionDocByAgentAndUnAssigned(agentSession.getAgentCode());
 
 		List<ChatSessionDto> chatSessionDtos = new ArrayList<ChatSessionDto>();
 		for (ChatSessionDoc chatSessionDoc : sessions) {
-			ChatSessionDto chatSessionDto = agentChatHandlerImpl.getChatSessionDto(chatSessionDoc);
+			ChatSessionDto chatSessionDto = agentChatHandlerImpl.getChatSessionDto(chatSessionDoc,
+					agentSession.getAgentCode());
 			chatSessionDtos.add(chatSessionDto);
 		}
 		return ApiResponse.buildResults(chatSessionDtos);
@@ -66,6 +70,13 @@ public class MsgController {
 	public ApiResponse<ChatMessageDto, Object> sendSessionMessage(@RequestBody OutboxMessage outboxMessage)
 			throws InterruptedException {
 		ChatSessionDoc sessionDoc = sessionStore.getSession(outboxMessage.getSessionId());
+
+		if (ArgUtil.isEmpty(sessionDoc.getAssignedToAgent())) {
+			AgentSessionDoc agent = mongoTemplate.findById(agentSession.getAgentCode(), AgentSessionDoc.class);
+			agentChatHandlerImpl.onAssign(agent, sessionDoc);
+			mongoTemplate.save(sessionDoc);
+		}
+
 		if (ArgUtil.areEqual(sessionDoc.getAssignedToAgent(), agentSession.getAgentCode())) {
 			ChatMessageDto messageDto = new ChatMessageDto();
 			messageDto.setType(true);

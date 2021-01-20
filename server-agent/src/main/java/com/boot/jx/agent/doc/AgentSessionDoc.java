@@ -11,6 +11,8 @@ public class AgentSessionDoc {
 	@Id
 	private String agentCode;
 
+	private String agentDept;
+
 	private boolean isLoggedIn;
 
 	private boolean isOnline;
@@ -47,5 +49,13 @@ public class AgentSessionDoc {
 
 	public void setLastOnlineStamp(long lastOnlineStamp) {
 		this.lastOnlineStamp = lastOnlineStamp;
+	}
+
+	public String getAgentDept() {
+		return agentDept;
+	}
+
+	public void setAgentDept(String agentDept) {
+		this.agentDept = agentDept;
 	}
 }
