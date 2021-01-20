@@ -4,19 +4,19 @@ const isToday = (someDate) => {
     someDate.getMonth() == today.getMonth() &&
     someDate.getFullYear() == today.getFullYear()
 }
-function formatTime(timestamp){
+function formatTime(timestamp,gap){
 	const NOW = new Date();
 	const DATE = new Date(timestamp);
 	const DIFF = moment(NOW).diff(DATE, 'day');
 	
 	if(DIFF < 1 && isToday(DATE)){
-		return moment(DATE).format('h:mm A');
+		return moment(DATE).format('h:mm a');
 	} else if(DIFF < 3 ){
-		return moment(DATE).format('hh:mm A ddd');
+		return moment(DATE).format('hh:mm a ddd');
 	} else if(DIFF < 7 ){
-		return moment(DATE).format('h:mm A ddd');
+		return moment(DATE).format('h:mm a ddd');
 	} else {
-		return moment(DATE).format('h:mm A DD/mm/YY');
+		return moment(DATE).format('h:mm a DD MMM YY');
 	}
 }
 
