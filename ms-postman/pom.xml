@@ -81,6 +81,12 @@
 			<artifactId>lib-postman-chat</artifactId>
 		</dependency>
 
+		<dependency>
+			<groupId>com.boot.jx</groupId>
+			<artifactId>boot-ext-jar</artifactId>
+			<type>pom</type>
+		</dependency>
+
 		<!-- PDF FLYINSOC -->
 		<dependency>
 			<groupId>org.xhtmlrenderer</groupId>
