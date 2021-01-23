@@ -176,22 +176,24 @@ var WhatsApp = function ToDoModel(app) {
     	}
     	subject.notifyObservers();
     },
+    senMessage: function (text) {
+    	var msg =  new appMessages(text, "", new Date().getHours() + ":" + new Date().getMinutes(), true);
+        console.log("currentChat",currentChat);
+        sendMessage({
+      	  message : msg.text,
+      	  sessionId : currentChat.sessionId
+        });
+        
+        WhatsApp.View.printMessage(msg);
+        currentChat.addMessage(msg);
+        $(".input-message").val("");
+        console.log("writeMessage")
+        subject.notifyObservers();
+        $("#" + currentChat.id).addClass("active-contact active");
+        scrollToBottom();
+    },
     writeMessage: function () {
-      var msg = new appMessages($(".input-message").val(), "", new Date().getHours() + ":" + new Date().getMinutes(), true);
-      
-      console.log("currentChat",currentChat);
-      sendMessage({
-    	  message : msg.text,
-    	  sessionId : currentChat.sessionId
-      });
-      
-      WhatsApp.View.printMessage(msg);
-      currentChat.addMessage(msg);
-      $(".input-message").val("");
-      console.log("writeMessage")
-      subject.notifyObservers();
-      $("#" + currentChat.id).addClass("active-contact active");
-      scrollToBottom();
+       return this.senMessage(text);
     },
     readMessage: function (m) {
     	console.log(m)
@@ -277,7 +279,7 @@ var WhatsApp = function ToDoView(app) {
 	    WhatsApp.View.showContactInformation();
     },
     printMessage: function (gc) {
-      $(".msg_card_body").append(quikr.tmpl(gc.type ? "temp_message_me" : "temp_message_you",{
+      $(".msg_card_body .msg_card_body-bubbles").append(quikr.tmpl(gc.type ? "temp_message_me" : "temp_message_you",{
       	gc : gc
       }));
     },
@@ -396,6 +398,11 @@ var WhatsApp = function ToDoCtrl(app) {
         $('span[theme]').click(function(){
         	document.cookie=("theme="+$(this).attr("theme"));
         	window.location.reload()
+        });
+        
+        $("body").on("click",".msg_cotainer_smart", function(event){
+        	console.log($(this).text());
+        	app.Model.senMessage($(this).text());
         });
         
         start = false;

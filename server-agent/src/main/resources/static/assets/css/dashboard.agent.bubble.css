@@ -30,6 +30,7 @@
 		.msg_card_body{
 			overflow-y: auto;
 			background-color: #f2f3f8 !important;
+			padding-bottom: 5px;
 			
 		}
 		.card-header{
@@ -100,10 +101,13 @@
 			width: 100% !important;
 			padding: 5px 10px;
 			margin-bottom: 3px !important;
+			cursor: pointer;
+			border-left: 5px solid #0000;
 		}
-	.active{
+		.contacts li.active{
+			border-left: 5px solid #1d3752;
 			background-color: rgba(0,0,0,0.3);
-	}
+		}
 		.user_img{
 			height: 50px;
 			width: 50px;
@@ -414,4 +418,34 @@ padding: 5px;
 ui.contacts.contact-list-unassigned li.data_unassigned {
 	color : #000 !important;
 	opacity: 0.4;
+}
+
+.msg_card_body-panel {
+	width:100%
+}
+.msg_card_body-panel hr{
+	border-top: 1px solid #e0dddd;
+	margin: 10px 0;
+}
+.msg_card_body-panel .msg_card_body-panel-tags {
+	  text-align: center;
+	  width: 90%;
+	  margin: 0 auto;
+	  display: table;
+	  text-align:center;
+}
+.msg_cotainer_smart{
+    margin-top: auto;
+    margin-bottom: auto;
+    margin-left: 3px;
+    margin-top: 2px;
+    border-radius: 8px;
+    background-color: #FFF;
+    color: #7b7575;
+    padding: 6px;
+    position: relative;
+    font-size: 14px;
+    border: 1px solid #2f8df7;
+    cursor : pointer;
+    display: inline;
 }

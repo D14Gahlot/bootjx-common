@@ -81,6 +81,12 @@
 			<artifactId>lib-postman-chat</artifactId>
 		</dependency>
 
+
+		<dependency>
+			<groupId>com.boot.jx</groupId>
+			<artifactId>lib-postman-nlp</artifactId>
+		</dependency>
+
 		<dependency>
 			<groupId>com.boot.jx</groupId>
 			<artifactId>boot-ext-jar</artifactId>

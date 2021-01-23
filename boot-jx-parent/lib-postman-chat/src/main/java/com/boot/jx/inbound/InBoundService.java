@@ -79,12 +79,14 @@ public class InBoundService {
 		if (ArgUtil.isEmpty(inBoundFilter) || inBoundFilter.onFilter(inboxMessageOriginal)) {
 			if (ArgUtil.is(inBoundHandler)) {
 				inBoundHandler.onHandle(inboxMessageOriginal);
-			} else if (agentService.onMessageSupported(inboxMessageOriginal)) {
+			}
+
+			if (agentService.onMessageSupported(inboxMessageOriginal)) {
 				agentService.onMessage(inboxMessageOriginal);
 			} else if (botEngine.isChatBotDefined() || chatClient.isChatDummyBotEnabled()) {
 				botEngine.invokeMethodsAsync(inboxMessageOriginal);
 			} else {
-				chatClient.forward(inboxMessageOriginal);
+				//chatClient.forward(inboxMessageOriginal);
 			}
 		}
 		return inboxMessageOriginal;

@@ -39,6 +39,7 @@ public class InboxMessage implements Serializable {
 
 	protected Map<String, Object> form = new HashMap<String, Object>();
 	protected Map<String, Object> data = new HashMap<String, Object>();
+	protected TagDocument tags;
 
 	public String getTo() {
 		return to;
@@ -254,6 +255,14 @@ public class InboxMessage implements Serializable {
 
 	public void setOriginalMessage(Object originalMessage) {
 		this.originalMessage = originalMessage;
+	}
+
+	public TagDocument getTags() {
+		return tags;
+	}
+
+	public void setTags(TagDocument tags) {
+		this.tags = tags;
 	}
 
 }

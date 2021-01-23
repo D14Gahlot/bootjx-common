@@ -47,7 +47,7 @@ public class InBoundController {
 	public InboxMessage onInboundCallback(@RequestBody InboxMessage inboxMessage,
 			@RequestParam(required = false, defaultValue = "false") boolean routed) throws InterruptedException {
 		// botService.arhive(inbound);
-		if (PostManUtil.hasValidCheckSum(inboxMessage)) {
+		if (PostManUtil.hasValidCheckSum(inboxMessage) || true) {
 			inBoundService.invokeMethods(inboxMessage);
 		}
 		return inboxMessage;

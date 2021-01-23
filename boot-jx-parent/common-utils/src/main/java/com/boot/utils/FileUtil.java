@@ -14,6 +14,7 @@ import java.io.Writer;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.security.CodeSource;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -59,7 +60,7 @@ public final class FileUtil {
 				throw new Exception();
 			}
 		} catch (Exception e) {
-			LOG.error("Path normalize {}  to {} ", path, resolvedPath,e);
+			LOG.error("Path normalize {}  to {} ", path, resolvedPath, e);
 			throw new RuntimeException("FILE_TRAVERSAL FOUND");
 		}
 		return path;
@@ -312,34 +313,38 @@ public final class FileUtil {
 		}
 
 		// Search in jar folder
-		String jarPathString = clazz.getProtectionDomain().getCodeSource().getLocation().getPath().split("!")[0];
+		CodeSource codeSource = clazz.getProtectionDomain().getCodeSource();
 
-		File jarPath = new File(normalize(jarPathString));
-		String propertiesPath = jarPath.getParentFile().getPath();
+		String propertiesPath = null;
 
-		propertiesPath = propertiesPath.startsWith(FILE_PREFIX2) ? propertiesPath.substring(FILE_PREFIX2.length())
-				: propertiesPath;
-		propertiesPath = propertiesPath.startsWith(FILE_PREFIX) ? propertiesPath.substring(FILE_PREFIX.length())
-				: propertiesPath;
-		propertiesPath = "/" + propertiesPath;
+		if (ArgUtil.is(codeSource)) {
+			String jarPathString = codeSource.getLocation().getPath().split("!")[0];
+			File jarPath = new File(normalize(jarPathString));
+			propertiesPath = jarPath.getParentFile().getPath();
+			propertiesPath = propertiesPath.startsWith(FILE_PREFIX2) ? propertiesPath.substring(FILE_PREFIX2.length())
+					: propertiesPath;
+			propertiesPath = propertiesPath.startsWith(FILE_PREFIX) ? propertiesPath.substring(FILE_PREFIX.length())
+					: propertiesPath;
+			propertiesPath = "/" + propertiesPath;
 
-		File file = new File(normalize(propertiesPath + "/" + filePath));
-		if (file.exists()) {
-			return file;
+			File file = new File(normalize(propertiesPath + "/" + filePath));
+			if (file.exists()) {
+				return file;
+			}
 		}
 
 		// Search working folder
 		propertiesPath = System.getProperty("user.dir");
-		file = new File(normalize(propertiesPath + "/" + filePath));
-		if (file.exists()) {
-			return file;
+		File file2 = new File(normalize(propertiesPath + "/" + filePath));
+		if (file2.exists()) {
+			return file2;
 		}
 
 		if (SysConfigUtil.FILE_SEARCH_TARGET) {
 			// Search in target folder
-			file = new File(normalize(propertiesPath + "/target/" + filePath));
-			if (file.exists()) {
-				return file;
+			file2 = new File(normalize(propertiesPath + "/target/" + filePath));
+			if (file2.exists()) {
+				return file2;
 			}
 		}
 
@@ -422,5 +427,62 @@ public final class FileUtil {
 			LOG.error("Fail:outSideInputStream:getExternalResourceAsStream", e);
 		}
 		return null;
+	}
+
+	public static InputStream getExternalOrInternalResourceAsStream(String filePath) {
+		return getExternalOrInternalResourceAsStream(filePath, FileUtil.class);
+	}
+
+	public static InputStream getExternalOrInternalResourceAsStream(String filePath, Class<?> clazz) {
+		String propertyFile = filePath;
+		InputStream inSideInputStream = null;
+		InputStream outSideInputStream = null;
+
+		try {
+			outSideInputStream = FileUtil.getExternalResourceAsStream(propertyFile, clazz);
+			if (outSideInputStream != null) {
+				LOG.info("Loaded from jarpath: {}", propertyFile);
+				return outSideInputStream;
+			} else {
+				LOG.info("Stream is EMPTY from jarpath: {}", propertyFile);
+			}
+
+		} catch (IllegalArgumentException | IOException e) {
+			LOG.error("Fail:outSideInputStream:getExternalResourceAsStream", e);
+		}
+
+		try {
+			URL ufile = FileUtil.getResource(propertyFile, clazz);
+			if (ufile != null) {
+				inSideInputStream = ufile.openStream();
+				// tenantProperties.load(inSideInputStream);
+				if (inSideInputStream != null) {
+					LOG.info("Loaded from classpath: {}", ufile.getPath());
+					return inSideInputStream;
+				} else {
+					LOG.info("Stream is EMPTY from classpath: {}", ufile.getPath());
+				}
+			} else {
+				LOG.info("URL is EMPTY from classpath: {}", propertyFile);
+			}
+		} catch (IllegalArgumentException | IOException e) {
+			LOG.error("Fail:inSideInputStream:getResource", e);
+		}
+
+		return null;
+	}
+
+	public static File getExternalOrInternalFile(String filePath) {
+		return getExternalOrInternalFile(filePath, File.class);
+	}
+
+	public static File getExternalOrInternalFile(String filePath, Class<?> clazz) {
+		File file = getExternalFile(filePath, clazz);
+		if (ArgUtil.is(file) && file.isFile()) {
+			return file;
+		}
+		// Handle internal File
+
+		return file;
 	}
 }
