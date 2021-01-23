@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org"
+	xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity3" >
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title th:text="${applicationTitle}">Al Mulla Online</title>
+</head>
+<body>
+	<div id="app"></div>
+	<script>
+window.CONST = {
+	    dev: false,
+	    remoteServerUrl: '',
+	    remoteJsUrl: '[[${cdnUrl}]]', //
+	    remoteJsVersion: '[[${CDN_VERSION}]]', //
+	    dummyApi: false,
+	    fpath : '[[${cdnUrl}]]/dist/fingerprint.js',
+	    did : '[[${did}]]',
+	    lang : '[[${lang}]]',
+	    fcmSenderId: '[[${fcmSenderId}]]',
+	    sac: '[[${sac}]]'
+	  };
+</script>
+	<script th:if="${did==null}">
+	(function(a){if("localStorage"in a){var b=a.localStorage.getItem("__did__");b?(a=new Date,a.setTime(a.getTime()+31536E6),a="expires="+a.toUTCString(),document.cookie="did="+b+";"+a+";path=/"):(b=a.CONST.fpath,a=document.createElement("script"),a.type="application/javascript",a.src=b,document.body.appendChild(a))}})(this);
+</script>
+	<script th:unless="${did==null}">
+(function(win){if("localStorage"in win)if(win.CONST.did)win.localStorage.setItem("__did__",win.CONST.did)})(this);
+</script>
+	<script>
+  function getJson(str) {
+    var json;
+    try {
+      json = JSON.parse(str);
+    } catch (e) {
+      console.error('Error in config: ', e);
+      return false;
+    }
+    return json;
+  }
+  var config = getJson(window.localStorage.getItem('debugConfig'));
+  if (config) {
+    window.CONST.dev = config.dev || false;
+    window.CONST.dummyApi = config.dummyApi || false;
+    window.CONST.remoteServerUrl = config.remoteServerUrl || '';
+    window.CONST.remoteJsUrl = config.remoteJsUrl || '';
+  }
+
+  // add css and js
+  var head = document.getElementsByTagName('head')[0];
+  var js = document.createElement('script');
+  js.type = 'text/javascript';
+  js.src = window.CONST.remoteJsUrl + '/dist/main.bundle.js?_=' + window.CONST.remoteJsVersion;
+  var css = document.createElement('link');
+  css.rel = 'stylesheet';
+  css.href = window.CONST.remoteJsUrl + '/dist/main.css?_=' + window.CONST.remoteJsVersion;
+  head.appendChild(css);
+  head.appendChild(js);
+
+  // add favicon
+  var link = document.querySelector("link[rel*='icon']") || document.createElement('link');
+  link.type = 'image/x-icon';
+  link.rel = 'shortcut icon';
+  link.href = window.CONST.remoteJsUrl + '/dist/favicon.ico';
+  document.getElementsByTagName('head')[0].appendChild(link);
+
+</script>
+</body>
+</html>

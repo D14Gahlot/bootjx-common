@@ -1,0 +1,16 @@
+{
+	"applinks": {
+		"apps": [],
+		"details": [
+			{
+				"appID": "[[${appid}]]",
+				"paths": [
+					"/app/landing/remittance",
+					"/pub/rating/*",
+					"/app/myaccount/insurance",
+					"/refer"			
+				]
+			}
+		]
+	}
+}

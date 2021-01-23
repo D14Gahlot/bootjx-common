@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+<base th:href="${APP_CONTEXT} + '/'" />
+
+<link href="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
+<link href="assets/css/dashboard.agent.bubble.css" rel="stylesheet"
+	id="bootstrap-css">
+<link href="assets/css/customer.plugin.bubble.css" rel="stylesheet"
+	id="bootstrap-css">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css" integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU" crossorigin="anonymous">
+<link href="assets/icon/style.css" rel="stylesheet"
+	id="bootstrap-css">
+ <script>
+		window.CONST = {
+			CONTEXT: '[[${APP_CONTEXT}]]'
+		}
+</script>
+</head>
+	<body>
+		<div class="h-100 bcdesgin">
+			<div class="justify-content-center h-100">
+				<div class="chat">
+					<div class="card">
+						<div class="card-header msg_head">
+							<div class="d-flex bd-highlight">
+								<div class="img_cont customer-chat-logo">
+								    <span class="icon-my-agent"></span>
+								</div>
+								<div class="user_info">
+									<span>Support</span>
+								</div>
+							</div>
+							<span id="action_menu_btn" hidden><i class="fas fa-ellipsis-v"></i></span>
+							<div class="action_menu">
+								<ul>
+									<li><i class="fas fa-user-circle"></i> View profile</li>
+									<li><i class="fas fa-users"></i> Add to close friends</li>
+									<li><i class="fas fa-plus"></i> Add to group</li>
+									<li><i class="fas fa-ban"></i> Block</li>
+								</ul>
+							</div>
+						</div>
+						<div class="card-body msg_card_body">
+						</div>
+						<div class="card-footer">
+							<div class="input-group">
+								<div class="input-group-append">
+									<span class="input-group-text attach_btn"><i class="fas fa-paperclip" hidden></i></span>
+								</div>
+								<input id="btn-input" name="" class="form-control type_msg" placeholder="Type your message..." autocomplete="off" />
+								<div class="input-group-append">
+									<span class="input-group-text send_btn" id="btn-chat"><i class="fas fa-location-arrow"></i></span>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		
+
+		<script type="text/template" id="onRcvMsgFormat">
+
+<div class="d-flex justify-content-start mb-4">
+	<div class="img_cont_msg">
+		<img src="https://static.turbosquid.com/Preview/001292/481/WV/_D.jpg" class="rounded-circle user_img_msg">
+	</div>
+	<div class="msg_cotainer">
+		<%=im._message%>
+		<% if(im._inputs && im._inputs.length>0) {%>
+<form class="cmxform" id="commentForm" method="get" action="">
+		<hr/>
+			<% for(var i in im._inputs) {%>
+			<div class="input-group">
+				<input 
+					type="<%=(im._inputs[i].type||"").toLowerCase()%>" 
+					placeholder="<%=im._inputs[i].label%>" 
+					name="<%=im._inputs[i].name%>" 
+				class="form-control" aria-describedby="id-<%=im.timestamp%>-<%=i%>">
+				<br/><small class="help-block error w-100" id="id-<%=im.timestamp%>-<%=i%>"></small>
+			</div><br>
+			<% } %>
+		<div class="input-group">
+			<input type="button" value="Send" name="" class="form-control form-submit btn btn-wyt">
+		</div>
+	<hr/>
+</form>
+		<% } %>
+		<span class="msg_time"><%=im._timestamp%></span>
+	</div>
+</div>
+		</script>
+	</body>
+	
+<script>
+function formatTime(timestamp){
+	const NOW = new Date();
+	const DATE = new Date(timestamp);
+	const DIFF = moment(NOW).diff(DATE, 'day');
+	if(DIFF < 1 ){
+		return moment(DATE).format('h:mm:ss a');
+	} else if(DIFF < 7 ){
+		return moment(DATE).format('h:mm:ss a, dddd');
+	} else {
+		return moment(DATE).format('MMM Do YY');
+	}
+}
+
+function sendMessage(data){
+	return $.ajax({
+	      type: 'POST',
+	      dataType: "json",
+	      contentType: 'application/json',
+	      url: window.CONST.CONTEXT + "/ext/inbound/web/callback",
+	      data: JSON.stringify(data),
+	});
+}
+
+var initFingerprintJS = function initFingerprintJS() {
+    FingerprintJS.load().then(fp => {
+      // The FingerprintJS agent is ready.
+      // Get a visitor identifier when you'd like to.
+      fp.get().then(result => {
+        // This is the visitor identifier:
+        const visitorId = result.visitorId;
+/////////////
+
+      	var MOBILE= result.visitorId;
+	$(function(){
+	    $(".heading-compose").click(function() {
+	      $(".side-two").css({
+	        "left": "0"
+	      });
+	    });
+
+	    $(".newMessage-back").click(function() {
+	      $(".side-two").css({
+	        "left": "-100%"
+	      });
+	    });
+	    
+	    var $SEND_BUTTON = $("#btn-chat");
+	    var $SEND_TEXT = $("#btn-input");
+	    
+	    function send(e){
+	        var id = e.target.id;
+	        //variables for testing, you could have all of the
+	        //comparisons in the 'if' statement, just using these to
+	        //make the 'if' statement more clear
+	        var notEmpty = $SEND_TEXT.val() != "",
+	            isEnterKeypress = e.type == "keypress" && e.keyCode == 13,
+	            isSendClick = e.type == "click" && id == "btn-chat";
+
+	        if( notEmpty && (isEnterKeypress || isSendClick) ) {
+	        	 var msg = $SEND_TEXT.val();
+	        	 if(msg.trim() === ""){
+	        		 $SEND_TEXT.val("");
+	        		 return
+	        	 }
+	        	
+				 var stamp = onSendMsg(msg);
+				 $SEND_TEXT.val("");
+		  	   	 return sendMessage({
+					 message :   msg, from:MOBILE
+				 }).done(function(rsp){
+					 $("#"+stamp).removeClass("blink_me") 
+				 });
+	        }
+	    }
+	    
+	    $SEND_BUTTON.click(send);
+	    $SEND_TEXT.keypress(send);
+	    pollMessage();
+	   
+	});
+
+
+	function pollMessage(){
+		//return
+		 $.getJSON(window.CONST.CONTEXT + "/ext/outbound/web/callback",{number:MOBILE}).done(function(rsp){
+			 onRcvMsg(rsp);
+		 }).always(function(rsp){
+			 setTimeout(pollMessage,2000);
+		 });;
+	}
+
+	function scrollToBottom(){
+		$('.msg_card_body')[0].scrollTop =  $('.msg_card_body')[0].scrollHeight
+	}
+	
+	function onSendMsg(msg,files){
+		var url = "";
+		if(files && files[0] && files[0].url){
+			url = '<a href="'+files[0].url+'" target="_blank" >Download</a>'
+		}
+		var stamp = new Date().getTime();
+		
+		$(".msg_card_body").append(
+			$('<div class="d-flex justify-content-end mb-4">').append(
+				$('<div class="msg_cotainer_send">').append(
+					$('<span id='+stamp+' class="blink_me"/>').append(msg),
+					$('<span class="msg_time_send">'+formatTime(stamp)+'</span>'),
+					url
+				),
+	   			$('<div class="img_cont_msg">').append(
+					'<img src="/agent/assets/images/profile.png" class="rounded-circle user_img_msg">')
+			)
+		);
+		scrollToBottom()
+		return stamp;
+	}
+	function onRcvMsg(im){
+		var url = "";
+		if(im.files && im.files[0] && im.files[0].url){
+			url = '<a href="'+files[0].url+'" target="_blank" >Download</a>'
+		}
+		var $formttdHtml = $(formatMessage(im));
+		$(".msg_card_body").append($formttdHtml);
+		$formttdHtml.find(".cmxform").validate({errorElement: "small"});
+		
+		$formttdHtml.find(".form-submit").click(function(e){
+			var form= {};
+			$formttdHtml.find('.cmxform').serializeArray().map(function(field,i){
+				form[field.name] = field.value;
+			});
+			 sendMessage({
+				 message : "", from : MOBILE, form : form
+			 }).done(function(rsp){
+				 $formttdHtml.find('.cmxform').hide(); 
+			 });
+		});
+		scrollToBottom()
+	}
+	//form-input-name:Name|TEXT;
+	//form-input-email:EMAIL|EMAIL;
+	function formatMessage(im){
+		var inputs = [];		
+		for(var key in im.options){
+			if(key.indexOf("form-input-") == 0){
+				var params = im.options[key].split("|");	
+				inputs.push({   
+					name : 	key.replace("form-input-",""),
+					label : params[0],
+					type : params[1]
+				})
+			}
+		}	
+	  im._message = (im.message || "").replace(/(?:\r\n|\r|\n)/g, '<br>');
+	  im._inputs = inputs;
+	  im._timestamp = formatTime(im.timestamp)
+      return $(quikr.tmpl("onRcvMsgFormat",{im : im }));
+	}
+      
+/////////////      
+      });
+    });
+}
+</script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script src="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.5.1/moment.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.2/jquery.validate.min.js"></script>
+	
+<script async src="//cdn.jsdelivr.net/npm/@fingerprintjs/fingerprintjs@3/dist/fp.min.js"
+  onload="initFingerprintJS()"></script>
+ <script src="assets/js/quikr.js"></script>

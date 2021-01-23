@@ -1,4 +1,4 @@
-package com.boot.jx.agent;
+package com.boot.jx.admin;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -16,7 +16,7 @@ import org.springframework.security.web.authentication.SimpleUrlAuthenticationSu
 
 @Configuration
 @EnableWebSecurity
-public class AgentSecurityConfig extends WebSecurityConfigurerAdapter {
+public class AdminSecurityConfig extends WebSecurityConfigurerAdapter {
 
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {

@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+<base th:href="${APP_CONTEXT} + '/'" />
+
+
+<link
+	href="//netdna.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css"
+	rel="stylesheet" id="bootstrap-css">
+<link href="assets/css/customer.plugin.css" rel="stylesheet"
+	id="bootstrap-css">
+ <script>
+		window.CONST = {
+			CONTEXT: '[[${APP_CONTEXT}]]'
+		}
+</script>
+</head>
+<body class="fullwidth" style="background-color: #428bca;">
+	<div class="panel panel-primary fullwidth">
+		<div class="panel-heading" id="accordion">
+			<span class="glyphicon glyphicon-comment"></span> Chat
+			<div class="btn-group pull-right">
+				<span type="button" class="btn btn-default btn-xs"
+					data-toggles="collapse" data-parent="#accordion" href="#collapseOne">
+					<span class="glyphicon glyphicon-chevron-down"></span>
+				</span>
+			</div>
+		</div>
+		<div class="panel-collapse collapse in" id="collapseOne">
+			<div class="panel-body botbox">
+				<ul class="chat">
+
+				</ul>
+			</div>
+			<div class="panel-footer">
+				<div class="input-group">
+					<input id="btn-input" type="text" class="form-control input-sm"
+						placeholder="Type your message here..." autocomplete="off" /> <span
+						class="input-group-btn">
+						<button class="btn btn-warning btn-sm" id="btn-chat">
+							Send</button>
+					</span>
+				</div>
+			</div>
+		</div>
+	</div>
+</body>
+<script src="//code.jquery.com/jquery-1.11.1.min.js"></script>
+<script>
+var initFingerprintJS = function initFingerprintJS() {
+    FingerprintJS.load().then(fp => {
+      // The FingerprintJS agent is ready.
+      // Get a visitor identifier when you'd like to.
+      fp.get().then(result => {
+        // This is the visitor identifier:
+        const visitorId = result.visitorId;
+/////////////
+
+      	var MOBILE= result.visitorId;
+	$(function(){
+	    $(".heading-compose").click(function() {
+	      $(".side-two").css({
+	        "left": "0"
+	      });
+	    });
+
+	    $(".newMessage-back").click(function() {
+	      $(".side-two").css({
+	        "left": "-100%"
+	      });
+	    });
+	    
+	    var $SEND_BUTTON = $("#btn-chat");
+	    var $SEND_TEXT = $("#btn-input");
+	    
+	    function send(e){
+	        var id = e.target.id;
+	        //variables for testing, you could have all of the
+	        //comparisons in the 'if' statement, just using these to
+	        //make the 'if' statement more clear
+	        var notEmpty = $SEND_TEXT.val() != "",
+	            isEnterKeypress = e.type == "keypress" && e.keyCode == 13,
+	            isSendClick = e.type == "click" && id == "btn-chat";
+
+	        if( notEmpty && (isEnterKeypress || isSendClick) ) {
+	        	 var msg = $SEND_TEXT.val();
+				 var stamp = onSendMsg(msg);
+				 $SEND_TEXT.val("");
+		  	   	 return $.post(window.CONST.CONTEXT + "/dummy/messages",{
+					 message :   msg, number:MOBILE
+				 }).done(function(rsp){
+					 $("#"+stamp).removeClass("blink_me") 
+				 });
+	        }
+	    }
+	    
+	    $SEND_BUTTON.click(send);
+	    $SEND_TEXT.keypress(send);
+	    pollMessage();
+	   
+	});
+
+
+	function pollMessage(){
+		//return
+		 $.getJSON(window.CONST.CONTEXT + "/dummy/messages",{number:MOBILE}).done(function(rsp){
+			 onRcvMsg((rsp.message || "").replace(/(?:\r\n|\r|\n)/g, '<br>'),rsp.files);
+		 }).always(function(rsp){
+			 setTimeout(pollMessage,2000);
+		 });;
+	}
+
+	function scrollToBottom(){
+		$('.botbox')[0].scrollTop =  $('.botbox')[0].scrollHeight
+	}
+	
+	function onSendMsg(msg,files){
+		var url = "";
+		if(files && files[0] && files[0].url){
+			url = '<a href="'+files[0].url+'" target="_blank" >Download</a>'
+		}
+		var stamp = new Date().getTime();
+		$(".chat").append(
+				$('<li class="right clearfix"></li>').append(
+	   				$('<span class="chat-img pull-right">').append(
+	   	    				'<img src="http://placehold.it/40/FA6F57/fff&text=ME" alt="User Avatar" class="img-circle">'),
+	   				$('<div class="chat-body clearfix">').append(
+	   					$('<div class="header"></div>').append(
+	   						$('<small class="text-muted"><span class="glyphicon glyphicon-time"></span>12 mins ago</small>'),
+	   						$('<strong class="pull-right primary-font">Me</strong>')),
+	   					$('<p id='+stamp+' class="pull-right blink_me" />').append(msg),
+	   					url
+	   				)
+				)
+			);
+		scrollToBottom()
+		return stamp;
+	}
+	function onRcvMsg(msg,files){
+		var url = "";
+		if(files && files[0] && files[0].url){
+			url = '<a href="'+files[0].url+'" target="_blank" >Download</a>'
+		}
+		$(".chat").append(
+				$('<li class="left clearfix"></li>').append(
+	   				$('<span class="chat-img pull-left">').append(
+	   	    				'<img src="http://placehold.it/40/55C1E7/fff&amp;text=U" alt="User Avatar" class="img-circle">'),
+	   				$('<div class="chat-body clearfix">').append(
+	   					$('<div class="header"></div>').append(
+	   						$('<strong class="primary-font">Jack Sparrow</strong>'),
+	   						$('<small class="pull-right text-muted"><span class="glyphicon glyphicon-time"></span>12 mins ago</small>')),
+	   					$('<p/>').append(msg),
+	   					url
+	   				)
+				)
+			);
+		scrollToBottom()
+	}
+      
+/////////////      
+      });
+    });
+}
+</script>
+<script
+	src="//netdna.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+<script async src="//cdn.jsdelivr.net/npm/@fingerprintjs/fingerprintjs@3/dist/fp.min.js"
+  onload="initFingerprintJS()"></script>
