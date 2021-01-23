@@ -2,6 +2,7 @@ package com.boot.jx.agent.dto;
 
 import java.io.Serializable;
 
+import com.boot.jx.postman.model.TagDocument;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -12,6 +13,7 @@ public class ChatMessageDto implements Serializable {
 	private String sessionId;
 	private long timestamp;
 	private boolean type;
+	private TagDocument tags;
 
 	public String getText() {
 		return text;
@@ -51,5 +53,13 @@ public class ChatMessageDto implements Serializable {
 
 	public void setSessionId(String sessionId) {
 		this.sessionId = sessionId;
+	}
+
+	public TagDocument getTags() {
+		return tags;
+	}
+
+	public void setTags(TagDocument tags) {
+		this.tags = tags;
 	}
 }

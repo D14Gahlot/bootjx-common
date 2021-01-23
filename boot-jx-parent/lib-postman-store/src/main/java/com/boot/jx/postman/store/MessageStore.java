@@ -41,6 +41,7 @@ public class MessageStore {
 		doc.setContact(contact);
 		doc.setMessage(inboxMessage.getMessage());
 		doc.setSessionId(inboxMessage.getSessionId());
+		doc.setTags(inboxMessage.getTags());
 		return doc;
 	}
 

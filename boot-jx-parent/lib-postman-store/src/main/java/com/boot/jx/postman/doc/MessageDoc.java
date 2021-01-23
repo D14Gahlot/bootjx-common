@@ -7,6 +7,8 @@ import org.springframework.data.annotation.TypeAlias;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import com.boot.jx.postman.model.TagDocument;
+
 @Document(collection = MessageDoc.COLLECTION_NAME)
 @TypeAlias("MessageDoc")
 public class MessageDoc implements Serializable {
@@ -27,6 +29,7 @@ public class MessageDoc implements Serializable {
 	private String status;
 	private ContactDoc contact;
 	private String agent;
+	private TagDocument tags;
 
 	@Indexed
 	private String contactId;
@@ -133,6 +136,14 @@ public class MessageDoc implements Serializable {
 
 	public void setAgent(String agent) {
 		this.agent = agent;
+	}
+
+	public TagDocument getTags() {
+		return tags;
+	}
+
+	public void setTags(TagDocument tags) {
+		this.tags = tags;
 	}
 
 }

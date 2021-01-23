@@ -19,7 +19,6 @@ import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.model.InboxMessage;
-import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.store.MessageStore;
 import com.boot.jx.stomp.StompTunnelService;
 import com.boot.utils.ArgUtil;
@@ -121,6 +120,7 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 			}
 			messageDto.setText(ArgUtil.nonEmpty(messageDoc.getTemplate(), messageDoc.getMessage()));
 			messageDto.setTimestamp(messageDoc.getTimestamp());
+			messageDto.setTags(messageDoc.getTags());
 			messageDtos.add(messageDto);
 		}
 		chatSessionDto.setMessages(messageDtos);

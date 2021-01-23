@@ -122,9 +122,8 @@ public class OpenNLPService {
 		Language[] langs = languageDetectorME.predictLanguages(userInput);
 
 		if (ArgUtil.is(langs)) {
-			java.util.stream.IntStream.range(0,Math.min(3, langs.length)).filter(i -> langs[i].getConfidence() > 0.01)
-			.mapToObj(i -> langs[i].getLang())
-			.collect(Collectors.toCollection(() -> nlpDocument.langs()));
+			java.util.stream.IntStream.range(0, Math.min(3, langs.length)).filter(i -> langs[i].getConfidence() > 0.01)
+					.mapToObj(i -> langs[i].getLang()).collect(Collectors.toCollection(() -> nlpDocument.langs()));
 		}
 
 		for (String sentence : sentences) {
