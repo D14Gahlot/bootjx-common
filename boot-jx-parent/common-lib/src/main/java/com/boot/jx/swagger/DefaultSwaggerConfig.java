@@ -11,8 +11,8 @@ import org.springframework.context.annotation.Configuration;
 import com.boot.jx.AppConfig;
 import com.boot.jx.AppConstants;
 import com.boot.jx.AppContextUtil;
-import com.boot.jx.dict.Tenant;
-import com.boot.jx.scope.TenantContextHolder;
+import com.boot.jx.scope.tnt.TenantContextHolder;
+import com.boot.jx.scope.tnt.Tenants;
 import com.boot.jx.swagger.MockParamBuilder.MockParam;
 import com.boot.utils.CollectionUtil;
 import com.boot.utils.UniqueID;
@@ -54,8 +54,7 @@ public class DefaultSwaggerConfig {
 			return docketWrapper.getDocket();
 		}
 
-		Docket docket = new Docket(DocumentationType.SWAGGER_2)
-				.select()
+		Docket docket = new Docket(DocumentationType.SWAGGER_2).select()
 				.apis(RequestHandlerSelectors.basePackage("com.boot"))
 				// .paths(regex("/product.*"))
 				.build();
@@ -76,15 +75,14 @@ public class DefaultSwaggerConfig {
 			operationParameters.add(parameter);
 		}
 		AppContextUtil.getSessionId(true);
-		AppContextUtil.getTraceId(true,true);
+		AppContextUtil.getTraceId(true, true);
 
 		operationParameters.add(new ParameterBuilder().name(AppConstants.TRANX_ID_XKEY).description("Transaction Id")
-				.defaultValue(
-						AppContextUtil.getTraceId())
-				.modelRef(new ModelRef(PARAM_STRING)).parameterType(PARAM_HEADER).required(false).build());
+				.defaultValue(AppContextUtil.getTraceId()).modelRef(new ModelRef(PARAM_STRING))
+				.parameterType(PARAM_HEADER).required(false).build());
 		operationParameters.add(new ParameterBuilder().name(AppConstants.TRACE_ID_XKEY).description("Trace Id")
-				.defaultValue(AppContextUtil.getTraceId())
-				.modelRef(new ModelRef(PARAM_STRING)).parameterType(PARAM_HEADER).required(false).build());
+				.defaultValue(AppContextUtil.getTraceId()).modelRef(new ModelRef(PARAM_STRING))
+				.parameterType(PARAM_HEADER).required(false).build());
 		docket.globalOperationParameters(operationParameters);
 		docket.apiInfo(metaData());
 		return docket;
@@ -92,19 +90,17 @@ public class DefaultSwaggerConfig {
 
 	@Bean
 	public MockParam tenantParam() {
-		return new MockParamBuilder().name(TenantContextHolder.TENANT).description("Tenant Country").defaultValue("KWT")
-				.parameterType(MockParamBuilder.MockParamType.HEADER)
-				.allowableValues(Tenant.tenantStrings(), TenantContextHolder.TENANT).required(true).build();
+		return new MockParamBuilder().name(TenantContextHolder.TENANT).description("Tenant Country")
+				.defaultValue(Tenants.DEFAULT_STR).parameterType(MockParamBuilder.MockParamType.HEADER)
+				.allowableValues(Tenants.tenantStrings(), TenantContextHolder.TENANT).required(true).build();
 
 	}
 
 	@Bean
 	public MockParam swaggerParam() {
 		return new MockParamBuilder().name(SWGGER_SECRET_PARAM).description(SWGGER_SECRET_PARAM)
-				.defaultValue(SWGGER_SECRET_VALUE)
-				.parameterType(MockParamBuilder.MockParamType.HEADER)
-				.allowableValues(CollectionUtil.getList(SWGGER_SECRET_VALUE), PARAM_STRING).required(true)
-				.hidden(true)
+				.defaultValue(SWGGER_SECRET_VALUE).parameterType(MockParamBuilder.MockParamType.HEADER)
+				.allowableValues(CollectionUtil.getList(SWGGER_SECRET_VALUE), PARAM_STRING).required(true).hidden(true)
 				.build();
 
 	}

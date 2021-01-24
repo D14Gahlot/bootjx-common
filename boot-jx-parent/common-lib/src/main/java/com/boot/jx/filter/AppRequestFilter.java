@@ -26,7 +26,6 @@ import com.boot.jx.AppConstants;
 import com.boot.jx.AppContextUtil;
 import com.boot.jx.api.AmxApiResponseUtil;
 import com.boot.jx.dict.Language;
-import com.boot.jx.dict.Tenant;
 import com.boot.jx.dict.UserClient.UserDeviceClient;
 import com.boot.jx.http.CommonHttpRequest;
 import com.boot.jx.http.CommonHttpRequest.ApiRequestDetail;
@@ -37,12 +36,12 @@ import com.boot.jx.logger.events.RequestTrackEvent.Type;
 import com.boot.jx.model.MapModel;
 import com.boot.jx.rest.AppRequestContextInFilter;
 import com.boot.jx.rest.AppRequestInterfaces.ClientAuthFilter;
-import com.boot.jx.scope.TenantContextHolder;
+import com.boot.jx.scope.tnt.TenantContextHolder;
+import com.boot.jx.scope.vendor.VendorAuthContext;
+import com.boot.jx.scope.vendor.VendorAuthFilter;
+import com.boot.jx.scope.vendor.VendorAuthService;
+import com.boot.jx.scope.vendor.VendorContext;
 import com.boot.jx.session.SessionContextService;
-import com.boot.jx.vendor.VendorAuthContext;
-import com.boot.jx.vendor.VendorAuthFilter;
-import com.boot.jx.vendor.VendorAuthService;
-import com.boot.jx.vendor.VendorContext;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.Constants;
 import com.boot.utils.CryptoUtil;
@@ -174,7 +173,7 @@ public class AppRequestFilter implements Filter {
 			if (!StringUtils.isEmpty(siteId)) {
 				TenantContextHolder.setCurrent(siteId, null);
 			}
-			Tenant tnt = TenantContextHolder.currentSite();
+			String tnt = TenantContextHolder.currentSite();
 
 			AppContextUtil.importAppContextFromRequest(req);
 

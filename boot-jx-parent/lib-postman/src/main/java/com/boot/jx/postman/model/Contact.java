@@ -5,14 +5,13 @@ import java.util.List;
 import java.util.Map;
 
 import com.boot.jx.dict.Language;
-import com.boot.jx.dict.Tenant;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Contact implements java.io.Serializable {
 
 	private static final long serialVersionUID = -2229330167964350550L;
-	Tenant tenant;
+	String tenant;
 	String country;
 	String userid;
 	String prefix;
@@ -60,11 +59,11 @@ public class Contact implements java.io.Serializable {
 		this.email = email;
 	}
 
-	public Tenant getTenant() {
+	public String getTenant() {
 		return tenant;
 	}
 
-	public void setTenant(Tenant tenant) {
+	public void setTenant(String tenant) {
 		this.tenant = tenant;
 	}
 

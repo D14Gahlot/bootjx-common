@@ -9,10 +9,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.boot.jx.dict.Tenant;
 import com.boot.jx.postman.GeoLocationService;
 import com.boot.jx.postman.PostManException;
 import com.boot.jx.postman.model.GeoLocation;
+import com.boot.jx.scope.tnt.Tenants.Tenant;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.FileUtil;
 import com.maxmind.geoip2.DatabaseReader;
@@ -76,7 +76,6 @@ public class GeoLocationServiceImpl implements GeoLocationService {
 			loc.setStateCode(response.getMostSpecificSubdivision().getIsoCode());
 			loc.setCountryCode(response.getCountry().getIsoCode());
 			loc.setContinentCode(response.getContinent().getCode());
-			loc.setTenant(Tenant.fromString(response.getCountry().getIsoCode(), defaultTennatId, true));
 		} catch (Exception e) {
 			loc.setTenant(defaultTennatId);
 			LOGGER.error("No location or IP " + ip, e);

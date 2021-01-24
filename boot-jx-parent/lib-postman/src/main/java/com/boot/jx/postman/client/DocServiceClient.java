@@ -20,10 +20,10 @@ import com.boot.jx.postman.model.DocResult;
 import com.boot.jx.rest.RestService;
 import com.boot.jx.rest.RestService.Ajax;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.CryptoUtil.HashBuilder;
 import com.boot.utils.JsonUtil;
 import com.boot.utils.UniqueID;
 import com.boot.utils.Urly;
-import com.boot.utils.CryptoUtil.HashBuilder;
 
 @Component
 public class DocServiceClient {

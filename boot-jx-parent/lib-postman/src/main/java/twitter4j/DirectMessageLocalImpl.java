@@ -4,8 +4,6 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.Map;
 
-import com.boot.utils.ArgUtil;
-
 import twitter4j.conf.Configuration;
 
 public final class DirectMessageLocalImpl extends TwitterResponseImpl implements DirectMessage, java.io.Serializable {

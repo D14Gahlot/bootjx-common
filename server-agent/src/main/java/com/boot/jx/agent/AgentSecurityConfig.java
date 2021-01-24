@@ -16,7 +16,7 @@ import org.springframework.security.web.authentication.SimpleUrlAuthenticationSu
 
 @Configuration
 @EnableWebSecurity
-public class AdminSecurityConfig extends WebSecurityConfigurerAdapter {
+public class AgentSecurityConfig extends WebSecurityConfigurerAdapter {
 
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {

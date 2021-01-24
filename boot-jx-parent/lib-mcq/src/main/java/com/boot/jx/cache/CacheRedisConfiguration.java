@@ -12,7 +12,6 @@ import org.redisson.config.SingleServerConfig;
 import org.redisson.spring.cache.CacheConfig;
 import org.redisson.spring.cache.RedissonSpringCacheManager;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Required;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;

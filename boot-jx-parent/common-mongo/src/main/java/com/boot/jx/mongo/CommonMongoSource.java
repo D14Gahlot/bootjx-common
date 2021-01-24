@@ -7,8 +7,8 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.SimpleMongoDbFactory;
 import org.springframework.stereotype.Component;
 
-import com.boot.jx.scope.TenantScoped;
-import com.boot.jx.scope.TenantValue;
+import com.boot.jx.scope.tnt.TenantScoped;
+import com.boot.jx.scope.tnt.TenantValue;
 import com.boot.utils.ArgUtil;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientURI;

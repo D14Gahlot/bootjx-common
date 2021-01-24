@@ -18,7 +18,7 @@ package com.boot.jx.mcq.shedlock;
 import java.time.Instant;
 import java.util.Objects;
 
-import com.boot.jx.dict.Tenant;
+import com.boot.jx.scope.tnt.Tenants;
 
 /**
  * Lock configuration.
@@ -26,7 +26,7 @@ import com.boot.jx.dict.Tenant;
 public class LockConfiguration {
 	private final String name;
 
-	private final Tenant tenant;
+	private final String tenant;
 
 	/**
 	 * The lock is held until this instant, after that it's automatically released
@@ -45,10 +45,10 @@ public class LockConfiguration {
 	}
 
 	public LockConfiguration(String name, Instant lockAtMostUntil, Instant lockAtLeastUntil) {
-		this(name, lockAtMostUntil, Instant.now(), Tenant.NONE);
+		this(name, lockAtMostUntil, Instant.now(), Tenants.NONE_STR);
 	}
 
-	public LockConfiguration(String name, Instant lockAtMostUntil, Instant lockAtLeastUntil, Tenant tenant) {
+	public LockConfiguration(String name, Instant lockAtMostUntil, Instant lockAtLeastUntil, String tenant) {
 		this.name = tenant.toString().toLowerCase() + "_" + Objects.requireNonNull(name);
 		this.tenant = tenant;
 		this.lockAtMostUntil = Objects.requireNonNull(lockAtMostUntil);
@@ -90,10 +90,7 @@ public class LockConfiguration {
 
 	@Override
 	public String toString() {
-		return "LockConfiguration{" +
-				"name='" + name + '\'' +
-				", lockAtMostUntil=" + lockAtMostUntil +
-				", lockAtLeastUntil=" + lockAtLeastUntil +
-				'}';
+		return "LockConfiguration{" + "name='" + name + '\'' + ", lockAtMostUntil=" + lockAtMostUntil
+				+ ", lockAtLeastUntil=" + lockAtLeastUntil + '}';
 	}
 }

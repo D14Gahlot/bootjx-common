@@ -1,6 +1,7 @@
-package com.boot.jx.scope;
+package com.boot.jx.scope.tnt;
 
-import com.boot.jx.dict.Tenant;
+import com.boot.jx.scope.tnt.Tenants.Tenant;
+import com.boot.utils.ArgUtil;
 import com.boot.utils.ContextUtil;
 
 public class TenantContextHolder {
@@ -12,27 +13,27 @@ public class TenantContextHolder {
 	}
 
 	public static void setCurrent(String siteId) {
-		ContextUtil.map().put(TENANT, fromString(siteId, Tenant.DEFAULT));
+		ContextUtil.map().put(TENANT, fromString(siteId, Tenants.DEFAULT).toString());
 	}
 
 	public static void setCurrent(String siteId, Tenant defaultTnt) {
-		ContextUtil.map().put(TENANT, fromString(siteId, defaultTnt));
+		ContextUtil.map().put(TENANT, fromString(siteId, defaultTnt).toString());
 	}
 
 	public static void setDefault() {
-		ContextUtil.map().put(TENANT, Tenant.DEFAULT);
+		ContextUtil.map().put(TENANT, Tenants.DEFAULT.toString());
 	}
 
-	private static Tenant currentSite(boolean returnDefault, Tenant defaultTnt) {
+	private static String currentSite(boolean returnDefault, Tenant defaultTnt) {
 		Object site = ContextUtil.map().get(TENANT);
 		if (site == null) {
 			if (returnDefault) {
-				return defaultTnt;
+				return ArgUtil.parseAsString(defaultTnt);
 			} else {
 				return null;
 			}
 		}
-		return (Tenant) site;
+		return (String) site;
 	}
 
 	/**
@@ -42,8 +43,8 @@ public class TenantContextHolder {
 	 * @param returnDefault - to return Tenant#DEFAULT in case no current is set
 	 * @return
 	 */
-	public static Tenant currentSite(boolean returnDefault) {
-		return currentSite(returnDefault, Tenant.DEFAULT);
+	public static String currentSite(boolean returnDefault) {
+		return currentSite(returnDefault, Tenants.DEFAULT);
 	}
 
 	/**
@@ -53,8 +54,8 @@ public class TenantContextHolder {
 	 * @param defaultTnt
 	 * @return
 	 */
-	public static Tenant currentSite(Tenant defaultTnt) {
-		return currentSite(true, Tenant.DEFAULT);
+	public static String currentSite(Tenant defaultTnt) {
+		return currentSite(true, Tenants.DEFAULT);
 	}
 
 	/**
@@ -64,8 +65,8 @@ public class TenantContextHolder {
 	 * @param defaultTnt
 	 * @return
 	 */
-	public static Tenant currentSite(String defaultTnt) {
-		return currentSite(fromString(defaultTnt, Tenant.DEFAULT));
+	public static String currentSite(String defaultTnt) {
+		return currentSite(fromString(defaultTnt, Tenants.DEFAULT));
 	}
 
 	/**
@@ -73,12 +74,12 @@ public class TenantContextHolder {
 	 * 
 	 * @return
 	 */
-	public static Tenant currentSite() {
+	public static String currentSite() {
 		return currentSite(true);
 	}
 
-	public static Tenant fromString(String siteId, Tenant defaultTnt) {
-		return Tenant.fromString(siteId, defaultTnt);
+	public static String fromString(String siteId, Tenant defaultTnt) {
+		return Tenants.fromString(siteId, defaultTnt).toString();
 	}
 
 }

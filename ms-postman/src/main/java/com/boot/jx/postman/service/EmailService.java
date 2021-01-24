@@ -36,7 +36,7 @@ import com.boot.jx.postman.model.Email;
 import com.boot.jx.postman.model.File;
 import com.boot.jx.postman.model.Message.Status;
 import com.boot.jx.postman.model.Notipy;
-import com.boot.jx.scope.TenantScoped;
+import com.boot.jx.scope.tnt.TenantScoped;
 import com.boot.jx.tmpl.TemplateUtils;
 import com.boot.jx.tunnel.TunnelMessage;
 import com.boot.utils.ArgUtil;

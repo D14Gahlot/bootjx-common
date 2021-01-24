@@ -1,4 +1,4 @@
-package com.boot.jx.vendor;
+package com.boot.jx.scope.vendor;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -7,8 +7,8 @@ import org.springframework.stereotype.Component;
 
 import com.boot.jx.http.CommonHttpRequest;
 import com.boot.jx.http.CommonHttpRequest.ApiRequestDetail;
-import com.boot.jx.vendor.VendorContext.VendorScoped;
-import com.boot.jx.vendor.VendorContext.VendorValue;
+import com.boot.jx.scope.vendor.VendorContext.VendorScoped;
+import com.boot.jx.scope.vendor.VendorContext.VendorValue;
 
 @Component
 @VendorScoped("DEFAULT")

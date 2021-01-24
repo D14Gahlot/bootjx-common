@@ -10,8 +10,8 @@ import com.boot.jx.postman.model.Email;
 import com.boot.jx.postman.model.MessageType;
 import com.boot.jx.postman.model.SupportEmail;
 import com.boot.jx.postman.model.TemplatesMX;
-import com.boot.jx.scope.TenantScoped;
-import com.boot.jx.scope.TenantValue;
+import com.boot.jx.scope.tnt.TenantScoped;
+import com.boot.jx.scope.tnt.TenantValue;
 import com.boot.utils.Utils;
 
 /**

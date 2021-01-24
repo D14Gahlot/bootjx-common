@@ -20,10 +20,9 @@ import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
 
 import com.boot.jx.dict.ContactType;
-import com.boot.jx.dict.Tenant;
 import com.boot.jx.logger.LoggerService;
 import com.boot.jx.postman.PostManException;
-import com.boot.jx.scope.TenantProperties;
+import com.boot.jx.scope.tnt.TenantProperties;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.Constants;
 import com.boot.utils.ContextUtil;
@@ -50,10 +49,8 @@ public class TemplateUtils {
 	private static final Map<String, String> base64 = new ConcurrentHashMap<String, String>();
 	private static final Map<String, String> templateFiles = new ConcurrentHashMap<String, String>();
 
-	private static final Cache<String, String> templateFilesExternal = CacheBuilder.newBuilder()
-			.maximumSize(10000)
-			.expireAfterWrite(5, TimeUnit.MINUTES)
-			.build();
+	private static final Cache<String, String> templateFilesExternal = CacheBuilder.newBuilder().maximumSize(10000)
+			.expireAfterWrite(5, TimeUnit.MINUTES).build();
 
 	private static boolean IS_TEMPLATE_SCANNED = false;
 
@@ -96,7 +93,7 @@ public class TemplateUtils {
 	@Value("${jax.static.path}")
 	String jaxStaticPath;
 
-	public String getTemplateFile(String file, Tenant tnt, Locale locale, ContactType contactType) {
+	public String getTemplateFile(String file, String tnt, Locale locale, ContactType contactType) {
 		if (!IS_TEMPLATE_SCANNED) {
 			try {
 				for (Resource resource : htmlFiles) {
@@ -171,7 +168,7 @@ public class TemplateUtils {
 		}
 	}
 
-	private String getValidTemplateFile(String file, Tenant tnt, Locale locale, ContactType contactType,
+	private String getValidTemplateFile(String file, String tnt, Locale locale, ContactType contactType,
 			boolean external) {
 		String relativeFile = file;
 		String folder = Constants.BLANK;
@@ -207,10 +204,10 @@ public class TemplateUtils {
 			}
 		}
 		specficFile = getValidTemplateFileInternal(Constants.BLANK, file, tnt, locale);
-			return specficFile;
+		return specficFile;
 	}
 
-	private String getValidTemplateFileInternal(String folder, String relativeFile, Tenant tnt, Locale locale) {
+	private String getValidTemplateFileInternal(String folder, String relativeFile, String tnt, Locale locale) {
 		String specficFile = String.format(folder + "%s_%s.%s", relativeFile, locale.getLanguage(),
 				ArgUtil.parseAsString(tnt, Constants.BLANK).toLowerCase());
 
@@ -225,8 +222,7 @@ public class TemplateUtils {
 			return tenantFile;
 		}
 
-		String localeFile = String.format(folder + "%s_%s", relativeFile,
-				locale.getLanguage());
+		String localeFile = String.format(folder + "%s_%s", relativeFile, locale.getLanguage());
 		if (templateFiles.containsKey(localeFile)) {
 			templateFiles.put(specficFile, localeFile);
 			return tenantFile;
@@ -241,7 +237,7 @@ public class TemplateUtils {
 		return null;
 	}
 
-	private String getValidTemplateFileExternal(String folder, String relativeFile, String ext, Tenant tnt,
+	private String getValidTemplateFileExternal(String folder, String relativeFile, String ext, String tnt,
 			Locale locale) {
 		String specficFile = String.format(folder + "%s_%s.%s", relativeFile, locale.getLanguage(),
 				ArgUtil.parseAsString(tnt, Constants.BLANK).toLowerCase());
@@ -257,8 +253,7 @@ public class TemplateUtils {
 			return specficFile;
 		}
 
-		specficFile = String.format(folder + "%s_%s", relativeFile,
-				locale.getLanguage());
+		specficFile = String.format(folder + "%s_%s", relativeFile, locale.getLanguage());
 		r = applicationContext.getResource("file:" + jaxStaticPath + "/templates/" + specficFile + ext);
 		if (r != null && r.exists()) {
 			return specficFile;
@@ -286,7 +281,7 @@ public class TemplateUtils {
 		}
 		return ArgUtil.parseAsString(value);
 	}
-	
+
 	public String json(Object object) {
 		return JsonUtil.toJson(object);
 	}
@@ -447,9 +442,8 @@ public class TemplateUtils {
 		if (base64.containsKey(contentId)) {
 			base64String = base64.get(contentId);
 		} else if (contentId.startsWith(jaxStaticContext)) {
-			byte[] imageByteArray = IoUtils
-					.toByteArray(
-							applicationContext.getResource("file:" + jaxStaticUrl + "/" + contentId).getInputStream());
+			byte[] imageByteArray = IoUtils.toByteArray(
+					applicationContext.getResource("file:" + jaxStaticUrl + "/" + contentId).getInputStream());
 			base64String = StringUtils.newStringUtf8(Base64.encodeBase64(imageByteArray, false));
 		} else {
 			byte[] imageByteArray = IoUtils
@@ -473,8 +467,8 @@ public class TemplateUtils {
 		if (contentId.startsWith(jaxStaticContext)) {
 			return applicationContext.getResource("file:" + jaxStaticUrl + "/" + contentId);
 		} else {
-		return applicationContext.getResource("classpath:" + contentId);
-	}
+			return applicationContext.getResource("classpath:" + contentId);
+		}
 	}
 
 	/**

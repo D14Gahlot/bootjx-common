@@ -1,4 +1,4 @@
-package com.boot.jx.scope;
+package com.boot.jx.scope.tnt;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;

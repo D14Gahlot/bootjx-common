@@ -2,7 +2,7 @@ package com.boot.jx.postman.model;
 
 import java.io.Serializable;
 
-import com.boot.jx.dict.Tenant;
+import com.boot.jx.scope.tnt.Tenants.Tenant;
 
 public class GeoLocation implements Serializable {
 

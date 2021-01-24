@@ -1,7 +1,5 @@
 package com.boot.jx.admin.model;
 
-
-
 import java.util.Date;
 
 import javax.persistence.Column;
@@ -15,7 +13,7 @@ public class Agent {
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Integer agent_id;
-	@Column(unique = true,nullable = false,length = 5)
+	@Column(unique = true, nullable = false, length = 5)
 	private String agent_code;
 	@Column(nullable = false)
 	private String agent_name;
@@ -23,14 +21,13 @@ public class Agent {
 	private String agent_email;
 	private String agent_number;
 	private Date created_date;
-	private String create_by="ADMIN";
+	private String create_by = "ADMIN";
 	private Date modified_date;
-	@Column(columnDefinition = "ADMIN")
-	private String modified_by="ADMIN";
-	@Column(columnDefinition = "Y",length =1)
+	@Column
+	private String modified_by = "ADMIN";
+	@Column(length = 1)
 	private String isactive;
 
-	
 	public String getAgent_name() {
 		return agent_name;
 	}
@@ -103,11 +100,6 @@ public class Agent {
 		this.isactive = isactive;
 	}
 
-	public Agent() {
-	}
-
-	
-	
 	public String getAgent_code() {
 		return agent_code;
 	}

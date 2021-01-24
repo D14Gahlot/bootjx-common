@@ -15,11 +15,12 @@ import com.boot.jx.api.ApiResponse;
 import com.boot.jx.dict.BranchesBHR;
 import com.boot.jx.dict.BranchesKWT;
 import com.boot.jx.dict.Nations;
-import com.boot.jx.dict.Tenant;
 import com.boot.jx.postman.PostManException;
 import com.boot.jx.postman.PostManUrls;
 import com.boot.jx.postman.client.PushNotifyClient;
 import com.boot.jx.postman.model.PushMessage;
+import com.boot.jx.scope.tnt.Tenants;
+import com.boot.jx.scope.tnt.Tenants.Tenant;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiParam;
@@ -48,7 +49,7 @@ public class NotifyController {
 	 */
 	@RequestMapping(value = PostManUrls.LIST_TENANT, method = RequestMethod.POST)
 	public List<Tenant> listOfTenants() throws PostManException, InterruptedException, ExecutionException {
-		return Arrays.asList(Tenant.values());
+		return Tenants.values();
 	}
 
 	/**
@@ -65,28 +66,6 @@ public class NotifyController {
 	}
 
 	/**
-	 * List of nations.
-	 *
-	 * @param tenant the tenant
-	 * @return the list
-	 * @throws PostManException     the post man exception
-	 * @throws InterruptedException the interrupted exception
-	 * @throws ExecutionException   the execution exception
-	 */
-	@RequestMapping(value = PostManUrls.LIST_BRANCHES, method = RequestMethod.POST)
-	public List<?> listOfNations(
-			@ApiParam(required = true, allowableValues = "KWT,BHR",
-					value = "Select Tenant") @RequestParam Tenant tenant)
-			throws PostManException, InterruptedException, ExecutionException {
-		if (tenant == Tenant.BHR) {
-			return Arrays.asList(BranchesBHR.values());
-		} else {
-			return Arrays.asList(BranchesKWT.values());
-		}
-
-	}
-
-	/**
 	 * Notify all.
 	 *
 	 * @param tenant  the tenant
@@ -97,8 +76,7 @@ public class NotifyController {
 	 */
 	@RequestMapping(value = "/postman/notify/all", method = RequestMethod.POST)
 	public ApiResponse<PushMessage, Object> notifyAll(
-			@ApiParam(required = true, allowableValues = "KWT,BHR",
-					value = "Select Tenant") @RequestParam Tenant tenant,
+			@ApiParam(required = true, allowableValues = "KWT,BHR", value = "Select Tenant") @RequestParam String tenant,
 			@RequestParam String message, @RequestParam String title) throws PostManException {
 		PushMessage msg = new PushMessage();
 		msg.setMessage(message);
@@ -119,8 +97,7 @@ public class NotifyController {
 	 */
 	@RequestMapping(value = "/postman/notify/nationality", method = RequestMethod.POST)
 	public ApiResponse<PushMessage, Object> notifyNational(
-			@ApiParam(required = true, allowableValues = "KWT,BHR",
-					value = "Select Tenant") @RequestParam Tenant tenant,
+			@ApiParam(required = true, allowableValues = "KWT,BHR", value = "Select Tenant") @RequestParam String tenant,
 			@RequestParam Nations nationality, @RequestParam String message, @RequestParam String title)
 			throws PostManException {
 		PushMessage msg = new PushMessage();

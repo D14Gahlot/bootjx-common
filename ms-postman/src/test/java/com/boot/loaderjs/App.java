@@ -11,13 +11,14 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.boot.jx.AppContextUtil;
-import com.boot.jx.dict.Tenant;
 import com.boot.jx.postman.model.Contact;
 import com.boot.jx.postman.model.PushMessage;
+import com.boot.jx.scope.tnt.Tenants;
+import com.boot.jx.scope.tnt.Tenants.Tenant;
 import com.boot.jx.tmpl.TemplateUtils;
+import com.boot.utils.CryptoUtil.HashBuilder;
 import com.boot.utils.MapBuilder;
 import com.boot.utils.Urly;
-import com.boot.utils.CryptoUtil.HashBuilder;
 
 public class App { // Noncompliant
 	/**
@@ -50,7 +51,7 @@ public class App { // Noncompliant
 
 		PushMessage msg = new PushMessage();
 		
-		AppContextUtil.setTenant(Tenant.KWT);
+		AppContextUtil.setTenant(Tenants.DEFAULT);
 
 		msg.addContact(new Contact().or(MapBuilder.map()
 				.put("lang", "en")

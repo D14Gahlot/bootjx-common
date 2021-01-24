@@ -21,14 +21,15 @@ import org.springframework.web.client.RestTemplate;
 
 import com.boot.jx.dict.Language;
 import com.boot.jx.dict.Project;
-import com.boot.jx.dict.Tenant;
 import com.boot.jx.dict.UserClient.AppType;
 import com.boot.jx.dict.UserClient.Channel;
 import com.boot.jx.dict.UserClient.ClientType;
 import com.boot.jx.dict.UserClient.DeviceType;
 import com.boot.jx.filter.AppClientErrorHanlder;
 import com.boot.jx.filter.AppClientInterceptor;
-import com.boot.jx.scope.TenantProperties;
+import com.boot.jx.scope.tnt.TenantProperties;
+import com.boot.jx.scope.tnt.Tenants;
+import com.boot.jx.scope.tnt.Tenants.Tenant;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.Constants;
 import com.boot.utils.JsonUtil.JsonUtilConfigurable;
@@ -149,7 +150,7 @@ public class AppConfig {
 
 	@Value(DEFAULT_TENANT_EXP)
 	@AppParamKey(AppParam.DEFAULT_TENANT)
-	private Tenant defaultTenant;
+	private String defaultTenant;
 
 	@Value("${default.lang}")
 	private Language defaultLang;
@@ -228,7 +229,7 @@ public class AppConfig {
 	@Value(JAX_CASHIER_URL)
 	@AppParamKey(AppParam.JAX_CASHIER_URL)
 	private String cashierURL;
-	
+
 	@Value(JAX_DROOL_URL)
 	@AppParamKey(AppParam.JAX_DROOL_URL)
 	private String jaxDroolUrl;
@@ -457,11 +458,11 @@ public class AppConfig {
 	public void init() {
 		TenantProperties.setEnviroment(environment);
 		if (defaultTenant != null) {
-			Tenant.DEFAULT = defaultTenant;
+			Tenants.setDefault(defaultTenant);
 		}
 	}
 
-	public Tenant getDefaultTenant() {
+	public String getDefaultTenant() {
 		return defaultTenant;
 	}
 
@@ -475,10 +476,6 @@ public class AppConfig {
 
 	public String getAppSpecifcDecryptedProp() {
 		return appSpecifcDecryptedProp;
-	}
-
-	public void setDefaultTenant(Tenant defaultTenant) {
-		this.defaultTenant = defaultTenant;
 	}
 
 	public String getAppAuthToken() {

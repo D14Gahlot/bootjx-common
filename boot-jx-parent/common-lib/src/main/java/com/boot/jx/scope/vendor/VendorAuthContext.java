@@ -1,4 +1,4 @@
-package com.boot.jx.vendor;
+package com.boot.jx.scope.vendor;
 
 import java.util.List;
 

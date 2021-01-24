@@ -1,4 +1,4 @@
-package com.boot.jx.vendor;
+package com.boot.jx.scope.vendor;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

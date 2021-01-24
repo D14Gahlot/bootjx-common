@@ -2,11 +2,10 @@ package com.boot.jx.sample;
 
 import org.springframework.stereotype.Component;
 
-import com.boot.jx.dict.Tenant;
-import com.boot.jx.scope.TenantSpecific;
+import com.boot.jx.scope.tnt.TenantSpecific;
 
 @Component
-@TenantSpecific({ Tenant.OMN, Tenant.KWT2 })
+@TenantSpecific({ "OMN", "KWT2" })
 public class CalcLibOMN implements CalcLib {
 
 	@Override

@@ -1,11 +1,10 @@
-package com.boot.jx.scope;
+package com.boot.jx.scope.tnt;
 
 import java.util.List;
 
 import com.boot.common.ScopedBeanFactory;
-import com.boot.jx.dict.Tenant;
 
-public class TenantContext<T> extends ScopedBeanFactory<Tenant, T> {
+public class TenantContext<T> extends ScopedBeanFactory<String, T> {
 
 	private static final long serialVersionUID = 4007091611441725719L;
 
@@ -14,7 +13,7 @@ public class TenantContext<T> extends ScopedBeanFactory<Tenant, T> {
 	}
 
 	@Override
-	public Tenant[] getKeys(T lib) {
+	public String[] getKeys(T lib) {
 		TenantSpecific annotation = lib.getClass().getAnnotation(TenantSpecific.class);
 		if (annotation != null) {
 			return annotation.value();
@@ -23,7 +22,7 @@ public class TenantContext<T> extends ScopedBeanFactory<Tenant, T> {
 	}
 
 	@Override
-	public Tenant getKey() {
+	public String getKey() {
 		return TenantContextHolder.currentSite();
 	}
 }

@@ -20,7 +20,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import com.boot.jx.dict.Tenant;
+import com.boot.jx.scope.tnt.Tenants;
 
 @Target({ ElementType.METHOD, ElementType.ANNOTATION_TYPE })
 @Retention(RetentionPolicy.RUNTIME)
@@ -37,7 +37,7 @@ public @interface SchedulerLock {
 
 	LockContext context() default LockContext.BY_METHOD;
 
-	Tenant tenent() default Tenant.NONE;
+	String tenent() default Tenants.NONE_STR;
 
 	/**
 	 * How long (in ms) the lock should be kept in case the machine which obtained

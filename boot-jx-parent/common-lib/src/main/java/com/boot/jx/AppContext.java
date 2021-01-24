@@ -4,7 +4,6 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.boot.jx.dict.Tenant;
 import com.boot.jx.dict.UserClient.UserDeviceClient;
 import com.boot.jx.http.CommonHttpRequest.ApiRequestDetail;
 import com.boot.utils.JsonUtil;
@@ -18,7 +17,7 @@ public class AppContext implements Serializable {
 
 	private static final long serialVersionUID = -6073379040253976816L;
 
-	Tenant tenant = null;
+	String tenant = null;
 	String traceId = null;
 	String contextId = null;
 	String tranxId = null;
@@ -30,11 +29,11 @@ public class AppContext implements Serializable {
 	long traceTime = 0L;
 	long tranxTime = 0L;
 
-	public Tenant getTenant() {
+	public String getTenant() {
 		return tenant;
 	}
 
-	public void setTenant(Tenant tenant) {
+	public void setTenant(String tenant) {
 		this.tenant = tenant;
 	}
 

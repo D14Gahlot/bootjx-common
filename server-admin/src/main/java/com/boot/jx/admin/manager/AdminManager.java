@@ -40,7 +40,7 @@ public class AdminManager {
 			agent.setIsactive("Y");
 		}else {
 			agent.setAgent_id(agent.getAgent_id());
-			agent.setModified_date(new Date());
+			//agent.setModified_date(new Date());
 		}
 		
 		if(ArgUtil.is(agent)) {

@@ -4,15 +4,15 @@ import java.math.BigDecimal;
 import java.text.ParseException;
 
 import com.boot.jx.dict.Language;
-import com.boot.jx.dict.Tenant;
 import com.boot.jx.postman.model.Contact;
 import com.boot.jx.postman.model.PushMessage;
+import com.boot.jx.scope.tnt.Tenants;
 
 public class PushMessageTests { // Noncompliant
 
 	static BigDecimal country = new BigDecimal(30);
 	static BigDecimal customer = new BigDecimal(30333);
-	static Tenant tnt = Tenant.KWT;
+	static String tnt = Tenants.DEFAULT_STR;
 	static String FORMAT = "%10s : %-10s : %10s";
 
 	/**

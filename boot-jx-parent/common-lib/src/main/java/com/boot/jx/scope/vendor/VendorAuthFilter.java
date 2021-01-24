@@ -1,4 +1,4 @@
-package com.boot.jx.vendor;
+package com.boot.jx.scope.vendor;
 
 import com.boot.jx.http.CommonHttpRequest;
 import com.boot.jx.http.CommonHttpRequest.ApiRequestDetail;

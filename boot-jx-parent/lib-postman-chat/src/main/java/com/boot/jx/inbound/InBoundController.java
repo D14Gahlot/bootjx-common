@@ -21,8 +21,8 @@ import com.boot.jx.postman.gupshup.GupShupInboundV2;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.service.ContactCleanerService;
 import com.boot.jx.rest.RestService;
+import com.boot.jx.scope.vendor.VendorContext.ApiVendorHeaders;
 import com.boot.jx.utils.PostManUtil;
-import com.boot.jx.vendor.VendorContext.ApiVendorHeaders;
 
 @RestController
 public class InBoundController {

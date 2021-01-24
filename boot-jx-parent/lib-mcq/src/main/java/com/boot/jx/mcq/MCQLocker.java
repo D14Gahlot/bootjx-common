@@ -14,8 +14,8 @@ import org.springframework.stereotype.Service;
 
 import com.boot.jx.AppConfig;
 import com.boot.jx.AppContextUtil;
-import com.boot.jx.dict.Tenant;
 import com.boot.jx.mcq.shedlock.LockingTaskExecutor.Task;
+import com.boot.jx.scope.tnt.Tenants;
 import com.boot.utils.ArgUtil;
 
 @Service
@@ -44,11 +44,9 @@ public class MCQLocker {
 		if (redisson == null) {
 			return null;
 		}
-		RMapCache<String, String> map = redisson
-				.getMapCache("MCQFLAGS");
+		RMapCache<String, String> map = redisson.getMapCache("MCQFLAGS");
 
-		String previousLeader = map.putIfAbsent(queue, id, maxAge,
-				TimeUnit.MILLISECONDS);
+		String previousLeader = map.putIfAbsent(queue, id, maxAge, TimeUnit.MILLISECONDS);
 		if (previousLeader == null) {
 			return id;
 		}
@@ -67,12 +65,10 @@ public class MCQLocker {
 	}
 
 	public boolean resign(Candidate candidate) {
-		RMapCache<String, String> map = redisson
-				.getMapCache("MCQFLAGS");
+		RMapCache<String, String> map = redisson.getMapCache("MCQFLAGS");
 		if (candidate.getId().equals(leaders.get(candidate.queue()))) {
 			if (candidate.getId().equals(map.get(candidate.queue()))) {
-				map.put(candidate.queue(), candidate.getId(), candidate.fixedDelay(),
-						TimeUnit.MILLISECONDS);
+				map.put(candidate.queue(), candidate.getId(), candidate.fixedDelay(), TimeUnit.MILLISECONDS);
 			}
 			leaders.remove(candidate.queue());
 		}
@@ -91,8 +87,8 @@ public class MCQLocker {
 	}
 
 	public boolean isTenant(Candidate candidate) {
-		if (!ArgUtil.isEmpty(candidate.tenant()) && !Tenant.NONE.equals(candidate.tenant())) {
-			if (appConfig.getDefaultTenant() != candidate.tenant()) {
+		if (!ArgUtil.isEmpty(candidate.tenant()) && !Tenants.NONE_STR.equals(candidate.tenant())) {
+			if (!ArgUtil.areEqual(appConfig.getDefaultTenant(), candidate.tenant())) {
 				return false;
 			}
 		}

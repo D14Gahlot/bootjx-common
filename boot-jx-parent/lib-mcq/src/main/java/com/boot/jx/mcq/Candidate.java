@@ -1,6 +1,5 @@
 package com.boot.jx.mcq;
 
-import com.boot.jx.dict.Tenant;
 import com.boot.utils.UniqueID;
 
 public class Candidate {
@@ -42,9 +41,9 @@ public class Candidate {
 		return this;
 	}
 
-	private Tenant tenant;
+	private String tenant;
 
-	public Candidate tenant(Tenant tenant) {
+	public Candidate tenant(String tenant) {
 		this.tenant = tenant;
 		return this;
 	}
@@ -69,7 +68,7 @@ public class Candidate {
 		return id;
 	}
 
-	public Tenant tenant() {
+	public String tenant() {
 		return tenant;
 	}
 

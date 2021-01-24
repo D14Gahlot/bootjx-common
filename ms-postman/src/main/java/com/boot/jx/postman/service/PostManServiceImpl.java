@@ -20,7 +20,6 @@ import com.boot.jx.postman.model.Email;
 import com.boot.jx.postman.model.ExceptionReport;
 import com.boot.jx.postman.model.File;
 import com.boot.jx.postman.model.File.Type;
-import com.boot.utils.ContextUtil;
 import com.boot.jx.postman.model.MessageBox;
 import com.boot.jx.postman.model.Notipy;
 import com.boot.jx.postman.model.PushMessage;
@@ -29,6 +28,7 @@ import com.boot.jx.postman.model.SupportEmail;
 import com.boot.jx.postman.model.TGMessage;
 import com.boot.jx.postman.model.TemplatesMX;
 import com.boot.jx.postman.model.WAMessage;
+import com.boot.utils.ContextUtil;
 
 /**
  * The Class PostManServiceImpl.

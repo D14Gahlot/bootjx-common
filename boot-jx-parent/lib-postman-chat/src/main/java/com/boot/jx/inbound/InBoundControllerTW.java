@@ -19,7 +19,7 @@ import com.boot.jx.connectors.TwitterConnector;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.tw.TwitterClient;
 import com.boot.jx.postman.tw.WebhookInfo;
-import com.boot.jx.vendor.VendorContext.ApiVendorHeaders;
+import com.boot.jx.scope.vendor.VendorContext.ApiVendorHeaders;
 import com.boot.utils.ArgUtil;
 
 import twitter4j.TwitterException;

@@ -13,9 +13,9 @@ import java.util.regex.Pattern;
 import com.boot.jx.AppParam;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.dict.Language;
-import com.boot.jx.dict.Tenant;
 import com.boot.jx.postman.PostManException;
-import com.boot.jx.scope.TenantContextHolder;
+import com.boot.jx.scope.tnt.TenantContextHolder;
+import com.boot.jx.scope.tnt.Tenants;
 import com.boot.utils.ArgUtil;
 
 public class PushMessage extends Message<PushMessage> {
@@ -82,10 +82,9 @@ public class PushMessage extends Message<PushMessage> {
 
 	public static String topic(String key, Object value) {
 		return String.format(PushMessage.FORMAT_TO_FILTER, AppParam.APP_ENV.getValue(),
-				TenantContextHolder.currentSite().toString(),
-				key, ArgUtil.parseAsString(value)).toLowerCase();
+				TenantContextHolder.currentSite().toString(), key, ArgUtil.parseAsString(value)).toLowerCase();
 	}
-	
+
 	public static String topicPath(String key, Object value) {
 		return TOPICS_PREFIX + topic(key, value);
 	}
@@ -93,7 +92,7 @@ public class PushMessage extends Message<PushMessage> {
 	public void addToFilter(String key, Object value) {
 		this.addTo(topicPath(key, value));
 	}
-	
+
 	public void addToFilter(String key, Date date) {
 		this.addTo(TOPICS_PREFIX + topic(key, simpleDateFormat.format(date)));
 	}
@@ -106,19 +105,16 @@ public class PushMessage extends Message<PushMessage> {
 		if (ArgUtil.is(date)) {
 			this.addTo(TOPICS_PREFIX
 					+ String.format(FORMAT_TO_DATE, AppParam.APP_ENV.getValue(), TenantContextHolder.currentSite(),
-							prefix,
-							simpleDateFormat.format(date))
-							.toLowerCase().replaceAll("\\s+", ""));
+							prefix, simpleDateFormat.format(date)).toLowerCase().replaceAll("\\s+", ""));
 		}
 	}
 
-	public void addToTenant(Tenant tenant, Language lang) {
-		this.addTopic(
-				String.format(PushMessage.FORMAT_TO_ALL, AppParam.APP_ENV.getValue(), tenant.toString(),
-						Language.toString(lang, ANY_VALUE)).toLowerCase());
+	public void addToTenant(String tenant, Language lang) {
+		this.addTopic(String.format(PushMessage.FORMAT_TO_ALL, AppParam.APP_ENV.getValue(), tenant.toString(),
+				Language.toString(lang, ANY_VALUE)).toLowerCase());
 	}
 
-	public void addToTenant(Tenant tenant) {
+	public void addToTenant(String tenant) {
 		this.addToTenant(tenant, null);
 	}
 
@@ -136,13 +132,12 @@ public class PushMessage extends Message<PushMessage> {
 		this.addToUser(userid, null);
 	}
 
-	public void addToCountry(Tenant tenant, Object nationalityId, Language lang) {
-		this.addTo(TOPICS_PREFIX
-				+ String.format(PushMessage.FORMAT_TO_NATIONALITY, AppParam.APP_ENV.getValue(), tenant.toString(),
-						nationalityId, Language.toString(lang, ANY_VALUE)).toLowerCase());
+	public void addToCountry(String tenant, Object nationalityId, Language lang) {
+		this.addTo(TOPICS_PREFIX + String.format(PushMessage.FORMAT_TO_NATIONALITY, AppParam.APP_ENV.getValue(),
+				tenant.toString(), nationalityId, Language.toString(lang, ANY_VALUE)).toLowerCase());
 	}
 
-	public void addToCountry(Tenant tenant, Object nationalityId) {
+	public void addToCountry(String tenant, Object nationalityId) {
 		addToCountry(tenant, nationalityId, null);
 	}
 
@@ -155,10 +150,10 @@ public class PushMessage extends Message<PushMessage> {
 	}
 
 	public void addToKey(String key, String value, Language lang) {
-		this.addTo(TOPICS_PREFIX
-				+ String.format(PushMessage.FORMAT_TO_KEY, AppParam.APP_ENV.getValue(),
-						TenantContextHolder.currentSite().toString(),
-						key, value, Language.toString(lang, ANY_VALUE)).toLowerCase());
+		this.addTo(TOPICS_PREFIX + String
+				.format(PushMessage.FORMAT_TO_KEY, AppParam.APP_ENV.getValue(),
+						TenantContextHolder.currentSite().toString(), key, value, Language.toString(lang, ANY_VALUE))
+				.toLowerCase());
 	}
 
 	public void addToKey(String key, String value) {
@@ -203,12 +198,10 @@ public class PushMessage extends Message<PushMessage> {
 				for (Map<String, Object> singleFilter : singleContact.getFilter()) {
 					StringJoiner andCondition = new StringJoiner(PushMessage.CONDITION_SEPRATOR_AND);
 					for (Entry<String, Object> entry : singleFilter.entrySet()) {
-						andCondition.add(
-								"'" + PushMessage.topic(entry.getKey(), entry.getValue())
-										+ "%sx%' in topics");
+						andCondition.add("'" + PushMessage.topic(entry.getKey(), entry.getValue()) + "%sx%' in topics");
 						totalConditions++;
 					}
-					//totalConditions++;
+					// totalConditions++;
 					totalOrConditions++;
 					orCondition.add(andCondition.toString());
 				}
@@ -235,7 +228,7 @@ public class PushMessage extends Message<PushMessage> {
 		Matcher m = PushMessage.FORMAT_TO_USER_PATTERN_V3.matcher(topic);
 		if (m.find()) {
 			c.setUserid(m.group(3));
-			Tenant tenant = Tenant.fromString(m.group(2), Tenant.DEFAULT);
+			String tenant = Tenants.fromAsString(m.group(2), Tenants.DEFAULT);
 			c.setTenant(tenant);
 			c.setLang(Language.fromString(m.group(4), null));
 			return c;
@@ -243,14 +236,14 @@ public class PushMessage extends Message<PushMessage> {
 		m = PushMessage.FORMAT_TO_NATIONALITY_PATTERN_V3.matcher(topic);
 		if (m.find()) {
 			c.setCountry(m.group(3));
-			Tenant tenant = Tenant.fromString(m.group(2), Tenant.DEFAULT);
+			String tenant = Tenants.fromAsString(m.group(2), Tenants.DEFAULT);
 			c.setTenant(tenant);
 			c.setLang(Language.fromString(m.group(4), null));
 			return c;
 		}
 		m = PushMessage.FORMAT_TO_ALL_PATTERN_V3.matcher(topic);
 		if (m.find()) {
-			Tenant tenant = Tenant.fromString(m.group(2), Tenant.DEFAULT);
+			String tenant = Tenants.fromAsString(m.group(2), Tenants.DEFAULT);
 			c.setTenant(tenant);
 			c.setLang(Language.fromString(m.group(3), null));
 			return c;
@@ -258,7 +251,7 @@ public class PushMessage extends Message<PushMessage> {
 
 		m = PushMessage.FORMAT_TO_KEY_PATTERN_V3.matcher(topic);
 		if (m.find()) {
-			Tenant tenant = Tenant.fromString(m.group(2), Tenant.DEFAULT);
+			String tenant = Tenants.fromAsString(m.group(2), Tenants.DEFAULT);
 			c.setTenant(tenant);
 			Map<String, String> keys = new HashMap<String, String>();
 			keys.put("k", m.group(3));
@@ -277,18 +270,18 @@ public class PushMessage extends Message<PushMessage> {
 		Matcher m = PushMessage.FORMAT_TO_USER_PATTERN_V2.matcher(topic);
 		if (m.find()) {
 			c.setUserid(m.group(3));
-			Tenant tenant = Tenant.fromString(m.group(2), Tenant.DEFAULT);
+			String tenant = Tenants.fromAsString(m.group(2), Tenants.DEFAULT);
 			c.setTenant(tenant);
 		} else {
 			m = PushMessage.FORMAT_TO_NATIONALITY_PATTERN_V2.matcher(topic);
 			if (m.find()) {
 				c.setCountry(m.group(3));
-				Tenant tenant = Tenant.fromString(m.group(2), Tenant.DEFAULT);
+				String tenant = Tenants.fromAsString(m.group(2), Tenants.DEFAULT);
 				c.setTenant(tenant);
 			} else {
 				m = PushMessage.FORMAT_TO_ALL_PATTERN_V2.matcher(topic);
 				if (m.find()) {
-					Tenant tenant = Tenant.fromString(m.group(2), Tenant.DEFAULT);
+					String tenant = Tenants.fromAsString(m.group(2), Tenants.DEFAULT);
 					c.setTenant(tenant);
 				} else {
 					return toContactV1(topic);
@@ -304,18 +297,18 @@ public class PushMessage extends Message<PushMessage> {
 		Matcher m = PushMessage.FORMAT_TO_USER_PATTERN.matcher(topic);
 		if (m.find()) {
 			c.setUserid(m.group(2));
-			Tenant tenant = Tenant.fromString(m.group(1), Tenant.DEFAULT);
+			String tenant = Tenants.fromAsString(m.group(1), Tenants.DEFAULT);
 			c.setTenant(tenant);
 		} else {
 			m = PushMessage.FORMAT_TO_NATIONALITY_PATTERN.matcher(topic);
 			if (m.find()) {
 				c.setCountry(m.group(2));
-				Tenant tenant = Tenant.fromString(m.group(1), Tenant.DEFAULT);
+				String tenant = Tenants.fromAsString(m.group(1), Tenants.DEFAULT);
 				c.setTenant(tenant);
 			} else {
 				m = PushMessage.FORMAT_TO_ALL_PATTERN.matcher(topic);
 				if (m.find()) {
-					Tenant tenant = Tenant.fromString(m.group(1), Tenant.DEFAULT);
+					String tenant = Tenants.fromAsString(m.group(1), Tenants.DEFAULT);
 					c.setTenant(tenant);
 				}
 			}

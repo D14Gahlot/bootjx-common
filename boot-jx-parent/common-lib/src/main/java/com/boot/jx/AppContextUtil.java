@@ -16,11 +16,11 @@ import org.springframework.http.HttpHeaders;
 
 import com.boot.jx.api.AmxApiResponseUtil;
 import com.boot.jx.dict.Language;
-import com.boot.jx.dict.Tenant;
 import com.boot.jx.dict.UserClient.UserDeviceClient;
 import com.boot.jx.http.CommonHttpRequest.ApiRequestDetail;
 import com.boot.jx.http.RequestType;
-import com.boot.jx.scope.TenantContextHolder;
+import com.boot.jx.scope.tnt.TenantContextHolder;
+import com.boot.jx.scope.tnt.Tenants.Tenant;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.Constants;
 import com.boot.utils.ContextUtil;
@@ -41,8 +41,7 @@ public class AppContextUtil {
 	}
 
 	public static String getRequestUser() {
-		return ArgUtil.parseAsString(ContextUtil.map().get(AppConstants.SESSION_SUFFIX_XKEY),
-				Constants.BLANK);
+		return ArgUtil.parseAsString(ContextUtil.map().get(AppConstants.SESSION_SUFFIX_XKEY), Constants.BLANK);
 	}
 
 	public static void setSessionId(Object sessionId) {
@@ -145,8 +144,8 @@ public class AppContextUtil {
 		} else {
 			userDeviceClient = (UserDeviceClient) userDeviceClientObject;
 		}
-		if(LOGGER.isDebugEnabled()) {
-			LOGGER.debug("User device client object json " + JsonUtil.toJson(userDeviceClient));			
+		if (LOGGER.isDebugEnabled()) {
+			LOGGER.debug("User device client object json " + JsonUtil.toJson(userDeviceClient));
 		}
 		return userDeviceClient;
 	}
@@ -212,7 +211,7 @@ public class AppContextUtil {
 		}
 	}
 
-	public static Tenant getTenant() {
+	public static String getTenant() {
 		return TenantContextHolder.currentSite();
 	}
 
@@ -225,8 +224,7 @@ public class AppContextUtil {
 	}
 
 	public static String getEnv() {
-		return ArgUtil
-				.parseAsString(ContextUtil.map().get(AppConstants.ENV_XKEY), AppParam.APP_ENV.getValue());
+		return ArgUtil.parseAsString(ContextUtil.map().get(AppConstants.ENV_XKEY), AppParam.APP_ENV.getValue());
 	}
 
 	public static void setTranceId(String traceId) {

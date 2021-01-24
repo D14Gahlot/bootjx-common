@@ -9,8 +9,8 @@ import org.springframework.stereotype.Component;
 import com.boot.jx.dict.Language;
 import com.boot.jx.postman.model.File;
 import com.boot.jx.postman.model.Message;
-import com.boot.jx.scope.TenantScoped;
-import com.boot.jx.scope.TenantValue;
+import com.boot.jx.scope.tnt.TenantScoped;
+import com.boot.jx.scope.tnt.TenantValue;
 
 /**
  * The Class PostManConfig.

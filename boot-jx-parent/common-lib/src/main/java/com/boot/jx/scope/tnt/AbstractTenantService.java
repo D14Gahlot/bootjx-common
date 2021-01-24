@@ -1,11 +1,9 @@
-package com.boot.jx.scope;
-
-import com.boot.jx.dict.Tenant;
+package com.boot.jx.scope.tnt;
 
 public abstract class AbstractTenantService {
 
-	public Tenant getTenant() {
+	public String getTenant() {
 		return TenantContextHolder.currentSite();
 	}
-	
+
 }

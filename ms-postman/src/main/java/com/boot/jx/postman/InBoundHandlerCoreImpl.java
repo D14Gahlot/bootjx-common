@@ -12,7 +12,6 @@ import com.boot.jx.postman.nlp.CoreNLPService;
 import com.boot.jx.postman.nlp.OpenNLPService;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
-import com.sun.xml.bind.v2.runtime.reflect.ListIterator;
 
 @Component
 public class InBoundHandlerCoreImpl implements InBoundHandler {

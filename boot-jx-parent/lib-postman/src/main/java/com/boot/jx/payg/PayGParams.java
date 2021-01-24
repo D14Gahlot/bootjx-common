@@ -3,8 +3,8 @@ package com.boot.jx.payg;
 import java.io.Serializable;
 
 import com.boot.jx.dict.PayGServiceCode;
-import com.boot.jx.dict.Tenant;
 import com.boot.jx.dict.UserClient.Channel;
+import com.boot.jx.scope.tnt.Tenants.Tenant;
 import com.boot.utils.ArgUtil;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 

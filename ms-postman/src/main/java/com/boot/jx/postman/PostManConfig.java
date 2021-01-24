@@ -12,9 +12,9 @@ import com.boot.jx.dict.Language;
 import com.boot.jx.postman.model.File;
 import com.boot.jx.postman.model.Message;
 import com.boot.jx.postman.model.Notipy.ChannelType;
-import com.boot.jx.scope.TenantProperties;
-import com.boot.jx.scope.TenantScoped;
-import com.boot.jx.scope.TenantValue;
+import com.boot.jx.scope.tnt.TenantProperties;
+import com.boot.jx.scope.tnt.TenantScoped;
+import com.boot.jx.scope.tnt.TenantValue;
 import com.boot.utils.ArgUtil;
 
 /**

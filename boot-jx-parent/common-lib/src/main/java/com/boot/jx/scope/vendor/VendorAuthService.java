@@ -1,4 +1,4 @@
-package com.boot.jx.vendor;
+package com.boot.jx.scope.vendor;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -13,8 +13,8 @@ import org.springframework.stereotype.Component;
 import com.boot.jx.dict.VendorFeatures;
 import com.boot.jx.http.CommonHttpRequest;
 import com.boot.jx.http.CommonHttpRequest.ApiRequestDetail;
-import com.boot.jx.vendor.VendorContext.VendorScoped;
-import com.boot.jx.vendor.VendorContext.VendorValue;
+import com.boot.jx.scope.vendor.VendorContext.VendorScoped;
+import com.boot.jx.scope.vendor.VendorContext.VendorValue;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CryptoUtil;
 

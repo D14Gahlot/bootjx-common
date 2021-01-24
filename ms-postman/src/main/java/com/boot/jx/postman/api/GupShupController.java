@@ -15,7 +15,7 @@ import com.boot.jx.postman.client.GupShupChatClient;
 import com.boot.jx.postman.client.GupShupNotifyClient;
 import com.boot.jx.postman.gupshup.GupShupConstants;
 import com.boot.jx.postman.gupshup.GupShupResp;
-import com.boot.jx.vendor.VendorContext.ApiVendorHeaders;
+import com.boot.jx.scope.vendor.VendorContext.ApiVendorHeaders;
 import com.maxmind.geoip2.exception.GeoIp2Exception;
 
 /**

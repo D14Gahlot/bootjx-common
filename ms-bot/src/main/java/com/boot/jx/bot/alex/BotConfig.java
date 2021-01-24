@@ -2,8 +2,8 @@ package com.boot.jx.bot.alex;
 
 import org.springframework.stereotype.Component;
 
-import com.boot.jx.scope.TenantScoped;
-import com.boot.jx.scope.TenantValue;
+import com.boot.jx.scope.tnt.TenantScoped;
+import com.boot.jx.scope.tnt.TenantValue;
 
 /**
  * The Class PostManConfig.

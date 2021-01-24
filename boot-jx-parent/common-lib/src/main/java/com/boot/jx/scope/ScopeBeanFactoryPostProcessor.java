@@ -5,9 +5,10 @@ import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 
 import com.boot.jx.AppConstants;
-import com.boot.jx.vendor.VendorScope;
+import com.boot.jx.scope.tnt.TenantScope;
+import com.boot.jx.scope.vendor.VendorScope;
 
-public class TenantBeanFactoryPostProcessor implements BeanFactoryPostProcessor {
+public class ScopeBeanFactoryPostProcessor implements BeanFactoryPostProcessor {
 
 	@Override
 	public void postProcessBeanFactory(ConfigurableListableBeanFactory factory) throws BeansException {

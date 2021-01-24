@@ -1,4 +1,4 @@
-package com.boot.jx.vendor;
+package com.boot.jx.scope.vendor;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -24,9 +24,10 @@ import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
 import com.boot.jx.dict.Language;
-import com.boot.jx.dict.Tenant;
-import com.boot.jx.vendor.VendorContext.VendorScoped;
-import com.boot.jx.vendor.VendorContext.VendorValue;
+import com.boot.jx.scope.tnt.Tenants;
+import com.boot.jx.scope.tnt.Tenants.Tenant;
+import com.boot.jx.scope.vendor.VendorContext.VendorScoped;
+import com.boot.jx.scope.vendor.VendorContext.VendorValue;
 import com.boot.model.UtilityModels.Stringable;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.FileUtil;
@@ -232,7 +233,7 @@ public class VendorProperties {
 						} else if (Language.class.getName().equals(typeName)) {
 							field.set(object, ArgUtil.parseAsEnum(propertyValue, Language.DEFAULT));
 						} else if (Tenant.class.getName().equals(typeName)) {
-							field.set(object, ArgUtil.parseAsEnum(propertyValue, Tenant.DEFAULT));
+							field.set(object, Tenants.from(propertyValue, Tenants.DEFAULT));
 						} else if ("java.lang.String[]".equals(typeName)) {
 							field.set(object, ArgUtil.parseAsStringArray(propertyValue));
 						} else if (type instanceof Class && ((Class<?>) type).isArray()
