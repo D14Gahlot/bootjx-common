@@ -3,6 +3,7 @@ package com.boot.jx.agent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
@@ -16,6 +17,7 @@ import org.springframework.security.web.authentication.SimpleUrlAuthenticationSu
 
 @Configuration
 @EnableWebSecurity
+@Order(99)
 public class AgentSecurityConfig extends WebSecurityConfigurerAdapter {
 
 	@Override
@@ -33,7 +35,7 @@ public class AgentSecurityConfig extends WebSecurityConfigurerAdapter {
 				// Login Forms
 				.and().formLogin().loginPage("/auth/login").successHandler(successHandler()).permitAll()
 				.failureUrl("/auth/login?error").permitAll()
-				//.loginProcessingUrl("/auth/login/submit").permitAll()
+				// .loginProcessingUrl("/auth/login/submit").permitAll()
 				// Logout Pages
 				.and().logout().permitAll().logoutSuccessUrl("/auth/login?logout").deleteCookies("JSESSIONID")
 				.invalidateHttpSession(true).permitAll().and().exceptionHandling().accessDeniedPage("/403").and().csrf()
