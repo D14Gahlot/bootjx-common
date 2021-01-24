@@ -66,6 +66,14 @@ public final class FileUtil {
 		return path;
 	}
 
+	public static String deprefix(String propertiesPath) {
+		propertiesPath = propertiesPath.startsWith(FILE_PREFIX2) ? propertiesPath.substring(FILE_PREFIX2.length())
+				: propertiesPath;
+		propertiesPath = propertiesPath.startsWith(FILE_PREFIX) ? propertiesPath.substring(FILE_PREFIX.length())
+				: propertiesPath;
+		return propertiesPath;
+	}
+
 	/**
 	 * Read file.
 	 *
@@ -260,6 +268,8 @@ public final class FileUtil {
 		File jarPath = new File(clazz.getProtectionDomain().getCodeSource().getLocation().getPath().split("!")[0]);
 		String propertiesPath = jarPath.getParent();
 
+		LOG.debug("getExternalResource:jarPath:{} {}", jarPath, jarPath.getParent());
+
 		URL u = clazz.getClassLoader().getResource(propertiesPath + "/" + filePath);
 		if (u != null) {
 			return u;
@@ -277,18 +287,28 @@ public final class FileUtil {
 			return u;
 		}
 
+		if (filePath.startsWith("ext-resources") && jarPath.getParent().endsWith("/target")) {
+			String modulePath = jarPath.getParentFile().getParent();
+			String targetFilePath = modulePath + "/" + filePath;
+			u = clazz.getClassLoader().getResource(targetFilePath);
+			LOG.warn("SLOW Module getExternalResource {}", targetFilePath);
+			if (u != null) {
+				return u;
+			}
+		}
+
 		if (SysConfigUtil.FILE_SEARCH_TARGET) {
 			// Search in target folder
 			String targetFilePath = propertiesPath + "/target/" + filePath;
 			u = clazz.getClassLoader().getResource(targetFilePath);
-			LOG.warn("SLOW getExternalResource {}", targetFilePath);
+			LOG.warn("SLOW Target getExternalResource {}", targetFilePath);
 			if (u != null) {
 				return u;
 			}
 
 			targetFilePath = FILE_PREFIX2 + propertiesPath + "/target/" + filePath;
 			u = clazz.getClassLoader().getResource(targetFilePath);
-			LOG.warn("SLOW getExternalResource {}", targetFilePath);
+			LOG.warn("SLOW Target getExternalResource {}", targetFilePath);
 			if (u != null) {
 				return u;
 			}
@@ -317,16 +337,13 @@ public final class FileUtil {
 
 		String propertiesPath = null;
 
+		String jarPathParent = null;
 		if (ArgUtil.is(codeSource)) {
 			String jarPathString = codeSource.getLocation().getPath().split("!")[0];
 			File jarPath = new File(normalize(jarPathString));
+			jarPathParent = jarPath.getParent();
 			propertiesPath = jarPath.getParentFile().getPath();
-			propertiesPath = propertiesPath.startsWith(FILE_PREFIX2) ? propertiesPath.substring(FILE_PREFIX2.length())
-					: propertiesPath;
-			propertiesPath = propertiesPath.startsWith(FILE_PREFIX) ? propertiesPath.substring(FILE_PREFIX.length())
-					: propertiesPath;
-			propertiesPath = "/" + propertiesPath;
-
+			propertiesPath =  "/" + deprefix(propertiesPath);
 			File file = new File(normalize(propertiesPath + "/" + filePath));
 			if (file.exists()) {
 				return file;
@@ -338,6 +355,15 @@ public final class FileUtil {
 		File file2 = new File(normalize(propertiesPath + "/" + filePath));
 		if (file2.exists()) {
 			return file2;
+		}
+
+		if (filePath.startsWith("ext-resources") && ArgUtil.is(jarPathParent) && jarPathParent.endsWith("/target")) {
+			String modulePath = jarPathParent.split("/target")[0];
+			modulePath =  "/" + deprefix(modulePath);
+			file2 = new File(normalize(modulePath + "/" + filePath));
+			if (file2.exists()) {
+				return file2;
+			}
 		}
 
 		if (SysConfigUtil.FILE_SEARCH_TARGET) {
@@ -473,7 +499,7 @@ public final class FileUtil {
 	}
 
 	public static File getExternalOrInternalFile(String filePath) {
-		return getExternalOrInternalFile(filePath, File.class);
+		return getExternalOrInternalFile(filePath, FileUtil.class);
 	}
 
 	public static File getExternalOrInternalFile(String filePath, Class<?> clazz) {

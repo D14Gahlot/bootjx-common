@@ -17,6 +17,7 @@ import org.springframework.stereotype.Component;
 import com.boot.jx.postman.model.TagDocument;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.FileUtil;
+import com.boot.utils.SysConfigUtil;
 
 import opennlp.tools.doccat.BagOfWordsFeatureGenerator;
 import opennlp.tools.doccat.DoccatFactory;
