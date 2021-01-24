@@ -79,7 +79,7 @@ public class TenantContextHolder {
 	}
 
 	public static String fromString(String siteId, Tenant defaultTnt) {
-		return Tenants.fromString(siteId, defaultTnt).toString();
+		return ArgUtil.parseAsString(Tenants.fromString(siteId, defaultTnt));
 	}
 
 }
