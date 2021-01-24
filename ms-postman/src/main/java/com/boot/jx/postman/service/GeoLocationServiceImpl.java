@@ -58,7 +58,7 @@ public class GeoLocationServiceImpl implements GeoLocationService {
 
 	/** The default tennat id. */
 	@Value("${default.tenant}")
-	Tenant defaultTennatId;
+	String defaultTennatId;
 
 	/*
 	 * (non-Javadoc)

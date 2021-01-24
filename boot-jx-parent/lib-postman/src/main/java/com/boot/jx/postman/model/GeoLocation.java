@@ -14,13 +14,13 @@ public class GeoLocation implements Serializable {
 	private String stateCode = null;
 	private String countryCode = null;
 	private String continentCode = null;
-	private Tenant tenant = null;
+	private String tenant = null;
 
-	public Tenant getTenant() {
+	public String getTenant() {
 		return tenant;
 	}
 
-	public void setTenant(Tenant tenant) {
+	public void setTenant(String tenant) {
 		this.tenant = tenant;
 	}
 
