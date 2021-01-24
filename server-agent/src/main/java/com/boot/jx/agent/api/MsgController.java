@@ -5,11 +5,15 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.thymeleaf.expression.Arrays;
 
 import com.boot.jx.AppConfig;
 import com.boot.jx.agent.AgentChatHandlerImpl;
@@ -20,6 +24,7 @@ import com.boot.jx.agent.dto.ChatSessionDto;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.chat.ChatService;
 import com.boot.jx.postman.doc.ChatSessionDoc;
+import com.boot.jx.postman.doc.SmartReply;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.store.MessageStore;
@@ -86,6 +91,14 @@ public class MsgController {
 			return ApiResponse.buildResult(messageDto);
 		}
 		return null;
+	}
+
+	@ResponseBody
+	@RequestMapping(value = "/category/map/smart_reply", method = { RequestMethod.GET })
+	public List<SmartReply> listSmartReply(@RequestParam(value = "value", required = false) List<String> categories) {
+		Query query2 = new Query();
+		query2.addCriteria(Criteria.where("_id.category").in(categories.stream().toArray(String[]::new)));
+		return mongoTemplate.find(query2, SmartReply.class);
 	}
 
 }

@@ -139,6 +139,7 @@ var WhatsApp = function ToDoModel(app) {
   var subject = new app.Subject();
 
   var Model = {
+	hisLastMessage : null,
     start: function () {
     	//https://s3-us-west-2.amazonaws.com/s.cdpn.io/1089577/contacts2.json
       $.getJSON("/agent/api/sessions/assigned.json", function (data) {
@@ -193,7 +194,7 @@ var WhatsApp = function ToDoModel(app) {
         scrollToBottom();
     },
     writeMessage: function () {
-       return this.senMessage(text);
+       return this.senMessage($(".input-message").val());
     },
     readMessage: function (m) {
     	console.log(m)
@@ -277,11 +278,25 @@ var WhatsApp = function ToDoView(app) {
 	    currentChat = cg;
 	    scrollToBottom();
 	    WhatsApp.View.showContactInformation();
+	    WhatsApp.View.printSmartTags();
+    },
+    printSmartTags(){
+    	console.log(app.hisLastMessage);
+    	return;
+        $.getJSON("/category/map/smart_reply.json?value=", function (data) {
+            for (var i = 0; i < data.results.length; i++) {
+            	app.Model._addChat(data.results[i]);
+            }
+            subject.notifyObservers();
+          });
     },
     printMessage: function (gc) {
       $(".msg_card_body .msg_card_body-bubbles").append(quikr.tmpl(gc.type ? "temp_message_me" : "temp_message_you",{
       	gc : gc
       }));
+      if(!gc.type){
+    	  app.hisLastMessage = gc;
+      }
     },
     showContactInformation: function () {
     	
