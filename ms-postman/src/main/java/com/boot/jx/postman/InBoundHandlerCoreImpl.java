@@ -10,6 +10,7 @@ import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.TagDocument;
 import com.boot.jx.postman.nlp.CoreNLPService;
 import com.boot.jx.postman.nlp.OpenNLPService;
+import com.boot.jx.postman.store.MessageStore;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
 
@@ -21,6 +22,9 @@ public class InBoundHandlerCoreImpl implements InBoundHandler {
 
 	@Autowired
 	private CoreNLPService coreNLPService;
+
+	@Autowired
+	MessageStore messageStore;
 
 	@Override
 	public InboxMessage onHandle(InboxMessage inboxMessage) {
@@ -108,6 +112,7 @@ public class InBoundHandlerCoreImpl implements InBoundHandler {
 					inboxMessage.getTags().setSentimentScore(scoe);
 				}
 
+				messageStore.setTags(inboxMessage, inboxMessage.getTags());
 			} catch (IOException e) {
 				e.printStackTrace();
 			}

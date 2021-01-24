@@ -13,6 +13,7 @@ import com.boot.jx.postman.doc.ContactDoc;
 import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.Message;
+import com.boot.jx.postman.model.TagDocument;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
@@ -67,6 +68,13 @@ public class MessageStore {
 	public void setTemplate(InboxMessage inboxMessage, String template) {
 		MessageDoc doc = findOrCreateMessageDoc(inboxMessage);
 		doc.setTemplate(template);
+		mongoTemplate.save(doc, getCollectionName(inboxMessage.getContactType()));
+		inboxMessage.setMessageId(doc.getMessageId());
+	}
+
+	public void setTags(InboxMessage inboxMessage, TagDocument tags) {
+		MessageDoc doc = findOrCreateMessageDoc(inboxMessage);
+		doc.setTags(tags);
 		mongoTemplate.save(doc, getCollectionName(inboxMessage.getContactType()));
 		inboxMessage.setMessageId(doc.getMessageId());
 	}
