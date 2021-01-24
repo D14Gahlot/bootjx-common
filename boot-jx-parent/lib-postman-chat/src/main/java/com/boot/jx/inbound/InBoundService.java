@@ -86,7 +86,7 @@ public class InBoundService {
 			} else if (botEngine.isChatBotDefined() || chatClient.isChatDummyBotEnabled()) {
 				botEngine.invokeMethodsAsync(inboxMessageOriginal);
 			} else {
-				//chatClient.forward(inboxMessageOriginal);
+				chatClient.forward(inboxMessageOriginal);
 			}
 		}
 		return inboxMessageOriginal;
