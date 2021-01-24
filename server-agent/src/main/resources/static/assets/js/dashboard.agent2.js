@@ -161,6 +161,7 @@ var WhatsApp = function ToDoModel(app) {
           var m = e.messages[j];
           m.time = formatTime(m.timestamp);
           var message = new appMessages(m.text, m.name, m.time, m.type, false);
+          message.m = m;
           contact.addMessage(message);
         }
         contactListNew.push(contact);
@@ -282,12 +283,15 @@ var WhatsApp = function ToDoView(app) {
     },
     printSmartTags(){
     	console.log(app.hisLastMessage);
-    	return;
-        $.getJSON("/category/map/smart_reply.json?value=", function (data) {
-            for (var i = 0; i < data.results.length; i++) {
-            	app.Model._addChat(data.results[i]);
-            }
-            subject.notifyObservers();
+    	//return;
+    	var $tags = $(".msg_card_body-panel-tags");
+    	 $tags.empty();
+        $.getJSON("/agent/category/map/smart_reply.json?value="+
+        		(app.hisLastMessage.m.tags || {categories : []}).categories.join(",")
+        		, function (data) {
+        	for(var i in data){
+        		$tags.append('<span class="msg_cotainer_smart">  ' + data[i].id.subject + ' </span>')
+        	}
           });
     },
     printMessage: function (gc) {
