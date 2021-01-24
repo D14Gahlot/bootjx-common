@@ -13,11 +13,11 @@ public class TenantContextHolder {
 	}
 
 	public static void setCurrent(String siteId) {
-		ContextUtil.map().put(TENANT, fromString(siteId, Tenants.DEFAULT).toString());
+		ContextUtil.map().put(TENANT, fromString(siteId, Tenants.DEFAULT));
 	}
 
 	public static void setCurrent(String siteId, Tenant defaultTnt) {
-		ContextUtil.map().put(TENANT, fromString(siteId, defaultTnt).toString());
+		ContextUtil.map().put(TENANT, fromString(siteId, defaultTnt));
 	}
 
 	public static void setDefault() {
