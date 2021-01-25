@@ -103,8 +103,7 @@ public class AuthController {
 			token.setDetails(new WebAuthenticationDetails(request));
 			Authentication authentication = agentAuthProvider.authenticate(token);
 			SecurityContextHolder.getContext().setAuthentication(authentication);
-
-			agentSession.update();
+			agentSession.login(username);;
 			stompTunnelSessionManager.registerUser(username);
 		} else {
 			x.setData("error");

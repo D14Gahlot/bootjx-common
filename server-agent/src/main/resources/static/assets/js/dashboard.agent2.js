@@ -88,12 +88,13 @@ var WhatsApp = function (app) {
 
 //messages
 var WhatsApp = function (app) {
-  function Message(text, name, time, type, group) {
+  function Message(text, name, time, type, group,m) {
     this.text = text;
     this.name = name,
     this.time = time;
     this.type = type;
     this.group = group;
+    this.m = m;
   }
 
   appMessages = Message;
@@ -159,14 +160,13 @@ var WhatsApp = function ToDoModel(app) {
         for (var j = 0; j < e.messages.length; j++) {
           var m = e.messages[j];
           m.time = formatTime(m.timestamp);
-          var message = new appMessages(m.text, m.name, m.time, m.type, false);
-          message.m = m;
+          var message = new appMessages(m.text, m.name, m.time, m.type, false,m);
           contact.addMessage(message);
         }
         contactListNew.push(contact);
         return contact;
     },
-    addChat : function(e){
+    addOneChat : function(e){
     	for(var i in contactList){
     		if(contactList[i].sessionId == e.sessionId){
     			e = null;
@@ -197,31 +197,24 @@ var WhatsApp = function ToDoModel(app) {
        return this.senMessage($(".input-message").val());
     },
     readMessage: function (m) {
-    	console.log(m)
+      console.log(m)
       for(var id in contactList){
     	  if(m.sessionId == contactList[id].sessionId){
-    		  this.getMessage(m.text,id,null);
+    		  this.getMessage(m.text,id,null,m);
     	  }
       }
     },
-    getMessage: function (text, id, name) {
+    getMessage: function (text, id, name, m) {
       if (name == undefined) {
-        var msg = new appMessages(text, contactList[id].name, new Date().getHours() + ":" + new Date().getMinutes(), false, false);
+        var msg = new appMessages(text, contactList[id].name, new Date().getHours() + ":" + new Date().getMinutes(), false, false,m);
       } else
       {
-        var msg = new appMessages(text, name, new Date().getHours() + ":" + new Date().getMinutes(), false, true);
+        var msg = new appMessages(text, name, new Date().getHours() + ":" + new Date().getMinutes(), false, true,m);
       }
       contactList[id].addMessage(msg);
       contactList[id].online = new Date().getHours() + ":" + new Date().getMinutes();
 
-      if (contactList[id] == currentChat) {
-        WhatsApp.View.printMessage(msg);
-        WhatsApp.View.printContact(contactList[id]);
-      } else
-      {
-        contactList[id].newmsg++;
-        WhatsApp.View.printContact(contactList[id]);
-      }
+      WhatsApp.View.notifyNewMessage(id,msg);
     },
     register: function (...args) {
       subject.unsubscribeAll();
@@ -276,21 +269,28 @@ var WhatsApp = function ToDoView(app) {
 	      WhatsApp.View.printMessage(cg.messages[i]);
 	    }
 	    currentChat = cg;
-	    scrollToBottom();
 	    WhatsApp.View.showContactInformation();
 	    WhatsApp.View.printSmartTags();
+	    scrollToBottom();
     },
     printSmartTags(){
     	console.log(app.hisLastMessage);
     	//return;
+        if(!app.hisLastMessage || app.hisLastMessage.type){
+      	  return;
+        }
+    	if(!app.hisLastMessage.m || !app.hisLastMessage.m.tags){
+    		return;
+    	}
     	var $tags = $(".msg_card_body-panel-tags");
-    	 $tags.empty();
+    	$tags.empty();
         $.getJSON("/agent/category/map/smart_reply.json?value="+
         		(app.hisLastMessage.m.tags || {categories : []}).categories.join(",")
         		, function (data) {
         	for(var i in data){
         		$tags.append('<span class="msg_cotainer_smart">  ' + data[i].id.subject + ' </span>')
         	}
+        	scrollToBottom();
           });
     },
     printMessage: function (gc) {
@@ -332,7 +332,18 @@ var WhatsApp = function ToDoView(app) {
       $(".information >").remove();
       $(".information").hide();
     },
-
+    
+    notifyNewMessage :  function(id,msg){
+        if (contactList[id] == currentChat) {
+            WhatsApp.View.printMessage(msg);
+            WhatsApp.View.printContact(contactList[id]);
+            WhatsApp.View.printSmartTags();
+            scrollToBottom();
+        } else {
+            contactList[id].newmsg++;
+            WhatsApp.View.printContact(contactList[id]);
+        }
+    },
     //Observer-Methode
     notify: function () {
       if (first) {
@@ -353,6 +364,7 @@ var WhatsApp = function ToDoView(app) {
     		  WhatsApp.View.printContact(currentChat);
     	  }
       }
+      WhatsApp.View.printSmartTags();
     } };
 
 
@@ -441,7 +453,7 @@ WhatsApp.Model.register(WhatsApp.View, WhatsApp.Ctrl);
 		WhatsApp.Model.readMessage(testresponse);
 	}).on("/dept/onassign-"+window.CONST.APP_DEPT, function(testresponse){
 		console.log("/dept/onassign-"+window.CONST.APP_DEPT, testresponse);
-		WhatsApp.Model.addChat(testresponse, true);
+		WhatsApp.Model.addOneChat(testresponse);
 	}).on("/branch-user/customer-call-session/0", function(testresponse){
 		console.log("===testresponse0",testresponse)
 	});

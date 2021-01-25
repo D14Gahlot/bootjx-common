@@ -68,10 +68,10 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 
 		if (ArgUtil.is(avaialbleAgent)) {
 			chatSessionDoc.setAssignedToAgent(avaialbleAgent.getAgentCode());
+			stompTunnelService.sendToAll("/dept/onassign-" + avaialbleAgent.getAgentDept(),
+					getChatSessionDto(chatSessionDoc, avaialbleAgent.getAgentDept()));
 		}
 
-		stompTunnelService.sendToAll("/dept/onassign-" + avaialbleAgent.getAgentDept(),
-				getChatSessionDto(chatSessionDoc, avaialbleAgent.getAgentDept()));
 	}
 
 	@Autowired
