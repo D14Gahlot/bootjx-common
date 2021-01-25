@@ -3,7 +3,7 @@
 ![alt text](docs/diag/svg/inboundflow.uml.svg "Title")
 
 ## Postman
-```.properties
+```application.properties
 ###### App Identification  ########
 app.env=LOCAL 					# optional Enviroment
 app.group=1  					# optional group of services
