@@ -89,7 +89,7 @@ public class SessionStore {
 			// SESSION UPDATE
 			chatSessionDoc.setActive(true);
 			chatSessionDoc.setLastInComingStamp(System.currentTimeMillis());
-			mongoTemplate.save(chatSessionDoc);
+			save(chatSessionDoc);
 
 			// CONTACT CREATION
 			if (ArgUtil.isEmpty(chatContactDoc) || ArgUtil.isEmpty(chatContactDoc.getCsid())) {
@@ -101,13 +101,13 @@ public class SessionStore {
 			}
 			// CONTACT UPDATE
 			chatContactDoc.setSessionId(chatSessionDoc.getSessionId());
-			mongoTemplate.save(chatContactDoc);
+			save(chatContactDoc);
 
 		} else {
 			// SESSION UPDATE
 			chatSessionDoc.setActive(true);
 			chatSessionDoc.setLastInComingStamp(System.currentTimeMillis());
-			mongoTemplate.save(chatSessionDoc);
+			save(chatSessionDoc);
 		}
 
 		inboxMessage.setSessionId(chatSessionDoc.getSessionId());
@@ -161,7 +161,15 @@ public class SessionStore {
 	}
 
 	public void save(ChatSessionDoc chatSessionDoc) {
-		mongoTemplate.save(chatSessionDoc);
+		try {
+			mongoTemplate.save(chatSessionDoc);
+		} catch (Exception e) {
+			if (chatSessionDoc.getVersion() == null) {
+				chatSessionDoc.setVersion(0);
+				mongoTemplate.save(chatSessionDoc);
+			}
+			e.printStackTrace();
+		}
 	}
 
 	public ChatSessionDoc initSession(ChatSessionDoc chatSessionDoc) {

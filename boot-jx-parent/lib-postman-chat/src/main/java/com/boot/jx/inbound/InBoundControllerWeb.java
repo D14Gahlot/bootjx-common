@@ -39,6 +39,7 @@ public class InBoundControllerWeb {
 		event.setLane("DUMMY");
 
 		// Cleaning
+		//event.setSessionId("600edc822743742e916202b9");
 		event.setSessionId(null);
 		event.setMessageId(null);
 		event.setAssignedToAgent(null);
