@@ -450,6 +450,7 @@ WhatsApp.Model.register(WhatsApp.View, WhatsApp.Ctrl);
 		user : '[[${APP_USER}]]',
 		context : "/agent"
 	}).instance().on("/agent/onmessage", function(testresponse){
+		console.log("/agent/onmessage", testresponse);
 		WhatsApp.Model.readMessage(testresponse);
 	}).on("/dept/onassign-"+window.CONST.APP_DEPT, function(testresponse){
 		console.log("/dept/onassign-"+window.CONST.APP_DEPT, testresponse);

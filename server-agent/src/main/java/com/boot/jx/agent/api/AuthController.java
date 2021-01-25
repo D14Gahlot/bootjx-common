@@ -50,6 +50,7 @@ public class AuthController {
 	public String home(Model model, @RequestParam(required = false) String theme) {
 		model.addAttribute("APP_CONTEXT", appConfig.getAppPrefix());
 		model.addAttribute("APP_USER", agentSession.getAgentCode());
+		model.addAttribute("APP_DEPT", agentSession.getAgentDept());
 
 		theme = commonHttpRequest.get("theme");
 
@@ -64,6 +65,7 @@ public class AuthController {
 	public String home2(Model model) {
 		model.addAttribute("APP_CONTEXT", appConfig.getAppPrefix());
 		model.addAttribute("APP_USER", agentSession.getAgentCode());
+		model.addAttribute("APP_DEPT", agentSession.getAgentDept());
 		return "whatsweb";
 	}
 
@@ -71,6 +73,7 @@ public class AuthController {
 	public String customertest(Model model, @RequestParam String page) {
 		model.addAttribute("APP_CONTEXT", appConfig.getAppPrefix());
 		model.addAttribute("APP_USER", agentSession.getAgentCode());
+		model.addAttribute("APP_DEPT", agentSession.getAgentDept());
 		return "customer." + page;
 	}
 
@@ -78,7 +81,7 @@ public class AuthController {
 	public String login(Model model) {
 		model.addAttribute("APP_CONTEXT", appConfig.getAppPrefix());
 		model.addAttribute("APP_USER", agentSession.getAgentCode());
-		//model.addAttribute("APP_DEPT", agentSession.);
+		model.addAttribute("APP_DEPT", agentSession.getAgentDept());
 		return "login";
 	}
 
