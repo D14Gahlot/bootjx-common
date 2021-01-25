@@ -164,7 +164,9 @@ public class SessionStore {
 		try {
 			mongoTemplate.save(chatSessionDoc);
 		} catch (Exception e) {
-			LOGGER.error(ArgUtil.parseAsString(chatSessionDoc.getVersion()),e);
+			ChatSessionDoc chatSessionDoc2 = mongoTemplate.findById(chatSessionDoc.getSessionId(),
+					ChatSessionDoc.class);
+			LOGGER.error(chatSessionDoc.getVersion() + " ~ " + chatSessionDoc2.getVersion(), e);
 			if (chatSessionDoc.getVersion() == null) {
 				chatSessionDoc.setVersion(0);
 				mongoTemplate.save(chatSessionDoc);
