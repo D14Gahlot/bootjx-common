@@ -14,6 +14,7 @@ import com.boot.utils.ArgUtil;
 public class AgentSessionBean {
 
 	private String agentCode;
+	private String agentDept;
 
 	private boolean isLoggedIn;
 
@@ -66,6 +67,14 @@ public class AgentSessionBean {
 		this.isDirty = true;
 	}
 
+	public String getAgentDept() {
+		return agentDept;
+	}
+
+	public void setAgentDept(String agentDept) {
+		this.agentDept = agentDept;
+	}
+
 	@Autowired
 	private MongoTemplate mongoTemplate;
 
@@ -75,9 +84,19 @@ public class AgentSessionBean {
 			agentSessionDoc = new AgentSessionDoc();
 		}
 		agentSessionDoc.setAgentCode(agentCode);
+		agentSessionDoc.setAgentDept(agentDept);
 		agentSessionDoc.setLoggedIn(isLoggedIn);
 		agentSessionDoc.setOnline(isOnline);
 		agentSessionDoc.setLastOnlineStamp(lastOnlineStamp);
 		mongoTemplate.save(agentSessionDoc);
 	}
+
+	public void login(String username) {
+		this.setLoggedIn(true);
+		this.setOnline(true);
+		this.setAgentCode(username);
+		this.setAgentDept("ONLINE");
+		this.setLastOnlineStamp(System.currentTimeMillis());
+	}
+
 }

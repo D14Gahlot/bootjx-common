@@ -56,7 +56,7 @@ public class AuthController {
 		if (ArgUtil.is(theme)) {
 			return theme;
 		}
-		
+
 		return "dashboard.agent.bubble";
 	}
 
@@ -78,6 +78,7 @@ public class AuthController {
 	public String login(Model model) {
 		model.addAttribute("APP_CONTEXT", appConfig.getAppPrefix());
 		model.addAttribute("APP_USER", agentSession.getAgentCode());
+		//model.addAttribute("APP_DEPT", agentSession.);
 		return "login";
 	}
 
@@ -102,10 +103,7 @@ public class AuthController {
 			token.setDetails(new WebAuthenticationDetails(request));
 			Authentication authentication = agentAuthProvider.authenticate(token);
 			SecurityContextHolder.getContext().setAuthentication(authentication);
-			agentSession.setLoggedIn(true);
-			agentSession.setOnline(true);
-			agentSession.setAgentCode(username);
-			agentSession.setLastOnlineStamp(System.currentTimeMillis());
+
 			agentSession.update();
 			stompTunnelSessionManager.registerUser(username);
 		} else {

@@ -153,7 +153,6 @@ var WhatsApp = function ToDoModel(app) {
        	e.online = formatTime(e.lastInComingStamp);
     	e.img = (e.profilePic || "/agent/assets/images/profile.png");
         var contact = new appContacts(e.name, e.img, e.online);
-        console.log("addedContact",contact);
         contact.contactType = e.contactType;
         contact.sessionId = e.sessionId;
         contact.o  = e;
@@ -440,7 +439,8 @@ WhatsApp.Model.register(WhatsApp.View, WhatsApp.Ctrl);
 		context : "/agent"
 	}).instance().on("/agent/onmessage", function(testresponse){
 		WhatsApp.Model.readMessage(testresponse);
-	}).on("/agent/onassign", function(testresponse){
+	}).on("/dept/onassign-"+window.CONST.APP_DEPT, function(testresponse){
+		console.log("/dept/onassign-"+window.CONST.APP_DEPT, testresponse);
 		WhatsApp.Model.addChat(testresponse, true);
 	}).on("/branch-user/customer-call-session/0", function(testresponse){
 		console.log("===testresponse0",testresponse)

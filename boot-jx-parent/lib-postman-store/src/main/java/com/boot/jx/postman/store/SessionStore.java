@@ -147,7 +147,7 @@ public class SessionStore {
 		Query query2 = new Query();
 
 		Calendar cal = Calendar.getInstance();
-		cal.add(Calendar.DATE, -5);
+		cal.add(Calendar.DATE, -2);
 
 		query2.addCriteria(Criteria.where("assignedToAgent").in(agentCode, null).and("active").is(true)
 				.and("lastInComingStamp").gt(cal.getTimeInMillis()));

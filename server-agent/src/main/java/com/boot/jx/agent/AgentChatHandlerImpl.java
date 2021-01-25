@@ -58,7 +58,7 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 			inboxMessage.setAssignedToAgent(avaialbleAgent.getAgentCode());
 		}
 		mongoTemplate.save(chatSessionDoc);
-		stompTunnelService.sendTo(inboxMessage.getAssignedToDept(), "/dept/onassign",
+		stompTunnelService.sendToAll("/dept/onassign-" + inboxMessage.getAssignedToDept(),
 				getChatSessionDto(chatSessionDoc, inboxMessage.getAssignedToAgent()));
 
 		return inboxMessage;
@@ -70,8 +70,8 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 			chatSessionDoc.setAssignedToAgent(avaialbleAgent.getAgentCode());
 		}
 
-		stompTunnelService.sendTo(avaialbleAgent.getAgentDept(), "/dept/onassign",
-				getChatSessionDto(chatSessionDoc, avaialbleAgent.getAgentCode()));
+		stompTunnelService.sendToAll("/dept/onassign-" + avaialbleAgent.getAgentDept(),
+				getChatSessionDto(chatSessionDoc, avaialbleAgent.getAgentDept()));
 	}
 
 	@Autowired
