@@ -143,6 +143,10 @@ public class SessionStore {
 		return mongoTemplate.find(query2, ChatSessionDoc.class);
 	}
 
+	public List<ChatSessionDoc> findChatSessionDocByQuery(Query query) {
+		return mongoTemplate.find(query, ChatSessionDoc.class);
+	}
+
 	public List<ChatSessionDoc> findChatSessionDocByAgentAndUnAssigned(String agentCode) {
 		Query query2 = new Query();
 
@@ -154,6 +158,10 @@ public class SessionStore {
 
 		LOGGER.info(query2.toString());
 		return mongoTemplate.find(query2, ChatSessionDoc.class);
+	}
+
+	public void save(ChatSessionDoc chatSessionDoc) {
+		mongoTemplate.save(chatSessionDoc);
 	}
 
 	public ChatSessionDoc initSession(ChatSessionDoc chatSessionDoc) {

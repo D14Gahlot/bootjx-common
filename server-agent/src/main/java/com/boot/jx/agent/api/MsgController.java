@@ -77,9 +77,11 @@ public class MsgController {
 			throws InterruptedException {
 		ChatSessionDoc sessionDoc = sessionStore.getSession(outboxMessage.getSessionId());
 
+		outboxMessage.setAgent(agentSession.getAgentCode());
+
 		if (ArgUtil.isEmpty(sessionDoc.getAssignedToAgent())) {
 			AgentSessionDoc agent = mongoTemplate.findById(agentSession.getAgentCode(), AgentSessionDoc.class);
-			agentChatHandlerImpl.onAssign(agent, sessionDoc);
+			agentChatHandlerImpl.onAssign(agent, sessionDoc, outboxMessage);
 			mongoTemplate.save(sessionDoc);
 		}
 

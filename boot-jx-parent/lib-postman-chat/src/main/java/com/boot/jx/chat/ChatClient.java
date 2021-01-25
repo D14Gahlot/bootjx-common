@@ -36,6 +36,9 @@ public class ChatClient {
 
 	@Value("${postman.chat.dummy.bot.enabled}")
 	boolean chatDummyBotEnabled;
+	
+	@Value("${postman.chat.onhold.timeout}")
+	private String chatOnlholdTimeout;
 
 	@Autowired
 	private RestService restService;
@@ -77,6 +80,10 @@ public class ChatClient {
 		} else {
 			return null;
 		}
+	}
+
+	public String getChatOnlholdTimeout() {
+		return chatOnlholdTimeout;
 	}
 
 }

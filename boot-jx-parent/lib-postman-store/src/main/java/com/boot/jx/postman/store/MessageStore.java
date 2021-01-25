@@ -13,6 +13,7 @@ import com.boot.jx.postman.doc.ContactDoc;
 import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.Message;
+import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.model.TagDocument;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.utils.ArgUtil;
@@ -20,6 +21,10 @@ import com.boot.utils.CollectionUtil;
 
 @Component
 public class MessageStore {
+
+	public static enum EVENTS {
+		ASGND_TO_DEPT, ASGND_TO_AGENT, UNASGND, PICKED_BY_AGENT, CLOSED_BY_AGENT
+	}
 
 	@Autowired
 	MongoTemplate mongoTemplate;
@@ -88,6 +93,40 @@ public class MessageStore {
 
 	public MessageDoc find(InboxMessage inboxMessage) {
 		return findOrCreateMessageDoc(inboxMessage);
+	}
+
+	public MessageDoc log(InboxMessage inboxMessage, EVENTS eventName, String logMessage) {
+		MessageDoc doc = new MessageDoc();
+		doc.setContactId(PostManUtil.createContactId(inboxMessage));
+		doc.setType("L");
+		doc.setTimestamp(System.currentTimeMillis());
+		doc.setMessage(logMessage);
+		doc.setTemplate(ArgUtil.parseAsString(eventName));
+		doc.setSessionId(inboxMessage.getSessionId());
+		doc.setAgent(inboxMessage.getAssignedToAgent());
+		mongoTemplate.save(doc, getCollectionName("LOGS"));
+		return doc;
+	}
+
+	public MessageDoc log(InboxMessage inboxMessage, EVENTS eventName) {
+		return log(inboxMessage, eventName, null);
+	}
+
+	public MessageDoc log(OutboxMessage outMessage, EVENTS eventName, String logMessage) {
+		MessageDoc doc = new MessageDoc();
+		doc.setContactId(PostManUtil.createContactId(outMessage));
+		doc.setType("L");
+		doc.setTimestamp(System.currentTimeMillis());
+		doc.setMessage(logMessage);
+		doc.setTemplate(ArgUtil.parseAsString(eventName));
+		doc.setSessionId(outMessage.getSessionId());
+		doc.setAgent(outMessage.getAgent());
+		mongoTemplate.save(doc, getCollectionName("LOGS"));
+		return doc;
+	}
+
+	public MessageDoc log(OutboxMessage outMessage, EVENTS eventName) {
+		return log(outMessage, eventName, null);
 	}
 
 	// Out Going Messages

@@ -21,12 +21,9 @@ public class TimeUtils {
 
 	public static enum TimeUnits {
 		SECONDS(TimeUnit.SECONDS, "s", "sec", "second", "seconds"),
-		MINUTES(TimeUnit.MINUTES, "mi", "min", "minute", "minutes"),
-		HOUR(TimeUnit.HOURS, "h", "hr", "hour", "hours"),
-		DAYS(TimeUnit.DAYS, "d", "days", "day"),
-		WEEK(TimeUnit.DAYS, 7, "w", "week", "wk", "weeks"),
-		MONTH(TimeUnit.DAYS, 31, "mo", "mon", "month", "months"),
-		YEAR(TimeUnit.DAYS, 365, "y", "yr", "year"),
+		MINUTES(TimeUnit.MINUTES, "mi", "min", "minute", "minutes"), HOUR(TimeUnit.HOURS, "h", "hr", "hour", "hours"),
+		DAYS(TimeUnit.DAYS, "d", "days", "day"), WEEK(TimeUnit.DAYS, 7, "w", "week", "wk", "weeks"),
+		MONTH(TimeUnit.DAYS, 31, "mo", "mon", "month", "months"), YEAR(TimeUnit.DAYS, 365, "y", "yr", "year"),
 		MIDNIGHT(TimeUnit.DAYS, "mid", "midnight") {
 			public long toMillis(long days) {
 				long todaysMillis = System.currentTimeMillis() - TimeUtils.getTodayStart().getTimeInMillis();
@@ -67,11 +64,9 @@ public class TimeUtils {
 		}
 	}
 
-	public static final Pattern PERIODS = Pattern
-			.compile(
-					"^([0-9\\s]*)(" + String.join("|", TimeUnits.keys()) + ")$");
+	public static final Pattern PERIODS = Pattern.compile("^([0-9\\s]*)(" + String.join("|", TimeUnits.keys()) + ")$");
 
-	public static long timeSince(String period) {
+	public static long toMillis(String period) {
 		period = period.toLowerCase();
 		StringMatcher funkey = new StringMatcher(period);
 		if (funkey.isMatch(PERIODS)) {
@@ -85,6 +80,11 @@ public class TimeUtils {
 			}
 		}
 		return ArgUtil.parseAsLong(period, 0L);
+	}
+
+	@Deprecated
+	public static long timeSince(String period) {
+		return toMillis(period);
 	}
 
 	/**
@@ -116,7 +116,7 @@ public class TimeUtils {
 	}
 
 	public static boolean isExpired(long timeThen, String maxAge) {
-		return isDead(timeThen, TimeUtils.timeSince(maxAge));
+		return isDead(timeThen, TimeUtils.toMillis(maxAge));
 	}
 
 	public static boolean isExpired(Date dateThen, long maxAge) {

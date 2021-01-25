@@ -1,16 +1,15 @@
 package com.boot.jx.agent;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Component;
 
 import com.boot.jx.agent.doc.AgentSessionDoc;
+import com.boot.jx.chat.ChatClient;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.TimeUtils;
-import com.boot.utils.TimeUtils.TimeUnits;
 
 @Component
 @Scope(value = "session", proxyMode = ScopedProxyMode.TARGET_CLASS)
@@ -102,11 +101,11 @@ public class AgentSessionBean {
 		this.setLastOnlineStamp(System.currentTimeMillis());
 	}
 
-	@Value("${postman.chat.onhold.timeout}")
-	String chatOnlholdTimeout;
-	
+	@Autowired
+	ChatClient chatClient;
+
 	public void refreshOnline() {
-		if (TimeUtils.isExpired(this.lastOnlineStamp, chatOnlholdTimeout)) {
+		if (TimeUtils.isExpired(this.lastOnlineStamp, chatClient.getChatOnlholdTimeout())) {
 			this.setLastOnlineStamp(System.currentTimeMillis());
 			this.update();
 		}

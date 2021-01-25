@@ -4,6 +4,7 @@ import java.io.Serializable;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.TypeAlias;
+import org.springframework.data.annotation.Version;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import com.boot.jx.swagger.ApiMockModelProperty;
@@ -16,6 +17,9 @@ public class ChatSessionDoc implements Serializable {
 
 	@Id
 	private String sessionId;
+
+	@Version
+	private Integer version;
 
 	@ApiMockModelProperty(example = "wa919930104050", required = false)
 	private String contactId;
