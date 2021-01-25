@@ -3,11 +3,13 @@ package com.boot.jx.bot;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.boot.jx.agent.AgentService;
+import com.boot.jx.api.ApiResponse;
 import com.boot.jx.chat.ChatService;
 import com.boot.jx.postman.doc.ChatPromise;
 import com.boot.jx.postman.doc.ChatPromise.PromiseCondition;
 import com.boot.jx.postman.doc.ChatPromise.Result;
 import com.boot.jx.postman.doc.ChatPromise.State;
+import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.utils.ArgUtil;
 
@@ -42,16 +44,17 @@ public class ChatController {
 		chatService.send(chatContext.getContact(), waMessage);
 	}
 
-	public void assignToAgent(String deptName) {
+	public ApiResponse<InboxMessage, Object> assignToAgent(String deptName) {
 		try {
-			agentService.assignToAgent(deptName);
+			return agentService.assignToAgent(deptName);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
+		return null;
 	}
 
-	public void assignToAgent() {
-		assignToAgent(null);
+	public ApiResponse<InboxMessage, Object> assignToAgent() {
+		return assignToAgent(null);
 	}
 
 	public void next(String key) {

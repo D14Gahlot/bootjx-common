@@ -48,12 +48,13 @@ public class AgentService {
 		}
 	}
 
-	public void assignToAgent(String deptName) throws InterruptedException {
+	public ApiResponse<InboxMessage, Object> assignToAgent(String deptName) throws InterruptedException {
 		InboxMessage inboxMessage = chatContext.getInboxMessage();
 		if (ArgUtil.is(inboxMessage)) {
 			inboxMessage.setAssignedToDept(deptName);
-			this.assignToAgent(inboxMessage);
+			return this.assignToAgent(inboxMessage);
 		}
+		return null;
 	}
 
 	public boolean onMessageSupported(InboxMessage inboxMessage) {

@@ -3,6 +3,7 @@ package com.boot.jx.bot.alex;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.boot.jx.api.ApiResponse;
 import com.boot.jx.bot.BotController;
 import com.boot.jx.bot.ChatContext;
 import com.boot.jx.bot.ChatController;
@@ -135,7 +136,13 @@ public class AccountVerifyController extends ChatController {
 			next(AlexBotConstants.KEY.SERVICE_SELECTOR);
 			break;
 		case "4":
-			assignToAgent();
+			InboxMessage agentAssignResp = assignToAgent().getResult();
+			;
+			if (ArgUtil.is(agentAssignResp.getAssignedToAgent())) {
+				reply("One of our agent will attend you shortly");
+			} else {
+				reply("All agents are busy or online, we will connect you whenever someone is avaialable.");
+			}
 			break;
 		case "5":
 			send(new OutboxMessage().message("You Selected Rcpt Download"));
