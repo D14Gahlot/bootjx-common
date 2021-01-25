@@ -64,10 +64,10 @@ mry.bot.url=http://localhost:8084/bot
 ###### App Identification  ########
 app.env=DEMO 					# optional Enviroment
 app.group=1  					# optional group of services
-app.id=AG1						# optional instance name
+app.id=BT1						# optional instance name
 
 ###### Appplication ########
-server.port=8083
+server.port=8084
 
 ###### DB Mongo ########
 spring.data.mongodb.uri=mongodb://localbot:localbot@10.28.42.30:27017/localbot
