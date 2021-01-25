@@ -1,7 +1,5 @@
 # InBoundFlow
 
-![alt text](docs/diag/svg/inboundflow.uml.svg "Title")
-
 ## Postman
 ```application.properties
 ###### App Identification  ########
