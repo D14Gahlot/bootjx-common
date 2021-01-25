@@ -164,11 +164,11 @@ public class SessionStore {
 		try {
 			mongoTemplate.save(chatSessionDoc);
 		} catch (Exception e) {
+			LOGGER.error(ArgUtil.parseAsString(chatSessionDoc.getVersion()),e);
 			if (chatSessionDoc.getVersion() == null) {
 				chatSessionDoc.setVersion(0);
 				mongoTemplate.save(chatSessionDoc);
 			}
-			e.printStackTrace();
 		}
 	}
 
