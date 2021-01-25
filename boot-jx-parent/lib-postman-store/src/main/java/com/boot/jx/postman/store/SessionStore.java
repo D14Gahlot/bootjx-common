@@ -2,6 +2,7 @@ package com.boot.jx.postman.store;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Calendar;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -144,7 +145,13 @@ public class SessionStore {
 
 	public List<ChatSessionDoc> findChatSessionDocByAgentAndUnAssigned(String agentCode) {
 		Query query2 = new Query();
-		query2.addCriteria(Criteria.where("assignedToAgent").in(agentCode, null).and("active").is(true));
+
+		Calendar cal = Calendar.getInstance();
+		cal.add(Calendar.DATE, -5);
+
+		query2.addCriteria(Criteria.where("assignedToAgent").in(agentCode, null).and("active").is(true)
+				.and("lastInComingStamp").gt(cal.getTimeInMillis()));
+
 		LOGGER.info(query2.toString());
 		return mongoTemplate.find(query2, ChatSessionDoc.class);
 	}
