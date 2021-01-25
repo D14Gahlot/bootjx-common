@@ -82,6 +82,7 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 
 	@Override
 	public InboxMessage onMessage(InboxMessage inboxMessage) {
+		
 		MessageDoc messageDoc = messageStore.find(inboxMessage);
 		ChatMessageDto messageDto = new ChatMessageDto();
 		messageDto.setType(false);
@@ -91,6 +92,15 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 		messageDto.setSessionId(messageDoc.getSessionId());
 		messageDto.setTags(messageDoc.getTags());
 		stompTunnelService.sendTo(inboxMessage.getAssignedToAgent(), "/agent/onmessage", messageDto);
+		
+		if(inboxMessage.getMessage().equalsIgnoreCase("/exit_chat")) {
+			ChatSessionDoc chatSessionDoc = mongoTemplate.findById(inboxMessage.getSessionId(), ChatSessionDoc.class);
+			chatSessionDoc.setAssignedToDept(null);
+			chatSessionDoc.setAssignedToAgent(null);
+			stompTunnelService.sendToAll("/dept/onassign-" + inboxMessage.getAssignedToDept(),
+					getChatSessionDto(chatSessionDoc, inboxMessage.getAssignedToAgent()));
+		}
+		
 		return inboxMessage;
 	}
 

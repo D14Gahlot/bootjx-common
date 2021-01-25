@@ -64,6 +64,7 @@ public class MsgController {
 					agentSession.getAgentCode());
 			chatSessionDtos.add(chatSessionDto);
 		}
+		agentSession.refreshOnline();
 		return ApiResponse.buildResults(chatSessionDtos);
 	}
 
@@ -90,6 +91,7 @@ public class MsgController {
 			chatService.send(sessionDoc, outboxMessage);
 			return ApiResponse.buildResult(messageDto);
 		}
+		agentSession.refreshOnline();
 		return null;
 	}
 

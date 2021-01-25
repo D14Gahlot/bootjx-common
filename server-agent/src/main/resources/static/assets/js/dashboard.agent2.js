@@ -447,7 +447,7 @@ var WhatsApp = function ToDoCtrl(app) {
 WhatsApp.Model.register(WhatsApp.View, WhatsApp.Ctrl);
 //# sourceURL=pen.js
 	tunnelClient.config({
-		user : '[[${APP_USER}]]',
+		user : window.CONST.APP_USER,
 		context : "/agent"
 	}).instance().on("/agent/onmessage", function(testresponse){
 		console.log("/agent/onmessage", testresponse);
