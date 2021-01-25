@@ -147,14 +147,15 @@ public class SessionStore {
 		return mongoTemplate.find(query, ChatSessionDoc.class);
 	}
 
-	public List<ChatSessionDoc> findChatSessionDocByAgentAndUnAssigned(String agentCode) {
+	public List<ChatSessionDoc> findChatSessionDocByAgentAndUnAssigned(String agentCode, String agentDept) {
 		Query query2 = new Query();
 
 		Calendar cal = Calendar.getInstance();
 		cal.add(Calendar.DATE, -2);
 
-		query2.addCriteria(Criteria.where("assignedToAgent").in(agentCode, null).and("active").is(true)
-				.and("lastInComingStamp").gt(cal.getTimeInMillis()));
+		query2.addCriteria(Criteria.where("assignedToAgent").in(agentCode, null).and("assignedToDept")
+				.in(PMStoreConstants.NO_DEPT, agentDept).and("active").is(true).and("lastInComingStamp")
+				.gt(cal.getTimeInMillis()));
 
 		LOGGER.info(query2.toString());
 		return mongoTemplate.find(query2, ChatSessionDoc.class);

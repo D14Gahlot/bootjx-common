@@ -99,6 +99,7 @@ public class AgentSessionBean {
 		this.setAgentCode(username);
 		this.setAgentDept("ONLINE");
 		this.setLastOnlineStamp(System.currentTimeMillis());
+		this.update();
 	}
 
 	@Autowired

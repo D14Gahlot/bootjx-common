@@ -56,7 +56,7 @@ public class MsgController {
 	@RequestMapping(value = "/api/sessions/assigned", method = { RequestMethod.GET })
 	public ApiResponse<ChatSessionDto, Object> getSessionsAssignedToMe() {
 		List<ChatSessionDoc> sessions = sessionStore
-				.findChatSessionDocByAgentAndUnAssigned(agentSession.getAgentCode());
+				.findChatSessionDocByAgentAndUnAssigned(agentSession.getAgentCode(),agentSession.getAgentDept());
 
 		List<ChatSessionDto> chatSessionDtos = new ArrayList<ChatSessionDto>();
 		for (ChatSessionDoc chatSessionDoc : sessions) {

@@ -20,6 +20,9 @@ public class ChatSessionDto implements Serializable {
 	private String profilePic;
 	private long lastInComingStamp;
 
+	private String assignedToDept;
+	private String assignedToAgent;
+
 	boolean assigned;
 
 	private List<ChatMessageDto> messages;
@@ -94,5 +97,21 @@ public class ChatSessionDto implements Serializable {
 
 	public void setAssigned(boolean assigned) {
 		this.assigned = assigned;
+	}
+
+	public String getAssignedToDept() {
+		return assignedToDept;
+	}
+
+	public void setAssignedToDept(String assignedToDept) {
+		this.assignedToDept = assignedToDept;
+	}
+
+	public String getAssignedToAgent() {
+		return assignedToAgent;
+	}
+
+	public void setAssignedToAgent(String assignedToAgent) {
+		this.assignedToAgent = assignedToAgent;
 	}
 }

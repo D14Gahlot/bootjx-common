@@ -454,8 +454,28 @@ WhatsApp.Model.register(WhatsApp.View, WhatsApp.Ctrl);
 		WhatsApp.Model.readMessage(testresponse);
 	}).on("/dept/onassign-"+window.CONST.APP_DEPT, function(testresponse){
 		console.log("/dept/onassign-"+window.CONST.APP_DEPT, testresponse);
+		if(testresponse.assignedToAgent == window.CONST.APP_USER){
+			WhatsApp.Model.addOneChat(testresponse);
+    	} else {
+    		var contactList = new Array();
+    		var contactListNew = new Array();
+    		
+        	for(var i in contactList){
+        		if(contactList[i].sessionId == testresponse.sessionId){
+        			contactList[i] = null;
+        			delete contactList[i];
+        		}
+        	}
+        	for(var i in contactListNew){
+        		if(contactListNew[i].sessionId == testresponse.sessionId){
+        			contactListNew[i] = null;
+        			delete contactListNew[i];
+        		}
+        	}
+        	$("#" + testresponse.sessionId).remove();
+    	}
+	}).on("/dept/onassign-__DEPT__", function(testresponse){
+		console.log("/dept/onassign-__DEPT__", testresponse);
 		WhatsApp.Model.addOneChat(testresponse);
-	}).on("/branch-user/customer-call-session/0", function(testresponse){
-		console.log("===testresponse0",testresponse)
-	});
+	})
 	

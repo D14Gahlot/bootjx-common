@@ -21,6 +21,7 @@ import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.store.MessageStore;
+import com.boot.jx.postman.store.PMStoreConstants;
 import com.boot.jx.postman.store.SessionStore;
 import com.boot.jx.stomp.StompTunnelService;
 import com.boot.utils.ArgUtil;
@@ -50,9 +51,13 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 		long timeThen = System.currentTimeMillis() - TimeUtils.toMillis(chatClient.getChatOnlholdTimeout());
 
 		Query query = new Query();
-		query.addCriteria(
-				Criteria.where("isOnline").is(true).and("isLoggedIn").is(true).and("lastOnlineStamp").gt(timeThen))
-				.with(new Sort(Direction.ASC, "lastOnlineStamp")).limit(1);
+		Criteria c = Criteria.where("isOnline").is(true).and("isLoggedIn").is(true).and("lastOnlineStamp").gt(timeThen);
+		if (ArgUtil.is(inboxMessage.getAssignedToDept())) {
+			c.and("agentDept").is(inboxMessage.getAssignedToDept());
+		} else {
+			inboxMessage.setAssignedToDept(PMStoreConstants.NO_DEPT);
+		}
+		query.addCriteria(c).with(new Sort(Direction.ASC, "lastOnlineStamp")).limit(1);
 
 		List<AgentSessionDoc> agents = mongoTemplate.find(query, AgentSessionDoc.class);
 
@@ -64,7 +69,10 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 
 		if (ArgUtil.is(avaialbleAgent)) {
 			chatSessionDoc.setAssignedToAgent(avaialbleAgent.getAgentCode());
+			chatSessionDoc.setAssignedToDept(avaialbleAgent.getAgentDept());
+
 			inboxMessage.setAssignedToAgent(avaialbleAgent.getAgentCode());
+			inboxMessage.setAssignedToDept(avaialbleAgent.getAgentDept());
 		}
 		sessionStore.save(chatSessionDoc);
 
@@ -127,6 +135,8 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 		chatSessionDto.setEmail(contact.getEmail());
 		chatSessionDto.setPhone(contact.getPhone());
 		chatSessionDto.setAssigned(ArgUtil.areEqual(chatSessionDoc.getAssignedToAgent(), agentCode));
+		chatSessionDto.setAssignedToAgent(chatSessionDoc.getAssignedToAgent());
+		chatSessionDto.setAssignedToDept(chatSessionDoc.getAssignedToDept());
 
 		List<MessageDoc> messages = messageStore.findBySessionId(contact.getSessionId(), contact.getContactType());
 		List<ChatMessageDto> messageDtos = new ArrayList<ChatMessageDto>();
