@@ -51,14 +51,10 @@ public class AuthController {
 		model.addAttribute("APP_CONTEXT", appConfig.getAppPrefix());
 		model.addAttribute("APP_USER", agentSession.getAgentCode());
 		model.addAttribute("APP_DEPT", agentSession.getAgentDept());
-
-		theme = commonHttpRequest.get("theme");
-
-		if (ArgUtil.is(theme)) {
-			return theme;
-		}
-
-		return "dashboard.agent.bubble";
+		model.addAttribute("APP_DEPT", agentSession.getAgentDept());
+		model.addAttribute("APP_THEME", agentSession.getAgentDept());
+		theme = ArgUtil.nonEmpty(commonHttpRequest.get("theme"), "dashboard.agent.bubble");
+		return theme;
 	}
 
 	@RequestMapping(value = "/app/home1", method = { RequestMethod.POST, RequestMethod.GET })
@@ -106,7 +102,8 @@ public class AuthController {
 			token.setDetails(new WebAuthenticationDetails(request));
 			Authentication authentication = agentAuthProvider.authenticate(token);
 			SecurityContextHolder.getContext().setAuthentication(authentication);
-			agentSession.login(username);;
+			agentSession.login(username);
+			;
 			stompTunnelSessionManager.registerUser(username);
 		} else {
 			x.setData("error");

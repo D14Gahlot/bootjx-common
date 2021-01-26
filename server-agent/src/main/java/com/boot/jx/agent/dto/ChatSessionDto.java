@@ -13,6 +13,7 @@ public class ChatSessionDto implements Serializable {
 	private String sessionId;
 	private String name;
 	private String contactType;
+	private String contactId;
 
 	private String email;
 	private String phone;
@@ -113,5 +114,13 @@ public class ChatSessionDto implements Serializable {
 
 	public void setAssignedToAgent(String assignedToAgent) {
 		this.assignedToAgent = assignedToAgent;
+	}
+
+	public String getContactId() {
+		return contactId;
+	}
+
+	public void setContactId(String contactId) {
+		this.contactId = contactId;
 	}
 }

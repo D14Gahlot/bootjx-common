@@ -36,7 +36,7 @@ function sendMessage(data){
 
 //contacts
 var WhatsApp = function (app) {
-  function Contact(name, img, online) {
+  function Contact(name, img, online, o) {
     this.id = contactList.length;
     this.name = name;
     this.img = img;
@@ -44,6 +44,8 @@ var WhatsApp = function (app) {
     this.messages = new Array();
     this.newmsg = 0;
     this.groups = new Array();
+    this.o = o;
+    this.contactId = this.o ? this.o.contactId : this.id;
 
     contactList.push(this);
   }
@@ -153,10 +155,9 @@ var WhatsApp = function ToDoModel(app) {
     _addChat : function(e){
        	e.online = formatTime(e.lastInComingStamp);
     	e.img = (e.profilePic || "/agent/assets/images/profile.png");
-        var contact = new appContacts(e.name, e.img, e.online);
+        var contact = new appContacts(e.name, e.img, e.online, e);
         contact.contactType = e.contactType;
         contact.sessionId = e.sessionId;
-        contact.o  = e;
         for (var j = 0; j < e.messages.length; j++) {
           var m = e.messages[j];
           m.time = formatTime(m.timestamp);
@@ -190,7 +191,7 @@ var WhatsApp = function ToDoModel(app) {
         $(".input-message").val("");
         console.log("writeMessage")
         subject.notifyObservers();
-        $("#" + currentChat.id).addClass("active-contact active");
+        $("#" + currentChat.contactId).addClass("active-contact active");
         scrollToBottom();
     },
     writeMessage: function () {
@@ -241,7 +242,7 @@ PP_ICONS = {
 var WhatsApp = function ToDoView(app) {
   var view = {
     printContact: function (c) {
-      $("#" + c.id).remove();
+      $("#" + c.contactId).remove();
       var lastmsg = c.messages[c.messages.length - 1];
 
       var html = $(quikr.tmpl("temp_contact",{
@@ -319,7 +320,7 @@ var WhatsApp = function ToDoView(app) {
             for (var i = 0; i < contactList.length; i++) {
               if ($(currentChat).find("p").text() == contactList[i].name) {
                 $(".active-contact").removeClass("active-contact");
-                $("#" + contactList[i].id).addClass("active-contact");
+                $("#" + contactList[i].contactId).addClass("active-contact");
                 WhatsApp.Groups.printChat(contactList[i]);
               }
             }
@@ -391,7 +392,7 @@ var WhatsApp = function ToDoCtrl(app) {
    	   	$(".active-contact,.active").removeClass("active-contact").removeClass("active");
         $(this).addClass("active-contact active");
         $(this).removeClass("new-message-contact");
-        $("#nm" + that.id).remove();
+        $("#nm" + that.contactId).remove();
         that.newmsg = 0;
         WhatsApp.View.printChat(that);
       });
@@ -472,7 +473,7 @@ WhatsApp.Model.register(WhatsApp.View, WhatsApp.Ctrl);
         			delete contactListNew[i];
         		}
         	}
-        	$("#" + testresponse.sessionId).remove();
+        	$("#" + testresponse.contactId).remove();
     	}
 	}).on("/dept/onassign-__DEPT__", function(testresponse){
 		console.log("/dept/onassign-__DEPT__", testresponse);
