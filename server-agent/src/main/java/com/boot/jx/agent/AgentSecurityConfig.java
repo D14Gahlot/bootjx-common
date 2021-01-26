@@ -14,11 +14,15 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 @Configuration
 @EnableWebSecurity
 @Order(99)
 public class AgentSecurityConfig extends WebSecurityConfigurerAdapter {
+
+	@Autowired
+	private AgentLogoutHandler agentLogoutHandler;
 
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
@@ -37,9 +41,10 @@ public class AgentSecurityConfig extends WebSecurityConfigurerAdapter {
 				.failureUrl("/auth/login?error").permitAll()
 				// .loginProcessingUrl("/auth/login/submit").permitAll()
 				// Logout Pages
-				.and().logout().permitAll().logoutSuccessUrl("/auth/login?logout").deleteCookies("JSESSIONID")
-				.invalidateHttpSession(true).permitAll().and().exceptionHandling().accessDeniedPage("/403").and().csrf()
-				.disable().headers().disable();
+				.and().logout().permitAll().addLogoutHandler(agentLogoutHandler).logoutUrl("/auth/logout")
+				.logoutSuccessUrl("/auth/login?logout").deleteCookies("JSESSIONID").invalidateHttpSession(true)
+				.permitAll().and().exceptionHandling().accessDeniedPage("/403").and().csrf().disable().headers()
+				.disable();
 	}
 
 	@Bean

@@ -13,11 +13,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.thymeleaf.expression.Arrays;
 
-import com.boot.jx.AppConfig;
 import com.boot.jx.agent.AgentChatHandlerImpl;
 import com.boot.jx.agent.AgentSessionBean;
+import com.boot.jx.agent.AgentSessionService;
 import com.boot.jx.agent.doc.AgentSessionDoc;
 import com.boot.jx.agent.dto.ChatMessageDto;
 import com.boot.jx.agent.dto.ChatSessionDto;
@@ -25,9 +24,7 @@ import com.boot.jx.api.ApiResponse;
 import com.boot.jx.chat.ChatService;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.SmartReply;
-import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.OutboxMessage;
-import com.boot.jx.postman.store.MessageStore;
 import com.boot.jx.postman.store.SessionStore;
 import com.boot.utils.ArgUtil;
 
@@ -35,28 +32,25 @@ import com.boot.utils.ArgUtil;
 public class MsgController {
 
 	@Autowired
-	AppConfig appConfig;
+	private SessionStore sessionStore;
 
 	@Autowired
-	SessionStore sessionStore;
+	private AgentSessionBean agentSession;
 
 	@Autowired
-	MessageStore messageStore;
-
-	@Autowired
-	AgentSessionBean agentSession;
-
-	@Autowired
-	MongoTemplate mongoTemplate;
+	private MongoTemplate mongoTemplate;
 
 	@Autowired
 	private AgentChatHandlerImpl agentChatHandlerImpl;
+	
+	@Autowired
+	private AgentSessionService agentSessionService;
 
 	@ResponseBody
 	@RequestMapping(value = "/api/sessions/assigned", method = { RequestMethod.GET })
 	public ApiResponse<ChatSessionDto, Object> getSessionsAssignedToMe() {
-		List<ChatSessionDoc> sessions = sessionStore
-				.findChatSessionDocByAgentAndUnAssigned(agentSession.getAgentCode(),agentSession.getAgentDept());
+		List<ChatSessionDoc> sessions = sessionStore.findChatSessionDocByAgentAndUnAssigned(agentSession.getAgentCode(),
+				agentSession.getAgentDept());
 
 		List<ChatSessionDto> chatSessionDtos = new ArrayList<ChatSessionDto>();
 		for (ChatSessionDoc chatSessionDoc : sessions) {
@@ -64,7 +58,7 @@ public class MsgController {
 					agentSession.getAgentCode());
 			chatSessionDtos.add(chatSessionDto);
 		}
-		agentSession.refreshOnline();
+		agentSessionService.refreshOnline();
 		return ApiResponse.buildResults(chatSessionDtos);
 	}
 
@@ -93,7 +87,7 @@ public class MsgController {
 			chatService.send(sessionDoc, outboxMessage);
 			return ApiResponse.buildResult(messageDto);
 		}
-		agentSession.refreshOnline();
+		agentSessionService.refreshOnline();
 		return null;
 	}
 

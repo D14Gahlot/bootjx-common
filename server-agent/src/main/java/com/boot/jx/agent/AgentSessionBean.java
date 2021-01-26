@@ -77,39 +77,4 @@ public class AgentSessionBean {
 		this.agentDept = agentDept;
 	}
 
-	@Autowired
-	private MongoTemplate mongoTemplate;
-
-	public void update() {
-		AgentSessionDoc agentSessionDoc = mongoTemplate.findById(this.agentCode, AgentSessionDoc.class);
-		if (ArgUtil.isEmpty(agentSessionDoc)) {
-			agentSessionDoc = new AgentSessionDoc();
-		}
-		agentSessionDoc.setAgentCode(agentCode);
-		agentSessionDoc.setAgentDept(agentDept);
-		agentSessionDoc.setLoggedIn(isLoggedIn);
-		agentSessionDoc.setOnline(isOnline);
-		agentSessionDoc.setLastOnlineStamp(lastOnlineStamp);
-		mongoTemplate.save(agentSessionDoc);
-	}
-
-	public void login(String username) {
-		this.setLoggedIn(true);
-		this.setOnline(true);
-		this.setAgentCode(username);
-		this.setAgentDept("ONLINE");
-		this.setLastOnlineStamp(System.currentTimeMillis());
-		this.update();
-	}
-
-	@Autowired
-	ChatClient chatClient;
-
-	public void refreshOnline() {
-		if (TimeUtils.isExpired(this.lastOnlineStamp, chatClient.getChatOnlholdTimeout())) {
-			this.setLastOnlineStamp(System.currentTimeMillis());
-			this.update();
-		}
-	}
-
 }

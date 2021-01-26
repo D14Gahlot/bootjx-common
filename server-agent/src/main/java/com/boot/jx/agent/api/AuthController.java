@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.boot.jx.AppConfig;
 import com.boot.jx.agent.AgentAuthProvider;
 import com.boot.jx.agent.AgentSessionBean;
+import com.boot.jx.agent.AgentSessionService;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.http.CommonHttpRequest;
 import com.boot.jx.stomp.StompTunnelSessionManager;
@@ -32,7 +33,10 @@ public class AuthController {
 	private AppConfig appConfig;
 
 	@Autowired
-	CommonHttpRequest commonHttpRequest;
+	private CommonHttpRequest commonHttpRequest;
+
+	@Autowired
+	private AgentSessionBean agentSession;
 
 	@ResponseBody
 	@RequestMapping(value = "/pub/test", method = { RequestMethod.POST, RequestMethod.GET })
@@ -85,7 +89,7 @@ public class AuthController {
 	private AgentAuthProvider agentAuthProvider;
 
 	@Autowired
-	private AgentSessionBean agentSession;
+	private AgentSessionService agentSessionService;
 
 	@Autowired
 	private StompTunnelSessionManager stompTunnelSessionManager;
@@ -102,8 +106,7 @@ public class AuthController {
 			token.setDetails(new WebAuthenticationDetails(request));
 			Authentication authentication = agentAuthProvider.authenticate(token);
 			SecurityContextHolder.getContext().setAuthentication(authentication);
-			agentSession.login(username);
-			;
+			agentSessionService.updateLogin(username);
 			stompTunnelSessionManager.registerUser(username);
 		} else {
 			x.setData("error");
