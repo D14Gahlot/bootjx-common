@@ -52,9 +52,9 @@ public class AuthController {
 		model.addAttribute("APP_USER", agentSession.getAgentCode());
 		model.addAttribute("APP_DEPT", agentSession.getAgentDept());
 		model.addAttribute("APP_DEPT", agentSession.getAgentDept());
-		model.addAttribute("APP_THEME", agentSession.getAgentDept());
 		theme = ArgUtil.nonEmpty(commonHttpRequest.get("theme"), "dashboard.agent.bubble");
-		return theme;
+		model.addAttribute("APP_THEME", theme);
+		return "dashboard.agent";
 	}
 
 	@RequestMapping(value = "/app/home1", method = { RequestMethod.POST, RequestMethod.GET })
