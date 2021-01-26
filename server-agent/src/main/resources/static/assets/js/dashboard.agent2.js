@@ -170,7 +170,7 @@ var WhatsApp = function ToDoModel(app) {
     addOneChat : function(e){
     	for(var i in contactList){
     		if(contactList[i].sessionId == e.sessionId){
-    			e = null;
+    			//e = null;
     		}
     	}
     	if(e){
