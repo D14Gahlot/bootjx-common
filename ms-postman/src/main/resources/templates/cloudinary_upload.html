@@ -1,0 +1,62 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta name="viewport" content="width=device-width" />
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>Postman Editor</title>
+
+<script src="/postman/node_modules/jquery/dist/jquery.js"
+	type="text/javascript"></script>
+<script
+	src="/postman/node_modules/blueimp-file-upload/js/vendor/jquery.ui.widget.js"
+	type="text/javascript"></script>
+<script
+	src="/postman/node_modules/blueimp-file-upload/js/jquery.iframe-transport.js"
+	type="text/javascript"></script>
+<script
+	src="/postman/node_modules/blueimp-file-upload/js/jquery.fileupload.js"
+	type="text/javascript"></script>
+<script
+	src="/postman/node_modules/cloudinary-jquery-file-upload/cloudinary-jquery-file-upload.js"
+	type="text/javascript"></script>
+<script src="https://rawgit.com/enyo/dropzone/master/dist/dropzone.js"></script>
+<style>
+    #dropzone-area{
+      width:200px;
+      height: 200px;
+      border:1px solid black;
+    }
+  
+</style>
+</head>
+<body>
+	<div th:utext="${html}"></div>
+	<div id="dropzone-area">Upload Here</div>
+</body>
+
+<script>
+     window.onload=function(){
+      var myDropzone = new Dropzone(document.getElementById('dropzone-area'), {
+        	uploadMultiple: false,
+        	acceptedFiles:'.jpg,.png,.jpeg,.gif',
+        	parallelUploads: 6,
+        	url: '[[${URL}]]'
+        });
+         myDropzone.on('sending', function (file, xhr, formData) {
+           alert("you added a file");
+         });
+      myDropzone.on('sending', function (file, xhr, formData) {
+      	formData.append('api_key', '[[${OPTIONS.api_key}]]');
+      	formData.append('timestamp', '[[${PARAMS.timestamp}]]');
+      	formData.append('public_id', '[[${PARAMS.public_id}]]');
+      	formData.append("signature",'[[${OPTIONS.signature}]]');
+      	//formData.append('upload_preset', 'presetname');
+      });
+      myDropzone.on('success', function (file, response) {
+      	console.log('Success! uploading file to Cloudinary');
+      });
+    }
+</script>
+
+</html>

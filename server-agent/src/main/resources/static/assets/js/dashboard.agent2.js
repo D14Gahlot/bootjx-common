@@ -151,6 +151,14 @@ var WhatsApp = function ToDoModel(app) {
         }
         subject.notifyObservers();
       });
+      
+      $.getJSON("/agent/gallery/map/media_reply", function (data) {
+          $(".media_card_body-bubbles").append(quikr.tmpl("temp_media_option",{
+        	  list : data
+           }));
+          subject.notifyObservers();
+       });
+      
     },
     _addChat : function(e){
        	e.online = formatTime(e.lastInComingStamp);
@@ -434,6 +442,11 @@ var WhatsApp = function ToDoCtrl(app) {
         $("body").on("click",".msg_cotainer_smart", function(event){
         	console.log($(this).text());
         	app.Model.senMessage($(this).text());
+        });
+        
+        $('.attach_btn').click(function(){
+        	$(".media_card_body").toggleClass("hidden");
+        	$(".msg_card_body").toggleClass("hidden");
         });
         
         start = false;

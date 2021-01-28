@@ -17,10 +17,10 @@ import com.boot.utils.CollectionUtil;
 @Component
 public class InBoundHandlerCoreImpl implements InBoundHandler {
 
-	@Autowired
+	@Autowired(required = false)
 	private OpenNLPService openNLPService;
 
-	@Autowired
+	@Autowired(required = false)
 	private CoreNLPService coreNLPService;
 
 	@Autowired
@@ -34,8 +34,14 @@ public class InBoundHandlerCoreImpl implements InBoundHandler {
 				if (!ArgUtil.is(inboxMessage.getTags())) {
 					inboxMessage.setTags(new TagDocument());
 				}
-				openNLPService.addTags(inboxMessage.getMessage(), inboxMessage.getTags());
-				coreNLPService.addTags(inboxMessage.getMessage(), inboxMessage.getTags());
+
+				if (ArgUtil.is(openNLPService)) {
+					openNLPService.addTags(inboxMessage.getMessage(), inboxMessage.getTags());
+				}
+
+				if (ArgUtil.is(coreNLPService)) {
+					coreNLPService.addTags(inboxMessage.getMessage(), inboxMessage.getTags());
+				}
 
 				if (ArgUtil.is(inboxMessage.getTags().getCategories())) {
 					inboxMessage.getTags()

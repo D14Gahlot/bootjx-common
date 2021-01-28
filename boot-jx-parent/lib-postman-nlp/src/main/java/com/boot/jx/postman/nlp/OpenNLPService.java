@@ -12,6 +12,7 @@ import javax.annotation.PostConstruct;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 import com.boot.jx.postman.model.TagDocument;
@@ -50,6 +51,7 @@ import opennlp.tools.util.TrainingParameters;
 import opennlp.tools.util.model.ModelUtil;
 
 @Component
+@ConditionalOnProperty("postman.nlp.opennlp.enabled")
 public class OpenNLPService {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(OpenNLPService.class);

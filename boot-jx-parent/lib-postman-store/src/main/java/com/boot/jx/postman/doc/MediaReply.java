@@ -9,10 +9,11 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import com.boot.utils.ArgUtil;
 
-@Document(collection = "DICT_QUICK_RESP")
-@TypeAlias("QuickReply")
-public class SmartReply implements Serializable {
-	private static final long serialVersionUID = -5649094988762846983L;
+@Document(collection = "DICT_MEDIA_RESP")
+@TypeAlias("MediaReply")
+public class MediaReply implements Serializable {
+
+	private static final long serialVersionUID = 7942286016346691701L;
 
 	@Id
 	private CompositeKey id;
@@ -21,7 +22,9 @@ public class SmartReply implements Serializable {
 	private String uniqueId;
 
 	private String message;
-	private String template;
+	private String media;
+	private String image;
+	private String video;
 
 	public CompositeKey id() {
 		if (!ArgUtil.is(this.id)) {
@@ -31,9 +34,9 @@ public class SmartReply implements Serializable {
 	}
 
 	public static class CompositeKey implements Serializable {
-		private static final long serialVersionUID = 2466914948472674930L;
+		private static final long serialVersionUID = -2593141269922970618L;
 		private String subject;
-		private String category;
+		private String gallery;
 
 		public String getSubject() {
 			return subject;
@@ -43,13 +46,14 @@ public class SmartReply implements Serializable {
 			this.subject = subject;
 		}
 
-		public String getCategory() {
-			return category;
+		public String getGallery() {
+			return gallery;
 		}
 
-		public void setCategory(String category) {
-			this.category = category;
+		public void setGallery(String gallery) {
+			this.gallery = gallery;
 		}
+
 	}
 
 	public String getMessage() {
@@ -60,20 +64,36 @@ public class SmartReply implements Serializable {
 		this.message = message;
 	}
 
-	public String getTemplate() {
-		return template;
-	}
-
-	public void setTemplate(String template) {
-		this.template = template;
-	}
-
 	public CompositeKey getId() {
 		return id;
 	}
 
 	public void setId(CompositeKey id) {
 		this.id = id;
+	}
+
+	public String getImage() {
+		return image;
+	}
+
+	public void setImage(String image) {
+		this.image = image;
+	}
+
+	public String getVideo() {
+		return video;
+	}
+
+	public void setVideo(String video) {
+		this.video = video;
+	}
+
+	public String getMedia() {
+		return media;
+	}
+
+	public void setMedia(String media) {
+		this.media = media;
 	}
 
 	public String getUniqueId() {

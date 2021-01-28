@@ -6,6 +6,7 @@ import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
 import com.boot.jx.dict.Language;
@@ -16,6 +17,7 @@ import com.boot.jx.scope.tnt.TenantProperties;
 import com.boot.jx.scope.tnt.TenantScoped;
 import com.boot.jx.scope.tnt.TenantValue;
 import com.boot.utils.ArgUtil;
+import com.cloudinary.Cloudinary;
 
 /**
  * The Class PostManConfig.

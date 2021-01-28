@@ -115,6 +115,19 @@
 								</div>
 							</div>
 						</div>
+						<div class="card-body media_card_body hidden" >
+							<div class="media_card_body-bubbles">
+								
+							</div>
+							<div class="media_card_body-panel hidden">
+								<hr/>
+								<div class="media_card_body-panel-actions">
+									<span class="media_cotainer_smart">Cancel</span>
+									<span class="media_cotainer_smart">Send</span>
+								</div>
+							</div>
+						</div>
+						
 						<div class="card-footer">
 							<div class="input-group">
 								<div class="input-group-append">
@@ -211,7 +224,18 @@
 		</div>
 	</div>
 </script>
-		
+	
+	
+<script type="text/template" id="temp_media_option">
+<div class="media_card_body-bubbles-wrapper">
+<% for(var i in list) { var media = list[i]; %>
+	<div class="media_thumb">
+			<img src="<%=media.media%>">
+	</div>
+<% } %>
+</div>
+</script>
+	
 </body>
 </html>
   <script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js'></script>

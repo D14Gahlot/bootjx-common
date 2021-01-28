@@ -23,6 +23,7 @@ import com.boot.jx.agent.dto.ChatSessionDto;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.chat.ChatService;
 import com.boot.jx.postman.doc.ChatSessionDoc;
+import com.boot.jx.postman.doc.MediaReply;
 import com.boot.jx.postman.doc.SmartReply;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.store.SessionStore;
@@ -42,7 +43,7 @@ public class MsgController {
 
 	@Autowired
 	private AgentChatHandlerImpl agentChatHandlerImpl;
-	
+
 	@Autowired
 	private AgentSessionService agentSessionService;
 
@@ -97,6 +98,12 @@ public class MsgController {
 		Query query2 = new Query();
 		query2.addCriteria(Criteria.where("_id.category").in(categories.stream().toArray(String[]::new)));
 		return mongoTemplate.find(query2, SmartReply.class);
+	}
+
+	@ResponseBody
+	@RequestMapping(value = "/gallery/map/media_reply", method = { RequestMethod.GET })
+	public List<MediaReply> listMediaReply() {
+		return mongoTemplate.findAll(MediaReply.class);
 	}
 
 }

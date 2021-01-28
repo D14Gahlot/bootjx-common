@@ -27,12 +27,6 @@
 			white-space: nowrap;
 			background-color: #6587a59c;
 		}
-		.msg_card_body{
-			overflow-y: auto;
-			background-color: #f2f3f8 !important;
-			padding-bottom: 5px;
-			
-		}
 		.card-header{
 			border-radius: 15px 15px 0 0 !important;
 			border-bottom: 0 !important;
@@ -420,6 +414,11 @@ ui.contacts.contact-list-unassigned li.data_unassigned {
 	opacity: 0.4;
 }
 
+.msg_card_body{
+	overflow-y: auto;
+	background-color: #f2f3f8 !important;
+	padding-bottom: 5px;
+}
 .msg_card_body-panel {
 	width:100%
 }
@@ -433,6 +432,7 @@ ui.contacts.contact-list-unassigned li.data_unassigned {
 	  margin: 0 auto;
 	  display: table;
 	  text-align:center;
+	  min-height : 25px;
 }
 .msg_cotainer_smart{
     margin-top: auto;
@@ -448,4 +448,57 @@ ui.contacts.contact-list-unassigned li.data_unassigned {
     border: 1px solid #2f8df7;
     cursor : pointer;
     display: inline;
+}
+.media_card_body{
+	overflow-y: auto;
+	background-color: #f2f3f8 !important;
+	padding-bottom: 5px;
+}
+.media_card_body-bubbles-wrapper{
+	height : 100%;	
+}
+
+.media_card_body .media_thumb{
+	width : 120px;
+	height : 120px;
+	float: left;
+}
+.media_card_body .media_thumb img{
+	width : 100px;
+	height : 100px;
+}
+.media_card_body-panel {
+	width:100%;
+	clear: both;
+}
+.media_card_body-panel hr{
+	border-top: 1px solid #e0dddd;
+	margin: 10px 0;
+}
+.media_card_body-panel .media_card_body-panel-actions {
+	  text-align: center;
+	  width: 90%;
+	  margin: 0 auto;
+	  display: table;
+	  text-align:center;
+	  min-height : 25px;
+}
+.media_cotainer_smart{
+    margin-top: auto;
+    margin-bottom: auto;
+    margin-left: 3px;
+    margin-top: 2px;
+    border-radius: 8px;
+    background-color: #FFF;
+    color: #7b7575;
+    padding: 6px;
+    position: relative;
+    font-size: 14px;
+    border: 1px solid #2f8df7;
+    cursor : pointer;
+    display: inline;
+}
+
+.hidden {
+	display : none!important;
 }

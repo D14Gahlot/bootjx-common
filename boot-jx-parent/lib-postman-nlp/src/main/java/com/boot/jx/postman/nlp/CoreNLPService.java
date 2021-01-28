@@ -10,6 +10,7 @@ import javax.annotation.PostConstruct;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 import com.boot.jx.postman.model.TagDocument;
@@ -20,6 +21,7 @@ import edu.stanford.nlp.pipeline.CoreEntityMention;
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
 
 @Component
+@ConditionalOnProperty("postman.nlp.corenlp.enabled")
 public class CoreNLPService {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CoreNLPService.class);
