@@ -78,7 +78,14 @@ public class TwitterClient {
 	public void sendReply(String id, String text, String lane) throws NumberFormatException, TwitterException {
 		Twitter twitter = getContext(lane).getTwitter();
 		twitter.sendDirectMessage(Long.parseLong(id), text);
-		LOGGER.info("Message result to {} : {}", id);
+		LOGGER.debug("Message result to {} : {}", id);
+	}
+
+	public void sendReply(String id, String text, Long mediaId, String lane)
+			throws NumberFormatException, TwitterException {
+		Twitter twitter = getContext(lane).getTwitter();
+		twitter.sendDirectMessage(Long.parseLong(id), text, mediaId);
+		LOGGER.debug("Message result to {} : {}", id);
 	}
 
 	public DirectMessageList pollDirectMessagesReceived(String lane) throws TwitterException {

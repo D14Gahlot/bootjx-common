@@ -1,6 +1,8 @@
 package com.boot.jx.postman.doc;
 
 import java.io.Serializable;
+import java.util.Map;
+import java.util.HashMap;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.TypeAlias;
@@ -24,6 +26,8 @@ public class TemplateReply implements Serializable {
 	private String content;
 
 	private String url;
+
+	private Map<String, Object> meta;
 
 	public String getName() {
 		return name;
@@ -71,6 +75,21 @@ public class TemplateReply implements Serializable {
 
 	public void setUrl(String url) {
 		this.url = url;
+	}
+
+	public Map<String, Object> getMeta() {
+		return meta;
+	}
+
+	public void setMeta(Map<String, Object> meta) {
+		this.meta = meta;
+	}
+
+	public Map<String, Object> meta() {
+		if (this.meta == null) {
+			this.meta = new HashMap<String, Object>();
+		}
+		return this.meta;
 	}
 
 }

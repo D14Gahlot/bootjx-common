@@ -1,13 +1,12 @@
 package com.boot.jx.postman.doc;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import javax.annotation.PostConstruct;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Component;
+
+import com.boot.utils.ArgUtil;
 
 @Component
 public class TemplatesReplies {
@@ -17,44 +16,18 @@ public class TemplatesReplies {
 
 	@PostConstruct
 	public void init() {
-		List<TemplateReply> list = new ArrayList<TemplateReply>();
-		TemplateReply temp1 = new TemplateReply();
-		temp1.setName("GIRL_AND_BIKE");
-		temp1.setTitle("Girl and bike");
-		temp1.setType("IMAGE");
-		temp1.setCategory("Gallery1");
-		temp1.setUrl("https://res.cloudinary.com/www-mehery-com/image/upload/v1611688334/samples/bike.jpg");
-		temp1.setContent("See this Nice Pic");
-		mongoTemplate.save(temp1);
 
-		TemplateReply temp2 = new TemplateReply();
-		temp2.setName("OFFICE_N_WORK");
-		temp2.setTitle("Office & Work");
-		temp2.setType("IMAGE");
-		temp2.setCategory("Gallery1");
-		temp2.setUrl("https://res.cloudinary.com/www-mehery-com/image/upload/v1611688339/samples/imagecon-group.jpg");
-		temp2.setContent("Work environment");
-		mongoTemplate.save(temp2);
+		mongoTemplate.save(create("GIRL_AND_BIKE", "Girl and bike", "Gallery1", "See this Nice Pic",
+				"https://res.cloudinary.com/www-mehery-com/image/upload/v1611688334/samples/bike.jpg"));
 
-		TemplateReply temp3 = new TemplateReply();
-		temp3.setName("KITTEN_PLAYING");
-		temp3.setTitle("Kitten Playing");
-		temp3.setType("IMAGE");
-		temp3.setCategory("Animals");
-		temp3.setUrl(
-				"https://res.cloudinary.com/www-mehery-com/image/upload/v1611688341/samples/animals/kitten-playing.gif");
-		temp3.setContent("Happy Kitten");
-		mongoTemplate.save(temp3);
+		mongoTemplate.save(create("OFFICE_N_WORK", "Office & Work", "Gallery1", "Work environment",
+				"https://res.cloudinary.com/www-mehery-com/image/upload/v1611688339/samples/imagecon-group.jpg"));
 
-		TemplateReply temp4 = new TemplateReply();
-		temp4.setName("THREE_DOGS");
-		temp4.setTitle("Three Dogs");
-		temp4.setType("IMAGE");
-		temp4.setCategory("Animals");
-		temp4.setUrl(
-				"https://res.cloudinary.com/www-mehery-com/image/upload/v1611688335/samples/animals/three-dogs.jpg");
-		temp4.setContent("Gang of Dogs");
-		mongoTemplate.save(temp4);
+		mongoTemplate.save(create("KITTEN_PLAYING", "Kitten Playing", "Animals", "Happy Kitten",
+				"https://res.cloudinary.com/www-mehery-com/image/upload/v1611688341/samples/animals/kitten-playing.gif"));
+
+		mongoTemplate.save(create("THREE_DOGS", "Three Dogs", "Animals", "Gang of Dogs",
+				"https://res.cloudinary.com/www-mehery-com/image/upload/v1611688335/samples/animals/three-dogs.jpg"));
 
 		mongoTemplate.save(create("REINDEER", "Reindeer", "Animals", "In Snow",
 				"https://res.cloudinary.com/www-mehery-com/image/upload/v1611688331/samples/animals/reindeer.jpg"));
@@ -74,7 +47,12 @@ public class TemplatesReplies {
 	}
 
 	private TemplateReply create(String name, String title, String category, String content, String url) {
-		TemplateReply temp5 = new TemplateReply();
+
+		TemplateReply temp5 = mongoTemplate.findById(name, TemplateReply.class);
+		if (ArgUtil.isEmpty(temp5)) {
+			temp5 = new TemplateReply();
+		}
+
 		temp5.setName(name);
 		temp5.setTitle(title);
 		temp5.setType("IMAGE");

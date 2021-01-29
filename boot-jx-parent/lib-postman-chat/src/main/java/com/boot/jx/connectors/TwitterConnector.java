@@ -1,11 +1,15 @@
 package com.boot.jx.connectors;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 import org.hibernate.validator.internal.util.privilegedactions.GetConstraintValidatorList;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -13,6 +17,7 @@ import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorHandler;
 import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorMapping;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.postman.doc.ChatContactDoc;
+import com.boot.jx.postman.doc.TemplateReply;
 import com.boot.jx.postman.gupshup.GupShupConfig;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.OutboxMessage;
@@ -27,6 +32,7 @@ import twitter4j.DirectMessageList;
 import twitter4j.DirectMessageLocalImpl;
 import twitter4j.ResponseList;
 import twitter4j.TwitterException;
+import twitter4j.UploadedMedia;
 
 @Component
 @ConnectorMapping(ContactType.TWITTER)
@@ -41,6 +47,9 @@ public class TwitterConnector implements ConnectorHandler {
 	@Autowired
 	private SessionStore sessionStore;
 
+	@Autowired
+	private MongoTemplate mongoTemplate;
+
 	@Override
 	public InboxMessage assignToAgent(InboxMessage inboxMessage) {
 		// twitterClient.sendReply(inboxMessage.getFrom(), "Call us @ " +
@@ -53,10 +62,8 @@ public class TwitterConnector implements ConnectorHandler {
 		try {
 			twitterClient.sendReply(inboxMessage.getFrom(), outboxMessage.getMessage(), inboxMessage.getLane());
 		} catch (NumberFormatException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (TwitterException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -64,12 +71,31 @@ public class TwitterConnector implements ConnectorHandler {
 	@Override
 	public void send(ChatContactDoc chatContactDoc, OutboxMessage outboxMessage) {
 		try {
-			twitterClient.sendReply(chatContactDoc.getCsid(), outboxMessage.getMessage(), chatContactDoc.getLane());
+			if (ArgUtil.is(outboxMessage.getTemplate())) {
+				TemplateReply templateReply = mongoTemplate.findById(outboxMessage.getTemplate(), TemplateReply.class);
+				if ("image".equalsIgnoreCase(templateReply.getType())) {
+					Long mediaId = ArgUtil.parseAsLong(templateReply.meta().get("twitterMediaId"));
+					if (!ArgUtil.is(mediaId)) {
+						TwitterClientContext ctx = twitterClient.getContext(chatContactDoc.getLane());
+						InputStream media = new java.net.URL(templateReply.getUrl()).openStream();
+						UploadedMedia uploadedMedia = ctx.getTwitter().uploadMedia(templateReply.getTitle(), media);
+						mediaId = uploadedMedia.getMediaId();
+						templateReply.meta().put("twitterMediaId", mediaId);
+						mongoTemplate.save(templateReply);
+					}
+					twitterClient.sendReply(chatContactDoc.getCsid(), outboxMessage.getMessage(), mediaId,
+							chatContactDoc.getLane());
+				}
+			} else {
+				twitterClient.sendReply(chatContactDoc.getCsid(), outboxMessage.getMessage(), chatContactDoc.getLane());
+			}
 		} catch (NumberFormatException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (TwitterException e) {
-			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
