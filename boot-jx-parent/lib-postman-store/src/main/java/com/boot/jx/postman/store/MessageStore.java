@@ -150,6 +150,11 @@ public class MessageStore {
 		return doc;
 	}
 
+	public MessageDoc find(Message<?> outMessage) {
+		return mongoTemplate.findById(outMessage.getMessageId(), MessageDoc.class,
+				getCollectionName(outMessage.getContactType()));
+	}
+
 	private MessageDoc findOrCreateMessageDoc(Message<?> outMessage) {
 		MessageDoc doc = null;
 		if (ArgUtil.is(outMessage.getMessageId())) {

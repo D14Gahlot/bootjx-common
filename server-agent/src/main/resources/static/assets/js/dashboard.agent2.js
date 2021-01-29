@@ -20,6 +20,14 @@ function formatTime(timestamp,gap){
 	}
 }
 
+function getThumb(mediaUrl){
+	var m = mediaUrl.match(/(.+)\/(res.cloudinary.com)\/([a-zA-Z0-9-_]+)\/([a-zA-Z0-9]+)\/(upload)\/([a-zA-Z0-9,_-]+)\/(.*)/);
+	if(m && m.length){
+		m[6] = "w_100,h_100";
+		return m.slice(1).join("/");
+	}
+}
+
 function scrollToBottom(){
 	$('.msg_card_body')[0].scrollTop =  $('.msg_card_body')[0].scrollHeight
 }
@@ -51,7 +59,14 @@ var WhatsApp = function (app) {
   }
 
   Contact.prototype.addMessage = function (msg) {
+	for(var i in  this.messages){
+		if(this.messages[i].m && (this.messages[i].m.messageId == msg.m.messageId)){
+			this.messages[i].m = msg.m;
+			return false;
+		}
+	}  
     this.messages.push(msg);
+    return true;
   };
 
   Contact.prototype.addGroup = function (group) {
@@ -90,13 +105,14 @@ var WhatsApp = function (app) {
 
 //messages
 var WhatsApp = function (app) {
-  function Message(text, name, time, type, group,m) {
+  function Message(text, name, time, type,m) {
     this.text = text;
     this.name = name,
     this.time = time;
     this.type = type;
-    this.group = group;
-    this.m = m;
+    //this.group = group;
+    this.m = m || {};
+    this.localId = new Date().getTime();
   }
 
   appMessages = Message;
@@ -137,6 +153,9 @@ var WhatsApp = function (app) {
 var currentChat;
 var contactList = new Array();
 var contactListNew = new Array();
+var flags = {
+	mediaSelection : false	
+}
 
 var WhatsApp = function ToDoModel(app) {
   var subject = new app.Subject();
@@ -169,7 +188,7 @@ var WhatsApp = function ToDoModel(app) {
         for (var j = 0; j < e.messages.length; j++) {
           var m = e.messages[j];
           m.time = formatTime(m.timestamp);
-          var message = new appMessages(m.text, m.name, m.time, m.type, false,m);
+          var message = new appMessages(m.text, m.name, m.time, m.type,m);
           contact.addMessage(message);
         }
         contactListNew.push(contact);
@@ -188,16 +207,31 @@ var WhatsApp = function ToDoModel(app) {
     },
     senMessage: function (text) {
     	var msg =  new appMessages(text, "", new Date().getHours() + ":" + new Date().getMinutes(), true);
-        console.log("currentChat",currentChat);
+    	var THAT = this;
+    	var template = flags.mediaSelection ?	$("[name=media]:checked").val() : null;
         sendMessage({
       	  message : msg.text,
+      	  template : template,
       	  sessionId : currentChat.sessionId
+        }).done(function(resp){
+        	if(resp.results && resp.results[0]){
+            	msg.m = resp.results[0];
+            	THAT._sendMessage(msg,"local");
+        	} else {
+        		console.log("senMessage:Error",resp);
+        	}
         });
-        
+        msg.m.template = template;
+        this._sendMessage(msg,"sent");
+    },
+    _sendMessage : function(msg,stts){
+    	$(".chat-bubble[data-local-id="+msg.localId+"]").remove();
+    	if(msg.m){
+    		$(".chat-bubble[data-message-id='"+msg.m.messageId+"']").remove();   		
+    	}
         WhatsApp.View.printMessage(msg);
         currentChat.addMessage(msg);
         $(".input-message").val("");
-        console.log("writeMessage")
         subject.notifyObservers();
         $("#" + currentChat.contactId).addClass("active-contact active");
         scrollToBottom();
@@ -206,19 +240,19 @@ var WhatsApp = function ToDoModel(app) {
        return this.senMessage($(".input-message").val());
     },
     readMessage: function (m) {
-      console.log(m)
       for(var id in contactList){
     	  if(m.sessionId == contactList[id].sessionId){
+    		  $(".chat-bubble[data-message-id='"+m.messageId+"']").remove();
     		  this.getMessage(m.text,id,null,m);
     	  }
       }
     },
     getMessage: function (text, id, name, m) {
       if (name == undefined) {
-        var msg = new appMessages(text, contactList[id].name, new Date().getHours() + ":" + new Date().getMinutes(), false, false,m);
+        var msg = new appMessages(text, contactList[id].name, new Date().getHours() + ":" + new Date().getMinutes(), m.type,m);
       } else
       {
-        var msg = new appMessages(text, name, new Date().getHours() + ":" + new Date().getMinutes(), false, true,m);
+        var msg = new appMessages(text, name, new Date().getHours() + ":" + new Date().getMinutes(), m.type,m);
       }
       contactList[id].addMessage(msg);
       contactList[id].online = new Date().getHours() + ":" + new Date().getMinutes();
@@ -268,6 +302,7 @@ var WhatsApp = function ToDoView(app) {
       WhatsApp.Ctrl.addClick(html, that);
     },
     printChat: function (cg) {
+      console.log("printChat");
       WhatsApp.View.closeContactInformation();
       $(".chat-head img").attr("src", cg.img);
       $(".user_info .user_name").text(cg.name);
@@ -292,6 +327,11 @@ var WhatsApp = function ToDoView(app) {
     		return;
     	}
     	var $tags = $(".msg_card_body-panel-tags");
+    	
+    	if($tags.data().mid == app.hisLastMessage.m.messageId){
+    		return;
+    	}
+    	$tags.data("mid",app.hisLastMessage.m.messageId);
     	$tags.empty();
         $.getJSON("/agent/category/map/smart_reply.json?value="+
         		(app.hisLastMessage.m.tags || {categories : []}).categories.join(",")
@@ -347,7 +387,7 @@ var WhatsApp = function ToDoView(app) {
             WhatsApp.View.printMessage(msg);
             WhatsApp.View.printContact(contactList[id]);
             WhatsApp.View.printSmartTags();
-            scrollToBottom();
+            //scrollToBottom();
         } else {
             contactList[id].newmsg++;
             WhatsApp.View.printContact(contactList[id]);
@@ -405,16 +445,34 @@ var WhatsApp = function ToDoCtrl(app) {
         WhatsApp.View.printChat(that);
       });
     },
-
+    toggelMedia :  function(show){
+    	if(show === undefined){
+    		show = !flags.mediaSelection;
+    	}
+    	if(show){
+           	$(".media_card_body").removeClass("hidden");
+        	$(".msg_card_body").addClass("hidden");
+    	} else {
+           	$(".media_card_body").addClass("hidden");
+        	$(".msg_card_body").removeClass("hidden");
+        	scrollToBottom();
+    	}
+    	flags.mediaSelection = !$(".media_card_body").hasClass("hidden")
+    },
     //Observer-Methode
     notify: function () {
       if (start) {
         $(".input-message").keyup(function (ev) {
           if (ev.which == 13 || ev.keyCode == 13) {
             app.Model.writeMessage();
+            Ctrl.toggelMedia(false);
           }
         });
-
+        $(".send_btn").click(function (ev) {
+            app.Model.writeMessage();
+            Ctrl.toggelMedia(false);
+        });
+        
         $("#show-contact-information").on("click", function () {
           WhatsApp.View.showContactInformation();
         });
@@ -445,8 +503,7 @@ var WhatsApp = function ToDoCtrl(app) {
         });
         
         $('.attach_btn').click(function(){
-        	$(".media_card_body").toggleClass("hidden");
-        	$(".msg_card_body").toggleClass("hidden");
+        	Ctrl.toggelMedia();
         });
         
         start = false;

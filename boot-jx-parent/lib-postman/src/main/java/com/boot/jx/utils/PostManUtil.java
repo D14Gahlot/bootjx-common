@@ -31,17 +31,23 @@ public class PostManUtil {
 			return "wa" + id;
 		} else if (ContactType.FACEBOOK.equals(contactType)) {
 			return "fb" + id;
-		}else if(ContactType.TWITTER.equals(contactType)) {
+		} else if (ContactType.TWITTER.equals(contactType)) {
 			return "tw" + id;
 		}
 		return id;
 	}
 
 	public static String createContactId(InboxMessage inboxMessage) {
+		if (ArgUtil.is(inboxMessage.getContactId())) {
+			return inboxMessage.getContactId();
+		}
 		return createContactId(inboxMessage.getContactType(), inboxMessage.getFrom());
 	}
 
 	public static String createContactId(Message<?> outMessage) {
+		if (ArgUtil.is(outMessage.getContactId())) {
+			return outMessage.getContactId();
+		}
 		return createContactId(outMessage.getContactType(), CollectionUtil.getOne(outMessage.getTo()));
 	}
 

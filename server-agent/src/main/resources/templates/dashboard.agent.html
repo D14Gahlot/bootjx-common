@@ -203,9 +203,11 @@
 	</li>
 </script>
 <script type="text/template" id="temp_message_me">
-	<div class="d-flex justify-content-end mb-4 chat-bubble">
+	<div class="d-flex justify-content-end mb-4 chat-bubble" data-local-id="<%=gc.localId%>" data-message-id="<%=gc.m.messageId%>">
 		<div class="msg_cotainer_send">
+			<% if(gc.m && !gc.m.messageId){ %><i class="sending fas fa-spinner fa-spin"></i><% } %>
 			<%=gc.text%>
+			<% if(gc.m && gc.m.template){ %><span class="fa fa-picture-o"></span>  <%=gc.m.template%><% } %>
 			<span class="msg_time_send"><%=gc.time%></span>
 		</div>
 		<div class="img_cont_msg">
@@ -225,12 +227,14 @@
 	</div>
 </script>
 	
-	
 <script type="text/template" id="temp_media_option">
 <div class="media_card_body-bubbles-wrapper">
 <% for(var i in list) { var media = list[i]; %>
 	<div class="media_thumb">
-			<img src="<%=media.media%>">
+			<input id="mdeia-<%=media.name%>" type="radio" name="media" value="<%=media.name%>" />
+			<label class="media_thumb_label" for="mdeia-<%=media.name%>">
+				<img src="<%=getThumb(media.url)%>">
+			</label>
 	</div>
 <% } %>
 </div>
@@ -240,7 +244,6 @@
 </html>
   <script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js'></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.5.1/moment.min.js"></script>
-  
   	<!-- <script src="js/jquery.min.js"></script> -->
 	<script src="js/sockjs.min.js"></script>
 	<script src="js/stomp.min.js"></script>
@@ -248,7 +251,6 @@
 	<script src="assets/js/quikr.js"></script>
 	<script src="assets/js/dashboard.agent2.js"></script>
 	<script src="https://use.fontawesome.com/1c6f725ec5.js"></script>
-	
 </body>
 
 </html>

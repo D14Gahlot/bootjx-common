@@ -43,6 +43,7 @@ public class Message<T extends Message<T>> implements Serializable, MessageOptio
 	protected List<String> to = null;
 	protected List<Contact> contacts = null;
 	private String template = null;
+	
 	private Map<String, Object> model = new HashMap<String, Object>();
 	protected Map<String, String> options = new HashMap<String, String>();
 	private MessageType messageType = null;
@@ -55,6 +56,7 @@ public class Message<T extends Message<T>> implements Serializable, MessageOptio
 	private String messageId;
 	private String messageIdExt;
 	private String sessionId;
+	private String contactId;
 
 	private String collapseId;
 	public int priority;
@@ -404,6 +406,14 @@ public class Message<T extends Message<T>> implements Serializable, MessageOptio
 
 	public void setSessionId(String sessionId) {
 		this.sessionId = sessionId;
+	}
+
+	public String getContactId() {
+		return contactId;
+	}
+
+	public void setContactId(String contactId) {
+		this.contactId = contactId;
 	}
 
 }

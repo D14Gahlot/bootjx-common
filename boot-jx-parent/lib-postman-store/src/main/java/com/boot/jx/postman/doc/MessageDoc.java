@@ -31,6 +31,9 @@ public class MessageDoc implements Serializable {
 	private String agent;
 	private TagDocument tags;
 
+	private String quickReplyId;
+	private String mediaReplyId;
+
 	@Indexed
 	private String contactId;
 
@@ -144,6 +147,22 @@ public class MessageDoc implements Serializable {
 
 	public void setTags(TagDocument tags) {
 		this.tags = tags;
+	}
+
+	public String getMediaReplyId() {
+		return mediaReplyId;
+	}
+
+	public void setMediaReplyId(String mediaReplyId) {
+		this.mediaReplyId = mediaReplyId;
+	}
+
+	public String getQuickReplyId() {
+		return quickReplyId;
+	}
+
+	public void setQuickReplyId(String quickReplyId) {
+		this.quickReplyId = quickReplyId;
 	}
 
 }

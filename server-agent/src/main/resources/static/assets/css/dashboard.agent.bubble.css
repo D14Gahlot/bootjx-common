@@ -466,7 +466,38 @@ ui.contacts.contact-list-unassigned li.data_unassigned {
 .media_card_body .media_thumb img{
 	width : 100px;
 	height : 100px;
+	cursor: pointer;
 }
+.media_thumb input{
+    position:absolute;
+    z-index:999;
+}
+
+.media_thumb input:active +.media_thumb_label {opacity: .9;}
+.media_thumb input:checked +.media_thumb_label{
+    -webkit-filter: none;
+       -moz-filter: none;
+            filter: none;
+}
+.media_thumb_label{
+    cursor:pointer;
+    background-size:contain;
+    background-repeat:no-repeat;
+    display:inline-block;
+    width:100px;height:70px;
+    -webkit-transition: all 100ms ease-in;
+       -moz-transition: all 100ms ease-in;
+            transition: all 100ms ease-in;
+    -webkit-filter: brightness(1.8) grayscale(.4) opacity(.7);
+       -moz-filter: brightness(1.8) grayscale(.4) opacity(.7);
+            filter: brightness(1.8) grayscale(.4) opacity(.7);
+}
+.media_thumb_label:hover{
+    -webkit-filter: brightness(1.2) grayscale(.2) opacity(.9);
+       -moz-filter: brightness(1.2) grayscale(.2) opacity(.9);
+            filter: brightness(1.2) grayscale(.2) opacity(.9);
+}
+
 .media_card_body-panel {
 	width:100%;
 	clear: both;

@@ -9,8 +9,10 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 public class ChatMessageDto implements Serializable {
 	private static final long serialVersionUID = 7766790295486098869L;
 	private String text;
+	private String template;
 	private String name;
 	private String sessionId;
+	private String messageId;
 	private long timestamp;
 	private boolean type;
 	private TagDocument tags;
@@ -61,5 +63,21 @@ public class ChatMessageDto implements Serializable {
 
 	public void setTags(TagDocument tags) {
 		this.tags = tags;
+	}
+
+	public String getTemplate() {
+		return template;
+	}
+
+	public void setTemplate(String template) {
+		this.template = template;
+	}
+
+	public String getMessageId() {
+		return messageId;
+	}
+
+	public void setMessageId(String messageId) {
+		this.messageId = messageId;
 	}
 }

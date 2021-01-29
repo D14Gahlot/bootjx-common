@@ -34,17 +34,19 @@ public class FacebooClient {
 		}
 	}
 
-	public void sendReply(String id, String text, String lane) {
+	public void sendReply(String lane, FacebookMessageRequest resp) {
 		lane = ArgUtil.nonEmpty(lane, "default").toLowerCase();
 		String accessToken = environment.getProperty("facebook.lane." + lane + ".accessToken");
-		FacebookMessageResponse response = new FacebookMessageResponse();
-		response.setMessageType("text");
-		response.getRecipient().put("id", id);
-		response.getMessage().put("text", text);
 		String result = restService.ajax("https://graph.facebook.com/v2.6/me/messages?access_token=" + accessToken)
-				.post(response).asString();
-		LOGGER.info("Message result to {} : {}", id, result);
+				.post(resp).asString();
+	}
 
+	public void sendReply(String id, String text, String lane) {
+		FacebookMessageRequest response = new FacebookMessageRequest();
+		response.messageType("text");
+		response.recipientId(id);
+		response.messageText(text);
+		sendReply(lane, response);
 	}
 
 	public FacebookUserProfile getUserProfile(String psid, String lane) {

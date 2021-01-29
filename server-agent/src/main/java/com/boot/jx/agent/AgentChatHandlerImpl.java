@@ -100,13 +100,9 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 	public InboxMessage onMessage(InboxMessage inboxMessage) {
 
 		MessageDoc messageDoc = messageStore.find(inboxMessage);
-		ChatMessageDto messageDto = new ChatMessageDto();
-		messageDto.setType(false);
-		messageDto.setName(messageDoc.getContactId());
-		messageDto.setText(ArgUtil.nonEmpty(messageDoc.getTemplate(), messageDoc.getMessage()));
-		messageDto.setTimestamp(messageDoc.getTimestamp());
-		messageDto.setSessionId(messageDoc.getSessionId());
-		messageDto.setTags(messageDoc.getTags());
+
+		ChatMessageDto messageDto = entityToDto(messageDoc);
+
 		stompTunnelService.sendTo(inboxMessage.getAssignedToAgent(), "/agent/onmessage", messageDto);
 
 		if (inboxMessage.getMessage().equalsIgnoreCase("/exit_chat")) {
@@ -120,6 +116,27 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 		}
 
 		return inboxMessage;
+	}
+
+	private ChatMessageDto entityToDto(MessageDoc messageDoc) {
+		ChatMessageDto messageDto = new ChatMessageDto();
+		messageDto.setType(false);
+		messageDto.setName(messageDoc.getContactId());
+		messageDto.setText(messageDoc.getMessage());
+		messageDto.setTemplate(messageDoc.getTemplate());
+		messageDto.setTimestamp(messageDoc.getTimestamp());
+		messageDto.setSessionId(messageDoc.getSessionId());
+		messageDto.setMessageId(messageDoc.getMessageId());
+		messageDto.setTags(messageDoc.getTags());
+		return messageDto;
+	}
+
+	public OutboxMessage onSend(OutboxMessage outboxMessage) {
+		MessageDoc messageDoc = messageStore.find(outboxMessage);
+		ChatMessageDto messageDto = entityToDto(messageDoc);
+		messageDto.setType(true);
+		stompTunnelService.sendTo(outboxMessage.getAgent(), "/agent/onmessage", messageDto);
+		return outboxMessage;
 	}
 
 	public ChatSessionDto getChatSessionDto(ChatSessionDoc chatSessionDoc, String agentCode) {
@@ -142,7 +159,7 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 		List<MessageDoc> messages = messageStore.findBySessionId(contact.getSessionId(), contact.getContactType());
 		List<ChatMessageDto> messageDtos = new ArrayList<ChatMessageDto>();
 		for (MessageDoc messageDoc : messages) {
-			ChatMessageDto messageDto = new ChatMessageDto();
+			ChatMessageDto messageDto = entityToDto(messageDoc);
 			if (ArgUtil.areEqual(messageDoc.getType(), "I")) {
 				messageDto.setType(false);
 				messageDto.setName(chatSessionDto.getName());
@@ -150,13 +167,10 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 				messageDto.setType(true);
 				messageDto.setName(messageDoc.getAgent());
 			}
-			messageDto.setText(ArgUtil.nonEmpty(messageDoc.getTemplate(), messageDoc.getMessage()));
-			messageDto.setTimestamp(messageDoc.getTimestamp());
-			messageDto.setTags(messageDoc.getTags());
 			messageDtos.add(messageDto);
 		}
 		chatSessionDto.setMessages(messageDtos);
 		return chatSessionDto;
 	}
-	
+
 }

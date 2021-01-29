@@ -73,7 +73,7 @@ public class ChatService {
 	private void sendIntenal(ChatContactDoc chatContactDoc, OutboxMessage outboxMessage) {
 		if (ArgUtil.is(chatContactDoc)) {
 			outboxMessage.setContactType(ArgUtil.parseAsEnumT(chatContactDoc.getContactType(), ContactType.class));
-			outboxMessage.setSessionId(outboxMessage.getSessionId());
+			outboxMessage.setContactId(chatContactDoc.getContactId());
 			ConnectorHandler connector = connectorHandlerFactory.get(outboxMessage.getContactType(),
 					outboxMessage.getChannel());
 			if (ArgUtil.is(connector)) {
