@@ -4,6 +4,9 @@
 ## Deployment
 ### POSTMAN
 ```
+// One time clone
+git clone https://github.com/mehery-soccom/apache-open-nlp ext-resources/apache-open-nlp
+
 mvn package -pl ms-postman -am -DskipTests
 // 
 java -jar ms-postman/target/ms-postman-0.0.1-SNAPSHOT.jar
