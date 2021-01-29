@@ -334,7 +334,7 @@ var WhatsApp = function ToDoView(app) {
     	$tags.data("mid",app.hisLastMessage.m.messageId);
     	$tags.empty();
 
-    	if(!app.hisLastMessage.m && !app.hisLastMessage.m.tags && !app.hisLastMessage.m.tags.categories){
+    	if(!app.hisLastMessage.m || !app.hisLastMessage.m.tags || !app.hisLastMessage.m.tags.categories){
     		return;
     	}
         $.getJSON("/agent/category/map/smart_reply.json?value="+
