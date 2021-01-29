@@ -5,7 +5,7 @@
 ### POSTMAN
 ```
 // One time clone
-git clone https://github.com/mehery-soccom/apache-open-nlp ext-resources/apache-open-nlp
+git clone git@github.com:mehery-soccom/apache-open-nlp.git ext-resources/apache-open-nlp
 
 mvn package -pl ms-postman -am -DskipTests
 // 
