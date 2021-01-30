@@ -68,6 +68,11 @@ public class WebConnector implements DefaultConnector {
 	@Autowired
 	private TmplClient tmplClient;
 
+	@Override
+	public void send(String lane, String to, OutboxMessage outboxMessage) {
+		// TODO Auto-generated method stub
+	}
+
 	private void sendMessage(String csid, OutboxMessage outboxMessage) {
 		if (ArgUtil.is(outboxMessage.getTemplate())) {
 			File file = new File();

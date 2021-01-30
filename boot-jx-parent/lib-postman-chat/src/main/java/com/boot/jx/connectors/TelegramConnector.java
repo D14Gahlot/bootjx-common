@@ -3,6 +3,7 @@ package com.boot.jx.connectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
@@ -11,6 +12,7 @@ import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorMapping;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
+import com.boot.jx.postman.doc.TemplateReply;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.store.SessionStore;
@@ -30,9 +32,23 @@ public class TelegramConnector implements ConnectorHandler {
 	@Autowired
 	private SessionStore sessionStore;
 
+	@Autowired
+	private MongoTemplate mongoTemplate;
+
+	public void send(String lane, String to, OutboxMessage outboxMessage) {
+		if (ArgUtil.is(outboxMessage.getTemplate())) {
+			TemplateReply mediaReply = mongoTemplate.findById(outboxMessage.getTemplate(), TemplateReply.class);
+			if ("image".equalsIgnoreCase(mediaReply.getType())) {
+				telegramClient.sendPhoto(lane, to, mediaReply.getUrl(), mediaReply.getTitle());
+			}
+		} else {
+			telegramClient.sendReply(lane, to, outboxMessage.getMessage());
+		}
+	}
+
 	@Override
 	public void reply(InboxMessage inboxMessage, OutboxMessage outboxMessage) {
-		telegramClient.sendReply(inboxMessage.getLane(), inboxMessage.getFrom(), outboxMessage.getMessage());
+		this.send(inboxMessage.getLane(), inboxMessage.getFrom(), outboxMessage);
 	}
 
 	@Override
@@ -84,7 +100,7 @@ public class TelegramConnector implements ConnectorHandler {
 
 	@Override
 	public void send(ChatContactDoc chatContactDoc, OutboxMessage outboxMessage) {
-		telegramClient.sendReply(chatContactDoc.getLane(), chatContactDoc.getCsid(), outboxMessage.getMessage());
+		this.send(chatContactDoc.getLane(), chatContactDoc.getCsid(), outboxMessage);
 	}
 
 }

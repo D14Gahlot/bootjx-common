@@ -9,7 +9,6 @@ import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorMapping;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
-import com.boot.jx.postman.doc.MediaReply;
 import com.boot.jx.postman.doc.TemplateReply;
 import com.boot.jx.postman.fb.FacebooClient;
 import com.boot.jx.postman.fb.FacebookMessageRequest;
@@ -20,8 +19,6 @@ import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.store.SessionStore;
 import com.boot.utils.ArgUtil;
-import com.boot.utils.JsonPath;
-import com.boot.utils.MapBuilder;
 
 @Component
 @ConnectorMapping(ContactType.FACEBOOK)
@@ -39,9 +36,24 @@ public class FacebookConnector implements ConnectorHandler {
 	@Autowired
 	private MongoTemplate mongoTemplate;
 
+	public void send(String lane, String to, OutboxMessage outboxMessage) {
+		FacebookMessageRequest req = new FacebookMessageRequest();
+		req.recipientId(to);
+		req.messageText(outboxMessage.getMessage());
+		if (ArgUtil.is(outboxMessage.getTemplate())) {
+			TemplateReply mediaReply = mongoTemplate.findById(outboxMessage.getTemplate(), TemplateReply.class);
+			if ("image".equalsIgnoreCase(mediaReply.getType())) {
+				req.attachmentType("image").attachmentUrl(mediaReply.getUrl());
+			}
+		} else {
+			req.messageType("text");
+		}
+		facebooClient.sendReply(lane, req);
+	}
+
 	@Override
 	public void reply(InboxMessage inboxMessage, OutboxMessage outboxMessage) {
-		facebooClient.sendReply(inboxMessage.getFrom(), outboxMessage.getMessage(), inboxMessage.getLane());
+		this.send(inboxMessage.getLane(), inboxMessage.getFrom(), outboxMessage);
 	}
 
 	@Override
@@ -75,19 +87,7 @@ public class FacebookConnector implements ConnectorHandler {
 
 	@Override
 	public void send(ChatContactDoc chatContactDoc, OutboxMessage outboxMessage) {
-		FacebookMessageRequest req = new FacebookMessageRequest();
-		req.recipientId(chatContactDoc.getCsid());
-		req.messageText(outboxMessage.getMessage());
-		if (ArgUtil.is(outboxMessage.getTemplate())) {
-			TemplateReply mediaReply = mongoTemplate.findById(outboxMessage.getTemplate(), TemplateReply.class);
-			if ("image".equalsIgnoreCase(mediaReply.getType())) {
-				req.attachmentType("image").attachmentUrl(mediaReply.getUrl());
-			}
-		} else {
-			req.messageType("text");
-		}
-
-		facebooClient.sendReply(chatContactDoc.getLane(), req);
+		this.send(chatContactDoc.getLane(), chatContactDoc.getCsid(), outboxMessage);
 	}
 
 }

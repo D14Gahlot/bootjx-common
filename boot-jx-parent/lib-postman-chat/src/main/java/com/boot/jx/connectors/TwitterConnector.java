@@ -7,10 +7,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.hibernate.validator.internal.util.privilegedactions.GetConstraintValidatorList;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorHandler;
@@ -19,7 +17,6 @@ import com.boot.jx.dict.ContactType;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.TemplateReply;
-import com.boot.jx.postman.fb.FacebookUserProfile;
 import com.boot.jx.postman.gupshup.GupShupConfig;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.OutboxMessage;
@@ -28,7 +25,6 @@ import com.boot.jx.postman.store.SessionStore;
 import com.boot.jx.postman.tw.TwitterClient;
 import com.boot.jx.postman.tw.TwitterClientContext;
 import com.boot.utils.ArgUtil;
-import com.boot.utils.MapBuilder;
 
 import twitter4j.DirectMessage;
 import twitter4j.DirectMessageList;
@@ -54,43 +50,24 @@ public class TwitterConnector implements ConnectorHandler {
 	private MongoTemplate mongoTemplate;
 
 	@Override
-	public InboxMessage assignToAgent(InboxMessage inboxMessage) {
-		// twitterClient.sendReply(inboxMessage.getFrom(), "Call us @ " +
-		// gupShupConfig.getGupShupWaNumber(),inboxMessage.getLane());
-		return inboxMessage;
-	}
-
-	@Override
-	public void reply(InboxMessage inboxMessage, OutboxMessage outboxMessage) {
-		try {
-			twitterClient.sendReply(inboxMessage.getFrom(), outboxMessage.getMessage(), inboxMessage.getLane());
-		} catch (NumberFormatException e) {
-			e.printStackTrace();
-		} catch (TwitterException e) {
-			e.printStackTrace();
-		}
-	}
-
-	@Override
-	public void send(ChatContactDoc chatContactDoc, OutboxMessage outboxMessage) {
+	public void send(String lane, String to, OutboxMessage outboxMessage) {
 		try {
 			if (ArgUtil.is(outboxMessage.getTemplate())) {
 				TemplateReply templateReply = mongoTemplate.findById(outboxMessage.getTemplate(), TemplateReply.class);
 				if ("image".equalsIgnoreCase(templateReply.getType())) {
 					Long mediaId = ArgUtil.parseAsLong(templateReply.meta().get("twitterMediaId"));
 					if (!ArgUtil.is(mediaId)) {
-						TwitterClientContext ctx = twitterClient.getContext(chatContactDoc.getLane());
+						TwitterClientContext ctx = twitterClient.getContext(lane);
 						InputStream media = new java.net.URL(templateReply.getUrl()).openStream();
 						UploadedMedia uploadedMedia = ctx.getTwitter().uploadMedia(templateReply.getTitle(), media);
 						mediaId = uploadedMedia.getMediaId();
 						templateReply.meta().put("twitterMediaId", mediaId);
 						mongoTemplate.save(templateReply);
 					}
-					twitterClient.sendReply(chatContactDoc.getCsid(), outboxMessage.getMessage(), mediaId,
-							chatContactDoc.getLane());
+					twitterClient.sendReply(to, outboxMessage.getMessage(), mediaId, lane);
 				}
 			} else {
-				twitterClient.sendReply(chatContactDoc.getCsid(), outboxMessage.getMessage(), chatContactDoc.getLane());
+				twitterClient.sendReply(to, outboxMessage.getMessage(), lane);
 			}
 		} catch (NumberFormatException e) {
 			e.printStackTrace();
@@ -101,6 +78,23 @@ public class TwitterConnector implements ConnectorHandler {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+
+	@Override
+	public InboxMessage assignToAgent(InboxMessage inboxMessage) {
+		// twitterClient.sendReply(inboxMessage.getFrom(), "Call us @ " +
+		// gupShupConfig.getGupShupWaNumber(),inboxMessage.getLane());
+		return inboxMessage;
+	}
+
+	@Override
+	public void reply(InboxMessage inboxMessage, OutboxMessage outboxMessage) {
+		this.send(inboxMessage.getLane(), inboxMessage.getFrom(), outboxMessage);
+	}
+
+	@Override
+	public void send(ChatContactDoc chatContactDoc, OutboxMessage outboxMessage) {
+		this.send(chatContactDoc.getLane(), chatContactDoc.getCsid(), outboxMessage);
 	}
 
 	public InboxMessage toInboxMessage(DirectMessage dm, String lane) {

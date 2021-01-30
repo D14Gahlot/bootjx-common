@@ -33,6 +33,8 @@ public class ConnectorHandlerFactory extends ScopedBeanFactory<String, Connector
 			return true;
 		}
 
+		void send(String lane, String to, OutboxMessage outboxMessage);
+
 	}
 
 	public interface DefaultConnector extends ConnectorHandler {

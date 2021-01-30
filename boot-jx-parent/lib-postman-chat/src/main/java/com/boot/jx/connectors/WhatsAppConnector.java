@@ -36,6 +36,11 @@ public class WhatsAppConnector implements ConnectorHandler {
 	protected GupShupConfig gupShupConfig;
 
 	@Override
+	public void send(String lane, String to, OutboxMessage outboxMessage) {
+		// TODO Auto-generated method stub
+	}
+
+	@Override
 	public void reply(InboxMessage inboxMessage, OutboxMessage outboxMessage) {
 		outboxMessage.setChannel(inboxMessage.getChannel());
 		if (ArgUtil.isEqual(inboxMessage.getChannel(), Channel.GUPSHUP.toString())) {
