@@ -3,10 +3,7 @@ package com.boot.jx.connectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-import org.telegram.telegrambots.meta.api.objects.Contact;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
 import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorHandler;
@@ -20,8 +17,6 @@ import com.boot.jx.postman.store.SessionStore;
 import com.boot.jx.postman.tg.TelegramClient;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.JsonUtil;
-
-import springfox.documentation.spring.web.json.Json;
 
 @Component
 @ConnectorMapping(ContactType.TELEGRAM)
@@ -90,11 +85,6 @@ public class TelegramConnector implements ConnectorHandler {
 	@Override
 	public void send(ChatContactDoc chatContactDoc, OutboxMessage outboxMessage) {
 		telegramClient.sendReply(chatContactDoc.getCsid(), outboxMessage.getMessage(),chatContactDoc.getLane());
-	}
-
-	@Scheduled(fixedDelay = 5000)
-	public void registerService() {
-		telegramClient.initWebhook();
 	}
 
 }
