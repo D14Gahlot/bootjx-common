@@ -10,16 +10,16 @@
     var index = scripts.length - 1;
     var myScript = scripts[index];
     var serviceUrl = myScript.src; 
-    var pluginUrl = "https://api.lalittanwar.com/agent/pub/customer/plugin.bubble?page=plugin.bubble";
+    var pluginUrl = "https://api.lalittanwar.com/agent/pub/customer/plugin.bubble.html?page=plugin.bubble";
     if(serviceUrl.indexOf("/assets/js/customer.plugin.")>0){
     	var urlparts = serviceUrl.split("/assets/js/customer.plugin.");
     	var domainUrl = urlparts[0];
     	var theme = (urlparts[1].split("theme=")[1] || "").split("&")[0];
     	if(theme){
-    		pluginUrl = domainUrl + "/" + "pub/customer/plugin." + theme + "?page=plugin."+theme;    		
+    		pluginUrl = domainUrl + "/" + "pub/customer/plugin." + theme + ".html?page=plugin."+theme;    		
     	}
     }
-    
+    console.log("pluginUrl",pluginUrl)
     document.getElementsByTagName('body')[0].appendChild(div);
     div.outerHTML = "<div id='botDiv' style='height: "+minHeight+"px; width: "+minWidth+"px; position: fixed; bottom: 10px; right:10px; z-index: 1000; background-color: transparent; overflow:hidden;border-radius: 15px!important;padding:0px!important; margin:0px!important ;' >" +
     					"<div id='botTitleBar' style='height: "+minHeight+"px; width: "+minWidth+"px; position:fixed; cursor: pointer;'></div>" +
