@@ -16,6 +16,7 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMar
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 
+import com.boot.jx.postman.tg.TelegramModels.TGSendPhoto;
 import com.boot.jx.rest.RestService;
 import com.boot.utils.ArgUtil;
 import com.ulisesbocchio.jasyptspringboot.annotation.EnableEncryptableProperties;
@@ -72,11 +73,10 @@ public class TelegramClient {
 	}
 
 	public void sendPhoto(String lane, String id, String photo, String caption) {
-		SendPhoto message = new SendPhoto() // Create a SendMessage object with mandatory fields
+		SendPhoto message = new TGSendPhoto() // Create a SendMessage object with mandatory fields
 				.setChatId(id).setPhoto(photo).setCaption(caption);
 		restService.ajax(PATH.URL).path(PATH.BOT).path("/sendPhoto").pathParam("accessToken", getAccessToken(lane))
 				.post(message).asString();
-
 	}
 
 	public String promptShareNumber(String id, String text, String lane) {
