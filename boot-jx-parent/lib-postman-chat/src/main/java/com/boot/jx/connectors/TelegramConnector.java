@@ -56,18 +56,16 @@ public class TelegramConnector implements ConnectorHandler {
 		return inboxMessage;
 	}
 
-	public InboxMessage toInboxMessage(Update update) {
+	public InboxMessage toInboxMessage(String lane, Update update) {
 		InboxMessage inboxMessage = new InboxMessage();
-
 		inboxMessage.setFrom(ArgUtil.parseAsString(update.getMessage().getChatId()));
-
 		if (ArgUtil.is(update.getMessage())) {
 			inboxMessage.setMessageIdExt(ArgUtil.parseAsString(update.getMessage().getMessageId()));
 			inboxMessage.setMessage(update.getMessage().getText());
 		}
-
 		inboxMessage.setOriginalMessage(update);
 		inboxMessage.setContactType(ContactType.TELEGRAM);
+		inboxMessage.setLane(lane);
 		return inboxMessage;
 	}
 

@@ -60,8 +60,8 @@ public class TelegramClient {
 		lane = ArgUtil.nonEmpty(lane, "default").toLowerCase();
 		String accessToken = environment.getProperty("postman.telegram.lane." + lane + ".accessToken");
 		return restService.ajax(PATH.URL).path(PATH.BOT_SET_WEBHOOK).pathParam("accessToken", accessToken)
-				.field("url", callbackURL + telegramWebhooPath).queryParam("url", callbackURL + telegramWebhooPath)
-				.post().asString();
+				.field("url", callbackURL + telegramWebhooPath)
+				.queryParam("url", callbackURL + telegramWebhooPath + "/" + lane).post().asString();
 	}
 
 	public void sendReply(String lane, String id, String text) {
@@ -74,7 +74,7 @@ public class TelegramClient {
 	public void sendPhoto(String lane, String id, String photo, String caption) {
 		SendPhoto message = new SendPhoto() // Create a SendMessage object with mandatory fields
 				.setChatId(id).setPhoto(photo).setCaption(caption);
-		restService.ajax(PATH.URL).path(PATH.BOT).path(SendPhoto.PATH).pathParam("accessToken", getAccessToken(lane))
+		restService.ajax(PATH.URL).path(PATH.BOT).path("/sendPhoto").pathParam("accessToken", getAccessToken(lane))
 				.post(message).asString();
 
 	}
@@ -109,10 +109,10 @@ public class TelegramClient {
 
 	}
 
-	public void initWebhook() {
+	public void registerWebhookOnce(String lane) {
 		try {
 			if (!isRegistered && ArgUtil.is(telegramWebhookUrl)) {
-				LOGGER.info("WebHook registered to {}", registerWebhook(telegramWebhookUrl, defaultLane));
+				LOGGER.info("WebHook registered to {}", registerWebhook(telegramWebhookUrl, lane));
 				isRegistered = true;
 			}
 		} catch (Exception e) {

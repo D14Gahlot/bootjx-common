@@ -1,7 +1,9 @@
 package com.boot.jx.inbound;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -12,6 +14,7 @@ import com.boot.jx.connectors.TelegramConnector;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.tg.TelegramClient;
 import com.boot.jx.scope.vendor.VendorContext.ApiVendorHeaders;
+import com.boot.utils.ArgUtil;
 
 @RestController
 public class InBoundControllerTG {
@@ -26,16 +29,23 @@ public class InBoundControllerTG {
 	private TelegramClient telegramClient;
 
 	@ApiVendorHeaders
-	@RequestMapping(value = "/ext/inbound/tg/callback", method = RequestMethod.POST)
-	public Update onReceiveMessage(@RequestBody Update update) throws InterruptedException {
-		InboxMessage event = telegramConnector.toInboxMessage(update);
+	@RequestMapping(value = "/ext/inbound/tg/callback/{lane}", method = RequestMethod.POST)
+	public Update onReceiveMessage(@PathVariable String lane, @RequestBody Update update) throws InterruptedException {
+		InboxMessage event = telegramConnector.toInboxMessage(lane, update);
 		inBoundService.invokeMethods(event);
 		return update;
 	}
 
+	@Value("${postman.telegram.webhook.lanes}")
+	private String[] webhookLanes;
+
 	@Scheduled(fixedDelay = 5000)
 	public void registerService() {
-		telegramClient.initWebhook();
+		for (String lane : webhookLanes) {
+			if (ArgUtil.is(lane)) {
+				telegramClient.registerWebhookOnce(lane);
+			}
+		}
 	}
 
 }
