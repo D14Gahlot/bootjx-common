@@ -92,7 +92,8 @@ public class SessionStore {
 			save(chatSessionDoc);
 
 			// CONTACT CREATION
-			if (ArgUtil.isEmpty(chatContactDoc) || ArgUtil.isEmpty(chatContactDoc.getCsid())) {
+			if (ArgUtil.isEmpty(chatContactDoc) || ArgUtil.isEmpty(chatContactDoc.getCsid())
+					|| ArgUtil.isEmpty(chatContactDoc.getLane())) {
 				chatContactDoc = new ChatContactDoc();
 				chatContactDoc.setContactId(contactId);
 				chatContactDoc.setContactType(ArgUtil.parseAsString(inboxMessage.getContactType()));
