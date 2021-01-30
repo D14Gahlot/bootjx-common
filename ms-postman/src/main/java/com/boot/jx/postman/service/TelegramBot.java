@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.methods.stickers.SetStickerSetThumb;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
@@ -200,5 +201,10 @@ public class TelegramBot extends TelegramLongPollingBot {
 	@Override
 	public String getBotToken() {
 		return botToken;
+	}
+
+	@Override
+	public Boolean execute(SetStickerSetThumb setStickerSetThumb) throws TelegramApiException {
+		return null;
 	}
 }
