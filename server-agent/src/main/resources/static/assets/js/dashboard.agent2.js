@@ -284,22 +284,29 @@ PP_ICONS = {
 var WhatsApp = function ToDoView(app) {
   var view = {
     printContact: function (c) {
-      $("#" + c.contactId).remove();
+      var $existing = $("#" + c.contactId);
       var lastmsg = c.messages[c.messages.length - 1];
 
-      var html = $(quikr.tmpl("temp_contact",{
+      var $html = $(quikr.tmpl("temp_contact",{
         	c : c,lastmsg : lastmsg,
         	contactIcon : PP_ICONS[c.contactType]
        }));
 
       var that = c;
-      if(that.o.assigned){
-    	  $(".contact-list").prepend(html);    	  
+      if( $existing &&  $existing.length>0){
+    	  $existing.replaceWith($html);
+    	  if(that.o.assigned){
+        	  $(".contact-list").prepend($html);    	  
+          }
       } else {
-    	  $(".contact-list-unassigned").prepend(html);
+          if(that.o.assigned){
+        	  $(".contact-list").prepend($html);    	  
+          } else {
+        	  $(".contact-list-unassigned").prepend($html);
+          }
       }
       console.log("printContact")
-      WhatsApp.Ctrl.addClick(html, that);
+      WhatsApp.Ctrl.addClick($html, that);
     },
     printChat: function (cg) {
       console.log("printChat");

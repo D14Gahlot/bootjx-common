@@ -247,7 +247,6 @@ body {
 
 /* ===================================== Login Page Design CSS ==================================== */
 .form-login-body {
-  background-image: url(../images/bg.jpg);
   background-size: cover; }
   @media screen and (max-width: 991px) {
     .form-login-body {
@@ -278,7 +277,7 @@ body {
         .form-login-body .login-desk .detail-box .detailsh p {
           font-size: .8rem; }
     .form-login-body .login-desk .loginform {
-      background-color: #4c56c0;
+      background-color: #2f8df7;
       text-align: center;
       color: #FFF;
       padding: 50px; }
@@ -295,12 +294,12 @@ body {
         .form-login-body .login-desk .loginform .login-det .form-row label {
           font-size: .85rem; }
       .form-login-body .login-desk .loginform .login-det .input-group .input-group-prepend .input-group-text {
-        background-color: #3d46a7;
+        background-color: #205fa6;
         color: #ffffffcf;
         border-right: 0px;
         border: 0px; }
       .form-login-body .login-desk .loginform .login-det .input-group .form-control {
-        background-color: #3d46a7;
+        background-color: #0000004d;
         color: #FFF;
         border-left: 0px;
         border: 0px; }
