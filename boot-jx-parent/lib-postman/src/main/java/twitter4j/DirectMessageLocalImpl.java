@@ -4,6 +4,8 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.Map;
 
+import com.boot.utils.ArgUtil;
+
 import twitter4j.conf.Configuration;
 
 public final class DirectMessageLocalImpl extends TwitterResponseImpl implements DirectMessage, java.io.Serializable {
@@ -18,8 +20,14 @@ public final class DirectMessageLocalImpl extends TwitterResponseImpl implements
 	private HashtagEntity[] hashtagEntities;
 	private MediaEntity[] mediaEntities;
 	private SymbolEntity[] symbolEntities;
+	private User sender;
+	private User recipient;
 
-	DirectMessageLocalImpl(HttpResponse res, Configuration conf) throws TwitterException {
+	public DirectMessageLocalImpl() {
+		super();
+	}
+
+	public DirectMessageLocalImpl(HttpResponse res, Configuration conf) throws TwitterException {
 		super(res);
 		JSONObject json = res.asJSONObject();
 		try {
@@ -34,7 +42,7 @@ public final class DirectMessageLocalImpl extends TwitterResponseImpl implements
 		}
 	}
 
-	/* package */ DirectMessageLocalImpl(JSONObject json) throws TwitterException {
+	public DirectMessageLocalImpl(JSONObject json) throws TwitterException {
 		init(json);
 	}
 
@@ -104,9 +112,18 @@ public final class DirectMessageLocalImpl extends TwitterResponseImpl implements
 			list = jsonObject.getJSONArray("direct_message_events");
 			directMessages = new DirectMessageListLocalImpl(list.length());
 
+			JSONObject users = jsonObject.getJSONObject("users");
+
 			for (int i = 0; i < list.length(); i++) {
 				JSONObject json = list.getJSONObject(i);
-				DirectMessage directMessage = new DirectMessageJSONImpl(json);
+				DirectMessageLocalImpl directMessage = new DirectMessageLocalImpl(json);
+				String senderid = ArgUtil.parseAsString(directMessage.getSenderId());
+
+				if (ArgUtil.is(users) && users.has(senderid)) {
+					JSONObject thisSender = users.getJSONObject(senderid);
+					directMessage.setSender(new UserJSONImpl(thisSender));
+				}
+
 				directMessages.add(directMessage);
 				if (conf.isJSONStoreEnabled()) {
 					TwitterObjectFactory.registerJSONObject(directMessage, json);
@@ -232,26 +249,26 @@ public final class DirectMessageLocalImpl extends TwitterResponseImpl implements
 
 	@Override
 	public String getSenderScreenName() {
-		throw new UnsupportedOperationException(
-				"Since Twitter4J 4.0.7, you are no longer able to use this method due to the API changes.");
+		return null;
 	}
 
 	@Override
 	public String getRecipientScreenName() {
-		throw new UnsupportedOperationException(
-				"Since Twitter4J 4.0.7, you are no longer able to use this method due to the API changes.");
+		return null;
 	}
 
 	@Override
 	public User getSender() {
-		throw new UnsupportedOperationException(
-				"Since Twitter4J 4.0.7, you are no longer able to use this method due to the API changes.");
+		return this.sender;
 	}
 
 	@Override
 	public User getRecipient() {
-		throw new UnsupportedOperationException(
-				"Since Twitter4J 4.0.7, you are no longer able to use this method due to the API changes.");
+		return this.recipient;
+	}
+
+	public void setSender(User sender) {
+		this.sender = sender;
 	}
 
 }

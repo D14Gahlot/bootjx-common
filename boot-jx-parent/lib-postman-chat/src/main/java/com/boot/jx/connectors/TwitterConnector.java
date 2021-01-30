@@ -17,7 +17,9 @@ import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorHandler;
 import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorMapping;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.postman.doc.ChatContactDoc;
+import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.TemplateReply;
+import com.boot.jx.postman.fb.FacebookUserProfile;
 import com.boot.jx.postman.gupshup.GupShupConfig;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.OutboxMessage;
@@ -26,6 +28,7 @@ import com.boot.jx.postman.store.SessionStore;
 import com.boot.jx.postman.tw.TwitterClient;
 import com.boot.jx.postman.tw.TwitterClientContext;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.MapBuilder;
 
 import twitter4j.DirectMessage;
 import twitter4j.DirectMessageList;
@@ -108,7 +111,28 @@ public class TwitterConnector implements ConnectorHandler {
 		ibm.setTo(String.valueOf(dm.getRecipientId()));
 		ibm.setChannel(Channel.DEFAULT.toString());
 		ibm.setContactType(ContactType.TWITTER);
+
+		/**
+		 * NOTE:- Do not user original DirectMessageJsonImpl as it can throw
+		 * serialization error
+		 */
+		if (dm instanceof DirectMessageLocalImpl) {
+			ibm.setOriginalMessage(dm);
+		}
+
 		return ibm;
+	}
+
+	@Override
+	public boolean initSession(InboxMessage inboxMessage, ChatSessionDoc session) {
+		if (ArgUtil.is(inboxMessage.getOriginalMessage())) {
+			ChatContactDoc contact = sessionStore.getContact(inboxMessage);
+			DirectMessageLocalImpl dm = (DirectMessageLocalImpl) inboxMessage.getOriginalMessage();
+			contact.setProfilePic(dm.getSender().getProfileBannerURL());
+			contact.setName(dm.getSender().getName());
+			sessionStore.save(contact);
+		}
+		return true;
 	}
 
 	public List<InboxMessage> messageConverter(ResponseList<DirectMessage> dml, String lane) {
