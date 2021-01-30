@@ -11,6 +11,7 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
@@ -63,11 +64,17 @@ public class TelegramClient {
 				.post().asString();
 	}
 
-	public void sendReply(String id, String text, String lane) {
+	public void sendReply(String lane, String id, String text) {
 		SendMessage message = new SendMessage() // Create a SendMessage object with mandatory fields
-				.setChatId(id)
-				.setText(text);
+				.setChatId(id).setText(text);
 		restService.ajax(PATH.URL).path(PATH.BOT_SEND_MESSAGE).pathParam("accessToken", getAccessToken(lane))
+				.post(message).asString();
+	}
+
+	public void sendPhoto(String lane, String id, String photo, String caption) {
+		SendPhoto message = new SendPhoto() // Create a SendMessage object with mandatory fields
+				.setChatId(id).setPhoto(photo).setCaption(caption);
+		restService.ajax(PATH.URL).path(PATH.BOT).path(SendPhoto.PATH).pathParam("accessToken", getAccessToken(lane))
 				.post(message).asString();
 
 	}

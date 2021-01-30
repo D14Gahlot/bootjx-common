@@ -32,7 +32,7 @@ public class TelegramConnector implements ConnectorHandler {
 
 	@Override
 	public void reply(InboxMessage inboxMessage, OutboxMessage outboxMessage) {
-		telegramClient.sendReply(inboxMessage.getFrom(), outboxMessage.getMessage(), inboxMessage.getLane());
+		telegramClient.sendReply(inboxMessage.getLane(), inboxMessage.getFrom(), outboxMessage.getMessage());
 	}
 
 	@Override
@@ -84,7 +84,7 @@ public class TelegramConnector implements ConnectorHandler {
 
 	@Override
 	public void send(ChatContactDoc chatContactDoc, OutboxMessage outboxMessage) {
-		telegramClient.sendReply(chatContactDoc.getCsid(), outboxMessage.getMessage(),chatContactDoc.getLane());
+		telegramClient.sendReply(chatContactDoc.getLane(), chatContactDoc.getCsid(), outboxMessage.getMessage());
 	}
 
 }
