@@ -100,7 +100,7 @@ public class AuthController {
 			HttpServletRequest request) {
 		ApiResponse<String, String> x = ApiResponse.buildData("success", "success");
 
-		if (ArgUtil.isEqual(username, password) && username.startsWith("agent")) {
+		if (username.startsWith("agent") && password.equals("mehery@1234")) {
 			x.redirectUrl(appConfig.getAppPrefix() + "/app/home");
 			UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(username, password);
 			token.setDetails(new WebAuthenticationDetails(request));
