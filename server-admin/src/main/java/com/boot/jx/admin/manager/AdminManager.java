@@ -38,9 +38,10 @@ public class AdminManager {
 		List<Agent> lstAgent = new ArrayList<Agent>();
 		if(agent!=null && agent.getAgent_id()==0) {
 			agent.setIsactive("Y");
+			agent.setModified_date(null);
 		}else {
 			agent.setAgent_id(agent.getAgent_id());
-			//agent.setModified_date(new Date());
+			agent.setModified_date(new Date());
 		}
 		
 		if(ArgUtil.is(agent)) {
@@ -83,6 +84,7 @@ public class AdminManager {
 		List<Department> lstDept = new ArrayList<Department>();
 		if(dept!=null && dept.getDept_id()==0) {
 			dept.setIsactive("Y");
+			dept.setModified_date(null);
 		}else {
 			dept.setDept_id(dept.getDept_id());
 			dept.setModified_date(new Date());
