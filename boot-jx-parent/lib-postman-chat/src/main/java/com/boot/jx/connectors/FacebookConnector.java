@@ -43,7 +43,6 @@ public class FacebookConnector implements ConnectorHandler {
 	public void send(String lane, String to, OutboxMessage outboxMessage) {
 		FacebookMessageRequest req = new FacebookMessageRequest();
 		req.recipientId(to);
-		req.messageText(outboxMessage.getMessage());
 		if (ArgUtil.is(outboxMessage.getTemplate())) {
 			TemplateReply mediaReply = mongoTemplate.findById(outboxMessage.getTemplate(), TemplateReply.class);
 			if (ArgUtil.is(mediaReply)) {
@@ -53,9 +52,11 @@ public class FacebookConnector implements ConnectorHandler {
 			} else {
 				tmplClient.process(outboxMessage);
 				req.messageType("text");
+				req.messageText(outboxMessage.getMessage());
 			}
 		} else {
 			req.messageType("text");
+			req.messageText(outboxMessage.getMessage());
 		}
 		facebooClient.sendReply(lane, req);
 	}
@@ -63,6 +64,11 @@ public class FacebookConnector implements ConnectorHandler {
 	@Override
 	public void reply(InboxMessage inboxMessage, OutboxMessage outboxMessage) {
 		this.send(inboxMessage.getLane(), inboxMessage.getFrom(), outboxMessage);
+	}
+
+	@Override
+	public void send(ChatContactDoc chatContactDoc, OutboxMessage outboxMessage) {
+		this.send(chatContactDoc.getLane(), chatContactDoc.getCsid(), outboxMessage);
 	}
 
 	@Override
@@ -92,11 +98,6 @@ public class FacebookConnector implements ConnectorHandler {
 		contact.setName(profile.getFirstName() + " " + profile.getLastName());
 		sessionStore.save(contact);
 		return true;
-	}
-
-	@Override
-	public void send(ChatContactDoc chatContactDoc, OutboxMessage outboxMessage) {
-		this.send(chatContactDoc.getLane(), chatContactDoc.getCsid(), outboxMessage);
 	}
 
 }
