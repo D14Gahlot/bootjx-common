@@ -51,14 +51,18 @@ public class MsgController {
 	@ResponseBody
 	@RequestMapping(value = "/api/sessions/assigned", method = { RequestMethod.GET })
 	public ApiResponse<ChatSessionDto, Object> getSessionsAssignedToMe() {
-		List<ChatSessionDoc> sessions = sessionStore.findChatSessionDocByAgentAndUnAssigned(agentSession.getAgentCode(),
-				agentSession.getAgentDept());
 
 		List<ChatSessionDto> chatSessionDtos = new ArrayList<ChatSessionDto>();
-		for (ChatSessionDoc chatSessionDoc : sessions) {
-			ChatSessionDto chatSessionDto = agentChatHandlerImpl.getChatSessionDto(chatSessionDoc,
-					agentSession.getAgentCode());
-			chatSessionDtos.add(chatSessionDto);
+
+		if (agentSession.isLoggedIn() && ArgUtil.is(agentSession.getAgentDept())) {
+			List<ChatSessionDoc> sessions = sessionStore
+					.findChatSessionDocByAgentAndUnAssigned(agentSession.getAgentCode(), agentSession.getAgentDept());
+
+			for (ChatSessionDoc chatSessionDoc : sessions) {
+				ChatSessionDto chatSessionDto = agentChatHandlerImpl.getChatSessionDto(chatSessionDoc,
+						agentSession.getAgentCode());
+				chatSessionDtos.add(chatSessionDto);
+			}
 		}
 
 		agentSessionService.refreshOnline();
