@@ -14,10 +14,12 @@ import org.springframework.stereotype.Component;
 import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorHandler;
 import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorMapping;
 import com.boot.jx.dict.ContactType;
+import com.boot.jx.postman.client.TmplClient;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.TemplateReply;
 import com.boot.jx.postman.gupshup.GupShupConfig;
+import com.boot.jx.postman.model.File;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.model.WAMessage.Channel;
@@ -49,6 +51,9 @@ public class TwitterConnector implements ConnectorHandler {
 	@Autowired
 	private MongoTemplate mongoTemplate;
 
+	@Autowired
+	private TmplClient tmplClient;
+
 	@Override
 	public void send(String lane, String to, OutboxMessage outboxMessage) {
 		try {
@@ -65,6 +70,13 @@ public class TwitterConnector implements ConnectorHandler {
 						mongoTemplate.save(templateReply);
 					}
 					twitterClient.sendReply(to, outboxMessage.getMessage(), mediaId, lane);
+				} else {
+					File file = new File();
+					file.setModel(outboxMessage.getModel());
+					file.setITemplate(outboxMessage.getITemplate());
+					file = tmplClient.process(file, outboxMessage.getContactType()).getResult();
+					outboxMessage.setMessage(file.getContent());
+					outboxMessage.options().putAll(file.getOptions());
 				}
 			} else {
 				twitterClient.sendReply(to, outboxMessage.getMessage(), lane);

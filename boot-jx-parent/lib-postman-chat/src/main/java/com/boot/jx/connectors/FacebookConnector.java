@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorHandler;
 import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorMapping;
 import com.boot.jx.dict.ContactType;
+import com.boot.jx.postman.client.TmplClient;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.TemplateReply;
@@ -15,6 +16,7 @@ import com.boot.jx.postman.fb.FacebookMessageRequest;
 import com.boot.jx.postman.fb.FacebookMessaging;
 import com.boot.jx.postman.fb.FacebookUserProfile;
 import com.boot.jx.postman.gupshup.GupShupConfig;
+import com.boot.jx.postman.model.File;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.store.SessionStore;
@@ -36,6 +38,9 @@ public class FacebookConnector implements ConnectorHandler {
 	@Autowired
 	private MongoTemplate mongoTemplate;
 
+	@Autowired
+	private TmplClient tmplClient;
+
 	public void send(String lane, String to, OutboxMessage outboxMessage) {
 		FacebookMessageRequest req = new FacebookMessageRequest();
 		req.recipientId(to);
@@ -44,6 +49,13 @@ public class FacebookConnector implements ConnectorHandler {
 			TemplateReply mediaReply = mongoTemplate.findById(outboxMessage.getTemplate(), TemplateReply.class);
 			if ("image".equalsIgnoreCase(mediaReply.getType())) {
 				req.attachmentType("image").attachmentUrl(mediaReply.getUrl());
+			} else {
+				File file = new File();
+				file.setModel(outboxMessage.getModel());
+				file.setITemplate(outboxMessage.getITemplate());
+				file = tmplClient.process(file, outboxMessage.getContactType()).getResult();
+				outboxMessage.setMessage(file.getContent());
+				outboxMessage.options().putAll(file.getOptions());
 			}
 		} else {
 			req.messageType("text");
