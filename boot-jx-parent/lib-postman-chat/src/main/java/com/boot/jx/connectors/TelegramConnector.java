@@ -43,8 +43,10 @@ public class TelegramConnector implements ConnectorHandler {
 	public void send(String lane, String to, OutboxMessage outboxMessage) {
 		if (ArgUtil.is(outboxMessage.getTemplate())) {
 			TemplateReply mediaReply = mongoTemplate.findById(outboxMessage.getTemplate(), TemplateReply.class);
-			if ("image".equalsIgnoreCase(mediaReply.getType())) {
-				telegramClient.sendPhoto(lane, to, mediaReply.getUrl(), mediaReply.getTitle());
+			if (ArgUtil.is(mediaReply)) {
+				if ("image".equalsIgnoreCase(mediaReply.getType())) {
+					telegramClient.sendPhoto(lane, to, mediaReply.getUrl(), mediaReply.getTitle());
+				}
 			} else {
 				tmplClient.process(outboxMessage);
 				telegramClient.sendReply(lane, to, outboxMessage.getMessage());
