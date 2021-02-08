@@ -86,10 +86,12 @@ public class DemoController extends ChatController {
 	public void feedback(InboxMessage inboxMessage, StringMatcher matcher) {
 		switch (inboxMessage.getMessage().toLowerCase()) {
 		case "yes":
+		case "y":
 		case "1":
 			reply("Thanks - Conversation Closed");
 			break;
 		case "no":
+		case "n":
 		case "2":
 			transferToAgent(inboxMessage, matcher);
 			break;
@@ -107,7 +109,7 @@ public class DemoController extends ChatController {
 			if (ArgUtil.is(agentAssignResp.getAssignedToAgent())) {
 				reply("One of our agent will attend you shortly");
 			} else {
-				reply("All agents are busy or online, we will connect you whenever someone is avaialable.");
+				reply("All agents are busy or online, we will connect you whenever someone is available.");
 			}
 		} catch (Exception e) {
 			reply("Some Tech Issues");

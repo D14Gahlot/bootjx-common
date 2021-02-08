@@ -52,6 +52,7 @@ public class FacebookConnector implements ConnectorHandler {
 				}
 			} else {
 				tmplClient.process(outboxMessage);
+				req.messageType("text");
 			}
 		} else {
 			req.messageType("text");

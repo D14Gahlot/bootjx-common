@@ -35,7 +35,7 @@ public class InBoundControllerWeb {
 	@ResponseBody
 	@RequestMapping(value = "/ext/inbound/web/callback", method = RequestMethod.POST)
 	public InboxMessage onReceiveMessage(@RequestBody InboxMessage event) throws InterruptedException {
-		event.setContactType(ContactType.FACEBOOK);
+		event.setContactType(ContactType.WEBSITE);
 		event.setLane("DUMMY");
 
 		// Cleaning
