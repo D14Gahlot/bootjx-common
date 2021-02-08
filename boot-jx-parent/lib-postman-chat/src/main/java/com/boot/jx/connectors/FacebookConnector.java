@@ -16,7 +16,6 @@ import com.boot.jx.postman.fb.FacebookMessageRequest;
 import com.boot.jx.postman.fb.FacebookMessaging;
 import com.boot.jx.postman.fb.FacebookUserProfile;
 import com.boot.jx.postman.gupshup.GupShupConfig;
-import com.boot.jx.postman.model.File;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.store.SessionStore;
@@ -33,13 +32,13 @@ public class FacebookConnector implements ConnectorHandler {
 	protected GupShupConfig gupShupConfig;
 
 	@Autowired
-	private SessionStore sessionStore;
-
-	@Autowired
 	private MongoTemplate mongoTemplate;
 
 	@Autowired
 	private TmplClient tmplClient;
+
+	@Autowired
+	private SessionStore sessionStore;
 
 	public void send(String lane, String to, OutboxMessage outboxMessage) {
 		FacebookMessageRequest req = new FacebookMessageRequest();
@@ -47,15 +46,12 @@ public class FacebookConnector implements ConnectorHandler {
 		req.messageText(outboxMessage.getMessage());
 		if (ArgUtil.is(outboxMessage.getTemplate())) {
 			TemplateReply mediaReply = mongoTemplate.findById(outboxMessage.getTemplate(), TemplateReply.class);
-			if ("image".equalsIgnoreCase(mediaReply.getType())) {
-				req.attachmentType("image").attachmentUrl(mediaReply.getUrl());
+			if (ArgUtil.is(mediaReply)) {
+				if ("image".equalsIgnoreCase(mediaReply.getType())) {
+					req.attachmentType("image").attachmentUrl(mediaReply.getUrl());
+				}
 			} else {
-				File file = new File();
-				file.setModel(outboxMessage.getModel());
-				file.setITemplate(outboxMessage.getITemplate());
-				file = tmplClient.process(file, outboxMessage.getContactType()).getResult();
-				outboxMessage.setMessage(file.getContent());
-				outboxMessage.options().putAll(file.getOptions());
+				tmplClient.process(outboxMessage);
 			}
 		} else {
 			req.messageType("text");

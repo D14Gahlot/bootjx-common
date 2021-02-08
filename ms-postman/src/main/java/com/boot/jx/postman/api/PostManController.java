@@ -91,13 +91,13 @@ public class PostManController {
 	@RequestMapping(value = PostManUrls.PROCESS_TEMPLATE, method = RequestMethod.POST)
 	public ApiResponse<File, Object> processTemplate(@RequestParam TemplatesMX template,
 			@RequestParam(required = false) String data, @RequestParam(required = false) String fileName,
-			@RequestParam(required = false) File.Type fileType) {
+			@RequestParam(required = false) File.FileFormat fileType) {
 
 		File file = new File();
 		getLang(file);
 
 		file.setITemplate(template);
-		file.setType(fileType);
+		file.setFileFormat(fileType);
 		file.setModel(JsonUtil.fromJson(data, Map.class));
 		return postManService.processTemplate(file);
 

@@ -54,29 +54,33 @@ public class TwitterConnector implements ConnectorHandler {
 	@Autowired
 	private TmplClient tmplClient;
 
+	private Long getMediaId(String lane, TemplateReply templateReply)
+			throws IOException, MalformedURLException, TwitterException {
+		Long mediaId = ArgUtil.parseAsLong(templateReply.meta().get("twitterMediaId"));
+		if (!ArgUtil.is(mediaId)) {
+			TwitterClientContext ctx = twitterClient.getContext(lane);
+			InputStream media = new java.net.URL(templateReply.getUrl()).openStream();
+			UploadedMedia uploadedMedia = ctx.getTwitter().uploadMedia(templateReply.getTitle(), media);
+			mediaId = uploadedMedia.getMediaId();
+			templateReply.meta().put("twitterMediaId", mediaId);
+			mongoTemplate.save(templateReply);
+		}
+		return mediaId;
+	}
+
 	@Override
 	public void send(String lane, String to, OutboxMessage outboxMessage) {
 		try {
 			if (ArgUtil.is(outboxMessage.getTemplate())) {
 				TemplateReply templateReply = mongoTemplate.findById(outboxMessage.getTemplate(), TemplateReply.class);
-				if ("image".equalsIgnoreCase(templateReply.getType())) {
-					Long mediaId = ArgUtil.parseAsLong(templateReply.meta().get("twitterMediaId"));
-					if (!ArgUtil.is(mediaId)) {
-						TwitterClientContext ctx = twitterClient.getContext(lane);
-						InputStream media = new java.net.URL(templateReply.getUrl()).openStream();
-						UploadedMedia uploadedMedia = ctx.getTwitter().uploadMedia(templateReply.getTitle(), media);
-						mediaId = uploadedMedia.getMediaId();
-						templateReply.meta().put("twitterMediaId", mediaId);
-						mongoTemplate.save(templateReply);
+				if (ArgUtil.is(templateReply)) {
+					if ("image".equalsIgnoreCase(templateReply.getType())) {
+						Long mediaId = getMediaId(lane, templateReply);
+						twitterClient.sendReply(to, outboxMessage.getMessage(), mediaId, lane);
 					}
-					twitterClient.sendReply(to, outboxMessage.getMessage(), mediaId, lane);
 				} else {
-					File file = new File();
-					file.setModel(outboxMessage.getModel());
-					file.setITemplate(outboxMessage.getITemplate());
-					file = tmplClient.process(file, outboxMessage.getContactType()).getResult();
-					outboxMessage.setMessage(file.getContent());
-					outboxMessage.options().putAll(file.getOptions());
+					tmplClient.process(outboxMessage);
+					twitterClient.sendReply(to, outboxMessage.getMessage(), lane);
 				}
 			} else {
 				twitterClient.sendReply(to, outboxMessage.getMessage(), lane);

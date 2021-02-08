@@ -19,7 +19,7 @@ import com.boot.jx.postman.PostManService;
 import com.boot.jx.postman.model.Email;
 import com.boot.jx.postman.model.ExceptionReport;
 import com.boot.jx.postman.model.File;
-import com.boot.jx.postman.model.File.Type;
+import com.boot.jx.postman.model.File.FileFormat;
 import com.boot.jx.postman.model.MessageBox;
 import com.boot.jx.postman.model.Notipy;
 import com.boot.jx.postman.model.PushMessage;
@@ -127,10 +127,10 @@ public class PostManServiceImpl implements PostManService {
 	 * @param fileType the file type
 	 * @return the file
 	 */
-	public File processTemplate(TemplatesMX template, Map<String, Object> map, Type fileType) {
+	public File processTemplate(TemplatesMX template, Map<String, Object> map, FileFormat fileType) {
 		File file = new File();
 		file.setITemplate(template);
-		file.setType(fileType);
+		file.setFileFormat(fileType);
 		file.setModel(map);
 		return this.processTemplate(file).getResult();
 	}

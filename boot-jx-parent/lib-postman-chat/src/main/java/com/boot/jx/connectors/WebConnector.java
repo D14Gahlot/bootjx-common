@@ -9,6 +9,7 @@ import org.redisson.api.RedissonClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Component;
 
 import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorMapping;
@@ -17,6 +18,7 @@ import com.boot.jx.dict.ContactType;
 import com.boot.jx.postman.client.TmplClient;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
+import com.boot.jx.postman.doc.TemplateReply;
 import com.boot.jx.postman.gupshup.GupShupConfig;
 import com.boot.jx.postman.model.File;
 import com.boot.jx.postman.model.InboxMessage;
@@ -68,19 +70,20 @@ public class WebConnector implements DefaultConnector {
 	@Autowired
 	private TmplClient tmplClient;
 
-	@Override
-	public void send(String lane, String to, OutboxMessage outboxMessage) {
-		// TODO Auto-generated method stub
-	}
+	@Autowired
+	private MongoTemplate mongoTemplate;
 
-	private void sendMessage(String csid, OutboxMessage outboxMessage) {
+	@Override
+	public void send(String lane, String csid, OutboxMessage outboxMessage) {
 		if (ArgUtil.is(outboxMessage.getTemplate())) {
-			File file = new File();
-			file.setModel(outboxMessage.getModel());
-			file.setITemplate(outboxMessage.getITemplate());
-			file = tmplClient.process(file, outboxMessage.getContactType()).getResult();
-			outboxMessage.setMessage(file.getContent());
-			outboxMessage.options().putAll(file.getOptions());
+			TemplateReply mediaReply = mongoTemplate.findById(outboxMessage.getTemplate(), TemplateReply.class);
+			if (ArgUtil.is(mediaReply)) {
+				if ("image".equalsIgnoreCase(mediaReply.getType())) {
+					outboxMessage.addFile(new File().url(mediaReply.getUrl()).fileType(File.FileType.IMAGE));
+				}
+			} else {
+				tmplClient.process(outboxMessage);
+			}
 		}
 
 		if (redisson == null) {
@@ -98,7 +101,12 @@ public class WebConnector implements DefaultConnector {
 
 	@Override
 	public void reply(InboxMessage inboxMessage, OutboxMessage outboxMessage) {
-		sendMessage(inboxMessage.getFrom(), outboxMessage);
+		send(inboxMessage.getLane(), inboxMessage.getFrom(), outboxMessage);
+	}
+
+	@Override
+	public void send(ChatContactDoc chatContactDoc, OutboxMessage outboxMessage) {
+		send(chatContactDoc.getLane(), chatContactDoc.getCsid(), outboxMessage);
 	}
 
 	@Override
@@ -150,11 +158,6 @@ public class WebConnector implements DefaultConnector {
 		}
 
 		return true;
-	}
-
-	@Override
-	public void send(ChatContactDoc chatContactDoc, OutboxMessage outboxMessage) {
-		sendMessage(chatContactDoc.getCsid(), outboxMessage);
 	}
 
 }

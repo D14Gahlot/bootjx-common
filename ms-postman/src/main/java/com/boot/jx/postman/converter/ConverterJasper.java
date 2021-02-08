@@ -19,7 +19,7 @@ import com.boot.jx.postman.PostManConfig;
 import com.boot.jx.postman.converter.jasper.SimpleReportExporter;
 import com.boot.jx.postman.converter.jasper.SimpleReportFiller;
 import com.boot.jx.postman.model.File;
-import com.boot.jx.postman.model.File.Type;
+import com.boot.jx.postman.model.File.FileFormat;
 import com.boot.jx.tmpl.TemplateUtils;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.FlatMap;
@@ -121,7 +121,7 @@ public class ConverterJasper implements FileConverter {
 			}
 
 			file.setBody(outputStream.toByteArray());
-			file.setType(Type.PDF);
+			file.setFileFormat(FileFormat.PDF);
 
 		} finally {
 			if (outputStream != null) {
@@ -183,7 +183,7 @@ public class ConverterJasper implements FileConverter {
 			JasperExportManager.exportReportToPdfStream(jasperPrint, outputStream);
 
 			file.setBody(outputStream.toByteArray());
-			file.setType(Type.PDF);
+			file.setFileFormat(FileFormat.PDF);
 
 		} catch (JRException e) {
 			LOGGER.error("Some Error", e);

@@ -18,12 +18,12 @@ public class PostManUtil {
 	public static ResponseEntity<byte[]> download(File file) {
 		return ResponseEntity.ok().contentLength(file.getBody().length)
 				.header("Content-Disposition", "attachment; filename=" + file.getName())
-				.contentType(MediaType.valueOf(file.getType().getContentType())).body(file.getBody());
+				.contentType(MediaType.valueOf(file.getFileFormat().getContentType())).body(file.getBody());
 	}
 
 	public static ResponseEntity<byte[]> render(File file) {
 		return ResponseEntity.ok().contentLength(file.getBody().length)
-				.contentType(MediaType.valueOf(file.getType().getContentType())).body(file.getBody());
+				.contentType(MediaType.valueOf(file.getFileFormat().getContentType())).body(file.getBody());
 	}
 
 	public static String createContactId(ContactType contactType, String id) {

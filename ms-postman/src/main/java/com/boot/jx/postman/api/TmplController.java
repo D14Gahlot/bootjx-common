@@ -72,14 +72,14 @@ public class TmplController {
 	@RequestMapping(value = TmplClient.PATH.TMPL_FILE_PROCESS, method = RequestMethod.GET)
 	public ApiResponse<File, Object> processTemplate(@RequestParam TemplatesMX template,
 			@RequestParam(required = false) String data, @RequestParam(required = false) String fileName,
-			@RequestParam(required = false) File.Type fileType,
+			@RequestParam(required = false) File.FileFormat fileType,
 			@RequestParam(required = false) ContactType contactType) {
 
 		File file = new File();
 		getLang(file);
 
 		file.setITemplate(template);
-		file.setType(fileType);
+		file.setFileFormat(fileType);
 		file.setModel(JsonUtil.fromJson(data, Map.class));
 		return ApiResponse.buildResult(fileService.create(file, contactType));
 

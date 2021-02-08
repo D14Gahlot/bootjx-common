@@ -139,7 +139,7 @@ public class FBPushServiceImpl implements IPushNotifyService {
 				file.setTemplate(msg.getTemplate());
 				file.setModel(msg.getModel());
 				file.setLang(msg.getLang());
-				file.setType(File.Type.JSON);
+				file.setFileFormat(File.FileFormat.JSON);
 
 				@SuppressWarnings("unchecked")
 				Map<String, Object> map = JsonUtil.fromJson(fileService.create(file, ContactType.PUSH).getContent(),

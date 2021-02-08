@@ -22,7 +22,7 @@ import org.w3c.dom.NodeList;
 import org.xhtmlrenderer.pdf.ITextRenderer;
 
 import com.boot.jx.postman.model.File;
-import com.boot.jx.postman.model.File.Type;
+import com.boot.jx.postman.model.File.FileFormat;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.Constants;
 import com.itextpdf.text.DocumentException;
@@ -144,7 +144,7 @@ public class ConverterAmxFlyingSaucer implements FileConverter {
 				renderer.createPDF(outputStream);
 				renderer.finishPDF();
 				file.setBody(outputStream.toByteArray());
-				file.setType(Type.PNG);
+				file.setFileFormat(FileFormat.PNG);
 			}
 		} catch (DocumentException | IOException | TransformerException e) {
 			LOGGER.error("Some Error", e);

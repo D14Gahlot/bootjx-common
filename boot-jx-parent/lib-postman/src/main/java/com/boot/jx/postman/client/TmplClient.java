@@ -12,6 +12,7 @@ import com.boot.jx.dict.ContactType;
 import com.boot.jx.postman.PostManException;
 import com.boot.jx.postman.PostmanPackages.ICommonTmplPackage;
 import com.boot.jx.postman.model.File;
+import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.rest.RestService;
 import com.boot.utils.ArgUtil;
 
@@ -45,6 +46,16 @@ public class TmplClient {
 				.contentTypeJson().acceptJson().post(file)
 				.as(new ParameterizedTypeReference<ApiResponse<File, Object>>() {
 				});
+	}
+
+	public OutboxMessage process(OutboxMessage outboxMessage) {
+		File file = new File();
+		file.setModel(outboxMessage.getModel());
+		file.setITemplate(outboxMessage.getITemplate());
+		file = this.process(file, outboxMessage.getContactType()).getResult();
+		outboxMessage.setMessage(file.getContent());
+		outboxMessage.options().putAll(file.getOptions());
+		return outboxMessage;
 	}
 
 }

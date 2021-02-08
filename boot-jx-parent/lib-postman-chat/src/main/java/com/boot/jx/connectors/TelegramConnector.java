@@ -46,12 +46,8 @@ public class TelegramConnector implements ConnectorHandler {
 			if ("image".equalsIgnoreCase(mediaReply.getType())) {
 				telegramClient.sendPhoto(lane, to, mediaReply.getUrl(), mediaReply.getTitle());
 			} else {
-				File file = new File();
-				file.setModel(outboxMessage.getModel());
-				file.setITemplate(outboxMessage.getITemplate());
-				file = tmplClient.process(file, outboxMessage.getContactType()).getResult();
-				outboxMessage.setMessage(file.getContent());
-				outboxMessage.options().putAll(file.getOptions());
+				tmplClient.process(outboxMessage);
+				telegramClient.sendReply(lane, to, outboxMessage.getMessage());
 			}
 		} else {
 			telegramClient.sendReply(lane, to, outboxMessage.getMessage());

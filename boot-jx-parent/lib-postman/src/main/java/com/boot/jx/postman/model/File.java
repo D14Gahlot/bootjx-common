@@ -25,45 +25,44 @@ public class File implements Serializable {
 
 	private static final long serialVersionUID = -3165262414318034816L;
 	private static Logger LOGGER = LoggerService.getLogger(File.class);
-	private static Map<String, Type> TYPEMAP = new HashMap<String, Type>();
+	private static Map<String, FileFormat> TYPEMAP = new HashMap<String, FileFormat>();
 
-	public static enum Format implements EnumType {
+	public static enum FileType implements EnumType {
 		IMAGE, VIDEO, TEXT, DOCUMENT
 	}
 
-	public enum Type implements EnumType {
+	public enum FileFormat implements EnumType {
 		PDF("application/pdf"), CSV("text/csv"),
 
-		PNG("image/png", Format.IMAGE), JPEG("image/jpeg", Format.IMAGE), JPG("image/jpg", Format.IMAGE),
-		BMP("image/bmp", Format.IMAGE), GIF("image/gif", Format.IMAGE),
-		TIFF("image/tiff", Format.IMAGE), TIF("image/tif", Format.IMAGE),
+		PNG("image/png", FileType.IMAGE), JPEG("image/jpeg", FileType.IMAGE), JPG("image/jpg", FileType.IMAGE),
+		BMP("image/bmp", FileType.IMAGE), GIF("image/gif", FileType.IMAGE), TIFF("image/tiff", FileType.IMAGE),
+		TIF("image/tif", FileType.IMAGE),
 
-		JSON("application/json"), HTML("text/html"), TEXT(
-				"text/plain", Format.TEXT);
+		JSON("application/json"), HTML("text/html"), TEXT("text/plain", FileType.TEXT);
 
 		String contentType;
-		Format formatType;
+		FileType fileType;
 
 		public String getContentType() {
 			return contentType;
 		}
 
-		Type(String contentType, Format formatType) {
+		FileFormat(String contentType, FileType formatType) {
 			this.contentType = contentType;
-			this.formatType = formatType;
+			this.fileType = formatType;
 			TYPEMAP.put(contentType, this);
 		}
 
-		Type(String contentType) {
-			this(contentType, Format.DOCUMENT);
+		FileFormat(String contentType) {
+			this(contentType, FileType.DOCUMENT);
 		}
 
-		public static Type from(String contentType) {
+		public static FileFormat from(String contentType) {
 			return TYPEMAP.get(contentType);
 		}
 
-		public Format getFormatType() {
-			return formatType;
+		public FileType getFormatType() {
+			return fileType;
 		}
 
 	}
@@ -90,7 +89,8 @@ public class File implements Serializable {
 	private String content;
 	private String name;
 	private String title;
-	private Type type;
+	private FileFormat fileFormat;
+	private FileType fileType;
 	private PDFConverter converter;
 	private String password;
 	private String url;
@@ -111,14 +111,14 @@ public class File implements Serializable {
 	}
 
 	@SuppressWarnings("unchecked")
-	public File(ITemplate template, Object data, Type fileType) {
+	public File(ITemplate template, Object data, FileFormat fileType) {
 		this.setITemplate(template);
-		this.setType(fileType);
+		this.setFileFormat(fileType);
 		this.setModel(JsonUtil.fromJson(JsonUtil.toJson(data), Map.class));
 	}
 
-	public File(Object data, Type fileType) {
-		this.setType(fileType);
+	public File(Object data, FileFormat fileType) {
+		this.setFileFormat(fileType);
 		this.setModel(JsonUtil.toJsonMap(data));
 	}
 
@@ -163,12 +163,12 @@ public class File implements Serializable {
 
 	private byte[] body;
 
-	public Type getType() {
-		return type;
+	public FileFormat getFileFormat() {
+		return fileFormat;
 	}
 
-	public void setType(Type type) {
-		this.type = type;
+	public void setFileFormat(FileFormat type) {
+		this.fileFormat = type;
 	}
 
 	public byte[] getBody() {
@@ -206,13 +206,13 @@ public class File implements Serializable {
 	public void create(HttpServletResponse response, Boolean download) throws IOException {
 		OutputStream outputStream = null;
 		response.setHeader("Cache-Control", "cache, must-revalidate");
-		if (this.type == Type.PDF) {
+		if (this.fileFormat == FileFormat.PDF) {
 			response.addHeader("Content-type", "application/pdf");
-		} else if (this.type == Type.PNG) {
+		} else if (this.fileFormat == FileFormat.PNG) {
 			response.addHeader("Content-type", "application/pdf");
-		} else if (this.type == Type.JPEG) {
+		} else if (this.fileFormat == FileFormat.JPEG) {
 			response.addHeader("Content-type", "application/jpeg");
-		} else if (this.type == Type.JPG) {
+		} else if (this.fileFormat == FileFormat.JPG) {
 			response.addHeader("Content-type", "application/jpg");
 		}
 		if (download) {
@@ -245,24 +245,24 @@ public class File implements Serializable {
 	}
 
 	public static File fromBase64(String base64String) {
-		return fromBase64(base64String, Type.TEXT);
+		return fromBase64(base64String, FileFormat.TEXT);
 	}
 
-	public static File fromBase64(String base64String, Type defaultType) {
+	public static File fromBase64(String base64String, FileFormat defaultType) {
 		String[] strings = base64String.split(",");
-		Type extension;
+		FileFormat extension;
 		String dataPart;
 		if (strings.length > 1) {
 			dataPart = strings[1];
 			switch (strings[0]) {// check image's extension
 			case "data:image/jpeg;base64":
-				extension = Type.JPEG;
+				extension = FileFormat.JPEG;
 				break;
 			case "data:image/png;base64":
-				extension = Type.PNG;
+				extension = FileFormat.PNG;
 				break;
 			default:// should write cases for more images types
-				extension = Type.JPG;
+				extension = FileFormat.JPG;
 				break;
 			}
 		} else {
@@ -270,7 +270,7 @@ public class File implements Serializable {
 			dataPart = strings[0];
 		}
 		File file = new File();
-		file.setType(extension);
+		file.setFileFormat(extension);
 		file.setBody(DatatypeConverter.parseBase64Binary(dataPart));
 		return file;
 	}
@@ -291,17 +291,35 @@ public class File implements Serializable {
 		this.url = url;
 	}
 
-	public File url(String url) {
-		this.setUrl(url);
-		return this;
-	}
-
 	public Map<String, String> getOptions() {
 		return options;
 	}
 
 	public void setOptions(Map<String, String> options) {
 		this.options = options;
+	}
+
+	public FileType getFileType() {
+		return fileType;
+	}
+
+	public void setFileType(FileType fileType) {
+		this.fileType = fileType;
+	}
+
+	public File url(String url) {
+		this.setUrl(url);
+		return this;
+	}
+
+	public File type(FileFormat fileFormat) {
+		this.setFileFormat(fileFormat);
+		return this;
+	}
+
+	public File fileType(FileType fileType) {
+		this.setFileType(fileType);
+		return this;
 	}
 
 }

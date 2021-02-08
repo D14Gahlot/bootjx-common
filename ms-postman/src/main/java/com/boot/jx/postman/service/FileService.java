@@ -19,7 +19,7 @@ import com.boot.jx.logger.AuditService;
 import com.boot.jx.logger.LoggerService;
 import com.boot.jx.postman.audit.PMGaugeEvent;
 import com.boot.jx.postman.model.File;
-import com.boot.jx.postman.model.File.Type;
+import com.boot.jx.postman.model.File.FileFormat;
 import com.boot.jx.tmpl.TemplateService;
 import com.boot.jx.tmpl.TemplateUtils;
 import com.boot.utils.ArgUtil;
@@ -82,9 +82,9 @@ public class FileService {
 			}
 
 			if (file.getName() == null) {
-				if (file.getType() == Type.PDF) {
+				if (file.getFileFormat() == FileFormat.PDF) {
 					file.setName(file.getITemplate().getFileName() + ".pdf");
-				} else if (file.getType() == Type.JSON) {
+				} else if (file.getFileFormat() == FileFormat.JSON) {
 					file.setName(file.getITemplate().getFileName() + ".json");
 				} else {
 					file.setName(file.getITemplate().getFileName() + ".html");
@@ -92,7 +92,7 @@ public class FileService {
 			}
 		}
 
-		if (file.getType() == File.Type.PDF) {
+		if (file.getFileFormat() == File.FileFormat.PDF) {
 			/**
 			 * From string to File type
 			 */

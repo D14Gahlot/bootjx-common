@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 import org.xhtmlrenderer.pdf.ITextRenderer;
 
 import com.boot.jx.postman.model.File;
-import com.boot.jx.postman.model.File.Type;
+import com.boot.jx.postman.model.File.FileFormat;
 import com.boot.utils.Constants;
 import com.codahale.metrics.annotation.Timed;
 import com.itextpdf.text.DocumentException;
@@ -83,7 +83,7 @@ public class ConverterFlyingSaucer implements FileConverter {
 				renderer.createPDF(outputStream);
 				renderer.finishPDF();
 				file.setBody(outputStream.toByteArray());
-				file.setType(Type.PNG);
+				file.setFileFormat(FileFormat.PNG);
 			}
 		} catch (DocumentException | IOException e) {
 			LOGGER.error("Some Error", e);

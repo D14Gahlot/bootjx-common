@@ -154,7 +154,7 @@ public class TemplateService {
 	public File process(File file, ContactType contactType) {
 		Locale locale = getLocal(file);
 
-		if (file.getType() == File.Type.PDF) {
+		if (file.getFileFormat() == File.FileFormat.PDF) {
 			String reverse = messageSource.getMessage("flag.reverse.char", null, locale);
 			if (("true".equalsIgnoreCase(reverse))) {
 				TemplateUtils.reverseFlag(true);
@@ -180,7 +180,7 @@ public class TemplateService {
 
 		if (file.getITemplate().isThymleaf()) {
 			String content;
-			if (file.getType() == File.Type.JSON || ContactType.PUSH == contactType) {
+			if (file.getFileFormat() == File.FileFormat.JSON || ContactType.PUSH == contactType) {
 				content = this.processJson(file.getITemplate(), context, locale, contactType);
 			} else {
 				content = this.processHtml(file.getITemplate(), context, locale, contactType);

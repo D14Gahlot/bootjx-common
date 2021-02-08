@@ -124,7 +124,7 @@ public abstract class AbstractGupShupClient {
 				&& ArgUtil.is(message.getFiles().get(0).getUrl())) {
 			File file = message.getFiles().get(0);
 
-			if (ArgUtil.is(file.getType()) && ArgUtil.isEqual(file.getType().getFormatType(), File.Format.IMAGE)) {
+			if (ArgUtil.is(file.getFileFormat()) && ArgUtil.isEqual(file.getFileFormat().getFormatType(), File.FileType.IMAGE)) {
 				return sendImageURL(phoneNumber, file.getUrl(), message.getMessage());
 			}
 			return sendDocumentURL(phoneNumber, file.getUrl(), message.getMessage());

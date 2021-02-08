@@ -222,13 +222,13 @@ public class PostManControllerTest {
 		file.setConverter(lib);
 
 		if ("pdf".equals(ext)) {
-			file.setType(File.Type.PDF);
+			file.setFileFormat(File.FileFormat.PDF);
 			file = postManClient.processTemplate(file).getResult();
 			// file = postManClient.processTemplate(template, map, File.Type.PDF);
 			file.create(response, false);
 			return null;
 		} else if ("json".equals(ext)) {
-			file.setType(File.Type.JSON);
+			file.setFileFormat(File.FileFormat.JSON);
 			file = postManClient.processTemplate(file).getResult();
 			return file.getContent();
 		} else if ("html".equals(ext)) {
@@ -254,7 +254,7 @@ public class PostManControllerTest {
 					Map<String, Object> map2 = readJsonWithObjectMapper(
 							"templates/dummy/" + attachment.getSampleJSON());
 					file2.setModel(map2);
-					file2.setType(File.Type.PDF);
+					file2.setFileFormat(File.FileFormat.PDF);
 					file2.setConverter(lib);
 					eml.addFile(file2);
 				}
@@ -280,7 +280,7 @@ public class PostManControllerTest {
 	@ResponseBody
 	@RequestMapping(value = PostManUrls.PROCESS_TEMPLATE + "/file/{template}.{contactType}", method = RequestMethod.GET)
 	public String processTemplate(@PathVariable("contactType") ContactType contactType,
-			@PathVariable("template") String template, @RequestParam(defaultValue = "HTML") File.Type type)
+			@PathVariable("template") String template, @RequestParam(defaultValue = "HTML") File.FileFormat type)
 			throws IOException {
 		ITemplate temp = ITemplates.getTemplate(template);
 
@@ -300,8 +300,8 @@ public class PostManControllerTest {
 		file.setModel(map);
 		file.setITemplate(temp);
 		// file.setConverter(lib);
-		if (File.Type.PDF.equals(type)) {
-			file.setType(File.Type.PDF);
+		if (File.FileFormat.PDF.equals(type)) {
+			file.setFileFormat(File.FileFormat.PDF);
 			file = postManClient.processTemplate(file).getResult();
 			// file = postManClient.processTemplate(template, map, File.Type.PDF);
 			file.create(response, false);
