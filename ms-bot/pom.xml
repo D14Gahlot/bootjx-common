@@ -67,7 +67,7 @@
 		<dependency>
 			<groupId>com.boot.jx</groupId>
 			<artifactId>lib-tmpl</artifactId>
-			<version>${jax.version}</version>
+			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
 
 		<dependency>

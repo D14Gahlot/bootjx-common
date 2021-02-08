@@ -67,16 +67,6 @@
 
 		<dependency>
 			<groupId>com.boot.jx</groupId>
-			<artifactId>lib-mcq</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>com.boot.jx</groupId>
-			<artifactId>lib-postman</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>com.boot.jx</groupId>
 			<artifactId>lib-postman-store</artifactId>
 		</dependency>
 

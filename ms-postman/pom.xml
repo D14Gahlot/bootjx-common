@@ -24,7 +24,6 @@
 		<itext.pdfhtml.version>2.0.1</itext.pdfhtml.version>
 		<itext.pdfcalligraph.version>2.0.0</itext.pdfcalligraph.version>
 		<itext5.version>5.5.13</itext5.version>
-
 	</properties>
 
 	<dependencies>
@@ -91,6 +90,12 @@
 			<groupId>com.boot.jx</groupId>
 			<artifactId>boot-ext-jar</artifactId>
 			<type>pom</type>
+		</dependency>
+
+		<dependency>
+			<groupId>com.boot.jx</groupId>
+			<artifactId>lib-tmpl</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
 
 		<!-- PDF FLYINSOC -->
