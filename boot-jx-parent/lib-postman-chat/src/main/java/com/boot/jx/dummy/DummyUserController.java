@@ -52,4 +52,9 @@ public class DummyUserController {
 		return "dummyuser";
 	}
 
+	@RequestMapping(value = "/dummy/customer", method = RequestMethod.GET)
+	public String dummyCustomer(Model model) throws InterruptedException {
+		model.addAttribute("APP_CONTEXT", appConfig.getAppPrefix());
+		return "customer.plugin.bubble";
+	}
 }

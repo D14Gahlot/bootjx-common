@@ -109,7 +109,7 @@ public class MessageBox {
 			this.smsBucket.add((SMS) m);
 		} else if (m instanceof Email  || ContactType.EMAIL.equals(m.getContactType())) {
 			this.emailBucket.add((Email) m);
-		} else if (m instanceof PushMessage  || ContactType.FBPUSH.equals(m.getContactType())) {
+		} else if (m instanceof PushMessage  || ContactType.PUSH.equals(m.getContactType())) {
 			this.pushBucket.add((PushMessage) m);
 		}
 		this.priority(m);
@@ -128,7 +128,7 @@ public class MessageBox {
 			} else if (m instanceof Email) {
 				this.priorityType = ContactType.EMAIL.getShortCode();
 			} else if (m instanceof PushMessage) {
-				this.priorityType = ContactType.FBPUSH.getShortCode();
+				this.priorityType = ContactType.PUSH.getShortCode();
 			}
 		}
 		return this;

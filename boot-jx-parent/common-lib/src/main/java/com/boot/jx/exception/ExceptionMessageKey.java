@@ -3,7 +3,7 @@ package com.boot.jx.exception;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.boot.jx.api.AmxFieldError;
+import com.boot.jx.api.ApiFieldError;
 import com.boot.jx.types.Dnum;
 import com.boot.utils.ArgUtil;
 
@@ -102,7 +102,7 @@ public class ExceptionMessageKey extends Dnum<ExceptionMessageKey> implements IM
 
 	public static void resolveLocalMessage(AmxApiError apiError) {
 		if (apiError.getErrors() != null) {
-			AmxFieldError fieldError = apiError.getErrors().get(0);
+			ApiFieldError fieldError = apiError.getErrors().get(0);
 			if (fieldError != null) {
 				if (ArgUtil.isEmpty(apiError.getMessageKey())) {
 					ExceptionMessageKey exceptionMessageKey = ExceptionMessageKey.valueOf(fieldError.getDescription());

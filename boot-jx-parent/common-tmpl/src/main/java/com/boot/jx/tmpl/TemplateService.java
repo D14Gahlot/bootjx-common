@@ -180,7 +180,7 @@ public class TemplateService {
 
 		if (file.getITemplate().isThymleaf()) {
 			String content;
-			if (file.getType() == File.Type.JSON || ContactType.FBPUSH == contactType) {
+			if (file.getType() == File.Type.JSON || ContactType.PUSH == contactType) {
 				content = this.processJson(file.getITemplate(), context, locale, contactType);
 			} else {
 				content = this.processHtml(file.getITemplate(), context, locale, contactType);

@@ -1,0 +1,29 @@
+.bcdesgin {
+       background: transparent!important;
+}
+.cmxform {
+	/* Firefox */
+	width: -moz-calc(100vw - 165px);
+	/* WebKit */
+	width: -webkit-calc(100vw - 165px);
+	/* Opera */
+	width: -o-calc(100vw - 165px);
+	/* Standard */
+	width: calc(100vw - 165px)
+}
+.form-submit {
+	cursor: pointer;
+}
+.customer-chat-logo{
+	color : #fff;
+    font-size: 33px;
+}
+.chat {
+	padding: 0px 0px!important;
+}
+.input-group input.form-submit {
+    float: left;
+    display: inline-block;
+    width: fit-content;
+    min-width: 26%;
+}

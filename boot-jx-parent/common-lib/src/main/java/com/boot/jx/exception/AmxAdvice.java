@@ -41,7 +41,7 @@ import com.boot.jx.AppConstants;
 import com.boot.jx.AppContextUtil;
 import com.boot.jx.api.AResponse;
 import com.boot.jx.api.AmxApiResponseUtil;
-import com.boot.jx.api.AmxFieldError;
+import com.boot.jx.api.ApiFieldError;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.exception.ApiHttpExceptions.ApiHttpArgException;
 import com.boot.jx.exception.ApiHttpExceptions.ApiStatusCodes;
@@ -83,7 +83,7 @@ public abstract class AmxAdvice implements ResponseBodyAdvice<ApiResponse<?, ?>>
 		response.setHeader(AppConstants.EXCEPTION_HEADER_KEY, apiError.getException());
 		response.setHeader(AppConstants.EXCEPTION_HEADER_CODE_KEY, apiAuditEvent.getErrorCode());
 
-		for (AmxFieldError warning : AmxApiResponseUtil.getWarnings()) {
+		for (ApiFieldError warning : AmxApiResponseUtil.getWarnings()) {
 			apiError.addWarning(warning);
 		}
 
@@ -117,7 +117,7 @@ public abstract class AmxAdvice implements ResponseBodyAdvice<ApiResponse<?, ?>>
 				ex);
 	}
 
-	protected ResponseEntity<AmxApiError> badRequest(Exception ex, List<AmxFieldError> errors,
+	protected ResponseEntity<AmxApiError> badRequest(Exception ex, List<ApiFieldError> errors,
 			HttpServletRequest request, HttpServletResponse response, ApiStatusCodes statusKey) {
 		AmxApiError apiError = new AmxApiError();
 		apiError.setHttpStatus(HttpStatus.BAD_REQUEST);
@@ -128,7 +128,7 @@ public abstract class AmxAdvice implements ResponseBodyAdvice<ApiResponse<?, ?>>
 		ExceptionMessageKey.resolveLocalMessage(apiError);
 		response.setHeader(AppConstants.EXCEPTION_HEADER_KEY, apiError.getException());
 
-		for (AmxFieldError warning : AmxApiResponseUtil.getWarnings()) {
+		for (ApiFieldError warning : AmxApiResponseUtil.getWarnings()) {
 			apiError.addWarning(warning);
 		}
 
@@ -145,9 +145,9 @@ public abstract class AmxAdvice implements ResponseBodyAdvice<ApiResponse<?, ?>>
 	protected ResponseEntity<AmxApiError> handle(MethodArgumentNotValidException ex, HttpServletRequest request,
 			HttpServletResponse response) {
 
-		List<AmxFieldError> errors = new ArrayList<AmxFieldError>();
+		List<ApiFieldError> errors = new ArrayList<ApiFieldError>();
 		for (FieldError error : ex.getBindingResult().getFieldErrors()) {
-			AmxFieldError newError = new AmxFieldError();
+			ApiFieldError newError = new ApiFieldError();
 			newError.setObzect(error.getObjectName());
 			newError.setField(error.getField());
 			newError.setDescription(HttpUtils.sanitze(error.getDefaultMessage()));
@@ -155,7 +155,7 @@ public abstract class AmxAdvice implements ResponseBodyAdvice<ApiResponse<?, ?>>
 			errors.add(newError);
 		}
 		for (ObjectError error : ex.getBindingResult().getGlobalErrors()) {
-			AmxFieldError newError = new AmxFieldError();
+			ApiFieldError newError = new ApiFieldError();
 			newError.setObzect(error.getObjectName());
 			newError.setDescription(HttpUtils.sanitze(error.getDefaultMessage()));
 			errors.add(newError);
@@ -176,13 +176,13 @@ public abstract class AmxAdvice implements ResponseBodyAdvice<ApiResponse<?, ?>>
 	@ResponseStatus(HttpStatus.BAD_REQUEST)
 	protected ResponseEntity<AmxApiError> handle(HttpMessageNotReadableException ex, HttpServletRequest request,
 			HttpServletResponse response) {
-		List<AmxFieldError> errors = new ArrayList<AmxFieldError>();
+		List<ApiFieldError> errors = new ArrayList<ApiFieldError>();
 
 		// newError.setField(ex.getName());
 		Throwable x = ex.getRootCause();
 		if (x instanceof InvalidFormatException) {
 			InvalidFormatException x1 = (InvalidFormatException) x;
-			AmxFieldError newError = new AmxFieldError();
+			ApiFieldError newError = new ApiFieldError();
 
 			StringBuilder sb = new StringBuilder();
 			Iterator<Reference> stit = x1.getPath().iterator();
@@ -199,7 +199,7 @@ public abstract class AmxAdvice implements ResponseBodyAdvice<ApiResponse<?, ?>>
 			newError.setDescription(HttpUtils.sanitze(x1.getOriginalMessage()));
 			errors.add(newError);
 		} else {
-			AmxFieldError newError = new AmxFieldError();
+			ApiFieldError newError = new ApiFieldError();
 			newError.setDescription(HttpUtils.sanitze(ex.getMessage()));
 			errors.add(newError);
 		}
@@ -220,8 +220,8 @@ public abstract class AmxAdvice implements ResponseBodyAdvice<ApiResponse<?, ?>>
 	@ResponseStatus(HttpStatus.BAD_REQUEST)
 	protected ResponseEntity<AmxApiError> handle(MethodArgumentTypeMismatchException ex, HttpServletRequest request,
 			HttpServletResponse response) {
-		List<AmxFieldError> errors = new ArrayList<AmxFieldError>();
-		AmxFieldError newError = new AmxFieldError();
+		List<ApiFieldError> errors = new ArrayList<ApiFieldError>();
+		ApiFieldError newError = new ApiFieldError();
 		newError.setField(ex.getName());
 		newError.setDescription(HttpUtils.sanitze(ex.getMessage()));
 		errors.add(newError);
@@ -239,9 +239,9 @@ public abstract class AmxAdvice implements ResponseBodyAdvice<ApiResponse<?, ?>>
 	@ResponseStatus(HttpStatus.BAD_REQUEST)
 	public ResponseEntity<AmxApiError> handle(ConstraintViolationException exception, HttpServletRequest request,
 			HttpServletResponse response) {
-		List<AmxFieldError> errors = new ArrayList<AmxFieldError>();
+		List<ApiFieldError> errors = new ArrayList<ApiFieldError>();
 		for (ConstraintViolation<?> responseError : exception.getConstraintViolations()) {
-			AmxFieldError newError = new AmxFieldError();
+			ApiFieldError newError = new ApiFieldError();
 			newError.setField(responseError.getPropertyPath().toString());
 			newError.setDescription(HttpUtils.sanitze(responseError.getMessage()));
 			errors.add(newError);
@@ -258,7 +258,7 @@ public abstract class AmxAdvice implements ResponseBodyAdvice<ApiResponse<?, ?>>
 	public ApiResponse<?, ?> beforeBodyWrite(ApiResponse<?, ?> body, MethodParameter returnType,
 			MediaType selectedContentType, Class<? extends HttpMessageConverter<?>> selectedConverterType,
 			ServerHttpRequest request, ServerHttpResponse response) {
-		for (AmxFieldError warning : AmxApiResponseUtil.getWarnings()) {
+		for (ApiFieldError warning : AmxApiResponseUtil.getWarnings()) {
 			body.addWarning(warning);
 		}
 		for (String log : AmxApiResponseUtil.getLogs()) {

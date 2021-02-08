@@ -113,7 +113,14 @@ public class AuthController {
 			x.setMeta("error");
 			x.redirectUrl(appConfig.getAppPrefix() + "/auth/login?error");
 		}
+		return x;
+	}
 
+	@ResponseBody
+	@RequestMapping(value = "/auth/online/status", method = { RequestMethod.POST })
+	public ApiResponse<String, String> onlineStatus(@RequestParam boolean status) {
+		ApiResponse<String, String> x = ApiResponse.buildData("success", "success");
+		agentSessionService.setOnline(status);
 		return x;
 	}
 

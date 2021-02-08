@@ -10,7 +10,6 @@ import com.boot.jx.exception.ApiHttpExceptions.ApiStatusCodes;
 import com.boot.jx.exception.IExceptionEnum;
 import com.boot.jx.swagger.ApiMockModelProperty;
 import com.boot.utils.ArgUtil;
-import com.boot.utils.BitFlags;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 public abstract class AResponse<M> implements ApiMetaResponse<M> {
@@ -41,18 +40,13 @@ public abstract class AResponse<M> implements ApiMetaResponse<M> {
 
 	// Amx Specs
 	protected M meta;
-	protected List<AmxFieldError> errors = null;
-	protected List<AmxFieldError> warnings = null;
+	protected List<ApiFieldError> errors = null;
+	protected List<ApiFieldError> warnings = null;
 	protected List<String> logs = null;
-
-	protected BitFlags warningFlags;
 
 	public AResponse() {
 		this.timestamp = System.currentTimeMillis();
 		this.meta = null;
-
-		// Default all warnings are set off
-		warningFlags = new BitFlags(0);
 	}
 
 	/**
@@ -259,7 +253,7 @@ public abstract class AResponse<M> implements ApiMetaResponse<M> {
 	 *
 	 * @return the errors
 	 */
-	public List<AmxFieldError> getErrors() {
+	public List<ApiFieldError> getErrors() {
 		return errors;
 	}
 
@@ -268,7 +262,7 @@ public abstract class AResponse<M> implements ApiMetaResponse<M> {
 	 *
 	 * @param errors the new errors
 	 */
-	public void setErrors(List<AmxFieldError> errors) {
+	public void setErrors(List<ApiFieldError> errors) {
 		this.errors = errors;
 	}
 
@@ -282,17 +276,17 @@ public abstract class AResponse<M> implements ApiMetaResponse<M> {
 		this.messageKey = messageKey;
 	}
 
-	public List<AmxFieldError> getWarnings() {
+	public List<ApiFieldError> getWarnings() {
 		return warnings;
 	}
 
-	public void setWarnings(List<AmxFieldError> warnings) {
+	public void setWarnings(List<ApiFieldError> warnings) {
 		this.warnings = warnings;
 	}
 
 	protected AResponse<M> warnings() {
 		if (this.warnings == null) {
-			this.warnings = new ArrayList<AmxFieldError>();
+			this.warnings = new ArrayList<ApiFieldError>();
 		}
 		return this;
 	}
@@ -305,21 +299,12 @@ public abstract class AResponse<M> implements ApiMetaResponse<M> {
 	}
 
 
-	public BitFlags getWarningFlags() {
-		return warningFlags;
-	}
-
-	public void setWarningFlags(BitFlags warningFlags) {
-		this.warningFlags = warningFlags;
-	}
-
-
-	public void addWarning(AmxFieldError warning) {
+	public void addWarning(ApiFieldError warning) {
 		if (ArgUtil.is(warning)) {
 			if (!ArgUtil.is(this.warningKey) && ArgUtil.is(warning.getCodeKey())) {
 				this.warningKey = warning.getCodeKey();
 			}
-			for (AmxFieldError amxWarning : this.warnings().getWarnings()) {
+			for (ApiFieldError amxWarning : this.warnings().getWarnings()) {
 				if (warning.toString().equals(amxWarning.toString())) {
 					return;
 				}
@@ -329,7 +314,7 @@ public abstract class AResponse<M> implements ApiMetaResponse<M> {
 	}
 
 	public void addWarning(String warning) {
-		AmxFieldError w = new AmxFieldError();
+		ApiFieldError w = new ApiFieldError();
 		w.setDescription(warning);
 		addWarning(w);
 	}

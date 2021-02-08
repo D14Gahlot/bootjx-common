@@ -15,7 +15,7 @@ import io.swagger.annotations.ExampleProperty;
  * @author lalittanwar
  *
  */
-@Target({ ElementType.METHOD, ElementType.TYPE })
+@Target({ ElementType.PARAMETER, ElementType.METHOD, ElementType.FIELD })
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ApiMockParam {
 

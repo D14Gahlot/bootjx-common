@@ -1,20 +1,10 @@
 package com.boot.jx.dict;
 
 public enum ContactType {
-	SMS("sms", "Mobile No."), EMAIL("email", "Email Id"), WHATSAPP("wa", "WhatsApp No."),
-	SMS_EMAIL("esms", "Mobile/Email"),
-	FBPUSH("push"),
-	FACEBOOK("fb", "Facebook Id"),
-	TELEGRAM("tg", "Telegram No."),
-	NOTP_APP("notpapp"),
-	WEBSITE("web"),
-	TWITTER("tw","Twitter"),
-	// Deprecated
-	@Deprecated
-	MOBILE(SMS),
+	SMS("sms", "Mobile No."), EMAIL("email", "Email Id"), WHATSAPP("wa", "WhatsApp No."), PUSH("push"),
+	FACEBOOK("fb", "Facebook Id"), TELEGRAM("tg", "Telegram No."), WEBSITE("web"), TWITTER("tw", "Twitter"),
 	// Default Null Value
-	DUMMY("dummy"),
-	EMPTY("");
+	DUMMY("dummy"), EMPTY("");
 
 	ContactType contactType;
 	String shortCode;

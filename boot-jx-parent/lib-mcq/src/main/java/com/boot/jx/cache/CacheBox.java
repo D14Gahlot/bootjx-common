@@ -17,7 +17,7 @@ import org.thavam.util.concurrent.blockingMap.BlockingHashMap;
 import com.boot.jx.AppConfig;
 import com.boot.jx.AppParam;
 import com.boot.jx.api.AmxApiResponseUtil;
-import com.boot.jx.api.AmxFieldError;
+import com.boot.jx.api.ApiFieldError;
 import com.boot.jx.cache.MCQStatus.MCQStatusCodes;
 import com.boot.jx.cache.MCQStatus.MCQStatusError;
 import com.boot.jx.def.ICacheBox;
@@ -108,7 +108,7 @@ public class CacheBox<T> implements ICacheBox<T> {
 		} catch (Exception e) {
 
 			LOGGER.error("REDIS_READ_EXCEPTION KEY:" + key + " from " + cache.getName(), e);
-			AmxFieldError w = new AmxFieldError();
+			ApiFieldError w = new ApiFieldError();
 			w.code(MCQStatusCodes.DATA_READ_ERROR);
 			w.setDescription("REDIS_READ_EXCEPTION KEY");
 			w.setField(key);
@@ -135,7 +135,7 @@ public class CacheBox<T> implements ICacheBox<T> {
 			return this.map().remove(key);
 		} catch (Exception e) {
 			LOGGER.error("REDIS_REMOVE_EXCEPTION KEY:" + key, e);
-			AmxFieldError w = new AmxFieldError();
+			ApiFieldError w = new ApiFieldError();
 			w.code(MCQStatusCodes.DATA_REMOVE_ERROR);
 			w.setDescription("REDIS_REMOVE_EXCEPTION KEY");
 			w.setField(key);

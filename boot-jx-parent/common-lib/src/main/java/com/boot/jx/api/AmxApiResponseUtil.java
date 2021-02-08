@@ -34,34 +34,34 @@ public class AmxApiResponseUtil {
 	}
 
 	@SuppressWarnings("unchecked")
-	public static List<AmxFieldError> getErrors() {
+	public static List<ApiFieldError> getErrors() {
 		Object warningsObject = ContextUtil.map().get(AppConstants.REQUEST_ERROR_XKEY);
-		List<AmxFieldError> warnings = null;
+		List<ApiFieldError> warnings = null;
 		if (warningsObject == null) {
-			warnings = new ArrayList<AmxFieldError>();
+			warnings = new ArrayList<ApiFieldError>();
 			ContextUtil.map().put(AppConstants.REQUEST_ERROR_XKEY, warnings);
 		} else {
-			warnings = (List<AmxFieldError>) warningsObject;
+			warnings = (List<ApiFieldError>) warningsObject;
 		}
 		return warnings;
 	}
 
 	@SuppressWarnings("unchecked")
-	public static List<AmxFieldError> getWarnings() {
+	public static List<ApiFieldError> getWarnings() {
 		Object userDeviceClientObject = ContextUtil.map().get(AppConstants.REQUEST_WARNING_XKEY);
-		List<AmxFieldError> warnings = null;
+		List<ApiFieldError> warnings = null;
 		if (userDeviceClientObject == null) {
-			warnings = new ArrayList<AmxFieldError>();
+			warnings = new ArrayList<ApiFieldError>();
 			ContextUtil.map().put(AppConstants.REQUEST_WARNING_XKEY, warnings);
 		} else {
-			warnings = (List<AmxFieldError>) userDeviceClientObject;
+			warnings = (List<ApiFieldError>) userDeviceClientObject;
 		}
 		return warnings;
 	}
 
-	public static void addWarning(AmxFieldError warning) {
-		List<AmxFieldError> amxFieldWarnings = getWarnings();
-		for (AmxFieldError amxFieldWarning : amxFieldWarnings) {
+	public static void addWarning(ApiFieldError warning) {
+		List<ApiFieldError> amxFieldWarnings = getWarnings();
+		for (ApiFieldError amxFieldWarning : amxFieldWarnings) {
 			// Find duplicate Warnings
 			if (amxFieldWarning.toString().equals(warning.toString())) {
 				return;
@@ -70,22 +70,22 @@ public class AmxApiResponseUtil {
 		amxFieldWarnings.add(warning);
 	}
 
-	public static void addWarning(List<AmxFieldError> warnings) {
+	public static void addWarning(List<ApiFieldError> warnings) {
 		if (!ArgUtil.isEmpty(warnings)) {
-			for (AmxFieldError warning : warnings) {
+			for (ApiFieldError warning : warnings) {
 				addWarning(warning);
 			}
 		}
 	}
 
 	public static void addWarning(String warning) {
-		AmxFieldError w = new AmxFieldError();
+		ApiFieldError w = new ApiFieldError();
 		w.setDescription(warning);
 		addWarning(w);
 	}
 
 	public static void addWarning(AmxApiException warning) {
-		AmxFieldError w = new AmxFieldError();
+		ApiFieldError w = new ApiFieldError();
 		if (ArgUtil.is(warning.getError())) {
 			w.setCode(ArgUtil.parseAsString(warning.getError().getStatusCode()));
 			w.setCodeKey(ArgUtil.parseAsString(warning.getError().getStatusKey()));
@@ -96,9 +96,9 @@ public class AmxApiResponseUtil {
 	}
 
 	// Errors
-	public static void addError(AmxFieldError warning) {
-		List<AmxFieldError> amxFieldErrors = getErrors();
-		for (AmxFieldError amxFieldWarning : amxFieldErrors) {
+	public static void addError(ApiFieldError warning) {
+		List<ApiFieldError> amxFieldErrors = getErrors();
+		for (ApiFieldError amxFieldWarning : amxFieldErrors) {
 			// Find duplicate Errors
 			if (amxFieldWarning.toString().equals(warning.toString())) {
 				return;
@@ -107,22 +107,22 @@ public class AmxApiResponseUtil {
 		amxFieldErrors.add(warning);
 	}
 
-	public static void addError(List<AmxFieldError> errors) {
+	public static void addError(List<ApiFieldError> errors) {
 		if (!ArgUtil.isEmpty(errors)) {
-			for (AmxFieldError warning : errors) {
+			for (ApiFieldError warning : errors) {
 				addError(warning);
 			}
 		}
 	}
 
 	public static void addError(String error) {
-		AmxFieldError w = new AmxFieldError();
+		ApiFieldError w = new ApiFieldError();
 		w.setDescription(error);
 		addError(w);
 	}
 
 	public static void addError(AmxApiException error) {
-		AmxFieldError w = new AmxFieldError();
+		ApiFieldError w = new ApiFieldError();
 		if (ArgUtil.is(error.getError())) {
 			w.setCode(ArgUtil.parseAsString(error.getError().getStatusCode()));
 			w.setCodeKey(ArgUtil.parseAsString(error.getError().getStatusKey()));
@@ -134,7 +134,7 @@ public class AmxApiResponseUtil {
 
 	// Exception
 	public static void throwException() {
-		List<AmxFieldError> errors = getErrors();
+		List<ApiFieldError> errors = getErrors();
 		if (errors.size() > 0) {
 			throwException(errors.get(0));
 		}
@@ -148,7 +148,7 @@ public class AmxApiResponseUtil {
 		throw new ApiErrorException(error);
 	}
 
-	public static void throwException(AmxFieldError fieldError) {
+	public static void throwException(ApiFieldError fieldError) {
 		AmxApiError error = new AmxApiError();
 		error.setStatusKey(fieldError.getCodeKey());
 		error.setErrorKey(fieldError.getDescriptionKey());

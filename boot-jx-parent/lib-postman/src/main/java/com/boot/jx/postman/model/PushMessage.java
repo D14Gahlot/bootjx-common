@@ -60,7 +60,7 @@ public class PushMessage extends Message<PushMessage> {
 	boolean condition;
 
 	public PushMessage() {
-		super(ContactType.FBPUSH);
+		super(ContactType.PUSH);
 		this.condition = false;
 	}
 

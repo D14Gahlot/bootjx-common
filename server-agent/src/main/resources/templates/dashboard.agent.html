@@ -29,9 +29,9 @@
   <button class="w3-bar-item w3-large menu_btn_close fas fa-arrow-left">&nbsp;</button>
   <a href="auth/logout" class="w3-bar-item w3-button"><i class="fas fa-sign-out-alt"></i> Logout</a>
     <hr/>
-  <span theme="dashboard.agent.metalic" class="w3-bar-item w3-button"><i class="fas fa-atom"></i> Metalic</span>
-  <span theme="dashboard.agent.indigo" class="w3-bar-item w3-button"><i class="fas fa-atom"></i> Indigo</span>
-  <span theme="dashboard.agent.bubble" class="w3-bar-item w3-button"><i class="fas fa-atom"></i> Bubble</span>
+  <span theme="dashboard.agent.metalic" class="w3-bar-item w3-button" hidden><i class="fas fa-atom"></i> Metalic</span>
+  <span theme="dashboard.agent.indigo" class="w3-bar-item w3-button" hidden><i class="fas fa-atom"></i> Indigo</span>
+  <span theme="dashboard.agent.bubble" class="w3-bar-item w3-button" hidden><i class="fas fa-atom"></i> Bubble</span>
 </div>
 </div>
 
@@ -181,7 +181,7 @@
 </script>
 
 
-<script type="text/tmpl" id="	">
+<script type="text/tmpl" id="temp_contact">
 	<li class="<%=(c.o.assigned ? "data_assigned" : "data_unassigned")%>  " id="<%=c.contactId%>">
 		<div class="d-flex bd-highlight contact-preview">
 			<div class="img_cont">

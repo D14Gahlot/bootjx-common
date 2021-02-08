@@ -42,6 +42,16 @@ function sendMessage(data){
 	});
 }
 
+function postQuery(url,data){
+	return $.ajax({
+	      type: 'POST',
+	      //dataType: "json",
+	      //contentType: 'application/json',
+	      url: window.CONST.CONTEXT + url,
+	      data: data,
+	});
+}
+
 //contacts
 var WhatsApp = function (app) {
   function Contact(name, img, online, o) {
@@ -169,6 +179,13 @@ var WhatsApp = function ToDoModel(app) {
         	app.Model._addChat(data.results[i]);
         }
         subject.notifyObservers();
+        
+        if(data.meta.isOnline){
+      	  $(".online-toggle").addClass("toggle-active");
+        } else {
+      	  $(".online-toggle").removeClass("toggle-active");
+        }
+        
       });
       
       $.getJSON("/agent/gallery/map/media_reply", function (data) {
@@ -493,6 +510,7 @@ var WhatsApp = function ToDoCtrl(app) {
         });
         $(".online-toggle").on("click", function () {
             $(this).toggleClass("toggle-active")
+            postQuery("/auth/online/status",{status : $(this).hasClass("toggle-active")})
           });
         $('.menu_btn').click(function(){
         	//$('.menu_btn_menu').toggle();

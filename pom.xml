@@ -81,10 +81,12 @@
 
 	<modules>
 		<module>boot-jx-parent</module>
+		<module>lib-tmpl</module>
 		<module>ms-bot</module>		
 		<module>ms-postman</module>
 		<module>server-agent</module>
 		<module>server-admin</module>
+		<module>server-xms</module>
 	</modules>
 </project>
 

@@ -35,7 +35,7 @@ public class PushNotifyClient implements IPushNotifyService {
 		LOGGER.info("Sending Push Notifications");
 		try {
 			return restService.ajax(appConfig.getPostmapURL()).path(PostManUrls.NOTIFY_PUSH)
-					.priority(ContactType.FBPUSH.getShortCode(), msg.getPriority())
+					.priority(ContactType.PUSH.getShortCode(), msg.getPriority())
 					.post(msg)
 					.as(new ParameterizedTypeReference<ApiResponse<PushMessage, Object>>() {
 					});
@@ -61,7 +61,7 @@ public class PushNotifyClient implements IPushNotifyService {
 		try {
 			PushMessage msg = CollectionUtil.getOne(msgs);
 			return restService.ajax(appConfig.getPostmapURL()).path(PostManUrls.NOTIFY_PUSH_BULK)
-					.priority(ContactType.FBPUSH.getShortCode(), msg.getPriority())
+					.priority(ContactType.PUSH.getShortCode(), msg.getPriority())
 					.post(msgs)
 					.asApiResponse(PushMessage.class);
 		} catch (Exception e) {

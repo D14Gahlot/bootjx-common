@@ -142,7 +142,7 @@ public class FBPushServiceImpl implements IPushNotifyService {
 				file.setType(File.Type.JSON);
 
 				@SuppressWarnings("unchecked")
-				Map<String, Object> map = JsonUtil.fromJson(fileService.create(file, ContactType.FBPUSH).getContent(),
+				Map<String, Object> map = JsonUtil.fromJson(fileService.create(file, ContactType.PUSH).getContent(),
 						Map.class);
 				msg.setModel(map);
 

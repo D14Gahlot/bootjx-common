@@ -15,7 +15,7 @@ import com.boot.jx.postman.service.ContactCleanerService;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.StringUtils.StringMatcher;
 
-@BotController(name = "ALEX")
+//@BotController(name = "ALEX")
 public class AccountVerifyController extends ChatController {
 
 	@Autowired

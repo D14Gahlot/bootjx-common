@@ -29,7 +29,7 @@ public class AmxResponseSchemes {
 
 		public void setMessage(String message);
 
-		@ApiMockModelProperty(example = "TRANX_SUCCESS:480:KWD")
+		@ApiMockModelProperty(example = "MESSAGE_SUCCESS:MOBILE:12")
 		public String getMessageKey();
 
 		public void setMessageKey(String messageKey);

@@ -51,6 +51,11 @@ public class AgentSessionService {
 		}
 	}
 
+	public void setOnline(boolean isOnline) {
+		agentSessionBean.setOnline(isOnline);
+		this.updateSession();
+	}
+
 	/**
 	 * Refreshes login status for currently logged in agent
 	 * 

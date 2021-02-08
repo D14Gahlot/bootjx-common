@@ -170,7 +170,10 @@ public class SessionStore {
 					ChatSessionDoc.class);
 			LOGGER.error(chatSessionDoc.getVersion() + " ~ " + chatSessionDoc2.getVersion(), e);
 			if (chatSessionDoc.getVersion() == null) {
-				chatSessionDoc.setVersion(0);
+				//chatSessionDoc.setVersion(0);
+				mongoTemplate.save(chatSessionDoc);
+			} else {
+				//chatSessionDoc.setVersion(chatSessionDoc2.getVersion()+1);
 				mongoTemplate.save(chatSessionDoc);
 			}
 		}

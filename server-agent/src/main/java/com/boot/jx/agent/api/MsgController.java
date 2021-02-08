@@ -28,6 +28,7 @@ import com.boot.jx.postman.doc.TemplateReply;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.store.SessionStore;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.MapBuilder;
 
 @Controller
 public class MsgController {
@@ -59,8 +60,11 @@ public class MsgController {
 					agentSession.getAgentCode());
 			chatSessionDtos.add(chatSessionDto);
 		}
+
 		agentSessionService.refreshOnline();
-		return ApiResponse.buildResults(chatSessionDtos);
+
+		return ApiResponse.buildResults(chatSessionDtos,
+				MapBuilder.map().put("isOnline", agentSession.isOnline()).build());
 	}
 
 	@Autowired
