@@ -14,6 +14,7 @@ import com.boot.jx.postman.client.TmplClient;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.TemplateReply;
+import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.File;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.OutboxMessage;
@@ -45,6 +46,8 @@ public class TelegramConnector implements ConnectorHandler {
 			TemplateReply mediaReply = mongoTemplate.findById(outboxMessage.getTemplate(), TemplateReply.class);
 			if (ArgUtil.is(mediaReply)) {
 				if ("image".equalsIgnoreCase(mediaReply.getType())) {
+					outboxMessage.attachment(
+							new Attachment().mediaURL(mediaReply.getUrl()).mediaType(File.FileType.IMAGE.toString()));
 					telegramClient.sendPhoto(lane, to, mediaReply.getUrl(), mediaReply.getTitle());
 				}
 			} else {
@@ -54,6 +57,11 @@ public class TelegramConnector implements ConnectorHandler {
 		} else {
 			telegramClient.sendReply(lane, to, outboxMessage.getMessage());
 		}
+	}
+
+	@Override
+	public void send(ChatContactDoc chatContactDoc, OutboxMessage outboxMessage) {
+		this.send(chatContactDoc.getLane(), chatContactDoc.getCsid(), outboxMessage);
 	}
 
 	@Override
@@ -104,11 +112,6 @@ public class TelegramConnector implements ConnectorHandler {
 		}
 
 		return true;
-	}
-
-	@Override
-	public void send(ChatContactDoc chatContactDoc, OutboxMessage outboxMessage) {
-		this.send(chatContactDoc.getLane(), chatContactDoc.getCsid(), outboxMessage);
 	}
 
 }

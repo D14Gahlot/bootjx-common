@@ -1,7 +1,9 @@
 package com.boot.jx.agent.dto;
 
 import java.io.Serializable;
+import java.util.List;
 
+import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.TagDocument;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
@@ -16,6 +18,7 @@ public class ChatMessageDto implements Serializable {
 	private long timestamp;
 	private boolean type;
 	private TagDocument tags;
+	private List<Attachment> attachments;
 
 	public String getText() {
 		return text;
@@ -79,5 +82,13 @@ public class ChatMessageDto implements Serializable {
 
 	public void setMessageId(String messageId) {
 		this.messageId = messageId;
+	}
+
+	public List<Attachment> getAttachments() {
+		return attachments;
+	}
+
+	public void setAttachments(List<Attachment> attachments) {
+		this.attachments = attachments;
 	}
 }

@@ -141,11 +141,14 @@ public class MessageStore {
 		contact.setContactType(outMessage.getContactType());
 		doc.setContact(contact);
 
-		if (ArgUtil.is(outMessage.getTemplate())) {
+		//if (ArgUtil.is(outMessage.getTemplate())) {
 			doc.setTemplate(outMessage.getTemplate());
-		} else {
+			doc.setModel(outMessage.getModel());
+		//} else {
 			doc.setMessage(outMessage.getMessage());
-		}
+		//}
+			doc.setAttachments(outMessage.getAttachments());
+			
 		doc.setSessionId(outMessage.getSessionId());
 		return doc;
 	}

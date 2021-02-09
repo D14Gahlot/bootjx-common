@@ -43,7 +43,7 @@ public class Message<T extends Message<T>> implements Serializable, MessageOptio
 	protected List<String> to = null;
 	protected List<Contact> contacts = null;
 	private String template = null;
-	
+
 	private Map<String, Object> model = new HashMap<String, Object>();
 	protected Map<String, String> options = new HashMap<String, String>();
 	private MessageType messageType = null;
@@ -51,6 +51,7 @@ public class Message<T extends Message<T>> implements Serializable, MessageOptio
 	protected String channel;;
 
 	private List<File> files = null;
+	private List<Attachment> attachments = null;
 
 	private String id;
 	private String messageId;
@@ -414,6 +415,29 @@ public class Message<T extends Message<T>> implements Serializable, MessageOptio
 
 	public void setContactId(String contactId) {
 		this.contactId = contactId;
+	}
+
+	public List<Attachment> getAttachments() {
+		return attachments;
+	}
+
+	public void setAttachments(List<Attachment> attachments) {
+		this.attachments = attachments;
+	}
+
+	public List<Attachment> attachments() {
+		if (this.attachments == null) {
+			this.attachments = new ArrayList<Attachment>();
+		}
+		return attachments;
+	}
+
+	@SuppressWarnings("unchecked")
+	public T attachment(Attachment... attachments) {
+		for (Attachment file : attachments) {
+			this.attachments().add(file);
+		}
+		return (T) this;
 	}
 
 }

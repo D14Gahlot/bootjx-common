@@ -16,6 +16,8 @@ import com.boot.jx.postman.fb.FacebookMessageRequest;
 import com.boot.jx.postman.fb.FacebookMessaging;
 import com.boot.jx.postman.fb.FacebookUserProfile;
 import com.boot.jx.postman.gupshup.GupShupConfig;
+import com.boot.jx.postman.model.Attachment;
+import com.boot.jx.postman.model.File;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.store.SessionStore;
@@ -47,6 +49,8 @@ public class FacebookConnector implements ConnectorHandler {
 			TemplateReply mediaReply = mongoTemplate.findById(outboxMessage.getTemplate(), TemplateReply.class);
 			if (ArgUtil.is(mediaReply)) {
 				if ("image".equalsIgnoreCase(mediaReply.getType())) {
+					outboxMessage.attachment(
+							new Attachment().mediaURL(mediaReply.getUrl()).mediaType(File.FileType.IMAGE.toString()));
 					req.attachmentType("image").attachmentUrl(mediaReply.getUrl());
 				}
 			} else {

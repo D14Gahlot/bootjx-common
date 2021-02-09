@@ -128,6 +128,7 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 		messageDto.setSessionId(messageDoc.getSessionId());
 		messageDto.setMessageId(messageDoc.getMessageId());
 		messageDto.setTags(messageDoc.getTags());
+		messageDto.setAttachments(messageDoc.getAttachments());
 		return messageDto;
 	}
 

@@ -20,6 +20,7 @@ import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.TemplateReply;
 import com.boot.jx.postman.gupshup.GupShupConfig;
+import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.File;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.OutboxMessage;
@@ -73,19 +74,24 @@ public class WebConnector implements DefaultConnector {
 	@Autowired
 	private MongoTemplate mongoTemplate;
 
-	@Override
-	public void send(String lane, String csid, OutboxMessage outboxMessage) {
+	public OutboxMessage process(OutboxMessage outboxMessage) {
 		if (ArgUtil.is(outboxMessage.getTemplate())) {
 			TemplateReply mediaReply = mongoTemplate.findById(outboxMessage.getTemplate(), TemplateReply.class);
 			if (ArgUtil.is(mediaReply)) {
 				if ("image".equalsIgnoreCase(mediaReply.getType())) {
-					outboxMessage.addFile(new File().url(mediaReply.getUrl()).fileType(File.FileType.IMAGE));
+					outboxMessage.attachment(
+							new Attachment().mediaURL(mediaReply.getUrl()).mediaType(File.FileType.IMAGE.toString()));
 				}
 			} else {
 				tmplClient.process(outboxMessage);
 			}
 		}
+		return outboxMessage;
+	}
 
+	@Override
+	public void send(String lane, String csid, OutboxMessage outboxMessage) {
+		process(outboxMessage);
 		if (redisson == null) {
 			try {
 				messageQueue.enqueue(outboxMessage);
@@ -94,7 +100,7 @@ public class WebConnector implements DefaultConnector {
 			}
 		} else {
 			LOGGER.debug("sendReply to " + csid);
-			RBlockingQueue<OutboxMessage> messageQueue = redisson.getBlockingQueue("WEB_USER_MESSAGE" + "_" + csid);
+			RBlockingQueue<OutboxMessage> messageQueue = redisson.getBlockingQueue("WEB_USER_MESSAGES" + "_" + csid);
 			messageQueue.add(outboxMessage);
 		}
 	}
@@ -126,7 +132,7 @@ public class WebConnector implements DefaultConnector {
 				e.printStackTrace();
 			}
 		}
-		RBlockingQueue<OutboxMessage> messageQueue = redisson.getBlockingQueue("WEB_USER_MESSAGE" + "_" + number);
+		RBlockingQueue<OutboxMessage> messageQueue = redisson.getBlockingQueue("WEB_USER_MESSAGES" + "_" + number);
 		return messageQueue.poll(5, TimeUnit.SECONDS);
 	}
 

@@ -89,8 +89,10 @@ public class TemplateService {
 	public String processHtml(ITemplate template, Context context, Locale locale, ContactType contactType) {
 		String tmplt = templateUtils.getTemplateFile(template.getHtmlFile(), AppContextUtil.getTenant(), locale,
 				contactType);
+		if(!ArgUtil.is(tmplt)) {
+			return Constants.BLANK;
+		}
 		String rawStr = templateEngine.process(tmplt, context);
-
 		Pattern p = Pattern.compile("src=\"inline:(.*?)\"");
 		Matcher m = p.matcher(rawStr);
 		while (m.find()) {
@@ -185,10 +187,12 @@ public class TemplateService {
 			} else {
 				content = this.processHtml(file.getITemplate(), context, locale, contactType);
 			}
-			String[] x = content.split("---options---");
-			file.setContent(x[0]);
-			if (x.length > 1 && ArgUtil.is(x[1])) {
-				file.setOptions(StringUtils.toMap(x[1]));
+			if(ArgUtil.is(content)) {
+				String[] x = content.split("---options---");
+				file.setContent(x[0]);
+				if (x.length > 1 && ArgUtil.is(x[1])) {
+					file.setOptions(StringUtils.toMap(x[1]));
+				}
 			}
 		}
 		return file;

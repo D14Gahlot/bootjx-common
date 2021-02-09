@@ -20,6 +20,10 @@ function formatTime(timestamp,gap){
 	}
 }
 
+function escape_HTML(html_str) {
+    return $('<div>').html(html_str).text();
+}
+
 function getThumb(mediaUrl){
 	var m = mediaUrl.match(/(.+)\/(res.cloudinary.com)\/([a-zA-Z0-9-_]+)\/([a-zA-Z0-9]+)\/(upload)\/([a-zA-Z0-9,_-]+)\/(.*)/);
 	if(m && m.length){
@@ -305,7 +309,7 @@ var WhatsApp = function ToDoView(app) {
       var lastmsg = c.messages[c.messages.length - 1];
 
       var $html = $(quikr.tmpl("temp_contact",{
-        	c : c,lastmsg : lastmsg,
+        	c : c,lastmsg : (lastmsg),
         	contactIcon : PP_ICONS[c.contactType]
        }));
 

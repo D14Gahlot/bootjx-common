@@ -533,3 +533,10 @@ ui.contacts.contact-list-unassigned li.data_unassigned {
 .hidden {
 	display : none!important;
 }
+.my-attachments {
+	justify-content: center;
+}
+.my-attachments img{
+	margin: 10px;
+	max-width : 200px;
+}

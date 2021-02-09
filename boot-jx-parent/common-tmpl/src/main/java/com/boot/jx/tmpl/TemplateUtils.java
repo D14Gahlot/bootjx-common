@@ -164,7 +164,10 @@ public class TemplateUtils {
 			return jaxStaticContext + "/templates/" + specficFile;
 		} else {
 			log.error("Template Not Found {}", fileCacheKey);
-			throw new PostManException("Template Not Found");
+			if(!ArgUtil.is(fileCacheKey)) {
+				throw new PostManException("Template Not Found");
+			}
+			return null;
 		}
 	}
 

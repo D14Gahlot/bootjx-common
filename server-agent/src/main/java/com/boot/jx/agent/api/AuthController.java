@@ -18,11 +18,16 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.boot.jx.AppConfig;
 import com.boot.jx.agent.AgentAuthProvider;
+import com.boot.jx.agent.AgentChatHandlerImpl;
 import com.boot.jx.agent.AgentSessionBean;
 import com.boot.jx.agent.AgentSessionService;
 import com.boot.jx.api.ApiResponse;
+import com.boot.jx.dict.ContactType;
 import com.boot.jx.http.CommonHttpRequest;
+import com.boot.jx.postman.doc.ChatSessionDoc;
+import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.stomp.StompTunnelSessionManager;
+import com.boot.jx.utils.PostManUtil;
 import com.boot.utils.ArgUtil;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
@@ -37,6 +42,9 @@ public class AuthController {
 
 	@Autowired
 	private AgentSessionBean agentSession;
+
+	@Autowired
+	private AgentChatHandlerImpl agentChatHandler;
 
 	@ResponseBody
 	@RequestMapping(value = "/pub/test", method = { RequestMethod.POST, RequestMethod.GET })

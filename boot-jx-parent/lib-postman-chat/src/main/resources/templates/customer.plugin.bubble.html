@@ -96,23 +96,73 @@
 	</div>
 		<% } %>
 
+		<% if(im.attachments && im.attachments.length>0) {%>
+	<div class="input-group my-attachments">
+			<% for(var i in im.attachments) {%>
+		<img src="<%=getThumb(im.attachments[i].mediaURL)%>" class="">
+			<% } %>
+	</div>
+		<% } %>
+
 		<span class="msg_time"><%=im._timestamp%></span>
 	</div>
 </div> 
 		</script>
+
+
+		
+		<script type="text/template" id="onSndMsgFormat">
+
+<div class="d-flex justify-content-end mb-4">
+	<div class="msg_cotainer_send">
+		<span id="<%=om.stamp%>" class="blink_me">
+			<%=om.msg%>
+		</span>
+		<span class="msg_time_send"><%=om._timestamp%></span>
+		<% var url = file2Url(om.files); if(url){ %>
+			<a href="<%=files[0].url %>" target="_blank" >Download</a>
+		<% } %>
+	</div>
+	<div class="img_cont_msg">
+		<img src="/agent/assets/images/profile.png" class="rounded-circle user_img_msg">
+	</div>
+</div>
+
+		</script>
 	</body>
 	
 <script>
-function formatTime(timestamp){
+const isToday = (someDate) => {
+  const today = new Date()
+  return someDate.getDate() == today.getDate() &&
+    someDate.getMonth() == today.getMonth() &&
+    someDate.getFullYear() == today.getFullYear()
+}
+function formatTime(timestamp,gap){
 	const NOW = new Date();
 	const DATE = new Date(timestamp);
 	const DIFF = moment(NOW).diff(DATE, 'day');
-	if(DIFF < 1 ){
-		return moment(DATE).format('h:mm:ss a');
+	
+	if(DIFF < 1 && isToday(DATE)){
+		return moment(DATE).format('h:mm a');
+	} else if(DIFF < 3 ){
+		return moment(DATE).format('hh:mm a ddd');
 	} else if(DIFF < 7 ){
-		return moment(DATE).format('h:mm:ss a, dddd');
+		return moment(DATE).format('h:mm a ddd');
 	} else {
-		return moment(DATE).format('MMM Do YY');
+		return moment(DATE).format('h:mm a DD MMM YY');
+	}
+}
+
+function file2Url(files){
+	return (files && files[0] && files[0].url);
+}
+
+function getThumb(mediaUrl){
+	var m = mediaUrl.match(/(.+)\/(res.cloudinary.com)\/([a-zA-Z0-9-_]+)\/([a-zA-Z0-9]+)\/(upload)\/([a-zA-Z0-9,_-]+)\/(.*)/);
+	if(m && m.length){
+		m[6] = "w_150,h_150";
+		return m.slice(1).join("/");
 	}
 }
 
@@ -183,7 +233,33 @@ var initFingerprintJS = function initFingerprintJS() {
 	    
 	    $SEND_BUTTON.click(send);
 	    $SEND_TEXT.keypress(send);
-	    pollMessage();
+	    
+	    $.getJSON(window.CONST.CONTEXT + "/ext/outbound/web/auth",{number:MOBILE}).done(function(rsp){
+	    	var msg = "";
+	    	var results =  rsp.results;
+	    	for(var i in results){
+	    		if(rsp.results[i].to && rsp.results[i].to.length){
+	    			msg = msg + quikr.tmpl("onSndMsgFormat",{om : {
+	    				stamp : results[i].timestamp,
+	    				msg : results[i].message,
+	    				_timestamp : formatTime(results[i].timestamp),
+	    				files : results[i].files
+	    			}});
+	    		} else {
+	    			msg = msg + quikr.tmpl("onRcvMsgFormat",{im : {
+	    				stamp : results[i].timestamp,
+	    				_message : results[i].message || results[i].template ,
+	    				_timestamp : formatTime(results[i].timestamp),
+	    				files : results[i].files,
+	    				attachments : results[i].attachments
+	    			}});
+	    		}
+	    	}
+	    	$(".msg_card_body").append(msg);
+	    	 $(".blink_me").removeClass("blink_me")
+	    	scrollToBottom();
+	    	pollMessage();
+	    });
 	    
 	    $("body").on("click", ".my-actions.my-enabled .my-actions-button", function(e){
 	    	var value = $(e.target).val();
@@ -218,16 +294,14 @@ var initFingerprintJS = function initFingerprintJS() {
 		var stamp = new Date().getTime();
 		
 		$(".msg_card_body").append(
-			$('<div class="d-flex justify-content-end mb-4">').append(
-				$('<div class="msg_cotainer_send">').append(
-					$('<span id='+stamp+' class="blink_me"/>').append(msg),
-					$('<span class="msg_time_send">'+formatTime(stamp)+'</span>'),
-					url
-				),
-	   			$('<div class="img_cont_msg">').append(
-					'<img src="/agent/assets/images/profile.png" class="rounded-circle user_img_msg">')
-			)
+			quikr.tmpl("onSndMsgFormat",{om : {
+				stamp : stamp,
+				msg : msg,
+				_timestamp : formatTime(stamp),
+				files : files
+			}})
 		);
+		
 		scrollToBottom()
 		return stamp;
 	}
@@ -276,7 +350,7 @@ var initFingerprintJS = function initFingerprintJS() {
 				})
 			}
 		}	
-	  im._message = (im.message || "").replace(/(?:\r\n|\r|\n)/g, '<br>');
+	  im._message = (im.message || "").replace(/(?:\r\n|\r|\n)/g, '').trim();
 	  im._inputs = inputs;
 	  im._buttons = buttons;
 	  im._timestamp = formatTime(im.timestamp)

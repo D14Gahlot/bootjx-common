@@ -1,12 +1,15 @@
 package com.boot.jx.postman.doc;
 
 import java.io.Serializable;
+import java.util.List;
+import java.util.Map;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.TypeAlias;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.TagDocument;
 
 @Document(collection = MessageDoc.COLLECTION_NAME)
@@ -30,6 +33,8 @@ public class MessageDoc implements Serializable {
 	private ContactDoc contact;
 	private String agent;
 	private TagDocument tags;
+	private Map<String, Object> model;
+	private List<Attachment> attachments;
 
 	private String quickReplyId;
 	private String mediaReplyId;
@@ -163,6 +168,22 @@ public class MessageDoc implements Serializable {
 
 	public void setQuickReplyId(String quickReplyId) {
 		this.quickReplyId = quickReplyId;
+	}
+
+	public Map<String, Object> getModel() {
+		return model;
+	}
+
+	public void setModel(Map<String, Object> model) {
+		this.model = model;
+	}
+
+	public List<Attachment> getAttachments() {
+		return attachments;
+	}
+
+	public void setAttachments(List<Attachment> attachments) {
+		this.attachments = attachments;
 	}
 
 }

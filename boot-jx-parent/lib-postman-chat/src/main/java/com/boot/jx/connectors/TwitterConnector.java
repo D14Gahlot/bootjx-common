@@ -19,6 +19,7 @@ import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.TemplateReply;
 import com.boot.jx.postman.gupshup.GupShupConfig;
+import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.File;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.OutboxMessage;
@@ -76,6 +77,8 @@ public class TwitterConnector implements ConnectorHandler {
 				if (ArgUtil.is(templateReply)) {
 					if ("image".equalsIgnoreCase(templateReply.getType())) {
 						Long mediaId = getMediaId(lane, templateReply);
+						outboxMessage.attachment(new Attachment().mediaURL(templateReply.getUrl())
+								.mediaType(File.FileType.IMAGE.toString()));
 						twitterClient.sendReply(to, outboxMessage.getMessage(), mediaId, lane);
 					}
 				} else {
