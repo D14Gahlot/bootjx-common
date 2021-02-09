@@ -317,14 +317,19 @@ var WhatsApp = function ToDoView(app) {
       if( $existing &&  $existing.length>0){
     	  $existing.replaceWith($html);
     	  if(that.o.assigned){
-        	  $(".contact-list").prepend($html);    	  
+        	  $(".contact-list").prepend($html); 
+        	  if(currentChat == c){
+        		  $html.addClass("active-contact active");
+        	  }
           }
+    	  console.log("replaceExisting",that.o)
       } else {
           if(that.o.assigned){
         	  $(".contact-list").prepend($html);    	  
           } else {
         	  $(".contact-list-unassigned").prepend($html);
           }
+          console.log("appendNew")
       }
       console.log("printContact")
       WhatsApp.Ctrl.addClick($html, that);
@@ -442,7 +447,7 @@ var WhatsApp = function ToDoView(app) {
 	            //currentChat = contactList[i];
 	          }  
     	  } else if(currentChat){
-    		  WhatsApp.View.printContact(currentChat);
+    		 WhatsApp.View.printContact(currentChat);
     	  }
       }
       WhatsApp.View.printSmartTags();
@@ -475,6 +480,13 @@ var WhatsApp = function ToDoCtrl(app) {
         $("#nm" + that.contactId).remove();
         that.newmsg = 0;
         WhatsApp.View.printChat(that);
+	      if(currentChat){
+	    	  $(".my-input-section").removeClass("fade")
+	    	  $(".type_msg.input-message").removeAttr("disabled")
+	      } else {
+	    	  $(".my-input-section").addClass("fade")
+	    	  $(".type_msg.input-message").attr("disabled")
+	      }
       });
     },
     toggelMedia :  function(show){
@@ -495,7 +507,7 @@ var WhatsApp = function ToDoCtrl(app) {
     notify: function () {
       if (start) {
         $(".input-message").keyup(function (ev) {
-          if (ev.which == 13 || ev.keyCode == 13) {
+          if (currentChat && (ev.which == 13 || ev.keyCode == 13)) {
             app.Model.writeMessage();
             Ctrl.toggelMedia(false);
           }
@@ -536,11 +548,13 @@ var WhatsApp = function ToDoCtrl(app) {
         });
         
         $('.attach_btn').click(function(){
-        	Ctrl.toggelMedia();
+        	if(currentChat)
+        		Ctrl.toggelMedia();
         });
         
         start = false;
       }
+      
     } };
 
   app.Ctrl = Ctrl;
