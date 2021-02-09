@@ -17,14 +17,29 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.aggregation.Aggregation;
+import org.springframework.data.mongodb.core.aggregation.AggregationResults;
+import org.springframework.data.mongodb.core.aggregation.GroupOperation;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Component;
 
 import com.boot.jx.admin.dto.DashBoardRequestDto;
 import com.boot.jx.admin.dto.DashBoardResponseDto;
+import com.boot.jx.admin.dto.PeakLoadDto;
 import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.utils.ArgUtil;
+
+
+//imports as static
+import static org.springframework.data.mongodb.core.aggregation.Aggregation.group;
+import static org.springframework.data.mongodb.core.aggregation.Aggregation.match;
+import static org.springframework.data.mongodb.core.aggregation.Aggregation.newAggregation;
+import static org.springframework.data.mongodb.core.aggregation.Aggregation.project;
+import static org.springframework.data.mongodb.core.aggregation.Aggregation.sort;
+import org.springframework.data.domain.Sort;
+
+
 
 @Component
 public class AdminDashBoardManager {
@@ -114,6 +129,9 @@ public class AdminDashBoardManager {
 		List<MessageDoc> distinctIdList = mongoTemplate.getCollection(contactType.toString()).distinct("contactId");
 		System.out.println("distinctIdList :" + distinctIdList.size());
 
+		PeakLoadDto peakLoadResult = getPeakLoadMsgCount(contactType,longTodayStartTime,longTodayendTime);
+		
+		
 		if (ArgUtil.is(totalInmsgDoc)) {
 			dto.setTotalInMsgExchanged(totalInmsgDoc.size());
 		}
@@ -131,6 +149,7 @@ public class AdminDashBoardManager {
 		}
 		dto.setContactType(contactType);
 		dto.setFilter("TODAY");
+		dto.setPeakLoad(peakLoadResult);
 
 		return dto;
 
@@ -159,6 +178,9 @@ public class AdminDashBoardManager {
 		// Get the distinct stuff from MongoDB
 		List<MessageDoc> distinctIdList = mongoTemplate.getCollection(contactType.toString()).distinct("contactId");
 		System.out.println("distinctIdList :" + distinctIdList.size());
+		
+		PeakLoadDto peakLoadResult = getPeakLoadMsgCount(contactType,longTodayStartTime,longTodayendTime);
+		
 
 		if (ArgUtil.is(totalInmsgDoc)) {
 			dto.setTotalInMsgExchanged(totalInmsgDoc.size());
@@ -177,6 +199,7 @@ public class AdminDashBoardManager {
 		}
 		dto.setContactType(contactType);
 		dto.setFilter("YESTERDAY");
+		dto.setPeakLoad(peakLoadResult);
 
 		return dto;
 
@@ -211,6 +234,8 @@ public class AdminDashBoardManager {
 		// Get the distinct stuff from MongoDB
 		List<MessageDoc> distinctIdList = mongoTemplate.getCollection(contactType.toString()).distinct("contactId");
 		System.out.println("distinctIdList :" + distinctIdList.size());
+		
+		PeakLoadDto peakLoadResult = getPeakLoadMsgCount(contactType,longWStartTime,longTodayendTime);
 
 		if (ArgUtil.is(totalInmsgDoc)) {
 			dto.setTotalInMsgExchanged(totalInmsgDoc.size());
@@ -227,6 +252,7 @@ public class AdminDashBoardManager {
 		}
 		dto.setContactType(contactType);
 		dto.setFilter("WEEK");
+		dto.setPeakLoad(peakLoadResult);
 
 		return dto;
 
@@ -263,6 +289,8 @@ public class AdminDashBoardManager {
 		// Get the distinct stuff from MongoDB
 		List<MessageDoc> distinctIdList = mongoTemplate.getCollection(contactType.toString()).distinct("contactId");
 		System.out.println("distinctIdList :" + distinctIdList.size());
+		
+		PeakLoadDto peakLoadResult = getPeakLoadMsgCount(contactType,monthStartDateEpocTime,longTodayendTime);
 
 		if (ArgUtil.is(totalInmsgDoc)) {
 			dto.setTotalInMsgExchanged(totalInmsgDoc.size());
@@ -281,6 +309,7 @@ public class AdminDashBoardManager {
 		}
 		dto.setContactType(contactType);
 		dto.setFilter("MONTH");
+		dto.setPeakLoad(peakLoadResult);
 
 		return dto;
 
@@ -309,6 +338,7 @@ public class AdminDashBoardManager {
 		// Get the distinct stuff from MongoDB
 		List<MessageDoc> distinctIdList = mongoTemplate.getCollection(contactType.toString()).distinct("contactId");
 		System.out.println("distinctIdList :" + distinctIdList.size());
+		PeakLoadDto peakLoadResult = getPeakLoadMsgCount(contactType,quaterStratDateTime,longTodayendTime);
 
 		if (ArgUtil.is(totalInmsgDoc)) {
 			dto.setTotalInMsgExchanged(totalInmsgDoc.size());
@@ -327,6 +357,7 @@ public class AdminDashBoardManager {
 		}
 		dto.setContactType(contactType);
 		dto.setFilter("QUATER");
+		dto.setPeakLoad(peakLoadResult);
 
 		return dto;
 
@@ -359,6 +390,8 @@ public class AdminDashBoardManager {
 		// Get the distinct stuff from MongoDB
 		List<MessageDoc> distinctIdList = mongoTemplate.getCollection(contactType.toString()).distinct("contactId");
 		System.out.println("distinctIdList :" + distinctIdList.size());
+		
+		PeakLoadDto peakLoadResult = getPeakLoadMsgCount(contactType,dateRange1,dateRange2);
 
 		if (ArgUtil.is(totalInmsgDoc)) {
 			dto.setTotalInMsgExchanged(totalInmsgDoc.size());
@@ -377,7 +410,7 @@ public class AdminDashBoardManager {
 		}
 		dto.setContactType(contactType);
 		dto.setFilter("DATE_RANGE");
-
+		dto.setPeakLoad(peakLoadResult);
 		return dto;
 
 	}
@@ -441,5 +474,21 @@ public class AdminDashBoardManager {
 		long longStartTime = startToday.toInstant().toEpochMilli();
 		System.out.println("start Date of Quatr :" + startToday + "\t |" + longStartTime);
 		return longStartTime;
+	}
+	
+	public PeakLoadDto getPeakLoadMsgCount(Object contactType, long startTime, long endTime) {
+	 Aggregation agg = newAggregation(
+			    match(Criteria.where("timestamp").gt(startTime).lt(endTime)),
+	            group("timestamp").count().as("total"),
+	            project("total").and("timestamp").previousOperation(),
+	            sort(Sort.Direction.DESC, "total","timestamp")
+	        );
+	 	//Convert the aggregation result into a List
+		 AggregationResults<PeakLoadDto> groupResults = mongoTemplate.aggregate(agg, contactType.toString(), PeakLoadDto.class);
+		 PeakLoadDto peakLoadResult =null;
+		 if(groupResults!=null && !groupResults.getMappedResults().isEmpty()) {
+		  peakLoadResult = groupResults.getMappedResults().get(0);
+		 }
+		 return peakLoadResult;
 	}
 }

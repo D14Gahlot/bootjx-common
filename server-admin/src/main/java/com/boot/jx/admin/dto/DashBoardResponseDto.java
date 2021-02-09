@@ -1,17 +1,17 @@
 package com.boot.jx.admin.dto;
 
-import java.util.Set;
-
 public class DashBoardResponseDto {
 	
 	
 	Object contactType;
+	String filter;
 	long totalInMsgExchanged;
 	long totalOutMsgExchanged;
 	long totalMsgExchanged;
 	long uniqueConversation;
 	long todayMsgExchanged;
-	String filter;
+	PeakLoadDto peakLoad;
+	
 	
 	
 
@@ -69,6 +69,14 @@ public class DashBoardResponseDto {
 
 	public void setFilter(String filter) {
 		this.filter = filter;
+	}
+
+	public PeakLoadDto getPeakLoad() {
+		return peakLoad;
+	}
+
+	public void setPeakLoad(PeakLoadDto peakLoad) {
+		this.peakLoad = peakLoad;
 	}
 
 	
