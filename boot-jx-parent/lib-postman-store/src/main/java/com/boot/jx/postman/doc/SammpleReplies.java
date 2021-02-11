@@ -7,6 +7,7 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Component;
 
 import com.boot.utils.ArgUtil;
+import com.boot.utils.UniqueID;
 
 @Component
 public class SammpleReplies {
@@ -79,6 +80,7 @@ public class SammpleReplies {
 		if (ArgUtil.isEmpty(temp5)) {
 			temp5 = new QuickReply();
 			temp5.setId(id);
+			temp5.setUniqueId(UniqueID.generateString());
 		}
 		return temp5;
 	}
