@@ -141,7 +141,7 @@ public class TwitterConnector implements ConnectorHandler {
 		if (ArgUtil.is(inboxMessage.getOriginalMessage())) {
 			ChatContactDoc contact = sessionStore.getContact(inboxMessage);
 			DirectMessageLocalImpl dm = (DirectMessageLocalImpl) inboxMessage.getOriginalMessage();
-			contact.setProfilePic(dm.getSender().getProfileBannerURL());
+			contact.setProfilePic(dm.getSender().getProfileImageURLHttps());
 			contact.setName(dm.getSender().getName());
 			sessionStore.save(contact);
 		}
