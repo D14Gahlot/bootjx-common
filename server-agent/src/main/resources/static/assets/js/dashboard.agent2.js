@@ -20,6 +20,10 @@ function formatTime(timestamp,gap){
 	}
 }
 
+function formatMessage(html_str) {
+    return html_str.replace(/(?:\r\n|\r|\n)/g, '<br/>').trim();
+}
+
 function escape_HTML(html_str) {
     return $('<div>').html(html_str).text();
 }
@@ -507,7 +511,7 @@ var WhatsApp = function ToDoCtrl(app) {
     notify: function () {
       if (start) {
         $(".input-message").keyup(function (ev) {
-          if (currentChat && (ev.which == 13 || ev.keyCode == 13)) {
+          if (currentChat && (ev.which == 13 || ev.keyCode == 13) && !ev.shiftKey) {
             app.Model.writeMessage();
             Ctrl.toggelMedia(false);
           }

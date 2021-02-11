@@ -462,6 +462,7 @@ ui.contacts.contact-list-unassigned li.data_unassigned {
 	width : 120px;
 	height : 120px;
 	float: left;
+	position: relative;
 }
 .media_card_body .media_thumb img{
 	width : 100px;

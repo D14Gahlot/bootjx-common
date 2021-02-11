@@ -133,7 +133,7 @@
 								<div class="input-group-append">
 									<span class="input-group-text attach_btn"><i class="fas fa-paperclip"></i></span>
 								</div>
-								<input name="" class="form-control type_msg input-message" placeholder="Type your message..." autocomplete="off" disabled>
+								<textarea name="" class="form-control type_msg input-message" placeholder="Type your message..." autocomplete="off" disabled></textarea>
 								<div class="input-group-append">
 									<span class="input-group-text send_btn"><i class="fas fa-location-arrow"></i></span>
 								</div>
@@ -206,7 +206,7 @@
 	<div class="d-flex justify-content-end mb-4 chat-bubble" data-local-id="<%=gc.localId%>" data-message-id="<%=gc.m.messageId%>">
 		<div class="msg_cotainer_send">
 			<% if(gc.m && !gc.m.messageId){ %><i class="sending fas fa-spinner fa-spin"></i><% } %>
-			<%=gc.text%>
+			<%=formatMessage(gc.text)%>
 			<% if(gc.m && gc.m.template){ %><span class="fa fa-picture-o"></span>  <%=gc.m.template%><% } %>
 			<span class="msg_time_send"><%=gc.time%></span>
 			<% if(gc.m.attachments && gc.m.attachments.length>0) {%>
@@ -228,7 +228,7 @@
 			<img src="assets/images/profile.png" class="rounded-circle user_img_msg">
 		</div>
 		<div class="msg_cotainer">
-			<%=gc.text%>
+			<%=formatMessage(gc.text)%>
 			<span class="msg_time"><%=gc.time%></span>
 		</div>
 	</div>
