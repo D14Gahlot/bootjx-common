@@ -11,7 +11,7 @@ import com.boot.utils.ArgUtil;
 
 @Document(collection = "DICT_QUICK_RESP")
 @TypeAlias("QuickReply")
-public class SmartReply implements Serializable {
+public class QuickReply implements Serializable {
 	private static final long serialVersionUID = -5649094988762846983L;
 
 	@Id
