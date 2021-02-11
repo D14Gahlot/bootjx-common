@@ -18,7 +18,6 @@ import org.springframework.stereotype.Component;
 import com.boot.jx.postman.model.TagDocument;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.FileUtil;
-import com.boot.utils.SysConfigUtil;
 
 import opennlp.tools.doccat.BagOfWordsFeatureGenerator;
 import opennlp.tools.doccat.DoccatFactory;
@@ -72,53 +71,68 @@ public class OpenNLPService {
 
 	private LanguageDetectorModel languageDetectorModel;
 
+	private boolean initd;
+
 	@PostConstruct
 	public void init() throws FileNotFoundException, IOException {
 
-		try (InputStream modelIn = FileUtil
-				.getExternalOrInternalResourceAsStream("ext-resources/apache-open-nlp/en-sent.bin")) {
-			this.sentenceModel = new SentenceModel(modelIn);
+		try {
+
+			try (InputStream modelIn = FileUtil
+					.getExternalOrInternalResourceAsStream("ext-resources/apache-open-nlp/en-sent.bin")) {
+				this.sentenceModel = new SentenceModel(modelIn);
+			}
+
+			try (InputStream modelIn = FileUtil
+					.getExternalOrInternalResourceAsStream("ext-resources/apache-open-nlp/en-token.bin")) {
+				this.tokenizerModel = new TokenizerModel(modelIn);
+			}
+
+			try (InputStream modelIn = FileUtil
+					.getExternalOrInternalResourceAsStream("ext-resources/apache-open-nlp/en-pos-maxent.bin")) {
+				this.posModel = new POSModel(modelIn);
+			}
+
+			try (InputStream modelIn = FileUtil
+					.getExternalOrInternalResourceAsStream("ext-resources/apache-open-nlp/en-lemmatizer.bin")) {
+				this.lemmatizerModel = new LemmatizerModel(modelIn);
+			}
+
+			try (InputStream modelIn = FileUtil
+					.getExternalOrInternalResourceAsStream("ext-resources/apache-open-nlp/en-ner-person.bin")) {
+				this.tokenNameFinderModelPerson = new TokenNameFinderModel(modelIn);
+			}
+
+			try (InputStream modelIn = FileUtil
+					.getExternalOrInternalResourceAsStream("ext-resources/apache-open-nlp/en-ner-location.bin")) {
+				this.tokenNameFinderModelLocation = new TokenNameFinderModel(modelIn);
+			}
+
+			try (InputStream modelIn = FileUtil
+					.getExternalOrInternalResourceAsStream("ext-resources/apache-open-nlp/en-ner-organization.bin")) {
+				this.tokenNameFinderModelOrganization = new TokenNameFinderModel(modelIn);
+			}
+
+			try (InputStream modelIn = FileUtil.getExternalOrInternalResourceAsStream(
+					"ext-resources/apache-open-nlp/langdetect-183-fromApache.bin")) {
+				this.languageDetectorModel = new LanguageDetectorModel(modelIn);
+			}
+
+			trainCategorizerModelFromFile();
+			initd = true;
+
+		} catch (Exception e) {
+			LOGGER.error("OpenNLPService NOT Working", e);
 		}
 
-		try (InputStream modelIn = FileUtil
-				.getExternalOrInternalResourceAsStream("ext-resources/apache-open-nlp/en-token.bin")) {
-			this.tokenizerModel = new TokenizerModel(modelIn);
-		}
-
-		try (InputStream modelIn = FileUtil
-				.getExternalOrInternalResourceAsStream("ext-resources/apache-open-nlp/en-pos-maxent.bin")) {
-			this.posModel = new POSModel(modelIn);
-		}
-
-		try (InputStream modelIn = FileUtil
-				.getExternalOrInternalResourceAsStream("ext-resources/apache-open-nlp/en-lemmatizer.bin")) {
-			this.lemmatizerModel = new LemmatizerModel(modelIn);
-		}
-
-		try (InputStream modelIn = FileUtil
-				.getExternalOrInternalResourceAsStream("ext-resources/apache-open-nlp/en-ner-person.bin")) {
-			this.tokenNameFinderModelPerson = new TokenNameFinderModel(modelIn);
-		}
-
-		try (InputStream modelIn = FileUtil
-				.getExternalOrInternalResourceAsStream("ext-resources/apache-open-nlp/en-ner-location.bin")) {
-			this.tokenNameFinderModelLocation = new TokenNameFinderModel(modelIn);
-		}
-
-		try (InputStream modelIn = FileUtil
-				.getExternalOrInternalResourceAsStream("ext-resources/apache-open-nlp/en-ner-organization.bin")) {
-			this.tokenNameFinderModelOrganization = new TokenNameFinderModel(modelIn);
-		}
-
-		try (InputStream modelIn = FileUtil
-				.getExternalOrInternalResourceAsStream("ext-resources/apache-open-nlp/langdetect-183-fromApache.bin")) {
-			this.languageDetectorModel = new LanguageDetectorModel(modelIn);
-		}
-
-		trainCategorizerModelFromFile();
 	}
 
 	public TagDocument addTags(String userInput, TagDocument nlpDocument) throws FileNotFoundException, IOException {
+
+		if (!initd) {
+			return nlpDocument;
+		}
+
 		String[] sentences = breakSentences(userInput);
 
 		LanguageDetectorME languageDetectorME = new LanguageDetectorME(languageDetectorModel);
