@@ -21,7 +21,7 @@ import edu.stanford.nlp.pipeline.CoreEntityMention;
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
 
 @Component
-@ConditionalOnProperty("postman.nlp.corenlp.enabled")
+@ConditionalOnProperty(value = "postman.nlp.corenlp.enabled", havingValue = "true")
 public class CoreNLPService {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CoreNLPService.class);
