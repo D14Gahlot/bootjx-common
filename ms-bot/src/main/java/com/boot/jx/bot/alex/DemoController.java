@@ -82,6 +82,28 @@ public class DemoController extends ChatController {
 		}
 	}
 
+	@ChatMapping(key = "more-onselect")
+	public void moreonSelect(InboxMessage inboxMessage, StringMatcher matcher) {
+		switch (inboxMessage.getMessage().toLowerCase()) {
+		case "yes":
+		case "y":
+		case "1":
+			reply(new OutboxMessage().template("menu-2").put("name", chatContext.getContact().getName()));
+			next("menu-2-onselect");
+			break;
+		case "no":
+		case "n":
+		case "2":
+			reply(new OutboxMessage().template("feedback"));
+			next("feedback-onselect");
+			break;
+		default:
+			reply("Invalid Option");
+			next("feedback-onselect");
+			return;
+		}
+	}
+	
 	@ChatMapping(key = "feedback-onselect")
 	public void feedback(InboxMessage inboxMessage, StringMatcher matcher) {
 		switch (inboxMessage.getMessage().toLowerCase()) {
