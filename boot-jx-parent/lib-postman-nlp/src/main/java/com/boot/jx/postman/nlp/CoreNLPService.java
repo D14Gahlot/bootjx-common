@@ -32,28 +32,40 @@ public class CoreNLPService {
 
 	StanfordCoreNLP nerPipeline;
 
+	private boolean initd;
+
 	@PostConstruct
 	public void init() throws FileNotFoundException, IOException {
-		// Sentiments
-		Properties sentimentProps = new Properties();
-		sentimentProps.setProperty("annotators", "parse, sentiment");
-		sentimentProps.setProperty("parse.binaryTrees", "true");
-		sentimentProps.setProperty("enforceRequirements", "false");
-		this.sentimentPipeline = new StanfordCoreNLP(sentimentProps);
+		try {
+			// Sentiments
+			Properties sentimentProps = new Properties();
+			sentimentProps.setProperty("annotators", "parse, sentiment");
+			sentimentProps.setProperty("parse.binaryTrees", "true");
+			sentimentProps.setProperty("enforceRequirements", "false");
+			this.sentimentPipeline = new StanfordCoreNLP(sentimentProps);
 
-		// Tokenizer
-		Properties tokenizerProps = new Properties();
-		tokenizerProps.setProperty("annotators", "tokenize ssplit");
-		this.tokenizerPipeline = new StanfordCoreNLP(tokenizerProps);
+			// Tokenizer
+			Properties tokenizerProps = new Properties();
+			tokenizerProps.setProperty("annotators", "tokenize ssplit");
+			this.tokenizerPipeline = new StanfordCoreNLP(tokenizerProps);
 
-		Properties nerProps = new Properties();
-		nerProps.setProperty("annotators", "tokenize,ssplit,pos,lemma,ner");
+			Properties nerProps = new Properties();
+			nerProps.setProperty("annotators", "tokenize,ssplit,pos,lemma,ner");
 
-		this.nerPipeline = new StanfordCoreNLP(nerProps);
+			this.nerPipeline = new StanfordCoreNLP(nerProps);
+			this.initd = true;
+
+		} catch (Throwable e) {
+			LOGGER.error("CoreNLPService NOT Working", e);
+		}
 
 	}
 
-	public void addTags(String line, TagDocument tagDocument) {
+	public TagDocument addTags(String line, TagDocument tagDocument) {
+
+		if (!initd) {
+			return tagDocument;
+		}
 
 		LOGGER.debug("SENTIMENT<");
 		CoreDocument sentimentDoc = this.tokenizerPipeline.processToCoreDocument(line);
@@ -89,6 +101,7 @@ public class CoreNLPService {
 			}
 		}
 		LOGGER.debug("TAGS>");
+		return tagDocument;
 	}
 	/**
 	 * public static void main(String[] args) throws FileNotFoundException,

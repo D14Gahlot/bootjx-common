@@ -121,7 +121,7 @@ public class OpenNLPService {
 			trainCategorizerModelFromFile();
 			initd = true;
 
-		} catch (Exception e) {
+		} catch (Throwable e) {
 			LOGGER.error("OpenNLPService NOT Working", e);
 		}
 
