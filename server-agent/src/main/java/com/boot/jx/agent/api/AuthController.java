@@ -29,6 +29,7 @@ import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.stomp.StompTunnelSessionManager;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.Constants;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @Controller
@@ -63,7 +64,9 @@ public class AuthController {
 		model.addAttribute("APP_CONTEXT", appConfig.getAppPrefix());
 		model.addAttribute("APP_USER", agentSession.getAgentCode());
 		model.addAttribute("APP_DEPT", agentSession.getAgentDept());
-		model.addAttribute("APP_DEPT", agentSession.getAgentDept());
+		
+		String appUrl = ArgUtil.parseAsString(commonHttpRequest.get("APP_URL"),Constants.BLANK);
+		model.addAttribute("APP_URL", appUrl);
 		theme = ArgUtil.nonEmpty(commonHttpRequest.get("theme"), "dashboard.agent.bubble");
 		model.addAttribute("APP_THEME", theme);
 		return "dashboard.agent";
