@@ -120,7 +120,7 @@ public class SessionStore {
 	public boolean closeActiveSessionsMulty(String contactId) {
 		Query query2 = new Query();
 		query2.addCriteria(Criteria.where("contactId").is(contactId).and("active").is(true));
-		Update update = Update.update("active", false);
+		Update update = new Update().set("active", false).set("closeSessionStamp", System.currentTimeMillis());
 		mongoTemplate.updateMulti(query2, update, ChatSessionDoc.class);
 		return true;
 	}
@@ -164,16 +164,19 @@ public class SessionStore {
 
 	public void save(ChatSessionDoc chatSessionDoc) {
 		try {
+			if (ArgUtil.isEmpty(chatSessionDoc.getStartSessionStamp())) {
+				chatSessionDoc.setStartSessionStamp(System.currentTimeMillis());
+			}
 			mongoTemplate.save(chatSessionDoc);
 		} catch (Exception e) {
 			ChatSessionDoc chatSessionDoc2 = mongoTemplate.findById(chatSessionDoc.getSessionId(),
 					ChatSessionDoc.class);
 			LOGGER.error(chatSessionDoc.getVersion() + " ~ " + chatSessionDoc2.getVersion(), e);
 			if (chatSessionDoc.getVersion() == null) {
-				//chatSessionDoc.setVersion(0);
+				// chatSessionDoc.setVersion(0);
 				mongoTemplate.save(chatSessionDoc);
 			} else {
-				//chatSessionDoc.setVersion(chatSessionDoc2.getVersion()+1);
+				// chatSessionDoc.setVersion(chatSessionDoc2.getVersion()+1);
 				mongoTemplate.save(chatSessionDoc);
 			}
 		}

@@ -66,10 +66,12 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 		// PUBLISH
 		ChatSessionDoc chatSessionDoc = sessionStore.getSession(inboxMessage.getSessionId());
 		chatSessionDoc.setAssignedToDept(inboxMessage.getAssignedToDept());
+		chatSessionDoc.setAssignedDeptStamp(System.currentTimeMillis());
 
 		if (ArgUtil.is(avaialbleAgent)) {
 			chatSessionDoc.setAssignedToAgent(avaialbleAgent.getAgentCode());
 			chatSessionDoc.setAssignedToDept(avaialbleAgent.getAgentDept());
+			chatSessionDoc.setAssignedAgentStamp(System.currentTimeMillis());
 
 			inboxMessage.setAssignedToAgent(avaialbleAgent.getAgentCode());
 			inboxMessage.setAssignedToDept(avaialbleAgent.getAgentDept());
@@ -85,6 +87,7 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 	public void onAssign(AgentSessionDoc avaialbleAgent, ChatSessionDoc chatSessionDoc, OutboxMessage outboxMessage) {
 		if (ArgUtil.is(avaialbleAgent)) {
 			chatSessionDoc.setAssignedToAgent(avaialbleAgent.getAgentCode());
+			chatSessionDoc.setAssignedAgentStamp(System.currentTimeMillis());
 			stompTunnelService.sendToAll("/dept/onassign-" + avaialbleAgent.getAgentDept(),
 					getChatSessionDto(chatSessionDoc, avaialbleAgent.getAgentCode()));
 		}

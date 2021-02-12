@@ -82,11 +82,17 @@ public class MsgController {
 
 		outboxMessage.setAgent(agentSession.getAgentCode());
 
+		// Session Stuff Logging <
 		if (ArgUtil.isEmpty(sessionDoc.getAssignedToAgent())) {
 			AgentSessionDoc agent = mongoTemplate.findById(agentSession.getAgentCode(), AgentSessionDoc.class);
 			agentChatHandlerImpl.onAssign(agent, sessionDoc, outboxMessage);
-			mongoTemplate.save(sessionDoc);
 		}
+		if (ArgUtil.isEmpty(sessionDoc.getFistResponseStamp())) {
+			sessionDoc.setFistResponseStamp(System.currentTimeMillis());
+		}
+		sessionDoc.setLastResponseStamp(System.currentTimeMillis());
+		mongoTemplate.save(sessionDoc);
+		// Session Stuff Logging >
 
 		if (ArgUtil.areEqual(sessionDoc.getAssignedToAgent(), agentSession.getAgentCode())) {
 			ChatMessageDto messageDto = new ChatMessageDto();

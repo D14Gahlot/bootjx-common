@@ -32,6 +32,18 @@ public class ChatSessionDoc implements Serializable {
 	private boolean active;
 	private boolean initd;
 
+	private long startSessionStamp;
+	private long closeSessionStamp;
+
+	private long assignedDeptStamp;
+	private long assignedAgentStamp;
+
+	private long fistResponseStamp;
+	private long lastResponseStamp;
+
+	private Integer agentScore;
+	private Integer botScore;
+
 	public long getLastInComingStamp() {
 		return lastInComingStamp;
 	}
@@ -94,6 +106,70 @@ public class ChatSessionDoc implements Serializable {
 
 	public void setVersion(Integer version) {
 		this.version = version;
+	}
+
+	public long getStartSessionStamp() {
+		return startSessionStamp;
+	}
+
+	public void setStartSessionStamp(long startSessionStamp) {
+		this.startSessionStamp = startSessionStamp;
+	}
+
+	public long getCloseSessionStamp() {
+		return closeSessionStamp;
+	}
+
+	public void setCloseSessionStamp(long closeSessionStamp) {
+		this.closeSessionStamp = closeSessionStamp;
+	}
+
+	public long getAssignedDeptStamp() {
+		return assignedDeptStamp;
+	}
+
+	public void setAssignedDeptStamp(long assignedDeptStamp) {
+		this.assignedDeptStamp = assignedDeptStamp;
+	}
+
+	public long getAssignedAgentStamp() {
+		return assignedAgentStamp;
+	}
+
+	public void setAssignedAgentStamp(long assignedAgentStamp) {
+		this.assignedAgentStamp = assignedAgentStamp;
+	}
+
+	public long getFistResponseStamp() {
+		return fistResponseStamp;
+	}
+
+	public void setFistResponseStamp(long fistResponseStamp) {
+		this.fistResponseStamp = fistResponseStamp;
+	}
+
+	public long getLastResponseStamp() {
+		return lastResponseStamp;
+	}
+
+	public void setLastResponseStamp(long lastResponseStamp) {
+		this.lastResponseStamp = lastResponseStamp;
+	}
+
+	public Integer getAgentScore() {
+		return agentScore;
+	}
+
+	public void setAgentScore(Integer agentScore) {
+		this.agentScore = agentScore;
+	}
+
+	public Integer getBotScore() {
+		return botScore;
+	}
+
+	public void setBotScore(Integer botScore) {
+		this.botScore = botScore;
 	}
 
 }
