@@ -1,0 +1,73 @@
+package com.boot.jx.admin;
+
+import org.springframework.context.annotation.Scope;
+import org.springframework.context.annotation.ScopedProxyMode;
+import org.springframework.stereotype.Component;
+
+@Component
+@Scope(value = "session", proxyMode = ScopedProxyMode.TARGET_CLASS)
+public class AdminSessionBean {
+
+	private String agentCode;
+	private String agentDept;
+
+	private boolean isLoggedIn;
+
+	private boolean isOnline;
+
+	private long lastOnlineStamp;
+
+	private boolean isDirty;
+
+	public String getAgentCode() {
+		return agentCode;
+	}
+
+	public void setAgentCode(String agentCode) {
+		this.agentCode = agentCode;
+	}
+
+	public boolean isLoggedIn() {
+		return isLoggedIn;
+	}
+
+	public void setLoggedIn(boolean isLoggedIn) {
+		this.isLoggedIn = isLoggedIn;
+		this.isDirty = true;
+	}
+
+	public boolean isOnline() {
+		return isOnline;
+	}
+
+	public void setOnline(boolean isOnline) {
+		this.isOnline = isOnline;
+		this.isDirty = true;
+	}
+
+	public boolean isDirty() {
+		return isDirty;
+	}
+
+	public void setDirty(boolean isDirty) {
+		this.isDirty = isDirty;
+	}
+
+	public long getLastOnlineStamp() {
+		return lastOnlineStamp;
+	}
+
+	public void setLastOnlineStamp(long lastOnlineStamp) {
+		this.lastOnlineStamp = lastOnlineStamp;
+		this.isDirty = true;
+	}
+
+	public String getAgentDept() {
+		return agentDept;
+	}
+
+	public void setAgentDept(String agentDept) {
+		this.agentDept = agentDept;
+	}
+
+}

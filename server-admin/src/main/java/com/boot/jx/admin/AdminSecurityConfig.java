@@ -18,26 +18,31 @@ import org.springframework.security.web.authentication.SimpleUrlAuthenticationSu
 @EnableWebSecurity
 public class AdminSecurityConfig extends WebSecurityConfigurerAdapter {
 
+	@Autowired
+	private AdminLogoutHandler agentLogoutHandler;
+
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
 		http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
 				// Publics Calls
 				.and().authorizeRequests().antMatchers("/pub/**").permitAll()
+				.and().authorizeRequests().antMatchers("/swagger-ui.html").permitAll()
 				// Login Calls
 				.and().authorizeRequests().antMatchers("/auth/**").permitAll()
 				// API Calls
 				.and().authorizeRequests().antMatchers("/api/**").authenticated()
 				// App Pages
 				.and().authorizeRequests().antMatchers("/app/**").authenticated().and().authorizeRequests()
-				.antMatchers("/.**").authenticated()
+				.antMatchers("/**").authenticated().and().authorizeRequests().antMatchers("/.**").authenticated()
 				// Login Forms
 				.and().formLogin().loginPage("/auth/login").successHandler(successHandler()).permitAll()
 				.failureUrl("/auth/login?error").permitAll()
-				//.loginProcessingUrl("/auth/login/submit").permitAll()
+				// .loginProcessingUrl("/auth/login/submit").permitAll()
 				// Logout Pages
-				.and().logout().permitAll().logoutSuccessUrl("/auth/login?logout").deleteCookies("JSESSIONID")
-				.invalidateHttpSession(true).permitAll().and().exceptionHandling().accessDeniedPage("/403").and().csrf()
-				.disable().headers().disable();
+				.and().logout().permitAll().addLogoutHandler(agentLogoutHandler).logoutUrl("/auth/logout")
+				.logoutSuccessUrl("/auth/login?logout").deleteCookies("JSESSIONID").invalidateHttpSession(true)
+				.permitAll().and().exceptionHandling().accessDeniedPage("/403").and().csrf().disable().headers()
+				.disable();
 	}
 
 	@Bean
@@ -51,11 +56,11 @@ public class AdminSecurityConfig extends WebSecurityConfigurerAdapter {
 	public void configure(AuthenticationManagerBuilder auth) throws Exception {
 		auth.inMemoryAuthentication()
 				// Agent 1
-				.withUser("agent1").password(passwordEncoder().encode("agent1")).roles("AGENT").and()
+				.withUser("admin1").password(passwordEncoder().encode("admin1")).roles("ADMIN").and()
 				// Agent 2
-				.withUser("agent2").password(passwordEncoder().encode("agent2")).roles("AGENT").and()
+				.withUser("admin2").password(passwordEncoder().encode("admin2")).roles("ADMIN").and()
 				// Agent 3
-				.withUser("agent3").password(passwordEncoder().encode("agent3")).roles("AGENT");
+				.withUser("admin3").password(passwordEncoder().encode("admin3")).roles("ADMIN");
 	}
 
 	@Bean
@@ -65,6 +70,8 @@ public class AdminSecurityConfig extends WebSecurityConfigurerAdapter {
 
 	@Override
 	public void configure(WebSecurity web) throws Exception {
-		web.ignoring().antMatchers("/resources/**", "/static/**", "/css/**", "/js/**", "/images/**");
+		web.ignoring().antMatchers("/resources/**", "/static/**", "/css/**", "/js/**", "/images/**", "/v2/api-docs",
+				"/configuration/ui", "/swagger-resources/**", "/configuration/security", "/swagger-ui.html",
+				"/webjars/**");
 	}
 }

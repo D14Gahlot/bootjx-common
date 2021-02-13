@@ -24,7 +24,7 @@ import com.boot.jx.admin.repository.IAgentRepository;
 @ComponentScan("com.boot.jx")
 @EnableAsync(proxyTargetClass = true)
 @EnableCaching
-public class Admin extends SpringBootServletInitializer {
+public class AdminOWS extends SpringBootServletInitializer {
 
 	/**
 	 * The main method.
@@ -32,7 +32,7 @@ public class Admin extends SpringBootServletInitializer {
 	 * @param args the arguments
 	 */
 	public static void main(String[] args) {
-		SpringApplication.run(Admin.class, args);
+		SpringApplication.run(AdminOWS.class, args);
 	}
 
 	/*
@@ -43,7 +43,7 @@ public class Admin extends SpringBootServletInitializer {
 	 * org.springframework.boot.builder.SpringApplicationBuilder)
 	 */
 	protected SpringApplicationBuilder configure(SpringApplicationBuilder applicationBuilder) {
-		return applicationBuilder.sources(Admin.class);
+		return applicationBuilder.sources(AdminOWS.class);
 	}
 	
 	@Autowired
