@@ -19,11 +19,11 @@
   <p th:case="*" th:remove="tag">
 	<link rel=stylesheet
 		href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900">
-	<link th:href="${CDN_URL} + '/dist/app.js'" rel=preload as=script>
-	<link th:href="${CDN_URL} + '/dist/css/app.css'" rel=preload as=style>
-	<link th:href="${CDN_URL} + '/dist/js/chunk-vendors.js'" rel=preload
+	<link th:href="${CDN_URL} + '/app.js'" rel=preload as=script>
+	<link th:href="${CDN_URL} + '/css/app.css'" rel=preload as=style>
+	<link th:href="${CDN_URL} + '/js/chunk-vendors.js'" rel=preload
 		as=script>
-	<link th:href="${CDN_URL} + '/dist/css/app.css'" rel=stylesheet>
+	<link th:href="${CDN_URL} + '/css/app.css'" rel=stylesheet>
   </p> 
 </div>
 
@@ -50,8 +50,8 @@
 		<script th:src="${CDN_URL}+'/app.js'"></script>
   </p>
   <p th:case="*" th:remove="tag">
-  	  	<script th:src="${CDN_URL}+'/dist/js/chunk-vendors.js'"></script>
-		<script th:src="${CDN_URL}+'/dist/app.js'"></script>
+  	  	<script th:src="${CDN_URL}+'/js/chunk-vendors.js'"></script>
+		<script th:src="${CDN_URL}+'/app.js'"></script>
   </p> 
 </div>
 
