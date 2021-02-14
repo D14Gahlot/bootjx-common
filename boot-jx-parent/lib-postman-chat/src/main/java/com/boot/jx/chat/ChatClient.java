@@ -22,7 +22,7 @@ public class ChatClient {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ChatClient.class);
 
 	public static class PATH {
-		public static final String ASSIGN_TO_AGENT = "/chat/assign/agent";
+		public static final String ASSIGN_TO_AGENT = "/ext/assign/agent";
 	}
 
 	@Value("${postman.agent.url}")
