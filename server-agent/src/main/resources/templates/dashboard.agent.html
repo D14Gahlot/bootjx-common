@@ -32,6 +32,7 @@
   <span theme="dashboard.agent.metalic" class="w3-bar-item w3-button" hidden><i class="fas fa-atom"></i> Metalic</span>
   <span theme="dashboard.agent.indigo" class="w3-bar-item w3-button" hidden><i class="fas fa-atom"></i> Indigo</span>
   <span theme="dashboard.agent.bubble" class="w3-bar-item w3-button" hidden><i class="fas fa-atom"></i> Bubble</span>
+  <div class="sidebar-logo"></div>
 </div>
 </div>
 
@@ -107,10 +108,10 @@
 						</div>
 						<div class="card-body msg_card_body">
 							<div class="msg_card_body-bubbles">
-							
+									<div class="msg_card_body-logo"></div>
 							</div>
 							<div class="msg_card_body-panel">
-							<hr/>
+								<hr/>
 								<div class="msg_card_body-panel-tags">
 								</div>
 							</div>
@@ -196,7 +197,7 @@
 			<div class="contact-time">
 				<p><%=lastmsg.time %></p>
 				<% if(c.newmsg>0){ %>
-					<div class="new-message" id="nm<%=c.contactId%>"><p><%=c.newmsg%></p></div>
+					<div class="new-message" id="nm<%=c.contactId%>"><p>&nbsp;</p></div>
 				<%}%>	
 			</div>
 		</div>

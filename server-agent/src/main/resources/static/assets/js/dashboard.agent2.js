@@ -345,7 +345,7 @@ var WhatsApp = function ToDoView(app) {
       $(".user_info .user_name").text(cg.name);
 	    $(".user_info .user_text").text("online @ " + cg.online);
 	    // Nachrichten konfigurieren
-	    $(".chat-bubble").remove();
+	    $(".chat-bubble,.msg_card_body-logo").remove();
 	    for (var i = 0; i < cg.messages.length; i++) {
 	      WhatsApp.View.printMessage(cg.messages[i]);
 	    }
@@ -424,13 +424,15 @@ var WhatsApp = function ToDoView(app) {
     },
     
     notifyNewMessage :  function(id,msg){
+    	console.log("msg",msg);
         if (contactList[id] == currentChat) {
             WhatsApp.View.printMessage(msg);
             WhatsApp.View.printContact(contactList[id]);
             WhatsApp.View.printSmartTags();
             //scrollToBottom();
         } else {
-            contactList[id].newmsg++;
+        	if(msg.type == false)
+        		contactList[id].newmsg++;
             WhatsApp.View.printContact(contactList[id]);
         }
     },

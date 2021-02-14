@@ -342,25 +342,41 @@ padding: 5px;
 }
 
 #mySidebar {
-	color : #FFF!important;
+	color: #437db1!important;
 	background-color: transparent!important
 }
 #mySidebar .mySidebar-container {
-	background-color: rgb(0 0 0 / 70%) !important;
+	background-color: rgb(242 243 248) !important;
 	height : 100%;
 }
 #mySidebar .menu_btn_close {
 	background-color: rgba(0, 0, 0, 0.03) !important;
-	color : #FFF;
+	color: #437db1;
 }
 #mySidebar a{
-	color : #FFF!important;
-	background-color: rgb(0 0 0 / 28%) !important;
+	background-color: rgb(0 0 0 / 9%) !important;
 }
 #mySidebar a:hover{
 	color : #FFF!important;
 	background-color: rgb(0 0 0 / 50%) !important;
 }
+
+#mySidebar .sidebar-logo{
+    /* min-height: calc(100% - 25px); */
+    height: 91px;
+    position: absolute;
+    bottom: 0px;
+    background-image: url(../images/bigbrandlogo.png);
+    background-repeat: no-repeat;
+    /* background-attachment: fixed; */
+    background-position: center;
+    /* filter: grayscale(100%); */
+    /* opacity: 0.2; */
+    width: 195px;
+    background-color: #fff0;
+    padding: 0px;
+}
+
 .card.card_contact_profile {
 	color : #FFF!important;
 }
@@ -421,6 +437,18 @@ ui.contacts.contact-list-unassigned li.data_unassigned {
 }
 .msg_card_body-panel {
 	width:100%
+}
+.msg_card_body-logo{
+	min-height: calc(100% - 25px);
+    height: 100%;
+    position: relative;
+    padding-top: calc(100vh - 250px);
+   	background-image: url('../images/bigbrandlogo.png');
+  	background-repeat: no-repeat;
+  	background-attachment: fixed;
+  	background-position: center;
+  	filter: grayscale(100%);
+  	opacity : 0.2;
 }
 .msg_card_body-panel hr{
 	border-top: 1px solid #e0dddd;
