@@ -25,8 +25,8 @@ public class AdminSecurityConfig extends WebSecurityConfigurerAdapter {
 	protected void configure(HttpSecurity http) throws Exception {
 		http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
 				// Publics Calls
-				.and().authorizeRequests().antMatchers("/pub/**").permitAll()
-				.and().authorizeRequests().antMatchers("/swagger-ui.html").permitAll()
+				.and().authorizeRequests().antMatchers("/pub/**").permitAll().and().authorizeRequests()
+				.antMatchers("/swagger-ui.html").permitAll()
 				// Login Calls
 				.and().authorizeRequests().antMatchers("/auth/**").permitAll()
 				// API Calls
@@ -70,8 +70,8 @@ public class AdminSecurityConfig extends WebSecurityConfigurerAdapter {
 
 	@Override
 	public void configure(WebSecurity web) throws Exception {
-		web.ignoring().antMatchers("/resources/**", "/static/**", "/css/**", "/js/**", "/images/**", "/v2/api-docs",
-				"/configuration/ui", "/swagger-resources/**", "/configuration/security", "/swagger-ui.html",
-				"/webjars/**");
+		web.ignoring().antMatchers("/resources/**", "/static/**", "/css/**", "/js/**", "/images/**", "/assets/**",
+				"/v2/api-docs", "/configuration/ui", "/swagger-resources/**", "/configuration/security",
+				"/swagger-ui.html", "/webjars/**");
 	}
 }
