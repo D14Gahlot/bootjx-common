@@ -34,6 +34,7 @@ public class ChatController {
 
 	public void reply(OutboxMessage message) {
 		try {
+			message.session().setAgent(chatService.getClient().getDefaultSender());
 			chatService.reply(message);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
@@ -41,6 +42,7 @@ public class ChatController {
 	}
 
 	public void send(OutboxMessage waMessage) {
+		waMessage.session().setAgent(chatService.getClient().getDefaultSender());
 		chatService.send(chatContext.getContact(), waMessage);
 	}
 

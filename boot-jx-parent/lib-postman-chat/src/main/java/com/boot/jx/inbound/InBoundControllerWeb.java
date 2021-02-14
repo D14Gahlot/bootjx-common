@@ -100,8 +100,8 @@ public class InBoundControllerWeb {
 		// event.setSessionId("600edc822743742e916202b9");
 		event.setSessionId(null);
 		event.setMessageId(null);
-		event.session().setAssignedToAgent(null);
-		event.session().setAssignedToDept(null);
+		event.session().setAgent(null);
+		event.session().setDept(null);
 		inBoundEngine.invokeMethods(event);
 
 		String webSessionId = commonHttpRequest.get("web-session-id");

@@ -13,7 +13,6 @@ import com.boot.jx.mongo.CommonDocStore;
 import com.boot.jx.postman.doc.ContactDoc;
 import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.model.InboxMessage;
-import com.boot.jx.postman.model.Message;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.model.TagDocument;
 import com.boot.jx.utils.PostManUtil;
@@ -104,7 +103,7 @@ public class MessageStore extends CommonDocStore {
 		doc.setMessage(logMessage);
 		doc.setTemplate(ArgUtil.parseAsString(eventName));
 		doc.setSessionId(inboxMessage.getSessionId());
-		doc.setAgent(inboxMessage.session().getAssignedToAgent());
+		doc.setAgent(inboxMessage.session().getAgent());
 		mongoTemplate.save(doc, getCollectionName("LOGS"));
 		return doc;
 	}
@@ -121,7 +120,7 @@ public class MessageStore extends CommonDocStore {
 		doc.setMessage(logMessage);
 		doc.setTemplate(ArgUtil.parseAsString(eventName));
 		doc.setSessionId(outMessage.getSessionId());
-		doc.setAgent(outMessage.getAgent());
+		doc.setAgent(outMessage.session().getAgent());
 		mongoTemplate.save(doc, getCollectionName("LOGS"));
 		return doc;
 	}
@@ -131,7 +130,7 @@ public class MessageStore extends CommonDocStore {
 	}
 
 	// Out Going Messages
-	private MessageDoc createMessageDoc(Message<?> outMessage) {
+	private MessageDoc createMessageDoc(OutboxMessage outMessage) {
 		String to = CollectionUtil.getOne(outMessage.getTo());
 		MessageDoc doc = new MessageDoc();
 		doc.setContactId(PostManUtil.createContactId(outMessage));
@@ -141,7 +140,7 @@ public class MessageStore extends CommonDocStore {
 		contact.setMobile(to);
 		contact.setContactType(outMessage.getContactType());
 		doc.setContact(contact);
-
+		doc.setAgent(outMessage.session().getAgent());
 		// if (ArgUtil.is(outMessage.getTemplate())) {
 		doc.setTemplate(outMessage.getTemplate());
 		doc.setModel(outMessage.getModel());
@@ -154,12 +153,12 @@ public class MessageStore extends CommonDocStore {
 		return doc;
 	}
 
-	public MessageDoc find(Message<?> outMessage) {
+	public MessageDoc find(OutboxMessage outMessage) {
 		return mongoTemplate.findById(outMessage.getMessageId(), MessageDoc.class,
 				getCollectionName(outMessage.getContactType()));
 	}
 
-	private MessageDoc findOrCreateMessageDoc(Message<?> outMessage) {
+	private MessageDoc findOrCreateMessageDoc(OutboxMessage outMessage) {
 		MessageDoc doc = null;
 		if (ArgUtil.is(outMessage.getMessageId())) {
 			doc = mongoTemplate.findById(outMessage.getMessageId(), MessageDoc.class,
@@ -171,14 +170,14 @@ public class MessageStore extends CommonDocStore {
 		return doc;
 	}
 
-	public MessageDoc get(Message<?> outMessage) {
+	public MessageDoc get(OutboxMessage outMessage) {
 		MessageDoc doc = findOrCreateMessageDoc(outMessage);
 		mongoTemplate.save(doc, getCollectionName(outMessage.getContactType()));
 		outMessage.setMessageId(doc.getMessageId());
 		return doc;
 	}
 
-	public MessageDoc create(Message<?> outMessage) {
+	public MessageDoc create(OutboxMessage outMessage) {
 		MessageDoc doc = createMessageDoc(outMessage);
 		mongoTemplate.save(doc, getCollectionName(outMessage.getContactType()));
 		outMessage.setMessageId(doc.getMessageId());

@@ -13,7 +13,7 @@ import com.boot.jx.postman.service.ContactCleanerService;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.StringUtils.StringMatcher;
 
-@BotController(name = "ALEX")
+@BotController(name = "DemoBot")
 public class DemoController extends ChatController {
 
 	@Autowired
@@ -131,7 +131,7 @@ public class DemoController extends ChatController {
 	public void transferToAgent(InboxMessage inboxMessage, StringMatcher matcher) {
 		try {
 			InboxMessage agentAssignResp = assignToAgent().getResult();
-			if (ArgUtil.is(agentAssignResp.session().getAssignedToAgent())) {
+			if (ArgUtil.is(agentAssignResp.session().getAgent())) {
 				reply("One of our agent will attend you shortly");
 			} else {
 				reply("All agents are busy or online, we will connect you whenever someone is available.");

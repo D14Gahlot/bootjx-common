@@ -22,7 +22,6 @@ import com.boot.jx.agent.doc.AgentSessionDoc;
 import com.boot.jx.agent.dto.ChatMessageDto;
 import com.boot.jx.agent.dto.ChatSessionDto;
 import com.boot.jx.api.ApiResponse;
-import com.boot.jx.chat.ChatService;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.QuickReply;
 import com.boot.jx.postman.doc.TemplateReply;
@@ -75,16 +74,11 @@ public class MsgController {
 				MapBuilder.map().put("isOnline", agentSession.isOnline()).build());
 	}
 
-	@Autowired
-	private ChatService chatService;
-
 	@ResponseBody
 	@RequestMapping(value = "/api/sessions/message/send", method = { RequestMethod.POST })
 	public ApiResponse<ChatMessageDto, Object> sendSessionMessage(@RequestBody OutboxMessage outboxMessage)
 			throws InterruptedException {
 		ChatSessionDoc sessionDoc = sessionStore.getSession(outboxMessage.getSessionId());
-
-		outboxMessage.setAgent(agentSession.getAgentCode());
 
 		// Session Stuff Logging <
 		if (ArgUtil.isEmpty(sessionDoc.getAssignedToAgent())) {

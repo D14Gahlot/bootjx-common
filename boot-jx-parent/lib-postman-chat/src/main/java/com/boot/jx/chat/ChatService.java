@@ -47,6 +47,14 @@ public class ChatService {
 	@Autowired(required = false)
 	private DefaultConnector defaultConnector;
 
+	public ChatContext getChatContext() {
+		return chatContext;
+	}
+
+	public ChatClient getClient() {
+		return chatClient;
+	}
+
 	private void replyIntenal(OutboxMessage outboxMessage) throws InterruptedException {
 		InboxMessage inboxMessage = chatContext.getInboxMessage();
 		if (ArgUtil.is(inboxMessage)) {
@@ -65,11 +73,6 @@ public class ChatService {
 		messageStore.create(outboxMessage);
 	}
 
-	public void reply(OutboxMessage outboxMessage) throws InterruptedException {
-		outboxMessage.option("isViaAgent", "true");
-		replyIntenal(outboxMessage);
-	}
-
 	private void sendIntenal(ChatContactDoc chatContactDoc, OutboxMessage outboxMessage) {
 		if (ArgUtil.is(chatContactDoc)) {
 			outboxMessage.setContactType(ArgUtil.parseAsEnumT(chatContactDoc.getContactType(), ContactType.class));
@@ -85,12 +88,28 @@ public class ChatService {
 		messageStore.create(outboxMessage);
 	}
 
+	public void reply(OutboxMessage outboxMessage) throws InterruptedException {
+
+		outboxMessage.option("isViaAgent", "true");// TODO:- to check if its required
+
+		if (ArgUtil.isEmpty(outboxMessage.session().getAgent())) {
+			outboxMessage.session().setAgent(chatClient.getDefaultSender());
+		}
+		replyIntenal(outboxMessage);
+	}
+
 	public void send(ChatSessionDoc sessionDoc, OutboxMessage outboxMessage) {
 		ChatContactDoc chatContactDoc = sessionStore.getContact(sessionDoc.getContactId());
+		if (ArgUtil.isEmpty(outboxMessage.session().getAgent())) {
+			outboxMessage.session().setAgent(sessionDoc.getAssignedToAgent());
+		}
 		sendIntenal(chatContactDoc, outboxMessage);
 	}
 
 	public void send(ChatContactDoc chatContactDoc, OutboxMessage outboxMessage) {
+		if (ArgUtil.isEmpty(outboxMessage.session().getAgent())) {
+			outboxMessage.session().setAgent(chatClient.getDefaultSender());
+		}
 		sendIntenal(chatContactDoc, outboxMessage);
 	}
 
@@ -137,10 +156,6 @@ public class ChatService {
 		}
 		mongoTemplate.save(doc);
 		chatContext.commitContact();
-	}
-
-	public ChatContext getChatContext() {
-		return chatContext;
 	}
 
 	public InboxMessage forward() {

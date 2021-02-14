@@ -3,14 +3,13 @@ package com.boot.jx.agent;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.OutboxMessage;
-import com.boot.utils.ArgUtil;
 
 public interface AgentChatHandler {
 
 	public boolean onAssignSupported(InboxMessage inboxMessage);
 
 	default public boolean onMessageSupported(InboxMessage inboxMessage) {
-		return ArgUtil.is("BOT".equalsIgnoreCase(inboxMessage.session().getMode()));
+		return "AGENT".equalsIgnoreCase(inboxMessage.session().getMode());
 	}
 
 	public InboxMessage onAssign(InboxMessage inboxMessage);

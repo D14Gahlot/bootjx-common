@@ -53,7 +53,7 @@ public class AgentService {
 	public ApiResponse<InboxMessage, Object> assignToAgent(String deptName) throws InterruptedException {
 		InboxMessage inboxMessage = chatContext.getInboxMessage();
 		if (ArgUtil.is(inboxMessage)) {
-			inboxMessage.session().setAssignedToDept(deptName);
+			inboxMessage.session().setDept(deptName);
 			return this.assignToAgent(inboxMessage);
 		}
 		return null;

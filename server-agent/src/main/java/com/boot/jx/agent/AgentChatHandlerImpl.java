@@ -63,10 +63,10 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 
 		Query query = new Query();
 		Criteria c = Criteria.where("isOnline").is(true).and("isLoggedIn").is(true).and("lastOnlineStamp").gt(timeThen);
-		if (ArgUtil.is(inboxMessage.session().getAssignedToDept())) {
-			c.and("agentDept").is(inboxMessage.session().getAssignedToDept());
+		if (ArgUtil.is(inboxMessage.session().getDept())) {
+			c.and("agentDept").is(inboxMessage.session().getDept());
 		} else {
-			inboxMessage.session().setAssignedToDept(PMStoreConstants.NO_DEPT);
+			inboxMessage.session().setDept(PMStoreConstants.NO_DEPT);
 		}
 		query.addCriteria(c).with(new Sort(Direction.ASC, "lastOnlineStamp")).limit(1);
 
@@ -76,7 +76,7 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 
 		// PUBLISH
 		ChatSessionDoc chatSessionDoc = sessionStore.getSession(inboxMessage.getSessionId());
-		chatSessionDoc.setAssignedToDept(inboxMessage.session().getAssignedToDept());
+		chatSessionDoc.setAssignedToDept(inboxMessage.session().getDept());
 		chatSessionDoc.setAssignedDeptStamp(System.currentTimeMillis());
 		chatSessionDoc.setMode("AGENT");
 
@@ -85,13 +85,13 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 			chatSessionDoc.setAssignedToDept(avaialbleAgent.getAgentDept());
 			chatSessionDoc.setAssignedAgentStamp(System.currentTimeMillis());
 
-			inboxMessage.session().setAssignedToAgent(avaialbleAgent.getAgentCode());
-			inboxMessage.session().setAssignedToDept(avaialbleAgent.getAgentDept());
+			inboxMessage.session().setAgent(avaialbleAgent.getAgentCode());
+			inboxMessage.session().setDept(avaialbleAgent.getAgentDept());
 		}
 		sessionStore.save(chatSessionDoc);
 
-		stompTunnelService.sendToAll("/dept/onassign-" + inboxMessage.session().getAssignedToDept(),
-				getChatSessionDto(chatSessionDoc, inboxMessage.session().getAssignedToAgent()));
+		stompTunnelService.sendToAll("/dept/onassign-" + inboxMessage.session().getDept(),
+				getChatSessionDto(chatSessionDoc, inboxMessage.session().getAgent()));
 
 		return inboxMessage;
 	}
@@ -116,7 +116,7 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 	public InboxMessage onMessageReceive(InboxMessage inboxMessage) {
 		MessageDoc messageDoc = messageStore.find(inboxMessage);
 		ChatMessageDto messageDto = entityToDto(messageDoc);
-		stompTunnelService.sendTo(inboxMessage.session().getAssignedToAgent(), "/agent/onmessage", messageDto);
+		stompTunnelService.sendTo(inboxMessage.session().getAgent(), "/agent/onmessage", messageDto);
 		if (inboxMessage.getMessage().equalsIgnoreCase("/exit_chat")) {
 			ChatSessionDoc chatSessionDoc = sessionStore.getSession(inboxMessage.getSessionId());
 			exitAgentMode(chatSessionDoc);
@@ -139,7 +139,7 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 			MessageDoc messageDoc = messageStore.find(outboxMessage);
 			ChatMessageDto messageDto = entityToDto(messageDoc);
 			messageDto.setType(true);
-			stompTunnelService.sendTo(outboxMessage.getAgent(), "/agent/onmessage", messageDto);
+			stompTunnelService.sendTo(outboxMessage.session().getAgent(), "/agent/onmessage", messageDto);
 		}
 		return outboxMessage;
 	}

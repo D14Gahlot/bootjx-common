@@ -17,7 +17,7 @@ public class OutboxMessage extends Message<OutboxMessage> implements WAMessageOp
 
 	protected Channel channel = Channel.DEFAULT;
 	private BigDecimal queue;
-	private String agent;
+	private MessageSession session;
 
 	public OutboxMessage(ContactType contactType) {
 		super(contactType);
@@ -39,12 +39,19 @@ public class OutboxMessage extends Message<OutboxMessage> implements WAMessageOp
 		this.queue = queue;
 	}
 
-	public String getAgent() {
-		return agent;
+	public MessageSession getSession() {
+		return session;
 	}
 
-	public void setAgent(String agent) {
-		this.agent = agent;
+	public void setSession(MessageSession session) {
+		this.session = session;
+	}
+
+	public MessageSession session() {
+		if (session == null) {
+			this.session = new MessageSession();
+		}
+		return this.session;
 	}
 
 }

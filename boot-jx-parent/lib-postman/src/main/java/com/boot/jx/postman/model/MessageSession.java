@@ -4,24 +4,24 @@ import java.io.Serializable;
 
 public class MessageSession implements Serializable {
 	private static final long serialVersionUID = -5472557093277982501L;
-	private String assignedToDept;
-	private String assignedToAgent;
+	private String dept;
+	private String agent;
 	private String mode;
 
-	public String getAssignedToDept() {
-		return assignedToDept;
+	public String getDept() {
+		return dept;
 	}
 
-	public void setAssignedToDept(String assignedToDept) {
-		this.assignedToDept = assignedToDept;
+	public void setDept(String dept) {
+		this.dept = dept;
 	}
 
-	public String getAssignedToAgent() {
-		return assignedToAgent;
+	public String getAgent() {
+		return agent;
 	}
 
-	public void setAssignedToAgent(String assignedToAgent) {
-		this.assignedToAgent = assignedToAgent;
+	public void setAgent(String agent) {
+		this.agent = agent;
 	}
 
 	public String getMode() {
