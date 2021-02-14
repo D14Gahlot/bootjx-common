@@ -1,5 +1,9 @@
 package com.boot.jx.admin.dto;
 
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 public class DashBoardResponseDto {
 	
 	
@@ -11,6 +15,9 @@ public class DashBoardResponseDto {
 	long uniqueConversation;
 	long todayMsgExchanged;
 	PeakLoadDto peakLoad;
+	Map<Object,Object> msgCountLst;
+	LeadMessanger leadMessanger;
+	
 	
 	
 	
@@ -77,6 +84,22 @@ public class DashBoardResponseDto {
 
 	public void setPeakLoad(PeakLoadDto peakLoad) {
 		this.peakLoad = peakLoad;
+	}
+
+	public Map<Object, Object> getMsgCountLst() {
+		return msgCountLst;
+	}
+
+	public void setMsgCountLst(Map<Object, Object> msgCountLst) {
+		this.msgCountLst = msgCountLst;
+	}
+
+	public LeadMessanger getLeadMessanger() {
+		return leadMessanger;
+	}
+
+	public void setLeadMessanger(LeadMessanger leadMessanger) {
+		this.leadMessanger = leadMessanger;
 	}
 
 	

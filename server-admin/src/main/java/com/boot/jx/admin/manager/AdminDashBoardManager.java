@@ -1,5 +1,15 @@
 package com.boot.jx.admin.manager;
 
+//imports as static
+import static org.springframework.data.mongodb.core.aggregation.Aggregation.group;
+import static org.springframework.data.mongodb.core.aggregation.Aggregation.match;
+import static org.springframework.data.mongodb.core.aggregation.Aggregation.newAggregation;
+import static org.springframework.data.mongodb.core.aggregation.Aggregation.project;
+import static org.springframework.data.mongodb.core.aggregation.Aggregation.sort;
+
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.Month;
@@ -8,37 +18,36 @@ import java.time.temporal.ChronoField;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Order;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
 import org.springframework.data.mongodb.core.aggregation.AggregationResults;
-import org.springframework.data.mongodb.core.aggregation.GroupOperation;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Component;
 
 import com.boot.jx.admin.dto.DashBoardRequestDto;
 import com.boot.jx.admin.dto.DashBoardResponseDto;
+import com.boot.jx.admin.dto.LeadMessanger;
 import com.boot.jx.admin.dto.PeakLoadDto;
+import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.utils.ArgUtil;
-
-
-//imports as static
-import static org.springframework.data.mongodb.core.aggregation.Aggregation.group;
-import static org.springframework.data.mongodb.core.aggregation.Aggregation.match;
-import static org.springframework.data.mongodb.core.aggregation.Aggregation.newAggregation;
-import static org.springframework.data.mongodb.core.aggregation.Aggregation.project;
-import static org.springframework.data.mongodb.core.aggregation.Aggregation.sort;
-import org.springframework.data.domain.Sort;
-
 
 
 @Component
@@ -93,7 +102,8 @@ public class AdminDashBoardManager {
 		DashBoardResponseDto month = monthAnalystics(requestDto);
 		DashBoardResponseDto quater = quaterAnalystics(requestDto);
 		DashBoardResponseDto dateRange = dateRange(requestDto);
-
+	
+		
 		dtoLst.add(today);
 		dtoLst.add(yesterday);
 		dtoLst.add(week);
@@ -131,6 +141,10 @@ public class AdminDashBoardManager {
 
 		PeakLoadDto peakLoadResult = getPeakLoadMsgCount(contactType,longTodayStartTime,longTodayendTime);
 		
+		/** lead Messanger **/
+		LeadMessanger  leadMsg =getLeadMessenger(contactType,longTodayStartTime, longTodayendTime);
+		
+		Map<Object,Object> hourWiseCount = getHourWiseCount(totalMsgDoc);
 		
 		if (ArgUtil.is(totalInmsgDoc)) {
 			dto.setTotalInMsgExchanged(totalInmsgDoc.size());
@@ -138,8 +152,6 @@ public class AdminDashBoardManager {
 		if (ArgUtil.is(totalOutmsgDoc)) {
 			dto.setTotalOutMsgExchanged(totalOutmsgDoc.size());
 		}
-
-		// dto.setTotalMsgExchanged(dto.getTotalInMsgExchanged()+dto.getTotalOutMsgExchanged());
 		if (ArgUtil.is(totalMsgDoc)) {
 			dto.setTotalMsgExchanged(totalMsgDoc.size());
 		}
@@ -147,9 +159,13 @@ public class AdminDashBoardManager {
 		if (ArgUtil.is(distinctIdList)) {
 			dto.setUniqueConversation(distinctIdList.size());
 		}
+		if (ArgUtil.is(hourWiseCount)) {
+			dto.setMsgCountLst(hourWiseCount);
+		}
 		dto.setContactType(contactType);
-		dto.setFilter("TODAY");
 		dto.setPeakLoad(peakLoadResult);
+		dto.setLeadMessanger(leadMsg);
+		dto.setFilter("TODAY");
 
 		return dto;
 
@@ -157,9 +173,6 @@ public class AdminDashBoardManager {
 
 	public DashBoardResponseDto yesterdayAnalystics(DashBoardRequestDto requestDto) {
 		DashBoardResponseDto dto = new DashBoardResponseDto();
-
-		long epochTime = System.currentTimeMillis();
-		System.out.println("epochTime :" + epochTime);
 		Object contactType=requestDto.getContactType();
 		// get a datetime plus time zone information using the system time zone
 		// subtract a day
@@ -177,9 +190,12 @@ public class AdminDashBoardManager {
 		List<MessageDoc> totalMsgDoc = getTotalMsgCount(contactType, longTodayStartTime, longTodayendTime);
 		// Get the distinct stuff from MongoDB
 		List<MessageDoc> distinctIdList = mongoTemplate.getCollection(contactType.toString()).distinct("contactId");
-		System.out.println("distinctIdList :" + distinctIdList.size());
+		Map<Object,Object> hourWiseCount = getHourWiseCount(totalMsgDoc);
 		
 		PeakLoadDto peakLoadResult = getPeakLoadMsgCount(contactType,longTodayStartTime,longTodayendTime);
+		
+		/** lead Messanger **/
+		LeadMessanger  leadMsg =getLeadMessenger(contactType,longTodayStartTime, longTodayendTime);
 		
 
 		if (ArgUtil.is(totalInmsgDoc)) {
@@ -197,9 +213,14 @@ public class AdminDashBoardManager {
 		if (ArgUtil.is(distinctIdList)) {
 			dto.setUniqueConversation(distinctIdList.size());
 		}
+		if (ArgUtil.is(hourWiseCount)) {
+			dto.setMsgCountLst(hourWiseCount);
+		}
+		
 		dto.setContactType(contactType);
 		dto.setFilter("YESTERDAY");
 		dto.setPeakLoad(peakLoadResult);
+		dto.setLeadMessanger(leadMsg);
 
 		return dto;
 
@@ -208,9 +229,6 @@ public class AdminDashBoardManager {
 	public DashBoardResponseDto weekAnalystics(DashBoardRequestDto requestDto) {
 		DashBoardResponseDto dto = new DashBoardResponseDto();
 		Object contactType = requestDto.getContactType();
-		long epochTime = System.currentTimeMillis();
-		System.out.println("epochTime :" + epochTime);
-
 		// get a datetime plus time zone information using the system time zone
 		// subtract a day
 		// and take the minimum time a day can have
@@ -233,9 +251,13 @@ public class AdminDashBoardManager {
 		List<MessageDoc> totalMsgDoc = getTotalMsgCount(contactType, longWStartTime, longTodayendTime);
 		// Get the distinct stuff from MongoDB
 		List<MessageDoc> distinctIdList = mongoTemplate.getCollection(contactType.toString()).distinct("contactId");
-		System.out.println("distinctIdList :" + distinctIdList.size());
+		
+		Map<Object,Object> dateWiseCount = getDateWiseCount(totalMsgDoc);
 		
 		PeakLoadDto peakLoadResult = getPeakLoadMsgCount(contactType,longWStartTime,longTodayendTime);
+		
+		/** lead Messanger **/
+		LeadMessanger  leadMsg =getLeadMessenger(contactType,longWStartTime, longTodayendTime);
 
 		if (ArgUtil.is(totalInmsgDoc)) {
 			dto.setTotalInMsgExchanged(totalInmsgDoc.size());
@@ -250,9 +272,13 @@ public class AdminDashBoardManager {
 		if (ArgUtil.is(distinctIdList)) {
 			dto.setUniqueConversation(distinctIdList.size());
 		}
+		if (ArgUtil.is(dateWiseCount)) {
+			dto.setMsgCountLst(dateWiseCount);
+		}
 		dto.setContactType(contactType);
 		dto.setFilter("WEEK");
 		dto.setPeakLoad(peakLoadResult);
+		dto.setLeadMessanger(leadMsg);
 
 		return dto;
 
@@ -262,9 +288,6 @@ public class AdminDashBoardManager {
 		DashBoardResponseDto dto = new DashBoardResponseDto();
 		Object contactType = requestDto.getContactType();
 
-		// get a datetime plus time zone information using the system time zone
-		// subtract a day
-		// and take the minimum time a day can have
 		ZonedDateTime todayDate = ZonedDateTime.now().minusDays(0).with(LocalTime.MIN);
 		// use the same datetime to create the end of the day using the maximum time for
 		// a day
@@ -275,10 +298,6 @@ public class AdminDashBoardManager {
 		long longTodayStartTime = todayDate.toInstant().toEpochMilli();
 		long longTodayendTime = endToday.toInstant().toEpochMilli();
 		long monthStartDateEpocTime = monthStartDate.toInstant().toEpochMilli();
-
-		System.out.println("today date end:\t" + endToday + "\t| " + longTodayendTime);
-		System.out.println("This monthStartDate :\t " + monthStartDate + "\t | " + monthStartDateEpocTime);
-
 		List<MessageDoc> totalInmsgDoc = getTotalInMsgCount(contactType, monthStartDateEpocTime, longTodayendTime);
 
 		List<MessageDoc> totalOutmsgDoc = getTotalOutMsgCount(contactType, monthStartDateEpocTime, longTodayendTime);
@@ -290,7 +309,12 @@ public class AdminDashBoardManager {
 		List<MessageDoc> distinctIdList = mongoTemplate.getCollection(contactType.toString()).distinct("contactId");
 		System.out.println("distinctIdList :" + distinctIdList.size());
 		
+		Map<Object,Object> dateWiseCount = getDateWiseCount(totalMsgDoc);
+		
 		PeakLoadDto peakLoadResult = getPeakLoadMsgCount(contactType,monthStartDateEpocTime,longTodayendTime);
+		
+		/** lead Messanger **/
+		LeadMessanger  leadMsg =getLeadMessenger(contactType,monthStartDateEpocTime, longTodayendTime);
 
 		if (ArgUtil.is(totalInmsgDoc)) {
 			dto.setTotalInMsgExchanged(totalInmsgDoc.size());
@@ -299,7 +323,6 @@ public class AdminDashBoardManager {
 			dto.setTotalOutMsgExchanged(totalOutmsgDoc.size());
 		}
 
-		// dto.setTotalMsgExchanged(dto.getTotalInMsgExchanged()+dto.getTotalOutMsgExchanged());
 		if (ArgUtil.is(totalMsgDoc)) {
 			dto.setTotalMsgExchanged(totalMsgDoc.size());
 		}
@@ -307,9 +330,13 @@ public class AdminDashBoardManager {
 		if (ArgUtil.is(distinctIdList)) {
 			dto.setUniqueConversation(distinctIdList.size());
 		}
+		if (ArgUtil.is(dateWiseCount)) {
+			dto.setMsgCountLst(dateWiseCount);
+		}
 		dto.setContactType(contactType);
 		dto.setFilter("MONTH");
 		dto.setPeakLoad(peakLoadResult);
+		dto.setLeadMessanger(leadMsg);
 
 		return dto;
 
@@ -326,9 +353,6 @@ public class AdminDashBoardManager {
 
 		long quaterStratDateTime = getStartAndEndQuarter();
 		long longTodayendTime = endToday.toInstant().toEpochMilli();
-
-		System.out.println("This quaterMonthStartDate :\t " + quaterStratDateTime + "\t | " + longTodayendTime);
-
 		List<MessageDoc> totalInmsgDoc = getTotalInMsgCount(contactType, quaterStratDateTime, longTodayendTime);
 
 		List<MessageDoc> totalOutmsgDoc = getTotalOutMsgCount(contactType, quaterStratDateTime, longTodayendTime);
@@ -339,7 +363,13 @@ public class AdminDashBoardManager {
 		List<MessageDoc> distinctIdList = mongoTemplate.getCollection(contactType.toString()).distinct("contactId");
 		System.out.println("distinctIdList :" + distinctIdList.size());
 		PeakLoadDto peakLoadResult = getPeakLoadMsgCount(contactType,quaterStratDateTime,longTodayendTime);
+		
+		/** lead Messanger **/
+		LeadMessanger  leadMsg =getLeadMessenger(contactType,quaterStratDateTime, longTodayendTime);
 
+		
+		Map<Object,Object> dateWiseCount = getDateWiseCount(totalMsgDoc);
+		
 		if (ArgUtil.is(totalInmsgDoc)) {
 			dto.setTotalInMsgExchanged(totalInmsgDoc.size());
 		}
@@ -347,7 +377,6 @@ public class AdminDashBoardManager {
 			dto.setTotalOutMsgExchanged(totalOutmsgDoc.size());
 		}
 
-		// dto.setTotalMsgExchanged(dto.getTotalInMsgExchanged()+dto.getTotalOutMsgExchanged());
 		if (ArgUtil.is(totalMsgDoc)) {
 			dto.setTotalMsgExchanged(totalMsgDoc.size());
 		}
@@ -355,9 +384,14 @@ public class AdminDashBoardManager {
 		if (ArgUtil.is(distinctIdList)) {
 			dto.setUniqueConversation(distinctIdList.size());
 		}
+		if (ArgUtil.is(dateWiseCount)) {
+			dto.setMsgCountLst(dateWiseCount);
+		}
+		
 		dto.setContactType(contactType);
 		dto.setFilter("QUATER");
 		dto.setPeakLoad(peakLoadResult);
+		dto.setLeadMessanger(leadMsg);
 
 		return dto;
 
@@ -378,9 +412,7 @@ public class AdminDashBoardManager {
 
 		long quaterStratDateTime = getStartAndEndQuarter();
 		long longTodayendTime = endToday.toInstant().toEpochMilli();
-
-		System.out.println("This quaterMonthStartDate :\t " + quaterStratDateTime + "\t | " + longTodayendTime);
-
+		
 		List<MessageDoc> totalInmsgDoc = getTotalInMsgCount(contactType, dateRange1, dateRange2);
 
 		List<MessageDoc> totalOutmsgDoc = getTotalOutMsgCount(contactType, dateRange1, dateRange2);
@@ -389,9 +421,10 @@ public class AdminDashBoardManager {
 		List<MessageDoc> totalMsgDoc = getTotalMsgCount(contactType, dateRange1, dateRange2); 
 		// Get the distinct stuff from MongoDB
 		List<MessageDoc> distinctIdList = mongoTemplate.getCollection(contactType.toString()).distinct("contactId");
-		System.out.println("distinctIdList :" + distinctIdList.size());
-		
+	
 		PeakLoadDto peakLoadResult = getPeakLoadMsgCount(contactType,dateRange1,dateRange2);
+		/** lead Messanger **/
+		LeadMessanger  leadMsg =getLeadMessenger(contactType, dateRange1, dateRange2);
 
 		if (ArgUtil.is(totalInmsgDoc)) {
 			dto.setTotalInMsgExchanged(totalInmsgDoc.size());
@@ -400,7 +433,7 @@ public class AdminDashBoardManager {
 			dto.setTotalOutMsgExchanged(totalOutmsgDoc.size());
 		}
 
-		// dto.setTotalMsgExchanged(dto.getTotalInMsgExchanged()+dto.getTotalOutMsgExchanged());
+		
 		if (ArgUtil.is(totalMsgDoc)) {
 			dto.setTotalMsgExchanged(totalMsgDoc.size());
 		}
@@ -411,6 +444,7 @@ public class AdminDashBoardManager {
 		dto.setContactType(contactType);
 		dto.setFilter("DATE_RANGE");
 		dto.setPeakLoad(peakLoadResult);
+		dto.setLeadMessanger(leadMsg);
 		return dto;
 
 	}
@@ -419,20 +453,50 @@ public class AdminDashBoardManager {
 		List<String> listContactType = new ArrayList<String>();
 		Set<String> contactTypeSet = mongoTemplate.getCollectionNames();
 		if (ArgUtil.is(contactTypeSet)) {
-			listContactType = contactTypeSet.stream().filter(x -> !x.isEmpty() && x.startsWith(COLLECTION_NAME))
-					.collect(Collectors.toList());
+			listContactType = contactTypeSet.stream().filter(x -> !x.isEmpty() && x.startsWith(COLLECTION_NAME)).collect(Collectors.toList());
 		}
 		return listContactType;
+	}
+	
+	/** fetch lead mesenger **/
+	public LeadMessanger getLeadMessenger(Object contactype, long startTime, long endTime) {
+		LeadMessanger leadMessanger = new LeadMessanger();
+		double percentageWithDecimal=0.0;
+		List<String> lst = getListOfContactType();
+		Map<String,Integer> leasMsgLst = new HashMap<String,Integer>();
+		for(String contactType: lst) {
+			List<MessageDoc> msgDocLst = getTotalMsgCount(contactType, startTime, endTime);
+			leasMsgLst.put(contactType, msgDocLst.size());
+		}
+		System.out.println("lead Msg :"+leasMsgLst.toString());
+		if(ArgUtil.is(leasMsgLst)) {
+		 Object maxEntryKey = Collections.max(leasMsgLst.entrySet(), Map.Entry.comparingByValue()).getKey();
+         Integer maxEntryKeyValue =leasMsgLst.get(maxEntryKey); 
+         Integer sumOfAllContactMsg = leasMsgLst.values().stream().mapToInt(i->i).sum();
+         if(maxEntryKeyValue>0  && sumOfAllContactMsg >0) {
+	         double percentage =((maxEntryKeyValue.doubleValue()/sumOfAllContactMsg.doubleValue())*100);
+	         BigDecimal bd = new BigDecimal(percentage).setScale(2, RoundingMode.HALF_UP);
+	         percentageWithDecimal = bd.doubleValue();
+         }
+         leadMessanger.setContactType(maxEntryKey);
+         leadMessanger.setNoOfMessage(maxEntryKeyValue);
+         leadMessanger.setTotalContactMessage(sumOfAllContactMsg);
+         leadMessanger.setPercentage(percentageWithDecimal);
+		}
+         
+		return leadMessanger;
 	}
 
 	// To fetch all the records from a collection
 	public List<MessageDoc> getTotalMsgCount(Object contactType, long startTime, long endTime) {
 		Query queryAll = new Query();
 		queryAll.addCriteria(Criteria.where("timestamp").gt(startTime).lt(endTime));
+		//queryAll.with(new Sort(Sort.Direction.ASC, "timestamp"));
+		queryAll.with(new Sort(new Order(Direction.ASC, "timestamp"))); 
+		
 		List<MessageDoc> totalMsgDoc = mongoTemplate.find(queryAll, MessageDoc.class, contactType.toString());
 		return totalMsgDoc;
 	}
-
 	// To fetch In msg records from a collection
 	public List<MessageDoc> getTotalInMsgCount(Object contactType, long startTime, long endTime) {
 		Query query = new Query();
@@ -464,8 +528,7 @@ public class AdminDashBoardManager {
 		LocalDate quaerEndDt = LocalDate.of(yearC, endMonth, endMonth.length(quaterStartDt.isLeapYear()));
 		// long epocTime =start.
 
-		System.out.println(
-				"Today Date :" + todayDt + "\t quaterStartDt :" + quaterStartDt + "\t quaerEndDt :" + quaerEndDt);
+		System.out.println("Today Date :" + todayDt + "\t quaterStartDt :" + quaterStartDt + "\t quaerEndDt :" + quaerEndDt);
 		long daysBetween = ChronoUnit.DAYS.between(quaterStartDt, todayDt);
 		System.out.println("No of days  between quater startdate and today date  :" + daysBetween);
 
@@ -491,4 +554,58 @@ public class AdminDashBoardManager {
 		 }
 		 return peakLoadResult;
 	}
+	
+	public List<ChatSessionDoc> getAgentList() {
+		List<ChatSessionDoc> distinceAgentList = mongoTemplate.getCollection("CHAT_SESSION").distinct("assignedToAgent");
+		return distinceAgentList;
+	}
+	
+	/** Timestamp **/
+	
+	public Map<Object,Object>  getHourWiseCount(List<MessageDoc>  msgLst) {
+		List<Object> hourList = new ArrayList<Object>();
+		List<Object> dateWiseList = new ArrayList<Object>();
+		Map<Object,Object> mapLst = new HashMap<Object,Object>();
+		for(MessageDoc msg :msgLst) {
+			 long timeStamp = msg.getTimestamp();
+			 Date date=new Date(timeStamp);  
+	         String dateWithTime = new SimpleDateFormat("dd-MM-yyyy hh:mm").format(date);
+	         String ddMMyyyyFormat = new SimpleDateFormat("dd-MM-yyyy").format(date);
+	         SimpleDateFormat sdfH = new SimpleDateFormat("HH");
+	         String formattedDateH = sdfH.format(date);
+	         dateWiseList.add(ddMMyyyyFormat);
+	         hourList.add(formattedDateH);
+    	 //System.out.println(" timeStamp :"+timeStamp+"\t long to date :"+date+"\t str :"+dateWithTime+"\t ddMMyyyyFormat :"+ddMMyyyyFormat+"\t formattedDateH :"+formattedDateH);
+		}
+		
+		Set<Object> hourWiseCount = new HashSet<Object>(hourList);
+		for (Object key : hourWiseCount) {
+			mapLst.put(key, Collections.frequency(hourList, key));
+		    //System.out.println(key + ": " + Collections.frequency(hourList, key));
+		}
+		
+		return mapLst;
+	}
+	/** date wise count **/
+	public Map<Object,Object>  getDateWiseCount(List<MessageDoc>  msgLst) {
+		List<Object> dateWiseList = new ArrayList<Object>();
+		Map<Object,Object> mapLst = new HashMap<Object,Object>();
+		for(MessageDoc msg :msgLst) {
+			 long timeStamp = msg.getTimestamp();
+			 Date date=new Date(timeStamp);
+	         String ddMMyyyyFormat = new SimpleDateFormat("dd-MM-yyyy").format(date);
+	         dateWiseList.add(ddMMyyyyFormat);
+		}
+		
+		//Datewise count
+		Set<Object> dateWiseCount = new HashSet<Object>(dateWiseList);
+		for (Object key : dateWiseCount) {
+			mapLst.put(key, Collections.frequency(dateWiseList, key));
+		   // System.out.println(key + ": " + Collections.frequency(dateWiseList, key));
+		}
+		
+		return mapLst;
+	}
+	
+	
 }
