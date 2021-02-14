@@ -29,6 +29,7 @@ public class AgentSecurityConfig extends WebSecurityConfigurerAdapter {
 		http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
 				// Publics Calls
 				.and().authorizeRequests().antMatchers("/pub/**").permitAll()
+				.and().authorizeRequests().antMatchers("/ext/**").permitAll()
 				// Login Calls
 				.and().authorizeRequests().antMatchers("/auth/**").permitAll()
 				// API Calls
