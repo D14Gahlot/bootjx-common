@@ -6,7 +6,6 @@ import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.format.FormatterRegistry;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
-import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
 import com.boot.jx.filter.AppRequestInterceptor;
@@ -38,21 +37,4 @@ public class AppMVConfig extends WebMvcConfigurerAdapter {
 		registry.addConverterFactory(new StringToEnumIgnoringCaseConverterFactory());
 	}
 
-	@Override
-	public void addResourceHandlers(ResourceHandlerRegistry registry) {
-		registry.addResourceHandler("/webjars/**").addResourceLocations("classpath:/META-INF/resources/webjars/");
-		registry.addResourceHandler("/swagger-ui.html").addResourceLocations(getStaticLocations());
-	}
-
-	private String[] getStaticLocations() {
-
-		String[] result = new String[5];
-		result[0] = "/";
-		result[1] = "classpath:/META-INF/resources/";
-		result[2] = "classpath:/resources/";
-		result[3] = "classpath:/static/";
-		result[4] = "classpath:/public/";
-
-		return result;
-	}
 }
