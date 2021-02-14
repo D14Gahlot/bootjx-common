@@ -30,6 +30,7 @@ public class AgentSecurityConfig extends WebSecurityConfigurerAdapter {
 				// Publics Calls
 				.and().authorizeRequests().antMatchers("/pub/**").permitAll()
 				.and().authorizeRequests().antMatchers("/ext/**").permitAll()
+				.and().authorizeRequests().antMatchers("/int/**").permitAll()
 				// Login Calls
 				.and().authorizeRequests().antMatchers("/auth/**").permitAll()
 				// API Calls
