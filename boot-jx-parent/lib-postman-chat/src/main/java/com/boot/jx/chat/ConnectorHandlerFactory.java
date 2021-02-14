@@ -33,6 +33,20 @@ public class ConnectorHandlerFactory extends ScopedBeanFactory<String, Connector
 			return true;
 		}
 
+		default public void message(String messageType, ChatContactDoc chatContactDoc, InboxMessage inboxMessage,
+				OutboxMessage outboxMessage) {
+			switch (messageType) {
+			case "SEND":
+				this.send(chatContactDoc, outboxMessage);
+				break;
+			case "REPLY":
+				this.reply(inboxMessage, outboxMessage);
+				break;
+			default:
+				break;
+			}
+		}
+
 		void send(String lane, String to, OutboxMessage outboxMessage);
 
 	}

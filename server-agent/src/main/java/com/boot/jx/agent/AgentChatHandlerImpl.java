@@ -15,6 +15,8 @@ import com.boot.jx.agent.doc.AgentSessionDoc;
 import com.boot.jx.agent.dto.ChatMessageDto;
 import com.boot.jx.agent.dto.ChatSessionDto;
 import com.boot.jx.chat.ChatClient;
+import com.boot.jx.chat.ChatCommands;
+import com.boot.jx.chat.ChatService;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.MessageDoc;
@@ -38,7 +40,16 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 	private ChatClient chatClient;
 
 	@Autowired
+	private ChatService chatService;
+
+	@Autowired
 	private SessionStore sessionStore;
+
+	@Autowired
+	private StompTunnelService stompTunnelService;
+
+	@Autowired
+	MessageStore messageStore;
 
 	@Override
 	public boolean onAssignSupported(InboxMessage inboxMessage) {
@@ -52,10 +63,10 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 
 		Query query = new Query();
 		Criteria c = Criteria.where("isOnline").is(true).and("isLoggedIn").is(true).and("lastOnlineStamp").gt(timeThen);
-		if (ArgUtil.is(inboxMessage.getAssignedToDept())) {
-			c.and("agentDept").is(inboxMessage.getAssignedToDept());
+		if (ArgUtil.is(inboxMessage.session().getAssignedToDept())) {
+			c.and("agentDept").is(inboxMessage.session().getAssignedToDept());
 		} else {
-			inboxMessage.setAssignedToDept(PMStoreConstants.NO_DEPT);
+			inboxMessage.session().setAssignedToDept(PMStoreConstants.NO_DEPT);
 		}
 		query.addCriteria(c).with(new Sort(Direction.ASC, "lastOnlineStamp")).limit(1);
 
@@ -65,21 +76,22 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 
 		// PUBLISH
 		ChatSessionDoc chatSessionDoc = sessionStore.getSession(inboxMessage.getSessionId());
-		chatSessionDoc.setAssignedToDept(inboxMessage.getAssignedToDept());
+		chatSessionDoc.setAssignedToDept(inboxMessage.session().getAssignedToDept());
 		chatSessionDoc.setAssignedDeptStamp(System.currentTimeMillis());
+		chatSessionDoc.setMode("AGENT");
 
 		if (ArgUtil.is(avaialbleAgent)) {
 			chatSessionDoc.setAssignedToAgent(avaialbleAgent.getAgentCode());
 			chatSessionDoc.setAssignedToDept(avaialbleAgent.getAgentDept());
 			chatSessionDoc.setAssignedAgentStamp(System.currentTimeMillis());
 
-			inboxMessage.setAssignedToAgent(avaialbleAgent.getAgentCode());
-			inboxMessage.setAssignedToDept(avaialbleAgent.getAgentDept());
+			inboxMessage.session().setAssignedToAgent(avaialbleAgent.getAgentCode());
+			inboxMessage.session().setAssignedToDept(avaialbleAgent.getAgentDept());
 		}
 		sessionStore.save(chatSessionDoc);
 
-		stompTunnelService.sendToAll("/dept/onassign-" + inboxMessage.getAssignedToDept(),
-				getChatSessionDto(chatSessionDoc, inboxMessage.getAssignedToAgent()));
+		stompTunnelService.sendToAll("/dept/onassign-" + inboxMessage.session().getAssignedToDept(),
+				getChatSessionDto(chatSessionDoc, inboxMessage.session().getAssignedToAgent()));
 
 		return inboxMessage;
 	}
@@ -93,32 +105,43 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 		}
 	}
 
-	@Autowired
-	private StompTunnelService stompTunnelService;
-
-	@Autowired
-	MessageStore messageStore;
+	public void exitAgentMode(ChatSessionDoc chatSessionDoc) {
+		chatSessionDoc.setActive(false);
+		sessionStore.save(chatSessionDoc);
+		stompTunnelService.sendToAll("/dept/onassign-" + chatSessionDoc.getAssignedToDept(),
+				getChatSessionDto(chatSessionDoc, chatSessionDoc.getAssignedToAgent()));
+	}
 
 	@Override
-	public InboxMessage onMessage(InboxMessage inboxMessage) {
-
+	public InboxMessage onMessageReceive(InboxMessage inboxMessage) {
 		MessageDoc messageDoc = messageStore.find(inboxMessage);
-
 		ChatMessageDto messageDto = entityToDto(messageDoc);
-
-		stompTunnelService.sendTo(inboxMessage.getAssignedToAgent(), "/agent/onmessage", messageDto);
-
+		stompTunnelService.sendTo(inboxMessage.session().getAssignedToAgent(), "/agent/onmessage", messageDto);
 		if (inboxMessage.getMessage().equalsIgnoreCase("/exit_chat")) {
 			ChatSessionDoc chatSessionDoc = sessionStore.getSession(inboxMessage.getSessionId());
-			chatSessionDoc.setAssignedToDept(null);
-			chatSessionDoc.setAssignedToAgent(null);
-			sessionStore.save(chatSessionDoc);
-			stompTunnelService.sendToAll("/dept/onassign-" + inboxMessage.getAssignedToDept(),
-					getChatSessionDto(chatSessionDoc, inboxMessage.getAssignedToAgent()));
+			exitAgentMode(chatSessionDoc);
 			messageStore.log(inboxMessage, MessageStore.EVENTS.UNASGND);
 		}
-
 		return inboxMessage;
+	}
+
+	public OutboxMessage onSend(ChatSessionDoc sessionDoc, OutboxMessage outboxMessage) {
+		if (ChatCommands.isCommand(outboxMessage.getMessage())) {
+			switch (outboxMessage.getMessage()) {
+			case "/exit_chat":
+				this.exitAgentMode(sessionDoc);
+				break;
+			default:
+				break;
+			}
+		} else {
+			chatService.send(sessionDoc, outboxMessage);
+			MessageDoc messageDoc = messageStore.find(outboxMessage);
+			ChatMessageDto messageDto = entityToDto(messageDoc);
+			messageDto.setType(true);
+			stompTunnelService.sendTo(outboxMessage.getAgent(), "/agent/onmessage", messageDto);
+		}
+		return outboxMessage;
 	}
 
 	private ChatMessageDto entityToDto(MessageDoc messageDoc) {
@@ -133,14 +156,6 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 		messageDto.setTags(messageDoc.getTags());
 		messageDto.setAttachments(messageDoc.getAttachments());
 		return messageDto;
-	}
-
-	public OutboxMessage onSend(OutboxMessage outboxMessage) {
-		MessageDoc messageDoc = messageStore.find(outboxMessage);
-		ChatMessageDto messageDto = entityToDto(messageDoc);
-		messageDto.setType(true);
-		stompTunnelService.sendTo(outboxMessage.getAgent(), "/agent/onmessage", messageDto);
-		return outboxMessage;
 	}
 
 	public ChatSessionDto getChatSessionDto(ChatSessionDoc chatSessionDoc, String agentCode) {

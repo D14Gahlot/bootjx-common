@@ -44,6 +44,8 @@ public class ChatSessionDoc implements Serializable {
 	private Integer agentScore;
 	private Integer botScore;
 
+	private String mode;
+
 	public long getLastInComingStamp() {
 		return lastInComingStamp;
 	}
@@ -170,6 +172,14 @@ public class ChatSessionDoc implements Serializable {
 
 	public void setBotScore(Integer botScore) {
 		this.botScore = botScore;
+	}
+
+	public String getMode() {
+		return mode;
+	}
+
+	public void setMode(String mode) {
+		this.mode = mode;
 	}
 
 }

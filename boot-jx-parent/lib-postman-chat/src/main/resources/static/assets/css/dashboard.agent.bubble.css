@@ -176,24 +176,26 @@
 		margin-top: auto;
 		margin-bottom: auto;
 		margin-left: 10px;
-		border-radius: 8px;
+		border-radius: 7px;
 		background-color: #2f8df7;
 		color : #fff;
 		padding: 6px;
 		position: relative;
 		font-size: 14px;
-		border : 1px solid #0000001c;
+		-border : 1px solid #0000001c;
+		box-shadow: 0 1.5px 1.5px #00000052;
 	}
 	.msg_cotainer_send{
 		margin-top: auto;
 		margin-bottom: auto;
 		margin-right: 10px;
-		border-radius: 8px;
+		border-radius: 7px;
 		background-color: #FFF;
 		padding: 6px;
 		position: relative;
 		font-size: 14px;
-		border : 1px solid #0000001c;
+		-border : 1px solid #0000001c;
+		box-shadow: 0 1.5px 1.5px #00000052;
 	}
 	.msg_time{
 		position: absolute;
@@ -569,3 +571,7 @@ ui.contacts.contact-list-unassigned li.data_unassigned {
 	margin: 10px;
 	max-width : 200px;
 }
+.my-actions-button.btn.disabled, .my-actions-button.btn[disabled]{
+	opacity: 1;
+	color: #b9b4b4;
+} 

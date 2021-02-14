@@ -112,8 +112,10 @@ public class SessionStore {
 		}
 
 		inboxMessage.setSessionId(chatSessionDoc.getSessionId());
-		inboxMessage.setAssignedToAgent(chatSessionDoc.getAssignedToAgent());
-		inboxMessage.setAssignedToDept(chatSessionDoc.getAssignedToDept());
+		inboxMessage.session().setAssignedToAgent(chatSessionDoc.getAssignedToAgent());
+		inboxMessage.session().setAssignedToDept(chatSessionDoc.getAssignedToDept());
+		inboxMessage.session().setMode(chatSessionDoc.getMode());
+
 		return chatSessionDoc;
 	}
 

@@ -57,9 +57,9 @@ public class ChatService {
 			ConnectorHandler connector = connectorHandlerFactory.get(outboxMessage.getContactType(),
 					outboxMessage.getChannel());
 			if (ArgUtil.is(connector)) {
-				connector.reply(inboxMessage, outboxMessage);
+				connector.message("REPLY", null, inboxMessage, outboxMessage);
 			} else if (ArgUtil.is(defaultConnector)) {
-				defaultConnector.reply(inboxMessage, outboxMessage);
+				defaultConnector.message("REPLY", null, inboxMessage, outboxMessage);
 			}
 		}
 		messageStore.create(outboxMessage);
@@ -77,9 +77,9 @@ public class ChatService {
 			ConnectorHandler connector = connectorHandlerFactory.get(outboxMessage.getContactType(),
 					outboxMessage.getChannel());
 			if (ArgUtil.is(connector)) {
-				connector.send(chatContactDoc, outboxMessage);
+				connector.message("SEND", chatContactDoc, null, outboxMessage);
 			} else if (ArgUtil.is(defaultConnector)) {
-				defaultConnector.send(chatContactDoc, outboxMessage);
+				defaultConnector.message("SEND", chatContactDoc, null, outboxMessage);
 			}
 		}
 		messageStore.create(outboxMessage);

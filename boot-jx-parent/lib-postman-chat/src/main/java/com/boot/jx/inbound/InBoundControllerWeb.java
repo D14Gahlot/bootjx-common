@@ -78,10 +78,10 @@ public class InBoundControllerWeb {
 				outboxMessage.setMessage(messageDoc.getMessage());
 				outboxMessage.setTemplate(messageDoc.getTemplate());
 				outboxMessage.setAttachments(messageDoc.getAttachments());
-				if(ArgUtil.isEqual(messageDoc.getType(), "I")) {
+				if (ArgUtil.isEqual(messageDoc.getType(), "I")) {
 					outboxMessage.addTo(messageDoc.getContactId());
 				} else {
-					//webConnector.process(outboxMessage);				
+					// webConnector.process(outboxMessage);
 				}
 				msgs.add(outboxMessage);
 			}
@@ -100,13 +100,13 @@ public class InBoundControllerWeb {
 		// event.setSessionId("600edc822743742e916202b9");
 		event.setSessionId(null);
 		event.setMessageId(null);
-		event.setAssignedToAgent(null);
-		event.setAssignedToDept(null);
+		event.session().setAssignedToAgent(null);
+		event.session().setAssignedToDept(null);
 		inBoundEngine.invokeMethods(event);
-		
+
 		String webSessionId = commonHttpRequest.get("web-session-id");
 		if (!ArgUtil.is(webSessionId)) {
-			commonHttpRequest.setCookie("web-session-id",event.getSessionId());
+			commonHttpRequest.setCookie("web-session-id", event.getSessionId());
 		}
 		return event;
 	}

@@ -9,12 +9,13 @@ import org.springframework.data.annotation.TypeAlias;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import com.boot.jx.mongo.Patchable;
 import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.TagDocument;
 
 @Document(collection = MessageDoc.COLLECTION_NAME)
 @TypeAlias("MessageDoc")
-public class MessageDoc implements Serializable {
+public class MessageDoc implements Serializable, Patchable<MessageDoc> {
 	private static final long serialVersionUID = -7003453286628859075L;
 	public static final String COLLECTION_NAME = "MESSAGE";
 
@@ -184,6 +185,13 @@ public class MessageDoc implements Serializable {
 
 	public void setAttachments(List<Attachment> attachments) {
 		this.attachments = attachments;
+	}
+
+	@Override
+	public MessageDoc patch() {
+		MessageDoc patch = new MessageDoc();
+		patch.setMessageId(this.getMessageId());
+		return patch;
 	}
 
 }

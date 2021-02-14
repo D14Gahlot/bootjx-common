@@ -32,10 +32,8 @@ public class InboxMessage implements Serializable {
 
 	private String checksum;
 
-	private String assignedToDept;
-	private String assignedToAgent;
-
 	private Object originalMessage;
+	private MessageSession session;
 
 	protected Map<String, Object> form = new HashMap<String, Object>();
 	protected Map<String, Object> data = new HashMap<String, Object>();
@@ -203,22 +201,6 @@ public class InboxMessage implements Serializable {
 		this.checksum = checksum;
 	}
 
-	public String getAssignedToDept() {
-		return assignedToDept;
-	}
-
-	public void setAssignedToDept(String assignedToDept) {
-		this.assignedToDept = assignedToDept;
-	}
-
-	public String getAssignedToAgent() {
-		return assignedToAgent;
-	}
-
-	public void setAssignedToAgent(String assignedToAgent) {
-		this.assignedToAgent = assignedToAgent;
-	}
-
 	public Map<String, Object> getForm() {
 		return form;
 	}
@@ -263,6 +245,21 @@ public class InboxMessage implements Serializable {
 
 	public void setTags(TagDocument tags) {
 		this.tags = tags;
+	}
+
+	public MessageSession getSession() {
+		return session;
+	}
+
+	public void setSession(MessageSession session) {
+		this.session = session;
+	}
+
+	public MessageSession session() {
+		if (session == null) {
+			this.session = new MessageSession();
+		}
+		return this.session;
 	}
 
 }

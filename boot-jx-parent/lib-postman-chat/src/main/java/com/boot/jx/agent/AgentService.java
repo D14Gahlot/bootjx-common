@@ -9,7 +9,9 @@ import com.boot.jx.chat.ChatClient;
 import com.boot.jx.chat.ConnectorHandlerFactory;
 import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorHandler;
 import com.boot.jx.chat.ConnectorHandlerFactory.DefaultConnector;
+import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.model.InboxMessage;
+import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.utils.ArgUtil;
 
 @Component
@@ -51,7 +53,7 @@ public class AgentService {
 	public ApiResponse<InboxMessage, Object> assignToAgent(String deptName) throws InterruptedException {
 		InboxMessage inboxMessage = chatContext.getInboxMessage();
 		if (ArgUtil.is(inboxMessage)) {
-			inboxMessage.setAssignedToDept(deptName);
+			inboxMessage.session().setAssignedToDept(deptName);
 			return this.assignToAgent(inboxMessage);
 		}
 		return null;
@@ -62,6 +64,11 @@ public class AgentService {
 	}
 
 	public InboxMessage onMessage(InboxMessage inboxMessage) {
-		return agentChatHandler.onMessage(inboxMessage);
+		return agentChatHandler.onMessageReceive(inboxMessage);
 	}
+
+	public OutboxMessage sendMessage(ChatSessionDoc sessionDoc, OutboxMessage outboxMessage) {
+		return agentChatHandler.onSend(sessionDoc, outboxMessage);
+	}
+
 }

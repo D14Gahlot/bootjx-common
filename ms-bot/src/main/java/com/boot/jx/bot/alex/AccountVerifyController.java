@@ -137,7 +137,7 @@ public class AccountVerifyController extends ChatController {
 			break;
 		case "4":
 			InboxMessage agentAssignResp = assignToAgent().getResult();
-			if (ArgUtil.is(agentAssignResp.getAssignedToAgent())) {
+			if (ArgUtil.is(agentAssignResp.session().getAssignedToAgent())) {
 				reply("One of our agent will attend you shortly");
 			} else {
 				reply("All agents are busy or online, we will connect you whenever someone is avaialable.");

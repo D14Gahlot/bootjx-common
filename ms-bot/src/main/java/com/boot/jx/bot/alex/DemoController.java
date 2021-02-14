@@ -61,15 +61,15 @@ public class DemoController extends ChatController {
 		switch (inboxMessage.getMessage().toLowerCase()) {
 		case "1":
 			reply(new OutboxMessage().template("today-credits").put("name", chatContext.getContact().getName()));
-			next("feedback-onselect");
+			next("more-onselect");
 			break;
 		case "2":
 			reply(new OutboxMessage().template("today-debits").put("name", chatContext.getContact().getName()));
-			next("feedback-onselect");
+			next("more-onselect");
 			break;
 		case "3":
 			reply(new OutboxMessage().template("today-trnx").put("name", chatContext.getContact().getName()));
-			next("feedback-onselect");
+			next("more-onselect");
 			break;
 		case "*":
 			reply(new OutboxMessage().template("feedback"));
@@ -103,15 +103,18 @@ public class DemoController extends ChatController {
 			return;
 		}
 	}
-	
+
 	@ChatMapping(key = "feedback-onselect")
 	public void feedback(InboxMessage inboxMessage, StringMatcher matcher) {
 		switch (inboxMessage.getMessage().toLowerCase()) {
+		case "happy":
 		case "yes":
 		case "y":
 		case "1":
 			reply("Thanks - Conversation Closed");
 			break;
+		case "not happy":
+		case "nothappy":
 		case "no":
 		case "n":
 		case "2":
@@ -128,7 +131,7 @@ public class DemoController extends ChatController {
 	public void transferToAgent(InboxMessage inboxMessage, StringMatcher matcher) {
 		try {
 			InboxMessage agentAssignResp = assignToAgent().getResult();
-			if (ArgUtil.is(agentAssignResp.getAssignedToAgent())) {
+			if (ArgUtil.is(agentAssignResp.session().getAssignedToAgent())) {
 				reply("One of our agent will attend you shortly");
 			} else {
 				reply("All agents are busy or online, we will connect you whenever someone is available.");

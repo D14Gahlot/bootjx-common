@@ -9,6 +9,7 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Component;
 
+import com.boot.jx.mongo.CommonDocStore;
 import com.boot.jx.postman.doc.ContactDoc;
 import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.model.InboxMessage;
@@ -20,7 +21,7 @@ import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
 
 @Component
-public class MessageStore {
+public class MessageStore extends CommonDocStore {
 
 	public static enum EVENTS {
 		ASGND_TO_DEPT, ASGND_TO_AGENT, UNASGND, PICKED_BY_AGENT, CLOSED_BY_AGENT
@@ -103,7 +104,7 @@ public class MessageStore {
 		doc.setMessage(logMessage);
 		doc.setTemplate(ArgUtil.parseAsString(eventName));
 		doc.setSessionId(inboxMessage.getSessionId());
-		doc.setAgent(inboxMessage.getAssignedToAgent());
+		doc.setAgent(inboxMessage.session().getAssignedToAgent());
 		mongoTemplate.save(doc, getCollectionName("LOGS"));
 		return doc;
 	}
@@ -134,21 +135,21 @@ public class MessageStore {
 		String to = CollectionUtil.getOne(outMessage.getTo());
 		MessageDoc doc = new MessageDoc();
 		doc.setContactId(PostManUtil.createContactId(outMessage));
-		doc.setType("O");
+		doc.setType(ArgUtil.nonEmpty(outMessage.getType(), "O"));
 		doc.setTimestamp(System.currentTimeMillis());
 		ContactDoc contact = new ContactDoc();
 		contact.setMobile(to);
 		contact.setContactType(outMessage.getContactType());
 		doc.setContact(contact);
 
-		//if (ArgUtil.is(outMessage.getTemplate())) {
-			doc.setTemplate(outMessage.getTemplate());
-			doc.setModel(outMessage.getModel());
-		//} else {
-			doc.setMessage(outMessage.getMessage());
-		//}
-			doc.setAttachments(outMessage.getAttachments());
-			
+		// if (ArgUtil.is(outMessage.getTemplate())) {
+		doc.setTemplate(outMessage.getTemplate());
+		doc.setModel(outMessage.getModel());
+		// } else {
+		doc.setMessage(outMessage.getMessage());
+		// }
+		doc.setAttachments(outMessage.getAttachments());
+
 		doc.setSessionId(outMessage.getSessionId());
 		return doc;
 	}
@@ -194,6 +195,10 @@ public class MessageStore {
 		query2.addCriteria(Criteria.where("sessionId").is(sessionId));
 		List<MessageDoc> messages = mongoTemplate.find(query2, MessageDoc.class, getCollectionName(contactType));
 		return messages;
+	}
+
+	public void applyPatch(MessageDoc messageDoc) {
+		applyPatch(messageDoc, getCollectionName(messageDoc.getContact().getContactType()));
 	}
 
 }

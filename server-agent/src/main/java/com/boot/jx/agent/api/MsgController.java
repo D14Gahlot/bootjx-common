@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.boot.jx.agent.AgentChatHandlerImpl;
+import com.boot.jx.agent.AgentService;
 import com.boot.jx.agent.AgentSessionBean;
 import com.boot.jx.agent.AgentSessionService;
 import com.boot.jx.agent.doc.AgentSessionDoc;
@@ -44,6 +45,9 @@ public class MsgController {
 
 	@Autowired
 	private AgentChatHandlerImpl agentChatHandlerImpl;
+
+	@Autowired
+	private AgentService agentService;
 
 	@Autowired
 	private AgentSessionService agentSessionService;
@@ -98,10 +102,8 @@ public class MsgController {
 			ChatMessageDto messageDto = new ChatMessageDto();
 			messageDto.setType(true);
 			messageDto.setName(agentSession.getAgentCode());
-			sessionDoc.getContactId();
-			chatService.send(sessionDoc, outboxMessage);
+			agentService.sendMessage(sessionDoc, outboxMessage);
 			messageDto.setMessageId(outboxMessage.getMessageId());
-			agentChatHandlerImpl.onSend(outboxMessage);
 			return ApiResponse.buildResult(messageDto);
 		}
 		agentSessionService.refreshOnline();

@@ -43,6 +43,7 @@ public class Message<T extends Message<T>> implements Serializable, MessageOptio
 	protected List<String> to = null;
 	protected List<Contact> contacts = null;
 	private String template = null;
+	private String type = null;
 
 	private Map<String, Object> model = new HashMap<String, Object>();
 	protected Map<String, String> options = new HashMap<String, String>();
@@ -438,6 +439,14 @@ public class Message<T extends Message<T>> implements Serializable, MessageOptio
 			this.attachments().add(file);
 		}
 		return (T) this;
+	}
+
+	public String getType() {
+		return type;
+	}
+
+	public void setType(String type) {
+		this.type = type;
 	}
 
 }
