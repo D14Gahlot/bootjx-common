@@ -24,6 +24,13 @@ mvn package -pl ms-bot -am -DskipTests
 java -jar ms-bot/target/ms-bot-0.0.1-SNAPSHOT.jar
 ```
 
+### ADMIN
+```
+mvn package -pl server-admin -am -DskipTests
+// 
+java -jar server-admin/target/server-admin-0.0.1-SNAPSHOT.jar
+```
+
 ## URL mapping
 
 ### API
@@ -32,8 +39,8 @@ java -jar ms-bot/target/ms-bot-0.0.1-SNAPSHOT.jar
 * https://api.mehery.com/bot => 127.0.0.1:8084/bot
 
 ### SERVER
-* https://demo.mehery.com/agent => 127.0.0.1:8083/agent
-* https://demo.mehery.com/admin => 127.0.0.1:8081/admin
+* https://app.mehery.com/agent => 127.0.0.1:8083/agent
+* https://app.mehery.com/admin => 127.0.0.1:8081/admin
 
 ### GUIDE
 [Application Properties](docs/application.properties.md)
