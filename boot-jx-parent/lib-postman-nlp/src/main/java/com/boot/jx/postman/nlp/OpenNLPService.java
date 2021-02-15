@@ -127,59 +127,65 @@ public class OpenNLPService {
 
 	}
 
-	public TagDocument addTags(String userInput, TagDocument nlpDocument) throws FileNotFoundException, IOException {
+	public TagDocument addTags(String userInput, TagDocument tagDocument) {
 
 		if (!initd) {
-			return nlpDocument;
+			return tagDocument;
 		}
 
-		String[] sentences = breakSentences(userInput);
+		try {
+			String[] sentences = breakSentences(userInput);
 
-		LanguageDetectorME languageDetectorME = new LanguageDetectorME(languageDetectorModel);
-		Language[] langs = languageDetectorME.predictLanguages(userInput);
+			LanguageDetectorME languageDetectorME = new LanguageDetectorME(languageDetectorModel);
+			Language[] langs = languageDetectorME.predictLanguages(userInput);
 
-		if (ArgUtil.is(langs)) {
-			java.util.stream.IntStream.range(0, Math.min(3, langs.length)).filter(i -> langs[i].getConfidence() > 0.01)
-					.mapToObj(i -> langs[i].getLang()).collect(Collectors.toCollection(() -> nlpDocument.langs()));
+			if (ArgUtil.is(langs)) {
+				java.util.stream.IntStream.range(0, Math.min(3, langs.length))
+						.filter(i -> langs[i].getConfidence() > 0.01).mapToObj(i -> langs[i].getLang())
+						.collect(Collectors.toCollection(() -> tagDocument.langs()));
+			}
+
+			for (String sentence : sentences) {
+				// Separate words from each sentence using tokenizer.
+				String[] tokens = tokenizeSentence(sentence);
+
+				// Tag separated words with POS tags to understand their gramatical structure.
+				String[] posTags = detectPOSTags(tokens);
+
+				// Lemmatize each word so that its easy to categorize.
+				String[] lemmas = lemmatizeTokens(tokens, posTags);
+
+				// Determine BEST category using lemmatized tokens used a mode that we trained
+				// at start.
+
+				tagDocument.categories().add(detectCategory(lemmas));
+
+				String[] simpleTokens = SimpleTokenizer.INSTANCE.tokenize(sentence);
+
+				NameFinderME personFinderME = new NameFinderME(tokenNameFinderModelPerson);
+				String[] persons = Span.spansToStrings(personFinderME.find(simpleTokens), simpleTokens);
+				if (ArgUtil.is(persons)) {
+					tagDocument.persons().addAll(Arrays.asList(persons));
+				}
+
+				NameFinderME locationFinderME = new NameFinderME(tokenNameFinderModelLocation);
+				String[] locations = Span.spansToStrings(locationFinderME.find(simpleTokens), simpleTokens);
+				if (ArgUtil.is(locations)) {
+					tagDocument.locations().addAll(Arrays.asList(locations));
+				}
+
+				NameFinderME orgFinderME = new NameFinderME(tokenNameFinderModelOrganization);
+				String[] organizations = Span.spansToStrings(orgFinderME.find(simpleTokens), simpleTokens);
+				if (ArgUtil.is(organizations)) {
+					tagDocument.organizations().addAll(Arrays.asList(organizations));
+				}
+			}
+
+		} catch (IOException e) {
+			LOGGER.error("Error While Adding Tag", e);
 		}
 
-		for (String sentence : sentences) {
-			// Separate words from each sentence using tokenizer.
-			String[] tokens = tokenizeSentence(sentence);
-
-			// Tag separated words with POS tags to understand their gramatical structure.
-			String[] posTags = detectPOSTags(tokens);
-
-			// Lemmatize each word so that its easy to categorize.
-			String[] lemmas = lemmatizeTokens(tokens, posTags);
-
-			// Determine BEST category using lemmatized tokens used a mode that we trained
-			// at start.
-
-			nlpDocument.categories().add(detectCategory(lemmas));
-
-			String[] simpleTokens = SimpleTokenizer.INSTANCE.tokenize(sentence);
-
-			NameFinderME personFinderME = new NameFinderME(tokenNameFinderModelPerson);
-			String[] persons = Span.spansToStrings(personFinderME.find(simpleTokens), simpleTokens);
-			if (ArgUtil.is(persons)) {
-				nlpDocument.persons().addAll(Arrays.asList(persons));
-			}
-
-			NameFinderME locationFinderME = new NameFinderME(tokenNameFinderModelLocation);
-			String[] locations = Span.spansToStrings(locationFinderME.find(simpleTokens), simpleTokens);
-			if (ArgUtil.is(locations)) {
-				nlpDocument.locations().addAll(Arrays.asList(locations));
-			}
-
-			NameFinderME orgFinderME = new NameFinderME(tokenNameFinderModelOrganization);
-			String[] organizations = Span.spansToStrings(orgFinderME.find(simpleTokens), simpleTokens);
-			if (ArgUtil.is(organizations)) {
-				nlpDocument.organizations().addAll(Arrays.asList(organizations));
-			}
-		}
-
-		return nlpDocument;
+		return tagDocument;
 	}
 
 	public String[] breakSentences(String data) throws FileNotFoundException, IOException {

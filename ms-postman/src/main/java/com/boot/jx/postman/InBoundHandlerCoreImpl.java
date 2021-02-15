@@ -1,7 +1,5 @@
 package com.boot.jx.postman;
 
-import java.io.IOException;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -119,7 +117,7 @@ public class InBoundHandlerCoreImpl implements InBoundHandler {
 				}
 
 				messageStore.setTags(inboxMessage, inboxMessage.getTags());
-			} catch (IOException e) {
+			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		}

@@ -1,7 +1,5 @@
 package com.boot.jx.postman.nlp;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.util.List;
 import java.util.Properties;
 import java.util.stream.Collectors;
@@ -35,7 +33,7 @@ public class CoreNLPService {
 	private boolean initd;
 
 	@PostConstruct
-	public void init() throws FileNotFoundException, IOException {
+	public void init() {
 		try {
 			// Sentiments
 			Properties sentimentProps = new Properties();
@@ -67,40 +65,47 @@ public class CoreNLPService {
 			return tagDocument;
 		}
 
-		LOGGER.debug("SENTIMENT<");
-		CoreDocument sentimentDoc = this.tokenizerPipeline.processToCoreDocument(line);
-		sentimentPipeline.annotate(sentimentDoc);
-		// normal output
-		List<String> sencs = sentimentDoc.sentences().stream().map(mapper -> mapper.sentiment())
-				.collect(Collectors.toCollection(() -> tagDocument.sentiments()));
-		LOGGER.debug("SENTIMENT>");
+		try {
 
-		if (ArgUtil.is(line)) {
-			// return;
-		}
+			LOGGER.debug("SENTIMENT<");
+			CoreDocument sentimentDoc = this.tokenizerPipeline.processToCoreDocument(line);
+			sentimentPipeline.annotate(sentimentDoc);
+			// normal output
+			List<String> sencs = sentimentDoc.sentences().stream().map(mapper -> mapper.sentiment())
+					.collect(Collectors.toCollection(() -> tagDocument.sentiments()));
+			LOGGER.debug("SENTIMENT>");
 
-		LOGGER.debug("TAGS<");
-		CoreDocument doc = nerPipeline.processToCoreDocument(line);
-		// pipeline2.annotate(doc);
+			if (ArgUtil.is(line)) {
+				// return;
+			}
 
-		if (ArgUtil.is(doc.entityMentions())) {
-			for (CoreEntityMention em : doc.entityMentions()) {
-				switch (em.entityType()) {
-				case "PERSON":
-					tagDocument.persons().add(em.text());
-					break;
-				case "COUNTRY":
-					tagDocument.countries().add(em.text());
-					break;
-				case "CITY":
-					tagDocument.cities().add(em.text());
-					break;
-				default:
-					break;
+			LOGGER.debug("TAGS<");
+			CoreDocument doc = nerPipeline.processToCoreDocument(line);
+			// pipeline2.annotate(doc);
+
+			if (ArgUtil.is(doc.entityMentions())) {
+				for (CoreEntityMention em : doc.entityMentions()) {
+					switch (em.entityType()) {
+					case "PERSON":
+						tagDocument.persons().add(em.text());
+						break;
+					case "COUNTRY":
+						tagDocument.countries().add(em.text());
+						break;
+					case "CITY":
+						tagDocument.cities().add(em.text());
+						break;
+					default:
+						break;
+					}
 				}
 			}
+			LOGGER.debug("TAGS>");
+
+		} catch (Exception e) {
+			LOGGER.error("Error While Adding Tag", e);
 		}
-		LOGGER.debug("TAGS>");
+
 		return tagDocument;
 	}
 	/**
