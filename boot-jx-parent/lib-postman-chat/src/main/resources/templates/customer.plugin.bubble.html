@@ -15,7 +15,7 @@
  <script>
 		window.CONST = {
 			CONTEXT: '[[${APP_CONTEXT}]]',
-			POSTMAN : '/postman'
+			POSTMAN : '[[${POSTMAN_CONTEXT}]]'
 		}
 </script>
 </head>
@@ -64,7 +64,7 @@
 
 		<script type="text/template" id="onRcvMsgFormat">
 
-<div class="d-flex justify-content-start mb-4">
+<div class="d-flex justify-content-start mb-4 chat-bubble">
 	<div class="img_cont_msg">
 		<img src="https://static.turbosquid.com/Preview/001292/481/WV/_D.jpg" class="rounded-circle user_img_msg">
 	</div>
@@ -105,8 +105,9 @@
 	</div>
 		<% } %>
 
-		<span class="msg_time"><%=im._timestamp%></span>
+		
 	</div>
+<span class="msg_time"><%=im._timestamp%></span>
 </div> 
 		</script>
 
@@ -114,15 +115,15 @@
 		
 		<script type="text/template" id="onSndMsgFormat">
 
-<div class="d-flex justify-content-end mb-4">
+<div class="d-flex justify-content-end mb-4 chat-bubble">
 	<div class="msg_cotainer_send">
 		<span id="<%=om.stamp%>" class="blink_me">
 			<%=om.msg%>
 		</span>
-		<span class="msg_time_send"><%=om._timestamp%></span>
 		<% var url = file2Url(om.files); if(url){ %>
 			<a href="<%=files[0].url %>" target="_blank" >Download</a>
 		<% } %>
+		<span class="msg_time_send"><%=om._timestamp%></span>
 	</div>
 	<div class="img_cont_msg">
 		<img src="/agent/assets/images/profile.png" class="rounded-circle user_img_msg">

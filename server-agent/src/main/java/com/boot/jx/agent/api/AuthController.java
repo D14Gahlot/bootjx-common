@@ -64,8 +64,8 @@ public class AuthController {
 		model.addAttribute("APP_CONTEXT", appConfig.getAppPrefix());
 		model.addAttribute("APP_USER", agentSession.getAgentCode());
 		model.addAttribute("APP_DEPT", agentSession.getAgentDept());
-		
-		String appUrl = ArgUtil.parseAsString(commonHttpRequest.get("APP_URL"),Constants.BLANK);
+
+		String appUrl = ArgUtil.parseAsString(commonHttpRequest.get("APP_URL"), Constants.BLANK);
 		model.addAttribute("APP_URL", appUrl);
 		theme = ArgUtil.nonEmpty(commonHttpRequest.get("theme"), "dashboard.agent.bubble");
 		model.addAttribute("APP_THEME", theme);
@@ -85,6 +85,7 @@ public class AuthController {
 		model.addAttribute("APP_CONTEXT", appConfig.getAppPrefix());
 		model.addAttribute("APP_USER", agentSession.getAgentCode());
 		model.addAttribute("APP_DEPT", agentSession.getAgentDept());
+		model.addAttribute("POSTMAN_CONTEXT", "/postman");
 		return "customer." + page;
 	}
 

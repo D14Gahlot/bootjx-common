@@ -8,7 +8,7 @@ import java.util.regex.Pattern;
 /**
  * Wrapper class for methods annotated with {@link ChatMapping}.
  */
-public class MethodWrapper {
+public class MethodWrapper implements Comparable<MethodWrapper> {
 	private String controller;
 	private Method method;
 	private Pattern[] pattern;
@@ -16,6 +16,8 @@ public class MethodWrapper {
 	private Matcher matcher;
 	private String next;
 	String key;
+	private int length;
+	private int priority;
 
 	public Method getMethod() {
 		return method;
@@ -95,6 +97,35 @@ public class MethodWrapper {
 
 	public void setLane(String lane) {
 		this.lane = lane;
+	}
+
+	@Override
+	public int compareTo(MethodWrapper o) {
+		if (this.priority == o.getPriority()) {
+			return o.getLength() - this.length;
+		}
+		return o.getPriority() - this.priority;
+	}
+
+	public int getPriority() {
+		return priority;
+	}
+
+	public void setPriority(int priority) {
+		this.priority = priority;
+	}
+
+	@Override
+	public String toString() {
+		return this.controller + " " + this.method.getName() + " " + this.key + " " + this.priority + " " + this.length;
+	}
+
+	public int getLength() {
+		return length;
+	}
+
+	public void setLength(int length) {
+		this.length = length;
 	}
 
 }

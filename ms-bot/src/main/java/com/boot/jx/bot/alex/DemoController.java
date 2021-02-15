@@ -139,6 +139,27 @@ public class DemoController extends ChatController {
 		} catch (Exception e) {
 			reply("Some Tech Issues");
 		}
+	}
+
+	@ChatMapping(key = AlexBotConstants.KEY.INITIATE, pattern = "^*$")
+	public void defaultHandler(InboxMessage inboxMessage, StringMatcher matcher) {
+		if (ArgUtil.is(inboxMessage.getTags()) && ArgUtil.is(inboxMessage.getTags().getCategories())) {
+			if (inboxMessage.getTags().getCategories().indexOf("today-credits") > -1) {
+				reply(new OutboxMessage().template("today-credits").put("name", chatContext.getContact().getName()));
+				next("more-onselect");
+			} else if (inboxMessage.getTags().getCategories().indexOf("today-debits") > -1) {
+				reply(new OutboxMessage().template("today-credits").put("name", chatContext.getContact().getName()));
+				next("more-onselect");
+			} else if (inboxMessage.getTags().getCategories().indexOf("today-trnx") > -1) {
+				reply(new OutboxMessage().template("today-credits").put("name", chatContext.getContact().getName()));
+				next("more-onselect");
+			} else if (inboxMessage.getTags().getCategories().indexOf("menu") > -1) {
+				reply(new OutboxMessage().template("menu-2").put("name", chatContext.getContact().getName()));
+				next("menu-2-onselect");
+			} else if (inboxMessage.getTags().getCategories().indexOf("transfer-to-agent") > -1) {
+				transferToAgent(inboxMessage, matcher);
+			}
+		}
 
 	}
 

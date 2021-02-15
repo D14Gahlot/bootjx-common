@@ -35,5 +35,7 @@ public @interface ChatMapping {
 	 */
 	int patternFlags() default 0;
 
+	int priority() default 0;
+
 	String next() default Constants.BLANK;
 }

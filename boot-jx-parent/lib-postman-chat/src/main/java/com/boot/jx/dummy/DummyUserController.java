@@ -65,6 +65,7 @@ public class DummyUserController {
 	@RequestMapping(value = "/dummy/user", method = RequestMethod.GET)
 	public String dummyUser(@RequestParam String number, Model model) throws InterruptedException {
 		model.addAttribute("APP_CONTEXT", appConfig.getAppPrefix());
+		model.addAttribute("POSTMAN_CONTEXT", appConfig.getAppPrefix());
 		return "dummyuser";
 	}
 
@@ -73,6 +74,7 @@ public class DummyUserController {
 			throws InterruptedException {
 		commonHttpRequest.setCookie("contactType", ArgUtil.parseAsString(contacyType, ContactType.WEBSITE.toString()));
 		model.addAttribute("APP_CONTEXT", appConfig.getAppPrefix());
+		model.addAttribute("POSTMAN_CONTEXT", appConfig.getAppPrefix());
 		return "customer.plugin.bubble";
 	}
 }

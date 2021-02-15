@@ -2,11 +2,14 @@ package com.boot.jx.bot;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.TreeMap;
 import java.util.regex.Pattern;
 
 import javax.annotation.PostConstruct;
@@ -36,7 +39,8 @@ public class BotEngine {
 	@Autowired(required = false)
 	List<ChatController> chatControllers;
 
-	protected final Map<String, MethodWrapper> eventToMethodsMap = new HashMap<>();
+	protected final TreeMap<String, MethodWrapper> eventToMethodsMap = new TreeMap<String, MethodWrapper>();
+	List<MethodWrapper> eventToMethodsList = new ArrayList<MethodWrapper>();
 
 	private final Map<String, MethodWrapper> methodNameMap = new HashMap<>();
 	/**
@@ -78,13 +82,17 @@ public class BotEngine {
 
 					MethodWrapper methodWrapper = new MethodWrapper();
 					methodWrapper.setMethod(method);
+					methodWrapper.setPriority(controller.priority());
 
 					Pattern[] patterns = new Pattern[patternStr.length];
 
+					int length = 0;
 					for (int i = 0; i < patternStr.length; i++) {
 						patterns[i] = Pattern.compile(patternStr[i], patternFlags);
+						length = Math.min(Math.max(patternStr[i].length(), length), patternStr[i].length());
 					}
 
+					methodWrapper.setLength(length);
 					methodWrapper.setPattern(patterns);
 					methodWrapper.setNext(next);
 					methodWrapper.setController(controllerName);
@@ -92,12 +100,18 @@ public class BotEngine {
 					methodWrapper.setLane(botControllerAnnot.lane());
 
 					// for (String event : events) {
-					eventToMethodsMap.put(key, methodWrapper);
+					eventToMethodsList.add(methodWrapper);
+					// eventToMethodsMap.put(key, methodWrapper);
 					// }
 					methodNameMap.put(method.getName(), methodWrapper);
 				}
 			}
 		}
+		Collections.sort(eventToMethodsList);
+		for (MethodWrapper methodWrapper : eventToMethodsList) {
+			eventToMethodsMap.put(methodWrapper.getKey(), methodWrapper);
+		}
+
 	}
 
 	/**
@@ -119,8 +133,7 @@ public class BotEngine {
 
 		StringMatcher matcher = new StringMatcher(event.getMessage().toUpperCase());
 
-		for (Entry<String, MethodWrapper> methodWrapperEntry : eventToMethodsMap.entrySet()) {
-			MethodWrapper methodWrapper = methodWrapperEntry.getValue();
+		for (MethodWrapper methodWrapper : eventToMethodsList) {
 			Pattern[] patterns = methodWrapper.getPattern();
 			if (patterns.length > 0) {
 				for (int i = 0; i < patterns.length; i++) {
@@ -135,8 +148,7 @@ public class BotEngine {
 			}
 		}
 
-		for (Entry<String, MethodWrapper> methodWrapperEntry : eventToMethodsMap.entrySet()) {
-			MethodWrapper methodWrapper = methodWrapperEntry.getValue();
+		for (MethodWrapper methodWrapper : eventToMethodsList) {
 			Pattern[] patterns = methodWrapper.getPattern();
 			if (patterns.length > 0) {
 				for (int i = 0; i < patterns.length; i++) {
