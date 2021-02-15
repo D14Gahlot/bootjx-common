@@ -209,7 +209,7 @@
 			<% if(gc.m && !gc.m.messageId){ %><i class="sending fas fa-spinner fa-spin"></i><% } %>
 			<%=formatMessage(gc.text)%>
 			<% if(gc.m && gc.m.template){ %><span class="fa fa-picture-o"></span>  <%=gc.m.template%><% } %>
-			<span class="msg_time_send"><%=formatTime(gc.time)%>&nbsp;&nbsp;<span class="msg_user"><%=gc.m.name ||'---'%></span></span>
+			<span class="msg_time_send"><%=formatTime(gc.time)%>&nbsp;&nbsp;<span class="msg_user"><%=gc.name ||'---'%></span></span>
 			<% if(gc.m.attachments && gc.m.attachments.length>0) {%>
 			<div class="input-group my-attachments">
 				<% for(var i in gc.m.attachments) {%>
@@ -231,7 +231,7 @@
 		<div class="msg_cotainer">
 			<%=formatMessage(gc.text)%>
 		</div>
-		<span class="msg_time"><span class="msg_user"><%=gc.m.name ||'---'%></span>&nbsp;&nbsp;<%=formatTime(gc.time)%></span>
+		<span class="msg_time"><span class="msg_user"><%=gc.name ||'---'%></span>&nbsp;&nbsp;<%=formatTime(gc.time)%></span>
 	</div>
 </script>
 	

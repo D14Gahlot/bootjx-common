@@ -125,7 +125,7 @@ var WhatsApp = function (app) {
 var WhatsApp = function (app) {
   function Message(text, name, time, type,m) {
     this.text = text;
-    this.name = name,
+    this.name = name || (m || {}).name;
     this.time = time;
     this.type = type;
     //this.group = group;
@@ -268,20 +268,15 @@ var WhatsApp = function ToDoModel(app) {
       for(var id in contactList){
     	  if(m.sessionId == contactList[id].sessionId){
     		  $(".chat-bubble[data-message-id='"+m.messageId+"']").remove();
-    		  this.getMessage(m.text,id,null,m);
+    		  this.getMessage(m.text,id,m.name || contactList[id].name, m);
+    		  break;
     	  }
       }
     },
     getMessage: function (text, id, name, m) {
-      if (name == undefined) {
-        var msg = new appMessages(text, contactList[id].name, new Date().getTime(), m.type,m);
-      } else
-      {
-        var msg = new appMessages(text, name, new Date().getTime(), m.type,m);
-      }
+      var msg = new appMessages(text, name, new Date().getTime(), m.type,m);
       contactList[id].addMessage(msg);
-      contactList[id].online = new Date().getHours() + ":" + new Date().getMinutes();
-
+      contactList[id].online = formatTime(new Date().getTime());
       WhatsApp.View.notifyNewMessage(id,msg);
     },
     register: function (...args) {
@@ -381,7 +376,7 @@ var WhatsApp = function ToDoView(app) {
         		$tags.append('<span class="msg_cotainer_smart">  ' + data[i].id.subject + ' </span>')
         	}
         	scrollToBottom();
-          });
+        });
     },
     printMessage: function (gc) {
       $(".msg_card_body .msg_card_body-bubbles").append(quikr.tmpl(gc.type ? "temp_message_me" : "temp_message_you",{
@@ -429,7 +424,7 @@ var WhatsApp = function ToDoView(app) {
             WhatsApp.View.printMessage(msg);
             WhatsApp.View.printContact(contactList[id]);
             WhatsApp.View.printSmartTags();
-            //scrollToBottom();
+            scrollToBottom();
         } else {
         	if(msg.type == false)
         		contactList[id].newmsg++;
