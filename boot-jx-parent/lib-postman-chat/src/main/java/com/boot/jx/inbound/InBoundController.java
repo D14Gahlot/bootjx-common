@@ -42,6 +42,21 @@ public class InBoundController {
 	@Autowired
 	private RestService restService;
 
+	@Autowired
+	private ChatClient chatClient;
+
+	@ApiVendorHeaders
+	@RequestMapping(value = "/int/webhook/callback", method = RequestMethod.POST)
+	public String setWebHook(@RequestParam(required = false) String callbackUrl) throws InterruptedException {
+		chatClient.setInboundForwardUrl(callbackUrl);
+		return callbackUrl;
+	}
+
+	@RequestMapping(value = "/int/webhook/callback", method = RequestMethod.GET)
+	public String getWebHook() throws InterruptedException {
+		return chatClient.getInboundForwardUrl();
+	}
+
 	@ApiVendorHeaders
 	@RequestMapping(value = "/int/inbound/callback", method = RequestMethod.POST)
 	public InboxMessage onInboundCallback(@RequestBody InboxMessage inboxMessage,

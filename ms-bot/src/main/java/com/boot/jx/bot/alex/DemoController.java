@@ -9,7 +9,6 @@ import com.boot.jx.bot.ChatController;
 import com.boot.jx.bot.ChatMapping;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.OutboxMessage;
-import com.boot.jx.postman.service.ContactCleanerService;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.StringUtils.StringMatcher;
 
@@ -19,13 +18,21 @@ public class DemoController extends ChatController {
 	@Autowired
 	private ChatContext chatContext;
 
-	@Autowired
-	private ContactCleanerService contactCleanerService;
+	@ChatMapping(key = AlexBotConstants.KEY.INITIATE + "menu", pattern = "^menu$")
+	private void showMenu(InboxMessage inboxMessage, StringMatcher matcher) {
+		if (chatContext.getSession().data().containsKey("isMenu1Shown")) {
+			reply(new OutboxMessage().template("menu-1").put("name", chatContext.getContact().getName()));
+			next("menu-1-onselect");
+			chatContext.getSession().data().put("isMenu1Shown", true);
+		} else {
+			reply(new OutboxMessage().template("menu-2").put("name", chatContext.getContact().getName()));
+			next("menu-2-onselect");
+		}
+	}
 
-	@ChatMapping(key = AlexBotConstants.KEY.ROUTE_NUMBER, pattern = "^route([ ]*)(\\d{5,15})([ ]*)$")
-	public void routeNumber(InboxMessage inboxMessage, StringMatcher matcher) {
-		contactCleanerService.addWhatsAppTest(inboxMessage.getFrom());
-		reply(new OutboxMessage().template(inboxMessage.getFrom() + " is added to dev testing"));
+	@ChatMapping(key = AlexBotConstants.KEY.INITIATE + "hi", pattern = "^HI$")
+	public void greet(InboxMessage inboxMessage, StringMatcher matcher) {
+		showMenu(inboxMessage, matcher);
 	}
 
 	@ChatMapping(key = AlexBotConstants.KEY.PING, pattern = "^PING$")
@@ -33,25 +40,20 @@ public class DemoController extends ChatController {
 		reply("PING");
 	}
 
-	@ChatMapping(key = AlexBotConstants.KEY.INITIATE, pattern = "^HI$")
-	public void greet(InboxMessage inboxMessage, StringMatcher matcher) {
-		reply(new OutboxMessage().template("menu-1").put("name", chatContext.getContact().getName()));
-		next("menu-1-onselect");
-	}
-
 	@ChatMapping(key = "menu-1-onselect")
 	public void menu1OnSelect(InboxMessage inboxMessage, StringMatcher matcher) {
 		switch (inboxMessage.getMessage().toLowerCase()) {
+		case "menu":
+		case "Banking":
 		case "2":
-			reply(new OutboxMessage().template("menu-2").put("name", chatContext.getContact().getName()));
-			next("menu-2-onselect");
+			showMenu(inboxMessage, matcher);
 			break;
+		case "talktoagent":
 		case "1":
 			transferToAgent(inboxMessage, matcher);
 			break;
 		default:
-			reply("Invalid Option");
-			next("menu-1-onselect");
+			handleGlobalOptionOrInvalidAndNext(inboxMessage, matcher, "menu-1-onselect");
 			return;
 		}
 	}
@@ -76,8 +78,10 @@ public class DemoController extends ChatController {
 			next("feedback-onselect");
 			break;
 		case "#":
-		default:
 			transferToAgent(inboxMessage, matcher);
+			break;
+		default:
+			handleGlobalOptionOrInvalidAndNext(inboxMessage, matcher, "menu-2-onselect");
 			break;
 		}
 	}
@@ -98,8 +102,7 @@ public class DemoController extends ChatController {
 			next("feedback-onselect");
 			break;
 		default:
-			reply("Invalid Option");
-			next("feedback-onselect");
+			handleGlobalOptionOrInvalidAndNext(inboxMessage, matcher, "more-onselect");
 			return;
 		}
 	}
@@ -107,22 +110,21 @@ public class DemoController extends ChatController {
 	@ChatMapping(key = "feedback-onselect")
 	public void feedback(InboxMessage inboxMessage, StringMatcher matcher) {
 		switch (inboxMessage.getMessage().toLowerCase()) {
-		case "happy":
-		case "yes":
-		case "y":
-		case "1":
-			reply("Thanks - Conversation Closed");
-			break;
 		case "not happy":
 		case "nothappy":
 		case "no":
 		case "n":
-		case "2":
+		case "1":
 			transferToAgent(inboxMessage, matcher);
 			break;
+		case "happy":
+		case "yes":
+		case "y":
+		case "2":
+			reply("Thanks");
+			break;
 		default:
-			reply("Invalid Option");
-			next("feedback-onselect");
+			handleGlobalOptionOrInvalidAndNext(inboxMessage, matcher, "feedback-onselect");
 			return;
 		}
 	}
@@ -141,26 +143,77 @@ public class DemoController extends ChatController {
 		}
 	}
 
-	@ChatMapping(key = AlexBotConstants.KEY.INITIATE, pattern = "^*$")
+	@ChatMapping(key = AlexBotConstants.KEY.INITIATE + "*", pattern = "^*$")
 	public void defaultHandler(InboxMessage inboxMessage, StringMatcher matcher) {
+		if (!handleGlobalOption(inboxMessage, matcher)) {
+			showMenu(inboxMessage, matcher);
+		}
+	}
+
+	private boolean handleGlobalOptionOrInvalidAndNext(InboxMessage inboxMessage, StringMatcher matcher,
+			String nextHandler) {
+		if (!handleGlobalOptionOrInvalid(inboxMessage, matcher)) {
+			next(nextHandler);
+			return false;
+		}
+		return true;
+	}
+
+	private boolean handleGlobalOptionOrInvalid(InboxMessage inboxMessage, StringMatcher matcher) {
+		if (!handleGlobalOption(inboxMessage, matcher)) {
+			reply(new OutboxMessage().template("invalid-options"));
+			return false;
+		}
+		return true;
+	}
+
+	private boolean handleGlobalOption(InboxMessage inboxMessage, StringMatcher matcher) {
+		String thisMessage = inboxMessage.getMessage().toLowerCase();
+
 		if (ArgUtil.is(inboxMessage.getTags()) && ArgUtil.is(inboxMessage.getTags().getCategories())) {
 			if (inboxMessage.getTags().getCategories().indexOf("today-credits") > -1) {
 				reply(new OutboxMessage().template("today-credits").put("name", chatContext.getContact().getName()));
 				next("more-onselect");
+				return true;
 			} else if (inboxMessage.getTags().getCategories().indexOf("today-debits") > -1) {
 				reply(new OutboxMessage().template("today-debits").put("name", chatContext.getContact().getName()));
 				next("more-onselect");
+				return true;
 			} else if (inboxMessage.getTags().getCategories().indexOf("today-trnx") > -1) {
 				reply(new OutboxMessage().template("today-trnx").put("name", chatContext.getContact().getName()));
 				next("more-onselect");
-			} else if (inboxMessage.getTags().getCategories().indexOf("menu") > -1) {
-				reply(new OutboxMessage().template("menu-2").put("name", chatContext.getContact().getName()));
-				next("menu-2-onselect");
-			} else if (inboxMessage.getTags().getCategories().indexOf("transfer-to-agent") > -1) {
+				return true;
+			} else if (inboxMessage.getTags().getCategories().indexOf("menu") > -1
+					|| thisMessage.equalsIgnoreCase("menu")) {
+				showMenu(inboxMessage, matcher);
+				return true;
+			} else if (inboxMessage.getTags().getCategories().indexOf("transfer-to-agent") > -1
+					|| thisMessage.equalsIgnoreCase("#") || thisMessage.equalsIgnoreCase("TalkToAgent")) {
 				transferToAgent(inboxMessage, matcher);
+				return true;
+			}
+		} else {
+			switch (thisMessage) {
+			case "menu":
+				showMenu(inboxMessage, matcher);
+				return true;
+			case "#":
+			case "TalkToAgent":
+				transferToAgent(inboxMessage, matcher);
+				return true;
+			case "*":
+			case "exit":
+			case "/exit_chat":
+				reply(new OutboxMessage().template("feedback"));
+				next("feedback-onselect");
+				return true;
+			default:
+				//System.out.println("NO Match");
+				break;
 			}
 		}
 
+		return false;
 	}
 
 }

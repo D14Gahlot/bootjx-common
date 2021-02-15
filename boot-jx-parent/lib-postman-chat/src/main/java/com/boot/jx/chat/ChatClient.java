@@ -93,4 +93,12 @@ public class ChatClient {
 		return defaultSender;
 	}
 
+	public String getInboundForwardUrl() {
+		return inboundForwardUrl;
+	}
+
+	public void setInboundForwardUrl(String inboundForwardUrl) {
+		this.inboundForwardUrl = inboundForwardUrl;
+	}
+
 }
