@@ -14,7 +14,8 @@
 	id="bootstrap-css">
  <script>
 		window.CONST = {
-			CONTEXT: '[[${APP_CONTEXT}]]'
+			CONTEXT: '[[${APP_CONTEXT}]]',
+			POSTMAN : 'postman'
 		}
 </script>
 </head>
@@ -171,7 +172,7 @@ function sendMessage(data){
 	      type: 'POST',
 	      dataType: "json",
 	      contentType: 'application/json',
-	      url: window.CONST.CONTEXT + "/ext/inbound/web/callback",
+	      url: window.CONST.POSTMAN + "/ext/inbound/web/callback",
 	      data: JSON.stringify(data),
 	});
 }
@@ -234,7 +235,7 @@ var initFingerprintJS = function initFingerprintJS() {
 	    $SEND_BUTTON.click(send);
 	    $SEND_TEXT.keypress(send);
 	    
-	    $.getJSON(window.CONST.CONTEXT + "/ext/outbound/web/auth",{number:MOBILE}).done(function(rsp){
+	    $.getJSON(window.CONST.POSTMAN + "/ext/outbound/web/auth",{number:MOBILE}).done(function(rsp){
 	    	var msg = "";
 	    	var results =  rsp.results;
 	    	for(var i in results){
@@ -275,7 +276,7 @@ var initFingerprintJS = function initFingerprintJS() {
 
 	function pollMessage(){
 		//return
-		 $.getJSON(window.CONST.CONTEXT + "/ext/outbound/web/callback",{number:MOBILE}).done(function(rsp){
+		 $.getJSON(window.CONST.POSTMAN + "/ext/outbound/web/callback",{number:MOBILE}).done(function(rsp){
 			 onRcvMsg(rsp);
 		 }).always(function(rsp){
 			 setTimeout(pollMessage,2000);

@@ -212,7 +212,7 @@ var WhatsApp = function ToDoModel(app) {
         contact.sessionId = e.sessionId;
         for (var j = 0; j < e.messages.length; j++) {
           var m = e.messages[j];
-          m.time = formatTime(m.timestamp);
+          m.time = m.timestamp;
           var message = new appMessages(m.text, m.name, m.time, m.type,m);
           contact.addMessage(message);
         }
@@ -231,7 +231,7 @@ var WhatsApp = function ToDoModel(app) {
     	subject.notifyObservers();
     },
     senMessage: function (text) {
-    	var msg =  new appMessages(text, "", new Date().getHours() + ":" + new Date().getMinutes(), true);
+    	var msg =  new appMessages(text, "", new Date().getTime(), true);
     	var THAT = this;
     	var template = flags.mediaSelection ?	$("[name=media]:checked").val() : null;
         sendMessage({
@@ -274,10 +274,10 @@ var WhatsApp = function ToDoModel(app) {
     },
     getMessage: function (text, id, name, m) {
       if (name == undefined) {
-        var msg = new appMessages(text, contactList[id].name, new Date().getHours() + ":" + new Date().getMinutes(), m.type,m);
+        var msg = new appMessages(text, contactList[id].name, new Date().getTime(), m.type,m);
       } else
       {
-        var msg = new appMessages(text, name, new Date().getHours() + ":" + new Date().getMinutes(), m.type,m);
+        var msg = new appMessages(text, name, new Date().getTime(), m.type,m);
       }
       contactList[id].addMessage(msg);
       contactList[id].online = new Date().getHours() + ":" + new Date().getMinutes();

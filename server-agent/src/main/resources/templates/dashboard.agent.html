@@ -195,7 +195,7 @@
 				<p class="font-preview" ><%=escape_HTML(lastmsg.text)%></p>
 			</div>
 			<div class="contact-time">
-				<p><%=lastmsg.time %></p>
+				<p><%=formatTime(lastmsg.time) %></p>
 				<% if(c.newmsg>0){ %>
 					<div class="new-message" id="nm<%=c.contactId%>"><p>&nbsp;</p></div>
 				<%}%>	
@@ -209,7 +209,7 @@
 			<% if(gc.m && !gc.m.messageId){ %><i class="sending fas fa-spinner fa-spin"></i><% } %>
 			<%=formatMessage(gc.text)%>
 			<% if(gc.m && gc.m.template){ %><span class="fa fa-picture-o"></span>  <%=gc.m.template%><% } %>
-			<span class="msg_time_send"><%=gc.time%></span>
+			<span class="msg_time_send"><%=formatTime(gc.time)%>&nbsp;&nbsp;<span class="msg_user"><%=gc.m.name ||'---'%></span></span>
 			<% if(gc.m.attachments && gc.m.attachments.length>0) {%>
 			<div class="input-group my-attachments">
 				<% for(var i in gc.m.attachments) {%>
@@ -230,8 +230,8 @@
 		</div>
 		<div class="msg_cotainer">
 			<%=formatMessage(gc.text)%>
-			<span class="msg_time"><%=gc.time%></span>
 		</div>
+		<span class="msg_time"><span class="msg_user"><%=gc.m.name ||'---'%></span>&nbsp;&nbsp;<%=formatTime(gc.time)%></span>
 	</div>
 </script>
 	

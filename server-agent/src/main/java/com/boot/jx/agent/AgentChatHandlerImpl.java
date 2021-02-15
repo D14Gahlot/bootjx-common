@@ -116,6 +116,8 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 	public InboxMessage onMessageReceive(InboxMessage inboxMessage) {
 		MessageDoc messageDoc = messageStore.find(inboxMessage);
 		ChatMessageDto messageDto = entityToDto(messageDoc);
+		messageDto.setType(false);
+		messageDto.setName(inboxMessage.getFromName());
 		stompTunnelService.sendTo(inboxMessage.session().getAgent(), "/agent/onmessage", messageDto);
 		if (inboxMessage.getMessage().equalsIgnoreCase("/exit_chat")) {
 			ChatSessionDoc chatSessionDoc = sessionStore.getSession(inboxMessage.getSessionId());
@@ -139,6 +141,7 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 			MessageDoc messageDoc = messageStore.find(outboxMessage);
 			ChatMessageDto messageDto = entityToDto(messageDoc);
 			messageDto.setType(true);
+			messageDto.setName(messageDoc.getAgent());
 			stompTunnelService.sendTo(outboxMessage.session().getAgent(), "/agent/onmessage", messageDto);
 		}
 		return outboxMessage;
@@ -147,7 +150,6 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 	private ChatMessageDto entityToDto(MessageDoc messageDoc) {
 		ChatMessageDto messageDto = new ChatMessageDto();
 		messageDto.setType(false);
-		messageDto.setName(messageDoc.getContactId());
 		messageDto.setText(messageDoc.getMessage());
 		messageDto.setTemplate(messageDoc.getTemplate());
 		messageDto.setTimestamp(messageDoc.getTimestamp());
@@ -155,6 +157,7 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 		messageDto.setMessageId(messageDoc.getMessageId());
 		messageDto.setTags(messageDoc.getTags());
 		messageDto.setAttachments(messageDoc.getAttachments());
+		messageDto.setSender(messageDoc.getAgent());
 		return messageDto;
 	}
 
