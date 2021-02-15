@@ -316,7 +316,9 @@ var WhatsApp = function ToDoView(app) {
       if( $existing &&  $existing.length>0){
     	  $existing.replaceWith($html);
     	  if(that.o.assigned){
-        	  $(".contact-list").prepend($html); 
+    		  if(!$html.closest(".contact-list").length){
+    			  $(".contact-list").prepend($html); 
+    		  }
         	  if(currentChat == c){
         		  $html.addClass("active-contact active");
         	  }
