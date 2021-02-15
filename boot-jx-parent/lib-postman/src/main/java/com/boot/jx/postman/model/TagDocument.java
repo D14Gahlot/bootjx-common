@@ -1,11 +1,14 @@
 package com.boot.jx.postman.model;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 import com.boot.utils.ArgUtil;
 
-public class TagDocument {
+public class TagDocument implements Serializable {
+	private static final long serialVersionUID = -7943342223656346570L;
+
 	public TagDocument() {
 		super();
 		this.sentimentScore = 0;
