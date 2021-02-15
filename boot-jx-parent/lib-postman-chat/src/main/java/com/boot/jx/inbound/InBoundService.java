@@ -1,5 +1,6 @@
 package com.boot.jx.inbound;
 
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -67,6 +68,7 @@ public class InBoundService {
 			locallySessionAssigned = true;
 		}
 		if (ArgUtil.isEmpty(inboxMessageOriginal.getMessageId())) {
+			inboxMessageOriginal.setMessage(StringUtils.trim(inboxMessageOriginal.getMessage()));
 			messageStore.create(inboxMessageOriginal);
 		}
 

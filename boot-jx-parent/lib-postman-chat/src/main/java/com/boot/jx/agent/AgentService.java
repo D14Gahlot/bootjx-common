@@ -1,5 +1,6 @@
 package com.boot.jx.agent;
 
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -68,6 +69,7 @@ public class AgentService {
 	}
 
 	public OutboxMessage sendMessage(ChatSessionDoc sessionDoc, OutboxMessage outboxMessage) {
+		outboxMessage.setMessage(StringUtils.trim(outboxMessage.getMessage()));
 		return agentChatHandler.onSend(sessionDoc, outboxMessage);
 	}
 
