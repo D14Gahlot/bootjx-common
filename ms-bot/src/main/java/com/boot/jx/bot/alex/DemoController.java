@@ -148,10 +148,10 @@ public class DemoController extends ChatController {
 				reply(new OutboxMessage().template("today-credits").put("name", chatContext.getContact().getName()));
 				next("more-onselect");
 			} else if (inboxMessage.getTags().getCategories().indexOf("today-debits") > -1) {
-				reply(new OutboxMessage().template("today-credits").put("name", chatContext.getContact().getName()));
+				reply(new OutboxMessage().template("today-debits").put("name", chatContext.getContact().getName()));
 				next("more-onselect");
 			} else if (inboxMessage.getTags().getCategories().indexOf("today-trnx") > -1) {
-				reply(new OutboxMessage().template("today-credits").put("name", chatContext.getContact().getName()));
+				reply(new OutboxMessage().template("today-trnx").put("name", chatContext.getContact().getName()));
 				next("more-onselect");
 			} else if (inboxMessage.getTags().getCategories().indexOf("menu") > -1) {
 				reply(new OutboxMessage().template("menu-2").put("name", chatContext.getContact().getName()));
