@@ -5,7 +5,7 @@ import java.util.Map;
 import com.boot.utils.ArgUtil;
 
 public interface MessageOptions {
-	public Map<String, String> options();
+	public Map<String, Object> options();
 
 	default public MessageOptions option(String key, String value) {
 		this.options().get("msg_type");
@@ -18,7 +18,7 @@ public interface MessageOptions {
 		}
 
 		default public String getMsgType() {
-			return this.options().get("msg_type");
+			return ArgUtil.parseAsString(this.options().get("msg_type"));
 		}
 
 		default public boolean isTemplate() {

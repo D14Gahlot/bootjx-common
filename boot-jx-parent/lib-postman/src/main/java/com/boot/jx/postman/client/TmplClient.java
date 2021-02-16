@@ -1,5 +1,11 @@
 package com.boot.jx.postman.client;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,8 +19,10 @@ import com.boot.jx.postman.PostManException;
 import com.boot.jx.postman.PostmanPackages.ICommonTmplPackage;
 import com.boot.jx.postman.model.File;
 import com.boot.jx.postman.model.OutboxMessage;
+import com.boot.jx.postman.model.TmplElement;
 import com.boot.jx.rest.RestService;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.CollectionUtil;
 
 @Component
 public class TmplClient {
@@ -54,7 +62,27 @@ public class TmplClient {
 		file.setITemplate(outboxMessage.getITemplate());
 		file = this.process(file, outboxMessage.getContactType()).getResult();
 		outboxMessage.setMessage(file.getContent());
-		outboxMessage.options().putAll(file.getOptions());
+
+		Map<String, Object> options = new HashMap<String, Object>();
+		List<TmplElement> buttons = new ArrayList<TmplElement>();
+		List<TmplElement> inputs = new ArrayList<TmplElement>();
+
+		for (Entry<String, String> entry : file.getOptions().entrySet()) {
+			if (entry.getKey().indexOf("form-input-") == 0) {
+				String[] params = entry.getValue().split("|");
+				inputs.add(new TmplElement().name(entry.getKey().replace("form-input-", ""))
+						.label(CollectionUtil.get(params, 0)).type(CollectionUtil.get(params, 1)));
+			} else if (entry.getKey().indexOf("actions-button-") == 0) {
+				String[] params = entry.getValue().split("\\|");
+				buttons.add(new TmplElement().name(entry.getKey().replace("actions-button-", ""))
+						.label(CollectionUtil.get(params, 0)).type(CollectionUtil.get(params, 1)));
+			} else {
+				options.put(entry.getKey(), entry.getValue());
+			}
+		}
+		options.put("inputs", inputs);
+		options.put("buttons", buttons);
+		outboxMessage.options().putAll(options);
 		return outboxMessage;
 	}
 

@@ -168,7 +168,7 @@ public class DemoController extends ChatController {
 	}
 
 	private boolean handleGlobalOption(InboxMessage inboxMessage, StringMatcher matcher) {
-		String thisMessage = inboxMessage.getMessage().toLowerCase();
+		String thisMessage = inboxMessage.getMessage().toLowerCase().replace(" ", "");
 
 		if (ArgUtil.is(inboxMessage.getTags()) && ArgUtil.is(inboxMessage.getTags().getCategories())) {
 			if (inboxMessage.getTags().getCategories().indexOf("today-credits") > -1) {
@@ -192,7 +192,7 @@ public class DemoController extends ChatController {
 				transferToAgent(inboxMessage, matcher);
 				return true;
 			}
-		} else {
+		} 
 			switch (thisMessage) {
 			case "menu":
 				showMenu(inboxMessage, matcher);
@@ -211,7 +211,6 @@ public class DemoController extends ChatController {
 				//System.out.println("NO Match");
 				break;
 			}
-		}
 
 		return false;
 	}

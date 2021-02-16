@@ -65,6 +65,13 @@ public class TelegramClient {
 				.queryParam("url", callbackURL + telegramWebhooPath + "/" + lane).post().asString();
 	}
 
+	public void sendReply(String lane, String id, SendMessage sendMessage) {
+		SendMessage message = sendMessage; // Create a SendMessage object with mandatory fields
+				sendMessage.setChatId(id);
+		restService.ajax(PATH.URL).path(PATH.BOT_SEND_MESSAGE).pathParam("accessToken", getAccessToken(lane))
+				.post(message).asString();
+	}
+
 	public void sendReply(String lane, String id, String text) {
 		SendMessage message = new SendMessage() // Create a SendMessage object with mandatory fields
 				.setChatId(id).setText(text);

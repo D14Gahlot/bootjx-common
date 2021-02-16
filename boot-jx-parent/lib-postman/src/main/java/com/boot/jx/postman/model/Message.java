@@ -46,7 +46,7 @@ public class Message<T extends Message<T>> implements Serializable, MessageOptio
 	private String type = null;
 
 	private Map<String, Object> model = new HashMap<String, Object>();
-	protected Map<String, String> options = new HashMap<String, String>();
+	protected Map<String, Object> options = new HashMap<String, Object>();
 	private MessageType messageType = null;
 	private ContactType contactType;
 	protected String channel;;
@@ -373,23 +373,23 @@ public class Message<T extends Message<T>> implements Serializable, MessageOptio
 		this.collapseId = collapseId;
 	}
 
-	public Map<String, String> getOptions() {
+	public Map<String, Object> getOptions() {
 		return options;
 	}
 
-	public void setOptions(Map<String, String> options) {
+	public void setOptions(Map<String, Object> options) {
 		this.options = options;
 	}
 
 	@SuppressWarnings("unchecked")
-	public T options(Map<String, String> options) {
-		this.options = new HashMap<String, String>();
+	public T options(Map<String, Object> options) {
+		this.options = new HashMap<String, Object>();
 		return (T) this;
 	}
 
-	public Map<String, String> options() {
+	public Map<String, Object> options() {
 		if (options == null) {
-			this.options = new HashMap<String, String>();
+			this.options = new HashMap<String, Object>();
 		}
 		return this.options;
 	}

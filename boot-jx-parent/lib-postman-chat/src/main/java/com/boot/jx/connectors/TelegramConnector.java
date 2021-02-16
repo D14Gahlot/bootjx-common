@@ -1,15 +1,23 @@
 package com.boot.jx.connectors;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Component;
+import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 
 import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorHandler;
 import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorMapping;
 import com.boot.jx.dict.ContactType;
+import com.boot.jx.model.MapModel;
 import com.boot.jx.postman.client.TmplClient;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
@@ -18,6 +26,7 @@ import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.File;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.OutboxMessage;
+import com.boot.jx.postman.model.TmplElement;
 import com.boot.jx.postman.store.SessionStore;
 import com.boot.jx.postman.tg.TelegramClient;
 import com.boot.utils.ArgUtil;
@@ -52,7 +61,39 @@ public class TelegramConnector implements ConnectorHandler {
 				}
 			} else {
 				tmplClient.process(outboxMessage);
-				telegramClient.sendReply(lane, to, outboxMessage.getMessage());
+
+				SendMessage sendMessage = new SendMessage();
+				sendMessage.setText(outboxMessage.getMessage());
+				if (outboxMessage.options().containsKey("buttons")) {
+
+					List<TmplElement> buttons = new MapModel(outboxMessage.options()).entry("buttons")
+							.asList(new TmplElement());
+
+					ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
+					replyKeyboardMarkup.setSelective(true);
+					replyKeyboardMarkup.setResizeKeyboard(true);
+					replyKeyboardMarkup.setOneTimeKeyboard(true);
+
+					List<KeyboardRow> keyboard = new ArrayList<>();
+					KeyboardRow keyboardFirstRow = new KeyboardRow();
+
+					for (TmplElement button : buttons) {
+						keyboardFirstRow.add(button.getLabel());
+					}
+
+					keyboard.add(keyboardFirstRow);
+
+					/**
+					 * KeyboardRow keyboardSecondRow = new KeyboardRow();
+					 * keyboardSecondRow.add(getAlertsCommand(language));
+					 * keyboardSecondRow.add(getBackCommand(language));
+					 * keyboard.add(keyboardSecondRow);
+					 **/
+
+					replyKeyboardMarkup.setKeyboard(keyboard);
+					sendMessage.setReplyMarkup(replyKeyboardMarkup);
+				}
+				telegramClient.sendReply(lane, to, sendMessage);
 			}
 		} else {
 			telegramClient.sendReply(lane, to, outboxMessage.getMessage());

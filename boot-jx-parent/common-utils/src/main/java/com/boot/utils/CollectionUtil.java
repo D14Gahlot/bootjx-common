@@ -251,6 +251,16 @@ public final class CollectionUtil {
 		return list.get(0);
 	}
 
+	public static <T> T get(T[] list, int index) {
+		if (ArgUtil.isEmpty(list)) {
+			return null;
+		}
+		if (index < list.length) {
+			return list[index];
+		}
+		return null;
+	}
+
 	public static <T> T set(List<T> list, int index, T e) {
 		return set(list, index, e, null);
 	}
