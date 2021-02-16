@@ -1,13 +1,12 @@
-	body,html{
+		body,html{
 			height: 100%;
 			margin: 0;
 			background: transparent;
 		}
-
 		.bcdesgin {
-			background: #7F7FD5;
-	       	background: -webkit-linear-gradient(to right, #91EAE4, #86A8E7, #7F7FD5);
-	        background: linear-gradient(to right, #55cff9,#1377f5, #1377f5);
+			background: #347fc3!important;
+/* 	       	background: -webkit-linear-gradient(to right, #91EAE4, #86A8E7, #7F7FD5);
+	        background: linear-gradient(to right, #55cff9,#1377f5, #1377f5); */
 	        	border-radius: 15px !important;
 		}
 		

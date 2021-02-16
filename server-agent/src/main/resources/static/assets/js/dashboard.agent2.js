@@ -193,7 +193,8 @@ var WhatsApp = function ToDoModel(app) {
         } else {
       	  $(".online-toggle").removeClass("toggle-active");
         }
-        
+        $("html").removeClass("loading");
+       // $(".fullloader.bar").remove();
       });
       
       $.getJSON("/agent/gallery/map/media_reply", function (data) {
