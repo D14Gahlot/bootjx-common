@@ -24,6 +24,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -368,7 +369,7 @@ public class AdminDashBoardManager {
 		LeadMessanger  leadMsg =getLeadMessenger(contactType,quaterStratDateTime, longTodayendTime);
 
 		
-		Map<Object,Object> dateWiseCount = getDateWiseCount(totalMsgDoc);
+		Map<Object,Object> dweekWiseCount = getWeekWiseCount(totalMsgDoc);
 		
 		if (ArgUtil.is(totalInmsgDoc)) {
 			dto.setTotalInMsgExchanged(totalInmsgDoc.size());
@@ -384,8 +385,8 @@ public class AdminDashBoardManager {
 		if (ArgUtil.is(distinctIdList)) {
 			dto.setUniqueConversation(distinctIdList.size());
 		}
-		if (ArgUtil.is(dateWiseCount)) {
-			dto.setMsgCountLst(dateWiseCount);
+		if (ArgUtil.is(dweekWiseCount)) {
+			dto.setMsgCountLst(dweekWiseCount);
 		}
 		
 		dto.setContactType(contactType);
@@ -581,7 +582,6 @@ public class AdminDashBoardManager {
 		Set<Object> hourWiseCount = new HashSet<Object>(hourList);
 		for (Object key : hourWiseCount) {
 			mapLst.put(key, Collections.frequency(hourList, key));
-		    //System.out.println(key + ": " + Collections.frequency(hourList, key));
 		}
 		
 		return mapLst;
@@ -601,11 +601,41 @@ public class AdminDashBoardManager {
 		Set<Object> dateWiseCount = new HashSet<Object>(dateWiseList);
 		for (Object key : dateWiseCount) {
 			mapLst.put(key, Collections.frequency(dateWiseList, key));
-		   // System.out.println(key + ": " + Collections.frequency(dateWiseList, key));
 		}
 		
 		return mapLst;
 	}
+	
+	/** week wise count **/
+	public Map<Object,Object>  getWeekWiseCount(List<MessageDoc>  msgLst) {
+		List<Object> weekWiseList = new ArrayList<Object>();
+		Map<Object,Object> mapLst = new HashMap<Object,Object>();
+		 Calendar cal = Calendar.getInstance();
+		for(MessageDoc msg :msgLst) {
+			 long timeStamp = msg.getTimestamp();
+			 Date date=new Date(timeStamp);
+	         String ddMMyyyyFormat = new SimpleDateFormat("dd-MM-yyyy").format(date);
+	        
+	        
+	         cal.setTime(date);
+	         String month = cal.getDisplayName(Calendar.MONTH, Calendar.LONG, Locale.getDefault()).toUpperCase();
+	         int weekOfMonth = cal.get(Calendar.WEEK_OF_MONTH);
+	         //int weekOfYear = cal.get(Calendar.WEEK_OF_MONTH);
+	         String str = month+" (WEEK) "+weekOfMonth;
+	         //System.out.println("Month :"+month.toUpperCase()+" ==weekOfMonth== :"+weekOfMonth+"\t weekOfYear :"+weekOfYear+"month :"+month+"-WEEK-"+weekOfMonth+"\t date :"+ddMMyyyyFormat+"\t str :"+str);
+	         weekWiseList.add(str);
+		}
+		
+		//week wise count
+		Set<Object> dateWiseCount = new HashSet<Object>(weekWiseList);
+		for (Object key : dateWiseCount) {
+			mapLst.put(key, Collections.frequency(weekWiseList, key));
+		    //System.out.println(key + ": " + Collections.frequency(weekWiseList, key));
+		}
+		
+		return mapLst;
+	}
+	
 	
 	
 }
