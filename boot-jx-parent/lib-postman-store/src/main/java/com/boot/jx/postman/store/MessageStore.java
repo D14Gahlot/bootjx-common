@@ -148,6 +148,7 @@ public class MessageStore extends CommonDocStore {
 		doc.setMessage(outMessage.getMessage());
 		// }
 		doc.setAttachments(outMessage.getAttachments());
+		doc.setLogs(outMessage.getLogs());
 
 		doc.setSessionId(outMessage.getSessionId());
 		return doc;

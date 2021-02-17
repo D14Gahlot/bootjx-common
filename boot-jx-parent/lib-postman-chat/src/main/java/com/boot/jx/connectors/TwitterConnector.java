@@ -95,13 +95,20 @@ public class TwitterConnector implements ConnectorHandler {
 				twitterClient.sendReply(to, outboxMessage.getMessage(), lane);
 			}
 		} catch (NumberFormatException e) {
+			outboxMessage.logs().add(e.getMessage());
 			e.printStackTrace();
 		} catch (TwitterException e) {
+			outboxMessage.logs().add(e.getMessage());
 			e.printStackTrace();
 		} catch (MalformedURLException e) {
+			outboxMessage.logs().add(e.getMessage());
 			e.printStackTrace();
 		} catch (IOException e) {
 			e.printStackTrace();
+			outboxMessage.logs().add(e.getMessage());
+		} catch (Exception e) {
+			e.printStackTrace();
+			outboxMessage.logs().add(e.getMessage());
 		}
 	}
 

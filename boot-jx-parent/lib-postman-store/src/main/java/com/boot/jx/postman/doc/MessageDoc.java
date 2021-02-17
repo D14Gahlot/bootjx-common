@@ -1,6 +1,7 @@
 package com.boot.jx.postman.doc;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -39,6 +40,8 @@ public class MessageDoc implements Serializable, Patchable<MessageDoc> {
 
 	private String quickReplyId;
 	private String mediaReplyId;
+
+	public List<String> logs;
 
 	@Indexed
 	private String contactId;
@@ -192,6 +195,14 @@ public class MessageDoc implements Serializable, Patchable<MessageDoc> {
 		MessageDoc patch = new MessageDoc();
 		patch.setMessageId(this.getMessageId());
 		return patch;
+	}
+
+	public List<String> getLogs() {
+		return logs;
+	}
+
+	public void setLogs(List<String> logs) {
+		this.logs = logs;
 	}
 
 }

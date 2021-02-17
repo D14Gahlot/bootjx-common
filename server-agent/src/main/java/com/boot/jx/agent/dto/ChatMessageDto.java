@@ -19,6 +19,7 @@ public class ChatMessageDto implements Serializable {
 	private boolean type;
 	private TagDocument tags;
 	private List<Attachment> attachments;
+	public List<String> logs;
 	private String sender;
 
 	public String getText() {
@@ -99,5 +100,13 @@ public class ChatMessageDto implements Serializable {
 
 	public void setSender(String sender) {
 		this.sender = sender;
+	}
+
+	public List<String> getLogs() {
+		return logs;
+	}
+
+	public void setLogs(List<String> logs) {
+		this.logs = logs;
 	}
 }

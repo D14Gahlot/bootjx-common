@@ -1,6 +1,8 @@
 package com.boot.jx.postman.model;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.postman.model.MessageOptions.WAMessageOptions;
@@ -18,6 +20,7 @@ public class OutboxMessage extends Message<OutboxMessage> implements WAMessageOp
 	protected Channel channel = Channel.DEFAULT;
 	private BigDecimal queue;
 	private MessageSession session;
+	public List<String> logs; 
 
 	public OutboxMessage(ContactType contactType) {
 		super(contactType);
@@ -52,6 +55,21 @@ public class OutboxMessage extends Message<OutboxMessage> implements WAMessageOp
 			this.session = new MessageSession();
 		}
 		return this.session;
+	}
+
+	public List<String> getLogs() {
+		return logs;
+	}
+
+	public void setLogs(List<String> logs) {
+		this.logs = logs;
+	}
+	
+	public List<String> logs() {
+		if(this.logs == null) {
+			this.logs = new ArrayList<String>();
+		}
+		return this.logs;
 	}
 
 }
