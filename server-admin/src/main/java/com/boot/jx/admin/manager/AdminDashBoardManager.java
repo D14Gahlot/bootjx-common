@@ -137,7 +137,7 @@ public class AdminDashBoardManager {
 		// To fetch all the records for a collection
 		List<MessageDoc> totalMsgDoc = getTotalMsgCount(contactType, longTodayStartTime, longTodayendTime);
 		// Get the distinct stuff from MongoDB
-		List<MessageDoc> distinctIdList = mongoTemplate.getCollection(contactType.toString()).distinct("contactId");
+		List<MessageDoc> distinctIdList = getUniqueConversation(contactType,longTodayStartTime,longTodayendTime);
 		System.out.println("distinctIdList :" + distinctIdList.size());
 
 		PeakLoadDto peakLoadResult = getPeakLoadMsgCount(contactType,longTodayStartTime,longTodayendTime);
@@ -190,7 +190,7 @@ public class AdminDashBoardManager {
 		// To fetch all the records for a collection
 		List<MessageDoc> totalMsgDoc = getTotalMsgCount(contactType, longTodayStartTime, longTodayendTime);
 		// Get the distinct stuff from MongoDB
-		List<MessageDoc> distinctIdList = mongoTemplate.getCollection(contactType.toString()).distinct("contactId");
+		List<MessageDoc> distinctIdList = getUniqueConversation(contactType,longTodayStartTime,longTodayendTime);
 		Map<Object,Object> hourWiseCount = getHourWiseCount(totalMsgDoc);
 		
 		PeakLoadDto peakLoadResult = getPeakLoadMsgCount(contactType,longTodayStartTime,longTodayendTime);
@@ -251,7 +251,7 @@ public class AdminDashBoardManager {
 		// To fetch all the records for a collection
 		List<MessageDoc> totalMsgDoc = getTotalMsgCount(contactType, longWStartTime, longTodayendTime);
 		// Get the distinct stuff from MongoDB
-		List<MessageDoc> distinctIdList = mongoTemplate.getCollection(contactType.toString()).distinct("contactId");
+		List<MessageDoc> distinctIdList = getUniqueConversation(contactType,longWStartTime,longTodayendTime);
 		
 		Map<Object,Object> dateWiseCount = getDateWiseCount(totalMsgDoc);
 		
@@ -307,7 +307,7 @@ public class AdminDashBoardManager {
 		List<MessageDoc> totalMsgDoc = getTotalMsgCount(contactType, monthStartDateEpocTime, longTodayendTime);
 
 		// Get the distinct stuff from MongoDB
-		List<MessageDoc> distinctIdList = mongoTemplate.getCollection(contactType.toString()).distinct("contactId");
+		List<MessageDoc> distinctIdList = getUniqueConversation(contactType,monthStartDateEpocTime,longTodayendTime);
 		System.out.println("distinctIdList :" + distinctIdList.size());
 		
 		Map<Object,Object> dateWiseCount = getDateWiseCount(totalMsgDoc);
@@ -361,7 +361,7 @@ public class AdminDashBoardManager {
 		// To fetch all the records for a collection
 		List<MessageDoc> totalMsgDoc = getTotalMsgCount(contactType, quaterStratDateTime, longTodayendTime); 
 		// Get the distinct stuff from MongoDB
-		List<MessageDoc> distinctIdList = mongoTemplate.getCollection(contactType.toString()).distinct("contactId");
+		List<MessageDoc> distinctIdList =  getUniqueConversation(contactType,quaterStratDateTime,longTodayendTime);
 		System.out.println("distinctIdList :" + distinctIdList.size());
 		PeakLoadDto peakLoadResult = getPeakLoadMsgCount(contactType,quaterStratDateTime,longTodayendTime);
 		
@@ -421,7 +421,7 @@ public class AdminDashBoardManager {
 		// To fetch all the records for a collection
 		List<MessageDoc> totalMsgDoc = getTotalMsgCount(contactType, dateRange1, dateRange2); 
 		// Get the distinct stuff from MongoDB
-		List<MessageDoc> distinctIdList = mongoTemplate.getCollection(contactType.toString()).distinct("contactId");
+		List<MessageDoc> distinctIdList = getUniqueConversation(contactType,dateRange1,dateRange2);
 	
 		PeakLoadDto peakLoadResult = getPeakLoadMsgCount(contactType,dateRange1,dateRange2);
 		/** lead Messanger **/
@@ -560,6 +560,17 @@ public class AdminDashBoardManager {
 		List<ChatSessionDoc> distinceAgentList = mongoTemplate.getCollection("CHAT_SESSION").distinct("assignedToAgent");
 		return distinceAgentList;
 	}
+	
+	
+	//To fetch unique conversation 
+	@SuppressWarnings("unchecked")
+	public List<MessageDoc> getUniqueConversation(Object contactType, long startTime, long endTime) {
+		Query query = new Query();
+		query.addCriteria(Criteria.where("timestamp").gt(startTime).lt(endTime));
+		List<MessageDoc> distinctIdList = mongoTemplate.getCollection(contactType.toString()).distinct("contactId",query.getQueryObject());
+		return distinctIdList;
+	}
+
 	
 	/** Timestamp **/
 	
