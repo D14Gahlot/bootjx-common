@@ -266,6 +266,9 @@ html.loading .fullloader.bar {
 									<span><i class="fas fa-video" hidden></i></span>
 									<span><i class="fas fa-phone" hidden></i></span>
 								</div>
+								<div class="chat_actions">
+									<span><i class="fa fa-times-circle-o"></i></span>
+								</div>
 							</div>
 							<span id="action_menu_btn" hidden><i class="fas fa-ellipsis-v"></i></span>
 							<div class="action_menu">
@@ -364,10 +367,10 @@ html.loading .fullloader.bar {
 			</div>
 			<div class="user_info contact-text">
 				<span class="font-name" ><%=c.name%></span>
-				<p class="font-preview" ><%=escape_HTML(lastmsg.text)%></p>
+				<p class="font-preview" ><%=escape_HTML((lastmsg||{}).text)%></p>
 			</div>
 			<div class="contact-time">
-				<p><%=formatTime(lastmsg.time) %></p>
+				<p><%=formatTime((lastmsg||{}).time) %></p>
 				<% if(c.newmsg>0){ %>
 					<div class="new-message" id="nm<%=c.contactId%>"><p>&nbsp;</p></div>
 				<%}%>	

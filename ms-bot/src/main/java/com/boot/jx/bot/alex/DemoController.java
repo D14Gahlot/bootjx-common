@@ -110,18 +110,18 @@ public class DemoController extends ChatController {
 	@ChatMapping(key = "feedback-onselect")
 	public void feedback(InboxMessage inboxMessage, StringMatcher matcher) {
 		switch (inboxMessage.getMessage().toLowerCase()) {
+		case "happy":
+		case "yes":
+		case "y":
+		case "1":
+			reply("Thanks");
+			break;
 		case "not happy":
 		case "nothappy":
 		case "no":
 		case "n":
-		case "1":
-			transferToAgent(inboxMessage, matcher);
-			break;
-		case "happy":
-		case "yes":
-		case "y":
 		case "2":
-			reply("Thanks");
+			transferToAgent(inboxMessage, matcher);
 			break;
 		default:
 			handleGlobalOptionOrInvalidAndNext(inboxMessage, matcher, "feedback-onselect");

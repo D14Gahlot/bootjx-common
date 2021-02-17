@@ -1,10 +1,21 @@
 {
-	"name" : "Rabil Mir Uddin",
-	"country" : "IN",
-	"region" : "MH",
-	"city" : "Mumbai",
-	"customerId" : "234",
-	"logmap" : {
+	"link": {
+		"id": "123",
+		"verificationCode": "ASADAS"
+	},
+	"customer": {
+		"firstName": "Riddhi",
+		"lastName": "Madhu",
+		"middleName": "Pata nhi",
+		"email": "xxxxxadhu@gmail.com",
+		"identityExpiredDate": 1573732662603
+	},
+	"name": "Rabil Mir Uddin",
+	"country": "IN",
+	"region": "MH",
+	"city": "Mumbai",
+	"customerId": "234",
+	"logmap": {
 		"desc": "LOGIN:COMPLETED:DONE",
 		"ms": "SERVER-UI",
 		"catg": "CAuthEvent",
@@ -49,4 +60,4 @@
 		"trxId": null,
 		"tnt": "KWT"
 	}
-}
+} 

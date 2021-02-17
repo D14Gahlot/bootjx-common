@@ -1,0 +1,4 @@
+{
+	"_subject": "[[${_tu.prop('company.idtype')}]] expiry",
+	"_message": "[[${T(com.boot.utils.DateUtil).formatDate(T(com.boot.utils.DateUtil).parseDate(customer.identityExpiredDate,'yyyy-dd-MM'),'dd MMM yyyy')}]]."
+}

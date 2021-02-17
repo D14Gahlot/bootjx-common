@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.Locale;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.ReloadableResourceBundleMessageSource;
@@ -103,6 +104,10 @@ public class TmplWebMvcConfigurerAdapter extends WebMvcConfigurerAdapter {
 		return messageSource;
 	}
 
+
+	@Value("${spring.thymeleaf.cache}")
+	boolean springThymeleafCache;
+	
 	@Bean
 	public SpringResourceTemplateResolver jsonMessageTemplateResolver() {
 		SpringResourceTemplateResolver theResourceTemplateResolver = new SpringResourceTemplateResolver();
@@ -111,7 +116,7 @@ public class TmplWebMvcConfigurerAdapter extends WebMvcConfigurerAdapter {
 		theResourceTemplateResolver.setSuffix(".json");
 		theResourceTemplateResolver.setTemplateMode(TemplateMode.TEXT);
 		theResourceTemplateResolver.setCharacterEncoding("UTF-8");
-		theResourceTemplateResolver.setCacheable(true);
+		theResourceTemplateResolver.setCacheable(springThymeleafCache);
 		theResourceTemplateResolver.setOrder(1);
 		return theResourceTemplateResolver;
 	}

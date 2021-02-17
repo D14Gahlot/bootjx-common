@@ -52,6 +52,10 @@ public class StompTunnelService {
 	@Async
 	public void sendTo(String stompUID, String topic, Object message) {
 		try {
+			if(!ArgUtil.is(stompUID)) {
+				LOGGER.error("stompSession for stompUID {} cannot be empty for {}", stompUID, topic);
+				return;
+			}
 			StompTunnelEvent event = new StompTunnelEvent();
 			event.setTopic(topic);
 			StompSession stompSession = stompTunnelSessionManager.getStompSession(stompUID);

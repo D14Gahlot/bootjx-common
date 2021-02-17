@@ -25,6 +25,9 @@ public class ChatClient {
 		public static final String ASSIGN_TO_AGENT = "/int/assign/agent";
 	}
 
+	@Value("${postman.app.type}")
+	private String postmanType;
+
 	@Value("${postman.agent.url}")
 	private String agentUrl;
 
@@ -99,6 +102,10 @@ public class ChatClient {
 
 	public void setInboundForwardUrl(String inboundForwardUrl) {
 		this.inboundForwardUrl = inboundForwardUrl;
+	}
+
+	public String getPostmanType() {
+		return postmanType;
 	}
 
 }

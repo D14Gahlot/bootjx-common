@@ -19,7 +19,7 @@ import com.boot.jx.swagger.ApiMockModelProperty;
 import com.boot.jx.xms.XmsConstants.ApiClientParams;
 
 @Controller
-public class OutboundAPIv1 {
+public class OutboundApiV1 {
 
 	public static class OutboxMessageV1 {
 		@ApiMockModelProperty(example = "WHATSAPP", value = "Contact Type")

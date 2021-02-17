@@ -8,14 +8,12 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.dict.ContactType;
-import com.boot.jx.dict.Language;
 import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.TagDocument;
 import com.boot.jx.swagger.ApiMockModelProperty;
-import com.boot.jx.xms.XmsConstants.ApiClientParams;
 
 @Controller
-public class InboundAPIv2 {
+public class InboundApiV2 {
 
 	public static class InboxMessageV1 {
 
@@ -67,7 +65,6 @@ public class InboundAPIv2 {
 
 	}
 
-	@ApiClientParams
 	@ResponseBody
 	@RequestMapping(value = "/api/v1/message/callback", method = { RequestMethod.POST })
 	public ApiResponse<InboxMessageV1, Object> onMessageCallback(@RequestBody InboxMessageV1 outboxMessageV1) {

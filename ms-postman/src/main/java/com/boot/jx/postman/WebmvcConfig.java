@@ -91,6 +91,9 @@ public class WebmvcConfig extends WebMvcConfigurerAdapter {
 		return lci;
 	}
 
+	@Value("${spring.thymeleaf.cache}")
+	boolean springThymeleafCache;
+	
 	/**
 	 * Message source.
 	 *
@@ -113,7 +116,7 @@ public class WebmvcConfig extends WebMvcConfigurerAdapter {
 		theResourceTemplateResolver.setSuffix(".json");
 		theResourceTemplateResolver.setTemplateMode(TemplateMode.TEXT);
 		theResourceTemplateResolver.setCharacterEncoding("UTF-8");
-		theResourceTemplateResolver.setCacheable(true);
+		theResourceTemplateResolver.setCacheable(springThymeleafCache);
 		theResourceTemplateResolver.setOrder(1);
 		return theResourceTemplateResolver;
 	}
@@ -123,7 +126,7 @@ public class WebmvcConfig extends WebMvcConfigurerAdapter {
 
 	@Value("${jax.static.context}")
 	String jaxStaticContext;
-
+	
 	@Autowired
 	TemplateUtils templateUtils;
 

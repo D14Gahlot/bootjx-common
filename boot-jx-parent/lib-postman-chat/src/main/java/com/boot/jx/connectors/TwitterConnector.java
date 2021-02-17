@@ -7,6 +7,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Component;
@@ -14,6 +16,7 @@ import org.springframework.stereotype.Component;
 import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorHandler;
 import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorMapping;
 import com.boot.jx.dict.ContactType;
+import com.boot.jx.inbound.InBoundService;
 import com.boot.jx.postman.client.TmplClient;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
@@ -28,6 +31,7 @@ import com.boot.jx.postman.store.SessionStore;
 import com.boot.jx.postman.tw.TwitterClient;
 import com.boot.jx.postman.tw.TwitterClientContext;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.JsonUtil;
 
 import twitter4j.DirectMessage;
 import twitter4j.DirectMessageList;
@@ -39,6 +43,8 @@ import twitter4j.UploadedMedia;
 @Component
 @ConnectorMapping(ContactType.TWITTER)
 public class TwitterConnector implements ConnectorHandler {
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(TwitterConnector.class);
 
 	@Autowired
 	private TwitterClient twitterClient;
@@ -140,9 +146,14 @@ public class TwitterConnector implements ConnectorHandler {
 	public boolean initSession(InboxMessage inboxMessage, ChatSessionDoc session) {
 		if (ArgUtil.is(inboxMessage.getOriginalMessage())) {
 			ChatContactDoc contact = sessionStore.getContact(inboxMessage);
-			DirectMessageLocalImpl dm = (DirectMessageLocalImpl) inboxMessage.getOriginalMessage();
-			contact.setProfilePic(dm.getSender().getProfileImageURLHttps());
-			contact.setName(dm.getSender().getName());
+			try {
+				DirectMessageLocalImpl dm = JsonUtil.parse(inboxMessage.getOriginalMessage(),
+						DirectMessageLocalImpl.class);
+				contact.setProfilePic(dm.getSender().getProfileImageURLHttps());
+				contact.setName(dm.getSender().getName());
+			} catch (Exception e) {
+				LOGGER.error("Twitter Init Session Data Parse Errror", e);
+			}
 			sessionStore.save(contact);
 		}
 		return true;
