@@ -18,7 +18,9 @@ public class AgentLogoutHandler implements LogoutHandler {
 
 	@Override
 	public void logout(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
-		agentSessionService.updateLogout(ArgUtil.parseAsString(authentication.getPrincipal()));
+		if(ArgUtil.is(authentication)) {
+			agentSessionService.updateLogout(ArgUtil.parseAsString(authentication.getPrincipal()));			
+		}
 	}
 
 }

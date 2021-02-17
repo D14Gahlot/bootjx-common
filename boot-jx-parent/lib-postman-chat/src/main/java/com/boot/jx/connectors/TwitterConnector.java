@@ -69,7 +69,7 @@ public class TwitterConnector implements ConnectorHandler {
 			InputStream media = new java.net.URL(templateReply.getUrl()).openStream();
 			UploadedMedia uploadedMedia = ctx.getTwitter().uploadMedia(templateReply.getTitle(), media);
 			mediaId = uploadedMedia.getMediaId();
-			templateReply.meta().put("twitterMediaId", mediaId);
+			templateReply.meta().put("twitterMediaId", ArgUtil.parseAsString(mediaId));
 			mongoTemplate.save(templateReply);
 		}
 		return mediaId;
@@ -84,7 +84,8 @@ public class TwitterConnector implements ConnectorHandler {
 					if ("image".equalsIgnoreCase(templateReply.getType())) {
 						Long mediaId = getMediaId(lane, templateReply);
 						outboxMessage.attachment(new Attachment().mediaURL(templateReply.getUrl())
-								.mediaType(File.FileType.IMAGE.toString()));
+								.mediaType(File.FileType.IMAGE.toString())
+								.mediaId(ArgUtil.parseAsString(mediaId)));
 						twitterClient.sendReply(to, outboxMessage.getMessage(), mediaId, lane);
 					}
 				} else {
