@@ -61,17 +61,19 @@ public class TwitterConnector implements ConnectorHandler {
 	@Autowired
 	private TmplClient tmplClient;
 
-	private Long getMediaId(String lane, TemplateReply templateReply)
+	private String getMediaId(String lane, TemplateReply templateReply)
 			throws IOException, MalformedURLException, TwitterException {
-		Long mediaId = ArgUtil.parseAsLong(templateReply.meta().get("twitterMediaId"));
-		if (!ArgUtil.is(mediaId)) {
-			TwitterClientContext ctx = twitterClient.getContext(lane);
-			InputStream media = new java.net.URL(templateReply.getUrl()).openStream();
-			UploadedMedia uploadedMedia = ctx.getTwitter().uploadMedia(templateReply.getTitle(), media);
-			mediaId = uploadedMedia.getMediaId();
-			templateReply.meta().put("twitterMediaId", ArgUtil.parseAsString(mediaId));
-			mongoTemplate.save(templateReply);
-		}
+		String mediaId = ArgUtil.parseAsString(templateReply.meta().get("twitterMediaId"));
+		// TODO:-Media cannot be shared, will update this api once we start using
+		// "SHARED MEDIA across Multiple messgaes"
+		// if (!ArgUtil.is(mediaId)) {
+		TwitterClientContext ctx = twitterClient.getContext(lane);
+		InputStream media = new java.net.URL(templateReply.getUrl()).openStream();
+		UploadedMedia uploadedMedia = ctx.getTwitter().uploadMedia(templateReply.getTitle(), media);
+		mediaId = ArgUtil.parseAsString(uploadedMedia.getMediaId());
+		//templateReply.meta().put("twitterMediaId", mediaId);
+		//mongoTemplate.save(templateReply);
+		// }
 		return mediaId;
 	}
 
@@ -82,10 +84,9 @@ public class TwitterConnector implements ConnectorHandler {
 				TemplateReply templateReply = mongoTemplate.findById(outboxMessage.getTemplate(), TemplateReply.class);
 				if (ArgUtil.is(templateReply)) {
 					if ("image".equalsIgnoreCase(templateReply.getType())) {
-						Long mediaId = getMediaId(lane, templateReply);
+						String mediaId = getMediaId(lane, templateReply);
 						outboxMessage.attachment(new Attachment().mediaURL(templateReply.getUrl())
-								.mediaType(File.FileType.IMAGE.toString())
-								.mediaId(ArgUtil.parseAsString(mediaId)));
+								.mediaType(File.FileType.IMAGE.toString()).mediaId(mediaId));
 						twitterClient.sendReply(to, outboxMessage.getMessage(), mediaId, lane);
 					}
 				} else {

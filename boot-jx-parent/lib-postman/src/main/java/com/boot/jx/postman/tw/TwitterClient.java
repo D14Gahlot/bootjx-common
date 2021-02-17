@@ -81,10 +81,10 @@ public class TwitterClient {
 		LOGGER.debug("Message result to {} : {}", id);
 	}
 
-	public void sendReply(String id, String text, Long mediaId, String lane)
+	public void sendReply(String id, String text, String mediaId, String lane)
 			throws NumberFormatException, TwitterException {
 		Twitter twitter = getContext(lane).getTwitter();
-		twitter.sendDirectMessage(Long.parseLong(id), text, mediaId);
+		twitter.sendDirectMessage(Long.parseLong(id), text, Long.parseLong(mediaId));
 		LOGGER.debug("Message result to {} : {}", id);
 	}
 
