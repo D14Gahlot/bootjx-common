@@ -43,3 +43,4 @@ ext-resources
 /dump.rdb
 .sts4-cache
 .sass-cache
+*.log
