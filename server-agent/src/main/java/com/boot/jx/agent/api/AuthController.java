@@ -5,6 +5,7 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -22,12 +23,8 @@ import com.boot.jx.agent.AgentChatHandlerImpl;
 import com.boot.jx.agent.AgentSessionBean;
 import com.boot.jx.agent.AgentSessionService;
 import com.boot.jx.api.ApiResponse;
-import com.boot.jx.dict.ContactType;
 import com.boot.jx.http.CommonHttpRequest;
-import com.boot.jx.postman.doc.ChatSessionDoc;
-import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.stomp.StompTunnelSessionManager;
-import com.boot.jx.utils.PostManUtil;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.Constants;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -35,6 +32,9 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 @Controller
 public class AuthController {
 
+	@Value("${mry.cdn.url}")
+	private String cdnServer;
+	
 	@Autowired
 	private AppConfig appConfig;
 
@@ -59,17 +59,25 @@ public class AuthController {
 		return new SampleSenderReply();
 	}
 
-	@RequestMapping(value = "/app/home", method = { RequestMethod.POST, RequestMethod.GET })
+	@RequestMapping(value = { "/app/home", "/", "", "/app/*" }, method = { RequestMethod.POST, RequestMethod.GET })
 	public String home(Model model, @RequestParam(required = false) String theme) {
 		model.addAttribute("APP_CONTEXT", appConfig.getAppPrefix());
 		model.addAttribute("APP_USER", agentSession.getAgentCode());
 		model.addAttribute("APP_DEPT", agentSession.getAgentDept());
-
-		String appUrl = ArgUtil.parseAsString(commonHttpRequest.get("APP_URL"), Constants.BLANK);
-		model.addAttribute("APP_URL", appUrl);
-		theme = ArgUtil.nonEmpty(commonHttpRequest.get("theme"), "dashboard.agent.bubble");
-		model.addAttribute("APP_THEME", theme);
-		return "dashboard.agent";
+		model.addAttribute("CDN_URL", ArgUtil.parseAsString(commonHttpRequest.get("CDN_URL"), cdnServer));
+		model.addAttribute("CDN_DEBUG", ArgUtil.parseAsString(commonHttpRequest.get("CDN_DEBUG"), "false"));
+		
+		String cdnnew = ArgUtil.parseAsString(commonHttpRequest.get("CDN_NEW"), "false");
+		
+		if("true".equalsIgnoreCase(cdnnew) ) {
+			return "app";
+		} else {
+			String appUrl = ArgUtil.parseAsString(commonHttpRequest.get("APP_URL"), Constants.BLANK);
+			model.addAttribute("APP_URL", appUrl);
+			theme = ArgUtil.nonEmpty(commonHttpRequest.get("theme"), "dashboard.agent.bubble");
+			model.addAttribute("APP_THEME", theme);
+			return "dashboard.agent";
+		}
 	}
 
 	@RequestMapping(value = "/app/home1", method = { RequestMethod.POST, RequestMethod.GET })

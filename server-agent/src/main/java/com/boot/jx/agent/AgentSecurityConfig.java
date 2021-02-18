@@ -36,6 +36,7 @@ public class AgentSecurityConfig extends WebSecurityConfigurerAdapter {
 				// API Calls
 				.and().authorizeRequests().antMatchers("/api/**").authenticated()
 				// App Pages
+				.and().authorizeRequests().antMatchers("/app/**").authenticated()
 				.and().authorizeRequests().antMatchers("**").authenticated().and().authorizeRequests()
 				.antMatchers("/.**").authenticated()
 				// Login Forms

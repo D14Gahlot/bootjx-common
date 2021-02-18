@@ -1,71 +1,221 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml"
 	xmlns:th="http://www.thymeleaf.org"
-	xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity3" >
+	xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity3">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-<title th:text="${applicationTitle}">Al Mulla Online</title>
+<meta charset=utf-8>
+<meta http-equiv=X-UA-Compatible content="IE=edge">
+<meta name=viewport
+	content="width=device-width,initial-scale=1,shrink-to-fit=no">
+
+<link rel=icon href=favicon.ico>
+
+<title>MeherY Online</title>
+
+
+
+<style type="text/css">
+html.loadable {
+    -webkit-transition: background-color 1s;
+    transition: background-color 1s;
+}
+html.loadable, body.loadable,.main-content-wrapper{
+    min-height: 100%;
+}
+html.loadable.loading {
+     background: #347fc3;
+}
+html.loadable .main-content-wrapper {
+    -webkit-transition: opacity 1s ease-in;
+    transition: opacity 1s ease-in;
+}
+html.loadable.loading .main-content-wrapper {
+    /* Make the contents of the body opaque during loading */
+    opacity: 0;
+    /* Ensures that the transition only runs in one direction */
+    -webkit-transition: opacity 0;
+    transition: opacity 0;
+}
+html.loadable .fullloader.bar {
+    opacity: 0;
+    -webkit-transition: opacity 0;
+    transition: opacity 0;
+    
+    -webkit-transition: background-color 0;
+    transition: background-color 0;
+    
+    -webkit-transition: opacity 1s ease-in;
+    transition: opacity 1s ease-in;
+    
+    bottom: 0px;
+    left: 0px;
+    right: 0px;
+    top: 0px;
+    position: absolute;
+}
+html.loadable.loading .fullloader.bar {
+    opacity: 1;
+}
+html.loadable .container {
+  height: 100vh;
+  width: 100vw;
+  font-family: Helvetica;
+}
+
+html.loadable .loader {
+  height: 20px;
+  width: 250px;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  margin: auto;
+}
+html.loadable .loader--dot {
+  animation-name: loader;
+  animation-timing-function: ease-in-out;
+  animation-duration: 3s;
+  animation-iteration-count: infinite;
+  height: 20px;
+  width: 20px;
+  border-radius: 100%;
+  background-color: black;
+  position: absolute;
+   border: 1px solid #ffffff;
+   opacity: 0.2;
+   background-color: #FFF;
+  
+}
+html.loadable .loader--dot:first-child {
+  animation-delay: 0.5s;
+}
+html.loadable .loader--dot:nth-child(2) {
+  animation-delay: 0.4s;
+}
+html.loadable .loader--dot:nth-child(3) {
+  animation-delay: 0.3s;
+}
+html.loadable .loader--dot:nth-child(4) {
+  animation-delay: 0.2s;
+}
+html.loadable .loader--dot:nth-child(5) {
+  animation-delay: 0.1s;
+}
+html.loadable .loader--dot:nth-child(6) {
+  animation-delay: 0s;
+}
+html.loadable .loader--text {
+  position: absolute;
+  top: 200%;
+  left: 0;
+  right: 0;
+  width: 4rem;
+  margin: auto;
+}
+html.loadable .loader--text:after {
+  content: "Loading";
+  font-weight: bold;
+  animation-name: loading-text;
+  animation-duration: 3s;
+  animation-iteration-count: infinite;
+  color : #FFF;
+}
+
+@keyframes loader {
+  15% {
+    transform: translateX(0);
+  }
+  45% {
+    transform: translateX(230px);
+  }
+  65% {
+    transform: translateX(230px);
+  }
+  95% {
+    transform: translateX(0);
+  }
+}
+@keyframes loading-text {
+  0% {
+    content: "Loading";
+  }
+  25% {
+    content: "Loading.";
+  }
+  50% {
+    content: "Loading..";
+  }
+  75% {
+    content: "Loading...";
+  }
+}
+
+</style>
+
+
+<div th:switch="${CDN_DEBUG}" th:remove="tag">
+	<p th:case="'true'" th:remove="tag">
+		<meta name=report th:content="${CDN_DEBUG}">
+	</p>
+	<p th:case="*" th:remove="tag">
+		<link rel=stylesheet
+			href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900">
+		<link th:href="${CDN_URL} + '/app.js'" rel=preload as=script>
+		<link th:href="${CDN_URL} + '/css/app.css'" rel=preload as=style>
+		<link th:href="${CDN_URL} + '/js/chunk-vendors.js'" rel=preload
+			as=script>
+		<link th:href="${CDN_URL} + '/css/app.css'" rel=stylesheet>
+	</p>
+</div>
+
+
+<script>
+	window.CONST = {
+		dev : '[[${CDN_DEBUG}]]',
+		CDN_URL : '[[${CDN_URL}]]', //
+		APP_CONTEXT : '[[${APP_CONTEXT}]]', //
+		remoteJsVersion : 'VERSION' //,
+		CONTEXT: '[[${APP_CONTEXT}]]', "APP_USER" : '[[${APP_USER}]]',"APP_DEPT" : '[[${APP_DEPT}]]'
+	};
+</script>
 </head>
 <body>
-	<div id="app"></div>
-	<script>
-window.CONST = {
-	    dev: false,
-	    remoteServerUrl: '',
-	    remoteJsUrl: '[[${cdnUrl}]]', //
-	    remoteJsVersion: '[[${CDN_VERSION}]]', //
-	    dummyApi: false,
-	    fpath : '[[${cdnUrl}]]/dist/fingerprint.js',
-	    did : '[[${did}]]',
-	    lang : '[[${lang}]]',
-	    fcmSenderId: '[[${fcmSenderId}]]',
-	    sac: '[[${sac}]]'
-	  };
-</script>
-	<script th:if="${did==null}">
-	(function(a){if("localStorage"in a){var b=a.localStorage.getItem("__did__");b?(a=new Date,a.setTime(a.getTime()+31536E6),a="expires="+a.toUTCString(),document.cookie="did="+b+";"+a+";path=/"):(b=a.CONST.fpath,a=document.createElement("script"),a.type="application/javascript",a.src=b,document.body.appendChild(a))}})(this);
-</script>
-	<script th:unless="${did==null}">
-(function(win){if("localStorage"in win)if(win.CONST.did)win.localStorage.setItem("__did__",win.CONST.did)})(this);
-</script>
-	<script>
-  function getJson(str) {
-    var json;
-    try {
-      json = JSON.parse(str);
-    } catch (e) {
-      console.error('Error in config: ', e);
-      return false;
-    }
-    return json;
-  }
-  var config = getJson(window.localStorage.getItem('debugConfig'));
-  if (config) {
-    window.CONST.dev = config.dev || false;
-    window.CONST.dummyApi = config.dummyApi || false;
-    window.CONST.remoteServerUrl = config.remoteServerUrl || '';
-    window.CONST.remoteJsUrl = config.remoteJsUrl || '';
-  }
+	<noscript>
+		<strong>We're sorry but ArchitectUI doesn't work properly
+			without JavaScript enabled. Please enable it to continue.</strong>
+	</noscript>
+	<div class="fullloader bar container">
+		<div class='loader'>
+			<div class='loader--dot'></div>
+			<div class='loader--dot'></div>
+			<div class='loader--dot'></div>
+			<div class='loader--dot'></div>
+			<div class='loader--dot'></div>
+			<div class='loader--dot'></div>
+			<div class='loader--text'></div>
+		</div>
+	</div>
 
-  // add css and js
-  var head = document.getElementsByTagName('head')[0];
-  var js = document.createElement('script');
-  js.type = 'text/javascript';
-  js.src = window.CONST.remoteJsUrl + '/dist/main.bundle.js?_=' + window.CONST.remoteJsVersion;
-  var css = document.createElement('link');
-  css.rel = 'stylesheet';
-  css.href = window.CONST.remoteJsUrl + '/dist/main.css?_=' + window.CONST.remoteJsVersion;
-  head.appendChild(css);
-  head.appendChild(js);
+	<div id=app></div>
+	
+<div th:switch="${CDN_DEBUG}" th:remove="tag"> 
+  <p th:case="'true'" th:remove="tag">
+		<script th:src="${CDN_URL}+'/app.js'"></script>
+  </p>
+  <p th:case="*" th:remove="tag">
+  	  	<script th:src="${CDN_URL}+'/js/chunk-vendors.js'"></script>
+		<script th:src="${CDN_URL}+'/app.js'"></script>
+  </p> 
+</div>
 
-  // add favicon
-  var link = document.querySelector("link[rel*='icon']") || document.createElement('link');
-  link.type = 'image/x-icon';
-  link.rel = 'shortcut icon';
-  link.href = window.CONST.remoteJsUrl + '/dist/favicon.ico';
-  document.getElementsByTagName('head')[0].appendChild(link);
 
-</script>
 </body>
+
+
+
+
+
 </html>
+
+
