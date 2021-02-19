@@ -59,7 +59,7 @@ public class AuthController {
 		return new SampleSenderReply();
 	}
 
-	@RequestMapping(value = { "/app/home", "/", "", "/app/*" }, method = { RequestMethod.POST, RequestMethod.GET })
+	@RequestMapping(value = { "/app/home", "/", "", "/app/**" }, method = { RequestMethod.POST, RequestMethod.GET })
 	public String home(Model model, @RequestParam(required = false) String theme) {
 		model.addAttribute("APP_CONTEXT", appConfig.getAppPrefix());
 		model.addAttribute("APP_USER", agentSession.getAgentCode());
