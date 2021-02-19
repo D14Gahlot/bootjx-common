@@ -1,5 +1,7 @@
 package com.boot.jx.inbound;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -9,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.*;
 import com.boot.jx.AppConfig;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.chat.ChatClient;
@@ -23,9 +26,12 @@ import com.boot.jx.postman.service.ContactCleanerService;
 import com.boot.jx.rest.RestService;
 import com.boot.jx.scope.vendor.VendorContext.ApiVendorHeaders;
 import com.boot.jx.utils.PostManUtil;
+import com.boot.utils.JsonUtil;
 
 @RestController
 public class InBoundController {
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(InBoundController.class);
 
 	@Autowired
 	private InBoundService inBoundService;
@@ -78,18 +84,23 @@ public class InBoundController {
 	// @ApiRequest(feature = "WA_GUPSHUP_INBOUND")
 	@ApiVendorHeaders
 	@RequestMapping(value = "/ext/inbound/gupshup/callback", method = RequestMethod.POST)
-	public GupShupInbound onReceiveMessage(@RequestBody GupShupInboundV2 inboundV2,
+	public InboxMessage onReceiveMessage(@RequestBody Map<String, Object> inboundMap,
 			@RequestParam(required = false, defaultValue = "false") boolean routed) throws InterruptedException {
-		GupShupInbound inbound = gupShupChatClient.parseAsGupShupInbound(inboundV2);
-		if (!routed && !appConfig.isProdMode() && contactCleanerService.isWhatsAppTest(inbound.getMobile())) {
-			return restService.ajax("https://apid-kwt.amxremit.com/bot/ext/inbound/gupshup/callback?routed=true")
-					.post(inboundV2).as(GupShupInbound.class);
-		} else {
-			// botService.arhive(inbound);
-			InboxMessage event = gupShupChatClient.parseAsInboxMessage(inboundV2);
+		try {
+			InboxMessage event = null;
+			if (inboundMap.containsKey("waNumber")) {
+				event = gupShupChatClient.parseAsInboxMessage(JsonUtil.toObject(inboundMap, GupShupInbound.class));
+			} else {
+				event = gupShupChatClient.parseAsInboxMessage(JsonUtil.toObject(inboundMap, GupShupInboundV2.class));
+			}
+			event.setOriginalMessage(inboundMap);
 			inBoundService.invokeMethods(event);
+			return event;
+		} catch (Exception e) {
+			LOGGER.error("INBOUND", e);
 		}
-		return inbound;
+		return null;
+
 	}
 
 	@Autowired

@@ -95,6 +95,18 @@ public class GupShupChatClient extends AbstractGupShupClient {
 		return inb;
 	}
 
+	public InboxMessage parseAsInboxMessage(GupShupInbound inbound) {
+		InboxMessage inboxMessage = new InboxMessage();
+		inboxMessage.setContactType(ContactType.WHATSAPP);
+		inboxMessage.setChannel(Channel.GUPSHUP.toString());
+		inboxMessage.from(inbound.getMobile());
+		inboxMessage.setFromName(inbound.getName());
+		inboxMessage.setMessage(inbound.getText());
+		inboxMessage.setTo(inbound.getWaNumber());
+		inboxMessage.setMessageIdExt(inbound.getReplyId());
+		return inboxMessage;
+	}
+
 	public InboxMessage parseAsInboxMessage(GupShupInboundV2 inboundV2) {
 		InboxMessage inboxMessage = new InboxMessage();
 		inboxMessage.setContactType(ContactType.WHATSAPP);
