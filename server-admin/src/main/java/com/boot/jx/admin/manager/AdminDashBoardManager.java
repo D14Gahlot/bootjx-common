@@ -60,6 +60,9 @@ public class AdminDashBoardManager {
 	public static final String COLLECTION_NAME = "MESSAGE";
 	@Autowired
 	MongoTemplate mongoTemplate;
+	
+	@Autowired
+	AgentAnalyticsManager agentAnaMgr;
 
 	private String getCollectionName(Object contactType) {
 		return (MessageDoc.COLLECTION_NAME + "_" + ArgUtil.parseAsString(contactType, "OTHERS"));
@@ -147,6 +150,13 @@ public class AdminDashBoardManager {
 		
 		Map<Object,Object> hourWiseCount = getHourWiseCount(totalMsgDoc);
 		
+		/** Open conversation **/
+		List<ChatSessionDoc> openConvesLst =getOpenConversation(contactType, longTodayStartTime, longTodayendTime);
+		if (ArgUtil.is(openConvesLst)) {
+			dto.setOpenConversation(openConvesLst.size());
+		}
+		
+		
 		if (ArgUtil.is(totalInmsgDoc)) {
 			dto.setTotalInMsgExchanged(totalInmsgDoc.size());
 		}
@@ -199,6 +209,13 @@ public class AdminDashBoardManager {
 		LeadMessanger  leadMsg =getLeadMessenger(contactType,longTodayStartTime, longTodayendTime);
 		
 
+		/** Open conversation **/
+		List<ChatSessionDoc> openConvesLst =getOpenConversation(contactType, longTodayStartTime, longTodayendTime);
+		if (ArgUtil.is(openConvesLst)) {
+			dto.setOpenConversation(openConvesLst.size());
+		}
+		
+		
 		if (ArgUtil.is(totalInmsgDoc)) {
 			dto.setTotalInMsgExchanged(totalInmsgDoc.size());
 		}
@@ -259,6 +276,14 @@ public class AdminDashBoardManager {
 		
 		/** lead Messanger **/
 		LeadMessanger  leadMsg =getLeadMessenger(contactType,longWStartTime, longTodayendTime);
+		
+
+		/** Open conversation **/
+		List<ChatSessionDoc> openConvesLst =getOpenConversation(contactType, longWStartTime, longTodayendTime);
+		if (ArgUtil.is(openConvesLst)) {
+			dto.setOpenConversation(openConvesLst.size());
+		}
+		
 
 		if (ArgUtil.is(totalInmsgDoc)) {
 			dto.setTotalInMsgExchanged(totalInmsgDoc.size());
@@ -316,6 +341,14 @@ public class AdminDashBoardManager {
 		
 		/** lead Messanger **/
 		LeadMessanger  leadMsg =getLeadMessenger(contactType,monthStartDateEpocTime, longTodayendTime);
+		
+
+		/** Open conversation **/
+		List<ChatSessionDoc> openConvesLst =getOpenConversation(contactType, monthStartDateEpocTime, longTodayendTime);
+		if (ArgUtil.is(openConvesLst)) {
+			dto.setOpenConversation(openConvesLst.size());
+		}
+		
 
 		if (ArgUtil.is(totalInmsgDoc)) {
 			dto.setTotalInMsgExchanged(totalInmsgDoc.size());
@@ -370,6 +403,14 @@ public class AdminDashBoardManager {
 
 		
 		Map<Object,Object> dweekWiseCount = getWeekWiseCount(totalMsgDoc);
+		
+
+		/** Open conversation **/
+		List<ChatSessionDoc> openConvesLst =getOpenConversation(contactType, quaterStratDateTime, longTodayendTime);
+		if (ArgUtil.is(openConvesLst)) {
+			dto.setOpenConversation(openConvesLst.size());
+		}
+		
 		
 		if (ArgUtil.is(totalInmsgDoc)) {
 			dto.setTotalInMsgExchanged(totalInmsgDoc.size());
@@ -646,6 +687,23 @@ public class AdminDashBoardManager {
 		
 		return mapLst;
 	}
+	
+	// Open conversation 
+		public List<ChatSessionDoc> getOpenConversation(Object contactType, long startTime, long endTime) {
+			 List<MessageDoc> uniqueConvesationLst =getUniqueConversation(contactType,startTime,endTime); 
+			 List<ChatSessionDoc> chatSessionLst =new ArrayList<ChatSessionDoc>();
+			
+			 for(Object msgDoc :uniqueConvesationLst )	{
+				 String strConId = (String)msgDoc;
+				 System.out.println("Open Conversation :"+strConId);
+				 Query query = new Query(); 
+				query.addCriteria(Criteria.where("contactId").is(strConId).and("active").is(true));
+				List<ChatSessionDoc> chatSessionValue = mongoTemplate.find(query,ChatSessionDoc.class,AgentAnalyticsManager.CHAT_SESSION);
+				chatSessionLst.addAll(chatSessionValue);
+			 }
+			 return chatSessionLst;
+		}
+
 	
 	
 	

@@ -4,7 +4,14 @@ public class DashBoardRequestDto {
 	Object contactType;
 	long dateRange1;
 	long dateReange2;
+	String agent;
 	
+	public String getAgent() {
+		return agent;
+	}
+	public void setAgent(String agent) {
+		this.agent = agent;
+	}
 	public long getDateRange1() {
 		return dateRange1;
 	}

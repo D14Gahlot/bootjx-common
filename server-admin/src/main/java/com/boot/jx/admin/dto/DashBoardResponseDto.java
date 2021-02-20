@@ -9,11 +9,14 @@ public class DashBoardResponseDto {
 	
 	Object contactType;
 	String filter;
+	String agentName;
 	long totalInMsgExchanged;
 	long totalOutMsgExchanged;
 	long totalMsgExchanged;
 	long uniqueConversation;
-	long todayMsgExchanged;
+	long openConversation;
+	long converDuration;
+	double startLag;
 	PeakLoadDto peakLoad;
 	Map<Object,Object> msgCountLst;
 	LeadMessanger leadMessanger;
@@ -62,13 +65,7 @@ public class DashBoardResponseDto {
 		this.uniqueConversation = uniqueConversation;
 	}
 
-	public long getTodayMsgExchanged() {
-		return todayMsgExchanged;
-	}
-
-	public void setTodayMsgExchanged(long todayMsgExchanged) {
-		this.todayMsgExchanged = todayMsgExchanged;
-	}
+	
 
 	public String getFilter() {
 		return filter;
@@ -100,6 +97,38 @@ public class DashBoardResponseDto {
 
 	public void setLeadMessanger(LeadMessanger leadMessanger) {
 		this.leadMessanger = leadMessanger;
+	}
+
+	public long getOpenConversation() {
+		return openConversation;
+	}
+
+	public void setOpenConversation(long openConversation) {
+		this.openConversation = openConversation;
+	}
+
+	public long getConverDuration() {
+		return converDuration;
+	}
+
+	public void setConverDuration(long converDuration) {
+		this.converDuration = converDuration;
+	}
+
+	public double getStartLag() {
+		return startLag;
+	}
+
+	public void setStartLag(double startLag) {
+		this.startLag = startLag;
+	}
+
+	public String getAgentName() {
+		return agentName;
+	}
+
+	public void setAgentName(String agentName) {
+		this.agentName = agentName;
 	}
 
 	
