@@ -62,7 +62,17 @@ public class ChatContext {
 	}
 
 	@SuppressWarnings("unchecked")
+	public <T extends BasicChatContextUser> T getUser(Class<T> type) {
+		return (T) getStore().getUser();
+	}
+
+	@SuppressWarnings("unchecked")
 	public <T extends BasicChatContextSession> T getSession() {
+		return (T) getStore().getSession();
+	}
+
+	@SuppressWarnings("unchecked")
+	public <T extends BasicChatContextSession> T getSession(Class<T> type) {
 		return (T) getStore().getSession();
 	}
 

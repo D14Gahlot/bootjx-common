@@ -3,7 +3,9 @@ package com.boot.jx.bot;
 import java.io.Serializable;
 import java.math.BigDecimal;
 
-public class ChatSession implements Serializable {
+import com.boot.jx.postman.store.IChatContextStore.BasicChatContextSession;
+
+public class ChatSession extends BasicChatContextSession implements Serializable {
 
 	private static final long serialVersionUID = -5282578895568965400L;
 
@@ -24,7 +26,7 @@ public class ChatSession implements Serializable {
 	public String civilExists;
 
 	public String civilMatch;
-	
+
 	public BigDecimal countryId;
 
 	public BigDecimal getCountryId() {
@@ -66,6 +68,5 @@ public class ChatSession implements Serializable {
 	public void setCivilMatch(String civilMatch) {
 		this.civilMatch = civilMatch;
 	}
-
 
 }

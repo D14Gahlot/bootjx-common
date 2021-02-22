@@ -3,7 +3,9 @@ package com.boot.jx.bot;
 import java.io.Serializable;
 import java.math.BigDecimal;
 
-public class ChatUser implements Serializable {
+import com.boot.jx.postman.store.IChatContextStore.BasicChatContextUser;
+
+public class ChatUser extends BasicChatContextUser implements Serializable {
 
 	private static final long serialVersionUID = 7269291269502598338L;
 
@@ -12,7 +14,6 @@ public class ChatUser implements Serializable {
 	}
 
 	private String identity;
-	private String firstName;
 	private BigDecimal customerId;
 
 	private LoginStatus loginStatus;
@@ -31,14 +32,6 @@ public class ChatUser implements Serializable {
 
 	public void setLoginStatus(LoginStatus loginStatus) {
 		this.loginStatus = loginStatus;
-	}
-
-	public String getFirstName() {
-		return firstName;
-	}
-
-	public void setFirstName(String firstName) {
-		this.firstName = firstName;
 	}
 
 	public BigDecimal getCustomerId() {
