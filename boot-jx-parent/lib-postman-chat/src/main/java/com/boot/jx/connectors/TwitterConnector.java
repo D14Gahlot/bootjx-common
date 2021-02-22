@@ -188,6 +188,7 @@ public class TwitterConnector implements ConnectorHandler {
 		TwitterClientContext ctx = twitterClient.getContext(lane);
 		DirectMessageList dml = DirectMessageLocalImpl.createDirectMessageList(update,
 				ctx.getTwitter().getConfiguration());
+		dml = ctx.removeDMsNotSentToMe(dml);
 		return messageConverter(dml, lane);
 	}
 
