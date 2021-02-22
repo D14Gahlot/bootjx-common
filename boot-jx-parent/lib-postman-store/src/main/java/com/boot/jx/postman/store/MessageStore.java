@@ -48,6 +48,7 @@ public class MessageStore extends CommonDocStore {
 		doc.setMessage(inboxMessage.getMessage());
 		doc.setSessionId(inboxMessage.getSessionId());
 		doc.setTags(inboxMessage.getTags());
+		doc.setMessageIdExt(inboxMessage.getMessageIdExt());
 		return doc;
 	}
 
@@ -151,6 +152,7 @@ public class MessageStore extends CommonDocStore {
 		doc.setLogs(outMessage.getLogs());
 
 		doc.setSessionId(outMessage.getSessionId());
+		doc.setMessageIdExt(outMessage.getMessageIdExt());
 		return doc;
 	}
 
