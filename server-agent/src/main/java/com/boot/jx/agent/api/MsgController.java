@@ -98,6 +98,7 @@ public class MsgController {
 			messageDto.setName(agentSession.getAgentCode());
 			agentService.sendMessage(sessionDoc, outboxMessage);
 			messageDto.setMessageId(outboxMessage.getMessageId());
+			messageDto.setMessageIdExt(outboxMessage.getMessageIdExt());
 			messageDto.setText(outboxMessage.getMessage());
 			return ApiResponse.buildResult(messageDto);
 		}
