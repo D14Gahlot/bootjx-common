@@ -198,7 +198,12 @@ html.loadable .loader--text:after {
 	</div>
 
 	<div id=app></div>
-	
+
+<script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js'></script>	
+<script src="js/sockjs.min.js"></script>
+<script src="js/stomp.min.js"></script>
+<script src="js/tunnel.client.js"></script>
+
 <div th:switch="${CDN_DEBUG}" th:remove="tag"> 
   <p th:case="'true'" th:remove="tag">
 		<script th:src="${CDN_URL}+'/app.js'"></script>

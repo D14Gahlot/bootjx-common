@@ -34,7 +34,7 @@ public class AuthController {
 
 	@Value("${mry.cdn.url}")
 	private String cdnServer;
-	
+
 	@Autowired
 	private AppConfig appConfig;
 
@@ -66,10 +66,10 @@ public class AuthController {
 		model.addAttribute("APP_DEPT", agentSession.getAgentDept());
 		model.addAttribute("CDN_URL", ArgUtil.parseAsString(commonHttpRequest.get("CDN_URL"), cdnServer));
 		model.addAttribute("CDN_DEBUG", ArgUtil.parseAsString(commonHttpRequest.get("CDN_DEBUG"), "false"));
-		
+
 		String cdnnew = ArgUtil.parseAsString(commonHttpRequest.get("CDN_NEW"), "false");
-		
-		if("true".equalsIgnoreCase(cdnnew) ) {
+
+		if ("true".equalsIgnoreCase(cdnnew)) {
 			return "app";
 		} else {
 			String appUrl = ArgUtil.parseAsString(commonHttpRequest.get("APP_URL"), Constants.BLANK);
@@ -138,8 +138,8 @@ public class AuthController {
 
 	@ResponseBody
 	@RequestMapping(value = "/auth/online/status", method = { RequestMethod.POST })
-	public ApiResponse<String, String> onlineStatus(@RequestParam boolean status) {
-		ApiResponse<String, String> x = ApiResponse.buildData("success", "success");
+	public ApiResponse<String, Object> onlineStatus(@RequestParam boolean status) {
+		ApiResponse<String, Object> x = ApiResponse.buildData("status", status);
 		agentSessionService.setOnline(status);
 		return x;
 	}
