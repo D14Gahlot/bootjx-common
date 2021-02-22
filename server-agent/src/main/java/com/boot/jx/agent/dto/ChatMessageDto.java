@@ -15,6 +15,7 @@ public class ChatMessageDto implements Serializable {
 	private String name;
 	private String sessionId;
 	private String messageId;
+	private String messageIdExt;
 	private long timestamp;
 	private boolean type;
 	private TagDocument tags;
@@ -108,5 +109,13 @@ public class ChatMessageDto implements Serializable {
 
 	public void setLogs(List<String> logs) {
 		this.logs = logs;
+	}
+
+	public String getMessageIdExt() {
+		return messageIdExt;
+	}
+
+	public void setMessageIdExt(String messageIdExt) {
+		this.messageIdExt = messageIdExt;
 	}
 }
