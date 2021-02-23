@@ -25,6 +25,7 @@ public class ChatSessionDto implements Serializable {
 	private String assignedToAgent;
 
 	boolean assigned;
+	boolean active;
 
 	private List<ChatMessageDto> messages;
 
@@ -122,5 +123,13 @@ public class ChatSessionDto implements Serializable {
 
 	public void setContactId(String contactId) {
 		this.contactId = contactId;
+	}
+
+	public boolean isActive() {
+		return active;
+	}
+
+	public void setActive(boolean active) {
+		this.active = active;
 	}
 }

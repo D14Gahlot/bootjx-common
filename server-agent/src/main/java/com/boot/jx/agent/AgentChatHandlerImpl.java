@@ -179,6 +179,7 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 		chatSessionDto.setAssignedToAgent(chatSessionDoc.getAssignedToAgent());
 		chatSessionDto.setAssignedToDept(chatSessionDoc.getAssignedToDept());
 		chatSessionDto.setContactId(contact.getContactId());
+		chatSessionDto.setActive(chatSessionDoc.isActive());
 
 		List<MessageDoc> messages = messageStore.findBySessionId(contact.getSessionId(), contact.getContactType());
 		List<ChatMessageDto> messageDtos = new ArrayList<ChatMessageDto>();
