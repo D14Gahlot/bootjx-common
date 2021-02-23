@@ -254,6 +254,9 @@ public class ApiResponse<T, M> extends AResponse<M>
 		return this;
 	}
 
-	
+	public ApiResponse<T, M> data(T data) {
+		this.data = data;
+		return this;
+	}
 
 }

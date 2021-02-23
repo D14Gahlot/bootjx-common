@@ -48,7 +48,7 @@ public class AppParamController {
 
 	public static final String EXT_PUB_CONFIG_CLIENT = "/ext/pub/config/client";
 	private static final Logger LOGGER = LoggerFactory.getLogger(AppParamController.class);
-	public static final String PUB_AMX_PREFIX = "/pub/amx";
+	public static final String PUB_AMX_PREFIX = "/pub/boot";
 	public static final String PUBG_AMX_PREFIX = "/pubg/";
 	public static final String PARAM_URL = PUB_AMX_PREFIX + "/params";
 	public static final String FEATURE_URL = PUB_AMX_PREFIX + "/features";
@@ -70,6 +70,44 @@ public class AppParamController {
 	List<IndicatorListner> listners;
 
 	@ApiRequest(type = RequestType.NO_TRACK_PING)
+	@RequestMapping(value = "/int/pub/boot/ping", method = RequestMethod.GET)
+	public ApiResponse<Object, Object> intPubPing() {
+		return ApiResponse.build().message("pong");
+	}
+
+	@ApiRequest(type = RequestType.NO_TRACK_PING)
+	@RequestMapping(value = "/int/pub/boot/metric", method = RequestMethod.GET)
+	public ApiResponse<Object, Object> intPubMetric() {
+		Map<String, Object> map = new HashMap<String, Object>();
+		for (AppParam eachAppParam : AppParam.values()) {
+			map.put(eachAppParam.toString(), eachAppParam);
+		}
+		GaugeIndicator gaugeIndicator = new GaugeIndicator();
+		if (!ArgUtil.isEmpty(listners)) {
+			for (IndicatorListner eachListner : listners) {
+				map.putAll(eachListner.getIndicators(gaugeIndicator));
+			}
+		}
+		return ApiResponse.build().data(map);
+	}
+
+	@ApiRequest(type = RequestType.NO_TRACK_PING)
+	@RequestMapping(value = METRIC_URL, method = RequestMethod.GET)
+	public Map<String, Object> metric() {
+		Map<String, Object> map = new HashMap<String, Object>();
+		for (AppParam eachAppParam : AppParam.values()) {
+			map.put(eachAppParam.toString(), eachAppParam);
+		}
+		GaugeIndicator gaugeIndicator = new GaugeIndicator();
+		if (!ArgUtil.isEmpty(listners)) {
+			for (IndicatorListner eachListner : listners) {
+				map.putAll(eachListner.getIndicators(gaugeIndicator));
+			}
+		}
+		return map;
+	}
+
+	@ApiRequest(type = RequestType.NO_TRACK_PING)
 	@RequestMapping(value = PARAM_URL, method = RequestMethod.GET)
 	public AppParam[] geoLocation(@RequestParam(required = false) AppParam id) {
 		if (id != null) {
@@ -87,22 +125,6 @@ public class AppParamController {
 			return vendorAuthConfig.getFeaturesList().toArray();
 		}
 		return null;
-	}
-
-	@ApiRequest(type = RequestType.NO_TRACK_PING)
-	@RequestMapping(value = METRIC_URL, method = RequestMethod.GET)
-	public Map<String, Object> metric() {
-		Map<String, Object> map = new HashMap<String, Object>();
-		for (AppParam eachAppParam : AppParam.values()) {
-			map.put(eachAppParam.toString(), eachAppParam);
-		}
-		GaugeIndicator gaugeIndicator = new GaugeIndicator();
-		if (!ArgUtil.isEmpty(listners)) {
-			for (IndicatorListner eachListner : listners) {
-				map.putAll(eachListner.getIndicators(gaugeIndicator));
-			}
-		}
-		return map;
 	}
 
 	@Autowired
@@ -138,8 +160,7 @@ public class AppParamController {
 
 	@RequestMapping(value = "/pub/amx/device", method = { RequestMethod.GET, RequestMethod.POST })
 	public ApiResponse<UserDevice, Map<String, Object>> userDevice(@RequestParam(required = false) String key,
-			@RequestParam(required = false) String vendor, HttpSession httpSession,
-			HttpServletRequest request) {
+			@RequestParam(required = false) String vendor, HttpSession httpSession, HttpServletRequest request) {
 		Map<String, Object> map = new HashMap<String, Object>();
 		map.put("getAppSpecifcDecryptedProp", appConfig.getAppSpecifcDecryptedProp());
 		map.put("getTenantSpecifcDecryptedProp2", appTenantConfig.getTenantSpecifcDecryptedProp2());
@@ -193,8 +214,7 @@ public class AppParamController {
 	}
 
 	@RequestMapping(value = "/pub/amx/encrypt", method = RequestMethod.GET)
-	public Map<String, String> encrypt(@RequestParam String secret,
-			@RequestParam String message) {
+	public Map<String, String> encrypt(@RequestParam String secret, @RequestParam String message) {
 		Map<String, String> map = new HashMap<String, String>();
 		BasicTextEncryptor textEncryptor = new BasicTextEncryptor();
 		textEncryptor.setPasswordCharArray(secret.toCharArray());
@@ -204,8 +224,7 @@ public class AppParamController {
 	}
 
 	@RequestMapping(value = "/pub/amx/decrypt", method = RequestMethod.GET)
-	public Map<String, String> decrypt(@RequestParam String secret,
-			@RequestParam String message) {
+	public Map<String, String> decrypt(@RequestParam String secret, @RequestParam String message) {
 		Map<String, String> map = new HashMap<String, String>();
 		BasicTextEncryptor textEncryptor = new BasicTextEncryptor();
 		textEncryptor.setPasswordCharArray(secret.toCharArray());
