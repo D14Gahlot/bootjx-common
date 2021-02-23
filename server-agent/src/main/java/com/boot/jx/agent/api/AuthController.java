@@ -67,7 +67,7 @@ public class AuthController {
 		model.addAttribute("CDN_URL", ArgUtil.parseAsString(commonHttpRequest.get("CDN_URL"), cdnServer));
 		model.addAttribute("CDN_DEBUG", ArgUtil.parseAsString(commonHttpRequest.get("CDN_DEBUG"), "false"));
 
-		String cdnnew = ArgUtil.parseAsString(commonHttpRequest.get("CDN_NEW"), "false");
+		String cdnnew = ArgUtil.parseAsString(commonHttpRequest.get("CDN_NEW"), "true");
 
 		if ("true".equalsIgnoreCase(cdnnew)) {
 			return "app";
