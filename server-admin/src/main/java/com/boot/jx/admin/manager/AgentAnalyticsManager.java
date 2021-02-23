@@ -10,6 +10,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.time.LocalTime;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
@@ -47,6 +48,7 @@ public class AgentAnalyticsManager {
 	public static final String CHAT_SESSION = "CHAT_SESSION";
 	
 	public static final String DEFAULT_AGENT = "TEAM";
+	public static final int OPEN_CONV_HR_LMT =5; 
 	
 	
 	@Autowired
@@ -188,8 +190,10 @@ public class AgentAnalyticsManager {
 	}
 	
 	public List<ChatSessionDoc> getAgentWiseOpenConversation(String agent,long startTime, long endTime){
+		List<ChatSessionDoc> totalOpenMsgDoc =new ArrayList<ChatSessionDoc>(); 
 		long dateRange1 =0;
 		long dateRange2 =0;
+		long currentTimeStamp =System.currentTimeMillis();
 		if(ArgUtil.is(startTime)) {
 			dateRange1 =todayStartTime();
 		}
@@ -200,7 +204,16 @@ public class AgentAnalyticsManager {
 		query.addCriteria(Criteria.where("assignedToAgent").is(agent).and("active").is(true));
 		query.addCriteria(Criteria.where("assignedAgentStamp").gt(dateRange1).lt(dateRange2));
 		List<ChatSessionDoc> totalMsgDoc = mongoTemplate.find(query, ChatSessionDoc.class, CHAT_SESSION);
-		return totalMsgDoc;
+		
+		for(ChatSessionDoc chatDoc:totalMsgDoc) {
+			long assignToAgent = chatDoc.getAssignedAgentStamp();
+			long diffInMilliSeconds = currentTimeStamp-assignToAgent;
+			int diffInHours = (int) (diffInMilliSeconds / (60 * 60 * 1000));
+			if(diffInHours>OPEN_CONV_HR_LMT) {
+				totalOpenMsgDoc.add(chatDoc);
+			}
+		}
+		return totalOpenMsgDoc;
 	}
 	
 	public long getConversationDuration(String agent,long startTime, long endTime){
@@ -417,13 +430,11 @@ public class AgentAnalyticsManager {
 	       System.out.println("difference in minutes: " + decimalFormatter.format(diffInMin));
 
 	       int diffInHours = (int) (diffInMilliSeconds / (60 * 60 * 1000));
-	       System.out.println("difference in hours: " + decimalFormatter.format(diffInHours));
 
 	       int diffInDays = (int) (diffInMilliSeconds / (24 * 60 * 60 * 1000));
-	       System.out.println("difference in days: " + diffInDays);
 	       
 	       dateDiffMap.put("MINUTE", diffInMin);
-	       dateDiffMap.put("HOUR", diffInMin);
+	       dateDiffMap.put("HOUR", diffInHours);
 	       dateDiffMap.put("DAYS", diffInDays);
 	       
 	       return dateDiffMap;
