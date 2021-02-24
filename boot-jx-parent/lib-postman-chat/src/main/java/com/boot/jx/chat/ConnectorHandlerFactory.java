@@ -23,9 +23,13 @@ public class ConnectorHandlerFactory extends ScopedBeanFactory<String, Connector
 	private static final long serialVersionUID = 4007091611441725719L;
 
 	public interface ConnectorHandler {
-		public void reply(InboxMessage inboxMessage, OutboxMessage outboxMessage);
+		default public void reply(InboxMessage inboxMessage, OutboxMessage outboxMessage) {
+			this.send(inboxMessage.getLane(), inboxMessage.getFrom(), outboxMessage);
+		}
 
-		public void send(ChatContactDoc chatContactDoc, OutboxMessage outboxMessage);
+		default public void send(ChatContactDoc chatContactDoc, OutboxMessage outboxMessage) {
+			this.send(chatContactDoc.getLane(), chatContactDoc.getCsid(), outboxMessage);
+		}
 
 		public InboxMessage assignToAgent(InboxMessage inboxMessage);
 
