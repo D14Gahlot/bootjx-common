@@ -56,7 +56,7 @@ public class InBoundControllerWA {
 		return null;
 	}
 
-	@RequestMapping(value = "/postman/webhook/apiwha/{secret}/update", method = { RequestMethod.POST })
+	@RequestMapping(value = "/ext/inbound/rapiwha/callback/{secret}", method = { RequestMethod.POST })
 	public ApiResponse<Object, Object> onAPIWHAMessage(@RequestParam(required = false) String secret,
 			@RequestParam String data) {
 		try {
