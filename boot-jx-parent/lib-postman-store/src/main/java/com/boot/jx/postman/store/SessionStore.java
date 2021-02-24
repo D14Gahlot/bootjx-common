@@ -55,6 +55,16 @@ public class SessionStore {
 	public ChatSessionDoc getSession(String sessionId) {
 		return mongoTemplate.findById(sessionId, ChatSessionDoc.class);
 	}
+	
+	public ChatSessionDoc getValidSession(String sessionId) {
+		ChatSessionDoc chatSessionDoc = mongoTemplate.findById(sessionId, ChatSessionDoc.class);
+		if ((ArgUtil.isEmpty(chatSessionDoc)
+				|| TimeUtils.isExpired(chatSessionDoc.getLastInComingStamp(), chatSessionTimeout)
+				|| !chatSessionDoc.isActive())) {
+			return null;
+		}
+		return chatSessionDoc;
+	}
 
 	public ChatSessionDoc createSession(InboxMessage inboxMessage) {
 		String contactId = PostManUtil.createContactId(inboxMessage);
@@ -73,7 +83,7 @@ public class SessionStore {
 		}
 
 		if (ArgUtil.is(sessionId)) {
-			chatSessionDoc = mongoTemplate.findById(sessionId, ChatSessionDoc.class);
+			chatSessionDoc = getValidSession(sessionId);
 		}
 
 		if ((ArgUtil.isEmpty(chatSessionDoc)

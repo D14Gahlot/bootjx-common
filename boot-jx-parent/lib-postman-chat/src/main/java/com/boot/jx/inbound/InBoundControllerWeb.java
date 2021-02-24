@@ -67,7 +67,7 @@ public class InBoundControllerWeb {
 
 		ChatSessionDoc session = null;
 		if (ArgUtil.is(webSessionId)) {
-			session = sessionStore.getSession(webSessionId);
+			session = sessionStore.getValidSession(webSessionId);
 		}
 		List<OutboxMessage> msgs = new ArrayList<OutboxMessage>();
 		if (ArgUtil.is(session)) {
@@ -105,7 +105,7 @@ public class InBoundControllerWeb {
 		inBoundEngine.invokeMethods(event);
 
 		String webSessionId = commonHttpRequest.get("web-session-id");
-		if (!ArgUtil.is(webSessionId)) {
+		if (!ArgUtil.is(webSessionId) || !webSessionId.equalsIgnoreCase(event.getSessionId()) ) {
 			commonHttpRequest.setCookie("web-session-id", event.getSessionId());
 		}
 		return event;

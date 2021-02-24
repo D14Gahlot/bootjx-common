@@ -69,7 +69,7 @@
 		<img src="https://static.turbosquid.com/Preview/001292/481/WV/_D.jpg" class="rounded-circle user_img_msg">
 	</div>
 	<div class="msg_cotainer">
-		<%=im._message%>
+		<span class="msg_cotainer_span"><%=formatHtml(im._message)%></span>
 		<% if(im._inputs && im._inputs.length>0) {%>
 <form class="cmxform" id="commentForm" method="get" action="">
 		<hr/>
@@ -169,6 +169,9 @@ function getThumb(mediaUrl){
 	}
 }
 
+function formatHtml(str){
+ return str.trim();
+}
 function sendMessage(data){
 	return $.ajax({
 	      type: 'POST',
@@ -333,8 +336,8 @@ var initFingerprintJS = function initFingerprintJS() {
 	//form-input-name:Name|TEXT;
 	//form-input-email:EMAIL|EMAIL;
 	function formatMessage(im){
-		var inputs = [];
-		var buttons = [];
+		var inputs = im.options.inputs || [];
+		var buttons = im.options.buttons || [];
 		for(var key in im.options){
 			if(key.indexOf("form-input-") == 0){
 				var params = im.options[key].split("|");	
@@ -353,7 +356,7 @@ var initFingerprintJS = function initFingerprintJS() {
 				})
 			}
 		}	
-	  im._message = (im.message || "").replace(/(?:\r\n|\r|\n)/g, '').trim();
+	  im._message = (im.message || "").trim();//.replace(/(?:\r\n|\r|\n)/g, '').trim();
 	  im._inputs = inputs;
 	  im._buttons = buttons;
 	  im._timestamp = formatTime(im.timestamp)

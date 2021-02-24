@@ -27,3 +27,6 @@
     width: fit-content;
     min-width: 26%;
 }
+.msg_cotainer_span{
+	white-space: pre-wrap;
+}
