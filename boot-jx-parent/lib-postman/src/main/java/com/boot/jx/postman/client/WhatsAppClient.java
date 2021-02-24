@@ -23,10 +23,10 @@ public class WhatsAppClient {
 	private static final Logger LOGGER = LoggerFactory.getLogger(WhatsAppClient.class);
 
 	@Autowired
-	RestService restService;
+	private RestService restService;
 
 	@Autowired
-	AppConfig appConfig;
+	private AppConfig appConfig;
 
 	/**
 	 * This is convenient method for {@link WhatsAppClient#send(List)}
