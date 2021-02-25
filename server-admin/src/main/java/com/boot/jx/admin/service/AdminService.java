@@ -46,7 +46,7 @@ public class AdminService {
 		for (AgentResponseDto agentResponseDto : agentList) {
 			if (ArgUtil.is(agentResponseDto.getAgent_id())) {
 				agentResponseDto.setDept(new DepartmentResponseDto()
-						.importFrom(CollectionUtil.getOne(adminManager.fetchDept(agentResponseDto.getAgent_id()))));
+						.importFrom(CollectionUtil.getOne(adminManager.fetchDept(agentResponseDto.getDept_id()))));
 			}
 		}
 		return agentList;
