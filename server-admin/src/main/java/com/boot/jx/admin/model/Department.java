@@ -1,5 +1,6 @@
 package com.boot.jx.admin.model;
 
+import java.math.BigDecimal;
 import java.util.Date;
 
 import javax.persistence.Column;
@@ -8,8 +9,11 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 
+import com.boot.jx.model.IResourceEntity;
+import com.boot.utils.ArgUtil;
+
 @Entity
-public class Department {
+public class Department implements IResourceEntity {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
@@ -97,6 +101,26 @@ public class Department {
 
 	public void setDept_id(Integer dept_id) {
 		this.dept_id = dept_id;
+	}
+
+	@Override
+	public BigDecimal resourceId() {
+		return ArgUtil.parseAsBigDecimal(this.dept_id);
+	}
+
+	@Override
+	public String resourceName() {
+		return this.dept_name;
+	}
+
+	@Override
+	public String resourceCode() {
+		return this.dept_code;
+	}
+
+	@Override
+	public String resourceLocalName() {
+		return this.dept_name;
 	}
 
 }

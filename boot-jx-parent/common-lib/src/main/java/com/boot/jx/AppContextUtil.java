@@ -14,7 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
 
-import com.boot.jx.api.AmxApiResponseUtil;
+import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.dict.Language;
 import com.boot.jx.dict.UserClient.UserDeviceClient;
 import com.boot.jx.http.CommonHttpRequest.ApiRequestDetail;
@@ -284,7 +284,7 @@ public class AppContextUtil {
 	}
 
 	/**
-	 * @deprecated {@link AmxApiResponseUtil#getExceptionLogs()}
+	 * @deprecated {@link ApiResponseUtil#getExceptionLogs()}
 	 * 
 	 * @return
 	 */
@@ -303,7 +303,7 @@ public class AppContextUtil {
 	}
 
 	/**
-	 * @deprecated {@link AmxApiResponseUtil#addExceptionLog()}
+	 * @deprecated {@link ApiResponseUtil#addExceptionLog()}
 	 * 
 	 * @return
 	 */

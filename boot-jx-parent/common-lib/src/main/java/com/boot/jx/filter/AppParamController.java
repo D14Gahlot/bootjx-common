@@ -23,7 +23,7 @@ import com.boot.jx.AppConfig;
 import com.boot.jx.AppParam;
 import com.boot.jx.AppSharedConfig;
 import com.boot.jx.AppTenantConfig;
-import com.boot.jx.api.AmxApiResponseUtil;
+import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.api.BoolRespModel;
 import com.boot.jx.def.IndicatorListner;
@@ -187,7 +187,7 @@ public class AppParamController {
 			map.put(key, prop(key));
 		}
 
-		AmxApiResponseUtil.addWarning("THis is a warning for no reason");
+		ApiResponseUtil.addWarning("THis is a warning for no reason");
 		ApiResponse<UserDevice, Map<String, Object>> resp = new ApiResponse<UserDevice, Map<String, Object>>();
 		resp.setMeta(map);
 		resp.setData(commonHttpRequest.getUserDevice().toSanitized());

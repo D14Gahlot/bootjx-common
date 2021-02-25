@@ -1,5 +1,6 @@
 package com.boot.jx.admin.model;
 
+import java.math.BigDecimal;
 import java.util.Date;
 
 import javax.persistence.Column;
@@ -8,8 +9,11 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 
+import com.boot.jx.model.IResourceEntity;
+import com.boot.utils.ArgUtil;
+
 @Entity
-public class Agent {
+public class Agent implements IResourceEntity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Integer agent_id;
@@ -20,6 +24,8 @@ public class Agent {
 	private String agent_department;
 	private String agent_email;
 	private String agent_number;
+	private String agent_password;
+	private String agent_channels;
 	private Date created_date;
 	private String create_by = "ADMIN";
 	private Date modified_date;
@@ -27,6 +33,8 @@ public class Agent {
 	private String modified_by = "ADMIN";
 	@Column(length = 1)
 	private String isactive;
+
+	private Integer dept_id;
 
 	public String getAgent_name() {
 		return agent_name;
@@ -114,6 +122,50 @@ public class Agent {
 
 	public void setAgent_id(Integer agent_id) {
 		this.agent_id = agent_id;
+	}
+
+	public String getAgent_password() {
+		return agent_password;
+	}
+
+	public void setAgent_password(String agent_password) {
+		this.agent_password = agent_password;
+	}
+
+	public String getAgent_channels() {
+		return agent_channels;
+	}
+
+	public void setAgent_channels(String agent_channels) {
+		this.agent_channels = agent_channels;
+	}
+
+	public Integer getDept_id() {
+		return dept_id;
+	}
+
+	public void setDept_id(Integer dept_id) {
+		this.dept_id = dept_id;
+	}
+
+	@Override
+	public BigDecimal resourceId() {
+		return ArgUtil.parseAsBigDecimal(this.agent_id);
+	}
+
+	@Override
+	public String resourceName() {
+		return this.agent_name;
+	}
+
+	@Override
+	public String resourceCode() {
+		return this.agent_code;
+	}
+
+	@Override
+	public String resourceLocalName() {
+		return this.agent_name;
 	}
 
 }

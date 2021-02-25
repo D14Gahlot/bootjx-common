@@ -40,7 +40,7 @@ import com.boot.jx.AppConfig;
 import com.boot.jx.AppConstants;
 import com.boot.jx.AppContextUtil;
 import com.boot.jx.api.AResponse;
-import com.boot.jx.api.AmxApiResponseUtil;
+import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.api.ApiFieldError;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.exception.ApiHttpExceptions.ApiHttpArgException;
@@ -83,11 +83,11 @@ public abstract class AmxAdvice implements ResponseBodyAdvice<ApiResponse<?, ?>>
 		response.setHeader(AppConstants.EXCEPTION_HEADER_KEY, apiError.getException());
 		response.setHeader(AppConstants.EXCEPTION_HEADER_CODE_KEY, apiAuditEvent.getErrorCode());
 
-		for (ApiFieldError warning : AmxApiResponseUtil.getWarnings()) {
+		for (ApiFieldError warning : ApiResponseUtil.getWarnings()) {
 			apiError.addWarning(warning);
 		}
 
-		for (String log : AmxApiResponseUtil.getLogs()) {
+		for (String log : ApiResponseUtil.getLogs()) {
 			apiError.addLog(log);
 		}
 
@@ -128,11 +128,11 @@ public abstract class AmxAdvice implements ResponseBodyAdvice<ApiResponse<?, ?>>
 		ExceptionMessageKey.resolveLocalMessage(apiError);
 		response.setHeader(AppConstants.EXCEPTION_HEADER_KEY, apiError.getException());
 
-		for (ApiFieldError warning : AmxApiResponseUtil.getWarnings()) {
+		for (ApiFieldError warning : ApiResponseUtil.getWarnings()) {
 			apiError.addWarning(warning);
 		}
 
-		for (String log : AmxApiResponseUtil.getLogs()) {
+		for (String log : ApiResponseUtil.getLogs()) {
 			apiError.addLog(log);
 		}
 
@@ -258,10 +258,10 @@ public abstract class AmxAdvice implements ResponseBodyAdvice<ApiResponse<?, ?>>
 	public ApiResponse<?, ?> beforeBodyWrite(ApiResponse<?, ?> body, MethodParameter returnType,
 			MediaType selectedContentType, Class<? extends HttpMessageConverter<?>> selectedConverterType,
 			ServerHttpRequest request, ServerHttpResponse response) {
-		for (ApiFieldError warning : AmxApiResponseUtil.getWarnings()) {
+		for (ApiFieldError warning : ApiResponseUtil.getWarnings()) {
 			body.addWarning(warning);
 		}
-		for (String log : AmxApiResponseUtil.getLogs()) {
+		for (String log : ApiResponseUtil.getLogs()) {
 			body.addLog(log);
 		}
 		return body;

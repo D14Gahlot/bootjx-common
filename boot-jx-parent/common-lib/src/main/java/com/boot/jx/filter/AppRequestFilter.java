@@ -25,7 +25,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import com.boot.jx.AppConfig;
 import com.boot.jx.AppConstants;
 import com.boot.jx.AppContextUtil;
-import com.boot.jx.api.AmxApiResponseUtil;
+import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.dict.Language;
 import com.boot.jx.dict.UserClient.UserDeviceClient;
 import com.boot.jx.http.CommonHttpRequest;
@@ -318,7 +318,7 @@ public class AppRequestFilter implements Filter {
 			try {
 				if (isRequestValid(localCommonHttpRequest, apiRequest, req, resp, traceId)) {
 					if (ArgUtil.is(apiRequest.getDeprecated())) {
-						AmxApiResponseUtil.addWarning(apiRequest.getDeprecated());
+						ApiResponseUtil.addWarning(apiRequest.getDeprecated());
 					}
 					chain.doFilter(req, new AppResponseWrapper(resp));
 				} else {

@@ -9,13 +9,12 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.boot.jx.admin.dto.AgentRequestDto;
 import com.boot.jx.admin.dto.AgentResponseDto;
-import com.boot.jx.admin.dto.DepartmentRequestDto;
 import com.boot.jx.admin.dto.DepartmentResponseDto;
 import com.boot.jx.admin.model.Agent;
 import com.boot.jx.admin.model.Department;
 import com.boot.jx.admin.service.AdminService;
+import com.boot.jx.api.ApiResponse;
 
 @RestController
 public class AdminController  {
@@ -23,14 +22,32 @@ public class AdminController  {
 	@Autowired
 	AdminService adminService;
 	
-	
+	@RequestMapping(value = "/api/admins/agent", method = { RequestMethod.GET })
+	public ApiResponse<AgentResponseDto, Object> fetchAgents(
+			@RequestParam(value = "agent_id", required = false) Integer agent_id) {
+		return ApiResponse.buildResults(adminService.fetchAgents(agent_id));
+	}
+
+	@RequestMapping(value = "/api/admins/agent", method = { RequestMethod.POST })
+	public ApiResponse<AgentResponseDto, Object> createAgent(@RequestBody AgentResponseDto dto) {
+		return ApiResponse.buildResults(adminService.saveAgent(dto));
+	}
+
+	@RequestMapping(value = "/api/admins/dept", method = { RequestMethod.GET })
+	public ApiResponse<DepartmentResponseDto, Object> fetchDepts(
+			@RequestParam(value = "dept_id", required = false) Integer deptId) {
+		return ApiResponse.buildResults(adminService.fetchDepartments(deptId));
+	}
+
+	@RequestMapping(value = "/api/admins/dept", method = { RequestMethod.POST })
+	public ApiResponse<DepartmentResponseDto, Object> fetchDepts(@RequestBody DepartmentResponseDto dto) {
+		return ApiResponse.buildResults(adminService.saveDept(dto));
+	}
 	
 	@RequestMapping(value = "/admin/create-update-agent", method = { RequestMethod.POST})
 	public List<Agent> createAgent(@RequestBody  Agent requestModel) {
 		return adminService.saveAgent(requestModel);
 	}
-	
-	
 	
 	@RequestMapping(value = "/admin/fetch-agent", method = { RequestMethod.GET})
 	public  List<Agent> fetchAgentList(@RequestParam(value = "agent_id", required = false) Integer agent_id) {

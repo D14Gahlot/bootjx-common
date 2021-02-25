@@ -11,7 +11,7 @@ import com.boot.jx.exception.IExceptionEnum;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.ContextUtil;
 
-public class AmxApiResponseUtil {
+public class ApiResponseUtil {
 
 	@SuppressWarnings("unchecked")
 	public static List<String> getLogs() {
