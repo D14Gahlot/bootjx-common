@@ -44,6 +44,7 @@ public class AdminService {
 	private List<AgentResponseDto> fetchAgents(List<Agent> lstOfAgent) {
 		List<AgentResponseDto> agentList = new AgentResponseDto().importFrom(lstOfAgent);
 		for (AgentResponseDto agentResponseDto : agentList) {
+			agentResponseDto.setAgent_password(null);
 			if (ArgUtil.is(agentResponseDto.getAgent_id())) {
 				agentResponseDto.setDept(new DepartmentResponseDto()
 						.importFrom(CollectionUtil.getOne(adminManager.fetchDept(agentResponseDto.getDept_id()))));
@@ -62,9 +63,8 @@ public class AdminService {
 		return new DepartmentResponseDto().importFrom(lstDept);
 	}
 
-	public List<Agent> updateAgentStatus(Integer agentId, String status) {
-		List<Agent> lstOfAgent = adminManager.updateAgentStatus(agentId, status);
-		return lstOfAgent;
+	public List<AgentResponseDto> updateAgentStatus(Integer agentId, String status) {
+		return fetchAgents(adminManager.updateAgentStatus(agentId, status));
 	}
 
 	public List<Department> createAndUpdateDepartment(Department deptReqDto) {

@@ -44,6 +44,13 @@ public class AdminController  {
 		return ApiResponse.buildResults(adminService.saveDept(dto));
 	}
 	
+	@RequestMapping(value = "/api/admins/agent", method = { RequestMethod.DELETE })
+	public List<AgentResponseDto> updateAgentStatus(@RequestParam(value = "agent_id", required = true) Integer agent_id,
+			@RequestParam(value = "status", required = true) String status) {
+		return adminService.updateAgentStatus(agent_id, status);
+	}
+	
+	
 	@RequestMapping(value = "/admin/create-update-agent", method = { RequestMethod.POST})
 	public List<Agent> createAgent(@RequestBody  Agent requestModel) {
 		return adminService.saveAgent(requestModel);
@@ -52,11 +59,6 @@ public class AdminController  {
 	@RequestMapping(value = "/admin/fetch-agent", method = { RequestMethod.GET})
 	public  List<Agent> fetchAgentList(@RequestParam(value = "agent_id", required = false) Integer agent_id) {
 		return adminService.fetchAgent(agent_id);
-	}
-	
-	@RequestMapping(value = "/admin/delete-agent", method = { RequestMethod.POST})
-	public  List<Agent> updateAgentStatus(@RequestParam(value="agent_id" ,required = true) Integer agent_id,@RequestParam(value="status" ,required = true) String status) {
-		return adminService.updateAgentStatus(agent_id,status);
 	}
 	
 	@RequestMapping(value = "/admin/create-update-dept", method = { RequestMethod.POST})
