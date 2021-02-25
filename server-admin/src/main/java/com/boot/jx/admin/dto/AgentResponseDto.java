@@ -14,6 +14,7 @@ public class AgentResponseDto extends AResourceDTO<AgentResponseDto> {
 	private String agent_department;
 	private String agent_email;
 	private String agent_number;
+	private String agent_password;
 	private String agent_channels;
 	private Date created_date;
 	private String create_by;
@@ -137,6 +138,14 @@ public class AgentResponseDto extends AResourceDTO<AgentResponseDto> {
 
 	public void setAgent_channels(String agent_channels) {
 		this.agent_channels = agent_channels;
+	}
+
+	public String getAgent_password() {
+		return agent_password;
+	}
+
+	public void setAgent_password(String agent_password) {
+		this.agent_password = agent_password;
 	}
 
 }
