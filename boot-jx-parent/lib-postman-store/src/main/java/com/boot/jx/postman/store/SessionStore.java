@@ -176,7 +176,8 @@ public class SessionStore {
 
 	public void save(ChatSessionDoc chatSessionDoc) {
 		try {
-			if (ArgUtil.isEmpty(chatSessionDoc.getStartSessionStamp())) {
+			if (ArgUtil.isEmpty(chatSessionDoc.getStartSessionStamp())
+					|| chatSessionDoc.getStartSessionStamp() == 0L) {
 				chatSessionDoc.setStartSessionStamp(System.currentTimeMillis());
 			}
 			mongoTemplate.save(chatSessionDoc);
