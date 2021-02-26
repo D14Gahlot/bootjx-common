@@ -55,7 +55,7 @@ public class SessionStore {
 	public ChatSessionDoc getSession(String sessionId) {
 		return mongoTemplate.findById(sessionId, ChatSessionDoc.class);
 	}
-	
+
 	public ChatSessionDoc getValidSession(String sessionId) {
 		ChatSessionDoc chatSessionDoc = mongoTemplate.findById(sessionId, ChatSessionDoc.class);
 		if ((ArgUtil.isEmpty(chatSessionDoc)
@@ -177,8 +177,7 @@ public class SessionStore {
 
 	public void save(ChatSessionDoc chatSessionDoc) {
 		try {
-			if (ArgUtil.isEmpty(chatSessionDoc.getStartSessionStamp())
-					|| chatSessionDoc.getStartSessionStamp() == 0L) {
+			if (ArgUtil.isEmpty(chatSessionDoc.getStartSessionStamp()) || chatSessionDoc.getStartSessionStamp() == 0L) {
 				chatSessionDoc.setStartSessionStamp(System.currentTimeMillis());
 			}
 			mongoTemplate.save(chatSessionDoc);
