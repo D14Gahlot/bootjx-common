@@ -95,7 +95,6 @@ public class SessionStore {
 			// SESSION CREATION
 			chatSessionDoc = new ChatSessionDoc();
 			chatSessionDoc.setContactId(contactId);
-			chatSessionDoc.setContactName(chatContactDoc.getName());
 
 			// SESSION UPDATE
 			chatSessionDoc.setActive(true);
@@ -167,9 +166,10 @@ public class SessionStore {
 		Calendar cal = Calendar.getInstance();
 		cal.add(Calendar.DATE, -2);
 
-		query2.addCriteria(Criteria.where("assignedToAgent").in(agentCode, null).and("assignedToDept")
-				.in(PMStoreConstants.NO_DEPT, agentDept).and("active").is(true).and("lastInComingStamp")
-				.gt(cal.getTimeInMillis()));
+		query2.addCriteria(Criteria.where("assignedToDept").in(PMStoreConstants.NO_DEPT, agentDept).and("active")
+				.is(true).and("lastInComingStamp").gt(cal.getTimeInMillis())
+				.andOperator(new Criteria().orOperator(Criteria.where("assignedToAgent").exists(false),
+						Criteria.where("assignedToAgent").is(agentCode))));
 
 		LOGGER.info(query2.toString());
 		return mongoTemplate.find(query2, ChatSessionDoc.class);
