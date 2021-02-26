@@ -29,7 +29,7 @@ import com.boot.utils.JsonUtil;
 
 @Component
 @PropertySource("classpath:application-rapiwha.properties")
-@ConnectorMapping(value = ContactType.WHATSAPP, channel = "RAPIWHA")
+@ConnectorMapping(contactType = ContactType.WHATSAPP, channel = "RAPIWHA")
 public class WARapiwhaConnector implements ConnectorHandler {
 
 	private static Logger LOGGER = LoggerService.getLogger(WARapiwhaConnector.class);

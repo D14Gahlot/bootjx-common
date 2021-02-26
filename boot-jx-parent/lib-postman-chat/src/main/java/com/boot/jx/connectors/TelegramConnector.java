@@ -33,7 +33,7 @@ import com.boot.utils.ArgUtil;
 import com.boot.utils.JsonUtil;
 
 @Component
-@ConnectorMapping(ContactType.TELEGRAM)
+@ConnectorMapping(contactType = ContactType.TELEGRAM)
 public class TelegramConnector implements ConnectorHandler {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(TelegramConnector.class);

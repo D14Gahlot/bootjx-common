@@ -24,7 +24,7 @@ import com.boot.jx.postman.store.SessionStore;
 import com.boot.utils.ArgUtil;
 
 @Component
-@ConnectorMapping(ContactType.FACEBOOK)
+@ConnectorMapping(contactType = ContactType.FACEBOOK)
 public class FacebookConnector implements ConnectorHandler {
 
 	@Autowired

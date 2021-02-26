@@ -28,7 +28,7 @@ import com.boot.jx.postman.store.SessionStore;
 import com.boot.utils.ArgUtil;
 
 @Component
-@ConnectorMapping(ContactType.WEBSITE)
+@ConnectorMapping(contactType = ContactType.WEBSITE)
 public class WebConnector implements DefaultConnector {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(WebConnector.class);

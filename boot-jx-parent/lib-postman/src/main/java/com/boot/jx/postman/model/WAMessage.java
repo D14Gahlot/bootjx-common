@@ -11,7 +11,7 @@ public class WAMessage extends Message<WAMessage> implements WAMessageOptions {
 	private static final long serialVersionUID = 2765644882757156928L;
 
 	public static enum Channel implements IChannel {
-		TWILIO, APIWHA, DEFAULT, GUPSHUP, DUMMY, RAPIWHA
+		TWILIO, APIWHA, DEFAULT, GUPSHUPAGENT, DUMMY, RAPIWHA
 	}
 
 	private BigDecimal queue;

@@ -61,7 +61,7 @@ public class ConnectorHandlerFactory extends ScopedBeanFactory<String, Connector
 	@Retention(RetentionPolicy.RUNTIME)
 	@Lazy
 	public @interface ConnectorMapping {
-		ContactType[] value();
+		ContactType[] contactType();
 
 		String[] channel() default "DEFAULT";
 	}
@@ -75,7 +75,7 @@ public class ConnectorHandlerFactory extends ScopedBeanFactory<String, Connector
 		ConnectorMapping annotation = lib.getClass().getAnnotation(ConnectorMapping.class);
 		List<String> zoom = new ArrayList<String>();
 		if (annotation != null) {
-			for (ContactType contactType : annotation.value()) {
+			for (ContactType contactType : annotation.contactType()) {
 				for (String channel : annotation.channel()) {
 					zoom.add(String.format("%s_%s", contactType, channel));
 				}

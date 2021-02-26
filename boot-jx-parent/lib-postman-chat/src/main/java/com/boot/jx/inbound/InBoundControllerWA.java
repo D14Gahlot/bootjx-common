@@ -13,8 +13,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.boot.jx.api.ApiResponse;
+import com.boot.jx.connectors.WAGupShupAgentConnector;
+import com.boot.jx.connectors.WAGupShupConnector;
 import com.boot.jx.connectors.WARapiwhaConnector;
-import com.boot.jx.postman.client.GupShupChatClient;
 import com.boot.jx.postman.gupshup.GupShupInbound;
 import com.boot.jx.postman.gupshup.GupShupInboundV2;
 import com.boot.jx.postman.model.InboxMessage;
@@ -30,22 +31,25 @@ public class InBoundControllerWA {
 	private InBoundService inBoundService;
 
 	@Autowired
-	private GupShupChatClient gupShupChatClient;
+	private WARapiwhaConnector waRapiwhaConnector;
 
 	@Autowired
-	private WARapiwhaConnector waRapiwhaConnector;
+	private WAGupShupConnector waGupShupConnector;
+
+	@Autowired
+	private WAGupShupAgentConnector waGupShupAgentConnector;
 
 	// @ApiRequest(feature = "WA_GUPSHUP_INBOUND")
 	@ApiVendorHeaders
-	@RequestMapping(value = "/ext/inbound/gupshup/callback", method = RequestMethod.POST)
+	@RequestMapping(value = "/ext/inbound/gupshup/callback", method = { RequestMethod.POST, RequestMethod.GET })
 	public InboxMessage onReceiveMessage(@RequestBody Map<String, Object> inboundMap,
 			@RequestParam(required = false, defaultValue = "false") boolean routed) throws InterruptedException {
 		try {
 			InboxMessage event = null;
 			if (inboundMap.containsKey("waNumber")) {
-				event = gupShupChatClient.parseAsInboxMessage(JsonUtil.toObject(inboundMap, GupShupInbound.class));
+				event = waGupShupConnector.toInboxMessage(JsonUtil.toObject(inboundMap, GupShupInbound.class));
 			} else {
-				event = gupShupChatClient.parseAsInboxMessage(JsonUtil.toObject(inboundMap, GupShupInboundV2.class));
+				event = waGupShupAgentConnector.toInboxMessage(JsonUtil.toObject(inboundMap, GupShupInboundV2.class));
 			}
 			event.setOriginalMessage(inboundMap);
 			inBoundService.invokeMethods(event);

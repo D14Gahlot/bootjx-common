@@ -41,7 +41,7 @@ import twitter4j.TwitterException;
 import twitter4j.UploadedMedia;
 
 @Component
-@ConnectorMapping(ContactType.TWITTER)
+@ConnectorMapping(contactType = ContactType.TWITTER)
 public class TwitterConnector implements ConnectorHandler {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(TwitterConnector.class);
