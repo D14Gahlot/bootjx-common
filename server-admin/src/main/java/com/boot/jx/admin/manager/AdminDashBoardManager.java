@@ -58,6 +58,8 @@ public class AdminDashBoardManager {
 	private static final String COLLECTION = "MessageDoc.class";
 
 	public static final String COLLECTION_NAME = "MESSAGE";
+	public static final String DEFAULT_TEAM = "TEAM";
+	
 	@Autowired
 	MongoTemplate mongoTemplate;
 	
@@ -93,6 +95,118 @@ public class AdminDashBoardManager {
 
 		return msgDoc;
 	}
+	
+	public List<DashBoardResponseDto> getContactWiseDashBoardAnalytics(DashBoardRequestDto req){
+		List<DashBoardResponseDto> dtoLst = new ArrayList<DashBoardResponseDto>();
+		 DashBoardResponseDto dto = null;
+		 List<String>  lstContactType=new ArrayList<String>();
+		 if(req!=null && (req.getContactType()==null || ArgUtil.isEmpty(req.getContactType()))) {
+			 lstContactType = getListOfContactType(); 
+		 }
+			 
+		 if(lstContactType !=null && !lstContactType.isEmpty()) {
+			 for(String messageDoc : lstContactType) {
+				 dto = new DashBoardResponseDto();
+				 String contactType=(String)messageDoc;
+				 dto = getCotactWiseAnalytics(contactType,req.getDateRange1(),req.getDateReange2());
+				 dtoLst.add(dto);
+			 }
+		 }else {
+			 dto = getCotactWiseAnalytics(req.getContactType().toString(),req.getDateRange1(),req.getDateReange2());
+			 dtoLst.add(dto);
+		 }
+		 
+		 if(!dtoLst.isEmpty() && dtoLst.size()>1) {
+			 DashBoardResponseDto dtoTeam = getTeamWiseAnalytics(dtoLst);
+			 dtoLst.add(dtoTeam);
+		 }
+		return dtoLst;
+	}
+	
+	public DashBoardResponseDto getTeamWiseAnalytics(List<DashBoardResponseDto> dtoLst) {
+		DashBoardResponseDto dto = new DashBoardResponseDto();
+		dto.setContactType(DEFAULT_TEAM);
+		long totalInMsg =0;
+		long totalOutMsg =0;
+		long totalMsg =0;
+		long totalUniqCon =0;
+		long totalOpenMsg =0;
+		
+		for (DashBoardResponseDto dt : dtoLst) {
+			totalInMsg +=dt.getTotalInMsgExchanged();
+			totalOutMsg+=dt.getTotalOutMsgExchanged();
+			totalMsg+=dt.getTotalMsgExchanged();
+			totalOpenMsg+=dt.getOpenConversation();
+		}
+		dto.setTotalInMsgExchanged(totalInMsg);
+		dto.setTotalOutMsgExchanged(totalOutMsg);
+		dto.setTotalMsgExchanged(totalMsg);
+		dto.setOpenConversation(totalOpenMsg);
+		dto.setUniqueConversation(totalUniqCon);
+		return dto;
+	}
+
+	public DashBoardResponseDto getCotactWiseAnalytics(String contactType,long dateRange1,long dateRange2) {
+		DashBoardResponseDto dto = new DashBoardResponseDto();
+		dto.setContactType(contactType);
+		
+		/** total In msg **/
+		List<MessageDoc> totalInmsgDoc = getTotalInMsgCount(contactType, dateRange1, dateRange2);
+		if (ArgUtil.is(totalInmsgDoc)) {
+			dto.setTotalInMsgExchanged(totalInmsgDoc.size());
+		}
+		/** total out msg **/
+		List<MessageDoc> totalOutmsgDoc = getTotalOutMsgCount(contactType, dateRange1, dateRange2);
+		if (ArgUtil.is(totalOutmsgDoc)) {
+			dto.setTotalOutMsgExchanged(totalOutmsgDoc.size());
+		}
+		
+		/** To fetch all the records for a collection **/
+		List<MessageDoc> totalMsgDoc = getTotalMsgCount(contactType,  dateRange1, dateRange2);
+		if (ArgUtil.is(totalMsgDoc)) {
+			dto.setTotalMsgExchanged(totalMsgDoc.size());
+		}
+		/**  Get the distinct stuff from MongoDB**/
+		List<MessageDoc> distinctIdList =  getUniqueConversation(contactType,  dateRange1, dateRange2);
+		if (ArgUtil.is(distinctIdList)) {
+			dto.setUniqueConversation(distinctIdList.size());
+		}
+		/** Peak Load **/
+		PeakLoadDto peakLoadResult = getPeakLoadMsgCount(contactType, dateRange1, dateRange2);
+		dto.setPeakLoad(peakLoadResult);
+		
+		/** lead Messanger **/
+		LeadMessanger  leadMsg =getLeadMessenger(contactType, dateRange1, dateRange2);
+		dto.setLeadMessanger(leadMsg);
+		
+		/** Open conversation **/
+		List<ChatSessionDoc> openConvesLst =getOpenConversation(contactType,dateRange1, dateRange2);
+		if (ArgUtil.is(openConvesLst)) {
+			dto.setOpenConversation(openConvesLst.size());
+		}
+		
+		/** find the date diff between two dates **/
+		Map<String,Integer> dateDiffMAp = agentAnaMgr.getDateDiff(dateRange1,dateRange2);
+		int hour=0;
+		int days=0;
+		if(ArgUtil.is(dateDiffMAp)) {
+			hour = dateDiffMAp.get("HOUR");
+			days = dateDiffMAp.get("DAYS");
+		}
+		if(hour<=24) {
+			Map<Object,Object> hourWiseCount = getHourWiseCount(totalMsgDoc);
+			dto.setMsgCountLst(hourWiseCount);
+		}else if(hour >24 && days<=30){
+			Map<Object,Object> dateWiseCount = getDateWiseCount(totalMsgDoc);
+			dto.setMsgCountLst(dateWiseCount);
+		}else {
+			Map<Object,Object> dweekWiseCount = getWeekWiseCount(totalMsgDoc);
+			dto.setMsgCountLst(dweekWiseCount);
+		}
+		
+		return dto;
+	}
+	
 
 	public List<DashBoardResponseDto> getDashBoardAnalytics(DashBoardRequestDto requestDto) {
 		List<DashBoardResponseDto> dtoLst = new ArrayList<DashBoardResponseDto>();
@@ -502,12 +616,21 @@ public class AdminDashBoardManager {
 	
 	/** fetch lead mesenger **/
 	public LeadMessanger getLeadMessenger(Object contactype, long startTime, long endTime) {
+		long dateRange1 =0;
+		long dateRange2 =0;
+		if(ArgUtil.is(startTime)) {
+			dateRange1 =agentAnaMgr.todayStartTime();
+		}
+		if(ArgUtil.is(endTime)) {
+		  dateRange2 =agentAnaMgr.todayEndTime();
+		}
+		
 		LeadMessanger leadMessanger = new LeadMessanger();
 		double percentageWithDecimal=0.0;
 		List<String> lst = getListOfContactType();
 		Map<String,Integer> leasMsgLst = new HashMap<String,Integer>();
 		for(String contactType: lst) {
-			List<MessageDoc> msgDocLst = getTotalMsgCount(contactType, startTime, endTime);
+			List<MessageDoc> msgDocLst = getTotalMsgCount(contactType, dateRange1, dateRange2);
 			leasMsgLst.put(contactType, msgDocLst.size());
 		}
 		System.out.println("lead Msg :"+leasMsgLst.toString());
@@ -531,8 +654,18 @@ public class AdminDashBoardManager {
 
 	// To fetch all the records from a collection
 	public List<MessageDoc> getTotalMsgCount(Object contactType, long startTime, long endTime) {
+		long dateRange1 =0;
+		long dateRange2 =0;
+		if(ArgUtil.is(startTime)) {
+			dateRange1 =agentAnaMgr.todayStartTime();
+		}
+		if(ArgUtil.is(endTime)) {
+		  dateRange2 =agentAnaMgr.todayEndTime();
+		}
+		
+		
 		Query queryAll = new Query();
-		queryAll.addCriteria(Criteria.where("timestamp").gt(startTime).lt(endTime));
+		queryAll.addCriteria(Criteria.where("timestamp").gt(dateRange1).lt(dateRange2));
 		//queryAll.with(new Sort(Sort.Direction.ASC, "timestamp"));
 		queryAll.with(new Sort(new Order(Direction.ASC, "timestamp"))); 
 		
@@ -541,18 +674,35 @@ public class AdminDashBoardManager {
 	}
 	// To fetch In msg records from a collection
 	public List<MessageDoc> getTotalInMsgCount(Object contactType, long startTime, long endTime) {
+		long dateRange1 =0;
+		long dateRange2 =0;
+		if(ArgUtil.is(startTime)) {
+			dateRange1 =agentAnaMgr.todayStartTime();
+		}
+		if(ArgUtil.is(endTime)) {
+		  dateRange2 =agentAnaMgr.todayEndTime();
+		}
+		
 		Query query = new Query();
 		query.addCriteria(Criteria.where("type").is("I"));
-		query.addCriteria(Criteria.where("timestamp").gt(startTime).lt(endTime));
+		query.addCriteria(Criteria.where("timestamp").gt(dateRange1).lt(dateRange2));
 		List<MessageDoc> totalInmsgDoc = mongoTemplate.find(query, MessageDoc.class, contactType.toString());
 		return totalInmsgDoc;
 	}
 
 	// To fetch Out msg the records from a collection
 	public List<MessageDoc> getTotalOutMsgCount(Object contactType, long startTime, long endTime) {
+		long dateRange1 =0;
+		long dateRange2 =0;
+		if(ArgUtil.is(startTime)) {
+			dateRange1 =agentAnaMgr.todayStartTime();
+		}
+		if(ArgUtil.is(endTime)) {
+		  dateRange2 =agentAnaMgr.todayEndTime();
+		}
 		Query query = new Query();
 		query.addCriteria(Criteria.where("type").is("O"));
-		query.addCriteria(Criteria.where("timestamp").gt(startTime).lt(endTime));
+		query.addCriteria(Criteria.where("timestamp").gt(dateRange1).lt(dateRange2));
 		List<MessageDoc> totalInmsgDoc = mongoTemplate.find(query, MessageDoc.class, contactType.toString());
 		return totalInmsgDoc;
 	}
@@ -582,8 +732,16 @@ public class AdminDashBoardManager {
 	}
 	
 	public PeakLoadDto getPeakLoadMsgCount(Object contactType, long startTime, long endTime) {
+		long dateRange1 =0;
+		long dateRange2 =0;
+		if(ArgUtil.is(startTime)) {
+			dateRange1 =agentAnaMgr.todayStartTime();
+		}
+		if(ArgUtil.is(endTime)) {
+		  dateRange2 =agentAnaMgr.todayEndTime();
+		}
 	 Aggregation agg = newAggregation(
-			    match(Criteria.where("timestamp").gt(startTime).lt(endTime)),
+			    match(Criteria.where("timestamp").gt(dateRange1).lt(dateRange2)),
 	            group("timestamp").count().as("total"),
 	            project("total").and("timestamp").previousOperation(),
 	            sort(Sort.Direction.DESC, "total","timestamp")
@@ -606,8 +764,17 @@ public class AdminDashBoardManager {
 	//To fetch unique conversation 
 	@SuppressWarnings("unchecked")
 	public List<MessageDoc> getUniqueConversation(Object contactType, long startTime, long endTime) {
+		long dateRange1 =0;
+		long dateRange2 =0;
+		if(ArgUtil.is(startTime)) {
+			dateRange1 =agentAnaMgr.todayStartTime();
+		}
+		if(ArgUtil.is(endTime)) {
+		  dateRange2 =agentAnaMgr.todayEndTime();
+		}
+		
 		Query query = new Query();
-		query.addCriteria(Criteria.where("timestamp").gt(startTime).lt(endTime));
+		query.addCriteria(Criteria.where("timestamp").gt(dateRange1).lt(dateRange2));
 		List<MessageDoc> distinctIdList = mongoTemplate.getCollection(contactType.toString()).distinct("contactId",query.getQueryObject());
 		return distinctIdList;
 	}
@@ -690,7 +857,17 @@ public class AdminDashBoardManager {
 	
 	// Open conversation 
 		public List<ChatSessionDoc> getOpenConversation(Object contactType, long startTime, long endTime) {
-			 List<MessageDoc> uniqueConvesationLst =getUniqueConversation(contactType,startTime,endTime); 
+			
+			long dateRange1 =0;
+			long dateRange2 =0;
+			if(ArgUtil.is(startTime)) {
+				dateRange1 =agentAnaMgr.todayStartTime();
+			}
+			if(ArgUtil.is(endTime)) {
+			  dateRange2 =agentAnaMgr.todayEndTime();
+			}
+			
+			 List<MessageDoc> uniqueConvesationLst =getUniqueConversation(contactType,dateRange1,dateRange2); 
 			 List<ChatSessionDoc> chatSessionLst =new ArrayList<ChatSessionDoc>();
 			
 			 for(Object msgDoc :uniqueConvesationLst )	{

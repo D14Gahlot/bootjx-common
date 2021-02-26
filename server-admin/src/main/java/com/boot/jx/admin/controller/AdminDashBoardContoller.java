@@ -12,6 +12,7 @@ import com.boot.jx.admin.dto.DashBoardRequestDto;
 import com.boot.jx.admin.dto.DashBoardResponseDto;
 import com.boot.jx.admin.manager.AdminDashBoardManager;
 import com.boot.jx.admin.manager.AgentAnalyticsManager;
+import com.boot.jx.api.ApiResponse;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 
 @RestController
@@ -23,10 +24,12 @@ public class AdminDashBoardContoller {
 	@Autowired
 	AgentAnalyticsManager agentAnaMgr;
 	
-	@RequestMapping(value = "/admin/dashboard-analytics", method = { RequestMethod.POST})
-	public  List<DashBoardResponseDto> dashBoardAnalytics(@RequestBody DashBoardRequestDto req){
-		List<DashBoardResponseDto> dto = adminDbMgr.getDashBoardAnalytics(req);
-		return dto;
+	@RequestMapping(value = "/admin/contactType-dashboard-analytics", method = { RequestMethod.POST})
+	public  ApiResponse<List<DashBoardResponseDto>,Object>  dashBoardAnalytics(@RequestBody DashBoardRequestDto req){//@RequestParam (value="contactType" ,required = true) Object contactType) {
+		List<DashBoardResponseDto> lst= adminDbMgr.getContactWiseDashBoardAnalytics(req);
+		ApiResponse<List<DashBoardResponseDto>,Object> resp=new ApiResponse<List<DashBoardResponseDto>,Object>();
+		resp.setData(lst);
+		return resp;
 	}
 	
 	@RequestMapping(value = "/admin/fetch-contact-type", method = { RequestMethod.GET})
@@ -34,16 +37,19 @@ public class AdminDashBoardContoller {
 		return adminDbMgr.getListOfContactType();
 	}
 	
-	
 	@RequestMapping(value = "/admin/fetch-agent-chat-session-list", method = { RequestMethod.GET})
 	public  List<ChatSessionDoc> getAgentList() {
 		return agentAnaMgr.getAgentList();
 	}
 	
 	
-	@RequestMapping(value = "/admin/fetch-agent-wise-analytics", method = { RequestMethod.POST})
-	public  List<DashBoardResponseDto> getAgentWiseAnalytics(@RequestBody  DashBoardRequestDto req) {
-		return agentAnaMgr.getAgentWiseAnalytics(req);
+	@RequestMapping(value = "/admin/agent-dashboard-analytics", method = { RequestMethod.POST})
+	public  ApiResponse<List<DashBoardResponseDto>,Object> getAgentWiseAnalytics(@RequestBody  DashBoardRequestDto req) {
+		List<DashBoardResponseDto> lst=agentAnaMgr.getAgentWiseAnalytics(req);
+		ApiResponse<List<DashBoardResponseDto>,Object> resp=new ApiResponse<List<DashBoardResponseDto>,Object>();
+		resp.setData(lst);
+		return resp;
 	}
+	
 	
 }

@@ -80,12 +80,34 @@ public class AgentAnalyticsManager {
 			 dto = getAgentAnalytics(req.getAgent(),req.getDateRange1(),req.getDateReange2());
 			 lstDto.add(dto);
 		 }
-		 
-		
-		
+		 if(!lstDto.isEmpty() && lstDto.size()>1) {
+			 DashBoardResponseDto dtoTeam = getTeamWiseAnalytics(lstDto);
+			 lstDto.add(dtoTeam);
+		 }
 		return lstDto;
 	}
-	
+	public DashBoardResponseDto getTeamWiseAnalytics(List<DashBoardResponseDto> dtoLst) {
+		DashBoardResponseDto dto = new DashBoardResponseDto();
+		dto.setContactType(DEFAULT_AGENT);
+		long totalInMsg =0;
+		long totalOutMsg =0;
+		long totalMsg =0;
+		long totalUniqCon =0;
+		long totalOpenMsg =0;
+		
+		for (DashBoardResponseDto dt : dtoLst) {
+			totalInMsg +=dt.getTotalInMsgExchanged();
+			totalOutMsg+=dt.getTotalOutMsgExchanged();
+			totalMsg+=dt.getTotalMsgExchanged();
+			totalOpenMsg+=dt.getOpenConversation();
+		}
+		dto.setTotalInMsgExchanged(totalInMsg);
+		dto.setTotalOutMsgExchanged(totalOutMsg);
+		dto.setTotalMsgExchanged(totalMsg);
+		dto.setOpenConversation(totalOpenMsg);
+		dto.setUniqueConversation(totalUniqCon);
+		return dto;
+	}
 	
 	public DashBoardResponseDto getAgentAnalytics(String agent,long dateRange1,long dateRange2) {
 		    DashBoardResponseDto dto = new  DashBoardResponseDto();
@@ -141,8 +163,6 @@ public class AgentAnalyticsManager {
 				Map<Object,Object> dweekWiseCount = getWeekWiseCount(totalMsgExchanged);
 				dto.setMsgCountLst(dweekWiseCount);
 			}
-			
-			
 			
 		    return dto;
 	}
