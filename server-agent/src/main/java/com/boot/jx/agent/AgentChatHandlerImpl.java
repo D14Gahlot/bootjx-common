@@ -79,6 +79,7 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 		chatSessionDoc.setAssignedToDept(inboxMessage.session().getDept());
 		chatSessionDoc.setAssignedDeptStamp(System.currentTimeMillis());
 		chatSessionDoc.setMode("AGENT");
+		chatSessionDoc.setAssignedToAgent(null);
 
 		if (ArgUtil.is(avaialbleAgent)) {
 			chatSessionDoc.setAssignedToAgent(avaialbleAgent.getAgentCode());
