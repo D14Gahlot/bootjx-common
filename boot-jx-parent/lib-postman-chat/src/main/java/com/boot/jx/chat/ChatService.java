@@ -122,7 +122,7 @@ public class ChatService {
 
 	public ChatContext loadChatContext(String contactId, InboxMessage inboxMessage) {
 
-		if (ArgUtil.is(inboxMessage.session().getMode())) {
+		if (!ArgUtil.is(inboxMessage.session().getMode())) {
 			ChatSessionDoc sessionDoc = sessionStore.getSession(inboxMessage.getSessionId());
 			inboxMessage.session().setMode("BOT");
 			inboxMessage.session().setAgent(chatClient.getDefaultSender());
