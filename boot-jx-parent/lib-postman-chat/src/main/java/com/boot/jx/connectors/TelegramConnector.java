@@ -11,7 +11,6 @@ import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 
 import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorHandler;
@@ -27,7 +26,6 @@ import com.boot.jx.postman.model.File;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.model.TmplElement;
-import com.boot.jx.postman.store.SessionStore;
 import com.boot.jx.postman.tg.TelegramClient;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.JsonUtil;
@@ -40,9 +38,6 @@ public class TelegramConnector implements ConnectorHandler {
 
 	@Autowired
 	private TelegramClient telegramClient;
-
-	@Autowired
-	private SessionStore sessionStore;
 
 	@Autowired
 	private MongoTemplate mongoTemplate;
@@ -129,8 +124,7 @@ public class TelegramConnector implements ConnectorHandler {
 	}
 
 	@Override
-	public boolean initSession(InboxMessage inboxMessage, ChatSessionDoc session) {
-		ChatContactDoc contact = sessionStore.getContact(inboxMessage);
+	public boolean initSession(ChatContactDoc contact, ChatSessionDoc session, InboxMessage inboxMessage) {
 
 		Update update = JsonUtil.parse(inboxMessage.getOriginalMessage(), Update.class);
 
@@ -141,7 +135,6 @@ public class TelegramConnector implements ConnectorHandler {
 				contact.setName(update.getMessage().getFrom().getFirstName() + " "
 						+ update.getMessage().getFrom().getLastName());
 				contact.setPhone(update.getMessage().getContact().getPhoneNumber());
-				sessionStore.save(contact);
 			}
 
 		}

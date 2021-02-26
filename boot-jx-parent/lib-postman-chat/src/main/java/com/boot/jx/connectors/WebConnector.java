@@ -24,7 +24,6 @@ import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.File;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.OutboxMessage;
-import com.boot.jx.postman.store.SessionStore;
 import com.boot.utils.ArgUtil;
 
 @Component
@@ -136,13 +135,8 @@ public class WebConnector implements DefaultConnector {
 		return messageQueue.poll(5, TimeUnit.SECONDS);
 	}
 
-	@Autowired
-	private SessionStore sessionStore;
-
 	@Override
-	public boolean initSession(InboxMessage inboxMessage, ChatSessionDoc session) {
-		ChatContactDoc contact = sessionStore.getContact(inboxMessage);
-
+	public boolean initSession(ChatContactDoc contact, ChatSessionDoc session, InboxMessage inboxMessage) {
 		if (ArgUtil.is(inboxMessage.getForm())) {
 			if (ArgUtil.is(inboxMessage.getForm().get("name"))) {
 				contact.setName(ArgUtil.parseAsString(inboxMessage.getForm().get("name")));
@@ -150,7 +144,6 @@ public class WebConnector implements DefaultConnector {
 			if (ArgUtil.is(inboxMessage.getForm().get("email"))) {
 				contact.setEmail(ArgUtil.parseAsString(inboxMessage.getForm().get("email")));
 			}
-			sessionStore.save(contact);
 		}
 
 		if (ArgUtil.isEmpty(contact.getName())) {

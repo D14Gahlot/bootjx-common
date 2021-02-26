@@ -174,10 +174,13 @@ public class ChatService {
 		ConnectorHandler connector = connectorHandlerFactory.get(inboxMessage.getContactType(),
 				inboxMessage.getChannel());
 
+		ChatContactDoc contact = sessionStore.getContact(inboxMessage);
 		if (ArgUtil.is(connector)) {
-			initd = connector.initSession(inboxMessage, session);
+			initd = connector.initSession(contact, session, inboxMessage);
+			sessionStore.save(contact);
 		}
 		if (initd) {
+			session.setContactName(contact.getName());
 			session = sessionStore.initSession(session);
 		}
 		return session.isInitd();

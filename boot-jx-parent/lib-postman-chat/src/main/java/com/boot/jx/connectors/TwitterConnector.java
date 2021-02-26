@@ -16,7 +16,6 @@ import org.springframework.stereotype.Component;
 import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorHandler;
 import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorMapping;
 import com.boot.jx.dict.ContactType;
-import com.boot.jx.inbound.InBoundService;
 import com.boot.jx.postman.client.TmplClient;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
@@ -27,7 +26,6 @@ import com.boot.jx.postman.model.File;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.model.WAMessage.Channel;
-import com.boot.jx.postman.store.SessionStore;
 import com.boot.jx.postman.tw.TwitterClient;
 import com.boot.jx.postman.tw.TwitterClientContext;
 import com.boot.utils.ArgUtil;
@@ -53,9 +51,6 @@ public class TwitterConnector implements ConnectorHandler {
 	protected GupShupConfig gupShupConfig;
 
 	@Autowired
-	private SessionStore sessionStore;
-
-	@Autowired
 	private MongoTemplate mongoTemplate;
 
 	@Autowired
@@ -71,8 +66,8 @@ public class TwitterConnector implements ConnectorHandler {
 		InputStream media = new java.net.URL(templateReply.getUrl()).openStream();
 		UploadedMedia uploadedMedia = ctx.getTwitter().uploadMedia(templateReply.getTitle(), media);
 		mediaId = ArgUtil.parseAsString(uploadedMedia.getMediaId());
-		//templateReply.meta().put("twitterMediaId", mediaId);
-		//mongoTemplate.save(templateReply);
+		// templateReply.meta().put("twitterMediaId", mediaId);
+		// mongoTemplate.save(templateReply);
 		// }
 		return mediaId;
 	}
@@ -152,9 +147,8 @@ public class TwitterConnector implements ConnectorHandler {
 	}
 
 	@Override
-	public boolean initSession(InboxMessage inboxMessage, ChatSessionDoc session) {
+	public boolean initSession(ChatContactDoc contact, ChatSessionDoc session, InboxMessage inboxMessage) {
 		if (ArgUtil.is(inboxMessage.getOriginalMessage())) {
-			ChatContactDoc contact = sessionStore.getContact(inboxMessage);
 			try {
 				DirectMessageLocalImpl dm = JsonUtil.parse(inboxMessage.getOriginalMessage(),
 						DirectMessageLocalImpl.class);
@@ -163,7 +157,6 @@ public class TwitterConnector implements ConnectorHandler {
 			} catch (Exception e) {
 				LOGGER.error("Twitter Init Session Data Parse Errror", e);
 			}
-			sessionStore.save(contact);
 		}
 		return true;
 	}

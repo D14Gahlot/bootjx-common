@@ -21,7 +21,6 @@ import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.File;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.OutboxMessage;
-import com.boot.jx.postman.store.SessionStore;
 import com.boot.jx.rest.RestService;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.Constants;
@@ -45,9 +44,6 @@ public class WARapiwhaConnector implements ConnectorHandler {
 
 	@Autowired
 	private TmplClient tmplClient;
-
-	@Autowired
-	private SessionStore sessionStore;
 
 	@Override
 	public void send(String lane, String to, OutboxMessage outboxMessage) {
@@ -77,14 +73,12 @@ public class WARapiwhaConnector implements ConnectorHandler {
 	}
 
 	@Override
-	public boolean initSession(InboxMessage inboxMessage, ChatSessionDoc session) {
-		ChatContactDoc contact = sessionStore.getContact(inboxMessage);
+	public boolean initSession(ChatContactDoc contact, ChatSessionDoc session, InboxMessage inboxMessage) {
 		Object x = inboxMessage.getOriginalMessage();
 		if (ArgUtil.is(x)) {
 			Map<String, Object> map = JsonUtil.toMap(x);
 			contact.setProfilePic(ArgUtil.parseAsString(map.get("profilepicture"), Constants.BLANK));
 			contact.setName(ArgUtil.parseAsString(map.get("pushname"), Constants.BLANK));
-			sessionStore.save(contact);
 		}
 		return true;
 	}

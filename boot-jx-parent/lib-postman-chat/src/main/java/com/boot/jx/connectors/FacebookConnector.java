@@ -39,9 +39,6 @@ public class FacebookConnector implements ConnectorHandler {
 	@Autowired
 	private TmplClient tmplClient;
 
-	@Autowired
-	private SessionStore sessionStore;
-
 	public void send(String lane, String to, OutboxMessage outboxMessage) {
 		FacebookMessageRequest req = new FacebookMessageRequest();
 		req.recipientId(to);
@@ -95,12 +92,10 @@ public class FacebookConnector implements ConnectorHandler {
 	}
 
 	@Override
-	public boolean initSession(InboxMessage inboxMessage, ChatSessionDoc session) {
-		ChatContactDoc contact = sessionStore.getContact(inboxMessage);
+	public boolean initSession(ChatContactDoc contact, ChatSessionDoc session, InboxMessage inboxMessage) {
 		FacebookUserProfile profile = facebooClient.getUserProfile(inboxMessage.getFrom(), inboxMessage.getLane());
 		contact.setProfilePic(profile.getProfilePic());
 		contact.setName(profile.getFirstName() + " " + profile.getLastName());
-		sessionStore.save(contact);
 		return true;
 	}
 

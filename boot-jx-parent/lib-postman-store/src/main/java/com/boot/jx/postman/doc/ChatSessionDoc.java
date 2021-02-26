@@ -23,6 +23,7 @@ public class ChatSessionDoc implements Serializable {
 
 	@ApiMockModelProperty(example = "wa919930104050", required = false)
 	private String contactId;
+	private String contactName;
 
 	private String assignedToDept;
 	private String assignedToAgent;
@@ -180,6 +181,14 @@ public class ChatSessionDoc implements Serializable {
 
 	public void setMode(String mode) {
 		this.mode = mode;
+	}
+
+	public String getContactName() {
+		return contactName;
+	}
+
+	public void setContactName(String contactName) {
+		this.contactName = contactName;
 	}
 
 }

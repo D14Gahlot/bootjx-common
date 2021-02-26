@@ -95,6 +95,7 @@ public class SessionStore {
 			// SESSION CREATION
 			chatSessionDoc = new ChatSessionDoc();
 			chatSessionDoc.setContactId(contactId);
+			chatSessionDoc.setContactName(chatContactDoc.getName());
 
 			// SESSION UPDATE
 			chatSessionDoc.setActive(true);

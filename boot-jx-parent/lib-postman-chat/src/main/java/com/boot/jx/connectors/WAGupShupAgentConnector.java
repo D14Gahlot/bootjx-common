@@ -94,7 +94,7 @@ public class WAGupShupAgentConnector implements ConnectorHandler {
 	}
 
 	@Override
-	public boolean initSession(InboxMessage inboxMessage, ChatSessionDoc session) {
+	public boolean initSession(ChatContactDoc contact, ChatSessionDoc session, InboxMessage inboxMessage) {
 		return true;
 	}
 

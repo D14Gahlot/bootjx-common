@@ -33,7 +33,7 @@ public class ConnectorHandlerFactory extends ScopedBeanFactory<String, Connector
 
 		public InboxMessage assignToAgent(InboxMessage inboxMessage);
 
-		default public boolean initSession(InboxMessage inboxMessage, ChatSessionDoc session) {
+		default public boolean initSession(ChatContactDoc contact, ChatSessionDoc session, InboxMessage inboxMessage) {
 			return true;
 		}
 
