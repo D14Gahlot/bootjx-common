@@ -131,21 +131,26 @@ public class AdminDashBoardManager {
 		long totalMsg =0;
 		long totalUniqCon =0;
 		long totalOpenMsg =0;
+		long convDuration=0;
+		int teamSize = dtoLst.size();
 		
 		for (DashBoardResponseDto dt : dtoLst) {
 			totalInMsg +=dt.getTotalInMsgExchanged();
 			totalOutMsg+=dt.getTotalOutMsgExchanged();
 			totalMsg+=dt.getTotalMsgExchanged();
 			totalOpenMsg+=dt.getOpenConversation();
+			convDuration+=dt.getConverDuration();
+			dto.setLeadMessanger(dt.getLeadMessanger());
+			
 		}
 		dto.setTotalInMsgExchanged(totalInMsg);
 		dto.setTotalOutMsgExchanged(totalOutMsg);
 		dto.setTotalMsgExchanged(totalMsg);
 		dto.setOpenConversation(totalOpenMsg);
 		dto.setUniqueConversation(totalUniqCon);
+		dto.setConverDuration(convDuration/teamSize);
 		return dto;
 	}
-
 	public DashBoardResponseDto getCotactWiseAnalytics(String contactType,long dateRange1,long dateRange2) {
 		DashBoardResponseDto dto = new DashBoardResponseDto();
 		dto.setContactType(contactType);

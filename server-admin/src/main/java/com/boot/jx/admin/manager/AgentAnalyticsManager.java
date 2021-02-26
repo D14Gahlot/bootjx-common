@@ -88,24 +88,30 @@ public class AgentAnalyticsManager {
 	}
 	public DashBoardResponseDto getTeamWiseAnalytics(List<DashBoardResponseDto> dtoLst) {
 		DashBoardResponseDto dto = new DashBoardResponseDto();
-		dto.setContactType(DEFAULT_AGENT);
+		dto.setAgentName(DEFAULT_AGENT);
 		long totalInMsg =0;
 		long totalOutMsg =0;
 		long totalMsg =0;
 		long totalUniqCon =0;
 		long totalOpenMsg =0;
+		long convDuration=0;
+		int teamSize = dtoLst.size();
 		
 		for (DashBoardResponseDto dt : dtoLst) {
 			totalInMsg +=dt.getTotalInMsgExchanged();
 			totalOutMsg+=dt.getTotalOutMsgExchanged();
 			totalMsg+=dt.getTotalMsgExchanged();
 			totalOpenMsg+=dt.getOpenConversation();
+			convDuration+=dt.getConverDuration();
+			dto.setLeadMessanger(dt.getLeadMessanger());
+			
 		}
 		dto.setTotalInMsgExchanged(totalInMsg);
 		dto.setTotalOutMsgExchanged(totalOutMsg);
 		dto.setTotalMsgExchanged(totalMsg);
 		dto.setOpenConversation(totalOpenMsg);
 		dto.setUniqueConversation(totalUniqCon);
+		dto.setConverDuration(convDuration/teamSize);
 		return dto;
 	}
 	
