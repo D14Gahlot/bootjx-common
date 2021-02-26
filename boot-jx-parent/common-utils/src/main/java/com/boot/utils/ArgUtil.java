@@ -704,6 +704,27 @@ public final class ArgUtil {
 		return false;
 	}
 
+	public static boolean isNone(Object object) {
+		if (object == null) {
+			return true;
+		} else if (object instanceof Long) {
+			if ((Long) object == 0L) {
+				return true;
+			}
+		} else if (object instanceof Integer) {
+			if ((Integer) object == 0) {
+				return true;
+			}
+		} else if (object instanceof String) {
+			if (((String) object).trim().length() == 0) {
+				return true;
+			}
+		} else if (object instanceof Collection) {
+			return ArgUtil.isCollectionEmpty((Collection<?>) object);
+		}
+		return false;
+	}
+
 	public static boolean is(Object object) {
 		return !ArgUtil.isEmpty(object);
 	}
