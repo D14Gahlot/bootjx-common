@@ -69,7 +69,7 @@ public class TmplClient {
 
 		for (Entry<String, String> entry : file.getOptions().entrySet()) {
 			if (entry.getKey().indexOf("form-input-") == 0) {
-				String[] params = entry.getValue().split("|");
+				String[] params = entry.getValue().split("\\|");
 				inputs.add(new TmplElement().name(entry.getKey().replace("form-input-", ""))
 						.label(CollectionUtil.get(params, 0)).type(CollectionUtil.get(params, 1)));
 			} else if (entry.getKey().indexOf("actions-button-") == 0) {
