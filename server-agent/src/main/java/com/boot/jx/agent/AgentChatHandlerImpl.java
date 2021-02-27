@@ -3,6 +3,7 @@ package com.boot.jx.agent;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.http.util.EntityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
@@ -28,6 +29,7 @@ import com.boot.jx.postman.store.SessionStore;
 import com.boot.jx.stomp.StompTunnelService;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
+import com.boot.utils.EntityDtoUtil;
 import com.boot.utils.TimeUtils;
 
 @Component
@@ -165,24 +167,16 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 	}
 
 	public ChatSessionDto getChatSessionDto(ChatSessionDoc chatSessionDoc, String agentCode) {
-		ChatContactDoc contact = mongoTemplate.findById(chatSessionDoc.getContactId(), ChatContactDoc.class);
-
-		// Populate
-		ChatSessionDto chatSessionDto = new ChatSessionDto();
-		chatSessionDto.setSessionId(contact.getSessionId());
-		chatSessionDto.setContactType(contact.getContactType());
-		chatSessionDto.setLastInComingStamp(chatSessionDoc.getLastInComingStamp());
-		chatSessionDto.setName(contact.getName());
-		chatSessionDto.setProfilePic(contact.getProfilePic());
-		chatSessionDto.setEmail(contact.getEmail());
-		chatSessionDto.setPhone(contact.getPhone());
+		ChatSessionDto chatSessionDto = toChatSessionDto(chatSessionDoc);
 		chatSessionDto.setAssigned(ArgUtil.areEqual(chatSessionDoc.getAssignedToAgent(), agentCode));
-		chatSessionDto.setAssignedToAgent(chatSessionDoc.getAssignedToAgent());
-		chatSessionDto.setAssignedToDept(chatSessionDoc.getAssignedToDept());
-		chatSessionDto.setContactId(contact.getContactId());
-		chatSessionDto.setActive(chatSessionDoc.isActive());
+		List<ChatMessageDto> messageDtos = getMessages(chatSessionDto);
+		chatSessionDto.setMessages(messageDtos);
+		return chatSessionDto;
+	}
 
-		List<MessageDoc> messages = messageStore.findBySessionId(contact.getSessionId(), contact.getContactType());
+	public List<ChatMessageDto> getMessages(ChatSessionDto chatSessionDto) {
+		List<MessageDoc> messages = messageStore.findBySessionId(chatSessionDto.getSessionId(),
+				chatSessionDto.getContactType());
 		List<ChatMessageDto> messageDtos = new ArrayList<ChatMessageDto>();
 		for (MessageDoc messageDoc : messages) {
 			ChatMessageDto messageDto = entityToDto(messageDoc);
@@ -195,7 +189,25 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 			}
 			messageDtos.add(messageDto);
 		}
-		chatSessionDto.setMessages(messageDtos);
+		return messageDtos;
+	}
+
+	public ChatSessionDto toChatSessionDto(ChatSessionDoc chatSessionDoc) {
+		ChatContactDoc contact = mongoTemplate.findById(chatSessionDoc.getContactId(), ChatContactDoc.class);
+		// Populate
+		ChatSessionDto chatSessionDto = EntityDtoUtil.entityToDto(chatSessionDoc, new ChatSessionDto());
+
+		chatSessionDto.setSessionId(chatSessionDto.getSessionId());
+		chatSessionDto.setContactType(contact.getContactType());
+		chatSessionDto.setLastInComingStamp(chatSessionDoc.getLastInComingStamp());
+		chatSessionDto.setName(contact.getName());
+		chatSessionDto.setProfilePic(contact.getProfilePic());
+		chatSessionDto.setEmail(contact.getEmail());
+		chatSessionDto.setPhone(contact.getPhone());
+		chatSessionDto.setAssignedToAgent(chatSessionDoc.getAssignedToAgent());
+		chatSessionDto.setAssignedToDept(chatSessionDoc.getAssignedToDept());
+		chatSessionDto.setContactId(contact.getContactId());
+		chatSessionDto.setActive(chatSessionDoc.isActive());
 		return chatSessionDto;
 	}
 

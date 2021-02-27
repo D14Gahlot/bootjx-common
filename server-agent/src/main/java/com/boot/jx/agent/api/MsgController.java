@@ -120,4 +120,26 @@ public class MsgController {
 		return mongoTemplate.findAll(TemplateReply.class);
 	}
 
+	@ResponseBody
+	@RequestMapping(value = "/api/sessions/contact", method = { RequestMethod.GET })
+	public ApiResponse<ChatSessionDto, Object> getSessionsForContact(@RequestParam String contactId) {
+
+		List<ChatSessionDto> chatSessionDtos = new ArrayList<ChatSessionDto>();
+
+		List<ChatSessionDoc> sessions = sessionStore.findChatSessionContactId(contactId);
+		for (ChatSessionDoc chatSessionDoc : sessions) {
+			ChatSessionDto chatSessionDto = agentChatHandlerImpl.toChatSessionDto(chatSessionDoc);
+			chatSessionDtos.add(chatSessionDto);
+		}
+		return ApiResponse.buildResults(chatSessionDtos,
+				MapBuilder.map().put("isOnline", agentSession.isOnline()).build());
+	}
+
+	@ResponseBody
+	@RequestMapping(value = "/api/sessions/messages", method = { RequestMethod.POST })
+	public ApiResponse<ChatMessageDto, Object> getMessagesForSession(@RequestBody ChatSessionDto chatSessionDto) {
+		ChatSessionDoc sessionDoc = sessionStore.getSession(chatSessionDto.getSessionId());
+		return ApiResponse.buildResults(
+				agentChatHandlerImpl.getChatSessionDto(sessionDoc, agentSession.getAgentCode()).getMessages());
+	}
 }

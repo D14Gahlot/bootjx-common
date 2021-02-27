@@ -19,10 +19,20 @@ public class ChatSessionDto implements Serializable {
 	private String phone;
 
 	private String profilePic;
-	private long lastInComingStamp;
 
 	private String assignedToDept;
 	private String assignedToAgent;
+
+	private long startSessionStamp;
+	private long fistResponseStamp;
+
+	private long lastInComingStamp;
+
+	private long assignedDeptStamp;
+	private long assignedAgentStamp;
+
+	private long lastResponseStamp;
+	private long closeSessionStamp;
 
 	boolean assigned;
 	boolean active;
@@ -131,5 +141,53 @@ public class ChatSessionDto implements Serializable {
 
 	public void setActive(boolean active) {
 		this.active = active;
+	}
+
+	public long getStartSessionStamp() {
+		return startSessionStamp;
+	}
+
+	public void setStartSessionStamp(long startSessionStamp) {
+		this.startSessionStamp = startSessionStamp;
+	}
+
+	public long getFistResponseStamp() {
+		return fistResponseStamp;
+	}
+
+	public void setFistResponseStamp(long fistResponseStamp) {
+		this.fistResponseStamp = fistResponseStamp;
+	}
+
+	public long getAssignedDeptStamp() {
+		return assignedDeptStamp;
+	}
+
+	public void setAssignedDeptStamp(long assignedDeptStamp) {
+		this.assignedDeptStamp = assignedDeptStamp;
+	}
+
+	public long getAssignedAgentStamp() {
+		return assignedAgentStamp;
+	}
+
+	public void setAssignedAgentStamp(long assignedAgentStamp) {
+		this.assignedAgentStamp = assignedAgentStamp;
+	}
+
+	public long getLastResponseStamp() {
+		return lastResponseStamp;
+	}
+
+	public void setLastResponseStamp(long lastResponseStamp) {
+		this.lastResponseStamp = lastResponseStamp;
+	}
+
+	public long getCloseSessionStamp() {
+		return closeSessionStamp;
+	}
+
+	public void setCloseSessionStamp(long closeSessionStamp) {
+		this.closeSessionStamp = closeSessionStamp;
 	}
 }

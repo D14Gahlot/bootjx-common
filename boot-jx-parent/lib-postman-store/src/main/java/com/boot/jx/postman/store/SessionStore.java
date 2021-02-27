@@ -171,6 +171,12 @@ public class SessionStore {
 				.andOperator(new Criteria().orOperator(Criteria.where("assignedToAgent").exists(false),
 						Criteria.where("assignedToAgent").is(agentCode))));
 
+		return mongoTemplate.find(query2, ChatSessionDoc.class);
+	}
+
+	public List<ChatSessionDoc> findChatSessionContactId(String contactId) {
+		Query query2 = new Query();
+		query2.addCriteria(Criteria.where("contactId").is(contactId));
 		LOGGER.info(query2.toString());
 		return mongoTemplate.find(query2, ChatSessionDoc.class);
 	}

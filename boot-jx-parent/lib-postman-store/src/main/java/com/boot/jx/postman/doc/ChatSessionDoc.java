@@ -28,19 +28,19 @@ public class ChatSessionDoc implements Serializable {
 	private String assignedToDept;
 	private String assignedToAgent;
 
-	private long lastInComingStamp;
-
 	private boolean active;
 	private boolean initd;
 
 	private long startSessionStamp;
-	private long closeSessionStamp;
+	private long fistResponseStamp;
+
+	private long lastInComingStamp;
 
 	private long assignedDeptStamp;
 	private long assignedAgentStamp;
 
-	private long fistResponseStamp;
 	private long lastResponseStamp;
+	private long closeSessionStamp;
 
 	private Integer agentScore;
 	private Integer botScore;
