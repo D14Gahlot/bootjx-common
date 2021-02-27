@@ -100,6 +100,21 @@ public class AdminDashBoardManager {
 		List<DashBoardResponseDto> dtoLst = new ArrayList<DashBoardResponseDto>();
 		 DashBoardResponseDto dto = null;
 		 List<String>  lstContactType=new ArrayList<String>();
+		 
+		    long dateRange1 =0;
+			long dateRange2 =0;
+			if(ArgUtil.is(req.getDateRange1()) && req.getDateRange1()>0) {
+				dateRange1 =req.getDateRange1();
+			}else {
+				dateRange1 =agentAnaMgr.todayStartTime();
+			}
+			if(ArgUtil.is(req.getDateReange2()) && req.getDateReange2()>0) {
+			  dateRange2 =req.getDateReange2();
+			}else {
+				dateRange2 =agentAnaMgr.todayEndTime();
+			}
+		 
+		 
 		 if(req!=null && (req.getContactType()==null || ArgUtil.isEmpty(req.getContactType()))) {
 			 lstContactType = getListOfContactType(); 
 		 }
@@ -108,11 +123,11 @@ public class AdminDashBoardManager {
 			 for(String messageDoc : lstContactType) {
 				 dto = new DashBoardResponseDto();
 				 String contactType=(String)messageDoc;
-				 dto = getCotactWiseAnalytics(contactType,req.getDateRange1(),req.getDateReange2());
+				 dto = getCotactWiseAnalytics(contactType,dateRange1,dateRange2);
 				 dtoLst.add(dto);
 			 }
 		 }else {
-			 dto = getCotactWiseAnalytics(req.getContactType().toString(),req.getDateRange1(),req.getDateReange2());
+			 dto = getCotactWiseAnalytics(req.getContactType().toString(),dateRange1,dateRange2);
 			 dtoLst.add(dto);
 		 }
 		 
@@ -122,7 +137,6 @@ public class AdminDashBoardManager {
 		 }
 		return dtoLst;
 	}
-	
 	public DashBoardResponseDto getTeamWiseAnalytics(List<DashBoardResponseDto> dtoLst) {
 		DashBoardResponseDto dto = agentAnaMgr.getTeamWiseAnalytics(dtoLst);
 		dto.setContactType(DEFAULT_TEAM);

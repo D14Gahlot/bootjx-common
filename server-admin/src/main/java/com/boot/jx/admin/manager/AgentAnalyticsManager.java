@@ -10,7 +10,6 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
-import java.time.Instant;
 import java.time.LocalTime;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
@@ -60,10 +59,24 @@ public class AgentAnalyticsManager {
 	
 	
 
+
 	public  List<DashBoardResponseDto> getAgentWiseAnalytics(DashBoardRequestDto req) {
-		 List<DashBoardResponseDto> lstDto = new ArrayList<>();
+ 		 List<DashBoardResponseDto> lstDto = new ArrayList<>();
 		 DashBoardResponseDto dto = null;
 		 List<ChatSessionDoc> allAgent =null;
+		 long date1=0;
+		 long date2=0;
+		 if(ArgUtil.is(req.getDateRange1()) && req.getDateRange1()>0) {
+				date1 =req.getDateRange1();
+			}else {
+				date1 =todayStartTime();
+			}
+			if(ArgUtil.is(req.getDateReange2()) && req.getDateReange2()>0) {
+				date2 =req.getDateReange2();
+			}else {
+				date2 =todayEndTime();
+			}
+			
 		
 		 if(req!=null && (ArgUtil.isEmptyString(req.getAgent()) || req.getAgent().equalsIgnoreCase(DEFAULT_AGENT))) {
 			 allAgent = getAgentList(); 
@@ -73,11 +86,11 @@ public class AgentAnalyticsManager {
 			 for(Object chatSess : allAgent) {
 				 dto = new DashBoardResponseDto();
 				String agent=(String)chatSess;
-				 dto = getAgentAnalytics(agent,req.getDateRange1(),req.getDateReange2());
+				 dto = getAgentAnalytics(agent,date1,date2);
 				lstDto.add(dto);
 			 }
 		 }else {
-			 dto = getAgentAnalytics(req.getAgent(),req.getDateRange1(),req.getDateReange2());
+			 dto = getAgentAnalytics(req.getAgent(),date1,date2);
 			 lstDto.add(dto);
 		 }
 		 if(!lstDto.isEmpty() && lstDto.size()>1) {
@@ -188,15 +201,8 @@ public class AgentAnalyticsManager {
 	}
 	
 	
-	public List<ChatSessionDoc> getUniqueAgentWiseContactList(String agent,long startTime, long endTime){
-		long dateRange1 =0;
-		long dateRange2 =0;
-		if(ArgUtil.is(startTime)) {
-			dateRange1 =todayStartTime();
-		}
-		if(ArgUtil.is(endTime)) {
-		  dateRange2 =todayEndTime();
-		}
+	public List<ChatSessionDoc> getUniqueAgentWiseContactList(String agent,long dateRange1, long dateRange2){
+		
 		Query query = new Query();
 		query.addCriteria(Criteria.where("assignedToAgent").is(agent));
 		query.addCriteria(Criteria.where("assignedAgentStamp").gt(dateRange1).lt(dateRange2));
@@ -204,15 +210,8 @@ public class AgentAnalyticsManager {
 		return distinctIdList;
 	}
 	
-	public List<ChatSessionDoc> getAgentWiseTotalMsgExchanged(String agent,long startTime, long endTime){
-		long dateRange1 =0;
-		long dateRange2 =0;
-		if(ArgUtil.is(startTime)) {
-			dateRange1 =todayStartTime();
-		}
-		if(ArgUtil.is(endTime)) {
-		  dateRange2 =todayEndTime();
-		}
+	public List<ChatSessionDoc> getAgentWiseTotalMsgExchanged(String agent,long dateRange1, long dateRange2){
+		
 		Query query = new Query();
 		query.addCriteria(Criteria.where("assignedToAgent").is(agent));
 		query.addCriteria(Criteria.where("assignedAgentStamp").gt(dateRange1).lt(dateRange2));
@@ -222,17 +221,9 @@ public class AgentAnalyticsManager {
 		return totalMsgDoc;
 	}
 	
-	public List<ChatSessionDoc> getAgentWiseOpenConversation(String agent,long startTime, long endTime){
+	public List<ChatSessionDoc> getAgentWiseOpenConversation(String agent,long dateRange1, long dateRange2){
 		List<ChatSessionDoc> totalOpenMsgDoc =new ArrayList<ChatSessionDoc>(); 
-		long dateRange1 =0;
-		long dateRange2 =0;
 		long currentTimeStamp =System.currentTimeMillis();
-		if(ArgUtil.is(startTime)) {
-			dateRange1 =todayStartTime();
-		}
-		if(ArgUtil.is(endTime)) {
-		  dateRange2 =todayEndTime();
-		}
 		Query query = new Query();
 		query.addCriteria(Criteria.where("assignedToAgent").is(agent).and("active").is(true));
 		query.addCriteria(Criteria.where("assignedAgentStamp").gt(dateRange1).lt(dateRange2));
@@ -274,20 +265,12 @@ public class AgentAnalyticsManager {
 	}
 	
 	
-	public double getStartLag(String agent,long startTime, long endTime){
+	public double getStartLag(String agent,long dateRange1, long dateRange2){
 		Map<String,Double> startLagMapLst = new HashMap<String,Double>();
 		double startLag =0.0d;
 		double percentageWithDecimal=0.0d;
 		
 		
-		long dateRange1 =0;
-		long dateRange2 =0;
-		if(ArgUtil.is(startTime)) {
-			dateRange1 =todayStartTime();
-		}
-		if(ArgUtil.is(endTime)) {
-		  dateRange2 =todayEndTime();
-		}
 	
 		List<ChatSessionDoc> uniquContactIdLst =getUniqueAgentWiseContactList(agent,dateRange1,dateRange2);
 		for(Object chatSession:uniquContactIdLst) {
@@ -454,13 +437,7 @@ public class AgentAnalyticsManager {
 	}
 	
 public Map<String,Integer> getDateDiff(long date1,long date2){
-		
-		if(ArgUtil.is(date1)) {
-			date1 =todayStartTime();
-		}
-		if(ArgUtil.is(date2)) {
-			date2 =todayEndTime();
-		}
+	
 		
 		   Map<String,Integer> dateDiffMap =new HashMap<String,Integer>();
 		   // For thousand separator
