@@ -105,7 +105,7 @@ public class ApiResponse<T, M> extends AResponse<M>
 	}
 
 	public ApiResponse<T, M> results(List<T> resultList) {
-		this.setResults(results);
+		this.setResults(resultList);
 		return this;
 	}
 
