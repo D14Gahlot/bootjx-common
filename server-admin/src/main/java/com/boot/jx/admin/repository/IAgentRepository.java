@@ -7,6 +7,6 @@ import com.boot.jx.admin.model.Agent;
 
 public interface IAgentRepository extends JpaRepository<Agent, Integer> {
 
-	@Query("select a from Agent a where a.agent_code=?1 and af.isactive >= ?2")
+	@Query("select a from Agent a where a.agent_code=?1 and a.isactive >= ?2")
 	Agent getAgentByCodeAndStatus(String agentCode, String status);
 }
