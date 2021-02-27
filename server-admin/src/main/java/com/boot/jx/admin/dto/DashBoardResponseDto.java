@@ -18,7 +18,7 @@ public class DashBoardResponseDto {
 	long converDuration;
 	double startLag;
 	PeakLoadDto peakLoad;
-	Map<Object,Object> msgCountLst;
+	Map<Object,Object> graphApiDetails;
 	LeadMessanger leadMessanger;
 	
 	
@@ -83,14 +83,6 @@ public class DashBoardResponseDto {
 		this.peakLoad = peakLoad;
 	}
 
-	public Map<Object, Object> getMsgCountLst() {
-		return msgCountLst;
-	}
-
-	public void setMsgCountLst(Map<Object, Object> msgCountLst) {
-		this.msgCountLst = msgCountLst;
-	}
-
 	public LeadMessanger getLeadMessanger() {
 		return leadMessanger;
 	}
@@ -129,6 +121,14 @@ public class DashBoardResponseDto {
 
 	public void setAgentName(String agentName) {
 		this.agentName = agentName;
+	}
+
+	public Map<Object, Object> getGraphApiDetails() {
+		return graphApiDetails;
+	}
+
+	public void setGraphApiDetails(Map<Object, Object> graphApiDetails) {
+		this.graphApiDetails = graphApiDetails;
 	}
 
 	

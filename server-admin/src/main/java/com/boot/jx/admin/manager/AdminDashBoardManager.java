@@ -124,31 +124,9 @@ public class AdminDashBoardManager {
 	}
 	
 	public DashBoardResponseDto getTeamWiseAnalytics(List<DashBoardResponseDto> dtoLst) {
-		DashBoardResponseDto dto = new DashBoardResponseDto();
+		DashBoardResponseDto dto = agentAnaMgr.getTeamWiseAnalytics(dtoLst);
 		dto.setContactType(DEFAULT_TEAM);
-		long totalInMsg =0;
-		long totalOutMsg =0;
-		long totalMsg =0;
-		long totalUniqCon =0;
-		long totalOpenMsg =0;
-		long convDuration=0;
-		int teamSize = dtoLst.size();
-		
-		for (DashBoardResponseDto dt : dtoLst) {
-			totalInMsg +=dt.getTotalInMsgExchanged();
-			totalOutMsg+=dt.getTotalOutMsgExchanged();
-			totalMsg+=dt.getTotalMsgExchanged();
-			totalOpenMsg+=dt.getOpenConversation();
-			convDuration+=dt.getConverDuration();
-			dto.setLeadMessanger(dt.getLeadMessanger());
-			
-		}
-		dto.setTotalInMsgExchanged(totalInMsg);
-		dto.setTotalOutMsgExchanged(totalOutMsg);
-		dto.setTotalMsgExchanged(totalMsg);
-		dto.setOpenConversation(totalOpenMsg);
-		dto.setUniqueConversation(totalUniqCon);
-		dto.setConverDuration(convDuration/teamSize);
+		dto.setAgentName("");
 		return dto;
 	}
 	public DashBoardResponseDto getCotactWiseAnalytics(String contactType,long dateRange1,long dateRange2) {
@@ -200,13 +178,13 @@ public class AdminDashBoardManager {
 		}
 		if(hour<=24) {
 			Map<Object,Object> hourWiseCount = getHourWiseCount(totalMsgDoc);
-			dto.setMsgCountLst(hourWiseCount);
+			dto.setGraphApiDetails(hourWiseCount);
 		}else if(hour >24 && days<=30){
 			Map<Object,Object> dateWiseCount = getDateWiseCount(totalMsgDoc);
-			dto.setMsgCountLst(dateWiseCount);
+			dto.setGraphApiDetails(dateWiseCount);
 		}else {
 			Map<Object,Object> dweekWiseCount = getWeekWiseCount(totalMsgDoc);
-			dto.setMsgCountLst(dweekWiseCount);
+			dto.setGraphApiDetails(dweekWiseCount);
 		}
 		
 		return dto;
@@ -290,7 +268,7 @@ public class AdminDashBoardManager {
 			dto.setUniqueConversation(distinctIdList.size());
 		}
 		if (ArgUtil.is(hourWiseCount)) {
-			dto.setMsgCountLst(hourWiseCount);
+			dto.setGraphApiDetails(hourWiseCount);
 		}
 		dto.setContactType(contactType);
 		dto.setPeakLoad(peakLoadResult);
@@ -351,7 +329,7 @@ public class AdminDashBoardManager {
 			dto.setUniqueConversation(distinctIdList.size());
 		}
 		if (ArgUtil.is(hourWiseCount)) {
-			dto.setMsgCountLst(hourWiseCount);
+			dto.setGraphApiDetails(hourWiseCount);
 		}
 		
 		dto.setContactType(contactType);
@@ -418,7 +396,7 @@ public class AdminDashBoardManager {
 			dto.setUniqueConversation(distinctIdList.size());
 		}
 		if (ArgUtil.is(dateWiseCount)) {
-			dto.setMsgCountLst(dateWiseCount);
+			dto.setGraphApiDetails(dateWiseCount);
 		}
 		dto.setContactType(contactType);
 		dto.setFilter("WEEK");
@@ -484,7 +462,7 @@ public class AdminDashBoardManager {
 			dto.setUniqueConversation(distinctIdList.size());
 		}
 		if (ArgUtil.is(dateWiseCount)) {
-			dto.setMsgCountLst(dateWiseCount);
+			dto.setGraphApiDetails(dateWiseCount);
 		}
 		dto.setContactType(contactType);
 		dto.setFilter("MONTH");
@@ -546,7 +524,7 @@ public class AdminDashBoardManager {
 			dto.setUniqueConversation(distinctIdList.size());
 		}
 		if (ArgUtil.is(dweekWiseCount)) {
-			dto.setMsgCountLst(dweekWiseCount);
+			dto.setGraphApiDetails(dweekWiseCount);
 		}
 		
 		dto.setContactType(contactType);
@@ -788,7 +766,7 @@ public class AdminDashBoardManager {
 	/** Timestamp **/
 	
 	public Map<Object,Object>  getHourWiseCount(List<MessageDoc>  msgLst) {
-		List<Object> hourList = new ArrayList<Object>();
+		List<Integer> hourList = new ArrayList<Integer>();
 		List<Object> dateWiseList = new ArrayList<Object>();
 		Map<Object,Object> mapLst = new HashMap<Object,Object>();
 		for(MessageDoc msg :msgLst) {
@@ -799,10 +777,11 @@ public class AdminDashBoardManager {
 	         SimpleDateFormat sdfH = new SimpleDateFormat("HH");
 	         String formattedDateH = sdfH.format(date);
 	         dateWiseList.add(ddMMyyyyFormat);
-	         hourList.add(formattedDateH);
-    	 //System.out.println(" timeStamp :"+timeStamp+"\t long to date :"+date+"\t str :"+dateWithTime+"\t ddMMyyyyFormat :"+ddMMyyyyFormat+"\t formattedDateH :"+formattedDateH);
+	         //hourList.add(formattedDateH);
+	         hourList.add(Integer.parseInt(formattedDateH));
+    	 System.out.println(" timeStamp :"+timeStamp+"\t long to date :"+date+"\t str :"+dateWithTime+"\t ddMMyyyyFormat :"+ddMMyyyyFormat+"\t formattedDateH :"+formattedDateH);
 		}
-		
+		Collections.sort(hourList);
 		Set<Object> hourWiseCount = new HashSet<Object>(hourList);
 		for (Object key : hourWiseCount) {
 			mapLst.put(key, Collections.frequency(hourList, key));

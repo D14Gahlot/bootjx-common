@@ -95,7 +95,9 @@ public class AgentAnalyticsManager {
 		long totalUniqCon =0;
 		long totalOpenMsg =0;
 		long convDuration=0;
+		double totalStartLag=0.0d;
 		int teamSize = dtoLst.size();
+		Map<Object,Object> graphApiMap = new HashMap<Object,Object>(); 
 		
 		for (DashBoardResponseDto dt : dtoLst) {
 			totalInMsg +=dt.getTotalInMsgExchanged();
@@ -103,7 +105,10 @@ public class AgentAnalyticsManager {
 			totalMsg+=dt.getTotalMsgExchanged();
 			totalOpenMsg+=dt.getOpenConversation();
 			convDuration+=dt.getConverDuration();
+			totalUniqCon+=dt.getUniqueConversation();
+			totalStartLag+=dt.getStartLag();
 			dto.setLeadMessanger(dt.getLeadMessanger());
+			graphApiMap = mergerMapKyAndValue(graphApiMap, dt.getGraphApiDetails());
 			
 		}
 		dto.setTotalInMsgExchanged(totalInMsg);
@@ -112,6 +117,8 @@ public class AgentAnalyticsManager {
 		dto.setOpenConversation(totalOpenMsg);
 		dto.setUniqueConversation(totalUniqCon);
 		dto.setConverDuration(convDuration/teamSize);
+		dto.setStartLag(totalStartLag);
+		dto.setGraphApiDetails(graphApiMap);
 		return dto;
 	}
 	
@@ -161,13 +168,13 @@ public class AgentAnalyticsManager {
 			}
 			if(hour<=24) {
 				Map<Object,Object> hourWiseCount = getHourWiseCount(totalMsgExchanged);
-				dto.setMsgCountLst(hourWiseCount);
+				dto.setGraphApiDetails(hourWiseCount);
 			}else if(hour >24 && days<=30){
 				Map<Object,Object> dateWiseCount = getDateWiseCount(totalMsgExchanged);
-				dto.setMsgCountLst(dateWiseCount);
+				dto.setGraphApiDetails(dateWiseCount);
 			}else {
 				Map<Object,Object> dweekWiseCount = getWeekWiseCount(totalMsgExchanged);
-				dto.setMsgCountLst(dweekWiseCount);
+				dto.setGraphApiDetails(dweekWiseCount);
 			}
 			
 		    return dto;
@@ -358,7 +365,7 @@ public class AgentAnalyticsManager {
 	/** Timestamp **/
 	
 	public Map<Object,Object>  getHourWiseCount(List<ChatSessionDoc>  msgLst) {
-		List<Object> hourList = new ArrayList<Object>();
+		List<Integer> hourList = new ArrayList<Integer>();
 		List<Object> dateWiseList = new ArrayList<Object>();
 		Map<Object,Object> mapLst = new HashMap<Object,Object>();
 		for(ChatSessionDoc msg :msgLst) {
@@ -369,13 +376,13 @@ public class AgentAnalyticsManager {
 	         SimpleDateFormat sdfH = new SimpleDateFormat("HH");
 	         String formattedDateH = sdfH.format(date);
 	         dateWiseList.add(ddMMyyyyFormat);
-	         hourList.add(formattedDateH);
-    	 System.out.println(" timeStamp :"+timeStamp+"\t long to date :"+date+"\t str :"+dateWithTime+"\t ddMMyyyyFormat :"+ddMMyyyyFormat+"\t formattedDateH :"+formattedDateH);
+	         hourList.add(Integer.parseInt(formattedDateH));
 		}
+		Collections.sort(hourList);
 		
 		Set<Object> hourWiseCount = new HashSet<Object>(hourList);
 		for (Object key : hourWiseCount) {
-			mapLst.put(key, Collections.frequency(hourWiseCount, key));
+			mapLst.put(key, Collections.frequency(hourList, key));
 		    System.out.println(key + ": " + Collections.frequency(hourList, key));
 		}
 		
@@ -446,7 +453,15 @@ public class AgentAnalyticsManager {
 		return longTodayendTime;
 	}
 	
-	public Map<String,Integer> getDateDiff(long date1,long date2){
+public Map<String,Integer> getDateDiff(long date1,long date2){
+		
+		if(ArgUtil.is(date1)) {
+			date1 =todayStartTime();
+		}
+		if(ArgUtil.is(date2)) {
+			date2 =todayEndTime();
+		}
+		
 		   Map<String,Integer> dateDiffMap =new HashMap<String,Integer>();
 		   // For thousand separator
 	       DecimalFormat decimalFormatter = new DecimalFormat("###,###");
@@ -465,6 +480,13 @@ public class AgentAnalyticsManager {
 	       
 	       return dateDiffMap;
 	}
-	
+public Map<Object, Object> mergerMapKyAndValue(Map<Object, Object> mergeMap,Map<Object, Object> map2){
+	Map<Object, Object> mergeValue =mergeMap;
+	   //Merge maps
+	   map2.forEach(
+	       (key, value) -> mergeValue.merge( key, value, (v1, v2) -> v1==v2 ? v1 : (Integer)v1 + (Integer)v2)
+	   );
+	return mergeValue;
+}
 	
 }
