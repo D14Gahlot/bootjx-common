@@ -6,6 +6,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -24,6 +25,7 @@ import com.boot.jx.agent.AgentSessionBean;
 import com.boot.jx.agent.AgentSessionService;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.http.CommonHttpRequest;
+import com.boot.jx.rest.RestService;
 import com.boot.jx.stomp.StompTunnelSessionManager;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.Constants;
@@ -34,6 +36,9 @@ public class AuthController {
 
 	@Value("${mry.cdn.url}")
 	private String cdnServer;
+
+	@Value("${mry.admin.url}")
+	private String adminUrl;
 
 	@Autowired
 	private AppConfig appConfig;
@@ -46,6 +51,9 @@ public class AuthController {
 
 	@Autowired
 	private AgentChatHandlerImpl agentChatHandler;
+
+	@Autowired
+	private RestService restService;
 
 	@ResponseBody
 	@RequestMapping(value = "/pub/test", method = { RequestMethod.POST, RequestMethod.GET })
@@ -116,11 +124,13 @@ public class AuthController {
 
 	@ResponseBody
 	@RequestMapping(value = "/auth/login/submit", method = { RequestMethod.POST })
-	public ApiResponse<String, String> login(@RequestParam String username, @RequestParam String password,
+	public ApiResponse<Map<String, Object>, String> login(@RequestParam String username, @RequestParam String password,
 			HttpServletRequest request) {
-		ApiResponse<String, String> x = ApiResponse.buildData("success", "success");
-
-		if (username.startsWith("agent") && password.equals("mehery@1234")) {
+		ApiResponse<Map<String, Object>, String> x = restService.ajax(adminUrl).path("/auth/agent/login")
+				.field("username", username).field("password", password).postForm()
+				.as(new ParameterizedTypeReference<ApiResponse<Map<String, Object>, String>>() {
+				});
+		if (ArgUtil.parseAsBoolean(x.getData().get("success"), false)) {
 			x.redirectUrl(appConfig.getAppPrefix() + "/app/home");
 			UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(username, password);
 			token.setDetails(new WebAuthenticationDetails(request));
@@ -129,8 +139,6 @@ public class AuthController {
 			agentSessionService.updateLogin(username);
 			stompTunnelSessionManager.registerUser(username);
 		} else {
-			x.setData("error");
-			x.setMeta("error");
 			x.redirectUrl(appConfig.getAppPrefix() + "/auth/login?error");
 		}
 		return x;

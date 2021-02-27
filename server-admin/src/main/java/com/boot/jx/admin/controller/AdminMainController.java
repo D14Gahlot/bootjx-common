@@ -1,5 +1,8 @@
 package com.boot.jx.admin.controller;
 
+import java.security.NoSuchAlgorithmException;
+import java.util.Map;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,9 +20,11 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.boot.jx.AppConfig;
 import com.boot.jx.admin.AdminAuthProvider;
+import com.boot.jx.admin.service.AgentLoginService;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.http.CommonHttpRequest;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.MapBuilder;
 
 @Controller
 public class AdminMainController {
@@ -87,4 +92,23 @@ public class AdminMainController {
 		return x;
 	}
 
+	@Autowired
+	private AgentLoginService agentLoginService;
+
+	@ResponseBody
+	@RequestMapping(value = "/auth/agent/login", method = { RequestMethod.POST })
+	public ApiResponse<Map<String, Object>, String> agentLogin(@RequestParam String username,
+			@RequestParam String password, HttpServletRequest request) throws NoSuchAlgorithmException {
+		ApiResponse<Map<String, Object>, String> x = ApiResponse
+				.buildData(MapBuilder.map().put("success", "success").toMap(), "success");
+		if (agentLoginService.loginAgent(username, password)) {
+			x.setStatusKey("SUCCESS");
+		} else {
+			x.data().put("success", false);
+			x.setMeta("error");
+			x.setStatusKey("ERROR");
+			x.setMessage("Username or Password is incorrect");
+		}
+		return x;
+	}
 }
