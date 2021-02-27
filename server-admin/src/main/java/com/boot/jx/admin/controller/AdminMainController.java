@@ -100,7 +100,7 @@ public class AdminMainController {
 	public ApiResponse<Map<String, Object>, String> agentLogin(@RequestParam String username,
 			@RequestParam String password, HttpServletRequest request) throws NoSuchAlgorithmException {
 		ApiResponse<Map<String, Object>, String> x = ApiResponse
-				.buildData(MapBuilder.map().put("success", "success").toMap(), "success");
+				.buildData(MapBuilder.map().put("success", true).toMap(), "success");
 		if (agentLoginService.loginAgent(username, password)) {
 			x.setStatusKey("SUCCESS");
 		} else {
