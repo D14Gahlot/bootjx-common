@@ -93,13 +93,11 @@ public class AgentAnalyticsManager {
 			 dto = getAgentAnalytics(req.getAgent(),date1,date2);
 			 lstDto.add(dto);
 		 }
-		 if(!lstDto.isEmpty() && lstDto.size()>1) {
-			 DashBoardResponseDto dtoTeam = getTeamWiseAnalytics(lstDto);
-			 lstDto.add(dtoTeam);
-		 }
 		return lstDto;
 	}
-	public DashBoardResponseDto getTeamWiseAnalytics(List<DashBoardResponseDto> dtoLst) {
+	
+	
+	public DashBoardResponseDto getSummery(List<DashBoardResponseDto> dtoLst) {
 		DashBoardResponseDto dto = new DashBoardResponseDto();
 		dto.setAgentName(DEFAULT_AGENT);
 		long totalInMsg =0;

@@ -138,7 +138,7 @@ public class AdminDashBoardManager {
 		return dtoLst;
 	}
 	public DashBoardResponseDto getTeamWiseAnalytics(List<DashBoardResponseDto> dtoLst) {
-		DashBoardResponseDto dto = agentAnaMgr.getTeamWiseAnalytics(dtoLst);
+		DashBoardResponseDto dto = agentAnaMgr.getSummery(dtoLst);
 		dto.setContactType(DEFAULT_TEAM);
 		dto.setAgentName("");
 		return dto;

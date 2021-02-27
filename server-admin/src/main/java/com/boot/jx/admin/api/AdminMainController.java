@@ -1,4 +1,4 @@
-package com.boot.jx.admin.controller;
+package com.boot.jx.admin.api;
 
 import java.security.NoSuchAlgorithmException;
 import java.util.Map;
