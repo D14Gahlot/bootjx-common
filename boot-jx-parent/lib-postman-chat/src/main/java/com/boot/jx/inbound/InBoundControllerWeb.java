@@ -16,13 +16,16 @@ import com.boot.jx.agent.AgentChatHandler;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.connectors.WebConnector;
 import com.boot.jx.dict.ContactType;
+import com.boot.jx.http.ApiRequest;
 import com.boot.jx.http.CommonHttpRequest;
+import com.boot.jx.http.RequestType;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.store.MessageStore;
 import com.boot.jx.postman.store.SessionStore;
+import com.boot.jx.scope.vendor.VendorContext.ApiVendorHeaders;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.utils.ArgUtil;
 
@@ -53,6 +56,7 @@ public class InBoundControllerWeb {
 	@Autowired
 	WebConnector webConnector;
 
+	@ApiRequest(type = RequestType.POLL)
 	@ResponseBody
 	@RequestMapping(value = "/ext/outbound/web/callback", method = RequestMethod.GET)
 	public OutboxMessage onReceiveMessage(@RequestParam String number) throws InterruptedException {
@@ -105,7 +109,7 @@ public class InBoundControllerWeb {
 		inBoundEngine.invokeMethods(event);
 
 		String webSessionId = commonHttpRequest.get("web-session-id");
-		if (!ArgUtil.is(webSessionId) || !webSessionId.equalsIgnoreCase(event.getSessionId()) ) {
+		if (!ArgUtil.is(webSessionId) || !webSessionId.equalsIgnoreCase(event.getSessionId())) {
 			commonHttpRequest.setCookie("web-session-id", event.getSessionId());
 		}
 		return event;
