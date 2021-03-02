@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.boot.jx.postman.gupshup.GupShupConstants.SessionType;
+import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.File;
 import com.boot.jx.postman.model.Message;
 import com.boot.jx.postman.model.MessageOptions.WAMessageOptions;
@@ -43,9 +44,8 @@ public abstract class AbstractGupShupClient {
 			req.password(gupShupConfig.getGupShupChatPass());
 		}
 		if (encrypt) {
-			ajax.field("encrdata",
-					CryptoUtil.getEncoder().obzect(req.password(gupShupConfig.getGupShupChatPass())).encodeBase64()
-							.toString());
+			ajax.field("encrdata", CryptoUtil.getEncoder().obzect(req.password(gupShupConfig.getGupShupChatPass()))
+					.encodeBase64().toString());
 		} else {
 			Map<String, Object> reqMap = JsonUtil.toMap(req);
 			for (Entry<String, Object> entrySet : reqMap.entrySet()) {
@@ -57,15 +57,15 @@ public abstract class AbstractGupShupClient {
 
 	private GupShupResp post(GupShupReq req, boolean encrypt) {
 		Ajax ajax = ajax(req, encrypt);
-		return ajax.postForm().as(GupShupResp.class);
+		GupShupResp x = ajax.postForm().as(GupShupResp.class);
+		//System.out.println("=============" + x.getResponse().getDetails());
+		return x;
 	}
 
 	public GupShupResp uploadDocument(String phoneNumber, MultipartFile file) throws IOException {
-		return ajax(new GupShupReq(GupShupConstants.Method.UploadMedia)
-				.sendTo(phoneNumber),
-				false).field("media_type", GupShupConstants.MessageType.DOCUMENT)
-						.field("media_file", file)
-						.postForm().as(GupShupResp.class);
+		return ajax(new GupShupReq(GupShupConstants.Method.UploadMedia).sendTo(phoneNumber), false)
+				.field("media_type", GupShupConstants.MessageType.DOCUMENT).field("media_file", file).postForm()
+				.as(GupShupResp.class);
 	}
 
 	protected GupShupResp post(GupShupReq req) {
@@ -79,59 +79,59 @@ public abstract class AbstractGupShupClient {
 	}
 
 	public GupShupResp optOut(String phoneNumber) {
-		return post(
-				new GupShupReq(GupShupConstants.Method.OPT_OUT).phoneNumber(phoneNumber));
+		return post(new GupShupReq(GupShupConstants.Method.OPT_OUT).phoneNumber(phoneNumber));
 	}
 
 	public GupShupResp sendMessage(String phoneNumber, String message) {
-		return post(
-				new GupShupReq(GupShupConstants.Method.SendMessage)
-						.sendTo(phoneNumber).messageType(GupShupConstants.MessageType.TEXT)
-						.message(CryptoUtil.getEncoder().message(message).toString()));
+		return post(new GupShupReq(GupShupConstants.Method.SendMessage).sendTo(phoneNumber)
+				.messageType(GupShupConstants.MessageType.TEXT)
+				.message(CryptoUtil.getEncoder().message(message).toString()));
 	}
 
 	public GupShupResp sendImageURL(String phoneNumber, String media_url, String caption) {
-		return post(
-				new GupShupReq(GupShupConstants.Method.SendMediaMessage)
-						.sendTo(phoneNumber).messageType(GupShupConstants.MessageType.IMAGE).hsm(getIsHSM())
-						.dataEncoding(GupShupConstants.DataEncoding.TEXT)
-						.mediaURL(media_url)
-						.caption(CryptoUtil.getEncoder().message(caption).encodeURL().toString()));
+		return post(new GupShupReq(GupShupConstants.Method.SendMediaMessage).sendTo(phoneNumber)
+				.messageType(GupShupConstants.MessageType.IMAGE).hsm(getIsHSM())
+				.dataEncoding(GupShupConstants.DataEncoding.TEXT).mediaURL(media_url)
+				.caption(CryptoUtil.getEncoder().message(caption).encodeURL().toString()));
 	}
 
 	public GupShupResp sendDocumentURL(String phoneNumber, String media_url, String caption) {
-		return post(
-				new GupShupReq(GupShupConstants.Method.SendMediaMessage)
-						.sendTo(phoneNumber).messageType(GupShupConstants.MessageType.DOCUMENT).hsm(getIsHSM())
-						.mediaURL(media_url)
-						.caption(CryptoUtil.getEncoder().message(caption).encodeURL().toString()));
+		return post(new GupShupReq(GupShupConstants.Method.SendMediaMessage).sendTo(phoneNumber)
+				.messageType(GupShupConstants.MessageType.DOCUMENT).hsm(getIsHSM()).mediaURL(media_url)
+				.caption(CryptoUtil.getEncoder().message(caption).encodeURL().toString()));
 	}
 
 	public GupShupResp sendDocument(String phoneNumber, MultipartFile file, String caption) throws IOException {
 		GupShupResp media = uploadDocument(phoneNumber, file);
-		return post(
-				new GupShupReq(GupShupConstants.Method.SendMediaMessage)
-						.sendTo(phoneNumber).messageType(GupShupConstants.MessageType.DOCUMENT).hsm(getIsHSM())
-						.dataEncoding(GupShupConstants.DataEncoding.TEXT)
-						.mediaId(media.getResponse().getId())
-						.caption(CryptoUtil.getEncoder().message(caption).encodeURL().toString()));
+		return post(new GupShupReq(GupShupConstants.Method.SendMediaMessage).sendTo(phoneNumber)
+				.messageType(GupShupConstants.MessageType.DOCUMENT).hsm(getIsHSM())
+				.dataEncoding(GupShupConstants.DataEncoding.TEXT).mediaId(media.getResponse().getId())
+				.caption(CryptoUtil.getEncoder().message(caption).encodeURL().toString()));
 	}
 
 	public GupShupResp sendMessage(Message<?> message) {
 		String phoneNumber = CollectionUtil.getOne(message.getTo());
-		if (ArgUtil.is(message.getFiles())
-				&& ArgUtil.is(message.getFiles().get(0))
+		if (ArgUtil.is(message.getFiles()) && ArgUtil.is(message.getFiles().get(0))
 				&& ArgUtil.is(message.getFiles().get(0).getUrl())) {
 			File file = message.getFiles().get(0);
 
-			if (ArgUtil.is(file.getFileFormat()) && ArgUtil.isEqual(file.getFileFormat().getFormatType(), File.FileType.IMAGE)) {
+			if (ArgUtil.is(file.getFileFormat())
+					&& ArgUtil.isEqual(file.getFileFormat().getFormatType(), File.FileType.IMAGE)) {
 				return sendImageURL(phoneNumber, file.getUrl(), message.getMessage());
 			}
 			return sendDocumentURL(phoneNumber, file.getUrl(), message.getMessage());
+		} else if (ArgUtil.is(message.getAttachments()) && ArgUtil.is(message.getAttachments().get(0))
+				&& ArgUtil.is(message.getAttachments().get(0).getMediaURL())) {
+			Attachment attachment = message.getAttachments().get(0);
+
+			if (ArgUtil.areEqual(attachment.getMediaType(), File.FileType.IMAGE.toString())) {
+				return sendImageURL(phoneNumber, attachment.getMediaURL(), message.getMessage());
+			}
+			return sendDocumentURL(phoneNumber, attachment.getMediaURL(), message.getMessage());
 		}
 
 		GupShupReq gupShupReq = new GupShupReq(GupShupConstants.Method.SendMessage).sendTo(phoneNumber)
-				.messageType(GupShupConstants.MessageType.TEXT)
+				.messageType(GupShupConstants.MessageType.DATA_TEXT)
 				.message(CryptoUtil.getEncoder().message(message.getMessage()).toString());
 
 		if (message instanceof WAMessageOptions) {

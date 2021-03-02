@@ -14,6 +14,7 @@ public class GupShupConstants {
 	public static class MessageType {
 		public static final String text = "text";
 		public static final String TEXT = "TEXT";
+		public static final String DATA_TEXT = "DATA_TEXT";
 		public static final String HSM = "HSM";
 		public static final String IMAGE = "IMAGE";
 		public static final String DOCUMENT = "DOCUMENT";

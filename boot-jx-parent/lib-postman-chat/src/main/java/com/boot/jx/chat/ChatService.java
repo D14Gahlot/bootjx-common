@@ -59,6 +59,7 @@ public class ChatService {
 		InboxMessage inboxMessage = chatContext.getInboxMessage();
 		if (ArgUtil.is(inboxMessage)) {
 			outboxMessage.setContactType(inboxMessage.getContactType());
+			outboxMessage.setChannel(inboxMessage.getChannel());
 			outboxMessage.setQueue(inboxMessage.getQueue());
 			outboxMessage.addTo(inboxMessage.getFrom());
 			outboxMessage.setSessionId(inboxMessage.getSessionId());

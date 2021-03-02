@@ -7,6 +7,8 @@ import com.boot.jx.bot.BotController;
 import com.boot.jx.bot.ChatContext;
 import com.boot.jx.bot.ChatController;
 import com.boot.jx.bot.ChatMapping;
+import com.boot.jx.postman.model.Attachment;
+import com.boot.jx.postman.model.File;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.utils.ArgUtil;
@@ -172,15 +174,21 @@ public class DemoController extends ChatController {
 
 		if (ArgUtil.is(inboxMessage.getTags()) && ArgUtil.is(inboxMessage.getTags().getCategories())) {
 			if (inboxMessage.getTags().getCategories().indexOf("today-credits") > -1) {
-				reply(new OutboxMessage().template("today-credits").put("name", chatContext.getContact().getName()));
+				reply(new OutboxMessage().template("today-credits").put("name", chatContext.getContact().getName())
+						.attachment(new Attachment().mediaURL("http://www.africau.edu/images/default/sample.pdf")
+								.mediaType(File.FileType.DOCUMENT.toString())));
 				next("more-onselect");
 				return true;
 			} else if (inboxMessage.getTags().getCategories().indexOf("today-debits") > -1) {
-				reply(new OutboxMessage().template("today-debits").put("name", chatContext.getContact().getName()));
+				reply(new OutboxMessage().template("today-debits").put("name", chatContext.getContact().getName())
+						.attachment(new Attachment().mediaURL("http://www.africau.edu/images/default/sample.pdf")
+								.mediaType(File.FileType.DOCUMENT.toString())));
 				next("more-onselect");
 				return true;
 			} else if (inboxMessage.getTags().getCategories().indexOf("today-trnx") > -1) {
-				reply(new OutboxMessage().template("today-trnx").put("name", chatContext.getContact().getName()));
+				reply(new OutboxMessage().template("today-trnx").put("name", chatContext.getContact().getName())
+						.attachment(new Attachment().mediaURL("http://www.africau.edu/images/default/sample.pdf")
+								.mediaType(File.FileType.DOCUMENT.toString())));
 				next("more-onselect");
 				return true;
 			} else if (inboxMessage.getTags().getCategories().indexOf("menu") > -1
@@ -192,25 +200,25 @@ public class DemoController extends ChatController {
 				transferToAgent(inboxMessage, matcher);
 				return true;
 			}
-		} 
-			switch (thisMessage) {
-			case "menu":
-				showMenu(inboxMessage, matcher);
-				return true;
-			case "#":
-			case "TalkToAgent":
-				transferToAgent(inboxMessage, matcher);
-				return true;
-			case "*":
-			case "exit":
-			case "/exit_chat":
-				reply(new OutboxMessage().template("feedback"));
-				next("feedback-onselect");
-				return true;
-			default:
-				//System.out.println("NO Match");
-				break;
-			}
+		}
+		switch (thisMessage) {
+		case "menu":
+			showMenu(inboxMessage, matcher);
+			return true;
+		case "#":
+		case "TalkToAgent":
+			transferToAgent(inboxMessage, matcher);
+			return true;
+		case "*":
+		case "exit":
+		case "/exit_chat":
+			reply(new OutboxMessage().template("feedback"));
+			next("feedback-onselect");
+			return true;
+		default:
+			// System.out.println("NO Match");
+			break;
+		}
 
 		return false;
 	}
