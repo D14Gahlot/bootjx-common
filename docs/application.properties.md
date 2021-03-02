@@ -23,6 +23,7 @@ server.connection-timeout=-1
 mry.postman.url=http://localhost:8082/postman
 mry.agent.url=http://localhost:8083/agent
 mry.bot.url=http://localhost:8084/bot
+mry.admin.url=http://localhost:8081/admin
 
 ```
 
@@ -55,6 +56,7 @@ server.connection-timeout=-1
 mry.postman.url=http://localhost:8082/postman
 mry.agent.url=http://localhost:8083/agent
 mry.bot.url=http://localhost:8084/bot
+mry.admin.url=http://localhost:8081/admin
 
 ```
 
@@ -81,7 +83,7 @@ server.connection-timeout=-1
 mry.postman.url=http://localhost:8082/postman
 mry.agent.url=http://localhost:8083/agent
 mry.bot.url=http://localhost:8084/bot
-
+mry.admin.url=http://localhost:8081/admin
 ```
 
 ## Admin
