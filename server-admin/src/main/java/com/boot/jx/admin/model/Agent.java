@@ -25,6 +25,7 @@ public class Agent implements IResourceEntity {
 	private String agent_email;
 	private String agent_number;
 	private String agent_password;
+	private String agent_otp;
 	private String agent_channels;
 	private Date created_date;
 	private String create_by = "ADMIN";
@@ -166,6 +167,14 @@ public class Agent implements IResourceEntity {
 	@Override
 	public String resourceLocalName() {
 		return this.agent_name;
+	}
+
+	public String getAgent_otp() {
+		return agent_otp;
+	}
+
+	public void setAgent_otp(String agent_otp) {
+		this.agent_otp = agent_otp;
 	}
 
 }

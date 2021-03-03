@@ -74,7 +74,6 @@ public class AdminMainController {
 	public ApiResponse<String, String> login(@RequestParam String username, @RequestParam String password,
 			HttpServletRequest request) {
 		ApiResponse<String, String> x = ApiResponse.buildData("success", "success");
-
 		if (username.startsWith("admin") && password.equals("mehery@1234")) {
 			x.redirectUrl(appConfig.getAppPrefix() + "/app/home");
 			UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(username, password);
@@ -108,6 +107,41 @@ public class AdminMainController {
 			x.setMeta("error");
 			x.setStatusKey("ERROR");
 			x.setMessage("Username or Password is incorrect");
+		}
+		return x;
+	}
+
+	@ResponseBody
+	@RequestMapping(value = "/auth/agent/pass/reset", method = { RequestMethod.POST })
+	public ApiResponse<Map<String, Object>, String> agentResetPass(@RequestParam String username,
+			HttpServletRequest request) throws NoSuchAlgorithmException {
+		ApiResponse<Map<String, Object>, String> x = ApiResponse
+				.buildData(MapBuilder.map().put("success", true).toMap(), "success");
+		if (agentLoginService.resetPassword(username)) {
+			x.setStatusKey("SUCCESS");
+		} else {
+			x.data().put("success", false);
+			x.setMeta("error");
+			x.setStatusKey("ERROR");
+			x.setMessage("Username is incorrect");
+		}
+		return x;
+	}
+
+	@ResponseBody
+	@RequestMapping(value = "/auth/agent/pass/set", method = { RequestMethod.POST })
+	public ApiResponse<Map<String, Object>, String> agentSetPass(@RequestParam String username,
+			@RequestParam String password, @RequestParam String newpassword, HttpServletRequest request)
+			throws NoSuchAlgorithmException {
+		ApiResponse<Map<String, Object>, String> x = ApiResponse
+				.buildData(MapBuilder.map().put("success", true).toMap(), "success");
+		if (agentLoginService.resetPassword(username)) {
+			x.setStatusKey("SUCCESS");
+		} else {
+			x.data().put("success", false);
+			x.setMeta("error");
+			x.setStatusKey("ERROR");
+			x.setMessage("Username is incorrect");
 		}
 		return x;
 	}
