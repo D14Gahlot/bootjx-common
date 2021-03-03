@@ -128,6 +128,7 @@ public class AuthController {
 	@RequestMapping(value = "/auth/login/submit", method = { RequestMethod.POST })
 	public ApiResponse<Map<String, Object>, String> login(@RequestParam String username, @RequestParam String password,
 			HttpServletRequest request) {
+		username = ArgUtil.parseAsString(username,Constants.BLANK).toLowerCase();
 		ApiResponse<Map<String, Object>, String> x = restService.ajax(adminUrl).path("/auth/agent/login")
 				.field("username", username).field("password", password).postForm()
 				.as(new ParameterizedTypeReference<ApiResponse<Map<String, Object>, String>>() {
