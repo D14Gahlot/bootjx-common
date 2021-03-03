@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import java.util.StringJoiner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -72,6 +73,19 @@ public class TwitterConnector implements ConnectorHandler {
 		return mediaId;
 	}
 
+	public String attachLink(OutboxMessage outboxMessage) {
+		StringJoiner sj = new StringJoiner("\n");
+		sj.add(outboxMessage.getMessage());
+		if (ArgUtil.is(outboxMessage.getAttachments())) {
+			for (Attachment attachment : outboxMessage.getAttachments()) {
+				if (ArgUtil.is(attachment.getMediaURL())) {
+					sj.add(attachment.getMediaURL());
+				}
+			}
+		}
+		return sj.toString();
+	}
+
 	@Override
 	public void send(String lane, String to, OutboxMessage outboxMessage) {
 		try {
@@ -83,13 +97,15 @@ public class TwitterConnector implements ConnectorHandler {
 						outboxMessage.attachment(new Attachment().mediaURL(templateReply.getUrl())
 								.mediaType(File.FileType.IMAGE.toString()).mediaId(mediaId));
 						twitterClient.sendReply(to, outboxMessage.getMessage(), mediaId, lane);
+					} else {
+						twitterClient.sendReply(to, attachLink(outboxMessage), lane);
 					}
 				} else {
 					tmplClient.process(outboxMessage);
-					twitterClient.sendReply(to, outboxMessage.getMessage(), lane);
+					twitterClient.sendReply(to, attachLink(outboxMessage), lane);
 				}
 			} else {
-				twitterClient.sendReply(to, outboxMessage.getMessage(), lane);
+				twitterClient.sendReply(to, attachLink(outboxMessage), lane);
 			}
 		} catch (NumberFormatException e) {
 			outboxMessage.logs().add(e.getMessage());
