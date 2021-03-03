@@ -38,7 +38,7 @@ $( document ).ready(function() {
 			 password :  $("#login-password").val(),
 		 }).done(function(rsp){
 			 console.log(rsp);
-			 if(rsp.success)
+			 if(rsp.data && rsp.data.success)
 				 location.href = window.CONST.CONTEXT + "/app/home";
 			 else {
 				 $("#login_error").text(rsp.message);
