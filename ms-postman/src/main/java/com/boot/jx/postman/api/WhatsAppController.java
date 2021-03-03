@@ -39,8 +39,7 @@ public class WhatsAppController {
 	AuditService auditService;
 
 	@RequestMapping(value = PostManUrls.WHATS_APP_SEND_BULK, method = RequestMethod.POST)
-	public ApiResponse<WAMessage, Object> sendWhatsAppBulk(@RequestBody List<WAMessage> msgs)
-			throws PostManException {
+	public ApiResponse<WAMessage, Object> sendWhatsAppBulk(@RequestBody List<WAMessage> msgs) throws PostManException {
 		return ApiResponse.buildList(whatsAppService.send(msgs));
 	}
 
@@ -71,8 +70,7 @@ public class WhatsAppController {
 	}
 
 	@RequestMapping(value = PostManUrls.WHATS_APP_POLL, method = RequestMethod.GET)
-	public WAMessage pollWhatsApp(@RequestParam BigDecimal q)
-			throws PostManException, InterruptedException {
+	public WAMessage pollWhatsApp(@RequestParam BigDecimal q) throws PostManException, InterruptedException {
 		return whatsAppService.poll(ArgUtil.parseAsBigDecimal(q, BigDecimal.ZERO));
 	}
 
@@ -99,7 +97,7 @@ public class WhatsAppController {
 			msg.setAttempt(msg.getAttempt() + 1);
 			whatsAppService.send(msg, ArgUtil.parseAsBigDecimal(q, BigDecimal.ZERO));
 		} else {
-			msg.setStatus(Status.FAILED);
+			msg.setStatus(Status.FAILD);
 			return statusWhatsApp(msg, "TIMEOUT");
 		}
 		return ApiResponse.build(msg);

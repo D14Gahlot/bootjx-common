@@ -20,6 +20,7 @@ import com.boot.jx.postman.model.File;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.JsonUtil;
 
 @Component
 @ConnectorMapping(contactType = ContactType.WHATSAPP, channel = "GUPSHUPW")
@@ -53,16 +54,13 @@ public class WAGupShupConnector implements ConnectorHandler {
 
 	@Override
 	public void reply(InboxMessage inboxMessage, OutboxMessage outboxMessage) {
-		outboxMessage.setChannel(inboxMessage.getChannel());
-
 		if (ArgUtil.is(outboxMessage.getTemplate())) {
 			TemplateReply templateReply = mongoTemplate.findById(outboxMessage.getTemplate(), TemplateReply.class);
 			if (ArgUtil.is(templateReply)) {
 				if ("image".equalsIgnoreCase(templateReply.getType())) {
 					outboxMessage.attachment(new Attachment().mediaURL(templateReply.getUrl())
 							.mediaType(File.FileType.IMAGE.toString()));
-					gupShupChatClient.sendImageURL(inboxMessage.getFrom(), templateReply.getUrl(),
-							outboxMessage.getMessage());
+					gupShupChatClient.sendMessage(outboxMessage);
 				}
 			} else {
 				tmplClient.process(outboxMessage);
@@ -80,6 +78,10 @@ public class WAGupShupConnector implements ConnectorHandler {
 
 	@Override
 	public boolean initSession(ChatContactDoc contact, ChatSessionDoc session, InboxMessage inboxMessage) {
+		if (ArgUtil.is(inboxMessage.getOriginalMessage())) {
+			GupShupInbound dm = JsonUtil.parse(inboxMessage.getOriginalMessage(), GupShupInbound.class);
+			contact.setName(dm.getName());
+		}
 		return true;
 	}
 

@@ -13,6 +13,7 @@ import com.boot.jx.postman.doc.ChatContextDoc;
 import com.boot.jx.postman.doc.ChatMeta;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.model.InboxMessage;
+import com.boot.jx.postman.model.Message;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.store.MessageStore;
 import com.boot.jx.postman.store.SessionStore;
@@ -55,8 +56,9 @@ public class ChatService {
 		return chatClient;
 	}
 
-	private void replyIntenal(OutboxMessage outboxMessage) throws InterruptedException {
-		InboxMessage inboxMessage = chatContext.getInboxMessage();
+	private void replyIntenal(InboxMessage inboxMessage, OutboxMessage outboxMessage) {
+		outboxMessage.setStatus(Message.Status.INIT);
+		messageStore.create(outboxMessage);
 		if (ArgUtil.is(inboxMessage)) {
 			outboxMessage.setContactType(inboxMessage.getContactType());
 			outboxMessage.setChannel(inboxMessage.getChannel());
@@ -67,14 +69,18 @@ public class ChatService {
 					outboxMessage.getChannel());
 			if (ArgUtil.is(connector)) {
 				connector.message("REPLY", null, inboxMessage, outboxMessage);
+				outboxMessage.setStatus(Message.Status.SENT);
 			} else if (ArgUtil.is(defaultConnector)) {
 				defaultConnector.message("REPLY", null, inboxMessage, outboxMessage);
+				outboxMessage.setStatus(Message.Status.SENT);
 			}
 		}
-		messageStore.create(outboxMessage);
+		messageStore.update(outboxMessage);
 	}
 
 	private void sendIntenal(ChatContactDoc chatContactDoc, OutboxMessage outboxMessage) {
+		outboxMessage.setStatus(Message.Status.INIT);
+		messageStore.create(outboxMessage);
 		if (ArgUtil.is(chatContactDoc)) {
 			outboxMessage.setContactType(ArgUtil.parseAsEnumT(chatContactDoc.getContactType(), ContactType.class));
 			outboxMessage.setContactId(chatContactDoc.getContactId());
@@ -82,21 +88,29 @@ public class ChatService {
 					outboxMessage.getChannel());
 			if (ArgUtil.is(connector)) {
 				connector.message("SEND", chatContactDoc, null, outboxMessage);
+				outboxMessage.setStatus(Message.Status.SENT);
 			} else if (ArgUtil.is(defaultConnector)) {
 				defaultConnector.message("SEND", chatContactDoc, null, outboxMessage);
+				outboxMessage.setStatus(Message.Status.SENT);
 			}
 		}
-		messageStore.create(outboxMessage);
+		messageStore.update(outboxMessage);
 	}
 
 	public void reply(OutboxMessage outboxMessage) throws InterruptedException {
-
-		outboxMessage.option("isViaAgent", "true");// TODO:- to check if its required
-
+		InboxMessage inboxMessage = chatContext.getInboxMessage();
 		if (ArgUtil.isEmpty(outboxMessage.session().getAgent())) {
 			outboxMessage.session().setAgent(chatClient.getDefaultSender());
 		}
-		replyIntenal(outboxMessage);
+		replyIntenal(inboxMessage, outboxMessage);
+	}
+
+	public void reply(ChatSessionDoc sessionDoc, OutboxMessage outboxMessage) {
+		InboxMessage inboxMessage = sessionStore.toInboxMessage(sessionDoc);
+		if (ArgUtil.isEmpty(outboxMessage.session().getAgent())) {
+			outboxMessage.session().setAgent(sessionDoc.getAssignedToAgent());
+		}
+		replyIntenal(inboxMessage, outboxMessage);
 	}
 
 	public void send(ChatSessionDoc sessionDoc, OutboxMessage outboxMessage) {

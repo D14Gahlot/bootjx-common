@@ -3,6 +3,7 @@ package com.boot.jx.postman.gupshup;
 import java.io.IOException;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.StringJoiner;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.multipart.MultipartFile;
@@ -11,7 +12,6 @@ import com.boot.jx.postman.gupshup.GupShupConstants.SessionType;
 import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.File;
 import com.boot.jx.postman.model.Message;
-import com.boot.jx.postman.model.MessageOptions.WAMessageOptions;
 import com.boot.jx.rest.RestService;
 import com.boot.jx.rest.RestService.Ajax;
 import com.boot.utils.ArgUtil;
@@ -58,7 +58,7 @@ public abstract class AbstractGupShupClient {
 	private GupShupResp post(GupShupReq req, boolean encrypt) {
 		Ajax ajax = ajax(req, encrypt);
 		GupShupResp x = ajax.postForm().as(GupShupResp.class);
-		//System.out.println("=============" + x.getResponse().getDetails());
+		// System.out.println("=============" + x.getResponse().getDetails());
 		return x;
 	}
 
@@ -111,36 +111,58 @@ public abstract class AbstractGupShupClient {
 
 	public GupShupResp sendMessage(Message<?> message) {
 		String phoneNumber = CollectionUtil.getOne(message.getTo());
-		if (ArgUtil.is(message.getFiles()) && ArgUtil.is(message.getFiles().get(0))
-				&& ArgUtil.is(message.getFiles().get(0).getUrl())) {
-			File file = message.getFiles().get(0);
 
-			if (ArgUtil.is(file.getFileFormat())
-					&& ArgUtil.isEqual(file.getFileFormat().getFormatType(), File.FileType.IMAGE)) {
-				return sendImageURL(phoneNumber, file.getUrl(), message.getMessage());
-			}
-			return sendDocumentURL(phoneNumber, file.getUrl(), message.getMessage());
-		} else if (ArgUtil.is(message.getAttachments()) && ArgUtil.is(message.getAttachments().get(0))
-				&& ArgUtil.is(message.getAttachments().get(0).getMediaURL())) {
-			Attachment attachment = message.getAttachments().get(0);
+		GupShupReq gupShupReq = new GupShupReq();
+		gupShupReq.setSendTo(phoneNumber);
+		gupShupReq.setMessageId(message.getMessageId());
 
-			if (ArgUtil.areEqual(attachment.getMediaType(), File.FileType.IMAGE.toString())) {
-				return sendImageURL(phoneNumber, attachment.getMediaURL(), message.getMessage());
-			}
-			return sendDocumentURL(phoneNumber, attachment.getMediaURL(), message.getMessage());
-		}
+		GupShupResp resp = null;
 
-		GupShupReq gupShupReq = new GupShupReq(GupShupConstants.Method.SendMessage).sendTo(phoneNumber)
-				.messageType(GupShupConstants.MessageType.DATA_TEXT)
-				.message(CryptoUtil.getEncoder().message(message.getMessage()).toString());
+		StringJoiner msgIds = new StringJoiner(",");
 
-		if (message instanceof WAMessageOptions) {
-			WAMessageOptions waMessageOptions = (WAMessageOptions) message;
-			if (waMessageOptions.isQRButtons()) {
-				gupShupReq.isTemplate(true);
-				gupShupReq.messageType(GupShupConstants.MessageType.HSM);
+		if (ArgUtil.is(message.getAttachments())) {
+			for (Attachment attachment : message.getAttachments()) {
+				gupShupReq.setCaption(message.getSubject());
+				gupShupReq.setMessage(message.getMessage());
+				if (ArgUtil.is(attachment.getMediaURL())) {
+					if (ArgUtil.areEqual(attachment.getMediaType(), File.FileType.IMAGE.toString())) {
+						gupShupReq.setMediaURL(attachment.getMediaURL());
+						resp = sendImageURL(gupShupReq);
+						msgIds.add(resp.getResponse().getId());
+					} else {
+						gupShupReq.setMediaURL(attachment.getMediaURL());
+						resp = sendDocumentURL(gupShupReq);
+						msgIds.add(resp.getResponse().getId());
+					}
+				}
 			}
 		}
+
+		if (ArgUtil.is(message.getMessage())) {
+			resp = sendMessage(phoneNumber, message.getMessage());
+			msgIds.add(resp.getResponse().getId());
+		}
+		message.setMessageIdExt(msgIds.toString());
+		return resp;
+	}
+
+	public GupShupResp sendDocumentURL(GupShupReq gupShupReq) {
+		return post(gupShupReq);
+	}
+
+	public GupShupResp sendMessage(GupShupReq gupShupReq) {
+		return post(gupShupReq);
+	}
+
+	public GupShupResp sendImageURL(GupShupReq gupShupReq) {
+		return post(gupShupReq);
+	}
+
+	public GupShupResp sendAudioURL(GupShupReq gupShupReq) {
+		return post(gupShupReq);
+	}
+
+	public GupShupResp sendVideoURL(GupShupReq gupShupReq) {
 		return post(gupShupReq);
 	}
 

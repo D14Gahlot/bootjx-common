@@ -1,6 +1,6 @@
 package com.boot.jx.postman.dms;
 
-import java.util.*;
+import java.util.Map;
 
 public class DMSObject {
 	private long timestamp;

@@ -1,22 +1,13 @@
 package com.boot.jx.postman.client;
 
-import java.util.Map;
-
 import org.springframework.stereotype.Component;
 
-import com.boot.jx.dict.ContactType;
 import com.boot.jx.postman.gupshup.AbstractGupShupClient;
-import com.boot.jx.postman.gupshup.GupShupAgentReq;
 import com.boot.jx.postman.gupshup.GupShupConstants;
+import com.boot.jx.postman.gupshup.GupShupConstants.DataEncoding;
 import com.boot.jx.postman.gupshup.GupShupConstants.SessionType;
-import com.boot.jx.postman.gupshup.GupShupInbound;
-import com.boot.jx.postman.gupshup.GupShupInboundV2;
 import com.boot.jx.postman.gupshup.GupShupReq;
 import com.boot.jx.postman.gupshup.GupShupResp;
-import com.boot.jx.postman.model.InboxMessage;
-import com.boot.jx.postman.model.WAMessage.Channel;
-import com.boot.jx.rest.RestService.Ajax;
-import com.boot.utils.ArgUtil;
 
 @Component
 public class GupShupChatClient extends AbstractGupShupClient {
@@ -27,72 +18,44 @@ public class GupShupChatClient extends AbstractGupShupClient {
 	}
 
 	@Override
-	public GupShupResp sendMessage(String phoneNumber, String message) {
-		return post(new GupShupReq(GupShupConstants.Method.SendMessage).sendTo(phoneNumber)
-				.messageType(GupShupConstants.MessageType.TEXT).message(message));
+	public GupShupResp sendMessage(GupShupReq gupShupReq) {
+		gupShupReq.method(GupShupConstants.Method.SendMessage).messageType(GupShupConstants.MessageType.DATA_TEXT);
+		return post(gupShupReq);
 	}
 
-	public Map<String, Object> sendViaAgent(GupShupInbound innbound, String message) {
-		GupShupAgentReq gupShupAgentReq = new GupShupAgentReq();
-		gupShupAgentReq.setMobile(innbound.getMobile());
-		gupShupAgentReq.setWaNumber(innbound.getWaNumber());
-		gupShupAgentReq.setName(innbound.getName());
-		gupShupAgentReq.setType(GupShupConstants.MessageType.text);
-		gupShupAgentReq.setMsg(message);
-		return this.restService.ajax(gupShupConfig.getGupShupAgentUrl()).path("/WhatsAppConnector/api")
-				.header("type", "BotRequest").post(gupShupAgentReq).asMap();
+	@Override
+	public GupShupResp sendDocumentURL(GupShupReq gupShupReq) {
+		gupShupReq.method(GupShupConstants.Method.SendMediaMessage).messageType(GupShupConstants.MessageType.DOCUMENT);
+		gupShupReq.setHsm(false);
+		//gupShupReq.dataEncoding(DataEncoding.TEXT);
+		gupShupReq.setFormat(GupShupConstants.Format.JSON);
+		return post(gupShupReq);
 	}
 
-	public Map<String, Object> sendViaAgent(InboxMessage inboxMessage, String message) {
-		GupShupAgentReq gupShupAgentReq = new GupShupAgentReq();
-		gupShupAgentReq.setMobile(inboxMessage.getFrom());
-		gupShupAgentReq.setWaNumber(inboxMessage.getTo());
-		gupShupAgentReq.setName(inboxMessage.getFromName());
-		gupShupAgentReq.setType(GupShupConstants.MessageType.text);
-		gupShupAgentReq.setMsg(message);
-		return this.restService.ajax(gupShupConfig.getGupShupAgentUrl()).path("/WhatsAppConnector/api")
-				.header("type", "BotRequest").post(gupShupAgentReq).asMap();
+	@Override
+	public GupShupResp sendImageURL(GupShupReq gupShupReq) {
+		gupShupReq.method(GupShupConstants.Method.SendMediaMessage).messageType(GupShupConstants.MessageType.IMAGE);
+		gupShupReq.setHsm(false);
+		//gupShupReq.dataEncoding(DataEncoding.TEXT);
+		gupShupReq.setFormat(GupShupConstants.Format.JSON);
+		return post(gupShupReq);
 	}
 
-	public Map<String, Object> agentArchive(GupShupInbound innbound) {
-		GupShupAgentReq gupShupAgentReq = new GupShupAgentReq();
-		gupShupAgentReq.setMobile(innbound.getMobile());
-		gupShupAgentReq.setWaNumber(innbound.getWaNumber());
-		gupShupAgentReq.setMsg(innbound.getText());
-		gupShupAgentReq.setType(innbound.getType());
-		gupShupAgentReq.setName(innbound.getName());
-		return this.restService.ajax(gupShupConfig.getGupShupAgentUrl()).path("/WhatsAppConnector/api")
-				.header("type", "BotRequest").post(gupShupAgentReq).asMap();
+	@Override
+	public GupShupResp sendAudioURL(GupShupReq gupShupReq) {
+		gupShupReq.method(GupShupConstants.Method.SendMediaMessage).messageType(GupShupConstants.MessageType.AUDIO);
+		gupShupReq.setHsm(false);
+		gupShupReq.dataEncoding(DataEncoding.TEXT);
+		gupShupReq.setFormat(GupShupConstants.Format.JSON);
+		return post(gupShupReq);
 	}
 
-	public Map<String, Object> getToken(String waNumber, String mobile) {
-		return this.restService.ajax(gupShupConfig.getGupShupAgentUrl()).path("/WhatsAppConnector/api")
-				.header("type", "getToken").field("userId", gupShupConfig.getGupShupChatId())
-				.field("password", gupShupConfig.getGupShupChatPass()).field("phoneNo", mobile)
-				.field("waNumber", waNumber).postForm().asMap();
+	@Override
+	public GupShupResp sendVideoURL(GupShupReq gupShupReq) {
+		gupShupReq.method(GupShupConstants.Method.SendMediaMessage).messageType(GupShupConstants.MessageType.VIDEO);
+		gupShupReq.setHsm(false);
+		gupShupReq.dataEncoding(DataEncoding.TEXT);
+		gupShupReq.setFormat(GupShupConstants.Format.JSON);
+		return post(gupShupReq);
 	}
-
-	public Map<String, Object> assignToAgent(String waNumber, String mobile, String deptName) {
-		String token = ArgUtil.parseAsString(this.getToken(waNumber, mobile).get("token"));
-		Ajax x = this.restService.ajax(gupShupConfig.getGupShupAgentUrl()).path("/WhatsAppConnector/api")
-				.header("type", "TransferRequestToAgent").field("token", token).field("phoneNo", mobile)
-				.field("waNumber", waNumber);
-		if (ArgUtil.is(deptName)) {
-			x.field("deptName", deptName);
-		}
-		return x.postForm().asMap();
-	}
-
-	public GupShupInbound parseAsGupShupInbound(GupShupInboundV2 inboundV2) {
-		GupShupInbound inb = new GupShupInbound();
-		inb.setWaNumber(inboundV2.getContacts().get(0).getWaId());
-		inb.setMobile(inboundV2.getMessages().get(0).getFrom());
-		inb.setName(inboundV2.getContacts().get(0).getProfile().getName());
-		inb.setText(inboundV2.getMessages().get(0).getText().getBody());
-		inb.setType(inboundV2.getMessages().get(0).getType());
-		inb.setTimestamp(inboundV2.getMessages().get(0).getTimestamp());
-		inb.setReplyId(inboundV2.getMessages().get(0).getId());
-		return inb;
-	}
-
 }

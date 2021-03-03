@@ -23,7 +23,7 @@ public class Message<T extends Message<T>> implements Serializable, MessageOptio
 	public static final String RESULTS_KEY = "results";
 
 	public static enum Status {
-		INIT, SENT, DELIVERED, READ, NOT_SENT, BLOCKED, FAILED
+		INIT, CRTD, SENT, DLVRD, READ, NSENT, BLCKD, FAILD
 	}
 
 	public static class Priority {

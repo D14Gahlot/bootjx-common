@@ -155,10 +155,10 @@ public class EmailService {
 			to = email.getTo() != null ? email.getTo().get(0) : null;
 
 			if (ArgUtil.isEmpty(to)) {
-				email.setStatus(Status.NOT_SENT);
+				email.setStatus(Status.NSENT);
 				auditService.log(pMGaugeEvent.set(AuditEvent.Result.REJECTED).set(email));
 			} else if (contactService.isEmailBlackListed(to)) {
-				email.setStatus(Status.BLOCKED);
+				email.setStatus(Status.BLCKD);
 				auditService.log(pMGaugeEvent.set(AuditEvent.Result.REJECTED).set(email));
 			} else {
 				if (email.getTemplate() != null) {
@@ -193,14 +193,12 @@ public class EmailService {
 		}
 
 		if (!ArgUtil.isEmpty(emailClone) && !Status.SENT.equals(email.getStatus())
-				&& !Status.NOT_SENT.equals(email.getStatus())
-				&& !Status.BLOCKED.equals(email.getStatus()) && redisson != null) {
+				&& !Status.NSENT.equals(email.getStatus()) && !Status.BLCKD.equals(email.getStatus())
+				&& redisson != null) {
 			AppContext context = AppContextUtil.getContext();
 			TunnelMessage<Email> tunnelMessage = new TunnelMessage<Email>(emailClone, context);
-			RQueue<TunnelMessage<Email>> emailQueue = redisson
-					.getQueue(FAILED_EMAIL_QUEUE + "_" +
-							TimeUtils.getRotationNumber(RESEND_INTERVAL, 0x1)
-							+ "_" + postManConfig.getEmailRetryPush());
+			RQueue<TunnelMessage<Email>> emailQueue = redisson.getQueue(FAILED_EMAIL_QUEUE + "_"
+					+ TimeUtils.getRotationNumber(RESEND_INTERVAL, 0x1) + "_" + postManConfig.getEmailRetryPush());
 			emailQueue.add(tunnelMessage);
 		}
 

@@ -1,8 +1,8 @@
 package com.boot.jx.postman.store;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Calendar;
+import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,6 +14,7 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Component;
 
+import com.boot.jx.dict.ContactType;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.model.InboxMessage;
@@ -107,6 +108,7 @@ public class SessionStore {
 				chatContactDoc = new ChatContactDoc();
 				chatContactDoc.setContactId(contactId);
 				chatContactDoc.setContactType(ArgUtil.parseAsString(inboxMessage.getContactType()));
+				chatContactDoc.setChannelType(inboxMessage.getChannel());
 				chatContactDoc.setCsid(inboxMessage.getFrom());
 				chatContactDoc.setLane(inboxMessage.getLane());
 			}
@@ -127,6 +129,19 @@ public class SessionStore {
 		inboxMessage.session().setMode(chatSessionDoc.getMode());
 
 		return chatSessionDoc;
+	}
+
+	public InboxMessage toInboxMessage(ChatSessionDoc session) {
+		ChatContactDoc contact = getContact(session.getContactId());
+		InboxMessage inboxMessage = new InboxMessage();
+		inboxMessage.setContactType(ArgUtil.parseAsEnumT(contact.getContactType(), ContactType.class));
+		inboxMessage.setChannel(contact.getChannelType());
+		inboxMessage.setFrom(contact.getCsid());
+		inboxMessage.setLane(contact.getLane());
+		inboxMessage.setFromName(contact.getName());
+		inboxMessage.setSessionId(contact.getSessionId());
+		inboxMessage.setContactId(contact.getContactId());
+		return inboxMessage;
 	}
 
 	public boolean closeActiveSessionsMulty(String contactId) {

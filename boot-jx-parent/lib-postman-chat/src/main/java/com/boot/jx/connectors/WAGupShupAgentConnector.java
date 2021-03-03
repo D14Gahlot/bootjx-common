@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorHandler;
 import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorMapping;
 import com.boot.jx.dict.ContactType;
+import com.boot.jx.postman.client.GupShupAgentClient;
 import com.boot.jx.postman.client.GupShupChatClient;
 import com.boot.jx.postman.client.GupShupNotifyClient;
 import com.boot.jx.postman.client.PostManClient;
@@ -29,6 +30,9 @@ public class WAGupShupAgentConnector implements ConnectorHandler {
 
 	@Autowired
 	private GupShupNotifyClient gupShupNotifyClient;
+
+	@Autowired
+	private GupShupAgentClient gupShupAgentClient;
 
 	@Autowired
 	private PostManClient postManClient;
@@ -64,7 +68,7 @@ public class WAGupShupAgentConnector implements ConnectorHandler {
 		outboxMessage.setChannel(inboxMessage.getChannel());
 		if (ArgUtil.isEqual(inboxMessage.getChannel(), Channel.GUPSHUPAGENT.toString())) {
 			if (outboxMessage.isViaAgent() && ArgUtil.isEmpty(outboxMessage.getFiles())) {
-				gupShupChatClient.sendViaAgent(inboxMessage, outboxMessage.getMessage());
+				gupShupAgentClient.sendViaAgent(inboxMessage, outboxMessage.getMessage());
 			} else if (outboxMessage.isTemplate() || outboxMessage.isQRButtons()) {
 				// gupShupNotifyClient.optIn(inboxMessage.getFrom());
 				gupShupNotifyClient.sendMessage(outboxMessage);
@@ -82,7 +86,7 @@ public class WAGupShupAgentConnector implements ConnectorHandler {
 	@Override
 	public InboxMessage assignToAgent(InboxMessage inboxMessage) {
 		if (ArgUtil.isEqual(inboxMessage.getChannel(), Channel.GUPSHUPAGENT.toString())) {
-			gupShupChatClient.assignToAgent(inboxMessage.getTo(), inboxMessage.getFrom(),
+			gupShupAgentClient.assignToAgent(inboxMessage.getTo(), inboxMessage.getFrom(),
 					inboxMessage.session().getDept());
 		} else if (ArgUtil.isEqual(inboxMessage.getChannel(), Channel.DEFAULT.toString())) {
 			Message<?> reply = inboxMessage.replyMessage("Call us @ " + gupShupConfig.getGupShupWaNumber());

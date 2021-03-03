@@ -2,6 +2,7 @@ package com.boot.jx.postman.gupshup;
 
 import java.io.Serializable;
 
+import com.boot.jx.postman.gupshup.GupShupConstants.Method;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -317,6 +318,11 @@ public class GupShupReq implements Serializable {
 
 	public GupShupReq isTemplate(boolean isTemplate) {
 		this.isTemplate = isTemplate;
+		return this;
+	}
+
+	public GupShupReq method(Method method) {
+		this.method = method;
 		return this;
 	}
 }

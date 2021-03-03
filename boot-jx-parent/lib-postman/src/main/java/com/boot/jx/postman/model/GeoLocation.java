@@ -2,8 +2,6 @@ package com.boot.jx.postman.model;
 
 import java.io.Serializable;
 
-import com.boot.jx.scope.tnt.Tenants.Tenant;
-
 public class GeoLocation implements Serializable {
 
 	private static final long serialVersionUID = 4616644115138392356L;

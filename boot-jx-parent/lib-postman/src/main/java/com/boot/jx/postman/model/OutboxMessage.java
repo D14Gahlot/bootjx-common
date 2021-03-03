@@ -17,7 +17,6 @@ public class OutboxMessage extends Message<OutboxMessage> implements WAMessageOp
 		TWILIO, APIWHA, DEFAULT, GUPSHUP, DUMMY
 	}
 
-	protected Channel channel = Channel.DEFAULT;
 	private BigDecimal queue;
 	private MessageSession session;
 	public List<String> logs; 
@@ -28,10 +27,6 @@ public class OutboxMessage extends Message<OutboxMessage> implements WAMessageOp
 
 	public OutboxMessage() {
 		super();
-	}
-
-	public void setIChannel(Channel channel) {
-		this.channel = channel;
 	}
 
 	public BigDecimal getQueue() {

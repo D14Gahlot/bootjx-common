@@ -80,8 +80,8 @@ public class WhatsAppService {
 			waMessage.setMessage(msg);
 		}
 
-		if (ArgUtil.is(waMessage.getFiles())
-				&& ArgUtil.is(waMessage.getFiles().get(0)) && ArgUtil.is(waMessage.getFiles().get(0).getUrl())) {
+		if (ArgUtil.is(waMessage.getFiles()) && ArgUtil.is(waMessage.getFiles().get(0))
+				&& ArgUtil.is(waMessage.getFiles().get(0).getUrl())) {
 			String msg = waMessage.getMessage();
 			msg = (msg + " Download File : " + waMessage.getFiles().get(0).getUrl());
 			waMessage.setMessage(msg);
@@ -104,7 +104,7 @@ public class WhatsAppService {
 				queue.add(message);
 			}
 		} else {
-			message.setStatus(Status.NOT_SENT);
+			message.setStatus(Status.NSENT);
 		}
 		return message;
 	}

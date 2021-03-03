@@ -20,7 +20,6 @@ import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.File;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.OutboxMessage;
-import com.boot.jx.postman.store.SessionStore;
 import com.boot.utils.ArgUtil;
 
 @Component

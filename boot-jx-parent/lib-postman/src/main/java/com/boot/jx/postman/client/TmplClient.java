@@ -63,6 +63,10 @@ public class TmplClient {
 		file = this.process(file, outboxMessage.getContactType()).getResult();
 		outboxMessage.setMessage(file.getContent());
 
+		if (!ArgUtil.is(outboxMessage.getSubject())) {
+			outboxMessage.setSubject(ArgUtil.parseAsString(file.getOptions().get("subject")));
+		}
+
 		Map<String, Object> options = new HashMap<String, Object>();
 		List<TmplElement> buttons = new ArrayList<TmplElement>();
 		List<TmplElement> inputs = new ArrayList<TmplElement>();

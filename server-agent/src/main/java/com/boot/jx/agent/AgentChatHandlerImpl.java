@@ -140,7 +140,7 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 				break;
 			}
 		} else {
-			chatService.send(sessionDoc, outboxMessage);
+			chatService.reply(sessionDoc, outboxMessage);
 			MessageDoc messageDoc = messageStore.find(outboxMessage);
 			ChatMessageDto messageDto = entityToDto(messageDoc);
 			messageDto.setType(true);

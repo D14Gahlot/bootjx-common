@@ -64,15 +64,28 @@ public class DemoController extends ChatController {
 	public void menu2OnSelect(InboxMessage inboxMessage, StringMatcher matcher) {
 		switch (inboxMessage.getMessage().toLowerCase()) {
 		case "1":
-			reply(new OutboxMessage().template("today-credits").put("name", chatContext.getContact().getName()));
+			reply(new OutboxMessage().template("today-credits").put("name", chatContext.getContact().getName())
+					.attachment(new Attachment().mediaURL("http://www.africau.edu/images/default/sample.pdf")
+							.mediaType(File.FileType.DOCUMENT.toString())));
 			next("more-onselect");
 			break;
 		case "2":
-			reply(new OutboxMessage().template("today-debits").put("name", chatContext.getContact().getName()));
+			reply(new OutboxMessage().template("today-debits").put("name", chatContext.getContact().getName())
+					.attachment(new Attachment().mediaURL("http://www.africau.edu/images/default/sample.pdf")
+							.mediaType(File.FileType.DOCUMENT.toString())));
 			next("more-onselect");
 			break;
 		case "3":
-			reply(new OutboxMessage().template("today-trnx").put("name", chatContext.getContact().getName()));
+			reply(new OutboxMessage().template("today-trnx").put("name", chatContext.getContact().getName())
+					.attachment(new Attachment().mediaURL("http://www.africau.edu/images/default/sample.pdf")
+							.mediaType(File.FileType.DOCUMENT.toString())));
+			next("more-onselect");
+			break;
+		case "4":
+			reply(new OutboxMessage().template("today-trnx").put("name", chatContext.getContact().getName())
+					.attachment(new Attachment().mediaURL(
+							"https://www.mehery.com/wp-content/uploads/2021/02/Screenshot-2021-02-03-at-10.12.29-PM.png")
+							.mediaType(File.FileType.IMAGE.toString())));
 			next("more-onselect");
 			break;
 		case "*":

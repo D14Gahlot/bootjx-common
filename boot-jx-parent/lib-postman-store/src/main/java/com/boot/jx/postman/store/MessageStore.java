@@ -173,7 +173,7 @@ public class MessageStore extends CommonDocStore {
 		return doc;
 	}
 
-	public MessageDoc get(OutboxMessage outMessage) {
+	public MessageDoc update(OutboxMessage outMessage) {
 		MessageDoc doc = findOrCreateMessageDoc(outMessage);
 		mongoTemplate.save(doc, getCollectionName(outMessage.getContactType()));
 		outMessage.setMessageId(doc.getMessageId());
