@@ -18,7 +18,7 @@ public class Department implements IResourceEntity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Integer dept_id;
-	@Column(unique = true, nullable = false, length = 5)
+	@Column(unique = true, nullable = false, length = 12)
 	private String dept_code;
 	@Column(nullable = false)
 	private String dept_name;
