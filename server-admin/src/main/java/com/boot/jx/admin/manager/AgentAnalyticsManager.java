@@ -59,7 +59,6 @@ public class AgentAnalyticsManager {
 	
 	
 
-
 	public  List<DashBoardResponseDto> getAgentWiseAnalytics(DashBoardRequestDto req) {
  		 List<DashBoardResponseDto> lstDto = new ArrayList<>();
 		 DashBoardResponseDto dto = null;
@@ -156,7 +155,7 @@ public class AgentAnalyticsManager {
 				dto.setOpenConversation(openConvesLst.size());
 			}
 			/** Peak Load **/
-			PeakLoadDto peakLoadResult = getAgentPeakLoadMsgCount(agent,dateRange1,dateRange2);
+			PeakLoadDto peakLoadResult = getAgentPeakLoadMsgCount(totalMsgExchanged);
 			dto.setPeakLoad(peakLoadResult);
 			
 			/** lead Messanger **/
@@ -223,8 +222,9 @@ public class AgentAnalyticsManager {
 	}
 	
 	public List<ChatSessionDoc> getAgentWiseOpenConversation(String agent,long dateRange1, long dateRange2){
-		List<ChatSessionDoc> totalOpenMsgDoc =new ArrayList<ChatSessionDoc>(); 
+		List<ChatSessionDoc> totalOpenMsgDoc =new ArrayList<ChatSessionDoc>();
 		long currentTimeStamp =System.currentTimeMillis();
+		
 		Query query = new Query();
 		query.addCriteria(Criteria.where("assignedToAgent").is(agent).and("active").is(true));
 		query.addCriteria(Criteria.where("assignedAgentStamp").gt(dateRange1).lt(dateRange2));
@@ -270,8 +270,6 @@ public class AgentAnalyticsManager {
 		Map<String,Double> startLagMapLst = new HashMap<String,Double>();
 		double startLag =0.0d;
 		double percentageWithDecimal=0.0d;
-		
-		
 	
 		List<ChatSessionDoc> uniquContactIdLst =getUniqueAgentWiseContactList(agent,dateRange1,dateRange2);
 		for(Object chatSession:uniquContactIdLst) {
@@ -299,7 +297,7 @@ public class AgentAnalyticsManager {
 	}
 	
 	
-	public PeakLoadDto getAgentPeakLoadMsgCount(String agent, long startTime, long endTime) {
+	public PeakLoadDto getAgentPeakLoadMsgCountOld(String agent, long startTime, long endTime) {
 		 Aggregation agg = newAggregation(
 				    match(Criteria.where("assignedAgentStamp").gt(startTime).lt(endTime)),
 		            group("assignedAgentStamp").count().as("total"),
@@ -314,6 +312,41 @@ public class AgentAnalyticsManager {
 			 }
 			 return peakLoadResult;
 		}
+	
+	public PeakLoadDto getAgentPeakLoadMsgCount(List<ChatSessionDoc>  msgLst) {
+		PeakLoadDto peakLoadResult =new PeakLoadDto();
+		List<Integer> hourList = new ArrayList<Integer>();
+		List<String> dateWithTimeList = new ArrayList<String>();
+		Map<Object,Integer> mapLst = new HashMap<Object,Integer>();
+		for(ChatSessionDoc msg :msgLst) {
+			 long timeStamp = msg.getAssignedAgentStamp();
+			 Date date=new Date(timeStamp);  
+	         String dateWithTime = new SimpleDateFormat("dd-MM-yyyy hh:mm").format(date);
+	         String ddMMyyyyFormat = new SimpleDateFormat("dd-MM-yyyy").format(date);
+	         SimpleDateFormat sdfH = new SimpleDateFormat("HH");
+	         String formattedDateH = sdfH.format(date);
+	         dateWithTimeList.add(dateWithTime);
+	         hourList.add(Integer.parseInt(formattedDateH));
+    	// System.out.println(" timeStamp :"+timeStamp+"\t long to date :"+date+"\t str :"+dateWithTime+"\t ddMMyyyyFormat :"+ddMMyyyyFormat+"\t formattedDateH :"+formattedDateH);
+		}
+		Collections.sort(dateWithTimeList);
+		
+		Set<Object> dateWithTimeWiseCount = new HashSet<Object>(dateWithTimeList);
+		for (Object key : dateWithTimeWiseCount) {
+			mapLst.put(key, Collections.frequency(dateWithTimeList, key));
+		   // System.out.println("Peak Load :"+ key + ": " + Collections.frequency(dateWithTimeList, key));
+		}
+		if(ArgUtil.is(mapLst) && !mapLst.isEmpty() ) {
+			 Object maxEntryKey = Collections.max(mapLst.entrySet(), Map.Entry.comparingByValue()).getKey();
+	         Integer maxEntryKeyValue =mapLst.get(maxEntryKey); 
+	        // System.out.println("Peak Load Date Time and Value:"+maxEntryKey +"- "+maxEntryKeyValue);
+	         peakLoadResult.setTimestamp(maxEntryKey);
+	         peakLoadResult.setTotal(maxEntryKeyValue.longValue());
+	         
+		}
+			 return peakLoadResult;
+		}
+		
 		
 	
 	/** fetch lead mesenger **/
@@ -361,6 +394,7 @@ public class AgentAnalyticsManager {
 	         String formattedDateH = sdfH.format(date);
 	         dateWiseList.add(ddMMyyyyFormat);
 	         hourList.add(Integer.parseInt(formattedDateH));
+    	
 		}
 		Collections.sort(hourList);
 		
@@ -437,8 +471,7 @@ public class AgentAnalyticsManager {
 		return longTodayendTime;
 	}
 	
-public Map<String,Integer> getDateDiff(long date1,long date2){
-	
+	public Map<String,Integer> getDateDiff(long date1,long date2){
 		
 		   Map<String,Integer> dateDiffMap =new HashMap<String,Integer>();
 		   // For thousand separator
@@ -458,13 +491,14 @@ public Map<String,Integer> getDateDiff(long date1,long date2){
 	       
 	       return dateDiffMap;
 	}
-public Map<Object, Object> mergerMapKyAndValue(Map<Object, Object> mergeMap,Map<Object, Object> map2){
-	Map<Object, Object> mergeValue =mergeMap;
-	   //Merge maps
-	   map2.forEach(
-	       (key, value) -> mergeValue.merge( key, value, (v1, v2) -> v1==v2 ? v1 : (Integer)v1 + (Integer)v2)
-	   );
-	return mergeValue;
-}
 	
+	public Map<Object, Object> mergerMapKyAndValue(Map<Object, Object> mergeMap,Map<Object, Object> map2){
+		Map<Object, Object> mergeValue =mergeMap;
+	    
+		   //Merge maps
+		   map2.forEach(
+		       (key, value) -> mergeValue.merge( key, value, (v1, v2) -> v1==v2 ? v1 : (Integer)v1 + (Integer)v2)
+		   );
+		return mergeValue;
+	}
 }
