@@ -10,12 +10,14 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
+import org.telegram.telegrambots.meta.api.methods.send.SendDocument;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 
+import com.boot.jx.postman.tg.TelegramModels.TGSendDocument;
 import com.boot.jx.postman.tg.TelegramModels.TGSendPhoto;
 import com.boot.jx.rest.RestService;
 import com.boot.utils.ArgUtil;
@@ -65,25 +67,32 @@ public class TelegramClient {
 				.queryParam("url", callbackURL + telegramWebhooPath + "/" + lane).post().asString();
 	}
 
-	public void sendReply(String lane, String id, SendMessage sendMessage) {
+	public String sendReply(String lane, String id, SendMessage sendMessage) {
 		SendMessage message = sendMessage; // Create a SendMessage object with mandatory fields
-				sendMessage.setChatId(id);
-		restService.ajax(PATH.URL).path(PATH.BOT_SEND_MESSAGE).pathParam("accessToken", getAccessToken(lane))
+		sendMessage.setChatId(id);
+		return restService.ajax(PATH.URL).path(PATH.BOT_SEND_MESSAGE).pathParam("accessToken", getAccessToken(lane))
 				.post(message).asString();
 	}
 
-	public void sendReply(String lane, String id, String text) {
+	public String sendReply(String lane, String id, String text) {
 		SendMessage message = new SendMessage() // Create a SendMessage object with mandatory fields
 				.setChatId(id).setText(text);
-		restService.ajax(PATH.URL).path(PATH.BOT_SEND_MESSAGE).pathParam("accessToken", getAccessToken(lane))
+		return restService.ajax(PATH.URL).path(PATH.BOT_SEND_MESSAGE).pathParam("accessToken", getAccessToken(lane))
 				.post(message).asString();
 	}
 
-	public void sendPhoto(String lane, String id, String photo, String caption) {
+	public String sendPhoto(String lane, String id, String photo, String caption) {
 		SendPhoto message = new TGSendPhoto() // Create a SendMessage object with mandatory fields
 				.setChatId(id).setPhoto(photo).setCaption(caption);
-		restService.ajax(PATH.URL).path(PATH.BOT).path("/sendPhoto").pathParam("accessToken", getAccessToken(lane))
-				.post(message).asString();
+		return restService.ajax(PATH.URL).path(PATH.BOT).path("/sendPhoto")
+				.pathParam("accessToken", getAccessToken(lane)).post(message).asString();
+	}
+
+	public String sendDocument(String lane, String id, String document, String caption) {
+		SendDocument message = new TGSendDocument() // Create a SendMessage object with mandatory fields
+				.setChatId(id).setDocument(document).setCaption(caption);
+		return restService.ajax(PATH.URL).path(PATH.BOT).path("/sendDocument")
+				.pathParam("accessToken", getAccessToken(lane)).post(message).asString();
 	}
 
 	public String promptShareNumber(String id, String text, String lane) {

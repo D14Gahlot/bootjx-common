@@ -1,5 +1,6 @@
 package com.boot.jx.postman.tg;
 
+import org.telegram.telegrambots.meta.api.methods.send.SendDocument;
 import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -12,6 +13,12 @@ public class TelegramModels {
 	@JsonInclude(Include.NON_NULL)
 	@JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
 	public static class TGSendPhoto extends SendPhoto {
+
+	}
+
+	@JsonInclude(Include.NON_NULL)
+	@JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
+	public static class TGSendDocument extends SendDocument {
 
 	}
 

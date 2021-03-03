@@ -2,6 +2,7 @@ package com.boot.jx.connectors;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.StringJoiner;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,53 +46,77 @@ public class TelegramConnector implements ConnectorHandler {
 	@Autowired
 	private TmplClient tmplClient;
 
+	public OutboxMessage sendOutboxMessage(String lane, String to, OutboxMessage message) {
+		String resp = null;
+		StringJoiner msgIds = new StringJoiner(",");
+
+		if (ArgUtil.is(message.getAttachments())) {
+			for (Attachment attachment : message.getAttachments()) {
+				if (ArgUtil.is(attachment.getMediaURL())) {
+					if (ArgUtil.areEqual(attachment.getMediaType(), File.FileType.IMAGE.toString())) {
+						resp = telegramClient.sendPhoto(lane, to, attachment.getMediaURL(),
+								attachment.getMediaCaption());
+						// msgIds.add(resp.getResponse().getId());
+					} else {
+						resp = telegramClient.sendDocument(lane, to, attachment.getMediaURL(),
+								attachment.getMediaCaption());
+						// msgIds.add(resp.getResponse().getId());
+					}
+				}
+			}
+		}
+
+		if (ArgUtil.is(message.getMessage())) {
+			SendMessage sendMessage = new SendMessage();
+			sendMessage.setText(message.getMessage());
+			if (message.options().containsKey("buttons")) {
+				List<TmplElement> buttons = new MapModel(message.options()).entry("buttons").asList(new TmplElement());
+				ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
+				replyKeyboardMarkup.setSelective(true);
+				replyKeyboardMarkup.setResizeKeyboard(true);
+				replyKeyboardMarkup.setOneTimeKeyboard(true);
+
+				List<KeyboardRow> keyboard = new ArrayList<>();
+				KeyboardRow keyboardFirstRow = new KeyboardRow();
+
+				for (TmplElement button : buttons) {
+					keyboardFirstRow.add(button.getLabel());
+				}
+
+				keyboard.add(keyboardFirstRow);
+
+				/**
+				 * KeyboardRow keyboardSecondRow = new KeyboardRow();
+				 * keyboardSecondRow.add(getAlertsCommand(language));
+				 * keyboardSecondRow.add(getBackCommand(language));
+				 * keyboard.add(keyboardSecondRow);
+				 **/
+
+				replyKeyboardMarkup.setKeyboard(keyboard);
+				sendMessage.setReplyMarkup(replyKeyboardMarkup);
+			}
+			telegramClient.sendReply(lane, to, sendMessage);
+			// msgIds.add(resp.getResponse().getId());
+		}
+		message.setMessageIdExt(msgIds.toString());
+		return message;
+	}
+
 	public void send(String lane, String to, OutboxMessage outboxMessage) {
 		if (ArgUtil.is(outboxMessage.getTemplate())) {
 			TemplateReply mediaReply = mongoTemplate.findById(outboxMessage.getTemplate(), TemplateReply.class);
 			if (ArgUtil.is(mediaReply)) {
 				if ("image".equalsIgnoreCase(mediaReply.getType())) {
-					outboxMessage.attachment(
-							new Attachment().mediaURL(mediaReply.getUrl()).mediaType(File.FileType.IMAGE.toString()));
-					telegramClient.sendPhoto(lane, to, mediaReply.getUrl(), mediaReply.getTitle());
+					outboxMessage.attachment(new Attachment().mediaURL(mediaReply.getUrl())
+							.mediaType(File.FileType.IMAGE.toString()).mediaCaption(mediaReply.getTitle()));
+					sendOutboxMessage(lane, to, outboxMessage);
 				}
 			} else {
 				tmplClient.process(outboxMessage);
-
-				SendMessage sendMessage = new SendMessage();
-				sendMessage.setText(outboxMessage.getMessage());
-				if (outboxMessage.options().containsKey("buttons")) {
-
-					List<TmplElement> buttons = new MapModel(outboxMessage.options()).entry("buttons")
-							.asList(new TmplElement());
-
-					ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
-					replyKeyboardMarkup.setSelective(true);
-					replyKeyboardMarkup.setResizeKeyboard(true);
-					replyKeyboardMarkup.setOneTimeKeyboard(true);
-
-					List<KeyboardRow> keyboard = new ArrayList<>();
-					KeyboardRow keyboardFirstRow = new KeyboardRow();
-
-					for (TmplElement button : buttons) {
-						keyboardFirstRow.add(button.getLabel());
-					}
-
-					keyboard.add(keyboardFirstRow);
-
-					/**
-					 * KeyboardRow keyboardSecondRow = new KeyboardRow();
-					 * keyboardSecondRow.add(getAlertsCommand(language));
-					 * keyboardSecondRow.add(getBackCommand(language));
-					 * keyboard.add(keyboardSecondRow);
-					 **/
-
-					replyKeyboardMarkup.setKeyboard(keyboard);
-					sendMessage.setReplyMarkup(replyKeyboardMarkup);
-				}
-				telegramClient.sendReply(lane, to, sendMessage);
+				sendOutboxMessage(lane, to, outboxMessage);
 			}
 		} else {
-			telegramClient.sendReply(lane, to, outboxMessage.getMessage());
+			sendOutboxMessage(lane, to, outboxMessage);
 		}
 	}
 
