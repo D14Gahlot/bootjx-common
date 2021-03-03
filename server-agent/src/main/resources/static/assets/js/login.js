@@ -37,7 +37,12 @@ $( document ).ready(function() {
  	   		 username :   $("#login-username").val(),
 			 password :  $("#login-password").val(),
 		 }).done(function(rsp){
-			 location.href = window.CONST.CONTEXT + "/app/home"
+			 console.log(rsp);
+			 if(rsp.success)
+				 location.href = window.CONST.CONTEXT + "/app/home";
+			 else {
+				 $("#login_error").text(rsp.message);
+			 }
 		 });
     });
 

@@ -107,6 +107,8 @@ public class AuthController {
 
 	@RequestMapping(value = "/auth/login", method = { RequestMethod.POST, RequestMethod.GET })
 	public String login(Model model) {
+		model.addAttribute("CDN_URL", ArgUtil.parseAsString(commonHttpRequest.get("CDN_URL"), cdnServer));
+		model.addAttribute("CDN_DEBUG", ArgUtil.parseAsString(commonHttpRequest.get("CDN_DEBUG"), "false"));
 		model.addAttribute("APP_CONTEXT", appConfig.getAppPrefix());
 		model.addAttribute("APP_USER", agentSession.getAgentCode());
 		model.addAttribute("APP_DEPT", agentSession.getAgentDept());

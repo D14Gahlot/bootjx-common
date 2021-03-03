@@ -362,3 +362,6 @@ body {
     position: absolute;
     text-align: center;
 }
+#login_error{
+	color : #FFF;
+}
