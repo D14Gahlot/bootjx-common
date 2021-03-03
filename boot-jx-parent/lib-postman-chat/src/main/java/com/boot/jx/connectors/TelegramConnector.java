@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
@@ -47,7 +48,7 @@ public class TelegramConnector implements ConnectorHandler {
 	private TmplClient tmplClient;
 
 	public OutboxMessage sendOutboxMessage(String lane, String to, OutboxMessage message) {
-		String resp = null;
+		Message resp = null;
 		StringJoiner msgIds = new StringJoiner(",");
 
 		if (ArgUtil.is(message.getAttachments())) {
@@ -56,11 +57,11 @@ public class TelegramConnector implements ConnectorHandler {
 					if (ArgUtil.areEqual(attachment.getMediaType(), File.FileType.IMAGE.toString())) {
 						resp = telegramClient.sendPhoto(lane, to, attachment.getMediaURL(),
 								attachment.getMediaCaption());
-						// msgIds.add(resp.getResponse().getId());
+						msgIds.add(ArgUtil.parseAsString(resp.getMessageId()));
 					} else {
 						resp = telegramClient.sendDocument(lane, to, attachment.getMediaURL(),
 								attachment.getMediaCaption());
-						// msgIds.add(resp.getResponse().getId());
+						msgIds.add(ArgUtil.parseAsString(resp.getMessageId()));
 					}
 				}
 			}
@@ -95,8 +96,8 @@ public class TelegramConnector implements ConnectorHandler {
 				replyKeyboardMarkup.setKeyboard(keyboard);
 				sendMessage.setReplyMarkup(replyKeyboardMarkup);
 			}
-			telegramClient.sendReply(lane, to, sendMessage);
-			// msgIds.add(resp.getResponse().getId());
+			resp = telegramClient.sendReply(lane, to, sendMessage);
+			msgIds.add(ArgUtil.parseAsString(resp.getMessageId()));
 		}
 		message.setMessageIdExt(msgIds.toString());
 		return message;
