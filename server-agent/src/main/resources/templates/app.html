@@ -8,7 +8,7 @@
 <meta name=viewport
 	content="width=device-width,initial-scale=1,shrink-to-fit=no">
 
-<link rel=icon href=favicon.ico>
+<link rel="shortcut icon" th:href="${CDN_URL}+'favicon.ico'" />
 
 <title>MeherY Desk</title>
 
@@ -23,7 +23,7 @@ html.loadable, body.loadable,.main-content-wrapper{
     min-height: 100%;
 }
 html.loadable.loading {
-     background: #347fc3;
+   background: #347fc3;
 }
 html.loadable .main-content-wrapper {
     -webkit-transition: opacity 1s ease-in;
@@ -89,12 +89,15 @@ html.loadable .loader--dot {
 }
 html.loadable .loader--dot:first-child {
   animation-delay: 0.5s;
+   /* background-color: #42aeef; */
 }
 html.loadable .loader--dot:nth-child(2) {
   animation-delay: 0.4s;
+  /* background-color: #ec407d; */
 }
 html.loadable .loader--dot:nth-child(3) {
   animation-delay: 0.3s;
+  /* background-color: #f6b042; */
 }
 html.loadable .loader--dot:nth-child(4) {
   animation-delay: 0.2s;
@@ -187,9 +190,6 @@ html.loadable .loader--text:after {
 	</noscript>
 	<div class="fullloader bar container">
 		<div class='loader'>
-			<div class='loader--dot'></div>
-			<div class='loader--dot'></div>
-			<div class='loader--dot'></div>
 			<div class='loader--dot'></div>
 			<div class='loader--dot'></div>
 			<div class='loader--dot'></div>
