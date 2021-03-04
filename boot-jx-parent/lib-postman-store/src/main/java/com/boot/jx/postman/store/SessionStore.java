@@ -216,9 +216,9 @@ public class SessionStore {
 			for (ChatContactDoc chatContactDoc : contacts) {
 				orExpression.add(Criteria.where("contactId").is(chatContactDoc.getContactId()));
 			}
-			query2.addCriteria(contactCriteria.orOperator(orExpression.toArray(new Criteria[orExpression.size()])));
+			contactCriteria.orOperator(orExpression.toArray(new Criteria[orExpression.size()]));
 		}
-
+		query2.addCriteria(contactCriteria);
 		LOGGER.info(query2.toString());
 		return mongoTemplate.find(query2, ChatSessionDoc.class);
 	}
