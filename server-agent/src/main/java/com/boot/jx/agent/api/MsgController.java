@@ -100,6 +100,7 @@ public class MsgController {
 			messageDto.setMessageId(outboxMessage.getMessageId());
 			messageDto.setMessageIdExt(outboxMessage.getMessageIdExt());
 			messageDto.setText(outboxMessage.getMessage());
+			messageDto.setMessageIdRef(outboxMessage.getMessageIdRef());
 			return ApiResponse.buildResult(messageDto);
 		}
 		agentSessionService.refreshOnline();

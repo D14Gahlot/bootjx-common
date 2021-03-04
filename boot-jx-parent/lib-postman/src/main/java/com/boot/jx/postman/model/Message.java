@@ -57,6 +57,7 @@ public class Message<T extends Message<T>> implements Serializable, MessageOptio
 	private String id;
 	private String messageId;
 	private String messageIdExt;
+	private String messageIdRef;
 	private String sessionId;
 	private String contactId;
 
@@ -447,6 +448,14 @@ public class Message<T extends Message<T>> implements Serializable, MessageOptio
 
 	public void setType(String type) {
 		this.type = type;
+	}
+
+	public String getMessageIdRef() {
+		return messageIdRef;
+	}
+
+	public void setMessageIdRef(String messageIdRef) {
+		this.messageIdRef = messageIdRef;
 	}
 
 }

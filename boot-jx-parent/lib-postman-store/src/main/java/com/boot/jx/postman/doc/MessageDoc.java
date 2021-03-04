@@ -22,6 +22,7 @@ public class MessageDoc implements Serializable, Patchable<MessageDoc> {
 	@Id
 	private String messageId;
 	private String messageIdExt;
+	private String messageIdRef;
 	private String sessionId;
 
 	private String id;
@@ -211,6 +212,14 @@ public class MessageDoc implements Serializable, Patchable<MessageDoc> {
 
 	public void setMessageIdExt(String messageIdExt) {
 		this.messageIdExt = messageIdExt;
+	}
+
+	public String getMessageIdRef() {
+		return messageIdRef;
+	}
+
+	public void setMessageIdRef(String messageIdRef) {
+		this.messageIdRef = messageIdRef;
 	}
 
 }
