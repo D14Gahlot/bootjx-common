@@ -3,6 +3,8 @@ package com.boot.jx.postman.store;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -190,9 +192,34 @@ public class SessionStore {
 	}
 
 	public List<ChatSessionDoc> findChatSessionContactId(String contactId) {
+		ChatContactDoc contact = getContact(contactId);
+
+		List<ChatContactDoc> contacts = null;
+		if (!ArgUtil.areEmpty(contact.getPhone(), contact.getEmail())) {
+			Query query1 = new Query();
+			List<Criteria> orExpression = new ArrayList<Criteria>();
+			if (ArgUtil.is(contact.getPhone())) {
+				orExpression.add(Criteria.where("phone").is(contact.getPhone()));
+			}
+			if (ArgUtil.is(contact.getEmail())) {
+				orExpression.add(Criteria.where("email").is(contact.getEmail()));
+			}
+			query1.addCriteria(new Criteria().orOperator(orExpression.toArray(new Criteria[orExpression.size()])));
+			contacts = mongoTemplate.find(query1, ChatContactDoc.class);
+		}
+
 		Query query2 = new Query();
-		query2.addCriteria(Criteria.where("contactId").is(contactId));
-		LOGGER.info(query2.toString());
+		Criteria contactCriteria = Criteria.where("contactId").is(contactId);
+
+		if (ArgUtil.is(contacts)) {
+			List<Criteria> orExpression = new ArrayList<Criteria>();
+			for (ChatContactDoc chatContactDoc : contacts) {
+				orExpression.add(Criteria.where("contactId").is(chatContactDoc.getContactId()));
+			}
+			query2.addCriteria(contactCriteria.orOperator(orExpression.toArray(new Criteria[orExpression.size()])));
+		}
+
+		LOGGER.debug(query2.toString());
 		return mongoTemplate.find(query2, ChatSessionDoc.class);
 	}
 
