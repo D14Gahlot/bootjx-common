@@ -2,114 +2,237 @@
 <html lang="en">
 
 <head>
-	<base th:href="${APP_CONTEXT} + '/'" />
-    
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <title>Multi-Channel Agent Dashboard</title>
-    
-    
-	<link rel="shortcut icon" th:href="${CDN_URL}+'/favicon.ico'" />
+<base th:href="${APP_CONTEXT} + '/'" />
 
-    <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i,800,800i&display=swap" rel="stylesheet">
-    <link rel="shortcut icon" href="assets/images/fav.jpg">
-    <link rel="stylesheet" th:href="${CDN_URL}+'/legacy/css/bootstrap.min.css'">
-    <link rel="stylesheet" th:href="${CDN_URL}+'/legacy/css/all.min.css'">
-    <link rel="stylesheet" th:href="${CDN_URL}+'/legacy/css/animate.css'">
-    <link rel="stylesheet" th:href="${CDN_URL}+'/legacy/plugins/slider/css/owl.carousel.min.css'">
-    <link rel="stylesheet" th:href="${CDN_URL}+'/legacy/plugins/slider/css/owl.theme.default.css'">
-    <link rel="stylesheet" type="text/css" th:href="${CDN_URL}+'/legacy/css/style.css'" />
-    
-     <script>
-		window.CONST = {
-			CONTEXT: '[[${APP_CONTEXT}]]'
-		}
+<meta charset="utf-8">
+<meta name="viewport"
+	content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<title>Multi-Channel Agent Dashboard</title>
+
+
+<link rel="shortcut icon" th:href="${CDN_URL}+'/favicon.ico'" />
+
+<link
+	href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i,800,800i&display=swap"
+	rel="stylesheet">
+<link rel="shortcut icon" href="assets/images/fav.jpg">
+<link rel="stylesheet"
+	th:href="${CDN_URL}+'/legacy/css/bootstrap.min.css'">
+<link rel="stylesheet" th:href="${CDN_URL}+'/legacy/css/all.min.css'">
+<link rel="stylesheet" th:href="${CDN_URL}+'/legacy/css/animate.css'">
+<link rel="stylesheet"
+	th:href="${CDN_URL}+'/legacy/plugins/slider/css/owl.carousel.min.css'">
+<link rel="stylesheet"
+	th:href="${CDN_URL}+'/legacy/plugins/slider/css/owl.theme.default.css'">
+<link rel="stylesheet" type="text/css"
+	th:href="${CDN_URL}+'/legacy/css/style.css'" />
+
+<script>
+	window.CONST = {
+		CONTEXT : '[[${APP_CONTEXT}]]'
+	}
 </script>
 
 </head>
 
-    <body class="form-login-body"> 
-            <div class="container">
-                <div class="row">
-                    <div class="col-lg-10 mx-auto login-desk">
-                       <div class="row">
-                            <div class="col-md-7 detail-box">
-                                <div class="detailsh">
-                                     <p>
-                                     	<img class="bigbrandlogo" th:src="${CDN_URL}+'/logo/logo-long.png'" alt="Enterprise.Social.Communication">
-                                     	<span class="bigbrandlogo_text" >Enterprise.Social.Communication</span>
-                                     </p>
-                                </div>
-                            </div>
-                            <div class="col-md-5 loginform">
-                                 <h4>Welcome Back</h4>                   
-                                 <p>Signin to your Account</p>
-                                 <div class="login-det">
-                                    <div class="form-row">
-                                         <label for="">Username</label>
-                                             <div class="input-group mb-3">
-                                              <div class="input-group-prepend">
-                                                <span class="input-group-text" id="basic-addon1">
-                                                    <i class="far fa-user"></i>
-                                                </span>
-                                              </div>
-                                              <input type="text" id="login-username" class="form-control is-invalid" placeholder="Enter Username" aria-label="Username" aria-describedby="basic-addon1">
-                                        		<div id="login_error" class="invalid-feedback order-last ">
-								                    
-								                </div>
-                                         </div>
-                                    </div>
-                                     <div class="form-row">
-                                         <label for="">Password</label>
-                                             <div class="input-group mb-3">
-                                              <div class="input-group-prepend">
-                                                <span class="input-group-text" id="basic-addon1">
-                                                    <i class="fas fa-lock"></i>
-                                                </span>
-                                              </div>
-                                              <input type="password" id="login-password" class="form-control" placeholder="Enter Password" aria-label="Username" aria-describedby="basic-addon1">
-                                         </div>
-                                    </div>
-                                    <div class="form-row">
-                                            <div class="invalid-feedback order-last">
-							                    Error Message
-							                </div>
-                                    </div>
-                                    
-                                    <p class="forget"><a href="#forgotpass" title="Not Allowed">Forget Password?</a></p>
-                                    
-                                    <button id="btn-login" class="btn btn-sm btn-danger">Login</button>
-                                    
-                                    
-                                    <div class="social-link">
-                                        <ul class="socil-icon">
-                                            <li>
-                                                <a href="https://www.facebook.com/MeherY.SocCom/"><i class="fab fa-facebook-f"></i></a>
-                                            </li>
-                                            <li>
-                                                <a href="https://twitter.com/mehery_soccom"><i class="fab fa-twitter"></i></a>
-                                            </li>
-                                       </ul>
-                                    </div>
-                                    
-                                 </div>
-                            </div>
-                       </div>
-                      
-                    </div>
-                </div>
-            </div>
-            
-            <footer>
-				<center>
-				<small> Copyright © MeherY SocCom. All Rights Reserved.<small></center>
-            </footer>
-    </body>
+<body class="form-login-body">
+	<div class="container">
+		<div class="row">
+			<div class="col-lg-10 mx-auto login-desk">
+				<div class="row" th:switch="${PAGE}">
+					<div class="col-md-7 detail-box">
+						<div class="detailsh">
+							<p>
+								<img class="bigbrandlogo"
+									th:src="${CDN_URL}+'/logo/logo-long.png'"
+									alt="Enterprise.Social.Communication"> <span
+									class="bigbrandlogo_text">Enterprise.Social.Communication</span>
+							</p>
+						</div>
+					</div>
+					<div class="col-md-5 loginform">
 
-    <script th:src="${CDN_URL}+'/legacy/js/jquery-3.2.1.min.js'"></script>
-    <script th:src="${CDN_URL}+'/legacy/js/popper.min.js'"></script>
-    <script th:src="${CDN_URL}+'/legacy/js/bootstrap.min.js'"></script>
-    <script th:src="${CDN_URL}+'/legacy/plugins/scroll-fixed/jquery-scrolltofixed-min.js'"></script>
-    <script th:src="${CDN_URL}+'/legacy/plugins/slider/js/owl.carousel.min.js'"></script>
-    <script th:src="${CDN_URL}+'/legacy/js/login.js'"></script>
+						<!--  LOGIN FORM -->
+						<div th:case="'login'">
+							<h4>Welcome Back</h4>
+							<p>Signin to your Account</p>
+							<div class="login-det">
+								<div class="form-row">
+									<label for="">Username</label>
+									<div class="input-group mb-3">
+										<div class="input-group-prepend">
+											<span class="input-group-text" id="basic-addon1"> <i
+												class="far fa-user"></i>
+											</span>
+										</div>
+										<input type="text" id="login-username"
+											class="form-control is-invalid" placeholder="Enter Username"
+											aria-label="Username" aria-describedby="basic-addon1">
+										<div id="login_error" class="invalid-feedback order-last ">
+
+										</div>
+									</div>
+								</div>
+								<div class="form-row">
+									<label for="">Password</label>
+									<div class="input-group mb-3">
+										<div class="input-group-prepend">
+											<span class="input-group-text" id="basic-addon1"> <i
+												class="fas fa-lock"></i>
+											</span>
+										</div>
+										<input type="password" id="login-password"
+											class="form-control" placeholder="Enter Password"
+											aria-label="Username" aria-describedby="basic-addon1">
+									</div>
+								</div>
+								<div class="form-row">
+									<div class="invalid-feedback order-last">Error Message</div>
+								</div>
+
+								<p class="forget">
+									<a th:href="@{/auth/resetpass(page='resetpass')}"
+										title="Not Allowed">Forget Password?</a>
+								</p>
+
+								<button id="btn-login" class="btn btn-sm btn-danger">Login</button>
+
+							</div>
+						</div>
+
+						<!--  FORGOT PASS FORM -->
+						<div th:case="'resetpass'">
+							<h4>Reset Password</h4>
+							<p>Enter details to receive reset link on email</p>
+							<div class="login-det">
+								<form
+									th:action="@{/auth/resetpass(page='resetpass',stamp=${STAMP})}"
+									method="POST">
+									<input type="hidden" name="action" value="resetpass">
+									<div class="form-row">
+										<label for="">Username</label>
+										<div class="input-group mb-3">
+											<div class="input-group-prepend">
+												<span class="input-group-text" id="basic-addon1"> <i
+													class="far fa-user"></i>
+												</span>
+											</div>
+											<input type="text" id="login-username" name="username"
+												class="form-control is-invalid" placeholder="Enter Username"
+												aria-label="Username" aria-describedby="basic-addon1">
+											<div th:text="${MESSAGE}" id="login_error"
+												class="invalid-feedback order-last "></div>
+										</div>
+									</div>
+
+									<p class="forget">
+										<a th:href="@{/auth/login(page='login')}" title="Not Allowed">Login
+											with password</a>
+									</p>
+
+									<button id="btn-reset-pass" class="btn btn-sm btn-danger"
+										type="submit">Send Link</button>
+								</form>
+							</div>
+						</div>
+
+
+						<!--  SETT PASS FORM -->
+						<div th:case="'setpass'">
+							<h4>Set Password</h4>
+							<p>Enter password and confirm password</p>
+							<div class="login-det">
+								<form
+									th:action="@{/auth/resetpass(page='setpass',stamp=${STAMP})}"
+									method="POST">
+									<input type="hidden" name="action" value="setpass"> <input
+										type="hidden" name="token" th:value="${token}">
+									<div class="form-row">
+										<label for="">Username</label>
+										<div class="input-group mb-3">
+											<div class="input-group-prepend">
+												<span class="input-group-text" id="basic-addon1"> <i
+													class="far fa-user"></i>
+												</span>
+											</div>
+											<input type="text" id="login-username" name="username"
+												th:value="${username}" readonly
+												class="form-control is-invalid" placeholder="Enter Username"
+												aria-label="Username" aria-describedby="basic-addon1">
+										</div>
+									</div>
+
+									<div class="form-row">
+										<label for="">Password</label>
+										<div class="input-group mb-3">
+											<div class="input-group-prepend">
+												<span class="input-group-text" id="basic-addon1"> <i
+													class="far fa-user"></i>
+												</span>
+											</div>
+											<input type="password" id="login-password" name="newpassword"
+												class="form-control is-invalid" placeholder="Enter Password"
+												aria-label="Password" aria-describedby="basic-addon1">
+										</div>
+									</div>
+
+									<div class="form-row">
+										<label for="">Confirm Password</label>
+										<div class="input-group mb-3">
+											<div class="input-group-prepend">
+												<span class="input-group-text" id="basic-addon1"> <i
+													class="far fa-user"></i>
+												</span>
+											</div>
+											<input type="password" id="login-password"
+												name="confirmpassword" class="form-control is-invalid"
+												placeholder="Confirm Password" aria-label="Confirm Password"
+												aria-describedby="basic-addon1">
+											<div th:text="${MESSAGE}" id="login_error"
+												class="invalid-feedback order-last "></div>
+										</div>
+									</div>
+
+									<p class="forget">
+										<a th:href="@{/auth/login(page='login')}" title="Not Allowed">Login
+											with password</a>
+									</p>
+
+									<button id="btn-reset-pass" class="btn btn-sm btn-danger"
+										type="submit">Change Password</button>
+								</form>
+							</div>
+						</div>
+
+						<!--  SOCIAL LINKs -->
+						<div class="social-link">
+							<ul class="socil-icon">
+								<li><a href="https://www.facebook.com/MeherY.SocCom/"><i
+										class="fab fa-facebook-f"></i></a></li>
+								<li><a href="https://twitter.com/mehery_soccom"><i
+										class="fab fa-twitter"></i></a></li>
+							</ul>
+						</div>
+					</div>
+				</div>
+
+			</div>
+		</div>
+	</div>
+
+	<footer>
+		<center>
+			<small> Copyright © MeherY SocCom. All Rights Reserved.<small>
+		</center>
+	</footer>
+</body>
+
+<script th:src="${CDN_URL}+'/legacy/js/jquery-3.2.1.min.js'"></script>
+<script th:src="${CDN_URL}+'/legacy/js/popper.min.js'"></script>
+<script th:src="${CDN_URL}+'/legacy/js/bootstrap.min.js'"></script>
+<script
+	th:src="${CDN_URL}+'/legacy/plugins/scroll-fixed/jquery-scrolltofixed-min.js'"></script>
+<script
+	th:src="${CDN_URL}+'/legacy/plugins/slider/js/owl.carousel.min.js'"></script>
+<script th:src="${CDN_URL}+'/legacy/js/login.js'"></script>
 </html>

@@ -105,13 +105,68 @@ public class AuthController {
 		return "customer." + page;
 	}
 
-	@RequestMapping(value = "/auth/login", method = { RequestMethod.POST, RequestMethod.GET })
+	@RequestMapping(value = { "/auth/login", "/auth/resetpass" }, method = { RequestMethod.POST, RequestMethod.GET })
 	public String login(Model model) {
 		model.addAttribute("CDN_URL", ArgUtil.parseAsString(commonHttpRequest.get("CDN_URL"), cdnServer));
 		model.addAttribute("CDN_DEBUG", ArgUtil.parseAsString(commonHttpRequest.get("CDN_DEBUG"), "false"));
 		model.addAttribute("APP_CONTEXT", appConfig.getAppPrefix());
 		model.addAttribute("APP_USER", agentSession.getAgentCode());
 		model.addAttribute("APP_DEPT", agentSession.getAgentDept());
+		model.addAttribute("STAMP", System.currentTimeMillis());
+
+		String page = ArgUtil.parseAsString(commonHttpRequest.get("page"), "login");
+		String action = ArgUtil.parseAsString(commonHttpRequest.get("action"), "login");
+		Object message = Constants.BLANK;
+		try {
+			if ("resetpass".equalsIgnoreCase(action)) {
+				String username = ArgUtil.parseAsString(commonHttpRequest.get("username"), Constants.BLANK)
+						.toLowerCase();
+				ApiResponse<Map<String, Object>, String> x = restService.ajax(adminUrl).path("/auth/agent/pass/reset")
+						.field("username", username).postForm()
+						.as(new ParameterizedTypeReference<ApiResponse<Map<String, Object>, String>>() {
+						});
+				if (ArgUtil.parseAsBoolean(x.getData().get("success"), false)) {
+					message = "Link to reset password sent on registered email.";
+				} else {
+					message = x.getMessage();
+				}
+			} else if ("setpass".equalsIgnoreCase(page)) {
+				String username = ArgUtil.parseAsString(commonHttpRequest.get("username"), Constants.BLANK)
+						.toLowerCase();
+				String token = ArgUtil.parseAsString(commonHttpRequest.get("token"), Constants.BLANK);
+				String newpassword = ArgUtil.parseAsString(commonHttpRequest.get("newpassword"), Constants.BLANK);
+				String confirmpassword = ArgUtil.parseAsString(commonHttpRequest.get("confirmpassword"),
+						Constants.BLANK);
+				model.addAttribute("username", username);
+				model.addAttribute("token", token);
+
+				if ("setpass".equalsIgnoreCase(action)) {
+					if (!ArgUtil.is(confirmpassword)) {
+						message = "Please enter valid password";
+					} else if (confirmpassword.equals(newpassword)) {
+						ApiResponse<Map<String, Object>, String> x = restService.ajax(adminUrl)
+								.path("/auth/agent/pass/set").field("username", username).field("password", token)
+								.field("newpassword", newpassword).postForm()
+								.as(new ParameterizedTypeReference<ApiResponse<Map<String, Object>, String>>() {
+								});
+						if (ArgUtil.parseAsBoolean(x.getData().get("success"), false)) {
+							message = "Password has been reset successfully";
+						} else {
+							message = x.getMessage();
+						}
+					} else {
+						message = "Password Mismatch";
+					}
+
+				}
+
+			}
+		} catch (Exception e) {
+			message = "Sorry some technical issues";
+		}
+
+		model.addAttribute("MESSAGE", message);
+		model.addAttribute("PAGE", page);
 		return "login";
 	}
 
@@ -128,7 +183,7 @@ public class AuthController {
 	@RequestMapping(value = "/auth/login/submit", method = { RequestMethod.POST })
 	public ApiResponse<Map<String, Object>, String> login(@RequestParam String username, @RequestParam String password,
 			HttpServletRequest request) {
-		username = ArgUtil.parseAsString(username,Constants.BLANK).toLowerCase();
+		username = ArgUtil.parseAsString(username, Constants.BLANK).toLowerCase();
 		ApiResponse<Map<String, Object>, String> x = restService.ajax(adminUrl).path("/auth/agent/login")
 				.field("username", username).field("password", password).postForm()
 				.as(new ParameterizedTypeReference<ApiResponse<Map<String, Object>, String>>() {
