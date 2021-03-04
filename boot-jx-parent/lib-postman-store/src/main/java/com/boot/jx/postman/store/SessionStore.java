@@ -219,7 +219,7 @@ public class SessionStore {
 			query2.addCriteria(contactCriteria.orOperator(orExpression.toArray(new Criteria[orExpression.size()])));
 		}
 
-		LOGGER.debug(query2.toString());
+		LOGGER.info(query2.toString());
 		return mongoTemplate.find(query2, ChatSessionDoc.class);
 	}
 
