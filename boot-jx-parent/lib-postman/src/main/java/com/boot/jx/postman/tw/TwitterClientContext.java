@@ -53,6 +53,11 @@ public class TwitterClientContext {
 		if (this.myId == -1) {
 			this.myId = this.twitter.verifyCredentials().getId();
 		}
+
+		if (!ArgUtil.is(list)) {
+			return null;
+		}
+
 		// filter direct messages not sent by me
 		boolean older = false;
 		for (int i = list.size() - 1; i >= 0; i--) {
