@@ -234,9 +234,9 @@ public class AgentAnalyticsManager {
 			long assignToAgent = chatDoc.getAssignedAgentStamp();
 			long diffInMilliSeconds = currentTimeStamp-assignToAgent;
 			int diffInHours = (int) (diffInMilliSeconds / (60 * 60 * 1000));
-			if(diffInHours>OPEN_CONV_HR_LMT) {
+			//if(diffInHours>OPEN_CONV_HR_LMT) {
 				totalOpenMsgDoc.add(chatDoc);
-			}
+			//}
 		}
 		return totalOpenMsgDoc;
 	}
