@@ -209,16 +209,15 @@ public class SessionStore {
 		}
 
 		Query query2 = new Query();
-		Criteria contactCriteria = Criteria.where("contactId").is(contactId);
+		List<Criteria> orExpression = new ArrayList<Criteria>();
 
+		orExpression.add(Criteria.where("contactId").is(contactId));
 		if (ArgUtil.is(contacts)) {
-			List<Criteria> orExpression = new ArrayList<Criteria>();
 			for (ChatContactDoc chatContactDoc : contacts) {
 				orExpression.add(Criteria.where("contactId").is(chatContactDoc.getContactId()));
 			}
-			contactCriteria.orOperator(orExpression.toArray(new Criteria[orExpression.size()]));
 		}
-		query2.addCriteria(contactCriteria);
+		query2.addCriteria(new Criteria().orOperator(orExpression.toArray(new Criteria[orExpression.size()])));
 		LOGGER.info(query2.toString());
 		return mongoTemplate.find(query2, ChatSessionDoc.class);
 	}
