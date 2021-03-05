@@ -56,9 +56,11 @@ public class AdminDashBoardManager {
 
 	private static final String COLLECTION = "MessageDoc.class";
 
-	public static final String COLLECTION_NAME = "MESSAGE";
+	public static final String COLLECTION_NAME = "MESSAGE_";
 	
 	public static final String DEFAULT_TEAM = "TEAM";
+	
+	
 	
 
 	
@@ -607,9 +609,16 @@ public class AdminDashBoardManager {
 
 	public List<String> getListOfContactType() {
 		List<String> listContactType = new ArrayList<String>();
+		List<String> lstOfConRemo = new ArrayList<String>();
+		lstOfConRemo.add("MESSAGE_LOGS");
+		lstOfConRemo.add("MESSAGE_OTHERS");
+		//)
 		Set<String> contactTypeSet = mongoTemplate.getCollectionNames();
 		if (ArgUtil.is(contactTypeSet)) {
 			listContactType = contactTypeSet.stream().filter(x -> !x.isEmpty() && x.startsWith(COLLECTION_NAME)).collect(Collectors.toList());
+		}
+		if(!listContactType.isEmpty()) {
+			listContactType.removeAll(lstOfConRemo);
 		}
 		return listContactType;
 	}
