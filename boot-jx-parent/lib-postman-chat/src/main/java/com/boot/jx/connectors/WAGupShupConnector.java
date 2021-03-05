@@ -81,6 +81,7 @@ public class WAGupShupConnector implements ConnectorHandler {
 		if (ArgUtil.is(inboxMessage.getOriginalMessage())) {
 			GupShupInbound dm = JsonUtil.parse(inboxMessage.getOriginalMessage(), GupShupInbound.class);
 			contact.setName(dm.getName());
+			contact.setPhone(dm.getMobile());
 		}
 		return true;
 	}
