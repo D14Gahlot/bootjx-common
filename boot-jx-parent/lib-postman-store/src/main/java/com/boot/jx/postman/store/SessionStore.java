@@ -195,7 +195,7 @@ public class SessionStore {
 		ChatContactDoc contact = getContact(contactId);
 
 		List<ChatContactDoc> contacts = null;
-		if (!ArgUtil.areEmpty(contact.getPhone(), contact.getEmail())) {
+		if (ArgUtil.is(contacts) && !ArgUtil.areEmpty(contact.getPhone(), contact.getEmail())) {
 			Query query1 = new Query();
 			List<Criteria> orExpression = new ArrayList<Criteria>();
 			if (ArgUtil.is(contact.getPhone())) {
