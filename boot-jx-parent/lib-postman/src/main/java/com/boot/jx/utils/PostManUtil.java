@@ -33,6 +33,10 @@ public class PostManUtil {
 			return "fb" + id;
 		} else if (ContactType.TWITTER.equals(contactType)) {
 			return "tw" + id;
+		} else if (ContactType.TELEGRAM.equals(contactType)) {
+			return "tg" + id;
+		} else if (ArgUtil.is(contactType)) {
+			return contactType.getShortCode() + id;
 		}
 		return id;
 	}
