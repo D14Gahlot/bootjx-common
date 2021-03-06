@@ -129,7 +129,7 @@ public class AgentAnalyticsManager {
 		dto.setTotalMsgExchanged(totalMsg);
 		dto.setOpenConversation(totalOpenMsg);
 		dto.setUniqueConversation(totalUniqCon);
-		dto.setConverDuration(convDuration/teamSize);
+		dto.setConverDuration(convDuration/totalMsg);
 		dto.setStartLag(totalStartLag);
 		dto.setGraphApiDetails(graphApiMap);
 		return dto;
@@ -143,11 +143,18 @@ public class AgentAnalyticsManager {
 			if(ArgUtil.is(distinctContactLst)) {
 				dto.setUniqueConversation(distinctContactLst.size());
 			}
-			/** Total Msg exchanged. **/
+			/** Total Msg exchanged chat session . **/
 			List<ChatSessionDoc> totalMsgExchanged =getAgentWiseTotalMsgExchanged(agent,dateRange1,dateRange2);
 			if(ArgUtil.is(totalMsgExchanged)) {
 				dto.setTotalMsgExchanged(totalMsgExchanged.size());
 			}
+			
+			/**  Total Agent-contact wise msg **/
+			List<MessageDoc> totalAgConMsgExchanged =getTotalMessageAgentAndContactWise(distinctContactLst,dateRange1,dateRange2);
+			if(ArgUtil.is(totalAgConMsgExchanged)) {
+				dto.setTotalMsgExchanged(totalAgConMsgExchanged.size());
+			}
+			
 			
 			/** Open conversation **/
 			List<ChatSessionDoc> openConvesLst = getAgentWiseOpenConversation(agent,dateRange1,dateRange2);
@@ -155,7 +162,7 @@ public class AgentAnalyticsManager {
 				dto.setOpenConversation(openConvesLst.size());
 			}
 			/** Peak Load **/
-			PeakLoadDto peakLoadResult = getAgentPeakLoadMsgCount(totalMsgExchanged);
+			PeakLoadDto peakLoadResult = adminDbMgr.getPeakLoadMsgCount(totalAgConMsgExchanged);//getAgentPeakLoadMsgCount(totalMsgExchanged);
 			dto.setPeakLoad(peakLoadResult);
 			
 			/** lead Messanger **/
@@ -180,13 +187,13 @@ public class AgentAnalyticsManager {
 				days = dateDiffMAp.get("DAYS");
 			}
 			if(hour<=24) {
-				Map<Object,Object> hourWiseCount = getHourWiseCount(totalMsgExchanged);
+				Map<Object,Object> hourWiseCount = adminDbMgr.getHourWiseCount(totalAgConMsgExchanged);
 				dto.setGraphApiDetails(hourWiseCount);
 			}else if(hour >24 && days<=30){
-				Map<Object,Object> dateWiseCount = getDateWiseCount(totalMsgExchanged);
+				Map<Object,Object> dateWiseCount = adminDbMgr.getDateWiseCount(totalAgConMsgExchanged);
 				dto.setGraphApiDetails(dateWiseCount);
 			}else {
-				Map<Object,Object> dweekWiseCount = getWeekWiseCount(totalMsgExchanged);
+				Map<Object,Object> dweekWiseCount = adminDbMgr.getWeekWiseCount(totalAgConMsgExchanged);
 				dto.setGraphApiDetails(dweekWiseCount);
 			}
 			
@@ -207,6 +214,9 @@ public class AgentAnalyticsManager {
 		query.addCriteria(Criteria.where("assignedToAgent").is(agent));
 		query.addCriteria(Criteria.where("assignedAgentStamp").gt(dateRange1).lt(dateRange2));
 		List<ChatSessionDoc> distinctIdList = mongoTemplate.getCollection(CHAT_SESSION).distinct("contactId",query.getQueryObject());
+		for(Object chat :distinctIdList) {
+			System.out.println("Chat doc :"+(String)chat);
+		}
 		return distinctIdList;
 	}
 	
@@ -494,11 +504,42 @@ public class AgentAnalyticsManager {
 	
 	public Map<Object, Object> mergerMapKyAndValue(Map<Object, Object> mergeMap,Map<Object, Object> map2){
 		Map<Object, Object> mergeValue =mergeMap;
-	    
 		   //Merge maps
 		   map2.forEach(
 		       (key, value) -> mergeValue.merge( key, value, (v1, v2) -> v1==v2 ? v1 : (Integer)v1 + (Integer)v2)
 		   );
 		return mergeValue;
 	}
+	
+	//Get Total Msg from 
+	
+	public List<MessageDoc> getTotalMessageAgentAndContactWise(List<ChatSessionDoc> lstChatSession,long dateRange1,long dateRange2){
+		List<MessageDoc> totalMsgDocLst = new ArrayList<MessageDoc>();
+		for(Object chatSession: lstChatSession) {
+			String contactId=(String)chatSession;
+			List<MessageDoc> msgDocLst = getMsgCountAgentContactWise(contactId, dateRange1, dateRange2);
+			totalMsgDocLst.addAll(msgDocLst);
+		}
+		
+		return totalMsgDocLst;
+	}
+	
+	// To fetch all the records from a collection
+		public List<MessageDoc> getMsgCountAgentContactWise(String contactId,long dateRange1, long dateRange2) {
+			
+			
+			List<MessageDoc> totalMsgDoc =new ArrayList<MessageDoc>();
+			
+			List<String> lst =adminDbMgr.getListOfContactType();
+			for(String contactType: lst) {
+				Query query = new Query();
+				query.addCriteria(Criteria.where("contactId").is(contactId));
+				query.addCriteria(Criteria.where("timestamp").gt(dateRange1).lt(dateRange2));
+				query.with(new Sort(new Order(Direction.ASC, "timestamp")));
+				List<MessageDoc>  totalMsg= mongoTemplate.find(query, MessageDoc.class, contactType.toString());
+				totalMsgDoc.addAll(totalMsg);
+			}
+			return totalMsgDoc;
+		}
+	
 }

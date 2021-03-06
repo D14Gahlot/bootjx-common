@@ -664,7 +664,6 @@ public class AdminDashBoardManager {
 
 	// To fetch all the records from a collection
 	public List<MessageDoc> getTotalMsgCount(Object contactType, long startTime, long endTime) {
-		
 		long dateRange1 =0;
 		long dateRange2 =0;
 		if(ArgUtil.is(startTime)) {
@@ -678,7 +677,6 @@ public class AdminDashBoardManager {
 		queryAll.addCriteria(Criteria.where("timestamp").gt(dateRange1).lt(dateRange2));
 		//queryAll.with(new Sort(Sort.Direction.ASC, "timestamp"));
 		queryAll.with(new Sort(new Order(Direction.ASC, "timestamp"))); 
-		
 		List<MessageDoc> totalMsgDoc = mongoTemplate.find(queryAll, MessageDoc.class, contactType.toString());
 		return totalMsgDoc;
 	}
@@ -782,8 +780,6 @@ public class AdminDashBoardManager {
 	//To fetch unique conversation 
 	@SuppressWarnings("unchecked")
 	public List<MessageDoc> getUniqueConversation(Object contactType, long dateRange1, long dateRange2) {
-		
-		
 		Query query = new Query();
 		query.addCriteria(Criteria.where("timestamp").gt(dateRange1).lt(dateRange2));
 		List<MessageDoc> distinctIdList = mongoTemplate.getCollection(contactType.toString()).distinct("contactId",query.getQueryObject());
@@ -808,7 +804,6 @@ public class AdminDashBoardManager {
 	         SimpleDateFormat sdfH = new SimpleDateFormat("HH");
 	         String formattedDateH = sdfH.format(date);
 	         dateWiseList.add(ddMMyyyyFormat);
-	         //hourList.add(formattedDateH);
 	         hourList.add(Integer.parseInt(formattedDateH));
     	// System.out.println(" timeStamp :"+timeStamp+"\t long to date :"+date+"\t str :"+dateWithTime+"\t ddMMyyyyFormat :"+ddMMyyyyFormat+"\t formattedDateH :"+formattedDateH);
 		}
