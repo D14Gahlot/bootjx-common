@@ -166,7 +166,7 @@ public class TelegramConnector implements ConnectorHandler {
 		}
 
 		if (ArgUtil.isEmpty(contact.getPhone())) {
-			telegramClient.promptShareNumber(inboxMessage.getContactId(),
+			telegramClient.promptShareNumber(inboxMessage.getFrom(),
 					"Confirm that you would like to share your contact number and continue, by clicking on the button below",
 					inboxMessage.getLane());
 			return false;
