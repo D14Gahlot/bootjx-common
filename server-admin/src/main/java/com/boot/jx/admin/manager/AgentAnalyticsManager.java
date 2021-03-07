@@ -41,6 +41,7 @@ import com.boot.jx.admin.dto.PeakLoadDto;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.JsonUtil;
 
 @Component
 public class AgentAnalyticsManager {
@@ -111,6 +112,7 @@ public class AgentAnalyticsManager {
 		
 		dto.setPeakLoad(new PeakLoadDto());
 		for (DashBoardResponseDto dt : dtoLst) {
+			System.out.println("get Agent/channel  wise {  ==== }:"+JsonUtil.toJson(dto));
 			totalInMsg +=dt.getTotalInMsgExchanged();
 			totalOutMsg+=dt.getTotalOutMsgExchanged();
 			totalMsg+=dt.getTotalMsgExchanged();
@@ -132,6 +134,7 @@ public class AgentAnalyticsManager {
 		dto.setConverDuration(convDuration/totalMsg);
 		dto.setStartLag(totalStartLag);
 		dto.setGraphApiDetails(graphApiMap);
+		System.out.println("\n\n get Summary ========:"+JsonUtil.toJson(dto));
 		return dto;
 	}
 	
@@ -145,10 +148,10 @@ public class AgentAnalyticsManager {
 			}
 			/** Total Msg exchanged chat session . **/
 			List<ChatSessionDoc> totalMsgExchanged =getAgentWiseTotalMsgExchanged(agent,dateRange1,dateRange2);
-			if(ArgUtil.is(totalMsgExchanged)) {
+			/*if(ArgUtil.is(totalMsgExchanged)) {
 				dto.setTotalMsgExchanged(totalMsgExchanged.size());
 			}
-			
+			*/
 			/**  Total Agent-contact wise msg **/
 			List<MessageDoc> totalAgConMsgExchanged =getTotalMessageAgentAndContactWise(distinctContactLst,dateRange1,dateRange2);
 			if(ArgUtil.is(totalAgConMsgExchanged)) {
@@ -520,7 +523,7 @@ public class AgentAnalyticsManager {
 			List<MessageDoc> msgDocLst = getMsgCountAgentContactWise(contactId, dateRange1, dateRange2);
 			totalMsgDocLst.addAll(msgDocLst);
 		}
-		
+		System.out.println("getTotalMessageAgentAndContactWise :"+totalMsgDocLst==null?BigDecimal.ZERO:totalMsgDocLst.size());
 		return totalMsgDocLst;
 	}
 	
