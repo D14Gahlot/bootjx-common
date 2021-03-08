@@ -131,7 +131,9 @@ public class AgentAnalyticsManager {
 		dto.setTotalMsgExchanged(totalMsg);
 		dto.setOpenConversation(totalOpenMsg);
 		dto.setUniqueConversation(totalUniqCon);
+		if(totalMsg!=0) {
 		dto.setConverDuration(convDuration/totalMsg);
+		}
 		dto.setStartLag(totalStartLag);
 		dto.setGraphApiDetails(graphApiMap);
 		System.out.println("\n\n get Summary ========:"+JsonUtil.toJson(dto));
