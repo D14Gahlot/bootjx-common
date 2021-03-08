@@ -51,7 +51,7 @@ public class SammpleReplies {
 		mongoTemplate.save(createQuickReply("Very Good After Noon", "greeting-afternoon"));
 		mongoTemplate.save(createQuickReply("Very Good Evening", "greeting-evening"));
 		mongoTemplate.save(createQuickReply("Nice talking too.", "conversation-complete"));
-		mongoTemplate.save(createQuickReply("Your welcome.", "conversation-complete"));
+		mongoTemplate.save(createQuickReply("You're welcome.", "conversation-complete"));
 
 	}
 
