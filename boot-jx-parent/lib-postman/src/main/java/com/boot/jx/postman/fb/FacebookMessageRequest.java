@@ -5,8 +5,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.boot.utils.JsonPath;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class FacebookMessageRequest implements Serializable {
 
 	private static final long serialVersionUID = 8865862314571412689L;
@@ -77,7 +79,7 @@ public class FacebookMessageRequest implements Serializable {
 	 */
 	public FacebookMessageRequest attachmentUrl(Object type) {
 		MESSAGE_ATTACHMENT_URL.save(this.message, type);
-		MESSAGE_ATTACHMENT_REUSABLE.save(this.message, true);
+		MESSAGE_ATTACHMENT_REUSABLE.save(this.message, false);
 		return this;
 	}
 

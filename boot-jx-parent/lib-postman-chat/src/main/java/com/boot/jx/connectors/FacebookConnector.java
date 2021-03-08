@@ -53,8 +53,9 @@ public class FacebookConnector implements ConnectorHandler {
 					if (ArgUtil.areEqual(attachment.getMediaType(), File.FileType.IMAGE.toString())) {
 						req.attachmentType("image").attachmentUrl(attachment.getMediaURL());
 					} else {
-						req.attachmentType("file").attachmentUrl(attachment.getMediaURL());
-
+						req.messageType("text");
+						req.messageText(attachment.getMediaURL());
+						//req.attachmentType("file").attachmentUrl(attachment.getMediaURL());
 					}
 				}
 				resp = facebooClient.sendReply(lane, req);
@@ -70,6 +71,7 @@ public class FacebookConnector implements ConnectorHandler {
 			resp = facebooClient.sendReply(lane, req);
 			msgIds.add(ArgUtil.parseAsString(resp.getMessageId()));
 		}
+		outboxMessage.setMessageIdExt(msgIds.toString());
 
 		return outboxMessage;
 	}

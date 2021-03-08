@@ -2,6 +2,9 @@ package com.boot.jx.postman.fb;
 
 import java.io.Serializable;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class FacebookMessage implements Serializable {
 	private static final long serialVersionUID = 260395496229953084L;
 	private String mid;

@@ -4,9 +4,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
+import com.boot.jx.api.ApiResponse;
 import com.boot.jx.rest.RestService;
 import com.boot.utils.ArgUtil;
 import com.ulisesbocchio.jasyptspringboot.annotation.EnableEncryptableProperties;
@@ -38,7 +40,8 @@ public class FacebooClient {
 		lane = ArgUtil.nonEmpty(lane, "default").toLowerCase();
 		String accessToken = environment.getProperty("facebook.lane." + lane + ".accessToken");
 		return restService.ajax("https://graph.facebook.com/v2.6/me/messages?access_token=" + accessToken).post(resp)
-				.as(FacebookMessageResp.class);
+				.as(new ParameterizedTypeReference<FacebookMessageResp>() {
+				});
 	}
 
 	public FacebookMessageResp sendReply(String id, String text, String lane) {
