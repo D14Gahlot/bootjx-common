@@ -152,7 +152,7 @@ public class DemoController extends ChatController {
 		try {
 			InboxMessage agentAssignResp = assignToAgent().getResult();
 			if (ArgUtil.is(agentAssignResp.session().getAgent())) {
-				reply("One of our agent will attend you shortly");
+				reply("Connecting you to one of our customer representatives. Give us a moment.");
 			} else {
 				reply("All agents are busy or online, we will connect you whenever someone is available.");
 			}
