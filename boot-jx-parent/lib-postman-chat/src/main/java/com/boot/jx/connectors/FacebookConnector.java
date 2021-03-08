@@ -1,5 +1,7 @@
 package com.boot.jx.connectors;
 
+import java.util.StringJoiner;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Component;
@@ -13,6 +15,7 @@ import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.TemplateReply;
 import com.boot.jx.postman.fb.FacebooClient;
 import com.boot.jx.postman.fb.FacebookMessageRequest;
+import com.boot.jx.postman.fb.FacebookMessageResp;
 import com.boot.jx.postman.fb.FacebookMessaging;
 import com.boot.jx.postman.fb.FacebookUserProfile;
 import com.boot.jx.postman.gupshup.GupShupConfig;
@@ -38,27 +41,52 @@ public class FacebookConnector implements ConnectorHandler {
 	@Autowired
 	private TmplClient tmplClient;
 
+	public OutboxMessage sendOutboxMessage(String lane, String to, OutboxMessage outboxMessage) {
+		FacebookMessageResp resp = null;
+		StringJoiner msgIds = new StringJoiner(",");
+		if (ArgUtil.is(outboxMessage.getAttachments())) {
+			for (Attachment attachment : outboxMessage.getAttachments()) {
+
+				FacebookMessageRequest req = new FacebookMessageRequest();
+				req.recipientId(to);
+				if (ArgUtil.is(attachment.getMediaURL())) {
+					if (ArgUtil.areEqual(attachment.getMediaType(), File.FileType.IMAGE.toString())) {
+						req.attachmentType("image").attachmentUrl(attachment.getMediaURL());
+					} else {
+						req.attachmentType("file").attachmentUrl(attachment.getMediaURL());
+
+					}
+				}
+				resp = facebooClient.sendReply(lane, req);
+				msgIds.add(ArgUtil.parseAsString(resp.getMessageId()));
+			}
+		}
+
+		if (ArgUtil.is(outboxMessage.getMessage())) {
+			FacebookMessageRequest req = new FacebookMessageRequest();
+			req.recipientId(to);
+			req.messageType("text");
+			req.messageText(outboxMessage.getMessage());
+			resp = facebooClient.sendReply(lane, req);
+			msgIds.add(ArgUtil.parseAsString(resp.getMessageId()));
+		}
+
+		return outboxMessage;
+	}
+
 	public void send(String lane, String to, OutboxMessage outboxMessage) {
-		FacebookMessageRequest req = new FacebookMessageRequest();
-		req.recipientId(to);
 		if (ArgUtil.is(outboxMessage.getTemplate())) {
 			TemplateReply mediaReply = mongoTemplate.findById(outboxMessage.getTemplate(), TemplateReply.class);
 			if (ArgUtil.is(mediaReply)) {
 				if ("image".equalsIgnoreCase(mediaReply.getType())) {
 					outboxMessage.attachment(
 							new Attachment().mediaURL(mediaReply.getUrl()).mediaType(File.FileType.IMAGE.toString()));
-					req.attachmentType("image").attachmentUrl(mediaReply.getUrl());
 				}
 			} else {
 				tmplClient.process(outboxMessage);
-				req.messageType("text");
-				req.messageText(outboxMessage.getMessage());
 			}
-		} else {
-			req.messageType("text");
-			req.messageText(outboxMessage.getMessage());
 		}
-		facebooClient.sendReply(lane, req);
+		this.sendOutboxMessage(lane, to, outboxMessage);
 	}
 
 	@Override
