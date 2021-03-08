@@ -65,19 +65,22 @@ public class DemoController extends ChatController {
 		switch (inboxMessage.getMessage().toLowerCase()) {
 		case "1":
 			reply(new OutboxMessage().template("today-credits").put("name", chatContext.getContact().getName())
-					.attachment(new Attachment().mediaURL("http://www.africau.edu/images/default/sample.pdf")
+					.attachment(new Attachment().mediaURL(
+							"https://cdn.jsdelivr.net/gh/mehery-soccom/mehery-content@main/sample-receipt/your-statement.pdf")
 							.mediaType(File.FileType.DOCUMENT.toString())));
 			next("more-onselect");
 			break;
 		case "2":
 			reply(new OutboxMessage().template("today-debits").put("name", chatContext.getContact().getName())
-					.attachment(new Attachment().mediaURL("http://www.africau.edu/images/default/sample.pdf")
+					.attachment(new Attachment().mediaURL(
+							"https://cdn.jsdelivr.net/gh/mehery-soccom/mehery-content@main/sample-receipt/top-10.pdf")
 							.mediaType(File.FileType.DOCUMENT.toString())));
 			next("more-onselect");
 			break;
 		case "3":
 			reply(new OutboxMessage().template("today-trnx").put("name", chatContext.getContact().getName())
-					.attachment(new Attachment().mediaURL("http://www.africau.edu/images/default/sample.pdf")
+					.attachment(new Attachment().mediaURL(
+							"https://cdn.jsdelivr.net/gh/mehery-soccom/mehery-content@main/sample-receipt/your-transactions-this-week.pdf")
 							.mediaType(File.FileType.DOCUMENT.toString())));
 			next("more-onselect");
 			break;
@@ -188,19 +191,22 @@ public class DemoController extends ChatController {
 		if (ArgUtil.is(inboxMessage.getTags()) && ArgUtil.is(inboxMessage.getTags().getCategories())) {
 			if (inboxMessage.getTags().getCategories().indexOf("today-credits") > -1) {
 				reply(new OutboxMessage().template("today-credits").put("name", chatContext.getContact().getName())
-						.attachment(new Attachment().mediaURL("http://www.africau.edu/images/default/sample.pdf")
+						.attachment(new Attachment().mediaURL(
+								"https://cdn.jsdelivr.net/gh/mehery-soccom/mehery-content@main/sample-receipt/your-statement.pdf")
 								.mediaType(File.FileType.DOCUMENT.toString())));
 				next("more-onselect");
 				return true;
 			} else if (inboxMessage.getTags().getCategories().indexOf("today-debits") > -1) {
 				reply(new OutboxMessage().template("today-debits").put("name", chatContext.getContact().getName())
-						.attachment(new Attachment().mediaURL("http://www.africau.edu/images/default/sample.pdf")
+						.attachment(new Attachment().mediaURL(
+								"https://cdn.jsdelivr.net/gh/mehery-soccom/mehery-content@main/sample-receipt/top-10.pdf")
 								.mediaType(File.FileType.DOCUMENT.toString())));
 				next("more-onselect");
 				return true;
 			} else if (inboxMessage.getTags().getCategories().indexOf("today-trnx") > -1) {
 				reply(new OutboxMessage().template("today-trnx").put("name", chatContext.getContact().getName())
-						.attachment(new Attachment().mediaURL("http://www.africau.edu/images/default/sample.pdf")
+						.attachment(new Attachment().mediaURL(
+								"https://cdn.jsdelivr.net/gh/mehery-soccom/mehery-content@main/sample-receipt/your-transactions-this-week.pdf")
 								.mediaType(File.FileType.DOCUMENT.toString())));
 				next("more-onselect");
 				return true;
