@@ -23,6 +23,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
@@ -45,10 +47,13 @@ import com.boot.utils.JsonUtil;
 
 @Component
 public class AgentAnalyticsManager {
+	private static final Logger LOGGER = LoggerFactory.getLogger(AgentAnalyticsManager.class);
 	public static final String CHAT_SESSION = "CHAT_SESSION";
 	
 	public static final String DEFAULT_AGENT = "TEAM";
 	public static final int OPEN_CONV_HR_LMT =5; 
+	
+	public static final int OPEN_CONV_HR =1; 
 	
 	
 	@Autowired
@@ -61,6 +66,7 @@ public class AgentAnalyticsManager {
 	
 
 	public  List<DashBoardResponseDto> getAgentWiseAnalytics(DashBoardRequestDto req) {
+		 System.out.println("getAgentWiseAnalytics {} :"+JsonUtil.toJson(req));
  		 List<DashBoardResponseDto> lstDto = new ArrayList<>();
 		 DashBoardResponseDto dto = null;
 		 List<ChatSessionDoc> allAgent =null;
@@ -79,7 +85,7 @@ public class AgentAnalyticsManager {
 			
 		
 		 if(req!=null && (ArgUtil.isEmptyString(req.getAgent()) || req.getAgent().equalsIgnoreCase(DEFAULT_AGENT))) {
-			 allAgent = getAgentList(); 
+			 allAgent = getAgentList(date1,date2); 
 		 }
 			 
 		 if(allAgent !=null && !allAgent.isEmpty()) {
@@ -112,7 +118,7 @@ public class AgentAnalyticsManager {
 		
 		dto.setPeakLoad(new PeakLoadDto());
 		for (DashBoardResponseDto dt : dtoLst) {
-			System.out.println("get Agent/channel  wise {  ==== }:"+JsonUtil.toJson(dto));
+			LOGGER.debug("get Agent/channel  wise {  ==== }:"+JsonUtil.toJson(dto));
 			totalInMsg +=dt.getTotalInMsgExchanged();
 			totalOutMsg+=dt.getTotalOutMsgExchanged();
 			totalMsg+=dt.getTotalMsgExchanged();
@@ -132,11 +138,11 @@ public class AgentAnalyticsManager {
 		dto.setOpenConversation(totalOpenMsg);
 		dto.setUniqueConversation(totalUniqCon);
 		if(totalMsg!=0) {
-		dto.setConverDuration(convDuration/totalMsg);
+			dto.setConverDuration(convDuration/totalMsg);
 		}
 		dto.setStartLag(totalStartLag);
 		dto.setGraphApiDetails(graphApiMap);
-		System.out.println("\n\n get Summary ========:"+JsonUtil.toJson(dto));
+		LOGGER.debug("\n\n get Summary ========:"+JsonUtil.toJson(dto));
 		return dto;
 	}
 	
@@ -205,10 +211,17 @@ public class AgentAnalyticsManager {
 		    return dto;
 	}
 	
-	
-
 	public List<ChatSessionDoc> getAgentList() {
 		List<ChatSessionDoc> distinceAgentList = mongoTemplate.getCollection("CHAT_SESSION").distinct("assignedToAgent");
+		return distinceAgentList;
+	}
+	
+	
+
+	public List<ChatSessionDoc> getAgentList(long dateRange1, long dateRange2) {
+		Query query = new Query();
+		query.addCriteria(Criteria.where("assignedAgentStamp").gt(dateRange1).lt(dateRange2));
+		List<ChatSessionDoc> distinceAgentList = mongoTemplate.getCollection("CHAT_SESSION").distinct("assignedToAgent",query.getQueryObject());
 		return distinceAgentList;
 	}
 	
@@ -220,7 +233,8 @@ public class AgentAnalyticsManager {
 		query.addCriteria(Criteria.where("assignedAgentStamp").gt(dateRange1).lt(dateRange2));
 		List<ChatSessionDoc> distinctIdList = mongoTemplate.getCollection(CHAT_SESSION).distinct("contactId",query.getQueryObject());
 		for(Object chat :distinctIdList) {
-			System.out.println("Chat doc :"+(String)chat);
+			LOGGER.debug("Chat doc :"+(String)chat);
+			LOGGER.info("Chat doc :"+(String)chat);
 		}
 		return distinctIdList;
 	}
@@ -374,7 +388,8 @@ public class AgentAnalyticsManager {
 			List<MessageDoc> msgDocLst = adminDbMgr.getTotalMsgCount(contactType, startTime, endTime);
 			leasMsgLst.put(contactType, msgDocLst.size());
 		}
-		System.out.println("lead Msg :"+leasMsgLst.toString());
+		LOGGER.debug("lead Msg  :"+leasMsgLst.toString());
+		LOGGER.info("lead Msg  :"+leasMsgLst.toString());
 		if(ArgUtil.is(leasMsgLst)) {
 		 Object maxEntryKey = Collections.max(leasMsgLst.entrySet(), Map.Entry.comparingByValue()).getKey();
          Integer maxEntryKeyValue =leasMsgLst.get(maxEntryKey); 
@@ -416,7 +431,8 @@ public class AgentAnalyticsManager {
 		Set<Object> hourWiseCount = new HashSet<Object>(hourList);
 		for (Object key : hourWiseCount) {
 			mapLst.put(key, Collections.frequency(hourList, key));
-		    System.out.println(key + ": " + Collections.frequency(hourList, key));
+			LOGGER.debug(key + ": " + Collections.frequency(hourList, key));
+			LOGGER.info(key + ": " + Collections.frequency(hourList, key));
 		}
 		
 		return mapLst;
@@ -436,7 +452,8 @@ public class AgentAnalyticsManager {
 		Set<Object> dateWiseCount = new HashSet<Object>(dateWiseList);
 		for (Object key : dateWiseCount) {
 			mapLst.put(key, Collections.frequency(dateWiseList, key));
-		    System.out.println(key + ": " + Collections.frequency(dateWiseList, key));
+			LOGGER.debug(key + ": " + Collections.frequency(dateWiseList, key));
+			LOGGER.info(key + ": " + Collections.frequency(dateWiseList, key));
 		}
 		
 		return mapLst;
@@ -462,7 +479,6 @@ public class AgentAnalyticsManager {
 		Set<Object> dateWiseCount = new HashSet<Object>(weekWiseList);
 		for (Object key : dateWiseCount) {
 			mapLst.put(key, Collections.frequency(weekWiseList, key));
-		    System.out.println(key + ": " + Collections.frequency(weekWiseList, key));
 		}
 		
 		return mapLst;
@@ -525,7 +541,7 @@ public class AgentAnalyticsManager {
 			List<MessageDoc> msgDocLst = getMsgCountAgentContactWise(contactId, dateRange1, dateRange2);
 			totalMsgDocLst.addAll(msgDocLst);
 		}
-		System.out.println("getTotalMessageAgentAndContactWise :"+totalMsgDocLst==null?BigDecimal.ZERO:totalMsgDocLst.size());
+		//LOGGER.debug("getTotalMessageAgentAndContactWise :"+totalMsgDocLst==null?BigDecimal.ZERO:totalMsgDocLst.size());
 		return totalMsgDocLst;
 	}
 	
@@ -542,6 +558,8 @@ public class AgentAnalyticsManager {
 				query.addCriteria(Criteria.where("timestamp").gt(dateRange1).lt(dateRange2));
 				query.with(new Sort(new Order(Direction.ASC, "timestamp")));
 				List<MessageDoc>  totalMsg= mongoTemplate.find(query, MessageDoc.class, contactType.toString());
+				System.out.print("\n ==== contactType :"+contactType+" \t getMsgCountAgentContactWise ==>");
+				System.out.print("\t getMsgCountAgentContactWise :"+totalMsg==null?0:totalMsg.size());
 				totalMsgDoc.addAll(totalMsg);
 			}
 			return totalMsgDoc;

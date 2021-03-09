@@ -48,6 +48,7 @@ import com.boot.jx.admin.dto.PeakLoadDto;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.JsonUtil;
 
 
 @Component
@@ -103,7 +104,8 @@ public class AdminDashBoardManager {
 	}
 	
 	public List<DashBoardResponseDto> getContactWiseDashBoardAnalytics(DashBoardRequestDto req){
-		List<DashBoardResponseDto> dtoLst = new ArrayList<DashBoardResponseDto>();
+		 System.out.println("getContactWiseDashBoardAnalytics { } :"+JsonUtil.toJson(req));
+		 List<DashBoardResponseDto> dtoLst = new ArrayList<DashBoardResponseDto>();
 		 DashBoardResponseDto dto = null;
 		 List<String>  lstContactType=new ArrayList<String>();
 		 
@@ -663,15 +665,7 @@ public class AdminDashBoardManager {
 	}
 
 	// To fetch all the records from a collection
-	public List<MessageDoc> getTotalMsgCount(Object contactType, long startTime, long endTime) {
-		long dateRange1 =0;
-		long dateRange2 =0;
-		if(ArgUtil.is(startTime)) {
-			dateRange1 =agentAnaMgr.todayStartTime();
-		}
-		if(ArgUtil.is(endTime)) {
-		  dateRange2 =agentAnaMgr.todayEndTime();
-		}
+	public List<MessageDoc> getTotalMsgCount(Object contactType, long dateRange1, long dateRange2) {
 		
 		Query queryAll = new Query();
 		queryAll.addCriteria(Criteria.where("timestamp").gt(dateRange1).lt(dateRange2));
@@ -793,7 +787,7 @@ public class AdminDashBoardManager {
 	/** Timestamp **/
 	
 	public Map<Object,Object>  getHourWiseCount(List<MessageDoc>  msgLst) {
-		List<Integer> hourList = new ArrayList<Integer>();
+		List<Long> hourList = new ArrayList<Long>();
 		List<Object> dateWiseList = new ArrayList<Object>();
 		Map<Object,Object> mapLst = new HashMap<Object,Object>();
 		for(MessageDoc msg :msgLst) {
@@ -804,8 +798,12 @@ public class AdminDashBoardManager {
 	         SimpleDateFormat sdfH = new SimpleDateFormat("HH");
 	         String formattedDateH = sdfH.format(date);
 	         dateWiseList.add(ddMMyyyyFormat);
-	         hourList.add(Integer.parseInt(formattedDateH));
-    	// System.out.println(" timeStamp :"+timeStamp+"\t long to date :"+date+"\t str :"+dateWithTime+"\t ddMMyyyyFormat :"+ddMMyyyyFormat+"\t formattedDateH :"+formattedDateH);
+	         /** 1 hr gap **/
+	         long hourTimeSamp = (long)(timeStamp / (60 * 1000));  
+	         long hh = timeStamp/hourTimeSamp;
+	        // hourList.add(Long.parseLong(formattedDateH)); hour wise count 
+	         hourList.add(hh);
+    	 System.out.println(" timeStamp :"+timeStamp+"\t long to date :"+date+"\t formattedDateH :"+formattedDateH+"\t hourTimeSamp :"+hourTimeSamp+"\t hh :"+hh);
 		}
 		Collections.sort(hourList);
 		Set<Object> hourWiseCount = new HashSet<Object>(hourList);
