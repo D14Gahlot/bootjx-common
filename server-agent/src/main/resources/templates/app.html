@@ -154,6 +154,95 @@ html.loadable .loader--text:after {
   }
 }
 
+
+
+html.loadable .dot-pulse::before {
+  content: '';
+  display: inline-block;
+  position: absolute;
+  top: 0;
+  width: 15px;
+  height: 15px;
+  border-radius: 15px;
+  background-color: #40a6db;
+  color: #40a6db;
+  margin: 0px 0px 0px -30px;
+
+  box-shadow: 9984px 0 0 -15px #40a6db;
+  animation: dotPulseBefore 1.5s infinite linear;
+  animation-delay: 0s;
+}
+
+html.loadable .dot-pulse {
+  position: relative;
+  left: -9999px;
+  width: 15px;
+  height: 15px;
+  border-radius: 15px;
+  background-color: #db3a70;
+  color: #db3a70;
+  margin-left: 100px;
+
+  box-shadow: 9999px 0 0 -15px #db3a70;
+  animation: dotPulse 1.5s infinite linear;
+  animation-delay: 0s;
+}
+
+html.loadable .dot-pulse::after {
+  content: '';
+  display: inline-block;
+  position: absolute;
+  top: 0;
+  width: 15px;
+  height: 15px;
+  border-radius: 15px;
+  background-color: #f1a948;
+  color: #f1a948;
+  margin-left: 30px;
+
+  box-shadow: 10014px 0 0 -15px #f1a948;
+  animation: dotPulseAfter 1.5s infinite linear;
+  animation-delay: 0s;
+}
+
+@keyframes dotPulseBefore {
+  0%,10% {
+    box-shadow: 9984px 0 0 -15px #40a6db;
+  }
+  20%, 100% {
+    box-shadow: 9984px 0 0 9px #40a6db;
+  }
+}
+
+@keyframes dotPulse {
+  0%,20% {
+    box-shadow: 9999px 0 0 -15px #db3a70;
+  }
+  30%,100% {
+    box-shadow: 9999px 0 0 9px #db3a70;
+  }
+}
+
+@keyframes dotPulseAfter {
+  0%,30% {
+    box-shadow: 10014px 0 0 -15px #f1a948;
+  }
+  40%, 100% {
+    box-shadow: 10014px 0 0 9px #f1a948;
+  }
+}
+
+  .stage {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    padding: 2rem 0;
+    margin: 0 -5%;
+    overflow: hidden;
+  }
+
+
 </style>
 
 
@@ -189,12 +278,15 @@ html.loadable .loader--text:after {
 			without JavaScript enabled. Please enable it to continue.</strong>
 	</noscript>
 	<div class="fullloader bar container">
-		<div class='loader'>
+		<div class='loader hidden'>
 			<div class='loader--dot'></div>
 			<div class='loader--dot'></div>
 			<div class='loader--dot'></div>
 			<div class='loader--text'></div>
 		</div>
+		<div class="loader">
+		     <div class="dot-pulse"></div>
+		 </div>
 	</div>
 
 	<div id=app></div>
