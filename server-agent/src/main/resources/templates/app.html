@@ -16,8 +16,8 @@
 
 <style type="text/css">
 html.loadable {
-    -webkit-transition: background-color 1s;
-    transition: background-color 1s;
+    -webkit-transition: background-color 0.5s;
+    transition: background-color 0.5s;
 }
 html.loadable, body.loadable,.main-content-wrapper{
     min-height: 100%;
@@ -26,8 +26,8 @@ html.loadable.loading {
    background: #292d79;
 }
 html.loadable .main-content-wrapper {
-    -webkit-transition: opacity 1s ease-in;
-    transition: opacity 1s ease-in;
+    -webkit-transition: opacity 0.5s ease-in;
+    transition: opacity 0.5s ease-in;
 }
 html.loadable.loading .main-content-wrapper {
     /* Make the contents of the body opaque during loading */
@@ -44,8 +44,8 @@ html.loadable .fullloader.bar {
     -webkit-transition: background-color 0;
     transition: background-color 0;
     
-    -webkit-transition: opacity 1s ease-in;
-    transition: opacity 1s ease-in;
+    -webkit-transition: opacity 0.5s ease-in;
+    transition: opacity 0.5s ease-in;
     
     bottom: 0px;
     left: 0px;
@@ -278,7 +278,7 @@ html.loadable .dot-pulse::after {
 			without JavaScript enabled. Please enable it to continue.</strong>
 	</noscript>
 	<div class="fullloader bar container">
-		<div class='loader hidden'>
+		<div class='loader' hidden>
 			<div class='loader--dot'></div>
 			<div class='loader--dot'></div>
 			<div class='loader--dot'></div>
