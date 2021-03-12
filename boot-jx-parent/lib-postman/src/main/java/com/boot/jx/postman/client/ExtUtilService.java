@@ -18,6 +18,7 @@ public class ExtUtilService {
 	private String googleSecret = "6LeK33AUAAAAANWoO_wM5_3FxJ0DoPjPZp_n7pVz";
 
 	private static final String tinyUrl = "http://tinyurl.com/api-create.php?url=";
+	private static final String trimUrl = "http://api.tr.im/v1/trim_simple?url=";
 
 	@Autowired
 	RestService restService;
@@ -39,8 +40,19 @@ public class ExtUtilService {
 		BufferedReader reader;
 		try {
 			reader = new BufferedReader(new InputStreamReader(new URL(tinyUrlLookup).openStream()));
-			String tinyUrl = reader.readLine();
-			return tinyUrl;
+			return reader.readLine();
+		} catch (IOException e) {
+			e.printStackTrace();
+			return url;
+		}
+	}
+
+	public String trimUrl(String url) {
+		String tinyUrlLookup = trimUrl + url;
+		BufferedReader reader;
+		try {
+			reader = new BufferedReader(new InputStreamReader(new URL(tinyUrlLookup).openStream()));
+			return reader.readLine();
 		} catch (IOException e) {
 			e.printStackTrace();
 			return url;

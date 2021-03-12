@@ -167,7 +167,7 @@ public class AuthController {
 
 		model.addAttribute("MESSAGE", message);
 		model.addAttribute("PAGE", page);
-		return "login";
+		return "agent-login";
 	}
 
 	@Autowired

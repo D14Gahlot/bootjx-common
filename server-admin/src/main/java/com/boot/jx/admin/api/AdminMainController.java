@@ -24,6 +24,7 @@ import com.boot.jx.admin.service.AgentLoginService;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.http.CommonHttpRequest;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.Constants;
 import com.boot.utils.MapBuilder;
 
 @Controller
@@ -38,12 +39,36 @@ public class AdminMainController {
 	@Autowired
 	private CommonHttpRequest commonHttpRequest;
 
+	@Autowired
+	private AgentLoginService agentLoginService;
+
 	@RequestMapping(value = { "/pub/**", "/app/**", "/auth/**", "/" }, method = { RequestMethod.GET })
 	public String home(Model model, @RequestParam(required = false) String theme) {
 		model.addAttribute("APP_CONTEXT", appConfig.getAppPrefix());
+		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+		if (ArgUtil.is(auth)) {
+			model.addAttribute("APP_USER", auth.getName());
+		} else {
+			model.addAttribute("APP_USER", "");
+		}
+
 		model.addAttribute("CDN_URL", ArgUtil.parseAsString(commonHttpRequest.get("CDN_URL"), cdnServer));
 		model.addAttribute("CDN_DEBUG", ArgUtil.parseAsString(commonHttpRequest.get("CDN_DEBUG"), "false"));
 		return "app";
+	}
+
+	@RequestMapping(value = { "/auth/login" }, method = { RequestMethod.POST, RequestMethod.GET })
+	public String login(Model model) {
+		model.addAttribute("CDN_URL", ArgUtil.parseAsString(commonHttpRequest.get("CDN_URL"), cdnServer));
+		model.addAttribute("CDN_DEBUG", ArgUtil.parseAsString(commonHttpRequest.get("CDN_DEBUG"), "false"));
+		model.addAttribute("APP_CONTEXT", appConfig.getAppPrefix());
+		model.addAttribute("STAMP", System.currentTimeMillis());
+		String page = ArgUtil.parseAsString(commonHttpRequest.get("page"), "login");
+		String action = ArgUtil.parseAsString(commonHttpRequest.get("action"), "login");
+		Object message = Constants.BLANK;
+		model.addAttribute("MESSAGE", message);
+		model.addAttribute("PAGE", page);
+		return "admin-login";
 	}
 
 	@Autowired
@@ -90,9 +115,6 @@ public class AdminMainController {
 		}
 		return x;
 	}
-
-	@Autowired
-	private AgentLoginService agentLoginService;
 
 	@ResponseBody
 	@RequestMapping(value = "/auth/agent/login", method = { RequestMethod.POST })
