@@ -7,7 +7,6 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Component;
 
 import com.boot.utils.ArgUtil;
-import com.boot.utils.UniqueID;
 
 @Component
 public class SammpleReplies {
@@ -46,12 +45,12 @@ public class SammpleReplies {
 				"https://res.cloudinary.com/www-mehery-com/image/upload/v1611688333/samples/ecommerce/shoes.png"));
 
 		// Quick Replies
-		mongoTemplate.save(createQuickReply("Hello", "greeting"));
-		mongoTemplate.save(createQuickReply("Very Good Morning", "greeting-morning"));
-		mongoTemplate.save(createQuickReply("Very Good After Noon", "greeting-afternoon"));
-		mongoTemplate.save(createQuickReply("Very Good Evening", "greeting-evening"));
-		mongoTemplate.save(createQuickReply("Nice talking too.", "conversation-complete"));
-		mongoTemplate.save(createQuickReply("You're welcome.", "conversation-complete"));
+		mongoTemplate.save(createQuickReply("0", "Hello", "greeting"));
+		mongoTemplate.save(createQuickReply("1", "Very Good Morning", "greeting-morning"));
+		mongoTemplate.save(createQuickReply("2", "Very Good After Noon", "greeting-afternoon"));
+		mongoTemplate.save(createQuickReply("3", "Very Good Evening", "greeting-evening"));
+		mongoTemplate.save(createQuickReply("4", "Nice talking too.", "conversation-complete"));
+		mongoTemplate.save(createQuickReply("5", "You're welcome.", "conversation-complete"));
 
 	}
 
@@ -72,16 +71,14 @@ public class SammpleReplies {
 		return temp5;
 	}
 
-	private QuickReply createQuickReply(String title, String category) {
-		QuickReply.CompositeKey id = new QuickReply.CompositeKey();
-		id.setCategory(category);
-		id.setSubject(title);
+	private QuickReply createQuickReply(String id, String title, String category) {
 		QuickReply temp5 = mongoTemplate.findById(id, QuickReply.class);
 		if (ArgUtil.isEmpty(temp5)) {
 			temp5 = new QuickReply();
-			temp5.setId(id);
-			temp5.setUniqueId(UniqueID.generateString());
 		}
+		temp5.setId(id);
+		temp5.setTitle(title);
+		temp5.setCategory(category);
 		return temp5;
 	}
 

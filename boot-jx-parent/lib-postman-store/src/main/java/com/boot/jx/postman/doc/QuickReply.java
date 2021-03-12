@@ -4,52 +4,26 @@ import java.io.Serializable;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.TypeAlias;
-import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import com.boot.utils.ArgUtil;
-
-@Document(collection = "DICT_QUICK_RESP")
+@Document(collection = "DICT_QUICK_REPS")
 @TypeAlias("QuickReply")
 public class QuickReply implements Serializable {
 	private static final long serialVersionUID = -5649094988762846983L;
 
 	@Id
-	private CompositeKey id;
-
-	@Indexed(unique = true)
-	private String uniqueId;
-
+	private String id;
+	private String title;
+	private String category;
 	private String message;
 	private String template;
 
-	public CompositeKey id() {
-		if (!ArgUtil.is(this.id)) {
-			this.id = new CompositeKey();
-		}
-		return id;
+	public String getCategory() {
+		return category;
 	}
 
-	public static class CompositeKey implements Serializable {
-		private static final long serialVersionUID = 2466914948472674930L;
-		private String subject;
-		private String category;
-
-		public String getSubject() {
-			return subject;
-		}
-
-		public void setSubject(String subject) {
-			this.subject = subject;
-		}
-
-		public String getCategory() {
-			return category;
-		}
-
-		public void setCategory(String category) {
-			this.category = category;
-		}
+	public void setCategory(String category) {
+		this.category = category;
 	}
 
 	public String getMessage() {
@@ -68,20 +42,20 @@ public class QuickReply implements Serializable {
 		this.template = template;
 	}
 
-	public CompositeKey getId() {
+	public String getTitle() {
+		return title;
+	}
+
+	public void setTitle(String title) {
+		this.title = title;
+	}
+
+	public String getId() {
 		return id;
 	}
 
-	public void setId(CompositeKey id) {
+	public void setId(String id) {
 		this.id = id;
-	}
-
-	public String getUniqueId() {
-		return uniqueId;
-	}
-
-	public void setUniqueId(String uniqueId) {
-		this.uniqueId = uniqueId;
 	}
 
 }
