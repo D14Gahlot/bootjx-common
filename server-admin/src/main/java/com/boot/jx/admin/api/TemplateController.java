@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.boot.jx.api.ApiResponse;
 import com.boot.jx.postman.doc.QuickReply;
 
 @RestController
@@ -34,27 +35,27 @@ public class TemplateController {
 	}
 
 	@RequestMapping(value = "/api/tmpl/quickreps", method = { RequestMethod.GET })
-	public List<QuickReply> listQuickReply() {
-		return mongoTemplate.findAll(QuickReply.class);
+	public ApiResponse<QuickReply, Object> listQuickReply() {
+		return ApiResponse.buildResults(mongoTemplate.findAll(QuickReply.class));
 	}
 
 	@RequestMapping(value = "/api/tmpl/quickreps", method = { RequestMethod.DELETE })
-	public List<QuickReply> deleteQuickReply(@RequestParam String id) {
+	public ApiResponse<QuickReply, Object> deleteQuickReply(@RequestParam String id) {
 		QuickReply qr = new QuickReply();
 		qr.setId(id);
 		mongoTemplate.remove(qr);
-		return mongoTemplate.findAll(QuickReply.class);
+		return ApiResponse.buildResults(mongoTemplate.findAll(QuickReply.class)).data(qr).message("QuickReply deleted");
 	}
 
 	@RequestMapping(value = "/api/tmpl/quickreps", method = { RequestMethod.POST })
-	public List<QuickReply> createQuickReply(@RequestParam String category, @RequestParam String title,
+	public ApiResponse<QuickReply, Object> createQuickReply(@RequestParam String category, @RequestParam String title,
 			@RequestParam(required = false) String template) {
 		QuickReply qr = new QuickReply();
 		qr.setCategory(category);
 		qr.setTitle(title);
 		qr.setTemplate(template);
 		mongoTemplate.save(qr);
-		return mongoTemplate.findAll(QuickReply.class);
+		return ApiResponse.buildResults(mongoTemplate.findAll(QuickReply.class)).data(qr).message("QuickReply created");
 	}
 
 }
