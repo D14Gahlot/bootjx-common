@@ -49,6 +49,11 @@ public class TemplateController {
 	@RequestMapping(value = "/api/tmpl/quickreps", method = { RequestMethod.POST })
 	public List<QuickReply> createQuickReply(@RequestParam String category, @RequestParam String title,
 			@RequestParam(required = false) String template) {
+		QuickReply qr = new QuickReply();
+		qr.setCategory(category);
+		qr.setTitle(title);
+		qr.setTemplate(template);
+		mongoTemplate.save(qr);
 		return mongoTemplate.findAll(QuickReply.class);
 	}
 
