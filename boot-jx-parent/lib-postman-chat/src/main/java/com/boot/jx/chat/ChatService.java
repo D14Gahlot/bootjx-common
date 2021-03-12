@@ -99,17 +99,21 @@ public class ChatService {
 
 	public void reply(OutboxMessage outboxMessage) throws InterruptedException {
 		InboxMessage inboxMessage = chatContext.getInboxMessage();
+		ChatContactDoc chatContactDoc = sessionStore.getContact(inboxMessage.getContactId());
 		if (ArgUtil.isEmpty(outboxMessage.session().getAgent())) {
 			outboxMessage.session().setAgent(chatClient.getDefaultSender());
 		}
+		outboxMessage.model().put("contact", ChatDTOUtil.getContactDTO(chatContactDoc));
 		replyIntenal(inboxMessage, outboxMessage);
 	}
 
 	public void reply(ChatSessionDoc sessionDoc, OutboxMessage outboxMessage) {
 		InboxMessage inboxMessage = sessionStore.toInboxMessage(sessionDoc);
+		ChatContactDoc chatContactDoc = sessionStore.getContact(sessionDoc.getContactId());
 		if (ArgUtil.isEmpty(outboxMessage.session().getAgent())) {
 			outboxMessage.session().setAgent(sessionDoc.getAssignedToAgent());
 		}
+		outboxMessage.model().put("contact", ChatDTOUtil.getContactDTO(chatContactDoc));
 		replyIntenal(inboxMessage, outboxMessage);
 	}
 
@@ -118,6 +122,7 @@ public class ChatService {
 		if (ArgUtil.isEmpty(outboxMessage.session().getAgent())) {
 			outboxMessage.session().setAgent(sessionDoc.getAssignedToAgent());
 		}
+		outboxMessage.model().put("contact", ChatDTOUtil.getContactDTO(chatContactDoc));
 		sendIntenal(chatContactDoc, outboxMessage);
 	}
 
@@ -125,6 +130,7 @@ public class ChatService {
 		if (ArgUtil.isEmpty(outboxMessage.session().getAgent())) {
 			outboxMessage.session().setAgent(chatClient.getDefaultSender());
 		}
+		outboxMessage.model().put("contact", ChatDTOUtil.getContactDTO(chatContactDoc));
 		sendIntenal(chatContactDoc, outboxMessage);
 	}
 

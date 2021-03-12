@@ -3,6 +3,7 @@ package com.boot.jx.agent.dto;
 import java.io.Serializable;
 import java.util.List;
 
+import com.boot.jx.postman.dto.ContactDTO;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -36,6 +37,8 @@ public class ChatSessionDto implements Serializable {
 
 	boolean assigned;
 	boolean active;
+
+	private ContactDTO contact;
 
 	private List<ChatMessageDto> messages;
 
@@ -189,5 +192,13 @@ public class ChatSessionDto implements Serializable {
 
 	public void setCloseSessionStamp(long closeSessionStamp) {
 		this.closeSessionStamp = closeSessionStamp;
+	}
+
+	public ContactDTO getContact() {
+		return contact;
+	}
+
+	public void setContact(ContactDTO contact) {
+		this.contact = contact;
 	}
 }

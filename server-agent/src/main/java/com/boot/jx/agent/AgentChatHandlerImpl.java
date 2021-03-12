@@ -17,6 +17,7 @@ import com.boot.jx.agent.dto.ChatMessageDto;
 import com.boot.jx.agent.dto.ChatSessionDto;
 import com.boot.jx.chat.ChatClient;
 import com.boot.jx.chat.ChatCommands;
+import com.boot.jx.chat.ChatDTOUtil;
 import com.boot.jx.chat.ChatService;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
@@ -209,6 +210,8 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 		chatSessionDto.setAssignedToDept(chatSessionDoc.getAssignedToDept());
 		chatSessionDto.setContactId(contact.getContactId());
 		chatSessionDto.setActive(chatSessionDoc.isActive());
+		chatSessionDto.setContact(ChatDTOUtil.getContactDTO(contact));
+
 		return chatSessionDto;
 	}
 
