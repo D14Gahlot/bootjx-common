@@ -1,5 +1,9 @@
 package com.boot.jx.postman.client;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.URL;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,9 +13,11 @@ import com.boot.jx.rest.RestService;
 import com.boot.utils.ArgUtil;
 
 @Component
-public class GoogleService {
+public class ExtUtilService {
 
 	private String googleSecret = "6LeK33AUAAAAANWoO_wM5_3FxJ0DoPjPZp_n7pVz";
+
+	private static final String tinyUrl = "http://tinyurl.com/api-create.php?url=";
 
 	@Autowired
 	RestService restService;
@@ -26,5 +32,18 @@ public class GoogleService {
 		}
 		return false;
 
+	}
+
+	public String tinyUrl(String url) {
+		String tinyUrlLookup = tinyUrl + url;
+		BufferedReader reader;
+		try {
+			reader = new BufferedReader(new InputStreamReader(new URL(tinyUrlLookup).openStream()));
+			String tinyUrl = reader.readLine();
+			return tinyUrl;
+		} catch (IOException e) {
+			e.printStackTrace();
+			return url;
+		}
 	}
 }

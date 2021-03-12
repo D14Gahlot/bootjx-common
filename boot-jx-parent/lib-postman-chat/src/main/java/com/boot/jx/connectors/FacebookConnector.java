@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorHandler;
 import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorMapping;
 import com.boot.jx.dict.ContactType;
+import com.boot.jx.postman.client.ExtUtilService;
 import com.boot.jx.postman.client.TmplClient;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
@@ -40,6 +41,9 @@ public class FacebookConnector implements ConnectorHandler {
 
 	@Autowired
 	private TmplClient tmplClient;
+	
+	@Autowired
+	ExtUtilService extUtilService;
 
 	public OutboxMessage sendOutboxMessage(String lane, String to, OutboxMessage outboxMessage) {
 		FacebookMessageResp resp = null;
@@ -54,7 +58,7 @@ public class FacebookConnector implements ConnectorHandler {
 						req.attachmentType("image").attachmentUrl(attachment.getMediaURL());
 					} else {
 						req.messageType("text");
-						req.messageText(attachment.getMediaURL());
+						req.messageText(extUtilService.tinyUrl(attachment.getMediaURL()));
 						//req.attachmentType("file").attachmentUrl(attachment.getMediaURL());
 					}
 				}

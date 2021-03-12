@@ -17,6 +17,7 @@ import org.springframework.stereotype.Component;
 import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorHandler;
 import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorMapping;
 import com.boot.jx.dict.ContactType;
+import com.boot.jx.postman.client.ExtUtilService;
 import com.boot.jx.postman.client.TmplClient;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
@@ -57,6 +58,9 @@ public class TwitterConnector implements ConnectorHandler {
 	@Autowired
 	private TmplClient tmplClient;
 
+	@Autowired
+	private ExtUtilService extUtilService;
+
 	private String getMediaId(String lane, TemplateReply templateReply)
 			throws IOException, MalformedURLException, TwitterException {
 		String mediaId = ArgUtil.parseAsString(templateReply.meta().get("twitterMediaId"));
@@ -79,7 +83,7 @@ public class TwitterConnector implements ConnectorHandler {
 		if (ArgUtil.is(outboxMessage.getAttachments())) {
 			for (Attachment attachment : outboxMessage.getAttachments()) {
 				if (ArgUtil.is(attachment.getMediaURL())) {
-					sj.add(attachment.getMediaURL());
+					sj.add(extUtilService.tinyUrl(attachment.getMediaURL()));
 				}
 			}
 		}
