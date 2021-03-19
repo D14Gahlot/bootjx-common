@@ -191,8 +191,8 @@ public class SessionStore {
 						),
 						// Is not resolved yet
 						new Criteria().orOperator(
-								Criteria.where("resolvedSessionStamp").exists(false),
-								Criteria.where("resolvedSessionStamp").is(0L)
+								Criteria.where("resolveSessionStamp").exists(false),
+								Criteria.where("resolveSessionStamp").is(0L)
 						)
 						
 				)
