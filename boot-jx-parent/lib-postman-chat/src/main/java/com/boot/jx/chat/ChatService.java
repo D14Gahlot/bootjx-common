@@ -218,4 +218,11 @@ public class ChatService {
 		return session.isInitd();
 	}
 
+	public boolean resolveSession(ChatSessionDoc session) {
+		if (ArgUtil.is(session.getResolveSessionStamp())) {
+			return true;
+		}
+		session = sessionStore.resolveSession(session);
+		return true;
+	}
 }

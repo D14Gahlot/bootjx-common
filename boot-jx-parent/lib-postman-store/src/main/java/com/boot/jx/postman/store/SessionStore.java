@@ -3,8 +3,6 @@ package com.boot.jx.postman.store;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -185,8 +183,16 @@ public class SessionStore {
 
 		query2.addCriteria(Criteria.where("assignedToDept").in(PMStoreConstants.NO_DEPT, agentDept).and("active")
 				.is(true).and("lastInComingStamp").gt(cal.getTimeInMillis())
-				.andOperator(new Criteria().orOperator(Criteria.where("assignedToAgent").exists(false),
-						Criteria.where("assignedToAgent").is(agentCode))));
+				.andOperator(
+						// Is not assigned to any agent or assigned to said agent
+						new Criteria().orOperator(
+								Criteria.where("assignedToAgent").exists(false),
+								Criteria.where("assignedToAgent").is(agentCode)
+						),
+						// Is not resolved yet
+						Criteria.where("resolvedSessionStamp").exists(false)
+				)
+		);
 
 		return mongoTemplate.find(query2, ChatSessionDoc.class);
 	}
@@ -253,4 +259,15 @@ public class SessionStore {
 		return chatSessionDoc;
 	}
 
+	public ChatSessionDoc resolveSession(ChatSessionDoc chatSessionDoc) {
+		chatSessionDoc.setResolveSessionStamp(System.currentTimeMillis());
+		save(chatSessionDoc);
+//		Query query2 = new Query();
+//		query2.addCriteria(Criteria.where("sessionId").is(chatSessionDoc.getSessionId()));
+//		Update update = Update.update("initd", true);
+//		mongoTemplate.updateMulti(query2, update, ChatSessionDoc.class);
+//		chatSessionDoc.setInitd(true);
+		return chatSessionDoc;
+	}
+	
 }

@@ -40,6 +40,7 @@ public class ChatSessionDoc implements Serializable {
 	private long assignedAgentStamp;
 
 	private long lastResponseStamp;
+	private long resolveSessionStamp;
 	private long closeSessionStamp;
 
 	private Integer agentScore;
@@ -189,6 +190,14 @@ public class ChatSessionDoc implements Serializable {
 
 	public void setContactName(String contactName) {
 		this.contactName = contactName;
+	}
+
+	public long getResolveSessionStamp() {
+		return resolveSessionStamp;
+	}
+
+	public void setResolveSessionStamp(long resolveSessionStamp) {
+		this.resolveSessionStamp = resolveSessionStamp;
 	}
 
 }

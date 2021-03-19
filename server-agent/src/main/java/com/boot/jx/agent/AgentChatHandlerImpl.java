@@ -110,8 +110,7 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 	}
 
 	public void exitAgentMode(ChatSessionDoc chatSessionDoc) {
-		chatSessionDoc.setActive(false);
-		sessionStore.save(chatSessionDoc);
+		chatService.resolveSession(chatSessionDoc);
 		stompTunnelService.sendToAll("/dept/onassign-" + chatSessionDoc.getAssignedToDept(),
 				getChatSessionDto(chatSessionDoc, chatSessionDoc.getAssignedToAgent()));
 	}
