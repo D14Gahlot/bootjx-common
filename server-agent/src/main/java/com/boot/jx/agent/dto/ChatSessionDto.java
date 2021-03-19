@@ -33,7 +33,7 @@ public class ChatSessionDto implements Serializable {
 	private long assignedAgentStamp;
 
 	private long lastResponseStamp;
-	private long resolvedSessionStamp;
+	private long resolveSessionStamp;
 	private long closeSessionStamp;
 
 	boolean assigned;
@@ -203,11 +203,11 @@ public class ChatSessionDto implements Serializable {
 		this.contact = contact;
 	}
 
-	public long getResolvedSessionStamp() {
-		return resolvedSessionStamp;
+	public long getResolveSessionStamp() {
+		return resolveSessionStamp;
 	}
 
-	public void setResolvedSessionStamp(long resolvedSessionStamp) {
-		this.resolvedSessionStamp = resolvedSessionStamp;
+	public void setResolveSessionStamp(long resolvedSessionStamp) {
+		this.resolveSessionStamp = resolvedSessionStamp;
 	}
 }
