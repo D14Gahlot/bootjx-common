@@ -219,7 +219,7 @@ public class ChatService {
 	}
 
 	public boolean resolveSession(ChatSessionDoc session) {
-		if (ArgUtil.is(session.getResolveSessionStamp())) {
+		if (!ArgUtil.isNone(session.getResolveSessionStamp()) ) {
 			return true;
 		}
 		session = sessionStore.resolveSession(session);
