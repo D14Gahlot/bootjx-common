@@ -169,7 +169,8 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 
 	public ChatSessionDto getChatSessionDto(ChatSessionDoc chatSessionDoc, String agentCode) {
 		ChatSessionDto chatSessionDto = toChatSessionDto(chatSessionDoc);
-		chatSessionDto.setAssigned(ArgUtil.areEqual(chatSessionDoc.getAssignedToAgent(), agentCode));
+		chatSessionDto.setAssigned(ArgUtil.areEqual(chatSessionDoc.getAssignedToAgent(), agentCode)
+				&& ArgUtil.isNone(chatSessionDoc.getResolveSessionStamp()));
 		List<ChatMessageDto> messageDtos = getMessages(chatSessionDto);
 		chatSessionDto.setMessages(messageDtos);
 		return chatSessionDto;
