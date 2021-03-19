@@ -190,7 +190,11 @@ public class SessionStore {
 								Criteria.where("assignedToAgent").is(agentCode)
 						),
 						// Is not resolved yet
-						Criteria.where("resolvedSessionStamp").exists(false)
+						new Criteria().orOperator(
+								Criteria.where("resolvedSessionStamp").exists(false),
+								Criteria.where("resolvedSessionStamp").is(0L)
+						)
+						
 				)
 		);
 
