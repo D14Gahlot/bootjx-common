@@ -16,7 +16,7 @@ import com.boot.utils.ArgUtil;
 public class ChatController {
 
 	@Autowired
-	private ChatService chatService;
+	protected ChatService chatService;
 
 	@Autowired
 	private ChatContext chatContext;
@@ -57,6 +57,10 @@ public class ChatController {
 
 	public ApiResponse<InboxMessage, Object> assignToAgent() {
 		return assignToAgent(null);
+	}
+
+	public void botScore(Integer botScore) {
+		chatService.botScore(chatContext.getChatSession(), botScore);
 	}
 
 	public void next(String key) {

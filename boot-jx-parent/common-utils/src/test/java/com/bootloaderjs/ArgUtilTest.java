@@ -23,6 +23,8 @@ public class ArgUtilTest { // Noncompliant
 		checkAssert("=====null", ArgUtil.isNone(3), false);
 		checkAssert("=====null", ArgUtil.isNone("3"), false);
 		checkAssert("=====null", ArgUtil.isNone("0"), false);
+		checkAssert("=====null", ArgUtil.isNone(false), true);
+		checkAssert("=====null", ArgUtil.isNone(Boolean.FALSE), true);
 	}
 
 	public static void checkAssert(String name, Object a, Object b) throws ParseException {

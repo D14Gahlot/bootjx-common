@@ -711,6 +711,10 @@ public final class ArgUtil {
 			if ((Long) object == 0L) {
 				return true;
 			}
+		} else if (object instanceof Boolean) {
+			if ((Boolean) object == Boolean.FALSE) {
+				return true;
+			}
 		} else if (object instanceof Integer) {
 			if ((Integer) object == 0) {
 				return true;

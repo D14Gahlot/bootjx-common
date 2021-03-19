@@ -38,6 +38,7 @@ public class ChatSessionDto implements Serializable {
 
 	boolean assigned;
 	boolean active;
+	private boolean resolved;
 
 	private ContactDTO contact;
 
@@ -209,5 +210,13 @@ public class ChatSessionDto implements Serializable {
 
 	public void setResolveSessionStamp(long resolvedSessionStamp) {
 		this.resolveSessionStamp = resolvedSessionStamp;
+	}
+
+	public boolean isResolved() {
+		return resolved;
+	}
+
+	public void setResolved(boolean resolved) {
+		this.resolved = resolved;
 	}
 }

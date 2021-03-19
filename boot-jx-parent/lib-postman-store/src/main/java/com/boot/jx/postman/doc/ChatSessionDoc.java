@@ -30,6 +30,7 @@ public class ChatSessionDoc implements Serializable {
 
 	private boolean active;
 	private boolean initd;
+	private boolean resolved;
 
 	private long startSessionStamp;
 	private long fistResponseStamp;
@@ -198,6 +199,14 @@ public class ChatSessionDoc implements Serializable {
 
 	public void setResolveSessionStamp(long resolveSessionStamp) {
 		this.resolveSessionStamp = resolveSessionStamp;
+	}
+
+	public boolean isResolved() {
+		return resolved;
+	}
+
+	public void setResolved(boolean resolved) {
+		this.resolved = resolved;
 	}
 
 }

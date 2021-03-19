@@ -132,6 +132,7 @@ public class DemoController extends ChatController {
 		case "yes":
 		case "y":
 		case "1":
+			botScore(0);
 			reply("Thanks");
 			break;
 		case "not happy":
@@ -139,6 +140,7 @@ public class DemoController extends ChatController {
 		case "no":
 		case "n":
 		case "2":
+			botScore(0);
 			transferToAgent(inboxMessage, matcher);
 			break;
 		default:

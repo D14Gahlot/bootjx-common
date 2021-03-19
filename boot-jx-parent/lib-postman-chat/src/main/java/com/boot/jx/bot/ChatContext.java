@@ -5,6 +5,7 @@ import org.springframework.stereotype.Component;
 
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatMeta;
+import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.store.DefaultChatContextStore;
 import com.boot.jx.postman.store.IChatContextStore;
@@ -24,6 +25,7 @@ public class ChatContext {
 	ChatMeta meta;
 	InboxMessage inboxMessage;
 	ChatContactDoc chatContactDoc;
+	ChatSessionDoc chatSessionDoc;
 
 	@Autowired(required = false)
 	ChatContextStore<?, ?> store;
@@ -54,6 +56,13 @@ public class ChatContext {
 			chatContactDoc = sessionStore.getContact(inboxMessage);
 		}
 		return chatContactDoc;
+	}
+
+	public ChatSessionDoc getChatSession() {
+		if (chatSessionDoc == null) {
+			chatSessionDoc = sessionStore.getSession(inboxMessage.getSessionId());
+		}
+		return chatSessionDoc;
 	}
 
 	@SuppressWarnings("unchecked")

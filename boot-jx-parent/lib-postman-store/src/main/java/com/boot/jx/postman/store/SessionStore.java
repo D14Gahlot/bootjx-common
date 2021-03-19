@@ -127,6 +127,7 @@ public class SessionStore {
 		inboxMessage.session().setAgent(chatSessionDoc.getAssignedToAgent());
 		inboxMessage.session().setDept(chatSessionDoc.getAssignedToDept());
 		inboxMessage.session().setMode(chatSessionDoc.getMode());
+		inboxMessage.session().setResolved(chatSessionDoc.isResolved());
 
 		return chatSessionDoc;
 	}
@@ -182,22 +183,16 @@ public class SessionStore {
 		cal.add(Calendar.DATE, -2);
 
 		query2.addCriteria(Criteria.where("assignedToDept").in(PMStoreConstants.NO_DEPT, agentDept).and("active")
-				.is(true).and("lastInComingStamp").gt(cal.getTimeInMillis())
-				.andOperator(
+				.is(true).and("lastInComingStamp").gt(cal.getTimeInMillis()).andOperator(
 						// Is not assigned to any agent or assigned to said agent
-						new Criteria().orOperator(
-								Criteria.where("assignedToAgent").exists(false),
-								Criteria.where("assignedToAgent").is(agentCode)
-						),
+						new Criteria().orOperator(Criteria.where("assignedToAgent").exists(false),
+								Criteria.where("assignedToAgent").is(agentCode)),
 						// Is not resolved yet
-						new Criteria().orOperator(
-								Criteria.where("resolveSessionStamp").exists(false),
-								Criteria.where("resolveSessionStamp").is(0L)
-						)
-						
-				)
-		);
+						new Criteria().orOperator(Criteria.where("resolved").exists(false),
+								Criteria.where("resolved").is(true))
 
+				));
+		//LOGGER.info(query2.toString());
 		return mongoTemplate.find(query2, ChatSessionDoc.class);
 	}
 
@@ -228,7 +223,7 @@ public class SessionStore {
 			}
 		}
 		query2.addCriteria(new Criteria().orOperator(orExpression.toArray(new Criteria[orExpression.size()])));
-		LOGGER.info(query2.toString());
+		//LOGGER.info(query2.toString());
 		return mongoTemplate.find(query2, ChatSessionDoc.class);
 	}
 
@@ -265,6 +260,7 @@ public class SessionStore {
 
 	public ChatSessionDoc resolveSession(ChatSessionDoc chatSessionDoc) {
 		chatSessionDoc.setResolveSessionStamp(System.currentTimeMillis());
+		chatSessionDoc.setResolved(true);
 		save(chatSessionDoc);
 //		Query query2 = new Query();
 //		query2.addCriteria(Criteria.where("sessionId").is(chatSessionDoc.getSessionId()));
@@ -273,5 +269,23 @@ public class SessionStore {
 //		chatSessionDoc.setInitd(true);
 		return chatSessionDoc;
 	}
-	
+
+	public ChatSessionDoc closeSession(ChatSessionDoc chatSessionDoc) {
+		chatSessionDoc.setCloseSessionStamp(System.currentTimeMillis());
+		chatSessionDoc.setActive(false);
+		save(chatSessionDoc);
+		return chatSessionDoc;
+	}
+
+	public ChatSessionDoc botScore(ChatSessionDoc chatSessionDoc, Integer botScore) {
+		chatSessionDoc.setBotScore(botScore);
+		save(chatSessionDoc);
+		return chatSessionDoc;
+	}
+
+	public ChatSessionDoc agentScore(ChatSessionDoc chatSessionDoc, Integer agentScore) {
+		chatSessionDoc.setAgentScore(agentScore);
+		save(chatSessionDoc);
+		return chatSessionDoc;
+	}
 }

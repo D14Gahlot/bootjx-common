@@ -219,10 +219,28 @@ public class ChatService {
 	}
 
 	public boolean resolveSession(ChatSessionDoc session) {
-		if (!ArgUtil.isNone(session.getResolveSessionStamp()) ) {
+		if (!ArgUtil.isNone(session.getResolveSessionStamp())) {
 			return true;
 		}
 		session = sessionStore.resolveSession(session);
+		return true;
+	}
+
+	public boolean closeSession(ChatSessionDoc session) {
+		if (!session.isActive()) {
+			return true;
+		}
+		session = sessionStore.closeSession(session);
+		return true;
+	}
+
+	public boolean botScore(ChatSessionDoc session, Integer botScore) {
+		session = sessionStore.botScore(session, botScore);
+		return true;
+	}
+
+	public boolean agentScore(ChatSessionDoc session, Integer botScore) {
+		session = sessionStore.agentScore(session, botScore);
 		return true;
 	}
 }

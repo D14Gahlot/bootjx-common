@@ -7,6 +7,7 @@ public class MessageSession implements Serializable {
 	private String dept;
 	private String agent;
 	private String mode;
+	private boolean resolved;
 
 	public String getDept() {
 		return dept;
@@ -30,5 +31,13 @@ public class MessageSession implements Serializable {
 
 	public void setMode(String mode) {
 		this.mode = mode;
+	}
+
+	public boolean isResolved() {
+		return resolved;
+	}
+
+	public void setResolved(boolean resolved) {
+		this.resolved = resolved;
 	}
 }

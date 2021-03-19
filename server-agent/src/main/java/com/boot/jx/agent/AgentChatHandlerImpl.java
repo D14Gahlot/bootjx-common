@@ -111,6 +111,7 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 
 	public void exitAgentMode(ChatSessionDoc chatSessionDoc) {
 		chatService.resolveSession(chatSessionDoc);
+		chatService.closeSession(chatSessionDoc);
 		stompTunnelService.sendToAll("/dept/onassign-" + chatSessionDoc.getAssignedToDept(),
 				getChatSessionDto(chatSessionDoc, chatSessionDoc.getAssignedToAgent()));
 	}
