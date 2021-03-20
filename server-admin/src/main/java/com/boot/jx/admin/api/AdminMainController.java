@@ -41,6 +41,10 @@ public class AdminMainController {
 
 	@Autowired
 	private AgentLoginService agentLoginService;
+	
+	private long getVersion() {
+		return System.currentTimeMillis() / 300000;
+	}
 
 	@RequestMapping(value = { "/pub/**", "/app/**", "/auth/**", "/" }, method = { RequestMethod.GET })
 	public String home(Model model, @RequestParam(required = false) String theme) {
@@ -51,7 +55,7 @@ public class AdminMainController {
 		} else {
 			model.addAttribute("APP_USER", "");
 		}
-
+		model.addAttribute("CDN_VERSION", getVersion());
 		model.addAttribute("CDN_URL", ArgUtil.parseAsString(commonHttpRequest.get("CDN_URL"), cdnServer));
 		model.addAttribute("CDN_DEBUG", ArgUtil.parseAsString(commonHttpRequest.get("CDN_DEBUG"), "false"));
 		return "app";
@@ -59,6 +63,7 @@ public class AdminMainController {
 
 	@RequestMapping(value = { "/auth/login" }, method = { RequestMethod.POST, RequestMethod.GET })
 	public String login(Model model) {
+		model.addAttribute("CDN_VERSION", getVersion());
 		model.addAttribute("CDN_URL", ArgUtil.parseAsString(commonHttpRequest.get("CDN_URL"), cdnServer));
 		model.addAttribute("CDN_DEBUG", ArgUtil.parseAsString(commonHttpRequest.get("CDN_DEBUG"), "false"));
 		model.addAttribute("APP_CONTEXT", appConfig.getAppPrefix());
