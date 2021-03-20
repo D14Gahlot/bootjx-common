@@ -189,7 +189,7 @@ public class SessionStore {
 								Criteria.where("assignedToAgent").is(agentCode)),
 						// Is not resolved yet
 						new Criteria().orOperator(Criteria.where("resolved").exists(false),
-								Criteria.where("resolved").is(true))
+								Criteria.where("resolved").is(false))
 
 				));
 		//LOGGER.info(query2.toString());
