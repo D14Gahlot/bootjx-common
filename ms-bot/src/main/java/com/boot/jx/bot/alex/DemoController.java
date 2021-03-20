@@ -132,8 +132,10 @@ public class DemoController extends ChatController {
 		case "yes":
 		case "y":
 		case "1":
-			botScore(0);
+			botScore(10);
 			reply("Thanks");
+			resolveSession();
+			closeSession();
 			break;
 		case "not happy":
 		case "nothappy":

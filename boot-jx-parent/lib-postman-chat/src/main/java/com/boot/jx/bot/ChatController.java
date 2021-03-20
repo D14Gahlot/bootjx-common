@@ -63,6 +63,18 @@ public class ChatController {
 		chatService.botScore(chatContext.getChatSession(), botScore);
 	}
 
+	public void agentScore(Integer agentScore) {
+		chatService.agentScore(chatContext.getChatSession(), agentScore);
+	}
+
+	public void resolveSession() {
+		chatService.resolveSession(chatContext.getChatSession());
+	}
+
+	public void closeSession() {
+		chatService.closeSession(chatContext.getChatSession());
+	}
+
 	public void next(String key) {
 		chatService.getChatContext().meta().setNextHandler(key);
 	}
