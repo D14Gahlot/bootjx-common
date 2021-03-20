@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.postman.doc.QuickReply;
+import com.boot.utils.ArgUtil;
 
 @RestController
 public class TemplateController {
@@ -48,9 +49,18 @@ public class TemplateController {
 	}
 
 	@RequestMapping(value = "/api/tmpl/quickreps", method = { RequestMethod.POST })
-	public ApiResponse<QuickReply, Object> createQuickReply(@RequestParam String category, @RequestParam String title,
+	public ApiResponse<QuickReply, Object> createQuickReply(@RequestParam(required = false) String id,
+			@RequestParam String category, @RequestParam String title,
 			@RequestParam(required = false) String template) {
-		QuickReply qr = new QuickReply();
+		QuickReply qr = null;
+		if (ArgUtil.is(id)) {
+			qr = mongoTemplate.findById(id, QuickReply.class);
+		}
+
+		if (!ArgUtil.is(qr)) {
+			qr = new QuickReply();
+		}
+
 		qr.setCategory(category);
 		qr.setTitle(title);
 		qr.setTemplate(template);
