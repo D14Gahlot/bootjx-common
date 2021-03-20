@@ -55,6 +55,10 @@ public class AuthController {
 	@Autowired
 	private RestService restService;
 
+	private long getVersion() {
+		return System.currentTimeMillis() / 300000;
+	}
+
 	@ResponseBody
 	@RequestMapping(value = "/pub/test", method = { RequestMethod.POST, RequestMethod.GET })
 	public SampleSenderReply postVote(@RequestParam String xyz) {
@@ -72,6 +76,7 @@ public class AuthController {
 		model.addAttribute("APP_CONTEXT", appConfig.getAppPrefix());
 		model.addAttribute("APP_USER", agentSession.getAgentCode());
 		model.addAttribute("APP_DEPT", agentSession.getAgentDept());
+		model.addAttribute("CDN_VERSION", getVersion());
 		model.addAttribute("CDN_URL", ArgUtil.parseAsString(commonHttpRequest.get("CDN_URL"), cdnServer));
 		model.addAttribute("CDN_DEBUG", ArgUtil.parseAsString(commonHttpRequest.get("CDN_DEBUG"), "false"));
 
@@ -93,6 +98,7 @@ public class AuthController {
 		model.addAttribute("APP_CONTEXT", appConfig.getAppPrefix());
 		model.addAttribute("APP_USER", agentSession.getAgentCode());
 		model.addAttribute("APP_DEPT", agentSession.getAgentDept());
+		model.addAttribute("CDN_VERSION", getVersion());
 		return "whatsweb";
 	}
 
@@ -101,6 +107,7 @@ public class AuthController {
 		model.addAttribute("APP_CONTEXT", appConfig.getAppPrefix());
 		model.addAttribute("APP_USER", agentSession.getAgentCode());
 		model.addAttribute("APP_DEPT", agentSession.getAgentDept());
+		model.addAttribute("CDN_VERSION", getVersion());
 		model.addAttribute("POSTMAN_CONTEXT", "/postman");
 		return "customer." + page;
 	}
@@ -112,6 +119,7 @@ public class AuthController {
 		model.addAttribute("APP_CONTEXT", appConfig.getAppPrefix());
 		model.addAttribute("APP_USER", agentSession.getAgentCode());
 		model.addAttribute("APP_DEPT", agentSession.getAgentDept());
+		model.addAttribute("CDN_VERSION", getVersion());
 		model.addAttribute("STAMP", System.currentTimeMillis());
 
 		String page = ArgUtil.parseAsString(commonHttpRequest.get("page"), "login");
