@@ -23,6 +23,7 @@ import com.boot.jx.agent.dto.ChatMessageDto;
 import com.boot.jx.agent.dto.ChatSessionDto;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.postman.doc.ChatSessionDoc;
+import com.boot.jx.postman.doc.QuickAction;
 import com.boot.jx.postman.doc.QuickReply;
 import com.boot.jx.postman.doc.TemplateReply;
 import com.boot.jx.postman.model.OutboxMessage;
@@ -119,6 +120,12 @@ public class MsgController {
 	@RequestMapping(value = "/gallery/map/media_reply", method = { RequestMethod.GET })
 	public List<TemplateReply> listMediaReply() {
 		return mongoTemplate.findAll(TemplateReply.class);
+	}
+
+	@ResponseBody
+	@RequestMapping(value = "/gallery/map/quick_actions", method = { RequestMethod.GET })
+	public List<QuickAction> listQuickActions() {
+		return mongoTemplate.findAll(QuickAction.class);
 	}
 
 	@ResponseBody
