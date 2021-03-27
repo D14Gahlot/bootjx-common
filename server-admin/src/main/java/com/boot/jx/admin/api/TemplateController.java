@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.boot.jx.api.ApiResponse;
+import com.boot.jx.postman.doc.QuickAction;
 import com.boot.jx.postman.doc.QuickReply;
 import com.boot.utils.ArgUtil;
 
@@ -68,4 +69,37 @@ public class TemplateController {
 		return ApiResponse.buildResults(mongoTemplate.findAll(QuickReply.class)).data(qr).message("QuickReply created");
 	}
 
+	@RequestMapping(value = "/api/tmpl/quickaxn", method = { RequestMethod.GET })
+	public ApiResponse<QuickAction, Object> listQuickAction() {
+		return ApiResponse.buildResults(mongoTemplate.findAll(QuickAction.class));
+	}
+
+	@RequestMapping(value = "/api/tmpl/quickaxn", method = { RequestMethod.DELETE })
+	public ApiResponse<QuickAction, Object> deleteQuickAction(@RequestParam String id) {
+		QuickAction qr = new QuickAction();
+		qr.setId(id);
+		mongoTemplate.remove(qr);
+		return ApiResponse.buildResults(mongoTemplate.findAll(QuickAction.class)).data(qr)
+				.message("QuickAction deleted");
+	}
+
+	@RequestMapping(value = "/api/tmpl/quickaxn", method = { RequestMethod.POST })
+	public ApiResponse<QuickAction, Object> createQuickAction(@RequestParam(required = false) String id,
+			@RequestParam String category, @RequestParam String title, String action) {
+		QuickAction qr = null;
+		if (ArgUtil.is(id)) {
+			qr = mongoTemplate.findById(id, QuickAction.class);
+		}
+
+		if (!ArgUtil.is(qr)) {
+			qr = new QuickAction();
+		}
+
+		qr.setCategory(category);
+		qr.setTitle(title);
+		qr.setAction(action);
+		mongoTemplate.save(qr);
+		return ApiResponse.buildResults(mongoTemplate.findAll(QuickAction.class)).data(qr)
+				.message("QuickAction created");
+	}
 }
