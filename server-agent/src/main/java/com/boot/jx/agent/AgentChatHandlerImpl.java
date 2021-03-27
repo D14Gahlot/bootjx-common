@@ -94,7 +94,7 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 			inboxMessage.session().setAgent(avaialbleAgent.getAgentCode());
 			inboxMessage.session().setDept(avaialbleAgent.getAgentDept());
 		} else {
-			messageStore.log(inboxMessage, MessageStore.EVENTS.ASGND_TO_DEPT, avaialbleAgent.getAgentDept());
+			messageStore.log(inboxMessage, MessageStore.EVENTS.ASGND_TO_DEPT, inboxMessage.session().getDept());
 		}
 		sessionStore.save(chatSessionDoc);
 
