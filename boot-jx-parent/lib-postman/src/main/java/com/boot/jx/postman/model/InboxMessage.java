@@ -10,7 +10,7 @@ import com.boot.utils.StringUtils.StringMatcher;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class InboxMessage implements Serializable,IMessage {
+public class InboxMessage implements Serializable, IMessage {
 
 	private static final long serialVersionUID = -4488174520614920589L;
 
@@ -260,6 +260,11 @@ public class InboxMessage implements Serializable,IMessage {
 			this.session = new MessageSession();
 		}
 		return this.session;
+	}
+
+	@Override
+	public String forContact() {
+		return this.from;
 	}
 
 }

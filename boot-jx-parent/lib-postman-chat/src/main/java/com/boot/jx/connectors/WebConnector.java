@@ -25,11 +25,13 @@ import com.boot.jx.postman.model.File;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.JsonUtil;
 
 @Component
 @ConnectorMapping(contactType = ContactType.WEBSITE)
 public class WebConnector implements DefaultConnector {
 
+	private static final String WEB_USER_MESSAGE_STR = "WEB_USER_MESSAGE_STR_";
 	private static final Logger LOGGER = LoggerFactory.getLogger(WebConnector.class);
 	@Autowired
 	protected GupShupConfig gupShupConfig;
@@ -99,8 +101,8 @@ public class WebConnector implements DefaultConnector {
 			}
 		} else {
 			LOGGER.debug("sendReply to " + csid);
-			RBlockingQueue<OutboxMessage> messageQueue = redisson.getBlockingQueue("WEB_USER_MESSAGES" + "_" + csid);
-			messageQueue.add(outboxMessage);
+			RBlockingQueue<String> messageQueue = redisson.getBlockingQueue(WEB_USER_MESSAGE_STR + csid);
+			messageQueue.add(JsonUtil.toJson(outboxMessage));
 		}
 	}
 
@@ -131,8 +133,13 @@ public class WebConnector implements DefaultConnector {
 				e.printStackTrace();
 			}
 		}
-		RBlockingQueue<OutboxMessage> messageQueue = redisson.getBlockingQueue("WEB_USER_MESSAGES" + "_" + number);
-		return messageQueue.poll(5, TimeUnit.SECONDS);
+		RBlockingQueue<String> messageQueue = redisson.getBlockingQueue(WEB_USER_MESSAGE_STR + number);
+		String x = messageQueue.poll(5, TimeUnit.SECONDS);
+
+		if (ArgUtil.is(x)) {
+			return JsonUtil.parse(x, OutboxMessage.class);
+		}
+		return null;
 	}
 
 	@Override

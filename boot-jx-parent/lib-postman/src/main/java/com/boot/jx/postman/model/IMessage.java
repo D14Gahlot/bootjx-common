@@ -8,7 +8,7 @@ public interface IMessage {
 
 	ContactType getContactType();
 
-	String getFrom();
+	String forContact();
 
 	String getSessionId();
 

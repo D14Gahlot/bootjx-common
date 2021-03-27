@@ -69,8 +69,8 @@ public class OutboxMessage extends Message<OutboxMessage> implements WAMessageOp
 	}
 
 	@Override
-	public String getFrom() {
-		return CollectionUtil.getOne(this.getTo());
+	public String forContact() {
+		return CollectionUtil.getOne(this.to);
 	}
 
 }

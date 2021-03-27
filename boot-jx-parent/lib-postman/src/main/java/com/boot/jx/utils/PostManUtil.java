@@ -40,18 +40,11 @@ public class PostManUtil {
 		return id;
 	}
 
-	public static String createContactId(InboxMessage inboxMessage) {
-		if (ArgUtil.is(inboxMessage.getContactId())) {
-			return inboxMessage.getContactId();
-		}
-		return createContactId(inboxMessage.getContactType(), inboxMessage.getFrom());
-	}
-
 	public static String createContactId(IMessage inboxMessage) {
 		if (ArgUtil.is(inboxMessage.getContactId())) {
 			return inboxMessage.getContactId();
 		}
-		return createContactId(inboxMessage.getContactType(), inboxMessage.getFrom());
+		return createContactId(inboxMessage.getContactType(), inboxMessage.forContact());
 	}
 
 	public static String generateCheckSum(InboxMessage inboxMessage) {
