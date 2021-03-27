@@ -18,7 +18,7 @@ public class ChatMessageDto implements Serializable {
 	private String messageIdExt;
 	private String messageIdRef;
 	private long timestamp;
-	private boolean type;
+	private String type;
 	private TagDocument tags;
 	private List<Attachment> attachments;
 	public List<String> logs;
@@ -46,14 +46,6 @@ public class ChatMessageDto implements Serializable {
 
 	public void setTimestamp(long timestamp) {
 		this.timestamp = timestamp;
-	}
-
-	public boolean isType() {
-		return type;
-	}
-
-	public void setType(boolean type) {
-		this.type = type;
 	}
 
 	public String getSessionId() {
@@ -126,5 +118,13 @@ public class ChatMessageDto implements Serializable {
 
 	public void setMessageIdRef(String messageIdRef) {
 		this.messageIdRef = messageIdRef;
+	}
+
+	public String getType() {
+		return type;
+	}
+
+	public void setType(String type) {
+		this.type = type;
 	}
 }

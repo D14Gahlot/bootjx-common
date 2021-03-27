@@ -3,7 +3,6 @@ package com.boot.jx.agent;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.http.util.EntityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
@@ -120,7 +119,6 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 	public InboxMessage onMessageReceive(InboxMessage inboxMessage) {
 		MessageDoc messageDoc = messageStore.find(inboxMessage);
 		ChatMessageDto messageDto = entityToDto(messageDoc);
-		messageDto.setType(false);
 		messageDto.setName(inboxMessage.getFromName());
 		stompTunnelService.sendTo(inboxMessage.session().getAgent(), "/agent/onmessage", messageDto);
 		if (inboxMessage.getMessage().equalsIgnoreCase("/exit_chat")) {
@@ -144,7 +142,6 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 			chatService.reply(sessionDoc, outboxMessage);
 			MessageDoc messageDoc = messageStore.find(outboxMessage);
 			ChatMessageDto messageDto = entityToDto(messageDoc);
-			messageDto.setType(true);
 			messageDto.setName(messageDoc.getAgent());
 			stompTunnelService.sendTo(outboxMessage.session().getAgent(), "/agent/onmessage", messageDto);
 		}
@@ -153,7 +150,7 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 
 	private ChatMessageDto entityToDto(MessageDoc messageDoc) {
 		ChatMessageDto messageDto = new ChatMessageDto();
-		messageDto.setType(false);
+		messageDto.setType(messageDoc.getType());
 		messageDto.setText(messageDoc.getMessage());
 		messageDto.setTemplate(messageDoc.getTemplate());
 		messageDto.setTimestamp(messageDoc.getTimestamp());
@@ -184,10 +181,8 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 		for (MessageDoc messageDoc : messages) {
 			ChatMessageDto messageDto = entityToDto(messageDoc);
 			if (ArgUtil.areEqual(messageDoc.getType(), "I")) {
-				messageDto.setType(false);
 				messageDto.setName(chatSessionDto.getName());
 			} else {
-				messageDto.setType(true);
 				messageDto.setName(messageDoc.getAgent());
 			}
 			messageDtos.add(messageDto);

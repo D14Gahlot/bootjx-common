@@ -95,9 +95,9 @@ public class MsgController {
 
 		if (ArgUtil.areEqual(sessionDoc.getAssignedToAgent(), agentSession.getAgentCode())) {
 			ChatMessageDto messageDto = new ChatMessageDto();
-			messageDto.setType(true);
 			messageDto.setName(agentSession.getAgentCode());
 			agentService.sendMessage(sessionDoc, outboxMessage);
+			messageDto.setType(outboxMessage.getType());
 			messageDto.setMessageId(outboxMessage.getMessageId());
 			messageDto.setMessageIdExt(outboxMessage.getMessageIdExt());
 			messageDto.setText(outboxMessage.getMessage());

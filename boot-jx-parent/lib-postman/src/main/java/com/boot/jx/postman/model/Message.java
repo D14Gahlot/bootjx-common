@@ -43,6 +43,7 @@ public class Message<T extends Message<T>> implements Serializable, MessageOptio
 	protected List<String> to = null;
 	protected List<Contact> contacts = null;
 	private String template = null;
+	private String action = null;
 	private String type = null;
 
 	private Map<String, Object> model = new HashMap<String, Object>();
@@ -456,6 +457,14 @@ public class Message<T extends Message<T>> implements Serializable, MessageOptio
 
 	public void setMessageIdRef(String messageIdRef) {
 		this.messageIdRef = messageIdRef;
+	}
+
+	public String getAction() {
+		return action;
+	}
+
+	public void setAction(String action) {
+		this.action = action;
 	}
 
 }

@@ -135,7 +135,13 @@ public class MessageStore extends CommonDocStore {
 		String to = CollectionUtil.getOne(outMessage.getTo());
 		MessageDoc doc = new MessageDoc();
 		doc.setContactId(PostManUtil.createContactId(outMessage));
-		doc.setType(ArgUtil.nonEmpty(outMessage.getType(), "O"));
+
+		if (ArgUtil.is(outMessage.getAction())) {
+			doc.setType(ArgUtil.nonEmpty(outMessage.getType(), "A"));
+		} else {
+			doc.setType(ArgUtil.nonEmpty(outMessage.getType(), "O"));
+		}
+
 		doc.setTimestamp(System.currentTimeMillis());
 		ContactDoc contact = new ContactDoc();
 		contact.setMobile(to);
