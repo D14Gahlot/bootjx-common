@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 import com.boot.jx.mongo.CommonDocStore;
 import com.boot.jx.postman.doc.ContactDoc;
 import com.boot.jx.postman.doc.MessageDoc;
+import com.boot.jx.postman.model.IMessage;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.model.TagDocument;
@@ -96,38 +97,21 @@ public class MessageStore extends CommonDocStore {
 		return findOrCreateMessageDoc(inboxMessage);
 	}
 
-	public MessageDoc log(InboxMessage inboxMessage, EVENTS eventName, String logMessage) {
+	public MessageDoc log(IMessage inboxMessage, EVENTS eventName, String... logMessage) {
 		MessageDoc doc = new MessageDoc();
 		doc.setContactId(PostManUtil.createContactId(inboxMessage));
 		doc.setType("L");
 		doc.setTimestamp(System.currentTimeMillis());
-		doc.setMessage(logMessage);
-		doc.setTemplate(ArgUtil.parseAsString(eventName));
+		if (ArgUtil.is(logMessage)) {
+			for (String string : logMessage) {
+				doc.getLogs().add(string);
+			}
+		}
+		doc.setAction(ArgUtil.parseAsString(eventName));
 		doc.setSessionId(inboxMessage.getSessionId());
 		doc.setAgent(inboxMessage.session().getAgent());
 		mongoTemplate.save(doc, getCollectionName(inboxMessage.getContactType()));
 		return doc;
-	}
-
-	public MessageDoc log(InboxMessage inboxMessage, EVENTS eventName) {
-		return log(inboxMessage, eventName, null);
-	}
-
-	public MessageDoc log(OutboxMessage outMessage, EVENTS eventName, String logMessage) {
-		MessageDoc doc = new MessageDoc();
-		doc.setContactId(PostManUtil.createContactId(outMessage));
-		doc.setType("L");
-		doc.setTimestamp(System.currentTimeMillis());
-		doc.setMessage(logMessage);
-		doc.setTemplate(ArgUtil.parseAsString(eventName));
-		doc.setSessionId(outMessage.getSessionId());
-		doc.setAgent(outMessage.session().getAgent());
-		mongoTemplate.save(doc, getCollectionName(outMessage.getContactType()));
-		return doc;
-	}
-
-	public MessageDoc log(OutboxMessage outMessage, EVENTS eventName) {
-		return log(outMessage, eventName, null);
 	}
 
 	// Out Going Messages

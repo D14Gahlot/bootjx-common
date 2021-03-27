@@ -7,10 +7,9 @@ import org.springframework.http.ResponseEntity;
 
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.postman.model.File;
+import com.boot.jx.postman.model.IMessage;
 import com.boot.jx.postman.model.InboxMessage;
-import com.boot.jx.postman.model.Message;
 import com.boot.utils.ArgUtil;
-import com.boot.utils.CollectionUtil;
 import com.boot.utils.CryptoUtil;
 
 public class PostManUtil {
@@ -48,11 +47,11 @@ public class PostManUtil {
 		return createContactId(inboxMessage.getContactType(), inboxMessage.getFrom());
 	}
 
-	public static String createContactId(Message<?> outMessage) {
-		if (ArgUtil.is(outMessage.getContactId())) {
-			return outMessage.getContactId();
+	public static String createContactId(IMessage inboxMessage) {
+		if (ArgUtil.is(inboxMessage.getContactId())) {
+			return inboxMessage.getContactId();
 		}
-		return createContactId(outMessage.getContactType(), CollectionUtil.getOne(outMessage.getTo()));
+		return createContactId(inboxMessage.getContactType(), inboxMessage.getFrom());
 	}
 
 	public static String generateCheckSum(InboxMessage inboxMessage) {
@@ -69,4 +68,5 @@ public class PostManUtil {
 	public static boolean hasValidCheckSum(InboxMessage inboxMessage) {
 		return ArgUtil.areEqual(inboxMessage.getChecksum(), generateCheckSum(inboxMessage));
 	}
+
 }

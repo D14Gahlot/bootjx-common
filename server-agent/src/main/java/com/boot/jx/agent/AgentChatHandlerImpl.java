@@ -88,8 +88,13 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 			chatSessionDoc.setAssignedToDept(avaialbleAgent.getAgentDept());
 			chatSessionDoc.setAssignedAgentStamp(System.currentTimeMillis());
 
+			messageStore.log(inboxMessage, MessageStore.EVENTS.ASGND_TO_AGENT, avaialbleAgent.getAgentCode(),
+					avaialbleAgent.getAgentDept());
+
 			inboxMessage.session().setAgent(avaialbleAgent.getAgentCode());
 			inboxMessage.session().setDept(avaialbleAgent.getAgentDept());
+		} else {
+			messageStore.log(inboxMessage, MessageStore.EVENTS.ASGND_TO_DEPT, avaialbleAgent.getAgentDept());
 		}
 		sessionStore.save(chatSessionDoc);
 
@@ -108,8 +113,11 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 		}
 	}
 
-	public void exitAgentMode(ChatSessionDoc chatSessionDoc) {
+	public void exitAgentMode(ChatSessionDoc chatSessionDoc, OutboxMessage outboxMessage) {
 		chatService.resolveSession(chatSessionDoc);
+		if (ArgUtil.is(outboxMessage)) {
+			chatService.reply(chatSessionDoc, outboxMessage);
+		}
 		chatService.closeSession(chatSessionDoc);
 		stompTunnelService.sendToAll("/dept/onassign-" + chatSessionDoc.getAssignedToDept(),
 				getChatSessionDto(chatSessionDoc, chatSessionDoc.getAssignedToAgent()));
@@ -123,17 +131,19 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 		stompTunnelService.sendTo(inboxMessage.session().getAgent(), "/agent/onmessage", messageDto);
 		if (inboxMessage.getMessage().equalsIgnoreCase("/exit_chat")) {
 			ChatSessionDoc chatSessionDoc = sessionStore.getSession(inboxMessage.getSessionId());
-			exitAgentMode(chatSessionDoc);
+			exitAgentMode(chatSessionDoc, null);
 			messageStore.log(inboxMessage, MessageStore.EVENTS.UNASGND);
 		}
 		return inboxMessage;
 	}
 
 	public OutboxMessage onSend(ChatSessionDoc sessionDoc, OutboxMessage outboxMessage) {
-		if (ChatCommands.isCommand(outboxMessage.getMessage())) {
-			switch (outboxMessage.getMessage()) {
-			case "/exit_chat":
-				this.exitAgentMode(sessionDoc);
+		String action = ChatCommands.getCommand(outboxMessage);
+		if (ArgUtil.is(action)) {
+			outboxMessage.setAction(action);
+			switch (action) {
+			case "RESOLVE":
+				this.exitAgentMode(sessionDoc, outboxMessage);
 				break;
 			default:
 				break;

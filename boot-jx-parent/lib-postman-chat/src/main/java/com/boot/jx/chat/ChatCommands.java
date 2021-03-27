@@ -3,20 +3,29 @@ package com.boot.jx.chat;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.boot.jx.postman.model.Message;
+import com.boot.utils.ArgUtil;
+
 public class ChatCommands {
 
 	public static Map<String, String> strMapping = new HashMap<String, String>();
 
-	public static void registerCommand(String command) {
-		strMapping.put(command, command);
+	public static void registerCommand(String command, String action) {
+		strMapping.put(command, action);
 	}
 
 	public static void init() {
-		registerCommand("/exit_chat");
+		registerCommand("/exit_chat", "RESOLVE");
+		registerCommand("RESOLVE", "RESOLVE");
 	}
 
-	public static boolean isCommand(String msg) {
-		return strMapping.containsKey(msg);
+	public static String getCommand(Message<?> outboxMessage) {
+		if (ArgUtil.is(outboxMessage.getAction())) {
+			return strMapping.get(outboxMessage.getAction());
+		} else if (ArgUtil.is(outboxMessage.getMessage())) {
+			return strMapping.get(outboxMessage.getMessage());
+		}
+		return null;
 	}
 
 	static {

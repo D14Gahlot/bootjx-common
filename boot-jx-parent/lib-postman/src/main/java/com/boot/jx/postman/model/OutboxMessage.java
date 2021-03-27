@@ -9,7 +9,7 @@ import com.boot.jx.postman.model.MessageOptions.WAMessageOptions;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class OutboxMessage extends Message<OutboxMessage> implements WAMessageOptions {
+public class OutboxMessage extends Message<OutboxMessage> implements WAMessageOptions, IMessage {
 
 	private static final long serialVersionUID = 3115992767625612005L;
 
@@ -19,7 +19,7 @@ public class OutboxMessage extends Message<OutboxMessage> implements WAMessageOp
 
 	private BigDecimal queue;
 	private MessageSession session;
-	public List<String> logs; 
+	public List<String> logs;
 
 	public OutboxMessage(ContactType contactType) {
 		super(contactType);
@@ -59,12 +59,17 @@ public class OutboxMessage extends Message<OutboxMessage> implements WAMessageOp
 	public void setLogs(List<String> logs) {
 		this.logs = logs;
 	}
-	
+
 	public List<String> logs() {
-		if(this.logs == null) {
+		if (this.logs == null) {
 			this.logs = new ArrayList<String>();
 		}
 		return this.logs;
+	}
+
+	@Override
+	public String getFrom() {
+		return null;
 	}
 
 }

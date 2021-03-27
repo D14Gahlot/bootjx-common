@@ -10,7 +10,7 @@ import com.boot.utils.StringUtils.StringMatcher;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class InboxMessage implements Serializable {
+public class InboxMessage implements Serializable,IMessage {
 
 	private static final long serialVersionUID = -4488174520614920589L;
 
