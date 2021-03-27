@@ -15,7 +15,7 @@
     	var domainUrl = urlparts[0];
     	var theme = (urlparts[1].split("theme=")[1] || "").split("&")[0];
     	if(theme){
-    		pluginUrl = domainUrl + "/" + "postman/dummy/customer?page=plugin."+theme;    		
+    		pluginUrl = domainUrl + "/" + "dummy/customer?page=plugin."+theme;    		
     	}
     }
     console.log("pluginUrl",pluginUrl)
