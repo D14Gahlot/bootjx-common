@@ -162,6 +162,7 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 		messageDto.setAttachments(messageDoc.getAttachments());
 		messageDto.setSender(messageDoc.getAgent());
 		messageDto.setLogs(messageDoc.getLogs());
+		messageDto.setAction(messageDoc.getAction());
 		return messageDto;
 	}
 

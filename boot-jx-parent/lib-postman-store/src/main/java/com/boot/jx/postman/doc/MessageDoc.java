@@ -30,6 +30,7 @@ public class MessageDoc implements Serializable, Patchable<MessageDoc> {
 	private long timestamp;
 	private String type;
 	private String template;
+	private String action;
 	private String handler;
 	private String message;
 	private String status;
@@ -220,6 +221,14 @@ public class MessageDoc implements Serializable, Patchable<MessageDoc> {
 
 	public void setMessageIdRef(String messageIdRef) {
 		this.messageIdRef = messageIdRef;
+	}
+
+	public String getAction() {
+		return action;
+	}
+
+	public void setAction(String action) {
+		this.action = action;
 	}
 
 }

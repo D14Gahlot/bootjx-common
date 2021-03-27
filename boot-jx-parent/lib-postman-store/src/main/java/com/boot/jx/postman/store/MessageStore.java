@@ -138,6 +138,7 @@ public class MessageStore extends CommonDocStore {
 
 		if (ArgUtil.is(outMessage.getAction())) {
 			doc.setType(ArgUtil.nonEmpty(outMessage.getType(), "A"));
+			doc.setAction(outMessage.getAction());
 		} else {
 			doc.setType(ArgUtil.nonEmpty(outMessage.getType(), "O"));
 		}
