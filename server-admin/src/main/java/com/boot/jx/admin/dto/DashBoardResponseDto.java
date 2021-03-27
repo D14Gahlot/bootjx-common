@@ -17,11 +17,11 @@ public class DashBoardResponseDto {
 	long openConversation;
 	long converDuration;
 	double startLag;
+	long botScore=0;
+	double botClosure=0;
 	PeakLoadDto peakLoad;
 	Map<Object,Object> graphApiDetails;
 	LeadMessanger leadMessanger;
-	
-	
 	
 	
 
@@ -129,6 +129,22 @@ public class DashBoardResponseDto {
 
 	public void setGraphApiDetails(Map<Object, Object> graphApiDetails) {
 		this.graphApiDetails = graphApiDetails;
+	}
+
+	public long getBotScore() {
+		return botScore;
+	}
+
+	public void setBotScore(long botScore) {
+		this.botScore = botScore;
+	}
+
+	public double getBotClosure() {
+		return botClosure;
+	}
+
+	public void setBotClosure(double botClosure) {
+		this.botClosure = botClosure;
 	}
 
 	

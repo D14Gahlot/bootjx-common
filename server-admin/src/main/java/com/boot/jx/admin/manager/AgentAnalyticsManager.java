@@ -112,6 +112,8 @@ public class AgentAnalyticsManager {
 		long totalUniqCon =0;
 		long totalOpenMsg =0;
 		long convDuration=0;
+		long botScore=0;
+		double botClosure=0.0d;
 		double totalStartLag=0.0d;
 		int teamSize = dtoLst.size();
 		Map<Object,Object> graphApiMap = new HashMap<Object,Object>(); 
@@ -126,6 +128,8 @@ public class AgentAnalyticsManager {
 			convDuration+=dt.getConverDuration();
 			totalUniqCon+=dt.getUniqueConversation();
 			totalStartLag+=dt.getStartLag();
+			botScore+=dt.getBotScore();
+			botClosure +=dt.getBotClosure();
 			dto.setLeadMessanger(dt.getLeadMessanger());
 			graphApiMap = mergerMapKyAndValue(graphApiMap, dt.getGraphApiDetails());
 			if(ArgUtil.is(dt.getPeakLoad()) && dt.getPeakLoad().getTotal() > dto.getPeakLoad().getTotal()) {
@@ -137,6 +141,8 @@ public class AgentAnalyticsManager {
 		dto.setTotalMsgExchanged(totalMsg);
 		dto.setOpenConversation(totalOpenMsg);
 		dto.setUniqueConversation(totalUniqCon);
+		dto.setBotScore(botScore);
+		dto.setBotClosure(botClosure);
 		if(totalMsg!=0) {
 			dto.setConverDuration(convDuration/totalMsg);
 		}
@@ -188,6 +194,14 @@ public class AgentAnalyticsManager {
 			/** startLag **/
 			double startLag = getStartLag(agent,dateRange1,dateRange2);
 			dto.setStartLag(startLag);
+			
+			/** bot score **/
+			long botScore = getBotScore(dateRange1, dateRange2);
+			dto.setBotScore(botScore);
+			
+			/** bot closure **/
+			double botClosure = getBotClosure(dateRange1, dateRange2,dto.getTotalMsgExchanged());
+			dto.setBotClosure(botClosure);
 			
 			/** find the date diff between two dates **/
 			Map<String,Integer> dateDiffMAp = getDateDiff(dateRange1,dateRange2);
@@ -563,6 +577,43 @@ public class AgentAnalyticsManager {
 				totalMsgDoc.addAll(totalMsg);
 			}
 			return totalMsgDoc;
+		}
+		
+		/** get Bot Score **/
+		
+		public long getBotScore(long dateRange1, long dateRange2) {
+		
+			long botScoer=0;
+		Query query = new Query();
+		query.addCriteria(Criteria.where("mode").is("BOT"));
+		query.addCriteria(Criteria.where("startSessionStamp").gt(dateRange1).lt(dateRange2));
+		List<ChatSessionDoc> botScoreLst = mongoTemplate.find(query, ChatSessionDoc.class, CHAT_SESSION);
+		for(ChatSessionDoc chat :botScoreLst) {
+			LOGGER.debug("Chat doc :"+ chat.getBotScore());
+			botScoer +=chat.getBotScore(); 
+			}
+		return botScoer;
+		}
+ 	
+		/** get Bot Score **/
+		
+		public double getBotClosure(long dateRange1, long dateRange2,long totalMsg) {
+			long botSize = 0;
+			double botClosure = 0;
+		Query query = new Query();
+		query.addCriteria(Criteria.where("mode").is("BOT"));
+		query.addCriteria(Criteria.where("active").is(false));
+		query.addCriteria(Criteria.where("startSessionStamp").gt(dateRange1).lt(dateRange2));
+		List<ChatSessionDoc> botLst = mongoTemplate.find(query, ChatSessionDoc.class, CHAT_SESSION);
+		if(botLst!=null && !botLst.isEmpty()) {
+			botSize = botLst.size();
+		}
+		if(ArgUtil.is(botSize) && ArgUtil.is(totalMsg) && totalMsg>0) {
+			botClosure =(botSize/totalMsg)*100;
+			BigDecimal bd = new BigDecimal(botClosure).setScale(2, RoundingMode.HALF_UP);
+			botClosure = bd.doubleValue();
+		}
+		return botClosure;
 		}
 	
 }
