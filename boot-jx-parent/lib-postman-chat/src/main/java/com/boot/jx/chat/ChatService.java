@@ -124,14 +124,15 @@ public class ChatService {
 		InboxMessage inboxMessage = chatContext.getInboxMessage();
 		ChatContactDoc chatContactDoc = sessionStore.getContact(inboxMessage.getContactId());
 
+		if (ArgUtil.isEmpty(outboxMessage.session().getAgent())) {
+			outboxMessage.session().setAgent(chatClient.getDefaultSender());
+		}
+
 		// Action Only
 		if (actionIntenal(chatContactDoc, outboxMessage)) {
 			return;
 		}
 
-		if (ArgUtil.isEmpty(outboxMessage.session().getAgent())) {
-			outboxMessage.session().setAgent(chatClient.getDefaultSender());
-		}
 		outboxMessage.model().put("contact", ChatDTOUtil.getContactDTO(chatContactDoc));
 		replyIntenal(inboxMessage, outboxMessage);
 	}
@@ -140,14 +141,15 @@ public class ChatService {
 		InboxMessage inboxMessage = sessionStore.toInboxMessage(sessionDoc);
 		ChatContactDoc chatContactDoc = sessionStore.getContact(sessionDoc.getContactId());
 
+		if (ArgUtil.isEmpty(outboxMessage.session().getAgent())) {
+			outboxMessage.session().setAgent(sessionDoc.getAssignedToAgent());
+		}
+
 		// Action Only
 		if (actionIntenal(chatContactDoc, outboxMessage)) {
 			return;
 		}
 
-		if (ArgUtil.isEmpty(outboxMessage.session().getAgent())) {
-			outboxMessage.session().setAgent(sessionDoc.getAssignedToAgent());
-		}
 		outboxMessage.model().put("contact", ChatDTOUtil.getContactDTO(chatContactDoc));
 
 		replyIntenal(inboxMessage, outboxMessage);
@@ -156,14 +158,15 @@ public class ChatService {
 	public void send(ChatSessionDoc sessionDoc, OutboxMessage outboxMessage) {
 		ChatContactDoc chatContactDoc = sessionStore.getContact(sessionDoc.getContactId());
 
+		if (ArgUtil.isEmpty(outboxMessage.session().getAgent())) {
+			outboxMessage.session().setAgent(sessionDoc.getAssignedToAgent());
+		}
+
 		// Action Only
 		if (actionIntenal(chatContactDoc, outboxMessage)) {
 			return;
 		}
 
-		if (ArgUtil.isEmpty(outboxMessage.session().getAgent())) {
-			outboxMessage.session().setAgent(sessionDoc.getAssignedToAgent());
-		}
 		outboxMessage.model().put("contact", ChatDTOUtil.getContactDTO(chatContactDoc));
 		sendIntenal(chatContactDoc, outboxMessage);
 	}
