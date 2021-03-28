@@ -16,6 +16,7 @@ import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.Message;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.store.MessageStore;
+import com.boot.jx.postman.store.MessageStore.EVENTS;
 import com.boot.jx.postman.store.SessionStore;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.TimeUtils;
@@ -153,6 +154,11 @@ public class ChatService {
 		outboxMessage.model().put("contact", ChatDTOUtil.getContactDTO(chatContactDoc));
 
 		replyIntenal(inboxMessage, outboxMessage);
+	}
+
+	public void log(ChatSessionDoc sessionDoc, EVENTS event, String... logs) {
+		InboxMessage inboxMessage = sessionStore.toInboxMessage(sessionDoc);
+		messageStore.log(inboxMessage, event, logs);
 	}
 
 	public void send(ChatSessionDoc sessionDoc, OutboxMessage outboxMessage) {
@@ -294,4 +300,5 @@ public class ChatService {
 		session = sessionStore.agentScore(session, botScore);
 		return true;
 	}
+
 }

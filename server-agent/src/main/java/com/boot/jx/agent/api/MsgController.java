@@ -86,6 +86,7 @@ public class MsgController {
 			AgentSessionDoc agent = mongoTemplate.findById(agentSession.getAgentCode(), AgentSessionDoc.class);
 			agentChatHandlerImpl.onAssign(agent, sessionDoc, outboxMessage);
 		}
+
 		if (ArgUtil.isNone(sessionDoc.getFistResponseStamp())) {
 			sessionDoc.setFistResponseStamp(System.currentTimeMillis());
 		}
