@@ -3,7 +3,9 @@ package com.boot.jx.postman.model;
 import java.io.Serializable;
 
 import com.boot.jx.swagger.ApiMockModelProperty;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Attachment implements Serializable {
 	private static final long serialVersionUID = 6420347322076291226L;
 

@@ -1,17 +1,20 @@
 package com.boot.jx.postman.model;
 
+import java.io.Serializable;
 import com.boot.jx.dict.ContactType;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
-public interface IMessage {
+@JsonIgnoreProperties(ignoreUnknown = true)
+public interface IMessage extends Serializable {
 
-	String getContactId();
+	public String getContactId();
 
-	ContactType getContactType();
+	public ContactType getContactType();
 
-	String forContact();
+	public String forContact();
 
-	String getSessionId();
+	public String getSessionId();
 
-	MessageSession session();
+	public MessageSession session();
 
 }

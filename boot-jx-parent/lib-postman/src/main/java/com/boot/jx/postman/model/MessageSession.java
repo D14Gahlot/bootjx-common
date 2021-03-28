@@ -2,6 +2,9 @@ package com.boot.jx.postman.model;
 
 import java.io.Serializable;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class MessageSession implements Serializable {
 	private static final long serialVersionUID = -5472557093277982501L;
 	private String dept;

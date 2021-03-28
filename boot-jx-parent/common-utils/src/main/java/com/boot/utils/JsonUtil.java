@@ -286,7 +286,7 @@ public final class JsonUtil {
 		} else if (json instanceof Map) {
 			return instance.toType(json, toValueType);
 		} else if (json instanceof String) {
-			return instance.toType(json, toValueType);
+			return instance.fromJson((String) json, toValueType);
 		} else {
 			return instance.toType(json, toValueType);
 		}

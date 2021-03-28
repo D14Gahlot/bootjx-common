@@ -7,6 +7,7 @@ import java.util.List;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.postman.model.MessageOptions.WAMessageOptions;
 import com.boot.utils.CollectionUtil;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -46,6 +47,7 @@ public class OutboxMessage extends Message<OutboxMessage> implements WAMessageOp
 		this.session = session;
 	}
 
+	@Override
 	public MessageSession session() {
 		if (session == null) {
 			this.session = new MessageSession();
@@ -69,6 +71,7 @@ public class OutboxMessage extends Message<OutboxMessage> implements WAMessageOp
 	}
 
 	@Override
+	@JsonIgnore
 	public String forContact() {
 		return CollectionUtil.getOne(this.to);
 	}

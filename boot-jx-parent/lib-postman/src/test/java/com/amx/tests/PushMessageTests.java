@@ -5,8 +5,10 @@ import java.text.ParseException;
 
 import com.boot.jx.dict.Language;
 import com.boot.jx.postman.model.Contact;
+import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.model.PushMessage;
 import com.boot.jx.scope.tnt.Tenants;
+import com.boot.utils.JsonUtil;
 
 public class PushMessageTests { // Noncompliant
 
@@ -22,11 +24,14 @@ public class PushMessageTests { // Noncompliant
 	 * @throws ParseException
 	 */
 	public static void main(String[] args) throws ParseException {
-		test1();
-		test2();
-		everyOne();
-		everyOne(Language.AR);
-		customer();
+		testOutboxMessage();
+	}
+
+	private static void testOutboxMessage() {
+		String json = JsonUtil.toJson(new OutboxMessage());
+		System.out.println(json);
+		JsonUtil.parse(json, OutboxMessage.class);
+
 	}
 
 	private static void print(String type, Object expected, Object actual) {
