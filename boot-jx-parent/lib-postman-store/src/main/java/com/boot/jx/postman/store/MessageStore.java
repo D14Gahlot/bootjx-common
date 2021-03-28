@@ -104,7 +104,7 @@ public class MessageStore extends CommonDocStore {
 		doc.setTimestamp(System.currentTimeMillis());
 		if (ArgUtil.is(logMessage)) {
 			for (String string : logMessage) {
-				doc.getLogs().add(string);
+				doc.logs().add(string);
 			}
 		}
 		doc.setAction(ArgUtil.parseAsString(eventName));
