@@ -12,7 +12,7 @@ public class ChatDTOUtil {
 		contact.setName(chatContactDoc.getName());
 		contact.setPhone(chatContactDoc.getPhone());
 		contact.setEmail(chatContactDoc.getEmail());
-		contact.setTagId(chatContactDoc.getTagId());
+		contact.setLabelId(chatContactDoc.getLabelId());
 
 		return contact;
 	}

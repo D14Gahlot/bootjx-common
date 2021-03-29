@@ -38,7 +38,7 @@ public class ChatContactDoc implements Serializable {
 	private String email;
 	private String phone;
 	private String profilePic;
-	private List<String> tagId;
+	private List<String> labelId;
 
 	public String getContactId() {
 		return contactId;
@@ -136,17 +136,17 @@ public class ChatContactDoc implements Serializable {
 		this.phone = phone;
 	}
 
-	public List<String> tagId() {
-		if (ArgUtil.isEmpty(this.tagId))
-			this.tagId = new ArrayList<String>();
-		return tagId;
+	public List<String> labelId() {
+		if (ArgUtil.isEmpty(this.labelId))
+			this.labelId = new ArrayList<String>();
+		return labelId;
 	}
 
-	public List<String> getTagId() {
-		return tagId;
+	public List<String> getLabelId() {
+		return labelId;
 	}
 
-	public void setTagId(List<String> tagId) {
-		this.tagId = tagId;
+	public void setLabelId(List<String> labelId) {
+		this.labelId = labelId;
 	}
 }

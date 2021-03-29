@@ -23,13 +23,15 @@ import com.boot.jx.agent.dto.ChatMessageDto;
 import com.boot.jx.agent.dto.ChatSessionDto;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.api.ListRequestModel;
+import com.boot.jx.chat.ChatDTOUtil;
 import com.boot.jx.chat.ChatService;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.QuickAction;
 import com.boot.jx.postman.doc.QuickReply;
-import com.boot.jx.postman.doc.QuickTag;
+import com.boot.jx.postman.doc.QuickLabel;
 import com.boot.jx.postman.doc.TemplateReply;
+import com.boot.jx.postman.dto.ContactDTO;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.store.MessageStore.EVENTS;
 import com.boot.jx.postman.store.SessionStore;
@@ -139,9 +141,9 @@ public class MsgController {
 	}
 
 	@ResponseBody
-	@RequestMapping(value = "/gallery/map/quick_tags", method = { RequestMethod.GET })
-	public List<QuickTag> listQuickTags() {
-		return mongoTemplate.findAll(QuickTag.class);
+	@RequestMapping(value = { "/gallery/map/quick_labels" }, method = { RequestMethod.GET })
+	public List<QuickLabel> listQuickTags() {
+		return mongoTemplate.findAll(QuickLabel.class);
 	}
 
 	@ResponseBody
@@ -168,34 +170,33 @@ public class MsgController {
 	}
 
 	@ResponseBody
-	@RequestMapping(value = "/api/contact/tag", method = { RequestMethod.POST })
-	public ApiResponse<ChatContactDoc, Object> addContactTag(@RequestParam String sessionId,
-			@RequestBody ListRequestModel<QuickTag> tags) {
+	@RequestMapping(value = { "/api/contact/label" }, method = { RequestMethod.POST })
+	public ApiResponse<ContactDTO, Object> addContactTag(@RequestParam String sessionId,
+			@RequestBody ListRequestModel<QuickLabel> tags) {
 		ChatSessionDoc sessionDoc = sessionStore.getSession(sessionId);
 		ChatContactDoc contact = sessionStore.getContact(sessionDoc.getContactId());
 
-		List<String> oldList = contact.tagId();
+		List<String> oldList = contact.labelId();
 		List<String> newList = new ArrayList<String>();
-		for (QuickTag tag : tags.getValues()) {
+		for (QuickLabel tag : tags.getValues()) {
 			newList.add(tag.getId());
 		}
 		newList = CollectionUtil.distinct(newList);
-		contact.setTagId(CollectionUtil.distinct(newList));
+		contact.setLabelId(CollectionUtil.distinct(newList));
 		sessionStore.save(contact);
 
 		// LOGS
 		List<String> removedItems = new ArrayList<String>(oldList);
 		removedItems.removeAll(newList);
 		if (ArgUtil.is(removedItems)) {
-			chatService.log(sessionDoc, EVENTS.TAGS_REMOVED, removedItems.toArray(new String[0]));
+			chatService.log(sessionDoc, EVENTS.LABEL_REMOVED, removedItems.toArray(new String[0]));
 		}
 
 		List<String> addedItems = new ArrayList<String>(newList);
 		addedItems.removeAll(oldList);
 		if (ArgUtil.is(addedItems)) {
-			chatService.log(sessionDoc, EVENTS.TAGS_ADDED, addedItems.toArray(new String[0]));
+			chatService.log(sessionDoc, EVENTS.LABEL_ADDED, addedItems.toArray(new String[0]));
 		}
-
-		return ApiResponse.buildData(contact);
+		return ApiResponse.buildData(ChatDTOUtil.getContactDTO(contact));
 	}
 }

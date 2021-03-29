@@ -24,7 +24,7 @@ public class ContactDTO implements java.io.Serializable {
 	@ApiMockModelProperty(example = "919876543210", required = false)
 	private String phone;
 
-	private List<String> tagId;
+	private List<String> labelId;
 
 	public String getContactId() {
 		return contactId;
@@ -58,12 +58,12 @@ public class ContactDTO implements java.io.Serializable {
 		this.phone = phone;
 	}
 
-	public List<String> getTagId() {
-		return tagId;
+	public List<String> getLabelId() {
+		return labelId;
 	}
 
-	public void setTagId(List<String> tagId) {
-		this.tagId = tagId;
+	public void setLabelId(List<String> labelId) {
+		this.labelId = labelId;
 	}
 
 }

@@ -6,9 +6,9 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.TypeAlias;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-@Document(collection = "DICT_QUICK_TAG")
-@TypeAlias("QuickTag")
-public class QuickTag implements Serializable {
+@Document(collection = "DICT_QUICK_LABEL")
+@TypeAlias("QuickLabel")
+public class QuickLabel implements Serializable {
 
 	private static final long serialVersionUID = 2845094878124818820L;
 	@Id
