@@ -22,6 +22,8 @@ import com.boot.jx.agent.doc.AgentSessionDoc;
 import com.boot.jx.agent.dto.ChatMessageDto;
 import com.boot.jx.agent.dto.ChatSessionDto;
 import com.boot.jx.api.ApiResponse;
+import com.boot.jx.api.ListRequestModel;
+import com.boot.jx.chat.ChatService;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.QuickAction;
@@ -29,6 +31,7 @@ import com.boot.jx.postman.doc.QuickReply;
 import com.boot.jx.postman.doc.QuickTag;
 import com.boot.jx.postman.doc.TemplateReply;
 import com.boot.jx.postman.model.OutboxMessage;
+import com.boot.jx.postman.store.MessageStore.EVENTS;
 import com.boot.jx.postman.store.SessionStore;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
@@ -51,6 +54,9 @@ public class MsgController {
 
 	@Autowired
 	private AgentService agentService;
+
+	@Autowired
+	ChatService chatService;
 
 	@Autowired
 	private AgentSessionService agentSessionService;
@@ -163,10 +169,33 @@ public class MsgController {
 
 	@ResponseBody
 	@RequestMapping(value = "/api/contact/tag", method = { RequestMethod.POST })
-	public List<QuickTag> addContactTag(@RequestParam String contactId, @RequestBody QuickTag tag) {
-		ChatContactDoc contact = sessionStore.getContact(contactId);
-		contact.tagId().add(tag.getId());
-		contact.setTagId(CollectionUtil.distinct(contact.tagId()));
-		return mongoTemplate.findAll(QuickTag.class);
+	public ApiResponse<ChatContactDoc, Object> addContactTag(@RequestParam String sessionId,
+			@RequestBody ListRequestModel<QuickTag> tags) {
+		ChatSessionDoc sessionDoc = sessionStore.getSession(sessionId);
+		ChatContactDoc contact = sessionStore.getContact(sessionDoc.getContactId());
+
+		List<String> oldList = contact.tagId();
+		List<String> newList = new ArrayList<String>();
+		for (QuickTag tag : tags.getValues()) {
+			newList.add(tag.getId());
+		}
+		newList = CollectionUtil.distinct(newList);
+		contact.setTagId(CollectionUtil.distinct(newList));
+		sessionStore.save(contact);
+
+		// LOGS
+		List<String> removedItems = new ArrayList<String>(oldList);
+		removedItems.removeAll(newList);
+		if (ArgUtil.is(removedItems)) {
+			chatService.log(sessionDoc, EVENTS.TAGS_REMOVED, removedItems.toArray(new String[0]));
+		}
+
+		List<String> addedItems = new ArrayList<String>(newList);
+		addedItems.removeAll(oldList);
+		if (ArgUtil.is(addedItems)) {
+			chatService.log(sessionDoc, EVENTS.TAGS_ADDED, addedItems.toArray(new String[0]));
+		}
+
+		return ApiResponse.buildData(contact);
 	}
 }
