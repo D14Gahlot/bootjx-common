@@ -51,7 +51,7 @@ public class WAGupShupAgentConnector implements ConnectorHandler {
 		if (ArgUtil.isEqual(outboxMessage.getChannel(), Channel.GUPSHUPAGENT.toString())) {
 			if (outboxMessage.isViaAgent() && ArgUtil.isEmpty(outboxMessage.getFiles())) {
 				gupShupChatClient.sendMessage(chatContactDoc.getCsid(), outboxMessage.getMessage());
-			} else if (outboxMessage.isTemplate() || outboxMessage.isQRButtons()) {
+			} else if (outboxMessage.isTemplateMsg() || outboxMessage.isQRButtons()) {
 				gupShupNotifyClient.sendMessage(outboxMessage);
 			} else {
 				gupShupChatClient.sendMessage(outboxMessage);
@@ -69,7 +69,7 @@ public class WAGupShupAgentConnector implements ConnectorHandler {
 		if (ArgUtil.isEqual(inboxMessage.getChannel(), Channel.GUPSHUPAGENT.toString())) {
 			if (outboxMessage.isViaAgent() && ArgUtil.isEmpty(outboxMessage.getFiles())) {
 				gupShupAgentClient.sendViaAgent(inboxMessage, outboxMessage.getMessage());
-			} else if (outboxMessage.isTemplate() || outboxMessage.isQRButtons()) {
+			} else if (outboxMessage.isTemplateMsg() || outboxMessage.isQRButtons()) {
 				// gupShupNotifyClient.optIn(inboxMessage.getFrom());
 				gupShupNotifyClient.sendMessage(outboxMessage);
 			} else {

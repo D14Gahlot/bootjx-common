@@ -192,7 +192,7 @@ public class SessionStore {
 								Criteria.where("resolved").is(false))
 
 				));
-		//LOGGER.info(query2.toString());
+		// LOGGER.info(query2.toString());
 		return mongoTemplate.find(query2, ChatSessionDoc.class);
 	}
 
@@ -223,7 +223,7 @@ public class SessionStore {
 			}
 		}
 		query2.addCriteria(new Criteria().orOperator(orExpression.toArray(new Criteria[orExpression.size()])));
-		//LOGGER.info(query2.toString());
+		// LOGGER.info(query2.toString());
 		return mongoTemplate.find(query2, ChatSessionDoc.class);
 	}
 

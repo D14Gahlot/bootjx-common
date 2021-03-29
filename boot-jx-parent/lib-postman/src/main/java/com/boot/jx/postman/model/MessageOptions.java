@@ -31,7 +31,7 @@ public interface MessageOptions {
 		}
 
 		@JsonIgnore
-		default public boolean isTemplate() {
+		default public boolean isTemplateMsg() {
 			return ArgUtil.parseAsBoolean(this.options().get("isTemplate"), false);
 		}
 
