@@ -1,5 +1,7 @@
 package com.boot.jx.postman.dto;
 
+import java.util.List;
+
 import com.boot.jx.swagger.ApiMockModelProperty;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -21,6 +23,8 @@ public class ContactDTO implements java.io.Serializable {
 
 	@ApiMockModelProperty(example = "919876543210", required = false)
 	private String phone;
+
+	private List<String> tagId;
 
 	public String getContactId() {
 		return contactId;
@@ -52,6 +56,14 @@ public class ContactDTO implements java.io.Serializable {
 
 	public void setPhone(String phone) {
 		this.phone = phone;
+	}
+
+	public List<String> getTagId() {
+		return tagId;
+	}
+
+	public void setTagId(List<String> tagId) {
+		this.tagId = tagId;
 	}
 
 }

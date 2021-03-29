@@ -165,8 +165,8 @@ public class MsgController {
 	@RequestMapping(value = "/api/contact/tag", method = { RequestMethod.POST })
 	public List<QuickTag> addContactTag(@RequestParam String contactId, @RequestBody QuickTag tag) {
 		ChatContactDoc contact = sessionStore.getContact(contactId);
-		contact.tags().add(tag.getId());
-		contact.setTags(CollectionUtil.distinct(contact.tags()));
+		contact.tagId().add(tag.getId());
+		contact.setTagId(CollectionUtil.distinct(contact.tagId()));
 		return mongoTemplate.findAll(QuickTag.class);
 	}
 }
