@@ -25,6 +25,7 @@ import com.boot.jx.api.ApiResponse;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.QuickAction;
 import com.boot.jx.postman.doc.QuickReply;
+import com.boot.jx.postman.doc.QuickTag;
 import com.boot.jx.postman.doc.TemplateReply;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.store.SessionStore;
@@ -127,6 +128,12 @@ public class MsgController {
 	@RequestMapping(value = "/gallery/map/quick_actions", method = { RequestMethod.GET })
 	public List<QuickAction> listQuickActions() {
 		return mongoTemplate.findAll(QuickAction.class);
+	}
+
+	@ResponseBody
+	@RequestMapping(value = "/gallery/map/quick_tags", method = { RequestMethod.GET })
+	public List<QuickTag> listQuickTags() {
+		return mongoTemplate.findAll(QuickTag.class);
 	}
 
 	@ResponseBody

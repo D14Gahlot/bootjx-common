@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.postman.doc.QuickAction;
 import com.boot.jx.postman.doc.QuickReply;
+import com.boot.jx.postman.doc.QuickTag;
 import com.boot.utils.ArgUtil;
 
 @RestController
@@ -101,5 +102,37 @@ public class TemplateController {
 		mongoTemplate.save(qr);
 		return ApiResponse.buildResults(mongoTemplate.findAll(QuickAction.class)).data(qr)
 				.message("QuickAction created");
+	}
+
+	@RequestMapping(value = "/api/tmpl/quicktag", method = { RequestMethod.GET })
+	public ApiResponse<QuickTag, Object> listQuickTag() {
+		return ApiResponse.buildResults(mongoTemplate.findAll(QuickTag.class));
+	}
+
+	@RequestMapping(value = "/api/tmpl/quicktag", method = { RequestMethod.DELETE })
+	public ApiResponse<QuickTag, Object> deleteQuickTag(@RequestParam String id) {
+		QuickTag qr = new QuickTag();
+		qr.setId(id);
+		mongoTemplate.remove(qr);
+		return ApiResponse.buildResults(mongoTemplate.findAll(QuickTag.class)).data(qr).message("QuickTag deleted");
+	}
+
+	@RequestMapping(value = "/api/tmpl/quicktag", method = { RequestMethod.POST })
+	public ApiResponse<QuickTag, Object> createQuickTag(@RequestParam(required = false) String id,
+			@RequestParam String category, @RequestParam String title, String code) {
+		QuickTag qr = null;
+		if (ArgUtil.is(id)) {
+			qr = mongoTemplate.findById(id, QuickTag.class);
+		}
+
+		if (!ArgUtil.is(qr)) {
+			qr = new QuickTag();
+		}
+
+		qr.setCategory(category);
+		qr.setTitle(title);
+		qr.setCode(code);
+		mongoTemplate.save(qr);
+		return ApiResponse.buildResults(mongoTemplate.findAll(QuickTag.class)).data(qr).message("QuickTag created");
 	}
 }
