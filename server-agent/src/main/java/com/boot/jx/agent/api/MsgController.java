@@ -22,6 +22,7 @@ import com.boot.jx.agent.doc.AgentSessionDoc;
 import com.boot.jx.agent.dto.ChatMessageDto;
 import com.boot.jx.agent.dto.ChatSessionDto;
 import com.boot.jx.api.ApiResponse;
+import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.QuickAction;
 import com.boot.jx.postman.doc.QuickReply;
@@ -30,6 +31,7 @@ import com.boot.jx.postman.doc.TemplateReply;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.store.SessionStore;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.CollectionUtil;
 import com.boot.utils.MapBuilder;
 
 @Controller
@@ -157,5 +159,14 @@ public class MsgController {
 		ChatSessionDoc sessionDoc = sessionStore.getSession(chatSessionDto.getSessionId());
 		return ApiResponse.buildResults(
 				agentChatHandlerImpl.getChatSessionDto(sessionDoc, agentSession.getAgentCode()).getMessages());
+	}
+
+	@ResponseBody
+	@RequestMapping(value = "/api/contact/tag", method = { RequestMethod.POST })
+	public List<QuickTag> addContactTag(@RequestParam String contactId, @RequestBody QuickTag tag) {
+		ChatContactDoc contact = sessionStore.getContact(contactId);
+		contact.tags().add(tag.getId());
+		contact.setTags(CollectionUtil.distinct(contact.tags()));
+		return mongoTemplate.findAll(QuickTag.class);
 	}
 }

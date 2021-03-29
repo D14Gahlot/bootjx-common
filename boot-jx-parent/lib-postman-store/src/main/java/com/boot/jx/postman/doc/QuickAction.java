@@ -6,6 +6,8 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.TypeAlias;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import com.boot.utils.ArgUtil;
+
 @Document(collection = "DICT_QUICK_AXN")
 @TypeAlias("QuickAction")
 public class QuickAction implements Serializable {
@@ -15,6 +17,7 @@ public class QuickAction implements Serializable {
 	private String id;
 	private String title;
 	private String category;
+	private String code;
 	private String action;
 
 	public String getCategory() {
@@ -42,11 +45,19 @@ public class QuickAction implements Serializable {
 	}
 
 	public String getAction() {
-		return action;
+		return ArgUtil.nonEmpty(code, action);
 	}
 
 	public void setAction(String action) {
-		this.action = action;
+		this.code = action;
+	}
+
+	public String getCode() {
+		return ArgUtil.nonEmpty(code, action);
+	}
+
+	public void setCode(String code) {
+		this.code = code;
 	}
 
 }

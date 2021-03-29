@@ -86,7 +86,7 @@ public class TemplateController {
 
 	@RequestMapping(value = "/api/tmpl/quickaxn", method = { RequestMethod.POST })
 	public ApiResponse<QuickAction, Object> createQuickAction(@RequestParam(required = false) String id,
-			@RequestParam String category, @RequestParam String title, String action) {
+			@RequestParam String category, @RequestParam String title, String code) {
 		QuickAction qr = null;
 		if (ArgUtil.is(id)) {
 			qr = mongoTemplate.findById(id, QuickAction.class);
@@ -98,7 +98,7 @@ public class TemplateController {
 
 		qr.setCategory(category);
 		qr.setTitle(title);
-		qr.setAction(action);
+		qr.setAction(code);
 		mongoTemplate.save(qr);
 		return ApiResponse.buildResults(mongoTemplate.findAll(QuickAction.class)).data(qr)
 				.message("QuickAction created");

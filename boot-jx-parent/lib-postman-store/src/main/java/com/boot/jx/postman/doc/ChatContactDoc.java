@@ -1,12 +1,15 @@
 package com.boot.jx.postman.doc;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.TypeAlias;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import com.boot.jx.swagger.ApiMockModelProperty;
+import com.boot.utils.ArgUtil;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 @Document(collection = "CHAT_CONTACT")
@@ -35,6 +38,7 @@ public class ChatContactDoc implements Serializable {
 	private String email;
 	private String phone;
 	private String profilePic;
+	private List<String> tags;
 
 	public String getContactId() {
 		return contactId;
@@ -132,4 +136,17 @@ public class ChatContactDoc implements Serializable {
 		this.phone = phone;
 	}
 
+	public List<String> getTags() {
+		return tags;
+	}
+
+	public void setTags(List<String> tags) {
+		this.tags = tags;
+	}
+
+	public List<String> tags() {
+		if (ArgUtil.isEmpty(this.tags))
+			this.tags = new ArrayList<String>();
+		return tags;
+	}
 }
