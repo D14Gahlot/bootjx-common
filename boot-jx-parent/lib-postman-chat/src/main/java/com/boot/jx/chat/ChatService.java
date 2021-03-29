@@ -158,6 +158,11 @@ public class ChatService {
 
 	public void log(ChatSessionDoc sessionDoc, EVENTS event, String... logs) {
 		InboxMessage inboxMessage = sessionStore.toInboxMessage(sessionDoc);
+
+		if (ArgUtil.isEmpty(inboxMessage.session().getAgent())) {
+			inboxMessage.session().setAgent(sessionDoc.getAssignedToAgent());
+		}
+
 		messageStore.log(inboxMessage, event, logs);
 	}
 
