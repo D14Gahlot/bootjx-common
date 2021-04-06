@@ -1,4 +1,4 @@
-package com.boot.jx.agent.dto;
+package com.boot.jx.postman.dto;
 
 import java.io.Serializable;
 import java.util.List;
@@ -8,7 +8,7 @@ import com.boot.jx.postman.model.TagDocument;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class ChatMessageDto implements Serializable {
+public class ChatMessageDTO implements Serializable {
 	private static final long serialVersionUID = 7766790295486098869L;
 	private String text;
 	private String template;

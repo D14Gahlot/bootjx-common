@@ -15,6 +15,9 @@ public class ContactDTO implements java.io.Serializable {
 	@JsonProperty("contactId")
 	private String contactId;
 
+	@JsonProperty("contactType")
+	private String contactType;
+
 	@ApiMockModelProperty(example = "John Doe", required = false)
 	private String name;
 
@@ -23,6 +26,8 @@ public class ContactDTO implements java.io.Serializable {
 
 	@ApiMockModelProperty(example = "919876543210", required = false)
 	private String phone;
+
+	private String profilePic;
 
 	private List<String> labelId;
 
@@ -64,6 +69,22 @@ public class ContactDTO implements java.io.Serializable {
 
 	public void setLabelId(List<String> labelId) {
 		this.labelId = labelId;
+	}
+
+	public String getContactType() {
+		return contactType;
+	}
+
+	public void setContactType(String contactType) {
+		this.contactType = contactType;
+	}
+
+	public String getProfilePic() {
+		return profilePic;
+	}
+
+	public void setProfilePic(String profilePic) {
+		this.profilePic = profilePic;
 	}
 
 }

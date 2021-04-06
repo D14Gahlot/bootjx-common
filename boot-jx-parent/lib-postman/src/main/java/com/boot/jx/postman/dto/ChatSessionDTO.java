@@ -1,13 +1,12 @@
-package com.boot.jx.agent.dto;
+package com.boot.jx.postman.dto;
 
 import java.io.Serializable;
 import java.util.List;
 
-import com.boot.jx.postman.dto.ContactDTO;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class ChatSessionDto implements Serializable {
+public class ChatSessionDTO implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
@@ -42,7 +41,7 @@ public class ChatSessionDto implements Serializable {
 
 	private ContactDTO contact;
 
-	private List<ChatMessageDto> messages;
+	private List<ChatMessageDTO> messages;
 
 	public String getSessionId() {
 		return sessionId;
@@ -76,11 +75,11 @@ public class ChatSessionDto implements Serializable {
 		this.lastInComingStamp = lastInComingStamp;
 	}
 
-	public List<ChatMessageDto> getMessages() {
+	public List<ChatMessageDTO> getMessages() {
 		return messages;
 	}
 
-	public void setMessages(List<ChatMessageDto> messages) {
+	public void setMessages(List<ChatMessageDTO> messages) {
 		this.messages = messages;
 	}
 

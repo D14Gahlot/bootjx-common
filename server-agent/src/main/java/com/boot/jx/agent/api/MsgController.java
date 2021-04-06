@@ -19,18 +19,19 @@ import com.boot.jx.agent.AgentService;
 import com.boot.jx.agent.AgentSessionBean;
 import com.boot.jx.agent.AgentSessionService;
 import com.boot.jx.agent.doc.AgentSessionDoc;
-import com.boot.jx.agent.dto.ChatMessageDto;
-import com.boot.jx.agent.dto.ChatSessionDto;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.api.ListRequestModel;
+import com.boot.jx.chat.ChatArchive;
 import com.boot.jx.chat.ChatDTOUtil;
 import com.boot.jx.chat.ChatService;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.QuickAction;
-import com.boot.jx.postman.doc.QuickReply;
 import com.boot.jx.postman.doc.QuickLabel;
+import com.boot.jx.postman.doc.QuickReply;
 import com.boot.jx.postman.doc.TemplateReply;
+import com.boot.jx.postman.dto.ChatMessageDTO;
+import com.boot.jx.postman.dto.ChatSessionDTO;
 import com.boot.jx.postman.dto.ContactDTO;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.store.MessageStore.EVENTS;
@@ -58,23 +59,26 @@ public class MsgController {
 	private AgentService agentService;
 
 	@Autowired
-	ChatService chatService;
+	private ChatService chatService;
+
+	@Autowired
+	private ChatArchive chatArchive;
 
 	@Autowired
 	private AgentSessionService agentSessionService;
 
 	@ResponseBody
 	@RequestMapping(value = "/api/sessions/assigned", method = { RequestMethod.GET })
-	public ApiResponse<ChatSessionDto, Object> getSessionsAssignedToMe() {
+	public ApiResponse<ChatSessionDTO, Object> getSessionsAssignedToMe() {
 
-		List<ChatSessionDto> chatSessionDtos = new ArrayList<ChatSessionDto>();
+		List<ChatSessionDTO> chatSessionDtos = new ArrayList<ChatSessionDTO>();
 
 		if (agentSession.isLoggedIn() && ArgUtil.is(agentSession.getAgentDept())) {
 			List<ChatSessionDoc> sessions = sessionStore
 					.findChatSessionDocByAgentAndUnAssigned(agentSession.getAgentCode(), agentSession.getAgentDept());
 
 			for (ChatSessionDoc chatSessionDoc : sessions) {
-				ChatSessionDto chatSessionDto = agentChatHandlerImpl.getChatSessionDto(chatSessionDoc,
+				ChatSessionDTO chatSessionDto = chatArchive.getChatSessionDto(chatSessionDoc,
 						agentSession.getAgentCode());
 				chatSessionDtos.add(chatSessionDto);
 			}
@@ -88,7 +92,7 @@ public class MsgController {
 
 	@ResponseBody
 	@RequestMapping(value = "/api/sessions/message/send", method = { RequestMethod.POST })
-	public ApiResponse<ChatMessageDto, Object> sendSessionMessage(@RequestBody OutboxMessage outboxMessage)
+	public ApiResponse<ChatMessageDTO, Object> sendSessionMessage(@RequestBody OutboxMessage outboxMessage)
 			throws InterruptedException {
 		ChatSessionDoc sessionDoc = sessionStore.getSession(outboxMessage.getSessionId());
 
@@ -106,7 +110,7 @@ public class MsgController {
 		// Session Stuff Logging >
 
 		if (ArgUtil.areEqual(sessionDoc.getAssignedToAgent(), agentSession.getAgentCode())) {
-			ChatMessageDto messageDto = new ChatMessageDto();
+			ChatMessageDTO messageDto = new ChatMessageDTO();
 			messageDto.setName(agentSession.getAgentCode());
 			agentService.sendMessage(sessionDoc, outboxMessage);
 			messageDto.setType(outboxMessage.getType());
@@ -148,13 +152,13 @@ public class MsgController {
 
 	@ResponseBody
 	@RequestMapping(value = "/api/sessions/contact", method = { RequestMethod.GET })
-	public ApiResponse<ChatSessionDto, Object> getSessionsForContact(@RequestParam String contactId) {
+	public ApiResponse<ChatSessionDTO, Object> getSessionsForContact(@RequestParam String contactId) {
 
-		List<ChatSessionDto> chatSessionDtos = new ArrayList<ChatSessionDto>();
+		List<ChatSessionDTO> chatSessionDtos = new ArrayList<ChatSessionDTO>();
 
 		List<ChatSessionDoc> sessions = sessionStore.findChatSessionContactId(contactId);
 		for (ChatSessionDoc chatSessionDoc : sessions) {
-			ChatSessionDto chatSessionDto = agentChatHandlerImpl.toChatSessionDto(chatSessionDoc);
+			ChatSessionDTO chatSessionDto = chatArchive.withContact(chatSessionDoc);
 			chatSessionDtos.add(chatSessionDto);
 		}
 		return ApiResponse.buildResults(chatSessionDtos,
@@ -163,10 +167,8 @@ public class MsgController {
 
 	@ResponseBody
 	@RequestMapping(value = "/api/sessions/messages", method = { RequestMethod.POST })
-	public ApiResponse<ChatMessageDto, Object> getMessagesForSession(@RequestBody ChatSessionDto chatSessionDto) {
-		ChatSessionDoc sessionDoc = sessionStore.getSession(chatSessionDto.getSessionId());
-		return ApiResponse.buildResults(
-				agentChatHandlerImpl.getChatSessionDto(sessionDoc, agentSession.getAgentCode()).getMessages());
+	public ApiResponse<ChatMessageDTO, Object> getMessagesForSession(@RequestBody ChatSessionDTO chatSessionDto) {
+		return ApiResponse.buildResults(chatArchive.getMessages(chatSessionDto));
 	}
 
 	@ResponseBody

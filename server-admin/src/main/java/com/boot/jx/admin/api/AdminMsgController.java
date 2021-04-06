@@ -7,20 +7,27 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.boot.jx.api.ApiResponse;
+import com.boot.jx.chat.ChatArchive;
 import com.boot.jx.postman.doc.ChatSessionDoc;
+import com.boot.jx.postman.dto.ChatMessageDTO;
+import com.boot.jx.postman.dto.ChatSessionDTO;
 import com.boot.utils.ArgUtil;
 
 @RestController
 public class AdminMsgController {
 
 	@Autowired
-	MongoTemplate mongoTemplate;
+	private MongoTemplate mongoTemplate;
+
+	@Autowired
+	private ChatArchive chatArchive;
 
 	@RequestMapping(value = "/api/message/session", method = { RequestMethod.GET })
 	public ApiResponse<ChatSessionDoc, Object> fetchSession(@RequestParam String startStamp,
@@ -63,4 +70,8 @@ public class AdminMsgController {
 		return ApiResponse.buildResults(messages);
 	}
 
+	@RequestMapping(value = "/api/message/messages", method = { RequestMethod.POST })
+	public ApiResponse<ChatMessageDTO, Object> getMessagesForSession(@RequestBody ChatSessionDTO chatSessionDto) {
+		return ApiResponse.buildResults(chatArchive.getMessages(chatSessionDto));
+	}
 }

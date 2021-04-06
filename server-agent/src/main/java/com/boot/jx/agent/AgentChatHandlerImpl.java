@@ -1,6 +1,5 @@
 package com.boot.jx.agent;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,15 +11,14 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Component;
 
 import com.boot.jx.agent.doc.AgentSessionDoc;
-import com.boot.jx.agent.dto.ChatMessageDto;
-import com.boot.jx.agent.dto.ChatSessionDto;
+import com.boot.jx.chat.ChatArchive;
 import com.boot.jx.chat.ChatClient;
 import com.boot.jx.chat.ChatCommands;
 import com.boot.jx.chat.ChatDTOUtil;
 import com.boot.jx.chat.ChatService;
-import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.MessageDoc;
+import com.boot.jx.postman.dto.ChatMessageDTO;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.store.MessageStore;
@@ -29,7 +27,6 @@ import com.boot.jx.postman.store.SessionStore;
 import com.boot.jx.stomp.StompTunnelService;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
-import com.boot.utils.EntityDtoUtil;
 import com.boot.utils.TimeUtils;
 
 @Component
@@ -51,7 +48,10 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 	private StompTunnelService stompTunnelService;
 
 	@Autowired
-	MessageStore messageStore;
+	private MessageStore messageStore;
+
+	@Autowired
+	private ChatArchive chatArchive;
 
 	@Override
 	public boolean onAssignSupported(InboxMessage inboxMessage) {
@@ -99,7 +99,7 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 		sessionStore.save(chatSessionDoc);
 
 		stompTunnelService.sendToAll("/dept/onassign-" + inboxMessage.session().getDept(),
-				getChatSessionDto(chatSessionDoc, inboxMessage.session().getAgent()));
+				chatArchive.getChatSessionDto(chatSessionDoc, inboxMessage.session().getAgent()));
 
 		return inboxMessage;
 	}
@@ -111,7 +111,7 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 			chatService.log(chatSessionDoc, MessageStore.EVENTS.ASGND_TO_AGENT, avaialbleAgent.getAgentCode(),
 					avaialbleAgent.getAgentDept());
 			stompTunnelService.sendToAll("/dept/onassign-" + avaialbleAgent.getAgentDept(),
-					getChatSessionDto(chatSessionDoc, avaialbleAgent.getAgentCode()));
+					chatArchive.getChatSessionDto(chatSessionDoc, avaialbleAgent.getAgentCode()));
 		}
 	}
 
@@ -122,13 +122,13 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 		}
 		chatService.closeSession(chatSessionDoc);
 		stompTunnelService.sendToAll("/dept/onassign-" + chatSessionDoc.getAssignedToDept(),
-				getChatSessionDto(chatSessionDoc, chatSessionDoc.getAssignedToAgent()));
+				chatArchive.getChatSessionDto(chatSessionDoc, chatSessionDoc.getAssignedToAgent()));
 	}
 
 	@Override
 	public InboxMessage onMessageReceive(InboxMessage inboxMessage) {
 		MessageDoc messageDoc = messageStore.find(inboxMessage);
-		ChatMessageDto messageDto = entityToDto(messageDoc);
+		ChatMessageDTO messageDto = ChatDTOUtil.getChatMessageDTO(messageDoc);
 		messageDto.setName(inboxMessage.getFromName());
 		stompTunnelService.sendTo(inboxMessage.session().getAgent(), "/agent/onmessage", messageDto);
 		if (inboxMessage.getMessage().equalsIgnoreCase("/exit_chat")) {
@@ -153,75 +153,11 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 		} else {
 			chatService.reply(sessionDoc, outboxMessage);
 			MessageDoc messageDoc = messageStore.find(outboxMessage);
-			ChatMessageDto messageDto = entityToDto(messageDoc);
+			ChatMessageDTO messageDto = ChatDTOUtil.getChatMessageDTO(messageDoc);
 			messageDto.setName(messageDoc.getAgent());
 			stompTunnelService.sendTo(outboxMessage.session().getAgent(), "/agent/onmessage", messageDto);
 		}
 		return outboxMessage;
-	}
-
-	private ChatMessageDto entityToDto(MessageDoc messageDoc) {
-		ChatMessageDto messageDto = new ChatMessageDto();
-		messageDto.setType(messageDoc.getType());
-		messageDto.setText(messageDoc.getMessage());
-		messageDto.setTemplate(messageDoc.getTemplate());
-		messageDto.setTimestamp(messageDoc.getTimestamp());
-		messageDto.setSessionId(messageDoc.getSessionId());
-		messageDto.setMessageId(messageDoc.getMessageId());
-		messageDto.setMessageIdExt(messageDoc.getMessageIdExt());
-		messageDto.setMessageIdRef(messageDoc.getMessageIdRef());
-		messageDto.setTags(messageDoc.getTags());
-		messageDto.setAttachments(messageDoc.getAttachments());
-		messageDto.setSender(messageDoc.getAgent());
-		messageDto.setLogs(messageDoc.getLogs());
-		messageDto.setAction(messageDoc.getAction());
-		return messageDto;
-	}
-
-	public ChatSessionDto getChatSessionDto(ChatSessionDoc chatSessionDoc, String agentCode) {
-		ChatSessionDto chatSessionDto = toChatSessionDto(chatSessionDoc);
-		chatSessionDto.setAssigned(ArgUtil.areEqual(chatSessionDoc.getAssignedToAgent(), agentCode)
-				&& ArgUtil.isNone(chatSessionDoc.getResolveSessionStamp()));
-		List<ChatMessageDto> messageDtos = getMessages(chatSessionDto);
-		chatSessionDto.setMessages(messageDtos);
-		return chatSessionDto;
-	}
-
-	public List<ChatMessageDto> getMessages(ChatSessionDto chatSessionDto) {
-		List<MessageDoc> messages = messageStore.findBySessionId(chatSessionDto.getSessionId(),
-				chatSessionDto.getContactType());
-		List<ChatMessageDto> messageDtos = new ArrayList<ChatMessageDto>();
-		for (MessageDoc messageDoc : messages) {
-			ChatMessageDto messageDto = entityToDto(messageDoc);
-			if (ArgUtil.areEqual(messageDoc.getType(), "I")) {
-				messageDto.setName(chatSessionDto.getName());
-			} else {
-				messageDto.setName(messageDoc.getAgent());
-			}
-			messageDtos.add(messageDto);
-		}
-		return messageDtos;
-	}
-
-	public ChatSessionDto toChatSessionDto(ChatSessionDoc chatSessionDoc) {
-		ChatContactDoc contact = mongoTemplate.findById(chatSessionDoc.getContactId(), ChatContactDoc.class);
-		// Populate
-		ChatSessionDto chatSessionDto = EntityDtoUtil.entityToDto(chatSessionDoc, new ChatSessionDto());
-
-		chatSessionDto.setSessionId(chatSessionDto.getSessionId());
-		chatSessionDto.setContactType(contact.getContactType());
-		chatSessionDto.setLastInComingStamp(chatSessionDoc.getLastInComingStamp());
-		chatSessionDto.setName(contact.getName());
-		chatSessionDto.setProfilePic(contact.getProfilePic());
-		chatSessionDto.setEmail(contact.getEmail());
-		chatSessionDto.setPhone(contact.getPhone());
-		chatSessionDto.setAssignedToAgent(chatSessionDoc.getAssignedToAgent());
-		chatSessionDto.setAssignedToDept(chatSessionDoc.getAssignedToDept());
-		chatSessionDto.setContactId(contact.getContactId());
-		chatSessionDto.setActive(chatSessionDoc.isActive());
-		chatSessionDto.setContact(ChatDTOUtil.getContactDTO(contact));
-
-		return chatSessionDto;
 	}
 
 }
