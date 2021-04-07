@@ -41,7 +41,7 @@ public class FacebookConnector implements ConnectorHandler {
 
 	@Autowired
 	private TmplClient tmplClient;
-	
+
 	@Autowired
 	ExtUtilService extUtilService;
 
@@ -59,7 +59,7 @@ public class FacebookConnector implements ConnectorHandler {
 					} else {
 						req.messageType("text");
 						req.messageText(extUtilService.tinyUrl(attachment.getMediaURL()));
-						//req.attachmentType("file").attachmentUrl(attachment.getMediaURL());
+						// req.attachmentType("file").attachmentUrl(attachment.getMediaURL());
 					}
 				}
 				resp = facebooClient.sendReply(lane, req);
@@ -129,6 +129,7 @@ public class FacebookConnector implements ConnectorHandler {
 		FacebookUserProfile profile = facebooClient.getUserProfile(inboxMessage.getFrom(), inboxMessage.getLane());
 		contact.setProfilePic(profile.getProfilePic());
 		contact.setName(profile.getFirstName() + " " + profile.getLastName());
+		contact.setEmail(profile.getEmail());
 		return true;
 	}
 

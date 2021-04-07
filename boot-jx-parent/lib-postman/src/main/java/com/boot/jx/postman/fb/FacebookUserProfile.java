@@ -14,6 +14,9 @@ public class FacebookUserProfile implements Serializable {
 	@JsonProperty("last_name")
 	private String lastName;
 
+	@JsonProperty("email")
+	private String email;
+
 	@JsonProperty("profile_pic")
 	private String profilePic;
 
@@ -23,7 +26,7 @@ public class FacebookUserProfile implements Serializable {
 	@JsonProperty("timezone")
 	private Object timezone;
 
-	@JsonProperty("timezone")
+	@JsonProperty("gender")
 	private String gender;
 
 	public String getFirstName() {
@@ -72,5 +75,13 @@ public class FacebookUserProfile implements Serializable {
 
 	public void setGender(String gender) {
 		this.gender = gender;
+	}
+
+	public String getEmail() {
+		return email;
+	}
+
+	public void setEmail(String email) {
+		this.email = email;
 	}
 }
