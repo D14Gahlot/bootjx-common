@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.chat.ChatArchive;
 import com.boot.jx.postman.doc.ChatSessionDoc;
-import com.boot.jx.postman.dto.ChatMessageDTO;
 import com.boot.jx.postman.dto.ChatSessionDTO;
 import com.boot.utils.ArgUtil;
 
