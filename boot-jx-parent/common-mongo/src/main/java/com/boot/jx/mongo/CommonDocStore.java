@@ -8,6 +8,7 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.convert.MongoConverter;
 import org.springframework.data.mongodb.core.query.Update;
 
+import com.boot.jx.mongo.CommonDocInterfaces.Patchable;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 

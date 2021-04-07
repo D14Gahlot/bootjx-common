@@ -54,20 +54,22 @@ public class TemplateController {
 	public ApiResponse<QuickReply, Object> createQuickReply(@RequestParam(required = false) String id,
 			@RequestParam String category, @RequestParam String title,
 			@RequestParam(required = false) String template) {
-		QuickReply qr = null;
+
+		QuickReply newVersion = new QuickReply();
 		if (ArgUtil.is(id)) {
-			qr = mongoTemplate.findById(id, QuickReply.class);
+			QuickReply oldVersion = mongoTemplate.findById(id, QuickReply.class);
+			if (ArgUtil.is(oldVersion)) {
+				newVersion.oldVersion(oldVersion);
+				newVersion.setId(id);
+			}
 		}
 
-		if (!ArgUtil.is(qr)) {
-			qr = new QuickReply();
-		}
-
-		qr.setCategory(category);
-		qr.setTitle(title);
-		qr.setTemplate(template);
-		mongoTemplate.save(qr);
-		return ApiResponse.buildResults(mongoTemplate.findAll(QuickReply.class)).data(qr).message("QuickReply created");
+		newVersion.setCategory(category);
+		newVersion.setTitle(title);
+		newVersion.setTemplate(template);
+		mongoTemplate.save(newVersion);
+		return ApiResponse.buildResults(mongoTemplate.findAll(QuickReply.class)).data(newVersion)
+				.message("QuickReply created");
 	}
 
 	@RequestMapping(value = "/api/tmpl/quickaxn", method = { RequestMethod.GET })
@@ -87,20 +89,21 @@ public class TemplateController {
 	@RequestMapping(value = "/api/tmpl/quickaxn", method = { RequestMethod.POST })
 	public ApiResponse<QuickAction, Object> createQuickAction(@RequestParam(required = false) String id,
 			@RequestParam String category, @RequestParam String title, String code) {
-		QuickAction qr = null;
+
+		QuickAction newVersion = new QuickAction();
 		if (ArgUtil.is(id)) {
-			qr = mongoTemplate.findById(id, QuickAction.class);
+			QuickAction oldVersion = mongoTemplate.findById(id, QuickAction.class);
+			if (ArgUtil.is(oldVersion)) {
+				newVersion.oldVersion(oldVersion);
+				newVersion.setId(id);
+			}
 		}
 
-		if (!ArgUtil.is(qr)) {
-			qr = new QuickAction();
-		}
-
-		qr.setCategory(category);
-		qr.setTitle(title);
-		qr.setAction(code);
-		mongoTemplate.save(qr);
-		return ApiResponse.buildResults(mongoTemplate.findAll(QuickAction.class)).data(qr)
+		newVersion.setCategory(category);
+		newVersion.setTitle(title);
+		newVersion.setAction(code);
+		mongoTemplate.save(newVersion);
+		return ApiResponse.buildResults(mongoTemplate.findAll(QuickAction.class)).data(newVersion)
 				.message("QuickAction created");
 	}
 
@@ -120,19 +123,20 @@ public class TemplateController {
 	@RequestMapping(value = "/api/tmpl/quicklabels", method = { RequestMethod.POST })
 	public ApiResponse<QuickLabel, Object> createQuickTag(@RequestParam(required = false) String id,
 			@RequestParam String category, @RequestParam String title, String code) {
-		QuickLabel qr = null;
+		QuickLabel newVersion = new QuickLabel();
 		if (ArgUtil.is(id)) {
-			qr = mongoTemplate.findById(id, QuickLabel.class);
+			QuickLabel oldVersion = mongoTemplate.findById(id, QuickLabel.class);
+			if (ArgUtil.is(oldVersion)) {
+				newVersion.oldVersion(oldVersion);
+				newVersion.setId(id);
+			}
 		}
 
-		if (!ArgUtil.is(qr)) {
-			qr = new QuickLabel();
-		}
-
-		qr.setCategory(category);
-		qr.setTitle(title);
-		qr.setCode(code);
-		mongoTemplate.save(qr);
-		return ApiResponse.buildResults(mongoTemplate.findAll(QuickLabel.class)).data(qr).message("QuickLabel created");
+		newVersion.setCategory(category);
+		newVersion.setTitle(title);
+		newVersion.setCode(code);
+		mongoTemplate.save(newVersion);
+		return ApiResponse.buildResults(mongoTemplate.findAll(QuickLabel.class)).data(newVersion)
+				.message("QuickLabel created");
 	}
 }
