@@ -19,6 +19,7 @@ public class ChatDTOUtil {
 		contact.setPhone(chatContactDoc.getPhone());
 		contact.setEmail(chatContactDoc.getEmail());
 		contact.setLabelId(chatContactDoc.getLabelId());
+		contact.setProfilePic(chatContactDoc.getProfilePic());
 
 		return contact;
 	}
