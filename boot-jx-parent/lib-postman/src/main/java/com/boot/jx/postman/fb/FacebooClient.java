@@ -56,8 +56,8 @@ public class FacebooClient {
 		lane = ArgUtil.nonEmpty(lane, "default").toLowerCase();
 		String accessToken = environment.getProperty("facebook.lane." + lane + ".accessToken");
 		return restService.ajax("https://graph.facebook.com").path("/{psid}").pathParam("psid", psid)
-				.queryParam("fields", "first_name,last_name,profile_pic").queryParam("access_token", accessToken).get()
-				.as(FacebookUserProfile.class);
+				.queryParam("fields", "first_name,last_name,profile_pic,email,id")
+				.queryParam("access_token", accessToken).get().as(FacebookUserProfile.class);
 
 	}
 }
