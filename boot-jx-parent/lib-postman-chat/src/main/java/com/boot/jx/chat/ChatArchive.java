@@ -34,13 +34,28 @@ public class ChatArchive {
 		return ChatDTOUtil.getContactDTO(contact);
 	}
 
+	public ChatSessionDTO withContact(ChatSessionDTO chatSessionDto) {
+
+		ContactDTO contact = getContact(chatSessionDto);
+		chatSessionDto.setContact(contact);
+
+		chatSessionDto.setContactType(contact.getContactType());
+		chatSessionDto.setName(contact.getName());
+		chatSessionDto.setProfilePic(contact.getProfilePic());
+		chatSessionDto.setEmail(contact.getEmail());
+		chatSessionDto.setPhone(contact.getPhone());
+		chatSessionDto.setContactId(contact.getContactId());
+
+		return chatSessionDto;
+	}
+
 	public ChatSessionDTO getChatSession(String sessionId) {
 		return ChatDTOUtil.getChatSessionDTO(sessionStore.getSession(sessionId));
 	}
 
 	public List<ChatMessageDTO> getMessages(ChatSessionDTO chatSessionDto) {
 		if (ArgUtil.isEmpty(chatSessionDto.getContactType())) {
-			chatSessionDto = getChatSession(chatSessionDto.getSessionId());
+			chatSessionDto = withContact(chatSessionDto);
 		}
 
 		List<MessageDoc> messages = messageStore.findBySessionId(chatSessionDto.getSessionId(),
@@ -56,21 +71,6 @@ public class ChatArchive {
 			messageDtos.add(messageDto);
 		}
 		return messageDtos;
-	}
-
-	public ChatSessionDTO withContact(ChatSessionDTO chatSessionDto) {
-
-		ContactDTO contact = getContact(chatSessionDto);
-		chatSessionDto.setContact(contact);
-
-		chatSessionDto.setContactType(contact.getContactType());
-		chatSessionDto.setName(contact.getName());
-		chatSessionDto.setProfilePic(contact.getProfilePic());
-		chatSessionDto.setEmail(contact.getEmail());
-		chatSessionDto.setPhone(contact.getPhone());
-		chatSessionDto.setContactId(contact.getContactId());
-
-		return chatSessionDto;
 	}
 
 	public ChatSessionDTO withContact(ChatSessionDoc chatSessionDoc) {
