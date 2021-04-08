@@ -590,7 +590,7 @@ public class AgentAnalyticsManager {
 		List<ChatSessionDoc> botScoreLst = mongoTemplate.find(query, ChatSessionDoc.class, CHAT_SESSION);
 		for(ChatSessionDoc chat :botScoreLst) {
 			LOGGER.debug("Chat doc :"+ chat.getBotScore());
-			botScoer +=chat.getBotScore(); 
+			botScoer +=chat.getBotScore()==null?0:chat.getBotScore();
 			}
 		return botScoer;
 		}
