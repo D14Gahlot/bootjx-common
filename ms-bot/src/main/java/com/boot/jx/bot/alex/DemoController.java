@@ -30,6 +30,11 @@ public class DemoController extends ChatController {
 			reply(new OutboxMessage().template("menu-2").put("name", chatContext.getContact().getName()));
 			next("menu-2-onselect");
 		}
+		/*added for on cost else {
+				reply(new OutboxMessage().template("menu-3").put("name", chatContext.getContact().getName()));
+				next("menu-3-onselect");
+			}
+		}*/
 	}
 
 	@ChatMapping(key = AlexBotConstants.KEY.INITIATE + "hi", pattern = "^HI$")
@@ -104,6 +109,52 @@ public class DemoController extends ChatController {
 		}
 	}
 
+	/** menu3 for Oncost comp KWT   **/
+	
+	@ChatMapping(key = "menu-3-onselect")
+	public void menu3OnSelect(InboxMessage inboxMessage, StringMatcher matcher) {
+		switch (inboxMessage.getMessage().toLowerCase()) {
+		case "1":
+			reply(new OutboxMessage().template("today-offers").put("name", chatContext.getContact().getName())
+					.attachment(new Attachment().mediaURL(
+							"https://cdn.jsdelivr.net/gh/mehery-soccom/mehery-content@main/sample-receipt/your-statement.pdf")
+							.mediaType(File.FileType.DOCUMENT.toString())));
+			next("more-onselect");
+			break;
+		case "2":
+			reply(new OutboxMessage().template("weekly-offers").put("name", chatContext.getContact().getName())
+					.attachment(new Attachment().mediaURL(
+							"https://cdn.jsdelivr.net/gh/mehery-soccom/mehery-content@main/sample-receipt/top-10.pdf")
+							.mediaType(File.FileType.DOCUMENT.toString())));
+			next("more-onselect");
+			break;
+		case "3":
+			reply(new OutboxMessage().template("oncost-branch").put("name", chatContext.getContact().getName())
+					.attachment(new Attachment().mediaURL(
+							"https://cdn.jsdelivr.net/gh/mehery-soccom/mehery-content@main/sample-receipt/your-transactions-this-week.pdf")
+							.mediaType(File.FileType.DOCUMENT.toString())));
+			next("more-onselect");
+			break;
+		case "4":
+			reply(new OutboxMessage().template("today-trnx").put("name", chatContext.getContact().getName())
+					.attachment(new Attachment().mediaURL(
+							"https://www.mehery.com/wp-content/uploads/2021/02/Screenshot-2021-02-03-at-10.12.29-PM.png")
+							.mediaType(File.FileType.IMAGE.toString())));
+			next("more-onselect");
+			break;
+		case "*":
+			reply(new OutboxMessage().template("feedback"));
+			next("feedback-onselect");
+			break;
+		case "#":
+			transferToAgent(inboxMessage, matcher);
+			break;
+		default:
+			handleGlobalOptionOrInvalidAndNext(inboxMessage, matcher, "menu-3-onselect");
+			break;
+		}
+	}
+	
 	@ChatMapping(key = "more-onselect")
 	public void moreonSelect(InboxMessage inboxMessage, StringMatcher matcher) {
 		switch (inboxMessage.getMessage().toLowerCase()) {
