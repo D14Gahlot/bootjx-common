@@ -22,19 +22,23 @@ public class DemoController extends ChatController {
 
 	@ChatMapping(key = AlexBotConstants.KEY.INITIATE + "menu", pattern = "^menu$")
 	private void showMenu(InboxMessage inboxMessage, StringMatcher matcher) {
-		if (chatContext.getSession().data().containsKey("isMenu1Shown")) {
-			reply(new OutboxMessage().template("menu-1").put("name", chatContext.getContact().getName()));
-			next("menu-1-onselect");
-			chatContext.getSession().data().put("isMenu1Shown", true);
-		} else {
-			reply(new OutboxMessage().template("menu-2").put("name", chatContext.getContact().getName()));
-			next("menu-2-onselect");
-		}
-		/*added for on cost else {
+		String prevMenu = ArgUtil.parseAsString(chatContext.getSession().data().get("current_menu")).toLowerCase();
+		if (ArgUtil.is(prevMenu)) {
+			switch (prevMenu) {
+			case "2":
+				reply(new OutboxMessage().template("menu-2").put("name", chatContext.getContact().getName()));
+				next("menu-2-onselect");
+				return;
+			case "3":
 				reply(new OutboxMessage().template("menu-3").put("name", chatContext.getContact().getName()));
 				next("menu-3-onselect");
+				return;
+			default:
+				break;
 			}
-		}*/
+		}
+		reply(new OutboxMessage().template("menu-1").put("name", chatContext.getContact().getName()));
+		next("menu-1-onselect");
 	}
 
 	@ChatMapping(key = AlexBotConstants.KEY.INITIATE + "hi", pattern = "^HI$")
@@ -51,8 +55,14 @@ public class DemoController extends ChatController {
 	public void menu1OnSelect(InboxMessage inboxMessage, StringMatcher matcher) {
 		switch (inboxMessage.getMessage().toLowerCase()) {
 		case "menu":
+			showMenu(inboxMessage, matcher);
 		case "Banking":
 		case "2":
+			chatContext.getSession().data().put("current_menu", "2");
+			showMenu(inboxMessage, matcher);
+			break;
+		case "3":
+			chatContext.getSession().data().put("current_menu", "3");
 			showMenu(inboxMessage, matcher);
 			break;
 		case "talktoagent":
@@ -109,8 +119,8 @@ public class DemoController extends ChatController {
 		}
 	}
 
-	/** menu3 for Oncost comp KWT   **/
-	
+	/** menu3 for Oncost comp KWT **/
+
 	@ChatMapping(key = "menu-3-onselect")
 	public void menu3OnSelect(InboxMessage inboxMessage, StringMatcher matcher) {
 		switch (inboxMessage.getMessage().toLowerCase()) {
@@ -154,7 +164,7 @@ public class DemoController extends ChatController {
 			break;
 		}
 	}
-	
+
 	@ChatMapping(key = "more-onselect")
 	public void moreonSelect(InboxMessage inboxMessage, StringMatcher matcher) {
 		switch (inboxMessage.getMessage().toLowerCase()) {
@@ -286,6 +296,7 @@ public class DemoController extends ChatController {
 		case "*":
 		case "exit":
 		case "/exit_chat":
+			chatContext.getSession().data().remove("current_menu");
 			reply(new OutboxMessage().template("feedback"));
 			next("feedback-onselect");
 			return true;
