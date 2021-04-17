@@ -12,6 +12,7 @@ import com.boot.jx.postman.model.File;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.Constants;
 import com.boot.utils.StringUtils.StringMatcher;
 
 @BotController(name = "DemoBot")
@@ -22,7 +23,7 @@ public class DemoController extends ChatController {
 
 	@ChatMapping(key = AlexBotConstants.KEY.INITIATE + "menu", pattern = "^menu$")
 	private void showMenu(InboxMessage inboxMessage, StringMatcher matcher) {
-		String prevMenu = ArgUtil.parseAsString(chatContext.getSession().data().get("current_menu")).toLowerCase();
+		String prevMenu = ArgUtil.parseAsString(chatContext.getSession().data().get("current_menu"),Constants.BLANK).toLowerCase();
 		if (ArgUtil.is(prevMenu)) {
 			switch (prevMenu) {
 			case "2":
