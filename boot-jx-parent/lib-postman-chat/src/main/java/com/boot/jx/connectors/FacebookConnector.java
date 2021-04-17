@@ -23,6 +23,7 @@ import com.boot.jx.postman.gupshup.GupShupConfig;
 import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.File;
 import com.boot.jx.postman.model.InboxMessage;
+import com.boot.jx.postman.model.Message;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.utils.ArgUtil;
 
@@ -76,6 +77,7 @@ public class FacebookConnector implements ConnectorHandler {
 			msgIds.add(ArgUtil.parseAsString(resp.getMessageId()));
 		}
 		outboxMessage.setMessageIdExt(msgIds.toString());
+		outboxMessage.setStatus(Message.Status.SENT);
 
 		return outboxMessage;
 	}

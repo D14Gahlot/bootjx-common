@@ -70,10 +70,8 @@ public class ChatService {
 					outboxMessage.getChannel());
 			if (ArgUtil.is(connector)) {
 				connector.message("ACTION", chatContactDoc, null, outboxMessage);
-				outboxMessage.setStatus(Message.Status.SENT);
 			} else if (ArgUtil.is(defaultConnector)) {
 				defaultConnector.message("ACTION", chatContactDoc, null, outboxMessage);
-				outboxMessage.setStatus(Message.Status.SENT);
 			}
 		}
 		messageStore.update(outboxMessage);
@@ -93,10 +91,8 @@ public class ChatService {
 					outboxMessage.getChannel());
 			if (ArgUtil.is(connector)) {
 				connector.message("REPLY", null, inboxMessage, outboxMessage);
-				outboxMessage.setStatus(Message.Status.SENT);
 			} else if (ArgUtil.is(defaultConnector)) {
 				defaultConnector.message("REPLY", null, inboxMessage, outboxMessage);
-				outboxMessage.setStatus(Message.Status.SENT);
 			}
 		}
 		messageStore.update(outboxMessage);
@@ -112,10 +108,8 @@ public class ChatService {
 					outboxMessage.getChannel());
 			if (ArgUtil.is(connector)) {
 				connector.message("SEND", chatContactDoc, null, outboxMessage);
-				outboxMessage.setStatus(Message.Status.SENT);
 			} else if (ArgUtil.is(defaultConnector)) {
 				defaultConnector.message("SEND", chatContactDoc, null, outboxMessage);
-				outboxMessage.setStatus(Message.Status.SENT);
 			}
 		}
 		messageStore.update(outboxMessage);

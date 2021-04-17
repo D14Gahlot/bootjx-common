@@ -111,21 +111,27 @@ public class TwitterConnector implements ConnectorHandler {
 			} else {
 				twitterClient.sendReply(to, attachLink(outboxMessage), lane);
 			}
+			outboxMessage.setStatus(OutboxMessage.Status.SENT);
 		} catch (NumberFormatException e) {
+			outboxMessage.setStatus(OutboxMessage.Status.SENT_ERR);
 			outboxMessage.logs().add(e.getMessage());
 			e.printStackTrace();
 		} catch (TwitterException e) {
+			outboxMessage.setStatus(OutboxMessage.Status.SENT_ERR);
 			outboxMessage.logs().add(e.getMessage());
 			e.printStackTrace();
 		} catch (MalformedURLException e) {
+			outboxMessage.setStatus(OutboxMessage.Status.SENT_ERR);
 			outboxMessage.logs().add(e.getMessage());
 			e.printStackTrace();
 		} catch (IOException e) {
-			e.printStackTrace();
+			outboxMessage.setStatus(OutboxMessage.Status.SENT_ERR);
 			outboxMessage.logs().add(e.getMessage());
+			e.printStackTrace();
 		} catch (Exception e) {
-			e.printStackTrace();
+			outboxMessage.setStatus(OutboxMessage.Status.SENT_ERR);
 			outboxMessage.logs().add(e.getMessage());
+			e.printStackTrace();
 		}
 	}
 

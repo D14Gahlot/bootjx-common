@@ -16,9 +16,11 @@ import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.TemplateReply;
 import com.boot.jx.postman.gupshup.GupShupConfig;
 import com.boot.jx.postman.gupshup.GupShupInbound;
+import com.boot.jx.postman.gupshup.GupShupResp;
 import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.File;
 import com.boot.jx.postman.model.InboxMessage;
+import com.boot.jx.postman.model.Message;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.JsonUtil;
@@ -55,21 +57,35 @@ public class WAGupShupConnector implements ConnectorHandler {
 
 	@Override
 	public void reply(InboxMessage inboxMessage, OutboxMessage outboxMessage) {
+		GupShupResp resp = null;
 		if (ArgUtil.is(outboxMessage.getTemplate())) {
 			TemplateReply templateReply = mongoTemplate.findById(outboxMessage.getTemplate(), TemplateReply.class);
 			if (ArgUtil.is(templateReply)) {
 				if ("image".equalsIgnoreCase(templateReply.getType())) {
 					outboxMessage.attachment(new Attachment().mediaURL(templateReply.getUrl())
 							.mediaType(File.FileType.IMAGE.toString()));
-					gupShupChatClient.sendMessage(outboxMessage);
+					resp = gupShupChatClient.sendMessage(outboxMessage);
 				}
 			} else {
 				tmplClient.process(outboxMessage);
-				gupShupChatClient.sendMessage(outboxMessage);
+				resp = gupShupChatClient.sendMessage(outboxMessage);
 			}
 		} else {
-			gupShupChatClient.sendMessage(outboxMessage);
+			resp = gupShupChatClient.sendMessage(outboxMessage);
 		}
+
+		if (!ArgUtil.is(resp) || !ArgUtil.is(resp.getResponse())) {
+			outboxMessage.setStatus(Message.Status.SENT_ERR);
+			outboxMessage.logs.add("No Response Object");
+		} else if (ArgUtil.isEqual(resp.getResponse().getStatus(), "error")) {
+			outboxMessage.logs
+					.add(String.format("%s : %s", resp.getResponse().getId(), resp.getResponse().getDetails()));
+			outboxMessage.setStatus(Message.Status.SENT_ERR);
+		} else {
+			outboxMessage.setMessageIdExt(resp.getResponse().getId());
+			outboxMessage.setStatus(Message.Status.SENT);
+		}
+
 	}
 
 	@Override

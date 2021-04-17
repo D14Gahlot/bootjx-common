@@ -100,6 +100,8 @@ public class TelegramConnector implements ConnectorHandler {
 			msgIds.add(ArgUtil.parseAsString(resp.getMessageId()));
 		}
 		message.setMessageIdExt(msgIds.toString());
+		message.setStatus(OutboxMessage.Status.SENT);
+
 		return message;
 	}
 
