@@ -57,7 +57,7 @@ public class DemoController extends ChatController {
 		switch (inboxMessage.getMessage().toLowerCase()) {
 		case "menu":
 			showMenu(inboxMessage, matcher);
-		case "Banking":
+		case "banking":
 		case "2":
 			chatContext.getSession().data().put("current_menu", "2");
 			showMenu(inboxMessage, matcher);
