@@ -115,6 +115,12 @@ public class MessageStore extends CommonDocStore {
 	}
 
 	// Out Going Messages
+	private void update(OutboxMessage outMessage, MessageDoc doc) {
+		doc.setLogs(outMessage.getLogs());
+		doc.setMessageIdExt(outMessage.getMessageIdExt());
+		doc.setStatus(ArgUtil.parseAsString(outMessage.getStatus()));
+	}
+
 	private MessageDoc createMessageDoc(OutboxMessage outMessage) {
 		String to = CollectionUtil.getOne(outMessage.getTo());
 		MessageDoc doc = new MessageDoc();
@@ -140,11 +146,11 @@ public class MessageStore extends CommonDocStore {
 		doc.setMessage(outMessage.getMessage());
 		// }
 		doc.setAttachments(outMessage.getAttachments());
-		doc.setLogs(outMessage.getLogs());
 
 		doc.setSessionId(outMessage.getSessionId());
-		doc.setMessageIdExt(outMessage.getMessageIdExt());
 		doc.setMessageIdRef(outMessage.getMessageIdRef());
+		
+		update(outMessage, doc);
 
 		return doc;
 	}
@@ -161,8 +167,11 @@ public class MessageStore extends CommonDocStore {
 					getCollectionName(outMessage.getContactType()));
 		}
 		if (!ArgUtil.is(doc)) {
-			return createMessageDoc(outMessage);
+			doc = createMessageDoc(outMessage);
 		}
+
+		update(outMessage, doc);
+
 		return doc;
 	}
 
