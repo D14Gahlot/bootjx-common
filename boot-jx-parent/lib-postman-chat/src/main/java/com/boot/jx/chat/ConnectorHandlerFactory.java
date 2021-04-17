@@ -14,6 +14,7 @@ import com.boot.jx.dict.ContactType;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.model.InboxMessage;
+import com.boot.jx.postman.model.Message;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.utils.ArgUtil;
 
@@ -39,16 +40,22 @@ public class ConnectorHandlerFactory extends ScopedBeanFactory<String, Connector
 
 		default public void message(String messageType, ChatContactDoc chatContactDoc, InboxMessage inboxMessage,
 				OutboxMessage outboxMessage) {
-			switch (messageType) {
-			case "SEND":
-				this.send(chatContactDoc, outboxMessage);
-				break;
-			case "REPLY":
-				this.reply(inboxMessage, outboxMessage);
-				break;
-			default:
-				break;
+			try {
+				switch (messageType) {
+				case "SEND":
+					this.send(chatContactDoc, outboxMessage);
+					break;
+				case "REPLY":
+					this.reply(inboxMessage, outboxMessage);
+					break;
+				default:
+					break;
+				}
+			} catch (Exception e) {
+				outboxMessage.setStatus(Message.Status.SENT_ERR);
+				outboxMessage.logs().add(e.getMessage());
 			}
+
 		}
 
 		void send(String lane, String to, OutboxMessage outboxMessage);

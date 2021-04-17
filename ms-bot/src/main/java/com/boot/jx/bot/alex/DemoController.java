@@ -22,14 +22,23 @@ public class DemoController extends ChatController {
 
 	@ChatMapping(key = AlexBotConstants.KEY.INITIATE + "menu", pattern = "^menu$")
 	private void showMenu(InboxMessage inboxMessage, StringMatcher matcher) {
-		if (chatContext.getSession().data().containsKey("isMenu1Shown")) {
-			reply(new OutboxMessage().template("menu-1").put("name", chatContext.getContact().getName()));
-			next("menu-1-onselect");
-			chatContext.getSession().data().put("isMenu1Shown", true);
-		} else {
-			reply(new OutboxMessage().template("menu-2").put("name", chatContext.getContact().getName()));
-			next("menu-2-onselect");
+		String prevMenu = ArgUtil.parseAsString(chatContext.getSession().data().get("current_menu")).toLowerCase();
+		if (ArgUtil.is(prevMenu)) {
+			switch (prevMenu) {
+			case "2":
+				reply(new OutboxMessage().template("menu-2").put("name", chatContext.getContact().getName()));
+				next("menu-2-onselect");
+				return;
+			case "3":
+				reply(new OutboxMessage().template("menu-3").put("name", chatContext.getContact().getName()));
+				next("menu-3-onselect");
+				return;
+			default:
+				break;
+			}
 		}
+		reply(new OutboxMessage().template("menu-1").put("name", chatContext.getContact().getName()));
+		next("menu-1-onselect");
 	}
 
 	@ChatMapping(key = AlexBotConstants.KEY.INITIATE + "hi", pattern = "^HI$")
@@ -46,8 +55,14 @@ public class DemoController extends ChatController {
 	public void menu1OnSelect(InboxMessage inboxMessage, StringMatcher matcher) {
 		switch (inboxMessage.getMessage().toLowerCase()) {
 		case "menu":
+			showMenu(inboxMessage, matcher);
 		case "Banking":
 		case "2":
+			chatContext.getSession().data().put("current_menu", "2");
+			showMenu(inboxMessage, matcher);
+			break;
+		case "3":
+			chatContext.getSession().data().put("current_menu", "3");
 			showMenu(inboxMessage, matcher);
 			break;
 		case "talktoagent":
@@ -100,6 +115,52 @@ public class DemoController extends ChatController {
 			break;
 		default:
 			handleGlobalOptionOrInvalidAndNext(inboxMessage, matcher, "menu-2-onselect");
+			break;
+		}
+	}
+
+	/** menu3 for Oncost comp KWT **/
+
+	@ChatMapping(key = "menu-3-onselect")
+	public void menu3OnSelect(InboxMessage inboxMessage, StringMatcher matcher) {
+		switch (inboxMessage.getMessage().toLowerCase()) {
+		case "1":
+			reply(new OutboxMessage().template("today-offers").put("name", chatContext.getContact().getName())
+					.attachment(new Attachment().mediaURL(
+							"https://cdn.jsdelivr.net/gh/mehery-soccom/mehery-content@main/sample-receipt/your-statement.pdf")
+							.mediaType(File.FileType.DOCUMENT.toString())));
+			next("more-onselect");
+			break;
+		case "2":
+			reply(new OutboxMessage().template("weekly-offers").put("name", chatContext.getContact().getName())
+					.attachment(new Attachment().mediaURL(
+							"https://cdn.jsdelivr.net/gh/mehery-soccom/mehery-content@main/sample-receipt/top-10.pdf")
+							.mediaType(File.FileType.DOCUMENT.toString())));
+			next("more-onselect");
+			break;
+		case "3":
+			reply(new OutboxMessage().template("oncost-branch").put("name", chatContext.getContact().getName())
+					.attachment(new Attachment().mediaURL(
+							"https://cdn.jsdelivr.net/gh/mehery-soccom/mehery-content@main/sample-receipt/your-transactions-this-week.pdf")
+							.mediaType(File.FileType.DOCUMENT.toString())));
+			next("more-onselect");
+			break;
+		case "4":
+			reply(new OutboxMessage().template("today-trnx").put("name", chatContext.getContact().getName())
+					.attachment(new Attachment().mediaURL(
+							"https://www.mehery.com/wp-content/uploads/2021/02/Screenshot-2021-02-03-at-10.12.29-PM.png")
+							.mediaType(File.FileType.IMAGE.toString())));
+			next("more-onselect");
+			break;
+		case "*":
+			reply(new OutboxMessage().template("feedback"));
+			next("feedback-onselect");
+			break;
+		case "#":
+			transferToAgent(inboxMessage, matcher);
+			break;
+		default:
+			handleGlobalOptionOrInvalidAndNext(inboxMessage, matcher, "menu-3-onselect");
 			break;
 		}
 	}
@@ -235,6 +296,7 @@ public class DemoController extends ChatController {
 		case "*":
 		case "exit":
 		case "/exit_chat":
+			chatContext.getSession().data().remove("current_menu");
 			reply(new OutboxMessage().template("feedback"));
 			next("feedback-onselect");
 			return true;
