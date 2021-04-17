@@ -98,6 +98,11 @@ public class InBoundControllerWeb {
 	public InboxMessage onReceiveMessage(@RequestBody InboxMessage event) throws InterruptedException {
 		event.setContactType(ContactType.WEBSITE);
 		event.setLane("DUMMY");
+		
+		//event.setContactType(ContactType.WHATSAPP);
+		//event.setChannel("GUPSHUPW");
+		//event.setFrom("919930104050");
+		//event.setFromName("Test");
 
 		// Cleaning
 		// event.setSessionId("600edc822743742e916202b9");

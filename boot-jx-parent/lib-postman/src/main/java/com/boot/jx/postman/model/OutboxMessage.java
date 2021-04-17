@@ -21,7 +21,7 @@ public class OutboxMessage extends Message<OutboxMessage> implements WAMessageOp
 
 	private BigDecimal queue;
 	private MessageSession session;
-	public List<String> logs;
+	private List<String> logs;
 
 	public OutboxMessage(ContactType contactType) {
 		super(contactType);
