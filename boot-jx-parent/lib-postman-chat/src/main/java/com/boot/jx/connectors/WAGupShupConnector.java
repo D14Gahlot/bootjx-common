@@ -7,7 +7,6 @@ import org.springframework.stereotype.Component;
 import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorHandler;
 import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorMapping;
 import com.boot.jx.dict.ContactType;
-import com.boot.jx.postman.client.ExtUtilService;
 import com.boot.jx.postman.client.GupShupChatClient;
 import com.boot.jx.postman.client.GupShupNotifyClient;
 import com.boot.jx.postman.client.TmplClient;
@@ -76,9 +75,9 @@ public class WAGupShupConnector implements ConnectorHandler {
 
 		if (!ArgUtil.is(resp) || !ArgUtil.is(resp.getResponse())) {
 			outboxMessage.setStatus(Message.Status.SENT_ERR);
-			outboxMessage.logs.add("No Response Object");
+			outboxMessage.logs().add("No Response Object");
 		} else if (ArgUtil.isEqual(resp.getResponse().getStatus(), "error")) {
-			outboxMessage.logs
+			outboxMessage.logs()
 					.add(String.format("%s : %s", resp.getResponse().getId(), resp.getResponse().getDetails()));
 			outboxMessage.setStatus(Message.Status.SENT_ERR);
 		} else {
