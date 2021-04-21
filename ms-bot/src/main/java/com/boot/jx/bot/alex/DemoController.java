@@ -57,11 +57,12 @@ public class DemoController extends ChatController {
 		switch (inboxMessage.getMessage().toLowerCase()) {
 		case "menu":
 			showMenu(inboxMessage, matcher);
-		case "banking":
+		case "asset management":
 		case "1":
 			chatContext.getSession().data().put("current_menu", "1");
 			showMenu(inboxMessage, matcher);
 			break;
+		case "retail":	
 		case "2":
 			chatContext.getSession().data().put("current_menu", "2");
 			showMenu(inboxMessage, matcher);
@@ -120,38 +121,38 @@ public class DemoController extends ChatController {
 		}
 	}
 
-	/** menu3 for Oncost comp KWT **/
+	/** menu2 for Retails **/
 
 	@ChatMapping(key = "menu-2-onselect")
 	public void menu3OnSelect(InboxMessage inboxMessage, StringMatcher matcher) {
 		switch (inboxMessage.getMessage().toLowerCase()) {
 		case "1":
-			reply(new OutboxMessage().template("today-offers").put("name", chatContext.getContact().getName())
+			reply(new OutboxMessage().template("menu-2-today-offers").put("name", chatContext.getContact().getName())
 					.attachment(new Attachment().mediaURL(
 							"https://cdn.jsdelivr.net/gh/mehery-soccom/mehery-content@main/sample-receipt/your-statement.pdf")
 							.mediaType(File.FileType.DOCUMENT.toString())));
-			next("more-onselect");
+			next("more-onselect-menu-2");
 			break;
 		case "2":
-			reply(new OutboxMessage().template("weekly-offers").put("name", chatContext.getContact().getName())
+			reply(new OutboxMessage().template("menu-2-weekly-offers").put("name", chatContext.getContact().getName())
 					.attachment(new Attachment().mediaURL(
 							"https://cdn.jsdelivr.net/gh/mehery-soccom/mehery-content@main/sample-receipt/top-10.pdf")
 							.mediaType(File.FileType.DOCUMENT.toString())));
-			next("more-onselect");
+			next("more-onselect-menu-2");
 			break;
 		case "3":
-			reply(new OutboxMessage().template("oncost-branch").put("name", chatContext.getContact().getName())
+			reply(new OutboxMessage().template("menu-2-retail-branch").put("name", chatContext.getContact().getName())
 					.attachment(new Attachment().mediaURL(
 							"https://cdn.jsdelivr.net/gh/mehery-soccom/mehery-content@main/sample-receipt/your-transactions-this-week.pdf")
 							.mediaType(File.FileType.DOCUMENT.toString())));
-			next("more-onselect");
+			next("more-onselect-menu-2");
 			break;
 		case "4":
 			reply(new OutboxMessage().template("today-trnx").put("name", chatContext.getContact().getName())
 					.attachment(new Attachment().mediaURL(
 							"https://www.mehery.com/wp-content/uploads/2021/02/Screenshot-2021-02-03-at-10.12.29-PM.png")
 							.mediaType(File.FileType.IMAGE.toString())));
-			next("more-onselect");
+			next("more-onselect-menu-2");
 			break;
 		case "*":
 			reply(new OutboxMessage().template("feedback"));
@@ -186,6 +187,29 @@ public class DemoController extends ChatController {
 			return;
 		}
 	}
+	
+	@ChatMapping(key = "more-onselect-menu-2")
+	public void moreonSelectRetailMenu(InboxMessage inboxMessage, StringMatcher matcher) {
+		switch (inboxMessage.getMessage().toLowerCase()) {
+		case "yes":
+		case "y":
+		case "1":
+			reply(new OutboxMessage().template("menu-2").put("name", chatContext.getContact().getName()));
+			next("menu-2-onselect");
+			break;
+		case "no":
+		case "n":
+		case "2":
+			reply(new OutboxMessage().template("feedback"));
+			next("feedback-onselect");
+			break;
+		default:
+			handleGlobalOptionOrInvalidAndNext(inboxMessage, matcher, "more-onselect");
+			return;
+		}
+	}
+
+	
 
 	@ChatMapping(key = "feedback-onselect")
 	public void feedback(InboxMessage inboxMessage, StringMatcher matcher) {
