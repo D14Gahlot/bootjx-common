@@ -26,20 +26,20 @@ public class DemoController extends ChatController {
 		String prevMenu = ArgUtil.parseAsString(chatContext.getSession().data().get("current_menu"),Constants.BLANK).toLowerCase();
 		if (ArgUtil.is(prevMenu)) {
 			switch (prevMenu) {
+			case "1":
+				reply(new OutboxMessage().template("menu-1").put("name", chatContext.getContact().getName()));
+				next("menu-1-onselect");
+				return;
 			case "2":
 				reply(new OutboxMessage().template("menu-2").put("name", chatContext.getContact().getName()));
 				next("menu-2-onselect");
-				return;
-			case "3":
-				reply(new OutboxMessage().template("menu-3").put("name", chatContext.getContact().getName()));
-				next("menu-3-onselect");
 				return;
 			default:
 				break;
 			}
 		}
-		reply(new OutboxMessage().template("menu-1").put("name", chatContext.getContact().getName()));
-		next("menu-1-onselect");
+		reply(new OutboxMessage().template("menu-0").put("name", chatContext.getContact().getName()));
+		next("menu-0-onselect");
 	}
 
 	@ChatMapping(key = AlexBotConstants.KEY.INITIATE + "hi", pattern = "^HI$")
@@ -52,31 +52,31 @@ public class DemoController extends ChatController {
 		reply("PING");
 	}
 
-	@ChatMapping(key = "menu-1-onselect")
+	@ChatMapping(key = "menu-0-onselect")
 	public void menu1OnSelect(InboxMessage inboxMessage, StringMatcher matcher) {
 		switch (inboxMessage.getMessage().toLowerCase()) {
 		case "menu":
 			showMenu(inboxMessage, matcher);
 		case "banking":
+		case "1":
+			chatContext.getSession().data().put("current_menu", "1");
+			showMenu(inboxMessage, matcher);
+			break;
 		case "2":
 			chatContext.getSession().data().put("current_menu", "2");
 			showMenu(inboxMessage, matcher);
 			break;
-		case "3":
-			chatContext.getSession().data().put("current_menu", "3");
-			showMenu(inboxMessage, matcher);
-			break;
 		case "talktoagent":
-		case "1":
+		case "3":
 			transferToAgent(inboxMessage, matcher);
 			break;
 		default:
-			handleGlobalOptionOrInvalidAndNext(inboxMessage, matcher, "menu-1-onselect");
+			handleGlobalOptionOrInvalidAndNext(inboxMessage, matcher, "menu-0-onselect");
 			return;
 		}
 	}
 
-	@ChatMapping(key = "menu-2-onselect")
+	@ChatMapping(key = "menu-1-onselect")
 	public void menu2OnSelect(InboxMessage inboxMessage, StringMatcher matcher) {
 		switch (inboxMessage.getMessage().toLowerCase()) {
 		case "1":
@@ -115,14 +115,14 @@ public class DemoController extends ChatController {
 			transferToAgent(inboxMessage, matcher);
 			break;
 		default:
-			handleGlobalOptionOrInvalidAndNext(inboxMessage, matcher, "menu-2-onselect");
+			handleGlobalOptionOrInvalidAndNext(inboxMessage, matcher, "menu-1-onselect");
 			break;
 		}
 	}
 
 	/** menu3 for Oncost comp KWT **/
 
-	@ChatMapping(key = "menu-3-onselect")
+	@ChatMapping(key = "menu-2-onselect")
 	public void menu3OnSelect(InboxMessage inboxMessage, StringMatcher matcher) {
 		switch (inboxMessage.getMessage().toLowerCase()) {
 		case "1":
@@ -161,7 +161,7 @@ public class DemoController extends ChatController {
 			transferToAgent(inboxMessage, matcher);
 			break;
 		default:
-			handleGlobalOptionOrInvalidAndNext(inboxMessage, matcher, "menu-3-onselect");
+			handleGlobalOptionOrInvalidAndNext(inboxMessage, matcher, "menu-2-onselect");
 			break;
 		}
 	}
@@ -172,8 +172,8 @@ public class DemoController extends ChatController {
 		case "yes":
 		case "y":
 		case "1":
-			reply(new OutboxMessage().template("menu-2").put("name", chatContext.getContact().getName()));
-			next("menu-2-onselect");
+			reply(new OutboxMessage().template("menu-1").put("name", chatContext.getContact().getName()));
+			next("menu-1-onselect");
 			break;
 		case "no":
 		case "n":
