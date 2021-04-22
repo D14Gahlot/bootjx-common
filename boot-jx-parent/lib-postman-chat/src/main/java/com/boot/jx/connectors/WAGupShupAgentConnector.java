@@ -108,7 +108,13 @@ public class WAGupShupAgentConnector implements ConnectorHandler {
 		inboxMessage.setChannel(Channel.GUPSHUPAGENT.toString());
 		inboxMessage.from(inboundV2.getMessages().get(0).getFrom());
 		inboxMessage.setFromName(inboundV2.getContacts().get(0).getProfile().getName());
-		inboxMessage.setMessage(inboundV2.getMessages().get(0).getText().getBody());
+
+		if (ArgUtil.areEqual(inboundV2.getMessages().get(0).getType(), "button")) {
+			inboxMessage.setMessage(inboundV2.getMessages().get(0).getButton().getText());
+		} else {
+			inboxMessage.setMessage(inboundV2.getMessages().get(0).getText().getBody());
+		}
+
 		inboxMessage.setTo(inboundV2.getContacts().get(0).getWaId());
 		inboxMessage.setMessageIdExt(inboundV2.getMessages().get(0).getId());
 		return inboxMessage;
