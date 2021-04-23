@@ -10,6 +10,8 @@ import org.springframework.stereotype.Component;
 
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.postman.PostManException;
+import com.boot.jx.postman.dto.ChatUserProfileDTO;
+import com.boot.jx.postman.dto.ChatUserProfileDTO.ChatUserProfileRequest;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.rest.RestService;
 import com.boot.jx.utils.PostManUtil;
@@ -33,6 +35,9 @@ public class ChatClient {
 
 	@Value("${postman.inbound.forward.url}")
 	private String inboundForwardUrl;
+
+	@Value("${postman.contact.details.url}")
+	private String contactDetailsUrl;
 
 	@Value("${postman.chat.dummy.user.enabled}")
 	boolean chatDummyUserEnabled;
@@ -82,6 +87,16 @@ public class ChatClient {
 			inboxMessage.setChecksum(PostManUtil.generateCheckSum(inboxMessage));
 			return restService.ajax(agentUrl).path(PATH.ASSIGN_TO_AGENT).post(inboxMessage)
 					.as(new ParameterizedTypeReference<ApiResponse<InboxMessage, Object>>() {
+					});
+		} else {
+			return null;
+		}
+	}
+
+	public ChatUserProfileDTO fetchContactDetails(ChatUserProfileRequest chatUserProfileRequest) {
+		if (ArgUtil.is(this.contactDetailsUrl)) {
+			return restService.ajax(contactDetailsUrl).post(chatUserProfileRequest)
+					.as(new ParameterizedTypeReference<ChatUserProfileDTO>() {
 					});
 		} else {
 			return null;
