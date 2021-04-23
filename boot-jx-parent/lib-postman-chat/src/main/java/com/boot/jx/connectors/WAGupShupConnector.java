@@ -81,7 +81,8 @@ public class WAGupShupConnector implements ConnectorHandler {
 					.add(String.format("%s : %s", resp.getResponse().getId(), resp.getResponse().getDetails()));
 			outboxMessage.setStatus(Message.Status.SENT_ERR);
 		} else {
-			outboxMessage.setMessageIdExt(resp.getResponse().getId());
+			if (ArgUtil.is(resp.getResponse().getId()))
+				outboxMessage.setMessageIdExt(resp.getResponse().getId());
 			outboxMessage.setStatus(Message.Status.SENT);
 		}
 

@@ -10,7 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
@@ -27,6 +26,7 @@ import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.File;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.OutboxMessage;
+import com.boot.jx.postman.model.TGMessage;
 import com.boot.jx.postman.model.TmplElement;
 import com.boot.jx.postman.tg.TelegramClient;
 import com.boot.utils.ArgUtil;
@@ -48,7 +48,7 @@ public class TelegramConnector implements ConnectorHandler {
 	private TmplClient tmplClient;
 
 	public OutboxMessage sendOutboxMessage(String lane, String to, OutboxMessage message) {
-		Message resp = null;
+		TGMessage resp = null;
 		StringJoiner msgIds = new StringJoiner(",");
 
 		if (ArgUtil.is(message.getAttachments())) {
@@ -57,11 +57,13 @@ public class TelegramConnector implements ConnectorHandler {
 					if (ArgUtil.areEqual(attachment.getMediaType(), File.FileType.IMAGE.toString())) {
 						resp = telegramClient.sendPhoto(lane, to, attachment.getMediaURL(),
 								attachment.getMediaCaption());
-						msgIds.add(ArgUtil.parseAsString(resp.getMessageId()));
+						if (ArgUtil.is(resp.getMessageId()))
+							msgIds.add(ArgUtil.parseAsString(resp.getMessageId()));
 					} else {
 						resp = telegramClient.sendDocument(lane, to, attachment.getMediaURL(),
 								attachment.getMediaCaption());
-						msgIds.add(ArgUtil.parseAsString(resp.getMessageId()));
+						if (ArgUtil.is(resp.getMessageId()))
+							msgIds.add(ArgUtil.parseAsString(resp.getMessageId()));
 					}
 				}
 			}
@@ -97,7 +99,8 @@ public class TelegramConnector implements ConnectorHandler {
 				sendMessage.setReplyMarkup(replyKeyboardMarkup);
 			}
 			resp = telegramClient.sendReply(lane, to, sendMessage);
-			msgIds.add(ArgUtil.parseAsString(resp.getMessageId()));
+			if (ArgUtil.is(resp.getMessageId()))
+				msgIds.add(ArgUtil.parseAsString(resp.getMessageId()));
 		}
 		message.setMessageIdExt(msgIds.toString());
 		message.setStatus(OutboxMessage.Status.SENT);

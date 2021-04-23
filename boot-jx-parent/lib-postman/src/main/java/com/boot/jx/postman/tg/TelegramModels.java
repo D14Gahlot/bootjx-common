@@ -22,4 +22,11 @@ public class TelegramModels {
 
 	}
 
+	@JsonInclude(Include.NON_NULL)
+	@JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
+	public static class TGMessage extends org.telegram.telegrambots.meta.api.objects.Message {
+		private static final long serialVersionUID = 1L;
+
+	}
+
 }
