@@ -12,6 +12,8 @@ import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatContextDoc;
 import com.boot.jx.postman.doc.ChatMeta;
 import com.boot.jx.postman.doc.ChatSessionDoc;
+import com.boot.jx.postman.dto.ChatUserProfileDTO;
+import com.boot.jx.postman.dto.ChatUserProfileDTO.ChatUserProfileRequest;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.Message;
 import com.boot.jx.postman.model.OutboxMessage;
@@ -270,6 +272,16 @@ public class ChatService {
 		if (initd) {
 			session.setContactName(contact.getName());
 			session = sessionStore.initSession(session);
+			try {
+				ChatUserProfileRequest chatUserProfileRequest = new ChatUserProfileRequest();
+				chatUserProfileRequest.setEmail(contact.getEmail());
+				chatUserProfileRequest.setMobile(contact.getPhone());
+				chatUserProfileRequest.setContactId(contact.getContactId());
+				ChatUserProfileDTO profile = chatClient.fetchContactDetails(chatUserProfileRequest);
+				contact.setProfile(profile);
+			} catch (Exception e) {
+
+			}
 		}
 		return session.isInitd();
 	}
