@@ -30,6 +30,7 @@ public class ContactDTO implements java.io.Serializable {
 	private String profilePic;
 
 	private List<String> labelId;
+	private ChatUserProfileDTO profile;
 
 	public String getContactId() {
 		return contactId;
@@ -85,6 +86,14 @@ public class ContactDTO implements java.io.Serializable {
 
 	public void setProfilePic(String profilePic) {
 		this.profilePic = profilePic;
+	}
+
+	public ChatUserProfileDTO getProfile() {
+		return profile;
+	}
+
+	public void setProfile(ChatUserProfileDTO profile) {
+		this.profile = profile;
 	}
 
 }
