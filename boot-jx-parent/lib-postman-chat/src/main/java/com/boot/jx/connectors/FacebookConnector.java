@@ -74,7 +74,8 @@ public class FacebookConnector implements ConnectorHandler {
 			req.messageType("text");
 			req.messageText(outboxMessage.getMessage());
 			resp = facebooClient.sendReply(lane, req);
-			msgIds.add(ArgUtil.parseAsString(resp.getMessageId()));
+			if (ArgUtil.is(resp.getMessageId()))
+				msgIds.add(ArgUtil.parseAsString(resp.getMessageId()));
 		}
 		outboxMessage.setMessageIdExt(msgIds.toString());
 		outboxMessage.setStatus(Message.Status.SENT);
