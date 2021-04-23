@@ -279,6 +279,7 @@ public class ChatService {
 				chatUserProfileRequest.setContactId(contact.getContactId());
 				ChatUserProfileDTO profile = chatClient.fetchContactDetails(chatUserProfileRequest);
 				contact.setProfile(profile);
+				sessionStore.save(contact);
 			} catch (Exception e) {
 
 			}
