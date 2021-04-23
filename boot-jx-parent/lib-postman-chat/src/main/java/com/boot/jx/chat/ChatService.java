@@ -273,6 +273,16 @@ public class ChatService {
 		if (initd) {
 			session.setContactName(contact.getName());
 			session = sessionStore.initSession(session);
+			try {
+				ChatUserProfileRequest chatUserProfileRequest = new ChatUserProfileRequest();
+				chatUserProfileRequest.setEmail(contact.getEmail());
+				chatUserProfileRequest.setMobile(contact.getPhone());
+				chatUserProfileRequest.setContactId(contact.getContactId());
+				ChatUserProfileDTO profile = chatClient.fetchContactDetails(chatUserProfileRequest);
+				contact.setProfile(profile);
+			} catch (Exception e) {
+
+			}
 		}
 		return session.isInitd();
 	}
