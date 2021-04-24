@@ -109,6 +109,7 @@ public class Tenants {
 					return site;
 				}
 			}
+			return new TemplateGeneric(siteId);
 		}
 		return defaultValue;
 	}

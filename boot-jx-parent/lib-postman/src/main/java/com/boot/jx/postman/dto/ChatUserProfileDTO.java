@@ -1,15 +1,19 @@
 package com.boot.jx.postman.dto;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class ChatUserProfileDTO {
+public class ChatUserProfileDTO implements Serializable {
+
+	private static final long serialVersionUID = 3000520290601093027L;
 
 	@JsonIgnoreProperties(ignoreUnknown = true)
-	public static class ChatUserProfileRequest {
+	public static class ChatUserProfileRequest implements Serializable {
+		private static final long serialVersionUID = -4573847059953057257L;
 		String contactId;
 		String mobile;
 		String email;
@@ -41,8 +45,9 @@ public class ChatUserProfileDTO {
 	}
 
 	@JsonIgnoreProperties(ignoreUnknown = true)
-	public static class CustomerLabel {
+	public static class CustomerLabel implements Serializable {
 
+		private static final long serialVersionUID = 3113597210867635972L;
 		String name;
 		Object value;
 		String key;
