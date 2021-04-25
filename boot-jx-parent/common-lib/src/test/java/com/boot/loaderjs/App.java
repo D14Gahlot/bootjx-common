@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.log4j.MDC;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,6 +17,7 @@ import com.boot.jx.AppContextUtil;
 import com.boot.jx.dict.UserClient.AppType;
 import com.boot.jx.dict.UserClient.DeviceType;
 import com.boot.jx.dict.UserClient.UserDeviceClient;
+import com.boot.jx.scope.tnt.TenantContextHolder;
 import com.boot.jx.tunnel.TunnelMessage;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.ContextUtil;
@@ -47,6 +49,10 @@ public class App { // Noncompliant
 	private static Logger LOGGER = LoggerFactory.getLogger(App.class);
 
 	public static void main(String[] args) throws ExpressionException {
+		MDC.put(TenantContextHolder.TENANT, "heohooh");
+		LOGGER.info("Hello");
+	}
+	public static void main8(String[] args) throws ExpressionException {
 
 		StringMatcher matcher = new StringMatcher("DOCUMENT_DATE<");
 
