@@ -15,7 +15,7 @@ import com.boot.utils.ArgUtil;
 import com.boot.utils.Constants;
 import com.boot.utils.StringUtils.StringMatcher;
 
-@BotController(name = "DemoBot")
+@BotController(name = "DemoBot", tenant = "app")
 public class DemoController extends ChatController {
 
 	@Autowired
@@ -23,7 +23,8 @@ public class DemoController extends ChatController {
 
 	@ChatMapping(key = AlexBotConstants.KEY.INITIATE + "menu", pattern = "^menu$")
 	private void showMenu(InboxMessage inboxMessage, StringMatcher matcher) {
-		String prevMenu = ArgUtil.parseAsString(chatContext.getSession().data().get("current_menu"),Constants.BLANK).toLowerCase();
+		String prevMenu = ArgUtil.parseAsString(chatContext.getSession().data().get("current_menu"), Constants.BLANK)
+				.toLowerCase();
 		if (ArgUtil.is(prevMenu)) {
 			switch (prevMenu) {
 			case "1":
@@ -62,7 +63,7 @@ public class DemoController extends ChatController {
 			chatContext.getSession().data().put("current_menu", "1");
 			showMenu(inboxMessage, matcher);
 			break;
-		case "retail":	
+		case "retail":
 		case "2":
 			chatContext.getSession().data().put("current_menu", "2");
 			showMenu(inboxMessage, matcher);
@@ -187,7 +188,7 @@ public class DemoController extends ChatController {
 			return;
 		}
 	}
-	
+
 	@ChatMapping(key = "more-onselect-menu-2")
 	public void moreonSelectRetailMenu(InboxMessage inboxMessage, StringMatcher matcher) {
 		switch (inboxMessage.getMessage().toLowerCase()) {
@@ -208,8 +209,6 @@ public class DemoController extends ChatController {
 			return;
 		}
 	}
-
-	
 
 	@ChatMapping(key = "feedback-onselect")
 	public void feedback(InboxMessage inboxMessage, StringMatcher matcher) {

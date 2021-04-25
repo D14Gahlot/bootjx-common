@@ -12,6 +12,7 @@ public class MethodWrapper implements Comparable<MethodWrapper> {
 	private String controller;
 	private Method method;
 	private Pattern[] pattern;
+	private String tenant;
 	private String lane;
 	private Matcher matcher;
 	private String next;
@@ -126,6 +127,14 @@ public class MethodWrapper implements Comparable<MethodWrapper> {
 
 	public void setLength(int length) {
 		this.length = length;
+	}
+
+	public String getTenant() {
+		return tenant;
+	}
+
+	public void setTenant(String tenant) {
+		this.tenant = tenant;
 	}
 
 }
