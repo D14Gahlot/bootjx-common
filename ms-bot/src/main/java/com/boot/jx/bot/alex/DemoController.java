@@ -129,14 +129,14 @@ public class DemoController extends ChatController {
 		case "1":
 			reply(new OutboxMessage().template("menu-2-today-offers").put("name", chatContext.getContact().getName())
 					.attachment(new Attachment().mediaURL(
-							"https://cdn.jsdelivr.net/gh/mehery-soccom/mehery-content@main/sample-receipt/your-statement.pdf")
+							"https://cdn.jsdelivr.net/gh/mehery-soccom/mehery-content@main/sample-receipt/weekly-offer.pdf")
 							.mediaType(File.FileType.DOCUMENT.toString())));
 			next("more-onselect-menu-2");
 			break;
 		case "2":
 			reply(new OutboxMessage().template("menu-2-weekly-offers").put("name", chatContext.getContact().getName())
 					.attachment(new Attachment().mediaURL(
-							"https://cdn.jsdelivr.net/gh/mehery-soccom/mehery-content@main/sample-receipt/top-10.pdf")
+							"https://cdn.jsdelivr.net/gh/mehery-soccom/mehery-content@main/sample-receipt/weekly-offer.pdf")
 							.mediaType(File.FileType.DOCUMENT.toString())));
 			next("more-onselect-menu-2");
 			break;
