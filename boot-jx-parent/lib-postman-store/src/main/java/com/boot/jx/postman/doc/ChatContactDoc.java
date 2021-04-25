@@ -8,6 +8,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.TypeAlias;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import com.boot.jx.postman.dto.ChatUserProfileDTO;
 import com.boot.jx.swagger.ApiMockModelProperty;
 import com.boot.utils.ArgUtil;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -39,6 +40,7 @@ public class ChatContactDoc implements Serializable {
 	private String phone;
 	private String profilePic;
 	private List<String> labelId;
+	private ChatUserProfileDTO profile;
 
 	public String getContactId() {
 		return contactId;
@@ -148,5 +150,13 @@ public class ChatContactDoc implements Serializable {
 
 	public void setLabelId(List<String> labelId) {
 		this.labelId = labelId;
+	}
+
+	public ChatUserProfileDTO getProfile() {
+		return profile;
+	}
+
+	public void setProfile(ChatUserProfileDTO profile) {
+		this.profile = profile;
 	}
 }

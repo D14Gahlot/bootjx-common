@@ -67,6 +67,14 @@ public class Tenants {
 		};
 	}
 
+	public static abstract class TenantResolver {
+
+		public String resolve(String tnt) {
+			return tnt;
+		}
+
+	}
+
 	public static Map<String, Tenant> strMapping = new HashMap<String, Tenant>();
 	public static final Map<Integer, Tenant> idMapping = new HashMap<Integer, Tenant>();
 	public static final List<Tenant> list = new ArrayList<Tenant>();
@@ -109,6 +117,7 @@ public class Tenants {
 					return site;
 				}
 			}
+			return new TemplateGeneric(siteId);
 		}
 		return defaultValue;
 	}

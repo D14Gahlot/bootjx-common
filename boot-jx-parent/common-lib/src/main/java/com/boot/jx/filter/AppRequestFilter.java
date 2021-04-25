@@ -20,7 +20,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
-import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.boot.jx.AppConfig;
 import com.boot.jx.AppConstants;
@@ -38,6 +37,7 @@ import com.boot.jx.model.MapModel;
 import com.boot.jx.rest.AppRequestContextInFilter;
 import com.boot.jx.rest.AppRequestInterfaces.ClientAuthFilter;
 import com.boot.jx.scope.tnt.TenantContextHolder;
+import com.boot.jx.scope.tnt.Tenants.TenantResolver;
 import com.boot.jx.scope.vendor.VendorAuthContext;
 import com.boot.jx.scope.vendor.VendorAuthFilter;
 import com.boot.jx.scope.vendor.VendorAuthService;
@@ -89,6 +89,9 @@ public class AppRequestFilter implements Filter {
 
 	@Autowired(required = false)
 	ClientAuthFilter clientAuthFilter;
+
+	@Autowired(required = false)
+	TenantResolver tenantResolver;
 
 	private boolean doesTokenMatch(CommonHttpRequest localCommonHttpRequest, HttpServletRequest req,
 			HttpServletResponse resp, String traceId, boolean checkHMAC) {
@@ -171,9 +174,15 @@ public class AppRequestFilter implements Filter {
 					siteId = Urly.getSubDomainName(request.getServerName());
 				}
 			}
+
+			if (ArgUtil.is(tenantResolver)) {
+				siteId = tenantResolver.resolve(siteId);
+			}
+
 			if (!StringUtils.isEmpty(siteId)) {
 				TenantContextHolder.setCurrent(siteId, null);
 			}
+
 			String tnt = TenantContextHolder.currentSite();
 
 			AppContextUtil.importAppContextFromRequest(req);

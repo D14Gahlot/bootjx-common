@@ -7,14 +7,14 @@
 	<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
 		<layout class="ch.qos.logback.classic.PatternLayout">
 			<Pattern>
-				%clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){faint} %clr(${LOG_LEVEL_PATTERN:-%5p}) %clr(${PID:- }){magenta} %clr(---){faint} [%.7replace(%t){"[^0-9a-zA-Z]+","-"} : %X{tnt}-%X{traceId}] %clr(%-40.40logger{39}){cyan} %clr(:){faint} %msg%n${LOG_EXCEPTION_CONVERSION_WORD:-%rEx}
+				%clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){faint} %clr(${LOG_LEVEL_PATTERN:-%5p}) %clr(${PID:- }){magenta} %clr(---){faint} [%.7replace(%t){"[^0-9a-zA-Z]+","-"} : %.-3X{tnt}-%X{traceId}] %clr(%-40.40logger{39}){cyan} %clr(:){faint} %msg%n${LOG_EXCEPTION_CONVERSION_WORD:-%rEx}
 			</Pattern>
 		</layout>
 	</appender>
 	<appender name="AUDIT" class="ch.qos.logback.core.ConsoleAppender">
 		<layout class="ch.qos.logback.classic.PatternLayout">
 			<Pattern>
-				%clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){faint} %clr(%marker{name:-%5p}) %clr(${PID:- }){magenta} %clr(---){faint} [%.7replace(%t){"[^0-9a-zA-Z]+","-"} : %X{tnt}-%X{traceId}] %clr(%-40.40logger{39}){cyan} %clr(:){faint} %msg x=0=x%n${LOG_EXCEPTION_CONVERSION_WORD:-%rEx}
+				%clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){faint} %clr(%marker{name:-%5p}) %clr(${PID:- }){magenta} %clr(---){faint} [%.7replace(%t){"[^0-9a-zA-Z]+","-"} : %.-3X{tnt}-%X{traceId}] %clr(%-40.40logger{39}){cyan} %clr(:){faint} %msg x=0=x%n${LOG_EXCEPTION_CONVERSION_WORD:-%rEx}
 			</Pattern>
 		</layout>
 	</appender>

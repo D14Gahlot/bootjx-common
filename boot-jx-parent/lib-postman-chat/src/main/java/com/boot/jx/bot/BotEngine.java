@@ -21,6 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
+import com.boot.jx.AppContextUtil;
 import com.boot.jx.chat.ChatService;
 import com.boot.jx.postman.doc.ChatPromise;
 import com.boot.jx.postman.doc.ChatPromise.State;
@@ -98,6 +99,7 @@ public class BotEngine {
 					methodWrapper.setController(controllerName);
 					methodWrapper.setKey(key);
 					methodWrapper.setLane(botControllerAnnot.lane());
+					methodWrapper.setTenant(botControllerAnnot.tenant());
 
 					// for (String event : events) {
 					eventToMethodsList.add(methodWrapper);
@@ -133,15 +135,19 @@ public class BotEngine {
 
 		StringMatcher matcher = new StringMatcher(event.getMessage().toUpperCase());
 
+		String tenant = AppContextUtil.getTenant();
+
 		for (MethodWrapper methodWrapper : eventToMethodsList) {
 			Pattern[] patterns = methodWrapper.getPattern();
 			if (patterns.length > 0) {
 				for (int i = 0; i < patterns.length; i++) {
-					if (ArgUtil.areEmpty(event.getLane(), methodWrapper.getLane())
-							|| ArgUtil.areEqual(event.getLane(), methodWrapper.getLane())) {
-						if (matcher.isMatch(patterns[i]) && ArgUtil.is(ArgUtil.parseAsString(patterns[i]))) {
-							event.setMatcher(matcher);
-							return methodWrapper;
+					if (ArgUtil.areEqual(methodWrapper.getTenant(), tenant)) {
+						if (ArgUtil.areEmpty(event.getLane(), methodWrapper.getLane())
+								|| ArgUtil.areEqual(event.getLane(), methodWrapper.getLane())) {
+							if (matcher.isMatch(patterns[i]) && ArgUtil.is(ArgUtil.parseAsString(patterns[i]))) {
+								event.setMatcher(matcher);
+								return methodWrapper;
+							}
 						}
 					}
 				}
@@ -152,11 +158,14 @@ public class BotEngine {
 			Pattern[] patterns = methodWrapper.getPattern();
 			if (patterns.length > 0) {
 				for (int i = 0; i < patterns.length; i++) {
-					if (ArgUtil.areEmpty(methodWrapper.getLane())
-							|| ArgUtil.areEqual(event.getLane(), methodWrapper.getLane())) {
-						if (matcher.isMatch(patterns[i]) && ArgUtil.is(ArgUtil.parseAsString(patterns[i]))) {
-							event.setMatcher(matcher);
-							return methodWrapper;
+					if (ArgUtil.isEmpty(methodWrapper.getTenant())
+							|| ArgUtil.areEqual(methodWrapper.getTenant(), tenant)) {
+						if (ArgUtil.areEmpty(methodWrapper.getLane())
+								|| ArgUtil.areEqual(event.getLane(), methodWrapper.getLane())) {
+							if (matcher.isMatch(patterns[i]) && ArgUtil.is(ArgUtil.parseAsString(patterns[i]))) {
+								event.setMatcher(matcher);
+								return methodWrapper;
+							}
 						}
 					}
 				}

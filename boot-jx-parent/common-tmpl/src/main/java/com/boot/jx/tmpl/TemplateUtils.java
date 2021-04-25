@@ -164,7 +164,7 @@ public class TemplateUtils {
 			return jaxStaticContext + "/templates/" + specficFile;
 		} else {
 			log.error("Template Not Found {}", fileCacheKey);
-			if(!ArgUtil.is(fileCacheKey)) {
+			if (!ArgUtil.is(fileCacheKey)) {
 				throw new PostManException("Template Not Found");
 			}
 			return null;
@@ -175,11 +175,12 @@ public class TemplateUtils {
 			boolean external) {
 		String relativeFile = file;
 		String folder = Constants.BLANK;
+		String folderRoot = Constants.BLANK;
 
 		String specficFile = null;
 		String ext = ".html";
 		String subfolder = "html/";
-		if (!ArgUtil.isEmpty(contactType)) {
+		if (ArgUtil.is(contactType)) {
 			if (file.startsWith("html/")) {
 				relativeFile = file.replace("html/", Constants.BLANK);
 			} else if (file.startsWith("json/")) {
@@ -191,10 +192,16 @@ public class TemplateUtils {
 				subfolder = "jasper/";
 				ext = ".jrxml";
 			}
-			folder = subfolder + contactType.getShortCode() + "/";
+			folder = subfolder + tnt + "/" + contactType.getShortCode() + "/";
+			folderRoot = subfolder + tnt + "/";
 
 			if (external) {
 				specficFile = getValidTemplateFileExternal(folder, relativeFile, ext, tnt, locale);
+
+				if (ArgUtil.isEmpty(specficFile)) {
+					specficFile = getValidTemplateFileExternal(folderRoot, relativeFile, ext, tnt, locale);
+				}
+
 				if (ArgUtil.isEmpty(specficFile)) {
 					return getValidTemplateFileExternal(Constants.BLANK, file, ext, tnt, locale);
 				}
@@ -202,6 +209,11 @@ public class TemplateUtils {
 			}
 
 			specficFile = getValidTemplateFileInternal(folder, relativeFile, tnt, locale);
+			if (!ArgUtil.isEmpty(specficFile)) {
+				return specficFile;
+			}
+
+			specficFile = getValidTemplateFileInternal(folderRoot, relativeFile, tnt, locale);
 			if (!ArgUtil.isEmpty(specficFile)) {
 				return specficFile;
 			}

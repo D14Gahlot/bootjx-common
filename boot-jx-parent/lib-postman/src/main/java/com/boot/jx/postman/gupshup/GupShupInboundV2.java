@@ -12,6 +12,7 @@ public class GupShupInboundV2 implements Serializable {
 
 	private static final long serialVersionUID = -5985194546657716271L;
 
+	@JsonIgnoreProperties(ignoreUnknown = true)
 	public static class Profile implements Serializable {
 		private static final long serialVersionUID = 1L;
 		private String name;
@@ -25,6 +26,7 @@ public class GupShupInboundV2 implements Serializable {
 		}
 	}
 
+	@JsonIgnoreProperties(ignoreUnknown = true)
 	public static class Contact implements Serializable {
 		public Contact() {
 			super();
@@ -55,6 +57,7 @@ public class GupShupInboundV2 implements Serializable {
 		}
 	}
 
+	@JsonIgnoreProperties(ignoreUnknown = true)
 	public static class Text implements Serializable {
 
 		private static final long serialVersionUID = 1L;
@@ -69,17 +72,35 @@ public class GupShupInboundV2 implements Serializable {
 		}
 	}
 
+	@JsonIgnoreProperties(ignoreUnknown = true)
+	public static class Button implements Serializable {
+
+		private static final long serialVersionUID = 1L;
+		private String text;
+
+		public String getText() {
+			return text;
+		}
+
+		public void setText(String text) {
+			this.text = text;
+		}
+	}
+
+	@JsonIgnoreProperties(ignoreUnknown = true)
 	public static class Message implements Serializable {
 		public Message() {
 			super();
 			this.type = "text";
 			this.text = new Text();
+			this.button = new Button();
 		}
 
 		private static final long serialVersionUID = 1L;
 		private String from;
 		private String id;
 		private Text text;
+		private Button button;
 		private String timestamp;
 		private String type;
 
@@ -122,6 +143,15 @@ public class GupShupInboundV2 implements Serializable {
 		public void setType(String type) {
 			this.type = type;
 		}
+
+		public Button getButton() {
+			return button;
+		}
+
+		public void setButton(Button button) {
+			this.button = button;
+		}
+
 	}
 
 	private List<Contact> contacts;
