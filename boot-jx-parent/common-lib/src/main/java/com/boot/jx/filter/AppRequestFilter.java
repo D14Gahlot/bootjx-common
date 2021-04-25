@@ -90,7 +90,7 @@ public class AppRequestFilter implements Filter {
 	@Autowired(required = false)
 	ClientAuthFilter clientAuthFilter;
 
-	@Autowired
+	@Autowired(required = false)
 	TenantResolver tenantResolver;
 
 	private boolean doesTokenMatch(CommonHttpRequest localCommonHttpRequest, HttpServletRequest req,
