@@ -2,6 +2,7 @@ package com.boot.jx.chat;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 import com.boot.jx.bot.ChatContext;
@@ -272,19 +273,25 @@ public class ChatService {
 		if (initd) {
 			session.setContactName(contact.getName());
 			session = sessionStore.initSession(session);
-			try {
-				ChatUserProfileRequest chatUserProfileRequest = new ChatUserProfileRequest();
-				chatUserProfileRequest.setEmail(contact.getEmail());
-				chatUserProfileRequest.setMobile(contact.getPhone());
-				chatUserProfileRequest.setContactId(contact.getContactId());
-				ChatUserProfileDTO profile = chatClient.fetchContactDetails(chatUserProfileRequest);
-				contact.setProfile(profile);
-				sessionStore.save(contact);
-			} catch (Exception e) {
-
-			}
 		}
 		return session.isInitd();
+	}
+
+	@Async
+	public void initSessionPost(InboxMessage inboxMessage, ChatSessionDoc session) {
+		ChatContactDoc contact = sessionStore.getContact(inboxMessage);
+		try {
+			ChatUserProfileRequest chatUserProfileRequest = new ChatUserProfileRequest();
+			chatUserProfileRequest.setEmail(contact.getEmail());
+			chatUserProfileRequest.setMobile(contact.getPhone());
+			chatUserProfileRequest.setContactId(contact.getContactId());
+			ChatUserProfileDTO profile = chatClient.fetchContactDetails(chatUserProfileRequest);
+			contact = sessionStore.getContact(inboxMessage);
+			contact.setProfile(profile);
+			sessionStore.save(contact);
+		} catch (Exception e) {
+
+		}
 	}
 
 	public boolean resolveSession(ChatSessionDoc session) {
