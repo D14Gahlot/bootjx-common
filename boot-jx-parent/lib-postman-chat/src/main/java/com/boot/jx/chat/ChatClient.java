@@ -49,7 +49,7 @@ public class ChatClient {
 	private String chatOnlholdTimeout;
 
 	@Value("${postman.default.sender}")
-	String defaultSender;
+	private String defaultSender;
 
 	@Autowired
 	private RestService restService;
