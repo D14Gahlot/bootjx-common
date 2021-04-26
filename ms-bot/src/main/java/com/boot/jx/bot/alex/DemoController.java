@@ -84,21 +84,21 @@ public class DemoController extends ChatController {
 		case "1":
 			reply(new OutboxMessage().template("today-credits").put("name", chatContext.getContact().getName())
 					.attachment(new Attachment().mediaURL(
-							"https://cdn.jsdelivr.net/gh/mehery-soccom/mehery-content@main/sample-receipt/your-statement.pdf")
+							"https://cdn.jsdelivr.net/gh/mehery-soccom/mehery-content@main/sample-receipt/mehery-sample-template.pdf")
 							.mediaType(File.FileType.DOCUMENT.toString())));
 			next("more-onselect");
 			break;
 		case "2":
 			reply(new OutboxMessage().template("today-debits").put("name", chatContext.getContact().getName())
 					.attachment(new Attachment().mediaURL(
-							"https://cdn.jsdelivr.net/gh/mehery-soccom/mehery-content@main/sample-receipt/top-10.pdf")
+							"https://cdn.jsdelivr.net/gh/mehery-soccom/mehery-content@main/sample-receipt/mehery-sample-template.pdf")
 							.mediaType(File.FileType.DOCUMENT.toString())));
 			next("more-onselect");
 			break;
 		case "3":
 			reply(new OutboxMessage().template("today-trnx").put("name", chatContext.getContact().getName())
 					.attachment(new Attachment().mediaURL(
-							"https://cdn.jsdelivr.net/gh/mehery-soccom/mehery-content@main/sample-receipt/your-transactions-this-week.pdf")
+							"https://cdn.jsdelivr.net/gh/mehery-soccom/mehery-content@main/sample-receipt/mehery-sample-template.pdf")
 							.mediaType(File.FileType.DOCUMENT.toString())));
 			next("more-onselect");
 			break;
@@ -130,21 +130,21 @@ public class DemoController extends ChatController {
 		case "1":
 			reply(new OutboxMessage().template("menu-2-today-offers").put("name", chatContext.getContact().getName())
 					.attachment(new Attachment().mediaURL(
-							"https://cdn.jsdelivr.net/gh/mehery-soccom/mehery-content@main/sample-receipt/weekly-offer.pdf")
+							"https://cdn.jsdelivr.net/gh/mehery-soccom/mehery-content@main/sample-receipt/mehery-sample-template.pdf")
 							.mediaType(File.FileType.DOCUMENT.toString())));
 			next("more-onselect-menu-2");
 			break;
 		case "2":
 			reply(new OutboxMessage().template("menu-2-weekly-offers").put("name", chatContext.getContact().getName())
 					.attachment(new Attachment().mediaURL(
-							"https://cdn.jsdelivr.net/gh/mehery-soccom/mehery-content@main/sample-receipt/weekly-offer.pdf")
+							"https://cdn.jsdelivr.net/gh/mehery-soccom/mehery-content@main/sample-receipt/mehery-sample-template.pdf")
 							.mediaType(File.FileType.DOCUMENT.toString())));
 			next("more-onselect-menu-2");
 			break;
 		case "3":
 			reply(new OutboxMessage().template("menu-2-retail-branch").put("name", chatContext.getContact().getName())
 					.attachment(new Attachment().mediaURL(
-							"https://cdn.jsdelivr.net/gh/mehery-soccom/mehery-content@main/sample-receipt/your-transactions-this-week.pdf")
+							"https://cdn.jsdelivr.net/gh/mehery-soccom/mehery-content@main/sample-receipt/mehery-sample-template.pdf")
 							.mediaType(File.FileType.DOCUMENT.toString())));
 			next("more-onselect-menu-2");
 			break;
@@ -281,21 +281,21 @@ public class DemoController extends ChatController {
 			if (inboxMessage.getTags().getCategories().indexOf("today-credits") > -1) {
 				reply(new OutboxMessage().template("today-credits").put("name", chatContext.getContact().getName())
 						.attachment(new Attachment().mediaURL(
-								"https://cdn.jsdelivr.net/gh/mehery-soccom/mehery-content@main/sample-receipt/your-statement.pdf")
+								"https://cdn.jsdelivr.net/gh/mehery-soccom/mehery-content@main/sample-receipt/mehery-sample-template.pdf")
 								.mediaType(File.FileType.DOCUMENT.toString())));
 				next("more-onselect");
 				return true;
 			} else if (inboxMessage.getTags().getCategories().indexOf("today-debits") > -1) {
 				reply(new OutboxMessage().template("today-debits").put("name", chatContext.getContact().getName())
 						.attachment(new Attachment().mediaURL(
-								"https://cdn.jsdelivr.net/gh/mehery-soccom/mehery-content@main/sample-receipt/top-10.pdf")
+								"https://cdn.jsdelivr.net/gh/mehery-soccom/mehery-content@main/sample-receipt/mehery-sample-template.pdf")
 								.mediaType(File.FileType.DOCUMENT.toString())));
 				next("more-onselect");
 				return true;
 			} else if (inboxMessage.getTags().getCategories().indexOf("today-trnx") > -1) {
 				reply(new OutboxMessage().template("today-trnx").put("name", chatContext.getContact().getName())
 						.attachment(new Attachment().mediaURL(
-								"https://cdn.jsdelivr.net/gh/mehery-soccom/mehery-content@main/sample-receipt/your-transactions-this-week.pdf")
+								"https://cdn.jsdelivr.net/gh/mehery-soccom/mehery-content@main/sample-receipt/mehery-sample-template.pdf")
 								.mediaType(File.FileType.DOCUMENT.toString())));
 				next("more-onselect");
 				return true;
