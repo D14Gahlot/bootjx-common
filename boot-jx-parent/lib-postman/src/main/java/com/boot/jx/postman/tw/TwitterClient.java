@@ -92,8 +92,9 @@ public class TwitterClient {
 	}
 
 	public StatusCode registerWebhook(String lane) {
-		if (ArgUtil.is(webhookUrl)) {
-			return registerWebhook(lane, webhookUrl);
+		TwitterConfig config = environment.get().twitter(lane);
+		if (ArgUtil.is(config.getWebhookUrl())) {
+			return registerWebhook(lane, config.getWebhookUrl());
 		}
 		return null;
 	}
