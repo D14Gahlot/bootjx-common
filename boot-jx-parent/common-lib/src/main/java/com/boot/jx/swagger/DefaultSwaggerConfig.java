@@ -115,8 +115,8 @@ public class DefaultSwaggerConfig {
 	@ConditionalOnProperty(value = "swagger.tenant.enabled", havingValue = "true")
 	public MockParam tenantParam() {
 		return new MockParamBuilder().name(TenantContextHolder.TENANT).description("Tenant Country")
-				.defaultValue(Tenants.DEFAULT_STR).parameterType(MockParamBuilder.MockParamType.HEADER)
-				.allowableValues(Tenants.tenantStrings(), TenantContextHolder.TENANT).required(true).build();
+				.defaultValue(Tenants.DEFAULT_STR).parameterType(MockParamBuilder.MockParamType.HEADER).required(false)
+				.build();
 	}
 
 	@Bean
