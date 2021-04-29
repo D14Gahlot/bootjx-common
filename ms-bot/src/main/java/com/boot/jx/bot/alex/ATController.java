@@ -27,7 +27,7 @@ public class ATController extends ChatController {
 				reply("All agents are busy or online, we will connect you whenever someone is available.");
 			}
 		} catch (Exception e) {
-			reply("Some Tech Issues");
+			reply("We are having some issues trying connect you to one of our customer representatives. Please be patient");
 		}
 	}
 
