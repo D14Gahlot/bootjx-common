@@ -5,10 +5,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
-import com.boot.jx.api.ApiResponse;
+import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.rest.RestService;
 import com.boot.utils.ArgUtil;
 import com.ulisesbocchio.jasyptspringboot.annotation.EnableEncryptableProperties;
@@ -24,11 +23,12 @@ public class FacebooClient {
 	RestService restService;
 
 	@Autowired
-	private Environment environment;
+	private PMEnvironment environment;
 
 	public String registerWebhook(String token, String challenge, String lane) {
 		lane = ArgUtil.nonEmpty(lane, "default").toLowerCase();
-		String verifyToken = environment.getProperty("facebook.lane." + lane + ".verifyToken");
+		FacebookConfig config = environment.get().facebook(lane);
+		String verifyToken = config.getVerifyToken();
 		if (token != null && !token.isEmpty() && token.equals(verifyToken)) {
 			return challenge;
 		} else {
@@ -38,9 +38,9 @@ public class FacebooClient {
 
 	public FacebookMessageResp sendReply(String lane, FacebookMessageRequest resp) {
 		lane = ArgUtil.nonEmpty(lane, "default").toLowerCase();
-		String accessToken = environment.getProperty("facebook.lane." + lane + ".accessToken");
-		return restService.ajax("https://graph.facebook.com/v2.6/me/messages?access_token=" + accessToken).post(resp)
-				.as(new ParameterizedTypeReference<FacebookMessageResp>() {
+		FacebookConfig config = environment.get().facebook(lane);
+		return restService.ajax("https://graph.facebook.com/v2.6/me/messages?access_token=" + config.getAccessToken())
+				.post(resp).as(new ParameterizedTypeReference<FacebookMessageResp>() {
 				});
 	}
 
@@ -54,10 +54,10 @@ public class FacebooClient {
 
 	public FacebookUserProfile getUserProfile(String psid, String lane) {
 		lane = ArgUtil.nonEmpty(lane, "default").toLowerCase();
-		String accessToken = environment.getProperty("facebook.lane." + lane + ".accessToken");
+		FacebookConfig config = environment.get().facebook(lane);
 		return restService.ajax("https://graph.facebook.com").path("/{psid}").pathParam("psid", psid)
 				.queryParam("fields", "first_name,last_name,profile_pic,email,id")
-				.queryParam("access_token", accessToken).get().as(FacebookUserProfile.class);
+				.queryParam("access_token", config.getAccessToken()).get().as(FacebookUserProfile.class);
 
 	}
 }
