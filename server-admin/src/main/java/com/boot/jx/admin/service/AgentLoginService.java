@@ -38,6 +38,8 @@ public class AgentLoginService {
 					|| ArgUtil.isEqual(passwordSHA1, agent.getAgent_password(), agent.getAgent_otp())
 					|| ArgUtil.isEqual(passwordSHA256, agent.getAgent_password(), agent.getAgent_otp())) {
 				return agent;
+			} else {
+				return null;
 			}
 		}
 		return agent;

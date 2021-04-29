@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.boot.jx.postman.fb.FacebookConfig;
+import com.boot.jx.postman.tw.TwitterConfig;
 import com.boot.utils.ArgUtil;
 
 public class ConnectorConfig implements Serializable {
@@ -12,7 +13,9 @@ public class ConnectorConfig implements Serializable {
 	private static final long serialVersionUID = -5432956433673368768L;
 
 	Map<String, FacebookConfig> facebook;
+	Map<String, TwitterConfig> twitter;
 
+	// Facebook
 	public Map<String, FacebookConfig> getFacebook() {
 		return facebook;
 	}
@@ -35,5 +38,30 @@ public class ConnectorConfig implements Serializable {
 	public ConnectorConfig facebook(FacebookConfig config) {
 		this.facebook().put(config.getPageId(), config);
 		return this;
+	}
+
+	// TWITTER
+	public TwitterConfig twitter(String handler) {
+		return twitter.get(handler);
+	}
+
+	public Map<String, TwitterConfig> twitter() {
+		if (ArgUtil.isEmpty(twitter)) {
+			twitter = new HashMap<String, TwitterConfig>();
+		}
+		return twitter;
+	}
+
+	public ConnectorConfig twitter(TwitterConfig config) {
+		this.twitter().put(config.getHandler(), config);
+		return this;
+	}
+
+	public Map<String, TwitterConfig> getTwitter() {
+		return twitter;
+	}
+
+	public void setTwitter(Map<String, TwitterConfig> twitter) {
+		this.twitter = twitter;
 	}
 }

@@ -13,6 +13,7 @@ import com.boot.jx.api.ApiResponse;
 import com.boot.jx.postman.ConnectorConfig;
 import com.boot.jx.postman.doc.ConnectorConfigDoc;
 import com.boot.jx.postman.fb.FacebookConfig;
+import com.boot.jx.postman.tw.TwitterConfig;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.EntityDtoUtil;
 
@@ -36,8 +37,9 @@ public class ConnectorController {
 	}
 
 	@RequestMapping(value = "/api/connector/fb", method = { RequestMethod.POST })
-	public ApiResponse<ConnectorConfigDoc, Object> postConfig(@RequestParam String pageId, @RequestParam String type,
-			@RequestParam String verifyToken, @RequestParam String appSecret, @RequestParam String accessToken) {
+	public ApiResponse<ConnectorConfigDoc, Object> addFacebookConfig(@RequestParam String pageId,
+			@RequestParam String type, @RequestParam String verifyToken, @RequestParam String appSecret,
+			@RequestParam String accessToken) {
 		ConnectorConfigDoc doc = mongoTemplate.findById(AppContextUtil.getTenant(), ConnectorConfigDoc.class);
 
 		if (ArgUtil.isEmpty(doc)) {
@@ -52,6 +54,32 @@ public class ConnectorController {
 		fbconfig.setAccessToken(accessToken);
 		fbconfig.setAppSecret(appSecret);
 		doc.facebook(fbconfig);
+		mongoTemplate.save(doc);
+		return ApiResponse.buildResults(mongoTemplate.findById(AppContextUtil.getTenant(), ConnectorConfigDoc.class));
+	}
+
+	@RequestMapping(value = "/api/connector/tw", method = { RequestMethod.POST })
+	public ApiResponse<ConnectorConfigDoc, Object> addTwitterConfig(@RequestParam String handler,
+			@RequestParam String type, @RequestParam String consumerKey, @RequestParam String consumerSecret,
+			@RequestParam String accessTokenSecret, @RequestParam String accessToken,
+			@RequestParam(required = false) String envName, @RequestParam String webhookUrl) {
+		ConnectorConfigDoc doc = mongoTemplate.findById(AppContextUtil.getTenant(), ConnectorConfigDoc.class);
+
+		if (ArgUtil.isEmpty(doc)) {
+			doc = new ConnectorConfigDoc();
+			doc.setTenant(AppContextUtil.getTenant());
+		}
+
+		TwitterConfig fbconfig = new TwitterConfig();
+		fbconfig.setHandler(handler);
+		fbconfig.setType(type);
+		fbconfig.setEnvName(envName);
+		fbconfig.setAccessToken(accessToken);
+		fbconfig.setAccessTokenSecret(accessTokenSecret);
+		fbconfig.setConsumerKey(consumerKey);
+		fbconfig.setConsumerSecret(consumerSecret);
+		fbconfig.setWebhookUrl(webhookUrl);
+		doc.twitter(fbconfig);
 		mongoTemplate.save(doc);
 		return ApiResponse.buildResults(mongoTemplate.findById(AppContextUtil.getTenant(), ConnectorConfigDoc.class));
 	}
