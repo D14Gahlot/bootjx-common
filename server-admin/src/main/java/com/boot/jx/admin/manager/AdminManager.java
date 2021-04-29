@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.boot.jx.AppContextUtil;
 import com.boot.jx.admin.dto.AgentResponseDto;
 import com.boot.jx.admin.dto.DepartmentRequestDto;
 import com.boot.jx.admin.dto.DepartmentResponseDto;
@@ -83,6 +84,10 @@ public class AdminManager {
 			dept.setModified_date(new Date());
 		}
 		if (ArgUtil.is(dept)) {
+			if (!ArgUtil.is(dept.getDept_email())) {
+				dept.setDept_email(dept.getDept_name() + "@" + AppContextUtil.getTenant());
+			}
+
 			if (ArgUtil.isEmpty(dept.getDept_id()) || ArgUtil.isEmpty(dept.getDept_name())
 					|| ArgUtil.isEmpty(dept.getDept_code())) {
 				ApiResponseUtil.throwException("All Inputs Required");
