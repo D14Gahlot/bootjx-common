@@ -1,9 +1,11 @@
 package com.boot.jx.postman;
 
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.Map;
 
 import com.boot.jx.postman.fb.FacebookConfig;
+import com.boot.utils.ArgUtil;
 
 public class ConnectorConfig implements Serializable {
 
@@ -23,4 +25,15 @@ public class ConnectorConfig implements Serializable {
 		return facebook.get(pageId);
 	}
 
+	public Map<String, FacebookConfig> facebook() {
+		if (ArgUtil.isEmpty(facebook)) {
+			facebook = new HashMap<String, FacebookConfig>();
+		}
+		return facebook;
+	}
+
+	public ConnectorConfig facebook(FacebookConfig config) {
+		this.facebook().put(config.getPageId(), config);
+		return this;
+	}
 }
