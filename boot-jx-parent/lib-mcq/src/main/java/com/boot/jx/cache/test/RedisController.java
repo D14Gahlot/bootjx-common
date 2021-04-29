@@ -60,7 +60,9 @@ public class RedisController {
 
 	@RequestMapping(value = "/pub/amx/config/shared/clear/all", method = RequestMethod.GET)
 	public ApiResponse<BoolRespModel, Object> clearSharedConfig() {
-		tunnelService.shout(SysTunnelEventsDict.Names.SHARED_CONFIG_UPDATE, new DBEvent());
+		DBEvent e = new DBEvent();
+		e.setEventCode(SysTunnelEventsDict.Names.SHARED_CONFIG_UPDATE);
+		tunnelService.shout(SysTunnelEventsDict.Names.SHARED_CONFIG_UPDATE, e);
 		return ApiResponse.build(new BoolRespModel(true));
 	}
 }
