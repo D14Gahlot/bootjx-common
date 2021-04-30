@@ -13,6 +13,7 @@ import com.boot.jx.api.ApiResponse;
 import com.boot.jx.postman.ConnectorConfig;
 import com.boot.jx.postman.doc.ConnectorConfigDoc;
 import com.boot.jx.postman.fb.FacebookConfig;
+import com.boot.jx.postman.tg.TelegramConfig;
 import com.boot.jx.postman.tw.TwitterConfig;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.EntityDtoUtil;
@@ -80,6 +81,27 @@ public class ConnectorController {
 		fbconfig.setConsumerSecret(consumerSecret);
 		fbconfig.setWebhookUrl(webhookUrl);
 		doc.twitter(fbconfig);
+		mongoTemplate.save(doc);
+		return ApiResponse.buildResults(mongoTemplate.findById(AppContextUtil.getTenant(), ConnectorConfigDoc.class));
+	}
+
+	@RequestMapping(value = "/api/connector/tg", method = { RequestMethod.POST })
+	public ApiResponse<ConnectorConfigDoc, Object> addTelegramConfig(@RequestParam String handler,
+			@RequestParam String type, @RequestParam String accessToken, @RequestParam(required = false) String envName,
+			@RequestParam String webhookUrl) {
+		ConnectorConfigDoc doc = mongoTemplate.findById(AppContextUtil.getTenant(), ConnectorConfigDoc.class);
+
+		if (ArgUtil.isEmpty(doc)) {
+			doc = new ConnectorConfigDoc();
+			doc.setTenant(AppContextUtil.getTenant());
+		}
+
+		TelegramConfig fbconfig = new TelegramConfig();
+		fbconfig.setHandler(handler);
+		fbconfig.setType(type);
+		fbconfig.setAccessToken(accessToken);
+		fbconfig.setWebhookUrl(webhookUrl);
+		doc.telegram(fbconfig);
 		mongoTemplate.save(doc);
 		return ApiResponse.buildResults(mongoTemplate.findById(AppContextUtil.getTenant(), ConnectorConfigDoc.class));
 	}
