@@ -146,14 +146,16 @@ public abstract class AResourceDTO<T extends AResourceDTO<T>> implements IResour
 	@SuppressWarnings("unchecked")
 	public T importFrom(IResourceEntity entity) {
 
-		entity.resources();
-		this.resourceId = entity.resourceId();
-		this.resourceCode = entity.resourceCode();
-		this.resourceName = entity.resourceName();
-		this.resourceLocalName = entity.resourceLocalName();
-		this.resourceValue = entity.resourceValue();
+		if (ArgUtil.is(entity)) {
+			entity.resources();
+			this.resourceId = entity.resourceId();
+			this.resourceCode = entity.resourceCode();
+			this.resourceName = entity.resourceName();
+			this.resourceLocalName = entity.resourceLocalName();
+			this.resourceValue = entity.resourceValue();
+			EntityDtoUtil.entityToDto(entity, this);
+		}
 
-		EntityDtoUtil.entityToDto(entity, this);
 		return (T) this;
 	}
 
