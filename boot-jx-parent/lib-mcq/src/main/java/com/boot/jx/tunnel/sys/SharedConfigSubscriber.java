@@ -26,7 +26,7 @@ public class SharedConfigSubscriber implements ITunnelSubscriber<DBEvent> {
 		if (ArgUtil.is(listAppSharedConfig)) {
 			for (AppSharedConfig appSharedConfig : listAppSharedConfig) {
 				appSharedConfig.clear(brokerEvent.getData());
-				LOGGER.info("for class {}", ClazzUtil.getUltimateClassName(appSharedConfig.getClass()));
+				LOGGER.info("for class {}", ClazzUtil.getUltimateClassName(appSharedConfig));
 			}
 		}
 	}
