@@ -74,9 +74,13 @@ public class InBoundService {
 		}
 
 		if (locallySessionAssigned && ArgUtil.is(session)) {
+			boolean sessionCreated = session.isInitd();
 			if (!chatService.initSession(inboxMessageOriginal, session)) {
 				return inboxMessageOriginal;
-			} else {
+			}
+			sessionCreated = (sessionCreated != session.isInitd());
+
+			if (sessionCreated) {
 				chatService.initSessionPost(inboxMessageOriginal, session);
 			}
 		}

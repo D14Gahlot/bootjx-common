@@ -25,8 +25,7 @@ public class ClazzUtil {
 	}
 
 	public static Pattern getGenericTypePattern(Class<?> clazz) {
-		return Pattern.compile(
-				"^" + clazz.getName() + "<(.*)>$");
+		return Pattern.compile("^" + clazz.getName() + "<(.*)>$");
 	}
 
 	public static String getClassName(Object target) {
@@ -49,5 +48,10 @@ public class ClazzUtil {
 	public static <A extends Annotation> A getAnnotationFromBean(Object candidate, Class<A> annotationClass) {
 		Class<?> c = AopProxyUtils.ultimateTargetClass(candidate);
 		return getAnnotation(c, annotationClass);
+	}
+
+	public static String getUltimateClassName(Object target) {
+		Class<?> c = AopProxyUtils.ultimateTargetClass(target);
+		return c.getName().split("\\$")[0];
 	}
 }
