@@ -3,14 +3,17 @@ package com.boot.jx.admin.service;
 import java.security.NoSuchAlgorithmException;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Component;
 
-import com.boot.jx.admin.model.Agent;
-import com.boot.jx.admin.repository.IAgentRepository;
+import com.boot.jx.admin.model.AgentDoc;
 import com.boot.jx.postman.client.PostManClient;
 import com.boot.jx.postman.model.Email;
 import com.boot.jx.postman.model.MessageBox;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.CollectionUtil;
 import com.boot.utils.CryptoUtil;
 import com.boot.utils.Random;
 
@@ -18,16 +21,16 @@ import com.boot.utils.Random;
 public class AgentLoginService {
 
 	@Autowired
-	IAgentRepository iAgentRepository;
+	MongoTemplate mongoTemplate;
 
 	@Autowired
 	PostManClient postManClient;
 
-	private Agent validateAgent(String username, String passsword) throws NoSuchAlgorithmException {
+	private AgentDoc validateAgent(String username, String passsword) throws NoSuchAlgorithmException {
 		if (ArgUtil.isEmpty(passsword)) {
 			return null;
 		}
-		Agent agent = iAgentRepository.getAgentByCodeAndStatus(username, "Y");
+		AgentDoc agent = getAgentByCodeAndStatus(username, "Y");
 		String passwordMd5 = CryptoUtil.getMD5Hash(passsword);
 		String passwordSHA1 = CryptoUtil.getSHA1Hash(passsword);
 		String passwordSHA256 = CryptoUtil.getSHA2Hash(passsword);
@@ -53,26 +56,32 @@ public class AgentLoginService {
 	}
 
 	public boolean resetPassword(String username) throws NoSuchAlgorithmException {
-		Agent agent = iAgentRepository.getAgentByCodeAndStatus(username, "Y");
+		AgentDoc agent = getAgentByCodeAndStatus(username, "Y");
 		if (!ArgUtil.is(agent)) {
 			return false;
 		}
 		agent.setAgent_otp(Random.randomAlphaNumeric(10));
-		iAgentRepository.save(agent);
+		mongoTemplate.save(agent);
 
 		postManClient.send(new MessageBox().push(new Email().to(agent.getAgent_email()).template("reset-password")
 				.put("otp", agent.getAgent_otp()).put("username", agent.getAgent_code())));
 		return true;
 	}
 
+	private AgentDoc getAgentByCodeAndStatus(String username, String string) {
+		Query query2 = new Query();
+		query2.addCriteria(Criteria.where("agent_code").is(username).and("isactive").is(string));
+		return CollectionUtil.getOne(mongoTemplate.find(query2, AgentDoc.class));
+	}
+
 	public boolean setPassword(String username, String passsword, String newpasssword) throws NoSuchAlgorithmException {
-		Agent agent = validateAgent(username, passsword);
+		AgentDoc agent = validateAgent(username, passsword);
 		if (!ArgUtil.is(agent)) {
 			return false;
 		}
 		agent.setAgent_password(newpasssword);
 		agent.setAgent_otp(null);
-		iAgentRepository.save(agent);
+		mongoTemplate.save(agent);
 		return true;
 	}
 

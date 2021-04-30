@@ -8,16 +8,14 @@ import org.apache.commons.beanutils.BeanUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Component;
 
 import com.boot.jx.AppContextUtil;
 import com.boot.jx.admin.dto.AgentResponseDto;
-import com.boot.jx.admin.dto.DepartmentRequestDto;
 import com.boot.jx.admin.dto.DepartmentResponseDto;
-import com.boot.jx.admin.model.Agent;
-import com.boot.jx.admin.model.Department;
-import com.boot.jx.admin.repository.IAgentRepository;
-import com.boot.jx.admin.repository.IDepartmentRepository;
+import com.boot.jx.admin.model.AgentDoc;
+import com.boot.jx.admin.model.DepartmentDoc;
 import com.boot.jx.api.ApiResponseUtil;
 import com.boot.utils.ArgUtil;
 
@@ -26,14 +24,12 @@ public class AdminManager {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(AdminManager.class);
 
-	@Autowired
-	IAgentRepository agentRepository;
 
 	@Autowired
-	IDepartmentRepository departmentRepository;
+	MongoTemplate mongoTemplate;
 
-	public List<Agent> saveAgent(Agent agent) {
-		List<Agent> lstAgent = new ArrayList<Agent>();
+	public List<AgentDoc> saveAgent(AgentDoc agent) {
+		List<AgentDoc> lstAgent = new ArrayList<AgentDoc>();
 		if (agent != null && agent.getAgent_id() == 0) {
 			agent.setIsactive("Y");
 			agent.setModified_date(null);
@@ -43,39 +39,39 @@ public class AdminManager {
 		}
 
 		if (ArgUtil.is(agent)) {
-			agentRepository.save(agent);
+			mongoTemplate.save(agent);
 		}
 
 		lstAgent = fetchAgentList(null);
 		return lstAgent;
 	}
 
-	public List<Agent> fetchAgentList(Integer agentId) {
-		List<Agent> agentList = new ArrayList<Agent>();
+	public List<AgentDoc> fetchAgentList(Integer agentId) {
+		List<AgentDoc> agentList = new ArrayList<AgentDoc>();
 		if (agentId != null && agentId > 0) {
-			Agent agent = agentRepository.findOne(agentId);
+			AgentDoc agent = mongoTemplate.findById(agentId, AgentDoc.class);
 			agentList.add(agent);
 		} else {
-			agentList = agentRepository.findAll();
+			agentList = mongoTemplate.findAll(AgentDoc.class);
 		}
 		return agentList;
 	}
 
-	public List<Agent> updateAgentStatus(Integer agentId, String status) {
-		List<Agent> agentList = new ArrayList<Agent>();
+	public List<AgentDoc> updateAgentStatus(Integer agentId, String status) {
+		List<AgentDoc> agentList = new ArrayList<AgentDoc>();
 		if (ArgUtil.is(agentId) && ArgUtil.is(status)) {
-			Agent agent = agentRepository.findOne(agentId);
+			AgentDoc agent = mongoTemplate.findById(agentId, AgentDoc.class);
 			if (ArgUtil.is(agent)) {
 				agent.setIsactive(status);
-				agentRepository.save(agent);
+				mongoTemplate.save(agent);
 			}
 		}
 		agentList = fetchAgentList(null);
 		return agentList;
 	}
 
-	public List<Department> createAndUpdateDepartment(Department dept) {
-		List<Department> lstDept = new ArrayList<Department>();
+	public List<DepartmentDoc> createAndUpdateDepartment(DepartmentDoc dept) {
+		List<DepartmentDoc> lstDept = new ArrayList<DepartmentDoc>();
 		if (dept != null && dept.getDept_id() == 0) {
 			dept.setIsactive("Y");
 			dept.setModified_date(null);
@@ -92,30 +88,30 @@ public class AdminManager {
 					|| ArgUtil.isEmpty(dept.getDept_code())) {
 				ApiResponseUtil.throwException("All Inputs Required");
 			}
-			departmentRepository.save(dept);
+			mongoTemplate.save(dept);
 		}
 		lstDept = fetchDept(null);
 		return lstDept;
 	}
 
-	public List<Department> fetchDept(Integer deptId) {
-		List<Department> lstDept = new ArrayList<Department>();
+	public List<DepartmentDoc> fetchDept(Integer deptId) {
+		List<DepartmentDoc> lstDept = new ArrayList<DepartmentDoc>();
 		if (deptId != null && deptId > 0) {
-			Department dept = departmentRepository.findOne(deptId);
+			DepartmentDoc dept = mongoTemplate.findById(deptId, DepartmentDoc.class);
 			lstDept.add(dept);
 		} else {
-			lstDept = departmentRepository.findAll();
+			lstDept = mongoTemplate.findAll(DepartmentDoc.class);
 		}
 		return lstDept;
 	}
 
-	public List<Department> updateDeptStatus(Integer deptId, String status) {
-		List<Department> lstDept = new ArrayList<Department>();
+	public List<DepartmentDoc> updateDeptStatus(Integer deptId, String status) {
+		List<DepartmentDoc> lstDept = new ArrayList<DepartmentDoc>();
 		if (ArgUtil.is(deptId) && ArgUtil.is(status)) {
-			Department dept = departmentRepository.findOne(deptId);
+			DepartmentDoc dept = mongoTemplate.findById(deptId, DepartmentDoc.class);
 			if (ArgUtil.is(dept)) {
 				dept.setIsactive(status);
-				departmentRepository.save(dept);
+				mongoTemplate.save(dept);
 			}
 		}
 		lstDept = fetchDept(null);
@@ -193,7 +189,7 @@ public class AdminManager {
 	 */
 
 	public List<AgentResponseDto> fetchAgent() {
-		List<Agent> agent = agentRepository.findAll();
+		List<AgentDoc> agent = mongoTemplate.findAll(AgentDoc.class);
 		List<AgentResponseDto> agentList = getAgents(agent);
 		return agentList;
 	}
@@ -208,10 +204,10 @@ public class AdminManager {
 	 * return deptResList; }
 	 */
 
-	public List<AgentResponseDto> getAgents(List<Agent> agentList) {
+	public List<AgentResponseDto> getAgents(List<AgentDoc> agentList) {
 		List<AgentResponseDto> agentLst = new ArrayList<AgentResponseDto>();
 		try {
-			for (Agent agent : agentList) {
+			for (AgentDoc agent : agentList) {
 				AgentResponseDto resdto = copyAgent(agent);
 				agentLst.add(resdto);
 			}
@@ -221,10 +217,10 @@ public class AdminManager {
 		return agentLst;
 	}
 
-	public List<DepartmentResponseDto> getDepartmets(List<Department> lstDept) {
+	public List<DepartmentResponseDto> getDepartmets(List<DepartmentDoc> lstDept) {
 		List<DepartmentResponseDto> deptLst = new ArrayList<DepartmentResponseDto>();
 		try {
-			for (Department dept : lstDept) {
+			for (DepartmentDoc dept : lstDept) {
 				DepartmentResponseDto dto = copyDept(dept);
 				deptLst.add(dto);
 			}
@@ -234,7 +230,7 @@ public class AdminManager {
 		return deptLst;
 	}
 
-	public AgentResponseDto copyAgent(Agent agent) {
+	public AgentResponseDto copyAgent(AgentDoc agent) {
 		AgentResponseDto dto = new AgentResponseDto();
 		try {
 			BeanUtils.copyProperties(dto, agent);
@@ -245,7 +241,7 @@ public class AdminManager {
 		return dto;
 	}
 
-	public DepartmentResponseDto copyDept(Department dept) {
+	public DepartmentResponseDto copyDept(DepartmentDoc dept) {
 		DepartmentResponseDto dto = new DepartmentResponseDto();
 		try {
 			BeanUtils.copyProperties(dto, dept);

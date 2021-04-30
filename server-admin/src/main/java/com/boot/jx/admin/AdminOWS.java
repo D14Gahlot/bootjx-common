@@ -1,9 +1,7 @@
 package com.boot.jx.admin;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.servlet.ServletComponentScan;
 import org.springframework.boot.web.support.SpringBootServletInitializer;
@@ -11,13 +9,11 @@ import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.scheduling.annotation.EnableAsync;
 
-import com.boot.jx.admin.model.Agent;
-import com.boot.jx.admin.repository.IAgentRepository;
-
 /**
  * The Class WebApplication.
-@EnableTransactionManagement
-@EnableCaching
+ * 
+ * @EnableTransactionManagement
+ * @EnableCaching
  */
 @ServletComponentScan
 @SpringBootApplication
@@ -45,25 +41,10 @@ public class AdminOWS extends SpringBootServletInitializer {
 	protected SpringApplicationBuilder configure(SpringApplicationBuilder applicationBuilder) {
 		return applicationBuilder.sources(AdminOWS.class);
 	}
-	
-	@Autowired
-	IAgentRepository agentRepository;
-	
-	 public void run(String... args) {
-		 	Agent ag = new Agent();
-		 	ag.setAgent_name("MeherY");
-		 	ag.setAgent_department("TEST");
-		 	
-		 	agentRepository.save(ag);
-	        System.out.println("\nfindAll()");
-	        agentRepository.findAll().forEach(x -> System.out.println(x));
 
-	        System.out.println("\nfindById(1L)");
-	        //agentRepository.findById(1l).ifPresent(x -> System.out.println(x));
-
-	        System.out.println("\nfindByName('Node')");
-	        //agentRepository.findByName("Node").forEach(x -> System.out.println(x));
-
-	    }
+	public void run(String... args) {
+		System.out.println("\nfindById(1L)");
+		System.out.println("\nfindByName('Node')");
+	}
 
 }

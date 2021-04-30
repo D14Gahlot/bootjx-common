@@ -3,7 +3,6 @@ package com.boot.jx.admin.api;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -12,15 +11,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.boot.jx.admin.dto.AgentResponseDto;
 import com.boot.jx.admin.dto.DepartmentResponseDto;
-import com.boot.jx.admin.model.Agent;
 import com.boot.jx.admin.model.AgentDoc;
-import com.boot.jx.admin.model.Department;
 import com.boot.jx.admin.model.DepartmentDoc;
-import com.boot.jx.admin.repository.IAgentRepository;
-import com.boot.jx.admin.repository.IDepartmentRepository;
 import com.boot.jx.admin.service.AdminService;
 import com.boot.jx.api.ApiResponse;
-import com.boot.utils.EntityDtoUtil;
 
 @RestController
 public class AdminController {
@@ -57,60 +51,29 @@ public class AdminController {
 	}
 
 	@RequestMapping(value = "/admin/create-update-agent", method = { RequestMethod.POST })
-	public List<Agent> createAgent(@RequestBody Agent requestModel) {
+	public List<AgentDoc> createAgent(@RequestBody AgentDoc requestModel) {
 		return adminService.saveAgent(requestModel);
 	}
 
 	@RequestMapping(value = "/admin/fetch-agent", method = { RequestMethod.GET })
-	public List<Agent> fetchAgentList(@RequestParam(value = "agent_id", required = false) Integer agent_id) {
+	public List<AgentDoc> fetchAgentList(@RequestParam(value = "agent_id", required = false) Integer agent_id) {
 		return adminService.fetchAgent(agent_id);
 	}
 
 	@RequestMapping(value = "/admin/create-update-dept", method = { RequestMethod.POST })
-	public List<Department> createDepartment(@RequestBody Department requestModel) {
+	public List<DepartmentDoc> createDepartment(@RequestBody DepartmentDoc requestModel) {
 		return adminService.createAndUpdateDepartment(requestModel);
 	}
 
 	@RequestMapping(value = "/admin/fetch-dept", method = { RequestMethod.GET })
-	public List<Department> fetchDepartment(@RequestParam(value = "dept_id", required = false) Integer deptId) {
+	public List<DepartmentDoc> fetchDepartment(@RequestParam(value = "dept_id", required = false) Integer deptId) {
 		return adminService.fetchDepartment(deptId);
 	}
 
 	@RequestMapping(value = "/admin/delete-dept", method = { RequestMethod.POST })
-	public List<Department> updateDepartment(@RequestParam(value = "dept_id", required = true) Integer dept_id,
+	public List<DepartmentDoc> updateDepartment(@RequestParam(value = "dept_id", required = true) Integer dept_id,
 			@RequestParam(value = "status", required = true) String status) {
 		return adminService.updateDepartment(dept_id, status);
-	}
-
-	@Autowired
-	IDepartmentRepository departmentRepository;
-
-	@Autowired
-	IAgentRepository agentRepository;
-
-	@Autowired
-	MongoTemplate mongoTemplate;
-
-	@RequestMapping(value = "/admin/departments", method = { RequestMethod.GET })
-	public List<DepartmentDoc> copyDepts() {
-		List<Department> x = departmentRepository.findAll();
-		for (Department department : x) {
-			DepartmentDoc doc = new DepartmentDoc();
-			doc = EntityDtoUtil.entityToDto(department, doc);
-			mongoTemplate.save(doc);
-		}
-		return mongoTemplate.findAll(DepartmentDoc.class);
-	}
-
-	@RequestMapping(value = "/admin/agents", method = { RequestMethod.GET })
-	public List<AgentDoc> copyAgents() {
-		List<Agent> x = agentRepository.findAll();
-		for (Agent agent : x) {
-			AgentDoc doc = new AgentDoc();
-			doc = EntityDtoUtil.entityToDto(agent, doc);
-			mongoTemplate.save(doc);
-		}
-		return mongoTemplate.findAll(AgentDoc.class);
 	}
 
 	/*
