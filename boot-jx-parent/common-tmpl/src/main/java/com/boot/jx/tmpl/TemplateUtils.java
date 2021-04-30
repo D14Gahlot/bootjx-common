@@ -94,6 +94,8 @@ public class TemplateUtils {
 	String jaxStaticPath;
 
 	public String getTemplateFile(String file, String tnt, Locale locale, ContactType contactType) {
+		//IS_TEMPLATE_SCANNED = false;
+		//templateFiles.clear();
 		if (!IS_TEMPLATE_SCANNED) {
 			try {
 				for (Resource resource : htmlFiles) {
@@ -176,6 +178,7 @@ public class TemplateUtils {
 		String relativeFile = file;
 		String folder = Constants.BLANK;
 		String folderRoot = Constants.BLANK;
+		String folderRootGlobal = Constants.BLANK;
 
 		String specficFile = null;
 		String ext = ".html";
@@ -194,12 +197,17 @@ public class TemplateUtils {
 			}
 			folder = subfolder + tnt + "/" + contactType.getShortCode() + "/";
 			folderRoot = subfolder + tnt + "/";
+			folderRootGlobal = subfolder + contactType.getShortCode() + "/";
 
 			if (external) {
 				specficFile = getValidTemplateFileExternal(folder, relativeFile, ext, tnt, locale);
 
 				if (ArgUtil.isEmpty(specficFile)) {
 					specficFile = getValidTemplateFileExternal(folderRoot, relativeFile, ext, tnt, locale);
+				}
+
+				if (ArgUtil.isEmpty(specficFile)) {
+					specficFile = getValidTemplateFileExternal(folderRootGlobal, relativeFile, ext, tnt, locale);
 				}
 
 				if (ArgUtil.isEmpty(specficFile)) {
@@ -214,6 +222,11 @@ public class TemplateUtils {
 			}
 
 			specficFile = getValidTemplateFileInternal(folderRoot, relativeFile, tnt, locale);
+			if (!ArgUtil.isEmpty(specficFile)) {
+				return specficFile;
+			}
+
+			specficFile = getValidTemplateFileInternal(folderRootGlobal, relativeFile, tnt, locale);
 			if (!ArgUtil.isEmpty(specficFile)) {
 				return specficFile;
 			}
