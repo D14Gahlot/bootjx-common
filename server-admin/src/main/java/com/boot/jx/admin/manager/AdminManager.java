@@ -33,6 +33,7 @@ public class AdminManager {
 		if (agent != null && agent.getAgent_id() == 0) {
 			agent.setIsactive("Y");
 			agent.setModified_date(null);
+			agent.setAgent_id(null);
 		} else {
 			agent.setAgent_id(agent.getAgent_id());
 			agent.setModified_date(new Date());
@@ -75,6 +76,7 @@ public class AdminManager {
 		if (dept != null && dept.getDept_id() == 0) {
 			dept.setIsactive("Y");
 			dept.setModified_date(null);
+			dept.setDept_id(null);
 		} else {
 			dept.setDept_id(dept.getDept_id());
 			dept.setModified_date(new Date());
