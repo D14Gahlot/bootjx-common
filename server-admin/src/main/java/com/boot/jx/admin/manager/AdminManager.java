@@ -5,10 +5,13 @@ import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.beanutils.BeanUtils;
+import org.bson.types.ObjectId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Component;
 
 import com.boot.jx.AppContextUtil;
@@ -24,19 +27,23 @@ public class AdminManager {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(AdminManager.class);
 
-
 	@Autowired
 	MongoTemplate mongoTemplate;
 
 	public List<AgentDoc> saveAgent(AgentDoc agent) {
 		List<AgentDoc> lstAgent = new ArrayList<AgentDoc>();
-		if (agent != null && agent.getAgent_id() == 0) {
+		if (agent != null && (ArgUtil.isEmpty(agent.getAgent_id()) || agent.getAgent_id().equals("0"))) {
 			agent.setIsactive("Y");
 			agent.setModified_date(null);
 			agent.setAgent_id(null);
 		} else {
 			agent.setAgent_id(agent.getAgent_id());
 			agent.setModified_date(new Date());
+		}
+
+		if (ArgUtil.isEmpty(agent.getAgent_code()) || ArgUtil.isEmpty(agent.getDept_id())
+				|| ArgUtil.isEmpty(agent.getAgent_name())) {
+			ApiResponseUtil.throwException("All Inputs Required");
 		}
 
 		if (ArgUtil.is(agent)) {
@@ -47,10 +54,10 @@ public class AdminManager {
 		return lstAgent;
 	}
 
-	public List<AgentDoc> fetchAgentList(Integer agentId) {
+	public List<AgentDoc> fetchAgentList(String agentId) {
 		List<AgentDoc> agentList = new ArrayList<AgentDoc>();
-		if (agentId != null && agentId > 0) {
-			AgentDoc agent = mongoTemplate.findById(agentId, AgentDoc.class);
+		if (ArgUtil.is(agentId)) {
+			AgentDoc agent = mongoTemplate.findOne(new Query(Criteria.where("_id").is(agentId)), AgentDoc.class);
 			agentList.add(agent);
 		} else {
 			agentList = mongoTemplate.findAll(AgentDoc.class);
@@ -61,7 +68,7 @@ public class AdminManager {
 	public List<AgentDoc> updateAgentStatus(Integer agentId, String status) {
 		List<AgentDoc> agentList = new ArrayList<AgentDoc>();
 		if (ArgUtil.is(agentId) && ArgUtil.is(status)) {
-			AgentDoc agent = mongoTemplate.findById(agentId, AgentDoc.class);
+			AgentDoc agent = mongoTemplate.findOne(new Query(Criteria.where("_id").is(agentId)), AgentDoc.class);
 			if (ArgUtil.is(agent)) {
 				agent.setIsactive(status);
 				mongoTemplate.save(agent);
@@ -73,7 +80,7 @@ public class AdminManager {
 
 	public List<DepartmentDoc> createAndUpdateDepartment(DepartmentDoc dept) {
 		List<DepartmentDoc> lstDept = new ArrayList<DepartmentDoc>();
-		if (dept != null && dept.getDept_id() == 0) {
+		if (dept != null && (ArgUtil.isEmpty(dept.getDept_id()) || dept.getDept_id().equals("0"))) {
 			dept.setIsactive("Y");
 			dept.setModified_date(null);
 			dept.setDept_id(null);
@@ -86,8 +93,7 @@ public class AdminManager {
 				dept.setDept_email(dept.getDept_name() + "@" + AppContextUtil.getTenant());
 			}
 
-			if (ArgUtil.isEmpty(dept.getDept_id()) || ArgUtil.isEmpty(dept.getDept_name())
-					|| ArgUtil.isEmpty(dept.getDept_code())) {
+			if (ArgUtil.isEmpty(dept.getDept_name()) || ArgUtil.isEmpty(dept.getDept_code())) {
 				ApiResponseUtil.throwException("All Inputs Required");
 			}
 			mongoTemplate.save(dept);
@@ -96,10 +102,11 @@ public class AdminManager {
 		return lstDept;
 	}
 
-	public List<DepartmentDoc> fetchDept(Integer deptId) {
+	public List<DepartmentDoc> fetchDept(String deptId) {
 		List<DepartmentDoc> lstDept = new ArrayList<DepartmentDoc>();
-		if (deptId != null && deptId > 0) {
-			DepartmentDoc dept = mongoTemplate.findById(deptId, DepartmentDoc.class);
+		if (ArgUtil.is(deptId)) {
+			DepartmentDoc dept = mongoTemplate.findOne(new Query(Criteria.where("_id").is(deptId)),
+					DepartmentDoc.class);
 			lstDept.add(dept);
 		} else {
 			lstDept = mongoTemplate.findAll(DepartmentDoc.class);
@@ -110,7 +117,8 @@ public class AdminManager {
 	public List<DepartmentDoc> updateDeptStatus(Integer deptId, String status) {
 		List<DepartmentDoc> lstDept = new ArrayList<DepartmentDoc>();
 		if (ArgUtil.is(deptId) && ArgUtil.is(status)) {
-			DepartmentDoc dept = mongoTemplate.findById(deptId, DepartmentDoc.class);
+			DepartmentDoc dept = mongoTemplate.findOne(new Query(Criteria.where("_id").is(deptId)),
+					DepartmentDoc.class);
 			if (ArgUtil.is(dept)) {
 				dept.setIsactive(status);
 				mongoTemplate.save(dept);

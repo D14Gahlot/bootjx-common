@@ -24,7 +24,7 @@ public class AdminController {
 
 	@RequestMapping(value = "/api/admins/agent", method = { RequestMethod.GET })
 	public ApiResponse<AgentResponseDto, Object> fetchAgents(
-			@RequestParam(value = "agent_id", required = false) Integer agent_id) {
+			@RequestParam(value = "agent_id", required = false) String agent_id) {
 		return ApiResponse.buildResults(adminService.fetchAgents(agent_id));
 	}
 
@@ -35,7 +35,7 @@ public class AdminController {
 
 	@RequestMapping(value = "/api/admins/dept", method = { RequestMethod.GET })
 	public ApiResponse<DepartmentResponseDto, Object> fetchDepts(
-			@RequestParam(value = "dept_id", required = false) Integer deptId) {
+			@RequestParam(value = "dept_id", required = false) String deptId) {
 		return ApiResponse.buildResults(adminService.fetchDepartments(deptId));
 	}
 
@@ -56,7 +56,7 @@ public class AdminController {
 	}
 
 	@RequestMapping(value = "/admin/fetch-agent", method = { RequestMethod.GET })
-	public List<AgentDoc> fetchAgentList(@RequestParam(value = "agent_id", required = false) Integer agent_id) {
+	public List<AgentDoc> fetchAgentList(@RequestParam(value = "agent_id", required = false) String agent_id) {
 		return adminService.fetchAgent(agent_id);
 	}
 
@@ -66,7 +66,7 @@ public class AdminController {
 	}
 
 	@RequestMapping(value = "/admin/fetch-dept", method = { RequestMethod.GET })
-	public List<DepartmentDoc> fetchDepartment(@RequestParam(value = "dept_id", required = false) Integer deptId) {
+	public List<DepartmentDoc> fetchDepartment(@RequestParam(value = "dept_id", required = false) String deptId) {
 		return adminService.fetchDepartment(deptId);
 	}
 

@@ -1,6 +1,6 @@
 package com.boot.jx.admin.model;
 
-import java.math.BigDecimal;
+import java.io.Serializable;
 import java.util.Date;
 
 import org.springframework.data.annotation.Id;
@@ -8,15 +8,17 @@ import org.springframework.data.annotation.TypeAlias;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import com.boot.jx.model.IResourceEntity;
-import com.boot.utils.ArgUtil;
+import com.boot.jx.mongo.CommonDocInterfaces.IDocument;
+import com.boot.jx.mongo.CommonDocInterfaces.Patchable;
 
 @Document(collection = "DEPARTMENT")
 @TypeAlias("DepartmentDoc")
-public class DepartmentDoc implements IResourceEntity {
+public class DepartmentDoc implements Serializable, Patchable<DepartmentDoc>, IDocument {
+
+	private static final long serialVersionUID = -3381417310939635611L;
 
 	@Id
-	private Integer dept_id;
+	private String dept_id;
 
 	@Indexed(unique = true)
 	private String dept_code;
@@ -92,32 +94,19 @@ public class DepartmentDoc implements IResourceEntity {
 		this.isactive = isactive;
 	}
 
-	public Integer getDept_id() {
+	public String getDept_id() {
 		return dept_id;
 	}
 
-	public void setDept_id(Integer dept_id) {
+	public void setDept_id(String dept_id) {
 		this.dept_id = dept_id;
 	}
 
 	@Override
-	public BigDecimal resourceId() {
-		return ArgUtil.parseAsBigDecimal(this.dept_id);
-	}
-
-	@Override
-	public String resourceName() {
-		return this.dept_name;
-	}
-
-	@Override
-	public String resourceCode() {
-		return this.dept_code;
-	}
-
-	@Override
-	public String resourceLocalName() {
-		return this.dept_name;
+	public DepartmentDoc patch() {
+		DepartmentDoc patch = new DepartmentDoc();
+		patch.setDept_id(this.getDept_id());
+		return patch;
 	}
 
 }

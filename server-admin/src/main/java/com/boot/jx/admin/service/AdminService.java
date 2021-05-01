@@ -25,7 +25,7 @@ public class AdminService {
 		return lstOfAgent;
 	}
 
-	public List<AgentDoc> fetchAgent(Integer agentId) {
+	public List<AgentDoc> fetchAgent(String agentId) {
 		List<AgentDoc> lstOfAgent = adminManager.fetchAgentList(agentId);
 		return lstOfAgent;
 	}
@@ -36,7 +36,7 @@ public class AdminService {
 		return fetchAgents(lstOfAgent);
 	}
 
-	public List<AgentResponseDto> fetchAgents(Integer agentId) {
+	public List<AgentResponseDto> fetchAgents(String agentId) {
 		List<AgentDoc> lstOfAgent = adminManager.fetchAgentList(agentId);
 		return fetchAgents(lstOfAgent);
 	}
@@ -46,8 +46,8 @@ public class AdminService {
 		for (AgentResponseDto agentResponseDto : agentList) {
 			agentResponseDto.setAgent_password(null);
 			if (ArgUtil.is(agentResponseDto.getAgent_id())) {
-				agentResponseDto.setDept(new DepartmentResponseDto()
-						.importFrom(CollectionUtil.getOne(adminManager.fetchDept(agentResponseDto.getDept_id()))));
+				agentResponseDto.setDept(new DepartmentResponseDto().importFrom(CollectionUtil
+						.getOne(adminManager.fetchDept(ArgUtil.parseAsString(agentResponseDto.getDept_id())))));
 			}
 		}
 		return agentList;
@@ -58,7 +58,7 @@ public class AdminService {
 		return new DepartmentResponseDto().importFrom(adminManager.createAndUpdateDepartment(reqEntity));
 	}
 
-	public List<DepartmentResponseDto> fetchDepartments(Integer deptId) {
+	public List<DepartmentResponseDto> fetchDepartments(String deptId) {
 		List<DepartmentDoc> lstDept = adminManager.fetchDept(deptId);
 		return new DepartmentResponseDto().importFrom(lstDept);
 	}
@@ -72,7 +72,7 @@ public class AdminService {
 		return lstDept;
 	}
 
-	public List<DepartmentDoc> fetchDepartment(Integer deptId) {
+	public List<DepartmentDoc> fetchDepartment(String deptId) {
 		List<DepartmentDoc> lstDept = adminManager.fetchDept(deptId);
 		return lstDept;
 	}

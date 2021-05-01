@@ -2,12 +2,12 @@ package com.boot.jx.admin.dto;
 
 import java.util.Date;
 
-import com.boot.jx.model.AResourceDTO;
+import com.boot.jx.mongo.CommonDocInterfaces.ADocumentDTO;
 
-public class DepartmentResponseDto extends AResourceDTO<DepartmentResponseDto> {
+public class DepartmentResponseDto extends ADocumentDTO<DepartmentResponseDto> {
 
 	private static final long serialVersionUID = -3495791543071105507L;
-	private Integer dept_id;
+	private Object dept_id;
 	private String dept_code;
 	private String dept_name;
 	private String dept_email;
@@ -81,11 +81,11 @@ public class DepartmentResponseDto extends AResourceDTO<DepartmentResponseDto> {
 		this.modified_by = modified_by;
 	}
 
-	public Integer getDept_id() {
+	public Object getDept_id() {
 		return dept_id;
 	}
 
-	public void setDept_id(Integer dept_id) {
+	public void setDept_id(Object dept_id) {
 		this.dept_id = dept_id;
 	}
 

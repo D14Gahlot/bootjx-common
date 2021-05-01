@@ -1,7 +1,7 @@
 package com.boot.jx.admin.dto;
 
 public class AgentRequestDto {
-	private Integer agent_id;
+	private String agent_id;
 	private String agent_code;
 	private String agent_name;
 	private String agent_department;
@@ -48,11 +48,11 @@ public class AgentRequestDto {
 		this.agent_number = agent_number;
 	}
 
-	public Integer getAgent_id() {
+	public String getAgent_id() {
 		return agent_id;
 	}
 
-	public void setAgent_id(Integer agent_id) {
+	public void setAgent_id(String agent_id) {
 		this.agent_id = agent_id;
 	}
 
