@@ -9,7 +9,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import com.boot.jx.mongo.CommonDocInterfaces.IDocument;
 
-@Document(collection = "AGENT")
+@Document(collection = "AGENTS")
 @TypeAlias("AgentDoc")
 public class AgentDoc implements IDocument {
 

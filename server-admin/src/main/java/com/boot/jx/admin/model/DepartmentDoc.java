@@ -11,7 +11,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import com.boot.jx.mongo.CommonDocInterfaces.IDocument;
 import com.boot.jx.mongo.CommonDocInterfaces.Patchable;
 
-@Document(collection = "DEPARTMENT")
+@Document(collection = "DEPARTMENTS")
 @TypeAlias("DepartmentDoc")
 public class DepartmentDoc implements Serializable, Patchable<DepartmentDoc>, IDocument {
 
