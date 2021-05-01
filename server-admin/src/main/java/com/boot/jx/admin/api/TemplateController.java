@@ -156,14 +156,14 @@ public class TemplateController {
 	}
 
 	@RequestMapping(value = "/api/tmpl/quickmedia", method = { RequestMethod.POST })
-	public ApiResponse<TemplateReply, Object> createQuickMedia(@RequestParam(required = false) String id,
+	public ApiResponse<TemplateReply, Object> createQuickMedia(@RequestParam(required = false) String name,
 			@RequestParam String category, @RequestParam String title, String url, String content) {
 		TemplateReply newVersion = new TemplateReply();
-		if (ArgUtil.is(id)) {
-			TemplateReply oldVersion = mongoTemplate.findById(id, TemplateReply.class);
+		if (ArgUtil.is(name)) {
+			TemplateReply oldVersion = mongoTemplate.findById(name, TemplateReply.class);
 			if (ArgUtil.is(oldVersion)) {
 				newVersion.oldVersion(oldVersion);
-				newVersion.setName(id);
+				newVersion.setName(name);
 			}
 		}
 
