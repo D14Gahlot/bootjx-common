@@ -65,7 +65,7 @@ public class AdminManager {
 		return agentList;
 	}
 
-	public List<AgentDoc> updateAgentStatus(Integer agentId, String status) {
+	public List<AgentDoc> updateAgentStatus(String agentId, String status) {
 		List<AgentDoc> agentList = new ArrayList<AgentDoc>();
 		if (ArgUtil.is(agentId) && ArgUtil.is(status)) {
 			AgentDoc agent = mongoTemplate.findOne(new Query(Criteria.where("_id").is(agentId)), AgentDoc.class);

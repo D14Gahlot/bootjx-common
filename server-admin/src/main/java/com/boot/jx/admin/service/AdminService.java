@@ -63,7 +63,7 @@ public class AdminService {
 		return new DepartmentResponseDto().importFrom(lstDept);
 	}
 
-	public List<AgentResponseDto> updateAgentStatus(Integer agentId, String status) {
+	public List<AgentResponseDto> updateAgentStatus(String agentId, String status) {
 		return fetchAgents(adminManager.updateAgentStatus(agentId, status));
 	}
 

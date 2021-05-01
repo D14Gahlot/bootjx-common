@@ -15,6 +15,7 @@ import com.boot.jx.admin.model.AgentDoc;
 import com.boot.jx.admin.model.DepartmentDoc;
 import com.boot.jx.admin.service.AdminService;
 import com.boot.jx.api.ApiResponse;
+import com.boot.utils.ArgUtil;
 
 @RestController
 public class AdminController {
@@ -30,7 +31,8 @@ public class AdminController {
 
 	@RequestMapping(value = "/api/admins/agent", method = { RequestMethod.POST })
 	public ApiResponse<AgentResponseDto, Object> createAgent(@RequestBody AgentResponseDto dto) {
-		return ApiResponse.buildResults(adminService.saveAgent(dto));
+		return ApiResponse.buildResults(adminService.saveAgent(dto))
+				.message(ArgUtil.is(dto.getDept_id()) ? "Agent Updated" : "Agent Created");
 	}
 
 	@RequestMapping(value = "/api/admins/dept", method = { RequestMethod.GET })
@@ -41,11 +43,12 @@ public class AdminController {
 
 	@RequestMapping(value = "/api/admins/dept", method = { RequestMethod.POST })
 	public ApiResponse<DepartmentResponseDto, Object> fetchDepts(@RequestBody DepartmentResponseDto dto) {
-		return ApiResponse.buildResults(adminService.saveDept(dto));
+		return ApiResponse.buildResults(adminService.saveDept(dto))
+				.message(ArgUtil.is(dto.getDept_id()) ? "Team Updated" : "Team Created");
 	}
 
 	@RequestMapping(value = "/api/admins/agent", method = { RequestMethod.DELETE })
-	public List<AgentResponseDto> updateAgentStatus(@RequestParam(value = "agent_id", required = true) Integer agent_id,
+	public List<AgentResponseDto> updateAgentStatus(@RequestParam(value = "agent_id", required = true) String agent_id,
 			@RequestParam(value = "status", required = true) String status) {
 		return adminService.updateAgentStatus(agent_id, status);
 	}
@@ -76,38 +79,4 @@ public class AdminController {
 		return adminService.updateDepartment(dept_id, status);
 	}
 
-	/*
-	 * @RequestMapping(value = "/admin/create-agent", method = {
-	 * RequestMethod.POST}) public List<AgentResponseDto> createAgent(@RequestBody
-	 * AgentRequestDto requestModel) { return adminService.saveAgent(requestModel);
-	 * }
-	 * 
-	 * @RequestMapping(value = "/admin/fetch-agent", method = { RequestMethod.GET})
-	 * public List<AgentResponseDto> fetchAgentList(@RequestParam(value =
-	 * "agent_id", required = false) Integer agent_id) { return
-	 * adminService.fetchAgent(agent_id); }
-	 * 
-	 * @RequestMapping(value = "/admin/delete-agent", method = {
-	 * RequestMethod.POST}) public List<AgentResponseDto>
-	 * updateAgentStatus(@RequestParam(value="agent_id" ,required = true) Integer
-	 * agent_id,@RequestParam(value="status" ,required = true) String status) {
-	 * return adminService.updateAgentStatus(agent_id,status); }
-	 * 
-	 * @RequestMapping(value = "/admin/create-dept", method = { RequestMethod.POST})
-	 * public List<DepartmentResponseDto> createDepartment(@RequestBody
-	 * DepartmentRequestDto requestModel) { return
-	 * adminService.createAndUpdateDepartment(requestModel); }
-	 * 
-	 * @RequestMapping(value = "/admin/fetch-dept", method = { RequestMethod.GET})
-	 * public List<DepartmentResponseDto> fetchDepartment(@RequestParam(value =
-	 * "dept_id", required = false) Integer deptId) { return
-	 * adminService.fetchDepartment(deptId); }
-	 * 
-	 * @RequestMapping(value = "/admin/delete-dept", method = { RequestMethod.POST})
-	 * public List<DepartmentResponseDto>
-	 * updateDepartment(@RequestParam(value="dept_id" ,required = true) Integer
-	 * dept_id,@RequestParam(value="status" ,required = true) String status) {
-	 * return adminService.updateDepartment(dept_id,status); }
-	 * 
-	 */
 }
