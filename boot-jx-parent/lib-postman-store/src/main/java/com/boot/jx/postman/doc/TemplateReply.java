@@ -2,15 +2,18 @@ package com.boot.jx.postman.doc;
 
 import java.io.Serializable;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.TypeAlias;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import com.boot.jx.mongo.CommonDocInterfaces.OldDocVersion;
+
 @Document(collection = "DICT_TEMPLATES")
 @TypeAlias("TmplRply")
-public class TemplateReply implements Serializable {
+public class TemplateReply implements Serializable, OldDocVersion<TemplateReply> {
 
 	private static final long serialVersionUID = 7942286016346691701L;
 
@@ -28,6 +31,8 @@ public class TemplateReply implements Serializable {
 	private String url;
 
 	private Map<String, Object> meta;
+
+	private List<TemplateReply> oldVersions;
 
 	public String getName() {
 		return name;
@@ -90,6 +95,16 @@ public class TemplateReply implements Serializable {
 			this.meta = new HashMap<String, Object>();
 		}
 		return this.meta;
+	}
+
+	@Override
+	public void setOldVersions(List<TemplateReply> oldVersions) {
+		this.oldVersions = oldVersions;
+	}
+
+	@Override
+	public List<TemplateReply> getOldVersions() {
+		return oldVersions;
 	}
 
 }
