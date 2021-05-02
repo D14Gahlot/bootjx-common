@@ -19,7 +19,7 @@ import com.boot.jx.postman.fb.FacebookMessageRequest;
 import com.boot.jx.postman.fb.FacebookMessageResp;
 import com.boot.jx.postman.fb.FacebookMessaging;
 import com.boot.jx.postman.fb.FacebookUserProfile;
-import com.boot.jx.postman.gupshup.GupShupConfig;
+import com.boot.jx.postman.gupshup.GupShupConfigClient;
 import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.File;
 import com.boot.jx.postman.model.InboxMessage;
@@ -35,7 +35,7 @@ public class FacebookConnector implements ConnectorHandler {
 	private FacebooClient facebooClient;
 
 	@Autowired
-	protected GupShupConfig gupShupConfig;
+	protected GupShupConfigClient gupShupConfig;
 
 	@Autowired
 	private MongoTemplate mongoTemplate;

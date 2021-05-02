@@ -8,6 +8,7 @@ import java.util.StringJoiner;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.gupshup.GupShupConstants.SessionType;
 import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.File;
@@ -19,10 +20,10 @@ import com.boot.utils.CollectionUtil;
 import com.boot.utils.CryptoUtil;
 import com.boot.utils.JsonUtil;
 
-public abstract class AbstractGupShupClient {
+public abstract class GupShupClientAbstract {
 
 	@Autowired
-	protected GupShupConfig gupShupConfig;
+	protected GupShupConfigClient gupShupConfig;
 
 	@Autowired
 	protected RestService restService;
@@ -33,18 +34,23 @@ public abstract class AbstractGupShupClient {
 		return false;
 	}
 
+	@Autowired
+	private PMEnvironment environment;
+
 	private Ajax ajax(GupShupReq req, boolean encrypt) {
 		Ajax ajax = restService.ajax(gupShupConfig.getGupShupApiUrl()).path("/GatewayAPI/rest");
 
+		GupShupConfig config = environment.get().gupshup(req.getWaNumber());
+
 		if (getSessionType() == SessionType.NOTIFICATION) {
-			ajax.field("userid", gupShupConfig.getGupShupNotifyId());
-			req.password(gupShupConfig.getGupShupNotifyPass());
+			ajax.field("userid", config.getNotifyId());
+			req.password(config.getNotifyPass());
 		} else {
-			ajax.field("userid", gupShupConfig.getGupShupChatId());
-			req.password(gupShupConfig.getGupShupChatPass());
+			ajax.field("userid", config.getChatId());
+			req.password(config.getChatPass());
 		}
 		if (encrypt) {
-			ajax.field("encrdata", CryptoUtil.getEncoder().obzect(req.password(gupShupConfig.getGupShupChatPass()))
+			ajax.field("encrdata", CryptoUtil.getEncoder().obzect(req.password(config.getChatPass()))
 					.encodeBase64().toString());
 		} else {
 			Map<String, Object> reqMap = JsonUtil.toMap(req);
@@ -109,12 +115,14 @@ public abstract class AbstractGupShupClient {
 				.caption(CryptoUtil.getEncoder().message(caption).encodeURL().toString()));
 	}
 
-	public GupShupResp sendMessage(Message<?> message) {
+	public GupShupResp sendMessage(Message<?> message, String lane) {
 		String phoneNumber = CollectionUtil.getOne(message.getTo());
 
 		GupShupReq gupShupReq = new GupShupReq();
 		gupShupReq.setSendTo(phoneNumber);
+		gupShupReq.setPhoneNumber(phoneNumber);
 		gupShupReq.setMessageId(message.getMessageId());
+		gupShupReq.setWaNumber(lane);
 
 		GupShupResp resp = null;
 

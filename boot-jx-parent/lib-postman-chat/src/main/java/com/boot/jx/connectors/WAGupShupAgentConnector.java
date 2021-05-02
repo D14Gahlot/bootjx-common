@@ -6,14 +6,14 @@ import org.springframework.stereotype.Component;
 import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorHandler;
 import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorMapping;
 import com.boot.jx.dict.ContactType;
-import com.boot.jx.postman.client.GupShupAgentClient;
-import com.boot.jx.postman.client.GupShupChatClient;
-import com.boot.jx.postman.client.GupShupNotifyClient;
 import com.boot.jx.postman.client.PostManClient;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
-import com.boot.jx.postman.gupshup.GupShupConfig;
+import com.boot.jx.postman.gupshup.GupShupClientAgent;
+import com.boot.jx.postman.gupshup.GupShupClientChat;
+import com.boot.jx.postman.gupshup.GupShupConfigClient;
 import com.boot.jx.postman.gupshup.GupShupInboundV2;
+import com.boot.jx.postman.gupshup.GupShupClientNotify;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.Message;
 import com.boot.jx.postman.model.MessageBox;
@@ -26,19 +26,19 @@ import com.boot.utils.ArgUtil;
 public class WAGupShupAgentConnector implements ConnectorHandler {
 
 	@Autowired
-	private GupShupChatClient gupShupChatClient;
+	private GupShupClientChat gupShupChatClient;
 
 	@Autowired
-	private GupShupNotifyClient gupShupNotifyClient;
+	private GupShupClientNotify gupShupNotifyClient;
 
 	@Autowired
-	private GupShupAgentClient gupShupAgentClient;
+	private GupShupClientAgent gupShupAgentClient;
 
 	@Autowired
 	private PostManClient postManClient;
 
 	@Autowired
-	protected GupShupConfig gupShupConfig;
+	protected GupShupConfigClient gupShupConfig;
 
 	@Override
 	public void send(String lane, String to, OutboxMessage outboxMessage) {
@@ -52,9 +52,9 @@ public class WAGupShupAgentConnector implements ConnectorHandler {
 			if (outboxMessage.isViaAgent() && ArgUtil.isEmpty(outboxMessage.getFiles())) {
 				gupShupChatClient.sendMessage(chatContactDoc.getCsid(), outboxMessage.getMessage());
 			} else if (outboxMessage.isTemplateMsg() || outboxMessage.isQRButtons()) {
-				gupShupNotifyClient.sendMessage(outboxMessage);
+				gupShupNotifyClient.sendMessage(outboxMessage, chatContactDoc.getLane());
 			} else {
-				gupShupChatClient.sendMessage(outboxMessage);
+				gupShupChatClient.sendMessage(outboxMessage, chatContactDoc.getLane());
 			}
 		} else if (ArgUtil.isEqual(outboxMessage.getChannel(), Channel.DEFAULT.toString())) {
 			MessageBox mb = new MessageBox();
@@ -71,9 +71,9 @@ public class WAGupShupAgentConnector implements ConnectorHandler {
 				gupShupAgentClient.sendViaAgent(inboxMessage, outboxMessage.getMessage());
 			} else if (outboxMessage.isTemplateMsg() || outboxMessage.isQRButtons()) {
 				// gupShupNotifyClient.optIn(inboxMessage.getFrom());
-				gupShupNotifyClient.sendMessage(outboxMessage);
+				gupShupNotifyClient.sendMessage(outboxMessage, inboxMessage.getLane());
 			} else {
-				gupShupChatClient.sendMessage(outboxMessage);
+				gupShupChatClient.sendMessage(outboxMessage, inboxMessage.getLane());
 			}
 		} else if (ArgUtil.isEqual(inboxMessage.getChannel(), Channel.DEFAULT.toString())) {
 			Message<?> reply = inboxMessage.replyMessage(outboxMessage.getMessage());

@@ -19,7 +19,7 @@ import com.boot.jx.postman.client.TmplClient;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.TemplateReply;
-import com.boot.jx.postman.gupshup.GupShupConfig;
+import com.boot.jx.postman.gupshup.GupShupConfigClient;
 import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.File;
 import com.boot.jx.postman.model.InboxMessage;
@@ -34,7 +34,7 @@ public class WebConnector implements DefaultConnector {
 	private static final String WEB_USER_MESSAGE_STR = "WEB_USER_MESSAGE_STR_";
 	private static final Logger LOGGER = LoggerFactory.getLogger(WebConnector.class);
 	@Autowired
-	protected GupShupConfig gupShupConfig;
+	protected GupShupConfigClient gupShupConfig;
 
 	public static class MessageQueue<T> {
 

@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.boot.jx.postman.fb.FacebookConfig;
+import com.boot.jx.postman.gupshup.GupShupConfig;
 import com.boot.jx.postman.tg.TelegramConfig;
 import com.boot.jx.postman.tw.TwitterConfig;
 import com.boot.utils.ArgUtil;
@@ -16,6 +17,7 @@ public class ConnectorConfig implements Serializable {
 	Map<String, FacebookConfig> facebook;
 	Map<String, TwitterConfig> twitter;
 	Map<String, TelegramConfig> telegram;
+	Map<String, GupShupConfig> gupshup;
 
 	// Facebook
 	public Map<String, FacebookConfig> getFacebook() {
@@ -89,6 +91,31 @@ public class ConnectorConfig implements Serializable {
 
 	public ConnectorConfig telegram(TelegramConfig config) {
 		this.telegram().put(config.getHandler(), config);
+		return this;
+	}
+
+	// GupShup
+	public Map<String, GupShupConfig> getGupshup() {
+		return gupshup;
+	}
+
+	public void setGupshup(Map<String, GupShupConfig> gupshup) {
+		this.gupshup = gupshup;
+	}
+
+	public GupShupConfig gupshup(String handler) {
+		return gupshup.get(handler);
+	}
+
+	public Map<String, GupShupConfig> gupshup() {
+		if (ArgUtil.isEmpty(gupshup)) {
+			gupshup = new HashMap<String, GupShupConfig>();
+		}
+		return gupshup;
+	}
+
+	public ConnectorConfig gupshup(GupShupConfig config) {
+		this.gupshup().put(config.getNumber(), config);
 		return this;
 	}
 

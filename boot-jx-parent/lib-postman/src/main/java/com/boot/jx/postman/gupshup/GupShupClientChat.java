@@ -1,16 +1,12 @@
-package com.boot.jx.postman.client;
+package com.boot.jx.postman.gupshup;
 
 import org.springframework.stereotype.Component;
 
-import com.boot.jx.postman.gupshup.AbstractGupShupClient;
-import com.boot.jx.postman.gupshup.GupShupConstants;
 import com.boot.jx.postman.gupshup.GupShupConstants.DataEncoding;
 import com.boot.jx.postman.gupshup.GupShupConstants.SessionType;
-import com.boot.jx.postman.gupshup.GupShupReq;
-import com.boot.jx.postman.gupshup.GupShupResp;
 
 @Component
-public class GupShupChatClient extends AbstractGupShupClient {
+public class GupShupClientChat extends GupShupClientAbstract {
 
 	@Override
 	public SessionType getSessionType() {

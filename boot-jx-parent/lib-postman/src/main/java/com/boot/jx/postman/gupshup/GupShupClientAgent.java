@@ -1,20 +1,16 @@
-package com.boot.jx.postman.client;
+package com.boot.jx.postman.gupshup;
 
 import java.util.Map;
 
 import org.springframework.stereotype.Component;
 
-import com.boot.jx.postman.gupshup.AbstractGupShupClient;
-import com.boot.jx.postman.gupshup.GupShupAgentReq;
-import com.boot.jx.postman.gupshup.GupShupConstants;
 import com.boot.jx.postman.gupshup.GupShupConstants.SessionType;
-import com.boot.jx.postman.gupshup.GupShupInbound;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.rest.RestService.Ajax;
 import com.boot.utils.ArgUtil;
 
 @Component
-public class GupShupAgentClient extends AbstractGupShupClient {
+public class GupShupClientAgent extends GupShupClientAbstract {
 
 	@Override
 	public SessionType getSessionType() {

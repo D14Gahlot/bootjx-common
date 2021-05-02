@@ -7,13 +7,13 @@ import org.springframework.stereotype.Component;
 import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorHandler;
 import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorMapping;
 import com.boot.jx.dict.ContactType;
-import com.boot.jx.postman.client.GupShupChatClient;
-import com.boot.jx.postman.client.GupShupNotifyClient;
 import com.boot.jx.postman.client.TmplClient;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.TemplateReply;
-import com.boot.jx.postman.gupshup.GupShupConfig;
+import com.boot.jx.postman.gupshup.GupShupClientChat;
+import com.boot.jx.postman.gupshup.GupShupClientNotify;
+import com.boot.jx.postman.gupshup.GupShupConfigClient;
 import com.boot.jx.postman.gupshup.GupShupInbound;
 import com.boot.jx.postman.gupshup.GupShupResp;
 import com.boot.jx.postman.model.Attachment;
@@ -29,13 +29,13 @@ import com.boot.utils.JsonUtil;
 public class WAGupShupConnector implements ConnectorHandler {
 
 	@Autowired
-	private GupShupChatClient gupShupChatClient;
+	private GupShupClientChat gupShupChatClient;
 
 	@Autowired
-	private GupShupNotifyClient gupShupNotifyClient;
+	private GupShupClientNotify gupShupNotifyClient;
 
 	@Autowired
-	protected GupShupConfig gupShupConfig;
+	protected GupShupConfigClient gupShupConfig;
 
 	@Autowired
 	private MongoTemplate mongoTemplate;
@@ -51,7 +51,7 @@ public class WAGupShupConnector implements ConnectorHandler {
 	@Override
 	public void send(ChatContactDoc chatContactDoc, OutboxMessage outboxMessage) {
 		outboxMessage.setChannel(chatContactDoc.getChannelType());
-		gupShupNotifyClient.sendMessage(outboxMessage);
+		gupShupNotifyClient.sendMessage(outboxMessage, chatContactDoc.getLane());
 	}
 
 	@Override
@@ -63,14 +63,14 @@ public class WAGupShupConnector implements ConnectorHandler {
 				if ("image".equalsIgnoreCase(templateReply.getType())) {
 					outboxMessage.attachment(new Attachment().mediaURL(templateReply.getUrl())
 							.mediaType(File.FileType.IMAGE.toString()));
-					resp = gupShupChatClient.sendMessage(outboxMessage);
+					resp = gupShupChatClient.sendMessage(outboxMessage, inboxMessage.getLane());
 				}
 			} else {
 				tmplClient.process(outboxMessage);
-				resp = gupShupChatClient.sendMessage(outboxMessage);
+				resp = gupShupChatClient.sendMessage(outboxMessage, inboxMessage.getLane());
 			}
 		} else {
-			resp = gupShupChatClient.sendMessage(outboxMessage);
+			resp = gupShupChatClient.sendMessage(outboxMessage, inboxMessage.getLane());
 		}
 
 		if (!ArgUtil.is(resp) || !ArgUtil.is(resp.getResponse())) {
@@ -112,6 +112,7 @@ public class WAGupShupConnector implements ConnectorHandler {
 		inboxMessage.setMessage(inbound.getText());
 		inboxMessage.setTo(inbound.getWaNumber());
 		inboxMessage.setMessageIdExt(inbound.getReplyId());
+		inboxMessage.setLane(inbound.getWaNumber());
 		return inboxMessage;
 	}
 }
