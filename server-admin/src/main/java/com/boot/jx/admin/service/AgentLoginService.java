@@ -75,7 +75,6 @@ public class AgentLoginService {
 				Criteria.where("agent_code").regex("^" + username + "$","i"),
 				Criteria.where("agent_email").is(username),
 				Criteria.where("agent_email").regex("^" + username + "$","i")));
-		System.out.println(query2.toString());
 		return CollectionUtil.getOne(mongoTemplate.find(query2, AgentDoc.class));
 	}
 
