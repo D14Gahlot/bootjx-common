@@ -13,6 +13,7 @@ import com.boot.jx.api.ApiResponse;
 import com.boot.jx.postman.ConnectorConfig;
 import com.boot.jx.postman.doc.ConnectorConfigDoc;
 import com.boot.jx.postman.fb.FacebookConfig;
+import com.boot.jx.postman.gupshup.GupShupConfig;
 import com.boot.jx.postman.tg.TelegramConfig;
 import com.boot.jx.postman.tw.TwitterConfig;
 import com.boot.utils.ArgUtil;
@@ -102,6 +103,29 @@ public class ConnectorController {
 		fbconfig.setAccessToken(accessToken);
 		fbconfig.setWebhookUrl(webhookUrl);
 		doc.telegram(fbconfig);
+		mongoTemplate.save(doc);
+		return ApiResponse.buildResults(mongoTemplate.findById(AppContextUtil.getTenant(), ConnectorConfigDoc.class));
+	}
+
+	@RequestMapping(value = "/api/connector/gs", method = { RequestMethod.POST })
+	public ApiResponse<ConnectorConfigDoc, Object> addWAConfig(@RequestParam String number,
+			@RequestParam String notifyId, @RequestParam String chatId, @RequestParam String chatPass,
+			@RequestParam String notifyPass) {
+		ConnectorConfigDoc doc = mongoTemplate.findById(AppContextUtil.getTenant(), ConnectorConfigDoc.class);
+
+		if (ArgUtil.isEmpty(doc)) {
+			doc = new ConnectorConfigDoc();
+			doc.setTenant(AppContextUtil.getTenant());
+		}
+
+		GupShupConfig fbconfig = new GupShupConfig();
+		fbconfig.setNumber(number);
+		fbconfig.setChatId(chatId);
+		fbconfig.setChatPass(chatPass);
+		fbconfig.setNotifyId(notifyId);
+		fbconfig.setNotifyPass(notifyPass);
+
+		doc.gupshup(fbconfig);
 		mongoTemplate.save(doc);
 		return ApiResponse.buildResults(mongoTemplate.findById(AppContextUtil.getTenant(), ConnectorConfigDoc.class));
 	}
