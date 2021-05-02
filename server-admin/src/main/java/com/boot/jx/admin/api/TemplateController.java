@@ -8,7 +8,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
+import com.boot.jx.admin.service.FileStore;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.postman.doc.QuickAction;
 import com.boot.jx.postman.doc.QuickLabel;
@@ -155,9 +157,19 @@ public class TemplateController {
 				.message("Quick Media deleted");
 	}
 
+	@Autowired
+	FileStore fileStore;
+
 	@RequestMapping(value = "/api/tmpl/quickmedia", method = { RequestMethod.POST })
 	public ApiResponse<TemplateReply, Object> createQuickMedia(@RequestParam(required = false) String name,
-			@RequestParam String category, @RequestParam String title, String url, String content) {
+			@RequestParam String category, @RequestParam String title, @RequestParam(required = false) String url,
+			@RequestParam(name = "file", required = false) MultipartFile file) {
+
+		if (ArgUtil.isEmpty(url) && ArgUtil.is(file)) {
+			url = fileStore.saveTodo(file);
+		} else if (ArgUtil.isEmpty(url)) {
+			throw new IllegalStateException("Cannot upload empty file");
+		}
 		TemplateReply newVersion = new TemplateReply();
 		if (ArgUtil.is(name)) {
 			TemplateReply oldVersion = mongoTemplate.findById(name, TemplateReply.class);
@@ -171,7 +183,6 @@ public class TemplateController {
 		newVersion.setType("IMAGE");
 		newVersion.setCategory(category);
 		newVersion.setUrl(url);
-		newVersion.setContent(content);
 
 		mongoTemplate.save(newVersion);
 
