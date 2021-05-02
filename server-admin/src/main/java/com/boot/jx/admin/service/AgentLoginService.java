@@ -70,7 +70,12 @@ public class AgentLoginService {
 
 	private AgentDoc getAgentByCodeAndStatus(String username, String string) {
 		Query query2 = new Query();
-		query2.addCriteria(Criteria.where("agent_code").is(username).and("isactive").is(string));
+		query2.addCriteria(Criteria.where("isactive").is(string).orOperator(
+				Criteria.where("agent_code").is(username),
+				Criteria.where("agent_code").regex("^" + username + "$","i"),
+				Criteria.where("agent_email").is(username),
+				Criteria.where("agent_email").regex("^" + username + "$","i")));
+		System.out.println(query2.toString());
 		return CollectionUtil.getOne(mongoTemplate.find(query2, AgentDoc.class));
 	}
 

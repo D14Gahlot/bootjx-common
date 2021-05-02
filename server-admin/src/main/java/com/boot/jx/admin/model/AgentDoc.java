@@ -19,6 +19,7 @@ public class AgentDoc implements IDocument {
 	private String agent_code;
 	private String agent_name;
 	private String agent_department;
+	@Indexed(unique = true)
 	private String agent_email;
 	private String agent_number;
 	private String agent_password;
