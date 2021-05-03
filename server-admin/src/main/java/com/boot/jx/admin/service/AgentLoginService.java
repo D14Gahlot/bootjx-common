@@ -66,7 +66,8 @@ public class AgentLoginService {
 
 		postManClient.send(new MessageBox()
 				.push(new Email().to(agent.getAgent_email()).template("reset-password").put("otp", agent.getAgent_otp())
-						.put("username", agent.getAgent_code()).put("tnt", AppContextUtil.getTenant())));
+						.put("username", agent.getAgent_code()).put("tnt", AppContextUtil.getTenant())
+						.put("panel", admin ? "admin" : "agent")));
 		return true;
 	}
 
