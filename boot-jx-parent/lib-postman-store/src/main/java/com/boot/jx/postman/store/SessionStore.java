@@ -96,6 +96,9 @@ public class SessionStore {
 			// SESSION CREATION
 			chatSessionDoc = new ChatSessionDoc();
 			chatSessionDoc.setContactId(contactId);
+			chatSessionDoc.setContactType(ArgUtil.parseAsString(inboxMessage.getContactType()));
+			chatSessionDoc.setChannel(inboxMessage.getChannel());
+			chatSessionDoc.setLane(inboxMessage.getLane());
 
 			// SESSION UPDATE
 			chatSessionDoc.setActive(true);
