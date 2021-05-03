@@ -59,18 +59,6 @@ public class AuthController {
 		return System.currentTimeMillis() / 300000;
 	}
 
-	@ResponseBody
-	@RequestMapping(value = "/pub/test", method = { RequestMethod.POST, RequestMethod.GET })
-	public SampleSenderReply postVote(@RequestParam String xyz) {
-		return new SampleSenderReply();
-	}
-
-	@ResponseBody
-	@RequestMapping(value = "/api/test", method = { RequestMethod.POST, RequestMethod.GET })
-	public SampleSenderReply apiVote(@RequestParam String xyz) {
-		return new SampleSenderReply();
-	}
-
 	@RequestMapping(value = { "/app/home", "/", "", "/app/**" }, method = { RequestMethod.POST, RequestMethod.GET })
 	public String home(Model model, @RequestParam(required = false) String theme) {
 		model.addAttribute("APP_CONTEXT", appConfig.getAppPrefix());
@@ -214,30 +202,6 @@ public class AuthController {
 		ApiResponse<String, Object> x = ApiResponse.buildData("status", status);
 		agentSessionService.setOnline(status);
 		return x;
-	}
-
-	@JsonIgnoreProperties(ignoreUnknown = true)
-	public static class SampleSenderReply {
-		Map<String, String> channel;
-		public SampleSender sender;
-
-		public Map<String, String> getChannel() {
-			return channel;
-		}
-
-		public void setChannel(Map<String, String> channel) {
-			this.channel = channel;
-		}
-	}
-
-	public static class SampleSender {
-		public SampleName name;
-	}
-
-	public static class SampleName {
-		public String nameType;
-		public String firstName;
-		public String lastName;
 	}
 
 }

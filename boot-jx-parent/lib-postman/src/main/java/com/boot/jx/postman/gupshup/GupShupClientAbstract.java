@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.boot.jx.postman.PMEnvironment;
+import com.boot.jx.postman.PostManException;
 import com.boot.jx.postman.gupshup.GupShupConstants.SessionType;
 import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.File;
@@ -42,6 +43,10 @@ public abstract class GupShupClientAbstract {
 
 		GupShupConfig config = environment.get().gupshup(req.getWaNumber());
 
+		if (ArgUtil.isEmpty(config)) {
+			throw new PostManException("No Config for lane " + req.getWaNumber());
+		}
+
 		if (getSessionType() == SessionType.NOTIFICATION) {
 			ajax.field("userid", config.getNotifyId());
 			req.password(config.getNotifyPass());
@@ -50,8 +55,8 @@ public abstract class GupShupClientAbstract {
 			req.password(config.getChatPass());
 		}
 		if (encrypt) {
-			ajax.field("encrdata", CryptoUtil.getEncoder().obzect(req.password(config.getChatPass()))
-					.encodeBase64().toString());
+			ajax.field("encrdata",
+					CryptoUtil.getEncoder().obzect(req.password(config.getChatPass())).encodeBase64().toString());
 		} else {
 			Map<String, Object> reqMap = JsonUtil.toMap(req);
 			for (Entry<String, Object> entrySet : reqMap.entrySet()) {

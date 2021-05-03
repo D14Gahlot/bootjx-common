@@ -49,14 +49,14 @@ public class AgentLoginService {
 		return agent;
 	}
 
-	public boolean loginAgent(String username, String passsword) throws NoSuchAlgorithmException {
+	public boolean loginAgent(String username, String passsword, boolean admin) throws NoSuchAlgorithmException {
 		if (ArgUtil.is(validateAgent(username, passsword))) {
 			return true;
 		}
 		return false;
 	}
 
-	public boolean resetPassword(String username) throws NoSuchAlgorithmException {
+	public boolean resetPassword(String username, boolean admin) throws NoSuchAlgorithmException {
 		AgentDoc agent = getAgentByCodeAndStatus(username, "Y");
 		if (!ArgUtil.is(agent)) {
 			return false;
@@ -79,7 +79,8 @@ public class AgentLoginService {
 		return CollectionUtil.getOne(mongoTemplate.find(query2, AgentDoc.class));
 	}
 
-	public boolean setPassword(String username, String passsword, String newpasssword) throws NoSuchAlgorithmException {
+	public boolean setPassword(String username, String passsword, String newpasssword, boolean admin)
+			throws NoSuchAlgorithmException {
 		AgentDoc agent = validateAgent(username, passsword);
 		if (!ArgUtil.is(agent)) {
 			return false;

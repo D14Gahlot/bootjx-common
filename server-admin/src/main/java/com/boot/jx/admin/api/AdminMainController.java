@@ -41,7 +41,7 @@ public class AdminMainController {
 
 	@Autowired
 	private AgentLoginService agentLoginService;
-	
+
 	private long getVersion() {
 		return System.currentTimeMillis() / 300000;
 	}
@@ -61,16 +61,54 @@ public class AdminMainController {
 		return "app";
 	}
 
-	@RequestMapping(value = { "/auth/login" }, method = { RequestMethod.POST, RequestMethod.GET })
-	public String login(Model model) {
-		model.addAttribute("CDN_VERSION", getVersion());
+	@RequestMapping(value = { "/auth/login", "/auth/resetpass" }, method = { RequestMethod.POST, RequestMethod.GET })
+	public String login(Model model, HttpServletRequest request) {
 		model.addAttribute("CDN_URL", ArgUtil.parseAsString(commonHttpRequest.get("CDN_URL"), cdnServer));
 		model.addAttribute("CDN_DEBUG", ArgUtil.parseAsString(commonHttpRequest.get("CDN_DEBUG"), "false"));
 		model.addAttribute("APP_CONTEXT", appConfig.getAppPrefix());
+		model.addAttribute("CDN_VERSION", getVersion());
 		model.addAttribute("STAMP", System.currentTimeMillis());
+
 		String page = ArgUtil.parseAsString(commonHttpRequest.get("page"), "login");
 		String action = ArgUtil.parseAsString(commonHttpRequest.get("action"), "login");
 		Object message = Constants.BLANK;
+		try {
+			if ("resetpass".equalsIgnoreCase(action)) {
+				String username = ArgUtil.parseAsString(commonHttpRequest.get("username"), Constants.BLANK);
+				ApiResponse<Map<String, Object>, String> x = agentResetPass(username, true);
+				if (ArgUtil.parseAsBoolean(x.getData().get("success"), false)) {
+					message = "Link to reset password sent on registered email.";
+				} else {
+					message = x.getMessage();
+				}
+			} else if ("setpass".equalsIgnoreCase(page)) {
+				String username = ArgUtil.parseAsString(commonHttpRequest.get("username"), Constants.BLANK);
+				String token = ArgUtil.parseAsString(commonHttpRequest.get("token"), Constants.BLANK);
+				String newpassword = ArgUtil.parseAsString(commonHttpRequest.get("newpassword"), Constants.BLANK);
+				String confirmpassword = ArgUtil.parseAsString(commonHttpRequest.get("confirmpassword"),
+						Constants.BLANK);
+				model.addAttribute("username", username);
+				model.addAttribute("token", token);
+
+				if ("setpass".equalsIgnoreCase(action)) {
+					if (!ArgUtil.is(confirmpassword)) {
+						message = "Please enter valid password";
+					} else if (confirmpassword.equals(newpassword)) {
+						ApiResponse<Map<String, Object>, String> x = agentSetPass(username, token, newpassword, true);
+						if (ArgUtil.parseAsBoolean(x.getData().get("success"), false)) {
+							message = "Password has been reset successfully";
+						} else {
+							message = x.getMessage();
+						}
+					} else {
+						message = "Password Mismatch";
+					}
+				}
+			}
+		} catch (Exception e) {
+			message = "Sorry some technical issues";
+		}
+
 		model.addAttribute("MESSAGE", message);
 		model.addAttribute("PAGE", page);
 		return "admin-login";
@@ -101,10 +139,11 @@ public class AdminMainController {
 
 	@ResponseBody
 	@RequestMapping(value = "/auth/login/submit", method = { RequestMethod.POST })
-	public ApiResponse<String, String> login(@RequestParam String username, @RequestParam String password,
-			HttpServletRequest request) {
-		ApiResponse<String, String> x = ApiResponse.buildData("success", "success");
-		if (username.startsWith("admin") && password.equals("mehery@1234")) {
+	public ApiResponse<Map<String, Object>, String> login(@RequestParam String username, @RequestParam String password,
+			HttpServletRequest request) throws NoSuchAlgorithmException {
+		username = ArgUtil.parseAsString(username, Constants.BLANK);
+		ApiResponse<Map<String, Object>, String> x = agentLogin(username, password, true);
+		if (ArgUtil.parseAsBoolean(x.getData().get("success"), false)) {
 			x.redirectUrl(appConfig.getAppPrefix() + "/app/home");
 			UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(username, password);
 			token.setDetails(new WebAuthenticationDetails(request));
@@ -112,22 +151,21 @@ public class AdminMainController {
 			SecurityContextHolder.getContext().setAuthentication(authentication);
 			x.setStatusKey("SUCCESS");
 		} else {
-			x.setData("error");
-			x.setMeta("error");
-			x.setStatusKey("ERROR");
-			x.setMessage("Username or Password is incorrect");
 			x.redirectUrl(appConfig.getAppPrefix() + "/auth/login?error");
 		}
 		return x;
 	}
 
+	// Agent APIS
+
 	@ResponseBody
 	@RequestMapping(value = "/auth/agent/login", method = { RequestMethod.POST })
 	public ApiResponse<Map<String, Object>, String> agentLogin(@RequestParam String username,
-			@RequestParam String password, HttpServletRequest request) throws NoSuchAlgorithmException {
+			@RequestParam String password, @RequestParam(required = false) boolean admin)
+			throws NoSuchAlgorithmException {
 		ApiResponse<Map<String, Object>, String> x = ApiResponse
 				.buildData(MapBuilder.map().put("success", true).toMap(), "success");
-		if (agentLoginService.loginAgent(username, password)) {
+		if (agentLoginService.loginAgent(username, password, admin)) {
 			x.setStatusKey("SUCCESS");
 		} else {
 			x.data().put("success", false);
@@ -141,10 +179,10 @@ public class AdminMainController {
 	@ResponseBody
 	@RequestMapping(value = "/auth/agent/pass/reset", method = { RequestMethod.POST })
 	public ApiResponse<Map<String, Object>, String> agentResetPass(@RequestParam String username,
-			HttpServletRequest request) throws NoSuchAlgorithmException {
+			@RequestParam(required = false) boolean admin) throws NoSuchAlgorithmException {
 		ApiResponse<Map<String, Object>, String> x = ApiResponse
 				.buildData(MapBuilder.map().put("success", true).toMap(), "success");
-		if (agentLoginService.resetPassword(username)) {
+		if (agentLoginService.resetPassword(username, admin)) {
 			x.setStatusKey("SUCCESS");
 		} else {
 			x.data().put("success", false);
@@ -158,11 +196,11 @@ public class AdminMainController {
 	@ResponseBody
 	@RequestMapping(value = "/auth/agent/pass/set", method = { RequestMethod.POST })
 	public ApiResponse<Map<String, Object>, String> agentSetPass(@RequestParam String username,
-			@RequestParam String password, @RequestParam String newpassword, HttpServletRequest request)
-			throws NoSuchAlgorithmException {
+			@RequestParam String password, @RequestParam String newpassword,
+			@RequestParam(required = false) boolean admin) throws NoSuchAlgorithmException {
 		ApiResponse<Map<String, Object>, String> x = ApiResponse
 				.buildData(MapBuilder.map().put("success", true).toMap(), "success");
-		if (agentLoginService.setPassword(username,password,newpassword)) {
+		if (agentLoginService.setPassword(username, password, newpassword, admin)) {
 			x.setStatusKey("SUCCESS");
 		} else {
 			x.data().put("success", false);
