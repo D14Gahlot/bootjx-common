@@ -57,33 +57,38 @@ public class WAGupShupConnector implements ConnectorHandler {
 	@Override
 	public void reply(InboxMessage inboxMessage, OutboxMessage outboxMessage) {
 		GupShupResp resp = null;
-		if (ArgUtil.is(outboxMessage.getTemplate())) {
-			TemplateReply templateReply = mongoTemplate.findById(outboxMessage.getTemplate(), TemplateReply.class);
-			if (ArgUtil.is(templateReply)) {
-				if ("image".equalsIgnoreCase(templateReply.getType())) {
-					outboxMessage.attachment(new Attachment().mediaURL(templateReply.getUrl())
-							.mediaType(File.FileType.IMAGE.toString()));
+		try {
+			if (ArgUtil.is(outboxMessage.getTemplate())) {
+				TemplateReply templateReply = mongoTemplate.findById(outboxMessage.getTemplate(), TemplateReply.class);
+				if (ArgUtil.is(templateReply)) {
+					if ("image".equalsIgnoreCase(templateReply.getType())) {
+						outboxMessage.attachment(new Attachment().mediaURL(templateReply.getUrl())
+								.mediaType(File.FileType.IMAGE.toString()));
+						resp = gupShupChatClient.sendMessage(outboxMessage, inboxMessage.getLane());
+					}
+				} else {
+					tmplClient.process(outboxMessage);
 					resp = gupShupChatClient.sendMessage(outboxMessage, inboxMessage.getLane());
 				}
 			} else {
-				tmplClient.process(outboxMessage);
 				resp = gupShupChatClient.sendMessage(outboxMessage, inboxMessage.getLane());
 			}
-		} else {
-			resp = gupShupChatClient.sendMessage(outboxMessage, inboxMessage.getLane());
-		}
 
-		if (!ArgUtil.is(resp) || !ArgUtil.is(resp.getResponse())) {
+			if (!ArgUtil.is(resp) || !ArgUtil.is(resp.getResponse())) {
+				outboxMessage.setStatus(Message.Status.SENT_ERR);
+				outboxMessage.logs().add("No Response Object");
+			} else if (ArgUtil.isEqual(resp.getResponse().getStatus(), "error")) {
+				outboxMessage.setStatus(Message.Status.SENT_ERR);
+				outboxMessage.logs()
+						.add(String.format("%s : %s", resp.getResponse().getId(), resp.getResponse().getDetails()));
+			} else {
+				if (ArgUtil.is(resp.getResponse().getId()))
+					outboxMessage.setMessageIdExt(resp.getResponse().getId());
+				outboxMessage.setStatus(Message.Status.SENT);
+			}
+		} catch (Exception e) {
 			outboxMessage.setStatus(Message.Status.SENT_ERR);
-			outboxMessage.logs().add("No Response Object");
-		} else if (ArgUtil.isEqual(resp.getResponse().getStatus(), "error")) {
-			outboxMessage.setStatus(Message.Status.SENT_ERR);
-			outboxMessage.logs()
-					.add(String.format("%s : %s", resp.getResponse().getId(), resp.getResponse().getDetails()));
-		} else {
-			if (ArgUtil.is(resp.getResponse().getId()))
-				outboxMessage.setMessageIdExt(resp.getResponse().getId());
-			outboxMessage.setStatus(Message.Status.SENT);
+			outboxMessage.logs().add(e.getMessage());
 		}
 
 	}
@@ -115,5 +120,5 @@ public class WAGupShupConnector implements ConnectorHandler {
 		inboxMessage.setLane(inbound.getWaNumber());
 		return inboxMessage;
 	}
-	
+
 }
