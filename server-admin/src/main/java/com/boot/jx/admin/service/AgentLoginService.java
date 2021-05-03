@@ -70,11 +70,10 @@ public class AgentLoginService {
 
 	private AgentDoc getAgentByCodeAndStatus(String username, String string) {
 		Query query2 = new Query();
-		query2.addCriteria(Criteria.where("isactive").is(string).orOperator(
-				Criteria.where("agent_code").is(username),
-				Criteria.where("agent_code").regex("^" + username + "$","i"),
+		query2.addCriteria(Criteria.where("isactive").is(string).orOperator(Criteria.where("agent_code").is(username),
+				Criteria.where("agent_code").regex("^" + username + "$", "i"),
 				Criteria.where("agent_email").is(username),
-				Criteria.where("agent_email").regex("^" + username + "$","i")));
+				Criteria.where("agent_email").regex("^" + username + "$", "i")));
 		return CollectionUtil.getOne(mongoTemplate.find(query2, AgentDoc.class));
 	}
 
@@ -83,7 +82,7 @@ public class AgentLoginService {
 		if (!ArgUtil.is(agent)) {
 			return false;
 		}
-		agent.setAgent_password(newpasssword);
+		agent.setAgent_password(passsword);
 		agent.setAgent_otp(null);
 		mongoTemplate.save(agent);
 		return true;

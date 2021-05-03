@@ -60,6 +60,12 @@ public class InBoundControllerWA {
 		return null;
 	}
 
+	@RequestMapping(value = "/ext/status/gupshup/callback", method = { RequestMethod.POST, RequestMethod.GET })
+	public Map<String, Object> onStatusMessage(@RequestBody Map<String, Object> inboundMap,
+			@RequestParam(required = false, defaultValue = "false") boolean routed) throws InterruptedException {
+		return inboundMap;
+	}
+
 	@RequestMapping(value = "/ext/inbound/rapiwha/callback/{secret}", method = { RequestMethod.POST })
 	public ApiResponse<Object, Object> onAPIWHAMessage(@RequestParam(required = false) String secret,
 			@RequestParam String data) {

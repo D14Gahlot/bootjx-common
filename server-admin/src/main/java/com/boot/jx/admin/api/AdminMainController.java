@@ -162,7 +162,7 @@ public class AdminMainController {
 			throws NoSuchAlgorithmException {
 		ApiResponse<Map<String, Object>, String> x = ApiResponse
 				.buildData(MapBuilder.map().put("success", true).toMap(), "success");
-		if (agentLoginService.resetPassword(username)) {
+		if (agentLoginService.setPassword(username,password,newpassword)) {
 			x.setStatusKey("SUCCESS");
 		} else {
 			x.data().put("success", false);
