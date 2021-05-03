@@ -79,21 +79,18 @@ public class AgentLoginService {
 		return true;
 	}
 
-	private AgentDoc getAgentByCodeAndStatus(String username, String password, boolean admin) {
+	private AgentDoc getAgentByCodeAndStatus(String username, String status, boolean admin) {
 		if (admin && ArgUtil.areEqual(superAdminUser, username)) {
-			if (ArgUtil.areEqual(superAdminPass, password)) {
-				AgentDoc agent = new AgentDoc();
-				agent.setAgent_code(username);
-				agent.setAdmin(true);
-				agent.setSuperAdmin(true);
-				return agent;
-			} else {
-				return null;
-			}
+			AgentDoc agent = new AgentDoc();
+			agent.setAgent_code(username);
+			agent.setAdmin(true);
+			agent.setSuperAdmin(true);
+			agent.setAgent_password(superAdminPass);
+			return agent;
 		}
 
 		Query query2 = new Query();
-		query2.addCriteria(Criteria.where("isactive").is(password).orOperator(Criteria.where("agent_code").is(username),
+		query2.addCriteria(Criteria.where("isactive").is(status).orOperator(Criteria.where("agent_code").is(username),
 				Criteria.where("agent_code").regex("^" + username + "$", "i"),
 				Criteria.where("agent_email").is(username),
 				Criteria.where("agent_email").regex("^" + username + "$", "i")));
