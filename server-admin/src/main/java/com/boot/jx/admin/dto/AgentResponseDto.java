@@ -21,6 +21,7 @@ public class AgentResponseDto extends ADocumentDTO<AgentResponseDto> {
 	private Date modified_date;
 	private String modified_by;
 	private String isactive;
+	private boolean isAdmin;
 	private DepartmentResponseDto dept;
 
 	public String getAgent_code() {
@@ -146,6 +147,14 @@ public class AgentResponseDto extends ADocumentDTO<AgentResponseDto> {
 
 	public void setAgent_password(String agent_password) {
 		this.agent_password = agent_password;
+	}
+
+	public boolean isAdmin() {
+		return isAdmin;
+	}
+
+	public void setAdmin(boolean isAdmin) {
+		this.isAdmin = isAdmin;
 	}
 
 }

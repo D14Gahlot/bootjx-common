@@ -54,8 +54,7 @@ public class AdminController {
 	}
 
 	@RequestMapping(value = "/api/admins/agent/admin", method = { RequestMethod.POST })
-	public List<AgentResponseDto> updateAgentAdmin(@RequestParam(value = "agent_id", required = true) String agent_id,
-			@RequestParam(value = "status", required = true) String status) {
+	public List<AgentResponseDto> updateAgentAdmin(@RequestParam(value = "agent_id", required = true) String agent_id) {
 		return adminService.updateAgentAdmin(agent_id);
 	}
 
