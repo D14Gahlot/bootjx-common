@@ -1,12 +1,14 @@
 package com.boot.jx.inbound;
 
 import java.io.IOException;
-import java.util.Map;
 import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -24,7 +26,6 @@ import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.scope.vendor.VendorContext.ApiVendorHeaders;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.JsonUtil;
-import java.util.Optional;
 
 @RestController
 public class InBoundControllerWA {
@@ -52,54 +53,63 @@ public class InBoundControllerWA {
 	public InboxMessage onReceiveMessage(
 			@RequestBody(required = false) Optional<Map<String, Object>> inboundMapOptional,
 			@RequestParam(required = false, defaultValue = "false") boolean routed) throws InterruptedException {
+		if (inboundMapOptional.isPresent()) {
+			extracted(inboundMapOptional.get());
+		}
+		return null;
+	}
+
+	@ApiVendorHeaders
+	@RequestMapping(value = "/ext/inbound/gupshup/callback", method = {
+			RequestMethod.POST }, consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+	public InboxMessage onReceiveMessage() throws InterruptedException {
+		Map<String, Object> inboundMap = new HashMap<String, Object>();
+		inboundMap.put("waNumber", commonHttpRequest.get("waNumber"));
+		inboundMap.put("mobile", commonHttpRequest.get("mobile"));
+		inboundMap.put("type", commonHttpRequest.get("type"));
+		inboundMap.put("text", commonHttpRequest.get("text"));
+		inboundMap.put("timestamp", commonHttpRequest.get("timestamp"));
+		inboundMap.put("name", commonHttpRequest.get("name"));
+
+		String image = commonHttpRequest.get("image");
+		if (ArgUtil.is(image)) {
+			inboundMap.put("image", JsonUtil.fromJsonToMap(image));
+		}
+
+		String document = commonHttpRequest.get("document");
+		if (ArgUtil.is(document)) {
+			inboundMap.put("document", JsonUtil.fromJsonToMap(document));
+		}
+
+		String voice = commonHttpRequest.get("document");
+		if (ArgUtil.is(voice)) {
+			inboundMap.put("voice", JsonUtil.fromJsonToMap(voice));
+		}
+
+		String audio = commonHttpRequest.get("audio");
+		if (ArgUtil.is(audio)) {
+			inboundMap.put("audio", JsonUtil.fromJsonToMap(audio));
+		}
+
+		String video = commonHttpRequest.get("video");
+		if (ArgUtil.is(video)) {
+			inboundMap.put("video", JsonUtil.fromJsonToMap(video));
+		}
+
+		String location = commonHttpRequest.get("location");
+		if (ArgUtil.is(location)) {
+			inboundMap.put("location", JsonUtil.fromJsonToMap(location));
+		}
+		String contacts = commonHttpRequest.get("contacts");
+		if (ArgUtil.is(contacts)) {
+			inboundMap.put("contacts", JsonUtil.fromJsonToMap(contacts));
+		}
+		return extracted(inboundMap);
+	}
+
+	private InboxMessage extracted(Map<String, Object> inboundMap) {
 		try {
 			InboxMessage event = null;
-			Map<String, Object> inboundMap = null;
-			if (inboundMapOptional.isPresent()) {
-				inboundMap = inboundMapOptional.get();
-			} else {
-				inboundMap = new HashMap<String, Object>();
-				inboundMap.put("waNumber", commonHttpRequest.get("waNumber"));
-				inboundMap.put("mobile", commonHttpRequest.get("mobile"));
-				inboundMap.put("type", commonHttpRequest.get("type"));
-				inboundMap.put("text", commonHttpRequest.get("text"));
-				inboundMap.put("timestamp", commonHttpRequest.get("timestamp"));
-				inboundMap.put("name", commonHttpRequest.get("name"));
-
-				String image = commonHttpRequest.get("image");
-				if (ArgUtil.is(image)) {
-					inboundMap.put("image", JsonUtil.fromJsonToMap(image));
-				}
-
-				String document = commonHttpRequest.get("document");
-				if (ArgUtil.is(document)) {
-					inboundMap.put("document", JsonUtil.fromJsonToMap(document));
-				}
-
-				String voice = commonHttpRequest.get("document");
-				if (ArgUtil.is(voice)) {
-					inboundMap.put("voice", JsonUtil.fromJsonToMap(voice));
-				}
-
-				String audio = commonHttpRequest.get("audio");
-				if (ArgUtil.is(audio)) {
-					inboundMap.put("audio", JsonUtil.fromJsonToMap(audio));
-				}
-
-				String video = commonHttpRequest.get("video");
-				if (ArgUtil.is(video)) {
-					inboundMap.put("video", JsonUtil.fromJsonToMap(video));
-				}
-
-				String location = commonHttpRequest.get("location");
-				if (ArgUtil.is(location)) {
-					inboundMap.put("location", JsonUtil.fromJsonToMap(location));
-				}
-				String contacts = commonHttpRequest.get("contacts");
-				if (ArgUtil.is(contacts)) {
-					inboundMap.put("contacts", JsonUtil.fromJsonToMap(contacts));
-				}
-			}
 			if (inboundMap.containsKey("waNumber")) {
 				event = waGupShupConnector.toInboxMessage(JsonUtil.toObject(inboundMap, GupShupInbound.class));
 			} else {
