@@ -59,7 +59,7 @@ public abstract class AmxApiException extends AmxException {
 	}
 
 	public AmxApiException(String errorMessage) {
-		this();
+		super(errorMessage, null, true, false);
 		this.errorMessage = errorMessage;
 	}
 

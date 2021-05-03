@@ -41,6 +41,10 @@ public abstract class GupShupClientAbstract {
 	private Ajax ajax(GupShupReq req, boolean encrypt) {
 		Ajax ajax = restService.ajax(gupShupConfig.getGupShupApiUrl()).path("/GatewayAPI/rest");
 
+		if (ArgUtil.isEmpty(req.getWaNumber())) {
+			throw new PostManException("No lane " + req.getWaNumber());
+		}
+
 		GupShupConfig config = environment.get().gupshup(req.getWaNumber());
 
 		if (ArgUtil.isEmpty(config)) {

@@ -20,6 +20,13 @@ public class ConnectorConfig implements Serializable {
 	Map<String, GupShupConfig> gupshup;
 
 	// Facebook
+	public Map<String, FacebookConfig> facebook() {
+		if (ArgUtil.isEmpty(facebook)) {
+			facebook = new HashMap<String, FacebookConfig>();
+		}
+		return facebook;
+	}
+
 	public Map<String, FacebookConfig> getFacebook() {
 		return facebook;
 	}
@@ -32,28 +39,21 @@ public class ConnectorConfig implements Serializable {
 		return facebook.get(pageId);
 	}
 
-	public Map<String, FacebookConfig> facebook() {
-		if (ArgUtil.isEmpty(facebook)) {
-			facebook = new HashMap<String, FacebookConfig>();
-		}
-		return facebook;
-	}
-
 	public ConnectorConfig facebook(FacebookConfig config) {
 		this.facebook().put(config.getPageId(), config);
 		return this;
 	}
 
 	// TWITTER
-	public TwitterConfig twitter(String handler) {
-		return twitter.get(handler);
-	}
-
 	public Map<String, TwitterConfig> twitter() {
 		if (ArgUtil.isEmpty(twitter)) {
 			twitter = new HashMap<String, TwitterConfig>();
 		}
 		return twitter;
+	}
+
+	public TwitterConfig twitter(String handler) {
+		return twitter().get(handler);
 	}
 
 	public ConnectorConfig twitter(TwitterConfig config) {
@@ -70,6 +70,13 @@ public class ConnectorConfig implements Serializable {
 	}
 
 	// Telegram
+	public Map<String, TelegramConfig> telegram() {
+		if (ArgUtil.isEmpty(telegram)) {
+			telegram = new HashMap<String, TelegramConfig>();
+		}
+		return telegram;
+	}
+
 	public Map<String, TelegramConfig> getTelegram() {
 		return telegram;
 	}
@@ -78,23 +85,23 @@ public class ConnectorConfig implements Serializable {
 		this.telegram = telegram;
 	}
 
-	public TelegramConfig telegram(String handler) {
-		return telegram.get(handler);
-	}
-
-	public Map<String, TelegramConfig> telegram() {
-		if (ArgUtil.isEmpty(telegram)) {
-			telegram = new HashMap<String, TelegramConfig>();
-		}
-		return telegram;
-	}
-
 	public ConnectorConfig telegram(TelegramConfig config) {
 		this.telegram().put(config.getHandler(), config);
 		return this;
 	}
 
+	public TelegramConfig telegram(String handler) {
+		return telegram().get(handler);
+	}
+
 	// GupShup
+	public Map<String, GupShupConfig> gupshup() {
+		if (ArgUtil.isEmpty(gupshup)) {
+			gupshup = new HashMap<String, GupShupConfig>();
+		}
+		return gupshup;
+	}
+
 	public Map<String, GupShupConfig> getGupshup() {
 		return gupshup;
 	}
@@ -104,14 +111,7 @@ public class ConnectorConfig implements Serializable {
 	}
 
 	public GupShupConfig gupshup(String handler) {
-		return gupshup.get(handler);
-	}
-
-	public Map<String, GupShupConfig> gupshup() {
-		if (ArgUtil.isEmpty(gupshup)) {
-			gupshup = new HashMap<String, GupShupConfig>();
-		}
-		return gupshup;
+		return gupshup().get(handler);
 	}
 
 	public ConnectorConfig gupshup(GupShupConfig config) {
