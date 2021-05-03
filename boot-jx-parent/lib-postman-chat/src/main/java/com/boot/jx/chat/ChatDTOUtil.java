@@ -40,6 +40,7 @@ public class ChatDTOUtil {
 		messageDto.setSender(messageDoc.getAgent());
 		messageDto.setLogs(messageDoc.getLogs());
 		messageDto.setAction(messageDoc.getAction());
+		messageDto.setStatus(messageDoc.getStatus());
 		return messageDto;
 	}
 

@@ -24,6 +24,7 @@ public class ChatMessageDTO implements Serializable {
 	private List<Attachment> attachments;
 	public List<String> logs;
 	private String sender;
+	private String status;
 
 	public String getText() {
 		return text;
@@ -135,5 +136,13 @@ public class ChatMessageDTO implements Serializable {
 
 	public void setAction(String action) {
 		this.action = action;
+	}
+
+	public String getStatus() {
+		return status;
+	}
+
+	public void setStatus(String status) {
+		this.status = status;
 	}
 }
