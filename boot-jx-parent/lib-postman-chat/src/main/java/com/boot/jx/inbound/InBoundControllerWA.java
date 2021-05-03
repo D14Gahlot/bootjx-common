@@ -2,6 +2,7 @@ package com.boot.jx.inbound;
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.HashMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,11 +17,14 @@ import com.boot.jx.api.ApiResponse;
 import com.boot.jx.connectors.WAGupShupAgentConnector;
 import com.boot.jx.connectors.WAGupShupConnector;
 import com.boot.jx.connectors.WARapiwhaConnector;
+import com.boot.jx.http.CommonHttpRequest;
 import com.boot.jx.postman.gupshup.GupShupInbound;
 import com.boot.jx.postman.gupshup.GupShupInboundV2;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.scope.vendor.VendorContext.ApiVendorHeaders;
+import com.boot.utils.ArgUtil;
 import com.boot.utils.JsonUtil;
+import java.util.Optional;
 
 @RestController
 public class InBoundControllerWA {
@@ -39,13 +43,28 @@ public class InBoundControllerWA {
 	@Autowired
 	private WAGupShupAgentConnector waGupShupAgentConnector;
 
+	@Autowired
+	CommonHttpRequest commonHttpRequest;
+
 	// @ApiRequest(feature = "WA_GUPSHUP_INBOUND")
 	@ApiVendorHeaders
 	@RequestMapping(value = "/ext/inbound/gupshup/callback", method = { RequestMethod.POST, RequestMethod.GET })
-	public InboxMessage onReceiveMessage(@RequestBody Map<String, Object> inboundMap,
+	public InboxMessage onReceiveMessage(@RequestBody Optional<Map<String, Object>> inboundMapOptional,
 			@RequestParam(required = false, defaultValue = "false") boolean routed) throws InterruptedException {
 		try {
 			InboxMessage event = null;
+			Map<String, Object> inboundMap = null;
+			if (inboundMapOptional.isPresent()) {
+				inboundMap = inboundMapOptional.get();
+			} else {
+				inboundMap = new HashMap<String, Object>();
+				inboundMap.put("waNumber", commonHttpRequest.get("waNumber"));
+				inboundMap.put("mobile", commonHttpRequest.get("mobile"));
+				inboundMap.put("type", commonHttpRequest.get("type"));
+				inboundMap.put("text", commonHttpRequest.get("text"));
+				inboundMap.put("timestamp", commonHttpRequest.get("timestamp"));
+				inboundMap.put("name", commonHttpRequest.get("name"));
+			}
 			if (inboundMap.containsKey("waNumber")) {
 				event = waGupShupConnector.toInboxMessage(JsonUtil.toObject(inboundMap, GupShupInbound.class));
 			} else {

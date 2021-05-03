@@ -115,4 +115,17 @@ public class WAGupShupConnector implements ConnectorHandler {
 		inboxMessage.setLane(inbound.getWaNumber());
 		return inboxMessage;
 	}
+	
+	public InboxMessage toInboxMessage(GupShupInbound inbound) {
+		InboxMessage inboxMessage = new InboxMessage();
+		inboxMessage.setContactType(ContactType.WHATSAPP);
+		inboxMessage.setChannel("GUPSHUPW");
+		inboxMessage.from(inbound.getMobile());
+		inboxMessage.setFromName(inbound.getName());
+		inboxMessage.setMessage(inbound.getText());
+		inboxMessage.setTo(inbound.getWaNumber());
+		inboxMessage.setMessageIdExt(inbound.getReplyId());
+		inboxMessage.setLane(inbound.getWaNumber());
+		return inboxMessage;
+	}
 }
