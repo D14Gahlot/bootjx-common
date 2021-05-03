@@ -82,7 +82,7 @@ public class AgentLoginService {
 		if (!ArgUtil.is(agent)) {
 			return false;
 		}
-		agent.setAgent_password(passsword);
+		agent.setAgent_password(CryptoUtil.getSHA2Hash(newpasssword));
 		agent.setAgent_otp(null);
 		mongoTemplate.save(agent);
 		return true;
