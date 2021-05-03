@@ -30,6 +30,8 @@ public class AgentDoc implements IDocument {
 	private Date modified_date;
 	private String modified_by = "ADMIN";
 	private String isactive;
+	private boolean isAdmin;
+	private boolean isSuperAdmin;
 
 	private String dept_id;
 
@@ -151,6 +153,22 @@ public class AgentDoc implements IDocument {
 
 	public void setAgent_otp(String agent_otp) {
 		this.agent_otp = agent_otp;
+	}
+
+	public boolean isAdmin() {
+		return isAdmin;
+	}
+
+	public void setAdmin(boolean isAdmin) {
+		this.isAdmin = isAdmin;
+	}
+
+	public boolean isSuperAdmin() {
+		return isSuperAdmin;
+	}
+
+	public void setSuperAdmin(boolean isSuperAdmin) {
+		this.isSuperAdmin = isSuperAdmin;
 	}
 
 }
