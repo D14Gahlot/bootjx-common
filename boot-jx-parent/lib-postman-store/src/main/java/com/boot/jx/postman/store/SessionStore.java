@@ -140,7 +140,7 @@ public class SessionStore {
 		InboxMessage inboxMessage = new InboxMessage();
 		inboxMessage.setContactType(ArgUtil.parseAsEnumT(contact.getContactType(), ContactType.class));
 		inboxMessage.setChannel(contact.getChannelType());
-		inboxMessage.setLane(session.getLane());
+		inboxMessage.setLane(ArgUtil.nonEmpty(session.getLane(), contact.getLane()));
 		inboxMessage.setFrom(contact.getCsid());
 		inboxMessage.setFromName(contact.getName());
 		inboxMessage.setSessionId(contact.getSessionId());

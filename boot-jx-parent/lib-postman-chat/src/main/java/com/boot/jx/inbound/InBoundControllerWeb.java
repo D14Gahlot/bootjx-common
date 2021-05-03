@@ -66,7 +66,7 @@ public class InBoundControllerWeb {
 	@RequestMapping(value = "/ext/outbound/web/auth", method = RequestMethod.GET)
 	public ApiResponse<OutboxMessage, Object> onAuth(@RequestParam String number) throws InterruptedException {
 		String webSessionId = commonHttpRequest.get("web-session-id");
-		String contactId = PostManUtil.createContactId(ContactType.WEBSITE, number);
+		String contactId = PostManUtil.createContactId(ContactType.WEBSITE, number, null);
 
 		ChatSessionDoc session = null;
 		if (ArgUtil.is(webSessionId)) {
@@ -98,11 +98,11 @@ public class InBoundControllerWeb {
 	public InboxMessage onReceiveMessage(@RequestBody InboxMessage event) throws InterruptedException {
 		event.setContactType(ContactType.WEBSITE);
 		event.setLane("DUMMY");
-		
-		//event.setContactType(ContactType.WHATSAPP);
-		//event.setChannel("GUPSHUPW");
-		//event.setFrom("919930104050");
-		//event.setFromName("Test");
+
+		// event.setContactType(ContactType.WHATSAPP);
+		// event.setChannel("GUPSHUPW");
+		// event.setFrom("919930104050");
+		// event.setFromName("Test");
 
 		// Cleaning
 		// event.setSessionId("600edc822743742e916202b9");

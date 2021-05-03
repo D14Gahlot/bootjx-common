@@ -50,7 +50,8 @@ public class Message<T extends Message<T>> implements Serializable, MessageOptio
 	protected Map<String, Object> options = new HashMap<String, Object>();
 	private MessageType messageType = null;
 	private ContactType contactType;
-	protected String channel;;
+	protected String channel;
+	protected String lane;
 
 	private List<File> files = null;
 	private List<Attachment> attachments = null;
@@ -465,6 +466,14 @@ public class Message<T extends Message<T>> implements Serializable, MessageOptio
 
 	public void setAction(String action) {
 		this.action = action;
+	}
+
+	public String getLane() {
+		return lane;
+	}
+
+	public void setLane(String lane) {
+		this.lane = lane;
 	}
 
 }

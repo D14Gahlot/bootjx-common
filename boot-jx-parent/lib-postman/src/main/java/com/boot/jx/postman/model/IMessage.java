@@ -11,6 +11,8 @@ public interface IMessage extends Serializable {
 
 	public ContactType getContactType();
 
+	public String getLane();
+
 	public String forContact();
 
 	public String getSessionId();
