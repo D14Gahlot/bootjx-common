@@ -30,7 +30,7 @@ public class AgentDoc implements IDocument {
 	private Date modified_date;
 	private String modified_by = "ADMIN";
 	private String isactive;
-	private boolean isAdmin;
+	private boolean admin;
 	private boolean isSuperAdmin;
 
 	private String dept_id;
@@ -156,11 +156,11 @@ public class AgentDoc implements IDocument {
 	}
 
 	public boolean isAdmin() {
-		return isAdmin;
+		return admin;
 	}
 
 	public void setAdmin(boolean isAdmin) {
-		this.isAdmin = isAdmin;
+		this.admin = isAdmin;
 	}
 
 	public boolean isSuperAdmin() {
