@@ -27,15 +27,15 @@ public class PostManUtil {
 
 	public static String createContactId(ContactType contactType, String id, String lane) {
 		if (ContactType.WHATSAPP.equals(contactType)) {
-			return "wa" + id + "/" + lane;
+			return "wa" + id + "_" + lane;
 		} else if (ContactType.FACEBOOK.equals(contactType)) {
-			return "fb" + id + "/" + lane;
+			return "fb" + id + "_" + lane;
 		} else if (ContactType.TWITTER.equals(contactType)) {
-			return "tw" + id + "/" + lane;
+			return "tw" + id + "_" + lane;
 		} else if (ContactType.TELEGRAM.equals(contactType)) {
-			return "tg" + id + "/" + lane;
+			return "tg" + id + "_" + lane;
 		} else if (ArgUtil.is(contactType)) {
-			return contactType.getShortCode() + id + "/" + lane;
+			return contactType.getShortCode() + id + "_" + lane;
 		}
 		return id;
 	}
