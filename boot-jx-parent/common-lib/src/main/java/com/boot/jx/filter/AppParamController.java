@@ -262,6 +262,12 @@ public class AppParamController {
 		return ApiResponse.build().message("pong");
 	}
 
+	@RequestMapping(value = "/ext/pub/logger", method = RequestMethod.GET)
+	public ApiResponse<Object, Object> toggleLogger() {
+		AppRequestUtil.isLocalEnable();
+		return ApiResponse.build().message("logger" + AppRequestUtil.isLocal());
+	}
+
 	@RequestMapping(value = EXT_PUB_CONFIG_CLIENT, method = RequestMethod.GET)
 	public ApiResponse<Map<String, Object>, Object> extPubConfig() {
 		Map<String, Object> config = new HashMap<String, Object>();

@@ -27,7 +27,11 @@ public class AppRequestUtil {
 	private static final int MAX_BODY_SIZE = 7000;
 	private static final int MAX_BODY_SIZE_PRINT = 200;
 
-	private static final boolean LOCAL_LOGGER = false;
+	private static boolean LOCAL_LOGGER = false;
+
+	public static void isLocalEnable() {
+		LOCAL_LOGGER = !LOCAL_LOGGER;
+	}
 
 	public static boolean isLocal() {
 		return LOCAL_LOGGER || false;
@@ -51,7 +55,7 @@ public class AppRequestUtil {
 		if (LOGGER.isDebugEnabled() || isLocal()) {
 			LinkedMultiValueMap<String, String> headerMap = getHeader(req);
 			log(">>>>> RQT-IN-HEDR =====: {}", headerMap.toString());
-			
+
 			StringBuilder sb = new StringBuilder();
 			Enumeration params = req.getParameterNames();
 			while (params.hasMoreElements()) {
