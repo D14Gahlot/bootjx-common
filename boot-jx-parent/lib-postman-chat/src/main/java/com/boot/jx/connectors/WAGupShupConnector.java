@@ -89,6 +89,7 @@ public class WAGupShupConnector implements ConnectorHandler {
 		} catch (Exception e) {
 			outboxMessage.setStatus(Message.Status.SENT_ERR);
 			outboxMessage.logs().add(e.getMessage());
+			e.printStackTrace();
 		}
 
 	}
