@@ -28,7 +28,7 @@ import com.boot.utils.Constants;
 import com.boot.utils.MapBuilder;
 
 @Controller
-public class AdminMainController {
+public class AdminAuthController {
 
 	@Value("${mry.cdn.url}")
 	private String cdnServer;

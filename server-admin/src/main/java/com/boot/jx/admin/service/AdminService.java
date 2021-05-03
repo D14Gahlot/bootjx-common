@@ -66,6 +66,9 @@ public class AdminService {
 	public List<AgentResponseDto> updateAgentStatus(String agentId, String status) {
 		return fetchAgents(adminManager.updateAgentStatus(agentId, status));
 	}
+	public List<AgentResponseDto> updateAgentAdmin(String agentId) {
+		return fetchAgents(adminManager.updateAgentAdmin(agentId));
+	}
 
 	public List<DepartmentDoc> createAndUpdateDepartment(DepartmentDoc deptReqDto) {
 		List<DepartmentDoc> lstDept = adminManager.createAndUpdateDepartment(deptReqDto);

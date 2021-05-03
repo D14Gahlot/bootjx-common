@@ -78,6 +78,19 @@ public class AdminManager {
 		return agentList;
 	}
 
+	public List<AgentDoc> updateAgentAdmin(String agentId) {
+		List<AgentDoc> agentList = new ArrayList<AgentDoc>();
+		if (ArgUtil.is(agentId)) {
+			AgentDoc agent = mongoTemplate.findOne(new Query(Criteria.where("_id").is(agentId)), AgentDoc.class);
+			if (ArgUtil.is(agent)) {
+				agent.setAdmin(!agent.isAdmin());
+				mongoTemplate.save(agent);
+			}
+		}
+		agentList = fetchAgentList(null);
+		return agentList;
+	}
+
 	public List<DepartmentDoc> createAndUpdateDepartment(DepartmentDoc dept) {
 		List<DepartmentDoc> lstDept = new ArrayList<DepartmentDoc>();
 		if (dept != null && (ArgUtil.isEmpty(dept.getDept_id()) || dept.getDept_id().equals("0"))) {
@@ -261,4 +274,5 @@ public class AdminManager {
 		}
 		return dto;
 	}
+
 }
