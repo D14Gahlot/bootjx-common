@@ -65,6 +65,40 @@ public class InBoundControllerWA {
 				inboundMap.put("text", commonHttpRequest.get("text"));
 				inboundMap.put("timestamp", commonHttpRequest.get("timestamp"));
 				inboundMap.put("name", commonHttpRequest.get("name"));
+
+				String image = commonHttpRequest.get("image");
+				if (ArgUtil.is(image)) {
+					inboundMap.put("image", JsonUtil.fromJsonToMap(image));
+				}
+
+				String document = commonHttpRequest.get("document");
+				if (ArgUtil.is(document)) {
+					inboundMap.put("document", JsonUtil.fromJsonToMap(document));
+				}
+
+				String voice = commonHttpRequest.get("document");
+				if (ArgUtil.is(voice)) {
+					inboundMap.put("voice", JsonUtil.fromJsonToMap(voice));
+				}
+
+				String audio = commonHttpRequest.get("audio");
+				if (ArgUtil.is(audio)) {
+					inboundMap.put("audio", JsonUtil.fromJsonToMap(audio));
+				}
+
+				String video = commonHttpRequest.get("video");
+				if (ArgUtil.is(video)) {
+					inboundMap.put("video", JsonUtil.fromJsonToMap(video));
+				}
+
+				String location = commonHttpRequest.get("location");
+				if (ArgUtil.is(location)) {
+					inboundMap.put("location", JsonUtil.fromJsonToMap(location));
+				}
+				String contacts = commonHttpRequest.get("contacts");
+				if (ArgUtil.is(contacts)) {
+					inboundMap.put("contacts", JsonUtil.fromJsonToMap(contacts));
+				}
 			}
 			if (inboundMap.containsKey("waNumber")) {
 				event = waGupShupConnector.toInboxMessage(JsonUtil.toObject(inboundMap, GupShupInbound.class));
