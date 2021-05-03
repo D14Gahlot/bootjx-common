@@ -8,6 +8,7 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Component;
 
+import com.boot.jx.AppContextUtil;
 import com.boot.jx.admin.model.AgentDoc;
 import com.boot.jx.postman.client.PostManClient;
 import com.boot.jx.postman.model.Email;
@@ -63,8 +64,9 @@ public class AgentLoginService {
 		agent.setAgent_otp(Random.randomAlphaNumeric(10));
 		mongoTemplate.save(agent);
 
-		postManClient.send(new MessageBox().push(new Email().to(agent.getAgent_email()).template("reset-password")
-				.put("otp", agent.getAgent_otp()).put("username", agent.getAgent_code())));
+		postManClient.send(new MessageBox()
+				.push(new Email().to(agent.getAgent_email()).template("reset-password").put("otp", agent.getAgent_otp())
+						.put("username", agent.getAgent_code()).put("tnt", AppContextUtil.getTenant())));
 		return true;
 	}
 
