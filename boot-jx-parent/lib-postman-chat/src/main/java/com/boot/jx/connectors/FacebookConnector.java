@@ -35,9 +35,6 @@ public class FacebookConnector implements ConnectorHandler {
 	private FacebooClient facebooClient;
 
 	@Autowired
-	protected GupShupConfigClient gupShupConfig;
-
-	@Autowired
 	private MongoTemplate mongoTemplate;
 
 	@Autowired
@@ -110,8 +107,7 @@ public class FacebookConnector implements ConnectorHandler {
 
 	@Override
 	public InboxMessage assignToAgent(InboxMessage inboxMessage) {
-		facebooClient.sendReply(inboxMessage.getFrom(), "Call us @ " + gupShupConfig.getGupShupWaNumber(),
-				inboxMessage.getLane());
+		this.reply(inboxMessage, new OutboxMessage().message("Our agent will get in touch with you"));
 		return inboxMessage;
 	}
 
