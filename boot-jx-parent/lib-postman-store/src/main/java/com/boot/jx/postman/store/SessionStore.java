@@ -215,6 +215,9 @@ public class SessionStore {
 			if (ArgUtil.is(contact.getEmail())) {
 				orExpression.add(Criteria.where("email").is(contact.getEmail()));
 			}
+			if (ArgUtil.is(contact.getProfileId())) {
+				orExpression.add(Criteria.where("profileId").is(contact.getProfileId()));
+			}
 			query1.addCriteria(new Criteria().orOperator(orExpression.toArray(new Criteria[orExpression.size()])));
 			contacts = mongoTemplate.find(query1, ChatContactDoc.class);
 		}
