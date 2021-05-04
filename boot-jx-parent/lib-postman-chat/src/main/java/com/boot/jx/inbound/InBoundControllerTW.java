@@ -111,7 +111,6 @@ public class InBoundControllerTW {
 		return x;
 	}
 
-
 	@Scheduled(fixedDelay = 5000)
 	public void registerService() {
 		for (String lane : pollingLanes) {

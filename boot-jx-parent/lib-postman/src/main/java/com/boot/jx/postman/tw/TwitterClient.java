@@ -95,6 +95,10 @@ public class TwitterClient {
 
 	public StatusCode registerWebhook(String lane) {
 		TwitterConfig config = environment.get().twitter(lane);
+		if(ArgUtil.isEmpty(config)){
+			LOGGER.info("No Config "+lane);
+		}
+
 		if (ArgUtil.is(config.getWebhookUrl())) {
 			return registerWebhook(lane, config.getWebhookUrl());
 		}
