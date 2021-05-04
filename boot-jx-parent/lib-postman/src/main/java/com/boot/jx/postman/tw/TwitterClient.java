@@ -48,6 +48,7 @@ public class TwitterClient {
 	public TwitterClientContext getContext(String lane) {
 		//lane = ArgUtil.nonEmpty(lane, defaultLane);
 		TwitterClientContext ctx = CLIENTS.get(lane);
+
 		if (ArgUtil.isEmpty(ctx)) {
 			TwitterConfig config = environment.get().twitter(lane);
 
@@ -88,6 +89,7 @@ public class TwitterClient {
 	public StatusCode registerWebhook(String lane, String callbackURL) {
 		//lane = ArgUtil.nonEmpty(lane, defaultLane);
 		TwitterClientContext ctx = getContext(lane);
+		LOGGER.info("RegisterWebHook "+callbackURL + webhookPath + "/" + lane);
 		return ctx.registerWebhook(callbackURL + webhookPath + "/" + lane);
 	}
 
