@@ -55,13 +55,11 @@ public class TelegramClient {
 	private PMEnvironment environment;
 
 	private String getAccessToken(String lane) {
-		lane = ArgUtil.nonEmpty(lane, defaultLane).toLowerCase();
 		TelegramConfig config = environment.get().telegram(lane);
 		return config.getAccessToken();
 	}
 
 	public String registerWebhook(String callbackURL, String lane) {
-		lane = ArgUtil.nonEmpty(lane, "default").toLowerCase();
 		TelegramConfig config = environment.get().telegram(lane);
 		return restService.ajax(PATH.URL).path(PATH.BOT_SET_WEBHOOK).pathParam("accessToken", config.getAccessToken())
 				.field("url", callbackURL + telegramWebhooPath)
