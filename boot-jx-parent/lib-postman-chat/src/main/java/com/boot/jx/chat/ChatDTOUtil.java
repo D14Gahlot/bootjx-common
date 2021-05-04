@@ -2,13 +2,20 @@ package com.boot.jx.chat;
 
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
+import com.boot.jx.postman.doc.ChatUserProfileDoc;
 import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.dto.ChatMessageDTO;
 import com.boot.jx.postman.dto.ChatSessionDTO;
+import com.boot.jx.postman.dto.ChatUserProfileDTO;
 import com.boot.jx.postman.dto.ContactDTO;
 import com.boot.utils.EntityDtoUtil;
 
 public class ChatDTOUtil {
+
+	public static ChatUserProfileDTO getProfileDTO(ChatUserProfileDoc profileDoc) {
+		ChatUserProfileDTO dto = EntityDtoUtil.entityToDto(profileDoc, new ChatUserProfileDTO());
+		return dto;
+	}
 
 	public static ContactDTO getContactDTO(ChatContactDoc chatContactDoc) {
 		ContactDTO contact = new ContactDTO();
@@ -53,4 +60,5 @@ public class ChatDTOUtil {
 		chatSessionDto.setActive(chatSessionDoc.isActive());
 		return chatSessionDto;
 	}
+
 }

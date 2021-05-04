@@ -15,6 +15,9 @@ public class ChatUserProfileDTO implements Serializable {
 	public static class ChatUserProfileRequest implements Serializable {
 		private static final long serialVersionUID = -4573847059953057257L;
 		String contactId;
+		String contactType;
+		String lane;
+		String profileId;
 		String mobile;
 		String email;
 
@@ -40,6 +43,30 @@ public class ChatUserProfileDTO implements Serializable {
 
 		public void setContactId(String contactId) {
 			this.contactId = contactId;
+		}
+
+		public String getContactType() {
+			return contactType;
+		}
+
+		public void setContactType(String contactType) {
+			this.contactType = contactType;
+		}
+
+		public String getLane() {
+			return lane;
+		}
+
+		public void setLane(String lane) {
+			this.lane = lane;
+		}
+
+		public String getProfileId() {
+			return profileId;
+		}
+
+		public void setProfileId(String profileId) {
+			this.profileId = profileId;
 		}
 
 	}
@@ -121,6 +148,7 @@ public class ChatUserProfileDTO implements Serializable {
 	}
 
 	String contactId;
+	String profileId;
 	String userId;
 	String mobile;
 	String email;
@@ -196,6 +224,14 @@ public class ChatUserProfileDTO implements Serializable {
 
 	public void setUserId(String userId) {
 		this.userId = userId;
+	}
+
+	public String getProfileId() {
+		return profileId;
+	}
+
+	public void setProfileId(String profileId) {
+		this.profileId = profileId;
 	}
 
 }

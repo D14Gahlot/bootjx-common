@@ -17,9 +17,12 @@ import org.springframework.stereotype.Component;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
+import com.boot.jx.postman.doc.ChatUserProfileDoc;
+import com.boot.jx.postman.dto.ChatUserProfileDTO;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.EntityDtoUtil;
 import com.boot.utils.TimeUtils;
 import com.mongodb.BasicDBObject;
 import com.mongodb.BulkWriteOperation;
@@ -290,5 +293,16 @@ public class SessionStore {
 		chatSessionDoc.setAgentScore(agentScore);
 		save(chatSessionDoc);
 		return chatSessionDoc;
+	}
+
+	public ChatUserProfileDoc save(ChatUserProfileDoc doc) {
+		mongoTemplate.save(doc);
+		return doc;
+	}
+
+	public ChatUserProfileDoc save(ChatUserProfileDTO profile) {
+		ChatUserProfileDoc doc = EntityDtoUtil.dtoToEntity(profile, new ChatUserProfileDoc());
+		doc.setId(profile.getProfileId());
+		return save(doc);
 	}
 }

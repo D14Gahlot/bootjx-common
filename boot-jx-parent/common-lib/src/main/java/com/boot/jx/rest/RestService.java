@@ -574,7 +574,7 @@ public class RestService {
 		String ext = "";
 		if (fileName.lastIndexOf(".") != -1 && fileName.lastIndexOf(".") != 0)
 			ext = fileName.substring(fileName.lastIndexOf(".") + 1);
-		Path testFile = Files.createTempFile(file.getName(), "." + ext);
+		Path testFile = Files.createTempFile(file.getName(), "." + ext.toLowerCase());
 		Files.write(testFile, file.getBytes());
 		return new FileSystemResource(testFile.toFile());
 	}

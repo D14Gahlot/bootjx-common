@@ -285,9 +285,17 @@ public class ChatService {
 			chatUserProfileRequest.setEmail(contact.getEmail());
 			chatUserProfileRequest.setMobile(contact.getPhone());
 			chatUserProfileRequest.setContactId(contact.getContactId());
+			chatUserProfileRequest.setContactType(contact.getContactType());
+			chatUserProfileRequest.setProfileId(contact.getProfileId());
 			ChatUserProfileDTO profile = chatClient.fetchContactDetails(chatUserProfileRequest);
+
 			contact = sessionStore.getContact(inboxMessage);
-			contact.setProfile(profile);
+			if (ArgUtil.is(profile.getProfileId())) {
+				sessionStore.save(profile);
+				contact.setProfileId(profile.getProfileId());
+			} else {
+				contact.setProfile(profile);
+			}
 			sessionStore.save(contact);
 		} catch (Exception e) {
 
