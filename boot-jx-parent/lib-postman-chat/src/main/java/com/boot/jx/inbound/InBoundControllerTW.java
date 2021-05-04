@@ -88,15 +88,29 @@ public class InBoundControllerTW {
 		return tmr;
 	}
 
-	@ApiVendorHeaders
-	@RequestMapping(value = "/ext/inbound/tw/registerwebhook", method = RequestMethod.GET)
+	@RequestMapping(value = "/ext/inbound/tw/registerwebhook", method = RequestMethod.POST)
 	public WebhookInfo registerwebhook(@RequestParam(required = false) String lane)
 			throws InterruptedException, TwitterException {
 		twitterClient.registerWebhook(lane);
-		// twitterClient.getContext(lane).getWebhookManager().triggerCRC();
 		WebhookInfo x = twitterClient.getContext(lane).getWebhookManager().getWebhookInfo();
 		return x;
 	}
+
+	@RequestMapping(value = "/ext/inbound/tw/registerwebhook", method = RequestMethod.GET)
+	public WebhookInfo getwebhook(@RequestParam(required = false) String lane)
+			throws InterruptedException, TwitterException {
+		WebhookInfo x = twitterClient.getContext(lane).getWebhookManager().getWebhookInfo();
+		return x;
+	}
+
+	@RequestMapping(value = "/ext/inbound/tw/crc", method = RequestMethod.GET)
+	public WebhookInfo triggerCRC(@RequestParam(required = false) String lane)
+			throws InterruptedException, TwitterException {
+		twitterClient.getContext(lane).getWebhookManager().triggerCRC();
+		WebhookInfo x = twitterClient.getContext(lane).getWebhookManager().getWebhookInfo();
+		return x;
+	}
+
 
 	@Scheduled(fixedDelay = 5000)
 	public void registerService() {
