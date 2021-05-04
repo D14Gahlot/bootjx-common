@@ -160,6 +160,7 @@ public class TwitterConnector implements ConnectorHandler {
 		ibm.setTo(String.valueOf(dm.getRecipientId()));
 		ibm.setChannel(Channel.DEFAULT.toString());
 		ibm.setContactType(ContactType.TWITTER);
+		ibm.setLane(lane);
 
 		/**
 		 * NOTE:- Do not user original DirectMessageJsonImpl as it can throw
