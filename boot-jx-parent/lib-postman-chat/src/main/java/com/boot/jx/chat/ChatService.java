@@ -286,6 +286,7 @@ public class ChatService {
 			chatUserProfileRequest.setMobile(contact.getPhone());
 			chatUserProfileRequest.setContactId(contact.getContactId());
 			chatUserProfileRequest.setContactType(contact.getContactType());
+			chatUserProfileRequest.setLane(contact.getLane());
 			chatUserProfileRequest.setProfileId(contact.getProfileId());
 			ChatUserProfileDTO profile = chatClient.fetchContactDetails(chatUserProfileRequest);
 
