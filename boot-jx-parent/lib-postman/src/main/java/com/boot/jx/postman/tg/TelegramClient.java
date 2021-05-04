@@ -17,6 +17,7 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.Keyboard
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 
 import com.boot.jx.postman.PMEnvironment;
+import com.boot.jx.postman.PostManException;
 import com.boot.jx.postman.model.TGMessage;
 import com.boot.jx.postman.tg.TelegramModels.TGSendDocument;
 import com.boot.jx.postman.tg.TelegramModels.TGSendPhoto;
@@ -55,13 +56,18 @@ public class TelegramClient {
 	private PMEnvironment environment;
 
 	private String getAccessToken(String lane) {
+		if (ArgUtil.isEmpty(lane)) {
+			throw new PostManException("No lane " + lane);
+		}
 		TelegramConfig config = environment.get().telegram(lane);
+		if (!ArgUtil.is(config)) {
+			throw new PostManException("No Config for lane " + lane);
+		}
 		return config.getAccessToken();
 	}
 
 	public String registerWebhook(String callbackURL, String lane) {
-		TelegramConfig config = environment.get().telegram(lane);
-		return restService.ajax(PATH.URL).path(PATH.BOT_SET_WEBHOOK).pathParam("accessToken", config.getAccessToken())
+		return restService.ajax(PATH.URL).path(PATH.BOT_SET_WEBHOOK).pathParam("accessToken", getAccessToken(lane))
 				.field("url", callbackURL + telegramWebhooPath)
 				.queryParam("url", callbackURL + telegramWebhooPath + "/" + lane).post().asString();
 	}

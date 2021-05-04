@@ -14,6 +14,7 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Component;
 
 import com.boot.jx.postman.PMEnvironment;
+import com.boot.jx.postman.PostManException;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CryptoUtil.HashBuilder;
 import com.ulisesbocchio.jasyptspringboot.annotation.EnableEncryptableProperties;
@@ -46,11 +47,19 @@ public class TwitterClient {
 	private PMEnvironment environment;
 
 	public TwitterClientContext getContext(String lane) {
-		//lane = ArgUtil.nonEmpty(lane, defaultLane);
+		// lane = ArgUtil.nonEmpty(lane, defaultLane);
+
+		if (ArgUtil.isEmpty(lane)) {
+			throw new PostManException("No lane " + lane);
+		}
+
 		TwitterClientContext ctx = CLIENTS.get(lane);
 
 		if (ArgUtil.isEmpty(ctx)) {
 			TwitterConfig config = environment.get().twitter(lane);
+			if (!ArgUtil.is(config)) {
+				throw new PostManException("No Config for lane " + lane);
+			}
 
 			ConfigurationBuilder cb = new ConfigurationBuilder();
 			cb.setDebugEnabled(true).setOAuthConsumerKey(config.getConsumerKey())
@@ -87,16 +96,16 @@ public class TwitterClient {
 	}
 
 	public StatusCode registerWebhook(String lane, String callbackURL) {
-		//lane = ArgUtil.nonEmpty(lane, defaultLane);
+		// lane = ArgUtil.nonEmpty(lane, defaultLane);
 		TwitterClientContext ctx = getContext(lane);
-		LOGGER.info("RegisterWebHook "+callbackURL + webhookPath + "/" + lane);
+		LOGGER.info("RegisterWebHook " + callbackURL + webhookPath + "/" + lane);
 		return ctx.registerWebhook(callbackURL + webhookPath + "/" + lane);
 	}
 
 	public StatusCode registerWebhook(String lane) {
 		TwitterConfig config = environment.get().twitter(lane);
-		if(ArgUtil.isEmpty(config)){
-			LOGGER.info("No Config "+lane);
+		if (ArgUtil.isEmpty(config)) {
+			LOGGER.info("No Config " + lane);
 		}
 
 		if (ArgUtil.is(config.getWebhookUrl())) {
