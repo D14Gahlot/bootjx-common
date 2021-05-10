@@ -109,9 +109,8 @@
 		</dependency>
 
 		<dependency>
-			<groupId>com.amazonaws</groupId>
-			<artifactId>aws-java-sdk</artifactId>
-			<version>1.11.931</version>
+			<groupId>com.boot.jx</groupId>
+			<artifactId>lib-aws</artifactId>
 		</dependency>
 
 	</dependencies>

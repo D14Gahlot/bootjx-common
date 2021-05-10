@@ -19,7 +19,9 @@ import com.boot.utils.ArgUtil;
 import com.boot.utils.CryptoUtil.HashBuilder;
 import com.ulisesbocchio.jasyptspringboot.annotation.EnableEncryptableProperties;
 
+import twitter4j.DirectMessage;
 import twitter4j.DirectMessageList;
+import twitter4j.DirectMessageLocalImpl;
 import twitter4j.Twitter;
 import twitter4j.TwitterException;
 import twitter4j.TwitterFactory;
@@ -77,17 +79,20 @@ public class TwitterClient {
 		return ctx;
 	}
 
-	public void sendReply(String id, String text, String lane) throws NumberFormatException, TwitterException {
+	public DirectMessage sendReply(String id, String text, String lane) throws NumberFormatException, TwitterException {
 		Twitter twitter = getContext(lane).getTwitter();
-		twitter.sendDirectMessage(Long.parseLong(id), text);
-		LOGGER.debug("Message result to {} : {}", id);
+		DirectMessageLocalImpl x = new DirectMessageLocalImpl(twitter.sendDirectMessage(Long.parseLong(id), text));
+		LOGGER.debug("Message result to {} : {}", id, x.getId());
+		return x;
 	}
 
-	public void sendReply(String id, String text, String mediaId, String lane)
+	public DirectMessage sendReply(String id, String text, String mediaId, String lane)
 			throws NumberFormatException, TwitterException {
 		Twitter twitter = getContext(lane).getTwitter();
-		twitter.sendDirectMessage(Long.parseLong(id), text, Long.parseLong(mediaId));
-		LOGGER.debug("Message result to {} : {}", id);
+		DirectMessageLocalImpl x = new DirectMessageLocalImpl(
+				twitter.sendDirectMessage(Long.parseLong(id), text, Long.parseLong(mediaId)));
+		LOGGER.debug("Message result to {} : {}", id, x.getId());
+		return x;
 	}
 
 	public DirectMessageList pollDirectMessagesReceived(String lane) throws TwitterException {

@@ -5,7 +5,7 @@ import org.springframework.stereotype.Component;
 
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.postman.PostmanPackages.ICommonTmplPackage;
-import com.boot.jx.postman.model.File;
+import com.boot.jx.postman.model.PostManFile;
 
 @Component
 public class CommonTmpPackageImpl implements ICommonTmplPackage {
@@ -14,7 +14,7 @@ public class CommonTmpPackageImpl implements ICommonTmplPackage {
 	private TemplateService templateService;
 
 	@Override
-	public File process(File file, ContactType contactType) {
+	public PostManFile process(PostManFile file, ContactType contactType) {
 		return templateService.process(file, contactType);
 	}
 

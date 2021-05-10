@@ -58,6 +58,18 @@ mry.agent.url=http://localhost:8083/agent
 mry.bot.url=http://localhost:8084/bot
 mry.admin.url=http://localhost:8081/admin
 
+
+aws.s3.b1.bucket=
+aws.s3.b1.accessKey=
+aws.s3.b1.secretKey=
+aws.s3.b1.region=eu-west-2
+
+
+aws.s3.b2.bucket=
+aws.s3.b2.accessKey=
+aws.s3.b2.secretKey=
+aws.s3.b2.region=eu-west-2
+
 ```
 
 ## BOT
@@ -115,19 +127,30 @@ mry.postman.url=http://localhost:8082/postman
 mry.agent.url=http://localhost:8083/agent
 mry.bot.url=http://localhost:8084/bot
 
+aws.s3.b1.bucket=
+aws.s3.b1.accessKey=
+aws.s3.b1.secretKey=
+aws.s3.b1.region=eu-west-2
+
+
+aws.s3.b2.bucket=
+aws.s3.b2.accessKey=
+aws.s3.b2.secretKey=
+aws.s3.b2.region=eu-west-2
+
 ```
 
 
 
 ## TenantProperties 
-###### application.aertrip.properties
+###### application.<tnt>.properties
 ```application.aertrip.properties
 ###### DB mysql ########
-spring.datasource.url=jdbc:mysql://127.0.0.1:3306/aertrip
-spring.datasource.username=aertrip
-spring.datasource.password=aertrip
+spring.datasource.url=jdbc:mysql://127.0.0.1:3306/<tnt>
+spring.datasource.username=<tnt>
+spring.datasource.password=<tnt>
 
 ###### DB Mongo ########
-spring.data.mongodb.uri=mongodb://aertrip:aertrip@10.28.42.30:27017/aertrip
+spring.data.mongodb.uri=mongodb://<tnt>:<tnt>@10.28.42.30:27017/<tnt>
 spring.data.mongodb.repositories.enabled=true
 ```

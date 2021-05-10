@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorHandler;
 import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorMapping;
 import com.boot.jx.dict.ContactType;
+import com.boot.jx.dict.FileType;
 import com.boot.jx.postman.client.TmplClient;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
@@ -17,7 +18,6 @@ import com.boot.jx.postman.gupshup.GupShupConfigClient;
 import com.boot.jx.postman.gupshup.GupShupInbound;
 import com.boot.jx.postman.gupshup.GupShupResp;
 import com.boot.jx.postman.model.Attachment;
-import com.boot.jx.postman.model.File;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.Message;
 import com.boot.jx.postman.model.OutboxMessage;
@@ -63,7 +63,7 @@ public class WAGupShupConnector implements ConnectorHandler {
 				if (ArgUtil.is(templateReply)) {
 					if ("image".equalsIgnoreCase(templateReply.getType())) {
 						outboxMessage.attachment(new Attachment().mediaURL(templateReply.getUrl())
-								.mediaType(File.FileType.IMAGE.toString()));
+								.mediaType(FileType.IMAGE.toString()));
 						resp = gupShupChatClient.sendMessage(outboxMessage, inboxMessage.getLane());
 					}
 				} else {

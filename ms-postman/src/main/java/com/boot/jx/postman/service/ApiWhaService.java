@@ -14,7 +14,7 @@ import com.boot.jx.logger.LoggerService;
 import com.boot.jx.postman.PostManConfig;
 import com.boot.jx.postman.audit.PMGaugeEvent;
 import com.boot.jx.postman.events.UserInboxEvent;
-import com.boot.jx.postman.model.File;
+import com.boot.jx.postman.model.PostManFile;
 import com.boot.jx.postman.model.WAMessage;
 import com.boot.jx.rest.RestService;
 import com.boot.jx.tunnel.TunnelService;
@@ -50,7 +50,7 @@ public class ApiWhaService {
 			if (message.getTemplate() != null) {
 				Context context = new Context(postManConfig.getLocal(message));
 				context.setVariables(message.getModel());
-				File file = new File();
+				PostManFile file = new PostManFile();
 				file.setTemplate(message.getTemplate());
 				file.setModel(message.getModel());
 				file.setLang(message.getLang());

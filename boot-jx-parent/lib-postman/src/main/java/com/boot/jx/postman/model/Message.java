@@ -53,7 +53,7 @@ public class Message<T extends Message<T>> implements Serializable, MessageOptio
 	protected String channel;
 	protected String lane;
 
-	private List<File> files = null;
+	private List<PostManFile> files = null;
 	private List<Attachment> attachments = null;
 
 	private String id;
@@ -279,23 +279,23 @@ public class Message<T extends Message<T>> implements Serializable, MessageOptio
 		}
 	}
 
-	public List<File> getFiles() {
+	public List<PostManFile> getFiles() {
 		return files;
 	}
 
-	public void setFiles(List<File> files) {
+	public void setFiles(List<PostManFile> files) {
 		this.files = files;
 	}
 
-	public List<File> files() {
+	public List<PostManFile> files() {
 		if (this.files == null) {
-			this.files = new ArrayList<File>();
+			this.files = new ArrayList<PostManFile>();
 		}
 		return files;
 	}
 
-	public void addFile(File... files) {
-		for (File file : files) {
+	public void addFile(PostManFile... files) {
+		for (PostManFile file : files) {
 			this.files().add(file);
 		}
 	}
@@ -355,7 +355,7 @@ public class Message<T extends Message<T>> implements Serializable, MessageOptio
 	}
 
 	@SuppressWarnings("unchecked")
-	public T file(File... files) {
+	public T file(PostManFile... files) {
 		this.addFile(files);
 		return (T) this;
 	}

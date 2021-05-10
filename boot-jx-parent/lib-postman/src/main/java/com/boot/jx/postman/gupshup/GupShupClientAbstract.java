@@ -8,11 +8,11 @@ import java.util.StringJoiner;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.boot.jx.dict.FileType;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PostManException;
 import com.boot.jx.postman.gupshup.GupShupConstants.SessionType;
 import com.boot.jx.postman.model.Attachment;
-import com.boot.jx.postman.model.File;
 import com.boot.jx.postman.model.Message;
 import com.boot.jx.rest.RestService;
 import com.boot.jx.rest.RestService.Ajax;
@@ -142,7 +142,7 @@ public abstract class GupShupClientAbstract {
 				gupShupReq.setCaption(message.getSubject());
 				gupShupReq.setMessage(message.getMessage());
 				if (ArgUtil.is(attachment.getMediaURL())) {
-					if (ArgUtil.areEqual(attachment.getMediaType(), File.FileType.IMAGE.toString())) {
+					if (ArgUtil.areEqual(attachment.getMediaType(), FileType.IMAGE.toString())) {
 						gupShupReq.setMediaURL(attachment.getMediaURL());
 						resp = sendImageURL(gupShupReq);
 						msgIds.add(resp.getResponse().getId());

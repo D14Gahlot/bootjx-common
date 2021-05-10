@@ -16,13 +16,15 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.boot.jx.AppParam;
 import com.boot.jx.api.ApiResponse;
+import com.boot.jx.dict.FileFormat;
 import com.boot.jx.dict.Language;
+import com.boot.jx.model.CommonFile;
 import com.boot.jx.postman.PostManConfig;
 import com.boot.jx.postman.PostManException;
 import com.boot.jx.postman.PostManUrls;
 import com.boot.jx.postman.model.Email;
 import com.boot.jx.postman.model.ExceptionReport;
-import com.boot.jx.postman.model.File;
+import com.boot.jx.postman.model.PostManFile;
 import com.boot.jx.postman.model.Message;
 import com.boot.jx.postman.model.MessageBox;
 import com.boot.jx.postman.model.Notipy;
@@ -59,7 +61,7 @@ public class PostManController {
 	 *
 	 * @return the lang
 	 */
-	public Language getLang(File file) {
+	public Language getLang(CommonFile file) {
 		if (ArgUtil.isEmpty(file) || ArgUtil.isEmpty(file.getLang())) {
 			String langString = request.getParameter(PostManServiceImpl.PARAM_LANG);// localeResolver.resolveLocale(request).toString();
 			Language lang = ArgUtil.parseAsEnumT(langString, postManConfig.getTenantLang(), Language.class);
@@ -89,11 +91,11 @@ public class PostManController {
 	 */
 	@SuppressWarnings("unchecked")
 	@RequestMapping(value = PostManUrls.PROCESS_TEMPLATE, method = RequestMethod.POST)
-	public ApiResponse<File, Object> processTemplate(@RequestParam TemplatesMX template,
+	public ApiResponse<PostManFile, Object> processTemplate(@RequestParam TemplatesMX template,
 			@RequestParam(required = false) String data, @RequestParam(required = false) String fileName,
-			@RequestParam(required = false) File.FileFormat fileType) {
+			@RequestParam(required = false) FileFormat fileType) {
 
-		File file = new File();
+		PostManFile file = new PostManFile();
 		getLang(file);
 
 		file.setITemplate(template);
@@ -111,7 +113,7 @@ public class PostManController {
 	 */
 	@RequestMapping(value = { PostManUrls.PROCESS_TEMPLATE_FILE,
 			PostManUrls.PROCESS_TEMPLATE_FILE_LOCAL }, method = RequestMethod.POST)
-	public File processTemplateFile(@RequestBody File file) {
+	public CommonFile processTemplateFile(@RequestBody PostManFile file) {
 		getLang(file);
 		return postManService.processTemplate(file).getResult();
 	}

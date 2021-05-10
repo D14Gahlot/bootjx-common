@@ -8,8 +8,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.xhtmlrenderer.pdf.ITextRenderer;
 
-import com.boot.jx.postman.model.File;
-import com.boot.jx.postman.model.File.FileFormat;
+import com.boot.jx.dict.FileFormat;
+import com.boot.jx.model.CommonFile;
+import com.boot.jx.postman.model.PostManFile;
 import com.boot.utils.Constants;
 import com.codahale.metrics.annotation.Timed;
 import com.itextpdf.text.DocumentException;
@@ -35,7 +36,7 @@ public class ConverterFlyingSaucer implements FileConverter {
 	 */
 	@Override
 	@Timed(name = "PDF_CREATION_FS", absolute = true)
-	public File toPDF(File file) throws JRException {
+	public CommonFile toPDF(PostManFile file) throws JRException {
 		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 		try {
 

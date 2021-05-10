@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.dict.ContactType;
+import com.boot.jx.dict.FileFormat;
 import com.boot.jx.logger.AuditEvent.Result;
 import com.boot.jx.logger.LoggerService;
 import com.boot.jx.logger.client.AuditServiceClient;
@@ -27,7 +28,7 @@ import com.boot.jx.postman.PostManException;
 import com.boot.jx.postman.audit.PMGaugeEvent;
 import com.boot.jx.postman.events.UserMessageEvent;
 import com.boot.jx.postman.model.Contact;
-import com.boot.jx.postman.model.File;
+import com.boot.jx.postman.model.PostManFile;
 import com.boot.jx.postman.model.Notipy;
 import com.boot.jx.postman.model.PushMessage;
 import com.boot.jx.rest.RestService;
@@ -135,11 +136,11 @@ public class FBPushServiceImpl implements IPushNotifyService {
 			}
 
 			if (msg.getTemplate() != null) {
-				File file = new File();
+				PostManFile file = new PostManFile();
 				file.setTemplate(msg.getTemplate());
 				file.setModel(msg.getModel());
 				file.setLang(msg.getLang());
-				file.setFileFormat(File.FileFormat.JSON);
+				file.setFileFormat(FileFormat.JSON);
 
 				@SuppressWarnings("unchecked")
 				Map<String, Object> map = JsonUtil.fromJson(fileService.create(file, ContactType.PUSH).getContent(),

@@ -14,12 +14,13 @@ import com.boot.jx.AppContextUtil;
 import com.boot.jx.AppParam;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.async.ExecutorConfig;
+import com.boot.jx.dict.FileFormat;
+import com.boot.jx.model.CommonFile;
 import com.boot.jx.postman.PostManException;
 import com.boot.jx.postman.PostManService;
 import com.boot.jx.postman.model.Email;
 import com.boot.jx.postman.model.ExceptionReport;
-import com.boot.jx.postman.model.File;
-import com.boot.jx.postman.model.File.FileFormat;
+import com.boot.jx.postman.model.PostManFile;
 import com.boot.jx.postman.model.MessageBox;
 import com.boot.jx.postman.model.Notipy;
 import com.boot.jx.postman.model.PushMessage;
@@ -115,7 +116,7 @@ public class PostManServiceImpl implements PostManService {
 	 * com.amx.jax.postman.PostManService#processTemplate(com.amx.jax.postman.model.
 	 * File)
 	 */
-	public ApiResponse<File, Object> processTemplate(File file) {
+	public ApiResponse<PostManFile, Object> processTemplate(PostManFile file) {
 		return ApiResponse.build(fileService.create(file));
 	}
 
@@ -127,8 +128,8 @@ public class PostManServiceImpl implements PostManService {
 	 * @param fileType the file type
 	 * @return the file
 	 */
-	public File processTemplate(TemplatesMX template, Map<String, Object> map, FileFormat fileType) {
-		File file = new File();
+	public CommonFile processTemplate(TemplatesMX template, Map<String, Object> map, FileFormat fileType) {
+		PostManFile file = new PostManFile();
 		file.setITemplate(template);
 		file.setFileFormat(fileType);
 		file.setModel(map);

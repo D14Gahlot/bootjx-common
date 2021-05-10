@@ -6,8 +6,8 @@ import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-
 import java.util.StringJoiner;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +17,7 @@ import org.springframework.stereotype.Component;
 import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorHandler;
 import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorMapping;
 import com.boot.jx.dict.ContactType;
+import com.boot.jx.dict.FileType;
 import com.boot.jx.postman.client.ExtUtilService;
 import com.boot.jx.postman.client.TmplClient;
 import com.boot.jx.postman.doc.ChatContactDoc;
@@ -24,7 +25,6 @@ import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.TemplateReply;
 import com.boot.jx.postman.gupshup.GupShupConfigClient;
 import com.boot.jx.postman.model.Attachment;
-import com.boot.jx.postman.model.File;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.model.WAMessage.Channel;
@@ -61,16 +61,21 @@ public class TwitterConnector implements ConnectorHandler {
 	@Autowired
 	private ExtUtilService extUtilService;
 
+	private String uploadMedia(String lane, String url, String title)
+			throws IOException, MalformedURLException, TwitterException {
+		TwitterClientContext ctx = twitterClient.getContext(lane);
+		InputStream media = new java.net.URL(url).openStream();
+		UploadedMedia uploadedMedia = ctx.getTwitter().uploadMedia(title, media);
+		return ArgUtil.parseAsString(uploadedMedia.getMediaId());
+	}
+
 	private String getMediaId(String lane, TemplateReply templateReply)
 			throws IOException, MalformedURLException, TwitterException {
 		String mediaId = ArgUtil.parseAsString(templateReply.meta().get("twitterMediaId"));
 		// TODO:-Media cannot be shared, will update this api once we start using
 		// "SHARED MEDIA across Multiple messgaes"
 		// if (!ArgUtil.is(mediaId)) {
-		TwitterClientContext ctx = twitterClient.getContext(lane);
-		InputStream media = new java.net.URL(templateReply.getUrl()).openStream();
-		UploadedMedia uploadedMedia = ctx.getTwitter().uploadMedia(templateReply.getTitle(), media);
-		mediaId = ArgUtil.parseAsString(uploadedMedia.getMediaId());
+		mediaId = uploadMedia(lane, templateReply.getUrl(), templateReply.getTitle());
 		// templateReply.meta().put("twitterMediaId", mediaId);
 		// mongoTemplate.save(templateReply);
 		// }
@@ -87,7 +92,37 @@ public class TwitterConnector implements ConnectorHandler {
 				}
 			}
 		}
+
 		return sj.toString();
+	}
+
+	public void sendWithAttachment(String lane, String to, OutboxMessage message)
+			throws NumberFormatException, TwitterException, MalformedURLException, IOException {
+		StringJoiner msgIds = new StringJoiner(",");
+
+		StringJoiner sj = new StringJoiner("\n");
+		sj.add(message.getMessage());
+
+		if (ArgUtil.is(message.getAttachments())) {
+			for (Attachment attachment : message.getAttachments()) {
+				if (ArgUtil.is(attachment.getMediaURL())) {
+					if (ArgUtil.areEqual(attachment.getMediaType(), FileType.IMAGE.toString())) {
+						String mediaId = uploadMedia(lane, attachment.getMediaURL(), attachment.getMediaCaption());
+						attachment.mediaId(mediaId);
+						DirectMessage resp = twitterClient.sendReply(to, message.getMessage(), mediaId, lane);
+						msgIds.add(ArgUtil.parseAsString(resp.getId()));
+					} else {
+						sj.add(extUtilService.tinyUrl(attachment.getMediaURL()));
+					}
+				}
+			}
+		}
+
+		if (sj.length() > 0) {
+			DirectMessage resp = twitterClient.sendReply(to, sj.toString(), lane);
+			msgIds.add(ArgUtil.parseAsString(resp.getId()));
+		}
+
 	}
 
 	@Override
@@ -97,34 +132,21 @@ public class TwitterConnector implements ConnectorHandler {
 				TemplateReply templateReply = mongoTemplate.findById(outboxMessage.getTemplate(), TemplateReply.class);
 				if (ArgUtil.is(templateReply)) {
 					if ("image".equalsIgnoreCase(templateReply.getType())) {
-						String mediaId = getMediaId(lane, templateReply);
-						outboxMessage.attachment(new Attachment().mediaURL(templateReply.getUrl())
-								.mediaType(File.FileType.IMAGE.toString()).mediaId(mediaId));
-						twitterClient.sendReply(to, outboxMessage.getMessage(), mediaId, lane);
+						outboxMessage.attachment(
+								new Attachment().mediaURL(templateReply.getUrl()).mediaType(FileType.IMAGE.toString()));
+						sendWithAttachment(lane, to, outboxMessage);
 					} else {
-						twitterClient.sendReply(to, attachLink(outboxMessage), lane);
+						sendWithAttachment(lane, to, outboxMessage);
 					}
 				} else {
 					tmplClient.process(outboxMessage);
-					twitterClient.sendReply(to, attachLink(outboxMessage), lane);
+					sendWithAttachment(lane, to, outboxMessage);
 				}
 			} else {
-				twitterClient.sendReply(to, attachLink(outboxMessage), lane);
+				sendWithAttachment(lane, to, outboxMessage);
 			}
 			outboxMessage.setStatus(OutboxMessage.Status.SENT);
-		} catch (NumberFormatException e) {
-			outboxMessage.setStatus(OutboxMessage.Status.SENT_ERR);
-			outboxMessage.logs().add(e.getMessage());
-			e.printStackTrace();
-		} catch (TwitterException e) {
-			outboxMessage.setStatus(OutboxMessage.Status.SENT_ERR);
-			outboxMessage.logs().add(e.getMessage());
-			e.printStackTrace();
-		} catch (MalformedURLException e) {
-			outboxMessage.setStatus(OutboxMessage.Status.SENT_ERR);
-			outboxMessage.logs().add(e.getMessage());
-			e.printStackTrace();
-		} catch (IOException e) {
+		} catch (NumberFormatException | TwitterException | IOException e) {
 			outboxMessage.setStatus(OutboxMessage.Status.SENT_ERR);
 			outboxMessage.logs().add(e.getMessage());
 			e.printStackTrace();

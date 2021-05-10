@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.boot.jx.agent.AgentChatHandlerImpl;
 import com.boot.jx.agent.AgentService;
@@ -21,6 +22,7 @@ import com.boot.jx.agent.AgentSessionService;
 import com.boot.jx.agent.doc.AgentSessionDoc;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.api.ListRequestModel;
+import com.boot.jx.aws.AWSFileStore;
 import com.boot.jx.chat.ChatArchive;
 import com.boot.jx.chat.ChatDTOUtil;
 import com.boot.jx.chat.ChatService;
@@ -33,11 +35,13 @@ import com.boot.jx.postman.doc.TemplateReply;
 import com.boot.jx.postman.dto.ChatMessageDTO;
 import com.boot.jx.postman.dto.ChatSessionDTO;
 import com.boot.jx.postman.dto.ContactDTO;
+import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.store.MessageStore.EVENTS;
 import com.boot.jx.postman.store.SessionStore;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
+import com.boot.utils.JsonUtil;
 import com.boot.utils.MapBuilder;
 
 @Controller
@@ -105,6 +109,7 @@ public class MsgController {
 		if (ArgUtil.isNone(sessionDoc.getFistResponseStamp())) {
 			sessionDoc.setFistResponseStamp(System.currentTimeMillis());
 		}
+
 		sessionDoc.setLastResponseStamp(System.currentTimeMillis());
 		mongoTemplate.save(sessionDoc);
 		// Session Stuff Logging >
@@ -120,8 +125,22 @@ public class MsgController {
 			messageDto.setMessageIdRef(outboxMessage.getMessageIdRef());
 			return ApiResponse.buildResult(messageDto);
 		}
+
 		agentSessionService.refreshOnline();
 		return null;
+	}
+
+	@Autowired
+	AWSFileStore fileStore;
+
+	@ResponseBody
+	@RequestMapping(value = "/api/sessions/message/send", method = { RequestMethod.POST })
+	public ApiResponse<ChatMessageDTO, Object> uploadSessionFile(@RequestParam String message,
+			@RequestParam(name = "file") MultipartFile file) throws InterruptedException {
+		OutboxMessage outboxMessage = JsonUtil.parse(message, OutboxMessage.class);
+		String url = fileStore.upload1(file).getUrl();
+		outboxMessage.attachment(new Attachment().mediaURL(url));
+		return sendSessionMessage(outboxMessage);
 	}
 
 	@ResponseBody

@@ -1,6 +1,7 @@
 package com.boot.jx.postman.converter;
 
-import com.boot.jx.postman.model.File;
+import com.boot.jx.model.CommonFile;
+import com.boot.jx.postman.model.PostManFile;
 
 import net.sf.jasperreports.engine.JRException;
 
@@ -18,5 +19,5 @@ public interface FileConverter {
 	 * @throws JRException
 	 *             the JR exception
 	 */
-	public File toPDF(File file) throws JRException;
+	public CommonFile toPDF(PostManFile file) throws JRException;
 }

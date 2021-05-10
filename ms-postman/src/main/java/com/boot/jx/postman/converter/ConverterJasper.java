@@ -15,11 +15,12 @@ import org.springframework.context.support.MessageSourceResourceBundle;
 import org.springframework.stereotype.Component;
 
 import com.boot.jx.AppContextUtil;
+import com.boot.jx.dict.FileFormat;
+import com.boot.jx.model.CommonFile;
 import com.boot.jx.postman.PostManConfig;
 import com.boot.jx.postman.converter.jasper.SimpleReportExporter;
 import com.boot.jx.postman.converter.jasper.SimpleReportFiller;
-import com.boot.jx.postman.model.File;
-import com.boot.jx.postman.model.File.FileFormat;
+import com.boot.jx.postman.model.PostManFile;
 import com.boot.jx.tmpl.TemplateUtils;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.FlatMap;
@@ -78,7 +79,7 @@ public class ConverterJasper implements FileConverter {
 	 */
 	@Override
 	@Timed(name = "PDF_CREATION_JASPER", absolute = true)
-	public File toPDF(File file) throws JRException {
+	public CommonFile toPDF(PostManFile file) throws JRException {
 
 		String jasperFileName = templateUtils.getTemplateFile(
 				"jasper/" + file.getITemplate().getFileName(), AppContextUtil.getTenant(),
@@ -158,7 +159,7 @@ public class ConverterJasper implements FileConverter {
 	 * @param file the file
 	 * @return the file
 	 */
-	public File toPDF2(File file) {
+	public CommonFile toPDF2(CommonFile file) {
 		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 		try {
 

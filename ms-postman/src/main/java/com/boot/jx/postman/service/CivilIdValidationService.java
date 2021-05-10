@@ -21,10 +21,10 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.boot.jx.dict.FileFormat;
 import com.boot.jx.dict.Language;
 import com.boot.jx.logger.LoggerService;
 import com.boot.jx.postman.model.DocResult;
-import com.boot.jx.postman.model.File.FileFormat;
 import com.boot.jx.rest.RestService;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.JsonPath;
@@ -182,7 +182,7 @@ public class CivilIdValidationService {
 	public static final SimpleDateFormat FIND_DATE_FORMAT = new SimpleDateFormat(FIND_DATE_FORMAT_STRING);
 
 	public Map<String, Object> scanId(MultipartFile file, Language lang) throws IOException {
-		FileFormat type = com.boot.jx.postman.model.File.FileFormat.from(file.getContentType());
+		FileFormat type = com.boot.jx.dict.FileFormat.from(file.getContentType());
 		String fileType = "." + type.toString().toLowerCase();
 		System.out.println("fileType==" + fileType + "  -  " + file.getName());
 		long startTime = System.currentTimeMillis();

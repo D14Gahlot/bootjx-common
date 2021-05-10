@@ -7,8 +7,8 @@ import com.boot.jx.bot.BotController;
 import com.boot.jx.bot.ChatContext;
 import com.boot.jx.bot.ChatController;
 import com.boot.jx.bot.ChatMapping;
+import com.boot.jx.dict.FileType;
 import com.boot.jx.postman.model.Attachment;
-import com.boot.jx.postman.model.File;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.utils.ArgUtil;
@@ -85,28 +85,28 @@ public class DemoController extends ChatController {
 			reply(new OutboxMessage().template("today-credits").put("name", chatContext.getContact().getName())
 					.attachment(new Attachment().mediaURL(
 							"https://cdn.jsdelivr.net/gh/mehery-soccom/mehery-content@main/sample-receipt/mehery-sample-template.pdf")
-							.mediaType(File.FileType.DOCUMENT.toString())));
+							.mediaType(FileType.DOCUMENT.toString())));
 			next("more-onselect");
 			break;
 		case "2":
 			reply(new OutboxMessage().template("today-debits").put("name", chatContext.getContact().getName())
 					.attachment(new Attachment().mediaURL(
 							"https://cdn.jsdelivr.net/gh/mehery-soccom/mehery-content@main/sample-receipt/mehery-sample-template.pdf")
-							.mediaType(File.FileType.DOCUMENT.toString())));
+							.mediaType(FileType.DOCUMENT.toString())));
 			next("more-onselect");
 			break;
 		case "3":
 			reply(new OutboxMessage().template("today-trnx").put("name", chatContext.getContact().getName())
 					.attachment(new Attachment().mediaURL(
 							"https://cdn.jsdelivr.net/gh/mehery-soccom/mehery-content@main/sample-receipt/mehery-sample-template.pdf")
-							.mediaType(File.FileType.DOCUMENT.toString())));
+							.mediaType(FileType.DOCUMENT.toString())));
 			next("more-onselect");
 			break;
 		case "4":
 			reply(new OutboxMessage().template("today-trnx").put("name", chatContext.getContact().getName())
 					.attachment(new Attachment().mediaURL(
 							"https://www.mehery.com/wp-content/uploads/2021/02/Screenshot-2021-02-03-at-10.12.29-PM.png")
-							.mediaType(File.FileType.IMAGE.toString())));
+							.mediaType(FileType.IMAGE.toString())));
 			next("more-onselect");
 			break;
 		case "*":
@@ -131,28 +131,28 @@ public class DemoController extends ChatController {
 			reply(new OutboxMessage().template("menu-2-today-offers").put("name", chatContext.getContact().getName())
 					.attachment(new Attachment().mediaURL(
 							"https://cdn.jsdelivr.net/gh/mehery-soccom/mehery-content@main/sample-receipt/mehery-sample-template.pdf")
-							.mediaType(File.FileType.DOCUMENT.toString())));
+							.mediaType(FileType.DOCUMENT.toString())));
 			next("more-onselect-menu-2");
 			break;
 		case "2":
 			reply(new OutboxMessage().template("menu-2-weekly-offers").put("name", chatContext.getContact().getName())
 					.attachment(new Attachment().mediaURL(
 							"https://cdn.jsdelivr.net/gh/mehery-soccom/mehery-content@main/sample-receipt/mehery-sample-template.pdf")
-							.mediaType(File.FileType.DOCUMENT.toString())));
+							.mediaType(FileType.DOCUMENT.toString())));
 			next("more-onselect-menu-2");
 			break;
 		case "3":
 			reply(new OutboxMessage().template("menu-2-retail-branch").put("name", chatContext.getContact().getName())
 					.attachment(new Attachment().mediaURL(
 							"https://cdn.jsdelivr.net/gh/mehery-soccom/mehery-content@main/sample-receipt/mehery-sample-template.pdf")
-							.mediaType(File.FileType.DOCUMENT.toString())));
+							.mediaType(FileType.DOCUMENT.toString())));
 			next("more-onselect-menu-2");
 			break;
 		case "4":
 			reply(new OutboxMessage().template("today-trnx").put("name", chatContext.getContact().getName())
 					.attachment(new Attachment().mediaURL(
 							"https://www.mehery.com/wp-content/uploads/2021/02/Screenshot-2021-02-03-at-10.12.29-PM.png")
-							.mediaType(File.FileType.IMAGE.toString())));
+							.mediaType(FileType.IMAGE.toString())));
 			next("more-onselect-menu-2");
 			break;
 		case "*":
@@ -282,21 +282,21 @@ public class DemoController extends ChatController {
 				reply(new OutboxMessage().template("today-credits").put("name", chatContext.getContact().getName())
 						.attachment(new Attachment().mediaURL(
 								"https://cdn.jsdelivr.net/gh/mehery-soccom/mehery-content@main/sample-receipt/mehery-sample-template.pdf")
-								.mediaType(File.FileType.DOCUMENT.toString())));
+								.mediaType(FileType.DOCUMENT.toString())));
 				next("more-onselect");
 				return true;
 			} else if (inboxMessage.getTags().getCategories().indexOf("today-debits") > -1) {
 				reply(new OutboxMessage().template("today-debits").put("name", chatContext.getContact().getName())
 						.attachment(new Attachment().mediaURL(
 								"https://cdn.jsdelivr.net/gh/mehery-soccom/mehery-content@main/sample-receipt/mehery-sample-template.pdf")
-								.mediaType(File.FileType.DOCUMENT.toString())));
+								.mediaType(FileType.DOCUMENT.toString())));
 				next("more-onselect");
 				return true;
 			} else if (inboxMessage.getTags().getCategories().indexOf("today-trnx") > -1) {
 				reply(new OutboxMessage().template("today-trnx").put("name", chatContext.getContact().getName())
 						.attachment(new Attachment().mediaURL(
 								"https://cdn.jsdelivr.net/gh/mehery-soccom/mehery-content@main/sample-receipt/mehery-sample-template.pdf")
-								.mediaType(File.FileType.DOCUMENT.toString())));
+								.mediaType(FileType.DOCUMENT.toString())));
 				next("more-onselect");
 				return true;
 			} else if (inboxMessage.getTags().getCategories().indexOf("menu") > -1

@@ -10,8 +10,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.boot.jx.admin.service.FileStore;
 import com.boot.jx.api.ApiResponse;
+import com.boot.jx.aws.AWSFileStore;
 import com.boot.jx.postman.doc.QuickAction;
 import com.boot.jx.postman.doc.QuickLabel;
 import com.boot.jx.postman.doc.QuickReply;
@@ -158,7 +158,7 @@ public class TemplateController {
 	}
 
 	@Autowired
-	FileStore fileStore;
+	AWSFileStore fileStore;
 
 	@RequestMapping(value = "/api/tmpl/quickmedia", method = { RequestMethod.POST })
 	public ApiResponse<TemplateReply, Object> createQuickMedia(@RequestParam(required = false) String name,
@@ -166,7 +166,7 @@ public class TemplateController {
 			@RequestParam(name = "file", required = false) MultipartFile file) {
 
 		if (ArgUtil.isEmpty(url) && ArgUtil.is(file)) {
-			url = fileStore.saveTodo(file);
+			url = fileStore.upload1(file).getUrl();
 		} else if (ArgUtil.isEmpty(url)) {
 			throw new IllegalStateException("Cannot upload empty file");
 		}

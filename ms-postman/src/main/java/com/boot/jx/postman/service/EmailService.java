@@ -29,11 +29,12 @@ import com.boot.jx.async.ExecutorConfig;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.logger.AuditEvent;
 import com.boot.jx.logger.AuditService;
+import com.boot.jx.model.CommonFile;
 import com.boot.jx.postman.PostManConfig;
 import com.boot.jx.postman.PostManException;
 import com.boot.jx.postman.audit.PMGaugeEvent;
 import com.boot.jx.postman.model.Email;
-import com.boot.jx.postman.model.File;
+import com.boot.jx.postman.model.PostManFile;
 import com.boot.jx.postman.model.Message.Status;
 import com.boot.jx.postman.model.Notipy;
 import com.boot.jx.scope.tnt.TenantScoped;
@@ -162,7 +163,7 @@ public class EmailService {
 				auditService.log(pMGaugeEvent.set(AuditEvent.Result.REJECTED).set(email));
 			} else {
 				if (email.getTemplate() != null) {
-					File file = new File();
+					PostManFile file = new PostManFile();
 					file.setTemplate(email.getTemplate());
 					file.setModel(email.getModel());
 					file.setLang(email.getLang());
@@ -175,7 +176,7 @@ public class EmailService {
 				}
 
 				if (email.getFiles() != null && email.getFiles().size() > 0) {
-					for (File file : email.getFiles()) {
+					for (PostManFile file : email.getFiles()) {
 						if (file.getLang() == null) {
 							file.setLang(email.getLang());
 						}
@@ -317,7 +318,7 @@ public class EmailService {
 		}
 
 		if (eParams.getFiles() != null && eParams.getFiles().size() > 0) {
-			for (File file : eParams.getFiles()) {
+			for (CommonFile file : eParams.getFiles()) {
 				helper.addAttachment(file.getName(), fileService.toDataSource(file));
 			}
 		}

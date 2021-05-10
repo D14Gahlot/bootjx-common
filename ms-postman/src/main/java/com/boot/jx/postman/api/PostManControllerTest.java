@@ -27,6 +27,7 @@ import com.boot.jx.AppConfig;
 import com.boot.jx.AppContextUtil;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.dict.ContactType;
+import com.boot.jx.dict.FileFormat;
 import com.boot.jx.postman.PostManException;
 import com.boot.jx.postman.PostManUrls;
 import com.boot.jx.postman.client.GeoLocationClient;
@@ -34,7 +35,7 @@ import com.boot.jx.postman.client.PushNotifyClient;
 import com.boot.jx.postman.model.DefaultMessage;
 import com.boot.jx.postman.model.Email;
 import com.boot.jx.postman.model.ExceptionReport;
-import com.boot.jx.postman.model.File;
+import com.boot.jx.postman.model.PostManFile;
 import com.boot.jx.postman.model.GeoLocation;
 import com.boot.jx.postman.model.ITemplates;
 import com.boot.jx.postman.model.ITemplates.ITemplate;
@@ -202,7 +203,7 @@ public class PostManControllerTest {
 	public String processTemplate(@PathVariable("template") TemplatesMX template, @PathVariable("ext") String ext,
 			@RequestParam(name = "email", required = false) String email,
 			@RequestBody(required = false) Map<String, Object> data, @RequestParam(required = false) Tenant tnt,
-			@RequestParam(required = false) File.PDFConverter lib,
+			@RequestParam(required = false) PostManFile.PDFConverter lib,
 			@RequestParam(required = false) TemplatesMX attachment)
 			throws IOException, /* DocumentException, */ PostManException {
 
@@ -216,23 +217,23 @@ public class PostManControllerTest {
 
 		postManClient.setLang(localeResolver.resolveLocale(request).toString());
 
-		File file = new File();
+		PostManFile file = new PostManFile();
 		file.setModel(map);
 		file.setITemplate(template);
 		file.setConverter(lib);
 
 		if ("pdf".equals(ext)) {
-			file.setFileFormat(File.FileFormat.PDF);
+			file.setFileFormat(FileFormat.PDF);
 			file = postManClient.processTemplate(file).getResult();
 			// file = postManClient.processTemplate(template, map, File.Type.PDF);
 			file.create(response, false);
 			return null;
 		} else if ("json".equals(ext)) {
-			file.setFileFormat(File.FileFormat.JSON);
+			file.setFileFormat(FileFormat.JSON);
 			file = postManClient.processTemplate(file).getResult();
 			return file.getContent();
 		} else if ("html".equals(ext)) {
-			ApiResponse<File, Object> resp = postManClient.processTemplate(file);
+			ApiResponse<PostManFile, Object> resp = postManClient.processTemplate(file);
 			file = resp.getResult();
 			if (email != null) {
 				Email eml = new Email();
@@ -244,7 +245,7 @@ public class PostManControllerTest {
 				eml.setModel(map);
 				// this.readImageWithObjectMapper(null);
 
-				File file2 = new File();
+				PostManFile file2 = new PostManFile();
 
 				if (ArgUtil.isEmpty(attachment)) {
 					file2.setITemplate(template);
@@ -254,7 +255,7 @@ public class PostManControllerTest {
 					Map<String, Object> map2 = readJsonWithObjectMapper(
 							"templates/dummy/" + attachment.getSampleJSON());
 					file2.setModel(map2);
-					file2.setFileFormat(File.FileFormat.PDF);
+					file2.setFileFormat(FileFormat.PDF);
 					file2.setConverter(lib);
 					eml.addFile(file2);
 				}
@@ -280,7 +281,7 @@ public class PostManControllerTest {
 	@ResponseBody
 	@RequestMapping(value = PostManUrls.PROCESS_TEMPLATE + "/file/{template}.{contactType}", method = RequestMethod.GET)
 	public String processTemplate(@PathVariable("contactType") ContactType contactType,
-			@PathVariable("template") String template, @RequestParam(defaultValue = "HTML") File.FileFormat type)
+			@PathVariable("template") String template, @RequestParam(defaultValue = "HTML") FileFormat type)
 			throws IOException {
 		ITemplate temp = ITemplates.getTemplate(template);
 
@@ -296,12 +297,12 @@ public class PostManControllerTest {
 
 		postManClient.setLang(localeResolver.resolveLocale(request).toString());
 
-		File file = new File();
+		PostManFile file = new PostManFile();
 		file.setModel(map);
 		file.setITemplate(temp);
 		// file.setConverter(lib);
-		if (File.FileFormat.PDF.equals(type)) {
-			file.setFileFormat(File.FileFormat.PDF);
+		if (FileFormat.PDF.equals(type)) {
+			file.setFileFormat(FileFormat.PDF);
 			file = postManClient.processTemplate(file).getResult();
 			// file = postManClient.processTemplate(template, map, File.Type.PDF);
 			file.create(response, false);
