@@ -52,6 +52,7 @@ public class AppConfig {
 	public static final String APP_NAME = "${app.name}";
 	public static final String APP_ID = "${app.id}";
 	public static final String APP_VERSION = "${app.version}";
+	public static final String APP_BUILDTIMESTAMP = "${app.buildtimestamp}";
 
 	public static final String APP_PROD = "${app.prod}";
 	public static final String APP_SWAGGER = "${app.swagger}";
@@ -113,6 +114,10 @@ public class AppConfig {
 	@Value(APP_VERSION)
 	@AppParamKey(AppParam.APP_VERSION)
 	private String appVersion;
+
+	@Value(APP_BUILDTIMESTAMP)
+	@AppParamKey(AppParam.APP_BUILDTIMESTAMP)
+	private String appAppBuildStamp;
 
 	@Value(APP_PROD)
 	@AppParamKey(AppParam.APP_PROD)
@@ -528,6 +533,10 @@ public class AppConfig {
 
 	public void setJaxDroolUrl(String jaxDroolUrl) {
 		this.jaxDroolUrl = jaxDroolUrl;
+	}
+
+	public String getAppAppBuildStamp() {
+		return appAppBuildStamp;
 	}
 
 }
