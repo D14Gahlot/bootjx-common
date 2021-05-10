@@ -134,7 +134,7 @@ public class MsgController {
 	AWSFileStore fileStore;
 
 	@ResponseBody
-	@RequestMapping(value = "/api/sessions/message/send", method = { RequestMethod.POST })
+	@RequestMapping(value = "/api/sessions/message/upload", method = { RequestMethod.POST })
 	public ApiResponse<ChatMessageDTO, Object> uploadSessionFile(@RequestParam String message,
 			@RequestParam(name = "file") MultipartFile file) throws InterruptedException {
 		OutboxMessage outboxMessage = JsonUtil.parse(message, OutboxMessage.class);
