@@ -2,7 +2,6 @@ package com.boot.jx.aws;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -21,6 +20,7 @@ import com.amazonaws.util.IOUtils;
 import com.boot.jx.AppContextUtil;
 import com.boot.jx.dict.FileFormat;
 import com.boot.jx.model.CommonFile;
+import com.boot.utils.ArgUtil;
 
 @Component
 public class AWSFileStore {
@@ -50,13 +50,13 @@ public class AWSFileStore {
 			throw new IllegalStateException("Cannot upload empty file");
 		}
 
+		FileFormat fileFormat = FileFormat.from(file.getContentType());
+
 		// Check if the file is an image
-		if (!Arrays
-				.asList(FileFormat.PNG.getContentType(), FileFormat.BMP.getContentType(),
-						FileFormat.GIF.getContentType(), FileFormat.JPEG.getContentType())
-				.contains(file.getContentType())) {
-			throw new IllegalStateException("FIle uploaded is not an image");
+		if (!ArgUtil.is(fileFormat)) {
+			throw new IllegalStateException("File uploaded is not an accepted format");
 		}
+
 		// get file metadata
 		Map<String, String> metadata = new HashMap<>();
 		metadata.put("Content-Type", file.getContentType());
@@ -72,7 +72,7 @@ public class AWSFileStore {
 		}
 		return new CommonFile()
 				.url(String.format("http://%s.s3.amazonaws.com/%s/%s", bucketName, pathFolder, fileNameNow))
-				.path(pathFolder).name(fileNameNow);
+				.path(pathFolder).name(fileNameNow).fileType(fileFormat.getFormatType());
 	}
 
 	public CommonFile upload1(MultipartFile file, String pathFolder, String fileName) {

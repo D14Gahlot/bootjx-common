@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.boot.jx.AppContextUtil;
 import com.boot.jx.agent.AgentChatHandlerImpl;
 import com.boot.jx.agent.AgentService;
 import com.boot.jx.agent.AgentSessionBean;
@@ -26,6 +27,7 @@ import com.boot.jx.aws.AWSFileStore;
 import com.boot.jx.chat.ChatArchive;
 import com.boot.jx.chat.ChatDTOUtil;
 import com.boot.jx.chat.ChatService;
+import com.boot.jx.model.CommonFile;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.QuickAction;
@@ -138,8 +140,10 @@ public class MsgController {
 	public ApiResponse<ChatMessageDTO, Object> uploadSessionFile(@RequestParam String message,
 			@RequestParam(name = "file") MultipartFile file) throws InterruptedException {
 		OutboxMessage outboxMessage = JsonUtil.parse(message, OutboxMessage.class);
-		String url = fileStore.upload1(file).getUrl();
-		outboxMessage.attachment(new Attachment().mediaURL(url));
+		CommonFile f = fileStore.upload2(file,
+				String.format("%s/session/%s", AppContextUtil.getTenant(), outboxMessage.getSessionId()),
+				String.format("%s_%s", outboxMessage.getMessageIdRef(), file.getOriginalFilename()));
+		outboxMessage.attachment(new Attachment().mediaURL(f.getUrl()).mediaType(f.getFileType()));
 		return sendSessionMessage(outboxMessage);
 	}
 

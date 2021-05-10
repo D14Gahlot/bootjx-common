@@ -3,6 +3,7 @@ package com.boot.jx.postman.model;
 import java.io.Serializable;
 
 import com.boot.jx.swagger.ApiMockModelProperty;
+import com.boot.utils.ArgUtil;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -39,8 +40,8 @@ public class Attachment implements Serializable {
 		return this;
 	}
 
-	public Attachment mediaType(String mediaType) {
-		this.mediaType = mediaType;
+	public Attachment mediaType(Object mediaTypeLocal) {
+		this.mediaType = ArgUtil.parseAsString(mediaTypeLocal);
 		return this;
 	}
 
