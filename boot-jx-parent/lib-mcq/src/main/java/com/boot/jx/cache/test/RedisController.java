@@ -11,7 +11,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.boot.jx.api.ApiResponse;
+import com.boot.jx.api.BoolRespModel;
 import com.boot.jx.cache.test.RedisSampleTxCacheBox.RedisSampleData;
+import com.boot.jx.tunnel.DBEvent;
 import com.boot.jx.tunnel.TunnelDBEventLimiter;
 import com.boot.jx.tunnel.TunnelService;
 import com.boot.jx.tunnel.sys.SysTunnelEventsDict;
@@ -55,4 +58,11 @@ public class RedisController {
 		return propMap;
 	}
 
+	@RequestMapping(value = "/pub/amx/config/shared/clear/all", method = RequestMethod.GET)
+	public ApiResponse<BoolRespModel, Object> clearSharedConfig() {
+		DBEvent e = new DBEvent();
+		e.setEventCode(SysTunnelEventsDict.Names.SHARED_CONFIG_UPDATE);
+		tunnelService.shout(SysTunnelEventsDict.Names.SHARED_CONFIG_UPDATE, e);
+		return ApiResponse.build(new BoolRespModel(true));
+	}
 }

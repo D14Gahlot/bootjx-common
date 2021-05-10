@@ -8,8 +8,8 @@ import org.springframework.stereotype.Service;
 import com.boot.jx.admin.dto.AgentResponseDto;
 import com.boot.jx.admin.dto.DepartmentResponseDto;
 import com.boot.jx.admin.manager.AdminManager;
-import com.boot.jx.admin.model.Agent;
-import com.boot.jx.admin.model.Department;
+import com.boot.jx.admin.model.AgentDoc;
+import com.boot.jx.admin.model.DepartmentDoc;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
 import com.boot.utils.EntityDtoUtil;
@@ -20,65 +20,68 @@ public class AdminService {
 	@Autowired
 	AdminManager adminManager;
 
-	public List<Agent> saveAgent(Agent reqDto) {
-		List<Agent> lstOfAgent = adminManager.saveAgent(reqDto);
+	public List<AgentDoc> saveAgent(AgentDoc reqDto) {
+		List<AgentDoc> lstOfAgent = adminManager.saveAgent(reqDto);
 		return lstOfAgent;
 	}
 
-	public List<Agent> fetchAgent(Integer agentId) {
-		List<Agent> lstOfAgent = adminManager.fetchAgentList(agentId);
+	public List<AgentDoc> fetchAgent(String agentId) {
+		List<AgentDoc> lstOfAgent = adminManager.fetchAgentList(agentId);
 		return lstOfAgent;
 	}
 
 	public List<AgentResponseDto> saveAgent(AgentResponseDto reqDto) {
-		Agent reqEntity = EntityDtoUtil.dtoToEntity(reqDto, new Agent());
-		List<Agent> lstOfAgent = adminManager.saveAgent(reqEntity);
+		AgentDoc reqEntity = EntityDtoUtil.dtoToEntity(reqDto, new AgentDoc());
+		List<AgentDoc> lstOfAgent = adminManager.saveAgent(reqEntity);
 		return fetchAgents(lstOfAgent);
 	}
 
-	public List<AgentResponseDto> fetchAgents(Integer agentId) {
-		List<Agent> lstOfAgent = adminManager.fetchAgentList(agentId);
+	public List<AgentResponseDto> fetchAgents(String agentId) {
+		List<AgentDoc> lstOfAgent = adminManager.fetchAgentList(agentId);
 		return fetchAgents(lstOfAgent);
 	}
 
-	private List<AgentResponseDto> fetchAgents(List<Agent> lstOfAgent) {
+	private List<AgentResponseDto> fetchAgents(List<AgentDoc> lstOfAgent) {
 		List<AgentResponseDto> agentList = new AgentResponseDto().importFrom(lstOfAgent);
 		for (AgentResponseDto agentResponseDto : agentList) {
 			agentResponseDto.setAgent_password(null);
 			if (ArgUtil.is(agentResponseDto.getAgent_id())) {
-				agentResponseDto.setDept(new DepartmentResponseDto()
-						.importFrom(CollectionUtil.getOne(adminManager.fetchDept(agentResponseDto.getDept_id()))));
+				agentResponseDto.setDept(new DepartmentResponseDto().importFrom(CollectionUtil
+						.getOne(adminManager.fetchDept(ArgUtil.parseAsString(agentResponseDto.getDept_id())))));
 			}
 		}
 		return agentList;
 	}
 
 	public List<DepartmentResponseDto> saveDept(DepartmentResponseDto dto) {
-		Department reqEntity = EntityDtoUtil.dtoToEntity(dto, new Department());
+		DepartmentDoc reqEntity = EntityDtoUtil.dtoToEntity(dto, new DepartmentDoc());
 		return new DepartmentResponseDto().importFrom(adminManager.createAndUpdateDepartment(reqEntity));
 	}
 
-	public List<DepartmentResponseDto> fetchDepartments(Integer deptId) {
-		List<Department> lstDept = adminManager.fetchDept(deptId);
+	public List<DepartmentResponseDto> fetchDepartments(String deptId) {
+		List<DepartmentDoc> lstDept = adminManager.fetchDept(deptId);
 		return new DepartmentResponseDto().importFrom(lstDept);
 	}
 
-	public List<AgentResponseDto> updateAgentStatus(Integer agentId, String status) {
+	public List<AgentResponseDto> updateAgentStatus(String agentId, String status) {
 		return fetchAgents(adminManager.updateAgentStatus(agentId, status));
 	}
+	public List<AgentResponseDto> updateAgentAdmin(String agentId) {
+		return fetchAgents(adminManager.updateAgentAdmin(agentId));
+	}
 
-	public List<Department> createAndUpdateDepartment(Department deptReqDto) {
-		List<Department> lstDept = adminManager.createAndUpdateDepartment(deptReqDto);
+	public List<DepartmentDoc> createAndUpdateDepartment(DepartmentDoc deptReqDto) {
+		List<DepartmentDoc> lstDept = adminManager.createAndUpdateDepartment(deptReqDto);
 		return lstDept;
 	}
 
-	public List<Department> fetchDepartment(Integer deptId) {
-		List<Department> lstDept = adminManager.fetchDept(deptId);
+	public List<DepartmentDoc> fetchDepartment(String deptId) {
+		List<DepartmentDoc> lstDept = adminManager.fetchDept(deptId);
 		return lstDept;
 	}
 
-	public List<Department> updateDepartment(Integer deptId, String status) {
-		List<Department> lstDept = adminManager.updateDeptStatus(deptId, status);
+	public List<DepartmentDoc> updateDepartment(Integer deptId, String status) {
+		List<DepartmentDoc> lstDept = adminManager.updateDeptStatus(deptId, status);
 		return lstDept;
 	}
 

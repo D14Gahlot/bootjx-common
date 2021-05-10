@@ -1,34 +1,33 @@
 package com.boot.jx.admin.model;
 
-import java.math.BigDecimal;
+import java.io.Serializable;
 import java.util.Date;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.TypeAlias;
+import org.springframework.data.mongodb.core.index.Indexed;
+import org.springframework.data.mongodb.core.mapping.Document;
 
-import com.boot.jx.model.IResourceEntity;
-import com.boot.utils.ArgUtil;
+import com.boot.jx.mongo.CommonDocInterfaces.IDocument;
+import com.boot.jx.mongo.CommonDocInterfaces.Patchable;
 
-@Entity
-public class Department implements IResourceEntity {
+@Document(collection = "DEPARTMENTS")
+@TypeAlias("DepartmentDoc")
+public class DepartmentDoc implements Serializable, Patchable<DepartmentDoc>, IDocument {
+
+	private static final long serialVersionUID = -3381417310939635611L;
 
 	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
-	private Integer dept_id;
-	@Column(unique = true, nullable = false, length = 12)
+	private String dept_id;
+
+	@Indexed(unique = true)
 	private String dept_code;
-	@Column(nullable = false)
 	private String dept_name;
 	private String dept_email;
 	private Date created_date;
 	private String create_by = "A";
 	private Date modified_date;
-	@Column
 	private String modified_by = "A";
-	@Column(length = 1)
 	private String isactive;
 
 	public String getDept_code() {
@@ -95,32 +94,19 @@ public class Department implements IResourceEntity {
 		this.isactive = isactive;
 	}
 
-	public Integer getDept_id() {
+	public String getDept_id() {
 		return dept_id;
 	}
 
-	public void setDept_id(Integer dept_id) {
+	public void setDept_id(String dept_id) {
 		this.dept_id = dept_id;
 	}
 
 	@Override
-	public BigDecimal resourceId() {
-		return ArgUtil.parseAsBigDecimal(this.dept_id);
-	}
-
-	@Override
-	public String resourceName() {
-		return this.dept_name;
-	}
-
-	@Override
-	public String resourceCode() {
-		return this.dept_code;
-	}
-
-	@Override
-	public String resourceLocalName() {
-		return this.dept_name;
+	public DepartmentDoc patch() {
+		DepartmentDoc patch = new DepartmentDoc();
+		patch.setDept_id(this.getDept_id());
+		return patch;
 	}
 
 }

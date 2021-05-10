@@ -2,13 +2,13 @@ package com.boot.jx.admin.dto;
 
 import java.sql.Date;
 
-import com.boot.jx.model.AResourceDTO;
+import com.boot.jx.mongo.CommonDocInterfaces.ADocumentDTO;
 
-public class AgentResponseDto extends AResourceDTO<AgentResponseDto> {
+public class AgentResponseDto extends ADocumentDTO<AgentResponseDto> {
 
 	private static final long serialVersionUID = 559612484746960788L;
-	private Integer agent_id;
-	private Integer dept_id;
+	private String agent_id;
+	private String dept_id;
 	private String agent_code;
 	private String agent_name;
 	private String agent_department;
@@ -21,6 +21,7 @@ public class AgentResponseDto extends AResourceDTO<AgentResponseDto> {
 	private Date modified_date;
 	private String modified_by;
 	private String isactive;
+	private boolean admin;
 	private DepartmentResponseDto dept;
 
 	public String getAgent_code() {
@@ -103,11 +104,11 @@ public class AgentResponseDto extends AResourceDTO<AgentResponseDto> {
 		this.isactive = isactive;
 	}
 
-	public Integer getAgent_id() {
+	public String getAgent_id() {
 		return agent_id;
 	}
 
-	public void setAgent_id(Integer agent_id) {
+	public void setAgent_id(String agent_id) {
 		this.agent_id = agent_id;
 	}
 
@@ -124,11 +125,11 @@ public class AgentResponseDto extends AResourceDTO<AgentResponseDto> {
 		return new AgentResponseDto();
 	}
 
-	public Integer getDept_id() {
+	public String getDept_id() {
 		return dept_id;
 	}
 
-	public void setDept_id(Integer dept_id) {
+	public void setDept_id(String dept_id) {
 		this.dept_id = dept_id;
 	}
 
@@ -146,6 +147,14 @@ public class AgentResponseDto extends AResourceDTO<AgentResponseDto> {
 
 	public void setAgent_password(String agent_password) {
 		this.agent_password = agent_password;
+	}
+
+	public boolean isAdmin() {
+		return admin;
+	}
+
+	public void setAdmin(boolean isAdmin) {
+		this.admin = isAdmin;
 	}
 
 }

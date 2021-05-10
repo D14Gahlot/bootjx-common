@@ -11,9 +11,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
-import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
+import com.boot.jx.postman.PMEnvironment;
+import com.boot.jx.postman.PostManException;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CryptoUtil.HashBuilder;
 import com.ulisesbocchio.jasyptspringboot.annotation.EnableEncryptableProperties;
@@ -43,31 +44,32 @@ public class TwitterClient {
 	private String webhookPath;
 
 	@Autowired
-	private Environment environment;
-
-	private String getProperty(String lane, String property) {
-		String accessToken = environment.getProperty("postman.twitter.lane." + lane + "." + property);
-		return accessToken;
-	}
+	private PMEnvironment environment;
 
 	public TwitterClientContext getContext(String lane) {
-		lane = ArgUtil.nonEmpty(lane, defaultLane).toLowerCase();
+		// lane = ArgUtil.nonEmpty(lane, defaultLane);
+
+		if (ArgUtil.isEmpty(lane)) {
+			throw new PostManException("No lane " + lane);
+		}
+
 		TwitterClientContext ctx = CLIENTS.get(lane);
+
 		if (ArgUtil.isEmpty(ctx)) {
-			String consumerKey = getProperty(lane, "consumer-key");
-			String consumerKeySecret = getProperty(lane, "consumer-secret");
-			String accessToken = getProperty(lane, "access-token");
-			String accessTokenSecret = getProperty(lane, "access-token-secret");
-			String envName = getProperty(lane, "env_name");
+			TwitterConfig config = environment.get().twitter(lane);
+			if (!ArgUtil.is(config)) {
+				throw new PostManException("No Config for lane " + lane);
+			}
 
 			ConfigurationBuilder cb = new ConfigurationBuilder();
-			cb.setDebugEnabled(true).setOAuthConsumerKey(consumerKey).setOAuthConsumerSecret(consumerKeySecret)
-					.setOAuthAccessToken(accessToken).setOAuthAccessTokenSecret(accessTokenSecret);
+			cb.setDebugEnabled(true).setOAuthConsumerKey(config.getConsumerKey())
+					.setOAuthConsumerSecret(config.getConsumerSecret()).setOAuthAccessToken(config.getAccessToken())
+					.setOAuthAccessTokenSecret(config.getAccessTokenSecret());
 			TwitterFactory tf = new TwitterFactory(cb.build());
 			Twitter tw = tf.getInstance();
 			ctx = new TwitterClientContext(tw);
-			if (ArgUtil.is(envName)) {
-				WebhookManager manager = new WebhookManager(tw.getConfiguration(), envName);
+			if (ArgUtil.is(config.getEnvName())) {
+				WebhookManager manager = new WebhookManager(tw.getConfiguration(), config.getEnvName());
 				ctx.setWebhookManager(manager);
 			}
 			CLIENTS.put(lane, ctx);
@@ -94,14 +96,20 @@ public class TwitterClient {
 	}
 
 	public StatusCode registerWebhook(String lane, String callbackURL) {
-		lane = ArgUtil.nonEmpty(lane, defaultLane).toLowerCase();
+		// lane = ArgUtil.nonEmpty(lane, defaultLane);
 		TwitterClientContext ctx = getContext(lane);
+		LOGGER.info("RegisterWebHook " + callbackURL + webhookPath + "/" + lane);
 		return ctx.registerWebhook(callbackURL + webhookPath + "/" + lane);
 	}
 
 	public StatusCode registerWebhook(String lane) {
-		if (ArgUtil.is(webhookUrl)) {
-			return registerWebhook(lane, webhookUrl);
+		TwitterConfig config = environment.get().twitter(lane);
+		if (ArgUtil.isEmpty(config)) {
+			LOGGER.info("No Config " + lane);
+		}
+
+		if (ArgUtil.is(config.getWebhookUrl())) {
+			return registerWebhook(lane, config.getWebhookUrl());
 		}
 		return null;
 	}

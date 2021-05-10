@@ -1,0 +1,38 @@
+package com.boot.jx.admin;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+import com.amazonaws.auth.AWSCredentials;
+import com.amazonaws.auth.AWSStaticCredentialsProvider;
+import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.AmazonS3ClientBuilder;
+
+/**
+ * The Class WebApplication.
+ * 
+ * @EnableTransactionManagement
+ * @EnableCaching
+ */
+@Configuration
+public class AdminOWSConfig {
+
+	@Value("${aws.s3.accessKey}")
+	String amazoneS3AccessKey;
+
+	@Value("${aws.s3.secretKey}")
+	String amazoneS3secretKey;
+
+	@Value("${aws.s3.region}")
+	String amazoneS3region;
+
+	@Bean
+	public AmazonS3 s3() {
+		AWSCredentials awsCredentials = new BasicAWSCredentials(amazoneS3AccessKey, amazoneS3secretKey);
+		return AmazonS3ClientBuilder.standard().withRegion(amazoneS3region)
+				.withCredentials(new AWSStaticCredentialsProvider(awsCredentials)).build();
+	}
+
+}

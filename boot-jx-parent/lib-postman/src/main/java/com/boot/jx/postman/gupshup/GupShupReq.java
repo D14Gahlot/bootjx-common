@@ -15,6 +15,8 @@ public class GupShupReq implements Serializable {
 	String userid;
 	String password;
 
+	String waNumber;
+
 	@JsonProperty("phone_number")
 	String phoneNumber;
 
@@ -324,5 +326,13 @@ public class GupShupReq implements Serializable {
 	public GupShupReq method(Method method) {
 		this.method = method;
 		return this;
+	}
+
+	public String getWaNumber() {
+		return waNumber;
+	}
+
+	public void setWaNumber(String waNumber) {
+		this.waNumber = waNumber;
 	}
 }

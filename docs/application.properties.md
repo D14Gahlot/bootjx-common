@@ -116,3 +116,18 @@ mry.agent.url=http://localhost:8083/agent
 mry.bot.url=http://localhost:8084/bot
 
 ```
+
+
+
+## TenantProperties 
+###### application.aertrip.properties
+```application.aertrip.properties
+###### DB mysql ########
+spring.datasource.url=jdbc:mysql://127.0.0.1:3306/aertrip
+spring.datasource.username=aertrip
+spring.datasource.password=aertrip
+
+###### DB Mongo ########
+spring.data.mongodb.uri=mongodb://aertrip:aertrip@10.28.42.30:27017/aertrip
+spring.data.mongodb.repositories.enabled=true
+```

@@ -1,27 +1,25 @@
 package com.boot.jx.admin.model;
 
-import java.math.BigDecimal;
 import java.util.Date;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.TypeAlias;
+import org.springframework.data.mongodb.core.index.Indexed;
+import org.springframework.data.mongodb.core.mapping.Document;
 
-import com.boot.jx.model.IResourceEntity;
-import com.boot.utils.ArgUtil;
+import com.boot.jx.mongo.CommonDocInterfaces.IDocument;
 
-@Entity
-public class Agent implements IResourceEntity {
+@Document(collection = "AGENTS")
+@TypeAlias("AgentDoc")
+public class AgentDoc implements IDocument {
+
 	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
-	private Integer agent_id;
-	@Column(unique = true, nullable = false, length = 12)
+	private String agent_id;
+	@Indexed(unique = true)
 	private String agent_code;
-	@Column(nullable = false)
 	private String agent_name;
 	private String agent_department;
+	@Indexed(unique = true)
 	private String agent_email;
 	private String agent_number;
 	private String agent_password;
@@ -30,12 +28,12 @@ public class Agent implements IResourceEntity {
 	private Date created_date;
 	private String create_by = "ADMIN";
 	private Date modified_date;
-	@Column
 	private String modified_by = "ADMIN";
-	@Column(length = 1)
 	private String isactive;
+	private boolean admin;
+	private boolean isSuperAdmin;
 
-	private Integer dept_id;
+	private String dept_id;
 
 	public String getAgent_name() {
 		return agent_name;
@@ -117,11 +115,11 @@ public class Agent implements IResourceEntity {
 		this.agent_code = agent_code;
 	}
 
-	public Integer getAgent_id() {
+	public String getAgent_id() {
 		return agent_id;
 	}
 
-	public void setAgent_id(Integer agent_id) {
+	public void setAgent_id(String agent_id) {
 		this.agent_id = agent_id;
 	}
 
@@ -141,32 +139,12 @@ public class Agent implements IResourceEntity {
 		this.agent_channels = agent_channels;
 	}
 
-	public Integer getDept_id() {
+	public String getDept_id() {
 		return dept_id;
 	}
 
-	public void setDept_id(Integer dept_id) {
+	public void setDept_id(String dept_id) {
 		this.dept_id = dept_id;
-	}
-
-	@Override
-	public BigDecimal resourceId() {
-		return ArgUtil.parseAsBigDecimal(this.agent_id);
-	}
-
-	@Override
-	public String resourceName() {
-		return this.agent_name;
-	}
-
-	@Override
-	public String resourceCode() {
-		return this.agent_code;
-	}
-
-	@Override
-	public String resourceLocalName() {
-		return this.agent_name;
 	}
 
 	public String getAgent_otp() {
@@ -175,6 +153,22 @@ public class Agent implements IResourceEntity {
 
 	public void setAgent_otp(String agent_otp) {
 		this.agent_otp = agent_otp;
+	}
+
+	public boolean isAdmin() {
+		return admin;
+	}
+
+	public void setAdmin(boolean isAdmin) {
+		this.admin = isAdmin;
+	}
+
+	public boolean isSuperAdmin() {
+		return isSuperAdmin;
+	}
+
+	public void setSuperAdmin(boolean isSuperAdmin) {
+		this.isSuperAdmin = isSuperAdmin;
 	}
 
 }

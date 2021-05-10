@@ -2,7 +2,6 @@ package com.boot.jx.chat;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 import com.boot.jx.bot.ChatContext;
@@ -13,8 +12,6 @@ import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatContextDoc;
 import com.boot.jx.postman.doc.ChatMeta;
 import com.boot.jx.postman.doc.ChatSessionDoc;
-import com.boot.jx.postman.dto.ChatUserProfileDTO;
-import com.boot.jx.postman.dto.ChatUserProfileDTO.ChatUserProfileRequest;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.Message;
 import com.boot.jx.postman.model.OutboxMessage;
@@ -285,9 +282,18 @@ public class ChatService {
 			chatUserProfileRequest.setEmail(contact.getEmail());
 			chatUserProfileRequest.setMobile(contact.getPhone());
 			chatUserProfileRequest.setContactId(contact.getContactId());
+			chatUserProfileRequest.setContactType(contact.getContactType());
+			chatUserProfileRequest.setLane(contact.getLane());
+			chatUserProfileRequest.setProfileId(contact.getProfileId());
 			ChatUserProfileDTO profile = chatClient.fetchContactDetails(chatUserProfileRequest);
+
 			contact = sessionStore.getContact(inboxMessage);
-			contact.setProfile(profile);
+			if (ArgUtil.is(profile.getProfileId())) {
+				sessionStore.save(profile);
+				contact.setProfileId(profile.getProfileId());
+			} else {
+				contact.setProfile(profile);
+			}
 			sessionStore.save(contact);
 		} catch (Exception e) {
 

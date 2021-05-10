@@ -7,6 +7,7 @@ import java.util.Map;
 
 import com.boot.jx.dict.ContactType;
 import com.boot.utils.StringUtils.StringMatcher;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -28,6 +29,8 @@ public class InboxMessage implements Serializable, IMessage {
 
 	private BigDecimal queue;
 	private String lane;
+	
+	@JsonIgnore
 	private StringMatcher matcher;
 
 	private String checksum;
@@ -121,10 +124,12 @@ public class InboxMessage implements Serializable, IMessage {
 		return this;
 	}
 
+	@JsonIgnore
 	public StringMatcher getMatcher() {
 		return matcher;
 	}
 
+	@JsonIgnore
 	public void setMatcher(StringMatcher matcher) {
 		this.matcher = matcher;
 	}

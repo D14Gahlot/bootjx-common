@@ -139,7 +139,8 @@ public abstract class AbstractGupShupClient {
 		}
 
 		if (ArgUtil.is(message.getMessage())) {
-			resp = sendMessage(phoneNumber, message.getMessage());
+			gupShupReq.setMessage(message.getMessage());
+			resp = sendMessage(gupShupReq);
 			if (ArgUtil.is(resp.getResponse().getId()))
 				msgIds.add(resp.getResponse().getId());
 		}

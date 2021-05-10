@@ -11,6 +11,7 @@ import com.boot.jx.tunnel.DBEvent;
 import com.boot.jx.tunnel.ITunnelSubscriber;
 import com.boot.jx.tunnel.TunnelEventMapping;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.ClazzUtil;
 
 @TunnelEventMapping(topic = SysTunnelEventsDict.Names.SHARED_CONFIG_UPDATE)
 public class SharedConfigSubscriber implements ITunnelSubscriber<DBEvent> {
@@ -25,6 +26,7 @@ public class SharedConfigSubscriber implements ITunnelSubscriber<DBEvent> {
 		if (ArgUtil.is(listAppSharedConfig)) {
 			for (AppSharedConfig appSharedConfig : listAppSharedConfig) {
 				appSharedConfig.clear(brokerEvent.getData());
+				LOGGER.info("for class {}", ClazzUtil.getUltimateClassName(appSharedConfig));
 			}
 		}
 	}

@@ -10,8 +10,10 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.boot.jx.postman.dms.DMService;
+import com.boot.utils.MapBuilder;
 import com.cloudinary.utils.ObjectUtils;
 
 /**
@@ -36,6 +38,7 @@ public class DMSController {
 				"timestamp" , timestamp/1000
 		);
 		String signature = dmService.cloudinary().apiSignRequest(params, dmService.getCloudinaryApiSecret());
+		
 		Map options = ObjectUtils.asMap(
 				"cloud_name", dmService.getCloudinaryName(),
 				"api_key" ,dmService.getCloudinaryApiKey(),
@@ -49,6 +52,27 @@ public class DMSController {
 		model.addAttribute("OPTIONS", options);
 
 		return "cloudinary_upload";
+	}
+	
+	@ResponseBody
+	@RequestMapping(value = "/ext/upload/options", method = RequestMethod.GET)
+	public Map<String, Object> uploadOptions(@RequestParam String publicId) {
+		long timestamp = System.currentTimeMillis();
+		Map params = ObjectUtils.asMap(
+				"public_id",publicId,
+				"timestamp" , timestamp/1000
+		);
+		String signature = dmService.cloudinary().apiSignRequest(params, dmService.getCloudinaryApiSecret());
+		
+		Map options = ObjectUtils.asMap(
+				"cloud_name", dmService.getCloudinaryName(),
+				"api_key" ,dmService.getCloudinaryApiKey(),
+				"resource_type", "auto",
+				"callback", "https://xyz.com/",
+				"signature", signature
+		);
+		String url = dmService.cloudinary().uploader().getUploadUrl(options);
+		return MapBuilder.map().put("URL", url).put("PARAMS", params).put("OPTIONS", options).build();
 	}
 
 }

@@ -11,9 +11,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.boot.jx.postman.PostManException;
-import com.boot.jx.postman.client.GupShupChatClient;
-import com.boot.jx.postman.client.GupShupNotifyClient;
+import com.boot.jx.postman.gupshup.GupShupClientChat;
 import com.boot.jx.postman.gupshup.GupShupConstants;
+import com.boot.jx.postman.gupshup.GupShupClientNotify;
 import com.boot.jx.postman.gupshup.GupShupResp;
 import com.boot.jx.scope.vendor.VendorContext.ApiVendorHeaders;
 import com.maxmind.geoip2.exception.GeoIp2Exception;
@@ -29,10 +29,10 @@ public class GupShupController {
 
 	/** The geo location service. */
 	@Autowired
-	GupShupChatClient gupShupChatClient;
+	GupShupClientChat gupShupChatClient;
 
 	@Autowired
-	GupShupNotifyClient gupShupNotifyClient;
+	GupShupClientNotify gupShupNotifyClient;
 
 	@RequestMapping(value = "/gupshup/optin", method = RequestMethod.POST)
 	public GupShupResp optIn(

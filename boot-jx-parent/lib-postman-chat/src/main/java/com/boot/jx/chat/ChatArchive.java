@@ -9,9 +9,11 @@ import org.springframework.stereotype.Component;
 
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
+import com.boot.jx.postman.doc.ChatUserProfileDoc;
 import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.dto.ChatMessageDTO;
 import com.boot.jx.postman.dto.ChatSessionDTO;
+import com.boot.jx.postman.dto.ChatUserProfileDTO;
 import com.boot.jx.postman.dto.ContactDTO;
 import com.boot.jx.postman.store.MessageStore;
 import com.boot.jx.postman.store.SessionStore;
@@ -31,7 +33,13 @@ public class ChatArchive {
 
 	public ContactDTO getContact(ChatSessionDTO chatSessionDto) {
 		ChatContactDoc contact = mongoTemplate.findById(chatSessionDto.getContactId(), ChatContactDoc.class);
-		return ChatDTOUtil.getContactDTO(contact);
+		ContactDTO dto = ChatDTOUtil.getContactDTO(contact);
+		if (ArgUtil.is(contact.getProfileId())) {
+			ChatUserProfileDoc profileDoc = mongoTemplate.findById(contact.getProfileId(), ChatUserProfileDoc.class);
+			ChatUserProfileDTO profileDTO = ChatDTOUtil.getProfileDTO(profileDoc);
+			dto.setProfile(profileDTO);
+		}
+		return dto;
 	}
 
 	public ChatSessionDTO withContact(ChatSessionDTO chatSessionDto) {

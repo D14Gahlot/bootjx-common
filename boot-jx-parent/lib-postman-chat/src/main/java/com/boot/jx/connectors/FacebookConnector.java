@@ -19,7 +19,7 @@ import com.boot.jx.postman.fb.FacebookMessageRequest;
 import com.boot.jx.postman.fb.FacebookMessageResp;
 import com.boot.jx.postman.fb.FacebookMessaging;
 import com.boot.jx.postman.fb.FacebookUserProfile;
-import com.boot.jx.postman.gupshup.GupShupConfig;
+import com.boot.jx.postman.gupshup.GupShupConfigClient;
 import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.File;
 import com.boot.jx.postman.model.InboxMessage;
@@ -33,9 +33,6 @@ public class FacebookConnector implements ConnectorHandler {
 
 	@Autowired
 	private FacebooClient facebooClient;
-
-	@Autowired
-	protected GupShupConfig gupShupConfig;
 
 	@Autowired
 	private MongoTemplate mongoTemplate;
@@ -110,8 +107,7 @@ public class FacebookConnector implements ConnectorHandler {
 
 	@Override
 	public InboxMessage assignToAgent(InboxMessage inboxMessage) {
-		facebooClient.sendReply(inboxMessage.getFrom(), "Call us @ " + gupShupConfig.getGupShupWaNumber(),
-				inboxMessage.getLane());
+		this.reply(inboxMessage, new OutboxMessage().message("Our agent will get in touch with you"));
 		return inboxMessage;
 	}
 

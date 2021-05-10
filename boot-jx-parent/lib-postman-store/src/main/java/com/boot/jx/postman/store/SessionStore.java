@@ -17,9 +17,12 @@ import org.springframework.stereotype.Component;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
+import com.boot.jx.postman.doc.ChatUserProfileDoc;
+import com.boot.jx.postman.dto.ChatUserProfileDTO;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.EntityDtoUtil;
 import com.boot.utils.TimeUtils;
 import com.mongodb.BasicDBObject;
 import com.mongodb.BulkWriteOperation;
@@ -96,6 +99,9 @@ public class SessionStore {
 			// SESSION CREATION
 			chatSessionDoc = new ChatSessionDoc();
 			chatSessionDoc.setContactId(contactId);
+			chatSessionDoc.setContactType(ArgUtil.parseAsString(inboxMessage.getContactType()));
+			chatSessionDoc.setChannel(inboxMessage.getChannel());
+			chatSessionDoc.setLane(inboxMessage.getLane());
 
 			// SESSION UPDATE
 			chatSessionDoc.setActive(true);
@@ -137,8 +143,8 @@ public class SessionStore {
 		InboxMessage inboxMessage = new InboxMessage();
 		inboxMessage.setContactType(ArgUtil.parseAsEnumT(contact.getContactType(), ContactType.class));
 		inboxMessage.setChannel(contact.getChannelType());
+		inboxMessage.setLane(ArgUtil.nonEmpty(session.getLane(), contact.getLane()));
 		inboxMessage.setFrom(contact.getCsid());
-		inboxMessage.setLane(contact.getLane());
 		inboxMessage.setFromName(contact.getName());
 		inboxMessage.setSessionId(contact.getSessionId());
 		inboxMessage.setContactId(contact.getContactId());
@@ -208,6 +214,9 @@ public class SessionStore {
 			}
 			if (ArgUtil.is(contact.getEmail())) {
 				orExpression.add(Criteria.where("email").is(contact.getEmail()));
+			}
+			if (ArgUtil.is(contact.getProfileId())) {
+				orExpression.add(Criteria.where("profileId").is(contact.getProfileId()));
 			}
 			query1.addCriteria(new Criteria().orOperator(orExpression.toArray(new Criteria[orExpression.size()])));
 			contacts = mongoTemplate.find(query1, ChatContactDoc.class);
@@ -287,5 +296,16 @@ public class SessionStore {
 		chatSessionDoc.setAgentScore(agentScore);
 		save(chatSessionDoc);
 		return chatSessionDoc;
+	}
+
+	public ChatUserProfileDoc save(ChatUserProfileDoc doc) {
+		mongoTemplate.save(doc);
+		return doc;
+	}
+
+	public ChatUserProfileDoc save(ChatUserProfileDTO profile) {
+		ChatUserProfileDoc doc = EntityDtoUtil.dtoToEntity(profile, new ChatUserProfileDoc());
+		doc.setId(profile.getProfileId());
+		return save(doc);
 	}
 }

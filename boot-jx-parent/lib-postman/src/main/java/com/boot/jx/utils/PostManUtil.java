@@ -25,17 +25,17 @@ public class PostManUtil {
 				.contentType(MediaType.valueOf(file.getFileFormat().getContentType())).body(file.getBody());
 	}
 
-	public static String createContactId(ContactType contactType, String id) {
+	public static String createContactId(ContactType contactType, String id, String lane) {
 		if (ContactType.WHATSAPP.equals(contactType)) {
-			return "wa" + id;
+			return "wa" + id + "_" + lane;
 		} else if (ContactType.FACEBOOK.equals(contactType)) {
-			return "fb" + id;
+			return "fb" + id + "_" + lane;
 		} else if (ContactType.TWITTER.equals(contactType)) {
-			return "tw" + id;
+			return "tw" + id + "_" + lane;
 		} else if (ContactType.TELEGRAM.equals(contactType)) {
-			return "tg" + id;
+			return "tg" + id + "_" + lane;
 		} else if (ArgUtil.is(contactType)) {
-			return contactType.getShortCode() + id;
+			return contactType.getShortCode() + id + "_" + lane;
 		}
 		return id;
 	}
@@ -44,7 +44,7 @@ public class PostManUtil {
 		if (ArgUtil.is(inboxMessage.getContactId())) {
 			return inboxMessage.getContactId();
 		}
-		return createContactId(inboxMessage.getContactType(), inboxMessage.forContact());
+		return createContactId(inboxMessage.getContactType(), inboxMessage.forContact(), inboxMessage.getLane());
 	}
 
 	public static String generateCheckSum(InboxMessage inboxMessage) {

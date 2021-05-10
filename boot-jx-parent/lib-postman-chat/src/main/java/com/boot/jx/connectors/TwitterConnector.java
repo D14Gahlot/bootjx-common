@@ -22,7 +22,7 @@ import com.boot.jx.postman.client.TmplClient;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.TemplateReply;
-import com.boot.jx.postman.gupshup.GupShupConfig;
+import com.boot.jx.postman.gupshup.GupShupConfigClient;
 import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.File;
 import com.boot.jx.postman.model.InboxMessage;
@@ -50,7 +50,7 @@ public class TwitterConnector implements ConnectorHandler {
 	private TwitterClient twitterClient;
 
 	@Autowired
-	protected GupShupConfig gupShupConfig;
+	protected GupShupConfigClient gupShupConfig;
 
 	@Autowired
 	private MongoTemplate mongoTemplate;
@@ -160,6 +160,7 @@ public class TwitterConnector implements ConnectorHandler {
 		ibm.setTo(String.valueOf(dm.getRecipientId()));
 		ibm.setChannel(Channel.DEFAULT.toString());
 		ibm.setContactType(ContactType.TWITTER);
+		ibm.setLane(lane);
 
 		/**
 		 * NOTE:- Do not user original DirectMessageJsonImpl as it can throw

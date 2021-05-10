@@ -8,12 +8,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
-import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendDocument;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
-import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
@@ -53,18 +51,21 @@ public class TelegramClient {
 	RestService restService;
 
 	@Autowired
-	private Environment environment;
+	private PMEnvironment environment;
 
 	private String getAccessToken(String lane) {
-		lane = ArgUtil.nonEmpty(lane, defaultLane).toLowerCase();
-		String accessToken = environment.getProperty("postman.telegram.lane." + lane + ".accessToken");
-		return accessToken;
+		if (ArgUtil.isEmpty(lane)) {
+			throw new PostManException("No lane " + lane);
+		}
+		TelegramConfig config = environment.get().telegram(lane);
+		if (!ArgUtil.is(config)) {
+			throw new PostManException("No Config for lane " + lane);
+		}
+		return config.getAccessToken();
 	}
 
 	public String registerWebhook(String callbackURL, String lane) {
-		lane = ArgUtil.nonEmpty(lane, "default").toLowerCase();
-		String accessToken = environment.getProperty("postman.telegram.lane." + lane + ".accessToken");
-		return restService.ajax(PATH.URL).path(PATH.BOT_SET_WEBHOOK).pathParam("accessToken", accessToken)
+		return restService.ajax(PATH.URL).path(PATH.BOT_SET_WEBHOOK).pathParam("accessToken", getAccessToken(lane))
 				.field("url", callbackURL + telegramWebhooPath)
 				.queryParam("url", callbackURL + telegramWebhooPath + "/" + lane).post().asString();
 	}
@@ -127,11 +128,24 @@ public class TelegramClient {
 
 	}
 
+	public String registerWebhook(String lane) {
+		try {
+			TelegramConfig config = environment.get().telegram(lane);
+			if (ArgUtil.is(config.getWebhookUrl())) {
+				String resp = registerWebhook(config.getWebhookUrl(), lane);
+				LOGGER.info("WebHook registered to {}", resp);
+				return resp;
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+
 	public void registerWebhookOnce(String lane) {
 		try {
-			if (!isRegistered && ArgUtil.is(telegramWebhookUrl)) {
-				LOGGER.info("WebHook registered to {}", registerWebhook(telegramWebhookUrl, lane));
-				isRegistered = true;
+			if (!isRegistered) {
+				registerWebhook(lane);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();

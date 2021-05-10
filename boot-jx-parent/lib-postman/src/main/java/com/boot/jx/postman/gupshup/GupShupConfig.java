@@ -1,91 +1,54 @@
 package com.boot.jx.postman.gupshup;
 
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.PropertySource;
+import java.io.Serializable;
 
-import com.ulisesbocchio.jasyptspringboot.annotation.EnableEncryptableProperties;
+public class GupShupConfig implements Serializable {
 
-@Configuration
-@PropertySource("classpath:application-gupshup.properties")
-@EnableEncryptableProperties
-public class GupShupConfig {
+	private static final long serialVersionUID = -2397678752642150000L;
+	private String number;
+	private String notifyId;
+	private String notifyPass;
+	private String chatId;
+	private String chatPass;
 
-	@Value("${gupshup.wa.number}")
-	protected String gupShupWaNumber;
-
-	@Value("${gupshup.api.url}")
-	protected String gupShupApiUrl;
-
-	@Value("${gupshup.agent.url}")
-	protected String gupShupAgentUrl;
-
-	@Value("${gupshup.notify.id}")
-	protected String gupShupNotifyId;
-
-	@Value("${gupshup.notify.pass}")
-	protected String gupShupNotifyPass;
-
-	@Value("${gupshup.chat.id}")
-	protected String gupShupChatId;
-
-	@Value("${gupshup.chat.pass}")
-	protected String gupShupChatPass;
-
-	public String getGupShupWaNumber() {
-		return gupShupWaNumber;
+	public String getNumber() {
+		return number;
 	}
 
-	public void setGupShupWaNumber(String gupShupWaNumber) {
-		this.gupShupWaNumber = gupShupWaNumber;
+	public void setNumber(String number) {
+		this.number = number;
 	}
 
-	public String getGupShupApiUrl() {
-		return gupShupApiUrl;
+	public String getNotifyId() {
+		return notifyId;
 	}
 
-	public void setGupShupApiUrl(String gupShupApiUrl) {
-		this.gupShupApiUrl = gupShupApiUrl;
+	public void setNotifyId(String notifyId) {
+		this.notifyId = notifyId;
 	}
 
-	public String getGupShupAgentUrl() {
-		return gupShupAgentUrl;
+	public String getNotifyPass() {
+		return notifyPass;
 	}
 
-	public void setGupShupAgentUrl(String gupShupAgentUrl) {
-		this.gupShupAgentUrl = gupShupAgentUrl;
+	public void setNotifyPass(String notifyPass) {
+		this.notifyPass = notifyPass;
 	}
 
-	public String getGupShupNotifyId() {
-		return gupShupNotifyId;
+	public String getChatId() {
+		return chatId;
 	}
 
-	public void setGupShupNotifyId(String gupShupNotifyId) {
-		this.gupShupNotifyId = gupShupNotifyId;
+	public void setChatId(String chatId) {
+		this.chatId = chatId;
 	}
 
-	public String getGupShupNotifyPass() {
-		return gupShupNotifyPass;
+	public String getChatPass() {
+		return chatPass;
 	}
 
-	public void setGupShupNotifyPass(String gupShupNotifyPass) {
-		this.gupShupNotifyPass = gupShupNotifyPass;
-	}
-
-	public String getGupShupChatId() {
-		return gupShupChatId;
-	}
-
-	public void setGupShupChatId(String gupShupChatId) {
-		this.gupShupChatId = gupShupChatId;
-	}
-
-	public String getGupShupChatPass() {
-		return gupShupChatPass;
-	}
-
-	public void setGupShupChatPass(String gupShupChatPass) {
-		this.gupShupChatPass = gupShupChatPass;
+	public void setChatPass(String chatPass) {
+		this.chatPass = chatPass;
 	}
 
 }
