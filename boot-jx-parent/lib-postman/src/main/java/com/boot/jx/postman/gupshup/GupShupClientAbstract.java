@@ -139,7 +139,7 @@ public abstract class GupShupClientAbstract {
 
 		if (ArgUtil.is(message.getAttachments())) {
 			for (Attachment attachment : message.getAttachments()) {
-				gupShupReq.setCaption(message.getSubject());
+				gupShupReq.setCaption(ArgUtil.nonEmpty(attachment.getMediaCaption(), message.getSubject()));
 				gupShupReq.setMessage(message.getMessage());
 				if (ArgUtil.is(attachment.getMediaURL())) {
 					if (ArgUtil.areEqual(attachment.getMediaType(), FileType.IMAGE.toString())) {
