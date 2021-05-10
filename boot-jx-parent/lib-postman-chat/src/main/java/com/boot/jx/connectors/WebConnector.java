@@ -25,6 +25,7 @@ import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.CollectionUtil;
 import com.boot.utils.JsonUtil;
 
 @Component
@@ -91,7 +92,9 @@ public class WebConnector implements DefaultConnector {
 	}
 
 	@Override
-	public void send(String lane, String csid, OutboxMessage outboxMessage) {
+	public void send(OutboxMessage outboxMessage) {
+		String to = CollectionUtil.getOne(outboxMessage.getTo());
+
 		process(outboxMessage);
 		if (redisson == null) {
 			try {
@@ -103,20 +106,10 @@ public class WebConnector implements DefaultConnector {
 				e.printStackTrace();
 			}
 		} else {
-			LOGGER.debug("sendReply to " + csid);
-			RBlockingQueue<String> messageQueue = redisson.getBlockingQueue(WEB_USER_MESSAGE_STR + csid);
+			LOGGER.debug("sendReply to " + to);
+			RBlockingQueue<String> messageQueue = redisson.getBlockingQueue(WEB_USER_MESSAGE_STR + to);
 			messageQueue.add(JsonUtil.toJson(outboxMessage));
 		}
-	}
-
-	@Override
-	public void reply(InboxMessage inboxMessage, OutboxMessage outboxMessage) {
-		send(inboxMessage.getLane(), inboxMessage.getFrom(), outboxMessage);
-	}
-
-	@Override
-	public void send(ChatContactDoc chatContactDoc, OutboxMessage outboxMessage) {
-		send(chatContactDoc.getLane(), chatContactDoc.getCsid(), outboxMessage);
 	}
 
 	@Override

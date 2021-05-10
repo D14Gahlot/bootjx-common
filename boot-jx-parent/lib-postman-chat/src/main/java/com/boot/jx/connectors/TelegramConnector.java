@@ -1,24 +1,16 @@
 package com.boot.jx.connectors;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.StringJoiner;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Component;
-import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 
 import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorHandler;
 import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorMapping;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.dict.FileType;
-import com.boot.jx.model.MapModel;
 import com.boot.jx.postman.client.TmplClient;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
@@ -26,8 +18,6 @@ import com.boot.jx.postman.doc.TemplateReply;
 import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.OutboxMessage;
-import com.boot.jx.postman.model.TGMessage;
-import com.boot.jx.postman.model.TmplElement;
 import com.boot.jx.postman.tg.TelegramClient;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.JsonUtil;
@@ -47,93 +37,30 @@ public class TelegramConnector implements ConnectorHandler {
 	@Autowired
 	private TmplClient tmplClient;
 
-	public OutboxMessage sendOutboxMessage(String lane, String to, OutboxMessage message) {
-		TGMessage resp = null;
-		StringJoiner msgIds = new StringJoiner(",");
-
-		if (ArgUtil.is(message.getAttachments())) {
-			for (Attachment attachment : message.getAttachments()) {
-				if (ArgUtil.is(attachment.getMediaURL())) {
-					if (ArgUtil.areEqual(attachment.getMediaType(), FileType.IMAGE.toString())) {
-						resp = telegramClient.sendPhoto(lane, to, attachment.getMediaURL(),
-								attachment.getMediaCaption());
-						if (ArgUtil.is(resp.getMessageId()))
-							msgIds.add(ArgUtil.parseAsString(resp.getMessageId()));
-					} else {
-						resp = telegramClient.sendDocument(lane, to, attachment.getMediaURL(),
-								attachment.getMediaCaption());
-						if (ArgUtil.is(resp.getMessageId()))
-							msgIds.add(ArgUtil.parseAsString(resp.getMessageId()));
+	public void send(OutboxMessage outboxMessage) {
+		try {
+			if (ArgUtil.is(outboxMessage.getTemplate())) {
+				TemplateReply mediaReply = mongoTemplate.findById(outboxMessage.getTemplate(), TemplateReply.class);
+				if (ArgUtil.is(mediaReply)) {
+					if ("image".equalsIgnoreCase(mediaReply.getType())) {
+						outboxMessage.attachment(new Attachment().mediaURL(mediaReply.getUrl())
+								.mediaType(FileType.IMAGE.toString()).mediaCaption(mediaReply.getTitle()));
+						telegramClient.send(outboxMessage);
 					}
-				}
-			}
-		}
-
-		if (ArgUtil.is(message.getMessage())) {
-			SendMessage sendMessage = new SendMessage();
-			sendMessage.setText(message.getMessage());
-			if (message.options().containsKey("buttons")) {
-				List<TmplElement> buttons = new MapModel(message.options()).entry("buttons").asList(new TmplElement());
-				ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
-				replyKeyboardMarkup.setSelective(true);
-				replyKeyboardMarkup.setResizeKeyboard(true);
-				replyKeyboardMarkup.setOneTimeKeyboard(true);
-
-				List<KeyboardRow> keyboard = new ArrayList<>();
-				KeyboardRow keyboardFirstRow = new KeyboardRow();
-
-				for (TmplElement button : buttons) {
-					keyboardFirstRow.add(button.getLabel());
-				}
-
-				keyboard.add(keyboardFirstRow);
-
-				/**
-				 * KeyboardRow keyboardSecondRow = new KeyboardRow();
-				 * keyboardSecondRow.add(getAlertsCommand(language));
-				 * keyboardSecondRow.add(getBackCommand(language));
-				 * keyboard.add(keyboardSecondRow);
-				 **/
-
-				replyKeyboardMarkup.setKeyboard(keyboard);
-				sendMessage.setReplyMarkup(replyKeyboardMarkup);
-			}
-			resp = telegramClient.sendReply(lane, to, sendMessage);
-			if (ArgUtil.is(resp.getMessageId()))
-				msgIds.add(ArgUtil.parseAsString(resp.getMessageId()));
-		}
-		message.setMessageIdExt(msgIds.toString());
-		message.setStatus(OutboxMessage.Status.SENT);
-
-		return message;
-	}
-
-	public void send(String lane, String to, OutboxMessage outboxMessage) {
-		if (ArgUtil.is(outboxMessage.getTemplate())) {
-			TemplateReply mediaReply = mongoTemplate.findById(outboxMessage.getTemplate(), TemplateReply.class);
-			if (ArgUtil.is(mediaReply)) {
-				if ("image".equalsIgnoreCase(mediaReply.getType())) {
-					outboxMessage.attachment(new Attachment().mediaURL(mediaReply.getUrl())
-							.mediaType(FileType.IMAGE.toString()).mediaCaption(mediaReply.getTitle()));
-					sendOutboxMessage(lane, to, outboxMessage);
+				} else {
+					tmplClient.process(outboxMessage);
+					telegramClient.send(outboxMessage);
 				}
 			} else {
-				tmplClient.process(outboxMessage);
-				sendOutboxMessage(lane, to, outboxMessage);
+				telegramClient.send(outboxMessage);
 			}
-		} else {
-			sendOutboxMessage(lane, to, outboxMessage);
+			outboxMessage.setStatus(OutboxMessage.Status.SENT);
+		} catch (Exception e) {
+			outboxMessage.setStatus(OutboxMessage.Status.SENT_ERR);
+			outboxMessage.logs().add(e.getMessage());
+			LOGGER.error("SEND ERROR", e);
 		}
-	}
 
-	@Override
-	public void send(ChatContactDoc chatContactDoc, OutboxMessage outboxMessage) {
-		this.send(chatContactDoc.getLane(), chatContactDoc.getCsid(), outboxMessage);
-	}
-
-	@Override
-	public void reply(InboxMessage inboxMessage, OutboxMessage outboxMessage) {
-		this.send(inboxMessage.getLane(), inboxMessage.getFrom(), outboxMessage);
 	}
 
 	@Override

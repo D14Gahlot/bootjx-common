@@ -13,7 +13,7 @@ import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PostManException;
 import com.boot.jx.postman.gupshup.GupShupConstants.SessionType;
 import com.boot.jx.postman.model.Attachment;
-import com.boot.jx.postman.model.Message;
+import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.rest.RestService;
 import com.boot.jx.rest.RestService.Ajax;
 import com.boot.utils.ArgUtil;
@@ -124,16 +124,17 @@ public abstract class GupShupClientAbstract {
 				.caption(CryptoUtil.getEncoder().message(caption).encodeURL().toString()));
 	}
 
-	public GupShupResp sendMessage(Message<?> message, String lane) {
-		String phoneNumber = CollectionUtil.getOne(message.getTo());
+	public OutboxMessage send(OutboxMessage message) {
+		String to = CollectionUtil.getOne(message.getTo());
 
 		GupShupReq gupShupReq = new GupShupReq();
-		gupShupReq.setSendTo(phoneNumber);
-		gupShupReq.setPhoneNumber(phoneNumber);
+		gupShupReq.setSendTo(to);
+		gupShupReq.setPhoneNumber(to);
 		gupShupReq.setMessageId(message.getMessageId());
-		gupShupReq.setWaNumber(lane);
+		gupShupReq.setWaNumber(message.getLane());
 
 		GupShupResp resp = null;
+		String id = null;
 
 		StringJoiner msgIds = new StringJoiner(",");
 
@@ -145,11 +146,13 @@ public abstract class GupShupClientAbstract {
 					if (ArgUtil.areEqual(attachment.getMediaType(), FileType.IMAGE.toString())) {
 						gupShupReq.setMediaURL(attachment.getMediaURL());
 						resp = sendImageURL(gupShupReq);
-						msgIds.add(resp.getResponse().getId());
+						if (ArgUtil.is(id = getMessageId(resp)))
+							msgIds.add(id);
 					} else {
 						gupShupReq.setMediaURL(attachment.getMediaURL());
 						resp = sendDocumentURL(gupShupReq);
-						msgIds.add(resp.getResponse().getId());
+						if (ArgUtil.is(id = getMessageId(resp)))
+							msgIds.add(id);
 					}
 				}
 			}
@@ -160,9 +163,21 @@ public abstract class GupShupClientAbstract {
 			resp = sendMessage(gupShupReq);
 			if (ArgUtil.is(resp.getResponse().getId()))
 				msgIds.add(resp.getResponse().getId());
+			getMessageId(resp);
 		}
 		message.setMessageIdExt(msgIds.toString());
-		return resp;
+
+		return message;
+	}
+
+	private String getMessageId(GupShupResp resp) {
+		if (!ArgUtil.is(resp) || !ArgUtil.is(resp.getResponse())) {
+			throw new PostManException("No Response Object");
+		} else if (ArgUtil.isEqual(resp.getResponse().getStatus(), "error")) {
+			throw new PostManException(
+					String.format("%s : %s", resp.getResponse().getId(), resp.getResponse().getDetails()));
+		}
+		return resp.getResponse().getId();
 	}
 
 	public GupShupResp sendDocumentURL(GupShupReq gupShupReq) {

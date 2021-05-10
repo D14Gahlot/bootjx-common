@@ -88,7 +88,7 @@ public abstract class AmxApiException extends AmxException {
 	}
 
 	public AmxApiException(Exception e) {
-		super(null, e, true, false);
+		super(e.getMessage(), e, true, false);
 	}
 
 	public AmxApiException(IExceptionEnum errorCode, Exception ex) {

@@ -23,6 +23,7 @@ import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.rest.RestService;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.CollectionUtil;
 import com.boot.utils.Constants;
 import com.boot.utils.JsonUtil;
 
@@ -46,7 +47,9 @@ public class WARapiwhaConnector implements ConnectorHandler {
 	private TmplClient tmplClient;
 
 	@Override
-	public void send(String lane, String to, OutboxMessage outboxMessage) {
+	public void send(OutboxMessage outboxMessage) {
+		String to = CollectionUtil.getOne(outboxMessage.getTo());
+
 		outboxMessage.setChannel(outboxMessage.getChannel());
 		String text = outboxMessage.getMessage();
 		if (ArgUtil.is(outboxMessage.getTemplate())) {

@@ -87,8 +87,10 @@ public class ChatService {
 		if (ArgUtil.is(inboxMessage)) {
 			outboxMessage.setContactType(inboxMessage.getContactType());
 			outboxMessage.setChannel(inboxMessage.getChannel());
+			outboxMessage.setLane(inboxMessage.getLane());
 			outboxMessage.setQueue(inboxMessage.getQueue());
 			outboxMessage.addTo(inboxMessage.getFrom());
+			outboxMessage.setContactId(inboxMessage.getContactId());
 			outboxMessage.setSessionId(inboxMessage.getSessionId());
 			ConnectorHandler connector = connectorHandlerFactory.get(outboxMessage.getContactType(),
 					outboxMessage.getChannel());
@@ -106,7 +108,10 @@ public class ChatService {
 		messageStore.create(outboxMessage);
 		if (ArgUtil.is(chatContactDoc)) {
 			outboxMessage.setContactType(ArgUtil.parseAsEnumT(chatContactDoc.getContactType(), ContactType.class));
+			outboxMessage.setChannel(chatContactDoc.getChannelType());
+			outboxMessage.setLane(chatContactDoc.getLane());
 			outboxMessage.setContactId(chatContactDoc.getContactId());
+			outboxMessage.setSessionId(chatContactDoc.getSessionId());
 			ConnectorHandler connector = connectorHandlerFactory.get(outboxMessage.getContactType(),
 					outboxMessage.getChannel());
 			if (ArgUtil.is(connector)) {
