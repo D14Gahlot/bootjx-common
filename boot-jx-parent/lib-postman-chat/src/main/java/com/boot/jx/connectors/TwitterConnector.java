@@ -109,8 +109,9 @@ public class TwitterConnector implements ConnectorHandler {
 					if (ArgUtil.areEqual(attachment.getMediaType(), FileType.IMAGE.toString())) {
 						String mediaId = uploadMedia(lane, attachment.getMediaURL(), attachment.getMediaCaption());
 						attachment.mediaId(mediaId);
-						DirectMessage resp = twitterClient.sendReply(to, message.getMessage(), mediaId, lane);
-						msgIds.add(ArgUtil.parseAsString(resp.getId()));
+						DirectMessage resp = twitterClient.sendReply(to, message.getSubject(), mediaId, lane);
+						if (ArgUtil.is(resp.getId()))
+							msgIds.add(ArgUtil.parseAsString(resp.getId()));
 					} else {
 						sj.add(extUtilService.tinyUrl(attachment.getMediaURL()));
 					}
@@ -120,8 +121,11 @@ public class TwitterConnector implements ConnectorHandler {
 
 		if (sj.length() > 0) {
 			DirectMessage resp = twitterClient.sendReply(to, sj.toString(), lane);
-			msgIds.add(ArgUtil.parseAsString(resp.getId()));
+			if (ArgUtil.is(resp.getId()))
+				msgIds.add(ArgUtil.parseAsString(resp.getId()));
 		}
+
+		message.setMessageIdExt(msgIds.toString());
 
 	}
 
