@@ -113,7 +113,7 @@ public class TwitterClient implements MessageClient {
 			throws IOException, MalformedURLException, TwitterException {
 		Twitter twitter = getContext(lane).getTwitter();
 		InputStream media = new java.net.URL(url).openStream();
-		UploadedMedia uploadedMedia = twitter.uploadMedia(title, media);
+		UploadedMedia uploadedMedia = twitter.uploadMedia(ArgUtil.parseAsString(title, "File"), media);
 		return ArgUtil.parseAsString(uploadedMedia.getMediaId());
 	}
 

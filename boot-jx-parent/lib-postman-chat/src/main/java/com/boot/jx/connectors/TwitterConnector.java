@@ -59,8 +59,8 @@ public class TwitterConnector implements ConnectorHandler {
 				TemplateReply templateReply = mongoTemplate.findById(outboxMessage.getTemplate(), TemplateReply.class);
 				if (ArgUtil.is(templateReply)) {
 					if ("image".equalsIgnoreCase(templateReply.getType())) {
-						outboxMessage.attachment(
-								new Attachment().mediaURL(templateReply.getUrl()).mediaType(FileType.IMAGE.toString()));
+						outboxMessage.attachment(new Attachment().mediaURL(templateReply.getUrl())
+								.mediaType(FileType.IMAGE.toString()).mediaCaption(templateReply.getTitle()));
 						twitterClient.send(outboxMessage);
 					} else {
 						twitterClient.send(outboxMessage);
