@@ -150,9 +150,12 @@ public class MsgController {
 	@ResponseBody
 	@RequestMapping(value = "/category/map/smart_reply", method = { RequestMethod.GET })
 	public List<QuickReply> listSmartReply(@RequestParam(value = "value", required = false) List<String> categories) {
-		Query query2 = new Query();
-		query2.addCriteria(Criteria.where("category").in(categories.stream().toArray(String[]::new)));
-		return mongoTemplate.find(query2, QuickReply.class);
+		if (ArgUtil.is(categories)) {
+			Query query2 = new Query();
+			query2.addCriteria(Criteria.where("category").in(categories.stream().toArray(String[]::new)));
+			return mongoTemplate.find(query2, QuickReply.class);
+		}
+		return mongoTemplate.findAll(QuickReply.class);
 	}
 
 	@ResponseBody
