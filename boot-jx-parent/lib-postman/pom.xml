@@ -46,14 +46,6 @@
 		</dependency>
 		<!-- TWITTER LIBS ends -->
 
-		<!-- https://stackoverflow.com/questions/61501810/javadoc-error-datatypeconverter-doesnot-exist -->
-		<dependency>
-			<groupId>jakarta.xml.bind</groupId>
-			<artifactId>jakarta.xml.bind-api</artifactId>
-			<version>2.3.3</version>
-		</dependency>
-
-
 	</dependencies>
 	<repositories>
 		<repository>
