@@ -90,6 +90,12 @@
 
 		<dependency>
 			<groupId>com.boot.jx</groupId>
+			<artifactId>lib-common-mongo</artifactId>
+			<version>${jax.version}</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>com.boot.jx</groupId>
 			<artifactId>lib-aws</artifactId>
 		</dependency>
 

@@ -5,7 +5,6 @@ import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.beanutils.BeanUtils;
-import org.bson.types.ObjectId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,9 +16,9 @@ import org.springframework.stereotype.Component;
 import com.boot.jx.AppContextUtil;
 import com.boot.jx.admin.dto.AgentResponseDto;
 import com.boot.jx.admin.dto.DepartmentResponseDto;
-import com.boot.jx.admin.model.AgentDoc;
-import com.boot.jx.admin.model.DepartmentDoc;
 import com.boot.jx.api.ApiResponseUtil;
+import com.boot.jx.common.doc.AgentDoc;
+import com.boot.jx.common.doc.DepartmentDoc;
 import com.boot.utils.ArgUtil;
 
 @Component

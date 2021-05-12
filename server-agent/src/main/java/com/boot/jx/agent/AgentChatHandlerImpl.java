@@ -16,6 +16,7 @@ import com.boot.jx.chat.ChatClient;
 import com.boot.jx.chat.ChatCommands;
 import com.boot.jx.chat.ChatDTOUtil;
 import com.boot.jx.chat.ChatService;
+import com.boot.jx.common.doc.AgentDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.dto.ChatMessageDTO;
@@ -104,13 +105,24 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 		return inboxMessage;
 	}
 
-	public void onAssign(AgentSessionDoc avaialbleAgent, ChatSessionDoc chatSessionDoc, OutboxMessage outboxMessage) {
+	public void onAssign(ChatSessionDoc chatSessionDoc, String agentDept, String agentCode) {
+		if (!ArgUtil.areEqual(chatSessionDoc.getAssignedToAgent(), agentCode)) {
+			sessionStore.setAssignedToAgent(chatSessionDoc, agentCode);
+			chatService.log(chatSessionDoc, MessageStore.EVENTS.ASGND_TO_AGENT, agentCode, agentDept);
+			stompTunnelService.sendToAll("/dept/onassign-" + agentDept,
+					chatArchive.getChatSessionDto(chatSessionDoc, agentCode));
+		}
+	}
+
+	public void onAssign(AgentSessionDoc avaialbleAgent, ChatSessionDoc chatSessionDoc) {
 		if (ArgUtil.is(avaialbleAgent)) {
-			sessionStore.setAssignedToAgent(chatSessionDoc, avaialbleAgent.getAgentCode());
-			chatService.log(chatSessionDoc, MessageStore.EVENTS.ASGND_TO_AGENT, avaialbleAgent.getAgentCode(),
-					avaialbleAgent.getAgentDept());
-			stompTunnelService.sendToAll("/dept/onassign-" + avaialbleAgent.getAgentDept(),
-					chatArchive.getChatSessionDto(chatSessionDoc, avaialbleAgent.getAgentCode()));
+			this.onAssign(chatSessionDoc, avaialbleAgent.getAgentDept(), avaialbleAgent.getAgentCode());
+		}
+	}
+
+	public void onAssign(AgentDoc agentDoc, ChatSessionDoc chatSessionDoc) {
+		if (ArgUtil.is(agentDoc)) {
+			this.onAssign(chatSessionDoc, agentDoc.getAgent_department(), agentDoc.getAgent_code());
 		}
 	}
 

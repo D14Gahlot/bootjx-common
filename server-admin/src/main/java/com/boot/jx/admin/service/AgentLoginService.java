@@ -9,7 +9,7 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Component;
 
 import com.boot.jx.AppContextUtil;
-import com.boot.jx.admin.model.AgentDoc;
+import com.boot.jx.common.doc.AgentDoc;
 import com.boot.jx.postman.client.PostManClient;
 import com.boot.jx.postman.model.Email;
 import com.boot.jx.postman.model.MessageBox;

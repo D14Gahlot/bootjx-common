@@ -1,4 +1,4 @@
-package com.boot.jx.admin.model;
+package com.boot.jx.common.doc;
 
 import java.util.Date;
 

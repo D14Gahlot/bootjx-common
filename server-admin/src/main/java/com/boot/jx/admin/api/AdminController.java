@@ -11,10 +11,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.boot.jx.admin.dto.AgentResponseDto;
 import com.boot.jx.admin.dto.DepartmentResponseDto;
-import com.boot.jx.admin.model.AgentDoc;
-import com.boot.jx.admin.model.DepartmentDoc;
 import com.boot.jx.admin.service.AdminService;
 import com.boot.jx.api.ApiResponse;
+import com.boot.jx.common.doc.AgentDoc;
+import com.boot.jx.common.doc.DepartmentDoc;
 import com.boot.utils.ArgUtil;
 
 @RestController
