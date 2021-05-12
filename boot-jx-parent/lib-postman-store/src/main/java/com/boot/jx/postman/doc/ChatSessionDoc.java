@@ -19,7 +19,7 @@ public class ChatSessionDoc implements Serializable {
 	private String sessionId;
 
 	@Version
-	private Integer version;
+	private Long version;
 
 	@ApiMockModelProperty(example = "wa919930104050", required = false)
 	private String contactId;
@@ -109,11 +109,11 @@ public class ChatSessionDoc implements Serializable {
 		this.initd = initd;
 	}
 
-	public Integer getVersion() {
+	public Long getVersion() {
 		return version;
 	}
 
-	public void setVersion(Integer version) {
+	public void setVersion(Long version) {
 		this.version = version;
 	}
 

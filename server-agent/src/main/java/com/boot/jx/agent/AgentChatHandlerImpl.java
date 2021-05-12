@@ -106,8 +106,7 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 
 	public void onAssign(AgentSessionDoc avaialbleAgent, ChatSessionDoc chatSessionDoc, OutboxMessage outboxMessage) {
 		if (ArgUtil.is(avaialbleAgent)) {
-			chatSessionDoc.setAssignedToAgent(avaialbleAgent.getAgentCode());
-			chatSessionDoc.setAssignedAgentStamp(System.currentTimeMillis());
+			sessionStore.setAssignedToAgent(chatSessionDoc, avaialbleAgent.getAgentCode());
 			chatService.log(chatSessionDoc, MessageStore.EVENTS.ASGND_TO_AGENT, avaialbleAgent.getAgentCode(),
 					avaialbleAgent.getAgentDept());
 			stompTunnelService.sendToAll("/dept/onassign-" + avaialbleAgent.getAgentDept(),

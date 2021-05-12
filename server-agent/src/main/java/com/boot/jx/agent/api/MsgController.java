@@ -107,13 +107,8 @@ public class MsgController {
 			AgentSessionDoc agent = mongoTemplate.findById(agentSession.getAgentCode(), AgentSessionDoc.class);
 			agentChatHandlerImpl.onAssign(agent, sessionDoc, outboxMessage);
 		}
-
-		if (ArgUtil.isNone(sessionDoc.getFistResponseStamp())) {
-			sessionDoc.setFistResponseStamp(System.currentTimeMillis());
-		}
-
-		sessionDoc.setLastResponseStamp(System.currentTimeMillis());
-		mongoTemplate.save(sessionDoc);
+		
+		sessionStore.updateResponseTime(sessionDoc);
 		// Session Stuff Logging >
 
 		if (ArgUtil.areEqual(sessionDoc.getAssignedToAgent(), agentSession.getAgentCode())) {
@@ -143,7 +138,8 @@ public class MsgController {
 		CommonFile f = fileStore.upload2(file,
 				String.format("%s/session/%s", AppContextUtil.getTenant(), outboxMessage.getSessionId()),
 				String.format("%s_%s", outboxMessage.getMessageIdRef(), file.getOriginalFilename()));
-		outboxMessage.attachment(new Attachment().mediaURL(f.getUrl()).mediaType(f.getFileType()));
+		outboxMessage.attachment(new Attachment().mediaURL(f.getUrl()).mediaType(f.getFileType())
+				.mediaCaption(ArgUtil.nonEmpty(outboxMessage.getSubject(), file.getOriginalFilename())));
 		return sendSessionMessage(outboxMessage);
 	}
 
