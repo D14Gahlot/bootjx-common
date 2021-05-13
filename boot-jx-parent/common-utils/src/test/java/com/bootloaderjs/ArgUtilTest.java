@@ -9,13 +9,15 @@ public class ArgUtilTest { // Noncompliant
 
 	public static final Pattern pattern = Pattern.compile("^com.amx.jax.logger.client.AuditFilter<(.*)>$");
 
-	/**
-	 * This is just a test method
-	 * 
-	 * @param args
-	 * @throws ParseException
-	 */
 	public static void main(String[] args) throws ParseException {
+		checkAssert("=====true", ArgUtil.isEqual(null), false);
+		checkAssert("=====true", ArgUtil.isEqual(null, null), true);
+		checkAssert("=====false", ArgUtil.isEqual("", null, null), false);
+		checkAssert("=====false", ArgUtil.isEqual(null, "", null), true);
+		checkAssert("=====false", ArgUtil.isEqual(null, "x", null), true);
+	}
+
+	public static void main2(String[] args) throws ParseException {
 		checkAssert("=====true", ArgUtil.isNone(0), true);
 		checkAssert("=====false", ArgUtil.isNone(0L), true);
 		checkAssert("=====null", ArgUtil.isNone(null), true);

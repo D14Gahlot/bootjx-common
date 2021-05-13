@@ -817,8 +817,8 @@ public final class ArgUtil {
 	}
 
 	public static <T> boolean isEqual(T checkFor, T... within) {
-		if (checkFor == null || within == null || within.length == 0) {
-			return false;
+		if (within == null || within.length == 0) {
+			return checkFor == within;
 		}
 
 		for (T val : within) {

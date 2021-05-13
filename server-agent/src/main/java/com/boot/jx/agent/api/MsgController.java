@@ -43,9 +43,11 @@ import com.boot.jx.postman.dto.ContactDTO;
 import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.store.MessageStore.EVENTS;
+import com.boot.jx.postman.store.PMStoreConstants;
 import com.boot.jx.postman.store.SessionStore;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
+import com.boot.utils.Constants;
 import com.boot.utils.JsonUtil;
 import com.boot.utils.MapBuilder;
 
@@ -85,10 +87,13 @@ public class MsgController {
 		if (agentSession.isLoggedIn() && ArgUtil.is(agentSession.getAgentDept())) {
 			List<ChatSessionDoc> sessions = sessionStore
 					.findChatSessionDocByAgentAndUnAssigned(agentSession.getAgentCode(), agentSession.getAgentDept());
-
 			for (ChatSessionDoc chatSessionDoc : sessions) {
-				ChatSessionDTO chatSessionDto = chatArchive.getChatSessionDto(chatSessionDoc,
-						agentSession.getAgentCode());
+				ChatSessionDTO chatSessionDto = chatArchive.withContact(chatSessionDoc);
+				if (ArgUtil.isEqual(chatSessionDto.getAssignedToDept(), PMStoreConstants.NO_DEPT,
+						agentSession.getAgentDept(), null, Constants.BLANK)
+						&& ArgUtil.isEqual(chatSessionDto.getAssignedToAgent(), agentSession.getAgentCode(), null)) {
+					chatSessionDto = chatArchive.withMessages(chatSessionDto);
+				}
 				chatSessionDtos.add(chatSessionDto);
 			}
 		}
