@@ -158,14 +158,20 @@ public class ChatService {
 		replyIntenal(inboxMessage, outboxMessage);
 	}
 
-	public void log(ChatSessionDoc sessionDoc, EVENTS event, String... logs) {
+	public void log(ChatSessionDoc sessionDoc, String agent, EVENTS event, String... logs) {
 		InboxMessage inboxMessage = sessionStore.toInboxMessage(sessionDoc);
 
-		if (ArgUtil.isEmpty(inboxMessage.session().getAgent())) {
+		if (ArgUtil.is(agent)) {
+			inboxMessage.session().setAgent(agent);
+		} else if (ArgUtil.isEmpty(inboxMessage.session().getAgent())) {
 			inboxMessage.session().setAgent(sessionDoc.getAssignedToAgent());
 		}
 
 		messageStore.log(inboxMessage, event, logs);
+	}
+
+	public void log(ChatSessionDoc sessionDoc, EVENTS event, String... logs) {
+		log(sessionDoc, null, event, logs);
 	}
 
 	public void send(ChatSessionDoc sessionDoc, OutboxMessage outboxMessage) {

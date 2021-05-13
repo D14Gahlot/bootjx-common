@@ -1,15 +1,8 @@
 package com.boot.jx.agent;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
-import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Component;
-
-import com.boot.jx.agent.doc.AgentSessionDoc;
-import com.boot.jx.chat.ChatClient;
-import com.boot.utils.ArgUtil;
-import com.boot.utils.TimeUtils;
 
 @Component
 @Scope(value = "session", proxyMode = ScopedProxyMode.TARGET_CLASS)

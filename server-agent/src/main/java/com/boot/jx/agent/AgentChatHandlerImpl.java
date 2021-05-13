@@ -58,6 +58,9 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 	@Autowired
 	AgentStore agentStore;
 
+	@Autowired
+	private AgentSessionBean agentSession;
+
 	@Override
 	public boolean onAssignSupported(InboxMessage inboxMessage) {
 		return true;
@@ -106,7 +109,8 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 	public void onAssign(ChatSessionDoc chatSessionDoc, String agentDept, String agentCode) {
 		if (!ArgUtil.areEqual(chatSessionDoc.getAssignedToAgent(), agentCode)) {
 			sessionStore.assignToAgent(chatSessionDoc, agentDept, agentCode);
-			chatService.log(chatSessionDoc, MessageStore.EVENTS.ASGND_TO_AGENT, agentCode, agentDept);
+			chatService.log(chatSessionDoc, agentSession.getAgentCode(), MessageStore.EVENTS.ASGND_TO_AGENT, agentCode,
+					agentDept);
 			stompTunnelService.sendToAll("/dept/onassign-" + agentDept,
 					chatArchive.getChatSessionDto(chatSessionDoc, agentCode));
 		}
