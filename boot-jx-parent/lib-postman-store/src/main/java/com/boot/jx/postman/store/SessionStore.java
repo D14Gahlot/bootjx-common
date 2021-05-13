@@ -281,7 +281,6 @@ public class SessionStore {
 	public ChatSessionDoc closeSession(ChatSessionDoc chatSessionDoc) {
 		chatSessionDoc.setCloseSessionStamp(System.currentTimeMillis());
 		chatSessionDoc.setActive(false);
-		save(chatSessionDoc);
 
 		CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder().whereId(chatSessionDoc.getSessionId());
 		builder.set("closeSessionStamp", chatSessionDoc.getCloseSessionStamp());
@@ -293,13 +292,21 @@ public class SessionStore {
 
 	public ChatSessionDoc botScore(ChatSessionDoc chatSessionDoc, Integer botScore) {
 		chatSessionDoc.setBotScore(botScore);
-		save(chatSessionDoc);
+
+		CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder().whereId(chatSessionDoc.getSessionId());
+		builder.set("botScore", chatSessionDoc.getBotScore());
+		mongoTemplate.updateFirst(builder.getQuery(), builder.getUpdate(), ChatSessionDoc.class);
+
 		return chatSessionDoc;
 	}
 
 	public ChatSessionDoc agentScore(ChatSessionDoc chatSessionDoc, Integer agentScore) {
 		chatSessionDoc.setAgentScore(agentScore);
-		save(chatSessionDoc);
+
+		CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder().whereId(chatSessionDoc.getSessionId());
+		builder.set("agentScore", chatSessionDoc.getAgentScore());
+		mongoTemplate.updateFirst(builder.getQuery(), builder.getUpdate(), ChatSessionDoc.class);
+
 		return chatSessionDoc;
 	}
 
