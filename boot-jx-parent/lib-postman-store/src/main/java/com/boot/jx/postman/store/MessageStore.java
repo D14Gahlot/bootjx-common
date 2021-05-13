@@ -97,7 +97,7 @@ public class MessageStore extends CommonDocStore {
 		return findOrCreateMessageDoc(inboxMessage);
 	}
 
-	public MessageDoc log(IMessage inboxMessage, EVENTS eventName, String... logMessage) {
+	public MessageDoc log(IMessage inboxMessage, String agent, EVENTS eventName, String... logMessage) {
 		MessageDoc doc = new MessageDoc();
 		doc.setContactId(PostManUtil.createContactId(inboxMessage));
 		doc.setType("L");
@@ -109,7 +109,7 @@ public class MessageStore extends CommonDocStore {
 		}
 		doc.setAction(ArgUtil.parseAsString(eventName));
 		doc.setSessionId(inboxMessage.getSessionId());
-		doc.setAgent(inboxMessage.session().getAgent());
+		doc.setAgent(agent);
 		mongoTemplate.save(doc, getCollectionName(inboxMessage.getContactType()));
 		return doc;
 	}
@@ -149,7 +149,7 @@ public class MessageStore extends CommonDocStore {
 
 		doc.setSessionId(outMessage.getSessionId());
 		doc.setMessageIdRef(outMessage.getMessageIdRef());
-		
+
 		update(outMessage, doc);
 
 		return doc;

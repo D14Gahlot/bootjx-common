@@ -90,14 +90,14 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 		if (ArgUtil.is(avaialbleAgent)) {
 			sessionStore.assignToAgent(chatSessionDoc, avaialbleAgent.getAgentDept(), avaialbleAgent.getAgentCode());
 
-			messageStore.log(inboxMessage, MessageStore.EVENTS.ASGND_TO_AGENT, avaialbleAgent.getAgentCode(),
+			chatService.log(inboxMessage, MessageStore.EVENTS.ASGND_TO_AGENT, avaialbleAgent.getAgentCode(),
 					avaialbleAgent.getAgentDept());
 
 			inboxMessage.session().setAgent(avaialbleAgent.getAgentCode());
 			inboxMessage.session().setDept(avaialbleAgent.getAgentDept());
 		} else {
 			sessionStore.assignToAgent(chatSessionDoc, inboxMessage.session().getDept(), null);
-			messageStore.log(inboxMessage, MessageStore.EVENTS.ASGND_TO_DEPT, inboxMessage.session().getDept());
+			chatService.log(inboxMessage, MessageStore.EVENTS.ASGND_TO_DEPT, inboxMessage.session().getDept());
 		}
 
 		stompTunnelService.sendToAll("/dept/onassign-" + inboxMessage.session().getDept(),
@@ -148,7 +148,7 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 		if (inboxMessage.getMessage().equalsIgnoreCase("/exit_chat")) {
 			ChatSessionDoc chatSessionDoc = sessionStore.getSession(inboxMessage.getSessionId());
 			exitAgentMode(chatSessionDoc, null);
-			messageStore.log(inboxMessage, MessageStore.EVENTS.UNASGND);
+			chatService.log(inboxMessage, MessageStore.EVENTS.UNASGND);
 		}
 		return inboxMessage;
 	}
