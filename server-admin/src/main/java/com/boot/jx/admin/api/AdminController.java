@@ -23,6 +23,7 @@ public class AdminController {
 	@Autowired
 	AdminService adminService;
 
+	// Agent
 	@RequestMapping(value = "/api/admins/agent", method = { RequestMethod.GET })
 	public ApiResponse<AgentResponseDto, Object> fetchAgents(
 			@RequestParam(value = "agent_id", required = false) String agent_id) {
@@ -35,6 +36,24 @@ public class AdminController {
 				.message(ArgUtil.is(dto.getDept_id()) ? "Agent Updated" : "Agent Created");
 	}
 
+	@RequestMapping(value = "/api/admins/agent", method = { RequestMethod.DELETE })
+	public List<AgentResponseDto> updateAgentStatus(@RequestParam(value = "agent_id", required = true) String agent_id,
+			@RequestParam(value = "status", required = true) String status) {
+		return adminService.updateAgentStatus(agent_id, status);
+	}
+
+	@RequestMapping(value = "/api/admins/agent/admin", method = { RequestMethod.POST })
+	public List<AgentResponseDto> updateAgentAdmin(@RequestParam(value = "agent_id", required = true) String agent_id) {
+		return adminService.updateAgentAdmin(agent_id);
+	}
+
+	@RequestMapping(value = "/api/admins/agent/default", method = { RequestMethod.POST })
+	public ApiResponse<AgentResponseDto, Object> updateAgentDefault(
+			@RequestParam(value = "agent_id", required = true) String agent_id) {
+		return ApiResponse.buildResults(adminService.updateAgentDefault(agent_id));
+	}
+
+	// DepartMent
 	@RequestMapping(value = "/api/admins/dept", method = { RequestMethod.GET })
 	public ApiResponse<DepartmentResponseDto, Object> fetchDepts(
 			@RequestParam(value = "dept_id", required = false) String deptId) {
@@ -47,15 +66,10 @@ public class AdminController {
 				.message(ArgUtil.is(dto.getDept_id()) ? "Team Updated" : "Team Created");
 	}
 
-	@RequestMapping(value = "/api/admins/agent", method = { RequestMethod.DELETE })
-	public List<AgentResponseDto> updateAgentStatus(@RequestParam(value = "agent_id", required = true) String agent_id,
-			@RequestParam(value = "status", required = true) String status) {
-		return adminService.updateAgentStatus(agent_id, status);
-	}
-
-	@RequestMapping(value = "/api/admins/agent/admin", method = { RequestMethod.POST })
-	public List<AgentResponseDto> updateAgentAdmin(@RequestParam(value = "agent_id", required = true) String agent_id) {
-		return adminService.updateAgentAdmin(agent_id);
+	@RequestMapping(value = "/api/admins/dept/default", method = { RequestMethod.POST })
+	public ApiResponse<DepartmentResponseDto, Object> updateDepartmentDefault(
+			@RequestParam(value = "dept_id", required = true) String deptId) {
+		return ApiResponse.buildResults(adminService.updateDepartmentDefault(deptId));
 	}
 
 	@RequestMapping(value = "/admin/create-update-agent", method = { RequestMethod.POST })

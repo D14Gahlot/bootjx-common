@@ -16,6 +16,7 @@ public class DepartmentResponseDto extends ADocumentDTO<DepartmentResponseDto> {
 	private String create_by;
 	private Date modified_date;
 	private String modified_by;
+	private boolean isDefault;
 
 	public String getIsactive() {
 		return isactive;
@@ -92,6 +93,14 @@ public class DepartmentResponseDto extends ADocumentDTO<DepartmentResponseDto> {
 	@Override
 	public DepartmentResponseDto newInstance() {
 		return new DepartmentResponseDto();
+	}
+
+	public boolean isDefault() {
+		return isDefault;
+	}
+
+	public void setDefault(boolean isDefault) {
+		this.isDefault = isDefault;
 	}
 
 }

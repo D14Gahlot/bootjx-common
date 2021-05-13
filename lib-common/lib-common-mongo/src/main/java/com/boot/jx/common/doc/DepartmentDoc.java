@@ -29,6 +29,7 @@ public class DepartmentDoc implements Serializable, Patchable<DepartmentDoc>, ID
 	private Date modified_date;
 	private String modified_by = "A";
 	private String isactive;
+	private boolean isDefault;
 
 	public String getDept_code() {
 		return dept_code;
@@ -107,6 +108,14 @@ public class DepartmentDoc implements Serializable, Patchable<DepartmentDoc>, ID
 		DepartmentDoc patch = new DepartmentDoc();
 		patch.setDept_id(this.getDept_id());
 		return patch;
+	}
+
+	public boolean isDefault() {
+		return isDefault;
+	}
+
+	public void setDefault(boolean isDefault) {
+		this.isDefault = isDefault;
 	}
 
 }

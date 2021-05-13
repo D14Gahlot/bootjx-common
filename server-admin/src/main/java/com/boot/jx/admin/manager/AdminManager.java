@@ -19,6 +19,8 @@ import com.boot.jx.admin.dto.DepartmentResponseDto;
 import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.common.doc.AgentDoc;
 import com.boot.jx.common.doc.DepartmentDoc;
+import com.boot.jx.common.store.AgentStore;
+import com.boot.jx.mongo.CommonMongoQueryBuilder;
 import com.boot.utils.ArgUtil;
 
 @Component
@@ -28,6 +30,9 @@ public class AdminManager {
 
 	@Autowired
 	MongoTemplate mongoTemplate;
+
+	@Autowired
+	AgentStore agentStore;
 
 	public List<AgentDoc> saveAgent(AgentDoc agent) {
 		List<AgentDoc> lstAgent = new ArrayList<AgentDoc>();
@@ -273,5 +278,6 @@ public class AdminManager {
 		}
 		return dto;
 	}
+
 
 }

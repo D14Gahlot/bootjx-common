@@ -28,8 +28,17 @@ public class CommonMongoQueryBuilder {
 		return this;
 	}
 
+	public CommonMongoQueryBuilder whereExists(String key) {
+		query().addCriteria(Criteria.where(key).exists(true));
+		return this;
+	}
+
 	public CommonMongoQueryBuilder whereId(Object id) {
 		return this.where("_id", id);
+	}
+
+	public CommonMongoQueryBuilder whereAll() {
+		return this.whereExists("_id");
 	}
 
 	public CommonMongoQueryBuilder set(String key, Object o) {

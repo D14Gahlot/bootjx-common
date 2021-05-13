@@ -10,6 +10,7 @@ import com.boot.jx.admin.dto.DepartmentResponseDto;
 import com.boot.jx.admin.manager.AdminManager;
 import com.boot.jx.common.doc.AgentDoc;
 import com.boot.jx.common.doc.DepartmentDoc;
+import com.boot.jx.common.store.AgentStore;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
 import com.boot.utils.EntityDtoUtil;
@@ -19,6 +20,9 @@ public class AdminService {
 
 	@Autowired
 	AdminManager adminManager;
+
+	@Autowired
+	AgentStore agentStore;
 
 	public List<AgentDoc> saveAgent(AgentDoc reqDto) {
 		List<AgentDoc> lstOfAgent = adminManager.saveAgent(reqDto);
@@ -66,6 +70,7 @@ public class AdminService {
 	public List<AgentResponseDto> updateAgentStatus(String agentId, String status) {
 		return fetchAgents(adminManager.updateAgentStatus(agentId, status));
 	}
+
 	public List<AgentResponseDto> updateAgentAdmin(String agentId) {
 		return fetchAgents(adminManager.updateAgentAdmin(agentId));
 	}
@@ -83,6 +88,16 @@ public class AdminService {
 	public List<DepartmentDoc> updateDepartment(Integer deptId, String status) {
 		List<DepartmentDoc> lstDept = adminManager.updateDeptStatus(deptId, status);
 		return lstDept;
+	}
+
+	public List<AgentResponseDto> updateAgentDefault(String agentId) {
+		agentStore.updateAgentDefault(agentId);
+		return fetchAgents(agentStore.findAll());
+	}
+
+	public List<DepartmentResponseDto> updateDepartmentDefault(String deptId) {
+		agentStore.updateDepartmentDefault(deptId);
+		return new DepartmentResponseDto().importFrom(agentStore.findDepartmentAll());
 	}
 
 	/*
