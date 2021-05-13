@@ -10,12 +10,12 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 public class CommonDocInterfaces {
 
-	public static interface Patchable<T> {
+	public static interface Patchable<T extends Patchable<T>> {
 		public T patch();
 	}
 
-	public static interface PatchableIndexed<T, I> extends Patchable<T> {
-		public PatchableIndexed<T, I> newInstance();
+	public static interface PatchableIndexed<T extends PatchableIndexed<T, I>, I> extends Patchable<T> {
+		public T newInstance();
 
 		public void savePatch(T patch);
 
@@ -23,10 +23,11 @@ public class CommonDocInterfaces {
 
 		default public T patch() {
 			if (fetchPatch() == null) {
-				PatchableIndexed<T, I> patch = newInstance();
+				T patch = newInstance();
+				this.savePatch(patch);
 				patch.id(this.id());
 			}
-			return fetchPatch();
+			return (T) fetchPatch();
 		}
 
 		public void id(I id);
@@ -34,7 +35,8 @@ public class CommonDocInterfaces {
 		public I id();
 	}
 
-	public static abstract class APatchableIndexed<T, I> implements PatchableIndexed<T, I> {
+	public static abstract class APatchableIndexed<T extends APatchableIndexed<T, I>, I>
+			implements PatchableIndexed<T, I> {
 		@JsonIgnore
 		private T patch;
 

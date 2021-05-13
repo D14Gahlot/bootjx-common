@@ -8,7 +8,6 @@ import org.springframework.data.annotation.Version;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import com.boot.jx.mongo.CommonDocInterfaces.APatchableIndexed;
-import com.boot.jx.mongo.CommonDocInterfaces.PatchableIndexed;
 import com.boot.jx.swagger.ApiMockModelProperty;
 
 @Document(collection = "CHAT_SESSION")
@@ -240,7 +239,7 @@ public class ChatSessionDoc extends APatchableIndexed<ChatSessionDoc, String> im
 	}
 
 	@Override
-	public PatchableIndexed<ChatSessionDoc, String> newInstance() {
+	public ChatSessionDoc newInstance() {
 		return new ChatSessionDoc();
 	}
 
