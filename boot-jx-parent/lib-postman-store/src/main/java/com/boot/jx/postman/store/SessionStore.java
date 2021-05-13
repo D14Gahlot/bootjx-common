@@ -24,6 +24,7 @@ import com.boot.jx.postman.dto.ChatUserProfileDTO;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.Constants;
 import com.boot.utils.EntityDtoUtil;
 import com.boot.utils.TimeUtils;
 import com.mongodb.BasicDBObject;
@@ -190,8 +191,9 @@ public class SessionStore extends CommonDocStore {
 		Calendar cal = Calendar.getInstance();
 		cal.add(Calendar.DATE, -2);
 
-		query2.addCriteria(Criteria.where("assignedToDept").in(PMStoreConstants.NO_DEPT, agentDept, null).and("active")
-				.is(true).and("mode").is("AGENT").and("lastInComingStamp").gt(cal.getTimeInMillis()).andOperator(
+		query2.addCriteria(Criteria.where("assignedToDept")
+				.in(PMStoreConstants.NO_DEPT, agentDept, null, Constants.BLANK).and("active").is(true).and("mode")
+				.is("AGENT").and("lastInComingStamp").gt(cal.getTimeInMillis()).andOperator(
 						// Is not assigned to any agent or assigned to said agent
 						new Criteria().orOperator(Criteria.where("assignedToAgent").exists(false),
 								Criteria.where("assignedToAgent").is(null),
@@ -201,7 +203,7 @@ public class SessionStore extends CommonDocStore {
 								Criteria.where("resolved").is(false))
 
 				));
-		// LOGGER.info(query2.toString());
+		//LOGGER.info(query2.toString());
 		return mongoTemplate.find(query2, ChatSessionDoc.class);
 	}
 
