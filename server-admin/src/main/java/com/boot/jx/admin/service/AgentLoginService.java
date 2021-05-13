@@ -68,7 +68,7 @@ public class AgentLoginService {
 	public AgentAuthResponseDto loginAgent(String username, String passsword, boolean admin)
 			throws NoSuchAlgorithmException {
 		AgentDoc agent = validateAgent(username, passsword, admin);
-		DepartmentDoc dept = agentStore.findDepartmentById(agent.getAgent_id());
+		DepartmentDoc dept = agentStore.findDepartmentById(agent.getDept_id());
 		return new AgentAuthResponseDto().importFrom(agent).dept(new DepartmentResponseDto().importFrom(dept));
 	}
 
