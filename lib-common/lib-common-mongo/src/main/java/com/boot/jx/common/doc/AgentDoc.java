@@ -35,7 +35,7 @@ public class AgentDoc implements IDocument {
 	private String isactive;
 	private boolean admin;
 	private boolean isSuperAdmin;
-	private boolean isDefault;
+	private boolean isDefaultValue;
 
 	private List<String> channels;
 	private String dept_id;
@@ -187,12 +187,12 @@ public class AgentDoc implements IDocument {
 		this.channels = channels;
 	}
 
-	public boolean isDefault() {
-		return isDefault;
+	public boolean isDefaultValue() {
+		return isDefaultValue;
 	}
 
-	public void setDefault(boolean isDefault) {
-		this.isDefault = isDefault;
+	public void setDefaultValue(boolean isDefaultValue) {
+		this.isDefaultValue = isDefaultValue;
 	}
 
 }

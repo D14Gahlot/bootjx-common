@@ -20,7 +20,6 @@ import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.common.doc.AgentDoc;
 import com.boot.jx.common.doc.DepartmentDoc;
 import com.boot.jx.common.store.AgentStore;
-import com.boot.jx.mongo.CommonMongoQueryBuilder;
 import com.boot.utils.ArgUtil;
 
 @Component

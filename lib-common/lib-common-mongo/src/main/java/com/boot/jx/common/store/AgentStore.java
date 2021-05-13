@@ -56,17 +56,17 @@ public class AgentStore {
 	public void updateAgentDefault(String agent_id) {
 		AgentDoc agent = findById(agent_id);
 
-		CommonMongoQueryBuilder cqb = new CommonMongoQueryBuilder().where("dept_id", agent.getDept_id()).set("default",
-				false);
+		CommonMongoQueryBuilder cqb = new CommonMongoQueryBuilder().where("dept_id", agent.getDept_id())
+				.set("isDefaultValue", false);
 		mongoTemplate.updateMulti(cqb.getQuery(), cqb.getUpdate(), AgentDoc.class);
 
-		CommonMongoQueryBuilder cqb2 = new CommonMongoQueryBuilder().whereId(agent_id).set("default", true);
+		CommonMongoQueryBuilder cqb2 = new CommonMongoQueryBuilder().whereId(agent_id).set("isDefaultValue", true);
 		mongoTemplate.updateMulti(cqb2.getQuery(), cqb2.getUpdate(), AgentDoc.class);
 	}
 
 	public void updateDepartmentDefault(String deptId) {
-		updateMulti(new CommonMongoQueryBuilder().whereAll().set("default", false), AgentDoc.class);
-		updateMulti(new CommonMongoQueryBuilder().whereId(deptId).set("default", true), AgentDoc.class);
+		updateMulti(new CommonMongoQueryBuilder().whereAll().set("isDefaultValue", false), DepartmentDoc.class);
+		updateMulti(new CommonMongoQueryBuilder().whereId(deptId).set("isDefaultValue", true), DepartmentDoc.class);
 	}
 
 }

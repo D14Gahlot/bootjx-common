@@ -23,7 +23,7 @@ public class AgentResponseDto extends ADocumentDTO<AgentResponseDto> {
 	private String modified_by;
 	private String isactive;
 	private boolean admin;
-	private boolean isDefault;
+	private boolean isDefaultValue;
 
 	private List<String> channels;
 	private DepartmentResponseDto dept;
@@ -169,12 +169,12 @@ public class AgentResponseDto extends ADocumentDTO<AgentResponseDto> {
 		this.channels = channels;
 	}
 
-	public boolean isDefault() {
-		return isDefault;
+	public boolean isDefaultValue() {
+		return isDefaultValue;
 	}
 
-	public void setDefault(boolean isDefault) {
-		this.isDefault = isDefault;
+	public void setDefaultValue(boolean isDefaultValue) {
+		this.isDefaultValue = isDefaultValue;
 	}
 
 }

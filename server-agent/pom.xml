@@ -90,7 +90,7 @@
 
 		<dependency>
 			<groupId>com.boot.jx</groupId>
-			<artifactId>lib-common-mongo</artifactId>
+			<artifactId>lib-common-config</artifactId>
 			<version>${jax.version}</version>
 		</dependency>
 		
