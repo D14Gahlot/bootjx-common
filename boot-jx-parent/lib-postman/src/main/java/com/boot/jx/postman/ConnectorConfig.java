@@ -19,6 +19,8 @@ public class ConnectorConfig implements Serializable {
 	Map<String, TelegramConfig> telegram;
 	Map<String, GupShupConfig> gupshup;
 
+	String defaultSender;
+
 	// Facebook
 	public Map<String, FacebookConfig> facebook() {
 		if (ArgUtil.isEmpty(facebook)) {
@@ -117,6 +119,14 @@ public class ConnectorConfig implements Serializable {
 	public ConnectorConfig gupshup(GupShupConfig config) {
 		this.gupshup().put(config.getNumber(), config);
 		return this;
+	}
+
+	public String getDefaultSender() {
+		return defaultSender;
+	}
+
+	public void setDefaultSender(String defaultSender) {
+		this.defaultSender = defaultSender;
 	}
 
 }

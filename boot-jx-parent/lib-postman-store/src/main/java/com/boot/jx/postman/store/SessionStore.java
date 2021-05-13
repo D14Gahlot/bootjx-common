@@ -345,14 +345,17 @@ public class SessionStore {
 		chatSessionDoc.setAssignedToAgent(agentCode);
 
 		CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder().whereId(chatSessionDoc.getSessionId());
+		builder.set("mode", chatSessionDoc.getMode());
+		builder.set("assignedToDept", chatSessionDoc.getAssignedToDept());
+		builder.set("assignedDeptStamp", chatSessionDoc.getAssignedDeptStamp());
 		builder.set("assignedToAgent", chatSessionDoc.getAssignedToAgent());
 		builder.set("assignedAgentStamp", chatSessionDoc.getAssignedAgentStamp());
 		mongoTemplate.updateFirst(builder.getQuery(), builder.getUpdate(), ChatSessionDoc.class);
 	}
 
-	public void setMode(ChatSessionDoc chatSessionDoc, MessageSession session) {
-		chatSessionDoc.setMode(session.getMode());
-		chatSessionDoc.setAssignedToAgent(session.getAgent());
+	public void assignToBot(ChatSessionDoc chatSessionDoc, String botName) {
+		chatSessionDoc.setMode("BOT");
+		chatSessionDoc.setAssignedToAgent(botName);
 
 		CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder().whereId(chatSessionDoc.getSessionId());
 		builder.set("mode", chatSessionDoc.getMode());

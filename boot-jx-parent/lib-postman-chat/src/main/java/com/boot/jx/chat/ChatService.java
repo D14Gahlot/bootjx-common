@@ -9,6 +9,7 @@ import com.boot.jx.bot.ChatContext;
 import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorHandler;
 import com.boot.jx.chat.ConnectorHandlerFactory.DefaultConnector;
 import com.boot.jx.dict.ContactType;
+import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatContextDoc;
 import com.boot.jx.postman.doc.ChatMeta;
@@ -212,7 +213,7 @@ public class ChatService {
 			inboxMessage.session().setMode("BOT");
 			inboxMessage.session().setAgent(chatClient.getDefaultSender());
 
-			sessionStore.setMode(sessionDoc,inboxMessage.session());
+			sessionStore.assignToBot(sessionDoc, chatClient.getDefaultSender());
 		}
 
 		ChatContextDoc doc = mongoTemplate.findById(contactId, ChatContextDoc.class);
