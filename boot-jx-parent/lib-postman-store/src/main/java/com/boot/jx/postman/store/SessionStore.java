@@ -15,6 +15,7 @@ import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Component;
 
 import com.boot.jx.dict.ContactType;
+import com.boot.jx.mongo.CommonDocStore;
 import com.boot.jx.mongo.CommonMongoQueryBuilder;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
@@ -32,7 +33,7 @@ import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
 
 @Component
-public class SessionStore {
+public class SessionStore extends CommonDocStore {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(SessionStore.class);
 
@@ -259,10 +260,13 @@ public class SessionStore {
 
 	public ChatSessionDoc initSession(ChatSessionDoc chatSessionDoc) {
 		chatSessionDoc.setInitd(true);
-
-		CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder().whereId(chatSessionDoc.getSessionId());
-		builder.set("initd", chatSessionDoc.isInitd());
-		mongoTemplate.updateFirst(builder.getQuery(), builder.getUpdate(), ChatSessionDoc.class);
+		
+		ChatSessionDoc patch = chatSessionDoc.patch();
+		patch.setInitd(true);
+		applyPatch(patch);
+		//CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder().whereId(chatSessionDoc.getSessionId());
+		//builder.set("initd", chatSessionDoc.isInitd());
+		//mongoTemplate.updateFirst(builder.getQuery(), builder.getUpdate(), ChatSessionDoc.class);
 		return chatSessionDoc;
 	}
 

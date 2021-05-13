@@ -9,7 +9,6 @@ import com.boot.jx.bot.ChatContext;
 import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorHandler;
 import com.boot.jx.chat.ConnectorHandlerFactory.DefaultConnector;
 import com.boot.jx.dict.ContactType;
-import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatContextDoc;
 import com.boot.jx.postman.doc.ChatMeta;
@@ -275,7 +274,8 @@ public class ChatService {
 			sessionStore.save(contact);
 		}
 		if (initd) {
-			session.setContactName(contact.getName());
+			ChatSessionDoc sessionPatch = session.patch();
+			sessionPatch.setContactName(contact.getName());
 			session = sessionStore.initSession(session);
 		}
 		return session.isInitd();

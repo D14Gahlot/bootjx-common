@@ -7,11 +7,13 @@ import org.springframework.data.annotation.TypeAlias;
 import org.springframework.data.annotation.Version;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import com.boot.jx.mongo.CommonDocInterfaces.APatchableIndexed;
+import com.boot.jx.mongo.CommonDocInterfaces.PatchableIndexed;
 import com.boot.jx.swagger.ApiMockModelProperty;
 
 @Document(collection = "CHAT_SESSION")
 @TypeAlias("ChatSessionDoc")
-public class ChatSessionDoc implements Serializable {
+public class ChatSessionDoc extends APatchableIndexed<ChatSessionDoc, String> implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
@@ -235,6 +237,21 @@ public class ChatSessionDoc implements Serializable {
 
 	public void setLane(String lane) {
 		this.lane = lane;
+	}
+
+	@Override
+	public PatchableIndexed<ChatSessionDoc, String> newInstance() {
+		return new ChatSessionDoc();
+	}
+
+	@Override
+	public void id(String id) {
+		this.sessionId = id;
+	}
+
+	@Override
+	public String id() {
+		return this.sessionId;
 	}
 
 }
