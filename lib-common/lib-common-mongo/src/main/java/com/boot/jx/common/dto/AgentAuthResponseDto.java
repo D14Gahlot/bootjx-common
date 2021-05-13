@@ -13,7 +13,7 @@ public class AgentAuthResponseDto extends ADocumentDTO<AgentAuthResponseDto> {
 	@JsonProperty("name")
 	private String agent_name;
 
-	@JsonProperty("code")
+	@JsonProperty("channels")
 	private String agent_channels;
 
 	private String isactive;

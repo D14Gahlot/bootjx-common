@@ -1,5 +1,7 @@
 package com.boot.jx.agent.dto;
 
+import java.util.List;
+
 import com.boot.jx.mongo.CommonDocInterfaces.ADocumentDTO;
 
 public class AgentResponseDto extends ADocumentDTO<AgentResponseDto> {
@@ -12,6 +14,7 @@ public class AgentResponseDto extends ADocumentDTO<AgentResponseDto> {
 	private String agent_department;
 	private String agent_channels;
 	private String isactive;
+	private List<String> channels;
 
 	public String getAgent_code() {
 		return agent_code;
@@ -72,6 +75,14 @@ public class AgentResponseDto extends ADocumentDTO<AgentResponseDto> {
 
 	public void setAgent_channels(String agent_channels) {
 		this.agent_channels = agent_channels;
+	}
+
+	public List<String> getChannels() {
+		return channels;
+	}
+
+	public void setChannels(List<String> channels) {
+		this.channels = channels;
 	}
 
 }

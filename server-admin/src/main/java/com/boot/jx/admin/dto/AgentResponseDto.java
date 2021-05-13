@@ -1,6 +1,7 @@
 package com.boot.jx.admin.dto;
 
 import java.sql.Date;
+import java.util.List;
 
 import com.boot.jx.mongo.CommonDocInterfaces.ADocumentDTO;
 
@@ -22,6 +23,8 @@ public class AgentResponseDto extends ADocumentDTO<AgentResponseDto> {
 	private String modified_by;
 	private String isactive;
 	private boolean admin;
+
+	private List<String> channels;
 	private DepartmentResponseDto dept;
 
 	public String getAgent_code() {
@@ -155,6 +158,14 @@ public class AgentResponseDto extends ADocumentDTO<AgentResponseDto> {
 
 	public void setAdmin(boolean isAdmin) {
 		this.admin = isAdmin;
+	}
+
+	public List<String> getChannels() {
+		return channels;
+	}
+
+	public void setChannels(List<String> channels) {
+		this.channels = channels;
 	}
 
 }
