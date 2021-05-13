@@ -212,9 +212,7 @@ public class ChatService {
 			inboxMessage.session().setMode("BOT");
 			inboxMessage.session().setAgent(chatClient.getDefaultSender());
 
-			sessionDoc.setMode(inboxMessage.session().getMode());
-			sessionDoc.setAssignedToAgent(inboxMessage.session().getAgent());
-			sessionStore.save(sessionDoc);
+			sessionStore.setMode(sessionDoc,inboxMessage.session());
 		}
 
 		ChatContextDoc doc = mongoTemplate.findById(contactId, ChatContextDoc.class);

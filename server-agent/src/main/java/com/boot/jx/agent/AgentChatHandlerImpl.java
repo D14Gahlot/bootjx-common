@@ -79,15 +79,9 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 
 		// PUBLISH
 		ChatSessionDoc chatSessionDoc = sessionStore.getSession(inboxMessage.getSessionId());
-		chatSessionDoc.setAssignedToDept(inboxMessage.session().getDept());
-		chatSessionDoc.setAssignedDeptStamp(System.currentTimeMillis());
-		chatSessionDoc.setMode("AGENT");
-		chatSessionDoc.setAssignedToAgent(null);
 
 		if (ArgUtil.is(avaialbleAgent)) {
-			chatSessionDoc.setAssignedToAgent(avaialbleAgent.getAgentCode());
-			chatSessionDoc.setAssignedToDept(avaialbleAgent.getAgentDept());
-			chatSessionDoc.setAssignedAgentStamp(System.currentTimeMillis());
+			sessionStore.assignToAgent(chatSessionDoc, avaialbleAgent.getAgentDept(), avaialbleAgent.getAgentCode());
 
 			messageStore.log(inboxMessage, MessageStore.EVENTS.ASGND_TO_AGENT, avaialbleAgent.getAgentCode(),
 					avaialbleAgent.getAgentDept());
@@ -95,9 +89,9 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 			inboxMessage.session().setAgent(avaialbleAgent.getAgentCode());
 			inboxMessage.session().setDept(avaialbleAgent.getAgentDept());
 		} else {
+			sessionStore.assignToAgent(chatSessionDoc, inboxMessage.session().getDept(), null);
 			messageStore.log(inboxMessage, MessageStore.EVENTS.ASGND_TO_DEPT, inboxMessage.session().getDept());
 		}
-		sessionStore.save(chatSessionDoc);
 
 		stompTunnelService.sendToAll("/dept/onassign-" + inboxMessage.session().getDept(),
 				chatArchive.getChatSessionDto(chatSessionDoc, inboxMessage.session().getAgent()));
@@ -107,7 +101,7 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 
 	public void onAssign(ChatSessionDoc chatSessionDoc, String agentDept, String agentCode) {
 		if (!ArgUtil.areEqual(chatSessionDoc.getAssignedToAgent(), agentCode)) {
-			sessionStore.setAssignedToAgent(chatSessionDoc, agentCode);
+			sessionStore.assignToAgent(chatSessionDoc, agentDept, agentCode);
 			chatService.log(chatSessionDoc, MessageStore.EVENTS.ASGND_TO_AGENT, agentCode, agentDept);
 			stompTunnelService.sendToAll("/dept/onassign-" + agentDept,
 					chatArchive.getChatSessionDto(chatSessionDoc, agentCode));

@@ -21,6 +21,7 @@ import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.ChatUserProfileDoc;
 import com.boot.jx.postman.dto.ChatUserProfileDTO;
 import com.boot.jx.postman.model.InboxMessage;
+import com.boot.jx.postman.model.MessageSession;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.EntityDtoUtil;
@@ -333,13 +334,29 @@ public class SessionStore {
 		mongoTemplate.updateFirst(builder.getQuery(), builder.getUpdate(), ChatSessionDoc.class);
 	}
 
-	public void setAssignedToAgent(ChatSessionDoc chatSessionDoc, String agentCode) {
-		chatSessionDoc.setAssignedToAgent(agentCode);
+	public void assignToAgent(ChatSessionDoc chatSessionDoc, String agentDept, String agentCode) {
+
+		if (!ArgUtil.areEqual(chatSessionDoc.getAssignedToDept(), agentDept)) {
+			chatSessionDoc.setAssignedDeptStamp(System.currentTimeMillis());
+		}
+		chatSessionDoc.setMode("AGENT");
+		chatSessionDoc.setAssignedToDept(agentDept);
 		chatSessionDoc.setAssignedAgentStamp(System.currentTimeMillis());
+		chatSessionDoc.setAssignedToAgent(agentCode);
 
 		CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder().whereId(chatSessionDoc.getSessionId());
 		builder.set("assignedToAgent", chatSessionDoc.getAssignedToAgent());
 		builder.set("assignedAgentStamp", chatSessionDoc.getAssignedAgentStamp());
+		mongoTemplate.updateFirst(builder.getQuery(), builder.getUpdate(), ChatSessionDoc.class);
+	}
+
+	public void setMode(ChatSessionDoc chatSessionDoc, MessageSession session) {
+		chatSessionDoc.setMode(session.getMode());
+		chatSessionDoc.setAssignedToAgent(session.getAgent());
+
+		CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder().whereId(chatSessionDoc.getSessionId());
+		builder.set("mode", chatSessionDoc.getMode());
+		builder.set("assignedToAgent", chatSessionDoc.getAssignedToAgent());
 		mongoTemplate.updateFirst(builder.getQuery(), builder.getUpdate(), ChatSessionDoc.class);
 	}
 }
