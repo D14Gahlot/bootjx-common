@@ -194,6 +194,7 @@ public class SessionStore extends CommonDocStore {
 				.is(true).and("mode").is("AGENT").and("lastInComingStamp").gt(cal.getTimeInMillis()).andOperator(
 						// Is not assigned to any agent or assigned to said agent
 						new Criteria().orOperator(Criteria.where("assignedToAgent").exists(false),
+								Criteria.where("assignedToAgent").is(null),
 								Criteria.where("assignedToAgent").is(agentCode)),
 						// Is not resolved yet
 						new Criteria().orOperator(Criteria.where("resolved").exists(false),
