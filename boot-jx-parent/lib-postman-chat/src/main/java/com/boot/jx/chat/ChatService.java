@@ -274,9 +274,7 @@ public class ChatService {
 			sessionStore.save(contact);
 		}
 		if (initd) {
-			ChatSessionDoc sessionPatch = session.patch();
-			sessionPatch.setContactName(contact.getName());
-			session = sessionStore.initSession(session);
+			session = sessionStore.initSession(session, contact);
 		}
 		return session.isInitd();
 	}

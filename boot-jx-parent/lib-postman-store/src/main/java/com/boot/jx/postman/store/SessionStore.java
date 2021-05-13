@@ -258,15 +258,15 @@ public class SessionStore extends CommonDocStore {
 		}
 	}
 
-	public ChatSessionDoc initSession(ChatSessionDoc chatSessionDoc) {
+	public ChatSessionDoc initSession(ChatSessionDoc chatSessionDoc, ChatContactDoc contact) {
 		chatSessionDoc.setInitd(true);
-		
-		ChatSessionDoc patch = chatSessionDoc.patch();
-		patch.setInitd(true);
-		applyPatch(patch);
-		//CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder().whereId(chatSessionDoc.getSessionId());
-		//builder.set("initd", chatSessionDoc.isInitd());
-		//mongoTemplate.updateFirst(builder.getQuery(), builder.getUpdate(), ChatSessionDoc.class);
+		chatSessionDoc.setContactName(contact.getName());
+
+		CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder().whereId(chatSessionDoc.getSessionId());
+		builder.set("initd", chatSessionDoc.isInitd());
+		builder.set("contactName", chatSessionDoc.getContactName());
+		mongoTemplate.updateFirst(builder.getQuery(), builder.getUpdate(), ChatSessionDoc.class);
+
 		return chatSessionDoc;
 	}
 

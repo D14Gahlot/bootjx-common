@@ -33,32 +33,32 @@ public class ChatSessionDoc extends APatchableIndexed<ChatSessionDoc, String> im
 	private String assignedToDept;
 	private String assignedToAgent;
 
-	private Boolean active;
-	private Boolean initd;
-	private Boolean resolved;
+	private boolean active;
+	private boolean initd;
+	private boolean resolved;
 
-	private Long startSessionStamp;
-	private Long fistResponseStamp;
+	private long startSessionStamp;
+	private long fistResponseStamp;
 
-	private Long lastInComingStamp;
+	private long lastInComingStamp;
 
-	private Long assignedDeptStamp;
-	private Long assignedAgentStamp;
+	private long assignedDeptStamp;
+	private long assignedAgentStamp;
 
-	private Long lastResponseStamp;
-	private Long resolveSessionStamp;
-	private Long closeSessionStamp;
+	private long lastResponseStamp;
+	private long resolveSessionStamp;
+	private long closeSessionStamp;
 
 	private Integer agentScore;
 	private Integer botScore;
 
 	private String mode;
 
-	public Long getLastInComingStamp() {
+	public long getLastInComingStamp() {
 		return lastInComingStamp;
 	}
 
-	public void setLastInComingStamp(Long lastInComingStamp) {
+	public void setLastInComingStamp(long lastInComingStamp) {
 		this.lastInComingStamp = lastInComingStamp;
 	}
 
@@ -78,11 +78,11 @@ public class ChatSessionDoc extends APatchableIndexed<ChatSessionDoc, String> im
 		this.contactId = contactId;
 	}
 
-	public Boolean isActive() {
+	public boolean isActive() {
 		return active;
 	}
 
-	public void setActive(Boolean active) {
+	public void setActive(boolean active) {
 		this.active = active;
 	}
 
@@ -102,11 +102,11 @@ public class ChatSessionDoc extends APatchableIndexed<ChatSessionDoc, String> im
 		this.assignedToAgent = assignedToAgent;
 	}
 
-	public Boolean isInitd() {
+	public boolean isInitd() {
 		return initd;
 	}
 
-	public void setInitd(Boolean initd) {
+	public void setInitd(boolean initd) {
 		this.initd = initd;
 	}
 
@@ -118,51 +118,51 @@ public class ChatSessionDoc extends APatchableIndexed<ChatSessionDoc, String> im
 		this.version = version;
 	}
 
-	public Long getStartSessionStamp() {
+	public long getStartSessionStamp() {
 		return startSessionStamp;
 	}
 
-	public void setStartSessionStamp(Long startSessionStamp) {
+	public void setStartSessionStamp(long startSessionStamp) {
 		this.startSessionStamp = startSessionStamp;
 	}
 
-	public Long getCloseSessionStamp() {
+	public long getCloseSessionStamp() {
 		return closeSessionStamp;
 	}
 
-	public void setCloseSessionStamp(Long closeSessionStamp) {
+	public void setCloseSessionStamp(long closeSessionStamp) {
 		this.closeSessionStamp = closeSessionStamp;
 	}
 
-	public Long getAssignedDeptStamp() {
+	public long getAssignedDeptStamp() {
 		return assignedDeptStamp;
 	}
 
-	public void setAssignedDeptStamp(Long assignedDeptStamp) {
+	public void setAssignedDeptStamp(long assignedDeptStamp) {
 		this.assignedDeptStamp = assignedDeptStamp;
 	}
 
-	public Long getAssignedAgentStamp() {
+	public long getAssignedAgentStamp() {
 		return assignedAgentStamp;
 	}
 
-	public void setAssignedAgentStamp(Long assignedAgentStamp) {
+	public void setAssignedAgentStamp(long assignedAgentStamp) {
 		this.assignedAgentStamp = assignedAgentStamp;
 	}
 
-	public Long getFistResponseStamp() {
+	public long getFistResponseStamp() {
 		return fistResponseStamp;
 	}
 
-	public void setFistResponseStamp(Long fistResponseStamp) {
+	public void setFistResponseStamp(long fistResponseStamp) {
 		this.fistResponseStamp = fistResponseStamp;
 	}
 
-	public Long getLastResponseStamp() {
+	public long getLastResponseStamp() {
 		return lastResponseStamp;
 	}
 
-	public void setLastResponseStamp(Long lastResponseStamp) {
+	public void setLastResponseStamp(long lastResponseStamp) {
 		this.lastResponseStamp = lastResponseStamp;
 	}
 
@@ -206,11 +206,11 @@ public class ChatSessionDoc extends APatchableIndexed<ChatSessionDoc, String> im
 		this.resolveSessionStamp = resolveSessionStamp;
 	}
 
-	public Boolean isResolved() {
+	public boolean isResolved() {
 		return resolved;
 	}
 
-	public void setResolved(Boolean resolved) {
+	public void setResolved(boolean resolved) {
 		this.resolved = resolved;
 	}
 
