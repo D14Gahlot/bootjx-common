@@ -24,12 +24,12 @@ import com.boot.jx.agent.AgentChatHandlerImpl;
 import com.boot.jx.agent.AgentSessionBean;
 import com.boot.jx.agent.AgentSessionService;
 import com.boot.jx.api.ApiResponse;
+import com.boot.jx.common.dto.AgentAuthResponseDto;
 import com.boot.jx.http.CommonHttpRequest;
 import com.boot.jx.rest.RestService;
 import com.boot.jx.stomp.StompTunnelSessionManager;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.Constants;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @Controller
 public class AuthController {
@@ -175,12 +175,12 @@ public class AuthController {
 
 	@ResponseBody
 	@RequestMapping(value = "/auth/login/submit", method = { RequestMethod.POST })
-	public ApiResponse<Map<String, Object>, String> login(@RequestParam String username, @RequestParam String password,
-			HttpServletRequest request) {
+	public ApiResponse<Map<String, Object>, AgentAuthResponseDto> login(@RequestParam String username,
+			@RequestParam String password, HttpServletRequest request) {
 		username = ArgUtil.parseAsString(username, Constants.BLANK);
-		ApiResponse<Map<String, Object>, String> x = restService.ajax(adminUrl).path("/auth/agent/login")
+		ApiResponse<Map<String, Object>, AgentAuthResponseDto> x = restService.ajax(adminUrl).path("/auth/agent/login")
 				.field("username", username).field("password", password).postForm()
-				.as(new ParameterizedTypeReference<ApiResponse<Map<String, Object>, String>>() {
+				.as(new ParameterizedTypeReference<ApiResponse<Map<String, Object>, AgentAuthResponseDto>>() {
 				});
 		if (ArgUtil.parseAsBoolean(x.getData().get("success"), false)) {
 			x.redirectUrl(appConfig.getAppPrefix() + "/app/home");
@@ -188,7 +188,7 @@ public class AuthController {
 			token.setDetails(new WebAuthenticationDetails(request));
 			Authentication authentication = agentAuthProvider.authenticate(token);
 			SecurityContextHolder.getContext().setAuthentication(authentication);
-			agentSessionService.updateLogin(username);
+			agentSessionService.updateLogin(x.getMeta());
 			stompTunnelSessionManager.registerUser(username);
 		} else {
 			x.redirectUrl(appConfig.getAppPrefix() + "/auth/login?error");

@@ -17,6 +17,8 @@ import com.boot.jx.chat.ChatCommands;
 import com.boot.jx.chat.ChatDTOUtil;
 import com.boot.jx.chat.ChatService;
 import com.boot.jx.common.doc.AgentDoc;
+import com.boot.jx.common.doc.DepartmentDoc;
+import com.boot.jx.common.store.AgentStore;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.dto.ChatMessageDTO;
@@ -53,6 +55,9 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 
 	@Autowired
 	private ChatArchive chatArchive;
+
+	@Autowired
+	AgentStore agentStore;
 
 	@Override
 	public boolean onAssignSupported(InboxMessage inboxMessage) {
@@ -116,7 +121,8 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 
 	public void onAssign(AgentDoc agentDoc, ChatSessionDoc chatSessionDoc) {
 		if (ArgUtil.is(agentDoc)) {
-			this.onAssign(chatSessionDoc, agentDoc.getAgent_department(), agentDoc.getAgent_code());
+			String deptCode = agentStore.findDepartmentCodeById(agentDoc.getDept_id());
+			this.onAssign(chatSessionDoc, deptCode, agentDoc.getAgent_code());
 		}
 	}
 

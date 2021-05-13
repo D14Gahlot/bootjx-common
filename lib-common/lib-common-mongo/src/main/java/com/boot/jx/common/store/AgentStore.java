@@ -9,7 +9,9 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Component;
 
 import com.boot.jx.common.doc.AgentDoc;
+import com.boot.jx.common.doc.DepartmentDoc;
 import com.boot.jx.mongo.CommonMongoQueryBuilder;
+import com.boot.utils.ArgUtil;
 
 @Component
 public class AgentStore {
@@ -28,4 +30,18 @@ public class AgentStore {
 		return mongoTemplate.findOne(builder.getQuery(), AgentDoc.class);
 	}
 
+	public DepartmentDoc findDepartmentById(String deptId) {
+		CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder().whereId(deptId);
+		return mongoTemplate.findOne(builder.getQuery(), DepartmentDoc.class);
+	}
+
+	public String findDepartmentCodeById(String deptId) {
+		if (ArgUtil.is(deptId)) {
+			DepartmentDoc dept = findDepartmentById(deptId);
+			if (ArgUtil.is(dept)) {
+				return dept.getDept_code();
+			}
+		}
+		return null;
+	}
 }
