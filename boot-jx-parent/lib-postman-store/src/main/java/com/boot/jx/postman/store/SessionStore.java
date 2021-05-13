@@ -189,8 +189,8 @@ public class SessionStore {
 		Calendar cal = Calendar.getInstance();
 		cal.add(Calendar.DATE, -2);
 
-		query2.addCriteria(Criteria.where("assignedToDept").in(PMStoreConstants.NO_DEPT, agentDept).and("active")
-				.is(true).and("lastInComingStamp").gt(cal.getTimeInMillis()).andOperator(
+		query2.addCriteria(Criteria.where("assignedToDept").in(PMStoreConstants.NO_DEPT, agentDept, null).and("active")
+				.is(true).and("mode").is("AGENT").and("lastInComingStamp").gt(cal.getTimeInMillis()).andOperator(
 						// Is not assigned to any agent or assigned to said agent
 						new Criteria().orOperator(Criteria.where("assignedToAgent").exists(false),
 								Criteria.where("assignedToAgent").is(agentCode)),
