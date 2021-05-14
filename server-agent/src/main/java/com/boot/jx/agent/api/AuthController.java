@@ -24,7 +24,7 @@ import com.boot.jx.agent.AgentChatHandlerImpl;
 import com.boot.jx.agent.AgentSessionBean;
 import com.boot.jx.agent.AgentSessionService;
 import com.boot.jx.api.ApiResponse;
-import com.boot.jx.common.dto.AgentAuthResponseDto;
+import com.boot.jx.common.dto.AgentResponseAuthDto;
 import com.boot.jx.http.CommonHttpRequest;
 import com.boot.jx.rest.RestService;
 import com.boot.jx.stomp.StompTunnelSessionManager;
@@ -175,12 +175,12 @@ public class AuthController {
 
 	@ResponseBody
 	@RequestMapping(value = "/auth/login/submit", method = { RequestMethod.POST })
-	public ApiResponse<Map<String, Object>, AgentAuthResponseDto> login(@RequestParam String username,
+	public ApiResponse<Map<String, Object>, AgentResponseAuthDto> login(@RequestParam String username,
 			@RequestParam String password, HttpServletRequest request) {
 		username = ArgUtil.parseAsString(username, Constants.BLANK);
-		ApiResponse<Map<String, Object>, AgentAuthResponseDto> x = restService.ajax(adminUrl).path("/auth/agent/login")
+		ApiResponse<Map<String, Object>, AgentResponseAuthDto> x = restService.ajax(adminUrl).path("/auth/agent/login")
 				.field("username", username).field("password", password).postForm()
-				.as(new ParameterizedTypeReference<ApiResponse<Map<String, Object>, AgentAuthResponseDto>>() {
+				.as(new ParameterizedTypeReference<ApiResponse<Map<String, Object>, AgentResponseAuthDto>>() {
 				});
 		if (ArgUtil.parseAsBoolean(x.getData().get("success"), false)) {
 			x.redirectUrl(appConfig.getAppPrefix() + "/app/home");

@@ -22,7 +22,7 @@ import com.boot.jx.AppConfig;
 import com.boot.jx.admin.AdminAuthProvider;
 import com.boot.jx.admin.service.AgentLoginService;
 import com.boot.jx.api.ApiResponse;
-import com.boot.jx.common.dto.AgentAuthResponseDto;
+import com.boot.jx.common.dto.AgentResponseAuthDto;
 import com.boot.jx.common.store.AgentStore;
 import com.boot.jx.http.CommonHttpRequest;
 import com.boot.utils.ArgUtil;
@@ -141,10 +141,10 @@ public class AdminAuthController {
 
 	@ResponseBody
 	@RequestMapping(value = "/auth/login/submit", method = { RequestMethod.POST })
-	public ApiResponse<Map<String, Object>, AgentAuthResponseDto> login(@RequestParam String username,
+	public ApiResponse<Map<String, Object>, AgentResponseAuthDto> login(@RequestParam String username,
 			@RequestParam String password, HttpServletRequest request) throws NoSuchAlgorithmException {
 		username = ArgUtil.parseAsString(username, Constants.BLANK);
-		ApiResponse<Map<String, Object>, AgentAuthResponseDto> x = agentLogin(username, password, true);
+		ApiResponse<Map<String, Object>, AgentResponseAuthDto> x = agentLogin(username, password, true);
 		if (ArgUtil.parseAsBoolean(x.getData().get("success"), false)) {
 			x.redirectUrl(appConfig.getAppPrefix() + "/app/home");
 			UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(username, password);
@@ -162,10 +162,10 @@ public class AdminAuthController {
 
 	@ResponseBody
 	@RequestMapping(value = "/auth/agent/login", method = { RequestMethod.POST })
-	public ApiResponse<Map<String, Object>, AgentAuthResponseDto> agentLogin(@RequestParam String username,
+	public ApiResponse<Map<String, Object>, AgentResponseAuthDto> agentLogin(@RequestParam String username,
 			@RequestParam String password, @RequestParam(required = false) boolean admin)
 			throws NoSuchAlgorithmException {
-		AgentAuthResponseDto agent = agentLoginService.loginAgent(username, password, admin);
+		AgentResponseAuthDto agent = agentLoginService.loginAgent(username, password, admin);
 		if (ArgUtil.is(agent)) {
 			return ApiResponse.buildData(MapBuilder.map().put("success", true).toMap(), agent).statusKey("SUCCESS");
 		} else {

@@ -21,7 +21,7 @@ import com.boot.jx.agent.AgentService;
 import com.boot.jx.agent.AgentSessionBean;
 import com.boot.jx.agent.AgentSessionService;
 import com.boot.jx.agent.doc.AgentSessionDoc;
-import com.boot.jx.agent.dto.AgentResponseDto;
+import com.boot.jx.agent.dto.AgentResponseAgentDto;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.api.ListRequestModel;
 import com.boot.jx.aws.AWSFileStore;
@@ -207,8 +207,8 @@ public class MsgController {
 
 	@ResponseBody
 	@RequestMapping(value = { "/api/options/agents" }, method = { RequestMethod.GET })
-	public ApiResponse<AgentResponseDto, Object> listAgents() {
-		return ApiResponse.buildResults(new AgentResponseDto().importFrom(agentStore.findAll()));
+	public ApiResponse<AgentResponseAgentDto, Object> listAgents() {
+		return ApiResponse.buildResults(new AgentResponseAgentDto().importFrom(agentStore.findAll()));
 	}
 
 	@ResponseBody

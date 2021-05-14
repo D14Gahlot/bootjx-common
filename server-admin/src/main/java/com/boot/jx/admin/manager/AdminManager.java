@@ -14,8 +14,8 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Component;
 
 import com.boot.jx.AppContextUtil;
-import com.boot.jx.admin.dto.AgentResponseDto;
-import com.boot.jx.admin.dto.DepartmentResponseDto;
+import com.boot.jx.admin.dto.AgentResponseAdminDto;
+import com.boot.jx.admin.dto.DepartmentResponseAdminDto;
 import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.common.doc.AgentDoc;
 import com.boot.jx.common.doc.DepartmentDoc;
@@ -214,9 +214,9 @@ public class AdminManager {
 	 * fetchDept(null); return lstDept; }
 	 */
 
-	public List<AgentResponseDto> fetchAgent() {
+	public List<AgentResponseAdminDto> fetchAgent() {
 		List<AgentDoc> agent = mongoTemplate.findAll(AgentDoc.class);
-		List<AgentResponseDto> agentList = getAgents(agent);
+		List<AgentResponseAdminDto> agentList = getAgents(agent);
 		return agentList;
 	}
 
@@ -230,11 +230,11 @@ public class AdminManager {
 	 * return deptResList; }
 	 */
 
-	public List<AgentResponseDto> getAgents(List<AgentDoc> agentList) {
-		List<AgentResponseDto> agentLst = new ArrayList<AgentResponseDto>();
+	public List<AgentResponseAdminDto> getAgents(List<AgentDoc> agentList) {
+		List<AgentResponseAdminDto> agentLst = new ArrayList<AgentResponseAdminDto>();
 		try {
 			for (AgentDoc agent : agentList) {
-				AgentResponseDto resdto = copyAgent(agent);
+				AgentResponseAdminDto resdto = copyAgent(agent);
 				agentLst.add(resdto);
 			}
 		} catch (Exception e) {
@@ -243,11 +243,11 @@ public class AdminManager {
 		return agentLst;
 	}
 
-	public List<DepartmentResponseDto> getDepartmets(List<DepartmentDoc> lstDept) {
-		List<DepartmentResponseDto> deptLst = new ArrayList<DepartmentResponseDto>();
+	public List<DepartmentResponseAdminDto> getDepartmets(List<DepartmentDoc> lstDept) {
+		List<DepartmentResponseAdminDto> deptLst = new ArrayList<DepartmentResponseAdminDto>();
 		try {
 			for (DepartmentDoc dept : lstDept) {
-				DepartmentResponseDto dto = copyDept(dept);
+				DepartmentResponseAdminDto dto = copyDept(dept);
 				deptLst.add(dto);
 			}
 		} catch (Exception e) {
@@ -256,8 +256,8 @@ public class AdminManager {
 		return deptLst;
 	}
 
-	public AgentResponseDto copyAgent(AgentDoc agent) {
-		AgentResponseDto dto = new AgentResponseDto();
+	public AgentResponseAdminDto copyAgent(AgentDoc agent) {
+		AgentResponseAdminDto dto = new AgentResponseAdminDto();
 		try {
 			BeanUtils.copyProperties(dto, agent);
 		} catch (Exception e) {
@@ -267,8 +267,8 @@ public class AdminManager {
 		return dto;
 	}
 
-	public DepartmentResponseDto copyDept(DepartmentDoc dept) {
-		DepartmentResponseDto dto = new DepartmentResponseDto();
+	public DepartmentResponseAdminDto copyDept(DepartmentDoc dept) {
+		DepartmentResponseAdminDto dto = new DepartmentResponseAdminDto();
 		try {
 			BeanUtils.copyProperties(dto, dept);
 		} catch (Exception e) {

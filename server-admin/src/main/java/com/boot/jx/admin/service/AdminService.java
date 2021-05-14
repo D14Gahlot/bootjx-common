@@ -5,8 +5,8 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.boot.jx.admin.dto.AgentResponseDto;
-import com.boot.jx.admin.dto.DepartmentResponseDto;
+import com.boot.jx.admin.dto.AgentResponseAdminDto;
+import com.boot.jx.admin.dto.DepartmentResponseAdminDto;
 import com.boot.jx.admin.manager.AdminManager;
 import com.boot.jx.common.doc.AgentDoc;
 import com.boot.jx.common.doc.DepartmentDoc;
@@ -34,44 +34,44 @@ public class AdminService {
 		return lstOfAgent;
 	}
 
-	public List<AgentResponseDto> saveAgent(AgentResponseDto reqDto) {
+	public List<AgentResponseAdminDto> saveAgent(AgentResponseAdminDto reqDto) {
 		AgentDoc reqEntity = EntityDtoUtil.dtoToEntity(reqDto, new AgentDoc());
 		List<AgentDoc> lstOfAgent = adminManager.saveAgent(reqEntity);
 		return fetchAgents(lstOfAgent);
 	}
 
-	public List<AgentResponseDto> fetchAgents(String agentId) {
+	public List<AgentResponseAdminDto> fetchAgents(String agentId) {
 		List<AgentDoc> lstOfAgent = adminManager.fetchAgentList(agentId);
 		return fetchAgents(lstOfAgent);
 	}
 
-	private List<AgentResponseDto> fetchAgents(List<AgentDoc> lstOfAgent) {
-		List<AgentResponseDto> agentList = new AgentResponseDto().importFrom(lstOfAgent);
-		for (AgentResponseDto agentResponseDto : agentList) {
+	private List<AgentResponseAdminDto> fetchAgents(List<AgentDoc> lstOfAgent) {
+		List<AgentResponseAdminDto> agentList = new AgentResponseAdminDto().importFrom(lstOfAgent);
+		for (AgentResponseAdminDto agentResponseDto : agentList) {
 			agentResponseDto.setAgent_password(null);
 			if (ArgUtil.is(agentResponseDto.getAgent_id())) {
-				agentResponseDto.setDept(new DepartmentResponseDto().importFrom(CollectionUtil
+				agentResponseDto.setDept(new DepartmentResponseAdminDto().importFrom(CollectionUtil
 						.getOne(adminManager.fetchDept(ArgUtil.parseAsString(agentResponseDto.getDept_id())))));
 			}
 		}
 		return agentList;
 	}
 
-	public List<DepartmentResponseDto> saveDept(DepartmentResponseDto dto) {
+	public List<DepartmentResponseAdminDto> saveDept(DepartmentResponseAdminDto dto) {
 		DepartmentDoc reqEntity = EntityDtoUtil.dtoToEntity(dto, new DepartmentDoc());
-		return new DepartmentResponseDto().importFrom(adminManager.createAndUpdateDepartment(reqEntity));
+		return new DepartmentResponseAdminDto().importFrom(adminManager.createAndUpdateDepartment(reqEntity));
 	}
 
-	public List<DepartmentResponseDto> fetchDepartments(String deptId) {
+	public List<DepartmentResponseAdminDto> fetchDepartments(String deptId) {
 		List<DepartmentDoc> lstDept = adminManager.fetchDept(deptId);
-		return new DepartmentResponseDto().importFrom(lstDept);
+		return new DepartmentResponseAdminDto().importFrom(lstDept);
 	}
 
-	public List<AgentResponseDto> updateAgentStatus(String agentId, String status) {
+	public List<AgentResponseAdminDto> updateAgentStatus(String agentId, String status) {
 		return fetchAgents(adminManager.updateAgentStatus(agentId, status));
 	}
 
-	public List<AgentResponseDto> updateAgentAdmin(String agentId) {
+	public List<AgentResponseAdminDto> updateAgentAdmin(String agentId) {
 		return fetchAgents(adminManager.updateAgentAdmin(agentId));
 	}
 
@@ -90,14 +90,14 @@ public class AdminService {
 		return lstDept;
 	}
 
-	public List<AgentResponseDto> updateAgentDefault(String agentId) {
+	public List<AgentResponseAdminDto> updateAgentDefault(String agentId) {
 		agentStore.updateAgentDefault(agentId);
 		return fetchAgents(agentStore.findAll());
 	}
 
-	public List<DepartmentResponseDto> updateDepartmentDefault(String deptId) {
+	public List<DepartmentResponseAdminDto> updateDepartmentDefault(String deptId) {
 		agentStore.updateDepartmentDefault(deptId);
-		return new DepartmentResponseDto().importFrom(agentStore.findDepartmentAll());
+		return new DepartmentResponseAdminDto().importFrom(agentStore.findDepartmentAll());
 	}
 
 	/*

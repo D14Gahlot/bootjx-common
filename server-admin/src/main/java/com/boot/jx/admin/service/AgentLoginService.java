@@ -11,8 +11,8 @@ import org.springframework.stereotype.Component;
 import com.boot.jx.AppContextUtil;
 import com.boot.jx.common.doc.AgentDoc;
 import com.boot.jx.common.doc.DepartmentDoc;
-import com.boot.jx.common.dto.AgentAuthResponseDto;
-import com.boot.jx.common.dto.DepartmentResponseDto;
+import com.boot.jx.common.dto.AgentResponseAuthDto;
+import com.boot.jx.common.dto.DepartmentResponseAuthDto;
 import com.boot.jx.common.store.AgentStore;
 import com.boot.jx.postman.client.PostManClient;
 import com.boot.jx.postman.model.Email;
@@ -65,11 +65,11 @@ public class AgentLoginService {
 		return agent;
 	}
 
-	public AgentAuthResponseDto loginAgent(String username, String passsword, boolean admin)
+	public AgentResponseAuthDto loginAgent(String username, String passsword, boolean admin)
 			throws NoSuchAlgorithmException {
 		AgentDoc agent = validateAgent(username, passsword, admin);
 		DepartmentDoc dept = agentStore.findDepartmentById(agent.getDept_id());
-		return new AgentAuthResponseDto().importFrom(agent).dept(new DepartmentResponseDto().importFrom(dept));
+		return new AgentResponseAuthDto().importFrom(agent).dept(new DepartmentResponseAuthDto().importFrom(dept));
 	}
 
 	public boolean resetPassword(String username, boolean admin) throws NoSuchAlgorithmException {

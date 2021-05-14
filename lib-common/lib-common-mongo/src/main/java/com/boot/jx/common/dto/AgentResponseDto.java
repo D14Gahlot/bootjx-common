@@ -1,9 +1,13 @@
 package com.boot.jx.common.dto;
 
+import java.util.List;
+
 import com.boot.jx.mongo.CommonDocInterfaces.ADocumentDTO;
+import com.boot.utils.ArgUtil;
+import com.boot.utils.StringUtils;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class AgentAuthResponseDto extends ADocumentDTO<AgentAuthResponseDto> {
+public class AgentResponseDto<T extends AgentResponseDto<T>> extends ADocumentDTO<T> {
 
 	private static final long serialVersionUID = -5273371227763139845L;
 	@JsonProperty("id")
@@ -13,24 +17,19 @@ public class AgentAuthResponseDto extends ADocumentDTO<AgentAuthResponseDto> {
 	@JsonProperty("name")
 	private String agent_name;
 
-	@JsonProperty("channels")
+	@JsonProperty("agent_channels")
 	private String agent_channels;
+	private List<String> channels;
 
 	private String isactive;
 
 	private boolean admin;
 
 	private boolean isSuperAdmin;
+	private boolean isDefaultValue;
 
 	@JsonProperty("dept_id")
 	private String dept_id;
-
-	private DepartmentResponseDto dept;
-
-	@Override
-	protected ADocumentDTO<AgentAuthResponseDto> newInstance() {
-		return new AgentAuthResponseDto();
-	}
 
 	public String getAgent_id() {
 		return agent_id;
@@ -96,16 +95,32 @@ public class AgentAuthResponseDto extends ADocumentDTO<AgentAuthResponseDto> {
 		this.dept_id = dept_id;
 	}
 
-	public DepartmentResponseDto getDept() {
-		return dept;
+	public boolean isEnabled() {
+		return this.isactive == "Y";
 	}
 
-	public void setDept(DepartmentResponseDto dept) {
-		this.dept = dept;
+	@Override
+	protected AgentResponseDto<T> newInstance() {
+		return new AgentResponseDto<T>();
 	}
 
-	public AgentAuthResponseDto dept(DepartmentResponseDto dept) {
-		this.dept = dept;
-		return this;
+	public boolean isDefaultValue() {
+		return isDefaultValue;
 	}
+
+	public void setDefaultValue(boolean isDefaultValue) {
+		this.isDefaultValue = isDefaultValue;
+	}
+
+	public List<String> getChannels() {
+		if (!ArgUtil.is(channels)) {
+			channels = StringUtils.toList(agent_channels);
+		}
+		return channels;
+	}
+
+	public void setChannels(List<String> channels) {
+		this.channels = channels;
+	}
+
 }
