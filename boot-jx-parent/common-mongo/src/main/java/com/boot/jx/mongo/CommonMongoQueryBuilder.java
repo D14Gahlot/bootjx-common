@@ -23,6 +23,11 @@ public class CommonMongoQueryBuilder {
 		return update;
 	}
 
+	public CommonMongoQueryBuilder with(Criteria criteria) {
+		query().addCriteria(criteria);
+		return this;
+	}
+
 	public CommonMongoQueryBuilder where(String key, Object o) {
 		query().addCriteria(Criteria.where(key).is(o));
 		return this;

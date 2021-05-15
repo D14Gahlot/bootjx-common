@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.boot.jx.AppContextUtil;
 import com.boot.jx.api.ApiResponse;
-import com.boot.jx.postman.ConnectorConfig;
+import com.boot.jx.postman.PMConfiguration;
 import com.boot.jx.postman.doc.ConnectorConfigDoc;
 import com.boot.jx.postman.fb.FacebookConfig;
 import com.boot.jx.postman.gupshup.GupShupConfig;
@@ -31,7 +31,7 @@ public class ConnectorController {
 	}
 
 	@RequestMapping(value = "/api/connector", method = { RequestMethod.POST })
-	public ApiResponse<ConnectorConfigDoc, Object> postConfig(@RequestBody ConnectorConfig config) {
+	public ApiResponse<ConnectorConfigDoc, Object> postConfig(@RequestBody PMConfiguration config) {
 		ConnectorConfigDoc doc = EntityDtoUtil.dtoToEntity(config, new ConnectorConfigDoc());
 		doc.setTenant(AppContextUtil.getTenant());
 		mongoTemplate.save(config);

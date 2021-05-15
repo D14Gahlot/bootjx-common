@@ -18,6 +18,7 @@ import com.boot.jx.chat.ChatDTOUtil;
 import com.boot.jx.chat.ChatService;
 import com.boot.jx.common.doc.AgentDoc;
 import com.boot.jx.common.store.AgentStore;
+import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.dto.ChatMessageDTO;
@@ -61,28 +62,46 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 	@Autowired
 	private AgentSessionBean agentSession;
 
+	@Autowired
+	private PMEnvironment environment;
+
 	@Override
 	public boolean onAssignSupported(InboxMessage inboxMessage) {
 		return true;
 	}
 
-	@Override
-	public InboxMessage onAssign(InboxMessage inboxMessage) {
-
+	private AgentSessionDoc getAgentSessonAssigned(InboxMessage inboxMessage) {
 		long timeThen = System.currentTimeMillis() - TimeUtils.toMillis(chatClient.getChatOnlholdTimeout());
-
 		Query query = new Query();
 		Criteria c = Criteria.where("isOnline").is(true).and("isLoggedIn").is(true).and("lastOnlineStamp").gt(timeThen);
 		if (ArgUtil.is(inboxMessage.session().getDept())) {
 			c.and("agentDept").is(inboxMessage.session().getDept());
 		} else {
-			inboxMessage.session().setDept(PMStoreConstants.NO_DEPT);
+			inboxMessage.session().setDept(
+					ArgUtil.nonEmpty(environment.config().agent().getDefaultBotName(), PMStoreConstants.NO_DEPT));
 		}
 		query.addCriteria(c).with(new Sort(Direction.ASC, "lastOnlineStamp")).limit(1);
 
 		List<AgentSessionDoc> agents = mongoTemplate.find(query, AgentSessionDoc.class);
 
 		AgentSessionDoc avaialbleAgent = CollectionUtil.getOne(agents);
+
+		String defAgentCode = environment.config().agent().defaultAgent(inboxMessage.session().getDept());
+		if (ArgUtil.is(defAgentCode)) {
+			for (AgentSessionDoc agentSessionDoc : agents) {
+				if (defAgentCode.equals(agentSessionDoc.getAgentCode())) {
+					avaialbleAgent = agentSessionDoc;
+					break;
+				}
+			}
+		}
+		return avaialbleAgent;
+	}
+
+	@Override
+	public InboxMessage onAssign(InboxMessage inboxMessage) {
+
+		AgentSessionDoc avaialbleAgent = getAgentSessonAssigned(inboxMessage);
 
 		// PUBLISH
 		ChatSessionDoc chatSessionDoc = sessionStore.getSession(inboxMessage.getSessionId());

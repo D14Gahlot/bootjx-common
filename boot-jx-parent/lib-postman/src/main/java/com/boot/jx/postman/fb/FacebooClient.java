@@ -41,7 +41,7 @@ public class FacebooClient implements MessageClient {
 		if (ArgUtil.isEmpty(lane)) {
 			throw new PostManException("No lane " + lane);
 		}
-		FacebookConfig config = environment.get().facebook(lane);
+		FacebookConfig config = environment.config().facebook(lane);
 
 		if (!ArgUtil.is(config)) {
 			throw new PostManException("No Config for lane " + lane);

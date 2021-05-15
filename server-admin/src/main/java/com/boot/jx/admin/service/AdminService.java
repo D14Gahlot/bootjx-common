@@ -3,14 +3,17 @@ package com.boot.jx.admin.service;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Service;
 
+import com.boot.jx.AppContextUtil;
 import com.boot.jx.admin.dto.AgentResponseAdminDto;
 import com.boot.jx.admin.dto.DepartmentResponseAdminDto;
 import com.boot.jx.admin.manager.AdminManager;
 import com.boot.jx.common.doc.AgentDoc;
 import com.boot.jx.common.doc.DepartmentDoc;
 import com.boot.jx.common.store.AgentStore;
+import com.boot.jx.postman.doc.ConnectorConfigDoc;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
 import com.boot.utils.EntityDtoUtil;
@@ -23,6 +26,9 @@ public class AdminService {
 
 	@Autowired
 	AgentStore agentStore;
+
+	@Autowired
+	MongoTemplate mongoTemplate;
 
 	public List<AgentDoc> saveAgent(AgentDoc reqDto) {
 		List<AgentDoc> lstOfAgent = adminManager.saveAgent(reqDto);
@@ -92,44 +98,29 @@ public class AdminService {
 
 	public List<AgentResponseAdminDto> updateAgentDefault(String agentId) {
 		agentStore.updateAgentDefault(agentId);
+		AgentDoc agent = agentStore.findById(agentId);
+		DepartmentDoc dept = agentStore.findDepartmentById(agent.getDept_id());
+		ConnectorConfigDoc doc = mongoTemplate.findById(AppContextUtil.getTenant(), ConnectorConfigDoc.class);
+		if (agent.isDefaultValue()) {
+			doc.agent().defaultAgents().put(dept.getDept_code(), agent.getAgent_code());
+		} else {
+			doc.agent().defaultAgents().remove(dept.getDept_code());
+		}
+		mongoTemplate.save(doc);
 		return fetchAgents(agentStore.findAll());
 	}
 
 	public List<DepartmentResponseAdminDto> updateDepartmentDefault(String deptId) {
 		agentStore.updateDepartmentDefault(deptId);
+		DepartmentDoc dept = agentStore.findDepartmentById(deptId);
+		ConnectorConfigDoc doc = mongoTemplate.findById(AppContextUtil.getTenant(), ConnectorConfigDoc.class);
+		if (dept.isDefaultValue()) {
+			doc.agent().setDefaultTeamCode(dept.getDept_code());
+		} else {
+			doc.agent().setDefaultTeamCode(null);
+		}
+		mongoTemplate.save(doc);
 		return new DepartmentResponseAdminDto().importFrom(agentStore.findDepartmentAll());
 	}
-
-	/*
-	 * public List<AgentResponseDto> saveAgent(AgentRequestDto reqDto) {
-	 * List<AgentResponseDto> lstOfAgent =adminManager.saveAgent(reqDto); return
-	 * lstOfAgent; }
-	 */
-
-	/*
-	 * public List<AgentResponseDto> fetchAgent(Integer agentId) {
-	 * List<AgentResponseDto> lstOfAgent =adminManager.fetchAgentList(agentId);
-	 * return lstOfAgent; }
-	 * 
-	 * 
-	 * public List<AgentResponseDto> updateAgentStatus(Integer agentId,String
-	 * status) { List<AgentResponseDto> lstOfAgent
-	 * =adminManager.updateAgentStatus(agentId,status); return lstOfAgent; }
-	 */
-
-	/*
-	 * public List<DepartmentResponseDto>
-	 * createAndUpdateDepartment(DepartmentRequestDto deptReqDto){
-	 * List<DepartmentResponseDto> lstDept =
-	 * adminManager.createAndUpdateDepartment(deptReqDto); return lstDept; }
-	 * 
-	 * public List<DepartmentResponseDto> fetchDepartment(Integer deptId){
-	 * List<DepartmentResponseDto> lstDept = adminManager.fetchDept(deptId); return
-	 * lstDept; }
-	 * 
-	 * public List<DepartmentResponseDto> updateDepartment(Integer deptId, String
-	 * status){ List<DepartmentResponseDto> lstDept =
-	 * adminManager.updateDeptStatus(deptId,status); return lstDept; }
-	 */
 
 }

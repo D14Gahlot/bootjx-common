@@ -9,15 +9,15 @@ import com.boot.utils.ArgUtil;
 public class PMEnvironment {
 
 	public static interface PMEnvironmentProvider {
-		public ConnectorConfig get();
+		public PMConfiguration config();
 	}
 
 	@Autowired(required = false)
 	private PMEnvironmentProvider provider;
 
-	public ConnectorConfig get() {
+	public PMConfiguration config() {
 		if (ArgUtil.is(provider)) {
-			return provider.get();
+			return provider.config();
 		}
 		return null;
 	}

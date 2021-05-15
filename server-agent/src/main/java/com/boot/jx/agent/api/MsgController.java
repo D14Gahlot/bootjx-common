@@ -119,7 +119,6 @@ public class MsgController {
 
 		sessionStore.updateResponseTime(sessionDoc);
 		// Session Stuff Logging >
-
 		if (ArgUtil.areEqual(sessionDoc.getAssignedToAgent(), agentSession.getAgentCode())) {
 			ChatMessageDTO messageDto = new ChatMessageDTO();
 			messageDto.setName(agentSession.getAgentCode());
@@ -129,11 +128,14 @@ public class MsgController {
 			messageDto.setMessageIdExt(outboxMessage.getMessageIdExt());
 			messageDto.setText(outboxMessage.getMessage());
 			messageDto.setMessageIdRef(outboxMessage.getMessageIdRef());
+
+			agentSessionService.refreshOnline();
 			return ApiResponse.buildResult(messageDto);
+		} else {
+			agentSessionService.refreshOnline();
+			return new ApiResponse<ChatMessageDTO, Object>().message("Only assignee can respond to chat.");
 		}
 
-		agentSessionService.refreshOnline();
-		return null;
 	}
 
 	@Autowired

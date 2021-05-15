@@ -4,13 +4,14 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.boot.jx.agent.AgentConfig;
 import com.boot.jx.postman.fb.FacebookConfig;
 import com.boot.jx.postman.gupshup.GupShupConfig;
 import com.boot.jx.postman.tg.TelegramConfig;
 import com.boot.jx.postman.tw.TwitterConfig;
 import com.boot.utils.ArgUtil;
 
-public class ConnectorConfig implements Serializable {
+public class PMConfiguration implements Serializable {
 
 	private static final long serialVersionUID = -5432956433673368768L;
 
@@ -19,7 +20,7 @@ public class ConnectorConfig implements Serializable {
 	Map<String, TelegramConfig> telegram;
 	Map<String, GupShupConfig> gupshup;
 
-	String defaultSender;
+	AgentConfig agent;
 
 	// Facebook
 	public Map<String, FacebookConfig> facebook() {
@@ -41,7 +42,7 @@ public class ConnectorConfig implements Serializable {
 		return facebook.get(pageId);
 	}
 
-	public ConnectorConfig facebook(FacebookConfig config) {
+	public PMConfiguration facebook(FacebookConfig config) {
 		this.facebook().put(config.getPageId(), config);
 		return this;
 	}
@@ -58,7 +59,7 @@ public class ConnectorConfig implements Serializable {
 		return twitter().get(handler);
 	}
 
-	public ConnectorConfig twitter(TwitterConfig config) {
+	public PMConfiguration twitter(TwitterConfig config) {
 		this.twitter().put(config.getHandler(), config);
 		return this;
 	}
@@ -87,7 +88,7 @@ public class ConnectorConfig implements Serializable {
 		this.telegram = telegram;
 	}
 
-	public ConnectorConfig telegram(TelegramConfig config) {
+	public PMConfiguration telegram(TelegramConfig config) {
 		this.telegram().put(config.getHandler(), config);
 		return this;
 	}
@@ -116,17 +117,29 @@ public class ConnectorConfig implements Serializable {
 		return gupshup().get(handler);
 	}
 
-	public ConnectorConfig gupshup(GupShupConfig config) {
+	public PMConfiguration gupshup(GupShupConfig config) {
 		this.gupshup().put(config.getNumber(), config);
 		return this;
 	}
 
-	public String getDefaultSender() {
-		return defaultSender;
+	// Agent
+	public AgentConfig agent() {
+		if (ArgUtil.isEmpty(agent)) {
+			agent = new AgentConfig();
+		}
+		return agent;
 	}
 
-	public void setDefaultSender(String defaultSender) {
-		this.defaultSender = defaultSender;
+	public AgentConfig getAgent() {
+		return agent;
 	}
 
+	public void setAgent(AgentConfig agent) {
+		this.agent = agent;
+	}
+
+	public PMConfiguration agent(AgentConfig agent) {
+		this.agent = agent;
+		return this;
+	}
 }

@@ -72,7 +72,7 @@ public class TwitterClient implements MessageClient {
 		TwitterClientContext ctx = CLIENTS.get(lane);
 
 		if (ArgUtil.isEmpty(ctx)) {
-			TwitterConfig config = environment.get().twitter(lane);
+			TwitterConfig config = environment.config().twitter(lane);
 			if (!ArgUtil.is(config)) {
 				throw new PostManException("No Config for lane " + lane);
 			}
@@ -170,7 +170,7 @@ public class TwitterClient implements MessageClient {
 	}
 
 	public StatusCode registerWebhook(String lane) {
-		TwitterConfig config = environment.get().twitter(lane);
+		TwitterConfig config = environment.config().twitter(lane);
 		if (ArgUtil.isEmpty(config)) {
 			LOGGER.info("No Config " + lane);
 		}

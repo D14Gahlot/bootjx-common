@@ -67,7 +67,7 @@ public class TelegramClient implements MessageClient {
 		if (ArgUtil.isEmpty(lane)) {
 			throw new PostManException("No lane " + lane);
 		}
-		TelegramConfig config = environment.get().telegram(lane);
+		TelegramConfig config = environment.config().telegram(lane);
 		if (!ArgUtil.is(config)) {
 			throw new PostManException("No Config for lane " + lane);
 		}
@@ -140,7 +140,7 @@ public class TelegramClient implements MessageClient {
 
 	public String registerWebhook(String lane) {
 		try {
-			TelegramConfig config = environment.get().telegram(lane);
+			TelegramConfig config = environment.config().telegram(lane);
 			if (ArgUtil.is(config.getWebhookUrl())) {
 				String resp = registerWebhook(config.getWebhookUrl(), lane);
 				LOGGER.info("WebHook registered to {}", resp);

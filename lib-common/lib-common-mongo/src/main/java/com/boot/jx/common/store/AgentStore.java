@@ -53,20 +53,25 @@ public class AgentStore {
 		return null;
 	}
 
-	public void updateAgentDefault(String agent_id) {
-		AgentDoc agent = findById(agent_id);
-
-		CommonMongoQueryBuilder cqb = new CommonMongoQueryBuilder().where("dept_id", agent.getDept_id())
-				.set("isDefaultValue", false);
-		mongoTemplate.updateMulti(cqb.getQuery(), cqb.getUpdate(), AgentDoc.class);
-
-		CommonMongoQueryBuilder cqb2 = new CommonMongoQueryBuilder().whereId(agent_id).set("isDefaultValue", true);
-		mongoTemplate.updateMulti(cqb2.getQuery(), cqb2.getUpdate(), AgentDoc.class);
+	public void updateAgentDefault(String agentId) {
+		AgentDoc agent = findById(agentId);
+		if (!agent.isDefaultValue()) {
+			CommonMongoQueryBuilder cqb = new CommonMongoQueryBuilder().where("dept_id", agent.getDept_id())
+					.set("isDefaultValue", false);
+			updateMulti(cqb, AgentDoc.class);
+		}
+		CommonMongoQueryBuilder cqb2 = new CommonMongoQueryBuilder().whereId(agentId).set("isDefaultValue",
+				!agent.isDefaultValue());
+		updateMulti(cqb2, AgentDoc.class);
 	}
 
 	public void updateDepartmentDefault(String deptId) {
-		updateMulti(new CommonMongoQueryBuilder().whereAll().set("isDefaultValue", false), DepartmentDoc.class);
-		updateMulti(new CommonMongoQueryBuilder().whereId(deptId).set("isDefaultValue", true), DepartmentDoc.class);
+		DepartmentDoc dept = findDepartmentById(deptId);
+		if (!dept.isDefaultValue()) {
+			updateMulti(new CommonMongoQueryBuilder().whereAll().set("isDefaultValue", false), DepartmentDoc.class);
+		}
+		updateMulti(new CommonMongoQueryBuilder().whereId(deptId).set("isDefaultValue", !dept.isDefaultValue()),
+				DepartmentDoc.class);
 	}
 
 }

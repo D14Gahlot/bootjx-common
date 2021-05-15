@@ -112,7 +112,7 @@ public class ChatClient {
 	}
 
 	public String getDefaultSender() {
-		return ArgUtil.parseAsString(environment.get().getDefaultSender(), defaultSender);
+		return ArgUtil.parseAsString(environment.config().agent().getDefaultBotName(), defaultSender);
 	}
 
 	public String getInboundForwardUrl() {
