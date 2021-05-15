@@ -201,7 +201,7 @@ public class MsgController {
 	@ResponseBody
 	@RequestMapping(value = "/api/sessions/messages", method = { RequestMethod.POST })
 	public ApiResponse<ChatSessionDTO, Object> getMessagesForSession(@RequestBody ChatSessionDTO chatSessionDto) {
-		chatSessionDto = chatArchive.getChatSession(chatSessionDto.getSessionId());
+		chatSessionDto = chatArchive.getChatSession(chatSessionDto);
 		chatSessionDto = chatArchive.withContact(chatSessionDto);
 		return ApiResponse.buildResult(chatArchive.withMessages(chatSessionDto));
 	}
