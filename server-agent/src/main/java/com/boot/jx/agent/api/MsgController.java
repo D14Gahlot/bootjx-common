@@ -201,7 +201,9 @@ public class MsgController {
 	@ResponseBody
 	@RequestMapping(value = "/api/sessions/messages", method = { RequestMethod.POST })
 	public ApiResponse<ChatSessionDTO, Object> getMessagesForSession(@RequestBody ChatSessionDTO chatSessionDto) {
-		return ApiResponse.buildResults(chatArchive.withMessages(chatSessionDto));
+		chatSessionDto = chatArchive.getChatSession(chatSessionDto.getSessionId());
+		chatSessionDto = chatArchive.withContact(chatSessionDto);
+		return ApiResponse.buildResult(chatArchive.withMessages(chatSessionDto));
 	}
 
 	@Autowired
@@ -214,7 +216,7 @@ public class MsgController {
 	}
 
 	@ResponseBody
-	@RequestMapping(value = { "/api/session/agent" }, method = { RequestMethod.POST })
+	@RequestMapping(value = { "/api/session/agent", "/api/session/agent/assign" }, method = { RequestMethod.POST })
 	public ApiResponse<ChatSessionDTO, Object> assignAgent(@RequestParam String sessionId,
 			@RequestParam String agentId) {
 		ChatSessionDoc chatSessionDoc = sessionStore.getSession(sessionId);

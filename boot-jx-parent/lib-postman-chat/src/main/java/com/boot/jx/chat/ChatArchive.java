@@ -61,6 +61,10 @@ public class ChatArchive {
 		return ChatDTOUtil.getChatSessionDTO(sessionStore.getSession(sessionId));
 	}
 
+	public ChatSessionDTO getChatSession(ChatSessionDTO chatSessionDto) {
+		return getChatSession(chatSessionDto.getSessionId());
+	}
+
 	public List<ChatMessageDTO> getMessages(ChatSessionDTO chatSessionDto) {
 		if (ArgUtil.isEmpty(chatSessionDto.getContactType())) {
 			chatSessionDto = withContact(chatSessionDto);
