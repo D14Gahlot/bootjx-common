@@ -7,6 +7,7 @@ import static org.springframework.data.mongodb.core.aggregation.Aggregation.newA
 import static org.springframework.data.mongodb.core.aggregation.Aggregation.project;
 import static org.springframework.data.mongodb.core.aggregation.Aggregation.sort;
 
+import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.text.SimpleDateFormat;
@@ -17,7 +18,9 @@ import java.time.ZonedDateTime;
 import java.time.temporal.ChronoField;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -45,10 +48,16 @@ import com.boot.jx.admin.dto.DashBoardRequestDto;
 import com.boot.jx.admin.dto.DashBoardResponseDto;
 import com.boot.jx.admin.dto.LeadMessanger;
 import com.boot.jx.admin.dto.PeakLoadDto;
+import com.boot.jx.admin.dto.TagDocumentDto;
+import com.boot.jx.admin.dto.TagDocumentLst;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.MessageDoc;
+import com.boot.jx.postman.model.TagDocument;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.JsonUtil;
+
+import org.apache.commons.beanutils.PropertyUtils;
+import java.beans.PropertyDescriptor;
 
 
 @Component
@@ -882,5 +891,113 @@ public class AdminDashBoardManager {
 		 }
 		 return chatSessionLst;
 	}
+	
+	public TagDocumentDto getTagDocumentDetails(DashBoardRequestDto req) {
+		long dateRange1=0;
+		long dateRange2=0;
+	
+		if(ArgUtil.is(req.getDateRange1()) && req.getDateRange1()>0) {
+			dateRange1 = req.getDateRange1();
+		}else {
+			dateRange1 =agentAnaMgr.todayStartTime();
+		}
+		if(ArgUtil.is(req.getDateReange2()) && req.getDateReange2()>0) {
+			dateRange2 = req.getDateReange2();
+		}else {
+			dateRange2 =agentAnaMgr.todayEndTime();
+		}
+		Map<String,List<String>> tagMap = new HashMap<>();
+		TagDocumentDto responseDto = new TagDocumentDto();
+		List<String> lst =getListOfContactType();
+		List<Object> toalTagLst = new ArrayList<Object>();
+		Map<String,TagDocumentLst> mapTagDocument= new HashMap<String,TagDocumentLst>();
+		List<TagDocumentLst> tagKeyValyeLst=new ArrayList<TagDocumentLst>();
+		
+		Map<Object,Object> mapTagLst = new HashMap<Object,Object>();
+		for(String contactType: lst) {
+			List<MessageDoc> msgTagDocLst = getTagDocumentDetails(contactType, dateRange1,dateRange2);
+			LOGGER.info("Tagwise contactType :"+contactType);
+			for(MessageDoc msgTagDoc:msgTagDocLst ) {
+				if(msgTagDoc!=null && msgTagDoc.getTags()!=null) {
+					TagDocument tagDocument =msgTagDoc.getTags();
+					List<Object> tagLst= showFieldsUsingBean(tagDocument);
+					toalTagLst.addAll(tagLst);
+				}
+				
+			}
+		}
+		
+		
+		//LOGGER.info("Total tag :{---}"+JsonUtil.toJson(toalTagLst));
+		
+		//tag wise Count 
+		
+		Set<Object> tagWiseCount = new HashSet<Object>(toalTagLst);
+		for (Object key : tagWiseCount) {
+			mapTagLst.put(key, Collections.frequency(toalTagLst, key));
+			TagDocumentLst tagKeyValye=new TagDocumentLst();
+			tagKeyValye.setTagCategory(key.toString());
+			tagKeyValye.setCount(Collections.frequency(toalTagLst, key));
+			tagKeyValyeLst.add(tagKeyValye);
+			//LOGGER.info("{  +++++++++   }"+key + ": " + Collections.frequency(toalTagLst, key));
+		}
+		
+		responseDto.setLstTagDocument(tagKeyValyeLst);
+		
+		return responseDto;
+	}
+	
+	public List<MessageDoc> getTagDocumentDetails(Object contactType,long dateRange1, long dateRange2){
+		//List<MessageDoc> msgDocLst =null;
+		Query query = new Query();
+		//query.addCriteria(Criteria.where("tag").exists(true));
+		query.addCriteria(Criteria.where("timestamp").gt(dateRange1).lt(dateRange2));
+		List<MessageDoc> msgDocLst = mongoTemplate.find(query, MessageDoc.class, contactType.toString());
+		return msgDocLst;
+	}
 
+	
+	public static List<Object> showFieldsUsingBean(Object obj) {
+		 List<Object> lstTagStr = new ArrayList<Object>();
+		 // Getting the PropertyDescriptors for the object
+        PropertyDescriptor[] objDescriptors = PropertyUtils.getPropertyDescriptors(obj);
+
+        // Iterating through each of the PropertyDescriptors
+        for (PropertyDescriptor objDescriptor : objDescriptors) {
+            try {
+            	
+                String propertyName = objDescriptor.getName();
+                Object propType = PropertyUtils.getPropertyType(obj, propertyName);
+                Object propValue = PropertyUtils.getProperty(obj, propertyName);
+                if(propValue!=null) {
+               List<?> objLst = convertObjectToList(propValue);
+               lstTagStr.addAll(objLst);
+             
+                }
+                // Printing the details
+               // LOGGER.info(" ========================= {====}Property="+propertyName+", Type="+propType+", Value="+propValue);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+         
+        }
+   
+        return lstTagStr;
+	}
+
+	
+	public static List<?> convertObjectToList(Object obj) {
+	    List<?> list = new ArrayList<>();
+	    if(obj!=null) {
+	    if (obj.getClass().isArray()) {
+	        list = Arrays.asList((Object[])obj);
+	    } else if (obj instanceof Collection) {
+	        list = new ArrayList<>((Collection<?>)obj);
+	    }else if(obj instanceof Integer[]) {
+	    	list= Arrays.asList((Integer[])obj);
+	    }
+	    }
+	    return list;
+	}
+	
 }

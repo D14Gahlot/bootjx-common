@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.boot.jx.admin.dto.DashBoardRequestDto;
 import com.boot.jx.admin.dto.DashBoardResponseDto;
+import com.boot.jx.admin.dto.TagDocumentDto;
 import com.boot.jx.admin.manager.AdminDashBoardManager;
 import com.boot.jx.admin.manager.AgentAnalyticsManager;
 import com.boot.jx.api.ApiResponse;
@@ -51,5 +52,14 @@ public class AdminDashBoardContoller {
 		resp.data(agentAnaMgr.getSummery(lst));
 		return resp;
 	}
+	
+	@RequestMapping(value = "/admin/tag-analytics", method = { RequestMethod.POST })
+	public ApiResponse<TagDocumentDto, Object> getTagAnalytics(@RequestBody DashBoardRequestDto req) {
+		TagDocumentDto lst = adminDbMgr.getTagDocumentDetails(req);
+		ApiResponse<TagDocumentDto, Object> resp = new ApiResponse<TagDocumentDto, Object>();
+		resp.setData(lst);
+		return resp;
+	}
+
 
 }
