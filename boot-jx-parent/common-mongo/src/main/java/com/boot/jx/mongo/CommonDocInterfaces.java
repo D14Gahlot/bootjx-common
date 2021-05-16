@@ -6,12 +6,49 @@ import java.util.List;
 
 import com.boot.utils.ArgUtil;
 import com.boot.utils.EntityDtoUtil;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 public class CommonDocInterfaces {
 
-	public static interface Patchable<T> {
-
+	public static interface Patchable<T extends Patchable<T>> {
 		public T patch();
+	}
+
+	public static interface PatchableIndexed<T extends PatchableIndexed<T, I>, I> extends Patchable<T> {
+		public T newInstance();
+
+		public void savePatch(T patch);
+
+		public T fetchPatch();
+
+		default public T patch() {
+			if (fetchPatch() == null) {
+				T patch = newInstance();
+				this.savePatch(patch);
+				patch.id(this.id());
+			}
+			return (T) fetchPatch();
+		}
+
+		public void id(I id);
+
+		public I id();
+	}
+
+	public static abstract class APatchableIndexed<T extends APatchableIndexed<T, I>, I>
+			implements PatchableIndexed<T, I> {
+		@JsonIgnore
+		private T patch;
+
+		@Override
+		public void savePatch(T patch) {
+			this.patch = patch;
+		}
+
+		@Override
+		public T fetchPatch() {
+			return this.patch;
+		}
 	}
 
 	public static interface OldDocVersion<T extends OldDocVersion<T>> {

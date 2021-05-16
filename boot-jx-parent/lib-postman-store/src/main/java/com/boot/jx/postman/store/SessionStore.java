@@ -15,6 +15,8 @@ import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Component;
 
 import com.boot.jx.dict.ContactType;
+import com.boot.jx.mongo.CommonDocStore;
+import com.boot.jx.mongo.CommonMongoQueryBuilder;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.ChatUserProfileDoc;
@@ -22,6 +24,7 @@ import com.boot.jx.postman.dto.ChatUserProfileDTO;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.Constants;
 import com.boot.utils.EntityDtoUtil;
 import com.boot.utils.TimeUtils;
 import com.mongodb.BasicDBObject;
@@ -31,7 +34,7 @@ import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
 
 @Component
-public class SessionStore {
+public class SessionStore extends CommonDocStore {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(SessionStore.class);
 
@@ -188,11 +191,12 @@ public class SessionStore {
 		Calendar cal = Calendar.getInstance();
 		cal.add(Calendar.DATE, -2);
 
-		query2.addCriteria(Criteria.where("assignedToDept").in(PMStoreConstants.NO_DEPT, agentDept).and("active")
-				.is(true).and("lastInComingStamp").gt(cal.getTimeInMillis()).andOperator(
-						// Is not assigned to any agent or assigned to said agent
-						new Criteria().orOperator(Criteria.where("assignedToAgent").exists(false),
-								Criteria.where("assignedToAgent").is(agentCode)),
+		query2.addCriteria(Criteria.where("active").is(true).and("mode").is("AGENT").and("lastInComingStamp")
+				.gt(cal.getTimeInMillis()).andOperator(
+				// Is not assigned to any agent or assigned to said agent
+//						new Criteria().orOperator(Criteria.where("assignedToAgent").exists(false),
+//								Criteria.where("assignedToAgent").is(null),
+//								Criteria.where("assignedToAgent").is(agentCode)),
 						// Is not resolved yet
 						new Criteria().orOperator(Criteria.where("resolved").exists(false),
 								Criteria.where("resolved").is(false))
@@ -256,45 +260,59 @@ public class SessionStore {
 		}
 	}
 
-	public ChatSessionDoc initSession(ChatSessionDoc chatSessionDoc) {
+	public ChatSessionDoc initSession(ChatSessionDoc chatSessionDoc, ChatContactDoc contact) {
 		chatSessionDoc.setInitd(true);
-		save(chatSessionDoc);
-//		Query query2 = new Query();
-//		query2.addCriteria(Criteria.where("sessionId").is(chatSessionDoc.getSessionId()));
-//		Update update = Update.update("initd", true);
-//		mongoTemplate.updateMulti(query2, update, ChatSessionDoc.class);
-//		chatSessionDoc.setInitd(true);
+		chatSessionDoc.setContactName(contact.getName());
+
+		CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder().whereId(chatSessionDoc.getSessionId());
+		builder.set("initd", chatSessionDoc.isInitd());
+		builder.set("contactName", chatSessionDoc.getContactName());
+		mongoTemplate.updateFirst(builder.getQuery(), builder.getUpdate(), ChatSessionDoc.class);
+
 		return chatSessionDoc;
 	}
 
 	public ChatSessionDoc resolveSession(ChatSessionDoc chatSessionDoc) {
+		// Old Way of Doing it
 		chatSessionDoc.setResolveSessionStamp(System.currentTimeMillis());
-		chatSessionDoc.setResolved(true);
-		save(chatSessionDoc);
-//		Query query2 = new Query();
-//		query2.addCriteria(Criteria.where("sessionId").is(chatSessionDoc.getSessionId()));
-//		Update update = Update.update("initd", true);
-//		mongoTemplate.updateMulti(query2, update, ChatSessionDoc.class);
-//		chatSessionDoc.setInitd(true);
+		chatSessionDoc.setResolved(false);
+
+		CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder().whereId(chatSessionDoc.getSessionId());
+		builder.set("resolveSessionStamp", chatSessionDoc.getResolveSessionStamp());
+		builder.set("resolved", chatSessionDoc.isResolved());
+		mongoTemplate.updateFirst(builder.getQuery(), builder.getUpdate(), ChatSessionDoc.class);
 		return chatSessionDoc;
 	}
 
 	public ChatSessionDoc closeSession(ChatSessionDoc chatSessionDoc) {
 		chatSessionDoc.setCloseSessionStamp(System.currentTimeMillis());
 		chatSessionDoc.setActive(false);
-		save(chatSessionDoc);
+
+		CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder().whereId(chatSessionDoc.getSessionId());
+		builder.set("closeSessionStamp", chatSessionDoc.getCloseSessionStamp());
+		builder.set("active", chatSessionDoc.isActive());
+		mongoTemplate.updateFirst(builder.getQuery(), builder.getUpdate(), ChatSessionDoc.class);
+
 		return chatSessionDoc;
 	}
 
 	public ChatSessionDoc botScore(ChatSessionDoc chatSessionDoc, Integer botScore) {
 		chatSessionDoc.setBotScore(botScore);
-		save(chatSessionDoc);
+
+		CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder().whereId(chatSessionDoc.getSessionId());
+		builder.set("botScore", chatSessionDoc.getBotScore());
+		mongoTemplate.updateFirst(builder.getQuery(), builder.getUpdate(), ChatSessionDoc.class);
+
 		return chatSessionDoc;
 	}
 
 	public ChatSessionDoc agentScore(ChatSessionDoc chatSessionDoc, Integer agentScore) {
 		chatSessionDoc.setAgentScore(agentScore);
-		save(chatSessionDoc);
+
+		CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder().whereId(chatSessionDoc.getSessionId());
+		builder.set("agentScore", chatSessionDoc.getAgentScore());
+		mongoTemplate.updateFirst(builder.getQuery(), builder.getUpdate(), ChatSessionDoc.class);
+
 		return chatSessionDoc;
 	}
 
@@ -307,5 +325,46 @@ public class SessionStore {
 		ChatUserProfileDoc doc = EntityDtoUtil.dtoToEntity(profile, new ChatUserProfileDoc());
 		doc.setId(profile.getProfileId());
 		return save(doc);
+	}
+
+	public void updateResponseTime(ChatSessionDoc chatSessionDoc) {
+		if (ArgUtil.isNone(chatSessionDoc.getFistResponseStamp())) {
+			chatSessionDoc.setFistResponseStamp(System.currentTimeMillis());
+		}
+		chatSessionDoc.setLastResponseStamp(System.currentTimeMillis());
+
+		CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder().whereId(chatSessionDoc.getSessionId());
+		builder.set("fistResponseStamp", chatSessionDoc.getFistResponseStamp());
+		builder.set("lastResponseStamp", chatSessionDoc.getLastResponseStamp());
+		mongoTemplate.updateFirst(builder.getQuery(), builder.getUpdate(), ChatSessionDoc.class);
+	}
+
+	public void assignToAgent(ChatSessionDoc chatSessionDoc, String agentDept, String agentCode) {
+
+		if (!ArgUtil.areEqual(chatSessionDoc.getAssignedToDept(), agentDept)) {
+			chatSessionDoc.setAssignedDeptStamp(System.currentTimeMillis());
+		}
+		chatSessionDoc.setMode("AGENT");
+		chatSessionDoc.setAssignedToDept(agentDept);
+		chatSessionDoc.setAssignedAgentStamp(System.currentTimeMillis());
+		chatSessionDoc.setAssignedToAgent(agentCode);
+
+		CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder().whereId(chatSessionDoc.getSessionId());
+		builder.set("mode", chatSessionDoc.getMode());
+		builder.set("assignedToDept", chatSessionDoc.getAssignedToDept());
+		builder.set("assignedDeptStamp", chatSessionDoc.getAssignedDeptStamp());
+		builder.set("assignedToAgent", chatSessionDoc.getAssignedToAgent());
+		builder.set("assignedAgentStamp", chatSessionDoc.getAssignedAgentStamp());
+		mongoTemplate.updateFirst(builder.getQuery(), builder.getUpdate(), ChatSessionDoc.class);
+	}
+
+	public void assignToBot(ChatSessionDoc chatSessionDoc, String botName) {
+		chatSessionDoc.setMode("BOT");
+		chatSessionDoc.setAssignedToAgent(botName);
+
+		CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder().whereId(chatSessionDoc.getSessionId());
+		builder.set("mode", chatSessionDoc.getMode());
+		builder.set("assignedToAgent", chatSessionDoc.getAssignedToAgent());
+		mongoTemplate.updateFirst(builder.getQuery(), builder.getUpdate(), ChatSessionDoc.class);
 	}
 }

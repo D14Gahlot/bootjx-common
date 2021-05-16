@@ -23,8 +23,8 @@ import com.boot.jx.postman.PostManConfig;
 import com.boot.jx.postman.PostManException;
 import com.boot.jx.postman.audit.PMGaugeEvent;
 import com.boot.jx.postman.events.UserInboxEvent;
-import com.boot.jx.postman.model.File;
 import com.boot.jx.postman.model.Message.Status;
+import com.boot.jx.postman.model.PostManFile;
 import com.boot.jx.postman.model.WAMessage;
 import com.boot.jx.tunnel.TunnelService;
 import com.boot.utils.ArgUtil;
@@ -71,7 +71,7 @@ public class WhatsAppService {
 			Context context = new Context(postManConfig.getLocal(waMessage));
 			context.setVariables(waMessage.getModel());
 
-			File file = new File();
+			PostManFile file = new PostManFile();
 			file.setTemplate(waMessage.getTemplate());
 			file.setModel(waMessage.getModel());
 			file.setLang(waMessage.getLang());

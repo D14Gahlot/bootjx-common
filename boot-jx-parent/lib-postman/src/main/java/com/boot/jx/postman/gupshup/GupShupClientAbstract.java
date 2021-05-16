@@ -8,10 +8,12 @@ import java.util.StringJoiner;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.boot.jx.dict.FileType;
+import com.boot.jx.postman.PMEnvironment;
+import com.boot.jx.postman.PostManException;
 import com.boot.jx.postman.gupshup.GupShupConstants.SessionType;
 import com.boot.jx.postman.model.Attachment;
-import com.boot.jx.postman.model.File;
-import com.boot.jx.postman.model.Message;
+import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.rest.RestService;
 import com.boot.jx.rest.RestService.Ajax;
 import com.boot.utils.ArgUtil;
@@ -19,10 +21,10 @@ import com.boot.utils.CollectionUtil;
 import com.boot.utils.CryptoUtil;
 import com.boot.utils.JsonUtil;
 
-public abstract class AbstractGupShupClient {
+public abstract class GupShupClientAbstract {
 
 	@Autowired
-	protected GupShupConfig gupShupConfig;
+	protected GupShupConfigClient gupShupConfig;
 
 	@Autowired
 	protected RestService restService;
@@ -33,19 +35,32 @@ public abstract class AbstractGupShupClient {
 		return false;
 	}
 
+	@Autowired
+	private PMEnvironment environment;
+
 	private Ajax ajax(GupShupReq req, boolean encrypt) {
 		Ajax ajax = restService.ajax(gupShupConfig.getGupShupApiUrl()).path("/GatewayAPI/rest");
 
+		if (ArgUtil.isEmpty(req.getWaNumber())) {
+			throw new PostManException("No lane " + req.getWaNumber());
+		}
+
+		GupShupConfig config = environment.config().gupshup(req.getWaNumber());
+
+		if (ArgUtil.isEmpty(config)) {
+			throw new PostManException("No Config for lane " + req.getWaNumber());
+		}
+
 		if (getSessionType() == SessionType.NOTIFICATION) {
-			ajax.field("userid", gupShupConfig.getGupShupNotifyId());
-			req.password(gupShupConfig.getGupShupNotifyPass());
+			ajax.field("userid", config.getNotifyId());
+			req.password(config.getNotifyPass());
 		} else {
-			ajax.field("userid", gupShupConfig.getGupShupChatId());
-			req.password(gupShupConfig.getGupShupChatPass());
+			ajax.field("userid", config.getChatId());
+			req.password(config.getChatPass());
 		}
 		if (encrypt) {
-			ajax.field("encrdata", CryptoUtil.getEncoder().obzect(req.password(gupShupConfig.getGupShupChatPass()))
-					.encodeBase64().toString());
+			ajax.field("encrdata",
+					CryptoUtil.getEncoder().obzect(req.password(config.getChatPass())).encodeBase64().toString());
 		} else {
 			Map<String, Object> reqMap = JsonUtil.toMap(req);
 			for (Entry<String, Object> entrySet : reqMap.entrySet()) {
@@ -109,30 +124,35 @@ public abstract class AbstractGupShupClient {
 				.caption(CryptoUtil.getEncoder().message(caption).encodeURL().toString()));
 	}
 
-	public GupShupResp sendMessage(Message<?> message) {
-		String phoneNumber = CollectionUtil.getOne(message.getTo());
+	public OutboxMessage send(OutboxMessage message) {
+		String to = CollectionUtil.getOne(message.getTo());
 
 		GupShupReq gupShupReq = new GupShupReq();
-		gupShupReq.setSendTo(phoneNumber);
+		gupShupReq.setSendTo(to);
+		gupShupReq.setPhoneNumber(to);
 		gupShupReq.setMessageId(message.getMessageId());
+		gupShupReq.setWaNumber(message.getLane());
 
 		GupShupResp resp = null;
+		String id = null;
 
 		StringJoiner msgIds = new StringJoiner(",");
 
 		if (ArgUtil.is(message.getAttachments())) {
 			for (Attachment attachment : message.getAttachments()) {
-				gupShupReq.setCaption(message.getSubject());
+				gupShupReq.setCaption(ArgUtil.nonEmpty(attachment.getMediaCaption(), message.getSubject()));
 				gupShupReq.setMessage(message.getMessage());
 				if (ArgUtil.is(attachment.getMediaURL())) {
-					if (ArgUtil.areEqual(attachment.getMediaType(), File.FileType.IMAGE.toString())) {
+					if (ArgUtil.areEqual(attachment.getMediaType(), FileType.IMAGE.toString())) {
 						gupShupReq.setMediaURL(attachment.getMediaURL());
 						resp = sendImageURL(gupShupReq);
-						msgIds.add(resp.getResponse().getId());
+						if (ArgUtil.is(id = getMessageId(resp)))
+							msgIds.add(id);
 					} else {
 						gupShupReq.setMediaURL(attachment.getMediaURL());
 						resp = sendDocumentURL(gupShupReq);
-						msgIds.add(resp.getResponse().getId());
+						if (ArgUtil.is(id = getMessageId(resp)))
+							msgIds.add(id);
 					}
 				}
 			}
@@ -143,9 +163,21 @@ public abstract class AbstractGupShupClient {
 			resp = sendMessage(gupShupReq);
 			if (ArgUtil.is(resp.getResponse().getId()))
 				msgIds.add(resp.getResponse().getId());
+			getMessageId(resp);
 		}
 		message.setMessageIdExt(msgIds.toString());
-		return resp;
+
+		return message;
+	}
+
+	private String getMessageId(GupShupResp resp) {
+		if (!ArgUtil.is(resp) || !ArgUtil.is(resp.getResponse())) {
+			throw new PostManException("No Response Object");
+		} else if (ArgUtil.isEqual(resp.getResponse().getStatus(), "error")) {
+			throw new PostManException(
+					String.format("%s : %s", resp.getResponse().getId(), resp.getResponse().getDetails()));
+		}
+		return resp.getResponse().getId();
 	}
 
 	public GupShupResp sendDocumentURL(GupShupReq gupShupReq) {

@@ -91,6 +91,11 @@
 			</dependency>
 			<dependency>
 				<groupId>com.boot.jx</groupId>
+				<artifactId>lib-aws</artifactId>
+				<version>${boot.jx.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.boot.jx</groupId>
 				<artifactId>boot-ext-jar</artifactId>
 				<version>${boot.jx.version}</version>
 				<type>pom</type>
@@ -160,6 +165,7 @@
 		<module>common-tmpl</module>
 		<module>../boot-ext-jar</module>
 		<module>lib-mcq</module>
+		<module>lib-aws</module>
 		<module>lib-postman</module>
 		<module>lib-postman-store</module>
 		<module>lib-postman-chat</module>

@@ -2,43 +2,21 @@ package com.boot.jx.admin.dto;
 
 import java.sql.Date;
 
-import com.boot.jx.mongo.CommonDocInterfaces.ADocumentDTO;
+import com.boot.jx.common.dto.AgentResponseDto;
 
-public class AgentResponseDto extends ADocumentDTO<AgentResponseDto> {
+public class AgentResponseAdminDto extends AgentResponseDto<AgentResponseAdminDto> {
 
 	private static final long serialVersionUID = 559612484746960788L;
-	private String agent_id;
-	private String dept_id;
-	private String agent_code;
-	private String agent_name;
 	private String agent_department;
 	private String agent_email;
 	private String agent_number;
 	private String agent_password;
-	private String agent_channels;
 	private Date created_date;
 	private String create_by;
 	private Date modified_date;
 	private String modified_by;
-	private String isactive;
-	private boolean admin;
-	private DepartmentResponseDto dept;
 
-	public String getAgent_code() {
-		return agent_code;
-	}
-
-	public void setAgent_code(String agent_code) {
-		this.agent_code = agent_code;
-	}
-
-	public String getAgent_name() {
-		return agent_name;
-	}
-
-	public void setAgent_name(String agent_name) {
-		this.agent_name = agent_name;
-	}
+	private DepartmentResponseAdminDto dept;
 
 	public String getAgent_department() {
 		return agent_department;
@@ -96,49 +74,17 @@ public class AgentResponseDto extends ADocumentDTO<AgentResponseDto> {
 		this.modified_by = modified_by;
 	}
 
-	public String getIsactive() {
-		return isactive;
-	}
-
-	public void setIsactive(String isactive) {
-		this.isactive = isactive;
-	}
-
-	public String getAgent_id() {
-		return agent_id;
-	}
-
-	public void setAgent_id(String agent_id) {
-		this.agent_id = agent_id;
-	}
-
-	public DepartmentResponseDto getDept() {
+	public DepartmentResponseAdminDto getDept() {
 		return dept;
 	}
 
-	public void setDept(DepartmentResponseDto dept) {
+	public void setDept(DepartmentResponseAdminDto dept) {
 		this.dept = dept;
 	}
 
 	@Override
-	public AgentResponseDto newInstance() {
-		return new AgentResponseDto();
-	}
-
-	public String getDept_id() {
-		return dept_id;
-	}
-
-	public void setDept_id(String dept_id) {
-		this.dept_id = dept_id;
-	}
-
-	public String getAgent_channels() {
-		return agent_channels;
-	}
-
-	public void setAgent_channels(String agent_channels) {
-		this.agent_channels = agent_channels;
+	public AgentResponseAdminDto newInstance() {
+		return new AgentResponseAdminDto();
 	}
 
 	public String getAgent_password() {
@@ -147,14 +93,6 @@ public class AgentResponseDto extends ADocumentDTO<AgentResponseDto> {
 
 	public void setAgent_password(String agent_password) {
 		this.agent_password = agent_password;
-	}
-
-	public boolean isAdmin() {
-		return admin;
-	}
-
-	public void setAdmin(boolean isAdmin) {
-		this.admin = isAdmin;
 	}
 
 }

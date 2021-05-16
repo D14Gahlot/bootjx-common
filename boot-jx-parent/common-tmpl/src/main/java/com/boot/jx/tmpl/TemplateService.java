@@ -20,7 +20,9 @@ import org.thymeleaf.spring4.SpringTemplateEngine;
 import com.boot.jx.AppConfig;
 import com.boot.jx.AppContextUtil;
 import com.boot.jx.dict.ContactType;
-import com.boot.jx.postman.model.File;
+import com.boot.jx.dict.FileFormat;
+import com.boot.jx.model.CommonFile;
+import com.boot.jx.postman.model.PostManFile;
 import com.boot.jx.postman.model.ITemplates.ITemplate;
 import com.boot.jx.tmpl.custom.HelloDialect;
 import com.boot.utils.ArgUtil;
@@ -139,7 +141,7 @@ public class TemplateService {
 	 * @param file the file
 	 * @return the local
 	 */
-	private Locale getLocal(File file) {
+	private Locale getLocal(CommonFile file) {
 		return postManConfig.getLocal(file);
 	}
 
@@ -149,14 +151,14 @@ public class TemplateService {
 	 * @param file the file
 	 * @return the file
 	 */
-	public File process(File file) {
+	public PostManFile process(PostManFile file) {
 		return this.process(file, null);
 	}
 
-	public File process(File file, ContactType contactType) {
+	public PostManFile process(PostManFile file, ContactType contactType) {
 		Locale locale = getLocal(file);
 
-		if (file.getFileFormat() == File.FileFormat.PDF) {
+		if (file.getFileFormat() == FileFormat.PDF) {
 			String reverse = messageSource.getMessage("flag.reverse.char", null, locale);
 			if (("true".equalsIgnoreCase(reverse))) {
 				TemplateUtils.reverseFlag(true);
@@ -182,7 +184,7 @@ public class TemplateService {
 
 		if (file.getITemplate().isThymleaf()) {
 			String content;
-			if (file.getFileFormat() == File.FileFormat.JSON || ContactType.PUSH == contactType) {
+			if (file.getFileFormat() == FileFormat.JSON || ContactType.PUSH == contactType) {
 				content = this.processJson(file.getITemplate(), context, locale, contactType);
 			} else {
 				content = this.processHtml(file.getITemplate(), context, locale, contactType);

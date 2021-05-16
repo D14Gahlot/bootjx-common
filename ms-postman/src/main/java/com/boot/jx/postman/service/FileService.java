@@ -15,11 +15,12 @@ import org.springframework.stereotype.Component;
 import org.thymeleaf.exceptions.TemplateInputException;
 
 import com.boot.jx.dict.ContactType;
+import com.boot.jx.dict.FileFormat;
 import com.boot.jx.logger.AuditService;
 import com.boot.jx.logger.LoggerService;
+import com.boot.jx.model.CommonFile;
 import com.boot.jx.postman.audit.PMGaugeEvent;
-import com.boot.jx.postman.model.File;
-import com.boot.jx.postman.model.File.FileFormat;
+import com.boot.jx.postman.model.PostManFile;
 import com.boot.jx.tmpl.TemplateService;
 import com.boot.jx.tmpl.TemplateUtils;
 import com.boot.utils.ArgUtil;
@@ -62,11 +63,11 @@ public class FileService {
 	 * @return the file
 	 */
 
-	public File create(File file) {
+	public PostManFile create(PostManFile file) {
 		return create(file, null);
 	}
 
-	public File create(File file, ContactType contactType) {
+	public PostManFile create(PostManFile file, ContactType contactType) {
 		if (file.getTemplate() != null) {
 			/**
 			 * from template to content
@@ -92,7 +93,7 @@ public class FileService {
 			}
 		}
 
-		if (file.getFileFormat() == File.FileFormat.PDF) {
+		if (file.getFileFormat() == FileFormat.PDF) {
 			/**
 			 * From string to File type
 			 */
@@ -114,7 +115,7 @@ public class FileService {
 	 * @param file the file
 	 * @return the input stream
 	 */
-	public InputStream toInputStream(File file) {
+	public InputStream toInputStream(CommonFile file) {
 		// convert bytes into InputStream
 		InputStream is = new ByteArrayInputStream(file.getBody());
 		// read it with BufferedReader
@@ -136,7 +137,7 @@ public class FileService {
 	 * @return the data source
 	 * @throws MessagingException the messaging exception
 	 */
-	public DataSource toDataSource(File file) throws MessagingException {
+	public DataSource toDataSource(CommonFile file) throws MessagingException {
 		DataSource dataSource = new ByteArrayDataSource(file.getBody(), "application/pdf");
 		MimeBodyPart pdfBodyPart = new MimeBodyPart();
 		pdfBodyPart.setDataHandler(new DataHandler(dataSource));

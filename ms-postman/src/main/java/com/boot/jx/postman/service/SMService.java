@@ -20,7 +20,7 @@ import com.boot.jx.logger.LoggerService;
 import com.boot.jx.postman.PostManConfig;
 import com.boot.jx.postman.PostManException;
 import com.boot.jx.postman.audit.PMGaugeEvent;
-import com.boot.jx.postman.model.File;
+import com.boot.jx.postman.model.PostManFile;
 import com.boot.jx.postman.model.Notipy;
 import com.boot.jx.postman.model.SMS;
 import com.boot.jx.rest.RestQuery;
@@ -160,7 +160,7 @@ public class SMService {
 				Context context = new Context(postManConfig.getLocal(sms));
 				context.setVariables(sms.getModel());
 
-				File file = new File();
+				PostManFile file = new PostManFile();
 				file.setTemplate(sms.getTemplate());
 				file.setModel(sms.getModel());
 				file.setLang(sms.getLang());

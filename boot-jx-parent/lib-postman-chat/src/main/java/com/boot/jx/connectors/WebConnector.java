@@ -15,16 +15,17 @@ import org.springframework.stereotype.Component;
 import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorMapping;
 import com.boot.jx.chat.ConnectorHandlerFactory.DefaultConnector;
 import com.boot.jx.dict.ContactType;
+import com.boot.jx.dict.FileType;
 import com.boot.jx.postman.client.TmplClient;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.TemplateReply;
 import com.boot.jx.postman.gupshup.GupShupConfigClient;
 import com.boot.jx.postman.model.Attachment;
-import com.boot.jx.postman.model.File;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.CollectionUtil;
 import com.boot.utils.JsonUtil;
 
 @Component
@@ -81,7 +82,7 @@ public class WebConnector implements DefaultConnector {
 			if (ArgUtil.is(mediaReply)) {
 				if ("image".equalsIgnoreCase(mediaReply.getType())) {
 					outboxMessage.attachment(
-							new Attachment().mediaURL(mediaReply.getUrl()).mediaType(File.FileType.IMAGE.toString()));
+							new Attachment().mediaURL(mediaReply.getUrl()).mediaType(FileType.IMAGE.toString()));
 				}
 			} else {
 				tmplClient.process(outboxMessage);
@@ -91,7 +92,9 @@ public class WebConnector implements DefaultConnector {
 	}
 
 	@Override
-	public void send(String lane, String csid, OutboxMessage outboxMessage) {
+	public void send(OutboxMessage outboxMessage) {
+		String to = CollectionUtil.getOne(outboxMessage.getTo());
+
 		process(outboxMessage);
 		if (redisson == null) {
 			try {
@@ -103,20 +106,10 @@ public class WebConnector implements DefaultConnector {
 				e.printStackTrace();
 			}
 		} else {
-			LOGGER.debug("sendReply to " + csid);
-			RBlockingQueue<String> messageQueue = redisson.getBlockingQueue(WEB_USER_MESSAGE_STR + csid);
+			LOGGER.debug("sendReply to " + to);
+			RBlockingQueue<String> messageQueue = redisson.getBlockingQueue(WEB_USER_MESSAGE_STR + to);
 			messageQueue.add(JsonUtil.toJson(outboxMessage));
 		}
-	}
-
-	@Override
-	public void reply(InboxMessage inboxMessage, OutboxMessage outboxMessage) {
-		send(inboxMessage.getLane(), inboxMessage.getFrom(), outboxMessage);
-	}
-
-	@Override
-	public void send(ChatContactDoc chatContactDoc, OutboxMessage outboxMessage) {
-		send(chatContactDoc.getLane(), chatContactDoc.getCsid(), outboxMessage);
 	}
 
 	@Override

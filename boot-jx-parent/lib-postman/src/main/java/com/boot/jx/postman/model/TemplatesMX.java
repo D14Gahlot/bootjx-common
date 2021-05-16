@@ -1,6 +1,6 @@
 package com.boot.jx.postman.model;
 
-import com.boot.jx.postman.model.File.PDFConverter;
+import com.boot.jx.postman.model.PostManFile.PDFConverter;
 import com.boot.jx.postman.model.ITemplates.ITemplate;
 import com.boot.jx.postman.model.Notipy.ChannelType;
 

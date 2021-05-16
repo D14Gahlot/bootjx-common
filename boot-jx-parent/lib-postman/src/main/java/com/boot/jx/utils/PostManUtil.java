@@ -6,7 +6,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 
 import com.boot.jx.dict.ContactType;
-import com.boot.jx.postman.model.File;
+import com.boot.jx.model.CommonFile;
 import com.boot.jx.postman.model.IMessage;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.utils.ArgUtil;
@@ -14,13 +14,13 @@ import com.boot.utils.CryptoUtil;
 
 public class PostManUtil {
 
-	public static ResponseEntity<byte[]> download(File file) {
+	public static ResponseEntity<byte[]> download(CommonFile file) {
 		return ResponseEntity.ok().contentLength(file.getBody().length)
 				.header("Content-Disposition", "attachment; filename=" + file.getName())
 				.contentType(MediaType.valueOf(file.getFileFormat().getContentType())).body(file.getBody());
 	}
 
-	public static ResponseEntity<byte[]> render(File file) {
+	public static ResponseEntity<byte[]> render(CommonFile file) {
 		return ResponseEntity.ok().contentLength(file.getBody().length)
 				.contentType(MediaType.valueOf(file.getFileFormat().getContentType())).body(file.getBody());
 	}

@@ -199,8 +199,7 @@ public final class StringUtils {
 	}
 
 	public static Map<String, String> toMap(String data) {
-		return getMapFromString(SPLITTER_CHAR,
-				KEY_VALUE_SEPARATOR_CHAR, data);
+		return getMapFromString(SPLITTER_CHAR, KEY_VALUE_SEPARATOR_CHAR, data);
 	}
 
 	public static String toString(Map<String, String> data) {
@@ -239,7 +238,7 @@ public final class StringUtils {
 	 * @return
 	 */
 	public static String pad(String src, String pad, int flip, int trim) {
-			if (trim == 0) {
+		if (trim == 0) {
 			return src;
 		}
 
@@ -308,9 +307,7 @@ public final class StringUtils {
 			sbMaskString.append(maskChar);
 		}
 
-		return strText.substring(0, start)
-				+ sbMaskString.toString()
-				+ strText.substring(start + maskLength);
+		return strText.substring(0, start) + sbMaskString.toString() + strText.substring(start + maskLength);
 	}
 
 	public static String mask(String strText) {
@@ -329,13 +326,10 @@ public final class StringUtils {
 		return Stream.of(matchers).anyMatch(val::equalsIgnoreCase);
 	}
 
-	final static char[] digits = {
-			'0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
-			'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n',
-			'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
-			'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N',
-			'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'
-	};
+	final static char[] digits = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f', 'g',
+			'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', 'A', 'B',
+			'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W',
+			'X', 'Y', 'Z' };
 
 	public static String alpha62(long i) {
 		int radix = 62;
@@ -388,7 +382,7 @@ public final class StringUtils {
 	public static long alpha62(final String encoded) {
 		long ret = 0L;
 		char c;
-		if(ArgUtil.is(encoded)) {
+		if (ArgUtil.is(encoded)) {
 			for (int index = 0; index < encoded.length(); index++) {
 				c = encoded.charAt(index);
 				ret *= digits.length;
@@ -437,6 +431,17 @@ public final class StringUtils {
 			return new String[0];
 		}
 		return str.split(KEY_VALUE_SEPARATOR_CHAR);
+	}
+
+	public static String[] toArray(String str) {
+		if (str == null) {
+			return new String[0];
+		}
+		return str.split(",");
+	}
+
+	public static List<String> toList(String str) {
+		return CollectionUtil.getList(toArray(str));
 	}
 
 	public static String getByIndex(String str, String regex, int index) {

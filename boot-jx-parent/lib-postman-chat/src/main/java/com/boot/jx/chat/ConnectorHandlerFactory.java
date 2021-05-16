@@ -25,11 +25,15 @@ public class ConnectorHandlerFactory extends ScopedBeanFactory<String, Connector
 
 	public interface ConnectorHandler {
 		default public void reply(InboxMessage inboxMessage, OutboxMessage outboxMessage) {
-			this.send(inboxMessage.getLane(), inboxMessage.getFrom(), outboxMessage);
+			outboxMessage.addTo(inboxMessage.getFrom());
+			outboxMessage.setLane(inboxMessage.getLane());
+			this.send(outboxMessage);
 		}
 
 		default public void send(ChatContactDoc chatContactDoc, OutboxMessage outboxMessage) {
-			this.send(chatContactDoc.getLane(), chatContactDoc.getCsid(), outboxMessage);
+			outboxMessage.addTo(chatContactDoc.getCsid());
+			outboxMessage.setLane(chatContactDoc.getLane());
+			this.send(outboxMessage);
 		}
 
 		public InboxMessage assignToAgent(InboxMessage inboxMessage);
@@ -59,7 +63,7 @@ public class ConnectorHandlerFactory extends ScopedBeanFactory<String, Connector
 
 		}
 
-		void send(String lane, String to, OutboxMessage outboxMessage);
+		void send(OutboxMessage outboxMessage);
 
 	}
 

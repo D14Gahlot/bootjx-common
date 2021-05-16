@@ -46,6 +46,13 @@ public final class DirectMessageLocalImpl extends TwitterResponseImpl implements
 		init(json);
 	}
 
+	public DirectMessageLocalImpl(DirectMessage fromDirectMessage) {
+		this.id = fromDirectMessage.getId();
+		this.senderId = fromDirectMessage.getSenderId();
+		this.recipientId = fromDirectMessage.getRecipientId();
+		this.createdAt = fromDirectMessage.getCreatedAt();
+	}
+
 	private void init(JSONObject json) throws TwitterException {
 		try {
 			id = ParseUtil.getLong("id", json);

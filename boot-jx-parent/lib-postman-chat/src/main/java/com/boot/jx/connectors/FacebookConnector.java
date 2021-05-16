@@ -1,7 +1,7 @@
 package com.boot.jx.connectors;
 
-import java.util.StringJoiner;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Component;
@@ -9,19 +9,16 @@ import org.springframework.stereotype.Component;
 import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorHandler;
 import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorMapping;
 import com.boot.jx.dict.ContactType;
+import com.boot.jx.dict.FileType;
 import com.boot.jx.postman.client.ExtUtilService;
 import com.boot.jx.postman.client.TmplClient;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.TemplateReply;
 import com.boot.jx.postman.fb.FacebooClient;
-import com.boot.jx.postman.fb.FacebookMessageRequest;
-import com.boot.jx.postman.fb.FacebookMessageResp;
 import com.boot.jx.postman.fb.FacebookMessaging;
 import com.boot.jx.postman.fb.FacebookUserProfile;
-import com.boot.jx.postman.gupshup.GupShupConfigClient;
 import com.boot.jx.postman.model.Attachment;
-import com.boot.jx.postman.model.File;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.Message;
 import com.boot.jx.postman.model.OutboxMessage;
@@ -30,6 +27,8 @@ import com.boot.utils.ArgUtil;
 @Component
 @ConnectorMapping(contactType = ContactType.FACEBOOK)
 public class FacebookConnector implements ConnectorHandler {
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(FacebookConnector.class);
 
 	@Autowired
 	private FacebooClient facebooClient;
@@ -43,66 +42,26 @@ public class FacebookConnector implements ConnectorHandler {
 	@Autowired
 	ExtUtilService extUtilService;
 
-	public OutboxMessage sendOutboxMessage(String lane, String to, OutboxMessage outboxMessage) {
-		FacebookMessageResp resp = null;
-		StringJoiner msgIds = new StringJoiner(",");
-		if (ArgUtil.is(outboxMessage.getAttachments())) {
-			for (Attachment attachment : outboxMessage.getAttachments()) {
-
-				FacebookMessageRequest req = new FacebookMessageRequest();
-				req.recipientId(to);
-				if (ArgUtil.is(attachment.getMediaURL())) {
-					if (ArgUtil.areEqual(attachment.getMediaType(), File.FileType.IMAGE.toString())) {
-						req.attachmentType("image").attachmentUrl(attachment.getMediaURL());
-					} else {
-						req.messageType("text");
-						req.messageText(extUtilService.tinyUrl(attachment.getMediaURL()));
-						// req.attachmentType("file").attachmentUrl(attachment.getMediaURL());
+	public void send(OutboxMessage outboxMessage) {
+		try {
+			if (ArgUtil.is(outboxMessage.getTemplate())) {
+				TemplateReply mediaReply = mongoTemplate.findById(outboxMessage.getTemplate(), TemplateReply.class);
+				if (ArgUtil.is(mediaReply)) {
+					if ("image".equalsIgnoreCase(mediaReply.getType())) {
+						outboxMessage.attachment(
+								new Attachment().mediaURL(mediaReply.getUrl()).mediaType(FileType.IMAGE.toString()));
 					}
+				} else {
+					tmplClient.process(outboxMessage);
 				}
-				resp = facebooClient.sendReply(lane, req);
-				msgIds.add(ArgUtil.parseAsString(resp.getMessageId()));
 			}
+			facebooClient.send(outboxMessage);
+			outboxMessage.setStatus(Message.Status.SENT);
+		} catch (Exception e) {
+			outboxMessage.setStatus(OutboxMessage.Status.SENT_ERR);
+			outboxMessage.logs().add(e.getMessage());
+			LOGGER.error("SEND ERROR", e);
 		}
-
-		if (ArgUtil.is(outboxMessage.getMessage())) {
-			FacebookMessageRequest req = new FacebookMessageRequest();
-			req.recipientId(to);
-			req.messageType("text");
-			req.messageText(outboxMessage.getMessage());
-			resp = facebooClient.sendReply(lane, req);
-			if (ArgUtil.is(resp.getMessageId()))
-				msgIds.add(ArgUtil.parseAsString(resp.getMessageId()));
-		}
-		outboxMessage.setMessageIdExt(msgIds.toString());
-		outboxMessage.setStatus(Message.Status.SENT);
-
-		return outboxMessage;
-	}
-
-	public void send(String lane, String to, OutboxMessage outboxMessage) {
-		if (ArgUtil.is(outboxMessage.getTemplate())) {
-			TemplateReply mediaReply = mongoTemplate.findById(outboxMessage.getTemplate(), TemplateReply.class);
-			if (ArgUtil.is(mediaReply)) {
-				if ("image".equalsIgnoreCase(mediaReply.getType())) {
-					outboxMessage.attachment(
-							new Attachment().mediaURL(mediaReply.getUrl()).mediaType(File.FileType.IMAGE.toString()));
-				}
-			} else {
-				tmplClient.process(outboxMessage);
-			}
-		}
-		this.sendOutboxMessage(lane, to, outboxMessage);
-	}
-
-	@Override
-	public void reply(InboxMessage inboxMessage, OutboxMessage outboxMessage) {
-		this.send(inboxMessage.getLane(), inboxMessage.getFrom(), outboxMessage);
-	}
-
-	@Override
-	public void send(ChatContactDoc chatContactDoc, OutboxMessage outboxMessage) {
-		this.send(chatContactDoc.getLane(), chatContactDoc.getCsid(), outboxMessage);
 	}
 
 	@Override

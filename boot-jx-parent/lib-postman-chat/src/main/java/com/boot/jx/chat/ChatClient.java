@@ -9,6 +9,7 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Component;
 
 import com.boot.jx.api.ApiResponse;
+import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PostManException;
 import com.boot.jx.postman.dto.ChatUserProfileDTO;
 import com.boot.jx.postman.dto.ChatUserProfileDTO.ChatUserProfileRequest;
@@ -53,6 +54,9 @@ public class ChatClient {
 
 	@Autowired
 	private RestService restService;
+
+	@Autowired
+	private PMEnvironment environment;
 
 	public boolean isChatDummyUserEnabled() {
 		return chatDummyUserEnabled;
@@ -108,7 +112,7 @@ public class ChatClient {
 	}
 
 	public String getDefaultSender() {
-		return defaultSender;
+		return ArgUtil.parseAsString(environment.config().agent().getDefaultBotName(), defaultSender);
 	}
 
 	public String getInboundForwardUrl() {

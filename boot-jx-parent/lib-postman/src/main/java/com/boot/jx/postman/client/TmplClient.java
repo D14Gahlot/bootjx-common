@@ -17,7 +17,7 @@ import com.boot.jx.api.ApiResponse;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.postman.PostManException;
 import com.boot.jx.postman.PostmanPackages.ICommonTmplPackage;
-import com.boot.jx.postman.model.File;
+import com.boot.jx.postman.model.PostManFile;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.model.TmplElement;
 import com.boot.jx.rest.RestService;
@@ -45,19 +45,19 @@ public class TmplClient {
 	@Autowired(required = false)
 	private ICommonTmplPackage iCommonTmplPackage;
 
-	public ApiResponse<File, Object> process(File file, ContactType contactType) throws PostManException {
+	public ApiResponse<PostManFile, Object> process(PostManFile file, ContactType contactType) throws PostManException {
 		if (isTmplLocal && ArgUtil.is(iCommonTmplPackage)) {
 			return ApiResponse.buildResult(iCommonTmplPackage.process(file, contactType));
 		}
 		return restService.ajax(postManClient.getPostmapURL()).path(PATH.TMPL_FILE_PROCESS)
 				.queryParam("contactType", contactType).queryParam(PostManClient.PARAM_LANG, postManClient.getLang())
 				.contentTypeJson().acceptJson().post(file)
-				.as(new ParameterizedTypeReference<ApiResponse<File, Object>>() {
+				.as(new ParameterizedTypeReference<ApiResponse<PostManFile, Object>>() {
 				});
 	}
 
 	public OutboxMessage process(OutboxMessage outboxMessage) {
-		File file = new File();
+		PostManFile file = new PostManFile();
 		file.setModel(outboxMessage.getModel());
 		file.setITemplate(outboxMessage.getITemplate());
 		file = this.process(file, outboxMessage.getContactType()).getResult();

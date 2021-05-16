@@ -2,11 +2,12 @@ package com.boot.jx.postman.gupshup;
 
 import org.springframework.stereotype.Component;
 
+import com.boot.jx.postman.PostmanPackages.MessageClient;
 import com.boot.jx.postman.gupshup.GupShupConstants.DataEncoding;
 import com.boot.jx.postman.gupshup.GupShupConstants.SessionType;
 
 @Component
-public class GupShupClientChat extends GupShupClientAbstract {
+public class GupShupClientChat extends GupShupClientAbstract implements MessageClient {
 
 	@Override
 	public SessionType getSessionType() {
@@ -23,7 +24,7 @@ public class GupShupClientChat extends GupShupClientAbstract {
 	public GupShupResp sendDocumentURL(GupShupReq gupShupReq) {
 		gupShupReq.method(GupShupConstants.Method.SendMediaMessage).messageType(GupShupConstants.MessageType.DOCUMENT);
 		gupShupReq.setHsm(false);
-		//gupShupReq.dataEncoding(DataEncoding.TEXT);
+		// gupShupReq.dataEncoding(DataEncoding.TEXT);
 		gupShupReq.setFormat(GupShupConstants.Format.JSON);
 		return post(gupShupReq);
 	}
@@ -32,7 +33,7 @@ public class GupShupClientChat extends GupShupClientAbstract {
 	public GupShupResp sendImageURL(GupShupReq gupShupReq) {
 		gupShupReq.method(GupShupConstants.Method.SendMediaMessage).messageType(GupShupConstants.MessageType.IMAGE);
 		gupShupReq.setHsm(false);
-		//gupShupReq.dataEncoding(DataEncoding.TEXT);
+		// gupShupReq.dataEncoding(DataEncoding.TEXT);
 		gupShupReq.setFormat(GupShupConstants.Format.JSON);
 		return post(gupShupReq);
 	}

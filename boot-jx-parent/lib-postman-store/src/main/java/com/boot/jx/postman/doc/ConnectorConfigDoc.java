@@ -4,11 +4,11 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.TypeAlias;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import com.boot.jx.postman.ConnectorConfig;
+import com.boot.jx.postman.PMConfiguration;
 
 @Document(collection = "CONNECTOR_CONFIG")
 @TypeAlias("ConfigDoc")
-public class ConnectorConfigDoc extends ConnectorConfig {
+public class ConnectorConfigDoc extends PMConfiguration {
 
 	private static final long serialVersionUID = 7942286016346691701L;
 

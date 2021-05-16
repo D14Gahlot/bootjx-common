@@ -20,6 +20,7 @@ import javax.validation.ConstraintViolationException;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.MethodParameter;
+import org.springframework.core.NestedRuntimeException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -40,9 +41,9 @@ import com.boot.jx.AppConfig;
 import com.boot.jx.AppConstants;
 import com.boot.jx.AppContextUtil;
 import com.boot.jx.api.AResponse;
-import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.api.ApiFieldError;
 import com.boot.jx.api.ApiResponse;
+import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.exception.ApiHttpExceptions.ApiHttpArgException;
 import com.boot.jx.exception.ApiHttpExceptions.ApiStatusCodes;
 import com.boot.jx.http.ApiRequest.ResponeError;
@@ -295,9 +296,7 @@ public abstract class AmxAdvice implements ResponseBodyAdvice<ApiResponse<?, ?>>
 					"Recovered from temporary error by recreating temporary directory. Please try to upload logo again.",
 					HttpStatus.BAD_REQUEST);
 		}
-		return new ResponseEntity<String>(
-				"Unable to process this request.",
-				HttpStatus.BAD_REQUEST);
+		return new ResponseEntity<String>("Unable to process this request.", HttpStatus.BAD_REQUEST);
 	}
 
 }

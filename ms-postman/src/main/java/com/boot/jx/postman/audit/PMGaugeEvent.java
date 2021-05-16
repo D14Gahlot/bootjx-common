@@ -5,7 +5,7 @@ import java.util.List;
 import com.boot.jx.exception.AmxApiException;
 import com.boot.jx.logger.AuditEvent;
 import com.boot.jx.postman.model.Email;
-import com.boot.jx.postman.model.File;
+import com.boot.jx.postman.model.PostManFile;
 import com.boot.jx.postman.model.PushMessage;
 import com.boot.jx.postman.model.SMS;
 import com.boot.jx.postman.model.WAMessage;
@@ -118,7 +118,7 @@ public class PMGaugeEvent extends AuditEvent<PMGaugeEvent> {
 	 * @param type the type
 	 * @param file the file
 	 */
-	public PMGaugeEvent(Type type, File file) {
+	public PMGaugeEvent(Type type, PostManFile file) {
 		super(type);
 		this.set(file);
 	}
@@ -176,7 +176,7 @@ public class PMGaugeEvent extends AuditEvent<PMGaugeEvent> {
 	 * @param file the file
 	 * @return the PM gauge event
 	 */
-	public PMGaugeEvent set(File file) {
+	public PMGaugeEvent set(PostManFile file) {
 		this.template = file.getTemplate();
 		return this;
 	}

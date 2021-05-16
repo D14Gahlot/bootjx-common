@@ -16,6 +16,9 @@ import com.boot.jx.chat.ChatClient;
 import com.boot.jx.chat.ChatCommands;
 import com.boot.jx.chat.ChatDTOUtil;
 import com.boot.jx.chat.ChatService;
+import com.boot.jx.common.doc.AgentDoc;
+import com.boot.jx.common.store.AgentStore;
+import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.dto.ChatMessageDTO;
@@ -53,22 +56,29 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 	@Autowired
 	private ChatArchive chatArchive;
 
+	@Autowired
+	AgentStore agentStore;
+
+	@Autowired
+	private AgentSessionBean agentSession;
+
+	@Autowired
+	private PMEnvironment environment;
+
 	@Override
 	public boolean onAssignSupported(InboxMessage inboxMessage) {
 		return true;
 	}
 
-	@Override
-	public InboxMessage onAssign(InboxMessage inboxMessage) {
-
+	private AgentSessionDoc getAgentSessonAssigned(InboxMessage inboxMessage) {
 		long timeThen = System.currentTimeMillis() - TimeUtils.toMillis(chatClient.getChatOnlholdTimeout());
-
 		Query query = new Query();
 		Criteria c = Criteria.where("isOnline").is(true).and("isLoggedIn").is(true).and("lastOnlineStamp").gt(timeThen);
 		if (ArgUtil.is(inboxMessage.session().getDept())) {
 			c.and("agentDept").is(inboxMessage.session().getDept());
 		} else {
-			inboxMessage.session().setDept(PMStoreConstants.NO_DEPT);
+			inboxMessage.session().setDept(
+					ArgUtil.nonEmpty(environment.config().agent().getDefaultBotName(), PMStoreConstants.NO_DEPT));
 		}
 		query.addCriteria(c).with(new Sort(Direction.ASC, "lastOnlineStamp")).limit(1);
 
@@ -76,27 +86,38 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 
 		AgentSessionDoc avaialbleAgent = CollectionUtil.getOne(agents);
 
+		String defAgentCode = environment.config().agent().defaultAgent(inboxMessage.session().getDept());
+		if (ArgUtil.is(defAgentCode)) {
+			for (AgentSessionDoc agentSessionDoc : agents) {
+				if (defAgentCode.equals(agentSessionDoc.getAgentCode())) {
+					avaialbleAgent = agentSessionDoc;
+					break;
+				}
+			}
+		}
+		return avaialbleAgent;
+	}
+
+	@Override
+	public InboxMessage onAssign(InboxMessage inboxMessage) {
+
+		AgentSessionDoc avaialbleAgent = getAgentSessonAssigned(inboxMessage);
+
 		// PUBLISH
 		ChatSessionDoc chatSessionDoc = sessionStore.getSession(inboxMessage.getSessionId());
-		chatSessionDoc.setAssignedToDept(inboxMessage.session().getDept());
-		chatSessionDoc.setAssignedDeptStamp(System.currentTimeMillis());
-		chatSessionDoc.setMode("AGENT");
-		chatSessionDoc.setAssignedToAgent(null);
 
 		if (ArgUtil.is(avaialbleAgent)) {
-			chatSessionDoc.setAssignedToAgent(avaialbleAgent.getAgentCode());
-			chatSessionDoc.setAssignedToDept(avaialbleAgent.getAgentDept());
-			chatSessionDoc.setAssignedAgentStamp(System.currentTimeMillis());
+			sessionStore.assignToAgent(chatSessionDoc, avaialbleAgent.getAgentDept(), avaialbleAgent.getAgentCode());
 
-			messageStore.log(inboxMessage, MessageStore.EVENTS.ASGND_TO_AGENT, avaialbleAgent.getAgentCode(),
+			chatService.log(inboxMessage, MessageStore.EVENTS.ASGND_TO_AGENT, avaialbleAgent.getAgentCode(),
 					avaialbleAgent.getAgentDept());
 
 			inboxMessage.session().setAgent(avaialbleAgent.getAgentCode());
 			inboxMessage.session().setDept(avaialbleAgent.getAgentDept());
 		} else {
-			messageStore.log(inboxMessage, MessageStore.EVENTS.ASGND_TO_DEPT, inboxMessage.session().getDept());
+			sessionStore.assignToAgent(chatSessionDoc, inboxMessage.session().getDept(), null);
+			chatService.log(inboxMessage, MessageStore.EVENTS.ASGND_TO_DEPT, inboxMessage.session().getDept());
 		}
-		sessionStore.save(chatSessionDoc);
 
 		stompTunnelService.sendToAll("/dept/onassign-" + inboxMessage.session().getDept(),
 				chatArchive.getChatSessionDto(chatSessionDoc, inboxMessage.session().getAgent()));
@@ -104,14 +125,26 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 		return inboxMessage;
 	}
 
-	public void onAssign(AgentSessionDoc avaialbleAgent, ChatSessionDoc chatSessionDoc, OutboxMessage outboxMessage) {
+	public void onAssign(ChatSessionDoc chatSessionDoc, String agentDept, String agentCode) {
+		if (!ArgUtil.areEqual(chatSessionDoc.getAssignedToAgent(), agentCode)) {
+			sessionStore.assignToAgent(chatSessionDoc, agentDept, agentCode);
+			chatService.log(chatSessionDoc, agentSession.getAgentCode(), MessageStore.EVENTS.ASGND_TO_AGENT, agentCode,
+					agentDept);
+			stompTunnelService.sendToAll("/dept/onassign-" + agentDept,
+					chatArchive.getChatSessionDto(chatSessionDoc, agentCode));
+		}
+	}
+
+	public void onAssign(AgentSessionDoc avaialbleAgent, ChatSessionDoc chatSessionDoc) {
 		if (ArgUtil.is(avaialbleAgent)) {
-			chatSessionDoc.setAssignedToAgent(avaialbleAgent.getAgentCode());
-			chatSessionDoc.setAssignedAgentStamp(System.currentTimeMillis());
-			chatService.log(chatSessionDoc, MessageStore.EVENTS.ASGND_TO_AGENT, avaialbleAgent.getAgentCode(),
-					avaialbleAgent.getAgentDept());
-			stompTunnelService.sendToAll("/dept/onassign-" + avaialbleAgent.getAgentDept(),
-					chatArchive.getChatSessionDto(chatSessionDoc, avaialbleAgent.getAgentCode()));
+			this.onAssign(chatSessionDoc, avaialbleAgent.getAgentDept(), avaialbleAgent.getAgentCode());
+		}
+	}
+
+	public void onAssign(AgentDoc agentDoc, ChatSessionDoc chatSessionDoc) {
+		if (ArgUtil.is(agentDoc)) {
+			String deptCode = agentStore.findDepartmentCodeById(agentDoc.getDept_id());
+			this.onAssign(chatSessionDoc, deptCode, agentDoc.getAgent_code());
 		}
 	}
 
@@ -134,7 +167,7 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 		if (inboxMessage.getMessage().equalsIgnoreCase("/exit_chat")) {
 			ChatSessionDoc chatSessionDoc = sessionStore.getSession(inboxMessage.getSessionId());
 			exitAgentMode(chatSessionDoc, null);
-			messageStore.log(inboxMessage, MessageStore.EVENTS.UNASGND);
+			chatService.log(inboxMessage, MessageStore.EVENTS.UNASGND);
 		}
 		return inboxMessage;
 	}

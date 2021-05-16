@@ -7,7 +7,7 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Component;
 
 import com.boot.jx.dict.Language;
-import com.boot.jx.postman.model.File;
+import com.boot.jx.model.CommonFile;
 import com.boot.jx.postman.model.Message;
 import com.boot.jx.scope.tnt.TenantScoped;
 import com.boot.jx.scope.tnt.TenantValue;
@@ -58,7 +58,7 @@ public class TmplConfig {
 	 * @param file the file
 	 * @return the local
 	 */
-	public Locale getLocal(File file) {
+	public Locale getLocal(CommonFile file) {
 		if (file != null && file.getLang() != null) {
 			return new Locale(file.getLang().getCode());
 		}

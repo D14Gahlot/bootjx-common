@@ -7,11 +7,12 @@ import org.springframework.data.annotation.TypeAlias;
 import org.springframework.data.annotation.Version;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import com.boot.jx.mongo.CommonDocInterfaces.APatchableIndexed;
 import com.boot.jx.swagger.ApiMockModelProperty;
 
 @Document(collection = "CHAT_SESSION")
 @TypeAlias("ChatSessionDoc")
-public class ChatSessionDoc implements Serializable {
+public class ChatSessionDoc extends APatchableIndexed<ChatSessionDoc, String> implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
@@ -19,7 +20,7 @@ public class ChatSessionDoc implements Serializable {
 	private String sessionId;
 
 	@Version
-	private Integer version;
+	private Long version;
 
 	@ApiMockModelProperty(example = "wa919930104050", required = false)
 	private String contactId;
@@ -109,11 +110,11 @@ public class ChatSessionDoc implements Serializable {
 		this.initd = initd;
 	}
 
-	public Integer getVersion() {
+	public Long getVersion() {
 		return version;
 	}
 
-	public void setVersion(Integer version) {
+	public void setVersion(Long version) {
 		this.version = version;
 	}
 
@@ -197,11 +198,11 @@ public class ChatSessionDoc implements Serializable {
 		this.contactName = contactName;
 	}
 
-	public long getResolveSessionStamp() {
+	public Long getResolveSessionStamp() {
 		return resolveSessionStamp;
 	}
 
-	public void setResolveSessionStamp(long resolveSessionStamp) {
+	public void setResolveSessionStamp(Long resolveSessionStamp) {
 		this.resolveSessionStamp = resolveSessionStamp;
 	}
 
@@ -235,6 +236,21 @@ public class ChatSessionDoc implements Serializable {
 
 	public void setLane(String lane) {
 		this.lane = lane;
+	}
+
+	@Override
+	public ChatSessionDoc newInstance() {
+		return new ChatSessionDoc();
+	}
+
+	@Override
+	public void id(String id) {
+		this.sessionId = id;
+	}
+
+	@Override
+	public String id() {
+		return this.sessionId;
 	}
 
 }

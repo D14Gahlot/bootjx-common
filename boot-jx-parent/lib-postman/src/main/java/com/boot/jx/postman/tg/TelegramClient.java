@@ -2,6 +2,7 @@ package com.boot.jx.postman.tg;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.StringJoiner;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,17 +17,26 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMar
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 
+import com.boot.jx.dict.FileType;
+import com.boot.jx.model.MapModel;
+import com.boot.jx.postman.PMEnvironment;
+import com.boot.jx.postman.PostManException;
+import com.boot.jx.postman.PostmanPackages.MessageClient;
+import com.boot.jx.postman.model.Attachment;
+import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.model.TGMessage;
+import com.boot.jx.postman.model.TmplElement;
 import com.boot.jx.postman.tg.TelegramModels.TGSendDocument;
 import com.boot.jx.postman.tg.TelegramModels.TGSendPhoto;
 import com.boot.jx.rest.RestService;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.CollectionUtil;
 import com.ulisesbocchio.jasyptspringboot.annotation.EnableEncryptableProperties;
 
 @Component
 @PropertySource("classpath:application-telegram.properties")
 @EnableEncryptableProperties
-public class TelegramClient {
+public class TelegramClient implements MessageClient {
 
 	boolean isRegistered;
 
@@ -57,7 +67,7 @@ public class TelegramClient {
 		if (ArgUtil.isEmpty(lane)) {
 			throw new PostManException("No lane " + lane);
 		}
-		TelegramConfig config = environment.get().telegram(lane);
+		TelegramConfig config = environment.config().telegram(lane);
 		if (!ArgUtil.is(config)) {
 			throw new PostManException("No Config for lane " + lane);
 		}
@@ -130,7 +140,7 @@ public class TelegramClient {
 
 	public String registerWebhook(String lane) {
 		try {
-			TelegramConfig config = environment.get().telegram(lane);
+			TelegramConfig config = environment.config().telegram(lane);
 			if (ArgUtil.is(config.getWebhookUrl())) {
 				String resp = registerWebhook(config.getWebhookUrl(), lane);
 				LOGGER.info("WebHook registered to {}", resp);
@@ -150,6 +160,68 @@ public class TelegramClient {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+
+	@Override
+	public OutboxMessage send(OutboxMessage message) {
+		String to = CollectionUtil.getOne(message.getTo());
+		String lane = message.getLane();
+
+		TGMessage resp = null;
+		StringJoiner msgIds = new StringJoiner(",");
+
+		if (ArgUtil.is(message.getAttachments())) {
+			for (Attachment attachment : message.getAttachments()) {
+				if (ArgUtil.is(attachment.getMediaURL())) {
+					if (ArgUtil.areEqual(attachment.getMediaType(), FileType.IMAGE.toString())) {
+						resp = sendPhoto(lane, to, attachment.getMediaURL(), attachment.getMediaCaption());
+						if (ArgUtil.is(resp.getMessageId()))
+							msgIds.add(ArgUtil.parseAsString(resp.getMessageId()));
+					} else {
+						resp = sendDocument(lane, to, attachment.getMediaURL(), attachment.getMediaCaption());
+						if (ArgUtil.is(resp.getMessageId()))
+							msgIds.add(ArgUtil.parseAsString(resp.getMessageId()));
+					}
+				}
+			}
+		}
+
+		if (ArgUtil.is(message.getMessage())) {
+			SendMessage sendMessage = new SendMessage();
+			sendMessage.setText(message.getMessage());
+			if (message.options().containsKey("buttons")) {
+				List<TmplElement> buttons = new MapModel(message.options()).entry("buttons").asList(new TmplElement());
+				ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
+				replyKeyboardMarkup.setSelective(true);
+				replyKeyboardMarkup.setResizeKeyboard(true);
+				replyKeyboardMarkup.setOneTimeKeyboard(true);
+
+				List<KeyboardRow> keyboard = new ArrayList<>();
+				KeyboardRow keyboardFirstRow = new KeyboardRow();
+
+				for (TmplElement button : buttons) {
+					keyboardFirstRow.add(button.getLabel());
+				}
+
+				keyboard.add(keyboardFirstRow);
+
+				/**
+				 * KeyboardRow keyboardSecondRow = new KeyboardRow();
+				 * keyboardSecondRow.add(getAlertsCommand(language));
+				 * keyboardSecondRow.add(getBackCommand(language));
+				 * keyboard.add(keyboardSecondRow);
+				 **/
+
+				replyKeyboardMarkup.setKeyboard(keyboard);
+				sendMessage.setReplyMarkup(replyKeyboardMarkup);
+			}
+			resp = sendReply(lane, to, sendMessage);
+			if (ArgUtil.is(resp.getMessageId()))
+				msgIds.add(ArgUtil.parseAsString(resp.getMessageId()));
+		}
+		message.setMessageIdExt(msgIds.toString());
+
+		return message;
 	}
 
 }

@@ -21,8 +21,9 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xhtmlrenderer.pdf.ITextRenderer;
 
-import com.boot.jx.postman.model.File;
-import com.boot.jx.postman.model.File.FileFormat;
+import com.boot.jx.dict.FileFormat;
+import com.boot.jx.model.CommonFile;
+import com.boot.jx.postman.model.PostManFile;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.Constants;
 import com.itextpdf.text.DocumentException;
@@ -55,7 +56,7 @@ public class ConverterAmxFlyingSaucer implements FileConverter {
 	 * File)
 	 */
 	@Override
-	public File toPDF(File file) throws JRException {
+	public CommonFile toPDF(PostManFile file) throws JRException {
 		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 		try {
 

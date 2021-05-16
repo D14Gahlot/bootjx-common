@@ -61,13 +61,13 @@
 		<dependency>
 			<groupId>net.sf.jasperreports</groupId>
 			<artifactId>jasperreports</artifactId>
-			<version>6.5.1</version>
+			<version>6.17.0</version>
 		</dependency>
 
 		<dependency>
 			<groupId>net.sf.jasperreports</groupId>
 			<artifactId>jasperreports-fonts</artifactId>
-			<version>6.0.0</version>
+			<version>6.17.0</version>
 		</dependency>
 
 	</dependencies>
@@ -85,6 +85,29 @@
 			<id>jcenter</id>
 			<url>https://jcenter.bintray.com/</url>
 		</repository>
+
+
+		<repository>
+			<id>jasper</id>
+			<url>http://jasperreports.sourceforge.net/maven2/</url>
+			<releases>
+				<enabled>true</enabled>
+			</releases>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+		</repository>
+		<repository>
+			<id>jasper1</id>
+			<url>http://jaspersoft.artifactoryonline.com/jaspersoft/jaspersoft-repo/</url>
+			<releases>
+				<enabled>true</enabled>
+			</releases>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+		</repository>
+
 	</repositories>
 
 </project>

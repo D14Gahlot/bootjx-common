@@ -1,10 +1,14 @@
 package com.boot.jx.postman.tw;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.MalformedURLException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.StringJoiner;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,22 +17,31 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Component;
 
+import com.boot.jx.dict.FileType;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PostManException;
+import com.boot.jx.postman.PostmanPackages.MessageClient;
+import com.boot.jx.postman.client.ExtUtilService;
+import com.boot.jx.postman.model.Attachment;
+import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.CollectionUtil;
 import com.boot.utils.CryptoUtil.HashBuilder;
 import com.ulisesbocchio.jasyptspringboot.annotation.EnableEncryptableProperties;
 
+import twitter4j.DirectMessage;
 import twitter4j.DirectMessageList;
+import twitter4j.DirectMessageLocalImpl;
 import twitter4j.Twitter;
 import twitter4j.TwitterException;
 import twitter4j.TwitterFactory;
+import twitter4j.UploadedMedia;
 import twitter4j.conf.ConfigurationBuilder;
 
 @Component
 @PropertySource("classpath:application-twitter.properties")
 @EnableEncryptableProperties
-public class TwitterClient {
+public class TwitterClient implements MessageClient {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(TwitterClient.class);
 	private static Map<String, TwitterClientContext> CLIENTS = Collections
@@ -46,6 +59,9 @@ public class TwitterClient {
 	@Autowired
 	private PMEnvironment environment;
 
+	@Autowired
+	private ExtUtilService extUtilService;
+
 	public TwitterClientContext getContext(String lane) {
 		// lane = ArgUtil.nonEmpty(lane, defaultLane);
 
@@ -56,7 +72,7 @@ public class TwitterClient {
 		TwitterClientContext ctx = CLIENTS.get(lane);
 
 		if (ArgUtil.isEmpty(ctx)) {
-			TwitterConfig config = environment.get().twitter(lane);
+			TwitterConfig config = environment.config().twitter(lane);
 			if (!ArgUtil.is(config)) {
 				throw new PostManException("No Config for lane " + lane);
 			}
@@ -77,17 +93,68 @@ public class TwitterClient {
 		return ctx;
 	}
 
-	public void sendReply(String id, String text, String lane) throws NumberFormatException, TwitterException {
+	public DirectMessage sendReply(String id, String text, String lane) throws NumberFormatException, TwitterException {
 		Twitter twitter = getContext(lane).getTwitter();
-		twitter.sendDirectMessage(Long.parseLong(id), text);
-		LOGGER.debug("Message result to {} : {}", id);
+		DirectMessageLocalImpl x = new DirectMessageLocalImpl(twitter.sendDirectMessage(Long.parseLong(id), text));
+		LOGGER.debug("Message result to {} : {}", id, x.getId());
+		return x;
 	}
 
-	public void sendReply(String id, String text, String mediaId, String lane)
+	public DirectMessage sendReply(String id, String text, String mediaId, String lane)
 			throws NumberFormatException, TwitterException {
 		Twitter twitter = getContext(lane).getTwitter();
-		twitter.sendDirectMessage(Long.parseLong(id), text, Long.parseLong(mediaId));
-		LOGGER.debug("Message result to {} : {}", id);
+		DirectMessageLocalImpl x = new DirectMessageLocalImpl(
+				twitter.sendDirectMessage(Long.parseLong(id), text, Long.parseLong(mediaId)));
+		LOGGER.debug("Message result to {} : {}", id, x.getId());
+		return x;
+	}
+
+	public String uploadMedia(String lane, String url, String title)
+			throws IOException, MalformedURLException, TwitterException {
+		Twitter twitter = getContext(lane).getTwitter();
+		InputStream media = new java.net.URL(url).openStream();
+		UploadedMedia uploadedMedia = twitter.uploadMedia(ArgUtil.parseAsString(title, "File"), media);
+		return ArgUtil.parseAsString(uploadedMedia.getMediaId());
+	}
+
+	public OutboxMessage send(OutboxMessage message) {
+		String to = CollectionUtil.getOne(message.getTo());
+		String lane = message.getLane();
+
+		StringJoiner msgIds = new StringJoiner(",");
+
+		StringJoiner sj = new StringJoiner("\n");
+		sj.add(message.getMessage());
+
+		try {
+			if (ArgUtil.is(message.getAttachments())) {
+				for (Attachment attachment : message.getAttachments()) {
+					if (ArgUtil.is(attachment.getMediaURL())) {
+						if (ArgUtil.areEqual(attachment.getMediaType(), FileType.IMAGE.toString())) {
+							String mediaId = uploadMedia(lane, attachment.getMediaURL(), attachment.getMediaCaption());
+							attachment.mediaId(mediaId);
+							DirectMessage resp = sendReply(to,
+									ArgUtil.nonEmpty(attachment.getMediaCaption(), message.getSubject()), mediaId,
+									lane);
+							if (ArgUtil.is(resp.getId()))
+								msgIds.add(ArgUtil.parseAsString(resp.getId()));
+						} else {
+							sj.add(extUtilService.tinyUrl(attachment.getMediaURL()));
+						}
+					}
+				}
+			}
+
+			if (sj.length() > 0) {
+				DirectMessage resp = sendReply(to, sj.toString(), lane);
+				if (ArgUtil.is(resp.getId()))
+					msgIds.add(ArgUtil.parseAsString(resp.getId()));
+			}
+			message.setMessageIdExt(msgIds.toString());
+		} catch (IOException | TwitterException e) {
+			throw new PostManException(e.getMessage());
+		}
+		return message;
 	}
 
 	public DirectMessageList pollDirectMessagesReceived(String lane) throws TwitterException {
@@ -103,7 +170,7 @@ public class TwitterClient {
 	}
 
 	public StatusCode registerWebhook(String lane) {
-		TwitterConfig config = environment.get().twitter(lane);
+		TwitterConfig config = environment.config().twitter(lane);
 		if (ArgUtil.isEmpty(config)) {
 			LOGGER.info("No Config " + lane);
 		}

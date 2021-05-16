@@ -17,6 +17,8 @@
 	</parent>
 
 	<properties>
+		<buildtimestamp>${maven.build.timestamp}</buildtimestamp>
+		<maven.build.timestamp.format>yyyy-MM-dd HH:mm</maven.build.timestamp.format>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 
@@ -89,6 +91,14 @@
 			<artifactId>java-expr-eval</artifactId>
 			<version>v3.1</version>
 		</dependency>
+
+		<!-- https://stackoverflow.com/questions/61501810/javadoc-error-datatypeconverter-doesnot-exist -->
+		<dependency>
+			<groupId>jakarta.xml.bind</groupId>
+			<artifactId>jakarta.xml.bind-api</artifactId>
+			<version>2.3.3</version>
+		</dependency>
+
 
 	</dependencies>
 

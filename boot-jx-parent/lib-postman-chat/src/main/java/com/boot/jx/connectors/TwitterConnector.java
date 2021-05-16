@@ -1,13 +1,9 @@
 package com.boot.jx.connectors;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import java.util.StringJoiner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,14 +13,13 @@ import org.springframework.stereotype.Component;
 import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorHandler;
 import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorMapping;
 import com.boot.jx.dict.ContactType;
-import com.boot.jx.postman.client.ExtUtilService;
+import com.boot.jx.dict.FileType;
 import com.boot.jx.postman.client.TmplClient;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.TemplateReply;
 import com.boot.jx.postman.gupshup.GupShupConfigClient;
 import com.boot.jx.postman.model.Attachment;
-import com.boot.jx.postman.model.File;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.model.WAMessage.Channel;
@@ -38,7 +33,6 @@ import twitter4j.DirectMessageList;
 import twitter4j.DirectMessageLocalImpl;
 import twitter4j.ResponseList;
 import twitter4j.TwitterException;
-import twitter4j.UploadedMedia;
 
 @Component
 @ConnectorMapping(contactType = ContactType.TWITTER)
@@ -58,76 +52,27 @@ public class TwitterConnector implements ConnectorHandler {
 	@Autowired
 	private TmplClient tmplClient;
 
-	@Autowired
-	private ExtUtilService extUtilService;
-
-	private String getMediaId(String lane, TemplateReply templateReply)
-			throws IOException, MalformedURLException, TwitterException {
-		String mediaId = ArgUtil.parseAsString(templateReply.meta().get("twitterMediaId"));
-		// TODO:-Media cannot be shared, will update this api once we start using
-		// "SHARED MEDIA across Multiple messgaes"
-		// if (!ArgUtil.is(mediaId)) {
-		TwitterClientContext ctx = twitterClient.getContext(lane);
-		InputStream media = new java.net.URL(templateReply.getUrl()).openStream();
-		UploadedMedia uploadedMedia = ctx.getTwitter().uploadMedia(templateReply.getTitle(), media);
-		mediaId = ArgUtil.parseAsString(uploadedMedia.getMediaId());
-		// templateReply.meta().put("twitterMediaId", mediaId);
-		// mongoTemplate.save(templateReply);
-		// }
-		return mediaId;
-	}
-
-	public String attachLink(OutboxMessage outboxMessage) {
-		StringJoiner sj = new StringJoiner("\n");
-		sj.add(outboxMessage.getMessage());
-		if (ArgUtil.is(outboxMessage.getAttachments())) {
-			for (Attachment attachment : outboxMessage.getAttachments()) {
-				if (ArgUtil.is(attachment.getMediaURL())) {
-					sj.add(extUtilService.tinyUrl(attachment.getMediaURL()));
-				}
-			}
-		}
-		return sj.toString();
-	}
-
 	@Override
-	public void send(String lane, String to, OutboxMessage outboxMessage) {
+	public void send(OutboxMessage outboxMessage) {
 		try {
 			if (ArgUtil.is(outboxMessage.getTemplate())) {
 				TemplateReply templateReply = mongoTemplate.findById(outboxMessage.getTemplate(), TemplateReply.class);
 				if (ArgUtil.is(templateReply)) {
 					if ("image".equalsIgnoreCase(templateReply.getType())) {
-						String mediaId = getMediaId(lane, templateReply);
 						outboxMessage.attachment(new Attachment().mediaURL(templateReply.getUrl())
-								.mediaType(File.FileType.IMAGE.toString()).mediaId(mediaId));
-						twitterClient.sendReply(to, outboxMessage.getMessage(), mediaId, lane);
+								.mediaType(FileType.IMAGE.toString()).mediaCaption(templateReply.getTitle()));
+						twitterClient.send(outboxMessage);
 					} else {
-						twitterClient.sendReply(to, attachLink(outboxMessage), lane);
+						twitterClient.send(outboxMessage);
 					}
 				} else {
 					tmplClient.process(outboxMessage);
-					twitterClient.sendReply(to, attachLink(outboxMessage), lane);
+					twitterClient.send(outboxMessage);
 				}
 			} else {
-				twitterClient.sendReply(to, attachLink(outboxMessage), lane);
+				twitterClient.send(outboxMessage);
 			}
 			outboxMessage.setStatus(OutboxMessage.Status.SENT);
-		} catch (NumberFormatException e) {
-			outboxMessage.setStatus(OutboxMessage.Status.SENT_ERR);
-			outboxMessage.logs().add(e.getMessage());
-			e.printStackTrace();
-		} catch (TwitterException e) {
-			outboxMessage.setStatus(OutboxMessage.Status.SENT_ERR);
-			outboxMessage.logs().add(e.getMessage());
-			e.printStackTrace();
-		} catch (MalformedURLException e) {
-			outboxMessage.setStatus(OutboxMessage.Status.SENT_ERR);
-			outboxMessage.logs().add(e.getMessage());
-			e.printStackTrace();
-		} catch (IOException e) {
-			outboxMessage.setStatus(OutboxMessage.Status.SENT_ERR);
-			outboxMessage.logs().add(e.getMessage());
-			e.printStackTrace();
 		} catch (Exception e) {
 			outboxMessage.setStatus(OutboxMessage.Status.SENT_ERR);
 			outboxMessage.logs().add(e.getMessage());
@@ -140,16 +85,6 @@ public class TwitterConnector implements ConnectorHandler {
 		// twitterClient.sendReply(inboxMessage.getFrom(), "Call us @ " +
 		// gupShupConfig.getGupShupWaNumber(),inboxMessage.getLane());
 		return inboxMessage;
-	}
-
-	@Override
-	public void reply(InboxMessage inboxMessage, OutboxMessage outboxMessage) {
-		this.send(inboxMessage.getLane(), inboxMessage.getFrom(), outboxMessage);
-	}
-
-	@Override
-	public void send(ChatContactDoc chatContactDoc, OutboxMessage outboxMessage) {
-		this.send(chatContactDoc.getLane(), chatContactDoc.getCsid(), outboxMessage);
 	}
 
 	public InboxMessage toInboxMessage(DirectMessage dm, String lane) {

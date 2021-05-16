@@ -1,11 +1,17 @@
 package com.boot.jx.postman;
 
 import com.boot.jx.dict.ContactType;
-import com.boot.jx.postman.model.File;
+import com.boot.jx.postman.model.OutboxMessage;
+import com.boot.jx.postman.model.PostManFile;
 
 public class PostmanPackages {
 
 	public static interface ICommonTmplPackage {
-		public File process(File file, ContactType contactType);
+		public PostManFile process(PostManFile file, ContactType contactType);
 	}
+
+	public static interface MessageClient {
+		public OutboxMessage send(OutboxMessage outboxMessage);
+	}
+
 }

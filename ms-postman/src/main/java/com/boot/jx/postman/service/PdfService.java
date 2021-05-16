@@ -4,9 +4,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.boot.jx.model.CommonFile;
 import com.boot.jx.postman.converter.FileConverter;
-import com.boot.jx.postman.model.File;
-import com.boot.jx.postman.model.File.PDFConverter;
+import com.boot.jx.postman.model.PostManFile;
+import com.boot.jx.postman.model.PostManFile.PDFConverter;
 
 import net.sf.jasperreports.engine.JRException;
 
@@ -47,7 +48,7 @@ public class PdfService {
 	 * @throws JRException
 	 *             the JR exception
 	 */
-	public File convert(File file) throws JRException {
+	public CommonFile convert(PostManFile file) throws JRException {
 
 		PDFConverter conv = file.getConverter();
 		if (conv == null) {

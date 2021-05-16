@@ -24,6 +24,7 @@ public class OWATest { // Noncompliant
 	 * @throws URISyntaxException
 	 */
 
+	
 	public static void main(String[] args) throws MalformedURLException, URISyntaxException {
 
 	}

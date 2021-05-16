@@ -10,6 +10,7 @@ import com.boot.jx.dict.ContactType;
 import com.boot.jx.dict.Language;
 import com.boot.jx.postman.model.ITemplates.ITemplate;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.CollectionUtil;
 import com.boot.utils.JsonUtil;
 import com.boot.utils.StringUtils;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -53,7 +54,7 @@ public class Message<T extends Message<T>> implements Serializable, MessageOptio
 	protected String channel;
 	protected String lane;
 
-	private List<File> files = null;
+	private List<PostManFile> files = null;
 	private List<Attachment> attachments = null;
 
 	private String id;
@@ -188,6 +189,13 @@ public class Message<T extends Message<T>> implements Serializable, MessageOptio
 		this.contactType = contactType;
 	}
 
+	public List<String> to() {
+		if (this.to == null) {
+			this.to = new ArrayList<String>();
+		}
+		return to;
+	}
+
 	/**
 	 * @return the to
 	 */
@@ -209,6 +217,7 @@ public class Message<T extends Message<T>> implements Serializable, MessageOptio
 		for (String recieverId : recieverIds) {
 			this.to.add(StringUtils.trim(recieverId));
 		}
+		this.to = CollectionUtil.distinct(this.to);
 	}
 
 	public void addLine(String... lines) {
@@ -279,23 +288,23 @@ public class Message<T extends Message<T>> implements Serializable, MessageOptio
 		}
 	}
 
-	public List<File> getFiles() {
+	public List<PostManFile> getFiles() {
 		return files;
 	}
 
-	public void setFiles(List<File> files) {
+	public void setFiles(List<PostManFile> files) {
 		this.files = files;
 	}
 
-	public List<File> files() {
+	public List<PostManFile> files() {
 		if (this.files == null) {
-			this.files = new ArrayList<File>();
+			this.files = new ArrayList<PostManFile>();
 		}
 		return files;
 	}
 
-	public void addFile(File... files) {
-		for (File file : files) {
+	public void addFile(PostManFile... files) {
+		for (PostManFile file : files) {
 			this.files().add(file);
 		}
 	}
@@ -355,7 +364,7 @@ public class Message<T extends Message<T>> implements Serializable, MessageOptio
 	}
 
 	@SuppressWarnings("unchecked")
-	public T file(File... files) {
+	public T file(PostManFile... files) {
 		this.addFile(files);
 		return (T) this;
 	}

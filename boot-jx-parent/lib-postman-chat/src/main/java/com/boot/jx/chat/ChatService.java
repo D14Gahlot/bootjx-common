@@ -2,6 +2,7 @@ package com.boot.jx.chat;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 import com.boot.jx.bot.ChatContext;
@@ -12,6 +13,8 @@ import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatContextDoc;
 import com.boot.jx.postman.doc.ChatMeta;
 import com.boot.jx.postman.doc.ChatSessionDoc;
+import com.boot.jx.postman.dto.ChatUserProfileDTO;
+import com.boot.jx.postman.dto.ChatUserProfileDTO.ChatUserProfileRequest;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.Message;
 import com.boot.jx.postman.model.OutboxMessage;
@@ -84,8 +87,10 @@ public class ChatService {
 		if (ArgUtil.is(inboxMessage)) {
 			outboxMessage.setContactType(inboxMessage.getContactType());
 			outboxMessage.setChannel(inboxMessage.getChannel());
+			outboxMessage.setLane(inboxMessage.getLane());
 			outboxMessage.setQueue(inboxMessage.getQueue());
 			outboxMessage.addTo(inboxMessage.getFrom());
+			outboxMessage.setContactId(inboxMessage.getContactId());
 			outboxMessage.setSessionId(inboxMessage.getSessionId());
 			ConnectorHandler connector = connectorHandlerFactory.get(outboxMessage.getContactType(),
 					outboxMessage.getChannel());
@@ -103,7 +108,10 @@ public class ChatService {
 		messageStore.create(outboxMessage);
 		if (ArgUtil.is(chatContactDoc)) {
 			outboxMessage.setContactType(ArgUtil.parseAsEnumT(chatContactDoc.getContactType(), ContactType.class));
+			outboxMessage.setChannel(chatContactDoc.getChannelType());
+			outboxMessage.setLane(chatContactDoc.getLane());
 			outboxMessage.setContactId(chatContactDoc.getContactId());
+			outboxMessage.setSessionId(chatContactDoc.getSessionId());
 			ConnectorHandler connector = connectorHandlerFactory.get(outboxMessage.getContactType(),
 					outboxMessage.getChannel());
 			if (ArgUtil.is(connector)) {
@@ -150,14 +158,21 @@ public class ChatService {
 		replyIntenal(inboxMessage, outboxMessage);
 	}
 
-	public void log(ChatSessionDoc sessionDoc, EVENTS event, String... logs) {
+	public void log(InboxMessage inboxMessage, String agent, EVENTS event, String... logs) {
+		messageStore.log(inboxMessage, agent, event, logs);
+	}
+
+	public void log(InboxMessage inboxMessage, EVENTS event, String... logs) {
+		log(inboxMessage, inboxMessage.session().getAgent(), event, logs);
+	}
+
+	public void log(ChatSessionDoc sessionDoc, String agent, EVENTS event, String... logs) {
 		InboxMessage inboxMessage = sessionStore.toInboxMessage(sessionDoc);
+		log(inboxMessage, agent, event, logs);
+	}
 
-		if (ArgUtil.isEmpty(inboxMessage.session().getAgent())) {
-			inboxMessage.session().setAgent(sessionDoc.getAssignedToAgent());
-		}
-
-		messageStore.log(inboxMessage, event, logs);
+	public void log(ChatSessionDoc sessionDoc, EVENTS event, String... logs) {
+		log(sessionDoc, sessionDoc.getAssignedToAgent(), event, logs);
 	}
 
 	public void send(ChatSessionDoc sessionDoc, OutboxMessage outboxMessage) {
@@ -204,9 +219,7 @@ public class ChatService {
 			inboxMessage.session().setMode("BOT");
 			inboxMessage.session().setAgent(chatClient.getDefaultSender());
 
-			sessionDoc.setMode(inboxMessage.session().getMode());
-			sessionDoc.setAssignedToAgent(inboxMessage.session().getAgent());
-			sessionStore.save(sessionDoc);
+			sessionStore.assignToBot(sessionDoc, chatClient.getDefaultSender());
 		}
 
 		ChatContextDoc doc = mongoTemplate.findById(contactId, ChatContextDoc.class);
@@ -268,8 +281,7 @@ public class ChatService {
 			sessionStore.save(contact);
 		}
 		if (initd) {
-			session.setContactName(contact.getName());
-			session = sessionStore.initSession(session);
+			session = sessionStore.initSession(session, contact);
 		}
 		return session.isInitd();
 	}

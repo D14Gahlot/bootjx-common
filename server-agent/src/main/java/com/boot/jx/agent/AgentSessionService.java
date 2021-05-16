@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 
 import com.boot.jx.agent.doc.AgentSessionDoc;
 import com.boot.jx.chat.ChatClient;
+import com.boot.jx.common.dto.AgentResponseAuthDto;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.TimeUtils;
 
@@ -66,6 +67,17 @@ public class AgentSessionService {
 		agentSessionBean.setOnline(true);
 		agentSessionBean.setAgentCode(username);
 		agentSessionBean.setAgentDept("ONLINE");
+		agentSessionBean.setLastOnlineStamp(System.currentTimeMillis());
+		this.updateSession();
+	}
+
+	public void updateLogin(AgentResponseAuthDto agent) {
+		agentSessionBean.setLoggedIn(true);
+		agentSessionBean.setOnline(true);
+		agentSessionBean.setAgentCode(agent.getAgent_code());
+		if (ArgUtil.is(agent.getDept())) {
+			agentSessionBean.setAgentDept(agent.getDept().getDept_code());
+		}
 		agentSessionBean.setLastOnlineStamp(System.currentTimeMillis());
 		this.updateSession();
 	}

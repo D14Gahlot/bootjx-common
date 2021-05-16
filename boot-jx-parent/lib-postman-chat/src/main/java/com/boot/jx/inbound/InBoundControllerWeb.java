@@ -99,9 +99,10 @@ public class InBoundControllerWeb {
 		event.setContactType(ContactType.WEBSITE);
 		event.setLane("DUMMY");
 
-		// event.setContactType(ContactType.WHATSAPP);
+		// event.setContactType(ContactType.TWITTER);
+		// event.setLane("mehery_soccom");
 		// event.setChannel("GUPSHUPW");
-		// event.setFrom("919930104050");
+		// event.setFrom("239303493");
 		// event.setFromName("Test");
 
 		// Cleaning

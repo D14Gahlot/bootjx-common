@@ -134,9 +134,9 @@ public class DefaultSwaggerConfig {
 
 	private ApiInfo metaData() {
 		return new ApiInfo(appConfig.getAppName(),
-				appConfig.getAppEnv() + "#" + appConfig.getAppGroup() + "#" + appConfig.getAppId(), "1.0",
-				"Terms of service",
-				new Contact("MeherY SocCom Team", "https://springframework.guru/about/", "support@mehery.com"),
+				String.format("%s#%s#%s", appConfig.getAppEnv(), appConfig.getAppGroup(), appConfig.getAppId()),
+				String.format("1.0 - %s", appConfig.getAppAppBuildStamp()), "Terms of service",
+				new Contact("boot-js Team", "https://springframework.guru/about/", "support@mehery.com"),
 				"Apache License Version 2.0", "https://www.apache.org/licenses/LICENSE-2.0");
 	}
 

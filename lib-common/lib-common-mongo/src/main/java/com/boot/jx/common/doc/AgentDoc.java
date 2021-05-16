@@ -1,6 +1,7 @@
-package com.boot.jx.admin.model;
+package com.boot.jx.common.doc;
 
 import java.util.Date;
+import java.util.List;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.TypeAlias;
@@ -8,6 +9,8 @@ import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import com.boot.jx.mongo.CommonDocInterfaces.IDocument;
+import com.boot.utils.ArgUtil;
+import com.boot.utils.StringUtils;
 
 @Document(collection = "AGENTS")
 @TypeAlias("AgentDoc")
@@ -32,7 +35,9 @@ public class AgentDoc implements IDocument {
 	private String isactive;
 	private boolean admin;
 	private boolean isSuperAdmin;
+	private boolean isDefaultValue;
 
+	private List<String> channels;
 	private String dept_id;
 
 	public String getAgent_name() {
@@ -169,6 +174,25 @@ public class AgentDoc implements IDocument {
 
 	public void setSuperAdmin(boolean isSuperAdmin) {
 		this.isSuperAdmin = isSuperAdmin;
+	}
+
+	public List<String> getChannels() {
+		if (!ArgUtil.is(channels)) {
+			channels = StringUtils.toList(agent_channels);
+		}
+		return channels;
+	}
+
+	public void setChannels(List<String> channels) {
+		this.channels = channels;
+	}
+
+	public boolean isDefaultValue() {
+		return isDefaultValue;
+	}
+
+	public void setDefaultValue(boolean isDefaultValue) {
+		this.isDefaultValue = isDefaultValue;
 	}
 
 }

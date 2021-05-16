@@ -7,8 +7,7 @@ import org.springframework.stereotype.Component;
 import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorHandler;
 import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorMapping;
 import com.boot.jx.dict.ContactType;
-import com.boot.jx.postman.client.GupShupChatClient;
-import com.boot.jx.postman.client.GupShupNotifyClient;
+import com.boot.jx.dict.FileType;
 import com.boot.jx.postman.client.TmplClient;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
@@ -17,13 +16,12 @@ import com.boot.jx.postman.gupshup.GupShupClientChat;
 import com.boot.jx.postman.gupshup.GupShupClientNotify;
 import com.boot.jx.postman.gupshup.GupShupConfigClient;
 import com.boot.jx.postman.gupshup.GupShupInbound;
-import com.boot.jx.postman.gupshup.GupShupResp;
 import com.boot.jx.postman.model.Attachment;
-import com.boot.jx.postman.model.File;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.Message;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.CollectionUtil;
 import com.boot.utils.JsonUtil;
 
 @Component
@@ -31,13 +29,13 @@ import com.boot.utils.JsonUtil;
 public class WAGupShupConnector implements ConnectorHandler {
 
 	@Autowired
-	private GupShupChatClient gupShupChatClient;
+	private GupShupClientChat gupShupChatClient;
 
 	@Autowired
-	private GupShupNotifyClient gupShupNotifyClient;
+	private GupShupClientNotify gupShupNotifyClient;
 
 	@Autowired
-	protected GupShupConfig gupShupConfig;
+	protected GupShupConfigClient gupShupConfig;
 
 	@Autowired
 	private MongoTemplate mongoTemplate;
@@ -46,51 +44,33 @@ public class WAGupShupConnector implements ConnectorHandler {
 	private TmplClient tmplClient;
 
 	@Override
-	public void send(String lane, String to, OutboxMessage outboxMessage) {
-		// TODO Auto-generated method stub
-	}
-
-	@Override
 	public void send(ChatContactDoc chatContactDoc, OutboxMessage outboxMessage) {
 		outboxMessage.setChannel(chatContactDoc.getChannelType());
-		gupShupNotifyClient.sendMessage(outboxMessage);
+		outboxMessage.setLane(chatContactDoc.getLane());
+		String to = CollectionUtil.getOne(outboxMessage.getTo());
+		gupShupNotifyClient.send(outboxMessage);
 	}
 
 	@Override
 	public void reply(InboxMessage inboxMessage, OutboxMessage outboxMessage) {
-		GupShupResp resp = null;
 		try {
+			outboxMessage.setLane(inboxMessage.getLane());
 			if (ArgUtil.is(outboxMessage.getTemplate())) {
 				TemplateReply templateReply = mongoTemplate.findById(outboxMessage.getTemplate(), TemplateReply.class);
 				if (ArgUtil.is(templateReply)) {
 					if ("image".equalsIgnoreCase(templateReply.getType())) {
-						outboxMessage.attachment(new Attachment().mediaURL(templateReply.getUrl())
-								.mediaType(File.FileType.IMAGE.toString()));
-						resp = gupShupChatClient.sendMessage(outboxMessage, inboxMessage.getLane());
+						outboxMessage.attachment(
+								new Attachment().mediaURL(templateReply.getUrl()).mediaType(FileType.IMAGE.toString()));
+						outboxMessage = gupShupChatClient.send(outboxMessage);
 					}
 				} else {
 					tmplClient.process(outboxMessage);
-					resp = gupShupChatClient.sendMessage(outboxMessage, inboxMessage.getLane());
+					outboxMessage = gupShupChatClient.send(outboxMessage);
 				}
 			} else {
-				resp = gupShupChatClient.sendMessage(outboxMessage, inboxMessage.getLane());
+				outboxMessage = gupShupChatClient.send(outboxMessage);
 			}
-		} else {
-			resp = gupShupChatClient.sendMessage(outboxMessage);
-		}
-
-			if (!ArgUtil.is(resp) || !ArgUtil.is(resp.getResponse())) {
-				outboxMessage.setStatus(Message.Status.SENT_ERR);
-				outboxMessage.logs().add("No Response Object");
-			} else if (ArgUtil.isEqual(resp.getResponse().getStatus(), "error")) {
-				outboxMessage.setStatus(Message.Status.SENT_ERR);
-				outboxMessage.logs()
-						.add(String.format("%s : %s", resp.getResponse().getId(), resp.getResponse().getDetails()));
-			} else {
-				if (ArgUtil.is(resp.getResponse().getId()))
-					outboxMessage.setMessageIdExt(resp.getResponse().getId());
-				outboxMessage.setStatus(Message.Status.SENT);
-			}
+			outboxMessage.setStatus(Message.Status.SENT);
 		} catch (Exception e) {
 			outboxMessage.setStatus(Message.Status.SENT_ERR);
 			outboxMessage.logs().add(e.getMessage());
@@ -123,6 +103,13 @@ public class WAGupShupConnector implements ConnectorHandler {
 		inboxMessage.setMessage(inbound.getText());
 		inboxMessage.setTo(inbound.getWaNumber());
 		inboxMessage.setMessageIdExt(inbound.getReplyId());
+		inboxMessage.setLane(inbound.getWaNumber());
 		return inboxMessage;
 	}
+
+	@Override
+	public void send(OutboxMessage outboxMessage) {
+		// TODO Auto-generated method stub
+	}
+
 }

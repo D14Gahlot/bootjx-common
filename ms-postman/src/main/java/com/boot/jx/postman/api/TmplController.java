@@ -15,10 +15,12 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.dict.ContactType;
+import com.boot.jx.dict.FileFormat;
 import com.boot.jx.dict.Language;
+import com.boot.jx.model.CommonFile;
 import com.boot.jx.postman.PostManConfig;
 import com.boot.jx.postman.client.TmplClient;
-import com.boot.jx.postman.model.File;
+import com.boot.jx.postman.model.PostManFile;
 import com.boot.jx.postman.model.TemplatesMX;
 import com.boot.jx.postman.service.FileService;
 import com.boot.jx.postman.service.PostManServiceImpl;
@@ -50,7 +52,7 @@ public class TmplController {
 	 *
 	 * @return the lang
 	 */
-	private Language getLang(File file) {
+	private Language getLang(CommonFile file) {
 		if (ArgUtil.isEmpty(file) || ArgUtil.isEmpty(file.getLang())) {
 			String langString = request.getParameter(PostManServiceImpl.PARAM_LANG);// localeResolver.resolveLocale(request).toString();
 			Language lang = ArgUtil.parseAsEnumT(langString, postManConfig.getTenantLang(), Language.class);
@@ -70,12 +72,12 @@ public class TmplController {
 	 */
 	@SuppressWarnings("unchecked")
 	@RequestMapping(value = TmplClient.PATH.TMPL_FILE_PROCESS, method = RequestMethod.GET)
-	public ApiResponse<File, Object> processTemplate(@RequestParam TemplatesMX template,
+	public ApiResponse<PostManFile, Object> processTemplate(@RequestParam TemplatesMX template,
 			@RequestParam(required = false) String data, @RequestParam(required = false) String fileName,
-			@RequestParam(required = false) File.FileFormat fileType,
+			@RequestParam(required = false) FileFormat fileType,
 			@RequestParam(required = false) ContactType contactType) {
 
-		File file = new File();
+		PostManFile file = new PostManFile();
 		getLang(file);
 
 		file.setITemplate(template);
@@ -92,7 +94,7 @@ public class TmplController {
 	 * @return the file
 	 */
 	@RequestMapping(value = { TmplClient.PATH.TMPL_FILE_PROCESS }, method = RequestMethod.POST)
-	public ApiResponse<File, Object> processTemplateFile(@RequestBody File file,
+	public ApiResponse<PostManFile, Object> processTemplateFile(@RequestBody PostManFile file,
 			@RequestParam(required = false) ContactType contactType) {
 		getLang(file);
 		return ApiResponse.buildResult(fileService.create(file, contactType));
