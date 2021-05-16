@@ -8,10 +8,11 @@
 <link rel="shortcut icon" type="image/x-icon" href="#" />  
 
 
-<script>
+<script th:inline="text" >
   window.console = window.console || function(t) {};
   window.CONST = {
-		CONTEXT: '[[${APP_CONTEXT}]]', "APP_USER" : '[[${APP_USER}]]',"APP_DEPT" : '[[${APP_DEPT}]]'
+		CONTEXT: '[[${APP_CONTEXT}]]', "APP_USER" : '[[${APP_USER}]]',"APP_DEPT" : '[[${APP_DEPT}]]',
+		CONFG : [(${CONFIG})]
   }
 </script>
 

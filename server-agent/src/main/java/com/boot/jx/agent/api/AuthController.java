@@ -24,12 +24,14 @@ import com.boot.jx.agent.AgentChatHandlerImpl;
 import com.boot.jx.agent.AgentSessionBean;
 import com.boot.jx.agent.AgentSessionService;
 import com.boot.jx.api.ApiResponse;
+import com.boot.jx.common.config.AppCommonConfig;
 import com.boot.jx.common.dto.AgentResponseAuthDto;
 import com.boot.jx.http.CommonHttpRequest;
 import com.boot.jx.rest.RestService;
 import com.boot.jx.stomp.StompTunnelSessionManager;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.Constants;
+import com.boot.utils.JsonUtil;
 
 @Controller
 public class AuthController {
@@ -55,6 +57,9 @@ public class AuthController {
 	@Autowired
 	private RestService restService;
 
+	@Autowired
+	private AppCommonConfig appCommonConfig;
+
 	private long getVersion() {
 		return System.currentTimeMillis() / 300000;
 	}
@@ -67,6 +72,7 @@ public class AuthController {
 		model.addAttribute("CDN_VERSION", getVersion());
 		model.addAttribute("CDN_URL", ArgUtil.parseAsString(commonHttpRequest.get("CDN_URL"), cdnServer));
 		model.addAttribute("CDN_DEBUG", ArgUtil.parseAsString(commonHttpRequest.get("CDN_DEBUG"), "false"));
+		model.addAttribute("CONFIG", JsonUtil.toJson(appCommonConfig.toMap()));
 
 		String cdnnew = ArgUtil.parseAsString(commonHttpRequest.get("CDN_NEW"), "true");
 
@@ -161,6 +167,7 @@ public class AuthController {
 
 		model.addAttribute("MESSAGE", message);
 		model.addAttribute("PAGE", page);
+
 		return "agent-login";
 	}
 

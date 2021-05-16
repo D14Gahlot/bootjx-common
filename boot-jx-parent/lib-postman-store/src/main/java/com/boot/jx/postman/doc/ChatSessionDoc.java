@@ -36,6 +36,7 @@ public class ChatSessionDoc extends APatchableIndexed<ChatSessionDoc, String> im
 	private boolean active;
 	private boolean initd;
 	private boolean resolved;
+	private boolean expired;
 
 	private long startSessionStamp;
 	private long fistResponseStamp;
@@ -198,11 +199,11 @@ public class ChatSessionDoc extends APatchableIndexed<ChatSessionDoc, String> im
 		this.contactName = contactName;
 	}
 
-	public Long getResolveSessionStamp() {
+	public long getResolveSessionStamp() {
 		return resolveSessionStamp;
 	}
 
-	public void setResolveSessionStamp(Long resolveSessionStamp) {
+	public void setResolveSessionStamp(long resolveSessionStamp) {
 		this.resolveSessionStamp = resolveSessionStamp;
 	}
 
@@ -251,6 +252,14 @@ public class ChatSessionDoc extends APatchableIndexed<ChatSessionDoc, String> im
 	@Override
 	public String id() {
 		return this.sessionId;
+	}
+
+	public boolean isExpired() {
+		return expired;
+	}
+
+	public void setExpired(boolean expired) {
+		this.expired = expired;
 	}
 
 }

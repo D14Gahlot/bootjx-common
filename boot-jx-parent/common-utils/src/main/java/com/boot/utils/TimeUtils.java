@@ -116,7 +116,7 @@ public class TimeUtils {
 	}
 
 	public static boolean isExpired(long timeThen, String maxAge) {
-		return isDead(timeThen, TimeUtils.toMillis(maxAge));
+		return isDead(timeThen, toMillis(maxAge));
 	}
 
 	public static boolean isExpired(Date dateThen, long maxAge) {

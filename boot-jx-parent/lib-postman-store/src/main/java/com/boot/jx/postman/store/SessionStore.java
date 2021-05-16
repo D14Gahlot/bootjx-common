@@ -367,4 +367,8 @@ public class SessionStore extends CommonDocStore {
 		builder.set("assignedToAgent", chatSessionDoc.getAssignedToAgent());
 		mongoTemplate.updateFirst(builder.getQuery(), builder.getUpdate(), ChatSessionDoc.class);
 	}
+
+	public String getChatSessionTimeout() {
+		return chatSessionTimeout;
+	}
 }

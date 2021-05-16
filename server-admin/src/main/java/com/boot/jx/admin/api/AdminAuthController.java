@@ -22,11 +22,12 @@ import com.boot.jx.AppConfig;
 import com.boot.jx.admin.AdminAuthProvider;
 import com.boot.jx.admin.service.AgentLoginService;
 import com.boot.jx.api.ApiResponse;
+import com.boot.jx.common.config.AppCommonConfig;
 import com.boot.jx.common.dto.AgentResponseAuthDto;
-import com.boot.jx.common.store.AgentStore;
 import com.boot.jx.http.CommonHttpRequest;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.Constants;
+import com.boot.utils.JsonUtil;
 import com.boot.utils.MapBuilder;
 
 @Controller
@@ -44,6 +45,9 @@ public class AdminAuthController {
 	@Autowired
 	private AgentLoginService agentLoginService;
 
+	@Autowired
+	private AppCommonConfig appCommonConfig;
+
 	private long getVersion() {
 		return System.currentTimeMillis() / 300000;
 	}
@@ -57,6 +61,7 @@ public class AdminAuthController {
 		} else {
 			model.addAttribute("APP_USER", "");
 		}
+		model.addAttribute("CONFIG", JsonUtil.toJson(appCommonConfig.toMap()));
 		model.addAttribute("CDN_VERSION", getVersion());
 		model.addAttribute("CDN_URL", ArgUtil.parseAsString(commonHttpRequest.get("CDN_URL"), cdnServer));
 		model.addAttribute("CDN_DEBUG", ArgUtil.parseAsString(commonHttpRequest.get("CDN_DEBUG"), "false"));
