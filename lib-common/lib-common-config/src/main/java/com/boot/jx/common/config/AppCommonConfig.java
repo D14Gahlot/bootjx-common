@@ -18,6 +18,7 @@ public class AppCommonConfig {
 	public Map<String, Object> toMap() {
 		Map<String, Object> map = new HashMap<String, Object>();
 		map.put("chatSessionTimeout", TimeUtils.toMillis(sessionStore.getChatSessionTimeout()));
+		map.put("timestamp", System.currentTimeMillis());
 		return map;
 	}
 }
