@@ -524,7 +524,7 @@ public class AgentAnalyticsManager {
 	       long diffInMilliSeconds =date2 -date1;
 		
 		   int diffInMin = (int) (diffInMilliSeconds / (60 * 1000));
-	       System.out.println("difference in minutes: " + decimalFormatter.format(diffInMin));
+	       //System.out.println("difference in minutes: " + decimalFormatter.format(diffInMin));
 
 	       int diffInHours = (int) (diffInMilliSeconds / (60 * 60 * 1000));
 
@@ -572,8 +572,8 @@ public class AgentAnalyticsManager {
 				query.addCriteria(Criteria.where("timestamp").gt(dateRange1).lt(dateRange2));
 				query.with(new Sort(new Order(Direction.ASC, "timestamp")));
 				List<MessageDoc>  totalMsg= mongoTemplate.find(query, MessageDoc.class, contactType.toString());
-				System.out.print("\n ==== contactType :"+contactType+" \t getMsgCountAgentContactWise ==>");
-				System.out.print("\t getMsgCountAgentContactWise :"+totalMsg==null?0:totalMsg.size());
+				//System.out.print("\n ==== contactType :"+contactType+" \t getMsgCountAgentContactWise ==>");
+				//System.out.print("\t getMsgCountAgentContactWise :"+totalMsg==null?0:totalMsg.size());
 				totalMsgDoc.addAll(totalMsg);
 			}
 			return totalMsgDoc;

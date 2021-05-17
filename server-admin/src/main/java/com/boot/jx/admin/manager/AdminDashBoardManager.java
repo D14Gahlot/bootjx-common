@@ -226,7 +226,7 @@ public class AdminDashBoardManager {
 		List<DashBoardResponseDto> dtoLst = new ArrayList<DashBoardResponseDto>();
 
 		long epochTime = System.currentTimeMillis();
-		System.out.println("epochTime :" + epochTime);
+		//System.out.println("epochTime :" + epochTime);
 
 		DashBoardResponseDto today = todayAnalystics(requestDto);
 		DashBoardResponseDto yesterday = yesterdayAnalystics(requestDto);
@@ -268,7 +268,7 @@ public class AdminDashBoardManager {
 		List<MessageDoc> totalMsgDoc = getTotalMsgCount(contactType, longTodayStartTime, longTodayendTime);
 		// Get the distinct stuff from MongoDB
 		List<MessageDoc> distinctIdList =  getUniqueConversation(contactType, longTodayStartTime, longTodayendTime);
-		System.out.println("distinctIdList :" + distinctIdList.size());
+		//System.out.println("distinctIdList :" + distinctIdList.size());
 
 		PeakLoadDto peakLoadResult = getPeakLoadMsgCount(totalMsgDoc);
 		
@@ -458,7 +458,7 @@ public class AdminDashBoardManager {
 
 		// Get the distinct stuff from MongoDB
 		List<MessageDoc> distinctIdList =  getUniqueConversation(contactType, monthStartDateEpocTime, longTodayendTime);
-		System.out.println("distinctIdList :" + distinctIdList.size());
+		//System.out.println("distinctIdList :" + distinctIdList.size());
 		
 		Map<Object,Object> dateWiseCount = getDateWiseCount(totalMsgDoc);
 		
@@ -518,7 +518,7 @@ public class AdminDashBoardManager {
 		List<MessageDoc> totalMsgDoc = getTotalMsgCount(contactType, quaterStratDateTime, longTodayendTime); 
 		// Get the distinct stuff from MongoDB
 		List<MessageDoc> distinctIdList =getUniqueConversation(contactType, quaterStratDateTime, longTodayendTime);
-		System.out.println("distinctIdList :" + distinctIdList.size());
+		//System.out.println("distinctIdList :" + distinctIdList.size());
 		PeakLoadDto peakLoadResult = getPeakLoadMsgCount(totalMsgDoc);
 		
 		/** lead Messanger **/
@@ -654,7 +654,7 @@ public class AdminDashBoardManager {
 			List<MessageDoc> msgDocLst = getTotalMsgCount(contactType, dateRange1, dateRange2);
 			leasMsgLst.put(contactType, msgDocLst.size());
 		}
-		System.out.println("lead Msg :"+leasMsgLst.toString());
+		//System.out.println("lead Msg :"+leasMsgLst.toString());
 		if(ArgUtil.is(leasMsgLst)) {
 		 Object maxEntryKey = Collections.max(leasMsgLst.entrySet(), Map.Entry.comparingByValue()).getKey();
          Integer maxEntryKeyValue =leasMsgLst.get(maxEntryKey); 
@@ -716,14 +716,14 @@ public class AdminDashBoardManager {
 		LocalDate quaerEndDt = LocalDate.of(yearC, endMonth, endMonth.length(quaterStartDt.isLeapYear()));
 		// long epocTime =start.
 
-		System.out.println("Today Date :" + todayDt + "\t quaterStartDt :" + quaterStartDt + "\t quaerEndDt :" + quaerEndDt);
+		//System.out.println("Today Date :" + todayDt + "\t quaterStartDt :" + quaterStartDt + "\t quaerEndDt :" + quaerEndDt);
 		long daysBetween = ChronoUnit.DAYS.between(quaterStartDt, todayDt);
-		System.out.println("No of days  between quater startdate and today date  :" + daysBetween);
+		//System.out.println("No of days  between quater startdate and today date  :" + daysBetween);
 
 		ZonedDateTime startToday = ZonedDateTime.now().minusDays(daysBetween).with(LocalTime.MIN);
 
 		long longStartTime = startToday.toInstant().toEpochMilli();
-		System.out.println("start Date of Quatr :" + startToday + "\t |" + longStartTime);
+		//System.out.println("start Date of Quatr :" + startToday + "\t |" + longStartTime);
 		return longStartTime;
 	}
 	
@@ -812,7 +812,7 @@ public class AdminDashBoardManager {
 	         long hh = timeStamp/hourTimeSamp;
 	        // hourList.add(Long.parseLong(formattedDateH)); hour wise count 
 	         hourList.add(hh);
-    	 System.out.println(" timeStamp :"+timeStamp+"\t long to date :"+date+"\t formattedDateH :"+formattedDateH+"\t hourTimeSamp :"+hourTimeSamp+"\t hh :"+hh);
+    	// System.out.println(" timeStamp :"+timeStamp+"\t long to date :"+date+"\t formattedDateH :"+formattedDateH+"\t hourTimeSamp :"+hourTimeSamp+"\t hh :"+hh);
 		}
 		Collections.sort(hourList);
 		Set<Object> hourWiseCount = new HashSet<Object>(hourList);
