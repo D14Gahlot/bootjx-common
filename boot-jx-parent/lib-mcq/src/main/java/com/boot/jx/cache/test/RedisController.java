@@ -17,6 +17,7 @@ import com.boot.jx.cache.test.RedisSampleTxCacheBox.RedisSampleData;
 import com.boot.jx.tunnel.DBEvent;
 import com.boot.jx.tunnel.TunnelDBEventLimiter;
 import com.boot.jx.tunnel.TunnelService;
+import com.boot.jx.tunnel.sys.SharedConfigManager;
 import com.boot.jx.tunnel.sys.SysTunnelEventsDict;
 
 @RestController
@@ -25,13 +26,16 @@ public class RedisController {
 	private static final Logger LOGGER = LoggerFactory.getLogger(RedisController.class);
 
 	@Autowired
-	RedisSampleTxCacheBox redisSampleCacheBox;
+	private RedisSampleTxCacheBox redisSampleCacheBox;
 
 	@Autowired
-	TunnelService tunnelService;
+	private TunnelService tunnelService;
 
 	@Autowired(required = false)
-	TunnelDBEventLimiter dbEventLimiter;
+	private TunnelDBEventLimiter dbEventLimiter;
+
+	@Autowired
+	SharedConfigManager sharedConfigManager;
 
 	@RequestMapping(value = "/pub/redis/test", method = RequestMethod.PUT)
 	public RedisSampleData cacheTestGet(@RequestBody RedisSampleData status) {
@@ -60,9 +64,7 @@ public class RedisController {
 
 	@RequestMapping(value = "/pub/amx/config/shared/clear/all", method = RequestMethod.GET)
 	public ApiResponse<BoolRespModel, Object> clearSharedConfig() {
-		DBEvent e = new DBEvent();
-		e.setEventCode(SysTunnelEventsDict.Names.SHARED_CONFIG_UPDATE);
-		tunnelService.shout(SysTunnelEventsDict.Names.SHARED_CONFIG_UPDATE, e);
+		sharedConfigManager.clear();
 		return ApiResponse.build(new BoolRespModel(true));
 	}
 }
