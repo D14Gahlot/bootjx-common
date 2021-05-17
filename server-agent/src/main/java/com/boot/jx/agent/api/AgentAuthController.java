@@ -20,7 +20,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.boot.jx.AppConfig;
 import com.boot.jx.agent.AgentAuthProvider;
-import com.boot.jx.agent.AgentChatHandlerImpl;
 import com.boot.jx.agent.AgentSessionBean;
 import com.boot.jx.agent.AgentSessionService;
 import com.boot.jx.api.ApiResponse;
@@ -52,9 +51,6 @@ public class AgentAuthController {
 	private AgentSessionBean agentSession;
 
 	@Autowired
-	private AgentChatHandlerImpl agentChatHandler;
-
-	@Autowired
 	private RestService restService;
 
 	@Autowired
@@ -66,6 +62,11 @@ public class AgentAuthController {
 
 	@RequestMapping(value = { "/app/home", "/", "", "/app/**" }, method = { RequestMethod.POST, RequestMethod.GET })
 	public String home(Model model, @RequestParam(required = false) String theme) {
+
+		if (!ArgUtil.is(agentSession.getAgentCode())) {
+			return "redirect:/auth/logout";
+		}
+
 		model.addAttribute("APP_CONTEXT", appConfig.getAppPrefix());
 		model.addAttribute("APP_USER", agentSession.getAgentCode());
 		model.addAttribute("APP_DEPT", agentSession.getAgentDept());
@@ -73,7 +74,6 @@ public class AgentAuthController {
 		model.addAttribute("CDN_URL", ArgUtil.parseAsString(commonHttpRequest.get("CDN_URL"), cdnServer));
 		model.addAttribute("CDN_DEBUG", ArgUtil.parseAsString(commonHttpRequest.get("CDN_DEBUG"), "false"));
 		model.addAttribute("CONFIG", JsonUtil.toJson(appCommonConfig.toMap()));
-
 		String cdnnew = ArgUtil.parseAsString(commonHttpRequest.get("CDN_NEW"), "true");
 
 		if ("true".equalsIgnoreCase(cdnnew)) {
@@ -191,12 +191,16 @@ public class AgentAuthController {
 				});
 		if (ArgUtil.parseAsBoolean(x.getData().get("success"), false)) {
 			x.redirectUrl(appConfig.getAppPrefix() + "/app/home");
-			UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(username, password);
-			token.setDetails(new WebAuthenticationDetails(request));
-			Authentication authentication = agentAuthProvider.authenticate(token);
-			SecurityContextHolder.getContext().setAuthentication(authentication);
-			agentSessionService.updateLogin(x.getMeta());
-			stompTunnelSessionManager.registerUser(username);
+			AgentResponseAuthDto agent = x.getMeta();
+			if (ArgUtil.is(agent)) {
+				UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(
+						agent.getAgent_code(), password);
+				token.setDetails(new WebAuthenticationDetails(request));
+				Authentication authentication = agentAuthProvider.authenticate(token);
+				SecurityContextHolder.getContext().setAuthentication(authentication);
+				agentSessionService.updateLogin(agent);
+				stompTunnelSessionManager.registerUser(agent.getAgent_code());
+			}
 		} else {
 			x.redirectUrl(appConfig.getAppPrefix() + "/auth/login?error");
 		}
