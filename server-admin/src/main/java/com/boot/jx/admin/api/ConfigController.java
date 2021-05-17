@@ -18,6 +18,7 @@ import com.boot.jx.postman.fb.FacebookConfig;
 import com.boot.jx.postman.gupshup.GupShupConfig;
 import com.boot.jx.postman.tg.TelegramConfig;
 import com.boot.jx.postman.tw.TwitterConfig;
+import com.boot.jx.tunnel.sys.SharedConfigManager;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.EntityDtoUtil;
 
@@ -26,6 +27,9 @@ public class ConfigController {
 
 	@Autowired
 	MongoTemplate mongoTemplate;
+
+	@Autowired
+	SharedConfigManager sharedConfigManager;
 
 	@RequestMapping(value = "/api/connector", method = { RequestMethod.GET })
 	public ApiResponse<ConnectorConfigDoc, Object> getConfig() {
@@ -37,6 +41,7 @@ public class ConfigController {
 		ConnectorConfigDoc doc = EntityDtoUtil.dtoToEntity(config, new ConnectorConfigDoc());
 		doc.setTenant(AppContextUtil.getTenant());
 		mongoTemplate.save(config);
+		sharedConfigManager.clear();
 		return ApiResponse.buildResults(mongoTemplate.findById(AppContextUtil.getTenant(), ConnectorConfigDoc.class));
 	}
 
@@ -59,6 +64,7 @@ public class ConfigController {
 		fbconfig.setAppSecret(appSecret);
 		doc.facebook(fbconfig);
 		mongoTemplate.save(doc);
+		sharedConfigManager.clear();
 		return ApiResponse.buildResults(mongoTemplate.findById(AppContextUtil.getTenant(), ConnectorConfigDoc.class));
 	}
 
@@ -85,6 +91,7 @@ public class ConfigController {
 		fbconfig.setWebhookUrl(webhookUrl);
 		doc.twitter(fbconfig);
 		mongoTemplate.save(doc);
+		sharedConfigManager.clear();
 		return ApiResponse.buildResults(mongoTemplate.findById(AppContextUtil.getTenant(), ConnectorConfigDoc.class));
 	}
 
@@ -106,6 +113,7 @@ public class ConfigController {
 		fbconfig.setWebhookUrl(webhookUrl);
 		doc.telegram(fbconfig);
 		mongoTemplate.save(doc);
+		sharedConfigManager.clear();
 		return ApiResponse.buildResults(mongoTemplate.findById(AppContextUtil.getTenant(), ConnectorConfigDoc.class));
 	}
 
@@ -129,6 +137,7 @@ public class ConfigController {
 
 		doc.gupshup(fbconfig);
 		mongoTemplate.save(doc);
+		sharedConfigManager.clear();
 		return ApiResponse.buildResults(mongoTemplate.findById(AppContextUtil.getTenant(), ConnectorConfigDoc.class));
 	}
 
@@ -142,7 +151,7 @@ public class ConfigController {
 		}
 		doc.set(map);
 		mongoTemplate.save(doc);
-
+		sharedConfigManager.clear();
 		return ApiResponse.buildResults(mongoTemplate.findById(AppContextUtil.getTenant(), ConnectorConfigDoc.class));
 	}
 
@@ -159,9 +168,8 @@ public class ConfigController {
 		if (ArgUtil.is(config.getDefaultBotName())) {
 			existing.setDefaultBotName(config.getDefaultBotName());
 		}
-
 		mongoTemplate.save(existing);
-
+		sharedConfigManager.clear();
 		return ApiResponse.buildResults(mongoTemplate.findById(AppContextUtil.getTenant(), ConnectorConfigDoc.class));
 	}
 }
