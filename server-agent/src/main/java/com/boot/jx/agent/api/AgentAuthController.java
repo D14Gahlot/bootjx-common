@@ -35,9 +35,6 @@ import com.boot.utils.JsonUtil;
 @Controller
 public class AgentAuthController {
 
-	@Value("${mry.cdn.url}")
-	private String cdnServer;
-
 	@Value("${mry.admin.url}")
 	private String adminUrl;
 
@@ -71,7 +68,8 @@ public class AgentAuthController {
 		model.addAttribute("APP_USER", agentSession.getAgentCode());
 		model.addAttribute("APP_DEPT", agentSession.getAgentDept());
 		model.addAttribute("CDN_VERSION", getVersion());
-		model.addAttribute("CDN_URL", ArgUtil.parseAsString(commonHttpRequest.get("CDN_URL"), cdnServer));
+		model.addAttribute("CDN_URL",
+				ArgUtil.parseAsString(commonHttpRequest.get("CDN_URL"), appCommonConfig.getCdnServer()));
 		model.addAttribute("CDN_DEBUG", ArgUtil.parseAsString(commonHttpRequest.get("CDN_DEBUG"), "false"));
 		model.addAttribute("CONFIG", JsonUtil.toJson(appCommonConfig.toMap()));
 		String cdnnew = ArgUtil.parseAsString(commonHttpRequest.get("CDN_NEW"), "true");
@@ -108,7 +106,8 @@ public class AgentAuthController {
 
 	@RequestMapping(value = { "/auth/login", "/auth/resetpass" }, method = { RequestMethod.POST, RequestMethod.GET })
 	public String login(Model model) {
-		model.addAttribute("CDN_URL", ArgUtil.parseAsString(commonHttpRequest.get("CDN_URL"), cdnServer));
+		model.addAttribute("CDN_URL",
+				ArgUtil.parseAsString(commonHttpRequest.get("CDN_URL"), appCommonConfig.getCdnServer()));
 		model.addAttribute("CDN_DEBUG", ArgUtil.parseAsString(commonHttpRequest.get("CDN_DEBUG"), "false"));
 		model.addAttribute("APP_CONTEXT", appConfig.getAppPrefix());
 		model.addAttribute("APP_USER", agentSession.getAgentCode());

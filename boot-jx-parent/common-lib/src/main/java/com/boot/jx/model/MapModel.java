@@ -52,6 +52,14 @@ public class MapModel implements JsonSerializerType<Object> {
 			return ArgUtil.parseAsListOfT(value, listItem, ((List<T>) Constants.EMPTY_LIST), false);
 		}
 
+		public Object getValue() {
+			return value;
+		}
+
+		public void setValue(Object value) {
+			this.value = value;
+		}
+
 	}
 
 	protected Map<String, Object> map;
@@ -129,8 +137,7 @@ public class MapModel implements JsonSerializerType<Object> {
 	}
 
 	public <T> T getAs(String key, Class<T> clazz) {
-		return JsonUtil.getMapper().convertValue(
-				this.get(key), clazz);
+		return JsonUtil.getMapper().convertValue(this.get(key), clazz);
 	}
 
 	@SuppressWarnings("unchecked")

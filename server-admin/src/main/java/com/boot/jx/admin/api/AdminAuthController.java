@@ -6,7 +6,6 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -32,9 +31,6 @@ import com.boot.utils.MapBuilder;
 
 @Controller
 public class AdminAuthController {
-
-	@Value("${mry.cdn.url}")
-	private String cdnServer;
 
 	@Autowired
 	private AppConfig appConfig;
@@ -63,14 +59,16 @@ public class AdminAuthController {
 		}
 		model.addAttribute("CONFIG", JsonUtil.toJson(appCommonConfig.toMap()));
 		model.addAttribute("CDN_VERSION", getVersion());
-		model.addAttribute("CDN_URL", ArgUtil.parseAsString(commonHttpRequest.get("CDN_URL"), cdnServer));
+		model.addAttribute("CDN_URL",
+				ArgUtil.parseAsString(commonHttpRequest.get("CDN_URL"), appCommonConfig.getCdnServer()));
 		model.addAttribute("CDN_DEBUG", ArgUtil.parseAsString(commonHttpRequest.get("CDN_DEBUG"), "false"));
 		return "app";
 	}
 
 	@RequestMapping(value = { "/auth/login", "/auth/resetpass" }, method = { RequestMethod.POST, RequestMethod.GET })
 	public String login(Model model, HttpServletRequest request) {
-		model.addAttribute("CDN_URL", ArgUtil.parseAsString(commonHttpRequest.get("CDN_URL"), cdnServer));
+		model.addAttribute("CDN_URL",
+				ArgUtil.parseAsString(commonHttpRequest.get("CDN_URL"), appCommonConfig.getCdnServer()));
 		model.addAttribute("CDN_DEBUG", ArgUtil.parseAsString(commonHttpRequest.get("CDN_DEBUG"), "false"));
 		model.addAttribute("APP_CONTEXT", appConfig.getAppPrefix());
 		model.addAttribute("CDN_VERSION", getVersion());

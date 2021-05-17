@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.boot.jx.agent.AgentConfig;
+import com.boot.jx.postman.PMEnvironment.PMConfigurationObject;
 import com.boot.jx.postman.fb.FacebookConfig;
 import com.boot.jx.postman.gupshup.GupShupConfig;
 import com.boot.jx.postman.tg.TelegramConfig;
@@ -19,6 +20,8 @@ public class PMConfiguration implements Serializable {
 	Map<String, TwitterConfig> twitter;
 	Map<String, TelegramConfig> telegram;
 	Map<String, GupShupConfig> gupshup;
+
+	Map<String, PMConfigurationObject> map;
 
 	AgentConfig agent;
 
@@ -140,6 +143,31 @@ public class PMConfiguration implements Serializable {
 
 	public PMConfiguration agent(AgentConfig agent) {
 		this.agent = agent;
+		return this;
+	}
+
+	// Config
+	public Map<String, PMConfigurationObject> getMap() {
+		return map;
+	}
+
+	public void setMap(Map<String, PMConfigurationObject> map) {
+		this.map = map;
+	}
+
+	private Map<String, PMConfigurationObject> map() {
+		if (ArgUtil.isEmpty(map)) {
+			map = new HashMap<String, PMConfigurationObject>();
+		}
+		return map;
+	}
+
+	public PMConfigurationObject get(String key) {
+		return map().getOrDefault(key, new PMConfigurationObject());
+	}
+
+	public PMConfiguration set(PMConfigurationObject map) {
+		this.map().put(map.getKey(), map);
 		return this;
 	}
 }
