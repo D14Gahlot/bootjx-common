@@ -34,7 +34,7 @@ import com.boot.utils.Constants;
 import com.boot.utils.JsonUtil;
 
 @Controller
-public class AuthController {
+public class AgentAuthController {
 
 	@Value("${mry.cdn.url}")
 	private String cdnServer;
