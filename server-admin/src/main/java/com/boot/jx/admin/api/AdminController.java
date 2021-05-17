@@ -31,19 +31,21 @@ public class AdminController {
 	}
 
 	@RequestMapping(value = "/api/admins/agent", method = { RequestMethod.POST })
-	public ApiResponse<AgentResponseAdminDto, Object> createAgent(@RequestBody AgentResponseAdminDto dto) {
-		return ApiResponse.buildResults(adminService.saveAgent(dto))
+	public ApiResponse<AgentResponseAdminDto, Object> createOrUpdateAgent(@RequestBody AgentResponseAdminDto dto) {
+		return ApiResponse.buildResults(adminService.createOrUpdateAgent(dto))
 				.message(ArgUtil.is(dto.getAgent_id()) ? "Agent Updated" : "Agent Created");
 	}
 
 	@RequestMapping(value = "/api/admins/agent", method = { RequestMethod.DELETE })
-	public List<AgentResponseAdminDto> updateAgentStatus(@RequestParam(value = "agent_id", required = true) String agent_id,
+	public List<AgentResponseAdminDto> updateAgentActive(
+			@RequestParam(value = "agent_id", required = true) String agent_id,
 			@RequestParam(value = "status", required = true) String status) {
-		return adminService.updateAgentStatus(agent_id, status);
+		return adminService.updateAgentActive(agent_id, status);
 	}
 
 	@RequestMapping(value = "/api/admins/agent/admin", method = { RequestMethod.POST })
-	public List<AgentResponseAdminDto> updateAgentAdmin(@RequestParam(value = "agent_id", required = true) String agent_id) {
+	public List<AgentResponseAdminDto> updateAgentAdmin(
+			@RequestParam(value = "agent_id", required = true) String agent_id) {
 		return adminService.updateAgentAdmin(agent_id);
 	}
 
@@ -54,42 +56,30 @@ public class AdminController {
 	}
 
 	// DepartMent
-	@RequestMapping(value = "/api/admins/dept", method = { RequestMethod.GET })
+	@RequestMapping(value = { "/api/admins/dept" }, method = { RequestMethod.GET })
 	public ApiResponse<DepartmentResponseAdminDto, Object> fetchDepts(
 			@RequestParam(value = "dept_id", required = false) String deptId) {
-		return ApiResponse.buildResults(adminService.fetchDepartments(deptId));
+		return ApiResponse.buildResults(adminService.fetchDepts(deptId));
 	}
 
-	@RequestMapping(value = "/api/admins/dept", method = { RequestMethod.POST })
-	public ApiResponse<DepartmentResponseAdminDto, Object> fetchDepts(@RequestBody DepartmentResponseAdminDto dto) {
-		return ApiResponse.buildResults(adminService.saveDept(dto))
+	@RequestMapping(value = { "/api/admins/dept" }, method = { RequestMethod.POST })
+	public ApiResponse<DepartmentResponseAdminDto, Object> createOrUpdateDept(
+			@RequestBody DepartmentResponseAdminDto dto) {
+		return ApiResponse.buildResults(adminService.createOrUpdateDept(dto))
 				.message(ArgUtil.is(dto.getDept_id()) ? "Team Updated" : "Team Created");
 	}
 
-	@RequestMapping(value = "/api/admins/dept/default", method = { RequestMethod.POST })
-	public ApiResponse<DepartmentResponseAdminDto, Object> updateDepartmentDefault(
+	@RequestMapping(value = { "/api/admins/dept/default" }, method = { RequestMethod.POST })
+	public ApiResponse<DepartmentResponseAdminDto, Object> updateDeptDefault(
 			@RequestParam(value = "dept_id", required = true) String deptId) {
 		return ApiResponse.buildResults(adminService.updateDepartmentDefault(deptId));
 	}
 
-	@RequestMapping(value = "/admin/create-update-agent", method = { RequestMethod.POST })
-	public List<AgentDoc> createAgent(@RequestBody AgentDoc requestModel) {
-		return adminService.saveAgent(requestModel);
-	}
-
-	@RequestMapping(value = "/admin/fetch-agent", method = { RequestMethod.GET })
-	public List<AgentDoc> fetchAgentList(@RequestParam(value = "agent_id", required = false) String agent_id) {
-		return adminService.fetchAgent(agent_id);
-	}
+	// OTHER APIS?
 
 	@RequestMapping(value = "/admin/create-update-dept", method = { RequestMethod.POST })
 	public List<DepartmentDoc> createDepartment(@RequestBody DepartmentDoc requestModel) {
 		return adminService.createAndUpdateDepartment(requestModel);
-	}
-
-	@RequestMapping(value = "/admin/fetch-dept", method = { RequestMethod.GET })
-	public List<DepartmentDoc> fetchDepartment(@RequestParam(value = "dept_id", required = false) String deptId) {
-		return adminService.fetchDepartment(deptId);
 	}
 
 	@RequestMapping(value = "/admin/delete-dept", method = { RequestMethod.POST })
