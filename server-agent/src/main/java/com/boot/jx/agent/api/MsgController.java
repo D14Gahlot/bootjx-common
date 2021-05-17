@@ -100,8 +100,8 @@ public class MsgController {
 
 		agentSessionService.refreshOnline();
 
-		return ApiResponse.buildResults(chatSessionDtos,
-				MapBuilder.map().put("isOnline", agentSession.isOnline()).build());
+		return ApiResponse.buildResults(chatSessionDtos, MapBuilder.map().put("isOnline", agentSession.isOnline())
+				.put("profile", agentSession.getProfile()).build());
 	}
 
 	@ResponseBody

@@ -4,6 +4,8 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.stereotype.Component;
 
+import com.boot.jx.common.dto.AgentResponseAuthDto;
+
 @Component
 @Scope(value = "session", proxyMode = ScopedProxyMode.TARGET_CLASS)
 public class AgentSessionBean {
@@ -18,6 +20,8 @@ public class AgentSessionBean {
 	private long lastOnlineStamp;
 
 	private boolean isDirty;
+
+	private AgentResponseAuthDto profile;
 
 	public String getAgentCode() {
 		return agentCode;
@@ -68,6 +72,14 @@ public class AgentSessionBean {
 
 	public void setAgentDept(String agentDept) {
 		this.agentDept = agentDept;
+	}
+
+	public AgentResponseAuthDto getProfile() {
+		return profile;
+	}
+
+	public void setProfile(AgentResponseAuthDto profile) {
+		this.profile = profile;
 	}
 
 }

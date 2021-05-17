@@ -18,7 +18,7 @@ public class AgentSessionService {
 
 	@Autowired
 	private ChatClient chatClient;
-
+	
 	/*
 	 * Below APIs are
 	 * 
@@ -57,21 +57,8 @@ public class AgentSessionService {
 		this.updateSession();
 	}
 
-	/**
-	 * Refreshes login status for currently logged in agent
-	 * 
-	 * @param username
-	 */
-	public void updateLogin(String username) {
-		agentSessionBean.setLoggedIn(true);
-		agentSessionBean.setOnline(true);
-		agentSessionBean.setAgentCode(username);
-		agentSessionBean.setAgentDept("ONLINE");
-		agentSessionBean.setLastOnlineStamp(System.currentTimeMillis());
-		this.updateSession();
-	}
-
 	public void updateLogin(AgentResponseAuthDto agent) {
+		agentSessionBean.setProfile(agent);
 		agentSessionBean.setLoggedIn(true);
 		agentSessionBean.setOnline(true);
 		agentSessionBean.setAgentCode(agent.getAgent_code());
