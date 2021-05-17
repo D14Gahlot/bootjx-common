@@ -107,7 +107,7 @@ public class MapBuilder {
 			}
 			return this;
 		}
-		
+
 		public BuilderMap putIfNotEmpty(String key, Object value) {
 			if (ArgUtil.is(value)) {
 				map.put(key, value);
