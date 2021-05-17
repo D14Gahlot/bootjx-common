@@ -194,7 +194,8 @@ public class SessionStore extends CommonDocStore {
 					.with(Criteria.where("active").is(true).and("lastInComingStamp").lt(cal.getTimeInMillis())
 							.andOperator(new Criteria().orOperator(Criteria.where("resolved").exists(false),
 									Criteria.where("resolved").is(false))))
-					.set("expired", true).set("closeSessionStamp", System.currentTimeMillis());
+					.set("expired", true)
+					.set("active", false).set("closeSessionStamp", System.currentTimeMillis());
 			mongoTemplate.updateFirst(cmqb.getQuery(), cmqb.getUpdate(), ChatSessionDoc.class);
 		}
 	}
