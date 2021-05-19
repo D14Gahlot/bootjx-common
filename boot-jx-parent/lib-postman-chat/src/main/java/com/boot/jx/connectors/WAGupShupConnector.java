@@ -15,6 +15,8 @@ import com.boot.jx.postman.doc.TemplateReply;
 import com.boot.jx.postman.gupshup.GupShupClientChat;
 import com.boot.jx.postman.gupshup.GupShupClientNotify;
 import com.boot.jx.postman.gupshup.GupShupConfigClient;
+import com.boot.jx.postman.gupshup.GupShupDeliveryResp;
+import com.boot.jx.postman.gupshup.GupShupDeliveryResp.GupShupDeliveryDto;
 import com.boot.jx.postman.gupshup.GupShupInbound;
 import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.InboxMessage;
@@ -72,7 +74,6 @@ public class WAGupShupConnector implements ConnectorHandler {
 			}
 			outboxMessage.setStatus(Message.Status.SENT);
 		} catch (Exception e) {
-			outboxMessage.setStatus(Message.Status.SENT_ERR);
 			outboxMessage.logs().add(e.getMessage());
 			e.printStackTrace();
 		}
@@ -110,6 +111,12 @@ public class WAGupShupConnector implements ConnectorHandler {
 	@Override
 	public void send(OutboxMessage outboxMessage) {
 		// TODO Auto-generated method stub
+	}
+
+	public void updateDeliveryStatus(GupShupDeliveryResp status) {
+		for (GupShupDeliveryDto gupShupDelivery : status.getResponse()) {
+
+		}
 	}
 
 }

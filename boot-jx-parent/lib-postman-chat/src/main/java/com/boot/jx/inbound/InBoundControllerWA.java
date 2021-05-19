@@ -20,6 +20,8 @@ import com.boot.jx.connectors.WAGupShupAgentConnector;
 import com.boot.jx.connectors.WAGupShupConnector;
 import com.boot.jx.connectors.WARapiwhaConnector;
 import com.boot.jx.http.CommonHttpRequest;
+import com.boot.jx.postman.gupshup.GupShupDeliveryResp;
+import com.boot.jx.postman.gupshup.GupShupDeliveryResp.GupShupDeliveryDto;
 import com.boot.jx.postman.gupshup.GupShupInbound;
 import com.boot.jx.postman.gupshup.GupShupInboundV2;
 import com.boot.jx.postman.model.InboxMessage;
@@ -125,9 +127,21 @@ public class InBoundControllerWA {
 	}
 
 	@RequestMapping(value = "/ext/status/gupshup/callback", method = { RequestMethod.POST, RequestMethod.GET })
-	public Map<String, Object> onStatusMessage(@RequestBody Map<String, Object> inboundMap,
-			@RequestParam(required = false, defaultValue = "false") boolean routed) throws InterruptedException {
-		return inboundMap;
+	public GupShupDeliveryResp onStatusMessage(@RequestBody GupShupDeliveryResp status) throws InterruptedException {
+		waGupShupConnector.updateDeliveryStatus(status);
+		return status;
+	}
+
+	@ApiVendorHeaders
+	@RequestMapping(value = "/ext/status/gupshup/callback", method = {
+			RequestMethod.POST }, consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+	public GupShupDeliveryResp onStatusMessage() throws InterruptedException, IOException {
+		GupShupDeliveryResp status = new GupShupDeliveryResp();
+		String response = commonHttpRequest.get("response");
+		if (ArgUtil.is(response)) {
+			status.setResponse(JsonUtil.getListFromJsonString(response));
+		}
+		return onStatusMessage(status);
 	}
 
 	@RequestMapping(value = "/ext/inbound/rapiwha/callback/{secret}", method = { RequestMethod.POST })
