@@ -2,6 +2,7 @@ package com.boot.jx.inbound;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -22,12 +23,14 @@ import com.boot.jx.connectors.WAGupShupConnector;
 import com.boot.jx.connectors.WARapiwhaConnector;
 import com.boot.jx.http.CommonHttpRequest;
 import com.boot.jx.postman.gupshup.GupShupDeliveryResp;
+import com.boot.jx.postman.gupshup.GupShupDeliveryResp.GupShupDeliveryDto;
 import com.boot.jx.postman.gupshup.GupShupInbound;
 import com.boot.jx.postman.gupshup.GupShupInboundV2;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.scope.vendor.VendorContext.ApiVendorHeaders;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.JsonUtil;
+import com.fasterxml.jackson.core.type.TypeReference;
 
 @RestController
 public class InBoundControllerWA {
@@ -142,7 +145,8 @@ public class InBoundControllerWA {
 		GupShupDeliveryResp status = new GupShupDeliveryResp();
 		String response = commonHttpRequest.get("response");
 		if (ArgUtil.is(response)) {
-			status.setResponse(JsonUtil.getListFromJsonString(response));
+			status.setResponse(JsonUtil.parse(response, new TypeReference<List<GupShupDeliveryDto>>() {
+			}));
 		}
 		return onStatusMessage(status);
 	}
