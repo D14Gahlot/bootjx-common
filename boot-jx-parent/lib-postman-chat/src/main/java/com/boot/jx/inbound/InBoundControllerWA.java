@@ -16,12 +16,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.boot.jx.api.ApiResponse;
+import com.boot.jx.chat.ChatService;
 import com.boot.jx.connectors.WAGupShupAgentConnector;
 import com.boot.jx.connectors.WAGupShupConnector;
 import com.boot.jx.connectors.WARapiwhaConnector;
 import com.boot.jx.http.CommonHttpRequest;
 import com.boot.jx.postman.gupshup.GupShupDeliveryResp;
-import com.boot.jx.postman.gupshup.GupShupDeliveryResp.GupShupDeliveryDto;
 import com.boot.jx.postman.gupshup.GupShupInbound;
 import com.boot.jx.postman.gupshup.GupShupInboundV2;
 import com.boot.jx.postman.model.InboxMessage;
@@ -48,6 +48,9 @@ public class InBoundControllerWA {
 
 	@Autowired
 	CommonHttpRequest commonHttpRequest;
+
+	@Autowired
+	ChatService chatService;
 
 	// @ApiRequest(feature = "WA_GUPSHUP_INBOUND")
 	@ApiVendorHeaders
@@ -128,7 +131,7 @@ public class InBoundControllerWA {
 
 	@RequestMapping(value = "/ext/status/gupshup/callback", method = { RequestMethod.POST, RequestMethod.GET })
 	public GupShupDeliveryResp onStatusMessage(@RequestBody GupShupDeliveryResp status) throws InterruptedException {
-		waGupShupConnector.updateDeliveryStatus(status);
+		chatService.updateMessageStatus(waGupShupConnector.updateDeliveryStatus(status));
 		return status;
 	}
 

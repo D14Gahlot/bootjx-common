@@ -10,10 +10,13 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Component;
 
 import com.boot.jx.mongo.CommonDocStore;
+import com.boot.jx.mongo.CommonMongoQueryBuilder;
+import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.ContactDoc;
 import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.model.IMessage;
 import com.boot.jx.postman.model.InboxMessage;
+import com.boot.jx.postman.model.MessageReport;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.model.TagDocument;
 import com.boot.jx.utils.PostManUtil;
@@ -203,6 +206,27 @@ public class MessageStore extends CommonDocStore {
 
 	public void applyPatch(MessageDoc messageDoc) {
 		applyPatch(messageDoc, getCollectionName(messageDoc.getContact().getContactType()));
+	}
+
+	public void updateStatus(MessageReport messageReport) {
+		CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder();
+
+		if (ArgUtil.is(messageReport.getMessageId())) {
+			builder.whereId(messageReport.getMessageId());
+		} else if (ArgUtil.is(messageReport.getMessageIdExt())) {
+			builder.where("messageIdExt", messageReport.getMessageIdExt());
+		} else if (ArgUtil.is(messageReport.getMessageIdRef())) {
+			builder.where("messageIdRef", messageReport.getMessageIdRef());
+		} else {
+			return;
+		}
+
+		if (ArgUtil.is(messageReport.getStatus())) {
+			builder.set("status", messageReport.getStatus());
+			builder.set("stamps." + messageReport.getStatus().toString(), messageReport.getTimestamp());
+			mongoTemplate.updateFirst(builder.getQuery(), builder.getUpdate(), ChatSessionDoc.class,
+					getCollectionName(messageReport.getContactType()));
+		}
 	}
 
 }

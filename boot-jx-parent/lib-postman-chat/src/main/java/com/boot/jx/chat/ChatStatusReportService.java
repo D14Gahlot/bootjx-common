@@ -1,0 +1,70 @@
+package com.boot.jx.chat;
+
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.concurrent.ConcurrentLinkedQueue;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.stereotype.Component;
+
+import com.boot.jx.postman.model.MessageReport;
+import com.boot.jx.postman.store.MessageStore;
+import com.boot.utils.ArgUtil;
+
+@Component
+public class ChatStatusReportService {
+	ConcurrentLinkedQueue<MessageReport> queue = new ConcurrentLinkedQueue<MessageReport>();
+
+	public static class MessageReportComparator implements Comparator<MessageReport> {
+		@Override
+		public int compare(MessageReport o1, MessageReport o2) {
+			return (int) (o1.getTimestamp() - o2.getTimestamp());
+		}
+	}
+
+	@Autowired
+	private MessageStore messageStore;
+
+	public void offer(MessageReport e) {
+		queue.offer(e);
+	}
+
+	public void offer(List<MessageReport> es) {
+		for (MessageReport e : es) {
+			queue.offer(e);
+		}
+	}
+
+	@Async
+	public void process(String batchId) {
+		try {
+			Thread.sleep(500L);
+			List<MessageReport> batch = new LinkedList<MessageReport>();
+			boolean hasElement = true;
+			while (hasElement) {
+				MessageReport e = queue.poll();
+				hasElement = ArgUtil.is(e);
+				if (hasElement) {
+					batch.add(e);
+				} else {
+					break;
+				}
+			}
+
+			Collections.sort(batch, new MessageReportComparator());
+
+			if (batch.size() > 0) {
+				for (MessageReport messageReport : batch) {
+					messageStore.updateStatus(messageReport);
+				}
+			}
+		} catch (InterruptedException e1) {
+			e1.printStackTrace();
+		}
+
+	}
+
+}

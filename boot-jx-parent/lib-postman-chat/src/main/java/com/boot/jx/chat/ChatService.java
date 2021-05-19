@@ -1,5 +1,7 @@
 package com.boot.jx.chat;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.scheduling.annotation.Async;
@@ -17,6 +19,7 @@ import com.boot.jx.postman.dto.ChatUserProfileDTO;
 import com.boot.jx.postman.dto.ChatUserProfileDTO.ChatUserProfileRequest;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.Message;
+import com.boot.jx.postman.model.MessageReport;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.store.MessageStore;
 import com.boot.jx.postman.store.MessageStore.EVENTS;
@@ -338,4 +341,11 @@ public class ChatService {
 		return true;
 	}
 
+	@Autowired
+	private ChatStatusReportService chatStatusReportService;
+
+	public void updateMessageStatus(List<MessageReport> updateDeliveryStatus) {
+		chatStatusReportService.offer(updateDeliveryStatus);
+		chatStatusReportService.process(null);
+	}
 }

@@ -1,5 +1,8 @@
 package com.boot.jx.connectors;
 
+import java.util.LinkedList;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Component;
@@ -21,6 +24,8 @@ import com.boot.jx.postman.gupshup.GupShupInbound;
 import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.Message;
+import com.boot.jx.postman.model.Message.Status;
+import com.boot.jx.postman.model.MessageReport;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
@@ -113,10 +118,30 @@ public class WAGupShupConnector implements ConnectorHandler {
 		// TODO Auto-generated method stub
 	}
 
-	public void updateDeliveryStatus(GupShupDeliveryResp status) {
+	public List<MessageReport> updateDeliveryStatus(GupShupDeliveryResp status) {
+		List<MessageReport> batch = new LinkedList<MessageReport>();
 		for (GupShupDeliveryDto gupShupDelivery : status.getResponse()) {
-
+			MessageReport report = new MessageReport();
+			report.setContactType(ContactType.WHATSAPP);
+			report.setTimestamp(gupShupDelivery.getEventTs());
+			report.setMessageIdExt(gupShupDelivery.getExternalId());
+			String[] x = gupShupDelivery.getExternalId().split("-");
+			if (x.length == 2) {
+				report.setMessageId(x[1]);
+			}
+			if ("SENT".equals(gupShupDelivery.getEventType())) {
+				report.setStatus(Status.SENTX);
+			} else if ("DELIVERED".equals(gupShupDelivery.getEventType())) {
+				report.setStatus(Status.DLVRD);
+			} else if ("READ".equals(gupShupDelivery.getEventType())) {
+				report.setStatus(Status.READ);
+			} else if ("FAILED".equals(gupShupDelivery.getEventType())) {
+				report.setStatus(Status.FAILD);
+				report.setReason(gupShupDelivery.getCause());
+			}
+			batch.add(report);
 		}
+		return batch;
 	}
 
 }
