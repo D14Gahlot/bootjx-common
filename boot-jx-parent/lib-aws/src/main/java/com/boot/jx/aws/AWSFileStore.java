@@ -28,14 +28,8 @@ public class AWSFileStore {
 	@Autowired
 	private AWSConfig awsConfig;
 
-	public void upload(AmazonS3 amazonS3, String path, String fileName, Optional<Map<String, String>> optionalMetaData,
+	public void upload(AmazonS3 amazonS3, String path, String fileName, ObjectMetadata objectMetadata,
 			InputStream inputStream) {
-		ObjectMetadata objectMetadata = new ObjectMetadata();
-		optionalMetaData.ifPresent(map -> {
-			if (!map.isEmpty()) {
-				map.forEach(objectMetadata::addUserMetadata);
-			}
-		});
 		try {
 			amazonS3.putObject(path, fileName, inputStream, objectMetadata);
 		} catch (AmazonServiceException e) {
@@ -58,15 +52,18 @@ public class AWSFileStore {
 		}
 
 		// get file metadata
+		ObjectMetadata objectMetadata =  new ObjectMetadata();
 		Map<String, String> metadata = new HashMap<>();
-		metadata.put("Content-Type", file.getContentType());
-		metadata.put("Content-Length", String.valueOf(file.getSize()));
+		objectMetadata.setContentType(file.getContentType());
+		objectMetadata.setContentLength(file.getSize());
+	
+		
 		// Save Image in S3 and then save Todo in the database
 
 		String path = String.format("%s/%s", bucketName, pathFolder);
 		String fileNameNow = String.format("%s", fileName);
 		try {
-			upload(amazonS3, path, fileNameNow, Optional.of(metadata), file.getInputStream());
+			upload(amazonS3, path, fileNameNow, objectMetadata, file.getInputStream());
 		} catch (IOException e) {
 			throw new IllegalStateException("Failed to upload file", e);
 		}

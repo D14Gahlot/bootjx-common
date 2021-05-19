@@ -149,7 +149,10 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 	}
 
 	public void exitAgentMode(ChatSessionDoc chatSessionDoc, OutboxMessage outboxMessage) {
-		chatService.resolveSession(chatSessionDoc);
+		if (!chatSessionDoc.isResolved()) {
+			chatService.resolveSession(chatSessionDoc);
+		}	
+
 		if (ArgUtil.is(outboxMessage)) {
 			chatService.reply(chatSessionDoc, outboxMessage);
 		}
