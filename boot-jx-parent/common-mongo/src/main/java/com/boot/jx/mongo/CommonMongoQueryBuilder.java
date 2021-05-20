@@ -1,5 +1,6 @@
 package com.boot.jx.mongo;
 
+import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
@@ -39,7 +40,7 @@ public class CommonMongoQueryBuilder {
 	}
 
 	public CommonMongoQueryBuilder whereId(Object id) {
-		return this.where("_id", id);
+		return this.with(Criteria.where("_id").is(id).orOperator(Criteria.where("_id").is(new ObjectId((String) id))));
 	}
 
 	public CommonMongoQueryBuilder whereAll() {

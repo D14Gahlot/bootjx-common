@@ -23,6 +23,8 @@ import com.boot.jx.postman.model.TagDocument;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
+import com.boot.utils.JsonUtil;
+import com.mongodb.WriteResult;
 
 @Component
 public class MessageStore extends CommonDocStore {
@@ -230,10 +232,10 @@ public class MessageStore extends CommonDocStore {
 
 		if (ArgUtil.is(messageReport.getStatus())) {
 			builder.set("status", messageReport.getStatus());
-			builder.set("stamps." + messageReport.getStatus().toString(), messageReport.getTimestamp());
+			builder.set("stampss." + messageReport.getStatus().toString(), messageReport.getTimestamp());
 			mongoTemplate.updateFirst(builder.getQuery(), builder.getUpdate(), MessageDoc.class,
 					getCollectionName(messageReport.getContactType()));
-			LOGGER.debug(builder.toString());
+			//LOGGER.info(JsonUtil.toJson(builder));
 		}
 	}
 
