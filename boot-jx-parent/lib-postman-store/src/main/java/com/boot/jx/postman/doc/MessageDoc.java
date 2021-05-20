@@ -23,11 +23,14 @@ public class MessageDoc implements Serializable, Patchable<MessageDoc> {
 
 	@Id
 	private String messageId;
+
+	@Indexed
 	private String messageIdExt;
 	private String messageIdRef;
+
+	@Indexed
 	private String sessionId;
 
-	private String id;
 	private String collapseId;
 	private long timestamp;
 	private String type;
@@ -50,14 +53,6 @@ public class MessageDoc implements Serializable, Patchable<MessageDoc> {
 
 	@Indexed
 	private String contactId;
-
-	public String getId() {
-		return id;
-	}
-
-	public void setId(String id) {
-		this.id = id;
-	}
 
 	public String getMessageId() {
 		return messageId;

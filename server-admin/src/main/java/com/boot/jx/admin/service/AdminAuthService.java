@@ -26,7 +26,7 @@ import com.boot.utils.Random;
 
 @Component
 @TenantScoped
-public class AgentLoginService {
+public class AdminAuthService {
 
 	@Autowired
 	MongoTemplate mongoTemplate;

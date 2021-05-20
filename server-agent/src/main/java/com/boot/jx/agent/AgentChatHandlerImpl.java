@@ -163,7 +163,7 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 
 	@Override
 	public InboxMessage onMessageReceive(InboxMessage inboxMessage) {
-		MessageDoc messageDoc = messageStore.find(inboxMessage);
+		MessageDoc messageDoc = messageStore.findOrCreateMessageDoc(inboxMessage);
 		ChatMessageDTO messageDto = ChatDTOUtil.getChatMessageDTO(messageDoc);
 		messageDto.setName(inboxMessage.getFromName());
 		stompTunnelService.sendToTag("/message/receive/new", messageDto, inboxMessage.session().getDept());

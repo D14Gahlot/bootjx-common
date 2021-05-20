@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.boot.jx.AppConfig;
 import com.boot.jx.admin.AdminAuthProvider;
-import com.boot.jx.admin.service.AgentLoginService;
+import com.boot.jx.admin.service.AdminAuthService;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.common.config.AppCommonConfig;
 import com.boot.jx.common.dto.AgentResponseAuthDto;
@@ -39,7 +39,7 @@ public class AdminAuthController {
 	private CommonHttpRequest commonHttpRequest;
 
 	@Autowired
-	private AgentLoginService agentLoginService;
+	private AdminAuthService agentLoginService;
 
 	@Autowired
 	private AppCommonConfig appCommonConfig;

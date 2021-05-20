@@ -61,20 +61,34 @@ public class MessageStore extends CommonDocStore {
 		return doc;
 	}
 
-	private MessageDoc findOrCreateMessageDoc(InboxMessage inboxMessage) {
-		MessageDoc doc = null;
+	public MessageDoc findByMessageIdId(String messageId, Object contactType) {
+		return mongoTemplate.findById(messageId, MessageDoc.class, getCollectionName(contactType));
+	}
+
+	private MessageDoc findMessageDoc(InboxMessage inboxMessage) {
 		if (ArgUtil.is(inboxMessage.getMessageId())) {
-			doc = mongoTemplate.findById(inboxMessage.getMessageId(), MessageDoc.class,
+			return mongoTemplate.findById(inboxMessage.getMessageId(), MessageDoc.class,
 					getCollectionName(inboxMessage.getContactType()));
+		} else if (ArgUtil.is(inboxMessage.getMessageIdExt())) {
+			CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder();
+			builder.where("messageIdExt", inboxMessage.getMessageIdExt());
+			return mongoTemplate.findOne(builder.getQuery(), MessageDoc.class,
+					getCollectionName(inboxMessage.getContactType()));
+		} else {
+			return null;
 		}
+	}
+
+	public MessageDoc findOrCreateMessageDoc(InboxMessage inboxMessage) {
+		MessageDoc doc = findMessageDoc(inboxMessage);
 		if (!ArgUtil.is(doc)) {
 			return createMessageDoc(inboxMessage);
 		}
 		return doc;
 	}
 
-	public MessageDoc create(InboxMessage inboxMessage) {
-		MessageDoc doc = createMessageDoc(inboxMessage);
+	public MessageDoc findAndUpdateMessageDoc(InboxMessage inboxMessage) {
+		MessageDoc doc = findOrCreateMessageDoc(inboxMessage);
 		mongoTemplate.save(doc, getCollectionName(inboxMessage.getContactType()));
 		inboxMessage.setMessageId(doc.getMessageId());
 		return doc;
@@ -99,10 +113,6 @@ public class MessageStore extends CommonDocStore {
 		doc.setHandler(handler);
 		mongoTemplate.save(doc, getCollectionName(inboxMessage.getContactType()));
 		inboxMessage.setMessageId(doc.getMessageId());
-	}
-
-	public MessageDoc find(InboxMessage inboxMessage) {
-		return findOrCreateMessageDoc(inboxMessage);
 	}
 
 	public MessageDoc log(IMessage inboxMessage, String agent, EVENTS eventName, String... logMessage) {
@@ -221,7 +231,7 @@ public class MessageStore extends CommonDocStore {
 		CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder();
 
 		if (ArgUtil.is(messageReport.getMessageId())) {
-			builder.whereId(messageReport.getMessageId());
+			builder.whereIdSafe(messageReport.getMessageId());
 		} else if (ArgUtil.is(messageReport.getMessageIdExt())) {
 			builder.where("messageIdExt", messageReport.getMessageIdExt());
 		} else if (ArgUtil.is(messageReport.getMessageIdRef())) {
