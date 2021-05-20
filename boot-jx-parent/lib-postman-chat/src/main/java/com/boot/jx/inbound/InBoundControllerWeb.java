@@ -99,12 +99,12 @@ public class InBoundControllerWeb {
 		event.setContactType(ContactType.WEBSITE);
 		event.setLane("DUMMY");
 
-		event.setContactType(ContactType.FACEBOOK);
-		event.setLane("110211671212683");
-		//event.setLane("919082854885");
-		//event.setChannel("GUPSHUPW");
-		//event.setFrom("239303493");
-		//event.setFromName("Test");
+		// event.setContactType(ContactType.FACEBOOK);
+		// event.setLane("110211671212683");
+		// event.setLane("919082854885");
+		// event.setChannel("GUPSHUPW");
+		// event.setFrom("239303493");
+		// event.setFromName("Test");
 
 		// Cleaning
 		// event.setSessionId("600edc822743742e916202b9");

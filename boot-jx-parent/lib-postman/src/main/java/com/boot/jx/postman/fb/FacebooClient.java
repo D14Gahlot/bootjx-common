@@ -9,8 +9,10 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpStatusCodeException;
+import org.springframework.web.client.RestClientResponseException;
 
 import com.boot.jx.dict.FileType;
+import com.boot.jx.exception.AmxException;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PostManException;
 import com.boot.jx.postman.PostmanPackages.MessageClient;
@@ -121,8 +123,13 @@ public class FacebooClient implements MessageClient {
 				if (ArgUtil.is(resp.getMessageId()))
 					msgIds.add(ArgUtil.parseAsString(resp.getMessageId()));
 			}
-		} catch (HttpStatusCodeException e) {
-			resp = JsonUtil.parse(e.getResponseBodyAsString(), FacebookMessageResp.class);
+		} catch (HttpStatusCodeException | AmxException e) {
+			if (e instanceof HttpStatusCodeException)
+				resp = JsonUtil.parse(((HttpStatusCodeException) e).getResponseBodyAsString(),
+						FacebookMessageResp.class);
+			else
+				resp = JsonUtil.parse(e.getMessage(), FacebookMessageResp.class);
+			
 			outboxMessage.logs().add(resp.getError().getMessage());
 			outboxMessage.logs()
 					.add(String.format("%s-%s", resp.getError().getCode(), resp.getError().getErrorSubcode()));
