@@ -125,6 +125,7 @@ public abstract class GupShupClientAbstract {
 	}
 
 	public OutboxMessage send(OutboxMessage message) {
+
 		String to = CollectionUtil.getOne(message.getTo());
 
 		GupShupReq gupShupReq = new GupShupReq();

@@ -235,7 +235,7 @@ public class MessageStore extends CommonDocStore {
 			builder.set("stamps." + messageReport.getStatus().toString(), messageReport.getTimestamp());
 
 			if (ArgUtil.is(messageReport.getReason())) {
-				builder.getUpdate().push("logs", messageReport.getReason());
+				builder.update().push("logs", messageReport.getReason());
 			}
 
 			mongoTemplate.updateFirst(builder.getQuery(), builder.getUpdate(), MessageDoc.class,

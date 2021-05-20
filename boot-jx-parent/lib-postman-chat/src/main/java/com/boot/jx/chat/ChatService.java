@@ -11,6 +11,7 @@ import com.boot.jx.bot.ChatContext;
 import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorHandler;
 import com.boot.jx.chat.ConnectorHandlerFactory.DefaultConnector;
 import com.boot.jx.dict.ContactType;
+import com.boot.jx.postman.PostManException;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatContextDoc;
 import com.boot.jx.postman.doc.ChatMeta;
@@ -67,61 +68,72 @@ public class ChatService {
 		if (!ArgUtil.is(outboxMessage.getAction())) {
 			return false;
 		}
+
+		if (!ArgUtil.is(chatContactDoc)) {
+			throw new PostManException("Destination Not Specified : chatContactDoc Empty");
+		}
+
 		outboxMessage.setStatus(Message.Status.INIT);
+		outboxMessage.setContactType(ArgUtil.parseAsEnumT(chatContactDoc.getContactType(), ContactType.class));
+		outboxMessage.setContactId(chatContactDoc.getContactId());
 		messageStore.create(outboxMessage);
-		if (ArgUtil.is(chatContactDoc)) {
-			outboxMessage.setContactType(ArgUtil.parseAsEnumT(chatContactDoc.getContactType(), ContactType.class));
-			outboxMessage.setContactId(chatContactDoc.getContactId());
-			ConnectorHandler connector = connectorHandlerFactory.get(outboxMessage.getContactType(),
-					outboxMessage.getChannel());
-			if (ArgUtil.is(connector)) {
-				connector.message("ACTION", chatContactDoc, null, outboxMessage);
-			} else if (ArgUtil.is(defaultConnector)) {
-				defaultConnector.message("ACTION", chatContactDoc, null, outboxMessage);
-			}
+
+		ConnectorHandler connector = connectorHandlerFactory.get(outboxMessage.getContactType(),
+				outboxMessage.getChannel());
+		if (ArgUtil.is(connector)) {
+			connector.message("ACTION", chatContactDoc, null, outboxMessage);
+		} else if (ArgUtil.is(defaultConnector)) {
+			defaultConnector.message("ACTION", chatContactDoc, null, outboxMessage);
 		}
 		messageStore.update(outboxMessage);
 		return true;
 	}
 
 	private void replyIntenal(InboxMessage inboxMessage, OutboxMessage outboxMessage) {
+
+		if (!ArgUtil.is(inboxMessage)) {
+			throw new PostManException("Destination Not Specified : inboxMessage Empty");
+		}
 		outboxMessage.setStatus(Message.Status.INIT);
+		outboxMessage.setContactType(inboxMessage.getContactType());
+		outboxMessage.setChannel(inboxMessage.getChannel());
+		outboxMessage.setLane(inboxMessage.getLane());
+		outboxMessage.setQueue(inboxMessage.getQueue());
+		outboxMessage.addTo(inboxMessage.getFrom());
+		outboxMessage.setContactId(inboxMessage.getContactId());
+		outboxMessage.setSessionId(inboxMessage.getSessionId());
 		messageStore.create(outboxMessage);
-		if (ArgUtil.is(inboxMessage)) {
-			outboxMessage.setContactType(inboxMessage.getContactType());
-			outboxMessage.setChannel(inboxMessage.getChannel());
-			outboxMessage.setLane(inboxMessage.getLane());
-			outboxMessage.setQueue(inboxMessage.getQueue());
-			outboxMessage.addTo(inboxMessage.getFrom());
-			outboxMessage.setContactId(inboxMessage.getContactId());
-			outboxMessage.setSessionId(inboxMessage.getSessionId());
-			ConnectorHandler connector = connectorHandlerFactory.get(outboxMessage.getContactType(),
-					outboxMessage.getChannel());
-			if (ArgUtil.is(connector)) {
-				connector.message("REPLY", null, inboxMessage, outboxMessage);
-			} else if (ArgUtil.is(defaultConnector)) {
-				defaultConnector.message("REPLY", null, inboxMessage, outboxMessage);
-			}
+
+		ConnectorHandler connector = connectorHandlerFactory.get(outboxMessage.getContactType(),
+				outboxMessage.getChannel());
+		if (ArgUtil.is(connector)) {
+			connector.message("REPLY", null, inboxMessage, outboxMessage);
+		} else if (ArgUtil.is(defaultConnector)) {
+			defaultConnector.message("REPLY", null, inboxMessage, outboxMessage);
 		}
 		messageStore.update(outboxMessage);
 	}
 
 	private void sendIntenal(ChatContactDoc chatContactDoc, OutboxMessage outboxMessage) {
+
+		if (!ArgUtil.is(chatContactDoc)) {
+			throw new PostManException("Destination Not Specified : chatContactDoc Empty");
+		}
+
 		outboxMessage.setStatus(Message.Status.INIT);
+		outboxMessage.setContactType(ArgUtil.parseAsEnumT(chatContactDoc.getContactType(), ContactType.class));
+		outboxMessage.setChannel(chatContactDoc.getChannelType());
+		outboxMessage.setLane(chatContactDoc.getLane());
+		outboxMessage.setContactId(chatContactDoc.getContactId());
+		outboxMessage.setSessionId(chatContactDoc.getSessionId());
 		messageStore.create(outboxMessage);
-		if (ArgUtil.is(chatContactDoc)) {
-			outboxMessage.setContactType(ArgUtil.parseAsEnumT(chatContactDoc.getContactType(), ContactType.class));
-			outboxMessage.setChannel(chatContactDoc.getChannelType());
-			outboxMessage.setLane(chatContactDoc.getLane());
-			outboxMessage.setContactId(chatContactDoc.getContactId());
-			outboxMessage.setSessionId(chatContactDoc.getSessionId());
-			ConnectorHandler connector = connectorHandlerFactory.get(outboxMessage.getContactType(),
-					outboxMessage.getChannel());
-			if (ArgUtil.is(connector)) {
-				connector.message("SEND", chatContactDoc, null, outboxMessage);
-			} else if (ArgUtil.is(defaultConnector)) {
-				defaultConnector.message("SEND", chatContactDoc, null, outboxMessage);
-			}
+
+		ConnectorHandler connector = connectorHandlerFactory.get(outboxMessage.getContactType(),
+				outboxMessage.getChannel());
+		if (ArgUtil.is(connector)) {
+			connector.message("SEND", chatContactDoc, null, outboxMessage);
+		} else if (ArgUtil.is(defaultConnector)) {
+			defaultConnector.message("SEND", chatContactDoc, null, outboxMessage);
 		}
 		messageStore.update(outboxMessage);
 	}
