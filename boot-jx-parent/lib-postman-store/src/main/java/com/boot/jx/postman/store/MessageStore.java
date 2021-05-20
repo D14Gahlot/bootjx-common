@@ -224,7 +224,7 @@ public class MessageStore extends CommonDocStore {
 		if (ArgUtil.is(messageReport.getStatus())) {
 			builder.set("status", messageReport.getStatus());
 			builder.set("stamps." + messageReport.getStatus().toString(), messageReport.getTimestamp());
-			mongoTemplate.updateFirst(builder.getQuery(), builder.getUpdate(), ChatSessionDoc.class,
+			mongoTemplate.updateFirst(builder.getQuery(), builder.getUpdate(), MessageDoc.class,
 					getCollectionName(messageReport.getContactType()));
 		}
 	}
