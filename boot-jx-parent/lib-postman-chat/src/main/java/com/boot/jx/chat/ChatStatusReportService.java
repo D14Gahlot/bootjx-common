@@ -6,6 +6,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
@@ -16,6 +18,8 @@ import com.boot.utils.ArgUtil;
 
 @Component
 public class ChatStatusReportService {
+	private static final Logger LOGGER = LoggerFactory.getLogger(ChatStatusReportService.class);
+
 	ConcurrentLinkedQueue<MessageReport> queue = new ConcurrentLinkedQueue<MessageReport>();
 
 	public static class MessageReportComparator implements Comparator<MessageReport> {
@@ -53,10 +57,9 @@ public class ChatStatusReportService {
 					break;
 				}
 			}
-
-			Collections.sort(batch, new MessageReportComparator());
-
+			LOGGER.debug("BATCH SIZE", batch.size());
 			if (batch.size() > 0) {
+				Collections.sort(batch, new MessageReportComparator());
 				for (MessageReport messageReport : batch) {
 					messageStore.updateStatus(messageReport);
 				}

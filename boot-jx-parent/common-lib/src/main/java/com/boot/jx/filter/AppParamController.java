@@ -43,6 +43,9 @@ import com.boot.utils.CryptoUtil.HashBuilder;
 import com.boot.utils.JsonUtil;
 import com.fasterxml.jackson.core.type.TypeReference;
 
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.LoggerContext;
+
 @RestController
 public class AppParamController {
 
@@ -263,8 +266,23 @@ public class AppParamController {
 	}
 
 	@RequestMapping(value = "/ext/pub/logger", method = RequestMethod.GET)
-	public ApiResponse<Object, Object> toggleLogger() {
-		AppRequestUtil.isLocalEnable();
+	public ApiResponse<Object, Object> toggleLogger(@RequestParam(required = false) String loggerName,
+			@RequestParam(required = false, defaultValue = "info") String level) {
+
+		if (ArgUtil.is(loggerName)) {
+			LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
+			ch.qos.logback.classic.Logger logger = loggerName.equalsIgnoreCase("root")
+					? loggerContext.getLogger(loggerName)
+					: loggerContext.exists(loggerName);
+			if (logger != null) {
+				logger.setLevel(Level.toLevel(level));
+				LOGGER.info("Changed logger: " + loggerName + " to level : " + level);
+			} else {
+				LOGGER.info("Logger Not Found Make Sure that logger name is correct");
+			}
+		} else {
+			AppRequestUtil.isLocalEnable();
+		}
 		return ApiResponse.build().message("logger" + AppRequestUtil.isLocal());
 	}
 

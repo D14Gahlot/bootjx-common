@@ -124,6 +124,7 @@ public class WAGupShupConnector implements ConnectorHandler {
 			MessageReport report = new MessageReport();
 			report.setContactType(ContactType.WHATSAPP);
 			report.setTimestamp(gupShupDelivery.getEventTs());
+			
 			report.setMessageIdExt(gupShupDelivery.getExternalId());
 			String[] x = gupShupDelivery.getExternalId().split("-");
 			if (x.length == 2) {

@@ -2,6 +2,8 @@ package com.boot.jx.postman.store;
 
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -11,7 +13,6 @@ import org.springframework.stereotype.Component;
 
 import com.boot.jx.mongo.CommonDocStore;
 import com.boot.jx.mongo.CommonMongoQueryBuilder;
-import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.ContactDoc;
 import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.model.IMessage;
@@ -25,6 +26,8 @@ import com.boot.utils.CollectionUtil;
 
 @Component
 public class MessageStore extends CommonDocStore {
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(MessageStore.class);
 
 	public static enum EVENTS {
 		ASGND_TO_DEPT, ASGND_TO_AGENT, UNASGND, PICKED_BY_AGENT, CLOSED_BY_AGENT, LABEL_ADDED, LABEL_REMOVED
@@ -209,6 +212,10 @@ public class MessageStore extends CommonDocStore {
 	}
 
 	public void updateStatus(MessageReport messageReport) {
+
+		LOGGER.debug("updateStatus {} {} {}", messageReport.getMessageId(), messageReport.getContactType(),
+				messageReport.getStatus());
+
 		CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder();
 
 		if (ArgUtil.is(messageReport.getMessageId())) {
@@ -226,6 +233,7 @@ public class MessageStore extends CommonDocStore {
 			builder.set("stamps." + messageReport.getStatus().toString(), messageReport.getTimestamp());
 			mongoTemplate.updateFirst(builder.getQuery(), builder.getUpdate(), MessageDoc.class,
 					getCollectionName(messageReport.getContactType()));
+			LOGGER.debug(builder.toString());
 		}
 	}
 
