@@ -233,9 +233,14 @@ public class MessageStore extends CommonDocStore {
 		if (ArgUtil.is(messageReport.getStatus())) {
 			builder.set("status", messageReport.getStatus());
 			builder.set("stampss." + messageReport.getStatus().toString(), messageReport.getTimestamp());
+
+			if (ArgUtil.is(messageReport)) {
+				builder.getUpdate().push("logs", messageReport.getReason());
+			}
+
 			mongoTemplate.updateFirst(builder.getQuery(), builder.getUpdate(), MessageDoc.class,
 					getCollectionName(messageReport.getContactType()));
-			//LOGGER.info(JsonUtil.toJson(builder));
+			// LOGGER.info(JsonUtil.toJson(builder));
 		}
 	}
 
