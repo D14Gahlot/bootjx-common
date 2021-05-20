@@ -234,7 +234,7 @@ public class MessageStore extends CommonDocStore {
 			builder.set("status", messageReport.getStatus());
 			builder.set("stamps." + messageReport.getStatus().toString(), messageReport.getTimestamp());
 
-			if (ArgUtil.is(messageReport)) {
+			if (ArgUtil.is(messageReport.getReason())) {
 				builder.getUpdate().push("logs", messageReport.getReason());
 			}
 
