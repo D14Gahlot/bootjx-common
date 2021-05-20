@@ -7,6 +7,7 @@ public class StompTunnelEvent extends TunnelEvent {
 
 	private String topic;
 	private String httpSessionId;
+	private String tagId;
 	private Object data;
 
 	public String getTopic() {
@@ -31,6 +32,14 @@ public class StompTunnelEvent extends TunnelEvent {
 
 	public void setHttpSessionId(String httpSessionId) {
 		this.httpSessionId = httpSessionId;
+	}
+
+	public String getTagId() {
+		return tagId;
+	}
+
+	public void setTagId(String tagId) {
+		this.tagId = tagId;
 	}
 
 }

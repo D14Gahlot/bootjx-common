@@ -198,7 +198,7 @@ public class AgentAuthController {
 				Authentication authentication = agentAuthProvider.authenticate(token);
 				SecurityContextHolder.getContext().setAuthentication(authentication);
 				agentSessionService.updateLogin(agent);
-				stompTunnelSessionManager.registerUser(agent.getAgent_code());
+				stompTunnelSessionManager.registerUser(agent.getAgent_code(), agent.getDept().getDept_code());
 			}
 		} else {
 			x.redirectUrl(appConfig.getAppPrefix() + "/auth/login?error");

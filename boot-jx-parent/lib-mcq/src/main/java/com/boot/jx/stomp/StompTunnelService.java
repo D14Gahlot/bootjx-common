@@ -37,7 +37,21 @@ public class StompTunnelService {
 		} catch (Exception e) {
 			LOGGER.error("Error While Sending StompMessage", e);
 		}
+	}
 
+	@Async
+	public void sendToTag(String topic, Object message, String tag) {
+		try {
+			StompTunnelEvent event = new StompTunnelEvent();
+			event.setTopic(topic);
+			event.setTagId(stompTunnelSessionManager.createTagId(tag));
+			Map<String, Object> messageData = new HashMap<String, Object>();
+			messageData.put("data", message);
+			event.setData(JsonUtil.toJsonMap(messageData));
+			tunnelService.shout(StompTunnelToAllSender.STOMP_TO_ALL, event);
+		} catch (Exception e) {
+			LOGGER.error("Error While Sending StompMessage", e);
+		}
 	}
 
 	/**
@@ -52,7 +66,7 @@ public class StompTunnelService {
 	@Async
 	public void sendTo(String stompUID, String topic, Object message) {
 		try {
-			if(!ArgUtil.is(stompUID)) {
+			if (!ArgUtil.is(stompUID)) {
 				LOGGER.error("stompSession for stompUID {} cannot be empty for {}", stompUID, topic);
 				return;
 			}
@@ -72,4 +86,5 @@ public class StompTunnelService {
 			LOGGER.error("Error While Sending StompMessage to stompUID " + stompUID, e);
 		}
 	}
+
 }

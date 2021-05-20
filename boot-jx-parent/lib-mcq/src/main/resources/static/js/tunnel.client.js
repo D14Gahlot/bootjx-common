@@ -7,6 +7,7 @@ var tunnelClient = (function(win) {
 	var $connectd = null, $dfd = null;
 	var sessionToken = null;
 	var stompClient = null;
+	var tagIds = [];
 	var pong = false;
 	function connect() {
 		$dfd = $dfd || jQuery.Deferred();
@@ -21,6 +22,7 @@ var tunnelClient = (function(win) {
 				var resp = JSON.parse(greeting.body);
 				console.log("@SubscribeMapping",resp);
 				sessionToken = resp["x-session-uid"];
+				tagIds = resp["tags"] || [];
 				$dfd.resolve(frame);
 			});
 		});
@@ -57,6 +59,15 @@ var tunnelClient = (function(win) {
 						fun(JSON.parse(greeting.body).data, topic, greeting);
 				}));
 			});
+			
+			onConnect().then(function() {
+				tagIds.map(function(tagId){
+					THAT.ids.push(stompClient.subscribe("/tags/" + tagId + topic, function(greeting) {
+						fun(JSON.parse(greeting.body).data, topic, greeting);
+					}));
+				});
+			});
+	
 			return this;
 		},	
 		send : function send(topic, msg) {

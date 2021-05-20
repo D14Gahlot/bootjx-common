@@ -10,6 +10,7 @@ import org.springframework.messaging.simp.annotation.SubscribeMapping;
 import org.springframework.stereotype.Controller;
 
 import com.boot.jx.AppConstants;
+import com.boot.jx.stomp.StompSessionCache.StompSession;
 import com.boot.utils.ArgUtil;
 
 @Controller
@@ -22,13 +23,21 @@ public class StompController {
 	StompTunnelService stompTunnelService;
 
 	@SubscribeMapping("/stomp/tunnel/meta")
-	public Map<String, String> meta(SimpMessageHeaderAccessor headerAccessor) {
-		Map<String, String> map = new HashMap<String, String>();
-		map.put(AppConstants.SESSION_UID_XKEY,
-				stompTunnelSessionManager.createSessionMapping(headerAccessor.getSessionId(),
-						ArgUtil.parseAsString(headerAccessor.getSessionAttributes().get(AppConstants.SESSION_ID_XKEY)),
-						ArgUtil.parseAsString(
-								headerAccessor.getSessionAttributes().get(AppConstants.SESSION_UID_XKEY))));
+	public Map<String, Object> meta(SimpMessageHeaderAccessor headerAccessor) {
+		Map<String, Object> map = new HashMap<String, Object>();
+
+		String httpsSessionId = ArgUtil
+				.parseAsString(headerAccessor.getSessionAttributes().get(AppConstants.SESSION_ID_XKEY));
+
+		StompSession stompSession = stompTunnelSessionManager.getStompSessionByHttpSessionId(httpsSessionId);
+
+		if (ArgUtil.is(stompSession) && ArgUtil.is(stompSession.getTags())) {
+			map.put("tags", stompSession.getTags());
+		}
+
+		map.put(AppConstants.SESSION_UID_XKEY, stompTunnelSessionManager.createSessionMapping(
+				headerAccessor.getSessionId(), httpsSessionId,
+				ArgUtil.parseAsString(headerAccessor.getSessionAttributes().get(AppConstants.SESSION_UID_XKEY))));
 		return map;
 	}
 

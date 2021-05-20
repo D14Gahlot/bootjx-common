@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 
 import com.boot.jx.postman.model.MessageReport;
 import com.boot.jx.postman.store.MessageStore;
+import com.boot.jx.stomp.StompTunnelService;
 import com.boot.utils.ArgUtil;
 
 @Component
@@ -31,6 +32,9 @@ public class ChatStatusReportService {
 
 	@Autowired
 	private MessageStore messageStore;
+
+	@Autowired
+	private StompTunnelService stompTunnelService;
 
 	public void offer(MessageReport e) {
 		queue.offer(e);
@@ -62,6 +66,7 @@ public class ChatStatusReportService {
 				Collections.sort(batch, new MessageReportComparator());
 				for (MessageReport messageReport : batch) {
 					messageStore.updateStatus(messageReport);
+					stompTunnelService.sendToAll("/message/status/update", messageReport);
 				}
 			}
 		} catch (InterruptedException e1) {
