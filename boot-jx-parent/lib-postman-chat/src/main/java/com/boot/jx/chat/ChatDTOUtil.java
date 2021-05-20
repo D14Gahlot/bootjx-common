@@ -48,6 +48,7 @@ public class ChatDTOUtil {
 		messageDto.setLogs(messageDoc.getLogs());
 		messageDto.setAction(messageDoc.getAction());
 		messageDto.setStatus(messageDoc.getStatus());
+		messageDto.setStamps(messageDoc.getStamps());
 		return messageDto;
 	}
 
