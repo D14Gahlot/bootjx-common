@@ -43,7 +43,7 @@ public class PMConfiguration implements Serializable {
 	}
 
 	public FacebookConfig facebook(String pageId) {
-		return facebook.get(pageId);
+		return facebook().get(pageId);
 	}
 
 	public PMConfiguration facebook(FacebookConfig config) {

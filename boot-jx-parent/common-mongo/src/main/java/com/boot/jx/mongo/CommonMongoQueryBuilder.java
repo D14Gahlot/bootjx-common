@@ -5,6 +5,8 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 
+import com.boot.utils.ArgUtil;
+
 public class CommonMongoQueryBuilder {
 
 	Query query;
@@ -40,7 +42,14 @@ public class CommonMongoQueryBuilder {
 	}
 
 	public CommonMongoQueryBuilder whereId(Object id) {
-		return this.with(Criteria.where("_id").is(id).orOperator(Criteria.where("_id").is(new ObjectId((String) id))));
+		Criteria c = Criteria.where("_id").is(id);
+
+		String idStr = ArgUtil.parseAsString(id);
+		if (idStr != null && ObjectId.isValid(idStr)) {
+			c.orOperator(Criteria.where("_id").is(new ObjectId(idStr)));
+		}
+
+		return this.with(c);
 	}
 
 	public CommonMongoQueryBuilder whereAll() {
