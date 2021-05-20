@@ -62,7 +62,7 @@ var tunnelClient = (function(win) {
 			
 			onConnect().then(function() {
 				tagIds.map(function(tagId){
-					THAT.ids.push(stompClient.subscribe("/tags/" + tagId + topic, function(greeting) {
+					THAT.ids.push(stompClient.subscribe("/tag/" + tagId + topic, function(greeting) {
 						fun(JSON.parse(greeting.body).data, topic, greeting);
 					}));
 				});

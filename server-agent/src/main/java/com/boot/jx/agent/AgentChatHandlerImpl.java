@@ -166,7 +166,7 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 		MessageDoc messageDoc = messageStore.find(inboxMessage);
 		ChatMessageDTO messageDto = ChatDTOUtil.getChatMessageDTO(messageDoc);
 		messageDto.setName(inboxMessage.getFromName());
-		stompTunnelService.sendToTag("/message/recieve/new", messageDto, inboxMessage.session().getDept());
+		stompTunnelService.sendToTag("/message/receive/new", messageDto, inboxMessage.session().getDept());
 		stompTunnelService.sendTo(inboxMessage.session().getAgent(), "/agent/onmessage", messageDto);
 		if (ArgUtil.is(inboxMessage.getMessage()) && inboxMessage.getMessage().equalsIgnoreCase("/exit_chat")) {
 			ChatSessionDoc chatSessionDoc = sessionStore.getSession(inboxMessage.getSessionId());

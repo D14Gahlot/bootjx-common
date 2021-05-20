@@ -66,7 +66,7 @@ public class ChatStatusReportService {
 				Collections.sort(batch, new MessageReportComparator());
 				for (MessageReport messageReport : batch) {
 					messageStore.updateStatus(messageReport);
-					stompTunnelService.sendToAll("/message/status/update", messageReport);
+					stompTunnelService.sendToAll("/message/update/status", messageReport);
 				}
 			}
 		} catch (InterruptedException e1) {
