@@ -54,9 +54,9 @@ public class TelegramConnector implements ConnectorHandler {
 			} else {
 				telegramClient.send(outboxMessage);
 			}
-			outboxMessage.setStatus(OutboxMessage.Status.SENT);
+			outboxMessage.updateStatus(OutboxMessage.Status.SENT);
 		} catch (Exception e) {
-			outboxMessage.setStatus(OutboxMessage.Status.SENT_ERR);
+			outboxMessage.updateStatus(OutboxMessage.Status.SENT_ERR);
 			outboxMessage.logs().add(e.getMessage());
 			LOGGER.error("SEND ERROR", e);
 		}

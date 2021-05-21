@@ -1,5 +1,8 @@
 package com.boot.jx.chat;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.ChatUserProfileDoc;
@@ -8,6 +11,7 @@ import com.boot.jx.postman.dto.ChatMessageDTO;
 import com.boot.jx.postman.dto.ChatSessionDTO;
 import com.boot.jx.postman.dto.ChatUserProfileDTO;
 import com.boot.jx.postman.dto.ContactDTO;
+import com.boot.utils.ArgUtil;
 import com.boot.utils.EntityDtoUtil;
 
 public class ChatDTOUtil {
@@ -49,6 +53,13 @@ public class ChatDTOUtil {
 		messageDto.setAction(messageDoc.getAction());
 		messageDto.setStatus(messageDoc.getStatus());
 		messageDto.setStamps(messageDoc.getStamps());
+
+		if (ArgUtil.is(messageDto.getStamps()) && ArgUtil.is(messageDto.getStatus())) {
+			Map<String, Long> stamps = new HashMap<String, Long>();
+			stamps.put(messageDto.getStatus(), messageDto.getTimestamp());
+			messageDto.setStamps(stamps);
+		}
+
 		return messageDto;
 	}
 

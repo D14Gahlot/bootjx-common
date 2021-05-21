@@ -58,9 +58,9 @@ public class FacebookConnector implements ConnectorHandler {
 				}
 			}
 			facebooClient.send(outboxMessage);
-			outboxMessage.setStatus(Message.Status.SENT);
+			outboxMessage.updateStatus(Message.Status.SENT);
 		} catch (Exception e) {
-			outboxMessage.setStatus(OutboxMessage.Status.SENT_ERR);
+			outboxMessage.updateStatus(OutboxMessage.Status.SENT_ERR);
 			outboxMessage.logs().add(e.getMessage());
 			LOGGER.error("SEND ERROR", e);
 		}

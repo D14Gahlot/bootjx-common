@@ -248,7 +248,7 @@ public class Message<T extends Message<T>> implements Serializable, MessageOptio
 		return status;
 	}
 
-	public void setStatus(Status status) {
+	public void status(Status status) {
 		this.status = status;
 	}
 
@@ -499,6 +499,10 @@ public class Message<T extends Message<T>> implements Serializable, MessageOptio
 		if (stamps == null)
 			stamps = new HashMap<String, Long>();
 		return stamps;
+	}
+
+	public void updateStatus(Status status) {
+		this.stamps().put(ArgUtil.parseAsString(status), System.currentTimeMillis());
 	}
 
 }

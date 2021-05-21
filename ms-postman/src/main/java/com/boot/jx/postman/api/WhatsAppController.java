@@ -97,7 +97,7 @@ public class WhatsAppController {
 			msg.setAttempt(msg.getAttempt() + 1);
 			whatsAppService.send(msg, ArgUtil.parseAsBigDecimal(q, BigDecimal.ZERO));
 		} else {
-			msg.setStatus(Status.FAILD);
+			msg.updateStatus(Status.FAILD);
 			return statusWhatsApp(msg, "TIMEOUT");
 		}
 		return ApiResponse.build(msg);

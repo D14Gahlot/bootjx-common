@@ -57,7 +57,7 @@ public class ConnectorHandlerFactory extends ScopedBeanFactory<String, Connector
 				}
 			} catch (Exception e) {
 				e.printStackTrace();
-				outboxMessage.setStatus(Message.Status.SENT_ERR);
+				outboxMessage.updateStatus(Message.Status.SENT_ERR);
 				outboxMessage.logs().add(e.getMessage());
 			}
 

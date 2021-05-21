@@ -104,7 +104,7 @@ public class WhatsAppService {
 				queue.add(message);
 			}
 		} else {
-			message.setStatus(Status.NSENT);
+			message.updateStatus(Status.NSENT);
 		}
 		return message;
 	}

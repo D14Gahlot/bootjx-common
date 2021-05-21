@@ -77,7 +77,7 @@ public class WAGupShupConnector implements ConnectorHandler {
 			} else {
 				outboxMessage = gupShupChatClient.send(outboxMessage);
 			}
-			outboxMessage.setStatus(Message.Status.SENT);
+			outboxMessage.updateStatus(Message.Status.SENT);
 		} catch (Exception e) {
 			outboxMessage.logs().add(e.getMessage());
 			e.printStackTrace();

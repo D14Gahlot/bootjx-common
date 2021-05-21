@@ -77,7 +77,7 @@ public class ChatService {
 			throw new PostManException("Destination Not Specified : chatContactDoc Empty");
 		}
 
-		outboxMessage.setStatus(Message.Status.INIT);
+		outboxMessage.updateStatus(Message.Status.INIT);
 		outboxMessage.setContactType(ArgUtil.parseAsEnumT(chatContactDoc.getContactType(), ContactType.class));
 		outboxMessage.setContactId(chatContactDoc.getContactId());
 
@@ -104,7 +104,7 @@ public class ChatService {
 			throw new PostManException("Destination Not Specified : inboxMessage Empty");
 		}
 
-		outboxMessage.setStatus(Message.Status.INIT);
+		outboxMessage.updateStatus(Message.Status.INIT);
 		outboxMessage.setContactType(inboxMessage.getContactType());
 		outboxMessage.setChannel(inboxMessage.getChannel());
 		outboxMessage.setLane(inboxMessage.getLane());
@@ -135,7 +135,7 @@ public class ChatService {
 			throw new PostManException("Destination Not Specified : chatContactDoc Empty");
 		}
 
-		outboxMessage.setStatus(Message.Status.INIT);
+		outboxMessage.updateStatus(Message.Status.INIT);
 		outboxMessage.setContactType(ArgUtil.parseAsEnumT(chatContactDoc.getContactType(), ContactType.class));
 		outboxMessage.setChannel(chatContactDoc.getChannelType());
 		outboxMessage.setLane(chatContactDoc.getLane());
