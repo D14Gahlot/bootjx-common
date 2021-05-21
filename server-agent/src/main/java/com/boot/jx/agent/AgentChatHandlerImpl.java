@@ -189,7 +189,7 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 			}
 		} else {
 			chatService.reply(sessionDoc, outboxMessage);
-			MessageDoc messageDoc = messageStore.find(outboxMessage);
+			MessageDoc messageDoc = messageStore.findMessageDoc(outboxMessage);
 			ChatMessageDTO messageDto = ChatDTOUtil.getChatMessageDTO(messageDoc);
 			messageDto.setName(messageDoc.getAgent());
 			stompTunnelService.sendTo(outboxMessage.session().getAgent(), "/agent/onmessage", messageDto);

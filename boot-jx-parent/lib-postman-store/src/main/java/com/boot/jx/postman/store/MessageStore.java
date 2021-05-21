@@ -23,8 +23,6 @@ import com.boot.jx.postman.model.TagDocument;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
-import com.boot.utils.JsonUtil;
-import com.mongodb.WriteResult;
 
 @Component
 public class MessageStore extends CommonDocStore {
@@ -45,15 +43,7 @@ public class MessageStore extends CommonDocStore {
 		return (MessageDoc.COLLECTION_NAME + "_" + ArgUtil.parseAsString(contactType, "OTHERS"));
 	}
 
-	private MessageDoc createMessageDoc(InboxMessage inboxMessage) {
-		MessageDoc doc = new MessageDoc();
-		doc.setContactId(PostManUtil.createContactId(inboxMessage));
-		doc.setType("I");
-		doc.setTimestamp(System.currentTimeMillis());
-		ContactDoc contact = new ContactDoc();
-		contact.setMobile(inboxMessage.getFrom());
-		contact.setContactType(inboxMessage.getContactType());
-		doc.setContact(contact);
+	private MessageDoc updateMessageDoc(InboxMessage inboxMessage, MessageDoc doc) {
 		doc.setMessage(inboxMessage.getMessage());
 		doc.setSessionId(inboxMessage.getSessionId());
 		doc.setTags(inboxMessage.getTags());
@@ -61,7 +51,23 @@ public class MessageStore extends CommonDocStore {
 		return doc;
 	}
 
-	public MessageDoc findByMessageIdId(String messageId, Object contactType) {
+	private MessageDoc createMessageDoc(InboxMessage inboxMessage) {
+		MessageDoc doc = new MessageDoc();
+		doc.setContactId(PostManUtil.createContactId(inboxMessage));
+		doc.setType("I");
+		doc.setTimestamp(System.currentTimeMillis());
+
+		ContactDoc contact = new ContactDoc();
+		contact.setMobile(inboxMessage.getFrom());
+		contact.setContactType(inboxMessage.getContactType());
+		doc.setContact(contact);
+
+		updateMessageDoc(inboxMessage, doc);
+
+		return doc;
+	}
+
+	public MessageDoc findByMessageId(String messageId, Object contactType) {
 		return mongoTemplate.findById(messageId, MessageDoc.class, getCollectionName(contactType));
 	}
 
@@ -89,7 +95,16 @@ public class MessageStore extends CommonDocStore {
 
 	public MessageDoc findAndUpdateMessageDoc(InboxMessage inboxMessage) {
 		MessageDoc doc = findOrCreateMessageDoc(inboxMessage);
+		if (ArgUtil.is(doc.getMessageId())) {
+			doc = updateMessageDoc(inboxMessage, doc);
+		}
 		mongoTemplate.save(doc, getCollectionName(inboxMessage.getContactType()));
+		inboxMessage.setMessageId(doc.getMessageId());
+		return doc;
+	}
+
+	public MessageDoc createOrUpdate(InboxMessage inboxMessage) {
+		MessageDoc doc = findAndUpdateMessageDoc(inboxMessage);
 		inboxMessage.setMessageId(doc.getMessageId());
 		return doc;
 	}
@@ -133,29 +148,7 @@ public class MessageStore extends CommonDocStore {
 	}
 
 	// Out Going Messages
-	private void update(OutboxMessage outMessage, MessageDoc doc) {
-		doc.setLogs(outMessage.getLogs());
-		doc.setMessageIdExt(outMessage.getMessageIdExt());
-		doc.setStatus(ArgUtil.parseAsString(outMessage.getStatus()));
-	}
-
-	private MessageDoc createMessageDoc(OutboxMessage outMessage) {
-		String to = CollectionUtil.getOne(outMessage.getTo());
-		MessageDoc doc = new MessageDoc();
-		doc.setContactId(PostManUtil.createContactId(outMessage));
-
-		if (ArgUtil.is(outMessage.getAction())) {
-			doc.setType(ArgUtil.nonEmpty(outMessage.getType(), "A"));
-			doc.setAction(outMessage.getAction());
-		} else {
-			doc.setType(ArgUtil.nonEmpty(outMessage.getType(), "O"));
-		}
-
-		doc.setTimestamp(System.currentTimeMillis());
-		ContactDoc contact = new ContactDoc();
-		contact.setMobile(to);
-		contact.setContactType(outMessage.getContactType());
-		doc.setContact(contact);
+	private MessageDoc updateMessageDoc(OutboxMessage outMessage, MessageDoc doc) {
 		doc.setAgent(outMessage.session().getAgent());
 		// if (ArgUtil.is(outMessage.getTemplate())) {
 		doc.setTemplate(outMessage.getTemplate());
@@ -168,41 +161,62 @@ public class MessageStore extends CommonDocStore {
 		doc.setSessionId(outMessage.getSessionId());
 		doc.setMessageIdRef(outMessage.getMessageIdRef());
 
-		update(outMessage, doc);
-
+		doc.setLogs(outMessage.getLogs());
+		doc.setMessageIdExt(outMessage.getMessageIdExt());
+		doc.setStatus(ArgUtil.parseAsString(outMessage.getStatus()));
 		return doc;
 	}
 
-	public MessageDoc find(OutboxMessage outMessage) {
-		return mongoTemplate.findById(outMessage.getMessageId(), MessageDoc.class,
-				getCollectionName(outMessage.getContactType()));
+	private MessageDoc createMessageDoc(OutboxMessage outMessage) {
+		MessageDoc doc = new MessageDoc();
+		if (ArgUtil.is(outMessage.getAction())) {
+			doc.setType(ArgUtil.nonEmpty(outMessage.getType(), "A"));
+			doc.setAction(outMessage.getAction());
+		} else {
+			doc.setType(ArgUtil.nonEmpty(outMessage.getType(), "O"));
+		}
+		doc.setTimestamp(System.currentTimeMillis());
+
+		String to = CollectionUtil.getOne(outMessage.getTo());
+		doc.setContactId(PostManUtil.createContactId(outMessage));
+
+		ContactDoc contact = new ContactDoc();
+		contact.setMobile(to);
+		contact.setContactType(outMessage.getContactType());
+		doc.setContact(contact);
+
+		updateMessageDoc(outMessage, doc);
+		return doc;
+	}
+
+	public MessageDoc findMessageDoc(OutboxMessage outMessage) {
+		if (ArgUtil.is(outMessage.getMessageId())) {
+			return mongoTemplate.findById(outMessage.getMessageId(), MessageDoc.class,
+					getCollectionName(outMessage.getContactType()));
+		}
+		return null;
 	}
 
 	private MessageDoc findOrCreateMessageDoc(OutboxMessage outMessage) {
-		MessageDoc doc = null;
-		if (ArgUtil.is(outMessage.getMessageId())) {
-			doc = mongoTemplate.findById(outMessage.getMessageId(), MessageDoc.class,
-					getCollectionName(outMessage.getContactType()));
-		}
+		MessageDoc doc = findMessageDoc(outMessage);
 		if (!ArgUtil.is(doc)) {
 			doc = createMessageDoc(outMessage);
 		}
-
-		update(outMessage, doc);
-
 		return doc;
 	}
 
-	public MessageDoc update(OutboxMessage outMessage) {
+	public MessageDoc findAndUpdateMessageDoc(OutboxMessage outMessage) {
 		MessageDoc doc = findOrCreateMessageDoc(outMessage);
+		if (ArgUtil.is(doc.getMessageId())) {
+			doc = updateMessageDoc(outMessage, doc);
+		}
 		mongoTemplate.save(doc, getCollectionName(outMessage.getContactType()));
 		outMessage.setMessageId(doc.getMessageId());
 		return doc;
 	}
 
-	public MessageDoc create(OutboxMessage outMessage) {
-		MessageDoc doc = createMessageDoc(outMessage);
-		mongoTemplate.save(doc, getCollectionName(outMessage.getContactType()));
+	public MessageDoc createOrUpdate(OutboxMessage outMessage) {
+		MessageDoc doc = findAndUpdateMessageDoc(outMessage);
 		outMessage.setMessageId(doc.getMessageId());
 		return doc;
 	}
