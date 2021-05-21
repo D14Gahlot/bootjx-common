@@ -26,6 +26,7 @@ import com.boot.jx.api.ApiResponse;
 import com.boot.jx.common.config.AppCommonConfig;
 import com.boot.jx.common.dto.AgentResponseAuthDto;
 import com.boot.jx.http.CommonHttpRequest;
+import com.boot.jx.postman.store.PMStoreConstants;
 import com.boot.jx.rest.RestService;
 import com.boot.jx.stomp.StompTunnelSessionManager;
 import com.boot.utils.ArgUtil;
@@ -198,7 +199,8 @@ public class AgentAuthController {
 				Authentication authentication = agentAuthProvider.authenticate(token);
 				SecurityContextHolder.getContext().setAuthentication(authentication);
 				agentSessionService.updateLogin(agent);
-				stompTunnelSessionManager.registerUser(agent.getAgent_code(), agent.getDept().getDept_code());
+				stompTunnelSessionManager.registerUser(agent.getAgent_code(), agent.getDept().getDept_code(),
+						PMStoreConstants.NO_DEPT);
 			}
 		} else {
 			x.redirectUrl(appConfig.getAppPrefix() + "/auth/login?error");
