@@ -4,12 +4,14 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.stereotype.Component;
 
+import com.boot.jx.common.config.AppCommonSessionBean;
 import com.boot.jx.common.dto.AgentResponseAuthDto;
 
 @Component
 @Scope(value = "session", proxyMode = ScopedProxyMode.TARGET_CLASS)
-public class AgentSessionBean {
+public class AgentSessionBean extends AppCommonSessionBean {
 
+	private static final long serialVersionUID = 5850744656958653564L;
 	private String agentCode;
 	private String agentDept;
 

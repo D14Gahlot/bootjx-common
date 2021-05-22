@@ -62,6 +62,7 @@ public class AgentSessionService {
 		agentSessionBean.setLoggedIn(true);
 		agentSessionBean.setOnline(true);
 		agentSessionBean.setAgentCode(agent.getAgent_code());
+		agentSessionBean.setActor(agent.getAgent_code());
 		if (ArgUtil.is(agent.getDept())) {
 			agentSessionBean.setAgentDept(agent.getDept().getDept_code());
 		}

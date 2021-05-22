@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.boot.jx.AppConfig;
 import com.boot.jx.admin.AdminAuthProvider;
+import com.boot.jx.admin.AdminSessionService;
 import com.boot.jx.admin.service.AdminAuthService;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.common.config.AppCommonConfig;
@@ -43,6 +44,9 @@ public class AdminAuthController {
 
 	@Autowired
 	private AppCommonConfig appCommonConfig;
+
+	@Autowired
+	private AdminSessionService sessionService;
 
 	private long getVersion() {
 		return System.currentTimeMillis() / 300000;
@@ -150,10 +154,12 @@ public class AdminAuthController {
 		ApiResponse<Map<String, Object>, AgentResponseAuthDto> x = agentLogin(username, password, true);
 		if (ArgUtil.parseAsBoolean(x.getData().get("success"), false)) {
 			x.redirectUrl(appConfig.getAppPrefix() + "/app/home");
-			UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(username, password);
+			UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(
+					x.getMeta().getAgent_code(), password);
 			token.setDetails(new WebAuthenticationDetails(request));
 			Authentication authentication = adminAuthProvider.authenticate(token);
 			SecurityContextHolder.getContext().setAuthentication(authentication);
+			sessionService.updateLogin(x.getMeta());
 			x.setStatusKey("SUCCESS");
 		} else {
 			x.redirectUrl(appConfig.getAppPrefix() + "/auth/login?error");

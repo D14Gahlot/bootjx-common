@@ -34,6 +34,9 @@ public class AdminManager {
 	AgentStore agentStore;
 
 	public List<AgentDoc> saveAgent(AgentDoc agent) {
+		
+		AppContextUtil.getActorId();
+		
 		List<AgentDoc> lstAgent = new ArrayList<AgentDoc>();
 		if (agent != null && (ArgUtil.isEmpty(agent.getAgent_id()) || agent.getAgent_id().equals("0"))) {
 			agent.setIsactive("Y");
