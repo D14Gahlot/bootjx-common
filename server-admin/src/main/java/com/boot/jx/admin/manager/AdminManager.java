@@ -20,6 +20,8 @@ import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.common.doc.AgentDoc;
 import com.boot.jx.common.doc.DepartmentDoc;
 import com.boot.jx.common.store.AgentStore;
+import com.boot.jx.logger.AuditDetailProvider;
+import com.boot.jx.mongo.UtilityMongoTemplate;
 import com.boot.utils.ArgUtil;
 
 @Component
@@ -33,31 +35,42 @@ public class AdminManager {
 	@Autowired
 	AgentStore agentStore;
 
-	public List<AgentDoc> saveAgent(AgentDoc agent) {
-		
-		AppContextUtil.getActorId();
-		
-		List<AgentDoc> lstAgent = new ArrayList<AgentDoc>();
-		if (agent != null && (ArgUtil.isEmpty(agent.getAgent_id()) || agent.getAgent_id().equals("0"))) {
+	@Autowired
+	AuditDetailProvider auditDetailProvider;
+
+	@Autowired
+	UtilityMongoTemplate utilityMongoTemplate;
+
+	public List<AgentDoc> createOrUpdateAgent(AgentDoc agent) {
+
+		if (ArgUtil.isEmpty(agent)) {
+			ApiResponseUtil.throwException("Input Required");
+		}
+
+		if ((ArgUtil.isEmpty(agent.getAgent_id()) || agent.getAgent_id().equals("0"))) {
 			agent.setIsactive("Y");
 			agent.setModified_date(null);
 			agent.setAgent_id(null);
+			agent.setCreate_by(auditDetailProvider.getAuditUser());
+			agent.setCreatedStamp(System.currentTimeMillis());
 		} else {
-			agent.setAgent_id(agent.getAgent_id());
-			agent.setModified_date(new Date());
+			agent.setModifiedStamp(System.currentTimeMillis());
+			agent.setModified_by(auditDetailProvider.getAuditUser());
 		}
-
 		if (ArgUtil.isEmpty(agent.getAgent_code()) || ArgUtil.isEmpty(agent.getDept_id())
 				|| ArgUtil.isEmpty(agent.getAgent_name())) {
 			ApiResponseUtil.throwException("All Inputs Required");
 		}
 
-		if (ArgUtil.is(agent)) {
-			mongoTemplate.save(agent);
+		AgentDoc oldAgent = utilityMongoTemplate.findById(agent.getAgent_id(), AgentDoc.class);
+		if (ArgUtil.is(oldAgent)) {
+			if (!oldAgent.getAgent_code().equals(agent.getAgent_code()))
+				ApiResponseUtil.throwException("Agent Code cannot be Modified");
+			agent.oldVersion(oldAgent);
 		}
+		mongoTemplate.save(agent);
 
-		lstAgent = fetchAgentList(null);
-		return lstAgent;
+		return fetchAgentList(null);
 	}
 
 	public List<AgentDoc> fetchAgentList(String agentId) {
@@ -97,28 +110,43 @@ public class AdminManager {
 		return agentList;
 	}
 
-	public List<DepartmentDoc> createAndUpdateDepartment(DepartmentDoc dept) {
-		List<DepartmentDoc> lstDept = new ArrayList<DepartmentDoc>();
+	public List<DepartmentDoc> createOrUpdateDepartment(DepartmentDoc dept) {
+		if (ArgUtil.isEmpty(dept)) {
+			ApiResponseUtil.throwException("Input Required");
+		}
+
 		if (dept != null && (ArgUtil.isEmpty(dept.getDept_id()) || dept.getDept_id().equals("0"))) {
 			dept.setIsactive("Y");
 			dept.setModified_date(null);
 			dept.setDept_id(null);
+			dept.setCreatedStamp(System.currentTimeMillis());
+			dept.setCreate_by(auditDetailProvider.getAuditUser());
+
 		} else {
 			dept.setDept_id(dept.getDept_id());
 			dept.setModified_date(new Date());
+			dept.setModifiedStamp(System.currentTimeMillis());
+			dept.setModified_by(auditDetailProvider.getAuditUser());
 		}
-		if (ArgUtil.is(dept)) {
-			if (!ArgUtil.is(dept.getDept_email())) {
-				dept.setDept_email(dept.getDept_name() + "@" + AppContextUtil.getTenant());
-			}
 
-			if (ArgUtil.isEmpty(dept.getDept_name()) || ArgUtil.isEmpty(dept.getDept_code())) {
-				ApiResponseUtil.throwException("All Inputs Required");
-			}
-			mongoTemplate.save(dept);
+		if (!ArgUtil.is(dept.getDept_email())) {
+			dept.setDept_email(dept.getDept_name() + "@" + AppContextUtil.getTenant());
 		}
-		lstDept = fetchDept(null);
-		return lstDept;
+
+		if (ArgUtil.isEmpty(dept.getDept_name()) || ArgUtil.isEmpty(dept.getDept_code())) {
+			ApiResponseUtil.throwException("All Inputs Required");
+		}
+
+		DepartmentDoc oldDept = utilityMongoTemplate.findById(dept.getDept_id(), DepartmentDoc.class);
+		if (ArgUtil.is(oldDept)) {
+
+			if (!oldDept.getDept_code().equals(dept.getDept_code()))
+				ApiResponseUtil.throwException("Team Code cannot be Modified");
+
+			dept.oldVersion(oldDept);
+		}
+		mongoTemplate.save(dept);
+		return fetchDept(null);
 	}
 
 	public List<DepartmentDoc> fetchDept(String deptId) {
@@ -147,91 +175,11 @@ public class AdminManager {
 		return lstDept;
 	}
 
-	/*
-	 * public List<AgentResponseDto> saveAgent(AgentRequestDto reqDto){
-	 * List<AgentResponseDto> agentList = new ArrayList<AgentResponseDto>(); Agent
-	 * agent = new Agent(); if(reqDto!=null && reqDto.getAgent_id()==0) {
-	 * agent.setAgent_code(reqDto.getAgent_code());
-	 * agent.setAgent_department(reqDto.getAgent_department());
-	 * agent.setAgent_email(reqDto.getAgent_email());
-	 * agent.setAgent_name(reqDto.getAgent_name()); agent.setCreated_date(new
-	 * Date()); agent.setIsactive("Y"); }else { agent =
-	 * agentRepository.findOne(reqDto.getAgent_id());
-	 * if(ArgUtil.is(reqDto.getAgent_department())) {
-	 * agent.setAgent_department(reqDto.getAgent_department()); }
-	 * if(ArgUtil.is(reqDto.getAgent_email())){
-	 * agent.setAgent_email(reqDto.getAgent_email()); }
-	 * if(ArgUtil.is(reqDto.getAgent_name())){
-	 * agent.setAgent_name(reqDto.getAgent_name()); } agent.setModified_date(new
-	 * Date()); } if(ArgUtil.is(agent)) { agentRepository.save(agent); }
-	 * agentList=fetchAgentList(null); return agentList; }
-	 */
-	/*
-	 * public List<AgentResponseDto> fetchAgentList(Integer agentId){ List<Agent>
-	 * agentLst = null; List<AgentResponseDto> agentList=new
-	 * ArrayList<AgentResponseDto>(); if(agentId!=null && agentId>0) { Agent agent =
-	 * agentRepository.findOne(agentId); agentList.add(copyAgent(agent)); }else {
-	 * agentLst = agentRepository.findAll(); agentList = getAgents(agentLst); }
-	 * return agentList; }
-	 */
-
-	/*
-	 * public List<AgentResponseDto> updateAgentStatus(Integer agentId,String
-	 * status) { List<AgentResponseDto> agentList=new ArrayList<AgentResponseDto>();
-	 * if(ArgUtil.is(agentId) && ArgUtil.is(status)) { Agent agent =
-	 * agentRepository.findOne(agentId); if(ArgUtil.is(agent)) {
-	 * agent.setIsactive(status); agentRepository.save(agent); } }
-	 * agentList=fetchAgentList(null); return agentList; }
-	 */
-
-	/*
-	 * public List<DepartmentResponseDto> updateDeptStatus(Integer deptId,String
-	 * status) { List<DepartmentResponseDto> deptList=new
-	 * ArrayList<DepartmentResponseDto>(); if(ArgUtil.is(deptId) &&
-	 * ArgUtil.is(status)) { Department dept = departmentRepository.findOne(deptId);
-	 * if(ArgUtil.is(dept)) { dept.setIsactive(status);
-	 * departmentRepository.save(dept); } } deptList=fetchDept(null); return
-	 * deptList; }
-	 */
-
-	/** create department **/
-	/*
-	 * public List<DepartmentResponseDto>
-	 * createAndUpdateDepartment(DepartmentRequestDto deptReqDto){
-	 * List<DepartmentResponseDto> lstDept = new ArrayList<DepartmentResponseDto>();
-	 * Department dept = new Department(); if(deptReqDto!=null &&
-	 * deptReqDto.getDept_id()==0) { dept.setDept_code(deptReqDto.getDeptCode());
-	 * dept.setDept_name(deptReqDto.getDeptName());
-	 * dept.setDept_email(deptReqDto.getDeptEmail()); dept.setCreated_date(new
-	 * Date()); dept.setIsactive("Y"); }else { dept =
-	 * departmentRepository.findOne(deptReqDto.getDept_id()); if(ArgUtil.is(dept)) {
-	 * if(ArgUtil.is(deptReqDto.getDeptCode())) {
-	 * dept.setDept_code(deptReqDto.getDeptCode()); }
-	 * if(ArgUtil.is(deptReqDto.getDeptEmail())) {
-	 * dept.setDept_email(deptReqDto.getDeptEmail()); }
-	 * if(ArgUtil.is(deptReqDto.getDeptName())) {
-	 * dept.setDept_name(deptReqDto.getDeptName()); } dept.setModified_date(new
-	 * Date()); } }
-	 * 
-	 * if(ArgUtil.is(dept)) { departmentRepository.save(dept); } lstDept =
-	 * fetchDept(null); return lstDept; }
-	 */
-
 	public List<AgentResponseAdminDto> fetchAgent() {
 		List<AgentDoc> agent = mongoTemplate.findAll(AgentDoc.class);
 		List<AgentResponseAdminDto> agentList = getAgents(agent);
 		return agentList;
 	}
-
-	/*
-	 * public List<DepartmentResponseDto> fetchDept(Integer deptId){
-	 * List<DepartmentResponseDto> deptResList =new
-	 * ArrayList<DepartmentResponseDto>(); if(deptId!=null && deptId>0) { Department
-	 * dept = departmentRepository.findOne(deptId); DepartmentResponseDto deptRes=
-	 * copyDept(dept); deptResList.add(deptRes); }else { List<Department> lstDept =
-	 * departmentRepository.findAll(); deptResList = getDepartmets(lstDept); }
-	 * return deptResList; }
-	 */
 
 	public List<AgentResponseAdminDto> getAgents(List<AgentDoc> agentList) {
 		List<AgentResponseAdminDto> agentLst = new ArrayList<AgentResponseAdminDto>();
@@ -280,6 +228,5 @@ public class AdminManager {
 		}
 		return dto;
 	}
-
 
 }

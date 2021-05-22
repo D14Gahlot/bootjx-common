@@ -41,13 +41,13 @@ public class AdminService {
 
 	public List<AgentResponseAdminDto> createOrUpdateAgent(AgentResponseAdminDto reqDto) {
 		AgentDoc reqEntity = EntityDtoUtil.dtoToEntity(reqDto, new AgentDoc());
-		List<AgentDoc> lstOfAgent = adminManager.saveAgent(reqEntity);
+		List<AgentDoc> lstOfAgent = adminManager.createOrUpdateAgent(reqEntity);
 		return buildAgentDto(lstOfAgent);
 	}
 
 	public List<DepartmentResponseAdminDto> createOrUpdateDept(DepartmentResponseAdminDto dto) {
 		DepartmentDoc reqEntity = EntityDtoUtil.dtoToEntity(dto, new DepartmentDoc());
-		return new DepartmentResponseAdminDto().importFrom(adminManager.createAndUpdateDepartment(reqEntity));
+		return new DepartmentResponseAdminDto().importFrom(adminManager.createOrUpdateDepartment(reqEntity));
 	}
 
 	public List<DepartmentResponseAdminDto> fetchDepts(String deptId) {
@@ -64,7 +64,7 @@ public class AdminService {
 	}
 
 	public List<DepartmentDoc> createAndUpdateDepartment(DepartmentDoc deptReqDto) {
-		List<DepartmentDoc> lstDept = adminManager.createAndUpdateDepartment(deptReqDto);
+		List<DepartmentDoc> lstDept = adminManager.createOrUpdateDepartment(deptReqDto);
 		return lstDept;
 	}
 

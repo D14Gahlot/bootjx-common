@@ -264,7 +264,9 @@ public class AppContextUtil {
 	}
 
 	public static void setActorId(Object actorId) {
-		ContextUtil.map().put(AppConstants.ACTOR_ID_XKEY, actorId);
+		if (ArgUtil.is(actorId)) {
+			ContextUtil.map().put(AppConstants.ACTOR_ID_XKEY, actorId);
+		}
 	}
 
 	public static void setLang(Object lang) {
