@@ -54,7 +54,7 @@ public class ChatDTOUtil {
 		messageDto.setStatus(messageDoc.getStatus());
 		messageDto.setStamps(messageDoc.getStamps());
 
-		if (ArgUtil.is(messageDto.getStamps()) && ArgUtil.is(messageDto.getStatus())) {
+		if (ArgUtil.isEmpty(messageDto.getStamps()) && ArgUtil.is(messageDto.getStatus())) {
 			Map<String, Long> stamps = new HashMap<String, Long>();
 			stamps.put(messageDto.getStatus(), messageDto.getTimestamp());
 			messageDto.setStamps(stamps);
