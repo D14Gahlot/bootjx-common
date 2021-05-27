@@ -5,12 +5,16 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Component;
+import org.telegram.telegrambots.meta.api.objects.PhotoSize;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
 import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorHandler;
 import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorMapping;
 import com.boot.jx.dict.ContactType;
+import com.boot.jx.dict.FileFormat;
 import com.boot.jx.dict.FileType;
+import com.boot.jx.model.CommonFile;
+import com.boot.jx.postman.client.PMFileStoreClient;
 import com.boot.jx.postman.client.TmplClient;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
@@ -19,6 +23,8 @@ import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.tg.TelegramClient;
+import com.boot.jx.postman.tg.TelegramModels.TGFile;
+import com.boot.jx.utils.PostManUtil;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.JsonUtil;
 
@@ -36,6 +42,9 @@ public class TelegramConnector implements ConnectorHandler {
 
 	@Autowired
 	private TmplClient tmplClient;
+
+	@Autowired
+	private PMFileStoreClient pmFileStoreClient;
 
 	public void send(OutboxMessage outboxMessage) {
 		try {
@@ -74,10 +83,31 @@ public class TelegramConnector implements ConnectorHandler {
 		if (ArgUtil.is(update.getMessage())) {
 			inboxMessage.setMessageIdExt(ArgUtil.parseAsString(update.getMessage().getMessageId()));
 			inboxMessage.setMessage(update.getMessage().getText());
+
+			if (ArgUtil.is(update.getMessage().getPhoto())) {
+				for (PhotoSize photo : update.getMessage().getPhoto()) {
+					TGFile file = telegramClient.getFile(lane, photo.getFileId());
+					/**
+					 * Telegram Does not provide Image, so explicitly set Image File Type
+					 */
+					CommonFile srcFile = new CommonFile().url(file.getFileUrl()).fileType(FileType.IMAGE);
+					CommonFile dstFile = pmFileStoreClient.createSessionFile(srcFile,
+							PostManUtil.createContactId(inboxMessage), inboxMessage.getMessageIdExt());
+					pmFileStoreClient.commitSessionFile(srcFile, dstFile);
+
+					inboxMessage.attachment(new Attachment().mediaURL(dstFile.getUrl()).mediaType(dstFile.getFileType())
+							.mediaSrc(srcFile.getUrl()).mediaCaption(update.getMessage().getCaption()));
+
+					break;
+					// telegramClient.sendDocument(lane, id, document, caption)
+				}
+			}
+
 		}
 		inboxMessage.setOriginalMessage(update);
 		inboxMessage.setContactType(ContactType.TELEGRAM);
 		inboxMessage.setLane(lane);
+
 		return inboxMessage;
 	}
 
@@ -93,6 +123,7 @@ public class TelegramConnector implements ConnectorHandler {
 				contact.setName(update.getMessage().getFrom().getFirstName() + " "
 						+ update.getMessage().getFrom().getLastName());
 				contact.setPhone(update.getMessage().getContact().getPhoneNumber());
+
 			}
 
 		}

@@ -1,11 +1,14 @@
 package com.boot.jx.model;
 
+import java.io.BufferedInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
 import java.net.URL;
+import java.net.URLConnection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -309,7 +312,15 @@ public class CommonFile implements Serializable {
 			File file = File.createTempFile("tmp", "." + this.getExtension());
 			byte[] binary = IOUtils.toByteArray(inputStream);
 			FileUtils.writeByteArrayToFile(file, binary);
-			UploadedMultipartFile multipartFile = new UploadedMultipartFile(file, file.length(), this.getContentType(),
+
+			String mimeType = this.getContentType();
+			if (!ArgUtil.is(this.getFileFormat())) {
+				InputStream is = new BufferedInputStream(new FileInputStream(file));
+				mimeType = URLConnection.guessContentTypeFromStream(is);
+				this.setFileFormat(FileFormat.from(mimeType));
+			}
+
+			UploadedMultipartFile multipartFile = new UploadedMultipartFile(file, file.length(), mimeType,
 					"formParameter", this.getName());
 			return multipartFile;
 		} catch (IOException e) {

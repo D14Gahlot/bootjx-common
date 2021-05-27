@@ -37,18 +37,13 @@ public class AWSFileStore {
 			String contentType) {
 		FileFormat fileFormat = FileFormat.from(contentType);
 
-		// Check if the file is an image
-		if (!ArgUtil.is(fileFormat)) {
-			throw new IllegalStateException("File uploaded is not an accepted format");
-		}
-
 		// Save Image in S3 and then save Todo in the database
 
 		String fileNameNow = String.format("%s", fileName);
 
 		return new CommonFile()
 				.url(String.format("http://%s.s3.amazonaws.com/%s/%s", bucketName, pathFolder, fileNameNow))
-				.path(pathFolder).name(fileNameNow).fileType(fileFormat.getFileType()).format(fileFormat);
+				.path(pathFolder).name(fileNameNow).format(fileFormat);
 	}
 
 	private CommonFile commitFile(AmazonS3 amazonS3, String bucketName, CommonFile dstFile, MultipartFile file) {
@@ -56,6 +51,15 @@ public class AWSFileStore {
 		if (file.isEmpty()) {
 			throw new IllegalStateException("Cannot upload empty file");
 		}
+
+		FileFormat fileFormat = FileFormat.from(file.getContentType());
+		dstFile.setFileFormat(fileFormat);
+
+		// Check if the file is an image
+		if (!ArgUtil.is(dstFile.getFileFormat())) {
+			throw new IllegalStateException("File uploaded is not an accepted format");
+		}
+
 
 		// get file metadata
 		ObjectMetadata objectMetadata = new ObjectMetadata();

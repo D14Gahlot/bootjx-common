@@ -55,7 +55,7 @@ public class WAGupShupConnector implements ConnectorHandler {
 	private TmplClient tmplClient;
 
 	@Autowired
-	PMFileStoreClient pmFileStoreClient;
+	private PMFileStoreClient pmFileStoreClient;
 
 	@Override
 	public void send(ChatContactDoc chatContactDoc, OutboxMessage outboxMessage) {

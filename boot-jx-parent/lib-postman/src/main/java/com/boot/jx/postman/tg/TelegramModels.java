@@ -26,7 +26,32 @@ public class TelegramModels {
 	@JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
 	public static class TGMessage extends org.telegram.telegrambots.meta.api.objects.Message {
 		private static final long serialVersionUID = 1L;
+	}
+
+	@JsonInclude(Include.NON_NULL)
+	@JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
+	public static class TGFile extends org.telegram.telegrambots.meta.api.objects.File {
+		private static final long serialVersionUID = 1L;
+		String fileUrl;
+
+		public String getFileUrl() {
+			return fileUrl;
+		}
+
+		public void setFileUrl(String fileUrl) {
+			this.fileUrl = fileUrl;
+		}
+
+		public TGFile updateFileUrl(String botToken) {
+			this.fileUrl = this.getFileUrl(botToken);
+			return this;
+		}
 
 	}
 
+	@JsonInclude(Include.NON_NULL)
+	@JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
+	public static class TGGetFile extends org.telegram.telegrambots.meta.api.methods.GetFile {
+
+	}
 }
