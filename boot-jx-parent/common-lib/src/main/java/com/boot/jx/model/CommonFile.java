@@ -1,20 +1,28 @@
 package com.boot.jx.model;
 
+import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.xml.bind.DatatypeConverter;
 
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
+import org.springframework.integration.http.multipart.UploadedMultipartFile;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.boot.jx.dict.FileFormat;
 import com.boot.jx.dict.FileType;
 import com.boot.jx.dict.Language;
 import com.boot.jx.logger.LoggerService;
+import com.boot.utils.ArgUtil;
 import com.boot.utils.JsonUtil;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -48,6 +56,7 @@ public class CommonFile implements Serializable {
 	private String title;
 	protected FileFormat fileFormat;
 	private FileType fileType;
+	private String extension;
 	private String password;
 	private String url;
 	private String template = null;
@@ -160,7 +169,32 @@ public class CommonFile implements Serializable {
 	}
 
 	public FileType getFileType() {
-		return fileType;
+		if (ArgUtil.is(this.fileType)) {
+			return this.fileType;
+		} else if (ArgUtil.is(this.fileFormat)) {
+			return this.fileFormat.getFileType();
+		}
+		return this.fileType;
+	}
+
+	public String getContentType() {
+		if (ArgUtil.is(this.fileFormat)) {
+			return this.fileFormat.getContentType();
+		}
+		return null;
+	}
+
+	public void setExtension(String extension) {
+		this.extension = extension;
+	}
+
+	public String getExtension() {
+		if (ArgUtil.is(this.extension)) {
+			return this.extension;
+		} else if (ArgUtil.is(this.fileFormat)) {
+			return this.fileFormat.name().toLowerCase();
+		}
+		return this.extension;
 	}
 
 	public void setFileType(FileType fileType) {
@@ -180,6 +214,7 @@ public class CommonFile implements Serializable {
 		return this;
 	}
 
+	@Deprecated
 	public CommonFile type(FileFormat fileFormat) {
 		this.setFileFormat(fileFormat);
 		return this;
@@ -187,6 +222,11 @@ public class CommonFile implements Serializable {
 
 	public CommonFile fileType(FileType fileType) {
 		this.setFileType(fileType);
+		return this;
+	}
+
+	public CommonFile format(FileFormat format) {
+		this.setFileFormat(format);
 		return this;
 	}
 
@@ -261,6 +301,21 @@ public class CommonFile implements Serializable {
 		file.setFileFormat(extension);
 		file.setBody(DatatypeConverter.parseBase64Binary(dataPart));
 		return file;
+	}
+
+	public MultipartFile toMultipartFile() {
+		try {
+			InputStream inputStream = new URL(this.url).openStream();
+			File file = File.createTempFile("tmp", "." + this.getExtension());
+			byte[] binary = IOUtils.toByteArray(inputStream);
+			FileUtils.writeByteArrayToFile(file, binary);
+			UploadedMultipartFile multipartFile = new UploadedMultipartFile(file, file.length(), this.getContentType(),
+					"formParameter", this.getName());
+			return multipartFile;
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return null;
 	}
 
 }

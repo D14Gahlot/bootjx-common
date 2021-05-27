@@ -31,6 +31,7 @@ import com.boot.jx.chat.ChatService;
 import com.boot.jx.common.doc.AgentDoc;
 import com.boot.jx.common.store.AgentStore;
 import com.boot.jx.model.CommonFile;
+import com.boot.jx.postman.client.PMFileStoreClient;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.QuickAction;
@@ -141,16 +142,21 @@ public class MsgController {
 	@Autowired
 	AWSFileStore fileStore;
 
+	@Autowired
+	PMFileStoreClient pmFileStoreClient;
+
 	@ResponseBody
 	@RequestMapping(value = "/api/sessions/message/upload", method = { RequestMethod.POST })
 	public ApiResponse<ChatMessageDTO, Object> uploadSessionFile(@RequestParam String message,
 			@RequestParam(name = "file") MultipartFile file) throws InterruptedException {
 		OutboxMessage outboxMessage = JsonUtil.parse(message, OutboxMessage.class);
-		CommonFile f = fileStore.upload2(file,
-				String.format("%s/session/%s", AppContextUtil.getTenant(), outboxMessage.getSessionId()),
-				String.format("%s_%s", outboxMessage.getMessageIdRef(), file.getOriginalFilename()));
+
+		CommonFile f = pmFileStoreClient.uploadSessionFile(file, outboxMessage.getSessionId(),
+				outboxMessage.getMessageIdRef());
+
 		outboxMessage.attachment(new Attachment().mediaURL(f.getUrl()).mediaType(f.getFileType())
 				.mediaCaption(ArgUtil.nonEmpty(outboxMessage.getSubject(), file.getOriginalFilename())));
+
 		return sendSessionMessage(outboxMessage);
 	}
 

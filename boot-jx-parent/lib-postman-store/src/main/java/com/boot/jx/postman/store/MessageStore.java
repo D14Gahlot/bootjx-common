@@ -48,6 +48,10 @@ public class MessageStore extends CommonDocStore {
 		doc.setSessionId(inboxMessage.getSessionId());
 		doc.setTags(inboxMessage.getTags());
 		doc.setMessageIdExt(inboxMessage.getMessageIdExt());
+
+		// Additonals
+		doc.setAttachments(inboxMessage.getAttachments());
+
 		return doc;
 	}
 

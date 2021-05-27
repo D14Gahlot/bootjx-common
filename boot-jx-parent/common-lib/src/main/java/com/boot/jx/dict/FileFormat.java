@@ -43,7 +43,12 @@ public enum FileFormat implements EnumType {
 		return TYPEMAP.get(contentType);
 	}
 
-	public FileType getFormatType() {
+	/**
+	 * IMAGE,TEXT, DOCUMENT,VIDEO
+	 * 
+	 * @return
+	 */
+	public FileType getFileType() {
 		return fileType;
 	}
 

@@ -10,7 +10,10 @@ import org.springframework.stereotype.Component;
 import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorHandler;
 import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorMapping;
 import com.boot.jx.dict.ContactType;
+import com.boot.jx.dict.FileFormat;
 import com.boot.jx.dict.FileType;
+import com.boot.jx.model.CommonFile;
+import com.boot.jx.postman.client.PMFileStoreClient;
 import com.boot.jx.postman.client.TmplClient;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
@@ -27,6 +30,7 @@ import com.boot.jx.postman.model.Message;
 import com.boot.jx.postman.model.Message.Status;
 import com.boot.jx.postman.model.MessageReport;
 import com.boot.jx.postman.model.OutboxMessage;
+import com.boot.jx.utils.PostManUtil;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
 import com.boot.utils.JsonUtil;
@@ -49,6 +53,9 @@ public class WAGupShupConnector implements ConnectorHandler {
 
 	@Autowired
 	private TmplClient tmplClient;
+
+	@Autowired
+	PMFileStoreClient pmFileStoreClient;
 
 	@Override
 	public void send(ChatContactDoc chatContactDoc, OutboxMessage outboxMessage) {
@@ -110,6 +117,30 @@ public class WAGupShupConnector implements ConnectorHandler {
 		inboxMessage.setTo(inbound.getWaNumber());
 		inboxMessage.setMessageIdExt(inbound.getReplyId());
 		inboxMessage.setLane(inbound.getWaNumber());
+
+		if (ArgUtil.is(inbound.getImage())) {
+			CommonFile srcFile = new CommonFile().url(inbound.getImage().getUrl() + inbound.getImage().getSignature())
+					.format(FileFormat.from(inbound.getImage().getMimeType()));
+
+			CommonFile dstFile = pmFileStoreClient.createSessionFile(srcFile, PostManUtil.createContactId(inboxMessage),
+					inboxMessage.getMessageIdExt());
+			pmFileStoreClient.commitSessionFile(srcFile, dstFile);
+
+			inboxMessage.attachment(new Attachment().mediaURL(dstFile.getUrl()).mediaType(dstFile.getFileType())
+					.mediaSrc(srcFile.getUrl()).mediaCaption(inbound.getImage().getCaption()));
+		} else if (ArgUtil.is(inbound.getDocument())) {
+			CommonFile srcFile = new CommonFile()
+					.url(inbound.getDocument().getUrl() + inbound.getDocument().getSignature())
+					.format(FileFormat.from(inbound.getDocument().getMimeType()));
+
+			CommonFile dstFile = pmFileStoreClient.createSessionFile(srcFile, PostManUtil.createContactId(inboxMessage),
+					inboxMessage.getMessageIdExt());
+			pmFileStoreClient.commitSessionFile(srcFile, dstFile);
+
+			inboxMessage.attachment(new Attachment().mediaURL(dstFile.getUrl()).mediaType(dstFile.getFileType())
+					.mediaSrc(srcFile.getUrl()).mediaCaption(inbound.getDocument().getCaption()));
+		}
+
 		return inboxMessage;
 	}
 
@@ -124,7 +155,7 @@ public class WAGupShupConnector implements ConnectorHandler {
 			MessageReport report = new MessageReport();
 			report.setContactType(ContactType.WHATSAPP);
 			report.setTimestamp(gupShupDelivery.getEventTs());
-			
+
 			report.setMessageIdExt(gupShupDelivery.getExternalId());
 			String[] x = gupShupDelivery.getExternalId().split("-");
 			if (x.length == 2) {

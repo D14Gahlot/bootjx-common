@@ -57,12 +57,13 @@ public class InBoundControllerWA {
 
 	// @ApiRequest(feature = "WA_GUPSHUP_INBOUND")
 	@ApiVendorHeaders
-	@RequestMapping(value = "/ext/inbound/gupshup/callback", method = { RequestMethod.POST, RequestMethod.GET })
+	@RequestMapping(value = "/ext/inbound/gupshup/callback", method = { RequestMethod.POST, RequestMethod.GET,
+			RequestMethod.PUT })
 	public InboxMessage onReceiveMessage(
 			@RequestBody(required = false) Optional<Map<String, Object>> inboundMapOptional,
 			@RequestParam(required = false, defaultValue = "false") boolean routed) throws InterruptedException {
 		if (inboundMapOptional.isPresent()) {
-			extracted(inboundMapOptional.get());
+			return extracted(inboundMapOptional.get());
 		}
 		return null;
 	}

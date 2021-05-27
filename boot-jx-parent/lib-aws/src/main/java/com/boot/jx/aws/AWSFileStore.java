@@ -2,12 +2,9 @@ package com.boot.jx.aws;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -17,7 +14,6 @@ import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectInputStream;
 import com.amazonaws.util.IOUtils;
-import com.boot.jx.AppContextUtil;
 import com.boot.jx.dict.FileFormat;
 import com.boot.jx.model.CommonFile;
 import com.boot.utils.ArgUtil;
@@ -37,39 +33,51 @@ public class AWSFileStore {
 		}
 	}
 
-	private CommonFile upload(AmazonS3 amazonS3, String bucketName, String pathFolder, String fileName,
-			MultipartFile file) {
-		// check if the file is empty
-		if (file.isEmpty()) {
-			throw new IllegalStateException("Cannot upload empty file");
-		}
-
-		FileFormat fileFormat = FileFormat.from(file.getContentType());
+	private CommonFile createFile(AmazonS3 amazonS3, String bucketName, String pathFolder, String fileName,
+			String contentType) {
+		FileFormat fileFormat = FileFormat.from(contentType);
 
 		// Check if the file is an image
 		if (!ArgUtil.is(fileFormat)) {
 			throw new IllegalStateException("File uploaded is not an accepted format");
 		}
 
-		// get file metadata
-		ObjectMetadata objectMetadata =  new ObjectMetadata();
-		Map<String, String> metadata = new HashMap<>();
-		objectMetadata.setContentType(file.getContentType());
-		objectMetadata.setContentLength(file.getSize());
-	
-		
 		// Save Image in S3 and then save Todo in the database
 
-		String path = String.format("%s/%s", bucketName, pathFolder);
 		String fileNameNow = String.format("%s", fileName);
+
+		return new CommonFile()
+				.url(String.format("http://%s.s3.amazonaws.com/%s/%s", bucketName, pathFolder, fileNameNow))
+				.path(pathFolder).name(fileNameNow).fileType(fileFormat.getFileType()).format(fileFormat);
+	}
+
+	private CommonFile commitFile(AmazonS3 amazonS3, String bucketName, CommonFile dstFile, MultipartFile file) {
+		// check if the file is empty
+		if (file.isEmpty()) {
+			throw new IllegalStateException("Cannot upload empty file");
+		}
+
+		// get file metadata
+		ObjectMetadata objectMetadata = new ObjectMetadata();
+		objectMetadata.setContentType(file.getContentType());
+		objectMetadata.setContentLength(file.getSize());
+
+		// Save Image in S3 and then save Todo in the database
+		String bucketPath = String.format("%s/%s", bucketName, dstFile.getPath());
+
 		try {
-			upload(amazonS3, path, fileNameNow, objectMetadata, file.getInputStream());
+			upload(amazonS3, bucketPath, dstFile.getName(), objectMetadata, file.getInputStream());
 		} catch (IOException e) {
 			throw new IllegalStateException("Failed to upload file", e);
 		}
-		return new CommonFile()
-				.url(String.format("http://%s.s3.amazonaws.com/%s/%s", bucketName, pathFolder, fileNameNow))
-				.path(pathFolder).name(fileNameNow).fileType(fileFormat.getFormatType());
+
+		return dstFile;
+	}
+
+	private CommonFile upload(AmazonS3 amazonS3, String bucketName, String pathFolder, String fileName,
+			MultipartFile file) {
+		CommonFile dstFile = createFile(amazonS3, bucketName, pathFolder, fileName, file.getContentType());
+		return commitFile(amazonS3, bucketName, dstFile, file);
 	}
 
 	public CommonFile upload1(MultipartFile file, String pathFolder, String fileName) {
@@ -80,14 +88,20 @@ public class AWSFileStore {
 		return upload(awsConfig.getS3B2(), awsConfig.getS3B2Name(), pathFolder, fileName, file);
 	}
 
-	public CommonFile upload1(MultipartFile file) {
-		String pathFolder = String.format("%s/%s", AppContextUtil.getTenant(), UUID.randomUUID());
-		return upload1(file, pathFolder, file.getOriginalFilename());
+	public CommonFile createFile2(CommonFile srcFile, String pathFolder, String fileName) {
+		return createFile(awsConfig.getS3B2(), awsConfig.getS3B2Name(), pathFolder, fileName, srcFile.getContentType());
 	}
 
-	public CommonFile upload2(MultipartFile file) {
-		String pathFolder = String.format("%s/%s", AppContextUtil.getTenant(), UUID.randomUUID());
-		return upload2(file, pathFolder, file.getOriginalFilename());
+	@Async
+	public CommonFile commitFile2(MultipartFile srcFile, CommonFile dstFile) {
+		return commitFile(awsConfig.getS3B2(), awsConfig.getS3B2Name(), dstFile, srcFile);
+	}
+
+	@Async
+	public CommonFile commitFile2(CommonFile srcFile, CommonFile dstFile) {
+		MultipartFile srcMultipartFile = new CommonFile().url(srcFile.getUrl()).format(dstFile.getFileFormat())
+				.name(dstFile.getName()).toMultipartFile();
+		return commitFile(awsConfig.getS3B2(), awsConfig.getS3B2Name(), dstFile, srcMultipartFile);
 	}
 
 	public byte[] download1(String pathFolder, String key) {
@@ -100,4 +114,5 @@ public class AWSFileStore {
 			throw new IllegalStateException("Failed to download the file", e);
 		}
 	}
+
 }
