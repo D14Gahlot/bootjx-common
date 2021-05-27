@@ -57,4 +57,10 @@ public class PMFileStoreClient {
 		MultipartFile multiParFile = toMultipartFile(srcFile);
 		return uploadSessionFile(multiParFile, sessionId, fileId);
 	}
+
+	public CommonFile uploadSessionFileAsync(CommonFile srcFile, String sessionId, String fileId) {
+		CommonFile dstFile = createSessionFile(srcFile, sessionId, fileId);
+		commitSessionFile(srcFile, dstFile);
+		return dstFile;
+	}
 }

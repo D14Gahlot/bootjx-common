@@ -120,22 +120,20 @@ public class WAGupShupConnector implements ConnectorHandler {
 
 		if (ArgUtil.is(inbound.getImage())) {
 			CommonFile srcFile = new CommonFile().url(inbound.getImage().getUrl() + inbound.getImage().getSignature())
-					.format(FileFormat.from(inbound.getImage().getMimeType()));
+					.fileType(FileType.IMAGE).format(FileFormat.from(inbound.getImage().getMimeType()));
 
-			CommonFile dstFile = pmFileStoreClient.createSessionFile(srcFile, PostManUtil.createContactId(inboxMessage),
-					inboxMessage.getMessageIdExt());
-			pmFileStoreClient.commitSessionFile(srcFile, dstFile);
+			CommonFile dstFile = pmFileStoreClient.uploadSessionFileAsync(srcFile,
+					PostManUtil.createContactId(inboxMessage), inboxMessage.getMessageIdExt());
 
 			inboxMessage.attachment(new Attachment().mediaURL(dstFile.getUrl()).mediaType(dstFile.getFileType())
 					.mediaSrc(srcFile.getUrl()).mediaCaption(inbound.getImage().getCaption()));
 		} else if (ArgUtil.is(inbound.getDocument())) {
 			CommonFile srcFile = new CommonFile()
 					.url(inbound.getDocument().getUrl() + inbound.getDocument().getSignature())
-					.format(FileFormat.from(inbound.getDocument().getMimeType()));
+					.fileType(FileType.DOCUMENT).format(FileFormat.from(inbound.getDocument().getMimeType()));
 
-			CommonFile dstFile = pmFileStoreClient.createSessionFile(srcFile, PostManUtil.createContactId(inboxMessage),
-					inboxMessage.getMessageIdExt());
-			pmFileStoreClient.commitSessionFile(srcFile, dstFile);
+			CommonFile dstFile = pmFileStoreClient.uploadSessionFileAsync(srcFile,
+					PostManUtil.createContactId(inboxMessage), inboxMessage.getMessageIdExt());
 
 			inboxMessage.attachment(new Attachment().mediaURL(dstFile.getUrl()).mediaType(dstFile.getFileType())
 					.mediaSrc(srcFile.getUrl()).mediaCaption(inbound.getDocument().getCaption()));

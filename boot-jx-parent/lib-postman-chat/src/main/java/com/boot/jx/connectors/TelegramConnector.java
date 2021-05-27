@@ -87,9 +87,10 @@ public class TelegramConnector implements ConnectorHandler {
 		inboxMessage.setFrom(ArgUtil.parseAsString(update.getMessage().getChatId()));
 
 		if (ArgUtil.is(update.getMessage())) {
-			inboxMessage.setMessageIdExt(ArgUtil.parseAsString(update.getMessage().getMessageId()));
-			inboxMessage.setMessage(update.getMessage().getText());
+			inboxMessage.setMessageIdExt(
+					String.format("%s-%s", update.getMessage().getChatId(), update.getMessage().getMessageId()));
 
+			inboxMessage.setMessage(update.getMessage().getText());
 			if (ArgUtil.is(update.getMessage().getPhoto())) {
 				Optional<PhotoSize> photo = update.getMessage().getPhoto().stream()
 						.max(Comparator.comparing(PhotoSize::getWidth));
@@ -100,13 +101,23 @@ public class TelegramConnector implements ConnectorHandler {
 					 * Telegram Does not provide Image, so explicitly set Image File Type
 					 */
 					CommonFile srcFile = new CommonFile().url(file.getFileUrl()).fileType(FileType.IMAGE);
-					CommonFile dstFile = pmFileStoreClient.createSessionFile(srcFile,
+					CommonFile dstFile = pmFileStoreClient.uploadSessionFileAsync(srcFile,
 							PostManUtil.createContactId(inboxMessage), inboxMessage.getMessageIdExt());
-					pmFileStoreClient.commitSessionFile(srcFile, dstFile);
 
 					inboxMessage.attachment(new Attachment().mediaURL(dstFile.getUrl()).mediaType(dstFile.getFileType())
 							.mediaCaption(update.getMessage().getCaption()));
 				}
+			} else if (ArgUtil.is(update.getMessage().getDocument())) {
+				TGFile file = telegramClient.getFile(lane, update.getMessage().getDocument().getFileId());
+				/**
+				 * Telegram Does not provide Image, so explicitly set Image File Type
+				 */
+				CommonFile srcFile = new CommonFile().url(file.getFileUrl()).fileType(FileType.DOCUMENT);
+				CommonFile dstFile = pmFileStoreClient.uploadSessionFileAsync(srcFile,
+						PostManUtil.createContactId(inboxMessage), inboxMessage.getMessageIdExt());
+
+				inboxMessage.attachment(new Attachment().mediaURL(dstFile.getUrl()).mediaType(dstFile.getFileType())
+						.mediaCaption(update.getMessage().getCaption()));
 			}
 
 		}
