@@ -34,16 +34,18 @@ public class AWSFileStore {
 	}
 
 	private CommonFile createFile(AmazonS3 amazonS3, String bucketName, String pathFolder, String fileName,
-			String contentType) {
-		FileFormat fileFormat = FileFormat.from(contentType);
+			CommonFile srcFile) {
+
+		if (!ArgUtil.is(srcFile.getContentType())) {
+			throw new IllegalStateException("File uploaded is not an accepted format");
+		}
 
 		// Save Image in S3 and then save Todo in the database
-
 		String fileNameNow = String.format("%s", fileName);
 
 		return new CommonFile()
 				.url(String.format("http://%s.s3.amazonaws.com/%s/%s", bucketName, pathFolder, fileNameNow))
-				.path(pathFolder).name(fileNameNow).format(fileFormat);
+				.path(pathFolder).name(fileNameNow).format(srcFile.getFileFormat());
 	}
 
 	private CommonFile commitFile(AmazonS3 amazonS3, String bucketName, CommonFile dstFile, MultipartFile file) {
@@ -59,7 +61,6 @@ public class AWSFileStore {
 		if (!ArgUtil.is(dstFile.getFileFormat())) {
 			throw new IllegalStateException("File uploaded is not an accepted format");
 		}
-
 
 		// get file metadata
 		ObjectMetadata objectMetadata = new ObjectMetadata();
@@ -80,7 +81,8 @@ public class AWSFileStore {
 
 	private CommonFile upload(AmazonS3 amazonS3, String bucketName, String pathFolder, String fileName,
 			MultipartFile file) {
-		CommonFile dstFile = createFile(amazonS3, bucketName, pathFolder, fileName, file.getContentType());
+		CommonFile dstFile = createFile(amazonS3, bucketName, pathFolder, fileName,
+				new CommonFile().contentType(file.getContentType()));
 		return commitFile(amazonS3, bucketName, dstFile, file);
 	}
 
@@ -93,7 +95,7 @@ public class AWSFileStore {
 	}
 
 	public CommonFile createFile2(CommonFile srcFile, String pathFolder, String fileName) {
-		return createFile(awsConfig.getS3B2(), awsConfig.getS3B2Name(), pathFolder, fileName, srcFile.getContentType());
+		return createFile(awsConfig.getS3B2(), awsConfig.getS3B2Name(), pathFolder, fileName, srcFile);
 	}
 
 	@Async

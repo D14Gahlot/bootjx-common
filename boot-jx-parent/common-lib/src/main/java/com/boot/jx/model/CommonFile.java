@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.HashMap;
@@ -16,6 +17,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.xml.bind.DatatypeConverter;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.springframework.integration.http.multipart.UploadedMultipartFile;
@@ -214,6 +216,32 @@ public class CommonFile implements Serializable {
 
 	public CommonFile url(String url) {
 		this.setUrl(url);
+		try {
+			URL urlObject = new URL(url);
+			if (!ArgUtil.is(this.extension)) {
+				this.extension = FilenameUtils.getExtension(urlObject.getPath());
+			}
+			if (!ArgUtil.is(this.name)) {
+				this.name = FilenameUtils.getName(urlObject.getPath());
+			}
+			if (!ArgUtil.is(this.title)) {
+				this.title = FilenameUtils.getBaseName(urlObject.getPath());
+			}
+			if (!ArgUtil.is(this.fileFormat) && ArgUtil.is(this.name)) {
+				this.fileFormat = FileFormat.from(URLConnection.guessContentTypeFromName(name));
+			}
+
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		}
+		return this;
+	}
+
+	public CommonFile contentType(String contentType) {
+		this.fileFormat = FileFormat.from(url, this.fileFormat);
+		if (ArgUtil.is(this.fileFormat)) {
+			this.fileType = this.fileFormat.getFileType();
+		}
 		return this;
 	}
 

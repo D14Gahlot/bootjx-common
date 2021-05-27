@@ -1,5 +1,8 @@
 package com.boot.jx.connectors;
 
+import java.util.Comparator;
+import java.util.Optional;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,7 +14,6 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorHandler;
 import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorMapping;
 import com.boot.jx.dict.ContactType;
-import com.boot.jx.dict.FileFormat;
 import com.boot.jx.dict.FileType;
 import com.boot.jx.model.CommonFile;
 import com.boot.jx.postman.client.PMFileStoreClient;
@@ -79,14 +81,21 @@ public class TelegramConnector implements ConnectorHandler {
 
 	public InboxMessage toInboxMessage(String lane, Update update) {
 		InboxMessage inboxMessage = new InboxMessage();
+		inboxMessage.setOriginalMessage(update);
+		inboxMessage.setContactType(ContactType.TELEGRAM);
+		inboxMessage.setLane(lane);
 		inboxMessage.setFrom(ArgUtil.parseAsString(update.getMessage().getChatId()));
+
 		if (ArgUtil.is(update.getMessage())) {
 			inboxMessage.setMessageIdExt(ArgUtil.parseAsString(update.getMessage().getMessageId()));
 			inboxMessage.setMessage(update.getMessage().getText());
 
 			if (ArgUtil.is(update.getMessage().getPhoto())) {
-				for (PhotoSize photo : update.getMessage().getPhoto()) {
-					TGFile file = telegramClient.getFile(lane, photo.getFileId());
+				Optional<PhotoSize> photo = update.getMessage().getPhoto().stream()
+						.max(Comparator.comparing(PhotoSize::getWidth));
+
+				if (photo.isPresent()) {
+					TGFile file = telegramClient.getFile(lane, photo.get().getFileId());
 					/**
 					 * Telegram Does not provide Image, so explicitly set Image File Type
 					 */
@@ -96,18 +105,11 @@ public class TelegramConnector implements ConnectorHandler {
 					pmFileStoreClient.commitSessionFile(srcFile, dstFile);
 
 					inboxMessage.attachment(new Attachment().mediaURL(dstFile.getUrl()).mediaType(dstFile.getFileType())
-							.mediaSrc(srcFile.getUrl()).mediaCaption(update.getMessage().getCaption()));
-
-					break;
-					// telegramClient.sendDocument(lane, id, document, caption)
+							.mediaCaption(update.getMessage().getCaption()));
 				}
 			}
 
 		}
-		inboxMessage.setOriginalMessage(update);
-		inboxMessage.setContactType(ContactType.TELEGRAM);
-		inboxMessage.setLane(lane);
-
 		return inboxMessage;
 	}
 
