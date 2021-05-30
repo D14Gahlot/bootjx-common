@@ -8,11 +8,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.boot.jx.admin.dto.ChatParserDto;
 import com.boot.jx.admin.dto.DashBoardRequestDto;
 import com.boot.jx.admin.dto.DashBoardResponseDto;
 import com.boot.jx.admin.dto.TagDocumentDto;
 import com.boot.jx.admin.manager.AdminDashBoardManager;
 import com.boot.jx.admin.manager.AgentAnalyticsManager;
+import com.boot.jx.admin.manager.WhatsUpChatParserMgr;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 
@@ -24,6 +26,9 @@ public class AdminDashBoardContoller {
 
 	@Autowired
 	AgentAnalyticsManager agentAnaMgr;
+	
+	@Autowired
+	WhatsUpChatParserMgr chatParseManager;
 
 	@RequestMapping(value = "/admin/contactType-dashboard-analytics", method = { RequestMethod.POST })
 	public ApiResponse<List<DashBoardResponseDto>, Object> dashBoardAnalytics(@RequestBody DashBoardRequestDto req) {
@@ -60,6 +65,13 @@ public class AdminDashBoardContoller {
 		resp.setData(lst);
 		return resp;
 	}
+	
+	@RequestMapping(value = "/admin/chat-parser", method = { RequestMethod.GET })
+	public List<ChatParserDto> getChatDetails() {
+		return chatParseManager.getParseFileUsingRegExp();
+	}
+
+	
 
 
 }
