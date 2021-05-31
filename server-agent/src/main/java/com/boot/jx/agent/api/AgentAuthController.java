@@ -24,6 +24,7 @@ import com.boot.jx.agent.AgentSessionBean;
 import com.boot.jx.agent.AgentSessionService;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.common.config.AppCommonConfig;
+import com.boot.jx.common.doc.AgentSessionDoc;
 import com.boot.jx.common.dto.AgentResponseAuthDto;
 import com.boot.jx.http.CommonHttpRequest;
 import com.boot.jx.postman.store.PMStoreConstants;
@@ -210,10 +211,9 @@ public class AgentAuthController {
 
 	@ResponseBody
 	@RequestMapping(value = "/auth/online/status", method = { RequestMethod.POST })
-	public ApiResponse<String, Object> onlineStatus(@RequestParam boolean status) {
-		ApiResponse<String, Object> x = ApiResponse.buildData("status", status);
+	public ApiResponse<AgentSessionDoc, Boolean> onlineStatus(@RequestParam boolean status) {
 		agentSessionService.setOnline(status);
-		return x;
+		return ApiResponse.buildResults(agentSessionService.getAgentSessions(), status);
 	}
 
 }
