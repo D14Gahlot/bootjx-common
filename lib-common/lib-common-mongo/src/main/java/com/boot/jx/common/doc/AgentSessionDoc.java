@@ -31,16 +31,8 @@ public class AgentSessionDoc {
 		this.agentCode = agentCode;
 	}
 
-	public Boolean isLoggedIn() {
-		return isLoggedIn;
-	}
-
 	public void setLoggedIn(Boolean isLoggedIn) {
 		this.isLoggedIn = isLoggedIn;
-	}
-
-	public Boolean isOnline() {
-		return isOnline;
 	}
 
 	public void setOnline(Boolean isOnline) {
