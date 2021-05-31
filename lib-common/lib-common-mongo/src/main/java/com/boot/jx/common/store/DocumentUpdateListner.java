@@ -8,6 +8,7 @@ import com.boot.jx.common.doc.AgentDoc;
 import com.boot.jx.common.doc.AgentSessionDoc;
 import com.boot.jx.mongo.CommonMongoQueryBuilder;
 import com.boot.jx.stomp.StompTunnelService;
+import com.boot.utils.ArgUtil;
 
 @Component
 public class DocumentUpdateListner {
@@ -20,16 +21,20 @@ public class DocumentUpdateListner {
 
 	public void onAgentSessionUpdate(String agentCode) {
 		AgentSessionDoc agentSession = mongoTemplate.findById(agentCode, AgentSessionDoc.class);
-		stompTunnelService.sendToAll("/session/agent/update", agentSession);
+		if (ArgUtil.is(agentSession)) {
+			stompTunnelService.sendToAll("/session/agent/update", agentSession);
+		}
 	}
 
 	public void onAgentUpdate(String agentId) {
 		AgentDoc agentDoc = mongoTemplate.findById(agentId, AgentDoc.class);
 
-		CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder().whereId(agentDoc.getAgent_code());
-		builder.set("isEnabled", agentDoc.isEnabled());
-		mongoTemplate.upsert(builder.getQuery(), builder.getUpdate(), AgentSessionDoc.class);
+		if (ArgUtil.is(agentDoc)) {
+			CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder().whereId(agentDoc.getAgent_code());
+			builder.set("isEnabled", agentDoc.isEnabled());
+			mongoTemplate.upsert(builder.getQuery(), builder.getUpdate(), AgentSessionDoc.class);
+			onAgentSessionUpdate(agentDoc.getAgent_code());
+		}
 
-		onAgentSessionUpdate(agentDoc.getAgent_code());
 	}
 }
