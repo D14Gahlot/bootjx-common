@@ -44,8 +44,8 @@ public class AgentSessionService {
 		CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder().whereId(agentSessionBean.getAgentCode());
 		builder.set("agentCode", agentSessionBean.getAgentCode());
 		builder.set("agentDept", agentSessionBean.getAgentDept());
-		builder.set("loggedIn", agentSessionBean.isLoggedIn());
-		builder.set("online", agentSessionBean.isOnline());
+		builder.set("isLoggedIn", agentSessionBean.isLoggedIn());
+		builder.set("isOnline", agentSessionBean.isOnline());
 		builder.set("lastOnlineStamp", agentSessionBean.getLastOnlineStamp());
 		builder.set("isEnabled", agentSessionBean.getProfile().isEnabled());
 		mongoTemplate.upsert(builder.getQuery(), builder.getUpdate(), AgentSessionDoc.class);
