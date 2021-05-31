@@ -32,6 +32,7 @@ public class ChatDTOUtil {
 		contact.setLabelId(chatContactDoc.getLabelId());
 		contact.setProfilePic(chatContactDoc.getProfilePic());
 		contact.setProfile(chatContactDoc.getProfile());
+		contact.setLane(chatContactDoc.getLane());
 
 		return contact;
 	}

@@ -4,9 +4,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Component;
 
-import com.boot.jx.agent.doc.AgentSessionDoc;
 import com.boot.jx.chat.ChatClient;
+import com.boot.jx.common.doc.AgentSessionDoc;
 import com.boot.jx.common.dto.AgentResponseAuthDto;
+import com.boot.jx.common.store.DocumentUpdateListner;
+import com.boot.jx.mongo.CommonMongoQueryBuilder;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.TimeUtils;
 
@@ -28,18 +30,18 @@ public class AgentSessionService {
 	@Autowired
 	private AgentSessionBean agentSessionBean;
 
+	@Autowired
+	private DocumentUpdateListner documentUpdateListner;
+
 	public void updateSession() {
-		AgentSessionDoc agentSessionDoc = mongoTemplate.findById(agentSessionBean.getAgentCode(),
-				AgentSessionDoc.class);
-		if (ArgUtil.isEmpty(agentSessionDoc)) {
-			agentSessionDoc = new AgentSessionDoc();
-		}
-		agentSessionDoc.setAgentCode(agentSessionBean.getAgentCode());
-		agentSessionDoc.setAgentDept(agentSessionBean.getAgentDept());
-		agentSessionDoc.setLoggedIn(agentSessionBean.isLoggedIn());
-		agentSessionDoc.setOnline(agentSessionBean.isOnline());
-		agentSessionDoc.setLastOnlineStamp(agentSessionBean.getLastOnlineStamp());
-		mongoTemplate.save(agentSessionDoc);
+		CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder().whereId(agentSessionBean.getAgentCode());
+		builder.set("agentCode", agentSessionBean.getAgentCode());
+		builder.set("agentDept", agentSessionBean.getAgentDept());
+		builder.set("loggedIn", agentSessionBean.isLoggedIn());
+		builder.set("online", agentSessionBean.isOnline());
+		builder.set("lastOnlineStamp", agentSessionBean.getLastOnlineStamp());
+		mongoTemplate.upsert(builder.getQuery(), builder.getUpdate(), AgentSessionDoc.class);
+		documentUpdateListner.onAgentSessionUpdate(agentSessionBean.getAgentCode());
 	}
 
 	/**

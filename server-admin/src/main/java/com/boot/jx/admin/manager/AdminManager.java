@@ -33,7 +33,7 @@ public class AdminManager {
 	MongoTemplate mongoTemplate;
 
 	@Autowired
-	AgentStore agentStore;
+	private AgentStore agentStore;
 
 	@Autowired
 	AuditDetailProvider auditDetailProvider;

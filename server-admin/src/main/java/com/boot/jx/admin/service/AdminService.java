@@ -1,9 +1,12 @@
 package com.boot.jx.admin.service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
 
 import com.boot.jx.AppContextUtil;
@@ -13,6 +16,7 @@ import com.boot.jx.admin.manager.AdminManager;
 import com.boot.jx.common.doc.AgentDoc;
 import com.boot.jx.common.doc.DepartmentDoc;
 import com.boot.jx.common.store.AgentStore;
+import com.boot.jx.common.store.DocumentUpdateListner;
 import com.boot.jx.postman.doc.ConnectorConfigDoc;
 import com.boot.jx.tunnel.sys.SharedConfigManager;
 import com.boot.utils.ArgUtil;
@@ -33,6 +37,9 @@ public class AdminService {
 
 	@Autowired
 	SharedConfigManager sharedConfigManager;
+
+	@Autowired
+	private DocumentUpdateListner documentUpdateListner;
 
 	public List<AgentResponseAdminDto> fetchAgents(String agentId) {
 		List<AgentDoc> lstOfAgent = adminManager.fetchAgentList(agentId);
@@ -56,7 +63,9 @@ public class AdminService {
 	}
 
 	public List<AgentResponseAdminDto> updateAgentActive(String agentId, String status) {
-		return buildAgentDto(adminManager.updateAgentActive(agentId, status));
+		agentStore.updateAgentActive(agentId, status);
+		documentUpdateListner.onAgentUpdate(agentId);
+		return buildAgentDto(agentStore.findAll());
 	}
 
 	public List<AgentResponseAdminDto> updateAgentAdmin(String agentId) {
@@ -75,6 +84,7 @@ public class AdminService {
 
 	public List<AgentResponseAdminDto> updateAgentDefault(String agentId) {
 		agentStore.updateAgentDefault(agentId);
+
 		AgentDoc agent = agentStore.findById(agentId);
 		DepartmentDoc dept = agentStore.findDepartmentById(agent.getDept_id());
 		ConnectorConfigDoc doc = mongoTemplate.findById(AppContextUtil.getTenant(), ConnectorConfigDoc.class);
@@ -85,6 +95,7 @@ public class AdminService {
 		}
 		mongoTemplate.save(doc);
 		sharedConfigManager.clear();
+
 		return buildAgentDto(agentStore.findAll());
 	}
 

@@ -10,14 +10,16 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Component;
 
-import com.boot.jx.agent.doc.AgentSessionDoc;
 import com.boot.jx.chat.ChatArchive;
 import com.boot.jx.chat.ChatClient;
 import com.boot.jx.chat.ChatCommands;
 import com.boot.jx.chat.ChatDTOUtil;
 import com.boot.jx.chat.ChatService;
 import com.boot.jx.common.doc.AgentDoc;
+import com.boot.jx.common.doc.AgentSessionDoc;
 import com.boot.jx.common.store.AgentStore;
+import com.boot.jx.common.store.DocumentUpdateListner;
+import com.boot.jx.mongo.CommonMongoQueryBuilder;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.MessageDoc;
@@ -65,6 +67,9 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 	@Autowired
 	private PMEnvironment environment;
 
+	@Autowired
+	private DocumentUpdateListner documentUpdateListner;
+
 	@Override
 	public boolean onAssignSupported(InboxMessage inboxMessage) {
 		return true;
@@ -80,7 +85,7 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 			inboxMessage.session().setDept(
 					ArgUtil.nonEmpty(environment.config().agent().getDefaultBotName(), PMStoreConstants.NO_DEPT));
 		}
-		query.addCriteria(c).with(new Sort(Direction.ASC, "lastOnlineStamp")).limit(1);
+		query.addCriteria(c).with(new Sort(Direction.ASC, "lastAssignStamp")).limit(1);
 
 		List<AgentSessionDoc> agents = mongoTemplate.find(query, AgentSessionDoc.class);
 
@@ -98,6 +103,16 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 		return avaialbleAgent;
 	}
 
+	private void assignToAgent(ChatSessionDoc chatSessionDoc, String agentDept, String agentCode) {
+		sessionStore.assignToAgent(chatSessionDoc, agentDept, agentCode);
+		if (ArgUtil.is(agentCode)) {
+			CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder().whereId(agentCode);
+			builder.set("lastAssignStamp", System.currentTimeMillis());
+			mongoTemplate.upsert(builder.getQuery(), builder.getUpdate(), AgentSessionDoc.class);
+			documentUpdateListner.onAgentSessionUpdate(agentCode);
+		}
+	}
+
 	@Override
 	public InboxMessage onAssign(InboxMessage inboxMessage) {
 
@@ -107,7 +122,8 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 		ChatSessionDoc chatSessionDoc = sessionStore.getSession(inboxMessage.getSessionId());
 
 		if (ArgUtil.is(avaialbleAgent)) {
-			sessionStore.assignToAgent(chatSessionDoc, avaialbleAgent.getAgentDept(), avaialbleAgent.getAgentCode());
+
+			assignToAgent(chatSessionDoc, avaialbleAgent.getAgentDept(), avaialbleAgent.getAgentCode());
 
 			chatService.log(inboxMessage, MessageStore.EVENTS.ASGND_TO_AGENT, avaialbleAgent.getAgentCode(),
 					avaialbleAgent.getAgentDept());
@@ -115,7 +131,7 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 			inboxMessage.session().setAgent(avaialbleAgent.getAgentCode());
 			inboxMessage.session().setDept(avaialbleAgent.getAgentDept());
 		} else {
-			sessionStore.assignToAgent(chatSessionDoc, inboxMessage.session().getDept(), null);
+			assignToAgent(chatSessionDoc, inboxMessage.session().getDept(), null);
 			chatService.log(inboxMessage, MessageStore.EVENTS.ASGND_TO_DEPT, inboxMessage.session().getDept());
 		}
 
@@ -127,7 +143,7 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 
 	public void onAssign(ChatSessionDoc chatSessionDoc, String agentDept, String agentCode) {
 		if (!ArgUtil.areEqual(chatSessionDoc.getAssignedToAgent(), agentCode)) {
-			sessionStore.assignToAgent(chatSessionDoc, agentDept, agentCode);
+			assignToAgent(chatSessionDoc, agentDept, agentCode);
 			chatService.log(chatSessionDoc, agentSession.getAgentCode(), MessageStore.EVENTS.ASGND_TO_AGENT, agentCode,
 					agentDept);
 			stompTunnelService.sendToAll("/dept/onassign-" + agentDept,

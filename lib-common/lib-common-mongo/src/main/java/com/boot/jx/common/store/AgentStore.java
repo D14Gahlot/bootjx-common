@@ -25,8 +25,17 @@ public class AgentStore {
 		mongoTemplate.updateMulti(builder.getQuery(), builder.getUpdate(), entityClass);
 	}
 
+	public void updateFirst(CommonMongoQueryBuilder builder, Class<?> entityClass) {
+		mongoTemplate.updateFirst(builder.getQuery(), builder.getUpdate(), entityClass);
+	}
+
 	public List<AgentDoc> findAll() {
 		return mongoTemplate.findAll(AgentDoc.class);
+	}
+
+	public List<AgentDoc> findAllActive() {
+		CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder().where("isactive", "Y");
+		return mongoTemplate.find(builder.getQuery(), AgentDoc.class);
 	}
 
 	public AgentDoc findById(String agentId) {
@@ -51,6 +60,13 @@ public class AgentStore {
 			}
 		}
 		return null;
+	}
+
+	public void updateAgentActive(String agentId, String status) {
+		boolean isEnabled = "Y".equalsIgnoreCase(status);
+		CommonMongoQueryBuilder cqb2 = new CommonMongoQueryBuilder().whereId(agentId).set("isEnabled", isEnabled)
+				.set("isactive", status);
+		updateFirst(cqb2, AgentDoc.class);
 	}
 
 	public void updateAgentDefault(String agentId) {

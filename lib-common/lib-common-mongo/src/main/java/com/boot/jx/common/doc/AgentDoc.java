@@ -39,6 +39,7 @@ public class AgentDoc implements IDocument, DocVersion {
 	private boolean admin;
 	private boolean isSuperAdmin;
 	private boolean isDefaultValue;
+	private boolean isEnabled;
 
 	private List<String> channels;
 	private String dept_id;
@@ -222,6 +223,14 @@ public class AgentDoc implements IDocument, DocVersion {
 
 	public void setModifiedStamp(Long modifiedStamp) {
 		this.modifiedStamp = modifiedStamp;
+	}
+
+	public boolean isEnabled() {
+		return isEnabled;
+	}
+
+	public void setEnabled(boolean isEnabled) {
+		this.isEnabled = isEnabled;
 	}
 
 }

@@ -1,0 +1,35 @@
+package com.boot.jx.common.store;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.stereotype.Component;
+
+import com.boot.jx.common.doc.AgentDoc;
+import com.boot.jx.common.doc.AgentSessionDoc;
+import com.boot.jx.mongo.CommonMongoQueryBuilder;
+import com.boot.jx.stomp.StompTunnelService;
+
+@Component
+public class DocumentUpdateListner {
+
+	@Autowired
+	private MongoTemplate mongoTemplate;
+
+	@Autowired
+	private StompTunnelService stompTunnelService;
+
+	public void onAgentSessionUpdate(String agentCode) {
+		AgentSessionDoc agentSession = mongoTemplate.findById(agentCode, AgentSessionDoc.class);
+		stompTunnelService.sendToAll("/session/agent/update", agentSession);
+	}
+
+	public void onAgentUpdate(String agentId) {
+		AgentDoc agentDoc = mongoTemplate.findById(agentId, AgentDoc.class);
+
+		CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder().whereId(agentDoc.getAgent_code());
+		builder.set("isEnabled", agentDoc.isEnabled());
+		mongoTemplate.upsert(builder.getQuery(), builder.getUpdate(), AgentSessionDoc.class);
+
+		onAgentSessionUpdate(agentDoc.getAgent_code());
+	}
+}
