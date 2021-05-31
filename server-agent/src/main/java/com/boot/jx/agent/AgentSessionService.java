@@ -1,5 +1,7 @@
 package com.boot.jx.agent;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Component;
@@ -33,6 +35,11 @@ public class AgentSessionService {
 	@Autowired
 	private DocumentUpdateListner documentUpdateListner;
 
+	public List<AgentSessionDoc> getAgentSessions() {
+		CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder().where("isEnabled", true);
+		return mongoTemplate.find(builder.getQuery(), AgentSessionDoc.class);
+	}
+
 	public void updateSession() {
 		CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder().whereId(agentSessionBean.getAgentCode());
 		builder.set("agentCode", agentSessionBean.getAgentCode());
@@ -40,6 +47,7 @@ public class AgentSessionService {
 		builder.set("loggedIn", agentSessionBean.isLoggedIn());
 		builder.set("online", agentSessionBean.isOnline());
 		builder.set("lastOnlineStamp", agentSessionBean.getLastOnlineStamp());
+		builder.set("isEnabled", agentSessionBean.getProfile().isEnabled());
 		mongoTemplate.upsert(builder.getQuery(), builder.getUpdate(), AgentSessionDoc.class);
 		documentUpdateListner.onAgentSessionUpdate(agentSessionBean.getAgentCode());
 	}
@@ -64,6 +72,7 @@ public class AgentSessionService {
 		agentSessionBean.setLoggedIn(true);
 		agentSessionBean.setOnline(true);
 		agentSessionBean.setAgentCode(agent.getAgent_code());
+
 		if (ArgUtil.is(agent.getDept())) {
 			agentSessionBean.setAgentDept(agent.getDept().getDept_code());
 		}

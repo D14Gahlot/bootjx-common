@@ -13,8 +13,10 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.boot.jx.agent.AgentSessionService;
 import com.boot.jx.agent.dto.AgentResponseAgentDto;
 import com.boot.jx.api.ApiResponse;
+import com.boot.jx.common.doc.AgentSessionDoc;
 import com.boot.jx.common.store.AgentStore;
 import com.boot.jx.postman.doc.QuickAction;
 import com.boot.jx.postman.doc.QuickLabel;
@@ -34,6 +36,9 @@ public class AgentMetaController {
 	@Autowired
 	private MongoTemplate mongoTemplate;
 
+	@Autowired
+	private AgentSessionService agentSessionService;
+
 	@ResponseBody
 	@RequestMapping(value = { "/api/options/agents" }, method = { RequestMethod.GET })
 	public ApiResponse<AgentResponseAgentDto, Object> listAgents() {
@@ -42,8 +47,8 @@ public class AgentMetaController {
 
 	@ResponseBody
 	@RequestMapping(value = { "/api/options/agents/status" }, method = { RequestMethod.GET })
-	public ApiResponse<AgentResponseAgentDto, Object> listAgentsOnline() {
-		return ApiResponse.buildResults(new AgentResponseAgentDto().importFrom(agentStore.findAll()));
+	public ApiResponse<AgentSessionDoc, Object> listAgentsOnline() {
+		return ApiResponse.buildResults(agentSessionService.getAgentSessions());
 	}
 
 	@ResponseBody
