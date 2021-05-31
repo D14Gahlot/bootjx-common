@@ -25,8 +25,13 @@ public class AgentResponseDto<T extends AgentResponseDto<T>> extends ADocumentDT
 
 	private boolean admin;
 
+	@JsonProperty("enabled")
 	private boolean isEnabled;
+
+	@JsonProperty("superAdmin")
 	private boolean isSuperAdmin;
+
+	@JsonProperty("defaultValue")
 	private boolean isDefaultValue;
 
 	@JsonProperty("dept_id")
@@ -97,7 +102,7 @@ public class AgentResponseDto<T extends AgentResponseDto<T>> extends ADocumentDT
 	}
 
 	public boolean isEnabled() {
-		return this.isactive == "Y" || this.isEnabled;
+		return "Y".equalsIgnoreCase(this.isactive) || this.isEnabled;
 	}
 
 	@Override
