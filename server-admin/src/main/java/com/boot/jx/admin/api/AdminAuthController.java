@@ -120,7 +120,8 @@ public class AdminAuthController {
 
 		model.addAttribute("MESSAGE", message);
 		model.addAttribute("PAGE", page);
-		return "admin-login";
+		model.addAttribute("APP_TITLE", appConfig.getAppTitle());
+		return "app-login";
 	}
 
 	@Autowired

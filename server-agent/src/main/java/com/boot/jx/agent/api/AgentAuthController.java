@@ -168,8 +168,9 @@ public class AgentAuthController {
 
 		model.addAttribute("MESSAGE", message);
 		model.addAttribute("PAGE", page);
+		model.addAttribute("APP_TITLE", appConfig.getAppTitle());
 
-		return "agent-login";
+		return "app-login";
 	}
 
 	@Autowired

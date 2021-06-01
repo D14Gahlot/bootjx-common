@@ -7,7 +7,7 @@
 <meta charset="utf-8">
 <meta name="viewport"
 	content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>Mehery - Admin</title>
+<title th:text="${APP_TITLE}">Application</title>
 
 
 <link rel="shortcut icon" th:href="${CDN_URL}+'/favicon.ico'" />
@@ -19,11 +19,6 @@
 <link rel="stylesheet"
 	th:href="${CDN_URL}+'/legacy/css/bootstrap.min.css'">
 <link rel="stylesheet" th:href="${CDN_URL}+'/legacy/css/all.min.css'">
-<link rel="stylesheet" th:href="${CDN_URL}+'/legacy/css/animate.css'">
-<link rel="stylesheet"
-	th:href="${CDN_URL}+'/legacy/plugins/slider/css/owl.carousel.min.css'">
-<link rel="stylesheet"
-	th:href="${CDN_URL}+'/legacy/plugins/slider/css/owl.theme.default.css'">
 <link rel="stylesheet" type="text/css"
 	th:href="${CDN_URL}+'/legacy/css/style.css'" />
 
@@ -40,7 +35,7 @@
 		<div class="row">
 			<div class="col-lg-10 mx-auto login-desk">
 				<div class="row" th:switch="${PAGE}">
-					<div class="col-md-7 detail-box">
+					<div class="col-md-7 detail-box d-none d-md-block">
 						<div class="detailsh">
 							<p>
 								<img class="bigbrandlogo"
@@ -51,6 +46,14 @@
 						</div>
 					</div>
 					<div class="col-md-5 loginform">
+						<div class="detailsh  d-block d-md-none">
+							<p>
+								<img class="bigbrandlogo-o"
+									th:src="${CDN_URL}+'/logo/logo-long-o.png'"
+									alt="Enterprise.Social.Communication"> <span
+									class="bigbrandlogo-o_text">Enterprise.Social.Communication</span>
+							</p>
+						</div>
 
 						<!--  LOGIN FORM -->
 						<div th:case="'login'">
@@ -207,6 +210,8 @@
 						<!--  SOCIAL LINKs -->
 						<div class="social-link">
 							<ul class="socil-icon">
+								<li><a href="https://www.instagram.com/mehery_soccom//"><i
+										class="fab fa-instagram"></i></a></li>
 								<li><a href="https://www.facebook.com/MeherY.SocCom/"><i
 										class="fab fa-facebook-f"></i></a></li>
 								<li><a href="https://twitter.com/mehery_soccom"><i
