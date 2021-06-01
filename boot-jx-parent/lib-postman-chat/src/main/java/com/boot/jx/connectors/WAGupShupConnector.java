@@ -167,6 +167,9 @@ public class WAGupShupConnector implements ConnectorHandler {
 				report.setStatus(Status.READ);
 			} else if ("FAILED".equals(gupShupDelivery.getEventType())) {
 				report.setStatus(Status.FAILD);
+				if ("BLOCKED_FOR_USER".equalsIgnoreCase(gupShupDelivery.getCause())) {
+					report.setStatus(Status.BLCKD);
+				}
 				report.setReason(gupShupDelivery.getCause());
 			}
 			batch.add(report);

@@ -1,10 +1,15 @@
 package com.boot.jx.postman.gupshup;
 
+import java.util.List;
+import java.util.Map;
+
 import org.springframework.stereotype.Component;
 
 import com.boot.jx.postman.PostmanPackages.MessageClient;
 import com.boot.jx.postman.gupshup.GupShupConstants.DataEncoding;
 import com.boot.jx.postman.gupshup.GupShupConstants.SessionType;
+import com.boot.jx.postman.model.MessageOptions;
+import com.boot.jx.postman.model.TmplElement;
 
 @Component
 public class GupShupClientChat extends GupShupClientAbstract implements MessageClient {
@@ -15,8 +20,14 @@ public class GupShupClientChat extends GupShupClientAbstract implements MessageC
 	}
 
 	@Override
-	public GupShupResp sendMessage(GupShupReq gupShupReq) {
-		gupShupReq.method(GupShupConstants.Method.SendMessage).messageType(GupShupConstants.MessageType.DATA_TEXT);
+	public GupShupResp sendMessage(GupShupReq gupShupReq, MessageOptions options) {
+		List<TmplElement> buttons = options.optionActionButtons();
+		gupShupReq.setMessageType(GupShupConstants.MessageType.DATA_TEXT);
+		if (buttons.size() > 0) {
+			gupShupReq.setIsTemplate(true);
+			gupShupReq.setMessageType(GupShupConstants.MessageType.TEXT);
+		}
+		gupShupReq.method(GupShupConstants.Method.SendMessage);
 		return post(gupShupReq);
 	}
 

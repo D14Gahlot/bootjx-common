@@ -1,7 +1,10 @@
 package com.boot.jx.postman.model;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
+import com.boot.jx.model.MapModel;
 import com.boot.utils.ArgUtil;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -16,6 +19,14 @@ public interface MessageOptions {
 	default public MessageOptions option(String key, String value) {
 		this.options().get("msg_type");
 		return this;
+	}
+
+	@JsonIgnore
+	default public List<TmplElement> optionActionButtons() {
+		if (this.options().containsKey("buttons")) {
+			return new MapModel(this.options()).entry("buttons").asList(new TmplElement());
+		}
+		return new ArrayList<TmplElement>();
 	}
 
 	@JsonIgnoreProperties(ignoreUnknown = true)

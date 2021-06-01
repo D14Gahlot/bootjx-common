@@ -9,9 +9,15 @@ var tunnelClient = (function(win) {
 	var stompClient = null;
 	var tagIds = [];
 	var pong = false;
+	var TUNNEL_DEBUG = false;
+	if(win.sessionStorage && win.sessionStorage.getItem)
+		TUNNEL_DEBUG = !!win.sessionStorage.getItem("TUNNEL_DEBUG");
+	
 	function connect() {
 		$dfd = $dfd || jQuery.Deferred();
-		var socket = new SockJS(config.context + '/stomp-tunnel');
+		var socket = new SockJS(config.context + '/stomp-tunnel',{
+			debug : TUNNEL_DEBUG
+		});
 		stompClient = Stomp.over(socket);
 		stompClient.connect({
 			user : config.user,
@@ -95,8 +101,8 @@ var tunnelClient = (function(win) {
 		}
 	}
 	
-	
 	return {
+		debug : false,
 		config : function (_config){
 			for(var key in _config){
 				config[key] = _config[key]

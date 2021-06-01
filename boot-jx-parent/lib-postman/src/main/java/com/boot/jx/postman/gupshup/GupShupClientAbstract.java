@@ -13,6 +13,7 @@ import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PostManException;
 import com.boot.jx.postman.gupshup.GupShupConstants.SessionType;
 import com.boot.jx.postman.model.Attachment;
+import com.boot.jx.postman.model.MessageOptions;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.rest.RestService;
 import com.boot.jx.rest.RestService.Ajax;
@@ -161,7 +162,7 @@ public abstract class GupShupClientAbstract {
 
 		if (ArgUtil.is(message.getMessage())) {
 			gupShupReq.setMessage(message.getMessage());
-			resp = sendMessage(gupShupReq);
+			resp = sendMessage(gupShupReq, message);
 			if (ArgUtil.is(resp.getResponse().getId()))
 				msgIds.add(resp.getResponse().getId());
 			getMessageId(resp);
@@ -185,7 +186,7 @@ public abstract class GupShupClientAbstract {
 		return post(gupShupReq);
 	}
 
-	public GupShupResp sendMessage(GupShupReq gupShupReq) {
+	public GupShupResp sendMessage(GupShupReq gupShupReq, MessageOptions options) {
 		return post(gupShupReq);
 	}
 
