@@ -25,7 +25,7 @@ public class GupShupClientChat extends GupShupClientAbstract implements MessageC
 		gupShupReq.setMessageType(GupShupConstants.MessageType.DATA_TEXT);
 
 		MapModel optionModel = options.optionsAsModel();
-		if (optionModel.entry("wa-is-template").asBoolean()) {
+		if (optionModel.entry("wa-show-buttons").asBoolean()) {
 			List<TmplElement> buttons = options.optionActionButtons();
 			if (buttons.size() > 0) {
 				gupShupReq.setIsTemplate(true);
