@@ -5,6 +5,7 @@ import java.util.Map;
 
 import org.springframework.stereotype.Component;
 
+import com.boot.jx.model.MapModel;
 import com.boot.jx.postman.PostmanPackages.MessageClient;
 import com.boot.jx.postman.gupshup.GupShupConstants.DataEncoding;
 import com.boot.jx.postman.gupshup.GupShupConstants.SessionType;
@@ -21,12 +22,17 @@ public class GupShupClientChat extends GupShupClientAbstract implements MessageC
 
 	@Override
 	public GupShupResp sendMessage(GupShupReq gupShupReq, MessageOptions options) {
-		List<TmplElement> buttons = options.optionActionButtons();
 		gupShupReq.setMessageType(GupShupConstants.MessageType.DATA_TEXT);
-		if (buttons.size() > 0) {
-			gupShupReq.setIsTemplate(true);
-			gupShupReq.setMessageType(GupShupConstants.MessageType.TEXT);
+
+		MapModel optionModel = options.optionsAsModel();
+		if (optionModel.entry("wa-is-template").asBoolean()) {
+			List<TmplElement> buttons = options.optionActionButtons();
+			if (buttons.size() > 0) {
+				gupShupReq.setIsTemplate(true);
+				gupShupReq.setMessageType(GupShupConstants.MessageType.TEXT);
+			}
 		}
+
 		gupShupReq.method(GupShupConstants.Method.SendMessage);
 		return post(gupShupReq);
 	}

@@ -47,6 +47,14 @@ public class MapModel implements JsonSerializerType<Object> {
 			return ArgUtil.parseAsBigDecimal(value, defaultvalue);
 		}
 
+		public Boolean asBoolean() {
+			return ArgUtil.parseAsBoolean(value, false);
+		}
+
+		public Boolean asBoolean(boolean defaultvalue) {
+			return ArgUtil.parseAsBoolean(value, defaultvalue);
+		}
+
 		@SuppressWarnings("unchecked")
 		public <T> List<T> asList(T listItem) {
 			return ArgUtil.parseAsListOfT(value, listItem, ((List<T>) Constants.EMPTY_LIST), false);
@@ -165,6 +173,10 @@ public class MapModel implements JsonSerializerType<Object> {
 
 	public <T> T as(Class<T> clazz) {
 		return JsonUtil.getMapper().convertValue(this.map, clazz);
+	}
+
+	public static MapModel from(Map<String, Object> map) {
+		return new MapModel(map);
 	}
 
 }

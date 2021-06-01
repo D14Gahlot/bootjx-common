@@ -17,7 +17,7 @@ public interface MessageOptions {
 
 	@JsonIgnore
 	default public MessageOptions option(String key, String value) {
-		this.options().get("msg_type");
+		this.options().put(key, value);
 		return this;
 	}
 
@@ -27,6 +27,11 @@ public interface MessageOptions {
 			return new MapModel(this.options()).entry("buttons").asList(new TmplElement());
 		}
 		return new ArrayList<TmplElement>();
+	}
+
+	@JsonIgnore
+	default public MapModel optionsAsModel() {
+		return MapModel.from(this.options());
 	}
 
 	@JsonIgnoreProperties(ignoreUnknown = true)
