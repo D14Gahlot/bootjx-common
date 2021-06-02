@@ -64,6 +64,7 @@ public class AgentSessionService {
 
 	public void setOnline(boolean isOnline) {
 		agentSessionBean.setOnline(isOnline);
+		agentSessionBean.setLastOnlineStamp(System.currentTimeMillis());
 		this.updateSession();
 	}
 
