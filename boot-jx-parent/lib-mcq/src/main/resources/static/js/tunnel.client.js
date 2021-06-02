@@ -19,6 +19,9 @@ var tunnelClient = (function(win) {
 			debug : TUNNEL_DEBUG
 		});
 		stompClient = Stomp.over(socket);
+		if(!TUNNEL_DEBUG){
+			stompClient.debug = () => {};
+		}
 		stompClient.connect({
 			user : config.user,
 			token : config.token
