@@ -11,6 +11,7 @@ import com.boot.jx.postman.dto.ChatMessageDTO;
 import com.boot.jx.postman.dto.ChatSessionDTO;
 import com.boot.jx.postman.dto.ChatUserProfileDTO;
 import com.boot.jx.postman.dto.ContactDTO;
+import com.boot.jx.postman.store.PMStoreConstants.CHAT_STATUS;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.EntityDtoUtil;
 
@@ -71,6 +72,22 @@ public class ChatDTOUtil {
 		chatSessionDto.setAssignedToAgent(chatSessionDoc.getAssignedToAgent());
 		chatSessionDto.setAssignedToDept(chatSessionDoc.getAssignedToDept());
 		chatSessionDto.setActive(chatSessionDoc.isActive());
+		chatSessionDto.setStatus(chatSessionDoc.getStatus());
+
+		if (!ArgUtil.is(chatSessionDto.getStatus())) {
+			if (chatSessionDto.isExpired()) {
+				chatSessionDto.setStatus(CHAT_STATUS.EXPIRED.toString());
+			} else if (!chatSessionDto.isActive()) {
+				chatSessionDto.setStatus(CHAT_STATUS.CLOSED.toString());
+			} else if (!chatSessionDto.isResolved()) {
+				chatSessionDto.setStatus(CHAT_STATUS.RESOLVED.toString());
+			} else if (chatSessionDto.getAssignedAgentStamp() == 0) {
+				chatSessionDto.setStatus(CHAT_STATUS.UNASSIGNED.toString());
+			} else {
+				chatSessionDto.setStatus(CHAT_STATUS.OPEN.toString());
+			}
+		}
+
 		return chatSessionDto;
 	}
 
