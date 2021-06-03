@@ -79,7 +79,7 @@ public class ChatDTOUtil {
 				chatSessionDto.setStatus(CHAT_STATUS.EXPIRED.toString());
 			} else if (!chatSessionDto.isActive()) {
 				chatSessionDto.setStatus(CHAT_STATUS.CLOSED.toString());
-			} else if (!chatSessionDto.isResolved()) {
+			} else if (chatSessionDto.isResolved()) {
 				chatSessionDto.setStatus(CHAT_STATUS.RESOLVED.toString());
 			} else if (chatSessionDto.getAssignedAgentStamp() == 0) {
 				chatSessionDto.setStatus(CHAT_STATUS.UNASSIGNED.toString());
