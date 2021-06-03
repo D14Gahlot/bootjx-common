@@ -33,7 +33,7 @@ public class AppCommonConfig {
 
 	public Map<String, Object> toMap() {
 		Map<String, Object> map = new HashMap<String, Object>();
-		map.put("chatIdleTimeout", chatClient.getChatIdleTimeout());
+		map.put("chatIdleTimeout", TimeUtils.toMillis(chatClient.getChatIdleTimeout()));
 		map.put("agentSessionTimeout", TimeUtils.toMillis(chatClient.getAgentSessionTimeout()));
 		map.put("chatSessionTimeout", TimeUtils.toMillis(sessionStore.getChatSessionTimeout()));
 		map.put("timestamp", System.currentTimeMillis());
