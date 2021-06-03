@@ -63,9 +63,15 @@ public class AgentSessionService {
 	}
 
 	public void setOnline(boolean isOnline) {
+		boolean oldOnline = agentSessionBean.isOnline();
 		agentSessionBean.setOnline(isOnline);
 		agentSessionBean.setLastOnlineStamp(System.currentTimeMillis());
-		this.updateSession();
+
+		if (oldOnline == isOnline) {
+			this.refreshOnline();
+		} else {
+			this.updateSession();
+		}
 	}
 
 	public void updateLogin(AgentResponseAuthDto agent) {
