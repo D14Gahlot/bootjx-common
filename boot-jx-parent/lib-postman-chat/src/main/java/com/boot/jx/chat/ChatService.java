@@ -26,6 +26,7 @@ import com.boot.jx.postman.model.MessageReport;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.store.MessageStore;
 import com.boot.jx.postman.store.MessageStore.EVENTS;
+import com.boot.jx.postman.store.PMStoreConstants.CHAT_STATUS;
 import com.boot.jx.postman.store.SessionStore;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.TimeUtils;
@@ -353,6 +354,7 @@ public class ChatService {
 			return true;
 		}
 		session = sessionStore.resolveSession(session);
+		log(session, EVENTS.STATUS_CHANGED, session.getStatus(), CHAT_STATUS.RESOLVED.toString());
 		return true;
 	}
 
@@ -361,6 +363,7 @@ public class ChatService {
 			return true;
 		}
 		session = sessionStore.closeSession(session);
+		log(session, EVENTS.STATUS_CHANGED, session.getStatus(), CHAT_STATUS.CLOSED.toString());
 		return true;
 	}
 

@@ -54,6 +54,7 @@ public class ChatSessionDoc extends APatchableIndexed<ChatSessionDoc, String> im
 	private Integer botScore;
 
 	private String mode;
+	private String status;
 
 	public long getLastInComingStamp() {
 		return lastInComingStamp;
@@ -260,6 +261,14 @@ public class ChatSessionDoc extends APatchableIndexed<ChatSessionDoc, String> im
 
 	public void setExpired(boolean expired) {
 		this.expired = expired;
+	}
+
+	public String getStatus() {
+		return status;
+	}
+
+	public void setStatus(String status) {
+		this.status = status;
 	}
 
 }

@@ -40,6 +40,9 @@ public class ChatSessionDTO implements Serializable {
 	private boolean resolved;
 	private boolean expired;
 
+	private String mode;
+	private String status;
+
 	private ContactDTO contact;
 
 	private List<ChatMessageDTO> messages;
@@ -226,6 +229,22 @@ public class ChatSessionDTO implements Serializable {
 
 	public void setExpired(boolean expired) {
 		this.expired = expired;
+	}
+
+	public String getMode() {
+		return mode;
+	}
+
+	public void setMode(String mode) {
+		this.mode = mode;
+	}
+
+	public String getStatus() {
+		return status;
+	}
+
+	public void setStatus(String status) {
+		this.status = status;
 	}
 
 }

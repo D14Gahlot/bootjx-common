@@ -22,6 +22,7 @@ import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.ChatUserProfileDoc;
 import com.boot.jx.postman.dto.ChatUserProfileDTO;
 import com.boot.jx.postman.model.InboxMessage;
+import com.boot.jx.postman.store.PMStoreConstants.CHAT_STATUS;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.EntityDtoUtil;
@@ -194,8 +195,7 @@ public class SessionStore extends CommonDocStore {
 					.with(Criteria.where("active").is(true).and("lastInComingStamp").lt(cal.getTimeInMillis())
 							.andOperator(new Criteria().orOperator(Criteria.where("resolved").exists(false),
 									Criteria.where("resolved").is(false))))
-					.set("expired", true)
-					.set("active", false).set("closeSessionStamp", System.currentTimeMillis());
+					.set("expired", true).set("active", false).set("closeSessionStamp", System.currentTimeMillis());
 			mongoTemplate.updateFirst(cmqb.getQuery(), cmqb.getUpdate(), ChatSessionDoc.class);
 		}
 	}
@@ -282,6 +282,15 @@ public class SessionStore extends CommonDocStore {
 		builder.set("contactName", chatSessionDoc.getContactName());
 		mongoTemplate.updateFirst(builder.getQuery(), builder.getUpdate(), ChatSessionDoc.class);
 
+		return chatSessionDoc;
+	}
+
+	public ChatSessionDoc changeStatus(ChatSessionDoc chatSessionDoc, CHAT_STATUS status) {
+		// Old Way of Doing it
+		chatSessionDoc.setStatus(status.toString());
+		CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder().whereId(chatSessionDoc.getSessionId());
+		builder.set("status", status.toString());
+		mongoTemplate.updateFirst(builder.getQuery(), builder.getUpdate(), ChatSessionDoc.class);
 		return chatSessionDoc;
 	}
 

@@ -38,6 +38,7 @@ import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.store.MessageStore.EVENTS;
 import com.boot.jx.postman.store.PMStoreConstants;
+import com.boot.jx.postman.store.PMStoreConstants.CHAT_STATUS;
 import com.boot.jx.postman.store.SessionStore;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
@@ -192,14 +193,14 @@ public class MsgController {
 
 	@ResponseBody
 	@RequestMapping(value = { "/api/contact/label" }, method = { RequestMethod.POST })
-	public ApiResponse<ContactDTO, Object> addContactTag(@RequestParam String sessionId,
-			@RequestBody ListRequestModel<QuickLabel> tags) {
+	public ApiResponse<ContactDTO, Object> addContactLabel(@RequestParam String sessionId,
+			@RequestBody ListRequestModel<QuickLabel> labels) {
 		ChatSessionDoc sessionDoc = sessionStore.getSession(sessionId);
 		ChatContactDoc contact = sessionStore.getContact(sessionDoc.getContactId());
 
 		List<String> oldList = contact.labelId();
 		List<String> newList = new ArrayList<String>();
-		for (QuickLabel tag : tags.getValues()) {
+		for (QuickLabel tag : labels.getValues()) {
 			newList.add(tag.getId());
 		}
 		newList = CollectionUtil.distinct(newList);
@@ -219,5 +220,17 @@ public class MsgController {
 			chatService.log(sessionDoc, EVENTS.LABEL_ADDED, addedItems.toArray(new String[0]));
 		}
 		return ApiResponse.buildData(ChatDTOUtil.getContactDTO(contact));
+	}
+
+	@ResponseBody
+	@RequestMapping(value = { "/api/session/status" }, method = { RequestMethod.POST })
+	public ApiResponse<ChatSessionDTO, Object> updateSessionStatus(@RequestParam String sessionId,
+			@RequestBody CHAT_STATUS status) {
+		ChatSessionDoc sessionDoc = sessionStore.getSession(sessionId);
+		if (!status.toString().equalsIgnoreCase(sessionDoc.getStatus())) {
+			sessionStore.changeStatus(sessionDoc, status);
+			chatService.log(sessionDoc, EVENTS.STATUS_CHANGED, sessionDoc.getStatus(), status.toString());
+		}
+		return ApiResponse.buildData(ChatDTOUtil.getChatSessionDTO(sessionDoc));
 	}
 }
