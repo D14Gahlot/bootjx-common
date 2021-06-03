@@ -56,7 +56,7 @@ public class AgentSessionService {
 	 * Refreshes online status for currently logged in agent
 	 */
 	public void refreshOnline() {
-		if (TimeUtils.isExpired(agentSessionBean.getLastOnlineStamp(), chatClient.getChatOnlholdTimeout())) {
+		if (TimeUtils.isExpired(agentSessionBean.getLastOnlineStamp(), chatClient.getAgentSessionTimeout())) {
 			agentSessionBean.setLastOnlineStamp(System.currentTimeMillis());
 			this.updateSession();
 		}

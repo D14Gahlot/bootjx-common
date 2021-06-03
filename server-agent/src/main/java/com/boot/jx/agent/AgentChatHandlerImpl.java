@@ -76,7 +76,7 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 	}
 
 	private AgentSessionDoc getAgentSessonAssigned(InboxMessage inboxMessage) {
-		long timeThen = System.currentTimeMillis() - TimeUtils.toMillis(chatClient.getChatOnlholdTimeout());
+		long timeThen = System.currentTimeMillis() - TimeUtils.toMillis(chatClient.getAgentSessionTimeout());
 		Query query = new Query();
 		Criteria c = Criteria.where("isOnline").is(true).and("isLoggedIn").is(true).and("lastOnlineStamp").gt(timeThen);
 		if (ArgUtil.is(inboxMessage.session().getDept())) {

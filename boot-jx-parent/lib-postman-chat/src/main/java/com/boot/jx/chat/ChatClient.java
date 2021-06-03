@@ -46,8 +46,14 @@ public class ChatClient {
 	@Value("${postman.chat.dummy.bot.enabled}")
 	boolean chatDummyBotEnabled;
 
-	@Value("${postman.chat.onhold.timeout}")
-	private String chatOnlholdTimeout;
+	@Value("${postman.chat.idle.timeout}")
+	private String chatIdleTimeout;
+
+	@Value("${postman.chat.session.timeout}")
+	private String chatSessionTimeout;
+
+	@Value("${postman.agent.session.timeout}")
+	private String agentSessionTimeout;
 
 	@Value("${postman.default.sender}")
 	private String defaultSender;
@@ -107,8 +113,8 @@ public class ChatClient {
 		}
 	}
 
-	public String getChatOnlholdTimeout() {
-		return chatOnlholdTimeout;
+	public String getChatIdleTimeout() {
+		return chatIdleTimeout;
 	}
 
 	public String getDefaultSender() {
@@ -125,6 +131,14 @@ public class ChatClient {
 
 	public String getPostmanType() {
 		return postmanType;
+	}
+
+	public String getChatSessionTimeout() {
+		return chatSessionTimeout;
+	}
+
+	public String getAgentSessionTimeout() {
+		return agentSessionTimeout;
 	}
 
 }
