@@ -225,7 +225,7 @@ public class MsgController {
 	@ResponseBody
 	@RequestMapping(value = { "/api/session/status" }, method = { RequestMethod.POST })
 	public ApiResponse<ChatSessionDTO, Object> updateSessionStatus(@RequestParam String sessionId,
-			@RequestBody CHAT_STATUS status) {
+			@RequestParam CHAT_STATUS status) {
 		ChatSessionDoc sessionDoc = sessionStore.getSession(sessionId);
 		if (!status.toString().equalsIgnoreCase(sessionDoc.getStatus())) {
 			sessionStore.changeStatus(sessionDoc, status);
