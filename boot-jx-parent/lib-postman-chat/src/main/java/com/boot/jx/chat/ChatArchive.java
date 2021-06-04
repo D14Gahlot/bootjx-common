@@ -85,20 +85,26 @@ public class ChatArchive {
 		return messageDtos;
 	}
 
-	public ChatSessionDTO withContact(ChatSessionDoc chatSessionDoc) {
-		ChatSessionDTO chatSessionDto = ChatDTOUtil.getChatSessionDTO(chatSessionDoc);
-		return withContact(chatSessionDto);
-	}
-
 	public ChatSessionDTO withMessages(ChatSessionDTO chatSessionDto) {
 		List<ChatMessageDTO> messageDtos = getMessages(chatSessionDto);
 		chatSessionDto.setMessages(messageDtos);
 		return chatSessionDto;
 	}
 
+	// With Doc Input
+	public ChatSessionDTO getChatSession(ChatSessionDoc chatSessionDoc) {
+		return ChatDTOUtil.getChatSessionDTO(chatSessionDoc);
+	}
+
+	public ChatSessionDTO withContact(ChatSessionDoc chatSessionDoc) {
+		ChatSessionDTO chatSessionDto = ChatDTOUtil.getChatSessionDTO(chatSessionDoc);
+		return withContact(chatSessionDto);
+	}
+
 	@Deprecated
 	public ChatSessionDTO getChatSessionDto(ChatSessionDoc chatSessionDoc, String agentCode) {
-		ChatSessionDTO chatSessionDto = withContact(chatSessionDoc);
+		ChatSessionDTO chatSessionDto = getChatSession(chatSessionDoc);
+		chatSessionDto = withContact(chatSessionDto);
 
 		chatSessionDto.setAssigned(ArgUtil.areEqual(chatSessionDoc.getAssignedToAgent(), agentCode)
 				&& ArgUtil.isNone(chatSessionDoc.getResolveSessionStamp()));

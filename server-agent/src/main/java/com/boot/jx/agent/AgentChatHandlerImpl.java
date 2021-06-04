@@ -24,10 +24,12 @@ import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.dto.ChatMessageDTO;
+import com.boot.jx.postman.dto.ChatSessionDTO;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.store.MessageStore;
 import com.boot.jx.postman.store.PMStoreConstants;
+import com.boot.jx.postman.store.PMStoreConstants.CHAT_STATUS;
 import com.boot.jx.postman.store.SessionStore;
 import com.boot.jx.stomp.StompTunnelService;
 import com.boot.utils.ArgUtil;
@@ -177,12 +179,22 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 				chatArchive.getChatSessionDto(chatSessionDoc, chatSessionDoc.getAssignedToAgent()));
 	}
 
+	public ChatSessionDTO updateChatSessionStatus(String sessionId, CHAT_STATUS status) {
+		ChatSessionDoc sessionDoc = sessionStore.getSession(sessionId);
+		if (chatService.updateSessionStatus(sessionDoc, status)) {
+			ChatSessionDTO dto = chatArchive.getChatSession(sessionDoc);
+			stompTunnelService.sendToTag(sessionDoc.getAssignedToDept(), "/chat/session/update", dto);
+			return dto;
+		}
+		return chatArchive.getChatSession(sessionDoc);
+	}
+
 	@Override
 	public InboxMessage onMessageReceive(InboxMessage inboxMessage) {
 		MessageDoc messageDoc = messageStore.findOrCreateMessageDoc(inboxMessage);
 		ChatMessageDTO messageDto = ChatDTOUtil.getChatMessageDTO(messageDoc);
 		messageDto.setName(inboxMessage.getFromName());
-		stompTunnelService.sendToTag("/message/receive/new", messageDto, inboxMessage.session().getDept());
+		stompTunnelService.sendToTag(inboxMessage.session().getDept(), "/message/receive/new", messageDto);
 		stompTunnelService.sendTo(inboxMessage.session().getAgent(), "/agent/onmessage", messageDto);
 		if (ArgUtil.is(inboxMessage.getMessage()) && inboxMessage.getMessage().equalsIgnoreCase("/exit_chat")) {
 			ChatSessionDoc chatSessionDoc = sessionStore.getSession(inboxMessage.getSessionId());

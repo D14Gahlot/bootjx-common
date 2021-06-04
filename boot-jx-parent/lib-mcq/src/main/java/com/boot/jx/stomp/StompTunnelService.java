@@ -43,7 +43,7 @@ public class StompTunnelService {
 	}
 
 	@Async
-	public void sendToTag(String topic, Object message, String tag) {
+	public void sendToTag(String tag, String topic, Object message) {
 		try {
 			StompTunnelEvent event = new StompTunnelEvent();
 			event.setTopic(topic);

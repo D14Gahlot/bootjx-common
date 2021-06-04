@@ -83,7 +83,9 @@ public class MsgController {
 			List<ChatSessionDoc> sessions = sessionStore
 					.findChatSessionDocByAgentAndUnAssigned(agentSession.getAgentCode(), agentSession.getAgentDept());
 			for (ChatSessionDoc chatSessionDoc : sessions) {
-				ChatSessionDTO chatSessionDto = chatArchive.withContact(chatSessionDoc);
+				ChatSessionDTO chatSessionDto = chatArchive.getChatSession(chatSessionDoc);
+				chatSessionDto = chatArchive.withContact(chatSessionDto);
+
 				if (ArgUtil.isEqual(chatSessionDto.getAssignedToDept(), PMStoreConstants.NO_DEPT,
 						agentSession.getAgentDept(), null, Constants.BLANK)
 						&& ArgUtil.isEqual(chatSessionDto.getAssignedToAgent(), agentSession.getAgentCode(), null)) {
@@ -226,13 +228,6 @@ public class MsgController {
 	@RequestMapping(value = { "/api/session/status" }, method = { RequestMethod.POST })
 	public ApiResponse<ChatSessionDTO, Object> updateSessionStatus(@RequestParam String sessionId,
 			@RequestParam CHAT_STATUS status) {
-		ChatSessionDoc sessionDoc = sessionStore.getSession(sessionId);
-		if (!status.toString().equalsIgnoreCase(sessionDoc.getStatus())) {
-			String oldStatus = sessionDoc.getStatus();
-			sessionStore.changeStatus(sessionDoc, status);
-			chatService.log(sessionDoc, agentSession.getAgentCode(), EVENTS.STATUS_CHANGED, oldStatus,
-					status.toString());
-		}
-		return ApiResponse.buildData(ChatDTOUtil.getChatSessionDTO(sessionDoc));
+		return ApiResponse.buildResult(agentChatHandlerImpl.updateChatSessionStatus(sessionId, status));
 	}
 }

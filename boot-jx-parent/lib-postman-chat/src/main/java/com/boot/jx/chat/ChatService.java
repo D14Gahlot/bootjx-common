@@ -12,6 +12,7 @@ import com.boot.jx.bot.ChatContext;
 import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorHandler;
 import com.boot.jx.chat.ConnectorHandlerFactory.DefaultConnector;
 import com.boot.jx.dict.ContactType;
+import com.boot.jx.logger.AuditDetailProvider;
 import com.boot.jx.logger.LoggerService;
 import com.boot.jx.postman.PostManException;
 import com.boot.jx.postman.doc.ChatContactDoc;
@@ -51,6 +52,9 @@ public class ChatService {
 	@Autowired
 	private SessionStore sessionStore;
 
+	@Autowired
+	private AuditDetailProvider auditDetailProvider;
+
 	public InboxMessage getInboxMessage() {
 		return chatContext.getInboxMessage();
 	}
@@ -67,6 +71,10 @@ public class ChatService {
 
 	public ChatClient getClient() {
 		return chatClient;
+	}
+
+	public String getCurrenUser() {
+		return ArgUtil.is(auditDetailProvider) ? auditDetailProvider.getAuditUser() : "_SYSTEM_";
 	}
 
 	private boolean actionIntenal(ChatContactDoc chatContactDoc, OutboxMessage outboxMessage) {
@@ -205,11 +213,11 @@ public class ChatService {
 
 	public void log(ChatSessionDoc sessionDoc, String agent, EVENTS event, String... logs) {
 		InboxMessage inboxMessage = sessionStore.toInboxMessage(sessionDoc);
-		log(inboxMessage, agent, event, logs);
+		log(inboxMessage, getCurrenUser(), event, logs);
 	}
 
 	public void log(ChatSessionDoc sessionDoc, EVENTS event, String... logs) {
-		log(sessionDoc, sessionDoc.getAssignedToAgent(), event, logs);
+		log(sessionDoc, getCurrenUser(), event, logs);
 	}
 
 	public void send(ChatSessionDoc sessionDoc, OutboxMessage outboxMessage) {
@@ -351,7 +359,7 @@ public class ChatService {
 
 	public boolean resolveSession(ChatSessionDoc session) {
 		if (!ArgUtil.isNone(session.getResolveSessionStamp())) {
-			return true;
+			return false;
 		}
 		session = sessionStore.resolveSession(session);
 		log(session, EVENTS.STATUS_CHANGED, session.getStatus(), CHAT_STATUS.RESOLVED.toString());
@@ -360,10 +368,26 @@ public class ChatService {
 
 	public boolean closeSession(ChatSessionDoc session) {
 		if (!session.isActive()) {
-			return true;
+			return false;
 		}
 		session = sessionStore.closeSession(session);
 		log(session, EVENTS.STATUS_CHANGED, session.getStatus(), CHAT_STATUS.CLOSED.toString());
+		return true;
+	}
+
+	public boolean updateSessionStatus(ChatSessionDoc sessionDoc, CHAT_STATUS status) {
+		String oldStatus = sessionDoc.getStatus();
+		if (status.toString().equalsIgnoreCase(oldStatus)) {
+			return false;
+		}
+		if (status == CHAT_STATUS.RESOLVED) {
+			return this.resolveSession(sessionDoc);
+		} else if (status == CHAT_STATUS.CLOSED) {
+			return this.closeSession(sessionDoc);
+		} else {
+			sessionStore.changeStatus(sessionDoc, status);
+			log(sessionDoc, EVENTS.STATUS_CHANGED, oldStatus, status.toString());
+		}
 		return true;
 	}
 

@@ -22,7 +22,7 @@ public class DocumentUpdateListner {
 	public void onAgentSessionUpdate(String agentCode) {
 		AgentSessionDoc agentSession = mongoTemplate.findById(agentCode, AgentSessionDoc.class);
 		if (ArgUtil.is(agentSession)) {
-			stompTunnelService.sendToAll("/session/agent/update", agentSession);
+			stompTunnelService.sendToAll("/agent/session/update", agentSession);
 		}
 	}
 
