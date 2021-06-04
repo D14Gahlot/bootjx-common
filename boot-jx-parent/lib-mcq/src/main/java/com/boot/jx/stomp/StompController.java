@@ -31,8 +31,13 @@ public class StompController {
 
 		StompSession stompSession = stompTunnelSessionManager.getStompSessionByHttpSessionId(httpsSessionId);
 
-		if (ArgUtil.is(stompSession) && ArgUtil.is(stompSession.getTags())) {
-			map.put("tags", stompSession.getTags());
+		if (ArgUtil.is(stompSession)) {
+			if (ArgUtil.is(stompSession.getTags())) {
+				map.put("tags", stompSession.getTags());
+			}
+			if (ArgUtil.is(stompSession.getTenantToken())) {
+				map.put("x-tenant-token", stompSession.getTenantToken());
+			}
 		}
 
 		map.put(AppConstants.SESSION_UID_XKEY, stompTunnelSessionManager.createSessionMapping(

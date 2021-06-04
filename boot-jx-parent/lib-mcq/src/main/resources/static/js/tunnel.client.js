@@ -6,6 +6,7 @@ var tunnelClient = (function(win) {
 	};
 	var $connectd = null, $dfd = null;
 	var sessionToken = null;
+	var tenantToken = null;
 	var stompClient = null;
 	var tagIds = [];
 	var pong = false;
@@ -31,6 +32,7 @@ var tunnelClient = (function(win) {
 				var resp = JSON.parse(greeting.body);
 				console.log("@SubscribeMapping",resp);
 				sessionToken = resp["x-session-uid"];
+				tenantToken = resp["x-tenant-token"];
 				tagIds = resp["tags"] || [];
 				$dfd.resolve(frame);
 			});
@@ -59,7 +61,7 @@ var tunnelClient = (function(win) {
 		on : function subscribe(topic, fun) {
 			var THAT = this;
 			onConnect().then(function() {
-				THAT.ids.push(stompClient.subscribe("/topic" + topic, function(greeting) {
+				THAT.ids.push(stompClient.subscribe("/topic" + tenantToken + topic, function(greeting) {
 						fun(JSON.parse(greeting.body).data, topic, greeting);
 				}));
 			});
@@ -71,8 +73,8 @@ var tunnelClient = (function(win) {
 			
 			onConnect().then(function() {
 				tagIds.map(function(tagId){
-					console.log("@sub - /tag/" + tagId + topic)
-					THAT.ids.push(stompClient.subscribe("/tag/" + tagId + topic, function(greeting) {
+					var sub_topic = "/tag/" + tenantToken +  tagId + topic;
+					THAT.ids.push(stompClient.subscribe(sub_topic, function(greeting) {
 						fun(JSON.parse(greeting.body).data, topic, greeting);
 					}));
 				});

@@ -20,6 +20,7 @@ public class StompSessionCache extends CacheBox<StompSession> {
 		String httpSessionId;
 		String prefix;
 		String[] tags;
+		String tenantToken;
 
 		public String getPrefix() {
 			return prefix;
@@ -45,13 +46,21 @@ public class StompSessionCache extends CacheBox<StompSession> {
 			this.tags = tags;
 		}
 
+		public String getTenantToken() {
+			return tenantToken;
+		}
+
+		public void setTenantToken(String tenantToken) {
+			this.tenantToken = tenantToken;
+		}
+
 	}
 
 	/**
 	 * Instantiates a new logged in users.
 	 */
 	public StompSessionCache() {
-		super(StompSession.class.getName() + "V2");
+		super(StompSession.class.getName() + "V3");
 	}
 
 }

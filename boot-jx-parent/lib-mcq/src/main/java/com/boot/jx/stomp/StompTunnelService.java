@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
+import com.boot.jx.AppContextUtil;
 import com.boot.jx.logger.LoggerService;
 import com.boot.jx.stomp.StompSessionCache.StompSession;
 import com.boot.jx.tunnel.TunnelService;
@@ -30,6 +31,8 @@ public class StompTunnelService {
 		try {
 			StompTunnelEvent event = new StompTunnelEvent();
 			event.setTopic(topic);
+			event.setTenantToken(stompTunnelSessionManager.createTagId(AppContextUtil.getTenant()));
+			
 			Map<String, Object> messageData = new HashMap<String, Object>();
 			messageData.put("data", message);
 			event.setData(JsonUtil.toJsonMap(messageData));
@@ -44,7 +47,9 @@ public class StompTunnelService {
 		try {
 			StompTunnelEvent event = new StompTunnelEvent();
 			event.setTopic(topic);
+			event.setTenantToken(stompTunnelSessionManager.createTagId(AppContextUtil.getTenant()));
 			event.setTagId(stompTunnelSessionManager.createTagId(tag));
+			
 			Map<String, Object> messageData = new HashMap<String, Object>();
 			messageData.put("data", message);
 			event.setData(JsonUtil.toJsonMap(messageData));
@@ -72,6 +77,8 @@ public class StompTunnelService {
 			}
 			StompTunnelEvent event = new StompTunnelEvent();
 			event.setTopic(topic);
+			event.setTenantToken(stompTunnelSessionManager.createTagId(AppContextUtil.getTenant()));
+			
 			StompSession stompSession = stompTunnelSessionManager.getStompSession(stompUID);
 			if (!ArgUtil.isEmpty(stompSession)) {
 				event.setHttpSessionId(stompSession.getHttpSessionId());
