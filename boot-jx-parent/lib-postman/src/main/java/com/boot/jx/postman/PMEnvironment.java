@@ -52,10 +52,14 @@ public class PMEnvironment {
 	private PMEnvironmentProvider provider;
 
 	public PMConfiguration config() {
+		PMConfiguration config = null;
 		if (ArgUtil.is(provider)) {
-			return provider.config();
+			config = provider.config();
 		}
-		return null;
+		if (config == null) {
+			config = new PMConfiguration();
+		}
+		return config;
 	}
 
 }

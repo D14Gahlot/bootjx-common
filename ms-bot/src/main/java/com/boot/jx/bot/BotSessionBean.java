@@ -1,10 +1,12 @@
 package com.boot.jx.bot;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.boot.jx.logger.AuditDetailProvider;
 import com.boot.jx.postman.PMEnvironment;
+import com.boot.utils.ArgUtil;
 
 @Component
 public class BotSessionBean implements AuditDetailProvider {
@@ -14,9 +16,12 @@ public class BotSessionBean implements AuditDetailProvider {
 	@Autowired
 	private PMEnvironment environment;
 
+	@Value("${postman.default.sender}")
+	private String defaultSender;
+
 	@Override
 	public String getAuditUser() {
-		return environment.config().agent().getDefaultBotName();
+		return ArgUtil.parseAsString(environment.config().agent().getDefaultBotName(), defaultSender);
 	}
 
 }
