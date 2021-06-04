@@ -33,7 +33,7 @@ public class AppCommonConfig {
 
 	public Map<String, Object> toMap() {
 		Map<String, Object> map = new HashMap<String, Object>();
-		map.put("SETTING_CHAT_TAG_ENABLED", pmEnvironment.config().get("chat.tag.enabled").asBoolean());
+		map.put("CHAT_TAG_ENABLED", pmEnvironment.config().get("chat.tag.enabled").asBoolean());
 		map.put("chatIdleTimeout", TimeUtils.toMillis(chatClient.getChatIdleTimeout()));
 		map.put("agentSessionTimeout", TimeUtils.toMillis(chatClient.getAgentSessionTimeout()));
 		map.put("chatSessionTimeout", TimeUtils.toMillis(sessionStore.getChatSessionTimeout()));
