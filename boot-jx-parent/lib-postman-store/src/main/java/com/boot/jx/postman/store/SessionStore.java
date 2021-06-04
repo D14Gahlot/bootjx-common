@@ -297,11 +297,12 @@ public class SessionStore extends CommonDocStore {
 	public ChatSessionDoc resolveSession(ChatSessionDoc chatSessionDoc) {
 		// Old Way of Doing it
 		chatSessionDoc.setResolveSessionStamp(System.currentTimeMillis());
-		chatSessionDoc.setResolved(false);
+		chatSessionDoc.setResolved(true);
 
 		CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder().whereId(chatSessionDoc.getSessionId());
 		builder.set("resolveSessionStamp", chatSessionDoc.getResolveSessionStamp());
 		builder.set("resolved", chatSessionDoc.isResolved());
+		builder.set("status", CHAT_STATUS.RESOLVED);
 		mongoTemplate.updateFirst(builder.getQuery(), builder.getUpdate(), ChatSessionDoc.class);
 		return chatSessionDoc;
 	}
@@ -313,6 +314,7 @@ public class SessionStore extends CommonDocStore {
 		CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder().whereId(chatSessionDoc.getSessionId());
 		builder.set("closeSessionStamp", chatSessionDoc.getCloseSessionStamp());
 		builder.set("active", chatSessionDoc.isActive());
+		builder.set("status", CHAT_STATUS.CLOSED);
 		mongoTemplate.updateFirst(builder.getQuery(), builder.getUpdate(), ChatSessionDoc.class);
 
 		return chatSessionDoc;
