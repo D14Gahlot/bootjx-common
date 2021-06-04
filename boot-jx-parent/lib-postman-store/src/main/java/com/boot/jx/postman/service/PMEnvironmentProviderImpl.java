@@ -29,7 +29,7 @@ public class PMEnvironmentProviderImpl implements PMEnvironmentProvider, AppShar
 		if (connectors.containsKey(tnt)) {
 			return connectors.get(tnt);
 		}
-		if (!ArgUtil.is(mongoTemplate)) {
+		if (ArgUtil.is(mongoTemplate)) {
 			ConnectorConfigDoc x = mongoTemplate.findById(AppContextUtil.getTenant(), ConnectorConfigDoc.class);
 			if (ArgUtil.is(x)) {
 				connectors.put(tnt, x);
