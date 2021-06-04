@@ -74,7 +74,7 @@ var tunnelClient = (function(win) {
 			onConnect().then(function() {
 				tagIds.map(function(tagId){
 					var sub_topic = "/tag/" + (tenantToken + "/" + tagId) + topic;
-					console.log("@sub - " sub_topic)
+					console.log("@sub - ",sub_topic)
 					THAT.ids.push(stompClient.subscribe(sub_topic, function(greeting) {
 						fun(JSON.parse(greeting.body).data, topic, greeting);
 					}));

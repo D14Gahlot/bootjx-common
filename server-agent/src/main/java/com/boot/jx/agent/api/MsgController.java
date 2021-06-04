@@ -228,8 +228,10 @@ public class MsgController {
 			@RequestParam CHAT_STATUS status) {
 		ChatSessionDoc sessionDoc = sessionStore.getSession(sessionId);
 		if (!status.toString().equalsIgnoreCase(sessionDoc.getStatus())) {
+			String oldStatus = sessionDoc.getStatus();
 			sessionStore.changeStatus(sessionDoc, status);
-			chatService.log(sessionDoc, EVENTS.STATUS_CHANGED, sessionDoc.getStatus(), status.toString());
+			chatService.log(sessionDoc, agentSession.getAgentCode(), EVENTS.STATUS_CHANGED, oldStatus,
+					status.toString());
 		}
 		return ApiResponse.buildData(ChatDTOUtil.getChatSessionDTO(sessionDoc));
 	}
