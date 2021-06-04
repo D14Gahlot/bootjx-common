@@ -52,7 +52,7 @@ public class ChatService {
 	@Autowired
 	private SessionStore sessionStore;
 
-	@Autowired
+	@Autowired(required = false)
 	private AuditDetailProvider auditDetailProvider;
 
 	public InboxMessage getInboxMessage() {
