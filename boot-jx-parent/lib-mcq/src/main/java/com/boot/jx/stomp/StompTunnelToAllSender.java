@@ -23,9 +23,10 @@ public class StompTunnelToAllSender implements ITunnelSubscriber<StompTunnelEven
 
 		if (!ArgUtil.isEmpty(messagingTemplate)) {
 			if (ArgUtil.is(msg.getTagId())) {
-				messagingTemplate.convertAndSend("/tag/" + msg.getTagId() + msg.getTopic(), msg.getData());
+				messagingTemplate.convertAndSend(
+						"/tag/" + (msg.getTenantToken() + "/" + msg.getTagId()) + msg.getTopic(), msg.getData());
 			} else {
-				messagingTemplate.convertAndSend("/topic" + msg.getTopic(), msg.getData());
+				messagingTemplate.convertAndSend("/topic/" + msg.getTenantToken() + msg.getTopic(), msg.getData());
 			}
 		}
 
