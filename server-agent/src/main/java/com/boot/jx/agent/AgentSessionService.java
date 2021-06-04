@@ -50,14 +50,14 @@ public class AgentSessionService {
 		builder.set("isEnabled", agentSessionBean.getProfile().isEnabled());
 		mongoTemplate.upsert(builder.getQuery(), builder.getUpdate(), AgentSessionDoc.class);
 		documentUpdateListner.onAgentSessionUpdate(agentSessionBean.getAgentCode());
+		agentSessionBean.setLastSyncStamp(System.currentTimeMillis());
 	}
 
 	/**
 	 * Refreshes online status for currently logged in agent
 	 */
 	public void refreshOnline() {
-		if (TimeUtils.isExpired(agentSessionBean.getLastOnlineStamp(), chatClient.getAgentSessionTimeout())) {
-			agentSessionBean.setLastOnlineStamp(System.currentTimeMillis());
+		if (TimeUtils.isExpired(agentSessionBean.getLastSyncStamp(), chatClient.getAgentSessionTimeout())) {
 			this.updateSession();
 		}
 	}
@@ -66,10 +66,7 @@ public class AgentSessionService {
 		boolean oldOnline = agentSessionBean.isOnline();
 		agentSessionBean.setOnline(isOnline);
 		agentSessionBean.setLastOnlineStamp(System.currentTimeMillis());
-
-		if (oldOnline == isOnline) {
-			this.refreshOnline();
-		} else {
+		if (oldOnline != isOnline) {
 			this.updateSession();
 		}
 	}

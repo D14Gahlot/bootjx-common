@@ -22,6 +22,8 @@ public class AgentSessionBean implements AuditDetailProvider {
 
 	private long lastOnlineStamp;
 
+	private long lastSyncStamp;
+
 	private boolean isDirty;
 
 	private AgentResponseAuthDto profile;
@@ -91,6 +93,14 @@ public class AgentSessionBean implements AuditDetailProvider {
 			return this.profile.getAgent_code();
 		}
 		return null;
+	}
+
+	public long getLastSyncStamp() {
+		return lastSyncStamp;
+	}
+
+	public void setLastSyncStamp(long lastSyncStamp) {
+		this.lastSyncStamp = lastSyncStamp;
 	}
 
 }
