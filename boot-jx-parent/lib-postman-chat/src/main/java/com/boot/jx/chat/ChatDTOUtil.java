@@ -62,6 +62,10 @@ public class ChatDTOUtil {
 			messageDto.setStamps(stamps);
 		}
 
+		if (ArgUtil.isEmpty(messageDto.getName())) {
+			messageDto.setName(messageDto.getSender());
+		}
+
 		return messageDto;
 	}
 
