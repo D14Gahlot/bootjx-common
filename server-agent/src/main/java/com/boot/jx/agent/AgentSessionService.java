@@ -47,7 +47,10 @@ public class AgentSessionService {
 		builder.set("isLoggedIn", agentSessionBean.isLoggedIn());
 		builder.set("isOnline", agentSessionBean.isOnline());
 		builder.set("lastOnlineStamp", agentSessionBean.getLastOnlineStamp());
-		builder.set("isEnabled", agentSessionBean.getProfile().isEnabled());
+
+		if (ArgUtil.is(agentSessionBean.getProfile())) {
+			builder.set("isEnabled", agentSessionBean.getProfile().isEnabled());
+		}
 		mongoTemplate.upsert(builder.getQuery(), builder.getUpdate(), AgentSessionDoc.class);
 		documentUpdateListner.onAgentSessionUpdate(agentSessionBean.getAgentCode());
 		agentSessionBean.setLastSyncStamp(System.currentTimeMillis());
