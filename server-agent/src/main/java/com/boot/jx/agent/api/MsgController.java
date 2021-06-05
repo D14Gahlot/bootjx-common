@@ -114,7 +114,6 @@ public class MsgController {
 			agentChatHandlerImpl.onAssign(agent, sessionDoc);
 		}
 
-		sessionStore.updateResponseTime(sessionDoc);
 		// Session Stuff Logging >
 		if (ArgUtil.areEqual(sessionDoc.getAssignedToAgent(), agentSession.getAgentCode())) {
 			ChatMessageDTO messageDto = new ChatMessageDTO();

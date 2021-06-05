@@ -221,6 +221,7 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 				break;
 			}
 		} else {
+			sessionStore.updateResponseTime(sessionDoc);
 			chatService.reply(sessionDoc, outboxMessage);
 			MessageDoc messageDoc = messageStore.findMessageDoc(outboxMessage);
 			ChatMessageDTO messageDto = ChatDTOUtil.getChatMessageDTO(messageDoc);
