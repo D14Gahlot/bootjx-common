@@ -85,7 +85,7 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 			c.and("agentDept").is(inboxMessage.session().getDept());
 		} else {
 			inboxMessage.session().setDept(
-					ArgUtil.nonEmpty(environment.config().agent().getDefaultBotName(), PMStoreConstants.NO_DEPT));
+					ArgUtil.nonEmpty(environment.config().agent().getDefaultTeamCode(), PMStoreConstants.NO_DEPT));
 		}
 		query.addCriteria(c).with(new Sort(Direction.ASC, "lastAssignStamp")).limit(1);
 
@@ -204,6 +204,9 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 	}
 
 	public OutboxMessage onSend(ChatSessionDoc sessionDoc, OutboxMessage outboxMessage) {
+		outboxMessage.session().setDept(agentSession.getAgentDept());
+		outboxMessage.session().setAgent(agentSession.getAgentCode());
+
 		String action = ChatCommands.getCommand(outboxMessage);
 		if (ArgUtil.is(action)) {
 			outboxMessage.setAction(action);

@@ -174,6 +174,10 @@ public class ChatService {
 			outboxMessage.session().setAgent(sessionDoc.getAssignedToAgent());
 		}
 
+		if (ArgUtil.isEmpty(outboxMessage.session().getDept())) {
+			outboxMessage.session().setAgent(sessionDoc.getAssignedToDept());
+		}
+
 		// Action Only
 		if (actionIntenal(chatContactDoc, outboxMessage)) {
 			return;
@@ -216,6 +220,10 @@ public class ChatService {
 
 		if (ArgUtil.isEmpty(outboxMessage.session().getAgent())) {
 			outboxMessage.session().setAgent(sessionDoc.getAssignedToAgent());
+		}
+
+		if (ArgUtil.isEmpty(outboxMessage.session().getDept())) {
+			outboxMessage.session().setAgent(sessionDoc.getAssignedToDept());
 		}
 
 		// Action Only
