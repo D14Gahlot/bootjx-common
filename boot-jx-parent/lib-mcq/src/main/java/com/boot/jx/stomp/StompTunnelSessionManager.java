@@ -13,7 +13,6 @@ import com.boot.jx.AppContextUtil;
 import com.boot.jx.stomp.StompSessionCache.StompSession;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CryptoUtil;
-import com.boot.utils.StringUtils.StringMatcher;
 import com.boot.utils.UniqueID;
 
 @Component
@@ -129,7 +128,7 @@ public class StompTunnelSessionManager {
 
 	public String createTagId(String tag) {
 		return tag + "-" + CryptoUtil.getHashBuilder().message(tag).secret("SOME_SECRET_TO_B_CHANGED_LATER")
-				.interval(86400).toSHA2().hash();
+				.toHmacSHA256().hash();
 	}
 
 }

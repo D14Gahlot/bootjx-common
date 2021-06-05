@@ -196,13 +196,12 @@ public class TwitterClient implements MessageClient {
 		return null;
 	}
 
-	public Map<String, String> verifyCRC(String lane, String crcToken)
-			throws InvalidKeyException, NoSuchAlgorithmException {
+	public Map<String, String> verifyCRC(String lane, String crcToken) {
 		TwitterClientContext ctx = getContext(lane);
 		Map<String, String> map = new HashMap<String, String>();
 		map.put("response_token",
 				"sha256=" + new HashBuilder().secret(ctx.getTwitter().getConfiguration().getOAuthConsumerSecret())
-						.message(crcToken).toHashHmac("HmacSHA256").hash());
+						.message(crcToken).toHmac("HmacSHA256").hash());
 		return map;
 
 	}

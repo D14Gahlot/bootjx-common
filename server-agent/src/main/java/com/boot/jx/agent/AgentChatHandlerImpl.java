@@ -195,7 +195,6 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 		ChatMessageDTO messageDto = ChatDTOUtil.getChatMessageDTO(messageDoc);
 		messageDto.setName(inboxMessage.getFromName());
 		stompTunnelService.sendToTag(inboxMessage.session().getDept(), "/message/receive/new", messageDto);
-		stompTunnelService.sendTo(inboxMessage.session().getAgent(), "/agent/onmessage", messageDto);
 		if (ArgUtil.is(inboxMessage.getMessage()) && inboxMessage.getMessage().equalsIgnoreCase("/exit_chat")) {
 			ChatSessionDoc chatSessionDoc = sessionStore.getSession(inboxMessage.getSessionId());
 			exitAgentMode(chatSessionDoc, null);
@@ -223,7 +222,7 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 			MessageDoc messageDoc = messageStore.findMessageDoc(outboxMessage);
 			ChatMessageDTO messageDto = ChatDTOUtil.getChatMessageDTO(messageDoc);
 			messageDto.setName(messageDoc.getAgent());
-			stompTunnelService.sendTo(outboxMessage.session().getAgent(), "/agent/onmessage", messageDto);
+			stompTunnelService.sendToTag(outboxMessage.session().getDept(), "/message/sent/new", messageDto);
 		}
 		return outboxMessage;
 	}
@@ -231,6 +230,6 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 	public void addStickyNote(ChatSessionDoc chatSessionDoc, OutboxMessage outboxMessage) {
 		MessageDoc messageDoc = chatService.note(chatSessionDoc, outboxMessage);
 		ChatMessageDTO messageDto = chatArchive.getMessage(messageDoc, chatSessionDoc);
-		stompTunnelService.sendToTag(chatSessionDoc.getAssignedToDept(), "/message/receive/new", messageDto);
+		stompTunnelService.sendToTag(chatSessionDoc.getAssignedToDept(), "/message/sent/new", messageDto);
 	}
 }
