@@ -19,6 +19,7 @@ import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatContextDoc;
 import com.boot.jx.postman.doc.ChatMeta;
 import com.boot.jx.postman.doc.ChatSessionDoc;
+import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.dto.ChatUserProfileDTO;
 import com.boot.jx.postman.dto.ChatUserProfileDTO.ChatUserProfileRequest;
 import com.boot.jx.postman.model.InboxMessage;
@@ -201,6 +202,15 @@ public class ChatService {
 		outboxMessage.model().put("contact", ChatDTOUtil.getContactDTO(chatContactDoc));
 
 		replyIntenal(inboxMessage, outboxMessage);
+	}
+
+	public MessageDoc note(ChatSessionDoc sessionDoc, OutboxMessage outboxMessage) {
+		outboxMessage.setContactType(ArgUtil.parseAsEnumT(sessionDoc.getContactType(), ContactType.class));
+		outboxMessage.setChannel(sessionDoc.getChannel());
+		outboxMessage.setLane(sessionDoc.getLane());
+		outboxMessage.setContactId(sessionDoc.getContactId());
+		outboxMessage.setSessionId(sessionDoc.getSessionId());
+		return messageStore.note(outboxMessage, getCurrenUser());
 	}
 
 	public void log(InboxMessage inboxMessage, String agent, EVENTS event, String... logs) {

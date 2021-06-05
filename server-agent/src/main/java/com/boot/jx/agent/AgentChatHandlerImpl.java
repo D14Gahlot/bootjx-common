@@ -212,6 +212,9 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 			case "RESOLVE":
 				this.exitAgentMode(sessionDoc, outboxMessage);
 				break;
+			case "ADD_STICKY_NOTE":
+				this.addStickyNote(sessionDoc, outboxMessage);
+				break;
 			default:
 				break;
 			}
@@ -225,4 +228,9 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 		return outboxMessage;
 	}
 
+	public void addStickyNote(ChatSessionDoc chatSessionDoc, OutboxMessage outboxMessage) {
+		MessageDoc messageDoc = chatService.note(chatSessionDoc, outboxMessage);
+		ChatMessageDTO messageDto = ChatDTOUtil.getChatMessageDTO(messageDoc);
+		stompTunnelService.sendToTag(chatSessionDoc.getAssignedToDept(), "/message/receive/new", messageDto);
+	}
 }

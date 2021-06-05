@@ -226,6 +226,14 @@ public class MessageStore extends CommonDocStore {
 		return doc;
 	}
 
+	public MessageDoc note(OutboxMessage outboxMessage, String agent) {
+		MessageDoc doc = createMessageDoc(outboxMessage);
+		doc.setType("N");
+		doc.setAgent(agent);
+		mongoTemplate.save(doc, getCollectionName(outboxMessage.getContactType()));
+		return doc;
+	}
+
 	public MessageDoc save(MessageDoc messageDoc) {
 		mongoTemplate.save(messageDoc, getCollectionName(messageDoc.getContact().getContactType()));
 		return messageDoc;
