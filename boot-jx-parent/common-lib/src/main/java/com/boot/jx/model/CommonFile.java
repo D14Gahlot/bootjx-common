@@ -238,7 +238,7 @@ public class CommonFile implements Serializable {
 	}
 
 	public CommonFile contentType(String contentType) {
-		this.fileFormat = FileFormat.from(url, this.fileFormat);
+		this.fileFormat = FileFormat.from(contentType, this.fileFormat);
 		if (ArgUtil.is(this.fileFormat)) {
 			this.fileType = this.fileFormat.getFileType();
 		}
