@@ -78,6 +78,22 @@ public class ChatService {
 		return ArgUtil.is(auditDetailProvider) ? auditDetailProvider.getAuditUser() : "_SYSTEM_";
 	}
 
+	private void message(String messageType, ChatContactDoc chatContactDoc, InboxMessage inboxMessage,
+			OutboxMessage outboxMessage) {
+		try {
+			ConnectorHandler connector = connectorHandlerFactory.get(outboxMessage.getContactType(),
+					outboxMessage.getChannel());
+			if (ArgUtil.is(connector)) {
+				connector.message(messageType, chatContactDoc, inboxMessage, outboxMessage);
+			} else if (ArgUtil.is(defaultConnector)) {
+				defaultConnector.message(messageType, chatContactDoc, inboxMessage, outboxMessage);
+			}
+		} catch (Exception e) {
+			LOGGER.error(messageType, e);
+		}
+		messageStore.createOrUpdate(outboxMessage);
+	}
+
 	private boolean actionIntenal(ChatContactDoc chatContactDoc, OutboxMessage outboxMessage) {
 		if (!ArgUtil.is(outboxMessage.getAction())) {
 			return false;
@@ -92,19 +108,7 @@ public class ChatService {
 		outboxMessage.setContactId(chatContactDoc.getContactId());
 
 		messageStore.createOrUpdate(outboxMessage);
-		try {
-			ConnectorHandler connector = connectorHandlerFactory.get(outboxMessage.getContactType(),
-					outboxMessage.getChannel());
-			if (ArgUtil.is(connector)) {
-				connector.message("ACTION", chatContactDoc, null, outboxMessage);
-			} else if (ArgUtil.is(defaultConnector)) {
-				defaultConnector.message("ACTION", chatContactDoc, null, outboxMessage);
-			}
-		} catch (Exception e) {
-			LOGGER.error("actionIntenal", e);
-		}
-
-		messageStore.createOrUpdate(outboxMessage);
+		connectorHandlerFactory.message("ACTION", chatContactDoc, null, outboxMessage);
 		return true;
 	}
 
@@ -124,19 +128,7 @@ public class ChatService {
 		outboxMessage.setSessionId(inboxMessage.getSessionId());
 
 		messageStore.createOrUpdate(outboxMessage);
-		try {
-			ConnectorHandler connector = connectorHandlerFactory.get(outboxMessage.getContactType(),
-					outboxMessage.getChannel());
-			if (ArgUtil.is(connector)) {
-				connector.message("REPLY", null, inboxMessage, outboxMessage);
-			} else if (ArgUtil.is(defaultConnector)) {
-				defaultConnector.message("REPLY", null, inboxMessage, outboxMessage);
-			}
-		} catch (Exception e) {
-			LOGGER.error("replyIntenal", e);
-		}
-
-		messageStore.createOrUpdate(outboxMessage);
+		connectorHandlerFactory.message("REPLY", null, inboxMessage, outboxMessage);
 	}
 
 	private void sendIntenal(ChatContactDoc chatContactDoc, OutboxMessage outboxMessage) {
@@ -153,20 +145,8 @@ public class ChatService {
 		outboxMessage.setSessionId(chatContactDoc.getSessionId());
 
 		messageStore.createOrUpdate(outboxMessage);
-		try {
-			ConnectorHandler connector = connectorHandlerFactory.get(outboxMessage.getContactType(),
-					outboxMessage.getChannel());
-			if (ArgUtil.is(connector)) {
-				connector.message("SEND", chatContactDoc, null, outboxMessage);
-			} else if (ArgUtil.is(defaultConnector)) {
-				defaultConnector.message("SEND", chatContactDoc, null, outboxMessage);
-			}
-		} catch (Exception e) {
-			LOGGER.error("sendIntenal", e);
-		}
 
-		messageStore.createOrUpdate(outboxMessage);
-
+		connectorHandlerFactory.message("SEND", chatContactDoc, null, outboxMessage);
 	}
 
 	public void reply(OutboxMessage outboxMessage) throws InterruptedException {
@@ -210,6 +190,7 @@ public class ChatService {
 		outboxMessage.setLane(sessionDoc.getLane());
 		outboxMessage.setContactId(sessionDoc.getContactId());
 		outboxMessage.setSessionId(sessionDoc.getSessionId());
+		outboxMessage.setType("N");
 		return messageStore.note(outboxMessage, getCurrenUser());
 	}
 

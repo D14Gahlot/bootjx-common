@@ -230,7 +230,7 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 
 	public void addStickyNote(ChatSessionDoc chatSessionDoc, OutboxMessage outboxMessage) {
 		MessageDoc messageDoc = chatService.note(chatSessionDoc, outboxMessage);
-		ChatMessageDTO messageDto =chatArchive.getMessage(messageDoc, chatSessionDoc);
+		ChatMessageDTO messageDto = chatArchive.getMessage(messageDoc, chatSessionDoc);
 		stompTunnelService.sendToTag(chatSessionDoc.getAssignedToDept(), "/message/receive/new", messageDto);
 	}
 }

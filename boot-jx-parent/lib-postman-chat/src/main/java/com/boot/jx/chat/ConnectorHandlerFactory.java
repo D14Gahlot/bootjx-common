@@ -5,23 +5,31 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 import com.boot.common.ScopedBeanFactory;
 import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorHandler;
+import com.boot.jx.chat.ConnectorHandlerFactory.DefaultConnector;
 import com.boot.jx.dict.ContactType;
+import com.boot.jx.logger.LoggerService;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.Message;
 import com.boot.jx.postman.model.OutboxMessage;
+import com.boot.jx.postman.store.MessageStore;
 import com.boot.utils.ArgUtil;
 
 @Component
 public class ConnectorHandlerFactory extends ScopedBeanFactory<String, ConnectorHandler> {
 
 	private static final long serialVersionUID = 4007091611441725719L;
+
+	public static Logger LOGGER = LoggerService.getLogger(ConnectorHandlerFactory.class);
 
 	public interface ConnectorHandler {
 		default public void reply(InboxMessage inboxMessage, OutboxMessage outboxMessage) {
@@ -105,6 +113,38 @@ public class ConnectorHandlerFactory extends ScopedBeanFactory<String, Connector
 		}
 		precisedKey = String.format("%s_DEFAULT", contactType);
 		return this.get(precisedKey);
+	}
+
+	@Autowired(required = false)
+	private DefaultConnector defaultConnector;
+
+	@Autowired
+	private MessageStore messageStore;
+
+	/**
+	 * 
+	 * Should always be last method or not changes in chatContactDoc or
+	 * outboxMessage after this;
+	 * 
+	 * @param messageType
+	 * @param chatContactDoc
+	 * @param inboxMessage
+	 * @param outboxMessage
+	 */
+	@Async
+	public void message(String messageType, ChatContactDoc chatContactDoc, InboxMessage inboxMessage,
+			OutboxMessage outboxMessage) {
+		try {
+			ConnectorHandler connector = get(outboxMessage.getContactType(), outboxMessage.getChannel());
+			if (ArgUtil.is(connector)) {
+				connector.message(messageType, chatContactDoc, inboxMessage, outboxMessage);
+			} else if (ArgUtil.is(defaultConnector)) {
+				defaultConnector.message(messageType, chatContactDoc, inboxMessage, outboxMessage);
+			}
+		} catch (Exception e) {
+			LOGGER.error(messageType, e);
+		}
+		messageStore.createOrUpdate(outboxMessage);
 	}
 
 }
