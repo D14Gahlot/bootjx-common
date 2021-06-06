@@ -2,7 +2,9 @@ package com.boot.jx.postman.model;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.boot.jx.dict.ContactType;
@@ -29,7 +31,7 @@ public class InboxMessage implements Serializable, IMessage {
 
 	private BigDecimal queue;
 	private String lane;
-	
+
 	@JsonIgnore
 	private StringMatcher matcher;
 
@@ -41,6 +43,7 @@ public class InboxMessage implements Serializable, IMessage {
 	protected Map<String, Object> form = new HashMap<String, Object>();
 	protected Map<String, Object> data = new HashMap<String, Object>();
 	protected TagDocument tags;
+	private List<Attachment> attachments = null;
 
 	public String getTo() {
 		return to;
@@ -272,4 +275,25 @@ public class InboxMessage implements Serializable, IMessage {
 		return this.from;
 	}
 
+	public List<Attachment> getAttachments() {
+		return attachments;
+	}
+
+	public void setAttachments(List<Attachment> attachments) {
+		this.attachments = attachments;
+	}
+
+	public List<Attachment> attachments() {
+		if (this.attachments == null) {
+			this.attachments = new ArrayList<Attachment>();
+		}
+		return attachments;
+	}
+
+	public InboxMessage attachment(Attachment... attachments) {
+		for (Attachment file : attachments) {
+			this.attachments().add(file);
+		}
+		return this;
+	}
 }

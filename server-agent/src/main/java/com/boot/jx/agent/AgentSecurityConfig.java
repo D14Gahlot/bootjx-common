@@ -28,26 +28,24 @@ public class AgentSecurityConfig extends WebSecurityConfigurerAdapter {
 	protected void configure(HttpSecurity http) throws Exception {
 		http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
 				// Publics Calls
-				.and().authorizeRequests().antMatchers("/pub/**").permitAll()
-				.and().authorizeRequests().antMatchers("/ext/**").permitAll()
-				.and().authorizeRequests().antMatchers("/int/**").permitAll()
+				.and().authorizeRequests().antMatchers("/pub/**").permitAll().and().authorizeRequests()
+				.antMatchers("/ext/**").permitAll().and().authorizeRequests().antMatchers("/int/**").permitAll()
 				// Login Calls
 				.and().authorizeRequests().antMatchers("/auth/**").permitAll()
 				// API Calls
 				.and().authorizeRequests().antMatchers("/api/**").authenticated()
 				// App Pages
-				.and().authorizeRequests().antMatchers("/app/**").authenticated()
-				.and().authorizeRequests().antMatchers("**").authenticated().and().authorizeRequests()
-				.antMatchers("/.**").authenticated()
+				.and().authorizeRequests().antMatchers("/app/**").authenticated().and().authorizeRequests()
+				.antMatchers("**").authenticated().and().authorizeRequests().antMatchers("/.**").authenticated()
 				// Login Forms
 				.and().formLogin().loginPage("/auth/login").successHandler(successHandler()).permitAll()
 				.failureUrl("/auth/login?error").permitAll()
 				// .loginProcessingUrl("/auth/login/submit").permitAll()
 				// Logout Pages
 				.and().logout().permitAll().addLogoutHandler(agentLogoutHandler).logoutUrl("/auth/logout")
-				.logoutSuccessUrl("/auth/login?logout").deleteCookies("JSESSIONID").invalidateHttpSession(true)
-				.permitAll().and().exceptionHandling().accessDeniedPage("/403").and().csrf().disable().headers()
-				.disable();
+				.logoutSuccessUrl("/auth/login?logout").deleteCookies("JSESSIONID", "JXSESSIONID")
+				.invalidateHttpSession(true).permitAll().and().exceptionHandling().accessDeniedPage("/403").and().csrf()
+				.disable().headers().disable();
 	}
 
 	@Bean

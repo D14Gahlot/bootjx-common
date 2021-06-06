@@ -4,9 +4,11 @@ import java.math.BigDecimal;
 import java.text.ParseException;
 
 import com.boot.jx.dict.Language;
+import com.boot.jx.postman.PMConfiguration;
 import com.boot.jx.postman.model.Contact;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.model.PushMessage;
+import com.boot.jx.postman.tw.TwitterConfig;
 import com.boot.jx.scope.tnt.Tenants;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.JsonUtil;
@@ -18,13 +20,30 @@ public class PushMessageTests { // Noncompliant
 	static String tnt = Tenants.DEFAULT_STR;
 	static String FORMAT = "%10s : %-10s : %10s";
 
+	public static void main(String[] args) throws ParseException {
+		PMConfiguration config = new PMConfiguration();
+
+		String key = "@$test.s";
+
+		TwitterConfig tw = new TwitterConfig();
+		tw.setHandler(key);
+		config.twitter(tw);
+		String json = JsonUtil.toJson(config);
+		System.out.println(json);
+
+		System.out.println(JsonUtil.toJson(JsonUtil.parse(json, PMConfiguration.class)));
+		System.out.println(JsonUtil.toJson(JsonUtil.parse(json, PMConfiguration.class).twitter(key)));
+		System.out.println(JsonUtil.toJson(JsonUtil.parse(json, PMConfiguration.class).twitter(key).getHandler()));
+
+	}
+
 	/**
 	 * This is just a test method
 	 * 
 	 * @param args
 	 * @throws ParseException
 	 */
-	public static void main(String[] args) throws ParseException {
+	public static void main3(String[] args) throws ParseException {
 		String id;
 
 		if (ArgUtil.is(id = getNull()))

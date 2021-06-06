@@ -74,14 +74,17 @@ public final class JsonUtil {
 		 * @param type the type
 		 * @return the e
 		 */
-		public <E> E fromJson(String json, Class<E> type) {
+		public <E> E fromJson(String json, Class<E> type, boolean supressWarning) {
 			if (json == null || "".equals(json.trim()) || "\"\"".equals(json.trim())) {
 				return null;
 			}
 			try {
 				return getMapper().readValue(json, type);
 			} catch (IOException e) {
-				LOG.warn("error converting from json=" + json + e.getMessage());
+				if (!supressWarning)
+					LOG.warn("error converting from json=" + json + e.getMessage());
+				else
+					LOG.debug("error converting from json=" + json + e.getMessage());
 			}
 			return null;
 		}
@@ -218,7 +221,11 @@ public final class JsonUtil {
 	 * @return the e
 	 */
 	public static <E> E fromJson(String json, Class<E> type) {
-		return instance.fromJson(json, type);
+		return instance.fromJson(json, type, false);
+	}
+
+	public static <E> E fromJson(String json, Class<E> type, boolean suppressWarning) {
+		return instance.fromJson(json, type, suppressWarning);
 	}
 
 	public static <E> E fromJson(String json, TypeReference<E> valueTypeRef) {
@@ -232,11 +239,11 @@ public final class JsonUtil {
 
 	@SuppressWarnings("unchecked")
 	public static <E> E deepCopy(E src) {
-		return (E) instance.fromJson(toJson(src), src.getClass());
+		return (E) instance.fromJson(toJson(src), src.getClass(), false);
 	}
 
 	public static <E> E deepCopy(Object src, Class<E> type) {
-		return instance.fromJson(toJson(src), type);
+		return instance.fromJson(toJson(src), type, false);
 	}
 
 	/**
@@ -286,9 +293,21 @@ public final class JsonUtil {
 		} else if (json instanceof Map) {
 			return instance.toType(json, toValueType);
 		} else if (json instanceof String) {
-			return instance.fromJson((String) json, toValueType);
+			return instance.fromJson((String) json, toValueType, false);
 		} else {
 			return instance.toType(json, toValueType);
+		}
+	}
+
+	public static <T> T parse(Object json, TypeReference<T> toValueTypeRef) {
+		if (json == null) {
+			return null;
+		} else if (json instanceof Map) {
+			return instance.toType(json, toValueTypeRef);
+		} else if (json instanceof String) {
+			return instance.fromJson((String) json, toValueTypeRef);
+		} else {
+			return instance.toType(json, toValueTypeRef);
 		}
 	}
 

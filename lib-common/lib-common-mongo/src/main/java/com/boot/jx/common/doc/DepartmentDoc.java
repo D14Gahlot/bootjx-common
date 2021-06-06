@@ -2,18 +2,20 @@ package com.boot.jx.common.doc;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.TypeAlias;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import com.boot.jx.mongo.CommonDocInterfaces.DocVersion;
 import com.boot.jx.mongo.CommonDocInterfaces.IDocument;
 import com.boot.jx.mongo.CommonDocInterfaces.Patchable;
 
 @Document(collection = "DEPARTMENTS")
 @TypeAlias("DepartmentDoc")
-public class DepartmentDoc implements Serializable, Patchable<DepartmentDoc>, IDocument {
+public class DepartmentDoc implements Serializable, Patchable<DepartmentDoc>, IDocument, DocVersion {
 
 	private static final long serialVersionUID = -3381417310939635611L;
 
@@ -25,11 +27,15 @@ public class DepartmentDoc implements Serializable, Patchable<DepartmentDoc>, ID
 	private String dept_name;
 	private String dept_email;
 	private Date created_date;
+	private Long createdStamp;
 	private String create_by = "A";
 	private Date modified_date;
+	private Long modifiedStamp;
 	private String modified_by = "A";
 	private String isactive;
 	private boolean isDefaultValue;
+
+	private List<DocVersion> oldVersions;
 
 	public String getDept_code() {
 		return dept_code;
@@ -116,6 +122,30 @@ public class DepartmentDoc implements Serializable, Patchable<DepartmentDoc>, ID
 
 	public void setDefaultValue(boolean isDefaultValue) {
 		this.isDefaultValue = isDefaultValue;
+	}
+
+	public List<DocVersion> getOldVersions() {
+		return oldVersions;
+	}
+
+	public void setOldVersions(List<DocVersion> oldVersions) {
+		this.oldVersions = oldVersions;
+	}
+
+	public Long getModifiedStamp() {
+		return modifiedStamp;
+	}
+
+	public void setModifiedStamp(Long modifiedStamp) {
+		this.modifiedStamp = modifiedStamp;
+	}
+
+	public Long getCreatedStamp() {
+		return createdStamp;
+	}
+
+	public void setCreatedStamp(Long createdStamp) {
+		this.createdStamp = createdStamp;
 	}
 
 }

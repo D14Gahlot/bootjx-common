@@ -16,6 +16,7 @@ public class ChatCommands {
 
 	public static void init() {
 		registerCommand("/exit_chat", "RESOLVE");
+		registerCommand("/add_stick_note", "ADD_STICKY_NOTE");
 		registerCommand("RESOLVE", "RESOLVE");
 	}
 

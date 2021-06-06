@@ -1,5 +1,9 @@
 package com.boot.jx.inbound;
 
+import java.util.LinkedList;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,12 +17,17 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.chat.ChatClient;
+import com.boot.jx.chat.ChatStatusReportService;
 import com.boot.jx.connectors.FacebookConnector;
 import com.boot.jx.postman.fb.FacebooClient;
 import com.boot.jx.postman.fb.FacebookHookRequest;
 import com.boot.jx.postman.model.InboxMessage;
+import com.boot.jx.postman.model.Message;
+import com.boot.jx.postman.model.MessageReport;
 import com.boot.jx.scope.vendor.VendorContext.ApiVendorHeaders;
 import com.boot.jx.utils.PostManUtil;
+import com.boot.utils.ArgUtil;
+import com.boot.utils.Random;
 
 @RestController
 public class InBoundController {
@@ -52,6 +61,30 @@ public class InBoundController {
 			inBoundService.invokeMethods(inboxMessage);
 		}
 		return inboxMessage;
+	}
+
+	static AtomicInteger counter = new AtomicInteger(1);
+
+	@Autowired
+	private ChatStatusReportService chatStatusReportService;
+
+	@ApiVendorHeaders
+	@RequestMapping(value = "/int/status/callback", method = RequestMethod.POST)
+	public List<MessageReport> onStatusCallback() throws InterruptedException {
+		List<MessageReport> list = new LinkedList<MessageReport>();
+		String ser = ArgUtil.parseAsString(counter.getAndIncrement());
+		for (int i = 0; i < 5; i++) {
+			MessageReport report = new MessageReport();
+			report.setMessageIdRef(ArgUtil.parseAsString(ser));
+			report.setMessageIdExt(ArgUtil.parseAsString(i));
+			int statusint = Random.getInt(0, 5);
+			report.setStatus(Message.Status.values()[statusint]);
+			report.setTimestamp(Random.getInt(100, 999));
+			list.add(report);
+		}
+		chatStatusReportService.offer(list);
+		chatStatusReportService.process(ser);
+		return list;
 	}
 
 	@ApiVendorHeaders

@@ -2,6 +2,7 @@ package com.boot.jx.postman.doc;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -22,11 +23,14 @@ public class MessageDoc implements Serializable, Patchable<MessageDoc> {
 
 	@Id
 	private String messageId;
+
+	@Indexed
 	private String messageIdExt;
 	private String messageIdRef;
+
+	@Indexed
 	private String sessionId;
 
-	private String id;
 	private String collapseId;
 	private long timestamp;
 	private String type;
@@ -44,18 +48,11 @@ public class MessageDoc implements Serializable, Patchable<MessageDoc> {
 	private String quickReplyId;
 	private String mediaReplyId;
 
+	private Map<String, Long> stamps;
 	public List<String> logs;
 
 	@Indexed
 	private String contactId;
-
-	public String getId() {
-		return id;
-	}
-
-	public void setId(String id) {
-		this.id = id;
-	}
 
 	public String getMessageId() {
 		return messageId;
@@ -239,4 +236,17 @@ public class MessageDoc implements Serializable, Patchable<MessageDoc> {
 		this.action = action;
 	}
 
+	public Map<String, Long> getStamps() {
+		return stamps;
+	}
+
+	public void setStamps(Map<String, Long> stamps) {
+		this.stamps = stamps;
+	}
+
+	public Map<String, Long> stamps() {
+		if (stamps == null)
+			stamps = new HashMap<String, Long>();
+		return stamps;
+	}
 }

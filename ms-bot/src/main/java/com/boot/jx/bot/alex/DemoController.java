@@ -110,7 +110,7 @@ public class DemoController extends ChatController {
 			next("more-onselect");
 			break;
 		case "*":
-			reply(new OutboxMessage().template("feedback"));
+			reply(new OutboxMessage().template("feedback").put("name", chatContext.getContact().getName()));
 			next("feedback-onselect");
 			break;
 		case "#":
@@ -156,7 +156,7 @@ public class DemoController extends ChatController {
 			next("more-onselect-menu-2");
 			break;
 		case "*":
-			reply(new OutboxMessage().template("feedback"));
+			reply(new OutboxMessage().template("feedback").put("name", chatContext.getContact().getName()));
 			next("feedback-onselect");
 			break;
 		case "#":
@@ -180,7 +180,7 @@ public class DemoController extends ChatController {
 		case "no":
 		case "n":
 		case "2":
-			reply(new OutboxMessage().template("feedback"));
+			reply(new OutboxMessage().template("feedback").put("name", chatContext.getContact().getName()));
 			next("feedback-onselect");
 			break;
 		default:
@@ -201,7 +201,7 @@ public class DemoController extends ChatController {
 		case "no":
 		case "n":
 		case "2":
-			reply(new OutboxMessage().template("feedback"));
+			reply(new OutboxMessage().template("feedback").put("name", chatContext.getContact().getName()));
 			next("feedback-onselect");
 			break;
 		default:
@@ -321,7 +321,8 @@ public class DemoController extends ChatController {
 		case "exit":
 		case "/exit_chat":
 			chatContext.getSession().data().remove("current_menu");
-			reply(new OutboxMessage().template("feedback"));
+			reply(new OutboxMessage().template("feedback").put("name",
+					ArgUtil.nonEmpty(chatContext.getContact().getName(), "WhatsApp User")));
 			next("feedback-onselect");
 			return true;
 		default:

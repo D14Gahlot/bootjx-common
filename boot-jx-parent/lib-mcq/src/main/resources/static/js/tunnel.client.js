@@ -6,12 +6,23 @@ var tunnelClient = (function(win) {
 	};
 	var $connectd = null, $dfd = null;
 	var sessionToken = null;
+	var tenantToken = null;
 	var stompClient = null;
+	var tagIds = [];
 	var pong = false;
+	var TUNNEL_DEBUG = false;
+	if(win.sessionStorage && win.sessionStorage.getItem)
+		TUNNEL_DEBUG = !!win.sessionStorage.getItem("TUNNEL_DEBUG");
+	
 	function connect() {
 		$dfd = $dfd || jQuery.Deferred();
-		var socket = new SockJS(config.context + '/stomp-tunnel');
+		var socket = new SockJS(config.context + '/stomp-tunnel',{
+			debug : TUNNEL_DEBUG
+		});
 		stompClient = Stomp.over(socket);
+		if(!TUNNEL_DEBUG){
+			stompClient.debug = () => {};
+		}
 		stompClient.connect({
 			user : config.user,
 			token : config.token
@@ -21,6 +32,8 @@ var tunnelClient = (function(win) {
 				var resp = JSON.parse(greeting.body);
 				console.log("@SubscribeMapping",resp);
 				sessionToken = resp["x-session-uid"];
+				tenantToken = resp["x-tenant-token"];
+				tagIds = resp["tags"] || [];
 				$dfd.resolve(frame);
 			});
 		});
@@ -48,7 +61,7 @@ var tunnelClient = (function(win) {
 		on : function subscribe(topic, fun) {
 			var THAT = this;
 			onConnect().then(function() {
-				THAT.ids.push(stompClient.subscribe("/topic" + topic, function(greeting) {
+				THAT.ids.push(stompClient.subscribe("/topic/" + tenantToken + topic, function(greeting) {
 						fun(JSON.parse(greeting.body).data, topic, greeting);
 				}));
 			});
@@ -57,6 +70,17 @@ var tunnelClient = (function(win) {
 						fun(JSON.parse(greeting.body).data, topic, greeting);
 				}));
 			});
+			
+			onConnect().then(function() {
+				tagIds.map(function(tagId){
+					var sub_topic = "/tag/" + (tenantToken + "/" + tagId) + topic;
+					console.log("@sub - ",sub_topic)
+					THAT.ids.push(stompClient.subscribe(sub_topic, function(greeting) {
+						fun(JSON.parse(greeting.body).data, topic, greeting);
+					}));
+				});
+			});
+	
 			return this;
 		},	
 		send : function send(topic, msg) {
@@ -83,8 +107,8 @@ var tunnelClient = (function(win) {
 		}
 	}
 	
-	
 	return {
+		debug : false,
 		config : function (_config){
 			for(var key in _config){
 				config[key] = _config[key]

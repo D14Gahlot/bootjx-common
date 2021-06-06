@@ -1,8 +1,11 @@
 package com.boot.jx.mongo;
 
+import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
+
+import com.boot.utils.ArgUtil;
 
 public class CommonMongoQueryBuilder {
 
@@ -33,17 +36,29 @@ public class CommonMongoQueryBuilder {
 		return this;
 	}
 
-	public CommonMongoQueryBuilder whereExists(String key) {
-		query().addCriteria(Criteria.where(key).exists(true));
-		return this;
+	/**
+	 * This is fail Safe '_id' based Search, if Document has 'id' as field
+	 * 
+	 * @param id
+	 * @return
+	 */
+	public CommonMongoQueryBuilder whereIdSafe(Object id) {
+		Criteria c = Criteria.where("_id").is(id);
+		String idStr = ArgUtil.parseAsString(id);
+		if (idStr != null && ObjectId.isValid(idStr)) {
+			Criteria altC = Criteria.where("_id").is(new ObjectId(idStr));
+			c = new Criteria().orOperator(c, altC);
+		}
+		return this.with(c);
 	}
 
 	public CommonMongoQueryBuilder whereId(Object id) {
-		return this.where("_id", id);
+		return this.with(Criteria.where("_id").is(id));
 	}
 
 	public CommonMongoQueryBuilder whereAll() {
-		return this.whereExists("_id");
+		query().addCriteria(new Criteria());
+		return this;
 	}
 
 	public CommonMongoQueryBuilder set(String key, Object o) {

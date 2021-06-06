@@ -2,6 +2,7 @@ package com.boot.jx.postman.dto;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.Map;
 
 import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.TagDocument;
@@ -25,6 +26,7 @@ public class ChatMessageDTO implements Serializable {
 	public List<String> logs;
 	private String sender;
 	private String status;
+	private Map<String, Long> stamps;
 
 	public String getText() {
 		return text;
@@ -144,5 +146,13 @@ public class ChatMessageDTO implements Serializable {
 
 	public void setStatus(String status) {
 		this.status = status;
+	}
+
+	public Map<String, Long> getStamps() {
+		return stamps;
+	}
+
+	public void setStamps(Map<String, Long> stamps) {
+		this.stamps = stamps;
 	}
 }

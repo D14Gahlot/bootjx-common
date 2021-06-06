@@ -1,5 +1,8 @@
 package com.boot.jx.chat;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.ChatUserProfileDoc;
@@ -8,6 +11,8 @@ import com.boot.jx.postman.dto.ChatMessageDTO;
 import com.boot.jx.postman.dto.ChatSessionDTO;
 import com.boot.jx.postman.dto.ChatUserProfileDTO;
 import com.boot.jx.postman.dto.ContactDTO;
+import com.boot.jx.postman.store.PMStoreConstants.CHAT_STATUS;
+import com.boot.utils.ArgUtil;
 import com.boot.utils.EntityDtoUtil;
 
 public class ChatDTOUtil {
@@ -28,6 +33,7 @@ public class ChatDTOUtil {
 		contact.setLabelId(chatContactDoc.getLabelId());
 		contact.setProfilePic(chatContactDoc.getProfilePic());
 		contact.setProfile(chatContactDoc.getProfile());
+		contact.setLane(chatContactDoc.getLane());
 
 		return contact;
 	}
@@ -48,6 +54,18 @@ public class ChatDTOUtil {
 		messageDto.setLogs(messageDoc.getLogs());
 		messageDto.setAction(messageDoc.getAction());
 		messageDto.setStatus(messageDoc.getStatus());
+		messageDto.setStamps(messageDoc.getStamps());
+
+		if (ArgUtil.isEmpty(messageDto.getStamps()) && ArgUtil.is(messageDto.getStatus())) {
+			Map<String, Long> stamps = new HashMap<String, Long>();
+			stamps.put(messageDto.getStatus(), messageDto.getTimestamp());
+			messageDto.setStamps(stamps);
+		}
+
+		if (ArgUtil.isEmpty(messageDto.getName())) {
+			messageDto.setName(messageDto.getSender());
+		}
+
 		return messageDto;
 	}
 
@@ -58,6 +76,22 @@ public class ChatDTOUtil {
 		chatSessionDto.setAssignedToAgent(chatSessionDoc.getAssignedToAgent());
 		chatSessionDto.setAssignedToDept(chatSessionDoc.getAssignedToDept());
 		chatSessionDto.setActive(chatSessionDoc.isActive());
+		chatSessionDto.setStatus(chatSessionDoc.getStatus());
+
+		if (!ArgUtil.is(chatSessionDto.getStatus())) {
+			if (chatSessionDto.isExpired()) {
+				chatSessionDto.setStatus(CHAT_STATUS.EXPIRED.toString());
+			} else if (!chatSessionDto.isActive()) {
+				chatSessionDto.setStatus(CHAT_STATUS.CLOSED.toString());
+			} else if (chatSessionDto.isResolved()) {
+				chatSessionDto.setStatus(CHAT_STATUS.RESOLVED.toString());
+			} else if (chatSessionDto.getAssignedAgentStamp() == 0) {
+				chatSessionDto.setStatus(CHAT_STATUS.UNASSIGNED.toString());
+			} else {
+				chatSessionDto.setStatus(CHAT_STATUS.OPEN.toString());
+			}
+		}
+
 		return chatSessionDto;
 	}
 

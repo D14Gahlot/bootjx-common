@@ -24,7 +24,7 @@ public class Message<T extends Message<T>> implements Serializable, MessageOptio
 	public static final String RESULTS_KEY = "results";
 
 	public static enum Status {
-		INIT, CRTD, SENT, SENT_ERR, DLVRD, READ, NSENT, BLCKD, FAILD;
+		CRTD, INIT, SENT, SENT_ERR, SENTX, SENTX_ERR, DLVRD, READ, NSENT, BLCKD, FAILD;
 	}
 
 	public static class Priority {
@@ -67,6 +67,12 @@ public class Message<T extends Message<T>> implements Serializable, MessageOptio
 	private String collapseId;
 	public int priority;
 
+	private Status status = null;
+
+	private Map<String, Long> stamps;
+
+	private List<String> lines = new ArrayList<String>();
+
 	public String getId() {
 		return id;
 	}
@@ -95,10 +101,6 @@ public class Message<T extends Message<T>> implements Serializable, MessageOptio
 	public void setIChannel(IChannel channel) {
 		this.channel = ArgUtil.parseAsString(channel);
 	}
-
-	private Status status = null;
-
-	private List<String> lines = new ArrayList<String>();
 
 	public Map<String, Object> getModel() {
 		return model;
@@ -177,7 +179,7 @@ public class Message<T extends Message<T>> implements Serializable, MessageOptio
 	public Message() {
 		this.attempt = 0;
 		this.timestamp = System.currentTimeMillis();
-		this.status = Status.INIT;
+		this.status = Status.CRTD;
 		this.to = new ArrayList<String>();
 		this.contacts = new ArrayList<Contact>();
 		this.priority = 0;
@@ -246,7 +248,7 @@ public class Message<T extends Message<T>> implements Serializable, MessageOptio
 		return status;
 	}
 
-	public void setStatus(Status status) {
+	public void status(Status status) {
 		this.status = status;
 	}
 
@@ -483,6 +485,24 @@ public class Message<T extends Message<T>> implements Serializable, MessageOptio
 
 	public void setLane(String lane) {
 		this.lane = lane;
+	}
+
+	public Map<String, Long> getStamps() {
+		return stamps;
+	}
+
+	public void setStamps(Map<String, Long> stamps) {
+		this.stamps = stamps;
+	}
+
+	public Map<String, Long> stamps() {
+		if (stamps == null)
+			stamps = new HashMap<String, Long>();
+		return stamps;
+	}
+
+	public void updateStatus(Status status) {
+		this.stamps().put(ArgUtil.parseAsString(status), System.currentTimeMillis());
 	}
 
 }

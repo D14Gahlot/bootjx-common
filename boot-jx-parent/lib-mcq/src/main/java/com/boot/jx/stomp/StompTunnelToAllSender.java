@@ -9,8 +9,7 @@ import com.boot.jx.tunnel.TunnelEventMapping;
 import com.boot.jx.tunnel.TunnelEventXchange;
 import com.boot.utils.ArgUtil;
 
-@TunnelEventMapping(topic = StompTunnelToAllSender.STOMP_TO_ALL, scheme = TunnelEventXchange.SHOUT_LISTNER,
-		integrity = false)
+@TunnelEventMapping(topic = StompTunnelToAllSender.STOMP_TO_ALL, scheme = TunnelEventXchange.SHOUT_LISTNER, integrity = false)
 @ConditionalOnProperty("app.stomp")
 public class StompTunnelToAllSender implements ITunnelSubscriber<StompTunnelEvent> {
 
@@ -21,9 +20,16 @@ public class StompTunnelToAllSender implements ITunnelSubscriber<StompTunnelEven
 
 	@Override
 	public void onMessage(String channel, StompTunnelEvent msg) {
+
 		if (!ArgUtil.isEmpty(messagingTemplate)) {
-			messagingTemplate.convertAndSend("/topic" + msg.getTopic(), msg.getData());
+			if (ArgUtil.is(msg.getTagId())) {
+				messagingTemplate.convertAndSend(
+						"/tag/" + (msg.getTenantToken() + "/" + msg.getTagId()) + msg.getTopic(), msg.getData());
+			} else {
+				messagingTemplate.convertAndSend("/topic/" + msg.getTenantToken() + msg.getTopic(), msg.getData());
+			}
 		}
+
 	}
 
 }

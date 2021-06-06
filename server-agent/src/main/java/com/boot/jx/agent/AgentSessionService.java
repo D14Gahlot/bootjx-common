@@ -1,12 +1,16 @@
 package com.boot.jx.agent;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Component;
 
-import com.boot.jx.agent.doc.AgentSessionDoc;
 import com.boot.jx.chat.ChatClient;
+import com.boot.jx.common.doc.AgentSessionDoc;
 import com.boot.jx.common.dto.AgentResponseAuthDto;
+import com.boot.jx.common.store.DocumentUpdateListner;
+import com.boot.jx.mongo.CommonMongoQueryBuilder;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.TimeUtils;
 
@@ -28,58 +32,68 @@ public class AgentSessionService {
 	@Autowired
 	private AgentSessionBean agentSessionBean;
 
-	public void updateSession() {
-		AgentSessionDoc agentSessionDoc = mongoTemplate.findById(agentSessionBean.getAgentCode(),
-				AgentSessionDoc.class);
-		if (ArgUtil.isEmpty(agentSessionDoc)) {
-			agentSessionDoc = new AgentSessionDoc();
+	@Autowired
+	private DocumentUpdateListner documentUpdateListner;
+
+	public List<AgentSessionDoc> getAgentSessions() {
+		CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder().where("isEnabled", true);
+		return mongoTemplate.find(builder.getQuery(), AgentSessionDoc.class);
+	}
+
+	public void updateSession(boolean publish) {
+		CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder().whereId(agentSessionBean.getAgentCode());
+		builder.set("agentCode", agentSessionBean.getAgentCode());
+		builder.set("agentDept", agentSessionBean.getAgentDept());
+		builder.set("isLoggedIn", agentSessionBean.isLoggedIn());
+		builder.set("isOnline", agentSessionBean.isOnline());
+		builder.set("lastOnlineStamp", agentSessionBean.getLastOnlineStamp());
+
+		if (ArgUtil.is(agentSessionBean.getProfile())) {
+			builder.set("isEnabled", agentSessionBean.getProfile().isEnabled());
 		}
-		agentSessionDoc.setAgentCode(agentSessionBean.getAgentCode());
-		agentSessionDoc.setAgentDept(agentSessionBean.getAgentDept());
-		agentSessionDoc.setLoggedIn(agentSessionBean.isLoggedIn());
-		agentSessionDoc.setOnline(agentSessionBean.isOnline());
-		agentSessionDoc.setLastOnlineStamp(agentSessionBean.getLastOnlineStamp());
-		mongoTemplate.save(agentSessionDoc);
+		mongoTemplate.upsert(builder.getQuery(), builder.getUpdate(), AgentSessionDoc.class);
+
+		if (publish) {
+			documentUpdateListner.onAgentSessionUpdate(agentSessionBean.getAgentCode());
+		}
+
+		agentSessionBean.setLastSyncStamp(System.currentTimeMillis());
 	}
 
 	/**
 	 * Refreshes online status for currently logged in agent
 	 */
 	public void refreshOnline() {
-		if (TimeUtils.isExpired(agentSessionBean.getLastOnlineStamp(), chatClient.getChatOnlholdTimeout())) {
-			agentSessionBean.setLastOnlineStamp(System.currentTimeMillis());
-			this.updateSession();
+		if (TimeUtils.isExpired(agentSessionBean.getLastSyncStamp(), chatClient.getAgentSessionTimeout())) {
+			this.updateSession(true);
 		}
 	}
 
 	public void setOnline(boolean isOnline) {
+		boolean oldOnline = agentSessionBean.isOnline();
 		agentSessionBean.setOnline(isOnline);
-		this.updateSession();
-	}
-
-	/**
-	 * Refreshes login status for currently logged in agent
-	 * 
-	 * @param username
-	 */
-	public void updateLogin(String username) {
-		agentSessionBean.setLoggedIn(true);
-		agentSessionBean.setOnline(true);
-		agentSessionBean.setAgentCode(username);
-		agentSessionBean.setAgentDept("ONLINE");
 		agentSessionBean.setLastOnlineStamp(System.currentTimeMillis());
-		this.updateSession();
+		if (oldOnline != isOnline) {
+			this.updateSession(true);
+		} else {
+			this.updateSession(false);
+		}
 	}
 
 	public void updateLogin(AgentResponseAuthDto agent) {
+		agentSessionBean.setProfile(agent);
 		agentSessionBean.setLoggedIn(true);
-		agentSessionBean.setOnline(true);
+
 		agentSessionBean.setAgentCode(agent.getAgent_code());
+
 		if (ArgUtil.is(agent.getDept())) {
 			agentSessionBean.setAgentDept(agent.getDept().getDept_code());
 		}
+
+		agentSessionBean.setOnline(true);
 		agentSessionBean.setLastOnlineStamp(System.currentTimeMillis());
-		this.updateSession();
+
+		this.updateSession(true);
 	}
 
 	/**
@@ -92,7 +106,7 @@ public class AgentSessionService {
 		agentSessionBean.setOnline(false);
 		agentSessionBean.setAgentCode(username);
 		agentSessionBean.setAgentDept("ONLINE");
-		this.updateSession();
+		this.updateSession(true);
 	}
 
 }

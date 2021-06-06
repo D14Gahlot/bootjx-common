@@ -2,6 +2,7 @@ package com.boot.jx.inbound;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -16,16 +17,20 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.boot.jx.api.ApiResponse;
+import com.boot.jx.chat.ChatService;
 import com.boot.jx.connectors.WAGupShupAgentConnector;
 import com.boot.jx.connectors.WAGupShupConnector;
 import com.boot.jx.connectors.WARapiwhaConnector;
 import com.boot.jx.http.CommonHttpRequest;
+import com.boot.jx.postman.gupshup.GupShupDeliveryResp;
+import com.boot.jx.postman.gupshup.GupShupDeliveryResp.GupShupDeliveryDto;
 import com.boot.jx.postman.gupshup.GupShupInbound;
 import com.boot.jx.postman.gupshup.GupShupInboundV2;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.scope.vendor.VendorContext.ApiVendorHeaders;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.JsonUtil;
+import com.fasterxml.jackson.core.type.TypeReference;
 
 @RestController
 public class InBoundControllerWA {
@@ -47,14 +52,18 @@ public class InBoundControllerWA {
 	@Autowired
 	CommonHttpRequest commonHttpRequest;
 
+	@Autowired
+	ChatService chatService;
+
 	// @ApiRequest(feature = "WA_GUPSHUP_INBOUND")
 	@ApiVendorHeaders
-	@RequestMapping(value = "/ext/inbound/gupshup/callback", method = { RequestMethod.POST, RequestMethod.GET })
+	@RequestMapping(value = "/ext/inbound/gupshup/callback", method = { RequestMethod.POST, RequestMethod.GET,
+			RequestMethod.PUT })
 	public InboxMessage onReceiveMessage(
 			@RequestBody(required = false) Optional<Map<String, Object>> inboundMapOptional,
 			@RequestParam(required = false, defaultValue = "false") boolean routed) throws InterruptedException {
 		if (inboundMapOptional.isPresent()) {
-			extracted(inboundMapOptional.get());
+			return extracted(inboundMapOptional.get());
 		}
 		return null;
 	}
@@ -125,9 +134,22 @@ public class InBoundControllerWA {
 	}
 
 	@RequestMapping(value = "/ext/status/gupshup/callback", method = { RequestMethod.POST, RequestMethod.GET })
-	public Map<String, Object> onStatusMessage(@RequestBody Map<String, Object> inboundMap,
-			@RequestParam(required = false, defaultValue = "false") boolean routed) throws InterruptedException {
-		return inboundMap;
+	public GupShupDeliveryResp onStatusMessage(@RequestBody GupShupDeliveryResp status) throws InterruptedException {
+		chatService.updateMessageStatus(waGupShupConnector.updateDeliveryStatus(status));
+		return status;
+	}
+
+	@ApiVendorHeaders
+	@RequestMapping(value = "/ext/status/gupshup/callback", method = {
+			RequestMethod.POST }, consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+	public GupShupDeliveryResp onStatusMessage() throws InterruptedException, IOException {
+		GupShupDeliveryResp status = new GupShupDeliveryResp();
+		String response = commonHttpRequest.get("response");
+		if (ArgUtil.is(response)) {
+			status.setResponse(JsonUtil.parse(response, new TypeReference<List<GupShupDeliveryDto>>() {
+			}));
+		}
+		return onStatusMessage(status);
 	}
 
 	@RequestMapping(value = "/ext/inbound/rapiwha/callback/{secret}", method = { RequestMethod.POST })

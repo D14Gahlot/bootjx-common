@@ -37,4 +37,5 @@ public class CommonDocStore {
 		mongoConverter.write(o, basicDBObject);
 		return basicDBObject;
 	}
+
 }

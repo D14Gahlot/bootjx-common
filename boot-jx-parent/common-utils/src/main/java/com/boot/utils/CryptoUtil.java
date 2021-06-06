@@ -477,18 +477,44 @@ public final class CryptoUtil {
 		}
 
 		/**
-		 * Generates time based HASH from params
+		 * Generates time based HASH from params, with given interval in SECONDS
 		 * 
 		 * @return
 		 */
-		public HashBuilder toHMAC() {
+		public HashBuilder toHmac(long interval) {
 			this.hash = CryptoUtil.generateHMAC(this.interval, this.secret, this.message, this.currentTime);
 			return this;
 		}
 
-		public HashBuilder toHashHmac(String algo) throws InvalidKeyException, NoSuchAlgorithmException {
-			this.hash = CryptoUtil.getHashHmac(algo, this.message, this.secret);
+		public HashBuilder toHMAC() {
+			return this.toHmac(this.interval);
+		}
+
+		public HashBuilder toHmac() {
+			return this.toHmac(this.interval);
+		}
+
+		/**
+		 * Generates timeless HASH from params, with given halgo
+		 * 
+		 * @param algo
+		 * @return
+		 * @throws InvalidKeyException
+		 * @throws NoSuchAlgorithmException
+		 */
+		public HashBuilder toHmac(String algo) {
+			try {
+				this.hash = CryptoUtil.getHashHmac(algo, this.message, this.secret);
+			} catch (InvalidKeyException e) {
+				e.printStackTrace();
+			} catch (NoSuchAlgorithmException e) {
+				e.printStackTrace();
+			}
 			return this;
+		}
+
+		public HashBuilder toHmacSHA256() {
+			return this.toHmac("HmacSHA256");
 		}
 
 		/**

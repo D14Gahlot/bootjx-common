@@ -25,7 +25,13 @@ public class AgentResponseDto<T extends AgentResponseDto<T>> extends ADocumentDT
 
 	private boolean admin;
 
+	@JsonProperty("enabled")
+	private boolean isEnabled;
+
+	@JsonProperty("superAdmin")
 	private boolean isSuperAdmin;
+
+	@JsonProperty("defaultValue")
 	private boolean isDefaultValue;
 
 	@JsonProperty("dept_id")
@@ -96,7 +102,7 @@ public class AgentResponseDto<T extends AgentResponseDto<T>> extends ADocumentDT
 	}
 
 	public boolean isEnabled() {
-		return this.isactive == "Y";
+		return "Y".equalsIgnoreCase(this.isactive) || this.isEnabled;
 	}
 
 	@Override
@@ -121,6 +127,10 @@ public class AgentResponseDto<T extends AgentResponseDto<T>> extends ADocumentDT
 
 	public void setChannels(List<String> channels) {
 		this.channels = channels;
+	}
+
+	public void setEnabled(boolean isEnabled) {
+		this.isEnabled = isEnabled;
 	}
 
 }

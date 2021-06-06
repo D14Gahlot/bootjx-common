@@ -1,5 +1,13 @@
 package com.boot.jx.logger;
 
-public interface AuditDetailProvider {
-	public AuditActor getActor();
+import java.io.Serializable;
+
+public interface AuditDetailProvider extends Serializable {
+
+	@Deprecated
+	public default AuditActor getActor() {
+		return null;
+	};
+
+	public String getAuditUser();
 }

@@ -1,16 +1,14 @@
 package com.boot.jx.admin.dto;
 
-import java.util.Date;
-
 import com.boot.jx.common.dto.DepartmentResponseDto;
 
 public class DepartmentResponseAdminDto extends DepartmentResponseDto<DepartmentResponseAdminDto> {
 
 	private static final long serialVersionUID = -3495791543071105507L;
 	private String dept_email;
-	private Date created_date;
+	private Long createdStamp;
 	private String create_by;
-	private Date modified_date;
+	private Long modifiedStamp;
 	private String modified_by;
 	private boolean isDefaultValue;
 
@@ -22,28 +20,12 @@ public class DepartmentResponseAdminDto extends DepartmentResponseDto<Department
 		this.dept_email = dept_email;
 	}
 
-	public Date getCreated_date() {
-		return created_date;
-	}
-
-	public void setCreated_date(Date created_date) {
-		this.created_date = created_date;
-	}
-
 	public String getCreate_by() {
 		return create_by;
 	}
 
 	public void setCreate_by(String create_by) {
 		this.create_by = create_by;
-	}
-
-	public Date getModified_date() {
-		return modified_date;
-	}
-
-	public void setModified_date(Date modified_date) {
-		this.modified_date = modified_date;
 	}
 
 	public String getModified_by() {
@@ -65,6 +47,22 @@ public class DepartmentResponseAdminDto extends DepartmentResponseDto<Department
 
 	public void setDefaultValue(boolean isDefaultValue) {
 		this.isDefaultValue = isDefaultValue;
+	}
+
+	public Long getCreatedStamp() {
+		return createdStamp;
+	}
+
+	public void setCreatedStamp(Long createdStamp) {
+		this.createdStamp = createdStamp;
+	}
+
+	public Long getModifiedStamp() {
+		return modifiedStamp;
+	}
+
+	public void setModifiedStamp(Long modifiedStamp) {
+		this.modifiedStamp = modifiedStamp;
 	}
 
 }

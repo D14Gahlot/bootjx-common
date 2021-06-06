@@ -9,10 +9,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Component;
+import org.telegram.telegrambots.meta.api.methods.GetFile;
 import org.telegram.telegrambots.meta.api.methods.send.SendDocument;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
+import org.telegram.telegrambots.meta.api.objects.ApiResponse;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
@@ -24,8 +27,10 @@ import com.boot.jx.postman.PostManException;
 import com.boot.jx.postman.PostmanPackages.MessageClient;
 import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.OutboxMessage;
-import com.boot.jx.postman.model.TGMessage;
 import com.boot.jx.postman.model.TmplElement;
+import com.boot.jx.postman.tg.TelegramModels.TGFile;
+import com.boot.jx.postman.tg.TelegramModels.TGGetFile;
+import com.boot.jx.postman.tg.TelegramModels.TGMessage;
 import com.boot.jx.postman.tg.TelegramModels.TGSendDocument;
 import com.boot.jx.postman.tg.TelegramModels.TGSendPhoto;
 import com.boot.jx.rest.RestService;
@@ -84,28 +89,42 @@ public class TelegramClient implements MessageClient {
 		SendMessage message = sendMessage; // Create a SendMessage object with mandatory fields
 		sendMessage.setChatId(id);
 		return restService.ajax(PATH.URL).path(PATH.BOT_SEND_MESSAGE).pathParam("accessToken", getAccessToken(lane))
-				.post(message).as(TGMessage.class);
+				.post(message).as(new ParameterizedTypeReference<ApiResponse<TGMessage>>() {
+				}).getResult();
 	}
 
 	public TGMessage sendReply(String lane, String id, String text) {
 		SendMessage message = new SendMessage() // Create a SendMessage object with mandatory fields
 				.setChatId(id).setText(text);
 		return restService.ajax(PATH.URL).path(PATH.BOT_SEND_MESSAGE).pathParam("accessToken", getAccessToken(lane))
-				.post(message).as(TGMessage.class);
+				.post(message).as(new ParameterizedTypeReference<ApiResponse<TGMessage>>() {
+				}).getResult();
 	}
 
 	public TGMessage sendPhoto(String lane, String id, String photo, String caption) {
 		SendPhoto message = new TGSendPhoto() // Create a SendMessage object with mandatory fields
 				.setChatId(id).setPhoto(photo).setCaption(caption);
 		return restService.ajax(PATH.URL).path(PATH.BOT).path("/sendPhoto")
-				.pathParam("accessToken", getAccessToken(lane)).post(message).as(TGMessage.class);
+				.pathParam("accessToken", getAccessToken(lane)).post(message)
+				.as(new ParameterizedTypeReference<ApiResponse<TGMessage>>() {
+				}).getResult();
 	}
 
 	public TGMessage sendDocument(String lane, String id, String document, String caption) {
 		SendDocument message = new TGSendDocument() // Create a SendMessage object with mandatory fields
 				.setChatId(id).setDocument(document).setCaption(caption);
 		return restService.ajax(PATH.URL).path(PATH.BOT).path("/sendDocument")
-				.pathParam("accessToken", getAccessToken(lane)).post(message).as(TGMessage.class);
+				.pathParam("accessToken", getAccessToken(lane)).post(message)
+				.as(new ParameterizedTypeReference<ApiResponse<TGMessage>>() {
+				}).getResult();
+	}
+
+	public TGFile getFile(String lane, String fileId) {
+		GetFile getFile = new TGGetFile().setFileId(fileId);
+		String accessToken = getAccessToken(lane);
+		return restService.ajax(PATH.URL).path(PATH.BOT).path("/getFile").pathParam("accessToken", accessToken)
+				.post(getFile).as(new ParameterizedTypeReference<ApiResponse<TGFile>>() {
+				}).getResult().updateFileUrl(accessToken);
 	}
 
 	public String promptShareNumber(String id, String text, String lane) {

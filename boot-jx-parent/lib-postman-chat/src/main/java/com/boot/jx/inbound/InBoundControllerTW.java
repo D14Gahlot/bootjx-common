@@ -1,7 +1,5 @@
 package com.boot.jx.inbound;
 
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.Map;
 
@@ -60,8 +58,7 @@ public class InBoundControllerTW {
 
 	@ApiVendorHeaders
 	@RequestMapping(value = "/ext/inbound/tw/callback/{lane}", method = { RequestMethod.GET })
-	public Map<String, String> onReceiveMessageGet(@PathVariable String lane, @RequestParam String crc_token)
-			throws InterruptedException, InvalidKeyException, NoSuchAlgorithmException {
+	public Map<String, String> onReceiveMessageGet(@PathVariable String lane, @RequestParam String crc_token) {
 		return twitterClient.verifyCRC(lane, crc_token);
 	}
 

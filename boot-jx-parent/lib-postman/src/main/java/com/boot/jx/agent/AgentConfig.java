@@ -1,18 +1,19 @@
 package com.boot.jx.agent;
 
 import java.io.Serializable;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.HashMap;
 
+import com.boot.model.SafeKeyHashMap;
 import com.boot.utils.ArgUtil;
 
 public class AgentConfig implements Serializable {
 
 	private static final long serialVersionUID = -3299316376121661559L;
-	String defaultBotName;
-	String defaultTeamCode;
+	private String defaultBotName;
+	private String defaultTeamCode;
 
-	Map<String, String> defaultAgents;
+	private Map<String, String> defaultAgents;
 
 	public String getDefaultBotName() {
 		return defaultBotName;
@@ -38,11 +39,11 @@ public class AgentConfig implements Serializable {
 		this.defaultAgents = defaultAgents;
 	}
 
-	public Map<String, String> defaultAgents() {
+	public SafeKeyHashMap<String> defaultAgents() {
 		if (ArgUtil.isEmpty(defaultAgents)) {
 			defaultAgents = new HashMap<String, String>();
 		}
-		return defaultAgents;
+		return new SafeKeyHashMap<String>(defaultAgents);
 	}
 
 	public String defaultAgent(String teamCode) {

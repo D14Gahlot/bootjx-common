@@ -22,9 +22,9 @@ import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.ChatUserProfileDoc;
 import com.boot.jx.postman.dto.ChatUserProfileDTO;
 import com.boot.jx.postman.model.InboxMessage;
+import com.boot.jx.postman.store.PMStoreConstants.CHAT_STATUS;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.utils.ArgUtil;
-import com.boot.utils.Constants;
 import com.boot.utils.EntityDtoUtil;
 import com.boot.utils.TimeUtils;
 import com.mongodb.BasicDBObject;
@@ -171,6 +171,7 @@ public class SessionStore extends CommonDocStore {
 		criteria.add(new BasicDBObject("active", true));
 		bulk.find(new BasicDBObject("$and", criteria))
 				.update(new BasicDBObject(new BasicDBObject("$set", new BasicDBObject("active", false))));
+
 		BulkWriteResult writeResult = bulk.execute();
 		return true;
 	}
@@ -185,12 +186,24 @@ public class SessionStore extends CommonDocStore {
 		return mongoTemplate.find(query, ChatSessionDoc.class);
 	}
 
+	public void expireChatSession() {
+		Calendar cal = Calendar.getInstance();
+		int offsetOur = (int) ((cal.getTimeInMillis() / 3600) % (TimeUtils.toHours(chatSessionTimeout) / 2));
+		if (offsetOur == 0) {
+			cal.add(Calendar.HOUR, -1 * (int) TimeUtils.toHours(chatSessionTimeout));
+			CommonMongoQueryBuilder cmqb = new CommonMongoQueryBuilder()
+					.with(Criteria.where("active").is(true).and("lastInComingStamp").lt(cal.getTimeInMillis())
+							.andOperator(new Criteria().orOperator(Criteria.where("resolved").exists(false),
+									Criteria.where("resolved").is(false))))
+					.set("expired", true).set("active", false).set("closeSessionStamp", System.currentTimeMillis());
+			mongoTemplate.updateFirst(cmqb.getQuery(), cmqb.getUpdate(), ChatSessionDoc.class);
+		}
+	}
+
 	public List<ChatSessionDoc> findChatSessionDocByAgentAndUnAssigned(String agentCode, String agentDept) {
 		Query query2 = new Query();
-
 		Calendar cal = Calendar.getInstance();
 		cal.add(Calendar.DATE, -2);
-
 		query2.addCriteria(Criteria.where("active").is(true).and("mode").is("AGENT").and("lastInComingStamp")
 				.gt(cal.getTimeInMillis()).andOperator(
 				// Is not assigned to any agent or assigned to said agent
@@ -272,14 +285,24 @@ public class SessionStore extends CommonDocStore {
 		return chatSessionDoc;
 	}
 
+	public ChatSessionDoc changeStatus(ChatSessionDoc chatSessionDoc, CHAT_STATUS status) {
+		// Old Way of Doing it
+		chatSessionDoc.setStatus(status.toString());
+		CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder().whereId(chatSessionDoc.getSessionId());
+		builder.set("status", status.toString());
+		mongoTemplate.updateFirst(builder.getQuery(), builder.getUpdate(), ChatSessionDoc.class);
+		return chatSessionDoc;
+	}
+
 	public ChatSessionDoc resolveSession(ChatSessionDoc chatSessionDoc) {
 		// Old Way of Doing it
 		chatSessionDoc.setResolveSessionStamp(System.currentTimeMillis());
-		chatSessionDoc.setResolved(false);
+		chatSessionDoc.setResolved(true);
 
 		CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder().whereId(chatSessionDoc.getSessionId());
 		builder.set("resolveSessionStamp", chatSessionDoc.getResolveSessionStamp());
 		builder.set("resolved", chatSessionDoc.isResolved());
+		builder.set("status", CHAT_STATUS.RESOLVED);
 		mongoTemplate.updateFirst(builder.getQuery(), builder.getUpdate(), ChatSessionDoc.class);
 		return chatSessionDoc;
 	}
@@ -291,6 +314,7 @@ public class SessionStore extends CommonDocStore {
 		CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder().whereId(chatSessionDoc.getSessionId());
 		builder.set("closeSessionStamp", chatSessionDoc.getCloseSessionStamp());
 		builder.set("active", chatSessionDoc.isActive());
+		builder.set("status", CHAT_STATUS.CLOSED);
 		mongoTemplate.updateFirst(builder.getQuery(), builder.getUpdate(), ChatSessionDoc.class);
 
 		return chatSessionDoc;
@@ -366,5 +390,9 @@ public class SessionStore extends CommonDocStore {
 		builder.set("mode", chatSessionDoc.getMode());
 		builder.set("assignedToAgent", chatSessionDoc.getAssignedToAgent());
 		mongoTemplate.updateFirst(builder.getQuery(), builder.getUpdate(), ChatSessionDoc.class);
+	}
+
+	public String getChatSessionTimeout() {
+		return chatSessionTimeout;
 	}
 }

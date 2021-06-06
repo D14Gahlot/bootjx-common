@@ -156,10 +156,10 @@ public class EmailService {
 			to = email.getTo() != null ? email.getTo().get(0) : null;
 
 			if (ArgUtil.isEmpty(to)) {
-				email.setStatus(Status.NSENT);
+				email.updateStatus(Status.NSENT);
 				auditService.log(pMGaugeEvent.set(AuditEvent.Result.REJECTED).set(email));
 			} else if (contactService.isEmailBlackListed(to)) {
-				email.setStatus(Status.BLCKD);
+				email.updateStatus(Status.BLCKD);
 				auditService.log(pMGaugeEvent.set(AuditEvent.Result.REJECTED).set(email));
 			} else {
 				if (email.getTemplate() != null) {
@@ -184,7 +184,7 @@ public class EmailService {
 					}
 				}
 				this.send(email);
-				email.setStatus(Status.SENT);
+				email.updateStatus(Status.SENT);
 				auditService.log(pMGaugeEvent.set(AuditEvent.Result.DONE).set(email));
 			}
 

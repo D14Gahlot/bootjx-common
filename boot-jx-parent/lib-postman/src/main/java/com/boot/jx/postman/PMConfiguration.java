@@ -5,29 +5,33 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.boot.jx.agent.AgentConfig;
+import com.boot.jx.postman.PMEnvironment.PMConfigurationObject;
 import com.boot.jx.postman.fb.FacebookConfig;
 import com.boot.jx.postman.gupshup.GupShupConfig;
 import com.boot.jx.postman.tg.TelegramConfig;
 import com.boot.jx.postman.tw.TwitterConfig;
+import com.boot.model.SafeKeyHashMap;
 import com.boot.utils.ArgUtil;
 
 public class PMConfiguration implements Serializable {
 
 	private static final long serialVersionUID = -5432956433673368768L;
 
-	Map<String, FacebookConfig> facebook;
-	Map<String, TwitterConfig> twitter;
-	Map<String, TelegramConfig> telegram;
-	Map<String, GupShupConfig> gupshup;
+	private Map<String, FacebookConfig> facebook;
+	private Map<String, TwitterConfig> twitter;
+	private Map<String, TelegramConfig> telegram;
+	private Map<String, GupShupConfig> gupshup;
+
+	private Map<String, PMConfigurationObject> map;
 
 	AgentConfig agent;
 
 	// Facebook
-	public Map<String, FacebookConfig> facebook() {
+	public SafeKeyHashMap<FacebookConfig> facebook() {
 		if (ArgUtil.isEmpty(facebook)) {
 			facebook = new HashMap<String, FacebookConfig>();
 		}
-		return facebook;
+		return new SafeKeyHashMap<FacebookConfig>(facebook);
 	}
 
 	public Map<String, FacebookConfig> getFacebook() {
@@ -39,7 +43,7 @@ public class PMConfiguration implements Serializable {
 	}
 
 	public FacebookConfig facebook(String pageId) {
-		return facebook.get(pageId);
+		return facebook().get(pageId);
 	}
 
 	public PMConfiguration facebook(FacebookConfig config) {
@@ -48,11 +52,11 @@ public class PMConfiguration implements Serializable {
 	}
 
 	// TWITTER
-	public Map<String, TwitterConfig> twitter() {
+	public SafeKeyHashMap<TwitterConfig> twitter() {
 		if (ArgUtil.isEmpty(twitter)) {
 			twitter = new HashMap<String, TwitterConfig>();
 		}
-		return twitter;
+		return new SafeKeyHashMap<TwitterConfig>(twitter);
 	}
 
 	public TwitterConfig twitter(String handler) {
@@ -73,11 +77,11 @@ public class PMConfiguration implements Serializable {
 	}
 
 	// Telegram
-	public Map<String, TelegramConfig> telegram() {
+	public SafeKeyHashMap<TelegramConfig> telegram() {
 		if (ArgUtil.isEmpty(telegram)) {
 			telegram = new HashMap<String, TelegramConfig>();
 		}
-		return telegram;
+		return new SafeKeyHashMap<TelegramConfig>(telegram);
 	}
 
 	public Map<String, TelegramConfig> getTelegram() {
@@ -98,11 +102,11 @@ public class PMConfiguration implements Serializable {
 	}
 
 	// GupShup
-	public Map<String, GupShupConfig> gupshup() {
+	public SafeKeyHashMap<GupShupConfig> gupshup() {
 		if (ArgUtil.isEmpty(gupshup)) {
 			gupshup = new HashMap<String, GupShupConfig>();
 		}
-		return gupshup;
+		return new SafeKeyHashMap<GupShupConfig>(gupshup);
 	}
 
 	public Map<String, GupShupConfig> getGupshup() {
@@ -142,4 +146,30 @@ public class PMConfiguration implements Serializable {
 		this.agent = agent;
 		return this;
 	}
+
+	// Config
+	public Map<String, PMConfigurationObject> getMap() {
+		return map;
+	}
+
+	public void setMap(Map<String, PMConfigurationObject> map) {
+		this.map = map;
+	}
+
+	public SafeKeyHashMap<PMConfigurationObject> map() {
+		if (ArgUtil.isEmpty(map)) {
+			map = new HashMap<String, PMConfigurationObject>();
+		}
+		return new SafeKeyHashMap<PMConfigurationObject>(map);
+	}
+
+	public PMConfigurationObject get(String key) {
+		return map().getOrDefault(key, new PMConfigurationObject());
+	}
+
+	public PMConfiguration set(PMConfigurationObject map) {
+		this.map().put(map.getKey(), map);
+		return this;
+	}
+
 }

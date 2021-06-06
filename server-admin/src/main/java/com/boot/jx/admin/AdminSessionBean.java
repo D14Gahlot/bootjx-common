@@ -4,70 +4,31 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.stereotype.Component;
 
+import com.boot.jx.common.dto.AgentResponseAuthDto;
+import com.boot.jx.logger.AuditDetailProvider;
+import com.boot.utils.ArgUtil;
+
 @Component
 @Scope(value = "session", proxyMode = ScopedProxyMode.TARGET_CLASS)
-public class AdminSessionBean {
+public class AdminSessionBean implements AuditDetailProvider {
 
-	private String agentCode;
-	private String agentDept;
+	private static final long serialVersionUID = 3090820592497487481L;
+	private AgentResponseAuthDto profile;
 
-	private boolean isLoggedIn;
-
-	private boolean isOnline;
-
-	private long lastOnlineStamp;
-
-	private boolean isDirty;
-
-	public String getAgentCode() {
-		return agentCode;
+	public AgentResponseAuthDto getProfile() {
+		return profile;
 	}
 
-	public void setAgentCode(String agentCode) {
-		this.agentCode = agentCode;
+	public void setProfile(AgentResponseAuthDto profile) {
+		this.profile = profile;
 	}
 
-	public boolean isLoggedIn() {
-		return isLoggedIn;
-	}
-
-	public void setLoggedIn(boolean isLoggedIn) {
-		this.isLoggedIn = isLoggedIn;
-		this.isDirty = true;
-	}
-
-	public boolean isOnline() {
-		return isOnline;
-	}
-
-	public void setOnline(boolean isOnline) {
-		this.isOnline = isOnline;
-		this.isDirty = true;
-	}
-
-	public boolean isDirty() {
-		return isDirty;
-	}
-
-	public void setDirty(boolean isDirty) {
-		this.isDirty = isDirty;
-	}
-
-	public long getLastOnlineStamp() {
-		return lastOnlineStamp;
-	}
-
-	public void setLastOnlineStamp(long lastOnlineStamp) {
-		this.lastOnlineStamp = lastOnlineStamp;
-		this.isDirty = true;
-	}
-
-	public String getAgentDept() {
-		return agentDept;
-	}
-
-	public void setAgentDept(String agentDept) {
-		this.agentDept = agentDept;
+	@Override
+	public String getAuditUser() {
+		if (ArgUtil.is(this.profile)) {
+			return this.profile.getAgent_code();
+		}
+		return null;
 	}
 
 }

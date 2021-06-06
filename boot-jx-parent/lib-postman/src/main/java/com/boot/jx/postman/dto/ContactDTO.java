@@ -18,6 +18,8 @@ public class ContactDTO implements java.io.Serializable {
 	@JsonProperty("contactType")
 	private String contactType;
 
+	private String lane;
+
 	@ApiMockModelProperty(example = "John Doe", required = false)
 	private String name;
 
@@ -94,6 +96,14 @@ public class ContactDTO implements java.io.Serializable {
 
 	public void setProfile(ChatUserProfileDTO profile) {
 		this.profile = profile;
+	}
+
+	public String getLane() {
+		return lane;
+	}
+
+	public void setLane(String lane) {
+		this.lane = lane;
 	}
 
 }

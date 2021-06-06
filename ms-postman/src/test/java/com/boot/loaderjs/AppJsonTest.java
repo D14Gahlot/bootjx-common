@@ -6,6 +6,7 @@ import java.net.URISyntaxException;
 import java.util.regex.Pattern;
 
 import com.boot.jx.postman.model.DocResult;
+import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.tmpl.TemplateUtils;
 import com.boot.utils.FileUtil;
 import com.boot.utils.IoUtils;
@@ -21,6 +22,16 @@ public class AppJsonTest { // Noncompliant
 	public static final Pattern pattern = Pattern.compile("^(.*)<(.*)>$");
 
 	public static void main(String[] args) throws URISyntaxException, IOException {
+		InputStream is = FileUtil.getExternalResourceAsStream("ext-resources/message.json");
+		String json = IoUtils.inputstream_to_string(is);
+
+		OutboxMessage map = JsonUtil.fromJson(json, OutboxMessage.class);
+
+		System.out.println(JsonUtil.toJson(map));
+
+	}
+
+	public static void main2(String[] args) throws URISyntaxException, IOException {
 		InputStream is = FileUtil.getExternalResourceAsStream("ext-resources/doc_response.json");
 		String json = IoUtils.inputstream_to_string(is);
 
@@ -29,9 +40,9 @@ public class AppJsonTest { // Noncompliant
 		System.out.println("getId		" + map.getId());
 		System.out.println("getFileID	" + map.getFileId());
 		System.out.println("getUserID	" + map.getUserID());
-		
+
 		System.out.println(JsonUtil.toJson(map));
-		
+
 	}
 
 }

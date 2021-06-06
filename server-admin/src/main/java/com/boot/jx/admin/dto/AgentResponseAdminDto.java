@@ -1,7 +1,5 @@
 package com.boot.jx.admin.dto;
 
-import java.sql.Date;
-
 import com.boot.jx.common.dto.AgentResponseDto;
 
 public class AgentResponseAdminDto extends AgentResponseDto<AgentResponseAdminDto> {
@@ -11,9 +9,9 @@ public class AgentResponseAdminDto extends AgentResponseDto<AgentResponseAdminDt
 	private String agent_email;
 	private String agent_number;
 	private String agent_password;
-	private Date created_date;
+	private Long createdStamp;
 	private String create_by;
-	private Date modified_date;
+	private Long modifiedStamp;
 	private String modified_by;
 
 	private DepartmentResponseAdminDto dept;
@@ -42,28 +40,12 @@ public class AgentResponseAdminDto extends AgentResponseDto<AgentResponseAdminDt
 		this.agent_number = agent_number;
 	}
 
-	public Date getCreated_date() {
-		return created_date;
-	}
-
-	public void setCreated_date(Date created_date) {
-		this.created_date = created_date;
-	}
-
 	public String getCreate_by() {
 		return create_by;
 	}
 
 	public void setCreate_by(String create_by) {
 		this.create_by = create_by;
-	}
-
-	public Date getModified_date() {
-		return modified_date;
-	}
-
-	public void setModified_date(Date modified_date) {
-		this.modified_date = modified_date;
 	}
 
 	public String getModified_by() {
@@ -93,6 +75,22 @@ public class AgentResponseAdminDto extends AgentResponseDto<AgentResponseAdminDt
 
 	public void setAgent_password(String agent_password) {
 		this.agent_password = agent_password;
+	}
+
+	public Long getCreatedStamp() {
+		return createdStamp;
+	}
+
+	public void setCreatedStamp(Long createdStamp) {
+		this.createdStamp = createdStamp;
+	}
+
+	public Long getModifiedStamp() {
+		return modifiedStamp;
+	}
+
+	public void setModifiedStamp(Long modifiedStamp) {
+		this.modifiedStamp = modifiedStamp;
 	}
 
 }

@@ -55,14 +55,14 @@ public class AppClientErrorHanlder implements ResponseErrorHandler {
 				.isEmpty(response.getHeaders().getFirst(AppConstants.EXCEPTION_HEADER_KEY));
 
 		if (response.getStatusCode().series() == HttpStatus.Series.SERVER_ERROR) {
-			if(statusCode == HttpStatus.BAD_GATEWAY) {
+			if (statusCode == HttpStatus.BAD_GATEWAY) {
 				apiError = throwError(null, ApiStatusCodes.HTTP_SERVER_ERROR, statusCode);
-				throw new ApiHttpServerException(statusCode, apiError);	
+				throw new ApiHttpServerException(statusCode, apiError);
 			} else {
 				String body = IoUtils.inputstream_to_string(response.getBody());
-				apiError = throwError(body, ApiStatusCodes.HTTP_SERVER_ERROR);			
+				apiError = throwError(body, ApiStatusCodes.HTTP_SERVER_ERROR);
 			}
-			throw new ApiHttpServerException(statusCode, apiError);	
+			throw new ApiHttpServerException(statusCode, apiError);
 		} else if (response.getStatusCode().series() == HttpStatus.Series.CLIENT_ERROR) {
 			String body2 = IoUtils.inputstream_to_string(response.getBody());
 			apiError = throwError(body2, ApiStatusCodes.UNKNOWN_CLIENT_ERROR);
@@ -76,18 +76,18 @@ public class AppClientErrorHanlder implements ResponseErrorHandler {
 	}
 
 	private AmxApiError throwError(String apiErrorJson, IExceptionEnum errorEnum) {
-		return throwError(apiErrorJson,errorEnum, null);
+		return throwError(apiErrorJson, errorEnum, null);
 	}
-	
+
 	private AmxApiError throwError(String apiErrorJson, IExceptionEnum errorEnum, HttpStatus httpStatus) {
-		if(!ArgUtil.is(apiErrorJson) && ArgUtil.is(httpStatus)) {
+		if (!ArgUtil.is(apiErrorJson) && ArgUtil.is(httpStatus)) {
 			AmxApiError defaulError = new AmxApiError();
 			defaulError.setHttpStatus(httpStatus);
 			defaulError.setMessage(httpStatus.getReasonPhrase());
 			return defaulError;
 		}
-		
-		AmxApiError apiError = JsonUtil.fromJson(apiErrorJson, AmxApiError.class);
+
+		AmxApiError apiError = JsonUtil.fromJson(apiErrorJson, AmxApiError.class, true);
 		if (!ArgUtil.isEmpty(apiError)) {
 			AmxApiException defExcp = ExceptionFactory.get(apiError.getException());
 			if (defExcp == null) {

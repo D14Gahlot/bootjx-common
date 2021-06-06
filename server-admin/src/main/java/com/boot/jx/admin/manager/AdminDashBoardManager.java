@@ -113,7 +113,7 @@ public class AdminDashBoardManager {
 	}
 	
 	public List<DashBoardResponseDto> getContactWiseDashBoardAnalytics(DashBoardRequestDto req){
-		 System.out.println("getContactWiseDashBoardAnalytics { } :"+JsonUtil.toJson(req));
+		// System.out.println("getContactWiseDashBoardAnalytics { } :"+JsonUtil.toJson(req));
 		 List<DashBoardResponseDto> dtoLst = new ArrayList<DashBoardResponseDto>();
 		 DashBoardResponseDto dto = null;
 		 List<String>  lstContactType=new ArrayList<String>();
@@ -999,5 +999,5 @@ public class AdminDashBoardManager {
 	    }
 	    return list;
 	}
-	
+
 }

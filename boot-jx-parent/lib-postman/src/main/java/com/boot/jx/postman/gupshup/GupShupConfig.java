@@ -2,6 +2,9 @@ package com.boot.jx.postman.gupshup;
 
 import java.io.Serializable;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class GupShupConfig implements Serializable {
 
 	private static final long serialVersionUID = -2397678752642150000L;

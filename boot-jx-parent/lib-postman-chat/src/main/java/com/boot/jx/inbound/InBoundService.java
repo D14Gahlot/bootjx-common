@@ -70,7 +70,7 @@ public class InBoundService {
 		}
 		if (ArgUtil.isEmpty(inboxMessageOriginal.getMessageId())) {
 			inboxMessageOriginal.setMessage(StringUtils.trim(inboxMessageOriginal.getMessage()));
-			messageStore.create(inboxMessageOriginal);
+			messageStore.createOrUpdate(inboxMessageOriginal);
 		}
 
 		if (locallySessionAssigned && ArgUtil.is(session)) {

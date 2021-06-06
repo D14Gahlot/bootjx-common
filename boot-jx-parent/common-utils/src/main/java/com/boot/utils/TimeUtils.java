@@ -59,6 +59,14 @@ public class TimeUtils {
 			return (this.timeUnit.toMillis(duration) * this.count);
 		}
 
+		public long toSeconds(long duration) {
+			return toMillis(duration) / 1000;
+		}
+
+		public long toHours(long duration) {
+			return toMillis(duration) / 3600000;
+		}
+
 		public static Set<String> keys() {
 			return MAP.keySet();
 		}
@@ -80,6 +88,10 @@ public class TimeUtils {
 			}
 		}
 		return ArgUtil.parseAsLong(period, 0L);
+	}
+
+	public static long toHours(String period) {
+		return toMillis(period) / 3600000;
 	}
 
 	@Deprecated
@@ -116,7 +128,7 @@ public class TimeUtils {
 	}
 
 	public static boolean isExpired(long timeThen, String maxAge) {
-		return isDead(timeThen, TimeUtils.toMillis(maxAge));
+		return isDead(timeThen, toMillis(maxAge));
 	}
 
 	public static boolean isExpired(Date dateThen, long maxAge) {

@@ -99,9 +99,9 @@ public class WebConnector implements DefaultConnector {
 		if (redisson == null) {
 			try {
 				messageQueue.enqueue(outboxMessage);
-				outboxMessage.setStatus(OutboxMessage.Status.SENT);
+				outboxMessage.updateStatus(OutboxMessage.Status.SENT);
 			} catch (InterruptedException e) {
-				outboxMessage.setStatus(OutboxMessage.Status.SENT_ERR);
+				outboxMessage.updateStatus(OutboxMessage.Status.SENT_ERR);
 				outboxMessage.logs().add(e.getMessage());
 				e.printStackTrace();
 			}

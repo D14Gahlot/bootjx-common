@@ -66,6 +66,9 @@ public class CommonDocInterfaces {
 			oldVersion.setOldVersions(null);
 			this.getOldVersions().add(oldVersion);
 		}
+	}
+
+	public static interface DocVersion extends OldDocVersion<DocVersion> {
 
 	}
 

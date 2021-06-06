@@ -30,6 +30,7 @@ import com.boot.jx.scope.vendor.VendorContext.VendorScoped;
 import com.boot.jx.scope.vendor.VendorContext.VendorValue;
 import com.boot.model.UtilityModels.Stringable;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.Constants;
 import com.boot.utils.FileUtil;
 
 @VendorScoped
@@ -98,7 +99,7 @@ public class VendorProperties {
 		String value = getEnvProperties(key);
 		if (ArgUtil.isEmpty(value) && !ArgUtil.isEmpty(APP_ENV)) {
 			if (ArgUtil.isEmpty(APP_ENV_VALUE)) {
-				APP_ENV_VALUE = getEnvProperties("app.env").toLowerCase();
+				APP_ENV_VALUE = ArgUtil.parseAsString(getEnvProperties("app.env"), Constants.BLANK).toLowerCase();
 			}
 			value = APP_ENV.getProperty(key.replace("@env", APP_ENV_VALUE));
 			if (ArgUtil.isEmpty(value)) {

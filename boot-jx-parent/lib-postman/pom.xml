@@ -46,6 +46,25 @@
 		</dependency>
 		<!-- TWITTER LIBS ends -->
 
+		<dependency>
+			<groupId>com.boot.jx</groupId>
+			<artifactId>lib-aws</artifactId>
+		</dependency>
+
+		<!-- file upload libs start -->
+		<dependency>
+			<groupId>org.springframework.integration</groupId>
+			<artifactId>spring-integration-http</artifactId>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/commons-io/commons-io -->
+		<dependency>
+			<groupId>commons-io</groupId>
+			<artifactId>commons-io</artifactId>
+			<version>2.9.0</version>
+		</dependency>
+		<!-- file upload libs ends -->
+
 	</dependencies>
 	<repositories>
 		<repository>

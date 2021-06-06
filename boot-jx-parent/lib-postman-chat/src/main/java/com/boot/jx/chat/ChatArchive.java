@@ -65,6 +65,26 @@ public class ChatArchive {
 		return getChatSession(chatSessionDto.getSessionId());
 	}
 
+	public ChatMessageDTO getMessage(MessageDoc messageDoc, ChatSessionDoc chatSessionDoc) {
+		ChatMessageDTO messageDto = ChatDTOUtil.getChatMessageDTO(messageDoc);
+		if (ArgUtil.areEqual(messageDoc.getType(), "I")) {
+			messageDto.setName(chatSessionDoc.getContactName());
+		} else {
+			messageDto.setName(messageDoc.getAgent());
+		}
+		return messageDto;
+	}
+
+	public ChatMessageDTO getMessage(MessageDoc messageDoc, ChatSessionDTO chatSessionDto) {
+		ChatMessageDTO messageDto = ChatDTOUtil.getChatMessageDTO(messageDoc);
+		if (ArgUtil.areEqual(messageDoc.getType(), "I")) {
+			messageDto.setName(chatSessionDto.getName());
+		} else {
+			messageDto.setName(messageDoc.getAgent());
+		}
+		return messageDto;
+	}
+
 	public List<ChatMessageDTO> getMessages(ChatSessionDTO chatSessionDto) {
 		if (ArgUtil.isEmpty(chatSessionDto.getContactType())) {
 			chatSessionDto = withContact(chatSessionDto);
@@ -74,20 +94,10 @@ public class ChatArchive {
 				chatSessionDto.getContactType());
 		List<ChatMessageDTO> messageDtos = new ArrayList<ChatMessageDTO>();
 		for (MessageDoc messageDoc : messages) {
-			ChatMessageDTO messageDto = ChatDTOUtil.getChatMessageDTO(messageDoc);
-			if (ArgUtil.areEqual(messageDoc.getType(), "I")) {
-				messageDto.setName(chatSessionDto.getName());
-			} else {
-				messageDto.setName(messageDoc.getAgent());
-			}
+			ChatMessageDTO messageDto = getMessage(messageDoc, chatSessionDto);
 			messageDtos.add(messageDto);
 		}
 		return messageDtos;
-	}
-
-	public ChatSessionDTO withContact(ChatSessionDoc chatSessionDoc) {
-		ChatSessionDTO chatSessionDto = ChatDTOUtil.getChatSessionDTO(chatSessionDoc);
-		return withContact(chatSessionDto);
 	}
 
 	public ChatSessionDTO withMessages(ChatSessionDTO chatSessionDto) {
@@ -96,9 +106,20 @@ public class ChatArchive {
 		return chatSessionDto;
 	}
 
+	// With Doc Input
+	public ChatSessionDTO getChatSession(ChatSessionDoc chatSessionDoc) {
+		return ChatDTOUtil.getChatSessionDTO(chatSessionDoc);
+	}
+
+	public ChatSessionDTO withContact(ChatSessionDoc chatSessionDoc) {
+		ChatSessionDTO chatSessionDto = ChatDTOUtil.getChatSessionDTO(chatSessionDoc);
+		return withContact(chatSessionDto);
+	}
+
 	@Deprecated
 	public ChatSessionDTO getChatSessionDto(ChatSessionDoc chatSessionDoc, String agentCode) {
-		ChatSessionDTO chatSessionDto = withContact(chatSessionDoc);
+		ChatSessionDTO chatSessionDto = getChatSession(chatSessionDoc);
+		chatSessionDto = withContact(chatSessionDto);
 
 		chatSessionDto.setAssigned(ArgUtil.areEqual(chatSessionDoc.getAssignedToAgent(), agentCode)
 				&& ArgUtil.isNone(chatSessionDoc.getResolveSessionStamp()));

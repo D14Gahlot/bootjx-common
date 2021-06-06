@@ -12,7 +12,7 @@ public enum FileFormat implements EnumType {
 	BMP("image/bmp", FileType.IMAGE), GIF("image/gif", FileType.IMAGE), TIFF("image/tiff", FileType.IMAGE),
 	TIF("image/tif", FileType.IMAGE),
 
-	JSON("application/json"), HTML("text/html"), TEXT("text/plain", FileType.TEXT);
+	JSON("application/json"), HTML("text/html"), TEXT("text/plain", FileType.TEXT), UNKNOWN("application/octet-stream");
 
 	private static final Map<String, FileFormat> TYPEMAP = new HashMap<String, FileFormat>();
 
@@ -43,7 +43,16 @@ public enum FileFormat implements EnumType {
 		return TYPEMAP.get(contentType);
 	}
 
-	public FileType getFormatType() {
+	public static FileFormat from(String contentType, FileFormat defaultValue) {
+		return TYPEMAP.getOrDefault(contentType, defaultValue);
+	}
+
+	/**
+	 * IMAGE,TEXT, DOCUMENT,VIDEO
+	 * 
+	 * @return
+	 */
+	public FileType getFileType() {
 		return fileType;
 	}
 

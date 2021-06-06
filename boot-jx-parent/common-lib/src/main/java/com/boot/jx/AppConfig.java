@@ -153,6 +153,9 @@ public class AppConfig {
 	@AppParamKey(AppParam.APP_CACHE)
 	private Boolean cache;
 
+	@Value("${app.title}")
+	private String appTitle;
+	
 	@Value(DEFAULT_TENANT_EXP)
 	@AppParamKey(AppParam.DEFAULT_TENANT)
 	private String defaultTenant;
@@ -537,6 +540,10 @@ public class AppConfig {
 
 	public String getAppAppBuildStamp() {
 		return appAppBuildStamp;
+	}
+
+	public String getAppTitle() {
+		return appTitle;
 	}
 
 }

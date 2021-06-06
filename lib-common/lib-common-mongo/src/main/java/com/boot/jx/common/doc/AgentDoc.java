@@ -8,13 +8,14 @@ import org.springframework.data.annotation.TypeAlias;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import com.boot.jx.mongo.CommonDocInterfaces.DocVersion;
 import com.boot.jx.mongo.CommonDocInterfaces.IDocument;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.StringUtils;
 
 @Document(collection = "AGENTS")
 @TypeAlias("AgentDoc")
-public class AgentDoc implements IDocument {
+public class AgentDoc implements IDocument, DocVersion {
 
 	@Id
 	private String agent_id;
@@ -29,16 +30,21 @@ public class AgentDoc implements IDocument {
 	private String agent_otp;
 	private String agent_channels;
 	private Date created_date;
+	private Long createdStamp;
 	private String create_by = "ADMIN";
 	private Date modified_date;
+	private Long modifiedStamp;
 	private String modified_by = "ADMIN";
 	private String isactive;
 	private boolean admin;
 	private boolean isSuperAdmin;
 	private boolean isDefaultValue;
+	private boolean isEnabled;
 
 	private List<String> channels;
 	private String dept_id;
+
+	private List<DocVersion> oldVersions;
 
 	public String getAgent_name() {
 		return agent_name;
@@ -193,6 +199,38 @@ public class AgentDoc implements IDocument {
 
 	public void setDefaultValue(boolean isDefaultValue) {
 		this.isDefaultValue = isDefaultValue;
+	}
+
+	public List<DocVersion> getOldVersions() {
+		return oldVersions;
+	}
+
+	public void setOldVersions(List<DocVersion> oldVersions) {
+		this.oldVersions = oldVersions;
+	}
+
+	public Long getCreatedStamp() {
+		return createdStamp;
+	}
+
+	public void setCreatedStamp(Long createdStamp) {
+		this.createdStamp = createdStamp;
+	}
+
+	public Long getModifiedStamp() {
+		return modifiedStamp;
+	}
+
+	public void setModifiedStamp(Long modifiedStamp) {
+		this.modifiedStamp = modifiedStamp;
+	}
+
+	public boolean isEnabled() {
+		return isEnabled;
+	}
+
+	public void setEnabled(boolean isEnabled) {
+		this.isEnabled = isEnabled;
 	}
 
 }

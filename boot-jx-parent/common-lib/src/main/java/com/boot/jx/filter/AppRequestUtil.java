@@ -154,7 +154,6 @@ public class AppRequestUtil {
 		} else {
 			LOGGER.debug(format, arg);
 		}
-
 	}
 
 }

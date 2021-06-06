@@ -26,7 +26,7 @@ import com.boot.utils.Random;
 
 @Component
 @TenantScoped
-public class AgentLoginService {
+public class AdminAuthService {
 
 	@Autowired
 	MongoTemplate mongoTemplate;
@@ -68,8 +68,11 @@ public class AgentLoginService {
 	public AgentResponseAuthDto loginAgent(String username, String passsword, boolean admin)
 			throws NoSuchAlgorithmException {
 		AgentDoc agent = validateAgent(username, passsword, admin);
-		DepartmentDoc dept = agentStore.findDepartmentById(agent.getDept_id());
-		return new AgentResponseAuthDto().importFrom(agent).dept(new DepartmentResponseAuthDto().importFrom(dept));
+		if (ArgUtil.is(agent)) {
+			DepartmentDoc dept = agentStore.findDepartmentById(agent.getDept_id());
+			return new AgentResponseAuthDto().importFrom(agent).dept(new DepartmentResponseAuthDto().importFrom(dept));
+		}
+		return null;
 	}
 
 	public boolean resetPassword(String username, boolean admin) throws NoSuchAlgorithmException {

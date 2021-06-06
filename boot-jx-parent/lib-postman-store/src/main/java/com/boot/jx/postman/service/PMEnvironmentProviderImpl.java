@@ -20,7 +20,7 @@ public class PMEnvironmentProviderImpl implements PMEnvironmentProvider, AppShar
 
 	private Map<String, ConnectorConfigDoc> connectors = new HashMap<String, ConnectorConfigDoc>();
 
-	@Autowired
+	@Autowired(required = false)
 	private MongoTemplate mongoTemplate;
 
 	@Override
@@ -29,11 +29,14 @@ public class PMEnvironmentProviderImpl implements PMEnvironmentProvider, AppShar
 		if (connectors.containsKey(tnt)) {
 			return connectors.get(tnt);
 		}
-		ConnectorConfigDoc x = mongoTemplate.findById(AppContextUtil.getTenant(), ConnectorConfigDoc.class);
-		if (ArgUtil.is(x)) {
-			connectors.put(tnt, x);
+		if (ArgUtil.is(mongoTemplate)) {
+			ConnectorConfigDoc x = mongoTemplate.findById(AppContextUtil.getTenant(), ConnectorConfigDoc.class);
+			if (ArgUtil.is(x)) {
+				connectors.put(tnt, x);
+			}
+			return x;
 		}
-		return x;
+		return null;
 	}
 
 	@Override

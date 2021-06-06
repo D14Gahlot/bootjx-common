@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
+import com.boot.jx.AppContextUtil;
 import com.boot.jx.logger.LoggerService;
 import com.boot.jx.stomp.StompSessionCache.StompSession;
 import com.boot.jx.tunnel.TunnelService;
@@ -30,6 +31,8 @@ public class StompTunnelService {
 		try {
 			StompTunnelEvent event = new StompTunnelEvent();
 			event.setTopic(topic);
+			event.setTenantToken(stompTunnelSessionManager.createTagId(AppContextUtil.getTenant()));
+			
 			Map<String, Object> messageData = new HashMap<String, Object>();
 			messageData.put("data", message);
 			event.setData(JsonUtil.toJsonMap(messageData));
@@ -37,7 +40,23 @@ public class StompTunnelService {
 		} catch (Exception e) {
 			LOGGER.error("Error While Sending StompMessage", e);
 		}
+	}
 
+	@Async
+	public void sendToTag(String tag, String topic, Object message) {
+		try {
+			StompTunnelEvent event = new StompTunnelEvent();
+			event.setTopic(topic);
+			event.setTenantToken(stompTunnelSessionManager.createTagId(AppContextUtil.getTenant()));
+			event.setTagId(stompTunnelSessionManager.createTagId(tag));
+			
+			Map<String, Object> messageData = new HashMap<String, Object>();
+			messageData.put("data", message);
+			event.setData(JsonUtil.toJsonMap(messageData));
+			tunnelService.shout(StompTunnelToAllSender.STOMP_TO_ALL, event);
+		} catch (Exception e) {
+			LOGGER.error("Error While Sending StompMessage", e);
+		}
 	}
 
 	/**
@@ -52,12 +71,14 @@ public class StompTunnelService {
 	@Async
 	public void sendTo(String stompUID, String topic, Object message) {
 		try {
-			if(!ArgUtil.is(stompUID)) {
+			if (!ArgUtil.is(stompUID)) {
 				LOGGER.error("stompSession for stompUID {} cannot be empty for {}", stompUID, topic);
 				return;
 			}
 			StompTunnelEvent event = new StompTunnelEvent();
 			event.setTopic(topic);
+			event.setTenantToken(stompTunnelSessionManager.createTagId(AppContextUtil.getTenant()));
+			
 			StompSession stompSession = stompTunnelSessionManager.getStompSession(stompUID);
 			if (!ArgUtil.isEmpty(stompSession)) {
 				event.setHttpSessionId(stompSession.getHttpSessionId());
@@ -72,4 +93,5 @@ public class StompTunnelService {
 			LOGGER.error("Error While Sending StompMessage to stompUID " + stompUID, e);
 		}
 	}
+
 }
