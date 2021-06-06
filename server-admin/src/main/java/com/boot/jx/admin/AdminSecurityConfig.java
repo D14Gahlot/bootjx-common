@@ -40,9 +40,9 @@ public class AdminSecurityConfig extends WebSecurityConfigurerAdapter {
 				// .loginProcessingUrl("/auth/login/submit").permitAll()
 				// Logout Pages
 				.and().logout().permitAll().addLogoutHandler(agentLogoutHandler).logoutUrl("/auth/logout")
-				.logoutSuccessUrl("/auth/login?logout").deleteCookies("JSESSIONID").invalidateHttpSession(true)
-				.permitAll().and().exceptionHandling().accessDeniedPage("/403").and().csrf().disable().headers()
-				.disable();
+				.logoutSuccessUrl("/auth/login?logout").deleteCookies("JSESSIONID", "JXSESSIONID")
+				.invalidateHttpSession(true).permitAll().and().exceptionHandling().accessDeniedPage("/403").and().csrf()
+				.disable().headers().disable();
 	}
 
 	@Bean

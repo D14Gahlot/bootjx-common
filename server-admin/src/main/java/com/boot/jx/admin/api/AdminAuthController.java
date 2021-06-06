@@ -4,6 +4,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -25,8 +26,10 @@ import com.boot.jx.api.ApiResponse;
 import com.boot.jx.common.config.AppCommonConfig;
 import com.boot.jx.common.dto.AgentResponseAuthDto;
 import com.boot.jx.http.CommonHttpRequest;
+import com.boot.jx.model.MapModel;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.Constants;
+import com.boot.utils.CryptoUtil;
 import com.boot.utils.JsonUtil;
 import com.boot.utils.MapBuilder;
 
@@ -70,7 +73,7 @@ public class AdminAuthController {
 	}
 
 	@RequestMapping(value = { "/auth/login", "/auth/resetpass" }, method = { RequestMethod.POST, RequestMethod.GET })
-	public String login(Model model, HttpServletRequest request) {
+	public String login(Model model, HttpServletRequest request, HttpServletResponse httpServletResponse) {
 		model.addAttribute("CDN_URL",
 				ArgUtil.parseAsString(commonHttpRequest.get("CDN_URL"), appCommonConfig.getCdnServer()));
 		model.addAttribute("CDN_DEBUG", ArgUtil.parseAsString(commonHttpRequest.get("CDN_DEBUG"), "false"));
@@ -80,14 +83,17 @@ public class AdminAuthController {
 
 		String page = ArgUtil.parseAsString(commonHttpRequest.get("page"), "login");
 		String action = ArgUtil.parseAsString(commonHttpRequest.get("action"), "login");
+		String status = Constants.BLANK;
 		Object message = Constants.BLANK;
 		try {
 			if ("resetpass".equalsIgnoreCase(action)) {
 				String username = ArgUtil.parseAsString(commonHttpRequest.get("username"), Constants.BLANK);
 				ApiResponse<Map<String, Object>, String> x = agentResetPass(username, true);
 				if (ArgUtil.parseAsBoolean(x.getData().get("success"), false)) {
+					status = "SUCCESS";
 					message = "Link to reset password sent on registered email.";
 				} else {
+					status = "ERROR";
 					message = x.getMessage();
 				}
 			} else if ("setpass".equalsIgnoreCase(page)) {
@@ -101,25 +107,49 @@ public class AdminAuthController {
 
 				if ("setpass".equalsIgnoreCase(action)) {
 					if (!ArgUtil.is(confirmpassword)) {
+						status = "ERROR";
 						message = "Please enter valid password";
 					} else if (confirmpassword.equals(newpassword)) {
 						ApiResponse<Map<String, Object>, String> x = agentSetPass(username, token, newpassword, true);
 						if (ArgUtil.parseAsBoolean(x.getData().get("success"), false)) {
+							status = "SUCCESS";
 							message = "Password has been reset successfully";
 						} else {
+							status = "FAIL";
 							message = x.getMessage();
 						}
 					} else {
+						status = "ERROR";
 						message = "Password Mismatch";
+					}
+				}
+			} else {
+				String xRemSession = ArgUtil.parseAsString(commonHttpRequest.get("JXSESSIONID"), Constants.BLANK);
+				if (ArgUtil.is(xRemSession)) {
+					@SuppressWarnings("unchecked")
+					MapModel map = MapModel.from(
+							CryptoUtil.getEncoder().message(xRemSession).decrypt().decodeBase64().toObzect(Map.class));
+					ApiResponse<Map<String, Object>, AgentResponseAuthDto> x = this.login(map.getString("username"),
+							map.getString("password"), request);
+					if (ArgUtil.parseAsBoolean(x.getData().get("success"), false)) {
+						if (ArgUtil.is(x.getMeta())) {
+							if (ArgUtil.is(x.getRedirectUrl())) {
+								httpServletResponse.setHeader("Location", x.getRedirectUrl());
+								httpServletResponse.setStatus(302);
+							}
+						}
 					}
 				}
 			}
 		} catch (Exception e) {
+			status = "FAIL";
 			message = "Sorry some technical issues";
 		}
 
 		model.addAttribute("MESSAGE", message);
 		model.addAttribute("PAGE", page);
+		model.addAttribute("ACTION", action);
+		model.addAttribute("STATUS", status);
 		model.addAttribute("APP_TITLE", appConfig.getAppTitle());
 		return "app-login";
 	}
@@ -162,6 +192,15 @@ public class AdminAuthController {
 			SecurityContextHolder.getContext().setAuthentication(authentication);
 			sessionService.updateLogin(x.getMeta());
 			x.setStatusKey("SUCCESS");
+
+			boolean rememberme = ArgUtil.parseAsBoolean(commonHttpRequest.get("rememberme"), false);
+			if (rememberme) {
+				String xRemSession = CryptoUtil.getEncoder()
+						.obzect(MapBuilder.map().put("username", username).put("password", password).toMap())
+						.encodeBase64().encrypt().toString();
+				commonHttpRequest.setCookie("JXSESSIONID", xRemSession);
+			}
+
 		} else {
 			x.redirectUrl(appConfig.getAppPrefix() + "/auth/login?error");
 		}
