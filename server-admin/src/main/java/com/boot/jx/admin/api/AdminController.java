@@ -13,7 +13,6 @@ import com.boot.jx.admin.dto.AgentResponseAdminDto;
 import com.boot.jx.admin.dto.DepartmentResponseAdminDto;
 import com.boot.jx.admin.service.AdminService;
 import com.boot.jx.api.ApiResponse;
-import com.boot.jx.common.doc.AgentDoc;
 import com.boot.jx.common.doc.DepartmentDoc;
 import com.boot.utils.ArgUtil;
 

@@ -2,7 +2,6 @@ package com.boot.jx.admin.manager;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -12,8 +11,6 @@ import org.springframework.stereotype.Component;
 
 import com.boot.jx.admin.dto.ChatParserDto;
 import com.boot.utils.ArgUtil;
-
-import javassist.tools.framedump;
 @Component
 public class WhatsUpChatParserMgr {
 	
