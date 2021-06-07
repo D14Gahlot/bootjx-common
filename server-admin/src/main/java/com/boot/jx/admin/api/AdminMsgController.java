@@ -1,6 +1,7 @@
 package com.boot.jx.admin.api;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
@@ -12,9 +13,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
+import com.boot.jx.admin.manager.WhatsUpChatParserMgr;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.chat.ChatArchive;
+import com.boot.jx.dict.ContactType;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.dto.ChatSessionDTO;
 import com.boot.utils.ArgUtil;
@@ -27,6 +31,9 @@ public class AdminMsgController {
 
 	@Autowired
 	private ChatArchive chatArchive;
+
+	@Autowired
+	private WhatsUpChatParserMgr chatParseManager;
 
 	@RequestMapping(value = "/api/message/session", method = { RequestMethod.GET })
 	public ApiResponse<ChatSessionDoc, Object> fetchSession(@RequestParam String startStamp,
@@ -74,5 +81,12 @@ public class AdminMsgController {
 		chatSessionDto = chatArchive.withContact(chatSessionDto);
 		chatSessionDto = chatArchive.withMessages(chatSessionDto);
 		return ApiResponse.buildData(chatSessionDto);
+	}
+
+	@RequestMapping(value = "/admin/chat-parser", method = { RequestMethod.POST })
+	public ApiResponse<ChatSessionDTO, Map<String, Object>> getChatDetails(
+			@RequestParam(name = "file") MultipartFile file, @RequestParam String clientDate,
+			@RequestParam ContactType contactType) {
+		return chatParseManager.getChats(file, clientDate);
 	}
 }

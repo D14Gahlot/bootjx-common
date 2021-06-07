@@ -40,10 +40,11 @@ public final class DateFormatUtil {
 			put("^\\d{14}$", new SimpleDateFormat("yyyyMMddHHmmss"));
 			put("^\\d{8}\\s\\d{6}$", new SimpleDateFormat("yyyyMMdd HHmmss"));
 			put("^\\d{1,2}-\\d{1,2}-\\d{4}\\s\\d{1,2}:\\d{2}:\\d{2}$", new SimpleDateFormat("dd-MM-yyyy HH:mm:ss"));
-			
+
 			put("^\\d{4}-\\d{1,2}-\\d{1,2}\\s\\d{1,2}:\\d{2}:\\d{2}$", new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"));
-			put("^\\d{4}-\\d{1,2}-\\d{1,2}t\\d{1,2}:\\d{2}:\\d{2}\\.\\d{3}$", new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS"));
-			
+			put("^\\d{4}-\\d{1,2}-\\d{1,2}t\\d{1,2}:\\d{2}:\\d{2}\\.\\d{3}$",
+					new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS"));
+
 			put("^\\d{1,2}/\\d{1,2}/\\d{4}\\s\\d{1,2}:\\d{2}:\\d{2}$", new SimpleDateFormat("MM/dd/yyyy HH:mm:ss"));
 			put("^\\d{4}/\\d{1,2}/\\d{1,2}\\s\\d{1,2}:\\d{2}:\\d{2}$", new SimpleDateFormat("yyyy/MM/dd HH:mm:ss"));
 			put("^\\d{1,2}\\s[a-z]{3}\\s\\d{4}\\s\\d{1,2}:\\d{2}:\\d{2}$",
@@ -52,7 +53,7 @@ public final class DateFormatUtil {
 					new SimpleDateFormat("dd MMMM yyyy HH:mm:ss"));
 			put("^\\d{1,2}\\s[a-z]{4,},\\s\\d{4}\\s\\d{1,2}:\\d{2}:\\d{2}\\s[a-z]{2}\\s[a-z]{3,}$",
 					new SimpleDateFormat("dd MMMM, yyyy hh:mm:ss a z"));
-			
+
 		}
 	};
 
@@ -80,7 +81,7 @@ public final class DateFormatUtil {
 			put("yyyyMMdd HHmmss", "^\\d{8}\\s\\d{6}$");
 			put(SQL_TIME_FORMAT_DEFAULT, "^\\d{1,2}-\\d{1,2}-\\d{4}\\s\\d{1,2}:\\d{2}:\\d{2}$");
 			put("DD/MM/YYYY HH24:MI:SS", "^\\d{1,2}/\\d{1,2}/\\d{4}\\s\\d{1,2}:\\d{2}:\\d{2}$");
-			
+
 			put("yyyy-MM-dd HH24:MI:SS", "^\\d{4}-\\d{1,2}-\\d{1,2}\\s\\d{1,2}:\\d{2}:\\d{2}$");
 			put("yyyy-MM-ddTHH24:MI:SS.FF3", "^\\d{4}-\\d{1,2}-\\d{1,2}t\\s\\d{1,2}:\\d{2}:\\d{2}\\.\\d{3}$");
 
