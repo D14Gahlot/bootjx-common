@@ -1,26 +1,21 @@
 package com.boot.jx.admin.api;
 
 import java.util.List;
-import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartFile;
 
 import com.boot.jx.admin.dto.DashBoardRequestDto;
 import com.boot.jx.admin.dto.DashBoardResponseDto;
 import com.boot.jx.admin.dto.TagDocumentDto;
+import com.boot.jx.admin.dto.TagDocumentLst;
 import com.boot.jx.admin.manager.AdminDashBoardManager;
 import com.boot.jx.admin.manager.AgentAnalyticsManager;
-import com.boot.jx.admin.manager.ChatParserAndImportor;
 import com.boot.jx.api.ApiResponse;
-import com.boot.jx.dict.ContactType;
 import com.boot.jx.postman.doc.ChatSessionDoc;
-import com.boot.jx.postman.dto.ChatSessionDTO;
 
 @RestController
 public class AdminDashBoardContoller {
@@ -60,12 +55,9 @@ public class AdminDashBoardContoller {
 	}
 
 	@RequestMapping(value = "/admin/tag-analytics", method = { RequestMethod.POST })
-	public ApiResponse<TagDocumentDto, Object> getTagAnalytics(@RequestBody DashBoardRequestDto req) {
+	public ApiResponse<TagDocumentLst, Object> getTagAnalytics(@RequestBody DashBoardRequestDto req) {
 		TagDocumentDto lst = adminDbMgr.getTagDocumentDetails(req);
-		ApiResponse<TagDocumentDto, Object> resp = new ApiResponse<TagDocumentDto, Object>();
-		resp.setData(lst);
-		return resp;
+		return ApiResponse.buildResults(lst.getLstTagDocument());
 	}
-
 
 }
