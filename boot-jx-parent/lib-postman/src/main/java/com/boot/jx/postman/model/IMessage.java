@@ -19,4 +19,16 @@ public interface IMessage extends Serializable {
 
 	public MessageSession session();
 
+	public static interface SessionMessage extends IMessage {
+
+		void setContactId(String contactId);
+
+		String getChannel();
+
+		String getFrom();
+
+		void setSessionId(String sessionId);
+
+	}
+
 }

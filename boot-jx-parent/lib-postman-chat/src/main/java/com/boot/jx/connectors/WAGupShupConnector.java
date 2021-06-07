@@ -111,7 +111,7 @@ public class WAGupShupConnector implements ConnectorHandler {
 		InboxMessage inboxMessage = new InboxMessage();
 		inboxMessage.setContactType(ContactType.WHATSAPP);
 		inboxMessage.setChannel("GUPSHUPW");
-		inboxMessage.from(inbound.getMobile());
+		inboxMessage.setFrom(inbound.getMobile());
 		inboxMessage.setFromName(inbound.getName());
 		inboxMessage.setMessage(inbound.getText());
 		inboxMessage.setTo(inbound.getWaNumber());

@@ -76,7 +76,7 @@ public class FacebookConnector implements ConnectorHandler {
 		String id = m.getSender().get("id");
 		InboxMessage event = new InboxMessage();
 		event.setChannel("PAGE");
-		event.from(id);
+		event.setFrom(id);
 		event.setMessage(m.getMessage().getText());
 		event.setTo(m.getRecipient().get("id"));
 		event.setContactType(ContactType.FACEBOOK);

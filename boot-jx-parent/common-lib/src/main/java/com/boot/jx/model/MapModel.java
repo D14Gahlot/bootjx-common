@@ -148,6 +148,10 @@ public class MapModel implements JsonSerializerType<Object> {
 		return JsonUtil.getMapper().convertValue(this.get(key), clazz);
 	}
 
+	public <T extends Enum<T>> T getAsEnum(String key, Class<T> clazz) {
+		return ArgUtil.parseAsEnumT(this.get(key), clazz);
+	}
+
 	@SuppressWarnings("unchecked")
 	public MapModel getMap(String key) {
 		return new MapModel((Map<String, Object>) this.get(key));

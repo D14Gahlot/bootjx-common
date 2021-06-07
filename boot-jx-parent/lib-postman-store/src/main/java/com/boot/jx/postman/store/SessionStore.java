@@ -21,6 +21,7 @@ import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.ChatUserProfileDoc;
 import com.boot.jx.postman.dto.ChatUserProfileDTO;
+import com.boot.jx.postman.model.IMessage.SessionMessage;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.store.PMStoreConstants.CHAT_STATUS;
 import com.boot.jx.utils.PostManUtil;
@@ -44,7 +45,7 @@ public class SessionStore extends CommonDocStore {
 	@Value("${postman.chat.session.timeout}")
 	String chatSessionTimeout;
 
-	public ChatContactDoc getContact(InboxMessage inboxMessage) {
+	public ChatContactDoc getContact(SessionMessage inboxMessage) {
 		String contactId = PostManUtil.createContactId(inboxMessage);
 		ChatContactDoc chatContactDoc = mongoTemplate.findById(contactId, ChatContactDoc.class);
 		return chatContactDoc;
@@ -70,6 +71,16 @@ public class SessionStore extends CommonDocStore {
 				|| !chatSessionDoc.isActive())) {
 			return null;
 		}
+		return chatSessionDoc;
+	}
+
+	public ChatSessionDoc createSession(ChatContactDoc chatContactDoc) {
+		ChatSessionDoc chatSessionDoc = new ChatSessionDoc();
+		chatSessionDoc.setContactId(chatContactDoc.getContactId());
+		chatSessionDoc.setContactType(chatContactDoc.getContactType());
+		chatSessionDoc.setChannel(chatContactDoc.getChannelType());
+		chatSessionDoc.setLane(chatContactDoc.getLane());
+		save(chatSessionDoc);
 		return chatSessionDoc;
 	}
 

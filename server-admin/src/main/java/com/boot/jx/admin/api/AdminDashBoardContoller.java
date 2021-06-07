@@ -16,7 +16,7 @@ import com.boot.jx.admin.dto.DashBoardResponseDto;
 import com.boot.jx.admin.dto.TagDocumentDto;
 import com.boot.jx.admin.manager.AdminDashBoardManager;
 import com.boot.jx.admin.manager.AgentAnalyticsManager;
-import com.boot.jx.admin.manager.WhatsUpChatParserMgr;
+import com.boot.jx.admin.manager.ChatParserAndImportor;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.postman.doc.ChatSessionDoc;

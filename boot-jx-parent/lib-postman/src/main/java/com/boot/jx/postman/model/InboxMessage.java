@@ -8,12 +8,13 @@ import java.util.List;
 import java.util.Map;
 
 import com.boot.jx.dict.ContactType;
+import com.boot.jx.postman.model.IMessage.SessionMessage;
 import com.boot.utils.StringUtils.StringMatcher;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class InboxMessage implements Serializable, IMessage {
+public class InboxMessage implements Serializable, SessionMessage {
 
 	private static final long serialVersionUID = -4488174520614920589L;
 

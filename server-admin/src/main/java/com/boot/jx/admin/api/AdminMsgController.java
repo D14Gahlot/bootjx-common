@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.boot.jx.admin.manager.WhatsUpChatParserMgr;
+import com.boot.jx.admin.manager.ChatParserAndImportor;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.chat.ChatArchive;
 import com.boot.jx.dict.ContactType;
@@ -33,7 +33,7 @@ public class AdminMsgController {
 	private ChatArchive chatArchive;
 
 	@Autowired
-	private WhatsUpChatParserMgr chatParseManager;
+	private ChatParserAndImportor chatParseManager;
 
 	@RequestMapping(value = "/api/message/session", method = { RequestMethod.GET })
 	public ApiResponse<ChatSessionDoc, Object> fetchSession(@RequestParam String startStamp,
@@ -83,10 +83,16 @@ public class AdminMsgController {
 		return ApiResponse.buildData(chatSessionDto);
 	}
 
-	@RequestMapping(value = "/admin/chat-parser", method = { RequestMethod.POST })
+	@RequestMapping(value = "/api/message/session/parse", method = { RequestMethod.POST })
 	public ApiResponse<ChatSessionDTO, Map<String, Object>> getChatDetails(
 			@RequestParam(name = "file") MultipartFile file, @RequestParam String clientDate,
 			@RequestParam ContactType contactType) {
-		return chatParseManager.getChats(file, clientDate);
+		return chatParseManager.getChats(file, clientDate, contactType);
+	}
+
+	@RequestMapping(value = "/api/message/session/import", method = { RequestMethod.POST })
+	public ApiResponse<ChatSessionDTO, Map<String, Object>> importChat(
+			@RequestBody ApiResponse<ChatSessionDTO, Map<String, Object>> requestBody) {
+		return chatParseManager.importChat(requestBody);
 	}
 }

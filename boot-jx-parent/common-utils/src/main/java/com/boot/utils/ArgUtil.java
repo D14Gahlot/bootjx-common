@@ -597,12 +597,16 @@ public final class ArgUtil {
 		}
 	}
 
+	public static <T extends Enum> Enum parseAsEnum(Object value, Class<T> enumType) {
+		return parseAsEnum(value, null, enumType);
+	}
+
 	public static <T extends Enum> T parseAsEnumT(Object value, T defaultValue, Class<T> enumType) {
 		return (T) parseAsEnum(value, defaultValue, enumType);
 	}
 
-	public static <T extends Enum> Enum parseAsEnum(Object value, Class<T> enumType) {
-		return parseAsEnum(value, null, enumType);
+	public static <T extends Enum> T parseAsEnumT(Object value, Class<T> enumType, T defaultValue) {
+		return (T) parseAsEnum(value, defaultValue, enumType);
 	}
 
 	public static <T extends Enum> T parseAsEnumT(Object value, Class<T> enumType) {
