@@ -98,11 +98,12 @@ public class ChatParserAndImportor {
 		return request;
 	}
 
-	public ApiResponse<ChatSessionDTO, Map<String, Object>> getChats(MultipartFile file, String clientDate,
-			ContactType contactType) {
+	public ApiResponse<ChatSessionDTO, Map<String, Object>> getChats(MultipartFile file, ContactType contactType,
+			String clientDate, String format) {
 
-		CommonDateTimeParser dtp = new CommonDateTimeParser().formatter("eee MMM dd yyyy HH:mm:ss 'GMT'Z (zzzz)")
-				.date(clientDate).calculateZone().formatter("M/d/yy, h:mm a").withZone();
+		CommonDateTimeParser dtp = new CommonDateTimeParser()
+				.formatter(ArgUtil.nonEmpty(format, "ccc LLL dd yyyy HH:mm:ss 'GMT'Z (zzzz)")).date(clientDate)
+				.calculateZone().formatter("M/d/yy, h:mm a").withZone();
 
 		List<ChatSessionDTO> sessions = new ArrayList<ChatSessionDTO>();
 		Map<String, Object> meta = new HashMap<String, Object>();
