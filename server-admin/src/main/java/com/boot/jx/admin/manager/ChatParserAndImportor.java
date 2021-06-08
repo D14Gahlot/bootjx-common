@@ -117,6 +117,7 @@ public class ChatParserAndImportor {
 					}
 					getFistResponseStamp = Math.min(message.getTimestamp(), getFistResponseStamp);
 					getLastResponseStamp = Math.max(message.getTimestamp(), getLastResponseStamp);
+					messageDoc.setAgent(message.getSender());
 				}
 				messageDoc.setMessage(message.getText());
 				messageDoc.setTimestamp(message.getTimestamp());

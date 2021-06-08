@@ -67,7 +67,7 @@ public class ChatArchive {
 
 	public ChatMessageDTO getMessage(MessageDoc messageDoc, ChatSessionDoc chatSessionDoc) {
 		ChatMessageDTO messageDto = ChatDTOUtil.getChatMessageDTO(messageDoc);
-		if (ArgUtil.areEqual(messageDoc.getType(), "I")) {
+		if (ArgUtil.isEqual(messageDoc.getType(), "I", "Ii")) {
 			messageDto.setName(chatSessionDoc.getContactName());
 		} else {
 			messageDto.setName(messageDoc.getAgent());
@@ -77,7 +77,7 @@ public class ChatArchive {
 
 	public ChatMessageDTO getMessage(MessageDoc messageDoc, ChatSessionDTO chatSessionDto) {
 		ChatMessageDTO messageDto = ChatDTOUtil.getChatMessageDTO(messageDoc);
-		if (ArgUtil.areEqual(messageDoc.getType(), "I")) {
+		if (ArgUtil.isEqual(messageDoc.getType(), "I", "Ii")) {
 			messageDto.setName(chatSessionDto.getName());
 		} else {
 			messageDto.setName(messageDoc.getAgent());
