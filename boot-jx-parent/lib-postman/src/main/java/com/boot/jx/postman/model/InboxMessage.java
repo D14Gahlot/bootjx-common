@@ -29,6 +29,7 @@ public class InboxMessage implements Serializable, SessionMessage {
 	private ContactType contactType;
 	private String contactId;
 	private String channel;
+	private String csid;
 
 	private BigDecimal queue;
 	private String lane;
@@ -296,5 +297,13 @@ public class InboxMessage implements Serializable, SessionMessage {
 			this.attachments().add(file);
 		}
 		return this;
+	}
+
+	public String getCsid() {
+		return csid;
+	}
+
+	public void setCsid(String csid) {
+		this.csid = csid;
 	}
 }

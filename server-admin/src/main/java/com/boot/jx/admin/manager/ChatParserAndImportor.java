@@ -170,7 +170,7 @@ public class ChatParserAndImportor {
 		List<String> lanes = new ArrayList<String>();
 		if (ContactType.WHATSAPP.equals(contactType)) {
 			for (Entry<String, GupShupConfig> conifg : environment.config().gupshup().entrySet()) {
-				conifg.getValue().getNumber();
+				lanes.add(conifg.getValue().getNumber());
 			}
 
 		}

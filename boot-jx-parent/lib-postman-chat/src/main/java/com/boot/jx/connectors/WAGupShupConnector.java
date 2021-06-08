@@ -117,6 +117,7 @@ public class WAGupShupConnector implements ConnectorHandler {
 		inboxMessage.setTo(inbound.getWaNumber());
 		inboxMessage.setMessageIdExt(inbound.getReplyId());
 		inboxMessage.setLane(inbound.getWaNumber());
+		inboxMessage.setCsid(inbound.getMobile());
 
 		if (ArgUtil.is(inbound.getImage())) {
 			CommonFile srcFile = new CommonFile().url(inbound.getImage().getUrl() + inbound.getImage().getSignature())
