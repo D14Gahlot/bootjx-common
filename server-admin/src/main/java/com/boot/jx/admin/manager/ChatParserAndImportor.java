@@ -27,6 +27,7 @@ import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.MessageDoc;
+import com.boot.jx.postman.doc.MessageDocWA;
 import com.boot.jx.postman.dto.ChatMessageDTO;
 import com.boot.jx.postman.dto.ChatSessionDTO;
 import com.boot.jx.postman.gupshup.GupShupConfig;
@@ -39,6 +40,7 @@ import com.boot.utils.CloseUtil;
 import com.boot.utils.CollectionUtil;
 import com.boot.utils.CommonDateTimeParser;
 import com.boot.utils.Constants;
+import com.boot.utils.EntityDtoUtil;
 
 @Component
 public class ChatParserAndImportor {
@@ -59,8 +61,9 @@ public class ChatParserAndImportor {
 		String contactMobile = meta.getString("contactMobile");
 		String contactName = meta.getString("contactName");
 		String contact = meta.getString("contact");
+		String sender = meta.getString("sender");
 		String lane = meta.getString("lane");
-		ContactType contactType = meta.getAsEnum(lane, ContactType.class);
+		ContactType contactType = meta.getAsEnum("contactType", ContactType.class);
 		String contactId = PostManUtil.createContactId(contactType, contactMobile, lane);
 
 		ChatContactDoc chatContactDoc = sessionStore.getContact(contactId);
@@ -78,26 +81,58 @@ public class ChatParserAndImportor {
 
 		for (ChatSessionDTO session : request.getResults()) {
 
-			ChatSessionDoc sessionDoc = sessionStore.createSession(chatContactDoc);
+			ChatSessionDoc chatSessionDoc = EntityDtoUtil.dtoToEntity(session, new ChatSessionDoc());
+			chatSessionDoc.setContactId(chatContactDoc.getContactId());
+			chatSessionDoc.setContactType(chatContactDoc.getContactType());
+			chatSessionDoc.setChannel(chatContactDoc.getChannelType());
+			chatSessionDoc.setLane(chatContactDoc.getLane());
+
+			chatSessionDoc.setResolved(true);
+			chatSessionDoc.setResolveSessionStamp(chatSessionDoc.getCloseSessionStamp());
+			chatSessionDoc.setCloseSessionStamp(chatSessionDoc.getCloseSessionStamp());
+			chatSessionDoc.setExpired(true);
+			chatSessionDoc.setAssignedToAgent(sender);
+			chatSessionDoc.setContactName(contactName);
+
+			// chatSessionDoc.setStartSessionStamp(session.getStartSessionStamp());
+
+			sessionStore.save(chatSessionDoc);
+
+			long getFistResponseStamp = 0L;
+			long getLastInComingStamp = 0L;
+			long getLastResponseStamp = 0L;
 
 			List<MessageDoc> messageDocs = new ArrayList<MessageDoc>();
 			for (ChatMessageDTO message : session.getMessages()) {
-				MessageDoc messageDoc = new MessageDoc();
+				MessageDocWA messageDoc = new MessageDocWA();
 				if (contact.equals(message.getSender())) {
 					messageDoc.setType("Ii");
-				} else if (contact.equals(message.getSender())) {
+					getLastInComingStamp = Math.max(message.getTimestamp(), getLastInComingStamp);
+
+				} else if (sender.equals(message.getSender())) {
 					messageDoc.setType("Oi");
 					messageDoc.setStatus(Message.Status.SENT.toString());
+					if (getFistResponseStamp == 0L) {
+						getFistResponseStamp = message.getTimestamp();
+					}
+					getFistResponseStamp = Math.min(message.getTimestamp(), getFistResponseStamp);
+					getLastResponseStamp = Math.max(message.getTimestamp(), getLastResponseStamp);
 				}
 				messageDoc.setMessage(message.getText());
 				messageDoc.setTimestamp(message.getTimestamp());
 				messageDoc.setAttachments(message.getAttachments());
-				messageDoc.setContactId(sessionDoc.getContactId());
-				messageDoc.setSessionId(sessionDoc.getSessionId());
+				messageDoc.setContactId(chatSessionDoc.getContactId());
+				messageDoc.setSessionId(chatSessionDoc.getSessionId());
 
 				messageDocs.add(messageDoc);
 			}
 			mongoTemplate.insertAll(messageDocs);
+
+			chatSessionDoc.setFistResponseStamp(getFistResponseStamp);
+			chatSessionDoc.setLastInComingStamp(getLastInComingStamp);
+			chatSessionDoc.setLastResponseStamp(getLastResponseStamp);
+
+			sessionStore.save(chatSessionDoc);
 		}
 
 		return request;

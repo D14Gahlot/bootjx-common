@@ -70,8 +70,7 @@ public class AdminMsgController {
 			criteria.and("assignedToAgent").is(agentCode);
 		}
 		query2 = query2.addCriteria(criteria).with(new Sort(Sort.Direction.DESC, "startSessionStamp"));
-		System.out.println(query2.toString());
-
+		//System.out.println(query2.toString());
 		List<ChatSessionDoc> messages = mongoTemplate.find(query2, ChatSessionDoc.class);
 		return ApiResponse.buildResults(messages);
 	}
