@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -22,15 +23,16 @@ import com.boot.jx.admin.dto.ChatParserDto;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.model.MapModel;
+import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.dto.ChatMessageDTO;
 import com.boot.jx.postman.dto.ChatSessionDTO;
+import com.boot.jx.postman.gupshup.GupShupConfig;
 import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.Message;
 import com.boot.jx.postman.store.SessionStore;
-import com.boot.jx.postman.store.PMStoreConstants.CHAT_STATUS;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CloseUtil;
@@ -43,6 +45,9 @@ public class ChatParserAndImportor {
 
 	@Autowired
 	private SessionStore sessionStore;
+
+	@Autowired
+	private PMEnvironment environment;
 
 	@Autowired
 	MongoTemplate mongoTemplate;
@@ -161,6 +166,15 @@ public class ChatParserAndImportor {
 		meta.put("senderB", ArgUtil.parseAsString(senderB, Constants.BLANK));
 		meta.put("contactType", contactType);
 		meta.put("timezone", dtp.getZone());
+
+		List<String> lanes = new ArrayList<String>();
+		if (ContactType.WHATSAPP.equals(contactType)) {
+			for (Entry<String, GupShupConfig> conifg : environment.config().gupshup().entrySet()) {
+				conifg.getValue().getNumber();
+			}
+
+		}
+		meta.put("lanes", lanes);
 
 		return ApiResponse.buildResults(sessions, meta);
 	}

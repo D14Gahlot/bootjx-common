@@ -31,7 +31,7 @@ public class DateUtilTest {
 
 		// System.out.println(date.toString());
 		System.out.println(
-				ZonedDateTime.now().format(DateTimeFormatter.ofPattern("EE MMM dd yyyy HH:mm:ss 'GMT'Z (zz)")));
+				ZonedDateTime.now().format(DateTimeFormatter.ofPattern("EE MMM dd yyyy HH:mm:ss 'GMT'Z (zzzz)")));
 
 		CommonDateTimeParser dtp = new CommonDateTimeParser().formatter("ccc MMM dd yyyy HH:mm:ss 'GMT'Z (zzzz)")
 				.date("Mon Jun 07 2021 23:23:37 GMT+0530 (India Standard Time)").calculateZone()

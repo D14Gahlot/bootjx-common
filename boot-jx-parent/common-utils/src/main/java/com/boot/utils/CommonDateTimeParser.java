@@ -1,12 +1,11 @@
 package com.boot.utils;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
-import java.time.ZonedDateTime;
-
-import java.time.Instant;
-import java.time.format.DateTimeFormatter;
 import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 
 public class CommonDateTimeParser {
 
@@ -19,7 +18,7 @@ public class CommonDateTimeParser {
 	}
 
 	public CommonDateTimeParser formatter(String formatter) {
-		this.formatter = DateTimeFormatter.ofPattern(formatter);
+		this.formatter = DateTimeFormatter.ofPattern(formatter).withLocale(java.util.Locale.US);
 		return this;
 	}
 
