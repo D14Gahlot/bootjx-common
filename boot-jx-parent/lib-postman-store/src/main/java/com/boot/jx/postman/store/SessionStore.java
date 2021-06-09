@@ -335,7 +335,7 @@ public class SessionStore extends CommonDocStore {
 	public ChatSessionDoc deleteSession(ChatSessionDoc chatSessionDoc) {
 		CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder()
 				.with(CommonMongoCriteria.whereId(chatSessionDoc.getSessionId()).and("channel").is("IMPORT"));
-		mongoTemplate.remove(builder.getQuery(), getClass());
+		mongoTemplate.remove(builder.getQuery(), ChatSessionDoc.class);
 		return chatSessionDoc;
 	}
 
