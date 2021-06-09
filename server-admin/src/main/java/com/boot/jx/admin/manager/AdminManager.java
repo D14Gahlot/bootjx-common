@@ -21,7 +21,7 @@ import com.boot.jx.common.doc.AgentDoc;
 import com.boot.jx.common.doc.DepartmentDoc;
 import com.boot.jx.common.store.AgentStore;
 import com.boot.jx.logger.AuditDetailProvider;
-import com.boot.jx.mongo.UtilityMongoTemplate;
+import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.utils.ArgUtil;
 
 @Component
@@ -39,7 +39,7 @@ public class AdminManager {
 	AuditDetailProvider auditDetailProvider;
 
 	@Autowired
-	UtilityMongoTemplate utilityMongoTemplate;
+	CommonMongoTemplate commonMongoTemplate;
 
 	public List<AgentDoc> createOrUpdateAgent(AgentDoc agent) {
 
@@ -62,10 +62,15 @@ public class AdminManager {
 			ApiResponseUtil.throwException("All Inputs Required");
 		}
 
-		AgentDoc oldAgent = utilityMongoTemplate.findById(agent.getAgent_id(), AgentDoc.class);
+		AgentDoc oldAgent = commonMongoTemplate.findByIdString(agent.getAgent_id(), AgentDoc.class);
 		if (ArgUtil.is(oldAgent)) {
 			if (!oldAgent.getAgent_code().equals(agent.getAgent_code()))
 				ApiResponseUtil.throwException("Agent Code cannot be Modified");
+
+			if (!ArgUtil.is(agent.getAgent_password())) {
+				agent.setAgent_password(oldAgent.getAgent_password());
+			}
+
 			agent.oldVersion(oldAgent);
 		}
 		mongoTemplate.save(agent);
@@ -137,7 +142,7 @@ public class AdminManager {
 			ApiResponseUtil.throwException("All Inputs Required");
 		}
 
-		DepartmentDoc oldDept = utilityMongoTemplate.findById(dept.getDept_id(), DepartmentDoc.class);
+		DepartmentDoc oldDept = commonMongoTemplate.findByIdString(dept.getDept_id(), DepartmentDoc.class);
 		if (ArgUtil.is(oldDept)) {
 
 			if (!oldDept.getDept_code().equals(dept.getDept_code()))
