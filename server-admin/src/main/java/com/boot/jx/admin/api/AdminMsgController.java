@@ -87,7 +87,7 @@ public class AdminMsgController {
 	}
 
 	@RequestMapping(value = "/api/message/session/remove", method = { RequestMethod.POST })
-	public ApiResponse<ChatSessionDoc, Object> getChatDetails(@RequestParam ChatSessionDoc chatSessionDoc) {
+	public ApiResponse<ChatSessionDoc, Object> getChatDetails(@RequestBody ChatSessionDoc chatSessionDoc) {
 		sessionStore.deleteSession(chatSessionDoc);
 		return ApiResponse.buildData(chatSessionDoc);
 	}
