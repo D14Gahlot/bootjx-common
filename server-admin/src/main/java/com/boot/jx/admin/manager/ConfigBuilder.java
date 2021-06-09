@@ -2,6 +2,9 @@ package com.boot.jx.admin.manager;
 
 import java.io.Serializable;
 import java.util.List;
+
+import com.boot.utils.CollectionUtil;
+
 import java.util.ArrayList;
 
 public class ConfigBuilder implements Serializable {
@@ -28,7 +31,9 @@ public class ConfigBuilder implements Serializable {
 	static {
 		LIST.add(new ConfigBuilder("Bot Name", "postman.default.sender"));
 		LIST.add(new ConfigBuilder("Contact Details Provider Webhook", "postman.contact.details.url"));
-		LIST.add(new ConfigBuilder("Chat Tag Enabled", "chat.tag.enabled"));
+		LIST.add(new ConfigBuilder("Chat Tag Enabled", "chat.tag.enabled")
+				.options(CollectionUtil.getList(Boolean.TRUE, Boolean.FALSE)));
+
 	}
 
 	public String getTitle() {
@@ -56,6 +61,9 @@ public class ConfigBuilder implements Serializable {
 	}
 
 	public ConfigBuilder options(List<Object> options) {
+		if (this.inputType == null) {
+			this.inputType = InputType.OPTIONS;
+		}
 		this.options = options;
 		return this;
 	}
@@ -66,5 +74,10 @@ public class ConfigBuilder implements Serializable {
 
 	public void setInputType(InputType inputType) {
 		this.inputType = inputType;
+	}
+
+	public ConfigBuilder inputType(InputType inputType) {
+		this.inputType = inputType;
+		return this;
 	}
 }
