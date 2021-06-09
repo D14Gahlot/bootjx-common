@@ -3,13 +3,10 @@ package com.boot.jx.chat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Component;
 
 import com.boot.jx.api.ApiResponse;
-import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PostManException;
 import com.boot.jx.postman.dto.ChatUserProfileDTO;
 import com.boot.jx.postman.dto.ChatUserProfileDTO.ChatUserProfileRequest;
@@ -19,7 +16,6 @@ import com.boot.jx.utils.PostManUtil;
 import com.boot.utils.ArgUtil;
 
 @Component
-@PropertySource("classpath:application-postman.properties")
 public class ChatClient {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(ChatClient.class);
@@ -28,60 +24,18 @@ public class ChatClient {
 		public static final String ASSIGN_TO_AGENT = "/int/assign/agent";
 	}
 
-	@Value("${postman.app.type}")
-	private String postmanType;
-
-	@Value("${postman.agent.url}")
-	private String agentUrl;
-
-	@Value("${postman.inbound.forward.url}")
-	private String inboundForwardUrl;
-
-	@Value("${postman.contact.details.url}")
-	private String contactDetailsUrl;
-
-	@Value("${postman.chat.dummy.user.enabled}")
-	boolean chatDummyUserEnabled;
-
-	@Value("${postman.chat.dummy.bot.enabled}")
-	boolean chatDummyBotEnabled;
-
-	@Value("${postman.chat.idle.timeout}")
-	private String chatIdleTimeout;
-
-	@Value("${postman.chat.session.timeout}")
-	private String chatSessionTimeout;
-
-	@Value("${postman.agent.session.timeout}")
-	private String agentSessionTimeout;
-
-	@Value("${postman.default.sender}")
-	private String defaultSender;
-
 	@Autowired
 	private RestService restService;
 
 	@Autowired
-	private PMEnvironment environment;
-
-	public boolean isChatDummyUserEnabled() {
-		return chatDummyUserEnabled;
-	}
-
-	public boolean isChatDummyBotEnabled() {
-		return chatDummyBotEnabled;
-	}
-
-	public String getAgentUrl() {
-		return agentUrl;
-	}
+	private ChatClientConfig chatClientConfig;
 
 	public ApiResponse<InboxMessage, Object> forward(InboxMessage inboxMessage) {
 		LOGGER.debug("Forwarding InboxMessage to other Service ");
 		try {
-			if (ArgUtil.is(inboundForwardUrl)) {
+			if (ArgUtil.is(chatClientConfig.getInboundForwardUrl())) {
 				inboxMessage.setChecksum(PostManUtil.generateCheckSum(inboxMessage));
-				return restService.ajax(inboundForwardUrl).post(inboxMessage)
+				return restService.ajax(chatClientConfig.getInboundForwardUrl()).post(inboxMessage)
 						.as(new ParameterizedTypeReference<ApiResponse<InboxMessage, Object>>() {
 						});
 			}
@@ -93,9 +47,9 @@ public class ChatClient {
 
 	public ApiResponse<InboxMessage, Object> assignToAgent(InboxMessage inboxMessage) {
 		LOGGER.debug("Assign InboxMessage Session to other Agent ");
-		if (ArgUtil.is(this.agentUrl)) {
+		if (ArgUtil.is(chatClientConfig.getAgentUrl())) {
 			inboxMessage.setChecksum(PostManUtil.generateCheckSum(inboxMessage));
-			return restService.ajax(agentUrl).path(PATH.ASSIGN_TO_AGENT).post(inboxMessage)
+			return restService.ajax(chatClientConfig.getAgentUrl()).path(PATH.ASSIGN_TO_AGENT).post(inboxMessage)
 					.as(new ParameterizedTypeReference<ApiResponse<InboxMessage, Object>>() {
 					});
 		} else {
@@ -104,41 +58,13 @@ public class ChatClient {
 	}
 
 	public ChatUserProfileDTO fetchContactDetails(ChatUserProfileRequest chatUserProfileRequest) {
-		if (ArgUtil.is(this.contactDetailsUrl)) {
-			return restService.ajax(contactDetailsUrl).post(chatUserProfileRequest)
+		if (ArgUtil.is(chatClientConfig.getContactDetailsUrl())) {
+			return restService.ajax(chatClientConfig.getContactDetailsUrl()).post(chatUserProfileRequest)
 					.as(new ParameterizedTypeReference<ChatUserProfileDTO>() {
 					});
 		} else {
 			return null;
 		}
-	}
-
-	public String getChatIdleTimeout() {
-		return chatIdleTimeout;
-	}
-
-	public String getDefaultSender() {
-		return ArgUtil.parseAsString(environment.config().agent().getDefaultBotName(), defaultSender);
-	}
-
-	public String getInboundForwardUrl() {
-		return inboundForwardUrl;
-	}
-
-	public void setInboundForwardUrl(String inboundForwardUrl) {
-		this.inboundForwardUrl = inboundForwardUrl;
-	}
-
-	public String getPostmanType() {
-		return postmanType;
-	}
-
-	public String getChatSessionTimeout() {
-		return chatSessionTimeout;
-	}
-
-	public String getAgentSessionTimeout() {
-		return agentSessionTimeout;
 	}
 
 }

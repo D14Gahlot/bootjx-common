@@ -7,22 +7,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.boot.jx.chat.ChatClient;
+import com.boot.jx.chat.ChatClientConfig;
 import com.boot.jx.postman.PMEnvironment;
-import com.boot.jx.postman.store.SessionStore;
 import com.boot.utils.TimeUtils;
 
 @Component
 public class AppCommonConfig {
 
 	@Autowired
-	private SessionStore sessionStore;
-
-	@Autowired
 	private PMEnvironment pmEnvironment;
 
 	@Autowired
-	private ChatClient chatClient;
+	private ChatClientConfig chatClientConfig;
 
 	@Value("${mry.cdn.url}")
 	private String cdnServer;
@@ -34,9 +30,9 @@ public class AppCommonConfig {
 	public Map<String, Object> toMap() {
 		Map<String, Object> map = new HashMap<String, Object>();
 		map.put("CHAT_TAG_ENABLED", pmEnvironment.config().get("chat.tag.enabled").asBoolean());
-		map.put("chatIdleTimeout", TimeUtils.toMillis(chatClient.getChatIdleTimeout()));
-		map.put("agentSessionTimeout", TimeUtils.toMillis(chatClient.getAgentSessionTimeout()));
-		map.put("chatSessionTimeout", TimeUtils.toMillis(sessionStore.getChatSessionTimeout()));
+		map.put("chatIdleTimeout", TimeUtils.toMillis(chatClientConfig.getChatIdleTimeout()));
+		map.put("agentSessionTimeout", TimeUtils.toMillis(chatClientConfig.getAgentSessionTimeout()));
+		map.put("chatSessionTimeout", TimeUtils.toMillis(chatClientConfig.getChatSessionTimeout()));
 		map.put("timestamp", System.currentTimeMillis());
 
 		return map;

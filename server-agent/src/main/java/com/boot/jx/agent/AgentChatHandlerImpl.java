@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 
 import com.boot.jx.chat.ChatArchive;
 import com.boot.jx.chat.ChatClient;
+import com.boot.jx.chat.ChatClientConfig;
 import com.boot.jx.chat.ChatCommands;
 import com.boot.jx.chat.ChatDTOUtil;
 import com.boot.jx.chat.ChatService;
@@ -46,6 +47,9 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 	private ChatClient chatClient;
 
 	@Autowired
+	private ChatClientConfig chatClientConfig;
+
+	@Autowired
 	private ChatService chatService;
 
 	@Autowired
@@ -78,7 +82,7 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 	}
 
 	private AgentSessionDoc getAgentSessonAssigned(InboxMessage inboxMessage) {
-		long timeThen = System.currentTimeMillis() - TimeUtils.toMillis(chatClient.getAgentSessionTimeout());
+		long timeThen = System.currentTimeMillis() - TimeUtils.toMillis(chatClientConfig.getAgentSessionTimeout());
 		Query query = new Query();
 		Criteria c = Criteria.where("isOnline").is(true).and("isLoggedIn").is(true).and("lastOnlineStamp").gt(timeThen);
 		if (ArgUtil.is(inboxMessage.session().getDept())) {

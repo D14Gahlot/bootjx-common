@@ -48,6 +48,9 @@ public class ChatService {
 	private ChatClient chatClient;
 
 	@Autowired
+	private ChatClientConfig chatClientConfig;
+
+	@Autowired
 	private MessageStore messageStore;
 
 	@Autowired
@@ -72,6 +75,10 @@ public class ChatService {
 
 	public ChatClient getClient() {
 		return chatClient;
+	}
+
+	public ChatClientConfig getClientConfig() {
+		return chatClientConfig;
 	}
 
 	public String getCurrenUser() {
@@ -154,7 +161,7 @@ public class ChatService {
 		ChatContactDoc chatContactDoc = sessionStore.getContact(inboxMessage.getContactId());
 
 		if (ArgUtil.isEmpty(outboxMessage.session().getAgent())) {
-			outboxMessage.session().setAgent(chatClient.getDefaultSender());
+			outboxMessage.session().setAgent(chatClientConfig.getDefaultSender());
 		}
 
 		// Action Only
@@ -237,7 +244,7 @@ public class ChatService {
 
 	public void send(ChatContactDoc chatContactDoc, OutboxMessage outboxMessage) {
 		if (ArgUtil.isEmpty(outboxMessage.session().getAgent())) {
-			outboxMessage.session().setAgent(chatClient.getDefaultSender());
+			outboxMessage.session().setAgent(chatClientConfig.getDefaultSender());
 		}
 
 		// Action Only
@@ -261,9 +268,9 @@ public class ChatService {
 		if (!ArgUtil.is(inboxMessage.session().getMode())) {
 			ChatSessionDoc sessionDoc = sessionStore.getSession(inboxMessage.getSessionId());
 			inboxMessage.session().setMode("BOT");
-			inboxMessage.session().setAgent(chatClient.getDefaultSender());
+			inboxMessage.session().setAgent(chatClientConfig.getDefaultSender());
 
-			sessionStore.assignToBot(sessionDoc, chatClient.getDefaultSender());
+			sessionStore.assignToBot(sessionDoc, chatClientConfig.getDefaultSender());
 		}
 
 		ChatContextDoc doc = mongoTemplate.findById(contactId, ChatContextDoc.class);

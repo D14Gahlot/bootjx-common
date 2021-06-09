@@ -12,6 +12,7 @@ import com.boot.jx.api.ApiResponse;
 import com.boot.jx.bot.BotEngine;
 import com.boot.jx.bot.ChatMapping;
 import com.boot.jx.chat.ChatClient;
+import com.boot.jx.chat.ChatClientConfig;
 import com.boot.jx.chat.ChatService;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.model.InboxMessage;
@@ -35,6 +36,9 @@ public class InBoundService {
 
 	@Autowired
 	private ChatClient chatClient;
+
+	@Autowired
+	private ChatClientConfig chatClientConfig;
 
 	@Autowired
 	private ChatService chatService;
@@ -64,7 +68,7 @@ public class InBoundService {
 		ChatSessionDoc session = null;
 		boolean locallySessionAssigned = false;
 		if (ArgUtil.isEmpty(inboxMessageOriginal.getSessionId())
-				|| "POSTMAN".equalsIgnoreCase(chatClient.getPostmanType())) {
+				|| "POSTMAN".equalsIgnoreCase(chatClientConfig.getPostmanType())) {
 			session = sessionStore.createSession(inboxMessageOriginal);
 			locallySessionAssigned = true;
 		}
@@ -94,7 +98,7 @@ public class InBoundService {
 
 			if (agentService.onMessageSupported(inboxMessageOriginal)) {
 				agentService.onMessage(inboxMessageOriginal);
-			} else if (botEngine.isChatBotDefined() || chatClient.isChatDummyBotEnabled()) {
+			} else if (botEngine.isChatBotDefined() || chatClientConfig.isChatDummyBotEnabled()) {
 				botEngine.invokeMethodsAsync(inboxMessageOriginal);
 			} else {
 				chatClient.forward(inboxMessageOriginal);

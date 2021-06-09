@@ -1,5 +1,7 @@
 package com.boot.jx.admin.api;
 
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -9,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.boot.jx.AppContextUtil;
+import com.boot.jx.admin.service.AdminConfigService;
 import com.boot.jx.agent.AgentConfig;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.postman.PMConfiguration;
@@ -26,13 +29,16 @@ import com.boot.utils.EntityDtoUtil;
 public class ConfigController {
 
 	@Autowired
-	MongoTemplate mongoTemplate;
+	private MongoTemplate mongoTemplate;
 
 	@Autowired
-	SharedConfigManager sharedConfigManager;
+	private SharedConfigManager sharedConfigManager;
+
+	@Autowired
+	private AdminConfigService adminConfigService;
 
 	@RequestMapping(value = "/api/connector", method = { RequestMethod.GET })
-	public ApiResponse<ConnectorConfigDoc, Object> getConfig() {
+	public ApiResponse<ConnectorConfigDoc, Object> getConnnectors() {
 		return ApiResponse.buildResults(mongoTemplate.findById(AppContextUtil.getTenant(), ConnectorConfigDoc.class));
 	}
 
@@ -142,17 +148,14 @@ public class ConfigController {
 	}
 
 	@RequestMapping(value = "/api/config/set", method = { RequestMethod.POST })
-	public ApiResponse<ConnectorConfigDoc, Object> addConfig(@RequestBody PMConfigurationObject map) {
-		ConnectorConfigDoc doc = mongoTemplate.findById(AppContextUtil.getTenant(), ConnectorConfigDoc.class);
+	public ApiResponse<Map<String, Object>, Object> addConfig(@RequestBody PMConfigurationObject map) {
+		adminConfigService.setAdminConfigs(map);
+		return ApiResponse.buildResults(adminConfigService.getAdminConfigs());
+	}
 
-		if (ArgUtil.isEmpty(doc)) {
-			doc = new ConnectorConfigDoc();
-			doc.setTenant(AppContextUtil.getTenant());
-		}
-		doc.set(map);
-		mongoTemplate.save(doc);
-		sharedConfigManager.clear();
-		return ApiResponse.buildResults(mongoTemplate.findById(AppContextUtil.getTenant(), ConnectorConfigDoc.class));
+	@RequestMapping(value = "/api/config", method = { RequestMethod.GET })
+	public ApiResponse<Map<String, Object>, Object> getConfig() {
+		return ApiResponse.buildResults(adminConfigService.getAdminConfigs());
 	}
 
 	@RequestMapping(value = "/api/config/agent", method = { RequestMethod.POST })

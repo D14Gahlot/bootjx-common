@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.bot.ChatContext;
 import com.boot.jx.chat.ChatClient;
+import com.boot.jx.chat.ChatClientConfig;
 import com.boot.jx.chat.ConnectorHandlerFactory;
 import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorHandler;
 import com.boot.jx.chat.ConnectorHandlerFactory.DefaultConnector;
@@ -25,6 +26,9 @@ public class AgentService {
 	private ChatClient chatClient;
 
 	@Autowired
+	private ChatClientConfig chatClientConfig;
+
+	@Autowired
 	private ConnectorHandlerFactory connectorHandlerFactory;
 
 	@Autowired(required = false)
@@ -36,7 +40,7 @@ public class AgentService {
 	public ApiResponse<InboxMessage, Object> assignToAgent(InboxMessage inboxMessage) {
 		if (ArgUtil.is(agentChatHandler) && agentChatHandler.onAssignSupported(inboxMessage)) {
 			return ApiResponse.buildResult(agentChatHandler.onAssign(inboxMessage));
-		} else if (ArgUtil.is(chatClient.getAgentUrl())) {
+		} else if (ArgUtil.is(chatClientConfig.getAgentUrl())) {
 			return chatClient.assignToAgent(inboxMessage);
 		} else {
 			ConnectorHandler connector = connectorHandlerFactory.get(inboxMessage.getContactType(),
