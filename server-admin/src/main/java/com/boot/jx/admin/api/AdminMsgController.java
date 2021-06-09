@@ -21,6 +21,7 @@ import com.boot.jx.chat.ChatArchive;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.dto.ChatSessionDTO;
+import com.boot.jx.postman.store.SessionStore;
 import com.boot.utils.ArgUtil;
 
 @RestController
@@ -34,6 +35,9 @@ public class AdminMsgController {
 
 	@Autowired
 	private ChatParserAndImportor chatParseManager;
+
+	@Autowired
+	private SessionStore sessionStore;
 
 	@RequestMapping(value = "/api/message/session", method = { RequestMethod.GET })
 	public ApiResponse<ChatSessionDoc, Object> fetchSession(@RequestParam String startStamp,
@@ -70,7 +74,7 @@ public class AdminMsgController {
 			criteria.and("assignedToAgent").is(agentCode);
 		}
 		query2 = query2.addCriteria(criteria).with(new Sort(Sort.Direction.DESC, "startSessionStamp"));
-		//System.out.println(query2.toString());
+		// System.out.println(query2.toString());
 		List<ChatSessionDoc> messages = mongoTemplate.find(query2, ChatSessionDoc.class);
 		return ApiResponse.buildResults(messages);
 	}
@@ -80,6 +84,12 @@ public class AdminMsgController {
 		chatSessionDto = chatArchive.withContact(chatSessionDto);
 		chatSessionDto = chatArchive.withMessages(chatSessionDto);
 		return ApiResponse.buildData(chatSessionDto);
+	}
+
+	@RequestMapping(value = "/api/message/session/remove", method = { RequestMethod.POST })
+	public ApiResponse<ChatSessionDoc, Object> getChatDetails(@RequestParam ChatSessionDoc chatSessionDoc) {
+		sessionStore.deleteSession(chatSessionDoc);
+		return ApiResponse.buildData(chatSessionDoc);
 	}
 
 	@RequestMapping(value = "/api/message/session/parse", method = { RequestMethod.POST })

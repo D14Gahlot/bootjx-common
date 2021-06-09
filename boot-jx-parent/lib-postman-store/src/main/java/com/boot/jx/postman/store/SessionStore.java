@@ -17,6 +17,7 @@ import org.springframework.stereotype.Component;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.mongo.CommonDocStore;
 import com.boot.jx.mongo.CommonMongoQueryBuilder;
+import com.boot.jx.mongo.CommonMongoQueryBuilder.CommonMongoCriteria;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.ChatUserProfileDoc;
@@ -331,6 +332,13 @@ public class SessionStore extends CommonDocStore {
 		return chatSessionDoc;
 	}
 
+	public ChatSessionDoc deleteSession(ChatSessionDoc chatSessionDoc) {
+		CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder()
+				.with(CommonMongoCriteria.whereId(chatSessionDoc.getSessionId()).and("channel").is("IMPORT"));
+		mongoTemplate.remove(builder.getQuery(), getClass());
+		return chatSessionDoc;
+	}
+
 	public ChatSessionDoc botScore(ChatSessionDoc chatSessionDoc, Integer botScore) {
 		chatSessionDoc.setBotScore(botScore);
 
@@ -406,4 +414,5 @@ public class SessionStore extends CommonDocStore {
 	public String getChatSessionTimeout() {
 		return chatSessionTimeout;
 	}
+
 }
