@@ -21,8 +21,12 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.boot.jx.admin.dto.ChatParserDto;
 import com.boot.jx.api.ApiResponse;
+import com.boot.jx.common.doc.ImportChatSessionDoc;
 import com.boot.jx.dict.ContactType;
+import com.boot.jx.logger.AuditDetailProvider;
 import com.boot.jx.model.MapModel;
+import com.boot.jx.mongo.CommonMongoQueryBuilder;
+import com.boot.jx.mongo.CommonMongoQueryBuilder.CommonMongoCriteria;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
@@ -41,6 +45,7 @@ import com.boot.utils.CollectionUtil;
 import com.boot.utils.CommonDateTimeParser;
 import com.boot.utils.Constants;
 import com.boot.utils.EntityDtoUtil;
+import com.boot.utils.UniqueID;
 
 @Component
 public class ChatParserAndImportor {
@@ -52,7 +57,10 @@ public class ChatParserAndImportor {
 	private PMEnvironment environment;
 
 	@Autowired
-	MongoTemplate mongoTemplate;
+	private MongoTemplate mongoTemplate;
+
+	@Autowired
+	private AuditDetailProvider auditDetailProvider;
 
 	public ApiResponse<ChatSessionDTO, Map<String, Object>> importChat(
 			ApiResponse<ChatSessionDTO, Map<String, Object>> request) {
@@ -65,6 +73,8 @@ public class ChatParserAndImportor {
 		String lane = meta.getString("lane");
 		ContactType contactType = meta.getAsEnum("contactType", ContactType.class);
 		String contactId = PostManUtil.createContactId(contactType, contactMobile, lane);
+
+		ImportChatSessionDoc importDetails = meta.getAs("importDetails", ImportChatSessionDoc.class);
 
 		ChatContactDoc chatContactDoc = sessionStore.getContact(contactId);
 
@@ -79,6 +89,7 @@ public class ChatParserAndImportor {
 			sessionStore.save(chatContactDoc);
 		}
 
+		List<String> sessionIds = new ArrayList<String>();
 		for (ChatSessionDTO session : request.getResults()) {
 
 			ChatSessionDoc chatSessionDoc = EntityDtoUtil.dtoToEntity(session, new ChatSessionDoc());
@@ -134,7 +145,19 @@ public class ChatParserAndImportor {
 			chatSessionDoc.setLastResponseStamp(getLastResponseStamp);
 
 			sessionStore.save(chatSessionDoc);
+			sessionIds.add(chatSessionDoc.getSessionId());
 		}
+
+		importDetails.setSessions(sessionIds);
+		importDetails.setContact(contact);
+		importDetails.setContactId(contactId);
+		importDetails.setContactMobile(contactMobile);
+		importDetails.setContactName(contactName);
+		importDetails.setContactType(contactType);
+		importDetails.setLane(lane);
+		importDetails.setSender(sender);
+		importDetails.setStatus("COMPLETED");
+		mongoTemplate.save(importDetails);
 
 		return request;
 	}
@@ -149,7 +172,12 @@ public class ChatParserAndImportor {
 		List<ChatSessionDTO> sessions = new ArrayList<ChatSessionDTO>();
 		Map<String, Object> meta = new HashMap<String, Object>();
 
-		List<ChatParserDto> list = this.getParseFileUsingRegExp(file, meta);
+		ImportChatSessionDoc importChatSession = new ImportChatSessionDoc();
+		importChatSession.setContactType(contactType);
+		importChatSession.setCreatedBy(auditDetailProvider.getAuditUser());
+		importChatSession.setCreatedStamp(System.currentTimeMillis());
+
+		List<ChatParserDto> list = this.getParseFileUsingRegExp(file, importChatSession);
 
 		ChatSessionDTO session = null;
 
@@ -212,10 +240,25 @@ public class ChatParserAndImportor {
 		}
 		meta.put("lanes", lanes);
 
+		importChatSession.setCountSessions(sessions.size());
+		importChatSession.setCountMessages(list.size());
+		importChatSession.setTimezone(dtp.getZone().toString());
+		importChatSession.setStatus("CREATED");
+		mongoTemplate.save(importChatSession);
+
+		meta.put("importDetails", importChatSession);
+
+		CommonMongoQueryBuilder qb = new CommonMongoQueryBuilder().with(
+				CommonMongoCriteria.where("fileMD5").is(importChatSession.getFileMD5()).and("status").is("COMPLETED"));
+		List<ImportChatSessionDoc> duplicates = mongoTemplate.find(qb.getQuery(), ImportChatSessionDoc.class);
+		if (ArgUtil.is(duplicates)) {
+			meta.put("duplicates", importChatSession);
+		}
+
 		return ApiResponse.buildResults(sessions, meta);
 	}
 
-	public List<ChatParserDto> getParseFileUsingRegExp(MultipartFile file, Map<String, Object> meta) {
+	public List<ChatParserDto> getParseFileUsingRegExp(MultipartFile file, ImportChatSessionDoc importChatSessionDoc) {
 		InputStream is = null;
 		BufferedReader br = null;
 		DigestInputStream dis = null;
@@ -268,9 +311,10 @@ public class ChatParserAndImportor {
 			while (hashtext.length() < 32) {
 				hashtext = "0" + hashtext;
 			}
-			meta.put("file-md5", hashtext);
-			meta.put("file-name", file.getOriginalFilename());
-			meta.put("file-size", file.getSize());
+			importChatSessionDoc.setFileMD5(hashtext);
+			importChatSessionDoc.setFileName(file.getOriginalFilename());
+			importChatSessionDoc.setFileSize(ArgUtil.parseAsString(file.getSize()));
+			importChatSessionDoc.setFileId(UniqueID.generateString62());
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {

@@ -40,7 +40,7 @@ public class MessageStore extends CommonDocStore {
 	@Value("${postman.chat.session.timeout}")
 	String chatSessionTimeout;
 
-	private String getCollectionName(Object contactType) {
+	public static String getCollectionName(Object contactType) {
 		return (MessageDoc.COLLECTION_NAME + "_" + ArgUtil.parseAsString(contactType, "OTHERS"));
 	}
 

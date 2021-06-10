@@ -18,6 +18,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.boot.jx.admin.manager.ChatParserAndImportor;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.chat.ChatArchive;
+import com.boot.jx.common.doc.ImportChatSessionDoc;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.dto.ChatSessionDTO;
@@ -103,5 +104,15 @@ public class AdminMsgController {
 	public ApiResponse<ChatSessionDTO, Map<String, Object>> importChat(
 			@RequestBody ApiResponse<ChatSessionDTO, Map<String, Object>> requestBody) {
 		return chatParseManager.importChat(requestBody);
+	}
+
+	@RequestMapping(value = "/api/message/session/import/logs", method = { RequestMethod.GET })
+	public ApiResponse<ImportChatSessionDoc, Object> importChatLogs() {
+		return ApiResponse.buildResults(mongoTemplate.findAll(ImportChatSessionDoc.class));
+	}
+
+	@RequestMapping(value = "/api/message/session/import/logs", method = { RequestMethod.GET })
+	public ApiResponse<ImportChatSessionDoc, Object> importChatLogsDelete() {
+		return ApiResponse.buildResults(mongoTemplate.findAll(ImportChatSessionDoc.class));
 	}
 }

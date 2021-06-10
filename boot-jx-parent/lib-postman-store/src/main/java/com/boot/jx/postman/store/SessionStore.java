@@ -21,6 +21,7 @@ import com.boot.jx.mongo.CommonMongoQueryBuilder.CommonMongoCriteria;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.ChatUserProfileDoc;
+import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.dto.ChatUserProfileDTO;
 import com.boot.jx.postman.model.IMessage.SessionMessage;
 import com.boot.jx.postman.model.InboxMessage;
@@ -336,6 +337,11 @@ public class SessionStore extends CommonDocStore {
 		CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder()
 				.with(CommonMongoCriteria.whereId(chatSessionDoc.getSessionId()).and("channel").is("IMPORT"));
 		mongoTemplate.remove(builder.getQuery(), ChatSessionDoc.class);
+
+		CommonMongoQueryBuilder builder2 = new CommonMongoQueryBuilder()
+				.with(CommonMongoCriteria.whereId(chatSessionDoc.getSessionId()));
+		mongoTemplate.remove(builder2.getQuery(), MessageDoc.class,
+				MessageStore.getCollectionName(chatSessionDoc.getContactType()));
 		return chatSessionDoc;
 	}
 
