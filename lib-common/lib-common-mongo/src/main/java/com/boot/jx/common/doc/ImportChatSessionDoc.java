@@ -9,7 +9,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import com.boot.jx.dict.ContactType;
 
-@Document(collection = "IMPORTED_SESSION")
+@Document(collection = "CHAT_IMPORT_LOGS")
 @TypeAlias("ImportChatSessionDoc")
 public class ImportChatSessionDoc implements Serializable {
 
