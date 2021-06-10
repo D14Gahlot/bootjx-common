@@ -398,12 +398,17 @@ public class SessionStore extends CommonDocStore {
 		chatSessionDoc.setAssignedAgentStamp(System.currentTimeMillis());
 		chatSessionDoc.setAssignedToAgent(agentCode);
 
+		if (chatSessionDoc.getAgentSessionStamp() == 0L) {
+			chatSessionDoc.setAgentSessionStamp(chatSessionDoc.getAssignedAgentStamp());
+		}
+
 		CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder().whereId(chatSessionDoc.getSessionId());
 		builder.set("mode", chatSessionDoc.getMode());
 		builder.set("assignedToDept", chatSessionDoc.getAssignedToDept());
 		builder.set("assignedDeptStamp", chatSessionDoc.getAssignedDeptStamp());
 		builder.set("assignedToAgent", chatSessionDoc.getAssignedToAgent());
 		builder.set("assignedAgentStamp", chatSessionDoc.getAssignedAgentStamp());
+		builder.set("agentSessionStamp", chatSessionDoc.getAgentSessionStamp());
 		mongoTemplate.updateFirst(builder.getQuery(), builder.getUpdate(), ChatSessionDoc.class);
 	}
 
