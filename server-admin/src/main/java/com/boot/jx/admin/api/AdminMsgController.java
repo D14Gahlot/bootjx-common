@@ -111,8 +111,8 @@ public class AdminMsgController {
 		return ApiResponse.buildResults(mongoTemplate.findAll(ImportChatSessionDoc.class));
 	}
 
-	@RequestMapping(value = "/api/message/session/import/logs", method = { RequestMethod.GET })
-	public ApiResponse<ImportChatSessionDoc, Object> importChatLogsDelete() {
-		return ApiResponse.buildResults(mongoTemplate.findAll(ImportChatSessionDoc.class));
+	@RequestMapping(value = "/api/message/session/import/trash", method = { RequestMethod.POST })
+	public ApiResponse<ImportChatSessionDoc, Object> importChatLogsDelete(@RequestBody ImportChatSessionDoc doc) {
+		return chatParseManager.trashChat(doc);
 	}
 }

@@ -339,7 +339,7 @@ public class SessionStore extends CommonDocStore {
 		mongoTemplate.remove(builder.getQuery(), ChatSessionDoc.class);
 
 		CommonMongoQueryBuilder builder2 = new CommonMongoQueryBuilder()
-				.with(CommonMongoCriteria.whereId(chatSessionDoc.getSessionId()));
+				.with(CommonMongoCriteria.where("sessionId").is(chatSessionDoc.getSessionId()));
 		mongoTemplate.remove(builder2.getQuery(), MessageDoc.class,
 				MessageStore.getCollectionName(chatSessionDoc.getContactType()));
 		return chatSessionDoc;

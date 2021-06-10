@@ -27,6 +27,7 @@ import com.boot.jx.logger.AuditDetailProvider;
 import com.boot.jx.model.MapModel;
 import com.boot.jx.mongo.CommonMongoQueryBuilder;
 import com.boot.jx.mongo.CommonMongoQueryBuilder.CommonMongoCriteria;
+import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
@@ -60,7 +61,24 @@ public class ChatParserAndImportor {
 	private MongoTemplate mongoTemplate;
 
 	@Autowired
+	private CommonMongoTemplate commpnMongoTemplate;
+
+	@Autowired
 	private AuditDetailProvider auditDetailProvider;
+
+	public ApiResponse<ImportChatSessionDoc, Object> trashChat(ImportChatSessionDoc doc) {
+		ImportChatSessionDoc docs = commpnMongoTemplate.findByIdString(doc.getId(), ImportChatSessionDoc.class);
+
+		for (String sessionId : docs.getSessions()) {
+			ChatSessionDoc session = new ChatSessionDoc();
+			session.setSessionId(sessionId);
+			session.setContactType(ArgUtil.parseAsString(docs.getContactType()));
+			sessionStore.deleteSession(session);
+		}
+		docs.setStatus("DELETED");
+		commpnMongoTemplate.save(docs);
+		return ApiResponse.buildResults(commpnMongoTemplate.findAll(ImportChatSessionDoc.class));
+	}
 
 	public ApiResponse<ChatSessionDTO, Map<String, Object>> importChat(
 			ApiResponse<ChatSessionDTO, Map<String, Object>> request) {
