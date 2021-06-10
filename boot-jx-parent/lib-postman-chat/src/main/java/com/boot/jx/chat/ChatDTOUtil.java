@@ -72,11 +72,16 @@ public class ChatDTOUtil {
 	public static ChatSessionDTO getChatSessionDTO(ChatSessionDoc chatSessionDoc) {
 		ChatSessionDTO chatSessionDto = EntityDtoUtil.entityToDto(chatSessionDoc, new ChatSessionDTO());
 		chatSessionDto.setSessionId(chatSessionDto.getSessionId());
-		chatSessionDto.setLastInComingStamp(chatSessionDoc.getLastInComingStamp());
 		chatSessionDto.setAssignedToAgent(chatSessionDoc.getAssignedToAgent());
 		chatSessionDto.setAssignedToDept(chatSessionDoc.getAssignedToDept());
 		chatSessionDto.setActive(chatSessionDoc.isActive());
 		chatSessionDto.setStatus(chatSessionDoc.getStatus());
+		
+		chatSessionDto.setAssignedAgentStamp(chatSessionDoc.getAssignedAgentStamp());
+		chatSessionDto.setAssignedDeptStamp(chatSessionDoc.getAssignedDeptStamp());
+		chatSessionDto.setLastInComingStamp(chatSessionDoc.getLastInComingStamp());
+		chatSessionDto.setLastResponseStamp(chatSessionDoc.getLastResponseStamp());
+		
 
 		if (!ArgUtil.is(chatSessionDto.getStatus())) {
 			if (chatSessionDto.isExpired()) {
