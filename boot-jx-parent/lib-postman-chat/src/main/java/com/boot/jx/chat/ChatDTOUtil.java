@@ -76,12 +76,15 @@ public class ChatDTOUtil {
 		chatSessionDto.setAssignedToDept(chatSessionDoc.getAssignedToDept());
 		chatSessionDto.setActive(chatSessionDoc.isActive());
 		chatSessionDto.setStatus(chatSessionDoc.getStatus());
-		
+
 		chatSessionDto.setAssignedAgentStamp(chatSessionDoc.getAssignedAgentStamp());
 		chatSessionDto.setAssignedDeptStamp(chatSessionDoc.getAssignedDeptStamp());
 		chatSessionDto.setLastInComingStamp(chatSessionDoc.getLastInComingStamp());
 		chatSessionDto.setLastResponseStamp(chatSessionDoc.getLastResponseStamp());
-		
+
+		if (chatSessionDto.getAgentSessionStamp() == 0L) {
+			chatSessionDto.setAgentSessionStamp(chatSessionDoc.getAssignedAgentStamp());
+		}
 
 		if (!ArgUtil.is(chatSessionDto.getStatus())) {
 			if (chatSessionDto.isExpired()) {
