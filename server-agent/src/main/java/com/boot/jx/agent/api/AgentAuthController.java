@@ -37,6 +37,7 @@ import com.boot.utils.Constants;
 import com.boot.utils.CryptoUtil;
 import com.boot.utils.JsonUtil;
 import com.boot.utils.MapBuilder;
+import com.boot.utils.MapBuilder.BuilderMap;
 
 @Controller
 public class AgentAuthController {
@@ -251,11 +252,14 @@ public class AgentAuthController {
 
 	@ResponseBody
 	@RequestMapping(value = "/auth/online/status", method = { RequestMethod.POST })
-	public ApiResponse<AgentSessionDoc, Boolean> onlineStatus(@RequestParam(required = false) Boolean status) {
+	public ApiResponse<AgentSessionDoc, Map<String, Object>> onlineStatus(
+			@RequestParam(required = false) Boolean status) {
+		BuilderMap meta = MapBuilder.map();
 		if (ArgUtil.is(status)) {
 			agentSessionService.setOnline(status.booleanValue());
+			meta.put("isOnline", status);
 		}
-		return ApiResponse.buildResults(agentSessionService.getAgentSessions(), status);
+		return ApiResponse.buildResults(agentSessionService.getAgentSessions(), meta.toMap());
 	}
 
 }
