@@ -325,7 +325,9 @@ public class AgentAnalyticsManager {
 			long assignedDeptStamp = chatSessionCon.getAssignedDeptStamp();
 			double converDuration = fistResponseStamp-assignedDeptStamp;
 			Double diffInMin = (double) (converDuration / (60 * 1000));
+			if(diffInMin>0) {
 			startLagMapLst.put(conId, diffInMin);
+			}
 		}
 		
 		
