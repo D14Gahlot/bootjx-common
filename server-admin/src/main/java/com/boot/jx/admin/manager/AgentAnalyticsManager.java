@@ -127,7 +127,9 @@ public class AgentAnalyticsManager {
 			totalOpenMsg+=dt.getOpenConversation();
 			convDuration+=dt.getConverDuration();
 			totalUniqCon+=dt.getUniqueConversation();
-			totalStartLag+=dt.getStartLag();
+			if(dt.getStartLag()>0) {
+				totalStartLag+=dt.getStartLag();
+			}
 			botScore+=dt.getBotScore();
 			botClosure +=dt.getBotClosure();
 			dto.setLeadMessanger(dt.getLeadMessanger());
