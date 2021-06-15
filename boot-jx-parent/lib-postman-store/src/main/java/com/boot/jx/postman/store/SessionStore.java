@@ -25,6 +25,7 @@ import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.dto.ChatUserProfileDTO;
 import com.boot.jx.postman.model.IMessage.SessionMessage;
 import com.boot.jx.postman.model.InboxMessage;
+import com.boot.jx.postman.store.PMStoreConstants.CHAT_MODE;
 import com.boot.jx.postman.store.PMStoreConstants.CHAT_STATUS;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.utils.ArgUtil;
@@ -154,7 +155,7 @@ public class SessionStore extends CommonDocStore {
 		return chatSessionDoc;
 	}
 
-	public InboxMessage toInboxMessage(ChatSessionDoc session) {
+	public SessionMessage toSessionMessage(ChatSessionDoc session) {
 		ChatContactDoc contact = getContact(session.getContactId());
 		InboxMessage inboxMessage = new InboxMessage();
 		inboxMessage.setContactType(ArgUtil.parseAsEnumT(contact.getContactType(), ContactType.class));
@@ -164,6 +165,11 @@ public class SessionStore extends CommonDocStore {
 		inboxMessage.setFromName(contact.getName());
 		inboxMessage.setSessionId(contact.getSessionId());
 		inboxMessage.setContactId(contact.getContactId());
+
+		inboxMessage.session().setMode(session.getMode());
+		inboxMessage.session().setAgent(session.getAssignedToAgent());
+		inboxMessage.session().setDept(session.getAssignedToDept());
+
 		return inboxMessage;
 	}
 
@@ -393,7 +399,7 @@ public class SessionStore extends CommonDocStore {
 		if (!ArgUtil.areEqual(chatSessionDoc.getAssignedToDept(), agentDept)) {
 			chatSessionDoc.setAssignedDeptStamp(System.currentTimeMillis());
 		}
-		chatSessionDoc.setMode("AGENT");
+		chatSessionDoc.setMode(CHAT_MODE.AGENT.toString());
 		chatSessionDoc.setAssignedToDept(agentDept);
 		chatSessionDoc.setAssignedAgentStamp(System.currentTimeMillis());
 		chatSessionDoc.setAssignedToAgent(agentCode);
@@ -413,7 +419,7 @@ public class SessionStore extends CommonDocStore {
 	}
 
 	public void assignToBot(ChatSessionDoc chatSessionDoc, String botName) {
-		chatSessionDoc.setMode("BOT");
+		chatSessionDoc.setMode(CHAT_MODE.BOT.toString());
 		chatSessionDoc.setAssignedToAgent(botName);
 
 		CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder().whereId(chatSessionDoc.getSessionId());

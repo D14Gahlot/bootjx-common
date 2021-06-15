@@ -13,15 +13,19 @@ import org.springframework.stereotype.Component;
 
 import com.boot.common.ScopedBeanFactory;
 import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorHandler;
-import com.boot.jx.chat.ConnectorHandlerFactory.DefaultConnector;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.logger.LoggerService;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
+import com.boot.jx.postman.doc.MessageDoc;
+import com.boot.jx.postman.dto.ChatMessageDTO;
+import com.boot.jx.postman.model.IMessage.SessionMessage;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.Message;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.store.MessageStore;
+import com.boot.jx.postman.store.PMStoreConstants.CHAT_MODE;
+import com.boot.jx.stomp.StompTunnelService;
 import com.boot.utils.ArgUtil;
 
 @Component
@@ -32,7 +36,7 @@ public class ConnectorHandlerFactory extends ScopedBeanFactory<String, Connector
 	public static Logger LOGGER = LoggerService.getLogger(ConnectorHandlerFactory.class);
 
 	public interface ConnectorHandler {
-		default public void reply(InboxMessage inboxMessage, OutboxMessage outboxMessage) {
+		default public void reply(SessionMessage inboxMessage, OutboxMessage outboxMessage) {
 			outboxMessage.addTo(inboxMessage.getFrom());
 			outboxMessage.setLane(inboxMessage.getLane());
 			this.send(outboxMessage);
@@ -50,7 +54,7 @@ public class ConnectorHandlerFactory extends ScopedBeanFactory<String, Connector
 			return true;
 		}
 
-		default public void message(String messageType, ChatContactDoc chatContactDoc, InboxMessage inboxMessage,
+		default public void message(String messageType, ChatContactDoc chatContactDoc, SessionMessage inboxMessage,
 				OutboxMessage outboxMessage) {
 			try {
 				switch (messageType) {
@@ -121,6 +125,9 @@ public class ConnectorHandlerFactory extends ScopedBeanFactory<String, Connector
 	@Autowired
 	private MessageStore messageStore;
 
+	@Autowired
+	private StompTunnelService stompTunnelService;
+
 	/**
 	 * 
 	 * Should always be last method or not changes in chatContactDoc or
@@ -132,7 +139,7 @@ public class ConnectorHandlerFactory extends ScopedBeanFactory<String, Connector
 	 * @param outboxMessage
 	 */
 	@Async
-	public void message(String messageType, ChatContactDoc chatContactDoc, InboxMessage inboxMessage,
+	public void message(String messageType, ChatContactDoc chatContactDoc, SessionMessage inboxMessage,
 			OutboxMessage outboxMessage) {
 		try {
 			ConnectorHandler connector = get(outboxMessage.getContactType(), outboxMessage.getChannel());
@@ -144,7 +151,13 @@ public class ConnectorHandlerFactory extends ScopedBeanFactory<String, Connector
 		} catch (Exception e) {
 			LOGGER.error(messageType, e);
 		}
-		messageStore.createOrUpdate(outboxMessage);
+		MessageDoc messageDoc = messageStore.createOrUpdate(outboxMessage);
+
+		if (CHAT_MODE.AGENT.toString().equals(outboxMessage.session().getMode())
+				&& ArgUtil.is(outboxMessage.session().getDept())) {
+			ChatMessageDTO messageDto = ChatDTOUtil.getChatMessageDTO(messageDoc);
+			stompTunnelService.sendToTag(outboxMessage.session().getDept(), "/message/sent/new", messageDto);
+		}
 	}
 
 }

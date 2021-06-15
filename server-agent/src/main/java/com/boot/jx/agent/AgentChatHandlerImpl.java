@@ -227,10 +227,6 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 		} else {
 			sessionStore.updateResponseTime(sessionDoc);
 			chatService.reply(sessionDoc, outboxMessage);
-			MessageDoc messageDoc = messageStore.findMessageDoc(outboxMessage);
-			ChatMessageDTO messageDto = ChatDTOUtil.getChatMessageDTO(messageDoc);
-			messageDto.setName(messageDoc.getAgent());
-			stompTunnelService.sendToTag(outboxMessage.session().getDept(), "/message/sent/new", messageDto);
 		}
 		return outboxMessage;
 	}

@@ -11,4 +11,8 @@ public class PMStoreConstants extends Constants {
 		OPEN, UNASSIGNED, URGENT, ONHOLD, ATTENTION, EXPIRED, RESOLVED, CLOSED;
 	}
 
+	public static enum CHAT_MODE {
+		AGENT, BOT;
+	}
+
 }

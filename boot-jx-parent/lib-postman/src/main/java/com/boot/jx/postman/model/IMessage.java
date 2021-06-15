@@ -1,6 +1,8 @@
 package com.boot.jx.postman.model;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
+
 import com.boot.jx.dict.ContactType;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
@@ -28,6 +30,14 @@ public interface IMessage extends Serializable {
 		String getFrom();
 
 		void setSessionId(String sessionId);
+
+		BigDecimal getQueue();
+
+		String getFromName();
+
+		String getTo();
+
+		Message<?> replyMessage(String message);
 
 	}
 

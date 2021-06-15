@@ -25,6 +25,7 @@ import com.boot.jx.postman.gupshup.GupShupDeliveryResp;
 import com.boot.jx.postman.gupshup.GupShupDeliveryResp.GupShupDeliveryDto;
 import com.boot.jx.postman.gupshup.GupShupInbound;
 import com.boot.jx.postman.model.Attachment;
+import com.boot.jx.postman.model.IMessage.SessionMessage;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.Message;
 import com.boot.jx.postman.model.Message.Status;
@@ -66,7 +67,7 @@ public class WAGupShupConnector implements ConnectorHandler {
 	}
 
 	@Override
-	public void reply(InboxMessage inboxMessage, OutboxMessage outboxMessage) {
+	public void reply(SessionMessage inboxMessage, OutboxMessage outboxMessage) {
 		try {
 			outboxMessage.setLane(inboxMessage.getLane());
 			if (ArgUtil.is(outboxMessage.getTemplate())) {

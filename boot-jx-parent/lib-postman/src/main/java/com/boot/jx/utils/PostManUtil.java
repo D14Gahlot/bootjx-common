@@ -62,4 +62,12 @@ public class PostManUtil {
 		return ArgUtil.areEqual(inboxMessage.getChecksum(), generateCheckSum(inboxMessage));
 	}
 
+	public static boolean isInBound(String type) {
+		return ArgUtil.isEqual(type, "I", "Ii");
+	}
+
+	public static boolean isOutBound(String type) {
+		return ArgUtil.isEqual(type, "O", "Oi");
+	}
+
 }

@@ -12,6 +12,7 @@ import com.boot.jx.postman.dto.ChatSessionDTO;
 import com.boot.jx.postman.dto.ChatUserProfileDTO;
 import com.boot.jx.postman.dto.ContactDTO;
 import com.boot.jx.postman.store.PMStoreConstants.CHAT_STATUS;
+import com.boot.jx.utils.PostManUtil;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.EntityDtoUtil;
 
@@ -50,7 +51,6 @@ public class ChatDTOUtil {
 		messageDto.setMessageIdRef(messageDoc.getMessageIdRef());
 		messageDto.setTags(messageDoc.getTags());
 		messageDto.setAttachments(messageDoc.getAttachments());
-		messageDto.setSender(messageDoc.getAgent());
 		messageDto.setLogs(messageDoc.getLogs());
 		messageDto.setAction(messageDoc.getAction());
 		messageDto.setStatus(messageDoc.getStatus());
@@ -62,8 +62,11 @@ public class ChatDTOUtil {
 			messageDto.setStamps(stamps);
 		}
 
-		if (ArgUtil.isEmpty(messageDto.getName())) {
-			messageDto.setName(messageDto.getSender());
+		if (PostManUtil.isOutBound(messageDoc.getType())) {
+			if (ArgUtil.isEmpty(messageDto.getName())) {
+				messageDto.setName(messageDoc.getAgent());
+			}
+			messageDto.setSender(messageDoc.getAgent());
 		}
 
 		return messageDto;

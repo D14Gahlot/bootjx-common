@@ -17,6 +17,7 @@ import com.boot.jx.postman.dto.ChatUserProfileDTO;
 import com.boot.jx.postman.dto.ContactDTO;
 import com.boot.jx.postman.store.MessageStore;
 import com.boot.jx.postman.store.SessionStore;
+import com.boot.jx.utils.PostManUtil;
 import com.boot.utils.ArgUtil;
 
 @Component
@@ -67,7 +68,7 @@ public class ChatArchive {
 
 	public ChatMessageDTO getMessage(MessageDoc messageDoc, ChatSessionDoc chatSessionDoc) {
 		ChatMessageDTO messageDto = ChatDTOUtil.getChatMessageDTO(messageDoc);
-		if (ArgUtil.isEqual(messageDoc.getType(), "I", "Ii")) {
+		if (PostManUtil.isInBound(messageDoc.getType())) {
 			messageDto.setName(chatSessionDoc.getContactName());
 		} else {
 			messageDto.setName(messageDoc.getAgent());
@@ -77,7 +78,7 @@ public class ChatArchive {
 
 	public ChatMessageDTO getMessage(MessageDoc messageDoc, ChatSessionDTO chatSessionDto) {
 		ChatMessageDTO messageDto = ChatDTOUtil.getChatMessageDTO(messageDoc);
-		if (ArgUtil.isEqual(messageDoc.getType(), "I", "Ii")) {
+		if (PostManUtil.isInBound(messageDoc.getType())) {
 			messageDto.setName(chatSessionDto.getName());
 		} else {
 			messageDto.setName(messageDoc.getAgent());

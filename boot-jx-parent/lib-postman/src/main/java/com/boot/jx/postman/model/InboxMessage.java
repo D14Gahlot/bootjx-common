@@ -306,4 +306,5 @@ public class InboxMessage implements Serializable, SessionMessage {
 	public void setCsid(String csid) {
 		this.csid = csid;
 	}
+
 }

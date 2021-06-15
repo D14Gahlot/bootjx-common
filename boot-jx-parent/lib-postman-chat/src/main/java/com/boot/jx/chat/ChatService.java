@@ -22,12 +22,14 @@ import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.dto.ChatUserProfileDTO;
 import com.boot.jx.postman.dto.ChatUserProfileDTO.ChatUserProfileRequest;
+import com.boot.jx.postman.model.IMessage.SessionMessage;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.Message;
 import com.boot.jx.postman.model.MessageReport;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.store.MessageStore;
 import com.boot.jx.postman.store.MessageStore.EVENTS;
+import com.boot.jx.postman.store.PMStoreConstants.CHAT_MODE;
 import com.boot.jx.postman.store.PMStoreConstants.CHAT_STATUS;
 import com.boot.jx.postman.store.SessionStore;
 import com.boot.utils.ArgUtil;
@@ -119,7 +121,7 @@ public class ChatService {
 		return true;
 	}
 
-	private void replyIntenal(InboxMessage inboxMessage, OutboxMessage outboxMessage) {
+	private void replyIntenal(SessionMessage inboxMessage, OutboxMessage outboxMessage) {
 
 		if (!ArgUtil.is(inboxMessage)) {
 			throw new PostManException("Destination Not Specified : inboxMessage Empty");
@@ -133,6 +135,10 @@ public class ChatService {
 		outboxMessage.addTo(inboxMessage.getFrom());
 		outboxMessage.setContactId(inboxMessage.getContactId());
 		outboxMessage.setSessionId(inboxMessage.getSessionId());
+
+		if (!ArgUtil.is(outboxMessage.session().getMode())) {
+			outboxMessage.session().setMode(inboxMessage.session().getMode());
+		}
 
 		messageStore.createOrUpdate(outboxMessage);
 		connectorHandlerFactory.message("REPLY", null, inboxMessage, outboxMessage);
@@ -174,7 +180,7 @@ public class ChatService {
 	}
 
 	public void reply(ChatSessionDoc sessionDoc, OutboxMessage outboxMessage) {
-		InboxMessage inboxMessage = sessionStore.toInboxMessage(sessionDoc);
+		SessionMessage inboxMessage = sessionStore.toSessionMessage(sessionDoc);
 		ChatContactDoc chatContactDoc = sessionStore.getContact(sessionDoc.getContactId());
 
 		if (ArgUtil.isEmpty(outboxMessage.session().getAgent())) {
@@ -205,16 +211,16 @@ public class ChatService {
 		return messageStore.note(outboxMessage, getCurrenUser());
 	}
 
-	public void log(InboxMessage inboxMessage, String agent, EVENTS event, String... logs) {
+	public void log(SessionMessage inboxMessage, String agent, EVENTS event, String... logs) {
 		messageStore.log(inboxMessage, agent, event, logs);
 	}
 
-	public void log(InboxMessage inboxMessage, EVENTS event, String... logs) {
+	public void log(SessionMessage inboxMessage, EVENTS event, String... logs) {
 		log(inboxMessage, inboxMessage.session().getAgent(), event, logs);
 	}
 
 	public void log(ChatSessionDoc sessionDoc, String agent, EVENTS event, String... logs) {
-		InboxMessage inboxMessage = sessionStore.toInboxMessage(sessionDoc);
+		SessionMessage inboxMessage = sessionStore.toSessionMessage(sessionDoc);
 		log(inboxMessage, getCurrenUser(), event, logs);
 	}
 
@@ -267,7 +273,7 @@ public class ChatService {
 
 		if (!ArgUtil.is(inboxMessage.session().getMode())) {
 			ChatSessionDoc sessionDoc = sessionStore.getSession(inboxMessage.getSessionId());
-			inboxMessage.session().setMode("BOT");
+			inboxMessage.session().setMode(CHAT_MODE.BOT.toString());
 			inboxMessage.session().setAgent(chatClientConfig.getDefaultSender());
 
 			sessionStore.assignToBot(sessionDoc, chatClientConfig.getDefaultSender());
