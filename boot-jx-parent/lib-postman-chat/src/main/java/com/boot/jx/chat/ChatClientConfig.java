@@ -78,7 +78,7 @@ public class ChatClientConfig {
 	}
 
 	public String getChatIdleTimeout() {
-		return chatIdleTimeout;
+		return ArgUtil.parseAsString(environment.config().get("postman.chat.idle.timeout"), chatIdleTimeout);
 	}
 
 	public String getInboundForwardUrl() {
@@ -94,7 +94,7 @@ public class ChatClientConfig {
 	}
 
 	public String getChatSessionTimeout() {
-		return chatSessionTimeout;
+		return ArgUtil.parseAsString(environment.config().get("postman.chat.session.timeout"), chatSessionTimeout);
 	}
 
 	public String getAgentSessionTimeout() {
