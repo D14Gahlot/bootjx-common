@@ -20,11 +20,12 @@ import com.boot.jx.postman.doc.ChatContextDoc;
 import com.boot.jx.postman.doc.ChatMeta;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.MessageDoc;
+import com.boot.jx.postman.dto.ChatMessageDTO;
 import com.boot.jx.postman.dto.ChatUserProfileDTO;
 import com.boot.jx.postman.dto.ChatUserProfileDTO.ChatUserProfileRequest;
-import com.boot.jx.postman.model.IMessage.SessionMessage;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.Message;
+import com.boot.jx.postman.model.MessageDefinitions.SessionMessage;
 import com.boot.jx.postman.model.MessageReport;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.store.MessageStore;
@@ -103,9 +104,9 @@ public class ChatService {
 		messageStore.createOrUpdate(outboxMessage);
 	}
 
-	private boolean actionIntenal(ChatContactDoc chatContactDoc, OutboxMessage outboxMessage) {
+	private MessageDoc actionIntenal(ChatContactDoc chatContactDoc, OutboxMessage outboxMessage) {
 		if (!ArgUtil.is(outboxMessage.getAction())) {
-			return false;
+			return null;
 		}
 
 		if (!ArgUtil.is(chatContactDoc)) {
@@ -116,12 +117,13 @@ public class ChatService {
 		outboxMessage.setContactType(ArgUtil.parseAsEnumT(chatContactDoc.getContactType(), ContactType.class));
 		outboxMessage.setContactId(chatContactDoc.getContactId());
 
-		messageStore.createOrUpdate(outboxMessage);
+		MessageDoc messageDoc = messageStore.createOrUpdate(outboxMessage);
 		connectorHandlerFactory.message("ACTION", chatContactDoc, null, outboxMessage);
-		return true;
+
+		return messageDoc;
 	}
 
-	private void replyIntenal(SessionMessage inboxMessage, OutboxMessage outboxMessage) {
+	private MessageDoc replyIntenal(SessionMessage inboxMessage, OutboxMessage outboxMessage) {
 
 		if (!ArgUtil.is(inboxMessage)) {
 			throw new PostManException("Destination Not Specified : inboxMessage Empty");
@@ -140,11 +142,12 @@ public class ChatService {
 			outboxMessage.session().setMode(inboxMessage.session().getMode());
 		}
 
-		messageStore.createOrUpdate(outboxMessage);
+		MessageDoc messageDoc = messageStore.createOrUpdate(outboxMessage);
 		connectorHandlerFactory.message("REPLY", null, inboxMessage, outboxMessage);
+		return messageDoc;
 	}
 
-	private void sendIntenal(ChatContactDoc chatContactDoc, OutboxMessage outboxMessage) {
+	private MessageDoc sendIntenal(ChatContactDoc chatContactDoc, OutboxMessage outboxMessage) {
 
 		if (!ArgUtil.is(chatContactDoc)) {
 			throw new PostManException("Destination Not Specified : chatContactDoc Empty");
@@ -157,12 +160,12 @@ public class ChatService {
 		outboxMessage.setContactId(chatContactDoc.getContactId());
 		outboxMessage.setSessionId(chatContactDoc.getSessionId());
 
-		messageStore.createOrUpdate(outboxMessage);
-
+		MessageDoc messageDoc = messageStore.createOrUpdate(outboxMessage);
 		connectorHandlerFactory.message("SEND", chatContactDoc, null, outboxMessage);
+		return messageDoc;
 	}
 
-	public void reply(OutboxMessage outboxMessage) throws InterruptedException {
+	public MessageDoc reply(OutboxMessage outboxMessage) throws InterruptedException {
 		InboxMessage inboxMessage = chatContext.getInboxMessage();
 		ChatContactDoc chatContactDoc = sessionStore.getContact(inboxMessage.getContactId());
 
@@ -171,15 +174,16 @@ public class ChatService {
 		}
 
 		// Action Only
-		if (actionIntenal(chatContactDoc, outboxMessage)) {
-			return;
+		MessageDoc actionDco = actionIntenal(chatContactDoc, outboxMessage);
+		if (ArgUtil.is(actionDco)) {
+			return actionDco;
 		}
 
 		outboxMessage.model().put("contact", ChatDTOUtil.getContactDTO(chatContactDoc));
-		replyIntenal(inboxMessage, outboxMessage);
+		return replyIntenal(inboxMessage, outboxMessage);
 	}
 
-	public void reply(ChatSessionDoc sessionDoc, OutboxMessage outboxMessage) {
+	public MessageDoc reply(ChatSessionDoc sessionDoc, OutboxMessage outboxMessage) {
 		SessionMessage inboxMessage = sessionStore.toSessionMessage(sessionDoc);
 		ChatContactDoc chatContactDoc = sessionStore.getContact(sessionDoc.getContactId());
 
@@ -192,13 +196,14 @@ public class ChatService {
 		}
 
 		// Action Only
-		if (actionIntenal(chatContactDoc, outboxMessage)) {
-			return;
+		MessageDoc actionDto = actionIntenal(chatContactDoc, outboxMessage);
+		if (ArgUtil.is(actionDto)) {
+			return actionDto;
 		}
 
 		outboxMessage.model().put("contact", ChatDTOUtil.getContactDTO(chatContactDoc));
 
-		replyIntenal(inboxMessage, outboxMessage);
+		return replyIntenal(inboxMessage, outboxMessage);
 	}
 
 	public MessageDoc note(ChatSessionDoc sessionDoc, OutboxMessage outboxMessage) {
@@ -228,7 +233,7 @@ public class ChatService {
 		log(sessionDoc, getCurrenUser(), event, logs);
 	}
 
-	public void send(ChatSessionDoc sessionDoc, OutboxMessage outboxMessage) {
+	public MessageDoc send(ChatSessionDoc sessionDoc, OutboxMessage outboxMessage) {
 		ChatContactDoc chatContactDoc = sessionStore.getContact(sessionDoc.getContactId());
 
 		if (ArgUtil.isEmpty(outboxMessage.session().getAgent())) {
@@ -240,26 +245,30 @@ public class ChatService {
 		}
 
 		// Action Only
-		if (actionIntenal(chatContactDoc, outboxMessage)) {
-			return;
+		// Action Only
+		MessageDoc actionDto = actionIntenal(chatContactDoc, outboxMessage);
+		if (ArgUtil.is(actionDto)) {
+			return actionDto;
 		}
 
 		outboxMessage.model().put("contact", ChatDTOUtil.getContactDTO(chatContactDoc));
-		sendIntenal(chatContactDoc, outboxMessage);
+		return sendIntenal(chatContactDoc, outboxMessage);
 	}
 
-	public void send(ChatContactDoc chatContactDoc, OutboxMessage outboxMessage) {
+	public MessageDoc send(ChatContactDoc chatContactDoc, OutboxMessage outboxMessage) {
 		if (ArgUtil.isEmpty(outboxMessage.session().getAgent())) {
 			outboxMessage.session().setAgent(chatClientConfig.getDefaultSender());
 		}
 
 		// Action Only
-		if (actionIntenal(chatContactDoc, outboxMessage)) {
-			return;
+		// Action Only
+		MessageDoc actionDto = actionIntenal(chatContactDoc, outboxMessage);
+		if (ArgUtil.is(actionDto)) {
+			return actionDto;
 		}
 
 		outboxMessage.model().put("contact", ChatDTOUtil.getContactDTO(chatContactDoc));
-		sendIntenal(chatContactDoc, outboxMessage);
+		return sendIntenal(chatContactDoc, outboxMessage);
 	}
 
 	public boolean beforeMessageHandler() {

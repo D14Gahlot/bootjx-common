@@ -69,7 +69,7 @@ public class InBoundService {
 		boolean locallySessionAssigned = false;
 		if (ArgUtil.isEmpty(inboxMessageOriginal.getSessionId())
 				|| "POSTMAN".equalsIgnoreCase(chatClientConfig.getPostmanType())) {
-			session = sessionStore.createSession(inboxMessageOriginal);
+			session = sessionStore.linkSession(inboxMessageOriginal);
 			locallySessionAssigned = true;
 		}
 		if (ArgUtil.isEmpty(inboxMessageOriginal.getMessageId())) {

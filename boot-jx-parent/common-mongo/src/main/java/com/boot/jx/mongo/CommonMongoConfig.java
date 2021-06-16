@@ -19,6 +19,6 @@ public class CommonMongoConfig {
 
 	@Bean
 	public MongoTemplate mongoTemplate() {
-		return new CommonMongoTemplateImpl(commonMongoSource.getMongoDbFactory(dataSourceUrl));
+		return new MongoTemplateCommonImpl(commonMongoSource.getMongoDbFactory(dataSourceUrl));
 	}
 }

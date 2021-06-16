@@ -20,7 +20,7 @@ import com.boot.jx.postman.client.PMFileStoreClient;
 import com.boot.jx.postman.client.TmplClient;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
-import com.boot.jx.postman.doc.TemplateReply;
+import com.boot.jx.postman.doc.QuickMedia;
 import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.OutboxMessage;
@@ -51,7 +51,7 @@ public class TelegramConnector implements ConnectorHandler {
 	public void send(OutboxMessage outboxMessage) {
 		try {
 			if (ArgUtil.is(outboxMessage.getTemplate())) {
-				TemplateReply mediaReply = mongoTemplate.findById(outboxMessage.getTemplate(), TemplateReply.class);
+				QuickMedia mediaReply = mongoTemplate.findById(outboxMessage.getTemplate(), QuickMedia.class);
 				if (ArgUtil.is(mediaReply)) {
 					if ("image".equalsIgnoreCase(mediaReply.getType())) {
 						outboxMessage.attachment(new Attachment().mediaURL(mediaReply.getUrl())

@@ -8,7 +8,8 @@ import java.util.List;
 import java.util.Map;
 
 import com.boot.jx.dict.ContactType;
-import com.boot.jx.postman.model.IMessage.SessionMessage;
+import com.boot.jx.postman.model.MessageDefinitions.MESSAGE_BOUND_TYPE;
+import com.boot.jx.postman.model.MessageDefinitions.SessionMessage;
 import com.boot.utils.StringUtils.StringMatcher;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -20,19 +21,20 @@ public class InboxMessage implements Serializable, SessionMessage {
 
 	private String messageId;
 	private String messageIdExt;
-	private String to;
+	protected List<String> to;
 	private String from;
 	private String fromName;
 	private String sessionId;
 
-	private String message;
 	private ContactType contactType;
-	private String contactId;
 	private String channel;
-	private String csid;
-
-	private BigDecimal queue;
 	private String lane;
+	private String csid;
+	private String contactId;
+	private BigDecimal queue;
+
+	private long timestamp;
+	private String message;
 
 	@JsonIgnore
 	private StringMatcher matcher;
@@ -47,12 +49,8 @@ public class InboxMessage implements Serializable, SessionMessage {
 	protected TagDocument tags;
 	private List<Attachment> attachments = null;
 
-	public String getTo() {
-		return to;
-	}
-
-	public void setTo(String to) {
-		this.to = to;
+	public InboxMessage() {
+		this.timestamp = System.currentTimeMillis();
 	}
 
 	public String getFrom() {
@@ -115,7 +113,7 @@ public class InboxMessage implements Serializable, SessionMessage {
 
 	// Builder Functions
 	public InboxMessage to(String to) {
-		this.setTo(to);
+		this.to().add(to);
 		return this;
 	}
 
@@ -265,6 +263,14 @@ public class InboxMessage implements Serializable, SessionMessage {
 		this.session = session;
 	}
 
+	@Override
+	public List<String> to() {
+		if (to == null) {
+			this.to = new ArrayList<String>();
+		}
+		return this.to;
+	}
+
 	public MessageSession session() {
 		if (session == null) {
 			this.session = new MessageSession();
@@ -305,6 +311,27 @@ public class InboxMessage implements Serializable, SessionMessage {
 
 	public void setCsid(String csid) {
 		this.csid = csid;
+	}
+
+	@Override
+	public String getType() {
+		return MESSAGE_BOUND_TYPE.INBOUND;
+	}
+
+	public long getTimestamp() {
+		return timestamp;
+	}
+
+	public void setTimestamp(long timestamp) {
+		this.timestamp = timestamp;
+	}
+
+	public List<String> getTo() {
+		return to;
+	}
+
+	public void setTo(List<String> to) {
+		this.to = to;
 	}
 
 }

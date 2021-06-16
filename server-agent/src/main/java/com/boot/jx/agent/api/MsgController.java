@@ -116,14 +116,16 @@ public class MsgController {
 
 		// Session Stuff Logging >
 		if (ArgUtil.areEqual(sessionDoc.getAssignedToAgent(), agentSession.getAgentCode())) {
-			ChatMessageDTO messageDto = new ChatMessageDTO();
+			ChatMessageDTO messageDto = agentService.sendMessage(sessionDoc, outboxMessage);
+
+			// Evaluate if required
 			messageDto.setName(agentSession.getAgentCode());
-			agentService.sendMessage(sessionDoc, outboxMessage);
 			messageDto.setType(outboxMessage.getType());
-			messageDto.setMessageId(outboxMessage.getMessageId());
-			messageDto.setMessageIdExt(outboxMessage.getMessageIdExt());
 			messageDto.setText(outboxMessage.getMessage());
 			messageDto.setMessageIdRef(outboxMessage.getMessageIdRef());
+
+			// messageDto.setMessageIdExt(outboxMessage.getMessageIdExt());
+			// messageDto.setMessageId(outboxMessage.getMessageId());
 
 			agentSessionService.refreshOnline();
 			return ApiResponse.buildResult(messageDto);

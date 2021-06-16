@@ -17,7 +17,7 @@ import com.boot.jx.dict.FileType;
 import com.boot.jx.postman.client.TmplClient;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
-import com.boot.jx.postman.doc.TemplateReply;
+import com.boot.jx.postman.doc.QuickMedia;
 import com.boot.jx.postman.gupshup.GupShupConfigClient;
 import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.InboxMessage;
@@ -56,7 +56,7 @@ public class TwitterConnector implements ConnectorHandler {
 	public void send(OutboxMessage outboxMessage) {
 		try {
 			if (ArgUtil.is(outboxMessage.getTemplate())) {
-				TemplateReply templateReply = mongoTemplate.findById(outboxMessage.getTemplate(), TemplateReply.class);
+				QuickMedia templateReply = mongoTemplate.findById(outboxMessage.getTemplate(), QuickMedia.class);
 				if (ArgUtil.is(templateReply)) {
 					if ("image".equalsIgnoreCase(templateReply.getType())) {
 						outboxMessage.attachment(new Attachment().mediaURL(templateReply.getUrl())
@@ -92,7 +92,7 @@ public class TwitterConnector implements ConnectorHandler {
 		ibm.setMessageIdExt(String.valueOf(dm.getId()));
 		ibm.setMessage(dm.getText());
 		ibm.setFrom(String.valueOf(dm.getSenderId()));
-		ibm.setTo(String.valueOf(dm.getRecipientId()));
+		ibm.to().add(String.valueOf(dm.getRecipientId()));
 		ibm.setChannel(Channel.DEFAULT.toString());
 		ibm.setContactType(ContactType.TWITTER);
 		ibm.setLane(lane);

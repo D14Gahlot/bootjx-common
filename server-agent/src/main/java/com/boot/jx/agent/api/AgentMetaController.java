@@ -21,7 +21,7 @@ import com.boot.jx.common.store.AgentStore;
 import com.boot.jx.postman.doc.QuickAction;
 import com.boot.jx.postman.doc.QuickLabel;
 import com.boot.jx.postman.doc.QuickReply;
-import com.boot.jx.postman.doc.TemplateReply;
+import com.boot.jx.postman.doc.QuickMedia;
 import com.boot.utils.ArgUtil;
 
 @Controller
@@ -64,8 +64,8 @@ public class AgentMetaController {
 
 	@ResponseBody
 	@RequestMapping(value = "/gallery/map/media_reply", method = { RequestMethod.GET })
-	public List<TemplateReply> listMediaReply() {
-		return mongoTemplate.findAll(TemplateReply.class);
+	public List<QuickMedia> listMediaReply() {
+		return mongoTemplate.findAll(QuickMedia.class);
 	}
 
 	@ResponseBody

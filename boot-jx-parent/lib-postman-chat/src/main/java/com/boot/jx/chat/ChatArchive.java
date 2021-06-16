@@ -68,10 +68,12 @@ public class ChatArchive {
 
 	public ChatMessageDTO getMessage(MessageDoc messageDoc, ChatSessionDoc chatSessionDoc) {
 		ChatMessageDTO messageDto = ChatDTOUtil.getChatMessageDTO(messageDoc);
-		if (PostManUtil.isInBound(messageDoc.getType())) {
-			messageDto.setName(chatSessionDoc.getContactName());
-		} else {
-			messageDto.setName(messageDoc.getAgent());
+		if (ArgUtil.is(messageDoc)) {
+			if (PostManUtil.isInBound(messageDoc.getType())) {
+				messageDto.setName(chatSessionDoc.getContactName());
+			} else {
+				messageDto.setName(messageDoc.getAgent());
+			}
 		}
 		return messageDto;
 	}

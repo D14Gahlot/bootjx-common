@@ -18,14 +18,16 @@ import com.boot.jx.dict.ContactType;
 import com.boot.jx.mongo.CommonDocStore;
 import com.boot.jx.mongo.CommonMongoQueryBuilder;
 import com.boot.jx.mongo.CommonMongoQueryBuilder.CommonMongoCriteria;
+import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.ChatUserProfileDoc;
 import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.dto.ChatUserProfileDTO;
-import com.boot.jx.postman.model.IMessage.SessionMessage;
 import com.boot.jx.postman.model.InboxMessage;
-import com.boot.jx.postman.model.OutboxMessage;
+import com.boot.jx.postman.model.MessageDefinitions.IMessage;
+import com.boot.jx.postman.model.MessageDefinitions.SessionMessage;
+import com.boot.jx.postman.query.ChatSessionQuery;
 import com.boot.jx.postman.store.PMStoreConstants.CHAT_MODE;
 import com.boot.jx.postman.store.PMStoreConstants.CHAT_STATUS;
 import com.boot.jx.utils.PostManUtil;
@@ -37,6 +39,7 @@ import com.mongodb.BulkWriteOperation;
 import com.mongodb.BulkWriteResult;
 import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
+import com.mongodb.WriteResult;
 
 @Component
 public class SessionStore extends CommonDocStore {
@@ -45,6 +48,9 @@ public class SessionStore extends CommonDocStore {
 
 	@Autowired
 	MongoTemplate mongoTemplate;
+
+	@Autowired
+	CommonMongoTemplate commonMongoTemplate;
 
 	@Value("${postman.chat.session.timeout}")
 	String chatSessionTimeout;
@@ -88,10 +94,8 @@ public class SessionStore extends CommonDocStore {
 		return chatSessionDoc;
 	}
 
-	public ChatSessionDoc createSession(InboxMessage inboxMessage) {
+	private ChatSessionDoc createSession(IMessage inboxMessage) {
 		String contactId = PostManUtil.createContactId(inboxMessage);
-		inboxMessage.setContactId(contactId);
-
 		String sessionId = inboxMessage.getSessionId();
 
 		ChatContactDoc chatContactDoc = null;
@@ -123,7 +127,13 @@ public class SessionStore extends CommonDocStore {
 
 			// SESSION UPDATE
 			chatSessionDoc.setActive(true);
-			chatSessionDoc.setLastInComingStamp(System.currentTimeMillis());
+
+			if (PostManUtil.isInBound(inboxMessage.getType())) {
+				chatSessionDoc.setLastInComingStamp(inboxMessage.getTimestamp());
+			} else if (PostManUtil.isOutBound(inboxMessage.getType())) {
+				chatSessionDoc.setLastResponseStamp(inboxMessage.getTimestamp());
+			}
+
 			save(chatSessionDoc);
 
 			// CONTACT CREATION
@@ -133,7 +143,7 @@ public class SessionStore extends CommonDocStore {
 				chatContactDoc.setContactId(contactId);
 				chatContactDoc.setContactType(ArgUtil.parseAsString(inboxMessage.getContactType()));
 				chatContactDoc.setChannelType(inboxMessage.getChannel());
-				chatContactDoc.setCsid(inboxMessage.getFrom());
+				chatContactDoc.setCsid(inboxMessage.getCsid());
 				chatContactDoc.setLane(inboxMessage.getLane());
 			}
 			// CONTACT UPDATE
@@ -142,17 +152,29 @@ public class SessionStore extends CommonDocStore {
 
 		} else {
 			// SESSION UPDATE
-			chatSessionDoc.setActive(true);
-			chatSessionDoc.setLastInComingStamp(System.currentTimeMillis());
-			save(chatSessionDoc);
-		}
+			ChatSessionQuery chatSessionDocQuery = new ChatSessionQuery(chatSessionDoc);
 
+			chatSessionDocQuery.setActive(true);
+
+			if (PostManUtil.isInBound(inboxMessage.getType())) {
+				chatSessionDocQuery.setLastInComingStamp(inboxMessage.getTimestamp());
+			} else if (PostManUtil.isOutBound(inboxMessage.getType())) {
+				chatSessionDocQuery.setLastResponseStamp(inboxMessage.getTimestamp());
+			}
+
+			commonMongoTemplate.updateFirst(chatSessionDocQuery);
+		}
+		return chatSessionDoc;
+	}
+
+	public ChatSessionDoc linkSession(IMessage inboxMessage) {
+		ChatSessionDoc chatSessionDoc = this.createSession(inboxMessage);
+		inboxMessage.setContactId(chatSessionDoc.getContactId());
 		inboxMessage.setSessionId(chatSessionDoc.getSessionId());
 		inboxMessage.session().setAgent(chatSessionDoc.getAssignedToAgent());
 		inboxMessage.session().setDept(chatSessionDoc.getAssignedToDept());
 		inboxMessage.session().setMode(chatSessionDoc.getMode());
 		inboxMessage.session().setResolved(chatSessionDoc.isResolved());
-
 		return chatSessionDoc;
 	}
 

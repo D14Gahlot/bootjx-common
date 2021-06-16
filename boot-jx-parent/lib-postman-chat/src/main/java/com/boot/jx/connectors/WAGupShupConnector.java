@@ -17,7 +17,7 @@ import com.boot.jx.postman.client.PMFileStoreClient;
 import com.boot.jx.postman.client.TmplClient;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
-import com.boot.jx.postman.doc.TemplateReply;
+import com.boot.jx.postman.doc.QuickMedia;
 import com.boot.jx.postman.gupshup.GupShupClientChat;
 import com.boot.jx.postman.gupshup.GupShupClientNotify;
 import com.boot.jx.postman.gupshup.GupShupConfigClient;
@@ -25,10 +25,10 @@ import com.boot.jx.postman.gupshup.GupShupDeliveryResp;
 import com.boot.jx.postman.gupshup.GupShupDeliveryResp.GupShupDeliveryDto;
 import com.boot.jx.postman.gupshup.GupShupInbound;
 import com.boot.jx.postman.model.Attachment;
-import com.boot.jx.postman.model.IMessage.SessionMessage;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.Message;
 import com.boot.jx.postman.model.Message.Status;
+import com.boot.jx.postman.model.MessageDefinitions.SessionMessage;
 import com.boot.jx.postman.model.MessageReport;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.utils.PostManUtil;
@@ -71,7 +71,7 @@ public class WAGupShupConnector implements ConnectorHandler {
 		try {
 			outboxMessage.setLane(inboxMessage.getLane());
 			if (ArgUtil.is(outboxMessage.getTemplate())) {
-				TemplateReply templateReply = mongoTemplate.findById(outboxMessage.getTemplate(), TemplateReply.class);
+				QuickMedia templateReply = mongoTemplate.findById(outboxMessage.getTemplate(), QuickMedia.class);
 				if (ArgUtil.is(templateReply)) {
 					if ("image".equalsIgnoreCase(templateReply.getType())) {
 						outboxMessage.attachment(
@@ -115,7 +115,7 @@ public class WAGupShupConnector implements ConnectorHandler {
 		inboxMessage.setFrom(inbound.getMobile());
 		inboxMessage.setFromName(inbound.getName());
 		inboxMessage.setMessage(inbound.getText());
-		inboxMessage.setTo(inbound.getWaNumber());
+		inboxMessage.to().add(inbound.getWaNumber());
 		inboxMessage.setMessageIdExt(inbound.getReplyId());
 		inboxMessage.setLane(inbound.getWaNumber());
 		inboxMessage.setCsid(inbound.getMobile());

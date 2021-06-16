@@ -4,9 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.HttpStatusCodeException;
 
 import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorHandler;
 import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorMapping;
@@ -16,7 +14,7 @@ import com.boot.jx.postman.client.ExtUtilService;
 import com.boot.jx.postman.client.TmplClient;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
-import com.boot.jx.postman.doc.TemplateReply;
+import com.boot.jx.postman.doc.QuickMedia;
 import com.boot.jx.postman.fb.FacebooClient;
 import com.boot.jx.postman.fb.FacebookMessaging;
 import com.boot.jx.postman.fb.FacebookUserProfile;
@@ -47,7 +45,7 @@ public class FacebookConnector implements ConnectorHandler {
 	public void send(OutboxMessage outboxMessage) {
 		try {
 			if (ArgUtil.is(outboxMessage.getTemplate())) {
-				TemplateReply mediaReply = mongoTemplate.findById(outboxMessage.getTemplate(), TemplateReply.class);
+				QuickMedia mediaReply = mongoTemplate.findById(outboxMessage.getTemplate(), QuickMedia.class);
 				if (ArgUtil.is(mediaReply)) {
 					if ("image".equalsIgnoreCase(mediaReply.getType())) {
 						outboxMessage.attachment(
@@ -77,8 +75,9 @@ public class FacebookConnector implements ConnectorHandler {
 		InboxMessage event = new InboxMessage();
 		event.setChannel("PAGE");
 		event.setFrom(id);
+		event.setCsid(id);
 		event.setMessage(m.getMessage().getText());
-		event.setTo(m.getRecipient().get("id"));
+		event.to().add(m.getRecipient().get("id"));
 		event.setContactType(ContactType.FACEBOOK);
 		event.setLane(lane);
 		return event;

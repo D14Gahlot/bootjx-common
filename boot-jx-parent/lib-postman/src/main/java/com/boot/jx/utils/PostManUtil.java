@@ -7,8 +7,9 @@ import org.springframework.http.ResponseEntity;
 
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.model.CommonFile;
-import com.boot.jx.postman.model.IMessage;
 import com.boot.jx.postman.model.InboxMessage;
+import com.boot.jx.postman.model.MessageDefinitions.IMessage;
+import com.boot.jx.postman.model.MessageDefinitions.MESSAGE_BOUND_TYPE;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CryptoUtil;
 
@@ -63,11 +64,11 @@ public class PostManUtil {
 	}
 
 	public static boolean isInBound(String type) {
-		return ArgUtil.isEqual(type, "I", "Ii");
+		return ArgUtil.isEqual(type, MESSAGE_BOUND_TYPE.INBOUND, MESSAGE_BOUND_TYPE.INBOUND_IMPORTED);
 	}
 
 	public static boolean isOutBound(String type) {
-		return ArgUtil.isEqual(type, "O", "Oi");
+		return ArgUtil.isEqual(type, MESSAGE_BOUND_TYPE.OUTBOUND, MESSAGE_BOUND_TYPE.OUTBOUND_IMPORTED);
 	}
 
 }

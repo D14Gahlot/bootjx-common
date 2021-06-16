@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.boot.jx.dict.ContactType;
+import com.boot.jx.postman.model.MessageDefinitions.IMessage;
 import com.boot.jx.postman.model.MessageOptions.WAMessageOptions;
 import com.boot.utils.CollectionUtil;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -22,6 +23,7 @@ public class OutboxMessage extends Message<OutboxMessage> implements WAMessageOp
 	private BigDecimal queue;
 	private MessageSession session;
 	private List<String> logs;
+	private String csid;
 
 	public OutboxMessage(ContactType contactType) {
 		super(contactType);
@@ -68,6 +70,14 @@ public class OutboxMessage extends Message<OutboxMessage> implements WAMessageOp
 			this.logs = new ArrayList<String>();
 		}
 		return this.logs;
+	}
+
+	public String getCsid() {
+		return csid;
+	}
+
+	public void setCsid(String csid) {
+		this.csid = csid;
 	}
 
 	@Override

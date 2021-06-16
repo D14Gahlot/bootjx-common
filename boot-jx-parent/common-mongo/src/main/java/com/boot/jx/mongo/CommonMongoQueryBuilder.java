@@ -88,4 +88,16 @@ public class CommonMongoQueryBuilder {
 		this.update = update;
 	}
 
+	public static abstract class DocQueryBuilder<T> extends CommonMongoQueryBuilder {
+		protected T doc;
+
+		public DocQueryBuilder(T doc) {
+			this.doc = doc;
+		}
+
+		public Class<?> getDocClass() {
+			return this.doc.getClass();
+		}
+	}
+
 }

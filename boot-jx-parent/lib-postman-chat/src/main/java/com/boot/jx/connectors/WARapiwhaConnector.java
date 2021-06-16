@@ -17,7 +17,7 @@ import com.boot.jx.logger.LoggerService;
 import com.boot.jx.postman.client.TmplClient;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
-import com.boot.jx.postman.doc.TemplateReply;
+import com.boot.jx.postman.doc.QuickMedia;
 import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.OutboxMessage;
@@ -53,7 +53,7 @@ public class WARapiwhaConnector implements ConnectorHandler {
 		outboxMessage.setChannel(outboxMessage.getChannel());
 		String text = outboxMessage.getMessage();
 		if (ArgUtil.is(outboxMessage.getTemplate())) {
-			TemplateReply mediaReply = mongoTemplate.findById(outboxMessage.getTemplate(), TemplateReply.class);
+			QuickMedia mediaReply = mongoTemplate.findById(outboxMessage.getTemplate(), QuickMedia.class);
 			if (ArgUtil.is(mediaReply)) {
 				if ("image".equalsIgnoreCase(mediaReply.getType())) {
 					outboxMessage.attachment(
@@ -94,7 +94,7 @@ public class WARapiwhaConnector implements ConnectorHandler {
 		event.setLane(lane);
 		if ("INBOX".equals(eventName)) {
 			event.from(ArgUtil.parseAsString(dataMap.get("from"), Constants.BLANK));
-			event.setTo(ArgUtil.parseAsString(dataMap.get("to"), Constants.BLANK));
+			event.to().add(ArgUtil.parseAsString(dataMap.get("to"), Constants.BLANK));
 			event.setMessage(ArgUtil.parseAsString(dataMap.get("text"), Constants.BLANK));
 			event.setFromName(ArgUtil.parseAsString(dataMap.get("pushname"), Constants.BLANK));
 			event.setOriginalMessage(dataMap);

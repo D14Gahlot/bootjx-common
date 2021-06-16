@@ -12,6 +12,7 @@ import com.boot.jx.chat.ConnectorHandlerFactory;
 import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorHandler;
 import com.boot.jx.chat.ConnectorHandlerFactory.DefaultConnector;
 import com.boot.jx.postman.doc.ChatSessionDoc;
+import com.boot.jx.postman.dto.ChatMessageDTO;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.utils.ArgUtil;
@@ -72,7 +73,7 @@ public class AgentService {
 		return agentChatHandler.onMessageReceive(inboxMessage);
 	}
 
-	public OutboxMessage sendMessage(ChatSessionDoc sessionDoc, OutboxMessage outboxMessage) {
+	public ChatMessageDTO sendMessage(ChatSessionDoc sessionDoc, OutboxMessage outboxMessage) {
 		outboxMessage.setMessage(StringUtils.trim(outboxMessage.getMessage()));
 		return agentChatHandler.onSend(sessionDoc, outboxMessage);
 	}

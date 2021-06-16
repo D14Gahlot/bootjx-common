@@ -110,6 +110,7 @@ public class InBoundControllerWeb {
 		// event.setSessionId("600edc822743742e916202b9");
 		event.setSessionId(null);
 		event.setMessageId(null);
+		event.setCsid(event.getFrom());
 		event.session().setAgent(null);
 		event.session().setDept(null);
 		inBoundEngine.invokeMethods(event);

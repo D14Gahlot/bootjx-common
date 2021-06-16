@@ -41,6 +41,10 @@ public class ChatDTOUtil {
 
 	public static ChatMessageDTO getChatMessageDTO(MessageDoc messageDoc) {
 		ChatMessageDTO messageDto = new ChatMessageDTO();
+		if (!ArgUtil.is(messageDoc)) {
+			return messageDto;
+		}
+
 		messageDto.setType(messageDoc.getType());
 		messageDto.setText(messageDoc.getMessage());
 		messageDto.setTemplate(messageDoc.getTemplate());

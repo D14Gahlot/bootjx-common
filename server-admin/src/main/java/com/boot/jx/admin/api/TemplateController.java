@@ -17,7 +17,7 @@ import com.boot.jx.aws.AWSFileStore;
 import com.boot.jx.postman.doc.QuickAction;
 import com.boot.jx.postman.doc.QuickLabel;
 import com.boot.jx.postman.doc.QuickReply;
-import com.boot.jx.postman.doc.TemplateReply;
+import com.boot.jx.postman.doc.QuickMedia;
 import com.boot.utils.ArgUtil;
 
 @RestController
@@ -146,16 +146,16 @@ public class TemplateController {
 	}
 
 	@RequestMapping(value = "/api/tmpl/quickmedia", method = { RequestMethod.GET })
-	public ApiResponse<TemplateReply, Object> listQuickMedia() {
-		return ApiResponse.buildResults(mongoTemplate.findAll(TemplateReply.class));
+	public ApiResponse<QuickMedia, Object> listQuickMedia() {
+		return ApiResponse.buildResults(mongoTemplate.findAll(QuickMedia.class));
 	}
 
 	@RequestMapping(value = "/api/tmpl/quickmedia", method = { RequestMethod.DELETE })
-	public ApiResponse<TemplateReply, Object> deleteQuickMedia(@RequestParam String id) {
-		TemplateReply qr = new TemplateReply();
+	public ApiResponse<QuickMedia, Object> deleteQuickMedia(@RequestParam String id) {
+		QuickMedia qr = new QuickMedia();
 		qr.setName(id);
 		mongoTemplate.remove(qr);
-		return ApiResponse.buildResults(mongoTemplate.findAll(TemplateReply.class)).data(qr)
+		return ApiResponse.buildResults(mongoTemplate.findAll(QuickMedia.class)).data(qr)
 				.message("Quick Media deleted");
 	}
 
@@ -163,7 +163,7 @@ public class TemplateController {
 	AWSFileStore fileStore;
 
 	@RequestMapping(value = "/api/tmpl/quickmedia", method = { RequestMethod.POST })
-	public ApiResponse<TemplateReply, Object> createQuickMedia(@RequestParam(required = false) String name,
+	public ApiResponse<QuickMedia, Object> createQuickMedia(@RequestParam(required = false) String name,
 			@RequestParam String category, @RequestParam String title, @RequestParam(required = false) String url,
 			@RequestParam(name = "file", required = false) MultipartFile file) {
 
@@ -175,9 +175,9 @@ public class TemplateController {
 		} else if (ArgUtil.isEmpty(url)) {
 			throw new IllegalStateException("Cannot upload empty file");
 		}
-		TemplateReply newVersion = new TemplateReply();
+		QuickMedia newVersion = new QuickMedia();
 		if (ArgUtil.is(name)) {
-			TemplateReply oldVersion = mongoTemplate.findById(name, TemplateReply.class);
+			QuickMedia oldVersion = mongoTemplate.findById(name, QuickMedia.class);
 			if (ArgUtil.is(oldVersion)) {
 				newVersion.oldVersion(oldVersion);
 				newVersion.setName(name);
@@ -191,7 +191,7 @@ public class TemplateController {
 
 		mongoTemplate.save(newVersion);
 
-		return ApiResponse.buildResults(mongoTemplate.findAll(TemplateReply.class)).data(newVersion)
+		return ApiResponse.buildResults(mongoTemplate.findAll(QuickMedia.class)).data(newVersion)
 				.message("Quick Media created");
 	}
 }

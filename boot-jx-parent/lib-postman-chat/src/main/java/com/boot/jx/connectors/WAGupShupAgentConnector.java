@@ -14,10 +14,10 @@ import com.boot.jx.postman.gupshup.GupShupClientChat;
 import com.boot.jx.postman.gupshup.GupShupClientNotify;
 import com.boot.jx.postman.gupshup.GupShupConfigClient;
 import com.boot.jx.postman.gupshup.GupShupInboundV2;
-import com.boot.jx.postman.model.IMessage.SessionMessage;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.Message;
 import com.boot.jx.postman.model.MessageBox;
+import com.boot.jx.postman.model.MessageDefinitions.SessionMessage;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.model.WAMessage.Channel;
 import com.boot.utils.ArgUtil;
@@ -84,7 +84,7 @@ public class WAGupShupAgentConnector implements ConnectorHandler {
 	@Override
 	public InboxMessage assignToAgent(InboxMessage inboxMessage) {
 		if (ArgUtil.isEqual(inboxMessage.getChannel(), Channel.GUPSHUPAGENT.toString())) {
-			gupShupAgentClient.assignToAgent(inboxMessage.getTo(), inboxMessage.getFrom(),
+			gupShupAgentClient.assignToAgent(inboxMessage.getTo().get(0), inboxMessage.getFrom(),
 					inboxMessage.session().getDept());
 		} else if (ArgUtil.isEqual(inboxMessage.getChannel(), Channel.DEFAULT.toString())) {
 			Message<?> reply = inboxMessage.replyMessage("Call us @ " + gupShupConfig.getGupShupWaNumber());
@@ -113,7 +113,7 @@ public class WAGupShupAgentConnector implements ConnectorHandler {
 			inboxMessage.setMessage(inboundV2.getMessages().get(0).getText().getBody());
 		}
 
-		inboxMessage.setTo(inboundV2.getContacts().get(0).getWaId());
+		inboxMessage.to().add(inboundV2.getContacts().get(0).getWaId());
 		inboxMessage.setMessageIdExt(inboundV2.getMessages().get(0).getId());
 		return inboxMessage;
 	}

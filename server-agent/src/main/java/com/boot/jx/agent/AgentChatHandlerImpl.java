@@ -170,17 +170,21 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 		}
 	}
 
-	public void exitAgentMode(ChatSessionDoc chatSessionDoc, OutboxMessage outboxMessage) {
+	public ChatMessageDTO exitAgentMode(ChatSessionDoc chatSessionDoc, OutboxMessage outboxMessage) {
+		MessageDoc messageDoc = null;
+
 		if (!chatSessionDoc.isResolved()) {
 			chatService.resolveSession(chatSessionDoc);
 		}
 
 		if (ArgUtil.is(outboxMessage)) {
-			chatService.reply(chatSessionDoc, outboxMessage);
+			messageDoc = chatService.reply(chatSessionDoc, outboxMessage);
 		}
 		chatService.closeSession(chatSessionDoc);
 		stompTunnelService.sendToAll("/dept/onassign-" + chatSessionDoc.getAssignedToDept(),
 				chatArchive.getChatSessionDto(chatSessionDoc, chatSessionDoc.getAssignedToAgent()));
+
+		return chatArchive.getMessage(messageDoc, chatSessionDoc);
 	}
 
 	public ChatSessionDTO updateChatSessionStatus(String sessionId, CHAT_STATUS status) {
@@ -207,7 +211,7 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 		return inboxMessage;
 	}
 
-	public OutboxMessage onSend(ChatSessionDoc sessionDoc, OutboxMessage outboxMessage) {
+	public ChatMessageDTO onSend(ChatSessionDoc sessionDoc, OutboxMessage outboxMessage) {
 		outboxMessage.session().setDept(agentSession.getAgentDept());
 		outboxMessage.session().setAgent(agentSession.getAgentCode());
 
@@ -216,24 +220,24 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 			outboxMessage.setAction(action);
 			switch (action) {
 			case "RESOLVE":
-				this.exitAgentMode(sessionDoc, outboxMessage);
-				break;
+				return this.exitAgentMode(sessionDoc, outboxMessage);
 			case "ADD_STICKY_NOTE":
-				this.addStickyNote(sessionDoc, outboxMessage);
-				break;
+				return this.addStickyNote(sessionDoc, outboxMessage);
 			default:
 				break;
 			}
 		} else {
 			sessionStore.updateResponseTime(sessionDoc);
-			chatService.reply(sessionDoc, outboxMessage);
+			MessageDoc messageDoc = chatService.reply(sessionDoc, outboxMessage);
+			return chatArchive.getMessage(messageDoc, sessionDoc);
 		}
-		return outboxMessage;
+		return new ChatMessageDTO();
 	}
 
-	public void addStickyNote(ChatSessionDoc chatSessionDoc, OutboxMessage outboxMessage) {
+	public ChatMessageDTO addStickyNote(ChatSessionDoc chatSessionDoc, OutboxMessage outboxMessage) {
 		MessageDoc messageDoc = chatService.note(chatSessionDoc, outboxMessage);
 		ChatMessageDTO messageDto = chatArchive.getMessage(messageDoc, chatSessionDoc);
 		stompTunnelService.sendToTag(chatSessionDoc.getAssignedToDept(), "/message/sent/new", messageDto);
+		return messageDto;
 	}
 }

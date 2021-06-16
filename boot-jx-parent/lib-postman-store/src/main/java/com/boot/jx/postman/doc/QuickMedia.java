@@ -12,8 +12,8 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import com.boot.jx.mongo.CommonDocInterfaces.OldDocVersion;
 
 @Document(collection = "DICT_TEMPLATES")
-@TypeAlias("TmplRply")
-public class TemplateReply implements Serializable, OldDocVersion<TemplateReply> {
+@TypeAlias("QuickMedia")
+public class QuickMedia implements Serializable, OldDocVersion<QuickMedia> {
 
 	private static final long serialVersionUID = 7942286016346691701L;
 
@@ -32,7 +32,7 @@ public class TemplateReply implements Serializable, OldDocVersion<TemplateReply>
 
 	private Map<String, Object> meta;
 
-	private List<TemplateReply> oldVersions;
+	private List<QuickMedia> oldVersions;
 
 	public String getName() {
 		return name;
@@ -98,12 +98,12 @@ public class TemplateReply implements Serializable, OldDocVersion<TemplateReply>
 	}
 
 	@Override
-	public void setOldVersions(List<TemplateReply> oldVersions) {
+	public void setOldVersions(List<QuickMedia> oldVersions) {
 		this.oldVersions = oldVersions;
 	}
 
 	@Override
-	public List<TemplateReply> getOldVersions() {
+	public List<QuickMedia> getOldVersions() {
 		return oldVersions;
 	}
 

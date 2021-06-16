@@ -2,8 +2,8 @@ package com.boot.jx.postman.model;
 
 import com.boot.jx.ProjectConfig;
 import com.boot.jx.dict.Project;
-import com.boot.jx.postman.model.PostManFile.PDFConverter;
 import com.boot.jx.postman.model.Notipy.ChannelType;
+import com.boot.jx.postman.model.PostManFile.PDFConverter;
 import com.boot.utils.ArgUtil;
 
 public class ITemplates {
