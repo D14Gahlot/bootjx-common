@@ -24,7 +24,7 @@ public class StompTunnelToAllSender implements ITunnelSubscriber<StompTunnelEven
 
 		if (!ArgUtil.isEmpty(messagingTemplate)) {
 			if (ArgUtil.is(msg.getTagId())) {
-				String[] tagIds = StringUtils.split(",");
+				String[] tagIds = StringUtils.split(msg.getTagId(), ",");
 				for (String tagId : tagIds) {
 					messagingTemplate.convertAndSend("/tag/" + (msg.getTenantToken() + "/" + tagId) + msg.getTopic(),
 							msg.getData());
