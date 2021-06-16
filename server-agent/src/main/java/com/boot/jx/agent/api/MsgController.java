@@ -120,7 +120,7 @@ public class MsgController {
 
 			// Evaluate if required
 			messageDto.setName(agentSession.getAgentCode());
-			messageDto.setType(outboxMessage.getType());
+			//messageDto.setType(outboxMessage.getType());
 			messageDto.setText(outboxMessage.getMessage());
 			messageDto.setMessageIdRef(outboxMessage.getMessageIdRef());
 
