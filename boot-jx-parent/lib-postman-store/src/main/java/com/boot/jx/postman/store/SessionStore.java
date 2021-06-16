@@ -25,6 +25,7 @@ import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.dto.ChatUserProfileDTO;
 import com.boot.jx.postman.model.IMessage.SessionMessage;
 import com.boot.jx.postman.model.InboxMessage;
+import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.store.PMStoreConstants.CHAT_MODE;
 import com.boot.jx.postman.store.PMStoreConstants.CHAT_STATUS;
 import com.boot.jx.utils.PostManUtil;

@@ -74,11 +74,11 @@ public class ChatClientConfig {
 	}
 
 	public String getContactDetailsUrl() {
-		return ArgUtil.parseAsString(environment.config().get("postman.contact.details.url"), contactDetailsUrl);
+		return environment.config().get("postman.contact.details.url").asString(contactDetailsUrl);
 	}
 
 	public String getChatIdleTimeout() {
-		return ArgUtil.parseAsString(environment.config().get("postman.chat.idle.timeout"), chatIdleTimeout);
+		return environment.config().get("postman.chat.idle.timeout").asString(chatIdleTimeout);
 	}
 
 	public String getInboundForwardUrl() {
@@ -94,7 +94,7 @@ public class ChatClientConfig {
 	}
 
 	public String getChatSessionTimeout() {
-		return ArgUtil.parseAsString(environment.config().get("postman.chat.session.timeout"), chatSessionTimeout);
+		return environment.config().get("postman.chat.session.timeout").asString(chatSessionTimeout);
 	}
 
 	public String getAgentSessionTimeout() {
