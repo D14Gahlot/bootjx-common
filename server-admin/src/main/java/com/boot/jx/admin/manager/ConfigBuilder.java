@@ -40,6 +40,9 @@ public class ConfigBuilder implements Serializable {
 		LIST.add(new ConfigBuilder("Chat Alert Timer", "postman.chat.idle.timeout")
 				.options(CollectionUtil.getList("5min", "10min", "15min", "20min", "25min", "30min")));
 
+		LIST.add(new ConfigBuilder("Agent can initiate new chat", "postman.agent.chat.init")
+				.options(CollectionUtil.getList(Boolean.TRUE, Boolean.FALSE)));
+
 	}
 
 	public String getTitle() {
