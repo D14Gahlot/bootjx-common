@@ -7,7 +7,6 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
@@ -19,6 +18,7 @@ import com.boot.jx.mongo.CommonDocStore;
 import com.boot.jx.mongo.CommonMongoQueryBuilder;
 import com.boot.jx.mongo.CommonMongoQueryBuilder.CommonMongoCriteria;
 import com.boot.jx.mongo.CommonMongoTemplate;
+import com.boot.jx.postman.PMClientConfig;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.ChatUserProfileDoc;
@@ -39,7 +39,6 @@ import com.mongodb.BulkWriteOperation;
 import com.mongodb.BulkWriteResult;
 import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
-import com.mongodb.WriteResult;
 
 @Component
 public class SessionStore extends CommonDocStore {
@@ -47,13 +46,13 @@ public class SessionStore extends CommonDocStore {
 	private static final Logger LOGGER = LoggerFactory.getLogger(SessionStore.class);
 
 	@Autowired
-	MongoTemplate mongoTemplate;
+	public MongoTemplate mongoTemplate;
 
 	@Autowired
-	CommonMongoTemplate commonMongoTemplate;
+	public CommonMongoTemplate commonMongoTemplate;
 
-	@Value("${postman.chat.session.timeout}")
-	String chatSessionTimeout;
+	@Autowired
+	public PMClientConfig pmClientConfig;
 
 	public ChatContactDoc getContact(SessionMessage inboxMessage) {
 		String contactId = PostManUtil.createContactId(inboxMessage);
@@ -74,13 +73,18 @@ public class SessionStore extends CommonDocStore {
 		return mongoTemplate.findById(sessionId, ChatSessionDoc.class);
 	}
 
+	public boolean isSessionValid(ChatSessionDoc chatSessionDoc) {
+		if ((ArgUtil.isEmpty(chatSessionDoc)
+				|| TimeUtils.isExpired(chatSessionDoc.getLastInComingStamp(), pmClientConfig.getChatSessionTimeout())
+				|| !chatSessionDoc.isActive())) {
+			return false;
+		}
+		return true;
+	}
+
 	public ChatSessionDoc getValidSession(String sessionId) {
 		ChatSessionDoc chatSessionDoc = mongoTemplate.findById(sessionId, ChatSessionDoc.class);
-		if ((ArgUtil.isEmpty(chatSessionDoc)
-				|| TimeUtils.isExpired(chatSessionDoc.getLastInComingStamp(), chatSessionTimeout)
-				|| !chatSessionDoc.isActive())) {
-			return null;
-		}
+		isSessionValid(chatSessionDoc);
 		return chatSessionDoc;
 	}
 
@@ -112,9 +116,7 @@ public class SessionStore extends CommonDocStore {
 			chatSessionDoc = getValidSession(sessionId);
 		}
 
-		if ((ArgUtil.isEmpty(chatSessionDoc)
-				|| TimeUtils.isExpired(chatSessionDoc.getLastInComingStamp(), chatSessionTimeout)
-				|| !chatSessionDoc.isActive())) {
+		if (isSessionValid(chatSessionDoc)) {
 
 			closeActiveSessionsMulty(contactId);
 
@@ -230,9 +232,10 @@ public class SessionStore extends CommonDocStore {
 
 	public void expireChatSession() {
 		Calendar cal = Calendar.getInstance();
-		int offsetOur = (int) ((cal.getTimeInMillis() / 3600) % (TimeUtils.toHours(chatSessionTimeout) / 2));
+		int offsetOur = (int) ((cal.getTimeInMillis() / 3600)
+				% (TimeUtils.toHours(pmClientConfig.getChatSessionTimeout()) / 2));
 		if (offsetOur == 0) {
-			cal.add(Calendar.HOUR, -1 * (int) TimeUtils.toHours(chatSessionTimeout));
+			cal.add(Calendar.HOUR, -1 * (int) TimeUtils.toHours(pmClientConfig.getChatSessionTimeout()));
 			CommonMongoQueryBuilder cmqb = new CommonMongoQueryBuilder()
 					.with(Criteria.where("active").is(true).and("lastInComingStamp").lt(cal.getTimeInMillis())
 							.andOperator(new Criteria().orOperator(Criteria.where("resolved").exists(false),
@@ -261,7 +264,7 @@ public class SessionStore extends CommonDocStore {
 		return mongoTemplate.find(query2, ChatSessionDoc.class);
 	}
 
-	public List<ChatSessionDoc> findChatSessionContactId(String contactId) {
+	public List<ChatSessionDoc> findSimilarChatSessionForContactId(String contactId) {
 		ChatContactDoc contact = getContact(contactId);
 
 		List<ChatContactDoc> contacts = null;
@@ -292,6 +295,12 @@ public class SessionStore extends CommonDocStore {
 		}
 		query2.addCriteria(new Criteria().orOperator(orExpression.toArray(new Criteria[orExpression.size()])));
 		// LOGGER.info(query2.toString());
+		return mongoTemplate.find(query2, ChatSessionDoc.class);
+	}
+
+	public List<ChatSessionDoc> findActiveChatSessionForContactId(String contactId) {
+		Query query2 = new Query();
+		query2.addCriteria(Criteria.where("contactId").is(contactId).and("active").is(true));
 		return mongoTemplate.find(query2, ChatSessionDoc.class);
 	}
 
@@ -450,10 +459,6 @@ public class SessionStore extends CommonDocStore {
 		builder.set("assignedToAgent", chatSessionDoc.getAssignedToAgent());
 		mongoTemplate.updateFirst(builder.getQuery(), builder.getUpdate(), ChatSessionDoc.class);
 
-	}
-
-	public String getChatSessionTimeout() {
-		return chatSessionTimeout;
 	}
 
 }

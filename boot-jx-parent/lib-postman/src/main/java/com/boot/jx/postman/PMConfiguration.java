@@ -3,9 +3,13 @@ package com.boot.jx.postman;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.List;
+import java.util.ArrayList;
 
 import com.boot.jx.agent.AgentConfig;
 import com.boot.jx.postman.PMEnvironment.PMConfigurationObject;
+import com.boot.jx.postman.PMEnvironment.PMConnectorConfig;
 import com.boot.jx.postman.fb.FacebookConfig;
 import com.boot.jx.postman.gupshup.GupShupConfig;
 import com.boot.jx.postman.tg.TelegramConfig;
@@ -170,6 +174,34 @@ public class PMConfiguration implements Serializable {
 	public PMConfiguration set(PMConfigurationObject map) {
 		this.map().put(map.getKey(), map);
 		return this;
+	}
+
+	public List<PMConnectorConfig> connectors() {
+		List<PMConnectorConfig> list = new ArrayList<PMConnectorConfig>();
+		if (this.facebook != null) {
+			for (Entry<String, FacebookConfig> configEntry : this.facebook.entrySet()) {
+				list.add(configEntry.getValue());
+			}
+		}
+		if (this.gupshup != null) {
+			for (Entry<String, GupShupConfig> configEntry : this.gupshup.entrySet()) {
+				list.add(configEntry.getValue());
+			}
+		}
+
+		if (this.twitter != null) {
+			for (Entry<String, TwitterConfig> configEntry : this.twitter.entrySet()) {
+				list.add(configEntry.getValue());
+			}
+		}
+
+		if (this.telegram != null) {
+			for (Entry<String, TelegramConfig> configEntry : this.telegram.entrySet()) {
+				list.add(configEntry.getValue());
+			}
+		}
+
+		return list;
 	}
 
 }

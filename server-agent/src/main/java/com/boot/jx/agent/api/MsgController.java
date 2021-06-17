@@ -120,7 +120,7 @@ public class MsgController {
 
 			// Evaluate if required
 			messageDto.setName(agentSession.getAgentCode());
-			//messageDto.setType(outboxMessage.getType());
+			// messageDto.setType(outboxMessage.getType());
 			messageDto.setText(outboxMessage.getMessage());
 			messageDto.setMessageIdRef(outboxMessage.getMessageIdRef());
 
@@ -163,13 +163,29 @@ public class MsgController {
 
 		List<ChatSessionDTO> chatSessionDtos = new ArrayList<ChatSessionDTO>();
 
-		List<ChatSessionDoc> sessions = sessionStore.findChatSessionContactId(contactId);
+		List<ChatSessionDoc> sessions = sessionStore.findSimilarChatSessionForContactId(contactId);
 		for (ChatSessionDoc chatSessionDoc : sessions) {
 			ChatSessionDTO chatSessionDto = chatArchive.withContact(chatSessionDoc);
 			chatSessionDtos.add(chatSessionDto);
 		}
 		return ApiResponse.buildResults(chatSessionDtos,
 				MapBuilder.map().put("isOnline", agentSession.isOnline()).build());
+	}
+
+	@ResponseBody
+	@RequestMapping(value = "/api/sessions/contact/active", method = { RequestMethod.GET })
+	public ApiResponse<ChatSessionDTO, Object> getActiveSessionsForContact(@RequestParam String contactId) {
+
+		List<ChatSessionDTO> chatSessionDtos = new ArrayList<ChatSessionDTO>();
+
+		List<ChatSessionDoc> sessions = sessionStore.findSimilarChatSessionForContactId(contactId);
+		for (ChatSessionDoc chatSessionDoc : sessions) {
+			if (sessionStore.isSessionValid(chatSessionDoc)) {
+				ChatSessionDTO chatSessionDto = chatArchive.withContact(chatSessionDoc);
+				chatSessionDtos.add(chatSessionDto);
+			}
+		}
+		return ApiResponse.buildResults(chatSessionDtos);
 	}
 
 	@ResponseBody

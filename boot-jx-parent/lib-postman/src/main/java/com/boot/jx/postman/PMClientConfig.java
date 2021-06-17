@@ -1,24 +1,22 @@
-package com.boot.jx.chat;
+package com.boot.jx.postman;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Component;
 
-import com.boot.jx.postman.PMEnvironment;
-import com.boot.jx.rest.RestService;
 import com.boot.utils.ArgUtil;
 
 @Component
 @PropertySource("classpath:application-postman.properties")
-public class ChatClientConfig {
-
-	private static final Logger LOGGER = LoggerFactory.getLogger(ChatClientConfig.class);
+public class PMClientConfig {
 
 	public static class PATH {
 		public static final String ASSIGN_TO_AGENT = "/int/assign/agent";
+	}
+
+	public static class PROPERTIES {
+		private static final String POSTMAN_CHAT_SESSION_TIMEOUT = "postman.chat.session.timeout";
 	}
 
 	@Value("${postman.app.type}")
@@ -42,7 +40,7 @@ public class ChatClientConfig {
 	@Value("${postman.chat.idle.timeout}")
 	private String chatIdleTimeout;
 
-	@Value("${postman.chat.session.timeout}")
+	@Value("${" + PROPERTIES.POSTMAN_CHAT_SESSION_TIMEOUT + "}")
 	private String chatSessionTimeout;
 
 	@Value("${postman.agent.session.timeout}")
@@ -50,9 +48,6 @@ public class ChatClientConfig {
 
 	@Value("${postman.default.sender}")
 	private String defaultSender;
-
-	@Autowired
-	private RestService restService;
 
 	@Autowired
 	private PMEnvironment environment;
@@ -94,7 +89,7 @@ public class ChatClientConfig {
 	}
 
 	public String getChatSessionTimeout() {
-		return environment.config().get("postman.chat.session.timeout").asString(chatSessionTimeout);
+		return environment.config().get(PROPERTIES.POSTMAN_CHAT_SESSION_TIMEOUT).asString(chatSessionTimeout);
 	}
 
 	public String getAgentSessionTimeout() {

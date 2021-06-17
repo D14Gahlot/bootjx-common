@@ -12,7 +12,6 @@ import org.springframework.stereotype.Component;
 
 import com.boot.jx.chat.ChatArchive;
 import com.boot.jx.chat.ChatClient;
-import com.boot.jx.chat.ChatClientConfig;
 import com.boot.jx.chat.ChatCommands;
 import com.boot.jx.chat.ChatDTOUtil;
 import com.boot.jx.chat.ChatService;
@@ -21,6 +20,7 @@ import com.boot.jx.common.doc.AgentSessionDoc;
 import com.boot.jx.common.store.AgentStore;
 import com.boot.jx.common.store.DocumentUpdateListner;
 import com.boot.jx.mongo.CommonMongoQueryBuilder;
+import com.boot.jx.postman.PMClientConfig;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.MessageDoc;
@@ -47,7 +47,7 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 	private ChatClient chatClient;
 
 	@Autowired
-	private ChatClientConfig chatClientConfig;
+	private PMClientConfig chatClientConfig;
 
 	@Autowired
 	private ChatService chatService;

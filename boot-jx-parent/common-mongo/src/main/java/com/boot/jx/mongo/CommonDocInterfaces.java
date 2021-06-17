@@ -75,11 +75,10 @@ public class CommonDocInterfaces {
 	public static interface IDocument {
 	}
 
-	public static abstract class ADocumentDTO<T extends ADocumentDTO<T>> implements IDocument, Serializable {
-		private static final long serialVersionUID = 5315474201666739759L;
+	public interface ADocumentDTO<T extends ADocumentDTO<T>> extends IDocument, Serializable {
 
 		@SuppressWarnings("unchecked")
-		public T importFrom(IDocument entity) {
+		default public T importFrom(IDocument entity) {
 
 			if (ArgUtil.is(entity)) {
 				EntityDtoUtil.entityToDto(entity, this);
@@ -88,7 +87,7 @@ public class CommonDocInterfaces {
 			return (T) this;
 		}
 
-		public List<T> importFrom(List<? extends IDocument> entityList) {
+		default public List<T> importFrom(List<? extends IDocument> entityList) {
 			List<T> list = new ArrayList<T>();
 			for (IDocument entity : entityList) {
 				T dto = this.newInstance().importFrom(entity);
@@ -97,7 +96,7 @@ public class CommonDocInterfaces {
 			return list;
 		}
 
-		protected abstract ADocumentDTO<T> newInstance();
+		ADocumentDTO<T> newInstance();
 	}
 
 }

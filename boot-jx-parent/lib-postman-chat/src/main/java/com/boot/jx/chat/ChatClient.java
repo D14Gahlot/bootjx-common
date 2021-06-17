@@ -7,6 +7,7 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Component;
 
 import com.boot.jx.api.ApiResponse;
+import com.boot.jx.postman.PMClientConfig;
 import com.boot.jx.postman.PostManException;
 import com.boot.jx.postman.dto.ChatUserProfileDTO;
 import com.boot.jx.postman.dto.ChatUserProfileDTO.ChatUserProfileRequest;
@@ -28,7 +29,7 @@ public class ChatClient {
 	private RestService restService;
 
 	@Autowired
-	private ChatClientConfig chatClientConfig;
+	private PMClientConfig chatClientConfig;
 
 	public ApiResponse<InboxMessage, Object> forward(InboxMessage inboxMessage) {
 		LOGGER.debug("Forwarding InboxMessage to other Service ");

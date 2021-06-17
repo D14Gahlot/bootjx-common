@@ -12,8 +12,8 @@ import com.boot.jx.api.ApiResponse;
 import com.boot.jx.bot.BotEngine;
 import com.boot.jx.bot.ChatMapping;
 import com.boot.jx.chat.ChatClient;
-import com.boot.jx.chat.ChatClientConfig;
 import com.boot.jx.chat.ChatService;
+import com.boot.jx.postman.PMClientConfig;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.store.MessageStore;
@@ -38,7 +38,7 @@ public class InBoundService {
 	private ChatClient chatClient;
 
 	@Autowired
-	private ChatClientConfig chatClientConfig;
+	private PMClientConfig chatClientConfig;
 
 	@Autowired
 	private ChatService chatService;

@@ -1,6 +1,7 @@
 package com.boot.jx.agent.api;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -16,13 +17,19 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.boot.jx.agent.AgentSessionService;
 import com.boot.jx.agent.dto.AgentResponseAgentDto;
 import com.boot.jx.api.ApiResponse;
+import com.boot.jx.chat.ChatDTOUtil;
 import com.boot.jx.common.doc.AgentSessionDoc;
 import com.boot.jx.common.store.AgentStore;
+import com.boot.jx.postman.PMEnvironment;
+import com.boot.jx.postman.PMEnvironment.PMConnectorConfig;
+import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.QuickAction;
 import com.boot.jx.postman.doc.QuickLabel;
-import com.boot.jx.postman.doc.QuickReply;
 import com.boot.jx.postman.doc.QuickMedia;
+import com.boot.jx.postman.doc.QuickReply;
+import com.boot.jx.postman.dto.ContactDTO;
 import com.boot.utils.ArgUtil;
+import com.fasterxml.jackson.annotation.JsonView;
 
 @Controller
 public class AgentMetaController {
@@ -39,10 +46,41 @@ public class AgentMetaController {
 	@Autowired
 	private AgentSessionService agentSessionService;
 
+	@Autowired
+	private PMEnvironment pmEnvironment;
+
 	@ResponseBody
 	@RequestMapping(value = { "/api/options/agents" }, method = { RequestMethod.GET })
 	public ApiResponse<AgentResponseAgentDto, Object> listAgents() {
 		return ApiResponse.buildResults(new AgentResponseAgentDto().importFrom(agentStore.findAllActive()));
+	}
+
+	@ResponseBody
+	@RequestMapping(value = { "/api/options/contacts" }, method = { RequestMethod.GET })
+	public ApiResponse<ContactDTO, Object> searchContacts(@RequestParam String search, @RequestParam String lane) {
+		// TODO:-- Optimize Search
+		// Query query =
+		// TextQuery.queryText(TextCriteria.forDefaultLanguage().matching(search)).sortByScore()
+		Query query = new Query()
+				// New Criteria
+				.addCriteria(
+						// Lane should be fixed
+						Criteria.where("lane").is(lane).orOperator(
+								// Check all fields
+								Criteria.where("name").regex("" + search + "", "i"),
+								Criteria.where("phone").regex("" + search + "", "i"),
+								Criteria.where("email").regex("" + search + "", "i")));
+
+		List<ContactDTO> asDto = mongoTemplate.find(query, ChatContactDoc.class).stream()
+				.map(chatContactDoc -> ChatDTOUtil.getContactDTO(chatContactDoc)).collect(Collectors.toList());
+		return ApiResponse.buildResults(asDto);
+	}
+
+	@JsonView(PMConnectorConfig.Public.class)
+	@ResponseBody
+	@RequestMapping(value = { "/api/options/lanes" }, method = { RequestMethod.GET })
+	public ApiResponse<PMConnectorConfig, Object> listActiveLanes() {
+		return ApiResponse.buildResults(pmEnvironment.config().connectors());
 	}
 
 	@ResponseBody

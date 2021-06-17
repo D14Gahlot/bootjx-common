@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.TypeAlias;
+import org.springframework.data.mongodb.core.index.TextIndexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import com.boot.jx.postman.dto.ChatUserProfileDTO;
@@ -35,9 +36,15 @@ public class ChatContactDoc implements Serializable {
 
 	private String sessionId;
 
+	@TextIndexed(weight = 10)
 	private String name;
+
+	@TextIndexed(weight = 1)
 	private String email;
+
+	@TextIndexed(weight = 5)
 	private String phone;
+
 	private String profilePic;
 	private List<String> labelId;
 	private ChatUserProfileDTO profile;

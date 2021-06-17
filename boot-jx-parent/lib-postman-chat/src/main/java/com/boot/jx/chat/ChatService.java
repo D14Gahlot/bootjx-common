@@ -14,6 +14,7 @@ import com.boot.jx.chat.ConnectorHandlerFactory.DefaultConnector;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.logger.AuditDetailProvider;
 import com.boot.jx.logger.LoggerService;
+import com.boot.jx.postman.PMClientConfig;
 import com.boot.jx.postman.PostManException;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatContextDoc;
@@ -51,7 +52,7 @@ public class ChatService {
 	private ChatClient chatClient;
 
 	@Autowired
-	private ChatClientConfig chatClientConfig;
+	private PMClientConfig chatClientConfig;
 
 	@Autowired
 	private MessageStore messageStore;
@@ -80,7 +81,7 @@ public class ChatService {
 		return chatClient;
 	}
 
-	public ChatClientConfig getClientConfig() {
+	public PMClientConfig getClientConfig() {
 		return chatClientConfig;
 	}
 

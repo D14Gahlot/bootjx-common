@@ -7,10 +7,10 @@ import org.springframework.stereotype.Component;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.bot.ChatContext;
 import com.boot.jx.chat.ChatClient;
-import com.boot.jx.chat.ChatClientConfig;
 import com.boot.jx.chat.ConnectorHandlerFactory;
 import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorHandler;
 import com.boot.jx.chat.ConnectorHandlerFactory.DefaultConnector;
+import com.boot.jx.postman.PMClientConfig;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.dto.ChatMessageDTO;
 import com.boot.jx.postman.model.InboxMessage;
@@ -27,7 +27,7 @@ public class AgentService {
 	private ChatClient chatClient;
 
 	@Autowired
-	private ChatClientConfig chatClientConfig;
+	private PMClientConfig chatClientConfig;
 
 	@Autowired
 	private ConnectorHandlerFactory connectorHandlerFactory;

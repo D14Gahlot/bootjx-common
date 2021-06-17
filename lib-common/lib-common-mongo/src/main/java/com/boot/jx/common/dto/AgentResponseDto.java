@@ -7,7 +7,7 @@ import com.boot.utils.ArgUtil;
 import com.boot.utils.StringUtils;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class AgentResponseDto<T extends AgentResponseDto<T>> extends ADocumentDTO<T> {
+public class AgentResponseDto<T extends AgentResponseDto<T>> implements ADocumentDTO<T> {
 
 	private static final long serialVersionUID = -5273371227763139845L;
 	@JsonProperty("id")
@@ -106,7 +106,7 @@ public class AgentResponseDto<T extends AgentResponseDto<T>> extends ADocumentDT
 	}
 
 	@Override
-	protected AgentResponseDto<T> newInstance() {
+	public AgentResponseDto<T> newInstance() {
 		return new AgentResponseDto<T>();
 	}
 

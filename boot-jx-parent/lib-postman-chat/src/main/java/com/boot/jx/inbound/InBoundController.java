@@ -17,9 +17,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.chat.ChatClient;
-import com.boot.jx.chat.ChatClientConfig;
 import com.boot.jx.chat.ChatStatusReportService;
 import com.boot.jx.connectors.FacebookConnector;
+import com.boot.jx.postman.PMClientConfig;
 import com.boot.jx.postman.fb.FacebooClient;
 import com.boot.jx.postman.fb.FacebookHookRequest;
 import com.boot.jx.postman.model.InboxMessage;
@@ -39,7 +39,7 @@ public class InBoundController {
 	private InBoundService inBoundService;
 
 	@Autowired
-	private ChatClientConfig chatClientConfig;
+	private PMClientConfig chatClientConfig;
 
 	@ApiVendorHeaders
 	@RequestMapping(value = "/int/webhook/callback", method = RequestMethod.POST)

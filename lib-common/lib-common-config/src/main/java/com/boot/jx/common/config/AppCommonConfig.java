@@ -7,7 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.boot.jx.chat.ChatClientConfig;
+import com.boot.jx.postman.PMClientConfig;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.utils.TimeUtils;
 
@@ -18,7 +18,7 @@ public class AppCommonConfig {
 	private PMEnvironment pmEnvironment;
 
 	@Autowired
-	private ChatClientConfig chatClientConfig;
+	private PMClientConfig chatClientConfig;
 
 	@Value("${mry.cdn.url}")
 	private String cdnServer;
