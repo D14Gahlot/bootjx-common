@@ -69,14 +69,16 @@ public class ChatParserAndImportor {
 	public ApiResponse<ImportChatSessionDoc, Object> trashChat(ImportChatSessionDoc doc) {
 		ImportChatSessionDoc docs = commpnMongoTemplate.findByIdString(doc.getId(), ImportChatSessionDoc.class);
 
-		for (String sessionId : docs.getSessions()) {
-			ChatSessionDoc session = new ChatSessionDoc();
-			session.setSessionId(sessionId);
-			session.setContactType(ArgUtil.parseAsString(docs.getContactType()));
-			sessionStore.deleteSession(session);
+		if(ArgUtil.is(docs)){
+			for (String sessionId : docs.getSessions()) {
+				ChatSessionDoc session = new ChatSessionDoc();
+				session.setSessionId(sessionId);
+				session.setContactType(ArgUtil.parseAsString(docs.getContactType()));
+				sessionStore.deleteSession(session);
+			}
+			docs.setStatus("DELETED");
+			commpnMongoTemplate.save(docs);
 		}
-		docs.setStatus("DELETED");
-		commpnMongoTemplate.save(docs);
 		return ApiResponse.buildResults(commpnMongoTemplate.findAll(ImportChatSessionDoc.class));
 	}
 
