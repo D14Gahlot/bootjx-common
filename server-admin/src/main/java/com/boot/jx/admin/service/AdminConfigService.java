@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import com.boot.jx.AppContextUtil;
 import com.boot.jx.admin.manager.ConfigBuilder;
+import com.boot.jx.postman.PMClientConfig;
 import com.boot.jx.postman.PMEnvironment.PMConfigurationObject;
 import com.boot.jx.postman.doc.ConnectorConfigDoc;
 import com.boot.jx.tunnel.sys.SharedConfigManager;
@@ -25,6 +26,9 @@ public class AdminConfigService {
 	@Autowired
 	private SharedConfigManager sharedConfigManager;
 
+	@Autowired
+	private PMClientConfig pmClientConfig;
+
 	public List<Map<String, Object>> getAdminConfigs() {
 		List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
 		ConnectorConfigDoc doc = mongoTemplate.findById(AppContextUtil.getTenant(), ConnectorConfigDoc.class);
@@ -35,7 +39,7 @@ public class AdminConfigService {
 			case "postman.default.sender":
 				list.add(MapBuilder.map().put("meta", meta)
 						.put("config",
-								new PMConfigurationObject("postman.default.sender", doc.agent().getDefaultBotName()))
+								new PMConfigurationObject("postman.default.sender", pmClientConfig.getDefaultSender()))
 						.toMap());
 				break;
 			default:
