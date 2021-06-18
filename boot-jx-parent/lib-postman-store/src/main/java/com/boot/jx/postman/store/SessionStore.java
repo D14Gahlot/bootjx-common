@@ -116,7 +116,7 @@ public class SessionStore extends CommonDocStore {
 			chatSessionDoc = getValidSession(sessionId);
 		}
 
-		if (isSessionValid(chatSessionDoc)) {
+		if (!isSessionValid(chatSessionDoc)) {
 
 			closeActiveSessionsMulty(contactId);
 
