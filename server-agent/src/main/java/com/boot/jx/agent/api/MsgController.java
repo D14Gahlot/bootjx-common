@@ -175,10 +175,8 @@ public class MsgController {
 	@ResponseBody
 	@RequestMapping(value = "/api/sessions/contact/active", method = { RequestMethod.GET })
 	public ApiResponse<ChatSessionDTO, Object> getActiveSessionsForContact(@RequestParam String contactId) {
-
 		List<ChatSessionDTO> chatSessionDtos = new ArrayList<ChatSessionDTO>();
-
-		List<ChatSessionDoc> sessions = sessionStore.findSimilarChatSessionForContactId(contactId);
+		List<ChatSessionDoc> sessions = sessionStore.findActiveChatSessionForContactId(contactId);
 		for (ChatSessionDoc chatSessionDoc : sessions) {
 			if (sessionStore.isSessionValid(chatSessionDoc)) {
 				ChatSessionDTO chatSessionDto = chatArchive.withContact(chatSessionDoc);
