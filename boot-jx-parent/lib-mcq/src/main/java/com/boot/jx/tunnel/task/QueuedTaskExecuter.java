@@ -69,8 +69,8 @@ public abstract class QueuedTaskExecuter {
 	private TunnelQueue<BatchJob> batch;
 
 	public TunnelQueue<Tasklet> queue() {
-		if (queue == null) {
-			this.queue = tunnelService.getQueue("QTE-TASK-Q-" + getJobName());
+		if (queue == null || true) {
+			this.queue = tunnelService.getQueue("QTE-TASK-Q2-" + getJobName());
 		}
 		return this.queue;
 	}
@@ -83,8 +83,8 @@ public abstract class QueuedTaskExecuter {
 	}
 
 	public TunnelQueue<BatchJob> batch() {
-		if (batch == null) {
-			this.batch = tunnelService.getQueue("QTE-BATCH-Q-" + getJobName());
+		if (batch == null || true) {
+			this.batch = tunnelService.getQueue("QTE-BATCH-Q2-" + getJobName());
 		}
 		return this.batch;
 	}

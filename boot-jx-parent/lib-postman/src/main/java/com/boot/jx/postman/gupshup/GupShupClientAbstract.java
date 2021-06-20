@@ -182,6 +182,13 @@ public abstract class GupShupClientAbstract {
 		return resp.getResponse().getId();
 	}
 
+	public GupShupResp optIn(OutboxMessage outboxMessage) {
+		GupShupReq gupShupReq = new GupShupReq(GupShupConstants.Method.OPT_IN).phoneNumber(outboxMessage.getCsid());
+		gupShupReq.setChannel("WHATSAPP");
+		gupShupReq.setWaNumber(outboxMessage.contact().getLane());
+		return post(gupShupReq);
+	}
+
 	public GupShupResp sendDocumentURL(GupShupReq gupShupReq) {
 		return post(gupShupReq);
 	}

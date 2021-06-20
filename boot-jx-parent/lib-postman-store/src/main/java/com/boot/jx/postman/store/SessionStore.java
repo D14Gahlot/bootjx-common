@@ -28,6 +28,7 @@ import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.MessageDefinitions.Contactable;
 import com.boot.jx.postman.model.MessageDefinitions.IMessage;
 import com.boot.jx.postman.model.MessageDefinitions.SessionMessage;
+import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.query.ChatContactQuery;
 import com.boot.jx.postman.query.ChatSessionQuery;
 import com.boot.jx.postman.store.PMStoreConstants.CHAT_MODE;
@@ -91,7 +92,7 @@ public class SessionStore extends CommonDocStore {
 				chatContactDoc = new ChatContactDoc();
 				chatContactDoc.setContactId(chatContactDocQuery.getContactId());
 				chatContactDoc.setContactType(chatContactDocQuery.getContactType());
-				chatContactDoc.setChannelType(chatContactDocQuery.getChannelType());
+				chatContactDoc.setChannel(chatContactDocQuery.getChannel());
 				chatContactDoc.setCsid(chatContactDocQuery.getCsid());
 				chatContactDoc.setLane(chatContactDocQuery.getLane());
 				mongoTemplate.save(chatContactDoc);
@@ -222,6 +223,17 @@ public class SessionStore extends CommonDocStore {
 		inboxMessage.session().setDept(chatSessionDoc.getAssignedToDept());
 		inboxMessage.session().setMode(chatSessionDoc.getMode());
 		inboxMessage.session().setResolved(chatSessionDoc.isResolved());
+		return chatSessionDoc;
+	}
+
+	public ChatSessionDoc linkSession(OutboxMessage outboxMessage) {
+		ChatSessionDoc chatSessionDoc = this.createSession(outboxMessage);
+		outboxMessage.contact().setContactId(chatSessionDoc.getContactId());
+		outboxMessage.setSessionId(chatSessionDoc.getSessionId());
+		outboxMessage.session().setAgent(chatSessionDoc.getAssignedToAgent());
+		outboxMessage.session().setDept(chatSessionDoc.getAssignedToDept());
+		outboxMessage.session().setMode(chatSessionDoc.getMode());
+		outboxMessage.session().setResolved(chatSessionDoc.isResolved());
 		return chatSessionDoc;
 	}
 

@@ -7,6 +7,7 @@ import java.util.List;
 import com.boot.jx.dict.ContactType;
 import com.boot.utils.ArgUtil;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 public class MessageDefinitions {
 
@@ -22,6 +23,7 @@ public class MessageDefinitions {
 		public static final String GUPSHUPW = "GUPSHUPW";
 	}
 
+	@JsonDeserialize(as = ContactInfo.class)
 	@JsonIgnoreProperties(ignoreUnknown = true)
 	public interface Contactable extends Serializable {
 		public String getContactType();
@@ -49,7 +51,7 @@ public class MessageDefinitions {
 		public void setLane(String lane);
 
 		public default ContactType type() {
-			return ArgUtil.parseAsEnumT(getContactId(), ContactType.class);
+			return ArgUtil.parseAsEnumT(getContactType(), ContactType.class);
 		}
 
 		public default void type(ContactType contactType) {

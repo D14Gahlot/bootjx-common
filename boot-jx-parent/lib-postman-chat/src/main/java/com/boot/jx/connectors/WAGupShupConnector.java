@@ -101,7 +101,7 @@ public class WAGupShupConnector implements ConnectorHandler {
 		outboxMessage.contact().setLane(chatContactDoc.getLane());
 		if (TimeUtils.isExpired(chatContactDoc.getLastInBoundStamp(), "24hr")) {
 			if (ArgUtil.isEmptyValue(chatContactDoc.getLastOptInStamp())) {
-				gupShupNotifyClient.optIn(outboxMessage.contact().getCsid());
+				gupShupNotifyClient.optIn(outboxMessage);
 				commonMongoTemplate.updateFirst(
 						new ChatContactQuery(chatContactDoc).setLastOptInStamp(System.currentTimeMillis()));
 			}

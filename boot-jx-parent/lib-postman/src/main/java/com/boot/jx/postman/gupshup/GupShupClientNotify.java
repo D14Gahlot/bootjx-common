@@ -3,6 +3,7 @@ package com.boot.jx.postman.gupshup;
 import org.springframework.stereotype.Component;
 
 import com.boot.jx.postman.gupshup.GupShupConstants.SessionType;
+import com.boot.jx.postman.model.OutboxMessage;
 
 @Component
 public class GupShupClientNotify extends GupShupClientAbstract {

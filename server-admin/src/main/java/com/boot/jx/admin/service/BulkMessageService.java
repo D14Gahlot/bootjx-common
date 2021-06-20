@@ -75,6 +75,8 @@ public class BulkMessageService extends QueuedTaskExecuter {
 				.jobId(session.getBulkSessionId())
 				// Contact Type for each message
 				.data("contactType", session.getContactType())
+				// Channel for each message
+				.data("channel", bulkMessage.contact().getChannel())
 				// Lane for each message
 				.data("lane", session.getLane()));
 
@@ -129,6 +131,7 @@ public class BulkMessageService extends QueuedTaskExecuter {
 
 		ChatContactDoc chatContactDoc = new ChatContactDoc();
 		chatContactDoc.setContactType(ArgUtil.parseAsString(contactType));
+		chatContactDoc.setChannel(channel);
 		chatContactDoc.setLane(lane);
 		if (ArgUtil.is(msg.getContact())) {
 			chatContactDoc.setEmail(msg.getContact().getEmail());

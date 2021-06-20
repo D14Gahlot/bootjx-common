@@ -31,7 +31,6 @@ public class GupShupClientChat extends GupShupClientAbstract implements MessageC
 				gupShupReq.setMessageType(GupShupConstants.MessageType.TEXT);
 			}
 		}
-
 		gupShupReq.method(GupShupConstants.Method.SendMessage);
 		return post(gupShupReq);
 	}
