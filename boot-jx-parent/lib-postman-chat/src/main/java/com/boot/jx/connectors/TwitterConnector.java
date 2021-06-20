@@ -93,10 +93,10 @@ public class TwitterConnector implements ConnectorHandler {
 		ibm.setMessage(dm.getText());
 		ibm.setFrom(String.valueOf(dm.getSenderId()));
 		ibm.to().add(String.valueOf(dm.getRecipientId()));
-		ibm.setChannel(Channel.DEFAULT.toString());
-		ibm.setContactType(ContactType.TWITTER);
-		ibm.setLane(lane);
-		ibm.setCsid(String.valueOf(dm.getSenderId()));
+		ibm.contact().setChannel(Channel.DEFAULT.toString());
+		ibm.contact().setContactType(ContactType.TWITTER.toString());
+		ibm.contact().setLane(lane);
+		ibm.contact().setCsid(String.valueOf(dm.getSenderId()));
 
 		/**
 		 * NOTE:- Do not user original DirectMessageJsonImpl as it can throw

@@ -125,7 +125,7 @@ public class ChatArchive {
 		chatSessionDto = withContact(chatSessionDto);
 
 		chatSessionDto.setAssigned(ArgUtil.areEqual(chatSessionDoc.getAssignedToAgent(), agentCode)
-				&& ArgUtil.isNone(chatSessionDoc.getResolveSessionStamp()));
+				&& ArgUtil.isEmptyValue(chatSessionDoc.getResolveSessionStamp()));
 		chatSessionDto = withMessages(chatSessionDto);
 		return chatSessionDto;
 	}

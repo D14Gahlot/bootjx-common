@@ -5,6 +5,7 @@ import java.math.BigDecimal;
 import java.util.List;
 
 import com.boot.jx.dict.ContactType;
+import com.boot.utils.ArgUtil;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 public class MessageDefinitions {
@@ -17,17 +18,50 @@ public class MessageDefinitions {
 		public static final String OUTBOUND_IMPORTED = "Oi";
 	}
 
-	// External attributes
-	@JsonIgnoreProperties(ignoreUnknown = true)
-	public interface IMessageExternal extends Serializable {
-		// External attributes
-		public String getChannel();
+	public static class MESSAGE_CHANNLES {
+		public static final String GUPSHUPW = "GUPSHUPW";
+	}
 
-		public ContactType getContactType();
+	@JsonIgnoreProperties(ignoreUnknown = true)
+	public interface Contactable extends Serializable {
+		public String getContactType();
+
+		public String getChannel();
 
 		public String getLane();
 
 		public String getCsid();
+
+		public String getEmail();
+
+		public String getPhone();
+
+		public String getContactId();
+
+		public void setCsid(String createCsid);
+
+		public void setContactId(String contactId);
+
+		public void setContactType(String contactType);
+
+		public void setChannel(String channel);
+
+		public void setLane(String lane);
+
+		public default ContactType type() {
+			return ArgUtil.parseAsEnumT(getContactId(), ContactType.class);
+		}
+
+		public default void type(ContactType contactType) {
+			this.setContactType(ArgUtil.parseAsString(contactType));
+		}
+
+	}
+
+	// External attributes
+	@JsonIgnoreProperties(ignoreUnknown = true)
+	public interface IMessageExternal extends Serializable {
+		// External attributes
 	}
 
 	// External attributes
@@ -38,9 +72,6 @@ public class MessageDefinitions {
 
 		public void setSessionId(String sessionId);
 
-		public String getContactId();
-
-		public void setContactId(String contactId);
 	}
 
 	@JsonIgnoreProperties(ignoreUnknown = true)
@@ -51,6 +82,8 @@ public class MessageDefinitions {
 		public String forContact();
 
 		public MessageSession session();
+
+		public Contactable contact();
 
 		public String getType();
 

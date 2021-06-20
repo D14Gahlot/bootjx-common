@@ -43,9 +43,9 @@ public class WAGupShupAgentConnector implements ConnectorHandler {
 
 	@Override
 	public void send(ChatContactDoc chatContactDoc, OutboxMessage outboxMessage) {
-		outboxMessage.setChannel(chatContactDoc.getChannelType());
-		outboxMessage.setLane(chatContactDoc.getLane());
-		if (ArgUtil.isEqual(outboxMessage.getChannel(), Channel.GUPSHUPAGENT.toString())) {
+		outboxMessage.contact().setChannel(chatContactDoc.getChannelType());
+		outboxMessage.contact().setLane(chatContactDoc.getLane());
+		if (ArgUtil.isEqual(outboxMessage.contact().getChannel(), Channel.GUPSHUPAGENT.toString())) {
 			if (outboxMessage.isViaAgent() && ArgUtil.isEmpty(outboxMessage.getFiles())) {
 				gupShupChatClient.sendMessage(chatContactDoc.getCsid(), outboxMessage.getMessage());
 			} else if (outboxMessage.isTemplateMsg() || outboxMessage.isQRButtons()) {
@@ -53,7 +53,7 @@ public class WAGupShupAgentConnector implements ConnectorHandler {
 			} else {
 				gupShupChatClient.send(outboxMessage);
 			}
-		} else if (ArgUtil.isEqual(outboxMessage.getChannel(), Channel.DEFAULT.toString())) {
+		} else if (ArgUtil.isEqual(outboxMessage.contact().getChannel(), Channel.DEFAULT.toString())) {
 			MessageBox mb = new MessageBox();
 			mb.push(outboxMessage);
 			postManClient.send(mb);
@@ -62,9 +62,9 @@ public class WAGupShupAgentConnector implements ConnectorHandler {
 
 	@Override
 	public void reply(SessionMessage inboxMessage, OutboxMessage outboxMessage) {
-		outboxMessage.setChannel(inboxMessage.getChannel());
-		outboxMessage.setLane(inboxMessage.getLane());
-		if (ArgUtil.isEqual(inboxMessage.getChannel(), Channel.GUPSHUPAGENT.toString())) {
+		outboxMessage.contact().setChannel(inboxMessage.contact().getChannel());
+		outboxMessage.contact().setLane(inboxMessage.contact().getLane());
+		if (ArgUtil.isEqual(inboxMessage.contact().getChannel(), Channel.GUPSHUPAGENT.toString())) {
 			if (outboxMessage.isViaAgent() && ArgUtil.isEmpty(outboxMessage.getFiles())) {
 				gupShupAgentClient.sendViaAgent(inboxMessage, outboxMessage.getMessage());
 			} else if (outboxMessage.isTemplateMsg() || outboxMessage.isQRButtons()) {
@@ -73,7 +73,7 @@ public class WAGupShupAgentConnector implements ConnectorHandler {
 			} else {
 				gupShupChatClient.send(outboxMessage);
 			}
-		} else if (ArgUtil.isEqual(inboxMessage.getChannel(), Channel.DEFAULT.toString())) {
+		} else if (ArgUtil.isEqual(inboxMessage.contact().getChannel(), Channel.DEFAULT.toString())) {
 			Message<?> reply = inboxMessage.replyMessage(outboxMessage.getMessage());
 			MessageBox mb = new MessageBox();
 			mb.push(reply);
@@ -83,10 +83,10 @@ public class WAGupShupAgentConnector implements ConnectorHandler {
 
 	@Override
 	public InboxMessage assignToAgent(InboxMessage inboxMessage) {
-		if (ArgUtil.isEqual(inboxMessage.getChannel(), Channel.GUPSHUPAGENT.toString())) {
+		if (ArgUtil.isEqual(inboxMessage.contact().getChannel(), Channel.GUPSHUPAGENT.toString())) {
 			gupShupAgentClient.assignToAgent(inboxMessage.getTo().get(0), inboxMessage.getFrom(),
 					inboxMessage.session().getDept());
-		} else if (ArgUtil.isEqual(inboxMessage.getChannel(), Channel.DEFAULT.toString())) {
+		} else if (ArgUtil.isEqual(inboxMessage.contact().getChannel(), Channel.DEFAULT.toString())) {
 			Message<?> reply = inboxMessage.replyMessage("Call us @ " + gupShupConfig.getGupShupWaNumber());
 			MessageBox mb = new MessageBox();
 			mb.push(reply);
@@ -102,8 +102,8 @@ public class WAGupShupAgentConnector implements ConnectorHandler {
 
 	public InboxMessage toInboxMessage(GupShupInboundV2 inboundV2) {
 		InboxMessage inboxMessage = new InboxMessage();
-		inboxMessage.setContactType(ContactType.WHATSAPP);
-		inboxMessage.setChannel(Channel.GUPSHUPAGENT.toString());
+		inboxMessage.contact().setContactType(ContactType.WHATSAPP.toString());
+		inboxMessage.contact().setChannel(Channel.GUPSHUPAGENT.toString());
 		inboxMessage.from(inboundV2.getMessages().get(0).getFrom());
 		inboxMessage.setFromName(inboundV2.getContacts().get(0).getProfile().getName());
 

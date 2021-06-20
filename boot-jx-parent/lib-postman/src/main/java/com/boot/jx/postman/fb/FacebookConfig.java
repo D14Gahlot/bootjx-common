@@ -87,4 +87,9 @@ public class FacebookConfig implements PMConnectorConfig {
 		return ContactType.FACEBOOK;
 	}
 
+	@Override
+	public String getChannel() {
+		return null;
+	}
+
 }

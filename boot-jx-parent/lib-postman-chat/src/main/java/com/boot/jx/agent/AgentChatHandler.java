@@ -12,7 +12,7 @@ public interface AgentChatHandler {
 
 	default public boolean onMessageSupported(InboxMessage inboxMessage) {
 		return "AGENT".equalsIgnoreCase(inboxMessage.session().getMode())
-				&& ArgUtil.isNone(inboxMessage.session().isResolved());
+				&& ArgUtil.isEmptyValue(inboxMessage.session().isResolved());
 	}
 
 	public InboxMessage onAssign(InboxMessage inboxMessage);

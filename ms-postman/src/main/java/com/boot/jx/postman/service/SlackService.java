@@ -78,7 +78,7 @@ public class SlackService {
 
 		Map<String, Object> message = new HashMap<String, Object>();
 		// message.put("text", msg.getSubject());
-		ChannelType channelType = ArgUtil.parseAsEnumT(msg.getChannel(), ChannelType.class);
+		ChannelType channelType = ArgUtil.parseAsEnumT(msg.contact().getChannel(), ChannelType.class);
 		message.put("channel", postManConfig.getChannelCode(channelType));
 		// message.put("text", msg.getSubject());
 
@@ -97,7 +97,7 @@ public class SlackService {
 		attachment.put("fields", msg.getFields());
 		message.put("attachments", Collections.singletonList(attachment));
 
-		String response = send(message, ArgUtil.parseAsEnumT(msg.getChannel(), ChannelType.class));
+		String response = send(message, ArgUtil.parseAsEnumT(msg.contact().getChannel(), ChannelType.class));
 		if (LOGGER.isDebugEnabled()) {
 			LOGGER.info("Slack Sent", response);
 		}

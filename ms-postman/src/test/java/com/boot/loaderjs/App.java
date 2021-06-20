@@ -11,7 +11,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.boot.jx.AppContextUtil;
-import com.boot.jx.postman.model.Contact;
+import com.boot.jx.postman.model.ContactInfo;
 import com.boot.jx.postman.model.PushMessage;
 import com.boot.jx.scope.tnt.Tenants;
 import com.boot.jx.scope.tnt.Tenants.Tenant;
@@ -31,37 +31,28 @@ public class App { // Noncompliant
 
 	public static void main(String[] args) throws MalformedURLException, URISyntaxException {
 		long timestamp = System.currentTimeMillis();
-		
+
 		System.out.println((timestamp));
 		System.out.println(Long.toString(timestamp));
 		String uniqueKey = "pk123456789";
 		String docKey = "TemporarySecret";
 		System.out.println(Urly
 				.parse(String.format("%s/upload/%d/%s/%s", "https://cdnd-kwt.amxremit.com/docs", timestamp, uniqueKey,
-						new HashBuilder().secret(docKey ).message(uniqueKey)
-						.currentTime(1587300194314L)
-						.interval(600)
-						.toHMAC().output()))
-				.queryParam("dir", "dir12")
-				.queryParam("docid", "did1234567")
-				.queryParam("type", "KWT_CIVILID").getURL());
+						new HashBuilder().secret(docKey).message(uniqueKey).currentTime(1587300194314L).interval(600)
+								.toHMAC().output()))
+				.queryParam("dir", "dir12").queryParam("docid", "did1234567").queryParam("type", "KWT_CIVILID")
+				.getURL());
 	}
 
 	public static void main41(String[] args) {
 
 		PushMessage msg = new PushMessage();
-		
+
 		AppContextUtil.setTenant(Tenants.DEFAULT);
 
-		msg.addContact(new Contact().or(MapBuilder.map()
-				.put("lang", "en")
-				.put("nationality", "4")
-				.toMap()));
+		msg.addContact(new ContactInfo().or(MapBuilder.map().put("lang", "en").put("nationality", "4").toMap()));
 
-		msg.addContact(new Contact().or(MapBuilder.map()
-				.put("lang", "ar")
-				.put("nationality", "5")
-				.toMap()));
+		msg.addContact(new ContactInfo().or(MapBuilder.map().put("lang", "ar").put("nationality", "5").toMap()));
 
 		String androidTopicStr = null;
 		String iosTopicStr = null;
@@ -71,13 +62,11 @@ public class App { // Noncompliant
 		if (msg.getContacts().size() > 0) {
 			StringJoiner orCondition = new StringJoiner(") || (");
 			int totalOrConditions = 0;
-			for (Contact singleContact : msg.getContacts()) {
+			for (ContactInfo singleContact : msg.getContacts()) {
 				for (Map<String, Object> singleFilter : singleContact.getFilter()) {
 					StringJoiner andCondition = new StringJoiner(PushMessage.CONDITION_SEPRATOR_AND);
 					for (Entry<String, Object> entry : singleFilter.entrySet()) {
-						andCondition.add(
-								"'" + PushMessage.topic(entry.getKey(), entry.getValue())
-										+ "%sx%' in topics");
+						andCondition.add("'" + PushMessage.topic(entry.getKey(), entry.getValue()) + "%sx%' in topics");
 						totalConditions++;
 					}
 					totalConditions++;
@@ -103,8 +92,7 @@ public class App { // Noncompliant
 	public static void main6(String[] args) throws IOException {
 
 		String str = "/topics/A & /topics/B";
-		System.out.println(
-				str.replaceAll("/topics/([A-Z]+)", "$1_web in topics"));
+		System.out.println(str.replaceAll("/topics/([A-Z]+)", "$1_web in topics"));
 	}
 
 	public static void main5(String[] args) {

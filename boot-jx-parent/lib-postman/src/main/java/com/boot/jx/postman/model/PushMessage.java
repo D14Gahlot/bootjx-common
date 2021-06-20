@@ -194,7 +194,7 @@ public class PushMessage extends Message<PushMessage> {
 		if (this.getContacts().size() > 0) {
 			StringJoiner orCondition = new StringJoiner(") || (");
 			int totalOrConditions = 0;
-			for (Contact singleContact : this.getContacts()) {
+			for (ContactInfo singleContact : this.getContacts()) {
 				for (Map<String, Object> singleFilter : singleContact.getFilter()) {
 					StringJoiner andCondition = new StringJoiner(PushMessage.CONDITION_SEPRATOR_AND);
 					for (Entry<String, Object> entry : singleFilter.entrySet()) {
@@ -222,8 +222,8 @@ public class PushMessage extends Message<PushMessage> {
 		}
 	}
 
-	public static Contact toContact(String topic) {
-		Contact c = new Contact();
+	public static ContactInfo toContact(String topic) {
+		ContactInfo c = new ContactInfo();
 
 		Matcher m = PushMessage.FORMAT_TO_USER_PATTERN_V3.matcher(topic);
 		if (m.find()) {
@@ -264,8 +264,8 @@ public class PushMessage extends Message<PushMessage> {
 		return toContactV2(topic);
 	}
 
-	public static Contact toContactV2(String topic) {
-		Contact c = new Contact();
+	public static ContactInfo toContactV2(String topic) {
+		ContactInfo c = new ContactInfo();
 
 		Matcher m = PushMessage.FORMAT_TO_USER_PATTERN_V2.matcher(topic);
 		if (m.find()) {
@@ -291,8 +291,8 @@ public class PushMessage extends Message<PushMessage> {
 		return c;
 	}
 
-	private static Contact toContactV1(String topic) {
-		Contact c = new Contact();
+	private static ContactInfo toContactV1(String topic) {
+		ContactInfo c = new ContactInfo();
 
 		Matcher m = PushMessage.FORMAT_TO_USER_PATTERN.matcher(topic);
 		if (m.find()) {

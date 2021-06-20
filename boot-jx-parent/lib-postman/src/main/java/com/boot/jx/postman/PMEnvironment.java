@@ -32,6 +32,11 @@ public class PMEnvironment {
 		public String getLane();
 
 		@JsonView(PMConnectorConfig.Public.class)
+		public default String getChannel() {
+			return null;
+		}
+
+		@JsonView(PMConnectorConfig.Public.class)
 		public boolean isPushAllowed();
 
 		@JsonView(PMConnectorConfig.Public.class)

@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.ArrayList;
 
 import com.boot.jx.agent.AgentConfig;
+import com.boot.jx.dict.ContactType;
 import com.boot.jx.postman.PMEnvironment.PMConfigurationObject;
 import com.boot.jx.postman.PMEnvironment.PMConnectorConfig;
 import com.boot.jx.postman.fb.FacebookConfig;
@@ -200,7 +201,6 @@ public class PMConfiguration implements Serializable {
 				list.add(configEntry.getValue());
 			}
 		}
-
 		return list;
 	}
 

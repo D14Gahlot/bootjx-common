@@ -66,7 +66,7 @@ public class InBoundControllerTW {
 	@RequestMapping(value = "/ext/inbound/tw/send", method = RequestMethod.POST)
 	public InboxMessage onSend(@RequestBody InboxMessage ibmsg)
 			throws InterruptedException, NumberFormatException, TwitterException {
-		twitterClient.sendReply(ibmsg.getMessageId(), ibmsg.getMessage(), ibmsg.getLane());
+		twitterClient.sendReply(ibmsg.getMessageId(), ibmsg.getMessage(), ibmsg.contact().getLane());
 		return ibmsg;
 	}
 

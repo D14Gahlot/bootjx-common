@@ -44,8 +44,8 @@ public class AgentService {
 		} else if (ArgUtil.is(chatClientConfig.getAgentUrl())) {
 			return chatClient.assignToAgent(inboxMessage);
 		} else {
-			ConnectorHandler connector = connectorHandlerFactory.get(inboxMessage.getContactType(),
-					inboxMessage.getChannel());
+			ConnectorHandler connector = connectorHandlerFactory.get(inboxMessage.contact().type(),
+					inboxMessage.contact().getChannel());
 			if (ArgUtil.is(connector)) {
 				connector.assignToAgent(inboxMessage);
 			} else if (ArgUtil.is(defaultConnector)) {

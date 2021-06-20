@@ -52,8 +52,8 @@ public class DummyUserController {
 			contactType = ArgUtil.parseAsEnumT(cookie.getValue(), contactType, ContactType.class);
 		}
 
-		event.setContactType(contactType);
-		event.setLane("DUMMY");
+		event.contact().setContactType(contactType.toString());
+		event.contact().setLane("DUMMY");
 		event.from(number);
 		event.setMessage(message);
 		inBoundEngine.invokeMethods(event);

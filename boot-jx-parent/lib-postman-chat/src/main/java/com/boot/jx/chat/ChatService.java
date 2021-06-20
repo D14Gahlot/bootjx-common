@@ -10,8 +10,6 @@ import org.springframework.stereotype.Component;
 
 import com.boot.jx.bot.ChatContext;
 import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorHandler;
-import com.boot.jx.chat.ConnectorHandlerFactory.DefaultConnector;
-import com.boot.jx.dict.ContactType;
 import com.boot.jx.logger.AuditDetailProvider;
 import com.boot.jx.logger.LoggerService;
 import com.boot.jx.postman.PMClientConfig;
@@ -21,7 +19,6 @@ import com.boot.jx.postman.doc.ChatContextDoc;
 import com.boot.jx.postman.doc.ChatMeta;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.MessageDoc;
-import com.boot.jx.postman.dto.ChatMessageDTO;
 import com.boot.jx.postman.dto.ChatUserProfileDTO;
 import com.boot.jx.postman.dto.ChatUserProfileDTO.ChatUserProfileRequest;
 import com.boot.jx.postman.model.InboxMessage;
@@ -70,9 +67,6 @@ public class ChatService {
 	@Autowired
 	private ConnectorHandlerFactory connectorHandlerFactory;
 
-	@Autowired(required = false)
-	private DefaultConnector defaultConnector;
-
 	public ChatContext getChatContext() {
 		return chatContext;
 	}
@@ -89,22 +83,6 @@ public class ChatService {
 		return ArgUtil.is(auditDetailProvider) ? auditDetailProvider.getAuditUser() : "_SYSTEM_";
 	}
 
-	private void message(String messageType, ChatContactDoc chatContactDoc, InboxMessage inboxMessage,
-			OutboxMessage outboxMessage) {
-		try {
-			ConnectorHandler connector = connectorHandlerFactory.get(outboxMessage.getContactType(),
-					outboxMessage.getChannel());
-			if (ArgUtil.is(connector)) {
-				connector.message(messageType, chatContactDoc, inboxMessage, outboxMessage);
-			} else if (ArgUtil.is(defaultConnector)) {
-				defaultConnector.message(messageType, chatContactDoc, inboxMessage, outboxMessage);
-			}
-		} catch (Exception e) {
-			LOGGER.error(messageType, e);
-		}
-		messageStore.createOrUpdate(outboxMessage);
-	}
-
 	private MessageDoc actionIntenal(ChatContactDoc chatContactDoc, OutboxMessage outboxMessage) {
 		if (!ArgUtil.is(outboxMessage.getAction())) {
 			return null;
@@ -115,8 +93,8 @@ public class ChatService {
 		}
 
 		outboxMessage.updateStatus(Message.Status.INIT);
-		outboxMessage.setContactType(ArgUtil.parseAsEnumT(chatContactDoc.getContactType(), ContactType.class));
-		outboxMessage.setContactId(chatContactDoc.getContactId());
+		outboxMessage.contact().setContactType(chatContactDoc.getContactType());
+		outboxMessage.contact().setContactId(chatContactDoc.getContactId());
 
 		MessageDoc messageDoc = messageStore.createOrUpdate(outboxMessage);
 		connectorHandlerFactory.message("ACTION", chatContactDoc, null, outboxMessage);
@@ -131,12 +109,12 @@ public class ChatService {
 		}
 
 		outboxMessage.updateStatus(Message.Status.INIT);
-		outboxMessage.setContactType(inboxMessage.getContactType());
-		outboxMessage.setChannel(inboxMessage.getChannel());
-		outboxMessage.setLane(inboxMessage.getLane());
+		outboxMessage.contact().type(inboxMessage.contact().type());
+		outboxMessage.contact().setChannel(inboxMessage.contact().getChannel());
+		outboxMessage.contact().setLane(inboxMessage.contact().getLane());
 		outboxMessage.setQueue(inboxMessage.getQueue());
 		outboxMessage.addTo(inboxMessage.getFrom());
-		outboxMessage.setContactId(inboxMessage.getContactId());
+		outboxMessage.contact().setContactId(inboxMessage.contact().getContactId());
 		outboxMessage.setSessionId(inboxMessage.getSessionId());
 
 		if (!ArgUtil.is(outboxMessage.session().getMode())) {
@@ -155,10 +133,10 @@ public class ChatService {
 		}
 
 		outboxMessage.updateStatus(Message.Status.INIT);
-		outboxMessage.setContactType(ArgUtil.parseAsEnumT(chatContactDoc.getContactType(), ContactType.class));
-		outboxMessage.setChannel(chatContactDoc.getChannelType());
-		outboxMessage.setLane(chatContactDoc.getLane());
-		outboxMessage.setContactId(chatContactDoc.getContactId());
+		outboxMessage.contact().setContactType(chatContactDoc.getContactType());
+		outboxMessage.contact().setChannel(chatContactDoc.getChannelType());
+		outboxMessage.contact().setLane(chatContactDoc.getLane());
+		outboxMessage.contact().setContactId(chatContactDoc.getContactId());
 		outboxMessage.setSessionId(chatContactDoc.getSessionId());
 
 		MessageDoc messageDoc = messageStore.createOrUpdate(outboxMessage);
@@ -168,7 +146,7 @@ public class ChatService {
 
 	public MessageDoc reply(OutboxMessage outboxMessage) throws InterruptedException {
 		InboxMessage inboxMessage = chatContext.getInboxMessage();
-		ChatContactDoc chatContactDoc = sessionStore.getContact(inboxMessage.getContactId());
+		ChatContactDoc chatContactDoc = sessionStore.getContact(inboxMessage.contact().getContactId());
 
 		if (ArgUtil.isEmpty(outboxMessage.session().getAgent())) {
 			outboxMessage.session().setAgent(chatClientConfig.getDefaultSender());
@@ -208,10 +186,10 @@ public class ChatService {
 	}
 
 	public MessageDoc note(ChatSessionDoc sessionDoc, OutboxMessage outboxMessage) {
-		outboxMessage.setContactType(ArgUtil.parseAsEnumT(sessionDoc.getContactType(), ContactType.class));
-		outboxMessage.setChannel(sessionDoc.getChannel());
-		outboxMessage.setLane(sessionDoc.getLane());
-		outboxMessage.setContactId(sessionDoc.getContactId());
+		outboxMessage.contact().setContactType(sessionDoc.getContactType());
+		outboxMessage.contact().setChannel(sessionDoc.getChannel());
+		outboxMessage.contact().setLane(sessionDoc.getLane());
+		outboxMessage.contact().setContactId(sessionDoc.getContactId());
 		outboxMessage.setSessionId(sessionDoc.getSessionId());
 		outboxMessage.setType("N");
 		return messageStore.note(outboxMessage, getCurrenUser());
@@ -339,8 +317,8 @@ public class ChatService {
 		if (initd) {
 			return true;
 		}
-		ConnectorHandler connector = connectorHandlerFactory.get(inboxMessage.getContactType(),
-				inboxMessage.getChannel());
+		ConnectorHandler connector = connectorHandlerFactory.get(inboxMessage.contact().type(),
+				inboxMessage.contact().getChannel());
 
 		ChatContactDoc contact = sessionStore.getContact(inboxMessage);
 		if (ArgUtil.is(connector)) {
@@ -380,7 +358,7 @@ public class ChatService {
 	}
 
 	public boolean resolveSession(ChatSessionDoc session) {
-		if (!ArgUtil.isNone(session.getResolveSessionStamp())) {
+		if (!ArgUtil.isEmptyValue(session.getResolveSessionStamp())) {
 			return false;
 		}
 		session = sessionStore.resolveSession(session);

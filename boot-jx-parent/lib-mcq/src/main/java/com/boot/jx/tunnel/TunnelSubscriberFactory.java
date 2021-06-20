@@ -52,8 +52,8 @@ public class TunnelSubscriberFactory {
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public TunnelSubscriberFactory(List<ITunnelSubscriber> listeners,
-			@Autowired(required = false) RedissonClient redisson,
-			@Autowired(required = true) AppConfig appConfigLocal, @Autowired AppParam loadAppParams) {
+			@Autowired(required = false) RedissonClient redisson, @Autowired(required = true) AppConfig appConfigLocal,
+			@Autowired AppParam loadAppParams) {
 		appConfig = appConfigLocal;
 		LOGGER.info("Subscribing {} tunnel events in {}", listeners.size(), appConfigLocal.getAppEnv());
 		if (redisson == null) {
@@ -75,7 +75,7 @@ public class TunnelSubscriberFactory {
 				} else if (ArgUtil.is(listenerTarget) && ArgUtil.is(listenerTarget.getTopic())) {
 					eventTopic = listenerTarget.getTopic();
 				}
-
+				
 				boolean integrity = tunnelEvent.integrity();
 				TunnelEventXchange scheme = tunnelEvent.scheme();
 				if (scheme == TunnelEventXchange.TASK_WORKER) {
@@ -298,8 +298,8 @@ public class TunnelSubscriberFactory {
 					AppContext context = msg.getContext();
 					AppContextUtil.setContext(context);
 					AppContextUtil.init();
-					AuditServiceClient.trackStatic(
-							new RequestTrackEvent(RequestTrackEvent.Type.SUB_IN, this.exchange, msg));
+					AuditServiceClient
+							.trackStatic(new RequestTrackEvent(RequestTrackEvent.Type.SUB_IN, this.exchange, msg));
 					try {
 						if (ArgUtil.isEmpty(msg.getData())) {
 							LOGGER.warn("NULL Event Rcvd for EVENT " + channel + " : ");

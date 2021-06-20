@@ -9,6 +9,7 @@ import java.util.Map;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.dict.Language;
 import com.boot.jx.postman.model.ITemplates.ITemplate;
+import com.boot.jx.postman.model.MessageDefinitions.Contactable;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
 import com.boot.utils.JsonUtil;
@@ -42,7 +43,8 @@ public class Message<T extends Message<T>> implements Serializable, MessageOptio
 	protected String subject;
 	protected String message = null;
 	protected List<String> to = null;
-	protected List<Contact> contacts = null;
+	protected List<ContactInfo> contacts = null;
+	private String templateId = null;
 	private String template = null;
 	private String action = null;
 	private String type = null;
@@ -50,9 +52,6 @@ public class Message<T extends Message<T>> implements Serializable, MessageOptio
 	private Map<String, Object> model = new HashMap<String, Object>();
 	protected Map<String, Object> options = new HashMap<String, Object>();
 	private MessageType messageType = null;
-	private ContactType contactType;
-	protected String channel;
-	protected String lane;
 
 	private List<PostManFile> files = null;
 	private List<Attachment> attachments = null;
@@ -62,7 +61,7 @@ public class Message<T extends Message<T>> implements Serializable, MessageOptio
 	private String messageIdExt;
 	private String messageIdRef;
 	private String sessionId;
-	private String contactId;
+	private Contactable contact;
 
 	private String collapseId;
 	public int priority;
@@ -81,25 +80,9 @@ public class Message<T extends Message<T>> implements Serializable, MessageOptio
 		this.id = id;
 	}
 
-	public ContactType getContactType() {
-		return contactType;
-	}
-
-	public void setContactType(ContactType contactType) {
-		this.contactType = contactType;
-	}
-
-	public String getChannel() {
-		return channel;
-	}
-
-	public void setChannel(String channel) {
-		this.channel = channel;
-	}
-
 	@JsonIgnore
 	public void setIChannel(IChannel channel) {
-		this.channel = ArgUtil.parseAsString(channel);
+		this.contact().setChannel(ArgUtil.parseAsString(channel));
 	}
 
 	public Map<String, Object> getModel() {
@@ -181,14 +164,14 @@ public class Message<T extends Message<T>> implements Serializable, MessageOptio
 		this.timestamp = System.currentTimeMillis();
 		this.status = Status.CRTD;
 		this.to = new ArrayList<String>();
-		this.contacts = new ArrayList<Contact>();
+		this.contacts = new ArrayList<ContactInfo>();
 		this.priority = 0;
 
 	}
 
 	public Message(ContactType contactType) {
 		this();
-		this.contactType = contactType;
+		this.contact().type(contactType);
 	}
 
 	public List<String> to() {
@@ -276,16 +259,16 @@ public class Message<T extends Message<T>> implements Serializable, MessageOptio
 		this.messageId = messageId;
 	}
 
-	public List<Contact> getContacts() {
+	public List<ContactInfo> getContacts() {
 		return contacts;
 	}
 
-	public void setContacts(List<Contact> contacts) {
+	public void setContacts(List<ContactInfo> contacts) {
 		this.contacts = contacts;
 	}
 
-	public void addContact(Contact... contacts) {
-		for (Contact contact : contacts) {
+	public void addContact(ContactInfo... contacts) {
+		for (ContactInfo contact : contacts) {
 			this.contacts.add(contact);
 		}
 	}
@@ -424,14 +407,6 @@ public class Message<T extends Message<T>> implements Serializable, MessageOptio
 		this.sessionId = sessionId;
 	}
 
-	public String getContactId() {
-		return contactId;
-	}
-
-	public void setContactId(String contactId) {
-		this.contactId = contactId;
-	}
-
 	public List<Attachment> getAttachments() {
 		return attachments;
 	}
@@ -479,14 +454,6 @@ public class Message<T extends Message<T>> implements Serializable, MessageOptio
 		this.action = action;
 	}
 
-	public String getLane() {
-		return lane;
-	}
-
-	public void setLane(String lane) {
-		this.lane = lane;
-	}
-
 	public Map<String, Long> getStamps() {
 		return stamps;
 	}
@@ -505,4 +472,26 @@ public class Message<T extends Message<T>> implements Serializable, MessageOptio
 		this.stamps().put(ArgUtil.parseAsString(status), System.currentTimeMillis());
 	}
 
+	public String getTemplateId() {
+		return templateId;
+	}
+
+	public void setTemplateId(String templateId) {
+		this.templateId = templateId;
+	}
+
+	public Contactable getContact() {
+		return contact;
+	}
+
+	public void setContact(Contactable contact) {
+		this.contact = contact;
+	}
+
+	public Contactable contact() {
+		if (this.contact == null) {
+			this.contact = new ContactInfo();
+		}
+		return this.contact;
+	}
 }

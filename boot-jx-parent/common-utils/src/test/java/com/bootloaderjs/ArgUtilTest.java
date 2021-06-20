@@ -32,15 +32,15 @@ public class ArgUtilTest { // Noncompliant
 	}
 
 	public static void main2(String[] args) throws ParseException {
-		checkAssert("=====true", ArgUtil.isNone(0), true);
-		checkAssert("=====false", ArgUtil.isNone(0L), true);
-		checkAssert("=====null", ArgUtil.isNone(null), true);
-		checkAssert("=====null", ArgUtil.isNone(""), true);
-		checkAssert("=====null", ArgUtil.isNone(3), false);
-		checkAssert("=====null", ArgUtil.isNone("3"), false);
-		checkAssert("=====null", ArgUtil.isNone("0"), false);
-		checkAssert("=====null", ArgUtil.isNone(false), true);
-		checkAssert("=====null", ArgUtil.isNone(Boolean.FALSE), true);
+		checkAssert("=====true", ArgUtil.isEmptyValue(0), true);
+		checkAssert("=====false", ArgUtil.isEmptyValue(0L), true);
+		checkAssert("=====null", ArgUtil.isEmptyValue(null), true);
+		checkAssert("=====null", ArgUtil.isEmptyValue(""), true);
+		checkAssert("=====null", ArgUtil.isEmptyValue(3), false);
+		checkAssert("=====null", ArgUtil.isEmptyValue("3"), false);
+		checkAssert("=====null", ArgUtil.isEmptyValue("0"), false);
+		checkAssert("=====null", ArgUtil.isEmptyValue(false), true);
+		checkAssert("=====null", ArgUtil.isEmptyValue(Boolean.FALSE), true);
 	}
 
 	public static void checkAssert(String name, Object a, Object b) throws ParseException {

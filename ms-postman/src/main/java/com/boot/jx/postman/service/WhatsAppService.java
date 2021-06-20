@@ -96,7 +96,7 @@ public class WhatsAppService {
 		message.setId(AppContextUtil.getTraceId());
 		message = resolveTemplate(message);
 		if (isValid(message)) {
-			WAMessage.Channel channelType = ArgUtil.parseAsEnumT(message.getChannel(), WAMessage.Channel.class);
+			WAMessage.Channel channelType = ArgUtil.parseAsEnumT(message.contact().getChannel(), WAMessage.Channel.class);
 			if (WAMessage.Channel.APIWHA == channelType) {
 				apiWhaService.sendWAMessage(message);
 			} else {

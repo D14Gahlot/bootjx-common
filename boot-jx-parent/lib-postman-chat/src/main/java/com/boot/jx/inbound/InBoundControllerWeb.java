@@ -96,21 +96,21 @@ public class InBoundControllerWeb {
 	@ResponseBody
 	@RequestMapping(value = "/ext/inbound/web/callback", method = RequestMethod.POST)
 	public InboxMessage onReceiveMessage(@RequestBody InboxMessage event) throws InterruptedException {
-		event.setContactType(ContactType.WEBSITE);
-		event.setLane("MainSite");
+		event.contact().setContactType(ContactType.WEBSITE.toString());
+		event.contact().setLane("MainSite");
 
-		//event.setContactType(ContactType.WHATSAPP);
-		//event.setLane("918750382050");
+		// event.setContactType(ContactType.WHATSAPP);
+		// event.setLane("918750382050");
 		// event.setLane("919082854885");
-		//event.setChannel("GUPSHUPW");
-		//event.setFrom("919930104050");
-		//event.setFromName("Lalit Tanwar");
+		// event.setChannel("GUPSHUPW");
+		// event.setFrom("919930104050");
+		// event.setFromName("Lalit Tanwar");
 
 		// Cleaning
 		// event.setSessionId("600edc822743742e916202b9");
 		event.setSessionId(null);
 		event.setMessageId(null);
-		event.setCsid(event.getFrom());
+		event.contact().setCsid(event.getFrom());
 		event.session().setAgent(null);
 		event.session().setDept(null);
 		inBoundEngine.invokeMethods(event);

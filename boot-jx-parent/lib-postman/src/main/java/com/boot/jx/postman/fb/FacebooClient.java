@@ -88,7 +88,7 @@ public class FacebooClient implements MessageClient {
 	@Override
 	public OutboxMessage send(OutboxMessage outboxMessage) {
 		String to = CollectionUtil.getOne(outboxMessage.getTo());
-		String lane = outboxMessage.getLane();
+		String lane = outboxMessage.contact().getLane();
 
 		FacebookMessageResp resp = null;
 		StringJoiner msgIds = new StringJoiner(",");

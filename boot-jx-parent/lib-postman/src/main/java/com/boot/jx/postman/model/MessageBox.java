@@ -101,15 +101,15 @@ public class MessageBox {
 	}
 
 	public MessageBox push(Message<?> m) {
-		if (m instanceof WAMessage || ContactType.WHATSAPP.equals(m.getContactType())) {
+		if (m instanceof WAMessage || ContactType.WHATSAPP.equals(m.contact().type())) {
 			this.waBucket.add((WAMessage) m);
-		} else if (m instanceof TGMessage || ContactType.TELEGRAM.equals(m.getContactType())) {
+		} else if (m instanceof TGMessage || ContactType.TELEGRAM.equals(m.contact().type())) {
 			this.tgBucket.add((TGMessage) m);
-		} else if (m instanceof SMS || ContactType.SMS.equals(m.getContactType())) {
+		} else if (m instanceof SMS || ContactType.SMS.equals(m.contact().type())) {
 			this.smsBucket.add((SMS) m);
-		} else if (m instanceof Email  || ContactType.EMAIL.equals(m.getContactType())) {
+		} else if (m instanceof Email  || ContactType.EMAIL.equals(m.contact().type())) {
 			this.emailBucket.add((Email) m);
-		} else if (m instanceof PushMessage  || ContactType.PUSH.equals(m.getContactType())) {
+		} else if (m instanceof PushMessage  || ContactType.PUSH.equals(m.contact().type())) {
 			this.pushBucket.add((PushMessage) m);
 		}
 		this.priority(m);

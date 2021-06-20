@@ -8,8 +8,10 @@ import java.util.List;
 import java.util.Map;
 
 import com.boot.jx.dict.ContactType;
+import com.boot.jx.postman.model.MessageDefinitions.Contactable;
 import com.boot.jx.postman.model.MessageDefinitions.MESSAGE_BOUND_TYPE;
 import com.boot.jx.postman.model.MessageDefinitions.SessionMessage;
+import com.boot.utils.ArgUtil;
 import com.boot.utils.StringUtils.StringMatcher;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -26,11 +28,7 @@ public class InboxMessage implements Serializable, SessionMessage {
 	private String fromName;
 	private String sessionId;
 
-	private ContactType contactType;
-	private String channel;
-	private String lane;
-	private String csid;
-	private String contactId;
+	private Contactable contact;
 	private BigDecimal queue;
 
 	private long timestamp;
@@ -86,27 +84,27 @@ public class InboxMessage implements Serializable, SessionMessage {
 	}
 
 	public Message<?> replyMessage(String message) {
-		if (ContactType.WHATSAPP.equals(this.contactType)) {
+		if (ContactType.WHATSAPP.toString().equals(this.contact().getContactType())) {
 			WAMessage reply = new WAMessage();
 			reply.setQueue(this.getQueue());
-			reply.setChannel(this.getChannel());
+			reply.contact().setChannel(this.contact().getChannel());
 			reply.addTo(this.getFrom());
 			reply.setMessage(message);
 			return reply;
-		} else if (ContactType.TELEGRAM.equals(this.contactType)) {
+		} else if (ContactType.TELEGRAM.toString().equals(this.contact().getContactType())) {
 			TGMessage reply = new TGMessage();
 			reply.setQueue(this.getQueue());
-			reply.setChannel(this.getChannel());
+			reply.contact().setChannel(this.contact().getChannel());
 			reply.addTo(this.getFrom());
 			reply.setMessage(message);
 			return reply;
 		} else {
 			OutboxMessage reply = new OutboxMessage();
 			reply.setQueue(this.getQueue());
-			reply.setChannel(this.getChannel());
+			reply.contact().setChannel(this.contact().getChannel());
 			reply.addTo(this.getFrom());
 			reply.setMessage(message);
-			reply.setContactType(this.contactType);
+			reply.contact().setContactType(this.contact().getContactType());
 			return reply;
 		}
 	}
@@ -137,36 +135,12 @@ public class InboxMessage implements Serializable, SessionMessage {
 		this.matcher = matcher;
 	}
 
-	public ContactType getContactType() {
-		return contactType;
-	}
-
-	public void setContactType(ContactType contactType) {
-		this.contactType = contactType;
-	}
-
-	public String getChannel() {
-		return channel;
-	}
-
-	public void setChannel(String channel) {
-		this.channel = channel;
-	}
-
 	public String getMessageId() {
 		return messageId;
 	}
 
 	public void setMessageId(String messageId) {
 		this.messageId = messageId;
-	}
-
-	public String getLane() {
-		return lane;
-	}
-
-	public void setLane(String lane) {
-		this.lane = lane;
 	}
 
 	public String getFromName() {
@@ -191,14 +165,6 @@ public class InboxMessage implements Serializable, SessionMessage {
 
 	public void setSessionId(String sessionId) {
 		this.sessionId = sessionId;
-	}
-
-	public String getContactId() {
-		return contactId;
-	}
-
-	public void setContactId(String contactId) {
-		this.contactId = contactId;
 	}
 
 	public String getChecksum() {
@@ -280,6 +246,9 @@ public class InboxMessage implements Serializable, SessionMessage {
 
 	@Override
 	public String forContact() {
+		if (ArgUtil.is(this.contact().getCsid())) {
+			return this.contact().getCsid();
+		}
 		return this.from;
 	}
 
@@ -305,14 +274,6 @@ public class InboxMessage implements Serializable, SessionMessage {
 		return this;
 	}
 
-	public String getCsid() {
-		return csid;
-	}
-
-	public void setCsid(String csid) {
-		this.csid = csid;
-	}
-
 	@Override
 	public String getType() {
 		return MESSAGE_BOUND_TYPE.INBOUND;
@@ -332,6 +293,21 @@ public class InboxMessage implements Serializable, SessionMessage {
 
 	public void setTo(List<String> to) {
 		this.to = to;
+	}
+
+	public Contactable getContact() {
+		return contact;
+	}
+
+	public void setContact(Contactable contact) {
+		this.contact = contact;
+	}
+
+	public Contactable contact() {
+		if (this.contact == null) {
+			this.contact = new ContactInfo();
+		}
+		return this.contact;
 	}
 
 }

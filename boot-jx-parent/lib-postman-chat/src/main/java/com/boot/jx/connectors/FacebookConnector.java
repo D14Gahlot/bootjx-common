@@ -73,19 +73,20 @@ public class FacebookConnector implements ConnectorHandler {
 	public InboxMessage toInboxMessage(FacebookMessaging m, String lane) {
 		String id = m.getSender().get("id");
 		InboxMessage event = new InboxMessage();
-		event.setChannel("PAGE");
+		event.contact().setChannel("PAGE");
 		event.setFrom(id);
-		event.setCsid(id);
+		event.contact().setCsid(id);
 		event.setMessage(m.getMessage().getText());
 		event.to().add(m.getRecipient().get("id"));
-		event.setContactType(ContactType.FACEBOOK);
-		event.setLane(lane);
+		event.contact().type(ContactType.FACEBOOK);
+		event.contact().setLane(lane);
 		return event;
 	}
 
 	@Override
 	public boolean initSession(ChatContactDoc contact, ChatSessionDoc session, InboxMessage inboxMessage) {
-		FacebookUserProfile profile = facebooClient.getUserProfile(inboxMessage.getFrom(), inboxMessage.getLane());
+		FacebookUserProfile profile = facebooClient.getUserProfile(inboxMessage.getFrom(),
+				inboxMessage.contact().getLane());
 		contact.setProfilePic(profile.getProfilePic());
 		contact.setName(profile.getFirstName() + " " + profile.getLastName());
 		contact.setEmail(profile.getEmail());

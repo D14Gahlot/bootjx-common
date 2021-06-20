@@ -88,4 +88,9 @@ public class GupShupConfig implements PMConnectorConfig {
 	public ContactType getContactType() {
 		return ContactType.WHATSAPP;
 	}
+
+	@Override
+	public String getChannel() {
+		return "GUPSHUPW";
+	}
 }

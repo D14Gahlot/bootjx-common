@@ -56,8 +56,7 @@ public class CacheBox<T> implements ICacheBox<T> {
 					(ArgUtil.isEmpty(getCahceName()) ? getClazzName() : getCahceName()),
 					CacheRedisConfiguration.CODEC_VERSION, version());
 			if (cache == null) {
-				cache = redisson.getLocalCachedMap(localCacheName,
-						localCacheOptions);
+				cache = redisson.getLocalCachedMap(localCacheName, localCacheOptions);
 			}
 			return cache;
 		}
@@ -221,6 +220,12 @@ public class CacheBox<T> implements ICacheBox<T> {
 
 	public Object version() {
 		return 0;
+	}
+
+	public static <CB> CacheBox<CB> getInstance(String name, RedissonClient redisson) {
+		CacheBox<CB> x = new CacheBox<CB>(name);
+		x.setClient(redisson);
+		return x;
 	}
 
 }

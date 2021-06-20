@@ -82,10 +82,10 @@ public class TelegramConnector implements ConnectorHandler {
 	public InboxMessage toInboxMessage(String lane, Update update) {
 		InboxMessage inboxMessage = new InboxMessage();
 		inboxMessage.setOriginalMessage(update);
-		inboxMessage.setContactType(ContactType.TELEGRAM);
-		inboxMessage.setLane(lane);
+		inboxMessage.contact().setContactType(ContactType.TELEGRAM.toString());
+		inboxMessage.contact().setLane(lane);
 		inboxMessage.setFrom(ArgUtil.parseAsString(update.getMessage().getChatId()));
-		inboxMessage.setCsid(ArgUtil.parseAsString(update.getMessage().getChatId()));
+		inboxMessage.contact().setCsid(ArgUtil.parseAsString(update.getMessage().getChatId()));
 
 		if (ArgUtil.is(update.getMessage())) {
 			inboxMessage.setMessageIdExt(
@@ -145,7 +145,7 @@ public class TelegramConnector implements ConnectorHandler {
 		if (ArgUtil.isEmpty(contact.getPhone())) {
 			telegramClient.promptShareNumber(inboxMessage.getFrom(),
 					"Confirm that you would like to share your contact number and continue, by clicking on the button below",
-					inboxMessage.getLane());
+					inboxMessage.contact().getLane());
 			return false;
 		}
 

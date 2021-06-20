@@ -117,7 +117,7 @@ public class TwitterClient implements MessageClient {
 
 	public OutboxMessage send(OutboxMessage message) {
 		String to = CollectionUtil.getOne(message.getTo());
-		String lane = message.getLane();
+		String lane = message.contact().getLane();
 
 		StringJoiner msgIds = new StringJoiner(",");
 

@@ -38,13 +38,13 @@ public class ConnectorHandlerFactory extends ScopedBeanFactory<String, Connector
 	public interface ConnectorHandler {
 		default public void reply(SessionMessage inboxMessage, OutboxMessage outboxMessage) {
 			outboxMessage.addTo(inboxMessage.getFrom());
-			outboxMessage.setLane(inboxMessage.getLane());
+			outboxMessage.contact().setLane(inboxMessage.contact().getLane());
 			this.send(outboxMessage);
 		}
 
 		default public void send(ChatContactDoc chatContactDoc, OutboxMessage outboxMessage) {
 			outboxMessage.addTo(chatContactDoc.getCsid());
-			outboxMessage.setLane(chatContactDoc.getLane());
+			outboxMessage.contact().setLane(chatContactDoc.getLane());
 			this.send(outboxMessage);
 		}
 
@@ -142,7 +142,7 @@ public class ConnectorHandlerFactory extends ScopedBeanFactory<String, Connector
 	public void message(String messageType, ChatContactDoc chatContactDoc, SessionMessage inboxMessage,
 			OutboxMessage outboxMessage) {
 		try {
-			ConnectorHandler connector = get(outboxMessage.getContactType(), outboxMessage.getChannel());
+			ConnectorHandler connector = get(outboxMessage.contact().type(), outboxMessage.contact().getChannel());
 			if (ArgUtil.is(connector)) {
 				connector.message(messageType, chatContactDoc, inboxMessage, outboxMessage);
 			} else if (ArgUtil.is(defaultConnector)) {

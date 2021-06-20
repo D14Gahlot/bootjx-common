@@ -5,26 +5,32 @@ import java.util.List;
 import java.util.Map;
 
 import com.boot.jx.dict.Language;
+import com.boot.jx.postman.model.MessageDefinitions.Contactable;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class Contact implements java.io.Serializable {
+public class ContactInfo implements java.io.Serializable, Contactable {
 
 	private static final long serialVersionUID = -2229330167964350550L;
 	String tenant;
 	String country;
 	String userid;
 	String prefix;
-	String mobile;
+	String phone;
 	String email;
 	Language lang;
+
+	private String contactType;
+	private String channel;
+	private String lane;
+	private String csid;
+	private String contactId;
+
 	List<Map<String, Object>> filter;
 	List<Map<String, String>> keymap;
 
-	public Contact() {
+	public ContactInfo() {
 		super();
-		this.filter = new ArrayList<Map<String, Object>>();
-		this.keymap = new ArrayList<Map<String, String>>();
 	}
 
 	public Language getLang() {
@@ -43,12 +49,12 @@ public class Contact implements java.io.Serializable {
 		this.prefix = prefix;
 	}
 
-	public String getMobile() {
-		return mobile;
+	public String getPhone() {
+		return phone;
 	}
 
-	public void setMobile(String mobile) {
-		this.mobile = mobile;
+	public void setPhone(String mobile) {
+		this.phone = mobile;
 	}
 
 	public String getEmail() {
@@ -83,17 +89,17 @@ public class Contact implements java.io.Serializable {
 		this.userid = userid;
 	}
 
-	public Contact prefix(String prefix) {
+	public ContactInfo prefix(String prefix) {
 		this.prefix = prefix;
 		return this;
 	}
 
-	public Contact mobile(String mobile) {
-		this.mobile = mobile;
+	public ContactInfo mobile(String mobile) {
+		this.phone = mobile;
 		return this;
 	}
 
-	public Contact email(String email) {
+	public ContactInfo email(String email) {
 		this.email = email;
 		return this;
 	}
@@ -114,9 +120,63 @@ public class Contact implements java.io.Serializable {
 		this.filter = filter;
 	}
 
-	public Contact or(Map<String, Object> or) {
-		this.filter.add(or);
+	public List<Map<String, Object>> filter() {
+		if (this.filter == null) {
+			this.filter = new ArrayList<Map<String, Object>>();
+		}
+		return this.filter;
+	}
+
+	public List<Map<String, String>> keymap() {
+		if (this.keymap == null) {
+			this.keymap = new ArrayList<Map<String, String>>();
+		}
+		return this.keymap;
+	}
+
+	public ContactInfo or(Map<String, Object> or) {
+		this.filter().add(or);
 		return this;
+	}
+
+	public String getContactType() {
+		return contactType;
+	}
+
+	public void setContactType(String contactType) {
+		this.contactType = contactType;
+	}
+
+	public String getLane() {
+		return lane;
+	}
+
+	public void setLane(String lane) {
+		this.lane = lane;
+	}
+
+	public String getCsid() {
+		return csid;
+	}
+
+	public void setCsid(String csid) {
+		this.csid = csid;
+	}
+
+	public String getContactId() {
+		return contactId;
+	}
+
+	public void setContactId(String contactId) {
+		this.contactId = contactId;
+	}
+
+	public String getChannel() {
+		return channel;
+	}
+
+	public void setChannel(String channel) {
+		this.channel = channel;
 	}
 
 }

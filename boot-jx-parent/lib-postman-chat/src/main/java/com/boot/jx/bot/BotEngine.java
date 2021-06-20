@@ -142,8 +142,8 @@ public class BotEngine {
 			if (patterns.length > 0) {
 				for (int i = 0; i < patterns.length; i++) {
 					if (ArgUtil.areEqual(methodWrapper.getTenant(), tenant)) {
-						if (ArgUtil.areEmpty(event.getLane(), methodWrapper.getLane())
-								|| ArgUtil.areEqual(event.getLane(), methodWrapper.getLane())) {
+						if (ArgUtil.areEmpty(event.contact().getLane(), methodWrapper.getLane())
+								|| ArgUtil.areEqual(event.contact().getLane(), methodWrapper.getLane())) {
 							if (matcher.isMatch(patterns[i]) && ArgUtil.is(ArgUtil.parseAsString(patterns[i]))) {
 								event.setMatcher(matcher);
 								return methodWrapper;
@@ -161,7 +161,7 @@ public class BotEngine {
 					if (ArgUtil.isEmpty(methodWrapper.getTenant())
 							|| ArgUtil.areEqual(methodWrapper.getTenant(), tenant)) {
 						if (ArgUtil.areEmpty(methodWrapper.getLane())
-								|| ArgUtil.areEqual(event.getLane(), methodWrapper.getLane())) {
+								|| ArgUtil.areEqual(event.contact().getLane(), methodWrapper.getLane())) {
 							if (matcher.isMatch(patterns[i]) && ArgUtil.is(ArgUtil.parseAsString(patterns[i]))) {
 								event.setMatcher(matcher);
 								return methodWrapper;

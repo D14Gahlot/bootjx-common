@@ -25,8 +25,10 @@ import com.boot.jx.postman.doc.ChatUserProfileDoc;
 import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.dto.ChatUserProfileDTO;
 import com.boot.jx.postman.model.InboxMessage;
+import com.boot.jx.postman.model.MessageDefinitions.Contactable;
 import com.boot.jx.postman.model.MessageDefinitions.IMessage;
 import com.boot.jx.postman.model.MessageDefinitions.SessionMessage;
+import com.boot.jx.postman.query.ChatContactQuery;
 import com.boot.jx.postman.query.ChatSessionQuery;
 import com.boot.jx.postman.store.PMStoreConstants.CHAT_MODE;
 import com.boot.jx.postman.store.PMStoreConstants.CHAT_STATUS;
@@ -69,6 +71,35 @@ public class SessionStore extends CommonDocStore {
 		return chatContactDoc;
 	}
 
+	public ChatContactDoc findOrCreate(ChatContactDoc chatContactDocQuery) {
+		ChatContactDoc chatContactDoc = null;
+		Contactable contact = PostManUtil.updateContact(chatContactDocQuery);
+		if (ArgUtil.is(contact.getContactId())) {
+			chatContactDoc = mongoTemplate.findById(contact.getContactId(), ChatContactDoc.class);
+		}
+
+		if (!ArgUtil.is(chatContactDoc) // chatContactDoc is not found
+				&& ArgUtil.is(contact.getCsid()) // csid is present
+				&& ArgUtil.is(chatContactDocQuery.getLane()) // lane is present
+		) {
+			chatContactDoc = mongoTemplate.findOne(Query.query(CommonMongoQueryBuilder.CommonMongoCriteria
+					// CSID should match
+					.where("csid").is(contact.getCsid())
+					// Lane must match
+					.and("lane").is(chatContactDocQuery.getLane())), ChatContactDoc.class);
+			if (!ArgUtil.is(chatContactDoc)) {
+				chatContactDoc = new ChatContactDoc();
+				chatContactDoc.setContactId(chatContactDocQuery.getContactId());
+				chatContactDoc.setContactType(chatContactDocQuery.getContactType());
+				chatContactDoc.setChannelType(chatContactDocQuery.getChannelType());
+				chatContactDoc.setCsid(chatContactDocQuery.getCsid());
+				chatContactDoc.setLane(chatContactDocQuery.getLane());
+				mongoTemplate.save(chatContactDoc);
+			}
+		}
+		return chatContactDoc;
+	}
+
 	public ChatSessionDoc getSession(String sessionId) {
 		return mongoTemplate.findById(sessionId, ChatSessionDoc.class);
 	}
@@ -99,7 +130,14 @@ public class SessionStore extends CommonDocStore {
 	}
 
 	private ChatSessionDoc createSession(IMessage inboxMessage) {
-		String contactId = PostManUtil.createContactId(inboxMessage);
+		Contactable contact = PostManUtil.updateContact(inboxMessage.contact());
+
+		if (ArgUtil.isEmpty(contact.getContactId())) {
+			return null;
+		}
+
+		String contactId = contact.getContactId();
+
 		String sessionId = inboxMessage.getSessionId();
 
 		ChatContactDoc chatContactDoc = null;
@@ -116,6 +154,9 @@ public class SessionStore extends CommonDocStore {
 			chatSessionDoc = getValidSession(sessionId);
 		}
 
+		ChatContactQuery chatContactQuery = ArgUtil.is(chatContactDoc) ? new ChatContactQuery(chatContactDoc)
+				: new ChatContactQuery(contactId);
+
 		if (!isSessionValid(chatSessionDoc)) {
 
 			closeActiveSessionsMulty(contactId);
@@ -123,35 +164,37 @@ public class SessionStore extends CommonDocStore {
 			// SESSION CREATION
 			chatSessionDoc = new ChatSessionDoc();
 			chatSessionDoc.setContactId(contactId);
-			chatSessionDoc.setContactType(ArgUtil.parseAsString(inboxMessage.getContactType()));
-			chatSessionDoc.setChannel(inboxMessage.getChannel());
-			chatSessionDoc.setLane(inboxMessage.getLane());
+			chatSessionDoc.setContactType(ArgUtil.parseAsString(inboxMessage.contact().type()));
+			chatSessionDoc.setChannel(inboxMessage.contact().getChannel());
+			chatSessionDoc.setLane(inboxMessage.contact().getLane());
 
 			// SESSION UPDATE
 			chatSessionDoc.setActive(true);
 
 			if (PostManUtil.isInBound(inboxMessage.getType())) {
 				chatSessionDoc.setLastInComingStamp(inboxMessage.getTimestamp());
+				chatContactQuery.setLastInBoundStamp(inboxMessage.getTimestamp());
 			} else if (PostManUtil.isOutBound(inboxMessage.getType())) {
 				chatSessionDoc.setLastResponseStamp(inboxMessage.getTimestamp());
+				chatContactQuery.setLastOutBoundStamp(inboxMessage.getTimestamp());
 			}
 
 			save(chatSessionDoc);
+			chatContactQuery.setSessionId(chatSessionDoc.getSessionId());
 
 			// CONTACT CREATION
 			if (ArgUtil.isEmpty(chatContactDoc) || ArgUtil.isEmpty(chatContactDoc.getCsid())
 					|| ArgUtil.isEmpty(chatContactDoc.getLane())) {
-				chatContactDoc = new ChatContactDoc();
-				chatContactDoc.setContactId(contactId);
-				chatContactDoc.setContactType(ArgUtil.parseAsString(inboxMessage.getContactType()));
-				chatContactDoc.setChannelType(inboxMessage.getChannel());
-				chatContactDoc.setCsid(inboxMessage.getCsid());
-				chatContactDoc.setLane(inboxMessage.getLane());
+				chatContactQuery.setContactId(contactId);
+				chatContactQuery.setContactType(ArgUtil.parseAsString(inboxMessage.contact().type()));
+				chatContactQuery.setChannelType(inboxMessage.contact().getChannel());
+				chatContactQuery.setCsid(inboxMessage.contact().getCsid());
+				chatContactQuery.setLane(inboxMessage.contact().getLane());
+				commonMongoTemplate.upsert(chatContactQuery);
+			} else {
+				// CONTACT UPDATE
+				commonMongoTemplate.updateFirst(chatContactQuery);
 			}
-			// CONTACT UPDATE
-			chatContactDoc.setSessionId(chatSessionDoc.getSessionId());
-			save(chatContactDoc);
-
 		} else {
 			// SESSION UPDATE
 			ChatSessionQuery chatSessionDocQuery = new ChatSessionQuery(chatSessionDoc);
@@ -160,18 +203,20 @@ public class SessionStore extends CommonDocStore {
 
 			if (PostManUtil.isInBound(inboxMessage.getType())) {
 				chatSessionDocQuery.setLastInComingStamp(inboxMessage.getTimestamp());
+				chatContactQuery.setLastInBoundStamp(inboxMessage.getTimestamp());
 			} else if (PostManUtil.isOutBound(inboxMessage.getType())) {
 				chatSessionDocQuery.setLastResponseStamp(inboxMessage.getTimestamp());
+				chatContactQuery.setLastOutBoundStamp(inboxMessage.getTimestamp());
 			}
-
 			commonMongoTemplate.updateFirst(chatSessionDocQuery);
+			commonMongoTemplate.updateFirst(chatContactQuery);
 		}
 		return chatSessionDoc;
 	}
 
-	public ChatSessionDoc linkSession(IMessage inboxMessage) {
+	public ChatSessionDoc linkSession(InboxMessage inboxMessage) {
 		ChatSessionDoc chatSessionDoc = this.createSession(inboxMessage);
-		inboxMessage.setContactId(chatSessionDoc.getContactId());
+		inboxMessage.contact().setContactId(chatSessionDoc.getContactId());
 		inboxMessage.setSessionId(chatSessionDoc.getSessionId());
 		inboxMessage.session().setAgent(chatSessionDoc.getAssignedToAgent());
 		inboxMessage.session().setDept(chatSessionDoc.getAssignedToDept());
@@ -183,13 +228,13 @@ public class SessionStore extends CommonDocStore {
 	public SessionMessage toSessionMessage(ChatSessionDoc session) {
 		ChatContactDoc contact = getContact(session.getContactId());
 		InboxMessage inboxMessage = new InboxMessage();
-		inboxMessage.setContactType(ArgUtil.parseAsEnumT(contact.getContactType(), ContactType.class));
-		inboxMessage.setChannel(contact.getChannelType());
-		inboxMessage.setLane(ArgUtil.nonEmpty(session.getLane(), contact.getLane()));
+		inboxMessage.contact().setContactType(contact.getContactType());
+		inboxMessage.contact().setChannel(contact.getChannelType());
+		inboxMessage.contact().setLane(ArgUtil.nonEmpty(session.getLane(), contact.getLane()));
 		inboxMessage.setFrom(contact.getCsid());
 		inboxMessage.setFromName(contact.getName());
 		inboxMessage.setSessionId(contact.getSessionId());
-		inboxMessage.setContactId(contact.getContactId());
+		inboxMessage.contact().setContactId(contact.getContactId());
 
 		inboxMessage.session().setMode(session.getMode());
 		inboxMessage.session().setAgent(session.getAssignedToAgent());
@@ -415,7 +460,7 @@ public class SessionStore extends CommonDocStore {
 	}
 
 	public void updateResponseTime(ChatSessionDoc chatSessionDoc) {
-		if (ArgUtil.isNone(chatSessionDoc.getFistResponseStamp())) {
+		if (ArgUtil.isEmptyValue(chatSessionDoc.getFistResponseStamp())) {
 			chatSessionDoc.setFistResponseStamp(System.currentTimeMillis());
 		}
 		chatSessionDoc.setLastResponseStamp(System.currentTimeMillis());

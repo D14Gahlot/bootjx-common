@@ -25,6 +25,15 @@ public class Candidate {
 
 	private long maxAge;
 
+	/**
+	 * How long (in ms) the lock should be kept in case the machine which obtained
+	 * the lock died before releasing it. This is just a fallback, under normal
+	 * circumstances the lock is released as soon the tasks finishes. Negative value
+	 * means default
+	 *
+	 * Ignored when using ZooKeeper and other lock providers which are able to
+	 * detect dead node.
+	 */
 	public Candidate maxAge(long maxAge) {
 		this.maxAge = maxAge;
 		return this;

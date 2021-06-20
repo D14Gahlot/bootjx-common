@@ -27,7 +27,7 @@ import com.boot.jx.postman.IPushNotifyService;
 import com.boot.jx.postman.PostManException;
 import com.boot.jx.postman.audit.PMGaugeEvent;
 import com.boot.jx.postman.events.UserMessageEvent;
-import com.boot.jx.postman.model.Contact;
+import com.boot.jx.postman.model.ContactInfo;
 import com.boot.jx.postman.model.PostManFile;
 import com.boot.jx.postman.model.Notipy;
 import com.boot.jx.postman.model.PushMessage;
@@ -180,7 +180,7 @@ public class FBPushServiceImpl implements IPushNotifyService {
 			userMessageEvent.setImage(msg.getImage());
 			userMessageEvent.setLink(msg.getLink());
 			userMessageEvent.setTemplate(msg.getTemplate());
-			userMessageEvent.setContactType(msg.getContactType());
+			userMessageEvent.contact().type(msg.contact().type());
 			userMessageEvent.setTimestamp(msg.getTimestamp());
 			userMessageEvent.setContacts(msg.getContacts());
 
@@ -193,7 +193,7 @@ public class FBPushServiceImpl implements IPushNotifyService {
 			if (msg.getContacts().size() > 0) {
 				StringJoiner orCondition = new StringJoiner(") || (");
 				int totalOrConditions = 0;
-				for (Contact singleContact : msg.getContacts()) {
+				for (ContactInfo singleContact : msg.getContacts()) {
 					for (Map<String, Object> singleFilter : singleContact.getFilter()) {
 						StringJoiner andCondition = new StringJoiner(PushMessage.CONDITION_SEPRATOR_AND);
 						for (Entry<String, Object> entry : singleFilter.entrySet()) {

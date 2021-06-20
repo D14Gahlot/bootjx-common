@@ -60,7 +60,7 @@ public class TmplClient {
 		PostManFile file = new PostManFile();
 		file.setModel(outboxMessage.getModel());
 		file.setITemplate(outboxMessage.getITemplate());
-		file = this.process(file, outboxMessage.getContactType()).getResult();
+		file = this.process(file, outboxMessage.contact().type()).getResult();
 		outboxMessage.setMessage(file.getContent());
 
 		if (!ArgUtil.is(outboxMessage.getSubject())) {

@@ -133,7 +133,7 @@ public abstract class GupShupClientAbstract {
 		gupShupReq.setSendTo(to);
 		gupShupReq.setPhoneNumber(to);
 		gupShupReq.setMessageId(message.getMessageId());
-		gupShupReq.setWaNumber(message.getLane());
+		gupShupReq.setWaNumber(message.contact().getLane());
 
 		GupShupResp resp = null;
 		String id = null;

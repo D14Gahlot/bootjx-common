@@ -239,7 +239,7 @@ public class PMGaugeEvent extends AuditEvent<PMGaugeEvent> {
 
 	public PMGaugeEvent set(WAMessage msg) {
 		this.to = msg.getTo();
-		this.channel = msg.getChannel();
+		this.channel = msg.contact().getChannel();
 		this.template = msg.getTemplate();
 		if (ArgUtil.isEmpty(this.template)) {
 			this.message = msg.getMessage();

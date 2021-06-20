@@ -55,6 +55,10 @@ public class MapModel implements JsonSerializerType<Object> {
 			return ArgUtil.parseAsBoolean(value, defaultvalue);
 		}
 
+		public <T extends Enum<T>> T asEnum(Class<T> clazz) {
+			return ArgUtil.parseAsEnumT(value, clazz);
+		}
+
 		@SuppressWarnings("unchecked")
 		public <T> List<T> asList(T listItem) {
 			return ArgUtil.parseAsListOfT(value, listItem, ((List<T>) Constants.EMPTY_LIST), false);
@@ -103,6 +107,11 @@ public class MapModel implements JsonSerializerType<Object> {
 
 	public Object get(String key, Object defaultValue) {
 		return this.map.getOrDefault(key, defaultValue);
+	}
+
+	public MapModel put(String key, Object value) {
+		this.map.put(key, value);
+		return this;
 	}
 
 	public Object getFirst() {

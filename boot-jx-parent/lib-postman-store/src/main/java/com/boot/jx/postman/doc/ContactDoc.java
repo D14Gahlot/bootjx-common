@@ -3,25 +3,27 @@ package com.boot.jx.postman.doc;
 import java.io.Serializable;
 import java.util.Map;
 
-import org.springframework.data.annotation.TypeAlias;
-import org.springframework.data.mongodb.core.mapping.Document;
+import com.boot.jx.postman.model.MessageDefinitions.Contactable;
 
-import com.boot.jx.dict.ContactType;
-
-@Document(collection = "CONTACT")
-@TypeAlias("ContactDoc")
-public class ContactDoc implements Serializable {
+public class ContactDoc implements Serializable, Contactable {
 	private static final long serialVersionUID = -6046846959629225232L;
-	private String mobile;
+	private String email;
 	private String userid;
-	private ContactType contactType;
+	private String mobile;
+
+	private String contactType;
+	private String channel;
+	private String lane;
+	private String csid;
+	private String contactId;
+
 	private Map<String, Object> filter;
 
-	public String getMobile() {
+	public String getPhone() {
 		return mobile;
 	}
 
-	public void setMobile(String mobile) {
+	public void setPhone(String mobile) {
 		this.mobile = mobile;
 	}
 
@@ -41,11 +43,59 @@ public class ContactDoc implements Serializable {
 		this.filter = filter;
 	}
 
-	public ContactType getContactType() {
+	public String getContactType() {
 		return contactType;
 	}
 
-	public void setContactType(ContactType contactType) {
+	public void setContactType(String contactType) {
 		this.contactType = contactType;
+	}
+
+	public String getEmail() {
+		return email;
+	}
+
+	public void setEmail(String email) {
+		this.email = email;
+	}
+
+	public String getMobile() {
+		return mobile;
+	}
+
+	public void setMobile(String mobile) {
+		this.mobile = mobile;
+	}
+
+	public String getContactId() {
+		return contactId;
+	}
+
+	public void setContactId(String contactId) {
+		this.contactId = contactId;
+	}
+
+	public String getCsid() {
+		return csid;
+	}
+
+	public void setCsid(String csid) {
+		this.csid = csid;
+	}
+
+	public String getLane() {
+		return lane;
+	}
+
+	public void setLane(String lane) {
+		this.lane = lane;
+	}
+
+	public String getChannel() {
+		return channel;
+	}
+
+	public void setChannel(String channel) {
+		this.channel = channel;
 	}
 }

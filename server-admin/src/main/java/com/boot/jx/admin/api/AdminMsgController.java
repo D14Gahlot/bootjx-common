@@ -16,14 +16,18 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.boot.jx.admin.manager.ChatParserAndImportor;
+import com.boot.jx.admin.service.BulkMessageService;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.chat.ChatArchive;
 import com.boot.jx.common.doc.ImportChatSessionDoc;
 import com.boot.jx.dict.ContactType;
+import com.boot.jx.postman.doc.BulkSessionDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.dto.ChatSessionDTO;
+import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.store.SessionStore;
 import com.boot.utils.ArgUtil;
+import com.google.i18n.phonenumbers.NumberParseException;
 
 @RestController
 public class AdminMsgController {
@@ -115,4 +119,14 @@ public class AdminMsgController {
 	public ApiResponse<ImportChatSessionDoc, Object> importChatLogsDelete(@RequestBody ImportChatSessionDoc doc) {
 		return chatParseManager.trashChat(doc);
 	}
+
+	@Autowired
+	private BulkMessageService bulkMessageService;
+
+	@RequestMapping(value = "/api/message/bulk/send", method = { RequestMethod.POST })
+	public ApiResponse<BulkSessionDoc, Object> sendBulkMessage(@RequestBody OutboxMessage bulkMessage)
+			throws NumberParseException {
+		return ApiResponse.buildResult(bulkMessageService.send(bulkMessage));
+	}
+
 }

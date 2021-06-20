@@ -57,4 +57,8 @@ public class CommonMongoTemplate extends CommonMongoTemplateDefault {
 		return mongoTemplate.updateFirst(builder.getQuery(), builder.getUpdate(), builder.getDocClass());
 	}
 
+	public WriteResult upsert(DocQueryBuilder<?> builder) {
+		return mongoTemplate.upsert(builder.getQuery(), builder.getUpdate(), builder.getDocClass());
+	}
+
 }

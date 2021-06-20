@@ -14,6 +14,8 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import com.boot.jx.mongo.CommonDocInterfaces.Patchable;
 import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.TagDocument;
+import com.boot.jx.postman.model.Message.Status;
+import com.boot.utils.ArgUtil;
 
 @Document(collection = MessageDoc.COLLECTION_NAME)
 @TypeAlias("MessageDoc")
@@ -31,10 +33,14 @@ public class MessageDoc implements Serializable, Patchable<MessageDoc> {
 	@Indexed
 	private String sessionId;
 
+	@Indexed
+	private String bulkSessionId;
+
 	private String collapseId;
 	private long timestamp;
 	private String type;
 	private String template;
+	private String templateId;
 	private String action;
 	private String handler;
 	private String message;
@@ -249,4 +255,27 @@ public class MessageDoc implements Serializable, Patchable<MessageDoc> {
 			stamps = new HashMap<String, Long>();
 		return stamps;
 	}
+
+	public void updateStatus(Status status) {
+		String statusStr = ArgUtil.parseAsString(status);
+		this.status = statusStr;
+		this.stamps().put(statusStr, System.currentTimeMillis());
+	}
+
+	public String getTemplateId() {
+		return templateId;
+	}
+
+	public void setTemplateId(String templateId) {
+		this.templateId = templateId;
+	}
+
+	public String getBulkSessionId() {
+		return bulkSessionId;
+	}
+
+	public void setBulkSessionId(String bulkId) {
+		this.bulkSessionId = bulkId;
+	}
+
 }

@@ -17,8 +17,8 @@ public class Notipy extends Message<Notipy> {
 	}
 
 	public static enum ChannelType implements IChannel {
-		NOTIPY("C9AK11W2K"), ALERTY("CET4055AB"), FEED("CET8JSKFZ"), DEPLOYER("C8L3GL92A"),
-		GENERAL("C7F823MLJ"), INQUIRY("CAQ4WUNAZ", Workspace.MODEX);
+		NOTIPY("C9AK11W2K"), ALERTY("CET4055AB"), FEED("CET8JSKFZ"), DEPLOYER("C8L3GL92A"), GENERAL("C7F823MLJ"),
+		INQUIRY("CAQ4WUNAZ", Workspace.MODEX);
 
 		String code;
 		Workspace workspace;
@@ -52,7 +52,7 @@ public class Notipy extends Message<Notipy> {
 	public Notipy() {
 		super();
 		this.fields = new ArrayList<Map<String, Object>>();
-		this.channel = ChannelType.DEFAULT.toString();
+		this.contact().setChannel(ChannelType.DEFAULT.toString());
 	}
 
 	public Object getAuthor() {
