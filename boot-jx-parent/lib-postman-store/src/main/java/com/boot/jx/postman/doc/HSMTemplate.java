@@ -1,20 +1,23 @@
 package com.boot.jx.postman.doc;
 
 import java.io.Serializable;
+import java.util.List;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.TypeAlias;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import com.boot.jx.mongo.CommonDocInterfaces.OldDocVersion;
+
 @Document(collection = "DICT_HSM_TEMPLATES")
 @TypeAlias("HSMTemplate")
-public class HSMTemplate implements Serializable {
+public class HSMTemplate implements Serializable, OldDocVersion<HSMTemplate> {
 
 	private static final long serialVersionUID = 5953299041958788771L;
 
 	@Id
-	private String templateId;
+	private String id;
 
 	@Indexed(unique = true)
 	private String name;
@@ -23,15 +26,9 @@ public class HSMTemplate implements Serializable {
 
 	private String title;
 
-	private String content;
+	private String template;
 
-	public String getTemplateId() {
-		return templateId;
-	}
-
-	public void setTemplateId(String templateId) {
-		this.templateId = templateId;
-	}
+	private List<HSMTemplate> oldVersions;
 
 	public String getName() {
 		return name;
@@ -57,12 +54,28 @@ public class HSMTemplate implements Serializable {
 		this.title = title;
 	}
 
-	public String getContent() {
-		return content;
+	public String getTemplate() {
+		return template;
 	}
 
-	public void setContent(String content) {
-		this.content = content;
+	public void setTemplate(String template) {
+		this.template = template;
+	}
+
+	public List<HSMTemplate> getOldVersions() {
+		return oldVersions;
+	}
+
+	public void setOldVersions(List<HSMTemplate> oldVersions) {
+		this.oldVersions = oldVersions;
+	}
+
+	public String getId() {
+		return id;
+	}
+
+	public void setId(String id) {
+		this.id = id;
 	}
 
 }

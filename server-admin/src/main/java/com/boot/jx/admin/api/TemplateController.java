@@ -14,10 +14,11 @@ import org.springframework.web.multipart.MultipartFile;
 import com.boot.jx.AppContextUtil;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.aws.AWSFileStore;
+import com.boot.jx.postman.doc.HSMTemplate;
 import com.boot.jx.postman.doc.QuickAction;
 import com.boot.jx.postman.doc.QuickLabel;
-import com.boot.jx.postman.doc.QuickReply;
 import com.boot.jx.postman.doc.QuickMedia;
+import com.boot.jx.postman.doc.QuickReply;
 import com.boot.utils.ArgUtil;
 
 @RestController
@@ -193,5 +194,41 @@ public class TemplateController {
 
 		return ApiResponse.buildResults(mongoTemplate.findAll(QuickMedia.class)).data(newVersion)
 				.message("Quick Media created");
+	}
+
+	@RequestMapping(value = "/api/tmpl/pushtemplate", method = { RequestMethod.GET })
+	public ApiResponse<HSMTemplate, Object> listPushTemplates() {
+		return ApiResponse.buildResults(mongoTemplate.findAll(HSMTemplate.class));
+	}
+
+	@RequestMapping(value = "/api/tmpl/pushtemplate", method = { RequestMethod.DELETE })
+	public ApiResponse<HSMTemplate, Object> deletePushTemplates(@RequestParam String id) {
+		HSMTemplate qr = new HSMTemplate();
+		qr.setId(id);
+		mongoTemplate.remove(qr);
+		return ApiResponse.buildResults(mongoTemplate.findAll(HSMTemplate.class)).data(qr)
+				.message("PushTemplate deleted");
+	}
+
+	@RequestMapping(value = "/api/tmpl/pushtemplate", method = { RequestMethod.POST })
+	public ApiResponse<HSMTemplate, Object> createPushTemplates(@RequestParam(required = false) String id,
+			@RequestParam String category, @RequestParam String title,
+			@RequestParam(required = false) String template) {
+
+		HSMTemplate newVersion = new HSMTemplate();
+		if (ArgUtil.is(id)) {
+			HSMTemplate oldVersion = mongoTemplate.findById(id, HSMTemplate.class);
+			if (ArgUtil.is(oldVersion)) {
+				newVersion.oldVersion(oldVersion);
+				newVersion.setId(id);
+			}
+		}
+
+		newVersion.setCategory(category);
+		newVersion.setTitle(title);
+		newVersion.setTemplate(template);
+		mongoTemplate.save(newVersion);
+		return ApiResponse.buildResults(mongoTemplate.findAll(HSMTemplate.class)).data(newVersion)
+				.message("QuickReply created");
 	}
 }
