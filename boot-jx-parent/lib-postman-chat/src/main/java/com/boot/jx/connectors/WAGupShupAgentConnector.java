@@ -43,7 +43,7 @@ public class WAGupShupAgentConnector implements ConnectorHandler {
 
 	@Override
 	public void send(ChatContactDoc chatContactDoc, OutboxMessage outboxMessage) {
-		outboxMessage.contact().setChannel(chatContactDoc.getChannelType());
+		outboxMessage.contact().setChannel(chatContactDoc.getChannel());
 		outboxMessage.contact().setLane(chatContactDoc.getLane());
 		if (ArgUtil.isEqual(outboxMessage.contact().getChannel(), Channel.GUPSHUPAGENT.toString())) {
 			if (outboxMessage.isViaAgent() && ArgUtil.isEmpty(outboxMessage.getFiles())) {

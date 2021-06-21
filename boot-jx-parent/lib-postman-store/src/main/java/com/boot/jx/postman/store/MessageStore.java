@@ -171,6 +171,10 @@ public class MessageStore extends CommonDocStore {
 		doc.setLogs(outMessage.getLogs());
 		doc.setMessageIdExt(outMessage.getMessageIdExt());
 		doc.setStatus(ArgUtil.parseAsString(outMessage.getStatus()));
+
+		doc.stamps().putAll(outMessage.stamps());
+		doc.meta().putAll(outMessage.meta());
+
 		return doc;
 	}
 

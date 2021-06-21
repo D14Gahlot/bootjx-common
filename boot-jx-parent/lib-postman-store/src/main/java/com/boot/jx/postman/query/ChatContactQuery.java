@@ -75,4 +75,10 @@ public class ChatContactQuery extends DocQueryBuilder<ChatContactDoc> {
 		return this;
 	}
 
+	public ChatContactQuery setChannel(String channel) {
+		this.doc.setChannel(channel);
+		this.set("channel", channel);
+		return this;
+	}
+
 }

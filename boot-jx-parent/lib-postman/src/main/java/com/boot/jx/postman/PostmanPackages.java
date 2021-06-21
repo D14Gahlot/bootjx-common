@@ -8,6 +8,8 @@ public class PostmanPackages {
 
 	public static interface ICommonTmplPackage {
 		public PostManFile process(PostManFile file, ContactType contactType);
+
+		public String process(String templateContent, Object contact);
 	}
 
 	public static interface MessageClient {

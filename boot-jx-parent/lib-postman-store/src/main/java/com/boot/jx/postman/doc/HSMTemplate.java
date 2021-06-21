@@ -1,7 +1,9 @@
 package com.boot.jx.postman.doc;
 
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.TypeAlias;
@@ -27,6 +29,10 @@ public class HSMTemplate implements Serializable, OldDocVersion<HSMTemplate> {
 	private String title;
 
 	private String template;
+
+	private Map<String, Object> meta;
+
+	protected Map<String, Object> options;
 
 	private List<HSMTemplate> oldVersions;
 
@@ -76,6 +82,36 @@ public class HSMTemplate implements Serializable, OldDocVersion<HSMTemplate> {
 
 	public void setId(String id) {
 		this.id = id;
+	}
+
+	public Map<String, Object> getMeta() {
+		return meta;
+	}
+
+	public void setMeta(Map<String, Object> meta) {
+		this.meta = meta;
+	}
+
+	public Map<String, Object> meta() {
+		if (this.meta == null) {
+			this.meta = new HashMap<String, Object>();
+		}
+		return this.meta;
+	}
+
+	public Map<String, Object> getOptions() {
+		return options;
+	}
+
+	public void setOptions(Map<String, Object> options) {
+		this.options = options;
+	}
+
+	public Map<String, Object> options() {
+		if (this.options == null) {
+			this.options = new HashMap<String, Object>();
+		}
+		return this.options;
 	}
 
 }

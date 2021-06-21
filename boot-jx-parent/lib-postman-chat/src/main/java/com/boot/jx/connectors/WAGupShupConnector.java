@@ -18,6 +18,7 @@ import com.boot.jx.postman.client.PMFileStoreClient;
 import com.boot.jx.postman.client.TmplClient;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
+import com.boot.jx.postman.doc.HSMTemplate;
 import com.boot.jx.postman.doc.QuickMedia;
 import com.boot.jx.postman.gupshup.GupShupClientAbstract;
 import com.boot.jx.postman.gupshup.GupShupClientChat;
@@ -85,6 +86,11 @@ public class WAGupShupConnector implements ConnectorHandler {
 					tmplClient.process(outboxMessage);
 					outboxMessage = getClient(isNotify).send(outboxMessage);
 				}
+			} else if (ArgUtil.is(outboxMessage.getTemplateId())) {
+				HSMTemplate hsmTemplate = mongoTemplate.findById(outboxMessage.getTemplateId(), HSMTemplate.class);
+
+				outboxMessage.setMessage(tmplClient.process(hsmTemplate.getTemplate(), outboxMessage.getModel()));
+				outboxMessage = getClient(isNotify).send(outboxMessage);
 			} else {
 				outboxMessage = getClient(isNotify).send(outboxMessage);
 			}
@@ -97,7 +103,8 @@ public class WAGupShupConnector implements ConnectorHandler {
 
 	@Override
 	public void send(ChatContactDoc chatContactDoc, OutboxMessage outboxMessage) {
-		outboxMessage.contact().setChannel(chatContactDoc.getChannelType());
+		outboxMessage.messageMetaWrapper().composeType("N"); // is a New Message
+		outboxMessage.contact().setChannel(chatContactDoc.getChannel());
 		outboxMessage.contact().setLane(chatContactDoc.getLane());
 		if (TimeUtils.isExpired(chatContactDoc.getLastInBoundStamp(), "24hr")) {
 			if (ArgUtil.isEmptyValue(chatContactDoc.getLastOptInStamp())) {
@@ -105,14 +112,17 @@ public class WAGupShupConnector implements ConnectorHandler {
 				commonMongoTemplate.updateFirst(
 						new ChatContactQuery(chatContactDoc).setLastOptInStamp(System.currentTimeMillis()));
 			}
+			outboxMessage.messageMetaWrapper().sendType("PM"); // Push Message
 			this.send(true, outboxMessage);
 		} else {
+			outboxMessage.messageMetaWrapper().sendType("SM"); // Session Message
 			this.send(false, outboxMessage);
 		}
 	}
 
 	@Override
 	public void reply(SessionMessage inboxMessage, OutboxMessage outboxMessage) {
+		outboxMessage.messageMetaWrapper().composeType("R"); // Its a Reply
 		this.send(false, outboxMessage);
 	}
 

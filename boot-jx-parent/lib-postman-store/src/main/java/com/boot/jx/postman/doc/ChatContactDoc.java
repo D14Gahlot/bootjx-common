@@ -28,7 +28,10 @@ public class ChatContactDoc implements Serializable, Contactable {
 	private String csid;
 
 	private String contactType;
+
 	private String channelType;
+	private String channel;
+
 	private String lane;
 
 	private long lastInBoundStamp;
@@ -189,11 +192,11 @@ public class ChatContactDoc implements Serializable, Contactable {
 
 	@Override
 	public void setChannel(String channel) {
-		this.channelType = channel;
+		this.channel = channel;
 	}
 
 	@Override
 	public String getChannel() {
-		return this.channelType;
+		return ArgUtil.nonEmpty(this.channel, this.channelType);
 	}
 }

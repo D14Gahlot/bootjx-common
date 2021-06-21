@@ -24,7 +24,6 @@ public class OutboxMessage extends Message<OutboxMessage> implements WAMessageOp
 	private BigDecimal queue;
 	private MessageSession session;
 	private List<String> logs;
-	private String csid;
 
 	public OutboxMessage(ContactType contactType) {
 		super(contactType);
@@ -74,18 +73,18 @@ public class OutboxMessage extends Message<OutboxMessage> implements WAMessageOp
 	}
 
 	public String getCsid() {
-		return csid;
+		return this.contact().getCsid();
 	}
 
 	public void setCsid(String csid) {
-		this.csid = csid;
+		this.contact().setCsid(csid);
 	}
 
 	@Override
 	@JsonIgnore
 	public String forContact() {
-		if (ArgUtil.is(this.csid)) {
-			return this.csid;
+		if (ArgUtil.is(this.getCsid())) {
+			return this.getCsid();
 		}
 		return CollectionUtil.getOne(this.to);
 	}

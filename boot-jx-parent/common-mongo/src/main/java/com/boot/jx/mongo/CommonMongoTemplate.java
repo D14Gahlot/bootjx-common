@@ -57,6 +57,13 @@ public class CommonMongoTemplate extends CommonMongoTemplateDefault {
 		return mongoTemplate.updateFirst(builder.getQuery(), builder.getUpdate(), builder.getDocClass());
 	}
 
+	/**
+	 * @param builder
+	 * @return
+	 * 
+	 * @see MongoTemplate#upsert(Query,
+	 *      org.springframework.data.mongodb.core.query.Update, Class, String)
+	 */
 	public WriteResult upsert(DocQueryBuilder<?> builder) {
 		return mongoTemplate.upsert(builder.getQuery(), builder.getUpdate(), builder.getDocClass());
 	}

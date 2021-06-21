@@ -69,7 +69,7 @@ public class ChatParserAndImportor {
 	public ApiResponse<ImportChatSessionDoc, Object> trashChat(ImportChatSessionDoc doc) {
 		ImportChatSessionDoc docs = commpnMongoTemplate.findByIdString(doc.getId(), ImportChatSessionDoc.class);
 
-		if(ArgUtil.is(docs)){
+		if (ArgUtil.is(docs)) {
 			for (String sessionId : docs.getSessions()) {
 				ChatSessionDoc session = new ChatSessionDoc();
 				session.setSessionId(sessionId);
@@ -115,7 +115,7 @@ public class ChatParserAndImportor {
 			ChatSessionDoc chatSessionDoc = EntityDtoUtil.dtoToEntity(session, new ChatSessionDoc());
 			chatSessionDoc.setContactId(chatContactDoc.getContactId());
 			chatSessionDoc.setContactType(chatContactDoc.getContactType());
-			chatSessionDoc.setChannel(chatContactDoc.getChannelType());
+			chatSessionDoc.setChannel(chatContactDoc.getChannel());
 			chatSessionDoc.setLane(chatContactDoc.getLane());
 
 			chatSessionDoc.setResolved(true);

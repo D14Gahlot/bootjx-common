@@ -127,7 +127,12 @@ public abstract class GupShupClientAbstract {
 
 	public OutboxMessage send(OutboxMessage message) {
 
-		String to = CollectionUtil.getOne(message.getTo());
+		String to = null;
+		if(ArgUtil.is(message.getCsid())) {
+			to = message.getCsid();
+		} else {
+			to = CollectionUtil.getOne(message.getTo());
+		}
 
 		GupShupReq gupShupReq = new GupShupReq();
 		gupShupReq.setSendTo(to);
@@ -194,6 +199,7 @@ public abstract class GupShupClientAbstract {
 	}
 
 	public GupShupResp sendMessage(GupShupReq gupShupReq, MessageOptions options) {
+		gupShupReq.method(GupShupConstants.Method.SendMessage);
 		return post(gupShupReq);
 	}
 

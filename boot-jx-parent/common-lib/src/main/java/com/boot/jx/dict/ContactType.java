@@ -1,8 +1,36 @@
 package com.boot.jx.dict;
 
 public enum ContactType {
-	SMS("sms", "Mobile No."), EMAIL("email", "Email Id"), WHATSAPP("wa", "WhatsApp No."), PUSH("push"),
-	FACEBOOK("fb", "Facebook Id"), TELEGRAM("tg", "Telegram No."), WEBSITE("web"), TWITTER("tw", "Twitter"),
+	SMS("sms", "Mobile No.") {
+		@Override
+		public boolean isPhoneIndex() {
+			return true;
+		}
+	},
+	EMAIL("email", "Email Id") {
+		@Override
+		public boolean isEmailIndex() {
+			return true;
+		}
+	},
+
+	WHATSAPP("wa", "WhatsApp No.") {
+		@Override
+		public boolean isPhoneIndex() {
+			return true;
+		}
+	},
+
+	PUSH("push"), FACEBOOK("fb", "Facebook Id"),
+
+	TELEGRAM("tg", "Telegram No.") {
+		@Override
+		public boolean isPhoneIndex() {
+			return true;
+		}
+	},
+
+	WEBSITE("web"), TWITTER("tw", "Twitter"),
 	// Default Null Value
 	DUMMY("dummy"), EMPTY("");
 
@@ -42,5 +70,13 @@ public enum ContactType {
 
 	public String getLabel() {
 		return label;
+	}
+
+	public boolean isPhoneIndex() {
+		return false;
+	}
+
+	public boolean isEmailIndex() {
+		return false;
 	}
 }

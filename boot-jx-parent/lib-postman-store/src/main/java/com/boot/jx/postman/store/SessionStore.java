@@ -13,7 +13,6 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Component;
 
-import com.boot.jx.dict.ContactType;
 import com.boot.jx.mongo.CommonDocStore;
 import com.boot.jx.mongo.CommonMongoQueryBuilder;
 import com.boot.jx.mongo.CommonMongoQueryBuilder.CommonMongoCriteria;
@@ -28,7 +27,6 @@ import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.MessageDefinitions.Contactable;
 import com.boot.jx.postman.model.MessageDefinitions.IMessage;
 import com.boot.jx.postman.model.MessageDefinitions.SessionMessage;
-import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.query.ChatContactQuery;
 import com.boot.jx.postman.query.ChatSessionQuery;
 import com.boot.jx.postman.store.PMStoreConstants.CHAT_MODE;
@@ -75,9 +73,14 @@ public class SessionStore extends CommonDocStore {
 	public ChatContactDoc findOrCreate(ChatContactDoc chatContactDocQuery) {
 		ChatContactDoc chatContactDoc = null;
 		Contactable contact = PostManUtil.updateContact(chatContactDocQuery);
-		if (ArgUtil.is(contact.getContactId())) {
-			chatContactDoc = mongoTemplate.findById(contact.getContactId(), ChatContactDoc.class);
+
+		if (ArgUtil.isEmpty(contact.getContactId())) {
+			return null;
 		}
+		chatContactDoc = mongoTemplate.findById(contact.getContactId(), ChatContactDoc.class);
+
+		ChatContactQuery chatContactQuery = ArgUtil.is(chatContactDoc) ? new ChatContactQuery(chatContactDoc)
+				: new ChatContactQuery(contact.getContactId());
 
 		if (!ArgUtil.is(chatContactDoc) // chatContactDoc is not found
 				&& ArgUtil.is(contact.getCsid()) // csid is present
@@ -90,12 +93,12 @@ public class SessionStore extends CommonDocStore {
 					.and("lane").is(chatContactDocQuery.getLane())), ChatContactDoc.class);
 			if (!ArgUtil.is(chatContactDoc)) {
 				chatContactDoc = new ChatContactDoc();
-				chatContactDoc.setContactId(chatContactDocQuery.getContactId());
-				chatContactDoc.setContactType(chatContactDocQuery.getContactType());
-				chatContactDoc.setChannel(chatContactDocQuery.getChannel());
-				chatContactDoc.setCsid(chatContactDocQuery.getCsid());
-				chatContactDoc.setLane(chatContactDocQuery.getLane());
-				mongoTemplate.save(chatContactDoc);
+				chatContactQuery.setContactId(chatContactDocQuery.getContactId());
+				chatContactQuery.setContactType(chatContactDocQuery.getContactType());
+				chatContactQuery.setChannel(chatContactDocQuery.getChannel());
+				chatContactQuery.setCsid(chatContactDocQuery.getCsid());
+				chatContactQuery.setLane(chatContactDocQuery.getLane());
+				commonMongoTemplate.upsert(chatContactQuery);
 			}
 		}
 		return chatContactDoc;
@@ -124,7 +127,7 @@ public class SessionStore extends CommonDocStore {
 		ChatSessionDoc chatSessionDoc = new ChatSessionDoc();
 		chatSessionDoc.setContactId(chatContactDoc.getContactId());
 		chatSessionDoc.setContactType(chatContactDoc.getContactType());
-		chatSessionDoc.setChannel(chatContactDoc.getChannelType());
+		chatSessionDoc.setChannel(chatContactDoc.getChannel());
 		chatSessionDoc.setLane(chatContactDoc.getLane());
 		save(chatSessionDoc);
 		return chatSessionDoc;
@@ -183,9 +186,12 @@ public class SessionStore extends CommonDocStore {
 			save(chatSessionDoc);
 			chatContactQuery.setSessionId(chatSessionDoc.getSessionId());
 
-			// CONTACT CREATION
-			if (ArgUtil.isEmpty(chatContactDoc) || ArgUtil.isEmpty(chatContactDoc.getCsid())
-					|| ArgUtil.isEmpty(chatContactDoc.getLane())) {
+			// CONTACT CREATION - needs creation or updation if
+			if (ArgUtil.isEmpty(chatContactDoc) // chatContactDo not found
+					|| ArgUtil.isEmpty(chatContactDoc.getContactType()) // or contactType is missing
+					|| ArgUtil.isEmpty(chatContactDoc.getCsid()) // or csid is missing
+					|| ArgUtil.isEmpty(chatContactDoc.getLane()) // or lane is missing
+					|| ArgUtil.isEmpty(chatContactDoc.getChannel())) { // or channel is mssing
 				chatContactQuery.setContactId(contactId);
 				chatContactQuery.setContactType(ArgUtil.parseAsString(inboxMessage.contact().type()));
 				chatContactQuery.setChannelType(inboxMessage.contact().getChannel());
@@ -215,25 +221,16 @@ public class SessionStore extends CommonDocStore {
 		return chatSessionDoc;
 	}
 
-	public ChatSessionDoc linkSession(InboxMessage inboxMessage) {
+	public ChatSessionDoc linkSession(IMessage inboxMessage) {
 		ChatSessionDoc chatSessionDoc = this.createSession(inboxMessage);
-		inboxMessage.contact().setContactId(chatSessionDoc.getContactId());
-		inboxMessage.setSessionId(chatSessionDoc.getSessionId());
-		inboxMessage.session().setAgent(chatSessionDoc.getAssignedToAgent());
-		inboxMessage.session().setDept(chatSessionDoc.getAssignedToDept());
-		inboxMessage.session().setMode(chatSessionDoc.getMode());
-		inboxMessage.session().setResolved(chatSessionDoc.isResolved());
-		return chatSessionDoc;
-	}
-
-	public ChatSessionDoc linkSession(OutboxMessage outboxMessage) {
-		ChatSessionDoc chatSessionDoc = this.createSession(outboxMessage);
-		outboxMessage.contact().setContactId(chatSessionDoc.getContactId());
-		outboxMessage.setSessionId(chatSessionDoc.getSessionId());
-		outboxMessage.session().setAgent(chatSessionDoc.getAssignedToAgent());
-		outboxMessage.session().setDept(chatSessionDoc.getAssignedToDept());
-		outboxMessage.session().setMode(chatSessionDoc.getMode());
-		outboxMessage.session().setResolved(chatSessionDoc.isResolved());
+		if (ArgUtil.is(chatSessionDoc)) {
+			inboxMessage.contact().setContactId(chatSessionDoc.getContactId());
+			inboxMessage.setSessionId(chatSessionDoc.getSessionId());
+			inboxMessage.session().setAgent(chatSessionDoc.getAssignedToAgent());
+			inboxMessage.session().setDept(chatSessionDoc.getAssignedToDept());
+			inboxMessage.session().setMode(chatSessionDoc.getMode());
+			inboxMessage.session().setResolved(chatSessionDoc.isResolved());
+		}
 		return chatSessionDoc;
 	}
 
@@ -241,7 +238,7 @@ public class SessionStore extends CommonDocStore {
 		ChatContactDoc contact = getContact(session.getContactId());
 		InboxMessage inboxMessage = new InboxMessage();
 		inboxMessage.contact().setContactType(contact.getContactType());
-		inboxMessage.contact().setChannel(contact.getChannelType());
+		inboxMessage.contact().setChannel(contact.getChannel());
 		inboxMessage.contact().setLane(ArgUtil.nonEmpty(session.getLane(), contact.getLane()));
 		inboxMessage.setFrom(contact.getCsid());
 		inboxMessage.setFromName(contact.getName());

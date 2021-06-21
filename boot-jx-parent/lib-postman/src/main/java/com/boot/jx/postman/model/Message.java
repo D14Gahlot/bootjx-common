@@ -25,7 +25,7 @@ public class Message<T extends Message<T>> implements Serializable, MessageOptio
 	public static final String RESULTS_KEY = "results";
 
 	public static enum Status {
-		CRTD, INIT, SENT, SENT_ERR, SENTX, SENTX_ERR, DLVRD, READ, NSENT, BLCKD, FAILD;
+		SCHLD, CRTD, INIT, SENT, SENT_ERR, SENTX, SENTX_ERR, DLVRD, READ, NSENT, BLCKD, FAILD;
 	}
 
 	public static class Priority {
@@ -51,6 +51,7 @@ public class Message<T extends Message<T>> implements Serializable, MessageOptio
 
 	private Map<String, Object> model = new HashMap<String, Object>();
 	protected Map<String, Object> options = new HashMap<String, Object>();
+	protected Map<String, Object> meta;
 	private MessageType messageType = null;
 
 	private List<PostManFile> files = null;
@@ -469,6 +470,7 @@ public class Message<T extends Message<T>> implements Serializable, MessageOptio
 	}
 
 	public void updateStatus(Status status) {
+		this.status = status;
 		this.stamps().put(ArgUtil.parseAsString(status), System.currentTimeMillis());
 	}
 
@@ -494,4 +496,31 @@ public class Message<T extends Message<T>> implements Serializable, MessageOptio
 		}
 		return this.contact;
 	}
+
+	public Map<String, Object> getMeta() {
+		return meta;
+	}
+
+	public void setMeta(Map<String, Object> meta) {
+		this.meta = meta;
+	}
+
+	public void setStatus(Status status) {
+		this.status = status;
+	}
+
+	public Map<String, Object> meta() {
+		if (this.meta == null) {
+			this.meta = new HashMap<String, Object>();
+		}
+		return this.meta;
+	}
+
+	public MessageMetaWrapper messageMetaWrapper() {
+		if (this.meta == null) {
+			this.meta = new HashMap<String, Object>();
+		}
+		return new MessageMetaWrapper(this.meta);
+	}
+
 }

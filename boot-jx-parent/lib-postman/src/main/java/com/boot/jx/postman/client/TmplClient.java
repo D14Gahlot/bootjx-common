@@ -45,6 +45,10 @@ public class TmplClient {
 	@Autowired(required = false)
 	private ICommonTmplPackage iCommonTmplPackage;
 
+	public String process(String templateContent, Object contact) {
+		return iCommonTmplPackage.process(templateContent, contact);
+	}
+
 	public ApiResponse<PostManFile, Object> process(PostManFile file, ContactType contactType) throws PostManException {
 		if (isTmplLocal && ArgUtil.is(iCommonTmplPackage)) {
 			return ApiResponse.buildResult(iCommonTmplPackage.process(file, contactType));

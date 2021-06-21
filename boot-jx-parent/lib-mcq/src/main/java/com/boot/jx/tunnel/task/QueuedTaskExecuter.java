@@ -109,9 +109,13 @@ public abstract class QueuedTaskExecuter {
 	}
 
 	public void registerJob(BatchJob batchJob) {
-		batchJob.setTenant(AppContextUtil.getTenant());
-		batch().add(batchJob);
-		jobs.put(batchJob.jobUUID(), batchJob);
+		try {
+			batchJob.setTenant(AppContextUtil.getTenant());
+			batch().add(batchJob);
+			jobs().put(batchJob.jobUUID(), batchJob);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 	public void registerJob(String jobId) {

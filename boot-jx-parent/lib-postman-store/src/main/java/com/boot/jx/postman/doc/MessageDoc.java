@@ -13,6 +13,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import com.boot.jx.mongo.CommonDocInterfaces.Patchable;
 import com.boot.jx.postman.model.Attachment;
+import com.boot.jx.postman.model.MessageMetaWrapper;
 import com.boot.jx.postman.model.TagDocument;
 import com.boot.jx.postman.model.Message.Status;
 import com.boot.utils.ArgUtil;
@@ -49,6 +50,7 @@ public class MessageDoc implements Serializable, Patchable<MessageDoc> {
 	private String agent;
 	private TagDocument tags;
 	private Map<String, Object> model;
+	private Map<String, Object> meta;
 	private List<Attachment> attachments;
 
 	private String quickReplyId;
@@ -278,4 +280,25 @@ public class MessageDoc implements Serializable, Patchable<MessageDoc> {
 		this.bulkSessionId = bulkId;
 	}
 
+	public Map<String, Object> getMeta() {
+		return meta;
+	}
+
+	public void setMeta(Map<String, Object> meta) {
+		this.meta = meta;
+	}
+
+	public Map<String, Object> meta() {
+		if (this.meta == null) {
+			this.meta = new HashMap<String, Object>();
+		}
+		return this.meta;
+	}
+
+	public MessageMetaWrapper messageMetaWrapper() {
+		if (this.meta == null) {
+			this.meta = new HashMap<String, Object>();
+		}
+		return new MessageMetaWrapper(this.meta);
+	}
 }

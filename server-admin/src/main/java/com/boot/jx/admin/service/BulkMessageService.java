@@ -13,7 +13,7 @@ import com.boot.jx.chat.ChatService;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.mongo.CommonMongoQueryBuilder.CommonMongoCriteria;
 import com.boot.jx.postman.doc.BulkSessionDoc;
-import com.boot.jx.postman.doc.ChatContactDoc;
+import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.model.Message.Status;
 import com.boot.jx.postman.model.OutboxMessage;
@@ -128,19 +128,13 @@ public class BulkMessageService extends QueuedTaskExecuter {
 		outboxMessage.contact().type(contactType);
 		outboxMessage.contact().setChannel(channel);
 		outboxMessage.contact().setLane(lane);
+		outboxMessage.contact().setEmail(msg.getContact().getEmail());
+		outboxMessage.contact().setPhone(msg.getContact().getPhone());
+		outboxMessage.contact().setContactId(msg.getContact().getContactId());
 
-		ChatContactDoc chatContactDoc = new ChatContactDoc();
-		chatContactDoc.setContactType(ArgUtil.parseAsString(contactType));
-		chatContactDoc.setChannel(channel);
-		chatContactDoc.setLane(lane);
-		if (ArgUtil.is(msg.getContact())) {
-			chatContactDoc.setEmail(msg.getContact().getEmail());
-			chatContactDoc.setPhone(msg.getContact().getPhone());
-			chatContactDoc.setContactId(msg.getContact().getContactId());
-		}
-		chatContactDoc = sessionStore.findOrCreate(chatContactDoc);
-		if (ArgUtil.is(chatContactDoc)) {
-			chatService.send(chatContactDoc, outboxMessage);
+		ChatSessionDoc chatSessionDoc = sessionStore.linkSession(outboxMessage);
+		if (ArgUtil.is(chatSessionDoc)) {
+			chatService.send(chatSessionDoc, outboxMessage);
 		} else {
 			msg.updateStatus(Status.NSENT);
 			messageStore.save(msg, contactType);

@@ -50,6 +50,10 @@ public class MessageDefinitions {
 
 		public void setLane(String lane);
 
+		public void setPhone(String phone);
+
+		public void setEmail(String email);
+
 		public default ContactType type() {
 			return ArgUtil.parseAsEnumT(getContactType(), ContactType.class);
 		}

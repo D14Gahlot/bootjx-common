@@ -64,6 +64,10 @@ public class MapModel implements JsonSerializerType<Object> {
 			return ArgUtil.parseAsListOfT(value, listItem, ((List<T>) Constants.EMPTY_LIST), false);
 		}
 
+		public boolean exists() {
+			return ArgUtil.is(value);
+		}
+
 		public Object getValue() {
 			return value;
 		}
@@ -190,6 +194,16 @@ public class MapModel implements JsonSerializerType<Object> {
 
 	public static MapModel from(Map<String, Object> map) {
 		return new MapModel(map);
+	}
+
+	public MapModel putAll(Map<? extends String, ? extends Object> source) {
+		this.map.putAll(source);
+		return this;
+	}
+
+	public MapModel putAll(MapModel source) {
+		this.map.putAll(source.toMap());
+		return this;
 	}
 
 }

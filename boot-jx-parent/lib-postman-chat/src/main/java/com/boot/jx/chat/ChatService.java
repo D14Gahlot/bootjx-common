@@ -134,8 +134,9 @@ public class ChatService {
 
 		outboxMessage.updateStatus(Message.Status.INIT);
 		outboxMessage.contact().setContactType(chatContactDoc.getContactType());
-		outboxMessage.contact().setChannel(chatContactDoc.getChannelType());
+		outboxMessage.contact().setChannel(chatContactDoc.getChannel());
 		outboxMessage.contact().setLane(chatContactDoc.getLane());
+		outboxMessage.contact().setCsid(chatContactDoc.getCsid());
 		outboxMessage.contact().setContactId(chatContactDoc.getContactId());
 		outboxMessage.setSessionId(chatContactDoc.getSessionId());
 

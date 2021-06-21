@@ -87,7 +87,6 @@ public class InBoundService {
 				chatService.initSessionPost(inboxMessageOriginal, session);
 			}
 			
-			
 		}
 
 		if (ArgUtil.isEmpty(inBoundFilter) || inBoundFilter.onFilter(inboxMessageOriginal)) {
