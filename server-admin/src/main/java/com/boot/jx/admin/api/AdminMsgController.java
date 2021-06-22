@@ -123,10 +123,16 @@ public class AdminMsgController {
 	@Autowired
 	private BulkMessageService bulkMessageService;
 
-	@RequestMapping(value = "/api/message/bulk/send", method = { RequestMethod.POST })
+	@RequestMapping(value = "/api/message/bulk/push/send", method = { RequestMethod.POST })
 	public ApiResponse<BulkSessionDoc, Object> sendBulkMessage(@RequestBody OutboxMessage bulkMessage)
 			throws NumberParseException {
 		return ApiResponse.buildResult(bulkMessageService.send(bulkMessage));
+	}
+
+	@RequestMapping(value = "/api/message/bulk/push/logs", method = { RequestMethod.GET })
+	public ApiResponse<BulkSessionDoc, Object> getBulkSession(@RequestParam String startStamp,
+			@RequestParam String endStamp) throws NumberParseException {
+		return ApiResponse.buildResults(mongoTemplate.findAll(BulkSessionDoc.class));
 	}
 
 }

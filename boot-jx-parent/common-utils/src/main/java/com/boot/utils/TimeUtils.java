@@ -116,7 +116,7 @@ public class TimeUtils {
 	 * 
 	 * @param timeThen - timeStamp we want to check or creation time of timestamp,
 	 *                 or birth-timestamp of entity
-	 * @param maxAge   - maximum age of timestamp or entity
+	 * @param maxAge   - maximum age of timestamp or entity, in milliseconds
 	 * @return
 	 */
 	public static boolean isDead(long timeThen, long maxAge) {

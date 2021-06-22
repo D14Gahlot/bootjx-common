@@ -9,8 +9,23 @@ import com.boot.jx.model.MapModel;
 public abstract class JobTaskModel<T> implements Serializable {
 
 	private static final long serialVersionUID = -8178126816683098712L;
+
+	public static enum JOB_STATUS {
+		CREATED, READING, READING_DONE, EXECUTING, RESOLVED, TALLY, CLOSED, COMPLETED
+	}
+
 	private String tenant;
 	private String jobId;
+	private String batchId;
+
+	public String getBatchId() {
+		return batchId;
+	}
+
+	public void setBatchId(String batchId) {
+		this.batchId = batchId;
+	}
+
 	private Map<String, Object> data;
 
 	public String getTenant() {
@@ -62,6 +77,79 @@ public abstract class JobTaskModel<T> implements Serializable {
 
 	public static class BatchJob extends JobTaskModel<BatchJob> {
 		private static final long serialVersionUID = 8313215764559747000L;
+		private JOB_STATUS status;
+		private long pushedTaskCount;
+		private long doneTaskCount;
+		private long donePercent;
+		private long openStamp;
+		private long resolveStamp;
+		private long closeStamp;
+		private long tallyStamp;
+
+		public JOB_STATUS getStatus() {
+			return status;
+		}
+
+		public void setStatus(JOB_STATUS status) {
+			this.status = status;
+		}
+
+		public long getPushedTaskCount() {
+			return pushedTaskCount;
+		}
+
+		public void setPushedTaskCount(long pushedTaskCount) {
+			this.pushedTaskCount = pushedTaskCount;
+		}
+
+		public long getDoneTaskCount() {
+			return doneTaskCount;
+		}
+
+		public void setDoneTaskCount(long doneTaskCount) {
+			this.doneTaskCount = doneTaskCount;
+		}
+
+		public long getDonePercent() {
+			return donePercent;
+		}
+
+		public void setDonePercent(long donePercent) {
+			this.donePercent = donePercent;
+		}
+
+		public long getOpenStamp() {
+			return openStamp;
+		}
+
+		public void setOpenStamp(long startStamp) {
+			this.openStamp = startStamp;
+		}
+
+		public long getResolveStamp() {
+			return resolveStamp;
+		}
+
+		public void setResolveStamp(long completeStamp) {
+			this.resolveStamp = completeStamp;
+		}
+
+		public long getTallyStamp() {
+			return tallyStamp;
+		}
+
+		public void setTallyStamp(long tallyStamp) {
+			this.tallyStamp = tallyStamp;
+		}
+
+		public long getCloseStamp() {
+			return closeStamp;
+		}
+
+		public void setCloseStamp(long closeStamp) {
+			this.closeStamp = closeStamp;
+		}
+
 	}
 
 	public static class Tasklet extends JobTaskModel<Tasklet> {
@@ -100,6 +188,7 @@ public abstract class JobTaskModel<T> implements Serializable {
 		Tasklet taslet = new Tasklet();
 		taslet.setTenant(job.getTenant());
 		taslet.setJobId(job.getJobId());
+		taslet.setBatchId(job.getBatchId());
 		return taslet;
 	}
 

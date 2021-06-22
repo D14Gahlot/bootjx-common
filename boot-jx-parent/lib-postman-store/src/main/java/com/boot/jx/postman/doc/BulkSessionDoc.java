@@ -1,6 +1,7 @@
 package com.boot.jx.postman.doc;
 
 import java.io.Serializable;
+import java.util.*;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.TypeAlias;
@@ -33,6 +34,8 @@ public class BulkSessionDoc implements AuditableEntity, Serializable {
 	private Integer messageCount;
 	private Integer messageSentCount;
 	private Integer messageFailedCount;
+
+	private Map<String, Long> stats;
 
 	@Override
 	public String getCreatedBy() {
@@ -132,6 +135,21 @@ public class BulkSessionDoc implements AuditableEntity, Serializable {
 
 	public void setLane(String lane) {
 		this.lane = lane;
+	}
+
+	public Map<String, Long> getStats() {
+		return stats;
+	}
+
+	public void setStats(Map<String, Long> stats) {
+		this.stats = stats;
+	}
+
+	public Map<String, Long> stats() {
+		if (this.stats == null) {
+			this.stats = new HashMap<String, Long>();
+		}
+		return this.stats;
 	}
 
 }

@@ -2,9 +2,13 @@ package com.boot.jx.admin.service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.aggregation.Aggregation;
+import org.springframework.data.mongodb.core.aggregation.AggregationResults;
+import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -24,6 +28,7 @@ import com.boot.jx.tunnel.task.JobTaskModel.BatchJob;
 import com.boot.jx.tunnel.task.JobTaskModel.Tasklet;
 import com.boot.jx.tunnel.task.QueuedTaskExecuter;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.JsonUtil;
 import com.boot.utils.UniqueID;
 import com.google.i18n.phonenumbers.NumberParseException;
 import com.google.i18n.phonenumbers.PhoneNumberUtil;
@@ -57,7 +62,7 @@ public class BulkMessageService extends QueuedTaskExecuter {
 		for (String to : bulkMessage.getTo()) {
 			MessageDoc doc = messageStore.createMessageDoc(bulkMessage);
 			doc.setContactId(null);
-			doc.updateStatus(Status.CRTD);
+			doc.updateStatus(Status.SCHLD);
 			doc.setBulkSessionId(session.getBulkSessionId());
 			PHONE_NUMBER_UTIL.parse(to, "IN", phoneNumber);
 			to = String.format("%s%s", phoneNumber.getCountryCode(), phoneNumber.getNationalNumber());
@@ -68,6 +73,7 @@ public class BulkMessageService extends QueuedTaskExecuter {
 			docs.add(doc);
 		}
 
+		session.setStatus("CREATED");
 		mongoTemplate.save(session);
 		messageStore.insert(docs, bulkMessage.contact().type());
 		registerJob(JobTaskModel.newBatchJob()
@@ -84,21 +90,27 @@ public class BulkMessageService extends QueuedTaskExecuter {
 	}
 
 	@Override
-	public BatchJob read(BatchJob batchJob) {
-		BulkSessionDoc doc = mongoTemplate.findById(batchJob.getJobId(), BulkSessionDoc.class);
-		Query query = new Query()
-				.addCriteria(
-						CommonMongoCriteria.where("bulkSessionId").is(batchJob.getJobId()).and("status").is("CRTD"))
-				.limit(50);
+	public boolean read(BatchJob currentBatchJob) {
+		BulkSessionDoc doc = mongoTemplate.findById(currentBatchJob.getJobId(), BulkSessionDoc.class);
+		Query query = new Query().addCriteria(CommonMongoCriteria.where("bulkSessionId").is(currentBatchJob.getJobId())
+				.and("status").is(Status.SCHLD.toString())).limit(10);
 		List<MessageDoc> msgs = messageStore.find(query, doc.getContactType());
 
 		if (!ArgUtil.is(msgs) || msgs.size() == 0) {
-			return null;
+			return true; // Reading is Finished
 		}
+
+		if (!ArgUtil.areEqual(currentBatchJob.getStatus(), doc.getStatus())) {
+			doc.setStatus(currentBatchJob.getStatus().toString());
+			mongoTemplate.save(doc);
+		}
+
 		for (MessageDoc messageDoc : msgs) {
-			push(JobTaskModel.newTasklet(batchJob).taskId(messageDoc.getMessageId()));
+			push(JobTaskModel.newTasklet(currentBatchJob).taskId(messageDoc.getMessageId()));
+			messageDoc.updateStatus(Status.CRTD);
+			messageStore.save(messageDoc, doc.getContactType());
 		}
-		return batchJob;
+		return false;
 	}
 
 	@Scheduled(fixedDelay = 1000)
@@ -134,11 +146,51 @@ public class BulkMessageService extends QueuedTaskExecuter {
 
 		ChatSessionDoc chatSessionDoc = sessionStore.linkSession(outboxMessage);
 		if (ArgUtil.is(chatSessionDoc)) {
+//			try {
+//				System.out.println("Task :" + outboxMessage.getMessageId());
+//				Thread.sleep(1000);
+//			} catch (InterruptedException e) {
+//				e.printStackTrace();
+//			}
 			chatService.send(chatSessionDoc, outboxMessage);
 		} else {
 			msg.updateStatus(Status.NSENT);
 			messageStore.save(msg, contactType);
 		}
+	}
+
+	@Override
+	public boolean tally(BatchJob currentBatchJob) {
+		BulkSessionDoc doc = mongoTemplate.findById(currentBatchJob.getJobId(), BulkSessionDoc.class);
+
+		ContactType contactType = currentBatchJob.data().entry("contactType").asEnum(ContactType.class);
+
+		Aggregation agg = Aggregation.newAggregation(
+				Aggregation.match(Criteria.where("bulkSessionId").is((currentBatchJob.getJobId()))), // Match
+				Aggregation.group("status").count().as("count") // Group By Status
+		);
+
+		// System.out.println("agg :" + agg.toString());
+
+		AggregationResults<Map> results = mongoTemplate.aggregate(agg, MessageStore.getCollectionName(contactType),
+				Map.class);
+		long totalCount = 0;
+		long doneCount = 0;
+		for (Map map : results) {
+			Status status = ArgUtil.parseAsEnumT(map.get("_id"), Status.class);
+			if (ArgUtil.is(status)) {
+				long count = ArgUtil.parseAsLong(map.get("count"), 0L);
+				doc.stats().put(ArgUtil.parseAsString(status), count);
+				totalCount = (totalCount + count);
+				// Done Count
+				if (status.ordinal() > Status.INIT.ordinal()) {
+					doneCount = (doneCount + count);
+				}
+			}
+		}
+		//System.out.println("TALLY : " + (totalCount == doneCount) + " -- " +currentBatchJob.getDonePercent());
+		mongoTemplate.save(doc);
+		return (totalCount == doneCount) && (currentBatchJob.getDonePercent() == 100);
 	}
 
 }

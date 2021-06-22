@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.redisson.api.RAtomicLong;
 import org.redisson.api.RedissonClient;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,12 +20,17 @@ import com.boot.jx.mcq.MCQLocker;
 import com.boot.jx.tunnel.TunnelQueue;
 import com.boot.jx.tunnel.TunnelService;
 import com.boot.jx.tunnel.task.JobTaskModel.BatchJob;
+import com.boot.jx.tunnel.task.JobTaskModel.JOB_STATUS;
 import com.boot.jx.tunnel.task.JobTaskModel.Tasklet;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.ClazzUtil;
+import com.boot.utils.TimeUtils;
 import com.boot.utils.UniqueID;
 
 public abstract class QueuedTaskExecuter {
+
+	public static final long JOB_RESOLVE_EXPIRY = 1000 * 60 * 15;
+	public static final long JOB_TALLY_TIMEOUT = JOB_RESOLVE_EXPIRY / 10;
 
 	public static Logger LOGGER = LoggerService.getLogger(QueuedTaskExecuter.class);
 
@@ -34,7 +40,7 @@ public abstract class QueuedTaskExecuter {
 
 	private String getJobName() {
 		if (this.jobName == null) {
-			this.jobName = ClazzUtil.getUltimateClassName(this);
+			this.jobName = ClazzUtil.getUltimateClassName(this) + "V4";
 		}
 		return this.jobName;
 	}
@@ -60,40 +66,40 @@ public abstract class QueuedTaskExecuter {
 	@Autowired(required = false)
 	private RedissonClient redisson;
 
-	private CacheBox<BatchJob> jobs;
+	private CacheBox<BatchJob> jobStatus;
 
-	private CacheBox<String> cache;
+	private CacheBox<String> taskStatus;
 
-	private TunnelQueue<Tasklet> queue;
+	private TunnelQueue<Tasklet> taskQueue;
 
-	private TunnelQueue<BatchJob> batch;
+	private TunnelQueue<BatchJob> jobQueue;
 
-	public TunnelQueue<Tasklet> queue() {
-		if (queue == null) {
-			this.queue = tunnelService.getQueue("QTE-TASK-Q2-" + getJobName());
+	public TunnelQueue<Tasklet> taskQueue() {
+		if (taskQueue == null) {
+			this.taskQueue = tunnelService.getQueue("QTE-TASK-PENDING-Q-" + getJobName());
 		}
-		return this.queue;
+		return this.taskQueue;
 	}
 
-	public ICacheBox<String> map() {
-		if (cache == null) {
-			this.cache = CacheBox.getInstance("QTE-TASK-M-" + getJobName(), redisson);
+	public ICacheBox<String> taskStatus() {
+		if (taskStatus == null) {
+			this.taskStatus = CacheBox.getInstance("QTE-TASK-M-" + getJobName(), redisson);
 		}
-		return this.cache;
+		return this.taskStatus;
 	}
 
-	public TunnelQueue<BatchJob> batch() {
-		if (batch == null) {
-			this.batch = tunnelService.getQueue("QTE-BATCH-Q2-" + getJobName());
+	public TunnelQueue<BatchJob> jobQueue() {
+		if (jobQueue == null) {
+			this.jobQueue = tunnelService.getQueue("QTE-BATCH-Q-" + getJobName());
 		}
-		return this.batch;
+		return this.jobQueue;
 	}
 
-	public ICacheBox<BatchJob> jobs() {
-		if (jobs == null) {
-			this.jobs = CacheBox.getInstance("QTE-BATCH-M" + getJobName(), redisson);
+	public ICacheBox<BatchJob> jobStatus() {
+		if (jobStatus == null) {
+			this.jobStatus = CacheBox.getInstance("QTE-BATCH-M" + getJobName(), redisson);
 		}
-		return this.jobs;
+		return this.jobStatus;
 	}
 
 	@Autowired
@@ -111,8 +117,10 @@ public abstract class QueuedTaskExecuter {
 	public void registerJob(BatchJob batchJob) {
 		try {
 			batchJob.setTenant(AppContextUtil.getTenant());
-			batch().add(batchJob);
-			jobs().put(batchJob.jobUUID(), batchJob);
+			batchJob.setStatus(JOB_STATUS.CREATED);
+			batchJob.setOpenStamp(System.currentTimeMillis());
+			jobQueue().add(batchJob);
+			jobStatus().put(batchJob.jobUUID(), batchJob);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -124,7 +132,7 @@ public abstract class QueuedTaskExecuter {
 		registerJob(job);
 	}
 
-	@Scheduled(fixedDelay = 1000)
+	@Scheduled(fixedDelay = 2000)
 	public void reader() {
 		read();
 	}
@@ -135,7 +143,7 @@ public abstract class QueuedTaskExecuter {
 			return;
 		}
 
-		BatchJob currentBatchJob = batch().poll();
+		BatchJob currentBatchJob = jobQueue().poll();
 		if (ArgUtil.is(currentBatchJob)) {
 			AppContextUtil.setTenant(currentBatchJob.getTenant());
 			String sessionId = UniqueID.generateString();
@@ -144,10 +152,78 @@ public abstract class QueuedTaskExecuter {
 			AppContextUtil.resetTraceTime();
 			AppContextUtil.init();
 
-			BatchJob nextBatchJob = this.read(currentBatchJob);
+			RAtomicLong pushedTaskCounter = redisson.getAtomicLong("PUSHED." + currentBatchJob.jobUUID());
+			RAtomicLong pushedDoneCounter = redisson.getAtomicLong("DONE." + currentBatchJob.jobUUID());
+			currentBatchJob.setPushedTaskCount(Math.max(1, pushedTaskCounter.get()));
+			currentBatchJob.setDoneTaskCount(pushedDoneCounter.get());
 
-			if (ArgUtil.is(nextBatchJob))
-				batch().add(nextBatchJob);
+			// Moving to next Step
+			if (JOB_STATUS.CREATED == currentBatchJob.getStatus()) {
+				currentBatchJob.setStatus(JOB_STATUS.READING);
+			} else if (JOB_STATUS.READING_DONE == currentBatchJob.getStatus()) {
+				currentBatchJob.setStatus(JOB_STATUS.EXECUTING);
+			} else if (JOB_STATUS.CLOSED == currentBatchJob.getStatus()) {
+				currentBatchJob.setStatus(JOB_STATUS.COMPLETED);
+			}
+
+			try {
+				// Reading & Writing Steps
+				if (JOB_STATUS.READING == currentBatchJob.getStatus()) {
+					currentBatchJob.setBatchId(UniqueID.generateString62());
+					long minDoneCount = currentBatchJob.getPushedTaskCount() / 2;
+					if (currentBatchJob.getDoneTaskCount() >= minDoneCount) {
+						boolean readCompleted = this.read(currentBatchJob);
+						if (readCompleted) {
+							currentBatchJob.setStatus(JOB_STATUS.READING_DONE);
+						}
+					}
+
+				} else if (JOB_STATUS.EXECUTING == currentBatchJob.getStatus()
+						|| JOB_STATUS.RESOLVED == currentBatchJob.getStatus()) {
+
+					// Calculate Progress
+					long percent = (currentBatchJob.getDoneTaskCount() * 100) / currentBatchJob.getPushedTaskCount();
+					long currentProgress = (percent - currentBatchJob.getDonePercent());
+					currentBatchJob.setDonePercent(percent);
+
+					// JOB GOT RESOLVED
+					boolean justGotResolved = false;
+					if (JOB_STATUS.RESOLVED != currentBatchJob.getStatus() && currentBatchJob.getDonePercent() == 100) {
+						currentBatchJob.setStatus(JOB_STATUS.RESOLVED);
+						currentBatchJob.setResolveStamp(System.currentTimeMillis());
+						justGotResolved = true;
+					}
+
+					// JOB is RESOLVED/TALLY =-------> Tally with Method
+					if (justGotResolved
+							// Tally Timeout has happened
+							|| TimeUtils.isExpired(currentBatchJob.getTallyStamp(), JOB_TALLY_TIMEOUT)
+							// Current Progress is more than 10%
+							|| (currentProgress > 0L)) {
+						boolean tallyCompleted = this.tally(currentBatchJob);
+						currentBatchJob.setTallyStamp(System.currentTimeMillis());
+						if (tallyCompleted || (currentBatchJob.getDonePercent() == 100
+								&& TimeUtils.isExpired(currentBatchJob.getResolveStamp(), JOB_RESOLVE_EXPIRY))) {
+							currentBatchJob.setStatus(JOB_STATUS.CLOSED);
+						}
+					}
+				}
+			} catch (Exception e) {
+				LOGGER.error("READING OR TALLY ERROR", e);
+			}
+
+			LOGGER.debug("{} {} ... {}% = {}/{}", currentBatchJob.jobUUID(), currentBatchJob.getStatus(),
+					currentBatchJob.getDonePercent(), currentBatchJob.getDoneTaskCount(),
+					currentBatchJob.getPushedTaskCount());
+
+			// Check if Final Step of continue
+			if (JOB_STATUS.COMPLETED == currentBatchJob.getStatus()) {
+				jobStatus().remove(currentBatchJob.jobUUID());
+			} else {
+				jobStatus().put(currentBatchJob.jobUUID(), currentBatchJob);
+				jobQueue().add(currentBatchJob);
+			}
+
 		}
 	}
 
@@ -156,25 +232,41 @@ public abstract class QueuedTaskExecuter {
 	 * {@link #read(BatchJob)}, read your tasklets for current batch and push them
 	 * one by one to executer using {{@link #push(Tasklet)},
 	 * 
-	 * @param batchJob
-	 * @return
+	 * 
+	 * @param currentBatchJob
+	 * @return - return true when reading is completed otherwise false to continue
+	 *         reading
 	 */
-	public abstract BatchJob read(BatchJob batchJob);
+	public abstract boolean read(BatchJob currentBatchJob);
+
+	/**
+	 * 
+	 * Can be used to track overall status of job
+	 * 
+	 * @param currentBatchJob
+	 * @return - return true when tally is completed otherwise false to continue
+	 *         tallying
+	 */
+	public abstract boolean tally(BatchJob currentBatchJob);
 
 	public String push(Tasklet tasklet) {
 		if (!ArgUtil.is(tasklet.getTenant())) {
 			tasklet.setTenant(AppContextUtil.getTenant());
 		}
 		String taskUUID = tasklet.taskUUID();
-		String ackId = map().get(taskUUID);
+		String ackId = taskStatus().get(taskUUID);
 		if (ArgUtil.is(ackId)) {
 			return ackId;
 		}
 		ackId = UniqueID.generateString62();
 		tasklet.setAckId(ackId);
 
-		map().put(taskUUID, tasklet.getAckId());
-		queue().add(tasklet);
+		taskStatus().put(taskUUID, tasklet.getAckId());
+		taskQueue().add(tasklet);
+
+		RAtomicLong counter = redisson.getAtomicLong("PUSHED." + tasklet.jobUUID());
+		counter.incrementAndGet();
+
 		return ackId;
 	}
 
@@ -190,33 +282,41 @@ public abstract class QueuedTaskExecuter {
 			LOGGER.error("No Redissson Client Instance Available");
 			return;
 		}
-		Tasklet tasklet = queue().poll();
+		Tasklet tasklet = taskQueue().poll();
 		if (ArgUtil.is(tasklet)) {
 			String taskUUID = tasklet.taskUUID();
-			String ackId = map().get(taskUUID);
-			if (ArgUtil.isEmpty(ackId) || ackId.equals("DONE") || !ackId.equals(tasklet.getAckId())) {
+			String ackId = taskStatus().get(taskUUID);
+			if (ArgUtil.isEmpty(ackId) || !ackId.equals(tasklet.getAckId())) {
 				return;
 			}
 
-			BatchJob taskJob = jobs().get(tasklet.jobUUID());
+			BatchJob taskJob = jobStatus().get(tasklet.jobUUID());
 
-			try {
-				if (ArgUtil.is(taskJob)) {
-					AppContextUtil.setTenant(tasklet.getTenant());
-					String sessionId = UniqueID.generateString();
-					AppContextUtil.setSessionId(sessionId);
-					AppContextUtil.getTraceId(true, true);
-					AppContextUtil.resetTraceTime();
-					AppContextUtil.init();
+			if (ArgUtil.is(taskJob)) {
+				AppContextUtil.setTenant(tasklet.getTenant());
+				String sessionId = UniqueID.generateString();
+				AppContextUtil.setSessionId(sessionId);
+				AppContextUtil.getTraceId(true, true);
+				AppContextUtil.resetTraceTime();
+				AppContextUtil.init();
+
+				try {
 					this.execute(taskJob, tasklet);
-					map().put(taskUUID, "DONE");
-				} else {
-					map().fastRemove(taskUUID);
+					taskStatus().put(taskUUID, "SUCCESS");
+				} catch (Exception e) {
+					LOGGER.error("For Tasklet:" + tasklet.getTaskId(), e);
+					taskStatus().put(taskUUID, "FAILED");
+				} finally {
+					RAtomicLong counter = redisson.getAtomicLong("DONE." + tasklet.jobUUID());
+					counter.incrementAndGet();
 				}
-
-			} catch (Exception e) {
-				LOGGER.error("For Tasklet:" + tasklet.getTaskId(), e);
 			}
+
+			if (ArgUtil.isEmpty(taskJob) || ArgUtil.isEmpty(taskJob.getStatus())
+					|| taskJob.getStatus().ordinal() > JOB_STATUS.READING.ordinal()) {
+				taskStatus().fastRemove(taskUUID);
+			}
+
 		}
 	}
 

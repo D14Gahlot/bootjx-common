@@ -17,7 +17,7 @@ import com.boot.jx.common.doc.DepartmentDoc;
 import com.boot.utils.ArgUtil;
 
 @RestController
-public class AdminController {
+public class AdminUserController {
 
 	@Autowired
 	AdminService adminService;

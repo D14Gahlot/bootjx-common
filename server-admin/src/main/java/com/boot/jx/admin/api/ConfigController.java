@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.boot.jx.AppContextUtil;
@@ -15,7 +16,9 @@ import com.boot.jx.admin.service.AdminConfigService;
 import com.boot.jx.agent.AgentConfig;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.postman.PMConfiguration;
+import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PMEnvironment.PMConfigurationObject;
+import com.boot.jx.postman.PMEnvironment.PMConnectorConfig;
 import com.boot.jx.postman.doc.ConnectorConfigDoc;
 import com.boot.jx.postman.fb.FacebookConfig;
 import com.boot.jx.postman.gupshup.GupShupConfig;
@@ -24,6 +27,7 @@ import com.boot.jx.postman.tw.TwitterConfig;
 import com.boot.jx.tunnel.sys.SharedConfigManager;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.EntityDtoUtil;
+import com.fasterxml.jackson.annotation.JsonView;
 
 @RestController
 public class ConfigController {
@@ -36,6 +40,9 @@ public class ConfigController {
 
 	@Autowired
 	private AdminConfigService adminConfigService;
+
+	@Autowired
+	private PMEnvironment pmEnvironment;
 
 	@RequestMapping(value = "/api/connector", method = { RequestMethod.GET })
 	public ApiResponse<ConnectorConfigDoc, Object> getConnnectors() {
@@ -174,5 +181,12 @@ public class ConfigController {
 		mongoTemplate.save(existing);
 		sharedConfigManager.clear();
 		return ApiResponse.buildResults(mongoTemplate.findById(AppContextUtil.getTenant(), ConnectorConfigDoc.class));
+	}
+
+	@JsonView(PMConnectorConfig.Public.class)
+	@ResponseBody
+	@RequestMapping(value = { "/api/options/lanes" }, method = { RequestMethod.GET })
+	public ApiResponse<PMConnectorConfig, Object> listActiveLanes() {
+		return ApiResponse.buildResults(pmEnvironment.config().connectors());
 	}
 }
