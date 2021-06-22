@@ -7,9 +7,9 @@ import org.springframework.stereotype.Component;
 
 import com.boot.jx.postman.PostManException;
 import com.boot.jx.postman.model.Email;
+import com.boot.jx.postman.model.ITemplates.TemplateDefaultEnum;
 import com.boot.jx.postman.model.MessageType;
 import com.boot.jx.postman.model.SupportEmail;
-import com.boot.jx.postman.model.TemplatesMX;
 import com.boot.jx.scope.tnt.TenantScoped;
 import com.boot.jx.scope.tnt.TenantValue;
 import com.boot.utils.Utils;
@@ -65,7 +65,7 @@ public class SupportService {
 		email.addAllTo(supportContactTo);
 		email.getModel().put("data", map);
 		email.setSubject(supportContactSubject);
-		email.setITemplate(TemplatesMX.CONTACT_US);
+		email.setITemplate(TemplateDefaultEnum.CONTACT_US);
 		email.setHtml(true);
 
 		return email;

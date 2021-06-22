@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.dict.ContactType;
+import com.boot.jx.model.CommonFile;
 import com.boot.jx.postman.PostManException;
 import com.boot.jx.postman.PostmanPackages.ICommonTmplPackage;
 import com.boot.jx.postman.model.OutboxMessage;
@@ -45,43 +46,45 @@ public class TmplClient {
 	@Autowired(required = false)
 	private ICommonTmplPackage iCommonTmplPackage;
 
-	public String process(String templateContent, Object contact) {
-		return iCommonTmplPackage.process(templateContent, contact);
+	public String process(String templateContent, Object model) {
+		return iCommonTmplPackage.process(templateContent, model);
 	}
 
-	public ApiResponse<PostManFile, Object> process(PostManFile file, ContactType contactType) throws PostManException {
+	public ApiResponse<CommonFile, Object> process(CommonFile file, ContactType contactType) throws PostManException {
 		if (isTmplLocal && ArgUtil.is(iCommonTmplPackage)) {
 			return ApiResponse.buildResult(iCommonTmplPackage.process(file, contactType));
 		}
 		return restService.ajax(postManClient.getPostmapURL()).path(PATH.TMPL_FILE_PROCESS)
 				.queryParam("contactType", contactType).queryParam(PostManClient.PARAM_LANG, postManClient.getLang())
 				.contentTypeJson().acceptJson().post(file)
-				.as(new ParameterizedTypeReference<ApiResponse<PostManFile, Object>>() {
+				.as(new ParameterizedTypeReference<ApiResponse<CommonFile, Object>>() {
 				});
 	}
 
 	public OutboxMessage process(OutboxMessage outboxMessage) {
-		PostManFile file = new PostManFile();
+		CommonFile file = new PostManFile();
 		file.setModel(outboxMessage.getModel());
-		file.setITemplate(outboxMessage.getITemplate());
+		file.setTemplate(outboxMessage.getTemplate());
+		file.setTemplateId(outboxMessage.getTemplateId());
+
 		file = this.process(file, outboxMessage.contact().type()).getResult();
 		outboxMessage.setMessage(file.getContent());
 
 		if (!ArgUtil.is(outboxMessage.getSubject())) {
-			outboxMessage.setSubject(ArgUtil.parseAsString(file.getOptions().get("subject")));
+			outboxMessage.setSubject(ArgUtil.parseAsString(file.getOptions().get("subject"), file.getTitle()));
 		}
 
 		Map<String, Object> options = new HashMap<String, Object>();
 		List<TmplElement> buttons = new ArrayList<TmplElement>();
 		List<TmplElement> inputs = new ArrayList<TmplElement>();
 
-		for (Entry<String, String> entry : file.getOptions().entrySet()) {
+		for (Entry<String, Object> entry : file.getOptions().entrySet()) {
 			if (entry.getKey().indexOf("form-input-") == 0) {
-				String[] params = entry.getValue().split("\\|");
+				String[] params = ArgUtil.parseAsString(entry.getValue()).split("\\|");
 				inputs.add(new TmplElement().name(entry.getKey().replace("form-input-", ""))
 						.label(CollectionUtil.get(params, 0)).type(CollectionUtil.get(params, 1)));
 			} else if (entry.getKey().indexOf("actions-button-") == 0) {
-				String[] params = entry.getValue().split("\\|");
+				String[] params = ArgUtil.parseAsString(entry.getValue()).split("\\|");
 				buttons.add(new TmplElement().name(entry.getKey().replace("actions-button-", ""))
 						.label(CollectionUtil.get(params, 0)).type(CollectionUtil.get(params, 1)));
 			} else {

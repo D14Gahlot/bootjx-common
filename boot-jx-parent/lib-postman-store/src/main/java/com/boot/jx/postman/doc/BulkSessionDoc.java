@@ -36,6 +36,7 @@ public class BulkSessionDoc implements AuditableEntity, Serializable {
 	private Integer messageFailedCount;
 
 	private Map<String, Long> stats;
+	private Long completedStamp;
 
 	@Override
 	public String getCreatedBy() {
@@ -150,6 +151,14 @@ public class BulkSessionDoc implements AuditableEntity, Serializable {
 			this.stats = new HashMap<String, Long>();
 		}
 		return this.stats;
+	}
+
+	public Long getCompletedStamp() {
+		return completedStamp;
+	}
+
+	public void setCompletedStamp(Long completedStamp) {
+		this.completedStamp = completedStamp;
 	}
 
 }

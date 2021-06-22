@@ -12,8 +12,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.boot.jx.api.ApiResponse;
-import com.boot.jx.dict.BranchesBHR;
-import com.boot.jx.dict.BranchesKWT;
 import com.boot.jx.dict.Nations;
 import com.boot.jx.postman.PostManException;
 import com.boot.jx.postman.PostManUrls;

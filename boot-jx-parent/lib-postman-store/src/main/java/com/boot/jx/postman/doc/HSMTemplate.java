@@ -11,10 +11,11 @@ import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import com.boot.jx.mongo.CommonDocInterfaces.OldDocVersion;
+import com.boot.jx.postman.model.ITemplates.BasicTemplate;
 
 @Document(collection = "DICT_HSM_TEMPLATES")
 @TypeAlias("HSMTemplate")
-public class HSMTemplate implements Serializable, OldDocVersion<HSMTemplate> {
+public class HSMTemplate implements Serializable, OldDocVersion<HSMTemplate>, BasicTemplate {
 
 	private static final long serialVersionUID = 5953299041958788771L;
 
@@ -36,6 +37,7 @@ public class HSMTemplate implements Serializable, OldDocVersion<HSMTemplate> {
 
 	private List<HSMTemplate> oldVersions;
 
+	@Override
 	public String getName() {
 		return name;
 	}
@@ -52,6 +54,7 @@ public class HSMTemplate implements Serializable, OldDocVersion<HSMTemplate> {
 		this.category = category;
 	}
 
+	@Override
 	public String getTitle() {
 		return title;
 	}
@@ -60,6 +63,7 @@ public class HSMTemplate implements Serializable, OldDocVersion<HSMTemplate> {
 		this.title = title;
 	}
 
+	@Override
 	public String getTemplate() {
 		return template;
 	}
@@ -92,6 +96,7 @@ public class HSMTemplate implements Serializable, OldDocVersion<HSMTemplate> {
 		this.meta = meta;
 	}
 
+	@Override
 	public Map<String, Object> meta() {
 		if (this.meta == null) {
 			this.meta = new HashMap<String, Object>();
@@ -107,6 +112,7 @@ public class HSMTemplate implements Serializable, OldDocVersion<HSMTemplate> {
 		this.options = options;
 	}
 
+	@Override
 	public Map<String, Object> options() {
 		if (this.options == null) {
 			this.options = new HashMap<String, Object>();

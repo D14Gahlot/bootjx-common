@@ -12,7 +12,6 @@ import org.springframework.stereotype.Component;
 import com.boot.jx.postman.GeoLocationService;
 import com.boot.jx.postman.PostManException;
 import com.boot.jx.postman.model.GeoLocation;
-import com.boot.jx.scope.tnt.Tenants.Tenant;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.FileUtil;
 import com.maxmind.geoip2.DatabaseReader;

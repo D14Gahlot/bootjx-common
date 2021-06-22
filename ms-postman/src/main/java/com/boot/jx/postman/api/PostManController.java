@@ -24,13 +24,13 @@ import com.boot.jx.postman.PostManException;
 import com.boot.jx.postman.PostManUrls;
 import com.boot.jx.postman.model.Email;
 import com.boot.jx.postman.model.ExceptionReport;
-import com.boot.jx.postman.model.PostManFile;
+import com.boot.jx.postman.model.ITemplates.ITemplate;
 import com.boot.jx.postman.model.Message;
 import com.boot.jx.postman.model.MessageBox;
 import com.boot.jx.postman.model.Notipy;
+import com.boot.jx.postman.model.PostManFile;
 import com.boot.jx.postman.model.SMS;
 import com.boot.jx.postman.model.SupportEmail;
-import com.boot.jx.postman.model.TemplatesMX;
 import com.boot.jx.postman.service.PostManServiceImpl;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.JsonUtil;
@@ -91,7 +91,7 @@ public class PostManController {
 	 */
 	@SuppressWarnings("unchecked")
 	@RequestMapping(value = PostManUrls.PROCESS_TEMPLATE, method = RequestMethod.POST)
-	public ApiResponse<PostManFile, Object> processTemplate(@RequestParam TemplatesMX template,
+	public ApiResponse<PostManFile, Object> processTemplate(@RequestParam ITemplate template,
 			@RequestParam(required = false) String data, @RequestParam(required = false) String fileName,
 			@RequestParam(required = false) FileFormat fileType) {
 

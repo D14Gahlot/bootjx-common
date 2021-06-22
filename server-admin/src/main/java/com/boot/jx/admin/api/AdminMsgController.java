@@ -132,7 +132,8 @@ public class AdminMsgController {
 	@RequestMapping(value = "/api/message/bulk/push/logs", method = { RequestMethod.GET })
 	public ApiResponse<BulkSessionDoc, Object> getBulkSession(@RequestParam String startStamp,
 			@RequestParam String endStamp) throws NumberParseException {
-		return ApiResponse.buildResults(mongoTemplate.findAll(BulkSessionDoc.class));
+		return ApiResponse.buildResults(
+				mongoTemplate.find(new Query().with(new Sort(Sort.Direction.ASC, "createdStamp")), BulkSessionDoc.class));
 	}
 
 }

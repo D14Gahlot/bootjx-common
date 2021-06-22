@@ -87,9 +87,10 @@ public class WAGupShupConnector implements ConnectorHandler {
 					outboxMessage = getClient(isNotify).send(outboxMessage);
 				}
 			} else if (ArgUtil.is(outboxMessage.getTemplateId())) {
-				HSMTemplate hsmTemplate = mongoTemplate.findById(outboxMessage.getTemplateId(), HSMTemplate.class);
-
-				outboxMessage.setMessage(tmplClient.process(hsmTemplate.getTemplate(), outboxMessage.getModel()));
+				
+				// outboxMessage.setMessage(tmplClient.process(hsmTemplate.getTemplate(),
+				// outboxMessage.getModel()));
+				tmplClient.process(outboxMessage);
 				outboxMessage = getClient(isNotify).send(outboxMessage);
 			} else {
 				outboxMessage = getClient(isNotify).send(outboxMessage);

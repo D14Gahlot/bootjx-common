@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 
 import com.boot.jx.chat.ChatService;
 import com.boot.jx.dict.ContactType;
+import com.boot.jx.logger.AuditDetailProvider;
 import com.boot.jx.mongo.CommonMongoQueryBuilder.CommonMongoCriteria;
 import com.boot.jx.postman.doc.BulkSessionDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
@@ -28,7 +29,6 @@ import com.boot.jx.tunnel.task.JobTaskModel.BatchJob;
 import com.boot.jx.tunnel.task.JobTaskModel.Tasklet;
 import com.boot.jx.tunnel.task.QueuedTaskExecuter;
 import com.boot.utils.ArgUtil;
-import com.boot.utils.JsonUtil;
 import com.boot.utils.UniqueID;
 import com.google.i18n.phonenumbers.NumberParseException;
 import com.google.i18n.phonenumbers.PhoneNumberUtil;
@@ -45,6 +45,9 @@ public class BulkMessageService extends QueuedTaskExecuter {
 	@Autowired
 	private MessageStore messageStore;
 
+	@Autowired
+	private AuditDetailProvider auditDetailProvider;
+
 	public BulkSessionDoc send(OutboxMessage bulkMessage) throws NumberParseException {
 
 		BulkSessionDoc session = new BulkSessionDoc();
@@ -56,6 +59,8 @@ public class BulkMessageService extends QueuedTaskExecuter {
 		session.setContactType(bulkMessage.contact().type());
 		session.setLane(bulkMessage.contact().getLane());
 		session.setBulkSessionId(UniqueID.generateString62());
+
+		auditDetailProvider.audit(session);
 
 		PhoneNumber phoneNumber = new PhoneNumber();
 		List<MessageDoc> docs = new ArrayList<MessageDoc>();
@@ -188,9 +193,16 @@ public class BulkMessageService extends QueuedTaskExecuter {
 				}
 			}
 		}
-		//System.out.println("TALLY : " + (totalCount == doneCount) + " -- " +currentBatchJob.getDonePercent());
+
+		// System.out.println("TALLY : " + (totalCount == doneCount) + " -- "
+		// +currentBatchJob.getDonePercent());
+		boolean completed = (totalCount == doneCount) && (currentBatchJob.getDonePercent() == 100);
+
+		if (completed) {
+			doc.setCompletedStamp(System.currentTimeMillis());
+		}
 		mongoTemplate.save(doc);
-		return (totalCount == doneCount) && (currentBatchJob.getDonePercent() == 100);
+		return completed;
 	}
 
 }
