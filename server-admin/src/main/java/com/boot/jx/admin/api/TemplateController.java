@@ -5,6 +5,7 @@ import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -211,22 +212,20 @@ public class TemplateController {
 	}
 
 	@RequestMapping(value = "/api/tmpl/pushtemplate", method = { RequestMethod.POST })
-	public ApiResponse<HSMTemplate, Object> createPushTemplates(@RequestParam(required = false) String id,
-			@RequestParam String category, @RequestParam String title,
-			@RequestParam(required = false) String template) {
+	public ApiResponse<HSMTemplate, Object> createPushTemplates(@RequestBody HSMTemplate HSMTemplateRequest) {
 
 		HSMTemplate newVersion = new HSMTemplate();
-		if (ArgUtil.is(id)) {
-			HSMTemplate oldVersion = mongoTemplate.findById(id, HSMTemplate.class);
+		if (ArgUtil.is(HSMTemplateRequest.getId())) {
+			HSMTemplate oldVersion = mongoTemplate.findById(HSMTemplateRequest.getId(), HSMTemplate.class);
 			if (ArgUtil.is(oldVersion)) {
 				newVersion.oldVersion(oldVersion);
-				newVersion.setId(id);
+				newVersion.setId(HSMTemplateRequest.getId());
 			}
 		}
 
-		newVersion.setCategory(category);
-		newVersion.setTitle(title);
-		newVersion.setTemplate(template);
+		newVersion.setCategory(HSMTemplateRequest.getCategory());
+		newVersion.setTitle(HSMTemplateRequest.getTitle());
+		newVersion.setTemplate(HSMTemplateRequest.getTemplate());
 		mongoTemplate.save(newVersion);
 		return ApiResponse.buildResults(mongoTemplate.findAll(HSMTemplate.class)).data(newVersion)
 				.message("QuickReply created");
