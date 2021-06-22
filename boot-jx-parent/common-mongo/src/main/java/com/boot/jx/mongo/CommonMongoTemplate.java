@@ -3,11 +3,15 @@ package com.boot.jx.mongo;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.convert.MongoConverter;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Component;
 
+import com.boot.jx.logger.AuditDetailProvider;
+import com.boot.jx.model.AuditableEntity;
 import com.boot.jx.mongo.CommonDocInterfaces.DocVersion;
+import com.boot.jx.mongo.CommonDocInterfaces.TrashDocument;
 import com.boot.jx.mongo.CommonMongoQueryBuilder.DocQueryBuilder;
 import com.boot.utils.ArgUtil;
 import com.mongodb.WriteResult;
@@ -17,6 +21,11 @@ public class CommonMongoTemplate extends CommonMongoTemplateDefault {
 
 	@Autowired
 	protected MongoTemplate mongoTemplate;
+
+	protected MongoConverter mongoConverter;
+
+	@Autowired(required = false)
+	private AuditDetailProvider auditDetailProvider;
 
 	protected MongoTemplate getCommonMongoTemplate() {
 		return mongoTemplate;
@@ -66,6 +75,15 @@ public class CommonMongoTemplate extends CommonMongoTemplateDefault {
 	 */
 	public WriteResult upsert(DocQueryBuilder<?> builder) {
 		return mongoTemplate.upsert(builder.getQuery(), builder.getUpdate(), builder.getDocClass());
+	}
+
+	public WriteResult trash(Object object) {
+		if (object instanceof AuditableEntity && ArgUtil.is(auditDetailProvider)) {
+			String collectionName = "TRASH_" + mongoTemplate.getCollectionName(object.getClass());
+			auditDetailProvider.audit((AuditableEntity) object);
+			mongoTemplate.save(new TrashDocument().doc(object), collectionName);
+		}
+		return getCommonMongoTemplate().remove(object);
 	}
 
 }

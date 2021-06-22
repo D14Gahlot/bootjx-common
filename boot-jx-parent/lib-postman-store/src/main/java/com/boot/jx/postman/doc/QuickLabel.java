@@ -7,11 +7,12 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.TypeAlias;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import com.boot.jx.model.AuditableEntity;
 import com.boot.jx.mongo.CommonDocInterfaces.OldDocVersion;
 
 @Document(collection = "DICT_QUICK_LABEL")
 @TypeAlias("QuickLabel")
-public class QuickLabel implements Serializable, OldDocVersion<QuickLabel> {
+public class QuickLabel implements Serializable, OldDocVersion<QuickLabel>, AuditableEntity {
 
 	private static final long serialVersionUID = 2845094878124818820L;
 	@Id
@@ -21,6 +22,8 @@ public class QuickLabel implements Serializable, OldDocVersion<QuickLabel> {
 	private String code;
 
 	private List<QuickLabel> oldVersions;
+	private String createdBy;
+	private Long createdStamp;
 
 	public String getCategory() {
 		return category;
@@ -60,5 +63,21 @@ public class QuickLabel implements Serializable, OldDocVersion<QuickLabel> {
 
 	public void setOldVersions(List<QuickLabel> oldVersions) {
 		this.oldVersions = oldVersions;
+	}
+
+	public String getCreatedBy() {
+		return createdBy;
+	}
+
+	public void setCreatedBy(String createdBy) {
+		this.createdBy = createdBy;
+	}
+
+	public Long getCreatedStamp() {
+		return createdStamp;
+	}
+
+	public void setCreatedStamp(Long createdStamp) {
+		this.createdStamp = createdStamp;
 	}
 }

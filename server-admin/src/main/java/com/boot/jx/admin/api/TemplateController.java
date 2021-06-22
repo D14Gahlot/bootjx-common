@@ -1,10 +1,10 @@
 package com.boot.jx.admin.api;
 
 import java.util.List;
+import java.util.ArrayList;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -15,6 +15,8 @@ import org.springframework.web.multipart.MultipartFile;
 import com.boot.jx.AppContextUtil;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.aws.AWSFileStore;
+import com.boot.jx.logger.AuditDetailProvider;
+import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.jx.postman.doc.HSMTemplate;
 import com.boot.jx.postman.doc.QuickAction;
 import com.boot.jx.postman.doc.QuickLabel;
@@ -26,8 +28,12 @@ import com.boot.utils.ArgUtil;
 public class TemplateController {
 
 	@Autowired
-	MongoTemplate mongoTemplate;
+	private CommonMongoTemplate mongoTemplate;
 
+	@Autowired
+	private AuditDetailProvider auditDetailProvider;
+
+	// QuickReply
 	@RequestMapping(value = "/category/map/smart_reply", method = { RequestMethod.POST })
 	public List<QuickReply> mapSmartReply(@RequestParam String category, @RequestParam String subject,
 			@RequestParam(required = false) String template, @RequestParam(required = false) String message) {
@@ -51,9 +57,8 @@ public class TemplateController {
 
 	@RequestMapping(value = "/api/tmpl/quickreps", method = { RequestMethod.DELETE })
 	public ApiResponse<QuickReply, Object> deleteQuickReply(@RequestParam String id) {
-		QuickReply qr = new QuickReply();
-		qr.setId(id);
-		mongoTemplate.remove(qr);
+		QuickReply qr = mongoTemplate.findById(id, QuickReply.class);
+		mongoTemplate.trash(qr);
 		return ApiResponse.buildResults(mongoTemplate.findAll(QuickReply.class)).data(qr).message("QuickReply deleted");
 	}
 
@@ -74,11 +79,14 @@ public class TemplateController {
 		newVersion.setCategory(category);
 		newVersion.setTitle(title);
 		newVersion.setTemplate(template);
+
+		auditDetailProvider.audit(newVersion);
 		mongoTemplate.save(newVersion);
 		return ApiResponse.buildResults(mongoTemplate.findAll(QuickReply.class)).data(newVersion)
 				.message("QuickReply created");
 	}
 
+	// QuickAction
 	@RequestMapping(value = "/api/tmpl/quickaxn", method = { RequestMethod.GET })
 	public ApiResponse<QuickAction, Object> listQuickAction() {
 		return ApiResponse.buildResults(mongoTemplate.findAll(QuickAction.class));
@@ -86,9 +94,8 @@ public class TemplateController {
 
 	@RequestMapping(value = "/api/tmpl/quickaxn", method = { RequestMethod.DELETE })
 	public ApiResponse<QuickAction, Object> deleteQuickAction(@RequestParam String id) {
-		QuickAction qr = new QuickAction();
-		qr.setId(id);
-		mongoTemplate.remove(qr);
+		QuickAction qr = mongoTemplate.findById(id, QuickAction.class);
+		mongoTemplate.trash(qr);
 		return ApiResponse.buildResults(mongoTemplate.findAll(QuickAction.class)).data(qr)
 				.message("QuickAction deleted");
 	}
@@ -109,11 +116,13 @@ public class TemplateController {
 		newVersion.setCategory(category);
 		newVersion.setTitle(title);
 		newVersion.setAction(code);
+		auditDetailProvider.audit(newVersion);
 		mongoTemplate.save(newVersion);
 		return ApiResponse.buildResults(mongoTemplate.findAll(QuickAction.class)).data(newVersion)
 				.message("QuickAction created");
 	}
 
+	// QuickLabel
 	@RequestMapping(value = "/api/tmpl/quicklabels", method = { RequestMethod.GET })
 	public ApiResponse<QuickLabel, Object> listQuickTag() {
 		return ApiResponse.buildResults(mongoTemplate.findAll(QuickLabel.class));
@@ -121,9 +130,8 @@ public class TemplateController {
 
 	@RequestMapping(value = "/api/tmpl/quicklabels", method = { RequestMethod.DELETE })
 	public ApiResponse<QuickLabel, Object> deleteQuickTag(@RequestParam String id) {
-		QuickLabel qr = new QuickLabel();
-		qr.setId(id);
-		mongoTemplate.remove(qr);
+		QuickLabel qr = mongoTemplate.findById(id, QuickLabel.class);
+		mongoTemplate.trash(qr);
 		return ApiResponse.buildResults(mongoTemplate.findAll(QuickLabel.class)).data(qr).message("QuickLabel deleted");
 	}
 
@@ -142,11 +150,13 @@ public class TemplateController {
 		newVersion.setCategory(category);
 		newVersion.setTitle(title);
 		newVersion.setCode(code);
+		auditDetailProvider.audit(newVersion);
 		mongoTemplate.save(newVersion);
 		return ApiResponse.buildResults(mongoTemplate.findAll(QuickLabel.class)).data(newVersion)
 				.message("QuickLabel created");
 	}
 
+	// QuickMedia
 	@RequestMapping(value = "/api/tmpl/quickmedia", method = { RequestMethod.GET })
 	public ApiResponse<QuickMedia, Object> listQuickMedia() {
 		return ApiResponse.buildResults(mongoTemplate.findAll(QuickMedia.class));
@@ -154,10 +164,9 @@ public class TemplateController {
 
 	@RequestMapping(value = "/api/tmpl/quickmedia", method = { RequestMethod.DELETE })
 	public ApiResponse<QuickMedia, Object> deleteQuickMedia(@RequestParam String id) {
-		QuickMedia qr = new QuickMedia();
-		qr.setName(id);
-		mongoTemplate.remove(qr);
-		return ApiResponse.buildResults(mongoTemplate.findAll(QuickMedia.class)).data(qr)
+		QuickMedia quickMedia = mongoTemplate.findById(id, QuickMedia.class);
+		mongoTemplate.trash(quickMedia);
+		return ApiResponse.buildResults(mongoTemplate.findAll(QuickMedia.class)).data(quickMedia)
 				.message("Quick Media deleted");
 	}
 
@@ -191,12 +200,14 @@ public class TemplateController {
 		newVersion.setCategory(category);
 		newVersion.setUrl(url);
 
+		auditDetailProvider.audit(newVersion);
 		mongoTemplate.save(newVersion);
 
 		return ApiResponse.buildResults(mongoTemplate.findAll(QuickMedia.class)).data(newVersion)
 				.message("Quick Media created");
 	}
 
+	// HSMTemplate
 	@RequestMapping(value = "/api/tmpl/pushtemplate", method = { RequestMethod.GET })
 	public ApiResponse<HSMTemplate, Object> listPushTemplates() {
 		return ApiResponse.buildResults(mongoTemplate.findAll(HSMTemplate.class));
@@ -204,29 +215,34 @@ public class TemplateController {
 
 	@RequestMapping(value = "/api/tmpl/pushtemplate", method = { RequestMethod.DELETE })
 	public ApiResponse<HSMTemplate, Object> deletePushTemplates(@RequestParam String id) {
-		HSMTemplate qr = new HSMTemplate();
-		qr.setId(id);
-		mongoTemplate.remove(qr);
+		HSMTemplate qr = mongoTemplate.findById(id, HSMTemplate.class);
+		mongoTemplate.trash(qr);
 		return ApiResponse.buildResults(mongoTemplate.findAll(HSMTemplate.class)).data(qr)
 				.message("PushTemplate deleted");
 	}
 
 	@RequestMapping(value = "/api/tmpl/pushtemplate", method = { RequestMethod.POST })
-	public ApiResponse<HSMTemplate, Object> createPushTemplates(@RequestBody HSMTemplate HSMTemplateRequest) {
+	public ApiResponse<HSMTemplate, Object> createPushTemplates(@RequestBody HSMTemplate hsmTemplateRequest) {
 
 		HSMTemplate newVersion = new HSMTemplate();
-		if (ArgUtil.is(HSMTemplateRequest.getId())) {
-			HSMTemplate oldVersion = mongoTemplate.findById(HSMTemplateRequest.getId(), HSMTemplate.class);
+		if (ArgUtil.is(hsmTemplateRequest.getId())) {
+			HSMTemplate oldVersion = mongoTemplate.findById(hsmTemplateRequest.getId(), HSMTemplate.class);
 			if (ArgUtil.is(oldVersion)) {
 				newVersion.oldVersion(oldVersion);
-				newVersion.setId(HSMTemplateRequest.getId());
+				newVersion.setId(hsmTemplateRequest.getId());
 			}
 		}
+		// newVersion.setId(null);
+		newVersion.setCategory(hsmTemplateRequest.getCategory());
+		newVersion.setTitle(hsmTemplateRequest.getTitle());
+		newVersion.setName(hsmTemplateRequest.getName());
+		newVersion.setTemplate(hsmTemplateRequest.getTemplate());
+		newVersion.options().putAll(hsmTemplateRequest.options());
+		newVersion.setOldVersions(new ArrayList<HSMTemplate>());
 
-		newVersion.setCategory(HSMTemplateRequest.getCategory());
-		newVersion.setTitle(HSMTemplateRequest.getTitle());
-		newVersion.setTemplate(HSMTemplateRequest.getTemplate());
+		auditDetailProvider.audit(newVersion);
 		mongoTemplate.save(newVersion);
+
 		return ApiResponse.buildResults(mongoTemplate.findAll(HSMTemplate.class)).data(newVersion)
 				.message("QuickReply created");
 	}

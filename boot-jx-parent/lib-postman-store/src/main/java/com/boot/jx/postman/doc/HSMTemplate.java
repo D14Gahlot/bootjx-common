@@ -6,16 +6,22 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.Reference;
 import org.springframework.data.annotation.TypeAlias;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
 
+import com.boot.jx.model.AuditableEntity;
 import com.boot.jx.mongo.CommonDocInterfaces.OldDocVersion;
 import com.boot.jx.postman.model.ITemplates.BasicTemplate;
 
-@Document(collection = "DICT_HSM_TEMPLATES")
+@Document(collection = HSMTemplate.COLLECTION_NAME)
 @TypeAlias("HSMTemplate")
-public class HSMTemplate implements Serializable, OldDocVersion<HSMTemplate>, BasicTemplate {
+public class HSMTemplate implements Serializable, OldDocVersion<HSMTemplate>, BasicTemplate, AuditableEntity {
+
+	public static final String COLLECTION_NAME = "DICT_HSM_TEMPLATES";
+	public static final String COLLECTION_NAME_TRASH = "TRASH_DICT_HSM_TEMPLATES";
 
 	private static final long serialVersionUID = 5953299041958788771L;
 
@@ -35,7 +41,12 @@ public class HSMTemplate implements Serializable, OldDocVersion<HSMTemplate>, Ba
 
 	protected Map<String, Object> options;
 
+	@Field("oldVersions")
+	@Reference
 	private List<HSMTemplate> oldVersions;
+
+	private String createdBy;
+	private Long createdStamp;
 
 	@Override
 	public String getName() {
@@ -72,10 +83,12 @@ public class HSMTemplate implements Serializable, OldDocVersion<HSMTemplate>, Ba
 		this.template = template;
 	}
 
+	@Override
 	public List<HSMTemplate> getOldVersions() {
 		return oldVersions;
 	}
 
+	@Override
 	public void setOldVersions(List<HSMTemplate> oldVersions) {
 		this.oldVersions = oldVersions;
 	}
@@ -118,6 +131,22 @@ public class HSMTemplate implements Serializable, OldDocVersion<HSMTemplate>, Ba
 			this.options = new HashMap<String, Object>();
 		}
 		return this.options;
+	}
+
+	public String getCreatedBy() {
+		return createdBy;
+	}
+
+	public void setCreatedBy(String createdBy) {
+		this.createdBy = createdBy;
+	}
+
+	public Long getCreatedStamp() {
+		return createdStamp;
+	}
+
+	public void setCreatedStamp(Long createdStamp) {
+		this.createdStamp = createdStamp;
 	}
 
 }

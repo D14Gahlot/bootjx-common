@@ -84,7 +84,7 @@ public class AdminManager {
 			AgentDoc agent = mongoTemplate.findOne(new Query(Criteria.where("_id").is(agentId)), AgentDoc.class);
 			agentList.add(agent);
 		} else {
-			agentList = mongoTemplate.findAll(AgentDoc.class);
+			agentList = commonMongoTemplate.findAll(AgentDoc.class);
 		}
 		return agentList;
 	}
