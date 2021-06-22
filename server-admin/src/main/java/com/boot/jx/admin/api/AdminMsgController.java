@@ -21,6 +21,7 @@ import com.boot.jx.api.ApiResponse;
 import com.boot.jx.chat.ChatArchive;
 import com.boot.jx.common.doc.ImportChatSessionDoc;
 import com.boot.jx.dict.ContactType;
+import com.boot.jx.mongo.CommonMongoQueryBuilder.CommonMongoCriteria;
 import com.boot.jx.postman.doc.BulkSessionDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.dto.ChatSessionDTO;
@@ -131,9 +132,14 @@ public class AdminMsgController {
 
 	@RequestMapping(value = "/api/message/bulk/push/logs", method = { RequestMethod.GET })
 	public ApiResponse<BulkSessionDoc, Object> getBulkSession(@RequestParam String startStamp,
-			@RequestParam String endStamp) throws NumberParseException {
-		return ApiResponse.buildResults(
-				mongoTemplate.find(new Query().with(new Sort(Sort.Direction.ASC, "createdStamp")), BulkSessionDoc.class));
+			@RequestParam String endStamp, @RequestParam(required = false) String bulkSessionId)
+			throws NumberParseException {
+		if (ArgUtil.is(bulkSessionId)) {
+			return ApiResponse.buildResults(mongoTemplate
+					.find(new Query().addCriteria(CommonMongoCriteria.whereId(bulkSessionId)), BulkSessionDoc.class));
+		}
+		return ApiResponse.buildResults(mongoTemplate
+				.find(new Query().with(new Sort(Sort.Direction.ASC, "createdStamp")), BulkSessionDoc.class));
 	}
 
 }
