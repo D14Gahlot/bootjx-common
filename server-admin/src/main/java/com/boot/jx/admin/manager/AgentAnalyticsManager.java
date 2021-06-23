@@ -130,8 +130,8 @@ public class AgentAnalyticsManager {
 			if(dt.getStartLag()>0) {
 				totalStartLag+=dt.getStartLag();
 			}
-			botScore+=dt.getBotScore();
-			botClosure +=dt.getBotClosure();
+			botScore=dt.getBotScore();
+			botClosure =dt.getBotClosure();
 			dto.setLeadMessanger(dt.getLeadMessanger());
 			graphApiMap = mergerMapKyAndValue(graphApiMap, dt.getGraphApiDetails());
 			if(ArgUtil.is(dt.getPeakLoad()) && dt.getPeakLoad().getTotal() > dto.getPeakLoad().getTotal()) {
