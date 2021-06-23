@@ -1,29 +1,40 @@
 package com.boot.jx.inbound;
 
+import java.util.regex.Pattern;
+
 import org.apache.commons.lang.StringUtils;
+import org.redisson.api.RedissonClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
+import com.boot.jx.AppContextUtil;
 import com.boot.jx.agent.AgentService;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.bot.BotEngine;
 import com.boot.jx.bot.ChatMapping;
+import com.boot.jx.cache.CacheBox;
 import com.boot.jx.chat.ChatClient;
 import com.boot.jx.chat.ChatService;
+import com.boot.jx.def.ICacheBox;
 import com.boot.jx.postman.PMClientConfig;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.store.MessageStore;
 import com.boot.jx.postman.store.SessionStore;
+import com.boot.jx.utils.PostManUtil;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.UniqueID;
+import com.boot.utils.StringUtils.StringMatcher;
 
 @Component
 public class InBoundService {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(InBoundService.class);
+	public static final Pattern PROXY = Pattern.compile("\\/proxy\\ ([a-zA-Z0-9_\\-]+)$");
+	public static final Pattern UNPROXY = Pattern.compile("\\/unproxy\\ ([a-zA-Z0-9_\\-]+)$");
 
 	@Autowired(required = false)
 	private InBoundHandler inBoundHandler;
@@ -52,6 +63,17 @@ public class InBoundService {
 	@Autowired
 	private MessageStore messageStore;
 
+	@Autowired(required = false)
+	private RedissonClient redisson;
+	private CacheBox<String> proxyManager;
+
+	public ICacheBox<String> proxy() {
+		if (proxyManager == null) {
+			this.proxyManager = CacheBox.getInstance("InBoundService-Proxy", redisson);
+		}
+		return this.proxyManager;
+	}
+
 	/**
 	 * Invoke the methods with matching {@link ChatMapping#events()} and
 	 * {@link ChatMapping#pattern()} in events received from Slack/Facebook.
@@ -64,6 +86,36 @@ public class InBoundService {
 	}
 
 	public InboxMessage invokeMethods(InboxMessage inboxMessageOriginal) {
+
+		if (AppContextUtil.getTenant().equals("app") && ArgUtil.is(inboxMessageOriginal.getMessage())
+				&& ArgUtil.is(redisson)) {
+			String contactId = PostManUtil.createContactId(inboxMessageOriginal.contact());
+			String proxy = null;
+
+			StringMatcher matcher = new StringMatcher(inboxMessageOriginal.getMessage());
+			if (matcher.isMatch(PROXY)) {
+				proxy = matcher.group(1);
+				proxyManager.put(contactId, proxy);
+				return inboxMessageOriginal;
+			} else if (matcher.isMatch(UNPROXY)) {
+				proxyManager.fastRemove(contactId);
+				return inboxMessageOriginal;
+			} else {
+				proxy = proxyManager.get(contactId);
+			}
+
+			if (ArgUtil.is(proxy)) {
+				AppContextUtil.clear();
+				AppContextUtil.setTenant(proxy);
+				String sessionId = UniqueID.generateString();
+				AppContextUtil.setSessionId(sessionId);
+				AppContextUtil.getTraceId(true, true);
+				AppContextUtil.resetTraceTime();
+				AppContextUtil.init();
+
+			}
+
+		}
 
 		ChatSessionDoc session = null;
 		boolean locallySessionAssigned = false;
@@ -86,7 +138,7 @@ public class InBoundService {
 			if (isSessionInitd && (wasSessionInitd != isSessionInitd)) {
 				chatService.initSessionPost(inboxMessageOriginal, session);
 			}
-			
+
 		}
 
 		if (ArgUtil.isEmpty(inBoundFilter) || inBoundFilter.onFilter(inboxMessageOriginal)) {

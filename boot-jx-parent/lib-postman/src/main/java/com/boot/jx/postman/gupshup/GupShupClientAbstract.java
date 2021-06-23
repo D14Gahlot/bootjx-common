@@ -53,6 +53,9 @@ public abstract class GupShupClientAbstract {
 		}
 
 		if (getSessionType() == SessionType.NOTIFICATION) {
+			if (ArgUtil.isEmpty(config.getNotifyId()) || ArgUtil.isEmpty(config.getNotifyPass())) {
+				throw new PostManException("Notification Not Configured for this lane " + req.getWaNumber());
+			}
 			ajax.field("userid", config.getNotifyId());
 			req.password(config.getNotifyPass());
 		} else {
@@ -128,7 +131,7 @@ public abstract class GupShupClientAbstract {
 	public OutboxMessage send(OutboxMessage message) {
 
 		String to = null;
-		if(ArgUtil.is(message.getCsid())) {
+		if (ArgUtil.is(message.getCsid())) {
 			to = message.getCsid();
 		} else {
 			to = CollectionUtil.getOne(message.getTo());
