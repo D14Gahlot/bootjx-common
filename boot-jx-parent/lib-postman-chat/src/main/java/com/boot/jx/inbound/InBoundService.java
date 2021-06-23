@@ -95,13 +95,13 @@ public class InBoundService {
 			StringMatcher matcher = new StringMatcher(inboxMessageOriginal.getMessage());
 			if (matcher.isMatch(PROXY)) {
 				proxy = matcher.group(1);
-				proxyManager.put(contactId, proxy);
+				proxy().put(contactId, proxy);
 				return inboxMessageOriginal;
 			} else if (matcher.isMatch(UNPROXY)) {
-				proxyManager.fastRemove(contactId);
+				proxy().fastRemove(contactId);
 				return inboxMessageOriginal;
 			} else {
-				proxy = proxyManager.get(contactId);
+				proxy = proxy().get(contactId);
 			}
 
 			if (ArgUtil.is(proxy)) {
