@@ -219,6 +219,9 @@ public class BulkMessageService extends QueuedTaskExecuter {
 		if (completed) {
 			doc.setCompletedStamp(System.currentTimeMillis());
 		}
+		if (!ArgUtil.areEqual(currentBatchJob.getStatus(), doc.getStatus())) {
+			doc.setStatus(currentBatchJob.getStatus().toString());
+		}
 		mongoTemplate.save(doc);
 		return completed;
 	}
