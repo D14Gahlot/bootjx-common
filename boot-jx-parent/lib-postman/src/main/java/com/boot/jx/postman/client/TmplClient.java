@@ -51,7 +51,7 @@ public class TmplClient {
 	}
 
 	public ApiResponse<CommonFile, Object> process(CommonFile file, ContactType contactType) throws PostManException {
-		if (isTmplLocal && ArgUtil.is(iCommonTmplPackage)) {
+		if (ArgUtil.is(iCommonTmplPackage)) {
 			return ApiResponse.buildResult(iCommonTmplPackage.process(file, contactType));
 		}
 		return restService.ajax(postManClient.getPostmapURL()).path(PATH.TMPL_FILE_PROCESS)
