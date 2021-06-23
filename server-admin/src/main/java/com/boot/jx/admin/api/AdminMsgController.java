@@ -113,7 +113,8 @@ public class AdminMsgController {
 
 	@RequestMapping(value = "/api/message/session/import/logs", method = { RequestMethod.GET })
 	public ApiResponse<ImportChatSessionDoc, Object> importChatLogs() {
-		return ApiResponse.buildResults(mongoTemplate.findAll(ImportChatSessionDoc.class));
+		return ApiResponse.buildResults(mongoTemplate
+				.find(new Query().with(new Sort(Sort.Direction.DESC, "createdStamp")), ImportChatSessionDoc.class));
 	}
 
 	@RequestMapping(value = "/api/message/session/import/trash", method = { RequestMethod.POST })
