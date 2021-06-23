@@ -139,7 +139,7 @@ public class AdminMsgController {
 					.find(new Query().addCriteria(CommonMongoCriteria.whereId(bulkSessionId)), BulkSessionDoc.class));
 		}
 		return ApiResponse.buildResults(mongoTemplate
-				.find(new Query().with(new Sort(Sort.Direction.ASC, "createdStamp")), BulkSessionDoc.class));
+				.find(new Query().with(new Sort(Sort.Direction.DESC, "createdStamp")), BulkSessionDoc.class));
 	}
 
 }
