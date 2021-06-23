@@ -172,9 +172,14 @@ public abstract class QueuedTaskExecuter {
 					currentBatchJob.setBatchId(UniqueID.generateString62());
 					long minDoneCount = currentBatchJob.getPushedTaskCount() / 2;
 					if (currentBatchJob.getDoneTaskCount() >= minDoneCount) {
-						boolean readCompleted = this.read(currentBatchJob);
-						if (readCompleted) {
-							currentBatchJob.setStatus(JOB_STATUS.READING_DONE);
+
+						try {
+							boolean readCompleted = this.read(currentBatchJob);
+							if (readCompleted) {
+								currentBatchJob.setStatus(JOB_STATUS.READING_DONE);
+							}
+						} catch (Exception e) {
+							e.printStackTrace();
 						}
 					}
 
@@ -200,12 +205,19 @@ public abstract class QueuedTaskExecuter {
 							|| TimeUtils.isExpired(currentBatchJob.getTallyStamp(), JOB_TALLY_TIMEOUT)
 							// Current Progress is more than 10%
 							|| (currentProgress > 0L)) {
-						boolean tallyCompleted = this.tally(currentBatchJob);
+						boolean tallyCompleted = false;
+						try {
+							tallyCompleted = this.tally(currentBatchJob);
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
+
 						currentBatchJob.setTallyStamp(System.currentTimeMillis());
 						if (tallyCompleted || (currentBatchJob.getDonePercent() == 100
 								&& TimeUtils.isExpired(currentBatchJob.getResolveStamp(), JOB_RESOLVE_EXPIRY))) {
 							currentBatchJob.setStatus(JOB_STATUS.CLOSED);
 						}
+
 					}
 				}
 			} catch (Exception e) {

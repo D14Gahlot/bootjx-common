@@ -33,6 +33,11 @@ import com.boot.utils.UniqueID;
 import com.google.i18n.phonenumbers.NumberParseException;
 import com.google.i18n.phonenumbers.PhoneNumberUtil;
 import com.google.i18n.phonenumbers.Phonenumber.PhoneNumber;
+import com.mongodb.AggregationOptions;
+import com.mongodb.AggregationOptions.OutputMode;
+import com.mongodb.Cursor;
+import com.mongodb.DBCollection;
+import com.mongodb.DBObject;
 
 @Component
 public class BulkMessageService extends QueuedTaskExecuter {
@@ -170,29 +175,42 @@ public class BulkMessageService extends QueuedTaskExecuter {
 
 		ContactType contactType = currentBatchJob.data().entry("contactType").asEnum(ContactType.class);
 
-		Aggregation agg = Aggregation.newAggregation(
-				Aggregation.match(Criteria.where("bulkSessionId").is((currentBatchJob.getJobId()))), // Match
-				Aggregation.group("status").count().as("count") // Group By Status
-		);
+//		Aggregation agg = Aggregation.newAggregation(
+//				Aggregation.match(Criteria.where("bulkSessionId").is((currentBatchJob.getJobId()))), // Match
+//				Aggregation.group("status").count().as("count") // Group By Status
+//		);
+//		AggregationResults<Map> results = mongoTemplate.aggregate(agg, MessageStore.getCollectionName(contactType),
+//				Map.class);
 
-		// System.out.println("agg :" + agg.toString());
+		List<DBObject> list = new ArrayList<DBObject>();
+		list.add(Aggregation.match(Criteria.where("bulkSessionId").is((currentBatchJob.getJobId()))) // Match
+				.toDBObject(Aggregation.DEFAULT_CONTEXT));
+		list.add(Aggregation.group("status").count().as("count").toDBObject(Aggregation.DEFAULT_CONTEXT));
 
-		AggregationResults<Map> results = mongoTemplate.aggregate(agg, MessageStore.getCollectionName(contactType),
-				Map.class);
+		DBCollection col = mongoTemplate.getCollection(MessageStore.getCollectionName(contactType));
+		Cursor cursor = col.aggregate(list,
+				AggregationOptions.builder().allowDiskUse(true).outputMode(OutputMode.CURSOR).build());
+
 		long totalCount = 0;
 		long doneCount = 0;
-		for (Map map : results) {
-			Status status = ArgUtil.parseAsEnumT(map.get("_id"), Status.class);
-			if (ArgUtil.is(status)) {
-				long count = ArgUtil.parseAsLong(map.get("count"), 0L);
-				doc.stats().put(ArgUtil.parseAsString(status), count);
-				totalCount = (totalCount + count);
-				// Done Count
-				if (status.ordinal() > Status.INIT.ordinal()) {
-					doneCount = (doneCount + count);
+		// for (Map map : results) {
+		while (cursor.hasNext()) {
+			DBObject object = cursor.next();
+			if (ArgUtil.is(object)) {
+				Status status = ArgUtil.parseAsEnumT(object.get("_id"), Status.class);
+				if (ArgUtil.is(status)) {
+					long count = ArgUtil.parseAsLong(object.get("count"), 0L);
+					doc.stats().put(ArgUtil.parseAsString(status), count);
+					totalCount = (totalCount + count);
+					// Done Count
+					if (status.ordinal() > Status.INIT.ordinal()) {
+						doneCount = (doneCount + count);
+					}
 				}
 			}
+
 		}
+		// }
 
 		// System.out.println("TALLY : " + (totalCount == doneCount) + " -- "
 		// +currentBatchJob.getDonePercent());
