@@ -53,7 +53,7 @@ public class ConfigController {
 	public ApiResponse<ConnectorConfigDoc, Object> postConfig(@RequestBody PMConfiguration config) {
 		ConnectorConfigDoc doc = EntityDtoUtil.dtoToEntity(config, new ConnectorConfigDoc());
 		doc.setTenant(AppContextUtil.getTenant());
-		mongoTemplate.save(config);
+		mongoTemplate.save(doc);
 		sharedConfigManager.clear();
 		return ApiResponse.buildResults(mongoTemplate.findById(AppContextUtil.getTenant(), ConnectorConfigDoc.class));
 	}
