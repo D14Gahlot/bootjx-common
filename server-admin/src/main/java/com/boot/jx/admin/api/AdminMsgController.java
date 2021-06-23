@@ -128,7 +128,7 @@ public class AdminMsgController {
 	@RequestMapping(value = "/api/message/bulk/push/send", method = { RequestMethod.POST })
 	public ApiResponse<BulkSessionDoc, Object> sendBulkMessage(@RequestBody OutboxMessage bulkMessage)
 			throws NumberParseException {
-		return ApiResponse.buildResult(bulkMessageService.send(bulkMessage));
+		return ApiResponse.buildResult(bulkMessageService.send(bulkMessage)).message("Bulk Message Job Created");
 	}
 
 	@RequestMapping(value = "/api/message/bulk/push/logs", method = { RequestMethod.GET })
