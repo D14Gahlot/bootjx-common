@@ -2,12 +2,10 @@ package com.boot.jx.admin.service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
-import org.springframework.data.mongodb.core.aggregation.AggregationResults;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -26,6 +24,7 @@ import com.boot.jx.postman.store.MessageStore;
 import com.boot.jx.postman.store.SessionStore;
 import com.boot.jx.tunnel.task.JobTaskModel;
 import com.boot.jx.tunnel.task.JobTaskModel.BatchJob;
+import com.boot.jx.tunnel.task.JobTaskModel.JOB_STATUS;
 import com.boot.jx.tunnel.task.JobTaskModel.Tasklet;
 import com.boot.jx.tunnel.task.QueuedTaskExecuter;
 import com.boot.utils.ArgUtil;
@@ -221,6 +220,9 @@ public class BulkMessageService extends QueuedTaskExecuter {
 		}
 		if (!ArgUtil.areEqual(currentBatchJob.getStatus(), doc.getStatus())) {
 			doc.setStatus(currentBatchJob.getStatus().toString());
+			if (completed) {
+				doc.setStatus(JOB_STATUS.COMPLETED.toString());
+			}
 		}
 		mongoTemplate.save(doc);
 		return completed;
