@@ -1,11 +1,10 @@
 package com.boot.jx.admin.manager;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 import com.boot.utils.CollectionUtil;
-
-import java.util.ArrayList;
 
 public class ConfigBuilder implements Serializable {
 

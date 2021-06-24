@@ -4,15 +4,15 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.boot.jx.AppConfigPackage.AppCommonConfig;
 import com.boot.jx.postman.PMClientConfig;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.utils.TimeUtils;
 
 @Component
-public class AppCommonConfig {
+public class AppCommonConfigImpl implements AppCommonConfig {
 
 	@Autowired
 	private PMEnvironment pmEnvironment;
@@ -20,11 +20,8 @@ public class AppCommonConfig {
 	@Autowired
 	private PMClientConfig chatClientConfig;
 
-	@Value("${mry.cdn.url}")
-	private String cdnServer;
-
 	public String getCdnServer() {
-		return pmEnvironment.config().get("mry.cdn.url").asString(cdnServer);
+		return pmEnvironment.get("mry.cdn.url").asString();
 	}
 
 	public Map<String, Object> toMap() {

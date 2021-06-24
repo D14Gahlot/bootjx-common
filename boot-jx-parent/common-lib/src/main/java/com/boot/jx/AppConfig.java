@@ -90,7 +90,7 @@ public class AppConfig {
 	public static final String JAX_SERVICE_PROVIDER_URL = "${jax.service-provider.url}";
 	public static final String JAX_CASHIER_URL = "${jax.cashier.url}";
 	public static final String JAX_DROOL_URL = "${jax.drools.url}";
-
+	
 	@Value(APP_ENV)
 	@AppParamKey(AppParam.APP_ENV)
 	private String appEnv;

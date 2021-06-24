@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.boot.jx.AppConfig;
+import com.boot.jx.AppConfigPackage.AppCommonConfig;
 import com.boot.jx.connectors.WebConnector;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.http.CommonHttpRequest;
@@ -18,6 +19,7 @@ import com.boot.jx.inbound.InBoundService;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.JsonUtil;
 
 @Controller
 public class DummyUserController {
@@ -33,6 +35,9 @@ public class DummyUserController {
 
 	@Autowired
 	CommonHttpRequest commonHttpRequest;
+
+	@Autowired
+	private AppCommonConfig appCommonConfig;
 
 	@ResponseBody
 	@RequestMapping(value = "/dummy/messages", method = RequestMethod.GET)
@@ -74,5 +79,22 @@ public class DummyUserController {
 		model.addAttribute("APP_CONTEXT", appConfig.getAppPrefix());
 		model.addAttribute("POSTMAN_CONTEXT", appConfig.getAppPrefix());
 		return "customer.plugin.bubble";
+	}
+
+	@RequestMapping(value = "/plugin/customer/**", method = RequestMethod.GET)
+	public String pluginCustomer(Model model, @RequestParam(required = false) String contacyType)
+			throws InterruptedException {
+		commonHttpRequest.setCookie("contactType", ArgUtil.parseAsString(contacyType, ContactType.WEBSITE.toString()));
+		model.addAttribute("APP_CONTEXT", appConfig.getAppPrefix());
+		model.addAttribute("POSTMAN_CONTEXT", appConfig.getAppPrefix());
+		model.addAttribute("WEBAPP_BASE", appConfig.getAppPrefix() + "/plugin/customer");
+
+		model.addAttribute("CDN_VERSION", "V3");
+		model.addAttribute("CDN_URL",
+				ArgUtil.parseAsString(commonHttpRequest.get("CDN_URL"), appCommonConfig.getCdnServer()));
+		model.addAttribute("CDN_DEBUG", ArgUtil.parseAsString(commonHttpRequest.get("CDN_DEBUG"), "false"));
+		model.addAttribute("CONFIG", JsonUtil.toJson(appCommonConfig.toMap()));
+
+		return "app-customer";
 	}
 }

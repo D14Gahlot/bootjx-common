@@ -20,11 +20,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.boot.jx.AppConfig;
+import com.boot.jx.AppConfigPackage.AppSharedConfig;
 import com.boot.jx.AppParam;
-import com.boot.jx.AppSharedConfig;
 import com.boot.jx.AppTenantConfig;
-import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.api.ApiResponse;
+import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.api.BoolRespModel;
 import com.boot.jx.def.IndicatorListner;
 import com.boot.jx.def.IndicatorListner.GaugeIndicator;

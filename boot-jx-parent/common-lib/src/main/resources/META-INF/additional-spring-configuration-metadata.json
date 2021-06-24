@@ -53,5 +53,10 @@
     "name": "jax.logger.url",
     "type": "java.lang.String",
     "description": "A description for 'jax.logger.url'"
+  },
+  {
+    "name": "app.session",
+    "type": "java.lang.Boolean",
+    "description": "A description for 'app.session'"
   }
 ]}

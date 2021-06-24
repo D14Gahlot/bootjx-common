@@ -98,6 +98,14 @@
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
 
+
+		<dependency>
+			<groupId>com.boot.jx</groupId>
+			<artifactId>lib-common-config</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+
+
 		<!-- PDF FLYINSOC -->
 		<dependency>
 			<groupId>org.xhtmlrenderer</groupId>
@@ -236,6 +244,7 @@
 			<artifactId>telegrambots</artifactId>
 			<version>4.5</version>
 		</dependency>
+
 
 	</dependencies>
 
