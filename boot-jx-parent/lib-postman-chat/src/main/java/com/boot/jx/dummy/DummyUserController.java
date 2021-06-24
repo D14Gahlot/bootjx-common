@@ -36,7 +36,7 @@ public class DummyUserController {
 	@Autowired
 	CommonHttpRequest commonHttpRequest;
 
-	@Autowired
+	@Autowired(required = false)
 	private AppCommonConfig appCommonConfig;
 
 	@ResponseBody
@@ -90,10 +90,13 @@ public class DummyUserController {
 		model.addAttribute("WEBAPP_BASE", appConfig.getAppPrefix() + "/plugin/customer");
 
 		model.addAttribute("CDN_VERSION", "V3");
-		model.addAttribute("CDN_URL",
-				ArgUtil.parseAsString(commonHttpRequest.get("CDN_URL"), appCommonConfig.getCdnServer()));
 		model.addAttribute("CDN_DEBUG", ArgUtil.parseAsString(commonHttpRequest.get("CDN_DEBUG"), "false"));
-		model.addAttribute("CONFIG", JsonUtil.toJson(appCommonConfig.toMap()));
+
+		if (appCommonConfig != null) {
+			model.addAttribute("CDN_URL",
+					ArgUtil.parseAsString(commonHttpRequest.get("CDN_URL"), appCommonConfig.getCdnServer()));
+			model.addAttribute("CONFIG", JsonUtil.toJson(appCommonConfig.toMap()));
+		}
 
 		return "app-customer";
 	}
