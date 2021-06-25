@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org"
+	xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity3" class="loadable loading">
+<head>
+<meta charset=utf-8>
+<meta http-equiv=X-UA-Compatible content="IE=edge">
+<meta name=viewport
+	content="width=device-width,initial-scale=1,shrink-to-fit=no">
+<link rel="shortcut icon" th:href="${CDN_URL}+'/favicon.ico'" />
+<title>Support</title>
+
+<style type="text/css">
+html.loadable {
+    -webkit-transition: background-color 0.5s;
+    transition: background-color 0.5s;
+}
+
+body {
+	background :  transparent!important;
+	margin:0px;
+}
+.fullloader {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: auto;
+    height: 100vh;
+}
+
+.lds-ellipsis {
+  display: inline-block;
+  position: relative;
+  width: 60px;
+  height: 60px;
+}
+.lds-ellipsis div {
+  position: absolute;
+  top: 26px;
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  background: #fff;
+  animation-timing-function: cubic-bezier(0, 1, 1, 0);
+}
+.lds-ellipsis div:nth-child(1) {
+  left: 2px;
+  animation: lds-ellipsis1 0.6s infinite;
+}
+.lds-ellipsis div:nth-child(2) {
+  left: 2px;
+  animation: lds-ellipsis2 0.6s infinite;
+}
+.lds-ellipsis div:nth-child(3) {
+  left: 26px;
+  animation: lds-ellipsis2 0.6s infinite;
+}
+.lds-ellipsis div:nth-child(4) {
+  left: 50px;
+  animation: lds-ellipsis3 0.6s infinite;
+}
+@keyframes lds-ellipsis1 {
+  0% {
+    transform: scale(0);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+@keyframes lds-ellipsis3 {
+  0% {
+    transform: scale(1);
+  }
+  100% {
+    transform: scale(0);
+  }
+}
+@keyframes lds-ellipsis2 {
+  0% {
+    transform: translate(0, 0);
+  }
+  100% {
+    transform: translate(24px, 0);
+  }
+}
+
+
+
+</style>
+
+
+<div th:switch="${CDN_DEBUG}" th:remove="tag">
+	<p th:case="'true'" th:remove="tag">
+		<meta name=report th:content="${CDN_DEBUG}">
+	</p>
+	<p th:case="*" th:remove="tag">
+		<link rel=stylesheet
+			href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900">
+		<link th:href="${CDN_URL} + '/app.js?_='+${CDN_VERSION}" rel=preload
+			as=script>
+		<link th:href="${CDN_URL} + '/css/app.css?_='+${CDN_VERSION}"
+			rel=preload as=style>
+		<link th:href="${CDN_URL} + '/js/chunk-vendors.js?_='+${CDN_VERSION}"
+			rel=preload as=script>
+
+		<link
+			th:href="${CDN_URL} + '/css/chunk-vendors.css?_='+${CDN_VERSION}"
+			rel=stylesheet>
+		<link th:href="${CDN_URL} + '/css/app.css?_='+${CDN_VERSION}"
+			rel=stylesheet />
+
+	</p>
+</div>
+
+
+<script th:inline="text" >
+	window.CONST = {
+		dev : '[[${CDN_DEBUG}]]',
+		CDN_URL : '[[${CDN_URL}]]', //
+		APP_CONTEXT : '[[${APP_CONTEXT}]]', //
+		remoteJsVersion : '[[${CDN_VERSION}]]', //
+		CONTEXT: '[[${APP_CONTEXT}]]',
+		CONFIG : [(${CONFIG})],
+		WEBAPP_BASE : '[[${WEBAPP_BASE}]]',
+		POSTMAN : '[[${POSTMAN_CONTEXT}]]'
+	};
+</script>
+</head>
+<body>
+	<noscript>
+		<strong>We're sorry but ArchitectUI doesn't work properly
+			without JavaScript enabled. Please enable it to continue.</strong>
+	</noscript>
+	<div class="fullloader">
+		 <div class="loader lds-ellipsis"><div></div><div></div><div></div><div></div></div>
+	</div>
+
+	<div id=app></div>
+
+<script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js'></script>	
+<script th:src="${APP_CONTEXT}+'/js/sockjs.min.js'"></script>
+<script th:src="${APP_CONTEXT}+'/js/stomp.min.js'"></script>
+<script th:src="${APP_CONTEXT}+'/js/tunnel.client.js'"></script>
+
+<div th:switch="${CDN_DEBUG}" th:remove="tag"> 
+  <p th:case="'true'" th:remove="tag">
+		<script th:src="${CDN_URL}+'/app.js?_='+${CDN_VERSION}"></script>
+  </p>
+  <p th:case="*" th:remove="tag">
+  	  	<script th:src="${CDN_URL}+'/js/chunk-vendors.js?_='+${CDN_VERSION}"></script>
+		<script th:src="${CDN_URL}+'/app.js?_='+${CDN_VERSION}"></script>
+  </p> 
+</div>
+
+</body>
+
+</html>
+
+
