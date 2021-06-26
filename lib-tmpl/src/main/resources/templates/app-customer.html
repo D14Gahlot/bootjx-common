@@ -153,6 +153,8 @@ html.loadable.loading .fullloader {
 <script th:src="${APP_CONTEXT}+'/js/sockjs.min.js'"></script>
 <script th:src="${APP_CONTEXT}+'/js/stomp.min.js'"></script>
 <script th:src="${APP_CONTEXT}+'/js/tunnel.client.js'"></script>
+<script async src="//cdn.jsdelivr.net/npm/@fingerprintjs/fingerprintjs@3/dist/fp.min.js"
+  onload="initFingerprintJS()"></script>
 
 <div th:switch="${CDN_DEBUG}" th:remove="tag"> 
   <p th:case="'true'" th:remove="tag">
