@@ -136,6 +136,14 @@ html.loadable.loading .fullloader {
 		WEBAPP_BASE : '[[${WEBAPP_BASE}]]',
 		POSTMAN : '[[${POSTMAN_CONTEXT}]]'
 	};
+	var initFingerprintJS = function initFingerprintJS() {
+		FingerprintJS.load().then(fp => {
+		      fp.get().then(result => {
+		    	  window.CONST.fp = result.visitorId;
+		    	    
+		      });
+		});
+	}
 </script>
 </head>
 <body>
