@@ -1,5 +1,6 @@
 package com.boot.jx.connectors;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -24,6 +25,7 @@ import com.boot.jx.postman.gupshup.GupShupConfigClient;
 import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.OutboxMessage;
+import com.boot.jx.postman.model.TmplElement;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
 import com.boot.utils.JsonUtil;
@@ -149,13 +151,18 @@ public class WebConnector implements DefaultConnector {
 			}
 		}
 
+		List<TmplElement> inputs = new ArrayList<TmplElement>();
 		if (ArgUtil.isEmpty(contact.getName())) {
-			reply(inboxMessage, (OutboxMessage) inboxMessage.replyMessage(null).template("pm-user-login-form"));
+			inputs.add(new TmplElement().name("name").label("Name").type("TEXT"));
+			reply(inboxMessage, (OutboxMessage) inboxMessage.replyMessage("Please fill below inputs to continue")
+					.option("inputs", inputs));
 			return false;
 		}
 
 		if (ArgUtil.isEmpty(contact.getEmail())) {
-			reply(inboxMessage, (OutboxMessage) inboxMessage.replyMessage(null).template("pm-user-login-form"));
+			inputs.add(new TmplElement().name("email").label("Email").type("EMAIL"));
+			reply(inboxMessage, (OutboxMessage) inboxMessage.replyMessage("Please fill below inputs to continue")
+					.option("inputs", inputs));
 			return false;
 		}
 

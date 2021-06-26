@@ -16,7 +16,7 @@ public interface MessageOptions {
 	public Map<String, Object> options();
 
 	@JsonIgnore
-	default public MessageOptions option(String key, String value) {
+	default public MessageOptions option(String key, Object value) {
 		this.options().put(key, value);
 		return this;
 	}
