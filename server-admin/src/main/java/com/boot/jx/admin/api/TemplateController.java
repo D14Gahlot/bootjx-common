@@ -238,6 +238,7 @@ public class TemplateController {
 		newVersion.setName(hsmTemplateRequest.getName());
 		newVersion.setTemplate(hsmTemplateRequest.getTemplate());
 		newVersion.options().putAll(hsmTemplateRequest.options());
+		newVersion.setData(hsmTemplateRequest.getData());
 		newVersion.setOldVersions(new ArrayList<HSMTemplate>());
 
 		auditDetailProvider.audit(newVersion);

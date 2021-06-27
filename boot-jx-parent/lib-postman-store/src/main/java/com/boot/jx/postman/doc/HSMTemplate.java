@@ -40,6 +40,7 @@ public class HSMTemplate implements Serializable, OldDocVersion<HSMTemplate>, Ba
 	private Map<String, Object> meta;
 
 	protected Map<String, Object> options;
+	protected Map<String, Object> data;
 
 	@Field("oldVersions")
 	@Reference
@@ -147,6 +148,14 @@ public class HSMTemplate implements Serializable, OldDocVersion<HSMTemplate>, Ba
 
 	public void setCreatedStamp(Long createdStamp) {
 		this.createdStamp = createdStamp;
+	}
+
+	public Map<String, Object> getData() {
+		return data;
+	}
+
+	public void setData(Map<String, Object> data) {
+		this.data = data;
 	}
 
 }
