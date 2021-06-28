@@ -249,11 +249,13 @@ public enum Language implements EnumType {
 	private String iso3code;
 	private int id;
 	private Language lang;
+	private String label;
 
-	Language(String iso3code, int id, String name) {
+	Language(String iso3code, int id, String label) {
 		this.id = id;
 		this.iso3code = iso3code;
 		this.lang = this;
+		this.label = label;
 	}
 
 	Language(Language lang) {
@@ -334,6 +336,10 @@ public enum Language implements EnumType {
 		for (Language site : Language.values()) {
 			MAP.put(site.getId(), site.getLang());
 		}
+	}
+
+	public String getLabel() {
+		return label;
 	}
 
 }
