@@ -13,7 +13,7 @@ public class ITemplates {
 
 		public Map<String, Object> meta();
 
-		public String getTitle();
+		public String getDesc();
 
 		public String getTemplate();
 
@@ -108,7 +108,7 @@ public class ITemplates {
 		}
 
 		@Override
-		public String getTitle() {
+		public String getDesc() {
 			return null;
 		}
 
@@ -223,7 +223,7 @@ public class ITemplates {
 		}
 
 		@Override
-		public String getTitle() {
+		public String getDesc() {
 			return null;
 		}
 

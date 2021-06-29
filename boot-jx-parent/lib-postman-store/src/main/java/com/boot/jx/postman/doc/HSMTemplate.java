@@ -31,9 +31,18 @@ public class HSMTemplate implements Serializable, OldDocVersion<HSMTemplate>, Ba
 	@Indexed(unique = true)
 	private String name;
 
+	@Indexed
+	private String code;
+
+	@Indexed
+	private String contactType;
+
+	@Indexed
+	private String lang;
+
 	private String category;
 
-	private String title;
+	private String desc;
 
 	private String template;
 
@@ -67,12 +76,12 @@ public class HSMTemplate implements Serializable, OldDocVersion<HSMTemplate>, Ba
 	}
 
 	@Override
-	public String getTitle() {
-		return title;
+	public String getDesc() {
+		return desc;
 	}
 
-	public void setTitle(String title) {
-		this.title = title;
+	public void setDesc(String desc) {
+		this.desc = desc;
 	}
 
 	@Override
