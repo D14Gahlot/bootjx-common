@@ -234,6 +234,7 @@ public class TemplateController {
 		}
 		// newVersion.setId(null);
 		newVersion.setCategory(hsmTemplateRequest.getCategory());
+		newVersion.setTitle(hsmTemplateRequest.getTitle());
 		newVersion.setDesc(hsmTemplateRequest.getDesc());
 		newVersion.setName(hsmTemplateRequest.getName());
 		newVersion.setTemplate(hsmTemplateRequest.getTemplate());

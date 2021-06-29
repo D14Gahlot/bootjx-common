@@ -43,6 +43,7 @@ public class HSMTemplate implements Serializable, OldDocVersion<HSMTemplate>, Ba
 	private String category;
 
 	private String desc;
+	private String title;
 
 	private String template;
 
@@ -165,6 +166,14 @@ public class HSMTemplate implements Serializable, OldDocVersion<HSMTemplate>, Ba
 
 	public void setData(Map<String, Object> data) {
 		this.data = data;
+	}
+
+	public String getTitle() {
+		return title;
+	}
+
+	public void setTitle(String title) {
+		this.title = title;
 	}
 
 }
