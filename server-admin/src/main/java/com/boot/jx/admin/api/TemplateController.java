@@ -236,10 +236,17 @@ public class TemplateController {
 		newVersion.setCategory(hsmTemplateRequest.getCategory());
 		newVersion.setTitle(hsmTemplateRequest.getTitle());
 		newVersion.setDesc(hsmTemplateRequest.getDesc());
+
+		newVersion.setCode(hsmTemplateRequest.getCode());
+		newVersion.setContactType(hsmTemplateRequest.getContactType());
+		newVersion.setLang(hsmTemplateRequest.getLang());
 		newVersion.setName(hsmTemplateRequest.getName());
+
 		newVersion.setTemplate(hsmTemplateRequest.getTemplate());
+
 		newVersion.meta().putAll(hsmTemplateRequest.meta());
 		newVersion.options().putAll(hsmTemplateRequest.options());
+
 		newVersion.setData(hsmTemplateRequest.getData());
 		newVersion.setOldVersions(new ArrayList<HSMTemplate>());
 

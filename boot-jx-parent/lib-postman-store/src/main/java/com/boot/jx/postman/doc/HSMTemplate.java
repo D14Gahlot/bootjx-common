@@ -176,4 +176,28 @@ public class HSMTemplate implements Serializable, OldDocVersion<HSMTemplate>, Ba
 		this.title = title;
 	}
 
+	public String getCode() {
+		return code;
+	}
+
+	public void setCode(String code) {
+		this.code = code;
+	}
+
+	public String getContactType() {
+		return contactType;
+	}
+
+	public void setContactType(String contactType) {
+		this.contactType = contactType;
+	}
+
+	public String getLang() {
+		return lang;
+	}
+
+	public void setLang(String lang) {
+		this.lang = lang;
+	}
+
 }
