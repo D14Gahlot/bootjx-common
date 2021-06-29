@@ -15,7 +15,7 @@ import com.boot.jx.model.AuditableEntity;
 import com.boot.jx.mongo.CommonDocInterfaces.OldDocVersion;
 
 @Document(collection = HSMContentType.COLLECTION_NAME)
-@TypeAlias("HSMTemplateTypes")
+@TypeAlias("HSMContentType")
 public class HSMContentType implements Serializable, OldDocVersion<HSMContentType>, AuditableEntity {
 
 	public static final List<HSMContentType> LIST = new ArrayList<HSMContentType>();

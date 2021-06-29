@@ -16,7 +16,7 @@ import com.boot.jx.model.AuditableEntity;
 import com.boot.jx.mongo.CommonDocInterfaces.OldDocVersion;
 
 @Document(collection = HSMLanguage.COLLECTION_NAME)
-@TypeAlias("HSMTemplateTypes")
+@TypeAlias("HSMLanguage")
 public class HSMLanguage implements Serializable, OldDocVersion<HSMLanguage>, AuditableEntity {
 
 	public static final List<HSMLanguage> LIST = new ArrayList<HSMLanguage>();
