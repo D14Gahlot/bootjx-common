@@ -238,6 +238,7 @@ public class TemplateController {
 		newVersion.setDesc(hsmTemplateRequest.getDesc());
 		newVersion.setName(hsmTemplateRequest.getName());
 		newVersion.setTemplate(hsmTemplateRequest.getTemplate());
+		newVersion.meta().putAll(hsmTemplateRequest.meta());
 		newVersion.options().putAll(hsmTemplateRequest.options());
 		newVersion.setData(hsmTemplateRequest.getData());
 		newVersion.setOldVersions(new ArrayList<HSMTemplate>());
