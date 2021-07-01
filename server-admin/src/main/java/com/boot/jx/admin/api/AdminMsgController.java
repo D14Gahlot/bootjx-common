@@ -164,9 +164,9 @@ public class AdminMsgController {
 		if (ArgUtil.is(session)) {
 			List<MessageDoc> msgs = messageStore.findByBulkSessionId(session.getBulkSessionId(),
 					session.getContactType());
-			resp.results(ChatDTOUtil.getChatMessageDTO(msgs, bulkSessionId, bulkSessionId));
+			resp.results(ChatDTOUtil.getChatMessageDTO(msgs, null, session.getCreatedBy()));
 		}
-		
+
 		return resp;
 
 	}

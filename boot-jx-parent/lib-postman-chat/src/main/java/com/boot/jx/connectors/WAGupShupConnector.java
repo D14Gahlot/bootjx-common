@@ -66,12 +66,6 @@ public class WAGupShupConnector implements ConnectorHandler {
 	@Autowired
 	private PMFileStoreClient pmFileStoreClient;
 
-	private GupShupClientAbstract getClient(boolean isNotify) {
-		if (isNotify)
-			return gupShupNotifyClient;
-		return gupShupChatClient;
-	}
-
 	private OutboxMessage resolveTemplate(OutboxMessage outboxMessage) {
 		if (ArgUtil.is(outboxMessage.getTemplate())) {
 			QuickMedia templateReply = mongoTemplate.findById(outboxMessage.getTemplate(), QuickMedia.class);
@@ -96,9 +90,13 @@ public class WAGupShupConnector implements ConnectorHandler {
 		return outboxMessage;
 	}
 
-	public void send(boolean isPushMessage, OutboxMessage outboxMessage) {
+	public void sendInternal(OutboxMessage outboxMessage, boolean isPushMessage) {
 		try {
-			getClient(isPushMessage).send(outboxMessage);
+			if (isPushMessage) {
+				gupShupNotifyClient.send(outboxMessage);
+			} else {
+				gupShupChatClient.send(outboxMessage);
+			}
 			outboxMessage.updateStatus(Message.Status.SENT);
 		} catch (Exception e) {
 			outboxMessage.logs().add(e.getMessage());
@@ -120,17 +118,17 @@ public class WAGupShupConnector implements ConnectorHandler {
 						new ChatContactQuery(chatContactDoc).setLastOptInStamp(System.currentTimeMillis()));
 			}
 			outboxMessage.messageMetaWrapper().sendType("PM"); // Push Message
-			this.send(true, outboxMessage);
+			this.sendInternal(outboxMessage, true);
 		} else {
 			outboxMessage.messageMetaWrapper().sendType("SM"); // Session Message
-			this.send(false, outboxMessage);
+			this.sendInternal(outboxMessage, false);
 		}
 	}
 
 	@Override
 	public void reply(SessionMessage inboxMessage, OutboxMessage outboxMessage) {
 		resolveTemplate(outboxMessage);
-		this.send(false, outboxMessage);
+		this.sendInternal(outboxMessage, false);
 	}
 
 	@Override

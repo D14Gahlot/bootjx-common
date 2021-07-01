@@ -27,6 +27,7 @@ public class ChatMessageDTO implements Serializable {
 	private String sender;
 	private String status;
 	private Map<String, Long> stamps;
+	private ContactDTO contact;
 
 	public String getText() {
 		return text;
@@ -154,5 +155,13 @@ public class ChatMessageDTO implements Serializable {
 
 	public void setStamps(Map<String, Long> stamps) {
 		this.stamps = stamps;
+	}
+
+	public ContactDTO getContact() {
+		return contact;
+	}
+
+	public void setContact(ContactDTO contact) {
+		this.contact = contact;
 	}
 }

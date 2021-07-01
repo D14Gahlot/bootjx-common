@@ -4,12 +4,14 @@ import java.io.Serializable;
 import java.util.Map;
 
 import com.boot.jx.postman.model.MessageDefinitions.Contactable;
+import com.boot.utils.ArgUtil;
 
 public class ContactDoc implements Serializable, Contactable {
 	private static final long serialVersionUID = -6046846959629225232L;
 	private String email;
 	private String userid;
 	private String mobile;
+	private String phone;
 
 	private String contactType;
 	private String channel;
@@ -20,11 +22,11 @@ public class ContactDoc implements Serializable, Contactable {
 	private Map<String, Object> filter;
 
 	public String getPhone() {
-		return mobile;
+		return ArgUtil.nonEmpty(this.phone, this.mobile);
 	}
 
-	public void setPhone(String mobile) {
-		this.mobile = mobile;
+	public void setPhone(String phone) {
+		this.phone = phone;
 	}
 
 	public String getUserid() {
@@ -59,10 +61,12 @@ public class ContactDoc implements Serializable, Contactable {
 		this.email = email;
 	}
 
+	@Deprecated
 	public String getMobile() {
 		return mobile;
 	}
 
+	@Deprecated
 	public void setMobile(String mobile) {
 		this.mobile = mobile;
 	}
