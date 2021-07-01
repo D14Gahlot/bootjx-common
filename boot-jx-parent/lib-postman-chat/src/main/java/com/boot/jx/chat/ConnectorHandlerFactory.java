@@ -66,18 +66,20 @@ public class ConnectorHandlerFactory extends ScopedBeanFactory<String, Connector
 				case "SEND":
 					outboxMessage.messageMetaWrapper().composeType("N"); // is a New Message
 					this.send(chatContactDoc, outboxMessage);
+					outboxMessage.updateStatus(Message.Status.SENT);
 					break;
 				case "REPLY":
 					outboxMessage.messageMetaWrapper().composeType("R"); // Its a Reply
 					this.reply(inboxMessage, outboxMessage);
+					outboxMessage.updateStatus(Message.Status.SENT);
 					break;
 				default:
 					break;
 				}
 			} catch (Exception e) {
-				e.printStackTrace();
 				outboxMessage.updateStatus(Message.Status.SENT_ERR);
 				outboxMessage.logs().add(e.getMessage());
+				LOGGER.error("SEND ERROR", e);
 			}
 
 		}

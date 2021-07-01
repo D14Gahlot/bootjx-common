@@ -76,7 +76,7 @@ public class TwitterConnector implements ConnectorHandler {
 		} catch (Exception e) {
 			outboxMessage.updateStatus(OutboxMessage.Status.SENT_ERR);
 			outboxMessage.logs().add(e.getMessage());
-			e.printStackTrace();
+			LOGGER.error("SEND ERROR", e);
 		}
 	}
 

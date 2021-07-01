@@ -3,6 +3,8 @@ package com.boot.jx.connectors;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Component;
@@ -13,14 +15,12 @@ import com.boot.jx.dict.ContactType;
 import com.boot.jx.dict.FileFormat;
 import com.boot.jx.dict.FileType;
 import com.boot.jx.model.CommonFile;
-import com.boot.jx.model.MapModel;
 import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.jx.postman.client.PMFileStoreClient;
 import com.boot.jx.postman.client.TmplClient;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.QuickMedia;
-import com.boot.jx.postman.gupshup.GupShupClientAbstract;
 import com.boot.jx.postman.gupshup.GupShupClientChat;
 import com.boot.jx.postman.gupshup.GupShupClientNotify;
 import com.boot.jx.postman.gupshup.GupShupConfigClient;
@@ -44,6 +44,8 @@ import com.boot.utils.TimeUtils;
 @Component
 @ConnectorMapping(contactType = ContactType.WHATSAPP, channel = MessageDefinitions.MESSAGE_CHANNLES.GUPSHUPW)
 public class WAGupShupConnector implements ConnectorHandler {
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(WAGupShupConnector.class);
 
 	@Autowired
 	private GupShupClientChat gupShupChatClient;
@@ -99,8 +101,9 @@ public class WAGupShupConnector implements ConnectorHandler {
 			}
 			outboxMessage.updateStatus(Message.Status.SENT);
 		} catch (Exception e) {
+			outboxMessage.updateStatus(OutboxMessage.Status.SENT_ERR);
 			outboxMessage.logs().add(e.getMessage());
-			e.printStackTrace();
+			LOGGER.error("SEND ERROR", e);
 		}
 	}
 
