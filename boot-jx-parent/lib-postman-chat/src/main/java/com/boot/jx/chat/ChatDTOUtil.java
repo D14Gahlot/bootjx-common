@@ -50,7 +50,7 @@ public class ChatDTOUtil {
 		messageDto.setType(messageDoc.getType());
 		messageDto.setText(messageDoc.getMessage());
 		messageDto.setTemplate(messageDoc.getTemplate());
-		messageDoc.setTemplateId(messageDoc.getTemplateId());
+		messageDto.setTemplateId(messageDoc.getTemplateId());
 		messageDto.setTimestamp(messageDoc.getTimestamp());
 		messageDto.setSessionId(messageDoc.getSessionId());
 		messageDto.setMessageId(messageDoc.getMessageId());
