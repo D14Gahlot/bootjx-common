@@ -17,6 +17,7 @@ public class ChatMessageDTO implements Serializable {
 	private String action;
 	private String name;
 	private String sessionId;
+	private String bulkSessionId;
 	private String messageId;
 	private String messageIdExt;
 	private String messageIdRef;
@@ -172,5 +173,13 @@ public class ChatMessageDTO implements Serializable {
 
 	public void setTemplateId(String templateId) {
 		this.templateId = templateId;
+	}
+
+	public String getBulkSessionId() {
+		return bulkSessionId;
+	}
+
+	public void setBulkSessionId(String bulkSessionId) {
+		this.bulkSessionId = bulkSessionId;
 	}
 }
