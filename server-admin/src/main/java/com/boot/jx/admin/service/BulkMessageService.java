@@ -161,6 +161,7 @@ public class BulkMessageService extends QueuedTaskExecuter {
 //			} catch (InterruptedException e) {
 //				e.printStackTrace();
 //			}
+			chatService.initSession(outboxMessage, chatSessionDoc);
 			chatService.send(chatSessionDoc, outboxMessage);
 		} else {
 			msg.updateStatus(Status.NSENT);

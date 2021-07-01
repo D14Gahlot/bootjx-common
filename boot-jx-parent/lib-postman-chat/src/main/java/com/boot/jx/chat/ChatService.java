@@ -332,6 +332,26 @@ public class ChatService {
 		return session.isInitd();
 	}
 
+	public boolean initSession(OutboxMessage outboxMessage, ChatSessionDoc session) {
+		boolean initd = session.isInitd();
+		if (initd) {
+			return true;
+		}
+		ConnectorHandler connector = connectorHandlerFactory.get(outboxMessage.contact().type(),
+				outboxMessage.contact().getChannel());
+
+		ChatContactDoc contact = sessionStore.getContact(session.getContactId());
+		if (ArgUtil.is(connector)) {
+			initd = connector.initSession(contact, session, outboxMessage);
+			// TODO:-- Validate if saving is required in case of outbound
+			// sessionStore.save(contact);
+		}
+		if (initd) {
+			session = sessionStore.initSession(session, contact);
+		}
+		return session.isInitd();
+	}
+
 	@Async
 	public void initSessionPost(InboxMessage inboxMessage, ChatSessionDoc session) {
 		ChatContactDoc contact = sessionStore.getContact(inboxMessage);

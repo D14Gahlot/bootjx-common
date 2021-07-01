@@ -54,6 +54,11 @@ public class ConnectorHandlerFactory extends ScopedBeanFactory<String, Connector
 			return true;
 		}
 
+		default public boolean initSession(ChatContactDoc contact, ChatSessionDoc session,
+				OutboxMessage outboxMessage) {
+			return true;
+		}
+
 		default public void message(String messageType, ChatContactDoc chatContactDoc, SessionMessage inboxMessage,
 				OutboxMessage outboxMessage) {
 			try {

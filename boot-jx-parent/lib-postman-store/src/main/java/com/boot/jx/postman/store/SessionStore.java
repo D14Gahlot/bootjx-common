@@ -183,6 +183,10 @@ public class SessionStore extends CommonDocStore {
 				chatContactQuery.setLastOutBoundStamp(inboxMessage.getTimestamp());
 			}
 
+			if (ArgUtil.is(chatContactDoc)) {
+				chatSessionDoc.setContactName(chatContactDoc.getName());
+			}
+
 			save(chatSessionDoc);
 			chatContactQuery.setSessionId(chatSessionDoc.getSessionId());
 
@@ -194,7 +198,7 @@ public class SessionStore extends CommonDocStore {
 					|| ArgUtil.isEmpty(chatContactDoc.getChannel())) { // or channel is mssing
 				chatContactQuery.setContactId(contactId);
 				chatContactQuery.setContactType(ArgUtil.parseAsString(inboxMessage.contact().type()));
-				chatContactQuery.setChannelType(inboxMessage.contact().getChannel());
+				chatContactQuery.setChannel(inboxMessage.contact().getChannel());
 				chatContactQuery.setCsid(inboxMessage.contact().getCsid());
 				chatContactQuery.setLane(inboxMessage.contact().getLane());
 				commonMongoTemplate.upsert(chatContactQuery);
@@ -384,7 +388,7 @@ public class SessionStore extends CommonDocStore {
 
 		CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder().whereId(chatSessionDoc.getSessionId());
 		builder.set("initd", chatSessionDoc.isInitd());
-		builder.set("contactName", chatSessionDoc.getContactName());
+		builder.set("contactName", ArgUtil.nonEmpty(chatSessionDoc.getContactName(), contact.getName()));
 		mongoTemplate.updateFirst(builder.getQuery(), builder.getUpdate(), ChatSessionDoc.class);
 
 		return chatSessionDoc;
