@@ -13,6 +13,7 @@ public class ChatMessageDTO implements Serializable {
 	private static final long serialVersionUID = 7766790295486098869L;
 	private String text;
 	private String template;
+	private String templateId;
 	private String action;
 	private String name;
 	private String sessionId;
@@ -163,5 +164,13 @@ public class ChatMessageDTO implements Serializable {
 
 	public void setContact(ContactDTO contact) {
 		this.contact = contact;
+	}
+
+	public String getTemplateId() {
+		return templateId;
+	}
+
+	public void setTemplateId(String templateId) {
+		this.templateId = templateId;
 	}
 }
