@@ -799,6 +799,13 @@ public final class ArgUtil {
 		return null;
 	}
 
+	public static <T> T nonEmpty(T str1, T strs2) {
+		if (!isEmpty(str1)) {
+			return str1;
+		}
+		return strs2;
+	}
+
 	@Deprecated
 	public static <T> T ifNotEmpty(T... strs) {
 		return nonEmpty(strs);

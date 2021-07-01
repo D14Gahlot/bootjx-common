@@ -37,7 +37,7 @@ public class AmxResponseSchemes {
 		public default String getTraceid() {
 			return AppContextUtil.getTraceId(false, false);
 		};
-		
+
 	}
 
 	public interface ApiMetaResponse<M> extends ApiWrapperResponse {

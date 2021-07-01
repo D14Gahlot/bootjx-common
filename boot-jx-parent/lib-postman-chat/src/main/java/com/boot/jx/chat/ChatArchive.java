@@ -67,24 +67,14 @@ public class ChatArchive {
 	}
 
 	public ChatMessageDTO getMessage(MessageDoc messageDoc, ChatSessionDoc chatSessionDoc) {
-		ChatMessageDTO messageDto = ChatDTOUtil.getChatMessageDTO(messageDoc);
-		if (ArgUtil.is(messageDoc)) {
-			if (PostManUtil.isInBound(messageDoc.getType())) {
-				messageDto.setName(chatSessionDoc.getContactName());
-			} else {
-				messageDto.setName(messageDoc.getAgent());
-			}
-		}
+		ChatMessageDTO messageDto = ChatDTOUtil.getChatMessageDTO(messageDoc, chatSessionDoc.getContactName(),
+				messageDoc.getAgent());
 		return messageDto;
 	}
 
 	public ChatMessageDTO getMessage(MessageDoc messageDoc, ChatSessionDTO chatSessionDto) {
-		ChatMessageDTO messageDto = ChatDTOUtil.getChatMessageDTO(messageDoc);
-		if (PostManUtil.isInBound(messageDoc.getType())) {
-			messageDto.setName(chatSessionDto.getName());
-		} else {
-			messageDto.setName(messageDoc.getAgent());
-		}
+		ChatMessageDTO messageDto = ChatDTOUtil.getChatMessageDTO(messageDoc, chatSessionDto.getName(),
+				messageDoc.getAgent());
 		return messageDto;
 	}
 

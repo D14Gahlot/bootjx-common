@@ -57,10 +57,20 @@ public class ChatSessionDTO implements Serializable {
 		this.sessionId = sessionId;
 	}
 
+	/**
+	 * Contact name
+	 * 
+	 * @param name
+	 */
 	public String getName() {
 		return name;
 	}
 
+	/**
+	 * Contact name
+	 * 
+	 * @param name
+	 */
 	public void setName(String name) {
 		this.name = name;
 	}

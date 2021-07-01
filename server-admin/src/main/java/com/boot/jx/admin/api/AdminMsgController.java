@@ -19,15 +19,20 @@ import com.boot.jx.admin.manager.ChatParserAndImportor;
 import com.boot.jx.admin.service.BulkMessageService;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.chat.ChatArchive;
+import com.boot.jx.chat.ChatDTOUtil;
 import com.boot.jx.common.doc.ImportChatSessionDoc;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.mongo.CommonMongoQueryBuilder.CommonMongoCriteria;
 import com.boot.jx.postman.doc.BulkSessionDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
+import com.boot.jx.postman.doc.MessageDoc;
+import com.boot.jx.postman.dto.ChatMessageDTO;
 import com.boot.jx.postman.dto.ChatSessionDTO;
 import com.boot.jx.postman.model.OutboxMessage;
+import com.boot.jx.postman.store.MessageStore;
 import com.boot.jx.postman.store.SessionStore;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.CollectionUtil;
 import com.google.i18n.phonenumbers.NumberParseException;
 
 @RestController
@@ -44,6 +49,9 @@ public class AdminMsgController {
 
 	@Autowired
 	private SessionStore sessionStore;
+
+	@Autowired
+	private MessageStore messageStore;
 
 	@RequestMapping(value = "/api/message/session", method = { RequestMethod.GET })
 	public ApiResponse<ChatSessionDoc, Object> fetchSession(@RequestParam String startStamp,
@@ -141,6 +149,26 @@ public class AdminMsgController {
 		}
 		return ApiResponse.buildResults(mongoTemplate
 				.find(new Query().with(new Sort(Sort.Direction.DESC, "createdStamp")), BulkSessionDoc.class));
+	}
+
+	@RequestMapping(value = "/api/message/bulk/push/messages", method = { RequestMethod.POST })
+	public ApiResponse<ChatMessageDTO, BulkSessionDoc> getBulkMessages(@RequestParam String bulkSessionId)
+			throws NumberParseException {
+		ApiResponse<ChatMessageDTO, BulkSessionDoc> resp = ApiResponse.instance(ChatMessageDTO.class,
+				BulkSessionDoc.class);
+
+		BulkSessionDoc session = CollectionUtil.getOne(mongoTemplate
+				.find(new Query().addCriteria(CommonMongoCriteria.whereId(bulkSessionId)), BulkSessionDoc.class));
+		resp.setMeta(session);
+
+		if (ArgUtil.is(session)) {
+			List<MessageDoc> msgs = messageStore.findByBulkSessionId(session.getBulkSessionId(),
+					session.getContactType());
+			resp.results(ChatDTOUtil.getChatMessageDTO(msgs, bulkSessionId, bulkSessionId));
+		}
+		
+		return resp;
+
 	}
 
 }

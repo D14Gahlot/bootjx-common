@@ -1,7 +1,9 @@
 package com.boot.jx.chat;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.List;
 
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
@@ -39,7 +41,7 @@ public class ChatDTOUtil {
 		return contact;
 	}
 
-	public static ChatMessageDTO getChatMessageDTO(MessageDoc messageDoc) {
+	public static ChatMessageDTO getChatMessageDTO(MessageDoc messageDoc, String contactName, String agentName) {
 		ChatMessageDTO messageDto = new ChatMessageDTO();
 		if (!ArgUtil.is(messageDoc)) {
 			return messageDto;
@@ -67,13 +69,30 @@ public class ChatDTOUtil {
 		}
 
 		if (PostManUtil.isOutBound(messageDoc.getType())) {
-			if (ArgUtil.isEmpty(messageDto.getName())) {
-				messageDto.setName(messageDoc.getAgent());
-			}
-			messageDto.setSender(messageDoc.getAgent());
+			messageDto.setSender(ArgUtil.nonEmpty(messageDoc.getAgent(), agentName));
+		} else if (PostManUtil.isInBound(messageDoc.getType())) {
+			messageDto.setSender(ArgUtil.nonEmpty(messageDto.getName(), contactName));
+		}
+
+		if (ArgUtil.isEmpty(messageDto.getName())) {
+			messageDto.setName(messageDto.getSender());
 		}
 
 		return messageDto;
+	}
+
+	public static ChatMessageDTO getChatMessageDTO(MessageDoc messageDoc) {
+		return getChatMessageDTO(messageDoc, null, messageDoc.getAgent());
+	}
+
+	public static List<ChatMessageDTO> getChatMessageDTO(List<MessageDoc> messageDocs, String contactName,
+			String agentName) {
+		List<ChatMessageDTO> messageDtos = new ArrayList<ChatMessageDTO>();
+		for (MessageDoc messageDoc : messageDocs) {
+			ChatMessageDTO messageDto = getChatMessageDTO(messageDoc, contactName, agentName);
+			messageDtos.add(messageDto);
+		}
+		return messageDtos;
 	}
 
 	public static ChatSessionDTO getChatSessionDTO(ChatSessionDoc chatSessionDoc) {
@@ -83,6 +102,7 @@ public class ChatDTOUtil {
 		chatSessionDto.setAssignedToDept(chatSessionDoc.getAssignedToDept());
 		chatSessionDto.setActive(chatSessionDoc.isActive());
 		chatSessionDto.setStatus(chatSessionDoc.getStatus());
+		chatSessionDto.setName(chatSessionDoc.getContactName());
 
 		chatSessionDto.setAssignedAgentStamp(chatSessionDoc.getAssignedAgentStamp());
 		chatSessionDto.setAssignedDeptStamp(chatSessionDoc.getAssignedDeptStamp());

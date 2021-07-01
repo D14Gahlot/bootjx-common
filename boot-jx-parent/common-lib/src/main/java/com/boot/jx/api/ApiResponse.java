@@ -114,6 +114,18 @@ public class ApiResponse<T, M> extends AResponse<M>
 		return new ApiResponse<TS, MS>();
 	}
 
+	public static <TS, MS> ApiResponse<TS, MS> instance() {
+		return new ApiResponse<TS, MS>();
+	}
+
+	public static <TS, MS> ApiResponse<TS, MS> instance(Class<TS> clazz) {
+		return new ApiResponse<TS, MS>();
+	}
+
+	public static <TS, MS> ApiResponse<TS, MS> instance(Class<TS> clazz, Class<MS> metaClass) {
+		return new ApiResponse<TS, MS>();
+	}
+
 	/**
 	 * @deprecated - use {@link #buildResults(Object)} for list of elements and
 	 *             {@link #buildResult(Object)} for single element list

@@ -247,6 +247,13 @@ public class MessageStore extends CommonDocStore {
 		return messages;
 	}
 
+	public List<MessageDoc> findByBulkSessionId(String bulkSessionId, ContactType contactType) {
+		Query query2 = new Query();
+		query2.addCriteria(Criteria.where("bulkSessionId").is(bulkSessionId));
+		List<MessageDoc> messages = mongoTemplate.find(query2, MessageDoc.class, getCollectionName(contactType));
+		return messages;
+	}
+
 	public void applyPatch(MessageDoc messageDoc) {
 		applyPatch(messageDoc, getCollectionName(messageDoc.getContact().getContactType()));
 	}
