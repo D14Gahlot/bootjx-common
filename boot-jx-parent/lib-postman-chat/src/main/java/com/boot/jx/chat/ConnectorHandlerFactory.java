@@ -64,9 +64,11 @@ public class ConnectorHandlerFactory extends ScopedBeanFactory<String, Connector
 			try {
 				switch (messageType) {
 				case "SEND":
+					outboxMessage.messageMetaWrapper().composeType("N"); // is a New Message
 					this.send(chatContactDoc, outboxMessage);
 					break;
 				case "REPLY":
+					outboxMessage.messageMetaWrapper().composeType("R"); // Its a Reply
 					this.reply(inboxMessage, outboxMessage);
 					break;
 				default:

@@ -13,6 +13,7 @@ import com.boot.jx.dict.ContactType;
 import com.boot.jx.dict.FileFormat;
 import com.boot.jx.dict.FileType;
 import com.boot.jx.model.CommonFile;
+import com.boot.jx.model.MapModel;
 import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.jx.postman.client.PMFileStoreClient;
 import com.boot.jx.postman.client.TmplClient;
@@ -71,29 +72,33 @@ public class WAGupShupConnector implements ConnectorHandler {
 		return gupShupChatClient;
 	}
 
-	public void send(boolean isNotify, OutboxMessage outboxMessage) {
-		try {
-			if (ArgUtil.is(outboxMessage.getTemplate())) {
-				QuickMedia templateReply = mongoTemplate.findById(outboxMessage.getTemplate(), QuickMedia.class);
-				if (ArgUtil.is(templateReply)) {
-					if ("image".equalsIgnoreCase(templateReply.getType())) {
-						outboxMessage.attachment(
-								new Attachment().mediaURL(templateReply.getUrl()).mediaType(FileType.IMAGE.toString()));
-						outboxMessage = getClient(isNotify).send(outboxMessage);
-					}
-				} else {
-					tmplClient.process(outboxMessage);
-					outboxMessage = getClient(isNotify).send(outboxMessage);
+	private OutboxMessage resolveTemplate(OutboxMessage outboxMessage) {
+		if (ArgUtil.is(outboxMessage.getTemplate())) {
+			QuickMedia templateReply = mongoTemplate.findById(outboxMessage.getTemplate(), QuickMedia.class);
+			if (ArgUtil.is(templateReply)) {
+				if ("image".equalsIgnoreCase(templateReply.getType())) {
+					outboxMessage.attachment(
+							new Attachment().mediaURL(templateReply.getUrl()).mediaType(FileType.IMAGE.toString()));
+					return outboxMessage;
 				}
-			} else if (ArgUtil.is(outboxMessage.getTemplateId())) {
-				
-				// outboxMessage.setMessage(tmplClient.process(hsmTemplate.getTemplate(),
-				// outboxMessage.getModel()));
-				tmplClient.process(outboxMessage);
-				outboxMessage = getClient(isNotify).send(outboxMessage);
 			} else {
-				outboxMessage = getClient(isNotify).send(outboxMessage);
+				tmplClient.process(outboxMessage);
+				return outboxMessage;
 			}
+		} else if (ArgUtil.is(outboxMessage.getTemplateId())) {
+			// outboxMessage.setMessage(tmplClient.process(hsmTemplate.getTemplate(),
+			// outboxMessage.getModel()));
+			tmplClient.process(outboxMessage);
+			return outboxMessage;
+		} else {
+			return outboxMessage;
+		}
+		return outboxMessage;
+	}
+
+	public void send(boolean isPushMessage, OutboxMessage outboxMessage) {
+		try {
+			getClient(isPushMessage).send(outboxMessage);
 			outboxMessage.updateStatus(Message.Status.SENT);
 		} catch (Exception e) {
 			outboxMessage.logs().add(e.getMessage());
@@ -103,10 +108,12 @@ public class WAGupShupConnector implements ConnectorHandler {
 
 	@Override
 	public void send(ChatContactDoc chatContactDoc, OutboxMessage outboxMessage) {
-		outboxMessage.messageMetaWrapper().composeType("N"); // is a New Message
 		outboxMessage.contact().setChannel(chatContactDoc.getChannel());
 		outboxMessage.contact().setLane(chatContactDoc.getLane());
-		if (TimeUtils.isExpired(chatContactDoc.getLastInBoundStamp(), "24hr")) {
+		resolveTemplate(outboxMessage);
+
+		if (TimeUtils.isExpired(chatContactDoc.getLastInBoundStamp(), "24hr")
+				&& outboxMessage.optionsAsModel().entry("wa-template-id").exists()) {
 			if (ArgUtil.isEmptyValue(chatContactDoc.getLastOptInStamp())) {
 				gupShupNotifyClient.optIn(outboxMessage);
 				commonMongoTemplate.updateFirst(
@@ -122,7 +129,7 @@ public class WAGupShupConnector implements ConnectorHandler {
 
 	@Override
 	public void reply(SessionMessage inboxMessage, OutboxMessage outboxMessage) {
-		outboxMessage.messageMetaWrapper().composeType("R"); // Its a Reply
+		resolveTemplate(outboxMessage);
 		this.send(false, outboxMessage);
 	}
 
