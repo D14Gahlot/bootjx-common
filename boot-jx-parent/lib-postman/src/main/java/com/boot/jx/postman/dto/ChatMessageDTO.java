@@ -1,6 +1,7 @@
 package com.boot.jx.postman.dto;
 
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -30,6 +31,8 @@ public class ChatMessageDTO implements Serializable {
 	private String status;
 	private Map<String, Long> stamps;
 	private ContactDTO contact;
+
+	private Map<String, Object> meta;
 
 	public String getText() {
 		return text;
@@ -181,5 +184,20 @@ public class ChatMessageDTO implements Serializable {
 
 	public void setBulkSessionId(String bulkSessionId) {
 		this.bulkSessionId = bulkSessionId;
+	}
+
+	public Map<String, Object> getMeta() {
+		return meta;
+	}
+
+	public void setMeta(Map<String, Object> meta) {
+		this.meta = meta;
+	}
+
+	public Map<String, Object> meta() {
+		if (this.meta == null) {
+			this.meta = new HashMap<String, Object>();
+		}
+		return this.meta;
 	}
 }

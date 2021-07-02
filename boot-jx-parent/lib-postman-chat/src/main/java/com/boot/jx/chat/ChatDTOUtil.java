@@ -63,6 +63,7 @@ public class ChatDTOUtil {
 		messageDto.setStatus(messageDoc.getStatus());
 		messageDto.setStamps(messageDoc.getStamps());
 		messageDto.setBulkSessionId(messageDoc.getBulkSessionId());
+		messageDto.setMeta(messageDoc.getMeta());
 
 		if (ArgUtil.is(messageDoc.getContact())) {
 			messageDto.setContact(EntityDtoUtil.entityToDto(messageDoc.getContact(), new ContactDTO()));
