@@ -17,11 +17,13 @@ import com.boot.jx.mongo.CommonMongoQueryBuilder;
 import com.boot.jx.postman.doc.ContactDoc;
 import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.model.InboxMessage;
+import com.boot.jx.postman.model.Message.Status;
 import com.boot.jx.postman.model.MessageDefinitions.IMessage;
 import com.boot.jx.postman.model.MessageReport;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.model.TagDocument;
 import com.boot.jx.utils.PostManUtil;
+import com.boot.utils.ArgExceptions.ArgException;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
 import com.google.common.collect.Lists;
@@ -256,6 +258,17 @@ public class MessageStore extends CommonDocStore {
 
 	public void applyPatch(MessageDoc messageDoc) {
 		applyPatch(messageDoc, getCollectionName(messageDoc.getContact().getContactType()));
+	}
+
+	public void updateStatus(ContactType contactType, MessageDoc messageDoc, Status status, String reason) {
+		CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder();
+		builder.set("status", status);
+		builder.set("stamps." + status.toString(), System.currentTimeMillis());
+		if (ArgUtil.is(reason)) {
+			builder.update().push("logs", reason);
+		}
+		mongoTemplate.updateFirst(builder.getQuery(), builder.getUpdate(), MessageDoc.class,
+				getCollectionName(contactType));
 	}
 
 	public void updateStatus(MessageReport messageReport) {

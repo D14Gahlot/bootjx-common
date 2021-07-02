@@ -164,8 +164,7 @@ public class BulkMessageService extends QueuedTaskExecuter {
 			chatService.initSession(outboxMessage, chatSessionDoc);
 			chatService.send(chatSessionDoc, outboxMessage);
 		} else {
-			msg.updateStatus(Status.NSENT);
-			messageStore.save(msg, contactType);
+			messageStore.updateStatus(contactType, msg, Status.NSENT, "Cannot create session");
 		}
 	}
 

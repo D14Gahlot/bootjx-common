@@ -299,6 +299,7 @@ public abstract class QueuedTaskExecuter {
 			String taskUUID = tasklet.taskUUID();
 			String ackId = taskStatus().get(taskUUID);
 			if (ArgUtil.isEmpty(ackId) || !ackId.equals(tasklet.getAckId())) {
+				LOGGER.debug("Skipping Task {} for AckMisMatch {} {}", tasklet.getTaskId(), ackId, tasklet.getAckId());
 				return;
 			}
 
@@ -321,11 +322,16 @@ public abstract class QueuedTaskExecuter {
 				} finally {
 					RAtomicLong counter = redisson.getAtomicLong("DONE." + tasklet.jobUUID());
 					counter.incrementAndGet();
+					LOGGER.debug("Completed Task {} for NoJob {} {} ", tasklet.getTaskId(), tasklet.jobUUID(),
+							taskJob.getStatus());
 				}
+			} else {
+				LOGGER.debug("Skipping Task {} for NoJob {}", tasklet.getTaskId(), tasklet.jobUUID());
 			}
 
 			if (ArgUtil.isEmpty(taskJob) || ArgUtil.isEmpty(taskJob.getStatus())
 					|| taskJob.getStatus().ordinal() > JOB_STATUS.READING.ordinal()) {
+				LOGGER.debug("Removing Task {} for Job {} {}", tasklet.getTaskId());
 				taskStatus().fastRemove(taskUUID);
 			}
 
