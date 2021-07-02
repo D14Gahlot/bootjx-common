@@ -93,11 +93,21 @@ public class CommonMongoQueryBuilder {
 
 		public DocQueryBuilder(T doc) {
 			this.doc = doc;
+			whereId(getId(this.doc));
+		}
+
+		public DocQueryBuilder(String id) {
+			this.doc = this.newDoc(id);
+			whereId(id);
 		}
 
 		public Class<?> getDocClass() {
 			return this.doc.getClass();
 		}
+
+		public abstract T newDoc(String id);
+
+		public abstract String getId(T doc);
 	}
 
 }

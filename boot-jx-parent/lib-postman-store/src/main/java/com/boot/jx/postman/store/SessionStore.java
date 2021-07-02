@@ -109,11 +109,15 @@ public class SessionStore extends CommonDocStore {
 	}
 
 	public boolean isSessionValid(ChatSessionDoc chatSessionDoc) {
-		if ((ArgUtil.isEmpty(chatSessionDoc)
-				|| TimeUtils.isExpired(chatSessionDoc.getLastInComingStamp(), pmClientConfig.getChatSessionTimeout())
-				|| !chatSessionDoc.isActive())) {
+		if ((ArgUtil.isEmpty(chatSessionDoc) || !chatSessionDoc.isActive()) || chatSessionDoc.isExpired()) {
 			return false;
 		}
+
+		if (!ArgUtil.isEmptyValue(chatSessionDoc.getLastInComingStamp())
+				&& (chatSessionDoc.getLastResponseStamp() > chatSessionDoc.getLastInComingStamp())) {
+			return TimeUtils.isExpired(chatSessionDoc.getLastInComingStamp(), pmClientConfig.getChatSessionTimeout());
+		}
+
 		return true;
 	}
 
@@ -179,8 +183,9 @@ public class SessionStore extends CommonDocStore {
 				chatSessionDoc.setLastInComingStamp(inboxMessage.getTimestamp());
 				chatContactQuery.setLastInBoundStamp(inboxMessage.getTimestamp());
 			} else if (PostManUtil.isOutBound(inboxMessage.getType())) {
-				chatSessionDoc.setLastResponseStamp(inboxMessage.getTimestamp());
-				chatContactQuery.setLastOutBoundStamp(inboxMessage.getTimestamp());
+				// check {{ConnectorHandlerFactory#message}}
+				// chatSessionDoc.setLastResponseStamp(inboxMessage.getTimestamp());
+				// chatContactQuery.setLastOutBoundStamp(inboxMessage.getTimestamp());
 			}
 
 			if (ArgUtil.is(chatContactDoc)) {
@@ -216,8 +221,9 @@ public class SessionStore extends CommonDocStore {
 				chatSessionDocQuery.setLastInComingStamp(inboxMessage.getTimestamp());
 				chatContactQuery.setLastInBoundStamp(inboxMessage.getTimestamp());
 			} else if (PostManUtil.isOutBound(inboxMessage.getType())) {
-				chatSessionDocQuery.setLastResponseStamp(inboxMessage.getTimestamp());
-				chatContactQuery.setLastOutBoundStamp(inboxMessage.getTimestamp());
+				// check {{ConnectorHandlerFactory#message}}
+				// chatSessionDocQuery.setLastResponseStamp(inboxMessage.getTimestamp());
+				// chatContactQuery.setLastOutBoundStamp(inboxMessage.getTimestamp());
 			}
 			commonMongoTemplate.updateFirst(chatSessionDocQuery);
 			commonMongoTemplate.updateFirst(chatContactQuery);

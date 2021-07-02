@@ -35,8 +35,9 @@ public class ChatContactDoc implements Serializable, Contactable {
 	private String lane;
 
 	private long lastInBoundStamp;
-
 	private long lastOutBoundStamp;
+	private long lastPushStamp;
+	private long lastReplyStamp;
 
 	private long lastOptInStamp;
 
@@ -198,5 +199,21 @@ public class ChatContactDoc implements Serializable, Contactable {
 	@Override
 	public String getChannel() {
 		return ArgUtil.nonEmpty(this.channel, this.channelType);
+	}
+
+	public long getLastPushStamp() {
+		return lastPushStamp;
+	}
+
+	public void setLastPushStamp(long lastPushStamp) {
+		this.lastPushStamp = lastPushStamp;
+	}
+
+	public long getLastReplyStamp() {
+		return lastReplyStamp;
+	}
+
+	public void setLastReplyStamp(long lastReplyStamp) {
+		this.lastReplyStamp = lastReplyStamp;
 	}
 }

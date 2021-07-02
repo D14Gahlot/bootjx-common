@@ -7,7 +7,22 @@ public class ChatSessionQuery extends DocQueryBuilder<ChatSessionDoc> {
 
 	public ChatSessionQuery(ChatSessionDoc doc) {
 		super(doc);
-		whereId(doc.getSessionId());
+	}
+
+	public ChatSessionQuery(String docId) {
+		super(docId);
+	}
+
+	@Override
+	public ChatSessionDoc newDoc(String id) {
+		ChatSessionDoc doc = new ChatSessionDoc();
+		doc.setSessionId(id);
+		return doc;
+	}
+
+	@Override
+	public String getId(ChatSessionDoc doc) {
+		return doc.getSessionId();
 	}
 
 	public ChatSessionQuery setActive(boolean active) {
@@ -27,5 +42,12 @@ public class ChatSessionQuery extends DocQueryBuilder<ChatSessionDoc> {
 		this.set("lastResponseStamp", timestamp);
 		return this;
 	}
+
+	public ChatSessionQuery setLastOutGoingStamp(long timestamp) {
+		this.doc.setLastOutGoingStamp(timestamp);
+		this.set("lastOutGoingStamp", timestamp);
+		return this;
+	}
+
 
 }

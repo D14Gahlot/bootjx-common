@@ -109,12 +109,13 @@ public class ChatService {
 		}
 
 		outboxMessage.updateStatus(Message.Status.INIT);
-		outboxMessage.contact().type(inboxMessage.contact().type());
+		outboxMessage.contact().setContactType(inboxMessage.contact().getContactType());
 		outboxMessage.contact().setChannel(inboxMessage.contact().getChannel());
 		outboxMessage.contact().setLane(inboxMessage.contact().getLane());
+		outboxMessage.contact().setCsid(inboxMessage.contact().getCsid());
+		outboxMessage.contact().setContactId(inboxMessage.contact().getContactId());
 		outboxMessage.setQueue(inboxMessage.getQueue());
 		outboxMessage.addTo(inboxMessage.getFrom());
-		outboxMessage.contact().setContactId(inboxMessage.contact().getContactId());
 		outboxMessage.setSessionId(inboxMessage.getSessionId());
 
 		if (!ArgUtil.is(outboxMessage.session().getMode())) {

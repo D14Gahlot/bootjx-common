@@ -7,18 +7,22 @@ public class ChatContactQuery extends DocQueryBuilder<ChatContactDoc> {
 
 	public ChatContactQuery(ChatContactDoc doc) {
 		super(doc);
-		whereId(doc.getContactId());
-	}
-
-	public static ChatContactDoc newChatContactDoc(String contactId) {
-		ChatContactDoc doc = new ChatContactDoc();
-		doc.setContactId(contactId);
-		return doc;
 	}
 
 	public ChatContactQuery(String contactId) {
-		super(newChatContactDoc(contactId));
-		whereId(contactId);
+		super(contactId);
+	}
+
+	@Override
+	public String getId(ChatContactDoc doc) {
+		return doc.getContactId();
+	}
+
+	@Override
+	public ChatContactDoc newDoc(String id) {
+		ChatContactDoc doc = new ChatContactDoc();
+		doc.setContactId(id);
+		return doc;
 	}
 
 	public ChatContactQuery setLastInBoundStamp(long timestamp) {
@@ -78,6 +82,18 @@ public class ChatContactQuery extends DocQueryBuilder<ChatContactDoc> {
 	public ChatContactQuery setChannel(String channel) {
 		this.doc.setChannel(channel);
 		this.set("channel", channel);
+		return this;
+	}
+
+	public ChatContactQuery setLastPushStamp(long lastPushStamp) {
+		this.doc.setLastPushStamp(lastPushStamp);
+		this.set("lastPushStamp", lastPushStamp);
+		return this;
+	}
+
+	public ChatContactQuery setLastReplyStamp(long lastReplyStamp) {
+		this.doc.setLastReplyStamp(lastReplyStamp);
+		this.set("lastReplyStamp", lastReplyStamp);
 		return this;
 	}
 

@@ -15,6 +15,7 @@ import com.boot.common.ScopedBeanFactory;
 import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorHandler;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.logger.LoggerService;
+import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.MessageDoc;
@@ -23,8 +24,11 @@ import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.Message;
 import com.boot.jx.postman.model.MessageDefinitions.SessionMessage;
 import com.boot.jx.postman.model.OutboxMessage;
+import com.boot.jx.postman.query.ChatContactQuery;
+import com.boot.jx.postman.query.ChatSessionQuery;
 import com.boot.jx.postman.store.MessageStore;
 import com.boot.jx.postman.store.PMStoreConstants.CHAT_MODE;
+import com.boot.jx.postman.store.SessionStore;
 import com.boot.jx.stomp.StompTunnelService;
 import com.boot.utils.ArgUtil;
 
@@ -137,6 +141,9 @@ public class ConnectorHandlerFactory extends ScopedBeanFactory<String, Connector
 	@Autowired
 	private StompTunnelService stompTunnelService;
 
+	@Autowired
+	public CommonMongoTemplate commonMongoTemplate;
+
 	/**
 	 * 
 	 * Should always be last method or not changes in chatContactDoc or
@@ -161,6 +168,28 @@ public class ConnectorHandlerFactory extends ScopedBeanFactory<String, Connector
 			LOGGER.error(messageType, e);
 		}
 		MessageDoc messageDoc = messageStore.createOrUpdate(outboxMessage);
+
+		if (ArgUtil.isEqual(messageType, "REPLY", "SEND")) {
+			ChatContactQuery chatContactQuery = new ChatContactQuery(outboxMessage.contact().getContactId());
+			ChatSessionQuery chatSessionQuery = new ChatSessionQuery(outboxMessage.getSessionId());
+			long now = System.currentTimeMillis();
+			chatContactQuery.setLastOutBoundStamp(now);
+			chatSessionQuery.setLastOutGoingStamp(now);
+
+			switch (messageType) {
+			case "REPLY":
+				chatContactQuery.setLastReplyStamp(now);
+				chatSessionQuery.setLastResponseStamp(now);
+				break;
+			case "SEND":
+				chatContactQuery.setLastPushStamp(now);
+				break;
+			default:
+				break;
+			}
+			commonMongoTemplate.updateFirst(chatSessionQuery);
+			commonMongoTemplate.updateFirst(chatContactQuery);
+		}
 
 		if (CHAT_MODE.AGENT.toString().equals(outboxMessage.session().getMode())
 				&& ArgUtil.is(outboxMessage.session().getDept())) {
