@@ -9,7 +9,7 @@ import com.boot.jx.postman.model.MessageDefinitions.Contactable;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class ContactInfo implements java.io.Serializable, Contactable {
+public class ContactMeta implements java.io.Serializable, Contactable {
 
 	private static final long serialVersionUID = -2229330167964350550L;
 	String tenant;
@@ -29,7 +29,7 @@ public class ContactInfo implements java.io.Serializable, Contactable {
 	List<Map<String, Object>> filter;
 	List<Map<String, String>> keymap;
 
-	public ContactInfo() {
+	public ContactMeta() {
 		super();
 	}
 
@@ -89,17 +89,17 @@ public class ContactInfo implements java.io.Serializable, Contactable {
 		this.userid = userid;
 	}
 
-	public ContactInfo prefix(String prefix) {
+	public ContactMeta prefix(String prefix) {
 		this.prefix = prefix;
 		return this;
 	}
 
-	public ContactInfo mobile(String mobile) {
+	public ContactMeta mobile(String mobile) {
 		this.phone = mobile;
 		return this;
 	}
 
-	public ContactInfo email(String email) {
+	public ContactMeta email(String email) {
 		this.email = email;
 		return this;
 	}
@@ -134,7 +134,7 @@ public class ContactInfo implements java.io.Serializable, Contactable {
 		return this.keymap;
 	}
 
-	public ContactInfo or(Map<String, Object> or) {
+	public ContactMeta or(Map<String, Object> or) {
 		this.filter().add(or);
 		return this;
 	}

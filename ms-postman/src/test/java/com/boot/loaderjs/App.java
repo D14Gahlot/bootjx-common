@@ -11,7 +11,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.boot.jx.AppContextUtil;
-import com.boot.jx.postman.model.ContactInfo;
+import com.boot.jx.postman.model.ContactMeta;
 import com.boot.jx.postman.model.PushMessage;
 import com.boot.jx.scope.tnt.Tenants;
 import com.boot.jx.scope.tnt.Tenants.Tenant;
@@ -50,9 +50,9 @@ public class App { // Noncompliant
 
 		AppContextUtil.setTenant(Tenants.DEFAULT);
 
-		msg.addContact(new ContactInfo().or(MapBuilder.map().put("lang", "en").put("nationality", "4").toMap()));
+		msg.addContact(new ContactMeta().or(MapBuilder.map().put("lang", "en").put("nationality", "4").toMap()));
 
-		msg.addContact(new ContactInfo().or(MapBuilder.map().put("lang", "ar").put("nationality", "5").toMap()));
+		msg.addContact(new ContactMeta().or(MapBuilder.map().put("lang", "ar").put("nationality", "5").toMap()));
 
 		String androidTopicStr = null;
 		String iosTopicStr = null;
@@ -62,7 +62,7 @@ public class App { // Noncompliant
 		if (msg.getContacts().size() > 0) {
 			StringJoiner orCondition = new StringJoiner(") || (");
 			int totalOrConditions = 0;
-			for (ContactInfo singleContact : msg.getContacts()) {
+			for (ContactMeta singleContact : msg.getContacts()) {
 				for (Map<String, Object> singleFilter : singleContact.getFilter()) {
 					StringJoiner andCondition = new StringJoiner(PushMessage.CONDITION_SEPRATOR_AND);
 					for (Entry<String, Object> entry : singleFilter.entrySet()) {

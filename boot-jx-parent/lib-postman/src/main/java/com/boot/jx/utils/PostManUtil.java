@@ -7,7 +7,7 @@ import org.springframework.http.ResponseEntity;
 
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.model.CommonFile;
-import com.boot.jx.postman.model.ContactInfo;
+import com.boot.jx.postman.model.ContactMeta;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.MessageDefinitions.Contactable;
 import com.boot.jx.postman.model.MessageDefinitions.IMessage;
@@ -66,7 +66,8 @@ public class PostManUtil {
 		if (ArgUtil.is(inboxMessage.contact().getContactId())) {
 			return inboxMessage.contact().getContactId();
 		}
-		return createContactId(inboxMessage.contact().type(), inboxMessage.forContact(), inboxMessage.contact().getLane());
+		return createContactId(inboxMessage.contact().type(), inboxMessage.forContact(),
+				inboxMessage.contact().getLane());
 	}
 
 	public static String createContactId(Contactable contact) {
@@ -78,7 +79,7 @@ public class PostManUtil {
 				contact.getLane());
 	}
 
-	public static Contactable updateContact(Contactable contact) {
+	public static Contactable updateContactMeta(Contactable contact) {
 		if (!ArgUtil.is(contact.getCsid())) {
 			contact.setCsid(createCsid(contact));
 		}
@@ -91,6 +92,12 @@ public class PostManUtil {
 					contact.getCsid(), contact.getLane()));
 		}
 		return contact;
+	}
+
+	public static Contactable getContactMeta(Contactable contact) {
+		Contactable contactMeta = new ContactMeta();
+		contactMeta.copyFrom(contact);
+		return updateContactMeta(contactMeta);
 	}
 
 	public static String generateCheckSum(InboxMessage inboxMessage) {
@@ -110,6 +117,10 @@ public class PostManUtil {
 
 	public static boolean isInBound(String type) {
 		return ArgUtil.isEqual(type, MESSAGE_BOUND_TYPE.INBOUND, MESSAGE_BOUND_TYPE.INBOUND_IMPORTED);
+	}
+
+	public static boolean isInBound(IMessage inboxMessage) {
+		return isInBound(inboxMessage.getType());
 	}
 
 	public static boolean isOutBound(String type) {

@@ -305,7 +305,7 @@ public class InboxMessage implements Serializable, SessionMessage {
 
 	public Contactable contact() {
 		if (this.contact == null) {
-			this.contact = new ContactInfo();
+			this.contact = new ContactMeta();
 		}
 		return this.contact;
 	}

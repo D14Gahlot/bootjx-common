@@ -43,7 +43,7 @@ public class Message<T extends Message<T>> implements Serializable, MessageOptio
 	protected String subject;
 	protected String message = null;
 	protected List<String> to = null;
-	protected List<ContactInfo> contacts = null;
+	protected List<ContactMeta> contacts = null;
 	private String templateId = null;
 	private String template = null;
 	private String action = null;
@@ -165,7 +165,7 @@ public class Message<T extends Message<T>> implements Serializable, MessageOptio
 		this.timestamp = System.currentTimeMillis();
 		this.status = Status.CRTD;
 		this.to = new ArrayList<String>();
-		this.contacts = new ArrayList<ContactInfo>();
+		this.contacts = new ArrayList<ContactMeta>();
 		this.priority = 0;
 
 	}
@@ -260,16 +260,16 @@ public class Message<T extends Message<T>> implements Serializable, MessageOptio
 		this.messageId = messageId;
 	}
 
-	public List<ContactInfo> getContacts() {
+	public List<ContactMeta> getContacts() {
 		return contacts;
 	}
 
-	public void setContacts(List<ContactInfo> contacts) {
+	public void setContacts(List<ContactMeta> contacts) {
 		this.contacts = contacts;
 	}
 
-	public void addContact(ContactInfo... contacts) {
-		for (ContactInfo contact : contacts) {
+	public void addContact(ContactMeta... contacts) {
+		for (ContactMeta contact : contacts) {
 			this.contacts.add(contact);
 		}
 	}
@@ -492,7 +492,7 @@ public class Message<T extends Message<T>> implements Serializable, MessageOptio
 
 	public Contactable contact() {
 		if (this.contact == null) {
-			this.contact = new ContactInfo();
+			this.contact = new ContactMeta();
 		}
 		return this.contact;
 	}

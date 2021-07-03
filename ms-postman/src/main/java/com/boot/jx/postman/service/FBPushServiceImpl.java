@@ -27,7 +27,7 @@ import com.boot.jx.postman.IPushNotifyService;
 import com.boot.jx.postman.PostManException;
 import com.boot.jx.postman.audit.PMGaugeEvent;
 import com.boot.jx.postman.events.UserMessageEvent;
-import com.boot.jx.postman.model.ContactInfo;
+import com.boot.jx.postman.model.ContactMeta;
 import com.boot.jx.postman.model.Notipy;
 import com.boot.jx.postman.model.PostManFile;
 import com.boot.jx.postman.model.PushMessage;
@@ -193,7 +193,7 @@ public class FBPushServiceImpl implements IPushNotifyService {
 			if (msg.getContacts().size() > 0) {
 				StringJoiner orCondition = new StringJoiner(") || (");
 				int totalOrConditions = 0;
-				for (ContactInfo singleContact : msg.getContacts()) {
+				for (ContactMeta singleContact : msg.getContacts()) {
 					for (Map<String, Object> singleFilter : singleContact.getFilter()) {
 						StringJoiner andCondition = new StringJoiner(PushMessage.CONDITION_SEPRATOR_AND);
 						for (Entry<String, Object> entry : singleFilter.entrySet()) {

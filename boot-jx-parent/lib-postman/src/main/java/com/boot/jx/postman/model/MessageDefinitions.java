@@ -23,7 +23,7 @@ public class MessageDefinitions {
 		public static final String GUPSHUPW = "GUPSHUPW";
 	}
 
-	@JsonDeserialize(as = ContactInfo.class)
+	@JsonDeserialize(as = ContactMeta.class)
 	@JsonIgnoreProperties(ignoreUnknown = true)
 	public interface Contactable extends Serializable {
 		public String getContactType();
@@ -60,6 +60,16 @@ public class MessageDefinitions {
 
 		public default void type(ContactType contactType) {
 			this.setContactType(ArgUtil.parseAsString(contactType));
+		}
+
+		public default void copyFrom(Contactable contactable) {
+			this.setContactType(contactable.getContactType());
+			this.setChannel(contactable.getChannel());
+			this.setLane(contactable.getLane());
+			this.setCsid(contactable.getCsid());
+			this.setPhone(contactable.getPhone());
+			this.setEmail(contactable.getEmail());
+			this.setContactId(contactable.getContactId());
 		}
 
 	}

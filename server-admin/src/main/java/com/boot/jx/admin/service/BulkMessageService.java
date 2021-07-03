@@ -117,9 +117,9 @@ public class BulkMessageService extends QueuedTaskExecuter {
 		for (MessageDoc messageDoc : msgs) {
 			push(JobTaskModel.newTasklet(currentBatchJob).taskId(messageDoc.getMessageId()));
 			messageDoc.updateStatus(Status.CRTD);
-			//System.out.println("Status.CRTD"+messageDoc.getContact().getPhone());
+			// System.out.println("Status.CRTD"+messageDoc.getContact().getPhone());
 			messageStore.updateStatus(doc.getContactType(), messageDoc, Status.CRTD, null);
-			//messageStore.save(messageDoc, doc.getContactType());
+			// messageStore.save(messageDoc, doc.getContactType());
 		}
 		return false;
 	}
