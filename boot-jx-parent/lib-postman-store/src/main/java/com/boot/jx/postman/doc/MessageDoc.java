@@ -46,7 +46,7 @@ public class MessageDoc implements Serializable, Patchable<MessageDoc> {
 	private String handler;
 	private String message;
 	private String status;
-	private ContactDoc contact;
+	private ContactDetailDoc contact;
 	private String agent;
 	private TagDocument tags;
 	private Map<String, Object> model;
@@ -118,11 +118,11 @@ public class MessageDoc implements Serializable, Patchable<MessageDoc> {
 		this.status = status;
 	}
 
-	public ContactDoc getContact() {
+	public ContactDetailDoc getContact() {
 		return contact;
 	}
 
-	public void setContact(ContactDoc contact) {
+	public void setContact(ContactDetailDoc contact) {
 		this.contact = contact;
 	}
 

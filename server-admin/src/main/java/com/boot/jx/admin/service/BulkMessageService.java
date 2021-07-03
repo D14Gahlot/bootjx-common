@@ -117,7 +117,9 @@ public class BulkMessageService extends QueuedTaskExecuter {
 		for (MessageDoc messageDoc : msgs) {
 			push(JobTaskModel.newTasklet(currentBatchJob).taskId(messageDoc.getMessageId()));
 			messageDoc.updateStatus(Status.CRTD);
-			messageStore.save(messageDoc, doc.getContactType());
+			//System.out.println("Status.CRTD"+messageDoc.getContact().getPhone());
+			messageStore.updateStatus(doc.getContactType(), messageDoc, Status.CRTD, null);
+			//messageStore.save(messageDoc, doc.getContactType());
 		}
 		return false;
 	}
@@ -135,7 +137,7 @@ public class BulkMessageService extends QueuedTaskExecuter {
 
 	@Override
 	public void execute(BatchJob taskJob, Tasklet tasklet) {
-		LOGGER.debug("mexecute(BatchJob {}, Tasklet {})", taskJob.getJobId(), tasklet.getTaskId());
+		LOGGER.debug("execute(BatchJob {}, Tasklet {})", taskJob.getJobId(), tasklet.getTaskId());
 		String messageId = tasklet.getTaskId();
 		ContactType contactType = taskJob.data().entry("contactType").asEnum(ContactType.class);
 		String channel = taskJob.data().entry("channel").asString();

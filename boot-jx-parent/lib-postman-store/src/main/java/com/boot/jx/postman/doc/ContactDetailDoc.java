@@ -6,7 +6,7 @@ import java.util.Map;
 import com.boot.jx.postman.model.MessageDefinitions.Contactable;
 import com.boot.utils.ArgUtil;
 
-public class ContactDoc implements Serializable, Contactable {
+public class ContactDetailDoc implements Serializable, Contactable {
 	private static final long serialVersionUID = -6046846959629225232L;
 	private String email;
 	private String userid;
@@ -27,6 +27,7 @@ public class ContactDoc implements Serializable, Contactable {
 
 	public void setPhone(String phone) {
 		this.phone = phone;
+		this.mobile = phone;
 	}
 
 	public String getUserid() {
@@ -63,12 +64,13 @@ public class ContactDoc implements Serializable, Contactable {
 
 	@Deprecated
 	public String getMobile() {
-		return mobile;
+		return ArgUtil.nonEmpty(this.phone, this.mobile);
 	}
 
 	@Deprecated
 	public void setMobile(String mobile) {
 		this.mobile = mobile;
+		this.phone = mobile;
 	}
 
 	public String getContactId() {

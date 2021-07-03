@@ -115,7 +115,7 @@ public class SessionStore extends CommonDocStore {
 
 		if (!ArgUtil.isEmptyValue(chatSessionDoc.getLastInComingStamp())
 				&& (chatSessionDoc.getLastResponseStamp() > chatSessionDoc.getLastInComingStamp())) {
-			return TimeUtils.isExpired(chatSessionDoc.getLastInComingStamp(), pmClientConfig.getChatSessionTimeout());
+			return !TimeUtils.isExpired(chatSessionDoc.getLastInComingStamp(), pmClientConfig.getChatSessionTimeout());
 		}
 
 		return true;

@@ -125,6 +125,7 @@ public class ConnectorHandlerFactory extends ScopedBeanFactory<String, Connector
 	}
 
 	public ConnectorHandler get(ContactType contactType, String channel) {
+		LOGGER.debug("get(ContactType {}, String {})",contactType,channel);
 		String precisedKey = String.format("%s_%s", contactType, channel);
 		ConnectorHandler x = this.get(precisedKey);
 		if (ArgUtil.is(x)) {

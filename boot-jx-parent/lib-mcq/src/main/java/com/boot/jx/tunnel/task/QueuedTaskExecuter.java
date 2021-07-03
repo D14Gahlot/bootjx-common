@@ -145,6 +145,8 @@ public abstract class QueuedTaskExecuter {
 
 		BatchJob currentBatchJob = jobQueue().poll();
 		if (ArgUtil.is(currentBatchJob)) {
+			
+			
 			AppContextUtil.setTenant(currentBatchJob.getTenant());
 			String sessionId = UniqueID.generateString();
 			AppContextUtil.setSessionId(sessionId);

@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.mongo.CommonDocStore;
 import com.boot.jx.mongo.CommonMongoQueryBuilder;
-import com.boot.jx.postman.doc.ContactDoc;
+import com.boot.jx.postman.doc.ContactDetailDoc;
 import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.Message.Status;
@@ -66,7 +66,7 @@ public class MessageStore extends CommonDocStore {
 		doc.setType("I");
 		doc.setTimestamp(System.currentTimeMillis());
 
-		ContactDoc contact = new ContactDoc();
+		ContactDetailDoc contact = new ContactDetailDoc();
 		contact.setPhone(inboxMessage.getFrom());
 		contact.setContactType(ArgUtil.parseAsString(inboxMessage.contact().type()));
 		doc.setContact(contact);
@@ -193,9 +193,10 @@ public class MessageStore extends CommonDocStore {
 		String to = CollectionUtil.getOne(outMessage.getTo());
 		doc.setContactId(PostManUtil.createContactId(outMessage));
 
-		ContactDoc contact = new ContactDoc();
+		ContactDetailDoc contact = new ContactDetailDoc();
 		contact.setPhone(to);
-		contact.setContactType(ArgUtil.parseAsString(contact.getContactType()));
+		contact.setMobile(to);
+		contact.setContactType(ArgUtil.parseAsString(outMessage.contact().getContactType()));
 		doc.setContact(contact);
 
 		updateMessageDoc(outMessage, doc);
@@ -262,6 +263,17 @@ public class MessageStore extends CommonDocStore {
 
 	public void updateStatus(ContactType contactType, MessageDoc messageDoc, Status status, String reason) {
 		CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder();
+		
+		if (ArgUtil.is(messageDoc.getMessageId())) {
+			builder.whereIdSafe(messageDoc.getMessageId());
+		} else if (ArgUtil.is(messageDoc.getMessageIdExt())) {
+			builder.where("messageIdExt", messageDoc.getMessageIdExt());
+		} else if (ArgUtil.is(messageDoc.getMessageIdRef())) {
+			builder.where("messageIdRef", messageDoc.getMessageIdRef());
+		} else {
+			return;
+		}
+		
 		builder.set("status", status);
 		builder.set("stamps." + status.toString(), System.currentTimeMillis());
 		if (ArgUtil.is(reason)) {
@@ -303,6 +315,13 @@ public class MessageStore extends CommonDocStore {
 	}
 
 	public void insert(List<MessageDoc> messages, ContactType contactType) {
+		/**
+		for (MessageDoc messageDoc : messages) {
+			mongoTemplate.save(messageDoc, MessageStore.getCollectionName(contactType));
+			//System.out.println("phone: "+messageDoc.getContact().getPhone());
+		}
+		return;
+		 **/
 		int n = 500;
 		// Calculate the total number of partitions of size `n` each
 		int m = messages.size() / n;
@@ -314,6 +333,7 @@ public class MessageStore extends CommonDocStore {
 		for (int i = 0; i < m; i++) {
 			mongoTemplate.insert(itr.get(i), MessageStore.getCollectionName(contactType));
 		}
+	
 	}
 
 	public List<MessageDoc> find(Query query, ContactType contactType) {
