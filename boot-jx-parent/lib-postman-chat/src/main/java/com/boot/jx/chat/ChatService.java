@@ -128,6 +128,7 @@ public class ChatService {
 	}
 
 	private MessageDoc sendIntenal(ChatContactDoc chatContactDoc, OutboxMessage outboxMessage) {
+		LOGGER.debug("sendIntenal(ChatContactDoc {}, OutboxMessage {})", chatContactDoc, outboxMessage);
 
 		if (!ArgUtil.is(chatContactDoc)) {
 			throw new PostManException("Destination Not Specified : chatContactDoc Empty");
@@ -215,6 +216,7 @@ public class ChatService {
 	}
 
 	public MessageDoc send(ChatSessionDoc sessionDoc, OutboxMessage outboxMessage) {
+		LOGGER.debug("send(ChatSessionDoc {}, OutboxMessage {})", sessionDoc, outboxMessage);
 		ChatContactDoc chatContactDoc = sessionStore.getContact(sessionDoc.getContactId());
 
 		if (ArgUtil.isEmpty(outboxMessage.session().getAgent())) {

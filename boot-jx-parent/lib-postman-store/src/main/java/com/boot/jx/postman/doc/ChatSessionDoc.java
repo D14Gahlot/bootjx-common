@@ -290,4 +290,9 @@ public class ChatSessionDoc extends APatchableIndexed<ChatSessionDoc, String> im
 		this.lastOutGoingStamp = lastOutGoingStamp;
 	}
 
+	@Override
+	public String toString() {
+		return String.format("[sessionId:%s]", this.sessionId);
+	}
+
 }

@@ -93,6 +93,8 @@ public class MessageDefinitions {
 
 		public String getType();
 
+		public String toString();
+
 	}
 
 	public static interface SessionMessage extends IMessage {

@@ -65,6 +65,8 @@ public class ConnectorHandlerFactory extends ScopedBeanFactory<String, Connector
 
 		default public void message(String messageType, ChatContactDoc chatContactDoc, SessionMessage inboxMessage,
 				OutboxMessage outboxMessage) {
+			LOGGER.debug("message(String {}, ChatContactDoc {}, SessionMessage {}, OutboxMessage {})", messageType,
+					chatContactDoc, inboxMessage, outboxMessage);
 			try {
 				switch (messageType) {
 				case "SEND":
@@ -157,6 +159,9 @@ public class ConnectorHandlerFactory extends ScopedBeanFactory<String, Connector
 	@Async
 	public void message(String messageType, ChatContactDoc chatContactDoc, SessionMessage inboxMessage,
 			OutboxMessage outboxMessage) {
+		LOGGER.debug("message(String {}, ChatContactDoc {}, SessionMessage {}, OutboxMessage {})", messageType,
+				chatContactDoc, inboxMessage, outboxMessage);
+
 		try {
 			ConnectorHandler connector = get(outboxMessage.contact().type(), outboxMessage.contact().getChannel());
 			if (ArgUtil.is(connector)) {

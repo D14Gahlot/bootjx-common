@@ -135,6 +135,7 @@ public class BulkMessageService extends QueuedTaskExecuter {
 
 	@Override
 	public void execute(BatchJob taskJob, Tasklet tasklet) {
+		LOGGER.debug("mexecute(BatchJob {}, Tasklet {})", taskJob.getJobId(), tasklet.getTaskId());
 		String messageId = tasklet.getTaskId();
 		ContactType contactType = taskJob.data().entry("contactType").asEnum(ContactType.class);
 		String channel = taskJob.data().entry("channel").asString();
@@ -155,12 +156,6 @@ public class BulkMessageService extends QueuedTaskExecuter {
 
 		ChatSessionDoc chatSessionDoc = sessionStore.linkSession(outboxMessage);
 		if (ArgUtil.is(chatSessionDoc)) {
-//			try {
-//				System.out.println("Task :" + outboxMessage.getMessageId());
-//				Thread.sleep(1000);
-//			} catch (InterruptedException e) {
-//				e.printStackTrace();
-//			}
 			chatService.initSession(outboxMessage, chatSessionDoc);
 			chatService.send(chatSessionDoc, outboxMessage);
 		} else {

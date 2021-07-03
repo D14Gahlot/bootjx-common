@@ -523,4 +523,8 @@ public class Message<T extends Message<T>> implements Serializable, MessageOptio
 		return new MessageMetaWrapper(this.meta);
 	}
 
+	@Override
+	public String toString() {
+		return String.format("[messageId:%s]", this.messageId);
+	}
 }

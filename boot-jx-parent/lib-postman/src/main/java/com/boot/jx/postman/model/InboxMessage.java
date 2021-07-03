@@ -310,4 +310,8 @@ public class InboxMessage implements Serializable, SessionMessage {
 		return this.contact;
 	}
 
+	@Override
+	public String toString() {
+		return String.format("[messageId:%s]", this.messageId);
+	}
 }

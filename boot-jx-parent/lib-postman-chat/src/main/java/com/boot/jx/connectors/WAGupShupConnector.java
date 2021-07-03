@@ -93,6 +93,7 @@ public class WAGupShupConnector implements ConnectorHandler {
 	}
 
 	public void sendInternal(OutboxMessage outboxMessage, boolean isPushMessage) {
+		LOGGER.debug("sendInternal(OutboxMessage {}, boolean {})", outboxMessage, isPushMessage);
 		try {
 			if (isPushMessage) {
 				gupShupNotifyClient.send(outboxMessage);

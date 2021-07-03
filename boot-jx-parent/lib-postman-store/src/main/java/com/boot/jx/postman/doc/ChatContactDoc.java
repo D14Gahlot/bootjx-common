@@ -216,4 +216,9 @@ public class ChatContactDoc implements Serializable, Contactable {
 	public void setLastReplyStamp(long lastReplyStamp) {
 		this.lastReplyStamp = lastReplyStamp;
 	}
+
+	@Override
+	public String toString() {
+		return String.format("[contactId:%s]", this.contactId);
+	}
 }
