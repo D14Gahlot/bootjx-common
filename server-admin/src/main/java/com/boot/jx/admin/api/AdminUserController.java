@@ -83,7 +83,6 @@ public class AdminUserController {
 	}
 
 	// OTHER APIS?
-
 	@RequestMapping(value = "/admin/create-update-dept", method = { RequestMethod.POST })
 	public List<DepartmentDoc> createDepartment(@RequestBody DepartmentDoc requestModel) {
 		return adminService.createAndUpdateDepartment(requestModel);
