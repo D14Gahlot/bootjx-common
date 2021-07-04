@@ -13,15 +13,23 @@ import org.springframework.stereotype.Component;
 
 import com.boot.common.ScopedBeanFactory;
 import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorHandler;
-import com.boot.jx.chat.ConnectorHandlerFactory.DefaultConnector;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.logger.LoggerService;
+import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
+import com.boot.jx.postman.doc.MessageDoc;
+import com.boot.jx.postman.dto.ChatMessageDTO;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.Message;
+import com.boot.jx.postman.model.MessageDefinitions.IMessageExtended;
 import com.boot.jx.postman.model.OutboxMessage;
+import com.boot.jx.postman.query.ChatContactQuery;
+import com.boot.jx.postman.query.ChatSessionQuery;
 import com.boot.jx.postman.store.MessageStore;
+import com.boot.jx.postman.store.PMStoreConstants.CHAT_MODE;
+import com.boot.jx.postman.store.SessionStore;
+import com.boot.jx.stomp.StompTunnelService;
 import com.boot.utils.ArgUtil;
 
 @Component
@@ -32,15 +40,15 @@ public class ConnectorHandlerFactory extends ScopedBeanFactory<String, Connector
 	public static Logger LOGGER = LoggerService.getLogger(ConnectorHandlerFactory.class);
 
 	public interface ConnectorHandler {
-		default public void reply(InboxMessage inboxMessage, OutboxMessage outboxMessage) {
+		default public void reply(IMessageExtended inboxMessage, OutboxMessage outboxMessage) {
 			outboxMessage.addTo(inboxMessage.getFrom());
-			outboxMessage.setLane(inboxMessage.getLane());
+			outboxMessage.contact().setLane(inboxMessage.contact().getLane());
 			this.send(outboxMessage);
 		}
 
 		default public void send(ChatContactDoc chatContactDoc, OutboxMessage outboxMessage) {
 			outboxMessage.addTo(chatContactDoc.getCsid());
-			outboxMessage.setLane(chatContactDoc.getLane());
+			outboxMessage.contact().setLane(chatContactDoc.getLane());
 			this.send(outboxMessage);
 		}
 
@@ -50,23 +58,34 @@ public class ConnectorHandlerFactory extends ScopedBeanFactory<String, Connector
 			return true;
 		}
 
-		default public void message(String messageType, ChatContactDoc chatContactDoc, InboxMessage inboxMessage,
+		default public boolean initSession(ChatContactDoc contact, ChatSessionDoc session,
 				OutboxMessage outboxMessage) {
+			return true;
+		}
+
+		default public void message(String messageType, ChatContactDoc chatContactDoc, IMessageExtended inboxMessage,
+				OutboxMessage outboxMessage) {
+			LOGGER.debug("message(String {}, ChatContactDoc {}, SessionMessage {}, OutboxMessage {})", messageType,
+					chatContactDoc, inboxMessage, outboxMessage);
 			try {
 				switch (messageType) {
 				case "SEND":
+					outboxMessage.messageMetaWrapper().composeType("N"); // is a New Message
 					this.send(chatContactDoc, outboxMessage);
+					outboxMessage.updateStatus(Message.Status.SENT);
 					break;
 				case "REPLY":
+					outboxMessage.messageMetaWrapper().composeType("R"); // Its a Reply
 					this.reply(inboxMessage, outboxMessage);
+					outboxMessage.updateStatus(Message.Status.SENT);
 					break;
 				default:
 					break;
 				}
 			} catch (Exception e) {
-				e.printStackTrace();
 				outboxMessage.updateStatus(Message.Status.SENT_ERR);
 				outboxMessage.logs().add(e.getMessage());
+				LOGGER.error("SEND ERROR", e);
 			}
 
 		}
@@ -106,6 +125,7 @@ public class ConnectorHandlerFactory extends ScopedBeanFactory<String, Connector
 	}
 
 	public ConnectorHandler get(ContactType contactType, String channel) {
+		LOGGER.debug("get(ContactType {}, String {})",contactType,channel);
 		String precisedKey = String.format("%s_%s", contactType, channel);
 		ConnectorHandler x = this.get(precisedKey);
 		if (ArgUtil.is(x)) {
@@ -121,6 +141,12 @@ public class ConnectorHandlerFactory extends ScopedBeanFactory<String, Connector
 	@Autowired
 	private MessageStore messageStore;
 
+	@Autowired
+	private StompTunnelService stompTunnelService;
+
+	@Autowired
+	public CommonMongoTemplate commonMongoTemplate;
+
 	/**
 	 * 
 	 * Should always be last method or not changes in chatContactDoc or
@@ -132,10 +158,13 @@ public class ConnectorHandlerFactory extends ScopedBeanFactory<String, Connector
 	 * @param outboxMessage
 	 */
 	@Async
-	public void message(String messageType, ChatContactDoc chatContactDoc, InboxMessage inboxMessage,
+	public void message(String messageType, ChatContactDoc chatContactDoc, IMessageExtended inboxMessage,
 			OutboxMessage outboxMessage) {
+		LOGGER.debug("message(String {}, ChatContactDoc {}, SessionMessage {}, OutboxMessage {})", messageType,
+				chatContactDoc, inboxMessage, outboxMessage);
+
 		try {
-			ConnectorHandler connector = get(outboxMessage.getContactType(), outboxMessage.getChannel());
+			ConnectorHandler connector = get(outboxMessage.contact().type(), outboxMessage.contact().getChannel());
 			if (ArgUtil.is(connector)) {
 				connector.message(messageType, chatContactDoc, inboxMessage, outboxMessage);
 			} else if (ArgUtil.is(defaultConnector)) {
@@ -144,7 +173,35 @@ public class ConnectorHandlerFactory extends ScopedBeanFactory<String, Connector
 		} catch (Exception e) {
 			LOGGER.error(messageType, e);
 		}
-		messageStore.createOrUpdate(outboxMessage);
+		MessageDoc messageDoc = messageStore.createOrUpdate(outboxMessage);
+
+		if (ArgUtil.isEqual(messageType, "REPLY", "SEND")) {
+			ChatContactQuery chatContactQuery = new ChatContactQuery(outboxMessage.contact().getContactId());
+			ChatSessionQuery chatSessionQuery = new ChatSessionQuery(outboxMessage.getSessionId());
+			long now = System.currentTimeMillis();
+			chatContactQuery.setLastOutBoundStamp(now);
+			chatSessionQuery.setLastOutGoingStamp(now);
+
+			switch (messageType) {
+			case "REPLY":
+				chatContactQuery.setLastReplyStamp(now);
+				chatSessionQuery.setLastResponseStamp(now);
+				break;
+			case "SEND":
+				chatContactQuery.setLastPushStamp(now);
+				break;
+			default:
+				break;
+			}
+			commonMongoTemplate.updateFirst(chatSessionQuery);
+			commonMongoTemplate.updateFirst(chatContactQuery);
+		}
+
+		if (CHAT_MODE.AGENT.toString().equals(outboxMessage.session().getMode())
+				&& ArgUtil.is(outboxMessage.session().getDept())) {
+			ChatMessageDTO messageDto = ChatDTOUtil.getChatMessageDTO(messageDoc);
+			stompTunnelService.sendToTag(outboxMessage.session().getDept(), "/message/sent/new", messageDto);
+		}
 	}
 
 }

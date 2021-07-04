@@ -20,8 +20,8 @@ import com.boot.jx.dict.Language;
 import com.boot.jx.model.CommonFile;
 import com.boot.jx.postman.PostManConfig;
 import com.boot.jx.postman.client.TmplClient;
+import com.boot.jx.postman.model.ITemplates.TemplateDefaultEnum;
 import com.boot.jx.postman.model.PostManFile;
-import com.boot.jx.postman.model.TemplatesMX;
 import com.boot.jx.postman.service.FileService;
 import com.boot.jx.postman.service.PostManServiceImpl;
 import com.boot.utils.ArgUtil;
@@ -72,7 +72,7 @@ public class TmplController {
 	 */
 	@SuppressWarnings("unchecked")
 	@RequestMapping(value = TmplClient.PATH.TMPL_FILE_PROCESS, method = RequestMethod.GET)
-	public ApiResponse<PostManFile, Object> processTemplate(@RequestParam TemplatesMX template,
+	public ApiResponse<PostManFile, Object> processTemplate(@RequestParam TemplateDefaultEnum template,
 			@RequestParam(required = false) String data, @RequestParam(required = false) String fileName,
 			@RequestParam(required = false) FileFormat fileType,
 			@RequestParam(required = false) ContactType contactType) {

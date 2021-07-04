@@ -19,6 +19,7 @@ import com.boot.jx.api.ApiResponse;
 import com.boot.jx.chat.ChatClient;
 import com.boot.jx.chat.ChatStatusReportService;
 import com.boot.jx.connectors.FacebookConnector;
+import com.boot.jx.postman.PMClientConfig;
 import com.boot.jx.postman.fb.FacebooClient;
 import com.boot.jx.postman.fb.FacebookHookRequest;
 import com.boot.jx.postman.model.InboxMessage;
@@ -38,18 +39,18 @@ public class InBoundController {
 	private InBoundService inBoundService;
 
 	@Autowired
-	private ChatClient chatClient;
+	private PMClientConfig chatClientConfig;
 
 	@ApiVendorHeaders
 	@RequestMapping(value = "/int/webhook/callback", method = RequestMethod.POST)
 	public String setWebHook(@RequestParam(required = false) String callbackUrl) throws InterruptedException {
-		chatClient.setInboundForwardUrl(callbackUrl);
+		chatClientConfig.setInboundForwardUrl(callbackUrl);
 		return callbackUrl;
 	}
 
 	@RequestMapping(value = "/int/webhook/callback", method = RequestMethod.GET)
 	public String getWebHook() throws InterruptedException {
-		return chatClient.getInboundForwardUrl();
+		return chatClientConfig.getInboundForwardUrl();
 	}
 
 	@ApiVendorHeaders

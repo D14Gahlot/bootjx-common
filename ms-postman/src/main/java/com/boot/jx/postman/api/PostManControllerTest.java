@@ -35,13 +35,13 @@ import com.boot.jx.postman.client.PushNotifyClient;
 import com.boot.jx.postman.model.DefaultMessage;
 import com.boot.jx.postman.model.Email;
 import com.boot.jx.postman.model.ExceptionReport;
-import com.boot.jx.postman.model.PostManFile;
 import com.boot.jx.postman.model.GeoLocation;
 import com.boot.jx.postman.model.ITemplates;
 import com.boot.jx.postman.model.ITemplates.ITemplate;
+import com.boot.jx.postman.model.ITemplates.TemplateDefaultEnum;
 import com.boot.jx.postman.model.Message;
+import com.boot.jx.postman.model.PostManFile;
 import com.boot.jx.postman.model.PushMessage;
-import com.boot.jx.postman.model.TemplatesMX;
 import com.boot.jx.postman.service.PostManServiceImpl;
 import com.boot.jx.scope.tnt.Tenants.Tenant;
 import com.boot.jx.tmpl.TemplateModelCache;
@@ -200,11 +200,11 @@ public class PostManControllerTest {
 	 */
 	@ResponseBody
 	@RequestMapping(value = PostManUrls.PROCESS_TEMPLATE + "/{template}.{ext}", method = RequestMethod.GET)
-	public String processTemplate(@PathVariable("template") TemplatesMX template, @PathVariable("ext") String ext,
+	public String processTemplate(@PathVariable("template") TemplateDefaultEnum template, @PathVariable("ext") String ext,
 			@RequestParam(name = "email", required = false) String email,
 			@RequestBody(required = false) Map<String, Object> data, @RequestParam(required = false) Tenant tnt,
 			@RequestParam(required = false) PostManFile.PDFConverter lib,
-			@RequestParam(required = false) TemplatesMX attachment)
+			@RequestParam(required = false) TemplateDefaultEnum attachment)
 			throws IOException, /* DocumentException, */ PostManException {
 
 		Map<String, Object> map = readJsonWithObjectMapper("templates/dummy/" + template.getSampleJSON());

@@ -1,6 +1,7 @@
 package com.boot.jx.postman.dto;
 
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -13,9 +14,11 @@ public class ChatMessageDTO implements Serializable {
 	private static final long serialVersionUID = 7766790295486098869L;
 	private String text;
 	private String template;
+	private String templateId;
 	private String action;
 	private String name;
 	private String sessionId;
+	private String bulkSessionId;
 	private String messageId;
 	private String messageIdExt;
 	private String messageIdRef;
@@ -27,6 +30,9 @@ public class ChatMessageDTO implements Serializable {
 	private String sender;
 	private String status;
 	private Map<String, Long> stamps;
+	private ContactDTO contact;
+
+	private Map<String, Object> meta;
 
 	public String getText() {
 		return text;
@@ -154,5 +160,44 @@ public class ChatMessageDTO implements Serializable {
 
 	public void setStamps(Map<String, Long> stamps) {
 		this.stamps = stamps;
+	}
+
+	public ContactDTO getContact() {
+		return contact;
+	}
+
+	public void setContact(ContactDTO contact) {
+		this.contact = contact;
+	}
+
+	public String getTemplateId() {
+		return templateId;
+	}
+
+	public void setTemplateId(String templateId) {
+		this.templateId = templateId;
+	}
+
+	public String getBulkSessionId() {
+		return bulkSessionId;
+	}
+
+	public void setBulkSessionId(String bulkSessionId) {
+		this.bulkSessionId = bulkSessionId;
+	}
+
+	public Map<String, Object> getMeta() {
+		return meta;
+	}
+
+	public void setMeta(Map<String, Object> meta) {
+		this.meta = meta;
+	}
+
+	public Map<String, Object> meta() {
+		if (this.meta == null) {
+			this.meta = new HashMap<String, Object>();
+		}
+		return this.meta;
 	}
 }

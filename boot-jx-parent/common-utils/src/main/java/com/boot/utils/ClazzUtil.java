@@ -1,11 +1,14 @@
 package com.boot.utils;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
 
 import org.springframework.aop.framework.AopProxyUtils;
+import org.springframework.aop.support.AopUtils;
+import org.springframework.core.annotation.AnnotatedElementUtils;
 
 public class ClazzUtil {
 
@@ -53,5 +56,31 @@ public class ClazzUtil {
 	public static String getUltimateClassName(Object target) {
 		Class<?> c = AopProxyUtils.ultimateTargetClass(target);
 		return c.getName().split("\\$")[0];
+	}
+
+	public static Class<?> getUltimateClass(Object target) {
+		Class<?> c = AopProxyUtils.ultimateTargetClass(target);
+		return c;
+	}
+
+	public static <A extends Annotation> A findMethodAnnotation(Object target, Method method,
+			Class<A> annotationClass) {
+		A annotation = AnnotatedElementUtils.getMergedAnnotation(method, annotationClass);
+		if (annotation != null) {
+			return annotation;
+		} else {
+			// Try to find annotation on proxied class
+			Class<?> targetClass = AopUtils.getTargetClass(target);
+			if (targetClass != null && !target.getClass().equals(targetClass)) {
+				try {
+					Method methodOnTarget = targetClass.getMethod(method.getName(), method.getParameterTypes());
+					return AnnotatedElementUtils.getMergedAnnotation(methodOnTarget, annotationClass);
+				} catch (NoSuchMethodException e) {
+					return null;
+				}
+			} else {
+				return null;
+			}
+		}
 	}
 }

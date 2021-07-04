@@ -35,7 +35,10 @@ public class CommonDocStore {
 	private DBObject getDbObject(Object o) {
 		BasicDBObject basicDBObject = new BasicDBObject();
 		mongoConverter.write(o, basicDBObject);
+		
 		return basicDBObject;
 	}
+	
+	
 
 }

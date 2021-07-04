@@ -20,7 +20,7 @@ import com.boot.jx.postman.client.PMFileStoreClient;
 import com.boot.jx.postman.client.TmplClient;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
-import com.boot.jx.postman.doc.TemplateReply;
+import com.boot.jx.postman.doc.QuickMedia;
 import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.OutboxMessage;
@@ -51,7 +51,7 @@ public class TelegramConnector implements ConnectorHandler {
 	public void send(OutboxMessage outboxMessage) {
 		try {
 			if (ArgUtil.is(outboxMessage.getTemplate())) {
-				TemplateReply mediaReply = mongoTemplate.findById(outboxMessage.getTemplate(), TemplateReply.class);
+				QuickMedia mediaReply = mongoTemplate.findById(outboxMessage.getTemplate(), QuickMedia.class);
 				if (ArgUtil.is(mediaReply)) {
 					if ("image".equalsIgnoreCase(mediaReply.getType())) {
 						outboxMessage.attachment(new Attachment().mediaURL(mediaReply.getUrl())
@@ -82,9 +82,10 @@ public class TelegramConnector implements ConnectorHandler {
 	public InboxMessage toInboxMessage(String lane, Update update) {
 		InboxMessage inboxMessage = new InboxMessage();
 		inboxMessage.setOriginalMessage(update);
-		inboxMessage.setContactType(ContactType.TELEGRAM);
-		inboxMessage.setLane(lane);
+		inboxMessage.contact().setContactType(ContactType.TELEGRAM.toString());
+		inboxMessage.contact().setLane(lane);
 		inboxMessage.setFrom(ArgUtil.parseAsString(update.getMessage().getChatId()));
+		inboxMessage.contact().setCsid(ArgUtil.parseAsString(update.getMessage().getChatId()));
 
 		if (ArgUtil.is(update.getMessage())) {
 			inboxMessage.setMessageIdExt(
@@ -144,7 +145,7 @@ public class TelegramConnector implements ConnectorHandler {
 		if (ArgUtil.isEmpty(contact.getPhone())) {
 			telegramClient.promptShareNumber(inboxMessage.getFrom(),
 					"Confirm that you would like to share your contact number and continue, by clicking on the button below",
-					inboxMessage.getLane());
+					inboxMessage.contact().getLane());
 			return false;
 		}
 

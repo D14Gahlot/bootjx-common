@@ -41,7 +41,10 @@ public class ChatSessionDoc extends APatchableIndexed<ChatSessionDoc, String> im
 	private long startSessionStamp;
 	private long fistResponseStamp;
 
+	private long agentSessionStamp;
+
 	private long lastInComingStamp;
+	private long lastOutGoingStamp;
 
 	private long assignedDeptStamp;
 	private long assignedAgentStamp;
@@ -269,6 +272,27 @@ public class ChatSessionDoc extends APatchableIndexed<ChatSessionDoc, String> im
 
 	public void setStatus(String status) {
 		this.status = status;
+	}
+
+	public long getAgentSessionStamp() {
+		return agentSessionStamp;
+	}
+
+	public void setAgentSessionStamp(long agentSessionStamp) {
+		this.agentSessionStamp = agentSessionStamp;
+	}
+
+	public long getLastOutGoingStamp() {
+		return lastOutGoingStamp;
+	}
+
+	public void setLastOutGoingStamp(long lastOutGoingStamp) {
+		this.lastOutGoingStamp = lastOutGoingStamp;
+	}
+
+	@Override
+	public String toString() {
+		return String.format("[sessionId:%s]", this.sessionId);
 	}
 
 }

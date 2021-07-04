@@ -9,7 +9,6 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpStatusCodeException;
-import org.springframework.web.client.RestClientResponseException;
 
 import com.boot.jx.dict.FileType;
 import com.boot.jx.exception.AmxException;
@@ -89,7 +88,7 @@ public class FacebooClient implements MessageClient {
 	@Override
 	public OutboxMessage send(OutboxMessage outboxMessage) {
 		String to = CollectionUtil.getOne(outboxMessage.getTo());
-		String lane = outboxMessage.getLane();
+		String lane = outboxMessage.contact().getLane();
 
 		FacebookMessageResp resp = null;
 		StringJoiner msgIds = new StringJoiner(",");

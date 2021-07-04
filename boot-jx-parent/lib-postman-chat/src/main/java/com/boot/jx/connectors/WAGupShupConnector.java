@@ -3,6 +3,8 @@ package com.boot.jx.connectors;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Component;
@@ -13,11 +15,12 @@ import com.boot.jx.dict.ContactType;
 import com.boot.jx.dict.FileFormat;
 import com.boot.jx.dict.FileType;
 import com.boot.jx.model.CommonFile;
+import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.jx.postman.client.PMFileStoreClient;
 import com.boot.jx.postman.client.TmplClient;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
-import com.boot.jx.postman.doc.TemplateReply;
+import com.boot.jx.postman.doc.QuickMedia;
 import com.boot.jx.postman.gupshup.GupShupClientChat;
 import com.boot.jx.postman.gupshup.GupShupClientNotify;
 import com.boot.jx.postman.gupshup.GupShupConfigClient;
@@ -28,16 +31,21 @@ import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.Message;
 import com.boot.jx.postman.model.Message.Status;
+import com.boot.jx.postman.model.MessageDefinitions;
+import com.boot.jx.postman.model.MessageDefinitions.IMessageExtended;
 import com.boot.jx.postman.model.MessageReport;
 import com.boot.jx.postman.model.OutboxMessage;
+import com.boot.jx.postman.query.ChatContactQuery;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.utils.ArgUtil;
-import com.boot.utils.CollectionUtil;
 import com.boot.utils.JsonUtil;
+import com.boot.utils.TimeUtils;
 
 @Component
-@ConnectorMapping(contactType = ContactType.WHATSAPP, channel = "GUPSHUPW")
+@ConnectorMapping(contactType = ContactType.WHATSAPP, channel = MessageDefinitions.MESSAGE_CHANNLES.GUPSHUPW)
 public class WAGupShupConnector implements ConnectorHandler {
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(WAGupShupConnector.class);
 
 	@Autowired
 	private GupShupClientChat gupShupChatClient;
@@ -52,44 +60,79 @@ public class WAGupShupConnector implements ConnectorHandler {
 	private MongoTemplate mongoTemplate;
 
 	@Autowired
+	private CommonMongoTemplate commonMongoTemplate;
+
+	@Autowired
 	private TmplClient tmplClient;
 
 	@Autowired
 	private PMFileStoreClient pmFileStoreClient;
 
-	@Override
-	public void send(ChatContactDoc chatContactDoc, OutboxMessage outboxMessage) {
-		outboxMessage.setChannel(chatContactDoc.getChannelType());
-		outboxMessage.setLane(chatContactDoc.getLane());
-		String to = CollectionUtil.getOne(outboxMessage.getTo());
-		gupShupNotifyClient.send(outboxMessage);
-	}
-
-	@Override
-	public void reply(InboxMessage inboxMessage, OutboxMessage outboxMessage) {
-		try {
-			outboxMessage.setLane(inboxMessage.getLane());
-			if (ArgUtil.is(outboxMessage.getTemplate())) {
-				TemplateReply templateReply = mongoTemplate.findById(outboxMessage.getTemplate(), TemplateReply.class);
-				if (ArgUtil.is(templateReply)) {
-					if ("image".equalsIgnoreCase(templateReply.getType())) {
-						outboxMessage.attachment(
-								new Attachment().mediaURL(templateReply.getUrl()).mediaType(FileType.IMAGE.toString()));
-						outboxMessage = gupShupChatClient.send(outboxMessage);
-					}
-				} else {
-					tmplClient.process(outboxMessage);
-					outboxMessage = gupShupChatClient.send(outboxMessage);
+	private OutboxMessage resolveTemplate(OutboxMessage outboxMessage) {
+		if (ArgUtil.is(outboxMessage.getTemplate())) {
+			QuickMedia templateReply = mongoTemplate.findById(outboxMessage.getTemplate(), QuickMedia.class);
+			if (ArgUtil.is(templateReply)) {
+				if ("image".equalsIgnoreCase(templateReply.getType())) {
+					outboxMessage.attachment(
+							new Attachment().mediaURL(templateReply.getUrl()).mediaType(FileType.IMAGE.toString()));
+					return outboxMessage;
 				}
 			} else {
-				outboxMessage = gupShupChatClient.send(outboxMessage);
+				tmplClient.process(outboxMessage);
+				return outboxMessage;
+			}
+		} else if (ArgUtil.is(outboxMessage.getTemplateId())) {
+			// outboxMessage.setMessage(tmplClient.process(hsmTemplate.getTemplate(),
+			// outboxMessage.getModel()));
+			tmplClient.process(outboxMessage);
+			return outboxMessage;
+		} else {
+			return outboxMessage;
+		}
+		return outboxMessage;
+	}
+
+	public void sendInternal(OutboxMessage outboxMessage, boolean isPushMessage) {
+		LOGGER.debug("sendInternal(OutboxMessage {}, boolean {})", outboxMessage, isPushMessage);
+		try {
+			if (isPushMessage) {
+				gupShupNotifyClient.send(outboxMessage);
+			} else {
+				gupShupChatClient.send(outboxMessage);
 			}
 			outboxMessage.updateStatus(Message.Status.SENT);
 		} catch (Exception e) {
+			outboxMessage.updateStatus(OutboxMessage.Status.SENT_ERR);
 			outboxMessage.logs().add(e.getMessage());
-			e.printStackTrace();
+			LOGGER.error("SEND ERROR", e);
 		}
+	}
 
+	@Override
+	public void send(ChatContactDoc chatContactDoc, OutboxMessage outboxMessage) {
+		outboxMessage.contact().setChannel(chatContactDoc.getChannel());
+		outboxMessage.contact().setLane(chatContactDoc.getLane());
+		resolveTemplate(outboxMessage);
+
+		if (TimeUtils.isExpired(chatContactDoc.getLastInBoundStamp(), "24hr")
+				&& outboxMessage.optionsAsModel().entry("wa-template-id").exists()) {
+			if (ArgUtil.isEmptyValue(chatContactDoc.getLastOptInStamp())) {
+				gupShupNotifyClient.optIn(outboxMessage);
+				commonMongoTemplate.updateFirst(
+						new ChatContactQuery(chatContactDoc).setLastOptInStamp(System.currentTimeMillis()));
+			}
+			outboxMessage.messageMetaWrapper().sendType("PM"); // Push Message
+			this.sendInternal(outboxMessage, true);
+		} else {
+			outboxMessage.messageMetaWrapper().sendType("SM"); // Session Message
+			this.sendInternal(outboxMessage, false);
+		}
+	}
+
+	@Override
+	public void reply(IMessageExtended inboxMessage, OutboxMessage outboxMessage) {
+		resolveTemplate(outboxMessage);
+		this.sendInternal(outboxMessage, false);
 	}
 
 	@Override
@@ -109,14 +152,15 @@ public class WAGupShupConnector implements ConnectorHandler {
 
 	public InboxMessage toInboxMessage(GupShupInbound inbound) {
 		InboxMessage inboxMessage = new InboxMessage();
-		inboxMessage.setContactType(ContactType.WHATSAPP);
-		inboxMessage.setChannel("GUPSHUPW");
+		inboxMessage.contact().setContactType(ContactType.WHATSAPP.toString());
+		inboxMessage.contact().setChannel("GUPSHUPW");
 		inboxMessage.setFrom(inbound.getMobile());
 		inboxMessage.setFromName(inbound.getName());
 		inboxMessage.setMessage(inbound.getText());
-		inboxMessage.setTo(inbound.getWaNumber());
+		inboxMessage.to().add(inbound.getWaNumber());
 		inboxMessage.setMessageIdExt(inbound.getReplyId());
-		inboxMessage.setLane(inbound.getWaNumber());
+		inboxMessage.contact().setLane(inbound.getWaNumber());
+		inboxMessage.contact().setCsid(inbound.getMobile());
 
 		if (ArgUtil.is(inbound.getImage())) {
 			CommonFile srcFile = new CommonFile().url(inbound.getImage().getUrl() + inbound.getImage().getSignature())

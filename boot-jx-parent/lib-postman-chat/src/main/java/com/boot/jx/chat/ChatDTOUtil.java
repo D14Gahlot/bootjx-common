@@ -1,6 +1,8 @@
 package com.boot.jx.chat;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.boot.jx.postman.doc.ChatContactDoc;
@@ -12,6 +14,7 @@ import com.boot.jx.postman.dto.ChatSessionDTO;
 import com.boot.jx.postman.dto.ChatUserProfileDTO;
 import com.boot.jx.postman.dto.ContactDTO;
 import com.boot.jx.postman.store.PMStoreConstants.CHAT_STATUS;
+import com.boot.jx.utils.PostManUtil;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.EntityDtoUtil;
 
@@ -24,7 +27,6 @@ public class ChatDTOUtil {
 
 	public static ContactDTO getContactDTO(ChatContactDoc chatContactDoc) {
 		ContactDTO contact = new ContactDTO();
-
 		contact.setContactId(chatContactDoc.getContactId());
 		contact.setContactType(chatContactDoc.getContactType());
 		contact.setName(chatContactDoc.getName());
@@ -34,15 +36,28 @@ public class ChatDTOUtil {
 		contact.setProfilePic(chatContactDoc.getProfilePic());
 		contact.setProfile(chatContactDoc.getProfile());
 		contact.setLane(chatContactDoc.getLane());
-
+		contact.setCsid(chatContactDoc.getCsid());
 		return contact;
 	}
 
-	public static ChatMessageDTO getChatMessageDTO(MessageDoc messageDoc) {
+	public static List<ContactDTO> getContactDTO(List<ChatContactDoc> chatContactDocs) {
+		List<ContactDTO> contactDTOs = new ArrayList<ContactDTO>();
+		for (ChatContactDoc chatContactDoc : chatContactDocs) {
+			contactDTOs.add(getContactDTO(chatContactDoc));
+		}
+		return contactDTOs;
+	}
+
+	public static ChatMessageDTO getChatMessageDTO(MessageDoc messageDoc, String contactName, String agentName) {
 		ChatMessageDTO messageDto = new ChatMessageDTO();
+		if (!ArgUtil.is(messageDoc)) {
+			return messageDto;
+		}
+
 		messageDto.setType(messageDoc.getType());
 		messageDto.setText(messageDoc.getMessage());
 		messageDto.setTemplate(messageDoc.getTemplate());
+		messageDto.setTemplateId(messageDoc.getTemplateId());
 		messageDto.setTimestamp(messageDoc.getTimestamp());
 		messageDto.setSessionId(messageDoc.getSessionId());
 		messageDto.setMessageId(messageDoc.getMessageId());
@@ -50,16 +65,27 @@ public class ChatDTOUtil {
 		messageDto.setMessageIdRef(messageDoc.getMessageIdRef());
 		messageDto.setTags(messageDoc.getTags());
 		messageDto.setAttachments(messageDoc.getAttachments());
-		messageDto.setSender(messageDoc.getAgent());
 		messageDto.setLogs(messageDoc.getLogs());
 		messageDto.setAction(messageDoc.getAction());
 		messageDto.setStatus(messageDoc.getStatus());
 		messageDto.setStamps(messageDoc.getStamps());
+		messageDto.setBulkSessionId(messageDoc.getBulkSessionId());
+		messageDto.setMeta(messageDoc.getMeta());
+
+		if (ArgUtil.is(messageDoc.getContact())) {
+			messageDto.setContact(EntityDtoUtil.entityToDto(messageDoc.getContact(), new ContactDTO()));
+		}
 
 		if (ArgUtil.isEmpty(messageDto.getStamps()) && ArgUtil.is(messageDto.getStatus())) {
 			Map<String, Long> stamps = new HashMap<String, Long>();
 			stamps.put(messageDto.getStatus(), messageDto.getTimestamp());
 			messageDto.setStamps(stamps);
+		}
+
+		if (PostManUtil.isOutBound(messageDoc.getType())) {
+			messageDto.setSender(ArgUtil.nonEmpty(messageDoc.getAgent(), agentName));
+		} else if (PostManUtil.isInBound(messageDoc.getType())) {
+			messageDto.setSender(ArgUtil.nonEmpty(messageDto.getName(), contactName));
 		}
 
 		if (ArgUtil.isEmpty(messageDto.getName())) {
@@ -69,14 +95,37 @@ public class ChatDTOUtil {
 		return messageDto;
 	}
 
+	public static ChatMessageDTO getChatMessageDTO(MessageDoc messageDoc) {
+		return getChatMessageDTO(messageDoc, null, messageDoc.getAgent());
+	}
+
+	public static List<ChatMessageDTO> getChatMessageDTO(List<MessageDoc> messageDocs, String contactName,
+			String agentName) {
+		List<ChatMessageDTO> messageDtos = new ArrayList<ChatMessageDTO>();
+		for (MessageDoc messageDoc : messageDocs) {
+			ChatMessageDTO messageDto = getChatMessageDTO(messageDoc, contactName, agentName);
+			messageDtos.add(messageDto);
+		}
+		return messageDtos;
+	}
+
 	public static ChatSessionDTO getChatSessionDTO(ChatSessionDoc chatSessionDoc) {
 		ChatSessionDTO chatSessionDto = EntityDtoUtil.entityToDto(chatSessionDoc, new ChatSessionDTO());
 		chatSessionDto.setSessionId(chatSessionDto.getSessionId());
-		chatSessionDto.setLastInComingStamp(chatSessionDoc.getLastInComingStamp());
 		chatSessionDto.setAssignedToAgent(chatSessionDoc.getAssignedToAgent());
 		chatSessionDto.setAssignedToDept(chatSessionDoc.getAssignedToDept());
 		chatSessionDto.setActive(chatSessionDoc.isActive());
 		chatSessionDto.setStatus(chatSessionDoc.getStatus());
+		chatSessionDto.setName(chatSessionDoc.getContactName());
+
+		chatSessionDto.setAssignedAgentStamp(chatSessionDoc.getAssignedAgentStamp());
+		chatSessionDto.setAssignedDeptStamp(chatSessionDoc.getAssignedDeptStamp());
+		chatSessionDto.setLastInComingStamp(chatSessionDoc.getLastInComingStamp());
+		chatSessionDto.setLastResponseStamp(chatSessionDoc.getLastResponseStamp());
+
+		if (chatSessionDto.getAgentSessionStamp() == 0L) {
+			chatSessionDto.setAgentSessionStamp(chatSessionDoc.getAssignedAgentStamp());
+		}
 
 		if (!ArgUtil.is(chatSessionDto.getStatus())) {
 			if (chatSessionDto.isExpired()) {

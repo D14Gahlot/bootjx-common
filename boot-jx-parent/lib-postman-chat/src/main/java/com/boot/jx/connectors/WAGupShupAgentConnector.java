@@ -11,12 +11,13 @@ import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.gupshup.GupShupClientAgent;
 import com.boot.jx.postman.gupshup.GupShupClientChat;
+import com.boot.jx.postman.gupshup.GupShupClientNotify;
 import com.boot.jx.postman.gupshup.GupShupConfigClient;
 import com.boot.jx.postman.gupshup.GupShupInboundV2;
-import com.boot.jx.postman.gupshup.GupShupClientNotify;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.Message;
 import com.boot.jx.postman.model.MessageBox;
+import com.boot.jx.postman.model.MessageDefinitions.IMessageExtended;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.model.WAMessage.Channel;
 import com.boot.utils.ArgUtil;
@@ -42,9 +43,9 @@ public class WAGupShupAgentConnector implements ConnectorHandler {
 
 	@Override
 	public void send(ChatContactDoc chatContactDoc, OutboxMessage outboxMessage) {
-		outboxMessage.setChannel(chatContactDoc.getChannelType());
-		outboxMessage.setLane(chatContactDoc.getLane());
-		if (ArgUtil.isEqual(outboxMessage.getChannel(), Channel.GUPSHUPAGENT.toString())) {
+		outboxMessage.contact().setChannel(chatContactDoc.getChannel());
+		outboxMessage.contact().setLane(chatContactDoc.getLane());
+		if (ArgUtil.isEqual(outboxMessage.contact().getChannel(), Channel.GUPSHUPAGENT.toString())) {
 			if (outboxMessage.isViaAgent() && ArgUtil.isEmpty(outboxMessage.getFiles())) {
 				gupShupChatClient.sendMessage(chatContactDoc.getCsid(), outboxMessage.getMessage());
 			} else if (outboxMessage.isTemplateMsg() || outboxMessage.isQRButtons()) {
@@ -52,7 +53,7 @@ public class WAGupShupAgentConnector implements ConnectorHandler {
 			} else {
 				gupShupChatClient.send(outboxMessage);
 			}
-		} else if (ArgUtil.isEqual(outboxMessage.getChannel(), Channel.DEFAULT.toString())) {
+		} else if (ArgUtil.isEqual(outboxMessage.contact().getChannel(), Channel.DEFAULT.toString())) {
 			MessageBox mb = new MessageBox();
 			mb.push(outboxMessage);
 			postManClient.send(mb);
@@ -60,10 +61,10 @@ public class WAGupShupAgentConnector implements ConnectorHandler {
 	}
 
 	@Override
-	public void reply(InboxMessage inboxMessage, OutboxMessage outboxMessage) {
-		outboxMessage.setChannel(inboxMessage.getChannel());
-		outboxMessage.setLane(inboxMessage.getLane());
-		if (ArgUtil.isEqual(inboxMessage.getChannel(), Channel.GUPSHUPAGENT.toString())) {
+	public void reply(IMessageExtended inboxMessage, OutboxMessage outboxMessage) {
+		outboxMessage.contact().setChannel(inboxMessage.contact().getChannel());
+		outboxMessage.contact().setLane(inboxMessage.contact().getLane());
+		if (ArgUtil.isEqual(inboxMessage.contact().getChannel(), Channel.GUPSHUPAGENT.toString())) {
 			if (outboxMessage.isViaAgent() && ArgUtil.isEmpty(outboxMessage.getFiles())) {
 				gupShupAgentClient.sendViaAgent(inboxMessage, outboxMessage.getMessage());
 			} else if (outboxMessage.isTemplateMsg() || outboxMessage.isQRButtons()) {
@@ -72,7 +73,7 @@ public class WAGupShupAgentConnector implements ConnectorHandler {
 			} else {
 				gupShupChatClient.send(outboxMessage);
 			}
-		} else if (ArgUtil.isEqual(inboxMessage.getChannel(), Channel.DEFAULT.toString())) {
+		} else if (ArgUtil.isEqual(inboxMessage.contact().getChannel(), Channel.DEFAULT.toString())) {
 			Message<?> reply = inboxMessage.replyMessage(outboxMessage.getMessage());
 			MessageBox mb = new MessageBox();
 			mb.push(reply);
@@ -82,10 +83,10 @@ public class WAGupShupAgentConnector implements ConnectorHandler {
 
 	@Override
 	public InboxMessage assignToAgent(InboxMessage inboxMessage) {
-		if (ArgUtil.isEqual(inboxMessage.getChannel(), Channel.GUPSHUPAGENT.toString())) {
-			gupShupAgentClient.assignToAgent(inboxMessage.getTo(), inboxMessage.getFrom(),
+		if (ArgUtil.isEqual(inboxMessage.contact().getChannel(), Channel.GUPSHUPAGENT.toString())) {
+			gupShupAgentClient.assignToAgent(inboxMessage.getTo().get(0), inboxMessage.getFrom(),
 					inboxMessage.session().getDept());
-		} else if (ArgUtil.isEqual(inboxMessage.getChannel(), Channel.DEFAULT.toString())) {
+		} else if (ArgUtil.isEqual(inboxMessage.contact().getChannel(), Channel.DEFAULT.toString())) {
 			Message<?> reply = inboxMessage.replyMessage("Call us @ " + gupShupConfig.getGupShupWaNumber());
 			MessageBox mb = new MessageBox();
 			mb.push(reply);
@@ -101,8 +102,8 @@ public class WAGupShupAgentConnector implements ConnectorHandler {
 
 	public InboxMessage toInboxMessage(GupShupInboundV2 inboundV2) {
 		InboxMessage inboxMessage = new InboxMessage();
-		inboxMessage.setContactType(ContactType.WHATSAPP);
-		inboxMessage.setChannel(Channel.GUPSHUPAGENT.toString());
+		inboxMessage.contact().setContactType(ContactType.WHATSAPP.toString());
+		inboxMessage.contact().setChannel(Channel.GUPSHUPAGENT.toString());
 		inboxMessage.from(inboundV2.getMessages().get(0).getFrom());
 		inboxMessage.setFromName(inboundV2.getContacts().get(0).getProfile().getName());
 
@@ -112,7 +113,7 @@ public class WAGupShupAgentConnector implements ConnectorHandler {
 			inboxMessage.setMessage(inboundV2.getMessages().get(0).getText().getBody());
 		}
 
-		inboxMessage.setTo(inboundV2.getContacts().get(0).getWaId());
+		inboxMessage.to().add(inboundV2.getContacts().get(0).getWaId());
 		inboxMessage.setMessageIdExt(inboundV2.getMessages().get(0).getId());
 		return inboxMessage;
 	}

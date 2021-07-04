@@ -1,7 +1,6 @@
 package com.boot.jx.postman.gupshup;
 
 import java.util.List;
-import java.util.Map;
 
 import org.springframework.stereotype.Component;
 
@@ -25,7 +24,7 @@ public class GupShupClientChat extends GupShupClientAbstract implements MessageC
 		gupShupReq.setMessageType(GupShupConstants.MessageType.DATA_TEXT);
 
 		MapModel optionModel = options.optionsAsModel();
-		if (optionModel.entry("wa-show-buttons").asBoolean()) {
+		if (optionModel.entry("wa-show-buttons").asBoolean() || optionModel.entry("wa-template-id").exists()) {
 			List<TmplElement> buttons = options.optionActionButtons();
 			if (buttons.size() > 0) {
 				gupShupReq.setIsTemplate(true);

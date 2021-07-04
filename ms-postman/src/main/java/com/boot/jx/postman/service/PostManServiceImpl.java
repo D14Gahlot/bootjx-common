@@ -20,14 +20,14 @@ import com.boot.jx.postman.PostManException;
 import com.boot.jx.postman.PostManService;
 import com.boot.jx.postman.model.Email;
 import com.boot.jx.postman.model.ExceptionReport;
-import com.boot.jx.postman.model.PostManFile;
+import com.boot.jx.postman.model.ITemplates.TemplateDefaultEnum;
 import com.boot.jx.postman.model.MessageBox;
 import com.boot.jx.postman.model.Notipy;
+import com.boot.jx.postman.model.PostManFile;
 import com.boot.jx.postman.model.PushMessage;
 import com.boot.jx.postman.model.SMS;
 import com.boot.jx.postman.model.SupportEmail;
 import com.boot.jx.postman.model.TGMessage;
-import com.boot.jx.postman.model.TemplatesMX;
 import com.boot.jx.postman.model.WAMessage;
 import com.boot.utils.ContextUtil;
 
@@ -128,7 +128,7 @@ public class PostManServiceImpl implements PostManService {
 	 * @param fileType the file type
 	 * @return the file
 	 */
-	public CommonFile processTemplate(TemplatesMX template, Map<String, Object> map, FileFormat fileType) {
+	public CommonFile processTemplate(TemplateDefaultEnum template, Map<String, Object> map, FileFormat fileType) {
 		PostManFile file = new PostManFile();
 		file.setITemplate(template);
 		file.setFileFormat(fileType);

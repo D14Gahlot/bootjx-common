@@ -20,11 +20,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.boot.jx.AppConfig;
+import com.boot.jx.AppConfigPackage.AppCommonConfig;
 import com.boot.jx.agent.AgentAuthProvider;
 import com.boot.jx.agent.AgentSessionBean;
 import com.boot.jx.agent.AgentSessionService;
 import com.boot.jx.api.ApiResponse;
-import com.boot.jx.common.config.AppCommonConfig;
 import com.boot.jx.common.doc.AgentSessionDoc;
 import com.boot.jx.common.dto.AgentResponseAuthDto;
 import com.boot.jx.http.CommonHttpRequest;
@@ -37,6 +37,7 @@ import com.boot.utils.Constants;
 import com.boot.utils.CryptoUtil;
 import com.boot.utils.JsonUtil;
 import com.boot.utils.MapBuilder;
+import com.boot.utils.MapBuilder.BuilderMap;
 
 @Controller
 public class AgentAuthController {
@@ -251,11 +252,14 @@ public class AgentAuthController {
 
 	@ResponseBody
 	@RequestMapping(value = "/auth/online/status", method = { RequestMethod.POST })
-	public ApiResponse<AgentSessionDoc, Boolean> onlineStatus(@RequestParam(required = false) Boolean status) {
+	public ApiResponse<AgentSessionDoc, Map<String, Object>> onlineStatus(
+			@RequestParam(required = false) Boolean status) {
+		BuilderMap meta = MapBuilder.map();
 		if (ArgUtil.is(status)) {
 			agentSessionService.setOnline(status.booleanValue());
+			meta.put("isOnline", status);
 		}
-		return ApiResponse.buildResults(agentSessionService.getAgentSessions(), status);
+		return ApiResponse.buildResults(agentSessionService.getAgentSessions(), meta.toMap());
 	}
 
 }

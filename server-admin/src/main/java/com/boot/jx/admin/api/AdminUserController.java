@@ -13,14 +13,22 @@ import com.boot.jx.admin.dto.AgentResponseAdminDto;
 import com.boot.jx.admin.dto.DepartmentResponseAdminDto;
 import com.boot.jx.admin.service.AdminService;
 import com.boot.jx.api.ApiResponse;
+import com.boot.jx.chat.ChatDTOUtil;
 import com.boot.jx.common.doc.DepartmentDoc;
+import com.boot.jx.dict.ContactType;
+import com.boot.jx.mongo.CommonMongoTemplate;
+import com.boot.jx.postman.doc.ChatContactDoc;
+import com.boot.jx.postman.dto.ContactDTO;
 import com.boot.utils.ArgUtil;
 
 @RestController
-public class AdminController {
+public class AdminUserController {
 
 	@Autowired
 	AdminService adminService;
+
+	@Autowired
+	CommonMongoTemplate commonMongoTemplate;
 
 	// Agent
 	@RequestMapping(value = "/api/admins/agent", method = { RequestMethod.GET })
@@ -75,7 +83,6 @@ public class AdminController {
 	}
 
 	// OTHER APIS?
-
 	@RequestMapping(value = "/admin/create-update-dept", method = { RequestMethod.POST })
 	public List<DepartmentDoc> createDepartment(@RequestBody DepartmentDoc requestModel) {
 		return adminService.createAndUpdateDepartment(requestModel);
@@ -87,4 +94,10 @@ public class AdminController {
 		return adminService.updateDepartment(dept_id, status);
 	}
 
+	@RequestMapping(value = "/api/admins/contacts", method = { RequestMethod.GET })
+	public ApiResponse<ContactDTO, Object> allContacts(@RequestParam(required = false) ContactType contactType,
+			@RequestParam(required = false) String lane) {
+		List<ChatContactDoc> chatContactDocs = commonMongoTemplate.findAll(ChatContactDoc.class);
+		return ApiResponse.buildResults(ChatDTOUtil.getContactDTO(chatContactDocs));
+	}
 }

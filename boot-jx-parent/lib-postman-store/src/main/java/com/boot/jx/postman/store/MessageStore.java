@@ -11,18 +11,22 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Component;
 
+import com.boot.jx.dict.ContactType;
 import com.boot.jx.mongo.CommonDocStore;
 import com.boot.jx.mongo.CommonMongoQueryBuilder;
-import com.boot.jx.postman.doc.ContactDoc;
+import com.boot.jx.postman.doc.ContactDetailDoc;
 import com.boot.jx.postman.doc.MessageDoc;
-import com.boot.jx.postman.model.IMessage;
 import com.boot.jx.postman.model.InboxMessage;
+import com.boot.jx.postman.model.Message.Status;
+import com.boot.jx.postman.model.MessageDefinitions.IMessage;
 import com.boot.jx.postman.model.MessageReport;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.model.TagDocument;
 import com.boot.jx.utils.PostManUtil;
+import com.boot.utils.ArgExceptions.ArgException;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
+import com.google.common.collect.Lists;
 
 @Component
 public class MessageStore extends CommonDocStore {
@@ -40,7 +44,7 @@ public class MessageStore extends CommonDocStore {
 	@Value("${postman.chat.session.timeout}")
 	String chatSessionTimeout;
 
-	private String getCollectionName(Object contactType) {
+	public static String getCollectionName(Object contactType) {
 		return (MessageDoc.COLLECTION_NAME + "_" + ArgUtil.parseAsString(contactType, "OTHERS"));
 	}
 
@@ -62,9 +66,9 @@ public class MessageStore extends CommonDocStore {
 		doc.setType("I");
 		doc.setTimestamp(System.currentTimeMillis());
 
-		ContactDoc contact = new ContactDoc();
-		contact.setMobile(inboxMessage.getFrom());
-		contact.setContactType(inboxMessage.getContactType());
+		ContactDetailDoc contact = new ContactDetailDoc();
+		contact.setPhone(inboxMessage.getFrom());
+		contact.setContactType(ArgUtil.parseAsString(inboxMessage.contact().type()));
 		doc.setContact(contact);
 
 		updateMessageDoc(inboxMessage, doc);
@@ -79,12 +83,12 @@ public class MessageStore extends CommonDocStore {
 	private MessageDoc findMessageDoc(InboxMessage inboxMessage) {
 		if (ArgUtil.is(inboxMessage.getMessageId())) {
 			return mongoTemplate.findById(inboxMessage.getMessageId(), MessageDoc.class,
-					getCollectionName(inboxMessage.getContactType()));
+					getCollectionName(inboxMessage.contact().type()));
 		} else if (ArgUtil.is(inboxMessage.getMessageIdExt())) {
 			CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder();
 			builder.where("messageIdExt", inboxMessage.getMessageIdExt());
 			return mongoTemplate.findOne(builder.getQuery(), MessageDoc.class,
-					getCollectionName(inboxMessage.getContactType()));
+					getCollectionName(inboxMessage.contact().type()));
 		} else {
 			return null;
 		}
@@ -103,7 +107,7 @@ public class MessageStore extends CommonDocStore {
 		if (ArgUtil.is(doc.getMessageId())) {
 			doc = updateMessageDoc(inboxMessage, doc);
 		}
-		mongoTemplate.save(doc, getCollectionName(inboxMessage.getContactType()));
+		mongoTemplate.save(doc, getCollectionName(inboxMessage.contact().type()));
 		inboxMessage.setMessageId(doc.getMessageId());
 		return doc;
 	}
@@ -117,21 +121,21 @@ public class MessageStore extends CommonDocStore {
 	public void setTemplate(InboxMessage inboxMessage, String template) {
 		MessageDoc doc = findOrCreateMessageDoc(inboxMessage);
 		doc.setTemplate(template);
-		mongoTemplate.save(doc, getCollectionName(inboxMessage.getContactType()));
+		mongoTemplate.save(doc, getCollectionName(inboxMessage.contact().type()));
 		inboxMessage.setMessageId(doc.getMessageId());
 	}
 
 	public void setTags(InboxMessage inboxMessage, TagDocument tags) {
 		MessageDoc doc = findOrCreateMessageDoc(inboxMessage);
 		doc.setTags(tags);
-		mongoTemplate.save(doc, getCollectionName(inboxMessage.getContactType()));
+		mongoTemplate.save(doc, getCollectionName(inboxMessage.contact().type()));
 		inboxMessage.setMessageId(doc.getMessageId());
 	}
 
 	public void setHandler(InboxMessage inboxMessage, String handler) {
 		MessageDoc doc = findOrCreateMessageDoc(inboxMessage);
 		doc.setHandler(handler);
-		mongoTemplate.save(doc, getCollectionName(inboxMessage.getContactType()));
+		mongoTemplate.save(doc, getCollectionName(inboxMessage.contact().type()));
 		inboxMessage.setMessageId(doc.getMessageId());
 	}
 
@@ -148,7 +152,7 @@ public class MessageStore extends CommonDocStore {
 		doc.setAction(ArgUtil.parseAsString(eventName));
 		doc.setSessionId(inboxMessage.getSessionId());
 		doc.setAgent(agent);
-		mongoTemplate.save(doc, getCollectionName(inboxMessage.getContactType()));
+		mongoTemplate.save(doc, getCollectionName(inboxMessage.contact().type()));
 		return doc;
 	}
 
@@ -169,10 +173,14 @@ public class MessageStore extends CommonDocStore {
 		doc.setLogs(outMessage.getLogs());
 		doc.setMessageIdExt(outMessage.getMessageIdExt());
 		doc.setStatus(ArgUtil.parseAsString(outMessage.getStatus()));
+
+		doc.stamps().putAll(outMessage.stamps());
+		doc.meta().putAll(outMessage.meta());
+
 		return doc;
 	}
 
-	private MessageDoc createMessageDoc(OutboxMessage outMessage) {
+	public MessageDoc createMessageDoc(OutboxMessage outMessage) {
 		MessageDoc doc = new MessageDoc();
 		if (ArgUtil.is(outMessage.getAction())) {
 			doc.setType(ArgUtil.nonEmpty(outMessage.getType(), "A"));
@@ -185,9 +193,10 @@ public class MessageStore extends CommonDocStore {
 		String to = CollectionUtil.getOne(outMessage.getTo());
 		doc.setContactId(PostManUtil.createContactId(outMessage));
 
-		ContactDoc contact = new ContactDoc();
+		ContactDetailDoc contact = new ContactDetailDoc();
+		contact.setPhone(to);
 		contact.setMobile(to);
-		contact.setContactType(outMessage.getContactType());
+		contact.setContactType(ArgUtil.parseAsString(outMessage.contact().getContactType()));
 		doc.setContact(contact);
 
 		updateMessageDoc(outMessage, doc);
@@ -197,7 +206,7 @@ public class MessageStore extends CommonDocStore {
 	public MessageDoc findMessageDoc(OutboxMessage outMessage) {
 		if (ArgUtil.is(outMessage.getMessageId())) {
 			return mongoTemplate.findById(outMessage.getMessageId(), MessageDoc.class,
-					getCollectionName(outMessage.getContactType()));
+					getCollectionName(outMessage.contact().type()));
 		}
 		return null;
 	}
@@ -215,7 +224,7 @@ public class MessageStore extends CommonDocStore {
 		if (ArgUtil.is(doc.getMessageId())) {
 			doc = updateMessageDoc(outMessage, doc);
 		}
-		mongoTemplate.save(doc, getCollectionName(outMessage.getContactType()));
+		mongoTemplate.save(doc, getCollectionName(outMessage.contact().type()));
 		outMessage.setMessageId(doc.getMessageId());
 		return doc;
 	}
@@ -230,13 +239,8 @@ public class MessageStore extends CommonDocStore {
 		MessageDoc doc = createMessageDoc(outboxMessage);
 		doc.setType("N");
 		doc.setAgent(agent);
-		mongoTemplate.save(doc, getCollectionName(outboxMessage.getContactType()));
+		mongoTemplate.save(doc, getCollectionName(outboxMessage.contact().type()));
 		return doc;
-	}
-
-	public MessageDoc save(MessageDoc messageDoc) {
-		mongoTemplate.save(messageDoc, getCollectionName(messageDoc.getContact().getContactType()));
-		return messageDoc;
 	}
 
 	public List<MessageDoc> findBySessionId(String sessionId, String contactType) {
@@ -246,8 +250,37 @@ public class MessageStore extends CommonDocStore {
 		return messages;
 	}
 
+	public List<MessageDoc> findByBulkSessionId(String bulkSessionId, ContactType contactType) {
+		Query query2 = new Query();
+		query2.addCriteria(Criteria.where("bulkSessionId").is(bulkSessionId));
+		List<MessageDoc> messages = mongoTemplate.find(query2, MessageDoc.class, getCollectionName(contactType));
+		return messages;
+	}
+
 	public void applyPatch(MessageDoc messageDoc) {
 		applyPatch(messageDoc, getCollectionName(messageDoc.getContact().getContactType()));
+	}
+
+	public void updateStatus(ContactType contactType, MessageDoc messageDoc, Status status, String reason) {
+		CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder();
+		
+		if (ArgUtil.is(messageDoc.getMessageId())) {
+			builder.whereIdSafe(messageDoc.getMessageId());
+		} else if (ArgUtil.is(messageDoc.getMessageIdExt())) {
+			builder.where("messageIdExt", messageDoc.getMessageIdExt());
+		} else if (ArgUtil.is(messageDoc.getMessageIdRef())) {
+			builder.where("messageIdRef", messageDoc.getMessageIdRef());
+		} else {
+			return;
+		}
+		
+		builder.set("status", status);
+		builder.set("stamps." + status.toString(), System.currentTimeMillis());
+		if (ArgUtil.is(reason)) {
+			builder.update().push("logs", reason);
+		}
+		mongoTemplate.updateFirst(builder.getQuery(), builder.getUpdate(), MessageDoc.class,
+				getCollectionName(contactType));
 	}
 
 	public void updateStatus(MessageReport messageReport) {
@@ -279,6 +312,37 @@ public class MessageStore extends CommonDocStore {
 					getCollectionName(messageReport.getContactType()));
 			// LOGGER.info(JsonUtil.toJson(builder));
 		}
+	}
+
+	public void insert(List<MessageDoc> messages, ContactType contactType) {
+		/**
+		for (MessageDoc messageDoc : messages) {
+			mongoTemplate.save(messageDoc, MessageStore.getCollectionName(contactType));
+			//System.out.println("phone: "+messageDoc.getContact().getPhone());
+		}
+		return;
+		 **/
+		int n = 500;
+		// Calculate the total number of partitions of size `n` each
+		int m = messages.size() / n;
+		if (messages.size() % n != 0) {
+			m++;
+		}
+		// partition the list into sublists of size `n` each
+		List<List<MessageDoc>> itr = Lists.partition(messages, n);
+		for (int i = 0; i < m; i++) {
+			mongoTemplate.insert(itr.get(i), MessageStore.getCollectionName(contactType));
+		}
+	
+	}
+
+	public List<MessageDoc> find(Query query, ContactType contactType) {
+		return mongoTemplate.find(query, MessageDoc.class, MessageStore.getCollectionName(contactType));
+	}
+
+	public MessageDoc save(MessageDoc msg, ContactType contactType) {
+		mongoTemplate.save(msg, MessageStore.getCollectionName(contactType));
+		return msg;
 	}
 
 }

@@ -1,0 +1,128 @@
+package com.boot.jx.postman.model;
+
+import java.io.Serializable;
+import java.math.BigDecimal;
+import java.util.List;
+
+import com.boot.jx.dict.ContactType;
+import com.boot.utils.ArgUtil;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+
+public class MessageDefinitions {
+
+	public static class MESSAGE_BOUND_TYPE {
+		public static final String INBOUND = "I";
+		public static final String INBOUND_IMPORTED = "Ii";
+
+		public static final String OUTBOUND = "O";
+		public static final String OUTBOUND_IMPORTED = "Oi";
+	}
+
+	public static class MESSAGE_CHANNLES {
+		public static final String GUPSHUPW = "GUPSHUPW";
+	}
+
+	@JsonDeserialize(as = ContactMeta.class)
+	@JsonIgnoreProperties(ignoreUnknown = true)
+	public interface Contactable extends Serializable {
+		public String getContactType();
+
+		public String getChannel();
+
+		public String getLane();
+
+		public String getCsid();
+
+		public String getEmail();
+
+		public String getPhone();
+
+		public String getContactId();
+
+		public void setCsid(String createCsid);
+
+		public void setContactId(String contactId);
+
+		public void setContactType(String contactType);
+
+		public void setChannel(String channel);
+
+		public void setLane(String lane);
+
+		public void setPhone(String phone);
+
+		public void setEmail(String email);
+
+		public default ContactType type() {
+			return ArgUtil.parseAsEnumT(getContactType(), ContactType.class);
+		}
+
+		public default void type(ContactType contactType) {
+			this.setContactType(ArgUtil.parseAsString(contactType));
+		}
+
+		public default void copyFrom(Contactable contactable) {
+			this.setContactType(contactable.getContactType());
+			this.setChannel(contactable.getChannel());
+			this.setLane(contactable.getLane());
+			this.setCsid(contactable.getCsid());
+			this.setPhone(contactable.getPhone());
+			this.setEmail(contactable.getEmail());
+			this.setContactId(contactable.getContactId());
+		}
+
+	}
+
+	// External attributes
+	@JsonIgnoreProperties(ignoreUnknown = true)
+	public interface IMessageExternal extends Serializable {
+		// External attributes
+	}
+
+	// External attributes
+	@JsonIgnoreProperties(ignoreUnknown = true)
+	public interface IMessageInternal extends Serializable {
+
+	}
+
+	// External attributes
+	@JsonIgnoreProperties(ignoreUnknown = true)
+	public interface SessionMessage extends Serializable {
+		// Internal attributes
+		public String getSessionId();
+
+		public void setSessionId(String sessionId);
+
+		public MessageSession session();
+
+		public Contactable contact();
+	}
+
+	@JsonIgnoreProperties(ignoreUnknown = true)
+	public interface IMessage extends IMessageExternal, IMessageInternal, SessionMessage {
+
+		public long getTimestamp();
+
+		public String forContact();
+
+		public String getType();
+
+		public String toString();
+
+	}
+
+	public static interface IMessageExtended extends IMessage {
+
+		public List<String> to();
+
+		String getFrom();
+
+		BigDecimal getQueue();
+
+		String getFromName();
+
+		Message<?> replyMessage(String message);
+
+	}
+}

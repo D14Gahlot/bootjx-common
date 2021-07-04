@@ -54,11 +54,11 @@ public class SammpleReplies {
 
 	}
 
-	private TemplateReply createTemplateReply(String name, String title, String category, String content, String url) {
+	private QuickMedia createTemplateReply(String name, String title, String category, String content, String url) {
 
-		TemplateReply temp5 = mongoTemplate.findById(name, TemplateReply.class);
+		QuickMedia temp5 = mongoTemplate.findById(name, QuickMedia.class);
 		if (ArgUtil.isEmpty(temp5)) {
-			temp5 = new TemplateReply();
+			temp5 = new QuickMedia();
 		}
 
 		temp5.setName(name);

@@ -25,8 +25,8 @@ public class InBoundListener implements ITunnelSubscriber<UserInboxEvent> {
 	@Override
 	public void onMessage(String channel, UserInboxEvent event) {
 		InboxMessage inboxMessageOriginal = EntityDtoUtil.entityToDto(event, new InboxMessage());
-		inboxMessageOriginal.setContactType(
-				ArgUtil.parseAsEnumT(event.getContactType(), ContactType.WHATSAPP, ContactType.class));
+		inboxMessageOriginal.contact().setContactType(
+				ArgUtil.parseAsEnumT(event.getContactType(), ContactType.WHATSAPP, ContactType.class).toString());
 		botEngine.invokeMethods(inboxMessageOriginal);
 	}
 

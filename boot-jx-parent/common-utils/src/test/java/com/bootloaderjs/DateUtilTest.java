@@ -4,6 +4,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.ZonedDateTime;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
@@ -19,18 +20,22 @@ public class DateUtilTest {
 
 		// DateTimeFormatter d;
 		// d.ofPattern(null)
-		System.out.println(x.toInstant().toEpochMilli());
+		// System.out.println(x.toInstant().toEpochMilli());
 
 		DateTimeFormatter f = DateTimeFormatter.ofPattern("eee MMM dd yyyy HH:mm:ss 'GMT'Z (zzzz)");
 
-		LocalDateTime date = LocalDateTime.parse("Mon Jun 07 2021 03:32:59 GMT+0530 (India Standard Time)", f);
+		// LocalDateTime date = LocalDateTime.parse("Mon Jun 07 2021 03:32:59 GMT+0530
+		// (India Standard Time)", f);
 //		LocalDateTime date2 = LocalDateTime.parse("Mon Jun 07 2021 03:32:59 GMT+0530 (India Standard Time)",
 //				DateTimeFormatter.BASIC_ISO_DATE);
 
-		System.out.println(date.toString());
+		// System.out.println(date.toString());
+		System.out.println(
+				ZonedDateTime.now().format(DateTimeFormatter.ofPattern("EE MMM dd yyyy HH:mm:ss 'GMT'Z (zzzz)")));
 
-		CommonDateTimeParser dtp = new CommonDateTimeParser().formatter("eee MMM dd yyyy HH:mm:ss 'GMT'Z (zzzz)")
-				.date("Mon Jun 07 2021 03:32:59 GMT+0530 (India Standard Time)").calculateZone();
+		CommonDateTimeParser dtp = new CommonDateTimeParser().formatter("ccc MMM dd yyyy HH:mm:ss 'GMT'Z (zzzz)")
+				.date("Mon Jun 07 2021 23:23:37 GMT+0530 (India Standard Time)").calculateZone()
+				.formatter("M/d/yy, h:mm a").withZone();
 
 		System.out.println(dtp.getZone());
 		dtp.formatter("M/d/yy, h:m:s a").withZone();

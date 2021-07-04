@@ -7,7 +7,7 @@ public class AgentResponseAuthDto extends AgentResponseDto<AgentResponseAuthDto>
 	private DepartmentResponseAuthDto dept;
 
 	@Override
-	protected AgentResponseAuthDto newInstance() {
+	public AgentResponseAuthDto newInstance() {
 		return new AgentResponseAuthDto();
 	}
 

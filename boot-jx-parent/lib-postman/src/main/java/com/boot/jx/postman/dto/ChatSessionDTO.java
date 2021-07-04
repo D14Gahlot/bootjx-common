@@ -26,6 +26,8 @@ public class ChatSessionDTO implements Serializable {
 	private long startSessionStamp;
 	private long fistResponseStamp;
 
+	private long agentSessionStamp;
+
 	private long lastInComingStamp;
 
 	private long assignedDeptStamp;
@@ -55,10 +57,20 @@ public class ChatSessionDTO implements Serializable {
 		this.sessionId = sessionId;
 	}
 
+	/**
+	 * Contact name
+	 * 
+	 * @param name
+	 */
 	public String getName() {
 		return name;
 	}
 
+	/**
+	 * Contact name
+	 * 
+	 * @param name
+	 */
 	public void setName(String name) {
 		this.name = name;
 	}
@@ -245,6 +257,14 @@ public class ChatSessionDTO implements Serializable {
 
 	public void setStatus(String status) {
 		this.status = status;
+	}
+
+	public long getAgentSessionStamp() {
+		return agentSessionStamp;
+	}
+
+	public void setAgentSessionStamp(long agentSessionStamp) {
+		this.agentSessionStamp = agentSessionStamp;
 	}
 
 }

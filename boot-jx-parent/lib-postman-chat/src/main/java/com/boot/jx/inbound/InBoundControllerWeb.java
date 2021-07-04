@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.boot.jx.AppConfig;
 import com.boot.jx.agent.AgentChatHandler;
 import com.boot.jx.api.ApiResponse;
+import com.boot.jx.chat.ChatDTOUtil;
 import com.boot.jx.connectors.WebConnector;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.http.ApiRequest;
@@ -21,6 +22,7 @@ import com.boot.jx.http.CommonHttpRequest;
 import com.boot.jx.http.RequestType;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.MessageDoc;
+import com.boot.jx.postman.dto.ChatMessageDTO;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.store.MessageStore;
@@ -94,22 +96,47 @@ public class InBoundControllerWeb {
 	}
 
 	@ResponseBody
+	@RequestMapping(value = "/ext/outbound/web/auth/v2", method = RequestMethod.GET)
+	public ApiResponse<ChatMessageDTO, Object> onAuthV2(@RequestParam String number) throws InterruptedException {
+		String webSessionId = commonHttpRequest.get("web-session-id");
+		String contactId = PostManUtil.createContactId(ContactType.WEBSITE, number, null);
+
+		ChatSessionDoc session = null;
+		if (ArgUtil.is(webSessionId)) {
+			session = sessionStore.getValidSession(webSessionId);
+		}
+		List<ChatMessageDTO> msgs = new ArrayList<ChatMessageDTO>();
+		if (ArgUtil.is(session)) {
+			List<MessageDoc> messages = messageStore.findBySessionId(webSessionId, ContactType.WEBSITE.toString());
+			for (MessageDoc messageDoc : messages) {
+				ChatMessageDTO outboxMessage = ChatDTOUtil.getChatMessageDTO(messageDoc);
+				if (ArgUtil.isEqual(messageDoc.getType(), "I", "O")) {
+					msgs.add(outboxMessage);
+				}
+			}
+		}
+
+		return ApiResponse.buildResults(msgs);
+	}
+
+	@ResponseBody
 	@RequestMapping(value = "/ext/inbound/web/callback", method = RequestMethod.POST)
 	public InboxMessage onReceiveMessage(@RequestBody InboxMessage event) throws InterruptedException {
-		event.setContactType(ContactType.WEBSITE);
-		event.setLane("MainSite");
+		event.contact().setContactType(ContactType.WEBSITE.toString());
+		event.contact().setLane("MainSite");
 
-		//event.setContactType(ContactType.WHATSAPP);
-		//event.setLane("918750382050");
+		// event.setContactType(ContactType.WHATSAPP);
+		// event.setLane("918750382050");
 		// event.setLane("919082854885");
-		//event.setChannel("GUPSHUPW");
-		//event.setFrom("919930104050");
-		//event.setFromName("Lalit Tanwar");
-
+		// event.setChannel("GUPSHUPW");
+		// event.setFrom("919930104050");
+		// event.setFromName("Lalit Tanwar");
+		
 		// Cleaning
 		// event.setSessionId("600edc822743742e916202b9");
 		event.setSessionId(null);
 		event.setMessageId(null);
+		event.contact().setCsid(event.getFrom());
 		event.session().setAgent(null);
 		event.session().setDept(null);
 		inBoundEngine.invokeMethods(event);

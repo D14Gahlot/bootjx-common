@@ -1,4 +1,4 @@
-package com.boot.jx.mcq;
+package com.boot.jx.samples;
 
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,9 +12,9 @@ import com.boot.jx.mcq.shedlock.SchedulerLock;
 //@EnableScheduling
 //@Component
 //@Service
-public class SampleTask3 {
+public class SampleTask2 {
 
-	private static final Logger LOGGER = LoggerService.getLogger(SampleTask3.class);
+	private static final Logger LOGGER = LoggerService.getLogger(SampleTask2.class);
 
 	@Autowired
 	AppConfig appConfig;

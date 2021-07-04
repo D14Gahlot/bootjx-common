@@ -9,11 +9,12 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.TypeAlias;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import com.boot.jx.model.AuditableEntity;
 import com.boot.jx.mongo.CommonDocInterfaces.OldDocVersion;
 
 @Document(collection = "DICT_TEMPLATES")
-@TypeAlias("TmplRply")
-public class TemplateReply implements Serializable, OldDocVersion<TemplateReply> {
+@TypeAlias("QuickMedia")
+public class QuickMedia implements Serializable, OldDocVersion<QuickMedia>, AuditableEntity {
 
 	private static final long serialVersionUID = 7942286016346691701L;
 
@@ -32,7 +33,10 @@ public class TemplateReply implements Serializable, OldDocVersion<TemplateReply>
 
 	private Map<String, Object> meta;
 
-	private List<TemplateReply> oldVersions;
+	private List<QuickMedia> oldVersions;
+
+	private String createdBy;
+	private Long createdStamp;
 
 	public String getName() {
 		return name;
@@ -98,13 +102,29 @@ public class TemplateReply implements Serializable, OldDocVersion<TemplateReply>
 	}
 
 	@Override
-	public void setOldVersions(List<TemplateReply> oldVersions) {
+	public void setOldVersions(List<QuickMedia> oldVersions) {
 		this.oldVersions = oldVersions;
 	}
 
 	@Override
-	public List<TemplateReply> getOldVersions() {
+	public List<QuickMedia> getOldVersions() {
 		return oldVersions;
+	}
+
+	public String getCreatedBy() {
+		return createdBy;
+	}
+
+	public void setCreatedBy(String createdBy) {
+		this.createdBy = createdBy;
+	}
+
+	public Long getCreatedStamp() {
+		return createdStamp;
+	}
+
+	public void setCreatedStamp(Long createdStamp) {
+		this.createdStamp = createdStamp;
 	}
 
 }

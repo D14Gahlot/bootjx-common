@@ -8,6 +8,7 @@ import java.util.List;
 import com.boot.jx.api.AmxResponseSchemes.ApiDataMetaResponse;
 import com.boot.jx.api.AmxResponseSchemes.ApiResultsMetaResponse;
 import com.boot.jx.exception.IExceptionEnum;
+import com.boot.utils.CollectionUtil;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
@@ -113,6 +114,18 @@ public class ApiResponse<T, M> extends AResponse<M>
 		return new ApiResponse<TS, MS>();
 	}
 
+	public static <TS, MS> ApiResponse<TS, MS> instance() {
+		return new ApiResponse<TS, MS>();
+	}
+
+	public static <TS, MS> ApiResponse<TS, MS> instance(Class<TS> clazz) {
+		return new ApiResponse<TS, MS>();
+	}
+
+	public static <TS, MS> ApiResponse<TS, MS> instance(Class<TS> clazz, Class<MS> metaClass) {
+		return new ApiResponse<TS, MS>();
+	}
+
 	/**
 	 * @deprecated - use {@link #buildResults(Object)} for list of elements and
 	 *             {@link #buildResult(Object)} for single element list
@@ -197,6 +210,14 @@ public class ApiResponse<T, M> extends AResponse<M>
 	 */
 	public static <TS, MS> ApiResponse<TS, MS> buildList(List<TS> resultList, MS meta) {
 		return buildResults(resultList, meta);
+	}
+
+	public static <TS, MS> ApiResponse<TS, MS> buildList(TS[] resultArray, MS meta) {
+		return buildResults(CollectionUtil.getList(resultArray), meta);
+	}
+
+	public static <TS> ApiResponse<TS, Object> buildResults(TS[] resultArray) {
+		return buildResults(CollectionUtil.getList(resultArray), new HashMap<String, Object>());
 	}
 
 	public static <TS> ApiResponse<TS, Object> buildResults(TS resultList) {

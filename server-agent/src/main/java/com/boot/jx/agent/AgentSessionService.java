@@ -6,11 +6,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Component;
 
-import com.boot.jx.chat.ChatClient;
 import com.boot.jx.common.doc.AgentSessionDoc;
 import com.boot.jx.common.dto.AgentResponseAuthDto;
 import com.boot.jx.common.store.DocumentUpdateListner;
 import com.boot.jx.mongo.CommonMongoQueryBuilder;
+import com.boot.jx.postman.PMClientConfig;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.TimeUtils;
 
@@ -21,7 +21,7 @@ public class AgentSessionService {
 	private MongoTemplate mongoTemplate;
 
 	@Autowired
-	private ChatClient chatClient;
+	private PMClientConfig chatClientConfig;
 
 	/*
 	 * Below APIs are
@@ -64,7 +64,7 @@ public class AgentSessionService {
 	 * Refreshes online status for currently logged in agent
 	 */
 	public void refreshOnline() {
-		if (TimeUtils.isExpired(agentSessionBean.getLastSyncStamp(), chatClient.getAgentSessionTimeout())) {
+		if (TimeUtils.isExpired(agentSessionBean.getLastSyncStamp(), chatClientConfig.getAgentSessionTimeout())) {
 			this.updateSession(true);
 		}
 	}

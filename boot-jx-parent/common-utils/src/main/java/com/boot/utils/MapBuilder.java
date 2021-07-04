@@ -304,6 +304,7 @@ public class MapBuilder {
 		}
 	}
 
+	@Deprecated
 	@JsonIgnoreProperties(ignoreUnknown = true)
 	public static class MapModel implements JsonSerializerType<Object> {
 		protected Map<String, Object> map;

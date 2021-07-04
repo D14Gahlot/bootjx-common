@@ -1,18 +1,25 @@
 package com.boot.jx.postman.tw;
 
-import java.io.Serializable;
+import com.boot.jx.dict.ContactType;
+import com.boot.jx.postman.PMEnvironment.PMConnectorConfig;
+import com.fasterxml.jackson.annotation.JsonView;
 
-public class TwitterConfig implements Serializable {
+public class TwitterConfig implements PMConnectorConfig {
 
 	private static final long serialVersionUID = -2397678752642150000L;
 	private String handler;
 	private String type;
 	private String envName;
 
+	@JsonView(PMConnectorConfig.Protected.class)
 	private String consumerKey;
+	@JsonView(PMConnectorConfig.Protected.class)
 	private String consumerSecret;
+	@JsonView(PMConnectorConfig.Protected.class)
 	private String accessToken;
+	@JsonView(PMConnectorConfig.Protected.class)
 	private String accessTokenSecret;
+	@JsonView(PMConnectorConfig.Protected.class)
 	private String webhookUrl;
 
 	public String getHandler() {
@@ -79,4 +86,33 @@ public class TwitterConfig implements Serializable {
 		this.webhookUrl = webhookUrl;
 	}
 
+	@Override
+	public String getLane() {
+		return this.handler;
+	}
+
+	@Override
+	public boolean isPushAllowed() {
+		return true;
+	}
+
+	@Override
+	public boolean isPushOnlyApproved() {
+		return false;
+	}
+
+	@Override
+	public boolean isPushFreeTextAllowed() {
+		return true;
+	}
+
+	@Override
+	public boolean isPushToNewContactAllowed() {
+		return false;
+	}
+
+	@Override
+	public ContactType getContactType() {
+		return ContactType.TWITTER;
+	}
 }

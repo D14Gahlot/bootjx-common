@@ -5,7 +5,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.boot.jx.dict.ContactType;
+import com.boot.jx.postman.model.MessageDefinitions.IMessage;
 import com.boot.jx.postman.model.MessageOptions.WAMessageOptions;
+import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -70,9 +72,20 @@ public class OutboxMessage extends Message<OutboxMessage> implements WAMessageOp
 		return this.logs;
 	}
 
+	public String getCsid() {
+		return this.contact().getCsid();
+	}
+
+	public void setCsid(String csid) {
+		this.contact().setCsid(csid);
+	}
+
 	@Override
 	@JsonIgnore
 	public String forContact() {
+		if (ArgUtil.is(this.getCsid())) {
+			return this.getCsid();
+		}
 		return CollectionUtil.getOne(this.to);
 	}
 

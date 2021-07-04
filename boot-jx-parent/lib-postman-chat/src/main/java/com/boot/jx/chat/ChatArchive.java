@@ -17,6 +17,7 @@ import com.boot.jx.postman.dto.ChatUserProfileDTO;
 import com.boot.jx.postman.dto.ContactDTO;
 import com.boot.jx.postman.store.MessageStore;
 import com.boot.jx.postman.store.SessionStore;
+import com.boot.jx.utils.PostManUtil;
 import com.boot.utils.ArgUtil;
 
 @Component
@@ -66,22 +67,14 @@ public class ChatArchive {
 	}
 
 	public ChatMessageDTO getMessage(MessageDoc messageDoc, ChatSessionDoc chatSessionDoc) {
-		ChatMessageDTO messageDto = ChatDTOUtil.getChatMessageDTO(messageDoc);
-		if (ArgUtil.areEqual(messageDoc.getType(), "I")) {
-			messageDto.setName(chatSessionDoc.getContactName());
-		} else {
-			messageDto.setName(messageDoc.getAgent());
-		}
+		ChatMessageDTO messageDto = ChatDTOUtil.getChatMessageDTO(messageDoc, chatSessionDoc.getContactName(),
+				messageDoc.getAgent());
 		return messageDto;
 	}
 
 	public ChatMessageDTO getMessage(MessageDoc messageDoc, ChatSessionDTO chatSessionDto) {
-		ChatMessageDTO messageDto = ChatDTOUtil.getChatMessageDTO(messageDoc);
-		if (ArgUtil.areEqual(messageDoc.getType(), "I")) {
-			messageDto.setName(chatSessionDto.getName());
-		} else {
-			messageDto.setName(messageDoc.getAgent());
-		}
+		ChatMessageDTO messageDto = ChatDTOUtil.getChatMessageDTO(messageDoc, chatSessionDto.getName(),
+				messageDoc.getAgent());
 		return messageDto;
 	}
 
@@ -122,7 +115,7 @@ public class ChatArchive {
 		chatSessionDto = withContact(chatSessionDto);
 
 		chatSessionDto.setAssigned(ArgUtil.areEqual(chatSessionDoc.getAssignedToAgent(), agentCode)
-				&& ArgUtil.isNone(chatSessionDoc.getResolveSessionStamp()));
+				&& ArgUtil.isEmptyValue(chatSessionDoc.getResolveSessionStamp()));
 		chatSessionDto = withMessages(chatSessionDto);
 		return chatSessionDto;
 	}

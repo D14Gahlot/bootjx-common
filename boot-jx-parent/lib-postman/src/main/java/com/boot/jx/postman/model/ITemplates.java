@@ -1,14 +1,27 @@
 package com.boot.jx.postman.model;
 
-import com.boot.jx.ProjectConfig;
-import com.boot.jx.dict.Project;
-import com.boot.jx.postman.model.PostManFile.PDFConverter;
+import java.util.Map;
+
 import com.boot.jx.postman.model.Notipy.ChannelType;
-import com.boot.utils.ArgUtil;
+import com.boot.jx.postman.model.PostManFile.PDFConverter;
 
 public class ITemplates {
 
-	public interface ITemplate {
+	public interface BasicTemplate {
+
+		public Map<String, Object> options();
+
+		public Map<String, Object> meta();
+
+		public String getDesc();
+
+		public String getTemplate();
+
+		public String getName();
+
+	}
+
+	public interface ITemplate extends BasicTemplate {
 
 		boolean isThymleaf();
 
@@ -43,18 +56,7 @@ public class ITemplates {
 	}
 
 	public static ITemplate getTemplate(String templateStr) {
-		ITemplate t = getTemplateInternal(templateStr);
-		if (t == null) {
-			return new TemplateGeneric(templateStr);
-		}
-		return t;
-	}
-
-	private static ITemplate getTemplateInternal(String templateStr) {
-		if (ProjectConfig.PROJECT == Project.IB) {
-			return (ITemplate) ArgUtil.parseAsEnum(templateStr, TemplatesIB.class);
-		}
-		return (ITemplate) ArgUtil.parseAsEnum(templateStr, TemplatesMX.class);
+		return new TemplateGeneric(templateStr);
 	}
 
 	public static class TemplateGeneric implements ITemplate {
@@ -93,6 +95,146 @@ public class ITemplates {
 		@Override
 		public String getSampleJSON() {
 			return "template-generic.json";
+		}
+
+		@Override
+		public Map<String, Object> options() {
+			return null;
+		}
+
+		@Override
+		public Map<String, Object> meta() {
+			return null;
+		}
+
+		@Override
+		public String getDesc() {
+			return null;
+		}
+
+		@Override
+		public String getTemplate() {
+			return null;
+		}
+
+		@Override
+		public String getName() {
+			return this.fileName;
+		}
+	}
+
+	/**
+	 * This Enum class is created just for the backward compatibility so that we can
+	 * move away from enum based templates towards DB templates or Runtime templates
+	 * 
+	 * @author lalittanwar
+	 *
+	 */
+	public static enum TemplateDefaultEnum implements ITemplate {
+		DEFAULT("DEFAULT"), CONTACT_US("ContactForm"),;
+
+		String fileName;
+		PDFConverter converter;
+		String sampleJSON;
+		boolean thymleaf = true;
+		ChannelType channel = null;
+
+		@Override
+		public String getFileName() {
+			return fileName;
+		}
+
+		@Override
+		public String getHtmlFile() {
+			return "html/" + getFileName();
+		}
+
+		@Override
+		public String getSMSFile() {
+			return "html/sms/" + getFileName();
+		}
+
+		@Override
+		public String getJsonFile() {
+			return "json/" + getFileName();
+		}
+
+		TemplateDefaultEnum(String fileName, PDFConverter converter, String sampleJSON, ChannelType channel) {
+			this.fileName = fileName;
+			this.converter = converter;
+			this.sampleJSON = sampleJSON;
+			if (this.converter == PDFConverter.JASPER) {
+				this.thymleaf = false;
+			}
+			this.channel = channel;
+		}
+
+		TemplateDefaultEnum(String fileName, PDFConverter converter, String sampleJSON) {
+			this(fileName, converter, sampleJSON, null);
+		}
+
+		TemplateDefaultEnum(String fileName, PDFConverter converter) {
+			this(fileName, converter, null, null);
+		}
+
+		TemplateDefaultEnum(String fileName, ChannelType channel) {
+			this(fileName, null, null, channel);
+		}
+
+		TemplateDefaultEnum(String fileName) {
+			this(fileName, null, null, null);
+		}
+
+		@Override
+		public PDFConverter getConverter() {
+			return converter;
+		}
+
+		@Override
+		public String getSampleJSON() {
+			if (sampleJSON == null) {
+				return this.fileName + ".json";
+			}
+			return sampleJSON;
+		}
+
+		@Override
+		public boolean isThymleaf() {
+			return thymleaf;
+		}
+
+		@Override
+		public ChannelType getChannel() {
+			return channel;
+		}
+
+		public String toString() {
+			return this.name();
+		}
+
+		@Override
+		public Map<String, Object> options() {
+			return null;
+		}
+
+		@Override
+		public Map<String, Object> meta() {
+			return null;
+		}
+
+		@Override
+		public String getDesc() {
+			return null;
+		}
+
+		@Override
+		public String getTemplate() {
+			return null;
+		}
+
+		@Override
+		public String getName() {
+			return null;
 		}
 
 	}

@@ -20,6 +20,8 @@ public class ContactDTO implements java.io.Serializable {
 
 	private String lane;
 
+	private String csid;
+
 	@ApiMockModelProperty(example = "John Doe", required = false)
 	private String name;
 
@@ -104,6 +106,14 @@ public class ContactDTO implements java.io.Serializable {
 
 	public void setLane(String lane) {
 		this.lane = lane;
+	}
+
+	public String getCsid() {
+		return csid;
+	}
+
+	public void setCsid(String csid) {
+		this.csid = csid;
 	}
 
 }

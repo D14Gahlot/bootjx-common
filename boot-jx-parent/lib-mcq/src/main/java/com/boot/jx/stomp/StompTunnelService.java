@@ -2,6 +2,7 @@ package com.boot.jx.stomp;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.StringJoiner;
 
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,7 +33,7 @@ public class StompTunnelService {
 			StompTunnelEvent event = new StompTunnelEvent();
 			event.setTopic(topic);
 			event.setTenantToken(stompTunnelSessionManager.createTagId(AppContextUtil.getTenant()));
-			
+
 			Map<String, Object> messageData = new HashMap<String, Object>();
 			messageData.put("data", message);
 			event.setData(JsonUtil.toJsonMap(messageData));
@@ -49,7 +50,7 @@ public class StompTunnelService {
 			event.setTopic(topic);
 			event.setTenantToken(stompTunnelSessionManager.createTagId(AppContextUtil.getTenant()));
 			event.setTagId(stompTunnelSessionManager.createTagId(tag));
-			
+
 			Map<String, Object> messageData = new HashMap<String, Object>();
 			messageData.put("data", message);
 			event.setData(JsonUtil.toJsonMap(messageData));
@@ -78,7 +79,7 @@ public class StompTunnelService {
 			StompTunnelEvent event = new StompTunnelEvent();
 			event.setTopic(topic);
 			event.setTenantToken(stompTunnelSessionManager.createTagId(AppContextUtil.getTenant()));
-			
+
 			StompSession stompSession = stompTunnelSessionManager.getStompSession(stompUID);
 			if (!ArgUtil.isEmpty(stompSession)) {
 				event.setHttpSessionId(stompSession.getHttpSessionId());
@@ -91,6 +92,39 @@ public class StompTunnelService {
 			}
 		} catch (Exception e) {
 			LOGGER.error("Error While Sending StompMessage to stompUID " + stompUID, e);
+		}
+	}
+
+	@Async
+	public void sendTo(StompQuery stompQuery, Object message) {
+		try {
+
+			// To One Users
+			if (ArgUtil.is(stompQuery.getStompUID())) {
+				this.sendTo(stompQuery.getStompUID(), stompQuery.getTopic(), message);
+			}
+
+			// To Multiple Tags
+			if (ArgUtil.is(stompQuery.getTags())) {
+
+				StompTunnelEvent event = new StompTunnelEvent();
+				event.setTopic(stompQuery.getTopic());
+				event.setTenantToken(stompTunnelSessionManager.createTagId(AppContextUtil.getTenant()));
+
+				StringJoiner sb = new StringJoiner(",");
+				for (String tag : stompQuery.getTags()) {
+					sb.add(stompTunnelSessionManager.createTagId(tag));
+				}
+				event.setTagId(sb.toString());
+
+				Map<String, Object> messageData = new HashMap<String, Object>();
+				messageData.put("data", message);
+				event.setData(JsonUtil.toJsonMap(messageData));
+				tunnelService.shout(StompTunnelToAllSender.STOMP_TO_ALL, event);
+			}
+
+		} catch (Exception e) {
+			LOGGER.error("Error While Sending StompMessage", e);
 		}
 	}
 

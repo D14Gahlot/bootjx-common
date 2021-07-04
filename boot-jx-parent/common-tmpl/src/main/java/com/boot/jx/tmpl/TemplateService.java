@@ -22,6 +22,7 @@ import com.boot.jx.AppContextUtil;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.dict.FileFormat;
 import com.boot.jx.model.CommonFile;
+import com.boot.jx.postman.model.ITemplates;
 import com.boot.jx.postman.model.PostManFile;
 import com.boot.jx.postman.model.ITemplates.ITemplate;
 import com.boot.jx.tmpl.custom.HelloDialect;
@@ -91,7 +92,7 @@ public class TemplateService {
 	public String processHtml(ITemplate template, Context context, Locale locale, ContactType contactType) {
 		String tmplt = templateUtils.getTemplateFile(template.getHtmlFile(), AppContextUtil.getTenant(), locale,
 				contactType);
-		if(!ArgUtil.is(tmplt)) {
+		if (!ArgUtil.is(tmplt)) {
 			return Constants.BLANK;
 		}
 		String rawStr = templateEngine.process(tmplt, context);
@@ -151,11 +152,11 @@ public class TemplateService {
 	 * @param file the file
 	 * @return the file
 	 */
-	public PostManFile process(PostManFile file) {
+	public CommonFile process(CommonFile file) {
 		return this.process(file, null);
 	}
 
-	public PostManFile process(PostManFile file, ContactType contactType) {
+	public CommonFile process(CommonFile file, ContactType contactType) {
 		Locale locale = getLocal(file);
 
 		if (file.getFileFormat() == FileFormat.PDF) {
@@ -175,25 +176,27 @@ public class TemplateService {
 
 		context.setVariables(file.getModel());
 
+		ITemplate iTemplate = ITemplates.getTemplate(file.getTemplate());
+
 		if (!appConfig.isProdMode() && appConfig.isCache()) {
-			templateModelCache.put(file.getITemplate().getSampleJSON(), file.getModel());
+			templateModelCache.put(iTemplate.getSampleJSON(), file.getModel());
 		}
 
 		AppContextUtil.set("template_locale", locale);
 		AppContextUtil.set("template_contactType", contactType);
 
-		if (file.getITemplate().isThymleaf()) {
+		if (iTemplate.isThymleaf()) {
 			String content;
 			if (file.getFileFormat() == FileFormat.JSON || ContactType.PUSH == contactType) {
-				content = this.processJson(file.getITemplate(), context, locale, contactType);
+				content = this.processJson(iTemplate, context, locale, contactType);
 			} else {
-				content = this.processHtml(file.getITemplate(), context, locale, contactType);
+				content = this.processHtml(iTemplate, context, locale, contactType);
 			}
-			if(ArgUtil.is(content)) {
+			if (ArgUtil.is(content)) {
 				String[] x = content.split("---options---");
 				file.setContent(x[0]);
 				if (x.length > 1 && ArgUtil.is(x[1])) {
-					file.setOptions(StringUtils.toMap(x[1]));
+					file.options().putAll(StringUtils.toMap(x[1]));
 				}
 			}
 		}

@@ -20,8 +20,8 @@ import com.boot.jx.logger.LoggerService;
 import com.boot.jx.postman.PostManConfig;
 import com.boot.jx.postman.PostManException;
 import com.boot.jx.postman.audit.PMGaugeEvent;
-import com.boot.jx.postman.model.PostManFile;
 import com.boot.jx.postman.model.Notipy;
+import com.boot.jx.postman.model.PostManFile;
 import com.boot.jx.postman.model.SMS;
 import com.boot.jx.rest.RestQuery;
 import com.boot.jx.rest.RestService;
@@ -228,7 +228,7 @@ public class SMService {
 			params.put("text", sms.toText());
 			params.put("traceid", AppContextUtil.getTraceId());
 
-			if (ArgUtil.areEqual(this.sms2Channel, sms.getChannel())) {
+			if (ArgUtil.areEqual(this.sms2Channel, sms.contact().getChannel())) {
 				params.put("username", sms2UserName);
 				params.put("password", sms2Password);
 				params.put("secret", sms2Secret);

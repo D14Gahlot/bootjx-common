@@ -5,7 +5,7 @@ public class DepartmentResponseAuthDto extends DepartmentResponseDto<DepartmentR
 	private static final long serialVersionUID = 3924319833059027100L;
 
 	@Override
-	protected DepartmentResponseAuthDto newInstance() {
+	public DepartmentResponseAuthDto newInstance() {
 		return new DepartmentResponseAuthDto();
 	}
 

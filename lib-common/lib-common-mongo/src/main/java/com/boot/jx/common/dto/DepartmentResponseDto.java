@@ -3,7 +3,7 @@ package com.boot.jx.common.dto;
 import com.boot.jx.mongo.CommonDocInterfaces.ADocumentDTO;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class DepartmentResponseDto<T extends DepartmentResponseDto<T>> extends ADocumentDTO<T> {
+public class DepartmentResponseDto<T extends DepartmentResponseDto<T>> implements ADocumentDTO<T> {
 
 	private static final long serialVersionUID = 3924319833059027100L;
 
@@ -19,7 +19,7 @@ public class DepartmentResponseDto<T extends DepartmentResponseDto<T>> extends A
 	private String isactive;
 
 	@Override
-	protected DepartmentResponseDto<T> newInstance() {
+	public DepartmentResponseDto<T> newInstance() {
 		return new DepartmentResponseDto<T>();
 	}
 

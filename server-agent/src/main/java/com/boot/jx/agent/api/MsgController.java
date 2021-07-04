@@ -116,14 +116,16 @@ public class MsgController {
 
 		// Session Stuff Logging >
 		if (ArgUtil.areEqual(sessionDoc.getAssignedToAgent(), agentSession.getAgentCode())) {
-			ChatMessageDTO messageDto = new ChatMessageDTO();
+			ChatMessageDTO messageDto = agentService.sendMessage(sessionDoc, outboxMessage);
+
+			// Evaluate if required
 			messageDto.setName(agentSession.getAgentCode());
-			agentService.sendMessage(sessionDoc, outboxMessage);
-			messageDto.setType(outboxMessage.getType());
-			messageDto.setMessageId(outboxMessage.getMessageId());
-			messageDto.setMessageIdExt(outboxMessage.getMessageIdExt());
+			// messageDto.setType(outboxMessage.getType());
 			messageDto.setText(outboxMessage.getMessage());
 			messageDto.setMessageIdRef(outboxMessage.getMessageIdRef());
+
+			// messageDto.setMessageIdExt(outboxMessage.getMessageIdExt());
+			// messageDto.setMessageId(outboxMessage.getMessageId());
 
 			agentSessionService.refreshOnline();
 			return ApiResponse.buildResult(messageDto);
@@ -161,13 +163,27 @@ public class MsgController {
 
 		List<ChatSessionDTO> chatSessionDtos = new ArrayList<ChatSessionDTO>();
 
-		List<ChatSessionDoc> sessions = sessionStore.findChatSessionContactId(contactId);
+		List<ChatSessionDoc> sessions = sessionStore.findSimilarChatSessionForContactId(contactId);
 		for (ChatSessionDoc chatSessionDoc : sessions) {
 			ChatSessionDTO chatSessionDto = chatArchive.withContact(chatSessionDoc);
 			chatSessionDtos.add(chatSessionDto);
 		}
 		return ApiResponse.buildResults(chatSessionDtos,
 				MapBuilder.map().put("isOnline", agentSession.isOnline()).build());
+	}
+
+	@ResponseBody
+	@RequestMapping(value = "/api/sessions/contact/active", method = { RequestMethod.GET })
+	public ApiResponse<ChatSessionDTO, Object> getActiveSessionsForContact(@RequestParam String contactId) {
+		List<ChatSessionDTO> chatSessionDtos = new ArrayList<ChatSessionDTO>();
+		List<ChatSessionDoc> sessions = sessionStore.findActiveChatSessionForContactId(contactId);
+		for (ChatSessionDoc chatSessionDoc : sessions) {
+			if (sessionStore.isSessionValid(chatSessionDoc)) {
+				ChatSessionDTO chatSessionDto = chatArchive.withContact(chatSessionDoc);
+				chatSessionDtos.add(chatSessionDto);
+			}
+		}
+		return ApiResponse.buildResults(chatSessionDtos);
 	}
 
 	@ResponseBody

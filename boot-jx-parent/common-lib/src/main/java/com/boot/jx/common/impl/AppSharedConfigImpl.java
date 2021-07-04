@@ -6,8 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.boot.jx.AppConfig;
+import com.boot.jx.AppConfigPackage.AppSharedConfig;
 import com.boot.jx.AppParam;
-import com.boot.jx.AppSharedConfig;
 
 @Component
 public class AppSharedConfigImpl implements AppSharedConfig {

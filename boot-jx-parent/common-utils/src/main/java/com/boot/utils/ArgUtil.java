@@ -708,7 +708,13 @@ public final class ArgUtil {
 		return false;
 	}
 
-	public static boolean isNone(Object object) {
+	/**
+	 * returns true of value is 'null',EMPTY_STRING or 0 value for Numberic
+	 * 
+	 * @param object
+	 * @return
+	 */
+	public static boolean isEmptyValue(Object object) {
 		if (object == null) {
 			return true;
 		} else if (object instanceof Long) {
@@ -791,6 +797,13 @@ public final class ArgUtil {
 			}
 		}
 		return null;
+	}
+
+	public static <T> T nonEmpty(T str1, T strs2) {
+		if (!isEmpty(str1)) {
+			return str1;
+		}
+		return strs2;
 	}
 
 	@Deprecated

@@ -10,7 +10,9 @@ import com.boot.jx.chat.ChatClient;
 import com.boot.jx.chat.ConnectorHandlerFactory;
 import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorHandler;
 import com.boot.jx.chat.ConnectorHandlerFactory.DefaultConnector;
+import com.boot.jx.postman.PMClientConfig;
 import com.boot.jx.postman.doc.ChatSessionDoc;
+import com.boot.jx.postman.dto.ChatMessageDTO;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.utils.ArgUtil;
@@ -25,6 +27,9 @@ public class AgentService {
 	private ChatClient chatClient;
 
 	@Autowired
+	private PMClientConfig chatClientConfig;
+
+	@Autowired
 	private ConnectorHandlerFactory connectorHandlerFactory;
 
 	@Autowired(required = false)
@@ -36,11 +41,11 @@ public class AgentService {
 	public ApiResponse<InboxMessage, Object> assignToAgent(InboxMessage inboxMessage) {
 		if (ArgUtil.is(agentChatHandler) && agentChatHandler.onAssignSupported(inboxMessage)) {
 			return ApiResponse.buildResult(agentChatHandler.onAssign(inboxMessage));
-		} else if (ArgUtil.is(chatClient.getAgentUrl())) {
+		} else if (ArgUtil.is(chatClientConfig.getAgentUrl())) {
 			return chatClient.assignToAgent(inboxMessage);
 		} else {
-			ConnectorHandler connector = connectorHandlerFactory.get(inboxMessage.getContactType(),
-					inboxMessage.getChannel());
+			ConnectorHandler connector = connectorHandlerFactory.get(inboxMessage.contact().type(),
+					inboxMessage.contact().getChannel());
 			if (ArgUtil.is(connector)) {
 				connector.assignToAgent(inboxMessage);
 			} else if (ArgUtil.is(defaultConnector)) {
@@ -68,7 +73,7 @@ public class AgentService {
 		return agentChatHandler.onMessageReceive(inboxMessage);
 	}
 
-	public OutboxMessage sendMessage(ChatSessionDoc sessionDoc, OutboxMessage outboxMessage) {
+	public ChatMessageDTO sendMessage(ChatSessionDoc sessionDoc, OutboxMessage outboxMessage) {
 		outboxMessage.setMessage(StringUtils.trim(outboxMessage.getMessage()));
 		return agentChatHandler.onSend(sessionDoc, outboxMessage);
 	}

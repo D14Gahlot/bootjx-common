@@ -9,6 +9,12 @@ import com.boot.utils.ArgUtil;
 
 public class CommonMongoQueryBuilder {
 
+	public static class CommonMongoCriteria extends Criteria {
+		public static Criteria whereId(Object id) {
+			return where("_id").is(id);
+		}
+	}
+
 	Query query;
 	Update update;
 
@@ -53,7 +59,7 @@ public class CommonMongoQueryBuilder {
 	}
 
 	public CommonMongoQueryBuilder whereId(Object id) {
-		return this.with(Criteria.where("_id").is(id));
+		return this.with(CommonMongoCriteria.whereId(id));
 	}
 
 	public CommonMongoQueryBuilder whereAll() {
@@ -80,6 +86,28 @@ public class CommonMongoQueryBuilder {
 
 	public void setUpdate(Update update) {
 		this.update = update;
+	}
+
+	public static abstract class DocQueryBuilder<T> extends CommonMongoQueryBuilder {
+		protected T doc;
+
+		public DocQueryBuilder(T doc) {
+			this.doc = doc;
+			whereId(getId(this.doc));
+		}
+
+		public DocQueryBuilder(String id) {
+			this.doc = this.newDoc(id);
+			whereId(id);
+		}
+
+		public Class<?> getDocClass() {
+			return this.doc.getClass();
+		}
+
+		public abstract T newDoc(String id);
+
+		public abstract String getId(T doc);
 	}
 
 }

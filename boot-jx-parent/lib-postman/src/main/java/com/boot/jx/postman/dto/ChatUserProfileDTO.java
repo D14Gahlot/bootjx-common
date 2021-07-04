@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.boot.jx.swagger.ApiMockModelProperty;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -75,11 +76,22 @@ public class ChatUserProfileDTO implements Serializable {
 	public static class CustomerLabel implements Serializable {
 
 		private static final long serialVersionUID = 3113597210867635972L;
-		String name;
-		Object value;
+
+		@ApiMockModelProperty(example = "CUSTOMER_TYPE", value = "Unique LabelType")
 		String key;
+
+		@ApiMockModelProperty(example = "Customer Type", value = "Display LabelType, Labels with same name will be grouped together,"
+				+ " if not provided key will be used instead", required = false)
+		String name;
+
+		@ApiMockModelProperty(example = "TEXT", value = "Type of Label", allowableValues = "TEXT,DATE,NUMBER,LIST", required = false)
 		String type;
+
+		@ApiMockModelProperty(example = "MM/DD/YY", value = "Data Format", allowableValues = "MM/DD/YY", required = false)
 		String format;
+
+		@ApiMockModelProperty(example = "Platinum", value = "Value of Label Value")
+		Object value;
 
 		public Object getValue() {
 			return value;
@@ -148,10 +160,15 @@ public class ChatUserProfileDTO implements Serializable {
 	}
 
 	String contactId;
+
 	String profileId;
+
 	String userId;
+
 	String mobile;
+
 	String email;
+
 	String name;
 
 	List<CustomerLabel> labels;

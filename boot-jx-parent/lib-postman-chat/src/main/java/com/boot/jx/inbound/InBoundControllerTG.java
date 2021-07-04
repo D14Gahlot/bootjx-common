@@ -14,7 +14,6 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import com.boot.jx.connectors.TelegramConnector;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.tg.TelegramClient;
-import com.boot.jx.postman.tw.WebhookInfo;
 import com.boot.jx.scope.vendor.VendorContext.ApiVendorHeaders;
 import com.boot.utils.ArgUtil;
 

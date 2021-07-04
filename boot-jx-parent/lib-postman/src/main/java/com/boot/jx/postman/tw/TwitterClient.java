@@ -3,8 +3,6 @@ package com.boot.jx.postman.tw;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -119,7 +117,7 @@ public class TwitterClient implements MessageClient {
 
 	public OutboxMessage send(OutboxMessage message) {
 		String to = CollectionUtil.getOne(message.getTo());
-		String lane = message.getLane();
+		String lane = message.contact().getLane();
 
 		StringJoiner msgIds = new StringJoiner(",");
 

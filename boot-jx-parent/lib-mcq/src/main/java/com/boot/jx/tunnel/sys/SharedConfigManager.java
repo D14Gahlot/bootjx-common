@@ -6,7 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.boot.jx.AppSharedConfig;
+import com.boot.jx.AppConfigPackage.AppSharedConfig;
 import com.boot.jx.tunnel.DBEvent;
 import com.boot.jx.tunnel.ITunnelSubscriber;
 import com.boot.jx.tunnel.TunnelEventMapping;
@@ -38,6 +38,12 @@ public class SharedConfigManager implements ITunnelSubscriber<DBEvent> {
 	public void clear() {
 		DBEvent e = new DBEvent();
 		e.setEventCode(SysTunnelEventsDict.Names.SHARED_CONFIG_UPDATE);
+		
+		if (ArgUtil.is(listAppSharedConfig)) {
+			for (AppSharedConfig appSharedConfig : listAppSharedConfig) {
+				appSharedConfig.clear(e.getData());
+			}
+		}
 		tunnelService.shout(SysTunnelEventsDict.Names.SHARED_CONFIG_UPDATE, e);
 	}
 

@@ -38,6 +38,9 @@ public class OutboundApiV1 {
 		@ApiMockModelProperty(example = "Hello User!", value = "Message to be sent")
 		public String message;
 
+		@ApiMockModelProperty(example = "true", value = "If Message content is to be Masked")
+		public Boolean mask;
+
 		@ApiMockModelProperty(required = false, example = "EN")
 		public Language lang;
 

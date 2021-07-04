@@ -127,9 +127,11 @@ public class AgentAnalyticsManager {
 			totalOpenMsg+=dt.getOpenConversation();
 			convDuration+=dt.getConverDuration();
 			totalUniqCon+=dt.getUniqueConversation();
-			totalStartLag+=dt.getStartLag();
-			botScore+=dt.getBotScore();
-			botClosure +=dt.getBotClosure();
+			if(dt.getStartLag()>0) {
+				totalStartLag+=dt.getStartLag();
+			}
+			botScore=dt.getBotScore();
+			botClosure =dt.getBotClosure();
 			dto.setLeadMessanger(dt.getLeadMessanger());
 			graphApiMap = mergerMapKyAndValue(graphApiMap, dt.getGraphApiDetails());
 			if(ArgUtil.is(dt.getPeakLoad()) && dt.getPeakLoad().getTotal() > dto.getPeakLoad().getTotal()) {
@@ -325,7 +327,9 @@ public class AgentAnalyticsManager {
 			long assignedDeptStamp = chatSessionCon.getAssignedDeptStamp();
 			double converDuration = fistResponseStamp-assignedDeptStamp;
 			Double diffInMin = (double) (converDuration / (60 * 1000));
+			if(diffInMin>0) {
 			startLagMapLst.put(conId, diffInMin);
+			}
 		}
 		
 		

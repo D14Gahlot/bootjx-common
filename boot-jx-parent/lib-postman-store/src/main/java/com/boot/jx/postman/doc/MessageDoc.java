@@ -13,7 +13,10 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import com.boot.jx.mongo.CommonDocInterfaces.Patchable;
 import com.boot.jx.postman.model.Attachment;
+import com.boot.jx.postman.model.Message.Status;
+import com.boot.jx.postman.model.MessageMetaWrapper;
 import com.boot.jx.postman.model.TagDocument;
+import com.boot.utils.ArgUtil;
 
 @Document(collection = MessageDoc.COLLECTION_NAME)
 @TypeAlias("MessageDoc")
@@ -31,18 +34,23 @@ public class MessageDoc implements Serializable, Patchable<MessageDoc> {
 	@Indexed
 	private String sessionId;
 
+	@Indexed
+	private String bulkSessionId;
+
 	private String collapseId;
 	private long timestamp;
 	private String type;
 	private String template;
+	private String templateId;
 	private String action;
 	private String handler;
 	private String message;
 	private String status;
-	private ContactDoc contact;
+	private ContactDetailDoc contact;
 	private String agent;
 	private TagDocument tags;
 	private Map<String, Object> model;
+	private Map<String, Object> meta;
 	private List<Attachment> attachments;
 
 	private String quickReplyId;
@@ -110,11 +118,11 @@ public class MessageDoc implements Serializable, Patchable<MessageDoc> {
 		this.status = status;
 	}
 
-	public ContactDoc getContact() {
+	public ContactDetailDoc getContact() {
 		return contact;
 	}
 
-	public void setContact(ContactDoc contact) {
+	public void setContact(ContactDetailDoc contact) {
 		this.contact = contact;
 	}
 
@@ -248,5 +256,49 @@ public class MessageDoc implements Serializable, Patchable<MessageDoc> {
 		if (stamps == null)
 			stamps = new HashMap<String, Long>();
 		return stamps;
+	}
+
+	public void updateStatus(Status status) {
+		String statusStr = ArgUtil.parseAsString(status);
+		this.status = statusStr;
+		this.stamps().put(statusStr, System.currentTimeMillis());
+	}
+
+	public String getTemplateId() {
+		return templateId;
+	}
+
+	public void setTemplateId(String templateId) {
+		this.templateId = templateId;
+	}
+
+	public String getBulkSessionId() {
+		return bulkSessionId;
+	}
+
+	public void setBulkSessionId(String bulkId) {
+		this.bulkSessionId = bulkId;
+	}
+
+	public Map<String, Object> getMeta() {
+		return meta;
+	}
+
+	public void setMeta(Map<String, Object> meta) {
+		this.meta = meta;
+	}
+
+	public Map<String, Object> meta() {
+		if (this.meta == null) {
+			this.meta = new HashMap<String, Object>();
+		}
+		return this.meta;
+	}
+
+	public MessageMetaWrapper messageMetaWrapper() {
+		if (this.meta == null) {
+			this.meta = new HashMap<String, Object>();
+		}
+		return new MessageMetaWrapper(this.meta);
 	}
 }

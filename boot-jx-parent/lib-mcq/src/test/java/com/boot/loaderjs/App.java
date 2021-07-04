@@ -17,7 +17,6 @@ import com.boot.jx.dict.UserClient.DeviceType;
 import com.boot.jx.dict.UserClient.UserDeviceClient;
 import com.boot.jx.tunnel.DBEvent;
 import com.boot.jx.tunnel.TunnelMessage;
-import com.boot.loaderjs.App;
 import com.boot.utils.JsonUtil;
 import com.fasterxml.jackson.core.type.TypeReference;
 

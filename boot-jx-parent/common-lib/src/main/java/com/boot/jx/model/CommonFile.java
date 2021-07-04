@@ -65,8 +65,9 @@ public class CommonFile implements Serializable {
 	private String password;
 	private String url;
 	private String template = null;
+	private String templateId;
 	private Map<String, Object> model = new HashMap<String, Object>();
-	private Map<String, String> options = new HashMap<String, String>();
+	private Map<String, Object> options = new HashMap<String, Object>();
 
 	public Map<String, Object> getModel() {
 		return model;
@@ -165,12 +166,19 @@ public class CommonFile implements Serializable {
 		this.url = url;
 	}
 
-	public Map<String, String> getOptions() {
+	public Map<String, Object> getOptions() {
 		return options;
 	}
 
-	public void setOptions(Map<String, String> options) {
+	public void setOptions(Map<String, Object> options) {
 		this.options = options;
+	}
+
+	public Map<String, Object> options() {
+		if (this.options == null) {
+			this.options = new HashMap<String, Object>();
+		}
+		return options;
 	}
 
 	public FileType getFileType() {
@@ -355,6 +363,14 @@ public class CommonFile implements Serializable {
 			e.printStackTrace();
 		}
 		return null;
+	}
+
+	public String getTemplateId() {
+		return templateId;
+	}
+
+	public void setTemplateId(String templateId) {
+		this.templateId = templateId;
 	}
 
 }

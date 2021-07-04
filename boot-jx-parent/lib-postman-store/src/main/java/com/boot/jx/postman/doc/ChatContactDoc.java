@@ -6,16 +6,18 @@ import java.util.List;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.TypeAlias;
+import org.springframework.data.mongodb.core.index.TextIndexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import com.boot.jx.postman.dto.ChatUserProfileDTO;
+import com.boot.jx.postman.model.MessageDefinitions.Contactable;
 import com.boot.jx.swagger.ApiMockModelProperty;
 import com.boot.utils.ArgUtil;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 @Document(collection = "CHAT_CONTACT")
 @TypeAlias("ChatContactDoc")
-public class ChatContactDoc implements Serializable {
+public class ChatContactDoc implements Serializable, Contactable {
 	private static final long serialVersionUID = 1L;
 
 	@Id
@@ -26,18 +28,30 @@ public class ChatContactDoc implements Serializable {
 	private String csid;
 
 	private String contactType;
+
 	private String channelType;
+	private String channel;
+
 	private String lane;
 
-	private long lastInComingStamp;
+	private long lastInBoundStamp;
+	private long lastOutBoundStamp;
+	private long lastPushStamp;
+	private long lastReplyStamp;
 
-	private long lastOutGoingStamp;
+	private long lastOptInStamp;
 
 	private String sessionId;
 
+	@TextIndexed(weight = 10)
 	private String name;
+
+	@TextIndexed(weight = 1)
 	private String email;
+
+	@TextIndexed(weight = 5)
 	private String phone;
+
 	private String profilePic;
 	private List<String> labelId;
 	private ChatUserProfileDTO profile;
@@ -59,20 +73,20 @@ public class ChatContactDoc implements Serializable {
 		this.contactType = contactType;
 	}
 
-	public long getLastInComingStamp() {
-		return lastInComingStamp;
+	public long getLastInBoundStamp() {
+		return lastInBoundStamp;
 	}
 
-	public void setLastInComingStamp(long lastInComingStamp) {
-		this.lastInComingStamp = lastInComingStamp;
+	public void setLastInBoundStamp(long lastInBoundStamp) {
+		this.lastInBoundStamp = lastInBoundStamp;
 	}
 
-	public long getLastOutGoingStamp() {
-		return lastOutGoingStamp;
+	public long getLastOutBoundStamp() {
+		return lastOutBoundStamp;
 	}
 
-	public void setLastOutGoingStamp(long lastOutGoingStamp) {
-		this.lastOutGoingStamp = lastOutGoingStamp;
+	public void setLastOutBoundStamp(long lastOutBoundStamp) {
+		this.lastOutBoundStamp = lastOutBoundStamp;
 	}
 
 	public String getSessionId() {
@@ -167,5 +181,44 @@ public class ChatContactDoc implements Serializable {
 
 	public void setProfileId(String profileId) {
 		this.profileId = profileId;
+	}
+
+	public long getLastOptInStamp() {
+		return lastOptInStamp;
+	}
+
+	public void setLastOptInStamp(long lastOptInStamp) {
+		this.lastOptInStamp = lastOptInStamp;
+	}
+
+	@Override
+	public void setChannel(String channel) {
+		this.channel = channel;
+	}
+
+	@Override
+	public String getChannel() {
+		return ArgUtil.nonEmpty(this.channel, this.channelType);
+	}
+
+	public long getLastPushStamp() {
+		return lastPushStamp;
+	}
+
+	public void setLastPushStamp(long lastPushStamp) {
+		this.lastPushStamp = lastPushStamp;
+	}
+
+	public long getLastReplyStamp() {
+		return lastReplyStamp;
+	}
+
+	public void setLastReplyStamp(long lastReplyStamp) {
+		this.lastReplyStamp = lastReplyStamp;
+	}
+
+	@Override
+	public String toString() {
+		return String.format("[contactId:%s]", this.contactId);
 	}
 }

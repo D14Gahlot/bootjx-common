@@ -215,6 +215,10 @@ public class AppContextUtil {
 		return TenantContextHolder.currentSite();
 	}
 
+	public static void setTenant(String tenant) {
+		TenantContextHolder.setCurrent(tenant);
+	}
+
 	public static void setTenant(Tenant tenant) {
 		TenantContextHolder.setCurrent(tenant);
 	}

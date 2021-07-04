@@ -1,17 +1,22 @@
 package com.boot.jx.postman.gupshup;
 
-import java.io.Serializable;
-
+import com.boot.jx.dict.ContactType;
+import com.boot.jx.postman.PMEnvironment.PMConnectorConfig;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonView;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class GupShupConfig implements Serializable {
+public class GupShupConfig implements PMConnectorConfig {
 
 	private static final long serialVersionUID = -2397678752642150000L;
 	private String number;
+	@JsonView(PMConnectorConfig.Protected.class)
 	private String notifyId;
+	@JsonView(PMConnectorConfig.Protected.class)
 	private String notifyPass;
+	@JsonView(PMConnectorConfig.Protected.class)
 	private String chatId;
+	@JsonView(PMConnectorConfig.Protected.class)
 	private String chatPass;
 
 	public String getNumber() {
@@ -54,4 +59,38 @@ public class GupShupConfig implements Serializable {
 		this.chatPass = chatPass;
 	}
 
+	@Override
+	public String getLane() {
+		return this.number;
+	}
+
+	@Override
+	public boolean isPushAllowed() {
+		return true;
+	}
+
+	@Override
+	public boolean isPushOnlyApproved() {
+		return true;
+	}
+
+	@Override
+	public boolean isPushFreeTextAllowed() {
+		return false;
+	}
+
+	@Override
+	public boolean isPushToNewContactAllowed() {
+		return true;
+	}
+
+	@Override
+	public ContactType getContactType() {
+		return ContactType.WHATSAPP;
+	}
+
+	@Override
+	public String getChannel() {
+		return "GUPSHUPW";
+	}
 }

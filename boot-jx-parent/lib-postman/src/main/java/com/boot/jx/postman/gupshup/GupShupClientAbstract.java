@@ -53,6 +53,9 @@ public abstract class GupShupClientAbstract {
 		}
 
 		if (getSessionType() == SessionType.NOTIFICATION) {
+			if (ArgUtil.isEmpty(config.getNotifyId()) || ArgUtil.isEmpty(config.getNotifyPass())) {
+				throw new PostManException("Notification Not Configured for this lane " + req.getWaNumber());
+			}
 			ajax.field("userid", config.getNotifyId());
 			req.password(config.getNotifyPass());
 		} else {
@@ -127,13 +130,18 @@ public abstract class GupShupClientAbstract {
 
 	public OutboxMessage send(OutboxMessage message) {
 
-		String to = CollectionUtil.getOne(message.getTo());
+		String to = null;
+		if (ArgUtil.is(message.getCsid())) {
+			to = message.getCsid();
+		} else {
+			to = CollectionUtil.getOne(message.getTo());
+		}
 
 		GupShupReq gupShupReq = new GupShupReq();
 		gupShupReq.setSendTo(to);
 		gupShupReq.setPhoneNumber(to);
 		gupShupReq.setMessageId(message.getMessageId());
-		gupShupReq.setWaNumber(message.getLane());
+		gupShupReq.setWaNumber(message.contact().getLane());
 
 		GupShupResp resp = null;
 		String id = null;
@@ -182,11 +190,19 @@ public abstract class GupShupClientAbstract {
 		return resp.getResponse().getId();
 	}
 
+	public GupShupResp optIn(OutboxMessage outboxMessage) {
+		GupShupReq gupShupReq = new GupShupReq(GupShupConstants.Method.OPT_IN).phoneNumber(outboxMessage.getCsid());
+		gupShupReq.setChannel("WHATSAPP");
+		gupShupReq.setWaNumber(outboxMessage.contact().getLane());
+		return post(gupShupReq);
+	}
+
 	public GupShupResp sendDocumentURL(GupShupReq gupShupReq) {
 		return post(gupShupReq);
 	}
 
 	public GupShupResp sendMessage(GupShupReq gupShupReq, MessageOptions options) {
+		gupShupReq.method(GupShupConstants.Method.SendMessage);
 		return post(gupShupReq);
 	}
 
