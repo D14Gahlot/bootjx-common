@@ -17,7 +17,7 @@ import com.boot.jx.postman.gupshup.GupShupInboundV2;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.Message;
 import com.boot.jx.postman.model.MessageBox;
-import com.boot.jx.postman.model.MessageDefinitions.SessionMessage;
+import com.boot.jx.postman.model.MessageDefinitions.IMessageExtended;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.model.WAMessage.Channel;
 import com.boot.utils.ArgUtil;
@@ -61,7 +61,7 @@ public class WAGupShupAgentConnector implements ConnectorHandler {
 	}
 
 	@Override
-	public void reply(SessionMessage inboxMessage, OutboxMessage outboxMessage) {
+	public void reply(IMessageExtended inboxMessage, OutboxMessage outboxMessage) {
 		outboxMessage.contact().setChannel(inboxMessage.contact().getChannel());
 		outboxMessage.contact().setLane(inboxMessage.contact().getLane());
 		if (ArgUtil.isEqual(inboxMessage.contact().getChannel(), Channel.GUPSHUPAGENT.toString())) {

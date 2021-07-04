@@ -32,7 +32,7 @@ import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.Message;
 import com.boot.jx.postman.model.Message.Status;
 import com.boot.jx.postman.model.MessageDefinitions;
-import com.boot.jx.postman.model.MessageDefinitions.SessionMessage;
+import com.boot.jx.postman.model.MessageDefinitions.IMessageExtended;
 import com.boot.jx.postman.model.MessageReport;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.query.ChatContactQuery;
@@ -130,7 +130,7 @@ public class WAGupShupConnector implements ConnectorHandler {
 	}
 
 	@Override
-	public void reply(SessionMessage inboxMessage, OutboxMessage outboxMessage) {
+	public void reply(IMessageExtended inboxMessage, OutboxMessage outboxMessage) {
 		resolveTemplate(outboxMessage);
 		this.sendInternal(outboxMessage, false);
 	}

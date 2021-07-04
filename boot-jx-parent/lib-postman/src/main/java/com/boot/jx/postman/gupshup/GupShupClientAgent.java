@@ -5,7 +5,7 @@ import java.util.Map;
 import org.springframework.stereotype.Component;
 
 import com.boot.jx.postman.gupshup.GupShupConstants.SessionType;
-import com.boot.jx.postman.model.MessageDefinitions.SessionMessage;
+import com.boot.jx.postman.model.MessageDefinitions.IMessageExtended;
 import com.boot.jx.rest.RestService.Ajax;
 import com.boot.utils.ArgUtil;
 
@@ -28,7 +28,7 @@ public class GupShupClientAgent extends GupShupClientAbstract {
 				.header("type", "BotRequest").post(gupShupAgentReq).asMap();
 	}
 
-	public Map<String, Object> sendViaAgent(SessionMessage inboxMessage, String message) {
+	public Map<String, Object> sendViaAgent(IMessageExtended inboxMessage, String message) {
 		GupShupAgentReq gupShupAgentReq = new GupShupAgentReq();
 		gupShupAgentReq.setMobile(inboxMessage.getFrom());
 		gupShupAgentReq.setWaNumber(inboxMessage.to().get(0));

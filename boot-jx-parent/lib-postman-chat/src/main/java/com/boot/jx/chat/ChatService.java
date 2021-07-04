@@ -23,7 +23,7 @@ import com.boot.jx.postman.dto.ChatUserProfileDTO;
 import com.boot.jx.postman.dto.ChatUserProfileDTO.ChatUserProfileRequest;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.Message;
-import com.boot.jx.postman.model.MessageDefinitions.SessionMessage;
+import com.boot.jx.postman.model.MessageDefinitions.IMessageExtended;
 import com.boot.jx.postman.model.MessageReport;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.store.MessageStore;
@@ -102,7 +102,7 @@ public class ChatService {
 		return messageDoc;
 	}
 
-	private MessageDoc replyIntenal(SessionMessage inboxMessage, OutboxMessage outboxMessage) {
+	private MessageDoc replyIntenal(IMessageExtended inboxMessage, OutboxMessage outboxMessage) {
 
 		if (!ArgUtil.is(inboxMessage)) {
 			throw new PostManException("Destination Not Specified : inboxMessage Empty");
@@ -166,7 +166,7 @@ public class ChatService {
 	}
 
 	public MessageDoc reply(ChatSessionDoc sessionDoc, OutboxMessage outboxMessage) {
-		SessionMessage inboxMessage = sessionStore.toSessionMessage(sessionDoc);
+		IMessageExtended inboxMessage = sessionStore.toSessionMessage(sessionDoc);
 		ChatContactDoc chatContactDoc = sessionStore.getContact(sessionDoc.getContactId());
 
 		if (ArgUtil.isEmpty(outboxMessage.session().getAgent())) {
@@ -198,16 +198,16 @@ public class ChatService {
 		return messageStore.note(outboxMessage, getCurrenUser());
 	}
 
-	public void log(SessionMessage inboxMessage, String agent, EVENTS event, String... logs) {
+	public void log(IMessageExtended inboxMessage, String agent, EVENTS event, String... logs) {
 		messageStore.log(inboxMessage, agent, event, logs);
 	}
 
-	public void log(SessionMessage inboxMessage, EVENTS event, String... logs) {
+	public void log(IMessageExtended inboxMessage, EVENTS event, String... logs) {
 		log(inboxMessage, inboxMessage.session().getAgent(), event, logs);
 	}
 
 	public void log(ChatSessionDoc sessionDoc, String agent, EVENTS event, String... logs) {
-		SessionMessage inboxMessage = sessionStore.toSessionMessage(sessionDoc);
+		IMessageExtended inboxMessage = sessionStore.toSessionMessage(sessionDoc);
 		log(inboxMessage, getCurrenUser(), event, logs);
 	}
 

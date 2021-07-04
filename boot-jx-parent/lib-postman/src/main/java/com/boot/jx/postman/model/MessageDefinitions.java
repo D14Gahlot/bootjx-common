@@ -83,23 +83,28 @@ public class MessageDefinitions {
 	// External attributes
 	@JsonIgnoreProperties(ignoreUnknown = true)
 	public interface IMessageInternal extends Serializable {
+
+	}
+
+	// External attributes
+	@JsonIgnoreProperties(ignoreUnknown = true)
+	public interface SessionMessage extends Serializable {
 		// Internal attributes
 		public String getSessionId();
 
 		public void setSessionId(String sessionId);
 
+		public MessageSession session();
+
+		public Contactable contact();
 	}
 
 	@JsonIgnoreProperties(ignoreUnknown = true)
-	public interface IMessage extends IMessageExternal, IMessageInternal {
+	public interface IMessage extends IMessageExternal, IMessageInternal, SessionMessage {
 
 		public long getTimestamp();
 
 		public String forContact();
-
-		public MessageSession session();
-
-		public Contactable contact();
 
 		public String getType();
 
@@ -107,13 +112,11 @@ public class MessageDefinitions {
 
 	}
 
-	public static interface SessionMessage extends IMessage {
+	public static interface IMessageExtended extends IMessage {
 
 		public List<String> to();
 
 		String getFrom();
-
-		void setSessionId(String sessionId);
 
 		BigDecimal getQueue();
 

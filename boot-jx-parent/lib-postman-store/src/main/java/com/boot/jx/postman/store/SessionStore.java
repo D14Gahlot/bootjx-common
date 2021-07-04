@@ -26,6 +26,7 @@ import com.boot.jx.postman.dto.ChatUserProfileDTO;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.MessageDefinitions.Contactable;
 import com.boot.jx.postman.model.MessageDefinitions.IMessage;
+import com.boot.jx.postman.model.MessageDefinitions.IMessageExtended;
 import com.boot.jx.postman.model.MessageDefinitions.SessionMessage;
 import com.boot.jx.postman.query.ChatContactQuery;
 import com.boot.jx.postman.query.ChatSessionQuery;
@@ -55,7 +56,7 @@ public class SessionStore extends CommonDocStore {
 	@Autowired
 	public PMClientConfig pmClientConfig;
 
-	public ChatContactDoc getContact(SessionMessage inboxMessage) {
+	public ChatContactDoc getContact(IMessageExtended inboxMessage) {
 		String contactId = PostManUtil.createContactId(inboxMessage);
 		ChatContactDoc chatContactDoc = mongoTemplate.findById(contactId, ChatContactDoc.class);
 		return chatContactDoc;
@@ -106,7 +107,7 @@ public class SessionStore extends CommonDocStore {
 		return null;
 	}
 
-	public ChatSessionDoc getSession(IMessage inboxMessage) {
+	public ChatSessionDoc getSession(SessionMessage inboxMessage) {
 		Contactable contact = PostManUtil.getContactMeta(inboxMessage.contact());
 
 		if (ArgUtil.isEmpty(contact.getContactId())) {
@@ -148,7 +149,7 @@ public class SessionStore extends CommonDocStore {
 			// SESSION UPDATE
 			chatSessionDoc.setActive(true);
 
-			if (ArgUtil.is(chatContactDoc)) {
+			if (ArgUtil.is(chatContactDoc) && ArgUtil.is(chatContactDoc.getName())) {
 				chatSessionDoc.setContactName(chatContactDoc.getName());
 			}
 
@@ -215,7 +216,7 @@ public class SessionStore extends CommonDocStore {
 		return chatSessionDoc;
 	}
 
-	public SessionMessage toSessionMessage(ChatSessionDoc session) {
+	public IMessageExtended toSessionMessage(ChatSessionDoc session) {
 		ChatContactDoc contact = getContact(session.getContactId());
 		InboxMessage inboxMessage = new InboxMessage();
 		inboxMessage.contact().setContactType(contact.getContactType());

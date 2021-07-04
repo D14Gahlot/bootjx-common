@@ -22,7 +22,7 @@ import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.dto.ChatMessageDTO;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.Message;
-import com.boot.jx.postman.model.MessageDefinitions.SessionMessage;
+import com.boot.jx.postman.model.MessageDefinitions.IMessageExtended;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.query.ChatContactQuery;
 import com.boot.jx.postman.query.ChatSessionQuery;
@@ -40,7 +40,7 @@ public class ConnectorHandlerFactory extends ScopedBeanFactory<String, Connector
 	public static Logger LOGGER = LoggerService.getLogger(ConnectorHandlerFactory.class);
 
 	public interface ConnectorHandler {
-		default public void reply(SessionMessage inboxMessage, OutboxMessage outboxMessage) {
+		default public void reply(IMessageExtended inboxMessage, OutboxMessage outboxMessage) {
 			outboxMessage.addTo(inboxMessage.getFrom());
 			outboxMessage.contact().setLane(inboxMessage.contact().getLane());
 			this.send(outboxMessage);
@@ -63,7 +63,7 @@ public class ConnectorHandlerFactory extends ScopedBeanFactory<String, Connector
 			return true;
 		}
 
-		default public void message(String messageType, ChatContactDoc chatContactDoc, SessionMessage inboxMessage,
+		default public void message(String messageType, ChatContactDoc chatContactDoc, IMessageExtended inboxMessage,
 				OutboxMessage outboxMessage) {
 			LOGGER.debug("message(String {}, ChatContactDoc {}, SessionMessage {}, OutboxMessage {})", messageType,
 					chatContactDoc, inboxMessage, outboxMessage);
@@ -158,7 +158,7 @@ public class ConnectorHandlerFactory extends ScopedBeanFactory<String, Connector
 	 * @param outboxMessage
 	 */
 	@Async
-	public void message(String messageType, ChatContactDoc chatContactDoc, SessionMessage inboxMessage,
+	public void message(String messageType, ChatContactDoc chatContactDoc, IMessageExtended inboxMessage,
 			OutboxMessage outboxMessage) {
 		LOGGER.debug("message(String {}, ChatContactDoc {}, SessionMessage {}, OutboxMessage {})", messageType,
 				chatContactDoc, inboxMessage, outboxMessage);

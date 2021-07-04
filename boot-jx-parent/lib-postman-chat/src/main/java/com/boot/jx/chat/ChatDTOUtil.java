@@ -27,7 +27,6 @@ public class ChatDTOUtil {
 
 	public static ContactDTO getContactDTO(ChatContactDoc chatContactDoc) {
 		ContactDTO contact = new ContactDTO();
-
 		contact.setContactId(chatContactDoc.getContactId());
 		contact.setContactType(chatContactDoc.getContactType());
 		contact.setName(chatContactDoc.getName());
@@ -37,8 +36,15 @@ public class ChatDTOUtil {
 		contact.setProfilePic(chatContactDoc.getProfilePic());
 		contact.setProfile(chatContactDoc.getProfile());
 		contact.setLane(chatContactDoc.getLane());
-
 		return contact;
+	}
+
+	public static List<ContactDTO> getContactDTO(List<ChatContactDoc> chatContactDocs) {
+		List<ContactDTO> contactDTOs = new ArrayList<ContactDTO>();
+		for (ChatContactDoc chatContactDoc : chatContactDocs) {
+			contactDTOs.add(getContactDTO(chatContactDoc));
+		}
+		return contactDTOs;
 	}
 
 	public static ChatMessageDTO getChatMessageDTO(MessageDoc messageDoc, String contactName, String agentName) {
