@@ -3,7 +3,12 @@ package com.boot.jx.xms.dto;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class DigitalObjectWrapper<T> {
+	/** DDO-Digital Data Object **/
+	public static final String DDO = "DDO";
 	String type;
 	String id;
 	T data;

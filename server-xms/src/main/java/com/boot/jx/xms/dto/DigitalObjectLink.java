@@ -1,5 +1,8 @@
 package com.boot.jx.xms.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class DigitalObjectLink
 {
 	String linkName;

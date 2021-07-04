@@ -1,5 +1,6 @@
 package com.boot.jx.xms.api;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -9,15 +10,19 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.xms.XmsConstants.ApiClientParams;
 import com.boot.jx.xms.dto.DigitalObjectWrapper;
+import com.boot.jx.xms.service.ApiService;
 
 @Controller
 public class EventAPIv1 {
 
+	@Autowired
+	ApiService apiService;
 	
 	@ApiClientParams
 	@ResponseBody
 	@RequestMapping(value = "/api/v1/data/push", method = { RequestMethod.POST })
-	public <T> ApiResponse<DigitalObjectWrapper, Object> dataPush(@RequestBody DigitalObjectWrapper<T> digitalWrapper) {
+	public <T> ApiResponse<DigitalObjectWrapper<T>, Object> dataPush(@RequestBody DigitalObjectWrapper<T> digitalWrapper) {
+		apiService.saveDigitalInfo(digitalWrapper);
 		return ApiResponse.buildResult(digitalWrapper);
 	}
 
