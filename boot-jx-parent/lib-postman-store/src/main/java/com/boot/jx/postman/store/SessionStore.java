@@ -157,19 +157,12 @@ public class SessionStore extends CommonDocStore {
 			chatContactQuery.setSessionId(chatSessionDoc.getSessionId());
 
 			// CONTACT CREATION - needs creation or updation if
-			if (ArgUtil.isEmpty(chatContactDoc) // chatContactDo not found
-					|| ArgUtil.isEmpty(chatContactDoc.getContactType()) // or contactType is missing
-					|| ArgUtil.isEmpty(chatContactDoc.getCsid()) // or csid is missing
-					|| ArgUtil.isEmpty(chatContactDoc.getLane()) // or lane is missing
-					|| ArgUtil.isEmpty(chatContactDoc.getChannel())) { // or channel is mssing
-				chatContactQuery.setContactId(contactId);
-				chatContactQuery.setContactType(ArgUtil.parseAsString(inboxMessage.contact().type()));
-				chatContactQuery.setChannel(inboxMessage.contact().getChannel());
-				chatContactQuery.setCsid(inboxMessage.contact().getCsid());
-				chatContactQuery.setLane(inboxMessage.contact().getLane());
+			if (ArgUtil.isEmpty(chatContactDoc)) {
+				chatContactQuery.update(inboxMessage.contact());
 				commonMongoTemplate.upsert(chatContactQuery);
 			} else {
 				// CONTACT UPDATE
+				chatContactQuery.update(inboxMessage.contact());
 				commonMongoTemplate.updateFirst(chatContactQuery);
 			}
 		} else {

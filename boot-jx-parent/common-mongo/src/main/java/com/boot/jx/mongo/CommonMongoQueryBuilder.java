@@ -90,10 +90,12 @@ public class CommonMongoQueryBuilder {
 
 	public static abstract class DocQueryBuilder<T> extends CommonMongoQueryBuilder {
 		protected T doc;
+		protected boolean synced;
 
 		public DocQueryBuilder(T doc) {
 			this.doc = doc;
 			whereId(getId(this.doc));
+			this.synced = true;
 		}
 
 		public DocQueryBuilder(String id) {

@@ -40,6 +40,8 @@ public class MessageDefinitions {
 
 		public String getContactId();
 
+		public String getName();
+
 		public void setCsid(String createCsid);
 
 		public void setContactId(String contactId);
@@ -53,6 +55,8 @@ public class MessageDefinitions {
 		public void setPhone(String phone);
 
 		public void setEmail(String email);
+
+		public void setName(String name);
 
 		public default ContactType type() {
 			return ArgUtil.parseAsEnumT(getContactType(), ContactType.class);
