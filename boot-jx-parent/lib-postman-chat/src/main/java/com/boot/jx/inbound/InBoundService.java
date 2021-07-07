@@ -19,8 +19,10 @@ import com.boot.jx.cache.CacheBox;
 import com.boot.jx.chat.ChatClient;
 import com.boot.jx.chat.ChatService;
 import com.boot.jx.def.ICacheBox;
+import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.jx.postman.PMClientConfig;
 import com.boot.jx.postman.doc.ChatSessionDoc;
+import com.boot.jx.postman.doc.ErrorObject;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.store.MessageContext;
 import com.boot.jx.postman.store.MessageStore;
@@ -126,8 +128,17 @@ public class InBoundService {
 		if (ArgUtil.isEmpty(inboxMessageOriginal.getSessionId())
 				|| "POSTMAN".equalsIgnoreCase(chatClientConfig.getPostmanType())) {
 			session = sessionStore.getSession(inboxMessageOriginal);
-			sessionStore.linkSession(session, inboxMessageOriginal);
-			locallySessionAssigned = true;
+			if (ArgUtil.is(session)) {
+				sessionStore.linkSession(session, inboxMessageOriginal);
+				locallySessionAssigned = true;
+			} else {
+				ErrorObject error = new ErrorObject();
+				error.setIncomingMessage(inboxMessageOriginal);
+				error.setErrorType("NO_SESSION_CREATED");
+				error.setMessage("Cannot Create Session");
+				messageContext.log(error);
+				return inboxMessageOriginal;
+			}
 		}
 
 		if (ArgUtil.isEmpty(inboxMessageOriginal.getMessageId())) {

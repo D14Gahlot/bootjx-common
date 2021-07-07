@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 
 import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.jx.postman.doc.ChatContactDoc;
+import com.boot.jx.postman.doc.ErrorObject;
 import com.boot.jx.postman.model.MessageDefinitions.Contactable;
 import com.boot.jx.postman.model.MessageDefinitions.IMessage;
 import com.boot.jx.postman.query.ChatContactQuery;
@@ -70,6 +71,10 @@ public class MessageContext {
 			commonMongoTemplate.updateFirst(this.chatContactQuery);
 			this.chatContactDoc = null;
 		}
+	}
+
+	public void log(ErrorObject error) {
+		commonMongoTemplate.save(error);
 	}
 
 }

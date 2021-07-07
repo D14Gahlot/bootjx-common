@@ -181,14 +181,16 @@ public class SessionStore extends CommonDocStore {
 	}
 
 	public ChatSessionDoc linkSession(ChatSessionDoc chatSessionDoc, IMessage inboxMessage) {
-		if (ArgUtil.is(chatSessionDoc)) {
-			inboxMessage.contact().setContactId(chatSessionDoc.getContactId());
-			inboxMessage.setSessionId(chatSessionDoc.getSessionId());
-			inboxMessage.session().setAgent(chatSessionDoc.getAssignedToAgent());
-			inboxMessage.session().setDept(chatSessionDoc.getAssignedToDept());
-			inboxMessage.session().setMode(chatSessionDoc.getMode());
-			inboxMessage.session().setResolved(chatSessionDoc.isResolved());
+		if (!ArgUtil.is(chatSessionDoc)) {
+			return null;
 		}
+
+		inboxMessage.contact().setContactId(chatSessionDoc.getContactId());
+		inboxMessage.setSessionId(chatSessionDoc.getSessionId());
+		inboxMessage.session().setAgent(chatSessionDoc.getAssignedToAgent());
+		inboxMessage.session().setDept(chatSessionDoc.getAssignedToDept());
+		inboxMessage.session().setMode(chatSessionDoc.getMode());
+		inboxMessage.session().setResolved(chatSessionDoc.isResolved());
 
 		if (PostManUtil.isInBound(inboxMessage)) {
 			chatSessionDoc.setLastInComingStamp(inboxMessage.getTimestamp());
