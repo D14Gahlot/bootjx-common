@@ -84,10 +84,11 @@ public class TelegramConnector implements ConnectorHandler {
 		inboxMessage.setOriginalMessage(update);
 		inboxMessage.contact().setContactType(ContactType.TELEGRAM.toString());
 		inboxMessage.contact().setLane(lane);
-		inboxMessage.setFrom(ArgUtil.parseAsString(update.getMessage().getChatId()));
-		inboxMessage.contact().setCsid(ArgUtil.parseAsString(update.getMessage().getChatId()));
 
 		if (ArgUtil.is(update.getMessage())) {
+			inboxMessage.setFrom(ArgUtil.parseAsString(update.getMessage().getChatId()));
+			inboxMessage.contact().setCsid(ArgUtil.parseAsString(update.getMessage().getChatId()));
+			
 			inboxMessage.setMessageIdExt(
 					String.format("%s-%s", update.getMessage().getChatId(), update.getMessage().getMessageId()));
 
