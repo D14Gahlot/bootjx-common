@@ -14,6 +14,7 @@ import com.boot.jx.mongo.CommonDocStore;
 import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.jx.postman.PMClientConfig;
 import com.boot.jx.postman.doc.ChatContactDoc;
+import com.boot.utils.ArgUtil;
 
 @Component
 public class ContactStore extends CommonDocStore {
@@ -33,17 +34,21 @@ public class ContactStore extends CommonDocStore {
 		// TODO:-- Optimize Search
 		// Query query =
 		// TextQuery.queryText(TextCriteria.forDefaultLanguage().matching(search)).sortByScore()
+
+		Criteria c = Criteria.where("lane").is(lane); // Lane should be fixed
+
+		if (ArgUtil.is(search)) {
+			c = c.orOperator(
+					// Check all fields
+					Criteria.where("name").regex("" + search + "", "i"),
+					Criteria.where("phone").regex("" + search + "", "i"),
+					Criteria.where("email").regex("" + search + "", "i"));
+		}
 		Query query = new Query()
 				// New Criteria
-				.addCriteria(
-						// Lane should be fixed
-						Criteria.where("lane").is(lane).orOperator(
-								// Check all fields
-								Criteria.where("name").regex("" + search + "", "i"),
-								Criteria.where("phone").regex("" + search + "", "i"),
-								Criteria.where("email").regex("" + search + "", "i")));
-
+				.addCriteria(c);
 		return mongoTemplate.find(query, ChatContactDoc.class);
+
 	}
 
 }
