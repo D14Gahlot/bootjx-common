@@ -117,6 +117,12 @@ public class ChatContactQuery extends DocQueryBuilder<ChatContactDoc> {
 		return this;
 	}
 
+	public ChatContactQuery setProfilePic(String profilePic) {
+		this.doc.setProfilePic(profilePic);
+		this.set("profilePic", profilePic);
+		return this;
+	}
+
 	public ChatContactQuery update(Contactable contactable) {
 		if (ArgUtil.is(contactable.getContactId())) {
 			this.setContactId(ArgUtil.nonEmpty(contactable.getContactId(), this.doc.getContactId()));
@@ -147,4 +153,5 @@ public class ChatContactQuery extends DocQueryBuilder<ChatContactDoc> {
 
 		return this;
 	}
+
 }

@@ -56,6 +56,9 @@ public class SessionStore extends CommonDocStore {
 	@Autowired
 	public PMClientConfig pmClientConfig;
 
+	@Autowired
+	private MessageContext messageContext;
+
 	public ChatContactDoc getContact(IMessageExtended inboxMessage) {
 		String contactId = PostManUtil.createContactId(inboxMessage);
 		ChatContactDoc chatContactDoc = mongoTemplate.findById(contactId, ChatContactDoc.class);
@@ -353,13 +356,16 @@ public class SessionStore extends CommonDocStore {
 		}
 	}
 
-	public ChatSessionDoc initSession(ChatSessionDoc chatSessionDoc, ChatContactDoc contact) {
+	public ChatSessionDoc initSession(ChatSessionDoc chatSessionDoc) {
+
+		ChatContactDoc contactDoc = messageContext.getChatContactDoc();
+
 		chatSessionDoc.setInitd(true);
-		chatSessionDoc.setContactName(contact.getName());
+		chatSessionDoc.setContactName(contactDoc.getName());
 
 		CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder().whereId(chatSessionDoc.getSessionId());
 		builder.set("initd", chatSessionDoc.isInitd());
-		builder.set("contactName", ArgUtil.nonEmpty(chatSessionDoc.getContactName(), contact.getName()));
+		builder.set("contactName", ArgUtil.nonEmpty(chatSessionDoc.getContactName(), contactDoc.getName()));
 		mongoTemplate.updateFirst(builder.getQuery(), builder.getUpdate(), ChatSessionDoc.class);
 
 		return chatSessionDoc;

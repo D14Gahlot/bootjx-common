@@ -110,6 +110,15 @@ public class CommonMongoQueryBuilder {
 		public abstract T newDoc(String id);
 
 		public abstract String getId(T doc);
+
+		public boolean isSynced() {
+			return synced;
+		}
+
+		public void setSynced(boolean synced) {
+			this.synced = synced;
+		}
+
 	}
 
 }

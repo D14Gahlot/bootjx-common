@@ -36,6 +36,7 @@ import com.boot.jx.postman.model.MessageDefinitions.IMessageExtended;
 import com.boot.jx.postman.model.MessageReport;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.query.ChatContactQuery;
+import com.boot.jx.postman.store.MessageContext;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.JsonUtil;
@@ -58,6 +59,9 @@ public class WAGupShupConnector implements ConnectorHandler {
 
 	@Autowired
 	private MongoTemplate mongoTemplate;
+
+	@Autowired
+	private MessageContext messageContext;
 
 	@Autowired
 	private CommonMongoTemplate commonMongoTemplate;
@@ -141,11 +145,12 @@ public class WAGupShupConnector implements ConnectorHandler {
 	}
 
 	@Override
-	public boolean initSession(ChatContactDoc contact, ChatSessionDoc session, InboxMessage inboxMessage) {
+	public boolean initSession(ChatSessionDoc session, InboxMessage inboxMessage) {
 		if (ArgUtil.is(inboxMessage.getOriginalMessage())) {
 			GupShupInbound dm = JsonUtil.parse(inboxMessage.getOriginalMessage(), GupShupInbound.class);
-			contact.setName(dm.getName());
-			contact.setPhone(dm.getMobile());
+			ChatContactQuery contactQuery = messageContext.getChatContactQuery();
+			contactQuery.setName(dm.getName());
+			contactQuery.setPhone(dm.getMobile());
 		}
 		return true;
 	}
@@ -154,13 +159,16 @@ public class WAGupShupConnector implements ConnectorHandler {
 		InboxMessage inboxMessage = new InboxMessage();
 		inboxMessage.contact().setContactType(ContactType.WHATSAPP.toString());
 		inboxMessage.contact().setChannel("GUPSHUPW");
+		inboxMessage.contact().setLane(inbound.getWaNumber());
+		inboxMessage.contact().setCsid(inbound.getMobile());
+		inboxMessage.contact().setName(inbound.getName());
+		inboxMessage.contact().setPhone(inbound.getMobile());
+
 		inboxMessage.setFrom(inbound.getMobile());
 		inboxMessage.setFromName(inbound.getName());
 		inboxMessage.setMessage(inbound.getText());
 		inboxMessage.to().add(inbound.getWaNumber());
 		inboxMessage.setMessageIdExt(inbound.getReplyId());
-		inboxMessage.contact().setLane(inbound.getWaNumber());
-		inboxMessage.contact().setCsid(inbound.getMobile());
 
 		if (ArgUtil.is(inbound.getImage())) {
 			CommonFile srcFile = new CommonFile().url(inbound.getImage().getUrl() + inbound.getImage().getSignature())

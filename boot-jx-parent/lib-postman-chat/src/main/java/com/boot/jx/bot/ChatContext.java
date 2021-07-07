@@ -22,19 +22,19 @@ public class ChatContext {
 
 	String currentHandler;
 
-	ChatMeta meta;
-	InboxMessage inboxMessage;
-	ChatContactDoc chatContactDoc;
-	ChatSessionDoc chatSessionDoc;
+	private ChatMeta meta;
+	private InboxMessage inboxMessage;
+	private ChatContactDoc chatContactDoc;
+	private ChatSessionDoc chatSessionDoc;
 
 	@Autowired(required = false)
-	ChatContextStore<?, ?> store;
+	private ChatContextStore<?, ?> store;
 
 	@Autowired
 	private SessionStore sessionStore;
 
 	@Autowired
-	DefaultChatContextStore defaultChatContextStore;
+	private DefaultChatContextStore defaultChatContextStore;
 
 	public IChatContextStore<?, ?> getStore() {
 		if (store == null) {

@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.PhotoSize;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
+import com.boot.jx.chat.ConnectorHandlerFactory.AbstractConnector;
 import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorHandler;
 import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorMapping;
 import com.boot.jx.dict.ContactType;
@@ -18,12 +19,14 @@ import com.boot.jx.dict.FileType;
 import com.boot.jx.model.CommonFile;
 import com.boot.jx.postman.client.PMFileStoreClient;
 import com.boot.jx.postman.client.TmplClient;
-import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.QuickMedia;
 import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.InboxMessage;
+import com.boot.jx.postman.model.MessageDefinitions.Contactable;
 import com.boot.jx.postman.model.OutboxMessage;
+import com.boot.jx.postman.query.ChatContactQuery;
+import com.boot.jx.postman.store.MessageContext;
 import com.boot.jx.postman.tg.TelegramClient;
 import com.boot.jx.postman.tg.TelegramModels.TGFile;
 import com.boot.jx.utils.PostManUtil;
@@ -32,7 +35,7 @@ import com.boot.utils.JsonUtil;
 
 @Component
 @ConnectorMapping(contactType = ContactType.TELEGRAM)
-public class TelegramConnector implements ConnectorHandler {
+public class TelegramConnector extends AbstractConnector {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(TelegramConnector.class);
 
@@ -82,13 +85,14 @@ public class TelegramConnector implements ConnectorHandler {
 	public InboxMessage toInboxMessage(String lane, Update update) {
 		InboxMessage inboxMessage = new InboxMessage();
 		inboxMessage.setOriginalMessage(update);
+
 		inboxMessage.contact().setContactType(ContactType.TELEGRAM.toString());
 		inboxMessage.contact().setLane(lane);
 
 		if (ArgUtil.is(update.getMessage())) {
-			inboxMessage.setFrom(ArgUtil.parseAsString(update.getMessage().getChatId()));
 			inboxMessage.contact().setCsid(ArgUtil.parseAsString(update.getMessage().getChatId()));
-			
+			inboxMessage.setFrom(ArgUtil.parseAsString(update.getMessage().getChatId()));
+
 			inboxMessage.setMessageIdExt(
 					String.format("%s-%s", update.getMessage().getChatId(), update.getMessage().getMessageId()));
 
@@ -127,7 +131,7 @@ public class TelegramConnector implements ConnectorHandler {
 	}
 
 	@Override
-	public boolean initSession(ChatContactDoc contact, ChatSessionDoc session, InboxMessage inboxMessage) {
+	public boolean initSession(ChatSessionDoc session, InboxMessage inboxMessage) {
 
 		Update update = JsonUtil.parse(inboxMessage.getOriginalMessage(), Update.class);
 
@@ -135,15 +139,20 @@ public class TelegramConnector implements ConnectorHandler {
 				&& ArgUtil.is(update.getMessage().getContact())) {
 
 			if (ArgUtil.isEqual(update.getMessage().getFrom().getId(), update.getMessage().getContact().getUserID())) {
-				contact.setName(update.getMessage().getFrom().getFirstName() + " "
+
+				ChatContactQuery contactQuery = messageContext.getChatContactQuery();
+
+				contactQuery.setName(update.getMessage().getFrom().getFirstName() + " "
 						+ update.getMessage().getFrom().getLastName());
-				contact.setPhone(update.getMessage().getContact().getPhoneNumber());
+				contactQuery.setPhone(update.getMessage().getContact().getPhoneNumber());
 
 			}
 
 		}
 
-		if (ArgUtil.isEmpty(contact.getPhone())) {
+		Contactable contactDoc = messageContext.getChatContactDoc();
+
+		if (ArgUtil.isEmpty(contactDoc.getPhone())) {
 			telegramClient.promptShareNumber(inboxMessage.getFrom(),
 					"Confirm that you would like to share your contact number and continue, by clicking on the button below",
 					inboxMessage.contact().getLane());

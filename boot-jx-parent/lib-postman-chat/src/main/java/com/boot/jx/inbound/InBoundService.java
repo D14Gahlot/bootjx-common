@@ -22,6 +22,7 @@ import com.boot.jx.def.ICacheBox;
 import com.boot.jx.postman.PMClientConfig;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.model.InboxMessage;
+import com.boot.jx.postman.store.MessageContext;
 import com.boot.jx.postman.store.MessageStore;
 import com.boot.jx.postman.store.SessionStore;
 import com.boot.jx.utils.PostManUtil;
@@ -62,6 +63,9 @@ public class InBoundService {
 
 	@Autowired
 	private MessageStore messageStore;
+
+	@Autowired
+	private MessageContext messageContext;
 
 	@Autowired(required = false)
 	private RedissonClient redisson;
@@ -125,10 +129,13 @@ public class InBoundService {
 			sessionStore.linkSession(session, inboxMessageOriginal);
 			locallySessionAssigned = true;
 		}
+
 		if (ArgUtil.isEmpty(inboxMessageOriginal.getMessageId())) {
 			inboxMessageOriginal.setMessage(StringUtils.trim(inboxMessageOriginal.getMessage()));
 			messageStore.createOrUpdate(inboxMessageOriginal);
 		}
+
+		messageContext.setMessage(inboxMessageOriginal);
 
 		if (locallySessionAssigned && ArgUtil.is(session)) {
 			boolean wasSessionInitd = session.isInitd();
