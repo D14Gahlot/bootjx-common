@@ -103,7 +103,7 @@ public class AdminUserController {
 	@RequestMapping(value = "/api/admins/contacts", method = { RequestMethod.GET })
 	public ApiResponse<ContactDTO, Object> allContacts(@RequestParam(required = false) ContactType contactType,
 			@RequestParam(required = false) NamedMapModel lane, @RequestParam(required = false) String search) {
-		String laneValue = lane.name("lane");
+		String laneValue = ArgUtil.is(lane) ? lane.name("lane") : null;
 		if (ArgUtil.is(laneValue)) {
 			return ApiResponse.buildResults( // Wrap with ApiResponse
 					ChatDTOUtil.getContactDTO( // Convert to DTO
