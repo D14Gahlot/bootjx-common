@@ -26,6 +26,7 @@ import com.boot.jx.postman.model.MessageDefinitions.IMessageExtended;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.query.ChatContactQuery;
 import com.boot.jx.postman.query.ChatSessionQuery;
+import com.boot.jx.postman.service.ChatDTOUtil;
 import com.boot.jx.postman.store.MessageStore;
 import com.boot.jx.postman.store.PMStoreConstants.CHAT_MODE;
 import com.boot.jx.postman.store.SessionStore;

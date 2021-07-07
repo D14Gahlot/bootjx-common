@@ -4,7 +4,7 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.boot.jx.model.MapModel;
+import com.boot.model.MapModel;
 
 public abstract class JobTaskModel<T> implements Serializable {
 

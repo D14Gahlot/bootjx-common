@@ -17,17 +17,17 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.boot.jx.agent.AgentSessionService;
 import com.boot.jx.agent.dto.AgentResponseAgentDto;
 import com.boot.jx.api.ApiResponse;
-import com.boot.jx.chat.ChatDTOUtil;
 import com.boot.jx.common.doc.AgentSessionDoc;
 import com.boot.jx.common.store.AgentStore;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PMEnvironment.PMConnectorConfig;
-import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.QuickAction;
 import com.boot.jx.postman.doc.QuickLabel;
 import com.boot.jx.postman.doc.QuickMedia;
 import com.boot.jx.postman.doc.QuickReply;
 import com.boot.jx.postman.dto.ContactDTO;
+import com.boot.jx.postman.service.ChatDTOUtil;
+import com.boot.jx.postman.store.ContactStore;
 import com.boot.utils.ArgUtil;
 import com.fasterxml.jackson.annotation.JsonView;
 
@@ -49,6 +49,9 @@ public class AgentMetaController {
 	@Autowired
 	private PMEnvironment pmEnvironment;
 
+	@Autowired
+	private ContactStore contactStore;
+
 	@ResponseBody
 	@RequestMapping(value = { "/api/options/agents" }, method = { RequestMethod.GET })
 	public ApiResponse<AgentResponseAgentDto, Object> listAgents() {
@@ -58,22 +61,10 @@ public class AgentMetaController {
 	@ResponseBody
 	@RequestMapping(value = { "/api/options/contacts" }, method = { RequestMethod.GET })
 	public ApiResponse<ContactDTO, Object> searchContacts(@RequestParam String search, @RequestParam String lane) {
-		// TODO:-- Optimize Search
-		// Query query =
-		// TextQuery.queryText(TextCriteria.forDefaultLanguage().matching(search)).sortByScore()
-		Query query = new Query()
-				// New Criteria
-				.addCriteria(
-						// Lane should be fixed
-						Criteria.where("lane").is(lane).orOperator(
-								// Check all fields
-								Criteria.where("name").regex("" + search + "", "i"),
-								Criteria.where("phone").regex("" + search + "", "i"),
-								Criteria.where("email").regex("" + search + "", "i")));
-
-		List<ContactDTO> asDto = mongoTemplate.find(query, ChatContactDoc.class).stream()
-				.map(chatContactDoc -> ChatDTOUtil.getContactDTO(chatContactDoc)).collect(Collectors.toList());
-		return ApiResponse.buildResults(asDto);
+		return ApiResponse.buildResults( // Wrap with ApiResponse
+				ChatDTOUtil.getContactDTO( // Convert to DTO
+						contactStore.searchContacts(search, lane) // Search Docs
+				));
 	}
 
 	@JsonView(PMConnectorConfig.Public.class)

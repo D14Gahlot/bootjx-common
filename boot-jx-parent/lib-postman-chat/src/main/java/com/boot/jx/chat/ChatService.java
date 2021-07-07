@@ -24,6 +24,7 @@ import com.boot.jx.postman.dto.ChatUserProfileDTO.ChatUserProfileRequest;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.Message;
 import com.boot.jx.postman.model.MessageDefinitions.IMessageExtended;
+import com.boot.jx.postman.service.ChatDTOUtil;
 import com.boot.jx.postman.model.MessageReport;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.store.MessageStore;

@@ -314,22 +314,27 @@ public class MapBuilder {
 			this.map = JsonUtil.fromJson(json, Map.class);
 		}
 
+		@Deprecated
 		public Object put(String key, Object value) {
 			return this.map.put(key, value);
 		}
 
+		@Deprecated
 		public Object get(String key) {
 			return this.map.get(key);
 		}
 
+		@Deprecated
 		public String getString(String key) {
 			return ArgUtil.parseAsString(this.get(key));
 		}
 
+		@Deprecated
 		public Long getLong(String key) {
 			return ArgUtil.parseAsLong(this.get(key));
 		}
 
+		@Deprecated
 		public BigDecimal getBigDecimal(String key) {
 			return ArgUtil.parseAsBigDecimal(this.get(key));
 		}
@@ -339,15 +344,18 @@ public class MapBuilder {
 			return new MapModel((Map<String, Object>) this.get(key));
 		}
 
+		@Deprecated
 		public MapModel(Map<String, Object> map) {
 			this.map = map;
 		}
 
+		@Deprecated
 		@Override
 		public Object toObject() {
 			return this.map;
 		}
 
+		@Deprecated
 		public <T> T as(Class<T> clazz) {
 			return JsonUtil.getMapper().convertValue(this.map, clazz);
 		}

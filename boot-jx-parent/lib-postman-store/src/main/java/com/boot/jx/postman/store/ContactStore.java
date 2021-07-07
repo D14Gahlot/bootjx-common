@@ -1,0 +1,49 @@
+package com.boot.jx.postman.store;
+
+import java.util.List;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.stereotype.Component;
+
+import com.boot.jx.mongo.CommonDocStore;
+import com.boot.jx.mongo.CommonMongoTemplate;
+import com.boot.jx.postman.PMClientConfig;
+import com.boot.jx.postman.doc.ChatContactDoc;
+
+@Component
+public class ContactStore extends CommonDocStore {
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(ContactStore.class);
+
+	@Autowired
+	public MongoTemplate mongoTemplate;
+
+	@Autowired
+	public CommonMongoTemplate commonMongoTemplate;
+
+	@Autowired
+	public PMClientConfig pmClientConfig;
+
+	public List<ChatContactDoc> searchContacts(String search, String lane) {
+		// TODO:-- Optimize Search
+		// Query query =
+		// TextQuery.queryText(TextCriteria.forDefaultLanguage().matching(search)).sortByScore()
+		Query query = new Query()
+				// New Criteria
+				.addCriteria(
+						// Lane should be fixed
+						Criteria.where("lane").is(lane).orOperator(
+								// Check all fields
+								Criteria.where("name").regex("" + search + "", "i"),
+								Criteria.where("phone").regex("" + search + "", "i"),
+								Criteria.where("email").regex("" + search + "", "i")));
+
+		return mongoTemplate.find(query, ChatContactDoc.class);
+	}
+
+}

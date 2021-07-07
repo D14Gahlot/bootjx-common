@@ -1,4 +1,4 @@
-package com.boot.jx.model;
+package com.boot.model;
 
 import java.math.BigDecimal;
 import java.util.HashMap;
@@ -94,7 +94,7 @@ public class MapModel implements JsonSerializerType<Object> {
 	}
 
 	public MapEntry entry(String key) {
-		return new MapEntry(this.map.get(key));
+		return new MapEntry(this.map().get(key));
 	}
 
 	public MapEntry entry(JsonPath jsonPath) {
@@ -106,20 +106,20 @@ public class MapModel implements JsonSerializerType<Object> {
 	}
 
 	public Object get(String key) {
-		return this.map.get(key);
+		return this.map().get(key);
 	}
 
 	public Object get(String key, Object defaultValue) {
-		return this.map.getOrDefault(key, defaultValue);
+		return this.map().getOrDefault(key, defaultValue);
 	}
 
 	public MapModel put(String key, Object value) {
-		this.map.put(key, value);
+		this.map().put(key, value);
 		return this;
 	}
 
 	public Object getFirst() {
-		for (Entry<String, Object> iterable_element : map.entrySet()) {
+		for (Entry<String, Object> iterable_element : map().entrySet()) {
 			return iterable_element.getValue();
 		}
 		return null;
@@ -172,7 +172,7 @@ public class MapModel implements JsonSerializerType<Object> {
 
 	@Override
 	public Object toObject() {
-		return this.map;
+		return this.map();
 	}
 
 	public MapModel fromMap(Map<String, Object> map) {
@@ -180,16 +180,23 @@ public class MapModel implements JsonSerializerType<Object> {
 		return this;
 	}
 
-	public Map<String, Object> toMap() {
+	public Map<String, Object> map() {
+		if (this.map == null) {
+			this.map = new HashMap<String, Object>();
+		}
 		return this.map;
 	}
 
+	public Map<String, Object> toMap() {
+		return this.map();
+	}
+
 	public String toJson() {
-		return JsonUtil.toJson(this.map);
+		return JsonUtil.toJson(this.map());
 	}
 
 	public <T> T as(Class<T> clazz) {
-		return JsonUtil.getMapper().convertValue(this.map, clazz);
+		return JsonUtil.getMapper().convertValue(this.map(), clazz);
 	}
 
 	public static MapModel from(Map<String, Object> map) {
@@ -197,12 +204,12 @@ public class MapModel implements JsonSerializerType<Object> {
 	}
 
 	public MapModel putAll(Map<? extends String, ? extends Object> source) {
-		this.map.putAll(source);
+		this.map().putAll(source);
 		return this;
 	}
 
 	public MapModel putAll(MapModel source) {
-		this.map.putAll(source.toMap());
+		this.map().putAll(source.toMap());
 		return this;
 	}
 

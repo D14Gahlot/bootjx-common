@@ -21,7 +21,6 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.Keyboard
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 
 import com.boot.jx.dict.FileType;
-import com.boot.jx.model.MapModel;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PostManException;
 import com.boot.jx.postman.PostmanPackages.MessageClient;
@@ -34,6 +33,7 @@ import com.boot.jx.postman.tg.TelegramModels.TGMessage;
 import com.boot.jx.postman.tg.TelegramModels.TGSendDocument;
 import com.boot.jx.postman.tg.TelegramModels.TGSendPhoto;
 import com.boot.jx.rest.RestService;
+import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
 import com.ulisesbocchio.jasyptspringboot.annotation.EnableEncryptableProperties;

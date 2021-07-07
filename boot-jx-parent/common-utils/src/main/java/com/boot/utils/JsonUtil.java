@@ -14,6 +14,9 @@ import com.boot.json.CommonSerilizers.EnumByIdSerializer;
 import com.boot.json.CommonSerilizers.EnumTypeSerializer;
 import com.boot.json.JsonSerializerType;
 import com.boot.json.JsonSerializerTypeSerializer;
+import com.boot.json.NamedEntityDeserializer;
+import com.boot.json.NamedEntityDeserializer.NamedEntity;
+import com.boot.json.NamedEntityDeserializer.NamedMapModel;
 import com.boot.model.UtilityModels.JsonObject;
 import com.boot.utils.ArgUtil.EnumById;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -188,7 +191,12 @@ public final class JsonUtil {
 		module.addSerializer(EnumType.class, new EnumTypeSerializer());
 		module.addSerializer(BigDecimal.class, new BigDecimalSerializer());
 		module.addSerializer(JsonSerializerType.class, new JsonSerializerTypeSerializer());
+		
+		module.addDeserializer(NamedEntity.class, new NamedEntityDeserializer());
+		module.addDeserializer(NamedMapModel.class, new NamedEntityDeserializer());
 
+		
+		
 		mapper.setSerializationInclusion(Include.NON_NULL);
 		mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 		mapper.configure(Feature.AUTO_CLOSE_SOURCE, true);

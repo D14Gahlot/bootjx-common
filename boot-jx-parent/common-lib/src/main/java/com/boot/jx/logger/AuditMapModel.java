@@ -3,7 +3,7 @@ package com.boot.jx.logger;
 import java.math.BigDecimal;
 import java.util.Map;
 
-import com.boot.jx.model.MapModel;
+import com.boot.model.MapModel;
 import com.boot.utils.JsonPath;
 
 public class AuditMapModel extends MapModel {

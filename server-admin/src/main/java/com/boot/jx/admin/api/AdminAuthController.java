@@ -26,7 +26,7 @@ import com.boot.jx.admin.service.AdminAuthService;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.common.dto.AgentResponseAuthDto;
 import com.boot.jx.http.CommonHttpRequest;
-import com.boot.jx.model.MapModel;
+import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.Constants;
 import com.boot.utils.CryptoUtil;
