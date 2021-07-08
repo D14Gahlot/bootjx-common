@@ -2,16 +2,25 @@ package com.boot.jx.xms.dto;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class DigitalObjectWrapper<T> {
-	/** DDO-Digital Data Object **/
-	public static final String DDO = "DDO";
+public class DigitalObjectDto {
 	String type;
 	String id;
-	T data;
+	Map<String,Object> data;
+	
+
+	public Map<String, Object> getData() {
+		return data;
+	}
+
+	public void setData(Map<String, Object> data) {
+		this.data = data;
+	}
+
 	List<DigitalObjectLink> links;
 
 	public String getType() {
@@ -30,14 +39,6 @@ public class DigitalObjectWrapper<T> {
 		this.id = id;
 	}
 
-	public T getData() {
-		return data;
-	}
-
-	public void setData(T data) {
-		this.data = data;
-	}
-
 	public List<DigitalObjectLink> getLinks() {
 		return links;
 	}
@@ -52,5 +53,6 @@ public class DigitalObjectWrapper<T> {
 		}
 		return links;
 	}
-
+	
+	
 }

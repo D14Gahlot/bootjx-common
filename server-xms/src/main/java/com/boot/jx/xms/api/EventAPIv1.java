@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.xms.XmsConstants.ApiClientParams;
-import com.boot.jx.xms.dto.DigitalObjectWrapper;
+import com.boot.jx.xms.dto.DigitalObjectDto;
 import com.boot.jx.xms.service.ApiService;
 
 @Controller
@@ -18,13 +18,15 @@ public class EventAPIv1 {
 	@Autowired
 	ApiService apiService;
 	
+
+	
 	@ApiClientParams
 	@ResponseBody
 	@RequestMapping(value = "/api/v1/data/push", method = { RequestMethod.POST })
-	public <T> ApiResponse<DigitalObjectWrapper<T>, Object> dataPush(@RequestBody DigitalObjectWrapper<T> digitalWrapper) {
-		apiService.saveDigitalInfo(digitalWrapper);
-		return ApiResponse.buildResult(digitalWrapper);
+	public ApiResponse<DigitalObjectDto, Object> dataPush(@RequestBody DigitalObjectDto digitalObjectDto) {
+		apiService.saveDigitalInfo(digitalObjectDto);
+		return ApiResponse.buildResult(digitalObjectDto);
 	}
-
+	
 	
 }

@@ -1,18 +1,29 @@
 package com.boot.jx.xms.service;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Component;
 
-import com.boot.jx.scope.tnt.TenantScoped;
-import com.boot.jx.xms.dto.DigitalObjectWrapper;
+import com.boot.jx.xms.dto.DigitalDocStore;
+import com.boot.jx.xms.dto.DigitalObjectDto;
+
 
 @Component
-@TenantScoped
 public class ApiService {
 
-	//@Mongo
+
+	@Autowired
+	MongoTemplate mongoTemplate;
 	
-	public <T> void saveDigitalInfo(DigitalObjectWrapper<T> digitalWrapper) {
-		
-		
+	@Autowired
+	DigitalDocStore digitalDocStore;
+	
+	
+	public  void saveDigitalInfo(DigitalObjectDto digitalObjectDto) {
+		digitalDocStore.createAndUpdateDigitalDoc(digitalObjectDto);
 	}
+	
+	
+	
+	
 }

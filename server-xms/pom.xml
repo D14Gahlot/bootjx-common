@@ -85,6 +85,16 @@
 		<!-- <dependency> <groupId>net.rossillo.mvc.cache</groupId> <artifactId>spring-mvc-cache-control</artifactId> 
 			<version>1.1.1-RELEASE</version> <scope>compile</scope> </dependency> -->
 
+
+		<dependency>
+			<groupId>com.boot.jx</groupId>
+			<artifactId>lib-common-mongo</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>com.boot.jx</groupId>
+			<artifactId>common-mongo</artifactId>
+		</dependency>
 	</dependencies>
 
 	<build>
