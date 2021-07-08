@@ -46,6 +46,8 @@ public class ChatDTOUtil {
 		contact.setLastOptInStamp(chatContactDoc.getLastOptInStamp());
 		contact.setLastPushStamp(chatContactDoc.getLastPushStamp());
 		contact.setLastReplyStamp(chatContactDoc.getLastReplyStamp());
+		
+		contact.setSessionId(chatContactDoc.getSessionId());
 
 		return contact;
 	}

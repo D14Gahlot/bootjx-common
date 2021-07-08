@@ -47,6 +47,8 @@ public class ContactDTO implements java.io.Serializable {
 	private Long createdStamp;
 	private String createdBy;
 
+	private String sessionId;
+
 	public String getContactId() {
 		return contactId;
 	}
@@ -197,6 +199,14 @@ public class ContactDTO implements java.io.Serializable {
 
 	public void setCreatedBy(String createdBy) {
 		this.createdBy = createdBy;
+	}
+
+	public String getSessionId() {
+		return sessionId;
+	}
+
+	public void setSessionId(String sessionId) {
+		this.sessionId = sessionId;
 	}
 
 }
