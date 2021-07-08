@@ -38,6 +38,15 @@ public class ChatDTOUtil {
 		contact.setProfile(chatContactDoc.getProfile());
 		contact.setLane(chatContactDoc.getLane());
 		contact.setCsid(chatContactDoc.getCsid());
+
+		contact.setCreatedBy(chatContactDoc.getCreatedBy());
+		contact.setCreatedStamp(chatContactDoc.getCreatedStamp());
+		contact.setLastInBoundStamp(chatContactDoc.getLastInBoundStamp());
+		contact.setLastOutBoundStamp(chatContactDoc.getLastOutBoundStamp());
+		contact.setLastOptInStamp(chatContactDoc.getLastOptInStamp());
+		contact.setLastPushStamp(chatContactDoc.getLastPushStamp());
+		contact.setLastReplyStamp(chatContactDoc.getLastReplyStamp());
+
 		return contact;
 	}
 

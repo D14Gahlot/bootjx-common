@@ -36,6 +36,17 @@ public class ContactDTO implements java.io.Serializable {
 	private List<String> labelId;
 	private ChatUserProfileDTO profile;
 
+	private long firstInBoundStamp;
+	private long firstOutBoundStamp;
+	private long lastInBoundStamp;
+	private long lastOutBoundStamp;
+	private long lastPushStamp;
+	private long lastReplyStamp;
+	private long lastOptInStamp;
+
+	private Long createdStamp;
+	private String createdBy;
+
 	public String getContactId() {
 		return contactId;
 	}
@@ -114,6 +125,78 @@ public class ContactDTO implements java.io.Serializable {
 
 	public void setCsid(String csid) {
 		this.csid = csid;
+	}
+
+	public long getFirstInBoundStamp() {
+		return firstInBoundStamp;
+	}
+
+	public void setFirstInBoundStamp(long firstInBoundStamp) {
+		this.firstInBoundStamp = firstInBoundStamp;
+	}
+
+	public long getFirstOutBoundStamp() {
+		return firstOutBoundStamp;
+	}
+
+	public void setFirstOutBoundStamp(long firstOutBoundStamp) {
+		this.firstOutBoundStamp = firstOutBoundStamp;
+	}
+
+	public long getLastInBoundStamp() {
+		return lastInBoundStamp;
+	}
+
+	public void setLastInBoundStamp(long lastInBoundStamp) {
+		this.lastInBoundStamp = lastInBoundStamp;
+	}
+
+	public long getLastOutBoundStamp() {
+		return lastOutBoundStamp;
+	}
+
+	public void setLastOutBoundStamp(long lastOutBoundStamp) {
+		this.lastOutBoundStamp = lastOutBoundStamp;
+	}
+
+	public long getLastPushStamp() {
+		return lastPushStamp;
+	}
+
+	public void setLastPushStamp(long lastPushStamp) {
+		this.lastPushStamp = lastPushStamp;
+	}
+
+	public long getLastReplyStamp() {
+		return lastReplyStamp;
+	}
+
+	public void setLastReplyStamp(long lastReplyStamp) {
+		this.lastReplyStamp = lastReplyStamp;
+	}
+
+	public long getLastOptInStamp() {
+		return lastOptInStamp;
+	}
+
+	public void setLastOptInStamp(long lastOptInStamp) {
+		this.lastOptInStamp = lastOptInStamp;
+	}
+
+	public Long getCreatedStamp() {
+		return createdStamp;
+	}
+
+	public void setCreatedStamp(Long createdStamp) {
+		this.createdStamp = createdStamp;
+	}
+
+	public String getCreatedBy() {
+		return createdBy;
+	}
+
+	public void setCreatedBy(String createdBy) {
+		this.createdBy = createdBy;
 	}
 
 }
