@@ -1,17 +1,30 @@
 package com.boot.jx.xms.dto;
 
+
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Component;
 
+import com.boot.jx.common.doc.AgentDoc;
 import com.boot.jx.mongo.CommonDocStore;
+import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.utils.ArgUtil;
 
 @Component
 public class DigitalDocStore  extends CommonDocStore {
 	
+
+	
 	@Autowired
 	MongoTemplate mongoTemplate;
+	
+	
+	@Autowired
+	CommonMongoTemplate commonMongoTemplate;
 
 	public static String getCollectionName(String ddoType) {
 		return (DigitalDataDoc.COLLECTION_NAME + "_" + ArgUtil.parseAsString(ddoType, "OTHERS"));
@@ -37,13 +50,13 @@ public class DigitalDocStore  extends CommonDocStore {
 	}
 	
 	private DigitalDataDoc findDigitalDocById(DigitalObjectDto digitalObjectDto) {
+		DigitalDataDoc digitalDoc = null;
 		if(ArgUtil.is(digitalObjectDto.getId())) {
-			return mongoTemplate.findById(digitalObjectDto.getId(), DigitalDataDoc.class);
+			String id = digitalObjectDto.getId();
+			digitalDoc = mongoTemplate.findOne(new Query(Criteria.where("_id").is(id)), DigitalDataDoc.class, getCollectionName(digitalObjectDto.getType()));
 		}
-		
-		return null;
+		return digitalDoc;
 	}
-	
 	
 	private DigitalDataDoc createDigitalDoc(DigitalObjectDto digitalObjectDto) {
 		DigitalDataDoc digitalDataDoc= new DigitalDataDoc();
