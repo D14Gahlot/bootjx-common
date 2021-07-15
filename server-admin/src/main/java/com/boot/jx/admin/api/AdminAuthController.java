@@ -26,6 +26,7 @@ import com.boot.jx.admin.service.AdminAuthService;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.common.dto.AgentResponseAuthDto;
 import com.boot.jx.http.CommonHttpRequest;
+import com.boot.jx.postman.PMEnvironment;
 import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.Constants;
@@ -51,6 +52,9 @@ public class AdminAuthController {
 	@Autowired
 	private AdminSessionService sessionService;
 
+	@Autowired
+	private PMEnvironment pmEnvironment;
+
 	private long getVersion() {
 		return System.currentTimeMillis() / 300000;
 	}
@@ -69,6 +73,7 @@ public class AdminAuthController {
 		model.addAttribute("CDN_URL",
 				ArgUtil.parseAsString(commonHttpRequest.get("CDN_URL"), appCommonConfig.getCdnServer()));
 		model.addAttribute("CDN_DEBUG", ArgUtil.parseAsString(commonHttpRequest.get("CDN_DEBUG"), "false"));
+		model.addAttribute("POSTMAN_AGENT_SCHEME_COLOR", pmEnvironment.get("postman.agent.scheme.color").asString());
 		return "app";
 	}
 
@@ -80,6 +85,7 @@ public class AdminAuthController {
 		model.addAttribute("APP_CONTEXT", appConfig.getAppPrefix());
 		model.addAttribute("CDN_VERSION", getVersion());
 		model.addAttribute("STAMP", System.currentTimeMillis());
+		model.addAttribute("POSTMAN_AGENT_SCHEME_COLOR", pmEnvironment.get("postman.agent.scheme.color").asString());
 
 		String page = ArgUtil.parseAsString(commonHttpRequest.get("page"), "login");
 		String action = ArgUtil.parseAsString(commonHttpRequest.get("action"), "login");

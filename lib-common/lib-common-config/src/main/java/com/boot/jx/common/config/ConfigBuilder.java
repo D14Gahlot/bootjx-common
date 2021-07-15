@@ -42,9 +42,11 @@ public class ConfigBuilder implements Serializable {
 
 	private String title;
 	private String key;
+	private Object defaultValue;
+
 	private InputType inputType;
 
-	private List<Object> options;
+	private List<ConfigOption> options;
 
 	public ConfigBuilder(String title, String key) {
 		this.key = key;
@@ -65,8 +67,8 @@ public class ConfigBuilder implements Serializable {
 
 		LIST.add(new ConfigBuilder("Agent can initiate new chat", "postman.agent.chat.init").optionsOnOff());
 
-		LIST.add(
-				new ConfigBuilder("Agent Panel Color Scheme", "postman.agent.scheme.color").inputType(InputType.COLOR));
+		LIST.add(new ConfigBuilder("Agent Panel Color Scheme", "postman.agent.scheme.color").inputType(InputType.COLOR)
+				.defaultValue("#4b56c0"));
 
 	}
 
@@ -86,17 +88,17 @@ public class ConfigBuilder implements Serializable {
 		this.key = key;
 	}
 
-	public List<Object> getOptions() {
+	public List<ConfigOption> getOptions() {
 		return options;
 	}
 
-	public void setOptions(List<Object> options) {
+	public void setOptions(List<ConfigOption> options) {
 		this.options = options;
 	}
 
-	public List<Object> options() {
+	public List<ConfigOption> options() {
 		if (this.options == null) {
-			this.options = new ArrayList<Object>();
+			this.options = new ArrayList<ConfigOption>();
 		}
 		return this.options;
 	}
@@ -137,6 +139,19 @@ public class ConfigBuilder implements Serializable {
 
 	public ConfigBuilder inputType(InputType inputType) {
 		this.inputType = inputType;
+		return this;
+	}
+
+	public Object getDefaultValue() {
+		return defaultValue;
+	}
+
+	public void setDefaultValue(Object defaultValue) {
+		this.defaultValue = defaultValue;
+	}
+
+	public ConfigBuilder defaultValue(Object defaultValue) {
+		this.defaultValue = defaultValue;
 		return this;
 	}
 }
