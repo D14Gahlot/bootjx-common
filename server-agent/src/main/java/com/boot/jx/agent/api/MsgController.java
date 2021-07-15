@@ -183,6 +183,8 @@ public class MsgController {
 				chatSessionDtos.add(chatSessionDto);
 			}
 		}
+
+		
 		return ApiResponse.buildResults(chatSessionDtos);
 	}
 

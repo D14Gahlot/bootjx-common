@@ -4,12 +4,36 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.boot.utils.CollectionUtil;
-
 public class ConfigBuilder implements Serializable {
 
 	public static enum InputType {
 		TEXT, OPTIONS, RANGE, NUMBER
+	}
+
+	public static class ConfigOption {
+
+		public static ConfigOption ON = new ConfigOption(Boolean.TRUE).label("ON");
+		public static ConfigOption OFF = new ConfigOption(Boolean.FALSE).label("OFF");
+
+		private String label;
+		private Object value;
+
+		public String getLabel() {
+			return label;
+		}
+
+		public Object getValue() {
+			return value;
+		}
+
+		public ConfigOption(Object value) {
+			this.value = value;
+		}
+
+		public ConfigOption label(String label) {
+			this.label = label;
+			return this;
+		}
 	}
 
 	private static final long serialVersionUID = -8418291522478302778L;
@@ -30,17 +54,16 @@ public class ConfigBuilder implements Serializable {
 	static {
 		LIST.add(new ConfigBuilder("Bot Name", "postman.default.sender"));
 		LIST.add(new ConfigBuilder("Contact Details Provider Webhook", "postman.contact.details.url"));
-		LIST.add(new ConfigBuilder("Chat Tag Enabled", "chat.tag.enabled")
-				.options(CollectionUtil.getList(Boolean.TRUE, Boolean.FALSE)));
 
-		LIST.add(new ConfigBuilder("Chat Session Timeout", "postman.chat.session.timeout")
-				.options(CollectionUtil.getList("8hr", "12hr", "16hr", "20hr", "24hr")));
+		LIST.add(new ConfigBuilder("Chat Tag Enabled", "chat.tag.enabled").optionsOnOff());
 
-		LIST.add(new ConfigBuilder("Chat Alert Timer", "postman.chat.idle.timeout")
-				.options(CollectionUtil.getList("5min", "10min", "15min", "20min", "25min", "30min")));
+		LIST.add(new ConfigBuilder("Chat Session Timeout", "postman.chat.session.timeout").optionValues("8hr", "12hr",
+				"16hr", "20hr", "24hr"));
 
-		LIST.add(new ConfigBuilder("Agent can initiate new chat", "postman.agent.chat.init")
-				.options(CollectionUtil.getList(Boolean.TRUE, Boolean.FALSE)));
+		LIST.add(new ConfigBuilder("Chat Alert Timer", "postman.chat.idle.timeout").optionValues("5min", "10min",
+				"15min", "20min", "25min", "30min"));
+
+		LIST.add(new ConfigBuilder("Agent can initiate new chat", "postman.agent.chat.init").optionsOnOff());
 
 	}
 
@@ -68,12 +91,37 @@ public class ConfigBuilder implements Serializable {
 		this.options = options;
 	}
 
-	public ConfigBuilder options(List<Object> options) {
+	public List<Object> options() {
+		if (this.options == null) {
+			this.options = new ArrayList<Object>();
+		}
+		return this.options;
+	}
+
+	public ConfigBuilder options(ConfigOption... options) {
 		if (this.inputType == null) {
 			this.inputType = InputType.OPTIONS;
 		}
-		this.options = options;
+		this.options = this.options();
+		for (ConfigOption configOption : options) {
+			this.options.add(configOption);
+		}
 		return this;
+	}
+
+	public ConfigBuilder optionValues(Object... optionValues) {
+		if (this.inputType == null) {
+			this.inputType = InputType.OPTIONS;
+		}
+		this.options = this.options();
+		for (Object optionValue : optionValues) {
+			this.options.add(new ConfigOption(optionValue));
+		}
+		return this;
+	}
+
+	public ConfigBuilder optionsOnOff() {
+		return this.options(ConfigOption.ON, ConfigOption.OFF);
 	}
 
 	public InputType getInputType() {
