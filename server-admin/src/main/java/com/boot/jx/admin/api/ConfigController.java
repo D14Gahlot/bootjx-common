@@ -154,6 +154,16 @@ public class ConfigController {
 		return ApiResponse.buildResults(mongoTemplate.findById(AppContextUtil.getTenant(), ConnectorConfigDoc.class));
 	}
 
+	@RequestMapping(value = "/api/config/set/cdn", method = { RequestMethod.POST })
+	public ApiResponse<PMConfigurationObject, Object> updateCDN(@RequestParam(required = false) String url) {
+		PMConfigurationObject config = pmEnvironment.get("mry.cdn.url");
+		if (ArgUtil.is(url)) {
+			config.setValue(url);
+			adminConfigService.setAdminConfigs(config);
+		}
+		return ApiResponse.buildResults(config);
+	}
+
 	@RequestMapping(value = "/api/config/set", method = { RequestMethod.POST })
 	public ApiResponse<Map<String, Object>, Object> addConfig(@RequestBody PMConfigurationObject map) {
 		adminConfigService.setAdminConfigs(map);
