@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 import com.boot.jx.AppConfigPackage.AppCommonConfig;
 import com.boot.jx.postman.PMClientConfig;
 import com.boot.jx.postman.PMEnvironment;
+import com.boot.model.SafeKeyHashMap;
 import com.boot.utils.TimeUtils;
 
 @Component
@@ -32,8 +33,13 @@ public class AppCommonConfigImpl implements AppCommonConfig {
 		map.put("chatIdleTimeout", TimeUtils.toMillis(chatClientConfig.getChatIdleTimeout()));
 		map.put("agentSessionTimeout", TimeUtils.toMillis(chatClientConfig.getAgentSessionTimeout()));
 		map.put("chatSessionTimeout", TimeUtils.toMillis(chatClientConfig.getChatSessionTimeout()));
-		map.put("timestamp", System.currentTimeMillis());
 
+		SafeKeyHashMap<Object> setup = new SafeKeyHashMap<Object>();
+		for (ConfigBuilder config : ConfigBuilder.LIST) {
+			setup.put(config.getKey().toUpperCase(), pmEnvironment.get(config.getKey()).getValue());
+		}
+		map.put("SETUP", setup);
+		map.put("timestamp", System.currentTimeMillis());
 		return map;
 	}
 

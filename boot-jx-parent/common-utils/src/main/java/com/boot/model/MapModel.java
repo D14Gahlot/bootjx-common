@@ -11,6 +11,7 @@ import com.boot.utils.ArgUtil;
 import com.boot.utils.Constants;
 import com.boot.utils.JsonPath;
 import com.boot.utils.JsonUtil;
+import com.boot.utils.TimeUtils;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -49,6 +50,10 @@ public class MapModel implements JsonSerializerType<Object> {
 
 		public Boolean asBoolean() {
 			return ArgUtil.parseAsBoolean(value, false);
+		}
+
+		public Long asMillis() {
+			return TimeUtils.toMillis(ArgUtil.parseAsString(value, Constants.BLANK));
 		}
 
 		public Boolean asBoolean(boolean defaultvalue) {

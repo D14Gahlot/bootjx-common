@@ -1,4 +1,4 @@
-package com.boot.jx.admin.manager;
+package com.boot.jx.common.config;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -7,7 +7,7 @@ import java.util.List;
 public class ConfigBuilder implements Serializable {
 
 	public static enum InputType {
-		TEXT, OPTIONS, RANGE, NUMBER
+		TEXT, OPTIONS, RANGE, NUMBER, COLOR
 	}
 
 	public static class ConfigOption {
@@ -64,6 +64,9 @@ public class ConfigBuilder implements Serializable {
 				"15min", "20min", "25min", "30min"));
 
 		LIST.add(new ConfigBuilder("Agent can initiate new chat", "postman.agent.chat.init").optionsOnOff());
+
+		LIST.add(
+				new ConfigBuilder("Agent Panel Color Scheme", "postman.agent.scheme.color").inputType(InputType.COLOR));
 
 	}
 
