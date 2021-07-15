@@ -16,6 +16,7 @@ import com.boot.jx.connectors.WebConnector;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.http.CommonHttpRequest;
 import com.boot.jx.inbound.InBoundService;
+import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.utils.ArgUtil;
@@ -38,6 +39,9 @@ public class DummyUserController {
 
 	@Autowired(required = false)
 	private AppCommonConfig appCommonConfig;
+
+	@Autowired
+	private PMEnvironment pmEnvironment;
 
 	@ResponseBody
 	@RequestMapping(value = "/dummy/messages", method = RequestMethod.GET)
@@ -69,6 +73,7 @@ public class DummyUserController {
 	public String dummyUser(@RequestParam String number, Model model) throws InterruptedException {
 		model.addAttribute("APP_CONTEXT", appConfig.getAppPrefix());
 		model.addAttribute("POSTMAN_CONTEXT", appConfig.getAppPrefix());
+		model.addAttribute("POSTMAN_AGENT_SCHEME_COLOR", pmEnvironment.get("postman.agent.scheme.color").asString());
 		return "dummyuser";
 	}
 
@@ -78,6 +83,7 @@ public class DummyUserController {
 		commonHttpRequest.setCookie("contactType", ArgUtil.parseAsString(contacyType, ContactType.WEBSITE.toString()));
 		model.addAttribute("APP_CONTEXT", appConfig.getAppPrefix());
 		model.addAttribute("POSTMAN_CONTEXT", appConfig.getAppPrefix());
+		model.addAttribute("POSTMAN_AGENT_SCHEME_COLOR", pmEnvironment.get("postman.agent.scheme.color").asString());
 		return "customer.plugin.bubble";
 	}
 
@@ -91,6 +97,7 @@ public class DummyUserController {
 
 		model.addAttribute("CDN_VERSION", "V3");
 		model.addAttribute("CDN_DEBUG", ArgUtil.parseAsString(commonHttpRequest.get("CDN_DEBUG"), "false"));
+		model.addAttribute("POSTMAN_AGENT_SCHEME_COLOR", pmEnvironment.get("postman.agent.scheme.color").asString());
 
 		if (appCommonConfig != null) {
 			model.addAttribute("CDN_URL",
