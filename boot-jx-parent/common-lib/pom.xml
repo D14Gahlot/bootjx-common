@@ -20,6 +20,7 @@
 		<buildtimestamp>${maven.build.timestamp}</buildtimestamp>
 		<maven.build.timestamp.format>yyyy-MM-dd HH:mm</maven.build.timestamp.format>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<swagger.version>2.7.0</swagger.version>
 	</properties>
 
 	<dependencies>
@@ -53,26 +54,26 @@
 		<dependency>
 			<groupId>com.googlecode.owasp-java-html-sanitizer</groupId>
 			<artifactId>owasp-java-html-sanitizer</artifactId>
-			<version>20180219.1</version>
+			<version>20200713.1</version>
 		</dependency>
 
 		<dependency>
 			<groupId>io.springfox</groupId>
 			<artifactId>springfox-swagger2</artifactId>
-			<version>2.6.1</version>
-			<scope>compile</scope>
+			<version>${swagger.version}</version>
+			<!-- <scope>compile</scope> -->
 		</dependency>
 		<dependency>
 			<groupId>io.springfox</groupId>
 			<artifactId>springfox-swagger-ui</artifactId>
-			<version>2.6.1</version>
-			<scope>compile</scope>
+			<version>${swagger.version}</version>
+			<!-- <scope>compile</scope> -->
 		</dependency>
 
 		<dependency>
 			<groupId>io.springfox</groupId>
 			<artifactId>springfox-spi</artifactId>
-			<version>2.6.1</version>
+			<version>${swagger.version}</version>
 		</dependency>
 
 		<dependency>

@@ -2,6 +2,7 @@ package com.boot.jx.swagger;
 
 import java.util.ArrayList;
 import java.util.List;
+import com.boot.utils.CollectionUtil;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -21,6 +22,7 @@ import com.boot.utils.UniqueID;
 
 import springfox.documentation.builders.ParameterBuilder;
 import springfox.documentation.builders.RequestHandlerSelectors;
+import springfox.documentation.schema.Collections;
 import springfox.documentation.schema.ModelRef;
 import springfox.documentation.service.AllowableListValues;
 import springfox.documentation.service.AllowableValues;
@@ -41,47 +43,47 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 @ConditionalOnProperty("app.swagger")
 public class DefaultSwaggerConfig {
 
-	public static final String PARAM_STRING = "string";
-	public static final String PARAM_HEADER = "header";
-	public static final String SWGGER_SECRET_PARAM = "x-swagger-key";
-	public static final String SWGGER_SECRET_VALUE = UniqueID.generateString();
+    public static final String PARAM_STRING = "string";
+    public static final String PARAM_HEADER = "header";
+    public static final String SWGGER_SECRET_PARAM = "x-swagger-key";
+    public static final String SWGGER_SECRET_VALUE = UniqueID.generateString();
 
-	@Autowired(required = false)
-	DocketWrapper docketWrapper;
+    @Autowired(required = false)
+    DocketWrapper docketWrapper;
 
-	@Value("${swagger.package}")
-	String swaggerPackage;
+    @Value("${swagger.package}")
+    String swaggerPackage;
 
-	@Bean
-	public Docket productApi(@Autowired(required = false) List<MockParam> mockParams) {
+    @Bean
+    public Docket productApi(@Autowired(required = false) List<MockParam> mockParams) {
 
-		if (docketWrapper != null && docketWrapper.getDocket() != null) {
-			return docketWrapper.getDocket();
+	if (docketWrapper != null && docketWrapper.getDocket() != null) {
+	    return docketWrapper.getDocket();
+	}
+
+	Docket docket = new Docket(DocumentationType.SWAGGER_2).select()
+		.apis(RequestHandlerSelectors.basePackage(swaggerPackage))
+		// .paths(regex("/product.*"))
+		.build();
+
+	List<Parameter> operationParameters = new ArrayList<Parameter>();
+	if (ArgUtil.is(mockParams))
+	    for (MockParam mockParam : mockParams) {
+		AllowableValues allowableValues = null;
+		if (mockParam.getValues() != null) {
+		    allowableValues = new AllowableListValues(mockParam.getValues(), mockParam.getValueType());
 		}
 
-		Docket docket = new Docket(DocumentationType.SWAGGER_2).select()
-				.apis(RequestHandlerSelectors.basePackage(swaggerPackage))
-				// .paths(regex("/product.*"))
-				.build();
+		Parameter parameter = new ParameterBuilder().name(mockParam.getName())
+			.description(mockParam.getDescription()).defaultValue(mockParam.getDefaultValue())
+			.modelRef(new ModelRef(PARAM_STRING))
+			.parameterType(mockParam.getType().toString().toLowerCase()).allowableValues(allowableValues)
+			.required(mockParam.isRequired()).hidden(mockParam.isHidden()).build();
 
-		List<Parameter> operationParameters = new ArrayList<Parameter>();
-		if (ArgUtil.is(mockParams))
-			for (MockParam mockParam : mockParams) {
-				AllowableValues allowableValues = null;
-				if (mockParam.getValues() != null) {
-					allowableValues = new AllowableListValues(mockParam.getValues(), mockParam.getValueType());
-				}
-
-				Parameter parameter = new ParameterBuilder().name(mockParam.getName())
-						.description(mockParam.getDescription()).defaultValue(mockParam.getDefaultValue())
-						.modelRef(new ModelRef(PARAM_STRING))
-						.parameterType(mockParam.getType().toString().toLowerCase()).allowableValues(allowableValues)
-						.required(mockParam.isRequired()).hidden(mockParam.isHidden()).build();
-
-				operationParameters.add(parameter);
-			}
-		AppContextUtil.getSessionId(true);
-		AppContextUtil.getTraceId(true, true);
+		operationParameters.add(parameter);
+	    }
+	AppContextUtil.getSessionId(true);
+	AppContextUtil.getTraceId(true, true);
 
 //		operationParameters.add(new ParameterBuilder().name(AppConstants.TRANX_ID_XKEY).description("Transaction Id")
 //				.defaultValue(AppContextUtil.getTraceId()).modelRef(new ModelRef(PARAM_STRING))
@@ -90,65 +92,61 @@ public class DefaultSwaggerConfig {
 //				.defaultValue(AppContextUtil.getTraceId()).modelRef(new ModelRef(PARAM_STRING))
 //				.parameterType(PARAM_HEADER).required(false).build());
 
-		docket.globalOperationParameters(operationParameters);
-		docket.apiInfo(metaData());
-		return docket;
+	docket.globalOperationParameters(operationParameters);
+	docket.apiInfo(metaData());
+	return docket;
+    }
+
+    @Bean @ConditionalOnProperty(value = "swagger.tranx.enabled", havingValue = "true")
+    public MockParam tranxParam() {
+	return new MockParamBuilder().name(AppConstants.TRANX_ID_XKEY).description("Transaction Id")
+		.defaultValue(AppContextUtil.getTraceId()).parameterType(MockParamBuilder.MockParamType.HEADER)
+		.required(false).build();
+    }
+
+    @Bean @ConditionalOnProperty(value = "swagger.tranx.enabled", havingValue = "true")
+    public MockParam traceParam() {
+	return new MockParamBuilder().name(AppConstants.TRACE_ID_XKEY).description("Trace Id")
+		.defaultValue(AppContextUtil.getTraceId()).parameterType(MockParamBuilder.MockParamType.HEADER)
+		.required(false).build();
+    }
+
+    @Bean @ConditionalOnProperty(value = "swagger.tenant.enabled", havingValue = "true")
+    public MockParam tenantParam() {
+	return new MockParamBuilder().name(TenantContextHolder.TENANT).description("Tenant Country")
+		.defaultValue(Tenants.DEFAULT_STR).parameterType(MockParamBuilder.MockParamType.HEADER).required(false)
+		.build();
+    }
+
+    @Bean @ConditionalOnProperty(value = "swagger.key.enabled", havingValue = "true")
+    public MockParam swaggerParam() {
+	return new MockParamBuilder().name(SWGGER_SECRET_PARAM).description(SWGGER_SECRET_PARAM)
+		.defaultValue(SWGGER_SECRET_VALUE).parameterType(MockParamBuilder.MockParamType.HEADER)
+		.allowableValues(CollectionUtil.getList(SWGGER_SECRET_VALUE), PARAM_STRING).required(true).hidden(true)
+		.build();
+
+    }
+
+    @Autowired
+    AppConfig appConfig;
+
+    private ApiInfo metaData() {
+	return new ApiInfo(appConfig.getAppName(),
+		String.format("%s#%s#%s", appConfig.getAppEnv(), appConfig.getAppGroup(), appConfig.getAppId()),
+		String.format("1.0 - %s", appConfig.getAppAppBuildStamp()), "Terms of service",
+		new Contact("boot-js Team", "https://springframework.guru/about/", "support@mehery.com"),
+		"Apache License Version 2.0", "https://www.apache.org/licenses/LICENSE-2.0", CollectionUtil.asList());
+    }
+
+    public static class DocketWrapper {
+	Docket docket;
+
+	public DocketWrapper(Docket docket) {
+	    this.docket = docket;
 	}
 
-	@Bean
-	@ConditionalOnProperty(value = "swagger.tranx.enabled", havingValue = "true")
-	public MockParam tranxParam() {
-		return new MockParamBuilder().name(AppConstants.TRANX_ID_XKEY).description("Transaction Id")
-				.defaultValue(AppContextUtil.getTraceId()).parameterType(MockParamBuilder.MockParamType.HEADER)
-				.required(false).build();
+	public Docket getDocket() {
+	    return docket;
 	}
-
-	@Bean
-	@ConditionalOnProperty(value = "swagger.tranx.enabled", havingValue = "true")
-	public MockParam traceParam() {
-		return new MockParamBuilder().name(AppConstants.TRACE_ID_XKEY).description("Trace Id")
-				.defaultValue(AppContextUtil.getTraceId()).parameterType(MockParamBuilder.MockParamType.HEADER)
-				.required(false).build();
-	}
-
-	@Bean
-	@ConditionalOnProperty(value = "swagger.tenant.enabled", havingValue = "true")
-	public MockParam tenantParam() {
-		return new MockParamBuilder().name(TenantContextHolder.TENANT).description("Tenant Country")
-				.defaultValue(Tenants.DEFAULT_STR).parameterType(MockParamBuilder.MockParamType.HEADER).required(false)
-				.build();
-	}
-
-	@Bean
-	@ConditionalOnProperty(value = "swagger.key.enabled", havingValue = "true")
-	public MockParam swaggerParam() {
-		return new MockParamBuilder().name(SWGGER_SECRET_PARAM).description(SWGGER_SECRET_PARAM)
-				.defaultValue(SWGGER_SECRET_VALUE).parameterType(MockParamBuilder.MockParamType.HEADER)
-				.allowableValues(CollectionUtil.getList(SWGGER_SECRET_VALUE), PARAM_STRING).required(true).hidden(true)
-				.build();
-
-	}
-
-	@Autowired
-	AppConfig appConfig;
-
-	private ApiInfo metaData() {
-		return new ApiInfo(appConfig.getAppName(),
-				String.format("%s#%s#%s", appConfig.getAppEnv(), appConfig.getAppGroup(), appConfig.getAppId()),
-				String.format("1.0 - %s", appConfig.getAppAppBuildStamp()), "Terms of service",
-				new Contact("boot-js Team", "https://springframework.guru/about/", "support@mehery.com"),
-				"Apache License Version 2.0", "https://www.apache.org/licenses/LICENSE-2.0");
-	}
-
-	public static class DocketWrapper {
-		Docket docket;
-
-		public DocketWrapper(Docket docket) {
-			this.docket = docket;
-		}
-
-		public Docket getDocket() {
-			return docket;
-		}
-	}
+    }
 }
