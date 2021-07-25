@@ -9,18 +9,19 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Component;
 
+import com.boot.jx.chat.ConnectorHandlerFactory.AbstractConnector;
 import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorHandler;
 import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorMapping;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.dict.FileType;
 import com.boot.jx.logger.LoggerService;
 import com.boot.jx.postman.client.TmplClient;
-import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.QuickMedia;
 import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.OutboxMessage;
+import com.boot.jx.postman.query.ChatContactQuery;
 import com.boot.jx.rest.RestService;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
@@ -30,7 +31,7 @@ import com.boot.utils.JsonUtil;
 @Component
 @PropertySource("classpath:application-rapiwha.properties")
 @ConnectorMapping(contactType = ContactType.WHATSAPP, channel = "RAPIWHA")
-public class WARapiwhaConnector implements ConnectorHandler {
+public class WARapiwhaConnector extends AbstractConnector {
 
 	private static Logger LOGGER = LoggerService.getLogger(WARapiwhaConnector.class);
 
@@ -76,12 +77,13 @@ public class WARapiwhaConnector implements ConnectorHandler {
 	}
 
 	@Override
-	public boolean initSession(ChatContactDoc contact, ChatSessionDoc session, InboxMessage inboxMessage) {
+	public boolean initSession(ChatSessionDoc session, InboxMessage inboxMessage) {
 		Object x = inboxMessage.getOriginalMessage();
 		if (ArgUtil.is(x)) {
 			Map<String, Object> map = JsonUtil.toMap(x);
-			contact.setProfilePic(ArgUtil.parseAsString(map.get("profilepicture"), Constants.BLANK));
-			contact.setName(ArgUtil.parseAsString(map.get("pushname"), Constants.BLANK));
+			ChatContactQuery contactQuery = messageContext.getChatContactQuery();
+			contactQuery.setProfilePic(ArgUtil.parseAsString(map.get("profilepicture"), Constants.BLANK));
+			contactQuery.setName(ArgUtil.parseAsString(map.get("pushname"), Constants.BLANK));
 		}
 		return true;
 	}

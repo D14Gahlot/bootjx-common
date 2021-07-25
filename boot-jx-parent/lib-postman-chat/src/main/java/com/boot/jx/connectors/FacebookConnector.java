@@ -6,13 +6,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Component;
 
+import com.boot.jx.chat.ConnectorHandlerFactory.AbstractConnector;
 import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorHandler;
 import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorMapping;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.dict.FileType;
 import com.boot.jx.postman.client.ExtUtilService;
 import com.boot.jx.postman.client.TmplClient;
-import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.QuickMedia;
 import com.boot.jx.postman.fb.FacebooClient;
@@ -22,11 +22,12 @@ import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.Message;
 import com.boot.jx.postman.model.OutboxMessage;
+import com.boot.jx.postman.query.ChatContactQuery;
 import com.boot.utils.ArgUtil;
 
 @Component
 @ConnectorMapping(contactType = ContactType.FACEBOOK)
-public class FacebookConnector implements ConnectorHandler {
+public class FacebookConnector extends AbstractConnector {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(FacebookConnector.class);
 
@@ -84,12 +85,13 @@ public class FacebookConnector implements ConnectorHandler {
 	}
 
 	@Override
-	public boolean initSession(ChatContactDoc contact, ChatSessionDoc session, InboxMessage inboxMessage) {
+	public boolean initSession(ChatSessionDoc session, InboxMessage inboxMessage) {
 		FacebookUserProfile profile = facebooClient.getUserProfile(inboxMessage.getFrom(),
 				inboxMessage.contact().getLane());
-		contact.setProfilePic(profile.getProfilePic());
-		contact.setName(profile.getFirstName() + " " + profile.getLastName());
-		contact.setEmail(profile.getEmail());
+		ChatContactQuery contactQuery = messageContext.getChatContactQuery();
+		contactQuery.setProfilePic(profile.getProfilePic());
+		contactQuery.setName(profile.getFirstName() + " " + profile.getLastName());
+		contactQuery.setEmail(profile.getEmail());
 		return true;
 	}
 

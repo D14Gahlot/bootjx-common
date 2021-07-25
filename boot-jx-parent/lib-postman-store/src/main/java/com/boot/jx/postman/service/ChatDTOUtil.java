@@ -1,9 +1,10 @@
-package com.boot.jx.chat;
+package com.boot.jx.postman.service;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
@@ -37,15 +38,23 @@ public class ChatDTOUtil {
 		contact.setProfile(chatContactDoc.getProfile());
 		contact.setLane(chatContactDoc.getLane());
 		contact.setCsid(chatContactDoc.getCsid());
+
+		contact.setCreatedBy(chatContactDoc.getCreatedBy());
+		contact.setCreatedStamp(chatContactDoc.getCreatedStamp());
+		contact.setLastInBoundStamp(chatContactDoc.getLastInBoundStamp());
+		contact.setLastOutBoundStamp(chatContactDoc.getLastOutBoundStamp());
+		contact.setLastOptInStamp(chatContactDoc.getLastOptInStamp());
+		contact.setLastPushStamp(chatContactDoc.getLastPushStamp());
+		contact.setLastReplyStamp(chatContactDoc.getLastReplyStamp());
+		
+		contact.setSessionId(chatContactDoc.getSessionId());
+
 		return contact;
 	}
 
 	public static List<ContactDTO> getContactDTO(List<ChatContactDoc> chatContactDocs) {
-		List<ContactDTO> contactDTOs = new ArrayList<ContactDTO>();
-		for (ChatContactDoc chatContactDoc : chatContactDocs) {
-			contactDTOs.add(getContactDTO(chatContactDoc));
-		}
-		return contactDTOs;
+		return chatContactDocs.stream().map(chatContactDoc -> ChatDTOUtil.getContactDTO(chatContactDoc))
+				.collect(Collectors.toList());
 	}
 
 	public static ChatMessageDTO getChatMessageDTO(MessageDoc messageDoc, String contactName, String agentName) {

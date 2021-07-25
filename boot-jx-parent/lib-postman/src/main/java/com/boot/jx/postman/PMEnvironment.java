@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 
 import com.boot.jx.AppConfig;
 import com.boot.jx.dict.ContactType;
-import com.boot.jx.model.MapModel.MapEntry;
+import com.boot.model.MapModel.MapEntry;
 import com.boot.utils.ArgUtil;
 import com.fasterxml.jackson.annotation.JsonView;
 

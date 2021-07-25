@@ -28,10 +28,11 @@ import com.boot.jx.api.ApiResponse;
 import com.boot.jx.common.doc.AgentSessionDoc;
 import com.boot.jx.common.dto.AgentResponseAuthDto;
 import com.boot.jx.http.CommonHttpRequest;
-import com.boot.jx.model.MapModel;
+import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.store.PMStoreConstants;
 import com.boot.jx.rest.RestService;
 import com.boot.jx.stomp.StompTunnelSessionManager;
+import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.Constants;
 import com.boot.utils.CryptoUtil;
@@ -59,6 +60,9 @@ public class AgentAuthController {
 
 	@Autowired
 	private AppCommonConfig appCommonConfig;
+	
+	@Autowired
+	private PMEnvironment pmEnvironment;
 
 	private long getVersion() {
 		return System.currentTimeMillis() / 300000;
@@ -80,6 +84,8 @@ public class AgentAuthController {
 		model.addAttribute("CDN_DEBUG", ArgUtil.parseAsString(commonHttpRequest.get("CDN_DEBUG"), "false"));
 		model.addAttribute("CONFIG", JsonUtil.toJson(appCommonConfig.toMap()));
 		String cdnnew = ArgUtil.parseAsString(commonHttpRequest.get("CDN_NEW"), "true");
+		
+		model.addAttribute("POSTMAN_AGENT_SCHEME_COLOR", pmEnvironment.get("postman.agent.scheme.color").asString());
 
 		if ("true".equalsIgnoreCase(cdnnew)) {
 			return "app";
@@ -98,6 +104,7 @@ public class AgentAuthController {
 		model.addAttribute("APP_USER", agentSession.getAgentCode());
 		model.addAttribute("APP_DEPT", agentSession.getAgentDept());
 		model.addAttribute("CDN_VERSION", getVersion());
+		model.addAttribute("POSTMAN_AGENT_SCHEME_COLOR", pmEnvironment.get("postman.agent.scheme.color").asString());
 		return "whatsweb";
 	}
 
@@ -108,6 +115,7 @@ public class AgentAuthController {
 		model.addAttribute("APP_DEPT", agentSession.getAgentDept());
 		model.addAttribute("CDN_VERSION", getVersion());
 		model.addAttribute("POSTMAN_CONTEXT", "/postman");
+		model.addAttribute("POSTMAN_AGENT_SCHEME_COLOR", pmEnvironment.get("postman.agent.scheme.color").asString());
 		return "customer." + page;
 	}
 
@@ -121,6 +129,7 @@ public class AgentAuthController {
 		model.addAttribute("APP_DEPT", agentSession.getAgentDept());
 		model.addAttribute("CDN_VERSION", getVersion());
 		model.addAttribute("STAMP", System.currentTimeMillis());
+		model.addAttribute("POSTMAN_AGENT_SCHEME_COLOR", pmEnvironment.get("postman.agent.scheme.color").asString());
 
 		String page = ArgUtil.parseAsString(commonHttpRequest.get("page"), "login");
 		String action = ArgUtil.parseAsString(commonHttpRequest.get("action"), "login");

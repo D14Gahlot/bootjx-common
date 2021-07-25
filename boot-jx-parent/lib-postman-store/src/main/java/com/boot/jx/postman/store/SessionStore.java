@@ -56,6 +56,9 @@ public class SessionStore extends CommonDocStore {
 	@Autowired
 	public PMClientConfig pmClientConfig;
 
+	@Autowired
+	private MessageContext messageContext;
+
 	public ChatContactDoc getContact(IMessageExtended inboxMessage) {
 		String contactId = PostManUtil.createContactId(inboxMessage);
 		ChatContactDoc chatContactDoc = mongoTemplate.findById(contactId, ChatContactDoc.class);
@@ -157,19 +160,12 @@ public class SessionStore extends CommonDocStore {
 			chatContactQuery.setSessionId(chatSessionDoc.getSessionId());
 
 			// CONTACT CREATION - needs creation or updation if
-			if (ArgUtil.isEmpty(chatContactDoc) // chatContactDo not found
-					|| ArgUtil.isEmpty(chatContactDoc.getContactType()) // or contactType is missing
-					|| ArgUtil.isEmpty(chatContactDoc.getCsid()) // or csid is missing
-					|| ArgUtil.isEmpty(chatContactDoc.getLane()) // or lane is missing
-					|| ArgUtil.isEmpty(chatContactDoc.getChannel())) { // or channel is mssing
-				chatContactQuery.setContactId(contactId);
-				chatContactQuery.setContactType(ArgUtil.parseAsString(inboxMessage.contact().type()));
-				chatContactQuery.setChannel(inboxMessage.contact().getChannel());
-				chatContactQuery.setCsid(inboxMessage.contact().getCsid());
-				chatContactQuery.setLane(inboxMessage.contact().getLane());
+			if (ArgUtil.isEmpty(chatContactDoc)) {
+				chatContactQuery.update(inboxMessage.contact());
 				commonMongoTemplate.upsert(chatContactQuery);
 			} else {
 				// CONTACT UPDATE
+				chatContactQuery.update(inboxMessage.contact());
 				commonMongoTemplate.updateFirst(chatContactQuery);
 			}
 		} else {
@@ -185,14 +181,16 @@ public class SessionStore extends CommonDocStore {
 	}
 
 	public ChatSessionDoc linkSession(ChatSessionDoc chatSessionDoc, IMessage inboxMessage) {
-		if (ArgUtil.is(chatSessionDoc)) {
-			inboxMessage.contact().setContactId(chatSessionDoc.getContactId());
-			inboxMessage.setSessionId(chatSessionDoc.getSessionId());
-			inboxMessage.session().setAgent(chatSessionDoc.getAssignedToAgent());
-			inboxMessage.session().setDept(chatSessionDoc.getAssignedToDept());
-			inboxMessage.session().setMode(chatSessionDoc.getMode());
-			inboxMessage.session().setResolved(chatSessionDoc.isResolved());
+		if (!ArgUtil.is(chatSessionDoc)) {
+			return null;
 		}
+
+		inboxMessage.contact().setContactId(chatSessionDoc.getContactId());
+		inboxMessage.setSessionId(chatSessionDoc.getSessionId());
+		inboxMessage.session().setAgent(chatSessionDoc.getAssignedToAgent());
+		inboxMessage.session().setDept(chatSessionDoc.getAssignedToDept());
+		inboxMessage.session().setMode(chatSessionDoc.getMode());
+		inboxMessage.session().setResolved(chatSessionDoc.isResolved());
 
 		if (PostManUtil.isInBound(inboxMessage)) {
 			chatSessionDoc.setLastInComingStamp(inboxMessage.getTimestamp());
@@ -360,13 +358,16 @@ public class SessionStore extends CommonDocStore {
 		}
 	}
 
-	public ChatSessionDoc initSession(ChatSessionDoc chatSessionDoc, ChatContactDoc contact) {
+	public ChatSessionDoc initSession(ChatSessionDoc chatSessionDoc) {
+
+		ChatContactDoc contactDoc = messageContext.getChatContactDoc();
+
 		chatSessionDoc.setInitd(true);
-		chatSessionDoc.setContactName(contact.getName());
+		chatSessionDoc.setContactName(contactDoc.getName());
 
 		CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder().whereId(chatSessionDoc.getSessionId());
 		builder.set("initd", chatSessionDoc.isInitd());
-		builder.set("contactName", ArgUtil.nonEmpty(chatSessionDoc.getContactName(), contact.getName()));
+		builder.set("contactName", ArgUtil.nonEmpty(chatSessionDoc.getContactName(), contactDoc.getName()));
 		mongoTemplate.updateFirst(builder.getQuery(), builder.getUpdate(), ChatSessionDoc.class);
 
 		return chatSessionDoc;

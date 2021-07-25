@@ -18,6 +18,7 @@ public class ContactMeta implements java.io.Serializable, Contactable {
 	String prefix;
 	String phone;
 	String email;
+	String name;
 	Language lang;
 
 	private String contactType;
@@ -177,6 +178,14 @@ public class ContactMeta implements java.io.Serializable, Contactable {
 
 	public void setChannel(String channel) {
 		this.channel = channel;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
 	}
 
 }

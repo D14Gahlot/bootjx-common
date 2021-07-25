@@ -2,6 +2,8 @@ package com.boot.jx.postman.query;
 
 import com.boot.jx.mongo.CommonMongoQueryBuilder.DocQueryBuilder;
 import com.boot.jx.postman.doc.ChatContactDoc;
+import com.boot.jx.postman.model.MessageDefinitions.Contactable;
+import com.boot.utils.ArgUtil;
 
 public class ChatContactQuery extends DocQueryBuilder<ChatContactDoc> {
 
@@ -94,6 +96,61 @@ public class ChatContactQuery extends DocQueryBuilder<ChatContactDoc> {
 	public ChatContactQuery setLastReplyStamp(long lastReplyStamp) {
 		this.doc.setLastReplyStamp(lastReplyStamp);
 		this.set("lastReplyStamp", lastReplyStamp);
+		return this;
+	}
+
+	public ChatContactQuery setName(String name) {
+		this.doc.setName(name);
+		this.set("name", name);
+		return this;
+	}
+
+	public ChatContactQuery setEmail(String email) {
+		this.doc.setEmail(email);
+		this.set("email", email);
+		return this;
+	}
+
+	public ChatContactQuery setPhone(String phone) {
+		this.doc.setPhone(phone);
+		this.set("phone", phone);
+		return this;
+	}
+
+	public ChatContactQuery setProfilePic(String profilePic) {
+		this.doc.setProfilePic(profilePic);
+		this.set("profilePic", profilePic);
+		return this;
+	}
+
+	public ChatContactQuery update(Contactable contactable) {
+		if (ArgUtil.is(contactable.getContactId())) {
+			this.setContactId(ArgUtil.nonEmpty(contactable.getContactId(), this.doc.getContactId()));
+		}
+		if (ArgUtil.is(contactable.getContactType())) {
+			this.setContactType(ArgUtil.nonEmpty(contactable.getContactType(), this.doc.getContactType()));
+		}
+		if (ArgUtil.is(contactable.getChannel())) {
+			this.setChannel(ArgUtil.nonEmpty(contactable.getChannel(), this.doc.getChannel()));
+		}
+		if (ArgUtil.is(contactable.getCsid())) {
+			this.setCsid(ArgUtil.nonEmpty(contactable.getCsid(), this.doc.getCsid()));
+		}
+		if (ArgUtil.is(contactable.getLane())) {
+			this.setLane(ArgUtil.nonEmpty(contactable.getLane(), this.doc.getLane()));
+		}
+		if (ArgUtil.is(contactable.getName())) {
+			this.setName(ArgUtil.nonEmpty(contactable.getName(), this.doc.getName()));
+		}
+
+		if (ArgUtil.is(contactable.getEmail())) {
+			this.setEmail(ArgUtil.nonEmpty(contactable.getEmail(), this.doc.getEmail()));
+		}
+
+		if (ArgUtil.is(contactable.getPhone())) {
+			this.setPhone(ArgUtil.nonEmpty(contactable.getPhone(), this.doc.getPhone()));
+		}
+
 		return this;
 	}
 

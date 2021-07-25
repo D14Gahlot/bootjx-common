@@ -9,26 +9,32 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.amazonaws.services.ecs.model.SystemControl;
+import com.boot.json.NamedEntityDeserializer.NamedMapModel;
 import com.boot.jx.admin.dto.AgentResponseAdminDto;
 import com.boot.jx.admin.dto.DepartmentResponseAdminDto;
 import com.boot.jx.admin.service.AdminService;
 import com.boot.jx.api.ApiResponse;
-import com.boot.jx.chat.ChatDTOUtil;
 import com.boot.jx.common.doc.DepartmentDoc;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.dto.ContactDTO;
+import com.boot.jx.postman.service.ChatDTOUtil;
+import com.boot.jx.postman.store.ContactStore;
 import com.boot.utils.ArgUtil;
 
 @RestController
 public class AdminUserController {
 
 	@Autowired
-	AdminService adminService;
+	private AdminService adminService;
 
 	@Autowired
-	CommonMongoTemplate commonMongoTemplate;
+	private CommonMongoTemplate commonMongoTemplate;
+
+	@Autowired
+	private ContactStore contactStore;
 
 	// Agent
 	@RequestMapping(value = "/api/admins/agent", method = { RequestMethod.GET })
@@ -96,8 +102,16 @@ public class AdminUserController {
 
 	@RequestMapping(value = "/api/admins/contacts", method = { RequestMethod.GET })
 	public ApiResponse<ContactDTO, Object> allContacts(@RequestParam(required = false) ContactType contactType,
-			@RequestParam(required = false) String lane) {
-		List<ChatContactDoc> chatContactDocs = commonMongoTemplate.findAll(ChatContactDoc.class);
-		return ApiResponse.buildResults(ChatDTOUtil.getContactDTO(chatContactDocs));
+			@RequestParam(required = false) NamedMapModel lane, @RequestParam(required = false) String search) {
+		String laneValue = ArgUtil.is(lane) ? lane.name("lane") : null;
+		if (ArgUtil.is(laneValue)) {
+			return ApiResponse.buildResults( // Wrap with ApiResponse
+					ChatDTOUtil.getContactDTO( // Convert to DTO
+							contactStore.searchContacts(search, laneValue) // Search Docs
+					));
+		} else {
+			return new ApiResponse<ContactDTO, Object>();
+		}
+
 	}
 }

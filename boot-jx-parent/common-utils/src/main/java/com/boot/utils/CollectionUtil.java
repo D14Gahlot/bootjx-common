@@ -214,6 +214,12 @@ public final class CollectionUtil {
 		return list;
 	}
 
+	@SafeVarargs
+	public static <T> List<T> asList(T... elements) {
+		return getList(elements);
+	}
+
+	@SafeVarargs
 	public static <T> T[] getArray(T... elements) {
 		return elements;
 	}

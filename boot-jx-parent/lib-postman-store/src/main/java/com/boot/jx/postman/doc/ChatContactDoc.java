@@ -9,6 +9,7 @@ import org.springframework.data.annotation.TypeAlias;
 import org.springframework.data.mongodb.core.index.TextIndexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import com.boot.jx.model.AuditableEntity;
 import com.boot.jx.postman.dto.ChatUserProfileDTO;
 import com.boot.jx.postman.model.MessageDefinitions.Contactable;
 import com.boot.jx.swagger.ApiMockModelProperty;
@@ -17,7 +18,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 @Document(collection = "CHAT_CONTACT")
 @TypeAlias("ChatContactDoc")
-public class ChatContactDoc implements Serializable, Contactable {
+public class ChatContactDoc implements Serializable, Contactable, AuditableEntity {
 	private static final long serialVersionUID = 1L;
 
 	@Id
@@ -34,6 +35,8 @@ public class ChatContactDoc implements Serializable, Contactable {
 
 	private String lane;
 
+	private long firstInBoundStamp;
+	private long firstOutBoundStamp;
 	private long lastInBoundStamp;
 	private long lastOutBoundStamp;
 	private long lastPushStamp;
@@ -56,6 +59,9 @@ public class ChatContactDoc implements Serializable, Contactable {
 	private List<String> labelId;
 	private ChatUserProfileDTO profile;
 	private String profileId;
+
+	private Long createdStamp;
+	private String createdBy;
 
 	public String getContactId() {
 		return contactId;
@@ -97,10 +103,12 @@ public class ChatContactDoc implements Serializable, Contactable {
 		this.sessionId = sessionId;
 	}
 
+	@Override
 	public String getName() {
 		return name;
 	}
 
+	@Override
 	public void setName(String name) {
 		this.name = name;
 	}
@@ -220,5 +228,37 @@ public class ChatContactDoc implements Serializable, Contactable {
 	@Override
 	public String toString() {
 		return String.format("[contactId:%s]", this.contactId);
+	}
+
+	public long getFirstInBoundStamp() {
+		return firstInBoundStamp;
+	}
+
+	public void setFirstInBoundStamp(long firstInBoundStamp) {
+		this.firstInBoundStamp = firstInBoundStamp;
+	}
+
+	public long getFirstOutBoundStamp() {
+		return firstOutBoundStamp;
+	}
+
+	public void setFirstOutBoundStamp(long firstOutBoundStamp) {
+		this.firstOutBoundStamp = firstOutBoundStamp;
+	}
+
+	public Long getCreatedStamp() {
+		return createdStamp;
+	}
+
+	public void setCreatedStamp(Long createdStamp) {
+		this.createdStamp = createdStamp;
+	}
+
+	public String getCreatedBy() {
+		return createdBy;
+	}
+
+	public void setCreatedBy(String createdBy) {
+		this.createdBy = createdBy;
 	}
 }

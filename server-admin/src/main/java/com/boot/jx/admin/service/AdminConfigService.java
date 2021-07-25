@@ -9,7 +9,7 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Service;
 
 import com.boot.jx.AppContextUtil;
-import com.boot.jx.admin.manager.ConfigBuilder;
+import com.boot.jx.common.config.ConfigBuilder;
 import com.boot.jx.postman.PMClientConfig;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PMEnvironment.PMConfigurationObject;

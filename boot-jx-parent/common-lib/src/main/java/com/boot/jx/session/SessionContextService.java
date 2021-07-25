@@ -7,7 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.boot.jx.model.MapModel;
+import com.boot.model.MapModel;
 import com.boot.utils.JsonUtil;
 
 @Component

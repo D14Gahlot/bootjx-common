@@ -4,12 +4,12 @@ import java.util.List;
 
 import org.springframework.stereotype.Component;
 
-import com.boot.jx.model.MapModel;
 import com.boot.jx.postman.PostmanPackages.MessageClient;
 import com.boot.jx.postman.gupshup.GupShupConstants.DataEncoding;
 import com.boot.jx.postman.gupshup.GupShupConstants.SessionType;
 import com.boot.jx.postman.model.MessageOptions;
 import com.boot.jx.postman.model.TmplElement;
+import com.boot.model.MapModel;
 
 @Component
 public class GupShupClientChat extends GupShupClientAbstract implements MessageClient {

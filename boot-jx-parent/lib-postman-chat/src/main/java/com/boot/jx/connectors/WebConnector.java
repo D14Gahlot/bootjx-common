@@ -26,13 +26,14 @@ import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.model.TmplElement;
+import com.boot.jx.postman.query.ChatContactQuery;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
 import com.boot.utils.JsonUtil;
 
 @Component
 @ConnectorMapping(contactType = ContactType.WEBSITE)
-public class WebConnector implements DefaultConnector {
+public class WebConnector extends DefaultConnector {
 
 	private static final String WEB_USER_MESSAGE_STR = "WEB_USER_MESSAGE_STR_";
 	private static final Logger LOGGER = LoggerFactory.getLogger(WebConnector.class);
@@ -141,25 +142,29 @@ public class WebConnector implements DefaultConnector {
 	}
 
 	@Override
-	public boolean initSession(ChatContactDoc contact, ChatSessionDoc session, InboxMessage inboxMessage) {
+	public boolean initSession(ChatSessionDoc session, InboxMessage inboxMessage) {
+
+		ChatContactQuery contactQuery = messageContext.getChatContactQuery();
+		ChatContactDoc chatContactDoc = messageContext.getChatContactDoc();
+
 		if (ArgUtil.is(inboxMessage.getForm())) {
 			if (ArgUtil.is(inboxMessage.getForm().get("name"))) {
-				contact.setName(ArgUtil.parseAsString(inboxMessage.getForm().get("name")));
+				contactQuery.setName(ArgUtil.parseAsString(inboxMessage.getForm().get("name")));
 			}
 			if (ArgUtil.is(inboxMessage.getForm().get("email"))) {
-				contact.setEmail(ArgUtil.parseAsString(inboxMessage.getForm().get("email")));
+				contactQuery.setEmail(ArgUtil.parseAsString(inboxMessage.getForm().get("email")));
 			}
 		}
 
 		List<TmplElement> inputs = new ArrayList<TmplElement>();
-		if (ArgUtil.isEmpty(contact.getName())) {
+		if (ArgUtil.isEmpty(chatContactDoc.getName())) {
 			inputs.add(new TmplElement().name("name").label("Name").type("TEXT"));
 			reply(inboxMessage, (OutboxMessage) inboxMessage.replyMessage("Please fill below inputs to continue")
 					.option("inputs", inputs));
 			return false;
 		}
 
-		if (ArgUtil.isEmpty(contact.getEmail())) {
+		if (ArgUtil.isEmpty(chatContactDoc.getEmail())) {
 			inputs.add(new TmplElement().name("email").label("Email").type("EMAIL"));
 			reply(inboxMessage, (OutboxMessage) inboxMessage.replyMessage("Please fill below inputs to continue")
 					.option("inputs", inputs));

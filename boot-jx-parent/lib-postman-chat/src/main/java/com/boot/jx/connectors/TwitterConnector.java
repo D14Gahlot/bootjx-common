@@ -10,12 +10,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Component;
 
+import com.boot.jx.chat.ConnectorHandlerFactory.AbstractConnector;
 import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorHandler;
 import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorMapping;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.dict.FileType;
 import com.boot.jx.postman.client.TmplClient;
-import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.QuickMedia;
 import com.boot.jx.postman.gupshup.GupShupConfigClient;
@@ -23,6 +23,7 @@ import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.model.WAMessage.Channel;
+import com.boot.jx.postman.query.ChatContactQuery;
 import com.boot.jx.postman.tw.TwitterClient;
 import com.boot.jx.postman.tw.TwitterClientContext;
 import com.boot.utils.ArgUtil;
@@ -36,7 +37,7 @@ import twitter4j.TwitterException;
 
 @Component
 @ConnectorMapping(contactType = ContactType.TWITTER)
-public class TwitterConnector implements ConnectorHandler {
+public class TwitterConnector extends AbstractConnector {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(TwitterConnector.class);
 
@@ -110,13 +111,14 @@ public class TwitterConnector implements ConnectorHandler {
 	}
 
 	@Override
-	public boolean initSession(ChatContactDoc contact, ChatSessionDoc session, InboxMessage inboxMessage) {
+	public boolean initSession(ChatSessionDoc session, InboxMessage inboxMessage) {
 		if (ArgUtil.is(inboxMessage.getOriginalMessage())) {
 			try {
 				DirectMessageLocalImpl dm = JsonUtil.parse(inboxMessage.getOriginalMessage(),
 						DirectMessageLocalImpl.class);
-				contact.setProfilePic(dm.getSender().getProfileImageURLHttps());
-				contact.setName(dm.getSender().getName());
+				ChatContactQuery contactQuery = messageContext.getChatContactQuery();
+				contactQuery.setProfilePic(dm.getSender().getProfileImageURLHttps());
+				contactQuery.setName(dm.getSender().getName());
 			} catch (Exception e) {
 				LOGGER.error("Twitter Init Session Data Parse Errror", e);
 			}

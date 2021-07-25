@@ -6,7 +6,7 @@ import java.util.List;
 import com.boot.common.ScopedBeanFactory;
 import com.boot.jx.def.AbstractQueryFactory.IQueryTemplate;
 import com.boot.jx.def.AbstractQueryFactory.QueryProcessor;
-import com.boot.jx.model.MapModel;
+import com.boot.model.MapModel;
 
 public abstract class AbstractQueryFactory<QT extends IQueryTemplate, QA extends Annotation, QP extends MapModel>
 		extends ScopedBeanFactory<QT, QueryProcessor<?, QP>> {

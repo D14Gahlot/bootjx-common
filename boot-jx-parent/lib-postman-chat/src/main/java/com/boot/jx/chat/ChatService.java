@@ -26,6 +26,9 @@ import com.boot.jx.postman.model.Message;
 import com.boot.jx.postman.model.MessageDefinitions.IMessageExtended;
 import com.boot.jx.postman.model.MessageReport;
 import com.boot.jx.postman.model.OutboxMessage;
+import com.boot.jx.postman.query.ChatContactQuery;
+import com.boot.jx.postman.service.ChatDTOUtil;
+import com.boot.jx.postman.store.MessageContext;
 import com.boot.jx.postman.store.MessageStore;
 import com.boot.jx.postman.store.MessageStore.EVENTS;
 import com.boot.jx.postman.store.PMStoreConstants.CHAT_MODE;
@@ -53,6 +56,9 @@ public class ChatService {
 
 	@Autowired
 	private MessageStore messageStore;
+
+	@Autowired
+	private MessageContext messageContext;
 
 	@Autowired
 	private SessionStore sessionStore;
@@ -324,13 +330,12 @@ public class ChatService {
 		ConnectorHandler connector = connectorHandlerFactory.get(inboxMessage.contact().type(),
 				inboxMessage.contact().getChannel());
 
-		ChatContactDoc contact = sessionStore.getContact(inboxMessage);
 		if (ArgUtil.is(connector)) {
-			initd = connector.initSession(contact, session, inboxMessage);
-			sessionStore.save(contact);
+			initd = connector.initSession(session, inboxMessage);
+			messageContext.commitChatContactQuery();
 		}
 		if (initd) {
-			session = sessionStore.initSession(session, contact);
+			session = sessionStore.initSession(session);
 		}
 		return session.isInitd();
 	}
@@ -343,14 +348,15 @@ public class ChatService {
 		ConnectorHandler connector = connectorHandlerFactory.get(outboxMessage.contact().type(),
 				outboxMessage.contact().getChannel());
 
-		ChatContactDoc contact = sessionStore.getContact(session.getContactId());
+		messageContext.setMessage(outboxMessage);
+		ChatContactQuery contactQuery = messageContext.getChatContactQuery();
 		if (ArgUtil.is(connector)) {
-			initd = connector.initSession(contact, session, outboxMessage);
+			initd = connector.initSession(contactQuery, session, outboxMessage);
 			// TODO:-- Validate if saving is required in case of outbound
 			// sessionStore.save(contact);
 		}
 		if (initd) {
-			session = sessionStore.initSession(session, contact);
+			session = sessionStore.initSession(session);
 		}
 		return session.isInitd();
 	}

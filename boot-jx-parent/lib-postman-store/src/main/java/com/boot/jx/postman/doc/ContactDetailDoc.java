@@ -12,6 +12,7 @@ public class ContactDetailDoc implements Serializable, Contactable {
 	private String userid;
 	private String mobile;
 	private String phone;
+	private String name;
 
 	private String contactType;
 	private String channel;
@@ -103,5 +104,13 @@ public class ContactDetailDoc implements Serializable, Contactable {
 
 	public void setChannel(String channel) {
 		this.channel = channel;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
 	}
 }

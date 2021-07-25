@@ -63,9 +63,12 @@ public class CommonMongoTemplate extends CommonMongoTemplateDefault {
 	}
 
 	public WriteResult updateFirst(DocQueryBuilder<?> builder) {
-		if(ArgUtil.is(builder.getUpdate())) {
-			return mongoTemplate.updateFirst(builder.getQuery(), builder.getUpdate(), builder.getDocClass());			
-		} return null;
+		WriteResult ret = null;
+		if (ArgUtil.is(builder.getUpdate())) {
+			ret = mongoTemplate.updateFirst(builder.getQuery(), builder.getUpdate(), builder.getDocClass());
+			builder.setUpdate(null);
+		}
+		return ret;
 	}
 
 	/**
@@ -76,7 +79,11 @@ public class CommonMongoTemplate extends CommonMongoTemplateDefault {
 	 *      org.springframework.data.mongodb.core.query.Update, Class, String)
 	 */
 	public WriteResult upsert(DocQueryBuilder<?> builder) {
-		return mongoTemplate.upsert(builder.getQuery(), builder.getUpdate(), builder.getDocClass());
+		WriteResult ret = null;
+		if (ArgUtil.is(builder.getUpdate())) {
+			ret = mongoTemplate.upsert(builder.getQuery(), builder.getUpdate(), builder.getDocClass());
+		}
+		return ret;
 	}
 
 	public WriteResult trash(Object object) {

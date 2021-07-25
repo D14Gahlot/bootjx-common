@@ -263,7 +263,7 @@ public class MessageStore extends CommonDocStore {
 
 	public void updateStatus(ContactType contactType, MessageDoc messageDoc, Status status, String reason) {
 		CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder();
-		
+
 		if (ArgUtil.is(messageDoc.getMessageId())) {
 			builder.whereIdSafe(messageDoc.getMessageId());
 		} else if (ArgUtil.is(messageDoc.getMessageIdExt())) {
@@ -273,7 +273,7 @@ public class MessageStore extends CommonDocStore {
 		} else {
 			return;
 		}
-		
+
 		builder.set("status", status);
 		builder.set("stamps." + status.toString(), System.currentTimeMillis());
 		if (ArgUtil.is(reason)) {
@@ -316,11 +316,9 @@ public class MessageStore extends CommonDocStore {
 
 	public void insert(List<MessageDoc> messages, ContactType contactType) {
 		/**
-		for (MessageDoc messageDoc : messages) {
-			mongoTemplate.save(messageDoc, MessageStore.getCollectionName(contactType));
-			//System.out.println("phone: "+messageDoc.getContact().getPhone());
-		}
-		return;
+		 * for (MessageDoc messageDoc : messages) { mongoTemplate.save(messageDoc,
+		 * MessageStore.getCollectionName(contactType)); //System.out.println("phone:
+		 * "+messageDoc.getContact().getPhone()); } return;
 		 **/
 		int n = 500;
 		// Calculate the total number of partitions of size `n` each
@@ -333,7 +331,7 @@ public class MessageStore extends CommonDocStore {
 		for (int i = 0; i < m; i++) {
 			mongoTemplate.insert(itr.get(i), MessageStore.getCollectionName(contactType));
 		}
-	
+
 	}
 
 	public List<MessageDoc> find(Query query, ContactType contactType) {

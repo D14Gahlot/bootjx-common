@@ -26,6 +26,8 @@ import com.boot.jx.postman.model.MessageDefinitions.IMessageExtended;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.query.ChatContactQuery;
 import com.boot.jx.postman.query.ChatSessionQuery;
+import com.boot.jx.postman.service.ChatDTOUtil;
+import com.boot.jx.postman.store.MessageContext;
 import com.boot.jx.postman.store.MessageStore;
 import com.boot.jx.postman.store.PMStoreConstants.CHAT_MODE;
 import com.boot.jx.postman.store.SessionStore;
@@ -54,11 +56,11 @@ public class ConnectorHandlerFactory extends ScopedBeanFactory<String, Connector
 
 		public InboxMessage assignToAgent(InboxMessage inboxMessage);
 
-		default public boolean initSession(ChatContactDoc contact, ChatSessionDoc session, InboxMessage inboxMessage) {
+		default public boolean initSession(ChatSessionDoc session, InboxMessage inboxMessage) {
 			return true;
 		}
 
-		default public boolean initSession(ChatContactDoc contact, ChatSessionDoc session,
+		default public boolean initSession(ChatContactQuery contactQuery, ChatSessionDoc session,
 				OutboxMessage outboxMessage) {
 			return true;
 		}
@@ -94,7 +96,12 @@ public class ConnectorHandlerFactory extends ScopedBeanFactory<String, Connector
 
 	}
 
-	public interface DefaultConnector extends ConnectorHandler {
+	public static abstract class AbstractConnector implements ConnectorHandler {
+		@Autowired
+		protected MessageContext messageContext;
+	}
+
+	public static abstract class DefaultConnector extends AbstractConnector {
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
@@ -125,7 +132,7 @@ public class ConnectorHandlerFactory extends ScopedBeanFactory<String, Connector
 	}
 
 	public ConnectorHandler get(ContactType contactType, String channel) {
-		LOGGER.debug("get(ContactType {}, String {})",contactType,channel);
+		LOGGER.debug("get(ContactType {}, String {})", contactType, channel);
 		String precisedKey = String.format("%s_%s", contactType, channel);
 		ConnectorHandler x = this.get(precisedKey);
 		if (ArgUtil.is(x)) {

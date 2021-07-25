@@ -20,7 +20,6 @@ import javax.validation.ConstraintViolationException;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.MethodParameter;
-import org.springframework.core.NestedRuntimeException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -31,12 +30,17 @@ import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
 
+import com.boot.json.NamedEntityDeserializer.NamedEntityEditor;
+import com.boot.json.NamedEntityDeserializer.NamedMapModel;
 import com.boot.jx.AppConfig;
 import com.boot.jx.AppConstants;
 import com.boot.jx.AppContextUtil;
@@ -65,6 +69,11 @@ public abstract class AmxAdvice implements ResponseBodyAdvice<ApiResponse<?, ?>>
 
 	@Autowired
 	private AppConfig appConfig;
+
+	@InitBinder
+	public void registerCustomEditors(WebDataBinder binder, WebRequest request) {
+		binder.registerCustomEditor(NamedMapModel.class, new NamedEntityEditor());
+	}
 
 	@ExceptionHandler(AmxApiException.class)
 	@ResponseBody

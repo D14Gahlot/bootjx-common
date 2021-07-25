@@ -2,7 +2,7 @@ package com.boot.jx.postman.model;
 
 import java.util.Map;
 
-import com.boot.jx.model.MapModel;
+import com.boot.model.MapModel;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
