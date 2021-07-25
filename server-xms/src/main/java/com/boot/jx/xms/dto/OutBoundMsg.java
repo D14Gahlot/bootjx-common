@@ -26,12 +26,17 @@ public class OutBoundMsg implements Serializable {
 	    allowableValues = "audio,document,image,location,system,text,video,voice,contacts,template")
     public String type;
 
+    @ApiMockModelProperty(required = false)
     public CommonMsgText text;
 
+    @ApiMockModelProperty(required = false)
     public OutBoundMsgMedia audio;
+    @ApiMockModelProperty(required = false)
     public OutBoundMsgMedia document;
+    @ApiMockModelProperty(required = false)
     public OutBoundMsgMedia image;
     // public Media sticker;
+    @ApiMockModelProperty(required = false)
     public OutBoundMsgMedia video;
 
     @ApiMockModelProperty(hidden = true)
@@ -39,5 +44,8 @@ public class OutBoundMsg implements Serializable {
 
     @ApiMockModelProperty(hidden = true)
     public CommonMsgLocation location;
+
+    @ApiMockModelProperty(required = false)
+    public OutBoundMsgTemplate template;
 
 }
