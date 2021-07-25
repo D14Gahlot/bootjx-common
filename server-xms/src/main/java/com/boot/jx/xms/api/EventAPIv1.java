@@ -1,5 +1,7 @@
 package com.boot.jx.xms.api;
 
+import javax.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -9,6 +11,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.xms.XmsConstants.ApiClientParams;
+import com.boot.jx.xms.dto.DigitalEventDto;
 import com.boot.jx.xms.dto.DigitalObjectDto;
 import com.boot.jx.xms.service.ApiService;
 
@@ -28,5 +31,14 @@ public class EventAPIv1 {
 		return ApiResponse.buildResult(digitalObjectDto);
 	}
 	
+	
+	@ApiClientParams
+	@ResponseBody
+	@RequestMapping(value = "/api/v1/event/push", method = { RequestMethod.POST })
+	public ApiResponse<DigitalEventDto, Object> dataEvent(@RequestBody DigitalEventDto digitalEventDto) {
+		
+		apiService.saveDigitalEvent(digitalEventDto);
+		return ApiResponse.buildResult(digitalEventDto);
+	}
 	
 }

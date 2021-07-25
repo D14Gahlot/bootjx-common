@@ -5,6 +5,7 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Component;
 
 import com.boot.jx.xms.dto.DigitalDocStore;
+import com.boot.jx.xms.dto.DigitalEventDto;
 import com.boot.jx.xms.dto.DigitalObjectDto;
 
 
@@ -23,7 +24,9 @@ public class ApiService {
 		digitalDocStore.createAndUpdateDigitalDoc(digitalObjectDto);
 	}
 	
-	
+	public void saveDigitalEvent(DigitalEventDto digitalEventDto) {
+		digitalDocStore.insertDigitalEvent(digitalEventDto);
+	}
 	
 	
 }

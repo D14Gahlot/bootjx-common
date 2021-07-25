@@ -13,6 +13,7 @@ import com.boot.jx.common.doc.AgentDoc;
 import com.boot.jx.mongo.CommonDocStore;
 import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.EntityDtoUtil;
 
 @Component
 public class DigitalDocStore  extends CommonDocStore {
@@ -69,6 +70,13 @@ public class DigitalDocStore  extends CommonDocStore {
 		return digitalDataDoc;
 	}
 	
+	/** to save digital event **/
 	
+	
+	public void insertDigitalEvent(DigitalEventDto digitalEventDto) {
+		DigitalEvent digitalEvent = EntityDtoUtil.dtoToEntity(digitalEventDto, new DigitalEvent());
+		digitalEvent.setCreatedStamp(System.currentTimeMillis());
+		mongoTemplate.save(digitalEvent);
+	}
 	
 }	
