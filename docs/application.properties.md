@@ -140,6 +140,32 @@ aws.s3.b2.region=eu-west-2
 
 ```
 
+## XMS
+###### application.properties
+```application.properties
+###### App Identification  ########
+app.env=DEMO 					# optional Enviroment
+app.group=1  					# optional group of services
+app.id=XMS1						# optional instance name
+
+###### Appplication ########
+server.port=8080				# optional Port
+
+###### DB Mongo ########
+spring.data.mongodb.uri=mongodb://localbot:localbot@10.28.42.30:27017/localbot
+
+###### DB Redis ########
+spring.redis.host=localhost
+spring.redis.port=6379
+server.connection-timeout=-1
+
+###### MeherY ########
+mry.postman.url=http://localhost:8082/postman
+mry.agent.url=http://localhost:8083/agent
+mry.bot.url=http://localhost:8084/bot
+mry.admin.url=http://localhost:8081/admin
+
+```
 
 
 ## TenantProperties 
