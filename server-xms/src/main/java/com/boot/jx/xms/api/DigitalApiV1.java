@@ -16,12 +16,10 @@ import com.boot.jx.xms.dto.DigitalObjectDto;
 import com.boot.jx.xms.service.ApiService;
 
 @Controller
-public class EventAPIv1 {
+public class DigitalApiV1 {
 
 	@Autowired
 	ApiService apiService;
-	
-
 	
 	@ApiClientParams
 	@ResponseBody
