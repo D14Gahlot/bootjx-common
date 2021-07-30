@@ -11,18 +11,18 @@ import com.boot.utils.ArgUtil;
 @Component
 public class TenantClientResolver extends TenantResolver {
 
-	public static final Map<String, String> tntMapping = new HashMap<String, String>();
+    public static final Map<String, String> tntMapping = new HashMap<String, String>();
 
-	public String resolve(String tnt) {
-		if (ArgUtil.is(tnt) && tntMapping.containsKey(tnt)) {
-			return tntMapping.get(tnt);
-		}
-		return tnt;
+    public String resolve(String tnt) {
+	if (ArgUtil.is(tnt) && tntMapping.containsKey(tnt)) {
+	    return tntMapping.get(tnt);
 	}
+	return tnt;
+    }
 
-	static {
-		tntMapping.put("app", "app");
-		tntMapping.put("api", "app");
-		tntMapping.put("local-kwt", "app");
-	}
+    static {
+	tntMapping.put("app", "app");
+	tntMapping.put("api", "app");
+	tntMapping.put("local", "local");
+    }
 }

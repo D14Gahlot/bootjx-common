@@ -5,8 +5,8 @@ import org.springframework.stereotype.Component;
 
 import com.boot.jx.AppConfig;
 import com.boot.jx.postman.GeoLocationService;
+import com.boot.jx.postman.PMConstants.PostManUrls;
 import com.boot.jx.postman.PostManException;
-import com.boot.jx.postman.PostManUrls;
 import com.boot.jx.postman.model.GeoLocation;
 import com.boot.jx.rest.RestService;
 

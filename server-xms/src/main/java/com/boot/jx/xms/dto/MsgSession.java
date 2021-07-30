@@ -4,10 +4,10 @@ import com.boot.jx.swagger.ApiMockModelProperty;
 
 public class MsgSession {
 	@ApiMockModelProperty(example = "SUPPORT", value = "Message Assignment If Any")
-	private String assignedToDept;
+	public String assignedToDept;
 
 	@ApiMockModelProperty(example = "SUPPORT", value = "Message Assignment If Any")
-	private String assignedToAgent;
+	public String assignedToAgent;
 
 	@ApiMockModelProperty(example = "xsds34434", value = "SessionId")
 	public String sessionId;

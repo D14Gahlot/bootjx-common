@@ -1,95 +1,101 @@
 package com.boot.jx.postman.fb;
 
 import com.boot.jx.dict.ContactType;
-import com.boot.jx.postman.PMEnvironment.PMConnectorConfig;
+import com.boot.jx.postman.PMConstants.CHANNEL_TYPE;
+import com.boot.jx.postman.PMEnvironment.AChannelConfig;
+import com.boot.jx.postman.PMEnvironment.AChannelDetails;
 import com.fasterxml.jackson.annotation.JsonView;
 
-public class FacebookConfig implements PMConnectorConfig {
+public class FacebookConfig extends AChannelDetails {
 
-	private static final long serialVersionUID = -2397678752642150000L;
-	private String pageId;
-	private String type;
+    public FacebookConfig() {
+	super(CHANNEL_TYPE.FACEBOOK);
+    }
 
-	@JsonView(PMConnectorConfig.Protected.class)
-	private String accessToken;
-	@JsonView(PMConnectorConfig.Protected.class)
-	private String verifyToken;
-	@JsonView(PMConnectorConfig.Protected.class)
-	private String appSecret;
+    private static final long serialVersionUID = -2397678752642150000L;
+    private String pageId;
+    private String type;
 
-	public String getPageId() {
-		return pageId;
-	}
+    @JsonView(AChannelConfig.Protected.class)
+    private String accessToken;
+    @JsonView(AChannelConfig.Protected.class)
+    private String verifyToken;
+    @JsonView(AChannelConfig.Protected.class)
+    private String appSecret;
 
-	public void setPageId(String pageId) {
-		this.pageId = pageId;
-	}
+    public String getPageId() {
+	return pageId;
+    }
 
-	public String getType() {
-		return type;
-	}
+    public void setPageId(String pageId) {
+	this.pageId = pageId;
+    }
 
-	public void setType(String type) {
-		this.type = type;
-	}
+    public String getType() {
+	return type;
+    }
 
-	public String getAccessToken() {
-		return accessToken;
-	}
+    public void setType(String type) {
+	this.type = type;
+    }
 
-	public void setAccessToken(String accessToken) {
-		this.accessToken = accessToken;
-	}
+    public String getAccessToken() {
+	return accessToken;
+    }
 
-	public String getVerifyToken() {
-		return verifyToken;
-	}
+    public void setAccessToken(String accessToken) {
+	this.accessToken = accessToken;
+    }
 
-	public void setVerifyToken(String verifyToken) {
-		this.verifyToken = verifyToken;
-	}
+    public String getVerifyToken() {
+	return verifyToken;
+    }
 
-	public String getAppSecret() {
-		return appSecret;
-	}
+    public void setVerifyToken(String verifyToken) {
+	this.verifyToken = verifyToken;
+    }
 
-	public void setAppSecret(String appSecret) {
-		this.appSecret = appSecret;
-	}
+    public String getAppSecret() {
+	return appSecret;
+    }
 
-	@Override
-	public String getLane() {
-		return this.pageId;
-	}
+    public void setAppSecret(String appSecret) {
+	this.appSecret = appSecret;
+    }
 
-	@Override
-	public boolean isPushAllowed() {
-		return false;
-	}
+    @Override
+    public String getLane() {
+	return this.pageId;
+    }
 
-	@Override
-	public boolean isPushOnlyApproved() {
-		return true;
-	}
+    @Override
+    public boolean isPushAllowed() {
+	return false;
+    }
 
-	@Override
-	public boolean isPushFreeTextAllowed() {
-		return false;
-	}
+    @Override
+    public boolean isPushOnlyApproved() {
+	return true;
+    }
 
-	@Override
-	public boolean isPushToNewContactAllowed() {
-		return false;
-	}
+    @Override
+    public boolean isPushFreeTextAllowed() {
+	return false;
+    }
 
-	@Override
-	public ContactType getContactType() {
-		return ContactType.FACEBOOK;
-	}
+    @Override
+    public boolean isPushToNewContactAllowed() {
+	return false;
+    }
 
-	@Override
-	public String getChannel() {
-		return null;
-	}
+    @Override
+    public ContactType getContactType() {
+	return ContactType.FACEBOOK;
+    }
+
+    @Override
+    public String getChannel() {
+	return null;
+    }
 
 }

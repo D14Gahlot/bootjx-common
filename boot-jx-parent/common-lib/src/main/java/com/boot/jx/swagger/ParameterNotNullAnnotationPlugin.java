@@ -15,6 +15,7 @@ import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
+import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
 import com.google.common.base.Optional;
 
@@ -60,14 +61,13 @@ public class ParameterNotNullAnnotationPlugin implements ModelPropertyBuilderPlu
 		    .isHidden(annotation.transform(toHidden()).or(false))
 		    .type(annotation.transform(toType(context.getResolver())).orNull())
 		    .position(annotation.transform(toPosition()).or(0))
-		    .example(annotation.transform(toExample()).orNull())
+		    .example(annotation.transform(toExample()).orNull());
 
-	    ;
-
-	    List<VendorExtension> notesExtensions = CollectionUtil
-		    .getList(new StringVendorExtension("notes", annotation.get().notes()));
-
-	    context.getBuilder().extensions(notesExtensions);
+	    if (ArgUtil.is(annotation.get().notes())) {
+		List<VendorExtension> notesExtensions = CollectionUtil
+			.getList(new StringVendorExtension("notes", annotation.get().notes()));
+		context.getBuilder().extensions(notesExtensions);
+	    }
 
 	} else {
 	    context.getBuilder()

@@ -1,96 +1,102 @@
 package com.boot.jx.postman.gupshup;
 
 import com.boot.jx.dict.ContactType;
-import com.boot.jx.postman.PMEnvironment.PMConnectorConfig;
+import com.boot.jx.postman.PMConstants.CHANNEL_TYPE;
+import com.boot.jx.postman.PMEnvironment.AChannelConfig;
+import com.boot.jx.postman.PMEnvironment.AChannelDetails;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonView;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class GupShupConfig implements PMConnectorConfig {
+public class GupShupConfig extends AChannelDetails {
 
-	private static final long serialVersionUID = -2397678752642150000L;
-	private String number;
-	@JsonView(PMConnectorConfig.Protected.class)
-	private String notifyId;
-	@JsonView(PMConnectorConfig.Protected.class)
-	private String notifyPass;
-	@JsonView(PMConnectorConfig.Protected.class)
-	private String chatId;
-	@JsonView(PMConnectorConfig.Protected.class)
-	private String chatPass;
+    public GupShupConfig() {
+	super(CHANNEL_TYPE.GUPSHUP);
+    }
 
-	public String getNumber() {
-		return number;
-	}
+    private static final long serialVersionUID = -2397678752642150000L;
+    private String number;
+    @JsonView(AChannelConfig.Protected.class)
+    private String notifyId;
+    @JsonView(AChannelConfig.Protected.class)
+    private String notifyPass;
+    @JsonView(AChannelConfig.Protected.class)
+    private String chatId;
+    @JsonView(AChannelConfig.Protected.class)
+    private String chatPass;
 
-	public void setNumber(String number) {
-		this.number = number;
-	}
+    public String getNumber() {
+	return number;
+    }
 
-	public String getNotifyId() {
-		return notifyId;
-	}
+    public void setNumber(String number) {
+	this.number = number;
+    }
 
-	public void setNotifyId(String notifyId) {
-		this.notifyId = notifyId;
-	}
+    public String getNotifyId() {
+	return notifyId;
+    }
 
-	public String getNotifyPass() {
-		return notifyPass;
-	}
+    public void setNotifyId(String notifyId) {
+	this.notifyId = notifyId;
+    }
 
-	public void setNotifyPass(String notifyPass) {
-		this.notifyPass = notifyPass;
-	}
+    public String getNotifyPass() {
+	return notifyPass;
+    }
 
-	public String getChatId() {
-		return chatId;
-	}
+    public void setNotifyPass(String notifyPass) {
+	this.notifyPass = notifyPass;
+    }
 
-	public void setChatId(String chatId) {
-		this.chatId = chatId;
-	}
+    public String getChatId() {
+	return chatId;
+    }
 
-	public String getChatPass() {
-		return chatPass;
-	}
+    public void setChatId(String chatId) {
+	this.chatId = chatId;
+    }
 
-	public void setChatPass(String chatPass) {
-		this.chatPass = chatPass;
-	}
+    public String getChatPass() {
+	return chatPass;
+    }
 
-	@Override
-	public String getLane() {
-		return this.number;
-	}
+    public void setChatPass(String chatPass) {
+	this.chatPass = chatPass;
+    }
 
-	@Override
-	public boolean isPushAllowed() {
-		return true;
-	}
+    @Override
+    public String getLane() {
+	return this.number;
+    }
 
-	@Override
-	public boolean isPushOnlyApproved() {
-		return true;
-	}
+    @Override
+    public boolean isPushAllowed() {
+	return true;
+    }
 
-	@Override
-	public boolean isPushFreeTextAllowed() {
-		return false;
-	}
+    @Override
+    public boolean isPushOnlyApproved() {
+	return true;
+    }
 
-	@Override
-	public boolean isPushToNewContactAllowed() {
-		return true;
-	}
+    @Override
+    public boolean isPushFreeTextAllowed() {
+	return false;
+    }
 
-	@Override
-	public ContactType getContactType() {
-		return ContactType.WHATSAPP;
-	}
+    @Override
+    public boolean isPushToNewContactAllowed() {
+	return true;
+    }
 
-	@Override
-	public String getChannel() {
-		return "GUPSHUPW";
-	}
+    @Override
+    public ContactType getContactType() {
+	return ContactType.WHATSAPP;
+    }
+
+    @Override
+    public String getChannel() {
+	return "GUPSHUPW";
+    }
 }

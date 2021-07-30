@@ -1,6 +1,17 @@
 package com.boot.jx.postman;
 
-public final class PostManUrls {
+public class PMConstants {
+
+    public final class CHANNEL_TYPE {
+
+	public static final String TELEGRAM = "tg";
+	public static final String TWITTER = "tw";
+	public static final String FACEBOOK = "fb";
+	public static final String GUPSHUP = "wags";
+
+    }
+
+    public final class PostManUrls {
 
 	private PostManUrls() {
 	}
@@ -45,4 +56,5 @@ public final class PostManUrls {
 	public static final String DOC_URL_BY_ID = "/url/{image_id}.{ext}";
 	public static final String DOC_SCAN_ID = "/scan/id";
 
+    }
 }

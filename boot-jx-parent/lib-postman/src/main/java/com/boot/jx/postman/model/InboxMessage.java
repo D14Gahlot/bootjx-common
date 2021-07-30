@@ -9,8 +9,8 @@ import java.util.Map;
 
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.postman.model.MessageDefinitions.Contactable;
-import com.boot.jx.postman.model.MessageDefinitions.MESSAGE_BOUND_TYPE;
 import com.boot.jx.postman.model.MessageDefinitions.IMessageExtended;
+import com.boot.jx.postman.model.MessageDefinitions.MESSAGE_BOUND_TYPE;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.StringUtils.StringMatcher;
 import com.fasterxml.jackson.annotation.JsonIgnore;

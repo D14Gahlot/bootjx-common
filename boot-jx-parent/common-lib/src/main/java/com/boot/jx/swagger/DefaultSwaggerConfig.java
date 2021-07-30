@@ -2,7 +2,6 @@ package com.boot.jx.swagger;
 
 import java.util.ArrayList;
 import java.util.List;
-import com.boot.utils.CollectionUtil;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -22,7 +21,6 @@ import com.boot.utils.UniqueID;
 
 import springfox.documentation.builders.ParameterBuilder;
 import springfox.documentation.builders.RequestHandlerSelectors;
-import springfox.documentation.schema.Collections;
 import springfox.documentation.schema.ModelRef;
 import springfox.documentation.service.AllowableListValues;
 import springfox.documentation.service.AllowableValues;
@@ -97,28 +95,32 @@ public class DefaultSwaggerConfig {
 	return docket;
     }
 
-    @Bean @ConditionalOnProperty(value = "swagger.tranx.enabled", havingValue = "true")
+    @Bean
+    @ConditionalOnProperty(value = "swagger.tranx.enabled", havingValue = "true")
     public MockParam tranxParam() {
 	return new MockParamBuilder().name(AppConstants.TRANX_ID_XKEY).description("Transaction Id")
 		.defaultValue(AppContextUtil.getTraceId()).parameterType(MockParamBuilder.MockParamType.HEADER)
 		.required(false).build();
     }
 
-    @Bean @ConditionalOnProperty(value = "swagger.tranx.enabled", havingValue = "true")
+    @Bean
+    @ConditionalOnProperty(value = "swagger.tranx.enabled", havingValue = "true")
     public MockParam traceParam() {
 	return new MockParamBuilder().name(AppConstants.TRACE_ID_XKEY).description("Trace Id")
 		.defaultValue(AppContextUtil.getTraceId()).parameterType(MockParamBuilder.MockParamType.HEADER)
 		.required(false).build();
     }
 
-    @Bean @ConditionalOnProperty(value = "swagger.tenant.enabled", havingValue = "true")
+    @Bean
+    @ConditionalOnProperty(value = "swagger.tenant.enabled", havingValue = "true")
     public MockParam tenantParam() {
 	return new MockParamBuilder().name(TenantContextHolder.TENANT).description("Tenant Country")
 		.defaultValue(Tenants.DEFAULT_STR).parameterType(MockParamBuilder.MockParamType.HEADER).required(false)
 		.build();
     }
 
-    @Bean @ConditionalOnProperty(value = "swagger.key.enabled", havingValue = "true")
+    @Bean
+    @ConditionalOnProperty(value = "swagger.key.enabled", havingValue = "true")
     public MockParam swaggerParam() {
 	return new MockParamBuilder().name(SWGGER_SECRET_PARAM).description(SWGGER_SECRET_PARAM)
 		.defaultValue(SWGGER_SECRET_VALUE).parameterType(MockParamBuilder.MockParamType.HEADER)
@@ -149,4 +151,5 @@ public class DefaultSwaggerConfig {
 	    return docket;
 	}
     }
+
 }

@@ -44,6 +44,6 @@ public class InBoundMsg {
 
     @ApiMockModelProperty(example = "{}",
 	    value = "Original Message sent by Channel :  only if modified/error by service")
-    private Object originalMessage;
+    public Object originalMessage;
 
 }

@@ -1,6 +1,8 @@
 package com.boot.jx.admin.api;
 
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -13,190 +15,141 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.boot.jx.AppContextUtil;
 import com.boot.jx.admin.service.AdminConfigService;
-import com.boot.jx.agent.AgentConfig;
 import com.boot.jx.api.ApiResponse;
-import com.boot.jx.postman.PMConfiguration;
+import com.boot.jx.postman.ChannelConfig;
 import com.boot.jx.postman.PMEnvironment;
+import com.boot.jx.postman.PMEnvironment.AChannelConfig;
+import com.boot.jx.postman.PMEnvironment.AChannelDetails;
 import com.boot.jx.postman.PMEnvironment.PMConfigurationObject;
-import com.boot.jx.postman.PMEnvironment.PMConnectorConfig;
-import com.boot.jx.postman.doc.ConnectorConfigDoc;
+import com.boot.jx.postman.doc.PMConfigurationDoc;
 import com.boot.jx.postman.fb.FacebookConfig;
 import com.boot.jx.postman.gupshup.GupShupConfig;
 import com.boot.jx.postman.tg.TelegramConfig;
 import com.boot.jx.postman.tw.TwitterConfig;
 import com.boot.jx.tunnel.sys.SharedConfigManager;
 import com.boot.utils.ArgUtil;
-import com.boot.utils.EntityDtoUtil;
+import com.boot.utils.StringUtils;
 import com.fasterxml.jackson.annotation.JsonView;
 
 @RestController
 public class ConfigController {
 
-	@Autowired
-	private MongoTemplate mongoTemplate;
+    @Autowired
+    private MongoTemplate mongoTemplate;
 
-	@Autowired
-	private SharedConfigManager sharedConfigManager;
+    @Autowired
+    private SharedConfigManager sharedConfigManager;
 
-	@Autowired
-	private AdminConfigService adminConfigService;
+    @Autowired
+    private AdminConfigService adminConfigService;
 
-	@Autowired
-	private PMEnvironment pmEnvironment;
+    @Autowired
+    private PMEnvironment pmEnvironment;
 
-	@RequestMapping(value = "/api/connector", method = { RequestMethod.GET })
-	public ApiResponse<ConnectorConfigDoc, Object> getConnnectors() {
-		return ApiResponse.buildResults(mongoTemplate.findById(AppContextUtil.getTenant(), ConnectorConfigDoc.class));
+    @RequestMapping(value = "/api/config", method = { RequestMethod.POST })
+    public ApiResponse<Map<String, Object>, Object> setConfig(@RequestBody PMConfigurationObject map) {
+	adminConfigService.save(map);
+	return ApiResponse.buildResults(adminConfigService.getAdminConfigs());
+    }
+
+    @RequestMapping(value = "/api/config", method = { RequestMethod.GET })
+    public ApiResponse<Map<String, Object>, Object> getConfig() {
+	return ApiResponse.buildResults(adminConfigService.getAdminConfigs());
+    }
+
+    @RequestMapping(value = "/api/config/refresh", method = { RequestMethod.GET })
+    public ApiResponse<PMConfigurationDoc, Object> getConnnectors() {
+	PMConfigurationDoc config = mongoTemplate.findById(AppContextUtil.getTenant(), PMConfigurationDoc.class);
+	adminConfigService.saveConfigs(config);
+	return ApiResponse.buildResults(mongoTemplate.findById(AppContextUtil.getTenant(), PMConfigurationDoc.class));
+    }
+
+    @RequestMapping(value = "/api/config/fb", method = { RequestMethod.POST })
+    public ApiResponse<PMConfigurationDoc, Object> addFacebookConfig(@RequestParam String pageId,
+	    @RequestParam String type, @RequestParam String verifyToken, @RequestParam String appSecret,
+	    @RequestParam String accessToken) {
+	FacebookConfig fbconfig = new FacebookConfig();
+	fbconfig.setPageId(pageId);
+	fbconfig.setType(type);
+	fbconfig.setVerifyToken(verifyToken);
+	fbconfig.setAccessToken(accessToken);
+	fbconfig.setAppSecret(appSecret);
+	adminConfigService.save(new ChannelConfig().from(fbconfig));
+	return ApiResponse.buildResults(mongoTemplate.findById(AppContextUtil.getTenant(), PMConfigurationDoc.class));
+    }
+
+    @RequestMapping(value = "/api/config/tw", method = { RequestMethod.POST })
+    public ApiResponse<PMConfigurationDoc, Object> addTwitterConfig(@RequestParam String handler,
+	    @RequestParam String type, @RequestParam String consumerKey, @RequestParam String consumerSecret,
+	    @RequestParam String accessTokenSecret, @RequestParam String accessToken,
+	    @RequestParam(required = false) String envName, @RequestParam String webhookUrl) {
+	TwitterConfig fbconfig = new TwitterConfig();
+	fbconfig.setHandler(handler);
+	fbconfig.setType(type);
+	fbconfig.setEnvName(envName);
+	fbconfig.setAccessToken(accessToken);
+	fbconfig.setAccessTokenSecret(accessTokenSecret);
+	fbconfig.setConsumerKey(consumerKey);
+	fbconfig.setConsumerSecret(consumerSecret);
+	fbconfig.setWebhookUrl(webhookUrl);
+	adminConfigService.save(new ChannelConfig().from(fbconfig));
+	return ApiResponse.buildResults(mongoTemplate.findById(AppContextUtil.getTenant(), PMConfigurationDoc.class));
+    }
+
+    @RequestMapping(value = "/api/config/tg", method = { RequestMethod.POST })
+    public ApiResponse<PMConfigurationDoc, Object> addTelegramConfig(@RequestParam String handler,
+	    @RequestParam String type, @RequestParam String accessToken, @RequestParam(required = false) String envName,
+	    @RequestParam String webhookUrl) {
+	TelegramConfig fbconfig = new TelegramConfig();
+	fbconfig.setHandler(handler);
+	fbconfig.setType(type);
+	fbconfig.setAccessToken(accessToken);
+	fbconfig.setWebhookUrl(webhookUrl);
+	adminConfigService.save(new ChannelConfig().from(fbconfig));
+	return ApiResponse.buildResults(mongoTemplate.findById(AppContextUtil.getTenant(), PMConfigurationDoc.class));
+    }
+
+    @RequestMapping(value = "/api/config/gs", method = { RequestMethod.POST })
+    public ApiResponse<PMConfigurationDoc, Object> addWAConfig(@RequestParam String number,
+	    @RequestParam(required = false) String notifyId, @RequestParam String chatId, @RequestParam String chatPass,
+	    @RequestParam(required = false) String notifyPass) {
+	GupShupConfig fbconfig = new GupShupConfig();
+	fbconfig.setNumber(number);
+	fbconfig.setChatId(chatId);
+	fbconfig.setChatPass(chatPass);
+	fbconfig.setNotifyId(notifyId);
+	fbconfig.setNotifyPass(notifyPass);
+	adminConfigService.save(new ChannelConfig().from(fbconfig));
+	return ApiResponse.buildResults(mongoTemplate.findById(AppContextUtil.getTenant(), PMConfigurationDoc.class));
+    }
+
+    @RequestMapping(value = "/api/config/cdn", method = { RequestMethod.POST })
+    public ApiResponse<PMConfigurationObject, Object> updateCDN(@RequestParam(required = false) String url,
+	    @RequestParam(required = false) String version) {
+	PMConfigurationObject config = pmEnvironment.get("mry.cdn.url");
+	String oldUrl = config.asString();
+
+	if (ArgUtil.is(version) && ArgUtil.is(oldUrl)) {
+	    Pattern pattern = Pattern.compile("(.+)cdn.jsdelivr.net/(.+)@(.+)/dist/");
+	    Matcher matcher = pattern.matcher(oldUrl);
+	    if (matcher.find()) {
+		url = String.format("%scdn.jsdelivr.net/%s@%s/dist/", matcher.group(1), matcher.group(2),
+			StringUtils.trim(version));
+	    }
 	}
 
-	@RequestMapping(value = "/api/connector", method = { RequestMethod.POST })
-	public ApiResponse<ConnectorConfigDoc, Object> postConfig(@RequestBody PMConfiguration config) {
-		ConnectorConfigDoc doc = EntityDtoUtil.dtoToEntity(config, new ConnectorConfigDoc());
-		doc.setTenant(AppContextUtil.getTenant());
-		mongoTemplate.save(doc);
-		sharedConfigManager.clear();
-		return ApiResponse.buildResults(mongoTemplate.findById(AppContextUtil.getTenant(), ConnectorConfigDoc.class));
+	if (ArgUtil.is(url)) {
+	    config.setValue(url);
+	    adminConfigService.save(config);
 	}
 
-	@RequestMapping(value = "/api/connector/fb", method = { RequestMethod.POST })
-	public ApiResponse<ConnectorConfigDoc, Object> addFacebookConfig(@RequestParam String pageId,
-			@RequestParam String type, @RequestParam String verifyToken, @RequestParam String appSecret,
-			@RequestParam String accessToken) {
-		ConnectorConfigDoc doc = mongoTemplate.findById(AppContextUtil.getTenant(), ConnectorConfigDoc.class);
+	return ApiResponse.buildResults(config);
+    }
 
-		if (ArgUtil.isEmpty(doc)) {
-			doc = new ConnectorConfigDoc();
-			doc.setTenant(AppContextUtil.getTenant());
-		}
-
-		FacebookConfig fbconfig = new FacebookConfig();
-		fbconfig.setPageId(pageId);
-		fbconfig.setType(type);
-		fbconfig.setVerifyToken(verifyToken);
-		fbconfig.setAccessToken(accessToken);
-		fbconfig.setAppSecret(appSecret);
-		doc.facebook(fbconfig);
-		mongoTemplate.save(doc);
-		sharedConfigManager.clear();
-		return ApiResponse.buildResults(mongoTemplate.findById(AppContextUtil.getTenant(), ConnectorConfigDoc.class));
-	}
-
-	@RequestMapping(value = "/api/connector/tw", method = { RequestMethod.POST })
-	public ApiResponse<ConnectorConfigDoc, Object> addTwitterConfig(@RequestParam String handler,
-			@RequestParam String type, @RequestParam String consumerKey, @RequestParam String consumerSecret,
-			@RequestParam String accessTokenSecret, @RequestParam String accessToken,
-			@RequestParam(required = false) String envName, @RequestParam String webhookUrl) {
-		ConnectorConfigDoc doc = mongoTemplate.findById(AppContextUtil.getTenant(), ConnectorConfigDoc.class);
-
-		if (ArgUtil.isEmpty(doc)) {
-			doc = new ConnectorConfigDoc();
-			doc.setTenant(AppContextUtil.getTenant());
-		}
-
-		TwitterConfig fbconfig = new TwitterConfig();
-		fbconfig.setHandler(handler);
-		fbconfig.setType(type);
-		fbconfig.setEnvName(envName);
-		fbconfig.setAccessToken(accessToken);
-		fbconfig.setAccessTokenSecret(accessTokenSecret);
-		fbconfig.setConsumerKey(consumerKey);
-		fbconfig.setConsumerSecret(consumerSecret);
-		fbconfig.setWebhookUrl(webhookUrl);
-		doc.twitter(fbconfig);
-		mongoTemplate.save(doc);
-		sharedConfigManager.clear();
-		return ApiResponse.buildResults(mongoTemplate.findById(AppContextUtil.getTenant(), ConnectorConfigDoc.class));
-	}
-
-	@RequestMapping(value = "/api/connector/tg", method = { RequestMethod.POST })
-	public ApiResponse<ConnectorConfigDoc, Object> addTelegramConfig(@RequestParam String handler,
-			@RequestParam String type, @RequestParam String accessToken, @RequestParam(required = false) String envName,
-			@RequestParam String webhookUrl) {
-		ConnectorConfigDoc doc = mongoTemplate.findById(AppContextUtil.getTenant(), ConnectorConfigDoc.class);
-
-		if (ArgUtil.isEmpty(doc)) {
-			doc = new ConnectorConfigDoc();
-			doc.setTenant(AppContextUtil.getTenant());
-		}
-
-		TelegramConfig fbconfig = new TelegramConfig();
-		fbconfig.setHandler(handler);
-		fbconfig.setType(type);
-		fbconfig.setAccessToken(accessToken);
-		fbconfig.setWebhookUrl(webhookUrl);
-		doc.telegram(fbconfig);
-		mongoTemplate.save(doc);
-		sharedConfigManager.clear();
-		return ApiResponse.buildResults(mongoTemplate.findById(AppContextUtil.getTenant(), ConnectorConfigDoc.class));
-	}
-
-	@RequestMapping(value = "/api/connector/gs", method = { RequestMethod.POST })
-	public ApiResponse<ConnectorConfigDoc, Object> addWAConfig(@RequestParam String number,
-			@RequestParam String notifyId, @RequestParam String chatId, @RequestParam String chatPass,
-			@RequestParam String notifyPass) {
-		ConnectorConfigDoc doc = mongoTemplate.findById(AppContextUtil.getTenant(), ConnectorConfigDoc.class);
-
-		if (ArgUtil.isEmpty(doc)) {
-			doc = new ConnectorConfigDoc();
-			doc.setTenant(AppContextUtil.getTenant());
-		}
-
-		GupShupConfig fbconfig = new GupShupConfig();
-		fbconfig.setNumber(number);
-		fbconfig.setChatId(chatId);
-		fbconfig.setChatPass(chatPass);
-		fbconfig.setNotifyId(notifyId);
-		fbconfig.setNotifyPass(notifyPass);
-
-		doc.gupshup(fbconfig);
-		mongoTemplate.save(doc);
-		sharedConfigManager.clear();
-		return ApiResponse.buildResults(mongoTemplate.findById(AppContextUtil.getTenant(), ConnectorConfigDoc.class));
-	}
-
-	@RequestMapping(value = "/api/config/set/cdn", method = { RequestMethod.POST })
-	public ApiResponse<PMConfigurationObject, Object> updateCDN(@RequestParam(required = false) String url) {
-		PMConfigurationObject config = pmEnvironment.get("mry.cdn.url");
-		if (ArgUtil.is(url)) {
-			config.setValue(url);
-			adminConfigService.setAdminConfigs(config);
-		}
-		return ApiResponse.buildResults(config);
-	}
-
-	@RequestMapping(value = "/api/config/set", method = { RequestMethod.POST })
-	public ApiResponse<Map<String, Object>, Object> addConfig(@RequestBody PMConfigurationObject map) {
-		adminConfigService.setAdminConfigs(map);
-		return ApiResponse.buildResults(adminConfigService.getAdminConfigs());
-	}
-
-	@RequestMapping(value = "/api/config", method = { RequestMethod.GET })
-	public ApiResponse<Map<String, Object>, Object> getConfig() {
-		return ApiResponse.buildResults(adminConfigService.getAdminConfigs());
-	}
-
-	@RequestMapping(value = "/api/config/agent", method = { RequestMethod.POST })
-	public ApiResponse<ConnectorConfigDoc, Object> setDefaultBotName(@RequestBody AgentConfig config) {
-		ConnectorConfigDoc doc = mongoTemplate.findById(AppContextUtil.getTenant(), ConnectorConfigDoc.class);
-
-		if (ArgUtil.isEmpty(doc)) {
-			doc = new ConnectorConfigDoc();
-			doc.setTenant(AppContextUtil.getTenant());
-		}
-
-		AgentConfig existing = doc.agent();
-		if (ArgUtil.is(config.getDefaultBotName())) {
-			existing.setDefaultBotName(config.getDefaultBotName());
-		}
-		mongoTemplate.save(existing);
-		sharedConfigManager.clear();
-		return ApiResponse.buildResults(mongoTemplate.findById(AppContextUtil.getTenant(), ConnectorConfigDoc.class));
-	}
-
-	@JsonView(PMConnectorConfig.Public.class)
-	@ResponseBody
-	@RequestMapping(value = { "/api/options/lanes" }, method = { RequestMethod.GET })
-	public ApiResponse<PMConnectorConfig, Object> listActiveLanes() {
-		return ApiResponse.buildResults(pmEnvironment.config().connectors());
-	}
+    @JsonView(AChannelConfig.Public.class)
+    @ResponseBody
+    @RequestMapping(value = { "/api/options/lanes" }, method = { RequestMethod.GET })
+    public ApiResponse<AChannelDetails, Object> listActiveLanes() {
+	return ApiResponse.buildResults(pmEnvironment.config().connectors());
+    }
 }

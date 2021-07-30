@@ -14,7 +14,7 @@ import com.boot.jx.common.doc.AgentDoc;
 import com.boot.jx.common.doc.DepartmentDoc;
 import com.boot.jx.common.store.AgentStore;
 import com.boot.jx.common.store.DocumentUpdateListner;
-import com.boot.jx.postman.doc.ConnectorConfigDoc;
+import com.boot.jx.postman.doc.PMConfigurationDoc;
 import com.boot.jx.tunnel.sys.SharedConfigManager;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
@@ -84,7 +84,7 @@ public class AdminService {
 
 		AgentDoc agent = agentStore.findById(agentId);
 		DepartmentDoc dept = agentStore.findDepartmentById(agent.getDept_id());
-		ConnectorConfigDoc doc = mongoTemplate.findById(AppContextUtil.getTenant(), ConnectorConfigDoc.class);
+		PMConfigurationDoc doc = mongoTemplate.findById(AppContextUtil.getTenant(), PMConfigurationDoc.class);
 		if (agent.isDefaultValue()) {
 			doc.agent().defaultAgents().put(dept.getDept_code(), agent.getAgent_code());
 		} else {
@@ -99,7 +99,7 @@ public class AdminService {
 	public List<DepartmentResponseAdminDto> updateDepartmentDefault(String deptId) {
 		agentStore.updateDepartmentDefault(deptId);
 		DepartmentDoc dept = agentStore.findDepartmentById(deptId);
-		ConnectorConfigDoc doc = mongoTemplate.findById(AppContextUtil.getTenant(), ConnectorConfigDoc.class);
+		PMConfigurationDoc doc = mongoTemplate.findById(AppContextUtil.getTenant(), PMConfigurationDoc.class);
 		if (dept.isDefaultValue()) {
 			doc.agent().setDefaultTeamCode(dept.getDept_code());
 		} else {

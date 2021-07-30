@@ -1,118 +1,124 @@
 package com.boot.jx.postman.tw;
 
 import com.boot.jx.dict.ContactType;
-import com.boot.jx.postman.PMEnvironment.PMConnectorConfig;
+import com.boot.jx.postman.PMConstants.CHANNEL_TYPE;
+import com.boot.jx.postman.PMEnvironment.AChannelConfig;
+import com.boot.jx.postman.PMEnvironment.AChannelDetails;
 import com.fasterxml.jackson.annotation.JsonView;
 
-public class TwitterConfig implements PMConnectorConfig {
+public class TwitterConfig extends AChannelDetails {
 
-	private static final long serialVersionUID = -2397678752642150000L;
-	private String handler;
-	private String type;
-	private String envName;
+    public TwitterConfig() {
+	super(CHANNEL_TYPE.TWITTER);
+    }
 
-	@JsonView(PMConnectorConfig.Protected.class)
-	private String consumerKey;
-	@JsonView(PMConnectorConfig.Protected.class)
-	private String consumerSecret;
-	@JsonView(PMConnectorConfig.Protected.class)
-	private String accessToken;
-	@JsonView(PMConnectorConfig.Protected.class)
-	private String accessTokenSecret;
-	@JsonView(PMConnectorConfig.Protected.class)
-	private String webhookUrl;
+    private static final long serialVersionUID = -2397678752642150000L;
+    private String handler;
+    private String type;
+    private String envName;
 
-	public String getHandler() {
-		return handler;
-	}
+    @JsonView(AChannelConfig.Protected.class)
+    private String consumerKey;
+    @JsonView(AChannelConfig.Protected.class)
+    private String consumerSecret;
+    @JsonView(AChannelConfig.Protected.class)
+    private String accessToken;
+    @JsonView(AChannelConfig.Protected.class)
+    private String accessTokenSecret;
+    @JsonView(AChannelConfig.Protected.class)
+    private String webhookUrl;
 
-	public void setHandler(String handler) {
-		this.handler = handler;
-	}
+    public String getHandler() {
+	return handler;
+    }
 
-	public String getType() {
-		return type;
-	}
+    public void setHandler(String handler) {
+	this.handler = handler;
+    }
 
-	public void setType(String type) {
-		this.type = type;
-	}
+    public String getType() {
+	return type;
+    }
 
-	public String getEnvName() {
-		return envName;
-	}
+    public void setType(String type) {
+	this.type = type;
+    }
 
-	public void setEnvName(String envName) {
-		this.envName = envName;
-	}
+    public String getEnvName() {
+	return envName;
+    }
 
-	public String getConsumerKey() {
-		return consumerKey;
-	}
+    public void setEnvName(String envName) {
+	this.envName = envName;
+    }
 
-	public void setConsumerKey(String consumerKey) {
-		this.consumerKey = consumerKey;
-	}
+    public String getConsumerKey() {
+	return consumerKey;
+    }
 
-	public String getConsumerSecret() {
-		return consumerSecret;
-	}
+    public void setConsumerKey(String consumerKey) {
+	this.consumerKey = consumerKey;
+    }
 
-	public void setConsumerSecret(String consumerSecret) {
-		this.consumerSecret = consumerSecret;
-	}
+    public String getConsumerSecret() {
+	return consumerSecret;
+    }
 
-	public String getAccessToken() {
-		return accessToken;
-	}
+    public void setConsumerSecret(String consumerSecret) {
+	this.consumerSecret = consumerSecret;
+    }
 
-	public void setAccessToken(String accessToken) {
-		this.accessToken = accessToken;
-	}
+    public String getAccessToken() {
+	return accessToken;
+    }
 
-	public String getAccessTokenSecret() {
-		return accessTokenSecret;
-	}
+    public void setAccessToken(String accessToken) {
+	this.accessToken = accessToken;
+    }
 
-	public void setAccessTokenSecret(String accessTokenSecret) {
-		this.accessTokenSecret = accessTokenSecret;
-	}
+    public String getAccessTokenSecret() {
+	return accessTokenSecret;
+    }
 
-	public String getWebhookUrl() {
-		return webhookUrl;
-	}
+    public void setAccessTokenSecret(String accessTokenSecret) {
+	this.accessTokenSecret = accessTokenSecret;
+    }
 
-	public void setWebhookUrl(String webhookUrl) {
-		this.webhookUrl = webhookUrl;
-	}
+    public String getWebhookUrl() {
+	return webhookUrl;
+    }
 
-	@Override
-	public String getLane() {
-		return this.handler;
-	}
+    public void setWebhookUrl(String webhookUrl) {
+	this.webhookUrl = webhookUrl;
+    }
 
-	@Override
-	public boolean isPushAllowed() {
-		return true;
-	}
+    @Override
+    public String getLane() {
+	return this.handler;
+    }
 
-	@Override
-	public boolean isPushOnlyApproved() {
-		return false;
-	}
+    @Override
+    public boolean isPushAllowed() {
+	return true;
+    }
 
-	@Override
-	public boolean isPushFreeTextAllowed() {
-		return true;
-	}
+    @Override
+    public boolean isPushOnlyApproved() {
+	return false;
+    }
 
-	@Override
-	public boolean isPushToNewContactAllowed() {
-		return false;
-	}
+    @Override
+    public boolean isPushFreeTextAllowed() {
+	return true;
+    }
 
-	@Override
-	public ContactType getContactType() {
-		return ContactType.TWITTER;
-	}
+    @Override
+    public boolean isPushToNewContactAllowed() {
+	return false;
+    }
+
+    @Override
+    public ContactType getContactType() {
+	return ContactType.TWITTER;
+    }
 }

@@ -2,13 +2,16 @@ package com.boot.jx.mongo;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.mongodb.MongoDbFactory;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.SimpleMongoDbFactory;
 import org.springframework.stereotype.Component;
 
+import com.boot.jx.AppContextUtil;
 import com.boot.jx.scope.tnt.TenantScoped;
 import com.boot.jx.scope.tnt.TenantValue;
+import com.boot.jx.scope.tnt.Tenants;
 import com.boot.utils.ArgUtil;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientURI;
@@ -17,74 +20,82 @@ import com.mongodb.MongoClientURI;
 @TenantScoped
 public class CommonMongoSource {
 
-	private final Logger LOGGER = LoggerFactory.getLogger(getClass());
+    private final Logger LOGGER = LoggerFactory.getLogger(getClass());
 
-	@TenantValue("${spring.data.mongodb.database}")
-	String dataSourceDatabase;
+    @TenantValue("${spring.data.mongodb.database}")
+    String dataSourceDatabase;
 
-	@TenantValue("${spring.data.mongodb.uri}")
-	String dataSourceUrl;
+    @TenantValue("${spring.data.mongodb.uri}")
+    String dataSourceUrl;
 
-	@TenantValue("${spring.data.mongodb.username}")
-	String dataSourceUsername;
+    @Value("${spring.data.mongodb.uri}")
+    String globalDataSourceUrl;
 
-	@TenantValue("${spring.data.mongodb.password}")
-	String dataSourcePassword;
+    @TenantValue("${spring.data.mongodb.username}")
+    String dataSourceUsername;
 
-	public String getDataSourceUrl() {
-		return dataSourceUrl;
+    @TenantValue("${spring.data.mongodb.password}")
+    String dataSourcePassword;
+
+    public String getDataSourceUrl() {
+	return dataSourceUrl;
+    }
+
+    public String getDataSourceUsername() {
+	return dataSourceUsername;
+    }
+
+    public String getDataSourcePassword() {
+	return dataSourcePassword;
+    }
+
+    MongoTemplate mongoTemplate;
+    MongoDbFactory mongoDbFactory;
+
+    boolean ready = false;
+
+    private static Object lock = new Object();
+
+    public MongoDbFactory getMongoDbFactory(String dataSourceUrl) {
+	String tnt = AppContextUtil.getTenant();
+	MongoClientURI mongoClientURI = new MongoClientURI(dataSourceUrl);
+	String dataBaseName = (ArgUtil.areEqual(dataSourceUrl, globalDataSourceUrl) && Tenants.isDefault(tnt))
+		? ("tnt_" + tnt)
+		: mongoClientURI.getDatabase();
+	LOGGER.debug("MONGODB: {}", dataBaseName);
+	return new SimpleMongoDbFactory(new MongoClient(mongoClientURI), dataBaseName);
+
+    }
+
+    public MongoDbFactory getMongoDbFactory() {
+	if (mongoDbFactory == null && ArgUtil.is(dataSourceUrl)) {
+	    mongoDbFactory = getMongoDbFactory(dataSourceUrl);
+	    LOGGER.debug("mongoTemplate was NULL So created One");
+	    ready = true;
 	}
+	return mongoDbFactory;
+    }
 
-	public String getDataSourceUsername() {
-		return dataSourceUsername;
-	}
-
-	public String getDataSourcePassword() {
-		return dataSourcePassword;
-	}
-
-	MongoTemplate mongoTemplate;
-	MongoDbFactory mongoDbFactory;
-
-	boolean ready = false;
-
-	private static Object lock = new Object();
-
-	public MongoDbFactory getMongoDbFactory(String dataSourceUrl) {
-		MongoClientURI mongoClientURI = new MongoClientURI(dataSourceUrl);
-		return new SimpleMongoDbFactory(
-				new MongoClient(mongoClientURI), mongoClientURI.getDatabase());
-	}
-
-	public MongoDbFactory getMongoDbFactory() {
-		if (mongoDbFactory == null && ArgUtil.is(dataSourceUrl)) {
-			mongoDbFactory = getMongoDbFactory(dataSourceUrl);
-			LOGGER.debug("mongoTemplate was NULL So created One");
-			ready = true;
+    public MongoTemplate getMongoTemplate() {
+	if (mongoTemplate == null) {
+	    synchronized (lock) {
+		LOGGER.debug("mongoTemplate is NULL So creating One {} {}", getDataSourceUrl(),
+			getDataSourceUsername());
+		mongoDbFactory = getMongoDbFactory();
+		if (ArgUtil.is(mongoDbFactory)) {
+		    mongoTemplate = new MongoTemplate(mongoDbFactory);
+		    LOGGER.debug("mongoTemplate was NULL So created One");
+		    ready = true;
+		} else {
+		    LOGGER.error("mongoDbFactory was NULL So cannot create One");
 		}
-		return mongoDbFactory;
+	    }
 	}
+	return mongoTemplate;
+    }
 
-	public MongoTemplate getMongoTemplate() {
-		if (mongoTemplate == null) {
-			synchronized (lock) {
-				LOGGER.debug("mongoTemplate is NULL So creating One {} {}", getDataSourceUrl(),
-						getDataSourceUsername());
-				mongoDbFactory = getMongoDbFactory();
-				if (ArgUtil.is(mongoDbFactory)) {
-					mongoTemplate = new MongoTemplate(mongoDbFactory);
-					LOGGER.debug("mongoTemplate was NULL So created One");
-					ready = true;
-				} else {
-					LOGGER.error("mongoDbFactory was NULL So cannot create One");
-				}
-			}
-		}
-		return mongoTemplate;
-	}
-
-	public boolean isReady() {
-		return ready;
-	}
+    public boolean isReady() {
+	return ready;
+    }
 
 }

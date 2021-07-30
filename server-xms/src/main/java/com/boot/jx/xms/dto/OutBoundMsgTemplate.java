@@ -17,6 +17,6 @@ public class OutBoundMsgTemplate {
     @ApiMockModelProperty(example = "{ amount : 10, currency : 'INR' }", required = false,
 	    value = "Data will be used to resolve placeholders in template, in case of missing value blank will be attempted, "
 		    + "\n Kindly note Template may be rejected in case it does not match the approved format")
-    private Map<String, Object> data;
+    public Map<String, Object> data;
 
 }

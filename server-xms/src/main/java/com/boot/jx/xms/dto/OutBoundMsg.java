@@ -26,6 +26,9 @@ public class OutBoundMsg implements Serializable {
 	    allowableValues = "audio,document,image,location,system,text,video,voice,contacts,template")
     public String type;
 
+    @ApiMockModelProperty(example = "false", value = "Mast the outgoing message data")
+    public boolean mask;
+
     @ApiMockModelProperty(required = false)
     public CommonMsgText text;
 

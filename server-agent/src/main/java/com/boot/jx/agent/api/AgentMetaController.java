@@ -1,7 +1,6 @@
 package com.boot.jx.agent.api;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -20,7 +19,8 @@ import com.boot.jx.api.ApiResponse;
 import com.boot.jx.common.doc.AgentSessionDoc;
 import com.boot.jx.common.store.AgentStore;
 import com.boot.jx.postman.PMEnvironment;
-import com.boot.jx.postman.PMEnvironment.PMConnectorConfig;
+import com.boot.jx.postman.PMEnvironment.AChannelConfig;
+import com.boot.jx.postman.PMEnvironment.AChannelDetails;
 import com.boot.jx.postman.doc.QuickAction;
 import com.boot.jx.postman.doc.QuickLabel;
 import com.boot.jx.postman.doc.QuickMedia;
@@ -34,78 +34,78 @@ import com.fasterxml.jackson.annotation.JsonView;
 @Controller
 public class AgentMetaController {
 
-	@Value("${mry.admin.url}")
-	private String adminUrl;
+    @Value("${mry.admin.url}")
+    private String adminUrl;
 
-	@Autowired
-	private AgentStore agentStore;
+    @Autowired
+    private AgentStore agentStore;
 
-	@Autowired
-	private MongoTemplate mongoTemplate;
+    @Autowired
+    private MongoTemplate mongoTemplate;
 
-	@Autowired
-	private AgentSessionService agentSessionService;
+    @Autowired
+    private AgentSessionService agentSessionService;
 
-	@Autowired
-	private PMEnvironment pmEnvironment;
+    @Autowired
+    private PMEnvironment pmEnvironment;
 
-	@Autowired
-	private ContactStore contactStore;
+    @Autowired
+    private ContactStore contactStore;
 
-	@ResponseBody
-	@RequestMapping(value = { "/api/options/agents" }, method = { RequestMethod.GET })
-	public ApiResponse<AgentResponseAgentDto, Object> listAgents() {
-		return ApiResponse.buildResults(new AgentResponseAgentDto().importFrom(agentStore.findAllActive()));
+    @ResponseBody
+    @RequestMapping(value = { "/api/options/agents" }, method = { RequestMethod.GET })
+    public ApiResponse<AgentResponseAgentDto, Object> listAgents() {
+	return ApiResponse.buildResults(new AgentResponseAgentDto().importFrom(agentStore.findAllActive()));
+    }
+
+    @ResponseBody
+    @RequestMapping(value = { "/api/options/contacts" }, method = { RequestMethod.GET })
+    public ApiResponse<ContactDTO, Object> searchContacts(@RequestParam String search, @RequestParam String lane) {
+	return ApiResponse.buildResults( // Wrap with ApiResponse
+		ChatDTOUtil.getContactDTO( // Convert to DTO
+			contactStore.searchContacts(search, lane) // Search Docs
+		));
+    }
+
+    @JsonView(AChannelConfig.Public.class)
+    @ResponseBody
+    @RequestMapping(value = { "/api/options/lanes" }, method = { RequestMethod.GET })
+    public ApiResponse<AChannelDetails, Object> listActiveLanes() {
+	return ApiResponse.buildResults(pmEnvironment.config().connectors());
+    }
+
+    @ResponseBody
+    @RequestMapping(value = { "/api/options/agents/status" }, method = { RequestMethod.GET })
+    public ApiResponse<AgentSessionDoc, Object> listAgentsOnline() {
+	return ApiResponse.buildResults(agentSessionService.getAgentSessions());
+    }
+
+    @ResponseBody
+    @RequestMapping(value = "/category/map/smart_reply", method = { RequestMethod.GET })
+    public List<QuickReply> listSmartReply(@RequestParam(value = "value", required = false) List<String> categories) {
+	if (ArgUtil.is(categories)) {
+	    Query query2 = new Query();
+	    query2.addCriteria(Criteria.where("category").in(categories.stream().toArray(String[]::new)));
+	    return mongoTemplate.find(query2, QuickReply.class);
 	}
+	return mongoTemplate.findAll(QuickReply.class);
+    }
 
-	@ResponseBody
-	@RequestMapping(value = { "/api/options/contacts" }, method = { RequestMethod.GET })
-	public ApiResponse<ContactDTO, Object> searchContacts(@RequestParam String search, @RequestParam String lane) {
-		return ApiResponse.buildResults( // Wrap with ApiResponse
-				ChatDTOUtil.getContactDTO( // Convert to DTO
-						contactStore.searchContacts(search, lane) // Search Docs
-				));
-	}
+    @ResponseBody
+    @RequestMapping(value = "/gallery/map/media_reply", method = { RequestMethod.GET })
+    public List<QuickMedia> listMediaReply() {
+	return mongoTemplate.findAll(QuickMedia.class);
+    }
 
-	@JsonView(PMConnectorConfig.Public.class)
-	@ResponseBody
-	@RequestMapping(value = { "/api/options/lanes" }, method = { RequestMethod.GET })
-	public ApiResponse<PMConnectorConfig, Object> listActiveLanes() {
-		return ApiResponse.buildResults(pmEnvironment.config().connectors());
-	}
+    @ResponseBody
+    @RequestMapping(value = "/gallery/map/quick_actions", method = { RequestMethod.GET })
+    public List<QuickAction> listQuickActions() {
+	return mongoTemplate.findAll(QuickAction.class);
+    }
 
-	@ResponseBody
-	@RequestMapping(value = { "/api/options/agents/status" }, method = { RequestMethod.GET })
-	public ApiResponse<AgentSessionDoc, Object> listAgentsOnline() {
-		return ApiResponse.buildResults(agentSessionService.getAgentSessions());
-	}
-
-	@ResponseBody
-	@RequestMapping(value = "/category/map/smart_reply", method = { RequestMethod.GET })
-	public List<QuickReply> listSmartReply(@RequestParam(value = "value", required = false) List<String> categories) {
-		if (ArgUtil.is(categories)) {
-			Query query2 = new Query();
-			query2.addCriteria(Criteria.where("category").in(categories.stream().toArray(String[]::new)));
-			return mongoTemplate.find(query2, QuickReply.class);
-		}
-		return mongoTemplate.findAll(QuickReply.class);
-	}
-
-	@ResponseBody
-	@RequestMapping(value = "/gallery/map/media_reply", method = { RequestMethod.GET })
-	public List<QuickMedia> listMediaReply() {
-		return mongoTemplate.findAll(QuickMedia.class);
-	}
-
-	@ResponseBody
-	@RequestMapping(value = "/gallery/map/quick_actions", method = { RequestMethod.GET })
-	public List<QuickAction> listQuickActions() {
-		return mongoTemplate.findAll(QuickAction.class);
-	}
-
-	@ResponseBody
-	@RequestMapping(value = { "/gallery/map/quick_labels" }, method = { RequestMethod.GET })
-	public List<QuickLabel> listQuickTags() {
-		return mongoTemplate.findAll(QuickLabel.class);
-	}
+    @ResponseBody
+    @RequestMapping(value = { "/gallery/map/quick_labels" }, method = { RequestMethod.GET })
+    public List<QuickLabel> listQuickTags() {
+	return mongoTemplate.findAll(QuickLabel.class);
+    }
 }
