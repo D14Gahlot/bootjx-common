@@ -1,5 +1,7 @@
 package com.boot.jx.dummy;
 
+import java.util.Map;
+
 import javax.servlet.http.Cookie;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,86 +27,89 @@ import com.boot.utils.JsonUtil;
 @Controller
 public class DummyUserController {
 
-	@Autowired
-	private InBoundService inBoundEngine;
+    @Autowired
+    private InBoundService inBoundEngine;
 
-	@Autowired(required = false)
-	private WebConnector dummyConnector;
+    @Autowired(required = false)
+    private WebConnector dummyConnector;
 
-	@Autowired
-	AppConfig appConfig;
+    @Autowired
+    AppConfig appConfig;
 
-	@Autowired
-	CommonHttpRequest commonHttpRequest;
+    @Autowired
+    CommonHttpRequest commonHttpRequest;
 
-	@Autowired(required = false)
-	private AppCommonConfig appCommonConfig;
+    @Autowired(required = false)
+    private AppCommonConfig appCommonConfig;
 
-	@Autowired
-	private PMEnvironment pmEnvironment;
+    @Autowired
+    private PMEnvironment pmEnvironment;
 
-	@ResponseBody
-	@RequestMapping(value = "/dummy/messages", method = RequestMethod.GET)
-	public OutboxMessage onReceiveMessage(@RequestParam String number) throws InterruptedException {
-		return dummyConnector.pollUnreadMessage(number);
+    @ResponseBody
+    @RequestMapping(value = "/dummy/messages", method = RequestMethod.GET)
+    public OutboxMessage onReceiveMessage(@RequestParam String number) throws InterruptedException {
+	return dummyConnector.pollUnreadMessage(number);
+    }
+
+    @ResponseBody
+    @RequestMapping(value = "/dummy/messages", method = RequestMethod.POST)
+    public InboxMessage onReceiveMessage(@RequestParam String message, @RequestParam String number)
+	    throws InterruptedException {
+	InboxMessage event = new InboxMessage();
+	Cookie cookie = commonHttpRequest.getCookie("contactType");
+
+	ContactType contactType = ContactType.WEBSITE;
+	if (ArgUtil.is(cookie)) {
+	    contactType = ArgUtil.parseAsEnumT(cookie.getValue(), contactType, ContactType.class);
 	}
 
-	@ResponseBody
-	@RequestMapping(value = "/dummy/messages", method = RequestMethod.POST)
-	public InboxMessage onReceiveMessage(@RequestParam String message, @RequestParam String number)
-			throws InterruptedException {
-		InboxMessage event = new InboxMessage();
-		Cookie cookie = commonHttpRequest.getCookie("contactType");
+	event.contact().setContactType(contactType.toString());
+	event.contact().setLane("DUMMY");
+	event.from(number);
+	event.setMessage(message);
+	inBoundEngine.invokeMethods(event);
+	return event;
+    }
 
-		ContactType contactType = ContactType.WEBSITE;
-		if (ArgUtil.is(cookie)) {
-			contactType = ArgUtil.parseAsEnumT(cookie.getValue(), contactType, ContactType.class);
-		}
+    @RequestMapping(value = "/dummy/user", method = RequestMethod.GET)
+    public String dummyUser(@RequestParam String number, Model model) throws InterruptedException {
+	model.addAttribute("APP_CONTEXT", appConfig.getAppPrefix());
+	model.addAttribute("POSTMAN_CONTEXT", appConfig.getAppPrefix());
+	model.addAttribute("POSTMAN_AGENT_SCHEME_COLOR", pmEnvironment.get("postman.agent.scheme.color").asString());
+	return "dummyuser";
+    }
 
-		event.contact().setContactType(contactType.toString());
-		event.contact().setLane("DUMMY");
-		event.from(number);
-		event.setMessage(message);
-		inBoundEngine.invokeMethods(event);
-		return event;
+    @RequestMapping(value = "/dummy/customer", method = RequestMethod.GET)
+    public String dummyCustomer(Model model, @RequestParam(required = false) String contacyType)
+	    throws InterruptedException {
+	commonHttpRequest.setCookie("contactType", ArgUtil.parseAsString(contacyType, ContactType.WEBSITE.toString()));
+	model.addAttribute("APP_CONTEXT", appConfig.getAppPrefix());
+	model.addAttribute("POSTMAN_CONTEXT", appConfig.getAppPrefix());
+	model.addAttribute("POSTMAN_AGENT_SCHEME_COLOR", pmEnvironment.get("postman.agent.scheme.color").asString());
+	return "customer.plugin.bubble";
+    }
+
+    @RequestMapping(value = "/plugin/customer/**", method = RequestMethod.GET)
+    public String pluginCustomer(Model model, @RequestParam(required = false) String contacyType)
+	    throws InterruptedException {
+	commonHttpRequest.setCookie("contactType", ArgUtil.parseAsString(contacyType, ContactType.WEBSITE.toString()));
+	model.addAttribute("APP_CONTEXT", appConfig.getAppPrefix());
+	model.addAttribute("POSTMAN_CONTEXT", appConfig.getAppPrefix());
+	model.addAttribute("WEBAPP_BASE", appConfig.getAppPrefix() + "/plugin/customer");
+
+	model.addAttribute("CDN_VERSION", "V3");
+	model.addAttribute("CDN_DEBUG", ArgUtil.parseAsString(commonHttpRequest.get("CDN_DEBUG"), "false"));
+	model.addAttribute("POSTMAN_AGENT_SCHEME_COLOR", pmEnvironment.get("postman.agent.scheme.color").asString());
+
+	if (appCommonConfig != null) {
+	    model.addAttribute("CDN_URL",
+		    ArgUtil.parseAsString(commonHttpRequest.get("CDN_URL"), appCommonConfig.getCdnServer()));
+
+	    Map<String, Object> config = appCommonConfig.toMap();
+	    model.addAttribute("CONFIG", config);
+	    model.addAttribute("CONFIG_JSON", JsonUtil.toJson(config));
 	}
 
-	@RequestMapping(value = "/dummy/user", method = RequestMethod.GET)
-	public String dummyUser(@RequestParam String number, Model model) throws InterruptedException {
-		model.addAttribute("APP_CONTEXT", appConfig.getAppPrefix());
-		model.addAttribute("POSTMAN_CONTEXT", appConfig.getAppPrefix());
-		model.addAttribute("POSTMAN_AGENT_SCHEME_COLOR", pmEnvironment.get("postman.agent.scheme.color").asString());
-		return "dummyuser";
-	}
-
-	@RequestMapping(value = "/dummy/customer", method = RequestMethod.GET)
-	public String dummyCustomer(Model model, @RequestParam(required = false) String contacyType)
-			throws InterruptedException {
-		commonHttpRequest.setCookie("contactType", ArgUtil.parseAsString(contacyType, ContactType.WEBSITE.toString()));
-		model.addAttribute("APP_CONTEXT", appConfig.getAppPrefix());
-		model.addAttribute("POSTMAN_CONTEXT", appConfig.getAppPrefix());
-		model.addAttribute("POSTMAN_AGENT_SCHEME_COLOR", pmEnvironment.get("postman.agent.scheme.color").asString());
-		return "customer.plugin.bubble";
-	}
-
-	@RequestMapping(value = "/plugin/customer/**", method = RequestMethod.GET)
-	public String pluginCustomer(Model model, @RequestParam(required = false) String contacyType)
-			throws InterruptedException {
-		commonHttpRequest.setCookie("contactType", ArgUtil.parseAsString(contacyType, ContactType.WEBSITE.toString()));
-		model.addAttribute("APP_CONTEXT", appConfig.getAppPrefix());
-		model.addAttribute("POSTMAN_CONTEXT", appConfig.getAppPrefix());
-		model.addAttribute("WEBAPP_BASE", appConfig.getAppPrefix() + "/plugin/customer");
-
-		model.addAttribute("CDN_VERSION", "V3");
-		model.addAttribute("CDN_DEBUG", ArgUtil.parseAsString(commonHttpRequest.get("CDN_DEBUG"), "false"));
-		model.addAttribute("POSTMAN_AGENT_SCHEME_COLOR", pmEnvironment.get("postman.agent.scheme.color").asString());
-
-		if (appCommonConfig != null) {
-			model.addAttribute("CDN_URL",
-					ArgUtil.parseAsString(commonHttpRequest.get("CDN_URL"), appCommonConfig.getCdnServer()));
-			model.addAttribute("CONFIG", JsonUtil.toJson(appCommonConfig.toMap()));
-		}
-
-		return "app-customer";
-	}
+	return "app-customer";
+    }
 }
