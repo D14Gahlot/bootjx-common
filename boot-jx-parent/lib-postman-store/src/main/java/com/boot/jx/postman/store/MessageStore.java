@@ -23,7 +23,6 @@ import com.boot.jx.postman.model.MessageReport;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.model.TagDocument;
 import com.boot.jx.utils.PostManUtil;
-import com.boot.utils.ArgExceptions.ArgException;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
 import com.google.common.collect.Lists;

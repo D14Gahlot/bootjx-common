@@ -9,7 +9,6 @@ import com.boot.jx.bot.BotController;
 import com.boot.jx.bot.ChatContext;
 import com.boot.jx.bot.ChatController;
 import com.boot.jx.bot.ChatMapping;
-import com.boot.jx.inbound.InBoundControllerWA;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.StringUtils.StringMatcher;

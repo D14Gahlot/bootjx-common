@@ -1,6 +1,6 @@
 package com.boot.jx.views;
 
-import java.util.*;
+import java.util.List;
 
 public class MasterView {
 

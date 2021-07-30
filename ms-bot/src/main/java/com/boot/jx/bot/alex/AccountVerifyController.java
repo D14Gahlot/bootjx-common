@@ -3,8 +3,6 @@ package com.boot.jx.bot.alex;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.boot.jx.api.ApiResponse;
-import com.boot.jx.bot.BotController;
 import com.boot.jx.bot.ChatContext;
 import com.boot.jx.bot.ChatController;
 import com.boot.jx.bot.ChatMapping;

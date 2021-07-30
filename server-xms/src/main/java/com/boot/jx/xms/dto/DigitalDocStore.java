@@ -1,15 +1,12 @@
 package com.boot.jx.xms.dto;
 
 
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Component;
 
-import com.boot.jx.common.doc.AgentDoc;
 import com.boot.jx.mongo.CommonDocStore;
 import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.utils.ArgUtil;

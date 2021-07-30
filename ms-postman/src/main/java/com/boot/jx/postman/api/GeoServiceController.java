@@ -10,8 +10,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.boot.jx.postman.PMConstants.PostManUrls;
 import com.boot.jx.postman.PostManException;
-import com.boot.jx.postman.PostManUrls;
 import com.boot.jx.postman.model.GeoLocation;
 import com.boot.jx.postman.service.GeoLocationServiceImpl;
 import com.maxmind.geoip2.exception.GeoIp2Exception;

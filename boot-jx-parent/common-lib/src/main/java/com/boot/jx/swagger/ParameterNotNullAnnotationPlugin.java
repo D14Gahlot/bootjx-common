@@ -11,6 +11,8 @@ import static com.boot.jx.swagger.ApiMockModelProperties.toPosition;
 import static com.boot.jx.swagger.ApiMockModelProperties.toType;
 import static springfox.documentation.schema.Annotations.findPropertyAnnotation;
 
+import java.util.List;
+
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
@@ -18,8 +20,6 @@ import org.springframework.stereotype.Component;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
 import com.google.common.base.Optional;
-
-import java.util.*;
 
 import springfox.documentation.service.StringVendorExtension;
 import springfox.documentation.service.VendorExtension;

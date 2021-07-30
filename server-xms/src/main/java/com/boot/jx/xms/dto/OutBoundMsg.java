@@ -4,7 +4,6 @@ import java.io.Serializable;
 import java.util.List;
 
 import com.boot.jx.swagger.ApiMockModelProperty;
-import com.boot.jx.xms.dto.CommonMsgContact.OutBoundMsgContactAddress;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 

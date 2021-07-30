@@ -13,8 +13,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.dict.Nations;
+import com.boot.jx.postman.PMConstants.PostManUrls;
 import com.boot.jx.postman.PostManException;
-import com.boot.jx.postman.PostManUrls;
 import com.boot.jx.postman.client.PushNotifyClient;
 import com.boot.jx.postman.model.PushMessage;
 import com.boot.jx.scope.tnt.Tenants;

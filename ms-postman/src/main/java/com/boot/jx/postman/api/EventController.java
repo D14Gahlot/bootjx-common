@@ -14,9 +14,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.boot.jx.event.TriggerEvent;
+import com.boot.jx.postman.PMConstants.PostManUrls;
 import com.boot.jx.postman.PostManConfig;
 import com.boot.jx.postman.PostManException;
-import com.boot.jx.postman.PostManUrls;
 import com.boot.jx.tunnel.ITunnelService;
 import com.maxmind.geoip2.exception.GeoIp2Exception;
 

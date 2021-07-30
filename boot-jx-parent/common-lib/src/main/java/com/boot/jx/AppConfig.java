@@ -29,7 +29,6 @@ import com.boot.jx.filter.AppClientErrorHanlder;
 import com.boot.jx.filter.AppClientInterceptor;
 import com.boot.jx.scope.tnt.TenantProperties;
 import com.boot.jx.scope.tnt.Tenants;
-import com.boot.jx.scope.tnt.Tenants.Tenant;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.Constants;
 import com.boot.utils.JsonUtil.JsonUtilConfigurable;

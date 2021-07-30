@@ -23,7 +23,6 @@ import com.boot.jx.dict.ContactType;
 import com.boot.jx.dict.FileFormat;
 import com.boot.jx.model.CommonFile;
 import com.boot.jx.postman.model.ITemplates;
-import com.boot.jx.postman.model.PostManFile;
 import com.boot.jx.postman.model.ITemplates.ITemplate;
 import com.boot.jx.tmpl.custom.HelloDialect;
 import com.boot.utils.ArgUtil;

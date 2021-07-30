@@ -1,6 +1,6 @@
 package com.boot.jx.xms.dto;
 
-import java.util.*;
+import java.util.List;
 
 import com.boot.jx.swagger.ApiMockModelProperty;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;

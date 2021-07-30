@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.amazonaws.services.ecs.model.SystemControl;
 import com.boot.json.NamedEntityDeserializer.NamedMapModel;
 import com.boot.jx.admin.dto.AgentResponseAdminDto;
 import com.boot.jx.admin.dto.DepartmentResponseAdminDto;
@@ -18,7 +17,6 @@ import com.boot.jx.api.ApiResponse;
 import com.boot.jx.common.doc.DepartmentDoc;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.mongo.CommonMongoTemplate;
-import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.dto.ContactDTO;
 import com.boot.jx.postman.service.ChatDTOUtil;
 import com.boot.jx.postman.store.ContactStore;

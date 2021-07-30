@@ -12,7 +12,6 @@ import org.telegram.telegrambots.meta.api.objects.PhotoSize;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
 import com.boot.jx.chat.ConnectorHandlerFactory.AbstractConnector;
-import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorHandler;
 import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorMapping;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.dict.FileType;
@@ -26,7 +25,6 @@ import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.MessageDefinitions.Contactable;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.query.ChatContactQuery;
-import com.boot.jx.postman.store.MessageContext;
 import com.boot.jx.postman.tg.TelegramClient;
 import com.boot.jx.postman.tg.TelegramModels.TGFile;
 import com.boot.jx.utils.PostManUtil;

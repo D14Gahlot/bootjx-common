@@ -1,7 +1,8 @@
 package com.boot.jx.views;
 
 import java.io.Serializable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Table implements Serializable {
 
