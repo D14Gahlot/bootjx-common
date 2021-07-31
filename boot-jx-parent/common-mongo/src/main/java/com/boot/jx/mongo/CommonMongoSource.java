@@ -62,7 +62,7 @@ public class CommonMongoSource {
 	String dataBaseName = (ArgUtil.areEqual(dataSourceUrl, globalDataSourceUrl) && Tenants.isDefault(tnt))
 		? ("tnt_" + tnt)
 		: mongoClientURI.getDatabase();
-	LOGGER.debug("MONGODB: {}", dataBaseName);
+	LOGGER.info("MONGODB: {}", dataBaseName);
 	return new SimpleMongoDbFactory(new MongoClient(mongoClientURI), dataBaseName);
 
     }
@@ -70,7 +70,7 @@ public class CommonMongoSource {
     public MongoDbFactory getMongoDbFactory() {
 	if (mongoDbFactory == null && ArgUtil.is(dataSourceUrl)) {
 	    mongoDbFactory = getMongoDbFactory(dataSourceUrl);
-	    LOGGER.debug("mongoTemplate was NULL So created One");
+	    LOGGER.info("mongoTemplate was NULL So created One");
 	    ready = true;
 	}
 	return mongoDbFactory;
