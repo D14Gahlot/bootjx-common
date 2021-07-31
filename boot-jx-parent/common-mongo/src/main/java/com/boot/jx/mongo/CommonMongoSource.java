@@ -13,6 +13,7 @@ import com.boot.jx.scope.tnt.TenantScoped;
 import com.boot.jx.scope.tnt.TenantValue;
 import com.boot.jx.scope.tnt.Tenants;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.StringUtils;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientURI;
 
@@ -59,10 +60,9 @@ public class CommonMongoSource {
     public MongoDbFactory getMongoDbFactory(String dataSourceUrl) {
 	String tnt = AppContextUtil.getTenant();
 	MongoClientURI mongoClientURI = new MongoClientURI(dataSourceUrl);
-	String dataBaseName = (ArgUtil.areEqual(dataSourceUrl, globalDataSourceUrl) && Tenants.isDefault(tnt))
-		? ("tnt_" + tnt)
-		: mongoClientURI.getDatabase();
-	LOGGER.info("MONGODB: {}", dataBaseName);
+	String dataBaseName = (!ArgUtil.areEqual(StringUtils.trim(dataSourceUrl), StringUtils.trim(globalDataSourceUrl))
+		|| Tenants.isDefault(tnt)) ? mongoClientURI.getDatabase() : ("tnt_" + tnt);
+	LOGGER.info("MONGODB: {}:{}", dataBaseName, Tenants.isDefault(tnt));
 	return new SimpleMongoDbFactory(new MongoClient(mongoClientURI), dataBaseName);
 
     }
