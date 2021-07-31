@@ -70,7 +70,7 @@ public class CommonMongoSource {
     public MongoDbFactory getMongoDbFactory() {
 	if (mongoDbFactory == null && ArgUtil.is(dataSourceUrl)) {
 	    mongoDbFactory = getMongoDbFactory(dataSourceUrl);
-	    LOGGER.info("mongoTemplate was NULL So created One");
+	    LOGGER.debug("mongoTemplate was NULL So created One");
 	    ready = true;
 	}
 	return mongoDbFactory;
