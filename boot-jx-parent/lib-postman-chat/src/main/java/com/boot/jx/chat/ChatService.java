@@ -271,6 +271,11 @@ public class ChatService {
 
 		if (!ArgUtil.is(inboxMessage.session().getMode())) {
 			ChatSessionDoc sessionDoc = sessionStore.getSession(inboxMessage.getSessionId());
+
+			if (!ArgUtil.is(sessionDoc)) {
+				LOGGER.error("No Session Found for {}/{}",contactId,inboxMessage.getSessionId());
+			}
+
 			inboxMessage.session().setMode(CHAT_MODE.BOT.toString());
 			inboxMessage.session().setAgent(chatClientConfig.getDefaultSender());
 
