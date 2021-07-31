@@ -488,6 +488,11 @@ public class SessionStore extends CommonDocStore {
 	}
 
 	public void assignToBot(ChatSessionDoc chatSessionDoc, String botName) {
+		if(!ArgUtil.is(chatSessionDoc)){
+			LOGGER.error("Session Cannot Be Empty for bot {}", botName);
+			return;
+		}
+
 		chatSessionDoc.setMode(CHAT_MODE.BOT.toString());
 		chatSessionDoc.setAssignedToAgent(botName);
 

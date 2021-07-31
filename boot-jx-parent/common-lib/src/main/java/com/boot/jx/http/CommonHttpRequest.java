@@ -521,6 +521,15 @@ public class CommonHttpRequest {
 		String deprecated;
 		Channel channel;
 		boolean initFlow;
+		boolean authenticateTenant;
+
+		public boolean isAuthenticateTenant() {
+		    return authenticateTenant;
+		}
+
+		public void setAuthenticateTenant(boolean authenticateTenant) {
+		    this.authenticateTenant = authenticateTenant;
+		}
 
 		public RequestType getType() {
 			return type;
@@ -628,6 +637,7 @@ public class CommonHttpRequest {
 			detail.setResponeError(x.responeError());
 			detail.setChannel(x.channel());
 			detail.setInitFlow(x.initFlow());
+			detail.setAuthenticateTenant(x.authenticateTenant());
 		}
 
 		if (ArgUtil.isEmpty(detail.getType()) || RequestType.DEFAULT.equals(detail.getType())) {
