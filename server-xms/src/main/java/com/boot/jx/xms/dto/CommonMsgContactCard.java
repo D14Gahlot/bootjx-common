@@ -14,7 +14,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
  *
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class CommonMsgContact {
+public class CommonMsgContactCard {
 
     public static class OutBoundMsgContactAddress {
 	@ApiMockModelProperty(example = "Menlo Park")

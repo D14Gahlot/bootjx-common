@@ -19,7 +19,6 @@ import com.boot.jx.api.ApiResponse;
 import com.boot.jx.common.doc.AgentSessionDoc;
 import com.boot.jx.common.store.AgentStore;
 import com.boot.jx.postman.PMEnvironment;
-import com.boot.jx.postman.PMEnvironment.AChannelConfig;
 import com.boot.jx.postman.PMEnvironment.AChannelDetails;
 import com.boot.jx.postman.doc.QuickAction;
 import com.boot.jx.postman.doc.QuickLabel;
@@ -67,7 +66,7 @@ public class AgentMetaController {
 		));
     }
 
-    @JsonView(AChannelConfig.Public.class)
+    @JsonView(PMEnvironment.PublicProperty.class)
     @ResponseBody
     @RequestMapping(value = { "/api/options/lanes" }, method = { RequestMethod.GET })
     public ApiResponse<AChannelDetails, Object> listActiveLanes() {

@@ -27,6 +27,7 @@ public class PMConfiguration implements Serializable {
     private Map<String, GupShupConfig> gupshup;
 
     private Map<String, ChannelConfig> channels;
+    private Map<String, ClientApiKey> clientApiKeys;
 
     private Map<String, PMConfigurationObject> map;
 
@@ -157,6 +158,23 @@ public class PMConfiguration implements Serializable {
 	return this;
     }
 
+    // All A:PI Ckeys
+    public SafeKeyHashMap<ClientApiKey> clientApiKeys() {
+	if (ArgUtil.isEmpty(clientApiKeys)) {
+	    clientApiKeys = new HashMap<String, ClientApiKey>();
+	}
+	return new SafeKeyHashMap<ClientApiKey>(clientApiKeys);
+    }
+
+    public ClientApiKey clientApiKey(String apiKey) {
+	return clientApiKeys().get(apiKey);
+    }
+
+    public PMConfiguration clientApiKey(ClientApiKey clientApiKey) {
+	this.clientApiKeys().put(clientApiKey.getKey(), clientApiKey);
+	return this;
+    }
+
     // Agent
     public AgentConfig agent() {
 	if (ArgUtil.isEmpty(agent)) {
@@ -195,7 +213,11 @@ public class PMConfiguration implements Serializable {
     }
 
     public PMConfigurationObject get(String key) {
-	return map().getOrDefault(key, new PMConfigurationObject());
+	return map().getOrDefault(key, new PMConfigurationObject(key, null));
+    }
+
+    public PMConfigurationObject get(String key, Object value) {
+	return map().getOrDefault(key, new PMConfigurationObject(key, value));
     }
 
     public PMConfiguration set(PMConfigurationObject map) {

@@ -11,9 +11,11 @@ import org.springframework.stereotype.Service;
 import com.boot.jx.AppContextUtil;
 import com.boot.jx.common.config.ConfigBuilder;
 import com.boot.jx.postman.ChannelConfig;
+import com.boot.jx.postman.ClientApiKey;
 import com.boot.jx.postman.PMConfiguration;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PMEnvironment.PMConfigurationObject;
+import com.boot.jx.postman.doc.ClientApiKeyDoc;
 import com.boot.jx.postman.doc.PMConfigurationDoc;
 import com.boot.jx.tunnel.sys.SharedConfigManager;
 import com.boot.utils.ArgUtil;
@@ -90,6 +92,13 @@ public class AdminConfigService {
     public void save(ChannelConfig config) {
 	pmEnvironment.config(config);
 	sharedConfigManager.clear();
+    }
+
+    public ClientApiKeyDoc save(ClientApiKeyDoc clientApiKey) {
+	clientApiKey.setKey(ClientApiKey.generateApiKey());
+	mongoTemplate.save(clientApiKey);
+	sharedConfigManager.clear();
+	return clientApiKey;
     }
 
 }

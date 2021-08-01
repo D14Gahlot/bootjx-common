@@ -11,122 +11,136 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 public class MessageDefinitions {
 
-	public static class MESSAGE_BOUND_TYPE {
-		public static final String INBOUND = "I";
-		public static final String INBOUND_IMPORTED = "Ii";
+    public static class MESSAGE_BOUND_TYPE {
+	public static final String INBOUND = "I";
+	public static final String INBOUND_IMPORTED = "Ii";
 
-		public static final String OUTBOUND = "O";
-		public static final String OUTBOUND_IMPORTED = "Oi";
+	public static final String OUTBOUND = "O";
+	public static final String OUTBOUND_IMPORTED = "Oi";
+    }
+
+    public static class MESSAGE_CHANNLES {
+	public static final String GUPSHUPW = "GUPSHUPW";
+    }
+
+    @JsonDeserialize(as = ContactMeta.class)
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public interface Contact extends Serializable {
+	public String getName();
+
+	public void setName(String name);
+
+	public String getEmail();
+
+	public String getPhone();
+
+	public void setPhone(String phone);
+
+	public void setEmail(String email);
+
+	public default void copyFrom(Contact contactable) {
+	    this.setName(contactable.getName());
+	    this.setPhone(contactable.getPhone());
+	    this.setEmail(contactable.getEmail());
 	}
 
-	public static class MESSAGE_CHANNLES {
-		public static final String GUPSHUPW = "GUPSHUPW";
+    }
+
+    @JsonDeserialize(as = ContactMeta.class)
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public interface Contactable extends Contact {
+	public String getContactType();
+
+	public String getChannel();
+
+	public String getLane();
+
+	public String getCsid();
+
+	public String getContactId();
+
+	public void setCsid(String createCsid);
+
+	public void setContactId(String contactId);
+
+	public void setContactType(String contactType);
+
+	public void setChannel(String channel);
+
+	public void setLane(String lane);
+
+	public default ContactType type() {
+	    return ArgUtil.parseAsEnumT(getContactType(), ContactType.class);
 	}
 
-	@JsonDeserialize(as = ContactMeta.class)
-	@JsonIgnoreProperties(ignoreUnknown = true)
-	public interface Contactable extends Serializable {
-		public String getContactType();
-
-		public String getChannel();
-
-		public String getLane();
-
-		public String getCsid();
-
-		public String getEmail();
-
-		public String getPhone();
-
-		public String getContactId();
-
-		public String getName();
-
-		public void setCsid(String createCsid);
-
-		public void setContactId(String contactId);
-
-		public void setContactType(String contactType);
-
-		public void setChannel(String channel);
-
-		public void setLane(String lane);
-
-		public void setPhone(String phone);
-
-		public void setEmail(String email);
-
-		public void setName(String name);
-
-		public default ContactType type() {
-			return ArgUtil.parseAsEnumT(getContactType(), ContactType.class);
-		}
-
-		public default void type(ContactType contactType) {
-			this.setContactType(ArgUtil.parseAsString(contactType));
-		}
-
-		public default void copyFrom(Contactable contactable) {
-			this.setContactType(contactable.getContactType());
-			this.setChannel(contactable.getChannel());
-			this.setLane(contactable.getLane());
-			this.setCsid(contactable.getCsid());
-			this.setPhone(contactable.getPhone());
-			this.setEmail(contactable.getEmail());
-			this.setContactId(contactable.getContactId());
-		}
-
+	public default void type(ContactType contactType) {
+	    this.setContactType(ArgUtil.parseAsString(contactType));
 	}
 
+	public default void copyFrom(Contactable contactable) {
+	    // Contact
+	    this.setName(contactable.getName());
+	    this.setPhone(contactable.getPhone());
+	    this.setEmail(contactable.getEmail());
+	    // Contactable
+	    this.setContactType(contactable.getContactType());
+	    this.setChannel(contactable.getChannel());
+	    this.setLane(contactable.getLane());
+	    this.setCsid(contactable.getCsid());
+	    this.setContactId(contactable.getContactId());
+	}
+
+    }
+
+    // External attributes
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public interface IMessageExternal extends Serializable {
 	// External attributes
-	@JsonIgnoreProperties(ignoreUnknown = true)
-	public interface IMessageExternal extends Serializable {
-		// External attributes
-	}
+    }
 
-	// External attributes
-	@JsonIgnoreProperties(ignoreUnknown = true)
-	public interface IMessageInternal extends Serializable {
+    // External attributes
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public interface IMessageInternal extends Serializable {
 
-	}
+    }
 
-	// External attributes
-	@JsonIgnoreProperties(ignoreUnknown = true)
-	public interface SessionMessage extends Serializable {
-		// Internal attributes
-		public String getSessionId();
+    // External attributes
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public interface SessionMessage extends Serializable {
+	// Internal attributes
+	public String getSessionId();
 
-		public void setSessionId(String sessionId);
+	public void setSessionId(String sessionId);
 
-		public MessageSession session();
+	public MessageSession session();
 
-		public Contactable contact();
-	}
+	public Contactable contact();
+    }
 
-	@JsonIgnoreProperties(ignoreUnknown = true)
-	public interface IMessage extends IMessageExternal, IMessageInternal, SessionMessage {
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public interface IMessage extends IMessageExternal, IMessageInternal, SessionMessage {
 
-		public long getTimestamp();
+	public long getTimestamp();
 
-		public String forContact();
+	public String forContact();
 
-		public String getType();
+	public String getType();
 
-		public String toString();
+	public String toString();
 
-	}
+    }
 
-	public static interface IMessageExtended extends IMessage {
+    public static interface IMessageExtended extends IMessage {
 
-		public List<String> to();
+	public List<String> to();
 
-		String getFrom();
+	String getFrom();
 
-		BigDecimal getQueue();
+	BigDecimal getQueue();
 
-		String getFromName();
+	String getFromName();
 
-		Message<?> replyMessage(String message);
+	Message<?> replyMessage(String message);
 
-	}
+    }
 }

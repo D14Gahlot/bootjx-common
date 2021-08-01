@@ -14,6 +14,15 @@ import com.fasterxml.jackson.annotation.JsonView;
 @Component
 public class PMEnvironment {
 
+    public static interface PublicProperty {
+    }
+
+    public static interface ProtectedProperty extends PublicProperty {
+    }
+
+    public static interface OneTimeVisibleProperty extends ProtectedProperty {
+    }
+
     public static interface PMEnvironmentProvider {
 	public PMConfiguration config();
 
@@ -24,35 +33,27 @@ public class PMEnvironment {
 
     public static interface ChannelDetails extends Serializable {
 
-	public static interface Public {
-
-	}
-
-	public static interface Protected extends Public {
-
-	}
-
-	@JsonView(ChannelDetails.Public.class)
+	@JsonView(PublicProperty.class)
 	public String getLane();
 
-	@JsonView(ChannelDetails.Public.class)
+	@JsonView(PublicProperty.class)
 	public default String getChannel() {
 	    return null;
 	}
 
-	@JsonView(ChannelDetails.Public.class)
+	@JsonView(PublicProperty.class)
 	public boolean isPushAllowed();
 
-	@JsonView(ChannelDetails.Public.class)
+	@JsonView(PublicProperty.class)
 	public boolean isPushOnlyApproved();
 
-	@JsonView(ChannelDetails.Public.class)
+	@JsonView(PublicProperty.class)
 	public boolean isPushFreeTextAllowed();
 
-	@JsonView(ChannelDetails.Public.class)
+	@JsonView(PublicProperty.class)
 	public boolean isPushToNewContactAllowed();
 
-	@JsonView(ChannelDetails.Public.class)
+	@JsonView(PublicProperty.class)
 	public ContactType getContactType();
 
     }

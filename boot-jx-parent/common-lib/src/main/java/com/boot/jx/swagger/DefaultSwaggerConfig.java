@@ -1,6 +1,7 @@
 package com.boot.jx.swagger;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +18,7 @@ import com.boot.jx.scope.tnt.Tenants;
 import com.boot.jx.swagger.MockParamBuilder.MockParam;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
+import com.boot.utils.StringUtils;
 import com.boot.utils.UniqueID;
 
 import springfox.documentation.builders.ParameterBuilder;
@@ -25,8 +27,10 @@ import springfox.documentation.schema.ModelRef;
 import springfox.documentation.service.AllowableListValues;
 import springfox.documentation.service.AllowableValues;
 import springfox.documentation.service.ApiInfo;
+import springfox.documentation.service.ApiKey;
 import springfox.documentation.service.Contact;
 import springfox.documentation.service.Parameter;
+import springfox.documentation.service.SecurityScheme;
 import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spring.web.plugins.Docket;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
@@ -65,20 +69,31 @@ public class DefaultSwaggerConfig {
 		.build();
 
 	List<Parameter> operationParameters = new ArrayList<Parameter>();
+	List<SecurityScheme> securitySchemes = new ArrayList<SecurityScheme>();
+
 	if (ArgUtil.is(mockParams))
 	    for (MockParam mockParam : mockParams) {
-		AllowableValues allowableValues = null;
-		if (mockParam.getValues() != null) {
-		    allowableValues = new AllowableListValues(mockParam.getValues(), mockParam.getValueType());
+
+		if (ArgUtil.areEqual(mockParam.getSecurityScheme(), "APIKEY")) {
+
+		    securitySchemes.add(new ApiKey(mockParam.getDescription(), mockParam.getName(),
+			    StringUtils.toLowerCase(ArgUtil.parseAsString(mockParam.getType()))));
+
+		} else {
+		    AllowableValues allowableValues = null;
+		    if (mockParam.getValues() != null) {
+			allowableValues = new AllowableListValues(mockParam.getValues(), mockParam.getValueType());
+		    }
+		    Parameter parameter = new ParameterBuilder().name(mockParam.getName())
+			    .description(mockParam.getDescription()).defaultValue(mockParam.getDefaultValue())
+			    .modelRef(new ModelRef(PARAM_STRING))
+			    .parameterType(mockParam.getType().toString().toLowerCase())
+			    .allowableValues(allowableValues).required(mockParam.isRequired())
+			    .hidden(mockParam.isHidden()).build();
+		    operationParameters.add(parameter);
+
 		}
 
-		Parameter parameter = new ParameterBuilder().name(mockParam.getName())
-			.description(mockParam.getDescription()).defaultValue(mockParam.getDefaultValue())
-			.modelRef(new ModelRef(PARAM_STRING))
-			.parameterType(mockParam.getType().toString().toLowerCase()).allowableValues(allowableValues)
-			.required(mockParam.isRequired()).hidden(mockParam.isHidden()).build();
-
-		operationParameters.add(parameter);
 	    }
 	AppContextUtil.getSessionId(true);
 	AppContextUtil.getTraceId(true, true);
@@ -92,6 +107,7 @@ public class DefaultSwaggerConfig {
 
 	docket.globalOperationParameters(operationParameters);
 	docket.apiInfo(metaData());
+	docket.securitySchemes(securitySchemes);
 	return docket;
     }
 
@@ -132,12 +148,26 @@ public class DefaultSwaggerConfig {
     @Autowired
     AppConfig appConfig;
 
+    @Value("${swagger.description}")
+    String swaggerDescription;
+
+    @Value("${swagger.contact.url}")
+    String swaggerContactUrl;
+
+    @Value("${swagger.contact.name}")
+    String swaggerContactName;
+
+    @Value("${swagger.contact.email}")
+    String swaggerContactEmail;
+
     private ApiInfo metaData() {
 	return new ApiInfo(appConfig.getAppName(),
-		String.format("%s#%s#%s", appConfig.getAppEnv(), appConfig.getAppGroup(), appConfig.getAppId()),
+		ArgUtil.nonEmpty(swaggerDescription,
+			String.format("%s#%s#%s", appConfig.getAppEnv(), appConfig.getAppGroup(),
+				appConfig.getAppId())),
 		String.format("1.0 - %s", appConfig.getAppAppBuildStamp()), "Terms of service",
-		new Contact("boot-js Team", "https://springframework.guru/about/", "support@mehery.com"),
-		"Apache License Version 2.0", "https://www.apache.org/licenses/LICENSE-2.0", CollectionUtil.asList());
+		new Contact(swaggerContactName, swaggerContactUrl, swaggerContactEmail), "Apache License Version 2.0",
+		"https://www.apache.org/licenses/LICENSE-2.0", CollectionUtil.asList());
     }
 
     public static class DocketWrapper {

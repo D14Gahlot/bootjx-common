@@ -13,28 +13,30 @@ import com.boot.jx.xms.dto.DigitalEventDto;
 import com.boot.jx.xms.dto.DigitalObjectDto;
 import com.boot.jx.xms.service.ApiService;
 
-@Controller
+import io.swagger.annotations.Api;
+
+//@Api(tags = "Digital Analytics", description = "Analytics APIS")
+//@Controller
 public class DigitalApiV1 {
 
-	@Autowired
-	ApiService apiService;
-	
-	@ApiClientParams
-	@ResponseBody
-	@RequestMapping(value = "/api/v1/data/push", method = { RequestMethod.POST })
-	public ApiResponse<DigitalObjectDto, Object> dataPush(@RequestBody DigitalObjectDto digitalObjectDto) {
-		apiService.saveDigitalInfo(digitalObjectDto);
-		return ApiResponse.buildResult(digitalObjectDto);
-	}
-	
-	
-	@ApiClientParams
-	@ResponseBody
-	@RequestMapping(value = "/api/v1/event/push", method = { RequestMethod.POST })
-	public ApiResponse<DigitalEventDto, Object> dataEvent(@RequestBody DigitalEventDto digitalEventDto) {
-		
-		apiService.saveDigitalEvent(digitalEventDto);
-		return ApiResponse.buildResult(digitalEventDto);
-	}
-	
+    @Autowired
+    ApiService apiService;
+
+    @ApiClientParams
+    @ResponseBody
+    @RequestMapping(value = "/api/v1/data/push", method = { RequestMethod.POST })
+    public ApiResponse<DigitalObjectDto, Object> dataPush(@RequestBody DigitalObjectDto digitalObjectDto) {
+	apiService.saveDigitalInfo(digitalObjectDto);
+	return ApiResponse.buildResult(digitalObjectDto);
+    }
+
+    @ApiClientParams
+    @ResponseBody
+    @RequestMapping(value = "/api/v1/event/push", method = { RequestMethod.POST })
+    public ApiResponse<DigitalEventDto, Object> dataEvent(@RequestBody DigitalEventDto digitalEventDto) {
+
+	apiService.saveDigitalEvent(digitalEventDto);
+	return ApiResponse.buildResult(digitalEventDto);
+    }
+
 }

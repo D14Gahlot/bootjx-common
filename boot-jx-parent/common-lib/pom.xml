@@ -20,7 +20,7 @@
 		<buildtimestamp>${maven.build.timestamp}</buildtimestamp>
 		<maven.build.timestamp.format>yyyy-MM-dd HH:mm</maven.build.timestamp.format>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<swagger.version>2.7.0</swagger.version>
+		<swagger.version>2.8.0</swagger.version>
 	</properties>
 
 	<dependencies>

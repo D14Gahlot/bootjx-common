@@ -2,7 +2,7 @@ package com.boot.jx.postman.tw;
 
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.postman.PMConstants.CHANNEL_TYPE;
-import com.boot.jx.postman.PMEnvironment.AChannelConfig;
+import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PMEnvironment.AChannelDetails;
 import com.fasterxml.jackson.annotation.JsonView;
 
@@ -17,15 +17,15 @@ public class TwitterConfig extends AChannelDetails {
     private String type;
     private String envName;
 
-    @JsonView(AChannelConfig.Protected.class)
+    @JsonView(PMEnvironment.ProtectedProperty.class)
     private String consumerKey;
-    @JsonView(AChannelConfig.Protected.class)
+    @JsonView(PMEnvironment.ProtectedProperty.class)
     private String consumerSecret;
-    @JsonView(AChannelConfig.Protected.class)
+    @JsonView(PMEnvironment.ProtectedProperty.class)
     private String accessToken;
-    @JsonView(AChannelConfig.Protected.class)
+    @JsonView(PMEnvironment.ProtectedProperty.class)
     private String accessTokenSecret;
-    @JsonView(AChannelConfig.Protected.class)
+    @JsonView(PMEnvironment.ProtectedProperty.class)
     private String webhookUrl;
 
     public String getHandler() {

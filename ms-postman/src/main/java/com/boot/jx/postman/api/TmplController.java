@@ -33,71 +33,71 @@ import com.boot.utils.JsonUtil;
 @RestController
 public class TmplController {
 
-	/** The Constant LOGGER. */
-	private static final Logger LOGGER = LoggerFactory.getLogger(TmplController.class);
+    /** The Constant LOGGER. */
+    private static final Logger LOGGER = LoggerFactory.getLogger(TmplController.class);
 
-	/** The request. */
-	@Autowired
-	private HttpServletRequest request;
+    /** The request. */
+    @Autowired
+    private HttpServletRequest request;
 
-	/** The post man config. */
-	@Autowired
-	private PostManConfig postManConfig;
+    /** The post man config. */
+    @Autowired
+    private PostManConfig postManConfig;
 
-	@Autowired
-	private FileService fileService;
+    @Autowired
+    private FileService fileService;
 
-	/**
-	 * Gets the lang.
-	 *
-	 * @return the lang
-	 */
-	private Language getLang(CommonFile file) {
-		if (ArgUtil.isEmpty(file) || ArgUtil.isEmpty(file.getLang())) {
-			String langString = request.getParameter(PostManServiceImpl.PARAM_LANG);// localeResolver.resolveLocale(request).toString();
-			Language lang = ArgUtil.parseAsEnumT(langString, postManConfig.getTenantLang(), Language.class);
-			file.setLang(lang);
-		}
-		return file.getLang();
+    /**
+     * Gets the lang.
+     *
+     * @return the lang
+     */
+    private String getLang(CommonFile file) {
+	if (ArgUtil.isEmpty(file) || ArgUtil.isEmpty(file.getLang())) {
+	    String langString = request.getParameter(PostManServiceImpl.PARAM_LANG);// localeResolver.resolveLocale(request).toString();
+	    Language lang = ArgUtil.parseAsEnumT(langString, postManConfig.getTenantLang(), Language.class);
+	    file.lang(lang);
 	}
+	return file.getLang();
+    }
 
-	/**
-	 * Process template.
-	 *
-	 * @param template the template
-	 * @param data     the data
-	 * @param fileName the file name
-	 * @param fileType the file type
-	 * @return the file
-	 */
-	@SuppressWarnings("unchecked")
-	@RequestMapping(value = TmplClient.PATH.TMPL_FILE_PROCESS, method = RequestMethod.GET)
-	public ApiResponse<PostManFile, Object> processTemplate(@RequestParam TemplateDefaultEnum template,
-			@RequestParam(required = false) String data, @RequestParam(required = false) String fileName,
-			@RequestParam(required = false) FileFormat fileType,
-			@RequestParam(required = false) ContactType contactType) {
+    /**
+     * Process template.
+     *
+     * @param template the template
+     * @param data     the data
+     * @param fileName the file name
+     * @param fileType the file type
+     * @return the file
+     */
+    @SuppressWarnings("unchecked")
+    @RequestMapping(value = TmplClient.PATH.TMPL_FILE_PROCESS, method = RequestMethod.GET)
+    public ApiResponse<PostManFile, Object> processTemplate(@RequestParam TemplateDefaultEnum template,
+	    @RequestParam(required = false) String data, @RequestParam(required = false) String fileName,
+	    @RequestParam(required = false) FileFormat fileType,
+	    @RequestParam(required = false) ContactType contactType) {
 
-		PostManFile file = new PostManFile();
-		getLang(file);
+	PostManFile file = new PostManFile();
+	getLang(file);
 
-		file.setITemplate(template);
-		file.setFileFormat(fileType);
-		file.setModel(JsonUtil.fromJson(data, Map.class));
-		return ApiResponse.buildResult(fileService.create(file, contactType));
+	file.setITemplate(template);
+	file.setFileFormat(fileType);
+	file.setModel(JsonUtil.fromJson(data, Map.class));
+	return ApiResponse.buildResult(fileService.create(file, contactType));
 
-	}
+    }
 
-	/**
-	 * Process template file.
-	 *
-	 * @param file the file
-	 * @return the file
-	 */
-	@RequestMapping(value = { TmplClient.PATH.TMPL_FILE_PROCESS }, method = RequestMethod.POST)
-	public ApiResponse<PostManFile, Object> processTemplateFile(@RequestBody PostManFile file,
-			@RequestParam(required = false) ContactType contactType) {
-		getLang(file);
-		return ApiResponse.buildResult(fileService.create(file, contactType));
-	}
+    /**
+     * Process template file.
+     *
+     * @param file the file
+     * @return the file
+     */
+    @RequestMapping(value = { TmplClient.PATH.TMPL_FILE_PROCESS }, method = RequestMethod.POST)
+    public ApiResponse<PostManFile, Object> processTemplateFile(@RequestBody PostManFile file,
+	    @RequestParam(required = false) ContactType contactType) {
+	getLang(file);
+	return ApiResponse.buildResult(fileService.create(file, contactType));
+    }
 
 }

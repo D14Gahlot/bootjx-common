@@ -16,6 +16,7 @@ import com.boot.jx.postman.PMConfiguration;
 import com.boot.jx.postman.PMConstants.CHANNEL_TYPE;
 import com.boot.jx.postman.PMEnvironment.PMEnvironmentProvider;
 import com.boot.jx.postman.doc.ChannelConfigDoc;
+import com.boot.jx.postman.doc.ClientApiKeyDoc;
 import com.boot.jx.postman.doc.PMConfigurationDoc;
 import com.boot.jx.postman.fb.FacebookConfig;
 import com.boot.jx.postman.gupshup.GupShupConfig;
@@ -45,6 +46,11 @@ public class PMEnvironmentProviderImpl implements PMEnvironmentProvider, AppShar
 
 	    for (ChannelConfigDoc channel : channels) {
 		x.channels(channel);
+	    }
+
+	    List<ClientApiKeyDoc> clientKeys = mongoTemplate.findAll(ClientApiKeyDoc.class);
+	    for (ClientApiKeyDoc clientKey : clientKeys) {
+		x.clientApiKey(clientKey);
 	    }
 
 	    if (ArgUtil.is(x)) {

@@ -60,7 +60,7 @@ public class TmplConfig {
 	 */
 	public Locale getLocal(CommonFile file) {
 		if (file != null && file.getLang() != null) {
-			return new Locale(file.getLang().getCode());
+			return new Locale(file.getLang());
 		}
 		if (tenantLang != null) {
 			new Locale(tenantLang.getCode());
@@ -72,7 +72,7 @@ public class TmplConfig {
 		if (msg == null || msg.getLang() == null) {
 			return new Locale(tenantLang.getCode());
 		}
-		return new Locale(msg.getLang().getCode());
+		return new Locale(msg.getLang());
 	}
 
 	public String getStaticUrl() {

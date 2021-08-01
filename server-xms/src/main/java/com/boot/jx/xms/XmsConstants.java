@@ -11,6 +11,8 @@ import com.boot.jx.swagger.MockParamBuilder.MockParamType;
 
 public class XmsConstants {
 
+    public static final String X_API_KEY = "x-api-key";
+
     @Target({ ElementType.TYPE, ElementType.METHOD })
     @Retention(RetentionPolicy.RUNTIME)
     @ApiMockParams({
@@ -22,7 +24,7 @@ public class XmsConstants {
 //		    paramType = MockParamType.HEADER),
 //	    @ApiMockParam(name = "x-access-token", value = "Access Token", defaultValue = "s1agenttoken$$$",
 //		    paramType = MockParamType.HEADER),
-	    @ApiMockParam(name = "x-api-key", value = "API Key", defaultValue = "x-api-key$$$",
+	    @ApiMockParam(name = X_API_KEY, value = "API Key", defaultValue = "x-api-key$$$",
 		    paramType = MockParamType.HEADER) })
     public @interface ApiClientParams {
 

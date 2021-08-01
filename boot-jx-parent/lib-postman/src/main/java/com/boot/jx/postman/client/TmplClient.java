@@ -66,6 +66,7 @@ public class TmplClient {
 		file.setModel(outboxMessage.getModel());
 		file.setTemplate(outboxMessage.getTemplate());
 		file.setTemplateId(outboxMessage.getTemplateId());
+		file.setLang(outboxMessage.getLang());
 
 		file = this.process(file, outboxMessage.contact().type()).getResult();
 		outboxMessage.setMessage(file.getContent());

@@ -12,28 +12,31 @@ import com.boot.jx.xms.dto.InBoundContact;
 import com.boot.jx.xms.dto.InBoundEvent;
 import com.boot.jx.xms.dto.InBoundMsg;
 
+import io.swagger.annotations.Api;
+
+@Api(tags = "InBound Callbacks", description = "API's to be implemented by Clients, to recieve inbound messages")
 @Controller
 public class InboundApiV1 {
 
-	@ResponseBody
-	@ApiCallbacktParams
-	@RequestMapping(value = "/api/v1/message/receive", method = { RequestMethod.POST })
-	public InBoundMsg onMessageCallback(@RequestBody InBoundMsg inboxMessage) {
-		return new InBoundMsg();
-	}
+    @ResponseBody
+    @ApiCallbacktParams
+    @RequestMapping(value = "/api/v1/message/receive", method = { RequestMethod.POST })
+    public InBoundMsg onMessageCallback(@RequestBody InBoundMsg inboxMessage) {
+	return new InBoundMsg();
+    }
 
-	@ResponseBody
-	@ApiCallbacktParams
-	@RequestMapping(value = "/api/v1/contact/info", method = { RequestMethod.POST })
-	public ContactInfoUpdate onProfileCallback(@RequestBody InBoundContact contactInfoRequest) {
-		return new ContactInfoUpdate();
-	}
+    @ResponseBody
+    @ApiCallbacktParams
+    @RequestMapping(value = "/api/v1/contact/info", method = { RequestMethod.POST })
+    public ContactInfoUpdate onProfileCallback(@RequestBody InBoundContact contactInfoRequest) {
+	return new ContactInfoUpdate();
+    }
 
-	@ResponseBody
-	@ApiCallbacktParams
-	@RequestMapping(value = "/api/v1/action/event", method = { RequestMethod.POST })
-	public InBoundEvent onActionCallback(@RequestBody InBoundEvent actionInfo) {
-		return new InBoundEvent();
-	}
+    @ResponseBody
+    @ApiCallbacktParams
+    @RequestMapping(value = "/api/v1/action/event", method = { RequestMethod.POST })
+    public InBoundEvent onActionCallback(@RequestBody InBoundEvent actionInfo) {
+	return new InBoundEvent();
+    }
 
 }
