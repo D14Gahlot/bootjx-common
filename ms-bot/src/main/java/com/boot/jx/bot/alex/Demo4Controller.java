@@ -9,12 +9,9 @@ import com.boot.jx.bot.BotController;
 import com.boot.jx.bot.ChatContext;
 import com.boot.jx.bot.ChatController;
 import com.boot.jx.bot.ChatMapping;
-import com.boot.jx.dict.FileType;
-import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.utils.ArgUtil;
-import com.boot.utils.Constants;
 import com.boot.utils.StringUtils.StringMatcher;
 
 @BotController(name = "DemoBot", tenant = "app")
@@ -26,7 +23,8 @@ public class Demo4Controller extends ChatController {
 
     public void start(InboxMessage inboxMessage, StringMatcher matcher) {
 	reply(new OutboxMessage().template("menu-4").put("name", chatContext.getContact().getName()));
-	reply(new OutboxMessage().template("menu-4-1-email-1-ask").put("name", chatContext.getContact().getName()));
+	// reply(new OutboxMessage().template("menu-4-1-email-1-ask").put("name",
+	// chatContext.getContact().getName()));
 	next("menu-4-1-email-onselect");
     }
 
@@ -37,7 +35,7 @@ public class Demo4Controller extends ChatController {
 
 	if (ArgUtil.is(matcher) && matcher.match(Pattern.compile(regex))) {
 	    reply(new OutboxMessage().template("menu-4-1-email-2-0"));
-	    reply(new OutboxMessage().template("menu-4-2-pan-1-ask"));
+	    // reply(new OutboxMessage().template("menu-4-2-pan-1-ask"));
 	    next("menu-4-2-pan-onselect");
 	} else {
 	    reply("Enter valid email");
@@ -60,7 +58,7 @@ public class Demo4Controller extends ChatController {
 	default:
 	    if (inboxMessage.getMessage().length() == 12) {
 		reply(new OutboxMessage().template("menu-4-3-pan-2-0"));
-		reply(new OutboxMessage().template("menu-4-4-date-1-ask"));
+		// reply(new OutboxMessage().template("menu-4-4-date-1-ask"));
 		next("menu-4-2-date-onselect");
 	    } else {
 		reply(new OutboxMessage().template("menu-4-3-pan-1-nok"));
@@ -72,7 +70,7 @@ public class Demo4Controller extends ChatController {
     }
 
     @ChatMapping(key = "menu-4-2-date-onselect")
-    public void dateOnSelect(InboxMessage inboxMessage, StringMatcher matcher) {
+    public void dateOnSelect(InboxMessage inboxMessage, StringMatcher matcher) throws InterruptedException {
 
 	switch (inboxMessage.getMessage().toLowerCase()) {
 
@@ -86,9 +84,13 @@ public class Demo4Controller extends ChatController {
 	default:
 	    if (inboxMessage.getMessage().length() == 8) {
 		reply(new OutboxMessage().template("menu-4-5-payment-0"));
-		reply(new OutboxMessage().template("menu-4-5-payment-1"));
+		// reply(new OutboxMessage().template("menu-4-5-payment-1"));
+		Thread.sleep(2000);
+
 		reply(new OutboxMessage().template("menu-4-6-payment-0"));
-		reply(new OutboxMessage().template("menu-4-6-payment-1-done"));
+		// reply(new OutboxMessage().template("menu-4-6-payment-1-done"));
+		Thread.sleep(2000);
+
 		reply(new OutboxMessage().template("menu-4-7-welcome"));
 		chatContext.getSession().data().remove(CURRENT_DEMO);
 	    } else {
@@ -107,7 +109,7 @@ public class Demo4Controller extends ChatController {
 	    if (ArgUtil.is(agentAssignResp.session().getAgent())) {
 		reply(new OutboxMessage().template("menu-4-8-talk2agent"));
 	    } else {
-		reply("All agents are busy or online, we will connect you whenever someone is available.");
+		reply("All the agents are busy or online, we will connect you whenever someone is available.");
 	    }
 	} catch (Exception e) {
 	    reply("Some Tech Issues");

@@ -23,7 +23,8 @@ public class Demo3Controller extends ChatController {
 
     public void start(InboxMessage inboxMessage, StringMatcher matcher) {
 	reply(new OutboxMessage().template("menu-3").put("name", chatContext.getContact().getName()));
-	reply(new OutboxMessage().template("menu-3-1").put("name", chatContext.getContact().getName()));
+	// reply(new OutboxMessage().template("menu-3-1").put("name",
+	// chatContext.getContact().getName()));
 	next("menu-3-1-onselect");
     }
 
@@ -32,8 +33,8 @@ public class Demo3Controller extends ChatController {
 	reply(new OutboxMessage().template("menu-3-1-resp").put("name", chatContext.getContact().getName())
 		.attachment(new Attachment().mediaURL(
 			"https://cdn.jsdelivr.net/gh/mehery-soccom/mehery-content@main/sample-receipt/zen-residence-compressed.pdf")
-			.mediaType(FileType.DOCUMENT.toString())));
-	reply(new OutboxMessage().template("menu-3-2-1"));
+			.mediaCaption("Floor Plan").mediaType(FileType.DOCUMENT.toString())));
+	// reply(new OutboxMessage().template("menu-3-2-1"));
 	next("menu-3-2-1-onselect");
     }
 
@@ -46,6 +47,7 @@ public class Demo3Controller extends ChatController {
 	    next("menu-3-2-2-onselect");
 	    break;
 	default:
+	    this.botScore(0);
 	    this.transferToAgent(inboxMessage, matcher);
 	    break;
 	}
@@ -59,10 +61,11 @@ public class Demo3Controller extends ChatController {
 	case "y":
 	    reply(new OutboxMessage().template("menu-3-3-1").attachment(new Attachment().mediaURL(
 		    "https://cdn.jsdelivr.net/gh/mehery-soccom/mehery-content@main/sample-receipt/zen-residence-compressed.pdf")
-		    .mediaType(FileType.DOCUMENT.toString())));
+		    .mediaCaption("Amenities").mediaType(FileType.DOCUMENT.toString())));
 	    next("menu-3-3-1-onselect");
 	    break;
 	default:
+	    this.botScore(0);
 	    this.transferToAgent(inboxMessage, matcher);
 	    break;
 	}
@@ -75,6 +78,7 @@ public class Demo3Controller extends ChatController {
 	case "y":
 	    reply(new OutboxMessage().template("menu-3-3-2-yes"));
 	default:
+	    this.botScore(0);
 	    this.transferToAgent(inboxMessage, matcher);
 	    break;
 	}
@@ -87,7 +91,7 @@ public class Demo3Controller extends ChatController {
 	    if (ArgUtil.is(agentAssignResp.session().getAgent())) {
 		reply(new OutboxMessage().template("menu-4-8-talk2agent"));
 	    } else {
-		reply("All agents are busy or online, we will connect you whenever someone is available.");
+		reply("All the agents are busy or online, we will connect you whenever someone is available.");
 	    }
 	} catch (Exception e) {
 	    reply("Some Tech Issues");
