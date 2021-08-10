@@ -60,7 +60,7 @@ public class Demo3Controller extends ChatController {
 	    reply(new OutboxMessage().template("menu-3-3-1").attachment(new Attachment().mediaURL(
 		    "https://cdn.jsdelivr.net/gh/mehery-soccom/mehery-content@main/sample-receipt/zen-residence-compressed.pdf")
 		    .mediaType(FileType.DOCUMENT.toString())));
-	    next("menu-3-3-2-yes-onselect");
+	    next("menu-3-3-1-onselect");
 	    break;
 	default:
 	    this.transferToAgent(inboxMessage, matcher);
