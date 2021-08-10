@@ -89,13 +89,13 @@ public class Demo4Controller extends ChatController {
 
 		reply(new OutboxMessage().template("menu-4-6-payment-0"));
 		// reply(new OutboxMessage().template("menu-4-6-payment-1-done"));
-		Thread.sleep(2000);
+		//Thread.sleep(2000);
 
-		reply(new OutboxMessage().template("menu-4-7-welcome"));
+		//reply(new OutboxMessage().template("menu-4-7-welcome"));
 		chatContext.getSession().data().remove(CURRENT_DEMO);
 	    } else {
 		reply(new OutboxMessage().template("menu-4-4-date-1-nok"));
-		next("menu-4-2-pan-1-ask-onselect");
+		next("menu-4-2-date-onselect");
 	    }
 	    break;
 	}

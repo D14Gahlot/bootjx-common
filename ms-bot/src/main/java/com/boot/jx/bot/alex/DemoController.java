@@ -81,6 +81,7 @@ public class DemoController extends ChatController {
 	    chatContext.getSession().data().put(CURRENT_DEMO, "2");
 	    showDemoMenu(inboxMessage, matcher);
 	    break;
+	case "realstate":
 	case "propertybkcmumbai":
 	case "3":
 	    chatContext.getSession().data().put(CURRENT_DEMO, "3");
