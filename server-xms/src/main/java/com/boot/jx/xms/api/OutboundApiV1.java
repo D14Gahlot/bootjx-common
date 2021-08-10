@@ -20,7 +20,7 @@ import com.boot.jx.xms.service.MessageService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
-@Api(tags = "Outbopund Messages", description = "API's to send OutBound Messages")
+@Api(tags = "OutBound Messages", description = "API's to send OutBound Messages")
 @Controller
 public class OutboundApiV1 {
 

@@ -76,6 +76,10 @@ public class DummyUserController {
 	model.addAttribute("APP_CONTEXT", appConfig.getAppPrefix());
 	model.addAttribute("POSTMAN_CONTEXT", appConfig.getAppPrefix());
 	model.addAttribute("POSTMAN_AGENT_SCHEME_COLOR", pmEnvironment.get("postman.agent.scheme.color").asString());
+	if (appCommonConfig != null) {
+	    model.addAttribute("CDN_URL",
+		    ArgUtil.parseAsString(commonHttpRequest.get("CDN_URL"), appCommonConfig.getCdnServer()));
+	}
 	return "dummyuser";
     }
 

@@ -18,319 +18,345 @@ import com.boot.utils.StringUtils.StringMatcher;
 @BotController(name = "DemoBot", tenant = "app")
 public class DemoController extends ChatController {
 
-	@Autowired
-	private ChatContext chatContext;
+    private static final String CURRENT_DEMO = "current_menu";
+    @Autowired
+    private ChatContext chatContext;
 
-	@ChatMapping(key = AlexBotConstants.KEY.INITIATE + "menu", pattern = "^menu$")
-	private void showMenu(InboxMessage inboxMessage, StringMatcher matcher) {
-		String prevMenu = ArgUtil.parseAsString(chatContext.getSession().data().get("current_menu"), Constants.BLANK)
-				.toLowerCase();
-		if (ArgUtil.is(prevMenu)) {
-			switch (prevMenu) {
-			case "1":
-				reply(new OutboxMessage().template("menu-1").put("name", chatContext.getContact().getName()));
-				next("menu-1-onselect");
-				return;
-			case "2":
-				reply(new OutboxMessage().template("menu-2").put("name", chatContext.getContact().getName()));
-				next("menu-2-onselect");
-				return;
-			default:
-				break;
-			}
-		}
-		reply(new OutboxMessage().template("menu-0").put("name", chatContext.getContact().getName()));
-		next("menu-0-onselect");
+    @Autowired
+    Demo4Controller demo4Controller;
+
+    @Autowired
+    Demo3Controller demo3Controller;
+
+    @ChatMapping(key = AlexBotConstants.KEY.INITIATE + "menu", pattern = "^menu$")
+    private void showDemoMenu(InboxMessage inboxMessage, StringMatcher matcher) {
+	String prevMenu = ArgUtil.parseAsString(chatContext.getSession().data().get(CURRENT_DEMO), Constants.BLANK)
+		.toLowerCase();
+	if (ArgUtil.is(prevMenu)) {
+	    switch (prevMenu) {
+	    case "1":
+		reply(new OutboxMessage().template("menu-1").put("name", chatContext.getContact().getName()));
+		next("menu-1-onselect");
+		return;
+	    case "2":
+		reply(new OutboxMessage().template("menu-2").put("name", chatContext.getContact().getName()));
+		next("menu-2-onselect");
+		return;
+	    case "3":
+		demo3Controller.start(inboxMessage, matcher);
+		return;
+	    case "4":
+		demo4Controller.start(inboxMessage, matcher);
+		return;
+	    default:
+		break;
+	    }
 	}
+	reply(new OutboxMessage().template("menu-0").put("name", chatContext.getContact().getName()));
+	next("menu-0-onselect");
+    }
 
-	@ChatMapping(key = AlexBotConstants.KEY.INITIATE + "hi", pattern = "^HI$")
-	public void greet(InboxMessage inboxMessage, StringMatcher matcher) {
-		showMenu(inboxMessage, matcher);
+    @ChatMapping(key = AlexBotConstants.KEY.INITIATE + "hi", pattern = "^HI$")
+    public void greet(InboxMessage inboxMessage, StringMatcher matcher) {
+	showDemoMenu(inboxMessage, matcher);
+    }
+
+    @ChatMapping(key = AlexBotConstants.KEY.PING, pattern = "^PING$")
+    public void onPing(InboxMessage inboxMessage, StringMatcher matcher) {
+	reply("PING");
+    }
+
+    @ChatMapping(key = "menu-0-onselect")
+    public void menu1OnSelect(InboxMessage inboxMessage, StringMatcher matcher) {
+	switch (inboxMessage.getMessage().toLowerCase()) {
+	case "menu":
+	    showDemoMenu(inboxMessage, matcher);
+	case "asset management":
+	case "1":
+	    chatContext.getSession().data().put(CURRENT_DEMO, "1");
+	    showDemoMenu(inboxMessage, matcher);
+	    break;
+	case "retail":
+	case "2":
+	    chatContext.getSession().data().put(CURRENT_DEMO, "2");
+	    showDemoMenu(inboxMessage, matcher);
+	    break;
+	case "talktoagent":
+	case "3":
+	    transferToAgent(inboxMessage, matcher);
+	    break;
+	default:
+	    handleGlobalOptionOrInvalidAndNext(inboxMessage, matcher, "menu-0-onselect");
+	    return;
 	}
+    }
 
-	@ChatMapping(key = AlexBotConstants.KEY.PING, pattern = "^PING$")
-	public void onPing(InboxMessage inboxMessage, StringMatcher matcher) {
-		reply("PING");
+    @ChatMapping(key = "menu-1-onselect")
+    public void menu2OnSelect(InboxMessage inboxMessage, StringMatcher matcher) {
+	switch (inboxMessage.getMessage().toLowerCase()) {
+	case "1":
+	    reply(new OutboxMessage().template("today-credits").put("name", chatContext.getContact().getName())
+		    .attachment(new Attachment().mediaURL(
+			    "https://cdn.jsdelivr.net/gh/mehery-soccom/mehery-content@main/sample-receipt/mehery-sample-template.pdf")
+			    .mediaType(FileType.DOCUMENT.toString())));
+	    next("more-onselect");
+	    break;
+	case "2":
+	    reply(new OutboxMessage().template("today-debits").put("name", chatContext.getContact().getName())
+		    .attachment(new Attachment().mediaURL(
+			    "https://cdn.jsdelivr.net/gh/mehery-soccom/mehery-content@main/sample-receipt/mehery-sample-template.pdf")
+			    .mediaType(FileType.DOCUMENT.toString())));
+	    next("more-onselect");
+	    break;
+	case "3":
+	    reply(new OutboxMessage().template("today-trnx").put("name", chatContext.getContact().getName())
+		    .attachment(new Attachment().mediaURL(
+			    "https://cdn.jsdelivr.net/gh/mehery-soccom/mehery-content@main/sample-receipt/mehery-sample-template.pdf")
+			    .mediaType(FileType.DOCUMENT.toString())));
+	    next("more-onselect");
+	    break;
+	case "4":
+	    reply(new OutboxMessage().template("today-trnx").put("name", chatContext.getContact().getName())
+		    .attachment(new Attachment().mediaURL(
+			    "https://www.mehery.com/wp-content/uploads/2021/02/Screenshot-2021-02-03-at-10.12.29-PM.png")
+			    .mediaType(FileType.IMAGE.toString())));
+	    next("more-onselect");
+	    break;
+	case "*":
+	    reply(new OutboxMessage().template("feedback").put("name", chatContext.getContact().getName()));
+	    next("feedback-onselect");
+	    break;
+	case "#":
+	    transferToAgent(inboxMessage, matcher);
+	    break;
+	default:
+	    handleGlobalOptionOrInvalidAndNext(inboxMessage, matcher, "menu-1-onselect");
+	    break;
 	}
+    }
 
-	@ChatMapping(key = "menu-0-onselect")
-	public void menu1OnSelect(InboxMessage inboxMessage, StringMatcher matcher) {
-		switch (inboxMessage.getMessage().toLowerCase()) {
-		case "menu":
-			showMenu(inboxMessage, matcher);
-		case "asset management":
-		case "1":
-			chatContext.getSession().data().put("current_menu", "1");
-			showMenu(inboxMessage, matcher);
-			break;
-		case "retail":
-		case "2":
-			chatContext.getSession().data().put("current_menu", "2");
-			showMenu(inboxMessage, matcher);
-			break;
-		case "talktoagent":
-		case "3":
-			transferToAgent(inboxMessage, matcher);
-			break;
-		default:
-			handleGlobalOptionOrInvalidAndNext(inboxMessage, matcher, "menu-0-onselect");
-			return;
-		}
+    /** menu2 for Retails **/
+
+    @ChatMapping(key = "menu-2-onselect")
+    public void menu3OnSelect(InboxMessage inboxMessage, StringMatcher matcher) {
+	switch (inboxMessage.getMessage().toLowerCase()) {
+	case "1":
+	    reply(new OutboxMessage().template("menu-2-today-offers").put("name", chatContext.getContact().getName())
+		    .attachment(new Attachment().mediaURL(
+			    "https://cdn.jsdelivr.net/gh/mehery-soccom/mehery-content@main/sample-receipt/mehery-sample-template.pdf")
+			    .mediaType(FileType.DOCUMENT.toString())));
+	    next("more-onselect-menu-2");
+	    break;
+	case "2":
+	    reply(new OutboxMessage().template("menu-2-weekly-offers").put("name", chatContext.getContact().getName())
+		    .attachment(new Attachment().mediaURL(
+			    "https://cdn.jsdelivr.net/gh/mehery-soccom/mehery-content@main/sample-receipt/mehery-sample-template.pdf")
+			    .mediaType(FileType.DOCUMENT.toString())));
+	    next("more-onselect-menu-2");
+	    break;
+	case "3":
+	    reply(new OutboxMessage().template("menu-2-retail-branch").put("name", chatContext.getContact().getName())
+		    .attachment(new Attachment().mediaURL(
+			    "https://cdn.jsdelivr.net/gh/mehery-soccom/mehery-content@main/sample-receipt/mehery-sample-template.pdf")
+			    .mediaType(FileType.DOCUMENT.toString())));
+	    next("more-onselect-menu-2");
+	    break;
+	case "4":
+	    reply(new OutboxMessage().template("today-trnx").put("name", chatContext.getContact().getName())
+		    .attachment(new Attachment().mediaURL(
+			    "https://www.mehery.com/wp-content/uploads/2021/02/Screenshot-2021-02-03-at-10.12.29-PM.png")
+			    .mediaType(FileType.IMAGE.toString())));
+	    next("more-onselect-menu-2");
+	    break;
+	case "*":
+	    reply(new OutboxMessage().template("feedback").put("name", chatContext.getContact().getName()));
+	    next("feedback-onselect");
+	    break;
+	case "#":
+	    transferToAgent(inboxMessage, matcher);
+	    break;
+	default:
+	    handleGlobalOptionOrInvalidAndNext(inboxMessage, matcher, "menu-2-onselect");
+	    break;
 	}
+    }
 
-	@ChatMapping(key = "menu-1-onselect")
-	public void menu2OnSelect(InboxMessage inboxMessage, StringMatcher matcher) {
-		switch (inboxMessage.getMessage().toLowerCase()) {
-		case "1":
-			reply(new OutboxMessage().template("today-credits").put("name", chatContext.getContact().getName())
-					.attachment(new Attachment().mediaURL(
-							"https://cdn.jsdelivr.net/gh/mehery-soccom/mehery-content@main/sample-receipt/mehery-sample-template.pdf")
-							.mediaType(FileType.DOCUMENT.toString())));
-			next("more-onselect");
-			break;
-		case "2":
-			reply(new OutboxMessage().template("today-debits").put("name", chatContext.getContact().getName())
-					.attachment(new Attachment().mediaURL(
-							"https://cdn.jsdelivr.net/gh/mehery-soccom/mehery-content@main/sample-receipt/mehery-sample-template.pdf")
-							.mediaType(FileType.DOCUMENT.toString())));
-			next("more-onselect");
-			break;
-		case "3":
-			reply(new OutboxMessage().template("today-trnx").put("name", chatContext.getContact().getName())
-					.attachment(new Attachment().mediaURL(
-							"https://cdn.jsdelivr.net/gh/mehery-soccom/mehery-content@main/sample-receipt/mehery-sample-template.pdf")
-							.mediaType(FileType.DOCUMENT.toString())));
-			next("more-onselect");
-			break;
-		case "4":
-			reply(new OutboxMessage().template("today-trnx").put("name", chatContext.getContact().getName())
-					.attachment(new Attachment().mediaURL(
-							"https://www.mehery.com/wp-content/uploads/2021/02/Screenshot-2021-02-03-at-10.12.29-PM.png")
-							.mediaType(FileType.IMAGE.toString())));
-			next("more-onselect");
-			break;
-		case "*":
-			reply(new OutboxMessage().template("feedback").put("name", chatContext.getContact().getName()));
-			next("feedback-onselect");
-			break;
-		case "#":
-			transferToAgent(inboxMessage, matcher);
-			break;
-		default:
-			handleGlobalOptionOrInvalidAndNext(inboxMessage, matcher, "menu-1-onselect");
-			break;
-		}
+    @ChatMapping(key = "more-onselect")
+    public void moreonSelect(InboxMessage inboxMessage, StringMatcher matcher) {
+	switch (inboxMessage.getMessage().toLowerCase()) {
+	case "yes":
+	case "y":
+	case "1":
+	    reply(new OutboxMessage().template("menu-1").put("name", chatContext.getContact().getName()));
+	    next("menu-1-onselect");
+	    break;
+	case "no":
+	case "n":
+	case "2":
+	    reply(new OutboxMessage().template("feedback").put("name", chatContext.getContact().getName()));
+	    next("feedback-onselect");
+	    break;
+	default:
+	    handleGlobalOptionOrInvalidAndNext(inboxMessage, matcher, "more-onselect");
+	    return;
 	}
+    }
 
-	/** menu2 for Retails **/
-
-	@ChatMapping(key = "menu-2-onselect")
-	public void menu3OnSelect(InboxMessage inboxMessage, StringMatcher matcher) {
-		switch (inboxMessage.getMessage().toLowerCase()) {
-		case "1":
-			reply(new OutboxMessage().template("menu-2-today-offers").put("name", chatContext.getContact().getName())
-					.attachment(new Attachment().mediaURL(
-							"https://cdn.jsdelivr.net/gh/mehery-soccom/mehery-content@main/sample-receipt/mehery-sample-template.pdf")
-							.mediaType(FileType.DOCUMENT.toString())));
-			next("more-onselect-menu-2");
-			break;
-		case "2":
-			reply(new OutboxMessage().template("menu-2-weekly-offers").put("name", chatContext.getContact().getName())
-					.attachment(new Attachment().mediaURL(
-							"https://cdn.jsdelivr.net/gh/mehery-soccom/mehery-content@main/sample-receipt/mehery-sample-template.pdf")
-							.mediaType(FileType.DOCUMENT.toString())));
-			next("more-onselect-menu-2");
-			break;
-		case "3":
-			reply(new OutboxMessage().template("menu-2-retail-branch").put("name", chatContext.getContact().getName())
-					.attachment(new Attachment().mediaURL(
-							"https://cdn.jsdelivr.net/gh/mehery-soccom/mehery-content@main/sample-receipt/mehery-sample-template.pdf")
-							.mediaType(FileType.DOCUMENT.toString())));
-			next("more-onselect-menu-2");
-			break;
-		case "4":
-			reply(new OutboxMessage().template("today-trnx").put("name", chatContext.getContact().getName())
-					.attachment(new Attachment().mediaURL(
-							"https://www.mehery.com/wp-content/uploads/2021/02/Screenshot-2021-02-03-at-10.12.29-PM.png")
-							.mediaType(FileType.IMAGE.toString())));
-			next("more-onselect-menu-2");
-			break;
-		case "*":
-			reply(new OutboxMessage().template("feedback").put("name", chatContext.getContact().getName()));
-			next("feedback-onselect");
-			break;
-		case "#":
-			transferToAgent(inboxMessage, matcher);
-			break;
-		default:
-			handleGlobalOptionOrInvalidAndNext(inboxMessage, matcher, "menu-2-onselect");
-			break;
-		}
+    @ChatMapping(key = "more-onselect-menu-2")
+    public void moreonSelectRetailMenu(InboxMessage inboxMessage, StringMatcher matcher) {
+	switch (inboxMessage.getMessage().toLowerCase()) {
+	case "yes":
+	case "y":
+	case "1":
+	    reply(new OutboxMessage().template("menu-2").put("name", chatContext.getContact().getName()));
+	    next("menu-2-onselect");
+	    break;
+	case "no":
+	case "n":
+	case "2":
+	    reply(new OutboxMessage().template("feedback").put("name", chatContext.getContact().getName()));
+	    next("feedback-onselect");
+	    break;
+	default:
+	    handleGlobalOptionOrInvalidAndNext(inboxMessage, matcher, "more-onselect");
+	    return;
 	}
+    }
 
-	@ChatMapping(key = "more-onselect")
-	public void moreonSelect(InboxMessage inboxMessage, StringMatcher matcher) {
-		switch (inboxMessage.getMessage().toLowerCase()) {
-		case "yes":
-		case "y":
-		case "1":
-			reply(new OutboxMessage().template("menu-1").put("name", chatContext.getContact().getName()));
-			next("menu-1-onselect");
-			break;
-		case "no":
-		case "n":
-		case "2":
-			reply(new OutboxMessage().template("feedback").put("name", chatContext.getContact().getName()));
-			next("feedback-onselect");
-			break;
-		default:
-			handleGlobalOptionOrInvalidAndNext(inboxMessage, matcher, "more-onselect");
-			return;
-		}
+    @ChatMapping(key = "feedback-onselect")
+    public void feedback(InboxMessage inboxMessage, StringMatcher matcher) {
+	switch (inboxMessage.getMessage().toLowerCase()) {
+	case "happy":
+	case "yes":
+	case "y":
+	case "1":
+	    botScore(10);
+	    reply("Thanks");
+	    resolveSession();
+	    closeSession();
+	    break;
+	case "not happy":
+	case "nothappy":
+	case "no":
+	case "n":
+	case "2":
+	    botScore(0);
+	    transferToAgent(inboxMessage, matcher);
+	    break;
+	default:
+	    handleGlobalOptionOrInvalidAndNext(inboxMessage, matcher, "feedback-onselect");
+	    return;
 	}
+    }
 
-	@ChatMapping(key = "more-onselect-menu-2")
-	public void moreonSelectRetailMenu(InboxMessage inboxMessage, StringMatcher matcher) {
-		switch (inboxMessage.getMessage().toLowerCase()) {
-		case "yes":
-		case "y":
-		case "1":
-			reply(new OutboxMessage().template("menu-2").put("name", chatContext.getContact().getName()));
-			next("menu-2-onselect");
-			break;
-		case "no":
-		case "n":
-		case "2":
-			reply(new OutboxMessage().template("feedback").put("name", chatContext.getContact().getName()));
-			next("feedback-onselect");
-			break;
-		default:
-			handleGlobalOptionOrInvalidAndNext(inboxMessage, matcher, "more-onselect");
-			return;
-		}
+    @ChatMapping(key = "transfer-to-agent")
+    public void transferToAgent(InboxMessage inboxMessage, StringMatcher matcher) {
+	try {
+	    InboxMessage agentAssignResp = assignToAgent().getResult();
+	    if (ArgUtil.is(agentAssignResp.session().getAgent())) {
+		reply("Connecting you to one of our customer representatives. Give us a moment.");
+	    } else {
+		reply("All agents are busy or online, we will connect you whenever someone is available.");
+	    }
+	} catch (Exception e) {
+	    reply("Some Tech Issues");
 	}
+    }
 
-	@ChatMapping(key = "feedback-onselect")
-	public void feedback(InboxMessage inboxMessage, StringMatcher matcher) {
-		switch (inboxMessage.getMessage().toLowerCase()) {
-		case "happy":
-		case "yes":
-		case "y":
-		case "1":
-			botScore(10);
-			reply("Thanks");
-			resolveSession();
-			closeSession();
-			break;
-		case "not happy":
-		case "nothappy":
-		case "no":
-		case "n":
-		case "2":
-			botScore(0);
-			transferToAgent(inboxMessage, matcher);
-			break;
-		default:
-			handleGlobalOptionOrInvalidAndNext(inboxMessage, matcher, "feedback-onselect");
-			return;
-		}
+    @ChatMapping(key = AlexBotConstants.KEY.INITIATE + "*", pattern = "^*$")
+    public void defaultHandler(InboxMessage inboxMessage, StringMatcher matcher) {
+	if (!handleGlobalOption(inboxMessage, matcher)) {
+	    showDemoMenu(inboxMessage, matcher);
 	}
+    }
 
-	@ChatMapping(key = "transfer-to-agent")
-	public void transferToAgent(InboxMessage inboxMessage, StringMatcher matcher) {
-		try {
-			InboxMessage agentAssignResp = assignToAgent().getResult();
-			if (ArgUtil.is(agentAssignResp.session().getAgent())) {
-				reply("Connecting you to one of our customer representatives. Give us a moment.");
-			} else {
-				reply("All agents are busy or online, we will connect you whenever someone is available.");
-			}
-		} catch (Exception e) {
-			reply("Some Tech Issues");
-		}
+    private boolean handleGlobalOptionOrInvalidAndNext(InboxMessage inboxMessage, StringMatcher matcher,
+	    String nextHandler) {
+	if (!handleGlobalOptionOrInvalid(inboxMessage, matcher)) {
+	    next(nextHandler);
+	    return false;
 	}
+	return true;
+    }
 
-	@ChatMapping(key = AlexBotConstants.KEY.INITIATE + "*", pattern = "^*$")
-	public void defaultHandler(InboxMessage inboxMessage, StringMatcher matcher) {
-		if (!handleGlobalOption(inboxMessage, matcher)) {
-			showMenu(inboxMessage, matcher);
-		}
+    private boolean handleGlobalOptionOrInvalid(InboxMessage inboxMessage, StringMatcher matcher) {
+	if (!handleGlobalOption(inboxMessage, matcher)) {
+	    reply(new OutboxMessage().template("invalid-options"));
+	    return false;
 	}
+	return true;
+    }
 
-	private boolean handleGlobalOptionOrInvalidAndNext(InboxMessage inboxMessage, StringMatcher matcher,
-			String nextHandler) {
-		if (!handleGlobalOptionOrInvalid(inboxMessage, matcher)) {
-			next(nextHandler);
-			return false;
-		}
+    private boolean handleGlobalOption(InboxMessage inboxMessage, StringMatcher matcher) {
+	String thisMessage = inboxMessage.getMessage().toLowerCase().replace(" ", "");
+
+	if (ArgUtil.is(inboxMessage.getTags()) && ArgUtil.is(inboxMessage.getTags().getCategories())) {
+	    if (inboxMessage.getTags().getCategories().indexOf("today-credits") > -1) {
+		reply(new OutboxMessage().template("today-credits").put("name", chatContext.getContact().getName())
+			.attachment(new Attachment().mediaURL(
+				"https://cdn.jsdelivr.net/gh/mehery-soccom/mehery-content@main/sample-receipt/mehery-sample-template.pdf")
+				.mediaType(FileType.DOCUMENT.toString())));
+		next("more-onselect");
 		return true;
-	}
-
-	private boolean handleGlobalOptionOrInvalid(InboxMessage inboxMessage, StringMatcher matcher) {
-		if (!handleGlobalOption(inboxMessage, matcher)) {
-			reply(new OutboxMessage().template("invalid-options"));
-			return false;
-		}
+	    } else if (inboxMessage.getTags().getCategories().indexOf("today-debits") > -1) {
+		reply(new OutboxMessage().template("today-debits").put("name", chatContext.getContact().getName())
+			.attachment(new Attachment().mediaURL(
+				"https://cdn.jsdelivr.net/gh/mehery-soccom/mehery-content@main/sample-receipt/mehery-sample-template.pdf")
+				.mediaType(FileType.DOCUMENT.toString())));
+		next("more-onselect");
 		return true;
+	    } else if (inboxMessage.getTags().getCategories().indexOf("today-trnx") > -1) {
+		reply(new OutboxMessage().template("today-trnx").put("name", chatContext.getContact().getName())
+			.attachment(new Attachment().mediaURL(
+				"https://cdn.jsdelivr.net/gh/mehery-soccom/mehery-content@main/sample-receipt/mehery-sample-template.pdf")
+				.mediaType(FileType.DOCUMENT.toString())));
+		next("more-onselect");
+		return true;
+	    } else if (inboxMessage.getTags().getCategories().indexOf("menu") > -1
+		    || thisMessage.equalsIgnoreCase("menu")) {
+		showDemoMenu(inboxMessage, matcher);
+		return true;
+	    } else if (inboxMessage.getTags().getCategories().indexOf("transfer-to-agent") > -1
+		    || thisMessage.equalsIgnoreCase("#") || thisMessage.equalsIgnoreCase("TalkToAgent")) {
+		transferToAgent(inboxMessage, matcher);
+		return true;
+	    }
+	}
+	switch (thisMessage) {
+	case "menu":
+	    showDemoMenu(inboxMessage, matcher);
+	    return true;
+
+	case "/propertybkcmumbai":
+	case "realstate":
+	    chatContext.getSession().data().put(CURRENT_DEMO, "3");
+	    showDemoMenu(inboxMessage, matcher);
+	    return true;
+
+	case "/newaccountopen":
+	case "newaccountopen":
+	    chatContext.getSession().data().put(CURRENT_DEMO, "4");
+	    showDemoMenu(inboxMessage, matcher);
+	    return true;
+
+	case "#":
+	case "TalkToAgent":
+	    transferToAgent(inboxMessage, matcher);
+	    return true;
+	case "*":
+	case "exit":
+	case "/exit_chat":
+	    chatContext.getSession().data().remove(CURRENT_DEMO);
+	    reply(new OutboxMessage().template("feedback").put("name",
+		    ArgUtil.nonEmpty(chatContext.getContact().getName(), "WhatsApp User")));
+	    next("feedback-onselect");
+	    return true;
+	default:
+	    // System.out.println("NO Match");
+	    break;
 	}
 
-	private boolean handleGlobalOption(InboxMessage inboxMessage, StringMatcher matcher) {
-		String thisMessage = inboxMessage.getMessage().toLowerCase().replace(" ", "");
-
-		if (ArgUtil.is(inboxMessage.getTags()) && ArgUtil.is(inboxMessage.getTags().getCategories())) {
-			if (inboxMessage.getTags().getCategories().indexOf("today-credits") > -1) {
-				reply(new OutboxMessage().template("today-credits").put("name", chatContext.getContact().getName())
-						.attachment(new Attachment().mediaURL(
-								"https://cdn.jsdelivr.net/gh/mehery-soccom/mehery-content@main/sample-receipt/mehery-sample-template.pdf")
-								.mediaType(FileType.DOCUMENT.toString())));
-				next("more-onselect");
-				return true;
-			} else if (inboxMessage.getTags().getCategories().indexOf("today-debits") > -1) {
-				reply(new OutboxMessage().template("today-debits").put("name", chatContext.getContact().getName())
-						.attachment(new Attachment().mediaURL(
-								"https://cdn.jsdelivr.net/gh/mehery-soccom/mehery-content@main/sample-receipt/mehery-sample-template.pdf")
-								.mediaType(FileType.DOCUMENT.toString())));
-				next("more-onselect");
-				return true;
-			} else if (inboxMessage.getTags().getCategories().indexOf("today-trnx") > -1) {
-				reply(new OutboxMessage().template("today-trnx").put("name", chatContext.getContact().getName())
-						.attachment(new Attachment().mediaURL(
-								"https://cdn.jsdelivr.net/gh/mehery-soccom/mehery-content@main/sample-receipt/mehery-sample-template.pdf")
-								.mediaType(FileType.DOCUMENT.toString())));
-				next("more-onselect");
-				return true;
-			} else if (inboxMessage.getTags().getCategories().indexOf("menu") > -1
-					|| thisMessage.equalsIgnoreCase("menu")) {
-				showMenu(inboxMessage, matcher);
-				return true;
-			} else if (inboxMessage.getTags().getCategories().indexOf("transfer-to-agent") > -1
-					|| thisMessage.equalsIgnoreCase("#") || thisMessage.equalsIgnoreCase("TalkToAgent")) {
-				transferToAgent(inboxMessage, matcher);
-				return true;
-			}
-		}
-		switch (thisMessage) {
-		case "menu":
-			showMenu(inboxMessage, matcher);
-			return true;
-		case "#":
-		case "TalkToAgent":
-			transferToAgent(inboxMessage, matcher);
-			return true;
-		case "*":
-		case "exit":
-		case "/exit_chat":
-			chatContext.getSession().data().remove("current_menu");
-			reply(new OutboxMessage().template("feedback").put("name",
-					ArgUtil.nonEmpty(chatContext.getContact().getName(), "WhatsApp User")));
-			next("feedback-onselect");
-			return true;
-		default:
-			// System.out.println("NO Match");
-			break;
-		}
-
-		return false;
-	}
+	return false;
+    }
 
 }
