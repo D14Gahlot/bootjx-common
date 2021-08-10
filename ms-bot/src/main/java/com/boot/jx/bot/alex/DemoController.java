@@ -81,8 +81,18 @@ public class DemoController extends ChatController {
 	    chatContext.getSession().data().put(CURRENT_DEMO, "2");
 	    showDemoMenu(inboxMessage, matcher);
 	    break;
-	case "talktoagent":
+	case "propertybkcmumbai":
 	case "3":
+	    chatContext.getSession().data().put(CURRENT_DEMO, "3");
+	    showDemoMenu(inboxMessage, matcher);
+	    break;
+	case "newaccountopen":
+	case "4":
+	    chatContext.getSession().data().put(CURRENT_DEMO, "4");
+	    showDemoMenu(inboxMessage, matcher);
+	    break;
+	case "talktoagent":
+	case "#":
 	    transferToAgent(inboxMessage, matcher);
 	    break;
 	default:
