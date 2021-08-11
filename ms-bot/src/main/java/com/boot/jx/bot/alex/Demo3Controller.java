@@ -87,6 +87,7 @@ public class Demo3Controller extends ChatController {
     @ChatMapping(key = "menu-4-8-talk2agent")
     public void transferToAgent(InboxMessage inboxMessage, StringMatcher matcher) {
 	try {
+	    chatContext.getSession().data().remove(CURRENT_DEMO);
 	    InboxMessage agentAssignResp = assignToAgent().getResult();
 	    if (ArgUtil.is(agentAssignResp.session().getAgent())) {
 		reply(new OutboxMessage().template("menu-4-8-talk2agent"));
