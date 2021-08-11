@@ -19,7 +19,7 @@ spring.redis.host=localhost
 spring.redis.port=6379
 server.connection-timeout=-1
 
-###### MeherY ########
+###### CherryBase ########
 mry.postman.url=http://localhost:8082/postman
 mry.agent.url=http://localhost:8083/agent
 mry.bot.url=http://localhost:8084/bot
@@ -40,9 +40,9 @@ app.id=AG1						# optional instance name
 server.port=8083
 
 ###### DB mysql ########
-spring.datasource.url=jdbc:mysql://127.0.0.1:3306/meherydemo
-spring.datasource.username=meherydemo
-spring.datasource.password=meherydemo
+spring.datasource.url=jdbc:mysql://127.0.0.1:3306/cherrybase
+spring.datasource.username=cherrybase
+spring.datasource.password=cherrybase
 
 ###### DB Mongo ########
 spring.data.mongodb.uri=mongodb://localbot:localbot@10.28.42.30:27017/localbot
@@ -52,7 +52,7 @@ spring.redis.host=localhost
 spring.redis.port=6379
 server.connection-timeout=-1
 
-###### MeherY ########
+###### CherryBase ########
 mry.postman.url=http://localhost:8082/postman
 mry.agent.url=http://localhost:8083/agent
 mry.bot.url=http://localhost:8084/bot
@@ -91,7 +91,7 @@ spring.redis.host=localhost
 spring.redis.port=6379
 server.connection-timeout=-1
 
-###### MeherY ########
+###### CherryBase ########
 mry.postman.url=http://localhost:8082/postman
 mry.agent.url=http://localhost:8083/agent
 mry.bot.url=http://localhost:8084/bot
@@ -110,9 +110,9 @@ app.id=AD1						# optional instance name
 server.port=8081
 
 ###### DB mysql ########
-spring.datasource.url=jdbc:mysql://127.0.0.1:3306/meherydemo
-spring.datasource.username=meherydemo
-spring.datasource.password=meherydemo
+spring.datasource.url=jdbc:mysql://127.0.0.1:3306/cherrybase
+spring.datasource.username=cherrybase
+spring.datasource.password=cherrybase
 
 ###### DB Mongo ########
 spring.data.mongodb.uri=mongodb://localbot:localbot@10.28.42.30:27017/localbot
@@ -122,7 +122,7 @@ spring.redis.host=localhost
 spring.redis.port=6379
 server.connection-timeout=-1
 
-###### MeherY ########
+###### cherrybase ########
 mry.postman.url=http://localhost:8082/postman
 mry.agent.url=http://localhost:8083/agent
 mry.bot.url=http://localhost:8084/bot
@@ -159,7 +159,7 @@ spring.redis.host=localhost
 spring.redis.port=6379
 server.connection-timeout=-1
 
-###### MeherY ########
+###### cherrybase ########
 mry.postman.url=http://localhost:8082/postman
 mry.agent.url=http://localhost:8083/agent
 mry.bot.url=http://localhost:8084/bot
@@ -170,7 +170,7 @@ mry.admin.url=http://localhost:8081/admin
 
 ## TenantProperties 
 ###### application.<tnt>.properties
-```application.aertrip.properties
+```application.<tnt>.properties
 ###### DB mysql ########
 spring.datasource.url=jdbc:mysql://127.0.0.1:3306/<tnt>
 spring.datasource.username=<tnt>
