@@ -263,6 +263,7 @@ public class DemoController extends ChatController {
     @ChatMapping(key = "transfer-to-agent")
     public void transferToAgent(InboxMessage inboxMessage, StringMatcher matcher) {
 	try {
+	    chatContext.getSession().data().remove(CURRENT_DEMO);
 	    InboxMessage agentAssignResp = assignToAgent().getResult();
 	    if (ArgUtil.is(agentAssignResp.session().getAgent())) {
 		reply("Connecting you to one of our customer representatives. Give us a moment.");
