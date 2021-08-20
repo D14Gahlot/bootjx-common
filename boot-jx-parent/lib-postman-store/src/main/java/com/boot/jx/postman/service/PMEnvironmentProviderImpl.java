@@ -41,7 +41,9 @@ public class PMEnvironmentProviderImpl implements PMEnvironmentProvider, AppShar
 	    return connectors.get(tnt);
 	}
 	if (ArgUtil.is(mongoTemplate)) {
-	    PMConfigurationDoc x = mongoTemplate.findById(AppContextUtil.getTenant(), PMConfigurationDoc.class);
+	    PMConfigurationDoc x = getPMConfigurationDoc();
+	    
+	    
 	    List<ChannelConfigDoc> channels = mongoTemplate.findAll(ChannelConfigDoc.class);
 
 	    for (ChannelConfigDoc channel : channels) {
@@ -105,11 +107,7 @@ public class PMEnvironmentProviderImpl implements PMEnvironmentProvider, AppShar
     @Override
     public void config(ChannelConfig config) {
 	configInternal(config);
-	PMConfigurationDoc doc = mongoTemplate.findById(AppContextUtil.getTenant(), PMConfigurationDoc.class);
-	if (ArgUtil.isEmpty(doc)) {
-	    doc = new PMConfigurationDoc();
-	    doc.setTenant(AppContextUtil.getTenant());
-	}
+	PMConfigurationDoc doc = getPMConfigurationDoc();
 	switch (config.getChannelType()) {
 	case CHANNEL_TYPE.FACEBOOK:
 	    doc.facebook(config.getFacebook());
@@ -126,6 +124,15 @@ public class PMEnvironmentProviderImpl implements PMEnvironmentProvider, AppShar
 	default:
 	}
 	mongoTemplate.save(doc);
+    }
+
+    private PMConfigurationDoc getPMConfigurationDoc() {
+	PMConfigurationDoc doc = mongoTemplate.findById(AppContextUtil.getTenant(), PMConfigurationDoc.class);
+	if (ArgUtil.isEmpty(doc)) {
+	    doc = new PMConfigurationDoc();
+	    doc.setTenant(AppContextUtil.getTenant());
+	}
+	return doc;
     }
 
     @Override
