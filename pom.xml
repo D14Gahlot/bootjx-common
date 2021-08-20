@@ -4,8 +4,8 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<artifactId>mehery</artifactId>
-	<name>mehery</name>
+	<artifactId>cherrybase</artifactId>
+	<name>cherrybase</name>
 	<packaging>pom</packaging>
 	<url>http://maven.apache.org</url>
 
@@ -89,6 +89,7 @@
 		<module>server-agent</module>
 		<module>server-admin</module>
 		<module>server-xms</module>
+		<module>server-account</module>
 	</modules>
 </project>
 

@@ -26,7 +26,7 @@ public class ArgUtilTest { // Noncompliant
 	}
 	
 	public static void main4(String[] args) throws ParseException {
-		String x = "Write failed with error code 11000 and error message 'E11000 duplicate key error collection: localbot.AGENTS index: agent_email dup key: { : \"lalit.tanwar.mehery@gmail.com\" }'; nested exception is com.mongodb.DuplicateKeyException: Write failed with error code 11000 and error message 'E11000 duplicate key error collection: localbot.AGENTS index: agent_email dup key: { : \"lalit.tanwar.mehery@gmail.com\" }'";
+		String x = "Write failed with error code 11000 and error message 'E11000 duplicate key error collection: localbot.AGENTS index: agent_email dup key: { : \"lalit.tanwar.cherrybase@gmail.com\" }'; nested exception is com.mongodb.DuplicateKeyException: Write failed with error code 11000 and error message 'E11000 duplicate key error collection: localbot.AGENTS index: agent_email dup key: { : \"lalit.tanwar.cherrybase@gmail.com\" }'";
 
 		StringMatcher matcher = new StringMatcher(x);
 		if (matcher.isMatch(pattern)) {

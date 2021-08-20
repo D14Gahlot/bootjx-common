@@ -12,7 +12,7 @@
 
 	<parent>
 		<groupId>com.boot.jx</groupId>
-		<artifactId>mehery</artifactId>
+		<artifactId>cherrybase</artifactId>
 		<version>0.0.1-SNAPSHOT</version>
 	</parent>
 

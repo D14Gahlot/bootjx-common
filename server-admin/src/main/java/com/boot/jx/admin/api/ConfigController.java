@@ -134,11 +134,17 @@ public class ConfigController {
 	String oldUrl = config.asString();
 
 	if (ArgUtil.is(version) && ArgUtil.is(oldUrl)) {
-	    Pattern pattern = Pattern.compile("(.+)cdn.jsdelivr.net/(.+)@(.+)/dist/");
+	    Pattern pattern = Pattern.compile(
+		    "(?<proto>.+)cdn.jsdelivr.net/gh/(?<org>.+)/(?<repo>.+)@(?<version>[-a-zA-Z0-9\\.]+)(?<path>.*)");
 	    Matcher matcher = pattern.matcher(oldUrl);
 	    if (matcher.find()) {
-		url = String.format("%scdn.jsdelivr.net/%s@%s/dist/", matcher.group(1), matcher.group(2),
-			StringUtils.trim(version));
+		String protoV = matcher.group("proto");
+		String orgV = matcher.group("org");
+		String repoV = matcher.group("repo");
+		String versionV = matcher.group("version");
+		String pathV = matcher.group("path");
+		url = String.format("%scdn.jsdelivr.net/gh/%s/%s@%s%s", protoV, orgV, repoV, StringUtils.trim(version),
+			pathV);
 	    }
 	}
 

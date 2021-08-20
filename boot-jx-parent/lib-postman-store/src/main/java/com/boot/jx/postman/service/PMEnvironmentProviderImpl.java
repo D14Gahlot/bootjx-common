@@ -125,6 +125,7 @@ public class PMEnvironmentProviderImpl implements PMEnvironmentProvider, AppShar
 	    break;
 	default:
 	}
+	mongoTemplate.save(doc);
     }
 
     @Override
