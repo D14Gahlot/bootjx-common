@@ -34,9 +34,6 @@ public class PMClientConfig {
     @Value("${postman.chat.dummy.user.enabled}")
     boolean chatDummyUserEnabled;
 
-    @Value("${postman.chat.dummy.bot.enabled}")
-    boolean chatDummyBotEnabled;
-
     @Value("${postman.chat.idle.timeout}")
     private String chatIdleTimeout;
 
@@ -54,10 +51,6 @@ public class PMClientConfig {
 
     public boolean isChatDummyUserEnabled() {
 	return chatDummyUserEnabled;
-    }
-
-    public boolean isChatDummyBotEnabled() {
-	return chatDummyBotEnabled;
     }
 
     public String getAgentUrl() {

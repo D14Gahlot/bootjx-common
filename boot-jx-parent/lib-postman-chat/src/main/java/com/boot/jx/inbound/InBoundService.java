@@ -34,148 +34,148 @@ import com.boot.utils.UniqueID;
 @Component
 public class InBoundService {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(InBoundService.class);
-	public static final Pattern PROXY = Pattern.compile("\\/proxy\\ ([a-zA-Z0-9_\\-]+)$");
-	public static final Pattern UNPROXY = Pattern.compile("\\/unproxy\\ ([a-zA-Z0-9_\\-]+)$");
+    private static final Logger LOGGER = LoggerFactory.getLogger(InBoundService.class);
+    public static final Pattern PROXY = Pattern.compile("\\/proxy\\ ([a-zA-Z0-9_\\-]+)$");
+    public static final Pattern UNPROXY = Pattern.compile("\\/unproxy\\ ([a-zA-Z0-9_\\-]+)$");
 
-	@Autowired(required = false)
-	private InBoundHandler inBoundHandler;
+    @Autowired(required = false)
+    private InBoundHandler inBoundHandler;
 
-	@Autowired(required = false)
-	private InBoundFilter inBoundFilter;
+    @Autowired(required = false)
+    private InBoundFilter inBoundFilter;
 
-	@Autowired
-	private BotEngine botEngine;
+    @Autowired
+    private BotEngine botEngine;
 
-	@Autowired
-	private ChatClient chatClient;
+    @Autowired
+    private ChatClient chatClient;
 
-	@Autowired
-	private PMClientConfig chatClientConfig;
+    @Autowired
+    private PMClientConfig chatClientConfig;
 
-	@Autowired
-	private ChatService chatService;
+    @Autowired
+    private ChatService chatService;
 
-	@Autowired
-	private AgentService agentService;
+    @Autowired
+    private AgentService agentService;
 
-	@Autowired
-	private SessionStore sessionStore;
+    @Autowired
+    private SessionStore sessionStore;
 
-	@Autowired
-	private MessageStore messageStore;
+    @Autowired
+    private MessageStore messageStore;
 
-	@Autowired
-	private MessageContext messageContext;
+    @Autowired
+    private MessageContext messageContext;
 
-	@Autowired(required = false)
-	private RedissonClient redisson;
-	private CacheBox<String> proxyManager;
+    @Autowired(required = false)
+    private RedissonClient redisson;
+    private CacheBox<String> proxyManager;
 
-	public ICacheBox<String> proxy() {
-		if (proxyManager == null) {
-			this.proxyManager = CacheBox.getInstance("InBoundService-Proxy", redisson);
-		}
-		return this.proxyManager;
+    public ICacheBox<String> proxy() {
+	if (proxyManager == null) {
+	    this.proxyManager = CacheBox.getInstance("InBoundService-Proxy", redisson);
 	}
+	return this.proxyManager;
+    }
 
-	/**
-	 * Invoke the methods with matching {@link ChatMapping#events()} and
-	 * {@link ChatMapping#pattern()} in events received from Slack/Facebook.
-	 *
-	 * @param event received from facebook
-	 */
-	@Async
-	public void invokeMethodsAsync(InboxMessage inboxMessageOriginal) {
-		invokeMethods(inboxMessageOriginal);
-	}
+    /**
+     * Invoke the methods with matching {@link ChatMapping#events()} and
+     * {@link ChatMapping#pattern()} in events received from Slack/Facebook.
+     *
+     * @param event received from facebook
+     */
+    @Async
+    public void invokeMethodsAsync(InboxMessage inboxMessageOriginal) {
+	invokeMethods(inboxMessageOriginal);
+    }
 
-	public InboxMessage invokeMethods(InboxMessage inboxMessageOriginal) {
+    public InboxMessage invokeMethods(InboxMessage inboxMessageOriginal) {
 
-		if (AppContextUtil.getTenant().equals("app") && ArgUtil.is(inboxMessageOriginal.getMessage())
-				&& ArgUtil.is(redisson)) {
-			String contactId = PostManUtil.createContactId(inboxMessageOriginal.contact());
-			String proxy = null;
+	if (AppContextUtil.getTenant().equals("app") && ArgUtil.is(inboxMessageOriginal.getMessage())
+		&& ArgUtil.is(redisson)) {
+	    String contactId = PostManUtil.createContactId(inboxMessageOriginal.contact());
+	    String proxy = null;
 
-			StringMatcher matcher = new StringMatcher(inboxMessageOriginal.getMessage());
-			if (matcher.isMatch(PROXY)) {
-				proxy = matcher.group(1);
-				proxy().put(contactId, proxy);
-				return inboxMessageOriginal;
-			} else if (matcher.isMatch(UNPROXY)) {
-				proxy().fastRemove(contactId);
-				return inboxMessageOriginal;
-			} else {
-				proxy = proxy().get(contactId);
-			}
-
-			if (ArgUtil.is(proxy)) {
-				AppContextUtil.clear();
-				AppContextUtil.setTenant(proxy);
-				String sessionId = UniqueID.generateString();
-				AppContextUtil.setSessionId(sessionId);
-				AppContextUtil.getTraceId(true, true);
-				AppContextUtil.resetTraceTime();
-				AppContextUtil.init();
-
-			}
-
-		}
-
-		ChatSessionDoc session = null;
-		boolean locallySessionAssigned = false;
-		if (ArgUtil.isEmpty(inboxMessageOriginal.getSessionId())
-				|| "POSTMAN".equalsIgnoreCase(chatClientConfig.getPostmanType())) {
-			session = sessionStore.getSession(inboxMessageOriginal);
-			if (ArgUtil.is(session)) {
-				sessionStore.linkSession(session, inboxMessageOriginal);
-				locallySessionAssigned = true;
-			} else {
-				ErrorObject error = new ErrorObject();
-				error.setIncomingMessage(inboxMessageOriginal);
-				error.setErrorType("NO_SESSION_CREATED");
-				error.setMessage("Cannot Create Session");
-				messageContext.log(error);
-				return inboxMessageOriginal;
-			}
-		}
-
-		if (ArgUtil.isEmpty(inboxMessageOriginal.getMessageId())) {
-			inboxMessageOriginal.setMessage(StringUtils.trim(inboxMessageOriginal.getMessage()));
-			messageStore.createOrUpdate(inboxMessageOriginal);
-		}
-
-		messageContext.setMessage(inboxMessageOriginal);
-
-		if (locallySessionAssigned && ArgUtil.is(session)) {
-			boolean wasSessionInitd = session.isInitd();
-			boolean isSessionInitd = chatService.initSession(inboxMessageOriginal, session);
-			if (!isSessionInitd) {
-				return inboxMessageOriginal;
-			}
-			if (isSessionInitd && (wasSessionInitd != isSessionInitd)) {
-				chatService.initSessionPost(inboxMessageOriginal, session);
-			}
-
-		}
-
-		if (ArgUtil.isEmpty(inBoundFilter) || inBoundFilter.onFilter(inboxMessageOriginal)) {
-			if (ArgUtil.is(inBoundHandler)) {
-				inBoundHandler.onHandle(inboxMessageOriginal);
-			}
-
-			if (agentService.onMessageSupported(inboxMessageOriginal)) {
-				agentService.onMessage(inboxMessageOriginal);
-			} else if (botEngine.isChatBotDefined() || chatClientConfig.isChatDummyBotEnabled()) {
-				botEngine.invokeMethodsAsync(inboxMessageOriginal);
-			} else {
-				chatClient.forward(inboxMessageOriginal);
-			}
-		}
+	    StringMatcher matcher = new StringMatcher(inboxMessageOriginal.getMessage());
+	    if (matcher.isMatch(PROXY)) {
+		proxy = matcher.group(1);
+		proxy().put(contactId, proxy);
 		return inboxMessageOriginal;
+	    } else if (matcher.isMatch(UNPROXY)) {
+		proxy().fastRemove(contactId);
+		return inboxMessageOriginal;
+	    } else {
+		proxy = proxy().get(contactId);
+	    }
+
+	    if (ArgUtil.is(proxy)) {
+		AppContextUtil.clear();
+		AppContextUtil.setTenant(proxy);
+		String sessionId = UniqueID.generateString();
+		AppContextUtil.setSessionId(sessionId);
+		AppContextUtil.getTraceId(true, true);
+		AppContextUtil.resetTraceTime();
+		AppContextUtil.init();
+
+	    }
+
 	}
 
-	public ApiResponse<InboxMessage, ?> assignToAgent(InboxMessage inboxMessageOriginal) {
-		return agentService.assignToAgent(inboxMessageOriginal);
+	ChatSessionDoc session = null;
+	boolean locallySessionAssigned = false;
+	if (ArgUtil.isEmpty(inboxMessageOriginal.getSessionId())
+		|| "POSTMAN".equalsIgnoreCase(chatClientConfig.getPostmanType())) {
+	    session = sessionStore.getSession(inboxMessageOriginal);
+	    if (ArgUtil.is(session)) {
+		sessionStore.linkSession(session, inboxMessageOriginal);
+		locallySessionAssigned = true;
+	    } else {
+		ErrorObject error = new ErrorObject();
+		error.setIncomingMessage(inboxMessageOriginal);
+		error.setErrorType("NO_SESSION_CREATED");
+		error.setMessage("Cannot Create Session");
+		messageContext.log(error);
+		return inboxMessageOriginal;
+	    }
 	}
+
+	if (ArgUtil.isEmpty(inboxMessageOriginal.getMessageId())) {
+	    inboxMessageOriginal.setMessage(StringUtils.trim(inboxMessageOriginal.getMessage()));
+	    messageStore.createOrUpdate(inboxMessageOriginal);
+	}
+
+	messageContext.setMessage(inboxMessageOriginal);
+
+	if (locallySessionAssigned && ArgUtil.is(session)) {
+	    boolean wasSessionInitd = session.isInitd();
+	    boolean isSessionInitd = chatService.initSession(inboxMessageOriginal, session);
+	    if (!isSessionInitd) {
+		return inboxMessageOriginal;
+	    }
+	    if (isSessionInitd && (wasSessionInitd != isSessionInitd)) {
+		chatService.initSessionPost(inboxMessageOriginal, session);
+	    }
+
+	}
+
+	if (ArgUtil.isEmpty(inBoundFilter) || inBoundFilter.onFilter(inboxMessageOriginal)) {
+	    if (ArgUtil.is(inBoundHandler)) {
+		inBoundHandler.onHandle(inboxMessageOriginal);
+	    }
+
+	    if (agentService.onMessageSupported(inboxMessageOriginal)) {
+		agentService.onMessage(inboxMessageOriginal);
+	    } else if (botEngine.isChatBotDefined()) {
+		botEngine.invokeMethodsAsync(inboxMessageOriginal);
+	    } else {
+		chatClient.forward(inboxMessageOriginal);
+	    }
+	}
+	return inboxMessageOriginal;
+    }
+
+    public ApiResponse<InboxMessage, ?> assignToAgent(InboxMessage inboxMessageOriginal) {
+	return agentService.assignToAgent(inboxMessageOriginal);
+    }
 }

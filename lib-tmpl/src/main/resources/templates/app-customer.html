@@ -114,17 +114,22 @@ html.loadable.loading .fullloader {
 	<p th:case="*" th:remove="tag">
 		<link rel=stylesheet
 			href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900">
-		<link th:href="${CDN_URL} + '/app.js?_='+${CDN_VERSION}" rel=preload
+		
+		<!-- // preload  css and js -->
+		<link th:href="${CDN_URL} + '/app-customer.js?_='+${CDN_VERSION}" rel=preload
 			as=script>
-		<link th:href="${CDN_URL} + '/css/app.css?_='+${CDN_VERSION}"
+		<link th:href="${CDN_URL} + '/css/chunk-common.css?_='+${CDN_VERSION}"
 			rel=preload as=style>
 		<link th:href="${CDN_URL} + '/js/chunk-vendors.js?_='+${CDN_VERSION}"
 			rel=preload as=script>
-
+		<link th:href="${CDN_URL} + '/js/chunk-common.js?_='+${CDN_VERSION}"
+			rel=preload as=script>
+			
+		<!-- // load  css -->
 		<link
 			th:href="${CDN_URL} + '/css/chunk-vendors.css?_='+${CDN_VERSION}"
 			rel=stylesheet>
-		<link th:href="${CDN_URL} + '/css/app.css?_='+${CDN_VERSION}"
+		<link th:href="${CDN_URL} + '/css/chunk-common.css?_='+${CDN_VERSION}"
 			rel=stylesheet />
 
 	</p>
@@ -138,7 +143,7 @@ html.loadable.loading .fullloader {
 		APP_CONTEXT : '[[${APP_CONTEXT}]]', //
 		remoteJsVersion : '[[${CDN_VERSION}]]', //
 		CONTEXT: '[[${APP_CONTEXT}]]',
-		CONFIG : [(${CONFIG_JSON})],
+		CONFIG : ([(${CONFIG_JSON})]),
 		WEBAPP_BASE : '[[${WEBAPP_BASE}]]',
 		POSTMAN : '[[${POSTMAN_CONTEXT}]]'
 	};
@@ -172,11 +177,14 @@ html.loadable.loading .fullloader {
 
 <div th:switch="${CDN_DEBUG}" th:remove="tag"> 
   <p th:case="'true'" th:remove="tag">
-		<script th:src="${CDN_URL}+'/app.js?_='+${CDN_VERSION}"></script>
+  		<!-- // load  js if debug -->
+		<script th:src="${CDN_URL}+'/app-customer.js?_='+${CDN_VERSION}"></script>
   </p>
   <p th:case="*" th:remove="tag">
+  		<!-- // load  js if prod -->
   	  	<script th:src="${CDN_URL}+'/js/chunk-vendors.js?_='+${CDN_VERSION}"></script>
-		<script th:src="${CDN_URL}+'/app.js?_='+${CDN_VERSION}"></script>
+  	  	<script th:src="${CDN_URL}+'/js/chunk-common.js?_='+${CDN_VERSION}"></script>
+		<script th:src="${CDN_URL}+'/app-customer.js?_='+${CDN_VERSION}"></script>
   </p> 
 </div>
 

@@ -56,7 +56,7 @@ public class DemoController extends ChatController {
 	next("menu-0-onselect");
     }
 
-    @ChatMapping(key = AlexBotConstants.KEY.INITIATE + "hi", pattern = "^HI$")
+    @ChatMapping(key = AlexBotConstants.KEY.INITIATE + "*", pattern = "^*$")
     public void greet(InboxMessage inboxMessage, StringMatcher matcher) {
 	showDemoMenu(inboxMessage, matcher);
     }
