@@ -125,8 +125,8 @@ public class InBoundControllerWeb {
 		event.contact().setContactType(ContactType.WEBSITE.toString());
 		event.contact().setLane("MainSite");
 
-		// event.setContactType(ContactType.WHATSAPP);
-		// event.setLane("918750382050");
+		//event.contact().setContactType(ContactType.TELEGRAM.toString());
+		//event.contact().setLane("MeheryDemoBot");
 		// event.setLane("919082854885");
 		// event.setChannel("GUPSHUPW");
 		// event.setFrom("919930104050");

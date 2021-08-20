@@ -17,6 +17,7 @@ public class ChannelConfig extends AChannelConfig {
     private TelegramConfig telegram;
     private GupShupConfig gupshup;
 
+    private boolean isDisabled;
     private boolean isPushAllowed;
     private boolean isPushOnlyApproved;
     private boolean isPushFreeTextAllowed;
@@ -118,4 +119,16 @@ public class ChannelConfig extends AChannelConfig {
 	return this;
     }
 
+    public boolean isDisabled() {
+	return isDisabled;
+    }
+
+    public void setDisabled(boolean isDisabled) {
+	this.isDisabled = isDisabled;
+    }
+
+    public ChannelConfig disabled(boolean isDisabled) {
+	this.isDisabled = isDisabled;
+	return this;
+    }
 }

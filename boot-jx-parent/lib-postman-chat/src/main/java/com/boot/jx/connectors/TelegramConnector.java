@@ -35,129 +35,129 @@ import com.boot.utils.JsonUtil;
 @ConnectorMapping(contactType = ContactType.TELEGRAM)
 public class TelegramConnector extends AbstractConnector {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(TelegramConnector.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(TelegramConnector.class);
 
-	@Autowired
-	private TelegramClient telegramClient;
+    @Autowired
+    private TelegramClient telegramClient;
 
-	@Autowired
-	private MongoTemplate mongoTemplate;
+    @Autowired
+    private MongoTemplate mongoTemplate;
 
-	@Autowired
-	private TmplClient tmplClient;
+    @Autowired
+    private TmplClient tmplClient;
 
-	@Autowired
-	private PMFileStoreClient pmFileStoreClient;
+    @Autowired
+    private PMFileStoreClient pmFileStoreClient;
 
-	public void send(OutboxMessage outboxMessage) {
-		try {
-			if (ArgUtil.is(outboxMessage.getTemplate())) {
-				QuickMedia mediaReply = mongoTemplate.findById(outboxMessage.getTemplate(), QuickMedia.class);
-				if (ArgUtil.is(mediaReply)) {
-					if ("image".equalsIgnoreCase(mediaReply.getType())) {
-						outboxMessage.attachment(new Attachment().mediaURL(mediaReply.getUrl())
-								.mediaType(FileType.IMAGE.toString()).mediaCaption(mediaReply.getTitle()));
-						telegramClient.send(outboxMessage);
-					}
-				} else {
-					tmplClient.process(outboxMessage);
-					telegramClient.send(outboxMessage);
-				}
-			} else {
-				telegramClient.send(outboxMessage);
-			}
-			outboxMessage.updateStatus(OutboxMessage.Status.SENT);
-		} catch (Exception e) {
-			outboxMessage.updateStatus(OutboxMessage.Status.SENT_ERR);
-			outboxMessage.logs().add(e.getMessage());
-			LOGGER.error("SEND ERROR", e);
+    public void send(OutboxMessage outboxMessage) {
+	try {
+	    if (ArgUtil.is(outboxMessage.getTemplate())) {
+		QuickMedia mediaReply = mongoTemplate.findById(outboxMessage.getTemplate(), QuickMedia.class);
+		if (ArgUtil.is(mediaReply)) {
+		    if ("image".equalsIgnoreCase(mediaReply.getType())) {
+			outboxMessage.attachment(new Attachment().mediaURL(mediaReply.getUrl())
+				.mediaType(FileType.IMAGE.toString()).mediaCaption(mediaReply.getTitle()));
+			telegramClient.send(outboxMessage);
+		    }
+		} else {
+		    tmplClient.process(outboxMessage);
+		    telegramClient.send(outboxMessage);
 		}
+	    } else {
+		telegramClient.send(outboxMessage);
+	    }
+	    outboxMessage.updateStatus(OutboxMessage.Status.SENT);
+	} catch (Exception e) {
+	    outboxMessage.updateStatus(OutboxMessage.Status.SENT_ERR);
+	    outboxMessage.logs().add(e.getMessage());
+	    LOGGER.error("SEND ERROR", e);
+	}
+
+    }
+
+    @Override
+    public InboxMessage assignToAgent(InboxMessage inboxMessage) {
+	return inboxMessage;
+    }
+
+    public InboxMessage toInboxMessage(String lane, Update update) {
+	InboxMessage inboxMessage = new InboxMessage();
+	inboxMessage.setOriginalMessage(update);
+
+	inboxMessage.contact().setContactType(ContactType.TELEGRAM.toString());
+	inboxMessage.contact().setLane(lane);
+
+	if (ArgUtil.is(update.getMessage())) {
+	    inboxMessage.contact().setCsid(ArgUtil.parseAsString(update.getMessage().getChatId()));
+	    inboxMessage.setFrom(ArgUtil.parseAsString(update.getMessage().getChatId()));
+
+	    inboxMessage.setMessageIdExt(
+		    String.format("%s-%s", update.getMessage().getChatId(), update.getMessage().getMessageId()));
+
+	    inboxMessage.setMessage(update.getMessage().getText());
+	    if (ArgUtil.is(update.getMessage().getPhoto())) {
+		Optional<PhotoSize> photo = update.getMessage().getPhoto().stream()
+			.max(Comparator.comparing(PhotoSize::getWidth));
+
+		if (photo.isPresent()) {
+		    TGFile file = telegramClient.getFile(lane, photo.get().getFileId());
+		    /**
+		     * Telegram Does not provide Image, so explicitly set Image File Type
+		     */
+		    CommonFile srcFile = new CommonFile().url(file.getFileUrl()).fileType(FileType.IMAGE);
+		    CommonFile dstFile = pmFileStoreClient.uploadSessionFileAsync(srcFile,
+			    PostManUtil.createContactId(inboxMessage), inboxMessage.getMessageIdExt());
+
+		    inboxMessage.attachment(new Attachment().mediaURL(dstFile.getUrl()).mediaType(dstFile.getFileType())
+			    .mediaCaption(update.getMessage().getCaption()));
+		}
+	    } else if (ArgUtil.is(update.getMessage().getDocument())) {
+		TGFile file = telegramClient.getFile(lane, update.getMessage().getDocument().getFileId());
+		/**
+		 * Telegram Does not provide Image, so explicitly set Image File Type
+		 */
+		CommonFile srcFile = new CommonFile().url(file.getFileUrl()).fileType(FileType.DOCUMENT);
+		CommonFile dstFile = pmFileStoreClient.uploadSessionFileAsync(srcFile,
+			PostManUtil.createContactId(inboxMessage), inboxMessage.getMessageIdExt());
+
+		inboxMessage.attachment(new Attachment().mediaURL(dstFile.getUrl()).mediaType(dstFile.getFileType())
+			.mediaCaption(update.getMessage().getCaption()));
+	    }
+
+	}
+	return inboxMessage;
+    }
+
+    @Override
+    public boolean initSession(ChatSessionDoc session, InboxMessage inboxMessage) {
+
+	Update update = JsonUtil.parse(inboxMessage.getOriginalMessage(), Update.class);
+
+	if (ArgUtil.is(update) && ArgUtil.is(update.getMessage()) && ArgUtil.is(update.getMessage().getFrom())
+		&& ArgUtil.is(update.getMessage().getContact())) {
+
+	    if (ArgUtil.isEqual(update.getMessage().getFrom().getId(), update.getMessage().getContact().getUserID())) {
+
+		ChatContactQuery contactQuery = messageContext.getChatContactQuery();
+
+		contactQuery.setName(update.getMessage().getFrom().getFirstName() + " "
+			+ update.getMessage().getFrom().getLastName());
+		contactQuery.setPhone(update.getMessage().getContact().getPhoneNumber());
+
+	    }
 
 	}
 
-	@Override
-	public InboxMessage assignToAgent(InboxMessage inboxMessage) {
-		return inboxMessage;
+	Contactable contactDoc = messageContext.getChatContactDoc();
+
+	if (ArgUtil.isEmpty(contactDoc.getPhone())) {
+	    telegramClient.promptShareNumber(inboxMessage.getFrom(),
+		    "Confirm that you would like to share your contact number and continue, by clicking on the button below",
+		    inboxMessage.contact().getLane());
+	    return false;
 	}
 
-	public InboxMessage toInboxMessage(String lane, Update update) {
-		InboxMessage inboxMessage = new InboxMessage();
-		inboxMessage.setOriginalMessage(update);
-
-		inboxMessage.contact().setContactType(ContactType.TELEGRAM.toString());
-		inboxMessage.contact().setLane(lane);
-
-		if (ArgUtil.is(update.getMessage())) {
-			inboxMessage.contact().setCsid(ArgUtil.parseAsString(update.getMessage().getChatId()));
-			inboxMessage.setFrom(ArgUtil.parseAsString(update.getMessage().getChatId()));
-
-			inboxMessage.setMessageIdExt(
-					String.format("%s-%s", update.getMessage().getChatId(), update.getMessage().getMessageId()));
-
-			inboxMessage.setMessage(update.getMessage().getText());
-			if (ArgUtil.is(update.getMessage().getPhoto())) {
-				Optional<PhotoSize> photo = update.getMessage().getPhoto().stream()
-						.max(Comparator.comparing(PhotoSize::getWidth));
-
-				if (photo.isPresent()) {
-					TGFile file = telegramClient.getFile(lane, photo.get().getFileId());
-					/**
-					 * Telegram Does not provide Image, so explicitly set Image File Type
-					 */
-					CommonFile srcFile = new CommonFile().url(file.getFileUrl()).fileType(FileType.IMAGE);
-					CommonFile dstFile = pmFileStoreClient.uploadSessionFileAsync(srcFile,
-							PostManUtil.createContactId(inboxMessage), inboxMessage.getMessageIdExt());
-
-					inboxMessage.attachment(new Attachment().mediaURL(dstFile.getUrl()).mediaType(dstFile.getFileType())
-							.mediaCaption(update.getMessage().getCaption()));
-				}
-			} else if (ArgUtil.is(update.getMessage().getDocument())) {
-				TGFile file = telegramClient.getFile(lane, update.getMessage().getDocument().getFileId());
-				/**
-				 * Telegram Does not provide Image, so explicitly set Image File Type
-				 */
-				CommonFile srcFile = new CommonFile().url(file.getFileUrl()).fileType(FileType.DOCUMENT);
-				CommonFile dstFile = pmFileStoreClient.uploadSessionFileAsync(srcFile,
-						PostManUtil.createContactId(inboxMessage), inboxMessage.getMessageIdExt());
-
-				inboxMessage.attachment(new Attachment().mediaURL(dstFile.getUrl()).mediaType(dstFile.getFileType())
-						.mediaCaption(update.getMessage().getCaption()));
-			}
-
-		}
-		return inboxMessage;
-	}
-
-	@Override
-	public boolean initSession(ChatSessionDoc session, InboxMessage inboxMessage) {
-
-		Update update = JsonUtil.parse(inboxMessage.getOriginalMessage(), Update.class);
-
-		if (ArgUtil.is(update) && ArgUtil.is(update.getMessage()) && ArgUtil.is(update.getMessage().getFrom())
-				&& ArgUtil.is(update.getMessage().getContact())) {
-
-			if (ArgUtil.isEqual(update.getMessage().getFrom().getId(), update.getMessage().getContact().getUserID())) {
-
-				ChatContactQuery contactQuery = messageContext.getChatContactQuery();
-
-				contactQuery.setName(update.getMessage().getFrom().getFirstName() + " "
-						+ update.getMessage().getFrom().getLastName());
-				contactQuery.setPhone(update.getMessage().getContact().getPhoneNumber());
-
-			}
-
-		}
-
-		Contactable contactDoc = messageContext.getChatContactDoc();
-
-		if (ArgUtil.isEmpty(contactDoc.getPhone())) {
-			telegramClient.promptShareNumber(inboxMessage.getFrom(),
-					"Confirm that you would like to share your contact number and continue, by clicking on the button below",
-					inboxMessage.contact().getLane());
-			return false;
-		}
-
-		return true;
-	}
+	return true;
+    }
 
 }

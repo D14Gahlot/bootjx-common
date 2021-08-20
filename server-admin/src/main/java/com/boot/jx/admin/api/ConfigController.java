@@ -20,6 +20,7 @@ import com.boot.jx.admin.service.AdminConfigService;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.postman.ChannelConfig;
 import com.boot.jx.postman.ClientApiKey;
+import com.boot.jx.postman.PMConfiguration;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PMEnvironment.AChannelDetails;
 import com.boot.jx.postman.PMEnvironment.PMConfigurationObject;
@@ -62,23 +63,24 @@ public class ConfigController {
     }
 
     @RequestMapping(value = "/api/config/refresh", method = { RequestMethod.GET })
-    public ApiResponse<PMConfigurationDoc, Object> getConnnectors() {
+    public ApiResponse<PMConfiguration, Object> getConnnectors() {
 	PMConfigurationDoc config = mongoTemplate.findById(AppContextUtil.getTenant(), PMConfigurationDoc.class);
 	adminConfigService.saveConfigs(config);
-	return ApiResponse.buildResults(mongoTemplate.findById(AppContextUtil.getTenant(), PMConfigurationDoc.class));
+	return ApiResponse.buildResults(pmEnvironment.config());
     }
 
     @RequestMapping(value = "/api/config/fb", method = { RequestMethod.POST })
     public ApiResponse<PMConfigurationDoc, Object> addFacebookConfig(@RequestParam String pageId,
 	    @RequestParam String type, @RequestParam String verifyToken, @RequestParam String appSecret,
-	    @RequestParam String accessToken) {
+	    @RequestParam String accessToken,
+	    @RequestParam(defaultValue = "false", required = false) boolean disabled) {
 	FacebookConfig fbconfig = new FacebookConfig();
 	fbconfig.setPageId(pageId);
 	fbconfig.setType(type);
 	fbconfig.setVerifyToken(verifyToken);
 	fbconfig.setAccessToken(accessToken);
 	fbconfig.setAppSecret(appSecret);
-	adminConfigService.save(new ChannelConfig().from(fbconfig));
+	adminConfigService.save(new ChannelConfig().from(fbconfig).disabled(disabled));
 	return ApiResponse.buildResults(mongoTemplate.findById(AppContextUtil.getTenant(), PMConfigurationDoc.class));
     }
 
@@ -86,7 +88,8 @@ public class ConfigController {
     public ApiResponse<PMConfigurationDoc, Object> addTwitterConfig(@RequestParam String handler,
 	    @RequestParam String type, @RequestParam String consumerKey, @RequestParam String consumerSecret,
 	    @RequestParam String accessTokenSecret, @RequestParam String accessToken,
-	    @RequestParam(required = false) String envName, @RequestParam String webhookUrl) {
+	    @RequestParam(required = false) String envName, @RequestParam String webhookUrl,
+	    @RequestParam(defaultValue = "false", required = false) boolean disabled) {
 	TwitterConfig fbconfig = new TwitterConfig();
 	fbconfig.setHandler(handler);
 	fbconfig.setType(type);
@@ -96,34 +99,35 @@ public class ConfigController {
 	fbconfig.setConsumerKey(consumerKey);
 	fbconfig.setConsumerSecret(consumerSecret);
 	fbconfig.setWebhookUrl(webhookUrl);
-	adminConfigService.save(new ChannelConfig().from(fbconfig));
+	adminConfigService.save(new ChannelConfig().from(fbconfig).disabled(disabled));
 	return ApiResponse.buildResults(mongoTemplate.findById(AppContextUtil.getTenant(), PMConfigurationDoc.class));
     }
 
     @RequestMapping(value = "/api/config/tg", method = { RequestMethod.POST })
     public ApiResponse<PMConfigurationDoc, Object> addTelegramConfig(@RequestParam String handler,
 	    @RequestParam String type, @RequestParam String accessToken, @RequestParam(required = false) String envName,
-	    @RequestParam String webhookUrl) {
+	    @RequestParam String webhookUrl, @RequestParam(defaultValue = "false", required = false) boolean disabled) {
 	TelegramConfig fbconfig = new TelegramConfig();
 	fbconfig.setHandler(handler);
 	fbconfig.setType(type);
 	fbconfig.setAccessToken(accessToken);
 	fbconfig.setWebhookUrl(webhookUrl);
-	adminConfigService.save(new ChannelConfig().from(fbconfig));
+	adminConfigService.save(new ChannelConfig().from(fbconfig).disabled(disabled));
 	return ApiResponse.buildResults(mongoTemplate.findById(AppContextUtil.getTenant(), PMConfigurationDoc.class));
     }
 
     @RequestMapping(value = "/api/config/gs", method = { RequestMethod.POST })
     public ApiResponse<PMConfigurationDoc, Object> addWAConfig(@RequestParam String number,
 	    @RequestParam(required = false) String notifyId, @RequestParam String chatId, @RequestParam String chatPass,
-	    @RequestParam(required = false) String notifyPass) {
+	    @RequestParam(required = false) String notifyPass,
+	    @RequestParam(defaultValue = "false", required = false) boolean disabled) {
 	GupShupConfig fbconfig = new GupShupConfig();
 	fbconfig.setNumber(number);
 	fbconfig.setChatId(chatId);
 	fbconfig.setChatPass(chatPass);
 	fbconfig.setNotifyId(notifyId);
 	fbconfig.setNotifyPass(notifyPass);
-	adminConfigService.save(new ChannelConfig().from(fbconfig));
+	adminConfigService.save(new ChannelConfig().from(fbconfig).disabled(disabled));
 	return ApiResponse.buildResults(mongoTemplate.findById(AppContextUtil.getTenant(), PMConfigurationDoc.class));
     }
 
