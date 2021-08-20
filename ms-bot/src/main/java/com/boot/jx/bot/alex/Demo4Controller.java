@@ -14,7 +14,7 @@ import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.StringUtils.StringMatcher;
 
-@BotController(name = "DemoBot", tenant = "app")
+@BotController(name = "DemoBot", tenant = { "app", "demo" })
 public class Demo4Controller extends ChatController {
 
     private static final String CURRENT_DEMO = "current_menu";
@@ -89,9 +89,9 @@ public class Demo4Controller extends ChatController {
 
 		reply(new OutboxMessage().template("menu-4-6-payment-0"));
 		// reply(new OutboxMessage().template("menu-4-6-payment-1-done"));
-		//Thread.sleep(2000);
+		// Thread.sleep(2000);
 
-		//reply(new OutboxMessage().template("menu-4-7-welcome"));
+		// reply(new OutboxMessage().template("menu-4-7-welcome"));
 		chatContext.getSession().data().remove(CURRENT_DEMO);
 	    } else {
 		reply(new OutboxMessage().template("menu-4-4-date-1-nok"));

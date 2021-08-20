@@ -55,39 +55,22 @@ public class AdminAuthController {
     @Autowired
     private PMEnvironment pmEnvironment;
 
-    private long getVersion() {
-	return System.currentTimeMillis() / 300000;
-    }
-
     @RequestMapping(value = { "/pub/**", "/app/**", "/auth/**", "/" }, method = { RequestMethod.GET })
     public String home(Model model, @RequestParam(required = false) String theme) {
-	model.addAttribute("APP_CONTEXT", appConfig.getAppPrefix());
+	model.addAllAttributes(appCommonConfig.appAttributes());
+
 	Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 	if (ArgUtil.is(auth)) {
 	    model.addAttribute("APP_USER", auth.getName());
 	} else {
 	    model.addAttribute("APP_USER", "");
 	}
-	Map<String, Object> config = appCommonConfig.toMap();
-	model.addAttribute("CONFIG", config);
-	model.addAttribute("CONFIG_JSON", JsonUtil.toJson(config));
-	model.addAttribute("CDN_VERSION", getVersion());
-	model.addAttribute("CDN_URL",
-		ArgUtil.parseAsString(commonHttpRequest.get("CDN_URL"), appCommonConfig.getCdnServer()));
-	model.addAttribute("CDN_DEBUG", ArgUtil.parseAsString(commonHttpRequest.get("CDN_DEBUG"), "false"));
-	model.addAttribute("POSTMAN_AGENT_SCHEME_COLOR", pmEnvironment.get("postman.agent.scheme.color").asString());
-	return "app";
+	return "app-admin";
     }
 
     @RequestMapping(value = { "/auth/login", "/auth/resetpass" }, method = { RequestMethod.POST, RequestMethod.GET })
     public String login(Model model, HttpServletRequest request, HttpServletResponse httpServletResponse) {
-	model.addAttribute("CDN_URL",
-		ArgUtil.parseAsString(commonHttpRequest.get("CDN_URL"), appCommonConfig.getCdnServer()));
-	model.addAttribute("CDN_DEBUG", ArgUtil.parseAsString(commonHttpRequest.get("CDN_DEBUG"), "false"));
-	model.addAttribute("APP_CONTEXT", appConfig.getAppPrefix());
-	model.addAttribute("CDN_VERSION", getVersion());
-	model.addAttribute("STAMP", System.currentTimeMillis());
-	model.addAttribute("POSTMAN_AGENT_SCHEME_COLOR", pmEnvironment.get("postman.agent.scheme.color").asString());
+	model.addAllAttributes(appCommonConfig.appAttributes());
 
 	String page = ArgUtil.parseAsString(commonHttpRequest.get("page"), "login");
 	String action = ArgUtil.parseAsString(commonHttpRequest.get("action"), "login");
@@ -158,7 +141,6 @@ public class AdminAuthController {
 	model.addAttribute("PAGE", page);
 	model.addAttribute("ACTION", action);
 	model.addAttribute("STATUS", status);
-	model.addAttribute("APP_TITLE", appConfig.getAppTitle());
 	return "app-login";
     }
 

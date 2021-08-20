@@ -9,6 +9,8 @@ public class AppConfigPackage {
 
 		public String getCdnServer();
 
+		public Map<String, Object> appAttributes();
+
 	}
 
 	public interface AppSharedConfig {

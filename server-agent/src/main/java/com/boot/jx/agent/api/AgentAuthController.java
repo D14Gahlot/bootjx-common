@@ -75,65 +75,38 @@ public class AgentAuthController {
 	    return "redirect:/auth/logout";
 	}
 
-	model.addAttribute("APP_CONTEXT", appConfig.getAppPrefix());
+	model.addAllAttributes(appCommonConfig.appAttributes());
+
 	model.addAttribute("APP_USER", agentSession.getAgentCode());
 	model.addAttribute("APP_DEPT", agentSession.getAgentDept());
-	model.addAttribute("CDN_VERSION", getVersion());
-	model.addAttribute("CDN_URL",
-		ArgUtil.parseAsString(commonHttpRequest.get("CDN_URL"), appCommonConfig.getCdnServer()));
-	model.addAttribute("CDN_DEBUG", ArgUtil.parseAsString(commonHttpRequest.get("CDN_DEBUG"), "false"));
 
-	Map<String, Object> config = appCommonConfig.toMap();
-	model.addAttribute("CONFIG", config);
-	model.addAttribute("CONFIG_JSON", JsonUtil.toJson(config));
-
-	String cdnnew = ArgUtil.parseAsString(commonHttpRequest.get("CDN_NEW"), "true");
-
-	model.addAttribute("POSTMAN_AGENT_SCHEME_COLOR", pmEnvironment.get("postman.agent.scheme.color").asString());
-
-	if ("true".equalsIgnoreCase(cdnnew)) {
-	    return "app";
-	} else {
-	    String appUrl = ArgUtil.parseAsString(commonHttpRequest.get("APP_URL"), Constants.BLANK);
-	    model.addAttribute("APP_URL", appUrl);
-	    theme = ArgUtil.nonEmpty(commonHttpRequest.get("theme"), "dashboard.agent.bubble");
-	    model.addAttribute("APP_THEME", theme);
-	    return "dashboard.agent";
-	}
+	return "app-agent";
     }
 
     @RequestMapping(value = "/app/home1", method = { RequestMethod.POST, RequestMethod.GET })
     public String home2(Model model) {
-	model.addAttribute("APP_CONTEXT", appConfig.getAppPrefix());
+	model.addAllAttributes(appCommonConfig.appAttributes());
+
 	model.addAttribute("APP_USER", agentSession.getAgentCode());
 	model.addAttribute("APP_DEPT", agentSession.getAgentDept());
-	model.addAttribute("CDN_VERSION", getVersion());
-	model.addAttribute("POSTMAN_AGENT_SCHEME_COLOR", pmEnvironment.get("postman.agent.scheme.color").asString());
 	return "whatsweb";
     }
 
     @RequestMapping(value = "/pub/customer/{page}", method = { RequestMethod.POST, RequestMethod.GET })
     public String customertest(Model model, @RequestParam String page) {
-	model.addAttribute("APP_CONTEXT", appConfig.getAppPrefix());
+	model.addAllAttributes(appCommonConfig.appAttributes());
 	model.addAttribute("APP_USER", agentSession.getAgentCode());
 	model.addAttribute("APP_DEPT", agentSession.getAgentDept());
-	model.addAttribute("CDN_VERSION", getVersion());
 	model.addAttribute("POSTMAN_CONTEXT", "/postman");
-	model.addAttribute("POSTMAN_AGENT_SCHEME_COLOR", pmEnvironment.get("postman.agent.scheme.color").asString());
 	return "customer." + page;
     }
 
     @RequestMapping(value = { "/auth/login", "/auth/resetpass" }, method = { RequestMethod.POST, RequestMethod.GET })
     public String login(Model model, HttpServletRequest request, HttpServletResponse httpServletResponse) {
-	model.addAttribute("CDN_URL",
-		ArgUtil.parseAsString(commonHttpRequest.get("CDN_URL"), appCommonConfig.getCdnServer()));
-	model.addAttribute("CDN_DEBUG", ArgUtil.parseAsString(commonHttpRequest.get("CDN_DEBUG"), "false"));
-	model.addAttribute("APP_CONTEXT", appConfig.getAppPrefix());
+
+	model.addAllAttributes(appCommonConfig.appAttributes());
 	model.addAttribute("APP_USER", agentSession.getAgentCode());
 	model.addAttribute("APP_DEPT", agentSession.getAgentDept());
-	model.addAttribute("CDN_VERSION", getVersion());
-	model.addAttribute("STAMP", System.currentTimeMillis());
-	model.addAttribute("POSTMAN_AGENT_SCHEME_COLOR", pmEnvironment.get("postman.agent.scheme.color").asString());
 
 	String page = ArgUtil.parseAsString(commonHttpRequest.get("page"), "login");
 	String action = ArgUtil.parseAsString(commonHttpRequest.get("action"), "login");
@@ -213,7 +186,6 @@ public class AgentAuthController {
 	model.addAttribute("PAGE", page);
 	model.addAttribute("ACTION", action);
 	model.addAttribute("STATUS", status);
-	model.addAttribute("APP_TITLE", appConfig.getAppTitle());
 
 	return "app-login";
     }

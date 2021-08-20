@@ -15,7 +15,7 @@ import com.boot.utils.ArgUtil;
 import com.boot.utils.Constants;
 import com.boot.utils.StringUtils.StringMatcher;
 
-@BotController(name = "DemoBot", tenant = "app")
+@BotController(name = "DemoBot", tenant = { "app", "demo" })
 public class DemoController extends ChatController {
 
     private static final String CURRENT_DEMO = "current_menu";
@@ -68,31 +68,32 @@ public class DemoController extends ChatController {
 
     @ChatMapping(key = "menu-0-onselect")
     public void menu1OnSelect(InboxMessage inboxMessage, StringMatcher matcher) {
-	switch (inboxMessage.getMessage().toLowerCase()) {
+	switch (inboxMessage.getMessage().toUpperCase()) {
 	case "menu":
 	    showDemoMenu(inboxMessage, matcher);
-	case "asset management":
+	case "ASSET MANAGEMENT":
 	case "1":
 	    chatContext.getSession().data().put(CURRENT_DEMO, "1");
 	    showDemoMenu(inboxMessage, matcher);
 	    break;
-	case "retail":
+	case "RETAIL":
 	case "2":
 	    chatContext.getSession().data().put(CURRENT_DEMO, "2");
 	    showDemoMenu(inboxMessage, matcher);
 	    break;
-	case "realstate":
-	case "propertybkcmumbai":
+	case "REALSTATE":
+	case "PROPERTYBKCMUMBAI":
 	case "3":
 	    chatContext.getSession().data().put(CURRENT_DEMO, "3");
 	    showDemoMenu(inboxMessage, matcher);
 	    break;
-	case "newaccountopen":
+	case "NEWACCOUNTOPEN":
 	case "4":
 	    chatContext.getSession().data().put(CURRENT_DEMO, "4");
 	    showDemoMenu(inboxMessage, matcher);
 	    break;
-	case "talktoagent":
+	case "TALK TO AGENT":
+	case "TALKTOAGENT":
 	case "#":
 	    transferToAgent(inboxMessage, matcher);
 	    break;
@@ -194,15 +195,15 @@ public class DemoController extends ChatController {
 
     @ChatMapping(key = "more-onselect")
     public void moreonSelect(InboxMessage inboxMessage, StringMatcher matcher) {
-	switch (inboxMessage.getMessage().toLowerCase()) {
-	case "yes":
-	case "y":
+	switch (inboxMessage.getMessage().toUpperCase()) {
+	case "YES":
+	case "Y":
 	case "1":
 	    reply(new OutboxMessage().template("menu-1").put("name", chatContext.getContact().getName()));
 	    next("menu-1-onselect");
 	    break;
-	case "no":
-	case "n":
+	case "NO":
+	case "N":
 	case "2":
 	    reply(new OutboxMessage().template("feedback").put("name", chatContext.getContact().getName()));
 	    next("feedback-onselect");
@@ -215,15 +216,15 @@ public class DemoController extends ChatController {
 
     @ChatMapping(key = "more-onselect-menu-2")
     public void moreonSelectRetailMenu(InboxMessage inboxMessage, StringMatcher matcher) {
-	switch (inboxMessage.getMessage().toLowerCase()) {
-	case "yes":
-	case "y":
+	switch (inboxMessage.getMessage().toUpperCase()) {
+	case "YES":
+	case "Y":
 	case "1":
 	    reply(new OutboxMessage().template("menu-2").put("name", chatContext.getContact().getName()));
 	    next("menu-2-onselect");
 	    break;
-	case "no":
-	case "n":
+	case "NO":
+	case "N":
 	case "2":
 	    reply(new OutboxMessage().template("feedback").put("name", chatContext.getContact().getName()));
 	    next("feedback-onselect");
@@ -236,20 +237,20 @@ public class DemoController extends ChatController {
 
     @ChatMapping(key = "feedback-onselect")
     public void feedback(InboxMessage inboxMessage, StringMatcher matcher) {
-	switch (inboxMessage.getMessage().toLowerCase()) {
-	case "happy":
-	case "yes":
-	case "y":
+	switch (inboxMessage.getMessage().toUpperCase()) {
+	case "HAPPY":
+	case "YES":
+	case "Y":
 	case "1":
 	    botScore(10);
 	    reply("Thanks");
 	    resolveSession();
 	    closeSession();
 	    break;
-	case "not happy":
-	case "nothappy":
-	case "no":
-	case "n":
+	case "NOT HAPPY":
+	case "NOTHAPPY":
+	case "NO":
+	case "N":
 	case "2":
 	    botScore(0);
 	    transferToAgent(inboxMessage, matcher);
@@ -300,7 +301,7 @@ public class DemoController extends ChatController {
     }
 
     private boolean handleGlobalOption(InboxMessage inboxMessage, StringMatcher matcher) {
-	String thisMessage = inboxMessage.getMessage().toLowerCase().replace(" ", "");
+	String thisMessage = inboxMessage.getMessage().toUpperCase().replace(" ", "");
 
 	if (ArgUtil.is(inboxMessage.getTags()) && ArgUtil.is(inboxMessage.getTags().getCategories())) {
 	    if (inboxMessage.getTags().getCategories().indexOf("today-credits") > -1) {
@@ -335,29 +336,30 @@ public class DemoController extends ChatController {
 	    }
 	}
 	switch (thisMessage) {
-	case "menu":
+	case "MENU":
 	    showDemoMenu(inboxMessage, matcher);
 	    return true;
 
-	case "/propertybkcmumbai":
-	case "realstate":
+	case "/PROPERTYBKCMUMBAI":
+	case "REALSTATE":
 	    chatContext.getSession().data().put(CURRENT_DEMO, "3");
 	    showDemoMenu(inboxMessage, matcher);
 	    return true;
 
-	case "/newaccountopen":
-	case "newaccountopen":
+	case "/NEWACCOUNTOPEN":
+	case "NEWACCOUNTOPEN":
 	    chatContext.getSession().data().put(CURRENT_DEMO, "4");
 	    showDemoMenu(inboxMessage, matcher);
 	    return true;
 
 	case "#":
-	case "TalkToAgent":
+	case "TALK TO AGENT":
+	case "TALKTOAGENT":
 	    transferToAgent(inboxMessage, matcher);
 	    return true;
 	case "*":
-	case "exit":
-	case "/exit_chat":
+	case "EXIT":
+	case "/EXIT_CHAT":
 	    chatContext.getSession().data().remove(CURRENT_DEMO);
 	    reply(new OutboxMessage().template("feedback").put("name",
 		    ArgUtil.nonEmpty(chatContext.getContact().getName(), "WhatsApp User")));

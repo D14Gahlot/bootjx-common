@@ -141,7 +141,7 @@ public class BotEngine {
 	    Pattern[] patterns = methodWrapper.getPattern();
 	    if (patterns.length > 0) {
 		for (int i = 0; i < patterns.length; i++) {
-		    if (ArgUtil.areEqual(methodWrapper.getTenant(), tenant)) {
+		    if (ArgUtil.isEqual(tenant, methodWrapper.getTenant())) {
 			if (matcher.isMatch(patterns[i]) && ArgUtil.is(ArgUtil.parseAsString(patterns[i]))) {
 			    event.setMatcher(matcher);
 			    return methodWrapper;
@@ -156,7 +156,7 @@ public class BotEngine {
 	    if (patterns.length > 0) {
 		for (int i = 0; i < patterns.length; i++) {
 		    if (ArgUtil.isEmpty(methodWrapper.getTenant())
-			    || ArgUtil.areEqual(methodWrapper.getTenant(), tenant)) {
+			    || ArgUtil.isEqual(tenant, methodWrapper.getTenant())) {
 			if (matcher.isMatch(patterns[i]) && ArgUtil.is(ArgUtil.parseAsString(patterns[i]))) {
 			    event.setMatcher(matcher);
 			    return methodWrapper;

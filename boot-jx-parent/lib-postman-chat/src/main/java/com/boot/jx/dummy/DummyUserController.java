@@ -100,18 +100,10 @@ public class DummyUserController {
 	model.addAttribute("APP_CONTEXT", appConfig.getAppPrefix());
 	model.addAttribute("POSTMAN_CONTEXT", appConfig.getAppPrefix());
 	model.addAttribute("WEBAPP_BASE", appConfig.getAppPrefix() + "/plugin/customer");
-
-	model.addAttribute("CDN_VERSION", "V3");
-	model.addAttribute("CDN_DEBUG", ArgUtil.parseAsString(commonHttpRequest.get("CDN_DEBUG"), "false"));
 	model.addAttribute("POSTMAN_AGENT_SCHEME_COLOR", pmEnvironment.get("postman.agent.scheme.color").asString());
 
 	if (appCommonConfig != null) {
-	    model.addAttribute("CDN_URL",
-		    ArgUtil.parseAsString(commonHttpRequest.get("CDN_URL"), appCommonConfig.getCdnServer()));
-
-	    Map<String, Object> config = appCommonConfig.toMap();
-	    model.addAttribute("CONFIG", config);
-	    model.addAttribute("CONFIG_JSON", JsonUtil.toJson(config));
+	    model.addAllAttributes(appCommonConfig.appAttributes());
 	}
 
 	return "app-customer";

@@ -14,7 +14,7 @@ import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.StringUtils.StringMatcher;
 
-@BotController(name = "DemoBot", tenant = "app")
+@BotController(name = "DemoBot", tenant = { "app", "demo" })
 public class Demo3Controller extends ChatController {
 
     private static final String CURRENT_DEMO = "current_menu";

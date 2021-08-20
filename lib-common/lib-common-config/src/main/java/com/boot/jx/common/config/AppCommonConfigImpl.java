@@ -9,10 +9,14 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Component;
 
+import com.boot.jx.AppConfig;
 import com.boot.jx.AppConfigPackage.AppCommonConfig;
+import com.boot.jx.http.CommonHttpRequest;
 import com.boot.jx.postman.PMClientConfig;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.model.SafeKeyHashMap;
+import com.boot.utils.ArgUtil;
+import com.boot.utils.JsonUtil;
 import com.boot.utils.TimeUtils;
 
 @Component
@@ -25,11 +29,24 @@ public class AppCommonConfigImpl implements AppCommonConfig {
     @Autowired
     private PMClientConfig chatClientConfig;
 
+    @Autowired
+    private CommonHttpRequest commonHttpRequest;
+
+    @Autowired
+    private AppConfig appConfig;
+
     @Value("${mry.cdn.url}")
     private String cdnUrl;
 
+    @Value("${common.const.app}")
+    private String app;
+
     public String getCdnServer() {
 	return pmEnvironment.get("mry.cdn.url").asString(cdnUrl);
+    }
+
+    private long getVersion() {
+	return System.currentTimeMillis() / 300000;
     }
 
     public Map<String, Object> toMap() {
@@ -47,6 +64,29 @@ public class AppCommonConfigImpl implements AppCommonConfig {
 	}
 	map.put("SETUP", setup);
 	map.put("timestamp", System.currentTimeMillis());
+	return map;
+    }
+
+    @Override
+    public Map<String, Object> appAttributes() {
+	Map<String, Object> map = new HashMap<String, Object>();
+
+	Map<String, Object> config = toMap();
+	map.put("CONFIG", config);
+	map.put("CONFIG_JSON", JsonUtil.toJson(config));
+	map.put("APP", app);
+	map.put("CDN_URL", ArgUtil.parseAsString(commonHttpRequest.get("CDN_URL"), getCdnServer()));
+	map.put("CDN_DEBUG", ArgUtil.parseAsString(commonHttpRequest.get("CDN_DEBUG"), "false"));
+	map.put("CDN_VERSION", "V3");
+	map.put("CDN_VERSION", getVersion());
+
+	map.put("APP_CONTEXT", appConfig.getAppPrefix());
+	map.put("POSTMAN_CONTEXT", appConfig.getAppPrefix());
+	
+	map.put("POSTMAN_AGENT_SCHEME_COLOR", pmEnvironment.get("postman.agent.scheme.color").asString());
+	map.put("STAMP", System.currentTimeMillis());
+	map.put("APP_TITLE", appConfig.getAppTitle());
+
 	return map;
     }
 
