@@ -27,7 +27,7 @@ public class PushMessageTests { // Noncompliant
 
 	TwitterConfig tw = new TwitterConfig();
 	tw.setHandler(key);
-	config.twitter(tw);
+	config.twitter(tw, false);
 	String json = JsonUtil.toJson(config);
 	System.out.println(json);
 

@@ -53,8 +53,11 @@ public class PMConfiguration implements Serializable {
 	return facebook().get(pageId);
     }
 
-    public PMConfiguration facebook(FacebookConfig config) {
-	this.facebook().put(config.getPageId(), config);
+    public PMConfiguration facebook(FacebookConfig config, boolean disbaled) {
+	if (disbaled) {
+	    this.telegram().remove(config.getPageId());
+	} else
+	    this.facebook().put(config.getPageId(), config);
 	return this;
     }
 
@@ -70,8 +73,11 @@ public class PMConfiguration implements Serializable {
 	return twitter().get(handler);
     }
 
-    public PMConfiguration twitter(TwitterConfig config) {
-	this.twitter().put(config.getHandler(), config);
+    public PMConfiguration twitter(TwitterConfig config, boolean disbaled) {
+	if (disbaled) {
+	    this.telegram().remove(config.getHandler());
+	} else
+	    this.twitter().put(config.getHandler(), config);
 	return this;
     }
 
@@ -99,8 +105,11 @@ public class PMConfiguration implements Serializable {
 	this.telegram = telegram;
     }
 
-    public PMConfiguration telegram(TelegramConfig config) {
-	this.telegram().put(config.getHandler(), config);
+    public PMConfiguration telegram(TelegramConfig config, boolean disbaled) {
+	if (disbaled) {
+	    this.telegram().remove(config.getHandler());
+	} else
+	    this.telegram().put(config.getHandler(), config);
 	return this;
     }
 
@@ -128,8 +137,11 @@ public class PMConfiguration implements Serializable {
 	return gupshup().get(handler);
     }
 
-    public PMConfiguration gupshup(GupShupConfig config) {
-	this.gupshup().put(config.getNumber(), config);
+    public PMConfiguration gupshup(GupShupConfig config, boolean disbaled) {
+	if (disbaled) {
+	    this.telegram().remove(config.getNumber());
+	} else
+	    this.gupshup().put(config.getNumber(), config);
 	return this;
     }
 

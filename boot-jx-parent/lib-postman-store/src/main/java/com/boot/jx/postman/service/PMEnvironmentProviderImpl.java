@@ -42,8 +42,7 @@ public class PMEnvironmentProviderImpl implements PMEnvironmentProvider, AppShar
 	}
 	if (ArgUtil.is(mongoTemplate)) {
 	    PMConfigurationDoc x = getPMConfigurationDoc();
-	    
-	    
+
 	    List<ChannelConfigDoc> channels = mongoTemplate.findAll(ChannelConfigDoc.class);
 
 	    for (ChannelConfigDoc channel : channels) {
@@ -101,7 +100,10 @@ public class PMEnvironmentProviderImpl implements PMEnvironmentProvider, AppShar
     public void configInternal(ChannelConfig config) {
 	ChannelConfigDoc doc = EntityDtoUtil.dtoToEntity(config, new ChannelConfigDoc());
 	doc.setId(StringUtils.toLowerCase(doc.getChannelId()));
-	mongoTemplate.save(doc);
+	if (config.isDisabled()) {
+	    mongoTemplate.remove(doc);
+	} else
+	    mongoTemplate.save(doc);
     }
 
     @Override
@@ -110,16 +112,16 @@ public class PMEnvironmentProviderImpl implements PMEnvironmentProvider, AppShar
 	PMConfigurationDoc doc = getPMConfigurationDoc();
 	switch (config.getChannelType()) {
 	case CHANNEL_TYPE.FACEBOOK:
-	    doc.facebook(config.getFacebook());
+	    doc.facebook(config.getFacebook(), config.isDisabled());
 	    break;
 	case CHANNEL_TYPE.GUPSHUP:
-	    doc.gupshup(config.getGupshup());
+	    doc.gupshup(config.getGupshup(), config.isDisabled());
 	    break;
 	case CHANNEL_TYPE.TELEGRAM:
-	    doc.telegram(config.getTelegram());
+	    doc.telegram(config.getTelegram(), config.isDisabled());
 	    break;
 	case CHANNEL_TYPE.TWITTER:
-	    doc.twitter(config.getTwitter());
+	    doc.twitter(config.getTwitter(), config.isDisabled());
 	    break;
 	default:
 	}
