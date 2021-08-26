@@ -23,7 +23,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.boot.jx.AppConfig;
 import com.boot.jx.AppConfigPackage.AppCommonConfig;
 import com.boot.jx.account.AccoountAuthService;
-import com.boot.jx.account.AccountAuthProvider;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.http.CommonHttpRequest;
@@ -95,12 +94,11 @@ public class AccountController {
 
 	commonMongoTemplate.save(account);
 
-	postManClient.send(new MessageBox().push(new Email().to(signupContact.getEmail()).template("new-account").put(
-		"logo",
-		"https://cdn.jsdelivr.net/gh/mehery-soccom/mehery-web-dist@gh-pages/dist/android-chrome-192x192.png")
-		.put("website", "www.mehery.com").put("service", "MeherY")
+	postManClient.send(new MessageBox().push(new Email().to(signupContact.getEmail()).template("new-account")
+		.put("logo", appConfig.prop("mry.prop.logo.192")).put("website", appConfig.prop("mry.prop.website"))
+		.put("service", appConfig.prop("mry.prop.service"))
 		.put("link",
-			String.format("https://app.mehery.com/account/verify-link?code=%s&account=%s",
+			String.format(appConfig.prop("mry.prop.reset.link"),
 				account.getMeta().getEmailVerificationCode(), account.getId()))
 		.put("name", account.getContact().getName())));
 

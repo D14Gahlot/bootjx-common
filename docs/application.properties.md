@@ -194,10 +194,12 @@ mry.bot.url=http://localhost:8084/bot
 mry.admin.url=http://localhost:8081/admin
 mry.xms.url=http://localhost:8085/xms
 
+###### Comma Sperated Emails allowed to login as Admin ########
+mry.superadmin.emails=cherrybase786@gmail.com,xyz@gmail.com
 ```
 
 
-## TenantProperties 
+## TenantProperties for All Services
 ###### application.&lt;tnt&gt;.properties
 ```application.tnt.properties
 ###### DB mysql ########
