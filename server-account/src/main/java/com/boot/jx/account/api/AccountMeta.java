@@ -9,6 +9,7 @@ public class AccountMeta implements Serializable {
     private boolean phoneVerified;
     private boolean emailVerified;
     private String emailVerificationCode;
+    private String passwordHash;
 
     public String getEmailVerificationCode() {
 	return emailVerificationCode;
@@ -32,5 +33,13 @@ public class AccountMeta implements Serializable {
 
     public void setEmailVerified(boolean emailVerified) {
 	this.emailVerified = emailVerified;
+    }
+
+    public String getPasswordHash() {
+	return passwordHash;
+    }
+
+    public void setPasswordHash(String passwordHash) {
+	this.passwordHash = passwordHash;
     }
 }

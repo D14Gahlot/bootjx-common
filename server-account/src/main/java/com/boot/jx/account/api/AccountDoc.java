@@ -1,5 +1,6 @@
 package com.boot.jx.account.api;
 
+import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 
@@ -16,7 +17,9 @@ import com.boot.utils.StringUtils;
 
 @Document(collection = "ACCOUNTS")
 @TypeAlias("AccountDoc")
-public class AccountDoc implements IDocument, DocVersion, AuditableEntity {
+public class AccountDoc implements IDocument, DocVersion, AuditableEntity, Serializable {
+
+    private static final long serialVersionUID = -3354844112176554561L;
 
     @Id
     private String id;

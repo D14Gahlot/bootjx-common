@@ -3,7 +3,6 @@ package com.boot.jx.account.api;
 import java.io.Serializable;
 
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Pattern;
 
 import com.boot.jx.validation.ValidationAnnotations.ValidEmail;
 import com.boot.jx.validation.ValidationAnnotations.ValidPhone;

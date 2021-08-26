@@ -149,7 +149,7 @@ app.group=1  					# optional group of services
 app.id=XMS1						# optional instance name
 
 ###### Appplication ########
-server.port=8080				# optional Port
+server.port=8085				# optional Port
 
 ###### DB Mongo ########
 spring.data.mongodb.uri=mongodb://localbot:localbot@10.28.42.30:27017/localbot
@@ -168,9 +168,38 @@ mry.admin.url=http://localhost:8081/admin
 ```
 
 
+## ACCOUNT
+###### application.properties
+```application.properties
+###### App Identification  ########
+app.env=DEMO 					# optional Enviroment
+app.group=1  					# optional group of services
+app.id=ACC1						# optional instance name
+
+###### Appplication ########
+server.port=8086				# optional Port
+
+###### DB Mongo ########
+spring.data.mongodb.uri=mongodb://localbot:localbot@10.28.42.30:27017/localbot
+
+###### DB Redis ########
+spring.redis.host=localhost
+spring.redis.port=6379
+server.connection-timeout=-1
+
+###### cherrybase ########
+mry.postman.url=http://localhost:8082/postman
+mry.agent.url=http://localhost:8083/agent
+mry.bot.url=http://localhost:8084/bot
+mry.admin.url=http://localhost:8081/admin
+mry.xms.url=http://localhost:8085/xms
+
+```
+
+
 ## TenantProperties 
-###### application.<tnt>.properties
-```application.<tnt>.properties
+###### application.&lt;tnt&gt;.properties
+```application.tnt.properties
 ###### DB mysql ########
 spring.datasource.url=jdbc:mysql://127.0.0.1:3306/<tnt>
 spring.datasource.username=<tnt>

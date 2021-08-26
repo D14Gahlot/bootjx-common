@@ -1,5 +1,6 @@
 package com.boot.jx.account.api;
 
+import java.security.NoSuchAlgorithmException;
 import java.util.UUID;
 
 import javax.servlet.http.HttpServletRequest;
@@ -32,6 +33,7 @@ import com.boot.jx.postman.model.Email;
 import com.boot.jx.postman.model.MessageBox;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
+import com.boot.utils.CryptoUtil;
 
 @Controller
 @RequestMapping("/account")
@@ -48,9 +50,6 @@ public class AccountController {
 
     @Autowired
     private AccoountAuthService sessionService;
-
-    @Autowired
-    private AccountAuthProvider adminAuthProvider;
 
     @Autowired
     private CommonMongoTemplate commonMongoTemplate;
@@ -106,6 +105,22 @@ public class AccountController {
 		.put("name", account.getContact().getName())));
 
 	return ApiResponse.build().message("Verification email sent");
+    }
+
+    @ResponseBody
+    @RequestMapping(value = { "/pub/verify/email" }, method = { RequestMethod.POST })
+    public ApiResponse<Object, Object> verifyEmail(Model model, HttpServletRequest request,
+	    HttpServletResponse httpServletResponse, @RequestBody String code, @RequestBody String account,
+	    @RequestBody String newpass) throws NoSuchAlgorithmException {
+	AccountDoc accountDoc = commonMongoTemplate.findById(account, AccountDoc.class);
+	if (!ArgUtil.is(accountDoc) || accountDoc.getMeta().getEmailVerificationCode().equals(code)) {
+	    ApiResponseUtil.throwException("Invalid Link");
+	}
+
+	accountDoc.getMeta().setPasswordHash(CryptoUtil.getSHA2Hash(newpass));
+	accountDoc.getMeta().setEmailVerificationCode(null);
+	sessionService.login(accountDoc, request);
+	return ApiResponse.build().message("Email verified");
     }
 
 }
