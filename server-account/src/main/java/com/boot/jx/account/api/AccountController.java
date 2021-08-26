@@ -27,6 +27,7 @@ import com.boot.jx.api.ApiResponse;
 import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.http.CommonHttpRequest;
 import com.boot.jx.mongo.CommonMongoTemplate;
+import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.client.PostManClient;
 import com.boot.jx.postman.model.Email;
 import com.boot.jx.postman.model.MessageBox;
@@ -51,10 +52,7 @@ public class AccountController {
     private AccoountAuthService sessionService;
 
     @Autowired
-    private CommonMongoTemplate commonMongoTemplate;
-
-    @Autowired
-    private PostManClient postManClient;
+    private AccountStore accountStore;
 
     @RequestMapping(value = { "/auth/register/**" }, method = { RequestMethod.GET })
     public String home(Model model, @RequestParam(required = false) String theme) {
@@ -77,10 +75,7 @@ public class AccountController {
     public ApiResponse<Object, Object> register(Model model, HttpServletRequest request,
 	    HttpServletResponse httpServletResponse, @RequestBody @Valid SignupContact signupContact) {
 
-	Query query2 = new Query();
-	query2.addCriteria(Criteria.where("contact.email").is(signupContact.getEmail()));
-
-	AccountDoc account = CollectionUtil.getOne(commonMongoTemplate.find(query2, AccountDoc.class));
+	AccountDoc account = accountStore.findOneByEmail(signupContact.getEmail(), AccountDoc.class);
 	if (ArgUtil.is(account)) {
 	    ApiResponseUtil.throwException("Email address already in use. Try reset password.");
 	}
@@ -92,25 +87,18 @@ public class AccountController {
 	account.setContact(signupContact);
 	account.setMeta(keys);
 
-	commonMongoTemplate.save(account);
-
-	postManClient.send(new MessageBox().push(new Email().to(signupContact.getEmail()).template("new-account")
-		.put("logo", appConfig.prop("mry.prop.logo.192")).put("website", appConfig.prop("mry.prop.website"))
-		.put("service", appConfig.prop("mry.prop.service"))
-		.put("link",
-			String.format(appConfig.prop("mry.prop.reset.link"),
-				account.getMeta().getEmailVerificationCode(), account.getId()))
-		.put("name", account.getContact().getName())));
+	accountStore.save(account);
+	sessionService.sendResetMail(account, "tenant-verify-email");
 
 	return ApiResponse.build().message("Verification email sent");
     }
 
     @ResponseBody
-    @RequestMapping(value = { "/pub/verify/email" }, method = { RequestMethod.POST })
+    @RequestMapping(value = { "/pub/set/pass" }, method = { RequestMethod.POST })
     public ApiResponse<Object, Object> verifyEmail(Model model, HttpServletRequest request,
 	    HttpServletResponse httpServletResponse, @RequestBody String code, @RequestBody String account,
 	    @RequestBody String newpass) throws NoSuchAlgorithmException {
-	AccountDoc accountDoc = commonMongoTemplate.findById(account, AccountDoc.class);
+	AccountDoc accountDoc = accountStore.findById(account, AccountDoc.class);
 	if (!ArgUtil.is(accountDoc) || accountDoc.getMeta().getEmailVerificationCode().equals(code)) {
 	    ApiResponseUtil.throwException("Invalid Link");
 	}
@@ -118,7 +106,42 @@ public class AccountController {
 	accountDoc.getMeta().setPasswordHash(CryptoUtil.getSHA2Hash(newpass));
 	accountDoc.getMeta().setEmailVerificationCode(null);
 	sessionService.login(accountDoc, request);
-	return ApiResponse.build().message("Email verified");
+	return ApiResponse.build().message("Password set successfuly");
+    }
+
+    @ResponseBody
+    @RequestMapping(value = { "/pub/forgot/pass" }, method = { RequestMethod.POST })
+    public ApiResponse<Object, Object> forgotPass(Model model, HttpServletRequest request,
+	    HttpServletResponse httpServletResponse, @RequestBody String email) throws NoSuchAlgorithmException {
+
+	AccountDoc accountDoc = accountStore.findOneByEmail(email, AccountDoc.class);
+
+	if (ArgUtil.is(accountDoc)) {
+	    ApiResponseUtil.throwException("Email not registered");
+	}
+
+	accountDoc.getMeta().setEmailVerificationCode(UUID.randomUUID().toString());
+	accountStore.save(accountDoc);
+	sessionService.sendResetMail(accountDoc, "tenant-reset-pass");
+
+	return ApiResponse.build().message("Password Reset Email Sent");
+    }
+
+    @ResponseBody
+    @RequestMapping(value = { "/pub/login" }, method = { RequestMethod.POST })
+    public ApiResponse<Object, Object> login(Model model, HttpServletRequest request,
+	    HttpServletResponse httpServletResponse, @RequestBody String email, @RequestBody String password,
+	    @RequestBody String newpass) throws NoSuchAlgorithmException {
+
+	AccountDoc accountDoc = accountStore.findOneByEmail(email, AccountDoc.class);
+
+	if (!ArgUtil.is(accountDoc)
+		|| !ArgUtil.areEqual(CryptoUtil.getSHA2Hash(newpass), accountDoc.getMeta().getPasswordHash())) {
+	    ApiResponseUtil.throwException("Invalid Email or Password");
+	}
+
+	sessionService.login(accountDoc, request);
+	return ApiResponse.build().message("Login Success");
     }
 
 }
