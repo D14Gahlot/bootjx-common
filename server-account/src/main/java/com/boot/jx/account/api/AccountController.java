@@ -8,8 +8,6 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.mongodb.core.query.Criteria;
-import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
@@ -26,13 +24,7 @@ import com.boot.jx.account.AccoountAuthService;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.http.CommonHttpRequest;
-import com.boot.jx.mongo.CommonMongoTemplate;
-import com.boot.jx.postman.PMEnvironment;
-import com.boot.jx.postman.client.PostManClient;
-import com.boot.jx.postman.model.Email;
-import com.boot.jx.postman.model.MessageBox;
 import com.boot.utils.ArgUtil;
-import com.boot.utils.CollectionUtil;
 import com.boot.utils.CryptoUtil;
 
 @Controller
@@ -54,7 +46,7 @@ public class AccountController {
     @Autowired
     private AccountStore accountStore;
 
-    @RequestMapping(value = { "/auth/register/**" }, method = { RequestMethod.GET })
+    @RequestMapping(value = { "/auth/**", "/app/**" }, method = { RequestMethod.GET })
     public String home(Model model, @RequestParam(required = false) String theme) {
 	model.addAllAttributes(appCommonConfig.appAttributes());
 

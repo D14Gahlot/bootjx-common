@@ -1,0 +1,6 @@
+{
+	"link" : "https://app.cherrybase.com/account/verify-link?code=%s&account=%s",
+	"service": "CherryBase",
+	"website": "www.cherrybase.com",
+	"logo" : "https://cdn.jsdelivr.net/gh/cherrybase/cherrybase.github.io@latest/favicon/android-chrome-192x192.png"
+}

@@ -288,9 +288,13 @@ public class PostManControllerTest {
 		Map<String, Object> map = null;
 
 		if (!appConfig.isProdMode() && appConfig.isCache()) {
-			// map = templateModelCache.get(temp.getSampleJSON());
+			//map = templateModelCache.get(temp.getSampleJSON());
 		}
 
+		if (map == null) {
+			map = readJsonWithObjectMapper("templates/dummy/" + temp.toString() + ".json");
+		}
+		
 		if (map == null) {
 			map = readJsonWithObjectMapper("templates/dummy/" + temp.getSampleJSON());
 		}
