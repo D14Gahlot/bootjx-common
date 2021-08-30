@@ -1,19 +1,18 @@
 package com.boot.jx.account.api;
 
 import java.io.Serializable;
-import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.TypeAlias;
-import org.springframework.data.mongodb.core.index.Indexed;
+import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import com.boot.jx.model.AuditableEntity;
 import com.boot.jx.mongo.CommonDocInterfaces.DocVersion;
 import com.boot.jx.mongo.CommonDocInterfaces.IDocument;
-import com.boot.utils.ArgUtil;
-import com.boot.utils.StringUtils;
+import com.boot.jx.rbac.docs.RbacUser;
 
 @Document(collection = "ACCOUNTS")
 @TypeAlias("AccountDoc")
@@ -32,6 +31,9 @@ public class AccountDoc implements IDocument, DocVersion, AuditableEntity, Seria
     private Long modifiedStamp;
     private String modifiedBy;
     private Boolean isActive;
+
+    @DBRef
+    private Set<RbacUser> users;
 
     private List<DocVersion> oldVersions;
 

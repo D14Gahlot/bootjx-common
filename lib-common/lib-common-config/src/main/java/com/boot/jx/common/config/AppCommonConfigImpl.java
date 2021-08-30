@@ -23,6 +23,18 @@ import com.boot.utils.TimeUtils;
 @PropertySource("classpath:application-common.properties")
 public class AppCommonConfigImpl implements AppCommonConfig {
 
+    public static final String[] PROPS = new String[] {
+	    // LOGO Transparent
+	    "logo.bg-x-logo-w", "logo.bg-x-logo-b",
+	    // LOGO - WHITE
+	    "logo.bg-w-logo", "logo.bg-w-logo-b",
+	    // LOGO - black
+	    "logo.bg-b-logo-w",
+	    // ICONS
+	    "logo.bg-x-icon-w", "logo.bg-x-icon",
+
+    };
+
     @Autowired
     private PMEnvironment pmEnvironment;
 
@@ -64,6 +76,12 @@ public class AppCommonConfigImpl implements AppCommonConfig {
 	}
 	map.put("SETUP", setup);
 	map.put("timestamp", System.currentTimeMillis());
+
+	for (String key : PROPS) {
+	    String newKey = key.replaceAll("[\\.@\\-$]", "_").toUpperCase();
+	    map.put("PROP_" + newKey, pmEnvironment.get("mry.prop." + key).asString());
+	}
+
 	return map;
     }
 
@@ -82,7 +100,7 @@ public class AppCommonConfigImpl implements AppCommonConfig {
 
 	map.put("APP_CONTEXT", appConfig.getAppPrefix());
 	map.put("POSTMAN_CONTEXT", appConfig.getAppPrefix());
-	
+
 	map.put("POSTMAN_AGENT_SCHEME_COLOR", pmEnvironment.get("postman.agent.scheme.color").asString());
 	map.put("STAMP", System.currentTimeMillis());
 	map.put("APP_TITLE", appConfig.getAppTitle());
