@@ -6,6 +6,7 @@ import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
 import com.boot.jx.validation.ValidationAnnotations.ValidPhone;
+import com.boot.utils.ArgUtil;
 
 public class PhoneValidator implements ConstraintValidator<ValidPhone, String> {
 
@@ -28,15 +29,20 @@ public class PhoneValidator implements ConstraintValidator<ValidPhone, String> {
     @Override
     public boolean isValid(String value, ConstraintValidatorContext context) {
 
+	if (!ArgUtil.is(value)) {
+	    return false;
+	}
+
 	if (false || P1.matcher(value).matches() || P2.matcher(value).matches() || P3.matcher(value).matches()
 		|| P4.matcher(value).matches() || P5.matcher(value).matches() || P6.matcher(value).matches()
 		|| P7.matcher(value).matches()) {
 	    return true;
 	}
-	String noSpaceValue = value.replaceAll("[\\ \\+]","");
-	
-	if (false || P1.matcher(noSpaceValue).matches() || P2.matcher(noSpaceValue).matches() || P3.matcher(noSpaceValue).matches()
-		|| P4.matcher(noSpaceValue).matches() || P5.matcher(noSpaceValue).matches() || P6.matcher(noSpaceValue).matches()
+	String noSpaceValue = value.replaceAll("[\\ \\+]", "");
+
+	if (false || P1.matcher(noSpaceValue).matches() || P2.matcher(noSpaceValue).matches()
+		|| P3.matcher(noSpaceValue).matches() || P4.matcher(noSpaceValue).matches()
+		|| P5.matcher(noSpaceValue).matches() || P6.matcher(noSpaceValue).matches()
 		|| P7.matcher(noSpaceValue).matches()) {
 	    return true;
 	}
