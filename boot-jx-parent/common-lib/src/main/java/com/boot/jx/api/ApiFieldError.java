@@ -15,163 +15,169 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ApiFieldError implements Serializable {
 
-	/** The Constant serialVersionUID. */
-	private static final long serialVersionUID = -3253269120058295762L;
+    /** The Constant serialVersionUID. */
+    private static final long serialVersionUID = -3253269120058295762L;
 
-	/** The obzect. */
-	String obzect = null;
-	String field = null;
-	String description = null;
-	String descriptionKey = null;
-	String code = null;
-	String codeKey = null;
-	// Enum Codes
-	//IExceptionEnum enumCode;
-	/**
-	 * Added but yet to be used for parameterized descriptionKey
-	 */
-	private Object[] descriptionArgs;
-	public String getCode() {
-		return code;
+    /** The obzect. */
+    String obzect = null;
+    String field = null;
+    String description = null;
+    String descriptionKey = null;
+    String code = null;
+    String codeKey = null;
+    // Enum Codes
+    // IExceptionEnum enumCode;
+    /**
+     * Added but yet to be used for parameterized descriptionKey
+     */
+    private Object[] descriptionArgs;
+
+    public String getCode() {
+	return code;
+    }
+
+    public void setCode(String code) {
+	this.code = code;
+    }
+
+    List<String> codes = null;
+
+    public ApiFieldError() {
+	this.codes = new ArrayList<String>();
+    }
+
+    public List<String> getCodes() {
+	return codes;
+    }
+
+    public void setCodes(List<String> codes) {
+	this.codes = codes;
+    }
+
+    /**
+     * Gets the obzect.
+     *
+     * @return the obzect
+     */
+    public String getObzect() {
+	return obzect;
+    }
+
+    /**
+     * Sets the obzect.
+     *
+     * @param obzect the new obzect
+     */
+    public void setObzect(String obzect) {
+	this.obzect = obzect;
+    }
+
+    /**
+     * Gets the description.
+     *
+     * @return the description
+     */
+    public String getDescription() {
+	return description;
+    }
+
+    /**
+     * Sets the description.
+     *
+     * @param description the new description
+     */
+    public void setDescription(String description) {
+	this.description = description;
+    }
+
+    /**
+     * Gets the field.
+     *
+     * @return the field
+     */
+    public String getField() {
+	return field;
+    }
+
+    /**
+     * Sets the field.
+     *
+     * @param field the new field
+     */
+    public void setField(String field) {
+	this.field = field;
+    }
+
+    public String toString() {
+	return code + codeKey + field + obzect + descriptionKey + description;
+    }
+
+    public String getDescriptionKey() {
+	if (!ArgUtil.is(descriptionKey) && ArgUtil.is(descriptionArgs)) {
+	    this.descriptionKey = ExceptionMessageKey.build(descriptionKey, descriptionArgs);
 	}
+	return descriptionKey;
+    }
 
-	public void setCode(String code) {
-		this.code = code;
-	}
+    public void setDescriptionKey(String descriptionKey) {
+	this.descriptionKey = descriptionKey;
+    }
 
-	List<String> codes = null;
+    public String getCodeKey() {
+	return codeKey;
+    }
 
-	public ApiFieldError() {
-		this.codes = new ArrayList<String>();
-	}
+    public void setCodeKey(String codeKey) {
+	this.codeKey = codeKey;
+    }
 
-	public List<String> getCodes() {
-		return codes;
-	}
+    public ApiFieldError descriptionKey(Object key) {
+	this.descriptionKey = ArgUtil.parseAsString(key);
+	return this;
+    }
 
-	public void setCodes(List<String> codes) {
-		this.codes = codes;
-	}
+    public ApiFieldError descriptionArgs(Object... key) {
+	this.descriptionArgs = key;
+	return this;
+    }
 
-	/**
-	 * Gets the obzect.
-	 *
-	 * @return the obzect
-	 */
-	public String getObzect() {
-		return obzect;
-	}
+    public ApiFieldError description(String description) {
+	this.description = description;
+	return this;
+    }
 
-	/**
-	 * Sets the obzect.
-	 *
-	 * @param obzect
-	 *            the new obzect
-	 */
-	public void setObzect(String obzect) {
-		this.obzect = obzect;
-	}
+    public ApiFieldError code(IExceptionEnum enumCode) {
+	this.code = ArgUtil.parseAsString(enumCode.getStatusCode());
+	this.codeKey = enumCode.getStatusKey();
+	return this;
+    }
 
-	/**
-	 * Gets the description.
-	 *
-	 * @return the description
-	 */
-	public String getDescription() {
-		return description;
-	}
+    public ApiFieldError codeKey(String codeKey) {
+	this.codeKey = codeKey;
+	return this;
+    }
 
-	/**
-	 * Sets the description.
-	 *
-	 * @param description
-	 *            the new description
-	 */
-	public void setDescription(String description) {
-		this.description = description;
-	}
+    public ApiFieldError code(int code) {
+	this.code = ArgUtil.parseAsString(code);
+	return this;
+    }
 
-	/**
-	 * Gets the field.
-	 *
-	 * @return the field
-	 */
-	public String getField() {
-		return field;
-	}
+    public ApiFieldError field(String field) {
+	this.field = field;
+	return this;
+    }
 
-	/**
-	 * Sets the field.
-	 *
-	 * @param field
-	 *            the new field
-	 */
-	public void setField(String field) {
-		this.field = field;
-	}
+    public ApiFieldError obzect(String obzect) {
+	this.obzect = obzect;
+	return this;
+    }
 
-	public String toString() {
-		return code + codeKey + field + obzect + descriptionKey + description;
-	}
-
-	public String getDescriptionKey() {
-		if (!ArgUtil.is(descriptionKey) && ArgUtil.is(descriptionArgs)) {
-			this.descriptionKey = ExceptionMessageKey.build(descriptionKey, descriptionArgs);
-		}
-		return descriptionKey;
-	}
-
-	public void setDescriptionKey(String descriptionKey) {
-		this.descriptionKey = descriptionKey;
-	}
-
-	public String getCodeKey() {
-		return codeKey;
-	}
-
-	public void setCodeKey(String codeKey) {
-		this.codeKey = codeKey;
-	}
-
-	public ApiFieldError descriptionKey(Object key) {
-		this.descriptionKey = ArgUtil.parseAsString(key);
-		return this;
-	}
-
-	public ApiFieldError descriptionArgs(Object... key) {
-		this.descriptionArgs = key;
-		return this;
-	}
-
-	public ApiFieldError description(String description) {
-		this.description = description;
-		return this;
-	}
-
-	public ApiFieldError code(IExceptionEnum enumCode) {
-		this.code = ArgUtil.parseAsString(enumCode.getStatusCode());
-		this.codeKey = enumCode.getStatusKey();
-		return this;
-	}
-
-	public ApiFieldError codeKey(String codeKey) {
-		this.codeKey = codeKey;
-		return this;
-	}
-
-	public ApiFieldError code(int code) {
-		this.code = ArgUtil.parseAsString(code);
-		return this;
-	}
-
-	/*public IExceptionEnum getEnumCode() {
-		return enumCode;
-	}
-
-	public void setEnumCode(IExceptionEnum enumCode) {
-		this.enumCode = enumCode;
-		this.code = String.valueOf(enumCode.getStatusCode());
-		this.codeKey = enumCode.getStatusKey();
-	}*/
+    /*
+     * public IExceptionEnum getEnumCode() { return enumCode; }
+     * 
+     * public void setEnumCode(IExceptionEnum enumCode) { this.enumCode = enumCode;
+     * this.code = String.valueOf(enumCode.getStatusCode()); this.codeKey =
+     * enumCode.getStatusKey(); }
+     */
 
 }

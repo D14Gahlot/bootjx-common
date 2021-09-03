@@ -70,11 +70,11 @@ public class AccoountAuthService {
 
     public void sendResetMail(AccountDoc accountDoc, String emailTemplate) {
 	postManClient.send(new MessageBox().push(new Email().to(accountDoc.getContact().getEmail())
-		.template(emailTemplate).put("logo", pmEnvironment.config().get("mry.prop.logo.192").asString())
-		.put("website", pmEnvironment.config().get("mry.prop.website").asString())
-		.put("service", pmEnvironment.config().get("mry.prop.service").asString())
+		.template(emailTemplate).put("logo", pmEnvironment.get("mry.prop.logo.192").asString())
+		.put("website", pmEnvironment.get("mry.prop.website").asString())
+		.put("service", pmEnvironment.get("mry.prop.service").asString())
 		.put("link",
-			String.format(pmEnvironment.config().get("mry.prop.reset.link").asString(),
+			String.format(pmEnvironment.get("mry.prop.reset.link").asString(),
 				accountDoc.getMeta().getEmailVerificationCode(), accountDoc.getId()))
 		.put("name", accountDoc.getContact().getName())));
     }

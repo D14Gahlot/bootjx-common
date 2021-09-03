@@ -20,9 +20,7 @@ public class ValidationAnnotations {
     @Target({ METHOD, FIELD, ANNOTATION_TYPE, CONSTRUCTOR, PARAMETER })
     @Retention(RUNTIME)
     @Documented
-    @Constraint(validatedBy = {})
-    @Pattern(regexp = "^[\\w!#$%&'*+/=?`{|}~^-]+(?:\\.[\\w!#$%&'*+/=?`{|}~^-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,6}",
-	    message = "Must be a valid email address")
+    @Constraint(validatedBy = EmailValidator.class)
     public @interface ValidEmail {
 	/**
 	 * @return the regular expression to match

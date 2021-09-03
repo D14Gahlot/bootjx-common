@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.boot.jx.AppConfig;
 import com.boot.jx.AppConfigPackage.AppCommonConfig;
 import com.boot.jx.account.AccoountAuthService;
+import com.boot.jx.api.ApiFieldError;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.http.CommonHttpRequest;
@@ -69,7 +70,9 @@ public class AccountController {
 
 	AccountDoc account = accountStore.findOneByEmail(signupContact.getEmail(), AccountDoc.class);
 	if (ArgUtil.is(account)) {
-	    ApiResponseUtil.throwException("Email address already in use. Try reset password.");
+	    ApiResponseUtil.throwDuplicateInputException("Email address already in use. Try reset password.",
+		    new ApiFieldError().obzect("signupContact").field("email").codeKey("ValidEmailDuplicate")
+			    .description("Email address already in use."));
 	}
 
 	AccountMeta keys = new AccountMeta();
