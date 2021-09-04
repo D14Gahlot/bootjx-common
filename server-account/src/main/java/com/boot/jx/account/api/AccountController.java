@@ -91,8 +91,8 @@ public class AccountController {
     @ResponseBody
     @RequestMapping(value = { "/pub/set/pass" }, method = { RequestMethod.POST })
     public ApiResponse<Object, Object> verifyEmail(Model model, HttpServletRequest request,
-	    HttpServletResponse httpServletResponse, @RequestBody String code, @RequestBody String account,
-	    @RequestBody String newpass) throws NoSuchAlgorithmException {
+	    HttpServletResponse httpServletResponse, @RequestParam String code, @RequestParam String account,
+	    @RequestParam String newpass) throws NoSuchAlgorithmException {
 	AccountDoc accountDoc = accountStore.findById(account, AccountDoc.class);
 	if (!ArgUtil.is(accountDoc) || accountDoc.getMeta().getEmailVerificationCode().equals(code)) {
 	    ApiResponseUtil.throwException("Invalid Link");
@@ -107,7 +107,7 @@ public class AccountController {
     @ResponseBody
     @RequestMapping(value = { "/pub/forgot/pass" }, method = { RequestMethod.POST })
     public ApiResponse<Object, Object> forgotPass(Model model, HttpServletRequest request,
-	    HttpServletResponse httpServletResponse, @RequestBody String email) throws NoSuchAlgorithmException {
+	    HttpServletResponse httpServletResponse, @RequestParam String email) throws NoSuchAlgorithmException {
 
 	AccountDoc accountDoc = accountStore.findOneByEmail(email, AccountDoc.class);
 
@@ -125,8 +125,8 @@ public class AccountController {
     @ResponseBody
     @RequestMapping(value = { "/pub/login" }, method = { RequestMethod.POST })
     public ApiResponse<Object, Object> login(Model model, HttpServletRequest request,
-	    HttpServletResponse httpServletResponse, @RequestBody String email, @RequestBody String password,
-	    @RequestBody String newpass) throws NoSuchAlgorithmException {
+	    HttpServletResponse httpServletResponse, @RequestParam String email, @RequestParam String password,
+	    @RequestParam String newpass) throws NoSuchAlgorithmException {
 
 	AccountDoc accountDoc = accountStore.findOneByEmail(email, AccountDoc.class);
 
