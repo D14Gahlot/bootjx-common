@@ -111,7 +111,7 @@ public class AccountController {
 
 	AccountDoc accountDoc = accountStore.findOneByEmail(email, AccountDoc.class);
 
-	if (ArgUtil.is(accountDoc)) {
+	if (!ArgUtil.is(accountDoc)) {
 	    ApiResponseUtil.throwException("Email not registered");
 	}
 
