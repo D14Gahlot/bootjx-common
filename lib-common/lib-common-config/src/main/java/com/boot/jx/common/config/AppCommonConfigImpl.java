@@ -33,6 +33,10 @@ public class AppCommonConfigImpl implements AppCommonConfig {
 	    // ICONS
 	    "logo.bg-x-icon-w", "logo.bg-x-icon",
 
+	    // WEBSITES
+	    "mry.prop.service.name", "mry.prop.service.website", "mry.prop.service.website.link",
+	    "mry.prop.service.aboutus.link", "mry.prop.service.privac.link", "mry.prop.service.tos.link"
+
     };
 
     @Autowired
