@@ -1,4 +1,4 @@
-package com.boot.jx.account.api;
+package com.boot.jx.account.doc;
 
 import java.io.Serializable;
 

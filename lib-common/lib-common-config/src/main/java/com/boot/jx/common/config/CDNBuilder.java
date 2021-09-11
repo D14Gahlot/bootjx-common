@@ -1,0 +1,75 @@
+package com.boot.jx.common.config;
+
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.stereotype.Component;
+
+import com.boot.jx.rest.RestService;
+import com.boot.utils.ArgUtil;
+import com.boot.utils.StringUtils;
+
+@Component
+public class CDNBuilder {
+
+    public static Pattern PATTERN = Pattern
+	    .compile("(?<proto>.+)cdn.jsdelivr.net/gh/(?<org>.+)/(?<repo>.+)@(?<version>[-a-zA-Z0-9\\.]+)(?<path>.*)");
+    public static String VERSION_URL = "https://api.github.com/repos/%s/%s/commits/%s?page=0&per_page=1";
+
+    private Map<String, String> cdnMapper = new ConcurrentHashMap<String, String>();
+
+    public String latest(String cdnUrl) {
+	String cdnUrlNew = cdnMapper.get(cdnUrl);
+	if (ArgUtil.is(cdnUrlNew)) {
+	    return cdnUrlNew;
+	} else {
+	    cdnMapper.put(cdnUrl, cdnUrl);
+	}
+	return cdnUrl;
+    }
+
+    public String updateVersion(String oldUrl, String version) {
+	Matcher matcher = PATTERN.matcher(oldUrl);
+	if (matcher.find()) {
+	    String protoV = matcher.group("proto");
+	    String orgV = matcher.group("org");
+	    String repoV = matcher.group("repo");
+	    String versionV = matcher.group("version");
+	    String pathV = matcher.group("path");
+	    return String.format("%scdn.jsdelivr.net/gh/%s/%s@%s%s", protoV, orgV, repoV, StringUtils.trim(version),
+		    pathV);
+	}
+	return oldUrl;
+    }
+
+    @Autowired
+    private RestService restService;
+
+    @Async
+    public void update() {
+	for (Entry<String, String> cdn : cdnMapper.entrySet()) {
+	    Matcher matcher = PATTERN.matcher(cdn.getKey());
+	    if (matcher.find()) {
+		String protoV = matcher.group("proto");
+		String orgV = matcher.group("org");
+		String repoV = matcher.group("repo");
+		String versionV = matcher.group("version");
+		String pathV = matcher.group("path");
+		String versionUrl = String.format(VERSION_URL, orgV, repoV, versionV);
+		Map<String, Object> resp = restService.ajax(versionUrl).get().asMap();
+		String sha = (String) resp.get("sha");
+		if (ArgUtil.is(sha)) {
+		    String url = String.format("%scdn.jsdelivr.net/gh/%s/%s@%s%s", protoV, orgV, repoV,
+			    StringUtils.trim(sha), pathV);
+		    cdnMapper.put(cdn.getKey(), url);
+		}
+	    }
+	}
+    }
+
+}

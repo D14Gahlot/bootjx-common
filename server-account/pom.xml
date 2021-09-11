@@ -80,11 +80,6 @@
 
 		<dependency>
 			<groupId>com.boot.jx</groupId>
-			<artifactId>common-lib-rbac</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>com.boot.jx</groupId>
 			<artifactId>lib-postman-chat</artifactId>
 		</dependency>
 

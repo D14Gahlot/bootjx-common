@@ -6,7 +6,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.boot.jx.AppConfig;
+import com.boot.jx.AppContextUtil;
 import com.boot.jx.dict.ContactType;
+import com.boot.jx.scope.tnt.Tenants;
+import com.boot.jx.scope.tnt.Tenants.Tenant;
 import com.boot.model.MapModel.MapEntry;
 import com.boot.utils.ArgUtil;
 import com.fasterxml.jackson.annotation.JsonView;
@@ -25,6 +28,8 @@ public class PMEnvironment {
 
     public static interface PMEnvironmentProvider {
 	public PMConfiguration config();
+
+	public PMConfiguration shared();
 
 	public void config(PMConfiguration configuration);
 
@@ -115,6 +120,7 @@ public class PMEnvironment {
 	private static final long serialVersionUID = 2678154770516185408L;
 	String key;
 	String description;
+	boolean shared;
 
 	public PMConfigurationObject(String key, Object value) {
 	    super(value);
@@ -141,6 +147,14 @@ public class PMEnvironment {
 	    this.description = description;
 	}
 
+	public boolean isShared() {
+	    return shared;
+	}
+
+	public void setShared(boolean shared) {
+	    this.shared = shared;
+	}
+
     }
 
     @Autowired(required = false)
@@ -150,6 +164,17 @@ public class PMEnvironment {
 	PMConfiguration config = null;
 	if (ArgUtil.is(provider)) {
 	    config = provider.config();
+	}
+	if (config == null) {
+	    config = new PMConfiguration();
+	}
+	return config;
+    }
+
+    public PMConfiguration shared() {
+	PMConfiguration config = null;
+	if (ArgUtil.is(provider)) {
+	    config = provider.shared();
 	}
 	if (config == null) {
 	    config = new PMConfiguration();
@@ -173,13 +198,23 @@ public class PMEnvironment {
     AppConfig appConfig;
 
     public PMConfigurationObject get(String key) {
-	PMConfigurationObject config = this.config().map().get(key);
-	if (ArgUtil.isEmpty(config)) {
-	    String value = appConfig.prop(key);
-	    config = new PMConfigurationObject(key, value);
-	    this.config().map().put(key, config);
+	PMConfigurationObject configObject = this.config().map().get(key);
+
+	String tnt = AppContextUtil.getTenant();
+	if (ArgUtil.isEmpty(configObject) && !Tenants.isDefault(tnt)) {
+	    PMConfigurationObject sharedConfigObject = this.shared().map().get(key);
+	    if (ArgUtil.is(sharedConfigObject)) {
+		return sharedConfigObject;
+	    }
 	}
-	return config;
+
+	if (ArgUtil.isEmpty(configObject)) {
+	    String value = appConfig.prop(key);
+	    configObject = new PMConfigurationObject(key, value);
+	    this.config().map().put(key, configObject);
+	}
+
+	return configObject;
     }
 
 }

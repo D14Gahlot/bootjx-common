@@ -3,20 +3,26 @@ package com.boot.jx.account;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetails;
 import org.springframework.stereotype.Component;
 
-import com.boot.jx.account.api.AccountDoc;
+import com.boot.jx.AppContextUtil;
+import com.boot.jx.account.doc.DomainUserDoc;
+import com.boot.jx.api.ApiResponse;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.client.PostManClient;
 import com.boot.jx.postman.model.Email;
 import com.boot.jx.postman.model.MessageBox;
+import com.boot.jx.rest.RestService;
+import com.boot.utils.ArgUtil;
 
 @Component
-public class AccoountAuthService {
+public class AccountAdminService {
 
     /*
      * Below APIs are
@@ -25,10 +31,16 @@ public class AccoountAuthService {
      */
 
     @Autowired
-    private AccountSessionBean adminSessionBean;
+    private AccountSessionBean sessionBean;
 
     @Autowired
     private AccountAuthProvider adminAuthProvider;
+
+    @Autowired
+    private RestService restService;
+
+    @Value("${mry.app.url}")
+    private String appServiceUrl;
 
     public void updateSession() {
     }
@@ -38,8 +50,9 @@ public class AccoountAuthService {
      * 
      * @param username
      */
-    public void updateLogin(AccountDoc account) {
-	adminSessionBean.setAccount(account);
+    public void updateLogin(DomainUserDoc account) {
+	sessionBean.domainUser(account);
+	sessionBean.setRole("DOMAIN_ADMIN");
 	this.updateSession();
     }
 
@@ -49,17 +62,35 @@ public class AccoountAuthService {
      * @param username
      */
     public void updateLogout(String username) {
-	adminSessionBean.setAccount(null);
+	sessionBean.domainUser(null);
+	SecurityContextHolder.getContext().setAuthentication(null);
 	this.updateSession();
     }
 
-    public void login(AccountDoc account, HttpServletRequest request) {
+    public void login(DomainUserDoc account, HttpServletRequest request) {
 	UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(
-		account.getContact().getEmail(), account.getMeta().getPasswordHash());
+		account.getContact().getEmail(), account.getMeta().getPassword());
 	token.setDetails(new WebAuthenticationDetails(request));
 	Authentication authentication = adminAuthProvider.authenticate(token);
 	SecurityContextHolder.getContext().setAuthentication(authentication);
 	updateLogin(account);
+    }
+
+    public boolean validateCpanelUser(String domainId, String domainToken, HttpServletRequest request) {
+	if (ArgUtil.is(domainId) && ArgUtil.is(domainToken)) {
+	    ApiResponse<DomainUserDoc, String> resp = restService.ajax(appServiceUrl).path("/account/pub/auth")
+		    .header("tnt", "app").field("tnt", "app").field("domain", AppContextUtil.getTenant())
+		    .field("domainId", domainId).field("domainToken", domainToken).post()
+		    .as(new ParameterizedTypeReference<ApiResponse<DomainUserDoc, String>>() {
+		    });
+	    login(resp.getResult(), request);
+	}
+
+	if (!ArgUtil.is(sessionBean.domainUser())) {
+	    return true;
+	}
+
+	return false;
     }
 
     @Autowired
@@ -68,7 +99,7 @@ public class AccoountAuthService {
     @Autowired
     private PMEnvironment pmEnvironment;
 
-    public void sendResetMail(AccountDoc accountDoc, String emailTemplate) {
+    public void sendResetMail(DomainUserDoc accountDoc, String emailTemplate) {
 	postManClient.send(new MessageBox().push(new Email().to(accountDoc.getContact().getEmail())
 		.template(emailTemplate).put("logo", pmEnvironment.get("mry.prop.logo.192").asString())
 		.put("website", pmEnvironment.get("mry.prop.website").asString())
@@ -77,6 +108,22 @@ public class AccoountAuthService {
 			String.format(pmEnvironment.get("mry.prop.reset.link").asString(),
 				accountDoc.getMeta().getEmailVerificationCode(), accountDoc.getId()))
 		.put("name", accountDoc.getContact().getName())));
+    }
+
+    public static Authentication getAuthentication() {
+	Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+	if (ArgUtil.is(auth) && auth instanceof UsernamePasswordAuthenticationToken && auth.isAuthenticated()) {
+	    return auth;
+	}
+	return null;
+    }
+
+    public static boolean isAuthenticated() {
+	Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+	if (ArgUtil.is(auth) && auth instanceof UsernamePasswordAuthenticationToken && auth.isAuthenticated()) {
+	    return true;
+	}
+	return false;
     }
 
 }

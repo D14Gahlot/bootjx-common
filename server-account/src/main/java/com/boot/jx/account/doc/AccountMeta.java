@@ -1,4 +1,4 @@
-package com.boot.jx.account.api;
+package com.boot.jx.account.doc;
 
 import java.io.Serializable;
 
@@ -9,7 +9,7 @@ public class AccountMeta implements Serializable {
     private boolean phoneVerified;
     private boolean emailVerified;
     private String emailVerificationCode;
-    private String passwordHash;
+    private String password;
 
     public String getEmailVerificationCode() {
 	return emailVerificationCode;
@@ -35,11 +35,12 @@ public class AccountMeta implements Serializable {
 	this.emailVerified = emailVerified;
     }
 
-    public String getPasswordHash() {
-	return passwordHash;
+    public String getPassword() {
+	return password;
     }
 
-    public void setPasswordHash(String passwordHash) {
-	this.passwordHash = passwordHash;
+    public void setPassword(String password) {
+	this.password = password;
     }
+
 }

@@ -10,20 +10,19 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.stereotype.Component;
 
 import com.boot.jx.rbac.docs.RbacPrivilege;
 import com.boot.jx.rbac.docs.RbacRole;
 import com.boot.jx.rbac.docs.RbacUser;
 
+@Component
 public class RbacUserDetailsService implements UserDetailsService {
 
     @Autowired
     private RbacUserRepository userRepository;
     @Autowired
     private RbacRoleRepository roleRepository;
-    @Autowired
-    private BCryptPasswordEncoder bCryptPasswordEncoder;
 
     public RbacUser findByUsername(String username) {
 	return userRepository.findByUsername(username);
@@ -36,19 +35,23 @@ public class RbacUserDetailsService implements UserDetailsService {
 	if (userAccount == null) {
 	    throw new UsernameNotFoundException("User with username [" + username + "] not found in the system");
 	}
+	Set<GrantedAuthority> authorities = getAuthorities(userAccount.getRoles());
+	return new RbacUserDetails(userAccount.getUsername(), userAccount.getPassword(), userAccount.isEnabled(),
+		authorities);
+    }
+
+    public Set<GrantedAuthority> getAuthorities(Set<RbacRole> roles) {
 	Set<GrantedAuthority> authorities = new HashSet<>();
-	for (RbacRole userRole : userAccount.getRoles()) {
+	for (RbacRole userRole : roles) {
 	    authorities.add(new SimpleGrantedAuthority("ROLE_" + userRole.getRole()));
 	    for (RbacPrivilege userRolePrivilege : userRole.getPrivileges()) {
 		authorities.add(new SimpleGrantedAuthority(userRolePrivilege.getPrivilegeName()));
 	    }
 	}
-	return new RbacUserDetails(userAccount.getUsername(), userAccount.getPassword(), userAccount.isEnabled(),
-		authorities);
+	return authorities;
     }
 
     public void createUser(RbacUser user, String role) {
-	user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
 	user.setEnabled(user.isEnabled());
 	RbacRole userRole = roleRepository.findByRole(role);
 	user.setRoles(new HashSet<>(Arrays.asList(userRole)));

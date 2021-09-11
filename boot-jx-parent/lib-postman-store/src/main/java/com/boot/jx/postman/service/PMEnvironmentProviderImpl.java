@@ -14,6 +14,7 @@ import com.boot.jx.AppContextUtil;
 import com.boot.jx.postman.ChannelConfig;
 import com.boot.jx.postman.PMConfiguration;
 import com.boot.jx.postman.PMConstants.CHANNEL_TYPE;
+import com.boot.jx.postman.PMEnvironment.PMConfigurationObject;
 import com.boot.jx.postman.PMEnvironment.PMEnvironmentProvider;
 import com.boot.jx.postman.doc.ChannelConfigDoc;
 import com.boot.jx.postman.doc.ClientApiKeyDoc;
@@ -22,6 +23,7 @@ import com.boot.jx.postman.fb.FacebookConfig;
 import com.boot.jx.postman.gupshup.GupShupConfig;
 import com.boot.jx.postman.tg.TelegramConfig;
 import com.boot.jx.postman.tw.TwitterConfig;
+import com.boot.jx.scope.tnt.Tenants;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.EntityDtoUtil;
 import com.boot.utils.StringUtils;
@@ -30,6 +32,8 @@ import com.boot.utils.StringUtils;
 public class PMEnvironmentProviderImpl implements PMEnvironmentProvider, AppSharedConfig {
 
     private Map<String, PMConfigurationDoc> connectors = new HashMap<String, PMConfigurationDoc>();
+
+    PMConfigurationDoc sharedConfiguration = null;
 
     @Autowired(required = false)
     private MongoTemplate mongoTemplate;
@@ -57,6 +61,17 @@ public class PMEnvironmentProviderImpl implements PMEnvironmentProvider, AppShar
 	    if (ArgUtil.is(x)) {
 		connectors.put(tnt, x);
 	    }
+
+	    if (Tenants.isDefault(tnt)) {
+		PMConfigurationDoc newSharedConfiguration = new PMConfigurationDoc();
+		for (Entry<String, PMConfigurationObject> entry : x.map().entrySet()) {
+		    if (entry.getValue().isShared()) {
+			newSharedConfiguration.set(entry.getValue());
+		    }
+		}
+		sharedConfiguration = newSharedConfiguration;
+	    }
+
 	    return x;
 	}
 	return null;
@@ -141,6 +156,11 @@ public class PMEnvironmentProviderImpl implements PMEnvironmentProvider, AppShar
     public void clear(Map<String, String> map) {
 	String tnt = AppContextUtil.getTenant();
 	connectors.remove(tnt);
+    }
+
+    @Override
+    public PMConfiguration shared() {
+	return sharedConfiguration;
     }
 
 }

@@ -3,7 +3,7 @@ package com.boot.jx.rbac.docs;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-@Document(collection = "rbac_privilege")
+@Document(collection = "RBAC_PRIVILEGE")
 public class RbacPrivilege {
     @Id
     private Integer id;

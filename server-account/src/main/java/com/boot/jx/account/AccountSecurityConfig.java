@@ -8,6 +8,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.annotation.web.configurers.ExpressionUrlAuthorizationConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -18,30 +19,40 @@ import org.springframework.security.web.authentication.SimpleUrlAuthenticationSu
 @EnableWebSecurity
 public class AccountSecurityConfig extends WebSecurityConfigurerAdapter {
 
+    public static final String[] CONTEXTS = new String[] { "account", "partner" };
+
     @Autowired
     private AccountLogoutHandler agentLogoutHandler;
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-	http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
-		// Publics Calls
-		.and().authorizeRequests().antMatchers("/account/pub/**").permitAll().and().authorizeRequests()
-		.antMatchers("/swagger-ui.html").permitAll()
-		// Login Calls
-		.and().authorizeRequests().antMatchers("/account/auth/**").permitAll()
-		// API Calls
-		.and().authorizeRequests().antMatchers("/account/api/**").authenticated()
-		// App Pages
-		.and().authorizeRequests().antMatchers("/account/app/**").authenticated().and().authorizeRequests()
-		.antMatchers("/account/**").authenticated().and().authorizeRequests().antMatchers("/account/.**")
-		.authenticated()
-		// Login Forms
-		.and().formLogin().loginPage("/account/auth/login").successHandler(successHandler()).permitAll()
-		.failureUrl("/account/auth/login?error").permitAll()
+	ExpressionUrlAuthorizationConfigurer<HttpSecurity>.ExpressionInterceptUrlRegistry sec = http.sessionManagement()
+		.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
+		// Swagger
+		.and().authorizeRequests().antMatchers("/swagger-ui.html").permitAll();
+
+	for (String context : CONTEXTS) {
+	    // Publics Calls
+	    sec = sec.and().authorizeRequests().antMatchers("/" + context + "/pub/**").permitAll()
+		    // Auth, login, register
+		    .and().authorizeRequests().antMatchers("/" + context + "/auth/**").permitAll()
+		    // API Calls
+		    .and().authorizeRequests().antMatchers("/" + context + "/api/**").authenticated()
+		    // App Pages
+		    .and().authorizeRequests().antMatchers("/" + context + "/app/**").authenticated()
+		    // Rest of the pages
+		    .and().authorizeRequests().antMatchers("/" + context + "/**").authenticated()
+		    // DOT extensions
+		    .and().authorizeRequests().antMatchers("/" + context + "/.**").authenticated();
+	}
+
+	// Login Forms
+	sec.and().formLogin().loginPage("/front/auth/login").successHandler(successHandler()).permitAll()
+		.failureUrl("/front/auth/login?error").permitAll()
 		// .loginProcessingUrl("/auth/login/submit").permitAll()
 		// Logout Pages
-		.and().logout().permitAll().addLogoutHandler(agentLogoutHandler).logoutUrl("/account/auth/logout")
-		.logoutSuccessUrl("/account/auth/login?logout")
+		.and().logout().permitAll().addLogoutHandler(agentLogoutHandler).logoutUrl("/front/auth/logout")
+		.logoutSuccessUrl("/front/auth/login?logout")
 		.deleteCookies("JSESSIONID", "JXSESSIONID", "ADMINSESSIONID").invalidateHttpSession(true).permitAll()
 		.and().exceptionHandling().accessDeniedPage("/403").and().csrf().disable().headers().disable();
     }

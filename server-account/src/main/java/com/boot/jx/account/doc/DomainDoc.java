@@ -1,49 +1,36 @@
-package com.boot.jx.account.api;
+package com.boot.jx.account.doc;
 
 import java.io.Serializable;
-import java.util.List;
-import java.util.Set;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.TypeAlias;
-import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import com.boot.jx.model.AuditableEntity;
-import com.boot.jx.mongo.CommonDocInterfaces.DocVersion;
 import com.boot.jx.mongo.CommonDocInterfaces.IDocument;
-import com.boot.jx.rbac.docs.RbacUser;
+import com.boot.jx.validation.AlphaNumValidator.ValidAlphaNum;
+import com.boot.utils.ArgUtil;
+import com.boot.utils.Constants;
 
-@Document(collection = "ACCOUNTS")
-@TypeAlias("AccountDoc")
-public class AccountDoc implements IDocument, DocVersion, AuditableEntity, Serializable {
+@Document(collection = "DOMAIN")
+@TypeAlias("DomainDoc")
+public class DomainDoc implements IDocument, AuditableEntity, Serializable, Comparable<DomainDoc> {
 
     private static final long serialVersionUID = -3354844112176554561L;
 
     @Id
     private String id;
 
-    private SignupContact contact;
-    private AccountMeta meta;
+    @ValidAlphaNum
+    private String domain;
+
+    private CompanyDoc company;
 
     private Long createdStamp;
     private String createdBy;
     private Long modifiedStamp;
     private String modifiedBy;
     private Boolean isActive;
-
-    @DBRef
-    private Set<RbacUser> users;
-
-    private List<DocVersion> oldVersions;
-
-    public List<DocVersion> getOldVersions() {
-	return oldVersions;
-    }
-
-    public void setOldVersions(List<DocVersion> oldVersions) {
-	this.oldVersions = oldVersions;
-    }
 
     public Long getCreatedStamp() {
 	return createdStamp;
@@ -67,14 +54,6 @@ public class AccountDoc implements IDocument, DocVersion, AuditableEntity, Seria
 
     public void setId(String id) {
 	this.id = id;
-    }
-
-    public SignupContact getContact() {
-	return contact;
-    }
-
-    public void setContact(SignupContact contact) {
-	this.contact = contact;
     }
 
     public Boolean getIsActive() {
@@ -101,12 +80,26 @@ public class AccountDoc implements IDocument, DocVersion, AuditableEntity, Seria
 	this.createdBy = createdBy;
     }
 
-    public AccountMeta getMeta() {
-	return meta;
+    public String getDomain() {
+	return domain;
     }
 
-    public void setMeta(AccountMeta accountKeys) {
-	this.meta = accountKeys;
+    public void setDomain(String domain) {
+	this.domain = domain;
+    }
+
+    public CompanyDoc getCompany() {
+	return company;
+    }
+
+    public void setCompany(CompanyDoc company) {
+	this.company = company;
+    }
+
+    @Override
+    public int compareTo(DomainDoc o) {
+	return ArgUtil.parseAsString(this.domain, Constants.BLANK)
+		.compareTo(ArgUtil.parseAsString(o.getDomain(), Constants.BLANK));
     }
 
 }

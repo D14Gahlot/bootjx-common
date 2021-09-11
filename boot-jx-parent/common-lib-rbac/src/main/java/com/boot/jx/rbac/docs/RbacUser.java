@@ -8,7 +8,7 @@ import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-@Document(collection = "rbac_user")
+@Document(collection = "RBAC_USER")
 public class RbacUser {
 
     @Id

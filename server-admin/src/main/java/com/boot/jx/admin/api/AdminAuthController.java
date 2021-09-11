@@ -31,7 +31,6 @@ import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.Constants;
 import com.boot.utils.CryptoUtil;
-import com.boot.utils.JsonUtil;
 import com.boot.utils.MapBuilder;
 
 @Controller
@@ -55,10 +54,20 @@ public class AdminAuthController {
     @Autowired
     private PMEnvironment pmEnvironment;
 
-    @RequestMapping(value = { "/pub/**", "/app/**", "/auth/**", "/" }, method = { RequestMethod.GET })
-    public String home(Model model, @RequestParam(required = false) String theme) {
-	model.addAllAttributes(appCommonConfig.appAttributes());
+    @RequestMapping(value = { "/pub/**", "/app/**", "/auth/**", "/" },
+	    method = { RequestMethod.GET, RequestMethod.POST })
+    public String home(Model model, HttpServletRequest request, @RequestParam(required = false) String domainName,
+	    @RequestParam(required = false) String domainId, @RequestParam(required = false) String domainToken,
+	    @RequestParam(required = false) String domainUser) throws NoSuchAlgorithmException {
 
+	if (ArgUtil.is(domainName) && ArgUtil.is(domainId) && ArgUtil.is(domainToken)) {
+	    AgentResponseAuthDto agent = agentLoginService.loginByDomainToken(domainName, domainId, domainUser,
+		    domainToken, true);
+	    sessionService.login(request, agent, domainToken);
+	    return "redirect:/app/home";
+	}
+
+	model.addAllAttributes(appCommonConfig.appAttributes());
 	Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 	if (ArgUtil.is(auth)) {
 	    model.addAttribute("APP_USER", auth.getName());
@@ -175,12 +184,8 @@ public class AdminAuthController {
 	ApiResponse<Map<String, Object>, AgentResponseAuthDto> x = agentLogin(username, password, true);
 	if (ArgUtil.parseAsBoolean(x.getData().get("success"), false)) {
 	    x.redirectUrl(appConfig.getAppPrefix() + "/app/home");
-	    UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(
-		    x.getMeta().getAgent_code(), password);
-	    token.setDetails(new WebAuthenticationDetails(request));
-	    Authentication authentication = adminAuthProvider.authenticate(token);
-	    SecurityContextHolder.getContext().setAuthentication(authentication);
-	    sessionService.updateLogin(x.getMeta());
+
+	    sessionService.login(request, x.getMeta(), password);
 	    x.setStatusKey("SUCCESS");
 
 	    boolean rememberme = ArgUtil.parseAsBoolean(commonHttpRequest.get("rememberme"), false);

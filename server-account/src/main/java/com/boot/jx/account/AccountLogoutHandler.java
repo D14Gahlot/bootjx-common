@@ -15,7 +15,7 @@ import com.boot.utils.ArgUtil;
 public class AccountLogoutHandler implements LogoutHandler {
 
 	@Autowired
-	AccoountAuthService agentSessionService;
+	AccountAdminService agentSessionService;
 
 	@Autowired
 	private CommonHttpRequest commonHttpRequest;

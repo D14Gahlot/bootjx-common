@@ -2,11 +2,17 @@ package com.boot.jx.common.config;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentHashMap;
+
+import javax.annotation.PostConstruct;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.core.env.ConfigurableEnvironment;
+import org.springframework.core.env.EnumerablePropertySource;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
 import com.boot.jx.AppConfig;
@@ -24,23 +30,10 @@ import com.boot.utils.TimeUtils;
 public class AppCommonConfigImpl implements AppCommonConfig {
 
     public static final String[] PROPS = new String[] {
-	    // LOGO Transparent
-	    "logo.bg-x-logo-w", "logo.bg-x-logo-b",
-	    // LOGO - WHITE
-	    "logo.bg-w-logo", "logo.bg-w-logo-b",
-	    // LOGO - black
-	    "logo.bg-b-logo-w",
-	    // ICONS
-	    "logo.bg-x-icon-w", "logo.bg-x-icon",
+	    // PRefixe
+	    "mry.prop.logo.", "mry.prop.service.", "mry.prop.social.", };
 
-	    // WEBSITES
-	    "service.name", "service.website", "service.website.link",
-	    "service.aboutus.link", "service.privac.link", "service.tos.link"
-
-    };
-
-    @Autowired
-    private PMEnvironment pmEnvironment;
+    private Map<String, String> PUBLIC_CONFIG = new ConcurrentHashMap<String, String>();
 
     @Autowired
     private PMClientConfig chatClientConfig;
@@ -54,11 +47,20 @@ public class AppCommonConfigImpl implements AppCommonConfig {
     @Value("${mry.cdn.url}")
     private String cdnUrl;
 
+    @Value("${mry.app.login.secret}")
+    private String appLoginSecret;
+
     @Value("${common.const.app}")
     private String app;
 
+    @Autowired
+    CDNBuilder cdnBuilder;
+
+    @Autowired
+    private Environment environment;
+
     public String getCdnServer() {
-	return pmEnvironment.get("mry.cdn.url").asString(cdnUrl);
+	return cdnBuilder.latest(pmEnvironment.get("mry.cdn.url").asString(cdnUrl));
     }
 
     private long getVersion() {
@@ -81,9 +83,9 @@ public class AppCommonConfigImpl implements AppCommonConfig {
 	map.put("SETUP", setup);
 	map.put("timestamp", System.currentTimeMillis());
 
-	for (String key : PROPS) {
-	    String newKey = key.replaceAll("[\\.@\\-$]", "_").toUpperCase();
-	    map.put("PROP_" + newKey, pmEnvironment.get("mry.prop." + key).asString());
+	for (Entry<String, String> entry : PUBLIC_CONFIG.entrySet()) {
+	    // String newKey = entry.getValue().replaceAll("[\\.@\\-$]", "_").toUpperCase();
+	    map.put(entry.getValue(), pmEnvironment.get(entry.getKey()).asString());
 	}
 
 	return map;
@@ -110,6 +112,34 @@ public class AppCommonConfigImpl implements AppCommonConfig {
 	map.put("APP_TITLE", appConfig.getAppTitle());
 
 	return map;
+    }
+
+    @Autowired
+    private PMEnvironment pmEnvironment;
+
+    @SuppressWarnings("rawtypes")
+    @PostConstruct
+    public void init() {
+
+	for (org.springframework.core.env.PropertySource<?> propertySource : ((ConfigurableEnvironment) environment)
+		.getPropertySources()) {
+	    if (propertySource instanceof EnumerablePropertySource) {
+		for (String key : ((EnumerablePropertySource) propertySource).getPropertyNames()) {
+		    for (String prefix : PROPS) {
+			if (key.startsWith(prefix)) {
+			    String shortKey = key.replace("mry.prop.", "");
+			    String newKey = shortKey.replaceAll("[\\.@\\-$]", "_").toUpperCase();
+			    PUBLIC_CONFIG.put(key, "PROP_" + newKey);
+			}
+		    }
+		}
+	    }
+	}
+
+    }
+
+    public String getAppLoginSecret() {
+        return appLoginSecret;
     }
 
 }

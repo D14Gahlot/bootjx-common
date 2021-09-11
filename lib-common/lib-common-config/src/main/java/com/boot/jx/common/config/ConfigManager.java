@@ -1,15 +1,15 @@
-package com.boot.jx.admin.service;
+package com.boot.jx.common.config;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Service;
 
 import com.boot.jx.AppContextUtil;
-import com.boot.jx.common.config.ConfigBuilder;
 import com.boot.jx.postman.ChannelConfig;
 import com.boot.jx.postman.ClientApiKey;
 import com.boot.jx.postman.PMConfiguration;
@@ -22,7 +22,8 @@ import com.boot.utils.ArgUtil;
 import com.boot.utils.MapBuilder;
 
 @Service
-public class AdminConfigService {
+@PropertySource("classpath:application.app.properties")
+public class ConfigManager {
 
     @Autowired
     private MongoTemplate mongoTemplate;
