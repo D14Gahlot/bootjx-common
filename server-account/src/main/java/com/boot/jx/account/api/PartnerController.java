@@ -68,7 +68,8 @@ public class PartnerController {
     public String home(Model model, @RequestParam(required = false) String theme) {
 	String tnt = AppContextUtil.getTenant();
 	if (!tnt.equals("app")) {
-	    return "redirect:" + appConfig.prop("mry.app.url") + commonHttpRequest.getRequestURI();
+	    return "redirect:" + String.format("https://app.%s/%s/auth/direct",
+		    env.get("mry.prop.service.domain").asString(), commonHttpRequest.getRequestURI());
 	}
 
 	model.addAllAttributes(appCommonConfig.appAttributes());
@@ -92,12 +93,13 @@ public class PartnerController {
     public String gotopanel(Model model, @PathVariable String domain, @PathVariable String panel) {
 	String tnt = AppContextUtil.getTenant();
 	if (!tnt.equals("app")) {
-	    return "redirect:" + appConfig.prop("mry.app.url") + commonHttpRequest.getRequestURI();
+	    return "redirect:" + String.format("https://app.%s/%s/auth/direct",
+		    env.get("mry.prop.service.domain").asString(), commonHttpRequest.getRequestURI());
 	}
 
 	model.addAllAttributes(appCommonConfig.appAttributes());
 	model.addAttribute("FORM_URL", String.format("https://%s.%s/%s/auth/direct", domain,
-		appConfig.prop("mry.prop.service.domain"), panel));
+		env.get("mry.prop.service.domain").asString(), panel));
 
 	String secret = appConfig.prop("mry.app.login.secret");
 	if (ArgUtil.is(adminSessionBean.domainUser())) {

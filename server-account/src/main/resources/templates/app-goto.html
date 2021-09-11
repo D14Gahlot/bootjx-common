@@ -30,14 +30,20 @@
 			without JavaScript enabled. Please enable it to continue.</strong>
 	</noscript>
 	<div id=app>
-		<form th:action="${FORM_URL}" method="POST">
+		<form th:action="${FORM_URL}" method="POST" name="login">
 			<input type="hidden" name="domainName" th:value="${DOMAIN_NAME}" />
-			<input type="hidden"  name="domainUser" th:value="${DOMAIN_USER}" />
-			<input type="hidden"  name="domainId" th:value="${DOMAIN_ID}" />
-			<input type="hidden"  name="domainToken" th:value="${DOMAIN_TOKEN}" />
-			<button type="submit">Please Wait..</button>
+			<input type="hidden" name="domainUser" th:value="${DOMAIN_USER}" />
+			<input type="hidden" name="domainId" th:value="${DOMAIN_ID}" />
+			<input type="hidden" name="domainToken" th:value="${DOMAIN_TOKEN}" />
+			<button type="submit">Redirecting...</button>
 		</form>
 	</div>
+
+	<script type="text/javascript">
+		window.onload = function(){
+	  		document.forms['login'].submit();
+		}
+	</script>
 </body>
 
 
