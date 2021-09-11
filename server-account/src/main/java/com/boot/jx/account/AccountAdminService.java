@@ -101,11 +101,12 @@ public class AccountAdminService {
 
     public void sendResetMail(DomainUserDoc accountDoc, String emailTemplate) {
 	postManClient.send(new MessageBox().push(new Email().to(accountDoc.getContact().getEmail())
-		.template(emailTemplate).put("logo", pmEnvironment.get("mry.prop.logo.192").asString())
-		.put("website", pmEnvironment.get("mry.prop.website").asString())
-		.put("service", pmEnvironment.get("mry.prop.service").asString())
+		.template(emailTemplate).put("logo", pmEnvironment.get("mry.prop.logo.bg-x-icon").asString())
+		.put("website", pmEnvironment.get("mry.prop.service.website").asString())
+		.put("service", pmEnvironment.get("mry.prop.service.name").asString())
 		.put("link",
-			String.format(pmEnvironment.get("mry.prop.reset.link").asString(),
+			String.format("https://app.%s/partner/auth/verify-link?code=%s&account=%s",
+				pmEnvironment.get("mry.prop.service.domain"),
 				accountDoc.getMeta().getEmailVerificationCode(), accountDoc.getId()))
 		.put("name", accountDoc.getContact().getName())));
     }
