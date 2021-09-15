@@ -1,4 +1,4 @@
-package com.boot.jx.postman.doc;
+package com.boot.jx.postman.doc.config;
 
 import java.io.Serializable;
 import java.util.List;
@@ -15,8 +15,8 @@ import com.boot.jx.mongo.CommonDocInterfaces.OldDocVersion;
 import com.boot.jx.postman.ClientApiKey;
 
 @Document(collection = "CONFIG_CLIENT_KEY")
-@TypeAlias("ClientApiKeyDoc")
-public class ClientApiKeyDoc implements OldDocVersion<ClientApiKeyDoc>, IDocument, AuditableEntity, ClientApiKey {
+@TypeAlias("ClientKeyConfig")
+public class ClientKeyConfigDoc implements OldDocVersion<ClientKeyConfigDoc>, IDocument, AuditableEntity, ClientApiKey {
 
     private static final long serialVersionUID = -6368905475787041196L;
 
@@ -32,7 +32,7 @@ public class ClientApiKeyDoc implements OldDocVersion<ClientApiKeyDoc>, IDocumen
     private String keyVersion;
 
     @Field("oldVersions")
-    private List<ClientApiKeyDoc> oldVersions;
+    private List<ClientKeyConfigDoc> oldVersions;
 
     public String getId() {
 	return id;
@@ -58,11 +58,11 @@ public class ClientApiKeyDoc implements OldDocVersion<ClientApiKeyDoc>, IDocumen
 	this.createdStamp = createdStamp;
     }
 
-    public List<ClientApiKeyDoc> getOldVersions() {
+    public List<ClientKeyConfigDoc> getOldVersions() {
 	return oldVersions;
     }
 
-    public void setOldVersions(List<ClientApiKeyDoc> oldVersions) {
+    public void setOldVersions(List<ClientKeyConfigDoc> oldVersions) {
 	this.oldVersions = oldVersions;
     }
 

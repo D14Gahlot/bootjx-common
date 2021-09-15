@@ -8,10 +8,12 @@ import org.springframework.stereotype.Component;
 import com.boot.jx.AppConfig;
 import com.boot.jx.AppContextUtil;
 import com.boot.jx.dict.ContactType;
+import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.scope.tnt.Tenants;
-import com.boot.jx.scope.tnt.Tenants.Tenant;
+import com.boot.jx.utils.PostManUtil;
 import com.boot.model.MapModel.MapEntry;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.Random;
 import com.fasterxml.jackson.annotation.JsonView;
 
 @Component
@@ -27,10 +29,13 @@ public class PMEnvironment {
     }
 
     public static interface PMEnvironmentProvider {
+
+	@Deprecated
 	public PMConfiguration config();
 
 	public PMConfiguration shared();
 
+	@Deprecated
 	public void config(PMConfiguration configuration);
 
 	public void config(ChannelConfig config);
@@ -71,6 +76,7 @@ public class PMEnvironment {
 	protected String channelType;
 
 	protected String channel;
+	protected String channelKey;
 
 	public AChannelDetails(String channelType) {
 	    this.channelType = channelType;
@@ -99,6 +105,18 @@ public class PMEnvironment {
 	public void setChannelType(String channelType) {
 	    this.channelType = channelType;
 	}
+
+	public String getChannelKey() {
+	    if (!ArgUtil.is(this.channelKey)) {
+		this.channelKey = PostManUtil.UNIQUE_API_KEY();
+	    }
+	    return channelKey;
+	}
+
+	public void setChannelKey(String channelKey) {
+	    this.channelKey = channelKey;
+	}
+
     }
 
     public static abstract class AChannelConfig extends AChannelDetails {
@@ -182,6 +200,7 @@ public class PMEnvironment {
 	return config;
     }
 
+    @Deprecated
     public void config(PMConfiguration config) {
 	if (ArgUtil.is(provider)) {
 	    provider.config(config);

@@ -203,7 +203,7 @@ public class JsonPath {
 	 */
 	public JsonPath(String reference) {
 
-		this.reference = reference;
+		this.reference = StringUtils.trim(reference,'/');
 		this.paths = new ArrayList<PathElement>();
 		StringTokenizer tokenizer = new StringTokenizer(reference, "/");
 		while (tokenizer.hasMoreTokens()) {

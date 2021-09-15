@@ -16,17 +16,17 @@ import org.springframework.web.bind.annotation.RestController;
 import com.boot.jx.AppContextUtil;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.common.config.ConfigManager;
-import com.boot.jx.postman.ChannelConfig;
 import com.boot.jx.postman.PMConfiguration;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PMEnvironment.AChannelDetails;
 import com.boot.jx.postman.PMEnvironment.PMConfigurationObject;
-import com.boot.jx.postman.doc.ClientApiKeyDoc;
 import com.boot.jx.postman.doc.PMConfigurationDoc;
-import com.boot.jx.postman.fb.FacebookConfig;
-import com.boot.jx.postman.gupshup.GupShupConfig;
-import com.boot.jx.postman.tg.TelegramConfig;
-import com.boot.jx.postman.tw.TwitterConfig;
+import com.boot.jx.postman.doc.config.ClientKeyConfigDoc;
+import com.boot.jx.postman.fb.FacebookConfigDetails;
+import com.boot.jx.postman.gupshup.GupShupConfigDetails;
+import com.boot.jx.postman.plugin.ChannelConfig;
+import com.boot.jx.postman.tg.TelegramConfigDetails;
+import com.boot.jx.postman.tw.TwitterConfigDetails;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.StringUtils;
 import com.fasterxml.jackson.annotation.JsonView;
@@ -54,6 +54,7 @@ public class ConfigController {
 	return ApiResponse.buildResults(adminConfigService.getAdminConfigs());
     }
 
+    @Deprecated
     @RequestMapping(value = "/api/config/refresh", method = { RequestMethod.GET })
     public ApiResponse<PMConfiguration, Object> getConnnectors() {
 	PMConfigurationDoc config = mongoTemplate.findById(AppContextUtil.getTenant(), PMConfigurationDoc.class);
@@ -66,7 +67,7 @@ public class ConfigController {
 	    @RequestParam String type, @RequestParam String verifyToken, @RequestParam String appSecret,
 	    @RequestParam String accessToken,
 	    @RequestParam(defaultValue = "false", required = false) boolean disabled) {
-	FacebookConfig fbconfig = new FacebookConfig();
+	FacebookConfigDetails fbconfig = new FacebookConfigDetails();
 	fbconfig.setPageId(pageId);
 	fbconfig.setType(type);
 	fbconfig.setVerifyToken(verifyToken);
@@ -82,7 +83,7 @@ public class ConfigController {
 	    @RequestParam String accessTokenSecret, @RequestParam String accessToken,
 	    @RequestParam(required = false) String envName, @RequestParam String webhookUrl,
 	    @RequestParam(defaultValue = "false", required = false) boolean disabled) {
-	TwitterConfig fbconfig = new TwitterConfig();
+	TwitterConfigDetails fbconfig = new TwitterConfigDetails();
 	fbconfig.setHandler(handler);
 	fbconfig.setType(type);
 	fbconfig.setEnvName(envName);
@@ -99,7 +100,7 @@ public class ConfigController {
     public ApiResponse<PMConfigurationDoc, Object> addTelegramConfig(@RequestParam String handler,
 	    @RequestParam String type, @RequestParam String accessToken, @RequestParam(required = false) String envName,
 	    @RequestParam String webhookUrl, @RequestParam(defaultValue = "false", required = false) boolean disabled) {
-	TelegramConfig fbconfig = new TelegramConfig();
+	TelegramConfigDetails fbconfig = new TelegramConfigDetails();
 	fbconfig.setHandler(handler);
 	fbconfig.setType(type);
 	fbconfig.setAccessToken(accessToken);
@@ -113,7 +114,7 @@ public class ConfigController {
 	    @RequestParam(required = false) String notifyId, @RequestParam String chatId, @RequestParam String chatPass,
 	    @RequestParam(required = false) String notifyPass,
 	    @RequestParam(defaultValue = "false", required = false) boolean disabled) {
-	GupShupConfig fbconfig = new GupShupConfig();
+	GupShupConfigDetails fbconfig = new GupShupConfigDetails();
 	fbconfig.setNumber(number);
 	fbconfig.setChatId(chatId);
 	fbconfig.setChatPass(chatPass);
@@ -162,14 +163,14 @@ public class ConfigController {
     @JsonView(PMEnvironment.PublicProperty.class)
     @ResponseBody
     @RequestMapping(value = { "/api/config/clientapikey" }, method = { RequestMethod.GET })
-    public ApiResponse<ClientApiKeyDoc, Object> createClientApiKey() {
-	return ApiResponse.buildResults(mongoTemplate.findAll(ClientApiKeyDoc.class));
+    public ApiResponse<ClientKeyConfigDoc, Object> createClientApiKey() {
+	return ApiResponse.buildResults(mongoTemplate.findAll(ClientKeyConfigDoc.class));
     }
 
     @JsonView(PMEnvironment.OneTimeVisibleProperty.class)
     @ResponseBody
     @RequestMapping(value = { "/api/config/clientapikey" }, method = { RequestMethod.POST })
-    public ApiResponse<ClientApiKeyDoc, Object> createClientApiKey(@RequestBody ClientApiKeyDoc clientApiKey) {
+    public ApiResponse<ClientKeyConfigDoc, Object> createClientApiKey(@RequestBody ClientKeyConfigDoc clientApiKey) {
 	return ApiResponse.buildData(adminConfigService.save(clientApiKey));
     }
 

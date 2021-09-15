@@ -46,7 +46,7 @@ public abstract class GupShupClientAbstract {
 			throw new PostManException("No lane " + req.getWaNumber());
 		}
 
-		GupShupConfig config = environment.config().gupshup(req.getWaNumber());
+		GupShupConfigDetails config = environment.config().gupshup(req.getWaNumber());
 
 		if (ArgUtil.isEmpty(config)) {
 			throw new PostManException("No Config for lane " + req.getWaNumber());

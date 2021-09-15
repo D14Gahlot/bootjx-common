@@ -1,36 +1,32 @@
-package com.boot.jx.postman.fb;
+package com.boot.jx.postman.tg;
 
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.postman.PMConstants.CHANNEL_TYPE;
 import com.boot.jx.postman.PMEnvironment;
-import com.boot.jx.postman.PMEnvironment.AChannelConfig;
 import com.boot.jx.postman.PMEnvironment.AChannelDetails;
-import com.boot.jx.postman.PMEnvironment.ProtectedProperty;
 import com.fasterxml.jackson.annotation.JsonView;
 
-public class FacebookConfig extends AChannelDetails {
+public class TelegramConfigDetails extends AChannelDetails {
 
-    public FacebookConfig() {
-	super(CHANNEL_TYPE.FACEBOOK);
+    public TelegramConfigDetails() {
+	super(CHANNEL_TYPE.TELEGRAM);
     }
 
     private static final long serialVersionUID = -2397678752642150000L;
-    private String pageId;
+    private String handler;
     private String type;
 
     @JsonView(PMEnvironment.ProtectedProperty.class)
     private String accessToken;
     @JsonView(PMEnvironment.ProtectedProperty.class)
-    private String verifyToken;
-    @JsonView(PMEnvironment.ProtectedProperty.class)
-    private String appSecret;
+    private String webhookUrl;
 
-    public String getPageId() {
-	return pageId;
+    public String getHandler() {
+	return handler;
     }
 
-    public void setPageId(String pageId) {
-	this.pageId = pageId;
+    public void setHandler(String handler) {
+	this.handler = handler;
     }
 
     public String getType() {
@@ -49,40 +45,32 @@ public class FacebookConfig extends AChannelDetails {
 	this.accessToken = accessToken;
     }
 
-    public String getVerifyToken() {
-	return verifyToken;
+    public String getWebhookUrl() {
+	return webhookUrl;
     }
 
-    public void setVerifyToken(String verifyToken) {
-	this.verifyToken = verifyToken;
-    }
-
-    public String getAppSecret() {
-	return appSecret;
-    }
-
-    public void setAppSecret(String appSecret) {
-	this.appSecret = appSecret;
+    public void setWebhookUrl(String webhookUrl) {
+	this.webhookUrl = webhookUrl;
     }
 
     @Override
     public String getLane() {
-	return this.pageId;
+	return this.handler;
     }
 
     @Override
     public boolean isPushAllowed() {
-	return false;
-    }
-
-    @Override
-    public boolean isPushOnlyApproved() {
 	return true;
     }
 
     @Override
-    public boolean isPushFreeTextAllowed() {
+    public boolean isPushOnlyApproved() {
 	return false;
+    }
+
+    @Override
+    public boolean isPushFreeTextAllowed() {
+	return true;
     }
 
     @Override
@@ -92,12 +80,6 @@ public class FacebookConfig extends AChannelDetails {
 
     @Override
     public ContactType getContactType() {
-	return ContactType.FACEBOOK;
+	return ContactType.TELEGRAM;
     }
-
-    @Override
-    public String getChannel() {
-	return null;
-    }
-
 }

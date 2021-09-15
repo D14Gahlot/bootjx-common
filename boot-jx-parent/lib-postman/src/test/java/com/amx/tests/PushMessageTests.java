@@ -8,7 +8,7 @@ import com.boot.jx.postman.PMConfiguration;
 import com.boot.jx.postman.model.ContactMeta;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.model.PushMessage;
-import com.boot.jx.postman.tw.TwitterConfig;
+import com.boot.jx.postman.tw.TwitterConfigDetails;
 import com.boot.jx.scope.tnt.Tenants;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.JsonUtil;
@@ -25,7 +25,7 @@ public class PushMessageTests { // Noncompliant
 
 	String key = "@$test.s";
 
-	TwitterConfig tw = new TwitterConfig();
+	TwitterConfigDetails tw = new TwitterConfigDetails();
 	tw.setHandler(key);
 	config.twitter(tw, false);
 	String json = JsonUtil.toJson(config);

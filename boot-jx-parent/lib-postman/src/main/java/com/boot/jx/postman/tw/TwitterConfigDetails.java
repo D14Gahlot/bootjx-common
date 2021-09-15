@@ -6,9 +6,9 @@ import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PMEnvironment.AChannelDetails;
 import com.fasterxml.jackson.annotation.JsonView;
 
-public class TwitterConfig extends AChannelDetails {
+public class TwitterConfigDetails extends AChannelDetails {
 
-    public TwitterConfig() {
+    public TwitterConfigDetails() {
 	super(CHANNEL_TYPE.TWITTER);
     }
 

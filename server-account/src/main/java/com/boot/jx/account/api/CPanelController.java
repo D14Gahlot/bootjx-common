@@ -1,8 +1,6 @@
 package com.boot.jx.account.api;
 
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -20,21 +18,22 @@ import com.boot.jx.AppContextUtil;
 import com.boot.jx.account.AccountAdminService;
 import com.boot.jx.account.AccountSessionBean;
 import com.boot.jx.api.ApiResponse;
+import com.boot.jx.chat.ConnectorHandlerFactory;
 import com.boot.jx.common.config.CDNBuilder;
 import com.boot.jx.common.config.ConfigManager;
-import com.boot.jx.postman.ChannelConfig;
 import com.boot.jx.postman.PMConfiguration;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PMEnvironment.AChannelDetails;
 import com.boot.jx.postman.PMEnvironment.PMConfigurationObject;
-import com.boot.jx.postman.doc.ClientApiKeyDoc;
 import com.boot.jx.postman.doc.PMConfigurationDoc;
-import com.boot.jx.postman.fb.FacebookConfig;
-import com.boot.jx.postman.gupshup.GupShupConfig;
-import com.boot.jx.postman.tg.TelegramConfig;
-import com.boot.jx.postman.tw.TwitterConfig;
+import com.boot.jx.postman.doc.config.ClientKeyConfigDoc;
+import com.boot.jx.postman.fb.FacebookConfigDetails;
+import com.boot.jx.postman.gupshup.GupShupConfigDetails;
+import com.boot.jx.postman.plugin.ChannelConfig;
+import com.boot.jx.postman.tg.TelegramConfigDetails;
+import com.boot.jx.postman.tw.TwitterConfigDetails;
+import com.boot.jx.postman.wa360.WA360ConfigDetails;
 import com.boot.utils.ArgUtil;
-import com.boot.utils.StringUtils;
 import com.fasterxml.jackson.annotation.JsonView;
 
 @Controller
@@ -45,7 +44,7 @@ public class CPanelController {
     private MongoTemplate mongoTemplate;
 
     @Autowired
-    private ConfigManager adminConfigService;
+    private ConfigManager configManager;
 
     @Autowired
     private PMEnvironment pmEnvironment;
@@ -60,7 +59,7 @@ public class CPanelController {
     private AccountSessionBean sessionBean;
 
     @Autowired
-    CDNBuilder cdnBuilder;
+    private CDNBuilder cdnBuilder;
 
     @RequestMapping(value = { "/app", "/app/**", "/app/*" }, method = { RequestMethod.POST, RequestMethod.GET })
     public String cpanel(Model model, @RequestParam(required = false) String authToken) {
@@ -85,21 +84,22 @@ public class CPanelController {
     @ResponseBody
     @RequestMapping(value = "/api/config", method = { RequestMethod.POST })
     public ApiResponse<Map<String, Object>, Object> setConfig(@RequestBody PMConfigurationObject map) {
-	adminConfigService.save(map);
-	return ApiResponse.buildResults(adminConfigService.getAdminConfigs());
+	configManager.save(map);
+	return ApiResponse.buildResults(configManager.getAdminConfigs());
     }
 
     @ResponseBody
     @RequestMapping(value = "/api/config", method = { RequestMethod.GET })
     public ApiResponse<Map<String, Object>, Object> getConfig() {
-	return ApiResponse.buildResults(adminConfigService.getAdminConfigs());
+	return ApiResponse.buildResults(configManager.getAdminConfigs());
     }
 
+    @Deprecated
     @ResponseBody
     @RequestMapping(value = "/api/config/refresh", method = { RequestMethod.GET })
     public ApiResponse<PMConfiguration, Object> getConnnectors() {
 	PMConfigurationDoc config = mongoTemplate.findById(AppContextUtil.getTenant(), PMConfigurationDoc.class);
-	adminConfigService.saveConfigs(config);
+	configManager.saveConfigs(config);
 	return ApiResponse.buildResults(pmEnvironment.config());
     }
 
@@ -109,13 +109,13 @@ public class CPanelController {
 	    @RequestParam String type, @RequestParam String verifyToken, @RequestParam String appSecret,
 	    @RequestParam String accessToken,
 	    @RequestParam(defaultValue = "false", required = false) boolean disabled) {
-	FacebookConfig fbconfig = new FacebookConfig();
+	FacebookConfigDetails fbconfig = new FacebookConfigDetails();
 	fbconfig.setPageId(pageId);
 	fbconfig.setType(type);
 	fbconfig.setVerifyToken(verifyToken);
 	fbconfig.setAccessToken(accessToken);
 	fbconfig.setAppSecret(appSecret);
-	adminConfigService.save(new ChannelConfig().from(fbconfig).disabled(disabled));
+	configManager.save(new ChannelConfig().from(fbconfig).disabled(disabled));
 	return ApiResponse.buildResults(mongoTemplate.findById(AppContextUtil.getTenant(), PMConfigurationDoc.class));
     }
 
@@ -126,7 +126,7 @@ public class CPanelController {
 	    @RequestParam String accessTokenSecret, @RequestParam String accessToken,
 	    @RequestParam(required = false) String envName, @RequestParam String webhookUrl,
 	    @RequestParam(defaultValue = "false", required = false) boolean disabled) {
-	TwitterConfig fbconfig = new TwitterConfig();
+	TwitterConfigDetails fbconfig = new TwitterConfigDetails();
 	fbconfig.setHandler(handler);
 	fbconfig.setType(type);
 	fbconfig.setEnvName(envName);
@@ -135,7 +135,7 @@ public class CPanelController {
 	fbconfig.setConsumerKey(consumerKey);
 	fbconfig.setConsumerSecret(consumerSecret);
 	fbconfig.setWebhookUrl(webhookUrl);
-	adminConfigService.save(new ChannelConfig().from(fbconfig).disabled(disabled));
+	configManager.save(new ChannelConfig().from(fbconfig).disabled(disabled));
 	return ApiResponse.buildResults(mongoTemplate.findById(AppContextUtil.getTenant(), PMConfigurationDoc.class));
     }
 
@@ -144,12 +144,12 @@ public class CPanelController {
     public ApiResponse<PMConfigurationDoc, Object> addTelegramConfig(@RequestParam String handler,
 	    @RequestParam String type, @RequestParam String accessToken, @RequestParam(required = false) String envName,
 	    @RequestParam String webhookUrl, @RequestParam(defaultValue = "false", required = false) boolean disabled) {
-	TelegramConfig fbconfig = new TelegramConfig();
+	TelegramConfigDetails fbconfig = new TelegramConfigDetails();
 	fbconfig.setHandler(handler);
 	fbconfig.setType(type);
 	fbconfig.setAccessToken(accessToken);
 	fbconfig.setWebhookUrl(webhookUrl);
-	adminConfigService.save(new ChannelConfig().from(fbconfig).disabled(disabled));
+	configManager.save(new ChannelConfig().from(fbconfig).disabled(disabled));
 	return ApiResponse.buildResults(mongoTemplate.findById(AppContextUtil.getTenant(), PMConfigurationDoc.class));
     }
 
@@ -159,13 +159,26 @@ public class CPanelController {
 	    @RequestParam(required = false) String notifyId, @RequestParam String chatId, @RequestParam String chatPass,
 	    @RequestParam(required = false) String notifyPass,
 	    @RequestParam(defaultValue = "false", required = false) boolean disabled) {
-	GupShupConfig fbconfig = new GupShupConfig();
+	GupShupConfigDetails fbconfig = new GupShupConfigDetails();
 	fbconfig.setNumber(number);
 	fbconfig.setChatId(chatId);
 	fbconfig.setChatPass(chatPass);
 	fbconfig.setNotifyId(notifyId);
 	fbconfig.setNotifyPass(notifyPass);
-	adminConfigService.save(new ChannelConfig().from(fbconfig).disabled(disabled));
+	configManager.save(new ChannelConfig().from(fbconfig).disabled(disabled));
+	return ApiResponse.buildResults(mongoTemplate.findById(AppContextUtil.getTenant(), PMConfigurationDoc.class));
+    }
+
+    @ResponseBody
+    @RequestMapping(value = "/api/config/wa360", method = { RequestMethod.POST })
+    public ApiResponse<PMConfigurationDoc, Object> addWA360Config(@RequestParam String number,
+	    @RequestParam String apiKey, @RequestParam(defaultValue = "false", required = false) boolean disabled,
+	    @RequestParam String webhookUrl) {
+	WA360ConfigDetails config = new WA360ConfigDetails();
+	config.setNumber(number);
+	config.setApiKey(apiKey);
+	config.setWebhookUrl(webhookUrl);
+	configManager.save(config, disabled);
 	return ApiResponse.buildResults(mongoTemplate.findById(AppContextUtil.getTenant(), PMConfigurationDoc.class));
     }
 
@@ -182,7 +195,7 @@ public class CPanelController {
 
 	if (ArgUtil.is(url)) {
 	    config.setValue(url);
-	    adminConfigService.save(config);
+	    configManager.save(config);
 	}
 
 	cdnBuilder.update();
@@ -200,15 +213,15 @@ public class CPanelController {
     @JsonView(PMEnvironment.PublicProperty.class)
     @ResponseBody
     @RequestMapping(value = { "/api/config/clientapikey" }, method = { RequestMethod.GET })
-    public ApiResponse<ClientApiKeyDoc, Object> createClientApiKey() {
-	return ApiResponse.buildResults(mongoTemplate.findAll(ClientApiKeyDoc.class));
+    public ApiResponse<ClientKeyConfigDoc, Object> createClientApiKey() {
+	return ApiResponse.buildResults(mongoTemplate.findAll(ClientKeyConfigDoc.class));
     }
 
     @JsonView(PMEnvironment.OneTimeVisibleProperty.class)
     @ResponseBody
     @RequestMapping(value = { "/api/config/clientapikey" }, method = { RequestMethod.POST })
-    public ApiResponse<ClientApiKeyDoc, Object> createClientApiKey(@RequestBody ClientApiKeyDoc clientApiKey) {
-	return ApiResponse.buildData(adminConfigService.save(clientApiKey));
+    public ApiResponse<ClientKeyConfigDoc, Object> createClientApiKey(@RequestBody ClientKeyConfigDoc clientApiKey) {
+	return ApiResponse.buildData(configManager.save(clientApiKey));
     }
 
 }

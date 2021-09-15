@@ -40,11 +40,11 @@ public class FacebooClient implements MessageClient {
 	@Autowired
 	private ExtUtilService extUtilService;
 
-	private FacebookConfig getConfig(String lane) {
+	private FacebookConfigDetails getConfig(String lane) {
 		if (ArgUtil.isEmpty(lane)) {
 			throw new PostManException("No lane " + lane);
 		}
-		FacebookConfig config = environment.config().facebook(lane);
+		FacebookConfigDetails config = environment.config().facebook(lane);
 
 		if (!ArgUtil.is(config)) {
 			throw new PostManException("No Config for lane " + lane);
@@ -53,7 +53,7 @@ public class FacebooClient implements MessageClient {
 	}
 
 	public String registerWebhook(String token, String challenge, String lane) {
-		FacebookConfig config = getConfig(lane);
+		FacebookConfigDetails config = getConfig(lane);
 		String verifyToken = config.getVerifyToken();
 		if (token != null && !token.isEmpty() && token.equals(verifyToken)) {
 			return challenge;
@@ -63,7 +63,7 @@ public class FacebooClient implements MessageClient {
 	}
 
 	public FacebookMessageResp sendReply(String lane, FacebookMessageRequest resp) {
-		FacebookConfig config = getConfig(lane);
+		FacebookConfigDetails config = getConfig(lane);
 		return restService.ajax("https://graph.facebook.com/v2.6/me/messages?access_token=" + config.getAccessToken())
 				.post(resp).as(new ParameterizedTypeReference<FacebookMessageResp>() {
 				});
@@ -78,7 +78,7 @@ public class FacebooClient implements MessageClient {
 	}
 
 	public FacebookUserProfile getUserProfile(String psid, String lane) {
-		FacebookConfig config = getConfig(lane);
+		FacebookConfigDetails config = getConfig(lane);
 		return restService.ajax("https://graph.facebook.com").path("/{psid}").pathParam("psid", psid)
 				.queryParam("fields", "first_name,last_name,profile_pic,email,id")
 				.queryParam("access_token", config.getAccessToken()).get().as(FacebookUserProfile.class);

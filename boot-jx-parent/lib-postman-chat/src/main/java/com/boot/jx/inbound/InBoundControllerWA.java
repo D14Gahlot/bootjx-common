@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -18,16 +19,20 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.chat.ChatService;
+import com.boot.jx.chat.ConnectorHandlerFactory;
+import com.boot.jx.connectors.WA360Connector;
 import com.boot.jx.connectors.WAGupShupAgentConnector;
 import com.boot.jx.connectors.WAGupShupConnector;
 import com.boot.jx.connectors.WARapiwhaConnector;
 import com.boot.jx.http.CommonHttpRequest;
+import com.boot.jx.postman.PMConstants.CHANNEL_TYPE;
 import com.boot.jx.postman.gupshup.GupShupDeliveryResp;
 import com.boot.jx.postman.gupshup.GupShupDeliveryResp.GupShupDeliveryDto;
 import com.boot.jx.postman.gupshup.GupShupInbound;
 import com.boot.jx.postman.gupshup.GupShupInboundV2;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.scope.vendor.VendorContext.ApiVendorHeaders;
+import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.JsonUtil;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -35,132 +40,156 @@ import com.fasterxml.jackson.core.type.TypeReference;
 @RestController
 public class InBoundControllerWA {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(InBoundControllerWA.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(InBoundControllerWA.class);
 
-	@Autowired
-	private InBoundService inBoundService;
+    @Autowired
+    private InBoundService inBoundService;
 
-	@Autowired
-	private WARapiwhaConnector waRapiwhaConnector;
+    @Autowired
+    private WARapiwhaConnector waRapiwhaConnector;
 
-	@Autowired
-	private WAGupShupConnector waGupShupConnector;
+    @Autowired
+    private WAGupShupConnector waGupShupConnector;
 
-	@Autowired
-	private WAGupShupAgentConnector waGupShupAgentConnector;
+    @Autowired
+    private WAGupShupAgentConnector waGupShupAgentConnector;
 
-	@Autowired
-	CommonHttpRequest commonHttpRequest;
+    @Autowired
+    private CommonHttpRequest commonHttpRequest;
 
-	@Autowired
-	ChatService chatService;
+    @Autowired
+    private ChatService chatService;
 
-	// @ApiRequest(feature = "WA_GUPSHUP_INBOUND")
-	@ApiVendorHeaders
-	@RequestMapping(value = "/ext/inbound/gupshup/callback", method = { RequestMethod.POST, RequestMethod.GET,
-			RequestMethod.PUT })
-	public InboxMessage onReceiveMessage(
-			@RequestBody(required = false) Optional<Map<String, Object>> inboundMapOptional,
-			@RequestParam(required = false, defaultValue = "false") boolean routed) throws InterruptedException {
-		if (inboundMapOptional.isPresent()) {
-			return extracted(inboundMapOptional.get());
-		}
-		return null;
+    @Autowired
+    private ConnectorHandlerFactory connectorHandlerFactory;
+
+    // @ApiRequest(feature = "WA_GUPSHUP_INBOUND")
+    @ApiVendorHeaders
+    @RequestMapping(value = "/ext/inbound/gupshup/callback",
+	    method = { RequestMethod.POST, RequestMethod.GET, RequestMethod.PUT })
+    public InboxMessage onReceiveMessage(
+	    @RequestBody(required = false) Optional<Map<String, Object>> inboundMapOptional,
+	    @RequestParam(required = false, defaultValue = "false") boolean routed) throws InterruptedException {
+	if (inboundMapOptional.isPresent()) {
+	    return extracted(inboundMapOptional.get());
+	}
+	return null;
+    }
+
+    @ApiVendorHeaders
+    @RequestMapping(value = "/ext/inbound/gupshup/callback", method = { RequestMethod.POST },
+	    consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+    public InboxMessage onReceiveMessage() throws InterruptedException {
+	Map<String, Object> inboundMap = new HashMap<String, Object>();
+	inboundMap.put("waNumber", commonHttpRequest.get("waNumber"));
+	inboundMap.put("mobile", commonHttpRequest.get("mobile"));
+	inboundMap.put("type", commonHttpRequest.get("type"));
+	inboundMap.put("text", commonHttpRequest.get("text"));
+	inboundMap.put("timestamp", commonHttpRequest.get("timestamp"));
+	inboundMap.put("name", commonHttpRequest.get("name"));
+
+	String image = commonHttpRequest.get("image");
+	if (ArgUtil.is(image)) {
+	    inboundMap.put("image", JsonUtil.fromJsonToMap(image));
 	}
 
-	@ApiVendorHeaders
-	@RequestMapping(value = "/ext/inbound/gupshup/callback", method = {
-			RequestMethod.POST }, consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
-	public InboxMessage onReceiveMessage() throws InterruptedException {
-		Map<String, Object> inboundMap = new HashMap<String, Object>();
-		inboundMap.put("waNumber", commonHttpRequest.get("waNumber"));
-		inboundMap.put("mobile", commonHttpRequest.get("mobile"));
-		inboundMap.put("type", commonHttpRequest.get("type"));
-		inboundMap.put("text", commonHttpRequest.get("text"));
-		inboundMap.put("timestamp", commonHttpRequest.get("timestamp"));
-		inboundMap.put("name", commonHttpRequest.get("name"));
-
-		String image = commonHttpRequest.get("image");
-		if (ArgUtil.is(image)) {
-			inboundMap.put("image", JsonUtil.fromJsonToMap(image));
-		}
-
-		String document = commonHttpRequest.get("document");
-		if (ArgUtil.is(document)) {
-			inboundMap.put("document", JsonUtil.fromJsonToMap(document));
-		}
-
-		String voice = commonHttpRequest.get("document");
-		if (ArgUtil.is(voice)) {
-			inboundMap.put("voice", JsonUtil.fromJsonToMap(voice));
-		}
-
-		String audio = commonHttpRequest.get("audio");
-		if (ArgUtil.is(audio)) {
-			inboundMap.put("audio", JsonUtil.fromJsonToMap(audio));
-		}
-
-		String video = commonHttpRequest.get("video");
-		if (ArgUtil.is(video)) {
-			inboundMap.put("video", JsonUtil.fromJsonToMap(video));
-		}
-
-		String location = commonHttpRequest.get("location");
-		if (ArgUtil.is(location)) {
-			inboundMap.put("location", JsonUtil.fromJsonToMap(location));
-		}
-		String contacts = commonHttpRequest.get("contacts");
-		if (ArgUtil.is(contacts)) {
-			inboundMap.put("contacts", JsonUtil.fromJsonToMap(contacts));
-		}
-		return extracted(inboundMap);
+	String document = commonHttpRequest.get("document");
+	if (ArgUtil.is(document)) {
+	    inboundMap.put("document", JsonUtil.fromJsonToMap(document));
 	}
 
-	private InboxMessage extracted(Map<String, Object> inboundMap) {
-		try {
-			InboxMessage event = null;
-			if (inboundMap.containsKey("waNumber")) {
-				event = waGupShupConnector.toInboxMessage(JsonUtil.toObject(inboundMap, GupShupInbound.class));
-			} else {
-				event = waGupShupAgentConnector.toInboxMessage(JsonUtil.toObject(inboundMap, GupShupInboundV2.class));
-			}
-			event.setOriginalMessage(inboundMap);
-			inBoundService.invokeMethods(event);
-			return event;
-		} catch (Exception e) {
-			LOGGER.error("INBOUND", e);
-		}
-		return null;
+	String voice = commonHttpRequest.get("document");
+	if (ArgUtil.is(voice)) {
+	    inboundMap.put("voice", JsonUtil.fromJsonToMap(voice));
 	}
 
-	@RequestMapping(value = "/ext/status/gupshup/callback", method = { RequestMethod.POST, RequestMethod.GET })
-	public GupShupDeliveryResp onStatusMessage(@RequestBody GupShupDeliveryResp status) throws InterruptedException {
-		chatService.updateMessageStatus(waGupShupConnector.updateDeliveryStatus(status));
-		return status;
+	String audio = commonHttpRequest.get("audio");
+	if (ArgUtil.is(audio)) {
+	    inboundMap.put("audio", JsonUtil.fromJsonToMap(audio));
 	}
 
-	@ApiVendorHeaders
-	@RequestMapping(value = "/ext/status/gupshup/callback", method = {
-			RequestMethod.POST }, consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
-	public GupShupDeliveryResp onStatusMessage() throws InterruptedException, IOException {
-		GupShupDeliveryResp status = new GupShupDeliveryResp();
-		String response = commonHttpRequest.get("response");
-		if (ArgUtil.is(response)) {
-			status.setResponse(JsonUtil.parse(response, new TypeReference<List<GupShupDeliveryDto>>() {
-			}));
-		}
-		return onStatusMessage(status);
+	String video = commonHttpRequest.get("video");
+	if (ArgUtil.is(video)) {
+	    inboundMap.put("video", JsonUtil.fromJsonToMap(video));
 	}
 
-	@RequestMapping(value = "/ext/inbound/rapiwha/callback/{secret}", method = { RequestMethod.POST })
-	public ApiResponse<Object, Object> onAPIWHAMessage(@RequestParam(required = false) String secret,
-			@RequestParam String data) {
-		try {
-			Map<String, Object> dataMap = JsonUtil.getMapFromJsonString(data);
-			waRapiwhaConnector.toInboxMessage(dataMap, null);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		return ApiResponse.build();
+	String location = commonHttpRequest.get("location");
+	if (ArgUtil.is(location)) {
+	    inboundMap.put("location", JsonUtil.fromJsonToMap(location));
 	}
+	String contacts = commonHttpRequest.get("contacts");
+	if (ArgUtil.is(contacts)) {
+	    inboundMap.put("contacts", JsonUtil.fromJsonToMap(contacts));
+	}
+	return extracted(inboundMap);
+    }
+
+    private InboxMessage extracted(Map<String, Object> inboundMap) {
+	try {
+	    InboxMessage event = null;
+	    if (inboundMap.containsKey("waNumber")) {
+		event = waGupShupConnector.toInboxMessage(JsonUtil.toObject(inboundMap, GupShupInbound.class));
+	    } else {
+		event = waGupShupAgentConnector.toInboxMessage(JsonUtil.toObject(inboundMap, GupShupInboundV2.class));
+	    }
+	    event.setOriginalMessage(inboundMap);
+	    inBoundService.invokeMethods(event);
+	    return event;
+	} catch (Exception e) {
+	    LOGGER.error("INBOUND", e);
+	}
+	return null;
+    }
+
+    @RequestMapping(value = "/ext/status/gupshup/callback", method = { RequestMethod.POST, RequestMethod.GET })
+    public GupShupDeliveryResp onStatusMessage(@RequestBody GupShupDeliveryResp status) throws InterruptedException {
+	chatService.updateMessageStatus(waGupShupConnector.updateDeliveryStatus(status));
+	return status;
+    }
+
+    @ApiVendorHeaders
+    @RequestMapping(value = "/ext/status/gupshup/callback", method = { RequestMethod.POST },
+	    consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+    public GupShupDeliveryResp onStatusMessage() throws InterruptedException, IOException {
+	GupShupDeliveryResp status = new GupShupDeliveryResp();
+	String response = commonHttpRequest.get("response");
+	if (ArgUtil.is(response)) {
+	    status.setResponse(JsonUtil.parse(response, new TypeReference<List<GupShupDeliveryDto>>() {
+	    }));
+	}
+	return onStatusMessage(status);
+    }
+
+    @RequestMapping(value = "/ext/inbound/rapiwha/callback/{secret}", method = { RequestMethod.POST })
+    public ApiResponse<Object, Object> onAPIWHAMessage(@RequestParam(required = false) String secret,
+	    @RequestParam String data) {
+	try {
+	    Map<String, Object> dataMap = JsonUtil.getMapFromJsonString(data);
+	    waRapiwhaConnector.toInboxMessage(dataMap, null);
+	} catch (IOException e) {
+	    e.printStackTrace();
+	}
+	return ApiResponse.build();
+    }
+
+    @Autowired
+    private WA360Connector w360Connector;
+
+    @RequestMapping(value = "/ext/inbound/wa360/registerwebhook", method = RequestMethod.GET)
+    public ApiResponse<Object, Object> registerWebHook(@RequestParam(required = false) String lane)
+	    throws InterruptedException {
+	connectorHandlerFactory.registerWebHook(CHANNEL_TYPE.WA_360D, lane);
+	return ApiResponse.build();
+    }
+
+    @RequestMapping(value = "/ext/inbound/wa360/callback/{accountKey}/{channelId}/{channelKey}",
+	    method = { RequestMethod.POST })
+    public ApiResponse<Object, Object> onWA360Message(@PathVariable(required = false) String accountKey,
+	    @PathVariable(required = false) String channelId, @PathVariable(required = false) String channelKey,
+	    @RequestBody Map<String, Object> data) {
+	MapModel map = MapModel.from(data);
+	InboxMessage inboundMessage = w360Connector.toInboxMessage(channelId, map);
+	inBoundService.invokeMethodsAsync(inboundMessage);
+	return ApiResponse.build();
+    }
 }

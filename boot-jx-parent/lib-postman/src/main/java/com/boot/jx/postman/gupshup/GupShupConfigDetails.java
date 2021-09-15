@@ -8,10 +8,10 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonView;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class GupShupConfig extends AChannelDetails {
+public class GupShupConfigDetails extends AChannelDetails {
 
-    public GupShupConfig() {
-	super(CHANNEL_TYPE.GUPSHUP);
+    public GupShupConfigDetails() {
+	super(CHANNEL_TYPE.WA_GUPSHUP);
     }
 
     private static final long serialVersionUID = -2397678752642150000L;

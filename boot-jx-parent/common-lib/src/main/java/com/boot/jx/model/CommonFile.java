@@ -12,6 +12,7 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.xml.bind.DatatypeConverter;
@@ -73,6 +74,7 @@ public class CommonFile implements Serializable {
     private String templateId;
     private Map<String, Object> model = new HashMap<String, Object>();
     private Map<String, Object> options = new HashMap<String, Object>();
+    private Map<String, String> headers;
 
     public Map<String, Object> getModel() {
 	return model;
@@ -227,6 +229,13 @@ public class CommonFile implements Serializable {
 	this.path = path;
     }
 
+    public Map<String, String> headers() {
+	if (!ArgUtil.is(this.headers)) {
+	    this.headers = new HashMap<String, String>();
+	}
+	return this.headers;
+    }
+
     public CommonFile url(String url) {
 	this.setUrl(url);
 	try {
@@ -281,6 +290,11 @@ public class CommonFile implements Serializable {
 
     public CommonFile name(String name) {
 	this.setName(name);
+	return this;
+    }
+
+    public CommonFile header(String headerKey, String headerValue) {
+	this.headers().put(headerKey, headerValue);
 	return this;
     }
 
@@ -349,7 +363,16 @@ public class CommonFile implements Serializable {
 
     public MultipartFile toMultipartFile() {
 	try {
-	    InputStream inputStream = new URL(this.url).openStream();
+	    URL url = new URL(this.url);
+	    URLConnection connection = url.openConnection();
+
+	    if (ArgUtil.is(this.headers)) {
+		for (Entry<String, String> entry : this.headers.entrySet()) {
+		    connection.setRequestProperty(entry.getKey(), entry.getValue());
+		}
+	    }
+
+	    InputStream inputStream = connection.getInputStream();
 	    File file = File.createTempFile("tmp", "." + this.getExtension());
 	    byte[] binary = IOUtils.toByteArray(inputStream);
 	    FileUtils.writeByteArrayToFile(file, binary);
@@ -376,6 +399,19 @@ public class CommonFile implements Serializable {
 
     public void setTemplateId(String templateId) {
 	this.templateId = templateId;
+    }
+
+    public Map<String, String> getHeaders() {
+	return headers;
+    }
+
+    public void setHeaders(Map<String, String> headers) {
+	this.headers = headers;
+    }
+
+    public CommonFile headers(Map<String, String> headers) {
+	this.headers = headers;
+	return this;
     }
 
 }

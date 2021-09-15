@@ -20,6 +20,7 @@ import com.boot.jx.postman.doc.QuickMedia;
 import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.OutboxMessage;
+import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.postman.query.ChatContactQuery;
 import com.boot.jx.rest.RestService;
 import com.boot.utils.ArgUtil;
@@ -32,75 +33,75 @@ import com.boot.utils.JsonUtil;
 @ConnectorMapping(contactType = ContactType.WHATSAPP, channel = "RAPIWHA")
 public class WARapiwhaConnector extends AbstractConnector {
 
-	private static Logger LOGGER = LoggerService.getLogger(WARapiwhaConnector.class);
+    private static Logger LOGGER = LoggerService.getLogger(WARapiwhaConnector.class);
 
-	@Autowired
-	private RestService restService;
+    @Autowired
+    private RestService restService;
 
-	@Value("${rapiwha.api.key}")
-	private String apiWhaKey;
+    @Value("${rapiwha.api.key}")
+    private String apiWhaKey;
 
-	@Autowired
-	private MongoTemplate mongoTemplate;
+    @Autowired
+    private MongoTemplate mongoTemplate;
 
-	@Autowired
-	private TmplClient tmplClient;
+    @Autowired
+    private TmplClient tmplClient;
 
-	@Override
-	public void send(OutboxMessage outboxMessage) {
-		String to = CollectionUtil.getOne(outboxMessage.getTo());
+    @Override
+    public void send(OutboxMessage outboxMessage) {
+	String to = CollectionUtil.getOne(outboxMessage.getTo());
 
-		outboxMessage.contact().setChannel(outboxMessage.contact().getChannel());
-		String text = outboxMessage.getMessage();
-		if (ArgUtil.is(outboxMessage.getTemplate())) {
-			QuickMedia mediaReply = mongoTemplate.findById(outboxMessage.getTemplate(), QuickMedia.class);
-			if (ArgUtil.is(mediaReply)) {
-				if ("image".equalsIgnoreCase(mediaReply.getType())) {
-					outboxMessage.attachment(
-							new Attachment().mediaURL(mediaReply.getUrl()).mediaType(FileType.IMAGE.toString()));
-					text = mediaReply.getUrl();
-				}
-			} else {
-				tmplClient.process(outboxMessage);
-				text = outboxMessage.getMessage();
-			}
+	outboxMessage.contact().setChannel(outboxMessage.contact().getChannel());
+	String text = outboxMessage.getMessage();
+	if (ArgUtil.is(outboxMessage.getTemplate())) {
+	    QuickMedia mediaReply = mongoTemplate.findById(outboxMessage.getTemplate(), QuickMedia.class);
+	    if (ArgUtil.is(mediaReply)) {
+		if ("image".equalsIgnoreCase(mediaReply.getType())) {
+		    outboxMessage.attachment(
+			    new Attachment().mediaURL(mediaReply.getUrl()).mediaType(FileType.IMAGE.toString()));
+		    text = mediaReply.getUrl();
 		}
-		String responseText = restService.ajax("http://panel.apiwha.com/send_message.php").field("apikey", apiWhaKey)
-				.field("number", to).field("text", text).postForm().asString();
-		LOGGER.info(responseText);
+	    } else {
+		tmplClient.process(outboxMessage);
+		text = outboxMessage.getMessage();
+	    }
 	}
+	String responseText = restService.ajax("http://panel.apiwha.com/send_message.php").field("apikey", apiWhaKey)
+		.field("number", to).field("text", text).postForm().asString();
+	LOGGER.info(responseText);
+    }
 
-	@Override
-	public InboxMessage assignToAgent(InboxMessage inboxMessage) {
-		return inboxMessage;
-	}
+    @Override
+    public InboxMessage assignToAgent(InboxMessage inboxMessage) {
+	return inboxMessage;
+    }
 
-	@Override
-	public boolean initSession(ChatSessionDoc session, InboxMessage inboxMessage) {
-		Object x = inboxMessage.getOriginalMessage();
-		if (ArgUtil.is(x)) {
-			Map<String, Object> map = JsonUtil.toMap(x);
-			ChatContactQuery contactQuery = messageContext.getChatContactQuery();
-			contactQuery.setProfilePic(ArgUtil.parseAsString(map.get("profilepicture"), Constants.BLANK));
-			contactQuery.setName(ArgUtil.parseAsString(map.get("pushname"), Constants.BLANK));
-		}
-		return true;
+    @Override
+    public boolean initSession(ChatSessionDoc session, InboxMessage inboxMessage) {
+	Object x = inboxMessage.getOriginalMessage();
+	if (ArgUtil.is(x)) {
+	    Map<String, Object> map = JsonUtil.toMap(x);
+	    ChatContactQuery contactQuery = messageContext.getChatContactQuery();
+	    contactQuery.setProfilePic(ArgUtil.parseAsString(map.get("profilepicture"), Constants.BLANK));
+	    contactQuery.setName(ArgUtil.parseAsString(map.get("pushname"), Constants.BLANK));
 	}
+	return true;
+    }
 
-	public InboxMessage toInboxMessage(Map<String, Object> dataMap, String lane) {
-		InboxMessage event = new InboxMessage();
-		String eventName = ArgUtil.parseAsString(dataMap.get("event"), Constants.BLANK);
-		event.contact().setContactType(ContactType.WHATSAPP.toString());
-		event.contact().setChannel("RAPIWHA");
-		event.contact().setLane(lane);
-		if ("INBOX".equals(eventName)) {
-			event.from(ArgUtil.parseAsString(dataMap.get("from"), Constants.BLANK));
-			event.to().add(ArgUtil.parseAsString(dataMap.get("to"), Constants.BLANK));
-			event.setMessage(ArgUtil.parseAsString(dataMap.get("text"), Constants.BLANK));
-			event.setFromName(ArgUtil.parseAsString(dataMap.get("pushname"), Constants.BLANK));
-			event.setOriginalMessage(dataMap);
-		}
-		return event;
+    public InboxMessage toInboxMessage(Map<String, Object> dataMap, String lane) {
+	InboxMessage event = new InboxMessage();
+	String eventName = ArgUtil.parseAsString(dataMap.get("event"), Constants.BLANK);
+	event.contact().setContactType(ContactType.WHATSAPP.toString());
+	event.contact().setChannel("RAPIWHA");
+	event.contact().setLane(lane);
+	if ("INBOX".equals(eventName)) {
+	    event.from(ArgUtil.parseAsString(dataMap.get("from"), Constants.BLANK));
+	    event.to().add(ArgUtil.parseAsString(dataMap.get("to"), Constants.BLANK));
+	    event.setMessage(ArgUtil.parseAsString(dataMap.get("text"), Constants.BLANK));
+	    event.setFromName(ArgUtil.parseAsString(dataMap.get("pushname"), Constants.BLANK));
+	    event.setOriginalMessage(dataMap);
 	}
+	return event;
+    }
 
 }

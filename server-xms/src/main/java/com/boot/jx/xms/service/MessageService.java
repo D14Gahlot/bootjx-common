@@ -5,10 +5,10 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Component;
 
 import com.boot.jx.chat.ChatService;
-import com.boot.jx.postman.ChannelConfig;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.model.OutboxMessage;
+import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.postman.store.SessionStore;
 import com.boot.jx.xms.dto.OutBoundMsgBasic.OutBoundMsg;
 import com.boot.jx.xms.dto.OutBoundReciept;

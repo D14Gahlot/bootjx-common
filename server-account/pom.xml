@@ -91,6 +91,12 @@
 			<version>${jax.version}</version>
 		</dependency>
 
+		<dependency>
+			<groupId>com.boot.jx</groupId>
+			<artifactId>lib-tmpl</artifactId>
+			<version>${jax.version}</version>
+		</dependency>
+		
 		<!-- <dependency> <groupId>net.rossillo.mvc.cache</groupId> <artifactId>spring-mvc-cache-control</artifactId> 
 			<version>1.1.1-RELEASE</version> <scope>compile</scope> </dependency> -->
 

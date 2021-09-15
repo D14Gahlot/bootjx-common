@@ -22,9 +22,9 @@ import com.boot.jx.AppConfig;
 import com.boot.jx.AppConfigPackage.AppCommonConfig;
 import com.boot.jx.admin.AdminAuthProvider;
 import com.boot.jx.admin.AdminSessionService;
-import com.boot.jx.admin.service.AdminAuthService;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.common.dto.AgentResponseAuthDto;
+import com.boot.jx.common.service.EmpAuthService;
 import com.boot.jx.http.CommonHttpRequest;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.model.MapModel;
@@ -43,7 +43,7 @@ public class AdminAuthController {
     private CommonHttpRequest commonHttpRequest;
 
     @Autowired
-    private AdminAuthService agentLoginService;
+    private EmpAuthService agentLoginService;
 
     @Autowired
     private AppCommonConfig appCommonConfig;
@@ -88,7 +88,7 @@ public class AdminAuthController {
 	try {
 	    if ("resetpass".equalsIgnoreCase(action)) {
 		String username = ArgUtil.parseAsString(commonHttpRequest.get("username"), Constants.BLANK);
-		ApiResponse<Map<String, Object>, String> x = agentResetPass(username, true);
+		ApiResponse<Map<String, Object>, String> x = agentLoginService.agentResetPass(username, true);
 		if (ArgUtil.parseAsBoolean(x.getData().get("success"), false)) {
 		    status = "SUCCESS";
 		    message = "Link to reset password sent on registered email.";
@@ -110,7 +110,8 @@ public class AdminAuthController {
 			status = "ERROR";
 			message = "Please enter valid password";
 		    } else if (confirmpassword.equals(newpassword)) {
-			ApiResponse<Map<String, Object>, String> x = agentSetPass(username, token, newpassword, true);
+			ApiResponse<Map<String, Object>, String> x = agentLoginService.agentSetPass(username, token,
+				newpassword, true);
 			if (ArgUtil.parseAsBoolean(x.getData().get("success"), false)) {
 			    status = "SUCCESS";
 			    message = "Password has been reset successfully";
@@ -181,7 +182,8 @@ public class AdminAuthController {
     public ApiResponse<Map<String, Object>, AgentResponseAuthDto> login(@RequestParam String username,
 	    @RequestParam String password, HttpServletRequest request) throws NoSuchAlgorithmException {
 	username = ArgUtil.parseAsString(username, Constants.BLANK);
-	ApiResponse<Map<String, Object>, AgentResponseAuthDto> x = agentLogin(username, password, true);
+	ApiResponse<Map<String, Object>, AgentResponseAuthDto> x = agentLoginService.agentLogin(username, password,
+		true);
 	if (ArgUtil.parseAsBoolean(x.getData().get("success"), false)) {
 	    x.redirectUrl(appConfig.getAppPrefix() + "/app/home");
 
@@ -204,52 +206,29 @@ public class AdminAuthController {
 
     // Agent APIS
 
+    @Deprecated
     @ResponseBody
     @RequestMapping(value = "/auth/agent/login", method = { RequestMethod.POST })
     public ApiResponse<Map<String, Object>, AgentResponseAuthDto> agentLogin(@RequestParam String username,
 	    @RequestParam String password, @RequestParam(required = false) boolean admin)
 	    throws NoSuchAlgorithmException {
-	AgentResponseAuthDto agent = agentLoginService.loginAgent(username, password, admin);
-	if (ArgUtil.is(agent)) {
-	    return ApiResponse.buildData(MapBuilder.map().put("success", true).toMap(), agent).statusKey("SUCCESS");
-	} else {
-	    return ApiResponse.buildData(MapBuilder.map().put("success", false).toMap(), agent).statusKey("ERROR")
-		    .message("Username or Password is incorrect");
-	}
+	return agentLoginService.agentLogin(username, password, admin);
     }
 
+    @Deprecated
     @ResponseBody
     @RequestMapping(value = "/auth/agent/pass/reset", method = { RequestMethod.POST })
     public ApiResponse<Map<String, Object>, String> agentResetPass(@RequestParam String username,
 	    @RequestParam(required = false) boolean admin) throws NoSuchAlgorithmException {
-	ApiResponse<Map<String, Object>, String> x = ApiResponse
-		.buildData(MapBuilder.map().put("success", true).toMap(), "success");
-	if (agentLoginService.resetPassword(username, admin)) {
-	    x.setStatusKey("SUCCESS");
-	} else {
-	    x.data().put("success", false);
-	    x.setMeta("error");
-	    x.setStatusKey("ERROR");
-	    x.setMessage("Username is incorrect");
-	}
-	return x;
+	return agentLoginService.agentResetPass(username, admin);
     }
 
+    @Deprecated
     @ResponseBody
     @RequestMapping(value = "/auth/agent/pass/set", method = { RequestMethod.POST })
     public ApiResponse<Map<String, Object>, String> agentSetPass(@RequestParam String username,
 	    @RequestParam String password, @RequestParam String newpassword,
 	    @RequestParam(required = false) boolean admin) throws NoSuchAlgorithmException {
-	ApiResponse<Map<String, Object>, String> x = ApiResponse
-		.buildData(MapBuilder.map().put("success", true).toMap(), "success");
-	if (agentLoginService.setPassword(username, password, newpassword, admin)) {
-	    x.setStatusKey("SUCCESS");
-	} else {
-	    x.data().put("success", false);
-	    x.setMeta("error");
-	    x.setStatusKey("ERROR");
-	    x.setMessage("Username is incorrect");
-	}
-	return x;
+	return agentLoginService.agentSetPass(username, password, newpassword, admin);
     }
 }

@@ -10,102 +10,105 @@ import java.util.Map.Entry;
 import com.boot.jx.agent.AgentConfig;
 import com.boot.jx.postman.PMEnvironment.AChannelDetails;
 import com.boot.jx.postman.PMEnvironment.PMConfigurationObject;
-import com.boot.jx.postman.fb.FacebookConfig;
-import com.boot.jx.postman.gupshup.GupShupConfig;
-import com.boot.jx.postman.tg.TelegramConfig;
-import com.boot.jx.postman.tw.TwitterConfig;
+import com.boot.jx.postman.fb.FacebookConfigDetails;
+import com.boot.jx.postman.gupshup.GupShupConfigDetails;
+import com.boot.jx.postman.plugin.ChannelConfig;
+import com.boot.jx.postman.tg.TelegramConfigDetails;
+import com.boot.jx.postman.tw.TwitterConfigDetails;
 import com.boot.model.SafeKeyHashMap;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.Random;
 
 public class PMConfiguration implements Serializable {
 
     private static final long serialVersionUID = -5432956433673368768L;
 
-    private Map<String, FacebookConfig> facebook;
-    private Map<String, TwitterConfig> twitter;
-    private Map<String, TelegramConfig> telegram;
-    private Map<String, GupShupConfig> gupshup;
+    private Map<String, FacebookConfigDetails> facebook;
+    private Map<String, TwitterConfigDetails> twitter;
+    private Map<String, TelegramConfigDetails> telegram;
+    private Map<String, GupShupConfigDetails> gupshup;
 
     private Map<String, ChannelConfig> channels;
     private Map<String, ClientApiKey> clientApiKeys;
 
     private Map<String, PMConfigurationObject> map;
 
-    AgentConfig agent;
+    private AgentConfig agent;
+    private String accountKey;
 
     // Facebook
-    public SafeKeyHashMap<FacebookConfig> facebook() {
+    public SafeKeyHashMap<FacebookConfigDetails> facebook() {
 	if (ArgUtil.isEmpty(facebook)) {
-	    facebook = new HashMap<String, FacebookConfig>();
+	    facebook = new HashMap<String, FacebookConfigDetails>();
 	}
-	return new SafeKeyHashMap<FacebookConfig>(facebook);
+	return new SafeKeyHashMap<FacebookConfigDetails>(facebook);
     }
 
-    public Map<String, FacebookConfig> getFacebook() {
+    public Map<String, FacebookConfigDetails> getFacebook() {
 	return facebook;
     }
 
-    public void setFacebook(Map<String, FacebookConfig> facebook) {
+    public void setFacebook(Map<String, FacebookConfigDetails> facebook) {
 	this.facebook = facebook;
     }
 
-    public FacebookConfig facebook(String pageId) {
+    public FacebookConfigDetails facebook(String pageId) {
 	return facebook().get(pageId);
     }
 
-    public PMConfiguration facebook(FacebookConfig config, boolean disbaled) {
+    public PMConfiguration facebook(FacebookConfigDetails config, boolean disbaled) {
 	if (disbaled) {
-	    this.telegram().remove(config.getPageId());
+	    this.facebook().remove(config.getPageId());
 	} else
 	    this.facebook().put(config.getPageId(), config);
 	return this;
     }
 
     // TWITTER
-    public SafeKeyHashMap<TwitterConfig> twitter() {
+    public SafeKeyHashMap<TwitterConfigDetails> twitter() {
 	if (ArgUtil.isEmpty(twitter)) {
-	    twitter = new HashMap<String, TwitterConfig>();
+	    twitter = new HashMap<String, TwitterConfigDetails>();
 	}
-	return new SafeKeyHashMap<TwitterConfig>(twitter);
+	return new SafeKeyHashMap<TwitterConfigDetails>(twitter);
     }
 
-    public TwitterConfig twitter(String handler) {
+    public TwitterConfigDetails twitter(String handler) {
 	return twitter().get(handler);
     }
 
-    public PMConfiguration twitter(TwitterConfig config, boolean disbaled) {
+    public PMConfiguration twitter(TwitterConfigDetails config, boolean disbaled) {
 	if (disbaled) {
-	    this.telegram().remove(config.getHandler());
+	    this.twitter().remove(config.getHandler());
 	} else
 	    this.twitter().put(config.getHandler(), config);
 	return this;
     }
 
-    public Map<String, TwitterConfig> getTwitter() {
+    public Map<String, TwitterConfigDetails> getTwitter() {
 	return twitter;
     }
 
-    public void setTwitter(Map<String, TwitterConfig> twitter) {
+    public void setTwitter(Map<String, TwitterConfigDetails> twitter) {
 	this.twitter = twitter;
     }
 
     // Telegram
-    public SafeKeyHashMap<TelegramConfig> telegram() {
+    public SafeKeyHashMap<TelegramConfigDetails> telegram() {
 	if (ArgUtil.isEmpty(telegram)) {
-	    telegram = new HashMap<String, TelegramConfig>();
+	    telegram = new HashMap<String, TelegramConfigDetails>();
 	}
-	return new SafeKeyHashMap<TelegramConfig>(telegram);
+	return new SafeKeyHashMap<TelegramConfigDetails>(telegram);
     }
 
-    public Map<String, TelegramConfig> getTelegram() {
+    public Map<String, TelegramConfigDetails> getTelegram() {
 	return telegram;
     }
 
-    public void setTelegram(Map<String, TelegramConfig> telegram) {
+    public void setTelegram(Map<String, TelegramConfigDetails> telegram) {
 	this.telegram = telegram;
     }
 
-    public PMConfiguration telegram(TelegramConfig config, boolean disbaled) {
+    public PMConfiguration telegram(TelegramConfigDetails config, boolean disbaled) {
 	if (disbaled) {
 	    this.telegram().remove(config.getHandler());
 	} else
@@ -113,33 +116,33 @@ public class PMConfiguration implements Serializable {
 	return this;
     }
 
-    public TelegramConfig telegram(String handler) {
+    public TelegramConfigDetails telegram(String handler) {
 	return telegram().get(handler);
     }
 
     // GupShup
-    public SafeKeyHashMap<GupShupConfig> gupshup() {
+    public SafeKeyHashMap<GupShupConfigDetails> gupshup() {
 	if (ArgUtil.isEmpty(gupshup)) {
-	    gupshup = new HashMap<String, GupShupConfig>();
+	    gupshup = new HashMap<String, GupShupConfigDetails>();
 	}
-	return new SafeKeyHashMap<GupShupConfig>(gupshup);
+	return new SafeKeyHashMap<GupShupConfigDetails>(gupshup);
     }
 
-    public Map<String, GupShupConfig> getGupshup() {
+    public Map<String, GupShupConfigDetails> getGupshup() {
 	return gupshup;
     }
 
-    public void setGupshup(Map<String, GupShupConfig> gupshup) {
+    public void setGupshup(Map<String, GupShupConfigDetails> gupshup) {
 	this.gupshup = gupshup;
     }
 
-    public GupShupConfig gupshup(String handler) {
+    public GupShupConfigDetails gupshup(String handler) {
 	return gupshup().get(handler);
     }
 
-    public PMConfiguration gupshup(GupShupConfig config, boolean disbaled) {
+    public PMConfiguration gupshup(GupShupConfigDetails config, boolean disbaled) {
 	if (disbaled) {
-	    this.telegram().remove(config.getNumber());
+	    this.gupshup().remove(config.getNumber());
 	} else
 	    this.gupshup().put(config.getNumber(), config);
 	return this;
@@ -161,8 +164,8 @@ public class PMConfiguration implements Serializable {
 	this.channels = channels;
     }
 
-    public ChannelConfig channels(String handler) {
-	return channels().get(handler);
+    public ChannelConfig channels(String channelId) {
+	return channels().get(channelId);
     }
 
     public PMConfiguration channels(ChannelConfig channel) {
@@ -240,28 +243,39 @@ public class PMConfiguration implements Serializable {
     public List<AChannelDetails> connectors() {
 	List<AChannelDetails> list = new ArrayList<AChannelDetails>();
 	if (this.facebook != null) {
-	    for (Entry<String, FacebookConfig> configEntry : this.facebook.entrySet()) {
+	    for (Entry<String, FacebookConfigDetails> configEntry : this.facebook.entrySet()) {
 		list.add(configEntry.getValue());
 	    }
 	}
 	if (this.gupshup != null) {
-	    for (Entry<String, GupShupConfig> configEntry : this.gupshup.entrySet()) {
+	    for (Entry<String, GupShupConfigDetails> configEntry : this.gupshup.entrySet()) {
 		list.add(configEntry.getValue());
 	    }
 	}
 
 	if (this.twitter != null) {
-	    for (Entry<String, TwitterConfig> configEntry : this.twitter.entrySet()) {
+	    for (Entry<String, TwitterConfigDetails> configEntry : this.twitter.entrySet()) {
 		list.add(configEntry.getValue());
 	    }
 	}
 
 	if (this.telegram != null) {
-	    for (Entry<String, TelegramConfig> configEntry : this.telegram.entrySet()) {
+	    for (Entry<String, TelegramConfigDetails> configEntry : this.telegram.entrySet()) {
 		list.add(configEntry.getValue());
 	    }
 	}
 	return list;
+    }
+
+    public String getAccountKey() {
+	if (!ArgUtil.is(this.accountKey)) {
+	    this.accountKey = Random.randomAlphaNumeric(10);
+	}
+	return accountKey;
+    }
+
+    public void setAccountKey(String accountKey) {
+	this.accountKey = accountKey;
     }
 
 }

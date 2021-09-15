@@ -222,6 +222,24 @@ public final class StringUtils {
 	return (str == null) ? str : str.trim();
     }
 
+    public static String trim(String s, char delimiter) {
+	int sIndex;
+	for (sIndex = 0; sIndex < s.length() - 1; sIndex++) {
+	    if (s.charAt(sIndex) != delimiter) {
+		break;
+	    }
+	}
+
+	int eIndex;
+	for (eIndex = s.length() - 1; eIndex > 0; eIndex--) {
+	    if (s.charAt(eIndex) != delimiter) {
+		break;
+	    }
+	}
+
+	return s.substring(sIndex, Math.max(sIndex, eIndex + 1));
+    }
+
     public static String trimLeadingZeroes(String value) {
 	if (ArgUtil.is(value)) {
 	    return new Long(value).toString();

@@ -1,6 +1,7 @@
-package com.boot.jx.admin.service;
+package com.boot.jx.common.service;
 
 import java.security.NoSuchAlgorithmException;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -10,6 +11,7 @@ import org.springframework.stereotype.Component;
 
 import com.boot.jx.AppConfig;
 import com.boot.jx.AppContextUtil;
+import com.boot.jx.api.ApiResponse;
 import com.boot.jx.common.doc.AgentDoc;
 import com.boot.jx.common.doc.DepartmentDoc;
 import com.boot.jx.common.dto.AgentResponseAuthDto;
@@ -23,12 +25,13 @@ import com.boot.jx.scope.tnt.TenantValue;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
 import com.boot.utils.CryptoUtil;
-import com.boot.utils.Random;
 import com.boot.utils.CryptoUtil.HashBuilder;
+import com.boot.utils.MapBuilder;
+import com.boot.utils.Random;
 
 @Component
 @TenantScoped
-public class AdminAuthService {
+public class EmpAuthService {
 
     @Autowired
     MongoTemplate mongoTemplate;
@@ -144,4 +147,45 @@ public class AdminAuthService {
 	return true;
     }
 
+    // Interface Service
+    public ApiResponse<Map<String, Object>, String> agentResetPass(String username, boolean admin)
+	    throws NoSuchAlgorithmException {
+	ApiResponse<Map<String, Object>, String> x = ApiResponse
+		.buildData(MapBuilder.map().put("success", true).toMap(), "success");
+	if (resetPassword(username, admin)) {
+	    x.setStatusKey("SUCCESS");
+	} else {
+	    x.data().put("success", false);
+	    x.setMeta("error");
+	    x.setStatusKey("ERROR");
+	    x.setMessage("Username is incorrect");
+	}
+	return x;
+    }
+
+    public ApiResponse<Map<String, Object>, String> agentSetPass(String username, String password, String newpassword,
+	    boolean admin) throws NoSuchAlgorithmException {
+	ApiResponse<Map<String, Object>, String> x = ApiResponse
+		.buildData(MapBuilder.map().put("success", true).toMap(), "success");
+	if (setPassword(username, password, newpassword, admin)) {
+	    x.setStatusKey("SUCCESS");
+	} else {
+	    x.data().put("success", false);
+	    x.setMeta("error");
+	    x.setStatusKey("ERROR");
+	    x.setMessage("Username is incorrect");
+	}
+	return x;
+    }
+
+    public ApiResponse<Map<String, Object>, AgentResponseAuthDto> agentLogin(String username, String password,
+	    boolean admin) throws NoSuchAlgorithmException {
+	AgentResponseAuthDto agent = loginAgent(username, password, admin);
+	if (ArgUtil.is(agent)) {
+	    return ApiResponse.buildData(MapBuilder.map().put("success", true).toMap(), agent).statusKey("SUCCESS");
+	} else {
+	    return ApiResponse.buildData(MapBuilder.map().put("success", false).toMap(), agent).statusKey("ERROR")
+		    .message("Username or Password is incorrect");
+	}
+    }
 }

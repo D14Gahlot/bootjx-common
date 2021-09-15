@@ -7,7 +7,8 @@ public class PMConstants {
 	public static final String TELEGRAM = "tg";
 	public static final String TWITTER = "tw";
 	public static final String FACEBOOK = "fb";
-	public static final String GUPSHUP = "wags";
+	public static final String WA_GUPSHUP = "wags";
+	public static final String WA_360D = "wa360";
 
     }
 

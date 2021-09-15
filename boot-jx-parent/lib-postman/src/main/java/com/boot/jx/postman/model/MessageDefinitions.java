@@ -19,10 +19,6 @@ public class MessageDefinitions {
 	public static final String OUTBOUND_IMPORTED = "Oi";
     }
 
-    public static class MESSAGE_CHANNLES {
-	public static final String GUPSHUPW = "GUPSHUPW";
-    }
-
     @JsonDeserialize(as = ContactMeta.class)
     @JsonIgnoreProperties(ignoreUnknown = true)
     public interface Contact extends Serializable {

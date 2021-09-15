@@ -40,8 +40,7 @@ public class FrontController {
 	return "app-account";
     }
 
-    @RequestMapping(value = { "/", "/*!swagger-ui.html", "/**!swagger-ui.html", "/front/", "/front/**" },
-	    method = { RequestMethod.GET })
+    @RequestMapping(value = { "/", "/front/", "/front/**" }, method = { RequestMethod.GET })
     public String front(Model model, @RequestParam(required = false) String theme) {
 	model.addAllAttributes(appCommonConfig.appAttributes());
 
@@ -59,7 +58,7 @@ public class FrontController {
 	return "app-front";
     }
 
-    @RequestMapping(value = { "/@{domain}", "/{domain:^.*(?!swagger-ui)}" }, method = { RequestMethod.GET })
+    @RequestMapping(value = { "/@{domain}", "/{domain:^.*(?!swagger-ui.html)}" }, method = { RequestMethod.GET })
     public String domain(Model model, @PathVariable @ValidAlphaNum String domain) {
 	model.addAllAttributes(appCommonConfig.appAttributes());
 

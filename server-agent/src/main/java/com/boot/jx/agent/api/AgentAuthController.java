@@ -1,5 +1,6 @@
 package com.boot.jx.agent.api;
 
+import java.security.NoSuchAlgorithmException;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
@@ -27,6 +28,7 @@ import com.boot.jx.agent.AgentSessionService;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.common.doc.AgentSessionDoc;
 import com.boot.jx.common.dto.AgentResponseAuthDto;
+import com.boot.jx.common.service.EmpAuthService;
 import com.boot.jx.http.CommonHttpRequest;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.store.PMStoreConstants;
@@ -64,9 +66,8 @@ public class AgentAuthController {
     @Autowired
     private PMEnvironment pmEnvironment;
 
-    private long getVersion() {
-	return System.currentTimeMillis() / 300000;
-    }
+    @Autowired
+    private EmpAuthService authService;
 
     @RequestMapping(value = { "/app/home", "/", "", "/app/**" }, method = { RequestMethod.POST, RequestMethod.GET })
     public String home(Model model, @RequestParam(required = false) String theme) {
@@ -115,10 +116,7 @@ public class AgentAuthController {
 	try {
 	    if ("resetpass".equalsIgnoreCase(action)) {
 		String username = ArgUtil.parseAsString(commonHttpRequest.get("username"), Constants.BLANK);
-		ApiResponse<Map<String, Object>, String> x = restService.ajax(adminUrl).path("/auth/agent/pass/reset")
-			.field("username", username).postForm()
-			.as(new ParameterizedTypeReference<ApiResponse<Map<String, Object>, String>>() {
-			});
+		ApiResponse<Map<String, Object>, String> x = authService.agentResetPass(username, false);
 		if (ArgUtil.parseAsBoolean(x.getData().get("success"), false)) {
 		    status = "SUCCESS";
 		    message = "Link to reset password sent on registered email.";
@@ -140,11 +138,8 @@ public class AgentAuthController {
 			status = "ERROR";
 			message = "Please enter valid password";
 		    } else if (confirmpassword.equals(newpassword)) {
-			ApiResponse<Map<String, Object>, String> x = restService.ajax(adminUrl)
-				.path("/auth/agent/pass/set").field("username", username).field("password", token)
-				.field("newpassword", newpassword).postForm()
-				.as(new ParameterizedTypeReference<ApiResponse<Map<String, Object>, String>>() {
-				});
+			ApiResponse<Map<String, Object>, String> x = authService.agentSetPass(username, token,
+				newpassword, false);
 			if (ArgUtil.parseAsBoolean(x.getData().get("success"), false)) {
 			    status = "SUCCESS";
 			    message = "Password has been reset successfully";
@@ -202,12 +197,9 @@ public class AgentAuthController {
     @ResponseBody
     @RequestMapping(value = "/auth/login/submit", method = { RequestMethod.POST })
     public ApiResponse<Map<String, Object>, AgentResponseAuthDto> login(@RequestParam String username,
-	    @RequestParam String password, HttpServletRequest request) {
+	    @RequestParam String password, HttpServletRequest request) throws NoSuchAlgorithmException {
 	username = ArgUtil.parseAsString(username, Constants.BLANK);
-	ApiResponse<Map<String, Object>, AgentResponseAuthDto> x = restService.ajax(adminUrl).path("/auth/agent/login")
-		.field("username", username).field("password", password).postForm()
-		.as(new ParameterizedTypeReference<ApiResponse<Map<String, Object>, AgentResponseAuthDto>>() {
-		});
+	ApiResponse<Map<String, Object>, AgentResponseAuthDto> x = authService.agentLogin(username, password, false);
 	if (ArgUtil.parseAsBoolean(x.getData().get("success"), false)) {
 	    x.redirectUrl(appConfig.getAppPrefix() + "/app/home");
 	    AgentResponseAuthDto agent = x.getMeta();

@@ -82,8 +82,6 @@ public class TwitterConnector extends AbstractConnector {
 
 	@Override
 	public InboxMessage assignToAgent(InboxMessage inboxMessage) {
-		// twitterClient.sendReply(inboxMessage.getFrom(), "Call us @ " +
-		// gupShupConfig.getGupShupWaNumber(),inboxMessage.getLane());
 		return inboxMessage;
 	}
 

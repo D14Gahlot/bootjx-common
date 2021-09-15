@@ -34,7 +34,7 @@ import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.doc.MessageDocWA;
 import com.boot.jx.postman.dto.ChatMessageDTO;
 import com.boot.jx.postman.dto.ChatSessionDTO;
-import com.boot.jx.postman.gupshup.GupShupConfig;
+import com.boot.jx.postman.gupshup.GupShupConfigDetails;
 import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.Message;
 import com.boot.jx.postman.store.SessionStore;
@@ -253,7 +253,7 @@ public class ChatParserAndImportor {
 
 		List<String> lanes = new ArrayList<String>();
 		if (ContactType.WHATSAPP.equals(contactType)) {
-			for (Entry<String, GupShupConfig> conifg : environment.config().gupshup().entrySet()) {
+			for (Entry<String, GupShupConfigDetails> conifg : environment.config().gupshup().entrySet()) {
 				lanes.add(conifg.getValue().getNumber());
 			}
 

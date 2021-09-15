@@ -22,344 +22,344 @@ import com.fasterxml.jackson.databind.JsonNode;
  */
 public class MapBuilder {
 
-	/**
-	 * Instantiates a new map builder.
-	 */
-	private MapBuilder() {
-		// private constructor to hide the implicit public one.
-	}
+    /**
+     * Instantiates a new map builder.
+     */
+    private MapBuilder() {
+	// private constructor to hide the implicit public one.
+    }
+
+    /**
+     * The Class MapItem.
+     */
+    public static class MapItem {
+
+	/** The key. */
+	String key;
+
+	/** The value. */
+	Object value;
 
 	/**
-	 * The Class MapItem.
-	 */
-	public static class MapItem {
-
-		/** The key. */
-		String key;
-
-		/** The value. */
-		Object value;
-
-		/**
-		 * Instantiates a new map item.
-		 *
-		 * @param key   the key
-		 * @param value the value
-		 */
-		MapItem(String key, Object value) {
-			this.key = key;
-			this.value = value;
-		}
-
-		/**
-		 * Gets the key.
-		 *
-		 * @return the key
-		 */
-		public String getKey() {
-			return key;
-		}
-
-		/**
-		 * Gets the value.
-		 *
-		 * @return the value
-		 */
-		public Object getValue() {
-			return value;
-		}
-	}
-
-	/**
-	 * The Class BuilderMap.
-	 */
-	public static class BuilderMap {
-
-		/** The map. */
-		private Map<String, Object> map = new HashMap<String, Object>();
-
-		/**
-		 * Instantiates a new builder map.
-		 *
-		 * @param items the items
-		 */
-		public BuilderMap(MapItem... items) {
-			for (MapItem item : items) {
-				this.put(item.getKey(), item.getValue());
-			}
-		}
-
-		/**
-		 * Put.
-		 *
-		 * @param key   the key
-		 * @param value the value
-		 * @return the builder map
-		 */
-		public BuilderMap put(String key, Object value) {
-			map.put(key, value);
-			return this;
-		}
-
-		public BuilderMap putIfNotNull(String key, Object value) {
-			if (value != null) {
-				map.put(key, value);
-			}
-			return this;
-		}
-
-		public BuilderMap putIfNotEmpty(String key, Object value) {
-			if (ArgUtil.is(value)) {
-				map.put(key, value);
-			}
-			return this;
-		}
-
-		/**
-		 * data will be stored against data key
-		 * 
-		 * @param value
-		 * @return
-		 */
-		public BuilderMap data(Object value) {
-			map.put("data", value);
-			return this;
-		}
-
-		/**
-		 * Put.
-		 *
-		 * @param jsonPath the json path
-		 * @param value    the value
-		 * @return the builder map
-		 */
-		public BuilderMap put(JsonPath jsonPath, Object value) {
-			jsonPath.save(map, value);
-			return this;
-		}
-
-		/**
-		 * To map.
-		 *
-		 * @return the map
-		 */
-		public Map<String, Object> toMap() {
-			return map;
-		}
-
-		public Map<String, Object> build() {
-			return map;
-		}
-
-		/**
-		 * To json node.
-		 *
-		 * @return the json node
-		 */
-		public JsonNode toJsonNode() {
-			return JsonUtil.getMapper().valueToTree(map);
-		}
-
-	}
-
-	/**
-	 * Map.
+	 * Instantiates a new map item.
 	 *
+	 * @param key   the key
+	 * @param value the value
+	 */
+	MapItem(String key, Object value) {
+	    this.key = key;
+	    this.value = value;
+	}
+
+	/**
+	 * Gets the key.
+	 *
+	 * @return the key
+	 */
+	public String getKey() {
+	    return key;
+	}
+
+	/**
+	 * Gets the value.
+	 *
+	 * @return the value
+	 */
+	public Object getValue() {
+	    return value;
+	}
+    }
+
+    /**
+     * The Class BuilderMap.
+     */
+    public static class BuilderMap {
+
+	/** The map. */
+	private Map<String, Object> map = new HashMap<String, Object>();
+
+	/**
+	 * Instantiates a new builder map.
+	 *
+	 * @param items the items
+	 */
+	public BuilderMap(MapItem... items) {
+	    for (MapItem item : items) {
+		this.put(item.getKey(), item.getValue());
+	    }
+	}
+
+	/**
+	 * Put.
+	 *
+	 * @param key   the key
+	 * @param value the value
 	 * @return the builder map
 	 */
-	public static BuilderMap map() {
-		return new BuilderMap();
+	public BuilderMap put(String key, Object value) {
+	    map.put(key, value);
+	    return this;
 	}
 
-	public static <K, V> MultiValueMap<K, V> multiValueMap(Map<K, List<V>> map) {
-		return new MultiValueMapAdapter<K, V>(map);
+	public BuilderMap putIfNotNull(String key, Object value) {
+	    if (value != null) {
+		map.put(key, value);
+	    }
+	    return this;
 	}
 
-	@SuppressWarnings("unused")
-	private static class MultiValueMapAdapter<K, V> implements MultiValueMap<K, V>, Serializable {
+	public BuilderMap putIfNotEmpty(String key, Object value) {
+	    if (ArgUtil.is(value)) {
+		map.put(key, value);
+	    }
+	    return this;
+	}
 
-		private static final long serialVersionUID = 1479947542891619565L;
-		private final Map<K, List<V>> map;
+	/**
+	 * data will be stored against data key
+	 * 
+	 * @param value
+	 * @return
+	 */
+	public BuilderMap data(Object value) {
+	    map.put("data", value);
+	    return this;
+	}
 
-		public MultiValueMapAdapter(Map<K, List<V>> map) {
-			Assert.notNull(map, "'map' must not be null");
-			this.map = map;
-		}
+	/**
+	 * Put.
+	 *
+	 * @param jsonPath the json path
+	 * @param value    the value
+	 * @return the builder map
+	 */
+	public BuilderMap put(JsonPath jsonPath, Object value) {
+	    jsonPath.save(map, value);
+	    return this;
+	}
 
-		@Override
-		public void add(K key, V value) {
-			List<V> values = this.map.get(key);
-			if (values == null) {
-				values = new LinkedList<V>();
-				this.map.put(key, values);
-			}
-			values.add(value);
-		}
+	/**
+	 * To map.
+	 *
+	 * @return the map
+	 */
+	public Map<String, Object> toMap() {
+	    return map;
+	}
 
-		@Override
-		public V getFirst(K key) {
-			List<V> values = this.map.get(key);
-			return (values != null ? values.get(0) : null);
-		}
+	public Map<String, Object> build() {
+	    return map;
+	}
 
-		@Override
-		public void set(K key, V value) {
-			List<V> values = new LinkedList<V>();
-			values.add(value);
-			this.map.put(key, values);
-		}
+	/**
+	 * To json node.
+	 *
+	 * @return the json node
+	 */
+	public JsonNode toJsonNode() {
+	    return JsonUtil.getMapper().valueToTree(map);
+	}
 
-		@Override
-		public void setAll(Map<K, V> values) {
-			for (Entry<K, V> entry : values.entrySet()) {
-				set(entry.getKey(), entry.getValue());
-			}
-		}
+    }
 
-		@Override
-		public Map<K, V> toSingleValueMap() {
-			LinkedHashMap<K, V> singleValueMap = new LinkedHashMap<K, V>(this.map.size());
-			for (Entry<K, List<V>> entry : map.entrySet()) {
-				singleValueMap.put(entry.getKey(), entry.getValue().get(0));
-			}
-			return singleValueMap;
-		}
+    /**
+     * Map.
+     *
+     * @return the builder map
+     */
+    public static BuilderMap map() {
+	return new BuilderMap();
+    }
 
-		@Override
-		public int size() {
-			return this.map.size();
-		}
+    public static <K, V> MultiValueMap<K, V> multiValueMap(Map<K, List<V>> map) {
+	return new MultiValueMapAdapter<K, V>(map);
+    }
 
-		@Override
-		public boolean isEmpty() {
-			return this.map.isEmpty();
-		}
+    @SuppressWarnings("unused")
+    private static class MultiValueMapAdapter<K, V> implements MultiValueMap<K, V>, Serializable {
 
-		@Override
-		public boolean containsKey(Object key) {
-			return this.map.containsKey(key);
-		}
+	private static final long serialVersionUID = 1479947542891619565L;
+	private final Map<K, List<V>> map;
 
-		@Override
-		public boolean containsValue(Object value) {
-			return this.map.containsValue(value);
-		}
+	public MultiValueMapAdapter(Map<K, List<V>> map) {
+	    Assert.notNull(map, "'map' must not be null");
+	    this.map = map;
+	}
 
-		@Override
-		public List<V> get(Object key) {
-			return this.map.get(key);
-		}
+	@Override
+	public void add(K key, V value) {
+	    List<V> values = this.map.get(key);
+	    if (values == null) {
+		values = new LinkedList<V>();
+		this.map.put(key, values);
+	    }
+	    values.add(value);
+	}
 
-		@Override
-		public List<V> put(K key, List<V> value) {
-			return this.map.put(key, value);
-		}
+	@Override
+	public V getFirst(K key) {
+	    List<V> values = this.map.get(key);
+	    return (values != null ? values.get(0) : null);
+	}
 
-		@Override
-		public List<V> remove(Object key) {
-			return this.map.remove(key);
-		}
+	@Override
+	public void set(K key, V value) {
+	    List<V> values = new LinkedList<V>();
+	    values.add(value);
+	    this.map.put(key, values);
+	}
 
-		@Override
-		public void putAll(Map<? extends K, ? extends List<V>> map) {
-			this.map.putAll(map);
-		}
+	@Override
+	public void setAll(Map<K, V> values) {
+	    for (Entry<K, V> entry : values.entrySet()) {
+		set(entry.getKey(), entry.getValue());
+	    }
+	}
 
-		@Override
-		public void clear() {
-			this.map.clear();
-		}
+	@Override
+	public Map<K, V> toSingleValueMap() {
+	    LinkedHashMap<K, V> singleValueMap = new LinkedHashMap<K, V>(this.map.size());
+	    for (Entry<K, List<V>> entry : map.entrySet()) {
+		singleValueMap.put(entry.getKey(), entry.getValue().get(0));
+	    }
+	    return singleValueMap;
+	}
 
-		@Override
-		public Set<K> keySet() {
-			return this.map.keySet();
-		}
+	@Override
+	public int size() {
+	    return this.map.size();
+	}
 
-		@Override
-		public Collection<List<V>> values() {
-			return this.map.values();
-		}
+	@Override
+	public boolean isEmpty() {
+	    return this.map.isEmpty();
+	}
 
-		@Override
-		public Set<Entry<K, List<V>>> entrySet() {
-			return this.map.entrySet();
-		}
+	@Override
+	public boolean containsKey(Object key) {
+	    return this.map.containsKey(key);
+	}
 
-		@Override
-		public boolean equals(Object other) {
-			if (this == other) {
-				return true;
-			}
-			return map.equals(other);
-		}
+	@Override
+	public boolean containsValue(Object value) {
+	    return this.map.containsValue(value);
+	}
 
-		@Override
-		public int hashCode() {
-			return this.map.hashCode();
-		}
+	@Override
+	public List<V> get(Object key) {
+	    return this.map.get(key);
+	}
 
-		@Override
-		public String toString() {
-			return this.map.toString();
-		}
+	@Override
+	public List<V> put(K key, List<V> value) {
+	    return this.map.put(key, value);
+	}
+
+	@Override
+	public List<V> remove(Object key) {
+	    return this.map.remove(key);
+	}
+
+	@Override
+	public void putAll(Map<? extends K, ? extends List<V>> map) {
+	    this.map.putAll(map);
+	}
+
+	@Override
+	public void clear() {
+	    this.map.clear();
+	}
+
+	@Override
+	public Set<K> keySet() {
+	    return this.map.keySet();
+	}
+
+	@Override
+	public Collection<List<V>> values() {
+	    return this.map.values();
+	}
+
+	@Override
+	public Set<Entry<K, List<V>>> entrySet() {
+	    return this.map.entrySet();
+	}
+
+	@Override
+	public boolean equals(Object other) {
+	    if (this == other) {
+		return true;
+	    }
+	    return map.equals(other);
+	}
+
+	@Override
+	public int hashCode() {
+	    return this.map.hashCode();
+	}
+
+	@Override
+	public String toString() {
+	    return this.map.toString();
+	}
+    }
+
+    @Deprecated
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class MapModel implements JsonSerializerType<Object> {
+	protected Map<String, Object> map;
+
+	@SuppressWarnings("unchecked")
+	public MapModel(String json) {
+	    this.map = JsonUtil.fromJson(json, Map.class);
 	}
 
 	@Deprecated
-	@JsonIgnoreProperties(ignoreUnknown = true)
-	public static class MapModel implements JsonSerializerType<Object> {
-		protected Map<String, Object> map;
-
-		@SuppressWarnings("unchecked")
-		public MapModel(String json) {
-			this.map = JsonUtil.fromJson(json, Map.class);
-		}
-
-		@Deprecated
-		public Object put(String key, Object value) {
-			return this.map.put(key, value);
-		}
-
-		@Deprecated
-		public Object get(String key) {
-			return this.map.get(key);
-		}
-
-		@Deprecated
-		public String getString(String key) {
-			return ArgUtil.parseAsString(this.get(key));
-		}
-
-		@Deprecated
-		public Long getLong(String key) {
-			return ArgUtil.parseAsLong(this.get(key));
-		}
-
-		@Deprecated
-		public BigDecimal getBigDecimal(String key) {
-			return ArgUtil.parseAsBigDecimal(this.get(key));
-		}
-
-		@SuppressWarnings("unchecked")
-		public MapModel getMap(String key) {
-			return new MapModel((Map<String, Object>) this.get(key));
-		}
-
-		@Deprecated
-		public MapModel(Map<String, Object> map) {
-			this.map = map;
-		}
-
-		@Deprecated
-		@Override
-		public Object toObject() {
-			return this.map;
-		}
-
-		@Deprecated
-		public <T> T as(Class<T> clazz) {
-			return JsonUtil.getMapper().convertValue(this.map, clazz);
-		}
-
+	public Object put(String key, Object value) {
+	    return this.map.put(key, value);
 	}
+
+	@Deprecated
+	public Object get(String key) {
+	    return this.map.get(key);
+	}
+
+	@Deprecated
+	public String getString(String key) {
+	    return ArgUtil.parseAsString(this.get(key));
+	}
+
+	@Deprecated
+	public Long getLong(String key) {
+	    return ArgUtil.parseAsLong(this.get(key));
+	}
+
+	@Deprecated
+	public BigDecimal getBigDecimal(String key) {
+	    return ArgUtil.parseAsBigDecimal(this.get(key));
+	}
+
+	@SuppressWarnings("unchecked")
+	public MapModel getMap(String key) {
+	    return new MapModel((Map<String, Object>) this.get(key));
+	}
+
+	@Deprecated
+	public MapModel(Map<String, Object> map) {
+	    this.map = map;
+	}
+
+	@Deprecated
+	@Override
+	public Object toObject() {
+	    return this.map;
+	}
+
+	@Deprecated
+	public <T> T as(Class<T> clazz) {
+	    return JsonUtil.getMapper().convertValue(this.map, clazz);
+	}
+
+    }
 
 }

@@ -1,4 +1,4 @@
-package com.boot.jx.postman.tg;
+package com.boot.jx.postman.wa360;
 
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.postman.PMConstants.CHANNEL_TYPE;
@@ -6,44 +6,19 @@ import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PMEnvironment.AChannelDetails;
 import com.fasterxml.jackson.annotation.JsonView;
 
-public class TelegramConfig extends AChannelDetails {
+public class WA360ConfigDetails extends AChannelDetails {
 
-    public TelegramConfig() {
-	super(CHANNEL_TYPE.TELEGRAM);
+    public WA360ConfigDetails() {
+	super(CHANNEL_TYPE.WA_360D);
     }
 
     private static final long serialVersionUID = -2397678752642150000L;
-    private String handler;
-    private String type;
+    private String number;
 
     @JsonView(PMEnvironment.ProtectedProperty.class)
-    private String accessToken;
+    private String apiKey;
     @JsonView(PMEnvironment.ProtectedProperty.class)
     private String webhookUrl;
-
-    public String getHandler() {
-	return handler;
-    }
-
-    public void setHandler(String handler) {
-	this.handler = handler;
-    }
-
-    public String getType() {
-	return type;
-    }
-
-    public void setType(String type) {
-	this.type = type;
-    }
-
-    public String getAccessToken() {
-	return accessToken;
-    }
-
-    public void setAccessToken(String accessToken) {
-	this.accessToken = accessToken;
-    }
 
     public String getWebhookUrl() {
 	return webhookUrl;
@@ -55,7 +30,7 @@ public class TelegramConfig extends AChannelDetails {
 
     @Override
     public String getLane() {
-	return this.handler;
+	return this.number;
     }
 
     @Override
@@ -80,6 +55,22 @@ public class TelegramConfig extends AChannelDetails {
 
     @Override
     public ContactType getContactType() {
-	return ContactType.TELEGRAM;
+	return ContactType.WHATSAPP;
+    }
+
+    public String getNumber() {
+	return number;
+    }
+
+    public void setNumber(String number) {
+	this.number = number;
+    }
+
+    public String getApiKey() {
+	return apiKey;
+    }
+
+    public void setApiKey(String apiKey) {
+	this.apiKey = apiKey;
     }
 }

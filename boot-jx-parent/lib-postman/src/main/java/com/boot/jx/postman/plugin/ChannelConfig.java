@@ -1,21 +1,23 @@
-package com.boot.jx.postman;
+package com.boot.jx.postman.plugin;
 
 import com.boot.jx.postman.PMEnvironment.AChannelConfig;
 import com.boot.jx.postman.PMEnvironment.AChannelDetails;
-import com.boot.jx.postman.fb.FacebookConfig;
-import com.boot.jx.postman.gupshup.GupShupConfig;
-import com.boot.jx.postman.tg.TelegramConfig;
-import com.boot.jx.postman.tw.TwitterConfig;
+import com.boot.jx.postman.fb.FacebookConfigDetails;
+import com.boot.jx.postman.gupshup.GupShupConfigDetails;
+import com.boot.jx.postman.tg.TelegramConfigDetails;
+import com.boot.jx.postman.tw.TwitterConfigDetails;
+import com.boot.jx.postman.wa360.WA360ConfigDetails;
 
 public class ChannelConfig extends AChannelConfig {
 
     private static final long serialVersionUID = -254797155595466825L;
     private String lane;
 
-    private FacebookConfig facebook;
-    private TwitterConfig twitter;
-    private TelegramConfig telegram;
-    private GupShupConfig gupshup;
+    private FacebookConfigDetails facebook;
+    private TwitterConfigDetails twitter;
+    private TelegramConfigDetails telegram;
+    private GupShupConfigDetails gupshup;
+    private WA360ConfigDetails wa360d;
 
     private boolean isDisabled;
     private boolean isPushAllowed;
@@ -27,6 +29,7 @@ public class ChannelConfig extends AChannelConfig {
 	this.contactType = channelConfig.getContactType();
 	this.channelType = channelConfig.getChannelType();
 	this.channel = channelConfig.getChannel();
+	this.channelKey = channelConfig.getChannelKey();
 	this.lane = channelConfig.getLane();
 	this.isPushAllowed = channelConfig.isPushAllowed();
 	this.isPushOnlyApproved = channelConfig.isPushOnlyApproved();
@@ -63,57 +66,57 @@ public class ChannelConfig extends AChannelConfig {
 	this.lane = lane;
     }
 
-    public FacebookConfig getFacebook() {
+    public FacebookConfigDetails getFacebook() {
 	return facebook;
     }
 
-    public void setFacebook(FacebookConfig facebook) {
+    public void setFacebook(FacebookConfigDetails facebook) {
 	this.facebook = facebook;
     }
 
-    public TwitterConfig getTwitter() {
+    public TwitterConfigDetails getTwitter() {
 	return twitter;
     }
 
-    public void setTwitter(TwitterConfig twitter) {
+    public void setTwitter(TwitterConfigDetails twitter) {
 	this.twitter = twitter;
     }
 
-    public TelegramConfig getTelegram() {
+    public TelegramConfigDetails getTelegram() {
 	return telegram;
     }
 
-    public void setTelegram(TelegramConfig telegram) {
+    public void setTelegram(TelegramConfigDetails telegram) {
 	this.telegram = telegram;
     }
 
-    public GupShupConfig getGupshup() {
+    public GupShupConfigDetails getGupshup() {
 	return gupshup;
     }
 
-    public void setGupshup(GupShupConfig gupshup) {
+    public void setGupshup(GupShupConfigDetails gupshup) {
 	this.gupshup = gupshup;
     }
 
-    public ChannelConfig from(FacebookConfig facebook) {
+    public ChannelConfig from(FacebookConfigDetails facebook) {
 	this.copy(facebook);
 	this.facebook = facebook;
 	return this;
     }
 
-    public ChannelConfig from(TwitterConfig twitter) {
+    public ChannelConfig from(TwitterConfigDetails twitter) {
 	this.copy(twitter);
 	this.twitter = twitter;
 	return this;
     }
 
-    public ChannelConfig from(TelegramConfig telegram) {
+    public ChannelConfig from(TelegramConfigDetails telegram) {
 	this.copy(telegram);
 	this.telegram = telegram;
 	return this;
     }
 
-    public ChannelConfig from(GupShupConfig gupshup) {
+    public ChannelConfig from(GupShupConfigDetails gupshup) {
 	this.copy(gupshup);
 	this.gupshup = gupshup;
 	return this;
@@ -131,4 +134,21 @@ public class ChannelConfig extends AChannelConfig {
 	this.isDisabled = isDisabled;
 	return this;
     }
+
+    public WA360ConfigDetails getWa360d() {
+	return wa360d;
+    }
+
+    public void setWa360d(WA360ConfigDetails wa360d) {
+	this.wa360d = wa360d;
+    }
+
+    public String getChannelKey() {
+	return channelKey;
+    }
+
+    public void setChannelKey(String channelKey) {
+	this.channelKey = channelKey;
+    }
+
 }
