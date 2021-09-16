@@ -47,7 +47,7 @@ public class ChannelPluginProvider {
 
     }
 
-    public static final Map<String, ChannelPlugin<?>> MAP = new HashMap<String, ChannelPlugin<?>>();
+    public static final Map<String, ChannelPlugin<? extends AChannelDetails>> MAP = new HashMap<String, ChannelPlugin<? extends AChannelDetails>>();
 
     public static <C extends AChannelDetails> void register(ChannelPlugin<C> channelPlugin) {
 	MAP.put(channelPlugin.getChannelType(), channelPlugin);
