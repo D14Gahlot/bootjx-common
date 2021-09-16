@@ -180,7 +180,7 @@ public class AppRequestFilter implements Filter {
 	    // Tenant Tracking
 	    String siteId = req.getHeader(TenantContextHolder.TENANT);
 	    if (StringUtils.isEmpty(siteId)) {
-		siteId = ArgUtil.parseAsString(request.getParameter(TenantContextHolder.TENANT));
+		siteId = ArgUtil.parseAsString(localCommonHttpRequest.getRequestParam(TenantContextHolder.TENANT));
 		if (siteId == null) {
 		    siteId = Urly.getSubDomainName(request.getServerName());
 		}
