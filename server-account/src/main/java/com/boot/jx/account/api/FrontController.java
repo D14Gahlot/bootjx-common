@@ -14,6 +14,7 @@ import com.boot.jx.account.AccountAdminService;
 import com.boot.jx.account.AccountSessionBean;
 import com.boot.jx.validation.AlphaNumValidator.ValidAlphaNum;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.Constants;
 
 @Controller
 public class FrontController {
@@ -41,8 +42,17 @@ public class FrontController {
     }
 
     @RequestMapping(value = { "/", "/front/", "/front/**" }, method = { RequestMethod.GET })
-    public String front(Model model, @RequestParam(required = false) String theme) {
+    public String front(Model model, @RequestParam(required = false) String domain) {
+
 	model.addAllAttributes(appCommonConfig.appAttributes());
+
+	if (ArgUtil.is(domain)) {
+	    model.addAttribute("APP_DOMAIN", domain);
+	    model.addAttribute("DOMAIN", domain);
+	} else {
+	    model.addAttribute("APP_DOMAIN", Constants.BLANK);
+	    model.addAttribute("DOMAIN", Constants.BLANK);
+	}
 
 	Authentication auth = AccountAdminService.getAuthentication();
 	if (ArgUtil.is(auth)) {
