@@ -57,7 +57,9 @@ public class ConnectorHandlerFactory extends ScopedBeanFactory<String, Connector
 	    this.send(outboxMessage);
 	}
 
-	public InboxMessage assignToAgent(InboxMessage inboxMessage);
+	default public InboxMessage assignToAgent(InboxMessage inboxMessage) {
+	    return inboxMessage;
+	}
 
 	default public boolean initSession(ChatSessionDoc session, InboxMessage inboxMessage) {
 	    return true;

@@ -2,6 +2,8 @@ package com.boot.jx.postman.model;
 
 import java.io.Serializable;
 
+import org.apache.commons.io.FilenameUtils;
+
 import com.boot.jx.swagger.ApiMockModelProperty;
 import com.boot.utils.ArgUtil;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -40,6 +42,9 @@ public class Attachment implements Serializable {
 
     public Attachment mediaURL(String mediaURL) {
 	this.mediaURL = mediaURL;
+	if(!ArgUtil.is(this.mediaName)) {
+	    this.mediaName = FilenameUtils.getName(mediaURL);
+	}
 	return this;
     }
 

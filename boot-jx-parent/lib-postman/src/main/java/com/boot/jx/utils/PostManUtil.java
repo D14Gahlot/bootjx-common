@@ -133,6 +133,10 @@ public class PostManUtil {
 	return String.format("%s:%s", chanelType, lane);
     }
 
+    public static String CHANNEL_ID(Contactable contactable) {
+	return CHANNEL_ID(contactable.getChannel(), contactable.getLane());
+    }
+
     public static String UNIQUE_API_KEY() {
 	return String.format("%s%s", UniqueID.generateString(), Random.randomAlphaNumeric(10));
     }

@@ -11,20 +11,27 @@ import com.boot.jx.dict.ContactType;
 import com.boot.jx.dict.FileFormat;
 import com.boot.jx.dict.FileType;
 import com.boot.jx.model.CommonFile;
+import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.jx.postman.PMConfiguration;
 import com.boot.jx.postman.PMConstants.CHANNEL_TYPE;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.client.PMFileStoreClient;
+import com.boot.jx.postman.client.TmplClient;
+import com.boot.jx.postman.doc.QuickMedia;
 import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.plugin.ChannelConfig;
+import com.boot.jx.postman.wa360.WA360Client;
 import com.boot.jx.postman.wa360.WA360Constants;
 import com.boot.jx.postman.wa360.WA360Constants.InBoundWrapperPaths;
+import com.boot.jx.postman.wa360.WA360Constants.OutBoundWrapperPaths;
 import com.boot.jx.postman.wa360.WA360InboundMedia;
 import com.boot.jx.rest.RestService;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.model.MapModel;
+import com.boot.utils.ArgUtil;
+import com.boot.utils.Constants;
 import com.boot.utils.JsonPath;
 
 @Component
@@ -41,6 +48,15 @@ public class WA360Connector implements ConnectorHandler {
     @Autowired
     private PMFileStoreClient pmFileStoreClient;
 
+    @Autowired
+    private TmplClient tmplClient;
+
+    @Autowired
+    private CommonMongoTemplate commonMongoTemplate;
+
+    @Autowired
+    private WA360Client wa360Client;
+
     @Override
     public void registerWebHook(ChannelConfig channelConfig) {
 	PMConfiguration config = environment.config();
@@ -50,16 +66,6 @@ public class WA360Connector implements ConnectorHandler {
 	restService.ajax(WA360Constants.BASE_URL).path("v1/configs/webhook")
 		.header(WA360Constants.D360_API_KEY, channelConfig.getWa360d().getApiKey())
 		.post(MapModel.createInstance().put("url", webhookUrl).toMap()).asMap();
-    }
-
-    @Override
-    public InboxMessage assignToAgent(InboxMessage inboxMessage) {
-	return null;
-    }
-
-    @Override
-    public void send(OutboxMessage outboxMessage) {
-
     }
 
     public InboxMessage toInboxMessage(String channelId, MapModel map) {
@@ -87,6 +93,20 @@ public class WA360Connector implements ConnectorHandler {
 
 	if ("text".equals(messageType)) {
 	    inboxMessage.setMessage(map.entry(InBoundWrapperPaths.MESSAGE_TEXT).asString());
+	} else if ("interactive".equals(messageType)) {
+	    String interactiveType = map.entry(InBoundWrapperPaths.INTERACTIVE_TYPE).asString();
+	    if ("button_reply".equals(interactiveType)) {
+		inboxMessage.form().put("reply_id", map.entry(InBoundWrapperPaths.INTERACTIVE_BUTTON_ID).asString());
+		inboxMessage.form().put("reply_title",
+			map.entry(InBoundWrapperPaths.INTERACTIVE_BUTTON_REPLY).asString());
+		inboxMessage.setMessage(ArgUtil.parseAsString(inboxMessage.form().get("reply_title"), Constants.BLANK));
+	    } else if ("list_reply".equals(interactiveType)) {
+		inboxMessage.form().put("reply_id", map.entry(InBoundWrapperPaths.INTERACTIVE_LIST_ID).asString());
+		inboxMessage.form().put("reply_title",
+			map.entry(InBoundWrapperPaths.INTERACTIVE_LIST_REPLY).asString());
+		inboxMessage.form().put("reply_desc", map.entry(InBoundWrapperPaths.INTERACTIVE_LIST_DESC).asString());
+	    }
+	    inboxMessage.setMessage(ArgUtil.parseAsString(inboxMessage.form().get("reply_title"), Constants.BLANK));
 	} else if ("image".equals(messageType)) {
 	    formatMedia(inboxMessage, map, channelConfig, InBoundWrapperPaths.IMAGE, FileType.IMAGE);
 	} else if ("document".equals(messageType)) {
@@ -116,6 +136,43 @@ public class WA360Connector implements ConnectorHandler {
 
 	inboxMessage.attachment(new Attachment().mediaURL(dstFile.getUrl()).mediaType(dstFile.getFileType())
 		.mediaSrc(srcFile.getUrl()).mediaCaption(media.getCaption()).mediaName(media.getFilename()));
+    }
+
+    private OutboxMessage resolveTemplate(OutboxMessage outboxMessage) {
+	if (ArgUtil.is(outboxMessage.getTemplate())) {
+	    QuickMedia templateReply = commonMongoTemplate.findById(outboxMessage.getTemplate(), QuickMedia.class);
+	    if (ArgUtil.is(templateReply)) {
+		if ("image".equalsIgnoreCase(templateReply.getType())) {
+		    outboxMessage.attachment(new Attachment().mediaURL(templateReply.getUrl())
+			    .mediaType(FileType.IMAGE.toString()).mediaCaption(templateReply.getTitle()));
+		    return outboxMessage;
+		}
+	    } else {
+		tmplClient.process(outboxMessage);
+		return outboxMessage;
+	    }
+	} else if (ArgUtil.is(outboxMessage.getTemplateId())) {
+	    // outboxMessage.setMessage(tmplClient.process(hsmTemplate.getTemplate(),
+	    // outboxMessage.getModel()));
+	    tmplClient.process(outboxMessage);
+	    return outboxMessage;
+	} else {
+	    return outboxMessage;
+	}
+	return outboxMessage;
+    }
+
+    @Override
+    public void send(OutboxMessage outboxMessage) {
+	try {
+	    resolveTemplate(outboxMessage);
+	    wa360Client.send(outboxMessage);
+	    outboxMessage.updateStatus(OutboxMessage.Status.SENT);
+	} catch (Exception e) {
+	    outboxMessage.updateStatus(OutboxMessage.Status.SENT_ERR);
+	    outboxMessage.logs().add(e.getMessage());
+	    LOGGER.error("SEND ERROR", e);
+	}
     }
 
 }

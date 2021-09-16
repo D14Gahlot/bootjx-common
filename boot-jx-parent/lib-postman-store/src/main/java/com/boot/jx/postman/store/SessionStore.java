@@ -217,6 +217,7 @@ public class SessionStore extends CommonDocStore {
 	public IMessageExtended toSessionMessage(ChatSessionDoc session) {
 		ChatContactDoc contact = getContact(session.getContactId());
 		InboxMessage inboxMessage = new InboxMessage();
+		inboxMessage.contact().copyFrom(contact);
 		inboxMessage.contact().setContactType(contact.getContactType());
 		inboxMessage.contact().setChannel(contact.getChannel());
 		inboxMessage.contact().setLane(ArgUtil.nonEmpty(session.getLane(), contact.getLane()));
