@@ -6,11 +6,13 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import com.boot.jx.logger.LoggerService;
 import com.boot.jx.rest.RestService;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.StringUtils;
@@ -18,6 +20,9 @@ import com.boot.utils.StringUtils;
 @Component
 public class CDNBuilder {
 
+    private static final Logger LOGGER = LoggerService.getLogger(CDNBuilder.class);
+
+    private static final String LATEST = "LATEST";
     public static Pattern PATTERN = Pattern
 	    .compile("(?<proto>.+)cdn.jsdelivr.net/gh/(?<org>.+)/(?<repo>.+)@(?<version>[-a-zA-Z0-9\\.]+)(?<path>.*)");
     public static String VERSION_URL = "https://api.github.com/repos/%s/%s/commits/%s?page=0&per_page=1";
@@ -26,7 +31,9 @@ public class CDNBuilder {
 
     public String latest(String cdnUrl) {
 	String cdnUrlNew = cdnMapper.get(cdnUrl);
-	if (ArgUtil.is(cdnUrlNew)) {
+	if (LATEST.equals(cdnUrlNew)) {
+	    return cdnUrl;
+	} else if (ArgUtil.is(cdnUrlNew)) {
 	    return cdnUrlNew;
 	} else {
 	    cdnMapper.put(cdnUrl, cdnUrl);
@@ -68,12 +75,19 @@ public class CDNBuilder {
 		    String pathV = matcher.group("path");
 		    if (!isValidSHA1(versionV)) {
 			String versionUrl = String.format(VERSION_URL, orgV, repoV, versionV);
-			Map<String, Object> resp = restService.ajax(versionUrl).get().asMap();
-			String sha = (String) resp.get("sha");
-			if (ArgUtil.is(sha)) {
+			String sha = null;
+			try {
+			    Map<String, Object> resp = restService.ajax(versionUrl).get().asMap();
+			    sha = (String) resp.get("sha");
+			} catch (Exception e) {
+			    LOGGER.error("Errror while fetching CDN version for {}" + versionUrl);
+			}
+			if (ArgUtil.is(sha) && !versionV.equals(sha)) {
 			    String url = String.format("%scdn.jsdelivr.net/gh/%s/%s@%s%s", protoV, orgV, repoV,
 				    StringUtils.trim(sha), pathV);
 			    cdnMapper.put(cdn.getKey(), url);
+			} else {
+			    cdnMapper.put(cdn.getKey(), LATEST);
 			}
 		    }
 
