@@ -91,7 +91,7 @@ public class EmpAuthService {
     public AgentResponseAuthDto loginByDomainToken(String domainName, String domainId, String username,
 	    String domainToken, boolean adminPanel) throws NoSuchAlgorithmException {
 	AgentDoc agent = getAgentByCodeAndStatus(username, "Y", adminPanel);
-	if (ArgUtil.is(agent)) {
+	if (!ArgUtil.is(agent)) {
 	    return null;
 	}
 
