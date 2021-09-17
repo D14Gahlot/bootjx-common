@@ -18,7 +18,7 @@ public class DefaultTenantConfigurer implements TenantAuthFilter {
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultTenantConfigurer.class);
 
     @Override
-    public boolean isAuthorizedTenantRequest(ApiRequestDetail apiRequest, CommonHttpRequest req, String traceId) {
+    public boolean filterTenantRequest(ApiRequestDetail apiRequest, CommonHttpRequest req, String traceId) {
 	LOGGER.debug("DefaultTenantConfigurer:isAuthorizedTenantRequest {}", traceId);
 	return true;
     }

@@ -1,6 +1,7 @@
 package com.boot.jx.filter;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -34,7 +35,7 @@ import com.boot.jx.logger.client.AuditServiceClient;
 import com.boot.jx.logger.events.RequestTrackEvent;
 import com.boot.jx.logger.events.RequestTrackEvent.Type;
 import com.boot.jx.rest.AppRequestContextInFilter;
-import com.boot.jx.rest.AppRequestInterfaces.ClientAuthFilter;
+import com.boot.jx.rest.AppRequestInterfaces.AppAuthFilter;
 import com.boot.jx.scope.tnt.TenantAuthContext;
 import com.boot.jx.scope.tnt.TenantAuthContext.TenantAuthFilter;
 import com.boot.jx.scope.tnt.TenantContextHolder;
@@ -93,7 +94,7 @@ public class AppRequestFilter implements Filter {
     // VendorAuthFilter vendorAuthFilter;
 
     @Autowired(required = false)
-    ClientAuthFilter clientAuthFilter;
+    List<AppAuthFilter> appAuthFilters;
 
     @Autowired(required = false)
     TenantResolver tenantResolver;
@@ -124,25 +125,27 @@ public class AppRequestFilter implements Filter {
 	    String authToken = localCommonHttpRequest.get(AppConstants.AUTH_TOKEN_XKEY);
 	    if (ArgUtil.is(authToken)) {
 		VendorAuthFilter vendorAuthFilter = vendorAuthContext.get();
-		return vendorAuthFilter.isAuthorizedVendorRequest(apiRequest, localCommonHttpRequest, traceId,
-			authToken);
+		return vendorAuthFilter.filterVendorRequest(apiRequest, localCommonHttpRequest, traceId, authToken);
 	    }
 	    return false;
 	}
 
 	if (apiRequest.isAuthenticateTenant()) {
 	    TenantAuthFilter tenantAuthFilter = tenantAuthContext.get();
-	    return tenantAuthFilter.isAuthorizedTenantRequest(apiRequest, localCommonHttpRequest, traceId);
-
+	    boolean conitnue = tenantAuthFilter.filterTenantRequest(apiRequest, localCommonHttpRequest, traceId);
+	    if (!conitnue) {
+		return conitnue;
+	    }
 	}
 
-	if (ArgUtil.is(apiRequest.getClientAuth())) {
-	    String authClientToken = localCommonHttpRequest.get(AppConstants.AUTH_CLIENT_TOKEN_XKEY);
-	    if (clientAuthFilter != null) {
-		return clientAuthFilter.isAuthorizedClientRequest(apiRequest, localCommonHttpRequest, traceId,
-			authClientToken);
+	if (ArgUtil.is(apiRequest.getPerms())) {
+	    if (appAuthFilters != null) {
+		for (AppAuthFilter appAuthFilter : appAuthFilters) {
+		    if (!appAuthFilter.filterAppRequest(apiRequest, localCommonHttpRequest, traceId)) {
+			return false;
+		    }
+		}
 	    }
-	    return false;
 	}
 
 	if (apiRequest.isUseAuthKey() && appConfig.isAppAuthEnabled()

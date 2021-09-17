@@ -18,7 +18,7 @@ public class TenantAuthContext extends TenantContext<TenantAuthFilter> {
     private static final long serialVersionUID = 8926326964205798155L;
 
     public interface TenantAuthFilter {
-	public boolean isAuthorizedTenantRequest(ApiRequestDetail apiRequest, CommonHttpRequest req, String traceId);
+	public boolean filterTenantRequest(ApiRequestDetail apiRequest, CommonHttpRequest req, String traceId);
     }
 
     @Autowired

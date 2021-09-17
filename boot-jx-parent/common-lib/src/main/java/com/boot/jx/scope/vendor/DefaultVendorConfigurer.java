@@ -23,7 +23,7 @@ public class DefaultVendorConfigurer implements VendorAuthFilter {
 	VendorAuthService vendorAuthService;
 
 	@Override
-	public boolean isAuthorizedVendorRequest(ApiRequestDetail apiRequest, CommonHttpRequest req, String traceId,
+	public boolean filterVendorRequest(ApiRequestDetail apiRequest, CommonHttpRequest req, String traceId,
 			String authToken) {
 		LOGGER.debug("isAuthVendorRequest {} {}", authToken, basicAuthUser);
 		return vendorAuthService.hasValidBasicAuth(traceId, authToken) && vendorAuthService.hasFeature(apiRequest)

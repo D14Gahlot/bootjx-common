@@ -28,9 +28,9 @@ public @interface ApiRequest {
 
     String feature() default Constants.BLANK;
 
-    String tracefilter() default Constants.BLANK;
+    String[] perms() default Constants.BLANK;
 
-    String clientAuth() default Constants.BLANK;
+    String tracefilter() default Constants.BLANK;
 
     boolean authenticateTenant() default false;
 

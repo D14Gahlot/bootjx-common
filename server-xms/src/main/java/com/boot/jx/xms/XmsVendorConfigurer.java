@@ -23,7 +23,7 @@ public class XmsVendorConfigurer implements TenantAuthFilter {
     private PMEnvironment pmEnvironment;
 
     @Override
-    public boolean isAuthorizedTenantRequest(ApiRequestDetail apiRequest, CommonHttpRequest req, String traceId) {
+    public boolean filterTenantRequest(ApiRequestDetail apiRequest, CommonHttpRequest req, String traceId) {
 	String apiKey = req.get(XmsConstants.X_API_KEY);
 	ClientApiKey apiKeyConfig = pmEnvironment.config().clientApiKey(apiKey);
 	return ArgUtil.areEqual(apiKey, apiKeyConfig.getKey());

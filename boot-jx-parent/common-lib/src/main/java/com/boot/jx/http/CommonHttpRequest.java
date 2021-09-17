@@ -508,8 +508,8 @@ public class CommonHttpRequest extends ACommonHttpRequest {
 	boolean useAuthKey;
 	String flow;
 	String feature;
+	String[] perms;
 	String traceFilter;
-	String clientAuth;
 	String deprecated;
 	Channel channel;
 	boolean initFlow;
@@ -571,14 +571,6 @@ public class CommonHttpRequest extends ACommonHttpRequest {
 	    this.traceFilter = traceFilter;
 	}
 
-	public String getClientAuth() {
-	    return clientAuth;
-	}
-
-	public void setClientAuth(String clientAuth) {
-	    this.clientAuth = clientAuth;
-	}
-
 	public String getDeprecated() {
 	    return deprecated;
 	}
@@ -611,6 +603,14 @@ public class CommonHttpRequest extends ACommonHttpRequest {
 	    this.initFlow = initFlow;
 	}
 
+	public String[] getPerms() {
+	    return perms;
+	}
+
+	public void setPerms(String[] perms) {
+	    this.perms = perms;
+	}
+
     }
 
     public ApiRequestDetail getApiRequest(HttpServletRequest req) {
@@ -623,12 +623,12 @@ public class CommonHttpRequest extends ACommonHttpRequest {
 	    detail.setFlow(x.flow());
 	    detail.setFeature(x.feature());
 	    detail.setTraceFilter(x.tracefilter());
-	    detail.setClientAuth(x.clientAuth());
 	    detail.setDeprecated(x.deprecated());
 	    detail.setResponeError(x.responeError());
 	    detail.setChannel(x.channel());
 	    detail.setInitFlow(x.initFlow());
 	    detail.setAuthenticateTenant(x.authenticateTenant());
+	    detail.setPerms(x.perms());
 	}
 
 	if (ArgUtil.isEmpty(detail.getType()) || RequestType.DEFAULT.equals(detail.getType())) {
