@@ -8,6 +8,7 @@ import java.util.regex.Pattern;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import com.boot.jx.rest.RestService;
@@ -50,26 +51,41 @@ public class CDNBuilder {
     @Autowired
     private RestService restService;
 
+    public boolean isValidSHA1(String s) {
+	return s.matches("^[a-fA-F0-9]{40}$");
+    }
+
     @Async
     public void update() {
 	for (Entry<String, String> cdn : cdnMapper.entrySet()) {
-	    Matcher matcher = PATTERN.matcher(cdn.getKey());
-	    if (matcher.find()) {
-		String protoV = matcher.group("proto");
-		String orgV = matcher.group("org");
-		String repoV = matcher.group("repo");
-		String versionV = matcher.group("version");
-		String pathV = matcher.group("path");
-		String versionUrl = String.format(VERSION_URL, orgV, repoV, versionV);
-		Map<String, Object> resp = restService.ajax(versionUrl).get().asMap();
-		String sha = (String) resp.get("sha");
-		if (ArgUtil.is(sha)) {
-		    String url = String.format("%scdn.jsdelivr.net/gh/%s/%s@%s%s", protoV, orgV, repoV,
-			    StringUtils.trim(sha), pathV);
-		    cdnMapper.put(cdn.getKey(), url);
+	    if (ArgUtil.areEqual(cdn.getKey(), cdn.getValue())) {
+		Matcher matcher = PATTERN.matcher(cdn.getKey());
+		if (matcher.find()) {
+		    String protoV = matcher.group("proto");
+		    String orgV = matcher.group("org");
+		    String repoV = matcher.group("repo");
+		    String versionV = matcher.group("version");
+		    String pathV = matcher.group("path");
+		    if (!isValidSHA1(versionV)) {
+			String versionUrl = String.format(VERSION_URL, orgV, repoV, versionV);
+			Map<String, Object> resp = restService.ajax(versionUrl).get().asMap();
+			String sha = (String) resp.get("sha");
+			if (ArgUtil.is(sha)) {
+			    String url = String.format("%scdn.jsdelivr.net/gh/%s/%s@%s%s", protoV, orgV, repoV,
+				    StringUtils.trim(sha), pathV);
+			    cdnMapper.put(cdn.getKey(), url);
+			}
+		    }
+
 		}
 	    }
+
 	}
+    }
+
+    @Scheduled(fixedDelay = 5000)
+    public void updateJob() {
+	this.update();
     }
 
 }
