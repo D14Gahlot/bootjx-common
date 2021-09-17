@@ -61,10 +61,12 @@ public class AdminAuthController {
 	    @RequestParam(required = false) String domainUser) throws NoSuchAlgorithmException {
 
 	if (ArgUtil.is(domainName) && ArgUtil.is(domainId) && ArgUtil.is(domainToken)) {
-	    AgentResponseAuthDto agent = authService.loginByDomainToken(domainName, domainId, domainUser,
-		    domainToken, true);
-	    sessionService.login(request, agent, domainToken);
-	    return "redirect:/app/home";
+	    AgentResponseAuthDto agent = authService.loginByDomainToken(domainName, domainId, domainUser, domainToken,
+		    true);
+	    if (ArgUtil.is(agent)) {
+		sessionService.login(request, agent, domainToken);
+		return "redirect:/app/home";
+	    }
 	}
 
 	model.addAllAttributes(appCommonConfig.appAttributes());
@@ -182,8 +184,7 @@ public class AdminAuthController {
     public ApiResponse<Map<String, Object>, AgentResponseAuthDto> login(@RequestParam String username,
 	    @RequestParam String password, HttpServletRequest request) throws NoSuchAlgorithmException {
 	username = ArgUtil.parseAsString(username, Constants.BLANK);
-	ApiResponse<Map<String, Object>, AgentResponseAuthDto> x = authService.empLogin(username, password,
-		true);
+	ApiResponse<Map<String, Object>, AgentResponseAuthDto> x = authService.empLogin(username, password, true);
 	if (ArgUtil.parseAsBoolean(x.getData().get("success"), false)) {
 	    x.redirectUrl(appConfig.getAppPrefix() + "/app/home");
 

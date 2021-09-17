@@ -69,7 +69,8 @@ public class AgentAuthController {
     @Autowired
     private EmpAuthService authService;
 
-    @RequestMapping(value = { "/app/home", "/", "", "/app/**" }, method = { RequestMethod.POST, RequestMethod.GET })
+    @RequestMapping(value = { "/app/home", "/", "", "/app/**", "/auth/**" },
+	    method = { RequestMethod.POST, RequestMethod.GET })
     public String home(HttpServletRequest request, Model model, @RequestParam(required = false) String domainName,
 	    @RequestParam(required = false) String domainId, @RequestParam(required = false) String domainToken,
 	    @RequestParam(required = false) String domainUser) throws NoSuchAlgorithmException {
@@ -77,7 +78,9 @@ public class AgentAuthController {
 	if (ArgUtil.is(domainName) && ArgUtil.is(domainId) && ArgUtil.is(domainToken)) {
 	    AgentResponseAuthDto agent = authService.loginByDomainToken(domainName, domainId, domainUser, domainToken,
 		    true);
-	    sessionService.login(request, agent, domainToken);
+	    if (ArgUtil.is(agent)) {
+		sessionService.login(request, agent, domainToken);
+	    }
 	    return "redirect:/app/home";
 	}
 

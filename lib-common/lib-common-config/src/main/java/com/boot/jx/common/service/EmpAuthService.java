@@ -236,6 +236,7 @@ public class EmpAuthService {
 	userLoginToken.setDomainName(domainName);
 	userLoginToken.setDomainId(domainId);
 	userLoginToken.setDomainToken(builder.toHMAC().output());
+	userLoginToken.setDomainUser(username);
 	userLoginToken.setApp(app);
 	return userLoginToken;
     }
