@@ -4,7 +4,7 @@
 
 <head>
 <meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
-<title>Reset Password</title>
+<title>Password Reset for [[${service}]] account</title>
 <meta name="description" content="Reset Password Email Template.">
 <style type="text/css">
 a:hover {
@@ -29,9 +29,9 @@ a:hover {
 					</tr>
 					<tr>
 						<td style="text-align: center;"><a
-							href="https://app.mehery.com" title="logo" target="_blank">
+							th:href="'https://' + ${website}" title="logo" target="_blank">
 								<img width="60"
-								src="https://cdn.jsdelivr.net/gh/mehery-soccom/mehery-web@gh-pages/dist/android-chrome-192x192.png"
+								th:src="${logo}"
 								title="logo" alt="logo">
 						</a></td>
 					</tr>
@@ -57,7 +57,7 @@ a:hover {
 											We cannot simply send you your old password. A unique link to
 											reset your password has been generated for you. To reset your
 											password, click the following link and follow the
-											instructions.</p> <a th:href="'https://' + ${tnt} + '.mehery.com/' + ${panel} + '/auth/resetpass?page=setpass&username=' + ${username} + '&token=' + ${otp} + '&stamp=0'"
+											instructions.</p> <a th:href="${panel}"
 										style="background: #20e277; text-decoration: none !important; font-weight: 500; margin-top: 35px; color: #fff; text-transform: uppercase; font-size: 14px; padding: 10px 24px; display: inline-block; border-radius: 50px;">Reset
 											Password</a>
 									</td>
@@ -74,7 +74,7 @@ a:hover {
 						<td style="text-align: center;">
 							<p
 								style="font-size: 14px; color: rgba(69, 80, 86, 0.7411764705882353); line-height: 18px; margin: 0 0 0;">
-								&copy; <strong>www.mehery.com</strong>
+								&copy; <strong>[[${website}]]</strong>
 							</p>
 						</td>
 					</tr>

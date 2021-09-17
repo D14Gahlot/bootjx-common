@@ -18,6 +18,7 @@ import com.boot.jx.common.dto.AgentResponseAuthDto;
 import com.boot.jx.common.dto.DepartmentResponseAuthDto;
 import com.boot.jx.common.dto.UserLoginToken;
 import com.boot.jx.common.store.AgentStore;
+import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.client.PostManClient;
 import com.boot.jx.postman.model.Email;
 import com.boot.jx.postman.model.MessageBox;
@@ -51,6 +52,9 @@ public class EmpAuthService {
 
     @Autowired
     private AppConfig appConfig;
+
+    @Autowired
+    private PMEnvironment pmEnvironment;
 
     private AgentDoc validateAgent(String username, String passsword, boolean admin) throws NoSuchAlgorithmException {
 	if (ArgUtil.isEmpty(passsword)) {
@@ -111,9 +115,19 @@ public class EmpAuthService {
 	agent.setAgent_otp(Random.randomAlphaNumeric(10));
 	mongoTemplate.save(agent);
 
-	postManClient.send(new MessageBox().push(new Email().to(agent.getAgent_email()).template("reset-password")
+	String app = admin ? "admin" : "agent";
+	String domain = AppContextUtil.getTenant();
+	postManClient.send(new MessageBox().push(new Email().to(agent.getAgent_email()).template("agent-reset-pass")
 		.put("otp", agent.getAgent_otp()).put("username", agent.getAgent_code())
-		.put("tnt", AppContextUtil.getTenant()).put("panel", admin ? "admin" : "agent")));
+		.put("logo", pmEnvironment.get("mry.prop.logo.bg-x-icon").asString())
+		.put("website", pmEnvironment.get("mry.prop.service.website").asString())
+		.put("service", pmEnvironment.get("mry.prop.service.name").asString())
+		.put("serviceDomain", pmEnvironment.get("mry.prop.service.domain").asString())
+		.put("link",
+			String.format("https://%s.%s.com/%s/auth/resetpass?page=setpass&username=%s&token=%s&stamp=0",
+				domain, pmEnvironment.get("mry.prop.service.domain").asString(), app,
+				agent.getAgent_code(), agent.getAgent_otp()))
+		.put("tnt", domain).put("panel", app).put("contactName", agent.getAgent_name())));
 	return true;
     }
 

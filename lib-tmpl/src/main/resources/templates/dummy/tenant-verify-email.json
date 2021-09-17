@@ -1,6 +1,8 @@
 {
+	"contactName" : "Ramesh",
 	"link" : "https://app.cherrybase.com/account/verify-link?code=%s&account=%s",
 	"service": "CherryBase",
 	"website": "www.cherrybase.com",
-	"logo" : "https://cdn.jsdelivr.net/gh/cherrybase/cherrybase.github.io@latest/favicon/android-chrome-192x192.png"
+	"logo" : "https://cdn.jsdelivr.net/gh/cherrybase/cherrybase.github.io@14a08ee2f710d7274ef18ba3219f3b4e21b81860/brand/bg-x-icon.png",
+	"serviceDomain" : "cherrybase.com"
 }

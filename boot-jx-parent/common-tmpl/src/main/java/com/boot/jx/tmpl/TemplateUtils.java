@@ -156,7 +156,13 @@ public class TemplateUtils {
 		templateFiles.put(fileCacheKey, specficFile);
 		return specficFile;
 	    } else {
-		templateFiles.put(fileCacheKey, CHECKED);
+		 specficFile = getValidTemplateFile(file, "shared", locale, contactType, false);
+		if (ArgUtil.is(specficFile)) {
+		    templateFiles.put(fileCacheKey, specficFile);
+		    return specficFile;
+		} else {
+		    templateFiles.put(fileCacheKey, CHECKED);
+		}
 	    }
 	}
 
@@ -170,12 +176,19 @@ public class TemplateUtils {
 	    templateFilesExternal.put(fileCacheKey, jaxStaticContext + "/templates/" + specficFile);
 	    return jaxStaticContext + "/templates/" + specficFile;
 	} else {
-	    log.error("Template Not Found {}", fileCacheKey);
-	    if (!ArgUtil.is(fileCacheKey)) {
-		throw new PostManException("Template Not Found");
+	    specficFile = getValidTemplateFile(file, "shared", locale, contactType, true);
+	    if (ArgUtil.is(specficFile)) {
+		templateFilesExternal.put(fileCacheKey, jaxStaticContext + "/templates/" + specficFile);
+		return jaxStaticContext + "/templates/" + specficFile;
+	    } else {
+		log.error("Template Not Found {}", fileCacheKey);
+		if (!ArgUtil.is(fileCacheKey)) {
+		    throw new PostManException("Template Not Found");
+		}
+		return null;
 	    }
-	    return null;
 	}
+
     }
 
     private String getValidTemplateFile(String file, String tnt, Locale locale, ContactType contactType,
