@@ -70,7 +70,16 @@ public class AgentAuthController {
     private EmpAuthService authService;
 
     @RequestMapping(value = { "/app/home", "/", "", "/app/**" }, method = { RequestMethod.POST, RequestMethod.GET })
-    public String home(Model model, @RequestParam(required = false) String theme) {
+    public String home(HttpServletRequest request, Model model, @RequestParam(required = false) String domainName,
+	    @RequestParam(required = false) String domainId, @RequestParam(required = false) String domainToken,
+	    @RequestParam(required = false) String domainUser) throws NoSuchAlgorithmException {
+
+	if (ArgUtil.is(domainName) && ArgUtil.is(domainId) && ArgUtil.is(domainToken)) {
+	    AgentResponseAuthDto agent = authService.loginByDomainToken(domainName, domainId, domainUser, domainToken,
+		    true);
+	    sessionService.login(request, agent, domainToken);
+	    return "redirect:/app/home";
+	}
 
 	if (!ArgUtil.is(agentSession.getAgentCode())) {
 	    return "redirect:/auth/logout";
@@ -189,7 +198,7 @@ public class AgentAuthController {
     private AgentAuthProvider agentAuthProvider;
 
     @Autowired
-    private AgentSessionService agentSessionService;
+    private AgentSessionService sessionService;
 
     @Autowired
     private StompTunnelSessionManager stompTunnelSessionManager;
@@ -199,7 +208,7 @@ public class AgentAuthController {
     public ApiResponse<Map<String, Object>, AgentResponseAuthDto> login(@RequestParam String username,
 	    @RequestParam String password, HttpServletRequest request) throws NoSuchAlgorithmException {
 	username = ArgUtil.parseAsString(username, Constants.BLANK);
-	ApiResponse<Map<String, Object>, AgentResponseAuthDto> x = authService.agentLogin(username, password, false);
+	ApiResponse<Map<String, Object>, AgentResponseAuthDto> x = authService.empLogin(username, password, false);
 	if (ArgUtil.parseAsBoolean(x.getData().get("success"), false)) {
 	    x.redirectUrl(appConfig.getAppPrefix() + "/app/home");
 	    AgentResponseAuthDto agent = x.getMeta();
@@ -209,7 +218,7 @@ public class AgentAuthController {
 		token.setDetails(new WebAuthenticationDetails(request));
 		Authentication authentication = agentAuthProvider.authenticate(token);
 		SecurityContextHolder.getContext().setAuthentication(authentication);
-		agentSessionService.updateLogin(agent);
+		sessionService.updateLogin(agent);
 		stompTunnelSessionManager.registerUser(agent.getAgent_code(), agent.getDept().getDept_code(),
 			PMStoreConstants.NO_DEPT);
 
@@ -233,10 +242,10 @@ public class AgentAuthController {
 	    @RequestParam(required = false) Boolean status) {
 	BuilderMap meta = MapBuilder.map();
 	if (ArgUtil.is(status)) {
-	    agentSessionService.setOnline(status.booleanValue());
+	    sessionService.setOnline(status.booleanValue());
 	    meta.put("isOnline", status);
 	}
-	return ApiResponse.buildResults(agentSessionService.getAgentSessions(), meta.toMap());
+	return ApiResponse.buildResults(sessionService.getAgentSessions(), meta.toMap());
     }
 
 }

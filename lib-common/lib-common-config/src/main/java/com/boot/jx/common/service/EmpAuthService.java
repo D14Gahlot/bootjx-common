@@ -16,6 +16,7 @@ import com.boot.jx.common.doc.AgentDoc;
 import com.boot.jx.common.doc.DepartmentDoc;
 import com.boot.jx.common.dto.AgentResponseAuthDto;
 import com.boot.jx.common.dto.DepartmentResponseAuthDto;
+import com.boot.jx.common.dto.UserLoginToken;
 import com.boot.jx.common.store.AgentStore;
 import com.boot.jx.postman.client.PostManClient;
 import com.boot.jx.postman.model.Email;
@@ -86,10 +87,14 @@ public class EmpAuthService {
     public AgentResponseAuthDto loginByDomainToken(String domainName, String domainId, String username,
 	    String domainToken, boolean adminPanel) throws NoSuchAlgorithmException {
 	AgentDoc agent = getAgentByCodeAndStatus(username, "Y", adminPanel);
+	if (ArgUtil.is(agent)) {
+	    return null;
+	}
 
 	String secret = appConfig.prop("mry.app.login.secret");
-	HashBuilder builder = new HashBuilder().interval(10000).secret(secret)
-		.message(String.format("%s@%s:%s", username, AppContextUtil.getTenant(), domainId));
+
+	HashBuilder builder = new HashBuilder().interval(10000).secret(secret).message(
+		String.format("%s@%s:%s#%s", username, AppContextUtil.getTenant(), domainId, agent.getAuthKey()));
 
 	if (ArgUtil.is(agent) && builder.validate(domainToken)) {
 	    DepartmentDoc dept = agentStore.findDepartmentById(agent.getDept_id());
@@ -119,6 +124,7 @@ public class EmpAuthService {
 	    agent.setAdmin(true);
 	    agent.setSuperAdmin(true);
 	    agent.setAgent_password(superAdminPass);
+	    agent.setAuthKey(appConfig.prop("mry.app.login.key"));
 	    return agent;
 	}
 
@@ -143,7 +149,7 @@ public class EmpAuthService {
 	}
 	agent.setAgent_password(CryptoUtil.getSHA2Hash(newpasssword));
 	agent.setAgent_otp(null);
-	mongoTemplate.save(agent);
+	agentStore.save(agent);
 	return true;
     }
 
@@ -178,7 +184,7 @@ public class EmpAuthService {
 	return x;
     }
 
-    public ApiResponse<Map<String, Object>, AgentResponseAuthDto> agentLogin(String username, String password,
+    public ApiResponse<Map<String, Object>, AgentResponseAuthDto> empLogin(String username, String password,
 	    boolean admin) throws NoSuchAlgorithmException {
 	AgentResponseAuthDto agent = loginAgent(username, password, admin);
 	if (ArgUtil.is(agent)) {
@@ -187,5 +193,36 @@ public class EmpAuthService {
 	    return ApiResponse.buildData(MapBuilder.map().put("success", false).toMap(), agent).statusKey("ERROR")
 		    .message("Username or Password is incorrect");
 	}
+    }
+
+    public UserLoginToken createAgentLoginToken(String username, String password, String domainName, String domainId,
+	    String app) throws NoSuchAlgorithmException {
+	UserLoginToken userLoginToken = new UserLoginToken();
+	AgentDoc agent = validateAgent(username, password, "admin".equals(app));
+	if (ArgUtil.is(agent)) {
+	    String secret = appConfig.prop("mry.app.login.secret");
+	    HashBuilder builder = new HashBuilder().interval(10000).secret(secret).message(
+		    String.format("%s@%s:%s#%s", username, AppContextUtil.getTenant(), domainId, agent.getAuthKey()));
+	    userLoginToken.setDomainName(domainName);
+	    userLoginToken.setDomainId(domainId);
+	    userLoginToken.setDomainToken(builder.toHMAC().output());
+	    userLoginToken.setDomainUser(username);
+	    userLoginToken.setApp(app);
+	}
+	return userLoginToken;
+    }
+
+    public UserLoginToken createSuperLoginToken(String username, String domainName, String domainId, String app)
+	    throws NoSuchAlgorithmException {
+	UserLoginToken userLoginToken = new UserLoginToken();
+	String secret = appConfig.prop("mry.app.login.secret");
+	String authKey = appConfig.prop("mry.app.login.key");
+	HashBuilder builder = new HashBuilder().interval(10000).secret(secret)
+		.message(String.format("%s@%s:%s#%s", username, AppContextUtil.getTenant(), domainId, authKey));
+	userLoginToken.setDomainName(domainName);
+	userLoginToken.setDomainId(domainId);
+	userLoginToken.setDomainToken(builder.toHMAC().output());
+	userLoginToken.setApp(app);
+	return userLoginToken;
     }
 }

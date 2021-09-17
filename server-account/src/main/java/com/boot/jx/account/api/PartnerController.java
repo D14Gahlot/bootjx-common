@@ -32,6 +32,8 @@ import com.boot.jx.account.doc.SignupContact;
 import com.boot.jx.api.ApiFieldError;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.api.ApiResponseUtil;
+import com.boot.jx.common.dto.UserLoginToken;
+import com.boot.jx.common.service.EmpAuthService;
 import com.boot.jx.http.CommonHttpRequest;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.utils.ArgUtil;
@@ -64,6 +66,9 @@ public class PartnerController {
     @Autowired
     private PMEnvironment env;
 
+    @Autowired
+    private EmpAuthService empAuthService;
+
     @RequestMapping(value = { "", "/", "/**", "/auth/**", "/app/**" }, method = { RequestMethod.GET })
     public String home(Model model, @RequestParam(required = false) String theme) {
 	String tnt = AppContextUtil.getTenant();
@@ -90,7 +95,8 @@ public class PartnerController {
     }
 
     @RequestMapping(value = { "/app/goto/{domain}/{panel}" }, method = { RequestMethod.GET })
-    public String gotopanel(Model model, @PathVariable String domain, @PathVariable String panel) {
+    public String gotopanel(Model model, @PathVariable String domain, @PathVariable String panel)
+	    throws NoSuchAlgorithmException {
 	String tnt = AppContextUtil.getTenant();
 	if (!tnt.equals("app")) {
 	    return "redirect:" + String.format("https://app.%s/%s/auth/direct",
@@ -101,16 +107,15 @@ public class PartnerController {
 	model.addAttribute("FORM_URL", String.format("https://%s.%s/%s/auth/direct", domain,
 		env.get("mry.prop.service.domain").asString(), panel));
 
-	String secret = appConfig.prop("mry.app.login.secret");
 	if (ArgUtil.is(adminSessionBean.domainUser())) {
 	    for (DomainDoc domainDoc : adminSessionBean.domainUser().getDomains()) {
+		UserLoginToken userLoginToken = empAuthService.createSuperLoginToken("superadmin", domain,
+			domainDoc.getId(), "admin");
 		if (ArgUtil.isEqual(domainDoc.getDomain(), domain)) {
-		    HashBuilder builder = new HashBuilder().interval(10000).secret(secret)
-			    .message(String.format("%s@%s:%s", "superadmin", domain, domainDoc.getId()));
-		    model.addAttribute("DOMAIN_USER", "superadmin");
-		    model.addAttribute("DOMAIN_NAME", domainDoc.getDomain());
-		    model.addAttribute("DOMAIN_ID", domainDoc.getId());
-		    model.addAttribute("DOMAIN_TOKEN", builder.toHMAC().output());
+		    model.addAttribute("DOMAIN_USER", userLoginToken.getDomainUser());
+		    model.addAttribute("DOMAIN_NAME", userLoginToken.getDomainName());
+		    model.addAttribute("DOMAIN_ID", userLoginToken.getDomainId());
+		    model.addAttribute("DOMAIN_TOKEN", userLoginToken.getDomainToken());
 		}
 	    }
 	}

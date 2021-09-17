@@ -7,11 +7,13 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import com.boot.jx.AppConfigPackage.AppCommonConfig;
 import com.boot.jx.account.AccountAdminService;
 import com.boot.jx.account.AccountSessionBean;
+import com.boot.jx.account.doc.AccountStore;
+import com.boot.jx.account.doc.DomainDoc;
+import com.boot.jx.http.CommonHttpRequest;
 import com.boot.jx.validation.AlphaNumValidator.ValidAlphaNum;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.Constants;
@@ -24,6 +26,12 @@ public class FrontController {
 
     @Autowired
     private AccountSessionBean adminSessionBean;
+
+    @Autowired
+    private CommonHttpRequest commonHttpRequest;
+
+    @Autowired
+    AccountStore accountStore;
 
     @RequestMapping(value = { "/account", "/account/**" }, method = { RequestMethod.GET })
     public String account(Model model) {
@@ -42,13 +50,24 @@ public class FrontController {
     }
 
     @RequestMapping(value = { "/", "/front/", "/front/**" }, method = { RequestMethod.GET })
-    public String front(Model model, @RequestParam(required = false) String domain) {
-
+    public String front(Model model) {
 	model.addAllAttributes(appCommonConfig.appAttributes());
 
-	if (ArgUtil.is(domain)) {
-	    model.addAttribute("APP_DOMAIN", domain);
-	    model.addAttribute("DOMAIN", domain);
+	String domainName = commonHttpRequest.get("domain");
+	String domainId = null;
+
+	if (ArgUtil.is(domainName)) {
+	    commonHttpRequest.setCookie("domain", domainName);
+	    DomainDoc domainDoc = accountStore.findDomainByName(domainName);
+	    if (ArgUtil.is(domainDoc)) {
+		domainId = domainDoc.getId();
+	    }
+	}
+
+	if (ArgUtil.is(domainName)) {
+	    model.addAttribute("APP_DOMAIN", domainName);
+	    model.addAttribute("APP_DOMAIN_ID", domainId);
+	    model.addAttribute("DOMAIN", domainName);
 	} else {
 	    model.addAttribute("APP_DOMAIN", Constants.BLANK);
 	    model.addAttribute("DOMAIN", Constants.BLANK);

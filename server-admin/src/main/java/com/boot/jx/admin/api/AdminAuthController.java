@@ -43,7 +43,7 @@ public class AdminAuthController {
     private CommonHttpRequest commonHttpRequest;
 
     @Autowired
-    private EmpAuthService agentLoginService;
+    private EmpAuthService authService;
 
     @Autowired
     private AppCommonConfig appCommonConfig;
@@ -61,7 +61,7 @@ public class AdminAuthController {
 	    @RequestParam(required = false) String domainUser) throws NoSuchAlgorithmException {
 
 	if (ArgUtil.is(domainName) && ArgUtil.is(domainId) && ArgUtil.is(domainToken)) {
-	    AgentResponseAuthDto agent = agentLoginService.loginByDomainToken(domainName, domainId, domainUser,
+	    AgentResponseAuthDto agent = authService.loginByDomainToken(domainName, domainId, domainUser,
 		    domainToken, true);
 	    sessionService.login(request, agent, domainToken);
 	    return "redirect:/app/home";
@@ -88,7 +88,7 @@ public class AdminAuthController {
 	try {
 	    if ("resetpass".equalsIgnoreCase(action)) {
 		String username = ArgUtil.parseAsString(commonHttpRequest.get("username"), Constants.BLANK);
-		ApiResponse<Map<String, Object>, String> x = agentLoginService.agentResetPass(username, true);
+		ApiResponse<Map<String, Object>, String> x = authService.agentResetPass(username, true);
 		if (ArgUtil.parseAsBoolean(x.getData().get("success"), false)) {
 		    status = "SUCCESS";
 		    message = "Link to reset password sent on registered email.";
@@ -110,7 +110,7 @@ public class AdminAuthController {
 			status = "ERROR";
 			message = "Please enter valid password";
 		    } else if (confirmpassword.equals(newpassword)) {
-			ApiResponse<Map<String, Object>, String> x = agentLoginService.agentSetPass(username, token,
+			ApiResponse<Map<String, Object>, String> x = authService.agentSetPass(username, token,
 				newpassword, true);
 			if (ArgUtil.parseAsBoolean(x.getData().get("success"), false)) {
 			    status = "SUCCESS";
@@ -182,7 +182,7 @@ public class AdminAuthController {
     public ApiResponse<Map<String, Object>, AgentResponseAuthDto> login(@RequestParam String username,
 	    @RequestParam String password, HttpServletRequest request) throws NoSuchAlgorithmException {
 	username = ArgUtil.parseAsString(username, Constants.BLANK);
-	ApiResponse<Map<String, Object>, AgentResponseAuthDto> x = agentLoginService.agentLogin(username, password,
+	ApiResponse<Map<String, Object>, AgentResponseAuthDto> x = authService.empLogin(username, password,
 		true);
 	if (ArgUtil.parseAsBoolean(x.getData().get("success"), false)) {
 	    x.redirectUrl(appConfig.getAppPrefix() + "/app/home");
@@ -212,7 +212,7 @@ public class AdminAuthController {
     public ApiResponse<Map<String, Object>, AgentResponseAuthDto> agentLogin(@RequestParam String username,
 	    @RequestParam String password, @RequestParam(required = false) boolean admin)
 	    throws NoSuchAlgorithmException {
-	return agentLoginService.agentLogin(username, password, admin);
+	return authService.empLogin(username, password, admin);
     }
 
     @Deprecated
@@ -220,7 +220,7 @@ public class AdminAuthController {
     @RequestMapping(value = "/auth/agent/pass/reset", method = { RequestMethod.POST })
     public ApiResponse<Map<String, Object>, String> agentResetPass(@RequestParam String username,
 	    @RequestParam(required = false) boolean admin) throws NoSuchAlgorithmException {
-	return agentLoginService.agentResetPass(username, admin);
+	return authService.agentResetPass(username, admin);
     }
 
     @Deprecated
@@ -229,6 +229,6 @@ public class AdminAuthController {
     public ApiResponse<Map<String, Object>, String> agentSetPass(@RequestParam String username,
 	    @RequestParam String password, @RequestParam String newpassword,
 	    @RequestParam(required = false) boolean admin) throws NoSuchAlgorithmException {
-	return agentLoginService.agentSetPass(username, password, newpassword, admin);
+	return authService.agentSetPass(username, password, newpassword, admin);
     }
 }

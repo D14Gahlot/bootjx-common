@@ -1,17 +1,11 @@
 package com.boot.jx.account.api;
 
 import java.security.NoSuchAlgorithmException;
-import java.util.UUID;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -19,15 +13,10 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.boot.jx.AppConfigPackage.AppCommonConfig;
 import com.boot.jx.account.AccountAdminService;
-import com.boot.jx.account.doc.DomainUserDoc;
-import com.boot.jx.account.doc.AccountMeta;
-import com.boot.jx.account.doc.AccountStore;
-import com.boot.jx.account.doc.SignupContact;
-import com.boot.jx.api.ApiFieldError;
 import com.boot.jx.api.ApiResponse;
-import com.boot.jx.api.ApiResponseUtil;
+import com.boot.jx.common.dto.UserLoginToken;
+import com.boot.jx.common.service.EmpAuthService;
 import com.boot.utils.ArgUtil;
-import com.boot.utils.CryptoUtil;
 
 @Controller
 @RequestMapping("/user")
@@ -37,10 +26,7 @@ public class UserController {
     private AppCommonConfig appCommonConfig;
 
     @Autowired
-    private AccountAdminService sessionService;
-
-    @Autowired
-    private AccountStore accountStore;
+    private EmpAuthService empAuthService;
 
     @RequestMapping(value = { "/auth/**", "/app/**" }, method = { RequestMethod.GET })
     public String home(Model model, @RequestParam(required = false) String theme) {
@@ -61,86 +47,11 @@ public class UserController {
     }
 
     @ResponseBody
-    @RequestMapping(value = { "/pub/register" }, method = { RequestMethod.POST })
-    public ApiResponse<Object, Object> register(Model model, HttpServletRequest request,
-	    HttpServletResponse httpServletResponse, @RequestBody @Valid SignupContact signupContact) {
-
-	DomainUserDoc account = accountStore.findOneByEmail(signupContact.getEmail(), DomainUserDoc.class);
-	if (ArgUtil.is(account)) {
-	    ApiResponseUtil.throwDuplicateInputException("Email address already in use. Try reset password.",
-		    new ApiFieldError().obzect("signupContact").field("email").codeKey("ValidEmailDuplicate")
-			    .description("Email address already in use."));
-	}
-
-	AccountMeta keys = new AccountMeta();
-	keys.setEmailVerificationCode(UUID.randomUUID().toString());
-
-	account = new DomainUserDoc();
-	account.setContact(signupContact);
-	account.setMeta(keys);
-
-	accountStore.save(account);
-	sessionService.sendResetMail(account, "tenant-verify-email");
-
-	return ApiResponse.build().message("Verification email sent");
-    }
-
-    @ResponseBody
-    @RequestMapping(value = { "/pub/set/pass" }, method = { RequestMethod.POST })
-    public ApiResponse<Object, Object> verifyEmail(Model model, HttpServletRequest request,
-	    HttpServletResponse httpServletResponse, @RequestParam String code, @RequestParam String account,
-	    @RequestParam String newpass) throws NoSuchAlgorithmException {
-
-	DomainUserDoc accountDoc = accountStore.findById(account, DomainUserDoc.class);
-	if (!ArgUtil.is(accountDoc) || !ArgUtil.is(accountDoc.getMeta())
-		|| !ArgUtil.is(accountDoc.getMeta().getEmailVerificationCode())
-		|| !accountDoc.getMeta().getEmailVerificationCode().equals(code)) {
-	    ApiResponseUtil.throwException("Invalid Link");
-	}
-
-	accountDoc.getMeta().setEmailVerificationCode(null);
-	accountDoc.getMeta().setEmailVerified(true);
-	accountDoc.getMeta().setPassword(CryptoUtil.getSHA2Hash(newpass));
-
-	sessionService.login(accountDoc, request);
-
-	accountStore.save(accountDoc);
-	return ApiResponse.build().message("Password set successfuly");
-    }
-
-    @ResponseBody
-    @RequestMapping(value = { "/pub/forgot/pass" }, method = { RequestMethod.POST })
-    public ApiResponse<Object, Object> forgotPass(Model model, HttpServletRequest request,
-	    HttpServletResponse httpServletResponse, @RequestParam String email) throws NoSuchAlgorithmException {
-
-	DomainUserDoc accountDoc = accountStore.findOneByEmail(email, DomainUserDoc.class);
-
-	if (!ArgUtil.is(accountDoc)) {
-	    ApiResponseUtil.throwException("Email not registered");
-	}
-
-	accountDoc.getMeta().setEmailVerificationCode(UUID.randomUUID().toString());
-	accountStore.save(accountDoc);
-	sessionService.sendResetMail(accountDoc, "tenant-reset-pass");
-
-	return ApiResponse.build().message("Password Reset Email Sent");
-    }
-
-    @ResponseBody
-    @RequestMapping(value = { "/pub/login" }, method = { RequestMethod.POST })
-    public ApiResponse<Object, Object> login(Model model, HttpServletRequest request,
-	    HttpServletResponse httpServletResponse, @RequestParam String email, @RequestParam String password,
-	    @RequestParam String newpass) throws NoSuchAlgorithmException {
-
-	DomainUserDoc accountDoc = accountStore.findOneByEmail(email, DomainUserDoc.class);
-
-	if (!ArgUtil.is(accountDoc)
-		|| !ArgUtil.areEqual(CryptoUtil.getSHA2Hash(newpass), accountDoc.getMeta().getPassword())) {
-	    ApiResponseUtil.throwException("Invalid Email or Password");
-	}
-
-	sessionService.login(accountDoc, request);
-	return ApiResponse.build().message("Login Success");
+    @RequestMapping(value = "/pub/login", method = { RequestMethod.POST })
+    public ApiResponse<UserLoginToken, Object> agentLogin(@RequestParam String username, @RequestParam String password,
+	    @RequestParam(required = false) String app, @RequestParam String tnt, @RequestParam String domainId)
+	    throws NoSuchAlgorithmException {
+	return ApiResponse.buildData(empAuthService.createAgentLoginToken(username, password, tnt, domainId, app));
     }
 
 }
