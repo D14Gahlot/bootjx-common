@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.boot.jx.AppConfig;
 import com.boot.jx.AppConfigPackage.AppCommonConfig;
 import com.boot.jx.admin.AdminAuthProvider;
+import com.boot.jx.admin.AdminSessionBean;
 import com.boot.jx.admin.AdminSessionService;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.common.dto.AgentResponseAuthDto;
@@ -52,6 +53,9 @@ public class AdminAuthController {
     private AdminSessionService sessionService;
 
     @Autowired
+    private AdminSessionBean adminSession;
+
+    @Autowired
     private PMEnvironment pmEnvironment;
 
     @RequestMapping(value = { "/pub/**", "/app/**", "/auth/**", "/" },
@@ -61,12 +65,16 @@ public class AdminAuthController {
 	    @RequestParam(required = false) String domainUser) throws NoSuchAlgorithmException {
 
 	if (ArgUtil.is(domainName) && ArgUtil.is(domainId) && ArgUtil.is(domainToken)) {
-	    AgentResponseAuthDto agent = authService.loginByDomainToken(domainName, domainId, domainUser, domainToken,
+	    AgentResponseAuthDto agent = authService.loginByDomainToken(domainUser, domainName, domainId, domainToken,
 		    true);
 	    if (ArgUtil.is(agent)) {
 		sessionService.login(request, agent, domainToken);
 		return "redirect:/app/home";
 	    }
+	}
+
+	if (!ArgUtil.is(adminSession.getProfile())) {
+	    return "redirect:/auth/logout";
 	}
 
 	model.addAllAttributes(appCommonConfig.appAttributes());

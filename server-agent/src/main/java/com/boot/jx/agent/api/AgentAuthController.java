@@ -76,8 +76,8 @@ public class AgentAuthController {
 	    @RequestParam(required = false) String domainUser) throws NoSuchAlgorithmException {
 
 	if (ArgUtil.is(domainName) && ArgUtil.is(domainId) && ArgUtil.is(domainToken)) {
-	    AgentResponseAuthDto agent = authService.loginByDomainToken(domainName, domainId, domainUser, domainToken,
-		    true);
+	    AgentResponseAuthDto agent = authService.loginByDomainToken(domainUser, domainName, domainId, domainToken,
+		    false);
 	    if (ArgUtil.is(agent)) {
 		sessionService.login(request, agent, domainToken);
 	    }

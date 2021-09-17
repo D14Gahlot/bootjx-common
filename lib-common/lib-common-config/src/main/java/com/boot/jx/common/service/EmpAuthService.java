@@ -3,6 +3,7 @@ package com.boot.jx.common.service;
 import java.security.NoSuchAlgorithmException;
 import java.util.Map;
 
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -12,12 +13,14 @@ import org.springframework.stereotype.Component;
 import com.boot.jx.AppConfig;
 import com.boot.jx.AppContextUtil;
 import com.boot.jx.api.ApiResponse;
+import com.boot.jx.common.config.CDNBuilder;
 import com.boot.jx.common.doc.AgentDoc;
 import com.boot.jx.common.doc.DepartmentDoc;
 import com.boot.jx.common.dto.AgentResponseAuthDto;
 import com.boot.jx.common.dto.DepartmentResponseAuthDto;
 import com.boot.jx.common.dto.UserLoginToken;
 import com.boot.jx.common.store.AgentStore;
+import com.boot.jx.logger.LoggerService;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.client.PostManClient;
 import com.boot.jx.postman.model.Email;
@@ -35,20 +38,22 @@ import com.boot.utils.Random;
 @TenantScoped
 public class EmpAuthService {
 
-    @Autowired
-    MongoTemplate mongoTemplate;
+    private static final Logger LOGGER = LoggerService.getLogger(CDNBuilder.class);
 
     @Autowired
-    PostManClient postManClient;
+    private MongoTemplate mongoTemplate;
 
     @Autowired
-    AgentStore agentStore;
+    private PostManClient postManClient;
+
+    @Autowired
+    private AgentStore agentStore;
 
     @TenantValue("${mry.superadmin.user}")
-    String superAdminUser;
+    private String superAdminUser;
 
     @TenantValue("${mry.superadmin.pass}")
-    String superAdminPass;
+    private String superAdminPass;
 
     @Autowired
     private AppConfig appConfig;
@@ -88,17 +93,20 @@ public class EmpAuthService {
 	return null;
     }
 
-    public AgentResponseAuthDto loginByDomainToken(String domainName, String domainId, String username,
+    public AgentResponseAuthDto loginByDomainToken(String username, String domainName, String domainId,
 	    String domainToken, boolean adminPanel) throws NoSuchAlgorithmException {
-	AgentDoc agent = getAgentByCodeAndStatus(username, "Y", adminPanel);
-	if (!ArgUtil.is(agent)) {
+	if (ArgUtil.areEqual(AppContextUtil.getTenant(), domainName)) {
+	    LOGGER.info("DOMAIN MISMATCH {}<>{}", AppContextUtil.getTenant(), domainName);
 	    return null;
 	}
 
-	String secret = appConfig.prop("mry.app.login.secret");
+	AgentDoc agent = getAgentByCodeAndStatus(username, "Y", adminPanel);
+	if (!ArgUtil.is(agent)) {
+	    LOGGER.info("NO USER FOUND {}", username);
+	    return null;
+	}
 
-	HashBuilder builder = new HashBuilder().interval(10000).secret(secret).message(
-		String.format("%s@%s:%s#%s", username, AppContextUtil.getTenant(), domainId, agent.getAuthKey()));
+	HashBuilder builder = getHashBuilder(username, AppContextUtil.getTenant(), domainId, agent.getAuthKey());
 
 	if (ArgUtil.is(agent) && builder.validate(domainToken)) {
 	    DepartmentDoc dept = agentStore.findDepartmentById(agent.getDept_id());
@@ -214,9 +222,7 @@ public class EmpAuthService {
 	UserLoginToken userLoginToken = new UserLoginToken();
 	AgentDoc agent = validateAgent(username, password, "admin".equals(app));
 	if (ArgUtil.is(agent)) {
-	    String secret = appConfig.prop("mry.app.login.secret");
-	    HashBuilder builder = new HashBuilder().interval(10000).secret(secret).message(
-		    String.format("%s@%s:%s#%s", username, AppContextUtil.getTenant(), domainId, agent.getAuthKey()));
+	    HashBuilder builder = getHashBuilder(username, domainName, domainId, agent.getAuthKey());
 	    userLoginToken.setDomainName(domainName);
 	    userLoginToken.setDomainId(domainId);
 	    userLoginToken.setDomainToken(builder.toHMAC().output());
@@ -229,15 +235,20 @@ public class EmpAuthService {
     public UserLoginToken createSuperLoginToken(String username, String domainName, String domainId, String app)
 	    throws NoSuchAlgorithmException {
 	UserLoginToken userLoginToken = new UserLoginToken();
-	String secret = appConfig.prop("mry.app.login.secret");
 	String authKey = appConfig.prop("mry.app.login.key");
-	HashBuilder builder = new HashBuilder().interval(10000).secret(secret)
-		.message(String.format("%s@%s:%s#%s", username, AppContextUtil.getTenant(), domainId, authKey));
+	HashBuilder builder = getHashBuilder(username, domainName, domainId, authKey);
 	userLoginToken.setDomainName(domainName);
 	userLoginToken.setDomainId(domainId);
 	userLoginToken.setDomainToken(builder.toHMAC().output());
 	userLoginToken.setDomainUser(username);
 	userLoginToken.setApp(app);
 	return userLoginToken;
+    }
+
+    private HashBuilder getHashBuilder(String username, String domainName, String domainId, String authKey) {
+	String secret = appConfig.prop("mry.app.login.secret");
+	HashBuilder builder = new HashBuilder().interval(10000).secret(secret)
+		.message(String.format("%s@%s:%s#%s", username, domainName, domainId, authKey));
+	return builder;
     }
 }
