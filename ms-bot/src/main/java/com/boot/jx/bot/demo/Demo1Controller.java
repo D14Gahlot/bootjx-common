@@ -1,5 +1,5 @@
 
-package com.boot.jx.bot.alex;
+package com.boot.jx.bot.demo;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -7,6 +7,8 @@ import com.boot.jx.bot.BotController;
 import com.boot.jx.bot.ChatContext;
 import com.boot.jx.bot.ChatController;
 import com.boot.jx.bot.ChatMapping;
+import com.boot.jx.bot.alex.AlexBotConstants;
+import com.boot.jx.bot.alex.AlexBotConstants.KEY;
 import com.boot.jx.dict.FileType;
 import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.InboxMessage;
@@ -15,18 +17,18 @@ import com.boot.utils.ArgUtil;
 import com.boot.utils.Constants;
 import com.boot.utils.StringUtils.StringMatcher;
 
-@BotController(name = "DemoBot", tenant = { "app", "demo" })
-public class DemoController extends ChatController {
+@BotController(name = "DemoBot", tenant = { "app", "demo", "sandbox" })
+public class Demo1Controller extends ChatController {
 
     private static final String CURRENT_DEMO = "current_menu";
     @Autowired
     private ChatContext chatContext;
 
     @Autowired
-    Demo4Controller demo4Controller;
+    Demo3Controller demo4Controller;
 
     @Autowired
-    Demo3Controller demo3Controller;
+    Demo2Controller demo3Controller;
 
     @ChatMapping(key = AlexBotConstants.KEY.INITIATE + "menu", pattern = "^menu$")
     private void showDemoMenu(InboxMessage inboxMessage, StringMatcher matcher) {

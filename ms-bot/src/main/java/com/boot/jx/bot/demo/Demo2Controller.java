@@ -1,5 +1,5 @@
 
-package com.boot.jx.bot.alex;
+package com.boot.jx.bot.demo;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -14,8 +14,8 @@ import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.StringUtils.StringMatcher;
 
-@BotController(name = "DemoBot", tenant = { "app", "demo" })
-public class Demo3Controller extends ChatController {
+@BotController(name = "DemoBot", tenant = { "app", "demo", "sandbox" })
+public class Demo2Controller extends ChatController {
 
     private static final String CURRENT_DEMO = "current_menu";
     @Autowired
