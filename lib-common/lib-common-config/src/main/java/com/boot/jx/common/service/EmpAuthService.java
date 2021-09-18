@@ -95,7 +95,7 @@ public class EmpAuthService {
 
     public AgentResponseAuthDto loginByDomainToken(String username, String domainName, String domainId,
 	    String domainToken, boolean adminPanel) throws NoSuchAlgorithmException {
-	if (ArgUtil.areEqual(AppContextUtil.getTenant(), domainName)) {
+	if (!ArgUtil.areEqual(AppContextUtil.getTenant(), domainName)) {
 	    LOGGER.info("DOMAIN MISMATCH {}<>{}", AppContextUtil.getTenant(), domainName);
 	    return null;
 	}
