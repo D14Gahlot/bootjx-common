@@ -75,6 +75,7 @@ public class PMEnvironment {
 	protected ContactType contactType;
 	protected String channelType;
 
+	@Deprecated
 	protected String channel;
 	protected String channelKey;
 
@@ -90,10 +91,12 @@ public class PMEnvironment {
 	    this.contactType = contactType;
 	}
 
+	@Deprecated
 	public String getChannel() {
 	    return channel;
 	}
 
+	@Deprecated
 	public void setChannel(String channel) {
 	    this.channel = channel;
 	}

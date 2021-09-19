@@ -97,6 +97,6 @@ public class GupShupConfigDetails extends AChannelDetails {
 
     @Override
     public String getChannel() {
-	return "GUPSHUPW";
+	return CHANNEL_TYPE.WA_GUPSHUP;
     }
 }

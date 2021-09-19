@@ -165,7 +165,7 @@ public class WAGupShupConnector implements ConnectorHandler {
 	ChannelConfig channelConfig = null;
 	InboxMessage inboxMessage = new InboxMessage();
 	inboxMessage.contact().setContactType(ContactType.WHATSAPP.toString());
-	inboxMessage.contact().setChannel("GUPSHUPW");
+	inboxMessage.contact().setChannel(CHANNEL_TYPE.WA_GUPSHUP);
 	inboxMessage.contact().setLane(inbound.getWaNumber());
 	inboxMessage.contact().setCsid(inbound.getMobile());
 	inboxMessage.contact().setName(inbound.getName());

@@ -12,7 +12,9 @@ import org.springframework.stereotype.Component;
 
 import com.boot.jx.AppConfig;
 import com.boot.jx.AppContextUtil;
+import com.boot.jx.api.ApiFieldError;
 import com.boot.jx.api.ApiResponse;
+import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.common.config.CDNBuilder;
 import com.boot.jx.common.doc.AgentDoc;
 import com.boot.jx.common.doc.DepartmentDoc;
@@ -228,6 +230,9 @@ public class EmpAuthService {
 	    userLoginToken.setDomainToken(builder.toHMAC().output());
 	    userLoginToken.setDomainUser(username);
 	    userLoginToken.setApp(app);
+	} else {
+	    ApiResponseUtil.throwInputException(new ApiFieldError().obzect("login").field("password")
+		    .codeKey("ValidCredentials").description("Invalid Email or Password"));
 	}
 	return userLoginToken;
     }
