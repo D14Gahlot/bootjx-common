@@ -25,7 +25,6 @@ import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.postman.wa360.WA360Client;
 import com.boot.jx.postman.wa360.WA360Constants;
 import com.boot.jx.postman.wa360.WA360Constants.InBoundWrapperPaths;
-import com.boot.jx.postman.wa360.WA360Constants.OutBoundWrapperPaths;
 import com.boot.jx.postman.wa360.WA360InboundMedia;
 import com.boot.jx.rest.RestService;
 import com.boot.jx.utils.PostManUtil;
@@ -68,18 +67,13 @@ public class WA360Connector implements ConnectorHandler {
 		.post(MapModel.createInstance().put("url", webhookUrl).toMap()).asMap();
     }
 
-    public InboxMessage toInboxMessage(String channelId, MapModel map) {
+    public InboxMessage toInboxMessage(ChannelConfig channelConfig, MapModel map) {
 
-	PMConfiguration config = environment.config();
-	ChannelConfig channelConfig = config.channels(channelId);
+	InboxMessage inboxMessage = this.createInboxMessage(channelConfig);
 
 	String contactNumber = map.entry(InBoundWrapperPaths.CONTACT_NUMBER).asString();
 	String contactName = map.entry(InBoundWrapperPaths.CONTACT_NAME).asString();
 
-	InboxMessage inboxMessage = new InboxMessage();
-	inboxMessage.contact().type(channelConfig.getContactType());
-	inboxMessage.contact().setChannel(channelConfig.getChannelType());
-	inboxMessage.contact().setLane(channelConfig.getLane());
 	inboxMessage.contact().setCsid(contactNumber);
 	inboxMessage.contact().setName(contactName);
 	inboxMessage.contact().setPhone(contactNumber);

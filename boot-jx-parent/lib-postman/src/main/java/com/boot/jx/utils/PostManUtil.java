@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.model.CommonFile;
+import com.boot.jx.postman.PMConstants.CHANNEL_TYPE;
 import com.boot.jx.postman.model.ContactMeta;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.MessageDefinitions.Contactable;
@@ -130,6 +131,9 @@ public class PostManUtil {
     }
 
     public static String CHANNEL_ID(String chanelType, String lane) {
+	if (CHANNEL_TYPE.WA_GUPSHUP_LEGACY.equals(chanelType)) {
+	    chanelType = CHANNEL_TYPE.WA_GUPSHUP;
+	}
 	return String.format("%s:%s", chanelType, lane);
     }
 

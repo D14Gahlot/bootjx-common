@@ -25,12 +25,15 @@ import com.boot.jx.connectors.WAGupShupAgentConnector;
 import com.boot.jx.connectors.WAGupShupConnector;
 import com.boot.jx.connectors.WARapiwhaConnector;
 import com.boot.jx.http.CommonHttpRequest;
+import com.boot.jx.postman.PMConfiguration;
 import com.boot.jx.postman.PMConstants.CHANNEL_TYPE;
+import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.gupshup.GupShupDeliveryResp;
 import com.boot.jx.postman.gupshup.GupShupDeliveryResp.GupShupDeliveryDto;
 import com.boot.jx.postman.gupshup.GupShupInbound;
 import com.boot.jx.postman.gupshup.GupShupInboundV2;
 import com.boot.jx.postman.model.InboxMessage;
+import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.scope.vendor.VendorContext.ApiVendorHeaders;
 import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
@@ -62,6 +65,9 @@ public class InBoundControllerWA {
 
     @Autowired
     private ConnectorHandlerFactory connectorHandlerFactory;
+
+    @Autowired
+    private PMEnvironment pmEnvironment;
 
     // @ApiRequest(feature = "WA_GUPSHUP_INBOUND")
     @ApiVendorHeaders
@@ -188,7 +194,9 @@ public class InBoundControllerWA {
 	    @PathVariable(required = false) String channelId, @PathVariable(required = false) String channelKey,
 	    @RequestBody Map<String, Object> data) {
 	MapModel map = MapModel.from(data);
-	InboxMessage inboundMessage = w360Connector.toInboxMessage(channelId, map);
+	PMConfiguration config = pmEnvironment.config();
+	ChannelConfig channelConfig = config.channels(channelId);
+	InboxMessage inboundMessage = w360Connector.toInboxMessage(channelConfig, map);
 	inBoundService.invokeMethodsAsync(inboundMessage);
 	return ApiResponse.build();
     }

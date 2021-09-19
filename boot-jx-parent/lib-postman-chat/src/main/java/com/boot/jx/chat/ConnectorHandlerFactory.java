@@ -103,6 +103,16 @@ public class ConnectorHandlerFactory extends ScopedBeanFactory<String, Connector
 	    LOGGER.error("WEBHOOK REGISTRATION NOT FOUND ");
 	}
 
+	default InboxMessage createInboxMessage(ChannelConfig channelConfig) {
+	    InboxMessage inboxMessage = new InboxMessage();
+	    if (ArgUtil.is(channelConfig)) {
+		inboxMessage.contact().type(channelConfig.getContactType());
+		inboxMessage.contact().setChannel(channelConfig.getChannelType());
+		inboxMessage.contact().setLane(channelConfig.getLane());
+	    }
+	    return inboxMessage;
+	}
+
     }
 
     public static abstract class AbstractConnector implements ConnectorHandler {
@@ -149,6 +159,16 @@ public class ConnectorHandlerFactory extends ScopedBeanFactory<String, Connector
 	}
 	precisedKey = String.format("%s_DEFAULT", contactType);
 	return this.get(precisedKey);
+    }
+
+    public ConnectorHandler get(ChannelConfig channelConfig) {
+	if (ArgUtil.is(channelConfig)) {
+	    ConnectorHandler connector = get(channelConfig.getContactType(), channelConfig.getChannelType());
+	    if (ArgUtil.is(connector)) {
+		return connector;
+	    }
+	}
+	return defaultConnector;
     }
 
     @Autowired(required = false)
@@ -201,16 +221,18 @@ public class ConnectorHandlerFactory extends ScopedBeanFactory<String, Connector
 	LOGGER.debug("message(String {}, ChatContactDoc {}, SessionMessage {}, OutboxMessage {})", messageType,
 		chatContactDoc, inboxMessage, outboxMessage);
 
+	String channelId = PostManUtil.CHANNEL_ID(outboxMessage.contact());
+	ChannelConfig channelConfig = environment.config().channels(channelId);
+
 	try {
-	    ConnectorHandler connector = get(outboxMessage.contact().type(), outboxMessage.contact().getChannel());
+	    ConnectorHandler connector = get(channelConfig);
 	    if (ArgUtil.is(connector)) {
 		connector.message(messageType, chatContactDoc, inboxMessage, outboxMessage);
-	    } else if (ArgUtil.is(defaultConnector)) {
-		defaultConnector.message(messageType, chatContactDoc, inboxMessage, outboxMessage);
 	    }
 	} catch (Exception e) {
 	    LOGGER.error(messageType, e);
 	}
+
 	MessageDoc messageDoc = messageStore.createOrUpdate(outboxMessage);
 
 	if (ArgUtil.isEqual(messageType, "REPLY", "SEND")) {

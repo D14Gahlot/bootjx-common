@@ -4,6 +4,9 @@ public class PMConstants {
 
     public final class CHANNEL_TYPE {
 
+	public static final String WA_GUPSHUP_LEGACY = "GUPSHUPW";
+	
+	
 	public static final String TELEGRAM = "tg";
 	public static final String TWITTER = "tw";
 	public static final String FACEBOOK = "fb";

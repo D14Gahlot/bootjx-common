@@ -267,6 +267,14 @@ public class PMConfiguration implements Serializable {
 	return list;
     }
 
+    public List<AChannelDetails> listChannels() {
+	List<AChannelDetails> list = new ArrayList<AChannelDetails>();
+	for (Entry<String, ChannelConfig> aChannelDetails : this.channels().entrySet()) {
+	    list.add(aChannelDetails.getValue());
+	}
+	return list;
+    }
+
     public String getAccountKey() {
 	if (!ArgUtil.is(this.accountKey)) {
 	    this.accountKey = Random.randomAlphaNumeric(10);
