@@ -64,7 +64,9 @@ public class CDNBuilder {
 
     @Async
     public void update() {
+
 	for (Entry<String, String> cdn : cdnMapper.entrySet()) {
+
 	    if (ArgUtil.areEqual(cdn.getKey(), cdn.getValue())) {
 		Matcher matcher = PATTERN.matcher(cdn.getKey());
 		if (matcher.find()) {

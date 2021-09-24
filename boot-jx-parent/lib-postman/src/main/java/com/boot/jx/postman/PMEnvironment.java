@@ -241,7 +241,7 @@ public class PMEnvironment {
     }
 
     @Autowired
-    AppConfig appConfig;
+    private AppConfig appConfig;
 
     public PMConfigurationObject get(String key) {
 	PMConfigurationObject configObject = this.config().map().get(key);
@@ -257,7 +257,7 @@ public class PMEnvironment {
 	if (ArgUtil.isEmpty(configObject)) {
 	    String value = appConfig.prop(key);
 	    configObject = new PMConfigurationObject(key, value);
-	    this.config().map().put(key, configObject);
+	    //this.config().map().put(key, configObject);
 	}
 
 	return configObject;
