@@ -13,6 +13,7 @@ import com.boot.jx.chat.ConnectorHandlerFactory;
 import com.boot.jx.common.impl.ConfigMeta;
 import com.boot.jx.common.impl.ConfigMeta.InputType;
 import com.boot.jx.mongo.CommonMongoTemplate;
+import com.boot.jx.postman.PMClientConfig;
 import com.boot.jx.postman.PMConfiguration;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PMEnvironment.AChannelDetails;
@@ -24,6 +25,7 @@ import com.boot.jx.postman.doc.config.PrefsConfigDoc;
 import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.postman.plugin.ChannelPluginProvider;
 import com.boot.jx.postman.plugin.ChannelPluginProvider.ChannelPlugin;
+import com.boot.jx.postman.store.ConfigStore;
 import com.boot.jx.tunnel.sys.SharedConfigManager;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.model.MapModel;
@@ -42,6 +44,9 @@ public class ConfigManager {
     private CommonMongoTemplate mongoTemplate;
 
     @Autowired
+    ConfigStore configStore;
+
+    @Autowired
     private SharedConfigManager sharedConfigManager;
 
     @Autowired
@@ -49,6 +54,9 @@ public class ConfigManager {
 
     @Autowired
     private ConnectorHandlerFactory connectorHandlerFactory;
+
+    @Autowired
+    PMClientConfig pmClientConfig;
 
     public List<Map<String, Object>> getAdminConfigs() {
 	List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
@@ -122,11 +130,11 @@ public class ConfigManager {
 	    doc.map().remove(key);
 	    PrefsConfigDoc prefsConfigDoc = new PrefsConfigDoc();
 	    prefsConfigDoc.setId(key);
-	    mongoTemplate.remove(prefsConfigDoc);
+	    configStore.remove(prefsConfigDoc);
 	    break;
 	}
 
-	mongoTemplate.save(doc);
+	configStore.save(doc);
 	sharedConfigManager.clear();
     }
 
@@ -153,12 +161,12 @@ public class ConfigManager {
 	    PrefsConfigDoc prefsConfigDoc = new PrefsConfigDoc();
 	    prefsConfigDoc.setId(configObject.getKey());
 	    prefsConfigDoc = EntityDtoUtil.dtoToEntity(configObject, prefsConfigDoc);
-	    mongoTemplate.save(prefsConfigDoc);
+	    configStore.savePrefsConfig(prefsConfigDoc);
 
 	    break;
 	}
 
-	mongoTemplate.save(doc);
+	configStore.saveConfiguration(doc);
 	sharedConfigManager.clear();
     }
 
@@ -196,7 +204,10 @@ public class ConfigManager {
 	    ChannelConfigDoc channelConfig = mongoTemplate.findById(channelId, ChannelConfigDoc.class);
 	    if (ArgUtil.is(channelConfig)) {
 		PMConfiguration config = pmEnvironment.config();
-		channelConfig.setCallbackPath(PostManUtil.CHANNEL_CALLBACK_PATH(config, channelConfig));
+		if (!ArgUtil.is(channelConfig.getWebhookUrl())) {
+		    channelConfig.setWebhookUrl(pmClientConfig.getWebhookUrl(channelConfig));
+		}
+		channelConfig.setCallbackPath(PostManUtil.CHANNEL_CALLBACK_PATH(config.getAccountKey(), channelConfig));
 		return channelConfig;
 	    }
 	}

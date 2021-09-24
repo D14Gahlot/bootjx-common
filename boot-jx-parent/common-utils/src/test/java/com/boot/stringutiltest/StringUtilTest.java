@@ -11,6 +11,11 @@ import com.boot.utils.UniqueID;
 public class StringUtilTest {
 
     @Test
+    public void replaceDot() {
+	System.out.println("3e3.343.34343.343".replaceAll("\\.", "/"));
+    }
+
+    @Test
     public void testTrim() {
 	assertEquals("t1", StringUtils.trim("/abc/def/ghij", '/'), "abc/def/ghij");
 	assertEquals("t2", StringUtils.trim("/abc/def/ghij/", '/'), "abc/def/ghij");

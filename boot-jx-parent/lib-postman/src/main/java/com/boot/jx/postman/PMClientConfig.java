@@ -5,6 +5,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Component;
 
+import com.boot.jx.AppContextUtil;
+import com.boot.jx.postman.plugin.ChannelConfig;
+import com.boot.jx.utils.PostManUtil;
 import com.boot.utils.ArgUtil;
 
 @Component
@@ -88,6 +91,22 @@ public class PMClientConfig {
 
     public String getAgentSessionTimeout() {
 	return agentSessionTimeout;
+    }
+
+    private String getWebhookBase(ChannelConfig channelConfig) {
+	String webhookUrl = channelConfig.getWebhookUrl();
+	if (!ArgUtil.is(webhookUrl)) {
+	    webhookUrl = String.format("https://%s.%s/postman", AppContextUtil.getTenant(),
+		    environment.get("mry.prop.service.domain").asString());
+	}
+	return webhookUrl;
+    }
+
+    public String getWebhookUrl(ChannelConfig channelConfig) {
+	PMConfiguration config = environment.config();
+	String webhookUrl = getWebhookBase(channelConfig);
+	return String.format("%s/%s", webhookUrl,
+		PostManUtil.CHANNEL_CALLBACK_PATH(config.getAccountKey(), channelConfig));
     }
 
 }

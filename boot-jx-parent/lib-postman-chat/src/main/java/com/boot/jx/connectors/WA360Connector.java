@@ -12,9 +12,8 @@ import com.boot.jx.dict.FileFormat;
 import com.boot.jx.dict.FileType;
 import com.boot.jx.model.CommonFile;
 import com.boot.jx.mongo.CommonMongoTemplate;
-import com.boot.jx.postman.PMConfiguration;
+import com.boot.jx.postman.PMClientConfig;
 import com.boot.jx.postman.PMConstants.CHANNEL_TYPE;
-import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.client.PMFileStoreClient;
 import com.boot.jx.postman.client.TmplClient;
 import com.boot.jx.postman.doc.QuickMedia;
@@ -42,9 +41,6 @@ public class WA360Connector implements ConnectorHandler {
     private RestService restService;
 
     @Autowired
-    private PMEnvironment environment;
-
-    @Autowired
     private PMFileStoreClient pmFileStoreClient;
 
     @Autowired
@@ -56,10 +52,12 @@ public class WA360Connector implements ConnectorHandler {
     @Autowired
     private WA360Client wa360Client;
 
+    @Autowired
+    PMClientConfig pmClientConfig;
+
     @Override
     public void registerWebHook(ChannelConfig channelConfig) {
-	PMConfiguration config = environment.config();
-	String webhookUrl = PostManUtil.CHANNEL_CALLBACK(config, channelConfig);
+	String webhookUrl = pmClientConfig.getWebhookUrl(channelConfig);
 	restService.ajax(WA360Constants.BASE_URL).path("v1/configs/webhook")
 		.header(WA360Constants.D360_API_KEY, channelConfig.getWa360d().getApiKey())
 		.post(MapModel.createInstance().put("url", webhookUrl).toMap()).asMap();

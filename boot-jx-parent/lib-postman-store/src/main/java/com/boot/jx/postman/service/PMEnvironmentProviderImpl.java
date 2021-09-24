@@ -6,7 +6,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Component;
 
 import com.boot.jx.AppConfigPackage.AppSharedConfig;
@@ -22,6 +21,7 @@ import com.boot.jx.postman.doc.config.PrefsConfigDoc;
 import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.postman.plugin.ChannelPluginProvider;
 import com.boot.jx.postman.plugin.ChannelPluginProvider.ChannelPlugin;
+import com.boot.jx.postman.store.ConfigStore;
 import com.boot.jx.scope.tnt.Tenants;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.EntityDtoUtil;
@@ -35,7 +35,7 @@ public class PMEnvironmentProviderImpl implements PMEnvironmentProvider, AppShar
     PMConfigurationDoc sharedConfiguration = null;
 
     @Autowired(required = false)
-    private MongoTemplate mongoTemplate;
+    private ConfigStore configStore;
 
     @Override
     public PMConfiguration config() {
@@ -43,20 +43,20 @@ public class PMEnvironmentProviderImpl implements PMEnvironmentProvider, AppShar
 	if (localConfigMap.containsKey(tnt)) {
 	    return localConfigMap.get(tnt);
 	}
-	if (ArgUtil.is(mongoTemplate)) {
+	if (ArgUtil.is(configStore)) {
 	    PMConfigurationDoc x = getPMConfigurationDoc();
 
-	    List<PrefsConfigDoc> prefsConfigs = mongoTemplate.findAll(PrefsConfigDoc.class);
+	    List<PrefsConfigDoc> prefsConfigs = configStore.findAll(PrefsConfigDoc.class);
 	    for (PrefsConfigDoc prefsConfig : prefsConfigs) {
 		x.set(prefsConfig);
 	    }
 
-	    List<ChannelConfigDoc> channels = mongoTemplate.findAll(ChannelConfigDoc.class);
+	    List<ChannelConfigDoc> channels = configStore.findAll(ChannelConfigDoc.class);
 	    for (ChannelConfigDoc channel : channels) {
 		x.channels(channel);
 	    }
 
-	    List<ClientKeyConfigDoc> clientKeys = mongoTemplate.findAll(ClientKeyConfigDoc.class);
+	    List<ClientKeyConfigDoc> clientKeys = configStore.findAll(ClientKeyConfigDoc.class);
 	    for (ClientKeyConfigDoc clientKey : clientKeys) {
 		x.clientApiKey(clientKey);
 	    }
@@ -82,9 +82,7 @@ public class PMEnvironmentProviderImpl implements PMEnvironmentProvider, AppShar
 
     @Deprecated
     public void config(PMConfiguration config) {
-
-	if (ArgUtil.is(mongoTemplate)) {
-
+	if (ArgUtil.is(configStore)) {
 	    for (Entry<String, ChannelPlugin<? extends AChannelDetails>> pluginEntry : ChannelPluginProvider.MAP
 		    .entrySet()) {
 		ChannelPlugin<? extends AChannelDetails> plugin = pluginEntry.getValue();
@@ -99,7 +97,7 @@ public class PMEnvironmentProviderImpl implements PMEnvironmentProvider, AppShar
 
 	    PMConfigurationDoc doc = EntityDtoUtil.dtoToEntity(config, new PMConfigurationDoc());
 	    doc.setTenant(AppContextUtil.getTenant());
-	    mongoTemplate.save(doc);
+	    configStore.saveConfiguration(doc);
 	}
 
     }
@@ -109,10 +107,9 @@ public class PMEnvironmentProviderImpl implements PMEnvironmentProvider, AppShar
 	doc.setId(StringUtils.toLowerCase(doc.getChannelId()));
 	if (config.isDisabled()) {
 	    doc.setDisabled(config.isDisabled());
-	    mongoTemplate.save(doc);
 	} else
 	    doc.setDisabled(false);
-	    mongoTemplate.save(doc);
+	configStore.saveChannelConfig(doc);
     }
 
     @Override
@@ -128,12 +125,12 @@ public class PMEnvironmentProviderImpl implements PMEnvironmentProvider, AppShar
 	    plugin.setConfig(doc, config);
 	}
 
-	mongoTemplate.save(doc);
+	configStore.save(doc);
 	// @Deperecated - Ends
     }
 
     private PMConfigurationDoc getPMConfigurationDoc() {
-	PMConfigurationDoc doc = mongoTemplate.findById(AppContextUtil.getTenant(), PMConfigurationDoc.class);
+	PMConfigurationDoc doc = configStore.findById(AppContextUtil.getTenant(), PMConfigurationDoc.class);
 	if (ArgUtil.isEmpty(doc)) {
 	    doc = new PMConfigurationDoc();
 	    doc.setTenant(AppContextUtil.getTenant());

@@ -5,6 +5,7 @@ import java.security.NoSuchAlgorithmException;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 
+import com.boot.jx.AppContextUtil;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.model.CommonFile;
 import com.boot.jx.postman.PMConfiguration;
@@ -148,26 +149,9 @@ public class PostManUtil {
 	return String.format("%s%s", UniqueID.generateString(), Random.randomAlphaNumeric(10));
     }
 
-    public static String CHANNEL_CALLBACK_PATH(String accountKey, String channelType, String lane, String channelKey) {
-	return String.format("ext/inbound/%s/callback/%s/%s/%s", channelType, accountKey, CHANNEL_ID(channelType, lane),
-		channelKey);
-    }
-
     public static String CHANNEL_CALLBACK_PATH(String accountKey, AChannelConfig channelConfig) {
 	return String.format("ext/inbound/%s/callback/%s/%s/%s", channelConfig.getChannelType(), accountKey,
 		CHANNEL_ID(channelConfig.getChannelType(), channelConfig.getLane()), channelConfig.getChannelKey());
-    }
-
-    public static String CHANNEL_CALLBACK_PATH(PMConfiguration config, ChannelConfig channelConfig) {
-	return CHANNEL_CALLBACK_PATH(config.getAccountKey(), channelConfig);
-    }
-
-    public static String CHANNEL_CALLBACK(String accountKey, AChannelConfig channelConfig) {
-	return String.format("%s/%s", channelConfig.getWebhookUrl(), CHANNEL_CALLBACK_PATH(accountKey, channelConfig));
-    }
-
-    public static String CHANNEL_CALLBACK(PMConfiguration config, ChannelConfig channelConfig) {
-	return CHANNEL_CALLBACK(config.getAccountKey(), channelConfig);
     }
 
 }
