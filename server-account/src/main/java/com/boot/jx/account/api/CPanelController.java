@@ -24,6 +24,7 @@ import com.boot.jx.common.config.CDNBuilder;
 import com.boot.jx.common.config.ConfigManager;
 import com.boot.jx.postman.PMConfiguration;
 import com.boot.jx.postman.PMEnvironment;
+import com.boot.jx.postman.PMConstants.CHANNEL_TYPE_ENUM;
 import com.boot.jx.postman.PMEnvironment.AChannelDetails;
 import com.boot.jx.postman.PMEnvironment.PMConfigurationObject;
 import com.boot.jx.postman.doc.PMConfigurationDoc;
@@ -99,6 +100,21 @@ public class CPanelController {
     @RequestMapping(value = "/api/config/{key}", method = { RequestMethod.GET })
     public ApiResponse<Map<String, Object>, Object> getConfig(@PathVariable String key) {
 	return ApiResponse.buildResults(configManager.getAdminConfigs(key));
+    }
+
+    @ResponseBody
+    @RequestMapping(value = "/api/config/channel/{channelType}", method = { RequestMethod.POST })
+    public ApiResponse<ChannelConfig, Object> saveChannelConfig(@PathVariable CHANNEL_TYPE_ENUM channelType,
+	    @RequestParam(defaultValue = "false", required = false) boolean disabled,
+	    @RequestBody Map<String, Object> data) {
+	return ApiResponse.buildResults(configManager.saveChannelConfig(channelType.toString(), disabled, data));
+    }
+
+    @ResponseBody
+    @RequestMapping(value = "/api/config/channel/{channelId}", method = { RequestMethod.GET })
+    public ApiResponse<ChannelConfig, Object> getChannelConfig(@PathVariable String channelId,
+	    @RequestParam(defaultValue = "false", required = false) boolean disabled) {
+	return ApiResponse.buildResults(configManager.getChannelConfig(channelId));
     }
 
     @Deprecated
