@@ -17,16 +17,6 @@ public class WA360ConfigDetails extends AChannelDetails {
 
     @JsonView(PMEnvironment.ProtectedProperty.class)
     private String apiKey;
-    @JsonView(PMEnvironment.ProtectedProperty.class)
-    private String webhookUrl;
-
-    public String getWebhookUrl() {
-	return webhookUrl;
-    }
-
-    public void setWebhookUrl(String webhookUrl) {
-	this.webhookUrl = webhookUrl;
-    }
 
     @Override
     public String getLane() {

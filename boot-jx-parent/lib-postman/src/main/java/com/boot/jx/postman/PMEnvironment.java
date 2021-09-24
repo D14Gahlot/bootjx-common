@@ -13,7 +13,7 @@ import com.boot.jx.scope.tnt.Tenants;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.model.MapModel.MapEntry;
 import com.boot.utils.ArgUtil;
-import com.boot.utils.Random;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonView;
 
 @Component
@@ -68,16 +68,21 @@ public class PMEnvironment {
 
     }
 
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static abstract class AChannelDetails implements ChannelDetails {
 
 	private static final long serialVersionUID = -5531902306230415784L;
 
+	protected String name;
 	protected ContactType contactType;
 	protected String channelType;
 
 	@Deprecated
 	protected String channel;
 	protected String channelKey;
+
+	@JsonView(PMEnvironment.PublicProperty.class)
+	protected String webhookUrl;
 
 	public AChannelDetails(String channelType) {
 	    this.channelType = channelType;
@@ -118,6 +123,25 @@ public class PMEnvironment {
 
 	public void setChannelKey(String channelKey) {
 	    this.channelKey = channelKey;
+	}
+
+	public String getName() {
+	    if (!ArgUtil.is(this.name)) {
+		return String.format("%s %s", this.getContactType(), this.getLane());
+	    }
+	    return name;
+	}
+
+	public void setName(String name) {
+	    this.name = name;
+	}
+
+	public String getWebhookUrl() {
+	    return webhookUrl;
+	}
+
+	public void setWebhookUrl(String webhookUrl) {
+	    this.webhookUrl = webhookUrl;
 	}
 
     }

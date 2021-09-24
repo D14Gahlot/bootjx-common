@@ -3,16 +3,17 @@ package com.boot.jx.postman;
 public class PMConstants {
 
     public final class CHANNEL_TYPE {
-
 	public static final String WA_GUPSHUP_LEGACY = "GUPSHUPW";
-	
-	
 	public static final String TELEGRAM = "tg";
 	public static final String TWITTER = "tw";
 	public static final String FACEBOOK = "fb";
 	public static final String WA_GUPSHUP = "wags";
 	public static final String WA_360D = "wa360";
+	public static final String WEB = "web";
+    }
 
+    public enum CHANNEL_TYPE_ENUM {
+	tg, tw, fb, wags, wa360, web
     }
 
     public final class PostManUrls {

@@ -6,36 +6,40 @@ import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.PropertySource;
-import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Service;
 
 import com.boot.jx.AppContextUtil;
 import com.boot.jx.chat.ConnectorHandlerFactory;
-import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorHandler;
-import com.boot.jx.postman.ClientApiKey;
+import com.boot.jx.common.impl.ConfigMeta;
+import com.boot.jx.common.impl.ConfigMeta.InputType;
+import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.jx.postman.PMConfiguration;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PMEnvironment.AChannelDetails;
 import com.boot.jx.postman.PMEnvironment.PMConfigurationObject;
 import com.boot.jx.postman.doc.PMConfigurationDoc;
+import com.boot.jx.postman.doc.config.ChannelConfigDoc;
 import com.boot.jx.postman.doc.config.ClientKeyConfigDoc;
 import com.boot.jx.postman.doc.config.PrefsConfigDoc;
 import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.postman.plugin.ChannelPluginProvider;
 import com.boot.jx.postman.plugin.ChannelPluginProvider.ChannelPlugin;
-import com.boot.jx.postman.wa360.WA360ConfigDetails;
 import com.boot.jx.tunnel.sys.SharedConfigManager;
 import com.boot.jx.utils.PostManUtil;
+import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.EntityDtoUtil;
 import com.boot.utils.MapBuilder;
+import com.boot.utils.MapBuilder.BuilderMap;
 
 @Service
 @PropertySource("classpath:application.app.properties")
 public class ConfigManager {
 
+    public static final List<ConfigMeta> CONFIG_LIST = new ArrayList<ConfigMeta>();
+
     @Autowired
-    private MongoTemplate mongoTemplate;
+    private CommonMongoTemplate mongoTemplate;
 
     @Autowired
     private SharedConfigManager sharedConfigManager;
@@ -50,7 +54,7 @@ public class ConfigManager {
 	List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
 	PMConfigurationDoc doc = mongoTemplate.findById(AppContextUtil.getTenant(), PMConfigurationDoc.class);
 
-	for (ConfigBuilder meta : ConfigBuilder.LIST) {
+	for (ConfigMeta meta : CONFIG_LIST) {
 
 	    switch (meta.getKey()) {
 
@@ -71,6 +75,25 @@ public class ConfigManager {
 		break;
 	    }
 	}
+	return list;
+    }
+
+    public List<Map<String, Object>> getAdminConfigs(String key) {
+	List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
+
+	BuilderMap mapBuilder = MapBuilder.map();
+
+	for (ConfigMeta meta : CONFIG_LIST) {
+	    if (meta.getKey().equals(key)) {
+		mapBuilder.put("meta", meta);
+	    } else {
+		mapBuilder.put("meta", new ConfigMeta().key(key));
+	    }
+	    mapBuilder.put("config", pmEnvironment.get(key)).put("shared", pmEnvironment.shared().get(key));
+	}
+
+	list.add(mapBuilder.toMap());
+
 	return list;
     }
 
@@ -131,6 +154,56 @@ public class ConfigManager {
 	    config.disabled(disabled);
 	    save(config);
 	}
+    }
+
+    public ChannelConfig getChannelConfig(String channelId) {
+	if (ArgUtil.is(channelId)) {
+	    ChannelConfigDoc channelConfig = mongoTemplate.findById(channelId, ChannelConfigDoc.class);
+	    if (ArgUtil.is(channelConfig)) {
+		PMConfiguration config = pmEnvironment.config();
+		channelConfig.setCallbackPath(PostManUtil.CHANNEL_CALLBACK_PATH(config, channelConfig));
+		return channelConfig;
+	    }
+	}
+	return null;
+    }
+
+    public ChannelConfig saveChannelConfig(String channelType, boolean disabled, Map<String, Object> data) {
+	MapModel map = MapModel.from(data);
+	ChannelPlugin<? extends AChannelDetails> plugin = ChannelPluginProvider.MAP.get(channelType);
+	String channelId = map.getString("channelId");
+	if (ArgUtil.is(data)) {
+	    AChannelDetails configDetails = null;
+	    if (ArgUtil.is(channelId)) {
+		ChannelConfig channelConfig = pmEnvironment.config().channels(channelId);
+		configDetails = plugin.getDetails(channelConfig);
+		plugin.extractChannelDetailsFromMap(configDetails, map, channelType);
+	    } else {
+		configDetails = plugin.getChannelDetailsFromMap(map);
+	    }
+	    configDetails.setName(map.getString("name", configDetails.getName()));
+	    configDetails.setChannelKey(map.getString("channelKey", configDetails.getChannelKey()));
+	    save(configDetails, disabled);
+	}
+	return getChannelConfig(channelId);
+    }
+
+    static {
+	CONFIG_LIST.add(new ConfigMeta("Bot Name", "postman.bot.name"));
+	CONFIG_LIST.add(new ConfigMeta("Contact Details Provider Webhook", "postman.contact.details.url"));
+
+	CONFIG_LIST.add(new ConfigMeta("Chat Tag Enabled", "chat.tag.enabled").optionsOnOff());
+
+	CONFIG_LIST.add(new ConfigMeta("Chat Session Timeout", "postman.chat.session.timeout").optionValues("8hr",
+		"12hr", "16hr", "20hr", "24hr"));
+
+	CONFIG_LIST.add(new ConfigMeta("Chat Alert Timer", "postman.chat.idle.timeout").optionValues("5min", "10min",
+		"15min", "20min", "25min", "30min"));
+
+	CONFIG_LIST.add(new ConfigMeta("Agent can initiate new chat", "postman.agent.chat.init").optionsOnOff());
+
+	CONFIG_LIST.add(new ConfigMeta("Agent Panel Color Scheme", "postman.agent.scheme.color")
+		.inputType(InputType.COLOR).defaultValue("#4b56c0"));
     }
 
 }

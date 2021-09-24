@@ -1,11 +1,13 @@
 package com.boot.jx.admin.api;
 
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -16,7 +18,9 @@ import org.springframework.web.bind.annotation.RestController;
 import com.boot.jx.AppContextUtil;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.common.config.ConfigManager;
+import com.boot.jx.common.impl.ConfigMeta;
 import com.boot.jx.postman.PMConfiguration;
+import com.boot.jx.postman.PMConstants.CHANNEL_TYPE_ENUM;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PMEnvironment.AChannelDetails;
 import com.boot.jx.postman.PMEnvironment.PMConfigurationObject;
@@ -25,8 +29,11 @@ import com.boot.jx.postman.doc.config.ClientKeyConfigDoc;
 import com.boot.jx.postman.fb.FacebookConfigDetails;
 import com.boot.jx.postman.gupshup.GupShupConfigDetails;
 import com.boot.jx.postman.plugin.ChannelConfig;
+import com.boot.jx.postman.plugin.ChannelPluginProvider;
+import com.boot.jx.postman.plugin.ChannelPluginProvider.ChannelPlugin;
 import com.boot.jx.postman.tg.TelegramConfigDetails;
 import com.boot.jx.postman.tw.TwitterConfigDetails;
+import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.StringUtils;
 import com.fasterxml.jackson.annotation.JsonView;
@@ -42,6 +49,9 @@ public class ConfigController {
 
     @Autowired
     private PMEnvironment pmEnvironment;
+
+    @Autowired
+    private ConfigManager configManager;
 
     @RequestMapping(value = "/api/config", method = { RequestMethod.POST })
     public ApiResponse<Map<String, Object>, Object> setConfig(@RequestBody PMConfigurationObject map) {
@@ -62,6 +72,22 @@ public class ConfigController {
 	return ApiResponse.buildResults(pmEnvironment.config());
     }
 
+    @ResponseBody
+    @RequestMapping(value = "/api/config/{channelType}", method = { RequestMethod.POST })
+    public ApiResponse<ChannelConfig, Object> saveChannelConfig(@PathVariable CHANNEL_TYPE_ENUM channelType,
+	    @RequestParam(defaultValue = "false", required = false) boolean disabled,
+	    @RequestBody Map<String, Object> data) {
+	return ApiResponse.buildResults(configManager.saveChannelConfig(channelType.toString(), disabled, data));
+    }
+
+    @ResponseBody
+    @RequestMapping(value = "/api/config/{channelId}", method = { RequestMethod.GET })
+    public ApiResponse<ChannelConfig, Object> getChannelConfig(@PathVariable String channelId,
+	    @RequestParam(defaultValue = "false", required = false) boolean disabled) {
+	return ApiResponse.buildResults(configManager.getChannelConfig(channelId));
+    }
+
+    @Deprecated
     @RequestMapping(value = "/api/config/fb", method = { RequestMethod.POST })
     public ApiResponse<PMConfigurationDoc, Object> addFacebookConfig(@RequestParam String pageId,
 	    @RequestParam String type, @RequestParam String verifyToken, @RequestParam String appSecret,
@@ -77,6 +103,7 @@ public class ConfigController {
 	return ApiResponse.buildResults(mongoTemplate.findById(AppContextUtil.getTenant(), PMConfigurationDoc.class));
     }
 
+    @Deprecated
     @RequestMapping(value = "/api/config/tw", method = { RequestMethod.POST })
     public ApiResponse<PMConfigurationDoc, Object> addTwitterConfig(@RequestParam String handler,
 	    @RequestParam String type, @RequestParam String consumerKey, @RequestParam String consumerSecret,
@@ -96,6 +123,7 @@ public class ConfigController {
 	return ApiResponse.buildResults(mongoTemplate.findById(AppContextUtil.getTenant(), PMConfigurationDoc.class));
     }
 
+    @Deprecated
     @RequestMapping(value = "/api/config/tg", method = { RequestMethod.POST })
     public ApiResponse<PMConfigurationDoc, Object> addTelegramConfig(@RequestParam String handler,
 	    @RequestParam String type, @RequestParam String accessToken, @RequestParam(required = false) String envName,
@@ -109,6 +137,7 @@ public class ConfigController {
 	return ApiResponse.buildResults(mongoTemplate.findById(AppContextUtil.getTenant(), PMConfigurationDoc.class));
     }
 
+    @Deprecated
     @RequestMapping(value = "/api/config/gs", method = { RequestMethod.POST })
     public ApiResponse<PMConfigurationDoc, Object> addWAConfig(@RequestParam String number,
 	    @RequestParam(required = false) String notifyId, @RequestParam String chatId, @RequestParam String chatPass,

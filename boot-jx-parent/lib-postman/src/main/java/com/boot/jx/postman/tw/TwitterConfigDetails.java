@@ -25,8 +25,6 @@ public class TwitterConfigDetails extends AChannelDetails {
     private String accessToken;
     @JsonView(PMEnvironment.ProtectedProperty.class)
     private String accessTokenSecret;
-    @JsonView(PMEnvironment.ProtectedProperty.class)
-    private String webhookUrl;
 
     public String getHandler() {
 	return handler;
@@ -82,14 +80,6 @@ public class TwitterConfigDetails extends AChannelDetails {
 
     public void setAccessTokenSecret(String accessTokenSecret) {
 	this.accessTokenSecret = accessTokenSecret;
-    }
-
-    public String getWebhookUrl() {
-	return webhookUrl;
-    }
-
-    public void setWebhookUrl(String webhookUrl) {
-	this.webhookUrl = webhookUrl;
     }
 
     @Override

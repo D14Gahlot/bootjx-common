@@ -12,12 +12,12 @@ import com.boot.jx.AppParam;
 @Component
 public class AppSharedConfigImpl implements AppSharedConfig {
 
-	@Autowired
-	private AppConfig appConfig;
+    @Autowired
+    private AppConfig appConfig;
 
-	@Override
-	public Map<String, Object> getExternalConfig(Map<String, Object> config) {
-		config.put(AppParam.JAX_LOGGER_URL.getProperty(), appConfig.getLoggerURL());
-		return config;
-	};
+    @Override
+    public Map<String, Object> getExternalConfig(Map<String, Object> config) {
+	config.put(AppParam.JAX_LOGGER_URL.getProperty(), appConfig.getLoggerURL());
+	return config;
+    };
 }

@@ -17,6 +17,7 @@ import org.springframework.stereotype.Component;
 
 import com.boot.jx.AppConfig;
 import com.boot.jx.AppConfigPackage.AppCommonConfig;
+import com.boot.jx.common.impl.ConfigMeta;
 import com.boot.jx.http.CommonHttpRequest;
 import com.boot.jx.postman.PMClientConfig;
 import com.boot.jx.postman.PMEnvironment;
@@ -77,7 +78,7 @@ public class AppCommonConfigImpl implements AppCommonConfig {
 	map.put("chatSessionTimeout", TimeUtils.toMillis(chatClientConfig.getChatSessionTimeout()));
 
 	SafeKeyHashMap<Object> setup = new SafeKeyHashMap<Object>();
-	for (ConfigBuilder config : ConfigBuilder.LIST) {
+	for (ConfigMeta config : ConfigManager.CONFIG_LIST) {
 	    setup.put(config.getKey().toUpperCase(), pmEnvironment.get(config.getKey()).getValue());
 	}
 	map.put("SETUP", setup);
@@ -120,7 +121,6 @@ public class AppCommonConfigImpl implements AppCommonConfig {
     @SuppressWarnings("rawtypes")
     @PostConstruct
     public void init() {
-
 	for (org.springframework.core.env.PropertySource<?> propertySource : ((ConfigurableEnvironment) environment)
 		.getPropertySources()) {
 	    if (propertySource instanceof EnumerablePropertySource) {
@@ -139,7 +139,7 @@ public class AppCommonConfigImpl implements AppCommonConfig {
     }
 
     public String getAppLoginSecret() {
-        return appLoginSecret;
+	return appLoginSecret;
     }
 
 }

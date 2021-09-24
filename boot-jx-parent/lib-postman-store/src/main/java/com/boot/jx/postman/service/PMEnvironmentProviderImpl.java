@@ -97,30 +97,6 @@ public class PMEnvironmentProviderImpl implements PMEnvironmentProvider, AppShar
 
 	    }
 
-//	    if (ArgUtil.is(config) && ArgUtil.is(config.getFacebook())) {
-//		for (Entry<String, FacebookConfig> configEntry : config.getFacebook().entrySet()) {
-//		    configInternal(new ChannelConfigDoc().from(configEntry.getValue()));
-//		}
-//	    }
-//
-//	    if (ArgUtil.is(config) && ArgUtil.is(config.getGupshup())) {
-//		for (Entry<String, GupShupConfig> configEntry : config.getGupshup().entrySet()) {
-//		    configInternal(new ChannelConfigDoc().from(configEntry.getValue()));
-//		}
-//	    }
-//
-//	    if (ArgUtil.is(config) && ArgUtil.is(config.getTwitter())) {
-//		for (Entry<String, TwitterConfig> configEntry : config.getTwitter().entrySet()) {
-//		    configInternal(new ChannelConfigDoc().from(configEntry.getValue()));
-//		}
-//	    }
-//
-//	    if (ArgUtil.is(config) && ArgUtil.is(config.getTelegram())) {
-//		for (Entry<String, TelegramConfig> configEntry : config.getTelegram().entrySet()) {
-//		    configInternal(new ChannelConfigDoc().from(configEntry.getValue()));
-//		}
-//	    }
-
 	    PMConfigurationDoc doc = EntityDtoUtil.dtoToEntity(config, new PMConfigurationDoc());
 	    doc.setTenant(AppContextUtil.getTenant());
 	    mongoTemplate.save(doc);
@@ -132,8 +108,10 @@ public class PMEnvironmentProviderImpl implements PMEnvironmentProvider, AppShar
 	ChannelConfigDoc doc = EntityDtoUtil.dtoToEntity(config, new ChannelConfigDoc());
 	doc.setId(StringUtils.toLowerCase(doc.getChannelId()));
 	if (config.isDisabled()) {
-	    mongoTemplate.remove(doc);
+	    doc.setDisabled(config.isDisabled());
+	    mongoTemplate.save(doc);
 	} else
+	    doc.setDisabled(false);
 	    mongoTemplate.save(doc);
     }
 
@@ -149,22 +127,6 @@ public class PMEnvironmentProviderImpl implements PMEnvironmentProvider, AppShar
 	if (ArgUtil.is(plugin)) {
 	    plugin.setConfig(doc, config);
 	}
-
-//	switch (config.getChannelType()) {
-//	case CHANNEL_TYPE.FACEBOOK:
-//	    doc.facebook(config.getFacebook(), config.isDisabled());
-//	    break;
-//	case CHANNEL_TYPE.GUPSHUP:
-//	    doc.gupshup(config.getGupshup(), config.isDisabled());
-//	    break;
-//	case CHANNEL_TYPE.TELEGRAM:
-//	    doc.telegram(config.getTelegram(), config.isDisabled());
-//	    break;
-//	case CHANNEL_TYPE.TWITTER:
-//	    doc.twitter(config.getTwitter(), config.isDisabled());
-//	    break;
-//	default:
-//	}
 
 	mongoTemplate.save(doc);
 	// @Deperecated - Ends

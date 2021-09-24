@@ -1,10 +1,10 @@
-package com.boot.jx.common.config;
+package com.boot.jx.common.impl;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ConfigBuilder implements Serializable {
+public class ConfigMeta implements Serializable {
 
     public static enum InputType {
 	TEXT, OPTIONS, RANGE, NUMBER, COLOR
@@ -38,38 +38,24 @@ public class ConfigBuilder implements Serializable {
 
     private static final long serialVersionUID = -8418291522478302778L;
 
-    public static final List<ConfigBuilder> LIST = new ArrayList<ConfigBuilder>();
-
     private String title;
     private String key;
+    private String path;
     private Object defaultValue;
+    private boolean optional;
+    private boolean readonly;
+    private boolean hidden;
 
     private InputType inputType;
 
     private List<ConfigOption> options;
 
-    public ConfigBuilder(String title, String key) {
-	this.key = key;
-	this.title = title;
+    public ConfigMeta() {
     }
 
-    static {
-	LIST.add(new ConfigBuilder("Bot Name", "postman.bot.name"));
-	LIST.add(new ConfigBuilder("Contact Details Provider Webhook", "postman.contact.details.url"));
-
-	LIST.add(new ConfigBuilder("Chat Tag Enabled", "chat.tag.enabled").optionsOnOff());
-
-	LIST.add(new ConfigBuilder("Chat Session Timeout", "postman.chat.session.timeout").optionValues("8hr", "12hr",
-		"16hr", "20hr", "24hr"));
-
-	LIST.add(new ConfigBuilder("Chat Alert Timer", "postman.chat.idle.timeout").optionValues("5min", "10min",
-		"15min", "20min", "25min", "30min"));
-
-	LIST.add(new ConfigBuilder("Agent can initiate new chat", "postman.agent.chat.init").optionsOnOff());
-
-	LIST.add(new ConfigBuilder("Agent Panel Color Scheme", "postman.agent.scheme.color").inputType(InputType.COLOR)
-		.defaultValue("#4b56c0"));
-
+    public ConfigMeta(String title, String key) {
+	this.key = key;
+	this.title = title;
     }
 
     public String getTitle() {
@@ -103,7 +89,7 @@ public class ConfigBuilder implements Serializable {
 	return this.options;
     }
 
-    public ConfigBuilder options(ConfigOption... options) {
+    public ConfigMeta options(ConfigOption... options) {
 	if (this.inputType == null) {
 	    this.inputType = InputType.OPTIONS;
 	}
@@ -114,7 +100,7 @@ public class ConfigBuilder implements Serializable {
 	return this;
     }
 
-    public ConfigBuilder optionValues(Object... optionValues) {
+    public ConfigMeta optionValues(Object... optionValues) {
 	if (this.inputType == null) {
 	    this.inputType = InputType.OPTIONS;
 	}
@@ -125,7 +111,7 @@ public class ConfigBuilder implements Serializable {
 	return this;
     }
 
-    public ConfigBuilder optionsOnOff() {
+    public ConfigMeta optionsOnOff() {
 	return this.options(ConfigOption.ON, ConfigOption.OFF);
     }
 
@@ -137,7 +123,7 @@ public class ConfigBuilder implements Serializable {
 	this.inputType = inputType;
     }
 
-    public ConfigBuilder inputType(InputType inputType) {
+    public ConfigMeta inputType(InputType inputType) {
 	this.inputType = inputType;
 	return this;
     }
@@ -150,8 +136,75 @@ public class ConfigBuilder implements Serializable {
 	this.defaultValue = defaultValue;
     }
 
-    public ConfigBuilder defaultValue(Object defaultValue) {
+    public ConfigMeta defaultValue(Object defaultValue) {
 	this.defaultValue = defaultValue;
 	return this;
     }
+
+    public ConfigMeta title(String title) {
+	this.title = title;
+	return this;
+    }
+
+    public ConfigMeta key(String key) {
+	this.key = key;
+	return this;
+    }
+
+    public static List<ConfigMeta> createList() {
+	return new ArrayList<ConfigMeta>();
+    }
+
+    public boolean isOptional() {
+	return optional;
+    }
+
+    public void setOptional(boolean optional) {
+	this.optional = optional;
+    }
+
+    public ConfigMeta optional() {
+	this.optional = true;
+	return this;
+    }
+
+    public boolean isReadonly() {
+	return readonly;
+    }
+
+    public void setReadonly(boolean readonly) {
+	this.readonly = readonly;
+    }
+
+    public ConfigMeta readonly() {
+	this.readonly = true;
+	return this;
+    }
+
+    public boolean isHidden() {
+	return hidden;
+    }
+
+    public void setHidden(boolean hidden) {
+	this.hidden = hidden;
+    }
+
+    public ConfigMeta hidden() {
+	this.hidden = true;
+	return this;
+    }
+
+    public String getPath() {
+	return path;
+    }
+
+    public void setPath(String path) {
+	this.path = path;
+    }
+
+    public ConfigMeta path(String path) {
+	this.path = path;
+	return this;
+    }
+
 }

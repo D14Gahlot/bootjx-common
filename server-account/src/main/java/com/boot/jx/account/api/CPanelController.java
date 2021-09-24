@@ -7,6 +7,7 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -92,6 +93,12 @@ public class CPanelController {
     @RequestMapping(value = "/api/config", method = { RequestMethod.GET })
     public ApiResponse<Map<String, Object>, Object> getConfig() {
 	return ApiResponse.buildResults(configManager.getAdminConfigs());
+    }
+
+    @ResponseBody
+    @RequestMapping(value = "/api/config/{key}", method = { RequestMethod.GET })
+    public ApiResponse<Map<String, Object>, Object> getConfig(@PathVariable String key) {
+	return ApiResponse.buildResults(configManager.getAdminConfigs(key));
     }
 
     @Deprecated

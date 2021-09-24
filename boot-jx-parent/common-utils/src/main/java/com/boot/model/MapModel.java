@@ -28,6 +28,12 @@ public class MapModel implements JsonSerializerType<Object> {
 	    return ArgUtil.parseAsString(value);
 	}
 
+	/**
+	 * Save as {@link #defaultValue(Object)} but type is always {@link String}
+	 * 
+	 * @param defaultvalue
+	 * @return
+	 */
 	public String asString(String defaultvalue) {
 	    return ArgUtil.parseAsString(value, defaultvalue);
 	}
@@ -36,6 +42,12 @@ public class MapModel implements JsonSerializerType<Object> {
 	    return ArgUtil.parseAsLong(value);
 	}
 
+	/**
+	 * Save as {@link #defaultValue(Object)} but type is always {@link Long}
+	 * 
+	 * @param defaultvalue
+	 * @return
+	 */
 	public Long asLong(Long defaultvalue) {
 	    return ArgUtil.parseAsLong(value, defaultvalue);
 	}
@@ -44,6 +56,12 @@ public class MapModel implements JsonSerializerType<Object> {
 	    return ArgUtil.parseAsBigDecimal(value);
 	}
 
+	/**
+	 * Save as {@link #defaultValue(Object)} but type is always {@link BigDecimal}
+	 * 
+	 * @param defaultvalue
+	 * @return
+	 */
 	public BigDecimal asBigDecimal(BigDecimal defaultvalue) {
 	    return ArgUtil.parseAsBigDecimal(value, defaultvalue);
 	}
@@ -56,12 +74,22 @@ public class MapModel implements JsonSerializerType<Object> {
 	    return TimeUtils.toMillis(ArgUtil.parseAsString(value, Constants.BLANK));
 	}
 
+	/**
+	 * Save as {@link #defaultValue(Object)} but type is always {@link Boolean}
+	 * 
+	 * @param defaultvalue
+	 * @return
+	 */
 	public Boolean asBoolean(boolean defaultvalue) {
 	    return ArgUtil.parseAsBoolean(value, defaultvalue);
 	}
 
 	public <T extends Enum<T>> T asEnum(Class<T> clazz) {
 	    return ArgUtil.parseAsEnumT(value, clazz);
+	}
+
+	public <T> T defaultValue(T defaultValue) {
+	    return ArgUtil.parseAsT(value, defaultValue, false);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -108,6 +136,18 @@ public class MapModel implements JsonSerializerType<Object> {
 
     public MapEntry entry(JsonPath jsonPath) {
 	return new MapEntry(jsonPath.load(this.map, null));
+    }
+
+    public MapEntry key(String key) {
+	return this.entry(key);
+    }
+
+    public MapEntry path(String path) {
+	return this.entry(new JsonPath(path));
+    }
+
+    public MapEntry path(JsonPath jsonPath) {
+	return this.entry(jsonPath);
     }
 
     public MapEntry first() {

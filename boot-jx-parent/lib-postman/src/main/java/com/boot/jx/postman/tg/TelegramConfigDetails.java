@@ -19,7 +19,6 @@ public class TelegramConfigDetails extends AChannelDetails {
     @JsonView(PMEnvironment.ProtectedProperty.class)
     private String accessToken;
     @JsonView(PMEnvironment.ProtectedProperty.class)
-    private String webhookUrl;
 
     public String getHandler() {
 	return handler;
@@ -43,14 +42,6 @@ public class TelegramConfigDetails extends AChannelDetails {
 
     public void setAccessToken(String accessToken) {
 	this.accessToken = accessToken;
-    }
-
-    public String getWebhookUrl() {
-	return webhookUrl;
-    }
-
-    public void setWebhookUrl(String webhookUrl) {
-	this.webhookUrl = webhookUrl;
     }
 
     @Override
@@ -82,4 +73,5 @@ public class TelegramConfigDetails extends AChannelDetails {
     public ContactType getContactType() {
 	return ContactType.TELEGRAM;
     }
+
 }

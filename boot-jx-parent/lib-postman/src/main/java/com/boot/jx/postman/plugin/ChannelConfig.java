@@ -4,9 +4,11 @@ import com.boot.jx.postman.PMEnvironment.AChannelConfig;
 import com.boot.jx.postman.PMEnvironment.AChannelDetails;
 import com.boot.jx.postman.fb.FacebookConfigDetails;
 import com.boot.jx.postman.gupshup.GupShupConfigDetails;
+import com.boot.jx.postman.plugin.WebPlugin.WebConfigDetails;
 import com.boot.jx.postman.tg.TelegramConfigDetails;
 import com.boot.jx.postman.tw.TwitterConfigDetails;
 import com.boot.jx.postman.wa360.WA360ConfigDetails;
+import com.boot.utils.ArgUtil;
 
 public class ChannelConfig extends AChannelConfig {
 
@@ -18,6 +20,7 @@ public class ChannelConfig extends AChannelConfig {
     private TelegramConfigDetails telegram;
     private GupShupConfigDetails gupshup;
     private WA360ConfigDetails wa360d;
+    private WebConfigDetails web;
 
     private boolean isDisabled;
     private boolean isPushAllowed;
@@ -25,7 +28,10 @@ public class ChannelConfig extends AChannelConfig {
     private boolean isPushFreeTextAllowed;
     private boolean isPushToNewContactAllowed;
 
+    private String callbackPath;
+
     public void copy(AChannelDetails channelConfig) {
+	this.name = channelConfig.getName();
 	this.contactType = channelConfig.getContactType();
 	this.channelType = channelConfig.getChannelType();
 	this.channel = channelConfig.getChannel();
@@ -35,6 +41,7 @@ public class ChannelConfig extends AChannelConfig {
 	this.isPushOnlyApproved = channelConfig.isPushOnlyApproved();
 	this.isPushFreeTextAllowed = channelConfig.isPushFreeTextAllowed();
 	this.isPushToNewContactAllowed = channelConfig.isPushToNewContactAllowed();
+	this.webhookUrl = ArgUtil.nonEmpty(channelConfig.getWebhookUrl(), this.webhookUrl);
 
     }
 
@@ -149,6 +156,22 @@ public class ChannelConfig extends AChannelConfig {
 
     public void setChannelKey(String channelKey) {
 	this.channelKey = channelKey;
+    }
+
+    public WebConfigDetails getWeb() {
+	return web;
+    }
+
+    public void setWeb(WebConfigDetails web) {
+	this.web = web;
+    }
+
+    public String getCallbackPath() {
+	return callbackPath;
+    }
+
+    public void setCallbackPath(String callbackPath) {
+	this.callbackPath = callbackPath;
     }
 
 }

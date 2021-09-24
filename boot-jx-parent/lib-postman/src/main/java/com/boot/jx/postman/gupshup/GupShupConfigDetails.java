@@ -16,11 +16,11 @@ public class GupShupConfigDetails extends AChannelDetails {
 
     private static final long serialVersionUID = -2397678752642150000L;
     private String number;
-    @JsonView(PMEnvironment.ProtectedProperty.class)
+    @JsonView(PMEnvironment.PublicProperty.class)
     private String notifyId;
     @JsonView(PMEnvironment.ProtectedProperty.class)
     private String notifyPass;
-    @JsonView(PMEnvironment.ProtectedProperty.class)
+    @JsonView(PMEnvironment.PublicProperty.class)
     private String chatId;
     @JsonView(PMEnvironment.ProtectedProperty.class)
     private String chatPass;

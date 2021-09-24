@@ -59,9 +59,7 @@ public class WA360Connector implements ConnectorHandler {
     @Override
     public void registerWebHook(ChannelConfig channelConfig) {
 	PMConfiguration config = environment.config();
-	String webhookUrl = String.format("%s/ext/inbound/wa360/callback/%s/%s/%s",
-		channelConfig.getWa360d().getWebhookUrl(), config.getAccountKey(), channelConfig.getChannelId(),
-		channelConfig.getChannelKey());
+	String webhookUrl = PostManUtil.CHANNEL_CALLBACK(config, channelConfig);
 	restService.ajax(WA360Constants.BASE_URL).path("v1/configs/webhook")
 		.header(WA360Constants.D360_API_KEY, channelConfig.getWa360d().getApiKey())
 		.post(MapModel.createInstance().put("url", webhookUrl).toMap()).asMap();
