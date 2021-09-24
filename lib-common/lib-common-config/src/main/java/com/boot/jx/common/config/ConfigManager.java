@@ -93,12 +93,41 @@ public class ConfigManager {
 	    } else {
 		mapBuilder.put("meta", new ConfigMeta().key(key));
 	    }
-	    mapBuilder.put("config", pmEnvironment.get(key)).put("shared", pmEnvironment.shared().get(key));
+	    mapBuilder
+
+		    .put("domain", pmEnvironment.config().get(key)) // Domain
+		    .put("shared", pmEnvironment.shared().get(key)) // Shared
+		    .put("config", pmEnvironment.get(key)) // Resolved
+	    ;
 	}
 
 	list.add(mapBuilder.toMap());
 
 	return list;
+    }
+
+    public void deleteAdminConfigs(String key) {
+	PMConfigurationDoc doc = mongoTemplate.findById(AppContextUtil.getTenant(), PMConfigurationDoc.class);
+
+	if (ArgUtil.isEmpty(doc)) {
+	    doc = new PMConfigurationDoc();
+	    doc.setTenant(AppContextUtil.getTenant());
+	}
+
+	switch (key) {
+	case "postman.bot.name":
+	case "postman.default.sender":
+	    doc.agent().setDefaultBotName(null);
+	default:
+	    doc.map().remove(key);
+	    PrefsConfigDoc prefsConfigDoc = new PrefsConfigDoc();
+	    prefsConfigDoc.setId(key);
+	    mongoTemplate.remove(prefsConfigDoc);
+	    break;
+	}
+
+	mongoTemplate.save(doc);
+	sharedConfigManager.clear();
     }
 
     public void save(PMConfigurationObject config) {

@@ -96,6 +96,13 @@ public class CPanelController {
     }
 
     @ResponseBody
+    @RequestMapping(value = "/api/config", method = { RequestMethod.DELETE })
+    public ApiResponse<Map<String, Object>, Object> deleteConfig(@RequestParam(required = false) String key) {
+	configManager.deleteAdminConfigs(key);
+	return ApiResponse.buildResults(configManager.getAdminConfigs());
+    }
+
+    @ResponseBody
     @RequestMapping(value = "/api/config/channel/{channelType}", method = { RequestMethod.POST })
     public ApiResponse<ChannelConfig, Object> saveChannelConfig(@PathVariable CHANNEL_TYPE_ENUM channelType,
 	    @RequestParam(defaultValue = "false", required = false) boolean disabled,
