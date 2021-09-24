@@ -1,6 +1,5 @@
 package com.boot.jx.admin.api;
 
-import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -18,7 +17,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.boot.jx.AppContextUtil;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.common.config.ConfigManager;
-import com.boot.jx.common.impl.ConfigMeta;
 import com.boot.jx.postman.PMConfiguration;
 import com.boot.jx.postman.PMConstants.CHANNEL_TYPE_ENUM;
 import com.boot.jx.postman.PMEnvironment;
@@ -29,11 +27,8 @@ import com.boot.jx.postman.doc.config.ClientKeyConfigDoc;
 import com.boot.jx.postman.fb.FacebookConfigDetails;
 import com.boot.jx.postman.gupshup.GupShupConfigDetails;
 import com.boot.jx.postman.plugin.ChannelConfig;
-import com.boot.jx.postman.plugin.ChannelPluginProvider;
-import com.boot.jx.postman.plugin.ChannelPluginProvider.ChannelPlugin;
 import com.boot.jx.postman.tg.TelegramConfigDetails;
 import com.boot.jx.postman.tw.TwitterConfigDetails;
-import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.StringUtils;
 import com.fasterxml.jackson.annotation.JsonView;
@@ -64,16 +59,14 @@ public class ConfigController {
 	return ApiResponse.buildResults(adminConfigService.getAdminConfigs());
     }
 
-    @Deprecated
-    @RequestMapping(value = "/api/config/refresh", method = { RequestMethod.GET })
-    public ApiResponse<PMConfiguration, Object> getConnnectors() {
-	PMConfigurationDoc config = mongoTemplate.findById(AppContextUtil.getTenant(), PMConfigurationDoc.class);
-	adminConfigService.saveConfigs(config);
-	return ApiResponse.buildResults(pmEnvironment.config());
+    @ResponseBody
+    @RequestMapping(value = "/api/config/{key}", method = { RequestMethod.GET })
+    public ApiResponse<Map<String, Object>, Object> getConfig(@PathVariable String key) {
+	return ApiResponse.buildResults(configManager.getAdminConfigs(key));
     }
 
     @ResponseBody
-    @RequestMapping(value = "/api/config/{channelType}", method = { RequestMethod.POST })
+    @RequestMapping(value = "/api/config/channel/{channelType}", method = { RequestMethod.POST })
     public ApiResponse<ChannelConfig, Object> saveChannelConfig(@PathVariable CHANNEL_TYPE_ENUM channelType,
 	    @RequestParam(defaultValue = "false", required = false) boolean disabled,
 	    @RequestBody Map<String, Object> data) {
@@ -81,10 +74,18 @@ public class ConfigController {
     }
 
     @ResponseBody
-    @RequestMapping(value = "/api/config/{channelId}", method = { RequestMethod.GET })
+    @RequestMapping(value = "/api/config/channel/{channelId}", method = { RequestMethod.GET })
     public ApiResponse<ChannelConfig, Object> getChannelConfig(@PathVariable String channelId,
 	    @RequestParam(defaultValue = "false", required = false) boolean disabled) {
 	return ApiResponse.buildResults(configManager.getChannelConfig(channelId));
+    }
+
+    @Deprecated
+    @RequestMapping(value = "/api/config/refresh", method = { RequestMethod.GET })
+    public ApiResponse<PMConfiguration, Object> getConnnectors() {
+	PMConfigurationDoc config = mongoTemplate.findById(AppContextUtil.getTenant(), PMConfigurationDoc.class);
+	adminConfigService.saveConfigs(config);
+	return ApiResponse.buildResults(pmEnvironment.config());
     }
 
     @Deprecated
