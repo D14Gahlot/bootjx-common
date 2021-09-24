@@ -79,6 +79,10 @@ public class ConfigManager {
     }
 
     public List<Map<String, Object>> getAdminConfigs(String key) {
+	if (!ArgUtil.is(key)) {
+	    return getAdminConfigs();
+	}
+
 	List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
 
 	BuilderMap mapBuilder = MapBuilder.map();
@@ -114,7 +118,7 @@ public class ConfigManager {
 	    configObject.setKey(config.getKey());
 	    configObject.setValue(config.getValue());
 	    configObject.setShared(config.isShared());
-	    
+
 	    doc.set(configObject);
 
 	    PrefsConfigDoc prefsConfigDoc = new PrefsConfigDoc();

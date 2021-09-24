@@ -19,12 +19,11 @@ import com.boot.jx.AppContextUtil;
 import com.boot.jx.account.AccountAdminService;
 import com.boot.jx.account.AccountSessionBean;
 import com.boot.jx.api.ApiResponse;
-import com.boot.jx.chat.ConnectorHandlerFactory;
 import com.boot.jx.common.config.CDNBuilder;
 import com.boot.jx.common.config.ConfigManager;
 import com.boot.jx.postman.PMConfiguration;
-import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PMConstants.CHANNEL_TYPE_ENUM;
+import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PMEnvironment.AChannelDetails;
 import com.boot.jx.postman.PMEnvironment.PMConfigurationObject;
 import com.boot.jx.postman.doc.PMConfigurationDoc;
@@ -92,13 +91,7 @@ public class CPanelController {
 
     @ResponseBody
     @RequestMapping(value = "/api/config", method = { RequestMethod.GET })
-    public ApiResponse<Map<String, Object>, Object> getConfig() {
-	return ApiResponse.buildResults(configManager.getAdminConfigs());
-    }
-
-    @ResponseBody
-    @RequestMapping(value = "/api/config/{key:.+}", method = { RequestMethod.GET })
-    public ApiResponse<Map<String, Object>, Object> getConfig(@PathVariable("key") String key) {
+    public ApiResponse<Map<String, Object>, Object> getConfig(@RequestParam(required = false) String key) {
 	return ApiResponse.buildResults(configManager.getAdminConfigs(key));
     }
 

@@ -54,14 +54,9 @@ public class ConfigController {
 	return ApiResponse.buildResults(adminConfigService.getAdminConfigs());
     }
 
-    @RequestMapping(value = "/api/config", method = { RequestMethod.GET })
-    public ApiResponse<Map<String, Object>, Object> getConfig() {
-	return ApiResponse.buildResults(adminConfigService.getAdminConfigs());
-    }
-
     @ResponseBody
-    @RequestMapping(value = "/api/config/{key}", method = { RequestMethod.GET })
-    public ApiResponse<Map<String, Object>, Object> getConfig(@PathVariable String key) {
+    @RequestMapping(value = "/api/config", method = { RequestMethod.GET })
+    public ApiResponse<Map<String, Object>, Object> getConfig(@RequestParam(required = false) String key) {
 	return ApiResponse.buildResults(configManager.getAdminConfigs(key));
     }
 
