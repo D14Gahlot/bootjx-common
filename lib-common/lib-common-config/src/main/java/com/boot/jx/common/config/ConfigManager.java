@@ -113,6 +113,8 @@ public class ConfigManager {
 	    PMConfigurationObject configObject = doc.get(config.getKey());
 	    configObject.setKey(config.getKey());
 	    configObject.setValue(config.getValue());
+	    configObject.setShared(config.isShared());
+	    
 	    doc.set(configObject);
 
 	    PrefsConfigDoc prefsConfigDoc = new PrefsConfigDoc();

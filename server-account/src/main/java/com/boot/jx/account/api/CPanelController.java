@@ -97,8 +97,8 @@ public class CPanelController {
     }
 
     @ResponseBody
-    @RequestMapping(value = "/api/config/{key}", method = { RequestMethod.GET })
-    public ApiResponse<Map<String, Object>, Object> getConfig(@PathVariable String key) {
+    @RequestMapping(value = "/api/config/{key:.+}", method = { RequestMethod.GET })
+    public ApiResponse<Map<String, Object>, Object> getConfig(@PathVariable("key") String key) {
 	return ApiResponse.buildResults(configManager.getAdminConfigs(key));
     }
 
