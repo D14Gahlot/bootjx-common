@@ -60,8 +60,9 @@ public class FrontController {
 	String domainName = commonHttpRequest.get("domain");
 	String domainId = null;
 
-	if (!ArgUtil.is(domainName) && !Tenants.isDefault(tnt)) {
+	if (!Tenants.isDefault(tnt)) {
 	    domainName = tnt;
+	    AppContextUtil.setTenant(Tenants.getDefault());
 	}
 
 	if (ArgUtil.is(domainName)) {
