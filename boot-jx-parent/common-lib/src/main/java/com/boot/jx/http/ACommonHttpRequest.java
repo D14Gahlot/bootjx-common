@@ -14,6 +14,11 @@ public abstract class ACommonHttpRequest {
 
     public abstract HttpServletResponse getResponse();
 
+    /**
+     * 
+     * @see HttpServletRequest#getRequestURI()
+     * @return
+     */
     public String getRequestURI() {
 	return getRequest().getRequestURI();
     }

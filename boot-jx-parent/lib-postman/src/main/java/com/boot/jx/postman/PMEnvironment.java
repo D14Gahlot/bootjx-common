@@ -41,6 +41,8 @@ public class PMEnvironment {
 	public void config(ChannelConfig config);
 
 	public void remove(ChannelConfig config);
+
+	public void reload();
     }
 
     public static interface ChannelDetails extends Serializable {
@@ -245,6 +247,12 @@ public class PMEnvironment {
     public void remove(ChannelConfig config) {
 	if (ArgUtil.is(provider)) {
 	    provider.remove(config);
+	}
+    }
+
+    public void reload() {
+	if (ArgUtil.is(provider)) {
+	    provider.reload();
 	}
     }
 
