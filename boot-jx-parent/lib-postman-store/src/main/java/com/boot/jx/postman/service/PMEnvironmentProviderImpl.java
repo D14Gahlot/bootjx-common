@@ -26,6 +26,7 @@ import com.boot.jx.scope.tnt.Tenants;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.EntityDtoUtil;
 import com.boot.utils.StringUtils;
+import com.boot.utils.UniqueID;
 
 @Component
 public class PMEnvironmentProviderImpl implements PMEnvironmentProvider, AppSharedConfig {
@@ -155,6 +156,20 @@ public class PMEnvironmentProviderImpl implements PMEnvironmentProvider, AppShar
     @Override
     public PMConfiguration shared() {
 	return sharedConfiguration;
+    }
+
+    @Override
+    public void reload() {
+	if (sharedConfiguration == null) {
+	    sharedConfiguration = new PMConfigurationDoc();
+	    AppContextUtil.setTenant(Tenants.getDefault());
+	    String sessionId = UniqueID.generateString();
+	    AppContextUtil.setSessionId(sessionId);
+	    AppContextUtil.getTraceId(true, true);
+	    AppContextUtil.resetTraceTime();
+	    AppContextUtil.init();
+	    config();
+	}
     }
 
 }

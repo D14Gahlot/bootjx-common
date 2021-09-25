@@ -39,7 +39,6 @@ import com.boot.jx.postman.PMEnvironment;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
 import com.boot.utils.CryptoUtil;
-import com.boot.utils.CryptoUtil.HashBuilder;
 
 @Controller
 @RequestMapping("/partner")
@@ -73,7 +72,7 @@ public class PartnerController {
     public String home(Model model, @RequestParam(required = false) String theme) {
 	String tnt = AppContextUtil.getTenant();
 	if (!tnt.equals("app")) {
-	    return "redirect:" + String.format("https://app.%s/%s", env.get("mry.prop.service.domain").asString(),
+	    return "redirect:" + String.format("https://app.%s%s", env.get("mry.prop.service.domain").asString(),
 		    commonHttpRequest.getRequestURI());
 	}
 

@@ -93,6 +93,10 @@ public class Tenants {
 	}
     }
 
+    public static String getDefault() {
+	return DEFAULT_STR;
+    }
+
     public static boolean isDefault(Object tenant) {
 	return ArgUtil.areEqual(tenant, DEFAULT_STR);
     }
