@@ -9,11 +9,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 import com.boot.jx.AppConfigPackage.AppCommonConfig;
+import com.boot.jx.AppContextUtil;
 import com.boot.jx.account.AccountAdminService;
 import com.boot.jx.account.AccountSessionBean;
 import com.boot.jx.account.doc.AccountStore;
 import com.boot.jx.account.doc.DomainDoc;
 import com.boot.jx.http.CommonHttpRequest;
+import com.boot.jx.scope.tnt.Tenants;
+import com.boot.jx.scope.tnt.Tenants.Tenant;
 import com.boot.jx.validation.AlphaNumValidator.ValidAlphaNum;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.Constants;
@@ -53,8 +56,13 @@ public class FrontController {
     public String front(Model model) {
 	model.addAllAttributes(appCommonConfig.appAttributes());
 
+	String tnt = AppContextUtil.getTenant();
 	String domainName = commonHttpRequest.get("domain");
 	String domainId = null;
+
+	if (!ArgUtil.is(domainName) && Tenants.isDefault(tnt)) {
+	    domainName = tnt;
+	}
 
 	if (ArgUtil.is(domainName)) {
 	    commonHttpRequest.setCookie("domain", domainName);
