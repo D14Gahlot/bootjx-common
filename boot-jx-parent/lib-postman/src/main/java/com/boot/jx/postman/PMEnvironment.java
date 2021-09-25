@@ -40,7 +40,7 @@ public class PMEnvironment {
 
 	public void config(ChannelConfig config);
 
-	void remove(ChannelConfig config);
+	public void remove(ChannelConfig config);
     }
 
     public static interface ChannelDetails extends Serializable {
@@ -242,6 +242,12 @@ public class PMEnvironment {
 	}
     }
 
+    public void remove(ChannelConfig config) {
+	if (ArgUtil.is(provider)) {
+	    provider.remove(config);
+	}
+    }
+
     @Autowired
     private AppConfig appConfig;
 
@@ -259,7 +265,7 @@ public class PMEnvironment {
 	if (ArgUtil.isEmpty(configObject)) {
 	    String value = appConfig.prop(key);
 	    configObject = new PMConfigurationObject(key, value);
-	    //this.config().map().put(key, configObject);
+	    // this.config().map().put(key, configObject);
 	}
 
 	return configObject;

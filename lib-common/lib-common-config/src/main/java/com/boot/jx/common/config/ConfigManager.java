@@ -237,8 +237,8 @@ public class ConfigManager {
     public ChannelConfig removeChannelConfig(String channelId) {
 	if (ArgUtil.is(channelId)) {
 	    ChannelConfig channelConfig = pmEnvironment.config().channels(channelId);
-	    configStore.remove(channelConfig);
-	    pmEnvironment.config().channels().remove(channelId);
+	    pmEnvironment.remove(channelConfig);
+	    sharedConfigManager.clear();
 	    return channelConfig;
 	}
 	return null;

@@ -132,8 +132,8 @@ public class PMEnvironmentProviderImpl implements PMEnvironmentProvider, AppShar
     public void remove(ChannelConfig config) {
 	configStore.remove(config);
 	PMConfigurationDoc doc = getPMConfigurationDoc();
-	doc.channels().remove(doc);
-	configStore.remove(doc);
+	doc.channels().remove(config.getChannelId());
+	configStore.save(doc);
     }
 
     private PMConfigurationDoc getPMConfigurationDoc() {
