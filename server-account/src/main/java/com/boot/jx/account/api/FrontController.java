@@ -76,10 +76,8 @@ public class FrontController {
 	if (ArgUtil.is(domainName)) {
 	    model.addAttribute("APP_DOMAIN", domainName);
 	    model.addAttribute("APP_DOMAIN_ID", domainId);
-	    model.addAttribute("DOMAIN", domainName);
 	} else {
 	    model.addAttribute("APP_DOMAIN", Constants.BLANK);
-	    model.addAttribute("DOMAIN", Constants.BLANK);
 	}
 
 	Authentication auth = AccountAdminService.getAuthentication();

@@ -19,6 +19,7 @@ import org.springframework.stereotype.Component;
 
 import com.boot.jx.AppConfig;
 import com.boot.jx.AppConfigPackage.AppCommonConfig;
+import com.boot.jx.AppContextUtil;
 import com.boot.jx.common.impl.ConfigMeta;
 import com.boot.jx.http.CommonHttpRequest;
 import com.boot.jx.postman.PMClientConfig;
@@ -113,6 +114,7 @@ public class AppCommonConfigImpl implements AppCommonConfig {
 	map.put("POSTMAN_AGENT_SCHEME_COLOR", pmEnvironment.get("postman.agent.scheme.color").asString());
 	map.put("STAMP", System.currentTimeMillis());
 	map.put("APP_TITLE", appConfig.getAppTitle());
+	map.put("TENANT", AppContextUtil.getTenant());
 
 	return map;
     }
