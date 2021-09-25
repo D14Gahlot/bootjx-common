@@ -73,8 +73,8 @@ public class PartnerController {
     public String home(Model model, @RequestParam(required = false) String theme) {
 	String tnt = AppContextUtil.getTenant();
 	if (!tnt.equals("app")) {
-	    return "redirect:" + String.format("https://app.%s/%s/auth/direct",
-		    env.get("mry.prop.service.domain").asString(), commonHttpRequest.getRequestURI());
+	    return "redirect:" + String.format("https://app.%s/%s", env.get("mry.prop.service.domain").asString(),
+		    commonHttpRequest.getRequestURI());
 	}
 
 	model.addAllAttributes(appCommonConfig.appAttributes());
