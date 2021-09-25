@@ -29,6 +29,7 @@ import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.ClazzUtil;
+import com.boot.utils.Constants;
 import com.boot.utils.EntityDtoUtil;
 import com.boot.utils.StringUtils.StringMatcher;
 
@@ -155,7 +156,8 @@ public class BotEngine {
 	    Pattern[] patterns = methodWrapper.getPattern();
 	    if (patterns.length > 0) {
 		for (int i = 0; i < patterns.length; i++) {
-		    if (ArgUtil.isEmpty(methodWrapper.getTenant())
+		    if (ArgUtil.isEmptyArray(methodWrapper.getTenant())
+			    || ArgUtil.isEqual(Constants.BLANK, methodWrapper.getTenant())
 			    || ArgUtil.isEqual(tenant, methodWrapper.getTenant())) {
 			if (matcher.isMatch(patterns[i]) && ArgUtil.is(ArgUtil.parseAsString(patterns[i]))) {
 			    event.setMatcher(matcher);
@@ -264,6 +266,8 @@ public class BotEngine {
 		} else {
 		    method.invoke(controller, inboxMessage);
 		}
+	    } else {
+		LOGGER.info("No Chat Controller Matched");
 	    }
 	} catch (ChatException ce) {
 	    LOGGER.info("Target Handler : " + ce.getTargetHandler());

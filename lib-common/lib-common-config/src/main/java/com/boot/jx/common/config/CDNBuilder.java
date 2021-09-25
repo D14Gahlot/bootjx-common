@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 import com.boot.jx.logger.LoggerService;
 import com.boot.jx.rest.RestService;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.Constants;
 import com.boot.utils.StringUtils;
 
 @Component
@@ -32,16 +33,18 @@ public class CDNBuilder {
     public String latest(String cdnUrl) {
 	String cdnUrlNew = cdnMapper.get(cdnUrl);
 	if (LATEST.equals(cdnUrlNew)) {
-	    return cdnUrl;
+	    return cdnUrl.replaceAll("\\s", "");
 	} else if (ArgUtil.is(cdnUrlNew)) {
-	    return cdnUrlNew;
+	    return cdnUrlNew.replaceAll("\\s", "");
 	} else {
-	    cdnMapper.put(cdnUrl, cdnUrl);
+	    String fixedCDNUrl = ArgUtil.parseAsString(cdnUrl, Constants.BLANK).replaceAll("\\s", "");
+	    cdnMapper.put(cdnUrl, fixedCDNUrl);
+	    return cdnUrl;
 	}
-	return cdnUrl;
     }
 
     public String updateVersion(String oldUrl, String version) {
+	oldUrl = StringUtils.trim(version);
 	Matcher matcher = PATTERN.matcher(oldUrl);
 	if (matcher.find()) {
 	    String protoV = matcher.group("proto");

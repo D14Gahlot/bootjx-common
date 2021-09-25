@@ -774,6 +774,13 @@ public final class ArgUtil {
 	return (str == null || Constants.BLANK.equals(str));
     }
 
+    public static boolean isEmptyArray(Object[] arr) {
+	if (arr == null) {
+	    return true;
+	}
+	return arr.length == 0;
+    }
+
     public static boolean areEqual(Object a, Object b) {
 	if (a == null || b == null) {
 	    return (a == null && b == null);

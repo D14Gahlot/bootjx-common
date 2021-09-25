@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.boot.jx.AppContextUtil;
 import com.boot.jx.api.ApiResponse;
+import com.boot.jx.common.config.CDNBuilder;
 import com.boot.jx.common.config.ConfigManager;
 import com.boot.jx.postman.PMConfiguration;
 import com.boot.jx.postman.PMConstants.CHANNEL_TYPE_ENUM;
@@ -47,6 +48,9 @@ public class ConfigController {
 
     @Autowired
     private ConfigManager configManager;
+
+    @Autowired
+    private CDNBuilder cdnBuilder;
 
     @RequestMapping(value = "/api/config", method = { RequestMethod.POST })
     public ApiResponse<Map<String, Object>, Object> setConfig(@RequestBody PMConfigurationObject map) {
@@ -161,24 +165,15 @@ public class ConfigController {
 	String oldUrl = config.asString();
 
 	if (ArgUtil.is(version) && ArgUtil.is(oldUrl)) {
-	    Pattern pattern = Pattern.compile(
-		    "(?<proto>.+)cdn.jsdelivr.net/gh/(?<org>.+)/(?<repo>.+)@(?<version>[-a-zA-Z0-9\\.]+)(?<path>.*)");
-	    Matcher matcher = pattern.matcher(oldUrl);
-	    if (matcher.find()) {
-		String protoV = matcher.group("proto");
-		String orgV = matcher.group("org");
-		String repoV = matcher.group("repo");
-		String versionV = matcher.group("version");
-		String pathV = matcher.group("path");
-		url = String.format("%scdn.jsdelivr.net/gh/%s/%s@%s%s", protoV, orgV, repoV, StringUtils.trim(version),
-			pathV);
-	    }
+	    url = cdnBuilder.updateVersion(oldUrl, version);
 	}
 
 	if (ArgUtil.is(url)) {
 	    config.setValue(url);
-	    adminConfigService.save(config);
+	    configManager.save(config);
 	}
+
+	cdnBuilder.update();
 
 	return ApiResponse.buildResults(config);
     }
