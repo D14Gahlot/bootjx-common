@@ -130,7 +130,8 @@ public class PMEnvironmentProviderImpl implements PMEnvironmentProvider, AppShar
 
     @Override
     public void remove(ChannelConfig config) {
-	configStore.remove(config);
+	ChannelConfigDoc configDoc = EntityDtoUtil.dtoToEntity(config, new ChannelConfigDoc());
+	configStore.remove(configDoc);
 	PMConfigurationDoc doc = getPMConfigurationDoc();
 	doc.channels().remove(config.getChannelId());
 	configStore.save(doc);
