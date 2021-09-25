@@ -117,6 +117,12 @@ public class CPanelController {
 	return ApiResponse.buildResults(configManager.getChannelConfig(channelId));
     }
 
+    @ResponseBody
+    @RequestMapping(value = "/api/config/channel/{channelId}", method = { RequestMethod.DELETE })
+    public ApiResponse<ChannelConfig, Object> deleteChannelConfig(@PathVariable String channelId) {
+	return ApiResponse.buildResults(configManager.removeChannelConfig(channelId));
+    }
+
     @Deprecated
     @ResponseBody
     @RequestMapping(value = "/api/config/refresh", method = { RequestMethod.GET })

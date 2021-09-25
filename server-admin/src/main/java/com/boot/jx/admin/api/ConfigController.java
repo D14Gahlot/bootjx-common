@@ -70,9 +70,14 @@ public class ConfigController {
 
     @ResponseBody
     @RequestMapping(value = "/api/config/channel/{channelId}", method = { RequestMethod.GET })
-    public ApiResponse<ChannelConfig, Object> getChannelConfig(@PathVariable String channelId,
-	    @RequestParam(defaultValue = "false", required = false) boolean disabled) {
+    public ApiResponse<ChannelConfig, Object> getChannelConfig(@PathVariable String channelId) {
 	return ApiResponse.buildResults(configManager.getChannelConfig(channelId));
+    }
+
+    @ResponseBody
+    @RequestMapping(value = "/api/config/channel/{channelId}", method = { RequestMethod.DELETE })
+    public ApiResponse<ChannelConfig, Object> deleteChannelConfig(@PathVariable String channelId) {
+	return ApiResponse.buildResults(configManager.removeChannelConfig(channelId));
     }
 
     @Deprecated

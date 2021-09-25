@@ -39,6 +39,8 @@ public class PMEnvironment {
 	public void config(PMConfiguration configuration);
 
 	public void config(ChannelConfig config);
+
+	void remove(ChannelConfig config);
     }
 
     public static interface ChannelDetails extends Serializable {

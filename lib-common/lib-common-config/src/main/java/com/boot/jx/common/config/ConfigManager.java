@@ -205,7 +205,7 @@ public class ConfigManager {
 	    if (ArgUtil.is(channelConfig)) {
 		PMConfiguration config = pmEnvironment.config();
 		if (!ArgUtil.is(channelConfig.getWebhookUrl())) {
-		    channelConfig.setWebhookUrl(pmClientConfig.getWebhookUrl(channelConfig));
+		    channelConfig.setWebhookUrl(pmClientConfig.getWebhookBase(channelConfig));
 		}
 		channelConfig.setCallbackPath(PostManUtil.CHANNEL_CALLBACK_PATH(config.getAccountKey(), channelConfig));
 		return channelConfig;
@@ -232,6 +232,16 @@ public class ConfigManager {
 	    save(configDetails, disabled);
 	}
 	return getChannelConfig(channelId);
+    }
+
+    public ChannelConfig removeChannelConfig(String channelId) {
+	if (ArgUtil.is(channelId)) {
+	    ChannelConfig channelConfig = pmEnvironment.config().channels(channelId);
+	    configStore.remove(channelConfig);
+	    pmEnvironment.config().channels().remove(channelId);
+	    return channelConfig;
+	}
+	return null;
     }
 
     static {

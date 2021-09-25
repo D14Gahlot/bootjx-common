@@ -124,9 +124,16 @@ public class PMEnvironmentProviderImpl implements PMEnvironmentProvider, AppShar
 	if (ArgUtil.is(plugin)) {
 	    plugin.setConfig(doc, config);
 	}
-
 	configStore.save(doc);
 	// @Deperecated - Ends
+    }
+
+    @Override
+    public void remove(ChannelConfig config) {
+	configStore.remove(config);
+	PMConfigurationDoc doc = getPMConfigurationDoc();
+	doc.channels().remove(doc);
+	configStore.remove(doc);
     }
 
     private PMConfigurationDoc getPMConfigurationDoc() {

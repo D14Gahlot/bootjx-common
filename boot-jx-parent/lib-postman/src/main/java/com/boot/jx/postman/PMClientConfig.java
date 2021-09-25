@@ -93,7 +93,7 @@ public class PMClientConfig {
 	return agentSessionTimeout;
     }
 
-    private String getWebhookBase(ChannelConfig channelConfig) {
+    public String getWebhookBase(ChannelConfig channelConfig) {
 	String webhookUrl = channelConfig.getWebhookUrl();
 	if (!ArgUtil.is(webhookUrl)) {
 	    webhookUrl = String.format("https://%s.%s/postman", AppContextUtil.getTenant(),
