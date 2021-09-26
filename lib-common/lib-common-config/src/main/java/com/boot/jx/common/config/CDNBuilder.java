@@ -44,7 +44,7 @@ public class CDNBuilder {
     }
 
     public String updateVersion(String oldUrl, String version) {
-	oldUrl = StringUtils.trim(version);
+	version = StringUtils.trim(version);
 	Matcher matcher = PATTERN.matcher(oldUrl);
 	if (matcher.find()) {
 	    String protoV = matcher.group("proto");
