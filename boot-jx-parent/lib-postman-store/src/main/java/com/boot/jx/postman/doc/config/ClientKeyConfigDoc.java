@@ -1,22 +1,17 @@
 package com.boot.jx.postman.doc.config;
 
-import java.io.Serializable;
-import java.util.List;
-
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.TypeAlias;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
-import org.springframework.data.mongodb.core.mapping.Field;
 
 import com.boot.jx.model.AuditableEntity;
 import com.boot.jx.mongo.CommonDocInterfaces.IDocument;
-import com.boot.jx.mongo.CommonDocInterfaces.OldDocVersion;
 import com.boot.jx.postman.ClientApiKey;
 
 @Document(collection = "CONFIG_CLIENT_KEY")
 @TypeAlias("ClientKeyConfig")
-public class ClientKeyConfigDoc implements OldDocVersion<ClientKeyConfigDoc>, IDocument, AuditableEntity, ClientApiKey {
+public class ClientKeyConfigDoc implements IDocument, AuditableEntity, ClientApiKey {
 
     private static final long serialVersionUID = -6368905475787041196L;
 
@@ -30,9 +25,6 @@ public class ClientKeyConfigDoc implements OldDocVersion<ClientKeyConfigDoc>, ID
     private Long createdStamp;
     private String key;
     private String keyVersion;
-
-    @Field("oldVersions")
-    private List<ClientKeyConfigDoc> oldVersions;
 
     public String getId() {
 	return id;
@@ -56,14 +48,6 @@ public class ClientKeyConfigDoc implements OldDocVersion<ClientKeyConfigDoc>, ID
 
     public void setCreatedStamp(Long createdStamp) {
 	this.createdStamp = createdStamp;
-    }
-
-    public List<ClientKeyConfigDoc> getOldVersions() {
-	return oldVersions;
-    }
-
-    public void setOldVersions(List<ClientKeyConfigDoc> oldVersions) {
-	this.oldVersions = oldVersions;
     }
 
     @Override
