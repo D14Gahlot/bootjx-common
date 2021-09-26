@@ -253,4 +253,11 @@ public class CPanelController {
 	return ApiResponse.buildData(configManager.save(clientApiKey));
     }
 
+    @ResponseBody
+    @RequestMapping(value = { "/api/collection/drop" }, method = { RequestMethod.POST })
+    public ApiResponse<Object, Object> dropCollection(@RequestParam String collectionName) {
+	mongoTemplate.dropCollection(collectionName);
+	return ApiResponse.build();
+    }
+
 }

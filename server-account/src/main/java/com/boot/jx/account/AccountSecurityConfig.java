@@ -19,7 +19,7 @@ import org.springframework.security.web.authentication.SimpleUrlAuthenticationSu
 @EnableWebSecurity
 public class AccountSecurityConfig extends WebSecurityConfigurerAdapter {
 
-    public static final String[] CONTEXTS = new String[] { "account", "partner" };
+    public static final String[] CONTEXTS = new String[] { "account", "partner", "front", "cpanel" };
 
     @Autowired
     private AccountLogoutHandler agentLogoutHandler;

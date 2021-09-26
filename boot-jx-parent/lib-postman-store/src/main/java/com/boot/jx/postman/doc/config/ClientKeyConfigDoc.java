@@ -8,12 +8,13 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import com.boot.jx.model.AuditableEntity;
 import com.boot.jx.mongo.CommonDocInterfaces.IDocument;
 import com.boot.jx.postman.ClientApiKey;
+import com.boot.model.UtilityModels.JsonIgnoreUnknown;
 
 @Document(collection = "CONFIG_CLIENT_KEY")
 @TypeAlias("ClientKeyConfig")
-public class ClientKeyConfigDoc implements IDocument, AuditableEntity, ClientApiKey {
+public class ClientKeyConfigDoc implements IDocument, AuditableEntity, ClientApiKey, JsonIgnoreUnknown {
 
-    private static final long serialVersionUID = -6368905475787041196L;
+    private static final long serialVersionUID = -3070718912315245729L;
 
     @Id
     private String id;
