@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 
 import com.boot.jx.http.CommonHttpRequest;
 import com.boot.jx.http.CommonHttpRequest.ApiRequestDetail;
+import com.boot.jx.scope.vendor.VendorAuthContext.VendorAuthFilter;
 import com.boot.jx.scope.vendor.VendorContext.VendorScoped;
 import com.boot.jx.scope.vendor.VendorContext.VendorValue;
 

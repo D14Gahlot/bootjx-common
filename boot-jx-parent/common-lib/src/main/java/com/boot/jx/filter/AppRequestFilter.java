@@ -41,7 +41,7 @@ import com.boot.jx.scope.tnt.TenantAuthContext.TenantAuthFilter;
 import com.boot.jx.scope.tnt.TenantContextHolder;
 import com.boot.jx.scope.tnt.Tenants.TenantResolver;
 import com.boot.jx.scope.vendor.VendorAuthContext;
-import com.boot.jx.scope.vendor.VendorAuthFilter;
+import com.boot.jx.scope.vendor.VendorAuthContext.VendorAuthFilter;
 import com.boot.jx.scope.vendor.VendorAuthService;
 import com.boot.jx.scope.vendor.VendorContext;
 import com.boot.jx.session.SessionContextService;
