@@ -184,7 +184,7 @@ public class ConfigManager {
 
     public ClientKeyConfigDoc save(ClientKeyConfigDoc clientApiKey) {
 	clientApiKey.setKey(PostManUtil.UNIQUE_API_KEY());
-	mongoTemplate.save(clientApiKey);
+	configStore.saveClientKeyConfig(clientApiKey);
 	sharedConfigManager.clear();
 	return clientApiKey;
     }
