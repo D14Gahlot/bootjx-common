@@ -9,8 +9,6 @@ import com.boot.jx.AppContextUtil;
 import com.boot.jx.http.CommonHttpRequest;
 import com.boot.jx.http.CommonHttpRequest.ApiRequestDetail;
 import com.boot.jx.scope.tnt.TenantAuthContext.TenantAuthFilter;
-import com.boot.jx.scope.vendor.VendorAuthFilter;
-import com.boot.jx.scope.vendor.VendorContext;
 
 @Component
 public class TenantAuthContext extends TenantContext<TenantAuthFilter> {
