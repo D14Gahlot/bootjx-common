@@ -189,6 +189,11 @@ public class ConfigManager {
 	return clientApiKey;
     }
 
+    public ClientKeyConfigDoc remove(ClientKeyConfigDoc clientApiKey) {
+	mongoTemplate.remove(clientApiKey);
+	return clientApiKey;
+    }
+
     public void save(AChannelDetails details, boolean disabled) {
 	ChannelPlugin<? extends AChannelDetails> plugin = ChannelPluginProvider.MAP.get(details.getChannelType());
 	if (ArgUtil.is(plugin)) {

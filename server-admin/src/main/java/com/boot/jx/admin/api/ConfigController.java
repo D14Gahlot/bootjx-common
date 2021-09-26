@@ -198,5 +198,14 @@ public class ConfigController {
     public ApiResponse<ClientKeyConfigDoc, Object> createClientApiKey(@RequestBody ClientKeyConfigDoc clientApiKey) {
 	return ApiResponse.buildData(adminConfigService.save(clientApiKey));
     }
+    
+    @JsonView(PMEnvironment.PublicProperty.class)
+    @ResponseBody
+    @RequestMapping(value = { "/api/config/clientapikey" }, method = { RequestMethod.DELETE })
+    public ApiResponse<ClientKeyConfigDoc, Object> deleteClientApiKey(@RequestParam String id) {
+	ClientKeyConfigDoc clientApiKey = new ClientKeyConfigDoc();
+	clientApiKey.setId(id);
+	return ApiResponse.buildResults(adminConfigService.remove(clientApiKey));
+    }
 
 }
