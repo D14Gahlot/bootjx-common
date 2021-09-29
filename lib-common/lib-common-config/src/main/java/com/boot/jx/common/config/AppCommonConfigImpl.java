@@ -7,6 +7,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import javax.annotation.PostConstruct;
 
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
@@ -22,6 +23,7 @@ import com.boot.jx.AppConfigPackage.AppCommonConfig;
 import com.boot.jx.AppContextUtil;
 import com.boot.jx.common.impl.ConfigMeta;
 import com.boot.jx.http.CommonHttpRequest;
+import com.boot.jx.logger.LoggerService;
 import com.boot.jx.postman.PMClientConfig;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.model.SafeKeyHashMap;
@@ -32,6 +34,8 @@ import com.boot.utils.TimeUtils;
 @Component
 @PropertySource("classpath:application-common.properties")
 public class AppCommonConfigImpl implements AppCommonConfig {
+
+    private static final Logger LOGGER = LoggerService.getLogger(AppCommonConfigImpl.class);
 
     public static final String[] PROPS = new String[] {
 	    // PRefixe
@@ -148,6 +152,11 @@ public class AppCommonConfigImpl implements AppCommonConfig {
 
     @EventListener(ApplicationReadyEvent.class)
     public void onApplicationReady() {
-	pmEnvironment.reload();
+	try {
+	    pmEnvironment.reload();
+	} catch (Exception e) {
+	    LOGGER.error("pmEnvironment.reload", e);
+	}
+
     }
 }
