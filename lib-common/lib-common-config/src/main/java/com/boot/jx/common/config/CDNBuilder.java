@@ -65,12 +65,16 @@ public class CDNBuilder {
 	return s.matches("^[a-fA-F0-9]{40}$");
     }
 
+    private long lastUpdate = 0L;
+
     @Async
     public void update() {
 
-	for (Entry<String, String> cdn : cdnMapper.entrySet()) {
+	long now = System.currentTimeMillis() / (1000 * 60 * 5);
+	boolean check = (now > lastUpdate);
 
-	    if (ArgUtil.areEqual(cdn.getKey(), cdn.getValue())) {
+	for (Entry<String, String> cdn : cdnMapper.entrySet()) {
+	    if (ArgUtil.areEqual(cdn.getKey(), cdn.getValue()) || check) {
 		Matcher matcher = PATTERN.matcher(cdn.getKey());
 		if (matcher.find()) {
 		    String protoV = matcher.group("proto");
@@ -95,10 +99,8 @@ public class CDNBuilder {
 			    cdnMapper.put(cdn.getKey(), LATEST);
 			}
 		    }
-
 		}
 	    }
-
 	}
     }
 
