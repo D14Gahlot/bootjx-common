@@ -72,6 +72,7 @@ public class CDNBuilder {
 
 	long now = System.currentTimeMillis() / (1000 * 60 * 5);
 	boolean check = (now > lastUpdate);
+	lastUpdate = now;
 
 	for (Entry<String, String> cdn : cdnMapper.entrySet()) {
 	    if (ArgUtil.areEqual(cdn.getKey(), cdn.getValue()) || check) {
@@ -82,6 +83,7 @@ public class CDNBuilder {
 		    String repoV = matcher.group("repo");
 		    String versionV = matcher.group("version");
 		    String pathV = matcher.group("path");
+		    //System.out.println("versionV "+versionV);
 		    if (!isValidSHA1(versionV)) {
 			String versionUrl = String.format(VERSION_URL, orgV, repoV, versionV);
 			String sha = null;
