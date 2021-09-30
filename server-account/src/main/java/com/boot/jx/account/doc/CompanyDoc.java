@@ -2,13 +2,6 @@ package com.boot.jx.account.doc;
 
 import java.io.Serializable;
 
-import org.springframework.data.annotation.Id;
-import org.springframework.data.annotation.TypeAlias;
-import org.springframework.data.mongodb.core.mapping.Document;
-
-import com.boot.jx.model.AuditableEntity;
-import com.boot.jx.mongo.CommonDocInterfaces.IDocument;
-
 public class CompanyDoc implements Serializable {
 
     private static final long serialVersionUID = -3354844112176554561L;

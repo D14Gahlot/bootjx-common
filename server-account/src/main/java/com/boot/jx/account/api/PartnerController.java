@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.boot.jx.AppConfig;
 import com.boot.jx.AppConfigPackage.AppCommonConfig;
@@ -32,10 +33,12 @@ import com.boot.jx.account.doc.SignupContact;
 import com.boot.jx.api.ApiFieldError;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.api.ApiResponseUtil;
+import com.boot.jx.aws.AWSFileStore;
 import com.boot.jx.common.dto.UserLoginToken;
 import com.boot.jx.common.service.EmpAuthService;
 import com.boot.jx.http.CommonHttpRequest;
 import com.boot.jx.postman.PMEnvironment;
+import com.boot.jx.postman.doc.QuickMedia;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
 import com.boot.utils.CryptoUtil;
@@ -234,7 +237,7 @@ public class PartnerController {
 	if (!ArgUtil.is(domainDoc.getCompany().getConactEmail())) {
 	    domainDoc.getCompany().setConactEmail(domainUser.getContact().getEmail());
 	}
-	
+
 	if (!ArgUtil.is(domainDoc.getCompany().getConactPhone())) {
 	    domainDoc.getCompany().setConactPhone(domainUser.getContact().getPhone());
 	}
@@ -303,6 +306,19 @@ public class PartnerController {
 	    return ApiResponse.build().message("Domain created");
 	}
 
+    }
+
+    @Autowired
+    AWSFileStore fileStore;
+
+    @RequestMapping(value = "/api/domain/logo", method = { RequestMethod.POST })
+    public ApiResponse<String, Object> upploadDomainLogo(
+	    @RequestParam(name = "file", required = false) MultipartFile file) {
+	DomainUserDoc domainUser = adminSessionBean.domainUser();
+	String domainUserId = domainUser.getId();
+	String url = fileStore.upload1(file, String.format("%s/docs/%s/%s", AppContextUtil.getTenant(), domainUserId,
+		domainUserId, UUID.randomUUID()), file.getOriginalFilename()).getUrl();
+	return ApiResponse.buildResults(url).message("Logo uplodaed");
     }
 
 }
