@@ -271,13 +271,14 @@ public class PartnerController {
 	DomainUserDoc domainUser = adminSessionBean.domainUser();
 
 	if (ArgUtil.is(domainUser.getDomains())) {
-	    DomainDoc domaonDoc = CollectionUtil.first(domainUser.getDomains());
-	    if (!domaonDoc.getDomain().equals(domain.getDomain())) {
+	    DomainDoc domainDoc = CollectionUtil.first(domainUser.getDomains());
+	    if (!domainDoc.getDomain().equals(domain.getDomain())) {
 		ApiResponseUtil.throwInputException(new ApiFieldError().field("domain").codeKey("ValidDomainMultiple")
 			.description("Domain Change Not Allowed"));
 	    }
-	    domaonDoc.setCompany(domain.getCompany());
-	    accountStore.save(domaonDoc);
+	    domainDoc.setCompany(domain.getCompany());
+	    domainDoc.setSocial(domain.getSocial());
+	    accountStore.save(domainDoc);
 	    accountStore.save(domainUser);
 
 	    return ApiResponse.build().message("Details updated");
@@ -288,6 +289,8 @@ public class PartnerController {
 	    DomainDoc domainDoc = new DomainDoc();
 	    domainDoc.setDomain(domain.getDomain());
 	    domainDoc.setCompany(domain.getCompany());
+	    domainDoc.setSocial(domain.getSocial());
+
 	    accountStore.save(domainDoc);
 
 	    domainUser.domains().add(domainDoc);
