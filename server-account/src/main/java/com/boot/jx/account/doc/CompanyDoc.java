@@ -20,6 +20,7 @@ public class CompanyDoc implements Serializable {
 
     private String conactAddress;
     private String conactCity;
+    private String conactPhone;
     private String conactCountry;
     private String conactPostalCode;
 
@@ -95,6 +96,14 @@ public class CompanyDoc implements Serializable {
 
     public void setBusinessAbout(String businessAbout) {
 	this.businessAbout = businessAbout;
+    }
+
+    public String getConactPhone() {
+        return conactPhone;
+    }
+
+    public void setConactPhone(String conactPhone) {
+        this.conactPhone = conactPhone;
     }
 
 }
