@@ -25,6 +25,7 @@ public class DomainDoc implements IDocument, AuditableEntity, Serializable, Comp
     private String domain;
 
     private CompanyDoc company;
+    private SocialDoc social;
 
     private Long createdStamp;
     private String createdBy;
@@ -100,6 +101,14 @@ public class DomainDoc implements IDocument, AuditableEntity, Serializable, Comp
     public int compareTo(DomainDoc o) {
 	return ArgUtil.parseAsString(this.domain, Constants.BLANK)
 		.compareTo(ArgUtil.parseAsString(o.getDomain(), Constants.BLANK));
+    }
+
+    public SocialDoc getSocial() {
+	return social;
+    }
+
+    public void setSocial(SocialDoc social) {
+	this.social = social;
     }
 
 }
