@@ -6,6 +6,7 @@ public class SocialDoc implements Serializable {
 
     private static final long serialVersionUID = -3354844112176554561L;
 
+    private String logo;
     private String facebookBMId;
     private String facebookPageId;
     private String facebookPage;
@@ -86,5 +87,13 @@ public class SocialDoc implements Serializable {
 
     public void setCustomerSupportPhone(String customerSupportPhone) {
 	this.customerSupportPhone = customerSupportPhone;
+    }
+
+    public String getLogo() {
+	return logo;
+    }
+
+    public void setLogo(String logo) {
+	this.logo = logo;
     }
 }
