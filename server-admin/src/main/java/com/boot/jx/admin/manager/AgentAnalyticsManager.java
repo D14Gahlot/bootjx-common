@@ -302,7 +302,7 @@ public class AgentAnalyticsManager {
 			conVerMsgLst.put(conId, converDuration);
 		}
 		
-		if(!conVerMsgLst.isEmpty() && ArgUtil.is(conVerMsgLst)) {
+		if(conVerMsgLst!=null && !conVerMsgLst.isEmpty() && ArgUtil.is(conVerMsgLst)) {
 			 Object maxEntryKey = Collections.max(conVerMsgLst.entrySet(), Map.Entry.comparingByValue()).getKey();
 	          maxEntryKeyValue =(Long)conVerMsgLst.get(maxEntryKey); 
 		}
@@ -333,7 +333,7 @@ public class AgentAnalyticsManager {
 		}
 		
 		
-		if(!startLagMapLst.isEmpty() && ArgUtil.is(startLagMapLst)) {
+		if(startLagMapLst!=null && !startLagMapLst.isEmpty() && ArgUtil.is(startLagMapLst)) {
 			 Object maxEntryKey = Collections.max(startLagMapLst.entrySet(), Map.Entry.comparingByValue()).getKey();
 			 Double maxEntryKeyValue =startLagMapLst.get(maxEntryKey); 
 			 startLag = maxEntryKeyValue;
@@ -383,7 +383,7 @@ public class AgentAnalyticsManager {
 			mapLst.put(key, Collections.frequency(dateWithTimeList, key));
 		   // System.out.println("Peak Load :"+ key + ": " + Collections.frequency(dateWithTimeList, key));
 		}
-		if(ArgUtil.is(mapLst) && !mapLst.isEmpty() ) {
+		if(mapLst!=null && ArgUtil.is(mapLst) && !mapLst.isEmpty() ) {
 			 Object maxEntryKey = Collections.max(mapLst.entrySet(), Map.Entry.comparingByValue()).getKey();
 	         Integer maxEntryKeyValue =mapLst.get(maxEntryKey); 
 	        // System.out.println("Peak Load Date Time and Value:"+maxEntryKey +"- "+maxEntryKeyValue);
@@ -408,7 +408,7 @@ public class AgentAnalyticsManager {
 		}
 		LOGGER.debug("lead Msg  :"+leasMsgLst.toString());
 		LOGGER.info("lead Msg  :"+leasMsgLst.toString());
-		if(ArgUtil.is(leasMsgLst)) {
+		if(leasMsgLst!=null && ArgUtil.is(leasMsgLst)) {
 		 Object maxEntryKey = Collections.max(leasMsgLst.entrySet(), Map.Entry.comparingByValue()).getKey();
          Integer maxEntryKeyValue =leasMsgLst.get(maxEntryKey); 
          Integer sumOfAllContactMsg = leasMsgLst.values().stream().mapToInt(i->i).sum();
