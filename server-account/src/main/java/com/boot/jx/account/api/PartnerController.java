@@ -311,6 +311,7 @@ public class PartnerController {
     @Autowired
     AWSFileStore fileStore;
 
+    @ResponseBody
     @RequestMapping(value = "/api/domain/logo", method = { RequestMethod.POST })
     public ApiResponse<String, Object> upploadDomainLogo(
 	    @RequestParam(name = "file", required = false) MultipartFile file) {
