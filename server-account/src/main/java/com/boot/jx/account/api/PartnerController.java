@@ -317,8 +317,9 @@ public class PartnerController {
 	    @RequestParam(name = "file", required = false) MultipartFile file) {
 	DomainUserDoc domainUser = adminSessionBean.domainUser();
 	String domainUserId = domainUser.getId();
-	String url = fileStore.upload1(file, String.format("%s/docs/%s/%s", AppContextUtil.getTenant(), domainUserId,
-		domainUserId, UUID.randomUUID()), file.getOriginalFilename()).getUrl();
+	String url = fileStore.upload1(file,
+		String.format("%s/docs/%s/logo/%s", AppContextUtil.getTenant(), domainUserId, UUID.randomUUID()),
+		file.getOriginalFilename()).getUrl();
 	return ApiResponse.buildResults(url).message("Logo uplodaed");
     }
 
