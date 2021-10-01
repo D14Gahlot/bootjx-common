@@ -1,13 +1,17 @@
 package com.boot.jx.postman.model;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.List;
 
 import com.boot.jx.dict.ContactType;
-import com.boot.jx.utils.PostManUtil;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.JsonUtil;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.KeyDeserializer;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 public class MessageDefinitions {
@@ -20,7 +24,7 @@ public class MessageDefinitions {
 	public static final String OUTBOUND_IMPORTED = "Oi";
     }
 
-    @JsonDeserialize(as = ContactMeta.class)
+    @JsonDeserialize(as = ContactMeta.class,keyUsing = ContactMetaKeyDeserializer.class)
     @JsonIgnoreProperties(ignoreUnknown = true)
     public interface Contact extends Serializable {
 	public String getName();
@@ -43,7 +47,7 @@ public class MessageDefinitions {
 
     }
 
-    @JsonDeserialize(as = ContactMeta.class)
+    @JsonDeserialize(as = ContactMeta.class, keyUsing = ContactMetaKeyDeserializer.class)
     @JsonIgnoreProperties(ignoreUnknown = true)
     public interface Contactable extends Contact {
 	public String getContactType();
@@ -139,5 +143,14 @@ public class MessageDefinitions {
 
 	Message<?> replyMessage(String message);
 
+    }
+
+    public class ContactMetaKeyDeserializer extends KeyDeserializer {
+
+	@Override
+	public Object deserializeKey(String key, DeserializationContext deserializationContext)
+		throws IOException, JsonProcessingException {
+	    return JsonUtil.getMapper().readValue(key, ContactMeta.class);
+	}
     }
 }

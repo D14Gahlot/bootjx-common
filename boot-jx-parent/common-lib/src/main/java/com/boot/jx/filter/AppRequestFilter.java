@@ -20,6 +20,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 
 import com.boot.jx.AppConfig;
@@ -28,6 +30,9 @@ import com.boot.jx.AppContextUtil;
 import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.dict.Language;
 import com.boot.jx.dict.UserClient.UserDeviceClient;
+import com.boot.jx.exception.AmxApiError;
+import com.boot.jx.exception.ApiHttpExceptions.ApiStatusCodes;
+import com.boot.jx.exception.ExceptionMessageKey;
 import com.boot.jx.http.CommonHttpRequest;
 import com.boot.jx.http.CommonHttpRequest.ApiRequestDetail;
 import com.boot.jx.http.RequestType;
@@ -346,6 +351,13 @@ public class AppRequestFilter implements Filter {
 		    chain.doFilter(req, new AppResponseWrapper(resp));
 		} else {
 		    resp.setStatus(HttpServletResponse.SC_FORBIDDEN);
+		    resp.setContentType(MediaType.APPLICATION_JSON_VALUE);
+		    AmxApiError apiError = new AmxApiError();
+		    apiError.setHttpStatus(HttpStatus.FORBIDDEN);
+		    apiError.setStatusKey(ApiStatusCodes.ACCESS_DENIED.toString());
+		    apiError.setErrors(ApiResponseUtil.getErrors());
+		    ExceptionMessageKey.resolveLocalMessage(apiError);
+		    JsonUtil.getMapper().writeValue(resp.getWriter(), apiError);
 		}
 	    } finally {
 		if (reqType.isTrack() || AuditServiceClient.isDebugEnabled()) {

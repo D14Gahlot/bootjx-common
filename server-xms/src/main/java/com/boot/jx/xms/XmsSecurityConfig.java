@@ -1,10 +1,12 @@
 package com.boot.jx.xms;
 
+import javax.servlet.http.HttpServletResponse;
+
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
@@ -16,9 +18,12 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 
+import com.boot.jx.exception.AmxApiError;
+import com.boot.jx.exception.ApiHttpExceptions.ApiStatusCodes;
+import com.boot.jx.exception.ExceptionMessageKey;
 import com.boot.jx.swagger.MockParamBuilder;
 import com.boot.jx.swagger.MockParamBuilder.MockParam;
-import com.boot.utils.CollectionUtil;
+import com.boot.utils.JsonUtil;
 
 @Configuration
 @EnableWebSecurity
@@ -26,8 +31,8 @@ import com.boot.utils.CollectionUtil;
 public class XmsSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
-    protected void configure(HttpSecurity http) throws Exception {
-	http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
+    protected void configure(HttpSecurity httpSecurity) throws Exception {
+	httpSecurity.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
 		// Publics Calls
 		.and().authorizeRequests().antMatchers("/pub/**").permitAll()
 		// Login Calls
@@ -45,6 +50,20 @@ public class XmsSecurityConfig extends WebSecurityConfigurerAdapter {
 		.and().logout().permitAll().logoutUrl("/auth/logout").logoutSuccessUrl("/auth/login?logout")
 		.deleteCookies("JSESSIONID").invalidateHttpSession(true).permitAll().and().exceptionHandling()
 		.accessDeniedPage("/403").and().csrf().disable().headers().disable();
+
+	// Exception handling configuration
+
+	httpSecurity.exceptionHandling().authenticationEntryPoint((request, response, e) -> {
+	    response.setContentType("application/json;charset=UTF-8");
+	    response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+	    AmxApiError apiError = new AmxApiError();
+	    apiError.setHttpStatus(HttpStatus.FORBIDDEN);
+	    apiError.setStatusKey(ApiStatusCodes.ACCESS_DENIED.toString());
+	    apiError.setException(e.getClass().getName());
+	    ExceptionMessageKey.resolveLocalMessage(apiError);
+	    response.getWriter().write(JsonUtil.toJson(apiError));
+	});
+
     }
 
     @Bean
