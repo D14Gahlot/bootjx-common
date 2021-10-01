@@ -4,6 +4,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Component;
 
+import com.boot.jx.api.ApiFieldError;
+import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.chat.ChatService;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.doc.ChatSessionDoc;
@@ -31,6 +33,11 @@ public class MessageService {
 
     public OutBoundReciept send(OutBoundMsg message) {
 	ChannelConfig channel = pmEnvironment.config().channels(message.getChannelId());
+
+	if (!ArgUtil.is(channel)) {
+	    ApiResponseUtil.throwInputException(new ApiFieldError().field("channelId").obzect("OutBoundMsg")
+		    .codeKey("CHANNEL_NOT_FOUND").description("Channel : " + message.getChannelId() + " is Not Setup"));
+	}
 
 	OutboxMessage outboxMessage = new OutboxMessage();
 

@@ -1,8 +1,14 @@
 package com.boot.jx.xms.dto;
 
+import com.boot.jx.postman.model.ContactMeta;
 import com.boot.jx.postman.model.MessageDefinitions.Contact;
+import com.boot.jx.postman.model.MessageDefinitions.ContactMetaKeyDeserializer;
 import com.boot.jx.swagger.ApiMockModelProperty;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
+@JsonDeserialize(as = OutBoundContact.class)
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class OutBoundContact implements Contact {
 
     private static final long serialVersionUID = -4577777772782792298L;

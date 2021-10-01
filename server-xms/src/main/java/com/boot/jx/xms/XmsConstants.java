@@ -5,6 +5,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import com.boot.jx.http.ApiRequest;
 import com.boot.jx.swagger.ApiMockParam;
 import com.boot.jx.swagger.ApiMockParams;
 import com.boot.jx.swagger.MockParamBuilder.MockParamType;
@@ -15,6 +16,7 @@ public class XmsConstants {
 
     @Target({ ElementType.TYPE, ElementType.METHOD })
     @Retention(RetentionPolicy.RUNTIME)
+    @ApiRequest(authenticateTenant = true)
     @ApiMockParams({
 //	    @ApiMockParam(name = "x-consumer-key", value = "Consumer Key", defaultValue = "abcvernorx",
 //		    paramType = MockParamType.HEADER),

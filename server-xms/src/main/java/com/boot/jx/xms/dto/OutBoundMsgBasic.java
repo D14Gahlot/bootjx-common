@@ -28,6 +28,7 @@ public class OutBoundMsgBasic implements Serializable {
     @ApiMockModelProperty(example = "false", value = "Mask the outgoing message data")
     public boolean mask;
 
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class OutBoundMsg extends OutBoundMsgBasic {
 	private static final long serialVersionUID = 5358190519262995012L;
 
