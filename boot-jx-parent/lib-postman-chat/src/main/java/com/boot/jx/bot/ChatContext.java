@@ -21,6 +21,7 @@ import com.boot.utils.ArgUtil;
 public class ChatContext {
 
 	String currentHandler;
+	String agent;
 
 	private ChatMeta meta;
 	private InboxMessage inboxMessage;
@@ -120,6 +121,14 @@ public class ChatContext {
 			return this.inboxMessage.getFrom();
 		}
 		return null;
+	}
+
+	public String getAgent() {
+	    return agent;
+	}
+
+	public void setAgent(String agent) {
+	    this.agent = agent;
 	}
 
 }
