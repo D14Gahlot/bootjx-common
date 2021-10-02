@@ -161,11 +161,11 @@ public class SessionStore extends CommonDocStore {
 
 			// CONTACT CREATION - needs creation or updation if
 			if (ArgUtil.isEmpty(chatContactDoc)) {
-				chatContactQuery.update(inboxMessage.contact());
+				chatContactQuery.update(contact);
 				commonMongoTemplate.upsert(chatContactQuery);
 			} else {
 				// CONTACT UPDATE
-				chatContactQuery.update(inboxMessage.contact());
+				chatContactQuery.update(contact);
 				commonMongoTemplate.updateFirst(chatContactQuery);
 			}
 		} else {
