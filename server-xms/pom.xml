@@ -100,6 +100,13 @@
 			<groupId>com.boot.jx</groupId>
 			<artifactId>common-mongo</artifactId>
 		</dependency>
+
+		<dependency>
+			<groupId>com.boot.jx</groupId>
+			<artifactId>lib-tmpl</artifactId>
+			<version>${jax.version}</version>
+		</dependency>
+
 	</dependencies>
 
 	<build>
