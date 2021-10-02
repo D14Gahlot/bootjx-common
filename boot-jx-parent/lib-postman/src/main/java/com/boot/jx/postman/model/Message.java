@@ -42,6 +42,7 @@ public class Message<T extends Message<T>> implements Serializable, MessageOptio
     protected String lang = null;
     protected String subject;
     protected String message = null;
+    protected String footer;
     protected List<String> to = null;
     protected List<ContactMeta> contacts = null;
     private String templateId = null;
@@ -532,6 +533,14 @@ public class Message<T extends Message<T>> implements Serializable, MessageOptio
     @Override
     public String toString() {
 	return String.format("[messageId:%s]", this.messageId);
+    }
+
+    public String getFooter() {
+        return footer;
+    }
+
+    public void setFooter(String footer) {
+        this.footer = footer;
     }
 
 }
