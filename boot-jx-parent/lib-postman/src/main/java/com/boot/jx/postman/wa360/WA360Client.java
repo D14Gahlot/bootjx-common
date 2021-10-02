@@ -50,9 +50,11 @@ public class WA360Client {
 	}
 
 	if (isList) {
-	    sendList(channelConfig, outboxMessage, buttons);
+	    MapModel resp = sendList(channelConfig, outboxMessage, buttons);
+	    msgIds.add(getMessageId(resp));
 	} else if (isButton) {
-	    sendButton(channelConfig, outboxMessage, buttons);
+	    MapModel resp = sendButton(channelConfig, outboxMessage, buttons);
+	    msgIds.add(getMessageId(resp));
 	} else {
 	    if (ArgUtil.is(outboxMessage.getMessage())) {
 		MapModel resp = sendText(channelConfig, outboxMessage);
@@ -91,6 +93,7 @@ public class WA360Client {
 
 	if (ArgUtil.areEqual(attachment.getMediaType(), FileType.IMAGE.toString())) {
 	    req.put(OutBoundWrapperPaths.MESSAGE_TYPE, "image");
+	    wa360OutBoundMedia.setFilename(null);
 	    req.put("image", wa360OutBoundMedia);
 	} else if (ArgUtil.areEqual(attachment.getMediaType(), FileType.VIDEO.toString())) {
 	    req.put(OutBoundWrapperPaths.MESSAGE_TYPE, "video");
@@ -169,6 +172,7 @@ public class WA360Client {
 	    wa360OutBoundMedia.setFilename(attachment.getMediaName());
 	    if (ArgUtil.areEqual(attachment.getMediaType(), FileType.IMAGE.toString())) {
 		intr.put(OutBoundWrapperPaths.MESSAGE_TYPE, "image");
+		 wa360OutBoundMedia.setFilename(null);
 		intr.put("image", wa360OutBoundMedia);
 	    } else if (ArgUtil.areEqual(attachment.getMediaType(), FileType.VIDEO.toString())) {
 		intr.put(OutBoundWrapperPaths.MESSAGE_TYPE, "video");

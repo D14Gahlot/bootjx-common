@@ -103,7 +103,7 @@ public class MessageService {
 			    .mediaCaption(message.getVideo().getCaption()).mediaType(FileType.VIDEO.toString()));
 	}
 
-	if (ArgUtil.is(message.getVideo())) {
+	if (ArgUtil.is(message.getAudio())) {
 	    outboxMessage.attachment(
 		    new Attachment().mediaURL(message.getAudio().getLink()).mediaName(message.getAudio().getFilename())
 			    .mediaCaption(message.getAudio().getCaption()).mediaType(FileType.AUDIO.toString()));
@@ -121,7 +121,8 @@ public class MessageService {
 	    chatService.send(chatSessionDoc, outboxMessage);
 	}
 
-	return new OutBoundReciept();
+	String messageId = outboxMessage.getMessageId();
+	return new OutBoundReciept().id(messageId);
     }
 
 }
