@@ -1,5 +1,8 @@
 package com.boot.jx.postman;
 
+import com.boot.jx.dict.ContactType;
+import com.boot.utils.ArgUtil;
+
 public class PMConstants {
 
     public final class CHANNEL_TYPE {
@@ -14,6 +17,28 @@ public class PMConstants {
 
     public enum CHANNEL_TYPE_ENUM {
 	tg, tw, fb, wags, wa360, web
+    }
+
+    public static String CHANNEL_TYPE(String contactType, String channel) {
+	CHANNEL_TYPE_ENUM channelEnum = ArgUtil.parseAsEnumT(channel, CHANNEL_TYPE_ENUM.class, null);
+	if (ArgUtil.is(channelEnum)) {
+	    return channel;
+	}
+	if (ContactType.FACEBOOK.toString().equals(contactType)) {
+	    return CHANNEL_TYPE.FACEBOOK;
+	} else if (ContactType.TWITTER.toString().equals(contactType)) {
+	    return CHANNEL_TYPE.TWITTER;
+	} else if (ContactType.TELEGRAM.toString().equals(contactType)) {
+	    return CHANNEL_TYPE.TELEGRAM;
+	} else if (ContactType.WEBSITE.toString().equals(contactType)) {
+	    return CHANNEL_TYPE.WEB;
+	} else if (ContactType.WHATSAPP.toString().equals(contactType)) {
+	    if (CHANNEL_TYPE.WA_GUPSHUP_LEGACY.equals(channel)) {
+		return CHANNEL_TYPE.WA_GUPSHUP;
+	    }
+	}
+
+	return null;
     }
 
     public final class PostManUrls {

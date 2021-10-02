@@ -41,18 +41,18 @@ public class MessageService {
 
 	OutboxMessage outboxMessage = new OutboxMessage();
 
-	if (message.type == "text") {
+	if ("text".equalsIgnoreCase(message.getType())) {
 	    outboxMessage.setMessage(message.getText().body);
 	}
 
-	if (message.type == "template") {
+	if ("template".equalsIgnoreCase(message.getType())) {
 	    outboxMessage.setTemplateId(message.getTemplate().id);
 	    outboxMessage.setTemplate(message.getTemplate().code);
 	    outboxMessage.setLang(message.getTemplate().lang);
 	}
 
 	outboxMessage.contact().type(channel.getContactType());
-	outboxMessage.contact().setChannel(channel.getChannel());
+	outboxMessage.contact().setChannel(channel.getChannelType());
 	outboxMessage.contact().setLane(channel.getLane());
 
 	outboxMessage.contact().copyFrom(message.getToContact());
