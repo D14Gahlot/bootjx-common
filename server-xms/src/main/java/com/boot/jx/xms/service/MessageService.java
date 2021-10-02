@@ -7,8 +7,10 @@ import org.springframework.stereotype.Component;
 import com.boot.jx.api.ApiFieldError;
 import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.chat.ChatService;
+import com.boot.jx.dict.FileType;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.doc.ChatSessionDoc;
+import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.postman.store.SessionStore;
@@ -46,9 +48,65 @@ public class MessageService {
 	}
 
 	if ("template".equalsIgnoreCase(message.getType())) {
+	    if (!ArgUtil.is(message.getTemplate())) {
+		ApiResponseUtil.throwInputException(new ApiFieldError().field("template").obzect("OutBoundMsg")
+			.codeKey("TEMPLATE_DETAILS_MISSING").description("Template details is missing"));
+	    }
 	    outboxMessage.setTemplateId(message.getTemplate().id);
 	    outboxMessage.setTemplate(message.getTemplate().code);
 	    outboxMessage.setLang(message.getTemplate().lang);
+	    outboxMessage.setModelData(message.getTemplate().data);
+	}
+
+	if ("document".equalsIgnoreCase(message.getType())) {
+	    if (!ArgUtil.is(message.getDocument())) {
+		ApiResponseUtil.throwInputException(new ApiFieldError().field("document").obzect("OutBoundMsg")
+			.codeKey("DOCUMENT_DETAILS_MISSING").description("Document details is missing"));
+	    }
+	}
+
+	if ("image".equalsIgnoreCase(message.getType())) {
+	    if (!ArgUtil.is(message.getImage())) {
+		ApiResponseUtil.throwInputException(new ApiFieldError().field("image").obzect("OutBoundMsg")
+			.codeKey("IMAGE_DETAILS_MISSING").description("Image details is missing"));
+	    }
+	}
+
+	if ("video".equalsIgnoreCase(message.getType())) {
+	    if (!ArgUtil.is(message.getVideo())) {
+		ApiResponseUtil.throwInputException(new ApiFieldError().field("video").obzect("OutBoundMsg")
+			.codeKey("VIDEO_DETAILS_MISSING").description("Video details is missing"));
+	    }
+	}
+
+	if ("audio".equalsIgnoreCase(message.getType())) {
+	    if (!ArgUtil.is(message.getAudio())) {
+		ApiResponseUtil.throwInputException(new ApiFieldError().field("audio").obzect("OutBoundMsg")
+			.codeKey("AUDIO_DETAILS_MISSING").description("Audio details is missing"));
+	    }
+	}
+
+	if (ArgUtil.is(message.getDocument())) {
+	    outboxMessage.attachment(new Attachment().mediaURL(message.getDocument().getLink())
+		    .mediaName(message.getDocument().getFilename()).mediaCaption(message.getDocument().getCaption())
+		    .mediaType(FileType.DOCUMENT.toString()));
+	}
+
+	if (ArgUtil.is(message.getImage())) {
+	    outboxMessage.attachment(
+		    new Attachment().mediaURL(message.getImage().getLink()).mediaName(message.getImage().getFilename())
+			    .mediaCaption(message.getImage().getCaption()).mediaType(FileType.IMAGE.toString()));
+	}
+	if (ArgUtil.is(message.getVideo())) {
+	    outboxMessage.attachment(
+		    new Attachment().mediaURL(message.getVideo().getLink()).mediaName(message.getVideo().getFilename())
+			    .mediaCaption(message.getVideo().getCaption()).mediaType(FileType.VIDEO.toString()));
+	}
+
+	if (ArgUtil.is(message.getVideo())) {
+	    outboxMessage.attachment(
+		    new Attachment().mediaURL(message.getAudio().getLink()).mediaName(message.getAudio().getFilename())
+			    .mediaCaption(message.getAudio().getCaption()).mediaType(FileType.AUDIO.toString()));
 	}
 
 	outboxMessage.contact().type(channel.getContactType());
