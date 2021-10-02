@@ -26,7 +26,7 @@ public class XmsConstants {
 //		    paramType = MockParamType.HEADER),
 //	    @ApiMockParam(name = "x-access-token", value = "Access Token", defaultValue = "s1agenttoken$$$",
 //		    paramType = MockParamType.HEADER),
-	    @ApiMockParam(name = X_API_KEY, value = "API Key", defaultValue = "x-api-key$$$",
+	    @ApiMockParam(name = X_API_KEY, value = "API Key", defaultValue = "thisduMmykEy4maTD0NTUsEit",
 		    paramType = MockParamType.HEADER) })
     public @interface ApiClientParams {
 
