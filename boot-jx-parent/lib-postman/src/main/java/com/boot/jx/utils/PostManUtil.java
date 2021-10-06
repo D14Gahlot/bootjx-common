@@ -154,4 +154,8 @@ public class PostManUtil {
 		CHANNEL_ID(channelConfig.getChannelType(), channelConfig.getLane()), channelConfig.getChannelKey());
     }
 
+    public static String ON_DEPT_ASSIGN_TOPIC(String dept) {
+	return "/dept/onassign-" + dept;
+    }
+
 }

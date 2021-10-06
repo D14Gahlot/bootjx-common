@@ -204,17 +204,17 @@ public class ChatService {
 	return messageStore.note(outboxMessage, getCurrenUser());
     }
 
-    public void log(IMessageExtended inboxMessage, String agent, EVENTS event, String... logs) {
-	messageStore.log(inboxMessage, agent, event, logs);
+    public void log(IMessageExtended inboxMessage, String auditAgent, EVENTS event, String... logs) {
+	messageStore.log(inboxMessage, auditAgent, event, logs);
     }
 
     public void log(IMessageExtended inboxMessage, EVENTS event, String... logs) {
 	log(inboxMessage, inboxMessage.session().getAgent(), event, logs);
     }
 
-    public void log(ChatSessionDoc sessionDoc, String agent, EVENTS event, String... logs) {
+    private void log(ChatSessionDoc sessionDoc, String auditAgent, EVENTS event, String... logs) {
 	IMessageExtended inboxMessage = sessionStore.toSessionMessage(sessionDoc);
-	log(inboxMessage, agent, event, logs);
+	log(inboxMessage, auditAgent, event, logs);
     }
 
     public void log(ChatSessionDoc sessionDoc, EVENTS event, String... logs) {

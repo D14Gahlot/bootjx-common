@@ -95,6 +95,8 @@ public class ChatDTOUtil {
 			messageDto.setSender(ArgUtil.nonEmpty(messageDoc.getAgent(), agentName));
 		} else if (PostManUtil.isInBound(messageDoc.getType())) {
 			messageDto.setSender(ArgUtil.nonEmpty(messageDto.getName(), contactName));
+		} else {
+		    messageDto.setSender(ArgUtil.nonEmpty(messageDoc.getAgent(), agentName));
 		}
 
 		if (ArgUtil.isEmpty(messageDto.getName())) {

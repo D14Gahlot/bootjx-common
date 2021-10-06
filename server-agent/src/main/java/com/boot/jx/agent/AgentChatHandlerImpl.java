@@ -36,6 +36,7 @@ import com.boot.jx.postman.store.PMStoreConstants.ASSIGNMENT_RULE;
 import com.boot.jx.postman.store.PMStoreConstants.CHAT_STATUS;
 import com.boot.jx.postman.store.SessionStore;
 import com.boot.jx.stomp.StompTunnelService;
+import com.boot.jx.utils.PostManUtil;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
 import com.boot.utils.TimeUtils;
@@ -167,7 +168,7 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 	    chatService.log(inboxMessage, MessageStore.EVENTS.ASGND_TO_DEPT, inboxMessage.session().getDept());
 	}
 
-	stompTunnelService.sendToAll("/dept/onassign-" + inboxMessage.session().getDept(),
+	stompTunnelService.sendToAll(PostManUtil.ON_DEPT_ASSIGN_TOPIC(inboxMessage.session().getDept()),
 		chatArchive.getChatSessionDto(chatSessionDoc, inboxMessage.session().getAgent()));
 
 	return inboxMessage;
@@ -182,12 +183,12 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
      * @param agentDept
      * @param agentCode
      */
+    @SuppressWarnings("deprecation")
     private void onAssign(ChatSessionDoc chatSessionDoc, String agentDept, String agentCode) {
 	if (!ArgUtil.areEqual(chatSessionDoc.getAssignedToAgent(), agentCode)) {
 	    assignToAgent(chatSessionDoc, agentDept, agentCode);
-	    chatService.log(chatSessionDoc, agentSession.getAgentCode(), MessageStore.EVENTS.ASGND_TO_AGENT, agentCode,
-		    agentDept);
-	    stompTunnelService.sendToAll("/dept/onassign-" + agentDept,
+	    chatService.log(chatSessionDoc, MessageStore.EVENTS.ASGND_TO_AGENT, agentCode, agentDept);
+	    stompTunnelService.sendToAll(PostManUtil.ON_DEPT_ASSIGN_TOPIC(agentDept),
 		    chatArchive.getChatSessionDto(chatSessionDoc, agentCode));
 	}
     }
@@ -228,7 +229,7 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 	    messageDoc = chatService.reply(chatSessionDoc, outboxMessage);
 	}
 	chatService.closeSession(chatSessionDoc);
-	stompTunnelService.sendToAll("/dept/onassign-" + chatSessionDoc.getAssignedToDept(),
+	stompTunnelService.sendToAll(PostManUtil.ON_DEPT_ASSIGN_TOPIC(chatSessionDoc.getAssignedToDept()),
 		chatArchive.getChatSessionDto(chatSessionDoc, chatSessionDoc.getAssignedToAgent()));
 
 	return chatArchive.getMessage(messageDoc, chatSessionDoc);

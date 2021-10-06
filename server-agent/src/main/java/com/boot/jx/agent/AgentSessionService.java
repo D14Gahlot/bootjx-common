@@ -92,16 +92,12 @@ public class AgentSessionService {
     public void updateLogin(AgentResponseAuthDto agent) {
 	agentSessionBean.setProfile(agent);
 	agentSessionBean.setLoggedIn(true);
-
 	agentSessionBean.setAgentCode(agent.getAgent_code());
-
 	if (ArgUtil.is(agent.getDept())) {
 	    agentSessionBean.setAgentDept(agent.getDept().getDept_code());
 	}
-
 	agentSessionBean.setOnline(true);
 	agentSessionBean.setLastOnlineStamp(System.currentTimeMillis());
-
 	this.updateSession(true);
     }
 
