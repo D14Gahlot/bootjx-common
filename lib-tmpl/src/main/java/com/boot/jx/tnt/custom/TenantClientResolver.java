@@ -36,5 +36,8 @@ public class TenantClientResolver extends TenantResolver {
 	tntMapping.put("api", "app");
 	tntMapping.put("local", "local");
 	tntMapping.put("8d5c-115-111-75-48", "app");
+	tntMapping.put("1a11-115-111-75-27", "app");
+	tntMapping.put("5a99-115-111-75-27", "app");
+
     }
 }
