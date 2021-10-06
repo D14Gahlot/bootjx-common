@@ -2,6 +2,7 @@ package com.boot.jx.agent;
 
 import java.util.List;
 
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
@@ -18,6 +19,7 @@ import com.boot.jx.common.doc.AgentDoc;
 import com.boot.jx.common.doc.AgentSessionDoc;
 import com.boot.jx.common.store.AgentStore;
 import com.boot.jx.common.store.DocumentUpdateListner;
+import com.boot.jx.logger.LoggerService;
 import com.boot.jx.mongo.CommonMongoQueryBuilder;
 import com.boot.jx.postman.PMClientConfig;
 import com.boot.jx.postman.PMEnvironment;
@@ -40,6 +42,8 @@ import com.boot.utils.TimeUtils;
 
 @Component
 public class AgentChatHandlerImpl implements AgentChatHandler {
+
+    public static final Logger LOGGER = LoggerService.getLogger(AgentChatHandlerImpl.class);
 
     @Autowired
     private MongoTemplate mongoTemplate;
@@ -144,7 +148,7 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 
 	ChatSessionDoc chatSessionDoc = sessionStore.getSession(inboxMessage.getSessionId());
 
-	if (ArgUtil.is(inboxMessage.session().getDept()) && ArgUtil.is(inboxMessage.session().getDept())) {
+	if (ArgUtil.is(inboxMessage.session().getDept()) && ArgUtil.is(inboxMessage.session().getAgent())) {
 	    assignToAgent(chatSessionDoc, inboxMessage.session().getDept(), inboxMessage.session().getAgent());
 	    chatService.log(inboxMessage, MessageStore.EVENTS.ASGND_TO_DEPT, inboxMessage.session().getDept());
 	}

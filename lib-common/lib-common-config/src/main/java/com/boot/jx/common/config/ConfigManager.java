@@ -264,11 +264,9 @@ public class ConfigManager {
 
 	CONFIG_LIST.add(new ConfigMeta("Agent can initiate new chat", "postman.agent.chat.init").optionsOnOff());
 
-	CONFIG_LIST
-		.add(new ConfigMeta("Agent Assignment", "postman.agent.chat.assignment")
-			.optionValues(ASSIGNMENT_RULE.ROUND_ROBIN, ASSIGNMENT_RULE.MANUAL,
-				ASSIGNMENT_RULE.STRICT_DEFAULT, ASSIGNMENT_RULE.STICKY)
-			.defaultValue(ASSIGNMENT_RULE.ROUND_ROBIN));
+	CONFIG_LIST.add(new ConfigMeta("Agent Assignment", "postman.agent.chat.assignment")
+		.optionValues(ASSIGNMENT_RULE.ROUND_ROBIN, ASSIGNMENT_RULE.MANUAL, ASSIGNMENT_RULE.STRICT_DEFAULT)
+		.defaultValue(ASSIGNMENT_RULE.ROUND_ROBIN));
 
 	CONFIG_LIST.add(new ConfigMeta("Agent Panel Color Scheme", "postman.agent.scheme.color")
 		.inputType(InputType.COLOR).defaultValue("#4b56c0"));
