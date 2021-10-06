@@ -2,6 +2,8 @@ package com.boot.jx.tnt.custom;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -14,6 +16,7 @@ import com.boot.utils.ArgUtil;
 public class TenantClientResolver extends TenantResolver {
 
     public static final Map<String, String> tntMapping = new HashMap<String, String>();
+    public static final Pattern pattern = Pattern.compile("^(.+?)-(.+?)-(.+?)-(.+?)-(.+?)$");
 
     @Autowired
     AppConfig appConfig;
@@ -26,6 +29,13 @@ public class TenantClientResolver extends TenantResolver {
 	String mappedTnt = appConfig.prop("tenant." + tnt);
 	if (ArgUtil.is(mappedTnt)) {
 	    return mappedTnt;
+	}
+
+	if (!appConfig.isProdMode() && ArgUtil.is(tnt)) {
+	    Matcher matcher = pattern.matcher(tnt);
+	    if (matcher.find()) {
+		return "app";
+	    }
 	}
 
 	return tnt;
