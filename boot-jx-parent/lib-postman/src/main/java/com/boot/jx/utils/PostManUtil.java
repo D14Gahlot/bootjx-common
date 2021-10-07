@@ -9,6 +9,7 @@ import com.boot.jx.dict.ContactType;
 import com.boot.jx.model.CommonFile;
 import com.boot.jx.postman.PMConstants;
 import com.boot.jx.postman.PMConstants.CHANNEL_TYPE;
+import com.boot.jx.postman.PMConstants.CHAT_MODE;
 import com.boot.jx.postman.PMEnvironment.AChannelConfig;
 import com.boot.jx.postman.model.ContactMeta;
 import com.boot.jx.postman.model.InboxMessage;
@@ -120,7 +121,8 @@ public class PostManUtil {
     }
 
     public static boolean isInBound(String type) {
-	return ArgUtil.isEqual(type, PMConstants.MESSAGE_BOUND_TYPE.INBOUND, PMConstants.MESSAGE_BOUND_TYPE.INBOUND_IMPORTED);
+	return ArgUtil.isEqual(type, PMConstants.MESSAGE_BOUND_TYPE.INBOUND,
+		PMConstants.MESSAGE_BOUND_TYPE.INBOUND_IMPORTED);
     }
 
     public static boolean isInBound(IMessage inboxMessage) {
@@ -128,11 +130,20 @@ public class PostManUtil {
     }
 
     public static boolean isOutBound(String type) {
-	return ArgUtil.isEqual(type, PMConstants.MESSAGE_BOUND_TYPE.OUTBOUND, PMConstants.MESSAGE_BOUND_TYPE.OUTBOUND_IMPORTED);
+	return ArgUtil.isEqual(type, PMConstants.MESSAGE_BOUND_TYPE.OUTBOUND,
+		PMConstants.MESSAGE_BOUND_TYPE.OUTBOUND_IMPORTED);
     }
 
     public static boolean isOutBound(IMessage inboxMessage) {
 	return isInBound(inboxMessage.getType());
+    }
+
+    public static boolean isBotMode(IMessage inboxMessage) {
+	return CHAT_MODE.BOT.toString().equals(inboxMessage.session().getMode());
+    }
+
+    public static boolean isAgentMode(IMessage inboxMessage) {
+	return CHAT_MODE.AGENT.toString().equals(inboxMessage.session().getMode());
     }
 
     public static String CHANNEL_ID(String chanelType, String lane) {
