@@ -514,7 +514,7 @@ public class SessionStore extends CommonDocStore {
 		commonMongoTemplate.updateFirst(chatSessionDocQuery);
 	    } else if (PostManUtil.isOutBound(msgDoc.getType())) {
 		if (PostManUtil.isAgentMode(iMessage)) {
-		    chatSessionDocQuery.setLastAgentReply(msgDoc, iMessage.session().getMode());
+		    chatSessionDocQuery.setLastAgentReply(msgDoc, iMessage.contact().getContactType());
 		} else if (PostManUtil.isBotMode(iMessage)) {
 		    chatSessionDocQuery.setLastBotReply(msgDoc, iMessage.contact().getContactType());
 		} else {
