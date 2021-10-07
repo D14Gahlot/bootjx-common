@@ -512,16 +512,16 @@ public class SessionStore extends CommonDocStore {
 	    chatSessionDocQuery.setLastInBoundMsg(msgDoc, outboxMessage.contact().getContactType());
 	    commonMongoTemplate.updateFirst(chatSessionDocQuery);
 	} else if (PostManUtil.isOutBound(msgDoc.getType())) {
-	    if (CHAT_MODE.AGENT.toString().equals(outboxMessage.session().getMode())) {
+	    if (PostManUtil.isAgentMode(outboxMessage)) {
 		chatSessionDocQuery.setLastAgentReply(msgDoc, outboxMessage.session().getMode());
-	    } else if (CHAT_MODE.BOT.toString().equals(outboxMessage.session().getMode())) {
+	    } else if (PostManUtil.isBotMode(outboxMessage)) {
 		chatSessionDocQuery.setLastBotReply(msgDoc, outboxMessage.contact().getContactType());
 	    } else {
 		chatSessionDocQuery.setLastOutBoundMsg(msgDoc, outboxMessage.contact().getContactType());
 	    }
 	    commonMongoTemplate.updateFirst(chatSessionDocQuery);
 	}
-	if (PostManUtil.isOutBound(msgDoc.getType()) || PostManUtil.isOutBound(msgDoc.getType())) {
+	if (PostManUtil.isInBound(msgDoc.getType()) || PostManUtil.isOutBound(msgDoc.getType())) {
 	    chatSessionDocQuery.setLastAgentReply(msgDoc, outboxMessage.contact().getContactType());
 	    commonMongoTemplate.updateFirst(chatSessionDocQuery);
 	}
