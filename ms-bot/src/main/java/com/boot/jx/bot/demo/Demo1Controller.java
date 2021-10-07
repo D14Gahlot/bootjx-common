@@ -8,7 +8,6 @@ import com.boot.jx.bot.ChatContext;
 import com.boot.jx.bot.ChatController;
 import com.boot.jx.bot.ChatMapping;
 import com.boot.jx.bot.alex.AlexBotConstants;
-import com.boot.jx.bot.alex.AlexBotConstants.KEY;
 import com.boot.jx.dict.FileType;
 import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.InboxMessage;

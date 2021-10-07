@@ -6,7 +6,6 @@ import org.junit.Test;
 
 import com.boot.utils.StringUtils;
 import com.boot.utils.StringUtils.DetailsBuilder;
-import com.boot.utils.UniqueID;
 
 public class StringUtilTest {
 

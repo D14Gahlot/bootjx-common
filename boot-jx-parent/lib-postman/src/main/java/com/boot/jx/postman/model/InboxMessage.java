@@ -9,7 +9,6 @@ import java.util.Map;
 
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.postman.PMConstants;
-import com.boot.jx.postman.PMConstants.MESSAGE_BOUND_TYPE;
 import com.boot.jx.postman.model.MessageDefinitions.Contactable;
 import com.boot.jx.postman.model.MessageDefinitions.IMessageExtended;
 import com.boot.utils.ArgUtil;

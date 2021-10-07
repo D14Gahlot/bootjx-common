@@ -18,7 +18,6 @@ import com.boot.jx.logger.LoggerService;
 import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.jx.postman.PMConfiguration;
 import com.boot.jx.postman.PMConstants;
-import com.boot.jx.postman.PMConstants.CHAT_MODE;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;

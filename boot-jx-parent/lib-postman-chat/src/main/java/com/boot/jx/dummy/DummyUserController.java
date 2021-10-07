@@ -1,7 +1,5 @@
 package com.boot.jx.dummy;
 
-import java.util.Map;
-
 import javax.servlet.http.Cookie;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +20,6 @@ import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.utils.ArgUtil;
-import com.boot.utils.JsonUtil;
 
 @Controller
 public class DummyUserController {

@@ -5,7 +5,6 @@ import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.stereotype.Component;
 
 import com.boot.jx.account.doc.DomainUserDoc;
-import com.boot.jx.common.dto.AgentResponseAuthDto;
 import com.boot.jx.logger.AuditDetailProvider;
 import com.boot.utils.ArgUtil;
 
