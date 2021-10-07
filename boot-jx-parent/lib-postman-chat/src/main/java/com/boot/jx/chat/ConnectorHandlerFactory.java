@@ -17,6 +17,8 @@ import com.boot.jx.dict.ContactType;
 import com.boot.jx.logger.LoggerService;
 import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.jx.postman.PMConfiguration;
+import com.boot.jx.postman.PMConstants;
+import com.boot.jx.postman.PMConstants.CHAT_MODE;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
@@ -32,7 +34,6 @@ import com.boot.jx.postman.query.ChatSessionQuery;
 import com.boot.jx.postman.service.ChatDTOUtil;
 import com.boot.jx.postman.store.MessageContext;
 import com.boot.jx.postman.store.MessageStore;
-import com.boot.jx.postman.store.PMStoreConstants.CHAT_MODE;
 import com.boot.jx.stomp.StompTunnelService;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.utils.ArgUtil;
@@ -257,7 +258,7 @@ public class ConnectorHandlerFactory extends ScopedBeanFactory<String, Connector
 	    commonMongoTemplate.updateFirst(chatContactQuery);
 	}
 
-	if (CHAT_MODE.AGENT.toString().equals(outboxMessage.session().getMode())
+	if (PMConstants.CHAT_MODE.AGENT.toString().equals(outboxMessage.session().getMode())
 		&& ArgUtil.is(outboxMessage.session().getDept())) {
 	    ChatMessageDTO messageDto = ChatDTOUtil.getChatMessageDTO(messageDoc);
 	    stompTunnelService.sendToTag(outboxMessage.session().getDept(), "/message/sent/new", messageDto);

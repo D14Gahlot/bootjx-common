@@ -13,6 +13,9 @@ import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorHandler;
 import com.boot.jx.logger.AuditDetailProvider;
 import com.boot.jx.logger.LoggerService;
 import com.boot.jx.postman.PMClientConfig;
+import com.boot.jx.postman.PMConstants;
+import com.boot.jx.postman.PMConstants.CHAT_MODE;
+import com.boot.jx.postman.PMConstants.CHAT_STATUS;
 import com.boot.jx.postman.PostManException;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatContextDoc;
@@ -31,8 +34,6 @@ import com.boot.jx.postman.service.ChatDTOUtil;
 import com.boot.jx.postman.store.MessageContext;
 import com.boot.jx.postman.store.MessageStore;
 import com.boot.jx.postman.store.MessageStore.EVENTS;
-import com.boot.jx.postman.store.PMStoreConstants.CHAT_MODE;
-import com.boot.jx.postman.store.PMStoreConstants.CHAT_STATUS;
 import com.boot.jx.postman.store.SessionStore;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.TimeUtils;
@@ -104,7 +105,7 @@ public class ChatService {
 
 	MessageDoc messageDoc = messageStore.createOrUpdate(outboxMessage);
 	connectorHandlerFactory.message("ACTION", chatContactDoc, null, outboxMessage);
-	sessionStore.push(messageDoc,outboxMessage.contact().getContactType());
+	sessionStore.push(messageDoc,outboxMessage);
 	return messageDoc;
     }
 
@@ -130,7 +131,7 @@ public class ChatService {
 
 	MessageDoc messageDoc = messageStore.createOrUpdate(outboxMessage);
 	connectorHandlerFactory.message("REPLY", null, inboxMessage, outboxMessage);
-	sessionStore.push(messageDoc,outboxMessage.contact().getContactType());
+	sessionStore.push(messageDoc,outboxMessage);
 	return messageDoc;
     }
 
@@ -151,7 +152,7 @@ public class ChatService {
 
 	MessageDoc messageDoc = messageStore.createOrUpdate(outboxMessage);
 	connectorHandlerFactory.message("SEND", chatContactDoc, null, outboxMessage);
-	sessionStore.push(messageDoc,outboxMessage.contact().getContactType());
+	sessionStore.push(messageDoc,outboxMessage);
 	return messageDoc;
     }
 
@@ -278,7 +279,7 @@ public class ChatService {
 		LOGGER.error("No Session Found for {}/{}", contactId, inboxMessage.getSessionId());
 	    }
 
-	    inboxMessage.session().setMode(CHAT_MODE.BOT.toString());
+	    inboxMessage.session().setMode(PMConstants.CHAT_MODE.BOT.toString());
 	    inboxMessage.session().setAgent(chatClientConfig.getDefaultSender());
 
 	    sessionStore.assignToBot(sessionDoc, chatClientConfig.getDefaultSender());
@@ -399,7 +400,7 @@ public class ChatService {
 	    return false;
 	}
 	session = sessionStore.resolveSession(session);
-	log(session, EVENTS.STATUS_CHANGED, session.getStatus(), CHAT_STATUS.RESOLVED.toString());
+	log(session, EVENTS.STATUS_CHANGED, session.getStatus(), PMConstants.CHAT_STATUS.RESOLVED.toString());
 	return true;
     }
 
@@ -408,18 +409,18 @@ public class ChatService {
 	    return false;
 	}
 	session = sessionStore.closeSession(session);
-	log(session, EVENTS.STATUS_CHANGED, session.getStatus(), CHAT_STATUS.CLOSED.toString());
+	log(session, EVENTS.STATUS_CHANGED, session.getStatus(), PMConstants.CHAT_STATUS.CLOSED.toString());
 	return true;
     }
 
-    public boolean updateSessionStatus(ChatSessionDoc sessionDoc, CHAT_STATUS status) {
+    public boolean updateSessionStatus(ChatSessionDoc sessionDoc, PMConstants.CHAT_STATUS status) {
 	String oldStatus = sessionDoc.getStatus();
 	if (status.toString().equalsIgnoreCase(oldStatus)) {
 	    return false;
 	}
-	if (status == CHAT_STATUS.RESOLVED) {
+	if (status == PMConstants.CHAT_STATUS.RESOLVED) {
 	    return this.resolveSession(sessionDoc);
-	} else if (status == CHAT_STATUS.CLOSED) {
+	} else if (status == PMConstants.CHAT_STATUS.CLOSED) {
 	    return this.closeSession(sessionDoc);
 	} else {
 	    sessionStore.changeStatus(sessionDoc, status);

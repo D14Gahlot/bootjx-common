@@ -26,6 +26,9 @@ import com.boot.jx.common.doc.AgentDoc;
 import com.boot.jx.common.doc.AgentSessionDoc;
 import com.boot.jx.common.store.AgentStore;
 import com.boot.jx.model.CommonFile;
+import com.boot.jx.postman.PMConstants;
+import com.boot.jx.postman.PMConstants.CHAT_STATUS;
+import com.boot.jx.postman.PMConstants.DEFAULT;
 import com.boot.jx.postman.client.PMFileStoreClient;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
@@ -37,8 +40,6 @@ import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.service.ChatDTOUtil;
 import com.boot.jx.postman.store.MessageStore.EVENTS;
-import com.boot.jx.postman.store.PMStoreConstants;
-import com.boot.jx.postman.store.PMStoreConstants.CHAT_STATUS;
 import com.boot.jx.postman.store.SessionStore;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
@@ -87,7 +88,7 @@ public class MsgController {
 		ChatSessionDTO chatSessionDto = chatArchive.getChatSession(chatSessionDoc);
 		chatSessionDto = chatArchive.withContact(chatSessionDto);
 
-		if (ArgUtil.isEqual(chatSessionDto.getAssignedToDept(), PMStoreConstants.NO_DEPT,
+		if (ArgUtil.isEqual(chatSessionDto.getAssignedToDept(), DEFAULT.NO_DEPT,
 			agentSession.getAgentDept(), null, Constants.BLANK)
 			&& ArgUtil.isEqual(chatSessionDto.getAssignedToAgent(), agentSession.getAgentCode(), null)
 			&& withMessage) {
@@ -245,7 +246,7 @@ public class MsgController {
     @ResponseBody
     @RequestMapping(value = { "/api/session/status" }, method = { RequestMethod.POST })
     public ApiResponse<ChatSessionDTO, Object> updateSessionStatus(@RequestParam String sessionId,
-	    @RequestParam CHAT_STATUS status) {
+	    @RequestParam PMConstants.CHAT_STATUS status) {
 	return ApiResponse.buildResult(agentChatHandlerImpl.updateChatSessionStatus(sessionId, status));
     }
 }

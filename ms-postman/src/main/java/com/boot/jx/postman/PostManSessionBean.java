@@ -4,7 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.boot.jx.logger.AuditDetailProvider;
-import com.boot.jx.postman.store.PMStoreConstants;
+import com.boot.jx.postman.PMConstants.DEFAULT;
 
 @Component
 public class PostManSessionBean implements AuditDetailProvider {
@@ -16,7 +16,7 @@ public class PostManSessionBean implements AuditDetailProvider {
 
 	@Override
 	public String getAuditUser() {
-		return PMStoreConstants.SYSTEM;
+		return DEFAULT.SYSTEM;
 	}
 
 }

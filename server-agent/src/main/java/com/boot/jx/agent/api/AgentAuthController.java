@@ -30,8 +30,8 @@ import com.boot.jx.common.doc.AgentSessionDoc;
 import com.boot.jx.common.dto.AgentResponseAuthDto;
 import com.boot.jx.common.service.EmpAuthService;
 import com.boot.jx.http.CommonHttpRequest;
+import com.boot.jx.postman.PMConstants.DEFAULT;
 import com.boot.jx.postman.PMEnvironment;
-import com.boot.jx.postman.store.PMStoreConstants;
 import com.boot.jx.rest.RestService;
 import com.boot.jx.stomp.StompTunnelSessionManager;
 import com.boot.model.MapModel;
@@ -223,7 +223,7 @@ public class AgentAuthController {
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 		sessionService.updateLogin(agent);
 		stompTunnelSessionManager.registerUser(agent.getAgent_code(), agent.getDept().getDept_code(),
-			PMStoreConstants.NO_DEPT);
+			DEFAULT.NO_DEPT);
 
 		boolean rememberme = ArgUtil.parseAsBoolean(commonHttpRequest.get("rememberme"), false);
 		if (rememberme) {
