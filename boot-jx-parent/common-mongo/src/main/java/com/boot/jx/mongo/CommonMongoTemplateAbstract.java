@@ -68,11 +68,13 @@ public class CommonMongoTemplateAbstract extends CommonMongoTemplateDefault {
 	WriteResult ret = null;
 	if (ArgUtil.is(builder.getUpdate())) {
 	    try {
+		//LOGGER.info("Query:{}", builder.getQuery().toString());
+		//LOGGER.info("Update:{}", builder.getUpdate().toString());
 		ret = mongoTemplate.updateFirst(builder.getQuery(), builder.getUpdate(), builder.getDocClass());
 		builder.setUpdate(null);
 	    } catch (Exception e) {
 		LOGGER.debug("Query:{}", builder.getQuery().toString());
-		LOGGER.debug("Query:{}", builder.getUpdate().toString());
+		LOGGER.debug("Update:{}", builder.getUpdate().toString());
 		throw e;
 	    }
 	}
@@ -93,7 +95,7 @@ public class CommonMongoTemplateAbstract extends CommonMongoTemplateDefault {
 		ret = mongoTemplate.upsert(builder.getQuery(), builder.getUpdate(), builder.getDocClass());
 	    } catch (Exception e) {
 		LOGGER.debug("Query:{}", builder.getQuery().toString());
-		LOGGER.debug("Query:{}", builder.getUpdate().toString());
+		LOGGER.debug("Update:{}", builder.getUpdate().toString());
 		throw e;
 	    }
 	}

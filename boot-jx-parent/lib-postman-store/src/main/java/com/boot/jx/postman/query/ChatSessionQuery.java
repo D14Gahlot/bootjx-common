@@ -6,6 +6,7 @@ import com.boot.jx.mongo.CommonMongoQueryBuilder.DocQueryBuilder;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.store.MessageStore;
+import com.boot.model.MapModel;
 
 public class ChatSessionQuery extends DocQueryBuilder<ChatSessionDoc> {
 
@@ -61,36 +62,31 @@ public class ChatSessionQuery extends DocQueryBuilder<ChatSessionDoc> {
 
     public ChatSessionQuery setLastInBoundMsg(MessageDoc lastInBoundMsg, String contactType) {
 	this.doc.setLastInBoundMsg(lastInBoundMsg);
-	this.set("lastInBoundMsg.$ref", MessageStore.getCollectionName(contactType));
-	this.set("lastInBoundMsg.$id", new ObjectId(lastInBoundMsg.getMessageId()));
+	this.ref("lastInBoundMsg", lastInBoundMsg.getMessageId(), MessageStore.getCollectionName(contactType));
 	return this;
     }
 
     public ChatSessionQuery setLastAgentReply(MessageDoc lastAgentReply, String contactType) {
 	this.doc.setLastAgentReply(lastAgentReply);
-	this.set("lastAgentReply.$ref", MessageStore.getCollectionName(contactType));
-	this.set("lastAgentReply.$id", new ObjectId(lastAgentReply.getMessageId()));
+	this.ref("lastAgentReply", lastAgentReply.getMessageId(), MessageStore.getCollectionName(contactType));
 	return this;
     }
 
     public ChatSessionQuery setLastBotReply(MessageDoc lastBotReply, String contactType) {
 	this.doc.setLastBotReply(lastBotReply);
-	this.set("lastBotReply.$ref", MessageStore.getCollectionName(contactType));
-	this.set("lastBotReply.$id", new ObjectId(lastBotReply.getMessageId()));
+	this.ref("lastBotReply", lastBotReply.getMessageId(), MessageStore.getCollectionName(contactType));
 	return this;
     }
 
     public ChatSessionQuery setLastOutBoundMsg(MessageDoc lastOutBoundMsg, String contactType) {
 	this.doc.setLastOutBoundMsg(lastOutBoundMsg);
-	this.set("lastOutBoundMsg.$ref", MessageStore.getCollectionName(contactType));
-	this.set("lastOutBoundMsg.$id", new ObjectId(lastOutBoundMsg.getMessageId()));
+	this.ref("lastOutBoundMsg", lastOutBoundMsg.getMessageId(), MessageStore.getCollectionName(contactType));
 	return this;
     }
 
     public ChatSessionQuery setLastMsg(MessageDoc lastMsg, String contactType) {
 	this.doc.setLastMsg(lastMsg);
-	this.set("lastMsg.$ref", MessageStore.getCollectionName(contactType));
-	this.set("lastMsg.$id", new ObjectId(lastMsg.getMessageId()));
+	this.ref("lastMsg", lastMsg.getMessageId(), MessageStore.getCollectionName(contactType));
 	return this;
     }
 
