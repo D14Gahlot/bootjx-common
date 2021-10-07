@@ -19,7 +19,6 @@ import com.boot.jx.mongo.CommonMongoQueryBuilder.CommonMongoCriteria;
 import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.jx.postman.PMClientConfig;
 import com.boot.jx.postman.PMConstants;
-import com.boot.jx.postman.PMConstants.CHAT_MODE;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.ChatUserProfileDoc;
@@ -506,24 +505,27 @@ public class SessionStore extends CommonDocStore {
 
     }
 
-    public void push(MessageDoc msgDoc, IMessage outboxMessage) {
-	ChatSessionQuery chatSessionDocQuery = new ChatSessionQuery(msgDoc.getSessionId());
-	if (PostManUtil.isInBound(msgDoc.getType())) {
-	    chatSessionDocQuery.setLastInBoundMsg(msgDoc, outboxMessage.contact().getContactType());
-	    commonMongoTemplate.updateFirst(chatSessionDocQuery);
-	} else if (PostManUtil.isOutBound(msgDoc.getType())) {
-	    if (PostManUtil.isAgentMode(outboxMessage)) {
-		chatSessionDocQuery.setLastAgentReply(msgDoc, outboxMessage.session().getMode());
-	    } else if (PostManUtil.isBotMode(outboxMessage)) {
-		chatSessionDocQuery.setLastBotReply(msgDoc, outboxMessage.contact().getContactType());
-	    } else {
-		chatSessionDocQuery.setLastOutBoundMsg(msgDoc, outboxMessage.contact().getContactType());
-	    }
-	    commonMongoTemplate.updateFirst(chatSessionDocQuery);
-	}
+    public void push(MessageDoc msgDoc, IMessage iMessage) {
 	if (PostManUtil.isInBound(msgDoc.getType()) || PostManUtil.isOutBound(msgDoc.getType())) {
-	    chatSessionDocQuery.setLastAgentReply(msgDoc, outboxMessage.contact().getContactType());
-	    commonMongoTemplate.updateFirst(chatSessionDocQuery);
+	    try {
+		ChatSessionQuery chatSessionDocQuery = new ChatSessionQuery(msgDoc.getSessionId());
+		if (PostManUtil.isInBound(msgDoc.getType())) {
+		    chatSessionDocQuery.setLastInBoundMsg(msgDoc, iMessage.contact().getContactType());
+		    commonMongoTemplate.updateFirst(chatSessionDocQuery);
+		} else if (PostManUtil.isOutBound(msgDoc.getType())) {
+		    if (PostManUtil.isAgentMode(iMessage)) {
+			chatSessionDocQuery.setLastAgentReply(msgDoc, iMessage.contact().getContactType());
+		    } else if (PostManUtil.isBotMode(iMessage)) {
+			chatSessionDocQuery.setLastBotReply(msgDoc, iMessage.contact().getContactType());
+		    } else {
+			chatSessionDocQuery.setLastOutBoundMsg(msgDoc, iMessage.contact().getContactType());
+		    }
+		}
+		chatSessionDocQuery.setLastMsg(msgDoc, iMessage.contact().getContactType());
+		commonMongoTemplate.updateFirst(chatSessionDocQuery);
+	    } catch (Exception e) {
+		LOGGER.error("SessionStore.push", e);
+	    }
 	}
 
     }
