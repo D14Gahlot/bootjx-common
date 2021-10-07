@@ -145,6 +145,7 @@ public class ChatDTOUtil {
 	chatSessionDto.msg().put("lastBotReply", getChatMessageDTO(chatSessionDoc.getLastBotReply()));
 	chatSessionDto.msg().put("lastAgentReply", getChatMessageDTO(chatSessionDoc.getLastAgentReply()));
 	chatSessionDto.msg().put("lastOutBoundMsg", getChatMessageDTO(chatSessionDoc.getLastOutBoundMsg()));
+	chatSessionDto.msg().put("lastMsg", getChatMessageDTO(chatSessionDoc.getLastMsg()));
 
 	if (!ArgUtil.is(chatSessionDto.getStatus())) {
 	    if (chatSessionDto.isExpired()) {
