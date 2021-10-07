@@ -24,6 +24,7 @@ import com.boot.jx.postman.doc.QuickAction;
 import com.boot.jx.postman.doc.QuickLabel;
 import com.boot.jx.postman.doc.QuickMedia;
 import com.boot.jx.postman.doc.QuickReply;
+import com.boot.jx.postman.doc.QuickTag;
 import com.boot.jx.postman.dto.ContactDTO;
 import com.boot.jx.postman.service.ChatDTOUtil;
 import com.boot.jx.postman.store.ContactStore;
@@ -106,5 +107,11 @@ public class AgentMetaController {
     @RequestMapping(value = { "/gallery/map/quick_labels" }, method = { RequestMethod.GET })
     public List<QuickLabel> listQuickTags() {
 	return mongoTemplate.findAll(QuickLabel.class);
+    }
+    
+    @ResponseBody
+    @RequestMapping(value = { "/gallery/map/quick_tags" }, method = { RequestMethod.GET })
+    public List<QuickTag> listQuickTagsCategory() {
+	return mongoTemplate.findAll(QuickTag.class);
     }
 }

@@ -55,6 +55,8 @@ public class AgentAnalyticsManager {
 	
 	public static final int OPEN_CONV_HR =1; 
 	
+	public static final String MY_BOT ="BOT"; 
+	
 	
 	@Autowired
 	MongoTemplate mongoTemplate;
@@ -156,7 +158,7 @@ public class AgentAnalyticsManager {
 	
 	public DashBoardResponseDto getAgentAnalytics(String agent,long dateRange1,long dateRange2) {
 		    DashBoardResponseDto dto = new  DashBoardResponseDto();
-			dto.setAgentName(agent);
+			dto.setAgentName(agent==null?MY_BOT:agent);
 			/** Unique agent list  **/
 			List<ChatSessionDoc> distinctContactLst = getUniqueAgentWiseContactList(agent,dateRange1,dateRange2);
 			if(ArgUtil.is(distinctContactLst)) {

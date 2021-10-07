@@ -77,13 +77,13 @@ public class AdminDashBoardManager {
 	}
 
 	public List<MessageDoc> testDashBoard() {
-		System.out.println("Collection Exists? " + mongoTemplate.collectionExists("MESSAGE_TWITTER"));
-		System.out.println("Collection Exists? " + mongoTemplate.collectionExists(COLLECTION));
+		LOGGER.info("Collection Exists? " + mongoTemplate.collectionExists("MESSAGE_TWITTER"));
+		LOGGER.info("Collection Exists? " + mongoTemplate.collectionExists(COLLECTION));
 
 		Query query = new Query();
 		query.addCriteria(Criteria.where("type").is("I"));
 		List<MessageDoc> msgDoc = mongoTemplate.find(query, MessageDoc.class, "MESSAGE_TWITTER");
-		System.out.println("Total Out Msg :" + msgDoc.size());
+		LOGGER.info("Total Out Msg :" + msgDoc.size());
 
 		Set<String> contactTypeSet = mongoTemplate.getCollectionNames();
 		List<String> aList = new ArrayList<String>();
@@ -96,7 +96,7 @@ public class AdminDashBoardManager {
 				.collect(Collectors.toList());
 
 		for (String s : filtered) {
-			System.out.println("Array List Stream :" + s);
+			LOGGER.info("Array List Stream :" + s);
 		}
 
 		return msgDoc;

@@ -22,6 +22,7 @@ import com.boot.jx.postman.doc.QuickAction;
 import com.boot.jx.postman.doc.QuickLabel;
 import com.boot.jx.postman.doc.QuickMedia;
 import com.boot.jx.postman.doc.QuickReply;
+import com.boot.jx.postman.doc.QuickTag;
 import com.boot.utils.ArgUtil;
 
 @RestController
@@ -255,5 +256,41 @@ public class TemplateController {
 
 		return ApiResponse.buildResults(mongoTemplate.findAll(HSMTemplate.class)).data(newVersion)
 				.message("QuickReply created");
+	}
+	
+	/** for adding quick Tag category e.g flight,train ,etc  */
+	
+	// QuickLabel
+		@RequestMapping(value = "/api/tmpl/quicktags", method = { RequestMethod.GET })
+		public ApiResponse<QuickTag, Object> listQuickTagCategory() {
+			return ApiResponse.buildResults(mongoTemplate.findAll(QuickTag.class));
+		}
+
+		@RequestMapping(value = "/api/tmpl/quicktags", method = { RequestMethod.DELETE })
+		public ApiResponse<QuickTag, Object> deleteQuickTagCategory(@RequestParam String id) {
+			QuickTag qr = mongoTemplate.findById(id, QuickTag.class);
+			mongoTemplate.trash(qr);
+			return ApiResponse.buildResults(mongoTemplate.findAll(QuickTag.class)).data(qr).message("QuickTag deleted");
+		}
+
+	
+	@RequestMapping(value = "/api/tmpl/quicktags", method = { RequestMethod.POST })
+	public ApiResponse<QuickTag, Object> createQuickTagCategory(@RequestParam(required = false) String id,
+			@RequestParam String category, @RequestParam String title, String code) {
+		QuickTag newVersion = new QuickTag();
+		if (ArgUtil.is(id)) {
+			QuickTag oldVersion = mongoTemplate.findById(id, QuickTag.class);
+			if (ArgUtil.is(oldVersion)) {
+				newVersion.oldVersion(oldVersion);
+				newVersion.setId(id);
+			}
+		}
+
+		newVersion.setCategory(category);
+		newVersion.setTitle(title);
+		newVersion.setCode(code);
+		auditDetailProvider.audit(newVersion);
+		mongoTemplate.save(newVersion);
+		return ApiResponse.buildResults(mongoTemplate.findAll(QuickTag.class)).data(newVersion).message("QuickTag created");
 	}
 }
