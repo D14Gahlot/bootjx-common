@@ -45,463 +45,482 @@ import com.mongodb.DBObject;
 @Component
 public class SessionStore extends CommonDocStore {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(SessionStore.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(SessionStore.class);
 
-	@Autowired
-	public MongoTemplate mongoTemplate;
+    @Autowired
+    public MongoTemplate mongoTemplate;
 
-	@Autowired
-	public CommonMongoTemplate commonMongoTemplate;
+    @Autowired
+    public CommonMongoTemplate commonMongoTemplate;
 
-	@Autowired
-	public PMClientConfig pmClientConfig;
+    @Autowired
+    public PMClientConfig pmClientConfig;
 
-	@Autowired
-	private MessageContext messageContext;
+    @Autowired
+    private MessageContext messageContext;
 
-	public ChatContactDoc getContact(IMessageExtended inboxMessage) {
-		String contactId = PostManUtil.createContactId(inboxMessage);
-		ChatContactDoc chatContactDoc = mongoTemplate.findById(contactId, ChatContactDoc.class);
-		return chatContactDoc;
+    public ChatContactDoc getContact(IMessageExtended inboxMessage) {
+	String contactId = PostManUtil.createContactId(inboxMessage);
+	ChatContactDoc chatContactDoc = mongoTemplate.findById(contactId, ChatContactDoc.class);
+	return chatContactDoc;
+    }
+
+    public ChatContactDoc getContact(String contactId) {
+	return mongoTemplate.findById(contactId, ChatContactDoc.class);
+    }
+
+    public ChatContactDoc save(ChatContactDoc chatContactDoc) {
+	mongoTemplate.save(chatContactDoc);
+	return chatContactDoc;
+    }
+
+    public ChatContactDoc getContact(Contactable contactMeta) {
+	if (ArgUtil.isEmpty(contactMeta.getContactId())) {
+	    return null;
+	}
+	return mongoTemplate.findById(contactMeta.getContactId(), ChatContactDoc.class);
+    }
+
+    public ChatContactDoc getContact(IMessage inboxMessage) {
+	return getContact(inboxMessage.contact());
+    }
+
+    public ChatSessionDoc getSession(String sessionId) {
+	return mongoTemplate.findById(sessionId, ChatSessionDoc.class);
+    }
+
+    public boolean isSessionValid(ChatSessionDoc chatSessionDoc) {
+	if ((ArgUtil.isEmpty(chatSessionDoc) || !chatSessionDoc.isActive()) || chatSessionDoc.isExpired()) {
+	    return false;
 	}
 
-	public ChatContactDoc getContact(String contactId) {
-		return mongoTemplate.findById(contactId, ChatContactDoc.class);
+	if (!ArgUtil.isEmptyValue(chatSessionDoc.getLastInComingStamp())
+		&& (chatSessionDoc.getLastResponseStamp() > chatSessionDoc.getLastInComingStamp())) {
+	    return !TimeUtils.isExpired(chatSessionDoc.getLastInComingStamp(), pmClientConfig.getChatSessionTimeout());
 	}
 
-	public ChatContactDoc save(ChatContactDoc chatContactDoc) {
-		mongoTemplate.save(chatContactDoc);
-		return chatContactDoc;
+	return true;
+    }
+
+    public ChatSessionDoc getValidSession(String sessionId) {
+	ChatSessionDoc chatSessionDoc = mongoTemplate.findById(sessionId, ChatSessionDoc.class);
+	if (isSessionValid(chatSessionDoc)) {
+	    return chatSessionDoc;
+	}
+	return null;
+    }
+
+    public ChatSessionDoc getSession(SessionMessage inboxMessage) {
+	Contactable contact = PostManUtil.getContactMeta(inboxMessage.contact());
+
+	if (ArgUtil.isEmpty(contact.getContactId())) {
+	    return null;
 	}
 
-	public ChatContactDoc getContact(Contactable contactMeta) {
-		if (ArgUtil.isEmpty(contactMeta.getContactId())) {
-			return null;
-		}
-		return mongoTemplate.findById(contactMeta.getContactId(), ChatContactDoc.class);
+	String contactId = contact.getContactId();
+
+	String sessionId = inboxMessage.getSessionId();
+
+	ChatContactDoc chatContactDoc = null;
+	ChatSessionDoc chatSessionDoc = null;
+
+	if (ArgUtil.isEmpty(sessionId)) {
+	    chatContactDoc = mongoTemplate.findById(contactId, ChatContactDoc.class);
+	    if (ArgUtil.is(chatContactDoc)) {
+		sessionId = chatContactDoc.getSessionId();
+	    }
 	}
 
-	public ChatContactDoc getContact(IMessage inboxMessage) {
-		return getContact(inboxMessage.contact());
+	if (ArgUtil.is(sessionId)) {
+	    chatSessionDoc = getValidSession(sessionId);
 	}
 
-	public ChatSessionDoc getSession(String sessionId) {
-		return mongoTemplate.findById(sessionId, ChatSessionDoc.class);
+	ChatContactQuery chatContactQuery = ArgUtil.is(chatContactDoc) ? new ChatContactQuery(chatContactDoc)
+		: new ChatContactQuery(contactId);
+
+	if (!isSessionValid(chatSessionDoc)) {
+
+	    closeActiveSessionsMulty(contactId);
+
+	    // SESSION CREATION
+	    chatSessionDoc = new ChatSessionDoc();
+	    chatSessionDoc.setContactId(contactId);
+	    chatSessionDoc.setContactType(ArgUtil.parseAsString(inboxMessage.contact().type()));
+	    chatSessionDoc.setChannel(inboxMessage.contact().getChannel());
+	    chatSessionDoc.setLane(inboxMessage.contact().getLane());
+
+	    // SESSION UPDATE
+	    chatSessionDoc.setActive(true);
+
+	    if (ArgUtil.is(chatContactDoc) && ArgUtil.is(chatContactDoc.getName())) {
+		chatSessionDoc.setContactName(chatContactDoc.getName());
+	    }
+
+	    save(chatSessionDoc);
+	    chatContactQuery.setSessionId(chatSessionDoc.getSessionId());
+
+	    // CONTACT CREATION - needs creation or updation if
+	    if (ArgUtil.isEmpty(chatContactDoc)) {
+		chatContactQuery.update(contact);
+		commonMongoTemplate.upsert(chatContactQuery);
+	    } else {
+		// CONTACT UPDATE
+		chatContactQuery.update(contact);
+		commonMongoTemplate.updateFirst(chatContactQuery);
+	    }
+	} else {
+	    // SESSION UPDATE
+	    ChatSessionQuery chatSessionDocQuery = new ChatSessionQuery(chatSessionDoc);
+	    chatSessionDocQuery.setActive(true);
+	    if (!ArgUtil.is(chatSessionDoc.getContactName())) {
+		chatSessionDocQuery.setContactName(chatSessionDoc.getContactName());
+	    }
+	    commonMongoTemplate.updateFirst(chatSessionDocQuery);
+	}
+	return chatSessionDoc;
+    }
+
+    public ChatSessionDoc linkSession(ChatSessionDoc chatSessionDoc, IMessage inboxMessage) {
+	if (!ArgUtil.is(chatSessionDoc)) {
+	    return null;
 	}
 
-	public boolean isSessionValid(ChatSessionDoc chatSessionDoc) {
-		if ((ArgUtil.isEmpty(chatSessionDoc) || !chatSessionDoc.isActive()) || chatSessionDoc.isExpired()) {
-			return false;
-		}
+	inboxMessage.contact().setContactId(chatSessionDoc.getContactId());
+	inboxMessage.setSessionId(chatSessionDoc.getSessionId());
+	inboxMessage.session().setAgent(chatSessionDoc.getAssignedToAgent());
+	inboxMessage.session().setDept(chatSessionDoc.getAssignedToDept());
+	inboxMessage.session().setMode(chatSessionDoc.getMode());
+	inboxMessage.session().setResolved(chatSessionDoc.isResolved());
 
-		if (!ArgUtil.isEmptyValue(chatSessionDoc.getLastInComingStamp())
-				&& (chatSessionDoc.getLastResponseStamp() > chatSessionDoc.getLastInComingStamp())) {
-			return !TimeUtils.isExpired(chatSessionDoc.getLastInComingStamp(), pmClientConfig.getChatSessionTimeout());
-		}
+	if (PostManUtil.isInBound(inboxMessage)) {
+	    chatSessionDoc.setLastInComingStamp(inboxMessage.getTimestamp());
+	    // Query Update for Session
+	    ChatSessionQuery chatSessionDocQuery = new ChatSessionQuery(chatSessionDoc);
+	    chatSessionDocQuery.setLastInComingStamp(chatSessionDoc.getLastInComingStamp());
+	    commonMongoTemplate.updateFirst(chatSessionDocQuery);
 
-		return true;
+	    // Query Update for Contact
+	    ChatContactQuery chatContactQuery = new ChatContactQuery(chatSessionDoc.getContactId());
+	    chatContactQuery.setLastInBoundStamp(inboxMessage.getTimestamp());
+	    commonMongoTemplate.updateFirst(chatContactQuery);
+	} else if (PostManUtil.isOutBound(inboxMessage)) {
+
 	}
 
-	public ChatSessionDoc getValidSession(String sessionId) {
-		ChatSessionDoc chatSessionDoc = mongoTemplate.findById(sessionId, ChatSessionDoc.class);
-		if (isSessionValid(chatSessionDoc)) {
-			return chatSessionDoc;
-		}
-		return null;
+	return chatSessionDoc;
+    }
+
+    public ChatSessionDoc linkSession(IMessage inboxMessage) {
+	ChatSessionDoc chatSessionDoc = this.getSession(inboxMessage);
+	linkSession(chatSessionDoc, inboxMessage);
+	return chatSessionDoc;
+    }
+
+    public IMessageExtended toSessionMessage(ChatSessionDoc session) {
+	ChatContactDoc contact = getContact(session.getContactId());
+	InboxMessage inboxMessage = new InboxMessage();
+	inboxMessage.contact().copyFrom(contact);
+	inboxMessage.contact().setContactType(contact.getContactType());
+	inboxMessage.contact().setChannel(contact.getChannel());
+	inboxMessage.contact().setLane(ArgUtil.nonEmpty(session.getLane(), contact.getLane()));
+	inboxMessage.setFrom(contact.getCsid());
+	inboxMessage.setFromName(contact.getName());
+	inboxMessage.setSessionId(contact.getSessionId());
+	inboxMessage.contact().setContactId(contact.getContactId());
+
+	inboxMessage.session().setMode(session.getMode());
+	inboxMessage.session().setAgent(session.getAssignedToAgent());
+	inboxMessage.session().setDept(session.getAssignedToDept());
+
+	return inboxMessage;
+    }
+
+    public boolean closeActiveSessionsMulty(String contactId) {
+	Query query2 = new Query();
+	query2.addCriteria(Criteria.where("contactId").is(contactId).and("active").is(true));
+	Update update = new Update().set("active", false).set("closeSessionStamp", System.currentTimeMillis());
+	mongoTemplate.updateMulti(query2, update, ChatSessionDoc.class);
+	return true;
+    }
+
+    public boolean closeActiveSessionsBulk(String contactId) {
+	DBCollection collection = mongoTemplate.getCollection(mongoTemplate.getCollectionName(ChatSessionDoc.class));
+	BulkWriteOperation bulk = collection.initializeOrderedBulkOperation();
+
+	List<DBObject> criteria = new ArrayList<DBObject>();
+	criteria.add(new BasicDBObject("contactId", contactId));
+	criteria.add(new BasicDBObject("active", true));
+	bulk.find(new BasicDBObject("$and", criteria))
+		.update(new BasicDBObject(new BasicDBObject("$set", new BasicDBObject("active", false))));
+
+	BulkWriteResult writeResult = bulk.execute();
+	return true;
+    }
+
+    public List<ChatSessionDoc> findChatSessionDocByAgent(String agentCode) {
+	Query query2 = new Query();
+	query2.addCriteria(Criteria.where("assignedToAgent").is(agentCode).and("active").is(true));
+	return mongoTemplate.find(query2, ChatSessionDoc.class);
+    }
+
+    public List<ChatSessionDoc> findChatSessionDocByQuery(Query query) {
+	return mongoTemplate.find(query, ChatSessionDoc.class);
+    }
+
+    public void expireChatSession() {
+	Calendar cal = Calendar.getInstance();
+	int offsetOur = (int) ((cal.getTimeInMillis() / 3600)
+		% (TimeUtils.toHours(pmClientConfig.getChatSessionTimeout()) / 2));
+	if (offsetOur == 0) {
+	    cal.add(Calendar.HOUR, -1 * (int) TimeUtils.toHours(pmClientConfig.getChatSessionTimeout()));
+	    CommonMongoQueryBuilder cmqb = new CommonMongoQueryBuilder()
+		    .with(Criteria.where("active").is(true).and("lastInComingStamp").lt(cal.getTimeInMillis())
+			    .andOperator(new Criteria().orOperator(Criteria.where("resolved").exists(false),
+				    Criteria.where("resolved").is(false))))
+		    .set("expired", true).set("active", false).set("closeSessionStamp", System.currentTimeMillis());
+	    mongoTemplate.updateFirst(cmqb.getQuery(), cmqb.getUpdate(), ChatSessionDoc.class);
 	}
+    }
 
-	public ChatSessionDoc getSession(SessionMessage inboxMessage) {
-		Contactable contact = PostManUtil.getContactMeta(inboxMessage.contact());
-
-		if (ArgUtil.isEmpty(contact.getContactId())) {
-			return null;
-		}
-
-		String contactId = contact.getContactId();
-
-		String sessionId = inboxMessage.getSessionId();
-
-		ChatContactDoc chatContactDoc = null;
-		ChatSessionDoc chatSessionDoc = null;
-
-		if (ArgUtil.isEmpty(sessionId)) {
-			chatContactDoc = mongoTemplate.findById(contactId, ChatContactDoc.class);
-			if (ArgUtil.is(chatContactDoc)) {
-				sessionId = chatContactDoc.getSessionId();
-			}
-		}
-
-		if (ArgUtil.is(sessionId)) {
-			chatSessionDoc = getValidSession(sessionId);
-		}
-
-		ChatContactQuery chatContactQuery = ArgUtil.is(chatContactDoc) ? new ChatContactQuery(chatContactDoc)
-				: new ChatContactQuery(contactId);
-
-		if (!isSessionValid(chatSessionDoc)) {
-
-			closeActiveSessionsMulty(contactId);
-
-			// SESSION CREATION
-			chatSessionDoc = new ChatSessionDoc();
-			chatSessionDoc.setContactId(contactId);
-			chatSessionDoc.setContactType(ArgUtil.parseAsString(inboxMessage.contact().type()));
-			chatSessionDoc.setChannel(inboxMessage.contact().getChannel());
-			chatSessionDoc.setLane(inboxMessage.contact().getLane());
-
-			// SESSION UPDATE
-			chatSessionDoc.setActive(true);
-
-			if (ArgUtil.is(chatContactDoc) && ArgUtil.is(chatContactDoc.getName())) {
-				chatSessionDoc.setContactName(chatContactDoc.getName());
-			}
-
-			save(chatSessionDoc);
-			chatContactQuery.setSessionId(chatSessionDoc.getSessionId());
-
-			// CONTACT CREATION - needs creation or updation if
-			if (ArgUtil.isEmpty(chatContactDoc)) {
-				chatContactQuery.update(contact);
-				commonMongoTemplate.upsert(chatContactQuery);
-			} else {
-				// CONTACT UPDATE
-				chatContactQuery.update(contact);
-				commonMongoTemplate.updateFirst(chatContactQuery);
-			}
-		} else {
-			// SESSION UPDATE
-			ChatSessionQuery chatSessionDocQuery = new ChatSessionQuery(chatSessionDoc);
-			chatSessionDocQuery.setActive(true);
-			if (!ArgUtil.is(chatSessionDoc.getContactName())) {
-				chatSessionDocQuery.setContactName(chatSessionDoc.getContactName());
-			}
-			commonMongoTemplate.updateFirst(chatSessionDocQuery);
-		}
-		return chatSessionDoc;
-	}
-
-	public ChatSessionDoc linkSession(ChatSessionDoc chatSessionDoc, IMessage inboxMessage) {
-		if (!ArgUtil.is(chatSessionDoc)) {
-			return null;
-		}
-
-		inboxMessage.contact().setContactId(chatSessionDoc.getContactId());
-		inboxMessage.setSessionId(chatSessionDoc.getSessionId());
-		inboxMessage.session().setAgent(chatSessionDoc.getAssignedToAgent());
-		inboxMessage.session().setDept(chatSessionDoc.getAssignedToDept());
-		inboxMessage.session().setMode(chatSessionDoc.getMode());
-		inboxMessage.session().setResolved(chatSessionDoc.isResolved());
-
-		if (PostManUtil.isInBound(inboxMessage)) {
-			chatSessionDoc.setLastInComingStamp(inboxMessage.getTimestamp());
-			// Query Update for Session
-			ChatSessionQuery chatSessionDocQuery = new ChatSessionQuery(chatSessionDoc);
-			chatSessionDocQuery.setLastInComingStamp(chatSessionDoc.getLastInComingStamp());
-			commonMongoTemplate.updateFirst(chatSessionDocQuery);
-
-			// Query Update for Contact
-			ChatContactQuery chatContactQuery = new ChatContactQuery(chatSessionDoc.getContactId());
-			chatContactQuery.setLastInBoundStamp(inboxMessage.getTimestamp());
-			commonMongoTemplate.updateFirst(chatContactQuery);
-		}
-
-		return chatSessionDoc;
-	}
-
-	public ChatSessionDoc linkSession(IMessage inboxMessage) {
-		ChatSessionDoc chatSessionDoc = this.getSession(inboxMessage);
-		linkSession(chatSessionDoc, inboxMessage);
-		return chatSessionDoc;
-	}
-
-	public IMessageExtended toSessionMessage(ChatSessionDoc session) {
-		ChatContactDoc contact = getContact(session.getContactId());
-		InboxMessage inboxMessage = new InboxMessage();
-		inboxMessage.contact().copyFrom(contact);
-		inboxMessage.contact().setContactType(contact.getContactType());
-		inboxMessage.contact().setChannel(contact.getChannel());
-		inboxMessage.contact().setLane(ArgUtil.nonEmpty(session.getLane(), contact.getLane()));
-		inboxMessage.setFrom(contact.getCsid());
-		inboxMessage.setFromName(contact.getName());
-		inboxMessage.setSessionId(contact.getSessionId());
-		inboxMessage.contact().setContactId(contact.getContactId());
-
-		inboxMessage.session().setMode(session.getMode());
-		inboxMessage.session().setAgent(session.getAssignedToAgent());
-		inboxMessage.session().setDept(session.getAssignedToDept());
-
-		return inboxMessage;
-	}
-
-	public boolean closeActiveSessionsMulty(String contactId) {
-		Query query2 = new Query();
-		query2.addCriteria(Criteria.where("contactId").is(contactId).and("active").is(true));
-		Update update = new Update().set("active", false).set("closeSessionStamp", System.currentTimeMillis());
-		mongoTemplate.updateMulti(query2, update, ChatSessionDoc.class);
-		return true;
-	}
-
-	public boolean closeActiveSessionsBulk(String contactId) {
-		DBCollection collection = mongoTemplate.getCollection(mongoTemplate.getCollectionName(ChatSessionDoc.class));
-		BulkWriteOperation bulk = collection.initializeOrderedBulkOperation();
-
-		List<DBObject> criteria = new ArrayList<DBObject>();
-		criteria.add(new BasicDBObject("contactId", contactId));
-		criteria.add(new BasicDBObject("active", true));
-		bulk.find(new BasicDBObject("$and", criteria))
-				.update(new BasicDBObject(new BasicDBObject("$set", new BasicDBObject("active", false))));
-
-		BulkWriteResult writeResult = bulk.execute();
-		return true;
-	}
-
-	public List<ChatSessionDoc> findChatSessionDocByAgent(String agentCode) {
-		Query query2 = new Query();
-		query2.addCriteria(Criteria.where("assignedToAgent").is(agentCode).and("active").is(true));
-		return mongoTemplate.find(query2, ChatSessionDoc.class);
-	}
-
-	public List<ChatSessionDoc> findChatSessionDocByQuery(Query query) {
-		return mongoTemplate.find(query, ChatSessionDoc.class);
-	}
-
-	public void expireChatSession() {
-		Calendar cal = Calendar.getInstance();
-		int offsetOur = (int) ((cal.getTimeInMillis() / 3600)
-				% (TimeUtils.toHours(pmClientConfig.getChatSessionTimeout()) / 2));
-		if (offsetOur == 0) {
-			cal.add(Calendar.HOUR, -1 * (int) TimeUtils.toHours(pmClientConfig.getChatSessionTimeout()));
-			CommonMongoQueryBuilder cmqb = new CommonMongoQueryBuilder()
-					.with(Criteria.where("active").is(true).and("lastInComingStamp").lt(cal.getTimeInMillis())
-							.andOperator(new Criteria().orOperator(Criteria.where("resolved").exists(false),
-									Criteria.where("resolved").is(false))))
-					.set("expired", true).set("active", false).set("closeSessionStamp", System.currentTimeMillis());
-			mongoTemplate.updateFirst(cmqb.getQuery(), cmqb.getUpdate(), ChatSessionDoc.class);
-		}
-	}
-
-	public List<ChatSessionDoc> findChatSessionDocByAgentAndUnAssigned(String agentCode, String agentDept) {
-		Query query2 = new Query();
-		Calendar cal = Calendar.getInstance();
-		cal.add(Calendar.DATE, -2);
-		query2.addCriteria(Criteria.where("active").is(true).and("mode").is("AGENT").and("lastInComingStamp")
-				.gt(cal.getTimeInMillis()).andOperator(
-				// Is not assigned to any agent or assigned to said agent
+    public List<ChatSessionDoc> findChatSessionDocByAgentAndUnAssigned(String agentCode, String agentDept) {
+	Query query2 = new Query();
+	Calendar cal = Calendar.getInstance();
+	cal.add(Calendar.DATE, -2);
+	query2.addCriteria(Criteria.where("active").is(true).and("mode").is("AGENT").and("lastInComingStamp")
+		.gt(cal.getTimeInMillis()).andOperator(
+		// Is not assigned to any agent or assigned to said agent
 //						new Criteria().orOperator(Criteria.where("assignedToAgent").exists(false),
 //								Criteria.where("assignedToAgent").is(null),
 //								Criteria.where("assignedToAgent").is(agentCode)),
-						// Is not resolved yet
-						new Criteria().orOperator(Criteria.where("resolved").exists(false),
-								Criteria.where("resolved").is(false))
+			// Is not resolved yet
+			new Criteria().orOperator(Criteria.where("resolved").exists(false),
+				Criteria.where("resolved").is(false))
 
-				));
-		// LOGGER.info(query2.toString());
-		return mongoTemplate.find(query2, ChatSessionDoc.class);
+		));
+	// LOGGER.info(query2.toString());
+	return mongoTemplate.find(query2, ChatSessionDoc.class);
+    }
+
+    public List<ChatSessionDoc> findSimilarChatSessionForContactId(String contactId) {
+	ChatContactDoc contact = getContact(contactId);
+
+	List<ChatContactDoc> contacts = null;
+	if (ArgUtil.is(contact) && !ArgUtil.areEmpty(contact.getPhone(), contact.getEmail())) {
+	    Query query1 = new Query();
+	    List<Criteria> orExpression = new ArrayList<Criteria>();
+	    if (ArgUtil.is(contact.getPhone())) {
+		orExpression.add(Criteria.where("phone").is(contact.getPhone()));
+	    }
+	    if (ArgUtil.is(contact.getEmail())) {
+		orExpression.add(Criteria.where("email").is(contact.getEmail()));
+	    }
+	    if (ArgUtil.is(contact.getProfileId())) {
+		orExpression.add(Criteria.where("profileId").is(contact.getProfileId()));
+	    }
+	    query1.addCriteria(new Criteria().orOperator(orExpression.toArray(new Criteria[orExpression.size()])));
+	    contacts = mongoTemplate.find(query1, ChatContactDoc.class);
 	}
 
-	public List<ChatSessionDoc> findSimilarChatSessionForContactId(String contactId) {
-		ChatContactDoc contact = getContact(contactId);
+	Query query2 = new Query();
+	List<Criteria> orExpression = new ArrayList<Criteria>();
 
-		List<ChatContactDoc> contacts = null;
-		if (ArgUtil.is(contact) && !ArgUtil.areEmpty(contact.getPhone(), contact.getEmail())) {
-			Query query1 = new Query();
-			List<Criteria> orExpression = new ArrayList<Criteria>();
-			if (ArgUtil.is(contact.getPhone())) {
-				orExpression.add(Criteria.where("phone").is(contact.getPhone()));
-			}
-			if (ArgUtil.is(contact.getEmail())) {
-				orExpression.add(Criteria.where("email").is(contact.getEmail()));
-			}
-			if (ArgUtil.is(contact.getProfileId())) {
-				orExpression.add(Criteria.where("profileId").is(contact.getProfileId()));
-			}
-			query1.addCriteria(new Criteria().orOperator(orExpression.toArray(new Criteria[orExpression.size()])));
-			contacts = mongoTemplate.find(query1, ChatContactDoc.class);
-		}
+	orExpression.add(Criteria.where("contactId").is(contactId));
+	if (ArgUtil.is(contacts)) {
+	    for (ChatContactDoc chatContactDoc : contacts) {
+		orExpression.add(Criteria.where("contactId").is(chatContactDoc.getContactId()));
+	    }
+	}
+	query2.addCriteria(new Criteria().orOperator(orExpression.toArray(new Criteria[orExpression.size()])));
+	// LOGGER.info(query2.toString());
+	return mongoTemplate.find(query2, ChatSessionDoc.class);
+    }
 
-		Query query2 = new Query();
-		List<Criteria> orExpression = new ArrayList<Criteria>();
+    public List<ChatSessionDoc> findActiveChatSessionForContactId(String contactId) {
+	Query query2 = new Query();
+	query2.addCriteria(Criteria.where("contactId").is(contactId).and("active").is(true));
+	return mongoTemplate.find(query2, ChatSessionDoc.class);
+    }
 
-		orExpression.add(Criteria.where("contactId").is(contactId));
-		if (ArgUtil.is(contacts)) {
-			for (ChatContactDoc chatContactDoc : contacts) {
-				orExpression.add(Criteria.where("contactId").is(chatContactDoc.getContactId()));
-			}
-		}
-		query2.addCriteria(new Criteria().orOperator(orExpression.toArray(new Criteria[orExpression.size()])));
-		// LOGGER.info(query2.toString());
-		return mongoTemplate.find(query2, ChatSessionDoc.class);
+    public void save(ChatSessionDoc chatSessionDoc) {
+	try {
+	    if (ArgUtil.isEmpty(chatSessionDoc.getStartSessionStamp()) || chatSessionDoc.getStartSessionStamp() == 0L) {
+		chatSessionDoc.setStartSessionStamp(System.currentTimeMillis());
+	    }
+	    mongoTemplate.save(chatSessionDoc);
+	} catch (Exception e) {
+	    ChatSessionDoc chatSessionDoc2 = mongoTemplate.findById(chatSessionDoc.getSessionId(),
+		    ChatSessionDoc.class);
+	    LOGGER.error(chatSessionDoc.getVersion() + " ~ " + chatSessionDoc2.getVersion(), e);
+	    if (chatSessionDoc.getVersion() == null) {
+		// chatSessionDoc.setVersion(0);
+		mongoTemplate.save(chatSessionDoc);
+	    } else {
+		// chatSessionDoc.setVersion(chatSessionDoc2.getVersion()+1);
+		mongoTemplate.save(chatSessionDoc);
+	    }
+	}
+    }
+
+    public ChatSessionDoc initSession(ChatSessionDoc chatSessionDoc) {
+
+	ChatContactDoc contactDoc = messageContext.getChatContactDoc();
+
+	chatSessionDoc.setInitd(true);
+	chatSessionDoc.setContactName(contactDoc.getName());
+
+	CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder().whereId(chatSessionDoc.getSessionId());
+	builder.set("initd", chatSessionDoc.isInitd());
+	builder.set("contactName", ArgUtil.nonEmpty(chatSessionDoc.getContactName(), contactDoc.getName()));
+	mongoTemplate.updateFirst(builder.getQuery(), builder.getUpdate(), ChatSessionDoc.class);
+
+	return chatSessionDoc;
+    }
+
+    public ChatSessionDoc changeStatus(ChatSessionDoc chatSessionDoc, CHAT_STATUS status) {
+	// Old Way of Doing it
+	chatSessionDoc.setStatus(status.toString());
+	CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder().whereId(chatSessionDoc.getSessionId());
+	builder.set("status", status.toString());
+	mongoTemplate.updateFirst(builder.getQuery(), builder.getUpdate(), ChatSessionDoc.class);
+	return chatSessionDoc;
+    }
+
+    public ChatSessionDoc resolveSession(ChatSessionDoc chatSessionDoc) {
+	// Old Way of Doing it
+	chatSessionDoc.setResolveSessionStamp(System.currentTimeMillis());
+	chatSessionDoc.setResolved(true);
+
+	CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder().whereId(chatSessionDoc.getSessionId());
+	builder.set("resolveSessionStamp", chatSessionDoc.getResolveSessionStamp());
+	builder.set("resolved", chatSessionDoc.isResolved());
+	builder.set("status", CHAT_STATUS.RESOLVED);
+	mongoTemplate.updateFirst(builder.getQuery(), builder.getUpdate(), ChatSessionDoc.class);
+	return chatSessionDoc;
+    }
+
+    public ChatSessionDoc closeSession(ChatSessionDoc chatSessionDoc) {
+	chatSessionDoc.setCloseSessionStamp(System.currentTimeMillis());
+	chatSessionDoc.setActive(false);
+
+	CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder().whereId(chatSessionDoc.getSessionId());
+	builder.set("closeSessionStamp", chatSessionDoc.getCloseSessionStamp());
+	builder.set("active", chatSessionDoc.isActive());
+	builder.set("status", CHAT_STATUS.CLOSED);
+	mongoTemplate.updateFirst(builder.getQuery(), builder.getUpdate(), ChatSessionDoc.class);
+
+	return chatSessionDoc;
+    }
+
+    public ChatSessionDoc deleteSession(ChatSessionDoc chatSessionDoc) {
+	CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder()
+		.with(CommonMongoCriteria.whereId(chatSessionDoc.getSessionId()).and("channel").is("IMPORT"));
+	mongoTemplate.remove(builder.getQuery(), ChatSessionDoc.class);
+
+	CommonMongoQueryBuilder builder2 = new CommonMongoQueryBuilder()
+		.with(CommonMongoCriteria.where("sessionId").is(chatSessionDoc.getSessionId()));
+	mongoTemplate.remove(builder2.getQuery(), MessageDoc.class,
+		MessageStore.getCollectionName(chatSessionDoc.getContactType()));
+	return chatSessionDoc;
+    }
+
+    public ChatSessionDoc botScore(ChatSessionDoc chatSessionDoc, Integer botScore) {
+	chatSessionDoc.setBotScore(botScore);
+
+	CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder().whereId(chatSessionDoc.getSessionId());
+	builder.set("botScore", chatSessionDoc.getBotScore());
+	mongoTemplate.updateFirst(builder.getQuery(), builder.getUpdate(), ChatSessionDoc.class);
+
+	return chatSessionDoc;
+    }
+
+    public ChatSessionDoc agentScore(ChatSessionDoc chatSessionDoc, Integer agentScore) {
+	chatSessionDoc.setAgentScore(agentScore);
+
+	CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder().whereId(chatSessionDoc.getSessionId());
+	builder.set("agentScore", chatSessionDoc.getAgentScore());
+	mongoTemplate.updateFirst(builder.getQuery(), builder.getUpdate(), ChatSessionDoc.class);
+
+	return chatSessionDoc;
+    }
+
+    public ChatUserProfileDoc save(ChatUserProfileDoc doc) {
+	mongoTemplate.save(doc);
+	return doc;
+    }
+
+    public ChatUserProfileDoc save(ChatUserProfileDTO profile) {
+	ChatUserProfileDoc doc = EntityDtoUtil.dtoToEntity(profile, new ChatUserProfileDoc());
+	doc.setId(profile.getProfileId());
+	return save(doc);
+    }
+
+    public void updateResponseTime(ChatSessionDoc chatSessionDoc) {
+	if (ArgUtil.isEmptyValue(chatSessionDoc.getFistResponseStamp())) {
+	    chatSessionDoc.setFistResponseStamp(System.currentTimeMillis());
+	}
+	chatSessionDoc.setLastResponseStamp(System.currentTimeMillis());
+
+	CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder().whereId(chatSessionDoc.getSessionId());
+	builder.set("fistResponseStamp", chatSessionDoc.getFistResponseStamp());
+	builder.set("lastResponseStamp", chatSessionDoc.getLastResponseStamp());
+	mongoTemplate.updateFirst(builder.getQuery(), builder.getUpdate(), ChatSessionDoc.class);
+    }
+
+    public void assignToAgent(ChatSessionDoc chatSessionDoc, String agentDept, String agentCode) {
+
+	if (!ArgUtil.areEqual(chatSessionDoc.getAssignedToDept(), agentDept)) {
+	    chatSessionDoc.setAssignedDeptStamp(System.currentTimeMillis());
+	}
+	chatSessionDoc.setMode(CHAT_MODE.AGENT.toString());
+	chatSessionDoc.setAssignedToDept(agentDept);
+	chatSessionDoc.setAssignedAgentStamp(System.currentTimeMillis());
+	chatSessionDoc.setAssignedToAgent(agentCode);
+
+	if (chatSessionDoc.getAgentSessionStamp() == 0L) {
+	    chatSessionDoc.setAgentSessionStamp(chatSessionDoc.getAssignedAgentStamp());
 	}
 
-	public List<ChatSessionDoc> findActiveChatSessionForContactId(String contactId) {
-		Query query2 = new Query();
-		query2.addCriteria(Criteria.where("contactId").is(contactId).and("active").is(true));
-		return mongoTemplate.find(query2, ChatSessionDoc.class);
+	CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder().whereId(chatSessionDoc.getSessionId());
+	builder.set("mode", chatSessionDoc.getMode());
+	builder.set("assignedToDept", chatSessionDoc.getAssignedToDept());
+	builder.set("assignedDeptStamp", chatSessionDoc.getAssignedDeptStamp());
+	builder.set("assignedToAgent", chatSessionDoc.getAssignedToAgent());
+	builder.set("assignedAgentStamp", chatSessionDoc.getAssignedAgentStamp());
+	builder.set("agentSessionStamp", chatSessionDoc.getAgentSessionStamp());
+	mongoTemplate.updateFirst(builder.getQuery(), builder.getUpdate(), ChatSessionDoc.class);
+    }
+
+    public void assignToBot(ChatSessionDoc chatSessionDoc, String botName) {
+	if (!ArgUtil.is(chatSessionDoc)) {
+	    LOGGER.error("Session Cannot Be Empty for bot {}", botName);
+	    return;
 	}
 
-	public void save(ChatSessionDoc chatSessionDoc) {
-		try {
-			if (ArgUtil.isEmpty(chatSessionDoc.getStartSessionStamp()) || chatSessionDoc.getStartSessionStamp() == 0L) {
-				chatSessionDoc.setStartSessionStamp(System.currentTimeMillis());
-			}
-			mongoTemplate.save(chatSessionDoc);
-		} catch (Exception e) {
-			ChatSessionDoc chatSessionDoc2 = mongoTemplate.findById(chatSessionDoc.getSessionId(),
-					ChatSessionDoc.class);
-			LOGGER.error(chatSessionDoc.getVersion() + " ~ " + chatSessionDoc2.getVersion(), e);
-			if (chatSessionDoc.getVersion() == null) {
-				// chatSessionDoc.setVersion(0);
-				mongoTemplate.save(chatSessionDoc);
-			} else {
-				// chatSessionDoc.setVersion(chatSessionDoc2.getVersion()+1);
-				mongoTemplate.save(chatSessionDoc);
-			}
-		}
+	chatSessionDoc.setMode(CHAT_MODE.BOT.toString());
+	chatSessionDoc.setAssignedToAgent(botName);
+
+	CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder().whereId(chatSessionDoc.getSessionId());
+	builder.set("mode", chatSessionDoc.getMode());
+	builder.set("assignedToAgent", chatSessionDoc.getAssignedToAgent());
+	mongoTemplate.updateFirst(builder.getQuery(), builder.getUpdate(), ChatSessionDoc.class);
+
+    }
+
+    public void push(MessageDoc msgDoc, String contactType) {
+	ChatSessionQuery chatSessionDocQuery = new ChatSessionQuery(msgDoc.getSessionId());
+	if (PostManUtil.isInBound(msgDoc.getType())) {
+	    chatSessionDocQuery.setLastInBoundMsg(msgDoc, contactType);
+	    commonMongoTemplate.updateFirst(chatSessionDocQuery);
+	} else if (PostManUtil.isOutBound(msgDoc.getType())) {
+	    chatSessionDocQuery.setLastOutBoundMsg(msgDoc, contactType);
+	    commonMongoTemplate.updateFirst(chatSessionDocQuery);
 	}
 
-	public ChatSessionDoc initSession(ChatSessionDoc chatSessionDoc) {
-
-		ChatContactDoc contactDoc = messageContext.getChatContactDoc();
-
-		chatSessionDoc.setInitd(true);
-		chatSessionDoc.setContactName(contactDoc.getName());
-
-		CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder().whereId(chatSessionDoc.getSessionId());
-		builder.set("initd", chatSessionDoc.isInitd());
-		builder.set("contactName", ArgUtil.nonEmpty(chatSessionDoc.getContactName(), contactDoc.getName()));
-		mongoTemplate.updateFirst(builder.getQuery(), builder.getUpdate(), ChatSessionDoc.class);
-
-		return chatSessionDoc;
+	if (PostManUtil.isOutBound(msgDoc.getType()) || PostManUtil.isOutBound(msgDoc.getType())) {
+	    chatSessionDocQuery.setLastAgentReply(msgDoc, contactType);
+	    commonMongoTemplate.updateFirst(chatSessionDocQuery);
 	}
 
-	public ChatSessionDoc changeStatus(ChatSessionDoc chatSessionDoc, CHAT_STATUS status) {
-		// Old Way of Doing it
-		chatSessionDoc.setStatus(status.toString());
-		CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder().whereId(chatSessionDoc.getSessionId());
-		builder.set("status", status.toString());
-		mongoTemplate.updateFirst(builder.getQuery(), builder.getUpdate(), ChatSessionDoc.class);
-		return chatSessionDoc;
-	}
-
-	public ChatSessionDoc resolveSession(ChatSessionDoc chatSessionDoc) {
-		// Old Way of Doing it
-		chatSessionDoc.setResolveSessionStamp(System.currentTimeMillis());
-		chatSessionDoc.setResolved(true);
-
-		CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder().whereId(chatSessionDoc.getSessionId());
-		builder.set("resolveSessionStamp", chatSessionDoc.getResolveSessionStamp());
-		builder.set("resolved", chatSessionDoc.isResolved());
-		builder.set("status", CHAT_STATUS.RESOLVED);
-		mongoTemplate.updateFirst(builder.getQuery(), builder.getUpdate(), ChatSessionDoc.class);
-		return chatSessionDoc;
-	}
-
-	public ChatSessionDoc closeSession(ChatSessionDoc chatSessionDoc) {
-		chatSessionDoc.setCloseSessionStamp(System.currentTimeMillis());
-		chatSessionDoc.setActive(false);
-
-		CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder().whereId(chatSessionDoc.getSessionId());
-		builder.set("closeSessionStamp", chatSessionDoc.getCloseSessionStamp());
-		builder.set("active", chatSessionDoc.isActive());
-		builder.set("status", CHAT_STATUS.CLOSED);
-		mongoTemplate.updateFirst(builder.getQuery(), builder.getUpdate(), ChatSessionDoc.class);
-
-		return chatSessionDoc;
-	}
-
-	public ChatSessionDoc deleteSession(ChatSessionDoc chatSessionDoc) {
-		CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder()
-				.with(CommonMongoCriteria.whereId(chatSessionDoc.getSessionId()).and("channel").is("IMPORT"));
-		mongoTemplate.remove(builder.getQuery(), ChatSessionDoc.class);
-
-		CommonMongoQueryBuilder builder2 = new CommonMongoQueryBuilder()
-				.with(CommonMongoCriteria.where("sessionId").is(chatSessionDoc.getSessionId()));
-		mongoTemplate.remove(builder2.getQuery(), MessageDoc.class,
-				MessageStore.getCollectionName(chatSessionDoc.getContactType()));
-		return chatSessionDoc;
-	}
-
-	public ChatSessionDoc botScore(ChatSessionDoc chatSessionDoc, Integer botScore) {
-		chatSessionDoc.setBotScore(botScore);
-
-		CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder().whereId(chatSessionDoc.getSessionId());
-		builder.set("botScore", chatSessionDoc.getBotScore());
-		mongoTemplate.updateFirst(builder.getQuery(), builder.getUpdate(), ChatSessionDoc.class);
-
-		return chatSessionDoc;
-	}
-
-	public ChatSessionDoc agentScore(ChatSessionDoc chatSessionDoc, Integer agentScore) {
-		chatSessionDoc.setAgentScore(agentScore);
-
-		CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder().whereId(chatSessionDoc.getSessionId());
-		builder.set("agentScore", chatSessionDoc.getAgentScore());
-		mongoTemplate.updateFirst(builder.getQuery(), builder.getUpdate(), ChatSessionDoc.class);
-
-		return chatSessionDoc;
-	}
-
-	public ChatUserProfileDoc save(ChatUserProfileDoc doc) {
-		mongoTemplate.save(doc);
-		return doc;
-	}
-
-	public ChatUserProfileDoc save(ChatUserProfileDTO profile) {
-		ChatUserProfileDoc doc = EntityDtoUtil.dtoToEntity(profile, new ChatUserProfileDoc());
-		doc.setId(profile.getProfileId());
-		return save(doc);
-	}
-
-	public void updateResponseTime(ChatSessionDoc chatSessionDoc) {
-		if (ArgUtil.isEmptyValue(chatSessionDoc.getFistResponseStamp())) {
-			chatSessionDoc.setFistResponseStamp(System.currentTimeMillis());
-		}
-		chatSessionDoc.setLastResponseStamp(System.currentTimeMillis());
-
-		CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder().whereId(chatSessionDoc.getSessionId());
-		builder.set("fistResponseStamp", chatSessionDoc.getFistResponseStamp());
-		builder.set("lastResponseStamp", chatSessionDoc.getLastResponseStamp());
-		mongoTemplate.updateFirst(builder.getQuery(), builder.getUpdate(), ChatSessionDoc.class);
-	}
-
-	public void assignToAgent(ChatSessionDoc chatSessionDoc, String agentDept, String agentCode) {
-
-		if (!ArgUtil.areEqual(chatSessionDoc.getAssignedToDept(), agentDept)) {
-			chatSessionDoc.setAssignedDeptStamp(System.currentTimeMillis());
-		}
-		chatSessionDoc.setMode(CHAT_MODE.AGENT.toString());
-		chatSessionDoc.setAssignedToDept(agentDept);
-		chatSessionDoc.setAssignedAgentStamp(System.currentTimeMillis());
-		chatSessionDoc.setAssignedToAgent(agentCode);
-
-		if (chatSessionDoc.getAgentSessionStamp() == 0L) {
-			chatSessionDoc.setAgentSessionStamp(chatSessionDoc.getAssignedAgentStamp());
-		}
-
-		CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder().whereId(chatSessionDoc.getSessionId());
-		builder.set("mode", chatSessionDoc.getMode());
-		builder.set("assignedToDept", chatSessionDoc.getAssignedToDept());
-		builder.set("assignedDeptStamp", chatSessionDoc.getAssignedDeptStamp());
-		builder.set("assignedToAgent", chatSessionDoc.getAssignedToAgent());
-		builder.set("assignedAgentStamp", chatSessionDoc.getAssignedAgentStamp());
-		builder.set("agentSessionStamp", chatSessionDoc.getAgentSessionStamp());
-		mongoTemplate.updateFirst(builder.getQuery(), builder.getUpdate(), ChatSessionDoc.class);
-	}
-
-	public void assignToBot(ChatSessionDoc chatSessionDoc, String botName) {
-		if(!ArgUtil.is(chatSessionDoc)){
-			LOGGER.error("Session Cannot Be Empty for bot {}", botName);
-			return;
-		}
-
-		chatSessionDoc.setMode(CHAT_MODE.BOT.toString());
-		chatSessionDoc.setAssignedToAgent(botName);
-
-		CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder().whereId(chatSessionDoc.getSessionId());
-		builder.set("mode", chatSessionDoc.getMode());
-		builder.set("assignedToAgent", chatSessionDoc.getAssignedToAgent());
-		mongoTemplate.updateFirst(builder.getQuery(), builder.getUpdate(), ChatSessionDoc.class);
-
-	}
+    }
 
 }

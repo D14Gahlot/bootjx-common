@@ -40,407 +40,409 @@ import com.boot.utils.TimeUtils;
 @Component
 public class ChatService {
 
-	public static Logger LOGGER = LoggerService.getLogger(ChatService.class);
+    public static Logger LOGGER = LoggerService.getLogger(ChatService.class);
 
-	@Autowired
-	private MongoTemplate mongoTemplate;
+    @Autowired
+    private MongoTemplate mongoTemplate;
 
-	@Autowired
-	private ChatContext chatContext;
+    @Autowired
+    private ChatContext chatContext;
 
-	@Autowired
-	private ChatClient chatClient;
+    @Autowired
+    private ChatClient chatClient;
 
-	@Autowired
-	private PMClientConfig chatClientConfig;
+    @Autowired
+    private PMClientConfig chatClientConfig;
 
-	@Autowired
-	private MessageStore messageStore;
+    @Autowired
+    private MessageStore messageStore;
 
-	@Autowired
-	private MessageContext messageContext;
+    @Autowired
+    private MessageContext messageContext;
 
-	@Autowired
-	private SessionStore sessionStore;
+    @Autowired
+    private SessionStore sessionStore;
 
-	@Autowired(required = false)
-	private AuditDetailProvider auditDetailProvider;
+    @Autowired(required = false)
+    private AuditDetailProvider auditDetailProvider;
 
-	public InboxMessage getInboxMessage() {
-		return chatContext.getInboxMessage();
+    public InboxMessage getInboxMessage() {
+	return chatContext.getInboxMessage();
+    }
+
+    @Autowired
+    private ConnectorHandlerFactory connectorHandlerFactory;
+
+    public ChatContext getChatContext() {
+	return chatContext;
+    }
+
+    public ChatClient getClient() {
+	return chatClient;
+    }
+
+    public PMClientConfig getClientConfig() {
+	return chatClientConfig;
+    }
+
+    public String getCurrenUser() {
+	return ArgUtil.is(auditDetailProvider) ? auditDetailProvider.getAuditUser() : "_SYSTEM_";
+    }
+
+    private MessageDoc actionIntenal(ChatContactDoc chatContactDoc, OutboxMessage outboxMessage) {
+	if (!ArgUtil.is(outboxMessage.getAction())) {
+	    return null;
 	}
 
-	@Autowired
-	private ConnectorHandlerFactory connectorHandlerFactory;
-
-	public ChatContext getChatContext() {
-		return chatContext;
+	if (!ArgUtil.is(chatContactDoc)) {
+	    throw new PostManException("Destination Not Specified : chatContactDoc Empty");
 	}
 
-	public ChatClient getClient() {
-		return chatClient;
+	outboxMessage.updateStatus(Message.Status.INIT);
+	outboxMessage.contact().setContactType(chatContactDoc.getContactType());
+	outboxMessage.contact().setContactId(chatContactDoc.getContactId());
+
+	MessageDoc messageDoc = messageStore.createOrUpdate(outboxMessage);
+	connectorHandlerFactory.message("ACTION", chatContactDoc, null, outboxMessage);
+	sessionStore.push(messageDoc,outboxMessage.contact().getContactType());
+	return messageDoc;
+    }
+
+    private MessageDoc replyIntenal(IMessageExtended inboxMessage, OutboxMessage outboxMessage) {
+
+	if (!ArgUtil.is(inboxMessage)) {
+	    throw new PostManException("Destination Not Specified : inboxMessage Empty");
 	}
 
-	public PMClientConfig getClientConfig() {
-		return chatClientConfig;
+	outboxMessage.updateStatus(Message.Status.INIT);
+	outboxMessage.contact().setContactType(inboxMessage.contact().getContactType());
+	outboxMessage.contact().setChannel(inboxMessage.contact().getChannel());
+	outboxMessage.contact().setLane(inboxMessage.contact().getLane());
+	outboxMessage.contact().setCsid(inboxMessage.contact().getCsid());
+	outboxMessage.contact().setContactId(inboxMessage.contact().getContactId());
+	outboxMessage.setQueue(inboxMessage.getQueue());
+	outboxMessage.addTo(inboxMessage.getFrom());
+	outboxMessage.setSessionId(inboxMessage.getSessionId());
+
+	if (!ArgUtil.is(outboxMessage.session().getMode())) {
+	    outboxMessage.session().setMode(inboxMessage.session().getMode());
 	}
 
-	public String getCurrenUser() {
-		return ArgUtil.is(auditDetailProvider) ? auditDetailProvider.getAuditUser() : "_SYSTEM_";
+	MessageDoc messageDoc = messageStore.createOrUpdate(outboxMessage);
+	connectorHandlerFactory.message("REPLY", null, inboxMessage, outboxMessage);
+	sessionStore.push(messageDoc,outboxMessage.contact().getContactType());
+	return messageDoc;
+    }
+
+    private MessageDoc sendIntenal(ChatContactDoc chatContactDoc, OutboxMessage outboxMessage) {
+	LOGGER.debug("sendIntenal(ChatContactDoc {}, OutboxMessage {})", chatContactDoc, outboxMessage);
+
+	if (!ArgUtil.is(chatContactDoc)) {
+	    throw new PostManException("Destination Not Specified : chatContactDoc Empty");
 	}
 
-	private MessageDoc actionIntenal(ChatContactDoc chatContactDoc, OutboxMessage outboxMessage) {
-		if (!ArgUtil.is(outboxMessage.getAction())) {
-			return null;
-		}
+	outboxMessage.updateStatus(Message.Status.INIT);
+	outboxMessage.contact().setContactType(chatContactDoc.getContactType());
+	outboxMessage.contact().setChannel(chatContactDoc.getChannel());
+	outboxMessage.contact().setLane(chatContactDoc.getLane());
+	outboxMessage.contact().setCsid(chatContactDoc.getCsid());
+	outboxMessage.contact().setContactId(chatContactDoc.getContactId());
+	outboxMessage.setSessionId(chatContactDoc.getSessionId());
 
-		if (!ArgUtil.is(chatContactDoc)) {
-			throw new PostManException("Destination Not Specified : chatContactDoc Empty");
-		}
+	MessageDoc messageDoc = messageStore.createOrUpdate(outboxMessage);
+	connectorHandlerFactory.message("SEND", chatContactDoc, null, outboxMessage);
+	sessionStore.push(messageDoc,outboxMessage.contact().getContactType());
+	return messageDoc;
+    }
 
-		outboxMessage.updateStatus(Message.Status.INIT);
-		outboxMessage.contact().setContactType(chatContactDoc.getContactType());
-		outboxMessage.contact().setContactId(chatContactDoc.getContactId());
+    public MessageDoc reply(OutboxMessage outboxMessage) throws InterruptedException {
+	InboxMessage inboxMessage = chatContext.getInboxMessage();
+	ChatContactDoc chatContactDoc = sessionStore.getContact(inboxMessage.contact().getContactId());
 
-		MessageDoc messageDoc = messageStore.createOrUpdate(outboxMessage);
-		connectorHandlerFactory.message("ACTION", chatContactDoc, null, outboxMessage);
-
-		return messageDoc;
+	if (ArgUtil.isEmpty(outboxMessage.session().getAgent())) {
+	    outboxMessage.session().setAgent(chatClientConfig.getDefaultSender());
 	}
 
-	private MessageDoc replyIntenal(IMessageExtended inboxMessage, OutboxMessage outboxMessage) {
-
-		if (!ArgUtil.is(inboxMessage)) {
-			throw new PostManException("Destination Not Specified : inboxMessage Empty");
-		}
-
-		outboxMessage.updateStatus(Message.Status.INIT);
-		outboxMessage.contact().setContactType(inboxMessage.contact().getContactType());
-		outboxMessage.contact().setChannel(inboxMessage.contact().getChannel());
-		outboxMessage.contact().setLane(inboxMessage.contact().getLane());
-		outboxMessage.contact().setCsid(inboxMessage.contact().getCsid());
-		outboxMessage.contact().setContactId(inboxMessage.contact().getContactId());
-		outboxMessage.setQueue(inboxMessage.getQueue());
-		outboxMessage.addTo(inboxMessage.getFrom());
-		outboxMessage.setSessionId(inboxMessage.getSessionId());
-
-		if (!ArgUtil.is(outboxMessage.session().getMode())) {
-			outboxMessage.session().setMode(inboxMessage.session().getMode());
-		}
-
-		MessageDoc messageDoc = messageStore.createOrUpdate(outboxMessage);
-		connectorHandlerFactory.message("REPLY", null, inboxMessage, outboxMessage);
-		return messageDoc;
+	// Action Only
+	MessageDoc actionDco = actionIntenal(chatContactDoc, outboxMessage);
+	if (ArgUtil.is(actionDco)) {
+	    return actionDco;
 	}
 
-	private MessageDoc sendIntenal(ChatContactDoc chatContactDoc, OutboxMessage outboxMessage) {
-		LOGGER.debug("sendIntenal(ChatContactDoc {}, OutboxMessage {})", chatContactDoc, outboxMessage);
+	outboxMessage.model().put("contact", ChatDTOUtil.getContactDTO(chatContactDoc));
+	return replyIntenal(inboxMessage, outboxMessage);
+    }
 
-		if (!ArgUtil.is(chatContactDoc)) {
-			throw new PostManException("Destination Not Specified : chatContactDoc Empty");
-		}
+    public MessageDoc reply(ChatSessionDoc sessionDoc, OutboxMessage outboxMessage) {
+	IMessageExtended inboxMessage = sessionStore.toSessionMessage(sessionDoc);
+	ChatContactDoc chatContactDoc = sessionStore.getContact(sessionDoc.getContactId());
 
-		outboxMessage.updateStatus(Message.Status.INIT);
-		outboxMessage.contact().setContactType(chatContactDoc.getContactType());
-		outboxMessage.contact().setChannel(chatContactDoc.getChannel());
-		outboxMessage.contact().setLane(chatContactDoc.getLane());
-		outboxMessage.contact().setCsid(chatContactDoc.getCsid());
-		outboxMessage.contact().setContactId(chatContactDoc.getContactId());
-		outboxMessage.setSessionId(chatContactDoc.getSessionId());
-
-		MessageDoc messageDoc = messageStore.createOrUpdate(outboxMessage);
-		connectorHandlerFactory.message("SEND", chatContactDoc, null, outboxMessage);
-		return messageDoc;
+	if (ArgUtil.isEmpty(outboxMessage.session().getAgent())) {
+	    outboxMessage.session().setAgent(sessionDoc.getAssignedToAgent());
 	}
 
-	public MessageDoc reply(OutboxMessage outboxMessage) throws InterruptedException {
-		InboxMessage inboxMessage = chatContext.getInboxMessage();
-		ChatContactDoc chatContactDoc = sessionStore.getContact(inboxMessage.contact().getContactId());
-
-		if (ArgUtil.isEmpty(outboxMessage.session().getAgent())) {
-			outboxMessage.session().setAgent(chatClientConfig.getDefaultSender());
-		}
-
-		// Action Only
-		MessageDoc actionDco = actionIntenal(chatContactDoc, outboxMessage);
-		if (ArgUtil.is(actionDco)) {
-			return actionDco;
-		}
-
-		outboxMessage.model().put("contact", ChatDTOUtil.getContactDTO(chatContactDoc));
-		return replyIntenal(inboxMessage, outboxMessage);
+	if (ArgUtil.isEmpty(outboxMessage.session().getDept())) {
+	    outboxMessage.session().setAgent(sessionDoc.getAssignedToDept());
 	}
 
-	public MessageDoc reply(ChatSessionDoc sessionDoc, OutboxMessage outboxMessage) {
-		IMessageExtended inboxMessage = sessionStore.toSessionMessage(sessionDoc);
-		ChatContactDoc chatContactDoc = sessionStore.getContact(sessionDoc.getContactId());
-
-		if (ArgUtil.isEmpty(outboxMessage.session().getAgent())) {
-			outboxMessage.session().setAgent(sessionDoc.getAssignedToAgent());
-		}
-
-		if (ArgUtil.isEmpty(outboxMessage.session().getDept())) {
-			outboxMessage.session().setAgent(sessionDoc.getAssignedToDept());
-		}
-
-		// Action Only
-		MessageDoc actionDto = actionIntenal(chatContactDoc, outboxMessage);
-		if (ArgUtil.is(actionDto)) {
-			return actionDto;
-		}
-
-		outboxMessage.model().put("contact", ChatDTOUtil.getContactDTO(chatContactDoc));
-
-		return replyIntenal(inboxMessage, outboxMessage);
+	// Action Only
+	MessageDoc actionDto = actionIntenal(chatContactDoc, outboxMessage);
+	if (ArgUtil.is(actionDto)) {
+	    return actionDto;
 	}
 
-	public MessageDoc note(ChatSessionDoc sessionDoc, OutboxMessage outboxMessage) {
-		outboxMessage.contact().setContactType(sessionDoc.getContactType());
-		outboxMessage.contact().setChannel(sessionDoc.getChannel());
-		outboxMessage.contact().setLane(sessionDoc.getLane());
-		outboxMessage.contact().setContactId(sessionDoc.getContactId());
-		outboxMessage.setSessionId(sessionDoc.getSessionId());
-		outboxMessage.setType("N");
-		return messageStore.note(outboxMessage, getCurrenUser());
+	outboxMessage.model().put("contact", ChatDTOUtil.getContactDTO(chatContactDoc));
+
+	return replyIntenal(inboxMessage, outboxMessage);
+    }
+
+    public MessageDoc note(ChatSessionDoc sessionDoc, OutboxMessage outboxMessage) {
+	outboxMessage.contact().setContactType(sessionDoc.getContactType());
+	outboxMessage.contact().setChannel(sessionDoc.getChannel());
+	outboxMessage.contact().setLane(sessionDoc.getLane());
+	outboxMessage.contact().setContactId(sessionDoc.getContactId());
+	outboxMessage.setSessionId(sessionDoc.getSessionId());
+	outboxMessage.setType("N");
+	return messageStore.note(outboxMessage, getCurrenUser());
+    }
+
+    public void log(IMessageExtended inboxMessage, String auditAgent, EVENTS event, String... logs) {
+	messageStore.log(inboxMessage, auditAgent, event, logs);
+    }
+
+    public void log(IMessageExtended inboxMessage, EVENTS event, String... logs) {
+	log(inboxMessage, inboxMessage.session().getAgent(), event, logs);
+    }
+
+    private void log(ChatSessionDoc sessionDoc, String auditAgent, EVENTS event, String... logs) {
+	IMessageExtended inboxMessage = sessionStore.toSessionMessage(sessionDoc);
+	log(inboxMessage, auditAgent, event, logs);
+    }
+
+    public void log(ChatSessionDoc sessionDoc, EVENTS event, String... logs) {
+	log(sessionDoc, getCurrenUser(), event, logs);
+    }
+
+    public MessageDoc send(ChatSessionDoc sessionDoc, OutboxMessage outboxMessage) {
+	LOGGER.debug("send(ChatSessionDoc {}, OutboxMessage {})", sessionDoc, outboxMessage);
+	ChatContactDoc chatContactDoc = sessionStore.getContact(sessionDoc.getContactId());
+
+	if (ArgUtil.isEmpty(outboxMessage.session().getAgent())) {
+	    outboxMessage.session().setAgent(sessionDoc.getAssignedToAgent());
 	}
 
-	public void log(IMessageExtended inboxMessage, String agent, EVENTS event, String... logs) {
-		messageStore.log(inboxMessage, agent, event, logs);
+	if (ArgUtil.isEmpty(outboxMessage.session().getDept())) {
+	    outboxMessage.session().setAgent(sessionDoc.getAssignedToDept());
 	}
 
-	public void log(IMessageExtended inboxMessage, EVENTS event, String... logs) {
-		log(inboxMessage, inboxMessage.session().getAgent(), event, logs);
+	// Action Only
+	// Action Only
+	MessageDoc actionDto = actionIntenal(chatContactDoc, outboxMessage);
+	if (ArgUtil.is(actionDto)) {
+	    return actionDto;
 	}
 
-	public void log(ChatSessionDoc sessionDoc, String agent, EVENTS event, String... logs) {
-		IMessageExtended inboxMessage = sessionStore.toSessionMessage(sessionDoc);
-		log(inboxMessage, getCurrenUser(), event, logs);
+	outboxMessage.model().put("contact", ChatDTOUtil.getContactDTO(chatContactDoc));
+	return sendIntenal(chatContactDoc, outboxMessage);
+    }
+
+    public MessageDoc send(ChatContactDoc chatContactDoc, OutboxMessage outboxMessage) {
+	if (ArgUtil.isEmpty(outboxMessage.session().getAgent())) {
+	    outboxMessage.session().setAgent(chatClientConfig.getDefaultSender());
 	}
 
-	public void log(ChatSessionDoc sessionDoc, EVENTS event, String... logs) {
-		log(sessionDoc, getCurrenUser(), event, logs);
+	// Action Only
+	// Action Only
+	MessageDoc actionDto = actionIntenal(chatContactDoc, outboxMessage);
+	if (ArgUtil.is(actionDto)) {
+	    return actionDto;
 	}
 
-	public MessageDoc send(ChatSessionDoc sessionDoc, OutboxMessage outboxMessage) {
-		LOGGER.debug("send(ChatSessionDoc {}, OutboxMessage {})", sessionDoc, outboxMessage);
-		ChatContactDoc chatContactDoc = sessionStore.getContact(sessionDoc.getContactId());
+	outboxMessage.model().put("contact", ChatDTOUtil.getContactDTO(chatContactDoc));
+	return sendIntenal(chatContactDoc, outboxMessage);
+    }
 
-		if (ArgUtil.isEmpty(outboxMessage.session().getAgent())) {
-			outboxMessage.session().setAgent(sessionDoc.getAssignedToAgent());
-		}
+    public boolean beforeMessageHandler() {
+	InboxMessage inboxMessage = chatContext.getInboxMessage();
+	if (ArgUtil.is(inboxMessage)) {
+	}
+	return true;
+    }
 
-		if (ArgUtil.isEmpty(outboxMessage.session().getDept())) {
-			outboxMessage.session().setAgent(sessionDoc.getAssignedToDept());
-		}
+    public ChatContext loadChatContext(String contactId, InboxMessage inboxMessage) {
 
-		// Action Only
-		// Action Only
-		MessageDoc actionDto = actionIntenal(chatContactDoc, outboxMessage);
-		if (ArgUtil.is(actionDto)) {
-			return actionDto;
-		}
+	if (!ArgUtil.is(inboxMessage.session().getMode())) {
+	    ChatSessionDoc sessionDoc = sessionStore.getSession(inboxMessage.getSessionId());
 
-		outboxMessage.model().put("contact", ChatDTOUtil.getContactDTO(chatContactDoc));
-		return sendIntenal(chatContactDoc, outboxMessage);
+	    if (!ArgUtil.is(sessionDoc)) {
+		LOGGER.error("No Session Found for {}/{}", contactId, inboxMessage.getSessionId());
+	    }
+
+	    inboxMessage.session().setMode(CHAT_MODE.BOT.toString());
+	    inboxMessage.session().setAgent(chatClientConfig.getDefaultSender());
+
+	    sessionStore.assignToBot(sessionDoc, chatClientConfig.getDefaultSender());
 	}
 
-	public MessageDoc send(ChatContactDoc chatContactDoc, OutboxMessage outboxMessage) {
-		if (ArgUtil.isEmpty(outboxMessage.session().getAgent())) {
-			outboxMessage.session().setAgent(chatClientConfig.getDefaultSender());
-		}
-
-		// Action Only
-		// Action Only
-		MessageDoc actionDto = actionIntenal(chatContactDoc, outboxMessage);
-		if (ArgUtil.is(actionDto)) {
-			return actionDto;
-		}
-
-		outboxMessage.model().put("contact", ChatDTOUtil.getContactDTO(chatContactDoc));
-		return sendIntenal(chatContactDoc, outboxMessage);
+	ChatContextDoc doc = mongoTemplate.findById(contactId, ChatContextDoc.class);
+	if (ArgUtil.is(doc)) {
+	    chatContext.getStore().loadUser(doc.getUser());
+	    if (ArgUtil.is(doc.getMeta()) && !TimeUtils.isExpired(doc.getMeta().getUpdateStamp(), "5min")) {
+		chatContext.setMeta(doc.getMeta());
+		chatContext.getStore().loadSession(doc.getSession());
+	    } else {
+		chatContext.getStore().loadSession(null);
+		chatContext.setMeta(new ChatMeta());
+	    }
+	} else {
+	    chatContext.getStore().loadUser(null);
+	    chatContext.getStore().loadSession(null);
+	    chatContext.setMeta(new ChatMeta());
 	}
+	chatContext.setInboxMessage(inboxMessage);
+	// messageStore.create(inboxMessage);
+	return chatContext;
+    }
 
-	public boolean beforeMessageHandler() {
-		InboxMessage inboxMessage = chatContext.getInboxMessage();
-		if (ArgUtil.is(inboxMessage)) {
-		}
-		return true;
+    public void commitChatContext(String contactId, String prevHandler, InboxMessage inboxMessage) {
+	ChatContextDoc doc = new ChatContextDoc();
+	doc.setContactId(contactId);
+	chatContext.meta().setPrevHandler(prevHandler);
+	chatContext.meta().setUpdateStamp(System.currentTimeMillis());
+
+	doc.setUser(chatContext.getStore().getUser());
+	doc.setSession(chatContext.getStore().getSession());
+	doc.setMeta(chatContext.getMeta());
+
+	if (ArgUtil.is(prevHandler)) {
+	    messageStore.setHandler(inboxMessage, prevHandler);
 	}
+	mongoTemplate.save(doc);
+	chatContext.commitContact();
+    }
 
-	public ChatContext loadChatContext(String contactId, InboxMessage inboxMessage) {
+    public InboxMessage forward() {
+	return chatClient.forward(getInboxMessage()).getResult();
+    }
 
-		if (!ArgUtil.is(inboxMessage.session().getMode())) {
-			ChatSessionDoc sessionDoc = sessionStore.getSession(inboxMessage.getSessionId());
+    public InboxMessage forward(InboxMessage inboxMessage) {
+	return chatClient.forward(inboxMessage).getResult();
+    }
 
-			if (!ArgUtil.is(sessionDoc)) {
-				LOGGER.error("No Session Found for {}/{}",contactId,inboxMessage.getSessionId());
-			}
-
-			inboxMessage.session().setMode(CHAT_MODE.BOT.toString());
-			inboxMessage.session().setAgent(chatClientConfig.getDefaultSender());
-
-			sessionStore.assignToBot(sessionDoc, chatClientConfig.getDefaultSender());
-		}
-
-		ChatContextDoc doc = mongoTemplate.findById(contactId, ChatContextDoc.class);
-		if (ArgUtil.is(doc)) {
-			chatContext.getStore().loadUser(doc.getUser());
-			if (ArgUtil.is(doc.getMeta()) && !TimeUtils.isExpired(doc.getMeta().getUpdateStamp(), "5min")) {
-				chatContext.setMeta(doc.getMeta());
-				chatContext.getStore().loadSession(doc.getSession());
-			} else {
-				chatContext.getStore().loadSession(null);
-				chatContext.setMeta(new ChatMeta());
-			}
-		} else {
-			chatContext.getStore().loadUser(null);
-			chatContext.getStore().loadSession(null);
-			chatContext.setMeta(new ChatMeta());
-		}
-		chatContext.setInboxMessage(inboxMessage);
-		// messageStore.create(inboxMessage);
-		return chatContext;
+    public boolean initSession(InboxMessage inboxMessage, ChatSessionDoc session) {
+	boolean initd = session.isInitd();
+	if (initd) {
+	    return true;
 	}
+	ConnectorHandler connector = connectorHandlerFactory.get(inboxMessage.contact().type(),
+		inboxMessage.contact().getChannel());
 
-	public void commitChatContext(String contactId, String prevHandler, InboxMessage inboxMessage) {
-		ChatContextDoc doc = new ChatContextDoc();
-		doc.setContactId(contactId);
-		chatContext.meta().setPrevHandler(prevHandler);
-		chatContext.meta().setUpdateStamp(System.currentTimeMillis());
-
-		doc.setUser(chatContext.getStore().getUser());
-		doc.setSession(chatContext.getStore().getSession());
-		doc.setMeta(chatContext.getMeta());
-
-		if (ArgUtil.is(prevHandler)) {
-			messageStore.setHandler(inboxMessage, prevHandler);
-		}
-		mongoTemplate.save(doc);
-		chatContext.commitContact();
+	if (ArgUtil.is(connector)) {
+	    initd = connector.initSession(session, inboxMessage);
+	    messageContext.commitChatContactQuery();
 	}
-
-	public InboxMessage forward() {
-		return chatClient.forward(getInboxMessage()).getResult();
+	if (initd) {
+	    session = sessionStore.initSession(session);
 	}
+	return session.isInitd();
+    }
 
-	public InboxMessage forward(InboxMessage inboxMessage) {
-		return chatClient.forward(inboxMessage).getResult();
+    public boolean initSession(OutboxMessage outboxMessage, ChatSessionDoc session) {
+	boolean initd = session.isInitd();
+	if (initd) {
+	    return true;
 	}
+	ConnectorHandler connector = connectorHandlerFactory.get(outboxMessage.contact().type(),
+		outboxMessage.contact().getChannel());
 
-	public boolean initSession(InboxMessage inboxMessage, ChatSessionDoc session) {
-		boolean initd = session.isInitd();
-		if (initd) {
-			return true;
-		}
-		ConnectorHandler connector = connectorHandlerFactory.get(inboxMessage.contact().type(),
-				inboxMessage.contact().getChannel());
-
-		if (ArgUtil.is(connector)) {
-			initd = connector.initSession(session, inboxMessage);
-			messageContext.commitChatContactQuery();
-		}
-		if (initd) {
-			session = sessionStore.initSession(session);
-		}
-		return session.isInitd();
+	messageContext.setMessage(outboxMessage);
+	ChatContactQuery contactQuery = messageContext.getChatContactQuery();
+	if (ArgUtil.is(connector)) {
+	    initd = connector.initSession(contactQuery, session, outboxMessage);
+	    // TODO:-- Validate if saving is required in case of outbound
+	    // sessionStore.save(contact);
 	}
-
-	public boolean initSession(OutboxMessage outboxMessage, ChatSessionDoc session) {
-		boolean initd = session.isInitd();
-		if (initd) {
-			return true;
-		}
-		ConnectorHandler connector = connectorHandlerFactory.get(outboxMessage.contact().type(),
-				outboxMessage.contact().getChannel());
-
-		messageContext.setMessage(outboxMessage);
-		ChatContactQuery contactQuery = messageContext.getChatContactQuery();
-		if (ArgUtil.is(connector)) {
-			initd = connector.initSession(contactQuery, session, outboxMessage);
-			// TODO:-- Validate if saving is required in case of outbound
-			// sessionStore.save(contact);
-		}
-		if (initd) {
-			session = sessionStore.initSession(session);
-		}
-		return session.isInitd();
+	if (initd) {
+	    session = sessionStore.initSession(session);
 	}
+	return session.isInitd();
+    }
 
-	@Async
-	public void initSessionPost(InboxMessage inboxMessage, ChatSessionDoc session) {
-		ChatContactDoc contact = sessionStore.getContact(inboxMessage);
-		try {
-			ChatUserProfileRequest chatUserProfileRequest = new ChatUserProfileRequest();
-			chatUserProfileRequest.setEmail(contact.getEmail());
-			chatUserProfileRequest.setMobile(contact.getPhone());
-			chatUserProfileRequest.setContactId(contact.getContactId());
-			chatUserProfileRequest.setContactType(contact.getContactType());
-			chatUserProfileRequest.setLane(contact.getLane());
-			chatUserProfileRequest.setProfileId(contact.getProfileId());
-			ChatUserProfileDTO profile = chatClient.fetchContactDetails(chatUserProfileRequest);
+    @Async
+    public void initSessionPost(InboxMessage inboxMessage, ChatSessionDoc session) {
+	ChatContactDoc contact = sessionStore.getContact(inboxMessage);
+	try {
+	    ChatUserProfileRequest chatUserProfileRequest = new ChatUserProfileRequest();
+	    chatUserProfileRequest.setEmail(contact.getEmail());
+	    chatUserProfileRequest.setMobile(contact.getPhone());
+	    chatUserProfileRequest.setContactId(contact.getContactId());
+	    chatUserProfileRequest.setContactType(contact.getContactType());
+	    chatUserProfileRequest.setLane(contact.getLane());
+	    chatUserProfileRequest.setProfileId(contact.getProfileId());
+	    ChatUserProfileDTO profile = chatClient.fetchContactDetails(chatUserProfileRequest);
 
-			contact = sessionStore.getContact(inboxMessage);
-			if (ArgUtil.is(profile.getProfileId())) {
-				sessionStore.save(profile);
-				contact.setProfileId(profile.getProfileId());
-			} else {
-				contact.setProfile(profile);
-			}
-			sessionStore.save(contact);
-		} catch (Exception e) {
+	    contact = sessionStore.getContact(inboxMessage);
+	    if (ArgUtil.is(profile.getProfileId())) {
+		sessionStore.save(profile);
+		contact.setProfileId(profile.getProfileId());
+	    } else {
+		contact.setProfile(profile);
+	    }
+	    sessionStore.save(contact);
+	} catch (Exception e) {
 
-		}
 	}
+    }
 
-	public boolean resolveSession(ChatSessionDoc session) {
-		if (!ArgUtil.isEmptyValue(session.getResolveSessionStamp())) {
-			return false;
-		}
-		session = sessionStore.resolveSession(session);
-		log(session, EVENTS.STATUS_CHANGED, session.getStatus(), CHAT_STATUS.RESOLVED.toString());
-		return true;
+    public boolean resolveSession(ChatSessionDoc session) {
+	if (!ArgUtil.isEmptyValue(session.getResolveSessionStamp())) {
+	    return false;
 	}
+	session = sessionStore.resolveSession(session);
+	log(session, EVENTS.STATUS_CHANGED, session.getStatus(), CHAT_STATUS.RESOLVED.toString());
+	return true;
+    }
 
-	public boolean closeSession(ChatSessionDoc session) {
-		if (!session.isActive()) {
-			return false;
-		}
-		session = sessionStore.closeSession(session);
-		log(session, EVENTS.STATUS_CHANGED, session.getStatus(), CHAT_STATUS.CLOSED.toString());
-		return true;
+    public boolean closeSession(ChatSessionDoc session) {
+	if (!session.isActive()) {
+	    return false;
 	}
+	session = sessionStore.closeSession(session);
+	log(session, EVENTS.STATUS_CHANGED, session.getStatus(), CHAT_STATUS.CLOSED.toString());
+	return true;
+    }
 
-	public boolean updateSessionStatus(ChatSessionDoc sessionDoc, CHAT_STATUS status) {
-		String oldStatus = sessionDoc.getStatus();
-		if (status.toString().equalsIgnoreCase(oldStatus)) {
-			return false;
-		}
-		if (status == CHAT_STATUS.RESOLVED) {
-			return this.resolveSession(sessionDoc);
-		} else if (status == CHAT_STATUS.CLOSED) {
-			return this.closeSession(sessionDoc);
-		} else {
-			sessionStore.changeStatus(sessionDoc, status);
-			log(sessionDoc, EVENTS.STATUS_CHANGED, oldStatus, status.toString());
-		}
-		return true;
+    public boolean updateSessionStatus(ChatSessionDoc sessionDoc, CHAT_STATUS status) {
+	String oldStatus = sessionDoc.getStatus();
+	if (status.toString().equalsIgnoreCase(oldStatus)) {
+	    return false;
 	}
-
-	public boolean botScore(ChatSessionDoc session, Integer botScore) {
-		session = sessionStore.botScore(session, botScore);
-		return true;
+	if (status == CHAT_STATUS.RESOLVED) {
+	    return this.resolveSession(sessionDoc);
+	} else if (status == CHAT_STATUS.CLOSED) {
+	    return this.closeSession(sessionDoc);
+	} else {
+	    sessionStore.changeStatus(sessionDoc, status);
+	    log(sessionDoc, EVENTS.STATUS_CHANGED, oldStatus, status.toString());
 	}
+	return true;
+    }
 
-	public boolean agentScore(ChatSessionDoc session, Integer botScore) {
-		session = sessionStore.agentScore(session, botScore);
-		return true;
-	}
+    public boolean botScore(ChatSessionDoc session, Integer botScore) {
+	session = sessionStore.botScore(session, botScore);
+	return true;
+    }
 
-	@Autowired
-	private ChatStatusReportService chatStatusReportService;
+    public boolean agentScore(ChatSessionDoc session, Integer botScore) {
+	session = sessionStore.agentScore(session, botScore);
+	return true;
+    }
 
-	public void updateMessageStatus(List<MessageReport> updateDeliveryStatus) {
-		chatStatusReportService.offer(updateDeliveryStatus);
-		chatStatusReportService.process(null);
-	}
+    @Autowired
+    private ChatStatusReportService chatStatusReportService;
+
+    public void updateMessageStatus(List<MessageReport> updateDeliveryStatus) {
+	chatStatusReportService.offer(updateDeliveryStatus);
+	chatStatusReportService.process(null);
+    }
 }

@@ -134,6 +134,10 @@ public class PostManUtil {
 	return ArgUtil.isEqual(type, MESSAGE_BOUND_TYPE.OUTBOUND, MESSAGE_BOUND_TYPE.OUTBOUND_IMPORTED);
     }
 
+    public static boolean isOutBound(IMessage inboxMessage) {
+	return isInBound(inboxMessage.getType());
+    }
+
     public static String CHANNEL_ID(String chanelType, String lane) {
 	if (CHANNEL_TYPE.WA_GUPSHUP_LEGACY.equals(chanelType)) {
 	    chanelType = CHANNEL_TYPE.WA_GUPSHUP;
@@ -152,6 +156,10 @@ public class PostManUtil {
     public static String CHANNEL_CALLBACK_PATH(String accountKey, AChannelConfig channelConfig) {
 	return String.format("ext/inbound/%s/callback/%s/%s/%s", channelConfig.getChannelType(), accountKey,
 		CHANNEL_ID(channelConfig.getChannelType(), channelConfig.getLane()), channelConfig.getChannelKey());
+    }
+
+    public static String ON_DEPT_ASSIGN_TOPIC(String dept) {
+	return "/dept/onassign-" + dept;
     }
 
 }

@@ -12,95 +12,95 @@ import com.boot.utils.ArgUtil;
 @Scope(value = "session", proxyMode = ScopedProxyMode.TARGET_CLASS)
 public class AgentSessionBean implements AuditDetailProvider {
 
-	private static final long serialVersionUID = 5850744656958653564L;
-	private String agentCode;
-	private String agentDept;
+    private static final long serialVersionUID = 5850744656958653564L;
+    private String agentCode;
+    private String agentDept;
 
-	private boolean isLoggedIn;
+    private boolean isLoggedIn;
 
-	private boolean isOnline;
+    private boolean isOnline;
 
-	private long lastOnlineStamp;
+    private long lastOnlineStamp;
 
-	private long lastSyncStamp;
+    private long lastSyncStamp;
 
-	private boolean isDirty;
+    private boolean isDirty;
 
-	private AgentResponseAuthDto profile;
+    private AgentResponseAuthDto profile;
 
-	public String getAgentCode() {
-		return agentCode;
+    public String getAgentCode() {
+	return agentCode;
+    }
+
+    public void setAgentCode(String agentCode) {
+	this.agentCode = agentCode;
+    }
+
+    public boolean isLoggedIn() {
+	return isLoggedIn;
+    }
+
+    public void setLoggedIn(boolean isLoggedIn) {
+	this.isLoggedIn = isLoggedIn;
+	this.isDirty = true;
+    }
+
+    public boolean isOnline() {
+	return isOnline;
+    }
+
+    public void setOnline(boolean isOnline) {
+	this.isOnline = isOnline;
+	this.isDirty = true;
+    }
+
+    public boolean isDirty() {
+	return isDirty;
+    }
+
+    public void setDirty(boolean isDirty) {
+	this.isDirty = isDirty;
+    }
+
+    public long getLastOnlineStamp() {
+	return lastOnlineStamp;
+    }
+
+    public void setLastOnlineStamp(long lastOnlineStamp) {
+	this.lastOnlineStamp = lastOnlineStamp;
+	this.isDirty = true;
+    }
+
+    public String getAgentDept() {
+	return agentDept;
+    }
+
+    public void setAgentDept(String agentDept) {
+	this.agentDept = agentDept;
+    }
+
+    public AgentResponseAuthDto getProfile() {
+	return profile;
+    }
+
+    public void setProfile(AgentResponseAuthDto profile) {
+	this.profile = profile;
+    }
+
+    @Override
+    public String getAuditUser() {
+	if (!ArgUtil.is(this.agentCode) && ArgUtil.is(this.profile)) {
+	    return this.profile.getAgent_code();
 	}
+	return this.agentCode;
+    }
 
-	public void setAgentCode(String agentCode) {
-		this.agentCode = agentCode;
-	}
+    public long getLastSyncStamp() {
+	return lastSyncStamp;
+    }
 
-	public boolean isLoggedIn() {
-		return isLoggedIn;
-	}
-
-	public void setLoggedIn(boolean isLoggedIn) {
-		this.isLoggedIn = isLoggedIn;
-		this.isDirty = true;
-	}
-
-	public boolean isOnline() {
-		return isOnline;
-	}
-
-	public void setOnline(boolean isOnline) {
-		this.isOnline = isOnline;
-		this.isDirty = true;
-	}
-
-	public boolean isDirty() {
-		return isDirty;
-	}
-
-	public void setDirty(boolean isDirty) {
-		this.isDirty = isDirty;
-	}
-
-	public long getLastOnlineStamp() {
-		return lastOnlineStamp;
-	}
-
-	public void setLastOnlineStamp(long lastOnlineStamp) {
-		this.lastOnlineStamp = lastOnlineStamp;
-		this.isDirty = true;
-	}
-
-	public String getAgentDept() {
-		return agentDept;
-	}
-
-	public void setAgentDept(String agentDept) {
-		this.agentDept = agentDept;
-	}
-
-	public AgentResponseAuthDto getProfile() {
-		return profile;
-	}
-
-	public void setProfile(AgentResponseAuthDto profile) {
-		this.profile = profile;
-	}
-
-	@Override
-	public String getAuditUser() {
-		if (ArgUtil.is(this.profile)) {
-			return this.profile.getAgent_code();
-		}
-		return null;
-	}
-
-	public long getLastSyncStamp() {
-		return lastSyncStamp;
-	}
-
-	public void setLastSyncStamp(long lastSyncStamp) {
-		this.lastSyncStamp = lastSyncStamp;
-	}
+    public void setLastSyncStamp(long lastSyncStamp) {
+	this.lastSyncStamp = lastSyncStamp;
+    }
 
 }

@@ -59,6 +59,7 @@ public class CommonMetaController {
     @ResponseBody
     @RequestMapping(value = { "/api/options/channels" }, method = { RequestMethod.GET })
     public ApiResponse<AChannelDetails, Object> listActiveLanes() {
+	pmEnvironment.reload();
 	return ApiResponse.buildResults(pmEnvironment.config().listChannels());
     }
 
