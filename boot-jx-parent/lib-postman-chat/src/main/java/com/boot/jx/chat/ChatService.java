@@ -14,8 +14,6 @@ import com.boot.jx.logger.AuditDetailProvider;
 import com.boot.jx.logger.LoggerService;
 import com.boot.jx.postman.PMClientConfig;
 import com.boot.jx.postman.PMConstants;
-import com.boot.jx.postman.PMConstants.CHAT_MODE;
-import com.boot.jx.postman.PMConstants.CHAT_STATUS;
 import com.boot.jx.postman.PostManException;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatContextDoc;

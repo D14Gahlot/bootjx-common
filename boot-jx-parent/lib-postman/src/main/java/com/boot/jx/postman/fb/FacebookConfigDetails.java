@@ -3,9 +3,7 @@ package com.boot.jx.postman.fb;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.postman.PMConstants.CHANNEL_TYPE;
 import com.boot.jx.postman.PMEnvironment;
-import com.boot.jx.postman.PMEnvironment.AChannelConfig;
 import com.boot.jx.postman.PMEnvironment.AChannelDetails;
-import com.boot.jx.postman.PMEnvironment.ProtectedProperty;
 import com.fasterxml.jackson.annotation.JsonView;
 
 public class FacebookConfigDetails extends AChannelDetails {

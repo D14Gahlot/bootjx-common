@@ -30,7 +30,6 @@ import com.boot.jx.postman.model.MessageDefinitions.Contactable;
 import com.boot.jx.postman.model.MessageDefinitions.IMessage;
 import com.boot.jx.postman.model.MessageDefinitions.IMessageExtended;
 import com.boot.jx.postman.model.MessageDefinitions.SessionMessage;
-import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.query.ChatContactQuery;
 import com.boot.jx.postman.query.ChatSessionQuery;
 import com.boot.jx.utils.PostManUtil;
@@ -507,7 +506,7 @@ public class SessionStore extends CommonDocStore {
 
     }
 
-    public void push(MessageDoc msgDoc, OutboxMessage outboxMessage) {
+    public void push(MessageDoc msgDoc, IMessage outboxMessage) {
 	ChatSessionQuery chatSessionDocQuery = new ChatSessionQuery(msgDoc.getSessionId());
 	if (PostManUtil.isInBound(msgDoc.getType())) {
 	    chatSessionDocQuery.setLastInBoundMsg(msgDoc, outboxMessage.contact().getContactType());

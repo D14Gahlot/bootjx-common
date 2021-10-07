@@ -144,7 +144,7 @@ public class InBoundService {
 	if (ArgUtil.isEmpty(inboxMessageOriginal.getMessageId())) {
 	    inboxMessageOriginal.setMessage(StringUtils.trim(inboxMessageOriginal.getMessage()));
 	    MessageDoc messageDoc = messageStore.createOrUpdate(inboxMessageOriginal);
-	    sessionStore.push(messageDoc, inboxMessageOriginal.contact().getContactType());
+	    sessionStore.push(messageDoc, inboxMessageOriginal);
 	}
 
 	messageContext.setMessage(inboxMessageOriginal);
