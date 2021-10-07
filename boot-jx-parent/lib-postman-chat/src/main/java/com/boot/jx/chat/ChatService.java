@@ -104,7 +104,7 @@ public class ChatService {
 
 	MessageDoc messageDoc = messageStore.createOrUpdate(outboxMessage);
 	connectorHandlerFactory.message("ACTION", chatContactDoc, null, outboxMessage);
-
+	sessionStore.push(messageDoc,outboxMessage.contact().getContactType());
 	return messageDoc;
     }
 
@@ -130,6 +130,7 @@ public class ChatService {
 
 	MessageDoc messageDoc = messageStore.createOrUpdate(outboxMessage);
 	connectorHandlerFactory.message("REPLY", null, inboxMessage, outboxMessage);
+	sessionStore.push(messageDoc,outboxMessage.contact().getContactType());
 	return messageDoc;
     }
 
@@ -150,6 +151,7 @@ public class ChatService {
 
 	MessageDoc messageDoc = messageStore.createOrUpdate(outboxMessage);
 	connectorHandlerFactory.message("SEND", chatContactDoc, null, outboxMessage);
+	sessionStore.push(messageDoc,outboxMessage.contact().getContactType());
 	return messageDoc;
     }
 

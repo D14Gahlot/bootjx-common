@@ -169,6 +169,9 @@ public class PMEnvironmentProviderImpl implements PMEnvironmentProvider, AppShar
 	    AppContextUtil.resetTraceTime();
 	    AppContextUtil.init();
 	    config();
+	} else {
+	    this.clear(null);
+	    config();
 	}
     }
 

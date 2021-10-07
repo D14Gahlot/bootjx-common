@@ -1,58 +1,97 @@
 package com.boot.jx.postman.query;
 
+import org.bson.types.ObjectId;
+
 import com.boot.jx.mongo.CommonMongoQueryBuilder.DocQueryBuilder;
 import com.boot.jx.postman.doc.ChatSessionDoc;
+import com.boot.jx.postman.doc.MessageDoc;
+import com.boot.jx.postman.store.MessageStore;
 
 public class ChatSessionQuery extends DocQueryBuilder<ChatSessionDoc> {
 
-	public ChatSessionQuery(ChatSessionDoc doc) {
-		super(doc);
-	}
+    public ChatSessionQuery(ChatSessionDoc doc) {
+	super(doc);
+    }
 
-	public ChatSessionQuery(String docId) {
-		super(docId);
-	}
+    public ChatSessionQuery(String docId) {
+	super(docId);
+    }
 
-	@Override
-	public ChatSessionDoc newDoc(String id) {
-		ChatSessionDoc doc = new ChatSessionDoc();
-		doc.setSessionId(id);
-		return doc;
-	}
+    @Override
+    public ChatSessionDoc newDoc(String id) {
+	ChatSessionDoc doc = new ChatSessionDoc();
+	doc.setSessionId(id);
+	return doc;
+    }
 
-	@Override
-	public String getId(ChatSessionDoc doc) {
-		return doc.getSessionId();
-	}
+    @Override
+    public String getId(ChatSessionDoc doc) {
+	return doc.getSessionId();
+    }
 
-	public ChatSessionQuery setActive(boolean active) {
-		this.doc.setActive(active);
-		this.set("active", active);
-		return this;
-	}
+    public ChatSessionQuery setActive(boolean active) {
+	this.doc.setActive(active);
+	this.set("active", active);
+	return this;
+    }
 
-	public ChatSessionQuery setLastInComingStamp(long timestamp) {
-		this.doc.setLastInComingStamp(timestamp);
-		this.set("lastInComingStamp", timestamp);
-		return this;
-	}
+    public ChatSessionQuery setLastInComingStamp(long timestamp) {
+	this.doc.setLastInComingStamp(timestamp);
+	this.set("lastInComingStamp", timestamp);
+	return this;
+    }
 
-	public ChatSessionQuery setLastResponseStamp(long timestamp) {
-		this.doc.setLastResponseStamp(timestamp);
-		this.set("lastResponseStamp", timestamp);
-		return this;
-	}
+    public ChatSessionQuery setLastResponseStamp(long timestamp) {
+	this.doc.setLastResponseStamp(timestamp);
+	this.set("lastResponseStamp", timestamp);
+	return this;
+    }
 
-	public ChatSessionQuery setLastOutGoingStamp(long timestamp) {
-		this.doc.setLastOutGoingStamp(timestamp);
-		this.set("lastOutGoingStamp", timestamp);
-		return this;
-	}
+    public ChatSessionQuery setLastOutGoingStamp(long timestamp) {
+	this.doc.setLastOutGoingStamp(timestamp);
+	this.set("lastOutGoingStamp", timestamp);
+	return this;
+    }
 
-	public ChatSessionQuery setContactName(String contactName) {
-		this.doc.setContactName(contactName);
-		this.set("contactName", contactName);
-		return this;
-	}
+    public ChatSessionQuery setContactName(String contactName) {
+	this.doc.setContactName(contactName);
+	this.set("contactName", contactName);
+	return this;
+    }
+
+    public ChatSessionQuery setLastInBoundMsg(MessageDoc lastInBoundMsg, String contactType) {
+	this.doc.setLastInBoundMsg(lastInBoundMsg);
+	this.set("lastInBoundMsg.$ref", MessageStore.getCollectionName(contactType));
+	this.set("lastInBoundMsg.$id", new ObjectId(lastInBoundMsg.getMessageId()));
+	return this;
+    }
+
+    public ChatSessionQuery setLastAgentReply(MessageDoc lastAgentReply, String contactType) {
+	this.doc.setLastAgentReply(lastAgentReply);
+	this.set("lastAgentReply.$ref", MessageStore.getCollectionName(contactType));
+	this.set("lastAgentReply.$id", new ObjectId(lastAgentReply.getMessageId()));
+	return this;
+    }
+
+    public ChatSessionQuery setLastBotReply(MessageDoc lastBotReply, String contactType) {
+	this.doc.setLastBotReply(lastBotReply);
+	this.set("lastBotReply.$ref", MessageStore.getCollectionName(contactType));
+	this.set("lastBotReply.$id", new ObjectId(lastBotReply.getMessageId()));
+	return this;
+    }
+
+    public ChatSessionQuery setLastOutBoundMsg(MessageDoc lastOutBoundMsg, String contactType) {
+	this.doc.setLastOutBoundMsg(lastOutBoundMsg);
+	this.set("lastOutBoundMsg.$ref", MessageStore.getCollectionName(contactType));
+	this.set("lastOutBoundMsg.$id", new ObjectId(lastOutBoundMsg.getMessageId()));
+	return this;
+    }
+
+    public ChatSessionQuery setLastMsg(MessageDoc lastMsg, String contactType) {
+	this.doc.setLastMsg(lastMsg);
+	this.set("lastMsg.$ref", MessageStore.getCollectionName(contactType));
+	this.set("lastMsg.$id", new ObjectId(lastMsg.getMessageId()));
+	return this;
+    }
 
 }

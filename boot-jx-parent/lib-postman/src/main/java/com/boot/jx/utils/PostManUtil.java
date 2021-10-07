@@ -134,6 +134,10 @@ public class PostManUtil {
 	return ArgUtil.isEqual(type, MESSAGE_BOUND_TYPE.OUTBOUND, MESSAGE_BOUND_TYPE.OUTBOUND_IMPORTED);
     }
 
+    public static boolean isOutBound(IMessage inboxMessage) {
+	return isInBound(inboxMessage.getType());
+    }
+
     public static String CHANNEL_ID(String chanelType, String lane) {
 	if (CHANNEL_TYPE.WA_GUPSHUP_LEGACY.equals(chanelType)) {
 	    chanelType = CHANNEL_TYPE.WA_GUPSHUP;
