@@ -22,6 +22,7 @@ import com.boot.jx.def.ICacheBox;
 import com.boot.jx.postman.PMClientConfig;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.ErrorObject;
+import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.store.MessageContext;
 import com.boot.jx.postman.store.MessageStore;
@@ -142,7 +143,8 @@ public class InBoundService {
 
 	if (ArgUtil.isEmpty(inboxMessageOriginal.getMessageId())) {
 	    inboxMessageOriginal.setMessage(StringUtils.trim(inboxMessageOriginal.getMessage()));
-	    messageStore.createOrUpdate(inboxMessageOriginal);
+	    MessageDoc messageDoc = messageStore.createOrUpdate(inboxMessageOriginal);
+	    sessionStore.push(messageDoc, inboxMessageOriginal.contact().getContactType());
 	}
 
 	messageContext.setMessage(inboxMessageOriginal);

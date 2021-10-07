@@ -22,6 +22,10 @@ import com.boot.jx.common.store.DocumentUpdateListner;
 import com.boot.jx.logger.LoggerService;
 import com.boot.jx.mongo.CommonMongoQueryBuilder;
 import com.boot.jx.postman.PMClientConfig;
+import com.boot.jx.postman.PMConstants;
+import com.boot.jx.postman.PMConstants.ASSIGNMENT_RULE;
+import com.boot.jx.postman.PMConstants.CHAT_STATUS;
+import com.boot.jx.postman.PMConstants.DEFAULT;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.MessageDoc;
@@ -31,9 +35,6 @@ import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.service.ChatDTOUtil;
 import com.boot.jx.postman.store.MessageStore;
-import com.boot.jx.postman.store.PMStoreConstants;
-import com.boot.jx.postman.store.PMStoreConstants.ASSIGNMENT_RULE;
-import com.boot.jx.postman.store.PMStoreConstants.CHAT_STATUS;
 import com.boot.jx.postman.store.SessionStore;
 import com.boot.jx.stomp.StompTunnelService;
 import com.boot.jx.utils.PostManUtil;
@@ -90,19 +91,19 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
     private AgentSessionDoc getAgentSessonAssigned(InboxMessage inboxMessage) {
 
 	String assignmentRule = environment.config().get("postman.agent.chat.assignment")
-		.asString(ASSIGNMENT_RULE.ROUND_ROBIN);
+		.asString(PMConstants.ASSIGNMENT_RULE.ROUND_ROBIN);
 
 	String assignedDept = ArgUtil.nonEmpty(inboxMessage.session().getDept(),
-		environment.config().agent().getDefaultTeamCode(), PMStoreConstants.NO_DEPT);
+		environment.config().agent().getDefaultTeamCode(), DEFAULT.NO_DEPT);
 	inboxMessage.session().setDept(assignedDept);
 
-	if (ASSIGNMENT_RULE.STRICT_DEFAULT.equals(assignmentRule)) {
+	if (PMConstants.ASSIGNMENT_RULE.STRICT_DEFAULT.equals(assignmentRule)) {
 	    String defAgentCode = environment.config().agent().defaultAgent(assignedDept);
 	    AgentSessionDoc agent = mongoTemplate.findById(defAgentCode, AgentSessionDoc.class);
 	    return agent;
 	}
 
-	if (ASSIGNMENT_RULE.ROUND_ROBIN.equals(assignmentRule)) {
+	if (PMConstants.ASSIGNMENT_RULE.ROUND_ROBIN.equals(assignmentRule)) {
 	    long timeThen = System.currentTimeMillis() - TimeUtils.toMillis(chatClientConfig.getAgentSessionTimeout());
 	    Query query = new Query();
 	    Criteria c = Criteria.where("isOnline").is(true).and("isLoggedIn").is(true).and("lastOnlineStamp")
@@ -235,7 +236,7 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 	return chatArchive.getMessage(messageDoc, chatSessionDoc);
     }
 
-    public ChatSessionDTO updateChatSessionStatus(String sessionId, CHAT_STATUS status) {
+    public ChatSessionDTO updateChatSessionStatus(String sessionId, PMConstants.CHAT_STATUS status) {
 	ChatSessionDoc sessionDoc = sessionStore.getSession(sessionId);
 	if (chatService.updateSessionStatus(sessionDoc, status)) {
 	    ChatSessionDTO dto = chatArchive.getChatSession(sessionDoc);

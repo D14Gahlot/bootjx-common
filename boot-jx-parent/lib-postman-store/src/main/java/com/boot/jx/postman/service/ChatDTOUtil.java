@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import com.boot.jx.postman.PMConstants;
+import com.boot.jx.postman.PMConstants.CHAT_STATUS;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.ChatUserProfileDoc;
@@ -14,7 +16,6 @@ import com.boot.jx.postman.dto.ChatMessageDTO;
 import com.boot.jx.postman.dto.ChatSessionDTO;
 import com.boot.jx.postman.dto.ChatUserProfileDTO;
 import com.boot.jx.postman.dto.ContactDTO;
-import com.boot.jx.postman.store.PMStoreConstants.CHAT_STATUS;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.EntityDtoUtil;
@@ -148,15 +149,15 @@ public class ChatDTOUtil {
 
 	if (!ArgUtil.is(chatSessionDto.getStatus())) {
 	    if (chatSessionDto.isExpired()) {
-		chatSessionDto.setStatus(CHAT_STATUS.EXPIRED.toString());
+		chatSessionDto.setStatus(PMConstants.CHAT_STATUS.EXPIRED.toString());
 	    } else if (!chatSessionDto.isActive()) {
-		chatSessionDto.setStatus(CHAT_STATUS.CLOSED.toString());
+		chatSessionDto.setStatus(PMConstants.CHAT_STATUS.CLOSED.toString());
 	    } else if (chatSessionDto.isResolved()) {
-		chatSessionDto.setStatus(CHAT_STATUS.RESOLVED.toString());
+		chatSessionDto.setStatus(PMConstants.CHAT_STATUS.RESOLVED.toString());
 	    } else if (chatSessionDto.getAssignedAgentStamp() == 0) {
-		chatSessionDto.setStatus(CHAT_STATUS.UNASSIGNED.toString());
+		chatSessionDto.setStatus(PMConstants.CHAT_STATUS.UNASSIGNED.toString());
 	    } else {
-		chatSessionDto.setStatus(CHAT_STATUS.OPEN.toString());
+		chatSessionDto.setStatus(PMConstants.CHAT_STATUS.OPEN.toString());
 	    }
 	}
 

@@ -15,6 +15,8 @@ import com.boot.jx.common.impl.ConfigMeta.InputType;
 import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.jx.postman.PMClientConfig;
 import com.boot.jx.postman.PMConfiguration;
+import com.boot.jx.postman.PMConstants;
+import com.boot.jx.postman.PMConstants.ASSIGNMENT_RULE;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PMEnvironment.AChannelDetails;
 import com.boot.jx.postman.PMEnvironment.PMConfigurationObject;
@@ -26,7 +28,6 @@ import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.postman.plugin.ChannelPluginProvider;
 import com.boot.jx.postman.plugin.ChannelPluginProvider.ChannelPlugin;
 import com.boot.jx.postman.store.ConfigStore;
-import com.boot.jx.postman.store.PMStoreConstants.ASSIGNMENT_RULE;
 import com.boot.jx.tunnel.sys.SharedConfigManager;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.model.MapModel;
@@ -265,8 +266,8 @@ public class ConfigManager {
 	CONFIG_LIST.add(new ConfigMeta("Agent can initiate new chat", "postman.agent.chat.init").optionsOnOff());
 
 	CONFIG_LIST.add(new ConfigMeta("Agent Assignment", "postman.agent.chat.assignment")
-		.optionValues(ASSIGNMENT_RULE.ROUND_ROBIN, ASSIGNMENT_RULE.MANUAL, ASSIGNMENT_RULE.STRICT_DEFAULT)
-		.defaultValue(ASSIGNMENT_RULE.ROUND_ROBIN));
+		.optionValues(PMConstants.ASSIGNMENT_RULE.ROUND_ROBIN, PMConstants.ASSIGNMENT_RULE.MANUAL, PMConstants.ASSIGNMENT_RULE.STRICT_DEFAULT)
+		.defaultValue(PMConstants.ASSIGNMENT_RULE.ROUND_ROBIN));
 
 	CONFIG_LIST.add(new ConfigMeta("Agent Panel Color Scheme", "postman.agent.scheme.color")
 		.inputType(InputType.COLOR).defaultValue("#4b56c0"));
