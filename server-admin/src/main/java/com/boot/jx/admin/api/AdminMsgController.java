@@ -18,7 +18,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.boot.jx.admin.manager.ChatParserAndImportor;
 import com.boot.jx.admin.service.BulkMessageService;
 import com.boot.jx.api.ApiResponse;
-import com.boot.jx.chat.ChatArchive;
+import com.boot.jx.chat.ChatArchiveService;
 import com.boot.jx.common.doc.ImportChatSessionDoc;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.mongo.CommonMongoQueryBuilder.CommonMongoCriteria;
@@ -42,7 +42,7 @@ public class AdminMsgController {
 	private MongoTemplate mongoTemplate;
 
 	@Autowired
-	private ChatArchive chatArchive;
+	private ChatArchiveService chatArchive;
 
 	@Autowired
 	private ChatParserAndImportor chatParseManager;

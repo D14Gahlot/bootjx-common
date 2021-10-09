@@ -11,8 +11,8 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Component;
 
-import com.boot.jx.chat.ChatArchive;
-import com.boot.jx.chat.ChatClient;
+import com.boot.jx.chat.ChatArchiveBuilder;
+import com.boot.jx.chat.ChatArchiveService;
 import com.boot.jx.chat.ChatCommands;
 import com.boot.jx.chat.ChatService;
 import com.boot.jx.common.doc.AgentDoc;
@@ -49,9 +49,6 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
     private MongoTemplate mongoTemplate;
 
     @Autowired
-    private ChatClient chatClient;
-
-    @Autowired
     private PMClientConfig chatClientConfig;
 
     @Autowired
@@ -67,7 +64,10 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
     private MessageStore messageStore;
 
     @Autowired
-    private ChatArchive chatArchive;
+    private ChatArchiveService chatArchive;
+
+    @Autowired
+    private ChatArchiveBuilder chatArchiveBuilder;
 
     @Autowired
     AgentStore agentStore;
@@ -168,7 +168,8 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 	}
 
 	stompTunnelService.sendToAll(PostManUtil.ON_DEPT_ASSIGN_TOPIC(inboxMessage.session().getDept()),
-		chatArchive.getChatSessionDto(chatSessionDoc, inboxMessage.session().getAgent()));
+		chatArchiveBuilder.buildChatSessionDTO().from(chatSessionDoc).withContact()
+			.isAssigned(inboxMessage.session().getAgent()).get());
 
 	return inboxMessage;
     }
@@ -182,13 +183,13 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
      * @param agentDept
      * @param agentCode
      */
-    @SuppressWarnings("deprecation")
     private void onAssign(ChatSessionDoc chatSessionDoc, String agentDept, String agentCode) {
 	if (!ArgUtil.areEqual(chatSessionDoc.getAssignedToAgent(), agentCode)) {
 	    assignToAgent(chatSessionDoc, agentDept, agentCode);
 	    chatService.log(chatSessionDoc, MessageStore.EVENTS.ASGND_TO_AGENT, agentCode, agentDept);
 	    stompTunnelService.sendToAll(PostManUtil.ON_DEPT_ASSIGN_TOPIC(agentDept),
-		    chatArchive.getChatSessionDto(chatSessionDoc, agentCode));
+		    chatArchiveBuilder.buildChatSessionDTO().from(chatSessionDoc).withContact()
+			    .isAssigned(chatSessionDoc.getAssignedToAgent()).get());
 	}
     }
 
@@ -229,8 +230,8 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 	}
 	chatService.closeSession(chatSessionDoc);
 	stompTunnelService.sendToAll(PostManUtil.ON_DEPT_ASSIGN_TOPIC(chatSessionDoc.getAssignedToDept()),
-		chatArchive.getChatSessionDto(chatSessionDoc, chatSessionDoc.getAssignedToAgent()));
-
+		chatArchiveBuilder.buildChatSessionDTO().from(chatSessionDoc).withContact()
+			.isAssigned(chatSessionDoc.getAssignedToAgent()).get());
 	return chatArchive.getMessage(messageDoc, chatSessionDoc);
     }
 

@@ -18,6 +18,7 @@ import com.boot.jx.postman.dto.ContactDTO;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.EntityDtoUtil;
+import com.boot.utils.NumberUtil;
 
 public class ChatDTOUtil {
 
@@ -136,10 +137,14 @@ public class ChatDTOUtil {
 	chatSessionDto.setAssignedDeptStamp(chatSessionDoc.getAssignedDeptStamp());
 	chatSessionDto.setLastInComingStamp(chatSessionDoc.getLastInComingStamp());
 	chatSessionDto.setLastResponseStamp(chatSessionDoc.getLastResponseStamp());
+	chatSessionDto.setUpdatedStamp(chatSessionDoc.getUpdatedStamp());
 
 	if (chatSessionDto.getAgentSessionStamp() == 0L) {
 	    chatSessionDto.setAgentSessionStamp(chatSessionDoc.getAssignedAgentStamp());
 	}
+
+	chatSessionDto.setUpdatedStamp(NumberUtil.max(chatSessionDto.getUpdatedStamp(),
+		chatSessionDto.getLastInComingStamp(), chatSessionDto.getLastResponseStamp()));
 
 	chatSessionDto.msg().put("lastInBoundMsg", getChatMessageDTO(chatSessionDoc.getLastInBoundMsg()));
 	chatSessionDto.msg().put("lastBotReply", getChatMessageDTO(chatSessionDoc.getLastBotReply()));

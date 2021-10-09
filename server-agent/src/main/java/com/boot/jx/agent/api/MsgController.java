@@ -20,7 +20,8 @@ import com.boot.jx.agent.AgentSessionService;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.api.ListRequestModel;
 import com.boot.jx.aws.AWSFileStore;
-import com.boot.jx.chat.ChatArchive;
+import com.boot.jx.chat.ChatArchiveBuilder;
+import com.boot.jx.chat.ChatArchiveService;
 import com.boot.jx.chat.ChatService;
 import com.boot.jx.common.doc.AgentDoc;
 import com.boot.jx.common.doc.AgentSessionDoc;
@@ -68,7 +69,7 @@ public class MsgController {
     private ChatService chatService;
 
     @Autowired
-    private ChatArchive chatArchive;
+    private ChatArchiveService chatArchive;
 
     @Autowired
     private AgentSessionService agentSessionService;
@@ -193,7 +194,10 @@ public class MsgController {
     }
 
     @Autowired
-    AgentStore agentStore;
+    private AgentStore agentStore;
+
+    @Autowired
+    private ChatArchiveBuilder chatArchiveBuilder;
 
     @ResponseBody
     @RequestMapping(value = { "/api/session/agent", "/api/session/agent/assign" }, method = { RequestMethod.POST })
@@ -202,7 +206,8 @@ public class MsgController {
 	ChatSessionDoc chatSessionDoc = sessionStore.getSession(sessionId);
 	AgentDoc agent = agentStore.findById(agentId);
 	agentChatHandlerImpl.onAssign(agent, chatSessionDoc);
-	ChatSessionDTO chatSessionDto = chatArchive.getChatSessionDto(chatSessionDoc, agentSession.getAgentCode());
+	ChatSessionDTO chatSessionDto = chatArchiveBuilder.buildChatSessionDTO().from(chatSessionDoc).withContact()
+		.isAssigned(agentSession.getAgentCode()).withMessages().get();
 	return ApiResponse.buildResult(chatSessionDto);
     }
 
