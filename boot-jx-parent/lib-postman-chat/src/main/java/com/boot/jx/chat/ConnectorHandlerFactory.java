@@ -228,7 +228,10 @@ public class ConnectorHandlerFactory extends ScopedBeanFactory<String, Connector
 	    ConnectorHandler connector = get(channelConfig);
 	    if (ArgUtil.is(connector)) {
 		connector.message(messageType, chatContactDoc, inboxMessage, outboxMessage);
+	    } else {
+		outboxMessage.logs().add(String.format("Connector not defined for %s", channelId));
 	    }
+	    
 	} catch (Exception e) {
 	    LOGGER.error(messageType, e);
 	}

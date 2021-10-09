@@ -77,28 +77,23 @@ public class MsgController {
     @RequestMapping(value = "/api/sessions/assigned", method = { RequestMethod.GET })
     public ApiResponse<ChatSessionDTO, Object> getSessionsAssignedToMe(
 	    @RequestParam(defaultValue = "true") boolean withMessage) {
-
 	List<ChatSessionDTO> chatSessionDtos = new ArrayList<ChatSessionDTO>();
-
 	if (agentSession.isLoggedIn() && ArgUtil.is(agentSession.getAgentDept())) {
 	    List<ChatSessionDoc> sessions = sessionStore
 		    .findChatSessionDocByAgentAndUnAssigned(agentSession.getAgentCode(), agentSession.getAgentDept());
 	    for (ChatSessionDoc chatSessionDoc : sessions) {
 		ChatSessionDTO chatSessionDto = chatArchive.getChatSession(chatSessionDoc);
 		chatSessionDto = chatArchive.withContact(chatSessionDto);
-
-		if (ArgUtil.isEqual(chatSessionDto.getAssignedToDept(), DEFAULT.NO_DEPT,
-			agentSession.getAgentDept(), null, Constants.BLANK)
-			&& ArgUtil.isEqual(chatSessionDto.getAssignedToAgent(), agentSession.getAgentCode(), null)
-			&& withMessage) {
+		if (withMessage
+			&& ArgUtil.isEqual(chatSessionDto.getAssignedToDept(), DEFAULT.NO_DEPT,
+				agentSession.getAgentDept(), null, Constants.BLANK)
+			&& ArgUtil.isEqual(chatSessionDto.getAssignedToAgent(), agentSession.getAgentCode(), null)) {
 		    chatSessionDto = chatArchive.withMessages(chatSessionDto);
 		}
 		chatSessionDtos.add(chatSessionDto);
 	    }
 	}
-
 	agentSessionService.refreshOnline();
-
 	return ApiResponse.buildResults(chatSessionDtos, MapBuilder.map().put("isOnline", agentSession.isOnline())
 		.put("profile", agentSession.getProfile()).build());
     }

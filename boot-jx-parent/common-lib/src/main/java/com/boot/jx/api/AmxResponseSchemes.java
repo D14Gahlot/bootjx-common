@@ -7,60 +7,64 @@ import com.boot.jx.swagger.ApiMockModelProperty;
 
 public class AmxResponseSchemes {
 
-	public interface ApiWrapperResponse {
+    public interface ApiWrapperResponse {
 
-		public void setTimestamp(Long timestamp);
+	public void setTimestamp(Long timestamp);
 
-		@ApiMockModelProperty(example = "1541276788518")
-		public Long getTimestamp();
+	@ApiMockModelProperty(example = "1541276788518")
+	public Long getTimestamp();
 
-		@ApiMockModelProperty(example = "200")
-		public String getStatus();
+	@ApiMockModelProperty(example = "200")
+	public String getStatus();
 
-		public void setStatus(String status);
+	public void setStatus(String status);
 
-		@ApiMockModelProperty(example = "SUCCESS")
-		public String getStatusKey();
+	@ApiMockModelProperty(example = "SUCCESS")
+	public String getStatusKey();
 
-		public void setStatusKey(String statusKey);
+	public void setStatusKey(String statusKey);
 
-		@ApiMockModelProperty(example = "This is success message in plain english")
-		public String getMessage();
+	@ApiMockModelProperty(example = "This is success message in plain english")
+	public String getMessage();
 
-		public void setMessage(String message);
+	public void setMessage(String message);
 
-		@ApiMockModelProperty(example = "MESSAGE_SUCCESS:MOBILE:12")
-		public String getMessageKey();
+	@ApiMockModelProperty(example = "MESSAGE_SUCCESS:MOBILE:12")
+	public String getMessageKey();
 
-		public void setMessageKey(String messageKey);
+	public void setMessageKey(String messageKey);
 
-		public default String getTraceid() {
-			return AppContextUtil.getTraceId(false, false);
-		};
+	public default String getTraceid() {
+	    return AppContextUtil.getTraceId(false, false);
+	};
 
-	}
+    }
 
-	public interface ApiMetaResponse<M> extends ApiWrapperResponse {
-		public M getMeta();
+    public interface ApiMetaResponse<M> extends ApiWrapperResponse {
+	public M getMeta();
 
-		public void setMeta(M meta);
-	}
+	public void setMeta(M reta);
 
-	public interface ApiResultsResponse<T> extends ApiWrapperResponse {
-		public List<T> getResults();
+	public List<M> getDetails();
 
-		public void setResults(List<T> results);
-	}
+	public void setDetails(List<M> details);
+    }
 
-	public interface ApiDataResponse<T> extends ApiWrapperResponse {
-		public T getData();
+    public interface ApiResultsResponse<T> extends ApiWrapperResponse {
+	public List<T> getResults();
 
-		public void setData(T data);
-	}
+	public void setResults(List<T> results);
+    }
 
-	public interface ApiResultsMetaResponse<T, M> extends ApiResultsResponse<T>, ApiMetaResponse<M> {
-	}
+    public interface ApiDataResponse<T> extends ApiWrapperResponse {
+	public T getData();
 
-	public interface ApiDataMetaResponse<T, M> extends ApiDataResponse<T>, ApiMetaResponse<M> {
-	}
+	public void setData(T data);
+    }
+
+    public interface ApiResultsMetaResponse<T, M> extends ApiResultsResponse<T>, ApiMetaResponse<M> {
+    }
+
+    public interface ApiDataMetaResponse<T, M> extends ApiDataResponse<T>, ApiMetaResponse<M> {
+    }
 }
