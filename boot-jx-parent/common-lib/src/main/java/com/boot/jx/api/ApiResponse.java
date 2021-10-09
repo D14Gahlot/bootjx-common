@@ -14,274 +14,279 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ApiResponse<T, M> extends AResponse<M>
-		implements ApiDataMetaResponse<T, M>, ApiResultsMetaResponse<T, M>, Serializable {
+	implements ApiDataMetaResponse<T, M>, ApiResultsMetaResponse<T, M>, Serializable {
 
-	private static final long serialVersionUID = 2026047322050489651L;
+    private static final long serialVersionUID = 2026047322050489651L;
 
-	/** The data. */
-	protected T data = null;
+    /** The data. */
+    protected T data = null;
 
-	/** The data. */
-	protected List<T> results = null;
+    /** The data. */
+    protected List<T> results = null;
 
-	public ApiResponse() {
-		super();
-		this.data = null;
-		this.results = new ArrayList<T>();
+    public ApiResponse() {
+	super();
+	this.data = null;
+	this.results = new ArrayList<T>();
+    }
+
+    /**
+     * Instantiates a new amx api response.
+     *
+     * @param resultList the result list
+     */
+    public ApiResponse(List<T> resultList) {
+	super();
+	this.data = null;
+	this.results = resultList;
+    }
+
+    /**
+     * Instantiates a new amx api response.
+     *
+     * @param resultList the result list
+     * @param meta       the meta
+     */
+    public ApiResponse(List<T> resultList, M meta) {
+	super();
+	this.data = null;
+	this.results = resultList;
+	this.meta = meta;
+    }
+
+    /**
+     * Gets the data.
+     *
+     * @return the data
+     */
+    @Override
+    public T getData() {
+	return data;
+    }
+
+    /**
+     * Sets the data.
+     *
+     * @param data the new data
+     */
+    @Override
+    public void setData(T data) {
+	this.data = data;
+    }
+
+    public List<T> getResults() {
+	return results;
+    }
+
+    public void setResults(List<T> results) {
+	this.results = results;
+    }
+
+    @JsonIgnore
+    public T getResult() {
+	if (results != null && !results.isEmpty()) {
+	    return results.get(0);
 	}
+	return null;
+    }
 
-	/**
-	 * Instantiates a new amx api response.
-	 *
-	 * @param resultList the result list
-	 */
-	public ApiResponse(List<T> resultList) {
-		super();
-		this.data = null;
-		this.results = resultList;
-	}
+    @JsonIgnore
+    public void setResult(T result) {
+	this.results = new ArrayList<T>();
+	this.results.add(result);
+    }
 
-	/**
-	 * Instantiates a new amx api response.
-	 *
-	 * @param resultList the result list
-	 * @param meta       the meta
-	 */
-	public ApiResponse(List<T> resultList, M meta) {
-		super();
-		this.data = null;
-		this.results = resultList;
-		this.meta = meta;
-	}
+    public void addResult(T result) {
+	this.results.add(result);
+    }
 
-	/**
-	 * Gets the data.
-	 *
-	 * @return the data
-	 */
-	@Override
-	public T getData() {
-		return data;
-	}
+    public ApiResponse<T, M> result(T result) {
+	this.addResult(result);
+	return this;
+    }
 
-	/**
-	 * Sets the data.
-	 *
-	 * @param data the new data
-	 */
-	@Override
-	public void setData(T data) {
-		this.data = data;
-	}
+    public ApiResponse<T, M> results(List<T> resultList) {
+	this.setResults(resultList);
+	return this;
+    }
 
-	public List<T> getResults() {
-		return results;
-	}
+    public static <TS, MS> ApiResponse<TS, MS> build() {
+	return new ApiResponse<TS, MS>();
+    }
 
-	public void setResults(List<T> results) {
-		this.results = results;
-	}
+    public static <TS, MS> ApiResponse<TS, MS> instance() {
+	return new ApiResponse<TS, MS>();
+    }
 
-	@JsonIgnore
-	public T getResult() {
-		if (results != null && !results.isEmpty()) {
-			return results.get(0);
-		}
-		return null;
-	}
+    public static <TS, MS> ApiResponse<TS, MS> instance(Class<TS> clazz) {
+	return new ApiResponse<TS, MS>();
+    }
 
-	@JsonIgnore
-	public void setResult(T result) {
-		this.results = new ArrayList<T>();
-		this.results.add(result);
-	}
+    public static <TS, MS> ApiResponse<TS, MS> instance(Class<TS> clazz, Class<MS> metaClass) {
+	return new ApiResponse<TS, MS>();
+    }
 
-	public void addResult(T result) {
-		this.results.add(result);
-	}
+    /**
+     * @deprecated - use {@link #buildResults(Object)} for list of elements and
+     *             {@link #buildResult(Object)} for single element list
+     * 
+     * @param <TS>
+     * @param result
+     * @return
+     */
+    @Deprecated
+    public static <TS> ApiResponse<TS, Object> build(TS result) {
+	ApiResponse<TS, Object> resp = new ApiResponse<TS, Object>();
+	resp.addResult(result);
+	return resp;
+    }
 
-	public ApiResponse<T, M> result(T result) {
-		this.addResult(result);
-		return this;
-	}
+    /**
+     * @deprecated - use {@link #buildResults(Object, Object)} for list of elements
+     *             and {@link #buildResult(Object, Object)} for single element list
+     * 
+     * @param <TS>
+     * @param result
+     * @return
+     */
+    @Deprecated
+    public static <TS, MS> ApiResponse<TS, MS> build(TS result, MS meta) {
+	return buildResult(result, meta);
+    }
 
-	public ApiResponse<T, M> results(List<T> resultList) {
-		this.setResults(resultList);
-		return this;
-	}
+    /**
+     * Builds the list.
+     * 
+     * @deprecated - this method should not be used for list , use
+     *             {@link #buildResults(List)} for this
+     *
+     * @param <TS>       the generic type
+     * @param resultList the result list
+     * @return the amx api response
+     */
+    @Deprecated
+    public static <TS> ApiResponse<List<TS>, HashMap<String, Object>> build(List<TS> resultList) {
+	return buildResult(resultList, new HashMap<String, Object>());
+    }
 
-	public static <TS, MS> ApiResponse<TS, MS> build() {
-		return new ApiResponse<TS, MS>();
-	}
+    public static <MS> ApiResponse<Object, MS> buildMeta(MS meta) {
+	ApiResponse<Object, MS> resp = new ApiResponse<Object, MS>();
+	resp.setMeta(meta);
+	return resp;
+    }
 
-	public static <TS, MS> ApiResponse<TS, MS> instance() {
-		return new ApiResponse<TS, MS>();
-	}
+    public static <TS> ApiResponse<TS, Object> buildData(TS data) {
+	ApiResponse<TS, Object> resp = new ApiResponse<TS, Object>();
+	resp.setData(data);
+	return resp;
+    }
 
-	public static <TS, MS> ApiResponse<TS, MS> instance(Class<TS> clazz) {
-		return new ApiResponse<TS, MS>();
-	}
+    public static <TS, MS> ApiResponse<TS, MS> buildData(TS data, MS meta) {
+	ApiResponse<TS, MS> resp = new ApiResponse<TS, MS>();
+	resp.setData(data);
+	resp.setMeta(meta);
+	return resp;
+    }
 
-	public static <TS, MS> ApiResponse<TS, MS> instance(Class<TS> clazz, Class<MS> metaClass) {
-		return new ApiResponse<TS, MS>();
-	}
+    /**
+     * Builds the list.
+     *
+     * @param <TS>       the generic type
+     * @param resultList the result list
+     * @return the amx api response
+     */
+    public static <TS> ApiResponse<TS, Object> buildList(List<TS> resultList) {
+	return buildList(resultList, new HashMap<String, Object>());
+    }
 
-	/**
-	 * @deprecated - use {@link #buildResults(Object)} for list of elements and
-	 *             {@link #buildResult(Object)} for single element list
-	 * 
-	 * @param <TS>
-	 * @param result
-	 * @return
-	 */
-	@Deprecated
-	public static <TS> ApiResponse<TS, Object> build(TS result) {
-		ApiResponse<TS, Object> resp = new ApiResponse<TS, Object>();
-		resp.addResult(result);
-		return resp;
-	}
+    /**
+     * Builds the list.
+     *
+     * @param <TS>       the generic type
+     * @param <MS>       the generic type
+     * @param resultList the result list
+     * @param meta       the meta
+     * @return the amx api response
+     */
+    public static <TS, MS> ApiResponse<TS, MS> buildList(List<TS> resultList, MS meta) {
+	return buildResults(resultList, meta);
+    }
 
-	/**
-	 * @deprecated - use {@link #buildResults(Object, Object)} for list of elements
-	 *             and {@link #buildResult(Object, Object)} for single element list
-	 * 
-	 * @param <TS>
-	 * @param result
-	 * @return
-	 */
-	@Deprecated
-	public static <TS, MS> ApiResponse<TS, MS> build(TS result, MS meta) {
-		return buildResult(result, meta);
-	}
+    public static <TS, MS> ApiResponse<TS, MS> buildList(TS[] resultArray, MS meta) {
+	return buildResults(CollectionUtil.getList(resultArray), meta);
+    }
 
-	/**
-	 * Builds the list.
-	 * 
-	 * @deprecated - this method should not be used for list , use
-	 *             {@link #buildResults(List)} for this
-	 *
-	 * @param <TS>       the generic type
-	 * @param resultList the result list
-	 * @return the amx api response
-	 */
-	@Deprecated
-	public static <TS> ApiResponse<List<TS>, HashMap<String, Object>> build(List<TS> resultList) {
-		return buildResult(resultList, new HashMap<String, Object>());
-	}
+    public static <TS> ApiResponse<TS, Object> buildResults(TS[] resultArray) {
+	return buildResults(CollectionUtil.getList(resultArray), new HashMap<String, Object>());
+    }
 
-	public static <MS> ApiResponse<Object, MS> buildMeta(MS meta) {
-		ApiResponse<Object, MS> resp = new ApiResponse<Object, MS>();
-		resp.setMeta(meta);
-		return resp;
-	}
+    public static <TS> ApiResponse<TS, Object> buildResults(TS resultList) {
+	return buildResult(resultList, new HashMap<String, Object>());
+    }
 
-	public static <TS> ApiResponse<TS, Object> buildData(TS data) {
-		ApiResponse<TS, Object> resp = new ApiResponse<TS, Object>();
-		resp.setData(data);
-		return resp;
-	}
+    public static <TS, MS> ApiResponse<TS, MS> buildResults(TS resultList, MS meta) {
+	return buildResult(resultList, meta);
+    }
 
-	public static <TS, MS> ApiResponse<TS, MS> buildData(TS data, MS meta) {
-		ApiResponse<TS, MS> resp = new ApiResponse<TS, MS>();
-		resp.setData(data);
-		resp.setMeta(meta);
-		return resp;
-	}
+    public static <TS> ApiResponse<TS, Object> buildResults(List<TS> resultList) {
+	return buildResults(resultList, new HashMap<String, Object>());
+    }
 
-	/**
-	 * Builds the list.
-	 *
-	 * @param <TS>       the generic type
-	 * @param resultList the result list
-	 * @return the amx api response
-	 */
-	public static <TS> ApiResponse<TS, Object> buildList(List<TS> resultList) {
-		return buildList(resultList, new HashMap<String, Object>());
-	}
+    public static <TS, MS> ApiResponse<TS, MS> buildResults(List<TS> resultList, MS meta) {
+	ApiResponse<TS, MS> resp = new ApiResponse<TS, MS>();
+	// ArrayList<TS> listOfStrings = new ArrayList<TS>(resultList.size());
+	// listOfStrings.addAll(resultList);
+	resp.setResults(resultList);
+	resp.setMeta(meta);
+	return resp;
+    }
 
-	/**
-	 * Builds the list.
-	 *
-	 * @param <TS>       the generic type
-	 * @param <MS>       the generic type
-	 * @param resultList the result list
-	 * @param meta       the meta
-	 * @return the amx api response
-	 */
-	public static <TS, MS> ApiResponse<TS, MS> buildList(List<TS> resultList, MS meta) {
-		return buildResults(resultList, meta);
-	}
+    public static <TS, MS> ApiResponse<TS, MS> buildResult(TS result, MS meta) {
+	ApiResponse<TS, MS> resp = new ApiResponse<TS, MS>();
+	resp.addResult(result);
+	resp.setMeta(meta);
+	return resp;
+    }
 
-	public static <TS, MS> ApiResponse<TS, MS> buildList(TS[] resultArray, MS meta) {
-		return buildResults(CollectionUtil.getList(resultArray), meta);
-	}
+    public static <TS, MS> ApiResponse<TS, MS> buildResult(TS result) {
+	ApiResponse<TS, MS> resp = new ApiResponse<TS, MS>();
+	resp.addResult(result);
+	return resp;
+    }
 
-	public static <TS> ApiResponse<TS, Object> buildResults(TS[] resultArray) {
-		return buildResults(CollectionUtil.getList(resultArray), new HashMap<String, Object>());
-	}
+    @JsonIgnore
+    public ApiResponse<T, M> redirectUrl(String redirectUrl) {
+	this.redirectUrl = redirectUrl;
+	return this;
+    }
 
-	public static <TS> ApiResponse<TS, Object> buildResults(TS resultList) {
-		return buildResult(resultList, new HashMap<String, Object>());
-	}
+    public ApiResponse<T, M> statusKey(String status) {
+	this.setStatus(status);
+	return this;
+    }
 
-	public static <TS, MS> ApiResponse<TS, MS> buildResults(TS resultList, MS meta) {
-		return buildResult(resultList, meta);
-	}
+    public ApiResponse<T, M> statusEnum(IExceptionEnum statusEnum) {
+	this.setStatusEnum(statusEnum);
+	return this;
+    }
 
-	public static <TS> ApiResponse<TS, Object> buildResults(List<TS> resultList) {
-		return buildResults(resultList, new HashMap<String, Object>());
-	}
+    public ApiResponse<T, M> message(String message) {
+	this.message = message;
+	return this;
+    }
 
-	public static <TS, MS> ApiResponse<TS, MS> buildResults(List<TS> resultList, MS meta) {
-		ApiResponse<TS, MS> resp = new ApiResponse<TS, MS>();
-		// ArrayList<TS> listOfStrings = new ArrayList<TS>(resultList.size());
-		// listOfStrings.addAll(resultList);
-		resp.setResults(resultList);
-		resp.setMeta(meta);
-		return resp;
-	}
+    public ApiResponse<T, M> data(T data) {
+	this.data = data;
+	return this;
+    }
 
-	public static <TS, MS> ApiResponse<TS, MS> buildResult(TS result, MS meta) {
-		ApiResponse<TS, MS> resp = new ApiResponse<TS, MS>();
-		resp.addResult(result);
-		resp.setMeta(meta);
-		return resp;
-	}
+    public ApiResponse<T, M> details(List<M> details) {
+	this.details = details;
+	return this;
+    }
 
-	public static <TS, MS> ApiResponse<TS, MS> buildResult(TS result) {
-		ApiResponse<TS, MS> resp = new ApiResponse<TS, MS>();
-		resp.addResult(result);
-		return resp;
-	}
-
-	@JsonIgnore
-	public ApiResponse<T, M> redirectUrl(String redirectUrl) {
-		this.redirectUrl = redirectUrl;
-		return this;
-	}
-
-	public ApiResponse<T, M> statusKey(String status) {
-		this.setStatus(status);
-		return this;
-	}
-
-	public ApiResponse<T, M> statusEnum(IExceptionEnum statusEnum) {
-		this.setStatusEnum(statusEnum);
-		return this;
-	}
-
-	public ApiResponse<T, M> message(String message) {
-		this.message = message;
-		return this;
-	}
-
-	public ApiResponse<T, M> data(T data) {
-		this.data = data;
-		return this;
-	}
-
-	public T data() {
-		return this.data;
-	}
+    public T data() {
+	return this.data;
+    }
 
 }
