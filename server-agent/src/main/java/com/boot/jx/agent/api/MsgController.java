@@ -84,10 +84,10 @@ public class MsgController {
 	    for (ChatSessionDoc chatSessionDoc : sessions) {
 		ChatSessionDTO chatSessionDto = chatArchive.getChatSession(chatSessionDoc);
 		chatSessionDto = chatArchive.withContact(chatSessionDto);
-		if (ArgUtil.isEqual(chatSessionDto.getAssignedToDept(), DEFAULT.NO_DEPT, agentSession.getAgentDept(),
-			null, Constants.BLANK)
-			&& ArgUtil.isEqual(chatSessionDto.getAssignedToAgent(), agentSession.getAgentCode(), null)
-			&& withMessage) {
+		if (withMessage
+			&& ArgUtil.isEqual(chatSessionDto.getAssignedToDept(), DEFAULT.NO_DEPT,
+				agentSession.getAgentDept(), null, Constants.BLANK)
+			&& ArgUtil.isEqual(chatSessionDto.getAssignedToAgent(), agentSession.getAgentCode(), null)) {
 		    chatSessionDto = chatArchive.withMessages(chatSessionDto);
 		}
 		chatSessionDtos.add(chatSessionDto);
