@@ -68,7 +68,7 @@ public class ChatArchiveBuilder {
 	    } else {
 		chatSessionDTO.getMessages().add(messageDto);
 	    }
-	    return null;
+	    return this;
 	}
 
     }
