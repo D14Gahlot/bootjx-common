@@ -58,7 +58,9 @@ public class ChatSessionDoc extends APatchableIndexed<ChatSessionDoc, String> im
 
 	private String mode;
 	private String status;
+	private String tagCategory;
 
+	
 	public long getLastInComingStamp() {
 		return lastInComingStamp;
 	}
@@ -293,6 +295,14 @@ public class ChatSessionDoc extends APatchableIndexed<ChatSessionDoc, String> im
 	@Override
 	public String toString() {
 		return String.format("[sessionId:%s]", this.sessionId);
+	}
+
+	public String getTagCategory() {
+		return tagCategory;
+	}
+
+	public void setTagCategory(String tagCategory) {
+		this.tagCategory = tagCategory;
 	}
 
 }

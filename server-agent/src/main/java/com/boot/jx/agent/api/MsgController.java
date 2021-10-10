@@ -248,4 +248,10 @@ public class MsgController {
 	    @RequestParam CHAT_STATUS status) {
 	return ApiResponse.buildResult(agentChatHandlerImpl.updateChatSessionStatus(sessionId, status));
     }
+    @ResponseBody
+    @RequestMapping(value = { "/api/session/tagCategory" }, method = { RequestMethod.POST })
+    public ApiResponse<ChatSessionDTO, Object> updateTagCategory(@RequestParam String sessionId,
+	    @RequestParam String tagCategory) {
+	return ApiResponse.buildResult(agentChatHandlerImpl.updateChatTagCategoryStatus(sessionId, tagCategory));
+    }
 }

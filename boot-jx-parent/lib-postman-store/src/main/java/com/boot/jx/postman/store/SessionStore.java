@@ -503,5 +503,13 @@ public class SessionStore extends CommonDocStore {
 		mongoTemplate.updateFirst(builder.getQuery(), builder.getUpdate(), ChatSessionDoc.class);
 
 	}
+	
+	public ChatSessionDoc updateTagCategory(ChatSessionDoc chatSessionDoc, String  tagCategory) {
+		chatSessionDoc.setTagCategory(tagCategory);
+		CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder().whereId(chatSessionDoc.getSessionId());
+		builder.set("tagCategory", tagCategory);
+		mongoTemplate.updateFirst(builder.getQuery(), builder.getUpdate(), ChatSessionDoc.class);
+		return chatSessionDoc;
+	}
 
 }
