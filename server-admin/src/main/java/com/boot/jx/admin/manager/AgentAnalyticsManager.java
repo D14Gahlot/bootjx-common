@@ -308,6 +308,9 @@ public class AgentAnalyticsManager {
 		query.addCriteria(Criteria.where("assignedToAgent").is(agent).and("resolved").is(true));
 		query.addCriteria(Criteria.where("assignedAgentStamp").gt(dateRange1).lt(dateRange2));
 		List<ChatSessionDoc> totalMsgDoc = mongoTemplate.find(query, ChatSessionDoc.class, CHAT_SESSION);
+		for(ChatSessionDoc chatDoc:totalMsgDoc) {
+			totalResolvedMsgDoc.add(chatDoc);
+		}
 		return totalResolvedMsgDoc;
 	}
 	
