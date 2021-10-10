@@ -186,10 +186,11 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
     private void onAssign(ChatSessionDoc chatSessionDoc, String agentDept, String agentCode) {
 	if (!ArgUtil.areEqual(chatSessionDoc.getAssignedToAgent(), agentCode)) {
 	    assignToAgent(chatSessionDoc, agentDept, agentCode);
-	    chatService.log(chatSessionDoc, MessageStore.EVENTS.ASGND_TO_AGENT, agentCode, agentDept);
+	    MessageDoc messageDoc = chatService.log(chatSessionDoc, MessageStore.EVENTS.ASGND_TO_AGENT, agentCode,
+		    agentDept);
 	    stompTunnelService.sendToAll(PostManUtil.ON_DEPT_ASSIGN_TOPIC(agentDept),
 		    chatArchiveBuilder.buildChatSessionDTO().from(chatSessionDoc).withContact()
-			    .isAssigned(chatSessionDoc.getAssignedToAgent()).get());
+			    .isAssigned(chatSessionDoc.getAssignedToAgent()).addMessage(messageDoc).get());
 	}
     }
 

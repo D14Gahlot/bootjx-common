@@ -205,21 +205,21 @@ public class ChatService {
 	return messageStore.note(outboxMessage, getCurrenUser());
     }
 
-    public void log(IMessageExtended inboxMessage, String auditAgent, EVENTS event, String... logs) {
-	messageStore.log(inboxMessage, auditAgent, event, logs);
+    public MessageDoc log(IMessageExtended inboxMessage, String auditAgent, EVENTS event, String... logs) {
+	return messageStore.log(inboxMessage, auditAgent, event, logs);
     }
 
-    public void log(IMessageExtended inboxMessage, EVENTS event, String... logs) {
-	log(inboxMessage, inboxMessage.session().getAgent(), event, logs);
+    public MessageDoc log(IMessageExtended inboxMessage, EVENTS event, String... logs) {
+	return log(inboxMessage, inboxMessage.session().getAgent(), event, logs);
     }
 
-    private void log(ChatSessionDoc sessionDoc, String auditAgent, EVENTS event, String... logs) {
+    private MessageDoc log(ChatSessionDoc sessionDoc, String auditAgent, EVENTS event, String... logs) {
 	IMessageExtended inboxMessage = sessionStore.toSessionMessage(sessionDoc);
-	log(inboxMessage, auditAgent, event, logs);
+	return log(inboxMessage, auditAgent, event, logs);
     }
 
-    public void log(ChatSessionDoc sessionDoc, EVENTS event, String... logs) {
-	log(sessionDoc, getCurrenUser(), event, logs);
+    public MessageDoc log(ChatSessionDoc sessionDoc, EVENTS event, String... logs) {
+	return log(sessionDoc, getCurrenUser(), event, logs);
     }
 
     public MessageDoc send(ChatSessionDoc sessionDoc, OutboxMessage outboxMessage) {

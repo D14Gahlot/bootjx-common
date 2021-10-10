@@ -6,10 +6,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.boot.jx.postman.doc.ChatSessionDoc;
+import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.dto.ChatMessageDTO;
 import com.boot.jx.postman.dto.ChatSessionDTO;
 import com.boot.jx.postman.service.ChatDTOUtil;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.CollectionUtil;
 
 @Component
 public class ChatArchiveBuilder {
@@ -57,6 +59,16 @@ public class ChatArchiveBuilder {
 
 	public ChatSessionDTO get() {
 	    return this.chatSessionDTO;
+	}
+
+	public ChatSessionDTOBuilder addMessage(MessageDoc messageDoc) {
+	    ChatMessageDTO messageDto = archive.getMessage(messageDoc, chatSessionDTO);
+	    if (!ArgUtil.is(chatSessionDTO.getMessages())) {
+		chatSessionDTO.setMessages(CollectionUtil.getList(messageDto));
+	    } else {
+		chatSessionDTO.getMessages().add(messageDto);
+	    }
+	    return null;
 	}
 
     }
