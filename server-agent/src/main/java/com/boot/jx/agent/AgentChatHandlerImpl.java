@@ -88,6 +88,28 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 
     private AgentSessionDoc getAgentSessonAssigned(InboxMessage inboxMessage) {
 
+	String stickyLogic = environment.config().get("postman.agent.chat.stickysession")
+		.asString(PMConstants.CHAT_SESSION_STICKY.NONE);
+
+	String lastAgent = null;
+	if (!PMConstants.CHAT_SESSION_STICKY.NONE.equals(stickyLogic)) {
+	    lastAgent = sessionStore.getLastAssignedAgent(inboxMessage.contact());
+	    if (ArgUtil.is(lastAgent)) {
+		AgentSessionDoc agent = mongoTemplate.findById(lastAgent, AgentSessionDoc.class);
+		if (ArgUtil.is(agent)) {
+		    if (PMConstants.CHAT_SESSION_STICKY.STRICT.equals(stickyLogic)) {
+			return agent;
+		    }
+		    if (PMConstants.CHAT_SESSION_STICKY.ONAVAILABLE.equals(stickyLogic)) {
+			if (ArgUtil.nullAsFalse(agent.getIsOnline())) {
+			    return agent;
+			}
+		    }
+		}
+
+	    }
+	}
+
 	String assignmentRule = environment.config().get("postman.agent.chat.assignment")
 		.asString(PMConstants.ASSIGNMENT_RULE.ROUND_ROBIN);
 

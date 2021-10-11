@@ -7,6 +7,8 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
@@ -528,6 +530,17 @@ public class SessionStore extends CommonDocStore {
 	    }
 	}
 
+    }
+
+    public String getLastAssignedAgent(Contactable contact) {
+	CommonMongoQueryBuilder cmqb = new CommonMongoQueryBuilder()
+		.with(Criteria.where("contactId").is(contact.getContactId()).and("assignedToAgent").exists(false));
+	cmqb.getQuery().with(new Sort(Direction.DESC, "startSessionStamp")).limit(1);
+	ChatSessionDoc lastSession = mongoTemplate.findOne(cmqb.getQuery(), ChatSessionDoc.class);
+	if (ArgUtil.is(lastSession)) {
+	    return lastSession.getAssignedToAgent();
+	}
+	return null;
     }
 
 }
