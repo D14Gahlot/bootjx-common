@@ -280,7 +280,7 @@ public class ConfigManager {
 		.add(new ConfigMeta("Enable Beta UI", "postman.ui.beta").optionsOnOff().defaultValue(ConfigOption.OFF));
 
 	CONFIG_LIST.add(new ConfigMeta("Agent Panel Color Scheme", "postman.agent.scheme.color")
-		.inputType(InputType.COLOR).defaultValue("#4b56c0"));
+		.inputType(InputType.COLOR).defaultValue("#4267b2"));
 
 	CONFIG_LIST.add(new ConfigMeta("Agent Color Scheme 2", "postman.agent.scheme2.color")
 		.inputType(InputType.COLOR_PALLETE).defaultValue(new ConfigMeta.ColorPalette()));

@@ -68,8 +68,14 @@ public class AppCommonConfigImpl implements AppCommonConfig {
     private Environment environment;
 
     public String getCdnServer() {
-	if (pmEnvironment.config().get("postman.ui.beta").asBoolean(Boolean.FALSE).booleanValue()) {
-	    return cdnBuilder.latest(pmEnvironment.get("mry.cdn.url.beta").asString(cdnUrl));
+
+	boolean isBeta = ArgUtil.parseAsBoolean(commonHttpRequest.get("postman.ui.beta"),
+		pmEnvironment.config().get("postman.ui.beta").asBoolean(Boolean.FALSE).booleanValue());
+	if (isBeta) {
+	    String betaCdn = cdnBuilder.latest(pmEnvironment.get("mry.cdn.url.beta").asString());
+	    if (ArgUtil.is(betaCdn)) {
+		return betaCdn;
+	    }
 	}
 	return cdnBuilder.latest(pmEnvironment.get("mry.cdn.url").asString(cdnUrl));
     }
