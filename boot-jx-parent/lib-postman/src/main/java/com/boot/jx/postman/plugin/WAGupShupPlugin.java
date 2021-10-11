@@ -23,7 +23,7 @@ public class WAGupShupPlugin implements ChannelPlugin<GupShupConfigDetails> {
 
     @Override
     public GupShupConfigDetails getDetails(ChannelConfig config) {
-	return null;
+	return config.getGupshup();
     }
 
     @Override

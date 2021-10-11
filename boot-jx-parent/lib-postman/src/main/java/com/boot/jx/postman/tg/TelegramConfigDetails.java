@@ -18,7 +18,6 @@ public class TelegramConfigDetails extends AChannelDetails {
 
     @JsonView(PMEnvironment.ProtectedProperty.class)
     private String accessToken;
-    @JsonView(PMEnvironment.ProtectedProperty.class)
 
     public String getHandler() {
 	return handler;
