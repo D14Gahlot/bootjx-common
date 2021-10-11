@@ -8,7 +8,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -30,15 +29,14 @@ import com.boot.jx.common.doc.AgentSessionDoc;
 import com.boot.jx.common.dto.AgentResponseAuthDto;
 import com.boot.jx.common.service.EmpAuthService;
 import com.boot.jx.http.CommonHttpRequest;
+import com.boot.jx.postman.PMConstants.DEFAULT;
 import com.boot.jx.postman.PMEnvironment;
-import com.boot.jx.postman.store.PMStoreConstants;
 import com.boot.jx.rest.RestService;
 import com.boot.jx.stomp.StompTunnelSessionManager;
 import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.Constants;
 import com.boot.utils.CryptoUtil;
-import com.boot.utils.JsonUtil;
 import com.boot.utils.MapBuilder;
 import com.boot.utils.MapBuilder.BuilderMap;
 
@@ -223,7 +221,7 @@ public class AgentAuthController {
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 		sessionService.updateLogin(agent);
 		stompTunnelSessionManager.registerUser(agent.getAgent_code(), agent.getDept().getDept_code(),
-			PMStoreConstants.NO_DEPT);
+			DEFAULT.NO_DEPT);
 
 		boolean rememberme = ArgUtil.parseAsBoolean(commonHttpRequest.get("rememberme"), false);
 		if (rememberme) {

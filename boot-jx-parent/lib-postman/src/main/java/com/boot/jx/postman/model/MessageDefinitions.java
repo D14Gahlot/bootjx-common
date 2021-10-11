@@ -16,14 +16,6 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 public class MessageDefinitions {
 
-    public static class MESSAGE_BOUND_TYPE {
-	public static final String INBOUND = "I";
-	public static final String INBOUND_IMPORTED = "Ii";
-
-	public static final String OUTBOUND = "O";
-	public static final String OUTBOUND_IMPORTED = "Oi";
-    }
-
     @JsonDeserialize(as = ContactMeta.class,keyUsing = ContactMetaKeyDeserializer.class)
     @JsonIgnoreProperties(ignoreUnknown = true)
     public interface Contact extends Serializable {

@@ -8,9 +8,9 @@ import java.util.List;
 import java.util.Map;
 
 import com.boot.jx.dict.ContactType;
+import com.boot.jx.postman.PMConstants;
 import com.boot.jx.postman.model.MessageDefinitions.Contactable;
 import com.boot.jx.postman.model.MessageDefinitions.IMessageExtended;
-import com.boot.jx.postman.model.MessageDefinitions.MESSAGE_BOUND_TYPE;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.StringUtils.StringMatcher;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -276,7 +276,7 @@ public class InboxMessage implements Serializable, IMessageExtended {
 
 	@Override
 	public String getType() {
-		return MESSAGE_BOUND_TYPE.INBOUND;
+		return PMConstants.MESSAGE_BOUND_TYPE.INBOUND;
 	}
 
 	public long getTimestamp() {

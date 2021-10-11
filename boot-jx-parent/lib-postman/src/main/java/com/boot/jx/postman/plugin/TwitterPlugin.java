@@ -5,7 +5,6 @@ import java.util.Map;
 
 import com.boot.jx.common.impl.ConfigMeta;
 import com.boot.jx.postman.PMConfiguration;
-import com.boot.jx.postman.PMConstants.CHANNEL_TYPE;
 import com.boot.jx.postman.plugin.ChannelPluginProvider.ChannelPlugin;
 import com.boot.jx.postman.tw.TwitterConfigDetails;
 import com.boot.model.MapModel;

@@ -11,8 +11,6 @@ import com.boot.utils.JsonUtil;
 import com.google.common.collect.MapDifference;
 import com.google.common.collect.Maps;
 
-import springfox.documentation.spring.web.json.Json;
-
 public class JsonDiffTest { // Noncompliant
 
     /**

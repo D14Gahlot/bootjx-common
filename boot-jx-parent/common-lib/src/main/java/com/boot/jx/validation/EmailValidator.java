@@ -6,7 +6,6 @@ import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
 import com.boot.jx.validation.ValidationAnnotations.ValidEmail;
-import com.boot.jx.validation.ValidationAnnotations.ValidPhone;
 import com.boot.utils.ArgUtil;
 
 public class EmailValidator implements ConstraintValidator<ValidEmail, String> {

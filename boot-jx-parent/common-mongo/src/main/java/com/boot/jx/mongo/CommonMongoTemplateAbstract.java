@@ -1,14 +1,15 @@
 package com.boot.jx.mongo;
 
 import org.bson.types.ObjectId;
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.convert.MongoConverter;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
-import org.springframework.stereotype.Component;
 
 import com.boot.jx.logger.AuditDetailProvider;
+import com.boot.jx.logger.LoggerService;
 import com.boot.jx.model.AuditableEntity;
 import com.boot.jx.mongo.CommonDocInterfaces.DocVersion;
 import com.boot.jx.mongo.CommonDocInterfaces.TrashDocument;
@@ -17,6 +18,8 @@ import com.boot.utils.ArgUtil;
 import com.mongodb.WriteResult;
 
 public class CommonMongoTemplateAbstract extends CommonMongoTemplateDefault {
+
+    public static final Logger LOGGER = LoggerService.getLogger(CommonMongoTemplateAbstract.class);
 
     @Autowired
     protected MongoTemplate mongoTemplate;
@@ -64,8 +67,17 @@ public class CommonMongoTemplateAbstract extends CommonMongoTemplateDefault {
     public WriteResult updateFirst(DocQueryBuilder<?> builder) {
 	WriteResult ret = null;
 	if (ArgUtil.is(builder.getUpdate())) {
-	    ret = mongoTemplate.updateFirst(builder.getQuery(), builder.getUpdate(), builder.getDocClass());
-	    builder.setUpdate(null);
+	    try {
+		builder.updatedStamp();
+		// LOGGER.info("Query:{}", builder.getQuery().toString());
+		// LOGGER.info("Update:{}", builder.getUpdate().toString());
+		ret = mongoTemplate.updateFirst(builder.getQuery(), builder.getUpdate(), builder.getDocClass());
+		builder.setUpdate(null);
+	    } catch (Exception e) {
+		LOGGER.debug("Query:{}", builder.getQuery().toString());
+		LOGGER.debug("Update:{}", builder.getUpdate().toString());
+		throw e;
+	    }
 	}
 	return ret;
     }
@@ -80,7 +92,14 @@ public class CommonMongoTemplateAbstract extends CommonMongoTemplateDefault {
     public WriteResult upsert(DocQueryBuilder<?> builder) {
 	WriteResult ret = null;
 	if (ArgUtil.is(builder.getUpdate())) {
-	    ret = mongoTemplate.upsert(builder.getQuery(), builder.getUpdate(), builder.getDocClass());
+	    try {
+		builder.updatedStamp();
+		ret = mongoTemplate.upsert(builder.getQuery(), builder.getUpdate(), builder.getDocClass());
+	    } catch (Exception e) {
+		LOGGER.debug("Query:{}", builder.getQuery().toString());
+		LOGGER.debug("Update:{}", builder.getUpdate().toString());
+		throw e;
+	    }
 	}
 	return ret;
     }

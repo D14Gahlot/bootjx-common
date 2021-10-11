@@ -20,12 +20,16 @@ import com.boot.jx.agent.AgentSessionService;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.api.ListRequestModel;
 import com.boot.jx.aws.AWSFileStore;
-import com.boot.jx.chat.ChatArchive;
+import com.boot.jx.chat.ChatArchiveBuilder;
+import com.boot.jx.chat.ChatArchiveService;
 import com.boot.jx.chat.ChatService;
 import com.boot.jx.common.doc.AgentDoc;
 import com.boot.jx.common.doc.AgentSessionDoc;
 import com.boot.jx.common.store.AgentStore;
 import com.boot.jx.model.CommonFile;
+import com.boot.jx.postman.PMConstants;
+import com.boot.jx.postman.PMConstants.CHAT_STATUS;
+import com.boot.jx.postman.PMConstants.DEFAULT;
 import com.boot.jx.postman.client.PMFileStoreClient;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
@@ -37,8 +41,6 @@ import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.service.ChatDTOUtil;
 import com.boot.jx.postman.store.MessageStore.EVENTS;
-import com.boot.jx.postman.store.PMStoreConstants;
-import com.boot.jx.postman.store.PMStoreConstants.CHAT_STATUS;
 import com.boot.jx.postman.store.SessionStore;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
@@ -68,7 +70,7 @@ public class MsgController {
     private ChatService chatService;
 
     @Autowired
-    private ChatArchive chatArchive;
+    private ChatArchiveService chatArchive;
 
     @Autowired
     private AgentSessionService agentSessionService;
@@ -77,28 +79,23 @@ public class MsgController {
     @RequestMapping(value = "/api/sessions/assigned", method = { RequestMethod.GET })
     public ApiResponse<ChatSessionDTO, Object> getSessionsAssignedToMe(
 	    @RequestParam(defaultValue = "true") boolean withMessage) {
-
 	List<ChatSessionDTO> chatSessionDtos = new ArrayList<ChatSessionDTO>();
-
 	if (agentSession.isLoggedIn() && ArgUtil.is(agentSession.getAgentDept())) {
 	    List<ChatSessionDoc> sessions = sessionStore
 		    .findChatSessionDocByAgentAndUnAssigned(agentSession.getAgentCode(), agentSession.getAgentDept());
 	    for (ChatSessionDoc chatSessionDoc : sessions) {
 		ChatSessionDTO chatSessionDto = chatArchive.getChatSession(chatSessionDoc);
 		chatSessionDto = chatArchive.withContact(chatSessionDto);
-
-		if (ArgUtil.isEqual(chatSessionDto.getAssignedToDept(), PMStoreConstants.NO_DEPT,
-			agentSession.getAgentDept(), null, Constants.BLANK)
-			&& ArgUtil.isEqual(chatSessionDto.getAssignedToAgent(), agentSession.getAgentCode(), null)
-			&& withMessage) {
+		if (withMessage
+			&& ArgUtil.isEqual(chatSessionDto.getAssignedToDept(), DEFAULT.NO_DEPT,
+				agentSession.getAgentDept(), null, Constants.BLANK)
+			&& ArgUtil.isEqual(chatSessionDto.getAssignedToAgent(), agentSession.getAgentCode(), null)) {
 		    chatSessionDto = chatArchive.withMessages(chatSessionDto);
 		}
 		chatSessionDtos.add(chatSessionDto);
 	    }
 	}
-
 	agentSessionService.refreshOnline();
-
 	return ApiResponse.buildResults(chatSessionDtos, MapBuilder.map().put("isOnline", agentSession.isOnline())
 		.put("profile", agentSession.getProfile()).build());
     }
@@ -198,7 +195,10 @@ public class MsgController {
     }
 
     @Autowired
-    AgentStore agentStore;
+    private AgentStore agentStore;
+
+    @Autowired
+    private ChatArchiveBuilder chatArchiveBuilder;
 
     @ResponseBody
     @RequestMapping(value = { "/api/session/agent", "/api/session/agent/assign" }, method = { RequestMethod.POST })
@@ -207,7 +207,8 @@ public class MsgController {
 	ChatSessionDoc chatSessionDoc = sessionStore.getSession(sessionId);
 	AgentDoc agent = agentStore.findById(agentId);
 	agentChatHandlerImpl.onAssign(agent, chatSessionDoc);
-	ChatSessionDTO chatSessionDto = chatArchive.getChatSessionDto(chatSessionDoc, agentSession.getAgentCode());
+	ChatSessionDTO chatSessionDto = chatArchiveBuilder.buildChatSessionDTO().from(chatSessionDoc).withContact()
+		.isAssigned(agentSession.getAgentCode()).withMessages().get();
 	return ApiResponse.buildResult(chatSessionDto);
     }
 
@@ -245,7 +246,7 @@ public class MsgController {
     @ResponseBody
     @RequestMapping(value = { "/api/session/status" }, method = { RequestMethod.POST })
     public ApiResponse<ChatSessionDTO, Object> updateSessionStatus(@RequestParam String sessionId,
-	    @RequestParam CHAT_STATUS status) {
+	    @RequestParam PMConstants.CHAT_STATUS status) {
 	return ApiResponse.buildResult(agentChatHandlerImpl.updateChatSessionStatus(sessionId, status));
     }
     @ResponseBody
