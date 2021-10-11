@@ -157,8 +157,9 @@ public class ConfigController {
 
     @RequestMapping(value = "/api/config/cdn", method = { RequestMethod.POST })
     public ApiResponse<PMConfigurationObject, Object> updateCDN(@RequestParam(required = false) String url,
-	    @RequestParam(required = false) String version) {
-	PMConfigurationObject config = pmEnvironment.get("mry.cdn.url");
+	    @RequestParam(required = false) String version,
+	    @RequestParam(required = false, defaultValue = "false") boolean beta) {
+	PMConfigurationObject config = pmEnvironment.get(beta ? "mry.cdn.url.beta" : "mry.cdn.url");
 	String oldUrl = config.asString();
 
 	if (ArgUtil.is(version) && ArgUtil.is(oldUrl)) {
@@ -195,7 +196,7 @@ public class ConfigController {
     public ApiResponse<ClientKeyConfigDoc, Object> createClientApiKey(@RequestBody ClientKeyConfigDoc clientApiKey) {
 	return ApiResponse.buildData(adminConfigService.save(clientApiKey));
     }
-    
+
     @JsonView(PMEnvironment.PublicProperty.class)
     @ResponseBody
     @RequestMapping(value = { "/api/config/clientapikey" }, method = { RequestMethod.DELETE })
