@@ -39,6 +39,8 @@ public class ChatSessionDTO implements Serializable {
     private long resolveSessionStamp;
     private long closeSessionStamp;
 
+    private long updatedStamp;
+
     private boolean assigned;
     private boolean active;
     private boolean resolved;
@@ -284,6 +286,14 @@ public class ChatSessionDTO implements Serializable {
 	    this.msg = new HashMap<String, ChatMessageDTO>();
 	}
 	return this.msg;
+    }
+
+    public long getUpdatedStamp() {
+	return updatedStamp;
+    }
+
+    public void setUpdatedStamp(long updatedStamp) {
+	this.updatedStamp = updatedStamp;
     }
 
 }

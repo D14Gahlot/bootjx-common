@@ -7,9 +7,7 @@ import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
-import org.springframework.integration.store.MessageStore;
 
-import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
 
 public class CommonMongoQueryBuilder {
@@ -104,6 +102,7 @@ public class CommonMongoQueryBuilder {
     public static abstract class DocQueryBuilder<T> extends CommonMongoQueryBuilder {
 	protected T doc;
 	protected boolean synced;
+	private long updatedStamp;
 
 	public DocQueryBuilder(T doc) {
 	    this.doc = doc;
@@ -132,6 +131,17 @@ public class CommonMongoQueryBuilder {
 	    this.synced = synced;
 	}
 
+	public long getUpdatedStamp() {
+	    return updatedStamp;
+	}
+
+	public void setUpdatedStamp(long updatedStamp) {
+	    this.updatedStamp = updatedStamp;
+	}
+
+	public void updatedStamp() {
+	    this.set("updatedStamp", System.currentTimeMillis());
+	}
     }
 
 }

@@ -54,6 +54,8 @@ public class ChatSessionDoc extends APatchableIndexed<ChatSessionDoc, String> im
     private long resolveSessionStamp;
     private long closeSessionStamp;
 
+    private long updatedStamp;
+
     private Integer agentScore;
     private Integer botScore;
 
@@ -345,11 +347,19 @@ public class ChatSessionDoc extends APatchableIndexed<ChatSessionDoc, String> im
     }
 
     public MessageDoc getLastMsg() {
-        return lastMsg;
+	return lastMsg;
     }
 
     public void setLastMsg(MessageDoc lastMsg) {
-        this.lastMsg = lastMsg;
+	this.lastMsg = lastMsg;
+    }
+
+    public long getUpdatedStamp() {
+	return updatedStamp;
+    }
+
+    public void setUpdatedStamp(long updatedStamp) {
+	this.updatedStamp = updatedStamp;
     }
 
 }

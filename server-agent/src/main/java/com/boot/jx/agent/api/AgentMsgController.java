@@ -13,8 +13,10 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.boot.jx.agent.AgentSessionBean;
 import com.boot.jx.agent.AgentSessionService;
 import com.boot.jx.api.ApiResponse;
-import com.boot.jx.chat.ChatArchive;
+import com.boot.jx.chat.ChatArchiveService;
 import com.boot.jx.common.doc.AgentSessionDoc;
+import com.boot.jx.http.ApiRequest;
+import com.boot.jx.http.RequestType;
 import com.boot.jx.postman.PMConstants.DEFAULT;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.dto.ChatSessionDTO;
@@ -32,11 +34,12 @@ public class AgentMsgController {
     private AgentSessionBean agentSession;
 
     @Autowired
-    private ChatArchive chatArchive;
+    private ChatArchiveService chatArchive;
 
     @Autowired
     private AgentSessionService agentSessionService;
 
+    @ApiRequest(type = RequestType.POLL)
     @ResponseBody
     @RequestMapping(value = "/api/sessions/assignments", method = { RequestMethod.GET })
     public ApiResponse<ChatSessionDTO, AgentSessionDoc> getSessionsAssignments(
