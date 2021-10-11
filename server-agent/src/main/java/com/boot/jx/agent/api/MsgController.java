@@ -254,4 +254,46 @@ public class MsgController {
 	    @RequestParam String tagCategory) {
 	return ApiResponse.buildResult(agentChatHandlerImpl.updateChatTagCategoryStatus(sessionId, tagCategory));
     }
+    
+    /* search by status
+    @ResponseBody
+    @RequestMapping(value = "/api/sessions/searchby/status", method = { RequestMethod.GET })
+    public ApiResponse<ChatSessionDTO, Object> getByStatus(@RequestParam(required = false,defaultValue ="OPEN") CHAT_STATUS status) {
+	List<ChatSessionDTO> chatSessionDtos = new ArrayList<ChatSessionDTO>();
+	List<ChatSessionDoc> sessions = sessionStore.findByStatus(status);
+	for (ChatSessionDoc chatSessionDoc : sessions) {
+		ChatSessionDTO chatSessionDto = chatArchive.withContact(chatSessionDoc);
+		chatSessionDtos.add(chatSessionDto);
+	   
+	}
+
+	return ApiResponse.buildResults(chatSessionDtos);
+    }
+    // search by tagCategory 
+    @ResponseBody
+    @RequestMapping(value = "/api/sessions/searchby/category", method = { RequestMethod.GET })
+    public ApiResponse<ChatSessionDTO, Object> getByTagCategory(@RequestParam(required= false) String tagCategory) {
+	List<ChatSessionDTO> chatSessionDtos = new ArrayList<ChatSessionDTO>();
+	List<ChatSessionDoc> sessions = sessionStore.findByTagCategory(tagCategory);
+	for (ChatSessionDoc chatSessionDoc : sessions) {
+		ChatSessionDTO chatSessionDto = chatArchive.withContact(chatSessionDoc);
+		chatSessionDtos.add(chatSessionDto);
+	   
+	}
+	return ApiResponse.buildResults(chatSessionDtos);
+    }
+  */
+    /** search by status or tagCategory **/
+    @ResponseBody
+    @RequestMapping(value = "/api/sessions/searchby/statusorcategory", method = { RequestMethod.GET })
+    public ApiResponse<ChatSessionDTO, Object> getByStatusOrCategory(@RequestParam(required = false,defaultValue ="OPEN") CHAT_STATUS status,@RequestParam(required= false) String tagCategory) {
+	List<ChatSessionDTO> chatSessionDtos = new ArrayList<ChatSessionDTO>();
+	List<ChatSessionDoc> sessions = sessionStore.findByStatusOrCategory(status,tagCategory);
+	for (ChatSessionDoc chatSessionDoc : sessions) {
+		ChatSessionDTO chatSessionDto = chatArchive.withContact(chatSessionDoc);
+		chatSessionDtos.add(chatSessionDto);
+	}
+	return ApiResponse.buildResults(chatSessionDtos);
+    }
+    
 }

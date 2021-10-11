@@ -511,5 +511,34 @@ public class SessionStore extends CommonDocStore {
 		mongoTemplate.updateFirst(builder.getQuery(), builder.getUpdate(), ChatSessionDoc.class);
 		return chatSessionDoc;
 	}
+	/** search by status **/
+	public List<ChatSessionDoc> findByStatus(CHAT_STATUS status) {
+		Query query2 = new Query();
+		if (ArgUtil.is(status)) {
+			query2.addCriteria(Criteria.where("status").is(status.toString()));
+		}
+		return mongoTemplate.find(query2, ChatSessionDoc.class);
+	}
+	/** Search by category **/
+	
+	public List<ChatSessionDoc> findByTagCategory(String tagCategory) {
+		Query query2 = new Query();
+		 if (ArgUtil.is(tagCategory)) {
+			query2.addCriteria(Criteria.where("tagCategory").is(tagCategory));
+		}
+		return mongoTemplate.find(query2, ChatSessionDoc.class);
+	}
+	
+	/** search by status or by tag category**/
+	public List<ChatSessionDoc> findByStatusOrCategory(CHAT_STATUS status,String tagCategory) {
+		Query query2 = new Query();
+		query2.addCriteria(new Criteria().orOperator(Criteria.where("status").is(status.toString()),
+			    Criteria.where("tagCategory").is(tagCategory)));
+		
+		return mongoTemplate.find(query2, ChatSessionDoc.class);
+	}
+	
 
 }
+
+
