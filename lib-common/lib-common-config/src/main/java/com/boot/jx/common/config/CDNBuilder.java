@@ -106,7 +106,7 @@ public class CDNBuilder {
 	}
     }
 
-    @Scheduled(fixedDelay = 5000)
+    //@Scheduled(fixedDelay = 5000)
     public void updateJob() {
 	this.update();
     }

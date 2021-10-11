@@ -7,7 +7,7 @@ import java.util.List;
 public class ConfigMeta implements Serializable {
 
     public static enum InputType {
-	TEXT, OPTIONS, RANGE, NUMBER, COLOR
+	TEXT, OPTIONS, RANGE, NUMBER, COLOR, COLOR_PALLETE
     }
 
     public static class ConfigOption {
@@ -34,6 +34,43 @@ public class ConfigMeta implements Serializable {
 	    this.label = label;
 	    return this;
 	}
+    }
+
+    public static class ColorPalette {
+	String primary;
+	String secondary;
+	String accent;
+
+	public ColorPalette() {
+	    this.primary = "#FFFFFF";
+	    this.secondary = "#FDFDFD";
+	    this.accent = "#1DC4E9";
+	}
+
+	public String getPrimary() {
+	    return primary;
+	}
+
+	public void setPrimary(String primary) {
+	    this.primary = primary;
+	}
+
+	public String getSecondary() {
+	    return secondary;
+	}
+
+	public void setSecondary(String secondary) {
+	    this.secondary = secondary;
+	}
+
+	public String getAccent() {
+	    return accent;
+	}
+
+	public void setAccent(String accent) {
+	    this.accent = accent;
+	}
+
     }
 
     private static final long serialVersionUID = -8418291522478302778L;

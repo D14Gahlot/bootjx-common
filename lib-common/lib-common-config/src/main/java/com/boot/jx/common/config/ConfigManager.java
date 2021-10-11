@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import com.boot.jx.AppContextUtil;
 import com.boot.jx.chat.ConnectorHandlerFactory;
 import com.boot.jx.common.impl.ConfigMeta;
+import com.boot.jx.common.impl.ConfigMeta.ConfigOption;
 import com.boot.jx.common.impl.ConfigMeta.InputType;
 import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.jx.postman.PMClientConfig;
@@ -265,11 +266,24 @@ public class ConfigManager {
 	CONFIG_LIST.add(new ConfigMeta("Agent can initiate new chat", "postman.agent.chat.init").optionsOnOff());
 
 	CONFIG_LIST.add(new ConfigMeta("Agent Assignment", "postman.agent.chat.assignment")
-		.optionValues(PMConstants.ASSIGNMENT_RULE.ROUND_ROBIN, PMConstants.ASSIGNMENT_RULE.MANUAL, PMConstants.ASSIGNMENT_RULE.STRICT_DEFAULT)
+		.optionValues(PMConstants.ASSIGNMENT_RULE.ROUND_ROBIN, PMConstants.ASSIGNMENT_RULE.MANUAL,
+			PMConstants.ASSIGNMENT_RULE.STRICT_DEFAULT)
 		.defaultValue(PMConstants.ASSIGNMENT_RULE.ROUND_ROBIN));
 
+	CONFIG_LIST
+		.add(new ConfigMeta("Sticky Session", "postman.agent.chat.stickysession")
+			.optionValues(PMConstants.CHAT_SESSION_STICKY.NONE, PMConstants.CHAT_SESSION_STICKY.ONAVAILABLE,
+				PMConstants.CHAT_SESSION_STICKY.STRICT)
+			.defaultValue(PMConstants.CHAT_SESSION_STICKY.NONE));
+
+	CONFIG_LIST
+		.add(new ConfigMeta("Enable Beta UI", "postman.ui.beta").optionsOnOff().defaultValue(ConfigOption.OFF));
+
 	CONFIG_LIST.add(new ConfigMeta("Agent Panel Color Scheme", "postman.agent.scheme.color")
-		.inputType(InputType.COLOR).defaultValue("#4b56c0"));
+		.inputType(InputType.COLOR).defaultValue("#4267b2"));
+
+	CONFIG_LIST.add(new ConfigMeta("Agent Color Scheme 2", "postman.agent.scheme2.color")
+		.inputType(InputType.COLOR_PALLETE).defaultValue(new ConfigMeta.ColorPalette()));
     }
 
 }

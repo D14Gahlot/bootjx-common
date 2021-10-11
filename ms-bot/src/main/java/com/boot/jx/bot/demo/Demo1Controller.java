@@ -73,6 +73,7 @@ public class Demo1Controller extends ChatController {
 	case "menu":
 	    showDemoMenu(inboxMessage, matcher);
 	case "ASSET MANAGEMENT":
+	case "ASSETMANAGMENT":
 	case "1":
 	    chatContext.getSession().data().put(CURRENT_DEMO, "1");
 	    showDemoMenu(inboxMessage, matcher);
@@ -338,6 +339,18 @@ public class Demo1Controller extends ChatController {
 	}
 	switch (thisMessage) {
 	case "MENU":
+	    showDemoMenu(inboxMessage, matcher);
+	    return true;
+
+	case "/ASSETMANAGMENT":
+	case "ASSETMANAGMENT":
+	    chatContext.getSession().data().put(CURRENT_DEMO, "1");
+	    showDemoMenu(inboxMessage, matcher);
+	    return true;
+
+	case "/RETAIL":
+	case "RETAIL":
+	    chatContext.getSession().data().put(CURRENT_DEMO, "2");
 	    showDemoMenu(inboxMessage, matcher);
 	    return true;
 

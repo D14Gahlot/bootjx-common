@@ -12,13 +12,13 @@ public class PMConstants {
 	public static final String NO_USER = "__USER__";
 
     }
-    
+
     public static class MESSAGE_BOUND_TYPE {
-        public static final String INBOUND = "I";
-        public static final String INBOUND_IMPORTED = "Ii";
-    
-        public static final String OUTBOUND = "O";
-        public static final String OUTBOUND_IMPORTED = "Oi";
+	public static final String INBOUND = "I";
+	public static final String INBOUND_IMPORTED = "Ii";
+
+	public static final String OUTBOUND = "O";
+	public static final String OUTBOUND_IMPORTED = "Oi";
     }
 
     public final class CHANNEL_TYPE {
@@ -30,7 +30,6 @@ public class PMConstants {
 	public static final String WA_360D = "wa360";
 	public static final String WEB = "web";
     }
-    
 
     public enum CHANNEL_TYPE_ENUM {
 	tg, tw, fb, wags, wa360, web
@@ -48,7 +47,12 @@ public class PMConstants {
 	public static final String MANUAL = "MANUAL";
 	public static final String ROUND_ROBIN = "ROUND_ROBIN";
 	public static final String STRICT_DEFAULT = "STRICT_DEFAULT";
-	public static final String STICKY = "STICKY"; // TODO:-
+    }
+
+    public static class CHAT_SESSION_STICKY {
+	public static final String NONE = "NONE";
+	public static final String ONAVAILABLE = "ONAVAILABLE";
+	public static final String STRICT = "STRICT"; // TODO:-
     }
 
     public static String CHANNEL_TYPE(String contactType, String channel) {
@@ -119,7 +123,5 @@ public class PMConstants {
 	public static final String DOC_SCAN_ID = "/scan/id";
 
     }
-
-
 
 }
