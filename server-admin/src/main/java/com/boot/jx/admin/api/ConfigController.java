@@ -31,6 +31,8 @@ import com.boot.jx.postman.tw.TwitterConfigDetails;
 import com.boot.utils.ArgUtil;
 import com.fasterxml.jackson.annotation.JsonView;
 
+import io.swagger.annotations.ApiParam;
+
 @RestController
 public class ConfigController {
 
@@ -87,72 +89,6 @@ public class ConfigController {
 	PMConfigurationDoc config = mongoTemplate.findById(AppContextUtil.getTenant(), PMConfigurationDoc.class);
 	adminConfigService.saveConfigs(config);
 	return ApiResponse.buildResults(pmEnvironment.config());
-    }
-
-    @Deprecated
-    @RequestMapping(value = "/api/config/fb", method = { RequestMethod.POST })
-    public ApiResponse<PMConfigurationDoc, Object> addFacebookConfig(@RequestParam String pageId,
-	    @RequestParam String type, @RequestParam String verifyToken, @RequestParam String appSecret,
-	    @RequestParam String accessToken,
-	    @RequestParam(defaultValue = "false", required = false) boolean disabled) {
-	FacebookConfigDetails fbconfig = new FacebookConfigDetails();
-	fbconfig.setPageId(pageId);
-	fbconfig.setType(type);
-	fbconfig.setVerifyToken(verifyToken);
-	fbconfig.setAccessToken(accessToken);
-	fbconfig.setAppSecret(appSecret);
-	adminConfigService.save(new ChannelConfig().from(fbconfig).disabled(disabled));
-	return ApiResponse.buildResults(mongoTemplate.findById(AppContextUtil.getTenant(), PMConfigurationDoc.class));
-    }
-
-    @Deprecated
-    @RequestMapping(value = "/api/config/tw", method = { RequestMethod.POST })
-    public ApiResponse<PMConfigurationDoc, Object> addTwitterConfig(@RequestParam String handler,
-	    @RequestParam String type, @RequestParam String consumerKey, @RequestParam String consumerSecret,
-	    @RequestParam String accessTokenSecret, @RequestParam String accessToken,
-	    @RequestParam(required = false) String envName, @RequestParam String webhookUrl,
-	    @RequestParam(defaultValue = "false", required = false) boolean disabled) {
-	TwitterConfigDetails fbconfig = new TwitterConfigDetails();
-	fbconfig.setHandler(handler);
-	fbconfig.setType(type);
-	fbconfig.setEnvName(envName);
-	fbconfig.setAccessToken(accessToken);
-	fbconfig.setAccessTokenSecret(accessTokenSecret);
-	fbconfig.setConsumerKey(consumerKey);
-	fbconfig.setConsumerSecret(consumerSecret);
-	fbconfig.setWebhookUrl(webhookUrl);
-	adminConfigService.save(new ChannelConfig().from(fbconfig).disabled(disabled));
-	return ApiResponse.buildResults(mongoTemplate.findById(AppContextUtil.getTenant(), PMConfigurationDoc.class));
-    }
-
-    @Deprecated
-    @RequestMapping(value = "/api/config/tg", method = { RequestMethod.POST })
-    public ApiResponse<PMConfigurationDoc, Object> addTelegramConfig(@RequestParam String handler,
-	    @RequestParam String type, @RequestParam String accessToken, @RequestParam(required = false) String envName,
-	    @RequestParam String webhookUrl, @RequestParam(defaultValue = "false", required = false) boolean disabled) {
-	TelegramConfigDetails fbconfig = new TelegramConfigDetails();
-	fbconfig.setHandler(handler);
-	fbconfig.setType(type);
-	fbconfig.setAccessToken(accessToken);
-	fbconfig.setWebhookUrl(webhookUrl);
-	adminConfigService.save(new ChannelConfig().from(fbconfig).disabled(disabled));
-	return ApiResponse.buildResults(mongoTemplate.findById(AppContextUtil.getTenant(), PMConfigurationDoc.class));
-    }
-
-    @Deprecated
-    @RequestMapping(value = "/api/config/gs", method = { RequestMethod.POST })
-    public ApiResponse<PMConfigurationDoc, Object> addWAConfig(@RequestParam String number,
-	    @RequestParam(required = false) String notifyId, @RequestParam String chatId, @RequestParam String chatPass,
-	    @RequestParam(required = false) String notifyPass,
-	    @RequestParam(defaultValue = "false", required = false) boolean disabled) {
-	GupShupConfigDetails fbconfig = new GupShupConfigDetails();
-	fbconfig.setNumber(number);
-	fbconfig.setChatId(chatId);
-	fbconfig.setChatPass(chatPass);
-	fbconfig.setNotifyId(notifyId);
-	fbconfig.setNotifyPass(notifyPass);
-	adminConfigService.save(new ChannelConfig().from(fbconfig).disabled(disabled));
-	return ApiResponse.buildResults(mongoTemplate.findById(AppContextUtil.getTenant(), PMConfigurationDoc.class));
     }
 
     @RequestMapping(value = "/api/config/cdn", method = { RequestMethod.POST })

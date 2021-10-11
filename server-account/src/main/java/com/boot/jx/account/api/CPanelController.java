@@ -37,6 +37,10 @@ import com.boot.jx.postman.wa360.WA360ConfigDetails;
 import com.boot.utils.ArgUtil;
 import com.fasterxml.jackson.annotation.JsonView;
 
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiParam;
+
 @Controller
 @RequestMapping("/cpanel")
 public class CPanelController {
@@ -214,8 +218,9 @@ public class CPanelController {
     @ResponseBody
     @RequestMapping(value = "/api/config/cdn", method = { RequestMethod.POST })
     public ApiResponse<PMConfigurationObject, Object> updateCDN(@RequestParam(required = false) String url,
-	    @RequestParam(required = false) String version) {
-	PMConfigurationObject config = pmEnvironment.get("mry.cdn.url");
+	    @RequestParam(required = false) String version,
+	    @RequestParam(required = false, defaultValue = "false") boolean beta) {
+	PMConfigurationObject config = pmEnvironment.get(beta ? "mry.cdn.url.beta" : "mry.cdn.url");
 	String oldUrl = config.asString();
 
 	if (ArgUtil.is(version) && ArgUtil.is(oldUrl)) {
