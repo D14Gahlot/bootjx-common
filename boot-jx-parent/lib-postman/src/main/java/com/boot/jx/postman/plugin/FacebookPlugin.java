@@ -40,6 +40,7 @@ public class FacebookPlugin implements ChannelPlugin<FacebookConfigDetails> {
     public void addConfigMeta(List<ConfigMeta> list) {
 	list.add(new ConfigMeta().path("facebook.pageId").title("Page Id"));
 	list.add(new ConfigMeta().path("facebook.type").title("Type").optionValues("page").hidden());
+	list.add(new ConfigMeta().path("facebook.handler").title("Handler"));
 	list.add(new ConfigMeta().path("facebook.verifyToken").title("Verify Token"));
 	list.add(new ConfigMeta().path("facebook.accessToken").title("Access Token"));
 	list.add(new ConfigMeta().path("facebook.appSecret").title("App Secret"));
@@ -48,6 +49,7 @@ public class FacebookPlugin implements ChannelPlugin<FacebookConfigDetails> {
     @Override
     public void extractChannelDetailsFromMap(FacebookConfigDetails channelDetails, MapModel map) {
 	channelDetails.setPageId(map.path("facebook.pageId").asString(channelDetails.getPageId()));
+	channelDetails.setHandler(map.path("facebook.handler").asString(channelDetails.getHandler()));
 	channelDetails.setType(map.path("facebook.type").asString(channelDetails.getType()));
 	channelDetails.setVerifyToken(map.path("facebook.verifyToken").asString(channelDetails.getVerifyToken()));
 	channelDetails.setAccessToken(map.path("facebook.accessToken").asString(channelDetails.getAccessToken()));
