@@ -17,7 +17,6 @@ import com.boot.jx.dict.FileType;
 import com.boot.jx.postman.client.TmplClient;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.QuickMedia;
-import com.boot.jx.postman.gupshup.GupShupConfigClient;
 import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.OutboxMessage;
@@ -43,8 +42,6 @@ public class TwitterConnector extends AbstractConnector {
 	@Autowired
 	private TwitterClient twitterClient;
 
-	@Autowired
-	protected GupShupConfigClient gupShupConfig;
 
 	@Autowired
 	private MongoTemplate mongoTemplate;

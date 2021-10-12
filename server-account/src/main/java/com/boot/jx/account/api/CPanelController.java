@@ -90,20 +90,20 @@ public class CPanelController {
     @RequestMapping(value = "/api/config", method = { RequestMethod.POST })
     public ApiResponse<Map<String, Object>, Object> setConfig(@RequestBody PMConfigurationObject map) {
 	configManager.save(map);
-	return ApiResponse.buildResults(configManager.getAdminConfigs());
+	return ApiResponse.buildResults(configManager.getSetupConfigs());
     }
 
     @ResponseBody
     @RequestMapping(value = "/api/config", method = { RequestMethod.GET })
     public ApiResponse<Map<String, Object>, Object> getConfig(@RequestParam(required = false) String key) {
-	return ApiResponse.buildResults(configManager.getAdminConfigs(key));
+	return ApiResponse.buildResults(configManager.getConfigs(key));
     }
 
     @ResponseBody
     @RequestMapping(value = "/api/config", method = { RequestMethod.DELETE })
     public ApiResponse<Map<String, Object>, Object> deleteConfig(@RequestParam(required = false) String key) {
 	configManager.deleteAdminConfigs(key);
-	return ApiResponse.buildResults(configManager.getAdminConfigs());
+	return ApiResponse.buildResults(configManager.getSetupConfigs());
     }
 
     @ResponseBody

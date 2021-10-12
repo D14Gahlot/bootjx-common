@@ -6,13 +6,14 @@ import org.springframework.stereotype.Component;
 import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorHandler;
 import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorMapping;
 import com.boot.jx.dict.ContactType;
+import com.boot.jx.postman.PMConfiguration;
+import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.client.PostManClient;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.gupshup.GupShupClientAgent;
 import com.boot.jx.postman.gupshup.GupShupClientChat;
 import com.boot.jx.postman.gupshup.GupShupClientNotify;
-import com.boot.jx.postman.gupshup.GupShupConfigClient;
 import com.boot.jx.postman.gupshup.GupShupInboundV2;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.Message;
@@ -20,6 +21,8 @@ import com.boot.jx.postman.model.MessageBox;
 import com.boot.jx.postman.model.MessageDefinitions.IMessageExtended;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.model.WAMessage.Channel;
+import com.boot.jx.postman.plugin.ChannelConfig;
+import com.boot.jx.utils.PostManUtil;
 import com.boot.utils.ArgUtil;
 
 @Component
@@ -39,7 +42,7 @@ public class WAGupShupAgentConnector implements ConnectorHandler {
     private PostManClient postManClient;
 
     @Autowired
-    protected GupShupConfigClient gupShupConfig;
+    private PMEnvironment environment;
 
     @Override
     public void send(ChatContactDoc chatContactDoc, OutboxMessage outboxMessage) {
@@ -83,11 +86,15 @@ public class WAGupShupAgentConnector implements ConnectorHandler {
 
     @Override
     public InboxMessage assignToAgent(InboxMessage inboxMessage) {
+
+	PMConfiguration config = environment.config();
+	String channelId = PostManUtil.CHANNEL_ID(inboxMessage.contact());
+	ChannelConfig channelConfig = config.channels(channelId);
+
 	if (ArgUtil.isEqual(inboxMessage.contact().getChannel(), Channel.GUPSHUPAGENT.toString())) {
-	    gupShupAgentClient.assignToAgent(inboxMessage.getTo().get(0), inboxMessage.getFrom(),
-		    inboxMessage.session().getDept());
+	    gupShupAgentClient.assignToAgent(inboxMessage);
 	} else if (ArgUtil.isEqual(inboxMessage.contact().getChannel(), Channel.DEFAULT.toString())) {
-	    Message<?> reply = inboxMessage.replyMessage("Call us @ " + gupShupConfig.getGupShupWaNumber());
+	    Message<?> reply = inboxMessage.replyMessage("Call us @ " + channelConfig.getGupshup().getNumber());
 	    MessageBox mb = new MessageBox();
 	    mb.push(reply);
 	    postManClient.send(mb);

@@ -24,7 +24,6 @@ import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.QuickMedia;
 import com.boot.jx.postman.gupshup.GupShupClientChat;
 import com.boot.jx.postman.gupshup.GupShupClientNotify;
-import com.boot.jx.postman.gupshup.GupShupConfigClient;
 import com.boot.jx.postman.gupshup.GupShupDeliveryResp;
 import com.boot.jx.postman.gupshup.GupShupDeliveryResp.GupShupDeliveryDto;
 import com.boot.jx.postman.gupshup.GupShupInbound;
@@ -55,9 +54,6 @@ public class WAGupShupConnector implements ConnectorHandler {
 
     @Autowired
     private GupShupClientNotify gupShupNotifyClient;
-
-    @Autowired
-    protected GupShupConfigClient gupShupConfig;
 
     @Autowired
     private MongoTemplate mongoTemplate;

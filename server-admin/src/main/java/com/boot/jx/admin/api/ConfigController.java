@@ -23,15 +23,9 @@ import com.boot.jx.postman.PMEnvironment.AChannelDetails;
 import com.boot.jx.postman.PMEnvironment.PMConfigurationObject;
 import com.boot.jx.postman.doc.PMConfigurationDoc;
 import com.boot.jx.postman.doc.config.ClientKeyConfigDoc;
-import com.boot.jx.postman.fb.FacebookConfigDetails;
-import com.boot.jx.postman.gupshup.GupShupConfigDetails;
 import com.boot.jx.postman.plugin.ChannelConfig;
-import com.boot.jx.postman.tg.TelegramConfigDetails;
-import com.boot.jx.postman.tw.TwitterConfigDetails;
 import com.boot.utils.ArgUtil;
 import com.fasterxml.jackson.annotation.JsonView;
-
-import io.swagger.annotations.ApiParam;
 
 @RestController
 public class ConfigController {
@@ -54,13 +48,13 @@ public class ConfigController {
     @RequestMapping(value = "/api/config", method = { RequestMethod.POST })
     public ApiResponse<Map<String, Object>, Object> setConfig(@RequestBody PMConfigurationObject map) {
 	adminConfigService.save(map);
-	return ApiResponse.buildResults(adminConfigService.getAdminConfigs());
+	return ApiResponse.buildResults(adminConfigService.getSetupConfigs());
     }
 
     @ResponseBody
     @RequestMapping(value = "/api/config", method = { RequestMethod.GET })
     public ApiResponse<Map<String, Object>, Object> getConfig(@RequestParam(required = false) String key) {
-	return ApiResponse.buildResults(configManager.getAdminConfigs(key));
+	return ApiResponse.buildResults(configManager.getConfigs(key));
     }
 
     @ResponseBody

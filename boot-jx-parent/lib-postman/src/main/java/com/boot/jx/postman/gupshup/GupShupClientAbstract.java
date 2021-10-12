@@ -24,8 +24,7 @@ import com.boot.utils.JsonUtil;
 
 public abstract class GupShupClientAbstract {
 
-    @Autowired
-    protected GupShupConfigClient gupShupConfig;
+    public static final String API_URL = "https://media.smsgupshup.com";
 
     @Autowired
     protected RestService restService;
@@ -40,7 +39,7 @@ public abstract class GupShupClientAbstract {
     private PMEnvironment environment;
 
     private Ajax ajax(GupShupReq req, boolean encrypt) {
-	Ajax ajax = restService.ajax(gupShupConfig.getGupShupApiUrl()).path("/GatewayAPI/rest");
+	Ajax ajax = restService.ajax(API_URL).path("/GatewayAPI/rest");
 
 	if (ArgUtil.isEmpty(req.getWaNumber())) {
 	    throw new PostManException("No lane " + req.getWaNumber());

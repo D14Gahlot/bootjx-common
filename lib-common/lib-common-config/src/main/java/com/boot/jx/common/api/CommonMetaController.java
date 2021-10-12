@@ -1,7 +1,10 @@
 package com.boot.jx.common.api;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -11,6 +14,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.boot.jx.api.ApiResponse;
+import com.boot.jx.common.config.ConfigConstants;
+import com.boot.jx.common.config.ConfigManager;
 import com.boot.jx.common.impl.ConfigMeta;
 import com.boot.jx.postman.PMConstants.CHANNEL_TYPE_ENUM;
 import com.boot.jx.postman.PMEnvironment;
@@ -61,6 +66,21 @@ public class CommonMetaController {
     public ApiResponse<AChannelDetails, Object> listActiveLanes() {
 	pmEnvironment.reload();
 	return ApiResponse.buildResults(pmEnvironment.config().listChannels());
+    }
+
+    @Autowired
+    private ConfigManager configManager;
+
+    @RequestMapping(value = { "/api/config/app" }, method = { RequestMethod.GET })
+    public ApiResponse<Map<String, Object>, Object> appConfig() {
+	pmEnvironment.reload();
+	return ApiResponse.buildResults(configManager.getAppConfigs());
+    }
+
+    @RequestMapping(value = { "/api/config/setup" }, method = { RequestMethod.GET })
+    public ApiResponse<Map<String, Object>, Object> setConfig() {
+	pmEnvironment.reload();
+	return ApiResponse.buildResults(configManager.getSetupConfigs());
     }
 
 }

@@ -5,7 +5,7 @@ import java.util.Map;
 public class AppConfigPackage {
     public interface AppCommonConfig {
 
-	public Map<String, Object> toMap();
+	public Map<String, Object> configAttributes();
 
 	public String getCdnServer();
 
