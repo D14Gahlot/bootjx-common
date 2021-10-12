@@ -287,9 +287,12 @@ public class MsgController {
     /** search by status or tagCategory **/
     @ResponseBody
     @RequestMapping(value = "/api/sessions/searchby/statusorcategory", method = { RequestMethod.GET })
-    public ApiResponse<ChatSessionDTO, Object> getByStatusOrCategory(@RequestParam(required = false,defaultValue ="OPEN") CHAT_STATUS status,@RequestParam(required= false) String tagCategory) {
+    public ApiResponse<ChatSessionDTO, Object> getByStatusOrCategory(@RequestParam(required = false,defaultValue ="OPEN") CHAT_STATUS status,
+    		@RequestParam(required= false) String tagCategory,
+    		@RequestParam(required= false) long dateRange1,
+    		@RequestParam(required= false) long dateRange2) {
 	List<ChatSessionDTO> chatSessionDtos = new ArrayList<ChatSessionDTO>();
-	List<ChatSessionDoc> sessions = sessionStore.findByStatusOrCategory(status,tagCategory);
+	List<ChatSessionDoc> sessions = sessionStore.findByStatusOrCategory(status,tagCategory,dateRange1,dateRange2);
 	for (ChatSessionDoc chatSessionDoc : sessions) {
 		ChatSessionDTO chatSessionDto = chatArchive.withContact(chatSessionDoc);
 		chatSessionDtos.add(chatSessionDto);

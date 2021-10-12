@@ -558,12 +558,17 @@ public class SessionStore extends CommonDocStore {
 	}
 	
 	/** search by status or by tag category**/
-	public List<ChatSessionDoc> findByStatusOrCategory(CHAT_STATUS status,String tagCategory) {
-		Query query2 = new Query();
-		query2.addCriteria(new Criteria().orOperator(Criteria.where("status").is(status.toString()),
-			    Criteria.where("tagCategory").is(tagCategory)));
+	public List<ChatSessionDoc> findByStatusOrCategory(CHAT_STATUS status,String tagCategory,long dateRange1,long dateRange2) {
+		Query query = new Query();
+		//query2.addCriteria(new Criteria().orOperator(Criteria.where("status").is(status.toString()),
+		//	    Criteria.where("tagCategory").is(tagCategory)));
 		
-		return mongoTemplate.find(query2, ChatSessionDoc.class);
+		query.addCriteria(Criteria.where("status").is(status.toString()));
+		query.addCriteria(Criteria.where("assignedAgentStamp").gt(dateRange1).lt(dateRange2));
+		if(ArgUtil.is(tagCategory)) {
+			query.addCriteria(Criteria.where("tagCategory").is(tagCategory));
+		}
+		return mongoTemplate.find(query, ChatSessionDoc.class);
 	}
 
 }
