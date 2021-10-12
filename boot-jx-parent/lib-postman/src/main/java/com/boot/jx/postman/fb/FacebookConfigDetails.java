@@ -4,6 +4,7 @@ import com.boot.jx.dict.ContactType;
 import com.boot.jx.postman.PMConstants.CHANNEL_TYPE;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PMEnvironment.AChannelDetails;
+import com.boot.utils.ArgUtil;
 import com.fasterxml.jackson.annotation.JsonView;
 
 public class FacebookConfigDetails extends AChannelDetails {
@@ -14,6 +15,7 @@ public class FacebookConfigDetails extends AChannelDetails {
 
     private static final long serialVersionUID = -2397678752642150000L;
     private String pageId;
+    private String handler;
     private String type;
 
     @JsonView(PMEnvironment.ProtectedProperty.class)
@@ -96,6 +98,25 @@ public class FacebookConfigDetails extends AChannelDetails {
     @Override
     public String getChannel() {
 	return null;
+    }
+
+    public String getHandler() {
+	return handler;
+    }
+
+    public void setHandler(String handler) {
+	this.handler = handler;
+    }
+
+    @Override
+    public String getName() {
+	if (!ArgUtil.is(this.name)) {
+	    if (ArgUtil.is(this.handler)) {
+		return this.handler;
+	    }
+	    return String.format("FB %s", this.getLane());
+	}
+	return name;
     }
 
 }
