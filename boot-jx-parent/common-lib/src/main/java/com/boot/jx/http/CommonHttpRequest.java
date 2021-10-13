@@ -1,8 +1,10 @@
 package com.boot.jx.http;
 
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -478,6 +480,7 @@ public class CommonHttpRequest extends ACommonHttpRequest {
 	    Set<Entry<RequestMappingInfo, HandlerMethod>> x = requestMappingHandlerMapping.getHandlerMethods()
 		    .entrySet();
 	    for (Entry<RequestMappingInfo, HandlerMethod> requestMappingInfo : x) {
+
 		HandlerMethod handlerMethod = requestMappingInfo.getValue();
 		ApiRequest apiRequest = handlerMethod.getMethodAnnotation(ApiRequest.class);
 		if (apiRequest == null) {
@@ -508,7 +511,7 @@ public class CommonHttpRequest extends ACommonHttpRequest {
 	boolean useAuthKey;
 	String flow;
 	String feature;
-	String[] perms;
+	Set<String> rules;
 	String traceFilter;
 	String deprecated;
 	Channel channel;
@@ -603,12 +606,12 @@ public class CommonHttpRequest extends ACommonHttpRequest {
 	    this.initFlow = initFlow;
 	}
 
-	public String[] getPerms() {
-	    return perms;
+	public Set<String> getRules() {
+	    return rules;
 	}
 
-	public void setPerms(String[] perms) {
-	    this.perms = perms;
+	public void setRules(String[] rules) {
+	    this.rules = new HashSet<String>(Arrays.asList(rules));
 	}
 
     }
@@ -628,7 +631,7 @@ public class CommonHttpRequest extends ACommonHttpRequest {
 	    detail.setChannel(x.channel());
 	    detail.setInitFlow(x.initFlow());
 	    detail.setAuthenticateTenant(x.authenticateTenant());
-	    detail.setPerms(x.perms());
+	    detail.setRules(x.rules());
 	}
 
 	if (ArgUtil.isEmpty(detail.getType()) || RequestType.DEFAULT.equals(detail.getType())) {

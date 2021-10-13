@@ -28,7 +28,7 @@ import com.boot.jx.account.doc.AccountMeta;
 import com.boot.jx.account.doc.AccountStore;
 import com.boot.jx.account.doc.CompanyDoc;
 import com.boot.jx.account.doc.DomainDoc;
-import com.boot.jx.account.doc.DomainUserDoc;
+import com.boot.jx.account.doc.BusinessUserDoc;
 import com.boot.jx.account.doc.SignupContact;
 import com.boot.jx.api.ApiFieldError;
 import com.boot.jx.api.ApiResponse;
@@ -129,7 +129,7 @@ public class PartnerController {
     public ApiResponse<Object, Object> register(Model model, HttpServletRequest request,
 	    HttpServletResponse httpServletResponse, @RequestBody @Valid SignupContact signupContact) {
 
-	DomainUserDoc account = accountStore.findOneByEmail(signupContact.getEmail(), DomainUserDoc.class);
+	BusinessUserDoc account = accountStore.findOneByEmail(signupContact.getEmail(), BusinessUserDoc.class);
 	if (ArgUtil.is(account)) {
 	    ApiResponseUtil.throwDuplicateInputException("Email address already in use. Try reset password.",
 		    new ApiFieldError().obzect("signupContact").field("email").codeKey("ValidEmailDuplicate")
@@ -139,7 +139,7 @@ public class PartnerController {
 	AccountMeta keys = new AccountMeta();
 	keys.setEmailVerificationCode(UUID.randomUUID().toString());
 
-	account = new DomainUserDoc();
+	account = new BusinessUserDoc();
 	account.setContact(signupContact);
 	account.setMeta(keys);
 
@@ -155,7 +155,7 @@ public class PartnerController {
 	    HttpServletResponse httpServletResponse, @RequestParam String code, @RequestParam String account,
 	    @RequestParam String newpass) throws NoSuchAlgorithmException {
 
-	DomainUserDoc accountDoc = accountStore.findById(account, DomainUserDoc.class);
+	BusinessUserDoc accountDoc = accountStore.findById(account, BusinessUserDoc.class);
 	if (!ArgUtil.is(accountDoc) || !ArgUtil.is(accountDoc.getMeta())
 		|| !ArgUtil.is(accountDoc.getMeta().getEmailVerificationCode())
 		|| !accountDoc.getMeta().getEmailVerificationCode().equals(code)) {
@@ -177,7 +177,7 @@ public class PartnerController {
     public ApiResponse<Object, Object> forgotPass(Model model, HttpServletRequest request,
 	    HttpServletResponse httpServletResponse, @RequestParam String email) throws NoSuchAlgorithmException {
 
-	DomainUserDoc accountDoc = accountStore.findOneByEmail(email, DomainUserDoc.class);
+	BusinessUserDoc accountDoc = accountStore.findOneByEmail(email, BusinessUserDoc.class);
 
 	if (!ArgUtil.is(accountDoc)) {
 	    ApiResponseUtil.throwException("Email not registered");
@@ -196,7 +196,7 @@ public class PartnerController {
 	    HttpServletResponse httpServletResponse, @RequestParam String email, @RequestParam String password,
 	    @RequestParam String newpass) throws NoSuchAlgorithmException {
 
-	DomainUserDoc accountDoc = accountStore.findOneByEmail(email, DomainUserDoc.class);
+	BusinessUserDoc accountDoc = accountStore.findOneByEmail(email, BusinessUserDoc.class);
 
 	if (!ArgUtil.is(accountDoc)
 		|| !ArgUtil.areEqual(CryptoUtil.getSHA2Hash(newpass), accountDoc.getMeta().getPassword())) {
@@ -218,7 +218,7 @@ public class PartnerController {
     @ResponseBody
     @RequestMapping(value = { "/api/domain" }, method = { RequestMethod.GET })
     public ApiResponse<DomainDoc, Object> getDomain() {
-	DomainUserDoc domainUser = adminSessionBean.domainUser();
+	BusinessUserDoc domainUser = adminSessionBean.domainUser();
 
 	if (!ArgUtil.is(domainUser)) {
 	    ApiResponseUtil.throwException("Access Denied");
@@ -274,7 +274,7 @@ public class PartnerController {
 	    HttpServletResponse httpServletResponse, @RequestBody @Valid DomainDoc domain,
 	    @RequestParam(required = false) boolean create) throws NoSuchAlgorithmException {
 
-	DomainUserDoc domainUser = adminSessionBean.domainUser();
+	BusinessUserDoc domainUser = adminSessionBean.domainUser();
 
 	if (ArgUtil.is(domainUser.getDomains())) {
 	    DomainDoc domainDoc = CollectionUtil.first(domainUser.getDomains());
@@ -314,7 +314,7 @@ public class PartnerController {
     @RequestMapping(value = "/api/domain/logo", method = { RequestMethod.POST })
     public ApiResponse<String, Object> upploadDomainLogo(
 	    @RequestParam(name = "file", required = false) MultipartFile file) {
-	DomainUserDoc domainUser = adminSessionBean.domainUser();
+	BusinessUserDoc domainUser = adminSessionBean.domainUser();
 	String domainUserId = domainUser.getId();
 	String url = fileStore.upload1(file,
 		String.format("%s/docs/%s/logo/%s", AppContextUtil.getTenant(), domainUserId, UUID.randomUUID()),

@@ -35,6 +35,7 @@ import com.boot.jx.postman.store.MessageContext;
 import com.boot.jx.postman.store.MessageStore;
 import com.boot.jx.stomp.StompTunnelService;
 import com.boot.jx.utils.PostManUtil;
+import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
 
 @Component
@@ -111,6 +112,29 @@ public class ConnectorHandlerFactory extends ScopedBeanFactory<String, Connector
 		inboxMessage.contact().setLane(channelConfig.getLane());
 	    }
 	    return inboxMessage;
+	}
+
+	/**
+	 * 
+	 * This method is invoked when message from ChannelProvider is recvd and is to
+	 * be formatted into InboxMessage format Basically this method should be
+	 * implemented to convert channel message fromt to internal format
+	 * 
+	 * @param channelConfig
+	 * @param map
+	 * @return
+	 */
+	public List<InboxMessage> extractInboxMessages(ChannelConfig channelConfig, MapModel map);
+
+	/**
+	 * This method is invoked after message from ChannelProvider has been processed
+	 * 
+	 * @param channelConfig
+	 * @param inboxMessages
+	 * @return
+	 */
+	default List<InboxMessage> onReadInboxMessage(ChannelConfig channelConfig, List<InboxMessage> inboxMessages) {
+	    return inboxMessages;
 	}
 
     }
@@ -231,7 +255,7 @@ public class ConnectorHandlerFactory extends ScopedBeanFactory<String, Connector
 	    } else {
 		outboxMessage.logs().add(String.format("Connector not defined for %s", channelId));
 	    }
-	    
+
 	} catch (Exception e) {
 	    LOGGER.error(messageType, e);
 	}

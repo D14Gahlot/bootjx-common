@@ -71,21 +71,29 @@ public class InBoundControllerWA {
 
     // @ApiRequest(feature = "WA_GUPSHUP_INBOUND")
     @ApiVendorHeaders
-    @RequestMapping(value = "/ext/inbound/gupshup/callback",
+    @RequestMapping(
+	    value = { "/ext/inbound/gupshup/callback",
+		    "/ext/inbound/v2/wags/callback/{accountKey}/{channelId}/{channelKey}" },
 	    method = { RequestMethod.POST, RequestMethod.GET, RequestMethod.PUT })
     public InboxMessage onReceiveMessage(
 	    @RequestBody(required = false) Optional<Map<String, Object>> inboundMapOptional,
-	    @RequestParam(required = false, defaultValue = "false") boolean routed) throws InterruptedException {
+	    @RequestParam(required = false, defaultValue = "false") boolean routed,
+	    @PathVariable(required = false) String accountKey, @PathVariable(required = false) String channelId,
+	    @PathVariable(required = false) String channelKey) throws InterruptedException {
 	if (inboundMapOptional.isPresent()) {
-	    return extracted(inboundMapOptional.get());
+	    return extracted(inboundMapOptional.get(), channelId);
 	}
 	return null;
     }
 
     @ApiVendorHeaders
-    @RequestMapping(value = "/ext/inbound/gupshup/callback", method = { RequestMethod.POST },
-	    consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
-    public InboxMessage onReceiveMessage() throws InterruptedException {
+    @RequestMapping(
+	    value = { "/ext/inbound/gupshup/callback",
+		    "/ext/inbound/v2/wags/callback/{accountKey}/{channelId}/{channelKey}" },
+	    method = { RequestMethod.POST }, consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+    public InboxMessage onReceiveMessage(@PathVariable(required = false) String accountKey,
+	    @PathVariable(required = false) String channelId, @PathVariable(required = false) String channelKey)
+	    throws InterruptedException {
 	Map<String, Object> inboundMap = new HashMap<String, Object>();
 	inboundMap.put("waNumber", commonHttpRequest.get("waNumber"));
 	inboundMap.put("mobile", commonHttpRequest.get("mobile"));
@@ -127,10 +135,10 @@ public class InBoundControllerWA {
 	if (ArgUtil.is(contacts)) {
 	    inboundMap.put("contacts", JsonUtil.fromJsonToMap(contacts));
 	}
-	return extracted(inboundMap);
+	return extracted(inboundMap, channelId);
     }
 
-    private InboxMessage extracted(Map<String, Object> inboundMap) {
+    private InboxMessage extracted(Map<String, Object> inboundMap, String channelId) {
 	try {
 	    InboxMessage event = null;
 	    if (inboundMap.containsKey("waNumber")) {

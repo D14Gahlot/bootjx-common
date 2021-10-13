@@ -11,9 +11,11 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetails;
 import org.springframework.stereotype.Component;
 
+import com.boot.jx.AppConfigPackage.AppCommonConfig;
 import com.boot.jx.AppContextUtil;
-import com.boot.jx.account.doc.DomainUserDoc;
+import com.boot.jx.account.doc.BusinessUserDoc;
 import com.boot.jx.api.ApiResponse;
+import com.boot.jx.postman.PMConstants;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.client.PostManClient;
 import com.boot.jx.postman.model.Email;
@@ -39,6 +41,9 @@ public class AccountAdminService {
     @Autowired
     private RestService restService;
 
+    @Autowired
+    private AppCommonConfig appCommonConfig;
+
     @Value("${mry.app.url}")
     private String appServiceUrl;
 
@@ -50,9 +55,12 @@ public class AccountAdminService {
      * 
      * @param username
      */
-    public void updateLogin(DomainUserDoc account) {
+    public void updateLogin(BusinessUserDoc account) {
 	sessionBean.domainUser(account);
-	sessionBean.setRole("DOMAIN_ADMIN");
+	sessionBean.addRole(PMConstants.USER_ROLE.BUSINESS_USER);
+	if (ArgUtil.areEqual(appCommonConfig.getDuperEmail(), account.getContact().getEmail())) {
+	    sessionBean.addRole(PMConstants.USER_ROLE.DUPER_USER);
+	}
 	this.updateSession();
     }
 
@@ -67,7 +75,7 @@ public class AccountAdminService {
 	this.updateSession();
     }
 
-    public void login(DomainUserDoc account, HttpServletRequest request) {
+    public void login(BusinessUserDoc account, HttpServletRequest request) {
 	UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(
 		account.getContact().getEmail(), account.getMeta().getPassword());
 	token.setDetails(new WebAuthenticationDetails(request));
@@ -78,10 +86,10 @@ public class AccountAdminService {
 
     public boolean validateCpanelUser(String domainId, String domainToken, HttpServletRequest request) {
 	if (ArgUtil.is(domainId) && ArgUtil.is(domainToken)) {
-	    ApiResponse<DomainUserDoc, String> resp = restService.ajax(appServiceUrl).path("/account/pub/auth")
+	    ApiResponse<BusinessUserDoc, String> resp = restService.ajax(appServiceUrl).path("/account/pub/auth")
 		    .header("tnt", "app").field("tnt", "app").field("domain", AppContextUtil.getTenant())
 		    .field("domainId", domainId).field("domainToken", domainToken).post()
-		    .as(new ParameterizedTypeReference<ApiResponse<DomainUserDoc, String>>() {
+		    .as(new ParameterizedTypeReference<ApiResponse<BusinessUserDoc, String>>() {
 		    });
 	    login(resp.getResult(), request);
 	}
@@ -99,7 +107,7 @@ public class AccountAdminService {
     @Autowired
     private PMEnvironment pmEnvironment;
 
-    public void sendResetMail(DomainUserDoc accountDoc, String emailTemplate) {
+    public void sendResetMail(BusinessUserDoc accountDoc, String emailTemplate) {
 	postManClient.send(new MessageBox().push(new Email().to(accountDoc.getContact().getEmail())
 		.template(emailTemplate).put("logo", pmEnvironment.get("mry.prop.logo.bg-x-icon").asString())
 		.put("website", pmEnvironment.get("mry.prop.service.website").asString())

@@ -3,20 +3,23 @@ package com.boot.jx.common.config;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+
+import javax.annotation.PostConstruct;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.core.env.ConfigurableEnvironment;
+import org.springframework.core.env.EnumerablePropertySource;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 
 import com.boot.jx.AppContextUtil;
 import com.boot.jx.chat.ConnectorHandlerFactory;
 import com.boot.jx.common.impl.ConfigMeta;
-import com.boot.jx.common.impl.ConfigMeta.ConfigOption;
-import com.boot.jx.common.impl.ConfigMeta.InputType;
 import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.jx.postman.PMClientConfig;
 import com.boot.jx.postman.PMConfiguration;
-import com.boot.jx.postman.PMConstants;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PMEnvironment.AChannelDetails;
 import com.boot.jx.postman.PMEnvironment.PMConfigurationObject;
@@ -40,19 +43,17 @@ import com.boot.utils.MapBuilder.BuilderMap;
 @PropertySource("classpath:application.app.properties")
 public class ConfigManager {
 
-    public static final List<ConfigMeta> CONFIG_LIST = new ArrayList<ConfigMeta>();
-
     @Autowired
     private CommonMongoTemplate mongoTemplate;
 
     @Autowired
-    ConfigStore configStore;
+    public ConfigStore configStore;
 
     @Autowired
     private SharedConfigManager sharedConfigManager;
 
     @Autowired
-    private PMEnvironment pmEnvironment;
+    public PMEnvironment pmEnvironment;
 
     @Autowired
     private ConnectorHandlerFactory connectorHandlerFactory;
@@ -60,11 +61,11 @@ public class ConfigManager {
     @Autowired
     PMClientConfig pmClientConfig;
 
-    public List<Map<String, Object>> getAdminConfigs() {
+    public List<Map<String, Object>> getSetupConfigs() {
 	List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
 	PMConfigurationDoc doc = mongoTemplate.findById(AppContextUtil.getTenant(), PMConfigurationDoc.class);
 
-	for (ConfigMeta meta : CONFIG_LIST) {
+	for (ConfigMeta meta : ConfigConstants.SETUP_CONFIG_LIST) {
 
 	    switch (meta.getKey()) {
 
@@ -88,28 +89,33 @@ public class ConfigManager {
 	return list;
     }
 
-    public List<Map<String, Object>> getAdminConfigs(String key) {
+    public List<Map<String, Object>> getAppConfigs() {
+	List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
+	for (Entry<String, String> entry : ConfigConstants.APP_CONFIG.entrySet()) {
+	    list.add(MapBuilder.map().put("config", pmEnvironment.get(entry.getKey())).toMap());
+	}
+	return list;
+    }
+
+    public List<Map<String, Object>> getConfigs(String key) {
 	if (!ArgUtil.is(key)) {
-	    return getAdminConfigs();
+	    return this.getSetupConfigs();
 	}
 
 	List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
 
 	BuilderMap mapBuilder = MapBuilder.map();
 
-	for (ConfigMeta meta : CONFIG_LIST) {
+	mapBuilder.put("meta", new ConfigMeta().key(key));
+	for (ConfigMeta meta : ConfigConstants.SETUP_CONFIG_LIST) {
 	    if (meta.getKey().equals(key)) {
 		mapBuilder.put("meta", meta);
-	    } else {
-		mapBuilder.put("meta", new ConfigMeta().key(key));
 	    }
-	    mapBuilder
-
-		    .put("domain", pmEnvironment.config().get(key)) // Domain
-		    .put("shared", pmEnvironment.shared().get(key)) // Shared
-		    .put("config", pmEnvironment.get(key)) // Resolved
-	    ;
 	}
+	mapBuilder.put("domain", this.pmEnvironment.config().get(key)) // Domain
+		.put("shared", this.pmEnvironment.shared().get(key)) // Shared
+		.put("config", this.pmEnvironment.get(key)) // Resolved
+	;
 
 	list.add(mapBuilder.toMap());
 
@@ -251,39 +257,26 @@ public class ConfigManager {
 	return null;
     }
 
-    static {
-	CONFIG_LIST.add(new ConfigMeta("Bot Name", "postman.bot.name"));
-	CONFIG_LIST.add(new ConfigMeta("Contact Details Provider Webhook", "postman.contact.details.url"));
+    @Autowired
+    private Environment environment;
 
-	CONFIG_LIST.add(new ConfigMeta("Chat Tag Enabled", "chat.tag.enabled").optionsOnOff());
-
-	CONFIG_LIST.add(new ConfigMeta("Chat Session Timeout", "postman.chat.session.timeout").optionValues("8hr",
-		"12hr", "16hr", "20hr", "24hr"));
-
-	CONFIG_LIST.add(new ConfigMeta("Chat Alert Timer", "postman.chat.idle.timeout").optionValues("5min", "10min",
-		"15min", "20min", "25min", "30min"));
-
-	CONFIG_LIST.add(new ConfigMeta("Agent can initiate new chat", "postman.agent.chat.init").optionsOnOff());
-
-	CONFIG_LIST.add(new ConfigMeta("Agent Assignment", "postman.agent.chat.assignment")
-		.optionValues(PMConstants.ASSIGNMENT_RULE.ROUND_ROBIN, PMConstants.ASSIGNMENT_RULE.MANUAL,
-			PMConstants.ASSIGNMENT_RULE.STRICT_DEFAULT)
-		.defaultValue(PMConstants.ASSIGNMENT_RULE.ROUND_ROBIN));
-
-	CONFIG_LIST
-		.add(new ConfigMeta("Sticky Session", "postman.agent.chat.stickysession")
-			.optionValues(PMConstants.CHAT_SESSION_STICKY.NONE, PMConstants.CHAT_SESSION_STICKY.ONAVAILABLE,
-				PMConstants.CHAT_SESSION_STICKY.STRICT)
-			.defaultValue(PMConstants.CHAT_SESSION_STICKY.NONE));
-
-	CONFIG_LIST
-		.add(new ConfigMeta("Enable Beta UI", "postman.ui.beta").optionsOnOff().defaultValue(ConfigOption.OFF));
-
-	CONFIG_LIST.add(new ConfigMeta("Agent Panel Color Scheme", "postman.agent.scheme.color")
-		.inputType(InputType.COLOR).defaultValue("#4267b2"));
-
-	CONFIG_LIST.add(new ConfigMeta("Agent Color Scheme 2", "postman.agent.scheme2.color")
-		.inputType(InputType.COLOR_PALLETE).defaultValue(new ConfigMeta.ColorPalette()));
+    @SuppressWarnings("rawtypes")
+    @PostConstruct
+    public void init() {
+	for (org.springframework.core.env.PropertySource<?> propertySource : ((ConfigurableEnvironment) environment)
+		.getPropertySources()) {
+	    if (propertySource instanceof EnumerablePropertySource) {
+		for (String key : ((EnumerablePropertySource) propertySource).getPropertyNames()) {
+		    for (String prefix : ConfigConstants.APP_CONFIG_PREFIX) {
+			if (key.startsWith(prefix)) {
+			    String shortKey = key.replace("mry.prop.", "");
+			    String newKey = shortKey.replaceAll("[\\.@\\-$]", "_").toUpperCase();
+			    ConfigConstants.APP_CONFIG.put(key, "PROP_" + newKey);
+			}
+		    }
+		}
+	    }
+	}
     }
 
 }

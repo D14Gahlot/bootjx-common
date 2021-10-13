@@ -17,7 +17,7 @@ import com.boot.utils.ArgUtil;
 
 @Document(collection = "DOMAIN_USER")
 @TypeAlias("DomainUser")
-public class DomainUserDoc implements IDocument, DocVersion, AuditableEntity, Serializable {
+public class BusinessUserDoc implements IDocument, DocVersion, AuditableEntity, Serializable {
 
     private static final long serialVersionUID = -3354844112176554561L;
 

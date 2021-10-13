@@ -25,6 +25,9 @@ public class GupShupConfigDetails extends AChannelDetails {
     @JsonView(PMEnvironment.ProtectedProperty.class)
     private String chatPass;
 
+    @JsonView(PMEnvironment.PublicProperty.class)
+    private String agentUrl;
+
     public String getNumber() {
 	return number;
     }
@@ -98,5 +101,13 @@ public class GupShupConfigDetails extends AChannelDetails {
     @Override
     public String getChannel() {
 	return CHANNEL_TYPE.WA_GUPSHUP;
+    }
+
+    public String getAgentUrl() {
+	return agentUrl;
+    }
+
+    public void setAgentUrl(String agentUrl) {
+	this.agentUrl = agentUrl;
     }
 }

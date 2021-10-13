@@ -101,7 +101,7 @@ public class ExceptionMessageKey extends Dnum<ExceptionMessageKey> implements IM
 	}
 
 	public static void resolveLocalMessage(AmxApiError apiError) {
-		if (apiError.getErrors() != null) {
+		if (apiError.getErrors() != null && apiError.getErrors().size()>0) {
 			ApiFieldError fieldError = apiError.getErrors().get(0);
 			if (fieldError != null) {
 				if (ArgUtil.isEmpty(apiError.getMessageKey())) {

@@ -19,9 +19,12 @@ import com.boot.jx.AppContextUtil;
 import com.boot.jx.account.AccountAdminService;
 import com.boot.jx.account.AccountSessionBean;
 import com.boot.jx.api.ApiResponse;
+import com.boot.jx.common.config.AppCommonAuthFilter.ACCESS_RULES;
 import com.boot.jx.common.config.CDNBuilder;
 import com.boot.jx.common.config.ConfigManager;
+import com.boot.jx.http.ApiRequest;
 import com.boot.jx.postman.PMConfiguration;
+import com.boot.jx.postman.PMConstants;
 import com.boot.jx.postman.PMConstants.CHANNEL_TYPE_ENUM;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PMEnvironment.AChannelDetails;
@@ -86,24 +89,12 @@ public class CPanelController {
 	return "app-cpanel";
     }
 
-    @ResponseBody
-    @RequestMapping(value = "/api/config", method = { RequestMethod.POST })
-    public ApiResponse<Map<String, Object>, Object> setConfig(@RequestBody PMConfigurationObject map) {
-	configManager.save(map);
-	return ApiResponse.buildResults(configManager.getAdminConfigs());
-    }
-
-    @ResponseBody
-    @RequestMapping(value = "/api/config", method = { RequestMethod.GET })
-    public ApiResponse<Map<String, Object>, Object> getConfig(@RequestParam(required = false) String key) {
-	return ApiResponse.buildResults(configManager.getAdminConfigs(key));
-    }
-
+    @ApiRequest(rules = ACCESS_RULES.ONLY_DUPERUSER)
     @ResponseBody
     @RequestMapping(value = "/api/config", method = { RequestMethod.DELETE })
     public ApiResponse<Map<String, Object>, Object> deleteConfig(@RequestParam(required = false) String key) {
 	configManager.deleteAdminConfigs(key);
-	return ApiResponse.buildResults(configManager.getAdminConfigs());
+	return ApiResponse.buildResults(configManager.getSetupConfigs());
     }
 
     @ResponseBody
@@ -125,94 +116,6 @@ public class CPanelController {
     @RequestMapping(value = "/api/config/channel/{channelId}", method = { RequestMethod.DELETE })
     public ApiResponse<ChannelConfig, Object> deleteChannelConfig(@PathVariable String channelId) {
 	return ApiResponse.buildResults(configManager.removeChannelConfig(channelId));
-    }
-
-    @Deprecated
-    @ResponseBody
-    @RequestMapping(value = "/api/config/refresh", method = { RequestMethod.GET })
-    public ApiResponse<PMConfiguration, Object> getConnnectors() {
-	PMConfigurationDoc config = mongoTemplate.findById(AppContextUtil.getTenant(), PMConfigurationDoc.class);
-	configManager.saveConfigs(config);
-	return ApiResponse.buildResults(pmEnvironment.config());
-    }
-
-    @ResponseBody
-    @RequestMapping(value = "/api/config/fb", method = { RequestMethod.POST })
-    public ApiResponse<PMConfigurationDoc, Object> addFacebookConfig(@RequestParam String pageId,
-	    @RequestParam String type, @RequestParam String verifyToken, @RequestParam String appSecret,
-	    @RequestParam String accessToken,
-	    @RequestParam(defaultValue = "false", required = false) boolean disabled) {
-	FacebookConfigDetails fbconfig = new FacebookConfigDetails();
-	fbconfig.setPageId(pageId);
-	fbconfig.setType(type);
-	fbconfig.setVerifyToken(verifyToken);
-	fbconfig.setAccessToken(accessToken);
-	fbconfig.setAppSecret(appSecret);
-	configManager.save(new ChannelConfig().from(fbconfig).disabled(disabled));
-	return ApiResponse.buildResults(mongoTemplate.findById(AppContextUtil.getTenant(), PMConfigurationDoc.class));
-    }
-
-    @ResponseBody
-    @RequestMapping(value = "/api/config/tw", method = { RequestMethod.POST })
-    public ApiResponse<PMConfigurationDoc, Object> addTwitterConfig(@RequestParam String handler,
-	    @RequestParam String type, @RequestParam String consumerKey, @RequestParam String consumerSecret,
-	    @RequestParam String accessTokenSecret, @RequestParam String accessToken,
-	    @RequestParam(required = false) String envName, @RequestParam String webhookUrl,
-	    @RequestParam(defaultValue = "false", required = false) boolean disabled) {
-	TwitterConfigDetails fbconfig = new TwitterConfigDetails();
-	fbconfig.setHandler(handler);
-	fbconfig.setType(type);
-	fbconfig.setEnvName(envName);
-	fbconfig.setAccessToken(accessToken);
-	fbconfig.setAccessTokenSecret(accessTokenSecret);
-	fbconfig.setConsumerKey(consumerKey);
-	fbconfig.setConsumerSecret(consumerSecret);
-	fbconfig.setWebhookUrl(webhookUrl);
-	configManager.save(new ChannelConfig().from(fbconfig).disabled(disabled));
-	return ApiResponse.buildResults(mongoTemplate.findById(AppContextUtil.getTenant(), PMConfigurationDoc.class));
-    }
-
-    @ResponseBody
-    @RequestMapping(value = "/api/config/tg", method = { RequestMethod.POST })
-    public ApiResponse<PMConfigurationDoc, Object> addTelegramConfig(@RequestParam String handler,
-	    @RequestParam String type, @RequestParam String accessToken, @RequestParam(required = false) String envName,
-	    @RequestParam String webhookUrl, @RequestParam(defaultValue = "false", required = false) boolean disabled) {
-	TelegramConfigDetails fbconfig = new TelegramConfigDetails();
-	fbconfig.setHandler(handler);
-	fbconfig.setType(type);
-	fbconfig.setAccessToken(accessToken);
-	fbconfig.setWebhookUrl(webhookUrl);
-	configManager.save(new ChannelConfig().from(fbconfig).disabled(disabled));
-	return ApiResponse.buildResults(mongoTemplate.findById(AppContextUtil.getTenant(), PMConfigurationDoc.class));
-    }
-
-    @ResponseBody
-    @RequestMapping(value = "/api/config/gs", method = { RequestMethod.POST })
-    public ApiResponse<PMConfigurationDoc, Object> addWAConfig(@RequestParam String number,
-	    @RequestParam(required = false) String notifyId, @RequestParam String chatId, @RequestParam String chatPass,
-	    @RequestParam(required = false) String notifyPass,
-	    @RequestParam(defaultValue = "false", required = false) boolean disabled) {
-	GupShupConfigDetails fbconfig = new GupShupConfigDetails();
-	fbconfig.setNumber(number);
-	fbconfig.setChatId(chatId);
-	fbconfig.setChatPass(chatPass);
-	fbconfig.setNotifyId(notifyId);
-	fbconfig.setNotifyPass(notifyPass);
-	configManager.save(new ChannelConfig().from(fbconfig).disabled(disabled));
-	return ApiResponse.buildResults(mongoTemplate.findById(AppContextUtil.getTenant(), PMConfigurationDoc.class));
-    }
-
-    @ResponseBody
-    @RequestMapping(value = "/api/config/wa360", method = { RequestMethod.POST })
-    public ApiResponse<PMConfigurationDoc, Object> addWA360Config(@RequestParam String number,
-	    @RequestParam String apiKey, @RequestParam(defaultValue = "false", required = false) boolean disabled,
-	    @RequestParam String webhookUrl) {
-	WA360ConfigDetails config = new WA360ConfigDetails();
-	config.setNumber(number);
-	config.setApiKey(apiKey);
-	config.setWebhookUrl(webhookUrl);
-	configManager.save(config, disabled);
-	return ApiResponse.buildResults(mongoTemplate.findById(AppContextUtil.getTenant(), PMConfigurationDoc.class));
     }
 
     @ResponseBody
@@ -258,6 +161,7 @@ public class CPanelController {
 	return ApiResponse.buildData(configManager.save(clientApiKey));
     }
 
+    @ApiRequest(rules = PMConstants.USER_ROLE.BUSINESS_USER)
     @ResponseBody
     @RequestMapping(value = { "/api/collection/drop" }, method = { RequestMethod.POST })
     public ApiResponse<Object, Object> dropCollection(@RequestParam String collectionName) {
