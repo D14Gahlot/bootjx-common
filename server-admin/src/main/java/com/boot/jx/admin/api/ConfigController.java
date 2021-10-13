@@ -12,16 +12,13 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.boot.jx.AppContextUtil;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.common.config.CDNBuilder;
 import com.boot.jx.common.config.ConfigManager;
-import com.boot.jx.postman.PMConfiguration;
 import com.boot.jx.postman.PMConstants.CHANNEL_TYPE_ENUM;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PMEnvironment.AChannelDetails;
 import com.boot.jx.postman.PMEnvironment.PMConfigurationObject;
-import com.boot.jx.postman.doc.PMConfigurationDoc;
 import com.boot.jx.postman.doc.config.ClientKeyConfigDoc;
 import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.utils.ArgUtil;
@@ -42,21 +39,6 @@ public class ConfigController {
     @Autowired
     private ConfigManager configManager;
 
-    @Autowired
-    private CDNBuilder cdnBuilder;
-
-    @RequestMapping(value = "/api/config", method = { RequestMethod.POST })
-    public ApiResponse<Map<String, Object>, Object> setConfig(@RequestBody PMConfigurationObject map) {
-	adminConfigService.save(map);
-	return ApiResponse.buildResults(adminConfigService.getSetupConfigs());
-    }
-
-    @ResponseBody
-    @RequestMapping(value = "/api/config", method = { RequestMethod.GET })
-    public ApiResponse<Map<String, Object>, Object> getConfig(@RequestParam(required = false) String key) {
-	return ApiResponse.buildResults(configManager.getConfigs(key));
-    }
-
     @ResponseBody
     @RequestMapping(value = "/api/config/channel/{channelType}", method = { RequestMethod.POST })
     public ApiResponse<ChannelConfig, Object> saveChannelConfig(@PathVariable CHANNEL_TYPE_ENUM channelType,
@@ -75,35 +57,6 @@ public class ConfigController {
     @RequestMapping(value = "/api/config/channel/{channelId}", method = { RequestMethod.DELETE })
     public ApiResponse<ChannelConfig, Object> deleteChannelConfig(@PathVariable String channelId) {
 	return ApiResponse.buildResults(configManager.removeChannelConfig(channelId));
-    }
-
-    @Deprecated
-    @RequestMapping(value = "/api/config/refresh", method = { RequestMethod.GET })
-    public ApiResponse<PMConfiguration, Object> getConnnectors() {
-	PMConfigurationDoc config = mongoTemplate.findById(AppContextUtil.getTenant(), PMConfigurationDoc.class);
-	adminConfigService.saveConfigs(config);
-	return ApiResponse.buildResults(pmEnvironment.config());
-    }
-
-    @RequestMapping(value = "/api/config/cdn", method = { RequestMethod.POST })
-    public ApiResponse<PMConfigurationObject, Object> updateCDN(@RequestParam(required = false) String url,
-	    @RequestParam(required = false) String version,
-	    @RequestParam(required = false, defaultValue = "false") boolean beta) {
-	PMConfigurationObject config = pmEnvironment.get(beta ? "mry.cdn.url.beta" : "mry.cdn.url");
-	String oldUrl = config.asString();
-
-	if (ArgUtil.is(version) && ArgUtil.is(oldUrl)) {
-	    url = cdnBuilder.updateVersion(oldUrl, version);
-	}
-
-	if (ArgUtil.is(url)) {
-	    config.setValue(url);
-	    configManager.save(config);
-	}
-
-	cdnBuilder.update();
-
-	return ApiResponse.buildResults(config);
     }
 
     @JsonView(PMEnvironment.PublicProperty.class)

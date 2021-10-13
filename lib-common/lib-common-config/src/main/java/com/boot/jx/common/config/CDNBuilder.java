@@ -1,19 +1,14 @@
 package com.boot.jx.common.config;
 
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.slf4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Async;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import com.boot.jx.logger.LoggerService;
-import com.boot.jx.rest.RestService;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.Constants;
 import com.boot.utils.StringUtils;
@@ -56,59 +51,6 @@ public class CDNBuilder {
 		    pathV);
 	}
 	return oldUrl;
-    }
-
-    @Autowired
-    private RestService restService;
-
-    public boolean isValidSHA1(String s) {
-	return s.matches("^[a-fA-F0-9]{40}$");
-    }
-
-    private long lastUpdate = 0L;
-
-    @Async
-    public void update() {
-
-	long now = System.currentTimeMillis() / (1000 * 60 * 5);
-	boolean check = (now > lastUpdate);
-	lastUpdate = now;
-
-	for (Entry<String, String> cdn : cdnMapper.entrySet()) {
-	    if (ArgUtil.areEqual(cdn.getKey(), cdn.getValue()) || check) {
-		Matcher matcher = PATTERN.matcher(cdn.getKey());
-		if (matcher.find()) {
-		    String protoV = matcher.group("proto");
-		    String orgV = matcher.group("org");
-		    String repoV = matcher.group("repo");
-		    String versionV = matcher.group("version");
-		    String pathV = matcher.group("path");
-		    //System.out.println("versionV "+versionV);
-		    if (!isValidSHA1(versionV)) {
-			String versionUrl = String.format(VERSION_URL, orgV, repoV, versionV);
-			String sha = null;
-			try {
-			    Map<String, Object> resp = restService.ajax(versionUrl).get().asMap();
-			    sha = (String) resp.get("sha");
-			} catch (Exception e) {
-			    LOGGER.error("Errror while fetching CDN version for {}" + versionUrl);
-			}
-			if (ArgUtil.is(sha) && !versionV.equals(sha)) {
-			    String url = String.format("%scdn.jsdelivr.net/gh/%s/%s@%s%s", protoV, orgV, repoV,
-				    StringUtils.trim(sha), pathV);
-			    cdnMapper.put(cdn.getKey(), url);
-			} else {
-			    cdnMapper.put(cdn.getKey(), LATEST);
-			}
-		    }
-		}
-	    }
-	}
-    }
-
-    //@Scheduled(fixedDelay = 5000)
-    public void updateJob() {
-	this.update();
     }
 
 }

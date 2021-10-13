@@ -116,8 +116,8 @@ public class InBoundController {
 	List<InboxMessage> inboundMessages = connector.extractInboxMessages(channelConfig, map);
 	inboundMessages.forEach(inboxMessage -> {
 	    inBoundService.invokeMethodsAsync(inboxMessage);
-	    connector.onReadInboxMessage(channelConfig, inboundMessages);
 	});
+	connector.onReadInboxMessage(channelConfig, inboundMessages);
 	return ApiResponse.build();
     }
 }

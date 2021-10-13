@@ -8,10 +8,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Component;
 
+import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.chat.ConnectorHandlerFactory.AbstractConnector;
 import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorMapping;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.dict.FileType;
+import com.boot.jx.postman.PMConstants.CHANNEL_TYPE;
 import com.boot.jx.postman.client.ExtUtilService;
 import com.boot.jx.postman.client.PMFileStoreClient;
 import com.boot.jx.postman.client.TmplClient;
@@ -27,6 +29,7 @@ import com.boot.jx.postman.model.Message;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.postman.query.ChatContactQuery;
+import com.boot.jx.postman.wa360.WA360Constants;
 import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
@@ -51,6 +54,11 @@ public class FacebookConnector extends AbstractConnector {
 
     @Autowired
     private PMFileStoreClient pmFileStoreClient;
+
+    @Override
+    public void registerWebHook(ChannelConfig channelConfig) {
+	ApiResponseUtil.addWarning("Set webhook URL manually from Facebook Developer Portal.");
+    }
 
     public void send(OutboxMessage outboxMessage) {
 	try {
@@ -82,8 +90,7 @@ public class FacebookConnector extends AbstractConnector {
 
     @Override
     public boolean initSession(ChatSessionDoc session, InboxMessage inboxMessage) {
-	FacebookUserProfile profile = facebooClient.getUserProfile(inboxMessage.getFrom(),
-		inboxMessage.contact().getLane());
+	FacebookUserProfile profile = facebooClient.getUserProfile(inboxMessage.contact());
 	ChatContactQuery contactQuery = messageContext.getChatContactQuery();
 	contactQuery.setProfilePic(profile.getProfilePic());
 	contactQuery.setName(profile.getFirstName() + " " + profile.getLastName());
@@ -94,7 +101,7 @@ public class FacebookConnector extends AbstractConnector {
     public InboxMessage toInboxMessage(FacebookMessaging m, String lane) {
 	String id = m.getSender().get("id");
 	InboxMessage event = new InboxMessage();
-	event.contact().setChannel("PAGE");
+	event.contact().setChannel(CHANNEL_TYPE.FACEBOOK);
 	event.setFrom(id);
 	event.contact().setCsid(id);
 	event.setMessage(m.getMessage().getText());

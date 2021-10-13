@@ -31,11 +31,16 @@ public class InBoundControllerFB {
     @Autowired
     private FacebookConnector facebookConnector;
 
-    @RequestMapping(value = "/ext/inbound/fb/callback", method = RequestMethod.GET)
-    public String get(@RequestParam(name = "hub.verify_token") String token,
+    @RequestMapping(
+	    value = { "/ext/inbound/fb/callback", "/ext/inbound/v2/fb/callback/{accountKey}/{channelId}/{channelKey}" },
+	    method = RequestMethod.GET)
+    public Object get(@RequestParam(name = "hub.verify_token") String token,
 	    @RequestParam(name = "hub.challenge") String challenge, @RequestParam(required = false) String lane,
-	    @RequestHeader(required = false, value = "X-Hub-Signature") String signature) {
-	return facebooClient.registerWebhook(token, challenge, lane);
+	    @RequestHeader(required = false, value = "X-Hub-Signature") String signature,
+	    // V2Params
+	    @PathVariable(required = false) String channelType, @PathVariable(required = false) String accountKey,
+	    @PathVariable(required = false) String channelId, @PathVariable(required = false) String channelKey) {
+	return facebooClient.registerWebhook(token, challenge, lane, channelId);
     }
 
     // @ApiRequest(feature = "WA_GUPSHUP_INBOUND")

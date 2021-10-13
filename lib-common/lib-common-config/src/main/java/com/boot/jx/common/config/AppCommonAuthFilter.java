@@ -11,6 +11,7 @@ import com.boot.jx.http.CommonHttpRequest.ApiRequestDetail;
 import com.boot.jx.postman.PMConstants;
 import com.boot.jx.rest.AppRequestInterfaces.AppAuthFilter;
 import com.boot.jx.rest.AppRequestInterfaces.AppAuthUser;
+import com.boot.utils.ArgUtil;
 
 @Component
 public class AppCommonAuthFilter implements AppAuthFilter {
@@ -70,6 +71,11 @@ public class AppCommonAuthFilter implements AppAuthFilter {
     public boolean filterAppRequest(ApiRequestDetail apiRequest, CommonHttpRequest req, String traceId) {
 
 	if (apiRequest.getRules().contains(ACCESS_RULES.ONLY_DUPERUSER)) {
+
+	    if (!ArgUtil.is(appCommonAuthUser)) {
+		return false;
+	    }
+
 	    return appCommonAuthUser.getRole().contains(PMConstants.USER_ROLE.DUPER_USER);
 	}
 
