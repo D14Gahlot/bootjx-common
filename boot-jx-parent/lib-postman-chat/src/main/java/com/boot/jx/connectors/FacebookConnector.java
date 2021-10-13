@@ -82,8 +82,7 @@ public class FacebookConnector extends AbstractConnector {
 
     @Override
     public boolean initSession(ChatSessionDoc session, InboxMessage inboxMessage) {
-	FacebookUserProfile profile = facebooClient.getUserProfile(inboxMessage.getFrom(),
-		inboxMessage.contact().getLane());
+	FacebookUserProfile profile = facebooClient.getUserProfile(inboxMessage.contact());
 	ChatContactQuery contactQuery = messageContext.getChatContactQuery();
 	contactQuery.setProfilePic(profile.getProfilePic());
 	contactQuery.setName(profile.getFirstName() + " " + profile.getLastName());

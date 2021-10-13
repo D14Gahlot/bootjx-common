@@ -40,7 +40,7 @@ public class InBoundControllerFB {
 	    // V2Params
 	    @PathVariable(required = false) String channelType, @PathVariable(required = false) String accountKey,
 	    @PathVariable(required = false) String channelId, @PathVariable(required = false) String channelKey) {
-	return facebooClient.registerWebhook(token, challenge, lane);
+	return facebooClient.registerWebhook(token, challenge, lane, channelId);
     }
 
     // @ApiRequest(feature = "WA_GUPSHUP_INBOUND")
