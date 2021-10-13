@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Component;
 
+import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.chat.ConnectorHandlerFactory.AbstractConnector;
 import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorMapping;
 import com.boot.jx.dict.ContactType;
@@ -27,6 +28,7 @@ import com.boot.jx.postman.model.Message;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.postman.query.ChatContactQuery;
+import com.boot.jx.postman.wa360.WA360Constants;
 import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
@@ -51,6 +53,11 @@ public class FacebookConnector extends AbstractConnector {
 
     @Autowired
     private PMFileStoreClient pmFileStoreClient;
+
+    @Override
+    public void registerWebHook(ChannelConfig channelConfig) {
+	ApiResponseUtil.addWarning("Set webhook URL manually from Facebook Developer Portal.");
+    }
 
     public void send(OutboxMessage outboxMessage) {
 	try {

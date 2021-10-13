@@ -34,7 +34,7 @@ public class InBoundControllerFB {
     @RequestMapping(
 	    value = { "/ext/inbound/fb/callback", "/ext/inbound/v2/fb/callback/{accountKey}/{channelId}/{channelKey}" },
 	    method = RequestMethod.GET)
-    public String get(@RequestParam(name = "hub.verify_token") String token,
+    public Object get(@RequestParam(name = "hub.verify_token") String token,
 	    @RequestParam(name = "hub.challenge") String challenge, @RequestParam(required = false) String lane,
 	    @RequestHeader(required = false, value = "X-Hub-Signature") String signature,
 	    // V2Params
