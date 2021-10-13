@@ -11,6 +11,8 @@ public class AppConfigPackage {
 
 	public Map<String, Object> appAttributes();
 
+	public String getDuperEmail();
+
     }
 
     public interface AppSharedConfig {

@@ -250,6 +250,10 @@ public final class CollectionUtil {
 	return new ArrayList<String>(Arrays.asList(arrylist));
     }
 
+    public static <T> List<T> getList(Class<T> clazz) {
+	return new ArrayList<T>();
+    }
+
     public static <T> T getOne(List<T> list) {
 	if (ArgUtil.isEmpty(list)) {
 	    return null;

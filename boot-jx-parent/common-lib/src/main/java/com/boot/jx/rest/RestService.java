@@ -41,6 +41,8 @@ import com.boot.jx.AppConfig;
 import com.boot.jx.AppConstants;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.filter.AppClientInterceptor;
+import com.boot.jx.rest.AppRequestInterfaces.IMetaRequestInFilter;
+import com.boot.jx.rest.AppRequestInterfaces.IMetaRequestOutFilter;
 import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.ClazzUtil;

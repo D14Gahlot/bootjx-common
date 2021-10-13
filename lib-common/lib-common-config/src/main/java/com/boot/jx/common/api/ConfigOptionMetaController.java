@@ -1,25 +1,25 @@
 package com.boot.jx.common.api;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.boot.jx.api.ApiResponse;
-import com.boot.jx.common.config.ConfigConstants;
 import com.boot.jx.common.config.ConfigManager;
 import com.boot.jx.common.impl.ConfigMeta;
 import com.boot.jx.postman.PMConstants.CHANNEL_TYPE_ENUM;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PMEnvironment.AChannelDetails;
+import com.boot.jx.postman.PMEnvironment.PMConfigurationObject;
 import com.boot.jx.postman.doc.HSMContentType;
 import com.boot.jx.postman.doc.HSMLanguage;
 import com.boot.jx.postman.doc.HSMMessageType;
@@ -28,7 +28,7 @@ import com.boot.jx.postman.plugin.ChannelPluginProvider.ChannelPlugin;
 import com.fasterxml.jackson.annotation.JsonView;
 
 @RestController
-public class CommonMetaController {
+public class ConfigOptionMetaController {
 
     @Autowired
     private PMEnvironment pmEnvironment;
@@ -70,6 +70,19 @@ public class CommonMetaController {
 
     @Autowired
     private ConfigManager configManager;
+
+    @ResponseBody
+    @RequestMapping(value = "/api/config", method = { RequestMethod.POST })
+    public ApiResponse<Map<String, Object>, Object> setConfig(@RequestBody PMConfigurationObject map) {
+	configManager.save(map);
+	return ApiResponse.buildResults(configManager.getSetupConfigs());
+    }
+
+    @ResponseBody
+    @RequestMapping(value = "/api/config", method = { RequestMethod.GET })
+    public ApiResponse<Map<String, Object>, Object> getConfig(@RequestParam(required = false) String key) {
+	return ApiResponse.buildResults(configManager.getConfigs(key));
+    }
 
     @RequestMapping(value = { "/api/config/app" }, method = { RequestMethod.GET })
     public ApiResponse<Map<String, Object>, Object> appConfig() {

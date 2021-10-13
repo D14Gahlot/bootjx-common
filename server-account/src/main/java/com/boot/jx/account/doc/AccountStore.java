@@ -25,8 +25,8 @@ public class AccountStore extends CommonMongoTemplateAbstract {
 	return doc;
     }
 
-    public DomainUserDoc findOneByEmail(String email, Class<DomainUserDoc> clazz) {
-	return findOneByKey("contact.email", email, DomainUserDoc.class);
+    public BusinessUserDoc findOneByEmail(String email, Class<BusinessUserDoc> clazz) {
+	return findOneByKey("contact.email", email, BusinessUserDoc.class);
     }
 
     public DomainDoc findDomainByName(String domain) {

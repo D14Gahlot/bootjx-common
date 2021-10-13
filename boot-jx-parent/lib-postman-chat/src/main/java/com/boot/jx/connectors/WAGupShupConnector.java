@@ -39,7 +39,9 @@ import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.postman.query.ChatContactQuery;
 import com.boot.jx.postman.store.MessageContext;
 import com.boot.jx.utils.PostManUtil;
+import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.CollectionUtil;
 import com.boot.utils.JsonUtil;
 import com.boot.utils.TimeUtils;
 
@@ -229,6 +231,11 @@ public class WAGupShupConnector implements ConnectorHandler {
 	    batch.add(report);
 	}
 	return batch;
+    }
+
+    @Override
+    public List<InboxMessage> extractInboxMessages(ChannelConfig channelConfig, MapModel map) {
+	return CollectionUtil.asList(toInboxMessage(map.as(GupShupInbound.class)));
     }
 
 }

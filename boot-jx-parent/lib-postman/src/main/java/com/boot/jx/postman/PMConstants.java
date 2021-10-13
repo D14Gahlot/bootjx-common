@@ -13,6 +13,13 @@ public class PMConstants {
 
     }
 
+    public final class USER_ROLE {
+	public static final String BUSINESS_USER = "BUSINESS_USER";
+	public static final String DUPER_USER = "DUPER_USER";
+	public static final String ADMIN = "ADMIN";
+	public static final String AGENT = "AGENT";
+    }
+
     public static class MESSAGE_BOUND_TYPE {
 	public static final String INBOUND = "I";
 	public static final String INBOUND_IMPORTED = "Ii";

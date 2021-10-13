@@ -1,5 +1,7 @@
 package com.boot.jx.connectors;
 
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +31,7 @@ import com.boot.jx.rest.RestService;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.CollectionUtil;
 import com.boot.utils.Constants;
 import com.boot.utils.JsonPath;
 
@@ -163,6 +166,11 @@ public class WA360Connector implements ConnectorHandler {
 	    outboxMessage.logs().add(e.getMessage());
 	    LOGGER.error("SEND ERROR", e);
 	}
+    }
+
+    @Override
+    public List<InboxMessage> extractInboxMessages(ChannelConfig channelConfig, MapModel map) {
+	return CollectionUtil.asList(toInboxMessage(channelConfig, map));
     }
 
 }

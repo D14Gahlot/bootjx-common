@@ -1,5 +1,6 @@
 package com.boot.jx.connectors;
 
+import java.util.List;
 import java.util.Map;
 
 import org.slf4j.Logger;
@@ -17,11 +18,14 @@ import com.boot.jx.logger.LoggerService;
 import com.boot.jx.postman.client.TmplClient;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.QuickMedia;
+import com.boot.jx.postman.gupshup.GupShupInbound;
 import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.OutboxMessage;
+import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.postman.query.ChatContactQuery;
 import com.boot.jx.rest.RestService;
+import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
 import com.boot.utils.Constants;
@@ -101,6 +105,11 @@ public class WARapiwhaConnector extends AbstractConnector {
 	    event.setOriginalMessage(dataMap);
 	}
 	return event;
+    }
+
+    @Override
+    public List<InboxMessage> extractInboxMessages(ChannelConfig channelConfig, MapModel map) {
+	return CollectionUtil.asList(toInboxMessage(map.toMap(), channelConfig.getLane()));
     }
 
 }

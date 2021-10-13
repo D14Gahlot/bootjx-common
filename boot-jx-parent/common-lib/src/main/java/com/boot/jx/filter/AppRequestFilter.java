@@ -143,7 +143,7 @@ public class AppRequestFilter implements Filter {
 	    }
 	}
 
-	if (ArgUtil.is(apiRequest.getPerms())) {
+	if (ArgUtil.is(apiRequest.getRules())) {
 	    if (appAuthFilters != null) {
 		for (AppAuthFilter appAuthFilter : appAuthFilters) {
 		    if (!appAuthFilter.filterAppRequest(apiRequest, localCommonHttpRequest, traceId)) {

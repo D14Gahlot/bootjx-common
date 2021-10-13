@@ -25,7 +25,9 @@ import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.model.TmplElement;
+import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.postman.query.ChatContactQuery;
+import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
 import com.boot.utils.JsonUtil;
@@ -169,6 +171,11 @@ public class WebConnector extends DefaultConnector {
 	}
 
 	return true;
+    }
+
+    @Override
+    public List<InboxMessage> extractInboxMessages(ChannelConfig channelConfig, MapModel map) {
+	return CollectionUtil.asList(new InboxMessage());
     }
 
 }

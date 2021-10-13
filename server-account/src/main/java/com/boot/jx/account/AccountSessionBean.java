@@ -4,17 +4,17 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.stereotype.Component;
 
-import com.boot.jx.account.doc.DomainUserDoc;
+import com.boot.jx.account.doc.BusinessUserDoc;
+import com.boot.jx.common.config.AppCommonAuthFilter.AppCommonAuthUser;
 import com.boot.jx.logger.AuditDetailProvider;
 import com.boot.utils.ArgUtil;
 
 @Component
 @Scope(value = "session", proxyMode = ScopedProxyMode.TARGET_CLASS)
-public class AccountSessionBean implements AuditDetailProvider {
+public class AccountSessionBean extends AppCommonAuthUser implements AuditDetailProvider {
 
     private static final long serialVersionUID = 3090820592497487481L;
-    private DomainUserDoc account;
-    private String role;
+    private BusinessUserDoc account;
 
     @Override
     public String getAuditUser() {
@@ -24,20 +24,12 @@ public class AccountSessionBean implements AuditDetailProvider {
 	return null;
     }
 
-    public DomainUserDoc domainUser() {
+    public BusinessUserDoc domainUser() {
 	return account;
     }
 
-    public void domainUser(DomainUserDoc account) {
+    public void domainUser(BusinessUserDoc account) {
 	this.account = account;
-    }
-
-    public String getRole() {
-	return role;
-    }
-
-    public void setRole(String role) {
-	this.role = role;
     }
 
 }

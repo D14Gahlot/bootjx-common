@@ -40,6 +40,9 @@ public class AppCommonConfigImpl implements AppCommonConfig {
     @Autowired
     private AppConfig appConfig;
 
+    @Value("${mry.duperadmin.email}")
+    private String duperEmail;
+
     @Value("${mry.cdn.url}")
     private String cdnUrl;
 
@@ -142,4 +145,10 @@ public class AppCommonConfigImpl implements AppCommonConfig {
 	}
 
     }
+
+    @Override
+    public String getDuperEmail() {
+	return duperEmail;
+    }
+
 }
