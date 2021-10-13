@@ -14,8 +14,11 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.boot.jx.api.ApiResponse;
+import com.boot.jx.common.config.AppCommonAuthFilter.ACCESS_RULES;
+import com.boot.jx.common.config.CDNBuilder;
 import com.boot.jx.common.config.ConfigManager;
 import com.boot.jx.common.impl.ConfigMeta;
+import com.boot.jx.http.ApiRequest;
 import com.boot.jx.postman.PMConstants.CHANNEL_TYPE_ENUM;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PMEnvironment.AChannelDetails;
@@ -25,6 +28,7 @@ import com.boot.jx.postman.doc.HSMLanguage;
 import com.boot.jx.postman.doc.HSMMessageType;
 import com.boot.jx.postman.plugin.ChannelPluginProvider;
 import com.boot.jx.postman.plugin.ChannelPluginProvider.ChannelPlugin;
+import com.boot.utils.ArgUtil;
 import com.fasterxml.jackson.annotation.JsonView;
 
 @RestController
@@ -32,6 +36,9 @@ public class ConfigOptionMetaController {
 
     @Autowired
     private PMEnvironment pmEnvironment;
+
+    @Autowired
+    private CDNBuilder cdnBuilder;
 
     @RequestMapping(value = "/api/meta/message_types", method = { RequestMethod.GET })
     public ApiResponse<HSMMessageType, Object> messageType() {
@@ -84,16 +91,43 @@ public class ConfigOptionMetaController {
 	return ApiResponse.buildResults(configManager.getConfigs(key));
     }
 
+    @ApiRequest(rules = ACCESS_RULES.ONLY_DUPERUSER)
+    @ResponseBody
+    @RequestMapping(value = "/api/config", method = { RequestMethod.DELETE })
+    public ApiResponse<Map<String, Object>, Object> deleteConfig(@RequestParam(required = false) String key) {
+	configManager.deleteAdminConfigs(key);
+	return ApiResponse.buildResults(configManager.getSetupConfigs());
+    }
+
     @RequestMapping(value = { "/api/config/app" }, method = { RequestMethod.GET })
-    public ApiResponse<Map<String, Object>, Object> appConfig() {
+    public ApiResponse<Map<String, Object>, Object> getAppConfigs() {
 	pmEnvironment.reload();
 	return ApiResponse.buildResults(configManager.getAppConfigs());
     }
 
     @RequestMapping(value = { "/api/config/setup" }, method = { RequestMethod.GET })
-    public ApiResponse<Map<String, Object>, Object> setConfig() {
+    public ApiResponse<Map<String, Object>, Object> getSetupConfigs() {
 	pmEnvironment.reload();
 	return ApiResponse.buildResults(configManager.getSetupConfigs());
+    }
+
+    @RequestMapping(value = "/api/config/cdn", method = { RequestMethod.POST })
+    public ApiResponse<PMConfigurationObject, Object> updateCDN(@RequestParam(required = false) String url,
+	    @RequestParam(required = false) String version,
+	    @RequestParam(required = false, defaultValue = "false") boolean beta) {
+	PMConfigurationObject config = pmEnvironment.get(beta ? "mry.cdn.url.beta" : "mry.cdn.url");
+	String oldUrl = config.asString();
+
+	if (ArgUtil.is(version) && ArgUtil.is(oldUrl)) {
+	    url = cdnBuilder.updateVersion(oldUrl, version);
+	}
+
+	if (ArgUtil.is(url)) {
+	    config.setValue(url);
+	    configManager.save(config);
+	}
+
+	return ApiResponse.buildResults(config);
     }
 
 }

@@ -66,9 +66,6 @@ public class CPanelController {
     @Autowired
     private AccountSessionBean sessionBean;
 
-    @Autowired
-    private CDNBuilder cdnBuilder;
-
     @RequestMapping(value = { "/app", "/app/**", "/app/*" }, method = { RequestMethod.POST, RequestMethod.GET })
     public String cpanel(Model model, @RequestParam(required = false) String authToken) {
 
@@ -87,14 +84,6 @@ public class CPanelController {
 	model.addAttribute("APP", "account");
 
 	return "app-cpanel";
-    }
-
-    @ApiRequest(rules = ACCESS_RULES.ONLY_DUPERUSER)
-    @ResponseBody
-    @RequestMapping(value = "/api/config", method = { RequestMethod.DELETE })
-    public ApiResponse<Map<String, Object>, Object> deleteConfig(@RequestParam(required = false) String key) {
-	configManager.deleteAdminConfigs(key);
-	return ApiResponse.buildResults(configManager.getSetupConfigs());
     }
 
     @ResponseBody
@@ -116,28 +105,6 @@ public class CPanelController {
     @RequestMapping(value = "/api/config/channel/{channelId}", method = { RequestMethod.DELETE })
     public ApiResponse<ChannelConfig, Object> deleteChannelConfig(@PathVariable String channelId) {
 	return ApiResponse.buildResults(configManager.removeChannelConfig(channelId));
-    }
-
-    @ResponseBody
-    @RequestMapping(value = "/api/config/cdn", method = { RequestMethod.POST })
-    public ApiResponse<PMConfigurationObject, Object> updateCDN(@RequestParam(required = false) String url,
-	    @RequestParam(required = false) String version,
-	    @RequestParam(required = false, defaultValue = "false") boolean beta) {
-	PMConfigurationObject config = pmEnvironment.get(beta ? "mry.cdn.url.beta" : "mry.cdn.url");
-	String oldUrl = config.asString();
-
-	if (ArgUtil.is(version) && ArgUtil.is(oldUrl)) {
-	    url = cdnBuilder.updateVersion(oldUrl, version);
-	}
-
-	if (ArgUtil.is(url)) {
-	    config.setValue(url);
-	    configManager.save(config);
-	}
-
-	cdnBuilder.update();
-
-	return ApiResponse.buildResults(config);
     }
 
     @JsonView(PMEnvironment.PublicProperty.class)
