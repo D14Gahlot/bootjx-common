@@ -1,8 +1,5 @@
 package com.boot.jx.inbound;
 
-import java.util.List;
-import java.util.Map;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,16 +11,11 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.boot.jx.api.ApiResponse;
-import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorHandler;
 import com.boot.jx.connectors.FacebookConnector;
-import com.boot.jx.postman.PMConfiguration;
 import com.boot.jx.postman.fb.FacebooClient;
 import com.boot.jx.postman.fb.FacebookHookRequest;
 import com.boot.jx.postman.model.InboxMessage;
-import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.scope.vendor.VendorContext.ApiVendorHeaders;
-import com.boot.model.MapModel;
 
 @RestController
 public class InBoundControllerFB {
