@@ -1,5 +1,8 @@
 package com.boot.jx.inbound;
 
+import java.util.List;
+import java.util.Map;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,11 +14,16 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.boot.jx.api.ApiResponse;
+import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorHandler;
 import com.boot.jx.connectors.FacebookConnector;
+import com.boot.jx.postman.PMConfiguration;
 import com.boot.jx.postman.fb.FacebooClient;
 import com.boot.jx.postman.fb.FacebookHookRequest;
 import com.boot.jx.postman.model.InboxMessage;
+import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.scope.vendor.VendorContext.ApiVendorHeaders;
+import com.boot.model.MapModel;
 
 @RestController
 public class InBoundControllerFB {
@@ -31,10 +39,15 @@ public class InBoundControllerFB {
     @Autowired
     private FacebookConnector facebookConnector;
 
-    @RequestMapping(value = "/ext/inbound/fb/callback", method = RequestMethod.GET)
+    @RequestMapping(
+	    value = { "/ext/inbound/fb/callback", "/ext/inbound/v2/fb/callback/{accountKey}/{channelId}/{channelKey}" },
+	    method = RequestMethod.GET)
     public String get(@RequestParam(name = "hub.verify_token") String token,
 	    @RequestParam(name = "hub.challenge") String challenge, @RequestParam(required = false) String lane,
-	    @RequestHeader(required = false, value = "X-Hub-Signature") String signature) {
+	    @RequestHeader(required = false, value = "X-Hub-Signature") String signature,
+	    // V2Params
+	    @PathVariable(required = false) String channelType, @PathVariable(required = false) String accountKey,
+	    @PathVariable(required = false) String channelId, @PathVariable(required = false) String channelKey) {
 	return facebooClient.registerWebhook(token, challenge, lane);
     }
 
