@@ -13,6 +13,7 @@ import com.boot.jx.chat.ConnectorHandlerFactory.AbstractConnector;
 import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorMapping;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.dict.FileType;
+import com.boot.jx.postman.PMConstants.CHANNEL_TYPE;
 import com.boot.jx.postman.client.ExtUtilService;
 import com.boot.jx.postman.client.PMFileStoreClient;
 import com.boot.jx.postman.client.TmplClient;
@@ -100,7 +101,7 @@ public class FacebookConnector extends AbstractConnector {
     public InboxMessage toInboxMessage(FacebookMessaging m, String lane) {
 	String id = m.getSender().get("id");
 	InboxMessage event = new InboxMessage();
-	event.contact().setChannel("PAGE");
+	event.contact().setChannel(CHANNEL_TYPE.FACEBOOK);
 	event.setFrom(id);
 	event.contact().setCsid(id);
 	event.setMessage(m.getMessage().getText());
