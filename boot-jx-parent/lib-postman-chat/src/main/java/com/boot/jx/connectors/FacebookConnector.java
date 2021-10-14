@@ -99,8 +99,8 @@ public class FacebookConnector extends AbstractConnector {
     }
 
     public InboxMessage toInboxMessage(FacebookMessaging m, String lane) {
-	String id = m.getSender().get("id");
 	InboxMessage event = new InboxMessage();
+	String id = m.getSender().get("id");
 	event.contact().setChannel(CHANNEL_TYPE.FACEBOOK);
 	event.setFrom(id);
 	event.contact().setCsid(id);
@@ -111,14 +111,26 @@ public class FacebookConnector extends AbstractConnector {
 	return event;
     }
 
+    public InboxMessage toInboxMessage(FacebookMessaging m, ChannelConfig channelConfig) {
+	InboxMessage event = this.createInboxMessage(channelConfig);
+	String id = m.getSender().get("id");
+	event.contact().setChannel(CHANNEL_TYPE.FACEBOOK);
+	event.setFrom(id);
+	event.contact().setCsid(id);
+	event.setMessage(m.getMessage().getText());
+	event.to().add(m.getRecipient().get("id"));
+	event.contact().type(ContactType.FACEBOOK);
+	event.contact().setLane(channelConfig.getLane());
+	return event;
+    }
+
     @Override
     public List<InboxMessage> extractInboxMessages(ChannelConfig channelConfig, MapModel map) {
 	List<InboxMessage> msgs = CollectionUtil.getList(InboxMessage.class);
 	FacebookHookRequest request = map.as(FacebookHookRequest.class);
-	InboxMessage inboxMessage = this.createInboxMessage(channelConfig);
 	request.getEntry().forEach(pageEntry -> {
 	    pageEntry.getMessaging().forEach(m -> {
-		InboxMessage event = toInboxMessage(m, pageEntry.getId());
+		InboxMessage event = toInboxMessage(m, channelConfig);
 		msgs.add(event);
 	    });
 	});

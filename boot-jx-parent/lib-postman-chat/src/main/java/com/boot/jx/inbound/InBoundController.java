@@ -20,6 +20,8 @@ import com.boot.jx.chat.ChatClient;
 import com.boot.jx.chat.ChatStatusReportService;
 import com.boot.jx.chat.ConnectorHandlerFactory;
 import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorHandler;
+import com.boot.jx.logger.AuditService;
+import com.boot.jx.postman.PMAuditEvent;
 import com.boot.jx.postman.PMClientConfig;
 import com.boot.jx.postman.PMConfiguration;
 import com.boot.jx.postman.PMEnvironment;
@@ -49,6 +51,9 @@ public class InBoundController {
 
     @Autowired
     private ConnectorHandlerFactory connectorHandlerFactory;
+
+    @Autowired
+    AuditService auditService;
 
     @ApiVendorHeaders
     @RequestMapping(value = "/int/webhook/callback", method = RequestMethod.POST)
@@ -113,11 +118,16 @@ public class InBoundController {
 	PMConfiguration config = pmEnvironment.config();
 	ChannelConfig channelConfig = config.channels(channelId);
 	ConnectorHandler connector = connectorHandlerFactory.get(channelConfig);
-	List<InboxMessage> inboundMessages = connector.extractInboxMessages(channelConfig, map);
-	inboundMessages.forEach(inboxMessage -> {
-	    inBoundService.invokeMethodsAsync(inboxMessage);
-	});
-	connector.onReadInboxMessage(channelConfig, inboundMessages);
+	try {
+	    List<InboxMessage> inboundMessages = connector.extractInboxMessages(channelConfig, map);
+	    inboundMessages.forEach(inboxMessage -> {
+		inBoundService.invokeMethodsAsync(inboxMessage);
+	    });
+	    connector.onReadInboxMessage(channelConfig, inboundMessages);
+	} catch (Exception e) {
+	    auditService.excep(new PMAuditEvent(PMAuditEvent.Type.INBOUND_ERROR).data(data), LOGGER, e);
+	}
+
 	return ApiResponse.build();
     }
 }
