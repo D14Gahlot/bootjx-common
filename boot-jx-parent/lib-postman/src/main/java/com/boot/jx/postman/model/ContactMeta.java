@@ -22,7 +22,7 @@ public class ContactMeta implements java.io.Serializable, Contactable {
 	Language lang;
 
 	private String contactType;
-	private String channel;
+	private String channelType;
 	private String lane;
 	private String csid;
 	private String contactId;
@@ -173,11 +173,11 @@ public class ContactMeta implements java.io.Serializable, Contactable {
 	}
 
 	public String getChannelType() {
-		return channel;
+		return channelType;
 	}
 
-	public void setChannelType(String channel) {
-		this.channel = channel;
+	public void setChannelType(String channelType) {
+		this.channelType = channelType;
 	}
 
 	public String getName() {

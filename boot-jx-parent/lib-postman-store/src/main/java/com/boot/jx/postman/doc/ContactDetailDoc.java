@@ -15,7 +15,7 @@ public class ContactDetailDoc implements Serializable, Contactable {
 	private String name;
 
 	private String contactType;
-	private String channel;
+	private String channelType;
 	private String lane;
 	private String csid;
 	private String contactId;
@@ -99,11 +99,11 @@ public class ContactDetailDoc implements Serializable, Contactable {
 	}
 
 	public String getChannelType() {
-		return channel;
+		return channelType;
 	}
 
-	public void setChannelType(String channel) {
-		this.channel = channel;
+	public void setChannelType(String channelType) {
+		this.channelType = channelType;
 	}
 
 	public String getName() {
