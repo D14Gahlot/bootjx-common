@@ -103,11 +103,12 @@ public class ChatService {
 
 	MessageDoc messageDoc = messageStore.createOrUpdate(outboxMessage);
 	connectorHandlerFactory.message("ACTION", chatContactDoc, null, outboxMessage);
-	sessionStore.push(messageDoc,outboxMessage);
+	sessionStore.push(messageDoc, outboxMessage);
 	return messageDoc;
     }
 
     private MessageDoc replyIntenal(IMessageExtended inboxMessage, OutboxMessage outboxMessage) {
+	LOGGER.debug("replyIntenal(ChatContactDoc {}, OutboxMessage {})", inboxMessage, outboxMessage);
 
 	if (!ArgUtil.is(inboxMessage)) {
 	    throw new PostManException("Destination Not Specified : inboxMessage Empty");
@@ -129,7 +130,7 @@ public class ChatService {
 
 	MessageDoc messageDoc = messageStore.createOrUpdate(outboxMessage);
 	connectorHandlerFactory.message("REPLY", null, inboxMessage, outboxMessage);
-	sessionStore.push(messageDoc,outboxMessage);
+	sessionStore.push(messageDoc, outboxMessage);
 	return messageDoc;
     }
 
@@ -150,7 +151,7 @@ public class ChatService {
 
 	MessageDoc messageDoc = messageStore.createOrUpdate(outboxMessage);
 	connectorHandlerFactory.message("SEND", chatContactDoc, null, outboxMessage);
-	sessionStore.push(messageDoc,outboxMessage);
+	sessionStore.push(messageDoc, outboxMessage);
 	return messageDoc;
     }
 
