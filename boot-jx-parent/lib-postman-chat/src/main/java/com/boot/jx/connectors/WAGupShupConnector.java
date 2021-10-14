@@ -32,6 +32,7 @@ import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.Message;
 import com.boot.jx.postman.model.Message.Status;
+import com.boot.jx.postman.model.MessageBoxEvent;
 import com.boot.jx.postman.model.MessageDefinitions.IMessageExtended;
 import com.boot.jx.postman.model.MessageReport;
 import com.boot.jx.postman.model.OutboxMessage;
@@ -41,7 +42,6 @@ import com.boot.jx.postman.store.MessageContext;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
-import com.boot.utils.CollectionUtil;
 import com.boot.utils.JsonUtil;
 import com.boot.utils.TimeUtils;
 
@@ -208,7 +208,7 @@ public class WAGupShupConnector implements ConnectorHandler {
 	for (GupShupDeliveryDto gupShupDelivery : status.getResponse()) {
 	    MessageReport report = new MessageReport();
 	    report.setContactType(ContactType.WHATSAPP);
-	    report.setTimestamp(gupShupDelivery.getEventTs());
+	    report.setChangeStamp(gupShupDelivery.getEventTs());
 
 	    report.setMessageIdExt(gupShupDelivery.getExternalId());
 	    String[] x = gupShupDelivery.getExternalId().split("-");
@@ -234,8 +234,9 @@ public class WAGupShupConnector implements ConnectorHandler {
     }
 
     @Override
-    public List<InboxMessage> extractInboxMessages(ChannelConfig channelConfig, MapModel map) {
-	return CollectionUtil.asList(toInboxMessage(map.as(GupShupInbound.class)));
+    public MessageBoxEvent inboundMessageBoxEvent(ChannelConfig channelConfig, MapModel requestMap,
+	    MessageBoxEvent messageBoxEvent) {
+	return messageBoxEvent.addInboxMessage(toInboxMessage(requestMap.as(GupShupInbound.class)));
     }
 
 }

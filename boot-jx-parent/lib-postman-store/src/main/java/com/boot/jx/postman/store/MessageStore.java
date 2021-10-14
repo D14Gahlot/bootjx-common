@@ -25,6 +25,7 @@ import com.boot.jx.postman.model.TagDocument;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
+import com.boot.utils.TimeUtils;
 import com.google.common.collect.Lists;
 
 @Component
@@ -289,26 +290,42 @@ public class MessageStore extends CommonDocStore {
 
 	CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder();
 
+	boolean multi = false;
 	if (ArgUtil.is(messageReport.getMessageId())) {
 	    builder.whereIdSafe(messageReport.getMessageId());
 	} else if (ArgUtil.is(messageReport.getMessageIdExt())) {
 	    builder.where("messageIdExt", messageReport.getMessageIdExt());
 	} else if (ArgUtil.is(messageReport.getMessageIdRef())) {
 	    builder.where("messageIdRef", messageReport.getMessageIdRef());
+	} else if (ArgUtil.is(messageReport.contact().getCsid()) && messageReport.getWatermarkStamp() > 0L) {
+	    String contactId = PostManUtil.CONTACT_ID(messageReport.contact());
+	    builder.with(
+		    // Main Condition
+		    Criteria.where("contactId").is(contactId).and("stamps." + messageReport.getStatus().toString())
+			    .exists(false).andOperator(
+				    // Range
+				    Criteria.where("timestamp").lt(messageReport.getWatermarkStamp()),
+				    Criteria.where("timestamp").gt(TimeUtils.beforeTimeMillis("24hr"))));
+	    multi = true;
 	} else {
 	    return;
 	}
 
 	if (ArgUtil.is(messageReport.getStatus())) {
 	    builder.set("status", messageReport.getStatus());
-	    builder.set("stamps." + messageReport.getStatus().toString(), messageReport.getTimestamp());
+	    builder.set("stamps." + messageReport.getStatus().toString(), messageReport.getChangeStamp());
 
 	    if (ArgUtil.is(messageReport.getReason())) {
 		builder.update().push("logs", messageReport.getReason());
 	    }
 
-	    mongoTemplate.updateFirst(builder.getQuery(), builder.getUpdate(), MessageDoc.class,
-		    getCollectionName(messageReport.getContactType()));
+	    if (multi) {
+		mongoTemplate.updateMulti(builder.getQuery(), builder.getUpdate(), MessageDoc.class,
+			getCollectionName(messageReport.getContactType()));
+	    } else {
+		mongoTemplate.updateFirst(builder.getQuery(), builder.getUpdate(), MessageDoc.class,
+			getCollectionName(messageReport.getContactType()));
+	    }
 	    // LOGGER.info(JsonUtil.toJson(builder));
 	}
     }

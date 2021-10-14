@@ -27,6 +27,7 @@ import com.boot.jx.postman.PMConfiguration;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.Message;
+import com.boot.jx.postman.model.MessageBoxEvent;
 import com.boot.jx.postman.model.MessageReport;
 import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.scope.vendor.VendorContext.ApiVendorHeaders;
@@ -53,7 +54,7 @@ public class InBoundController {
     private ConnectorHandlerFactory connectorHandlerFactory;
 
     @Autowired
-    AuditService auditService;
+    private AuditService auditService;
 
     @ApiVendorHeaders
     @RequestMapping(value = "/int/webhook/callback", method = RequestMethod.POST)
@@ -94,7 +95,7 @@ public class InBoundController {
 	    report.setMessageIdExt(ArgUtil.parseAsString(i));
 	    int statusint = Random.getInt(0, 5);
 	    report.setStatus(Message.Status.values()[statusint]);
-	    report.setTimestamp(Random.getInt(100, 999));
+	    report.setChangeStamp(Random.getInt(100, 999));
 	    list.add(report);
 	}
 	chatStatusReportService.offer(list);
@@ -119,11 +120,17 @@ public class InBoundController {
 	ChannelConfig channelConfig = config.channels(channelId);
 	ConnectorHandler connector = connectorHandlerFactory.get(channelConfig);
 	try {
-	    List<InboxMessage> inboundMessages = connector.extractInboxMessages(channelConfig, map);
-	    inboundMessages.forEach(inboxMessage -> {
-		inBoundService.invokeMethodsAsync(inboxMessage);
-	    });
-	    connector.onReadInboxMessage(channelConfig, inboundMessages);
+	    MessageBoxEvent messageBoxEvent = connector.inboundMessageBoxEvent(channelConfig, map,
+		    new MessageBoxEvent());
+	    if (ArgUtil.is(messageBoxEvent.getInboxMessages())) {
+		messageBoxEvent.getInboxMessages().forEach(inboxMessage -> {
+		    inBoundService.invokeMethodsAsync(inboxMessage);
+		});
+		connector.onReadInboxMessage(channelConfig, messageBoxEvent.getInboxMessages());
+	    } else if (ArgUtil.is(messageBoxEvent.getMessageReports())) {
+		connector.onMessageReports(channelConfig, messageBoxEvent.getMessageReports());
+		chatStatusReportService.update(messageBoxEvent.getMessageReports());
+	    }
 	} catch (Exception e) {
 	    auditService.excep(new PMAuditEvent(PMAuditEvent.Type.INBOUND_ERROR).data(data), LOGGER, e);
 	}

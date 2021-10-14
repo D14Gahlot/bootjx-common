@@ -25,7 +25,9 @@ import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.dto.ChatMessageDTO;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.Message;
+import com.boot.jx.postman.model.MessageBoxEvent;
 import com.boot.jx.postman.model.MessageDefinitions.IMessageExtended;
+import com.boot.jx.postman.model.MessageReport;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.postman.query.ChatContactQuery;
@@ -114,17 +116,29 @@ public class ConnectorHandlerFactory extends ScopedBeanFactory<String, Connector
 	    return inboxMessage;
 	}
 
+	default MessageReport createMessageReport(ChannelConfig channelConfig) {
+	    MessageReport messageReport = new MessageReport();
+	    if (ArgUtil.is(channelConfig)) {
+		messageReport.contact().type(channelConfig.getContactType());
+		messageReport.contact().setChannel(channelConfig.getChannelType());
+		messageReport.contact().setLane(channelConfig.getLane());
+	    }
+	    return messageReport;
+	}
+
 	/**
 	 * 
 	 * This method is invoked when message from ChannelProvider is recvd and is to
-	 * be formatted into InboxMessage format Basically this method should be
-	 * implemented to convert channel message fromt to internal format
+	 * be formatted into MessageBoxEvent format Basically this method should be
+	 * implemented to convert channel message formats to internal formats
 	 * 
 	 * @param channelConfig
-	 * @param map
+	 * @param requestMap
+	 * @param messageBoxEvent TODO
 	 * @return
 	 */
-	public List<InboxMessage> extractInboxMessages(ChannelConfig channelConfig, MapModel map);
+	public MessageBoxEvent inboundMessageBoxEvent(ChannelConfig channelConfig, MapModel requestMap,
+		MessageBoxEvent messageBoxEvent);
 
 	/**
 	 * This method is invoked after message from ChannelProvider has been processed
@@ -135,6 +149,10 @@ public class ConnectorHandlerFactory extends ScopedBeanFactory<String, Connector
 	 */
 	default List<InboxMessage> onReadInboxMessage(ChannelConfig channelConfig, List<InboxMessage> inboxMessages) {
 	    return inboxMessages;
+	}
+
+	default void onMessageReports(ChannelConfig channelConfig, List<MessageReport> messageReports) {
+	    // DO Nothing this method is optional
 	}
 
     }

@@ -1,7 +1,5 @@
 package com.boot.jx.connectors;
 
-import java.util.List;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,13 +24,14 @@ import com.boot.jx.postman.fb.FacebookUserProfile;
 import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.Message;
+import com.boot.jx.postman.model.Message.Status;
+import com.boot.jx.postman.model.MessageBoxEvent;
+import com.boot.jx.postman.model.MessageReport;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.postman.query.ChatContactQuery;
-import com.boot.jx.postman.wa360.WA360Constants;
 import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
-import com.boot.utils.CollectionUtil;
 
 @Component
 @ConnectorMapping(contactType = ContactType.FACEBOOK)
@@ -98,6 +97,7 @@ public class FacebookConnector extends AbstractConnector {
 	return true;
     }
 
+    @Deprecated
     public InboxMessage toInboxMessage(FacebookMessaging m, String lane) {
 	InboxMessage event = new InboxMessage();
 	String id = m.getSender().get("id");
@@ -124,17 +124,32 @@ public class FacebookConnector extends AbstractConnector {
 	return event;
     }
 
+    private MessageReport toMessageReport(FacebookMessaging m, ChannelConfig channelConfig) {
+	MessageReport report = this.createMessageReport(channelConfig);
+	String csid = m.getSender().get("id");
+	report.contact().setCsid(csid);
+	report.setChangeStamp(m.getTimestamp());
+	if (ArgUtil.is(m.getRead())) {
+	    report.setChangeStamp(m.getReadWatermark());
+	    report.setStatus(Status.READ);
+	}
+	return report;
+    }
+
     @Override
-    public List<InboxMessage> extractInboxMessages(ChannelConfig channelConfig, MapModel map) {
-	List<InboxMessage> msgs = CollectionUtil.getList(InboxMessage.class);
-	FacebookHookRequest request = map.as(FacebookHookRequest.class);
+    public MessageBoxEvent inboundMessageBoxEvent(ChannelConfig channelConfig, MapModel requestMap,
+	    MessageBoxEvent messageBoxEvent) {
+	FacebookHookRequest request = requestMap.as(FacebookHookRequest.class);
 	request.getEntry().forEach(pageEntry -> {
 	    pageEntry.getMessaging().forEach(m -> {
-		InboxMessage event = toInboxMessage(m, channelConfig);
-		msgs.add(event);
+		if (ArgUtil.is(m.getMessage())) {
+		    messageBoxEvent.addInboxMessage(toInboxMessage(m, channelConfig));
+		} else if (ArgUtil.is(m.getRead())) {
+		    messageBoxEvent.addMessageReport(toMessageReport(m, channelConfig));
+		}
 	    });
 	});
-	return msgs;
+	return messageBoxEvent;
     }
 
 }
