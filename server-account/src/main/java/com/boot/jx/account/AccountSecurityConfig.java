@@ -14,6 +14,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
+import org.springframework.security.web.authentication.logout.LogoutHandler;
 
 @Configuration
 @EnableWebSecurity
@@ -22,7 +23,7 @@ public class AccountSecurityConfig extends WebSecurityConfigurerAdapter {
     public static final String[] CONTEXTS = new String[] { "account", "partner", "front", "cpanel" };
 
     @Autowired
-    private AccountLogoutHandler agentLogoutHandler;
+    private LogoutHandler agentLogoutHandler;
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {

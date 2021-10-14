@@ -1,18 +1,23 @@
 package com.boot.jx.admin;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetails;
+import org.springframework.security.web.authentication.logout.LogoutHandler;
 import org.springframework.stereotype.Component;
 
+import com.boot.jx.AppConfig;
 import com.boot.jx.common.dto.AgentResponseAuthDto;
+import com.boot.jx.http.CommonHttpRequest;
+import com.boot.utils.ArgUtil;
 
 @Component
-public class AdminSessionService {
+public class AdminSessionService implements LogoutHandler {
 
     /*
      * Below APIs are
@@ -56,6 +61,20 @@ public class AdminSessionService {
 	Authentication authentication = adminAuthProvider.authenticate(token);
 	SecurityContextHolder.getContext().setAuthentication(authentication);
 	updateLogin(agent);
+    }
+
+    @Autowired
+    private AppConfig appConfig;
+
+    @Autowired
+    private CommonHttpRequest commonHttpRequest;
+
+    @Override
+    public void logout(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
+	if (ArgUtil.is(authentication)) {
+	    updateLogout(ArgUtil.parseAsString(authentication.getPrincipal()));
+	}
+	commonHttpRequest.instance(request, response, appConfig).setCookie("JXSESSIONID", "JXSESSIONID", 0);
     }
 
 }

@@ -8,8 +8,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.boot.jx.xms.XmsConstants.ApiCallbacktParams;
 import com.boot.jx.xms.dto.ContactInfoUpdate;
-import com.boot.jx.xms.dto.InBoundContact;
 import com.boot.jx.xms.dto.InBoundAction;
+import com.boot.jx.xms.dto.InBoundContact;
 import com.boot.jx.xms.dto.InBoundMsg;
 
 import io.swagger.annotations.Api;

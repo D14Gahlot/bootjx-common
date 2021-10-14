@@ -1,6 +1,7 @@
 package com.boot.jx.account;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -9,12 +10,15 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetails;
+import org.springframework.security.web.authentication.logout.LogoutHandler;
 import org.springframework.stereotype.Component;
 
+import com.boot.jx.AppConfig;
 import com.boot.jx.AppConfigPackage.AppCommonConfig;
 import com.boot.jx.AppContextUtil;
 import com.boot.jx.account.doc.BusinessUserDoc;
 import com.boot.jx.api.ApiResponse;
+import com.boot.jx.http.CommonHttpRequest;
 import com.boot.jx.postman.PMConstants;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.client.PostManClient;
@@ -24,7 +28,7 @@ import com.boot.jx.rest.RestService;
 import com.boot.utils.ArgUtil;
 
 @Component
-public class AccountAdminService {
+public class AccountAdminService implements LogoutHandler {
 
     /*
      * Below APIs are
@@ -134,6 +138,20 @@ public class AccountAdminService {
 	    return true;
 	}
 	return false;
+    }
+
+    @Autowired
+    private AppConfig appConfig;
+
+    @Autowired
+    private CommonHttpRequest commonHttpRequest;
+
+    @Override
+    public void logout(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
+	if (ArgUtil.is(authentication)) {
+	    updateLogout(ArgUtil.parseAsString(authentication.getPrincipal()));
+	}
+	commonHttpRequest.instance(request, response, appConfig).setCookie("JXSESSIONID", "JXSESSIONID", 0);
     }
 
 }

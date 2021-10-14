@@ -3,6 +3,7 @@ package com.boot.jx.agent;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -10,18 +11,21 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetails;
+import org.springframework.security.web.authentication.logout.LogoutHandler;
 import org.springframework.stereotype.Component;
 
+import com.boot.jx.AppConfig;
 import com.boot.jx.common.doc.AgentSessionDoc;
 import com.boot.jx.common.dto.AgentResponseAuthDto;
 import com.boot.jx.common.store.DocumentUpdateListner;
+import com.boot.jx.http.CommonHttpRequest;
 import com.boot.jx.mongo.CommonMongoQueryBuilder;
 import com.boot.jx.postman.PMClientConfig;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.TimeUtils;
 
 @Component
-public class AgentSessionService {
+public class AgentSessionService implements LogoutHandler {
 
     @Autowired
     private MongoTemplate mongoTemplate;
@@ -121,6 +125,20 @@ public class AgentSessionService {
 	Authentication authentication = authProvider.authenticate(token);
 	SecurityContextHolder.getContext().setAuthentication(authentication);
 	updateLogin(agent);
+    }
+
+    @Autowired
+    private AppConfig appConfig;
+
+    @Autowired
+    private CommonHttpRequest commonHttpRequest;
+
+    @Override
+    public void logout(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
+	if (ArgUtil.is(authentication)) {
+	    updateLogout(ArgUtil.parseAsString(authentication.getPrincipal()));
+	}
+	commonHttpRequest.instance(request, response, appConfig).setCookie("JXSESSIONID", "JXSESSIONID", 0);
     }
 
 }

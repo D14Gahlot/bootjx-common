@@ -15,34 +15,19 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.boot.jx.AppConfigPackage.AppCommonConfig;
-import com.boot.jx.AppContextUtil;
 import com.boot.jx.account.AccountAdminService;
 import com.boot.jx.account.AccountSessionBean;
 import com.boot.jx.api.ApiResponse;
-import com.boot.jx.common.config.AppCommonAuthFilter.ACCESS_RULES;
-import com.boot.jx.common.config.CDNBuilder;
 import com.boot.jx.common.config.ConfigManager;
 import com.boot.jx.http.ApiRequest;
-import com.boot.jx.postman.PMConfiguration;
 import com.boot.jx.postman.PMConstants;
 import com.boot.jx.postman.PMConstants.CHANNEL_TYPE_ENUM;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PMEnvironment.AChannelDetails;
-import com.boot.jx.postman.PMEnvironment.PMConfigurationObject;
-import com.boot.jx.postman.doc.PMConfigurationDoc;
 import com.boot.jx.postman.doc.config.ClientKeyConfigDoc;
-import com.boot.jx.postman.fb.FacebookConfigDetails;
-import com.boot.jx.postman.gupshup.GupShupConfigDetails;
 import com.boot.jx.postman.plugin.ChannelConfig;
-import com.boot.jx.postman.tg.TelegramConfigDetails;
-import com.boot.jx.postman.tw.TwitterConfigDetails;
-import com.boot.jx.postman.wa360.WA360ConfigDetails;
 import com.boot.utils.ArgUtil;
 import com.fasterxml.jackson.annotation.JsonView;
-
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
-import io.swagger.annotations.ApiParam;
 
 @Controller
 @RequestMapping("/cpanel")
