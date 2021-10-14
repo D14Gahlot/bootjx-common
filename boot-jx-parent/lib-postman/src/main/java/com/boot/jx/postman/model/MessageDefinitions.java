@@ -64,7 +64,7 @@ public class MessageDefinitions {
 
 	public String getChannelType();
 
-	public void setChannelType(String channel);
+	public void setChannelType(String channelType);
 
 	public default void type(ContactType contactType) {
 	    this.setContactType(ArgUtil.parseAsString(contactType));
