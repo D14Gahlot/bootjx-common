@@ -1,6 +1,5 @@
 package com.boot.jx.inbound;
 
-import java.util.List;
 import java.util.regex.Pattern;
 
 import org.apache.commons.lang.StringUtils;

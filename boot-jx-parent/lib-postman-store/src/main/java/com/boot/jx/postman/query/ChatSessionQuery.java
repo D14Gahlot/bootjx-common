@@ -1,12 +1,9 @@
 package com.boot.jx.postman.query;
 
-import org.bson.types.ObjectId;
-
 import com.boot.jx.mongo.CommonMongoQueryBuilder.DocQueryBuilder;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.store.MessageStore;
-import com.boot.model.MapModel;
 
 public class ChatSessionQuery extends DocQueryBuilder<ChatSessionDoc> {
 
