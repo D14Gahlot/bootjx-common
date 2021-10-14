@@ -101,7 +101,7 @@ public class FacebookConnector extends AbstractConnector {
     public InboxMessage toInboxMessage(FacebookMessaging m, String lane) {
 	InboxMessage event = new InboxMessage();
 	String id = m.getSender().get("id");
-	event.contact().setChannel(CHANNEL_TYPE.FACEBOOK);
+	event.contact().setChannelType(CHANNEL_TYPE.FACEBOOK);
 	event.setFrom(id);
 	event.contact().setCsid(id);
 	event.setMessage(m.getMessage().getText());

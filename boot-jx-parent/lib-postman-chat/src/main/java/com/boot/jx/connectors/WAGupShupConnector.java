@@ -114,7 +114,7 @@ public class WAGupShupConnector implements ConnectorHandler {
 
     @Override
     public void send(ChatContactDoc chatContactDoc, OutboxMessage outboxMessage) {
-	outboxMessage.contact().setChannel(chatContactDoc.getChannel());
+	outboxMessage.contact().setChannelType(chatContactDoc.getChannelType());
 	outboxMessage.contact().setLane(chatContactDoc.getLane());
 	resolveTemplate(outboxMessage);
 
@@ -161,7 +161,7 @@ public class WAGupShupConnector implements ConnectorHandler {
 	InboxMessage inboxMessage = this.createInboxMessage(channelConfig);
 
 	inboxMessage.contact().setContactType(ContactType.WHATSAPP.toString());
-	inboxMessage.contact().setChannel(CHANNEL_TYPE.WA_GUPSHUP);
+	inboxMessage.contact().setChannelType(CHANNEL_TYPE.WA_GUPSHUP);
 	inboxMessage.contact().setLane(inbound.getWaNumber());
 	inboxMessage.contact().setCsid(inbound.getMobile());
 	inboxMessage.contact().setName(inbound.getName());

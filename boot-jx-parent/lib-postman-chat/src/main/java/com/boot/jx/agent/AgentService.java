@@ -45,7 +45,7 @@ public class AgentService {
 			return chatClient.assignToAgent(inboxMessage);
 		} else {
 			ConnectorHandler connector = connectorHandlerFactory.get(inboxMessage.contact().type(),
-					inboxMessage.contact().getChannel());
+					inboxMessage.contact().getChannelType());
 			if (ArgUtil.is(connector)) {
 				connector.assignToAgent(inboxMessage);
 			} else if (ArgUtil.is(defaultConnector)) {

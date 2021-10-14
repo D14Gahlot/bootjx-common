@@ -31,6 +31,7 @@ public class ChatDTOUtil {
 	ContactDTO contact = new ContactDTO();
 	contact.setContactId(chatContactDoc.getContactId());
 	contact.setContactType(chatContactDoc.getContactType());
+	contact.setChannelType(chatContactDoc.getChannelType());
 	contact.setName(chatContactDoc.getName());
 	contact.setPhone(chatContactDoc.getPhone());
 	contact.setEmail(chatContactDoc.getEmail());

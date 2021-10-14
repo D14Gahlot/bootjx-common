@@ -115,7 +115,7 @@ public class ChatParserAndImportor {
 			ChatSessionDoc chatSessionDoc = EntityDtoUtil.dtoToEntity(session, new ChatSessionDoc());
 			chatSessionDoc.setContactId(chatContactDoc.getContactId());
 			chatSessionDoc.setContactType(chatContactDoc.getContactType());
-			chatSessionDoc.setChannel(chatContactDoc.getChannel());
+			chatSessionDoc.setChannel(chatContactDoc.getChannelType());
 			chatSessionDoc.setLane(chatContactDoc.getLane());
 
 			chatSessionDoc.setResolved(true);

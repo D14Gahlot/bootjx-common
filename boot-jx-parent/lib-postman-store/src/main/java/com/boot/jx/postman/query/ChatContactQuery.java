@@ -83,7 +83,7 @@ public class ChatContactQuery extends DocQueryBuilder<ChatContactDoc> {
     }
 
     public ChatContactQuery setChannel(String channel) {
-	this.doc.setChannel(channel);
+	this.doc.setChannelType(channel);
 	this.set("channel", channel);
 	return this;
     }
@@ -131,13 +131,13 @@ public class ChatContactQuery extends DocQueryBuilder<ChatContactDoc> {
 	if (ArgUtil.is(contactable.getContactType())) {
 	    this.setContactType(ArgUtil.nonEmpty(contactable.getContactType(), this.doc.getContactType()));
 	}
-	if (ArgUtil.is(contactable.getChannel())) {
-	    this.setChannel(ArgUtil.nonEmpty(contactable.getChannel(), this.doc.getChannel()));
+	if (ArgUtil.is(contactable.getChannelType())) {
+	    this.setChannel(ArgUtil.nonEmpty(contactable.getChannelType(), this.doc.getChannelType()));
 	}
 
-	if (ArgUtil.is(contactable.getContactType()) || ArgUtil.is(contactable.getChannel())) {
+	if (ArgUtil.is(contactable.getContactType()) || ArgUtil.is(contactable.getChannelType())) {
 	    this.setChannelType(
-		    ArgUtil.nonEmpty(PMConstants.CHANNEL_TYPE(contactable.getContactType(), contactable.getChannel()),
+		    ArgUtil.nonEmpty(PMConstants.CHANNEL_TYPE(contactable.getContactType(), contactable.getChannelType()),
 			    this.doc.getChannelType()));
 	}
 

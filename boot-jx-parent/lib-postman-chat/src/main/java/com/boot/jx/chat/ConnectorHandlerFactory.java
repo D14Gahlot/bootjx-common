@@ -110,7 +110,7 @@ public class ConnectorHandlerFactory extends ScopedBeanFactory<String, Connector
 	    InboxMessage inboxMessage = new InboxMessage();
 	    if (ArgUtil.is(channelConfig)) {
 		inboxMessage.contact().type(channelConfig.getContactType());
-		inboxMessage.contact().setChannel(channelConfig.getChannelType());
+		inboxMessage.contact().setChannelType(channelConfig.getChannelType());
 		inboxMessage.contact().setLane(channelConfig.getLane());
 	    }
 	    return inboxMessage;
@@ -120,7 +120,7 @@ public class ConnectorHandlerFactory extends ScopedBeanFactory<String, Connector
 	    MessageReport messageReport = new MessageReport();
 	    if (ArgUtil.is(channelConfig)) {
 		messageReport.contact().type(channelConfig.getContactType());
-		messageReport.contact().setChannel(channelConfig.getChannelType());
+		messageReport.contact().setChannelType(channelConfig.getChannelType());
 		messageReport.contact().setLane(channelConfig.getLane());
 	    }
 	    return messageReport;

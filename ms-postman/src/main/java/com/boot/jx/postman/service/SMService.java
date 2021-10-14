@@ -228,7 +228,7 @@ public class SMService {
 			params.put("text", sms.toText());
 			params.put("traceid", AppContextUtil.getTraceId());
 
-			if (ArgUtil.areEqual(this.sms2Channel, sms.contact().getChannel())) {
+			if (ArgUtil.areEqual(this.sms2Channel, sms.contact().getChannelType())) {
 				params.put("username", sms2UserName);
 				params.put("password", sms2Password);
 				params.put("secret", sms2Secret);

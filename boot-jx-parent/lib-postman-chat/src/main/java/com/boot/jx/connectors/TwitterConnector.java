@@ -90,7 +90,7 @@ public class TwitterConnector extends AbstractConnector {
 	ibm.setMessage(dm.getText());
 	ibm.setFrom(String.valueOf(dm.getSenderId()));
 	ibm.to().add(String.valueOf(dm.getRecipientId()));
-	ibm.contact().setChannel(Channel.DEFAULT.toString());
+	ibm.contact().setChannelType(Channel.DEFAULT.toString());
 	ibm.contact().setContactType(ContactType.TWITTER.toString());
 	ibm.contact().setLane(lane);
 	ibm.contact().setCsid(String.valueOf(dm.getSenderId()));

@@ -53,7 +53,7 @@ public class WARapiwhaConnector extends AbstractConnector {
     public void send(OutboxMessage outboxMessage) {
 	String to = CollectionUtil.getOne(outboxMessage.getTo());
 
-	outboxMessage.contact().setChannel(outboxMessage.contact().getChannel());
+	outboxMessage.contact().setChannelType(outboxMessage.contact().getChannelType());
 	String text = outboxMessage.getMessage();
 	if (ArgUtil.is(outboxMessage.getTemplate())) {
 	    QuickMedia mediaReply = mongoTemplate.findById(outboxMessage.getTemplate(), QuickMedia.class);
@@ -94,7 +94,7 @@ public class WARapiwhaConnector extends AbstractConnector {
 	InboxMessage event = new InboxMessage();
 	String eventName = ArgUtil.parseAsString(dataMap.get("event"), Constants.BLANK);
 	event.contact().setContactType(ContactType.WHATSAPP.toString());
-	event.contact().setChannel("RAPIWHA");
+	event.contact().setChannelType("RAPIWHA");
 	event.contact().setLane(lane);
 	if ("INBOX".equals(eventName)) {
 	    event.from(ArgUtil.parseAsString(dataMap.get("from"), Constants.BLANK));

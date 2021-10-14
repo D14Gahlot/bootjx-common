@@ -21,11 +21,11 @@ public class SMS extends Message<SMS> {
 
 	public SMS() {
 		super(ContactType.SMS);
-		this.contact().setChannel(Channel.DEFAULT.toString());
+		this.contact().setChannelType(Channel.DEFAULT.toString());
 	}
 
 	public void setIChannel(Channel channel) {
-		this.contact().setChannel(ArgUtil.parseAsString(channel));
+		this.contact().setChannelType(ArgUtil.parseAsString(channel));
 	}
 
 }
