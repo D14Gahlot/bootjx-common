@@ -1,7 +1,6 @@
 package com.boot.jx.connectors;
 
 import java.util.Comparator;
-import java.util.List;
 import java.util.Optional;
 
 import org.slf4j.Logger;
@@ -21,9 +20,9 @@ import com.boot.jx.postman.client.PMFileStoreClient;
 import com.boot.jx.postman.client.TmplClient;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.QuickMedia;
-import com.boot.jx.postman.fb.FacebookHookRequest;
 import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.InboxMessage;
+import com.boot.jx.postman.model.MessageBoxEvent;
 import com.boot.jx.postman.model.MessageDefinitions.Contactable;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.plugin.ChannelConfig;
@@ -33,7 +32,6 @@ import com.boot.jx.postman.tg.TelegramModels.TGFile;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
-import com.boot.utils.CollectionUtil;
 import com.boot.utils.JsonUtil;
 
 @Component
@@ -161,14 +159,14 @@ public class TelegramConnector extends AbstractConnector {
 		    inboxMessage.contact().getLane());
 	    return false;
 	}
-
 	return true;
     }
 
     @Override
-    public List<InboxMessage> extractInboxMessages(ChannelConfig channelConfig, MapModel map) {
-	Update update = map.as(Update.class);
-	return CollectionUtil.asList(toInboxMessage(channelConfig.getLane(), update));
+    public MessageBoxEvent inboundMessageBoxEvent(ChannelConfig channelConfig, MapModel requestMap,
+	    MessageBoxEvent messageBoxEvent) {
+	Update update = requestMap.as(Update.class);
+	return messageBoxEvent.addInboxMessage(toInboxMessage(channelConfig.getLane(), update));
     }
 
 }

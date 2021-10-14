@@ -23,6 +23,7 @@ import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.QuickMedia;
 import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.InboxMessage;
+import com.boot.jx.postman.model.MessageBoxEvent;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.model.TmplElement;
 import com.boot.jx.postman.plugin.ChannelConfig;
@@ -174,8 +175,9 @@ public class WebConnector extends DefaultConnector {
     }
 
     @Override
-    public List<InboxMessage> extractInboxMessages(ChannelConfig channelConfig, MapModel map) {
-	return CollectionUtil.asList(new InboxMessage());
+    public MessageBoxEvent inboundMessageBoxEvent(ChannelConfig channelConfig, MapModel requestMap,
+	    MessageBoxEvent messageBoxEvent) {
+	return messageBoxEvent.addInboxMessage(new InboxMessage());
     }
 
 }

@@ -146,6 +146,10 @@ public class PostManUtil {
 	return CHAT_MODE.AGENT.toString().equals(inboxMessage.session().getMode());
     }
 
+    public static String CONTACT_ID(Contactable contactable) {
+	return createContactId(contactable);
+    }
+
     public static String CHANNEL_ID(String chanelType, String lane) {
 	if (CHANNEL_TYPE.WA_GUPSHUP_LEGACY.equals(chanelType)) {
 	    chanelType = CHANNEL_TYPE.WA_GUPSHUP;

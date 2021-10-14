@@ -19,6 +19,7 @@ import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.QuickMedia;
 import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.InboxMessage;
+import com.boot.jx.postman.model.MessageBoxEvent;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.model.WAMessage.Channel;
 import com.boot.jx.postman.plugin.ChannelConfig;
@@ -146,13 +147,14 @@ public class TwitterConnector extends AbstractConnector {
     }
 
     @Override
-    public List<InboxMessage> extractInboxMessages(ChannelConfig channelConfig, MapModel map) {
+    public MessageBoxEvent inboundMessageBoxEvent(ChannelConfig channelConfig, MapModel requestMap,
+	    MessageBoxEvent messageBoxEvent) {
 	try {
-	    return process(channelConfig.getLane(), map.toMap());
+	    messageBoxEvent.addInboxMessage(process(channelConfig.getLane(), requestMap.toMap()));
 	} catch (TwitterException e) {
 	    LOGGER.error("Exception while converting inbox message from twitter webhook", e);
 	}
-	return null;
+	return messageBoxEvent;
     }
 
     @Override

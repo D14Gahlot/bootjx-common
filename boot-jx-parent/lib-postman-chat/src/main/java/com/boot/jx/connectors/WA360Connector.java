@@ -1,7 +1,5 @@
 package com.boot.jx.connectors;
 
-import java.util.List;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +19,7 @@ import com.boot.jx.postman.client.TmplClient;
 import com.boot.jx.postman.doc.QuickMedia;
 import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.InboxMessage;
+import com.boot.jx.postman.model.MessageBoxEvent;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.postman.wa360.WA360Client;
@@ -31,7 +30,6 @@ import com.boot.jx.rest.RestService;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
-import com.boot.utils.CollectionUtil;
 import com.boot.utils.Constants;
 import com.boot.utils.JsonPath;
 
@@ -169,8 +167,9 @@ public class WA360Connector implements ConnectorHandler {
     }
 
     @Override
-    public List<InboxMessage> extractInboxMessages(ChannelConfig channelConfig, MapModel map) {
-	return CollectionUtil.asList(toInboxMessage(channelConfig, map));
+    public MessageBoxEvent inboundMessageBoxEvent(ChannelConfig channelConfig, MapModel requestMap,
+	    MessageBoxEvent messageBoxEvent) {
+	return messageBoxEvent.addInboxMessage(toInboxMessage(channelConfig, requestMap));
     }
 
 }

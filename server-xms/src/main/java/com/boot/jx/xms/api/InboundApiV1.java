@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.boot.jx.xms.XmsConstants.ApiCallbacktParams;
 import com.boot.jx.xms.dto.ContactInfoUpdate;
 import com.boot.jx.xms.dto.InBoundContact;
-import com.boot.jx.xms.dto.InBoundEvent;
+import com.boot.jx.xms.dto.InBoundAction;
 import com.boot.jx.xms.dto.InBoundMsg;
 
 import io.swagger.annotations.Api;
@@ -35,8 +35,8 @@ public class InboundApiV1 {
     @ResponseBody
     @ApiCallbacktParams
     @RequestMapping(value = "/api/v1/action/event", method = { RequestMethod.POST })
-    public InBoundEvent onActionCallback(@RequestBody InBoundEvent actionInfo) {
-	return new InBoundEvent();
+    public InBoundAction onActionCallback(@RequestBody InBoundAction actionInfo) {
+	return new InBoundAction();
     }
 
 }
