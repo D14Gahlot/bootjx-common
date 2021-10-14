@@ -52,7 +52,7 @@ public class Notipy extends Message<Notipy> {
 	public Notipy() {
 		super();
 		this.fields = new ArrayList<Map<String, Object>>();
-		this.contact().setChannel(ChannelType.DEFAULT.toString());
+		this.contact().setChannelType(ChannelType.DEFAULT.toString());
 	}
 
 	public Object getAuthor() {

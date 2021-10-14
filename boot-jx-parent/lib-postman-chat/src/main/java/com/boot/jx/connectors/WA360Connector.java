@@ -66,8 +66,10 @@ public class WA360Connector implements ConnectorHandler {
 
     public InboxMessage toInboxMessage(ChannelConfig channelConfig, MapModel map) {
 
+	// Create Default Message from Channel
 	InboxMessage inboxMessage = this.createInboxMessage(channelConfig);
 
+	// Set Contact info
 	String contactNumber = map.entry(InBoundWrapperPaths.CONTACT_NUMBER).asString();
 	String contactName = map.entry(InBoundWrapperPaths.CONTACT_NAME).asString();
 
@@ -75,9 +77,12 @@ public class WA360Connector implements ConnectorHandler {
 	inboxMessage.contact().setName(contactName);
 	inboxMessage.contact().setPhone(contactNumber);
 
+	// Set Additional info
 	inboxMessage.setFrom(contactNumber);
 	inboxMessage.setFromName(contactName);
 	inboxMessage.to().add(channelConfig.getLane());
+
+	// Extract Message Details
 	inboxMessage.setMessageIdExt(map.entry(InBoundWrapperPaths.MESSAGE_ID).asString());
 
 	String messageType = map.entry(InBoundWrapperPaths.MESSAGE_TYPE).asString();

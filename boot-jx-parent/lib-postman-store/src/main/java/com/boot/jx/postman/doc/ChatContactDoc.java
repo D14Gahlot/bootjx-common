@@ -19,246 +19,247 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @Document(collection = "CHAT_CONTACT")
 @TypeAlias("ChatContactDoc")
 public class ChatContactDoc implements Serializable, Contactable, AuditableEntity {
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	@Id
-	@ApiMockModelProperty(example = "wa919930104050", required = false)
-	@JsonProperty("contactId")
-	private String contactId;
+    @Id
+    @ApiMockModelProperty(example = "wa919930104050", required = false)
+    @JsonProperty("contactId")
+    private String contactId;
 
-	private String csid;
+    private String csid;
 
-	private String contactType;
+    private String contactType;
 
-	private String channelType;
-	private String channel;
+    private String channelType;
+    @Deprecated
+    private String channel;
 
-	private String lane;
+    private String lane;
 
-	private long firstInBoundStamp;
-	private long firstOutBoundStamp;
-	private long lastInBoundStamp;
-	private long lastOutBoundStamp;
-	private long lastPushStamp;
-	private long lastReplyStamp;
+    private long firstInBoundStamp;
+    private long firstOutBoundStamp;
+    private long lastInBoundStamp;
+    private long lastOutBoundStamp;
+    private long lastPushStamp;
+    private long lastReplyStamp;
 
-	private long lastOptInStamp;
+    private long lastOptInStamp;
 
-	private String sessionId;
+    private String sessionId;
 
-	@TextIndexed(weight = 10)
-	private String name;
+    @TextIndexed(weight = 10)
+    private String name;
 
-	@TextIndexed(weight = 1)
-	private String email;
+    @TextIndexed(weight = 1)
+    private String email;
 
-	@TextIndexed(weight = 5)
-	private String phone;
+    @TextIndexed(weight = 5)
+    private String phone;
 
-	private String profilePic;
-	private List<String> labelId;
-	private ChatUserProfileDTO profile;
-	private String profileId;
+    private String profilePic;
+    private List<String> labelId;
+    private ChatUserProfileDTO profile;
+    private String profileId;
 
-	private Long createdStamp;
-	private String createdBy;
+    private Long createdStamp;
+    private String createdBy;
 
-	public String getContactId() {
-		return contactId;
-	}
+    public String getContactId() {
+	return contactId;
+    }
 
-	public void setContactId(String contactId) {
-		this.contactId = contactId;
-	}
+    public void setContactId(String contactId) {
+	this.contactId = contactId;
+    }
 
-	public String getContactType() {
-		return contactType;
-	}
+    public String getContactType() {
+	return contactType;
+    }
 
-	public void setContactType(String contactType) {
-		this.contactType = contactType;
-	}
+    public void setContactType(String contactType) {
+	this.contactType = contactType;
+    }
 
-	public long getLastInBoundStamp() {
-		return lastInBoundStamp;
-	}
+    public long getLastInBoundStamp() {
+	return lastInBoundStamp;
+    }
 
-	public void setLastInBoundStamp(long lastInBoundStamp) {
-		this.lastInBoundStamp = lastInBoundStamp;
-	}
+    public void setLastInBoundStamp(long lastInBoundStamp) {
+	this.lastInBoundStamp = lastInBoundStamp;
+    }
 
-	public long getLastOutBoundStamp() {
-		return lastOutBoundStamp;
-	}
+    public long getLastOutBoundStamp() {
+	return lastOutBoundStamp;
+    }
 
-	public void setLastOutBoundStamp(long lastOutBoundStamp) {
-		this.lastOutBoundStamp = lastOutBoundStamp;
-	}
+    public void setLastOutBoundStamp(long lastOutBoundStamp) {
+	this.lastOutBoundStamp = lastOutBoundStamp;
+    }
 
-	public String getSessionId() {
-		return sessionId;
-	}
+    public String getSessionId() {
+	return sessionId;
+    }
 
-	public void setSessionId(String sessionId) {
-		this.sessionId = sessionId;
-	}
+    public void setSessionId(String sessionId) {
+	this.sessionId = sessionId;
+    }
 
-	@Override
-	public String getName() {
-		return name;
-	}
+    @Override
+    public String getName() {
+	return name;
+    }
 
-	@Override
-	public void setName(String name) {
-		this.name = name;
-	}
+    @Override
+    public void setName(String name) {
+	this.name = name;
+    }
 
-	public String getProfilePic() {
-		return profilePic;
-	}
+    public String getProfilePic() {
+	return profilePic;
+    }
 
-	public void setProfilePic(String profilePic) {
-		this.profilePic = profilePic;
-	}
+    public void setProfilePic(String profilePic) {
+	this.profilePic = profilePic;
+    }
 
-	public String getEmail() {
-		return email;
-	}
+    public String getEmail() {
+	return email;
+    }
 
-	public void setEmail(String email) {
-		this.email = email;
-	}
+    public void setEmail(String email) {
+	this.email = email;
+    }
 
-	public String getCsid() {
-		return csid;
-	}
+    public String getCsid() {
+	return csid;
+    }
 
-	public void setCsid(String csid) {
-		this.csid = csid;
-	}
+    public void setCsid(String csid) {
+	this.csid = csid;
+    }
 
-	public String getLane() {
-		return lane;
-	}
+    public String getLane() {
+	return lane;
+    }
 
-	public void setLane(String lane) {
-		this.lane = lane;
-	}
+    public void setLane(String lane) {
+	this.lane = lane;
+    }
 
-	public String getChannelType() {
-		return channelType;
-	}
+    public String getChannel() {
+	return ArgUtil.nonEmpty(this.channelType, this.channel);
+    }
 
-	public void setChannelType(String channelType) {
-		this.channelType = channelType;
-	}
+    public void setChannel(String channel) {
+	this.channel = channel;
+    }
 
-	public String getPhone() {
-		return phone;
-	}
+    public String getPhone() {
+	return phone;
+    }
 
-	public void setPhone(String phone) {
-		this.phone = phone;
-	}
+    public void setPhone(String phone) {
+	this.phone = phone;
+    }
 
-	public List<String> labelId() {
-		if (ArgUtil.isEmpty(this.labelId))
-			this.labelId = new ArrayList<String>();
-		return labelId;
-	}
+    public List<String> labelId() {
+	if (ArgUtil.isEmpty(this.labelId))
+	    this.labelId = new ArrayList<String>();
+	return labelId;
+    }
 
-	public List<String> getLabelId() {
-		return labelId;
-	}
+    public List<String> getLabelId() {
+	return labelId;
+    }
 
-	public void setLabelId(List<String> labelId) {
-		this.labelId = labelId;
-	}
+    public void setLabelId(List<String> labelId) {
+	this.labelId = labelId;
+    }
 
-	public ChatUserProfileDTO getProfile() {
-		return profile;
-	}
+    public ChatUserProfileDTO getProfile() {
+	return profile;
+    }
 
-	public void setProfile(ChatUserProfileDTO profile) {
-		this.profile = profile;
-	}
+    public void setProfile(ChatUserProfileDTO profile) {
+	this.profile = profile;
+    }
 
-	public String getProfileId() {
-		return profileId;
-	}
+    public String getProfileId() {
+	return profileId;
+    }
 
-	public void setProfileId(String profileId) {
-		this.profileId = profileId;
-	}
+    public void setProfileId(String profileId) {
+	this.profileId = profileId;
+    }
 
-	public long getLastOptInStamp() {
-		return lastOptInStamp;
-	}
+    public long getLastOptInStamp() {
+	return lastOptInStamp;
+    }
 
-	public void setLastOptInStamp(long lastOptInStamp) {
-		this.lastOptInStamp = lastOptInStamp;
-	}
+    public void setLastOptInStamp(long lastOptInStamp) {
+	this.lastOptInStamp = lastOptInStamp;
+    }
 
-	@Override
-	public void setChannel(String channel) {
-		this.channel = channel;
-	}
+    @Override
+    public void setChannelType(String channelType) {
+	this.channelType = channelType;
+    }
 
-	@Override
-	public String getChannel() {
-		return ArgUtil.nonEmpty(this.channel, this.channelType);
-	}
+    @Override
+    public String getChannelType() {
+	return ArgUtil.nonEmpty(this.channelType, this.channel);
+    }
 
-	public long getLastPushStamp() {
-		return lastPushStamp;
-	}
+    public long getLastPushStamp() {
+	return lastPushStamp;
+    }
 
-	public void setLastPushStamp(long lastPushStamp) {
-		this.lastPushStamp = lastPushStamp;
-	}
+    public void setLastPushStamp(long lastPushStamp) {
+	this.lastPushStamp = lastPushStamp;
+    }
 
-	public long getLastReplyStamp() {
-		return lastReplyStamp;
-	}
+    public long getLastReplyStamp() {
+	return lastReplyStamp;
+    }
 
-	public void setLastReplyStamp(long lastReplyStamp) {
-		this.lastReplyStamp = lastReplyStamp;
-	}
+    public void setLastReplyStamp(long lastReplyStamp) {
+	this.lastReplyStamp = lastReplyStamp;
+    }
 
-	@Override
-	public String toString() {
-		return String.format("[contactId:%s]", this.contactId);
-	}
+    @Override
+    public String toString() {
+	return String.format("[contactId:%s]", this.contactId);
+    }
 
-	public long getFirstInBoundStamp() {
-		return firstInBoundStamp;
-	}
+    public long getFirstInBoundStamp() {
+	return firstInBoundStamp;
+    }
 
-	public void setFirstInBoundStamp(long firstInBoundStamp) {
-		this.firstInBoundStamp = firstInBoundStamp;
-	}
+    public void setFirstInBoundStamp(long firstInBoundStamp) {
+	this.firstInBoundStamp = firstInBoundStamp;
+    }
 
-	public long getFirstOutBoundStamp() {
-		return firstOutBoundStamp;
-	}
+    public long getFirstOutBoundStamp() {
+	return firstOutBoundStamp;
+    }
 
-	public void setFirstOutBoundStamp(long firstOutBoundStamp) {
-		this.firstOutBoundStamp = firstOutBoundStamp;
-	}
+    public void setFirstOutBoundStamp(long firstOutBoundStamp) {
+	this.firstOutBoundStamp = firstOutBoundStamp;
+    }
 
-	public Long getCreatedStamp() {
-		return createdStamp;
-	}
+    public Long getCreatedStamp() {
+	return createdStamp;
+    }
 
-	public void setCreatedStamp(Long createdStamp) {
-		this.createdStamp = createdStamp;
-	}
+    public void setCreatedStamp(Long createdStamp) {
+	this.createdStamp = createdStamp;
+    }
 
-	public String getCreatedBy() {
-		return createdBy;
-	}
+    public String getCreatedBy() {
+	return createdBy;
+    }
 
-	public void setCreatedBy(String createdBy) {
-		this.createdBy = createdBy;
-	}
+    public void setCreatedBy(String createdBy) {
+	this.createdBy = createdBy;
+    }
 }

@@ -98,11 +98,11 @@ public class ContactDetailDoc implements Serializable, Contactable {
 		this.lane = lane;
 	}
 
-	public String getChannel() {
+	public String getChannelType() {
 		return channel;
 	}
 
-	public void setChannel(String channel) {
+	public void setChannelType(String channel) {
 		this.channel = channel;
 	}
 

@@ -87,21 +87,21 @@ public class InboxMessage implements Serializable, IMessageExtended {
 		if (ContactType.WHATSAPP.toString().equals(this.contact().getContactType())) {
 			WAMessage reply = new WAMessage();
 			reply.setQueue(this.getQueue());
-			reply.contact().setChannel(this.contact().getChannel());
+			reply.contact().setChannelType(this.contact().getChannelType());
 			reply.addTo(this.getFrom());
 			reply.setMessage(message);
 			return reply;
 		} else if (ContactType.TELEGRAM.toString().equals(this.contact().getContactType())) {
 			TGMessage reply = new TGMessage();
 			reply.setQueue(this.getQueue());
-			reply.contact().setChannel(this.contact().getChannel());
+			reply.contact().setChannelType(this.contact().getChannelType());
 			reply.addTo(this.getFrom());
 			reply.setMessage(message);
 			return reply;
 		} else {
 			OutboxMessage reply = new OutboxMessage();
 			reply.setQueue(this.getQueue());
-			reply.contact().setChannel(this.contact().getChannel());
+			reply.contact().setChannelType(this.contact().getChannelType());
 			reply.addTo(this.getFrom());
 			reply.setMessage(message);
 			reply.contact().setContactType(this.contact().getContactType());

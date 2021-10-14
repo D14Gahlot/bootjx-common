@@ -172,11 +172,11 @@ public class ContactMeta implements java.io.Serializable, Contactable {
 		this.contactId = contactId;
 	}
 
-	public String getChannel() {
+	public String getChannelType() {
 		return channel;
 	}
 
-	public void setChannel(String channel) {
+	public void setChannelType(String channel) {
 		this.channel = channel;
 	}
 

@@ -103,11 +103,12 @@ public class ChatService {
 
 	MessageDoc messageDoc = messageStore.createOrUpdate(outboxMessage);
 	connectorHandlerFactory.message("ACTION", chatContactDoc, null, outboxMessage);
-	sessionStore.push(messageDoc,outboxMessage);
+	sessionStore.push(messageDoc, outboxMessage);
 	return messageDoc;
     }
 
     private MessageDoc replyIntenal(IMessageExtended inboxMessage, OutboxMessage outboxMessage) {
+	LOGGER.debug("replyIntenal(ChatContactDoc {}, OutboxMessage {})", inboxMessage, outboxMessage);
 
 	if (!ArgUtil.is(inboxMessage)) {
 	    throw new PostManException("Destination Not Specified : inboxMessage Empty");
@@ -115,7 +116,7 @@ public class ChatService {
 
 	outboxMessage.updateStatus(Message.Status.INIT);
 	outboxMessage.contact().setContactType(inboxMessage.contact().getContactType());
-	outboxMessage.contact().setChannel(inboxMessage.contact().getChannel());
+	outboxMessage.contact().setChannelType(inboxMessage.contact().getChannelType());
 	outboxMessage.contact().setLane(inboxMessage.contact().getLane());
 	outboxMessage.contact().setCsid(inboxMessage.contact().getCsid());
 	outboxMessage.contact().setContactId(inboxMessage.contact().getContactId());
@@ -129,7 +130,7 @@ public class ChatService {
 
 	MessageDoc messageDoc = messageStore.createOrUpdate(outboxMessage);
 	connectorHandlerFactory.message("REPLY", null, inboxMessage, outboxMessage);
-	sessionStore.push(messageDoc,outboxMessage);
+	sessionStore.push(messageDoc, outboxMessage);
 	return messageDoc;
     }
 
@@ -142,7 +143,7 @@ public class ChatService {
 
 	outboxMessage.updateStatus(Message.Status.INIT);
 	outboxMessage.contact().setContactType(chatContactDoc.getContactType());
-	outboxMessage.contact().setChannel(chatContactDoc.getChannel());
+	outboxMessage.contact().setChannelType(chatContactDoc.getChannelType());
 	outboxMessage.contact().setLane(chatContactDoc.getLane());
 	outboxMessage.contact().setCsid(chatContactDoc.getCsid());
 	outboxMessage.contact().setContactId(chatContactDoc.getContactId());
@@ -150,7 +151,7 @@ public class ChatService {
 
 	MessageDoc messageDoc = messageStore.createOrUpdate(outboxMessage);
 	connectorHandlerFactory.message("SEND", chatContactDoc, null, outboxMessage);
-	sessionStore.push(messageDoc,outboxMessage);
+	sessionStore.push(messageDoc, outboxMessage);
 	return messageDoc;
     }
 
@@ -197,7 +198,7 @@ public class ChatService {
 
     public MessageDoc note(ChatSessionDoc sessionDoc, OutboxMessage outboxMessage) {
 	outboxMessage.contact().setContactType(sessionDoc.getContactType());
-	outboxMessage.contact().setChannel(sessionDoc.getChannel());
+	outboxMessage.contact().setChannelType(sessionDoc.getChannel());
 	outboxMessage.contact().setLane(sessionDoc.getLane());
 	outboxMessage.contact().setContactId(sessionDoc.getContactId());
 	outboxMessage.setSessionId(sessionDoc.getSessionId());
@@ -334,7 +335,7 @@ public class ChatService {
 	    return true;
 	}
 	ConnectorHandler connector = connectorHandlerFactory.get(inboxMessage.contact().type(),
-		inboxMessage.contact().getChannel());
+		inboxMessage.contact().getChannelType());
 
 	if (ArgUtil.is(connector)) {
 	    initd = connector.initSession(session, inboxMessage);
@@ -352,7 +353,7 @@ public class ChatService {
 	    return true;
 	}
 	ConnectorHandler connector = connectorHandlerFactory.get(outboxMessage.contact().type(),
-		outboxMessage.contact().getChannel());
+		outboxMessage.contact().getChannelType());
 
 	messageContext.setMessage(outboxMessage);
 	ChatContactQuery contactQuery = messageContext.getChatContactQuery();

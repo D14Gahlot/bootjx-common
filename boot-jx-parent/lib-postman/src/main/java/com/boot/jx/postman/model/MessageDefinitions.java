@@ -16,7 +16,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 public class MessageDefinitions {
 
-    @JsonDeserialize(as = ContactMeta.class,keyUsing = ContactMetaKeyDeserializer.class)
+    @JsonDeserialize(as = ContactMeta.class, keyUsing = ContactMetaKeyDeserializer.class)
     @JsonIgnoreProperties(ignoreUnknown = true)
     public interface Contact extends Serializable {
 	public String getName();
@@ -44,8 +44,6 @@ public class MessageDefinitions {
     public interface Contactable extends Contact {
 	public String getContactType();
 
-	public String getChannel();
-
 	public String getLane();
 
 	public String getCsid();
@@ -58,13 +56,15 @@ public class MessageDefinitions {
 
 	public void setContactType(String contactType);
 
-	public void setChannel(String channel);
-
 	public void setLane(String lane);
 
 	public default ContactType type() {
 	    return ArgUtil.parseAsEnumT(getContactType(), ContactType.class);
 	}
+
+	public String getChannelType();
+
+	public void setChannelType(String channelType);
 
 	public default void type(ContactType contactType) {
 	    this.setContactType(ArgUtil.parseAsString(contactType));
@@ -77,7 +77,7 @@ public class MessageDefinitions {
 	    this.setEmail(contactable.getEmail());
 	    // Contactable
 	    this.setContactType(contactable.getContactType());
-	    this.setChannel(contactable.getChannel());
+	    this.setChannelType(contactable.getChannelType());
 	    this.setLane(contactable.getLane());
 	    this.setCsid(contactable.getCsid());
 	    this.setContactId(contactable.getContactId());

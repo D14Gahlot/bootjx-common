@@ -147,7 +147,7 @@ public class SessionStore extends CommonDocStore {
 	    chatSessionDoc = new ChatSessionDoc();
 	    chatSessionDoc.setContactId(contactId);
 	    chatSessionDoc.setContactType(ArgUtil.parseAsString(inboxMessage.contact().type()));
-	    chatSessionDoc.setChannel(inboxMessage.contact().getChannel());
+	    chatSessionDoc.setChannel(inboxMessage.contact().getChannelType());
 	    chatSessionDoc.setLane(inboxMessage.contact().getLane());
 
 	    // SESSION UPDATE
@@ -222,7 +222,7 @@ public class SessionStore extends CommonDocStore {
 	InboxMessage inboxMessage = new InboxMessage();
 	inboxMessage.contact().copyFrom(contact);
 	inboxMessage.contact().setContactType(contact.getContactType());
-	inboxMessage.contact().setChannel(contact.getChannel());
+	inboxMessage.contact().setChannelType(contact.getChannelType());
 	inboxMessage.contact().setLane(ArgUtil.nonEmpty(session.getLane(), contact.getLane()));
 	inboxMessage.setFrom(contact.getCsid());
 	inboxMessage.setFromName(contact.getName());

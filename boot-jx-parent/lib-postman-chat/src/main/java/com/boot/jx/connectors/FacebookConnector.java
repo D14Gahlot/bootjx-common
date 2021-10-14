@@ -101,7 +101,7 @@ public class FacebookConnector extends AbstractConnector {
     public InboxMessage toInboxMessage(FacebookMessaging m, String lane) {
 	InboxMessage event = new InboxMessage();
 	String id = m.getSender().get("id");
-	event.contact().setChannel(CHANNEL_TYPE.FACEBOOK);
+	event.contact().setChannelType(CHANNEL_TYPE.FACEBOOK);
 	event.setFrom(id);
 	event.contact().setCsid(id);
 	event.setMessage(m.getMessage().getText());
@@ -112,16 +112,23 @@ public class FacebookConnector extends AbstractConnector {
     }
 
     public InboxMessage toInboxMessage(FacebookMessaging m, ChannelConfig channelConfig) {
-	InboxMessage event = this.createInboxMessage(channelConfig);
-	String id = m.getSender().get("id");
-	event.contact().setChannel(CHANNEL_TYPE.FACEBOOK);
-	event.setFrom(id);
-	event.contact().setCsid(id);
-	event.setMessage(m.getMessage().getText());
-	event.to().add(m.getRecipient().get("id"));
-	event.contact().type(ContactType.FACEBOOK);
-	event.contact().setLane(channelConfig.getLane());
-	return event;
+	// Create Default Message from Channel
+	InboxMessage inboxMessage = this.createInboxMessage(channelConfig);
+
+	// Set Contact info
+	String csid = m.getSender().get("id");
+
+	inboxMessage.contact().setCsid(csid);
+
+	// Set Additional info
+	inboxMessage.setFrom(csid);
+	inboxMessage.to().add(m.getRecipient().get("id"));
+
+	// Extract Message Details
+	inboxMessage.setMessageIdExt(m.getMessage().getMid());
+	inboxMessage.setMessage(m.getMessage().getText());
+
+	return inboxMessage;
     }
 
     private MessageReport toMessageReport(FacebookMessaging m, ChannelConfig channelConfig) {

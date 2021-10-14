@@ -91,7 +91,7 @@ public class BulkMessageService extends QueuedTaskExecuter {
 				// Contact Type for each message
 				.data("contactType", session.getContactType())
 				// Channel for each message
-				.data("channel", bulkMessage.contact().getChannel())
+				.data("channel", bulkMessage.contact().getChannelType())
 				// Lane for each message
 				.data("lane", session.getLane()));
 
@@ -150,7 +150,7 @@ public class BulkMessageService extends QueuedTaskExecuter {
 		outboxMessage.setTemplate(msg.getTemplate());
 		outboxMessage.setTemplateId(msg.getTemplateId());
 		outboxMessage.contact().type(contactType);
-		outboxMessage.contact().setChannel(channel);
+		outboxMessage.contact().setChannelType(channel);
 		outboxMessage.contact().setLane(lane);
 		outboxMessage.contact().setEmail(msg.getContact().getEmail());
 		outboxMessage.contact().setPhone(msg.getContact().getPhone());

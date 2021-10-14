@@ -84,7 +84,7 @@ public class Message<T extends Message<T>> implements Serializable, MessageOptio
 
     @JsonIgnore
     public void setIChannel(IChannel channel) {
-	this.contact().setChannel(ArgUtil.parseAsString(channel));
+	this.contact().setChannelType(ArgUtil.parseAsString(channel));
     }
 
     public Map<String, Object> getModel() {

@@ -110,7 +110,7 @@ public class MessageService {
 	}
 
 	outboxMessage.contact().type(channel.getContactType());
-	outboxMessage.contact().setChannel(channel.getChannelType());
+	outboxMessage.contact().setChannelType(channel.getChannelType());
 	outboxMessage.contact().setLane(channel.getLane());
 
 	outboxMessage.contact().copyFrom(message.getToContact());

@@ -110,7 +110,7 @@ public class ConnectorHandlerFactory extends ScopedBeanFactory<String, Connector
 	    InboxMessage inboxMessage = new InboxMessage();
 	    if (ArgUtil.is(channelConfig)) {
 		inboxMessage.contact().type(channelConfig.getContactType());
-		inboxMessage.contact().setChannel(channelConfig.getChannelType());
+		inboxMessage.contact().setChannelType(channelConfig.getChannelType());
 		inboxMessage.contact().setLane(channelConfig.getLane());
 	    }
 	    return inboxMessage;
@@ -120,7 +120,7 @@ public class ConnectorHandlerFactory extends ScopedBeanFactory<String, Connector
 	    MessageReport messageReport = new MessageReport();
 	    if (ArgUtil.is(channelConfig)) {
 		messageReport.contact().type(channelConfig.getContactType());
-		messageReport.contact().setChannel(channelConfig.getChannelType());
+		messageReport.contact().setChannelType(channelConfig.getChannelType());
 		messageReport.contact().setLane(channelConfig.getLane());
 	    }
 	    return messageReport;
@@ -260,18 +260,22 @@ public class ConnectorHandlerFactory extends ScopedBeanFactory<String, Connector
     @Async
     public void message(String messageType, ChatContactDoc chatContactDoc, IMessageExtended inboxMessage,
 	    OutboxMessage outboxMessage) {
-	LOGGER.debug("message(String {}, ChatContactDoc {}, SessionMessage {}, OutboxMessage {})", messageType,
+	LOGGER.debug("message(String {}, ChatContactDoc {}, IMessageExtended {}, OutboxMessage {})", messageType,
 		chatContactDoc, inboxMessage, outboxMessage);
 
 	String channelId = PostManUtil.CHANNEL_ID(outboxMessage.contact());
 	ChannelConfig channelConfig = environment.config().channels(channelId);
 
 	try {
-	    ConnectorHandler connector = get(channelConfig);
-	    if (ArgUtil.is(connector)) {
-		connector.message(messageType, chatContactDoc, inboxMessage, outboxMessage);
+	    if (ArgUtil.is(channelConfig) || ContactType.WEBSITE.equals(outboxMessage.contact().type())) {
+		ConnectorHandler connector = get(channelConfig);
+		if (ArgUtil.is(connector)) {
+		    connector.message(messageType, chatContactDoc, inboxMessage, outboxMessage);
+		} else {
+		    outboxMessage.logs().add(String.format("Connector not defined for %s", channelId));
+		}
 	    } else {
-		outboxMessage.logs().add(String.format("Connector not defined for %s", channelId));
+		outboxMessage.logs().add(String.format("ChannelConfig not found for %s", channelId));
 	    }
 
 	} catch (Exception e) {
