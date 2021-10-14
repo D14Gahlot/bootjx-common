@@ -43,6 +43,7 @@ public class InBoundControllerFB {
 	return facebooClient.registerWebhook(token, challenge, lane, channelId);
     }
 
+    @Deprecated
     // @ApiRequest(feature = "WA_GUPSHUP_INBOUND")
     @ApiVendorHeaders
     @RequestMapping(value = "/ext/inbound/fb/callback", method = RequestMethod.POST)
@@ -59,6 +60,7 @@ public class InBoundControllerFB {
 	return request;
     }
 
+    @Deprecated
     @ApiVendorHeaders
     @RequestMapping(value = "/ext/inbound/fb/callback/{lane}", method = RequestMethod.POST)
     public FacebookHookRequest onReceiveMessageLane(@RequestBody FacebookHookRequest request, @PathVariable String lane)

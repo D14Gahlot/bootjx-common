@@ -162,6 +162,9 @@ public class PMEnvironment {
 	    return String.format("%s:%s", this.getChannelType(), this.getLane());
 	}
 
+	public String toString() {
+	    return this.getChannelId();
+	}
     }
 
     public static class PMConfigurationObject extends MapEntry implements Serializable {

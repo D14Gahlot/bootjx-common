@@ -260,7 +260,7 @@ public class ConnectorHandlerFactory extends ScopedBeanFactory<String, Connector
     @Async
     public void message(String messageType, ChatContactDoc chatContactDoc, IMessageExtended inboxMessage,
 	    OutboxMessage outboxMessage) {
-	LOGGER.debug("message(String {}, ChatContactDoc {}, SessionMessage {}, OutboxMessage {})", messageType,
+	LOGGER.debug("message(String {}, ChatContactDoc {}, IMessageExtended {}, OutboxMessage {})", messageType,
 		chatContactDoc, inboxMessage, outboxMessage);
 
 	String channelId = PostManUtil.CHANNEL_ID(outboxMessage.contact());
