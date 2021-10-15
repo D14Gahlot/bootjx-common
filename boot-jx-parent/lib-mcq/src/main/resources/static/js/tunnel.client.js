@@ -54,7 +54,7 @@ var tunnelClient = (function(win) {
 				}
 			});
 		}, function(error){
-			console.error("__onsocket_disconnect__",error);
+			console.error("__onsocket_disconnect__",{error : error});
 			$connectd = null;
 			if(typeof win.__onsocket_disconnect__ == 'function'){
 				win.__onsocket_disconnect__(error, function(){
