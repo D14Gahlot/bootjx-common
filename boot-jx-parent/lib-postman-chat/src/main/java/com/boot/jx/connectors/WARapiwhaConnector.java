@@ -50,7 +50,7 @@ public class WARapiwhaConnector extends AbstractConnector {
     private TmplClient tmplClient;
 
     @Override
-    public void send(OutboxMessage outboxMessage) {
+    public void send(ChannelConfig channelConfig, OutboxMessage outboxMessage) {
 	String to = CollectionUtil.getOne(outboxMessage.getTo());
 
 	outboxMessage.contact().setChannelType(outboxMessage.contact().getChannelType());

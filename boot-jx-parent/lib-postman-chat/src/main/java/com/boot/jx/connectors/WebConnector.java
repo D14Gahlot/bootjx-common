@@ -95,7 +95,7 @@ public class WebConnector extends DefaultConnector {
     }
 
     @Override
-    public void send(OutboxMessage outboxMessage) {
+    public void send(ChannelConfig channelConfig, OutboxMessage outboxMessage) {
 	String to = CollectionUtil.getOne(outboxMessage.getTo());
 
 	process(outboxMessage);
@@ -117,7 +117,7 @@ public class WebConnector extends DefaultConnector {
 
     @Override
     public InboxMessage assignToAgent(InboxMessage inboxMessage) {
-	this.reply(inboxMessage, new OutboxMessage().message("Call us"));
+	this.reply(inboxMessage, new OutboxMessage().message("Call us"), null);
 	return inboxMessage;
     }
 
@@ -160,14 +160,14 @@ public class WebConnector extends DefaultConnector {
 	if (ArgUtil.isEmpty(chatContactDoc.getName())) {
 	    inputs.add(new TmplElement().name("name").label("Name").type("TEXT"));
 	    reply(inboxMessage, (OutboxMessage) inboxMessage.replyMessage("Please fill below inputs to continue")
-		    .option("inputs", inputs));
+		    .option("inputs", inputs), null);
 	    return false;
 	}
 
 	if (ArgUtil.isEmpty(chatContactDoc.getEmail())) {
 	    inputs.add(new TmplElement().name("email").label("Email").type("EMAIL"));
 	    reply(inboxMessage, (OutboxMessage) inboxMessage.replyMessage("Please fill below inputs to continue")
-		    .option("inputs", inputs));
+		    .option("inputs", inputs), null);
 	    return false;
 	}
 

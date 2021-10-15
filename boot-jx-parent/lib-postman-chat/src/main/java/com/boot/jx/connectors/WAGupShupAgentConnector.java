@@ -3,6 +3,7 @@ package com.boot.jx.connectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.boot.jx.chat.ConnectorHandlerFactory.AbstractConnector;
 import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorHandler;
 import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorMapping;
 import com.boot.jx.dict.ContactType;
@@ -29,7 +30,7 @@ import com.boot.utils.ArgUtil;
 
 @Component
 @ConnectorMapping(contactType = ContactType.WHATSAPP, channel = "GUPSHUPAGENT")
-public class WAGupShupAgentConnector implements ConnectorHandler {
+public class WAGupShupAgentConnector extends AbstractConnector {
 
     @Autowired
     private GupShupClientChat gupShupChatClient;
@@ -43,20 +44,17 @@ public class WAGupShupAgentConnector implements ConnectorHandler {
     @Autowired
     private PostManClient postManClient;
 
-    @Autowired
-    private PMEnvironment environment;
-
     @Override
-    public void send(ChatContactDoc chatContactDoc, OutboxMessage outboxMessage) {
+    public void send(ChannelConfig channelConfig, ChatContactDoc chatContactDoc, OutboxMessage outboxMessage) {
 	outboxMessage.contact().setChannelType(chatContactDoc.getChannelType());
 	outboxMessage.contact().setLane(chatContactDoc.getLane());
 	if (ArgUtil.isEqual(outboxMessage.contact().getChannelType(), Channel.GUPSHUPAGENT.toString())) {
 	    if (outboxMessage.isViaAgent() && ArgUtil.isEmpty(outboxMessage.getFiles())) {
 		gupShupChatClient.sendMessage(chatContactDoc.getCsid(), outboxMessage.getMessage());
 	    } else if (outboxMessage.isTemplateMsg() || outboxMessage.isQRButtons()) {
-		gupShupNotifyClient.send(outboxMessage);
+		gupShupNotifyClient.send(null, outboxMessage);
 	    } else {
-		gupShupChatClient.send(outboxMessage);
+		gupShupChatClient.send(null, outboxMessage);
 	    }
 	} else if (ArgUtil.isEqual(outboxMessage.contact().getChannelType(), Channel.DEFAULT.toString())) {
 	    MessageBox mb = new MessageBox();
@@ -66,7 +64,7 @@ public class WAGupShupAgentConnector implements ConnectorHandler {
     }
 
     @Override
-    public void reply(IMessageExtended inboxMessage, OutboxMessage outboxMessage) {
+    public void reply(IMessageExtended inboxMessage, OutboxMessage outboxMessage, ChannelConfig channelConfig) {
 	outboxMessage.contact().setChannelType(inboxMessage.contact().getChannelType());
 	outboxMessage.contact().setLane(inboxMessage.contact().getLane());
 	if (ArgUtil.isEqual(inboxMessage.contact().getChannelType(), Channel.GUPSHUPAGENT.toString())) {
@@ -74,9 +72,9 @@ public class WAGupShupAgentConnector implements ConnectorHandler {
 		gupShupAgentClient.sendViaAgent(inboxMessage, outboxMessage.getMessage());
 	    } else if (outboxMessage.isTemplateMsg() || outboxMessage.isQRButtons()) {
 		// gupShupNotifyClient.optIn(inboxMessage.getFrom());
-		gupShupNotifyClient.send(outboxMessage);
+		gupShupNotifyClient.send(null, outboxMessage);
 	    } else {
-		gupShupChatClient.send(outboxMessage);
+		gupShupChatClient.send(null, outboxMessage);
 	    }
 	} else if (ArgUtil.isEqual(inboxMessage.contact().getChannelType(), Channel.DEFAULT.toString())) {
 	    Message<?> reply = inboxMessage.replyMessage(outboxMessage.getMessage());
@@ -132,7 +130,7 @@ public class WAGupShupAgentConnector implements ConnectorHandler {
     }
 
     @Override
-    public void send(OutboxMessage outboxMessage) {
+    public void send(ChannelConfig channelConfig, OutboxMessage outboxMessage) {
 	// TODO Auto-generated method stub
     }
 

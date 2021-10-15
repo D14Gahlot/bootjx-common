@@ -52,7 +52,7 @@ public class TwitterConnector extends AbstractConnector {
     private TmplClient tmplClient;
 
     @Override
-    public void send(OutboxMessage outboxMessage) {
+    public void send(ChannelConfig channelConfig, OutboxMessage outboxMessage) {
 	try {
 	    if (ArgUtil.is(outboxMessage.getTemplate())) {
 		QuickMedia templateReply = mongoTemplate.findById(outboxMessage.getTemplate(), QuickMedia.class);
@@ -60,16 +60,16 @@ public class TwitterConnector extends AbstractConnector {
 		    if ("image".equalsIgnoreCase(templateReply.getType())) {
 			outboxMessage.attachment(new Attachment().mediaURL(templateReply.getUrl())
 				.mediaType(FileType.IMAGE.toString()).mediaCaption(templateReply.getTitle()));
-			twitterClient.send(outboxMessage);
+			twitterClient.send(null, outboxMessage);
 		    } else {
-			twitterClient.send(outboxMessage);
+			twitterClient.send(null, outboxMessage);
 		    }
 		} else {
 		    tmplClient.process(outboxMessage);
-		    twitterClient.send(outboxMessage);
+		    twitterClient.send(null, outboxMessage);
 		}
 	    } else {
-		twitterClient.send(outboxMessage);
+		twitterClient.send(null, outboxMessage);
 	    }
 	    outboxMessage.updateStatus(OutboxMessage.Status.SENT);
 	} catch (Exception e) {

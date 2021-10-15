@@ -103,7 +103,7 @@ public class FacebooClient implements MessageClient {
     }
 
     @Override
-    public OutboxMessage send(OutboxMessage outboxMessage) {
+    public OutboxMessage send(ChannelConfig channelConfig, OutboxMessage outboxMessage) {
 	String to = CollectionUtil.getOne(outboxMessage.getTo());
 	String lane = outboxMessage.contact().getLane();
 

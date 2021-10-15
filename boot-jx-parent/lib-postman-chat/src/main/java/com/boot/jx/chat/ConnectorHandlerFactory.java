@@ -16,6 +16,7 @@ import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorHandler;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.logger.LoggerService;
 import com.boot.jx.mongo.CommonMongoTemplate;
+import com.boot.jx.postman.PMClientConfig;
 import com.boot.jx.postman.PMConfiguration;
 import com.boot.jx.postman.PMConstants;
 import com.boot.jx.postman.PMEnvironment;
@@ -26,6 +27,7 @@ import com.boot.jx.postman.dto.ChatMessageDTO;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.Message;
 import com.boot.jx.postman.model.MessageBoxEvent;
+import com.boot.jx.postman.model.MessageDefinitions.IMessage;
 import com.boot.jx.postman.model.MessageDefinitions.IMessageExtended;
 import com.boot.jx.postman.model.MessageReport;
 import com.boot.jx.postman.model.OutboxMessage;
@@ -48,16 +50,18 @@ public class ConnectorHandlerFactory extends ScopedBeanFactory<String, Connector
     public static Logger LOGGER = LoggerService.getLogger(ConnectorHandlerFactory.class);
 
     public interface ConnectorHandler {
-	default public void reply(IMessageExtended inboxMessage, OutboxMessage outboxMessage) {
+	default public void reply(IMessageExtended inboxMessage, OutboxMessage outboxMessage,
+		ChannelConfig channelConfig) {
 	    outboxMessage.addTo(inboxMessage.getFrom());
 	    outboxMessage.contact().setLane(inboxMessage.contact().getLane());
-	    this.send(outboxMessage);
+	    this.send(null, outboxMessage);
 	}
 
-	default public void send(ChatContactDoc chatContactDoc, OutboxMessage outboxMessage) {
+	default public void send(ChannelConfig channelConfig, ChatContactDoc chatContactDoc,
+		OutboxMessage outboxMessage) {
 	    outboxMessage.addTo(chatContactDoc.getCsid());
 	    outboxMessage.contact().setLane(chatContactDoc.getLane());
-	    this.send(outboxMessage);
+	    this.send(null, outboxMessage);
 	}
 
 	default public InboxMessage assignToAgent(InboxMessage inboxMessage) {
@@ -73,20 +77,20 @@ public class ConnectorHandlerFactory extends ScopedBeanFactory<String, Connector
 	    return true;
 	}
 
-	default public void message(String messageType, ChatContactDoc chatContactDoc, IMessageExtended inboxMessage,
-		OutboxMessage outboxMessage) {
+	default public void message(ChannelConfig channelConfig, String messageType, ChatContactDoc chatContactDoc,
+		IMessageExtended inboxMessage, OutboxMessage outboxMessage) {
 	    LOGGER.debug("message(String {}, ChatContactDoc {}, SessionMessage {}, OutboxMessage {})", messageType,
 		    chatContactDoc, inboxMessage, outboxMessage);
 	    try {
 		switch (messageType) {
 		case "SEND":
 		    outboxMessage.messageMetaWrapper().composeType("N"); // is a New Message
-		    this.send(chatContactDoc, outboxMessage);
+		    this.send(channelConfig, chatContactDoc, outboxMessage);
 		    outboxMessage.updateStatus(Message.Status.SENT);
 		    break;
 		case "REPLY":
 		    outboxMessage.messageMetaWrapper().composeType("R"); // Its a Reply
-		    this.reply(inboxMessage, outboxMessage);
+		    this.reply(inboxMessage, outboxMessage, channelConfig);
 		    outboxMessage.updateStatus(Message.Status.SENT);
 		    break;
 		default:
@@ -100,7 +104,7 @@ public class ConnectorHandlerFactory extends ScopedBeanFactory<String, Connector
 
 	}
 
-	void send(OutboxMessage outboxMessage);
+	void send(ChannelConfig channelConfig, OutboxMessage outboxMessage);
 
 	default void registerWebHook(ChannelConfig channelConfig) {
 	    LOGGER.error("WEBHOOK REGISTRATION NOT FOUND ");
@@ -155,11 +159,35 @@ public class ConnectorHandlerFactory extends ScopedBeanFactory<String, Connector
 	    // DO Nothing this method is optional
 	}
 
+	ChannelConfig getChannelConfig(IMessage outboxMessage);
     }
 
     public static abstract class AbstractConnector implements ConnectorHandler {
 	@Autowired
 	protected MessageContext messageContext;
+
+	@Autowired
+	protected PMClientConfig pmClientConfig;
+
+	@Autowired
+	protected PMEnvironment environment;
+
+	@Override
+	public void registerWebHook(ChannelConfig channelConfig) {
+	    String webhookUrl = pmClientConfig.getWebhookUrl(channelConfig);
+	    registerWebHook(channelConfig, webhookUrl);
+	}
+
+	public void registerWebHook(ChannelConfig channelConfig, String webhookUrl) {
+	    LOGGER.error("WEBHOOK REGISTRATION NOT DEFINED for URL");
+	}
+
+	@Override
+	public ChannelConfig getChannelConfig(IMessage iMessage) {
+	    String channelId = PostManUtil.CHANNEL_ID(iMessage.contact());
+	    ChannelConfig channelConfig = environment.config().channels(channelId);
+	    return channelConfig;
+	}
     }
 
     public static abstract class DefaultConnector extends AbstractConnector {
@@ -270,7 +298,7 @@ public class ConnectorHandlerFactory extends ScopedBeanFactory<String, Connector
 	    if (ArgUtil.is(channelConfig) || ContactType.WEBSITE.equals(outboxMessage.contact().type())) {
 		ConnectorHandler connector = get(channelConfig);
 		if (ArgUtil.is(connector)) {
-		    connector.message(messageType, chatContactDoc, inboxMessage, outboxMessage);
+		    connector.message(channelConfig, messageType, chatContactDoc, inboxMessage, outboxMessage);
 		} else {
 		    outboxMessage.logs().add(String.format("Connector not defined for %s", channelId));
 		}
