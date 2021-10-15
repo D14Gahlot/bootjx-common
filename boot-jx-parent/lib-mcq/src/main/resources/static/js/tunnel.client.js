@@ -11,6 +11,14 @@ var tunnelClient = (function(win) {
 	var tagIds = [];
 	var pong = false;
 	var TUNNEL_DEBUG = false;
+	
+	win.__onsocket_connect__ = function(frame){
+		console.log("__onsocket_connect__",frame);
+	}
+	win.__onsocket_disconnect__ = function(error){
+		console.log("__onsocket_disconnect__",error);
+	}
+	
 	if(win.sessionStorage && win.sessionStorage.getItem)
 		TUNNEL_DEBUG = !!win.sessionStorage.getItem("TUNNEL_DEBUG");
 	
@@ -35,7 +43,19 @@ var tunnelClient = (function(win) {
 				tenantToken = resp["x-tenant-token"];
 				tagIds = resp["tags"] || [];
 				$dfd.resolve(frame);
+				if(typeof win.__onsocket_connect__ == 'function'){
+					win.__onsocket_connect__(frame);
+				}
 			});
+		}, function(error){
+			if(typeof win.__onsocket_disconnect__ == 'function'){
+				win.__onsocket_disconnect__(error);
+			}
+			console.log('STOMP: ' + error);
+			$connectd = null;
+		    setTimeout(connect, 5000);
+		    $dfd = null;
+		    console.log('STOMP: Reconecting in 5 seconds');
 		});
 		return $dfd.promise();
 	}
@@ -48,10 +68,10 @@ var tunnelClient = (function(win) {
 				+ s4() + s4();
 	}
 	function onConnect() {
-		if (!this.$connectd) {
-			this.$connectd = connect();
+		if (!$connectd) {
+			$connectd = connect();
 		}
-		return this.$connectd;
+		return $connectd;
 	}
 	
 	function TunnelClient (){

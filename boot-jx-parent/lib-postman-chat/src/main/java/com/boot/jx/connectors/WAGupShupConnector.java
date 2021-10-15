@@ -9,7 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Component;
 
-import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorHandler;
+import com.boot.jx.chat.ConnectorHandlerFactory.AbstractConnector;
 import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorMapping;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.dict.FileFormat;
@@ -47,7 +47,7 @@ import com.boot.utils.TimeUtils;
 
 @Component
 @ConnectorMapping(contactType = ContactType.WHATSAPP, channel = CHANNEL_TYPE.WA_GUPSHUP)
-public class WAGupShupConnector implements ConnectorHandler {
+public class WAGupShupConnector extends AbstractConnector {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(WAGupShupConnector.class);
 
@@ -100,9 +100,9 @@ public class WAGupShupConnector implements ConnectorHandler {
 	LOGGER.debug("sendInternal(OutboxMessage {}, boolean {})", outboxMessage, isPushMessage);
 	try {
 	    if (isPushMessage) {
-		gupShupNotifyClient.send(outboxMessage);
+		gupShupNotifyClient.send(null, outboxMessage);
 	    } else {
-		gupShupChatClient.send(outboxMessage);
+		gupShupChatClient.send(null, outboxMessage);
 	    }
 	    outboxMessage.updateStatus(Message.Status.SENT);
 	} catch (Exception e) {
@@ -113,7 +113,7 @@ public class WAGupShupConnector implements ConnectorHandler {
     }
 
     @Override
-    public void send(ChatContactDoc chatContactDoc, OutboxMessage outboxMessage) {
+    public void send(ChannelConfig channelConfig, ChatContactDoc chatContactDoc, OutboxMessage outboxMessage) {
 	outboxMessage.contact().setChannelType(chatContactDoc.getChannelType());
 	outboxMessage.contact().setLane(chatContactDoc.getLane());
 	resolveTemplate(outboxMessage);
@@ -134,7 +134,7 @@ public class WAGupShupConnector implements ConnectorHandler {
     }
 
     @Override
-    public void reply(IMessageExtended inboxMessage, OutboxMessage outboxMessage) {
+    public void reply(IMessageExtended inboxMessage, OutboxMessage outboxMessage, ChannelConfig channelConfig) {
 	resolveTemplate(outboxMessage);
 	this.sendInternal(outboxMessage, false);
     }
@@ -199,7 +199,7 @@ public class WAGupShupConnector implements ConnectorHandler {
     }
 
     @Override
-    public void send(OutboxMessage outboxMessage) {
+    public void send(ChannelConfig channelConfig, OutboxMessage outboxMessage) {
 	// TODO Auto-generated method stub
     }
 

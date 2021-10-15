@@ -5,7 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorHandler;
+import com.boot.jx.chat.ConnectorHandlerFactory.AbstractConnector;
 import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorMapping;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.dict.FileFormat;
@@ -35,7 +35,7 @@ import com.boot.utils.JsonPath;
 
 @Component
 @ConnectorMapping(contactType = ContactType.WHATSAPP, channel = CHANNEL_TYPE.WA_360D)
-public class WA360Connector implements ConnectorHandler {
+public class WA360Connector extends AbstractConnector {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(WA360Connector.class);
     @Autowired
@@ -159,7 +159,7 @@ public class WA360Connector implements ConnectorHandler {
     }
 
     @Override
-    public void send(OutboxMessage outboxMessage) {
+    public void send(ChannelConfig channelConfig, OutboxMessage outboxMessage) {
 	try {
 	    resolveTemplate(outboxMessage);
 	    wa360Client.send(outboxMessage);

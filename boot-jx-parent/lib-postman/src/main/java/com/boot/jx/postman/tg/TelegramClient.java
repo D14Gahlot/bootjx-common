@@ -21,12 +21,11 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.Keyboard
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 
 import com.boot.jx.dict.FileType;
-import com.boot.jx.postman.PMEnvironment;
-import com.boot.jx.postman.PostManException;
 import com.boot.jx.postman.PostmanPackages.MessageClient;
 import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.model.TmplElement;
+import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.postman.tg.TelegramModels.TGFile;
 import com.boot.jx.postman.tg.TelegramModels.TGGetFile;
 import com.boot.jx.postman.tg.TelegramModels.TGMessage;
@@ -43,204 +42,168 @@ import com.ulisesbocchio.jasyptspringboot.annotation.EnableEncryptableProperties
 @EnableEncryptableProperties
 public class TelegramClient implements MessageClient {
 
-	boolean isRegistered;
+    boolean isRegistered;
 
-	@Value("${postman.telegram.webhook.url}")
-	private String telegramWebhookUrl;
-	@Value("${postman.telegram.webhook.path}")
-	private String telegramWebhooPath;
+    @Value("${postman.telegram.webhook.url}")
+    private String telegramWebhookUrl;
+    @Value("${postman.telegram.webhook.path}")
+    private String telegramWebhooPath;
 
-	@Value("${postman.telegram.default.lane}")
-	private String defaultLane;
+    @Value("${postman.telegram.default.lane}")
+    private String defaultLane;
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(TelegramClient.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(TelegramClient.class);
 
-	public static class PATH {
-		public static final String URL = "https://api.telegram.org";
-		public static final String BOT = "/bot{accessToken}";
-		public static final String BOT_SET_WEBHOOK = BOT + "/setWebHook";
-		public static final String BOT_SEND_MESSAGE = BOT + "/sendMessage";
-	}
+    public static class PATH {
+	public static final String URL = "https://api.telegram.org";
+	public static final String BOT = "/bot{accessToken}";
+	public static final String BOT_SET_WEBHOOK = BOT + "/setWebHook";
+	public static final String BOT_SEND_MESSAGE = BOT + "/sendMessage";
+    }
 
-	@Autowired
-	RestService restService;
+    @Autowired
+    private RestService restService;
 
-	@Autowired
-	private PMEnvironment environment;
+    public String registerWebHook(ChannelConfig channelConfig, String webhookUrl) {
+	return restService.ajax(PATH.URL).path(PATH.BOT_SET_WEBHOOK)
+		.pathParam("accessToken", channelConfig.getTelegram().getAccessToken()).field("url", webhookUrl)
+		.queryParam("url", webhookUrl).post().asString();
+    }
 
-	private String getAccessToken(String lane) {
-		if (ArgUtil.isEmpty(lane)) {
-			throw new PostManException("No lane " + lane);
+    public TGMessage sendReply(ChannelConfig channelConfig, String id, SendMessage sendMessage) {
+	SendMessage message = sendMessage; // Create a SendMessage object with mandatory fields
+	sendMessage.setChatId(id);
+	return restService.ajax(PATH.URL).path(PATH.BOT_SEND_MESSAGE)
+		.pathParam("accessToken", channelConfig.getTelegram().getAccessToken()).post(message)
+		.as(new ParameterizedTypeReference<ApiResponse<TGMessage>>() {
+		}).getResult();
+    }
+
+    public TGMessage sendReply(ChannelConfig channelConfig, String id, String text) {
+	SendMessage message = new SendMessage() // Create a SendMessage object with mandatory fields
+		.setChatId(id).setText(text);
+	return restService.ajax(PATH.URL).path(PATH.BOT_SEND_MESSAGE)
+		.pathParam("accessToken", channelConfig.getTelegram().getAccessToken()).post(message)
+		.as(new ParameterizedTypeReference<ApiResponse<TGMessage>>() {
+		}).getResult();
+    }
+
+    public TGMessage sendPhoto(ChannelConfig channelConfig, String id, String photo, String caption) {
+	SendPhoto message = new TGSendPhoto() // Create a SendMessage object with mandatory fields
+		.setChatId(id).setPhoto(photo).setCaption(caption);
+	return restService.ajax(PATH.URL).path(PATH.BOT).path("/sendPhoto")
+		.pathParam("accessToken", channelConfig.getTelegram().getAccessToken()).post(message)
+		.as(new ParameterizedTypeReference<ApiResponse<TGMessage>>() {
+		}).getResult();
+    }
+
+    public TGMessage sendDocument(ChannelConfig channelConfig, String id, String document, String caption) {
+	SendDocument message = new TGSendDocument() // Create a SendMessage object with mandatory fields
+		.setChatId(id).setDocument(document).setCaption(caption);
+	return restService.ajax(PATH.URL).path(PATH.BOT).path("/sendDocument")
+		.pathParam("accessToken", channelConfig.getTelegram().getAccessToken()).post(message)
+		.as(new ParameterizedTypeReference<ApiResponse<TGMessage>>() {
+		}).getResult();
+    }
+
+    public TGFile getFile(ChannelConfig channelConfig, String fileId) {
+	GetFile getFile = new TGGetFile().setFileId(fileId);
+	String accessToken = channelConfig.getTelegram().getAccessToken();
+	return restService.ajax(PATH.URL).path(PATH.BOT).path("/getFile").pathParam("accessToken", accessToken)
+		.post(getFile).as(new ParameterizedTypeReference<ApiResponse<TGFile>>() {
+		}).getResult().updateFileUrl(accessToken);
+    }
+
+    public String promptShareNumber(ChannelConfig channelConfig, String id, String text) {
+	SendMessage message = new SendMessage() // Create a SendMessage object with mandatory fields
+		.setChatId(id);
+	message.setText(text);
+
+	// create keyboard
+	ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
+	message.setReplyMarkup(replyKeyboardMarkup);
+	replyKeyboardMarkup.setSelective(true);
+	replyKeyboardMarkup.setResizeKeyboard(true);
+	replyKeyboardMarkup.setOneTimeKeyboard(true);
+
+	// new list
+	List<KeyboardRow> keyboard = new ArrayList<>();
+
+	// first keyboard line
+	KeyboardRow keyboardFirstRow = new KeyboardRow();
+	KeyboardButton keyboardButton = new KeyboardButton();
+	keyboardButton.setText(text).setRequestContact(true);
+	keyboardFirstRow.add(keyboardButton);
+	// add array to list
+	keyboard.add(keyboardFirstRow);
+	// add list to our keyboard
+	replyKeyboardMarkup.setKeyboard(keyboard);
+
+	return restService.ajax(PATH.URL).path(PATH.BOT_SEND_MESSAGE)
+		.pathParam("accessToken", channelConfig.getTelegram().getAccessToken()).post(message).asString();
+
+    }
+
+    @Override
+    public OutboxMessage send(ChannelConfig channelConfig, OutboxMessage message) {
+	String to = CollectionUtil.getOne(message.getTo());
+	String lane = message.contact().getLane();
+
+	TGMessage resp = null;
+	StringJoiner msgIds = new StringJoiner(",");
+
+	if (ArgUtil.is(message.getAttachments())) {
+	    for (Attachment attachment : message.getAttachments()) {
+		if (ArgUtil.is(attachment.getMediaURL())) {
+		    if (ArgUtil.areEqual(attachment.getMediaType(), FileType.IMAGE.toString())) {
+			resp = sendPhoto(channelConfig, to, attachment.getMediaURL(), attachment.getMediaCaption());
+			if (ArgUtil.is(resp.getMessageId()))
+			    msgIds.add(ArgUtil.parseAsString(resp.getMessageId()));
+		    } else {
+			resp = sendDocument(channelConfig, to, attachment.getMediaURL(), attachment.getMediaCaption());
+			if (ArgUtil.is(resp.getMessageId()))
+			    msgIds.add(ArgUtil.parseAsString(resp.getMessageId()));
+		    }
 		}
-		TelegramConfigDetails config = environment.config().telegram(lane);
-		if (!ArgUtil.is(config)) {
-			throw new PostManException("No Config for lane " + lane);
-		}
-		return config.getAccessToken();
+	    }
 	}
 
-	public String registerWebhook(String callbackURL, String lane) {
-		return restService.ajax(PATH.URL).path(PATH.BOT_SET_WEBHOOK).pathParam("accessToken", getAccessToken(lane))
-				.field("url", callbackURL + telegramWebhooPath)
-				.queryParam("url", callbackURL + telegramWebhooPath + "/" + lane).post().asString();
-	}
-
-	public TGMessage sendReply(String lane, String id, SendMessage sendMessage) {
-		SendMessage message = sendMessage; // Create a SendMessage object with mandatory fields
-		sendMessage.setChatId(id);
-		return restService.ajax(PATH.URL).path(PATH.BOT_SEND_MESSAGE).pathParam("accessToken", getAccessToken(lane))
-				.post(message).as(new ParameterizedTypeReference<ApiResponse<TGMessage>>() {
-				}).getResult();
-	}
-
-	public TGMessage sendReply(String lane, String id, String text) {
-		SendMessage message = new SendMessage() // Create a SendMessage object with mandatory fields
-				.setChatId(id).setText(text);
-		return restService.ajax(PATH.URL).path(PATH.BOT_SEND_MESSAGE).pathParam("accessToken", getAccessToken(lane))
-				.post(message).as(new ParameterizedTypeReference<ApiResponse<TGMessage>>() {
-				}).getResult();
-	}
-
-	public TGMessage sendPhoto(String lane, String id, String photo, String caption) {
-		SendPhoto message = new TGSendPhoto() // Create a SendMessage object with mandatory fields
-				.setChatId(id).setPhoto(photo).setCaption(caption);
-		return restService.ajax(PATH.URL).path(PATH.BOT).path("/sendPhoto")
-				.pathParam("accessToken", getAccessToken(lane)).post(message)
-				.as(new ParameterizedTypeReference<ApiResponse<TGMessage>>() {
-				}).getResult();
-	}
-
-	public TGMessage sendDocument(String lane, String id, String document, String caption) {
-		SendDocument message = new TGSendDocument() // Create a SendMessage object with mandatory fields
-				.setChatId(id).setDocument(document).setCaption(caption);
-		return restService.ajax(PATH.URL).path(PATH.BOT).path("/sendDocument")
-				.pathParam("accessToken", getAccessToken(lane)).post(message)
-				.as(new ParameterizedTypeReference<ApiResponse<TGMessage>>() {
-				}).getResult();
-	}
-
-	public TGFile getFile(String lane, String fileId) {
-		GetFile getFile = new TGGetFile().setFileId(fileId);
-		String accessToken = getAccessToken(lane);
-		return restService.ajax(PATH.URL).path(PATH.BOT).path("/getFile").pathParam("accessToken", accessToken)
-				.post(getFile).as(new ParameterizedTypeReference<ApiResponse<TGFile>>() {
-				}).getResult().updateFileUrl(accessToken);
-	}
-
-	public String promptShareNumber(String id, String text, String lane) {
-		SendMessage message = new SendMessage() // Create a SendMessage object with mandatory fields
-				.setChatId(id);
-		message.setText(text);
-
-		// create keyboard
+	if (ArgUtil.is(message.getMessage())) {
+	    SendMessage sendMessage = new SendMessage();
+	    sendMessage.setText(message.getMessage());
+	    if (message.options().containsKey("buttons")) {
+		List<TmplElement> buttons = new MapModel(message.options()).entry("buttons").asList(new TmplElement());
 		ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
-		message.setReplyMarkup(replyKeyboardMarkup);
 		replyKeyboardMarkup.setSelective(true);
 		replyKeyboardMarkup.setResizeKeyboard(true);
 		replyKeyboardMarkup.setOneTimeKeyboard(true);
 
-		// new list
 		List<KeyboardRow> keyboard = new ArrayList<>();
-
-		// first keyboard line
 		KeyboardRow keyboardFirstRow = new KeyboardRow();
-		KeyboardButton keyboardButton = new KeyboardButton();
-		keyboardButton.setText(text).setRequestContact(true);
-		keyboardFirstRow.add(keyboardButton);
-		// add array to list
+
+		for (TmplElement button : buttons) {
+		    keyboardFirstRow.add(button.getLabel());
+		}
+
 		keyboard.add(keyboardFirstRow);
-		// add list to our keyboard
+
+		/**
+		 * KeyboardRow keyboardSecondRow = new KeyboardRow();
+		 * keyboardSecondRow.add(getAlertsCommand(language));
+		 * keyboardSecondRow.add(getBackCommand(language));
+		 * keyboard.add(keyboardSecondRow);
+		 **/
+
 		replyKeyboardMarkup.setKeyboard(keyboard);
-
-		return restService.ajax(PATH.URL).path(PATH.BOT_SEND_MESSAGE).pathParam("accessToken", getAccessToken(lane))
-				.post(message).asString();
-
+		sendMessage.setReplyMarkup(replyKeyboardMarkup);
+	    }
+	    resp = sendReply(channelConfig, to, sendMessage);
+	    if (ArgUtil.is(resp.getMessageId()))
+		msgIds.add(ArgUtil.parseAsString(resp.getMessageId()));
 	}
+	message.setMessageIdExt(msgIds.toString());
 
-	public String registerWebhook(String lane) {
-		try {
-			TelegramConfigDetails config = environment.config().telegram(lane);
-			if (ArgUtil.is(config.getWebhookUrl())) {
-				String resp = registerWebhook(config.getWebhookUrl(), lane);
-				LOGGER.info("WebHook registered to {}", resp);
-				return resp;
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return null;
-	}
-
-	public void registerWebhookOnce(String lane) {
-		try {
-			if (!isRegistered) {
-				registerWebhook(lane);
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
-
-	@Override
-	public OutboxMessage send(OutboxMessage message) {
-		String to = CollectionUtil.getOne(message.getTo());
-		String lane = message.contact().getLane();
-
-		TGMessage resp = null;
-		StringJoiner msgIds = new StringJoiner(",");
-
-		if (ArgUtil.is(message.getAttachments())) {
-			for (Attachment attachment : message.getAttachments()) {
-				if (ArgUtil.is(attachment.getMediaURL())) {
-					if (ArgUtil.areEqual(attachment.getMediaType(), FileType.IMAGE.toString())) {
-						resp = sendPhoto(lane, to, attachment.getMediaURL(), attachment.getMediaCaption());
-						if (ArgUtil.is(resp.getMessageId()))
-							msgIds.add(ArgUtil.parseAsString(resp.getMessageId()));
-					} else {
-						resp = sendDocument(lane, to, attachment.getMediaURL(), attachment.getMediaCaption());
-						if (ArgUtil.is(resp.getMessageId()))
-							msgIds.add(ArgUtil.parseAsString(resp.getMessageId()));
-					}
-				}
-			}
-		}
-
-		if (ArgUtil.is(message.getMessage())) {
-			SendMessage sendMessage = new SendMessage();
-			sendMessage.setText(message.getMessage());
-			if (message.options().containsKey("buttons")) {
-				List<TmplElement> buttons = new MapModel(message.options()).entry("buttons").asList(new TmplElement());
-				ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
-				replyKeyboardMarkup.setSelective(true);
-				replyKeyboardMarkup.setResizeKeyboard(true);
-				replyKeyboardMarkup.setOneTimeKeyboard(true);
-
-				List<KeyboardRow> keyboard = new ArrayList<>();
-				KeyboardRow keyboardFirstRow = new KeyboardRow();
-
-				for (TmplElement button : buttons) {
-					keyboardFirstRow.add(button.getLabel());
-				}
-
-				keyboard.add(keyboardFirstRow);
-
-				/**
-				 * KeyboardRow keyboardSecondRow = new KeyboardRow();
-				 * keyboardSecondRow.add(getAlertsCommand(language));
-				 * keyboardSecondRow.add(getBackCommand(language));
-				 * keyboard.add(keyboardSecondRow);
-				 **/
-
-				replyKeyboardMarkup.setKeyboard(keyboard);
-				sendMessage.setReplyMarkup(replyKeyboardMarkup);
-			}
-			resp = sendReply(lane, to, sendMessage);
-			if (ArgUtil.is(resp.getMessageId()))
-				msgIds.add(ArgUtil.parseAsString(resp.getMessageId()));
-		}
-		message.setMessageIdExt(msgIds.toString());
-
-		return message;
-	}
+	return message;
+    }
 
 }

@@ -19,62 +19,62 @@ import com.boot.jx.utils.PostManUtil;
 @ThreadScoped
 public class MessageContext {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(MessageContext.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(MessageContext.class);
 
-	@Autowired
-	public MongoTemplate mongoTemplate;
+    @Autowired
+    public MongoTemplate mongoTemplate;
 
-	@Autowired
-	public CommonMongoTemplate commonMongoTemplate;
+    @Autowired
+    public CommonMongoTemplate commonMongoTemplate;
 
-	// DTOs
-	private IMessage message;
-	private Contactable contactable;
+    // DTOs
+    private IMessage message;
+    private Contactable contactable;
 
-	// DOCs
-	private ChatContactDoc chatContactDoc;
+    // DOCs
+    private ChatContactDoc chatContactDoc;
 
-	// QUERYs
-	private ChatContactQuery chatContactQuery;
+    // QUERYs
+    private ChatContactQuery chatContactQuery;
 
-	public void setMessage(IMessage message) {
-		this.message = message;
+    public void setMessage(IMessage message) {
+	this.message = message;
+    }
+
+    private Contactable getContactable() {
+	if (this.contactable == null) {
+	    if (message != null) {
+		this.contactable = PostManUtil.getContactMeta(message.contact());
+	    }
 	}
+	return this.contactable;
+    }
 
-	private Contactable getContactable() {
-		if (this.contactable == null) {
-			if (message != null) {
-				this.contactable = PostManUtil.getContactMeta(message.contact());
-			}
-		}
-		return this.contactable;
+    public ChatContactDoc getChatContactDoc() {
+	if (this.chatContactDoc == null) {
+	    Contactable c = getContactable();
+	    this.chatContactDoc = commonMongoTemplate.findById(c.getContactId(), ChatContactDoc.class);
 	}
+	return this.chatContactDoc;
+    }
 
-	public ChatContactDoc getChatContactDoc() {
-		if (this.chatContactDoc == null) {
-			Contactable c = getContactable();
-			this.chatContactDoc = commonMongoTemplate.findById(c.getContactId(), ChatContactDoc.class);
-		}
-		return this.chatContactDoc;
+    public ChatContactQuery getChatContactQuery() {
+	if (this.chatContactQuery == null) {
+	    ChatContactDoc chatContactDoc = this.getChatContactDoc();
+	    this.chatContactQuery = new ChatContactQuery(chatContactDoc);
 	}
+	return this.chatContactQuery;
+    }
 
-	public ChatContactQuery getChatContactQuery() {
-		if (this.chatContactQuery == null) {
-			ChatContactDoc chatContactDoc = this.getChatContactDoc();
-			this.chatContactQuery = new ChatContactQuery(chatContactDoc);
-		}
-		return this.chatContactQuery;
+    public void commitChatContactQuery() {
+	if (this.chatContactQuery != null) {
+	    commonMongoTemplate.updateFirst(this.chatContactQuery);
+	    this.chatContactDoc = null;
 	}
+    }
 
-	public void commitChatContactQuery() {
-		if (this.chatContactQuery != null) {
-			commonMongoTemplate.updateFirst(this.chatContactQuery);
-			this.chatContactDoc = null;
-		}
-	}
-
-	public void log(ErrorObject error) {
-		commonMongoTemplate.save(error);
-	}
+    public void log(ErrorObject error) {
+	commonMongoTemplate.save(error);
+    }
 
 }

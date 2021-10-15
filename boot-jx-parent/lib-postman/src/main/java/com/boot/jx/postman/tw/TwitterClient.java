@@ -22,6 +22,7 @@ import com.boot.jx.postman.PostmanPackages.MessageClient;
 import com.boot.jx.postman.client.ExtUtilService;
 import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.OutboxMessage;
+import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
 import com.boot.utils.CryptoUtil.HashBuilder;
@@ -115,7 +116,7 @@ public class TwitterClient implements MessageClient {
 		return ArgUtil.parseAsString(uploadedMedia.getMediaId());
 	}
 
-	public OutboxMessage send(OutboxMessage message) {
+	public OutboxMessage send(ChannelConfig channelConfig, OutboxMessage message) {
 		String to = CollectionUtil.getOne(message.getTo());
 		String lane = message.contact().getLane();
 

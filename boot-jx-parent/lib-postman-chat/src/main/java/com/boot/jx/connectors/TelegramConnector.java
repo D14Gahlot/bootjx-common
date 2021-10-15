@@ -52,7 +52,12 @@ public class TelegramConnector extends AbstractConnector {
     @Autowired
     private PMFileStoreClient pmFileStoreClient;
 
-    public void send(OutboxMessage outboxMessage) {
+    @Override
+    public void registerWebHook(ChannelConfig channelConfig, String webhookUrl) {
+	telegramClient.registerWebHook(channelConfig, webhookUrl);
+    }
+
+    public void send(ChannelConfig channelConfig, OutboxMessage outboxMessage) {
 	try {
 	    if (ArgUtil.is(outboxMessage.getTemplate())) {
 		QuickMedia mediaReply = mongoTemplate.findById(outboxMessage.getTemplate(), QuickMedia.class);
@@ -60,14 +65,14 @@ public class TelegramConnector extends AbstractConnector {
 		    if ("image".equalsIgnoreCase(mediaReply.getType())) {
 			outboxMessage.attachment(new Attachment().mediaURL(mediaReply.getUrl())
 				.mediaType(FileType.IMAGE.toString()).mediaCaption(mediaReply.getTitle()));
-			telegramClient.send(outboxMessage);
+			telegramClient.send(channelConfig, outboxMessage);
 		    }
 		} else {
 		    tmplClient.process(outboxMessage);
-		    telegramClient.send(outboxMessage);
+		    telegramClient.send(channelConfig, outboxMessage);
 		}
 	    } else {
-		telegramClient.send(outboxMessage);
+		telegramClient.send(channelConfig, outboxMessage);
 	    }
 	    outboxMessage.updateStatus(OutboxMessage.Status.SENT);
 	} catch (Exception e) {
@@ -83,12 +88,12 @@ public class TelegramConnector extends AbstractConnector {
 	return inboxMessage;
     }
 
-    public InboxMessage toInboxMessage(String lane, Update update) {
+    public InboxMessage toInboxMessage(ChannelConfig channelConfig, Update update) {
 	InboxMessage inboxMessage = new InboxMessage();
 	inboxMessage.setOriginalMessage(update);
 
 	inboxMessage.contact().setContactType(ContactType.TELEGRAM.toString());
-	inboxMessage.contact().setLane(lane);
+	inboxMessage.contact().setLane(channelConfig.getLane());
 
 	if (ArgUtil.is(update.getMessage())) {
 	    inboxMessage.contact().setCsid(ArgUtil.parseAsString(update.getMessage().getChatId()));
@@ -103,7 +108,7 @@ public class TelegramConnector extends AbstractConnector {
 			.max(Comparator.comparing(PhotoSize::getWidth));
 
 		if (photo.isPresent()) {
-		    TGFile file = telegramClient.getFile(lane, photo.get().getFileId());
+		    TGFile file = telegramClient.getFile(channelConfig, photo.get().getFileId());
 		    /**
 		     * Telegram Does not provide Image, so explicitly set Image File Type
 		     */
@@ -115,7 +120,7 @@ public class TelegramConnector extends AbstractConnector {
 			    .mediaCaption(update.getMessage().getCaption()));
 		}
 	    } else if (ArgUtil.is(update.getMessage().getDocument())) {
-		TGFile file = telegramClient.getFile(lane, update.getMessage().getDocument().getFileId());
+		TGFile file = telegramClient.getFile(channelConfig, update.getMessage().getDocument().getFileId());
 		/**
 		 * Telegram Does not provide Image, so explicitly set Image File Type
 		 */
@@ -154,9 +159,9 @@ public class TelegramConnector extends AbstractConnector {
 	Contactable contactDoc = messageContext.getChatContactDoc();
 
 	if (ArgUtil.isEmpty(contactDoc.getPhone())) {
-	    telegramClient.promptShareNumber(inboxMessage.getFrom(),
-		    "Confirm that you would like to share your contact number and continue, by clicking on the button below",
-		    inboxMessage.contact().getLane());
+	    ChannelConfig config = getChannelConfig(inboxMessage);
+	    telegramClient.promptShareNumber(config, inboxMessage.getFrom(),
+		    "Confirm that you would like to share your contact number and continue, by clicking on the button below");
 	    return false;
 	}
 	return true;
@@ -166,7 +171,7 @@ public class TelegramConnector extends AbstractConnector {
     public MessageBoxEvent inboundMessageBoxEvent(ChannelConfig channelConfig, MapModel requestMap,
 	    MessageBoxEvent messageBoxEvent) {
 	Update update = requestMap.as(Update.class);
-	return messageBoxEvent.addInboxMessage(toInboxMessage(channelConfig.getLane(), update));
+	return messageBoxEvent.addInboxMessage(toInboxMessage(channelConfig, update));
     }
 
 }

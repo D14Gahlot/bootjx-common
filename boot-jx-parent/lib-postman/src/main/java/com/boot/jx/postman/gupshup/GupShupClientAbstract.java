@@ -15,6 +15,7 @@ import com.boot.jx.postman.gupshup.GupShupConstants.SessionType;
 import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.MessageOptions;
 import com.boot.jx.postman.model.OutboxMessage;
+import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.rest.RestService;
 import com.boot.jx.rest.RestService.Ajax;
 import com.boot.utils.ArgUtil;
@@ -127,7 +128,7 @@ public abstract class GupShupClientAbstract {
 		.caption(CryptoUtil.getEncoder().message(caption).encodeURL().toString()));
     }
 
-    public OutboxMessage send(OutboxMessage message) {
+    public OutboxMessage send(ChannelConfig channelConfig, OutboxMessage message) {
 
 	String to = null;
 	if (ArgUtil.is(message.getCsid())) {

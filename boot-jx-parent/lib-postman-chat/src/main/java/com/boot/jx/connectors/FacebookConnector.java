@@ -12,8 +12,6 @@ import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorMapping;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.dict.FileType;
 import com.boot.jx.postman.PMConstants.CHANNEL_TYPE;
-import com.boot.jx.postman.client.ExtUtilService;
-import com.boot.jx.postman.client.PMFileStoreClient;
 import com.boot.jx.postman.client.TmplClient;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.QuickMedia;
@@ -48,18 +46,12 @@ public class FacebookConnector extends AbstractConnector {
     @Autowired
     private TmplClient tmplClient;
 
-    @Autowired
-    private ExtUtilService extUtilService;
-
-    @Autowired
-    private PMFileStoreClient pmFileStoreClient;
-
     @Override
     public void registerWebHook(ChannelConfig channelConfig) {
 	ApiResponseUtil.addWarning("Set webhook URL manually from Facebook Developer Portal.");
     }
 
-    public void send(OutboxMessage outboxMessage) {
+    public void send(ChannelConfig channelConfig, OutboxMessage outboxMessage) {
 	try {
 	    if (ArgUtil.is(outboxMessage.getTemplate())) {
 		QuickMedia mediaReply = mongoTemplate.findById(outboxMessage.getTemplate(), QuickMedia.class);
@@ -72,7 +64,7 @@ public class FacebookConnector extends AbstractConnector {
 		    tmplClient.process(outboxMessage);
 		}
 	    }
-	    facebooClient.send(outboxMessage);
+	    facebooClient.send(null, outboxMessage);
 	    outboxMessage.updateStatus(Message.Status.SENT);
 	} catch (Exception e) {
 	    outboxMessage.updateStatus(OutboxMessage.Status.SENT_ERR);
@@ -83,7 +75,7 @@ public class FacebookConnector extends AbstractConnector {
 
     @Override
     public InboxMessage assignToAgent(InboxMessage inboxMessage) {
-	this.reply(inboxMessage, new OutboxMessage().message("Our agent will get in touch with you"));
+	this.reply(inboxMessage, new OutboxMessage().message("Our agent will get in touch with you"), null);
 	return inboxMessage;
     }
 
