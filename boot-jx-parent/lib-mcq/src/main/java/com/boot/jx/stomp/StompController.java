@@ -16,42 +16,42 @@ import com.boot.utils.ArgUtil;
 @Controller
 public class StompController {
 
-	@Autowired
-	StompTunnelSessionManager stompTunnelSessionManager;
+    @Autowired
+    StompTunnelSessionManager stompTunnelSessionManager;
 
-	@Autowired
-	StompTunnelService stompTunnelService;
+    @Autowired
+    StompTunnelService stompTunnelService;
 
-	@SubscribeMapping("/stomp/tunnel/meta")
-	public Map<String, Object> meta(SimpMessageHeaderAccessor headerAccessor) {
-		Map<String, Object> map = new HashMap<String, Object>();
+    @SubscribeMapping("/stomp/tunnel/meta")
+    public Map<String, Object> meta(SimpMessageHeaderAccessor headerAccessor) {
+	Map<String, Object> map = new HashMap<String, Object>();
 
-		String httpsSessionId = ArgUtil
-				.parseAsString(headerAccessor.getSessionAttributes().get(AppConstants.SESSION_ID_XKEY));
+	String httpsSessionId = ArgUtil
+		.parseAsString(headerAccessor.getSessionAttributes().get(AppConstants.SESSION_ID_XKEY));
 
-		StompSession stompSession = stompTunnelSessionManager.getStompSessionByHttpSessionId(httpsSessionId);
+	StompSession stompSession = stompTunnelSessionManager.getStompSessionByHttpSessionId(httpsSessionId);
 
-		if (ArgUtil.is(stompSession)) {
-			if (ArgUtil.is(stompSession.getTags())) {
-				map.put("tags", stompSession.getTags());
-			}
-			if (ArgUtil.is(stompSession.getTenantToken())) {
-				map.put("x-tenant-token", stompSession.getTenantToken());
-			}
-		}
-
-		map.put(AppConstants.SESSION_UID_XKEY, stompTunnelSessionManager.createSessionMapping(
-				headerAccessor.getSessionId(), httpsSessionId,
-				ArgUtil.parseAsString(headerAccessor.getSessionAttributes().get(AppConstants.SESSION_UID_XKEY))));
-		return map;
+	if (ArgUtil.is(stompSession)) {
+	    if (ArgUtil.is(stompSession.getTags())) {
+		map.put("tags", stompSession.getTags());
+	    }
+	    if (ArgUtil.is(stompSession.getTenantToken())) {
+		map.put("x-tenant-token", stompSession.getTenantToken());
+	    }
 	}
 
-	@MessageMapping("/ping")
-	public Map<String, String> ping(SimpMessageHeaderAccessor headerAccessor) throws InterruptedException {
-		Thread.sleep(1000); // simulated delay
-		Map<String, String> map = new HashMap<String, String>();
-		map.put("message", "Hey baby ping pong!");
-		stompTunnelService.sendToAll("/pong", map);
-		return map;
-	}
+	map.put(AppConstants.SESSION_UID_XKEY, stompTunnelSessionManager.createSessionMapping(
+		headerAccessor.getSessionId(), httpsSessionId,
+		ArgUtil.parseAsString(headerAccessor.getSessionAttributes().get(AppConstants.SESSION_UID_XKEY))));
+	return map;
+    }
+
+    @MessageMapping("/ping")
+    public Map<String, String> ping(SimpMessageHeaderAccessor headerAccessor) throws InterruptedException {
+	Thread.sleep(1000); // simulated delay
+	Map<String, String> map = new HashMap<String, String>();
+	map.put("message", "Hey baby ping pong!");
+	stompTunnelService.sendToAll("/pong", map);
+	return map;
+    }
 }

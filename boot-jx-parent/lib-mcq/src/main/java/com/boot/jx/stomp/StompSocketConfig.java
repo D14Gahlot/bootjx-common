@@ -13,25 +13,22 @@ import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 @ConditionalOnProperty("app.stomp")
 public class StompSocketConfig extends AbstractWebSocketMessageBrokerConfigurer {
 
-	@Override
-	public void configureMessageBroker(MessageBrokerRegistry config) {
-		config.enableSimpleBroker("/topic", "/queue", "/tag");
-		config.setApplicationDestinationPrefixes("/app");
-	}
+    @Override
+    public void configureMessageBroker(MessageBrokerRegistry config) {
+	config.enableSimpleBroker("/topic", "/queue", "/tag");
+	config.setApplicationDestinationPrefixes("/app");
+    }
 
-	@Override
-	public void registerStompEndpoints(StompEndpointRegistry registry) {
-		registry
-			.addEndpoint("/stomp-tunnel")
-			.setAllowedOrigins("*")
-			.withSockJS()
-			.setClientLibraryUrl("https://cdn.jsdelivr.net/npm/sockjs-client@1.4.0/dist/sockjs.min.js") // https://www.gitmemory.com/issue/sockjs/sockjs-client/488/534647358
-			.setInterceptors(httpSessionIdHandshakeInterceptor());
-	}
+    @Override
+    public void registerStompEndpoints(StompEndpointRegistry registry) {
+	registry.addEndpoint("/stomp-tunnel").setAllowedOrigins("*").withSockJS()
+		.setClientLibraryUrl("https://cdn.jsdelivr.net/npm/sockjs-client@1.4.0/dist/sockjs.min.js") // https://www.gitmemory.com/issue/sockjs/sockjs-client/488/534647358
+		.setInterceptors(httpSessionIdHandshakeInterceptor());
+    }
 
-	@Bean
-	public StompHttpHandshakeInterceptor httpSessionIdHandshakeInterceptor() {
-		return new StompHttpHandshakeInterceptor();
-	}
+    @Bean
+    public StompHttpHandshakeInterceptor httpSessionIdHandshakeInterceptor() {
+	return new StompHttpHandshakeInterceptor();
+    }
 
 }
