@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.PhotoSize;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
+import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.chat.ConnectorHandlerFactory.AbstractConnector;
 import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorMapping;
 import com.boot.jx.dict.ContactType;
@@ -89,50 +90,53 @@ public class TelegramConnector extends AbstractConnector {
     }
 
     public InboxMessage toInboxMessage(ChannelConfig channelConfig, Update update) {
-	InboxMessage inboxMessage = new InboxMessage();
+
+	// Create Default Message from Channel
+	InboxMessage inboxMessage = this.createInboxMessage(channelConfig);
+
+	// Set Contact info
+	String csid = ArgUtil.parseAsString(update.getMessage().getChatId());
+
+	inboxMessage.contact().setCsid(csid);
+
+	// Set Additional info
+	inboxMessage.setFrom(csid);
+
+	// Extract Message Details
 	inboxMessage.setOriginalMessage(update);
+	inboxMessage.setMessageIdExt(
+		String.format("%s-%s", update.getMessage().getChatId(), update.getMessage().getMessageId()));
+	inboxMessage.setMessage(update.getMessage().getText());
 
-	inboxMessage.contact().setContactType(ContactType.TELEGRAM.toString());
-	inboxMessage.contact().setLane(channelConfig.getLane());
+	if (ArgUtil.is(update.getMessage().getPhoto())) {
+	    Optional<PhotoSize> photo = update.getMessage().getPhoto().stream()
+		    .max(Comparator.comparing(PhotoSize::getWidth));
 
-	if (ArgUtil.is(update.getMessage())) {
-	    inboxMessage.contact().setCsid(ArgUtil.parseAsString(update.getMessage().getChatId()));
-	    inboxMessage.setFrom(ArgUtil.parseAsString(update.getMessage().getChatId()));
-
-	    inboxMessage.setMessageIdExt(
-		    String.format("%s-%s", update.getMessage().getChatId(), update.getMessage().getMessageId()));
-
-	    inboxMessage.setMessage(update.getMessage().getText());
-	    if (ArgUtil.is(update.getMessage().getPhoto())) {
-		Optional<PhotoSize> photo = update.getMessage().getPhoto().stream()
-			.max(Comparator.comparing(PhotoSize::getWidth));
-
-		if (photo.isPresent()) {
-		    TGFile file = telegramClient.getFile(channelConfig, photo.get().getFileId());
-		    /**
-		     * Telegram Does not provide Image, so explicitly set Image File Type
-		     */
-		    CommonFile srcFile = new CommonFile().url(file.getFileUrl()).fileType(FileType.IMAGE);
-		    CommonFile dstFile = pmFileStoreClient.uploadSessionFileAsync(srcFile,
-			    PostManUtil.createContactId(inboxMessage), inboxMessage.getMessageIdExt());
-
-		    inboxMessage.attachment(new Attachment().mediaURL(dstFile.getUrl()).mediaType(dstFile.getFileType())
-			    .mediaCaption(update.getMessage().getCaption()));
-		}
-	    } else if (ArgUtil.is(update.getMessage().getDocument())) {
-		TGFile file = telegramClient.getFile(channelConfig, update.getMessage().getDocument().getFileId());
+	    if (photo.isPresent()) {
+		TGFile file = telegramClient.getFile(channelConfig, photo.get().getFileId());
 		/**
 		 * Telegram Does not provide Image, so explicitly set Image File Type
 		 */
-		CommonFile srcFile = new CommonFile().url(file.getFileUrl()).fileType(FileType.DOCUMENT);
+		CommonFile srcFile = new CommonFile().url(file.getFileUrl()).fileType(FileType.IMAGE);
 		CommonFile dstFile = pmFileStoreClient.uploadSessionFileAsync(srcFile,
 			PostManUtil.createContactId(inboxMessage), inboxMessage.getMessageIdExt());
 
 		inboxMessage.attachment(new Attachment().mediaURL(dstFile.getUrl()).mediaType(dstFile.getFileType())
 			.mediaCaption(update.getMessage().getCaption()));
 	    }
+	} else if (ArgUtil.is(update.getMessage().getDocument())) {
+	    TGFile file = telegramClient.getFile(channelConfig, update.getMessage().getDocument().getFileId());
+	    /**
+	     * Telegram Does not provide Image, so explicitly set Image File Type
+	     */
+	    CommonFile srcFile = new CommonFile().url(file.getFileUrl()).fileType(FileType.DOCUMENT);
+	    CommonFile dstFile = pmFileStoreClient.uploadSessionFileAsync(srcFile,
+		    PostManUtil.createContactId(inboxMessage), inboxMessage.getMessageIdExt());
 
+	    inboxMessage.attachment(new Attachment().mediaURL(dstFile.getUrl()).mediaType(dstFile.getFileType())
+		    .mediaCaption(update.getMessage().getCaption()));
 	}
+
 	return inboxMessage;
     }
 
@@ -171,7 +175,12 @@ public class TelegramConnector extends AbstractConnector {
     public MessageBoxEvent inboundMessageBoxEvent(ChannelConfig channelConfig, MapModel requestMap,
 	    MessageBoxEvent messageBoxEvent) {
 	Update update = requestMap.as(Update.class);
-	return messageBoxEvent.addInboxMessage(toInboxMessage(channelConfig, update));
+	if (ArgUtil.is(update.getMessage())) {
+	    return messageBoxEvent.addInboxMessage(toInboxMessage(channelConfig, update));
+	} else {
+	    ApiResponseUtil.throwException("No Message found in Update");
+	}
+	return messageBoxEvent;
     }
 
 }
