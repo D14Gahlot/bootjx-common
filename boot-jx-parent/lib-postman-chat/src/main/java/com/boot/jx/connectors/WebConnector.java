@@ -117,7 +117,7 @@ public class WebConnector extends DefaultConnector {
 
     @Override
     public InboxMessage assignToAgent(InboxMessage inboxMessage) {
-	this.reply(inboxMessage, new OutboxMessage().message("Call us"), null);
+	this.reply(null, inboxMessage, new OutboxMessage().message("Call us"));
 	return inboxMessage;
     }
 
@@ -159,15 +159,15 @@ public class WebConnector extends DefaultConnector {
 	List<TmplElement> inputs = new ArrayList<TmplElement>();
 	if (ArgUtil.isEmpty(chatContactDoc.getName())) {
 	    inputs.add(new TmplElement().name("name").label("Name").type("TEXT"));
-	    reply(inboxMessage, (OutboxMessage) inboxMessage.replyMessage("Please fill below inputs to continue")
-		    .option("inputs", inputs), null);
+	    reply(null, inboxMessage, (OutboxMessage) inboxMessage.replyMessage("Please fill below inputs to continue")
+		        .option("inputs", inputs));
 	    return false;
 	}
 
 	if (ArgUtil.isEmpty(chatContactDoc.getEmail())) {
 	    inputs.add(new TmplElement().name("email").label("Email").type("EMAIL"));
-	    reply(inboxMessage, (OutboxMessage) inboxMessage.replyMessage("Please fill below inputs to continue")
-		    .option("inputs", inputs), null);
+	    reply(null, inboxMessage, (OutboxMessage) inboxMessage.replyMessage("Please fill below inputs to continue")
+		        .option("inputs", inputs));
 	    return false;
 	}
 

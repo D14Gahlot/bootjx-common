@@ -50,18 +50,18 @@ public class ConnectorHandlerFactory extends ScopedBeanFactory<String, Connector
     public static Logger LOGGER = LoggerService.getLogger(ConnectorHandlerFactory.class);
 
     public interface ConnectorHandler {
-	default public void reply(IMessageExtended inboxMessage, OutboxMessage outboxMessage,
-		ChannelConfig channelConfig) {
+	default public void reply(ChannelConfig channelConfig, IMessageExtended inboxMessage,
+		OutboxMessage outboxMessage) {
 	    outboxMessage.addTo(inboxMessage.getFrom());
 	    outboxMessage.contact().setLane(inboxMessage.contact().getLane());
-	    this.send(null, outboxMessage);
+	    this.send(channelConfig, outboxMessage);
 	}
 
 	default public void send(ChannelConfig channelConfig, ChatContactDoc chatContactDoc,
 		OutboxMessage outboxMessage) {
 	    outboxMessage.addTo(chatContactDoc.getCsid());
 	    outboxMessage.contact().setLane(chatContactDoc.getLane());
-	    this.send(null, outboxMessage);
+	    this.send(channelConfig, outboxMessage);
 	}
 
 	default public InboxMessage assignToAgent(InboxMessage inboxMessage) {
@@ -90,7 +90,7 @@ public class ConnectorHandlerFactory extends ScopedBeanFactory<String, Connector
 		    break;
 		case "REPLY":
 		    outboxMessage.messageMetaWrapper().composeType("R"); // Its a Reply
-		    this.reply(inboxMessage, outboxMessage, channelConfig);
+		    this.reply(channelConfig, inboxMessage, outboxMessage);
 		    outboxMessage.updateStatus(Message.Status.SENT);
 		    break;
 		default:
