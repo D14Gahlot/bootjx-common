@@ -186,6 +186,9 @@ public class ConnectorHandlerFactory extends ScopedBeanFactory<String, Connector
 	public ChannelConfig getChannelConfig(IMessage iMessage) {
 	    String channelId = PostManUtil.CHANNEL_ID(iMessage.contact());
 	    ChannelConfig channelConfig = environment.config().channels(channelId);
+	    if (!ArgUtil.is(channelConfig) && !ContactType.WEBSITE.equals(iMessage.contact().type())) {
+		LOGGER.error(String.format("ChannelConfig not found for %s", channelId));
+	    }
 	    return channelConfig;
 	}
     }
