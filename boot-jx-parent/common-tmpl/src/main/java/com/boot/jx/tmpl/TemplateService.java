@@ -177,9 +177,9 @@ public class TemplateService {
 
 		ITemplate iTemplate = ITemplates.getTemplate(file.getTemplate());
 
-		if (!appConfig.isProdMode() && appConfig.isCache()) {
-			templateModelCache.put(iTemplate.getSampleJSON(), file.getModel());
-		}
+//		if (!appConfig.isProdMode() && appConfig.isCache()) {
+//			templateModelCache.put(iTemplate.getSampleJSON(), file.getModel());
+//		}
 
 		AppContextUtil.set("template_locale", locale);
 		AppContextUtil.set("template_contactType", contactType);
