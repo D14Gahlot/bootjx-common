@@ -166,7 +166,7 @@ public class PostManUtil {
     }
 
     public static String CHANNEL_CALLBACK_PATH(String accountKey, AChannelConfig channelConfig) {
-	return String.format("ext/inbound/%s/callback/%s/%s/%s", channelConfig.getChannelType(), accountKey,
+	return String.format("ext/inbound/v2/%s/callback/%s/%s/%s", channelConfig.getChannelType(), accountKey,
 		CHANNEL_ID(channelConfig.getChannelType(), channelConfig.getLane()), channelConfig.getChannelKey());
     }
 
