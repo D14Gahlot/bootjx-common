@@ -147,7 +147,6 @@ public class TelegramClient implements MessageClient {
     @Override
     public OutboxMessage send(ChannelConfig channelConfig, OutboxMessage message) {
 	String to = CollectionUtil.getOne(message.getTo());
-	String lane = message.contact().getLane();
 
 	TGMessage resp = null;
 	StringJoiner msgIds = new StringJoiner(",");

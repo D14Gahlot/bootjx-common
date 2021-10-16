@@ -28,8 +28,10 @@ public class AgentSecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
 	http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
 		// Publics Calls
-		.and().authorizeRequests().antMatchers("/pub/**").permitAll().and().authorizeRequests()
-		.antMatchers("/ext/**").permitAll().and().authorizeRequests().antMatchers("/int/**").permitAll()
+		.and().authorizeRequests().antMatchers("/pub/**").permitAll() // Public URLs
+		.and().authorizeRequests().antMatchers("/ext/**").permitAll() // External URLS
+		.and().authorizeRequests().antMatchers("/int/**").permitAll() //Internal URLs
+		.and().authorizeRequests().antMatchers("/stomp-tunnel/**").permitAll() //Stomp Calls
 		// Login Calls
 		.and().authorizeRequests().antMatchers("/auth/**").permitAll()
 		// API Calls

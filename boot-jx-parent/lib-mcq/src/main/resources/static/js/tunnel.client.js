@@ -2,7 +2,8 @@ var tunnelClient = (function(win) {
 	var config = {
 		context : "/offsite",
 		user : "guest",
-		token : guid()
+		token : guid(),
+		reconnect : false
 	};
 	var $connectd = null, $dfd = null;
 	var sessionToken = null;
@@ -15,8 +16,13 @@ var tunnelClient = (function(win) {
 	win.__onsocket_connect__ = function(frame){
 		console.log("__onsocket_connect__",frame);
 	}
-	win.__onsocket_disconnect__ = function(error){
-		console.log("__onsocket_disconnect__",error);
+	win.__onsocket_disconnect__ = function(error, reconnect){
+		if(config.reconnect){
+			setTimeout(reconnect, 5000);
+			console.log('STOMP: Reconecting in 5 seconds');
+		} else {
+			console.log('STOMP: Auto reconnect not anebaled');
+		}
 	}
 	
 	if(win.sessionStorage && win.sessionStorage.getItem)
@@ -48,14 +54,14 @@ var tunnelClient = (function(win) {
 				}
 			});
 		}, function(error){
-			if(typeof win.__onsocket_disconnect__ == 'function'){
-				win.__onsocket_disconnect__(error);
-			}
-			console.log('STOMP: ' + error);
+			console.error("__onsocket_disconnect__",{error : error});
 			$connectd = null;
-		    setTimeout(connect, 5000);
-		    $dfd = null;
-		    console.log('STOMP: Reconecting in 5 seconds');
+			if(typeof win.__onsocket_disconnect__ == 'function'){
+				win.__onsocket_disconnect__(error, function(){
+					$dfd = null;
+				   	connect();	
+				});
+			}
 		});
 		return $dfd.promise();
 	}

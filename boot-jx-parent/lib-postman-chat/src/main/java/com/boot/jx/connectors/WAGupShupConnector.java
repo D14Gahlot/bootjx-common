@@ -134,7 +134,7 @@ public class WAGupShupConnector extends AbstractConnector {
     }
 
     @Override
-    public void reply(IMessageExtended inboxMessage, OutboxMessage outboxMessage, ChannelConfig channelConfig) {
+    public void reply(ChannelConfig channelConfig, IMessageExtended inboxMessage, OutboxMessage outboxMessage) {
 	resolveTemplate(outboxMessage);
 	this.sendInternal(outboxMessage, false);
     }
