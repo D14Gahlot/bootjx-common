@@ -40,10 +40,12 @@ import com.boot.jx.admin.dto.DashBoardRequestDto;
 import com.boot.jx.admin.dto.DashBoardResponseDto;
 import com.boot.jx.admin.dto.LeadMessanger;
 import com.boot.jx.admin.dto.PeakLoadDto;
+import com.boot.jx.mongo.MongoUtils;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.JsonUtil;
+import com.mongodb.client.DistinctIterable;
 
 @Component
 public class AgentAnalyticsManager {
@@ -228,8 +230,8 @@ public class AgentAnalyticsManager {
 	}
 	
 	public List<ChatSessionDoc> getAgentList() {
-		List<ChatSessionDoc> distinceAgentList = mongoTemplate.getCollection("CHAT_SESSION").distinct("assignedToAgent");
-		return distinceAgentList;
+	    	DistinctIterable<ChatSessionDoc> distinceAgentList = mongoTemplate.getCollection("CHAT_SESSION").distinct("assignedToAgent",ChatSessionDoc.class);
+		return MongoUtils.toList(distinceAgentList);
 	}
 	
 	
@@ -237,8 +239,8 @@ public class AgentAnalyticsManager {
 	public List<ChatSessionDoc> getAgentList(long dateRange1, long dateRange2) {
 		Query query = new Query();
 		query.addCriteria(Criteria.where("assignedAgentStamp").gt(dateRange1).lt(dateRange2));
-		List<ChatSessionDoc> distinceAgentList = mongoTemplate.getCollection("CHAT_SESSION").distinct("assignedToAgent",query.getQueryObject());
-		return distinceAgentList;
+		DistinctIterable<ChatSessionDoc> distinceAgentList = mongoTemplate.getCollection("CHAT_SESSION").distinct("assignedToAgent",query.getQueryObject(),ChatSessionDoc.class);
+		return MongoUtils.toList(distinceAgentList);
 	}
 	
 	
@@ -247,12 +249,12 @@ public class AgentAnalyticsManager {
 		Query query = new Query();
 		query.addCriteria(Criteria.where("assignedToAgent").is(agent));
 		query.addCriteria(Criteria.where("assignedAgentStamp").gt(dateRange1).lt(dateRange2));
-		List<ChatSessionDoc> distinctIdList = mongoTemplate.getCollection(CHAT_SESSION).distinct("contactId",query.getQueryObject());
+		DistinctIterable<ChatSessionDoc> distinctIdList = mongoTemplate.getCollection(CHAT_SESSION).distinct("contactId",query.getQueryObject(),ChatSessionDoc.class);
 		for(Object chat :distinctIdList) {
 			LOGGER.debug("Chat doc :"+(String)chat);
 			LOGGER.info("Chat doc :"+(String)chat);
 		}
-		return distinctIdList;
+		return MongoUtils.toList(distinctIdList);
 	}
 	
 	public List<ChatSessionDoc> getAgentWiseTotalMsgExchanged(String agent,long dateRange1, long dateRange2){

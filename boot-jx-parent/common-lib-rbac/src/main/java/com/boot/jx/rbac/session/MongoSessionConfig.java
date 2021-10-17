@@ -1,5 +1,6 @@
 package com.boot.jx.rbac.session;
 
+import java.time.Duration;
 import java.util.Collections;
 
 import javax.annotation.PostConstruct;
@@ -12,6 +13,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.jackson2.CoreJackson2Module;
 import org.springframework.session.data.mongo.AbstractMongoSessionConverter;
 import org.springframework.session.data.mongo.JacksonMongoSessionConverter;
+import org.springframework.session.data.mongo.JdkMongoSessionConverter;
 import org.springframework.session.data.mongo.config.annotation.web.http.EnableMongoHttpSession;
 
 import com.boot.jx.logger.LoggerService;
@@ -31,12 +33,12 @@ public class MongoSessionConfig {
     @Value("${spring.session.store-type}")
     private String sessionStoreType;
 
-//    @Bean
-//    public JdkMongoSessionConverter jdkMongoSessionConverter() {
-//	return new JdkMongoSessionConverter();
-//    }
-
     @Bean
+    public JdkMongoSessionConverter jdkMongoSessionConverter() {
+	return new JdkMongoSessionConverter(Duration.ofMinutes(30));
+    }
+
+    // @Bean
     public AbstractMongoSessionConverter mongoSessionConverter() {
 	// List<Module> securityModules =
 	// SecurityJackson2Modules.getModules(getClass().getClassLoader());
@@ -49,7 +51,7 @@ public class MongoSessionConfig {
 		.<Module>singletonList(new SimpleModule("forMongoSession", new Version(1, 0, 0, null, null, null)));
     }
 
-    @Bean
+    // @Bean
     public ObjectMapper objectMapper() {
 	ObjectMapper mapper = JsonUtil.createMapper("forMongoSession");
 	mapper.registerModule(new CoreJackson2Module());
@@ -59,7 +61,7 @@ public class MongoSessionConfig {
     @PostConstruct
     public void init() {
 	LOGGER.info("spring.session.store-type=none turns spring session off.");
-	LOGGER.info("Monog Session Replication is turned {}.", sessionStoreType.equals("mongo") ? "ON" : "OFF");
+	LOGGER.info("Monog Session Replication is turned {}.", sessionStoreType.equals("mongodb") ? "ON" : "OFF");
     }
 
 }

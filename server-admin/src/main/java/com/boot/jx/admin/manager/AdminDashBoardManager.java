@@ -51,10 +51,12 @@ import com.boot.jx.admin.dto.LeadMessanger;
 import com.boot.jx.admin.dto.PeakLoadDto;
 import com.boot.jx.admin.dto.TagDocumentDto;
 import com.boot.jx.admin.dto.TagDocumentLst;
+import com.boot.jx.mongo.MongoUtils;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.model.TagDocument;
 import com.boot.utils.ArgUtil;
+import com.mongodb.client.DistinctIterable;
 
 @Component
 public class AdminDashBoardManager {
@@ -769,13 +771,12 @@ public class AdminDashBoardManager {
 	}
 
 	// To fetch unique conversation
-	@SuppressWarnings("unchecked")
 	public List<MessageDoc> getUniqueConversation(Object contactType, long dateRange1, long dateRange2) {
 		Query query = new Query();
 		query.addCriteria(Criteria.where("timestamp").gt(dateRange1).lt(dateRange2));
-		List<MessageDoc> distinctIdList = mongoTemplate.getCollection(contactType.toString()).distinct("contactId",
-				query.getQueryObject());
-		return distinctIdList;
+		 DistinctIterable<MessageDoc> distinctIdList = mongoTemplate.getCollection(contactType.toString()).distinct("contactId",
+				query.getQueryObject(),MessageDoc.class);
+		return MongoUtils.toList(distinctIdList);
 	}
 
 	/** Timestamp **/

@@ -68,10 +68,12 @@ public class CommonMongoSource {
     }
 
     public MongoDbFactory getMongoDbFactory() {
-	if (mongoDbFactory == null && ArgUtil.is(dataSourceUrl)) {
-	    mongoDbFactory = getMongoDbFactory(dataSourceUrl);
-	    LOGGER.debug("mongoTemplate was NULL So created One");
+	if (mongoDbFactory == null && ArgUtil.is(globalDataSourceUrl)) {
+	    mongoDbFactory = getMongoDbFactory(globalDataSourceUrl);
+	    LOGGER.info("mongoTemplate was NULL So created One");
 	    ready = true;
+	} else {
+	    
 	}
 	return mongoDbFactory;
     }
@@ -84,7 +86,7 @@ public class CommonMongoSource {
 		mongoDbFactory = getMongoDbFactory();
 		if (ArgUtil.is(mongoDbFactory)) {
 		    mongoTemplate = new MongoTemplate(mongoDbFactory);
-		    LOGGER.debug("mongoTemplate was NULL So created One");
+		    LOGGER.info("mongoTemplate was NULL So created One");
 		    ready = true;
 		} else {
 		    LOGGER.error("mongoDbFactory was NULL So cannot create One");
