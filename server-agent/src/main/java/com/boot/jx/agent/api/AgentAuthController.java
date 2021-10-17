@@ -32,6 +32,7 @@ import com.boot.jx.http.CommonHttpRequest;
 import com.boot.jx.postman.PMConstants.DEFAULT;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.rest.RestService;
+import com.boot.jx.stomp.StompQuery;
 import com.boot.jx.stomp.StompTunnelSessionManager;
 import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
@@ -221,7 +222,7 @@ public class AgentAuthController {
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 		sessionService.updateLogin(agent);
 		stompTunnelSessionManager.registerUser(agent.getAgent_code(), agent.getDept().getDept_code(),
-			DEFAULT.NO_DEPT);
+			DEFAULT.NO_DEPT, StompQuery.PING_TAG);
 
 		boolean rememberme = ArgUtil.parseAsBoolean(commonHttpRequest.get("rememberme"), false);
 		if (rememberme) {

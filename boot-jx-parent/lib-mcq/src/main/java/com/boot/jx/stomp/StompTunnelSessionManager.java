@@ -19,116 +19,116 @@ import com.boot.utils.UniqueID;
 @Service
 public class StompTunnelSessionManager {
 
-	/*
-	 * Map for <httpSessionId, stompUID>
-	 */
-	public static final Map<String, String> http2sessionUIdMap = Collections
-			.synchronizedMap(new HashMap<String, String>());
+    /*
+     * Map for <httpSessionId, stompUID>
+     */
+    public static final Map<String, String> http2sessionUIdMap = Collections
+	    .synchronizedMap(new HashMap<String, String>());
 
-	public static final Map<String, String> http2stompUIdMap = Collections
-			.synchronizedMap(new HashMap<String, String>());
+    public static final Map<String, String> http2stompUIdMap = Collections
+	    .synchronizedMap(new HashMap<String, String>());
 
-	/*
-	 * Map for <wsSessionID, httpSessionId>
-	 */
-	public static final Map<String, String> ws2httpMap = Collections.synchronizedMap(new HashMap<String, String>());
+    /*
+     * Map for <wsSessionID, httpSessionId>
+     */
+    public static final Map<String, String> ws2httpMap = Collections.synchronizedMap(new HashMap<String, String>());
 
-	/*
-	 * Map for <stompUID, stompSession>
-	 */
-	@Autowired(required = false)
-	StompSessionCache stompSessionCache;
+    /*
+     * Map for <stompUID, stompSession>
+     */
+    @Autowired(required = false)
+    StompSessionCache stompSessionCache;
 
-	public static String getSystemPrefix() {
-		return UniqueID.PREF;
+    public static String getSystemPrefix() {
+	return UniqueID.PREF;
+    }
+
+    public String createSessionMapping(String wsSessionID, String httpSessionId, String sessionUID) {
+	if (ArgUtil.isEmpty(sessionUID)) {
+	    sessionUID = http2sessionUIdMap.get(httpSessionId);
+	    if (ArgUtil.isEmpty(sessionUID)) {
+		sessionUID = String.format("%s-%s-%s", getSystemPrefix(), httpSessionId, wsSessionID);
+		http2sessionUIdMap.put(httpSessionId, sessionUID);
+	    }
 	}
+	ws2httpMap.put(wsSessionID, httpSessionId);
+	return sessionUID;
+    }
 
-	public String createSessionMapping(String wsSessionID, String httpSessionId, String sessionUID) {
-		if (ArgUtil.isEmpty(sessionUID)) {
-			sessionUID = http2sessionUIdMap.get(httpSessionId);
-			if (ArgUtil.isEmpty(sessionUID)) {
-				sessionUID = String.format("%s-%s-%s", getSystemPrefix(), httpSessionId, wsSessionID);
-				http2sessionUIdMap.put(httpSessionId, sessionUID);
-			}
-		}
-		ws2httpMap.put(wsSessionID, httpSessionId);
-		return sessionUID;
+    /**
+     * Returns SessionUID for httpSessionId
+     * 
+     * @param httpSessionId
+     * @return
+     */
+    public String getSessionUId(String httpSessionId) {
+	return http2sessionUIdMap.get(httpSessionId);
+    }
+
+    public void delinkWs2Http(String httpSessionId, String wsSessionID) {
+	ws2httpMap.remove(wsSessionID);
+	boolean isExists = false;
+	for (Entry<String, String> entry : ws2httpMap.entrySet()) {
+	    if (entry.getValue().equals(httpSessionId)) {
+		isExists = true;
+	    }
 	}
-
-	/**
-	 * Returns SessionUID for httpSessionId
-	 * 
-	 * @param httpSessionId
-	 * @return
-	 */
-	public String getSessionUId(String httpSessionId) {
-		return http2sessionUIdMap.get(httpSessionId);
+	if (!isExists) {
+	    http2sessionUIdMap.remove(httpSessionId);
 	}
+    }
 
-	public void delinkWs2Http(String httpSessionId, String wsSessionID) {
-		ws2httpMap.remove(wsSessionID);
-		boolean isExists = false;
-		for (Entry<String, String> entry : ws2httpMap.entrySet()) {
-			if (entry.getValue().equals(httpSessionId)) {
-				isExists = true;
-			}
-		}
-		if (!isExists) {
-			http2sessionUIdMap.remove(httpSessionId);
-		}
+    /**
+     * 
+     * @param stompUID      - only one session with one stompUID can exists, if you
+     *                      want to support multiple, change accordingly
+     * @param httpSessionId
+     */
+    public void mapHTTPSession(String stompUID, String httpSessionId, String... tags) {
+	StompSession stompSession = new StompSession();
+	stompSession.setPrefix(getSystemPrefix());
+	stompSession.setHttpSessionId(httpSessionId);
+
+	if (tags != null && tags.length > 0) {
+	    String[] etags = new String[tags.length];
+	    for (int i = 0; i < tags.length; i++) {
+		etags[i] = createTagId(tags[i]);
+	    }
+	    stompSession.setTags(etags);
 	}
+	stompSession.setTenantToken(createTagId(AppContextUtil.getTenant()));
+	http2stompUIdMap.put(httpSessionId, stompUID);
+	stompSessionCache.put(stompUID, stompSession);
+    }
 
-	/**
-	 * 
-	 * @param stompUID      - only one session with one stompUID can exists, if you
-	 *                      want to support multiple, change accordingly
-	 * @param httpSessionId
-	 */
-	public void mapHTTPSession(String stompUID, String httpSessionId, String... tags) {
-		StompSession stompSession = new StompSession();
-		stompSession.setPrefix(getSystemPrefix());
-		stompSession.setHttpSessionId(httpSessionId);
+    /**
+     * Create Stomp Session for User, Prefer with prefix E:21,C:1212,T:3435
+     * 
+     * @param stompUID
+     */
+    public void registerUser(String stompUID) {
+	mapHTTPSession(stompUID, AppContextUtil.getSessionId(true));
+    }
 
-		if (tags != null && tags.length > 0) {
-			String[] etags = new String[tags.length];
-			for (int i = 0; i < tags.length; i++) {
-				etags[i] = createTagId(tags[i]);
-			}
-			stompSession.setTags(etags);
-		}
-		stompSession.setTenantToken(createTagId(AppContextUtil.getTenant()));
-		http2stompUIdMap.put(httpSessionId, stompUID);
-		stompSessionCache.put(stompUID, stompSession);
+    public void registerUser(String stompUID, String... tags) {
+	mapHTTPSession(stompUID, AppContextUtil.getSessionId(true), tags);
+    }
+
+    public StompSession getStompSession(String stompUID) {
+	return stompSessionCache.get(stompUID);
+    }
+
+    public StompSession getStompSessionByHttpSessionId(String httpSessionId) {
+	String stompUID = http2stompUIdMap.get(httpSessionId);
+	if (ArgUtil.is(stompUID)) {
+	    return stompSessionCache.get(stompUID);
 	}
+	return null;
+    }
 
-	/**
-	 * Create Stomp Session for User, Prefer with prefix E:21,C:1212,T:3435
-	 * 
-	 * @param stompUID
-	 */
-	public void registerUser(String stompUID) {
-		mapHTTPSession(stompUID, AppContextUtil.getSessionId(true));
-	}
-
-	public void registerUser(String stompUID, String... tags) {
-		mapHTTPSession(stompUID, AppContextUtil.getSessionId(true), tags);
-	}
-
-	public StompSession getStompSession(String stompUID) {
-		return stompSessionCache.get(stompUID);
-	}
-
-	public StompSession getStompSessionByHttpSessionId(String httpSessionId) {
-		String stompUID = http2stompUIdMap.get(httpSessionId);
-		if (ArgUtil.is(stompUID)) {
-			return stompSessionCache.get(stompUID);
-		}
-		return null;
-	}
-
-	public String createTagId(String tag) {
-		return tag + "-" + CryptoUtil.getHashBuilder().message(tag).secret("SOME_SECRET_TO_B_CHANGED_LATER")
-				.toHmacSHA256().hash();
-	}
+    public String createTagId(String tag) {
+	return tag + "-" + CryptoUtil.getHashBuilder().message(tag).secret("SOME_SECRET_TO_B_CHANGED_LATER")
+		.toHmacSHA256().hash();
+    }
 
 }
