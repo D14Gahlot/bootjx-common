@@ -15,7 +15,8 @@ import com.boot.jx.mongo.CommonDocInterfaces.DocVersion;
 import com.boot.jx.mongo.CommonDocInterfaces.TrashDocument;
 import com.boot.jx.mongo.CommonMongoQueryBuilder.DocQueryBuilder;
 import com.boot.utils.ArgUtil;
-import com.mongodb.WriteResult;
+import com.mongodb.client.result.DeleteResult;
+import com.mongodb.client.result.UpdateResult;
 
 public class CommonMongoTemplateAbstract extends CommonMongoTemplateDefault {
 
@@ -64,8 +65,8 @@ public class CommonMongoTemplateAbstract extends CommonMongoTemplateDefault {
 	return newVersion;
     }
 
-    public WriteResult updateFirst(DocQueryBuilder<?> builder) {
-	WriteResult ret = null;
+    public UpdateResult updateFirst(DocQueryBuilder<?> builder) {
+	UpdateResult ret = null;
 	if (ArgUtil.is(builder.getUpdate())) {
 	    try {
 		builder.updatedStamp();
@@ -89,8 +90,8 @@ public class CommonMongoTemplateAbstract extends CommonMongoTemplateDefault {
      * @see MongoTemplate#upsert(Query,
      *      org.springframework.data.mongodb.core.query.Update, Class, String)
      */
-    public WriteResult upsert(DocQueryBuilder<?> builder) {
-	WriteResult ret = null;
+    public UpdateResult upsert(DocQueryBuilder<?> builder) {
+	UpdateResult ret = null;
 	if (ArgUtil.is(builder.getUpdate())) {
 	    try {
 		builder.updatedStamp();
@@ -104,7 +105,7 @@ public class CommonMongoTemplateAbstract extends CommonMongoTemplateDefault {
 	return ret;
     }
 
-    public WriteResult trash(Object object) {
+    public DeleteResult trash(Object object) {
 	if (object instanceof AuditableEntity && ArgUtil.is(auditDetailProvider)) {
 	    String collectionName = "TRASH_" + mongoTemplate.getCollectionName(object.getClass());
 	    auditDetailProvider.audit((AuditableEntity) object);

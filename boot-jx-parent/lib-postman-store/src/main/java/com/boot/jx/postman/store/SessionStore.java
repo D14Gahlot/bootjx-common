@@ -37,11 +37,6 @@ import com.boot.jx.utils.PostManUtil;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.EntityDtoUtil;
 import com.boot.utils.TimeUtils;
-import com.mongodb.BasicDBObject;
-import com.mongodb.BulkWriteOperation;
-import com.mongodb.BulkWriteResult;
-import com.mongodb.DBCollection;
-import com.mongodb.DBObject;
 
 @Component
 public class SessionStore extends CommonDocStore {
@@ -241,20 +236,6 @@ public class SessionStore extends CommonDocStore {
 	query2.addCriteria(Criteria.where("contactId").is(contactId).and("active").is(true));
 	Update update = new Update().set("active", false).set("closeSessionStamp", System.currentTimeMillis());
 	mongoTemplate.updateMulti(query2, update, ChatSessionDoc.class);
-	return true;
-    }
-
-    public boolean closeActiveSessionsBulk(String contactId) {
-	DBCollection collection = mongoTemplate.getCollection(mongoTemplate.getCollectionName(ChatSessionDoc.class));
-	BulkWriteOperation bulk = collection.initializeOrderedBulkOperation();
-
-	List<DBObject> criteria = new ArrayList<DBObject>();
-	criteria.add(new BasicDBObject("contactId", contactId));
-	criteria.add(new BasicDBObject("active", true));
-	bulk.find(new BasicDBObject("$and", criteria))
-		.update(new BasicDBObject(new BasicDBObject("$set", new BasicDBObject("active", false))));
-
-	BulkWriteResult writeResult = bulk.execute();
 	return true;
     }
 

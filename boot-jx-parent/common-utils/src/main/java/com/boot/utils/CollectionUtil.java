@@ -219,6 +219,10 @@ public final class CollectionUtil {
 	return getList(elements);
     }
 
+    public static String[] asArray(List<String> list) {
+	return list.toArray(new String[list.size()]);
+    }
+
     @SafeVarargs
     public static <T> T[] getArray(T... elements) {
 	return elements;
