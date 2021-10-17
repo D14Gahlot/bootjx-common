@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.annotation.SubscribeMapping;
@@ -17,6 +18,7 @@ import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
 
 @Controller
+@ConditionalOnProperty("app.stomp")
 public class StompController {
 
     @Autowired

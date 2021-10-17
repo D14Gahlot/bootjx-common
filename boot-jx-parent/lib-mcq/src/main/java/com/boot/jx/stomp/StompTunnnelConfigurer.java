@@ -8,13 +8,10 @@ import org.springframework.web.socket.config.annotation.AbstractWebSocketMessage
 import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 
-import com.boot.jx.cache.CacheBox;
-import com.boot.jx.cache.CacheBox.StringCacheBox;
-
 @Configuration
 @EnableWebSocketMessageBroker
 @ConditionalOnProperty("app.stomp")
-public class StompSocketConfig extends AbstractWebSocketMessageBrokerConfigurer {
+public class StompTunnnelConfigurer extends AbstractWebSocketMessageBrokerConfigurer {
 
     @Override
     public void configureMessageBroker(MessageBrokerRegistry config) {
@@ -34,18 +31,4 @@ public class StompSocketConfig extends AbstractWebSocketMessageBrokerConfigurer 
 	return new StompHttpHandshakeInterceptor();
     }
 
-    @Bean("http2sessionUIdMap")
-    public StringCacheBox http2sessionUIdMap() {
-	return new StringCacheBox("http2sessionUIdMap");
-    }
-
-    @Bean("http2stompUIdMap")
-    public StringCacheBox http2stompUIdMap() {
-	return new StringCacheBox("http2stompUIdMap");
-    }
-
-    @Bean("ws2httpMap")
-    public StringCacheBox ws2httpMap() {
-	return new StringCacheBox("ws2httpMap");
-    }
 }

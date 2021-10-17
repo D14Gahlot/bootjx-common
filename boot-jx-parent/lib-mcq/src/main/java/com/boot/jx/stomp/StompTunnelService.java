@@ -19,113 +19,113 @@ import com.boot.utils.JsonUtil;
 @Component
 public class StompTunnelService {
 
-	public static Logger LOGGER = LoggerService.getLogger(StompTunnelService.class);
+    public static Logger LOGGER = LoggerService.getLogger(StompTunnelService.class);
 
-	@Autowired
-	TunnelService tunnelService;
+    @Autowired
+    TunnelService tunnelService;
 
-	@Autowired
-	StompTunnelSessionManager stompTunnelSessionManager;
+    @Autowired
+    StompTunnelSessionManager stompTunnelSessionManager;
 
-	@Async
-	public void sendToAll(String topic, Object message) {
-		try {
-			StompTunnelEvent event = new StompTunnelEvent();
-			event.setTopic(topic);
-			event.setTenantToken(stompTunnelSessionManager.createTagId(AppContextUtil.getTenant()));
+    @Async
+    public void sendToAll(String topic, Object message) {
+	try {
+	    StompTunnelEvent event = new StompTunnelEvent();
+	    event.setTopic(topic);
+	    event.setTenantToken(stompTunnelSessionManager.createTagId(AppContextUtil.getTenant()));
 
-			Map<String, Object> messageData = new HashMap<String, Object>();
-			messageData.put("data", message);
-			event.setData(JsonUtil.toJsonMap(messageData));
-			tunnelService.shout(StompTunnelToAllSender.STOMP_TO_ALL, event);
-		} catch (Exception e) {
-			LOGGER.error("Error While Sending StompMessage", e);
-		}
+	    Map<String, Object> messageData = new HashMap<String, Object>();
+	    messageData.put("data", message);
+	    event.setData(JsonUtil.toJsonMap(messageData));
+	    tunnelService.shout(StompTunnelToAllSender.STOMP_TO_ALL, event);
+	} catch (Exception e) {
+	    LOGGER.error("Error While Sending StompMessage", e);
 	}
+    }
 
-	@Async
-	public void sendToTag(String tag, String topic, Object message) {
-		try {
-			StompTunnelEvent event = new StompTunnelEvent();
-			event.setTopic(topic);
-			event.setTenantToken(stompTunnelSessionManager.createTagId(AppContextUtil.getTenant()));
-			event.setTagId(stompTunnelSessionManager.createTagId(tag));
+    @Async
+    public void sendToTag(String tag, String topic, Object message) {
+	try {
+	    StompTunnelEvent event = new StompTunnelEvent();
+	    event.setTopic(topic);
+	    event.setTenantToken(stompTunnelSessionManager.createTagId(AppContextUtil.getTenant()));
+	    event.setTagId(stompTunnelSessionManager.createTagId(tag));
 
-			Map<String, Object> messageData = new HashMap<String, Object>();
-			messageData.put("data", message);
-			event.setData(JsonUtil.toJsonMap(messageData));
-			tunnelService.shout(StompTunnelToAllSender.STOMP_TO_ALL, event);
-		} catch (Exception e) {
-			LOGGER.error("Error While Sending StompMessage", e);
-		}
+	    Map<String, Object> messageData = new HashMap<String, Object>();
+	    messageData.put("data", message);
+	    event.setData(JsonUtil.toJsonMap(messageData));
+	    tunnelService.shout(StompTunnelToAllSender.STOMP_TO_ALL, event);
+	} catch (Exception e) {
+	    LOGGER.error("Error While Sending StompMessage", e);
 	}
+    }
 
-	/**
-	 * This method will work only if
-	 * {@link StompTunnelSessionManager#mapHTTPSession(stompUID, String)} has been
-	 * called already for the session
-	 * 
-	 * @param stompUID - UNIQUE ID to Identify End User
-	 * @param topic
-	 * @param message
-	 */
-	@Async
-	public void sendTo(String stompUID, String topic, Object message) {
-		try {
-			if (!ArgUtil.is(stompUID)) {
-				LOGGER.error("stompSession for stompUID {} cannot be empty for {}", stompUID, topic);
-				return;
-			}
-			StompTunnelEvent event = new StompTunnelEvent();
-			event.setTopic(topic);
-			event.setTenantToken(stompTunnelSessionManager.createTagId(AppContextUtil.getTenant()));
+    /**
+     * This method will work only if
+     * {@link StompTunnelSessionManager#mapHTTPSession(stompUID, String)} has been
+     * called already for the session
+     * 
+     * @param stompUID - UNIQUE ID to Identify End User
+     * @param topic
+     * @param message
+     */
+    @Async
+    public void sendTo(String stompUID, String topic, Object message) {
+	try {
+	    if (!ArgUtil.is(stompUID)) {
+		LOGGER.error("stompSession for stompUID {} cannot be empty for {}", stompUID, topic);
+		return;
+	    }
+	    StompTunnelEvent event = new StompTunnelEvent();
+	    event.setTopic(topic);
+	    event.setTenantToken(stompTunnelSessionManager.createTagId(AppContextUtil.getTenant()));
 
-			StompSession stompSession = stompTunnelSessionManager.getStompSession(stompUID);
-			if (!ArgUtil.isEmpty(stompSession)) {
-				event.setHttpSessionId(stompSession.getHttpSessionId());
-				Map<String, Object> messageData = new HashMap<String, Object>();
-				messageData.put("data", message);
-				event.setData(JsonUtil.toJsonMap(messageData));
-				tunnelService.shout(StompTunnelToXSender.getSendTopic(stompSession.getPrefix()), event);
-			} else {
-				LOGGER.error("stompSession for stompUID {}  not found to send on topic {}", stompUID, topic);
-			}
-		} catch (Exception e) {
-			LOGGER.error("Error While Sending StompMessage to stompUID " + stompUID, e);
-		}
+	    StompSession stompSession = stompTunnelSessionManager.getStompSession(stompUID);
+	    if (!ArgUtil.isEmpty(stompSession)) {
+		event.setHttpSessionId(stompSession.getHttpSessionId());
+		Map<String, Object> messageData = new HashMap<String, Object>();
+		messageData.put("data", message);
+		event.setData(JsonUtil.toJsonMap(messageData));
+		tunnelService.shout(StompTunnelToXSender.getSendTopic(stompSession.getPrefix()), event);
+	    } else {
+		LOGGER.error("stompSession for stompUID {}  not found to send on topic {}", stompUID, topic);
+	    }
+	} catch (Exception e) {
+	    LOGGER.error("Error While Sending StompMessage to stompUID " + stompUID, e);
 	}
+    }
 
-	@Async
-	public void sendTo(StompQuery stompQuery, Object message) {
-		try {
+    @Async
+    public void sendTo(StompQuery stompQuery, Object message) {
+	try {
 
-			// To One Users
-			if (ArgUtil.is(stompQuery.getStompUID())) {
-				this.sendTo(stompQuery.getStompUID(), stompQuery.getTopic(), message);
-			}
+	    // To One Users
+	    if (ArgUtil.is(stompQuery.getStompUID())) {
+		this.sendTo(stompQuery.getStompUID(), stompQuery.getTopic(), message);
+	    }
 
-			// To Multiple Tags
-			if (ArgUtil.is(stompQuery.getTags())) {
+	    // To Multiple Tags
+	    if (ArgUtil.is(stompQuery.getTags())) {
 
-				StompTunnelEvent event = new StompTunnelEvent();
-				event.setTopic(stompQuery.getTopic());
-				event.setTenantToken(stompTunnelSessionManager.createTagId(AppContextUtil.getTenant()));
+		StompTunnelEvent event = new StompTunnelEvent();
+		event.setTopic(stompQuery.getTopic());
+		event.setTenantToken(stompTunnelSessionManager.createTagId(AppContextUtil.getTenant()));
 
-				StringJoiner sb = new StringJoiner(",");
-				for (String tag : stompQuery.getTags()) {
-					sb.add(stompTunnelSessionManager.createTagId(tag));
-				}
-				event.setTagId(sb.toString());
-
-				Map<String, Object> messageData = new HashMap<String, Object>();
-				messageData.put("data", message);
-				event.setData(JsonUtil.toJsonMap(messageData));
-				tunnelService.shout(StompTunnelToAllSender.STOMP_TO_ALL, event);
-			}
-
-		} catch (Exception e) {
-			LOGGER.error("Error While Sending StompMessage", e);
+		StringJoiner sb = new StringJoiner(",");
+		for (String tag : stompQuery.getTags()) {
+		    sb.add(stompTunnelSessionManager.createTagId(tag));
 		}
+		event.setTagId(sb.toString());
+
+		Map<String, Object> messageData = new HashMap<String, Object>();
+		messageData.put("data", message);
+		event.setData(JsonUtil.toJsonMap(messageData));
+		tunnelService.shout(StompTunnelToAllSender.STOMP_TO_ALL, event);
+	    }
+
+	} catch (Exception e) {
+	    LOGGER.error("Error While Sending StompMessage", e);
 	}
+    }
 
 }
