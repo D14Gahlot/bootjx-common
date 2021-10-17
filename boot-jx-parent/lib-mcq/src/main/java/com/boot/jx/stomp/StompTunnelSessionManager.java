@@ -1,8 +1,5 @@
 package com.boot.jx.stomp;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Map.Entry;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,10 +7,11 @@ import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
 import com.boot.jx.AppContextUtil;
+import com.boot.jx.AppParam;
+import com.boot.jx.cache.CacheBox.StringCacheBox;
 import com.boot.jx.stomp.StompSessionCache.StompSession;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CryptoUtil;
-import com.boot.utils.UniqueID;
 
 @Component
 @Service
@@ -22,16 +20,25 @@ public class StompTunnelSessionManager {
     /*
      * Map for <httpSessionId, stompUID>
      */
-    public static final Map<String, String> http2sessionUIdMap = Collections
-	    .synchronizedMap(new HashMap<String, String>());
+//    public static final Map<String, String> http2sessionUIdMap = Collections
+//	    .synchronizedMap(new HashMap<String, String>());
+//    
+    @Autowired
+    private StringCacheBox http2sessionUIdMap;
 
-    public static final Map<String, String> http2stompUIdMap = Collections
-	    .synchronizedMap(new HashMap<String, String>());
+//    public static final Map<String, String> http2stompUIdMap = Collections
+//	    .synchronizedMap(new HashMap<String, String>());
+
+    @Autowired
+    private StringCacheBox http2stompUIdMap;
 
     /*
      * Map for <wsSessionID, httpSessionId>
      */
-    public static final Map<String, String> ws2httpMap = Collections.synchronizedMap(new HashMap<String, String>());
+//    public static final Map<String, String> ws2httpMap = Collections.synchronizedMap(new HashMap<String, String>());
+
+    @Autowired
+    private StringCacheBox ws2httpMap;
 
     /*
      * Map for <stompUID, stompSession>
@@ -39,15 +46,15 @@ public class StompTunnelSessionManager {
     @Autowired(required = false)
     StompSessionCache stompSessionCache;
 
-    public static String getSystemPrefix() {
-	return UniqueID.PREF;
+    public static String getMSInstanceId() {
+	return AppParam.APP_INSTANCE_ID.getValue();
     }
 
     public String createSessionMapping(String wsSessionID, String httpSessionId, String sessionUID) {
 	if (ArgUtil.isEmpty(sessionUID)) {
 	    sessionUID = http2sessionUIdMap.get(httpSessionId);
 	    if (ArgUtil.isEmpty(sessionUID)) {
-		sessionUID = String.format("%s-%s-%s", getSystemPrefix(), httpSessionId, wsSessionID);
+		sessionUID = String.format("%s-%s-%s", getMSInstanceId(), httpSessionId, wsSessionID);
 		http2sessionUIdMap.put(httpSessionId, sessionUID);
 	    }
 	}
@@ -68,7 +75,7 @@ public class StompTunnelSessionManager {
     public void delinkWs2Http(String httpSessionId, String wsSessionID) {
 	ws2httpMap.remove(wsSessionID);
 	boolean isExists = false;
-	for (Entry<String, String> entry : ws2httpMap.entrySet()) {
+	for (Entry<String, String> entry : ws2httpMap.readAllEntrySet()) {
 	    if (entry.getValue().equals(httpSessionId)) {
 		isExists = true;
 	    }
@@ -86,7 +93,7 @@ public class StompTunnelSessionManager {
      */
     public void mapHTTPSession(String stompUID, String httpSessionId, String... tags) {
 	StompSession stompSession = new StompSession();
-	stompSession.setPrefix(getSystemPrefix());
+	stompSession.setPrefix(getMSInstanceId());
 	stompSession.setHttpSessionId(httpSessionId);
 
 	if (tags != null && tags.length > 0) {

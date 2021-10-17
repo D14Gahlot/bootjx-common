@@ -1,6 +1,7 @@
 package com.boot.jx;
 
 import java.lang.reflect.Field;
+import java.security.NoSuchAlgorithmException;
 import java.util.Collections;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -31,7 +32,9 @@ import com.boot.jx.scope.tnt.TenantProperties;
 import com.boot.jx.scope.tnt.Tenants;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.Constants;
+import com.boot.utils.CryptoUtil;
 import com.boot.utils.JsonUtil.JsonUtilConfigurable;
+import com.boot.utils.UniqueID;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ulisesbocchio.jasyptspringboot.annotation.EnableEncryptableProperties;
@@ -362,6 +365,13 @@ public class AppConfig {
 	    }
 	}
 
+	try {
+	    AppParam.APP_INSTANCE_ID
+		    .setValue(CryptoUtil.getMD5Hash(String.format("%s#%s#%s#%s", AppParam.APP_ENV.getValue(),
+			    AppParam.APP_GROUP.getValue(), AppParam.APP_NAME.getValue(), AppParam.APP_ID.getValue())));
+	} catch (NoSuchAlgorithmException e) {
+	    e.printStackTrace();
+	}
 	return null;
     }
 

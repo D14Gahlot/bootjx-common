@@ -29,7 +29,7 @@ public class StompTunnelToXSender implements ITunnelSubscriber<StompTunnelEvent>
 
 	@Override
 	public String getTopic() {
-		return getSendTopic(StompTunnelSessionManager.getSystemPrefix());
+		return getSendTopic(StompTunnelSessionManager.getMSInstanceId());
 	}
 
 	@Override
