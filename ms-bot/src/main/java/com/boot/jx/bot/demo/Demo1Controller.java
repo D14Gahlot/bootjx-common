@@ -269,7 +269,7 @@ public class Demo1Controller extends ChatController {
 	    chatContext.getSession().data().remove(CURRENT_DEMO);
 	    InboxMessage agentAssignResp = assignToAgent().getResult();
 	    if (ArgUtil.is(agentAssignResp.session().getAgent())) {
-	    	if(ArgUtil.is(AppContextUtil.getTenant()) && AppContextUtil.getTenant().equalsIgnoreCase("tathkara")) {
+	    	if(ArgUtil.is(AppContextUtil.getTenant()) && AppContextUtil.getTenant().equalsIgnoreCase("tathkarah")) {
 	    		 reply("عميلنا العزيز،\r\n"
 	    		 		+ "\r\n"
 	    		 		+ "مرحباً بك في تطبيق تذكره!\r\n"
