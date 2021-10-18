@@ -31,7 +31,7 @@ public class PMConfiguration implements Serializable {
     private Map<String, ChannelConfig> channels;
     private Map<String, ClientApiKey> clientApiKeys;
 
-    private Map<String, PMConfigurationObject> map;
+    private Map<String, PMConfigurationObject> prefs;
 
     private AgentConfig agent;
     private String accountKey;
@@ -212,31 +212,31 @@ public class PMConfiguration implements Serializable {
     }
 
     // Config
-    public Map<String, PMConfigurationObject> getMap() {
-	return map;
+    public Map<String, PMConfigurationObject> getPrefs() {
+	return prefs;
     }
 
-    public void setMap(Map<String, PMConfigurationObject> map) {
-	this.map = map;
+    public void setPrefs(Map<String, PMConfigurationObject> prefs) {
+	this.prefs = prefs;
     }
 
-    public SafeKeyHashMap<PMConfigurationObject> map() {
-	if (ArgUtil.isEmpty(map)) {
-	    map = new HashMap<String, PMConfigurationObject>();
+    public SafeKeyHashMap<PMConfigurationObject> prefs() {
+	if (ArgUtil.isEmpty(prefs)) {
+	    prefs = new HashMap<String, PMConfigurationObject>();
 	}
-	return new SafeKeyHashMap<PMConfigurationObject>(map);
+	return new SafeKeyHashMap<PMConfigurationObject>(prefs);
     }
 
-    public PMConfigurationObject get(String key) {
-	return map().getOrDefault(key, new PMConfigurationObject(key, null));
+    public PMConfigurationObject getPref(String key) {
+	return prefs().getOrDefault(key, new PMConfigurationObject(key, null));
     }
 
-    public PMConfigurationObject get(String key, Object value) {
-	return map().getOrDefault(key, new PMConfigurationObject(key, value));
+    public PMConfigurationObject getPref(String key, Object value) {
+	return prefs().getOrDefault(key, new PMConfigurationObject(key, value));
     }
 
-    public PMConfiguration set(PMConfigurationObject map) {
-	this.map().put(map.getKey(), map);
+    public PMConfiguration setPref(PMConfigurationObject map) {
+	this.prefs().put(map.getKey(), map);
 	return this;
     }
 

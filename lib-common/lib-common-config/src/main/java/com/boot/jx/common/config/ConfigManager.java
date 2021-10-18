@@ -111,8 +111,8 @@ public class ConfigManager {
 		mapBuilder.put("meta", meta);
 	    }
 	}
-	mapBuilder.put("domain", this.pmEnvironment.config().get(key)) // Domain
-		.put("shared", this.pmEnvironment.shared().get(key)) // Shared
+	mapBuilder.put("domain", this.pmEnvironment.config().getPref(key)) // Domain
+		.put("shared", this.pmEnvironment.shared().getPref(key)) // Shared
 		.put("config", this.pmEnvironment.get(key)) // Resolved
 	;
 
@@ -134,7 +134,7 @@ public class ConfigManager {
 	case "postman.default.sender":
 	    doc.agent().setDefaultBotName(null);
 	default:
-	    doc.map().remove(key);
+	    doc.prefs().remove(key);
 	    PrefsConfigDoc prefsConfigDoc = new PrefsConfigDoc();
 	    prefsConfigDoc.setId(key);
 	    configStore.remove(prefsConfigDoc);
@@ -158,12 +158,12 @@ public class ConfigManager {
 	case "postman.default.sender":
 	    doc.agent().setDefaultBotName(config.asString());
 	default:
-	    PMConfigurationObject configObject = doc.get(config.getKey());
+	    PMConfigurationObject configObject = doc.getPref(config.getKey());
 	    configObject.setKey(config.getKey());
 	    configObject.setValue(config.getValue());
 	    configObject.setShared(config.isShared());
 
-	    doc.set(configObject);
+	    doc.setPref(configObject);
 
 	    PrefsConfigDoc prefsConfigDoc = new PrefsConfigDoc();
 	    prefsConfigDoc.setId(configObject.getKey());

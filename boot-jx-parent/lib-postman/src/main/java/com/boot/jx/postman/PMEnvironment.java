@@ -263,11 +263,11 @@ public class PMEnvironment {
     private AppConfig appConfig;
 
     public PMConfigurationObject get(String key) {
-	PMConfigurationObject configObject = this.config().map().get(key);
+	PMConfigurationObject configObject = this.config().prefs().get(key);
 
 	String tnt = AppContextUtil.getTenant();
 	if (ArgUtil.isEmpty(configObject) && !Tenants.isDefault(tnt)) {
-	    PMConfigurationObject sharedConfigObject = this.shared().map().get(key);
+	    PMConfigurationObject sharedConfigObject = this.shared().prefs().get(key);
 	    if (ArgUtil.is(sharedConfigObject)) {
 		return sharedConfigObject;
 	    }
