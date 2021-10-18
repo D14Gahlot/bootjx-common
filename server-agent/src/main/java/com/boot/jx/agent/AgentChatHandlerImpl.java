@@ -88,7 +88,7 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 
     private AgentSessionDoc getAgentSessonAssigned(InboxMessage inboxMessage) {
 
-	String stickyLogic = environment.config().get("postman.agent.chat.stickysession")
+	String stickyLogic = environment.config().getPref("postman.agent.chat.stickysession")
 		.asString(PMConstants.CHAT_SESSION_STICKY.NONE);
 
 	String lastAgent = null;
@@ -110,7 +110,7 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 	    }
 	}
 
-	String assignmentRule = environment.config().get("postman.agent.chat.assignment")
+	String assignmentRule = environment.config().getPref("postman.agent.chat.assignment")
 		.asString(PMConstants.ASSIGNMENT_RULE.ROUND_ROBIN);
 
 	String assignedDept = ArgUtil.nonEmpty(inboxMessage.session().getDept(),

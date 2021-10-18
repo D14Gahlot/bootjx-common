@@ -45,38 +45,38 @@ public class PMEnvironmentProviderImpl implements PMEnvironmentProvider, AppShar
 	    return localConfigMap.get(tnt);
 	}
 	if (ArgUtil.is(configStore)) {
-	    PMConfigurationDoc x = getPMConfigurationDoc();
+	    PMConfigurationDoc prefs = getPMConfigurationDoc();
 
 	    List<PrefsConfigDoc> prefsConfigs = configStore.findAll(PrefsConfigDoc.class);
 	    for (PrefsConfigDoc prefsConfig : prefsConfigs) {
-		x.set(prefsConfig);
+		prefs.setPref(prefsConfig);
 	    }
 
 	    List<ChannelConfigDoc> channels = configStore.findAll(ChannelConfigDoc.class);
 	    for (ChannelConfigDoc channel : channels) {
-		x.channels(channel);
+		prefs.channels(channel);
 	    }
 
 	    List<ClientKeyConfigDoc> clientKeys = configStore.findAll(ClientKeyConfigDoc.class);
 	    for (ClientKeyConfigDoc clientKey : clientKeys) {
-		x.clientApiKey(clientKey);
+		prefs.clientApiKey(clientKey);
 	    }
 
-	    if (ArgUtil.is(x)) {
-		localConfigMap.put(tnt, x);
+	    if (ArgUtil.is(prefs)) {
+		localConfigMap.put(tnt, prefs);
 	    }
 
 	    if (Tenants.isDefault(tnt)) {
 		PMConfigurationDoc newSharedConfiguration = new PMConfigurationDoc();
-		for (Entry<String, PMConfigurationObject> entry : x.map().entrySet()) {
-		    if (entry.getValue().isShared()) {
-			newSharedConfiguration.set(entry.getValue());
-		    }
+		for (Entry<String, PMConfigurationObject> entry : prefs.prefs().entrySet()) {
+		    //if (entry.getValue().isShared()) {
+			newSharedConfiguration.setPref(entry.getValue());
+		    //}
 		}
 		sharedConfiguration = newSharedConfiguration;
 	    }
 
-	    return x;
+	    return prefs;
 	}
 	return null;
     }

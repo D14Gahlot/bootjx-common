@@ -58,7 +58,7 @@ public class AppCommonConfigImpl implements AppCommonConfig {
     public String getCdnServer() {
 
 	boolean isBeta = ArgUtil.parseAsBoolean(commonHttpRequest.get("postman.ui.beta"),
-		pmEnvironment.config().get("postman.ui.beta").asBoolean(Boolean.FALSE).booleanValue());
+		pmEnvironment.config().getPref("postman.ui.beta").asBoolean(Boolean.FALSE).booleanValue());
 	if (isBeta) {
 	    String betaCdn = pmEnvironment.get("mry.cdn.url.beta").asString();
 	    if (ArgUtil.is(betaCdn)) {
@@ -91,7 +91,7 @@ public class AppCommonConfigImpl implements AppCommonConfig {
     private Map<String, Object> commonAttributes() {
 	Map<String, Object> map = new HashMap<String, Object>();
 	map.put("AGENT_CHAT_INIT", pmEnvironment.get("postman.agent.chat.init").asBoolean());
-	map.put("CHAT_TAG_ENABLED", pmEnvironment.config().get("chat.tag.enabled").asBoolean());
+	map.put("CHAT_TAG_ENABLED", pmEnvironment.config().getPref("chat.tag.enabled").asBoolean());
 	map.put("chatIdleTimeout", TimeUtils.toMillis(chatClientConfig.getChatIdleTimeout()));
 	map.put("agentSessionTimeout", TimeUtils.toMillis(chatClientConfig.getAgentSessionTimeout()));
 	map.put("chatSessionTimeout", TimeUtils.toMillis(chatClientConfig.getChatSessionTimeout()));
