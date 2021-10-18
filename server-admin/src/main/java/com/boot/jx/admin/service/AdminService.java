@@ -10,12 +10,12 @@ import com.boot.jx.AppContextUtil;
 import com.boot.jx.admin.dto.AgentResponseAdminDto;
 import com.boot.jx.admin.dto.DepartmentResponseAdminDto;
 import com.boot.jx.admin.manager.AdminManager;
+import com.boot.jx.common.config.ConfigManager;
 import com.boot.jx.common.doc.AgentDoc;
 import com.boot.jx.common.doc.DepartmentDoc;
 import com.boot.jx.common.store.AgentStore;
 import com.boot.jx.common.store.DocumentUpdateListner;
 import com.boot.jx.postman.doc.PMConfigurationDoc;
-import com.boot.jx.tunnel.sys.SharedConfigManager;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
 import com.boot.utils.EntityDtoUtil;
@@ -33,7 +33,7 @@ public class AdminService {
 	MongoTemplate mongoTemplate;
 
 	@Autowired
-	SharedConfigManager sharedConfigManager;
+	ConfigManager configManager;
 
 	@Autowired
 	private DocumentUpdateListner documentUpdateListner;
@@ -91,7 +91,7 @@ public class AdminService {
 			doc.agent().defaultAgents().remove(dept.getDept_code());
 		}
 		mongoTemplate.save(doc);
-		sharedConfigManager.clear();
+		configManager.refresh();
 
 		return buildAgentDto(agentStore.findAll());
 	}
@@ -106,7 +106,7 @@ public class AdminService {
 			doc.agent().setDefaultTeamCode(null);
 		}
 		mongoTemplate.save(doc);
-		sharedConfigManager.clear();
+		configManager.refresh();
 		return new DepartmentResponseAdminDto().importFrom(agentStore.findDepartmentAll());
 	}
 

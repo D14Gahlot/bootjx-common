@@ -148,31 +148,26 @@ public class PMEnvironmentProviderImpl implements PMEnvironmentProvider, AppShar
     }
 
     @Override
-    public void clear(Map<String, String> map) {
-	String tnt = AppContextUtil.getTenant();
-	localConfigMap.remove(tnt);
-    }
-
-    @Override
     public PMConfiguration shared() {
 	return sharedConfiguration;
     }
 
     @Override
-    public void reload() {
-	if (sharedConfiguration == null) {
-	    sharedConfiguration = new PMConfigurationDoc();
-	    AppContextUtil.setTenant(Tenants.getDefault());
-	    String sessionId = UniqueID.generateString();
-	    AppContextUtil.setSessionId(sessionId);
-	    AppContextUtil.getTraceId(true, true);
-	    AppContextUtil.resetTraceTime();
-	    AppContextUtil.init();
-	    config();
-	} else {
-	    this.clear(null);
-	    config();
-	}
+    public void initConfig() {
+	String sessionId = UniqueID.generateString();
+	AppContextUtil.setSessionId(sessionId);
+	AppContextUtil.getTraceId(true, true);
+	AppContextUtil.resetTraceTime();
+	AppContextUtil.init();
+	config();
     }
 
+    @Override
+    public void clear(Map<String, String> map) {
+	String tnt = AppContextUtil.getTenant();
+	localConfigMap.remove(tnt);
+	if (Tenants.isDefault(tnt)) {
+	    this.initConfig();
+	}
+    }
 }
