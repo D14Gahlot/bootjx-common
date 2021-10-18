@@ -63,7 +63,6 @@ public class ConfigManager {
 
     public List<Map<String, Object>> getSetupConfigs() {
 	List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
-	PMConfigurationDoc doc = mongoTemplate.findById(AppContextUtil.getTenant(), PMConfigurationDoc.class);
 
 	for (ConfigMeta meta : ConfigConstants.SETUP_CONFIG_LIST) {
 
@@ -143,7 +142,7 @@ public class ConfigManager {
 	}
 
 	configStore.save(doc);
-	sharedConfigManager.clear();
+	this.refresh();
     }
 
     public void save(PMConfigurationObject config) {
@@ -175,25 +174,25 @@ public class ConfigManager {
 	}
 
 	configStore.saveConfiguration(doc);
-	sharedConfigManager.clear();
+	this.refresh();
     }
 
     @Deprecated
     public void saveConfigs(PMConfiguration config) {
 	pmEnvironment.config(config);
-	sharedConfigManager.clear();
+	this.refresh();
     }
 
     public void save(ChannelConfig config) {
 	pmEnvironment.config(config);
-	sharedConfigManager.clear();
+	this.refresh();
 	connectorHandlerFactory.registerWebHook(config.getChannelType(), config.getLane());
     }
 
     public ClientKeyConfigDoc save(ClientKeyConfigDoc clientApiKey) {
 	clientApiKey.setKey(PostManUtil.UNIQUE_API_KEY());
 	configStore.saveClientKeyConfig(clientApiKey);
-	sharedConfigManager.clear();
+	this.refresh();
 	return clientApiKey;
     }
 
@@ -251,10 +250,14 @@ public class ConfigManager {
 	if (ArgUtil.is(channelId)) {
 	    ChannelConfig channelConfig = pmEnvironment.config().channels(channelId);
 	    pmEnvironment.remove(channelConfig);
-	    sharedConfigManager.clear();
+	    this.refresh();
 	    return channelConfig;
 	}
 	return null;
+    }
+
+    public void refresh() {
+	sharedConfigManager.clear();
     }
 
     @Autowired

@@ -155,7 +155,7 @@ public class AppParamController {
 		appSharedConfig.clear(null);
 	    }
 	}
-	return ApiResponse.build(new BoolRespModel(true));
+	return ApiResponse.buildData(new BoolRespModel(true));
     }
 
     @Autowired(required = false)

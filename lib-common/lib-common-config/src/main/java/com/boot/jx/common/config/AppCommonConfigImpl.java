@@ -139,7 +139,7 @@ public class AppCommonConfigImpl implements AppCommonConfig {
     @EventListener(ApplicationReadyEvent.class)
     public void onApplicationReady() {
 	try {
-	    pmEnvironment.reload();
+	    pmEnvironment.initConfig();
 	} catch (Exception e) {
 	    LOGGER.error("pmEnvironment.reload", e);
 	}

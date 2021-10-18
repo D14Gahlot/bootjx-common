@@ -71,7 +71,6 @@ public class ConfigOptionMetaController {
     @ResponseBody
     @RequestMapping(value = { "/api/options/channels" }, method = { RequestMethod.GET })
     public ApiResponse<AChannelDetails, Object> listActiveLanes() {
-	pmEnvironment.reload();
 	return ApiResponse.buildResults(pmEnvironment.config().listChannels());
     }
 
@@ -101,13 +100,11 @@ public class ConfigOptionMetaController {
 
     @RequestMapping(value = { "/api/config/app" }, method = { RequestMethod.GET })
     public ApiResponse<Map<String, Object>, Object> getAppConfigs() {
-	pmEnvironment.reload();
 	return ApiResponse.buildResults(configManager.getAppConfigs());
     }
 
     @RequestMapping(value = { "/api/config/setup" }, method = { RequestMethod.GET })
     public ApiResponse<Map<String, Object>, Object> getSetupConfigs() {
-	pmEnvironment.reload();
 	return ApiResponse.buildResults(configManager.getSetupConfigs());
     }
 
