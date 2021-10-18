@@ -311,4 +311,16 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 	stompTunnelService.sendToTag(chatSessionDoc.getAssignedToDept(), "/message/sent/new", messageDto);
 	return messageDto;
     }
+    
+    public ChatSessionDTO updateChatTagCategoryStatus(String sessionId, String tagCategory) {
+    	ChatSessionDoc sessionDoc = sessionStore.getSession(sessionId);
+    	if (chatService.updateTagCategoryStatus(sessionDoc, tagCategory)) {
+    	    ChatSessionDTO dto = chatArchive.getChatSession(sessionDoc);
+    	    stompTunnelService.sendToTag(sessionDoc.getAssignedToDept(), "/chat/session/update", dto);
+    	    return dto;
+    	}
+    	return chatArchive.getChatSession(sessionDoc);
+        }
+
+    
 }

@@ -445,4 +445,17 @@ public class ChatService {
 	chatStatusReportService.offer(updateDeliveryStatus);
 	chatStatusReportService.process(null);
     }
+    
+    public boolean updateTagCategoryStatus(ChatSessionDoc sessionDoc, String tagCategory) {
+    	String oldTagCategory=null;
+    	if(ArgUtil.is(sessionDoc.getTagCategory())) {
+    		 oldTagCategory = sessionDoc.getTagCategory();
+    	}
+    	sessionStore.updateTagCategory(sessionDoc, tagCategory);
+	    log(sessionDoc, EVENTS.TAG_ADDED, oldTagCategory, tagCategory);
+	    return true;
+	}
+	
+   
+
 }

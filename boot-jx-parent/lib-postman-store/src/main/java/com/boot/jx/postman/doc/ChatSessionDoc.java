@@ -61,6 +61,7 @@ public class ChatSessionDoc extends APatchableIndexed<ChatSessionDoc, String> im
 
     private String mode;
     private String status;
+    private String tagCategory;
 
     // MessageStats
     @DBRef
@@ -361,5 +362,13 @@ public class ChatSessionDoc extends APatchableIndexed<ChatSessionDoc, String> im
     public void setUpdatedStamp(long updatedStamp) {
 	this.updatedStamp = updatedStamp;
     }
+
+	public String getTagCategory() {
+		return tagCategory;
+	}
+
+	public void setTagCategory(String tagCategory) {
+		this.tagCategory = tagCategory;
+	}
 
 }
