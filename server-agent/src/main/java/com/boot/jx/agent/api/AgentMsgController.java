@@ -99,8 +99,7 @@ public class AgentMsgController {
 	ChatSessionDoc sessionDoc = sessionStore.getSession(outboxMessage.getSessionId());
 
 	// Session Stuff Logging >
-	if (ArgUtil.areEqual(sessionDoc.getAssignedToAgent(), agentSession.getAgentCode())
-		|| agentSession.isAdmin()) {
+	if (ArgUtil.areEqual(sessionDoc.getAssignedToAgent(), agentSession.getAgentCode()) || agentSession.isAdmin()) {
 	    ChatMessageDTO messageDto = agentService.sendMessage(sessionDoc, outboxMessage);
 	    messageDto.setAction("ADD_STICKY_NOTE");
 	    // Evaluate if required
@@ -112,7 +111,7 @@ public class AgentMsgController {
 	    return ApiResponse.buildResult(messageDto);
 	} else {
 	    agentSessionService.refreshOnline();
-	    return new ApiResponse<ChatMessageDTO, Object>().message("Only Assignee/Admin can respond to chat.");
+	    return new ApiResponse<ChatMessageDTO, Object>().message("Only Assignee/Admin can add StickyNote to chat.");
 	}
     }
 }
