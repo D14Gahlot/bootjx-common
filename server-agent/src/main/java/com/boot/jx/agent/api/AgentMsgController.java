@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.boot.jx.agent.AgentService;
 import com.boot.jx.agent.AgentSessionBean;
 import com.boot.jx.agent.AgentSessionService;
 import com.boot.jx.agent.api.ControllerRequestDTOs.ChatTagUpdateRequest;
@@ -21,8 +22,10 @@ import com.boot.jx.http.ApiRequest;
 import com.boot.jx.http.RequestType;
 import com.boot.jx.postman.PMConstants.DEFAULT;
 import com.boot.jx.postman.doc.ChatSessionDoc;
+import com.boot.jx.postman.dto.ChatMessageDTO;
 import com.boot.jx.postman.dto.ChatSessionDTO;
 import com.boot.jx.postman.manager.ChatSessionManager;
+import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.service.ChatDTOUtil;
 import com.boot.jx.postman.store.SessionStore;
 import com.boot.utils.ArgUtil;
@@ -47,7 +50,10 @@ public class AgentMsgController {
     private ChatSessionManager chatSessionManager;
 
     @Autowired
-    DocumentUpdateListner documentUpdateListner;
+    private DocumentUpdateListner documentUpdateListner;
+
+    @Autowired
+    private AgentService agentService;
 
     @ApiRequest(type = RequestType.POLL)
     @RequestMapping(value = "/api/sessions/assignments", method = { RequestMethod.GET })
@@ -85,5 +91,28 @@ public class AgentMsgController {
 	    documentUpdateListner.onChatSessionUpdate(sessionDoc);
 	}
 	return ApiResponse.buildData(ChatDTOUtil.getChatSessionDTO(sessionDoc));
+    }
+
+    @RequestMapping(value = "/api/sessions/note", method = { RequestMethod.POST })
+    public ApiResponse<ChatMessageDTO, Object> addStickyNote(@RequestBody OutboxMessage outboxMessage)
+	    throws InterruptedException {
+	ChatSessionDoc sessionDoc = sessionStore.getSession(outboxMessage.getSessionId());
+
+	// Session Stuff Logging >
+	if (ArgUtil.areEqual(sessionDoc.getAssignedToAgent(), agentSession.getAgentCode())
+		|| agentSession.isAdmin()) {
+	    ChatMessageDTO messageDto = agentService.sendMessage(sessionDoc, outboxMessage);
+	    messageDto.setAction("ADD_STICKY_NOTE");
+	    // Evaluate if required
+	    messageDto.setName(agentSession.getAgentCode());
+	    // messageDto.setType(outboxMessage.getType());
+	    messageDto.setText(outboxMessage.getMessage());
+	    messageDto.setMessageIdRef(outboxMessage.getMessageIdRef());
+	    agentSessionService.refreshOnline();
+	    return ApiResponse.buildResult(messageDto);
+	} else {
+	    agentSessionService.refreshOnline();
+	    return new ApiResponse<ChatMessageDTO, Object>().message("Only Assignee/Admin can respond to chat.");
+	}
     }
 }

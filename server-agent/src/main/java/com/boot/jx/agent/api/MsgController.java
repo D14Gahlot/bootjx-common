@@ -68,9 +68,6 @@ public class MsgController {
     private AgentService agentService;
 
     @Autowired
-    private ChatService chatService;
-
-    @Autowired
     private ChatArchiveService chatArchive;
 
     
