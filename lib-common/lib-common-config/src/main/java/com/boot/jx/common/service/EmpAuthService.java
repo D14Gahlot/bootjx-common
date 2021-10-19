@@ -134,7 +134,7 @@ public class EmpAuthService {
 		.put("service", pmEnvironment.get("mry.prop.service.name").asString())
 		.put("serviceDomain", pmEnvironment.get("mry.prop.service.domain").asString())
 		.put("link",
-			String.format("https://%s.%s.com/%s/auth/resetpass?page=setpass&username=%s&token=%s&stamp=0",
+			String.format("https://%s.%s/%s/auth/resetpass?page=setpass&username=%s&token=%s&stamp=0",
 				domain, pmEnvironment.get("mry.prop.service.domain").asString(), app,
 				agent.getAgent_code(), agent.getAgent_otp()))
 		.put("tnt", domain).put("panel", app).put("contactName", agent.getAgent_name())));
