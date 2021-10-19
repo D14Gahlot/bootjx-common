@@ -36,6 +36,7 @@ import com.boot.jx.postman.query.ChatContactQuery;
 import com.boot.jx.postman.query.ChatSessionQuery;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.CollectionUtil;
 import com.boot.utils.EntityDtoUtil;
 import com.boot.utils.TimeUtils;
 import com.mongodb.BasicDBObject;
@@ -532,43 +533,69 @@ public class SessionStore extends CommonDocStore {
 	}
 
     }
-    
-    public ChatSessionDoc updateTagCategory(ChatSessionDoc chatSessionDoc, String  tagCategory) {
-		chatSessionDoc.setTagCategory(tagCategory);
-		CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder().whereId(chatSessionDoc.getSessionId());
-		builder.set("tagCategory", tagCategory);
-		mongoTemplate.updateFirst(builder.getQuery(), builder.getUpdate(), ChatSessionDoc.class);
-		return chatSessionDoc;
+
+    public ChatSessionDoc updateQuickTags(ChatSessionDoc chatSessionDoc, List<String> tagIds) {
+	chatSessionDoc.setTagId(tagIds);
+	CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder().whereId(chatSessionDoc.getSessionId());
+	builder.set("tagId", tagIds);
+	mongoTemplate.updateFirst(builder.getQuery(), builder.getUpdate(), ChatSessionDoc.class);
+	return chatSessionDoc;
+    }
+
+    public ChatSessionDoc updateQuickTag(ChatSessionDoc chatSessionDoc, String tagCategory) {
+	chatSessionDoc.setTagCategory(tagCategory);
+	CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder().whereId(chatSessionDoc.getSessionId());
+	builder.set("tagId", CollectionUtil.getList(tagCategory));
+	mongoTemplate.updateFirst(builder.getQuery(), builder.getUpdate(), ChatSessionDoc.class);
+	return chatSessionDoc;
+    }
+
+    /**
+     * search by status
+     * 
+     * @param status
+     * @return
+     */
+    public List<ChatSessionDoc> findByStatus(CHAT_STATUS status) {
+	Query query2 = new Query();
+	if (ArgUtil.is(status)) {
+	    query2.addCriteria(Criteria.where("status").is(status.toString()));
 	}
-    
-    /** search by status **/
-	public List<ChatSessionDoc> findByStatus(CHAT_STATUS status) {
-		Query query2 = new Query();
-		if (ArgUtil.is(status)) {
-			query2.addCriteria(Criteria.where("status").is(status.toString()));
-		}
-		return mongoTemplate.find(query2, ChatSessionDoc.class);
+	return mongoTemplate.find(query2, ChatSessionDoc.class);
+    }
+
+    /**
+     * Search by category
+     * 
+     * @param tagCategory
+     * @return
+     */
+    public List<ChatSessionDoc> findByQuickTag(String tagCategory) {
+	Query query2 = new Query();
+	if (ArgUtil.is(tagCategory)) {
+	    query2.addCriteria(Criteria.where("tagId").is(tagCategory));
 	}
-	/** Search by category **/
-	
-	public List<ChatSessionDoc> findByTagCategory(String tagCategory) {
-		Query query2 = new Query();
-		 if (ArgUtil.is(tagCategory)) {
-			query2.addCriteria(Criteria.where("tagCategory").is(tagCategory));
-		}
-		return mongoTemplate.find(query2, ChatSessionDoc.class);
-	}
-	
-	/** search by status or by tag category**/
-	public List<ChatSessionDoc> findByStatusOrCategory(CHAT_STATUS status,String tagCategory,long dateRange1,long dateRange2) {
-		Query query = new Query();
-		//query2.addCriteria(new Criteria().orOperator(Criteria.where("status").is(status.toString()),
-		//	    Criteria.where("tagCategory").is(tagCategory)));
-		query.addCriteria(Criteria.where("assignedAgentStamp").gt(dateRange1).lt(dateRange2));
-		query.addCriteria(new Criteria().orOperator(Criteria.where("status").is(status.toString()),Criteria.where("tagCategory").is(tagCategory)));
-		
-		return mongoTemplate.find(query, ChatSessionDoc.class);
-	}
+	return mongoTemplate.find(query2, ChatSessionDoc.class);
+    }
+
+    /**
+     * search by status or by tag category
+     * 
+     * @param status
+     * @param tagCategory
+     * @param dateRange1
+     * @param dateRange2
+     * @return
+     */
+    public List<ChatSessionDoc> findByStatusOrQuickTag(CHAT_STATUS status, String tagCategory, long dateRange1,
+	    long dateRange2) {
+	Query query = new Query();
+	query.addCriteria(Criteria.where("assignedAgentStamp").gt(dateRange1).lt(dateRange2));
+	query.addCriteria(new Criteria().orOperator(Criteria.where("status").is(status.toString()),
+		Criteria.where("tagCategory").is(tagCategory)));
+
+	return mongoTemplate.find(query, ChatSessionDoc.class);
+    }
 
     public String getLastAssignedAgent(Contactable contact) {
 	CommonMongoQueryBuilder cmqb = new CommonMongoQueryBuilder()

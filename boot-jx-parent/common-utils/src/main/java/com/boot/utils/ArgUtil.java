@@ -757,7 +757,7 @@ public final class ArgUtil {
      * @param collection the collection
      * @return true, if is collection empty
      */
-    static boolean isCollectionEmpty(Collection<?> collection) {
+    public static boolean isCollectionEmpty(Collection<?> collection) {
 	if (collection == null || collection.isEmpty()) {
 	    return true;
 	}

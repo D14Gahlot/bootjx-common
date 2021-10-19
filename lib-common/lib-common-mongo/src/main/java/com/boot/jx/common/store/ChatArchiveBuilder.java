@@ -1,4 +1,4 @@
-package com.boot.jx.chat;
+package com.boot.jx.common.store;
 
 import java.util.List;
 

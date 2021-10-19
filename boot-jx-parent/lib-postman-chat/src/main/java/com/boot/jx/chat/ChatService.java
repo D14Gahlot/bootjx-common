@@ -10,7 +10,6 @@ import org.springframework.stereotype.Component;
 
 import com.boot.jx.bot.ChatContext;
 import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorHandler;
-import com.boot.jx.logger.AuditDetailProvider;
 import com.boot.jx.logger.LoggerService;
 import com.boot.jx.postman.PMClientConfig;
 import com.boot.jx.postman.PMConstants;
@@ -22,6 +21,7 @@ import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.dto.ChatUserProfileDTO;
 import com.boot.jx.postman.dto.ChatUserProfileDTO.ChatUserProfileRequest;
+import com.boot.jx.postman.manager.LogManager;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.Message;
 import com.boot.jx.postman.model.MessageDefinitions.IMessageExtended;
@@ -62,9 +62,6 @@ public class ChatService {
     @Autowired
     private SessionStore sessionStore;
 
-    @Autowired(required = false)
-    private AuditDetailProvider auditDetailProvider;
-
     public InboxMessage getInboxMessage() {
 	return chatContext.getInboxMessage();
     }
@@ -84,9 +81,8 @@ public class ChatService {
 	return chatClientConfig;
     }
 
-    public String getCurrenUser() {
-	return ArgUtil.is(auditDetailProvider) ? auditDetailProvider.getAuditUser() : "_SYSTEM_";
-    }
+    @Autowired
+    private LogManager logManager;
 
     private MessageDoc actionIntenal(ChatContactDoc chatContactDoc, OutboxMessage outboxMessage) {
 	if (!ArgUtil.is(outboxMessage.getAction())) {
@@ -194,33 +190,6 @@ public class ChatService {
 	outboxMessage.model().put("contact", ChatDTOUtil.getContactDTO(chatContactDoc));
 
 	return replyIntenal(inboxMessage, outboxMessage);
-    }
-
-    public MessageDoc note(ChatSessionDoc sessionDoc, OutboxMessage outboxMessage) {
-	outboxMessage.contact().setContactType(sessionDoc.getContactType());
-	outboxMessage.contact().setChannelType(sessionDoc.getChannel());
-	outboxMessage.contact().setLane(sessionDoc.getLane());
-	outboxMessage.contact().setContactId(sessionDoc.getContactId());
-	outboxMessage.setSessionId(sessionDoc.getSessionId());
-	outboxMessage.setType("N");
-	return messageStore.note(outboxMessage, getCurrenUser());
-    }
-
-    public MessageDoc log(IMessageExtended inboxMessage, String auditAgent, EVENTS event, String... logs) {
-	return messageStore.log(inboxMessage, auditAgent, event, logs);
-    }
-
-    public MessageDoc log(IMessageExtended inboxMessage, EVENTS event, String... logs) {
-	return log(inboxMessage, inboxMessage.session().getAgent(), event, logs);
-    }
-
-    private MessageDoc log(ChatSessionDoc sessionDoc, String auditAgent, EVENTS event, String... logs) {
-	IMessageExtended inboxMessage = sessionStore.toSessionMessage(sessionDoc);
-	return log(inboxMessage, auditAgent, event, logs);
-    }
-
-    public MessageDoc log(ChatSessionDoc sessionDoc, EVENTS event, String... logs) {
-	return log(sessionDoc, getCurrenUser(), event, logs);
     }
 
     public MessageDoc send(ChatSessionDoc sessionDoc, OutboxMessage outboxMessage) {
@@ -394,40 +363,6 @@ public class ChatService {
 	}
     }
 
-    public boolean resolveSession(ChatSessionDoc session) {
-	if (!ArgUtil.isEmptyValue(session.getResolveSessionStamp())) {
-	    return false;
-	}
-	session = sessionStore.resolveSession(session);
-	log(session, EVENTS.STATUS_CHANGED, session.getStatus(), PMConstants.CHAT_STATUS.RESOLVED.toString());
-	return true;
-    }
-
-    public boolean closeSession(ChatSessionDoc session) {
-	if (!session.isActive()) {
-	    return false;
-	}
-	session = sessionStore.closeSession(session);
-	log(session, EVENTS.STATUS_CHANGED, session.getStatus(), PMConstants.CHAT_STATUS.CLOSED.toString());
-	return true;
-    }
-
-    public boolean updateSessionStatus(ChatSessionDoc sessionDoc, PMConstants.CHAT_STATUS status) {
-	String oldStatus = sessionDoc.getStatus();
-	if (status.toString().equalsIgnoreCase(oldStatus)) {
-	    return false;
-	}
-	if (status == PMConstants.CHAT_STATUS.RESOLVED) {
-	    return this.resolveSession(sessionDoc);
-	} else if (status == PMConstants.CHAT_STATUS.CLOSED) {
-	    return this.closeSession(sessionDoc);
-	} else {
-	    sessionStore.changeStatus(sessionDoc, status);
-	    log(sessionDoc, EVENTS.STATUS_CHANGED, oldStatus, status.toString());
-	}
-	return true;
-    }
-
     public boolean botScore(ChatSessionDoc session, Integer botScore) {
 	session = sessionStore.botScore(session, botScore);
 	return true;
@@ -445,17 +380,15 @@ public class ChatService {
 	chatStatusReportService.offer(updateDeliveryStatus);
 	chatStatusReportService.process(null);
     }
-    
+
     public boolean updateTagCategoryStatus(ChatSessionDoc sessionDoc, String tagCategory) {
-    	String oldTagCategory=null;
-    	if(ArgUtil.is(sessionDoc.getTagCategory())) {
-    		 oldTagCategory = sessionDoc.getTagCategory();
-    	}
-    	sessionStore.updateTagCategory(sessionDoc, tagCategory);
-	    log(sessionDoc, EVENTS.TAG_ADDED, oldTagCategory, tagCategory);
-	    return true;
+	String oldTagCategory = null;
+	if (ArgUtil.is(sessionDoc.getTagCategory())) {
+	    oldTagCategory = sessionDoc.getTagCategory();
 	}
-	
-   
+	sessionStore.updateQuickTag(sessionDoc, tagCategory);
+	logManager.log(sessionDoc, EVENTS.TAG_ADDED, oldTagCategory, tagCategory);
+	return true;
+    }
 
 }

@@ -4,27 +4,31 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 
 import com.boot.jx.agent.AgentSessionBean;
 import com.boot.jx.agent.AgentSessionService;
+import com.boot.jx.agent.api.ControllerRequestDTOs.ChatTagUpdateRequest;
 import com.boot.jx.api.ApiResponse;
-import com.boot.jx.chat.ChatArchiveService;
 import com.boot.jx.common.doc.AgentSessionDoc;
+import com.boot.jx.common.store.ChatArchiveService;
+import com.boot.jx.common.store.DocumentUpdateListner;
 import com.boot.jx.http.ApiRequest;
 import com.boot.jx.http.RequestType;
 import com.boot.jx.postman.PMConstants.DEFAULT;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.dto.ChatSessionDTO;
+import com.boot.jx.postman.manager.ChatSessionManager;
+import com.boot.jx.postman.service.ChatDTOUtil;
 import com.boot.jx.postman.store.SessionStore;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.Constants;
 
-@Controller
+@RestController
 public class AgentMsgController {
 
     @Autowired
@@ -39,8 +43,13 @@ public class AgentMsgController {
     @Autowired
     private AgentSessionService agentSessionService;
 
+    @Autowired
+    private ChatSessionManager chatSessionManager;
+
+    @Autowired
+    DocumentUpdateListner documentUpdateListner;
+
     @ApiRequest(type = RequestType.POLL)
-    @ResponseBody
     @RequestMapping(value = "/api/sessions/assignments", method = { RequestMethod.GET })
     public ApiResponse<ChatSessionDTO, AgentSessionDoc> getSessionsAssignments(
 	    @RequestParam(defaultValue = "false") boolean withMessage, @RequestParam(required = false) Boolean status) {
@@ -68,4 +77,13 @@ public class AgentMsgController {
 		.details(agentSessionService.getAgentSessions());
     }
 
+    @RequestMapping(value = { "/api/session/tag" }, method = { RequestMethod.POST })
+    public ApiResponse<ChatSessionDTO, Object> addSessionTags(@RequestBody ChatTagUpdateRequest updateRequest) {
+	ChatSessionDoc sessionDoc = sessionStore.getSession(updateRequest.sessionId);
+	if (chatSessionManager.updateSessionStatus(sessionDoc, updateRequest.status)
+		|| chatSessionManager.updateSessionTags(sessionDoc, updateRequest.tags)) {
+	    documentUpdateListner.onChatSessionUpdate(sessionDoc);
+	}
+	return ApiResponse.buildData(ChatDTOUtil.getChatSessionDTO(sessionDoc));
+    }
 }
