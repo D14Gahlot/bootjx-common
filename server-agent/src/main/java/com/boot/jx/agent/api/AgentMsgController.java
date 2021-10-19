@@ -100,8 +100,8 @@ public class AgentMsgController {
 
 	// Session Stuff Logging >
 	if (ArgUtil.areEqual(sessionDoc.getAssignedToAgent(), agentSession.getAgentCode()) || agentSession.isAdmin()) {
+	    outboxMessage.setAction("ADD_STICKY_NOTE");
 	    ChatMessageDTO messageDto = agentService.sendMessage(sessionDoc, outboxMessage);
-	    messageDto.setAction("ADD_STICKY_NOTE");
 	    // Evaluate if required
 	    messageDto.setName(agentSession.getAgentCode());
 	    // messageDto.setType(outboxMessage.getType());
