@@ -84,6 +84,11 @@ public class PMConstants {
 	return null;
     }
 
+    public static class CHAT_SESSION_ACTIONS {
+	public static final String ADD_STICKY_NOTE = "ADD_STICKY_NOTE";
+	public static final String RESOLVE = "RESOLVE";
+    }
+
     public final class PostManUrls {
 
 	private PostManUrls() {

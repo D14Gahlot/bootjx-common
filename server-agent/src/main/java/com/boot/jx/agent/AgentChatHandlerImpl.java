@@ -23,6 +23,7 @@ import com.boot.jx.logger.LoggerService;
 import com.boot.jx.mongo.CommonMongoQueryBuilder;
 import com.boot.jx.postman.PMClientConfig;
 import com.boot.jx.postman.PMConstants;
+import com.boot.jx.postman.PMConstants.CHAT_SESSION_ACTIONS;
 import com.boot.jx.postman.PMConstants.DEFAULT;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.doc.ChatSessionDoc;
@@ -298,9 +299,9 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 	if (ArgUtil.is(action)) {
 	    outboxMessage.setAction(action);
 	    switch (action) {
-	    case "RESOLVE":
+	    case CHAT_SESSION_ACTIONS.RESOLVE:
 		return this.exitAgentMode(sessionDoc, outboxMessage);
-	    case "ADD_STICKY_NOTE":
+	    case CHAT_SESSION_ACTIONS.ADD_STICKY_NOTE:
 		return this.addStickyNote(sessionDoc, outboxMessage);
 	    default:
 		break;

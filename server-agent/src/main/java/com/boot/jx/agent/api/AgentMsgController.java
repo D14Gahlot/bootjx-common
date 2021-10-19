@@ -20,6 +20,7 @@ import com.boot.jx.common.store.ChatArchiveService;
 import com.boot.jx.common.store.DocumentUpdateListner;
 import com.boot.jx.http.ApiRequest;
 import com.boot.jx.http.RequestType;
+import com.boot.jx.postman.PMConstants.CHAT_SESSION_ACTIONS;
 import com.boot.jx.postman.PMConstants.DEFAULT;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.dto.ChatMessageDTO;
@@ -100,7 +101,7 @@ public class AgentMsgController {
 
 	// Session Stuff Logging >
 	if (ArgUtil.areEqual(sessionDoc.getAssignedToAgent(), agentSession.getAgentCode()) || agentSession.isAdmin()) {
-	    outboxMessage.setAction("ADD_STICKY_NOTE");
+	    outboxMessage.setAction(CHAT_SESSION_ACTIONS.ADD_STICKY_NOTE);
 	    ChatMessageDTO messageDto = agentService.sendMessage(sessionDoc, outboxMessage);
 	    // Evaluate if required
 	    messageDto.setName(agentSession.getAgentCode());
