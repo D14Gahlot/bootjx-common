@@ -271,17 +271,17 @@ public class Demo1Controller extends ChatController {
 	    InboxMessage agentAssignResp = assignToAgent().getResult();
 	    if (ArgUtil.is(agentAssignResp.session().getAgent())) {
 	    	if(ArgUtil.is(AppContextUtil.getTenant()) && AppContextUtil.getTenant().equalsIgnoreCase("tathkarah")) {
-	    	reply("عميلنا العزيز،\r\n"
-	    			+ "\r\n"
-	    			+ "مرحباً بك في تطبيق تذكره!\r\n"
-	    			+ "\r\n"
-	    			+ "لحظات وسيتم توصيلك بأحد ممثلي خدمة العملاء. \r\n"
-	    			+ "\r\n"
-	    			+ "شكرا لانتظارك …..");
-	    }else {
-	    	reply("Connecting you to one of our customer representatives. Give us a moment.");
-	    }
-    } else {
+	    		 reply("، عميلنا العزيز\r\n"
+	    		 		+ "\r\n"
+	    		 		+ "مرحباً بك في تطبيق تذكره!\r\n"
+	    		 		+ "\r\n"
+	    		 		+ "لحظات وسيتم توصيلك بأحد ممثلي خدمة العملاء. \r\n"
+	    		 		+ "\r\n"
+	    		 		+ " …..شكرا لانتظارك");
+	    	}else {
+	    	 reply("Connecting you to one of our customer representatives. Give us a moment.");
+	    	}
+	    } else {
 		reply("All agents are busy or online, we will connect you whenever someone is available.");
 	    }
 	} catch (Exception e) {

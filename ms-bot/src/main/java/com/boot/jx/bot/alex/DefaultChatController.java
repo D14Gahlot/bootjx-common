@@ -5,6 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.boot.jx.AppContext;
 import com.boot.jx.AppContextUtil;
 import com.boot.jx.bot.BotController;
 import com.boot.jx.bot.ChatContext;
@@ -21,25 +22,27 @@ public class DefaultChatController extends ChatController {
 
     @Autowired
     private ChatContext chatContext;
+    
+
 
     @ChatMapping(key = "transfer-to-agent")
     public void transferToAgent(InboxMessage inboxMessage, StringMatcher matcher) {
 	try {
 	    InboxMessage agentAssignResp = assignToAgent().getResult();
 	    if (ArgUtil.is(agentAssignResp.session().getAgent())) {
-		    	if(ArgUtil.is(AppContextUtil.getTenant()) && AppContextUtil.getTenant().equalsIgnoreCase("tathkarah")) {
-		    	reply("عميلنا العزيز،\r\n"
-		    			+ "\r\n"
-		    			+ "مرحباً بك في تطبيق تذكره!\r\n"
-		    			+ "\r\n"
-		    			+ "لحظات وسيتم توصيلك بأحد ممثلي خدمة العملاء. \r\n"
-		    			+ "\r\n"
-		    			+ "شكرا لانتظارك …..");
-		    }else {
-		    	reply("Connecting you to one of our customer representatives. Give us a moment.");
-		    }
+	    	if(ArgUtil.is(AppContextUtil.getTenant()) && AppContextUtil.getTenant().equalsIgnoreCase("tathkarah")) {
+	    		reply("، عميلنا العزيز\r\n"
+	    		 		+ "\r\n"
+	    		 		+ "مرحباً بك في تطبيق تذكره!\r\n"
+	    		 		+ "\r\n"
+	    		 		+ "لحظات وسيتم توصيلك بأحد ممثلي خدمة العملاء. \r\n"
+	    		 		+ "\r\n"
+	    		 		+ " …..شكرا لانتظارك");
+	    	}else {
+	    	 reply("Connecting you to one of our customer representatives. Give us a moment.");
+	    	}
 	    } else {
-		reply("All agents are busy or online, we will connect you whenever someone is available.");
+	    	reply("All agents are busy or online, we will connect you whenever someone is available.");
 	    }
 	} catch (Exception e) {
 	    reply("We are having some issues trying connect you to one of our customer representatives. Please be patient");
