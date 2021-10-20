@@ -101,16 +101,21 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 		.asString(PMConstants.CHAT_SESSION_STICKY.NONE);
 
 	String lastAgent = null;
+	LOGGER.debug("CHAT_SESSION_STICKY : {}", stickyLogic);
 	if (!PMConstants.CHAT_SESSION_STICKY.NONE.equals(stickyLogic)) {
 	    lastAgent = sessionStore.getLastAssignedAgent(inboxMessage.contact());
 	    if (ArgUtil.is(lastAgent)) {
+		LOGGER.debug("CHAT_SESSION_STICKY : lastAgent found {}", lastAgent);
 		AgentSessionDoc agent = mongoTemplate.findById(lastAgent, AgentSessionDoc.class);
 		if (ArgUtil.is(agent)) {
+		    LOGGER.debug("CHAT_SESSION_STICKY : has session {}", agent);
 		    if (PMConstants.CHAT_SESSION_STICKY.STRICT.equals(stickyLogic)) {
+			LOGGER.debug("CHAT_SESSION_STICKY : because its strictly {}", agent);
 			return agent;
 		    }
 		    if (PMConstants.CHAT_SESSION_STICKY.ONAVAILABLE.equals(stickyLogic)) {
 			if (ArgUtil.nullAsFalse(agent.getIsOnline())) {
+			    LOGGER.debug("CHAT_SESSION_STICKY : because its availanle {}", agent);
 			    return agent;
 			}
 		    }
@@ -126,9 +131,12 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 		environment.config().agent().getDefaultTeamCode(), DEFAULT.NO_DEPT);
 	inboxMessage.session().setDept(assignedDept);
 
+	LOGGER.debug("ASSIGNMENT_RULE : No Assignment {} {}", assignmentRule, assignedDept);
+
 	if (PMConstants.ASSIGNMENT_RULE.STRICT_DEFAULT.equals(assignmentRule)) {
 	    String defAgentCode = environment.config().agent().defaultAgent(assignedDept);
 	    AgentSessionDoc agent = mongoTemplate.findById(defAgentCode, AgentSessionDoc.class);
+	    LOGGER.debug("ASSIGNMENT_RULE : Default {} : {}", defAgentCode, agent);
 	    return agent;
 	}
 
