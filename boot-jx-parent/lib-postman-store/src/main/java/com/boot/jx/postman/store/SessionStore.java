@@ -21,6 +21,7 @@ import com.boot.jx.mongo.CommonMongoQueryBuilder.CommonMongoCriteria;
 import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.jx.postman.PMClientConfig;
 import com.boot.jx.postman.PMConstants;
+import com.boot.jx.postman.PMConstants.CHAT_MODE;
 import com.boot.jx.postman.PMConstants.CHAT_STATUS;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
@@ -598,8 +599,8 @@ public class SessionStore extends CommonDocStore {
     }
 
     public String getLastAssignedAgent(Contactable contact) {
-	CommonMongoQueryBuilder cmqb = new CommonMongoQueryBuilder()
-		.with(Criteria.where("contactId").is(contact.getContactId()).and("assignedToAgent").exists(true));
+	CommonMongoQueryBuilder cmqb = new CommonMongoQueryBuilder().with(Criteria.where("contactId")
+		.is(contact.getContactId()).and("assignedToAgent").exists(true).and("mode").is(CHAT_MODE.AGENT));
 	cmqb.getQuery().with(new Sort(Direction.DESC, "startSessionStamp")).limit(1);
 	ChatSessionDoc lastSession = mongoTemplate.findOne(cmqb.getQuery(), ChatSessionDoc.class);
 	if (ArgUtil.is(lastSession)) {
