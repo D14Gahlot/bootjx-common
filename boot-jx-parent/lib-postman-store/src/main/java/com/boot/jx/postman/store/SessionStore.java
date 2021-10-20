@@ -599,7 +599,7 @@ public class SessionStore extends CommonDocStore {
 
     public String getLastAssignedAgent(Contactable contact) {
 	CommonMongoQueryBuilder cmqb = new CommonMongoQueryBuilder()
-		.with(Criteria.where("contactId").is(contact.getContactId()).and("assignedToAgent").exists(false));
+		.with(Criteria.where("contactId").is(contact.getContactId()).and("assignedToAgent").exists(true));
 	cmqb.getQuery().with(new Sort(Direction.DESC, "startSessionStamp")).limit(1);
 	ChatSessionDoc lastSession = mongoTemplate.findOne(cmqb.getQuery(), ChatSessionDoc.class);
 	if (ArgUtil.is(lastSession)) {
