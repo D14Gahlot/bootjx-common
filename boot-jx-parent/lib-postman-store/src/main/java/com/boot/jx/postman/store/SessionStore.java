@@ -289,7 +289,7 @@ public class SessionStore extends CommonDocStore {
     public List<ChatSessionDoc> findChatSessionDocByAgentAndUnAssigned(String agentCode, String agentDept) {
 	Query query2 = new Query();
 	Calendar cal = Calendar.getInstance();
-	cal.add(Calendar.DATE, -2);
+	cal.add(Calendar.DATE, -7);
 	query2.addCriteria(Criteria.where("active").is(true).and("mode").is("AGENT").and("lastInComingStamp")
 		.gt(cal.getTimeInMillis()).andOperator(
 		// Is not assigned to any agent or assigned to said agent
