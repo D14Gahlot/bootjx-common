@@ -53,6 +53,9 @@ public class ConfigConstants {
 
 	ConfigConstants.SETUP_CONFIG_LIST.add(new ConfigMeta("Agent Color Scheme 2", "postman.agent.scheme2.color")
 		.inputType(InputType.COLOR_PALLETE).defaultValue(new ConfigMeta.ColorPalette()));
+
+	ConfigConstants.SETUP_CONFIG_LIST
+		.add(new ConfigMeta("Show History Tab", "postman.agent.tab.history").optionsOnOff().defaultFalse());
     }
 
 }

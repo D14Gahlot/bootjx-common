@@ -178,6 +178,16 @@ public class ConfigMeta implements Serializable {
 	return this;
     }
 
+    public ConfigMeta defaultFalse() {
+	this.defaultValue = Boolean.FALSE;
+	return this;
+    }
+
+    public ConfigMeta defaultTrue() {
+	this.defaultValue = Boolean.TRUE;
+	return this;
+    }
+
     public ConfigMeta title(String title) {
 	this.title = title;
 	return this;
