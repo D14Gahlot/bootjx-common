@@ -112,7 +112,7 @@ public class ConfigOptionMetaController {
     public ApiResponse<PMConfigurationObject, Object> updateCDN(@RequestParam(required = false) String url,
 	    @RequestParam(required = false) String version,
 	    @RequestParam(required = false, defaultValue = "false") boolean beta) {
-	PMConfigurationObject config = pmEnvironment.get(beta ? "mry.cdn.url.beta" : "mry.cdn.url");
+	PMConfigurationObject config = pmEnvironment.keyEntry(beta ? "mry.cdn.url.beta" : "mry.cdn.url");
 	String oldUrl = config.asString();
 
 	if (ArgUtil.is(version) && ArgUtil.is(oldUrl)) {

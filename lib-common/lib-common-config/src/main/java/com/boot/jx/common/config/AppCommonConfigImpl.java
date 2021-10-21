@@ -60,16 +60,16 @@ public class AppCommonConfigImpl implements AppCommonConfig {
 	boolean isBeta = ArgUtil.parseAsBoolean(commonHttpRequest.get("postman.ui.beta"),
 		pmEnvironment.config().getPref("postman.ui.beta").asBoolean(Boolean.FALSE).booleanValue());
 	if (isBeta) {
-	    boolean betaEnabled = pmEnvironment.get("postman.ui.beta").asBoolean();
+	    boolean betaEnabled = pmEnvironment.keyEntry("postman.ui.beta").asBoolean();
 	    if (betaEnabled) {
-		String betaCdn = pmEnvironment.get("mry.cdn.url.beta").asString();
+		String betaCdn = pmEnvironment.keyEntry("mry.cdn.url.beta").asString();
 		if (ArgUtil.is(betaCdn)) {
 		    return cdnBuilder.latest(betaCdn);
 		}
 	    }
 
 	}
-	return cdnBuilder.latest(pmEnvironment.get("mry.cdn.url").asString(cdnUrl));
+	return cdnBuilder.latest(pmEnvironment.keyEntry("mry.cdn.url").asString(cdnUrl));
     }
 
     private long getVersion() {
@@ -79,7 +79,7 @@ public class AppCommonConfigImpl implements AppCommonConfig {
     public Map<String, Object> appConfigAttributes() {
 	Map<String, Object> map = new HashMap<String, Object>();
 	for (Entry<String, String> entry : ConfigConstants.APP_CONFIG.entrySet()) {
-	    map.put(entry.getValue(), pmEnvironment.get(entry.getKey()).asString());
+	    map.put(entry.getValue(), pmEnvironment.keyEntry(entry.getKey()).asString());
 	}
 	return map;
     }
@@ -87,14 +87,14 @@ public class AppCommonConfigImpl implements AppCommonConfig {
     private SafeKeyHashMap<Object> setupConfigAttributes() {
 	SafeKeyHashMap<Object> setup = new SafeKeyHashMap<Object>();
 	for (ConfigMeta config : ConfigConstants.SETUP_CONFIG_LIST) {
-	    setup.put(config.getKey().toUpperCase(), pmEnvironment.get(config.getKey()).getValue());
+	    setup.put(config.getKey().toUpperCase(), pmEnvironment.keyEntry(config.getKey()).getValue());
 	}
 	return setup;
     }
 
     private Map<String, Object> commonAttributes() {
 	Map<String, Object> map = new HashMap<String, Object>();
-	map.put("AGENT_CHAT_INIT", pmEnvironment.get("postman.agent.chat.init").asBoolean());
+	map.put("AGENT_CHAT_INIT", pmEnvironment.keyEntry("postman.agent.chat.init").asBoolean());
 	map.put("CHAT_TAG_ENABLED", pmEnvironment.config().getPref("chat.tag.enabled").asBoolean());
 	map.put("chatIdleTimeout", TimeUtils.toMillis(chatClientConfig.getChatIdleTimeout()));
 	map.put("agentSessionTimeout", TimeUtils.toMillis(chatClientConfig.getAgentSessionTimeout()));
@@ -125,7 +125,7 @@ public class AppCommonConfigImpl implements AppCommonConfig {
 	map.put("APP_CONTEXT", appConfig.getAppPrefix());
 	map.put("POSTMAN_CONTEXT", appConfig.getAppPrefix());
 
-	map.put("POSTMAN_AGENT_SCHEME_COLOR", pmEnvironment.get("postman.agent.scheme.color").asString());
+	map.put("POSTMAN_AGENT_SCHEME_COLOR", pmEnvironment.keyEntry("postman.agent.scheme.color").asString());
 	map.put("STAMP", System.currentTimeMillis());
 	map.put("APP_TITLE", appConfig.getAppTitle());
 	map.put("TENANT", AppContextUtil.getTenant());

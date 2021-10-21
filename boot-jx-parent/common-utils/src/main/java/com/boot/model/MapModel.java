@@ -97,6 +97,14 @@ public class MapModel implements JsonSerializerType<Object> {
 	    return ArgUtil.parseAsListOfT(value, listItem, ((List<T>) Constants.EMPTY_LIST), false);
 	}
 
+	public List<Object> asList() {
+	    return ArgUtil.parseAsListOfT(value, new Object(), Constants.EMPTY_LIST, false);
+	}
+
+	public List<Map<String, Object>> asListOfMap() {
+	    return this.asList(new HashMap<String, Object>());
+	}
+
 	public <T> T as(Class<T> clazz) {
 	    return JsonUtil.getMapper().convertValue(value, clazz);
 	}
@@ -138,11 +146,11 @@ public class MapModel implements JsonSerializerType<Object> {
 	return new MapEntry(jsonPath.load(this.map, null));
     }
 
-    public MapEntry key(String key) {
+    public MapEntry keyEntry(String key) {
 	return this.entry(key);
     }
 
-    public MapEntry path(String path) {
+    public MapEntry pathEntry(String path) {
 	return this.entry(new JsonPath(path));
     }
 
@@ -269,5 +277,10 @@ public class MapModel implements JsonSerializerType<Object> {
     public MapModel put(JsonPath jsonPath, Object value) {
 	jsonPath.save(this.map(), value);
 	return this;
+    }
+
+    public MapModel remove(String key) {
+	this.map().remove(key);
+	return null;
     }
 }

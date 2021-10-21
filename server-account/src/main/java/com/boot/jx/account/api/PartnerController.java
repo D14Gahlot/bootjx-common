@@ -74,7 +74,7 @@ public class PartnerController {
     public String home(Model model, @RequestParam(required = false) String theme) {
 	String tnt = AppContextUtil.getTenant();
 	if (!tnt.equals("app")) {
-	    return "redirect:" + String.format("https://app.%s%s", env.get("mry.prop.service.domain").asString(),
+	    return "redirect:" + String.format("https://app.%s%s", env.keyEntry("mry.prop.service.domain").asString(),
 		    commonHttpRequest.getRequestURI());
 	}
 
@@ -101,12 +101,12 @@ public class PartnerController {
 	String tnt = AppContextUtil.getTenant();
 	if (!tnt.equals("app")) {
 	    return "redirect:" + String.format("https://app.%s/%s/auth/direct",
-		    env.get("mry.prop.service.domain").asString(), commonHttpRequest.getRequestURI());
+		    env.keyEntry("mry.prop.service.domain").asString(), commonHttpRequest.getRequestURI());
 	}
 
 	model.addAllAttributes(appCommonConfig.appAttributes());
 	model.addAttribute("FORM_URL", String.format("https://%s.%s/%s/auth/direct", domain,
-		env.get("mry.prop.service.domain").asString(), panel));
+		env.keyEntry("mry.prop.service.domain").asString(), panel));
 
 	if (ArgUtil.is(adminSessionBean.domainUser())) {
 	    for (DomainDoc domainDoc : adminSessionBean.domainUser().getDomains()) {

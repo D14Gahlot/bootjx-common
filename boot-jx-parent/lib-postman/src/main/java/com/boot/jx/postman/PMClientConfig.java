@@ -61,7 +61,7 @@ public class PMClientConfig {
     }
 
     public String getDefaultSender() {
-	return environment.get("postman.bot.name")
+	return environment.keyEntry("postman.bot.name")
 		.asString(ArgUtil.parseAsString(environment.config().agent().getDefaultBotName(), defaultSender));
     }
 
@@ -97,7 +97,7 @@ public class PMClientConfig {
 	String webhookUrl = channelConfig.getWebhookUrl();
 	if (!ArgUtil.is(webhookUrl)) {
 	    webhookUrl = String.format("https://%s.%s/postman", AppContextUtil.getTenant(),
-		    environment.get("mry.prop.service.domain").asString());
+		    environment.keyEntry("mry.prop.service.domain").asString());
 	}
 	return webhookUrl;
     }

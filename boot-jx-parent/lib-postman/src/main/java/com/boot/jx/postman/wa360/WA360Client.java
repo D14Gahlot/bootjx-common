@@ -172,7 +172,7 @@ public class WA360Client {
 	    wa360OutBoundMedia.setFilename(attachment.getMediaName());
 	    if (ArgUtil.areEqual(attachment.getMediaType(), FileType.IMAGE.toString())) {
 		intr.put(OutBoundWrapperPaths.MESSAGE_TYPE, "image");
-		 wa360OutBoundMedia.setFilename(null);
+		wa360OutBoundMedia.setFilename(null);
 		intr.put("image", wa360OutBoundMedia);
 	    } else if (ArgUtil.areEqual(attachment.getMediaType(), FileType.VIDEO.toString())) {
 		intr.put(OutBoundWrapperPaths.MESSAGE_TYPE, "video");
@@ -219,6 +219,12 @@ public class WA360Client {
 	    throw new PostManException(String.format("%s : %s / %s / %s ", id, errorCode, errorTitle, errorDetails));
 	}
 	return id;
+    }
+
+    public MapModel fetchTemplates(ChannelConfig channelConfig) {
+	MapModel resp = restService.ajax(WA360Constants.BASE_URL).path("v1/configs/templates")
+		.header(WA360Constants.D360_API_KEY, channelConfig.getWa360d().getApiKey()).get().asMapModel();
+	return resp;
     }
 
 }

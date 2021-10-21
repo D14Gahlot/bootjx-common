@@ -26,7 +26,7 @@ import com.boot.jx.postman.doc.QuickTag;
 import com.boot.utils.ArgUtil;
 
 @RestController
-public class TemplateController {
+public class TmplQuickController {
 
     @Autowired
     private CommonMongoTemplate mongoTemplate;

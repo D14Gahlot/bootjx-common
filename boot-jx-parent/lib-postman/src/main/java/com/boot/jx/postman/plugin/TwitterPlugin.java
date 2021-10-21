@@ -49,15 +49,15 @@ public class TwitterPlugin implements ChannelPlugin<TwitterConfigDetails> {
 
     @Override
     public void extractChannelDetailsFromMap(TwitterConfigDetails channelDetails, MapModel map) {
-	channelDetails.setHandler(map.path("twitter.handler").asString(channelDetails.getHandler()));
-	channelDetails.setType(map.path("twitter.type").asString(channelDetails.getType()));
-	channelDetails.setEnvName(map.path("twitter.envName").asString(channelDetails.getEnvName()));
-	channelDetails.setAccessToken(map.path("twitter.accessToken").asString(channelDetails.getAccessToken()));
+	channelDetails.setHandler(map.pathEntry("twitter.handler").asString(channelDetails.getHandler()));
+	channelDetails.setType(map.pathEntry("twitter.type").asString(channelDetails.getType()));
+	channelDetails.setEnvName(map.pathEntry("twitter.envName").asString(channelDetails.getEnvName()));
+	channelDetails.setAccessToken(map.pathEntry("twitter.accessToken").asString(channelDetails.getAccessToken()));
 	channelDetails.setAccessTokenSecret(
-		map.path("twitter.accessTokenSecret").asString(channelDetails.getAccessTokenSecret()));
-	channelDetails.setConsumerKey(map.path("twitter.consumerKey").asString(channelDetails.getConsumerKey()));
+		map.pathEntry("twitter.accessTokenSecret").asString(channelDetails.getAccessTokenSecret()));
+	channelDetails.setConsumerKey(map.pathEntry("twitter.consumerKey").asString(channelDetails.getConsumerKey()));
 	channelDetails
-		.setConsumerSecret(map.path("twitter.consumerSecret").asString(channelDetails.getConsumerSecret()));
+		.setConsumerSecret(map.pathEntry("twitter.consumerSecret").asString(channelDetails.getConsumerSecret()));
     }
 
 }

@@ -262,7 +262,7 @@ public class PMEnvironment {
     @Autowired
     private AppConfig appConfig;
 
-    public PMConfigurationObject get(String key) {
+    public PMConfigurationObject keyEntry(String key) {
 	PMConfigurationObject configObject = this.config().prefs().get(key);
 
 	String tnt = AppContextUtil.getTenant();

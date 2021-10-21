@@ -45,9 +45,9 @@ public class TelegramPlugin implements ChannelPlugin<TelegramConfigDetails> {
 
     @Override
     public void extractChannelDetailsFromMap(TelegramConfigDetails channelDetails, MapModel map) {
-	channelDetails.setHandler(map.path("telegram.handler").asString(channelDetails.getHandler()));
-	channelDetails.setType(map.path("telegram.type").asString(channelDetails.getType()));
-	channelDetails.setAccessToken(map.path("telegram.accessToken").asString(channelDetails.getAccessToken()));
+	channelDetails.setHandler(map.pathEntry("telegram.handler").asString(channelDetails.getHandler()));
+	channelDetails.setType(map.pathEntry("telegram.type").asString(channelDetails.getType()));
+	channelDetails.setAccessToken(map.pathEntry("telegram.accessToken").asString(channelDetails.getAccessToken()));
     }
 
 }
