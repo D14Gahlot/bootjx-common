@@ -48,6 +48,7 @@ public class ChatSessionDTO implements Serializable {
 
     private String mode;
     private String status;
+    private List<String> tagId;
 
     private ContactDTO contact;
 
@@ -294,6 +295,14 @@ public class ChatSessionDTO implements Serializable {
 
     public void setUpdatedStamp(long updatedStamp) {
 	this.updatedStamp = updatedStamp;
+    }
+
+    public List<String> getTagId() {
+	return tagId;
+    }
+
+    public void setTagId(List<String> tagId) {
+	this.tagId = tagId;
     }
 
 }
