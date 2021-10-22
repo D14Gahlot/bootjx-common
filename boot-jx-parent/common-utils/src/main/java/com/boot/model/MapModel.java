@@ -281,6 +281,6 @@ public class MapModel implements JsonSerializerType<Object> {
 
     public MapModel remove(String key) {
 	this.map().remove(key);
-	return null;
+	return this;
     }
 }
