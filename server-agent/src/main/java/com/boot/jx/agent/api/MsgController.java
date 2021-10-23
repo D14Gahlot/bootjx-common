@@ -106,7 +106,7 @@ public class MsgController {
     public ApiResponse<ChatMessageDTO, Object> sendSessionMessage(@RequestBody OutboxMessage outboxMessage)
 	    throws InterruptedException {
 
-	ChatSessionDoc sessionDoc = sessionStore.getSession(outboxMessage.getSessionId());
+	ChatSessionDoc sessionDoc = sessionStore.createSession(outboxMessage);
 
 	// Session Stuff Logging <
 	if (ArgUtil.isEmpty(sessionDoc.getAssignedToAgent())) {
