@@ -114,29 +114,60 @@ public class SessionStore extends CommonDocStore {
 	return null;
     }
 
-    public ChatSessionDoc getSession(SessionMessage inboxMessage) {
-	Contactable contact = PostManUtil.getContactMeta(inboxMessage.contact());
+    /**
+     * 
+     * This method will take messages and returns session, session sbhould be
+     * created if there is not present session against this message or return if its
+     * there, this method should return null only in case there is nothing can be
+     * done for message.
+     * 
+     * Additionally this message is responsible for updating ContactDoc and Session
+     * doc for stamps and entry points
+     * 
+     * @param sessionMessage
+     * @return
+     */
+    public ChatSessionDoc createSession(SessionMessage sessionMessage) {
+	Contactable contact = PostManUtil.getContactMeta(sessionMessage.contact());
 
-	if (ArgUtil.isEmpty(contact.getContactId())) {
-	    return null;
-	}
-
+	String sessionId = sessionMessage.getSessionId();
 	String contactId = contact.getContactId();
 
-	String sessionId = inboxMessage.getSessionId();
-
-	ChatContactDoc chatContactDoc = null;
 	ChatSessionDoc chatSessionDoc = null;
+	ChatContactDoc chatContactDoc = null;
 
-	if (ArgUtil.isEmpty(sessionId)) {
-	    chatContactDoc = mongoTemplate.findById(contactId, ChatContactDoc.class);
-	    if (ArgUtil.is(chatContactDoc)) {
-		sessionId = chatContactDoc.getSessionId();
+	if (ArgUtil.isEmpty(contactId)) {
+	    // If these conact & session are not present there is nothing we can do about
+	    // this message
+	    if (ArgUtil.isEmpty(sessionId)) {
+		return null;
 	    }
+	    chatSessionDoc = getSession(sessionId);
+
+	    if (ArgUtil.isEmpty(chatSessionDoc)) {
+		return null;
+	    }
+
+	    if (!isSessionValid(chatSessionDoc)) {
+		contactId = chatSessionDoc.getContactId();
+		chatContactDoc = mongoTemplate.findById(contactId, ChatContactDoc.class);
+		contact.copyFrom(chatContactDoc);
+	    }
+
 	}
 
-	if (ArgUtil.is(sessionId)) {
-	    chatSessionDoc = getValidSession(sessionId);
+	// Find Out Chat Session
+	if (ArgUtil.isEmpty(chatSessionDoc)) {
+	    if (ArgUtil.isEmpty(sessionId)) {
+		chatContactDoc = mongoTemplate.findById(contactId, ChatContactDoc.class);
+		if (ArgUtil.is(chatContactDoc)) {
+		    sessionId = chatContactDoc.getSessionId();
+		}
+	    }
+
+	    if (ArgUtil.is(sessionId)) {
+		chatSessionDoc = getValidSession(sessionId);
+	    }
 	}
 
 	ChatContactQuery chatContactQuery = ArgUtil.is(chatContactDoc) ? new ChatContactQuery(chatContactDoc)
@@ -149,9 +180,9 @@ public class SessionStore extends CommonDocStore {
 	    // SESSION CREATION
 	    chatSessionDoc = new ChatSessionDoc();
 	    chatSessionDoc.setContactId(contactId);
-	    chatSessionDoc.setContactType(ArgUtil.parseAsString(inboxMessage.contact().type()));
-	    chatSessionDoc.setChannel(inboxMessage.contact().getChannelType());
-	    chatSessionDoc.setLane(inboxMessage.contact().getLane());
+	    chatSessionDoc.setContactType(ArgUtil.parseAsString(sessionMessage.contact().type()));
+	    chatSessionDoc.setChannel(sessionMessage.contact().getChannelType());
+	    chatSessionDoc.setLane(sessionMessage.contact().getLane());
 
 	    // SESSION UPDATE
 	    chatSessionDoc.setActive(true);
@@ -215,7 +246,7 @@ public class SessionStore extends CommonDocStore {
     }
 
     public ChatSessionDoc linkSession(IMessage inboxMessage) {
-	ChatSessionDoc chatSessionDoc = this.getSession(inboxMessage);
+	ChatSessionDoc chatSessionDoc = this.createSession(inboxMessage);
 	linkSession(chatSessionDoc, inboxMessage);
 	return chatSessionDoc;
     }
