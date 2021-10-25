@@ -1,5 +1,7 @@
 package com.boot.jx.mongo;
 
+import java.util.List;
+
 import org.bson.types.ObjectId;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,6 +54,10 @@ public class CommonMongoTemplateAbstract extends CommonMongoTemplateDefault {
 	    return getCommonMongoTemplate().findOne(new Query(c), clazz);
 	}
 	return null;
+    }
+
+    public <T> List<T> find(CommonMongoQueryBuilder builder, Class<T> clazz) {
+	return find(builder.getQuery(), clazz);
     }
 
     public <T extends DocVersion> T creatNewDocuemnt(String id, Class<T> clazz, T newVersion) {

@@ -8,25 +8,33 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.postman.PMEnvironment;
+import com.boot.jx.postman.doc.HSMTemplate3rdParty;
+import com.boot.jx.postman.manager.ThirdPartyTemplateManager;
 import com.boot.jx.postman.plugin.ChannelConfig;
-import com.boot.jx.postman.wa360.WA360Client;
-import com.boot.model.MapModel;
 
 @RestController
 public class TmplHSMController {
 
     @Autowired
-    private WA360Client wa360Client;
-
-    @Autowired
     private PMEnvironment pmEnvironment;
 
+    @Autowired
+    private ThirdPartyTemplateManager templateManager;
+
     @RequestMapping(value = "/api/tmpl/waba_templates", method = { RequestMethod.GET })
-    public ApiResponse<Object, Object> listPushTemplates(@RequestParam String channelId) {
+    public ApiResponse<HSMTemplate3rdParty, Object> listWabaTemplates(@RequestParam String channelId,
+	    @RequestParam(required = false, defaultValue = "false") boolean sync) {
 	ChannelConfig channelConfig = pmEnvironment.config().channels(channelId);
-	MapModel resp = wa360Client.fetchTemplates(channelConfig);
-	return ApiResponse.instance().results(resp.keyEntry("waba_templates").asList())
-		.meta(resp.remove("waba_templates").toMap());
+	if (sync) {
+	    templateManager.refreshWA360Templates(channelConfig);
+	}
+	return new ApiResponse<HSMTemplate3rdParty, Object>().results(templateManager.getTemplates(channelConfig));
+    }
+
+    @RequestMapping(value = "/api/tmpl/hsm/link", method = { RequestMethod.POST })
+    public ApiResponse<HSMTemplate3rdParty, Object> linkWabaTemplates(@RequestParam String templateId,
+	    @RequestParam String hsmTemplateId) {
+	return new ApiResponse<HSMTemplate3rdParty, Object>().data(templateManager.link(templateId, hsmTemplateId));
     }
 
 }
