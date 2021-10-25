@@ -17,6 +17,10 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class MapModel implements JsonSerializerType<Object> {
 
+    public static interface EntryMeta {
+	public String getKey();
+    }
+
     public static class MapEntry {
 	private Object value;
 

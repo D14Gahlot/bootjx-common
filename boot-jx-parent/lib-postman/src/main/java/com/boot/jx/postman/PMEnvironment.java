@@ -11,6 +11,7 @@ import com.boot.jx.dict.ContactType;
 import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.scope.tnt.Tenants;
 import com.boot.jx.utils.PostManUtil;
+import com.boot.model.MapModel.EntryMeta;
 import com.boot.model.MapModel.MapEntry;
 import com.boot.utils.ArgUtil;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -280,6 +281,10 @@ public class PMEnvironment {
 	}
 
 	return configObject;
+    }
+
+    public PMConfigurationObject keyEntry(EntryMeta entryMeta) {
+	return keyEntry(entryMeta.getKey());
     }
 
 }

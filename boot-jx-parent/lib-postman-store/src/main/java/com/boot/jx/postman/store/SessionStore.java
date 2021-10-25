@@ -23,6 +23,8 @@ import com.boot.jx.postman.PMClientConfig;
 import com.boot.jx.postman.PMConstants;
 import com.boot.jx.postman.PMConstants.CHAT_MODE;
 import com.boot.jx.postman.PMConstants.CHAT_STATUS;
+import com.boot.jx.postman.PMConstants.DEFAULT_VALUES;
+import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.ChatUserProfileDoc;
@@ -317,12 +319,13 @@ public class SessionStore extends CommonDocStore {
 	}
     }
 
-    public List<ChatSessionDoc> findChatSessionDocByAgentAndUnAssigned(String agentCode, String agentDept) {
+    public List<ChatSessionDoc> findChatSessionDocByAgentAndUnAssigned(String agentCode, String agentDept,
+	    long period) {
 	Query query2 = new Query();
-	Calendar cal = Calendar.getInstance();
-	cal.add(Calendar.DATE, -7);
+	Calendar timeout = Calendar.getInstance();
+	timeout.setTimeInMillis(timeout.getTimeInMillis() + period);
 	query2.addCriteria(Criteria.where("active").is(true).and("mode").is("AGENT").and("lastInComingStamp")
-		.gt(cal.getTimeInMillis()).andOperator(
+		.gt(timeout.getTimeInMillis()).andOperator(
 		// Is not assigned to any agent or assigned to said agent
 //						new Criteria().orOperator(Criteria.where("assignedToAgent").exists(false),
 //								Criteria.where("assignedToAgent").is(null),
@@ -334,6 +337,11 @@ public class SessionStore extends CommonDocStore {
 		));
 	// LOGGER.info(query2.toString());
 	return mongoTemplate.find(query2, ChatSessionDoc.class);
+    }
+
+    public List<ChatSessionDoc> findChatSessionDocByAgentAndUnAssigned(String agentCode, String agentDept) {
+	return findChatSessionDocByAgentAndUnAssigned(agentCode, agentDept,
+		DEFAULT_VALUES.POSTMAN_AGENT_TAB_HISTORY_PERIOD);
     }
 
     public List<ChatSessionDoc> findSimilarChatSessionForContactId(String contactId) {

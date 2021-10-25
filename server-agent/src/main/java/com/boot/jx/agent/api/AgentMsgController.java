@@ -15,11 +15,14 @@ import com.boot.jx.agent.AgentSessionBean;
 import com.boot.jx.agent.AgentSessionService;
 import com.boot.jx.agent.api.ControllerRequestDTOs.ChatTagUpdateRequest;
 import com.boot.jx.api.ApiResponse;
+import com.boot.jx.common.config.ConfigConstants.KEY;
 import com.boot.jx.common.doc.AgentSessionDoc;
 import com.boot.jx.common.store.ChatArchiveService;
 import com.boot.jx.common.store.DocumentUpdateListner;
 import com.boot.jx.http.ApiRequest;
 import com.boot.jx.http.RequestType;
+import com.boot.jx.postman.PMEnvironment;
+import com.boot.jx.postman.PMConstants;
 import com.boot.jx.postman.PMConstants.CHAT_SESSION_ACTIONS;
 import com.boot.jx.postman.PMConstants.DEFAULT;
 import com.boot.jx.postman.doc.ChatSessionDoc;
@@ -56,6 +59,9 @@ public class AgentMsgController {
     @Autowired
     private AgentService agentService;
 
+    @Autowired
+    private PMEnvironment environment;
+
     @ApiRequest(type = RequestType.POLL)
     @RequestMapping(value = "/api/sessions/assignments", method = { RequestMethod.GET })
     public ApiResponse<ChatSessionDTO, AgentSessionDoc> getSessionsAssignments(
@@ -63,8 +69,18 @@ public class AgentMsgController {
 
 	List<ChatSessionDTO> chatSessionDtos = new ArrayList<ChatSessionDTO>();
 	if (agentSession.isLoggedIn() && ArgUtil.is(agentSession.getAgentDept())) {
-	    List<ChatSessionDoc> sessions = sessionStore
-		    .findChatSessionDocByAgentAndUnAssigned(agentSession.getAgentCode(), agentSession.getAgentDept());
+	    List<ChatSessionDoc> sessions = null;
+	    boolean isHistoryEnabled = environment.keyEntry(KEY.POSTMAN_AGENT_TAB_HISTORY).asBoolean();
+	    long historyPeriod = environment.keyEntry(KEY.POSTMAN_AGENT_TAB_HISTORY_PERIOD)
+		    .asLong(PMConstants.DEFAULT_VALUES.POSTMAN_AGENT_TAB_HISTORY_PERIOD);
+	    if (isHistoryEnabled || (historyPeriod > PMConstants.DEFAULT_VALUES.POSTMAN_AGENT_TAB_HISTORY_PERIOD)) {
+		sessions = sessionStore.findChatSessionDocByAgentAndUnAssigned(agentSession.getAgentCode(),
+			agentSession.getAgentDept(), historyPeriod);
+	    } else {
+		sessions = sessionStore.findChatSessionDocByAgentAndUnAssigned(agentSession.getAgentCode(),
+			agentSession.getAgentDept());
+	    }
+
 	    for (ChatSessionDoc chatSessionDoc : sessions) {
 		ChatSessionDTO chatSessionDto = chatArchive.getChatSession(chatSessionDoc);
 		chatSessionDto = chatArchive.withContact(chatSessionDto);
