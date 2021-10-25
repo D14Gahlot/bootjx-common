@@ -1,6 +1,7 @@
 package com.boot.model;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -96,9 +97,8 @@ public class MapModel implements JsonSerializerType<Object> {
 	    return ArgUtil.parseAsT(value, defaultValue, false);
 	}
 
-	@SuppressWarnings("unchecked")
 	public <T> List<T> asList(T listItem) {
-	    return ArgUtil.parseAsListOfT(value, listItem, ((List<T>) Constants.EMPTY_LIST), false);
+	    return ArgUtil.parseAsListOfT(value, listItem, new ArrayList<T>(), false);
 	}
 
 	public List<Object> asList() {
