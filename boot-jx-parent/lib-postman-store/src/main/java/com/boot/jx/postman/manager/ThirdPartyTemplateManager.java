@@ -13,6 +13,7 @@ import com.boot.jx.postman.wa360.WA360Client;
 import com.boot.jx.postman.wa360.WA360Template;
 import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.JsonUtil;
 
 @Component
 public class ThirdPartyTemplateManager {
@@ -37,7 +38,7 @@ public class ThirdPartyTemplateManager {
 		thirdPartyTemplate.setId(id);
 	    }
 	    thirdPartyTemplate.setChannelId(channelConfig.getChannelId());
-	    thirdPartyTemplate.setWa360Template(wa360Template);
+	    thirdPartyTemplate.setTemplate(JsonUtil.toMap(wa360Template));
 	    commonMongoTemplate.save(thirdPartyTemplate);
 	}
     }

@@ -41,6 +41,7 @@ import com.boot.jx.stomp.StompTunnelService;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.TimeUtils;
 
 @Component
 public class ConnectorHandlerFactory extends ScopedBeanFactory<String, ConnectorHandler> {
@@ -50,6 +51,9 @@ public class ConnectorHandlerFactory extends ScopedBeanFactory<String, Connector
     public static Logger LOGGER = LoggerService.getLogger(ConnectorHandlerFactory.class);
 
     public interface ConnectorHandler {
+
+	public static final long DEFAULT_SESISON_PERIOD = TimeUtils.toMillis("24h");
+
 	default public void reply(ChannelConfig channelConfig, IMessageExtended inboxMessage,
 		OutboxMessage outboxMessage) {
 	    outboxMessage.addTo(inboxMessage.getFrom());
@@ -77,6 +81,15 @@ public class ConnectorHandlerFactory extends ScopedBeanFactory<String, Connector
 	    return true;
 	}
 
+	default public void meta(ChannelConfig channelConfig, String messageType, ChatContactDoc chatContactDoc,
+		IMessageExtended inboxMessage, OutboxMessage outboxMessage) {
+	    if (TimeUtils.isExpired(chatContactDoc.getLastInBoundStamp(), DEFAULT_SESISON_PERIOD)) {
+		outboxMessage.messageMetaWrapper().sendType("PM"); // Push Message
+	    } else {
+		outboxMessage.messageMetaWrapper().sendType("SM"); // Session Message
+	    }
+	}
+
 	default public void message(ChannelConfig channelConfig, String messageType, ChatContactDoc chatContactDoc,
 		IMessageExtended inboxMessage, OutboxMessage outboxMessage) {
 	    LOGGER.debug("message(String {}, ChatContactDoc {}, SessionMessage {}, OutboxMessage {})", messageType,
@@ -85,11 +98,13 @@ public class ConnectorHandlerFactory extends ScopedBeanFactory<String, Connector
 		switch (messageType) {
 		case "SEND":
 		    outboxMessage.messageMetaWrapper().composeType("N"); // is a New Message
+		    this.meta(channelConfig, messageType, chatContactDoc, inboxMessage, outboxMessage);
 		    this.send(channelConfig, chatContactDoc, outboxMessage);
 		    outboxMessage.updateStatus(Message.Status.SENT);
 		    break;
 		case "REPLY":
 		    outboxMessage.messageMetaWrapper().composeType("R"); // Its a Reply
+		    this.meta(channelConfig, messageType, chatContactDoc, inboxMessage, outboxMessage);
 		    this.reply(channelConfig, inboxMessage, outboxMessage);
 		    outboxMessage.updateStatus(Message.Status.SENT);
 		    break;

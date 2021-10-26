@@ -1,13 +1,13 @@
 package com.boot.jx.postman.doc;
 
 import java.io.Serializable;
+import java.util.Map;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.TypeAlias;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import com.boot.jx.model.AuditableEntity;
-import com.boot.jx.postman.wa360.WA360Template;
 
 @Document(collection = HSMTemplate3rdParty.COLLECTION_NAME)
 @TypeAlias("HSMTemplate3rdParty")
@@ -25,7 +25,10 @@ public class HSMTemplate3rdParty implements Serializable, AuditableEntity {
 
     private String channelId;
 
-    private WA360Template wa360Template;
+    private String channelType;
+    private String contactType;
+
+    private Map<String, Object> template;
 
     private String createdBy;
     private Long createdStamp;
@@ -38,12 +41,12 @@ public class HSMTemplate3rdParty implements Serializable, AuditableEntity {
 	this.id = id;
     }
 
-    public WA360Template getWa360Template() {
-	return wa360Template;
+    public Map<String, Object> getTemplate() {
+	return template;
     }
 
-    public void setWa360Template(WA360Template wa360Template) {
-	this.wa360Template = wa360Template;
+    public void setTemplate(Map<String, Object> template) {
+	this.template = template;
     }
 
     public String getCreatedBy() {
@@ -76,6 +79,22 @@ public class HSMTemplate3rdParty implements Serializable, AuditableEntity {
 
     public void setHsmTemplateId(String hsmTemplateId) {
 	this.hsmTemplateId = hsmTemplateId;
+    }
+
+    public String getChannelType() {
+	return channelType;
+    }
+
+    public void setChannelType(String channelType) {
+	this.channelType = channelType;
+    }
+
+    public String getContactType() {
+	return contactType;
+    }
+
+    public void setContactType(String contactType) {
+	this.contactType = contactType;
     }
 
 }

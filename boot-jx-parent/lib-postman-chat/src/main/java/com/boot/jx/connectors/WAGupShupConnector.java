@@ -118,7 +118,7 @@ public class WAGupShupConnector extends AbstractConnector {
 	outboxMessage.contact().setLane(chatContactDoc.getLane());
 	resolveTemplate(outboxMessage);
 
-	if (TimeUtils.isExpired(chatContactDoc.getLastInBoundStamp(), "24hr")
+	if (TimeUtils.isExpired(chatContactDoc.getLastInBoundStamp(), DEFAULT_SESISON_PERIOD)
 		&& outboxMessage.optionsAsModel().entry("wa-template-id").exists()) {
 	    if (ArgUtil.isEmptyValue(chatContactDoc.getLastOptInStamp())) {
 		gupShupNotifyClient.optIn(outboxMessage);
