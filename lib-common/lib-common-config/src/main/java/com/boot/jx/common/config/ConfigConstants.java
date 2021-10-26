@@ -22,7 +22,7 @@ public class ConfigConstants {
 
     public static enum KEY implements EntryMeta {
 	POSTMAN_BOT_NAME(new ConfigMeta("Bot Name", "postman.bot.name")),
-	POSTMAN_CONTACT_DETAILS_URL(new ConfigMeta("Bot Name", "postman.bot.name")),
+	POSTMAN_CONTACT_DETAILS_URL(new ConfigMeta("Contact Details Provider Webhook", "postman.contact.details.url")),
 
 	CHAT_TAG_ENABLED(new ConfigMeta("Chat Tag Enabled", "chat.tag.enabled").optionsOnOff()),
 
