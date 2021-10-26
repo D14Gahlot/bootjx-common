@@ -13,8 +13,8 @@ import com.boot.jx.postman.wa360.WA360Template;
 @TypeAlias("HSMTemplate3rdParty")
 public class HSMTemplate3rdParty implements Serializable, AuditableEntity {
 
-    public static final String COLLECTION_NAME = "DICT_HSM_TEMPLATES_WA360";
-    public static final String COLLECTION_NAME_TRASH = "TRASH_DICT_HSM_TEMPLATES_WA360";
+    public static final String COLLECTION_NAME = "DICT_HSM_TEMPLATES_3RD";
+    public static final String COLLECTION_NAME_TRASH = "TRASH_DICT_HSM_TEMPLATES_3RD";
 
     private static final long serialVersionUID = 5953299041958788771L;
 
