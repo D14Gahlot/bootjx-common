@@ -171,7 +171,7 @@ public class TelegramClient implements MessageClient {
 	    SendMessage sendMessage = new SendMessage();
 	    sendMessage.setText(message.getMessage());
 	    if (message.options().containsKey("buttons")) {
-		List<TmplElement> buttons = new MapModel(message.options()).entry("buttons").asList(new TmplElement());
+		List<TmplElement> buttons = new MapModel(message.options()).entry("buttons").asList(TmplElement.class);
 		ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
 		replyKeyboardMarkup.setSelective(true);
 		replyKeyboardMarkup.setResizeKeyboard(true);

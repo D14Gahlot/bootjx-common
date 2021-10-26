@@ -26,7 +26,7 @@ public class ThirdPartyTemplateManager {
     public void refreshWA360Templates(ChannelConfig channelConfig) {
 	MapModel resp = wa360Client.fetchTemplates(channelConfig);
 
-	List<WA360Template> wabaTemplates = resp.keyEntry("waba_templates").asList(new WA360Template());
+	List<WA360Template> wabaTemplates = resp.keyEntry("waba_templates").asList(WA360Template.class);
 
 	for (WA360Template wa360Template : wabaTemplates) {
 	    String id = String.format("%s/%s/%s", channelConfig.getChannelId(), wa360Template.getName(),

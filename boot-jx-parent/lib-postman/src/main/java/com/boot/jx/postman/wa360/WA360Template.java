@@ -3,7 +3,9 @@ package com.boot.jx.postman.wa360;
 import java.io.Serializable;
 import java.util.List;
 
-public class WA360Template implements Serializable {
+import com.boot.model.UtilityModels.JsonIgnoreUnknown;
+
+public class WA360Template implements Serializable, JsonIgnoreUnknown {
     private static final long serialVersionUID = -3743792916425816429L;
 
     private String category;

@@ -44,7 +44,7 @@ public class WA360Client {
 	boolean isButton = false;
 	List<TmplElement> buttons = null;
 	if (outboxMessage.options().containsKey("buttons")) {
-	    buttons = new MapModel(outboxMessage.options()).entry("buttons").asList(new TmplElement());
+	    buttons = new MapModel(outboxMessage.options()).entry("buttons").asList(TmplElement.class);
 	    isList = (buttons.size() > 3);
 	    isButton = (buttons.size() > 0) && (buttons.size() < 4);
 	}

@@ -14,6 +14,7 @@ import com.boot.utils.JsonPath;
 import com.boot.utils.JsonUtil;
 import com.boot.utils.TimeUtils;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.core.type.TypeReference;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class MapModel implements JsonSerializerType<Object> {
@@ -97,8 +98,21 @@ public class MapModel implements JsonSerializerType<Object> {
 	    return ArgUtil.parseAsT(value, defaultValue, false);
 	}
 
-	public <T> List<T> asList(T listItem) {
-	    return ArgUtil.parseAsListOfT(value, listItem, new ArrayList<T>(), false);
+	public <T> T as(Class<T> clazz) {
+	    return JsonUtil.getMapper().convertValue(value, clazz);
+	}
+
+	public <T> T as(TypeReference<T> toValueTypeRef) {
+	    return JsonUtil.getMapper().convertValue(value, toValueTypeRef);
+	}
+
+	public <T> List<T> asList(Class<T> clazz) {
+	    List<Object> list = this.asList();
+	    List<T> newList = new ArrayList<T>();
+	    for (Object object : list) {
+		newList.add(JsonUtil.parse(object, clazz));
+	    }
+	    return newList;
 	}
 
 	public List<Object> asList() {
@@ -106,11 +120,8 @@ public class MapModel implements JsonSerializerType<Object> {
 	}
 
 	public List<Map<String, Object>> asListOfMap() {
-	    return this.asList(new HashMap<String, Object>());
-	}
-
-	public <T> T as(Class<T> clazz) {
-	    return JsonUtil.getMapper().convertValue(value, clazz);
+	    return ArgUtil.parseAsListOfT(value, new HashMap<String, Object>(), new ArrayList<Map<String, Object>>(),
+		    false);
 	}
 
 	public boolean exists() {
