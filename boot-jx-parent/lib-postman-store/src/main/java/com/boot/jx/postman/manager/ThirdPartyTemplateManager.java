@@ -38,6 +38,9 @@ public class ThirdPartyTemplateManager {
 		thirdPartyTemplate.setId(id);
 	    }
 	    thirdPartyTemplate.setChannelId(channelConfig.getChannelId());
+	    thirdPartyTemplate.setContactType(ArgUtil.parseAsString(channelConfig.getContactType()));
+	    thirdPartyTemplate.setChannelType(channelConfig.getChannelType());
+
 	    thirdPartyTemplate.setTemplate(JsonUtil.toMap(wa360Template));
 	    commonMongoTemplate.save(thirdPartyTemplate);
 	}
