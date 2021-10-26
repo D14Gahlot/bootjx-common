@@ -322,7 +322,7 @@ public class SessionStore extends CommonDocStore {
 	    long period) {
 	Query query2 = new Query();
 	Calendar timeout = Calendar.getInstance();
-	timeout.setTimeInMillis(timeout.getTimeInMillis() + period);
+	timeout.setTimeInMillis(timeout.getTimeInMillis() - period);
 	query2.addCriteria(Criteria.where("active").is(true).and("mode").is("AGENT").and("lastInComingStamp")
 		.gt(timeout.getTimeInMillis()).andOperator(
 		// Is not assigned to any agent or assigned to said agent
