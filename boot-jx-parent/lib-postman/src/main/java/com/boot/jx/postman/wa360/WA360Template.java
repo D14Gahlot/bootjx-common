@@ -10,7 +10,7 @@ public class WA360Template implements Serializable, JsonIgnoreUnknown {
 
     private String category;
 
-    private String lang;
+    private String language;
 
     private String name;
 
@@ -28,14 +28,6 @@ public class WA360Template implements Serializable, JsonIgnoreUnknown {
 
     public void setCategory(String category) {
 	this.category = category;
-    }
-
-    public String getLang() {
-	return lang;
-    }
-
-    public void setLang(String lang) {
-	this.lang = lang;
     }
 
     public String getName() {
@@ -76,5 +68,13 @@ public class WA360Template implements Serializable, JsonIgnoreUnknown {
 
     public void setComponents(List<Object> components) {
 	this.components = components;
+    }
+
+    public String getLanguage() {
+        return language;
+    }
+
+    public void setLanguage(String language) {
+        this.language = language;
     }
 }

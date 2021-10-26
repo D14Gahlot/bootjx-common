@@ -30,7 +30,7 @@ public class ThirdPartyTemplateManager {
 
 	for (WA360Template wa360Template : wabaTemplates) {
 	    String id = String.format("%s/%s/%s", channelConfig.getChannelId(), wa360Template.getName(),
-		    wa360Template.getLang());
+		    wa360Template.getLanguage());
 	    HSMTemplate3rdParty thirdPartyTemplate = commonMongoTemplate.findById(id, HSMTemplate3rdParty.class);
 	    if (!ArgUtil.is(thirdPartyTemplate)) {
 		thirdPartyTemplate = new HSMTemplate3rdParty();
