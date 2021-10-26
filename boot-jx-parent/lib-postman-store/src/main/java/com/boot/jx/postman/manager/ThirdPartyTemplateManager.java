@@ -36,7 +36,7 @@ public class ThirdPartyTemplateManager {
 		thirdPartyTemplate = new HSMTemplate3rdParty();
 		thirdPartyTemplate.setId(id);
 	    }
-	    thirdPartyTemplate.setChannelId(id);
+	    thirdPartyTemplate.setChannelId(channelConfig.getChannelId());
 	    thirdPartyTemplate.setWa360Template(wa360Template);
 	    commonMongoTemplate.save(thirdPartyTemplate);
 	}
