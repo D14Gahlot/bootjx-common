@@ -96,6 +96,7 @@ public abstract class AbstractConnector<CD extends AChannelDetails, P extends Ch
     }
 
     private OutboxMessage process(ChannelConfig channelConfig, OutboxMessage outboxMessage) {
+	tmplClient.process(outboxMessage);
 	if (ArgUtil.is(outboxMessage.getTemplateId())) {
 	    if (MESSAGE_SEND_TYPE.PUSH_MESSAGE.equals(outboxMessage.messageMetaWrapper().sendType())
 		    && channelConfig.isPushAllowed() && channelConfig.isPushOnlyApproved()) {
@@ -120,7 +121,6 @@ public abstract class AbstractConnector<CD extends AChannelDetails, P extends Ch
 		}
 	    }
 	}
-	tmplClient.process(outboxMessage);
 	return outboxMessage;
     }
 }
