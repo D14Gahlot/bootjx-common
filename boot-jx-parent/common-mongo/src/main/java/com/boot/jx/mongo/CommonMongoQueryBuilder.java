@@ -7,11 +7,9 @@ public class CommonMongoQueryBuilder extends CommonMongoQB<CommonMongoQueryBuild
 	protected boolean synced;
 	private long updatedStamp;
 
-	@SuppressWarnings("unchecked")
 	public DocQueryBuilder(T doc) {
 	    this.doc = doc;
 	    whereId(getId(this.doc));
-	    this.docClass = (Class<T>) this.doc.getClass();
 	    this.synced = true;
 	}
 
@@ -42,6 +40,14 @@ public class CommonMongoQueryBuilder extends CommonMongoQB<CommonMongoQueryBuild
 
 	public void updatedStamp() {
 	    this.set("updatedStamp", System.currentTimeMillis());
+	}
+
+	@SuppressWarnings("unchecked")
+	public Class<T> getDocClass() {
+	    if (docClass == null) {
+		this.docClass = this.doc == null ? null : (Class<T>) this.doc.getClass();
+	    }
+	    return docClass;
 	}
     }
 
