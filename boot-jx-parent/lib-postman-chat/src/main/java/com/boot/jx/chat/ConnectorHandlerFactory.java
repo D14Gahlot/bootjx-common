@@ -54,8 +54,8 @@ public class ConnectorHandlerFactory extends ScopedBeanFactory<String, Connector
 
 	public static final long DEFAULT_SESISON_PERIOD = TimeUtils.toMillis("24h");
 
-	default public void reply(ChannelConfig channelConfig, IMessageExtended inboxMessage,
-		OutboxMessage outboxMessage) {
+	default public void reply(ChannelConfig channelConfig, ChatContactDoc chatContactDoc,
+		OutboxMessage outboxMessage, IMessageExtended inboxMessage) {
 	    outboxMessage.addTo(inboxMessage.getFrom());
 	    outboxMessage.contact().setLane(inboxMessage.contact().getLane());
 	    this.send(channelConfig, outboxMessage);
@@ -91,7 +91,7 @@ public class ConnectorHandlerFactory extends ScopedBeanFactory<String, Connector
 	}
 
 	default public void message(ChannelConfig channelConfig, String messageType, ChatContactDoc chatContactDoc,
-		IMessageExtended inboxMessage, OutboxMessage outboxMessage) {
+		OutboxMessage outboxMessage, IMessageExtended inboxMessage) {
 	    LOGGER.debug("message(String {}, ChatContactDoc {}, SessionMessage {}, OutboxMessage {})", messageType,
 		    chatContactDoc, inboxMessage, outboxMessage);
 	    try {
@@ -105,7 +105,7 @@ public class ConnectorHandlerFactory extends ScopedBeanFactory<String, Connector
 		case "REPLY":
 		    outboxMessage.messageMetaWrapper().composeType("R"); // Its a Reply
 		    this.meta(channelConfig, messageType, chatContactDoc, inboxMessage, outboxMessage);
-		    this.reply(channelConfig, inboxMessage, outboxMessage);
+		    this.reply(channelConfig, chatContactDoc, outboxMessage, inboxMessage);
 		    outboxMessage.updateStatus(Message.Status.SENT);
 		    break;
 		default:
@@ -268,12 +268,12 @@ public class ConnectorHandlerFactory extends ScopedBeanFactory<String, Connector
      * 
      * @param messageType
      * @param chatContactDoc
-     * @param inboxMessage
      * @param outboxMessage
+     * @param inboxMessage
      */
     @Async
-    public void message(String messageType, ChatContactDoc chatContactDoc, IMessageExtended inboxMessage,
-	    OutboxMessage outboxMessage) {
+    public void message(String messageType, ChatContactDoc chatContactDoc, OutboxMessage outboxMessage,
+	    IMessageExtended inboxMessage) {
 	LOGGER.debug("message(String {}, ChatContactDoc {}, IMessageExtended {}, OutboxMessage {})", messageType,
 		chatContactDoc, inboxMessage, outboxMessage);
 
@@ -284,7 +284,7 @@ public class ConnectorHandlerFactory extends ScopedBeanFactory<String, Connector
 	    if (ArgUtil.is(channelConfig) || ContactType.WEBSITE.equals(outboxMessage.contact().type())) {
 		ConnectorHandler connector = get(channelConfig);
 		if (ArgUtil.is(connector)) {
-		    connector.message(channelConfig, messageType, chatContactDoc, inboxMessage, outboxMessage);
+		    connector.message(channelConfig, messageType, chatContactDoc, outboxMessage, inboxMessage);
 		} else {
 		    outboxMessage.logs().add(String.format("Connector not defined for %s", channelId));
 		}

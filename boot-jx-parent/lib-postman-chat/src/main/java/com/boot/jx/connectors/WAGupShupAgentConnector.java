@@ -72,7 +72,7 @@ public class WAGupShupAgentConnector extends AbstractConnector<GupShupConfigDeta
     }
 
     @Override
-    public void reply(ChannelConfig channelConfig, IMessageExtended inboxMessage, OutboxMessage outboxMessage) {
+    public void reply(ChannelConfig channelConfig, ChatContactDoc chatContactDoc, OutboxMessage outboxMessage, IMessageExtended inboxMessage) {
 	outboxMessage.contact().setChannelType(inboxMessage.contact().getChannelType());
 	outboxMessage.contact().setLane(inboxMessage.contact().getLane());
 	if (ArgUtil.isEqual(inboxMessage.contact().getChannelType(), Channel.GUPSHUPAGENT.toString())) {
