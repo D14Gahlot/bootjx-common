@@ -54,8 +54,8 @@ public class ConnectorHandlerFactory extends ScopedBeanFactory<String, Connector
 
 	public static final long DEFAULT_SESISON_PERIOD = TimeUtils.toMillis("24h");
 
-	default public void reply(ChannelConfig channelConfig, IMessageExtended inboxMessage,
-		OutboxMessage outboxMessage) {
+	default public void reply(ChannelConfig channelConfig, ChatContactDoc chatContactDoc,
+		OutboxMessage outboxMessage, IMessageExtended inboxMessage) {
 	    outboxMessage.addTo(inboxMessage.getFrom());
 	    outboxMessage.contact().setLane(inboxMessage.contact().getLane());
 	    this.send(channelConfig, outboxMessage);
@@ -105,7 +105,7 @@ public class ConnectorHandlerFactory extends ScopedBeanFactory<String, Connector
 		case "REPLY":
 		    outboxMessage.messageMetaWrapper().composeType("R"); // Its a Reply
 		    this.meta(channelConfig, messageType, chatContactDoc, inboxMessage, outboxMessage);
-		    this.reply(channelConfig, inboxMessage, outboxMessage);
+		    this.reply(channelConfig, chatContactDoc, outboxMessage, inboxMessage);
 		    outboxMessage.updateStatus(Message.Status.SENT);
 		    break;
 		default:

@@ -83,7 +83,7 @@ public class FacebookConnector extends AbstractConnector<FacebookConfigDetails, 
 
     @Override
     public InboxMessage assignToAgent(InboxMessage inboxMessage) {
-	this.reply(null, inboxMessage, new OutboxMessage().message("Our agent will get in touch with you"));
+	this.reply(null, null, new OutboxMessage().message("Our agent will get in touch with you"), inboxMessage);
 	return inboxMessage;
     }
 

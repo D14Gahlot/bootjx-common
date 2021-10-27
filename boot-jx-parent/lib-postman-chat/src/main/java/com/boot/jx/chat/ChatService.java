@@ -103,7 +103,8 @@ public class ChatService {
 	return messageDoc;
     }
 
-    private MessageDoc replyIntenal(IMessageExtended inboxMessage, OutboxMessage outboxMessage) {
+    private MessageDoc replyIntenal(ChatContactDoc chatContactDoc, OutboxMessage outboxMessage,
+	    IMessageExtended inboxMessage) {
 	LOGGER.debug("replyIntenal(ChatContactDoc {}, OutboxMessage {})", inboxMessage, outboxMessage);
 
 	if (!ArgUtil.is(inboxMessage)) {
@@ -125,7 +126,7 @@ public class ChatService {
 	}
 
 	MessageDoc messageDoc = messageStore.createOrUpdate(outboxMessage);
-	connectorHandlerFactory.message("REPLY", null, inboxMessage, outboxMessage);
+	connectorHandlerFactory.message("REPLY", chatContactDoc, inboxMessage, outboxMessage);
 	sessionStore.push(messageDoc, outboxMessage);
 	return messageDoc;
     }
@@ -166,7 +167,7 @@ public class ChatService {
 	}
 
 	outboxMessage.model().put("contact", ChatDTOUtil.getContactDTO(chatContactDoc));
-	return replyIntenal(inboxMessage, outboxMessage);
+	return replyIntenal(chatContactDoc, outboxMessage, inboxMessage);
     }
 
     public MessageDoc reply(ChatSessionDoc sessionDoc, OutboxMessage outboxMessage) {
@@ -189,7 +190,7 @@ public class ChatService {
 
 	outboxMessage.model().put("contact", ChatDTOUtil.getContactDTO(chatContactDoc));
 
-	return replyIntenal(inboxMessage, outboxMessage);
+	return replyIntenal(chatContactDoc, outboxMessage, inboxMessage);
     }
 
     public MessageDoc send(ChatSessionDoc sessionDoc, OutboxMessage outboxMessage) {
