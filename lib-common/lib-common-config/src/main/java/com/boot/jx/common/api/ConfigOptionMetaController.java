@@ -19,6 +19,7 @@ import com.boot.jx.common.config.CDNBuilder;
 import com.boot.jx.common.config.ConfigManager;
 import com.boot.jx.common.impl.ConfigMeta;
 import com.boot.jx.http.ApiRequest;
+import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.jx.postman.PMConstants.CHANNEL_TYPE_ENUM;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PMEnvironment.AChannelDetails;
@@ -26,6 +27,7 @@ import com.boot.jx.postman.PMEnvironment.PMConfigurationObject;
 import com.boot.jx.postman.doc.HSMContentType;
 import com.boot.jx.postman.doc.HSMLanguage;
 import com.boot.jx.postman.doc.HSMMessageType;
+import com.boot.jx.postman.doc.HSMTemplate;
 import com.boot.jx.postman.plugin.ChannelPluginProvider;
 import com.boot.jx.postman.plugin.ChannelPluginProvider.ChannelPlugin;
 import com.boot.utils.ArgUtil;
@@ -40,6 +42,10 @@ public class ConfigOptionMetaController {
     @Autowired
     private CDNBuilder cdnBuilder;
 
+    @Autowired
+    CommonMongoTemplate commonMongoTemplate;
+
+    // Meta APIS
     @RequestMapping(value = "/api/meta/message_types", method = { RequestMethod.GET })
     public ApiResponse<HSMMessageType, Object> messageType() {
 	return ApiResponse.buildResults(HSMMessageType.values());
@@ -66,14 +72,21 @@ public class ConfigOptionMetaController {
 	List<ConfigMeta> configs = plugin.listConfigMeta(pmEnvironment);
 	return ApiResponse.buildResults(configs);
     }
-
+    
+    // Option APIS
+    
     @JsonView(PMEnvironment.PublicProperty.class)
-    @ResponseBody
     @RequestMapping(value = { "/api/options/channels" }, method = { RequestMethod.GET })
     public ApiResponse<AChannelDetails, Object> listActiveLanes() {
 	return ApiResponse.buildResults(pmEnvironment.config().listChannels());
     }
 
+    @RequestMapping(value = "/api/options/tmpl/hsm", method = { RequestMethod.GET })
+    public ApiResponse<HSMTemplate, Object> listPushTemplateslistHsmTmpl() {
+	return ApiResponse.buildResults(commonMongoTemplate.findAll(HSMTemplate.class));
+    }
+    
+    // Config APIS
     @Autowired
     private ConfigManager configManager;
 
