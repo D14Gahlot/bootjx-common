@@ -45,7 +45,7 @@ public class PMClientConfig {
     private String chatSessionTimeout;
 
     @Value("${postman.agent.session.timeout}")
-    private TimePeriod agentSessionTimeout;
+    private String agentSessionTimeout;
 
     @Value("${postman.default.sender}")
     private String defaultSender;
@@ -91,7 +91,7 @@ public class PMClientConfig {
     }
 
     public TimePeriod getAgentSessionTimeout() {
-	return agentSessionTimeout;
+	return TimePeriod.from(agentSessionTimeout);
     }
 
     public String getWebhookBase(ChannelConfig channelConfig) {
