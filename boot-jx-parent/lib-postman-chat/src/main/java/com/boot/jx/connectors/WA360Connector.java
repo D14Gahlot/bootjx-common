@@ -5,18 +5,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.boot.jx.chat.ConnectorHandlerFactory.AbstractConnector;
 import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorMapping;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.dict.FileFormat;
 import com.boot.jx.dict.FileType;
 import com.boot.jx.model.CommonFile;
-import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.jx.postman.PMClientConfig;
 import com.boot.jx.postman.PMConstants.CHANNEL_TYPE;
 import com.boot.jx.postman.client.PMFileStoreClient;
-import com.boot.jx.postman.client.TmplClient;
-import com.boot.jx.postman.doc.QuickMedia;
 import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.MessageBoxEvent;
@@ -43,12 +39,6 @@ public class WA360Connector extends AbstractConnector {
 
     @Autowired
     private PMFileStoreClient pmFileStoreClient;
-
-    @Autowired
-    private TmplClient tmplClient;
-
-    @Autowired
-    private CommonMongoTemplate commonMongoTemplate;
 
     @Autowired
     private WA360Client wa360Client;
@@ -134,34 +124,10 @@ public class WA360Connector extends AbstractConnector {
 		.mediaSrc(srcFile.getUrl()).mediaCaption(media.getCaption()).mediaName(media.getFilename()));
     }
 
-    private OutboxMessage resolveTemplate(OutboxMessage outboxMessage) {
-	if (ArgUtil.is(outboxMessage.getTemplate())) {
-	    QuickMedia templateReply = commonMongoTemplate.findById(outboxMessage.getTemplate(), QuickMedia.class);
-	    if (ArgUtil.is(templateReply)) {
-		if ("image".equalsIgnoreCase(templateReply.getType())) {
-		    outboxMessage.attachment(new Attachment().mediaURL(templateReply.getUrl())
-			    .mediaType(FileType.IMAGE.toString()).mediaCaption(templateReply.getTitle()));
-		    return outboxMessage;
-		}
-	    } else {
-		tmplClient.process(outboxMessage);
-		return outboxMessage;
-	    }
-	} else if (ArgUtil.is(outboxMessage.getTemplateId())) {
-	    // outboxMessage.setMessage(tmplClient.process(hsmTemplate.getTemplate(),
-	    // outboxMessage.getModel()));
-	    tmplClient.process(outboxMessage);
-	    return outboxMessage;
-	} else {
-	    return outboxMessage;
-	}
-	return outboxMessage;
-    }
-
     @Override
     public void send(ChannelConfig channelConfig, OutboxMessage outboxMessage) {
 	try {
-	    resolveTemplate(outboxMessage);
+	    template(channelConfig, outboxMessage);
 	    wa360Client.send(outboxMessage);
 	    outboxMessage.updateStatus(OutboxMessage.Status.SENT);
 	} catch (Exception e) {

@@ -51,6 +51,11 @@ public class PMConstants {
 	AGENT, BOT, PUSH;
     }
 
+    public static class MESSAGE_SEND_TYPE {
+	public static final String PUSH_MESSAGE = "PM";
+	public static final String SESSION_MESSAGE = "SM";
+    }
+
     public static class ASSIGNMENT_RULE {
 	public static final String MANUAL = "MANUAL";
 	public static final String ROUND_ROBIN = "ROUND_ROBIN";

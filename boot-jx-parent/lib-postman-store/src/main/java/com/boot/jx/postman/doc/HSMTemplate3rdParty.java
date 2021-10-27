@@ -8,10 +8,11 @@ import org.springframework.data.annotation.TypeAlias;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import com.boot.jx.model.AuditableEntity;
+import com.boot.jx.postman.model.ITemplates.BasicExternalTemplate;
 
 @Document(collection = HSMTemplate3rdParty.COLLECTION_NAME)
 @TypeAlias("HSMTemplate3rdParty")
-public class HSMTemplate3rdParty implements Serializable, AuditableEntity {
+public class HSMTemplate3rdParty implements Serializable, AuditableEntity, BasicExternalTemplate {
 
     public static final String COLLECTION_NAME = "DICT_HSM_TEMPLATES_3RD";
     public static final String COLLECTION_NAME_TRASH = "TRASH_DICT_HSM_TEMPLATES_3RD";
@@ -27,8 +28,10 @@ public class HSMTemplate3rdParty implements Serializable, AuditableEntity {
 
     private String channelType;
     private String contactType;
+    private String lang;
 
     private Map<String, Object> template;
+    private Map<String, Object> varMap;
 
     private String createdBy;
     private Long createdStamp;
@@ -95,6 +98,22 @@ public class HSMTemplate3rdParty implements Serializable, AuditableEntity {
 
     public void setContactType(String contactType) {
 	this.contactType = contactType;
+    }
+
+    public Map<String, Object> getVarMap() {
+	return varMap;
+    }
+
+    public void setVarMap(Map<String, Object> varMap) {
+	this.varMap = varMap;
+    }
+
+    public String getLang() {
+	return lang;
+    }
+
+    public void setLang(String lang) {
+	this.lang = lang;
     }
 
 }

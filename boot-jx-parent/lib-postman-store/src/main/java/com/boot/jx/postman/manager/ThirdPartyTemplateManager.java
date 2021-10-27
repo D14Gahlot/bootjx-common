@@ -1,6 +1,7 @@
 package com.boot.jx.postman.manager;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -40,6 +41,7 @@ public class ThirdPartyTemplateManager {
 	    thirdPartyTemplate.setChannelId(channelConfig.getChannelId());
 	    thirdPartyTemplate.setContactType(ArgUtil.parseAsString(channelConfig.getContactType()));
 	    thirdPartyTemplate.setChannelType(channelConfig.getChannelType());
+	    thirdPartyTemplate.setLang(wa360Template.getLanguage());
 
 	    thirdPartyTemplate.setTemplate(JsonUtil.toMap(wa360Template));
 	    commonMongoTemplate.save(thirdPartyTemplate);
@@ -55,6 +57,14 @@ public class ThirdPartyTemplateManager {
 	HSMTemplate3rdParty thirdPartyTemplate = commonMongoTemplate.findById(thirdPartyTemplateId,
 		HSMTemplate3rdParty.class);
 	thirdPartyTemplate.setHsmTemplateId(hsmTemplateId);
+	commonMongoTemplate.save(thirdPartyTemplate);
+	return thirdPartyTemplate;
+    }
+
+    public HSMTemplate3rdParty varMap(String thirdPartyTemplateId, Map<String, Object> varMap) {
+	HSMTemplate3rdParty thirdPartyTemplate = commonMongoTemplate.findById(thirdPartyTemplateId,
+		HSMTemplate3rdParty.class);
+	thirdPartyTemplate.setVarMap(varMap);
 	commonMongoTemplate.save(thirdPartyTemplate);
 	return thirdPartyTemplate;
     }

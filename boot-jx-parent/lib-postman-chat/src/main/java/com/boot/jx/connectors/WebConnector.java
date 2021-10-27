@@ -14,7 +14,7 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Component;
 
 import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorMapping;
-import com.boot.jx.chat.ConnectorHandlerFactory.DefaultConnector;
+import com.boot.jx.connectors.AbstractConnector.DefaultConnector;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.dict.FileType;
 import com.boot.jx.postman.client.TmplClient;
@@ -35,7 +35,7 @@ import com.boot.utils.JsonUtil;
 
 @Component
 @ConnectorMapping(contactType = ContactType.WEBSITE)
-public class WebConnector extends DefaultConnector {
+public class WebConnector extends AbstractConnector.DefaultConnector {
 
     private static final String WEB_USER_MESSAGE_STR = "WEB_USER_MESSAGE_STR_";
     private static final Logger LOGGER = LoggerFactory.getLogger(WebConnector.class);

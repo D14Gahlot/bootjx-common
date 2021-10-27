@@ -15,6 +15,7 @@ import com.boot.jx.logger.LoggerService;
 import com.boot.jx.model.AuditableEntity;
 import com.boot.jx.mongo.CommonDocInterfaces.DocVersion;
 import com.boot.jx.mongo.CommonDocInterfaces.TrashDocument;
+import com.boot.jx.mongo.CommonMongoQB.CommonMongoQBimpl;
 import com.boot.jx.mongo.CommonMongoQueryBuilder.DocQueryBuilder;
 import com.boot.utils.ArgUtil;
 import com.mongodb.WriteResult;
@@ -58,6 +59,10 @@ public class CommonMongoTemplateAbstract extends CommonMongoTemplateDefault {
 
     public <T> List<T> find(CommonMongoQueryBuilder builder, Class<T> clazz) {
 	return find(builder.getQuery(), clazz);
+    }
+
+    public <T> List<T> find(CommonMongoQBimpl<T> builder) {
+	return find(builder.getQuery(), builder.getDocClass());
     }
 
     public <T extends DocVersion> T creatNewDocuemnt(String id, Class<T> clazz, T newVersion) {

@@ -13,12 +13,13 @@ import org.springframework.stereotype.Component;
 
 import com.boot.common.ScopedBeanFactory;
 import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorHandler;
+import com.boot.jx.connectors.AbstractConnector;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.logger.LoggerService;
 import com.boot.jx.mongo.CommonMongoTemplate;
-import com.boot.jx.postman.PMClientConfig;
 import com.boot.jx.postman.PMConfiguration;
 import com.boot.jx.postman.PMConstants;
+import com.boot.jx.postman.PMConstants.MESSAGE_SEND_TYPE;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
@@ -35,7 +36,6 @@ import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.postman.query.ChatContactQuery;
 import com.boot.jx.postman.query.ChatSessionQuery;
 import com.boot.jx.postman.service.ChatDTOUtil;
-import com.boot.jx.postman.store.MessageContext;
 import com.boot.jx.postman.store.MessageStore;
 import com.boot.jx.stomp.StompTunnelService;
 import com.boot.jx.utils.PostManUtil;
@@ -84,9 +84,9 @@ public class ConnectorHandlerFactory extends ScopedBeanFactory<String, Connector
 	default public void meta(ChannelConfig channelConfig, String messageType, ChatContactDoc chatContactDoc,
 		IMessageExtended inboxMessage, OutboxMessage outboxMessage) {
 	    if (TimeUtils.isExpired(chatContactDoc.getLastInBoundStamp(), DEFAULT_SESISON_PERIOD)) {
-		outboxMessage.messageMetaWrapper().sendType("PM"); // Push Message
+		outboxMessage.messageMetaWrapper().sendType(MESSAGE_SEND_TYPE.PUSH_MESSAGE); // Push Message
 	    } else {
-		outboxMessage.messageMetaWrapper().sendType("SM"); // Session Message
+		outboxMessage.messageMetaWrapper().sendType(MESSAGE_SEND_TYPE.SESSION_MESSAGE); // Session Message
 	    }
 	}
 
@@ -174,41 +174,9 @@ public class ConnectorHandlerFactory extends ScopedBeanFactory<String, Connector
 	    // DO Nothing this method is optional
 	}
 
-	ChannelConfig getChannelConfig(IMessage outboxMessage);
-    }
+	public ChannelConfig getChannelConfig(IMessage outboxMessage);
 
-    public static abstract class AbstractConnector implements ConnectorHandler {
-	@Autowired
-	protected MessageContext messageContext;
-
-	@Autowired
-	protected PMClientConfig pmClientConfig;
-
-	@Autowired
-	protected PMEnvironment environment;
-
-	@Override
-	public void registerWebHook(ChannelConfig channelConfig) {
-	    String webhookUrl = pmClientConfig.getWebhookUrl(channelConfig);
-	    registerWebHook(channelConfig, webhookUrl);
-	}
-
-	public void registerWebHook(ChannelConfig channelConfig, String webhookUrl) {
-	    LOGGER.error("WEBHOOK REGISTRATION NOT DEFINED for URL");
-	}
-
-	@Override
-	public ChannelConfig getChannelConfig(IMessage iMessage) {
-	    String channelId = PostManUtil.CHANNEL_ID(iMessage.contact());
-	    ChannelConfig channelConfig = environment.config().channels(channelId);
-	    if (!ArgUtil.is(channelConfig) && !ContactType.WEBSITE.equals(iMessage.contact().type())) {
-		LOGGER.error(String.format("ChannelConfig not found for %s", channelId));
-	    }
-	    return channelConfig;
-	}
-    }
-
-    public static abstract class DefaultConnector extends AbstractConnector {
+	public OutboxMessage template(ChannelConfig channelConfig, OutboxMessage outboxMessage);
     }
 
     @Retention(RetentionPolicy.RUNTIME)
@@ -260,7 +228,7 @@ public class ConnectorHandlerFactory extends ScopedBeanFactory<String, Connector
     }
 
     @Autowired(required = false)
-    private DefaultConnector defaultConnector;
+    private AbstractConnector.DefaultConnector defaultConnector;
 
     @Autowired
     private MessageStore messageStore;

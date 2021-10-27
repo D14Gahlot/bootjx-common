@@ -139,6 +139,7 @@ public class MapModel implements JsonSerializerType<Object> {
     }
 
     protected Map<String, Object> map;
+    protected List<Object> list;
 
     public MapModel() {
 	this.map = new HashMap<String, Object>();
@@ -151,6 +152,10 @@ public class MapModel implements JsonSerializerType<Object> {
     @SuppressWarnings("unchecked")
     public MapModel(String json) {
 	this.map = JsonUtil.fromJson(json, Map.class);
+    }
+
+    public MapModel(List<Object> list) {
+	this.list = list;
     }
 
     public MapEntry entry(String key) {
@@ -254,6 +259,13 @@ public class MapModel implements JsonSerializerType<Object> {
 	return this.map;
     }
 
+    public List<Object> list() {
+	if (this.list == null) {
+	    this.list = new ArrayList<Object>();
+	}
+	return this.list;
+    }
+
     public Map<String, Object> toMap() {
 	return this.map();
     }
@@ -289,6 +301,11 @@ public class MapModel implements JsonSerializerType<Object> {
 	return this;
     }
 
+    public MapModel add(Object value) {
+	this.list().add(value);
+	return this;
+    }
+
     public MapModel put(JsonPath jsonPath, Object value) {
 	jsonPath.save(this.map(), value);
 	return this;
@@ -297,5 +314,12 @@ public class MapModel implements JsonSerializerType<Object> {
     public MapModel remove(String key) {
 	this.map().remove(key);
 	return this;
+    }
+
+    public boolean containsKey(String key) {
+	if (this.map == null) {
+	    return false;
+	}
+	return this.map.containsKey(key);
     }
 }

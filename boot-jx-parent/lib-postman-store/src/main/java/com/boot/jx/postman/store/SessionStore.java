@@ -16,8 +16,8 @@ import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Component;
 
 import com.boot.jx.mongo.CommonDocStore;
+import com.boot.jx.mongo.CommonMongoQB.CommonMongoCriteria;
 import com.boot.jx.mongo.CommonMongoQueryBuilder;
-import com.boot.jx.mongo.CommonMongoQueryBuilder.CommonMongoCriteria;
 import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.jx.postman.PMClientConfig;
 import com.boot.jx.postman.PMConstants;

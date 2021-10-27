@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
 import com.boot.jx.chat.ChatService;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.logger.AuditDetailProvider;
-import com.boot.jx.mongo.CommonMongoQueryBuilder.CommonMongoCriteria;
+import com.boot.jx.mongo.CommonMongoQB.CommonMongoCriteria;
 import com.boot.jx.postman.doc.BulkSessionDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.MessageDoc;
