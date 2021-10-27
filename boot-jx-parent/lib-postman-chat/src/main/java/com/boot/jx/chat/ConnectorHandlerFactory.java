@@ -91,7 +91,7 @@ public class ConnectorHandlerFactory extends ScopedBeanFactory<String, Connector
 	}
 
 	default public void message(ChannelConfig channelConfig, String messageType, ChatContactDoc chatContactDoc,
-		IMessageExtended inboxMessage, OutboxMessage outboxMessage) {
+		OutboxMessage outboxMessage, IMessageExtended inboxMessage) {
 	    LOGGER.debug("message(String {}, ChatContactDoc {}, SessionMessage {}, OutboxMessage {})", messageType,
 		    chatContactDoc, inboxMessage, outboxMessage);
 	    try {
@@ -268,12 +268,12 @@ public class ConnectorHandlerFactory extends ScopedBeanFactory<String, Connector
      * 
      * @param messageType
      * @param chatContactDoc
-     * @param inboxMessage
      * @param outboxMessage
+     * @param inboxMessage
      */
     @Async
-    public void message(String messageType, ChatContactDoc chatContactDoc, IMessageExtended inboxMessage,
-	    OutboxMessage outboxMessage) {
+    public void message(String messageType, ChatContactDoc chatContactDoc, OutboxMessage outboxMessage,
+	    IMessageExtended inboxMessage) {
 	LOGGER.debug("message(String {}, ChatContactDoc {}, IMessageExtended {}, OutboxMessage {})", messageType,
 		chatContactDoc, inboxMessage, outboxMessage);
 
@@ -284,7 +284,7 @@ public class ConnectorHandlerFactory extends ScopedBeanFactory<String, Connector
 	    if (ArgUtil.is(channelConfig) || ContactType.WEBSITE.equals(outboxMessage.contact().type())) {
 		ConnectorHandler connector = get(channelConfig);
 		if (ArgUtil.is(connector)) {
-		    connector.message(channelConfig, messageType, chatContactDoc, inboxMessage, outboxMessage);
+		    connector.message(channelConfig, messageType, chatContactDoc, outboxMessage, inboxMessage);
 		} else {
 		    outboxMessage.logs().add(String.format("Connector not defined for %s", channelId));
 		}

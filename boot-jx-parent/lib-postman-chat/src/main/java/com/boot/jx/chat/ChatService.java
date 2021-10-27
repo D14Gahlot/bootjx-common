@@ -98,7 +98,7 @@ public class ChatService {
 	outboxMessage.contact().setContactId(chatContactDoc.getContactId());
 
 	MessageDoc messageDoc = messageStore.createOrUpdate(outboxMessage);
-	connectorHandlerFactory.message("ACTION", chatContactDoc, null, outboxMessage);
+	connectorHandlerFactory.message("ACTION", chatContactDoc, outboxMessage, null);
 	sessionStore.push(messageDoc, outboxMessage);
 	return messageDoc;
     }
@@ -126,7 +126,7 @@ public class ChatService {
 	}
 
 	MessageDoc messageDoc = messageStore.createOrUpdate(outboxMessage);
-	connectorHandlerFactory.message("REPLY", chatContactDoc, inboxMessage, outboxMessage);
+	connectorHandlerFactory.message("REPLY", chatContactDoc, outboxMessage, inboxMessage);
 	sessionStore.push(messageDoc, outboxMessage);
 	return messageDoc;
     }
@@ -147,7 +147,7 @@ public class ChatService {
 	outboxMessage.setSessionId(chatContactDoc.getSessionId());
 
 	MessageDoc messageDoc = messageStore.createOrUpdate(outboxMessage);
-	connectorHandlerFactory.message("SEND", chatContactDoc, null, outboxMessage);
+	connectorHandlerFactory.message("SEND", chatContactDoc, outboxMessage, null);
 	sessionStore.push(messageDoc, outboxMessage);
 	return messageDoc;
     }
