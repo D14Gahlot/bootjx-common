@@ -13,6 +13,7 @@ public class DashBoardResponseDto {
 	long totalMsgExchanged;
 	long uniqueConversation;
 	long openConversation;
+	long resolvedConversation;
 	long converDuration;
 	double startLag;
 	long botScore=0;
@@ -143,6 +144,14 @@ public class DashBoardResponseDto {
 
 	public void setBotClosure(double botClosure) {
 		this.botClosure = botClosure;
+	}
+
+	public long getResolvedConversation() {
+		return resolvedConversation;
+	}
+
+	public void setResolvedConversation(long resolvedConversation) {
+		this.resolvedConversation = resolvedConversation;
 	}
 
 	

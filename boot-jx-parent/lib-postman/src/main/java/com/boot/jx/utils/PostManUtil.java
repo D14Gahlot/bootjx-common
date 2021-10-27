@@ -15,6 +15,7 @@ import com.boot.jx.postman.model.ContactMeta;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.MessageDefinitions.Contactable;
 import com.boot.jx.postman.model.MessageDefinitions.IMessage;
+import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CryptoUtil;
 import com.boot.utils.Random;
@@ -126,7 +127,10 @@ public class PostManUtil {
     }
 
     public static boolean isInBound(IMessage inboxMessage) {
-	return isInBound(inboxMessage.getType());
+	if (ArgUtil.is(inboxMessage.getType())) {
+	    return isInBound(inboxMessage.getType());
+	}
+	return inboxMessage instanceof InboxMessage;
     }
 
     public static boolean isOutBound(String type) {
@@ -135,7 +139,10 @@ public class PostManUtil {
     }
 
     public static boolean isOutBound(IMessage inboxMessage) {
-	return isInBound(inboxMessage.getType());
+	if (ArgUtil.is(inboxMessage.getType())) {
+	    return isOutBound(inboxMessage.getType());
+	}
+	return inboxMessage instanceof OutboxMessage;
     }
 
     public static boolean isBotMode(IMessage inboxMessage) {

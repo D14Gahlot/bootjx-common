@@ -9,6 +9,7 @@ import com.boot.jx.postman.doc.ChatPromise;
 import com.boot.jx.postman.doc.ChatPromise.PromiseCondition;
 import com.boot.jx.postman.doc.ChatPromise.Result;
 import com.boot.jx.postman.doc.ChatPromise.State;
+import com.boot.jx.postman.manager.ChatSessionManager;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.utils.ArgUtil;
@@ -23,6 +24,9 @@ public class ChatController {
 
 	@Autowired
 	private AgentService agentService;
+	
+	@Autowired
+	private ChatSessionManager chatSessionManager;
 
 	public void reply(String message) {
 		try {
@@ -68,11 +72,11 @@ public class ChatController {
 	}
 
 	public void resolveSession() {
-		chatService.resolveSession(chatContext.getChatSession());
+	    chatSessionManager.resolveSession(chatContext.getChatSession());
 	}
 
 	public void closeSession() {
-		chatService.closeSession(chatContext.getChatSession());
+	    chatSessionManager.closeSession(chatContext.getChatSession());
 	}
 
 	public void next(String key) {

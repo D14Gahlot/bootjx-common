@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.boot.jx.api.AmxResponseSchemes.ApiDataMetaResponse;
 import com.boot.jx.api.AmxResponseSchemes.ApiResultsMetaResponse;
@@ -118,7 +119,7 @@ public class ApiResponse<T, M> extends AResponse<M>
 	return new ApiResponse<TS, MS>();
     }
 
-    public static <TS, MS> ApiResponse<TS, MS> instance(Class<TS> clazz) {
+    public static <TS, MS> ApiResponse<TS, MS> instance(Class<Map<?, ?>> clazz) {
 	return new ApiResponse<TS, MS>();
     }
 
@@ -287,6 +288,11 @@ public class ApiResponse<T, M> extends AResponse<M>
 
     public T data() {
 	return this.data;
+    }
+
+    public ApiResponse<T, M> meta(M meta) {
+	this.meta = meta;
+	return this;
     }
 
 }

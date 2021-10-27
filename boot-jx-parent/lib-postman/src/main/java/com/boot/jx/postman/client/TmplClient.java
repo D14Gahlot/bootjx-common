@@ -28,74 +28,74 @@ import com.boot.utils.CollectionUtil;
 @Component
 public class TmplClient {
 
-	public static class PATH {
-		public static final String TMPL_FILE_PROCESS = "/tmpl/file/process";
+    public static class PATH {
+	public static final String TMPL_FILE_PROCESS = "/tmpl/file/process";
+    }
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(TmplClient.class);
+
+    @Autowired
+    private RestService restService;
+
+    @Autowired
+    private PostManClient postManClient;
+
+    @Value("${app.tmpl.local}")
+    private boolean isTmplLocal;
+
+    @Autowired(required = false)
+    private ICommonTmplPackage iCommonTmplPackage;
+
+    public String process(String templateContent, Object model) {
+	return iCommonTmplPackage.process(templateContent, model);
+    }
+
+    public ApiResponse<CommonFile, Object> process(CommonFile file, ContactType contactType) throws PostManException {
+	if (ArgUtil.is(iCommonTmplPackage)) {
+	    return ApiResponse.buildResult(iCommonTmplPackage.process(file, contactType));
+	}
+	return restService.ajax(postManClient.getPostmapURL()).path(PATH.TMPL_FILE_PROCESS)
+		.queryParam("contactType", contactType).queryParam(PostManClient.PARAM_LANG, postManClient.getLang())
+		.contentTypeJson().acceptJson().post(file)
+		.as(new ParameterizedTypeReference<ApiResponse<CommonFile, Object>>() {
+		});
+    }
+
+    public OutboxMessage process(OutboxMessage outboxMessage) {
+	CommonFile file = new PostManFile();
+	file.setModel(outboxMessage.getModel());
+	file.setTemplate(outboxMessage.getTemplate());
+	file.setTemplateId(outboxMessage.getTemplateId());
+	file.setLang(outboxMessage.getLang());
+
+	file = this.process(file, outboxMessage.contact().type()).getResult();
+	outboxMessage.setMessage(file.getContent());
+
+	if (!ArgUtil.is(outboxMessage.getSubject())) {
+	    outboxMessage.setSubject(ArgUtil.parseAsString(file.getOptions().get("subject"), file.getTitle()));
 	}
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(TmplClient.class);
+	Map<String, Object> options = new HashMap<String, Object>();
+	List<TmplElement> buttons = new ArrayList<TmplElement>();
+	List<TmplElement> inputs = new ArrayList<TmplElement>();
 
-	@Autowired
-	private RestService restService;
-
-	@Autowired
-	private PostManClient postManClient;
-
-	@Value("${app.tmpl.local}")
-	private boolean isTmplLocal;
-
-	@Autowired(required = false)
-	private ICommonTmplPackage iCommonTmplPackage;
-
-	public String process(String templateContent, Object model) {
-		return iCommonTmplPackage.process(templateContent, model);
+	for (Entry<String, Object> entry : file.getOptions().entrySet()) {
+	    if (entry.getKey().indexOf("form-input-") == 0) {
+		String[] params = ArgUtil.parseAsString(entry.getValue()).split("\\|");
+		inputs.add(new TmplElement().name(entry.getKey().replace("form-input-", ""))
+			.label(CollectionUtil.get(params, 0)).type(CollectionUtil.get(params, 1)));
+	    } else if (entry.getKey().indexOf("actions-button-") == 0) {
+		String[] params = ArgUtil.parseAsString(entry.getValue()).split("\\|");
+		buttons.add(new TmplElement().name(entry.getKey().replace("actions-button-", ""))
+			.label(CollectionUtil.get(params, 0)).type(CollectionUtil.get(params, 1)));
+	    } else {
+		options.put(entry.getKey(), entry.getValue());
+	    }
 	}
-
-	public ApiResponse<CommonFile, Object> process(CommonFile file, ContactType contactType) throws PostManException {
-		if (ArgUtil.is(iCommonTmplPackage)) {
-			return ApiResponse.buildResult(iCommonTmplPackage.process(file, contactType));
-		}
-		return restService.ajax(postManClient.getPostmapURL()).path(PATH.TMPL_FILE_PROCESS)
-				.queryParam("contactType", contactType).queryParam(PostManClient.PARAM_LANG, postManClient.getLang())
-				.contentTypeJson().acceptJson().post(file)
-				.as(new ParameterizedTypeReference<ApiResponse<CommonFile, Object>>() {
-				});
-	}
-
-	public OutboxMessage process(OutboxMessage outboxMessage) {
-		CommonFile file = new PostManFile();
-		file.setModel(outboxMessage.getModel());
-		file.setTemplate(outboxMessage.getTemplate());
-		file.setTemplateId(outboxMessage.getTemplateId());
-		file.setLang(outboxMessage.getLang());
-
-		file = this.process(file, outboxMessage.contact().type()).getResult();
-		outboxMessage.setMessage(file.getContent());
-
-		if (!ArgUtil.is(outboxMessage.getSubject())) {
-			outboxMessage.setSubject(ArgUtil.parseAsString(file.getOptions().get("subject"), file.getTitle()));
-		}
-
-		Map<String, Object> options = new HashMap<String, Object>();
-		List<TmplElement> buttons = new ArrayList<TmplElement>();
-		List<TmplElement> inputs = new ArrayList<TmplElement>();
-
-		for (Entry<String, Object> entry : file.getOptions().entrySet()) {
-			if (entry.getKey().indexOf("form-input-") == 0) {
-				String[] params = ArgUtil.parseAsString(entry.getValue()).split("\\|");
-				inputs.add(new TmplElement().name(entry.getKey().replace("form-input-", ""))
-						.label(CollectionUtil.get(params, 0)).type(CollectionUtil.get(params, 1)));
-			} else if (entry.getKey().indexOf("actions-button-") == 0) {
-				String[] params = ArgUtil.parseAsString(entry.getValue()).split("\\|");
-				buttons.add(new TmplElement().name(entry.getKey().replace("actions-button-", ""))
-						.label(CollectionUtil.get(params, 0)).type(CollectionUtil.get(params, 1)));
-			} else {
-				options.put(entry.getKey(), entry.getValue());
-			}
-		}
-		options.put("inputs", inputs);
-		options.put("buttons", buttons);
-		outboxMessage.options().putAll(options);
-		return outboxMessage;
-	}
+	options.put("inputs", inputs);
+	options.put("buttons", buttons);
+	outboxMessage.options().putAll(options);
+	return outboxMessage;
+    }
 
 }

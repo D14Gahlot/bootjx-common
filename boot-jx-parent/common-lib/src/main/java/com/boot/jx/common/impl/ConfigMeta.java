@@ -6,8 +6,16 @@ import java.util.List;
 
 public class ConfigMeta implements Serializable {
 
-    public static enum InputType {
+    public static enum OPTIONS_TYPE {
 	TEXT, OPTIONS, RANGE, NUMBER, COLOR, COLOR_PALLETE
+    }
+
+    public static enum DATA_TYPE {
+	TIMESPAN
+    }
+
+    public static enum CONVERT_TYPE {
+	TIME_MILLIS
     }
 
     public static class ConfigOption {
@@ -83,7 +91,9 @@ public class ConfigMeta implements Serializable {
     private boolean readonly;
     private boolean hidden;
 
-    private InputType inputType;
+    private OPTIONS_TYPE inputType;
+    private DATA_TYPE dataType;
+    private CONVERT_TYPE converterType;
 
     private List<ConfigOption> options;
 
@@ -128,7 +138,7 @@ public class ConfigMeta implements Serializable {
 
     public ConfigMeta options(ConfigOption... options) {
 	if (this.inputType == null) {
-	    this.inputType = InputType.OPTIONS;
+	    this.inputType = OPTIONS_TYPE.OPTIONS;
 	}
 	this.options = this.options();
 	for (ConfigOption configOption : options) {
@@ -139,7 +149,7 @@ public class ConfigMeta implements Serializable {
 
     public ConfigMeta optionValues(Object... optionValues) {
 	if (this.inputType == null) {
-	    this.inputType = InputType.OPTIONS;
+	    this.inputType = OPTIONS_TYPE.OPTIONS;
 	}
 	this.options = this.options();
 	for (Object optionValue : optionValues) {
@@ -152,15 +162,15 @@ public class ConfigMeta implements Serializable {
 	return this.options(ConfigOption.ON, ConfigOption.OFF);
     }
 
-    public InputType getInputType() {
+    public OPTIONS_TYPE getInputType() {
 	return inputType;
     }
 
-    public void setInputType(InputType inputType) {
+    public void setInputType(OPTIONS_TYPE inputType) {
 	this.inputType = inputType;
     }
 
-    public ConfigMeta inputType(InputType inputType) {
+    public ConfigMeta inputType(OPTIONS_TYPE inputType) {
 	this.inputType = inputType;
 	return this;
     }
@@ -175,6 +185,16 @@ public class ConfigMeta implements Serializable {
 
     public ConfigMeta defaultValue(Object defaultValue) {
 	this.defaultValue = defaultValue;
+	return this;
+    }
+
+    public ConfigMeta defaultFalse() {
+	this.defaultValue = Boolean.FALSE;
+	return this;
+    }
+
+    public ConfigMeta defaultTrue() {
+	this.defaultValue = Boolean.TRUE;
 	return this;
     }
 
@@ -242,6 +262,22 @@ public class ConfigMeta implements Serializable {
     public ConfigMeta path(String path) {
 	this.path = path;
 	return this;
+    }
+
+    public DATA_TYPE getDataType() {
+	return dataType;
+    }
+
+    public void setDataType(DATA_TYPE dataType) {
+	this.dataType = dataType;
+    }
+
+    public CONVERT_TYPE getConverterType() {
+	return converterType;
+    }
+
+    public void setConverterType(CONVERT_TYPE converterType) {
+	this.converterType = converterType;
     }
 
 }

@@ -48,12 +48,12 @@ public class FacebookPlugin implements ChannelPlugin<FacebookConfigDetails> {
 
     @Override
     public void extractChannelDetailsFromMap(FacebookConfigDetails channelDetails, MapModel map) {
-	channelDetails.setPageId(map.path("facebook.pageId").asString(channelDetails.getPageId()));
-	channelDetails.setHandler(map.path("facebook.handler").asString(channelDetails.getHandler()));
-	channelDetails.setType(map.path("facebook.type").asString(channelDetails.getType()));
-	channelDetails.setVerifyToken(map.path("facebook.verifyToken").asString(channelDetails.getVerifyToken()));
-	channelDetails.setAccessToken(map.path("facebook.accessToken").asString(channelDetails.getAccessToken()));
-	channelDetails.setAppSecret(map.path("facebook.appSecret").asString(channelDetails.getAppSecret()));
+	channelDetails.setPageId(map.pathEntry("facebook.pageId").asString(channelDetails.getPageId()));
+	channelDetails.setHandler(map.pathEntry("facebook.handler").asString(channelDetails.getHandler()));
+	channelDetails.setType(map.pathEntry("facebook.type").asString(channelDetails.getType()));
+	channelDetails.setVerifyToken(map.pathEntry("facebook.verifyToken").asString(channelDetails.getVerifyToken()));
+	channelDetails.setAccessToken(map.pathEntry("facebook.accessToken").asString(channelDetails.getAccessToken()));
+	channelDetails.setAppSecret(map.pathEntry("facebook.appSecret").asString(channelDetails.getAppSecret()));
     }
 
 }

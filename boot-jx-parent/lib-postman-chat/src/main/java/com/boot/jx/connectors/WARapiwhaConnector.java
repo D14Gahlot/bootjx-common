@@ -9,7 +9,6 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Component;
 
-import com.boot.jx.chat.ConnectorHandlerFactory.AbstractConnector;
 import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorMapping;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.dict.FileType;
@@ -22,6 +21,9 @@ import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.MessageBoxEvent;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.plugin.ChannelConfig;
+import com.boot.jx.postman.plugin.ChannelPluginProvider;
+import com.boot.jx.postman.plugin.WebPlugin;
+import com.boot.jx.postman.plugin.WebPlugin.WebConfigDetails;
 import com.boot.jx.postman.query.ChatContactQuery;
 import com.boot.jx.rest.RestService;
 import com.boot.model.MapModel;
@@ -33,9 +35,14 @@ import com.boot.utils.JsonUtil;
 @Component
 @PropertySource("classpath:application-rapiwha.properties")
 @ConnectorMapping(contactType = ContactType.WHATSAPP, channel = "RAPIWHA")
-public class WARapiwhaConnector extends AbstractConnector {
+public class WARapiwhaConnector extends AbstractConnector<WebConfigDetails, WebPlugin> {
 
     private static Logger LOGGER = LoggerService.getLogger(WARapiwhaConnector.class);
+
+    @Override
+    public WebPlugin getPlugin() {
+	return ChannelPluginProvider.WEB;
+    }
 
     @Autowired
     private RestService restService;

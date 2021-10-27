@@ -7,8 +7,10 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import com.boot.jx.common.impl.ConfigMeta;
 import com.boot.jx.common.impl.ConfigMeta.ConfigOption;
-import com.boot.jx.common.impl.ConfigMeta.InputType;
+import com.boot.jx.common.impl.ConfigMeta.OPTIONS_TYPE;
 import com.boot.jx.postman.PMConstants;
+import com.boot.model.MapModel.EntryMeta;
+import com.boot.utils.TimeUtils;
 
 public class ConfigConstants {
 
@@ -18,41 +20,66 @@ public class ConfigConstants {
     public static final Map<String, String> APP_CONFIG = new ConcurrentHashMap<String, String>();
     public static final List<ConfigMeta> SETUP_CONFIG_LIST = new ArrayList<ConfigMeta>();
 
-    static {
-	ConfigConstants.SETUP_CONFIG_LIST.add(new ConfigMeta("Bot Name", "postman.bot.name"));
-	ConfigConstants.SETUP_CONFIG_LIST
-		.add(new ConfigMeta("Contact Details Provider Webhook", "postman.contact.details.url"));
+    public static enum KEY implements EntryMeta {
+	POSTMAN_BOT_NAME(new ConfigMeta("Bot Name", "postman.bot.name")),
+	POSTMAN_CONTACT_DETAILS_URL(new ConfigMeta("Contact Details Provider Webhook", "postman.contact.details.url")),
 
-	ConfigConstants.SETUP_CONFIG_LIST.add(new ConfigMeta("Chat Tag Enabled", "chat.tag.enabled").optionsOnOff());
+	CHAT_TAG_ENABLED(new ConfigMeta("Chat Tag Enabled", "chat.tag.enabled").optionsOnOff()),
 
-	ConfigConstants.SETUP_CONFIG_LIST.add(new ConfigMeta("Chat Session Timeout", "postman.chat.session.timeout")
-		.optionValues("8hr", "12hr", "16hr", "20hr", "24hr"));
+	POSTMAN_CHAT_SESSION_TIMEOUT(new ConfigMeta("Chat Session Timeout", "postman.chat.session.timeout")
+		.optionValues("8hr", "12hr", "16hr", "20hr", "24hr")),
 
-	ConfigConstants.SETUP_CONFIG_LIST.add(new ConfigMeta("Chat Alert Timer", "postman.chat.idle.timeout")
-		.optionValues("5min", "10min", "15min", "20min", "25min", "30min"));
+	POSTMAN_CHAT_IDLE_TIMEOUT(new ConfigMeta("Chat Alert Timer", "postman.chat.idle.timeout").optionValues("5min",
+		"10min", "15min", "20min", "25min", "30min")),
 
-	ConfigConstants.SETUP_CONFIG_LIST
-		.add(new ConfigMeta("Agent can initiate new chat", "postman.agent.chat.init").optionsOnOff());
+	POSTMAN_AGENT_CHAT_INIT(
+		new ConfigMeta("Agent can initiate new chat", "postman.agent.chat.init").optionsOnOff()),
 
-	ConfigConstants.SETUP_CONFIG_LIST.add(new ConfigMeta("Agent Assignment", "postman.agent.chat.assignment")
+	POSTMAN_AGENT_CHAT_ASSIGNMENT(new ConfigMeta("Agent Assignment", "postman.agent.chat.assignment")
 		.optionValues(PMConstants.ASSIGNMENT_RULE.ROUND_ROBIN, PMConstants.ASSIGNMENT_RULE.MANUAL,
 			PMConstants.ASSIGNMENT_RULE.STRICT_DEFAULT)
-		.defaultValue(PMConstants.ASSIGNMENT_RULE.ROUND_ROBIN));
+		.defaultValue(PMConstants.ASSIGNMENT_RULE.ROUND_ROBIN)),
 
-	ConfigConstants.SETUP_CONFIG_LIST
-		.add(new ConfigMeta("Sticky Session", "postman.agent.chat.stickysession")
+	POSTMAN_AGENT_CHAT_STICKYSESSION(
+		new ConfigMeta("Sticky Session", "postman.agent.chat.stickysession")
 			.optionValues(PMConstants.CHAT_SESSION_STICKY.NONE, PMConstants.CHAT_SESSION_STICKY.ONAVAILABLE,
 				PMConstants.CHAT_SESSION_STICKY.STRICT)
-			.defaultValue(PMConstants.CHAT_SESSION_STICKY.NONE));
+			.defaultValue(PMConstants.CHAT_SESSION_STICKY.NONE)),
+	POSTMAN_UI_BETA(
+		new ConfigMeta("Enable Beta UI", "postman.ui.beta").optionsOnOff().defaultValue(ConfigOption.OFF)),
 
-	ConfigConstants.SETUP_CONFIG_LIST
-		.add(new ConfigMeta("Enable Beta UI", "postman.ui.beta").optionsOnOff().defaultValue(ConfigOption.OFF));
+	POSTMAN_AGENT_SCHEME_COLOR(new ConfigMeta("Agent Panel Color Scheme", "postman.agent.scheme.color")
+		.inputType(OPTIONS_TYPE.COLOR).defaultValue("#4267b2")),
 
-	ConfigConstants.SETUP_CONFIG_LIST.add(new ConfigMeta("Agent Panel Color Scheme", "postman.agent.scheme.color")
-		.inputType(InputType.COLOR).defaultValue("#4267b2"));
+	POSTMAN_AGENT_SCHEME2_COLOR(new ConfigMeta("Agent Color Scheme 2", "postman.agent.scheme2.color")
+		.inputType(OPTIONS_TYPE.COLOR_PALLETE).defaultValue(new ConfigMeta.ColorPalette())),
 
-	ConfigConstants.SETUP_CONFIG_LIST.add(new ConfigMeta("Agent Color Scheme 2", "postman.agent.scheme2.color")
-		.inputType(InputType.COLOR_PALLETE).defaultValue(new ConfigMeta.ColorPalette()));
+	POSTMAN_AGENT_TAB_HISTORY_PERIOD(
+		new ConfigMeta("Show History Period", "postman.agent.tab.history.period")
+			.options(
+				new ConfigOption(PMConstants.DEFAULT_VALUES.POSTMAN_AGENT_TAB_HISTORY_PERIOD)
+					.label("OFF"),
+				new ConfigOption(TimeUtils.toMillis("3d")).label("+3Days"),
+				new ConfigOption(TimeUtils.toMillis("5d")).label("+5Days"),
+				new ConfigOption(TimeUtils.toMillis("7d")).label("+7Days"))
+			.defaultValue(PMConstants.DEFAULT_VALUES.POSTMAN_AGENT_TAB_HISTORY_PERIOD))
+	// Ends here
+	;
+
+	private String key;
+
+	KEY(ConfigMeta defaultFalse) {
+	    this.key = defaultFalse.getKey();
+	    ConfigConstants.SETUP_CONFIG_LIST.add(defaultFalse);
+	}
+
+	public String getKey() {
+	    return key;
+	}
+    }
+
+    static {
+	ConfigConstants.KEY.values();
     }
 
 }

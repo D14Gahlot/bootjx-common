@@ -11,24 +11,27 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Component;
 
-import com.boot.jx.chat.ChatArchiveBuilder;
-import com.boot.jx.chat.ChatArchiveService;
 import com.boot.jx.chat.ChatCommands;
 import com.boot.jx.chat.ChatService;
 import com.boot.jx.common.doc.AgentDoc;
 import com.boot.jx.common.doc.AgentSessionDoc;
 import com.boot.jx.common.store.AgentStore;
+import com.boot.jx.common.store.ChatArchiveBuilder;
+import com.boot.jx.common.store.ChatArchiveService;
 import com.boot.jx.common.store.DocumentUpdateListner;
 import com.boot.jx.logger.LoggerService;
 import com.boot.jx.mongo.CommonMongoQueryBuilder;
 import com.boot.jx.postman.PMClientConfig;
 import com.boot.jx.postman.PMConstants;
+import com.boot.jx.postman.PMConstants.CHAT_SESSION_ACTIONS;
 import com.boot.jx.postman.PMConstants.DEFAULT;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.dto.ChatMessageDTO;
 import com.boot.jx.postman.dto.ChatSessionDTO;
+import com.boot.jx.postman.manager.ChatSessionManager;
+import com.boot.jx.postman.manager.LogManager;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.service.ChatDTOUtil;
@@ -50,6 +53,12 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 
     @Autowired
     private PMClientConfig chatClientConfig;
+
+    @Autowired
+    private ChatSessionManager chatSessionManager;
+
+    @Autowired
+    private LogManager logManager;
 
     @Autowired
     private ChatService chatService;
@@ -90,18 +99,25 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 
 	String stickyLogic = environment.config().getPref("postman.agent.chat.stickysession")
 		.asString(PMConstants.CHAT_SESSION_STICKY.NONE);
+	long timeThen = System.currentTimeMillis() - chatClientConfig.getAgentSessionTimeout().toMillis();
 
 	String lastAgent = null;
+	LOGGER.debug("CHAT_SESSION_STICKY : {}", stickyLogic);
 	if (!PMConstants.CHAT_SESSION_STICKY.NONE.equals(stickyLogic)) {
 	    lastAgent = sessionStore.getLastAssignedAgent(inboxMessage.contact());
 	    if (ArgUtil.is(lastAgent)) {
+		LOGGER.debug("CHAT_SESSION_STICKY : lastAgent found {}", lastAgent);
 		AgentSessionDoc agent = mongoTemplate.findById(lastAgent, AgentSessionDoc.class);
 		if (ArgUtil.is(agent)) {
+		    LOGGER.debug("CHAT_SESSION_STICKY : has session {}", agent);
 		    if (PMConstants.CHAT_SESSION_STICKY.STRICT.equals(stickyLogic)) {
+			LOGGER.debug("CHAT_SESSION_STICKY : because its strictly {}", agent);
 			return agent;
 		    }
 		    if (PMConstants.CHAT_SESSION_STICKY.ONAVAILABLE.equals(stickyLogic)) {
-			if (ArgUtil.nullAsFalse(agent.getIsOnline())) {
+			if (ArgUtil.nullAsFalse(agent.getIsOnline()) && ArgUtil.nullAsFalse(agent.getIsLoggedIn())
+				&& (agent.getLastOnlineStamp() > timeThen)) {
+			    LOGGER.debug("CHAT_SESSION_STICKY : because its availanle {}", agent);
 			    return agent;
 			}
 		    }
@@ -117,14 +133,16 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 		environment.config().agent().getDefaultTeamCode(), DEFAULT.NO_DEPT);
 	inboxMessage.session().setDept(assignedDept);
 
+	LOGGER.debug("ASSIGNMENT_RULE : No Assignment {} {}", assignmentRule, assignedDept);
+
 	if (PMConstants.ASSIGNMENT_RULE.STRICT_DEFAULT.equals(assignmentRule)) {
 	    String defAgentCode = environment.config().agent().defaultAgent(assignedDept);
 	    AgentSessionDoc agent = mongoTemplate.findById(defAgentCode, AgentSessionDoc.class);
+	    LOGGER.debug("ASSIGNMENT_RULE : Default {} : {}", defAgentCode, agent);
 	    return agent;
 	}
 
 	if (PMConstants.ASSIGNMENT_RULE.ROUND_ROBIN.equals(assignmentRule)) {
-	    long timeThen = System.currentTimeMillis() - TimeUtils.toMillis(chatClientConfig.getAgentSessionTimeout());
 	    Query query = new Query();
 	    Criteria c = Criteria.where("isOnline").is(true).and("isLoggedIn").is(true).and("lastOnlineStamp")
 		    .gt(timeThen);
@@ -172,21 +190,21 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 
 	if (ArgUtil.is(inboxMessage.session().getDept()) && ArgUtil.is(inboxMessage.session().getAgent())) {
 	    assignToAgent(chatSessionDoc, inboxMessage.session().getDept(), inboxMessage.session().getAgent());
-	    chatService.log(inboxMessage, MessageStore.EVENTS.ASGND_TO_DEPT, inboxMessage.session().getDept());
+	    logManager.log(inboxMessage, MessageStore.EVENTS.ASGND_TO_DEPT, inboxMessage.session().getDept());
 	}
 
 	AgentSessionDoc avaialbleAgent = getAgentSessonAssigned(inboxMessage);
 
 	if (ArgUtil.is(avaialbleAgent)) {
 	    assignToAgent(chatSessionDoc, avaialbleAgent.getAgentDept(), avaialbleAgent.getAgentCode());
-	    chatService.log(inboxMessage, MessageStore.EVENTS.ASGND_TO_AGENT, avaialbleAgent.getAgentCode(),
+	    logManager.log(inboxMessage, MessageStore.EVENTS.ASGND_TO_AGENT, avaialbleAgent.getAgentCode(),
 		    avaialbleAgent.getAgentDept());
 
 	    inboxMessage.session().setAgent(avaialbleAgent.getAgentCode());
 	    inboxMessage.session().setDept(avaialbleAgent.getAgentDept());
 	} else {
 	    assignToAgent(chatSessionDoc, inboxMessage.session().getDept(), null);
-	    chatService.log(inboxMessage, MessageStore.EVENTS.ASGND_TO_DEPT, inboxMessage.session().getDept());
+	    logManager.log(inboxMessage, MessageStore.EVENTS.ASGND_TO_DEPT, inboxMessage.session().getDept());
 	}
 
 	stompTunnelService.sendToAll(PostManUtil.ON_DEPT_ASSIGN_TOPIC(inboxMessage.session().getDept()),
@@ -208,7 +226,7 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
     private void onAssign(ChatSessionDoc chatSessionDoc, String agentDept, String agentCode) {
 	if (!ArgUtil.areEqual(chatSessionDoc.getAssignedToAgent(), agentCode)) {
 	    assignToAgent(chatSessionDoc, agentDept, agentCode);
-	    MessageDoc messageDoc = chatService.log(chatSessionDoc, MessageStore.EVENTS.ASGND_TO_AGENT, agentCode,
+	    MessageDoc messageDoc = logManager.log(chatSessionDoc, MessageStore.EVENTS.ASGND_TO_AGENT, agentCode,
 		    agentDept);
 	    stompTunnelService.sendToAll(PostManUtil.ON_DEPT_ASSIGN_TOPIC(agentDept),
 		    chatArchiveBuilder.buildChatSessionDTO().from(chatSessionDoc).withContact()
@@ -245,13 +263,13 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 	MessageDoc messageDoc = null;
 
 	if (!chatSessionDoc.isResolved()) {
-	    chatService.resolveSession(chatSessionDoc);
+	    chatSessionManager.resolveSession(chatSessionDoc);
 	}
 
 	if (ArgUtil.is(outboxMessage)) {
 	    messageDoc = chatService.reply(chatSessionDoc, outboxMessage);
 	}
-	chatService.closeSession(chatSessionDoc);
+	chatSessionManager.closeSession(chatSessionDoc);
 	stompTunnelService.sendToAll(PostManUtil.ON_DEPT_ASSIGN_TOPIC(chatSessionDoc.getAssignedToDept()),
 		chatArchiveBuilder.buildChatSessionDTO().from(chatSessionDoc).withContact()
 			.isAssigned(chatSessionDoc.getAssignedToAgent()).get());
@@ -260,7 +278,7 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 
     public ChatSessionDTO updateChatSessionStatus(String sessionId, PMConstants.CHAT_STATUS status) {
 	ChatSessionDoc sessionDoc = sessionStore.getSession(sessionId);
-	if (chatService.updateSessionStatus(sessionDoc, status)) {
+	if (chatSessionManager.updateSessionStatus(sessionDoc, status)) {
 	    ChatSessionDTO dto = chatArchive.getChatSession(sessionDoc);
 	    stompTunnelService.sendToTag(sessionDoc.getAssignedToDept(), "/chat/session/update", dto);
 	    return dto;
@@ -277,7 +295,7 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 	if (ArgUtil.is(inboxMessage.getMessage()) && inboxMessage.getMessage().equalsIgnoreCase("/exit_chat")) {
 	    ChatSessionDoc chatSessionDoc = sessionStore.getSession(inboxMessage.getSessionId());
 	    exitAgentMode(chatSessionDoc, null);
-	    chatService.log(inboxMessage, MessageStore.EVENTS.UNASGND);
+	    logManager.log(inboxMessage, MessageStore.EVENTS.UNASGND);
 	}
 	return inboxMessage;
     }
@@ -290,9 +308,9 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 	if (ArgUtil.is(action)) {
 	    outboxMessage.setAction(action);
 	    switch (action) {
-	    case "RESOLVE":
+	    case CHAT_SESSION_ACTIONS.RESOLVE:
 		return this.exitAgentMode(sessionDoc, outboxMessage);
-	    case "ADD_STICKY_NOTE":
+	    case CHAT_SESSION_ACTIONS.ADD_STICKY_NOTE:
 		return this.addStickyNote(sessionDoc, outboxMessage);
 	    default:
 		break;
@@ -306,9 +324,20 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
     }
 
     public ChatMessageDTO addStickyNote(ChatSessionDoc chatSessionDoc, OutboxMessage outboxMessage) {
-	MessageDoc messageDoc = chatService.note(chatSessionDoc, outboxMessage);
+	MessageDoc messageDoc = logManager.note(chatSessionDoc, outboxMessage);
 	ChatMessageDTO messageDto = chatArchive.getMessage(messageDoc, chatSessionDoc);
 	stompTunnelService.sendToTag(chatSessionDoc.getAssignedToDept(), "/message/sent/new", messageDto);
 	return messageDto;
     }
+
+    public ChatSessionDTO updateChatTagCategoryStatus(String sessionId, String tagCategory) {
+	ChatSessionDoc sessionDoc = sessionStore.getSession(sessionId);
+	if (chatService.updateTagCategoryStatus(sessionDoc, tagCategory)) {
+	    ChatSessionDTO dto = chatArchive.getChatSession(sessionDoc);
+	    stompTunnelService.sendToTag(sessionDoc.getAssignedToDept(), "/chat/session/update", dto);
+	    return dto;
+	}
+	return chatArchive.getChatSession(sessionDoc);
+    }
+
 }

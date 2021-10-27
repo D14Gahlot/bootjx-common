@@ -1,5 +1,7 @@
 package com.boot.jx.postman.query;
 
+import java.util.List;
+
 import com.boot.jx.mongo.CommonMongoQueryBuilder.DocQueryBuilder;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.MessageDoc;
@@ -84,6 +86,12 @@ public class ChatSessionQuery extends DocQueryBuilder<ChatSessionDoc> {
     public ChatSessionQuery setLastMsg(MessageDoc lastMsg, String contactType) {
 	this.doc.setLastMsg(lastMsg);
 	this.ref("lastMsg", lastMsg.getMessageId(), MessageStore.getCollectionName(contactType));
+	return this;
+    }
+
+    public ChatSessionQuery setTagId(List<String> tagIds) {
+	this.doc.setTagId(tagIds);
+	this.set("tagId", tagIds);
 	return this;
     }
 

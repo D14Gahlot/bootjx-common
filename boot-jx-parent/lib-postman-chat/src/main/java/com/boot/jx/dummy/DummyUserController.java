@@ -72,7 +72,7 @@ public class DummyUserController {
     public String dummyUser(@RequestParam String number, Model model) throws InterruptedException {
 	model.addAttribute("APP_CONTEXT", appConfig.getAppPrefix());
 	model.addAttribute("POSTMAN_CONTEXT", appConfig.getAppPrefix());
-	model.addAttribute("POSTMAN_AGENT_SCHEME_COLOR", pmEnvironment.get("postman.agent.scheme.color").asString());
+	model.addAttribute("POSTMAN_AGENT_SCHEME_COLOR", pmEnvironment.keyEntry("postman.agent.scheme.color").asString());
 	if (appCommonConfig != null) {
 	    model.addAttribute("CDN_URL",
 		    ArgUtil.parseAsString(commonHttpRequest.get("CDN_URL"), appCommonConfig.getCdnServer()));
@@ -86,7 +86,7 @@ public class DummyUserController {
 	commonHttpRequest.setCookie("contactType", ArgUtil.parseAsString(contacyType, ContactType.WEBSITE.toString()));
 	model.addAttribute("APP_CONTEXT", appConfig.getAppPrefix());
 	model.addAttribute("POSTMAN_CONTEXT", appConfig.getAppPrefix());
-	model.addAttribute("POSTMAN_AGENT_SCHEME_COLOR", pmEnvironment.get("postman.agent.scheme.color").asString());
+	model.addAttribute("POSTMAN_AGENT_SCHEME_COLOR", pmEnvironment.keyEntry("postman.agent.scheme.color").asString());
 	return "customer.plugin.bubble";
     }
 
@@ -97,7 +97,7 @@ public class DummyUserController {
 	model.addAttribute("APP_CONTEXT", appConfig.getAppPrefix());
 	model.addAttribute("POSTMAN_CONTEXT", appConfig.getAppPrefix());
 	model.addAttribute("WEBAPP_BASE", appConfig.getAppPrefix() + "/plugin/customer");
-	model.addAttribute("POSTMAN_AGENT_SCHEME_COLOR", pmEnvironment.get("postman.agent.scheme.color").asString());
+	model.addAttribute("POSTMAN_AGENT_SCHEME_COLOR", pmEnvironment.keyEntry("postman.agent.scheme.color").asString());
 
 	if (appCommonConfig != null) {
 	    model.addAllAttributes(appCommonConfig.appAttributes());

@@ -113,13 +113,13 @@ public class AccountAdminService implements LogoutHandler {
 
     public void sendResetMail(BusinessUserDoc accountDoc, String emailTemplate) {
 	postManClient.send(new MessageBox().push(new Email().to(accountDoc.getContact().getEmail())
-		.template(emailTemplate).put("logo", pmEnvironment.get("mry.prop.logo.bg-x-icon").asString())
-		.put("website", pmEnvironment.get("mry.prop.service.website").asString())
-		.put("service", pmEnvironment.get("mry.prop.service.name").asString())
-		.put("servicedomain", pmEnvironment.get("mry.prop.service.domain").asString())
+		.template(emailTemplate).put("logo", pmEnvironment.keyEntry("mry.prop.logo.bg-x-icon").asString())
+		.put("website", pmEnvironment.keyEntry("mry.prop.service.website").asString())
+		.put("service", pmEnvironment.keyEntry("mry.prop.service.name").asString())
+		.put("servicedomain", pmEnvironment.keyEntry("mry.prop.service.domain").asString())
 		.put("link",
 			String.format("https://app.%s/partner/auth/verify-link?code=%s&account=%s",
-				pmEnvironment.get("mry.prop.service.domain").asString(),
+				pmEnvironment.keyEntry("mry.prop.service.domain").asString(),
 				accountDoc.getMeta().getEmailVerificationCode(), accountDoc.getId()))
 		.put("contactName", accountDoc.getContact().getName())));
     }

@@ -1,6 +1,8 @@
 package com.boot.jx.postman.doc;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.TypeAlias;
@@ -10,6 +12,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import com.boot.jx.mongo.CommonDocInterfaces.APatchableIndexed;
 import com.boot.jx.swagger.ApiMockModelProperty;
+import com.boot.utils.ArgUtil;
 
 @Document(collection = "CHAT_SESSION")
 @TypeAlias("ChatSessionDoc")
@@ -61,6 +64,9 @@ public class ChatSessionDoc extends APatchableIndexed<ChatSessionDoc, String> im
 
     private String mode;
     private String status;
+    @Deprecated
+    private String tagCategory;
+    private List<String> tagId;
 
     // MessageStats
     @DBRef
@@ -362,4 +368,25 @@ public class ChatSessionDoc extends APatchableIndexed<ChatSessionDoc, String> im
 	this.updatedStamp = updatedStamp;
     }
 
+    public String getTagCategory() {
+	return tagCategory;
+    }
+
+    public void setTagCategory(String tagCategory) {
+	this.tagCategory = tagCategory;
+    }
+
+    public List<String> getTagId() {
+	return tagId;
+    }
+
+    public void setTagId(List<String> tagId) {
+	this.tagId = tagId;
+    }
+
+    public List<String> tagId() {
+	if (ArgUtil.isEmpty(this.tagId))
+	    this.tagId = new ArrayList<String>();
+	return tagId;
+    }
 }

@@ -55,6 +55,8 @@ public class AgentAnalyticsManager {
 	
 	public static final int OPEN_CONV_HR =1; 
 	
+	public static final String MY_BOT ="BOT"; 
+	
 	
 	@Autowired
 	MongoTemplate mongoTemplate;
@@ -111,6 +113,7 @@ public class AgentAnalyticsManager {
 		long totalMsg =0;
 		long totalUniqCon =0;
 		long totalOpenMsg =0;
+		long totalResolvedMsg =0;
 		long convDuration=0;
 		long botScore=0;
 		double botClosure=0.0d;
@@ -125,6 +128,7 @@ public class AgentAnalyticsManager {
 			totalOutMsg+=dt.getTotalOutMsgExchanged();
 			totalMsg+=dt.getTotalMsgExchanged();
 			totalOpenMsg+=dt.getOpenConversation();
+			totalResolvedMsg+=dt.getResolvedConversation();
 			convDuration+=dt.getConverDuration();
 			totalUniqCon+=dt.getUniqueConversation();
 			if(dt.getStartLag()>0) {
@@ -142,6 +146,7 @@ public class AgentAnalyticsManager {
 		dto.setTotalOutMsgExchanged(totalOutMsg);
 		dto.setTotalMsgExchanged(totalMsg);
 		dto.setOpenConversation(totalOpenMsg);
+		dto.setResolvedConversation(totalResolvedMsg);
 		dto.setUniqueConversation(totalUniqCon);
 		dto.setBotScore(botScore);
 		dto.setBotClosure(botClosure);
@@ -156,7 +161,7 @@ public class AgentAnalyticsManager {
 	
 	public DashBoardResponseDto getAgentAnalytics(String agent,long dateRange1,long dateRange2) {
 		    DashBoardResponseDto dto = new  DashBoardResponseDto();
-			dto.setAgentName(agent);
+			dto.setAgentName(agent==null?MY_BOT:agent);
 			/** Unique agent list  **/
 			List<ChatSessionDoc> distinctContactLst = getUniqueAgentWiseContactList(agent,dateRange1,dateRange2);
 			if(ArgUtil.is(distinctContactLst)) {
@@ -180,6 +185,14 @@ public class AgentAnalyticsManager {
 			if (ArgUtil.is(openConvesLst)) {
 				dto.setOpenConversation(openConvesLst.size());
 			}
+			
+			/** Resolved Conversation **/
+			
+			List<ChatSessionDoc> resolvedConversation = getAgentWiseResolvedConversation(agent, dateRange1, dateRange2);
+			if(ArgUtil.is(resolvedConversation)) {
+				dto.setResolvedConversation(resolvedConversation.size());
+			}
+			
 			/** Peak Load **/
 			PeakLoadDto peakLoadResult = adminDbMgr.getPeakLoadMsgCount(totalAgConMsgExchanged);//getAgentPeakLoadMsgCount(totalMsgExchanged);
 			dto.setPeakLoad(peakLoadResult);
@@ -284,6 +297,21 @@ public class AgentAnalyticsManager {
 			//}
 		}
 		return totalOpenMsgDoc;
+	}
+	
+	
+	public List<ChatSessionDoc> getAgentWiseResolvedConversation(String agent,long dateRange1, long dateRange2){
+		List<ChatSessionDoc> totalResolvedMsgDoc =new ArrayList<ChatSessionDoc>();
+		long currentTimeStamp =System.currentTimeMillis();
+		
+		Query query = new Query();
+		query.addCriteria(Criteria.where("assignedToAgent").is(agent).and("resolved").is(true));
+		query.addCriteria(Criteria.where("assignedAgentStamp").gt(dateRange1).lt(dateRange2));
+		List<ChatSessionDoc> totalMsgDoc = mongoTemplate.find(query, ChatSessionDoc.class, CHAT_SESSION);
+		for(ChatSessionDoc chatDoc:totalMsgDoc) {
+			totalResolvedMsgDoc.add(chatDoc);
+		}
+		return totalResolvedMsgDoc;
 	}
 	
 	public long getConversationDuration(String agent,long startTime, long endTime){

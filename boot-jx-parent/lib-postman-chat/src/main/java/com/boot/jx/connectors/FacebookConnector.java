@@ -7,7 +7,6 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Component;
 
 import com.boot.jx.api.ApiResponseUtil;
-import com.boot.jx.chat.ConnectorHandlerFactory.AbstractConnector;
 import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorMapping;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.dict.FileType;
@@ -16,6 +15,7 @@ import com.boot.jx.postman.client.TmplClient;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.QuickMedia;
 import com.boot.jx.postman.fb.FacebooClient;
+import com.boot.jx.postman.fb.FacebookConfigDetails;
 import com.boot.jx.postman.fb.FacebookHookRequest;
 import com.boot.jx.postman.fb.FacebookMessaging;
 import com.boot.jx.postman.fb.FacebookUserProfile;
@@ -27,15 +27,23 @@ import com.boot.jx.postman.model.MessageBoxEvent;
 import com.boot.jx.postman.model.MessageReport;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.plugin.ChannelConfig;
+import com.boot.jx.postman.plugin.ChannelPluginProvider;
+import com.boot.jx.postman.plugin.FacebookPlugin;
 import com.boot.jx.postman.query.ChatContactQuery;
 import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
 
+import net.bytebuddy.agent.builder.AgentBuilder.Transformer.ForBuildPlugin;
+
 @Component
 @ConnectorMapping(contactType = ContactType.FACEBOOK)
-public class FacebookConnector extends AbstractConnector {
-
+public class FacebookConnector extends AbstractConnector<FacebookConfigDetails, FacebookPlugin> {
     private static final Logger LOGGER = LoggerFactory.getLogger(FacebookConnector.class);
+
+    @Override
+    public FacebookPlugin getPlugin() {
+	return ChannelPluginProvider.FACEBOOK;
+    }
 
     @Autowired
     private FacebooClient facebooClient;

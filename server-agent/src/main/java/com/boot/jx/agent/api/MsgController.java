@@ -20,14 +20,15 @@ import com.boot.jx.agent.AgentSessionService;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.api.ListRequestModel;
 import com.boot.jx.aws.AWSFileStore;
-import com.boot.jx.chat.ChatArchiveBuilder;
-import com.boot.jx.chat.ChatArchiveService;
 import com.boot.jx.chat.ChatService;
 import com.boot.jx.common.doc.AgentDoc;
 import com.boot.jx.common.doc.AgentSessionDoc;
 import com.boot.jx.common.store.AgentStore;
+import com.boot.jx.common.store.ChatArchiveBuilder;
+import com.boot.jx.common.store.ChatArchiveService;
 import com.boot.jx.model.CommonFile;
 import com.boot.jx.postman.PMConstants;
+import com.boot.jx.postman.PMConstants.CHAT_STATUS;
 import com.boot.jx.postman.PMConstants.DEFAULT;
 import com.boot.jx.postman.client.PMFileStoreClient;
 import com.boot.jx.postman.doc.ChatContactDoc;
@@ -36,6 +37,7 @@ import com.boot.jx.postman.doc.QuickLabel;
 import com.boot.jx.postman.dto.ChatMessageDTO;
 import com.boot.jx.postman.dto.ChatSessionDTO;
 import com.boot.jx.postman.dto.ContactDTO;
+import com.boot.jx.postman.manager.LogManager;
 import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.service.ChatDTOUtil;
@@ -66,10 +68,10 @@ public class MsgController {
     private AgentService agentService;
 
     @Autowired
-    private ChatService chatService;
+    private ChatArchiveService chatArchive;
 
     @Autowired
-    private ChatArchiveService chatArchive;
+    private LogManager logManager;
 
     @Autowired
     private AgentSessionService agentSessionService;
@@ -104,7 +106,7 @@ public class MsgController {
     public ApiResponse<ChatMessageDTO, Object> sendSessionMessage(@RequestBody OutboxMessage outboxMessage)
 	    throws InterruptedException {
 
-	ChatSessionDoc sessionDoc = sessionStore.getSession(outboxMessage.getSessionId());
+	ChatSessionDoc sessionDoc = sessionStore.createSession(outboxMessage);
 
 	// Session Stuff Logging <
 	if (ArgUtil.isEmpty(sessionDoc.getAssignedToAgent())) {
@@ -231,13 +233,13 @@ public class MsgController {
 	List<String> removedItems = new ArrayList<String>(oldList);
 	removedItems.removeAll(newList);
 	if (ArgUtil.is(removedItems)) {
-	    chatService.log(sessionDoc, EVENTS.LABEL_REMOVED, removedItems.toArray(new String[0]));
+	    logManager.log(sessionDoc, EVENTS.LABEL_REMOVED, removedItems.toArray(new String[0]));
 	}
 
 	List<String> addedItems = new ArrayList<String>(newList);
 	addedItems.removeAll(oldList);
 	if (ArgUtil.is(addedItems)) {
-	    chatService.log(sessionDoc, EVENTS.LABEL_ADDED, addedItems.toArray(new String[0]));
+	    logManager.log(sessionDoc, EVENTS.LABEL_ADDED, addedItems.toArray(new String[0]));
 	}
 	return ApiResponse.buildData(ChatDTOUtil.getContactDTO(contact));
     }
@@ -248,4 +250,60 @@ public class MsgController {
 	    @RequestParam PMConstants.CHAT_STATUS status) {
 	return ApiResponse.buildResult(agentChatHandlerImpl.updateChatSessionStatus(sessionId, status));
     }
+
+    @ResponseBody
+    @RequestMapping(value = { "/api/session/tagCategory" }, method = { RequestMethod.POST })
+    public ApiResponse<ChatSessionDTO, Object> updateSession(@RequestParam String sessionId,
+	    @RequestParam String tagCategory) {
+	return ApiResponse.buildResult(agentChatHandlerImpl.updateChatTagCategoryStatus(sessionId, tagCategory));
+    }
+
+    /*
+     * search by status
+     * 
+     * @ResponseBody
+     * 
+     * @RequestMapping(value = "/api/sessions/searchby/status", method = {
+     * RequestMethod.GET }) public ApiResponse<ChatSessionDTO, Object>
+     * getByStatus(@RequestParam(required = false,defaultValue ="OPEN") CHAT_STATUS
+     * status) { List<ChatSessionDTO> chatSessionDtos = new
+     * ArrayList<ChatSessionDTO>(); List<ChatSessionDoc> sessions =
+     * sessionStore.findByStatus(status); for (ChatSessionDoc chatSessionDoc :
+     * sessions) { ChatSessionDTO chatSessionDto =
+     * chatArchive.withContact(chatSessionDoc); chatSessionDtos.add(chatSessionDto);
+     * 
+     * }
+     * 
+     * return ApiResponse.buildResults(chatSessionDtos); } // search by tagCategory
+     * 
+     * @ResponseBody
+     * 
+     * @RequestMapping(value = "/api/sessions/searchby/category", method = {
+     * RequestMethod.GET }) public ApiResponse<ChatSessionDTO, Object>
+     * getByTagCategory(@RequestParam(required= false) String tagCategory) {
+     * List<ChatSessionDTO> chatSessionDtos = new ArrayList<ChatSessionDTO>();
+     * List<ChatSessionDoc> sessions = sessionStore.findByTagCategory(tagCategory);
+     * for (ChatSessionDoc chatSessionDoc : sessions) { ChatSessionDTO
+     * chatSessionDto = chatArchive.withContact(chatSessionDoc);
+     * chatSessionDtos.add(chatSessionDto);
+     * 
+     * } return ApiResponse.buildResults(chatSessionDtos); }
+     */
+    /** search by status or tagCategory **/
+    @ResponseBody
+    @RequestMapping(value = "/api/sessions/searchby/statusorcategory", method = { RequestMethod.GET })
+    public ApiResponse<ChatSessionDTO, Object> getByStatusOrCategory(
+	    @RequestParam(required = false, defaultValue = "OPEN") CHAT_STATUS status,
+	    @RequestParam(required = false) String tagCategory, @RequestParam(required = false) long dateRange1,
+	    @RequestParam(required = false) long dateRange2) {
+	List<ChatSessionDTO> chatSessionDtos = new ArrayList<ChatSessionDTO>();
+	List<ChatSessionDoc> sessions = sessionStore.findByStatusOrQuickTag(status, tagCategory, dateRange1,
+		dateRange2);
+	for (ChatSessionDoc chatSessionDoc : sessions) {
+	    ChatSessionDTO chatSessionDto = chatArchive.withContact(chatSessionDoc);
+	    chatSessionDtos.add(chatSessionDto);
+	}
+	return ApiResponse.buildResults(chatSessionDtos);
+    }
+
 }

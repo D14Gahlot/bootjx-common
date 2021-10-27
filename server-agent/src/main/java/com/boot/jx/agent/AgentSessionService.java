@@ -21,6 +21,9 @@ import com.boot.jx.common.store.DocumentUpdateListner;
 import com.boot.jx.http.CommonHttpRequest;
 import com.boot.jx.mongo.CommonMongoQueryBuilder;
 import com.boot.jx.postman.PMClientConfig;
+import com.boot.jx.postman.PMConstants.DEFAULT;
+import com.boot.jx.stomp.StompQuery;
+import com.boot.jx.stomp.StompTunnelSessionManager;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.TimeUtils;
 
@@ -47,6 +50,9 @@ public class AgentSessionService implements LogoutHandler {
 
     @Autowired
     private AgentAuthProvider authProvider;
+
+    @Autowired
+    private StompTunnelSessionManager stompTunnelSessionManager;
 
     public List<AgentSessionDoc> getAgentSessions() {
 	CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder().where("isEnabled", true);
@@ -77,7 +83,7 @@ public class AgentSessionService implements LogoutHandler {
      * Refreshes online status for currently logged in agent
      */
     public void refreshOnline() {
-	if (TimeUtils.isExpired(agentSessionBean.getLastSyncStamp(), chatClientConfig.getAgentSessionTimeout())) {
+	if (TimeUtils.isExpired(agentSessionBean.getLastSyncStamp(), chatClientConfig.getAgentSessionTimeout().toMillis())) {
 	    this.updateSession(true);
 	}
     }
@@ -124,6 +130,8 @@ public class AgentSessionService implements LogoutHandler {
 	token.setDetails(new WebAuthenticationDetails(request));
 	Authentication authentication = authProvider.authenticate(token);
 	SecurityContextHolder.getContext().setAuthentication(authentication);
+	stompTunnelSessionManager.registerUser(agent.getAgent_code(), agent.getDept().getDept_code(), DEFAULT.NO_DEPT,
+		StompQuery.PING_TAG);
 	updateLogin(agent);
     }
 

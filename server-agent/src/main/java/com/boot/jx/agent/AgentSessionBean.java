@@ -103,4 +103,8 @@ public class AgentSessionBean implements AuditDetailProvider {
 	this.lastSyncStamp = lastSyncStamp;
     }
 
+    public boolean isAdmin() {
+	return getProfile().isAdmin();
+    }
+
 }

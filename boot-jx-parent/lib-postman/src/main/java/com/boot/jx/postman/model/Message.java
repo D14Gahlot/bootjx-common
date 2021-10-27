@@ -8,6 +8,7 @@ import java.util.Map;
 
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.dict.Language;
+import com.boot.jx.postman.model.ITemplates.BasicExternalTemplate;
 import com.boot.jx.postman.model.ITemplates.ITemplate;
 import com.boot.jx.postman.model.MessageDefinitions.Contactable;
 import com.boot.utils.ArgUtil;
@@ -25,7 +26,7 @@ public class Message<T extends Message<T>> implements Serializable, MessageOptio
     public static final String RESULTS_KEY = "results";
 
     public static enum Status {
-	SCHLD, CRTD, INIT, SENT, SENT_ERR, SENTX, SENTX_ERR, DLVRD, READ, NSENT, BLCKD, FAILD;
+	SCHLD, CRTD, INIT, SENT, SENT_ERR, SENTX, SENTX_ERR, DLVRD, READ, NSENT, BLCKD, FAILD, DELTD;
     }
 
     public static class Priority {
@@ -47,6 +48,7 @@ public class Message<T extends Message<T>> implements Serializable, MessageOptio
     protected List<ContactMeta> contacts = null;
     private String templateId = null;
     private String template = null;
+    private BasicExternalTemplate templateExt;
     private String action = null;
     private String type = null;
 
@@ -536,11 +538,19 @@ public class Message<T extends Message<T>> implements Serializable, MessageOptio
     }
 
     public String getFooter() {
-        return footer;
+	return footer;
     }
 
     public void setFooter(String footer) {
-        this.footer = footer;
+	this.footer = footer;
+    }
+
+    public BasicExternalTemplate getTemplateExt() {
+	return templateExt;
+    }
+
+    public void setTemplateExt(BasicExternalTemplate templateExt) {
+	this.templateExt = templateExt;
     }
 
 }

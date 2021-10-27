@@ -32,8 +32,8 @@ public class WA360Plugin implements ChannelPlugin<WA360ConfigDetails> {
 
     @Override
     public void extractChannelDetailsFromMap(WA360ConfigDetails channelDetails, MapModel map) {
-	channelDetails.setNumber(map.path("wa360d.number").asString(channelDetails.getNumber()));
-	channelDetails.setApiKey(map.path("wa360d.apiKey").asString(channelDetails.getApiKey()));
+	channelDetails.setNumber(map.pathEntry("wa360d.number").asString(channelDetails.getNumber()));
+	channelDetails.setApiKey(map.pathEntry("wa360d.apiKey").asString(channelDetails.getApiKey()));
     }
 
 }

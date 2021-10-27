@@ -3,7 +3,6 @@ package com.boot.jx.connectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.boot.jx.chat.ConnectorHandlerFactory.AbstractConnector;
 import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorHandler;
 import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorMapping;
 import com.boot.jx.dict.ContactType;
@@ -15,6 +14,7 @@ import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.gupshup.GupShupClientAgent;
 import com.boot.jx.postman.gupshup.GupShupClientChat;
 import com.boot.jx.postman.gupshup.GupShupClientNotify;
+import com.boot.jx.postman.gupshup.GupShupConfigDetails;
 import com.boot.jx.postman.gupshup.GupShupInboundV2;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.Message;
@@ -24,13 +24,21 @@ import com.boot.jx.postman.model.MessageDefinitions.IMessageExtended;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.model.WAMessage.Channel;
 import com.boot.jx.postman.plugin.ChannelConfig;
+import com.boot.jx.postman.plugin.ChannelPluginProvider;
+import com.boot.jx.postman.plugin.TwitterPlugin;
+import com.boot.jx.postman.plugin.WAGupShupPlugin;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
 
 @Component
 @ConnectorMapping(contactType = ContactType.WHATSAPP, channel = "GUPSHUPAGENT")
-public class WAGupShupAgentConnector extends AbstractConnector {
+public class WAGupShupAgentConnector extends AbstractConnector<GupShupConfigDetails, WAGupShupPlugin> {
+
+    @Override
+    public WAGupShupPlugin getPlugin() {
+	return ChannelPluginProvider.WA_GUPSHUP;
+    }
 
     @Autowired
     private GupShupClientChat gupShupChatClient;

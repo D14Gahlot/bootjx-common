@@ -30,17 +30,17 @@ public class WA360ConfigDetails extends AChannelDetails {
 
     @Override
     public boolean isPushOnlyApproved() {
-	return false;
-    }
-
-    @Override
-    public boolean isPushFreeTextAllowed() {
 	return true;
     }
 
     @Override
-    public boolean isPushToNewContactAllowed() {
+    public boolean isPushFreeTextAllowed() {
 	return false;
+    }
+
+    @Override
+    public boolean isPushToNewContactAllowed() {
+	return true;
     }
 
     @Override
