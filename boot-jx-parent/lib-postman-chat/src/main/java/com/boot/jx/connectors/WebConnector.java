@@ -27,6 +27,9 @@ import com.boot.jx.postman.model.MessageBoxEvent;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.model.TmplElement;
 import com.boot.jx.postman.plugin.ChannelConfig;
+import com.boot.jx.postman.plugin.ChannelPluginProvider;
+import com.boot.jx.postman.plugin.WebPlugin;
+import com.boot.jx.postman.plugin.WebPlugin.WebConfigDetails;
 import com.boot.jx.postman.query.ChatContactQuery;
 import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
@@ -35,10 +38,15 @@ import com.boot.utils.JsonUtil;
 
 @Component
 @ConnectorMapping(contactType = ContactType.WEBSITE)
-public class WebConnector extends AbstractConnector.DefaultConnector {
+public class WebConnector extends DefaultConnector<WebConfigDetails, WebPlugin> {
 
     private static final String WEB_USER_MESSAGE_STR = "WEB_USER_MESSAGE_STR_";
     private static final Logger LOGGER = LoggerFactory.getLogger(WebConnector.class);
+
+    @Override
+    public WebPlugin getPlugin() {
+	return ChannelPluginProvider.WEB;
+    }
 
     public static class MessageQueue<T> {
 
@@ -160,14 +168,14 @@ public class WebConnector extends AbstractConnector.DefaultConnector {
 	if (ArgUtil.isEmpty(chatContactDoc.getName())) {
 	    inputs.add(new TmplElement().name("name").label("Name").type("TEXT"));
 	    reply(null, inboxMessage, (OutboxMessage) inboxMessage.replyMessage("Please fill below inputs to continue")
-		        .option("inputs", inputs));
+		    .option("inputs", inputs));
 	    return false;
 	}
 
 	if (ArgUtil.isEmpty(chatContactDoc.getEmail())) {
 	    inputs.add(new TmplElement().name("email").label("Email").type("EMAIL"));
 	    reply(null, inboxMessage, (OutboxMessage) inboxMessage.replyMessage("Please fill below inputs to continue")
-		        .option("inputs", inputs));
+		    .option("inputs", inputs));
 	    return false;
 	}
 

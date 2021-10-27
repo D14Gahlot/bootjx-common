@@ -22,9 +22,12 @@ import com.boot.jx.postman.model.MessageBoxEvent;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.model.WAMessage.Channel;
 import com.boot.jx.postman.plugin.ChannelConfig;
+import com.boot.jx.postman.plugin.ChannelPluginProvider;
+import com.boot.jx.postman.plugin.TwitterPlugin;
 import com.boot.jx.postman.query.ChatContactQuery;
 import com.boot.jx.postman.tw.TwitterClient;
 import com.boot.jx.postman.tw.TwitterClientContext;
+import com.boot.jx.postman.tw.TwitterConfigDetails;
 import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.JsonUtil;
@@ -37,9 +40,14 @@ import twitter4j.TwitterException;
 
 @Component
 @ConnectorMapping(contactType = ContactType.TWITTER)
-public class TwitterConnector extends AbstractConnector {
+public class TwitterConnector extends AbstractConnector<TwitterConfigDetails, TwitterPlugin> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TwitterConnector.class);
+
+    @Override
+    public TwitterPlugin getPlugin() {
+	return ChannelPluginProvider.TWITTER;
+    }
 
     @Autowired
     private TwitterClient twitterClient;

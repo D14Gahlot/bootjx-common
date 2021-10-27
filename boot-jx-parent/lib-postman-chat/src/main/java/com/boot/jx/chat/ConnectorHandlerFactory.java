@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 
 import com.boot.common.ScopedBeanFactory;
 import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorHandler;
-import com.boot.jx.connectors.AbstractConnector;
+import com.boot.jx.connectors.AbstractConnector.DefaultConnector;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.logger.LoggerService;
 import com.boot.jx.mongo.CommonMongoTemplate;
@@ -228,7 +228,7 @@ public class ConnectorHandlerFactory extends ScopedBeanFactory<String, Connector
     }
 
     @Autowired(required = false)
-    private AbstractConnector.DefaultConnector defaultConnector;
+    private DefaultConnector<?, ?> defaultConnector;
 
     @Autowired
     private MessageStore messageStore;

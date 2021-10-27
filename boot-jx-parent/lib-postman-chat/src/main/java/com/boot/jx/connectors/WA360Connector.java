@@ -1,5 +1,8 @@
 package com.boot.jx.connectors;
 
+import java.util.List;
+import java.util.Map;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,10 +18,15 @@ import com.boot.jx.postman.PMConstants.CHANNEL_TYPE;
 import com.boot.jx.postman.client.PMFileStoreClient;
 import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.InboxMessage;
+import com.boot.jx.postman.model.Message.Status;
 import com.boot.jx.postman.model.MessageBoxEvent;
+import com.boot.jx.postman.model.MessageReport;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.plugin.ChannelConfig;
+import com.boot.jx.postman.plugin.ChannelPluginProvider;
+import com.boot.jx.postman.plugin.WA360Plugin;
 import com.boot.jx.postman.wa360.WA360Client;
+import com.boot.jx.postman.wa360.WA360ConfigDetails;
 import com.boot.jx.postman.wa360.WA360Constants;
 import com.boot.jx.postman.wa360.WA360Constants.InBoundWrapperPaths;
 import com.boot.jx.postman.wa360.WA360InboundMedia;
@@ -31,7 +39,12 @@ import com.boot.utils.JsonPath;
 
 @Component
 @ConnectorMapping(contactType = ContactType.WHATSAPP, channel = CHANNEL_TYPE.WA_360D)
-public class WA360Connector extends AbstractConnector {
+public class WA360Connector extends AbstractConnector<WA360ConfigDetails, WA360Plugin> {
+
+    @Override
+    public WA360Plugin getPlugin() {
+	return ChannelPluginProvider.WA_360D;
+    }
 
     private static final Logger LOGGER = LoggerFactory.getLogger(WA360Connector.class);
     @Autowired
@@ -137,10 +150,48 @@ public class WA360Connector extends AbstractConnector {
 	}
     }
 
+    private MessageReport toMessageReport(ChannelConfig channelConfig, MapModel requestMap) {
+	MessageReport report = this.createMessageReport(channelConfig);
+	String csid = requestMap.getString("recipient_id");
+	report.contact().setCsid(csid);
+	report.setChangeStamp(requestMap.getLong("timestamp", 0L) * 1000);
+	report.setMessageIdExt(requestMap.getString("id"));
+
+	String status = requestMap.getString("status");
+
+	if ("sent".equals(status)) {
+	    report.setStatus(Status.SENTX);
+	} else if ("delivered".equals(status)) {
+	    report.setStatus(Status.DLVRD);
+	} else if ("read".equals(status)) {
+	    report.setStatus(Status.READ);
+	} else if ("deleted".equals(status)) {
+	    report.setStatus(Status.DELTD);
+	} else if ("failed".equals(status)) {
+	    report.setStatus(Status.FAILD);
+	    String errorCode = requestMap.pathEntry("errors/[0]/code").asString();
+	    report.setReason("Code:" + errorCode);
+	}
+
+	return report;
+    }
+
     @Override
     public MessageBoxEvent inboundMessageBoxEvent(ChannelConfig channelConfig, MapModel requestMap,
 	    MessageBoxEvent messageBoxEvent) {
-	return messageBoxEvent.addInboxMessage(toInboxMessage(channelConfig, requestMap));
+
+	if (requestMap.containsKey("messages")) {
+	    messageBoxEvent.addInboxMessage(toInboxMessage(channelConfig, requestMap));
+	}
+
+	if (requestMap.containsKey("statuses")) {
+	    List<Map<String, Object>> statusMaps = requestMap.keyEntry("statuses").asListOfMap();
+	    for (Map<String, Object> statusMap : statusMaps) {
+		messageBoxEvent.addMessageReport(toMessageReport(channelConfig, MapModel.from(statusMap)));
+	    }
+	}
+
+	return messageBoxEvent;
     }
 
 }

@@ -174,4 +174,20 @@ public class ChannelConfig extends AChannelConfig {
 	this.callbackPath = callbackPath;
     }
 
+    public void setPushAllowed(boolean isPushAllowed) {
+        this.isPushAllowed = isPushAllowed;
+    }
+
+    public void setPushOnlyApproved(boolean isPushOnlyApproved) {
+        this.isPushOnlyApproved = isPushOnlyApproved;
+    }
+
+    public void setPushFreeTextAllowed(boolean isPushFreeTextAllowed) {
+        this.isPushFreeTextAllowed = isPushFreeTextAllowed;
+    }
+
+    public void setPushToNewContactAllowed(boolean isPushToNewContactAllowed) {
+        this.isPushToNewContactAllowed = isPushToNewContactAllowed;
+    }
+
 }

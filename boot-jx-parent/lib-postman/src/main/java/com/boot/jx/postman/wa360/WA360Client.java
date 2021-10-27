@@ -109,7 +109,7 @@ public class WA360Client {
 			}
 			components.add(headerComponentReq.build().map());
 		    }
-		} else {
+		} else if(ArgUtil.is(outboxMessage.getAttachments())) {
 		    String lowerFormat = extTemplateComponentFormat.toLowerCase();
 		    WA360OutBoundMedia media = createMedia(lowerFormat, outboxMessage.getAttachments().get(0));
 		    headerComponentReq.parameter(lowerFormat, media);

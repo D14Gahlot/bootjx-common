@@ -23,6 +23,7 @@ import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.QuickMedia;
 import com.boot.jx.postman.gupshup.GupShupClientChat;
 import com.boot.jx.postman.gupshup.GupShupClientNotify;
+import com.boot.jx.postman.gupshup.GupShupConfigDetails;
 import com.boot.jx.postman.gupshup.GupShupDeliveryResp;
 import com.boot.jx.postman.gupshup.GupShupDeliveryResp.GupShupDeliveryDto;
 import com.boot.jx.postman.gupshup.GupShupInbound;
@@ -36,6 +37,8 @@ import com.boot.jx.postman.model.MessageDefinitions.IMessageExtended;
 import com.boot.jx.postman.model.MessageReport;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.plugin.ChannelConfig;
+import com.boot.jx.postman.plugin.ChannelPluginProvider;
+import com.boot.jx.postman.plugin.WAGupShupPlugin;
 import com.boot.jx.postman.query.ChatContactQuery;
 import com.boot.jx.postman.store.MessageContext;
 import com.boot.jx.utils.PostManUtil;
@@ -46,9 +49,14 @@ import com.boot.utils.TimeUtils;
 
 @Component
 @ConnectorMapping(contactType = ContactType.WHATSAPP, channel = CHANNEL_TYPE.WA_GUPSHUP)
-public class WAGupShupConnector extends AbstractConnector {
+public class WAGupShupConnector extends AbstractConnector<GupShupConfigDetails, WAGupShupPlugin> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(WAGupShupConnector.class);
+
+    @Override
+    public WAGupShupPlugin getPlugin() {
+	return ChannelPluginProvider.WA_GUPSHUP;
+    }
 
     @Autowired
     private GupShupClientChat gupShupChatClient;

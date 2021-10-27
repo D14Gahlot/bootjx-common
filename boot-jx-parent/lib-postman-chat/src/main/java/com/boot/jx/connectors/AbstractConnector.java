@@ -13,19 +13,26 @@ import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.jx.postman.PMClientConfig;
 import com.boot.jx.postman.PMConstants.MESSAGE_SEND_TYPE;
 import com.boot.jx.postman.PMEnvironment;
+import com.boot.jx.postman.PMEnvironment.AChannelDetails;
 import com.boot.jx.postman.client.TmplClient;
 import com.boot.jx.postman.doc.HSMTemplate3rdParty;
 import com.boot.jx.postman.doc.QuickMedia;
 import com.boot.jx.postman.model.Attachment;
-import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.model.MessageDefinitions.IMessage;
+import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.plugin.ChannelConfig;
+import com.boot.jx.postman.plugin.ChannelPluginProvider.ChannelPlugin;
 import com.boot.jx.postman.store.MessageContext;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.utils.ArgUtil;
 
-public abstract class AbstractConnector implements ConnectorHandler {
-    public static abstract class DefaultConnector extends AbstractConnector {
+public abstract class AbstractConnector<CD extends AChannelDetails, P extends ChannelPlugin<CD>>
+	implements ConnectorHandler {
+
+    abstract public P getPlugin();
+
+    public static abstract class DefaultConnector<CD extends AChannelDetails, P extends ChannelPlugin<CD>>
+	    extends AbstractConnector<CD, P> {
     }
 
     @Autowired
