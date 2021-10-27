@@ -99,6 +99,7 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 
 	String stickyLogic = environment.config().getPref("postman.agent.chat.stickysession")
 		.asString(PMConstants.CHAT_SESSION_STICKY.NONE);
+	long timeThen = System.currentTimeMillis() - chatClientConfig.getAgentSessionTimeout().toMillis();
 
 	String lastAgent = null;
 	LOGGER.debug("CHAT_SESSION_STICKY : {}", stickyLogic);
@@ -114,7 +115,8 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 			return agent;
 		    }
 		    if (PMConstants.CHAT_SESSION_STICKY.ONAVAILABLE.equals(stickyLogic)) {
-			if (ArgUtil.nullAsFalse(agent.getIsOnline())) {
+			if (ArgUtil.nullAsFalse(agent.getIsOnline()) && ArgUtil.nullAsFalse(agent.getIsLoggedIn())
+				&& (agent.getLastOnlineStamp() > timeThen)) {
 			    LOGGER.debug("CHAT_SESSION_STICKY : because its availanle {}", agent);
 			    return agent;
 			}
@@ -141,7 +143,6 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 	}
 
 	if (PMConstants.ASSIGNMENT_RULE.ROUND_ROBIN.equals(assignmentRule)) {
-	    long timeThen = System.currentTimeMillis() - TimeUtils.toMillis(chatClientConfig.getAgentSessionTimeout());
 	    Query query = new Query();
 	    Criteria c = Criteria.where("isOnline").is(true).and("isLoggedIn").is(true).and("lastOnlineStamp")
 		    .gt(timeThen);

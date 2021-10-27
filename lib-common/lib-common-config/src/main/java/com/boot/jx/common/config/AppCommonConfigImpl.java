@@ -97,7 +97,7 @@ public class AppCommonConfigImpl implements AppCommonConfig {
 	map.put("AGENT_CHAT_INIT", pmEnvironment.keyEntry("postman.agent.chat.init").asBoolean());
 	map.put("CHAT_TAG_ENABLED", pmEnvironment.config().getPref("chat.tag.enabled").asBoolean());
 	map.put("chatIdleTimeout", TimeUtils.toMillis(chatClientConfig.getChatIdleTimeout()));
-	map.put("agentSessionTimeout", TimeUtils.toMillis(chatClientConfig.getAgentSessionTimeout()));
+	map.put("agentSessionTimeout", chatClientConfig.getAgentSessionTimeout().toMillis());
 	map.put("chatSessionTimeout", TimeUtils.toMillis(chatClientConfig.getChatSessionTimeout()));
 	return map;
     }

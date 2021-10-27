@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.boot.jx.api.ApiResponse;
@@ -72,9 +71,9 @@ public class ConfigOptionMetaController {
 	List<ConfigMeta> configs = plugin.listConfigMeta(pmEnvironment);
 	return ApiResponse.buildResults(configs);
     }
-    
+
     // Option APIS
-    
+
     @JsonView(PMEnvironment.PublicProperty.class)
     @RequestMapping(value = { "/api/options/channels" }, method = { RequestMethod.GET })
     public ApiResponse<AChannelDetails, Object> listActiveLanes() {
@@ -85,26 +84,23 @@ public class ConfigOptionMetaController {
     public ApiResponse<HSMTemplate, Object> listPushTemplateslistHsmTmpl() {
 	return ApiResponse.buildResults(commonMongoTemplate.findAll(HSMTemplate.class));
     }
-    
+
     // Config APIS
     @Autowired
     private ConfigManager configManager;
 
-    @ResponseBody
     @RequestMapping(value = "/api/config", method = { RequestMethod.POST })
     public ApiResponse<Map<String, Object>, Object> setConfig(@RequestBody PMConfigurationObject map) {
 	configManager.save(map);
 	return ApiResponse.buildResults(configManager.getSetupConfigs());
     }
 
-    @ResponseBody
     @RequestMapping(value = "/api/config", method = { RequestMethod.GET })
     public ApiResponse<Map<String, Object>, Object> getConfig(@RequestParam(required = false) String key) {
 	return ApiResponse.buildResults(configManager.getConfigs(key));
     }
 
     @ApiRequest(rules = ACCESS_RULES.ONLY_DUPERUSER)
-    @ResponseBody
     @RequestMapping(value = "/api/config", method = { RequestMethod.DELETE })
     public ApiResponse<Map<String, Object>, Object> deleteConfig(@RequestParam(required = false) String key) {
 	configManager.deleteAdminConfigs(key);

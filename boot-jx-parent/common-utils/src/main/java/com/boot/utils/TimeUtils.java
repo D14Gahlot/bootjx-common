@@ -72,6 +72,18 @@ public class TimeUtils {
 	}
     }
 
+    public static class TimePeriod {
+	long millis;
+
+	public long toMillis() {
+	    return millis;
+	}
+
+	public void setMillis(long millis) {
+	    this.millis = millis;
+	}
+    }
+
     public static final Pattern PERIODS = Pattern.compile("^([0-9\\s]*)(" + String.join("|", TimeUnits.keys()) + ")$");
 
     public static long toMillis(String period) {

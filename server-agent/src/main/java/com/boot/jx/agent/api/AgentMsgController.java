@@ -70,10 +70,9 @@ public class AgentMsgController {
 	List<ChatSessionDTO> chatSessionDtos = new ArrayList<ChatSessionDTO>();
 	if (agentSession.isLoggedIn() && ArgUtil.is(agentSession.getAgentDept())) {
 	    List<ChatSessionDoc> sessions = null;
-	    boolean isHistoryEnabled = environment.keyEntry(KEY.POSTMAN_AGENT_TAB_HISTORY).asBoolean();
 	    long historyPeriod = environment.keyEntry(KEY.POSTMAN_AGENT_TAB_HISTORY_PERIOD)
 		    .asLong(PMConstants.DEFAULT_VALUES.POSTMAN_AGENT_TAB_HISTORY_PERIOD);
-	    if (isHistoryEnabled || (historyPeriod > PMConstants.DEFAULT_VALUES.POSTMAN_AGENT_TAB_HISTORY_PERIOD)) {
+	    if (historyPeriod > PMConstants.DEFAULT_VALUES.POSTMAN_AGENT_TAB_HISTORY_PERIOD) {
 		sessions = sessionStore.findChatSessionDocByAgentAndUnAssigned(agentSession.getAgentCode(),
 			agentSession.getAgentDept(), historyPeriod);
 	    } else {

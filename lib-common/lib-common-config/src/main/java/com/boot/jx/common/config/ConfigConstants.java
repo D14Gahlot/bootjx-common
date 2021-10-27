@@ -54,11 +54,8 @@ public class ConfigConstants {
 	POSTMAN_AGENT_SCHEME2_COLOR(new ConfigMeta("Agent Color Scheme 2", "postman.agent.scheme2.color")
 		.inputType(OPTIONS_TYPE.COLOR_PALLETE).defaultValue(new ConfigMeta.ColorPalette())),
 
-	POSTMAN_AGENT_TAB_HISTORY(
-		new ConfigMeta("Show History Tab", "postman.agent.tab.history").optionsOnOff().defaultFalse()),
-
 	POSTMAN_AGENT_TAB_HISTORY_PERIOD(
-		new ConfigMeta("Show History Tab", "postman.agent.tab.history.period")
+		new ConfigMeta("Show History Period", "postman.agent.tab.history.period")
 			.options(
 				new ConfigOption(PMConstants.DEFAULT_VALUES.POSTMAN_AGENT_TAB_HISTORY_PERIOD)
 					.label("OFF"),

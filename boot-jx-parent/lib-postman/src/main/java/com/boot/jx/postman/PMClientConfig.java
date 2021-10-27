@@ -9,6 +9,7 @@ import com.boot.jx.AppContextUtil;
 import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.TimeUtils.TimePeriod;
 
 @Component
 @PropertySource("classpath:application-postman.properties")
@@ -44,7 +45,7 @@ public class PMClientConfig {
     private String chatSessionTimeout;
 
     @Value("${postman.agent.session.timeout}")
-    private String agentSessionTimeout;
+    private TimePeriod agentSessionTimeout;
 
     @Value("${postman.default.sender}")
     private String defaultSender;
@@ -89,7 +90,7 @@ public class PMClientConfig {
 	return environment.config().getPref(PROPERTIES.POSTMAN_CHAT_SESSION_TIMEOUT).asString(chatSessionTimeout);
     }
 
-    public String getAgentSessionTimeout() {
+    public TimePeriod getAgentSessionTimeout() {
 	return agentSessionTimeout;
     }
 
