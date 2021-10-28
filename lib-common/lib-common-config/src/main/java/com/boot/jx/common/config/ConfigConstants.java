@@ -54,15 +54,12 @@ public class ConfigConstants {
 	POSTMAN_AGENT_SCHEME2_COLOR(new ConfigMeta("Agent Color Scheme 2", "postman.agent.scheme2.color")
 		.inputType(OPTIONS_TYPE.COLOR_PALLETE).defaultValue(new ConfigMeta.ColorPalette())),
 
-	POSTMAN_AGENT_TAB_HISTORY_PERIOD(
-		new ConfigMeta("Show History Period", "postman.agent.tab.history.period")
-			.options(
-				new ConfigOption(PMConstants.DEFAULT_VALUES.POSTMAN_AGENT_TAB_HISTORY_PERIOD)
-					.label("OFF"),
-				new ConfigOption(TimeUtils.toMillis("3d")).label("+3Days"),
-				new ConfigOption(TimeUtils.toMillis("5d")).label("+5Days"),
-				new ConfigOption(TimeUtils.toMillis("7d")).label("+7Days"))
-			.defaultValue(PMConstants.DEFAULT_VALUES.POSTMAN_AGENT_TAB_HISTORY_PERIOD))
+	POSTMAN_AGENT_TAB_HISTORY_PERIOD(new ConfigMeta("Show History Period", "postman.agent.tab.history.period")
+		.options(new ConfigOption(0).label("OFF"), new ConfigOption(TimeUtils.toMillis("1d")).label("+1Days"),
+			new ConfigOption(TimeUtils.toMillis("3d")).label("+3Days"),
+			new ConfigOption(TimeUtils.toMillis("5d")).label("+5Days"),
+			new ConfigOption(TimeUtils.toMillis("7d")).label("+7Days"))
+		.defaultValue(0))
 	// Ends here
 	;
 
