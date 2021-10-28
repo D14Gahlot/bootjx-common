@@ -64,8 +64,8 @@ public class AgentMsgController {
 
     @ApiRequest(type = RequestType.POLL)
     @RequestMapping(value = "/api/sessions/assignments", method = { RequestMethod.GET })
-    public ApiResponse<ChatSessionDTO, AgentSessionDoc> getSessionsAssignments(@RequestParam Boolean withMessage,
-	    @RequestParam(required = false) Boolean status) {
+    public ApiResponse<ChatSessionDTO, AgentSessionDoc> getSessionsAssignments(
+	    @RequestParam(defaultValue = "false") boolean withMessage, @RequestParam(required = false) Boolean status) {
 
 	List<ChatSessionDTO> chatSessionDtos = new ArrayList<ChatSessionDTO>();
 	if (agentSession.isLoggedIn() && ArgUtil.is(agentSession.getAgentDept())) {
