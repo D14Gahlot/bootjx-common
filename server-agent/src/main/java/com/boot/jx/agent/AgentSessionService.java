@@ -83,9 +83,14 @@ public class AgentSessionService implements LogoutHandler {
      * Refreshes online status for currently logged in agent
      */
     public void refreshOnline() {
-	if (TimeUtils.isExpired(agentSessionBean.getLastSyncStamp(), chatClientConfig.getAgentSessionTimeout().toMillis())) {
+	if (TimeUtils.isExpired(agentSessionBean.getLastSyncStamp(),
+		chatClientConfig.getAgentSessionTimeout().toMillis())) {
 	    this.updateSession(true);
 	}
+    }
+
+    public void setAway(boolean isAway) {
+	agentSessionBean.setAway(isAway);
     }
 
     public void setOnline(boolean isOnline) {

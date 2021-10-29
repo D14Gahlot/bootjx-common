@@ -65,7 +65,8 @@ public class AgentMsgController {
     @ApiRequest(type = RequestType.POLL)
     @RequestMapping(value = "/api/sessions/assignments", method = { RequestMethod.GET })
     public ApiResponse<ChatSessionDTO, AgentSessionDoc> getSessionsAssignments(
-	    @RequestParam(defaultValue = "false") boolean withMessage, @RequestParam(required = false) Boolean status) {
+	    @RequestParam(defaultValue = "false") boolean withMessage, @RequestParam(required = false) Boolean status,
+	    @RequestParam(required = false) Boolean away) {
 
 	List<ChatSessionDTO> chatSessionDtos = new ArrayList<ChatSessionDTO>();
 	if (agentSession.isLoggedIn() && ArgUtil.is(agentSession.getAgentDept())) {
@@ -91,6 +92,9 @@ public class AgentMsgController {
 		}
 		chatSessionDtos.add(chatSessionDto);
 	    }
+	}
+	if (away != null) {
+	    agentSessionService.setAway(away.booleanValue());
 	}
 	if (status != null) {
 	    agentSessionService.setOnline(status.booleanValue());

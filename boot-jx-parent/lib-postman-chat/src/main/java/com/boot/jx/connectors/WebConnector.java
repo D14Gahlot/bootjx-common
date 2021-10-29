@@ -10,18 +10,13 @@ import org.redisson.api.RedissonClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Component;
 
 import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorMapping;
 import com.boot.jx.connectors.AbstractConnector.DefaultConnector;
 import com.boot.jx.dict.ContactType;
-import com.boot.jx.dict.FileType;
-import com.boot.jx.postman.client.TmplClient;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
-import com.boot.jx.postman.doc.QuickMedia;
-import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.MessageBoxEvent;
 import com.boot.jx.postman.model.OutboxMessage;
@@ -81,32 +76,11 @@ public class WebConnector extends DefaultConnector<WebConfigDetails, WebPlugin> 
 
     private MessageQueue<OutboxMessage> messageQueue = new MessageQueue<OutboxMessage>(100);
 
-    @Autowired
-    private TmplClient tmplClient;
-
-    @Autowired
-    private MongoTemplate mongoTemplate;
-
-    public OutboxMessage process(OutboxMessage outboxMessage) {
-	if (ArgUtil.is(outboxMessage.getTemplate())) {
-	    QuickMedia mediaReply = mongoTemplate.findById(outboxMessage.getTemplate(), QuickMedia.class);
-	    if (ArgUtil.is(mediaReply)) {
-		if ("image".equalsIgnoreCase(mediaReply.getType())) {
-		    outboxMessage.attachment(
-			    new Attachment().mediaURL(mediaReply.getUrl()).mediaType(FileType.IMAGE.toString()));
-		}
-	    } else {
-		tmplClient.process(outboxMessage);
-	    }
-	}
-	return outboxMessage;
-    }
-
     @Override
     public void send(ChannelConfig channelConfig, OutboxMessage outboxMessage) {
 	String to = CollectionUtil.getOne(outboxMessage.getTo());
 
-	process(outboxMessage);
+	template(channelConfig, outboxMessage);
 	if (redisson == null) {
 	    try {
 		messageQueue.enqueue(outboxMessage);
