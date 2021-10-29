@@ -16,7 +16,7 @@ public class AgentSessionDoc {
     private Boolean isLoggedIn;
 
     private Boolean isOnline;
-    
+
     private Boolean isAway;
 
     private Boolean isEnabled;
@@ -24,6 +24,8 @@ public class AgentSessionDoc {
     private Long lastOnlineStamp;
 
     private Long lastAssignStamp;
+
+    private String domain;
 
     public String getAgentCode() {
 	return agentCode;
@@ -94,11 +96,19 @@ public class AgentSessionDoc {
     }
 
     public Boolean getIsAway() {
-        return isAway;
+	return isAway;
     }
 
     public void setIsAway(Boolean isAway) {
-        this.isAway = isAway;
+	this.isAway = isAway;
+    }
+
+    public String getDomain() {
+	return domain;
+    }
+
+    public void setDomain(String domain) {
+	this.domain = domain;
     }
 
 }
