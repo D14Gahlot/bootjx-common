@@ -1,24 +1,32 @@
 package com.boot.jx.agent;
 
+import java.io.Serializable;
+import java.security.Principal;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationListener;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.session.SessionDestroyedEvent;
 import org.springframework.security.web.authentication.WebAuthenticationDetails;
 import org.springframework.security.web.authentication.logout.LogoutHandler;
 import org.springframework.stereotype.Component;
 
 import com.boot.jx.AppConfig;
+import com.boot.jx.AppContextUtil;
 import com.boot.jx.common.doc.AgentSessionDoc;
 import com.boot.jx.common.dto.AgentResponseAuthDto;
 import com.boot.jx.common.store.DocumentUpdateListner;
 import com.boot.jx.http.CommonHttpRequest;
+import com.boot.jx.logger.LoggerService;
 import com.boot.jx.mongo.CommonMongoQueryBuilder;
 import com.boot.jx.postman.PMClientConfig;
 import com.boot.jx.postman.PMConstants.DEFAULT;
@@ -28,8 +36,9 @@ import com.boot.utils.ArgUtil;
 import com.boot.utils.TimeUtils;
 
 @Component
-public class AgentSessionService implements LogoutHandler {
+public class AgentSessionService implements LogoutHandler, ApplicationListener<SessionDestroyedEvent> {
 
+    public static final Logger LOGGER = LoggerService.getLogger(AgentSessionService.class);
     @Autowired
     private MongoTemplate mongoTemplate;
 
@@ -65,7 +74,9 @@ public class AgentSessionService implements LogoutHandler {
 	builder.set("agentDept", agentSessionBean.getAgentDept());
 	builder.set("isLoggedIn", agentSessionBean.isLoggedIn());
 	builder.set("isOnline", agentSessionBean.isOnline());
+	builder.set("isAway", agentSessionBean.isAway());
 	builder.set("lastOnlineStamp", agentSessionBean.getLastOnlineStamp());
+	builder.set("domain", AppContextUtil.getTenant());
 
 	if (ArgUtil.is(agentSessionBean.getProfile())) {
 	    builder.set("isEnabled", agentSessionBean.getProfile().isEnabled());
@@ -83,9 +94,14 @@ public class AgentSessionService implements LogoutHandler {
      * Refreshes online status for currently logged in agent
      */
     public void refreshOnline() {
-	if (TimeUtils.isExpired(agentSessionBean.getLastSyncStamp(), chatClientConfig.getAgentSessionTimeout().toMillis())) {
+	if (TimeUtils.isExpired(agentSessionBean.getLastSyncStamp(),
+		chatClientConfig.getAgentSessionTimeout().toMillis())) {
 	    this.updateSession(true);
 	}
+    }
+
+    public void setAway(boolean isAway) {
+	agentSessionBean.setAway(isAway);
     }
 
     public void setOnline(boolean isOnline) {
@@ -116,17 +132,20 @@ public class AgentSessionService implements LogoutHandler {
      * 
      * @param username
      */
-    public void updateLogout(String username) {
+    public void updateLogout(AgentPrincipal agentPrincipal) {
 	agentSessionBean.setLoggedIn(false);
 	agentSessionBean.setOnline(false);
-	agentSessionBean.setAgentCode(username);
-	agentSessionBean.setAgentDept("ONLINE");
+	agentSessionBean.setAgentCode(agentPrincipal.getAgentCode());
+	// agentSessionBean.setAgentDept("ONLINE");
 	this.updateSession(true);
     }
 
     public void login(HttpServletRequest request, AgentResponseAuthDto agent, String passhash) {
-	UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(agent.getAgent_code(),
-		passhash);
+
+	AgentPrincipal agentPrincipal = new AgentPrincipal();
+	agentPrincipal.setAgentCode(agent.getAgent_code());
+	agentPrincipal.setDomain(AppContextUtil.getTenant());
+	UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(agentPrincipal, passhash);
 	token.setDetails(new WebAuthenticationDetails(request));
 	Authentication authentication = authProvider.authenticate(token);
 	SecurityContextHolder.getContext().setAuthentication(authentication);
@@ -144,9 +163,57 @@ public class AgentSessionService implements LogoutHandler {
     @Override
     public void logout(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
 	if (ArgUtil.is(authentication)) {
-	    updateLogout(ArgUtil.parseAsString(authentication.getPrincipal()));
+	    try {
+		AgentPrincipal agentPrincipal = (AgentPrincipal) authentication.getPrincipal();
+		updateLogout(agentPrincipal);
+	    } catch (Exception e) {
+		LOGGER.error("logout(Authentication)", e);
+	    }
 	}
 	commonHttpRequest.instance(request, response, appConfig).setCookie("JXSESSIONID", "JXSESSIONID", 0);
+    }
+
+    @Override
+    public void onApplicationEvent(SessionDestroyedEvent event) {
+	for (SecurityContext securityContext : event.getSecurityContexts()) {
+	    try {
+		Authentication authentication = securityContext.getAuthentication();
+		AgentPrincipal agentPrincipal = (AgentPrincipal) authentication.getPrincipal();
+		AppContextUtil.clear();
+		AppContextUtil.setTenant(agentPrincipal.getDomain());
+		AppContextUtil.init();
+		updateLogout(agentPrincipal);
+	    } catch (Exception e) {
+		LOGGER.error("onApplicationEvent(SessionDestroyedEvent)", e);
+	    }
+	}
+    }
+
+    public static class AgentPrincipal implements Serializable, Principal {
+	private static final long serialVersionUID = 1L;
+	String domain;
+	String agentCode;
+
+	public String getDomain() {
+	    return domain;
+	}
+
+	public void setDomain(String domain) {
+	    this.domain = domain;
+	}
+
+	public String getAgentCode() {
+	    return agentCode;
+	}
+
+	public void setAgentCode(String agentCode) {
+	    this.agentCode = agentCode;
+	}
+
+	@Override
+	public String getName() {
+	    return this.agentCode;
+	}
     }
 
 }

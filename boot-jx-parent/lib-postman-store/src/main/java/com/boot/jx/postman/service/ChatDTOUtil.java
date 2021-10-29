@@ -15,6 +15,7 @@ import com.boot.jx.postman.dto.ChatMessageDTO;
 import com.boot.jx.postman.dto.ChatSessionDTO;
 import com.boot.jx.postman.dto.ChatUserProfileDTO;
 import com.boot.jx.postman.dto.ContactDTO;
+import com.boot.jx.postman.model.ContactMeta;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.EntityDtoUtil;
@@ -25,6 +26,15 @@ public class ChatDTOUtil {
     public static ChatUserProfileDTO getProfileDTO(ChatUserProfileDoc profileDoc) {
 	ChatUserProfileDTO dto = EntityDtoUtil.entityToDto(profileDoc, new ChatUserProfileDTO());
 	return dto;
+    }
+
+    public static ContactMeta getContactMeta(ChatContactDoc chatContactDoc) {
+	ContactMeta contact = new ContactMeta();
+	contact.setName(chatContactDoc.getName());
+	contact.setPhone(chatContactDoc.getPhone());
+	contact.setEmail(chatContactDoc.getEmail());
+	contact.setContactType(chatContactDoc.getContactType());
+	return contact;
     }
 
     public static ContactDTO getContactDTO(ChatContactDoc chatContactDoc) {

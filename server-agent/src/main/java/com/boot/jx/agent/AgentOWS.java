@@ -8,11 +8,13 @@ import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.servlet.DelegatingFilterProxyRegistrationBean;
 import org.springframework.boot.web.servlet.ServletComponentScan;
+import org.springframework.boot.web.servlet.ServletListenerRegistrationBean;
 import org.springframework.boot.web.support.SpringBootServletInitializer;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.scheduling.annotation.EnableAsync;
+import org.springframework.security.web.session.HttpSessionEventPublisher;
 import org.springframework.web.context.request.RequestContextListener;
 
 /**
@@ -63,6 +65,11 @@ public class AgentOWS extends SpringBootServletInitializer {
     @Bean
     public RequestContextListener requestContextListener() {
 	return new RequestContextListener();
+    }
+
+    @Bean
+    public ServletListenerRegistrationBean<HttpSessionEventPublisher> httpSessionEventPublisher() {
+	return new ServletListenerRegistrationBean<HttpSessionEventPublisher>(new HttpSessionEventPublisher());
     }
 
 }

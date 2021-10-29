@@ -125,6 +125,7 @@ public class ChatService {
 	    outboxMessage.session().setMode(inboxMessage.session().getMode());
 	}
 
+	outboxMessage.model().put("contact", ChatDTOUtil.getContactMeta(chatContactDoc));
 	MessageDoc messageDoc = messageStore.createOrUpdate(outboxMessage);
 	connectorHandlerFactory.message("REPLY", chatContactDoc, outboxMessage, inboxMessage);
 	sessionStore.push(messageDoc, outboxMessage);
@@ -146,6 +147,7 @@ public class ChatService {
 	outboxMessage.contact().setContactId(chatContactDoc.getContactId());
 	outboxMessage.setSessionId(chatContactDoc.getSessionId());
 
+	outboxMessage.model().put("contact", ChatDTOUtil.getContactMeta(chatContactDoc));
 	MessageDoc messageDoc = messageStore.createOrUpdate(outboxMessage);
 	connectorHandlerFactory.message("SEND", chatContactDoc, outboxMessage, null);
 	sessionStore.push(messageDoc, outboxMessage);
@@ -166,7 +168,6 @@ public class ChatService {
 	    return actionDco;
 	}
 
-	outboxMessage.model().put("contact", ChatDTOUtil.getContactDTO(chatContactDoc));
 	return replyIntenal(chatContactDoc, outboxMessage, inboxMessage);
     }
 
@@ -187,8 +188,6 @@ public class ChatService {
 	if (ArgUtil.is(actionDto)) {
 	    return actionDto;
 	}
-
-	outboxMessage.model().put("contact", ChatDTOUtil.getContactDTO(chatContactDoc));
 
 	return replyIntenal(chatContactDoc, outboxMessage, inboxMessage);
     }
@@ -212,7 +211,6 @@ public class ChatService {
 	    return actionDto;
 	}
 
-	outboxMessage.model().put("contact", ChatDTOUtil.getContactDTO(chatContactDoc));
 	return sendIntenal(chatContactDoc, outboxMessage);
     }
 
@@ -228,7 +226,6 @@ public class ChatService {
 	    return actionDto;
 	}
 
-	outboxMessage.model().put("contact", ChatDTOUtil.getContactDTO(chatContactDoc));
 	return sendIntenal(chatContactDoc, outboxMessage);
     }
 

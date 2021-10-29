@@ -103,7 +103,7 @@ public class WAGupShupConnector extends AbstractConnector<GupShupConfigDetails, 
 	return outboxMessage;
     }
 
-    public void sendInternal(OutboxMessage outboxMessage, boolean isPushMessage) {
+    public void sendInternal(ChannelConfig channelConfig, OutboxMessage outboxMessage, boolean isPushMessage) {
 	LOGGER.debug("sendInternal(OutboxMessage {}, boolean {})", outboxMessage, isPushMessage);
 	try {
 	    if (isPushMessage) {
@@ -133,17 +133,18 @@ public class WAGupShupConnector extends AbstractConnector<GupShupConfigDetails, 
 			new ChatContactQuery(chatContactDoc).setLastOptInStamp(System.currentTimeMillis()));
 	    }
 	    outboxMessage.messageMetaWrapper().sendType("PM"); // Push Message
-	    this.sendInternal(outboxMessage, true);
+	    this.sendInternal(channelConfig, outboxMessage, true);
 	} else {
 	    outboxMessage.messageMetaWrapper().sendType("SM"); // Session Message
-	    this.sendInternal(outboxMessage, false);
+	    this.sendInternal(channelConfig, outboxMessage, false);
 	}
     }
 
     @Override
-    public void reply(ChannelConfig channelConfig, ChatContactDoc chatContactDoc, OutboxMessage outboxMessage, IMessageExtended inboxMessage) {
+    public void reply(ChannelConfig channelConfig, ChatContactDoc chatContactDoc, OutboxMessage outboxMessage,
+	    IMessageExtended inboxMessage) {
 	resolveTemplate(outboxMessage);
-	this.sendInternal(outboxMessage, false);
+	this.sendInternal(channelConfig, outboxMessage, false);
     }
 
     @Override

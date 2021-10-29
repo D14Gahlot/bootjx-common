@@ -61,23 +61,8 @@ public class TwitterConnector extends AbstractConnector<TwitterConfigDetails, Tw
     @Override
     public void send(ChannelConfig channelConfig, OutboxMessage outboxMessage) {
 	try {
-	    if (ArgUtil.is(outboxMessage.getTemplate())) {
-		QuickMedia templateReply = mongoTemplate.findById(outboxMessage.getTemplate(), QuickMedia.class);
-		if (ArgUtil.is(templateReply)) {
-		    if ("image".equalsIgnoreCase(templateReply.getType())) {
-			outboxMessage.attachment(new Attachment().mediaURL(templateReply.getUrl())
-				.mediaType(FileType.IMAGE.toString()).mediaCaption(templateReply.getTitle()));
-			twitterClient.send(null, outboxMessage);
-		    } else {
-			twitterClient.send(null, outboxMessage);
-		    }
-		} else {
-		    tmplClient.process(outboxMessage);
-		    twitterClient.send(null, outboxMessage);
-		}
-	    } else {
-		twitterClient.send(null, outboxMessage);
-	    }
+	    template(channelConfig, outboxMessage);
+	    twitterClient.send(channelConfig, outboxMessage);
 	    outboxMessage.updateStatus(OutboxMessage.Status.SENT);
 	} catch (Exception e) {
 	    outboxMessage.updateStatus(OutboxMessage.Status.SENT_ERR);
