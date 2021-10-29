@@ -65,6 +65,7 @@ public class AgentSessionService implements LogoutHandler {
 	builder.set("agentDept", agentSessionBean.getAgentDept());
 	builder.set("isLoggedIn", agentSessionBean.isLoggedIn());
 	builder.set("isOnline", agentSessionBean.isOnline());
+	builder.set("isAway", agentSessionBean.isAway());
 	builder.set("lastOnlineStamp", agentSessionBean.getLastOnlineStamp());
 
 	if (ArgUtil.is(agentSessionBean.getProfile())) {
