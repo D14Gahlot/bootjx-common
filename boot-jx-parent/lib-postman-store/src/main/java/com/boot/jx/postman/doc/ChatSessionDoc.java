@@ -7,6 +7,7 @@ import java.util.List;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.TypeAlias;
 import org.springframework.data.annotation.Version;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -27,6 +28,7 @@ public class ChatSessionDoc extends APatchableIndexed<ChatSessionDoc, String> im
     private Long version;
 
     @ApiMockModelProperty(example = "wa919930104050", required = false)
+    @Indexed
     private String contactId;
     private String contactType;
     private String channel;
@@ -45,8 +47,10 @@ public class ChatSessionDoc extends APatchableIndexed<ChatSessionDoc, String> im
     private long startSessionStamp;
     private long fistResponseStamp;
 
+    @Indexed
     private long agentSessionStamp;
 
+    @Indexed
     private long lastInComingStamp;
     private long lastOutGoingStamp;
 
@@ -62,6 +66,7 @@ public class ChatSessionDoc extends APatchableIndexed<ChatSessionDoc, String> im
     private Integer agentScore;
     private Integer botScore;
 
+    @Indexed
     private String mode;
     private String status;
     @Deprecated

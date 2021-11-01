@@ -323,14 +323,21 @@ public class SessionStore extends CommonDocStore {
 	Query query2 = new Query();
 	Calendar timeout = Calendar.getInstance();
 	timeout.setTimeInMillis(timeout.getTimeInMillis() - period);
-	query2.addCriteria(Criteria.where("active").is(true).and("mode").is("AGENT").and("agentSessionStamp")
-		.gt(timeout.getTimeInMillis() * 2).andOperator(
+	long watermarkStamp = timeout.getTimeInMillis();
+	timeout.setTimeInMillis(timeout.getTimeInMillis() - period);
+	long graceStamp = timeout.getTimeInMillis();
+
+	query2.addCriteria(Criteria.where("active").is(true).and("mode").is("AGENT")
+		// Agent Session Start
+		.and("agentSessionStamp").gt(watermarkStamp)
+		// Additional Stamps
+		.andOperator(
 			//
 			new Criteria().orOperator(
 				// Customer has replied within CustomerCareWindow
-				Criteria.where("lastInComingStamp").gt(timeout.getTimeInMillis()),
+				Criteria.where("lastInComingStamp").gt(graceStamp),
 				// Agent Has been Assigned to it
-				Criteria.where("agentSessionStamp").gt(timeout.getTimeInMillis())),
+				Criteria.where("agentSessionStamp").gt(graceStamp)),
 			// Is not assigned to any agent or assigned to said agent
 //						new Criteria().orOperator(Criteria.where("assignedToAgent").exists(false),
 //								Criteria.where("assignedToAgent").is(null),
@@ -379,7 +386,7 @@ public class SessionStore extends CommonDocStore {
 	    }
 	}
 	query2.addCriteria(new Criteria().orOperator(orExpression.toArray(new Criteria[orExpression.size()])));
-	// LOGGER.info(query2.toString());
+	//LOGGER.info(query2.toString());
 	return mongoTemplate.find(query2, ChatSessionDoc.class);
     }
 
