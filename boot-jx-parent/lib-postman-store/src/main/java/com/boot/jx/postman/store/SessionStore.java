@@ -323,9 +323,15 @@ public class SessionStore extends CommonDocStore {
 	Query query2 = new Query();
 	Calendar timeout = Calendar.getInstance();
 	timeout.setTimeInMillis(timeout.getTimeInMillis() - period);
-	query2.addCriteria(Criteria.where("active").is(true).and("mode").is("AGENT").and("lastInComingStamp")
-		.gt(timeout.getTimeInMillis()).andOperator(
-		// Is not assigned to any agent or assigned to said agent
+	query2.addCriteria(Criteria.where("active").is(true).and("mode").is("AGENT").and("startSessionStamp")
+		.gt(timeout.getTimeInMillis() * 2).andOperator(
+			//
+			new Criteria().orOperator(
+				// Customer has replied within CustomerCareWindow
+				Criteria.where("lastInComingStamp").gt(timeout.getTimeInMillis()),
+				// Agent Has been Assigned to it
+				Criteria.where("agentSessionStamp").gt(timeout.getTimeInMillis())),
+			// Is not assigned to any agent or assigned to said agent
 //						new Criteria().orOperator(Criteria.where("assignedToAgent").exists(false),
 //								Criteria.where("assignedToAgent").is(null),
 //								Criteria.where("assignedToAgent").is(agentCode)),
