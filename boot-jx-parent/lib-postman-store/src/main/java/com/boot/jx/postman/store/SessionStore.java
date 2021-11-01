@@ -323,7 +323,7 @@ public class SessionStore extends CommonDocStore {
 	Query query2 = new Query();
 	Calendar timeout = Calendar.getInstance();
 	timeout.setTimeInMillis(timeout.getTimeInMillis() - period);
-	query2.addCriteria(Criteria.where("active").is(true).and("mode").is("AGENT").and("startSessionStamp")
+	query2.addCriteria(Criteria.where("active").is(true).and("mode").is("AGENT").and("agentSessionStamp")
 		.gt(timeout.getTimeInMillis() * 2).andOperator(
 			//
 			new Criteria().orOperator(
