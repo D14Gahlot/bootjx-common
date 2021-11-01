@@ -337,7 +337,7 @@ public class SessionStore extends CommonDocStore {
 				// Customer has replied within CustomerCareWindow
 				Criteria.where("lastInComingStamp").gt(graceStamp),
 				// Agent Has been Assigned to it
-				Criteria.where("agentSessionStamp").gt(graceStamp)),
+				Criteria.where("lastOutGoingStamp").gt(graceStamp)),
 			// Is not assigned to any agent or assigned to said agent
 //						new Criteria().orOperator(Criteria.where("assignedToAgent").exists(false),
 //								Criteria.where("assignedToAgent").is(null),
