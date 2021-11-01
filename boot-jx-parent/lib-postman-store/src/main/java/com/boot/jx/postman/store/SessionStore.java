@@ -379,14 +379,15 @@ public class SessionStore extends CommonDocStore {
 	Query query2 = new Query();
 	List<Criteria> orExpression = new ArrayList<Criteria>();
 
-	orExpression.add(Criteria.where("contactId").is(contactId));
 	if (ArgUtil.is(contacts)) {
 	    for (ChatContactDoc chatContactDoc : contacts) {
 		orExpression.add(Criteria.where("contactId").is(chatContactDoc.getContactId()));
 	    }
+	} else {
+	    orExpression.add(Criteria.where("contactId").is(contactId));
 	}
 	query2.addCriteria(new Criteria().orOperator(orExpression.toArray(new Criteria[orExpression.size()])));
-	//LOGGER.info(query2.toString());
+	// LOGGER.info(query2.toString());
 	return mongoTemplate.find(query2, ChatSessionDoc.class);
     }
 
