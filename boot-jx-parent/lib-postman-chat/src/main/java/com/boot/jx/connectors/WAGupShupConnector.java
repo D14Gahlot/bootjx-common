@@ -215,7 +215,7 @@ public class WAGupShupConnector extends AbstractConnector<GupShupConfigDetails, 
 	List<MessageReport> batch = new LinkedList<MessageReport>();
 	for (GupShupDeliveryDto gupShupDelivery : status.getResponse()) {
 	    MessageReport report = new MessageReport();
-	    report.setContactType(ContactType.WHATSAPP);
+	    report.contact().type(ContactType.WHATSAPP);
 	    report.setChangeStamp(gupShupDelivery.getEventTs());
 
 	    report.setMessageIdExt(gupShupDelivery.getExternalId());

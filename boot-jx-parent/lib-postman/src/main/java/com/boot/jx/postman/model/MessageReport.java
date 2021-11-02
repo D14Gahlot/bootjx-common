@@ -2,7 +2,6 @@ package com.boot.jx.postman.model;
 
 import java.io.Serializable;
 
-import com.boot.jx.dict.ContactType;
 import com.boot.jx.postman.model.Message.Status;
 import com.boot.jx.postman.model.MessageDefinitions.Contactable;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -19,7 +18,6 @@ public class MessageReport implements Serializable {
 
     protected long changeStamp;
     protected long watermarkStamp;
-    private ContactType contactType;
     private Status status = null;
     private String reason = null;
 
@@ -61,14 +59,6 @@ public class MessageReport implements Serializable {
 
     public void setChangeStamp(long changeStamp) {
 	this.changeStamp = changeStamp;
-    }
-
-    public ContactType getContactType() {
-	return contactType;
-    }
-
-    public void setContactType(ContactType contactType) {
-	this.contactType = contactType;
     }
 
     public String getReason() {

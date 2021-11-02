@@ -285,7 +285,7 @@ public class MessageStore extends CommonDocStore {
 
     public void updateStatus(MessageReport messageReport) {
 
-	LOGGER.debug("updateStatus {} {} {}", messageReport.getMessageId(), messageReport.getContactType(),
+	LOGGER.debug("updateStatus {} {} {}", messageReport.getMessageId(), messageReport.contact().getChannelType(),
 		messageReport.getStatus());
 
 	CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder();
@@ -321,10 +321,10 @@ public class MessageStore extends CommonDocStore {
 
 	    if (multi) {
 		mongoTemplate.updateMulti(builder.getQuery(), builder.getUpdate(), MessageDoc.class,
-			getCollectionName(messageReport.getContactType()));
+			getCollectionName(messageReport.contact().getContactType()));
 	    } else {
 		mongoTemplate.updateFirst(builder.getQuery(), builder.getUpdate(), MessageDoc.class,
-			getCollectionName(messageReport.getContactType()));
+			getCollectionName((messageReport.contact().getContactType())));
 	    }
 	    // LOGGER.info(JsonUtil.toJson(builder));
 	}
