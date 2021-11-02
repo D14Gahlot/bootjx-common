@@ -795,8 +795,9 @@ public class AdminDashBoardManager {
 			/** 1 hr gap **/
 			long hourTimeSamp = (long) (timeStamp / (60 * 1000));
 			long hh = timeStamp / hourTimeSamp;
-			// hourList.add(Long.parseLong(formattedDateH)); hour wise count
-			hourList.add(hh);
+			//hourList.add(hh);
+			 hourList.add(Long.parseLong(formattedDateH));// hour wise count
+			
 			// System.out.println(" timeStamp :"+timeStamp+"\t long to date :"+date+"\t
 			// formattedDateH :"+formattedDateH+"\t hourTimeSamp :"+hourTimeSamp+"\t hh
 			// :"+hh);
