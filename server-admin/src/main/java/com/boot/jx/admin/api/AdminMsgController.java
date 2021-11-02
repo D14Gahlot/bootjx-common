@@ -1,5 +1,6 @@
 package com.boot.jx.admin.api;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -21,6 +23,8 @@ import com.boot.jx.api.ApiResponse;
 import com.boot.jx.common.doc.ImportChatSessionDoc;
 import com.boot.jx.common.store.ChatArchiveService;
 import com.boot.jx.dict.ContactType;
+import com.boot.jx.mongo.CommonMongoQueryBuilder.CommonMongoCriteria;
+import com.boot.jx.postman.PMConstants.CHAT_STATUS;
 import com.boot.jx.mongo.CommonMongoQB.CommonMongoCriteria;
 import com.boot.jx.postman.doc.BulkSessionDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
@@ -170,5 +174,22 @@ public class AdminMsgController {
 		return resp;
 
 	}
+	
+	/** search by status or tagCategory **/
+    @ResponseBody
+    @RequestMapping(value = "/api/message/sessions/searchby/statusorcategory", method = { RequestMethod.GET })
+    public ApiResponse<ChatSessionDTO, Object> getByStatusOrCategory(@RequestParam(required = false,defaultValue ="OPEN") CHAT_STATUS status,
+    		@RequestParam(required= false) String tagCategory,
+    		@RequestParam(required= false) long dateRange1,
+    		@RequestParam(required= false) long dateRange2) {
+	List<ChatSessionDTO> chatSessionDtos = new ArrayList<ChatSessionDTO>();
+	List<ChatSessionDoc> sessions = sessionStore.findByStatusOrQuickTag(status,tagCategory,dateRange1,dateRange2);
+	for (ChatSessionDoc chatSessionDoc : sessions) {
+		ChatSessionDTO chatSessionDto = chatArchive.withContact(chatSessionDoc);
+		chatSessionDtos.add(chatSessionDto);
+	}
+	return ApiResponse.buildResults(chatSessionDtos);
+    }
+    
 
 }

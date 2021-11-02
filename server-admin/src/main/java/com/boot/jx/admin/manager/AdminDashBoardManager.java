@@ -662,7 +662,7 @@ public class AdminDashBoardManager {
 
 		Query queryAll = new Query();
 		queryAll.addCriteria(Criteria.where("timestamp").gt(dateRange1).lt(dateRange2));
-		// queryAll.with(new Sort(Sort.Direction.ASC, "timestamp"));
+		queryAll.addCriteria(Criteria.where("type").in("I","O"));
 		queryAll.with(new Sort(new Order(Direction.ASC, "timestamp")));
 		List<MessageDoc> totalMsgDoc = mongoTemplate.find(queryAll, MessageDoc.class, contactType.toString());
 		return totalMsgDoc;
@@ -773,6 +773,7 @@ public class AdminDashBoardManager {
 	public List<MessageDoc> getUniqueConversation(Object contactType, long dateRange1, long dateRange2) {
 		Query query = new Query();
 		query.addCriteria(Criteria.where("timestamp").gt(dateRange1).lt(dateRange2));
+		query.addCriteria(Criteria.where("type").in("O","I"));
 		List<MessageDoc> distinctIdList = mongoTemplate.getCollection(contactType.toString()).distinct("contactId",
 				query.getQueryObject());
 		return distinctIdList;
@@ -795,8 +796,9 @@ public class AdminDashBoardManager {
 			/** 1 hr gap **/
 			long hourTimeSamp = (long) (timeStamp / (60 * 1000));
 			long hh = timeStamp / hourTimeSamp;
-			// hourList.add(Long.parseLong(formattedDateH)); hour wise count
-			hourList.add(hh);
+			//hourList.add(hh);
+			 hourList.add(Long.parseLong(formattedDateH));// hour wise count
+			
 			// System.out.println(" timeStamp :"+timeStamp+"\t long to date :"+date+"\t
 			// formattedDateH :"+formattedDateH+"\t hourTimeSamp :"+hourTimeSamp+"\t hh
 			// :"+hh);

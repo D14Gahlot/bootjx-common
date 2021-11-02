@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.boot.jx.dict.FileType;
+import com.boot.jx.exception.ApiHttpExceptions.ApiHttpClientException;
 import com.boot.jx.postman.PMConfiguration;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PostManException;
@@ -109,7 +110,7 @@ public class WA360Client {
 			}
 			components.add(headerComponentReq.build().map());
 		    }
-		} else if(ArgUtil.is(outboxMessage.getAttachments())) {
+		} else if (ArgUtil.is(outboxMessage.getAttachments())) {
 		    String lowerFormat = extTemplateComponentFormat.toLowerCase();
 		    WA360OutBoundMedia media = createMedia(lowerFormat, outboxMessage.getAttachments().get(0));
 		    headerComponentReq.parameter(lowerFormat, media);
@@ -307,10 +308,14 @@ public class WA360Client {
     }
 
     private MapModel send(MapModel req, ChannelConfig channelConfig) {
-	MapModel resp = restService.ajax(WA360Constants.BASE_URL).path("v1/messages")
-		.header(WA360Constants.D360_API_KEY, channelConfig.getWa360d().getApiKey()).post(req.toMap())
-		.asMapModel();
-	return resp;
+	try {
+	    MapModel resp = restService.ajax(WA360Constants.BASE_URL).path("v1/messages")
+		    .header(WA360Constants.D360_API_KEY, channelConfig.getWa360d().getApiKey()).post(req.toMap())
+		    .asMapModel();
+	    return resp;
+	} catch (ApiHttpClientException e) {
+	    return MapModel.from(e.getResponse().getBody());
+	}
     }
 
     private String getMessageId(MapModel resp) {

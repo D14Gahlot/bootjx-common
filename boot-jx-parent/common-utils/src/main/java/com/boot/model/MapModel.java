@@ -282,6 +282,10 @@ public class MapModel implements JsonSerializerType<Object> {
 	return new MapModel(map);
     }
 
+    public static MapModel from(String json) {
+	return new MapModel(json);
+    }
+
     public static MapModel createInstance() {
 	return new MapModel(new HashMap<String, Object>());
     }

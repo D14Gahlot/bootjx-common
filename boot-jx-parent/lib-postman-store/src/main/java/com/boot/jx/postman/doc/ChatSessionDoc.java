@@ -52,6 +52,7 @@ public class ChatSessionDoc extends APatchableIndexed<ChatSessionDoc, String> im
 
     @Indexed
     private long lastInComingStamp;
+    @Indexed
     private long lastOutGoingStamp;
 
     private long assignedDeptStamp;
