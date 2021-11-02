@@ -10,23 +10,21 @@ import org.redisson.api.RedissonClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Component;
 
 import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorMapping;
-import com.boot.jx.chat.ConnectorHandlerFactory.DefaultConnector;
+import com.boot.jx.connectors.AbstractConnector.DefaultConnector;
 import com.boot.jx.dict.ContactType;
-import com.boot.jx.dict.FileType;
-import com.boot.jx.postman.client.TmplClient;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
-import com.boot.jx.postman.doc.QuickMedia;
-import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.MessageBoxEvent;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.model.TmplElement;
 import com.boot.jx.postman.plugin.ChannelConfig;
+import com.boot.jx.postman.plugin.ChannelPluginProvider;
+import com.boot.jx.postman.plugin.WebPlugin;
+import com.boot.jx.postman.plugin.WebPlugin.WebConfigDetails;
 import com.boot.jx.postman.query.ChatContactQuery;
 import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
@@ -35,10 +33,15 @@ import com.boot.utils.JsonUtil;
 
 @Component
 @ConnectorMapping(contactType = ContactType.WEBSITE)
-public class WebConnector extends DefaultConnector {
+public class WebConnector extends DefaultConnector<WebConfigDetails, WebPlugin> {
 
     private static final String WEB_USER_MESSAGE_STR = "WEB_USER_MESSAGE_STR_";
     private static final Logger LOGGER = LoggerFactory.getLogger(WebConnector.class);
+
+    @Override
+    public WebPlugin getPlugin() {
+	return ChannelPluginProvider.WEB;
+    }
 
     public static class MessageQueue<T> {
 
@@ -73,32 +76,11 @@ public class WebConnector extends DefaultConnector {
 
     private MessageQueue<OutboxMessage> messageQueue = new MessageQueue<OutboxMessage>(100);
 
-    @Autowired
-    private TmplClient tmplClient;
-
-    @Autowired
-    private MongoTemplate mongoTemplate;
-
-    public OutboxMessage process(OutboxMessage outboxMessage) {
-	if (ArgUtil.is(outboxMessage.getTemplate())) {
-	    QuickMedia mediaReply = mongoTemplate.findById(outboxMessage.getTemplate(), QuickMedia.class);
-	    if (ArgUtil.is(mediaReply)) {
-		if ("image".equalsIgnoreCase(mediaReply.getType())) {
-		    outboxMessage.attachment(
-			    new Attachment().mediaURL(mediaReply.getUrl()).mediaType(FileType.IMAGE.toString()));
-		}
-	    } else {
-		tmplClient.process(outboxMessage);
-	    }
-	}
-	return outboxMessage;
-    }
-
     @Override
     public void send(ChannelConfig channelConfig, OutboxMessage outboxMessage) {
 	String to = CollectionUtil.getOne(outboxMessage.getTo());
 
-	process(outboxMessage);
+	template(channelConfig, outboxMessage);
 	if (redisson == null) {
 	    try {
 		messageQueue.enqueue(outboxMessage);
@@ -117,7 +99,7 @@ public class WebConnector extends DefaultConnector {
 
     @Override
     public InboxMessage assignToAgent(InboxMessage inboxMessage) {
-	this.reply(null, inboxMessage, new OutboxMessage().message("Call us"));
+	this.reply(null, null, new OutboxMessage().message("Call us"), inboxMessage);
 	return inboxMessage;
     }
 
@@ -159,15 +141,15 @@ public class WebConnector extends DefaultConnector {
 	List<TmplElement> inputs = new ArrayList<TmplElement>();
 	if (ArgUtil.isEmpty(chatContactDoc.getName())) {
 	    inputs.add(new TmplElement().name("name").label("Name").type("TEXT"));
-	    reply(null, inboxMessage, (OutboxMessage) inboxMessage.replyMessage("Please fill below inputs to continue")
-		        .option("inputs", inputs));
+	    reply(null, null, (OutboxMessage) inboxMessage.replyMessage("Please fill below inputs to continue")
+		    .option("inputs", inputs), inboxMessage);
 	    return false;
 	}
 
 	if (ArgUtil.isEmpty(chatContactDoc.getEmail())) {
 	    inputs.add(new TmplElement().name("email").label("Email").type("EMAIL"));
-	    reply(null, inboxMessage, (OutboxMessage) inboxMessage.replyMessage("Please fill below inputs to continue")
-		        .option("inputs", inputs));
+	    reply(null, null, (OutboxMessage) inboxMessage.replyMessage("Please fill below inputs to continue")
+		    .option("inputs", inputs), inboxMessage);
 	    return false;
 	}
 

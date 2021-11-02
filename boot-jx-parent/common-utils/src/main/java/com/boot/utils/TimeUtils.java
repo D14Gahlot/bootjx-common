@@ -1,5 +1,6 @@
 package com.boot.utils;
 
+import java.io.Serializable;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -9,6 +10,7 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
+import com.boot.model.UtilityModels.Stringable;
 import com.boot.utils.StringUtils.StringMatcher;
 
 /**
@@ -69,6 +71,36 @@ public class TimeUtils {
 
 	public static Set<String> keys() {
 	    return MAP.keySet();
+	}
+    }
+
+    public static class TimePeriod implements Stringable, Serializable {
+	private static final long serialVersionUID = 1L;
+	long millis;
+	String stringValue;
+
+	public long toMillis() {
+	    return millis;
+	}
+
+	public void setMillis(long millis) {
+	    this.millis = millis;
+	}
+
+	@Override
+	public void fromString(String string) {
+	    this.stringValue = string;
+	    this.millis = TimeUtils.toMillis(string);
+	}
+
+	public String toString() {
+	    return stringValue;
+	}
+
+	public static TimePeriod from(String string) {
+	    TimePeriod tp = new TimePeriod();
+	    tp.fromString(string);
+	    return tp;
 	}
     }
 

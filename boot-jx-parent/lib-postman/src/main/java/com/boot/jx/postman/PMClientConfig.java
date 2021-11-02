@@ -9,6 +9,7 @@ import com.boot.jx.AppContextUtil;
 import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.TimeUtils.TimePeriod;
 
 @Component
 @PropertySource("classpath:application-postman.properties")
@@ -61,7 +62,7 @@ public class PMClientConfig {
     }
 
     public String getDefaultSender() {
-	return environment.get("postman.bot.name")
+	return environment.keyEntry("postman.bot.name")
 		.asString(ArgUtil.parseAsString(environment.config().agent().getDefaultBotName(), defaultSender));
     }
 
@@ -89,15 +90,15 @@ public class PMClientConfig {
 	return environment.config().getPref(PROPERTIES.POSTMAN_CHAT_SESSION_TIMEOUT).asString(chatSessionTimeout);
     }
 
-    public String getAgentSessionTimeout() {
-	return agentSessionTimeout;
+    public TimePeriod getAgentSessionTimeout() {
+	return TimePeriod.from(agentSessionTimeout);
     }
 
     public String getWebhookBase(ChannelConfig channelConfig) {
 	String webhookUrl = channelConfig.getWebhookUrl();
 	if (!ArgUtil.is(webhookUrl)) {
 	    webhookUrl = String.format("https://%s.%s/postman", AppContextUtil.getTenant(),
-		    environment.get("mry.prop.service.domain").asString());
+		    environment.keyEntry("mry.prop.service.domain").asString());
 	}
 	return webhookUrl;
     }

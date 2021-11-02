@@ -10,7 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Component;
 
-import com.boot.jx.chat.ConnectorHandlerFactory.AbstractConnector;
 import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorMapping;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.dict.FileType;
@@ -23,9 +22,12 @@ import com.boot.jx.postman.model.MessageBoxEvent;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.model.WAMessage.Channel;
 import com.boot.jx.postman.plugin.ChannelConfig;
+import com.boot.jx.postman.plugin.ChannelPluginProvider;
+import com.boot.jx.postman.plugin.TwitterPlugin;
 import com.boot.jx.postman.query.ChatContactQuery;
 import com.boot.jx.postman.tw.TwitterClient;
 import com.boot.jx.postman.tw.TwitterClientContext;
+import com.boot.jx.postman.tw.TwitterConfigDetails;
 import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.JsonUtil;
@@ -38,9 +40,14 @@ import twitter4j.TwitterException;
 
 @Component
 @ConnectorMapping(contactType = ContactType.TWITTER)
-public class TwitterConnector extends AbstractConnector {
+public class TwitterConnector extends AbstractConnector<TwitterConfigDetails, TwitterPlugin> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TwitterConnector.class);
+
+    @Override
+    public TwitterPlugin getPlugin() {
+	return ChannelPluginProvider.TWITTER;
+    }
 
     @Autowired
     private TwitterClient twitterClient;
@@ -54,23 +61,8 @@ public class TwitterConnector extends AbstractConnector {
     @Override
     public void send(ChannelConfig channelConfig, OutboxMessage outboxMessage) {
 	try {
-	    if (ArgUtil.is(outboxMessage.getTemplate())) {
-		QuickMedia templateReply = mongoTemplate.findById(outboxMessage.getTemplate(), QuickMedia.class);
-		if (ArgUtil.is(templateReply)) {
-		    if ("image".equalsIgnoreCase(templateReply.getType())) {
-			outboxMessage.attachment(new Attachment().mediaURL(templateReply.getUrl())
-				.mediaType(FileType.IMAGE.toString()).mediaCaption(templateReply.getTitle()));
-			twitterClient.send(null, outboxMessage);
-		    } else {
-			twitterClient.send(null, outboxMessage);
-		    }
-		} else {
-		    tmplClient.process(outboxMessage);
-		    twitterClient.send(null, outboxMessage);
-		}
-	    } else {
-		twitterClient.send(null, outboxMessage);
-	    }
+	    template(channelConfig, outboxMessage);
+	    twitterClient.send(channelConfig, outboxMessage);
 	    outboxMessage.updateStatus(OutboxMessage.Status.SENT);
 	} catch (Exception e) {
 	    outboxMessage.updateStatus(OutboxMessage.Status.SENT_ERR);

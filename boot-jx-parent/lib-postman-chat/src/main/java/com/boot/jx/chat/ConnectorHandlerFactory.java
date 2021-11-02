@@ -13,12 +13,13 @@ import org.springframework.stereotype.Component;
 
 import com.boot.common.ScopedBeanFactory;
 import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorHandler;
+import com.boot.jx.connectors.AbstractConnector.DefaultConnector;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.logger.LoggerService;
 import com.boot.jx.mongo.CommonMongoTemplate;
-import com.boot.jx.postman.PMClientConfig;
 import com.boot.jx.postman.PMConfiguration;
 import com.boot.jx.postman.PMConstants;
+import com.boot.jx.postman.PMConstants.MESSAGE_SEND_TYPE;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
@@ -35,12 +36,12 @@ import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.postman.query.ChatContactQuery;
 import com.boot.jx.postman.query.ChatSessionQuery;
 import com.boot.jx.postman.service.ChatDTOUtil;
-import com.boot.jx.postman.store.MessageContext;
 import com.boot.jx.postman.store.MessageStore;
 import com.boot.jx.stomp.StompTunnelService;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.TimeUtils;
 
 @Component
 public class ConnectorHandlerFactory extends ScopedBeanFactory<String, ConnectorHandler> {
@@ -50,8 +51,11 @@ public class ConnectorHandlerFactory extends ScopedBeanFactory<String, Connector
     public static Logger LOGGER = LoggerService.getLogger(ConnectorHandlerFactory.class);
 
     public interface ConnectorHandler {
-	default public void reply(ChannelConfig channelConfig, IMessageExtended inboxMessage,
-		OutboxMessage outboxMessage) {
+
+	public static final long DEFAULT_SESISON_PERIOD = TimeUtils.toMillis("24h");
+
+	default public void reply(ChannelConfig channelConfig, ChatContactDoc chatContactDoc,
+		OutboxMessage outboxMessage, IMessageExtended inboxMessage) {
 	    outboxMessage.addTo(inboxMessage.getFrom());
 	    outboxMessage.contact().setLane(inboxMessage.contact().getLane());
 	    this.send(channelConfig, outboxMessage);
@@ -77,20 +81,31 @@ public class ConnectorHandlerFactory extends ScopedBeanFactory<String, Connector
 	    return true;
 	}
 
-	default public void message(ChannelConfig channelConfig, String messageType, ChatContactDoc chatContactDoc,
+	default public void meta(ChannelConfig channelConfig, String messageType, ChatContactDoc chatContactDoc,
 		IMessageExtended inboxMessage, OutboxMessage outboxMessage) {
+	    if (TimeUtils.isExpired(chatContactDoc.getLastInBoundStamp(), DEFAULT_SESISON_PERIOD)) {
+		outboxMessage.messageMetaWrapper().sendType(MESSAGE_SEND_TYPE.PUSH_MESSAGE); // Push Message
+	    } else {
+		outboxMessage.messageMetaWrapper().sendType(MESSAGE_SEND_TYPE.SESSION_MESSAGE); // Session Message
+	    }
+	}
+
+	default public void message(ChannelConfig channelConfig, String messageType, ChatContactDoc chatContactDoc,
+		OutboxMessage outboxMessage, IMessageExtended inboxMessage) {
 	    LOGGER.debug("message(String {}, ChatContactDoc {}, SessionMessage {}, OutboxMessage {})", messageType,
 		    chatContactDoc, inboxMessage, outboxMessage);
 	    try {
 		switch (messageType) {
 		case "SEND":
 		    outboxMessage.messageMetaWrapper().composeType("N"); // is a New Message
+		    this.meta(channelConfig, messageType, chatContactDoc, inboxMessage, outboxMessage);
 		    this.send(channelConfig, chatContactDoc, outboxMessage);
 		    outboxMessage.updateStatus(Message.Status.SENT);
 		    break;
 		case "REPLY":
 		    outboxMessage.messageMetaWrapper().composeType("R"); // Its a Reply
-		    this.reply(channelConfig, inboxMessage, outboxMessage);
+		    this.meta(channelConfig, messageType, chatContactDoc, inboxMessage, outboxMessage);
+		    this.reply(channelConfig, chatContactDoc, outboxMessage, inboxMessage);
 		    outboxMessage.updateStatus(Message.Status.SENT);
 		    break;
 		default:
@@ -159,41 +174,9 @@ public class ConnectorHandlerFactory extends ScopedBeanFactory<String, Connector
 	    // DO Nothing this method is optional
 	}
 
-	ChannelConfig getChannelConfig(IMessage outboxMessage);
-    }
+	public ChannelConfig getChannelConfig(IMessage outboxMessage);
 
-    public static abstract class AbstractConnector implements ConnectorHandler {
-	@Autowired
-	protected MessageContext messageContext;
-
-	@Autowired
-	protected PMClientConfig pmClientConfig;
-
-	@Autowired
-	protected PMEnvironment environment;
-
-	@Override
-	public void registerWebHook(ChannelConfig channelConfig) {
-	    String webhookUrl = pmClientConfig.getWebhookUrl(channelConfig);
-	    registerWebHook(channelConfig, webhookUrl);
-	}
-
-	public void registerWebHook(ChannelConfig channelConfig, String webhookUrl) {
-	    LOGGER.error("WEBHOOK REGISTRATION NOT DEFINED for URL");
-	}
-
-	@Override
-	public ChannelConfig getChannelConfig(IMessage iMessage) {
-	    String channelId = PostManUtil.CHANNEL_ID(iMessage.contact());
-	    ChannelConfig channelConfig = environment.config().channels(channelId);
-	    if (!ArgUtil.is(channelConfig) && !ContactType.WEBSITE.equals(iMessage.contact().type())) {
-		LOGGER.error(String.format("ChannelConfig not found for %s", channelId));
-	    }
-	    return channelConfig;
-	}
-    }
-
-    public static abstract class DefaultConnector extends AbstractConnector {
+	public OutboxMessage template(ChannelConfig channelConfig, OutboxMessage outboxMessage);
     }
 
     @Retention(RetentionPolicy.RUNTIME)
@@ -245,7 +228,7 @@ public class ConnectorHandlerFactory extends ScopedBeanFactory<String, Connector
     }
 
     @Autowired(required = false)
-    private DefaultConnector defaultConnector;
+    private DefaultConnector<?, ?> defaultConnector;
 
     @Autowired
     private MessageStore messageStore;
@@ -285,12 +268,12 @@ public class ConnectorHandlerFactory extends ScopedBeanFactory<String, Connector
      * 
      * @param messageType
      * @param chatContactDoc
-     * @param inboxMessage
      * @param outboxMessage
+     * @param inboxMessage
      */
     @Async
-    public void message(String messageType, ChatContactDoc chatContactDoc, IMessageExtended inboxMessage,
-	    OutboxMessage outboxMessage) {
+    public void message(String messageType, ChatContactDoc chatContactDoc, OutboxMessage outboxMessage,
+	    IMessageExtended inboxMessage) {
 	LOGGER.debug("message(String {}, ChatContactDoc {}, IMessageExtended {}, OutboxMessage {})", messageType,
 		chatContactDoc, inboxMessage, outboxMessage);
 
@@ -301,7 +284,7 @@ public class ConnectorHandlerFactory extends ScopedBeanFactory<String, Connector
 	    if (ArgUtil.is(channelConfig) || ContactType.WEBSITE.equals(outboxMessage.contact().type())) {
 		ConnectorHandler connector = get(channelConfig);
 		if (ArgUtil.is(connector)) {
-		    connector.message(channelConfig, messageType, chatContactDoc, inboxMessage, outboxMessage);
+		    connector.message(channelConfig, messageType, chatContactDoc, outboxMessage, inboxMessage);
 		} else {
 		    outboxMessage.logs().add(String.format("Connector not defined for %s", channelId));
 		}

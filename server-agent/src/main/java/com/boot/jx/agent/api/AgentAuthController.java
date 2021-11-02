@@ -215,15 +215,17 @@ public class AgentAuthController {
 	    x.redirectUrl(appConfig.getAppPrefix() + "/app/home");
 	    AgentResponseAuthDto agent = x.getMeta();
 	    if (ArgUtil.is(agent)) {
-		UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(
-			agent.getAgent_code(), password);
-		token.setDetails(new WebAuthenticationDetails(request));
-		Authentication authentication = agentAuthProvider.authenticate(token);
-		SecurityContextHolder.getContext().setAuthentication(authentication);
-		sessionService.updateLogin(agent);
-		stompTunnelSessionManager.registerUser(agent.getAgent_code(), agent.getDept().getDept_code(),
-			DEFAULT.NO_DEPT, StompQuery.PING_TAG);
-
+		
+		sessionService.login(request, agent, password);
+//		UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(
+//			agent.getAgent_code(), password);
+//		token.setDetails(new WebAuthenticationDetails(request));
+//		Authentication authentication = agentAuthProvider.authenticate(token);
+//		SecurityContextHolder.getContext().setAuthentication(authentication);
+//		sessionService.updateLogin(agent);
+//		stompTunnelSessionManager.registerUser(agent.getAgent_code(), agent.getDept().getDept_code(),
+//			DEFAULT.NO_DEPT, StompQuery.PING_TAG);
+		
 		boolean rememberme = ArgUtil.parseAsBoolean(commonHttpRequest.get("rememberme"), false);
 		if (rememberme) {
 		    String xRemSession = CryptoUtil.getEncoder()

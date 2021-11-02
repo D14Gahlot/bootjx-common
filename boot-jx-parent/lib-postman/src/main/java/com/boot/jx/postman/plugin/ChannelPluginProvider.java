@@ -72,7 +72,7 @@ public class ChannelPluginProvider {
 	    list.add(new ConfigMeta().key("name").title("Desc"));
 	    list.add(new ConfigMeta().key("channelKey").title("Channel Key").readonly().hidden()
 		    .defaultValue(PostManUtil.UNIQUE_API_KEY()));
-	    String serviceDomain = pmEnvironment.get("mry.prop.service.domain").asString();
+	    String serviceDomain = pmEnvironment.keyEntry("mry.prop.service.domain").asString();
 	    String clientDomain = AppContextUtil.getTenant();
 	    list.add(new ConfigMeta().key("webhookUrl").title("Webhook URL").hidden()
 		    .defaultValue(String.format("https://%s.%s/postman", clientDomain, serviceDomain)));

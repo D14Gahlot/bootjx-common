@@ -16,12 +16,14 @@ import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Component;
 
 import com.boot.jx.mongo.CommonDocStore;
+import com.boot.jx.mongo.CommonMongoQB.CommonMongoCriteria;
 import com.boot.jx.mongo.CommonMongoQueryBuilder;
-import com.boot.jx.mongo.CommonMongoQueryBuilder.CommonMongoCriteria;
 import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.jx.postman.PMClientConfig;
 import com.boot.jx.postman.PMConstants;
+import com.boot.jx.postman.PMConstants.CHAT_MODE;
 import com.boot.jx.postman.PMConstants.CHAT_STATUS;
+import com.boot.jx.postman.PMConstants.DEFAULT_VALUES;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.ChatUserProfileDoc;
@@ -113,29 +115,60 @@ public class SessionStore extends CommonDocStore {
 	return null;
     }
 
-    public ChatSessionDoc getSession(SessionMessage inboxMessage) {
-	Contactable contact = PostManUtil.getContactMeta(inboxMessage.contact());
+    /**
+     * 
+     * This method will take messages and returns session, session sbhould be
+     * created if there is not present session against this message or return if its
+     * there, this method should return null only in case there is nothing can be
+     * done for message.
+     * 
+     * Additionally this message is responsible for updating ContactDoc and Session
+     * doc for stamps and entry points
+     * 
+     * @param sessionMessage
+     * @return
+     */
+    public ChatSessionDoc createSession(SessionMessage sessionMessage) {
+	Contactable contact = PostManUtil.getContactMeta(sessionMessage.contact());
 
-	if (ArgUtil.isEmpty(contact.getContactId())) {
-	    return null;
-	}
-
+	String sessionId = sessionMessage.getSessionId();
 	String contactId = contact.getContactId();
 
-	String sessionId = inboxMessage.getSessionId();
-
-	ChatContactDoc chatContactDoc = null;
 	ChatSessionDoc chatSessionDoc = null;
+	ChatContactDoc chatContactDoc = null;
 
-	if (ArgUtil.isEmpty(sessionId)) {
-	    chatContactDoc = mongoTemplate.findById(contactId, ChatContactDoc.class);
-	    if (ArgUtil.is(chatContactDoc)) {
-		sessionId = chatContactDoc.getSessionId();
+	if (ArgUtil.isEmpty(contactId)) {
+	    // If these conact & session are not present there is nothing we can do about
+	    // this message
+	    if (ArgUtil.isEmpty(sessionId)) {
+		return null;
 	    }
+	    chatSessionDoc = getSession(sessionId);
+
+	    if (ArgUtil.isEmpty(chatSessionDoc)) {
+		return null;
+	    }
+
+	    if (!isSessionValid(chatSessionDoc)) {
+		contactId = chatSessionDoc.getContactId();
+		chatContactDoc = mongoTemplate.findById(contactId, ChatContactDoc.class);
+		contact.copyFrom(chatContactDoc);
+	    }
+
 	}
 
-	if (ArgUtil.is(sessionId)) {
-	    chatSessionDoc = getValidSession(sessionId);
+	// Find Out Chat Session
+	if (ArgUtil.isEmpty(chatSessionDoc)) {
+	    if (ArgUtil.isEmpty(sessionId)) {
+		chatContactDoc = mongoTemplate.findById(contactId, ChatContactDoc.class);
+		if (ArgUtil.is(chatContactDoc)) {
+		    sessionId = chatContactDoc.getSessionId();
+		}
+	    }
+
+	    if (ArgUtil.is(sessionId)) {
+		chatSessionDoc = getValidSession(sessionId);
+	    }
 	}
 
 	ChatContactQuery chatContactQuery = ArgUtil.is(chatContactDoc) ? new ChatContactQuery(chatContactDoc)
@@ -148,9 +181,9 @@ public class SessionStore extends CommonDocStore {
 	    // SESSION CREATION
 	    chatSessionDoc = new ChatSessionDoc();
 	    chatSessionDoc.setContactId(contactId);
-	    chatSessionDoc.setContactType(ArgUtil.parseAsString(inboxMessage.contact().type()));
-	    chatSessionDoc.setChannel(inboxMessage.contact().getChannelType());
-	    chatSessionDoc.setLane(inboxMessage.contact().getLane());
+	    chatSessionDoc.setContactType(ArgUtil.parseAsString(sessionMessage.contact().type()));
+	    chatSessionDoc.setChannel(sessionMessage.contact().getChannelType());
+	    chatSessionDoc.setLane(sessionMessage.contact().getLane());
 
 	    // SESSION UPDATE
 	    chatSessionDoc.setActive(true);
@@ -214,7 +247,7 @@ public class SessionStore extends CommonDocStore {
     }
 
     public ChatSessionDoc linkSession(IMessage inboxMessage) {
-	ChatSessionDoc chatSessionDoc = this.getSession(inboxMessage);
+	ChatSessionDoc chatSessionDoc = this.createSession(inboxMessage);
 	linkSession(chatSessionDoc, inboxMessage);
 	return chatSessionDoc;
     }
@@ -285,13 +318,27 @@ public class SessionStore extends CommonDocStore {
 	}
     }
 
-    public List<ChatSessionDoc> findChatSessionDocByAgentAndUnAssigned(String agentCode, String agentDept) {
+    public List<ChatSessionDoc> findChatSessionDocByAgentAndUnAssigned(String agentCode, String agentDept,
+	    long period) {
 	Query query2 = new Query();
-	Calendar cal = Calendar.getInstance();
-	cal.add(Calendar.DATE, -2);
-	query2.addCriteria(Criteria.where("active").is(true).and("mode").is("AGENT").and("lastInComingStamp")
-		.gt(cal.getTimeInMillis()).andOperator(
-		// Is not assigned to any agent or assigned to said agent
+	Calendar timeout = Calendar.getInstance();
+	timeout.setTimeInMillis(timeout.getTimeInMillis() - period);
+	long watermarkStamp = timeout.getTimeInMillis();
+	timeout.setTimeInMillis(timeout.getTimeInMillis() - period);
+	long graceStamp = timeout.getTimeInMillis();
+
+	query2.addCriteria(Criteria.where("active").is(true).and("mode").is("AGENT")
+		// Agent Session Start
+		.and("agentSessionStamp").gt(watermarkStamp)
+		// Additional Stamps
+		.andOperator(
+			//
+			new Criteria().orOperator(
+				// Customer has replied within CustomerCareWindow
+				Criteria.where("lastInComingStamp").gt(graceStamp),
+				// Agent Has been Assigned to it
+				Criteria.where("lastOutGoingStamp").gt(graceStamp)),
+			// Is not assigned to any agent or assigned to said agent
 //						new Criteria().orOperator(Criteria.where("assignedToAgent").exists(false),
 //								Criteria.where("assignedToAgent").is(null),
 //								Criteria.where("assignedToAgent").is(agentCode)),
@@ -302,6 +349,11 @@ public class SessionStore extends CommonDocStore {
 		));
 	// LOGGER.info(query2.toString());
 	return mongoTemplate.find(query2, ChatSessionDoc.class);
+    }
+
+    public List<ChatSessionDoc> findChatSessionDocByAgentAndUnAssigned(String agentCode, String agentDept) {
+	return findChatSessionDocByAgentAndUnAssigned(agentCode, agentDept,
+		DEFAULT_VALUES.POSTMAN_AGENT_TAB_HISTORY_PERIOD);
     }
 
     public List<ChatSessionDoc> findSimilarChatSessionForContactId(String contactId) {
@@ -327,11 +379,12 @@ public class SessionStore extends CommonDocStore {
 	Query query2 = new Query();
 	List<Criteria> orExpression = new ArrayList<Criteria>();
 
-	orExpression.add(Criteria.where("contactId").is(contactId));
 	if (ArgUtil.is(contacts)) {
 	    for (ChatContactDoc chatContactDoc : contacts) {
 		orExpression.add(Criteria.where("contactId").is(chatContactDoc.getContactId()));
 	    }
+	} else {
+	    orExpression.add(Criteria.where("contactId").is(contactId));
 	}
 	query2.addCriteria(new Criteria().orOperator(orExpression.toArray(new Criteria[orExpression.size()])));
 	// LOGGER.info(query2.toString());
@@ -598,8 +651,8 @@ public class SessionStore extends CommonDocStore {
     }
 
     public String getLastAssignedAgent(Contactable contact) {
-	CommonMongoQueryBuilder cmqb = new CommonMongoQueryBuilder()
-		.with(Criteria.where("contactId").is(contact.getContactId()).and("assignedToAgent").exists(false));
+	CommonMongoQueryBuilder cmqb = new CommonMongoQueryBuilder().with(Criteria.where("contactId")
+		.is(contact.getContactId()).and("assignedToAgent").exists(true).and("mode").is(CHAT_MODE.AGENT));
 	cmqb.getQuery().with(new Sort(Direction.DESC, "startSessionStamp")).limit(1);
 	ChatSessionDoc lastSession = mongoTemplate.findOne(cmqb.getQuery(), ChatSessionDoc.class);
 	if (ArgUtil.is(lastSession)) {

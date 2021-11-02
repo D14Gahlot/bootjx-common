@@ -68,15 +68,11 @@ public class MsgController {
     private AgentService agentService;
 
     @Autowired
-    private ChatService chatService;
-
-    @Autowired
     private ChatArchiveService chatArchive;
 
-    
     @Autowired
     private LogManager logManager;
-    
+
     @Autowired
     private AgentSessionService agentSessionService;
 
@@ -110,7 +106,7 @@ public class MsgController {
     public ApiResponse<ChatMessageDTO, Object> sendSessionMessage(@RequestBody OutboxMessage outboxMessage)
 	    throws InterruptedException {
 
-	ChatSessionDoc sessionDoc = sessionStore.getSession(outboxMessage.getSessionId());
+	ChatSessionDoc sessionDoc = sessionStore.createSession(outboxMessage);
 
 	// Session Stuff Logging <
 	if (ArgUtil.isEmpty(sessionDoc.getAssignedToAgent())) {
@@ -254,55 +250,60 @@ public class MsgController {
 	    @RequestParam PMConstants.CHAT_STATUS status) {
 	return ApiResponse.buildResult(agentChatHandlerImpl.updateChatSessionStatus(sessionId, status));
     }
+
     @ResponseBody
     @RequestMapping(value = { "/api/session/tagCategory" }, method = { RequestMethod.POST })
     public ApiResponse<ChatSessionDTO, Object> updateSession(@RequestParam String sessionId,
 	    @RequestParam String tagCategory) {
 	return ApiResponse.buildResult(agentChatHandlerImpl.updateChatTagCategoryStatus(sessionId, tagCategory));
     }
-    
-    /* search by status
-    @ResponseBody
-    @RequestMapping(value = "/api/sessions/searchby/status", method = { RequestMethod.GET })
-    public ApiResponse<ChatSessionDTO, Object> getByStatus(@RequestParam(required = false,defaultValue ="OPEN") CHAT_STATUS status) {
-	List<ChatSessionDTO> chatSessionDtos = new ArrayList<ChatSessionDTO>();
-	List<ChatSessionDoc> sessions = sessionStore.findByStatus(status);
-	for (ChatSessionDoc chatSessionDoc : sessions) {
-		ChatSessionDTO chatSessionDto = chatArchive.withContact(chatSessionDoc);
-		chatSessionDtos.add(chatSessionDto);
-	   
-	}
 
-	return ApiResponse.buildResults(chatSessionDtos);
-    }
-    // search by tagCategory 
-    @ResponseBody
-    @RequestMapping(value = "/api/sessions/searchby/category", method = { RequestMethod.GET })
-    public ApiResponse<ChatSessionDTO, Object> getByTagCategory(@RequestParam(required= false) String tagCategory) {
-	List<ChatSessionDTO> chatSessionDtos = new ArrayList<ChatSessionDTO>();
-	List<ChatSessionDoc> sessions = sessionStore.findByTagCategory(tagCategory);
-	for (ChatSessionDoc chatSessionDoc : sessions) {
-		ChatSessionDTO chatSessionDto = chatArchive.withContact(chatSessionDoc);
-		chatSessionDtos.add(chatSessionDto);
-	   
-	}
-	return ApiResponse.buildResults(chatSessionDtos);
-    }
-  */
+    /*
+     * search by status
+     * 
+     * @ResponseBody
+     * 
+     * @RequestMapping(value = "/api/sessions/searchby/status", method = {
+     * RequestMethod.GET }) public ApiResponse<ChatSessionDTO, Object>
+     * getByStatus(@RequestParam(required = false,defaultValue ="OPEN") CHAT_STATUS
+     * status) { List<ChatSessionDTO> chatSessionDtos = new
+     * ArrayList<ChatSessionDTO>(); List<ChatSessionDoc> sessions =
+     * sessionStore.findByStatus(status); for (ChatSessionDoc chatSessionDoc :
+     * sessions) { ChatSessionDTO chatSessionDto =
+     * chatArchive.withContact(chatSessionDoc); chatSessionDtos.add(chatSessionDto);
+     * 
+     * }
+     * 
+     * return ApiResponse.buildResults(chatSessionDtos); } // search by tagCategory
+     * 
+     * @ResponseBody
+     * 
+     * @RequestMapping(value = "/api/sessions/searchby/category", method = {
+     * RequestMethod.GET }) public ApiResponse<ChatSessionDTO, Object>
+     * getByTagCategory(@RequestParam(required= false) String tagCategory) {
+     * List<ChatSessionDTO> chatSessionDtos = new ArrayList<ChatSessionDTO>();
+     * List<ChatSessionDoc> sessions = sessionStore.findByTagCategory(tagCategory);
+     * for (ChatSessionDoc chatSessionDoc : sessions) { ChatSessionDTO
+     * chatSessionDto = chatArchive.withContact(chatSessionDoc);
+     * chatSessionDtos.add(chatSessionDto);
+     * 
+     * } return ApiResponse.buildResults(chatSessionDtos); }
+     */
     /** search by status or tagCategory **/
     @ResponseBody
     @RequestMapping(value = "/api/sessions/searchby/statusorcategory", method = { RequestMethod.GET })
-    public ApiResponse<ChatSessionDTO, Object> getByStatusOrCategory(@RequestParam(required = false,defaultValue ="OPEN") CHAT_STATUS status,
-    		@RequestParam(required= false) String tagCategory,
-    		@RequestParam(required= false) long dateRange1,
-    		@RequestParam(required= false) long dateRange2) {
+    public ApiResponse<ChatSessionDTO, Object> getByStatusOrCategory(
+	    @RequestParam(required = false, defaultValue = "OPEN") CHAT_STATUS status,
+	    @RequestParam(required = false) String tagCategory, @RequestParam(required = false) long dateRange1,
+	    @RequestParam(required = false) long dateRange2) {
 	List<ChatSessionDTO> chatSessionDtos = new ArrayList<ChatSessionDTO>();
-	List<ChatSessionDoc> sessions = sessionStore.findByStatusOrQuickTag(status,tagCategory,dateRange1,dateRange2);
+	List<ChatSessionDoc> sessions = sessionStore.findByStatusOrQuickTag(status, tagCategory, dateRange1,
+		dateRange2);
 	for (ChatSessionDoc chatSessionDoc : sessions) {
-		ChatSessionDTO chatSessionDto = chatArchive.withContact(chatSessionDoc);
-		chatSessionDtos.add(chatSessionDto);
+	    ChatSessionDTO chatSessionDto = chatArchive.withContact(chatSessionDoc);
+	    chatSessionDtos.add(chatSessionDto);
 	}
 	return ApiResponse.buildResults(chatSessionDtos);
     }
-    
+
 }

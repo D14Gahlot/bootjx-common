@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Component;
 
-import com.boot.jx.chat.ConnectorHandlerFactory.AbstractConnector;
 import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorMapping;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.dict.FileFormat;
@@ -24,6 +23,7 @@ import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.QuickMedia;
 import com.boot.jx.postman.gupshup.GupShupClientChat;
 import com.boot.jx.postman.gupshup.GupShupClientNotify;
+import com.boot.jx.postman.gupshup.GupShupConfigDetails;
 import com.boot.jx.postman.gupshup.GupShupDeliveryResp;
 import com.boot.jx.postman.gupshup.GupShupDeliveryResp.GupShupDeliveryDto;
 import com.boot.jx.postman.gupshup.GupShupInbound;
@@ -37,6 +37,8 @@ import com.boot.jx.postman.model.MessageDefinitions.IMessageExtended;
 import com.boot.jx.postman.model.MessageReport;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.plugin.ChannelConfig;
+import com.boot.jx.postman.plugin.ChannelPluginProvider;
+import com.boot.jx.postman.plugin.WAGupShupPlugin;
 import com.boot.jx.postman.query.ChatContactQuery;
 import com.boot.jx.postman.store.MessageContext;
 import com.boot.jx.utils.PostManUtil;
@@ -47,9 +49,14 @@ import com.boot.utils.TimeUtils;
 
 @Component
 @ConnectorMapping(contactType = ContactType.WHATSAPP, channel = CHANNEL_TYPE.WA_GUPSHUP)
-public class WAGupShupConnector extends AbstractConnector {
+public class WAGupShupConnector extends AbstractConnector<GupShupConfigDetails, WAGupShupPlugin> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(WAGupShupConnector.class);
+
+    @Override
+    public WAGupShupPlugin getPlugin() {
+	return ChannelPluginProvider.WA_GUPSHUP;
+    }
 
     @Autowired
     private GupShupClientChat gupShupChatClient;
@@ -96,7 +103,7 @@ public class WAGupShupConnector extends AbstractConnector {
 	return outboxMessage;
     }
 
-    public void sendInternal(OutboxMessage outboxMessage, boolean isPushMessage) {
+    public void sendInternal(ChannelConfig channelConfig, OutboxMessage outboxMessage, boolean isPushMessage) {
 	LOGGER.debug("sendInternal(OutboxMessage {}, boolean {})", outboxMessage, isPushMessage);
 	try {
 	    if (isPushMessage) {
@@ -118,7 +125,7 @@ public class WAGupShupConnector extends AbstractConnector {
 	outboxMessage.contact().setLane(chatContactDoc.getLane());
 	resolveTemplate(outboxMessage);
 
-	if (TimeUtils.isExpired(chatContactDoc.getLastInBoundStamp(), "24hr")
+	if (TimeUtils.isExpired(chatContactDoc.getLastInBoundStamp(), DEFAULT_SESISON_PERIOD)
 		&& outboxMessage.optionsAsModel().entry("wa-template-id").exists()) {
 	    if (ArgUtil.isEmptyValue(chatContactDoc.getLastOptInStamp())) {
 		gupShupNotifyClient.optIn(outboxMessage);
@@ -126,17 +133,18 @@ public class WAGupShupConnector extends AbstractConnector {
 			new ChatContactQuery(chatContactDoc).setLastOptInStamp(System.currentTimeMillis()));
 	    }
 	    outboxMessage.messageMetaWrapper().sendType("PM"); // Push Message
-	    this.sendInternal(outboxMessage, true);
+	    this.sendInternal(channelConfig, outboxMessage, true);
 	} else {
 	    outboxMessage.messageMetaWrapper().sendType("SM"); // Session Message
-	    this.sendInternal(outboxMessage, false);
+	    this.sendInternal(channelConfig, outboxMessage, false);
 	}
     }
 
     @Override
-    public void reply(ChannelConfig channelConfig, IMessageExtended inboxMessage, OutboxMessage outboxMessage) {
+    public void reply(ChannelConfig channelConfig, ChatContactDoc chatContactDoc, OutboxMessage outboxMessage,
+	    IMessageExtended inboxMessage) {
 	resolveTemplate(outboxMessage);
-	this.sendInternal(outboxMessage, false);
+	this.sendInternal(channelConfig, outboxMessage, false);
     }
 
     @Override

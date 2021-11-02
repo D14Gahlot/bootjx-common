@@ -19,6 +19,7 @@ public class AgentSessionBean implements AuditDetailProvider {
     private boolean isLoggedIn;
 
     private boolean isOnline;
+    private boolean isAway;
 
     private long lastOnlineStamp;
 
@@ -101,6 +102,18 @@ public class AgentSessionBean implements AuditDetailProvider {
 
     public void setLastSyncStamp(long lastSyncStamp) {
 	this.lastSyncStamp = lastSyncStamp;
+    }
+
+    public boolean isAdmin() {
+	return getProfile().isAdmin();
+    }
+
+    public boolean isAway() {
+	return isAway;
+    }
+
+    public void setAway(boolean isAway) {
+	this.isAway = isAway;
     }
 
 }

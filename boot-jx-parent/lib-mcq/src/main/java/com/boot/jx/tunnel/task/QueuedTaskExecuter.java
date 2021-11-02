@@ -40,7 +40,7 @@ public abstract class QueuedTaskExecuter {
 
 	private String getJobName() {
 		if (this.jobName == null) {
-			this.jobName = ClazzUtil.getUltimateClassName(this) + "V4";
+			this.jobName = ClazzUtil.getUltimateClassName(this) + "V5";
 		}
 		return this.jobName;
 	}

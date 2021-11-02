@@ -20,12 +20,14 @@ import com.boot.jx.common.doc.AgentSessionDoc;
 import com.boot.jx.common.store.AgentStore;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PMEnvironment.AChannelDetails;
+import com.boot.jx.postman.doc.HSMTemplate;
 import com.boot.jx.postman.doc.QuickAction;
 import com.boot.jx.postman.doc.QuickLabel;
 import com.boot.jx.postman.doc.QuickMedia;
 import com.boot.jx.postman.doc.QuickReply;
 import com.boot.jx.postman.doc.QuickTag;
 import com.boot.jx.postman.dto.ContactDTO;
+import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.postman.service.ChatDTOUtil;
 import com.boot.jx.postman.store.ContactStore;
 import com.boot.utils.ArgUtil;
@@ -108,10 +110,18 @@ public class AgentMetaController {
     public List<QuickLabel> listQuickTags() {
 	return mongoTemplate.findAll(QuickLabel.class);
     }
-    
+
     @ResponseBody
     @RequestMapping(value = { "/gallery/map/quick_tags" }, method = { RequestMethod.GET })
     public List<QuickTag> listQuickTagsCategory() {
 	return mongoTemplate.findAll(QuickTag.class);
+    }
+
+    @ResponseBody
+    @RequestMapping(value = "/api/tmpl/pushtemplate", method = { RequestMethod.GET })
+    public ApiResponse<HSMTemplate, Object> listPushTemplates(@RequestParam String channelId) {
+	ChannelConfig channelConfig = pmEnvironment.config().channels(channelId);
+
+	return ApiResponse.buildResults(mongoTemplate.findAll(HSMTemplate.class));
     }
 }

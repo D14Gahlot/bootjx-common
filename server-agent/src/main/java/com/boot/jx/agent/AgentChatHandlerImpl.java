@@ -23,6 +23,7 @@ import com.boot.jx.logger.LoggerService;
 import com.boot.jx.mongo.CommonMongoQueryBuilder;
 import com.boot.jx.postman.PMClientConfig;
 import com.boot.jx.postman.PMConstants;
+import com.boot.jx.postman.PMConstants.CHAT_SESSION_ACTIONS;
 import com.boot.jx.postman.PMConstants.DEFAULT;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.doc.ChatSessionDoc;
@@ -98,18 +99,25 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 
 	String stickyLogic = environment.config().getPref("postman.agent.chat.stickysession")
 		.asString(PMConstants.CHAT_SESSION_STICKY.NONE);
+	long timeThen = System.currentTimeMillis() - chatClientConfig.getAgentSessionTimeout().toMillis();
 
 	String lastAgent = null;
+	LOGGER.debug("CHAT_SESSION_STICKY : {}", stickyLogic);
 	if (!PMConstants.CHAT_SESSION_STICKY.NONE.equals(stickyLogic)) {
 	    lastAgent = sessionStore.getLastAssignedAgent(inboxMessage.contact());
 	    if (ArgUtil.is(lastAgent)) {
+		LOGGER.debug("CHAT_SESSION_STICKY : lastAgent found {}", lastAgent);
 		AgentSessionDoc agent = mongoTemplate.findById(lastAgent, AgentSessionDoc.class);
 		if (ArgUtil.is(agent)) {
+		    LOGGER.debug("CHAT_SESSION_STICKY : has session {}", agent);
 		    if (PMConstants.CHAT_SESSION_STICKY.STRICT.equals(stickyLogic)) {
+			LOGGER.debug("CHAT_SESSION_STICKY : because its strictly {}", agent);
 			return agent;
 		    }
 		    if (PMConstants.CHAT_SESSION_STICKY.ONAVAILABLE.equals(stickyLogic)) {
-			if (ArgUtil.nullAsFalse(agent.getIsOnline())) {
+			if (ArgUtil.nullAsFalse(agent.getIsOnline()) && ArgUtil.nullAsFalse(agent.getIsLoggedIn())
+				&& (agent.getLastOnlineStamp() > timeThen)) {
+			    LOGGER.debug("CHAT_SESSION_STICKY : because its availanle {}", agent);
 			    return agent;
 			}
 		    }
@@ -125,14 +133,16 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 		environment.config().agent().getDefaultTeamCode(), DEFAULT.NO_DEPT);
 	inboxMessage.session().setDept(assignedDept);
 
+	LOGGER.debug("ASSIGNMENT_RULE : No Assignment {} {}", assignmentRule, assignedDept);
+
 	if (PMConstants.ASSIGNMENT_RULE.STRICT_DEFAULT.equals(assignmentRule)) {
 	    String defAgentCode = environment.config().agent().defaultAgent(assignedDept);
 	    AgentSessionDoc agent = mongoTemplate.findById(defAgentCode, AgentSessionDoc.class);
+	    LOGGER.debug("ASSIGNMENT_RULE : Default {} : {}", defAgentCode, agent);
 	    return agent;
 	}
 
 	if (PMConstants.ASSIGNMENT_RULE.ROUND_ROBIN.equals(assignmentRule)) {
-	    long timeThen = System.currentTimeMillis() - TimeUtils.toMillis(chatClientConfig.getAgentSessionTimeout());
 	    Query query = new Query();
 	    Criteria c = Criteria.where("isOnline").is(true).and("isLoggedIn").is(true).and("lastOnlineStamp")
 		    .gt(timeThen);
@@ -298,9 +308,9 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 	if (ArgUtil.is(action)) {
 	    outboxMessage.setAction(action);
 	    switch (action) {
-	    case "RESOLVE":
+	    case CHAT_SESSION_ACTIONS.RESOLVE:
 		return this.exitAgentMode(sessionDoc, outboxMessage);
-	    case "ADD_STICKY_NOTE":
+	    case CHAT_SESSION_ACTIONS.ADD_STICKY_NOTE:
 		return this.addStickyNote(sessionDoc, outboxMessage);
 	    default:
 		break;

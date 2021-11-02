@@ -2,6 +2,7 @@ package com.boot.jx.postman;
 
 import com.boot.jx.dict.ContactType;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.TimeUtils;
 
 public class PMConstants {
 
@@ -47,7 +48,12 @@ public class PMConstants {
     }
 
     public static enum CHAT_MODE {
-	AGENT, BOT;
+	AGENT, BOT, PUSH;
+    }
+
+    public static class MESSAGE_SEND_TYPE {
+	public static final String PUSH_MESSAGE = "PM";
+	public static final String SESSION_MESSAGE = "SM";
     }
 
     public static class ASSIGNMENT_RULE {
@@ -82,6 +88,15 @@ public class PMConstants {
 	}
 
 	return null;
+    }
+
+    public static class CHAT_SESSION_ACTIONS {
+	public static final String ADD_STICKY_NOTE = "ADD_STICKY_NOTE";
+	public static final String RESOLVE = "RESOLVE";
+    }
+
+    public static class DEFAULT_VALUES {
+	public static final long POSTMAN_AGENT_TAB_HISTORY_PERIOD = TimeUtils.toMillis("1d");
     }
 
     public final class PostManUrls {

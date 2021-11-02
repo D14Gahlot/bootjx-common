@@ -7,19 +7,16 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Component;
 
 import com.boot.jx.api.ApiResponseUtil;
-import com.boot.jx.chat.ConnectorHandlerFactory.AbstractConnector;
 import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorMapping;
 import com.boot.jx.dict.ContactType;
-import com.boot.jx.dict.FileType;
 import com.boot.jx.postman.PMConstants.CHANNEL_TYPE;
 import com.boot.jx.postman.client.TmplClient;
 import com.boot.jx.postman.doc.ChatSessionDoc;
-import com.boot.jx.postman.doc.QuickMedia;
 import com.boot.jx.postman.fb.FacebooClient;
+import com.boot.jx.postman.fb.FacebookConfigDetails;
 import com.boot.jx.postman.fb.FacebookHookRequest;
 import com.boot.jx.postman.fb.FacebookMessaging;
 import com.boot.jx.postman.fb.FacebookUserProfile;
-import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.Message;
 import com.boot.jx.postman.model.Message.Status;
@@ -27,24 +24,24 @@ import com.boot.jx.postman.model.MessageBoxEvent;
 import com.boot.jx.postman.model.MessageReport;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.plugin.ChannelConfig;
+import com.boot.jx.postman.plugin.ChannelPluginProvider;
+import com.boot.jx.postman.plugin.FacebookPlugin;
 import com.boot.jx.postman.query.ChatContactQuery;
 import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
 
 @Component
 @ConnectorMapping(contactType = ContactType.FACEBOOK)
-public class FacebookConnector extends AbstractConnector {
-
+public class FacebookConnector extends AbstractConnector<FacebookConfigDetails, FacebookPlugin> {
     private static final Logger LOGGER = LoggerFactory.getLogger(FacebookConnector.class);
+
+    @Override
+    public FacebookPlugin getPlugin() {
+	return ChannelPluginProvider.FACEBOOK;
+    }
 
     @Autowired
     private FacebooClient facebooClient;
-
-    @Autowired
-    private MongoTemplate mongoTemplate;
-
-    @Autowired
-    private TmplClient tmplClient;
 
     @Override
     public void registerWebHook(ChannelConfig channelConfig) {
@@ -53,18 +50,8 @@ public class FacebookConnector extends AbstractConnector {
 
     public void send(ChannelConfig channelConfig, OutboxMessage outboxMessage) {
 	try {
-	    if (ArgUtil.is(outboxMessage.getTemplate())) {
-		QuickMedia mediaReply = mongoTemplate.findById(outboxMessage.getTemplate(), QuickMedia.class);
-		if (ArgUtil.is(mediaReply)) {
-		    if ("image".equalsIgnoreCase(mediaReply.getType())) {
-			outboxMessage.attachment(
-				new Attachment().mediaURL(mediaReply.getUrl()).mediaType(FileType.IMAGE.toString()));
-		    }
-		} else {
-		    tmplClient.process(outboxMessage);
-		}
-	    }
-	    facebooClient.send(null, outboxMessage);
+	    template(channelConfig, outboxMessage);
+	    facebooClient.send(channelConfig, outboxMessage);
 	    outboxMessage.updateStatus(Message.Status.SENT);
 	} catch (Exception e) {
 	    outboxMessage.updateStatus(OutboxMessage.Status.SENT_ERR);
@@ -75,7 +62,7 @@ public class FacebookConnector extends AbstractConnector {
 
     @Override
     public InboxMessage assignToAgent(InboxMessage inboxMessage) {
-	this.reply(null, inboxMessage, new OutboxMessage().message("Our agent will get in touch with you"));
+	this.reply(null, null, new OutboxMessage().message("Our agent will get in touch with you"), inboxMessage);
 	return inboxMessage;
     }
 

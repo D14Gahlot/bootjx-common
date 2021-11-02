@@ -71,7 +71,7 @@ public class ConfigManager {
 	    case "postman.bot.name":
 	    case "postman.default.sender":
 
-		PMConfigurationObject configObject = pmEnvironment.get("postman.bot.name");
+		PMConfigurationObject configObject = pmEnvironment.keyEntry("postman.bot.name");
 
 		if (!ArgUtil.is(configObject.getValue())) {
 		    configObject.setValue(pmEnvironment.config().agent().getDefaultBotName());
@@ -81,7 +81,7 @@ public class ConfigManager {
 
 		break;
 	    default:
-		list.add(MapBuilder.map().put("meta", meta).put("config", pmEnvironment.get(meta.getKey())).toMap());
+		list.add(MapBuilder.map().put("meta", meta).put("config", pmEnvironment.keyEntry(meta.getKey())).toMap());
 		break;
 	    }
 	}
@@ -91,7 +91,7 @@ public class ConfigManager {
     public List<Map<String, Object>> getAppConfigs() {
 	List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
 	for (Entry<String, String> entry : ConfigConstants.APP_CONFIG.entrySet()) {
-	    list.add(MapBuilder.map().put("config", pmEnvironment.get(entry.getKey())).toMap());
+	    list.add(MapBuilder.map().put("config", pmEnvironment.keyEntry(entry.getKey())).toMap());
 	}
 	return list;
     }
@@ -113,7 +113,7 @@ public class ConfigManager {
 	}
 	mapBuilder.put("domain", this.pmEnvironment.config().getPref(key)) // Domain
 		.put("shared", this.pmEnvironment.shared().getPref(key)) // Shared
-		.put("config", this.pmEnvironment.get(key)) // Resolved
+		.put("config", this.pmEnvironment.keyEntry(key)) // Resolved
 	;
 
 	list.add(mapBuilder.toMap());

@@ -47,11 +47,11 @@ public class WAGupShupPlugin implements ChannelPlugin<GupShupConfigDetails> {
 
     @Override
     public void extractChannelDetailsFromMap(GupShupConfigDetails channelDetails, MapModel map) {
-	channelDetails.setNumber(map.path("gupshup.number").asString(channelDetails.getNumber()));
-	channelDetails.setChatId(map.path("gupshup.chatId").asString(channelDetails.getChatId()));
-	channelDetails.setChatPass(map.path("gupshup.chatPass").asString(channelDetails.getChatPass()));
-	channelDetails.setNotifyId(map.path("gupshup.notifyId").asString(channelDetails.getNotifyId()));
-	channelDetails.setNotifyPass(map.path("gupshup.notifyPass").asString(channelDetails.getNotifyPass()));
+	channelDetails.setNumber(map.pathEntry("gupshup.number").asString(channelDetails.getNumber()));
+	channelDetails.setChatId(map.pathEntry("gupshup.chatId").asString(channelDetails.getChatId()));
+	channelDetails.setChatPass(map.pathEntry("gupshup.chatPass").asString(channelDetails.getChatPass()));
+	channelDetails.setNotifyId(map.pathEntry("gupshup.notifyId").asString(channelDetails.getNotifyId()));
+	channelDetails.setNotifyPass(map.pathEntry("gupshup.notifyPass").asString(channelDetails.getNotifyPass()));
     }
 
 }
