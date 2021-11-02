@@ -106,6 +106,11 @@ public class WA360Connector extends AbstractConnector<WA360ConfigDetails, WA360P
 		inboxMessage.form().put("reply_desc", map.entry(InBoundWrapperPaths.INTERACTIVE_LIST_DESC).asString());
 	    }
 	    inboxMessage.setMessage(ArgUtil.parseAsString(inboxMessage.form().get("reply_title"), Constants.BLANK));
+	} else if ("button".equals(messageType)) {
+	    inboxMessage.form().put("reply_title", map.entry(InBoundWrapperPaths.SIMPLE_BUTTON_REPLY).asString());
+	    inboxMessage.form().put("reply_payload", map.entry(InBoundWrapperPaths.SIMPLE_BUTTON_PAYLOAD).asString());
+
+	    inboxMessage.setMessage(ArgUtil.parseAsString(inboxMessage.form().get("reply_title"), Constants.BLANK));
 	} else if ("image".equals(messageType)) {
 	    formatMedia(inboxMessage, map, channelConfig, InBoundWrapperPaths.IMAGE, FileType.IMAGE);
 	} else if ("document".equals(messageType)) {
@@ -118,6 +123,11 @@ public class WA360Connector extends AbstractConnector<WA360ConfigDetails, WA360P
 	    formatMedia(inboxMessage, map, channelConfig, InBoundWrapperPaths.VIDEO, FileType.VIDEO);
 	} else if ("sticker".equals(messageType)) {
 	    formatMedia(inboxMessage, map, channelConfig, InBoundWrapperPaths.STICKER, FileType.IMAGE);
+	}
+
+	String replyIdExt = map.entry(InBoundWrapperPaths.CONTEXT_ID).asString();
+	if (ArgUtil.is(replyIdExt)) {
+	    inboxMessage.setReplyIdExt(replyIdExt);
 	}
 
 	return inboxMessage;
