@@ -793,9 +793,10 @@ public class AdminDashBoardManager {
 			SimpleDateFormat sdfH = new SimpleDateFormat("HH");
 			String formattedDateH = sdfH.format(date);
 			dateWiseList.add(ddMMyyyyFormat);
+			LOGGER.info("getHourWiseCount :"+formattedDateH);
 			/** 1 hr gap **/
-			long hourTimeSamp = (long) (timeStamp / (60 * 1000));
-			long hh = timeStamp / hourTimeSamp;
+			//long hourTimeSamp = (long) (timeStamp / (60 * 1000));
+			//long hh = timeStamp / hourTimeSamp;
 			//hourList.add(hh);
 			 hourList.add(Long.parseLong(formattedDateH));// hour wise count
 			
