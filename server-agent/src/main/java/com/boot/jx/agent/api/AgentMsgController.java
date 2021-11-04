@@ -71,7 +71,7 @@ public class AgentMsgController {
 	List<ChatSessionDTO> chatSessionDtos = new ArrayList<ChatSessionDTO>();
 	if (agentSession.isLoggedIn() && ArgUtil.is(agentSession.getAgentDept())) {
 	    List<ChatSessionDoc> sessions = null;
-	    long historyPeriod = environment.keyEntry(KEY.POSTMAN_AGENT_TAB_HISTORY_PERIOD).asLong();
+	    long historyPeriod = environment.keyEntry(KEY.POSTMAN_AGENT_TAB_HISTORY_PERIOD).asLong(0L);
 	    if (historyPeriod > 0L) {
 		sessions = sessionStore.findChatSessionDocByAgentAndUnAssigned(agentSession.getAgentCode(),
 			agentSession.getAgentDept(),
