@@ -746,6 +746,16 @@ public class AdminDashBoardManager {
 			Integer maxEntryKeyValue = mapLst.get(maxEntryKey);
 			// System.out.println("Peak Load Date Time and Value:"+maxEntryKey +"-
 			// "+maxEntryKeyValue);
+			SimpleDateFormat df = new SimpleDateFormat("dd-MM-yyyy hh:mm"); 
+			try {
+			    Date d = df.parse(maxEntryKey.toString());
+			    long milliseconds = d.getTime();
+			    if(milliseconds != 0) {
+			    	maxEntryKey = milliseconds;
+			    }
+			} catch (Exception e) {
+			    e.printStackTrace();
+			}
 			peakLoadResult.setTimestamp(maxEntryKey);
 			peakLoadResult.setTotal(maxEntryKeyValue.longValue());
 

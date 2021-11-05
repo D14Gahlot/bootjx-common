@@ -23,6 +23,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
+import org.jfree.util.Log;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -615,16 +616,21 @@ public class AgentAnalyticsManager {
 		
 		public long getBotScore(long dateRange1, long dateRange2) {
 		
-			long botScoer=0;
+			long totalBotScore=0;
+			long averageBotScore=0;
 		Query query = new Query();
 		query.addCriteria(Criteria.where("mode").is("BOT"));
 		query.addCriteria(Criteria.where("startSessionStamp").gt(dateRange1).lt(dateRange2));
 		List<ChatSessionDoc> botScoreLst = mongoTemplate.find(query, ChatSessionDoc.class, CHAT_SESSION);
 		for(ChatSessionDoc chat :botScoreLst) {
 			LOGGER.debug("Chat doc :"+ chat.getBotScore());
-			botScoer +=chat.getBotScore()==null?0:chat.getBotScore(); 
-			}
-		return botScoer;
+			totalBotScore +=chat.getBotScore()==null?0:chat.getBotScore(); 
+		}
+		if(botScoreLst.size() > 0 && totalBotScore != 0) {
+			averageBotScore = totalBotScore/botScoreLst.size();
+		}
+		
+		return averageBotScore;
 		}
  	
 		/** get Bot Score **/
