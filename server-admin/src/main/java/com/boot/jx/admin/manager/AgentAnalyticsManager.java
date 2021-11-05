@@ -43,6 +43,7 @@ import com.boot.jx.admin.dto.LeadMessanger;
 import com.boot.jx.admin.dto.PeakLoadDto;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.MessageDoc;
+import com.boot.jx.postman.model.Message;
 import com.boot.jx.postman.model.MessageMetaWrapper;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.JsonUtil;
@@ -113,7 +114,8 @@ public class AgentAnalyticsManager {
 		long totalInMsg =0;
 		long totalOutMsg =0;
 		long totalMsg =0;
-		long totalTemplateMsg=0;
+		long totalTemplateMsgSent=0;
+		long totalTemplateMsgDelivered=0;
 		long totalUniqCon =0;
 		long totalOpenMsg =0;
 		long totalResolvedMsg =0;
@@ -130,7 +132,8 @@ public class AgentAnalyticsManager {
 			totalInMsg +=dt.getTotalInMsgExchanged();
 			totalOutMsg+=dt.getTotalOutMsgExchanged();
 			totalMsg+=dt.getTotalMsgExchanged();
-			totalTemplateMsg+=dt.getTotalTemplateMsgSent();
+			totalTemplateMsgSent+=dt.getTotalTemplateMsgSent();
+			totalTemplateMsgDelivered+=dt.getTotalTemplateMsgDelivered();
 			totalOpenMsg+=dt.getOpenConversation();
 			totalResolvedMsg+=dt.getResolvedConversation();
 			convDuration+=dt.getConverDuration();
@@ -149,7 +152,8 @@ public class AgentAnalyticsManager {
 		dto.setTotalInMsgExchanged(totalInMsg);
 		dto.setTotalOutMsgExchanged(totalOutMsg);
 		dto.setTotalMsgExchanged(totalMsg);
-		dto.setTotalTemplateMsgSent(totalTemplateMsg);
+		dto.setTotalTemplateMsgSent(totalTemplateMsgSent);
+		dto.setTotalTemplateMsgDelivered(totalTemplateMsgDelivered);
 		dto.setOpenConversation(totalOpenMsg);
 		dto.setResolvedConversation(totalResolvedMsg);
 		dto.setUniqueConversation(totalUniqCon);
@@ -184,15 +188,22 @@ public class AgentAnalyticsManager {
 				dto.setTotalMsgExchanged(totalAgConMsgExchanged.size());
 				
 				List<MessageDoc> totalTemplateMsgExchanged = new ArrayList<>();
+				List<MessageDoc> totalTemplateMsgDelivered = new ArrayList<>();
 				for(MessageDoc messageDoc : totalAgConMsgExchanged) {
 					if(messageDoc != null) {
 						MessageMetaWrapper metaWrapper = new MessageMetaWrapper(messageDoc.getMeta());
 						if(metaWrapper != null) {
 							if(metaWrapper.sendType() != null && metaWrapper.sendType().equalsIgnoreCase("PM")) {
 								totalTemplateMsgExchanged.add(messageDoc);
+								if(messageDoc.getStamps().get(Message.Status.DLVRD.name()) != null) {
+									totalTemplateMsgDelivered.add(messageDoc);
+								}
 							}
 						}
 					}
+				}
+				if(ArgUtil.is(totalTemplateMsgDelivered)) {
+					dto.setTotalTemplateMsgDelivered(totalTemplateMsgDelivered.size());
 				}
 				if(ArgUtil.is(totalTemplateMsgExchanged)) {
 					dto.setTotalTemplateMsgSent(totalTemplateMsgExchanged.size());
