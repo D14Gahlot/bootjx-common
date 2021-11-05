@@ -19,7 +19,6 @@ import com.boot.jx.model.CommonFile;
 import com.boot.jx.postman.client.PMFileStoreClient;
 import com.boot.jx.postman.client.TmplClient;
 import com.boot.jx.postman.doc.ChatSessionDoc;
-import com.boot.jx.postman.doc.QuickMedia;
 import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.MessageBoxEvent;
@@ -27,7 +26,6 @@ import com.boot.jx.postman.model.MessageDefinitions.Contactable;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.postman.plugin.ChannelPluginProvider;
-import com.boot.jx.postman.plugin.ChannelPluginProvider.ChannelPlugin;
 import com.boot.jx.postman.plugin.TelegramPlugin;
 import com.boot.jx.postman.query.ChatContactQuery;
 import com.boot.jx.postman.tg.TelegramClient;
@@ -53,12 +51,6 @@ public class TelegramConnector extends AbstractConnector<TelegramConfigDetails, 
     private TelegramClient telegramClient;
 
     @Autowired
-    private MongoTemplate mongoTemplate;
-
-    @Autowired
-    private TmplClient tmplClient;
-
-    @Autowired
     private PMFileStoreClient pmFileStoreClient;
 
     @Override
@@ -68,21 +60,8 @@ public class TelegramConnector extends AbstractConnector<TelegramConfigDetails, 
 
     public void send(ChannelConfig channelConfig, OutboxMessage outboxMessage) {
 	try {
-	    if (ArgUtil.is(outboxMessage.getTemplate())) {
-		QuickMedia mediaReply = mongoTemplate.findById(outboxMessage.getTemplate(), QuickMedia.class);
-		if (ArgUtil.is(mediaReply)) {
-		    if ("image".equalsIgnoreCase(mediaReply.getType())) {
-			outboxMessage.attachment(new Attachment().mediaURL(mediaReply.getUrl())
-				.mediaType(FileType.IMAGE.toString()).mediaCaption(mediaReply.getTitle()));
-			telegramClient.send(channelConfig, outboxMessage);
-		    }
-		} else {
-		    tmplClient.process(outboxMessage);
-		    telegramClient.send(channelConfig, outboxMessage);
-		}
-	    } else {
-		telegramClient.send(channelConfig, outboxMessage);
-	    }
+	    template(channelConfig, outboxMessage);
+	    telegramClient.send(channelConfig, outboxMessage);
 	    outboxMessage.updateStatus(OutboxMessage.Status.SENT);
 	} catch (Exception e) {
 	    outboxMessage.updateStatus(OutboxMessage.Status.SENT_ERR);

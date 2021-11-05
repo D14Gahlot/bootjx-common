@@ -227,6 +227,7 @@ public class AgentAnalyticsManager {
 				hour = dateDiffMAp.get("HOUR");
 				days = dateDiffMAp.get("DAYS");
 			}
+			LOGGER.info("mru hour :"+hour);
 			if(hour<=24) {
 				Map<Object,Object> hourWiseCount = adminDbMgr.getHourWiseCount(totalAgConMsgExchanged);
 				dto.setGraphApiDetails(hourWiseCount);

@@ -65,16 +65,17 @@ public class AgentMsgController {
     @ApiRequest(type = RequestType.POLL)
     @RequestMapping(value = "/api/sessions/assignments", method = { RequestMethod.GET })
     public ApiResponse<ChatSessionDTO, AgentSessionDoc> getSessionsAssignments(
-	    @RequestParam(defaultValue = "false") boolean withMessage, @RequestParam(required = false) Boolean status) {
+	    @RequestParam(defaultValue = "false") boolean withMessage, @RequestParam(required = false) Boolean status,
+	    @RequestParam(required = false) Boolean away) {
 
 	List<ChatSessionDTO> chatSessionDtos = new ArrayList<ChatSessionDTO>();
 	if (agentSession.isLoggedIn() && ArgUtil.is(agentSession.getAgentDept())) {
 	    List<ChatSessionDoc> sessions = null;
-	    long historyPeriod = environment.keyEntry(KEY.POSTMAN_AGENT_TAB_HISTORY_PERIOD)
-		    .asLong(PMConstants.DEFAULT_VALUES.POSTMAN_AGENT_TAB_HISTORY_PERIOD);
-	    if (historyPeriod > PMConstants.DEFAULT_VALUES.POSTMAN_AGENT_TAB_HISTORY_PERIOD) {
+	    long historyPeriod = environment.keyEntry(KEY.POSTMAN_AGENT_TAB_HISTORY_PERIOD).asLong(0L);
+	    if (historyPeriod > 0L) {
 		sessions = sessionStore.findChatSessionDocByAgentAndUnAssigned(agentSession.getAgentCode(),
-			agentSession.getAgentDept(), historyPeriod);
+			agentSession.getAgentDept(),
+			PMConstants.DEFAULT_VALUES.POSTMAN_AGENT_TAB_HISTORY_PERIOD + historyPeriod);
 	    } else {
 		sessions = sessionStore.findChatSessionDocByAgentAndUnAssigned(agentSession.getAgentCode(),
 			agentSession.getAgentDept());
@@ -92,7 +93,10 @@ public class AgentMsgController {
 		chatSessionDtos.add(chatSessionDto);
 	    }
 	}
-	if (ArgUtil.is(status)) {
+	if (away != null) {
+	    agentSessionService.setAway(away.booleanValue());
+	}
+	if (status != null) {
 	    agentSessionService.setOnline(status.booleanValue());
 	}
 	return new ApiResponse<ChatSessionDTO, AgentSessionDoc>().results(chatSessionDtos)

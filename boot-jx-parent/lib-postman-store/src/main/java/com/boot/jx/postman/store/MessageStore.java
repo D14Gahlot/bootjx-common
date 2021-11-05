@@ -35,7 +35,7 @@ public class MessageStore extends CommonDocStore {
 
     public static enum EVENTS {
 	ASGND_TO_DEPT, ASGND_TO_AGENT, UNASGND, PICKED_BY_AGENT, CLOSED_BY_AGENT, LABEL_ADDED, LABEL_REMOVED,
-	STATUS_CHANGED,TAG_ADDED, TAG_REMOVED
+	STATUS_CHANGED, TAG_ADDED, TAG_REMOVED
     }
 
     @Autowired
@@ -53,6 +53,7 @@ public class MessageStore extends CommonDocStore {
 	doc.setSessionId(inboxMessage.getSessionId());
 	doc.setTags(inboxMessage.getTags());
 	doc.setMessageIdExt(inboxMessage.getMessageIdExt());
+	doc.setReplyIdExt(inboxMessage.getReplyIdExt());
 
 	// Additonals
 	doc.setAttachments(inboxMessage.getAttachments());
@@ -285,7 +286,7 @@ public class MessageStore extends CommonDocStore {
 
     public void updateStatus(MessageReport messageReport) {
 
-	LOGGER.debug("updateStatus {} {} {}", messageReport.getMessageId(), messageReport.getContactType(),
+	LOGGER.debug("updateStatus {} {} {}", messageReport.getMessageId(), messageReport.contact().getChannelType(),
 		messageReport.getStatus());
 
 	CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder();
@@ -321,10 +322,10 @@ public class MessageStore extends CommonDocStore {
 
 	    if (multi) {
 		mongoTemplate.updateMulti(builder.getQuery(), builder.getUpdate(), MessageDoc.class,
-			getCollectionName(messageReport.getContactType()));
+			getCollectionName(messageReport.contact().getContactType()));
 	    } else {
 		mongoTemplate.updateFirst(builder.getQuery(), builder.getUpdate(), MessageDoc.class,
-			getCollectionName(messageReport.getContactType()));
+			getCollectionName((messageReport.contact().getContactType())));
 	    }
 	    // LOGGER.info(JsonUtil.toJson(builder));
 	}
