@@ -751,7 +751,7 @@ public class AdminDashBoardManager {
 			    Date d = df.parse(maxEntryKey.toString());
 			    long milliseconds = d.getTime();
 			    if(milliseconds != 0) {
-			    	maxEntryKey = milliseconds;
+			    	peakLoadResult.setEpochStamp(milliseconds);
 			    }
 			} catch (Exception e) {
 			    e.printStackTrace();
