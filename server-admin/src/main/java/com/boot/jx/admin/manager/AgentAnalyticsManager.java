@@ -139,7 +139,9 @@ public class AgentAnalyticsManager {
 			botClosure =dt.getBotClosure();
 			dto.setLeadMessanger(dt.getLeadMessanger());
 			graphApiMap = mergerMapKyAndValue(graphApiMap, dt.getGraphApiDetails());
-			graphApiMapV1 =  mergerMapKyAndValue(graphApiMapV1, dt.getGraphApiDetailsV1());
+			if(dt.getGraphApiDetailsV1()!=null && !dt.getGraphApiDetailsV1().isEmpty()) {
+			 graphApiMapV1 =  mergerMapKyAndValue(graphApiMapV1, dt.getGraphApiDetailsV1());
+			}
 			if(ArgUtil.is(dt.getPeakLoad()) && dt.getPeakLoad().getTotal() > dto.getPeakLoad().getTotal()) {
 				dto.setPeakLoad(dt.getPeakLoad());
 			}
@@ -157,7 +159,9 @@ public class AgentAnalyticsManager {
 		}
 		dto.setStartLag(totalStartLag);
 		dto.setGraphApiDetails(graphApiMap);
-		dto.setGraphApiDetailsV1(graphApiMapV1);
+		if(graphApiMapV1!=null && !graphApiMapV1.isEmpty()) {
+		 dto.setGraphApiDetailsV1(graphApiMapV1);
+		}
 		LOGGER.debug("\n\n get Summary ========:"+JsonUtil.toJson(dto));
 		return dto;
 	}
