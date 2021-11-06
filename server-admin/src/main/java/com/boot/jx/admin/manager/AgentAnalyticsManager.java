@@ -226,13 +226,16 @@ public class AgentAnalyticsManager {
 				hour = dateDiffMAp.get("HOUR");
 				days = dateDiffMAp.get("DAYS");
 			}
-			LOGGER.info("mru hour :"+hour);
+			LOGGER.info("mru hour :"+hour+"\t dateDiffMAp :"+dateDiffMAp);
+			
 			if(hour<=24) {
 				Map<Object,Object> hourWiseCount = adminDbMgr.getHourWiseCount(totalAgConMsgExchanged);
 				dto.setGraphApiDetails(hourWiseCount);
-			}else if(hour >24 && days<=30){
+			}else if(hour >24 && days<=31){
 				Map<Object,Object> dateWiseCount = adminDbMgr.getDateWiseCount(totalAgConMsgExchanged);
 				dto.setGraphApiDetails(dateWiseCount);
+				Map<Object,Object> timeStampWiseCount = adminDbMgr.getTimeStampWiseCount(totalAgConMsgExchanged);
+				dto.setGraphApiDetailsV1(timeStampWiseCount);
 			}else {
 				Map<Object,Object> dweekWiseCount = adminDbMgr.getWeekWiseCount(totalAgConMsgExchanged);
 				dto.setGraphApiDetails(dweekWiseCount);
@@ -273,7 +276,7 @@ public class AgentAnalyticsManager {
 		
 		Query query = new Query();
 		query.addCriteria(Criteria.where("assignedToAgent").is(agent));
-		query.addCriteria(Criteria.where("assignedAgentStamp").gt(dateRange1).lt(dateRange2));
+		query.addCriteria(Criteria.where("assignedAgentStamp").gte(dateRange1).lt(dateRange2));
 		query.with(new Sort(new Order(Direction.ASC, "timestamp"))); 
 		
 		List<ChatSessionDoc> totalMsgDoc = mongoTemplate.find(query, ChatSessionDoc.class, CHAT_SESSION);
@@ -602,7 +605,7 @@ public class AgentAnalyticsManager {
 			for(String contactType: lst) {
 				Query query = new Query();
 				query.addCriteria(Criteria.where("contactId").is(contactId));
-				query.addCriteria(Criteria.where("timestamp").gt(dateRange1).lt(dateRange2));
+				query.addCriteria(Criteria.where("timestamp").gte(dateRange1).lt(dateRange2));
 				query.with(new Sort(new Order(Direction.ASC, "timestamp")));
 				List<MessageDoc>  totalMsg= mongoTemplate.find(query, MessageDoc.class, contactType.toString());
 				//System.out.print("\n ==== contactType :"+contactType+" \t getMsgCountAgentContactWise ==>");

@@ -835,6 +835,26 @@ public class AdminDashBoardManager {
 
 		return mapLst;
 	}
+	
+	
+	/** date wise count **/
+	public Map<Object, Object> getTimeStampWiseCount(List<MessageDoc> msgLst) {
+		List<Object> dateWiseTimeStampList = new ArrayList<Object>();
+		Map<Object, Object> mapLst = new HashMap<Object, Object>();
+		for (MessageDoc msg : msgLst) {
+			long timeStamp = msg.getTimestamp();
+			timeStamp =(timeStamp-(timeStamp%(1000*60*60*24)));  
+			dateWiseTimeStampList.add(timeStamp);
+		}
+
+		// Datewise count
+		Set<Object> timeStampWiseCount = new HashSet<Object>(dateWiseTimeStampList);
+		for (Object key : timeStampWiseCount) {
+			mapLst.put(key, Collections.frequency(dateWiseTimeStampList, key));
+		}
+
+		return mapLst;
+	}
 
 	/** week wise count **/
 	public Map<Object, Object> getWeekWiseCount(List<MessageDoc> msgLst) {
@@ -866,6 +886,7 @@ public class AdminDashBoardManager {
 
 		return mapLst;
 	}
+	
 
 	// Open conversation
 	public List<ChatSessionDoc> getOpenConversation(Object contactType, long dateRange1, long dateRange2) {
