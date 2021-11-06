@@ -120,6 +120,7 @@ public class AgentAnalyticsManager {
 		double totalStartLag=0.0d;
 		int teamSize = dtoLst.size();
 		Map<Object,Object> graphApiMap = new HashMap<Object,Object>(); 
+		Map<Object,Object> graphApiMapV1 = new HashMap<Object,Object>(); 
 		
 		dto.setPeakLoad(new PeakLoadDto());
 		for (DashBoardResponseDto dt : dtoLst) {
@@ -138,6 +139,7 @@ public class AgentAnalyticsManager {
 			botClosure =dt.getBotClosure();
 			dto.setLeadMessanger(dt.getLeadMessanger());
 			graphApiMap = mergerMapKyAndValue(graphApiMap, dt.getGraphApiDetails());
+			graphApiMapV1 =  mergerMapKyAndValue(graphApiMapV1, dt.getGraphApiDetailsV1());
 			if(ArgUtil.is(dt.getPeakLoad()) && dt.getPeakLoad().getTotal() > dto.getPeakLoad().getTotal()) {
 				dto.setPeakLoad(dt.getPeakLoad());
 			}
@@ -155,6 +157,7 @@ public class AgentAnalyticsManager {
 		}
 		dto.setStartLag(totalStartLag);
 		dto.setGraphApiDetails(graphApiMap);
+		dto.setGraphApiDetailsV1(graphApiMapV1);
 		LOGGER.debug("\n\n get Summary ========:"+JsonUtil.toJson(dto));
 		return dto;
 	}
