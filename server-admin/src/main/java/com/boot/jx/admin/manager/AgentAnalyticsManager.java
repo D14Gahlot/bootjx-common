@@ -238,6 +238,8 @@ public class AgentAnalyticsManager {
 			if(hour<=24) {
 				Map<Object,Object> hourWiseCount = adminDbMgr.getHourWiseCount(totalAgConMsgExchanged);
 				dto.setGraphApiDetails(hourWiseCount);
+				Map<Object,Object> hourWiseCountV1 = adminDbMgr.getHourWiseCountV1(totalAgConMsgExchanged);
+				dto.setGraphApiDetailsV1(hourWiseCountV1);
 			}else if(hour >24 && days<=31){
 				Map<Object,Object> dateWiseCount = adminDbMgr.getDateWiseCount(totalAgConMsgExchanged);
 				dto.setGraphApiDetails(dateWiseCount);
@@ -246,6 +248,9 @@ public class AgentAnalyticsManager {
 			}else {
 				Map<Object,Object> dweekWiseCount = adminDbMgr.getWeekWiseCount(totalAgConMsgExchanged);
 				dto.setGraphApiDetails(dweekWiseCount);
+				Map<Object,Object> timeStampWiseCount = adminDbMgr.getWeekWiseCountV1(totalAgConMsgExchanged);
+				dto.setGraphApiDetailsV1(timeStampWiseCount);
+				
 			}
 			
 		    return dto;

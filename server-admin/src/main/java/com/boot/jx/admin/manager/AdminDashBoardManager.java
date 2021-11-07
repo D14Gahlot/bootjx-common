@@ -815,6 +815,24 @@ public class AdminDashBoardManager {
 		return mapLst;
 	}
 
+	public Map<Object, Object> getHourWiseCountV1(List<MessageDoc> msgLst) {
+		List<Long> hourList = new ArrayList<Long>();
+		List<Object> dateWiseList = new ArrayList<Object>();
+		Map<Object, Object> mapLst = new HashMap<Object, Object>();
+		for (MessageDoc msg : msgLst) {
+			long timeStamp = msg.getTimestamp();
+			timeStamp =(timeStamp-(timeStamp%(1000*60*60)));
+			 hourList.add(timeStamp);// hour wise count
+		}
+		Collections.sort(hourList);
+		Set<Object> hourWiseCount = new HashSet<Object>(hourList);
+		for (Object key : hourWiseCount) {
+			mapLst.put(key, Collections.frequency(hourList, key));
+		}
+
+		return mapLst;
+	}
+	
 	/** date wise count **/
 	public Map<Object, Object> getDateWiseCount(List<MessageDoc> msgLst) {
 		List<Object> dateWiseList = new ArrayList<Object>();
@@ -865,7 +883,6 @@ public class AdminDashBoardManager {
 			long timeStamp = msg.getTimestamp();
 			Date date = new Date(timeStamp);
 			String ddMMyyyyFormat = new SimpleDateFormat("dd-MM-yyyy").format(date);
-
 			cal.setTime(date);
 			String month = cal.getDisplayName(Calendar.MONTH, Calendar.LONG, Locale.getDefault()).toUpperCase();
 			int weekOfMonth = cal.get(Calendar.WEEK_OF_MONTH);
@@ -875,6 +892,27 @@ public class AdminDashBoardManager {
 			// :"+weekOfMonth+"\t weekOfYear :"+weekOfYear+"month
 			// :"+month+"-WEEK-"+weekOfMonth+"\t date :"+ddMMyyyyFormat+"\t str :"+str);
 			weekWiseList.add(str);
+		}
+
+		// Datewise count
+		Set<Object> dateWiseCount = new HashSet<Object>(weekWiseList);
+		for (Object key : dateWiseCount) {
+			mapLst.put(key, Collections.frequency(weekWiseList, key));
+			// System.out.println(key + ": " + Collections.frequency(weekWiseList, key));
+		}
+
+		return mapLst;
+	}
+	
+	/** week wise count **/
+	public Map<Object, Object> getWeekWiseCountV1(List<MessageDoc> msgLst) {
+		List<Object> weekWiseList = new ArrayList<Object>();
+		Map<Object, Object> mapLst = new HashMap<Object, Object>();
+		Calendar cal = Calendar.getInstance();
+		for (MessageDoc msg : msgLst) {
+			long timeStamp = msg.getTimestamp();
+			timeStamp =(timeStamp-(timeStamp%(1000*60*60*24)));  
+			weekWiseList.add(timeStamp);
 		}
 
 		// Datewise count
