@@ -11,6 +11,8 @@ public class DashBoardResponseDto {
 	long totalInMsgExchanged;
 	long totalOutMsgExchanged;
 	long totalMsgExchanged;
+	long totalTemplateMsgSent;
+	long totalTemplateMsgDelivered;
 	long uniqueConversation;
 	long openConversation;
 	long resolvedConversation;
@@ -54,6 +56,22 @@ public class DashBoardResponseDto {
 
 	public void setTotalMsgExchanged(long totalMsgExchanged) {
 		this.totalMsgExchanged = totalMsgExchanged;
+	}
+	
+	public long getTotalTemplateMsgSent() {
+		return totalTemplateMsgSent;
+	}
+
+	public void setTotalTemplateMsgSent(long totalTemplateMsgSent) {
+		this.totalTemplateMsgSent = totalTemplateMsgSent;
+	}
+	
+	public long getTotalTemplateMsgDelivered() {
+		return totalTemplateMsgDelivered;
+	}
+
+	public void setTotalTemplateMsgDelivered(long totalTemplateMsgDelivered) {
+		this.totalTemplateMsgDelivered = totalTemplateMsgDelivered;
 	}
 
 	public long getUniqueConversation() {
