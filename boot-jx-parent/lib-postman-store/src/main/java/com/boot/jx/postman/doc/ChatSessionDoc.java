@@ -27,7 +27,8 @@ public class ChatSessionDoc extends APatchableIndexed<ChatSessionDoc, String> im
     @Version
     private Long version;
 
-    @ApiMockModelProperty(example = "wa919930104050", required = false)
+    @ApiMockModelProperty(example = "wa919930104050_918828218374", required = false,
+	    value = "format like {{ContactType.getShortCode}}{{csid}}_{{lane}}")
     @Indexed
     private String contactId;
     private String contactType;
@@ -72,6 +73,8 @@ public class ChatSessionDoc extends APatchableIndexed<ChatSessionDoc, String> im
     private String status;
     @Deprecated
     private String tagCategory;
+
+    @Indexed
     private List<String> tagId;
 
     // MessageStats
