@@ -95,7 +95,11 @@ public class ChatService {
 
 	outboxMessage.updateStatus(Message.Status.INIT);
 	outboxMessage.contact().setContactType(chatContactDoc.getContactType());
+	outboxMessage.contact().setChannelType(chatContactDoc.getChannelType());
+	outboxMessage.contact().setLane(chatContactDoc.getLane());
+	outboxMessage.contact().setCsid(chatContactDoc.getCsid());
 	outboxMessage.contact().setContactId(chatContactDoc.getContactId());
+	outboxMessage.setSessionId(chatContactDoc.getSessionId());
 
 	MessageDoc messageDoc = messageStore.createOrUpdate(outboxMessage);
 	connectorHandlerFactory.message("ACTION", chatContactDoc, outboxMessage, null);

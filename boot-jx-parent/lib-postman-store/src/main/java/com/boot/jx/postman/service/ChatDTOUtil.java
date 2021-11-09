@@ -84,6 +84,10 @@ public class ChatDTOUtil {
 	messageDto.setMessageId(messageDoc.getMessageId());
 	messageDto.setMessageIdExt(messageDoc.getMessageIdExt());
 	messageDto.setMessageIdRef(messageDoc.getMessageIdRef());
+	
+	messageDto.setReplyId(messageDoc.getReplyId());
+	messageDto.setReplyIdExt(messageDoc.getReplyIdExt());
+	
 	messageDto.setTags(messageDoc.getTags());
 	messageDto.setAttachments(messageDoc.getAttachments());
 	messageDto.setLogs(messageDoc.getLogs());

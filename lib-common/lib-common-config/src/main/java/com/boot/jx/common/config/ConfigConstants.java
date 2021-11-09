@@ -33,7 +33,15 @@ public class ConfigConstants {
 		"10min", "15min", "20min", "25min", "30min")),
 
 	POSTMAN_AGENT_CHAT_INIT(
-		new ConfigMeta("Agent can initiate new chat", "postman.agent.chat.init").optionsOnOff()),
+		new ConfigMeta("Agent can initiate new Chat", "postman.agent.chat.init").optionsOnOff().deprecated()),
+
+	POSTMAN_AGENT_CHAT_INIT_SESSION(
+		new ConfigMeta("Agent can initiate chat with existing contact", "postman.agent.chat.init.session")
+			.optionsOnOff()),
+
+	POSTMAN_AGENT_CHAT_INIT_CONTACT(
+		new ConfigMeta("Agent can initiate chat with new contact", "postman.agent.chat.init.contact")
+			.optionsOnOff()),
 
 	POSTMAN_AGENT_CHAT_ASSIGNMENT(new ConfigMeta("Agent Assignment", "postman.agent.chat.assignment")
 		.optionValues(PMConstants.ASSIGNMENT_RULE.ROUND_ROBIN, PMConstants.ASSIGNMENT_RULE.MANUAL,
