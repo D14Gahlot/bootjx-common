@@ -90,6 +90,7 @@ public class ConfigMeta implements Serializable {
     private boolean optional;
     private boolean readonly;
     private boolean hidden;
+    private boolean deprecated;
 
     private OPTIONS_TYPE inputType;
     private DATA_TYPE dataType;
@@ -278,6 +279,19 @@ public class ConfigMeta implements Serializable {
 
     public void setConverterType(CONVERT_TYPE converterType) {
 	this.converterType = converterType;
+    }
+
+    public boolean isDeprecated() {
+	return deprecated;
+    }
+
+    public void setDeprecated(boolean deprecated) {
+	this.deprecated = deprecated;
+    }
+
+    public ConfigMeta deprecated() {
+	this.deprecated = true;
+	return this;
     }
 
 }
