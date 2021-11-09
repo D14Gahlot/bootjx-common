@@ -158,11 +158,13 @@ public class MsgController {
 
     @ResponseBody
     @RequestMapping(value = "/api/sessions/contact", method = { RequestMethod.GET })
-    public ApiResponse<ChatSessionDTO, Object> getSessionsForContact(@RequestParam String contactId) {
+    public ApiResponse<ChatSessionDTO, Object> getSessionsForContact(@RequestParam String contactId,
+	    @RequestParam(defaultValue = "0", required = false) Long fromStamp,
+	    @RequestParam(defaultValue = "0", required = false) Long toStamp) {
 
 	List<ChatSessionDTO> chatSessionDtos = new ArrayList<ChatSessionDTO>();
 
-	List<ChatSessionDoc> sessions = sessionStore.findSimilarChatSessionForContactId(contactId);
+	List<ChatSessionDoc> sessions = sessionStore.findSimilarChatSessionForContactId(contactId, fromStamp, toStamp);
 	for (ChatSessionDoc chatSessionDoc : sessions) {
 	    ChatSessionDTO chatSessionDto = chatArchive.withContact(chatSessionDoc);
 	    chatSessionDtos.add(chatSessionDto);

@@ -356,7 +356,7 @@ public class SessionStore extends CommonDocStore {
 		DEFAULT_VALUES.POSTMAN_AGENT_TAB_HISTORY_PERIOD);
     }
 
-    public List<ChatSessionDoc> findSimilarChatSessionForContactId(String contactId) {
+    public List<ChatSessionDoc> findSimilarChatSessionForContactId(String contactId, Long fromStamp, Long toStamp) {
 	ChatContactDoc contact = getContact(contactId);
 
 	List<ChatContactDoc> contacts = null;
@@ -376,6 +376,9 @@ public class SessionStore extends CommonDocStore {
 	    contacts = mongoTemplate.find(query1, ChatContactDoc.class);
 	}
 
+	Calendar timeout = Calendar.getInstance();
+	timeout.setTimeInMillis(timeout.getTimeInMillis() - DEFAULT_VALUES.POSTMAN_AGENT_TAB_HISTORY_PERIOD * 30);
+
 	Query query2 = new Query();
 	List<Criteria> orExpression = new ArrayList<Criteria>();
 
@@ -386,8 +389,19 @@ public class SessionStore extends CommonDocStore {
 	} else {
 	    orExpression.add(Criteria.where("contactId").is(contactId));
 	}
-	query2.addCriteria(new Criteria().orOperator(orExpression.toArray(new Criteria[orExpression.size()])));
+	//Time Limit Criteria
+	Criteria tymCriteria = Criteria.where("updatedStamp");
+	if (fromStamp > 0L) {
+	    tymCriteria.gte(fromStamp);
+	}
+	if (toStamp > 0L) {
+	    tymCriteria.lt(toStamp);
+	}
+
+	query2.addCriteria(tymCriteria.orOperator(orExpression.toArray(new Criteria[orExpression.size()])));
 	// LOGGER.info(query2.toString());
+	query2.fields().exclude("lastInBoundMsg").exclude("lastBotReply").exclude("lastAgentReply")
+		.exclude("lastOutBoundMsg").exclude("lastMsg");
 	return mongoTemplate.find(query2, ChatSessionDoc.class);
     }
 

@@ -10,8 +10,10 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
@@ -23,6 +25,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
+import org.jfree.util.Log;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,6 +45,8 @@ import com.boot.jx.admin.dto.LeadMessanger;
 import com.boot.jx.admin.dto.PeakLoadDto;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.MessageDoc;
+import com.boot.jx.postman.model.Message;
+import com.boot.jx.postman.model.MessageMetaWrapper;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.JsonUtil;
 
@@ -85,11 +90,11 @@ public class AgentAnalyticsManager {
 				date2 =todayEndTime();
 			}
 			
-		
+		System.out.println("Agent List");
 		 if(req!=null && (ArgUtil.isEmptyString(req.getAgent()) || req.getAgent().equalsIgnoreCase(DEFAULT_AGENT))) {
 			 allAgent = getAgentList(date1,date2); 
 		 }
-			 
+		System.out.println("Analytics List");
 		 if(allAgent !=null && !allAgent.isEmpty()) {
 			 for(Object chatSess : allAgent) {
 				 dto = new DashBoardResponseDto();
@@ -111,6 +116,8 @@ public class AgentAnalyticsManager {
 		long totalInMsg =0;
 		long totalOutMsg =0;
 		long totalMsg =0;
+		long totalTemplateMsgSent=0;
+		long totalTemplateMsgDelivered=0;
 		long totalUniqCon =0;
 		long totalOpenMsg =0;
 		long totalResolvedMsg =0;
@@ -128,6 +135,8 @@ public class AgentAnalyticsManager {
 			totalInMsg +=dt.getTotalInMsgExchanged();
 			totalOutMsg+=dt.getTotalOutMsgExchanged();
 			totalMsg+=dt.getTotalMsgExchanged();
+			totalTemplateMsgSent+=dt.getTotalTemplateMsgSent();
+			totalTemplateMsgDelivered+=dt.getTotalTemplateMsgDelivered();
 			totalOpenMsg+=dt.getOpenConversation();
 			totalResolvedMsg+=dt.getResolvedConversation();
 			convDuration+=dt.getConverDuration();
@@ -149,6 +158,8 @@ public class AgentAnalyticsManager {
 		dto.setTotalInMsgExchanged(totalInMsg);
 		dto.setTotalOutMsgExchanged(totalOutMsg);
 		dto.setTotalMsgExchanged(totalMsg);
+		dto.setTotalTemplateMsgSent(totalTemplateMsgSent);
+		dto.setTotalTemplateMsgDelivered(totalTemplateMsgDelivered);
 		dto.setOpenConversation(totalOpenMsg);
 		dto.setResolvedConversation(totalResolvedMsg);
 		dto.setUniqueConversation(totalUniqCon);
@@ -167,65 +178,99 @@ public class AgentAnalyticsManager {
 	}
 	
 	public DashBoardResponseDto getAgentAnalytics(String agent,long dateRange1,long dateRange2) {
+			DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");  
+//			System.out.println(dtf.format(LocalDateTime.now())+"Get Analytics for "+agent);
 		    DashBoardResponseDto dto = new  DashBoardResponseDto();
 			dto.setAgentName(agent==null?MY_BOT:agent);
 			/** Unique agent list  **/
+//			System.out.println(dtf.format(LocalDateTime.now())+"Get Unique agent list");
 			List<ChatSessionDoc> distinctContactLst = getUniqueAgentWiseContactList(agent,dateRange1,dateRange2);
 			if(ArgUtil.is(distinctContactLst)) {
 				dto.setUniqueConversation(distinctContactLst.size());
 			}
 			/** Total Msg exchanged chat session . **/
-			List<ChatSessionDoc> totalMsgExchanged =getAgentWiseTotalMsgExchanged(agent,dateRange1,dateRange2);
+			//List<ChatSessionDoc> totalMsgExchanged =getAgentWiseTotalMsgExchanged(agent,dateRange1,dateRange2);
 			/*if(ArgUtil.is(totalMsgExchanged)) {
 				dto.setTotalMsgExchanged(totalMsgExchanged.size());
 			}
 			*/
 			/**  Total Agent-contact wise msg **/
+//			System.out.println(dtf.format(LocalDateTime.now())+"Get Total message Exchanged");
 			List<MessageDoc> totalAgConMsgExchanged =getTotalMessageAgentAndContactWise(distinctContactLst,dateRange1,dateRange2);
 			if(ArgUtil.is(totalAgConMsgExchanged)) {
 				dto.setTotalMsgExchanged(totalAgConMsgExchanged.size());
+				
+				List<MessageDoc> totalTemplateMsgExchanged = new ArrayList<>();
+				List<MessageDoc> totalTemplateMsgDelivered = new ArrayList<>();
+				for(MessageDoc messageDoc : totalAgConMsgExchanged) {
+					if(messageDoc != null) {
+						MessageMetaWrapper metaWrapper = new MessageMetaWrapper(messageDoc.getMeta());
+						if(metaWrapper != null) {
+							if(metaWrapper.sendType() != null && metaWrapper.sendType().equalsIgnoreCase("PM")) {
+								totalTemplateMsgExchanged.add(messageDoc);
+								if(messageDoc.getStamps().get(Message.Status.DLVRD.name()) != null) {
+									totalTemplateMsgDelivered.add(messageDoc);
+								}
+							}
+						}
+					}
+				}
+				if(ArgUtil.is(totalTemplateMsgDelivered)) {
+					dto.setTotalTemplateMsgDelivered(totalTemplateMsgDelivered.size());
+				}
+				if(ArgUtil.is(totalTemplateMsgExchanged)) {
+					dto.setTotalTemplateMsgSent(totalTemplateMsgExchanged.size());
+				}
 			}
 			
-			
 			/** Open conversation **/
+//			System.out.println(dtf.format(LocalDateTime.now())+"Get Open conversation");
 			List<ChatSessionDoc> openConvesLst = getAgentWiseOpenConversation(agent,dateRange1,dateRange2);
 			if (ArgUtil.is(openConvesLst)) {
 				dto.setOpenConversation(openConvesLst.size());
 			}
 			
 			/** Resolved Conversation **/
-			
+//			System.out.println(dtf.format(LocalDateTime.now())+"Get Resolved conversation");
 			List<ChatSessionDoc> resolvedConversation = getAgentWiseResolvedConversation(agent, dateRange1, dateRange2);
 			if(ArgUtil.is(resolvedConversation)) {
 				dto.setResolvedConversation(resolvedConversation.size());
 			}
 			
 			/** Peak Load **/
+//			System.out.println(dtf.format(LocalDateTime.now())+"Get Peak Load");
 			PeakLoadDto peakLoadResult = adminDbMgr.getPeakLoadMsgCount(totalAgConMsgExchanged);//getAgentPeakLoadMsgCount(totalMsgExchanged);
 			dto.setPeakLoad(peakLoadResult);
 			
 			/** lead Messanger **/
+//			System.out.println(dtf.format(LocalDateTime.now())+"Get Lead messanger");
 			LeadMessanger  leadMsg =getLeadMessenger(agent,dateRange1,dateRange2);
 			dto.setLeadMessanger(leadMsg);
 			
 			/** Converation duration **/
+//			System.out.println(dtf.format(LocalDateTime.now())+"Get Conv duration");
 			long conVerDuration = getConversationDuration(agent,dateRange1,dateRange2);
 			if(ArgUtil.is(conVerDuration)) {
 			dto.setConverDuration(conVerDuration);
 			}
+			
 			/** startLag **/
+//			System.out.println(dtf.format(LocalDateTime.now())+"Get Start lag");
 			double startLag = getStartLag(agent,dateRange1,dateRange2);
 			dto.setStartLag(startLag);
 			
 			/** bot score **/
+//			System.out.println(dtf.format(LocalDateTime.now())+"Get Bot score");
 			long botScore = getBotScore(dateRange1, dateRange2);
 			dto.setBotScore(botScore);
 			
 			/** bot closure **/
+//			System.out.println(dtf.format(LocalDateTime.now())+"Get Bot closure");
 			double botClosure = getBotClosure(dateRange1, dateRange2,dto.getTotalMsgExchanged());
 			dto.setBotClosure(botClosure);
 			
 			/** find the date diff between two dates **/
+//			System.out.println(dtf.format(LocalDateTime.now())+"Get Diff");
 			Map<String,Integer> dateDiffMAp = getDateDiff(dateRange1,dateRange2);
 			int hour=0;
 			int days=0;
@@ -252,7 +297,7 @@ public class AgentAnalyticsManager {
 				dto.setGraphApiDetailsV1(timeStampWiseCount);
 				
 			}
-			
+			System.out.println(dtf.format(LocalDateTime.now())+"Return");
 		    return dto;
 	}
 	
@@ -631,16 +676,21 @@ public class AgentAnalyticsManager {
 		
 		public long getBotScore(long dateRange1, long dateRange2) {
 		
-			long botScoer=0;
+			long totalBotScore=0;
+			long averageBotScore=0;
 		Query query = new Query();
 		query.addCriteria(Criteria.where("mode").is("BOT"));
 		query.addCriteria(Criteria.where("startSessionStamp").gt(dateRange1).lt(dateRange2));
 		List<ChatSessionDoc> botScoreLst = mongoTemplate.find(query, ChatSessionDoc.class, CHAT_SESSION);
 		for(ChatSessionDoc chat :botScoreLst) {
 			LOGGER.debug("Chat doc :"+ chat.getBotScore());
-			botScoer +=chat.getBotScore()==null?0:chat.getBotScore(); 
-			}
-		return botScoer;
+			totalBotScore +=chat.getBotScore()==null?0:chat.getBotScore(); 
+		}
+		if(botScoreLst.size() > 0 && totalBotScore != 0) {
+			averageBotScore = totalBotScore/botScoreLst.size();
+		}
+		
+		return averageBotScore;
 		}
  	
 		/** get Bot Score **/
