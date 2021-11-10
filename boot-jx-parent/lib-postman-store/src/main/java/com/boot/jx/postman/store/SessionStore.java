@@ -654,12 +654,16 @@ public class SessionStore extends CommonDocStore {
      * @param dateRange2
      * @return
      */
-    public List<ChatSessionDoc> findByStatusOrQuickTag(CHAT_STATUS status, String tagCategory, long dateRange1,
+    public List<ChatSessionDoc> findByStatusOrQuickTag(List<String> status, List<String> tagCategory, long dateRange1,
 	    long dateRange2) {
+    if(status==null || status.isEmpty()) {
+    	status =new ArrayList<>(); 
+    	status.add(CHAT_STATUS.OPEN.toString());
+    }
 	Query query = new Query();
 	query.addCriteria(Criteria.where("assignedAgentStamp").gt(dateRange1).lt(dateRange2));
-	query.addCriteria(new Criteria().orOperator(Criteria.where("status").is(status.toString()),
-		Criteria.where("tagCategory").is(tagCategory)));
+	query.addCriteria(new Criteria().orOperator(Criteria.where("status").in(status),
+		Criteria.where("tagCategory").in(tagCategory)));
 
 	return mongoTemplate.find(query, ChatSessionDoc.class);
     }

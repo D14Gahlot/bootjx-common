@@ -177,8 +177,8 @@ public class AdminMsgController {
 	/** search by status or tagCategory **/
     @ResponseBody
     @RequestMapping(value = "/api/message/sessions/searchby/statusorcategory", method = { RequestMethod.GET })
-    public ApiResponse<ChatSessionDTO, Object> getByStatusOrCategory(@RequestParam(required = false,defaultValue ="OPEN") CHAT_STATUS status,
-    		@RequestParam(required= false) String tagCategory,
+    public ApiResponse<ChatSessionDTO, Object> getByStatusOrCategory(@RequestParam(required = false) List<String> status,
+    		@RequestParam(required= false) List<String> tagCategory,
     		@RequestParam(required= false) long dateRange1,
     		@RequestParam(required= false) long dateRange2) {
 	List<ChatSessionDTO> chatSessionDtos = new ArrayList<ChatSessionDTO>();
