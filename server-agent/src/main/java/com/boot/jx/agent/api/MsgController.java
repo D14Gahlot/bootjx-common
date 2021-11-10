@@ -70,6 +70,9 @@ public class MsgController {
     private ChatArchiveService chatArchive;
 
     @Autowired
+    private ChatArchiveBuilder chatArchiveBuilder;
+
+    @Autowired
     private LogManager logManager;
 
     @Autowired
@@ -127,7 +130,8 @@ public class MsgController {
 	    // messageDto.setMessageId(outboxMessage.getMessageId());
 
 	    agentSessionService.refreshOnline();
-	    return ApiResponse.buildResult(messageDto);
+	    return new ApiResponse<ChatMessageDTO, Object>().result(messageDto)
+		    .meta(chatArchiveBuilder.buildChatSessionDTO().from(sessionDoc).get());
 	} else {
 	    agentSessionService.refreshOnline();
 	    return new ApiResponse<ChatMessageDTO, Object>().message("Only assignee can respond to chat.");
@@ -198,9 +202,6 @@ public class MsgController {
 
     @Autowired
     private AgentStore agentStore;
-
-    @Autowired
-    private ChatArchiveBuilder chatArchiveBuilder;
 
     @ResponseBody
     @RequestMapping(value = { "/api/session/agent", "/api/session/agent/assign" }, method = { RequestMethod.POST })
