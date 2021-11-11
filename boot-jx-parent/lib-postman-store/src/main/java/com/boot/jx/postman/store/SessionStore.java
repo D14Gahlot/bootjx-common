@@ -397,9 +397,13 @@ public class SessionStore extends CommonDocStore {
 	if (toStamp > 0L) {
 	    tymCriteria.lt(toStamp);
 	}
+	
+	if(fromStamp == 0L && toStamp == 0L) {
+	    tymCriteria.gte(timeout.getTimeInMillis());
+	}
 
 	query2.addCriteria(tymCriteria.orOperator(orExpression.toArray(new Criteria[orExpression.size()])));
-	// LOGGER.info(query2.toString());
+	//LOGGER.info(query2.toString());
 	query2.fields().exclude("lastInBoundMsg").exclude("lastBotReply").exclude("lastAgentReply")
 		.exclude("lastOutBoundMsg").exclude("lastMsg");
 	return mongoTemplate.find(query2, ChatSessionDoc.class);
