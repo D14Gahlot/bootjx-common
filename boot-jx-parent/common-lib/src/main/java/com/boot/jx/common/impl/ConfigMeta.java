@@ -3,6 +3,7 @@ package com.boot.jx.common.impl;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 public class ConfigMeta implements Serializable {
 
@@ -157,6 +158,10 @@ public class ConfigMeta implements Serializable {
 	    this.options.add(new ConfigOption(optionValue));
 	}
 	return this;
+    }
+
+    public ConfigMeta optionValues(Set<Object> options) {
+	return this.optionValues(options.toArray());
     }
 
     public ConfigMeta optionsOnOff() {
