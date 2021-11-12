@@ -383,14 +383,4 @@ public class ChatService {
 	chatStatusReportService.process(null);
     }
 
-    public boolean updateTagCategoryStatus(ChatSessionDoc sessionDoc, String tagCategory) {
-	String oldTagCategory = null;
-	if (ArgUtil.is(sessionDoc.getTagCategory())) {
-	    oldTagCategory = sessionDoc.getTagCategory();
-	}
-	sessionStore.updateQuickTag(sessionDoc, tagCategory);
-	logManager.log(sessionDoc, EVENTS.TAG_ADDED, oldTagCategory, tagCategory);
-	return true;
-    }
-
 }

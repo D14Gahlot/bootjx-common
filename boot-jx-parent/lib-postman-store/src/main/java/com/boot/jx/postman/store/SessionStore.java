@@ -38,7 +38,6 @@ import com.boot.jx.postman.query.ChatContactQuery;
 import com.boot.jx.postman.query.ChatSessionQuery;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.utils.ArgUtil;
-import com.boot.utils.CollectionUtil;
 import com.boot.utils.EntityDtoUtil;
 import com.boot.utils.TimeUtils;
 import com.mongodb.BasicDBObject;
@@ -389,7 +388,7 @@ public class SessionStore extends CommonDocStore {
 	} else {
 	    orExpression.add(Criteria.where("contactId").is(contactId));
 	}
-	//Time Limit Criteria
+	// Time Limit Criteria
 	Criteria tymCriteria = Criteria.where("updatedStamp");
 	if (fromStamp > 0L) {
 	    tymCriteria.gte(fromStamp);
@@ -397,13 +396,13 @@ public class SessionStore extends CommonDocStore {
 	if (toStamp > 0L) {
 	    tymCriteria.lt(toStamp);
 	}
-	
-	if(fromStamp == 0L && toStamp == 0L) {
+
+	if (fromStamp == 0L && toStamp == 0L) {
 	    tymCriteria.gte(timeout.getTimeInMillis());
 	}
 
 	query2.addCriteria(tymCriteria.orOperator(orExpression.toArray(new Criteria[orExpression.size()])));
-	//LOGGER.info(query2.toString());
+	// LOGGER.info(query2.toString());
 	query2.fields().exclude("lastInBoundMsg").exclude("lastBotReply").exclude("lastAgentReply")
 		.exclude("lastOutBoundMsg").exclude("lastMsg");
 	return mongoTemplate.find(query2, ChatSessionDoc.class);
@@ -613,14 +612,6 @@ public class SessionStore extends CommonDocStore {
 	return chatSessionDoc;
     }
 
-    public ChatSessionDoc updateQuickTag(ChatSessionDoc chatSessionDoc, String tagCategory) {
-	chatSessionDoc.setTagCategory(tagCategory);
-	CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder().whereId(chatSessionDoc.getSessionId());
-	builder.set("tagId", CollectionUtil.getList(tagCategory));
-	mongoTemplate.updateFirst(builder.getQuery(), builder.getUpdate(), ChatSessionDoc.class);
-	return chatSessionDoc;
-    }
-
     /**
      * search by status
      * 
@@ -654,21 +645,20 @@ public class SessionStore extends CommonDocStore {
      * 
      * @param status
      * @param tagCategory
-     * @param dateRange1
-     * @param dateRange2
+     * @param fromStamp
+     * @param toStamp
      * @return
      */
-    public List<ChatSessionDoc> findByStatusOrQuickTag(List<String> status, List<String> tagCategory, long dateRange1,
-	    long dateRange2) {
-    if(status==null || status.isEmpty()) {
-    	status =new ArrayList<>(); 
-    	status.add(CHAT_STATUS.OPEN.toString());
-    }
+    public List<ChatSessionDoc> findByStatusOrQuickTag(List<CHAT_STATUS> status, List<String> tagCategory,
+	    long fromStamp, long toStamp) {
+	if (status == null || status.isEmpty()) {
+	    status = new ArrayList<>();
+	    status.add(CHAT_STATUS.OPEN);
+	}
 	Query query = new Query();
-	query.addCriteria(Criteria.where("assignedAgentStamp").gt(dateRange1).lt(dateRange2));
+	query.addCriteria(Criteria.where("assignedAgentStamp").gt(fromStamp).lt(toStamp));
 	query.addCriteria(new Criteria().orOperator(Criteria.where("status").in(status),
-		Criteria.where("tagCategory").in(tagCategory)));
-
+		Criteria.where("tagId").in(tagCategory)));
 	return mongoTemplate.find(query, ChatSessionDoc.class);
     }
 

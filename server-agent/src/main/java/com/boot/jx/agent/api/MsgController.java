@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -253,13 +254,6 @@ public class MsgController {
 	return ApiResponse.buildResult(agentChatHandlerImpl.updateChatSessionStatus(sessionId, status));
     }
 
-    @ResponseBody
-    @RequestMapping(value = { "/api/session/tagCategory" }, method = { RequestMethod.POST })
-    public ApiResponse<ChatSessionDTO, Object> updateSession(@RequestParam String sessionId,
-	    @RequestParam String tagCategory) {
-	return ApiResponse.buildResult(agentChatHandlerImpl.updateChatTagCategoryStatus(sessionId, tagCategory));
-    }
-
     /*
      * search by status
      * 
@@ -293,9 +287,10 @@ public class MsgController {
      */
     /** search by status or tagCategory **/
     @ResponseBody
+    @Deprecated
     @RequestMapping(value = "/api/sessions/searchby/statusorcategory", method = { RequestMethod.GET })
     public ApiResponse<ChatSessionDTO, Object> getByStatusOrCategory(
-	    @RequestParam(required = false) List<String> status,
+	    @RequestParam(required = false) List<CHAT_STATUS> status,
 	    @RequestParam(required = false) List<String> tagCategory, @RequestParam(required = false) long dateRange1,
 	    @RequestParam(required = false) long dateRange2) {
 	List<ChatSessionDTO> chatSessionDtos = new ArrayList<ChatSessionDTO>();
