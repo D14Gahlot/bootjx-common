@@ -103,6 +103,10 @@ public class SessionStore extends CommonDocStore {
 	    return !TimeUtils.isExpired(chatSessionDoc.getLastInComingStamp(), pmClientConfig.getChatSessionTimeout());
 	}
 
+	if (ArgUtil.is(chatSessionDoc.getUpdated())) {
+	    return !TimeUtils.isExpired(chatSessionDoc.getUpdated().getStamp(), pmClientConfig.getChatSessionTimeout());
+	}
+
 	return true;
     }
 
@@ -323,20 +327,18 @@ public class SessionStore extends CommonDocStore {
 	Calendar timeout = Calendar.getInstance();
 	timeout.setTimeInMillis(timeout.getTimeInMillis() - period);
 	long watermarkStamp = timeout.getTimeInMillis();
-	long watermarkStampDay = timeout.getTimeInMillis()/TimeUtils.Constants.MILLIS_IN_DAY;
-	
+	long watermarkStampDay = timeout.getTimeInMillis() / TimeUtils.Constants.MILLIS_IN_DAY;
+
 	timeout.setTimeInMillis(timeout.getTimeInMillis() - period);
 	long graceStamp = timeout.getTimeInMillis();
-	
 
 	query2.addCriteria(Criteria.where("active").is(true).and("mode").is("AGENT")
 		// Agent Session Start
 		// .and("agentSessionStamp").gt(watermarkStamp)
-		.orOperator(
-			Criteria.where("agentSessionStamp").gt(watermarkStamp),
-			//@deprecated condition
+		.orOperator(Criteria.where("agentSessionStamp").gt(watermarkStamp),
+			// @deprecated condition
 			Criteria.where("updatedStamp").gt(watermarkStamp),
-			//new Condition
+			// new Condition
 			Criteria.where("updated.day").gt(watermarkStampDay))
 		// .and("updatedStamp").gt(watermarkStamp)
 		// Additional Stamps
