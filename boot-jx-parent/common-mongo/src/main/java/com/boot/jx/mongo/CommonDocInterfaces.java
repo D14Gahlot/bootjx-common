@@ -5,12 +5,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
 import com.boot.jx.model.AuditableEntity;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.EntityDtoUtil;
+import com.boot.utils.TimeUtils;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
@@ -192,6 +194,80 @@ public class CommonDocInterfaces {
 	    this.createdStamp = createdStamp;
 	}
 
+    }
+
+    public static class TimeStamp implements Serializable {
+
+	private static final long serialVersionUID = 9114924334759684396L;
+	private long stamp;
+	@Indexed
+	private long hour;
+	@Indexed
+	private long day;
+	@Indexed
+	private long week;
+
+	public long getStamp() {
+	    return stamp;
+	}
+
+	public void setStamp(long stamp) {
+	    this.stamp = stamp;
+	}
+
+	public long getHour() {
+	    return hour;
+	}
+
+	public void setHour(long hour) {
+	    this.hour = hour;
+	}
+
+	public long getDay() {
+	    return day;
+	}
+
+	public void setDay(long day) {
+	    this.day = day;
+	}
+
+	public long getWeek() {
+	    return week;
+	}
+
+	public void setWeek(long week) {
+	    this.week = week;
+	}
+
+	public static TimeStamp from(long stamp) {
+	    TimeStamp timeStamp = new TimeStamp();
+	    timeStamp.setHour(stamp / TimeUtils.Constants.MILLIS_IN_HOUR);
+	    timeStamp.setDay(stamp / TimeUtils.Constants.MILLIS_IN_DAY);
+	    timeStamp.setWeek(stamp / TimeUtils.Constants.MILLIS_IN_WEEK);
+	    return timeStamp;
+	}
+
+	public static TimeStamp now() {
+	    return from(System.currentTimeMillis());
+	}
+
+	public interface UpdatedTimeStampSupport {
+	    public TimeStamp getUpdated();
+
+	    public void setUpdated(TimeStamp updated);
+	}
+
+	public static class UpdatedTimeStampDoc implements UpdatedTimeStampSupport {
+	    private TimeStamp updated;
+
+	    public TimeStamp getUpdated() {
+		return updated;
+	    }
+
+	    public void setUpdated(TimeStamp updated) {
+		this.updated = updated;
+	    }
+	}
     }
 
 }

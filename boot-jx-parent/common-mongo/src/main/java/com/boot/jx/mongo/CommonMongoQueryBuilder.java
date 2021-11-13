@@ -1,8 +1,12 @@
 package com.boot.jx.mongo;
 
+import com.boot.jx.mongo.CommonDocInterfaces.TimeStamp.UpdatedTimeStampSupport;
+import com.boot.utils.TimeUtils;
+
 public class CommonMongoQueryBuilder extends CommonMongoQB<CommonMongoQueryBuilder, Object> {
 
     public static abstract class DocQueryBuilder<T> extends CommonMongoQB<DocQueryBuilder<T>, T> {
+
 	protected T doc;
 	protected boolean synced;
 	private long updatedStamp;
@@ -39,7 +43,14 @@ public class CommonMongoQueryBuilder extends CommonMongoQB<CommonMongoQueryBuild
 	}
 
 	public void updatedStamp() {
-	    this.set("updatedStamp", System.currentTimeMillis());
+	    long updatedStamp = System.currentTimeMillis();
+	    if (this.doc instanceof UpdatedTimeStampSupport) {
+		this.set("updated.stamp", updatedStamp);
+		this.set("updated.hour", updatedStamp / TimeUtils.Constants.MILLIS_IN_HOUR);
+		this.set("updated.day", updatedStamp / TimeUtils.Constants.MILLIS_IN_DAY);
+		this.set("updated.week", updatedStamp / TimeUtils.Constants.MILLIS_IN_WEEK);
+	    }
+	    this.set("updatedStamp", updatedStamp);
 	}
 
 	@SuppressWarnings("unchecked")

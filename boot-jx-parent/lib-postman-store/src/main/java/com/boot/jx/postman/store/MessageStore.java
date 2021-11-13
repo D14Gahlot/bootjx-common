@@ -258,10 +258,6 @@ public class MessageStore extends CommonDocStore {
 	return messages;
     }
 
-    public void applyPatch(MessageDoc messageDoc) {
-	applyPatch(messageDoc, getCollectionName(messageDoc.getContact().getContactType()));
-    }
-
     public void updateStatus(ContactType contactType, MessageDoc messageDoc, Status status, String reason) {
 	CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder();
 

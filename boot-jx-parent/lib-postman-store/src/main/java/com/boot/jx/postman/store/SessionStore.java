@@ -323,12 +323,22 @@ public class SessionStore extends CommonDocStore {
 	Calendar timeout = Calendar.getInstance();
 	timeout.setTimeInMillis(timeout.getTimeInMillis() - period);
 	long watermarkStamp = timeout.getTimeInMillis();
+	long watermarkStampDay = timeout.getTimeInMillis()/TimeUtils.Constants.MILLIS_IN_DAY;
+	
 	timeout.setTimeInMillis(timeout.getTimeInMillis() - period);
 	long graceStamp = timeout.getTimeInMillis();
+	
 
 	query2.addCriteria(Criteria.where("active").is(true).and("mode").is("AGENT")
 		// Agent Session Start
-		.and("agentSessionStamp").gt(watermarkStamp)
+		// .and("agentSessionStamp").gt(watermarkStamp)
+		.orOperator(
+			Criteria.where("agentSessionStamp").gt(watermarkStamp),
+			//@deprecated condition
+			Criteria.where("updatedStamp").gt(watermarkStamp),
+			//new Condition
+			Criteria.where("updated.day").gt(watermarkStampDay))
+		// .and("updatedStamp").gt(watermarkStamp)
 		// Additional Stamps
 		.andOperator(
 			//
@@ -419,17 +429,17 @@ public class SessionStore extends CommonDocStore {
 	    if (ArgUtil.isEmpty(chatSessionDoc.getStartSessionStamp()) || chatSessionDoc.getStartSessionStamp() == 0L) {
 		chatSessionDoc.setStartSessionStamp(System.currentTimeMillis());
 	    }
-	    mongoTemplate.save(chatSessionDoc);
+	    commonMongoTemplate.save(chatSessionDoc);
 	} catch (Exception e) {
 	    ChatSessionDoc chatSessionDoc2 = mongoTemplate.findById(chatSessionDoc.getSessionId(),
 		    ChatSessionDoc.class);
 	    LOGGER.error(chatSessionDoc.getVersion() + " ~ " + chatSessionDoc2.getVersion(), e);
 	    if (chatSessionDoc.getVersion() == null) {
 		// chatSessionDoc.setVersion(0);
-		mongoTemplate.save(chatSessionDoc);
+		commonMongoTemplate.save(chatSessionDoc);
 	    } else {
 		// chatSessionDoc.setVersion(chatSessionDoc2.getVersion()+1);
-		mongoTemplate.save(chatSessionDoc);
+		commonMongoTemplate.save(chatSessionDoc);
 	    }
 	}
     }
