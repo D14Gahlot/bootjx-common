@@ -52,7 +52,6 @@ public class ChatContactDoc implements Serializable, Contactable, AuditableEntit
     private String sessionId;
 
     // @TextIndexed(weight = 10)
-    @Indexed
     private String name;
 
     // @TextIndexed(weight = 1)
@@ -67,6 +66,8 @@ public class ChatContactDoc implements Serializable, Contactable, AuditableEntit
     @Indexed
     private List<String> labelId;
     private ChatUserProfileDTO profile;
+    
+    @Indexed
     private String profileId;
 
     private Long createdStamp;

@@ -11,4 +11,11 @@ public class ControllerRequestDTOs {
 	public CHAT_STATUS status;
 	public List<QuickTag> tags;
     }
+
+    public static class SessionSearchRequest {
+	public List<CHAT_STATUS> status;
+	public List<QuickTag> tags;
+	public long fromStamp;
+	public long toStamp;
+    }
 }

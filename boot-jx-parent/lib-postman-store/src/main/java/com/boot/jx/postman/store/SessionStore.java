@@ -38,7 +38,6 @@ import com.boot.jx.postman.query.ChatContactQuery;
 import com.boot.jx.postman.query.ChatSessionQuery;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.utils.ArgUtil;
-import com.boot.utils.CollectionUtil;
 import com.boot.utils.EntityDtoUtil;
 import com.boot.utils.TimeUtils;
 import com.mongodb.BasicDBObject;
@@ -102,6 +101,10 @@ public class SessionStore extends CommonDocStore {
 	if (!ArgUtil.isEmptyValue(chatSessionDoc.getLastInComingStamp())
 		&& (chatSessionDoc.getLastResponseStamp() > chatSessionDoc.getLastInComingStamp())) {
 	    return !TimeUtils.isExpired(chatSessionDoc.getLastInComingStamp(), pmClientConfig.getChatSessionTimeout());
+	}
+
+	if (ArgUtil.is(chatSessionDoc.getUpdated())) {
+	    return !TimeUtils.isExpired(chatSessionDoc.getUpdated().getStamp(), pmClientConfig.getChatSessionTimeout());
 	}
 
 	return true;
@@ -324,12 +327,20 @@ public class SessionStore extends CommonDocStore {
 	Calendar timeout = Calendar.getInstance();
 	timeout.setTimeInMillis(timeout.getTimeInMillis() - period);
 	long watermarkStamp = timeout.getTimeInMillis();
+	long watermarkStampDay = timeout.getTimeInMillis() / TimeUtils.Constants.MILLIS_IN_DAY;
+
 	timeout.setTimeInMillis(timeout.getTimeInMillis() - period);
 	long graceStamp = timeout.getTimeInMillis();
 
 	query2.addCriteria(Criteria.where("active").is(true).and("mode").is("AGENT")
 		// Agent Session Start
-		.and("agentSessionStamp").gt(watermarkStamp)
+		// .and("agentSessionStamp").gt(watermarkStamp)
+		.orOperator(Criteria.where("agentSessionStamp").gt(watermarkStamp),
+			// @deprecated condition
+			Criteria.where("updatedStamp").gt(watermarkStamp),
+			// new Condition
+			Criteria.where("updated.day").gt(watermarkStampDay))
+		// .and("updatedStamp").gt(watermarkStamp)
 		// Additional Stamps
 		.andOperator(
 			//
@@ -356,7 +367,7 @@ public class SessionStore extends CommonDocStore {
 		DEFAULT_VALUES.POSTMAN_AGENT_TAB_HISTORY_PERIOD);
     }
 
-    public List<ChatSessionDoc> findSimilarChatSessionForContactId(String contactId) {
+    public List<ChatSessionDoc> findSimilarChatSessionForContactId(String contactId, Long fromStamp, Long toStamp) {
 	ChatContactDoc contact = getContact(contactId);
 
 	List<ChatContactDoc> contacts = null;
@@ -376,6 +387,9 @@ public class SessionStore extends CommonDocStore {
 	    contacts = mongoTemplate.find(query1, ChatContactDoc.class);
 	}
 
+	Calendar timeout = Calendar.getInstance();
+	timeout.setTimeInMillis(timeout.getTimeInMillis() - DEFAULT_VALUES.POSTMAN_AGENT_TAB_HISTORY_PERIOD * 30);
+
 	Query query2 = new Query();
 	List<Criteria> orExpression = new ArrayList<Criteria>();
 
@@ -386,8 +400,23 @@ public class SessionStore extends CommonDocStore {
 	} else {
 	    orExpression.add(Criteria.where("contactId").is(contactId));
 	}
-	query2.addCriteria(new Criteria().orOperator(orExpression.toArray(new Criteria[orExpression.size()])));
+	// Time Limit Criteria
+	Criteria tymCriteria = Criteria.where("updatedStamp");
+	if (fromStamp > 0L) {
+	    tymCriteria.gte(fromStamp);
+	}
+	if (toStamp > 0L) {
+	    tymCriteria.lt(toStamp);
+	}
+
+	if (fromStamp == 0L && toStamp == 0L) {
+	    tymCriteria.gte(timeout.getTimeInMillis());
+	}
+
+	query2.addCriteria(tymCriteria.orOperator(orExpression.toArray(new Criteria[orExpression.size()])));
 	// LOGGER.info(query2.toString());
+	query2.fields().exclude("lastInBoundMsg").exclude("lastBotReply").exclude("lastAgentReply")
+		.exclude("lastOutBoundMsg").exclude("lastMsg");
 	return mongoTemplate.find(query2, ChatSessionDoc.class);
     }
 
@@ -402,17 +431,17 @@ public class SessionStore extends CommonDocStore {
 	    if (ArgUtil.isEmpty(chatSessionDoc.getStartSessionStamp()) || chatSessionDoc.getStartSessionStamp() == 0L) {
 		chatSessionDoc.setStartSessionStamp(System.currentTimeMillis());
 	    }
-	    mongoTemplate.save(chatSessionDoc);
+	    commonMongoTemplate.save(chatSessionDoc);
 	} catch (Exception e) {
 	    ChatSessionDoc chatSessionDoc2 = mongoTemplate.findById(chatSessionDoc.getSessionId(),
 		    ChatSessionDoc.class);
 	    LOGGER.error(chatSessionDoc.getVersion() + " ~ " + chatSessionDoc2.getVersion(), e);
 	    if (chatSessionDoc.getVersion() == null) {
 		// chatSessionDoc.setVersion(0);
-		mongoTemplate.save(chatSessionDoc);
+		commonMongoTemplate.save(chatSessionDoc);
 	    } else {
 		// chatSessionDoc.setVersion(chatSessionDoc2.getVersion()+1);
-		mongoTemplate.save(chatSessionDoc);
+		commonMongoTemplate.save(chatSessionDoc);
 	    }
 	}
     }
@@ -595,14 +624,6 @@ public class SessionStore extends CommonDocStore {
 	return chatSessionDoc;
     }
 
-    public ChatSessionDoc updateQuickTag(ChatSessionDoc chatSessionDoc, String tagCategory) {
-	chatSessionDoc.setTagCategory(tagCategory);
-	CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder().whereId(chatSessionDoc.getSessionId());
-	builder.set("tagId", CollectionUtil.getList(tagCategory));
-	mongoTemplate.updateFirst(builder.getQuery(), builder.getUpdate(), ChatSessionDoc.class);
-	return chatSessionDoc;
-    }
-
     /**
      * search by status
      * 
@@ -636,17 +657,20 @@ public class SessionStore extends CommonDocStore {
      * 
      * @param status
      * @param tagCategory
-     * @param dateRange1
-     * @param dateRange2
+     * @param fromStamp
+     * @param toStamp
      * @return
      */
-    public List<ChatSessionDoc> findByStatusOrQuickTag(CHAT_STATUS status, String tagCategory, long dateRange1,
-	    long dateRange2) {
+    public List<ChatSessionDoc> findByStatusOrQuickTag(List<CHAT_STATUS> status, List<String> tagCategory,
+	    long fromStamp, long toStamp) {
+	if (status == null || status.isEmpty()) {
+	    status = new ArrayList<>();
+	    status.add(CHAT_STATUS.OPEN);
+	}
 	Query query = new Query();
-	query.addCriteria(Criteria.where("assignedAgentStamp").gt(dateRange1).lt(dateRange2));
-	query.addCriteria(new Criteria().orOperator(Criteria.where("status").is(status.toString()),
-		Criteria.where("tagCategory").is(tagCategory)));
-
+	query.addCriteria(Criteria.where("assignedAgentStamp").gt(fromStamp).lt(toStamp));
+	query.addCriteria(new Criteria().orOperator(Criteria.where("status").in(status),
+		Criteria.where("tagId").in(tagCategory)));
 	return mongoTemplate.find(query, ChatSessionDoc.class);
     }
 

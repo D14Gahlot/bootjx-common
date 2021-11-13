@@ -14,6 +14,7 @@ import com.boot.jx.agent.AgentService;
 import com.boot.jx.agent.AgentSessionBean;
 import com.boot.jx.agent.AgentSessionService;
 import com.boot.jx.agent.api.ControllerRequestDTOs.ChatTagUpdateRequest;
+import com.boot.jx.agent.api.ControllerRequestDTOs.SessionSearchRequest;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.common.config.ConfigConstants.KEY;
 import com.boot.jx.common.doc.AgentSessionDoc;
@@ -21,10 +22,10 @@ import com.boot.jx.common.store.ChatArchiveService;
 import com.boot.jx.common.store.DocumentUpdateListner;
 import com.boot.jx.http.ApiRequest;
 import com.boot.jx.http.RequestType;
-import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PMConstants;
 import com.boot.jx.postman.PMConstants.CHAT_SESSION_ACTIONS;
 import com.boot.jx.postman.PMConstants.DEFAULT;
+import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.dto.ChatMessageDTO;
 import com.boot.jx.postman.dto.ChatSessionDTO;
@@ -107,7 +108,7 @@ public class AgentMsgController {
     public ApiResponse<ChatSessionDTO, Object> addSessionTags(@RequestBody ChatTagUpdateRequest updateRequest) {
 	ChatSessionDoc sessionDoc = sessionStore.getSession(updateRequest.sessionId);
 	if (chatSessionManager.updateSessionStatus(sessionDoc, updateRequest.status)
-		|| chatSessionManager.updateSessionTags(sessionDoc, updateRequest.tags)) {
+		| chatSessionManager.updateSessionTags(sessionDoc, updateRequest.tags)) {
 	    documentUpdateListner.onChatSessionUpdate(sessionDoc);
 	}
 	return ApiResponse.buildData(ChatDTOUtil.getChatSessionDTO(sessionDoc));
@@ -119,7 +120,9 @@ public class AgentMsgController {
 	ChatSessionDoc sessionDoc = sessionStore.getSession(outboxMessage.getSessionId());
 
 	// Session Stuff Logging >
-	if (ArgUtil.areEqual(sessionDoc.getAssignedToAgent(), agentSession.getAgentCode()) || agentSession.isAdmin()) {
+	// if (ArgUtil.areEqual(sessionDoc.getAssignedToAgent(),
+	// agentSession.getAgentCode()) || agentSession.isAdmin()) {
+	if (ArgUtil.is(sessionDoc)) {
 	    outboxMessage.setAction(CHAT_SESSION_ACTIONS.ADD_STICKY_NOTE);
 	    ChatMessageDTO messageDto = agentService.sendMessage(sessionDoc, outboxMessage);
 	    // Evaluate if required
@@ -133,5 +136,17 @@ public class AgentMsgController {
 	    agentSessionService.refreshOnline();
 	    return new ApiResponse<ChatMessageDTO, Object>().message("Only Assignee/Admin can add StickyNote to chat.");
 	}
+    }
+
+    @RequestMapping(value = "/api/sessions/search", method = { RequestMethod.POST })
+    public ApiResponse<ChatSessionDTO, Object> searchSessions(@RequestBody SessionSearchRequest query) {
+	List<ChatSessionDTO> chatSessionDtos = new ArrayList<ChatSessionDTO>();
+	List<ChatSessionDoc> sessions = chatSessionManager.searchBy(query.status, query.tags, query.fromStamp,
+		query.toStamp);
+	for (ChatSessionDoc chatSessionDoc : sessions) {
+	    ChatSessionDTO chatSessionDto = chatArchive.withContact(chatSessionDoc);
+	    chatSessionDtos.add(chatSessionDto);
+	}
+	return ApiResponse.buildResults(chatSessionDtos);
     }
 }

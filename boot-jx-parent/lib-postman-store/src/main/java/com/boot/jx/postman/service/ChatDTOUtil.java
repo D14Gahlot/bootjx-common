@@ -84,10 +84,10 @@ public class ChatDTOUtil {
 	messageDto.setMessageId(messageDoc.getMessageId());
 	messageDto.setMessageIdExt(messageDoc.getMessageIdExt());
 	messageDto.setMessageIdRef(messageDoc.getMessageIdRef());
-	
+
 	messageDto.setReplyId(messageDoc.getReplyId());
 	messageDto.setReplyIdExt(messageDoc.getReplyIdExt());
-	
+
 	messageDto.setTags(messageDoc.getTags());
 	messageDto.setAttachments(messageDoc.getAttachments());
 	messageDto.setLogs(messageDoc.getLogs());
@@ -152,7 +152,12 @@ public class ChatDTOUtil {
 	chatSessionDto.setAssignedDeptStamp(chatSessionDoc.getAssignedDeptStamp());
 	chatSessionDto.setLastInComingStamp(chatSessionDoc.getLastInComingStamp());
 	chatSessionDto.setLastResponseStamp(chatSessionDoc.getLastResponseStamp());
-	chatSessionDto.setUpdatedStamp(chatSessionDoc.getUpdatedStamp());
+
+	if (ArgUtil.is(chatSessionDoc.getUpdated())) {
+	    chatSessionDto.setUpdatedStamp(chatSessionDoc.getUpdated().getStamp());
+	} else {
+	    chatSessionDto.setUpdatedStamp(chatSessionDoc.getUpdatedStamp());
+	}
 
 	if (chatSessionDto.getAgentSessionStamp() == 0L) {
 	    chatSessionDto.setAgentSessionStamp(chatSessionDoc.getAssignedAgentStamp());

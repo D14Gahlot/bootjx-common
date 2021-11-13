@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.boot.jx.postman.PMConstants;
+import com.boot.jx.postman.PMConstants.CHAT_STATUS;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.QuickTag;
 import com.boot.jx.postman.store.MessageStore.EVENTS;
@@ -91,5 +92,13 @@ public class ChatSessionManager {
 	    logManager.log(sessionDoc, EVENTS.TAG_ADDED, addedItems.toArray(new String[0]));
 	}
 	return updated;
+    }
+
+    public List<ChatSessionDoc> searchBy(List<CHAT_STATUS> status, List<QuickTag> tags, long fromStamp, long toStamp) {
+	List<String> newList = new ArrayList<String>();
+	for (QuickTag tag : tags) {
+	    newList.add(tag.getId());
+	}
+	return sessionStore.findByStatusOrQuickTag(status, newList, fromStamp, toStamp);
     }
 }

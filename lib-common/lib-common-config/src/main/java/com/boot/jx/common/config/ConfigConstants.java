@@ -11,8 +11,11 @@ import com.boot.jx.common.impl.ConfigMeta.OPTIONS_TYPE;
 import com.boot.jx.postman.PMConstants;
 import com.boot.model.MapModel.EntryMeta;
 import com.boot.utils.TimeUtils;
+import com.google.i18n.phonenumbers.PhoneNumberUtil;
 
 public class ConfigConstants {
+
+    public static final PhoneNumberUtil PHONE_NUMBER_UTIL = PhoneNumberUtil.getInstance();
 
     public static final String[] APP_CONFIG_PREFIX = new String[] {
 	    // PRefixe
@@ -67,7 +70,11 @@ public class ConfigConstants {
 			new ConfigOption(TimeUtils.toMillis("3d")).label("+3Days"),
 			new ConfigOption(TimeUtils.toMillis("5d")).label("+5Days"),
 			new ConfigOption(TimeUtils.toMillis("7d")).label("+7Days"))
-		.defaultValue(0))
+		.defaultValue(0)),
+
+	POSTMAN_PHONEBOOK_REGION(new ConfigMeta("Default ISD Country", "postman.phonebook.region")
+		.optionValues(PHONE_NUMBER_UTIL.getSupportedRegions()).defaultValue("IN")),
+
 	// Ends here
 	;
 

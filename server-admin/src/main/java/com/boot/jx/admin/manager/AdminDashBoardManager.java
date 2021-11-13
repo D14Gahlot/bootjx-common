@@ -746,6 +746,16 @@ public class AdminDashBoardManager {
 			Integer maxEntryKeyValue = mapLst.get(maxEntryKey);
 			// System.out.println("Peak Load Date Time and Value:"+maxEntryKey +"-
 			// "+maxEntryKeyValue);
+			SimpleDateFormat df = new SimpleDateFormat("dd-MM-yyyy hh:mm"); 
+			try {
+			    Date d = df.parse(maxEntryKey.toString());
+			    long milliseconds = d.getTime();
+			    if(milliseconds != 0) {
+			    	peakLoadResult.setEpochStamp(milliseconds);
+			    }
+			} catch (Exception e) {
+			    e.printStackTrace();
+			}
 			peakLoadResult.setTimestamp(maxEntryKey);
 			peakLoadResult.setTotal(maxEntryKeyValue.longValue());
 
@@ -815,6 +825,24 @@ public class AdminDashBoardManager {
 		return mapLst;
 	}
 
+	public Map<Object, Object> getHourWiseCountV1(List<MessageDoc> msgLst) {
+		List<Long> hourList = new ArrayList<Long>();
+		List<Object> dateWiseList = new ArrayList<Object>();
+		Map<Object, Object> mapLst = new HashMap<Object, Object>();
+		for (MessageDoc msg : msgLst) {
+			long timeStamp = msg.getTimestamp();
+			timeStamp =(timeStamp-(timeStamp%(1000*60*60)));
+			 hourList.add(timeStamp);// hour wise count
+		}
+		Collections.sort(hourList);
+		Set<Object> hourWiseCount = new HashSet<Object>(hourList);
+		for (Object key : hourWiseCount) {
+			mapLst.put(key, Collections.frequency(hourList, key));
+		}
+
+		return mapLst;
+	}
+	
 	/** date wise count **/
 	public Map<Object, Object> getDateWiseCount(List<MessageDoc> msgLst) {
 		List<Object> dateWiseList = new ArrayList<Object>();
@@ -835,6 +863,26 @@ public class AdminDashBoardManager {
 
 		return mapLst;
 	}
+	
+	
+	/** date wise count **/
+	public Map<Object, Object> getTimeStampWiseCount(List<MessageDoc> msgLst) {
+		List<Object> dateWiseTimeStampList = new ArrayList<Object>();
+		Map<Object, Object> mapLst = new HashMap<Object, Object>();
+		for (MessageDoc msg : msgLst) {
+			long timeStamp = msg.getTimestamp();
+			timeStamp =(timeStamp-(timeStamp%(1000*60*60*24)));  
+			dateWiseTimeStampList.add(timeStamp);
+		}
+
+		// Datewise count
+		Set<Object> timeStampWiseCount = new HashSet<Object>(dateWiseTimeStampList);
+		for (Object key : timeStampWiseCount) {
+			mapLst.put(key, Collections.frequency(dateWiseTimeStampList, key));
+		}
+
+		return mapLst;
+	}
 
 	/** week wise count **/
 	public Map<Object, Object> getWeekWiseCount(List<MessageDoc> msgLst) {
@@ -845,7 +893,6 @@ public class AdminDashBoardManager {
 			long timeStamp = msg.getTimestamp();
 			Date date = new Date(timeStamp);
 			String ddMMyyyyFormat = new SimpleDateFormat("dd-MM-yyyy").format(date);
-
 			cal.setTime(date);
 			String month = cal.getDisplayName(Calendar.MONTH, Calendar.LONG, Locale.getDefault()).toUpperCase();
 			int weekOfMonth = cal.get(Calendar.WEEK_OF_MONTH);
@@ -866,6 +913,28 @@ public class AdminDashBoardManager {
 
 		return mapLst;
 	}
+	
+	/** week wise count **/
+	public Map<Object, Object> getWeekWiseCountV1(List<MessageDoc> msgLst) {
+		List<Object> weekWiseList = new ArrayList<Object>();
+		Map<Object, Object> mapLst = new HashMap<Object, Object>();
+		Calendar cal = Calendar.getInstance();
+		for (MessageDoc msg : msgLst) {
+			long timeStamp = msg.getTimestamp();
+			timeStamp =(timeStamp-(timeStamp%(1000*60*60*24)));  
+			weekWiseList.add(timeStamp);
+		}
+
+		// Datewise count
+		Set<Object> dateWiseCount = new HashSet<Object>(weekWiseList);
+		for (Object key : dateWiseCount) {
+			mapLst.put(key, Collections.frequency(weekWiseList, key));
+			// System.out.println(key + ": " + Collections.frequency(weekWiseList, key));
+		}
+
+		return mapLst;
+	}
+	
 
 	// Open conversation
 	public List<ChatSessionDoc> getOpenConversation(Object contactType, long dateRange1, long dateRange2) {

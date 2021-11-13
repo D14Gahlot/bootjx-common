@@ -11,13 +11,14 @@ import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import com.boot.jx.mongo.CommonDocInterfaces.APatchableIndexed;
+import com.boot.jx.mongo.CommonDocInterfaces.TimeStamp.UpdatedTimeStampDoc;
+import com.boot.jx.mongo.CommonDocInterfaces.TimeStamp.UpdatedTimeStampSupport;
 import com.boot.jx.swagger.ApiMockModelProperty;
 import com.boot.utils.ArgUtil;
 
 @Document(collection = "CHAT_SESSION")
 @TypeAlias("ChatSessionDoc")
-public class ChatSessionDoc extends APatchableIndexed<ChatSessionDoc, String> implements Serializable {
+public class ChatSessionDoc extends UpdatedTimeStampDoc implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -27,7 +28,8 @@ public class ChatSessionDoc extends APatchableIndexed<ChatSessionDoc, String> im
     @Version
     private Long version;
 
-    @ApiMockModelProperty(example = "wa919930104050", required = false)
+    @ApiMockModelProperty(example = "wa919930104050_918828218374", required = false,
+	    value = "format like {{ContactType.getShortCode}}{{csid}}_{{lane}}")
     @Indexed
     private String contactId;
     private String contactType;
@@ -56,12 +58,17 @@ public class ChatSessionDoc extends APatchableIndexed<ChatSessionDoc, String> im
     private long lastOutGoingStamp;
 
     private long assignedDeptStamp;
+    @Indexed
     private long assignedAgentStamp;
 
     private long lastResponseStamp;
     private long resolveSessionStamp;
     private long closeSessionStamp;
 
+    /**
+     * @deprecated Use {@link UpdatedTimeStampSupport#getUpdated()}
+     */
+    @Deprecated
     private long updatedStamp;
 
     private Integer agentScore;
@@ -72,6 +79,8 @@ public class ChatSessionDoc extends APatchableIndexed<ChatSessionDoc, String> im
     private String status;
     @Deprecated
     private String tagCategory;
+
+    @Indexed
     private List<String> tagId;
 
     // MessageStats
@@ -274,21 +283,6 @@ public class ChatSessionDoc extends APatchableIndexed<ChatSessionDoc, String> im
 	this.lane = lane;
     }
 
-    @Override
-    public ChatSessionDoc newInstance() {
-	return new ChatSessionDoc();
-    }
-
-    @Override
-    public void id(String id) {
-	this.sessionId = id;
-    }
-
-    @Override
-    public String id() {
-	return this.sessionId;
-    }
-
     public boolean isExpired() {
 	return expired;
     }
@@ -366,10 +360,19 @@ public class ChatSessionDoc extends APatchableIndexed<ChatSessionDoc, String> im
 	this.lastMsg = lastMsg;
     }
 
+    /**
+     * @deprecated Use {@link UpdatedTimeStampSupport#getUpdated())}
+     */
+    @Deprecated
     public long getUpdatedStamp() {
 	return updatedStamp;
     }
 
+    /**
+     * @deprecated Use
+     *             {@link UpdatedTimeStampSupport#setUpdated(com.boot.jx.mongo.CommonDocInterfaces.TimeStamp)}
+     */
+    @Deprecated
     public void setUpdatedStamp(long updatedStamp) {
 	this.updatedStamp = updatedStamp;
     }
