@@ -16,6 +16,7 @@ import com.boot.jx.agent.AgentSessionService;
 import com.boot.jx.agent.api.ControllerRequestDTOs.ChatTagUpdateRequest;
 import com.boot.jx.agent.api.ControllerRequestDTOs.SessionSearchRequest;
 import com.boot.jx.api.ApiResponse;
+import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.common.config.ConfigConstants.KEY;
 import com.boot.jx.common.doc.AgentSessionDoc;
 import com.boot.jx.common.store.ChatArchiveService;
@@ -79,6 +80,7 @@ public class AgentMsgController {
 			agentSession.getAgentDept(),
 			PMConstants.DEFAULT_VALUES.POSTMAN_AGENT_TAB_HISTORY_PERIOD + historyPeriod);
 	    } else {
+		ApiResponseUtil.addLog("Only Active Chats");
 		sessions = sessionStore.findChatSessionDocByAgentAndUnAssigned(agentSession.getAgentCode(),
 			agentSession.getAgentDept());
 	    }
