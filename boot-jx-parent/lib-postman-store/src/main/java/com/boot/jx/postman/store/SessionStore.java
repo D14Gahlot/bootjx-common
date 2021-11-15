@@ -415,9 +415,13 @@ public class SessionStore extends CommonDocStore {
 
 	query2.addCriteria(tymCriteria.orOperator(orExpression.toArray(new Criteria[orExpression.size()])));
 	// LOGGER.info(query2.toString());
+	removeMsgFields(query2);
+	return mongoTemplate.find(query2, ChatSessionDoc.class);
+    }
+
+    private void removeMsgFields(Query query2) {
 	query2.fields().exclude("lastInBoundMsg").exclude("lastBotReply").exclude("lastAgentReply")
 		.exclude("lastOutBoundMsg").exclude("lastMsg");
-	return mongoTemplate.find(query2, ChatSessionDoc.class);
     }
 
     public List<ChatSessionDoc> findActiveChatSessionForContactId(String contactId) {
@@ -671,6 +675,7 @@ public class SessionStore extends CommonDocStore {
 	query.addCriteria(Criteria.where("assignedAgentStamp").gt(fromStamp).lt(toStamp));
 	query.addCriteria(new Criteria().orOperator(Criteria.where("status").in(status),
 		Criteria.where("tagId").in(tagCategory)));
+	removeMsgFields(query);
 	return mongoTemplate.find(query, ChatSessionDoc.class);
     }
 
