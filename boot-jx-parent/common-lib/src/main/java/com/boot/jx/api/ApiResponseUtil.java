@@ -35,6 +35,12 @@ public class ApiResponseUtil {
 	}
     }
 
+    public static void addLog(String message) {
+	if (ArgUtil.is(message)) {
+	    getLogs().add(message);
+	}
+    }
+
     @SuppressWarnings("unchecked")
     public static List<ApiFieldError> getErrors() {
 	Object warningsObject = ContextUtil.map().get(AppConstants.REQUEST_ERROR_XKEY);

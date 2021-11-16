@@ -1,7 +1,9 @@
 package com.boot.jx.api;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.http.HttpStatus;
 
@@ -44,6 +46,8 @@ public abstract class AResponse<M> implements ApiMetaResponse<M> {
     protected List<ApiFieldError> errors = null;
     protected List<ApiFieldError> warnings = null;
     protected List<String> logs = null;
+    protected Map<String, Object> params = null;
+    protected Map<String, Object> extra = null;
 
     public AResponse() {
 	this.timestamp = System.currentTimeMillis();
@@ -339,4 +343,35 @@ public abstract class AResponse<M> implements ApiMetaResponse<M> {
 	this.details = details;
     }
 
+    public Map<String, Object> getParams() {
+	return params;
+    }
+
+    public void setParams(Map<String, Object> params) {
+	this.params = params;
+    }
+
+    public Map<String, Object> getExtra() {
+	return extra;
+    }
+
+    public void setExtra(Map<String, Object> extra) {
+	this.extra = extra;
+    }
+
+    protected AResponse<M> param(String paramKey, Object paramValue) {
+	if (this.params == null) {
+	    this.params = new HashMap<String, Object>();
+	}
+	this.params.put(paramKey, paramValue);
+	return this;
+    }
+
+    protected AResponse<M> extra(String paramKey, Object paramValue) {
+	if (this.extra == null) {
+	    this.extra = new HashMap<String, Object>();
+	}
+	this.extra.put(paramKey, paramValue);
+	return this;
+    }
 }
