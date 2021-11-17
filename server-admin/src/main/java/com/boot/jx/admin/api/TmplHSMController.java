@@ -38,12 +38,14 @@ public class TmplHSMController {
 
     @RequestMapping(value = "/api/tmpl/hsm/waba_templates", method = { RequestMethod.GET })
     public ApiResponse<HSMTemplate3rdParty, Object> listWabaTemplates(@RequestParam String channelId,
+	    @RequestParam(required = false) String templateCode,
 	    @RequestParam(required = false, defaultValue = "false") boolean sync) {
 	ChannelConfig channelConfig = pmEnvironment.config().channels(channelId);
 	if (sync) {
 	    templateManager.refreshWA360Templates(channelConfig);
 	}
-	return new ApiResponse<HSMTemplate3rdParty, Object>().results(templateManager.getTemplates(channelConfig));
+	return new ApiResponse<HSMTemplate3rdParty, Object>()
+		.results(templateManager.getTemplates(channelConfig, templateCode));
     }
 
     @RequestMapping(value = "/api/tmpl/hsm/waba_templates", method = { RequestMethod.POST })

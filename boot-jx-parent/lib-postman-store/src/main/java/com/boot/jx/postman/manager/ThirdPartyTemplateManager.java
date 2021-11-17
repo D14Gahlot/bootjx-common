@@ -44,10 +44,14 @@ public class ThirdPartyTemplateManager {
 	    thirdPartyTemplate = new HSMTemplate3rdParty();
 	    thirdPartyTemplate.setId(id);
 	}
+
 	thirdPartyTemplate.setChannelId(channelConfig.getChannelId());
+	thirdPartyTemplate.setCode(wa360Template.getName());
+	thirdPartyTemplate.setLang(wa360Template.getLanguage());
+
 	thirdPartyTemplate.setContactType(ArgUtil.parseAsString(channelConfig.getContactType()));
 	thirdPartyTemplate.setChannelType(channelConfig.getChannelType());
-	thirdPartyTemplate.setLang(wa360Template.getLanguage());
+
 	thirdPartyTemplate.setTemplate(JsonUtil.toMap(wa360Template));
 	return thirdPartyTemplate;
     }
@@ -58,9 +62,18 @@ public class ThirdPartyTemplateManager {
 	return toHSM3rdParty(channelConfig, resp.as(WA360Template.class));
     }
 
+    public List<HSMTemplate3rdParty> getTemplates(ChannelConfig channelConfig, String code) {
+	CommonMongoQueryBuilder q = new CommonMongoQueryBuilder().where("channelId", channelConfig.getChannelId());
+
+	if (ArgUtil.is(code)) {
+	    q.where("code", code);
+	}
+
+	return commonMongoTemplate.find(q, HSMTemplate3rdParty.class);
+    }
+
     public List<HSMTemplate3rdParty> getTemplates(ChannelConfig channelConfig) {
-	return commonMongoTemplate.find(new CommonMongoQueryBuilder().where("channelId", channelConfig.getChannelId()),
-		HSMTemplate3rdParty.class);
+	return this.getTemplates(channelConfig, null);
     }
 
     public HSMTemplate3rdParty link(String thirdPartyTemplateId, String hsmTemplateId) {
