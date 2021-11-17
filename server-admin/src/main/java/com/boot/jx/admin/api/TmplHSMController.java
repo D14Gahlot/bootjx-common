@@ -3,6 +3,7 @@ package com.boot.jx.admin.api;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -43,6 +44,14 @@ public class TmplHSMController {
 	    templateManager.refreshWA360Templates(channelConfig);
 	}
 	return new ApiResponse<HSMTemplate3rdParty, Object>().results(templateManager.getTemplates(channelConfig));
+    }
+
+    @RequestMapping(value = "/api/tmpl/hsm/waba_templates", method = { RequestMethod.POST })
+    public ApiResponse<HSMTemplate3rdParty, Object> createWabaTemplates(@RequestParam String channelId,
+	    @RequestBody Map<String, Object> templateStructure) {
+	ChannelConfig channelConfig = pmEnvironment.config().channels(channelId);
+	return new ApiResponse<HSMTemplate3rdParty, Object>()
+		.result(templateManager.createhWA360Templates(channelConfig, templateStructure));
     }
 
 }

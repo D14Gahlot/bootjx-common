@@ -11,8 +11,6 @@ import org.springframework.stereotype.Component;
 
 import com.boot.jx.dict.FileType;
 import com.boot.jx.exception.ApiHttpExceptions.ApiHttpClientException;
-import com.boot.jx.postman.PMConfiguration;
-import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PostManException;
 import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.OutboxMessage;
@@ -21,7 +19,6 @@ import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.postman.wa360.WA360Constants.OutBoundWrapperPaths;
 import com.boot.jx.postman.wa360.WA360Constants.TmplComponent;
 import com.boot.jx.rest.RestService;
-import com.boot.jx.utils.PostManUtil;
 import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.Constants;
@@ -31,15 +28,9 @@ import com.boot.utils.JsonPath;
 public class WA360Client {
 
     @Autowired
-    private PMEnvironment environment;
-
-    @Autowired
     private RestService restService;
 
-    public OutboxMessage send(OutboxMessage outboxMessage) {
-	PMConfiguration config = environment.config();
-	String channelId = PostManUtil.CHANNEL_ID(outboxMessage.contact());
-	ChannelConfig channelConfig = config.channels(channelId);
+    public OutboxMessage send(ChannelConfig channelConfig, OutboxMessage outboxMessage) {
 	StringJoiner msgIds = new StringJoiner(",");
 
 	if (ArgUtil.is(outboxMessage.getTemplateExt())) {
@@ -332,6 +323,13 @@ public class WA360Client {
     public MapModel fetchTemplates(ChannelConfig channelConfig) {
 	MapModel resp = restService.ajax(WA360Constants.BASE_URL).path("v1/configs/templates")
 		.header(WA360Constants.D360_API_KEY, channelConfig.getWa360d().getApiKey()).get().asMapModel();
+	return resp;
+    }
+
+    public MapModel createTemplates(ChannelConfig channelConfig, MapModel req) {
+	MapModel resp = restService.ajax(WA360Constants.BASE_URL).path("v1/configs/templates")
+		.header(WA360Constants.D360_API_KEY, channelConfig.getWa360d().getApiKey()).post(req.toMap())
+		.asMapModel();
 	return resp;
     }
 

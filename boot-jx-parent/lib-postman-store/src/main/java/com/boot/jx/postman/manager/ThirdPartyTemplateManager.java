@@ -31,21 +31,31 @@ public class ThirdPartyTemplateManager {
 	List<WA360Template> wabaTemplates = resp.keyEntry("waba_templates").asList(WA360Template.class);
 
 	for (WA360Template wa360Template : wabaTemplates) {
-	    String id = String.format("%s/%s/%s", channelConfig.getChannelId(), wa360Template.getName(),
-		    wa360Template.getLanguage());
-	    HSMTemplate3rdParty thirdPartyTemplate = commonMongoTemplate.findById(id, HSMTemplate3rdParty.class);
-	    if (!ArgUtil.is(thirdPartyTemplate)) {
-		thirdPartyTemplate = new HSMTemplate3rdParty();
-		thirdPartyTemplate.setId(id);
-	    }
-	    thirdPartyTemplate.setChannelId(channelConfig.getChannelId());
-	    thirdPartyTemplate.setContactType(ArgUtil.parseAsString(channelConfig.getContactType()));
-	    thirdPartyTemplate.setChannelType(channelConfig.getChannelType());
-	    thirdPartyTemplate.setLang(wa360Template.getLanguage());
-
-	    thirdPartyTemplate.setTemplate(JsonUtil.toMap(wa360Template));
+	    HSMTemplate3rdParty thirdPartyTemplate = toHSM3rdParty(channelConfig, wa360Template);
 	    commonMongoTemplate.save(thirdPartyTemplate);
 	}
+    }
+
+    private HSMTemplate3rdParty toHSM3rdParty(ChannelConfig channelConfig, WA360Template wa360Template) {
+	String id = String.format("%s/%s/%s", channelConfig.getChannelId(), wa360Template.getName(),
+		wa360Template.getLanguage());
+	HSMTemplate3rdParty thirdPartyTemplate = commonMongoTemplate.findById(id, HSMTemplate3rdParty.class);
+	if (!ArgUtil.is(thirdPartyTemplate)) {
+	    thirdPartyTemplate = new HSMTemplate3rdParty();
+	    thirdPartyTemplate.setId(id);
+	}
+	thirdPartyTemplate.setChannelId(channelConfig.getChannelId());
+	thirdPartyTemplate.setContactType(ArgUtil.parseAsString(channelConfig.getContactType()));
+	thirdPartyTemplate.setChannelType(channelConfig.getChannelType());
+	thirdPartyTemplate.setLang(wa360Template.getLanguage());
+	thirdPartyTemplate.setTemplate(JsonUtil.toMap(wa360Template));
+	return thirdPartyTemplate;
+    }
+
+    public HSMTemplate3rdParty createhWA360Templates(ChannelConfig channelConfig,
+	    Map<String, Object> templateStructure) {
+	MapModel resp = wa360Client.fetchTemplates(channelConfig);
+	return toHSM3rdParty(channelConfig, resp.as(WA360Template.class));
     }
 
     public List<HSMTemplate3rdParty> getTemplates(ChannelConfig channelConfig) {
