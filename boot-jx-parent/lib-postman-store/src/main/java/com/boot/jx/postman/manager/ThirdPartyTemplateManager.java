@@ -49,6 +49,7 @@ public class ThirdPartyTemplateManager {
 	thirdPartyTemplate.setCode(wa360Template.getName());
 	thirdPartyTemplate.setLang(wa360Template.getLanguage());
 
+	thirdPartyTemplate.setCategory(wa360Template.getCategory());
 	thirdPartyTemplate.setContactType(ArgUtil.parseAsString(channelConfig.getContactType()));
 	thirdPartyTemplate.setChannelType(channelConfig.getChannelType());
 
