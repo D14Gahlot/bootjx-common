@@ -673,8 +673,12 @@ public class SessionStore extends CommonDocStore {
 	}
 	Query query = new Query();
 	query.addCriteria(Criteria.where("assignedAgentStamp").gt(fromStamp).lt(toStamp));
+	if(tagCategory!=null && !tagCategory.isEmpty()) {
 	query.addCriteria(new Criteria().orOperator(Criteria.where("status").in(status),
 		Criteria.where("tagId").in(tagCategory)));
+	}else {
+		query.addCriteria(Criteria.where("status").in(status));
+	}
 	removeMsgFields(query);
 	return mongoTemplate.find(query, ChatSessionDoc.class);
     }
