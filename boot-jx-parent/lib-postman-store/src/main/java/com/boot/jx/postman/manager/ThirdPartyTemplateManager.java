@@ -59,7 +59,7 @@ public class ThirdPartyTemplateManager {
 
     public HSMTemplate3rdParty createhWA360Templates(ChannelConfig channelConfig,
 	    Map<String, Object> templateStructure) {
-	MapModel resp = wa360Client.fetchTemplates(channelConfig);
+	MapModel resp = wa360Client.createTemplates(channelConfig, MapModel.from(templateStructure));
 	return toHSM3rdParty(channelConfig, resp.as(WA360Template.class));
     }
 
