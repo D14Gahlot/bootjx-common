@@ -12,6 +12,7 @@ import org.springframework.web.client.HttpStatusCodeException;
 
 import com.boot.jx.dict.FileType;
 import com.boot.jx.exception.AmxException;
+import com.boot.jx.exception.ApiHttpExceptions.ApiHttpException;
 import com.boot.jx.postman.PMConstants.CHANNEL_TYPE;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PostManException;
@@ -139,21 +140,21 @@ public class FacebooClient implements MessageClient {
 		if (ArgUtil.is(resp.getMessageId()))
 		    msgIds.add(ArgUtil.parseAsString(resp.getMessageId()));
 	    }
-	} catch (HttpStatusCodeException | AmxException e) {
-	    if (e instanceof HttpStatusCodeException)
+	} catch (HttpStatusCodeException | ApiHttpException e) {
+	    if (e instanceof HttpStatusCodeException) {
 		resp = JsonUtil.parse(((HttpStatusCodeException) e).getResponseBodyAsString(),
 			FacebookMessageResp.class);
-	    else
-		resp = JsonUtil.parse(e.getMessage(), FacebookMessageResp.class);
-
+	    } else {
+		resp = JsonUtil.parse(((ApiHttpException) e).getResponse().getBody(), FacebookMessageResp.class);
+	    }
 	    outboxMessage.logs().add(resp.getError().getMessage());
 	    outboxMessage.logs()
 		    .add(String.format("%s-%s", resp.getError().getCode(), resp.getError().getErrorSubcode()));
 	    outboxMessage.logs().add(ArgUtil.parseAsString(resp.getError().getFbtraceId()));
+	} catch (Exception e) {
+	    outboxMessage.logs().add(e.getMessage());
 	}
-
 	outboxMessage.setMessageIdExt(msgIds.toString());
-
 	return outboxMessage;
     }
 

@@ -8,10 +8,14 @@ import java.util.StringJoiner;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.HttpStatusCodeException;
 
+import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.dict.FileType;
 import com.boot.jx.exception.ApiHttpExceptions.ApiHttpClientException;
+import com.boot.jx.exception.ApiHttpExceptions.ApiHttpException;
 import com.boot.jx.postman.PostManException;
+import com.boot.jx.postman.fb.FacebookMessageResp;
 import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.model.TmplElement;
@@ -23,6 +27,7 @@ import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.Constants;
 import com.boot.utils.JsonPath;
+import com.boot.utils.JsonUtil;
 
 @Component
 public class WA360Client {
@@ -327,10 +332,20 @@ public class WA360Client {
     }
 
     public MapModel createTemplates(ChannelConfig channelConfig, MapModel req) {
-	MapModel resp = restService.ajax(WA360Constants.BASE_URL).path("v1/configs/templates")
-		.header(WA360Constants.D360_API_KEY, channelConfig.getWa360d().getApiKey()).post(req.toMap())
-		.asMapModel();
-	return resp;
+	try {
+	    MapModel resp = restService.ajax(WA360Constants.BASE_URL).path("v1/configs/templates")
+		    .header(WA360Constants.D360_API_KEY, channelConfig.getWa360d().getApiKey()).post(req.toMap())
+		    .asMapModel();
+
+	    return resp;
+	} catch (HttpStatusCodeException | ApiHttpException e) {
+	    if (e instanceof HttpStatusCodeException)
+		ApiResponseUtil.addError(((HttpStatusCodeException) e).getResponseBodyAsString());
+	    else
+		ApiResponseUtil.addError(((ApiHttpException) e));
+	    throw e;
+	}
+
     }
 
 }
