@@ -52,8 +52,9 @@ public class TmplHSMController {
     public ApiResponse<HSMTemplate3rdParty, Object> createWabaTemplates(@RequestParam String channelId,
 	    @RequestBody Map<String, Object> templateStructure) {
 	ChannelConfig channelConfig = pmEnvironment.config().channels(channelId);
-	return new ApiResponse<HSMTemplate3rdParty, Object>()
-		.result(templateManager.createhWA360Templates(channelConfig, templateStructure));
+	HSMTemplate3rdParty temp = templateManager.createhWA360Templates(channelConfig, templateStructure);
+	templateManager.refreshWA360Templates(channelConfig);
+	return new ApiResponse<HSMTemplate3rdParty, Object>().result(temp);
     }
 
 }
