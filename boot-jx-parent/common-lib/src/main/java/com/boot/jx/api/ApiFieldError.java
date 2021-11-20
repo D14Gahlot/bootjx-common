@@ -25,6 +25,7 @@ public class ApiFieldError implements Serializable {
     String descriptionKey = null;
     String code = null;
     String codeKey = null;
+    Object body;
     // Enum Codes
     // IExceptionEnum enumCode;
     /**
@@ -170,6 +171,14 @@ public class ApiFieldError implements Serializable {
     public ApiFieldError obzect(String obzect) {
 	this.obzect = obzect;
 	return this;
+    }
+
+    public Object getBody() {
+	return body;
+    }
+
+    public void setBody(Object body) {
+	this.body = body;
     }
 
     /*
