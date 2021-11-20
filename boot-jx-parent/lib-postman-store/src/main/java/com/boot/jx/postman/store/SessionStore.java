@@ -7,12 +7,17 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
+import org.springframework.data.repository.support.PageableExecutionUtils;
 import org.springframework.stereotype.Component;
 
 import com.boot.jx.mongo.CommonDocStore;
@@ -667,17 +672,20 @@ public class SessionStore extends CommonDocStore {
      */
     public List<ChatSessionDoc> findByStatusOrQuickTag(List<CHAT_STATUS> status, List<String> tagCategory,
 	    long fromStamp, long toStamp) {
-	if (status == null || status.isEmpty()) {
+	if (status == null || status.isEmpty() || status.contains(null)) {
 	    status = new ArrayList<>();
 	    status.add(CHAT_STATUS.OPEN);
 	}
+	
 	Query query = new Query();
+	
 	query.addCriteria(Criteria.where("assignedAgentStamp").gt(fromStamp).lt(toStamp));
-	if(tagCategory!=null && !tagCategory.isEmpty()) {
-	query.addCriteria(new Criteria().orOperator(Criteria.where("status").in(status),
-		Criteria.where("tagId").in(tagCategory)));
-	}else {
+	
+	if(status!=null && !status.isEmpty()) {
 		query.addCriteria(Criteria.where("status").in(status));
+	}
+	if(tagCategory!=null && !tagCategory.isEmpty() && !tagCategory.contains(null) && !tagCategory.contains("") ) {
+		query.addCriteria(Criteria.where("tagId").in(tagCategory));
 	}
 	removeMsgFields(query);
 	return mongoTemplate.find(query, ChatSessionDoc.class);
