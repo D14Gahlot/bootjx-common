@@ -54,7 +54,8 @@ public class TmplHSMController {
 	ChannelConfig channelConfig = pmEnvironment.config().channels(channelId);
 	HSMTemplate3rdParty temp = templateManager.createhWA360Templates(channelConfig, templateStructure);
 	templateManager.refreshWA360Templates(channelConfig);
-	return new ApiResponse<HSMTemplate3rdParty, Object>().result(temp);
+	return new ApiResponse<HSMTemplate3rdParty, Object>().result(temp)
+		.message("Template submitted to waba");
     }
 
 }
