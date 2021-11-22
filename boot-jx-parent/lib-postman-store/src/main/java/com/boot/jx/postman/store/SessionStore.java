@@ -672,7 +672,8 @@ public class SessionStore extends CommonDocStore {
      */
     public List<ChatSessionDoc> findByStatusOrQuickTag(List<CHAT_STATUS> status, List<String> tagCategory,
 	    long fromStamp, long toStamp) {
-	if (status == null || status.isEmpty() || status.contains(null)) {
+	if ( (status == null || status.isEmpty() || status.contains(null)) 
+			&& (tagCategory==null  || tagCategory.isEmpty() || tagCategory.contains(null) && tagCategory.contains("")) ) {
 	    status = new ArrayList<>();
 	    status.add(CHAT_STATUS.OPEN);
 	}
