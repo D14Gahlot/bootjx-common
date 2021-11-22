@@ -4,6 +4,7 @@ import com.boot.jx.postman.PMEnvironment.AChannelConfig;
 import com.boot.jx.postman.PMEnvironment.AChannelDetails;
 import com.boot.jx.postman.fb.FacebookConfigDetails;
 import com.boot.jx.postman.gupshup.GupShupConfigDetails;
+import com.boot.jx.postman.ig.InstagramConfig;
 import com.boot.jx.postman.plugin.WebPlugin.WebConfigDetails;
 import com.boot.jx.postman.tg.TelegramConfigDetails;
 import com.boot.jx.postman.tw.TwitterConfigDetails;
@@ -19,6 +20,7 @@ public class ChannelConfig extends AChannelConfig {
     private TwitterConfigDetails twitter;
     private TelegramConfigDetails telegram;
     private GupShupConfigDetails gupshup;
+    private InstagramConfig instagram;
     private WA360ConfigDetails wa360d;
     private WebConfigDetails web;
 
@@ -75,10 +77,18 @@ public class ChannelConfig extends AChannelConfig {
 
     public FacebookConfigDetails getFacebook() {
 	return facebook;
-    }
+    }       
 
     public void setFacebook(FacebookConfigDetails facebook) {
 	this.facebook = facebook;
+    }
+    
+    public InstagramConfig getInstagram() {
+    	return instagram;
+     }
+    
+    public void setInstagram(InstagramConfig instagram) {
+    	this.instagram = instagram;
     }
 
     public TwitterConfigDetails getTwitter() {
@@ -109,6 +119,13 @@ public class ChannelConfig extends AChannelConfig {
 	this.copy(facebook);
 	this.facebook = facebook;
 	return this;
+    }
+    
+    
+    public ChannelConfig from(InstagramConfig instagram) {
+    	this.copy(instagram);
+    	this.instagram = instagram;
+    	return this;
     }
 
     public ChannelConfig from(TwitterConfigDetails twitter) {

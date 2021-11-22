@@ -114,6 +114,7 @@ public class ChannelPluginProvider {
     public static final TelegramPlugin TELEGRAM = new TelegramPlugin();
     public static final WAGupShupPlugin WA_GUPSHUP = new WAGupShupPlugin();
     public static final WA360Plugin WA_360D = new WA360Plugin();
+    public static final InstagramPlugin INSTAGRAM = new InstagramPlugin();
 
     static {
 	register(WEB);
