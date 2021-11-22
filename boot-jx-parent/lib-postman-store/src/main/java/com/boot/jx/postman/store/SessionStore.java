@@ -673,18 +673,24 @@ public class SessionStore extends CommonDocStore {
      */
     public List<ChatSessionDoc> findByStatusOrQuickTag(List<CHAT_STATUS> status, List<String> tagCategory,
 	    long fromStamp, long toStamp) {
+    List<String> statusLst=new ArrayList<>();;	
 	if ( (status == null || status.isEmpty() || status.contains(null)) 
 			&& (tagCategory==null  || tagCategory.isEmpty() || tagCategory.contains(null) && tagCategory.contains("")) ) {
-	    status = new ArrayList<>();
-	    status.add(CHAT_STATUS.OPEN);
+	    //status = new ArrayList<>();
+	    //status.add(CHAT_STATUS.OPEN);
+	    statusLst.add(CHAT_STATUS.OPEN.toString());
+	}else {
+		for(CHAT_STATUS chatSt:status) {
+			statusLst.add(chatSt.toString());
+		}
 	}
 	
 	Query query = new Query();
 	
 	query.addCriteria(Criteria.where("assignedAgentStamp").gt(fromStamp).lt(toStamp));
 	
-	if(status!=null && !status.isEmpty()) {
-		query.addCriteria(Criteria.where("status").in(status));
+	if(statusLst!=null && !statusLst.isEmpty()) {
+		query.addCriteria(Criteria.where("status").in(statusLst));
 	}
 	if(tagCategory!=null && !tagCategory.isEmpty() && !tagCategory.contains(null) && !tagCategory.contains("") ) {
 		query.addCriteria(Criteria.where("tagId").in(tagCategory));
