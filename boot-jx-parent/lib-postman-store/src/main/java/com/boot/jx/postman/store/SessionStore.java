@@ -13,6 +13,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
+import org.springframework.data.domain.Sort.Order;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
@@ -688,7 +689,9 @@ public class SessionStore extends CommonDocStore {
 	if(tagCategory!=null && !tagCategory.isEmpty() && !tagCategory.contains(null) && !tagCategory.contains("") ) {
 		query.addCriteria(Criteria.where("tagId").in(tagCategory));
 	}
+	query.with(new Sort(new Order(Direction.DESC, "assignedAgentStamp")));
 	removeMsgFields(query);
+	LOGGER.info("query {===}"+query);
 	return mongoTemplate.find(query, ChatSessionDoc.class);
     }
 
