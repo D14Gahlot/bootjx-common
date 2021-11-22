@@ -34,7 +34,7 @@ public class TenantClientResolver extends TenantResolver {
 	if (!appConfig.isProdMode() && ArgUtil.is(tnt)) {
 	    Matcher matcher = pattern.matcher(tnt);
 	    if (matcher.find()) {
-		return "app";
+		return "demo";
 	    }
 	}
 
@@ -48,6 +48,7 @@ public class TenantClientResolver extends TenantResolver {
 	tntMapping.put("8d5c-115-111-75-48", "app");
 	tntMapping.put("1a11-115-111-75-27", "app");
 	tntMapping.put("5a99-115-111-75-27", "app");
+	tntMapping.put("f3ac-45-112-40-98", "demo");
 
     }
 }
