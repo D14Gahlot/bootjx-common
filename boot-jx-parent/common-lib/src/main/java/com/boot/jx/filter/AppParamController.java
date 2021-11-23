@@ -73,41 +73,26 @@ public class AppParamController {
     List<IndicatorListner> listners;
 
     @ApiRequest(type = RequestType.NO_TRACK_PING)
-    @RequestMapping(value = "/int/pub/boot/ping", method = RequestMethod.GET)
+    @RequestMapping(value = { PUB_AMX_PREFIX + "/ping" }, method = RequestMethod.GET)
     public ApiResponse<Object, Object> intPubPing() {
 	return ApiResponse.build().message("pong");
     }
 
     @ApiRequest(type = RequestType.NO_TRACK_PING)
-    @RequestMapping(value = "/int/pub/boot/metric", method = RequestMethod.GET)
+    @RequestMapping(value = { "/int/pub/boot/metric", METRIC_URL }, method = RequestMethod.GET)
     public ApiResponse<Object, Object> intPubMetric() {
-	Map<String, Object> map = new HashMap<String, Object>();
+	ApiResponse<Object, Object> response = ApiResponse.build();
 	for (AppParam eachAppParam : AppParam.values()) {
-	    map.put(eachAppParam.toString(), eachAppParam);
+	    response.addResult(eachAppParam);
 	}
+	Map<String, Object> map = new HashMap<String, Object>();
 	GaugeIndicator gaugeIndicator = new GaugeIndicator();
 	if (!ArgUtil.isEmpty(listners)) {
 	    for (IndicatorListner eachListner : listners) {
 		map.putAll(eachListner.getIndicators(gaugeIndicator));
 	    }
 	}
-	return ApiResponse.build().data(map);
-    }
-
-    @ApiRequest(type = RequestType.NO_TRACK_PING)
-    @RequestMapping(value = METRIC_URL, method = RequestMethod.GET)
-    public Map<String, Object> metric() {
-	Map<String, Object> map = new HashMap<String, Object>();
-	for (AppParam eachAppParam : AppParam.values()) {
-	    map.put(eachAppParam.toString(), eachAppParam);
-	}
-	GaugeIndicator gaugeIndicator = new GaugeIndicator();
-	if (!ArgUtil.isEmpty(listners)) {
-	    for (IndicatorListner eachListner : listners) {
-		map.putAll(eachListner.getIndicators(gaugeIndicator));
-	    }
-	}
-	return map;
+	return response.data(map);
     }
 
     @ApiRequest(type = RequestType.NO_TRACK_PING)
@@ -258,11 +243,6 @@ public class AppParamController {
 	AmxApiError error = new AmxApiError(status, status);
 	error.setException(exception);
 	return error;
-    }
-
-    @RequestMapping(value = "/ext/pub/ping", method = RequestMethod.GET)
-    public ApiResponse<Object, Object> extPubPing() {
-	return ApiResponse.build().message("pong");
     }
 
     @RequestMapping(value = "/ext/pub/logger", method = RequestMethod.GET)

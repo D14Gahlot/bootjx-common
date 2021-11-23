@@ -7,12 +7,18 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
+import org.springframework.data.domain.Sort.Order;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
+import org.springframework.data.repository.support.PageableExecutionUtils;
 import org.springframework.stereotype.Component;
 
 import com.boot.jx.mongo.CommonDocStore;
@@ -667,15 +673,31 @@ public class SessionStore extends CommonDocStore {
      */
     public List<ChatSessionDoc> findByStatusOrQuickTag(List<CHAT_STATUS> status, List<String> tagCategory,
 	    long fromStamp, long toStamp) {
-	if (status == null || status.isEmpty()) {
-	    status = new ArrayList<>();
-	    status.add(CHAT_STATUS.OPEN);
+    List<String> statusLst=new ArrayList<>();;	
+	if ( (status == null || status.isEmpty() || status.contains(null)) 
+			&& (tagCategory==null  || tagCategory.isEmpty() || tagCategory.contains(null) && tagCategory.contains("")) ) {
+	    //status = new ArrayList<>();
+	    //status.add(CHAT_STATUS.OPEN);
+	    statusLst.add(CHAT_STATUS.OPEN.toString());
+	}else {
+		for(CHAT_STATUS chatSt:status) {
+			statusLst.add(chatSt.toString());
+		}
 	}
+	
 	Query query = new Query();
+	
 	query.addCriteria(Criteria.where("assignedAgentStamp").gt(fromStamp).lt(toStamp));
-	query.addCriteria(new Criteria().orOperator(Criteria.where("status").in(status),
-		Criteria.where("tagId").in(tagCategory)));
+	
+	if(statusLst!=null && !statusLst.isEmpty()) {
+		query.addCriteria(Criteria.where("status").in(statusLst));
+	}
+	if(tagCategory!=null && !tagCategory.isEmpty() && !tagCategory.contains(null) && !tagCategory.contains("") ) {
+		query.addCriteria(Criteria.where("tagId").in(tagCategory));
+	}
+	query.with(new Sort(new Order(Direction.DESC, "assignedAgentStamp")));
 	removeMsgFields(query);
+	LOGGER.info("query {===}"+query);
 	return mongoTemplate.find(query, ChatSessionDoc.class);
     }
 

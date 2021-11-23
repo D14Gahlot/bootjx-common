@@ -22,13 +22,16 @@ public class HSMTemplate3rdParty implements Serializable, AuditableEntity, Basic
     @Id
     private String id;
 
-    private String hsmTemplateId;
-
+    // Template Filters
     private String channelId;
+    private String code;
+    private String lang;
+    private String category;
 
+    // Template Filters
+    private String hsmTemplateId;
     private String channelType;
     private String contactType;
-    private String lang;
 
     private Map<String, Object> template;
     private Map<String, Object> varMap;
@@ -114,6 +117,22 @@ public class HSMTemplate3rdParty implements Serializable, AuditableEntity, Basic
 
     public void setLang(String lang) {
 	this.lang = lang;
+    }
+
+    public String getCode() {
+	return code;
+    }
+
+    public void setCode(String code) {
+	this.code = code;
+    }
+
+    public String getCategory() {
+	return category;
+    }
+
+    public void setCategory(String category) {
+	this.category = category;
     }
 
 }

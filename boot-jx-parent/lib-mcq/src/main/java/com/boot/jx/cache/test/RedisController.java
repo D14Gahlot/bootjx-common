@@ -52,7 +52,7 @@ public class RedisController {
 		return tunnelService.shout(SysTunnelEventsDict.Names.TEST_TOPIC, status);
 	}
 
-	@RequestMapping(value = "/pub/stats/tunne-limiter", method = RequestMethod.GET)
+	@RequestMapping(value = "/pub/stats/tunnel-limiter", method = RequestMethod.GET)
 	public Map<String, Object> getStats() {
 		Map<String, Object> propMap = new HashMap<String, Object>();
 		if (dbEventLimiter != null) {
