@@ -151,7 +151,7 @@ public class WA360Connector extends AbstractConnector<WA360ConfigDetails, WA360P
     public void send(ChannelConfig channelConfig, OutboxMessage outboxMessage) {
 	try {
 	    template(channelConfig, outboxMessage);
-	    wa360Client.send(outboxMessage);
+	    wa360Client.send(channelConfig,outboxMessage);
 	    outboxMessage.updateStatus(OutboxMessage.Status.SENT);
 	} catch (Exception e) {
 	    outboxMessage.updateStatus(OutboxMessage.Status.SENT_ERR);
