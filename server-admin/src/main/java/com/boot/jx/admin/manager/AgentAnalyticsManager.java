@@ -278,7 +278,7 @@ public class AgentAnalyticsManager {
 				hour = dateDiffMAp.get("HOUR");
 				days = dateDiffMAp.get("DAYS");
 			}
-			LOGGER.info("mru hour :"+hour+"\t dateDiffMAp :"+dateDiffMAp);
+			LOGGER.debug("mru hour :"+hour+"\t dateDiffMAp :"+dateDiffMAp);
 			
 			if(hour<=24) {
 				Map<Object,Object> hourWiseCount = adminDbMgr.getHourWiseCount(totalAgConMsgExchanged);
@@ -321,10 +321,10 @@ public class AgentAnalyticsManager {
 		Query query = new Query();
 		query.addCriteria(Criteria.where("assignedToAgent").is(agent));
 		query.addCriteria(Criteria.where("assignedAgentStamp").gt(dateRange1).lt(dateRange2));
+		removeChatSessField(query);
 		List<ChatSessionDoc> distinctIdList = mongoTemplate.getCollection(CHAT_SESSION).distinct("contactId",query.getQueryObject());
 		for(Object chat :distinctIdList) {
 			LOGGER.debug("Chat doc :"+(String)chat);
-			LOGGER.info("Chat doc :"+(String)chat);
 		}
 		return distinctIdList;
 	}
@@ -496,7 +496,7 @@ public class AgentAnalyticsManager {
 			leasMsgLst.put(contactType, msgDocLst.size());
 		}
 		LOGGER.debug("lead Msg  :"+leasMsgLst.toString());
-		LOGGER.info("lead Msg  :"+leasMsgLst.toString());
+		
 		if(leasMsgLst!=null && ArgUtil.is(leasMsgLst)) {
 		 Object maxEntryKey = Collections.max(leasMsgLst.entrySet(), Map.Entry.comparingByValue()).getKey();
          Integer maxEntryKeyValue =leasMsgLst.get(maxEntryKey); 
@@ -664,9 +664,8 @@ public class AgentAnalyticsManager {
 				query.addCriteria(Criteria.where("contactId").is(contactId));
 				query.addCriteria(Criteria.where("timestamp").gte(dateRange1).lt(dateRange2));
 				query.with(new Sort(new Order(Direction.ASC, "timestamp")));
+				removeMsgFields(query);
 				List<MessageDoc>  totalMsg= mongoTemplate.find(query, MessageDoc.class, contactType.toString());
-				//System.out.print("\n ==== contactType :"+contactType+" \t getMsgCountAgentContactWise ==>");
-				//System.out.print("\t getMsgCountAgentContactWise :"+totalMsg==null?0:totalMsg.size());
 				totalMsgDoc.addAll(totalMsg);
 			}
 			return totalMsgDoc;
@@ -681,6 +680,7 @@ public class AgentAnalyticsManager {
 		Query query = new Query();
 		query.addCriteria(Criteria.where("mode").is("BOT"));
 		query.addCriteria(Criteria.where("startSessionStamp").gt(dateRange1).lt(dateRange2));
+		removeChatSessField(query);
 		List<ChatSessionDoc> botScoreLst = mongoTemplate.find(query, ChatSessionDoc.class, CHAT_SESSION);
 		for(ChatSessionDoc chat :botScoreLst) {
 			LOGGER.debug("Chat doc :"+ chat.getBotScore());
@@ -702,6 +702,7 @@ public class AgentAnalyticsManager {
 		query.addCriteria(Criteria.where("mode").is("BOT"));
 		query.addCriteria(Criteria.where("active").is(false));
 		query.addCriteria(Criteria.where("startSessionStamp").gt(dateRange1).lt(dateRange2));
+		removeChatSessField(query);
 		List<ChatSessionDoc> botLst = mongoTemplate.find(query, ChatSessionDoc.class, CHAT_SESSION);
 		if(botLst!=null && !botLst.isEmpty()) {
 			botSize = botLst.size();
@@ -714,4 +715,14 @@ public class AgentAnalyticsManager {
 		return botClosure;
 		}
 	
+		
+		public void removeMsgFields(Query query2) {
+			query2.fields().exclude("model").exclude("meta").exclude("stamps")
+				.exclude("contact").exclude("tags").exclude("attachments");
+		    }
+		
+		private void  removeChatSessField(Query query2) {
+			query2.fields().exclude("updated").exclude("lastInBoundMsg").
+			exclude("lastMsg").exclude("lastBotReply");
+		}
 }

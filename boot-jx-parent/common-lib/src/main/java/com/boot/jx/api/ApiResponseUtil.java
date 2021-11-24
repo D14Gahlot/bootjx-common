@@ -8,6 +8,7 @@ import com.boot.jx.exception.AmxApiError;
 import com.boot.jx.exception.AmxApiException;
 import com.boot.jx.exception.ApiHttpExceptions.ApiErrorException;
 import com.boot.jx.exception.ApiHttpExceptions.ApiHttpArgException;
+import com.boot.jx.exception.ApiHttpExceptions.ApiHttpException;
 import com.boot.jx.exception.ApiHttpExceptions.ApiStatusCodes;
 import com.boot.jx.exception.IExceptionEnum;
 import com.boot.utils.ArgUtil;
@@ -137,6 +138,17 @@ public class ApiResponseUtil {
 	}
 	w.setDescription(error.getErrorMessage());
 	w.setDescriptionKey(error.getErrorKey());
+	addError(w);
+    }
+
+    public static void addError(ApiHttpException error) {
+	ApiFieldError w = new ApiFieldError();
+	if (ArgUtil.is(error.getResponse())) {
+	    w.setBody(error.getResponse().getBody());
+	    w.setCode(ArgUtil.parseAsString(error.getHttpStatus().value()));
+	    w.setCodeKey(error.getHttpStatus().name());
+	}
+	w.setDescription(error.getMessage());
 	addError(w);
     }
 

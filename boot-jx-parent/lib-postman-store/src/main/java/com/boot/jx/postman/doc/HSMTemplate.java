@@ -1,6 +1,7 @@
 package com.boot.jx.postman.doc;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,6 +15,7 @@ import org.springframework.data.mongodb.core.mapping.Field;
 
 import com.boot.jx.model.AuditableEntity;
 import com.boot.jx.mongo.CommonDocInterfaces.OldDocVersion;
+import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.ITemplates.BasicTemplate;
 
 @Document(collection = HSMTemplate.COLLECTION_NAME)
@@ -51,6 +53,7 @@ public class HSMTemplate implements Serializable, OldDocVersion<HSMTemplate>, Ba
 
     protected Map<String, Object> options;
     protected Map<String, Object> data;
+    private List<Attachment> attachments;
 
     @Field("oldVersions")
     @Reference
@@ -200,4 +203,25 @@ public class HSMTemplate implements Serializable, OldDocVersion<HSMTemplate>, Ba
 	this.lang = lang;
     }
 
+    public List<Attachment> getAttachments() {
+	return attachments;
+    }
+
+    public void setAttachments(List<Attachment> attachments) {
+	this.attachments = attachments;
+    }
+
+    public List<Attachment> attachments() {
+	if (this.attachments == null) {
+	    this.attachments = new ArrayList<Attachment>();
+	}
+	return attachments;
+    }
+
+    public HSMTemplate attachment(Attachment... attachments) {
+	for (Attachment file : attachments) {
+	    this.attachments().add(file);
+	}
+	return this;
+    }
 }

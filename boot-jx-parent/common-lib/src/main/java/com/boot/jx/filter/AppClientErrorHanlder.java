@@ -100,7 +100,7 @@ public class AppClientErrorHanlder implements ResponseErrorHandler {
 	    return apiError;
 	}
 	AmxApiError defaulError = new AmxApiError(errorEnum);
-	defaulError.setMessage(apiErrorJson);
+	defaulError.setMessage("Error cannot be parsed to JSON see body for full response");
 	defaulError.setBody(apiErrorJson);
 	return defaulError;
     }

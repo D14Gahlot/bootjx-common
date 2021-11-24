@@ -23,7 +23,9 @@ public class LanguageTest {
 
 		Locale[] locales = Locale.getAvailableLocales();
 		for (Locale locale : locales) {
-			LOGGER.info("{} - {}", locale.toString(), locale.getDisplayName());
+			LOGGER.info("{} - {} - {} - {}", locale.toString(), locale.getISO3Language(),
+				locale.getLanguage(),
+				locale.getDisplayName());
 		}
 
 	}
