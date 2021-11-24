@@ -88,7 +88,7 @@ public class PMConfiguration implements Serializable {
 
 	public PMConfiguration instagram(InstagramConfig config,boolean disbaled) {
 		if (disbaled) {
-		    this.telegram().remove(config.getPageId());
+		    this.instagram().remove(config.getPageId());
 		} else
 		    this.instagram().put(config.getPageId(), config);
 		return this;
