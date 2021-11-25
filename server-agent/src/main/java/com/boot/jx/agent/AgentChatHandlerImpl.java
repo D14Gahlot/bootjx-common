@@ -267,7 +267,7 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 	}
 
 	if (ArgUtil.is(outboxMessage)) {
-	    messageDoc = chatService.reply(chatSessionDoc, outboxMessage);
+	    messageDoc = chatService.send(chatSessionDoc, outboxMessage);
 	}
 	chatSessionManager.closeSession(chatSessionDoc);
 	stompTunnelService.sendToAll(PostManUtil.ON_DEPT_ASSIGN_TOPIC(chatSessionDoc.getAssignedToDept()),
@@ -317,7 +317,7 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 	    }
 	} else {
 	    sessionStore.updateResponseTime(sessionDoc);
-	    MessageDoc messageDoc = chatService.reply(sessionDoc, outboxMessage);
+	    MessageDoc messageDoc = chatService.send(sessionDoc, outboxMessage);
 	    return chatArchive.getMessage(messageDoc, sessionDoc);
 	}
 	return new ChatMessageDTO();

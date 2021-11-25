@@ -47,7 +47,7 @@ public class ApiHttpExceptions {
 
 	private static final long serialVersionUID = -1220231169516141164L;
 
-	private AmxApiError response;
+	protected AmxApiError response;
 
 	public ApiHttpException(HttpStatus statusCode, String message) {
 	    super(statusCode, message);
@@ -83,6 +83,10 @@ public class ApiHttpExceptions {
 
 	public ApiHttpNotFoundException(HttpStatus statusCode) {
 	    super(statusCode, String.format("[%s]", statusCode.value(), statusCode.getReasonPhrase()));
+	}
+
+	public ApiHttpNotFoundException(HttpStatus statusCode, AmxApiError apiError) {
+	    super(statusCode, apiError);
 	}
     }
 
