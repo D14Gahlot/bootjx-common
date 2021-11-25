@@ -18,6 +18,7 @@ import com.boot.jx.dict.FileType;
 import com.boot.jx.model.CommonFile;
 import com.boot.jx.postman.client.PMFileStoreClient;
 import com.boot.jx.postman.client.TmplClient;
+import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.InboxMessage;
@@ -58,7 +59,7 @@ public class TelegramConnector extends AbstractConnector<TelegramConfigDetails, 
 	telegramClient.registerWebHook(channelConfig, webhookUrl);
     }
 
-    public void send(ChannelConfig channelConfig, OutboxMessage outboxMessage) {
+    public void onSend(ChannelConfig channelConfig, ChatContactDoc chatContactDoc, OutboxMessage outboxMessage) {
 	try {
 	    template(channelConfig, outboxMessage);
 	    telegramClient.send(channelConfig, outboxMessage);

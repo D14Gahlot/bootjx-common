@@ -7,7 +7,6 @@ import java.util.List;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.TypeAlias;
 import org.springframework.data.mongodb.core.index.Indexed;
-import org.springframework.data.mongodb.core.index.TextIndexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import com.boot.jx.model.AuditableEntity;
@@ -48,6 +47,7 @@ public class ChatContactDoc implements Serializable, Contactable, AuditableEntit
     private long lastReplyStamp;
 
     private long lastOptInStamp;
+    private long lastSentXStamp;
 
     private String sessionId;
 
@@ -66,7 +66,7 @@ public class ChatContactDoc implements Serializable, Contactable, AuditableEntit
     @Indexed
     private List<String> labelId;
     private ChatUserProfileDTO profile;
-    
+
     @Indexed
     private String profileId;
 
@@ -271,4 +271,13 @@ public class ChatContactDoc implements Serializable, Contactable, AuditableEntit
     public void setCreatedBy(String createdBy) {
 	this.createdBy = createdBy;
     }
+
+    public long getLastSentXStamp() {
+	return lastSentXStamp;
+    }
+
+    public void setLastSentXStamp(long lastSentXStamp) {
+	this.lastSentXStamp = lastSentXStamp;
+    }
+
 }

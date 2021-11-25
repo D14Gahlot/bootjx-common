@@ -14,6 +14,8 @@ import com.boot.jx.mongo.CommonDocStore;
 import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.jx.postman.PMClientConfig;
 import com.boot.jx.postman.doc.ChatContactDoc;
+import com.boot.jx.postman.model.MessageDefinitions.Contactable;
+import com.boot.jx.utils.PostManUtil;
 import com.boot.utils.ArgUtil;
 
 @Component
@@ -29,6 +31,14 @@ public class ContactStore extends CommonDocStore {
 
     @Autowired
     public PMClientConfig pmClientConfig;
+
+    public ChatContactDoc findContact(Contactable contactMeta) {
+	Contactable contact = PostManUtil.getContactMeta(contactMeta);
+	if (ArgUtil.isEmpty(contact.getContactId())) {
+	    return null;
+	}
+	return mongoTemplate.findById(contact.getContactId(), ChatContactDoc.class);
+    }
 
     public List<ChatContactDoc> searchContacts(String search, String lane) {
 	// TODO:-- Optimize Search
