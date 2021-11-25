@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorMapping;
+import com.boot.jx.common.config.ConfigConstants;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.dict.FileFormat;
 import com.boot.jx.dict.FileType;
@@ -40,7 +41,9 @@ import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.Constants;
 import com.boot.utils.JsonPath;
+import com.google.i18n.phonenumbers.NumberParseException;
 import com.google.i18n.phonenumbers.PhoneNumberUtil;
+import com.google.i18n.phonenumbers.Phonenumber.PhoneNumber;
 
 @Component
 @ConnectorMapping(contactType = ContactType.WHATSAPP, channel = CHANNEL_TYPE.WA_360D)
@@ -228,8 +231,18 @@ public class WA360Connector extends AbstractConnector<WA360ConfigDetails, WA360P
 
     @Override
     public boolean optin(ChannelConfig channelConfig, ChatContactDoc chatContactDoc) {
+
 	if (ArgUtil.isEmptyValue(chatContactDoc.getLastOptInStamp())) {
-	    MapModel resp = wa360Client.fetchContact("+" + chatContactDoc.getPhone(), channelConfig);
+	    String defaultRegion = environment.keyEntry("postman.phonebook.region").asString("IN");
+	    String phone = chatContactDoc.getPhone();
+	    try {
+		PhoneNumber phoneNumber = PHONE_NUMBER_UTIL.parse(chatContactDoc.getPhone(), defaultRegion);
+		phone = String.format("+%s%s", phoneNumber.getCountryCode(), phoneNumber.getNationalNumber());
+	    } catch (NumberParseException e) {
+		phone = String.format("+%s", phone);
+	    }
+
+	    MapModel resp = wa360Client.fetchContact(phone, channelConfig);
 	    String waId = resp.getString("wa_id");
 
 	    String input = resp.getString("input");
