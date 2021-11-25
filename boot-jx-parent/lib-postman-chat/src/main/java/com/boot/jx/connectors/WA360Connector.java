@@ -12,10 +12,13 @@ import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorMapping;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.dict.FileFormat;
 import com.boot.jx.dict.FileType;
+import com.boot.jx.exception.AmxApiException;
 import com.boot.jx.model.CommonFile;
 import com.boot.jx.postman.PMClientConfig;
 import com.boot.jx.postman.PMConstants.CHANNEL_TYPE;
+import com.boot.jx.postman.PMConstants.MESSAGE_COMPOSE_TYPE;
 import com.boot.jx.postman.client.PMFileStoreClient;
+import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.Message.Status;
@@ -25,6 +28,7 @@ import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.postman.plugin.ChannelPluginProvider;
 import com.boot.jx.postman.plugin.WA360Plugin;
+import com.boot.jx.postman.query.ChatContactQuery;
 import com.boot.jx.postman.wa360.WA360Client;
 import com.boot.jx.postman.wa360.WA360ConfigDetails;
 import com.boot.jx.postman.wa360.WA360Constants;
@@ -36,10 +40,13 @@ import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.Constants;
 import com.boot.utils.JsonPath;
+import com.google.i18n.phonenumbers.PhoneNumberUtil;
 
 @Component
 @ConnectorMapping(contactType = ContactType.WHATSAPP, channel = CHANNEL_TYPE.WA_360D)
 public class WA360Connector extends AbstractConnector<WA360ConfigDetails, WA360Plugin> {
+
+    public static final PhoneNumberUtil PHONE_NUMBER_UTIL = PhoneNumberUtil.getInstance();
 
     @Override
     public WA360Plugin getPlugin() {
@@ -148,14 +155,29 @@ public class WA360Connector extends AbstractConnector<WA360ConfigDetails, WA360P
     }
 
     @Override
-    public void send(ChannelConfig channelConfig, OutboxMessage outboxMessage) {
+    public void onSend(ChannelConfig channelConfig, ChatContactDoc chatContactDoc, OutboxMessage outboxMessage) {
 	try {
-	    template(channelConfig, outboxMessage);
-	    wa360Client.send(channelConfig,outboxMessage);
-	    outboxMessage.updateStatus(OutboxMessage.Status.SENT);
+	    template(channelConfig, outboxMessage); // TODO:- This is common for all connector, make it generic
+
+	    boolean isValidContact = true;
+	    if (outboxMessage.messageMetaWrapper().composeTypeIs(MESSAGE_COMPOSE_TYPE.SEND_CODE)) {
+		isValidContact = optin(channelConfig, chatContactDoc);
+	    }
+
+	    if (isValidContact) {
+		wa360Client.send(channelConfig, outboxMessage);
+		outboxMessage.updateStatus(OutboxMessage.Status.SENT);
+	    } else {
+		outboxMessage.logs().add(String.format("Invalid Contact for %s", chatContactDoc));
+	    }
+
 	} catch (Exception e) {
 	    outboxMessage.updateStatus(OutboxMessage.Status.SENT_ERR);
-	    outboxMessage.logs().add(e.getMessage());
+	    String log = null;
+	    if (e instanceof AmxApiException) {
+		log = ((AmxApiException) e).getErrorKey();
+	    }
+	    outboxMessage.logs().add(ArgUtil.parseAsString(log, e.getMessage()));
 	    LOGGER.error("SEND ERROR", e);
 	}
     }
@@ -202,6 +224,25 @@ public class WA360Connector extends AbstractConnector<WA360ConfigDetails, WA360P
 	}
 
 	return messageBoxEvent;
+    }
+
+    @Override
+    public boolean optin(ChannelConfig channelConfig, ChatContactDoc chatContactDoc) {
+	if (ArgUtil.isEmptyValue(chatContactDoc.getLastOptInStamp())) {
+	    MapModel resp = wa360Client.fetchContact("+" + chatContactDoc.getPhone(), channelConfig);
+	    String waId = resp.getString("wa_id");
+
+	    String input = resp.getString("input");
+	    String status = resp.getString("status");
+
+	    if ("valid".equals(status)) {
+		ChatContactQuery chatContactQuery = new ChatContactQuery(chatContactDoc);
+		chatContactQuery.updateLastOptInStamp();
+		commonMongoTemplate.updateFirst(chatContactQuery);
+		return true;
+	    }
+	}
+	return !ArgUtil.isEmptyValue(chatContactDoc.getLastOptInStamp());
     }
 
 }

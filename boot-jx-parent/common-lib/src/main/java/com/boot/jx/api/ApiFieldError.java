@@ -163,6 +163,11 @@ public class ApiFieldError implements Serializable {
 	return this;
     }
 
+    public ApiFieldError code(String code) {
+	this.code = code;
+	return this;
+    }
+
     public ApiFieldError field(String field) {
 	this.field = field;
 	return this;

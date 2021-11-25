@@ -124,8 +124,20 @@ public class MapModel implements JsonSerializerType<Object> {
 		    false);
 	}
 
+	public Map<String, Object> asMap() {
+	    return JsonUtil.toMap(this.value);
+	}
+
+	public MapModel asMapModel() {
+	    return MapModel.from(this.asMap());
+	}
+
 	public boolean exists() {
 	    return ArgUtil.is(value);
+	}
+
+	public boolean is(Object compare) {
+	    return ArgUtil.areEqual(this.value, compare);
 	}
 
 	public Object getValue() {
