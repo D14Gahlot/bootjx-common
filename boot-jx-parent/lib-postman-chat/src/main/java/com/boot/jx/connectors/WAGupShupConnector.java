@@ -207,7 +207,7 @@ public class WAGupShupConnector extends AbstractConnector<GupShupConfigDetails, 
     }
 
     @Override
-    public void send(ChannelConfig channelConfig, OutboxMessage outboxMessage) {
+    public void onSend(ChannelConfig channelConfig, ChatContactDoc chatContactDoc, OutboxMessage outboxMessage) {
 	// TODO Auto-generated method stub
     }
 

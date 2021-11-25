@@ -7,11 +7,9 @@ import com.boot.utils.TimeUtils;
 public class PMConstants {
 
     public final class DEFAULT {
-
 	public static final String SYSTEM = "__SYSTEM__";
 	public static final String NO_DEPT = "__DEPT__";
 	public static final String NO_USER = "__USER__";
-
     }
 
     public final class USER_ROLE {
@@ -50,6 +48,16 @@ public class PMConstants {
 
     public static enum CHAT_MODE {
 	AGENT, BOT, PUSH;
+    }
+
+    public static class MESSAGE_COMPOSE_TYPE {
+	public static final String ACTION = "ACTION";
+	public static final String SEND = "SEND";
+	public static final String REPLY = "REPLY";
+	
+	public static final String SEND_CODE = "N";
+	public static final String REPLY_CODE = "R";
+
     }
 
     public static class MESSAGE_SEND_TYPE {

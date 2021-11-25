@@ -124,6 +124,12 @@ public class ChatContactQuery extends DocQueryBuilder<ChatContactDoc> {
 	return this;
     }
 
+    public void updateLastOptInStamp() {
+	long optinStamp = System.currentTimeMillis();
+	this.doc.setLastOptInStamp(optinStamp);
+	this.set("lastOptInStamp", optinStamp);
+    }
+
     public ChatContactQuery update(Contactable contactable) {
 	if (ArgUtil.is(contactable.getContactId())) {
 	    this.setContactId(ArgUtil.nonEmpty(contactable.getContactId(), this.doc.getContactId()));
@@ -136,9 +142,9 @@ public class ChatContactQuery extends DocQueryBuilder<ChatContactDoc> {
 	}
 
 	if (ArgUtil.is(contactable.getContactType()) || ArgUtil.is(contactable.getChannelType())) {
-	    this.setChannelType(
-		    ArgUtil.nonEmpty(PMConstants.CHANNEL_TYPE(contactable.getContactType(), contactable.getChannelType()),
-			    this.doc.getChannelType()));
+	    this.setChannelType(ArgUtil.nonEmpty(
+		    PMConstants.CHANNEL_TYPE(contactable.getContactType(), contactable.getChannelType()),
+		    this.doc.getChannelType()));
 	}
 
 	if (ArgUtil.is(contactable.getCsid())) {
