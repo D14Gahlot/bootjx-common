@@ -10,7 +10,6 @@ import com.boot.jx.chat.ChatClient;
 import com.boot.jx.chat.ConnectorHandlerFactory;
 import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorHandler;
 import com.boot.jx.connectors.AbstractConnector;
-import com.boot.jx.connectors.AbstractConnector.DefaultConnector;
 import com.boot.jx.postman.PMClientConfig;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.dto.ChatMessageDTO;
