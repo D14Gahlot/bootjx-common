@@ -11,6 +11,7 @@ import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorMapping;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.postman.PMConstants.CHANNEL_TYPE;
 import com.boot.jx.postman.client.TmplClient;
+import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.ig.InstagramClient;
 import com.boot.jx.postman.ig.InstagramConfig;
@@ -48,7 +49,8 @@ public class InstagramConnector extends AbstractConnector<InstagramConfig, Insta
 	ApiResponseUtil.addWarning("Set webhook URL manually from Facebook Developer Portal.");
     }
 
-    public void send(ChannelConfig channelConfig, OutboxMessage outboxMessage) {
+    @Override
+    public void onSend(ChannelConfig channelConfig, ChatContactDoc chatContactDoc, OutboxMessage outboxMessage) {
 	try {
 	    template(channelConfig, outboxMessage);
 	    instaClient.send(channelConfig, outboxMessage);
@@ -124,7 +126,7 @@ public class InstagramConnector extends AbstractConnector<InstagramConfig, Insta
     @Override
     public MessageBoxEvent inboundMessageBoxEvent(ChannelConfig channelConfig, MapModel requestMap,
 	    MessageBoxEvent messageBoxEvent) {
-    	InstagramHookRequest request = requestMap.as(InstagramHookRequest.class);
+	InstagramHookRequest request = requestMap.as(InstagramHookRequest.class);
 	request.getEntry().forEach(pageEntry -> {
 	    pageEntry.getMessaging().forEach(m -> {
 		if (ArgUtil.is(m.getMessage())) {
