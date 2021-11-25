@@ -15,7 +15,6 @@ import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.rest.RestService;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.utils.ArgUtil;
-import com.google.i18n.phonenumbers.PhoneNumberUtil;
 
 @Component
 public class ChatClient {
