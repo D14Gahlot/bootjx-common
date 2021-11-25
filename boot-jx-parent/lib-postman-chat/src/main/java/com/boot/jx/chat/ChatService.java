@@ -32,7 +32,6 @@ import com.boot.jx.postman.query.ChatContactQuery;
 import com.boot.jx.postman.service.ChatDTOUtil;
 import com.boot.jx.postman.store.MessageContext;
 import com.boot.jx.postman.store.MessageStore;
-import com.boot.jx.postman.store.MessageStore.EVENTS;
 import com.boot.jx.postman.store.SessionStore;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.TimeUtils;

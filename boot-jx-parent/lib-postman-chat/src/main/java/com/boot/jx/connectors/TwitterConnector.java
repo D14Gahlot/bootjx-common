@@ -12,12 +12,9 @@ import org.springframework.stereotype.Component;
 
 import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorMapping;
 import com.boot.jx.dict.ContactType;
-import com.boot.jx.dict.FileType;
 import com.boot.jx.postman.client.TmplClient;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
-import com.boot.jx.postman.doc.QuickMedia;
-import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.MessageBoxEvent;
 import com.boot.jx.postman.model.OutboxMessage;
