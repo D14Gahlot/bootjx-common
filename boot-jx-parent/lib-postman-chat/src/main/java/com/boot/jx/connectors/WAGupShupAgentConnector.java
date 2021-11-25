@@ -60,9 +60,9 @@ public class WAGupShupAgentConnector extends AbstractConnector<GupShupConfigDeta
 	    if (outboxMessage.isViaAgent() && ArgUtil.isEmpty(outboxMessage.getFiles())) {
 		gupShupChatClient.sendMessage(chatContactDoc.getCsid(), outboxMessage.getMessage());
 	    } else if (outboxMessage.isTemplateMsg() || outboxMessage.isQRButtons()) {
-		gupShupNotifyClient.send(null, outboxMessage);
+		gupShupNotifyClient.send(channelConfig, outboxMessage);
 	    } else {
-		gupShupChatClient.send(null, outboxMessage);
+		gupShupChatClient.send(channelConfig, outboxMessage);
 	    }
 	} else if (ArgUtil.isEqual(outboxMessage.contact().getChannelType(), Channel.DEFAULT.toString())) {
 	    MessageBox mb = new MessageBox();
@@ -72,7 +72,8 @@ public class WAGupShupAgentConnector extends AbstractConnector<GupShupConfigDeta
     }
 
     @Override
-    public void reply(ChannelConfig channelConfig, ChatContactDoc chatContactDoc, OutboxMessage outboxMessage, IMessageExtended inboxMessage) {
+    public void reply(ChannelConfig channelConfig, ChatContactDoc chatContactDoc, OutboxMessage outboxMessage,
+	    IMessageExtended inboxMessage) {
 	outboxMessage.contact().setChannelType(inboxMessage.contact().getChannelType());
 	outboxMessage.contact().setLane(inboxMessage.contact().getLane());
 	if (ArgUtil.isEqual(inboxMessage.contact().getChannelType(), Channel.GUPSHUPAGENT.toString())) {
@@ -80,9 +81,9 @@ public class WAGupShupAgentConnector extends AbstractConnector<GupShupConfigDeta
 		gupShupAgentClient.sendViaAgent(inboxMessage, outboxMessage.getMessage());
 	    } else if (outboxMessage.isTemplateMsg() || outboxMessage.isQRButtons()) {
 		// gupShupNotifyClient.optIn(inboxMessage.getFrom());
-		gupShupNotifyClient.send(null, outboxMessage);
+		gupShupNotifyClient.send(channelConfig, outboxMessage);
 	    } else {
-		gupShupChatClient.send(null, outboxMessage);
+		gupShupChatClient.send(channelConfig, outboxMessage);
 	    }
 	} else if (ArgUtil.isEqual(inboxMessage.contact().getChannelType(), Channel.DEFAULT.toString())) {
 	    Message<?> reply = inboxMessage.replyMessage(outboxMessage.getMessage());
@@ -138,7 +139,7 @@ public class WAGupShupAgentConnector extends AbstractConnector<GupShupConfigDeta
     }
 
     @Override
-    public void send(ChannelConfig channelConfig, OutboxMessage outboxMessage) {
+    public void onSend(ChannelConfig channelConfig, ChatContactDoc chatContactDoc, OutboxMessage outboxMessage) {
 	// TODO Auto-generated method stub
     }
 

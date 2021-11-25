@@ -37,6 +37,10 @@ public class MessageMetaWrapper extends MapModel {
 	return this;
     }
 
+    public boolean composeTypeIs(String composeType) {
+	return this.keyEntry("composeType").is(composeType);
+    }
+
     public String sendType() {
 	return this.getString("sendType");
     }

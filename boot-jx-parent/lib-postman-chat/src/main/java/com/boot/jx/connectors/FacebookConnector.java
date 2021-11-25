@@ -11,6 +11,7 @@ import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorMapping;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.postman.PMConstants.CHANNEL_TYPE;
 import com.boot.jx.postman.client.TmplClient;
+import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.fb.FacebooClient;
 import com.boot.jx.postman.fb.FacebookConfigDetails;
@@ -48,7 +49,7 @@ public class FacebookConnector extends AbstractConnector<FacebookConfigDetails, 
 	ApiResponseUtil.addWarning("Set webhook URL manually from Facebook Developer Portal.");
     }
 
-    public void send(ChannelConfig channelConfig, OutboxMessage outboxMessage) {
+    public void onSend(ChannelConfig channelConfig, ChatContactDoc chatContactDoc, OutboxMessage outboxMessage) {
 	try {
 	    template(channelConfig, outboxMessage);
 	    facebooClient.send(channelConfig, outboxMessage);

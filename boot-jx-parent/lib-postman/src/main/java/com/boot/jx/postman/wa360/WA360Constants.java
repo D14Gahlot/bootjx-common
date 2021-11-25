@@ -74,6 +74,9 @@ public class WA360Constants {
 	public static final JsonPath TEMPLATE_LANGUAGE_CODE = new JsonPath("template/language/code");
 	public static final JsonPath TEMPLATE_NAME = new JsonPath("template/name");
 	public static final JsonPath TEMPLATE_COMPONENTS = new JsonPath("template/components");
+	
+	
+	public static final JsonPath FETCH_CONTACTS_DETAILS = new JsonPath("contacts/[0]");
 
     }
 

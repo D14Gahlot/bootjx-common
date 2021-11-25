@@ -15,6 +15,7 @@ import com.boot.jx.postman.PMConstants.MESSAGE_SEND_TYPE;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PMEnvironment.AChannelDetails;
 import com.boot.jx.postman.client.TmplClient;
+import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.HSMTemplate3rdParty;
 import com.boot.jx.postman.doc.QuickMedia;
 import com.boot.jx.postman.model.Attachment;
@@ -96,7 +97,7 @@ public abstract class AbstractConnector<CD extends AChannelDetails, P extends Ch
     }
 
     private OutboxMessage process(ChannelConfig channelConfig, OutboxMessage outboxMessage) {
-	
+
 	tmplClient.process(outboxMessage);
 	if (ArgUtil.is(outboxMessage.getTemplateId())) {
 	    if (MESSAGE_SEND_TYPE.PUSH_MESSAGE.equals(outboxMessage.messageMetaWrapper().sendType())
@@ -124,4 +125,10 @@ public abstract class AbstractConnector<CD extends AChannelDetails, P extends Ch
 	}
 	return outboxMessage;
     }
+
+    @Override
+    public boolean optin(ChannelConfig channelConfig, ChatContactDoc chatContactDoc) {
+	return ArgUtil.is(chatContactDoc.getCsid());
+    }
+
 }

@@ -10,12 +10,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpStatusCodeException;
 
+import com.boot.jx.api.ApiFieldError;
 import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.dict.FileType;
-import com.boot.jx.exception.ApiHttpExceptions.ApiHttpClientException;
 import com.boot.jx.exception.ApiHttpExceptions.ApiHttpException;
 import com.boot.jx.postman.PostManException;
-import com.boot.jx.postman.fb.FacebookMessageResp;
 import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.model.TmplElement;
@@ -27,7 +26,6 @@ import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.Constants;
 import com.boot.utils.JsonPath;
-import com.boot.utils.JsonUtil;
 
 @Component
 public class WA360Client {
@@ -309,7 +307,19 @@ public class WA360Client {
 		    .header(WA360Constants.D360_API_KEY, channelConfig.getWa360d().getApiKey()).post(req.toMap())
 		    .asMapModel();
 	    return resp;
-	} catch (ApiHttpClientException e) {
+	} catch (ApiHttpException e) {
+	    return MapModel.from(e.getResponse().getBody());
+	}
+    }
+
+    public MapModel fetchContact(String contact, ChannelConfig channelConfig) {
+	try {
+	    MapModel resp = restService.ajax(WA360Constants.BASE_URL).path("v1/contacts")
+		    .header(WA360Constants.D360_API_KEY, channelConfig.getWa360d().getApiKey())
+		    .post(MapModel.createInstance().put("blocking", "wait").put(OutBoundWrapperPaths.FETCH_CONTACTS_DETAILS, contact).toMap())
+		    .asMapModel();
+	    return resp.path(OutBoundWrapperPaths.FETCH_CONTACTS_DETAILS).asMapModel();
+	} catch (ApiHttpException e) {
 	    return MapModel.from(e.getResponse().getBody());
 	}
     }
@@ -320,7 +330,18 @@ public class WA360Client {
 	if (ArgUtil.is(errorCode)) {
 	    String errorTitle = resp.entry(OutBoundWrapperPaths.RESPONSE_ERROR_TITLE).asString();
 	    String errorDetails = resp.entry(OutBoundWrapperPaths.RESPONSE_ERROR_DETAILS).asString();
-	    throw new PostManException(String.format("%s : %s / %s / %s ", id, errorCode, errorTitle, errorDetails));
+
+	    ApiFieldError error = new ApiFieldError();
+	    error.code(errorCode);
+	    error.codeKey(errorTitle);
+	    error.setDescription(String.format("%s : %s / %s / %s ", id, errorCode, errorTitle, errorDetails));
+	    if ("1006".equals(errorCode)) {
+		error.setDescriptionKey("File or resource not found");
+		if ("unknown contact".equals(errorDetails)) {
+		    error.field("to").code(PostManException.ErrorCode.CONTACT_NOTFOUND);
+		}
+	    }
+	    ApiResponseUtil.throwException(error);
 	}
 	return id;
     }

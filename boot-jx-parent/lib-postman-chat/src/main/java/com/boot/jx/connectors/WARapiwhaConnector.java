@@ -14,6 +14,7 @@ import com.boot.jx.dict.ContactType;
 import com.boot.jx.dict.FileType;
 import com.boot.jx.logger.LoggerService;
 import com.boot.jx.postman.client.TmplClient;
+import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.QuickMedia;
 import com.boot.jx.postman.model.Attachment;
@@ -57,7 +58,7 @@ public class WARapiwhaConnector extends AbstractConnector<WebConfigDetails, WebP
     private TmplClient tmplClient;
 
     @Override
-    public void send(ChannelConfig channelConfig, OutboxMessage outboxMessage) {
+    public void onSend(ChannelConfig channelConfig, ChatContactDoc chatContactDoc, OutboxMessage outboxMessage) {
 	String to = CollectionUtil.getOne(outboxMessage.getTo());
 
 	outboxMessage.contact().setChannelType(outboxMessage.contact().getChannelType());
