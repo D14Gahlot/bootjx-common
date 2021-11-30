@@ -45,15 +45,18 @@ public class HSMTemplate implements Serializable, OldDocVersion<HSMTemplate>, Ba
     private String category;
 
     private String desc;
-    private String title;
 
-    private String template;
-
-    private Map<String, Object> meta;
-
+    //message structure
+    private String header;
+    private String body;
+    private String footer;
     protected Map<String, Object> options;
-    protected Map<String, Object> data;
     private List<Attachment> attachments;
+    
+    private String template;
+    private Map<String, Object> meta;
+    protected Map<String, Object> data;
+    
 
     @Field("oldVersions")
     @Reference
@@ -171,12 +174,12 @@ public class HSMTemplate implements Serializable, OldDocVersion<HSMTemplate>, Ba
 	this.data = data;
     }
 
-    public String getTitle() {
-	return title;
+    public String getHeader() {
+	return header;
     }
 
-    public void setTitle(String title) {
-	this.title = title;
+    public void setHeader(String header) {
+	this.header = header;
     }
 
     public String getCode() {
@@ -223,5 +226,21 @@ public class HSMTemplate implements Serializable, OldDocVersion<HSMTemplate>, Ba
 	    this.attachments().add(file);
 	}
 	return this;
+    }
+
+    public String getBody() {
+        return body;
+    }
+
+    public void setBody(String body) {
+        this.body = body;
+    }
+
+    public String getFooter() {
+        return footer;
+    }
+
+    public void setFooter(String footer) {
+        this.footer = footer;
     }
 }

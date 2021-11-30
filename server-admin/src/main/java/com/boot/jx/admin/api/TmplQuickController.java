@@ -235,7 +235,6 @@ public class TmplQuickController {
 	}
 	// newVersion.setId(null);
 	newVersion.setCategory(hsmTemplateRequest.getCategory());
-	newVersion.setTitle(hsmTemplateRequest.getTitle());
 	newVersion.setDesc(hsmTemplateRequest.getDesc());
 
 	newVersion.setCode(hsmTemplateRequest.getCode());
@@ -243,6 +242,9 @@ public class TmplQuickController {
 	newVersion.setLang(hsmTemplateRequest.getLang());
 	newVersion.setName(hsmTemplateRequest.getName());
 
+	newVersion.setHeader(hsmTemplateRequest.getHeader());
+	newVersion.setBody(hsmTemplateRequest.getBody());
+	newVersion.setFooter(hsmTemplateRequest.getFooter());
 	newVersion.setTemplate(hsmTemplateRequest.getTemplate());
 
 	newVersion.meta().putAll(hsmTemplateRequest.meta());
