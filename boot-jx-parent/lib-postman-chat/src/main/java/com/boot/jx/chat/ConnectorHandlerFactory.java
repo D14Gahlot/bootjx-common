@@ -327,6 +327,11 @@ public class ConnectorHandlerFactory extends ScopedBeanFactory<String, Connector
 	    default:
 		break;
 	    }
+
+	    if (ArgUtil.is(inboxMessage) && ArgUtil.is(inboxMessage.contact())) {
+		chatContactQuery.update(inboxMessage.contact());
+	    }
+
 	    commonMongoTemplate.updateFirst(chatSessionQuery);
 	    commonMongoTemplate.updateFirst(chatContactQuery);
 	}
