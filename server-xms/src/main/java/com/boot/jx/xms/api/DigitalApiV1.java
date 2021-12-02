@@ -14,6 +14,7 @@ import com.boot.jx.xms.dto.DigitalObjectDto;
 import com.boot.jx.xms.service.ApiService;
 
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 
 @Api(tags = "Digital Analytics", description = "Analytics APIS")
 @Controller
@@ -22,6 +23,8 @@ public class DigitalApiV1 {
     @Autowired
     ApiService apiService;
 
+    @ApiOperation(value = "Push Customer Data", notes = "This API can be used to upload customer details",
+	    hidden = true)
     @ApiClientParams
     @ResponseBody
     @RequestMapping(value = "/api/v1/data/push", method = { RequestMethod.POST })
