@@ -5,7 +5,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.boot.jx.AppContext;
 import com.boot.jx.AppContextUtil;
 import com.boot.jx.bot.BotController;
 import com.boot.jx.bot.ChatContext;

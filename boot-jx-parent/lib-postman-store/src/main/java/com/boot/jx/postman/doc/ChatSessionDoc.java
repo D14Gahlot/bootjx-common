@@ -52,6 +52,9 @@ public class ChatSessionDoc extends UpdatedTimeStampDoc implements Serializable 
     @Indexed
     private long agentSessionStamp;
 
+    private long firstInComingStamp;
+    private long firstOutGoingStamp;
+
     @Indexed
     private long lastInComingStamp;
     @Indexed
@@ -397,5 +400,21 @@ public class ChatSessionDoc extends UpdatedTimeStampDoc implements Serializable 
 	if (ArgUtil.isEmpty(this.tagId))
 	    this.tagId = new ArrayList<String>();
 	return tagId;
+    }
+
+    public long getFirstInComingStamp() {
+	return firstInComingStamp;
+    }
+
+    public void setFirstInComingStamp(long firstInComingStamp) {
+	this.firstInComingStamp = firstInComingStamp;
+    }
+
+    public long getFirstOutGoingStamp() {
+	return firstOutGoingStamp;
+    }
+
+    public void setFirstOutGoingStamp(long firstOutGoingStamp) {
+	this.firstOutGoingStamp = firstOutGoingStamp;
     }
 }
