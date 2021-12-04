@@ -3,6 +3,8 @@ package com.boot.jx.xms.dto;
 import java.io.Serializable;
 import java.util.List;
 
+import com.boot.jx.postman.model.ext.CommonMsgLocation;
+import com.boot.jx.postman.model.ext.CommonMsgText;
 import com.boot.jx.swagger.ApiMockModelProperty;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;

@@ -6,11 +6,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.boot.jx.postman.model.ext.InBoundAction;
+import com.boot.jx.postman.model.ext.InBoundContact;
+import com.boot.jx.postman.model.ext.InBoundMsg;
 import com.boot.jx.xms.XmsConstants.ApiCallbacktParams;
 import com.boot.jx.xms.dto.ContactInfoUpdate;
-import com.boot.jx.xms.dto.InBoundAction;
-import com.boot.jx.xms.dto.InBoundContact;
-import com.boot.jx.xms.dto.InBoundMsg;
 
 import io.swagger.annotations.Api;
 

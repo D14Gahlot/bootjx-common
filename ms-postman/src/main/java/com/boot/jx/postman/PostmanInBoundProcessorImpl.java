@@ -3,7 +3,7 @@ package com.boot.jx.postman;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.boot.jx.inbound.InBoundHandler;
+import com.boot.jx.inbound.InBound.InBoundProcessor;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.TagDocument;
 import com.boot.jx.postman.nlp.CoreNLPService;
@@ -13,7 +13,7 @@ import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
 
 @Component
-public class InBoundHandlerCoreImpl implements InBoundHandler {
+public class PostmanInBoundProcessorImpl implements InBoundProcessor {
 
 	@Autowired(required = false)
 	private OpenNLPService openNLPService;
@@ -25,7 +25,7 @@ public class InBoundHandlerCoreImpl implements InBoundHandler {
 	MessageStore messageStore;
 
 	@Override
-	public InboxMessage onHandle(InboxMessage inboxMessage) {
+	public InboxMessage process(InboxMessage inboxMessage) {
 
 		if (ArgUtil.is(inboxMessage.getMessage())) {
 			try {

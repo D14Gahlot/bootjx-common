@@ -1,4 +1,4 @@
-package com.boot.jx.xms.dto;
+package com.boot.jx.postman.model.ext;
 
 import java.io.Serializable;
 import java.util.List;

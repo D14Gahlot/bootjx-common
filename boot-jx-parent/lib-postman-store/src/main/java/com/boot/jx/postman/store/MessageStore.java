@@ -67,6 +67,9 @@ public class MessageStore extends CommonDocStore {
 	doc.setType("I");
 	doc.setTimestamp(System.currentTimeMillis());
 
+	doc.setFormatType(inboxMessage.getFormatType());
+	doc.setFormatSubType(inboxMessage.getFormatSubType());
+
 	ContactDetailDoc contact = new ContactDetailDoc();
 	contact.setPhone(inboxMessage.getFrom());
 	contact.setContactType(ArgUtil.parseAsString(inboxMessage.contact().type()));

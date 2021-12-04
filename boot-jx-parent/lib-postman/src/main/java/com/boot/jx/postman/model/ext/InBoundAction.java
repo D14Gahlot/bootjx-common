@@ -1,4 +1,4 @@
-package com.boot.jx.xms.dto;
+package com.boot.jx.postman.model.ext;
 
 import com.boot.jx.swagger.ApiMockModelProperty;
 
