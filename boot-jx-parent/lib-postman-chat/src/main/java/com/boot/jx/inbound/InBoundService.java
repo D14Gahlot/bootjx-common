@@ -23,6 +23,8 @@ import com.boot.jx.inbound.InBound.InBoundFilter;
 import com.boot.jx.inbound.InBound.InBoundHandler;
 import com.boot.jx.inbound.InBound.InBoundProcessor;
 import com.boot.jx.postman.PMClientConfig;
+import com.boot.jx.postman.PMEnvironment;
+import com.boot.jx.postman.PMEnvironment.PMConfigurationObject;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.ErrorObject;
 import com.boot.jx.postman.doc.MessageDoc;
@@ -75,6 +77,9 @@ public class InBoundService {
     @Autowired
     private MessageContext messageContext;
 
+    @Autowired
+    private PMEnvironment pmEnvironment;
+
     @Autowired(required = false)
     private RedissonClient redisson;
     private CacheBox<String> proxyManager;
@@ -99,8 +104,10 @@ public class InBoundService {
 
     public InboxMessage invokeMethods(InboxMessage inboxMessageOriginal) {
 
-	if (AppContextUtil.getTenant().equals("app") && ArgUtil.is(inboxMessageOriginal.getMessage())
-		&& ArgUtil.is(redisson)) {
+	PMConfigurationObject proxyConfig = pmEnvironment.keyEntry("mry.proxy.enabled");
+
+	if ((AppContextUtil.getTenant().equals("app") || proxyConfig.asBoolean())
+		&& ArgUtil.is(inboxMessageOriginal.getMessage()) && ArgUtil.is(redisson)) {
 	    String contactId = PostManUtil.createContactId(inboxMessageOriginal.contact());
 	    String proxy = null;
 
