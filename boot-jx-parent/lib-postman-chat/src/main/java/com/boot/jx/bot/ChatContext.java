@@ -7,128 +7,95 @@ import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatMeta;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.model.InboxMessage;
-import com.boot.jx.postman.store.DefaultChatContextStore;
-import com.boot.jx.postman.store.IChatContextStore;
-import com.boot.jx.postman.store.IChatContextStore.BasicChatContextSession;
-import com.boot.jx.postman.store.IChatContextStore.BasicChatContextUser;
-import com.boot.jx.postman.store.IChatContextStore.ChatContextStore;
+import com.boot.jx.postman.store.BasicChatDataStore;
+import com.boot.jx.postman.store.BasicChatDataStore.BasicChatSessionData;
+import com.boot.jx.postman.store.BasicChatDataStore.BasicChatUserData;
 import com.boot.jx.postman.store.SessionStore;
 import com.boot.jx.scope.ThreadScoped;
-import com.boot.utils.ArgUtil;
 
 @Component
 @ThreadScoped
 public class ChatContext {
 
-	String currentHandler;
-	String agent;
+    private String currentHandler;
 
-	private ChatMeta meta;
-	private InboxMessage inboxMessage;
-	private ChatContactDoc chatContactDoc;
-	private ChatSessionDoc chatSessionDoc;
+    private ChatMeta meta;
 
-	@Autowired(required = false)
-	private ChatContextStore<?, ?> store;
+    private InboxMessage inboxMessage;
+    private ChatContactDoc chatContactDoc;
+    private ChatSessionDoc chatSessionDoc;
 
-	@Autowired
-	private SessionStore sessionStore;
+    @Autowired
+    private SessionStore sessionStore;
 
-	@Autowired
-	private DefaultChatContextStore defaultChatContextStore;
+    @Autowired
+    private BasicChatDataStore chatDataStore;
 
-	public IChatContextStore<?, ?> getStore() {
-		if (store == null) {
-			return defaultChatContextStore;
-		}
-		return store;
+    public BasicChatDataStore getDataStore() {
+	if (chatDataStore == null) {
+	    chatDataStore = new BasicChatDataStore();
 	}
+	return chatDataStore;
+    }
 
-	public InboxMessage getInboxMessage() {
-		return inboxMessage;
-	}
+    public InboxMessage getInboxMessage() {
+	return inboxMessage;
+    }
 
-	public void setInboxMessage(InboxMessage inboxMessage) {
-		this.inboxMessage = inboxMessage;
-	}
+    public void setInboxMessage(InboxMessage inboxMessage) {
+	this.inboxMessage = inboxMessage;
+    }
 
-	public ChatContactDoc getContact() {
-		if (chatContactDoc == null) {
-			chatContactDoc = sessionStore.getContact(inboxMessage);
-		}
-		return chatContactDoc;
+    public ChatContactDoc getContact() {
+	if (chatContactDoc == null) {
+	    chatContactDoc = sessionStore.getContact(inboxMessage);
 	}
+	return chatContactDoc;
+    }
 
-	public ChatSessionDoc getChatSession() {
-		if (chatSessionDoc == null) {
-			chatSessionDoc = sessionStore.getSession(inboxMessage.getSessionId());
-		}
-		return chatSessionDoc;
+    public ChatSessionDoc getChatSession() {
+	if (chatSessionDoc == null) {
+	    chatSessionDoc = sessionStore.getSession(inboxMessage.getSessionId());
 	}
+	return chatSessionDoc;
+    }
 
-	@SuppressWarnings("unchecked")
-	public <T extends BasicChatContextUser> T getUser() {
-		return (T) getStore().getUser();
-	}
+    public BasicChatUserData getUserData() {
+	return getDataStore().getUserData();
+    }
 
-	@SuppressWarnings("unchecked")
-	public <T extends BasicChatContextUser> T getUser(Class<T> type) {
-		return (T) getStore().getUser();
-	}
+    public BasicChatSessionData sessionData() {
+	return getDataStore().getSessionData();
+    }
 
-	@SuppressWarnings("unchecked")
-	public <T extends BasicChatContextSession> T getSession() {
-		return (T) getStore().getSession();
+    public ChatContactDoc commitContact() {
+	if (chatContactDoc != null) {
+	    sessionStore.save(chatContactDoc);
 	}
+	return null;
+    }
 
-	@SuppressWarnings("unchecked")
-	public <T extends BasicChatContextSession> T getSession(Class<T> type) {
-		return (T) getStore().getSession();
+    public ChatMeta meta() {
+	if (this.meta == null) {
+	    this.meta = new ChatMeta();
 	}
+	return meta;
+    }
 
-	public ChatContactDoc commitContact() {
-		if (chatContactDoc != null) {
-			sessionStore.save(chatContactDoc);
-		}
-		return null;
-	}
+    public ChatMeta getMeta() {
+	return meta;
+    }
 
-	public ChatMeta meta() {
-		if (this.meta == null) {
-			this.meta = new ChatMeta();
-		}
-		return meta;
-	}
+    public void setMeta(ChatMeta meta) {
+	this.meta = meta;
+    }
 
-	public ChatMeta getMeta() {
-		return meta;
-	}
+    public String getCurrentHandler() {
+	return currentHandler;
+    }
 
-	public void setMeta(ChatMeta meta) {
-		this.meta = meta;
-	}
-
-	public String getCurrentHandler() {
-		return currentHandler;
-	}
-
-	public void setCurrentHandler(String currentHandler) {
-		this.currentHandler = currentHandler;
-	}
-
-	public String getMobile() {
-		if (ArgUtil.is(this.inboxMessage)) {
-			return this.inboxMessage.getFrom();
-		}
-		return null;
-	}
-
-	public String getAgent() {
-	    return agent;
-	}
-
-	public void setAgent(String agent) {
-	    this.agent = agent;
-	}
+    public void setCurrentHandler(String currentHandler) {
+	this.currentHandler = currentHandler;
+    }
 
 }

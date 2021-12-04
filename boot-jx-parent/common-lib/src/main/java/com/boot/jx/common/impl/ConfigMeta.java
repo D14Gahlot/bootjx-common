@@ -160,10 +160,6 @@ public class ConfigMeta implements Serializable {
 	return this;
     }
 
-    public ConfigMeta optionValues(Set<Object> options) {
-	return this.optionValues(options.toArray());
-    }
-
     public ConfigMeta optionsOnOff() {
 	return this.options(ConfigOption.ON, ConfigOption.OFF);
     }

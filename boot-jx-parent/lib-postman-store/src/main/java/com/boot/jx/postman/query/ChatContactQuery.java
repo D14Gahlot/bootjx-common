@@ -100,6 +100,18 @@ public class ChatContactQuery extends DocQueryBuilder<ChatContactDoc> {
 	return this;
     }
 
+    public ChatContactQuery setFirstOutBoundStamp(long firstOutBoundStamp) {
+	this.doc.setFirstOutBoundStamp(firstOutBoundStamp);
+	this.set("firstOutBoundStamp", firstOutBoundStamp);
+	return this;
+    }
+
+    public ChatContactQuery setFirstInBoundStamp(long firstInBoundStamp) {
+	this.doc.setFirstInBoundStamp(firstInBoundStamp);
+	this.set("firstInBoundStamp", firstInBoundStamp);
+	return this;
+    }
+
     public ChatContactQuery setName(String name) {
 	this.doc.setName(name);
 	this.set("name", name);
@@ -128,6 +140,18 @@ public class ChatContactQuery extends DocQueryBuilder<ChatContactDoc> {
 	long optinStamp = System.currentTimeMillis();
 	this.doc.setLastOptInStamp(optinStamp);
 	this.set("lastOptInStamp", optinStamp);
+    }
+
+    public void updateCreatedStamp() {
+	long optinStamp = System.currentTimeMillis();
+	this.doc.setCreatedStamp(optinStamp);
+	update().setOnInsert("createdStamp", optinStamp);
+    }
+
+    public void updateFirstInBoundStamp() {
+	long optinStamp = System.currentTimeMillis();
+	this.doc.setFirstInBoundStamp(optinStamp);
+	update().setOnInsert("firstInBoundStamp", optinStamp);
     }
 
     public ChatContactQuery update(Contactable contactable) {

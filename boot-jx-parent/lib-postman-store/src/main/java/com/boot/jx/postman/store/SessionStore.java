@@ -204,13 +204,13 @@ public class SessionStore extends CommonDocStore {
 	    save(chatSessionDoc);
 	    chatContactQuery.setSessionId(chatSessionDoc.getSessionId());
 
+	    chatContactQuery.update(contact);
+	    chatContactQuery.updateCreatedStamp();
 	    // CONTACT CREATION - needs creation or updation if
 	    if (ArgUtil.isEmpty(chatContactDoc)) {
-		chatContactQuery.update(contact);
 		commonMongoTemplate.upsert(chatContactQuery);
 	    } else {
 		// CONTACT UPDATE
-		chatContactQuery.update(contact);
 		commonMongoTemplate.updateFirst(chatContactQuery);
 	    }
 	} else {
@@ -242,11 +242,17 @@ public class SessionStore extends CommonDocStore {
 	    // Query Update for Session
 	    ChatSessionQuery chatSessionDocQuery = new ChatSessionQuery(chatSessionDoc);
 	    chatSessionDocQuery.setLastInComingStamp(chatSessionDoc.getLastInComingStamp());
+
+	    if (ArgUtil.isEmptyValue(chatSessionDoc.getFirstInComingStamp())) {
+		chatSessionDocQuery.setFirstInComingStamp(inboxMessage.getTimestamp());
+	    }
+
 	    commonMongoTemplate.updateFirst(chatSessionDocQuery);
 
 	    // Query Update for Contact
 	    ChatContactQuery chatContactQuery = new ChatContactQuery(chatSessionDoc.getContactId());
 	    chatContactQuery.setLastInBoundStamp(inboxMessage.getTimestamp());
+	    chatContactQuery.update(inboxMessage.contact());
 	    commonMongoTemplate.updateFirst(chatContactQuery);
 	} else if (PostManUtil.isOutBound(inboxMessage)) {
 
@@ -673,31 +679,32 @@ public class SessionStore extends CommonDocStore {
      */
     public List<ChatSessionDoc> findByStatusOrQuickTag(List<CHAT_STATUS> status, List<String> tagCategory,
 	    long fromStamp, long toStamp) {
-    List<String> statusLst=new ArrayList<>();;	
-	if ( (status == null || status.isEmpty() || status.contains(null)) 
-			&& (tagCategory==null  || tagCategory.isEmpty() || tagCategory.contains(null) && tagCategory.contains("")) ) {
-	    //status = new ArrayList<>();
-	    //status.add(CHAT_STATUS.OPEN);
+	List<String> statusLst = new ArrayList<>();
+	;
+	if ((status == null || status.isEmpty() || status.contains(null)) && (tagCategory == null
+		|| tagCategory.isEmpty() || tagCategory.contains(null) && tagCategory.contains(""))) {
+	    // status = new ArrayList<>();
+	    // status.add(CHAT_STATUS.OPEN);
 	    statusLst.add(CHAT_STATUS.OPEN.toString());
-	}else {
-		for(CHAT_STATUS chatSt:status) {
-			statusLst.add(chatSt.toString());
-		}
+	} else {
+	    for (CHAT_STATUS chatSt : status) {
+		statusLst.add(chatSt.toString());
+	    }
 	}
-	
+
 	Query query = new Query();
-	
+
 	query.addCriteria(Criteria.where("assignedAgentStamp").gt(fromStamp).lt(toStamp));
-	
-	if(statusLst!=null && !statusLst.isEmpty()) {
-		query.addCriteria(Criteria.where("status").in(statusLst));
+
+	if (statusLst != null && !statusLst.isEmpty()) {
+	    query.addCriteria(Criteria.where("status").in(statusLst));
 	}
-	if(tagCategory!=null && !tagCategory.isEmpty() && !tagCategory.contains(null) && !tagCategory.contains("") ) {
-		query.addCriteria(Criteria.where("tagId").in(tagCategory));
+	if (tagCategory != null && !tagCategory.isEmpty() && !tagCategory.contains(null) && !tagCategory.contains("")) {
+	    query.addCriteria(Criteria.where("tagId").in(tagCategory));
 	}
 	query.with(new Sort(new Order(Direction.DESC, "assignedAgentStamp")));
 	removeMsgFields(query);
-	LOGGER.info("query {===}"+query);
+	LOGGER.info("query {===}" + query);
 	return mongoTemplate.find(query, ChatSessionDoc.class);
     }
 

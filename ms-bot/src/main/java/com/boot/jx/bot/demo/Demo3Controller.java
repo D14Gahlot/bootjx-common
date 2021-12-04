@@ -92,7 +92,7 @@ public class Demo3Controller extends ChatController {
 		// Thread.sleep(2000);
 
 		// reply(new OutboxMessage().template("menu-4-7-welcome"));
-		chatContext.getSession().data().remove(CURRENT_DEMO);
+		chatContext.sessionData().data().remove(CURRENT_DEMO);
 	    } else {
 		reply(new OutboxMessage().template("menu-4-4-date-1-nok"));
 		next("menu-4-2-date-onselect");
@@ -105,7 +105,7 @@ public class Demo3Controller extends ChatController {
     @ChatMapping(key = "menu-4-8-talk2agent")
     public void transferToAgent(InboxMessage inboxMessage, StringMatcher matcher) {
 	try {
-	    chatContext.getSession().data().remove(CURRENT_DEMO);
+	    chatContext.sessionData().data().remove(CURRENT_DEMO);
 	    InboxMessage agentAssignResp = assignToAgent().getResult();
 	    if (ArgUtil.is(agentAssignResp.session().getAgent())) {
 		reply(new OutboxMessage().template("menu-4-8-talk2agent"));
