@@ -240,6 +240,17 @@ public final class StringUtils {
 	return s.substring(sIndex, Math.max(sIndex, eIndex + 1));
     }
 
+    public static String ltrim(String s, char delimiter) {
+	int sIndex;
+	for (sIndex = 0; sIndex < s.length() - 1; sIndex++) {
+	    if (s.charAt(sIndex) != delimiter) {
+		break;
+	    }
+	}
+	int eIndex = s.length();
+	return s.substring(sIndex, Math.max(sIndex, eIndex + 1));
+    }
+
     public static String trimLeadingZeroes(String value) {
 	if (ArgUtil.is(value)) {
 	    return new Long(value).toString();

@@ -28,7 +28,6 @@ public class ChatContext {
     @Autowired
     private SessionStore sessionStore;
 
-    @Autowired
     private BasicChatDataStore chatDataStore;
 
     public BasicChatDataStore getDataStore() {

@@ -246,7 +246,8 @@ public class WA360Connector extends AbstractConnector<WA360ConfigDetails, WA360P
 	    String defaultRegion = environment.keyEntry("postman.phonebook.region").asString("IN");
 	    String phone = chatContactDoc.getPhone();
 	    try {
-		PhoneNumber phoneNumber = PHONE_NUMBER_UTIL.parse("++" + chatContactDoc.getPhone(), defaultRegion);
+		phone = phone.replace(" ", "").replaceAll("^[\\+0\\s]+(?!$)", "").trim();
+		PhoneNumber phoneNumber = PHONE_NUMBER_UTIL.parse("+" + phone, defaultRegion);
 		phone = String.format("+%s%s", phoneNumber.getCountryCode(), phoneNumber.getNationalNumber());
 	    } catch (NumberParseException e) {
 		phone = String.format("+%s", phone);
