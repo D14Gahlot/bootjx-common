@@ -3,6 +3,7 @@ package com.boot.jx.postman;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import com.boot.jx.chat.ChatClient;
 import com.boot.jx.common.config.ConfigConstants;
@@ -20,6 +21,7 @@ import com.boot.jx.rest.RestService;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
 
+@Component
 public class PostManInBoundHandler implements InBoundHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PostManInBoundHandler.class);
