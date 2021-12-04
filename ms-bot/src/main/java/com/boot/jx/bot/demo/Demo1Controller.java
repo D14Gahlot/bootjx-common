@@ -32,7 +32,7 @@ public class Demo1Controller extends ChatController {
 
     @ChatMapping(key = AlexBotConstants.KEY.INITIATE + "menu", pattern = "^menu$")
     private void showDemoMenu(InboxMessage inboxMessage, StringMatcher matcher) {
-	String prevMenu = ArgUtil.parseAsString(chatContext.getSession().data().get(CURRENT_DEMO), Constants.BLANK)
+	String prevMenu = ArgUtil.parseAsString(chatContext.sessionData().data().get(CURRENT_DEMO), Constants.BLANK)
 		.toLowerCase();
 	if (ArgUtil.is(prevMenu)) {
 	    switch (prevMenu) {
@@ -76,23 +76,23 @@ public class Demo1Controller extends ChatController {
 	case "ASSET MANAGEMENT":
 	case "ASSETMANAGMENT":
 	case "1":
-	    chatContext.getSession().data().put(CURRENT_DEMO, "1");
+	    chatContext.sessionData().data().put(CURRENT_DEMO, "1");
 	    showDemoMenu(inboxMessage, matcher);
 	    break;
 	case "RETAIL":
 	case "2":
-	    chatContext.getSession().data().put(CURRENT_DEMO, "2");
+	    chatContext.sessionData().data().put(CURRENT_DEMO, "2");
 	    showDemoMenu(inboxMessage, matcher);
 	    break;
 	case "REALSTATE":
 	case "PROPERTYBKCMUMBAI":
 	case "3":
-	    chatContext.getSession().data().put(CURRENT_DEMO, "3");
+	    chatContext.sessionData().data().put(CURRENT_DEMO, "3");
 	    showDemoMenu(inboxMessage, matcher);
 	    break;
 	case "NEWACCOUNTOPEN":
 	case "4":
-	    chatContext.getSession().data().put(CURRENT_DEMO, "4");
+	    chatContext.sessionData().data().put(CURRENT_DEMO, "4");
 	    showDemoMenu(inboxMessage, matcher);
 	    break;
 	case "TALK TO AGENT":
@@ -267,7 +267,7 @@ public class Demo1Controller extends ChatController {
     @ChatMapping(key = "transfer-to-agent")
     public void transferToAgent(InboxMessage inboxMessage, StringMatcher matcher) {
 	try {
-	    chatContext.getSession().data().remove(CURRENT_DEMO);
+	    chatContext.sessionData().data().remove(CURRENT_DEMO);
 	    InboxMessage agentAssignResp = assignToAgent().getResult();
 	    if (ArgUtil.is(agentAssignResp.session().getAgent())) {
 	    	if(ArgUtil.is(AppContextUtil.getTenant()) && AppContextUtil.getTenant().equalsIgnoreCase("tathkarah")) {
@@ -355,25 +355,25 @@ public class Demo1Controller extends ChatController {
 
 	case "/ASSETMANAGMENT":
 	case "ASSETMANAGMENT":
-	    chatContext.getSession().data().put(CURRENT_DEMO, "1");
+	    chatContext.sessionData().data().put(CURRENT_DEMO, "1");
 	    showDemoMenu(inboxMessage, matcher);
 	    return true;
 
 	case "/RETAIL":
 	case "RETAIL":
-	    chatContext.getSession().data().put(CURRENT_DEMO, "2");
+	    chatContext.sessionData().data().put(CURRENT_DEMO, "2");
 	    showDemoMenu(inboxMessage, matcher);
 	    return true;
 
 	case "/PROPERTYBKCMUMBAI":
 	case "REALSTATE":
-	    chatContext.getSession().data().put(CURRENT_DEMO, "3");
+	    chatContext.sessionData().data().put(CURRENT_DEMO, "3");
 	    showDemoMenu(inboxMessage, matcher);
 	    return true;
 
 	case "/NEWACCOUNTOPEN":
 	case "NEWACCOUNTOPEN":
-	    chatContext.getSession().data().put(CURRENT_DEMO, "4");
+	    chatContext.sessionData().data().put(CURRENT_DEMO, "4");
 	    showDemoMenu(inboxMessage, matcher);
 	    return true;
 
@@ -385,7 +385,7 @@ public class Demo1Controller extends ChatController {
 	case "*":
 	case "EXIT":
 	case "/EXIT_CHAT":
-	    chatContext.getSession().data().remove(CURRENT_DEMO);
+	    chatContext.sessionData().data().remove(CURRENT_DEMO);
 	    reply(new OutboxMessage().template("feedback").put("name",
 		    ArgUtil.nonEmpty(chatContext.getContact().getName(), "WhatsApp User")));
 	    next("feedback-onselect");

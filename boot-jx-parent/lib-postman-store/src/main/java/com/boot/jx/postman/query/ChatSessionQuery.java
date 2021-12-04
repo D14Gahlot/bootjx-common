@@ -35,15 +35,27 @@ public class ChatSessionQuery extends DocQueryBuilder<ChatSessionDoc> {
 	return this;
     }
 
-    public ChatSessionQuery setLastInComingStamp(long timestamp) {
-	this.doc.setLastInComingStamp(timestamp);
-	this.set("lastInComingStamp", timestamp);
+    public ChatSessionQuery setFirstInComingStamp(long firstInComingStamp) {
+	this.doc.setFirstInComingStamp(firstInComingStamp);
+	this.set("firstInComingStamp", firstInComingStamp);
+	return this;
+    }
+
+    public ChatSessionQuery setFirstOutGoingStamp(long firstOutGoingStamp) {
+	this.doc.setFirstOutGoingStamp(firstOutGoingStamp);
+	this.set("firstOutGoingStamp", firstOutGoingStamp);
 	return this;
     }
 
     public ChatSessionQuery setLastResponseStamp(long timestamp) {
 	this.doc.setLastResponseStamp(timestamp);
 	this.set("lastResponseStamp", timestamp);
+	return this;
+    }
+
+    public ChatSessionQuery setLastInComingStamp(long timestamp) {
+	this.doc.setLastInComingStamp(timestamp);
+	this.set("lastInComingStamp", timestamp);
 	return this;
     }
 

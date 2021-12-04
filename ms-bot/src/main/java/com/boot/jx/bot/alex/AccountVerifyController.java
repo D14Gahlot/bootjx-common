@@ -54,7 +54,7 @@ public class AccountVerifyController extends ChatController {
 	@ChatMapping(key = AlexBotConstants.KEY.SAVE_NAME_ONENTER)
 	public void saveNameOnConfirm(InboxMessage inboxMessage, StringMatcher matcher) {
 		String name = inboxMessage.getMessage();
-		chatContext.getSession().put("_name", name);
+		chatContext.sessionData().put("_name", name);
 
 		ChatPromise x = require(AlexBotConstants.KEY.SAVE_NAME_CONFIRM);
 		switch (x.getResult()) {
@@ -73,7 +73,7 @@ public class AccountVerifyController extends ChatController {
 
 	@ChatMapping(key = AlexBotConstants.KEY.SAVE_NAME_CONFIRM)
 	public void savenameOCnifmr(InboxMessage inboxMessage, StringMatcher matcher) {
-		String name = ArgUtil.parseAsString(chatContext.getSession().get("_name"));
+		String name = ArgUtil.parseAsString(chatContext.sessionData().get("_name"));
 		reply("Is your name '" + name + "' ? 'YES' to confirm. 'NO' to exit. or You can just type your name");
 		next(AlexBotConstants.KEY.SAVE_NAME_CONFIRM_ONSELECT);
 	}
@@ -82,9 +82,9 @@ public class AccountVerifyController extends ChatController {
 	public void confirmName(InboxMessage inboxMessage, StringMatcher matcher) {
 		switch (inboxMessage.getMessage().toUpperCase()) {
 		case "YES":
-			String _name = ArgUtil.parseAsString(chatContext.getSession().get("_name"));
+			String _name = ArgUtil.parseAsString(chatContext.sessionData().get("_name"));
 			chatContext.getContact().setName(_name);
-			chatContext.getUser().put("name", _name);
+			chatContext.getUserData().put("name", _name);
 			reply("Hello " + _name + "! Your name has been updated");
 			resolve(AlexBotConstants.KEY.SAVE_NAME_CONFIRM);
 			resolve(AlexBotConstants.KEY.SAVE_NAME_CONFIRM_ONSELECT);
@@ -94,7 +94,7 @@ public class AccountVerifyController extends ChatController {
 			resolve(AlexBotConstants.KEY.SAVE_NAME_CONFIRM_ONSELECT);
 			break;
 		default:
-			chatContext.getSession().put("_name", inboxMessage.getMessage());
+			chatContext.sessionData().put("_name", inboxMessage.getMessage());
 			reply("Is your name '" + inboxMessage.getMessage()
 					+ "' ? 'YES' to confirm. 'NO' to exit. or You can just type your name");
 			next(AlexBotConstants.KEY.SAVE_NAME_CONFIRM_ONSELECT);
