@@ -1,4 +1,7 @@
-package com.boot.jx.xms.dto;
+package com.boot.jx.postman.model.ext;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import com.boot.jx.postman.model.TagDocument;
 import com.boot.jx.swagger.ApiMockModelProperty;
@@ -35,10 +38,15 @@ public class InBoundMsg {
     public InBoundMsgMedia audio;
     public InBoundMsgMedia document;
     public InBoundMsgMedia image;
+    @ApiMockModelProperty(hidden = true)
+    public InBoundMsgMedia sticker;
     public CommonMsgLocation location;
 
+    @ApiMockModelProperty(hidden = true)
+    public Map<String, Object> input = new HashMap<String, Object>();
+
     @ApiMockModelProperty(value = "Several Tags/Categories Assigned by our ML/NLP program")
-    protected TagDocument tags;
+    public TagDocument tags;
 
     public MsgSession session;
 
