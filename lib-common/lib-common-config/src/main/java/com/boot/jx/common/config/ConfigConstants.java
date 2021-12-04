@@ -75,7 +75,7 @@ public class ConfigConstants {
 		.defaultValue(0)),
 
 	POSTMAN_PHONEBOOK_REGION(new ConfigMeta("Default ISD Country", "postman.phonebook.region")
-		.optionValues(PHONE_NUMBER_UTIL.getSupportedRegions()).defaultValue("IN")),
+		.optionValues(PHONE_NUMBER_UTIL.getSupportedRegions().toArray()).defaultValue("IN")),
 
 	// Ends here
 	;
