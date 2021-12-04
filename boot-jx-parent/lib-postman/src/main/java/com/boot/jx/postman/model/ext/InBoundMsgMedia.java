@@ -1,9 +1,10 @@
-package com.boot.jx.xms.dto;
+package com.boot.jx.postman.model.ext;
 
+import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.swagger.ApiMockModelProperty;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class InBoundMsgMedia {
+public class InBoundMsgMedia extends CommonMsg {
 
     @Deprecated
     @ApiMockModelProperty(example = "/file/of/vdo", value = "absolute-filepath-on-coreapp", hidden = true)
@@ -32,5 +33,14 @@ public class InBoundMsgMedia {
 
     @ApiMockModelProperty(example = "m3232kaoe4belrr", value = "Metadata pertaining to sticker media.", hidden = true)
     public Object metadata;
+
+    public static InBoundMsgMedia from(Attachment attachment) {
+	InBoundMsgMedia media = new InBoundMsgMedia();
+	media.caption = attachment.getMediaCaption();
+	media.filename = attachment.getMediaName();
+	media.link = attachment.getMediaURL();
+	media.mimeType = attachment.getMediaMimeType();
+	return media;
+    }
 
 }

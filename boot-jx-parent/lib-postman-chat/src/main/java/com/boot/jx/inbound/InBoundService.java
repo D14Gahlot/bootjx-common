@@ -19,6 +19,9 @@ import com.boot.jx.cache.CacheBox;
 import com.boot.jx.chat.ChatClient;
 import com.boot.jx.chat.ChatService;
 import com.boot.jx.def.ICacheBox;
+import com.boot.jx.inbound.InBound.InBoundFilter;
+import com.boot.jx.inbound.InBound.InBoundHandler;
+import com.boot.jx.inbound.InBound.InBoundProcessor;
 import com.boot.jx.postman.PMClientConfig;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.ErrorObject;
@@ -40,10 +43,13 @@ public class InBoundService {
     public static final Pattern UNPROXY = Pattern.compile("\\/unproxy\\ ([a-zA-Z0-9_\\-]+)$");
 
     @Autowired(required = false)
-    private InBoundHandler inBoundHandler;
+    private InBoundProcessor inBoundProcessor;
 
     @Autowired(required = false)
     private InBoundFilter inBoundFilter;
+
+    @Autowired(required = false)
+    private InBoundHandler inBoundHandler;
 
     @Autowired
     private BotEngine botEngine;
@@ -162,15 +168,17 @@ public class InBoundService {
 	}
 
 	if (ArgUtil.isEmpty(inBoundFilter) || inBoundFilter.onFilter(inboxMessageOriginal)) {
-	    if (ArgUtil.is(inBoundHandler)) {
-		inBoundHandler.onHandle(inboxMessageOriginal);
+	    if (ArgUtil.is(inBoundProcessor)) {
+		inBoundProcessor.process(inboxMessageOriginal);
 	    }
 
-	    if (agentService.onMessageSupported(inboxMessageOriginal)) {
+	    if (ArgUtil.is(inBoundHandler)) {
+		inBoundHandler.handle(inboxMessageOriginal);
+	    } else if (agentService.onMessageSupported(inboxMessageOriginal)) { // TODO:-- TO be removed
 		agentService.onMessage(inboxMessageOriginal);
-	    } else if (botEngine.isChatBotDefined()) {
+	    } else if (botEngine.isChatBotDefined()) { // TODO:-- TO be removed
 		botEngine.invokeMethodsAsync(inboxMessageOriginal);
-	    } else {
+	    } else { // TODO:-- TO be removed
 		chatClient.forward(inboxMessageOriginal);
 	    }
 	}
