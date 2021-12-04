@@ -240,17 +240,17 @@ public class ChatService {
 
 	ChatContextDoc doc = mongoTemplate.findById(contactId, ChatContextDoc.class);
 	if (ArgUtil.is(doc)) {
-	    chatContext.getStore().loadUser(doc.getUser());
+	    chatContext.getDataStore().loadUserData(doc.getUser());
 	    if (ArgUtil.is(doc.getMeta()) && !TimeUtils.isExpired(doc.getMeta().getUpdateStamp(), "5min")) {
 		chatContext.setMeta(doc.getMeta());
-		chatContext.getStore().loadSession(doc.getSession());
+		chatContext.getDataStore().loadSessionData(doc.getSession());
 	    } else {
-		chatContext.getStore().loadSession(null);
+		chatContext.getDataStore().loadSessionData(null);
 		chatContext.setMeta(new ChatMeta());
 	    }
 	} else {
-	    chatContext.getStore().loadUser(null);
-	    chatContext.getStore().loadSession(null);
+	    chatContext.getDataStore().loadUserData(null);
+	    chatContext.getDataStore().loadSessionData(null);
 	    chatContext.setMeta(new ChatMeta());
 	}
 	chatContext.setInboxMessage(inboxMessage);
@@ -264,8 +264,8 @@ public class ChatService {
 	chatContext.meta().setPrevHandler(prevHandler);
 	chatContext.meta().setUpdateStamp(System.currentTimeMillis());
 
-	doc.setUser(chatContext.getStore().getUser());
-	doc.setSession(chatContext.getStore().getSession());
+	doc.setUser(chatContext.getDataStore().getUserData());
+	doc.setSession(chatContext.getDataStore().getSessionData());
 	doc.setMeta(chatContext.getMeta());
 
 	if (ArgUtil.is(prevHandler)) {

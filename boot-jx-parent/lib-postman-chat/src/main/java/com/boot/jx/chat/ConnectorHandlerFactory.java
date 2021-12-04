@@ -310,11 +310,18 @@ public class ConnectorHandlerFactory extends ScopedBeanFactory<String, Connector
 	MessageDoc messageDoc = messageStore.createOrUpdate(outboxMessage);
 
 	if (ArgUtil.isEqual(messageType, "REPLY", "SEND")) {
-	    ChatContactQuery chatContactQuery = new ChatContactQuery(outboxMessage.contact().getContactId());
+	    ChatContactQuery chatContactQuery = ArgUtil.is(chatContactDoc) ? new ChatContactQuery(chatContactDoc)
+		    : new ChatContactQuery(outboxMessage.contact().getContactId());
 	    ChatSessionQuery chatSessionQuery = new ChatSessionQuery(outboxMessage.getSessionId());
 	    long now = System.currentTimeMillis();
 	    chatContactQuery.setLastOutBoundStamp(now);
 	    chatSessionQuery.setLastOutGoingStamp(now);
+
+	    if (ArgUtil.is(chatContactDoc)) {
+		if (ArgUtil.isEmptyValue(chatContactDoc.getFirstOutBoundStamp())) {
+		    chatContactQuery.setFirstOutBoundStamp(now);
+		}
+	    }
 
 	    switch (messageType) {
 	    case MESSAGE_COMPOSE_TYPE.REPLY:

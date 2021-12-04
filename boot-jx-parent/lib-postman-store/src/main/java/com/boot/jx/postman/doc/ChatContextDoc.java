@@ -13,59 +13,47 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @TypeAlias("ChatContextDoc")
 public class ChatContextDoc implements Serializable {
 
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	@Id
-	@ApiMockModelProperty(example = "wa919930104050", required = false)
-	@JsonProperty("contactId")
-	private String contactId;
+    @Id
+    @ApiMockModelProperty(example = "wa919930104050", required = false)
+    @JsonProperty("contactId")
+    private String contactId;
 
-	@ApiMockModelProperty(example = "+919930104050", required = false)
-	@JsonProperty("mobile")
-	private String mobile;
+    ChatMeta meta;
+    Object session;
+    Object user;
 
-	Object session;
-	Object user;
-	ChatMeta meta;
+    public Object getSession() {
+	return session;
+    }
 
-	public String getMobile() {
-		return mobile;
-	}
+    public void setSession(Object session) {
+	this.session = session;
+    }
 
-	public void setMobile(String mobile) {
-		this.mobile = mobile;
-	}
+    public Object getUser() {
+	return user;
+    }
 
-	public Object getSession() {
-		return session;
-	}
+    public void setUser(Object user) {
+	this.user = user;
+    }
 
-	public void setSession(Object session) {
-		this.session = session;
-	}
+    public ChatMeta getMeta() {
+	return meta;
+    }
 
-	public Object getUser() {
-		return user;
-	}
+    public void setMeta(ChatMeta meta) {
+	this.meta = meta;
+    }
 
-	public void setUser(Object user) {
-		this.user = user;
-	}
+    public String getContactId() {
+	return contactId;
+    }
 
-	public ChatMeta getMeta() {
-		return meta;
-	}
-
-	public void setMeta(ChatMeta meta) {
-		this.meta = meta;
-	}
-
-	public String getContactId() {
-		return contactId;
-	}
-
-	public void setContactId(String contactId) {
-		this.contactId = contactId;
-	}
+    public void setContactId(String contactId) {
+	this.contactId = contactId;
+    }
 
 }
