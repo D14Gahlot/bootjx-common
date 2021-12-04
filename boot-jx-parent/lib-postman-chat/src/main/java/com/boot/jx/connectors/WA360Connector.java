@@ -17,6 +17,7 @@ import com.boot.jx.model.CommonFile;
 import com.boot.jx.postman.PMClientConfig;
 import com.boot.jx.postman.PMConstants.CHANNEL_TYPE;
 import com.boot.jx.postman.PMConstants.MESSAGE_COMPOSE_TYPE;
+import com.boot.jx.postman.PMConstants.MESSAGE_FORMAT_TYPE;
 import com.boot.jx.postman.client.PMFileStoreClient;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.model.Attachment;
@@ -100,8 +101,10 @@ public class WA360Connector extends AbstractConnector<WA360ConfigDetails, WA360P
 	String messageType = map.entry(InBoundWrapperPaths.MESSAGE_TYPE).asString();
 
 	if ("text".equals(messageType)) {
+	    inboxMessage.setFormatType(MESSAGE_FORMAT_TYPE.TEXT);
 	    inboxMessage.setMessage(map.entry(InBoundWrapperPaths.MESSAGE_TEXT).asString());
 	} else if ("interactive".equals(messageType)) {
+	    inboxMessage.setFormatType(MESSAGE_FORMAT_TYPE.TEXT);
 	    String interactiveType = map.entry(InBoundWrapperPaths.INTERACTIVE_TYPE).asString();
 	    if ("button_reply".equals(interactiveType)) {
 		inboxMessage.form().put("reply_id", map.entry(InBoundWrapperPaths.INTERACTIVE_BUTTON_ID).asString());
@@ -121,18 +124,25 @@ public class WA360Connector extends AbstractConnector<WA360ConfigDetails, WA360P
 
 	    inboxMessage.setMessage(ArgUtil.parseAsString(inboxMessage.form().get("reply_title"), Constants.BLANK));
 	} else if ("image".equals(messageType)) {
+	    inboxMessage.setFormatType(MESSAGE_FORMAT_TYPE.IMAGE);
 	    formatMedia(inboxMessage, map, channelConfig, InBoundWrapperPaths.IMAGE, FileType.IMAGE);
 	} else if ("document".equals(messageType)) {
+	    inboxMessage.setFormatType(MESSAGE_FORMAT_TYPE.DOCUMENT);
 	    formatMedia(inboxMessage, map, channelConfig, InBoundWrapperPaths.DOCUMENT, FileType.DOCUMENT);
 	} else if ("audio".equals(messageType)) {
+	    inboxMessage.setFormatType(MESSAGE_FORMAT_TYPE.AUDIO);
 	    formatMedia(inboxMessage, map, channelConfig, InBoundWrapperPaths.AUDIO, FileType.AUDIO);
 	} else if ("voice".equals(messageType)) {
+	    inboxMessage.setFormatType(MESSAGE_FORMAT_TYPE.VOICE);
 	    formatMedia(inboxMessage, map, channelConfig, InBoundWrapperPaths.VOICE, FileType.AUDIO);
 	} else if ("video".equals(messageType)) {
+	    inboxMessage.setFormatType(MESSAGE_FORMAT_TYPE.VIDEO);
 	    formatMedia(inboxMessage, map, channelConfig, InBoundWrapperPaths.VIDEO, FileType.VIDEO);
 	} else if ("sticker".equals(messageType)) {
+	    inboxMessage.setFormatType(MESSAGE_FORMAT_TYPE.STICKER);
 	    formatMedia(inboxMessage, map, channelConfig, InBoundWrapperPaths.STICKER, FileType.IMAGE);
 	}
+	inboxMessage.setFormatSubType(messageType);
 
 	String replyIdExt = map.entry(InBoundWrapperPaths.CONTEXT_ID).asString();
 	if (ArgUtil.is(replyIdExt)) {
@@ -153,7 +163,8 @@ public class WA360Connector extends AbstractConnector<WA360ConfigDetails, WA360P
 		PostManUtil.createContactId(inboxMessage), inboxMessage.getMessageIdExt());
 
 	inboxMessage.attachment(new Attachment().mediaURL(dstFile.getUrl()).mediaType(dstFile.getFileType())
-		.mediaSrc(srcFile.getUrl()).mediaCaption(media.getCaption()).mediaName(media.getFilename()));
+		.mediaSrc(srcFile.getUrl()).mediaCaption(media.getCaption()).mediaName(media.getFilename())
+		.mediaMimeType(media.getMimeType()));
     }
 
     @Override

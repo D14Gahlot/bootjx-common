@@ -121,6 +121,10 @@ public class MessageDefinitions {
 
 	public String toString();
 
+	public String getFormatType();
+
+	public String getFormatSubType();
+
     }
 
     public static interface IMessageExtended extends IMessage {

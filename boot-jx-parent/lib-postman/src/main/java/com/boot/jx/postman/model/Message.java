@@ -44,6 +44,10 @@ public class Message<T extends Message<T>> implements Serializable, MessageOptio
     protected String subject;
     protected String message = null;
     protected String footer;
+
+    private String formatType;
+    private String formatSubType;
+
     protected List<String> to = null;
     protected List<ContactMeta> contacts = null;
     private String templateId = null;
@@ -55,6 +59,7 @@ public class Message<T extends Message<T>> implements Serializable, MessageOptio
     private Map<String, Object> model = new HashMap<String, Object>();
     protected Map<String, Object> options = new HashMap<String, Object>();
     protected Map<String, Object> meta;
+
     private MessageType messageType = null;
 
     private List<PostManFile> files = null;
@@ -551,6 +556,22 @@ public class Message<T extends Message<T>> implements Serializable, MessageOptio
 
     public void setTemplateExt(BasicExternalTemplate templateExt) {
 	this.templateExt = templateExt;
+    }
+
+    public String getFormatType() {
+	return formatType;
+    }
+
+    public void setFormatType(String formatType) {
+	this.formatType = formatType;
+    }
+
+    public String getFormatSubType() {
+	return formatSubType;
+    }
+
+    public void setFormatSubType(String formatSubType) {
+	this.formatSubType = formatSubType;
     }
 
 }

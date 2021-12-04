@@ -45,6 +45,10 @@ public class MessageDoc implements Serializable, Patchable<MessageDoc> {
     private String action;
     private String handler;
     private String message;
+
+    private String formatType;
+    private String formatSubType;
+
     private String status;
     private ContactDetailDoc contact;
     private String agent;
@@ -319,5 +323,21 @@ public class MessageDoc implements Serializable, Patchable<MessageDoc> {
 
     public void setReplyId(String replyId) {
 	this.replyId = replyId;
+    }
+
+    public String getFormatType() {
+	return formatType;
+    }
+
+    public void setFormatType(String formatType) {
+	this.formatType = formatType;
+    }
+
+    public String getFormatSubType() {
+	return formatSubType;
+    }
+
+    public void setFormatSubType(String formatSubType) {
+	this.formatSubType = formatSubType;
     }
 }
