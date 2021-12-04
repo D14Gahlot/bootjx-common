@@ -39,7 +39,7 @@ public class PMConstants {
     }
 
     public enum CHANNEL_TYPE_ENUM {
-	tg, tw, fb, wags, wa360, web,ig
+	tg, tw, fb, wags, wa360, web, ig
     }
 
     public static enum CHAT_STATUS {
@@ -54,7 +54,7 @@ public class PMConstants {
 	public static final String ACTION = "ACTION";
 	public static final String SEND = "SEND";
 	public static final String REPLY = "REPLY";
-	
+
 	public static final String SEND_CODE = "N";
 	public static final String REPLY_CODE = "R";
 
@@ -63,6 +63,22 @@ public class PMConstants {
     public static class MESSAGE_SEND_TYPE {
 	public static final String PUSH_MESSAGE = "PM";
 	public static final String SESSION_MESSAGE = "SM";
+    }
+
+    public static class MESSAGE_FORMAT_TYPE {
+	public static final String TEXT = "text";
+	public static final String TEXT_SYSTEM = "system";
+	public static final String TEXT_INTERACTIVE = "interactive";
+	public static final String TEXT_BUTTON = "button";
+
+	public static final String AUDIO = "audio";
+	public static final String VOICE = "voice";
+
+	public static final String DOCUMENT = "document";
+	public static final String IMAGE = "image";
+	public static final String STICKER = "sticker";
+	public static final String LOCATION = "location";
+	public static final String VIDEO = "video";
     }
 
     public static class ASSIGNMENT_RULE {
