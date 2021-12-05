@@ -150,7 +150,7 @@ public class HSMMessageType implements Serializable, OldDocVersion<HSMMessageTyp
 		LIST.add(new HSMMessageType().id("shipping_update").label("Shipping Update")
 				.desc("Send shipping updates to customers about their orders.").icon("fa fa-truck"));
 
-		LIST.add(new HSMMessageType().id("ticket_finance_update").label("Ticket Finance Update")
+		LIST.add(new HSMMessageType().id("ticket_update").label("Ticket Update")
 				.desc("Send ticketing information or updates to customers.").icon("fa fa-ticket"));
 
 		LIST.add(new HSMMessageType().id("transportation_update").label("Transportation Update")

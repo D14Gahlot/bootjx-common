@@ -208,58 +208,6 @@ public class TmplQuickController {
 		.message("Quick Media created");
     }
 
-    // HSMTemplate
-    @RequestMapping(value = "/api/tmpl/pushtemplate", method = { RequestMethod.GET })
-    public ApiResponse<HSMTemplate, Object> listPushTemplates() {
-	return ApiResponse.buildResults(mongoTemplate.findAll(HSMTemplate.class));
-    }
-
-    @RequestMapping(value = "/api/tmpl/pushtemplate", method = { RequestMethod.DELETE })
-    public ApiResponse<HSMTemplate, Object> deletePushTemplates(@RequestParam String id) {
-	HSMTemplate qr = mongoTemplate.findById(id, HSMTemplate.class);
-	mongoTemplate.trash(qr);
-	return ApiResponse.buildResults(mongoTemplate.findAll(HSMTemplate.class)).data(qr)
-		.message("PushTemplate deleted");
-    }
-
-    @RequestMapping(value = "/api/tmpl/pushtemplate", method = { RequestMethod.POST })
-    public ApiResponse<HSMTemplate, Object> createPushTemplates(@RequestBody HSMTemplate hsmTemplateRequest) {
-
-	HSMTemplate newVersion = new HSMTemplate();
-	if (ArgUtil.is(hsmTemplateRequest.getId())) {
-	    HSMTemplate oldVersion = mongoTemplate.findById(hsmTemplateRequest.getId(), HSMTemplate.class);
-	    if (ArgUtil.is(oldVersion)) {
-		newVersion.oldVersion(oldVersion);
-		newVersion.setId(hsmTemplateRequest.getId());
-	    }
-	}
-	// newVersion.setId(null);
-	newVersion.setCategory(hsmTemplateRequest.getCategory());
-	newVersion.setDesc(hsmTemplateRequest.getDesc());
-
-	newVersion.setCode(hsmTemplateRequest.getCode());
-	newVersion.setContactType(hsmTemplateRequest.getContactType());
-	newVersion.setLang(hsmTemplateRequest.getLang());
-	newVersion.setName(hsmTemplateRequest.getName());
-
-	newVersion.setHeader(hsmTemplateRequest.getHeader());
-	newVersion.setBody(hsmTemplateRequest.getBody());
-	newVersion.setFooter(hsmTemplateRequest.getFooter());
-	newVersion.setTemplate(hsmTemplateRequest.getTemplate());
-
-	newVersion.meta().putAll(hsmTemplateRequest.meta());
-	newVersion.options().putAll(hsmTemplateRequest.options());
-
-	newVersion.setData(hsmTemplateRequest.getData());
-	newVersion.setOldVersions(new ArrayList<HSMTemplate>());
-
-	auditDetailProvider.audit(newVersion);
-	mongoTemplate.save(newVersion);
-
-	return ApiResponse.buildResults(mongoTemplate.findAll(HSMTemplate.class)).data(newVersion)
-		.message("QuickReply created");
-    }
-
     /** for adding quick Tag category e.g flight,train ,etc */
 
     // QuickLabel
