@@ -42,7 +42,13 @@ public class CommonBotController extends ChatController {
 		    reply("Connecting you to one of our customer representatives. Give us a moment.");
 		}
 	    } else {
-		reply("All agents are busy or online, we will connect you whenever someone is available.");
+		PMConfigurationObject noAgentReply = pmEnvironment
+			.keyEntry(ConfigConstants.KEY.POSTMAN_AGENT_CHAT_AUTOREPLY_NOAGENT);
+		if (noAgentReply.exists()) {
+		    reply(new OutboxMessage().templateId(noAgentReply.asString()));
+		} else {
+		    reply("All agents are busy or online, we will connect you whenever someone is available.");
+		}
 	    }
 	} catch (Exception e) {
 	    reply("We are having some issues trying connect you to one of our customer representatives. Please be patient");
