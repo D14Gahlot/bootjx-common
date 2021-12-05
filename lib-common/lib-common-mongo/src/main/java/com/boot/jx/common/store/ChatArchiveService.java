@@ -5,6 +5,8 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Component;
 
 import com.boot.jx.postman.doc.ChatContactDoc;
@@ -39,6 +41,12 @@ public class ChatArchiveService {
 	    ChatUserProfileDoc profileDoc = mongoTemplate.findById(contact.getProfileId(), ChatUserProfileDoc.class);
 	    ChatUserProfileDTO profileDTO = ChatDTOUtil.getProfileDTO(profileDoc);
 	    dto.setProfile(profileDTO);
+	}else if(ArgUtil.is(contact.getPhone())) {
+		Query query =new Query();
+		query.addCriteria(Criteria.where("mobile").is(contact.getPhone()));
+		ChatUserProfileDoc profileDoc = mongoTemplate.findOne(query, ChatUserProfileDoc.class);
+		ChatUserProfileDTO profileDTO = ChatDTOUtil.getProfileDTO(profileDoc);
+		dto.setProfile(profileDTO);
 	}
 	return dto;
     }
