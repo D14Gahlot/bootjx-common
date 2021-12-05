@@ -496,6 +496,12 @@ public class Message<T extends Message<T>> implements Serializable, MessageOptio
 	this.templateId = templateId;
     }
 
+    @SuppressWarnings("unchecked")
+    public T templateId(String templateId) {
+	this.templateId = templateId;
+	return (T) this;
+    }
+    
     public Contactable getContact() {
 	return contact;
     }

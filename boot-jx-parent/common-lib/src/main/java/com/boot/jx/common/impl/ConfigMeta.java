@@ -98,6 +98,7 @@ public class ConfigMeta implements Serializable {
     private CONVERT_TYPE converterType;
 
     private List<ConfigOption> options;
+    private String source;
 
     public ConfigMeta() {
     }
@@ -132,16 +133,22 @@ public class ConfigMeta implements Serializable {
     }
 
     public List<ConfigOption> options() {
+	if (this.inputType == null) {
+	    this.inputType = OPTIONS_TYPE.OPTIONS;
+	}
 	if (this.options == null) {
 	    this.options = new ArrayList<ConfigOption>();
 	}
 	return this.options;
     }
 
+    public ConfigMeta options(String src) {
+	this.options = this.options();
+	this.source = src;
+	return this;
+    }
+
     public ConfigMeta options(ConfigOption... options) {
-	if (this.inputType == null) {
-	    this.inputType = OPTIONS_TYPE.OPTIONS;
-	}
 	this.options = this.options();
 	for (ConfigOption configOption : options) {
 	    this.options.add(configOption);
@@ -150,13 +157,23 @@ public class ConfigMeta implements Serializable {
     }
 
     public ConfigMeta optionValues(Object... optionValues) {
-	if (this.inputType == null) {
-	    this.inputType = OPTIONS_TYPE.OPTIONS;
-	}
 	this.options = this.options();
 	for (Object optionValue : optionValues) {
 	    this.options.add(new ConfigOption(optionValue));
 	}
+	return this;
+    }
+
+    public String getSource() {
+	return source;
+    }
+
+    public void setSource(String src) {
+	this.source = src;
+    }
+
+    public ConfigMeta source(String src) {
+	this.source = src;
 	return this;
     }
 
