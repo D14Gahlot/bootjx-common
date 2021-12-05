@@ -13,10 +13,12 @@ import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
+import com.boot.jx.def.CacheForThis;
 import com.boot.jx.model.AuditableEntity;
 import com.boot.jx.mongo.CommonDocInterfaces.OldDocVersion;
 import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.ITemplates.BasicTemplate;
+import com.boot.utils.ArgUtil;
 
 @Document(collection = HSMTemplate.COLLECTION_NAME)
 @TypeAlias("HSMTemplate")
@@ -43,20 +45,21 @@ public class HSMTemplate implements Serializable, OldDocVersion<HSMTemplate>, Ba
     private String lang;
 
     private String category;
+    private String categoryType;
 
     private String desc;
 
-    //message structure
+    // message structure
+    private String formatType;
     private String header;
     private String body;
     private String footer;
     protected Map<String, Object> options;
     private List<Attachment> attachments;
-    
+
     private String template;
     private Map<String, Object> meta;
     protected Map<String, Object> data;
-    
 
     @Field("oldVersions")
     @Reference
@@ -229,18 +232,40 @@ public class HSMTemplate implements Serializable, OldDocVersion<HSMTemplate>, Ba
     }
 
     public String getBody() {
-        return body;
+	return body;
     }
 
     public void setBody(String body) {
-        this.body = body;
+	this.body = body;
     }
 
     public String getFooter() {
-        return footer;
+	return footer;
     }
 
     public void setFooter(String footer) {
-        this.footer = footer;
+	this.footer = footer;
+    }
+
+    public String getCategoryType() {
+	if (categoryType == null) {
+	    return ArgUtil.parseAsString(this.meta().get("messageType"));
+	}
+	return categoryType;
+    }
+
+    public void setCategoryType(String categoryType) {
+	this.categoryType = categoryType;
+    }
+
+    public String getFormatType() {
+	if (formatType == null) {
+	    return ArgUtil.parseAsString(this.meta().get("contentType"));
+	}
+	return formatType;
+    }
+
+    public void setFormatType(String formatType) {
+	this.formatType = formatType;
     }
 }
