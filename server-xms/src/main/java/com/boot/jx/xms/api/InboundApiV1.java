@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.boot.jx.postman.model.ext.InBoundAction;
 import com.boot.jx.postman.model.ext.InBoundContact;
 import com.boot.jx.postman.model.ext.InBoundMsg;
+import com.boot.jx.postman.model.ext.InBoundWrapper;
 import com.boot.jx.xms.XmsConstants.ApiCallbacktParams;
 import com.boot.jx.xms.dto.ContactInfoUpdate;
 
@@ -21,7 +22,7 @@ public class InboundApiV1 {
     @ResponseBody
     @ApiCallbacktParams
     @RequestMapping(value = "/api/v1/message/receive", method = { RequestMethod.POST })
-    public InBoundMsg onMessageCallback(@RequestBody InBoundMsg inboxMessage) {
+    public InBoundMsg onMessageCallback(@RequestBody InBoundWrapper inboxMessage) {
 	return new InBoundMsg();
     }
 
