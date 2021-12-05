@@ -54,10 +54,10 @@ public class ConfigConstants {
 		.defaultValue(PMConstants.ASSIGNMENT_RULE.ROUND_ROBIN)),
 
 	POSTMAN_AGENT_CHAT_AUTOREPLY_TALK2AGENT(new ConfigMeta("Message to customer while chat is transferred to agent",
-		"postman.agent.chat.autoreply.talk2agent").options("getx:/api/tmpl/pushtemplate")),
+		"postman.agent.chat.autoreply.talk2agent").options("getx:/api/tmpl/hsm")),
 
 	POSTMAN_AGENT_CHAT_AUTOREPLY_RESOLVED(new ConfigMeta("Message to customer when chat is resolevd by agent",
-		"postman.agent.chat.autoreply.resolved").options("getx:/api/tmpl/pushtemplate")),
+		"postman.agent.chat.autoreply.resolved").options("getx:/api/tmpl/hsm")),
 
 	POSTMAN_AGENT_CHAT_STICKYSESSION(
 		new ConfigMeta("Sticky Session", "postman.agent.chat.stickysession")
