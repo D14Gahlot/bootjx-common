@@ -37,7 +37,8 @@ public class TmplHSMController {
     @RequestMapping(value = "/api/tmpl/hsm/link", method = { RequestMethod.POST })
     public ApiResponse<HSMTemplate3rdParty, Object> linkWabaTemplates(@RequestParam String templateId,
 	    @RequestParam String hsmTemplateId) {
-	return new ApiResponse<HSMTemplate3rdParty, Object>().data(thirdPartyTmplManager.link(templateId, hsmTemplateId));
+	return new ApiResponse<HSMTemplate3rdParty, Object>()
+		.data(thirdPartyTmplManager.link(templateId, hsmTemplateId));
     }
 
     @RequestMapping(value = "/api/tmpl/hsm/map_vars", method = { RequestMethod.POST })
@@ -59,15 +60,25 @@ public class TmplHSMController {
     }
 
     @RequestMapping(value = "/api/tmpl/hsm/waba_templates", method = { RequestMethod.POST })
-    public ApiResponse<HSMTemplate3rdParty, Object> createWabaTemplates(@RequestParam String channelId,
-	    @RequestBody Map<String, Object> templateStructure, @RequestParam(required = false) String hsmTemplateId) {
-	ChannelConfig channelConfig = pmEnvironment.config().channels(channelId);
-	HSMTemplate3rdParty temp = thirdPartyTmplManager.createhWA360Templates(channelConfig, templateStructure);
-	if (ArgUtil.is(hsmTemplateId)) {
-	    thirdPartyTmplManager.link(temp.getId(), hsmTemplateId);
+    public ApiResponse<HSMTemplate3rdParty, Object> createWabaTemplates(@RequestBody HSMTemplate3rdParty extTemplate) {
+	ChannelConfig channelConfig = pmEnvironment.config().channels(extTemplate.getChannelId());
+
+	if (ArgUtil.is(extTemplate.getTemplate())) {
+	    HSMTemplate3rdParty createTemplate = thirdPartyTmplManager.createhWA360Templates(channelConfig,
+		    extTemplate.getTemplate());
+	    extTemplate.setId(createTemplate.getId());
+	    thirdPartyTmplManager.refreshWA360Templates(channelConfig);
 	}
-	thirdPartyTmplManager.refreshWA360Templates(channelConfig);
+
+	HSMTemplate3rdParty temp = null;
+	if (ArgUtil.is(extTemplate.getId())) {
+	    temp = mongoTemplate.findById(extTemplate.getId(), HSMTemplate3rdParty.class);
+	    if (ArgUtil.is(extTemplate.getHsmTemplateId())) {
+		thirdPartyTmplManager.link(temp.getId(), extTemplate.getHsmTemplateId());
+	    }
+	}
 	return new ApiResponse<HSMTemplate3rdParty, Object>().result(temp).message("Template submitted to waba");
+
     }
 
     // HSMTemplate
