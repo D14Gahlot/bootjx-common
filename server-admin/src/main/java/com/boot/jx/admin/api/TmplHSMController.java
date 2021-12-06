@@ -81,7 +81,7 @@ public class TmplHSMController {
 	    HSMTemplate3rdParty createTemplate = thirdPartyTmplManager.createhWA360Templates(channelConfig,
 		    extTemplate.getTemplate());
 	    extTemplate.setId(createTemplate.getId());
-	    //thirdPartyTmplManager.refreshWA360Templates(channelConfig);
+	    thirdPartyTmplManager.refreshWA360Templates(channelConfig);
 	}
 
 	if (ArgUtil.is(extTemplate.getId())) {
