@@ -59,7 +59,7 @@ public class HSMTemplate implements Serializable, OldDocVersion<HSMTemplate>, Ba
 
     private String template;
     private Map<String, Object> meta;
-    protected Map<String, Object> data;
+    protected Map<String, Object> model;
 
     @Field("oldVersions")
     @Reference
@@ -169,14 +169,6 @@ public class HSMTemplate implements Serializable, OldDocVersion<HSMTemplate>, Ba
 	this.createdStamp = createdStamp;
     }
 
-    public Map<String, Object> getData() {
-	return data;
-    }
-
-    public void setData(Map<String, Object> data) {
-	this.data = data;
-    }
-
     public String getHeader() {
 	return header;
     }
@@ -267,5 +259,13 @@ public class HSMTemplate implements Serializable, OldDocVersion<HSMTemplate>, Ba
 
     public void setFormatType(String formatType) {
 	this.formatType = formatType;
+    }
+
+    public Map<String, Object> getModel() {
+	return model;
+    }
+
+    public void setModel(Map<String, Object> model) {
+	this.model = model;
     }
 }
