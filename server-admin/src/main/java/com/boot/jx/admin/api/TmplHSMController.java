@@ -18,6 +18,7 @@ import com.boot.jx.postman.doc.HSMTemplate3rdParty;
 import com.boot.jx.postman.manager.ThirdPartyTemplateManager;
 import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.Constants;
 
 @RestController
 public class TmplHSMController {
@@ -63,18 +64,33 @@ public class TmplHSMController {
     public ApiResponse<HSMTemplate3rdParty, Object> createWabaTemplates(@RequestBody HSMTemplate3rdParty extTemplate) {
 	ChannelConfig channelConfig = pmEnvironment.config().channels(extTemplate.getChannelId());
 
-	if (ArgUtil.is(extTemplate.getTemplate())) {
+	HSMTemplate3rdParty temp = null;
+	boolean editable = true;
+	if (ArgUtil.is(extTemplate.getId())) {
+	    temp = mongoTemplate.findById(extTemplate.getId(), HSMTemplate3rdParty.class);
+	    if (ArgUtil.is(temp)) {
+		String status = ArgUtil.parseAsString(temp.getTemplate().get("status"), Constants.BLANK);
+		if ("approved".equalsIgnoreCase(status) || "pending".equalsIgnoreCase(status)
+			|| "submitted".equalsIgnoreCase(status)) {
+		    editable = false;
+		}
+	    }
+	}
+
+	if (editable && ArgUtil.is(extTemplate.getTemplate())) {
 	    HSMTemplate3rdParty createTemplate = thirdPartyTmplManager.createhWA360Templates(channelConfig,
 		    extTemplate.getTemplate());
 	    extTemplate.setId(createTemplate.getId());
-	    thirdPartyTmplManager.refreshWA360Templates(channelConfig);
+	    //thirdPartyTmplManager.refreshWA360Templates(channelConfig);
 	}
 
-	HSMTemplate3rdParty temp = null;
 	if (ArgUtil.is(extTemplate.getId())) {
 	    temp = mongoTemplate.findById(extTemplate.getId(), HSMTemplate3rdParty.class);
 	    if (ArgUtil.is(extTemplate.getHsmTemplateId())) {
 		thirdPartyTmplManager.link(temp.getId(), extTemplate.getHsmTemplateId());
+	    }
+	    if (ArgUtil.is(extTemplate.getVarMap())) {
+		 thirdPartyTmplManager.varMap(temp.getId(), extTemplate.getVarMap());
 	    }
 	}
 	return new ApiResponse<HSMTemplate3rdParty, Object>().result(temp).message("Template submitted to waba");
