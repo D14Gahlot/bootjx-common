@@ -26,7 +26,7 @@ public class TmplHSMController {
     private PMEnvironment pmEnvironment;
 
     @Autowired
-    private ThirdPartyTemplateManager templateManager;
+    private ThirdPartyTemplateManager thirdPartyTmplManager;
 
     @Autowired
     private CommonMongoTemplate mongoTemplate;
@@ -37,13 +37,13 @@ public class TmplHSMController {
     @RequestMapping(value = "/api/tmpl/hsm/link", method = { RequestMethod.POST })
     public ApiResponse<HSMTemplate3rdParty, Object> linkWabaTemplates(@RequestParam String templateId,
 	    @RequestParam String hsmTemplateId) {
-	return new ApiResponse<HSMTemplate3rdParty, Object>().data(templateManager.link(templateId, hsmTemplateId));
+	return new ApiResponse<HSMTemplate3rdParty, Object>().data(thirdPartyTmplManager.link(templateId, hsmTemplateId));
     }
 
     @RequestMapping(value = "/api/tmpl/hsm/map_vars", method = { RequestMethod.POST })
     public ApiResponse<HSMTemplate3rdParty, Object> mapVars(@RequestParam String templateId,
 	    @RequestParam Map<String, Object> varMap) {
-	return new ApiResponse<HSMTemplate3rdParty, Object>().data(templateManager.varMap(templateId, varMap));
+	return new ApiResponse<HSMTemplate3rdParty, Object>().data(thirdPartyTmplManager.varMap(templateId, varMap));
     }
 
     @RequestMapping(value = "/api/tmpl/hsm/waba_templates", method = { RequestMethod.GET })
@@ -52,18 +52,21 @@ public class TmplHSMController {
 	    @RequestParam(required = false, defaultValue = "false") boolean sync) {
 	ChannelConfig channelConfig = pmEnvironment.config().channels(channelId);
 	if (sync) {
-	    templateManager.refreshWA360Templates(channelConfig);
+	    thirdPartyTmplManager.refreshWA360Templates(channelConfig);
 	}
 	return new ApiResponse<HSMTemplate3rdParty, Object>()
-		.results(templateManager.getTemplates(channelConfig, templateCode));
+		.results(thirdPartyTmplManager.getTemplates(channelConfig, templateCode));
     }
 
     @RequestMapping(value = "/api/tmpl/hsm/waba_templates", method = { RequestMethod.POST })
     public ApiResponse<HSMTemplate3rdParty, Object> createWabaTemplates(@RequestParam String channelId,
-	    @RequestBody Map<String, Object> templateStructure) {
+	    @RequestBody Map<String, Object> templateStructure, @RequestParam(required = false) String hsmTemplateId) {
 	ChannelConfig channelConfig = pmEnvironment.config().channels(channelId);
-	HSMTemplate3rdParty temp = templateManager.createhWA360Templates(channelConfig, templateStructure);
-	templateManager.refreshWA360Templates(channelConfig);
+	HSMTemplate3rdParty temp = thirdPartyTmplManager.createhWA360Templates(channelConfig, templateStructure);
+	if (ArgUtil.is(hsmTemplateId)) {
+	    thirdPartyTmplManager.link(temp.getId(), hsmTemplateId);
+	}
+	thirdPartyTmplManager.refreshWA360Templates(channelConfig);
 	return new ApiResponse<HSMTemplate3rdParty, Object>().result(temp).message("Template submitted to waba");
     }
 
