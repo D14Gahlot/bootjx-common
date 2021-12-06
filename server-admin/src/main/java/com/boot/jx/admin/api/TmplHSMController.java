@@ -45,15 +45,15 @@ public class TmplHSMController {
 
     @RequestMapping(value = "/api/tmpl/hsm/map_vars", method = { RequestMethod.POST })
     public ApiResponse<HSMTemplate3rdParty, Object> mapVars(@RequestParam String templateId,
-	    @RequestParam Map<String, Object> varMap) {
+	    @RequestBody Map<String, Object> varMap) {
 	return new ApiResponse<HSMTemplate3rdParty, Object>().data(thirdPartyTmplManager.varMap(templateId, varMap));
     }
 
     @RequestMapping(value = "/api/tmpl/hsm/meta", method = { RequestMethod.POST })
     public ApiResponse<HSMTemplate, Object> updateHsmMeta(@RequestParam String templateId,
-	    @RequestParam Map<String, Object> newMata) {
+	    @RequestBody Map<String, Object> newMata) {
 	HSMTemplate template = mongoTemplate.findById(templateId, HSMTemplate.class);
-	if (ArgUtil.is(templateId)) {
+	if (ArgUtil.is(template)) {
 	    template.meta().putAll(newMata);
 	    mongoTemplate.save(template);
 	}
