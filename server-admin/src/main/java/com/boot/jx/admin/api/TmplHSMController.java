@@ -1,6 +1,7 @@
 package com.boot.jx.admin.api;
 
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -48,6 +49,17 @@ public class TmplHSMController {
 	return new ApiResponse<HSMTemplate3rdParty, Object>().data(thirdPartyTmplManager.varMap(templateId, varMap));
     }
 
+    @RequestMapping(value = "/api/tmpl/hsm/meta", method = { RequestMethod.POST })
+    public ApiResponse<HSMTemplate, Object> updateHsmMeta(@RequestParam String templateId,
+	    @RequestParam Map<String, Object> newMata) {
+	HSMTemplate template = mongoTemplate.findById(templateId, HSMTemplate.class);
+	if (ArgUtil.is(templateId)) {
+	    template.meta().putAll(newMata);
+	    mongoTemplate.save(template);
+	}
+	return new ApiResponse<HSMTemplate, Object>().result(template);
+    }
+
     @RequestMapping(value = "/api/tmpl/hsm/waba_templates", method = { RequestMethod.GET })
     public ApiResponse<HSMTemplate3rdParty, Object> listWabaTemplates(@RequestParam String channelId,
 	    @RequestParam(required = false) String templateCode,
@@ -90,7 +102,7 @@ public class TmplHSMController {
 		thirdPartyTmplManager.link(temp.getId(), extTemplate.getHsmTemplateId());
 	    }
 	    if (ArgUtil.is(extTemplate.getVarMap())) {
-		 thirdPartyTmplManager.varMap(temp.getId(), extTemplate.getVarMap());
+		thirdPartyTmplManager.varMap(temp.getId(), extTemplate.getVarMap());
 	    }
 	}
 	return new ApiResponse<HSMTemplate3rdParty, Object>().result(temp).message("Template submitted to waba");
