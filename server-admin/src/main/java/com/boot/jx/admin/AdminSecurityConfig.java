@@ -26,8 +26,11 @@ public class AdminSecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
 	http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
 		// Publics Calls
-		.and().authorizeRequests().antMatchers("/pub/**").permitAll().and().authorizeRequests()
-		.antMatchers("/swagger-ui.html").permitAll()
+		.and().authorizeRequests().antMatchers("/pub/**").permitAll() // Public URLs
+		.and().authorizeRequests().antMatchers("/ext/**").permitAll() // External URLS
+		.and().authorizeRequests().antMatchers("/int/**").permitAll() //Internal URLs
+		.and().authorizeRequests().antMatchers("/stomp-tunnel/**").permitAll() //Stomp Calls
+		.and().authorizeRequests().antMatchers("/swagger-ui.html").permitAll() //Swagger UI
 		// Login Calls
 		.and().authorizeRequests().antMatchers("/auth/**").permitAll()
 		// API Calls

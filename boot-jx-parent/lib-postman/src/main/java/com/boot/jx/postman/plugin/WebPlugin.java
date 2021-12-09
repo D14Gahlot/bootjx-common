@@ -57,12 +57,12 @@ public class WebPlugin implements ChannelPlugin<WebConfigDetails> {
     }
 
     @Override
-    public WebConfigDetails getChannelDetails() {
+    public WebConfigDetails newChannelDetails() {
 	return new WebConfigDetails();
     }
 
     @Override
-    public void extractChannelDetailsFromMap(WebConfigDetails channelDetails, MapModel map) {
+    public void importChannelDetailsFromMap(WebConfigDetails channelDetails, MapModel map) {
 	// TODO Auto-generated method stub
     }
 

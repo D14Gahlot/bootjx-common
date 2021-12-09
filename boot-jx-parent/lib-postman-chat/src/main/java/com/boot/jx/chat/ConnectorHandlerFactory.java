@@ -129,7 +129,7 @@ public class ConnectorHandlerFactory extends ScopedBeanFactory<String, Connector
 
 	void onSend(ChannelConfig channelConfig, ChatContactDoc chatContactDoc, OutboxMessage outboxMessage);
 
-	default void registerWebHook(ChannelConfig channelConfig) {
+	default void onChannelUpdate(ChannelConfig channelConfig) {
 	    LOGGER.error("WEBHOOK REGISTRATION NOT FOUND ");
 	}
 
@@ -258,17 +258,21 @@ public class ConnectorHandlerFactory extends ScopedBeanFactory<String, Connector
      * @param channelType
      * @param lane
      */
-    public void registerWebHook(String channelType, String lane) {
+    public void onChannelUpdate(String channelType, String lane) {
 	String channelId = PostManUtil.CHANNEL_ID(channelType, lane);
 	PMConfiguration config = environment.config();
 	ChannelConfig channelConfig = config.channels(channelId);
-	registerWebHook(channelConfig);
+	onChannelUpdate(channelConfig);
     }
 
-    public void registerWebHook(ChannelConfig channelConfig) {
+    public void onChannelUpdate(ChannelConfig channelConfig) {
 	ConnectorHandler connector = get(channelConfig.getContactType(), channelConfig.getChannelType());
 	if (ArgUtil.is(connector)) {
-	    connector.registerWebHook(channelConfig);
+	    try {
+		connector.onChannelUpdate(channelConfig);
+	    } catch (Exception e) {
+		LOGGER.error("error onChannelUpdate " + channelConfig,e);
+	    }
 	}
     }
 

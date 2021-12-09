@@ -12,7 +12,7 @@ import com.boot.model.MapModel;
 public class FacebookPlugin implements ChannelPlugin<FacebookConfigDetails> {
 
     @Override
-    public FacebookConfigDetails getChannelDetails() {
+    public FacebookConfigDetails newChannelDetails() {
 	return new FacebookConfigDetails();
     }
 
@@ -47,7 +47,7 @@ public class FacebookPlugin implements ChannelPlugin<FacebookConfigDetails> {
     }
 
     @Override
-    public void extractChannelDetailsFromMap(FacebookConfigDetails channelDetails, MapModel map) {
+    public void importChannelDetailsFromMap(FacebookConfigDetails channelDetails, MapModel map) {
 	channelDetails.setPageId(map.pathEntry("facebook.pageId").asString(channelDetails.getPageId()));
 	channelDetails.setHandler(map.pathEntry("facebook.handler").asString(channelDetails.getHandler()));
 	channelDetails.setType(map.pathEntry("facebook.type").asString(channelDetails.getType()));
