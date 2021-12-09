@@ -161,7 +161,7 @@ public class PostManUtil {
 	if (CHANNEL_TYPE.WA_GUPSHUP_LEGACY.equals(chanelType)) {
 	    chanelType = CHANNEL_TYPE.WA_GUPSHUP;
 	}
-	return String.format("%s:%s", chanelType, lane);
+	return String.format("%s:%s", chanelType, lane).toLowerCase();
     }
 
     public static String CHANNEL_ID(Contactable contactable) {

@@ -62,12 +62,12 @@ public class ConfigOptionMetaController {
 
     @RequestMapping(value = "/api/meta/channel_types", method = { RequestMethod.GET })
     public ApiResponse<AChannelDetails, Object> channel() {
-	return ApiResponse.buildResults(new ArrayList<AChannelDetails>(ChannelPluginProvider.DETAILS.values()));
+	return ApiResponse.buildResults(new ArrayList<AChannelDetails>(ChannelPluginProvider.DETAILS_MAPPING.values()));
     }
 
     @RequestMapping(value = "/api/meta/channel_configs/{channelType}", method = { RequestMethod.GET })
     public ApiResponse<ConfigMeta, Object> channelConfig(@PathVariable CHANNEL_TYPE_ENUM channelType) {
-	ChannelPlugin<? extends AChannelDetails> plugin = ChannelPluginProvider.MAP.get(channelType.toString());
+	ChannelPlugin<? extends AChannelDetails> plugin = ChannelPluginProvider.PLUGIN_MAPPING.get(channelType.toString());
 	List<ConfigMeta> configs = plugin.listConfigMeta(pmEnvironment);
 	return ApiResponse.buildResults(configs);
     }

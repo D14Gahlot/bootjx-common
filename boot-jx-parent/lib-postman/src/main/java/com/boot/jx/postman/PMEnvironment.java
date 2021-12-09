@@ -160,7 +160,7 @@ public class PMEnvironment {
 	}
 
 	public String getChannelId() {
-	    return String.format("%s:%s", this.getChannelType(), this.getLane());
+	    return String.format("%s:%s", this.getChannelType(), this.getLane()).toLowerCase();
 	}
 
 	public String toString() {

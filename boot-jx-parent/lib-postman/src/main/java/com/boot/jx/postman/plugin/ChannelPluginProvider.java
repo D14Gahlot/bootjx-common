@@ -20,15 +20,11 @@ public class ChannelPluginProvider {
 	 * 
 	 * @return new instance of {@link AChannelDetails}
 	 */
-	public C getChannelDetails();
+	public C newChannelDetails();
 
 	@SuppressWarnings("unchecked")
 	default public C getChannelDetails(AChannelDetails channelDetails) {
 	    return (C) channelDetails;
-	}
-
-	public default String getChannelType() {
-	    return this.getChannelDetails().getChannelType();
 	}
 
 	@Deprecated
@@ -80,33 +76,28 @@ public class ChannelPluginProvider {
 	    return list;
 	}
 
-	void extractChannelDetailsFromMap(C channelDetails, MapModel map);
+	void importChannelDetailsFromMap(C channelDetails, MapModel map);
 
 	@SuppressWarnings("unchecked")
-	default void extractChannelDetailsFromMap(AChannelDetails channelDetails, MapModel map, String channelType) {
-	    extractChannelDetailsFromMap((C) channelDetails, map);
-	}
-
-	public default C getChannelDetailsFromMap(MapModel map) {
-	    C channelDetails = getChannelDetails();
-	    extractChannelDetailsFromMap(channelDetails, map);
-	    return channelDetails;
+	default void importChannelDetailsFromMap(AChannelDetails channelDetails, MapModel map, String channelType) {
+	    importChannelDetailsFromMap((C) channelDetails, map);
 	}
 
     }
 
-    public static final Map<String, ChannelPlugin<? extends AChannelDetails>> MAP = new HashMap<String, ChannelPlugin<? extends AChannelDetails>>();
-    public static final Map<String, AChannelDetails> DETAILS = new HashMap<String, AChannelDetails>();
+    public static final Map<String, ChannelPlugin<? extends AChannelDetails>> PLUGIN_MAPPING = new HashMap<String, ChannelPlugin<? extends AChannelDetails>>();
+    public static final Map<String, AChannelDetails> DETAILS_MAPPING = new HashMap<String, AChannelDetails>();
 
     public static final WebPlugin WEB = new WebPlugin();
 
     public static <C extends AChannelDetails> void register(ChannelPlugin<C> channelPlugin) {
-	DETAILS.put(channelPlugin.getChannelType(), channelPlugin.getChannelDetails());
-	MAP.put(channelPlugin.getChannelType(), channelPlugin);
+	C details = channelPlugin.newChannelDetails();
+	DETAILS_MAPPING.put(details.getChannelType(), channelPlugin.newChannelDetails());
+	PLUGIN_MAPPING.put(details.getChannelType(), channelPlugin);
     }
 
     public ChannelPlugin<? extends AChannelDetails> get(String channelType) {
-	return MAP.getOrDefault(channelType, WEB);
+	return PLUGIN_MAPPING.getOrDefault(channelType, WEB);
     }
 
     public static final FacebookPlugin FACEBOOK = new FacebookPlugin();

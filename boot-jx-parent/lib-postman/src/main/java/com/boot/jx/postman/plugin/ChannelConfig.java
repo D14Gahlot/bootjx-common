@@ -5,9 +5,9 @@ import com.boot.jx.postman.PMEnvironment.AChannelDetails;
 import com.boot.jx.postman.fb.FacebookConfigDetails;
 import com.boot.jx.postman.gupshup.GupShupConfigDetails;
 import com.boot.jx.postman.ig.InstagramConfig;
+import com.boot.jx.postman.plugin.TwitterPlugin.TwitterConfigDetails;
 import com.boot.jx.postman.plugin.WebPlugin.WebConfigDetails;
 import com.boot.jx.postman.tg.TelegramConfigDetails;
-import com.boot.jx.postman.tw.TwitterConfigDetails;
 import com.boot.jx.postman.wa360.WA360ConfigDetails;
 import com.boot.utils.ArgUtil;
 

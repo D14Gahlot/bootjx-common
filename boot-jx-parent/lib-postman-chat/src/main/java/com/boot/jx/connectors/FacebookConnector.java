@@ -43,7 +43,7 @@ public class FacebookConnector extends AbstractConnector<FacebookConfigDetails, 
     private FacebooClient facebooClient;
 
     @Override
-    public void registerWebHook(ChannelConfig channelConfig) {
+    public void onChannelUpdate(ChannelConfig channelConfig) {
 	ApiResponseUtil.addWarning("Set webhook URL manually from Facebook Developer Portal.");
     }
 
@@ -67,7 +67,8 @@ public class FacebookConnector extends AbstractConnector<FacebookConfigDetails, 
 
     @Override
     public boolean initSession(ChatSessionDoc session, InboxMessage inboxMessage) {
-	FacebookUserProfile profile = facebooClient.getUserProfile(inboxMessage.contact());
+	ChannelConfig config = getChannelConfig(inboxMessage);
+	FacebookUserProfile profile = facebooClient.getUserProfile(config, inboxMessage.contact());
 	ChatContactQuery contactQuery = messageContext.getChatContactQuery();
 	contactQuery.setProfilePic(profile.getProfilePic());
 	contactQuery.setName(profile.getFirstName() + " " + profile.getLastName());
