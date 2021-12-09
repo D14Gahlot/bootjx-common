@@ -154,11 +154,11 @@ public class TwitterClient implements MessageClient {
 
 		if (options.list().size() > 0) {
 		    reqMessage.put(OutBoundPaths.QUICK_REPLY_TYPE, "options");
-		    reqMessage.put(OutBoundPaths.QUICK_REPLY_OPTIONS, options);
+		    reqMessage.put(OutBoundPaths.QUICK_REPLY_OPTIONS, options.list());
 		}
 
 		if (ctas.list().size() > 0) {
-		    reqMessage.put(OutBoundPaths.MESSAGE_CTA, ctas);
+		    reqMessage.put(OutBoundPaths.MESSAGE_CTA, ctas.list());
 		}
 
 	    }
