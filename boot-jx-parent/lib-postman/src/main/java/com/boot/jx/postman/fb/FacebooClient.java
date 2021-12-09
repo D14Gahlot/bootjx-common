@@ -11,11 +11,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpStatusCodeException;
 
 import com.boot.jx.dict.FileType;
-import com.boot.jx.exception.AmxException;
 import com.boot.jx.exception.ApiHttpExceptions.ApiHttpException;
-import com.boot.jx.postman.PMConstants.CHANNEL_TYPE;
 import com.boot.jx.postman.PMEnvironment;
-import com.boot.jx.postman.PostManException;
 import com.boot.jx.postman.PostmanPackages.MessageClient;
 import com.boot.jx.postman.client.ExtUtilService;
 import com.boot.jx.postman.model.Attachment;
@@ -23,7 +20,6 @@ import com.boot.jx.postman.model.MessageDefinitions.Contactable;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.rest.RestService;
-import com.boot.jx.utils.PostManUtil;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
 import com.boot.utils.JsonUtil;
@@ -45,33 +41,8 @@ public class FacebooClient implements MessageClient {
     @Autowired
     private ExtUtilService extUtilService;
 
-    private FacebookConfigDetails getConfig(String lane, String channelId) {
-	if (ArgUtil.isEmpty(channelId)) {
-	    if (ArgUtil.isEmpty(lane)) {
-		throw new PostManException("No lane " + lane);
-	    } else {
-		channelId = PostManUtil.CHANNEL_ID(CHANNEL_TYPE.FACEBOOK, lane);
-	    }
-	}
-	ChannelConfig config = environment.config().channels(channelId);
-
-	if (!ArgUtil.is(config)) {
-	    throw new PostManException("No Config for " + channelId);
-	}
-
-	if (!ArgUtil.is(config.getFacebook())) {
-	    throw new PostManException("No Facebook Config for " + channelId);
-	}
-
-	return config.getFacebook();
-    }
-
-    private FacebookConfigDetails getConfig(Contactable contact) {
-	return getConfig(null, PostManUtil.CHANNEL_ID(contact));
-    }
-
-    public String registerWebhook(String token, String challenge, String lane, String channelId) {
-	FacebookConfigDetails config = getConfig(lane, channelId);
+    public String registerWebhook(ChannelConfig channelConfig, String token, String challenge) {
+	FacebookConfigDetails config = channelConfig.getFacebook();
 	String verifyToken = config.getVerifyToken();
 	if (token != null && !token.isEmpty() && token.equals(verifyToken)) {
 	    return challenge;
@@ -80,27 +51,18 @@ public class FacebooClient implements MessageClient {
 	}
     }
 
-    public FacebookMessageResp sendReply(String lane, FacebookMessageRequest resp) {
-	FacebookConfigDetails config = getConfig(lane, null);
-	return restService.ajax("https://graph.facebook.com/v2.6/me/messages?access_token=" + config.getAccessToken())
+    public FacebookMessageResp sendReply(ChannelConfig channelConfig, FacebookMessageRequest resp) {
+	return restService
+		.ajax("https://graph.facebook.com/v2.6/me/messages?access_token="
+			+ channelConfig.getFacebook().getAccessToken())
 		.post(resp).as(new ParameterizedTypeReference<FacebookMessageResp>() {
 		});
     }
 
-    public FacebookMessageResp sendReply(String id, String text, String lane) {
-	FacebookMessageRequest response = new FacebookMessageRequest();
-	response.messageType("text");
-	response.recipientId(id);
-	response.messageText(text);
-	return sendReply(lane, response);
-    }
-
-    public FacebookUserProfile getUserProfile(Contactable contact) {
-	FacebookConfigDetails config = getConfig(contact);
+    public FacebookUserProfile getUserProfile(ChannelConfig config, Contactable contact) {
 	return restService.ajax("https://graph.facebook.com").path("/{psid}").pathParam("psid", contact.getCsid())
 		.queryParam("fields", "first_name,last_name,profile_pic,email,id")
-		.queryParam("access_token", config.getAccessToken()).get().as(FacebookUserProfile.class);
-
+		.queryParam("access_token", config.getFacebook().getAccessToken()).get().as(FacebookUserProfile.class);
     }
 
     @Override
@@ -126,7 +88,7 @@ public class FacebooClient implements MessageClient {
 			    // req.attachmentType("file").attachmentUrl(attachment.getMediaURL());
 			}
 		    }
-		    resp = sendReply(lane, req);
+		    resp = sendReply(channelConfig, req);
 		    msgIds.add(ArgUtil.parseAsString(resp.getMessageId()));
 		}
 	    }
@@ -136,7 +98,7 @@ public class FacebooClient implements MessageClient {
 		req.recipientId(to);
 		req.messageType("text");
 		req.messageText(outboxMessage.getMessage());
-		resp = sendReply(lane, req);
+		resp = sendReply(channelConfig, req);
 		if (ArgUtil.is(resp.getMessageId()))
 		    msgIds.add(ArgUtil.parseAsString(resp.getMessageId()));
 	    }

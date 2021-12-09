@@ -12,10 +12,10 @@ import com.boot.jx.postman.PMEnvironment.AChannelDetails;
 import com.boot.jx.postman.PMEnvironment.PMConfigurationObject;
 import com.boot.jx.postman.fb.FacebookConfigDetails;
 import com.boot.jx.postman.gupshup.GupShupConfigDetails;
-import com.boot.jx.postman.plugin.ChannelConfig;
-import com.boot.jx.postman.tg.TelegramConfigDetails;
-import com.boot.jx.postman.tw.TwitterConfigDetails;
 import com.boot.jx.postman.ig.InstagramConfig;
+import com.boot.jx.postman.plugin.ChannelConfig;
+import com.boot.jx.postman.plugin.TwitterPlugin.TwitterConfigDetails;
+import com.boot.jx.postman.tg.TelegramConfigDetails;
 import com.boot.model.SafeKeyHashMap;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.Random;
@@ -28,7 +28,7 @@ public class PMConfiguration implements Serializable {
     private Map<String, TwitterConfigDetails> twitter;
     private Map<String, TelegramConfigDetails> telegram;
     private Map<String, GupShupConfigDetails> gupshup;
-    private Map<String,InstagramConfig> instagram;
+    private Map<String, InstagramConfig> instagram;
 
     private Map<String, ChannelConfig> channels;
     private Map<String, ClientApiKey> clientApiKeys;
@@ -65,36 +65,34 @@ public class PMConfiguration implements Serializable {
 	    this.facebook().put(config.getPageId(), config);
 	return this;
     }
-    
 
-    //INSTAGRAM
+    // INSTAGRAM
     public SafeKeyHashMap<InstagramConfig> instagram() {
-    	if (ArgUtil.isEmpty(instagram)) {
-    		instagram = new HashMap<String, InstagramConfig>();
-    	}
-    	return new SafeKeyHashMap<InstagramConfig>(instagram);
-        }
+	if (ArgUtil.isEmpty(instagram)) {
+	    instagram = new HashMap<String, InstagramConfig>();
+	}
+	return new SafeKeyHashMap<InstagramConfig>(instagram);
+    }
 
     public InstagramConfig instagram(String pageId) {
-		return instagram().get(pageId);
-	    }
+	return instagram().get(pageId);
+    }
+
     public Map<String, InstagramConfig> getInstagram() {
-		return instagram;
-	}
+	return instagram;
+    }
 
-	public void setInstagram(Map<String, InstagramConfig> instagram) {
-		this.instagram = instagram;
-	}
+    public void setInstagram(Map<String, InstagramConfig> instagram) {
+	this.instagram = instagram;
+    }
 
-	public PMConfiguration instagram(InstagramConfig config,boolean disbaled) {
-		if (disbaled) {
-		    this.telegram().remove(config.getPageId());
-		} else
-		    this.instagram().put(config.getPageId(), config);
-		return this;
-	}
-
-
+    public PMConfiguration instagram(InstagramConfig config, boolean disbaled) {
+	if (disbaled) {
+	    this.telegram().remove(config.getPageId());
+	} else
+	    this.instagram().put(config.getPageId(), config);
+	return this;
+    }
 
     // TWITTER
     public SafeKeyHashMap<TwitterConfigDetails> twitter() {

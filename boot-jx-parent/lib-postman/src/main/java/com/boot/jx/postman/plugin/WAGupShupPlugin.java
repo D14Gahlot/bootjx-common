@@ -32,7 +32,7 @@ public class WAGupShupPlugin implements ChannelPlugin<GupShupConfigDetails> {
     }
 
     @Override
-    public GupShupConfigDetails getChannelDetails() {
+    public GupShupConfigDetails newChannelDetails() {
 	return new GupShupConfigDetails();
     }
 
@@ -46,7 +46,7 @@ public class WAGupShupPlugin implements ChannelPlugin<GupShupConfigDetails> {
     }
 
     @Override
-    public void extractChannelDetailsFromMap(GupShupConfigDetails channelDetails, MapModel map) {
+    public void importChannelDetailsFromMap(GupShupConfigDetails channelDetails, MapModel map) {
 	channelDetails.setNumber(map.pathEntry("gupshup.number").asString(channelDetails.getNumber()));
 	channelDetails.setChatId(map.pathEntry("gupshup.chatId").asString(channelDetails.getChatId()));
 	channelDetails.setChatPass(map.pathEntry("gupshup.chatPass").asString(channelDetails.getChatPass()));

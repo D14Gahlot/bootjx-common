@@ -17,10 +17,13 @@ import com.boot.jx.model.AuditableEntity;
 import com.boot.jx.mongo.CommonDocInterfaces.OldDocVersion;
 import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.ITemplates.BasicTemplate;
+import com.boot.jx.postman.model.ResourceMeta;
+import com.boot.utils.ArgUtil;
 
 @Document(collection = HSMTemplate.COLLECTION_NAME)
 @TypeAlias("HSMTemplate")
-public class HSMTemplate implements Serializable, OldDocVersion<HSMTemplate>, BasicTemplate, AuditableEntity {
+public class HSMTemplate
+	implements Serializable, OldDocVersion<HSMTemplate>, BasicTemplate, AuditableEntity, ResourceMeta {
 
     public static final String COLLECTION_NAME = "DICT_HSM_TEMPLATES";
     public static final String COLLECTION_NAME_TRASH = "TRASH_DICT_HSM_TEMPLATES";
@@ -43,20 +46,21 @@ public class HSMTemplate implements Serializable, OldDocVersion<HSMTemplate>, Ba
     private String lang;
 
     private String category;
+    private String categoryType;
 
     private String desc;
 
-    //message structure
+    // message structure
+    private String formatType;
     private String header;
     private String body;
     private String footer;
     protected Map<String, Object> options;
     private List<Attachment> attachments;
-    
+
     private String template;
     private Map<String, Object> meta;
-    protected Map<String, Object> data;
-    
+    protected Map<String, Object> model;
 
     @Field("oldVersions")
     @Reference
@@ -118,10 +122,12 @@ public class HSMTemplate implements Serializable, OldDocVersion<HSMTemplate>, Ba
 	this.id = id;
     }
 
+    @Override
     public Map<String, Object> getMeta() {
 	return meta;
     }
 
+    @Override
     public void setMeta(Map<String, Object> meta) {
 	this.meta = meta;
     }
@@ -164,14 +170,6 @@ public class HSMTemplate implements Serializable, OldDocVersion<HSMTemplate>, Ba
 
     public void setCreatedStamp(Long createdStamp) {
 	this.createdStamp = createdStamp;
-    }
-
-    public Map<String, Object> getData() {
-	return data;
-    }
-
-    public void setData(Map<String, Object> data) {
-	this.data = data;
     }
 
     public String getHeader() {
@@ -229,18 +227,48 @@ public class HSMTemplate implements Serializable, OldDocVersion<HSMTemplate>, Ba
     }
 
     public String getBody() {
-        return body;
+	return body;
     }
 
     public void setBody(String body) {
-        this.body = body;
+	this.body = body;
     }
 
     public String getFooter() {
-        return footer;
+	return footer;
     }
 
     public void setFooter(String footer) {
-        this.footer = footer;
+	this.footer = footer;
+    }
+
+    public String getCategoryType() {
+	if (categoryType == null) {
+	    return ArgUtil.parseAsString(this.meta().get("messageType"));
+	}
+	return categoryType;
+    }
+
+    public void setCategoryType(String categoryType) {
+	this.categoryType = categoryType;
+    }
+
+    public String getFormatType() {
+	if (formatType == null) {
+	    return ArgUtil.parseAsString(this.meta().get("contentType"));
+	}
+	return formatType;
+    }
+
+    public void setFormatType(String formatType) {
+	this.formatType = formatType;
+    }
+
+    public Map<String, Object> getModel() {
+	return model;
+    }
+
+    public void setModel(Map<String, Object> model) {
+	this.model = model;
     }
 }

@@ -51,14 +51,19 @@ public abstract class AbstractConnector<CD extends AChannelDetails, P extends Ch
     @Autowired
     protected TmplClient tmplClient;
 
-    @Override
-    public void registerWebHook(ChannelConfig channelConfig) {
-	String webhookUrl = pmClientConfig.getWebhookUrl(channelConfig);
-	registerWebHook(channelConfig, webhookUrl);
+    public void registerWebhook(ChannelConfig channelConfig, String webhookUrl) {
+	ConnectorHandlerFactory.LOGGER.error("WEBHOOK REGISTRATION NOT DEFINED for URL");
     }
 
-    public void registerWebHook(ChannelConfig channelConfig, String webhookUrl) {
-	ConnectorHandlerFactory.LOGGER.error("WEBHOOK REGISTRATION NOT DEFINED for URL");
+    public void registerWebhook(ChannelConfig channelConfig) {
+	String webhookUrl = pmClientConfig.getWebhookUrl(channelConfig);
+	this.registerWebhook(channelConfig, webhookUrl);
+    }
+
+    @Override
+    public void onChannelUpdate(ChannelConfig channelConfig) {
+	// Register Webhook URL
+	this.registerWebhook(channelConfig);
     }
 
     @Override

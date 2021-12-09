@@ -20,7 +20,7 @@ public class WA360Plugin implements ChannelPlugin<WA360ConfigDetails> {
     }
 
     @Override
-    public WA360ConfigDetails getChannelDetails() {
+    public WA360ConfigDetails newChannelDetails() {
 	return new WA360ConfigDetails();
     }
 
@@ -31,7 +31,7 @@ public class WA360Plugin implements ChannelPlugin<WA360ConfigDetails> {
     }
 
     @Override
-    public void extractChannelDetailsFromMap(WA360ConfigDetails channelDetails, MapModel map) {
+    public void importChannelDetailsFromMap(WA360ConfigDetails channelDetails, MapModel map) {
 	channelDetails.setNumber(map.pathEntry("wa360d.number").asString(channelDetails.getNumber()));
 	channelDetails.setApiKey(map.pathEntry("wa360d.apiKey").asString(channelDetails.getApiKey()));
     }

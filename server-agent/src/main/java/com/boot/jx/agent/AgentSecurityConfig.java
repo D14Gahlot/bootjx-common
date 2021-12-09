@@ -30,8 +30,9 @@ public class AgentSecurityConfig extends WebSecurityConfigurerAdapter {
 		// Publics Calls
 		.and().authorizeRequests().antMatchers("/pub/**").permitAll() // Public URLs
 		.and().authorizeRequests().antMatchers("/ext/**").permitAll() // External URLS
-		.and().authorizeRequests().antMatchers("/int/**").permitAll() //Internal URLs
-		.and().authorizeRequests().antMatchers("/stomp-tunnel/**").permitAll() //Stomp Calls
+		.and().authorizeRequests().antMatchers("/int/**").permitAll() // Internal URLs
+		.and().authorizeRequests().antMatchers("/stomp-tunnel/**").permitAll() // Stomp Calls
+		.and().authorizeRequests().antMatchers("/swagger-ui.html").permitAll() // Swagger UI
 		// Login Calls
 		.and().authorizeRequests().antMatchers("/auth/**").permitAll()
 		// API Calls

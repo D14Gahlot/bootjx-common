@@ -53,7 +53,7 @@ public class TelegramConnector extends AbstractConnector<TelegramConfigDetails, 
     private PMFileStoreClient pmFileStoreClient;
 
     @Override
-    public void registerWebHook(ChannelConfig channelConfig, String webhookUrl) {
+    public void registerWebhook(ChannelConfig channelConfig, String webhookUrl) {
 	telegramClient.registerWebHook(channelConfig, webhookUrl);
     }
 
@@ -67,7 +67,6 @@ public class TelegramConnector extends AbstractConnector<TelegramConfigDetails, 
 	    outboxMessage.logs().add(e.getMessage());
 	    LOGGER.error("SEND ERROR", e);
 	}
-
     }
 
     @Override

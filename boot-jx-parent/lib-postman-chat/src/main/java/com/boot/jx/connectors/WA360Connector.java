@@ -70,7 +70,7 @@ public class WA360Connector extends AbstractConnector<WA360ConfigDetails, WA360P
     PMClientConfig pmClientConfig;
 
     @Override
-    public void registerWebHook(ChannelConfig channelConfig) {
+    public void onChannelUpdate(ChannelConfig channelConfig) {
 	String webhookUrl = pmClientConfig.getWebhookUrl(channelConfig);
 	restService.ajax(WA360Constants.BASE_URL).path("v1/configs/webhook")
 		.header(WA360Constants.D360_API_KEY, channelConfig.getWa360d().getApiKey())

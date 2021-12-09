@@ -5,7 +5,6 @@ import java.util.Map;
 
 import com.boot.jx.common.impl.ConfigMeta;
 import com.boot.jx.postman.PMConfiguration;
-import com.boot.jx.postman.fb.FacebookConfigDetails;
 import com.boot.jx.postman.ig.InstagramConfig;
 import com.boot.jx.postman.plugin.ChannelPluginProvider.ChannelPlugin;
 import com.boot.model.MapModel;
@@ -13,7 +12,7 @@ import com.boot.model.MapModel;
 public class InstagramPlugin implements ChannelPlugin<InstagramConfig> {
 
     @Override
-    public InstagramConfig getChannelDetails() {
+    public InstagramConfig newChannelDetails() {
 	return new InstagramConfig();
     }
 
@@ -48,7 +47,7 @@ public class InstagramPlugin implements ChannelPlugin<InstagramConfig> {
     }
 
     @Override
-    public void extractChannelDetailsFromMap(InstagramConfig channelDetails, MapModel map) {
+    public void importChannelDetailsFromMap(InstagramConfig channelDetails, MapModel map) {
 	channelDetails.setPageId(map.pathEntry("instagram.pageId").asString(channelDetails.getPageId()));
 	channelDetails.setHandler(map.pathEntry("instagram.handler").asString(channelDetails.getHandler()));
 	channelDetails.setType(map.pathEntry("instagram.type").asString(channelDetails.getType()));
