@@ -43,7 +43,7 @@ public class InstagramConnector extends AbstractConnector<InstagramConfig, Insta
     private InstagramClient instaClient;
 
     @Override
-    public void registerWebHook(ChannelConfig channelConfig) {
+    public void onChannelUpdate(ChannelConfig channelConfig) {
 	ApiResponseUtil.addWarning("Set webhook URL manually from Facebook Developer Portal.");
     }
 
@@ -68,7 +68,8 @@ public class InstagramConnector extends AbstractConnector<InstagramConfig, Insta
 
     @Override
     public boolean initSession(ChatSessionDoc session, InboxMessage inboxMessage) {
-	InstagramUserProfile profile = instaClient.getUserProfile(inboxMessage.contact());
+	ChannelConfig config = getChannelConfig(inboxMessage);
+	InstagramUserProfile profile = instaClient.getUserProfile(config,inboxMessage.contact());
 	ChatContactQuery contactQuery = messageContext.getChatContactQuery();
 	contactQuery.setProfilePic(profile.getProfilePic());
 	contactQuery.setName(profile.getName());

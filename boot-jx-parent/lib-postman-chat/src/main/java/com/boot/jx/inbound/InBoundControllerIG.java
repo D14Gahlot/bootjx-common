@@ -40,7 +40,7 @@ public class InBoundControllerIG {
 	    // V2Params
 	    @PathVariable(required = false) String channelType, @PathVariable(required = false) String accountKey,
 	    @PathVariable(required = false) String channelId, @PathVariable(required = false) String channelKey) {
-	return instaClient.registerWebhook(token, challenge, lane, channelId)  ;
+	return instaClient.registerWebhook(token, challenge, lane, channelId);
     }
 
     @Deprecated
@@ -63,8 +63,8 @@ public class InBoundControllerIG {
     @Deprecated
     @ApiVendorHeaders
     @RequestMapping(value = "/ext/inbound/ig/callback/{lane}", method = RequestMethod.POST)
-    public InstagramHookRequest onReceiveMessageLane(@RequestBody InstagramHookRequest request, @PathVariable String lane)
-	    throws InterruptedException {
+    public InstagramHookRequest onReceiveMessageLane(@RequestBody InstagramHookRequest request,
+	    @PathVariable String lane) throws InterruptedException {
 	request.getEntry().forEach(pageEntry -> {
 	    pageEntry.getMessaging().forEach(m -> {
 		InboxMessage event = instaConnector.toInboxMessage(m, pageEntry.getId());

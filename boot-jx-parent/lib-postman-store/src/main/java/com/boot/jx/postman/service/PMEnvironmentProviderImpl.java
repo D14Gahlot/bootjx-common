@@ -84,7 +84,7 @@ public class PMEnvironmentProviderImpl implements PMEnvironmentProvider, AppShar
     @Deprecated
     public void config(PMConfiguration config) {
 	if (ArgUtil.is(configStore)) {
-	    for (Entry<String, ChannelPlugin<? extends AChannelDetails>> pluginEntry : ChannelPluginProvider.MAP
+	    for (Entry<String, ChannelPlugin<? extends AChannelDetails>> pluginEntry : ChannelPluginProvider.PLUGIN_MAPPING
 		    .entrySet()) {
 		ChannelPlugin<? extends AChannelDetails> plugin = pluginEntry.getValue();
 		Map<String, ? extends AChannelDetails> multipleDetails = plugin.getDetails(config);
@@ -121,7 +121,7 @@ public class PMEnvironmentProviderImpl implements PMEnvironmentProvider, AppShar
 	// This code is only for backward compatibility not to be written for New
 	// Channels
 	PMConfigurationDoc doc = getPMConfigurationDoc();
-	ChannelPlugin<?> plugin = ChannelPluginProvider.MAP.get(config.getChannelType());
+	ChannelPlugin<?> plugin = ChannelPluginProvider.PLUGIN_MAPPING.get(config.getChannelType());
 	if (ArgUtil.is(plugin)) {
 	    plugin.setConfig(doc, config);
 	}
@@ -131,11 +131,15 @@ public class PMEnvironmentProviderImpl implements PMEnvironmentProvider, AppShar
 
     @Override
     public void remove(ChannelConfig config) {
-	ChannelConfigDoc configDoc = EntityDtoUtil.dtoToEntity(config, new ChannelConfigDoc());
-	configStore.remove(configDoc);
-	PMConfigurationDoc doc = getPMConfigurationDoc();
-	doc.channels().remove(config.getChannelId());
-	configStore.save(doc);
+	if(ArgUtil.is(config)) {
+	    ChannelConfigDoc configDoc = EntityDtoUtil.dtoToEntity(config, new ChannelConfigDoc());
+	    configStore.remove(configDoc);
+	    PMConfigurationDoc doc = getPMConfigurationDoc();
+	    doc.channels().remove(config.getChannelId());
+	    configStore.save(doc);
+	} else {
+	    System.out.println("No Channel to delete");
+	}
     }
 
     private PMConfigurationDoc getPMConfigurationDoc() {

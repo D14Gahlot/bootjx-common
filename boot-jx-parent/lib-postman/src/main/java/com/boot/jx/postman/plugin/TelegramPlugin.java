@@ -12,7 +12,7 @@ import com.boot.model.MapModel;
 public class TelegramPlugin implements ChannelPlugin<TelegramConfigDetails> {
 
     @Override
-    public TelegramConfigDetails getChannelDetails() {
+    public TelegramConfigDetails newChannelDetails() {
 	return new TelegramConfigDetails();
     }
 
@@ -44,7 +44,7 @@ public class TelegramPlugin implements ChannelPlugin<TelegramConfigDetails> {
     }
 
     @Override
-    public void extractChannelDetailsFromMap(TelegramConfigDetails channelDetails, MapModel map) {
+    public void importChannelDetailsFromMap(TelegramConfigDetails channelDetails, MapModel map) {
 	channelDetails.setHandler(map.pathEntry("telegram.handler").asString(channelDetails.getHandler()));
 	channelDetails.setType(map.pathEntry("telegram.type").asString(channelDetails.getType()));
 	channelDetails.setAccessToken(map.pathEntry("telegram.accessToken").asString(channelDetails.getAccessToken()));
