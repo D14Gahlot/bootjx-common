@@ -117,11 +117,18 @@ public class CommonMongoTemplateAbstract extends CommonMongoTemplateDefault {
 
     public WriteResult trash(Object object) {
 	if (object instanceof AuditableEntity && ArgUtil.is(auditDetailProvider)) {
-	    String collectionName = "TRASH_" + mongoTemplate.getCollectionName(object.getClass());
+	    String collectionName = "ZTRASH_" + mongoTemplate.getCollectionName(object.getClass());
 	    auditDetailProvider.audit((AuditableEntity) object);
 	    mongoTemplate.save(new TrashDocument().doc(object), collectionName);
 	}
 	return getCommonMongoTemplate().remove(object);
+    }
+
+    public void archive(Object oldDocument) {
+	String collectionName = "ZCHANGED_" + mongoTemplate.getCollectionName(oldDocument.getClass());
+	TrashDocument oldDocumentArchived = new TrashDocument().doc(oldDocument);
+	auditDetailProvider.audit(oldDocumentArchived);
+	mongoTemplate.save(oldDocumentArchived, collectionName);
     }
 
 }

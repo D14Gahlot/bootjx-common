@@ -178,8 +178,9 @@ public class InBoundService {
 	    if (ArgUtil.is(inBoundProcessor)) {
 		inBoundProcessor.process(inboxMessageOriginal);
 	    }
-
-	    if (ArgUtil.is(inBoundHandler)) {
+	    if (chatClientConfig.isLocalDummyBotEnabled()) {
+		botEngine.invokeMethodsAsync(inboxMessageOriginal);
+	    } else if (ArgUtil.is(inBoundHandler)) {
 		inBoundHandler.handle(inboxMessageOriginal);
 	    } else if (agentService.onMessageSupported(inboxMessageOriginal)) { // TODO:-- TO be removed
 		agentService.onMessage(inboxMessageOriginal);

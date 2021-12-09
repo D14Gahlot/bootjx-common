@@ -13,16 +13,17 @@ import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
-import com.boot.jx.def.CacheForThis;
 import com.boot.jx.model.AuditableEntity;
 import com.boot.jx.mongo.CommonDocInterfaces.OldDocVersion;
 import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.ITemplates.BasicTemplate;
+import com.boot.jx.postman.model.ResourceMeta;
 import com.boot.utils.ArgUtil;
 
 @Document(collection = HSMTemplate.COLLECTION_NAME)
 @TypeAlias("HSMTemplate")
-public class HSMTemplate implements Serializable, OldDocVersion<HSMTemplate>, BasicTemplate, AuditableEntity {
+public class HSMTemplate
+	implements Serializable, OldDocVersion<HSMTemplate>, BasicTemplate, AuditableEntity, ResourceMeta {
 
     public static final String COLLECTION_NAME = "DICT_HSM_TEMPLATES";
     public static final String COLLECTION_NAME_TRASH = "TRASH_DICT_HSM_TEMPLATES";
@@ -59,7 +60,7 @@ public class HSMTemplate implements Serializable, OldDocVersion<HSMTemplate>, Ba
 
     private String template;
     private Map<String, Object> meta;
-    protected Map<String, Object> data;
+    protected Map<String, Object> model;
 
     @Field("oldVersions")
     @Reference
@@ -121,10 +122,12 @@ public class HSMTemplate implements Serializable, OldDocVersion<HSMTemplate>, Ba
 	this.id = id;
     }
 
+    @Override
     public Map<String, Object> getMeta() {
 	return meta;
     }
 
+    @Override
     public void setMeta(Map<String, Object> meta) {
 	this.meta = meta;
     }
@@ -167,14 +170,6 @@ public class HSMTemplate implements Serializable, OldDocVersion<HSMTemplate>, Ba
 
     public void setCreatedStamp(Long createdStamp) {
 	this.createdStamp = createdStamp;
-    }
-
-    public Map<String, Object> getData() {
-	return data;
-    }
-
-    public void setData(Map<String, Object> data) {
-	this.data = data;
     }
 
     public String getHeader() {
@@ -267,5 +262,13 @@ public class HSMTemplate implements Serializable, OldDocVersion<HSMTemplate>, Ba
 
     public void setFormatType(String formatType) {
 	this.formatType = formatType;
+    }
+
+    public Map<String, Object> getModel() {
+	return model;
+    }
+
+    public void setModel(Map<String, Object> model) {
+	this.model = model;
     }
 }
