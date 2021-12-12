@@ -15,13 +15,15 @@ public class WebPlugin implements ChannelPlugin<WebConfigDetails> {
 
 	private static final long serialVersionUID = 8692015716138195462L;
 
+	private String site;
+
 	public WebConfigDetails() {
 	    super(CHANNEL_TYPE.WEB);
 	}
 
 	@Override
 	public String getLane() {
-	    return null;
+	    return this.site;
 	}
 
 	@Override
@@ -44,6 +46,14 @@ public class WebPlugin implements ChannelPlugin<WebConfigDetails> {
 	    return false;
 	}
 
+	public String getSite() {
+	    return site;
+	}
+
+	public void setSite(String site) {
+	    this.site = site;
+	}
+
     }
 
     @Override
@@ -63,12 +73,12 @@ public class WebPlugin implements ChannelPlugin<WebConfigDetails> {
 
     @Override
     public void importChannelDetailsFromMap(WebConfigDetails channelDetails, MapModel map) {
-	// TODO Auto-generated method stub
+	channelDetails.setSite(map.pathEntry("web.site").asString(channelDetails.getSite()));
     }
 
     @Override
     public void addConfigMeta(List<ConfigMeta> configMetaList) {
-	// TODO Auto-generated method stub
+	configMetaList.add(new ConfigMeta().path("web.site").title("Site"));
     }
 
 }
