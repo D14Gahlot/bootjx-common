@@ -11,6 +11,7 @@ import com.boot.jx.postman.gupshup.GupShupConstants.SessionType;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.MessageDefinitions.IMessageExtended;
 import com.boot.jx.postman.plugin.ChannelConfig;
+import com.boot.jx.postman.plugin.WAGupShupPlugin.GupShupConfigDetails;
 import com.boot.jx.rest.RestService.Ajax;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.utils.ArgUtil;

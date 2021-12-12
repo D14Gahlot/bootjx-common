@@ -178,12 +178,6 @@ public class ConfigManager {
 	this.refresh();
     }
 
-    @Deprecated
-    public void saveConfigs(PMConfiguration config) {
-	pmEnvironment.config(config);
-	this.refresh();
-    }
-
     public void save(ChannelConfig config) {
 	pmEnvironment.config(config);
 	this.refresh();
@@ -200,17 +194,6 @@ public class ConfigManager {
     public ClientKeyConfigDoc remove(ClientKeyConfigDoc clientApiKey) {
 	mongoTemplate.remove(clientApiKey);
 	return clientApiKey;
-    }
-
-    public void save(AChannelDetails details, boolean disabled) {
-	ChannelPlugin<? extends AChannelDetails> plugin = ChannelPluginProvider.PLUGIN_MAPPING
-		.get(details.getChannelType());
-	if (ArgUtil.is(plugin)) {
-	    ChannelConfig config = new ChannelConfig();
-	    plugin.fromDetails(config, details);
-	    config.disabled(disabled);
-	    save(config);
-	}
     }
 
     public ChannelConfig getChannelConfig(String channelId) {
@@ -233,18 +216,14 @@ public class ConfigManager {
 	ChannelPlugin<? extends AChannelDetails> plugin = ChannelPluginProvider.PLUGIN_MAPPING.get(channelType);
 	String channelId = map.getString("channelId");
 	if (ArgUtil.is(data)) {
-	    AChannelDetails channelDetails = null;
-	    if (ArgUtil.is(channelId)) {
-		ChannelConfig channelConfig = pmEnvironment.config().channels(channelId);
-		channelDetails = plugin.getDetails(channelConfig);
-		plugin.importChannelDetailsFromMap(channelDetails, map, channelType);
-	    } else {
-		channelDetails = plugin.newChannelDetails();
-		plugin.importChannelDetailsFromMap(channelDetails, map, channelType);
+	    ChannelConfig config = pmEnvironment.config().channels(channelId);
+	    if (config == null) {
+		config = new ChannelConfig();
 	    }
-	    channelDetails.setName(map.getString("name", channelDetails.getName()));
-	    channelDetails.setChannelKey(map.getString("channelKey", channelDetails.getChannelKey()));
-	    save(channelDetails, disabled);
+	    plugin.importChannelConfigFromMap(config, map, channelType);
+	    config.disabled(disabled);
+	    save(config);
+
 	}
 	return getChannelConfig(channelId);
     }

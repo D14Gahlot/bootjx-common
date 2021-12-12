@@ -266,12 +266,14 @@ public class ConnectorHandlerFactory extends ScopedBeanFactory<String, Connector
     }
 
     public void onChannelUpdate(ChannelConfig channelConfig) {
-	ConnectorHandler connector = get(channelConfig.getContactType(), channelConfig.getChannelType());
-	if (ArgUtil.is(connector)) {
-	    try {
-		connector.onChannelUpdate(channelConfig);
-	    } catch (Exception e) {
-		LOGGER.error("error onChannelUpdate " + channelConfig,e);
+	if (ArgUtil.is(channelConfig)) {
+	    ConnectorHandler connector = get(channelConfig.getContactType(), channelConfig.getChannelType());
+	    if (ArgUtil.is(connector)) {
+		try {
+		    connector.onChannelUpdate(channelConfig);
+		} catch (Exception e) {
+		    LOGGER.error("error onChannelUpdate " + channelConfig, e);
+		}
 	    }
 	}
     }

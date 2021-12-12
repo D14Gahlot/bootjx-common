@@ -19,6 +19,7 @@ import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.MessageDefinitions.Contactable;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.plugin.ChannelConfig;
+import com.boot.jx.postman.plugin.FacebookPlugin.FacebookConfigDetails;
 import com.boot.jx.rest.RestService;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
