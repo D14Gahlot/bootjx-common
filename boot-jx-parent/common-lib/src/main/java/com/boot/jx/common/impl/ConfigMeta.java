@@ -3,7 +3,6 @@ package com.boot.jx.common.impl;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 public class ConfigMeta implements Serializable {
 
@@ -90,6 +89,7 @@ public class ConfigMeta implements Serializable {
     private Object defaultValue;
     private boolean optional;
     private boolean readonly;
+    private boolean nonEditable;
     private boolean hidden;
     private boolean deprecated;
 
@@ -312,4 +312,16 @@ public class ConfigMeta implements Serializable {
 	return this;
     }
 
+    public boolean isNonEditable() {
+	return nonEditable;
+    }
+
+    public void setNonEditable(boolean nonEditable) {
+	this.nonEditable = nonEditable;
+    }
+
+    public ConfigMeta nonEditable() {
+	this.nonEditable = true;
+	return this;
+    }
 }
