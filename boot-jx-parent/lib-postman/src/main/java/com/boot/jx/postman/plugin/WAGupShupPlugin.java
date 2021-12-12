@@ -38,7 +38,7 @@ public class WAGupShupPlugin implements ChannelPlugin<GupShupConfigDetails> {
 
     @Override
     public void addConfigMeta(List<ConfigMeta> list) {
-	list.add(new ConfigMeta().path("gupshup.number").title("Number"));
+	list.add(new ConfigMeta().path("gupshup.number").title("Number").nonEditable());
 	list.add(new ConfigMeta().path("gupshup.chatId").title("Chat Id"));
 	list.add(new ConfigMeta().path("gupshup.chatPass").title("Chat Password"));
 	list.add(new ConfigMeta().path("gupshup.notifyId").title("Notification Id"));

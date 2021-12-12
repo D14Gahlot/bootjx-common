@@ -150,7 +150,7 @@ public class TwitterPlugin implements ChannelPlugin<TwitterConfigDetails> {
 
     @Override
     public void addConfigMeta(List<ConfigMeta> configMetaList) {
-	configMetaList.add(new ConfigMeta().path("twitter.handler").title("Handler"));
+	configMetaList.add(new ConfigMeta().path("twitter.handler").title("Handler").nonEditable());
 	configMetaList.add(new ConfigMeta().path("twitter.type").title("Type").hidden());
 	configMetaList.add(new ConfigMeta().path("twitter.envName").title("Env").optional());
 	configMetaList.add(new ConfigMeta().path("twitter.accessToken").title("Access Token"));
