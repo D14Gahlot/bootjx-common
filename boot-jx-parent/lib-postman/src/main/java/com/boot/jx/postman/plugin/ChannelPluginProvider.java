@@ -88,8 +88,6 @@ public class ChannelPluginProvider {
     public static final Map<String, ChannelPlugin<? extends AChannelDetails>> PLUGIN_MAPPING = new HashMap<String, ChannelPlugin<? extends AChannelDetails>>();
     public static final Map<String, AChannelDetails> DETAILS_MAPPING = new HashMap<String, AChannelDetails>();
 
-    public static final WebPlugin WEB = new WebPlugin();
-
     public static <C extends AChannelDetails> void register(ChannelPlugin<C> channelPlugin) {
 	C details = channelPlugin.newChannelDetails();
 	DETAILS_MAPPING.put(details.getChannelType(), channelPlugin.newChannelDetails());
@@ -100,6 +98,7 @@ public class ChannelPluginProvider {
 	return PLUGIN_MAPPING.getOrDefault(channelType, WEB);
     }
 
+    public static final WebPlugin WEB = new WebPlugin();
     public static final FacebookPlugin FACEBOOK = new FacebookPlugin();
     public static final TwitterPlugin TWITTER = new TwitterPlugin();
     public static final TelegramPlugin TELEGRAM = new TelegramPlugin();
@@ -114,6 +113,7 @@ public class ChannelPluginProvider {
 	register(TELEGRAM);
 	register(WA_GUPSHUP);
 	register(WA_360D);
+	register(INSTAGRAM);
     }
 
 }
