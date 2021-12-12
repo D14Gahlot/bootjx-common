@@ -4,12 +4,108 @@ import java.util.List;
 import java.util.Map;
 
 import com.boot.jx.common.impl.ConfigMeta;
+import com.boot.jx.dict.ContactType;
 import com.boot.jx.postman.PMConfiguration;
-import com.boot.jx.postman.fb.FacebookConfigDetails;
+import com.boot.jx.postman.PMConstants.CHANNEL_TYPE;
+import com.boot.jx.postman.PMEnvironment;
+import com.boot.jx.postman.PMEnvironment.AChannelDetails;
 import com.boot.jx.postman.plugin.ChannelPluginProvider.ChannelPlugin;
+import com.boot.jx.postman.plugin.FacebookPlugin.FacebookConfigDetails;
 import com.boot.model.MapModel;
+import com.boot.utils.ArgUtil;
+import com.fasterxml.jackson.annotation.JsonView;
 
 public class FacebookPlugin implements ChannelPlugin<FacebookConfigDetails> {
+
+    public class FacebookConfigDetails extends AChannelDetails {
+
+	private static final long serialVersionUID = -2397678752642150000L;
+	private String pageId;
+	private String handler;
+	private String type;
+
+	@JsonView(PMEnvironment.ProtectedProperty.class)
+	private String accessToken;
+	@JsonView(PMEnvironment.ProtectedProperty.class)
+	private String verifyToken;
+	@JsonView(PMEnvironment.ProtectedProperty.class)
+	private String appSecret;
+
+	public String getPageId() {
+	    return pageId;
+	}
+
+	public void setPageId(String pageId) {
+	    this.pageId = pageId;
+	}
+
+	public String getType() {
+	    return type;
+	}
+
+	public void setType(String type) {
+	    this.type = type;
+	}
+
+	public String getAccessToken() {
+	    return accessToken;
+	}
+
+	public void setAccessToken(String accessToken) {
+	    this.accessToken = accessToken;
+	}
+
+	public String getVerifyToken() {
+	    return verifyToken;
+	}
+
+	public void setVerifyToken(String verifyToken) {
+	    this.verifyToken = verifyToken;
+	}
+
+	public String getAppSecret() {
+	    return appSecret;
+	}
+
+	public void setAppSecret(String appSecret) {
+	    this.appSecret = appSecret;
+	}
+
+	@Override
+	public String getLane() {
+	    return this.pageId;
+	}
+
+	public String getHandler() {
+	    return handler;
+	}
+
+	public void setHandler(String handler) {
+	    this.handler = handler;
+	}
+
+    }
+
+    @Override
+    public String getDefaultName(ChannelConfig config) {
+	if (!ArgUtil.is(config.getName())) {
+	    if (ArgUtil.is(config.getFacebook().getHandler())) {
+		return config.getFacebook().getHandler();
+	    }
+	    return String.format("FB %s", config.getLane());
+	}
+	return config.getName();
+    }
+
+    @Override
+    public String getChannelType() {
+	return CHANNEL_TYPE.FACEBOOK;
+    }
+
+    @Override
+    public ContactType getContactType() {
+	return ContactType.FACEBOOK;
+    }
 
     @Override
     public FacebookConfigDetails newChannelDetails() {
@@ -54,6 +150,26 @@ public class FacebookPlugin implements ChannelPlugin<FacebookConfigDetails> {
 	channelDetails.setVerifyToken(map.pathEntry("facebook.verifyToken").asString(channelDetails.getVerifyToken()));
 	channelDetails.setAccessToken(map.pathEntry("facebook.accessToken").asString(channelDetails.getAccessToken()));
 	channelDetails.setAppSecret(map.pathEntry("facebook.appSecret").asString(channelDetails.getAppSecret()));
+    }
+
+    @Override
+    public boolean isPushAllowed() {
+	return false;
+    }
+
+    @Override
+    public boolean isPushOnlyApproved() {
+	return true;
+    }
+
+    @Override
+    public boolean isPushFreeTextAllowed() {
+	return false;
+    }
+
+    @Override
+    public boolean isPushToNewContactAllowed() {
+	return false;
     }
 
 }

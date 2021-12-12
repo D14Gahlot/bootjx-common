@@ -11,7 +11,6 @@ import org.springframework.stereotype.Component;
 import com.boot.jx.AppConfigPackage.AppSharedConfig;
 import com.boot.jx.AppContextUtil;
 import com.boot.jx.postman.PMConfiguration;
-import com.boot.jx.postman.PMEnvironment.AChannelDetails;
 import com.boot.jx.postman.PMEnvironment.PMConfigurationObject;
 import com.boot.jx.postman.PMEnvironment.PMEnvironmentProvider;
 import com.boot.jx.postman.doc.PMConfigurationDoc;
@@ -69,9 +68,9 @@ public class PMEnvironmentProviderImpl implements PMEnvironmentProvider, AppShar
 	    if (Tenants.isDefault(tnt)) {
 		PMConfigurationDoc newSharedConfiguration = new PMConfigurationDoc();
 		for (Entry<String, PMConfigurationObject> entry : prefs.prefs().entrySet()) {
-		    //if (entry.getValue().isShared()) {
-			newSharedConfiguration.setPref(entry.getValue());
-		    //}
+		    // if (entry.getValue().isShared()) {
+		    newSharedConfiguration.setPref(entry.getValue());
+		    // }
 		}
 		sharedConfiguration = newSharedConfiguration;
 	    }
@@ -79,28 +78,6 @@ public class PMEnvironmentProviderImpl implements PMEnvironmentProvider, AppShar
 	    return prefs;
 	}
 	return null;
-    }
-
-    @Deprecated
-    public void config(PMConfiguration config) {
-	if (ArgUtil.is(configStore)) {
-	    for (Entry<String, ChannelPlugin<? extends AChannelDetails>> pluginEntry : ChannelPluginProvider.PLUGIN_MAPPING
-		    .entrySet()) {
-		ChannelPlugin<? extends AChannelDetails> plugin = pluginEntry.getValue();
-		Map<String, ? extends AChannelDetails> multipleDetails = plugin.getDetails(config);
-		if (ArgUtil.is(multipleDetails)) {
-		    for (Entry<String, ? extends AChannelDetails> configEntry : multipleDetails.entrySet()) {
-			configInternal(plugin.fromDetails(new ChannelConfigDoc(), configEntry.getValue()));
-		    }
-		}
-
-	    }
-
-	    PMConfigurationDoc doc = EntityDtoUtil.dtoToEntity(config, new PMConfigurationDoc());
-	    doc.setTenant(AppContextUtil.getTenant());
-	    configStore.saveConfiguration(doc);
-	}
-
     }
 
     public void configInternal(ChannelConfig config) {
@@ -131,7 +108,7 @@ public class PMEnvironmentProviderImpl implements PMEnvironmentProvider, AppShar
 
     @Override
     public void remove(ChannelConfig config) {
-	if(ArgUtil.is(config)) {
+	if (ArgUtil.is(config)) {
 	    ChannelConfigDoc configDoc = EntityDtoUtil.dtoToEntity(config, new ChannelConfigDoc());
 	    configStore.remove(configDoc);
 	    PMConfigurationDoc doc = getPMConfigurationDoc();

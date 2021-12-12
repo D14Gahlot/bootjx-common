@@ -10,12 +10,12 @@ import java.util.Map.Entry;
 import com.boot.jx.agent.AgentConfig;
 import com.boot.jx.postman.PMEnvironment.AChannelDetails;
 import com.boot.jx.postman.PMEnvironment.PMConfigurationObject;
-import com.boot.jx.postman.fb.FacebookConfigDetails;
-import com.boot.jx.postman.gupshup.GupShupConfigDetails;
-import com.boot.jx.postman.ig.InstagramConfig;
 import com.boot.jx.postman.plugin.ChannelConfig;
+import com.boot.jx.postman.plugin.FacebookPlugin.FacebookConfigDetails;
+import com.boot.jx.postman.plugin.InstagramPlugin.InstagramConfig;
+import com.boot.jx.postman.plugin.TelegramPlugin.TelegramConfigDetails;
 import com.boot.jx.postman.plugin.TwitterPlugin.TwitterConfigDetails;
-import com.boot.jx.postman.tg.TelegramConfigDetails;
+import com.boot.jx.postman.plugin.WAGupShupPlugin.GupShupConfigDetails;
 import com.boot.model.SafeKeyHashMap;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.Random;
@@ -195,6 +195,9 @@ public class PMConfiguration implements Serializable {
     }
 
     public ChannelConfig channels(String channelId) {
+	if (!ArgUtil.is(channelId)) {
+	    return null;
+	}
 	return channels().get(channelId);
     }
 
