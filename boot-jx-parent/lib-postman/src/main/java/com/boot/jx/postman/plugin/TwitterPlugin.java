@@ -16,11 +16,17 @@ import com.fasterxml.jackson.annotation.JsonView;
 
 public class TwitterPlugin implements ChannelPlugin<TwitterConfigDetails> {
 
-    public static class TwitterConfigDetails extends AChannelDetails {
+    @Override
+    public ContactType getContactType() {
+	return ContactType.TWITTER;
+    }
 
-	public TwitterConfigDetails() {
-	    super(CHANNEL_TYPE.TWITTER);
-	}
+    @Override
+    public String getChannelType() {
+	return CHANNEL_TYPE.TWITTER;
+    }
+
+    public static class TwitterConfigDetails extends AChannelDetails {
 
 	private static final long serialVersionUID = -2397678752642150000L;
 	private String handler;
@@ -97,30 +103,6 @@ public class TwitterPlugin implements ChannelPlugin<TwitterConfigDetails> {
 	    return this.handler;
 	}
 
-	@Override
-	public boolean isPushAllowed() {
-	    return true;
-	}
-
-	@Override
-	public boolean isPushOnlyApproved() {
-	    return false;
-	}
-
-	@Override
-	public boolean isPushFreeTextAllowed() {
-	    return true;
-	}
-
-	@Override
-	public boolean isPushToNewContactAllowed() {
-	    return false;
-	}
-
-	@Override
-	public ContactType getContactType() {
-	    return ContactType.TWITTER;
-	}
     }
 
     @Override
@@ -172,4 +154,23 @@ public class TwitterPlugin implements ChannelPlugin<TwitterConfigDetails> {
 		map.pathEntry("twitter.consumerSecret").asString(channelDetails.getConsumerSecret()));
     }
 
+    @Override
+    public boolean isPushAllowed() {
+	return true;
+    }
+
+    @Override
+    public boolean isPushOnlyApproved() {
+	return false;
+    }
+
+    @Override
+    public boolean isPushFreeTextAllowed() {
+	return true;
+    }
+
+    @Override
+    public boolean isPushToNewContactAllowed() {
+	return false;
+    }
 }

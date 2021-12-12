@@ -3,6 +3,7 @@ package com.boot.jx.postman.plugin;
 import java.util.List;
 
 import com.boot.jx.common.impl.ConfigMeta;
+import com.boot.jx.dict.ContactType;
 import com.boot.jx.postman.PMConstants.CHANNEL_TYPE;
 import com.boot.jx.postman.PMEnvironment.AChannelDetails;
 import com.boot.jx.postman.plugin.ChannelPluginProvider.ChannelPlugin;
@@ -17,33 +18,9 @@ public class WebPlugin implements ChannelPlugin<WebConfigDetails> {
 
 	private String site;
 
-	public WebConfigDetails() {
-	    super(CHANNEL_TYPE.WEB);
-	}
-
 	@Override
 	public String getLane() {
 	    return this.site;
-	}
-
-	@Override
-	public boolean isPushAllowed() {
-	    return false;
-	}
-
-	@Override
-	public boolean isPushOnlyApproved() {
-	    return false;
-	}
-
-	@Override
-	public boolean isPushFreeTextAllowed() {
-	    return false;
-	}
-
-	@Override
-	public boolean isPushToNewContactAllowed() {
-	    return false;
 	}
 
 	public String getSite() {
@@ -54,6 +31,16 @@ public class WebPlugin implements ChannelPlugin<WebConfigDetails> {
 	    this.site = site;
 	}
 
+    }
+
+    @Override
+    public ContactType getContactType() {
+	return ContactType.WEBSITE;
+    }
+
+    @Override
+    public String getChannelType() {
+	return CHANNEL_TYPE.WEB;
     }
 
     @Override
@@ -79,6 +66,26 @@ public class WebPlugin implements ChannelPlugin<WebConfigDetails> {
     @Override
     public void addConfigMeta(List<ConfigMeta> configMetaList) {
 	configMetaList.add(new ConfigMeta().path("web.site").title("Site"));
+    }
+
+    @Override
+    public boolean isPushAllowed() {
+	return false;
+    }
+
+    @Override
+    public boolean isPushOnlyApproved() {
+	return false;
+    }
+
+    @Override
+    public boolean isPushFreeTextAllowed() {
+	return false;
+    }
+
+    @Override
+    public boolean isPushToNewContactAllowed() {
+	return false;
     }
 
 }
