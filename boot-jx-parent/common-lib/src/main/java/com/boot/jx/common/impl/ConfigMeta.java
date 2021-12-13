@@ -89,7 +89,8 @@ public class ConfigMeta implements Serializable {
     private Object defaultValue;
     private boolean optional;
     private boolean readonly;
-    private boolean nonEditable;
+    private boolean createonly;
+    private boolean writeonly;
     private boolean hidden;
     private boolean deprecated;
 
@@ -312,16 +313,29 @@ public class ConfigMeta implements Serializable {
 	return this;
     }
 
-    public boolean isNonEditable() {
-	return nonEditable;
+    public ConfigMeta createonly() {
+	this.createonly = true;
+	return this;
     }
 
-    public void setNonEditable(boolean nonEditable) {
-	this.nonEditable = nonEditable;
+    public boolean isCreateonly() {
+	return createonly;
     }
 
-    public ConfigMeta nonEditable() {
-	this.nonEditable = true;
+    public void setCreateonly(boolean createonly) {
+	this.createonly = createonly;
+    }
+
+    public boolean isWriteonly() {
+	return writeonly;
+    }
+
+    public void setWriteonly(boolean writeonly) {
+	this.writeonly = writeonly;
+    }
+
+    public ConfigMeta writeonly() {
+	this.writeonly = true;
 	return this;
     }
 }
