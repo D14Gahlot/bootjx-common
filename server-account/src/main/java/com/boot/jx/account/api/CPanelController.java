@@ -23,7 +23,6 @@ import com.boot.jx.http.ApiRequest;
 import com.boot.jx.postman.PMConstants;
 import com.boot.jx.postman.PMConstants.CHANNEL_TYPE_ENUM;
 import com.boot.jx.postman.PMEnvironment;
-import com.boot.jx.postman.PMEnvironment.AChannelDetails;
 import com.boot.jx.postman.doc.config.ClientKeyConfigDoc;
 import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.utils.ArgUtil;
@@ -90,13 +89,6 @@ public class CPanelController {
     @RequestMapping(value = "/api/config/channel/{channelId}", method = { RequestMethod.DELETE })
     public ApiResponse<ChannelConfig, Object> deleteChannelConfig(@PathVariable String channelId) {
 	return ApiResponse.buildResults(configManager.removeChannelConfig(channelId));
-    }
-
-    @JsonView(PMEnvironment.PublicProperty.class)
-    @ResponseBody
-    @RequestMapping(value = { "/api/options/lanes" }, method = { RequestMethod.GET })
-    public ApiResponse<AChannelDetails, Object> listActiveLanes() {
-	return ApiResponse.buildResults(pmEnvironment.config().connectors());
     }
 
     @JsonView(PMEnvironment.PublicProperty.class)

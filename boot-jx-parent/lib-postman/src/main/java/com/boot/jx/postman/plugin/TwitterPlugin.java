@@ -106,11 +106,6 @@ public class TwitterPlugin implements ChannelPlugin<TwitterConfigDetails> {
     }
 
     @Override
-    public Map<String, TwitterConfigDetails> getDetails(PMConfiguration config) {
-	return config.getTwitter();
-    }
-
-    @Override
     public void setDetails(ChannelConfig config, TwitterConfigDetails details) {
 	config.setTwitter(details);
     }
@@ -118,11 +113,6 @@ public class TwitterPlugin implements ChannelPlugin<TwitterConfigDetails> {
     @Override
     public TwitterConfigDetails getDetails(ChannelConfig config) {
 	return config.getTwitter();
-    }
-
-    @Override
-    public void setConfig(PMConfiguration configuration, ChannelConfig config) {
-	configuration.twitter(config.getTwitter(), config.isDisabled());
     }
 
     @Override
