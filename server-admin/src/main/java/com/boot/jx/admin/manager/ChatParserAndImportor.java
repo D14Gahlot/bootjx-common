@@ -46,6 +46,7 @@ import com.boot.utils.CollectionUtil;
 import com.boot.utils.CommonDateTimeParser;
 import com.boot.utils.Constants;
 import com.boot.utils.EntityDtoUtil;
+import com.boot.utils.JsonUtil;
 import com.boot.utils.UniqueID;
 
 @Component
@@ -301,19 +302,23 @@ public class ChatParserAndImportor {
 
 			ChatParserDto lastMessage = null;
 			while ((sCurrentLine = br.readLine()) != null) {
+				if(ArgUtil.is(sCurrentLine)  && sCurrentLine.charAt(0)=='[') {
+					String sCurrentLines = sCurrentLine.replace("[","").replace("]", " -");
+					sCurrentLine=parsingStringValue(sCurrentLines); 
+				}
 				Matcher m = r.matcher(sCurrentLine);
+				
 				if (m.find()) {
 					// System.out.println("======" + sCurrentLine);
 					// New Message
 					lastMessage = new ChatParserDto();
 					String date = m.group(1);
+					
 					String auther = m.group(2);
 					String msg = m.group(3);
 					lastMessage.setDate(date);
 					lastMessage.setAuther(auther);
-
 					lastMessage.setMessage(msg);
-					// System.out.println("Message: " + m.group(4) );
 					if (lastMessage != null && ArgUtil.is(lastMessage.getDate())) {
 						chatLst.add(lastMessage);
 					}
@@ -342,9 +347,25 @@ public class ChatParserAndImportor {
 			CloseUtil.close(is);
 			CloseUtil.close(dis);
 		}
-
 		return chatLst;
 
+	}
+	private String parsingStringValue(String str) {
+		String strDate = null;
+		int pos1 = str.indexOf("-");
+		String dateStr = str.substring(0,pos1);
+		String[] spl = dateStr.split(",");
+    	String dateS =spl[0];
+    	String time =spl[1];
+    	int remove = time.lastIndexOf(':');
+    	String hhMM = time.substring(0,remove) + time.substring(remove+3);
+    	String[] dt = dateS.split("/");
+    	String dd =dt[0];
+    	String mm=dt[1];
+    	String yy=dt[2];
+    	String finalDateStr =mm+"/"+dd+"/"+yy+","+hhMM;
+    	strDate = finalDateStr+"-"+str.substring(pos1+1);
+		return strDate ; 
 	}
 
 }
