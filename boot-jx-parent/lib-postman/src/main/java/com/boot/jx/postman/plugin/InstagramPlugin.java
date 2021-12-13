@@ -113,11 +113,6 @@ public class InstagramPlugin implements ChannelPlugin<InstagramConfig> {
     }
 
     @Override
-    public Map<String, InstagramConfig> getDetails(PMConfiguration config) {
-	return config.getInstagram();
-    }
-
-    @Override
     public void setDetails(ChannelConfig config, InstagramConfig details) {
 	config.setInstagram(details);
     }
@@ -125,11 +120,6 @@ public class InstagramPlugin implements ChannelPlugin<InstagramConfig> {
     @Override
     public InstagramConfig getDetails(ChannelConfig config) {
 	return config.getInstagram();
-    }
-
-    @Override
-    public void setConfig(PMConfiguration configuration, ChannelConfig config) {
-	configuration.instagram(config.getInstagram(), config.isDisabled());
     }
 
     @Override

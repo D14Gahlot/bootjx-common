@@ -113,11 +113,6 @@ public class FacebookPlugin implements ChannelPlugin<FacebookConfigDetails> {
     }
 
     @Override
-    public Map<String, FacebookConfigDetails> getDetails(PMConfiguration config) {
-	return config.getFacebook();
-    }
-
-    @Override
     public void setDetails(ChannelConfig config, FacebookConfigDetails details) {
 	config.setFacebook(details);
     }
@@ -125,11 +120,6 @@ public class FacebookPlugin implements ChannelPlugin<FacebookConfigDetails> {
     @Override
     public FacebookConfigDetails getDetails(ChannelConfig config) {
 	return config.getFacebook();
-    }
-
-    @Override
-    public void setConfig(PMConfiguration configuration, ChannelConfig config) {
-	configuration.facebook(config.getFacebook(), config.isDisabled());
     }
 
     @Override

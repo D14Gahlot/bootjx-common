@@ -29,11 +29,6 @@ public class ChannelPluginProvider {
 	    return (C) channelDetails;
 	}
 
-	@Deprecated
-	public default Map<String, C> getDetails(PMConfiguration configuration) {
-	    return new HashMap<String, C>();
-	}
-
 	/**
 	 * For new Configs
 	 * 
@@ -68,11 +63,6 @@ public class ChannelPluginProvider {
 	public void setDetails(ChannelConfig config, C details);
 
 	public C getDetails(ChannelConfig config);
-
-	@Deprecated
-	public default void setConfig(PMConfiguration configuration, ChannelConfig config) {
-	    configuration.channels(config);
-	}
 
 	public void addConfigMeta(List<ConfigMeta> configMetaList);
 
