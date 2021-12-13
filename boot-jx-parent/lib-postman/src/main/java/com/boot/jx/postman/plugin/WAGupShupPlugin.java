@@ -99,11 +99,6 @@ public class WAGupShupPlugin implements ChannelPlugin<GupShupConfigDetails> {
     }
 
     @Override
-    public Map<String, GupShupConfigDetails> getDetails(PMConfiguration configuration) {
-	return configuration.getGupshup();
-    }
-
-    @Override
     public void setDetails(ChannelConfig config, GupShupConfigDetails details) {
 	config.setGupshup(details);
     }
@@ -111,11 +106,6 @@ public class WAGupShupPlugin implements ChannelPlugin<GupShupConfigDetails> {
     @Override
     public GupShupConfigDetails getDetails(ChannelConfig config) {
 	return config.getGupshup();
-    }
-
-    @Override
-    public void setConfig(PMConfiguration configuration, ChannelConfig config) {
-	configuration.gupshup(config.getGupshup(), config.isDisabled());
     }
 
     @Override

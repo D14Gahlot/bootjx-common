@@ -22,18 +22,12 @@ public class PushMessageTests { // Noncompliant
 
     public static void main(String[] args) throws ParseException {
 	PMConfiguration config = new PMConfiguration();
-
 	String key = "@$test.s";
-
 	TwitterConfigDetails tw = new TwitterConfigDetails();
 	tw.setHandler(key);
-	config.twitter(tw, false);
 	String json = JsonUtil.toJson(config);
 	System.out.println(json);
-
 	System.out.println(JsonUtil.toJson(JsonUtil.parse(json, PMConfiguration.class)));
-	System.out.println(JsonUtil.toJson(JsonUtil.parse(json, PMConfiguration.class).twitter(key)));
-	System.out.println(JsonUtil.toJson(JsonUtil.parse(json, PMConfiguration.class).twitter(key).getHandler()));
 
     }
 
