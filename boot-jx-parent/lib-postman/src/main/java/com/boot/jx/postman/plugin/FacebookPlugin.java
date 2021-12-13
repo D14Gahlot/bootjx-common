@@ -134,12 +134,12 @@ public class FacebookPlugin implements ChannelPlugin<FacebookConfigDetails> {
 
     @Override
     public void addConfigMeta(List<ConfigMeta> list) {
-	list.add(new ConfigMeta().path("facebook.pageId").title("Page Id").nonEditable());
+	list.add(new ConfigMeta().path("facebook.pageId").title("Page Id").createonly());
 	list.add(new ConfigMeta().path("facebook.type").title("Type").optionValues("page").hidden());
 	list.add(new ConfigMeta().path("facebook.handler").title("Handler"));
-	list.add(new ConfigMeta().path("facebook.verifyToken").title("Verify Token"));
-	list.add(new ConfigMeta().path("facebook.accessToken").title("Access Token"));
-	list.add(new ConfigMeta().path("facebook.appSecret").title("App Secret"));
+	list.add(new ConfigMeta().path("facebook.verifyToken").title("Verify Token").writeonly());
+	list.add(new ConfigMeta().path("facebook.accessToken").title("Access Token").writeonly());
+	list.add(new ConfigMeta().path("facebook.appSecret").title("App Secret").writeonly());
     }
 
     @Override

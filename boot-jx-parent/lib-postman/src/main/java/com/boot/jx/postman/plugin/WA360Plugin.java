@@ -71,8 +71,8 @@ public class WA360Plugin implements ChannelPlugin<WA360ConfigDetails> {
 
     @Override
     public void addConfigMeta(List<ConfigMeta> configMetaList) {
-	configMetaList.add(new ConfigMeta().path("wa360d.number").title("Number").nonEditable());
-	configMetaList.add(new ConfigMeta().path("wa360d.apiKey").title("API Key"));
+	configMetaList.add(new ConfigMeta().path("wa360d.number").title("Number").createonly());
+	configMetaList.add(new ConfigMeta().path("wa360d.apiKey").title("API Key").writeonly());
     }
 
     @Override

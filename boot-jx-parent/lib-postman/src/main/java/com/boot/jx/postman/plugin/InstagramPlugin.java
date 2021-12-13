@@ -134,12 +134,12 @@ public class InstagramPlugin implements ChannelPlugin<InstagramConfig> {
 
     @Override
     public void addConfigMeta(List<ConfigMeta> list) {
-	list.add(new ConfigMeta().path("instagram.pageId").title("Page Id").nonEditable());
+	list.add(new ConfigMeta().path("instagram.pageId").title("Page Id").createonly());
 	list.add(new ConfigMeta().path("instagram.type").title("Type").optionValues("page").hidden());
 	list.add(new ConfigMeta().path("instagram.handler").title("Handler"));
-	list.add(new ConfigMeta().path("instagram.verifyToken").title("Verify Token"));
-	list.add(new ConfigMeta().path("instagram.accessToken").title("Access Token"));
-	list.add(new ConfigMeta().path("instagram.appSecret").title("App Secret"));
+	list.add(new ConfigMeta().path("instagram.verifyToken").title("Verify Token").writeonly());
+	list.add(new ConfigMeta().path("instagram.accessToken").title("Access Token").writeonly());
+	list.add(new ConfigMeta().path("instagram.appSecret").title("App Secret").writeonly());
     }
 
     @Override

@@ -93,9 +93,9 @@ public class TelegramPlugin implements ChannelPlugin<TelegramConfigDetails> {
 
     @Override
     public void addConfigMeta(List<ConfigMeta> configMetaList) {
-	configMetaList.add(new ConfigMeta().path("telegram.handler").title("BotName").nonEditable());
+	configMetaList.add(new ConfigMeta().path("telegram.handler").title("BotName").createonly());
 	configMetaList.add(new ConfigMeta().path("telegram.type").optionValues("bot").hidden());
-	configMetaList.add(new ConfigMeta().path("telegram.accessToken").title("Access Token"));
+	configMetaList.add(new ConfigMeta().path("telegram.accessToken").title("Access Token").writeonly());
     }
 
     @Override
