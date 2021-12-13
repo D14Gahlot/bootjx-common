@@ -16,6 +16,7 @@ import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.MessageOptions;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.plugin.ChannelConfig;
+import com.boot.jx.postman.plugin.WAGupShupPlugin.GupShupConfigDetails;
 import com.boot.jx.rest.RestService;
 import com.boot.jx.rest.RestService.Ajax;
 import com.boot.utils.ArgUtil;

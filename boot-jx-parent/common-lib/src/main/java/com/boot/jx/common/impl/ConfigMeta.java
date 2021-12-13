@@ -3,7 +3,6 @@ package com.boot.jx.common.impl;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 public class ConfigMeta implements Serializable {
 
@@ -90,6 +89,8 @@ public class ConfigMeta implements Serializable {
     private Object defaultValue;
     private boolean optional;
     private boolean readonly;
+    private boolean createonly;
+    private boolean writeonly;
     private boolean hidden;
     private boolean deprecated;
 
@@ -312,4 +313,29 @@ public class ConfigMeta implements Serializable {
 	return this;
     }
 
+    public ConfigMeta createonly() {
+	this.createonly = true;
+	return this;
+    }
+
+    public boolean isCreateonly() {
+	return createonly;
+    }
+
+    public void setCreateonly(boolean createonly) {
+	this.createonly = createonly;
+    }
+
+    public boolean isWriteonly() {
+	return writeonly;
+    }
+
+    public void setWriteonly(boolean writeonly) {
+	this.writeonly = writeonly;
+    }
+
+    public ConfigMeta writeonly() {
+	this.writeonly = true;
+	return this;
+    }
 }
