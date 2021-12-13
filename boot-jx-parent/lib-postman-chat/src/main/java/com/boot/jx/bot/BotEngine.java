@@ -130,11 +130,13 @@ public class BotEngine {
      */
     protected MethodWrapper getMethodWithMatchingPatternAndFilterUnmatchedMethods(InboxMessage event) {
 
-	if (ArgUtil.isEmpty(event.getMessage())) {
+	if (ArgUtil.isEmpty(event.getMessage())
+		&& ArgUtil.isEmpty(event.getAttachments())) {
 	    return null;
 	}
 
-	StringMatcher matcher = new StringMatcher(event.getMessage().toUpperCase());
+	String text = ArgUtil.nonEmpty(event.getMessage(),Constants.BLANK).toUpperCase();
+	StringMatcher matcher = new StringMatcher(text);
 
 	String tenant = AppContextUtil.getTenant();
 
