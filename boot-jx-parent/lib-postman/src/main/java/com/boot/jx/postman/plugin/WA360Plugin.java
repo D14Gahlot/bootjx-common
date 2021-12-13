@@ -14,6 +14,16 @@ import com.fasterxml.jackson.annotation.JsonView;
 
 public class WA360Plugin implements ChannelPlugin<WA360ConfigDetails> {
 
+    @Override
+    public String getChannelType() {
+	return CHANNEL_TYPE.WA_360D;
+    }
+
+    @Override
+    public ContactType getContactType() {
+	return ContactType.WHATSAPP;
+    }
+
     public static class WA360ConfigDetails extends AChannelDetails {
 
 	private static final long serialVersionUID = -2397678752642150000L;
@@ -42,16 +52,6 @@ public class WA360Plugin implements ChannelPlugin<WA360ConfigDetails> {
 	public void setApiKey(String apiKey) {
 	    this.apiKey = apiKey;
 	}
-    }
-
-    @Override
-    public String getChannelType() {
-	return CHANNEL_TYPE.WA_360D;
-    }
-
-    @Override
-    public ContactType getContactType() {
-	return ContactType.WHATSAPP;
     }
 
     @Override

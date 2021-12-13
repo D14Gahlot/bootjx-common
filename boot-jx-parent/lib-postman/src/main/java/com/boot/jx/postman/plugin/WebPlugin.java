@@ -12,6 +12,16 @@ import com.boot.model.MapModel;
 
 public class WebPlugin implements ChannelPlugin<WebConfigDetails> {
 
+    @Override
+    public ContactType getContactType() {
+	return ContactType.WEBSITE;
+    }
+
+    @Override
+    public String getChannelType() {
+	return CHANNEL_TYPE.WEB;
+    }
+
     public static final class WebConfigDetails extends AChannelDetails {
 
 	private static final long serialVersionUID = 8692015716138195462L;
@@ -31,16 +41,6 @@ public class WebPlugin implements ChannelPlugin<WebConfigDetails> {
 	    this.site = site;
 	}
 
-    }
-
-    @Override
-    public ContactType getContactType() {
-	return ContactType.WEBSITE;
-    }
-
-    @Override
-    public String getChannelType() {
-	return CHANNEL_TYPE.WEB;
     }
 
     @Override
