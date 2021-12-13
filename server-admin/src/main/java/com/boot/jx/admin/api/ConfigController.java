@@ -58,13 +58,6 @@ public class ConfigController {
 
     @JsonView(PMEnvironment.PublicProperty.class)
     @ResponseBody
-    @RequestMapping(value = { "/api/options/lanes" }, method = { RequestMethod.GET })
-    public ApiResponse<AChannelDetails, Object> listActiveLanes() {
-	return ApiResponse.buildResults(pmEnvironment.config().connectors());
-    }
-
-    @JsonView(PMEnvironment.PublicProperty.class)
-    @ResponseBody
     @RequestMapping(value = { "/api/config/clientapikey" }, method = { RequestMethod.GET })
     public ApiResponse<ClientKeyConfigDoc, Object> createClientApiKey() {
 	return ApiResponse.buildResults(mongoTemplate.findAll(ClientKeyConfigDoc.class));
