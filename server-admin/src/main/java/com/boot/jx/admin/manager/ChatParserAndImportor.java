@@ -290,6 +290,12 @@ public class ChatParserAndImportor {
 
 	    ChatParserDto lastMessage = null;
 	    while ((sCurrentLine = br.readLine()) != null) {
+	    	if(ArgUtil.is(sCurrentLine)  && sCurrentLine.charAt(0)=='[') {
+				String sCurrentLines = sCurrentLine.replace("[","").replace("]", " -");
+				if(ArgUtil.is(sCurrentLines)) {
+					sCurrentLine=parsingStringValue(sCurrentLines); 
+				}
+			}
 		Matcher m = r.matcher(sCurrentLine);
 		if (m.find()) {
 		    // System.out.println("======" + sCurrentLine);
@@ -335,5 +341,23 @@ public class ChatParserAndImportor {
 	return chatLst;
 
     }
+    
+    private String parsingStringValue(String str) {
+		String strDate = null;
+		int pos1 = str.indexOf("-");
+		String dateStr = str.substring(0,pos1);
+		String[] spl = dateStr.split(",");
+    	String dateS =spl[0];
+    	String time =spl[1];
+    	int remove = time.lastIndexOf(':');
+    	String hhMM = time.substring(0,remove) + time.substring(remove+3);
+    	String[] dt = dateS.split("/");
+    	String dd =dt[0];
+    	String mm=dt[1];
+    	String yy=dt[2];
+    	String finalDateStr =mm+"/"+dd+"/"+yy+","+hhMM;
+    	strDate = finalDateStr+"-"+str.substring(pos1+1);
+		return strDate ; 
+	}	
 
 }
