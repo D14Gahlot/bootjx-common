@@ -132,13 +132,13 @@ public class TwitterPlugin implements ChannelPlugin<TwitterConfigDetails> {
 
     @Override
     public void addConfigMeta(List<ConfigMeta> configMetaList) {
-	configMetaList.add(new ConfigMeta().path("twitter.handler").title("Handler").nonEditable());
+	configMetaList.add(new ConfigMeta().path("twitter.handler").title("Handler").createonly());
 	configMetaList.add(new ConfigMeta().path("twitter.type").title("Type").hidden());
 	configMetaList.add(new ConfigMeta().path("twitter.envName").title("Env").optional());
-	configMetaList.add(new ConfigMeta().path("twitter.accessToken").title("Access Token"));
-	configMetaList.add(new ConfigMeta().path("twitter.accessTokenSecret").title("Access Token Secret"));
-	configMetaList.add(new ConfigMeta().path("twitter.consumerKey").title("Consumer/Api Key"));
-	configMetaList.add(new ConfigMeta().path("twitter.consumerSecret").title("Consumer/Api Secret"));
+	configMetaList.add(new ConfigMeta().path("twitter.accessToken").title("Access Token").writeonly());
+	configMetaList.add(new ConfigMeta().path("twitter.accessTokenSecret").title("Access Token Secret").writeonly());
+	configMetaList.add(new ConfigMeta().path("twitter.consumerKey").title("Consumer/Api Key").writeonly());
+	configMetaList.add(new ConfigMeta().path("twitter.consumerSecret").title("Consumer/Api Secret").writeonly());
     }
 
     @Override

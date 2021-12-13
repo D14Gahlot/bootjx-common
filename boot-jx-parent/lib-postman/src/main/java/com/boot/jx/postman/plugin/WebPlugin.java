@@ -65,7 +65,7 @@ public class WebPlugin implements ChannelPlugin<WebConfigDetails> {
 
     @Override
     public void addConfigMeta(List<ConfigMeta> configMetaList) {
-	configMetaList.add(new ConfigMeta().path("web.site").title("Site").nonEditable());
+	configMetaList.add(new ConfigMeta().path("web.site").title("Site").createonly());
     }
 
     @Override
