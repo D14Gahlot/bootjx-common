@@ -18,8 +18,6 @@ import com.boot.jx.postman.doc.config.ChannelConfigDoc;
 import com.boot.jx.postman.doc.config.ClientKeyConfigDoc;
 import com.boot.jx.postman.doc.config.PrefsConfigDoc;
 import com.boot.jx.postman.plugin.ChannelConfig;
-import com.boot.jx.postman.plugin.ChannelPluginProvider;
-import com.boot.jx.postman.plugin.ChannelPluginProvider.ChannelPlugin;
 import com.boot.jx.postman.store.ConfigStore;
 import com.boot.jx.scope.tnt.Tenants;
 import com.boot.utils.ArgUtil;
@@ -93,17 +91,6 @@ public class PMEnvironmentProviderImpl implements PMEnvironmentProvider, AppShar
     @Override
     public void config(ChannelConfig config) {
 	configInternal(config);
-
-	// @Deperecated - Start
-	// This code is only for backward compatibility not to be written for New
-	// Channels
-	PMConfigurationDoc doc = getPMConfigurationDoc();
-	ChannelPlugin<?> plugin = ChannelPluginProvider.PLUGIN_MAPPING.get(config.getChannelType());
-	if (ArgUtil.is(plugin)) {
-	    plugin.setConfig(doc, config);
-	}
-	configStore.save(doc);
-	// @Deperecated - Ends
     }
 
     @Override
