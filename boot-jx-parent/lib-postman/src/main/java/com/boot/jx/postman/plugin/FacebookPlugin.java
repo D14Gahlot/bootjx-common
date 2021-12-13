@@ -17,7 +17,17 @@ import com.fasterxml.jackson.annotation.JsonView;
 
 public class FacebookPlugin implements ChannelPlugin<FacebookConfigDetails> {
 
-    public class FacebookConfigDetails extends AChannelDetails {
+    @Override
+    public String getChannelType() {
+	return CHANNEL_TYPE.FACEBOOK;
+    }
+
+    @Override
+    public ContactType getContactType() {
+	return ContactType.FACEBOOK;
+    }
+
+    public static class FacebookConfigDetails extends AChannelDetails {
 
 	private static final long serialVersionUID = -2397678752642150000L;
 	private String pageId;
@@ -95,16 +105,6 @@ public class FacebookPlugin implements ChannelPlugin<FacebookConfigDetails> {
 	    return String.format("FB %s", config.getLane());
 	}
 	return config.getName();
-    }
-
-    @Override
-    public String getChannelType() {
-	return CHANNEL_TYPE.FACEBOOK;
-    }
-
-    @Override
-    public ContactType getContactType() {
-	return ContactType.FACEBOOK;
     }
 
     @Override

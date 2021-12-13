@@ -17,8 +17,18 @@ import com.fasterxml.jackson.annotation.JsonView;
 
 public class WAGupShupPlugin implements ChannelPlugin<GupShupConfigDetails> {
 
+    @Override
+    public String getChannelType() {
+	return CHANNEL_TYPE.WA_GUPSHUP;
+    }
+
+    @Override
+    public ContactType getContactType() {
+	return ContactType.WHATSAPP;
+    }
+
     @JsonIgnoreProperties(ignoreUnknown = true)
-    public class GupShupConfigDetails extends AChannelDetails {
+    public static class GupShupConfigDetails extends AChannelDetails {
 
 	private static final long serialVersionUID = -2397678752642150000L;
 	private String number;
@@ -86,16 +96,6 @@ public class WAGupShupPlugin implements ChannelPlugin<GupShupConfigDetails> {
 	public void setAgentUrl(String agentUrl) {
 	    this.agentUrl = agentUrl;
 	}
-    }
-
-    @Override
-    public String getChannelType() {
-	return CHANNEL_TYPE.WA_GUPSHUP;
-    }
-
-    @Override
-    public ContactType getContactType() {
-	return ContactType.WHATSAPP;
     }
 
     @Override
