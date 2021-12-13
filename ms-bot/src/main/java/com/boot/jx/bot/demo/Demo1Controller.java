@@ -16,7 +16,7 @@ import com.boot.utils.ArgUtil;
 import com.boot.utils.Constants;
 import com.boot.utils.StringUtils.StringMatcher;
 
-@BotController(name = "DemoBot", tenant = { "app", "demo", "sandbox" })
+@BotController(name = "DemoBot", tenant = { "app", "demo", "sandbox", "customer" })
 public class Demo1Controller extends CommonBotController {
 
     private static final String CURRENT_DEMO = "current_menu";
