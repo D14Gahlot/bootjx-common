@@ -101,4 +101,5 @@ public class ChatSessionManager {
 	}
 	return sessionStore.findByStatusOrQuickTag(status, newList, fromStamp, toStamp);
     }
+
 }

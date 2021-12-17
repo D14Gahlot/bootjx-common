@@ -45,6 +45,9 @@ public class ChatSessionDoc extends UpdatedTimeStampDoc implements Serializable 
     private boolean initd;
     private boolean resolved;
     private boolean expired;
+    @Indexed
+    private boolean primary;
+    private boolean closed;
 
     private long startSessionStamp;
     private long fistResponseStamp;
@@ -416,5 +419,21 @@ public class ChatSessionDoc extends UpdatedTimeStampDoc implements Serializable 
 
     public void setFirstOutGoingStamp(long firstOutGoingStamp) {
 	this.firstOutGoingStamp = firstOutGoingStamp;
+    }
+
+    public boolean isPrimary() {
+        return primary;
+    }
+
+    public void setPrimary(boolean primary) {
+        this.primary = primary;
+    }
+
+    public boolean isClosed() {
+        return closed;
+    }
+
+    public void setClosed(boolean closed) {
+        this.closed = closed;
     }
 }
