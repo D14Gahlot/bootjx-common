@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Component;
 
 import com.boot.jx.postman.PMConstants;
@@ -100,6 +102,23 @@ public class ChatSessionManager {
 	    newList.add(tag.getId());
 	}
 	return sessionStore.findByStatusOrQuickTag(status, newList, fromStamp, toStamp);
+    }
+
+    public List<ChatSessionDoc> searchPrimary(String search) {
+	Criteria c = Criteria.where("primary").is(true); // Lane should be fixed
+	if (ArgUtil.is(search)) {
+	    c = c.orOperator(
+		    // Check all fields
+		    Criteria.where("contactId").regex("" + search + "", "i"),
+		    Criteria.where("contactName").regex("" + search + "", "i"),
+		    Criteria.where("contact.name").regex("" + search + "", "i"),
+		    Criteria.where("contact.phone").regex("" + search + "", "i"),
+		    Criteria.where("contact.email").regex("" + search + "", "i"));
+	}
+	Query query = new Query()
+		// New Criteria
+		.addCriteria(c);
+	return sessionStore.find(query, ChatSessionDoc.class);
     }
 
 }
