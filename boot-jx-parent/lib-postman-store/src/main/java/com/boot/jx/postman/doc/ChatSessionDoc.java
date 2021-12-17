@@ -38,6 +38,8 @@ public class ChatSessionDoc extends UpdatedTimeStampDoc implements Serializable 
 
     private String contactName;
 
+    private ContactDetailDoc contact;
+
     private String assignedToDept;
     private String assignedToAgent;
 
@@ -422,18 +424,26 @@ public class ChatSessionDoc extends UpdatedTimeStampDoc implements Serializable 
     }
 
     public boolean isPrimary() {
-        return primary;
+	return primary;
     }
 
     public void setPrimary(boolean primary) {
-        this.primary = primary;
+	this.primary = primary;
     }
 
     public boolean isClosed() {
-        return closed;
+	return closed;
     }
 
     public void setClosed(boolean closed) {
-        this.closed = closed;
+	this.closed = closed;
+    }
+
+    public ContactDetailDoc getContact() {
+        return contact;
+    }
+
+    public void setContact(ContactDetailDoc contact) {
+        this.contact = contact;
     }
 }
