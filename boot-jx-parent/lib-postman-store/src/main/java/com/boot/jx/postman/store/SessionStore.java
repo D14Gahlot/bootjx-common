@@ -7,10 +7,6 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.domain.Sort.Order;
@@ -18,7 +14,6 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
-import org.springframework.data.repository.support.PageableExecutionUtils;
 import org.springframework.stereotype.Component;
 
 import com.boot.jx.mongo.CommonDocStore;
@@ -196,6 +191,7 @@ public class SessionStore extends CommonDocStore {
 
 	    // SESSION UPDATE
 	    chatSessionDoc.setActive(true);
+	    chatSessionDoc.setPrimary(true);
 
 	    if (ArgUtil.is(chatContactDoc) && ArgUtil.is(chatContactDoc.getName())) {
 		chatSessionDoc.setContactName(chatContactDoc.getName());
@@ -289,7 +285,8 @@ public class SessionStore extends CommonDocStore {
     public boolean closeActiveSessionsMulty(String contactId) {
 	Query query2 = new Query();
 	query2.addCriteria(Criteria.where("contactId").is(contactId).and("active").is(true));
-	Update update = new Update().set("active", false).set("closeSessionStamp", System.currentTimeMillis());
+	Update update = new Update().set("active", false).set("primary", false).set("closeSessionStamp",
+		System.currentTimeMillis());
 	mongoTemplate.updateMulti(query2, update, ChatSessionDoc.class);
 	return true;
     }
