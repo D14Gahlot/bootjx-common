@@ -155,4 +155,15 @@ public class AgentMsgController {
 	}
 	return ApiResponse.buildResults(chatSessionDtos);
     }
+
+    @RequestMapping(value = "/api/sessions/primary", method = { RequestMethod.POST })
+    public ApiResponse<ChatSessionDTO, Object> searchPrimarySessions(@RequestBody SessionSearchRequest query) {
+	List<ChatSessionDTO> chatSessionDtos = new ArrayList<ChatSessionDTO>();
+	List<ChatSessionDoc> sessions = chatSessionManager.searchPrimary(query.text);
+	for (ChatSessionDoc chatSessionDoc : sessions) {
+	    ChatSessionDTO chatSessionDto = chatArchive.getChatSession(chatSessionDoc);
+	    chatSessionDtos.add(chatSessionDto);
+	}
+	return ApiResponse.buildResults(chatSessionDtos);
+    }
 }

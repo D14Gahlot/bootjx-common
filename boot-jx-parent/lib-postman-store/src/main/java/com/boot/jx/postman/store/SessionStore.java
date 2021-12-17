@@ -28,6 +28,7 @@ import com.boot.jx.postman.PMConstants.DEFAULT_VALUES;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.ChatUserProfileDoc;
+import com.boot.jx.postman.doc.ContactDetailDoc;
 import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.dto.ChatUserProfileDTO;
 import com.boot.jx.postman.model.InboxMessage;
@@ -54,9 +55,6 @@ public class SessionStore extends CommonDocStore {
 
     @Autowired
     public MongoTemplate mongoTemplate;
-
-    @Autowired
-    public CommonMongoTemplate commonMongoTemplate;
 
     @Autowired
     public PMClientConfig pmClientConfig;
@@ -193,8 +191,12 @@ public class SessionStore extends CommonDocStore {
 	    chatSessionDoc.setActive(true);
 	    chatSessionDoc.setPrimary(true);
 
-	    if (ArgUtil.is(chatContactDoc) && ArgUtil.is(chatContactDoc.getName())) {
-		chatSessionDoc.setContactName(chatContactDoc.getName());
+	    if (ArgUtil.is(chatContactDoc)) {
+		if (ArgUtil.is(chatContactDoc.getName())) {
+		    chatSessionDoc.setContactName(chatContactDoc.getName());
+		}
+		chatSessionDoc.setContact(new ContactDetailDoc());
+		chatSessionDoc.getContact().copyFrom(chatContactDoc);
 	    }
 
 	    save(chatSessionDoc);
@@ -701,7 +703,7 @@ public class SessionStore extends CommonDocStore {
 	}
 	query.with(new Sort(new Order(Direction.DESC, "assignedAgentStamp")));
 	removeMsgFields(query);
-	LOGGER.info("query {===}" + query);
+	LOGGER.debug("query {===}" + query);
 	return mongoTemplate.find(query, ChatSessionDoc.class);
     }
 
