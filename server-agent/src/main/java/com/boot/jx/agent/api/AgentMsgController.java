@@ -72,20 +72,21 @@ public class AgentMsgController {
     public ApiResponse<ChatSessionDTO, AgentSessionDoc> getSessionsAssignments(
 	    @RequestParam(defaultValue = "false") boolean withMessage, @RequestParam(required = false) Boolean status,
 	    @RequestParam(required = false) Boolean away,
-	    @RequestParam(required = false, defaultValue = "HISTORY") String tab) {
+	    @RequestParam(required = false, defaultValue = "HISTORY") String tab,
+	    @RequestParam(required = false) String search) {
 
 	List<ChatSessionDTO> chatSessionDtos = new ArrayList<ChatSessionDTO>();
 	if (agentSession.isLoggedIn() && ArgUtil.is(agentSession.getAgentDept())) {
 	    List<ChatSessionDoc> sessions = null;
 	    long historyPeriod = environment.keyEntry(KEY.POSTMAN_AGENT_TAB_HISTORY_PERIOD).asLong(0L);
 	    if (historyPeriod > 0L && "HISTORY".equals(tab)) {
-		sessions = sessionStore.findChatSessionDocByAgentAndUnAssigned(agentSession.getAgentCode(),
-			agentSession.getAgentDept(),
+		sessions = chatSessionManager.findChatSessionDocByAgentAndUnAssigned(agentSession.getAgentCode(),
+			agentSession.getAgentDept(), search,
 			PMConstants.DEFAULT_VALUES.POSTMAN_AGENT_TAB_HISTORY_PERIOD + historyPeriod);
 	    } else {
 		ApiResponseUtil.addLog("Only Active Chats");
-		sessions = sessionStore.findChatSessionDocByAgentAndUnAssigned(agentSession.getAgentCode(),
-			agentSession.getAgentDept());
+		sessions = chatSessionManager.findChatSessionDocByAgentAndUnAssigned(agentSession.getAgentCode(),
+			agentSession.getAgentDept(), search);
 	    }
 
 	    for (ChatSessionDoc chatSessionDoc : sessions) {
