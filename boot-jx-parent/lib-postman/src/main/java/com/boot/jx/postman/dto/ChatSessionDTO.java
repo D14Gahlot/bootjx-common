@@ -47,6 +47,9 @@ public class ChatSessionDTO implements Serializable {
     private boolean resolved;
     private boolean expired;
 
+    private boolean primary;
+    private boolean closed;
+
     private String mode;
     private String status;
     private List<String> tagId;
@@ -304,6 +307,22 @@ public class ChatSessionDTO implements Serializable {
 
     public void setTagId(List<String> tagId) {
 	this.tagId = tagId;
+    }
+
+    public boolean isPrimary() {
+        return primary;
+    }
+
+    public void setPrimary(boolean primary) {
+        this.primary = primary;
+    }
+
+    public boolean isClosed() {
+        return closed;
+    }
+
+    public void setClosed(boolean closed) {
+        this.closed = closed;
     }
 
 }
