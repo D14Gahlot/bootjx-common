@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.DependsOn;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -29,7 +28,6 @@ import com.boot.jx.common.store.ChatArchiveService;
 import com.boot.jx.model.CommonFile;
 import com.boot.jx.postman.PMConstants;
 import com.boot.jx.postman.PMConstants.CHAT_STATUS;
-import com.boot.jx.postman.PMConstants.DEFAULT;
 import com.boot.jx.postman.client.PMFileStoreClient;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
@@ -37,6 +35,7 @@ import com.boot.jx.postman.doc.QuickLabel;
 import com.boot.jx.postman.dto.ChatMessageDTO;
 import com.boot.jx.postman.dto.ChatSessionDTO;
 import com.boot.jx.postman.dto.ContactDTO;
+import com.boot.jx.postman.manager.ChatSessionManager;
 import com.boot.jx.postman.manager.LogManager;
 import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.OutboxMessage;
@@ -45,7 +44,6 @@ import com.boot.jx.postman.store.MessageStore.EVENTS;
 import com.boot.jx.postman.store.SessionStore;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
-import com.boot.utils.Constants;
 import com.boot.utils.JsonUtil;
 import com.boot.utils.MapBuilder;
 
@@ -54,6 +52,9 @@ public class MsgController {
 
     @Autowired
     private SessionStore sessionStore;
+    
+    @Autowired
+    ChatSessionManager chatSessionManager;
 
     @Autowired
     private AgentSessionBean agentSession;
@@ -78,31 +79,6 @@ public class MsgController {
 
     @Autowired
     private AgentSessionService agentSessionService;
-
-    @ResponseBody
-    @RequestMapping(value = "/api/sessions/assigned", method = { RequestMethod.GET })
-    public ApiResponse<ChatSessionDTO, Object> getSessionsAssignedToMe(
-	    @RequestParam(defaultValue = "true") boolean withMessage) {
-	List<ChatSessionDTO> chatSessionDtos = new ArrayList<ChatSessionDTO>();
-	if (agentSession.isLoggedIn() && ArgUtil.is(agentSession.getAgentDept())) {
-	    List<ChatSessionDoc> sessions = sessionStore
-		    .findChatSessionDocByAgentAndUnAssigned(agentSession.getAgentCode(), agentSession.getAgentDept());
-	    for (ChatSessionDoc chatSessionDoc : sessions) {
-		ChatSessionDTO chatSessionDto = chatArchive.getChatSession(chatSessionDoc);
-		chatSessionDto = chatArchive.withContact(chatSessionDto);
-		if (withMessage
-			&& ArgUtil.isEqual(chatSessionDto.getAssignedToDept(), DEFAULT.NO_DEPT,
-				agentSession.getAgentDept(), null, Constants.BLANK)
-			&& ArgUtil.isEqual(chatSessionDto.getAssignedToAgent(), agentSession.getAgentCode(), null)) {
-		    chatSessionDto = chatArchive.withMessages(chatSessionDto);
-		}
-		chatSessionDtos.add(chatSessionDto);
-	    }
-	}
-	agentSessionService.refreshOnline();
-	return ApiResponse.buildResults(chatSessionDtos, MapBuilder.map().put("isOnline", agentSession.isOnline())
-		.put("profile", agentSession.getProfile()).build());
-    }
 
     @ResponseBody
     @RequestMapping(value = "/api/sessions/message/send", method = { RequestMethod.POST })

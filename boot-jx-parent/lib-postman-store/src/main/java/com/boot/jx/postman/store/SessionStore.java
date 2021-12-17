@@ -19,7 +19,6 @@ import org.springframework.stereotype.Component;
 import com.boot.jx.mongo.CommonDocStore;
 import com.boot.jx.mongo.CommonMongoQB.CommonMongoCriteria;
 import com.boot.jx.mongo.CommonMongoQueryBuilder;
-import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.jx.postman.PMClientConfig;
 import com.boot.jx.postman.PMConstants;
 import com.boot.jx.postman.PMConstants.CHAT_MODE;
@@ -332,52 +331,7 @@ public class SessionStore extends CommonDocStore {
 	}
     }
 
-    public List<ChatSessionDoc> findChatSessionDocByAgentAndUnAssigned(String agentCode, String agentDept,
-	    long period) {
-	Query query2 = new Query();
-	Calendar timeout = Calendar.getInstance();
-	timeout.setTimeInMillis(timeout.getTimeInMillis() - period);
-	long watermarkStamp = timeout.getTimeInMillis();
-	long watermarkStampDay = timeout.getTimeInMillis() / TimeUtils.Constants.MILLIS_IN_DAY;
-
-	timeout.setTimeInMillis(timeout.getTimeInMillis() - period);
-	long graceStamp = timeout.getTimeInMillis();
-
-	query2.addCriteria(Criteria.where("active").is(true).and("mode").is("AGENT")
-		// Agent Session Start
-		// .and("agentSessionStamp").gt(watermarkStamp)
-		.orOperator(Criteria.where("agentSessionStamp").gt(watermarkStamp),
-			// @deprecated condition
-			Criteria.where("updatedStamp").gt(watermarkStamp),
-			// new Condition
-			Criteria.where("updated.day").gt(watermarkStampDay))
-		// .and("updatedStamp").gt(watermarkStamp)
-		// Additional Stamps
-		.andOperator(
-			//
-			new Criteria().orOperator(
-				// Customer has replied within CustomerCareWindow
-				Criteria.where("lastInComingStamp").gt(graceStamp),
-				// Agent Has been Assigned to it
-				Criteria.where("lastOutGoingStamp").gt(graceStamp)),
-			// Is not assigned to any agent or assigned to said agent
-//						new Criteria().orOperator(Criteria.where("assignedToAgent").exists(false),
-//								Criteria.where("assignedToAgent").is(null),
-//								Criteria.where("assignedToAgent").is(agentCode)),
-			// Is not resolved yet
-			new Criteria().orOperator(Criteria.where("resolved").exists(false),
-				Criteria.where("resolved").is(false))
-
-		));
-	// LOGGER.info(query2.toString());
-	return mongoTemplate.find(query2, ChatSessionDoc.class);
-    }
-
-    public List<ChatSessionDoc> findChatSessionDocByAgentAndUnAssigned(String agentCode, String agentDept) {
-	return findChatSessionDocByAgentAndUnAssigned(agentCode, agentDept,
-		DEFAULT_VALUES.POSTMAN_AGENT_TAB_HISTORY_PERIOD);
-    }
-
+    
     public List<ChatSessionDoc> findSimilarChatSessionForContactId(String contactId, Long fromStamp, Long toStamp) {
 	ChatContactDoc contact = getContact(contactId);
 
