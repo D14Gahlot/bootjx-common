@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.boot.jx.postman.model.MessageDefinitions.Contactable;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -50,7 +51,7 @@ public class ChatSessionDTO implements Serializable {
     private String status;
     private List<String> tagId;
 
-    private ContactDTO contact;
+    private Contactable contact;
 
     private List<ChatMessageDTO> messages;
 
@@ -218,11 +219,11 @@ public class ChatSessionDTO implements Serializable {
 	this.closeSessionStamp = closeSessionStamp;
     }
 
-    public ContactDTO getContact() {
+    public Contactable getContact() {
 	return contact;
     }
 
-    public void setContact(ContactDTO contact) {
+    public void setContact(Contactable contact) {
 	this.contact = contact;
     }
 
