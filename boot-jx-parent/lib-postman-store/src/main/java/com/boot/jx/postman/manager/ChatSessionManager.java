@@ -151,6 +151,7 @@ public class ChatSessionManager {
 	);
 
 	if (ArgUtil.is(search)) {
+	    search = search.replace("*", "");
 	    Criteria archiveCriteria = Criteria.where("primary").is(true).orOperator(
 		    // Check all fields
 		    Criteria.where("contactId").regex("" + search + "", "i"),
