@@ -48,7 +48,6 @@ public class ChatSessionDTO implements Serializable {
     private boolean expired;
 
     private boolean primary;
-    private boolean closed;
 
     private String mode;
     private String status;
@@ -310,19 +309,11 @@ public class ChatSessionDTO implements Serializable {
     }
 
     public boolean isPrimary() {
-        return primary;
+	return primary;
     }
 
     public void setPrimary(boolean primary) {
-        this.primary = primary;
-    }
-
-    public boolean isClosed() {
-        return closed;
-    }
-
-    public void setClosed(boolean closed) {
-        this.closed = closed;
+	this.primary = primary;
     }
 
 }
