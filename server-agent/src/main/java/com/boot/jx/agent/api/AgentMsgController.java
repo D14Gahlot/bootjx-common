@@ -1,7 +1,10 @@
 package com.boot.jx.agent.api;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -144,12 +147,17 @@ public class AgentMsgController {
 
     @RequestMapping(value = "/api/sessions/search", method = { RequestMethod.POST })
     public ApiResponse<ChatSessionDTO, Object> searchSessions(@RequestBody SessionSearchRequest query) {
-	List<ChatSessionDTO> chatSessionDtos = new ArrayList<ChatSessionDTO>();
+	List<ChatSessionDTO> chatSessionDtos = new ArrayList<ChatSessionDTO>();	
 	List<ChatSessionDoc> sessions = chatSessionManager.searchBy(query.status, query.tags, query.fromStamp,
 		query.toStamp);
 	for (ChatSessionDoc chatSessionDoc : sessions) {
-	    ChatSessionDTO chatSessionDto = chatArchive.withContact(chatSessionDoc);
+		ChatSessionDTO chatSessionDto = chatArchive.withContact(chatSessionDoc);
 	    chatSessionDtos.add(chatSessionDto);
+	}
+	/**remove duplicate /multiple Session for each contact  we can filter based on name , phone number on any field **/
+	if(chatSessionDtos!=null &&  !chatSessionDtos.isEmpty()) {
+		Set<String> chatSessionSet = new HashSet<>();
+		chatSessionDtos=chatSessionDtos.stream().filter(e->chatSessionSet.add(e.getPhone())).collect(Collectors.toList());
 	}
 	return ApiResponse.buildResults(chatSessionDtos);
     }
@@ -163,5 +171,5 @@ public class AgentMsgController {
 	    chatSessionDtos.add(chatSessionDto);
 	}
 	return ApiResponse.buildResults(chatSessionDtos);
-    }
+    } 
 }

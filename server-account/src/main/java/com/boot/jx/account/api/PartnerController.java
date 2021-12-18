@@ -145,7 +145,8 @@ public class PartnerController {
 
 	accountStore.save(account);
 	sessionService.sendResetMail(account, "tenant-verify-email");
-
+	sessionService.sendMailToSalesTeam(account, "new-customer-register-email");
+//Customer registers on our website
 	return ApiResponse.build().message("Verification email sent");
     }
 
