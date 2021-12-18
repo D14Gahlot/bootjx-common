@@ -177,7 +177,7 @@ public class SessionStore extends CommonDocStore {
 
 	if (!isSessionValid(chatSessionDoc)) {
 
-	    closeActiveSessionsMulty(contactId);
+	    closeAllPreviousSessions(contactId);
 
 	    // SESSION CREATION
 	    chatSessionDoc = new ChatSessionDoc();
@@ -283,26 +283,16 @@ public class SessionStore extends CommonDocStore {
 	return inboxMessage;
     }
 
-    public boolean closeActiveSessionsMulty(String contactId) {
+    public boolean closeAllPreviousSessions(String contactId) {
 	Query query2 = new Query();
-	query2.addCriteria(Criteria.where("contactId").is(contactId).and("active").is(true));
+	query2.addCriteria(Criteria.where("contactId").is(contactId).orOperator(
+		// is active
+		Criteria.where("active").is(true),
+		// or primary
+		Criteria.where("primary").is(true)));
 	Update update = new Update().set("active", false).set("primary", false).set("closeSessionStamp",
 		System.currentTimeMillis());
 	mongoTemplate.updateMulti(query2, update, ChatSessionDoc.class);
-	return true;
-    }
-
-    public boolean closeActiveSessionsBulk(String contactId) {
-	DBCollection collection = mongoTemplate.getCollection(mongoTemplate.getCollectionName(ChatSessionDoc.class));
-	BulkWriteOperation bulk = collection.initializeOrderedBulkOperation();
-
-	List<DBObject> criteria = new ArrayList<DBObject>();
-	criteria.add(new BasicDBObject("contactId", contactId));
-	criteria.add(new BasicDBObject("active", true));
-	bulk.find(new BasicDBObject("$and", criteria))
-		.update(new BasicDBObject(new BasicDBObject("$set", new BasicDBObject("active", false))));
-
-	BulkWriteResult writeResult = bulk.execute();
 	return true;
     }
 
@@ -331,7 +321,6 @@ public class SessionStore extends CommonDocStore {
 	}
     }
 
-    
     public List<ChatSessionDoc> findSimilarChatSessionForContactId(String contactId, Long fromStamp, Long toStamp) {
 	ChatContactDoc contact = getContact(contactId);
 
