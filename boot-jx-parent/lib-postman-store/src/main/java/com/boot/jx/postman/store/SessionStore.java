@@ -19,7 +19,6 @@ import org.springframework.stereotype.Component;
 import com.boot.jx.mongo.CommonDocStore;
 import com.boot.jx.mongo.CommonMongoQB.CommonMongoCriteria;
 import com.boot.jx.mongo.CommonMongoQueryBuilder;
-import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.jx.postman.PMClientConfig;
 import com.boot.jx.postman.PMConstants;
 import com.boot.jx.postman.PMConstants.CHAT_MODE;
@@ -178,7 +177,7 @@ public class SessionStore extends CommonDocStore {
 
 	if (!isSessionValid(chatSessionDoc)) {
 
-	    closeActiveSessionsMulty(contactId);
+	    closeAllPreviousSessions(contactId);
 
 	    // SESSION CREATION
 	    chatSessionDoc = new ChatSessionDoc();
@@ -284,26 +283,16 @@ public class SessionStore extends CommonDocStore {
 	return inboxMessage;
     }
 
-    public boolean closeActiveSessionsMulty(String contactId) {
+    public boolean closeAllPreviousSessions(String contactId) {
 	Query query2 = new Query();
-	query2.addCriteria(Criteria.where("contactId").is(contactId).and("active").is(true));
+	query2.addCriteria(Criteria.where("contactId").is(contactId).orOperator(
+		// is active
+		Criteria.where("active").is(true),
+		// or primary
+		Criteria.where("primary").is(true)));
 	Update update = new Update().set("active", false).set("primary", false).set("closeSessionStamp",
 		System.currentTimeMillis());
 	mongoTemplate.updateMulti(query2, update, ChatSessionDoc.class);
-	return true;
-    }
-
-    public boolean closeActiveSessionsBulk(String contactId) {
-	DBCollection collection = mongoTemplate.getCollection(mongoTemplate.getCollectionName(ChatSessionDoc.class));
-	BulkWriteOperation bulk = collection.initializeOrderedBulkOperation();
-
-	List<DBObject> criteria = new ArrayList<DBObject>();
-	criteria.add(new BasicDBObject("contactId", contactId));
-	criteria.add(new BasicDBObject("active", true));
-	bulk.find(new BasicDBObject("$and", criteria))
-		.update(new BasicDBObject(new BasicDBObject("$set", new BasicDBObject("active", false))));
-
-	BulkWriteResult writeResult = bulk.execute();
 	return true;
     }
 
@@ -330,52 +319,6 @@ public class SessionStore extends CommonDocStore {
 		    .set("expired", true).set("active", false).set("closeSessionStamp", System.currentTimeMillis());
 	    mongoTemplate.updateFirst(cmqb.getQuery(), cmqb.getUpdate(), ChatSessionDoc.class);
 	}
-    }
-
-    public List<ChatSessionDoc> findChatSessionDocByAgentAndUnAssigned(String agentCode, String agentDept,
-	    long period) {
-	Query query2 = new Query();
-	Calendar timeout = Calendar.getInstance();
-	timeout.setTimeInMillis(timeout.getTimeInMillis() - period);
-	long watermarkStamp = timeout.getTimeInMillis();
-	long watermarkStampDay = timeout.getTimeInMillis() / TimeUtils.Constants.MILLIS_IN_DAY;
-
-	timeout.setTimeInMillis(timeout.getTimeInMillis() - period);
-	long graceStamp = timeout.getTimeInMillis();
-
-	query2.addCriteria(Criteria.where("active").is(true).and("mode").is("AGENT")
-		// Agent Session Start
-		// .and("agentSessionStamp").gt(watermarkStamp)
-		.orOperator(Criteria.where("agentSessionStamp").gt(watermarkStamp),
-			// @deprecated condition
-			Criteria.where("updatedStamp").gt(watermarkStamp),
-			// new Condition
-			Criteria.where("updated.day").gt(watermarkStampDay))
-		// .and("updatedStamp").gt(watermarkStamp)
-		// Additional Stamps
-		.andOperator(
-			//
-			new Criteria().orOperator(
-				// Customer has replied within CustomerCareWindow
-				Criteria.where("lastInComingStamp").gt(graceStamp),
-				// Agent Has been Assigned to it
-				Criteria.where("lastOutGoingStamp").gt(graceStamp)),
-			// Is not assigned to any agent or assigned to said agent
-//						new Criteria().orOperator(Criteria.where("assignedToAgent").exists(false),
-//								Criteria.where("assignedToAgent").is(null),
-//								Criteria.where("assignedToAgent").is(agentCode)),
-			// Is not resolved yet
-			new Criteria().orOperator(Criteria.where("resolved").exists(false),
-				Criteria.where("resolved").is(false))
-
-		));
-	// LOGGER.info(query2.toString());
-	return mongoTemplate.find(query2, ChatSessionDoc.class);
-    }
-
-    public List<ChatSessionDoc> findChatSessionDocByAgentAndUnAssigned(String agentCode, String agentDept) {
-	return findChatSessionDocByAgentAndUnAssigned(agentCode, agentDept,
-		DEFAULT_VALUES.POSTMAN_AGENT_TAB_HISTORY_PERIOD);
     }
 
     public List<ChatSessionDoc> findSimilarChatSessionForContactId(String contactId, Long fromStamp, Long toStamp) {

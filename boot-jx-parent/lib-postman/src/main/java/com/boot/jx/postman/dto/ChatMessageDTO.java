@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.boot.jx.postman.model.Attachment;
+import com.boot.jx.postman.model.MessageDefinitions.Contactable;
 import com.boot.jx.postman.model.TagDocument;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
@@ -34,7 +35,7 @@ public class ChatMessageDTO implements Serializable {
     private String sender;
     private String status;
     private Map<String, Long> stamps;
-    private ContactDTO contact;
+    private Contactable contact;
 
     private Map<String, Object> meta;
 
@@ -166,11 +167,11 @@ public class ChatMessageDTO implements Serializable {
 	this.stamps = stamps;
     }
 
-    public ContactDTO getContact() {
+    public Contactable getContact() {
 	return contact;
     }
 
-    public void setContact(ContactDTO contact) {
+    public void setContact(Contactable contact) {
 	this.contact = contact;
     }
 
