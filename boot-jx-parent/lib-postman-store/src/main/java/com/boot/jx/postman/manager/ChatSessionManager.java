@@ -7,6 +7,8 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Component;
@@ -161,6 +163,7 @@ public class ChatSessionManager {
 	} else {
 	    query2.addCriteria(Criteria.where("mode").is("AGENT").andOperator(localCriteria));
 	}
+	query2.with(new Sort(Direction.DESC, "updated.day")).limit(100);
 	// System.out.println(query2.toString());
 	LOGGER.debug(query2.toString());
 	return sessionStore.find(query2, ChatSessionDoc.class);
