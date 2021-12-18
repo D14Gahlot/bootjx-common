@@ -2,12 +2,13 @@ package com.boot.jx.postman.dto;
 
 import java.util.List;
 
+import com.boot.jx.postman.model.MessageDefinitions.Contactable;
 import com.boot.jx.swagger.ApiMockModelProperty;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class ContactDTO implements java.io.Serializable {
+public class ContactDTO implements java.io.Serializable, Contactable {
 
     private static final long serialVersionUID = 8977954934029643371L;
 

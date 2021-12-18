@@ -38,6 +38,8 @@ public class ChatSessionDoc extends UpdatedTimeStampDoc implements Serializable 
 
     private String contactName;
 
+    private ContactDetailDoc contact;
+
     private String assignedToDept;
     private String assignedToAgent;
 
@@ -45,6 +47,8 @@ public class ChatSessionDoc extends UpdatedTimeStampDoc implements Serializable 
     private boolean initd;
     private boolean resolved;
     private boolean expired;
+    @Indexed
+    private boolean primary;
 
     private long startSessionStamp;
     private long fistResponseStamp;
@@ -416,5 +420,21 @@ public class ChatSessionDoc extends UpdatedTimeStampDoc implements Serializable 
 
     public void setFirstOutGoingStamp(long firstOutGoingStamp) {
 	this.firstOutGoingStamp = firstOutGoingStamp;
+    }
+
+    public boolean isPrimary() {
+	return primary;
+    }
+
+    public void setPrimary(boolean primary) {
+	this.primary = primary;
+    }
+
+    public ContactDetailDoc getContact() {
+	return contact;
+    }
+
+    public void setContact(ContactDetailDoc contact) {
+	this.contact = contact;
     }
 }
