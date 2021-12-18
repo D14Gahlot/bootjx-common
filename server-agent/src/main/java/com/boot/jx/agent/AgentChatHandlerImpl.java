@@ -172,6 +172,17 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 	return null;
     }
 
+    private AgentSessionDoc getAgentSessonAssignedAndActive(InboxMessage inboxMessage) {
+	AgentSessionDoc avaialbleAgent = this.getAgentSessonAssigned(inboxMessage);
+	if (ArgUtil.is(avaialbleAgent)) {
+	    AgentDoc agent = agentStore.findByCode(avaialbleAgent.getAgentCode());
+	    if (agent.isEnabled()) {
+		return avaialbleAgent;
+	    }
+	}
+	return null;
+    }
+
     private void assignToAgent(ChatSessionDoc chatSessionDoc, String agentDept, String agentCode) {
 	sessionStore.assignToAgent(chatSessionDoc, agentDept, agentCode);
 	if (ArgUtil.is(agentCode)) {
@@ -195,7 +206,7 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 	    logManager.log(inboxMessage, MessageStore.EVENTS.ASGND_TO_DEPT, inboxMessage.session().getDept());
 	}
 
-	AgentSessionDoc avaialbleAgent = getAgentSessonAssigned(inboxMessage);
+	AgentSessionDoc avaialbleAgent = getAgentSessonAssignedAndActive(inboxMessage);
 
 	if (ArgUtil.is(avaialbleAgent)) {
 	    assignToAgent(chatSessionDoc, avaialbleAgent.getAgentDept(), avaialbleAgent.getAgentCode());
