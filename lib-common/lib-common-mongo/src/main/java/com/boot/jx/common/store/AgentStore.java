@@ -44,6 +44,11 @@ public class AgentStore {
 	return mongoTemplate.findOne(builder.getQuery(), AgentDoc.class);
     }
 
+    public AgentDoc findByCode(String agentCode) {
+	CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder().where("agent_code", agentCode);
+	return mongoTemplate.findOne(builder.getQuery(), AgentDoc.class);
+    }
+
     public List<DepartmentDoc> findDepartmentAll() {
 	return mongoTemplate.findAll(DepartmentDoc.class);
     }

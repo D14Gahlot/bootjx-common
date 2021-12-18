@@ -33,6 +33,7 @@ import com.boot.jx.postman.tg.TelegramModels.TGFile;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.Constants;
 import com.boot.utils.JsonUtil;
 
 @Component
@@ -91,7 +92,15 @@ public class TelegramConnector extends AbstractConnector<TelegramConfigDetails, 
 	inboxMessage.setOriginalMessage(update);
 	inboxMessage.setMessageIdExt(
 		String.format("%s-%s", update.getMessage().getChatId(), update.getMessage().getMessageId()));
-	inboxMessage.setMessage(update.getMessage().getText());
+
+
+	String text = ArgUtil.parseAsString(update.getMessage().getText(),Constants.BLANK);
+	
+	if(text.startsWith("/start ")) {
+	    inboxMessage.setMessage(text.replace("/start ", ""));
+	} else {
+	    inboxMessage.setMessage(text);
+	}
 
 	if (ArgUtil.is(update.getMessage().getPhoto())) {
 	    Optional<PhotoSize> photo = update.getMessage().getPhoto().stream()
