@@ -22,6 +22,7 @@ import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.model.PostManFile;
 import com.boot.jx.postman.model.TmplElement;
 import com.boot.jx.rest.RestService;
+import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
 
@@ -78,6 +79,15 @@ public class TmplClient {
 	Map<String, Object> options = new HashMap<String, Object>();
 	List<TmplElement> buttons = new ArrayList<TmplElement>();
 	List<TmplElement> inputs = new ArrayList<TmplElement>();
+	
+	MapModel optionsModel = MapModel.from(file.options());
+	List<Map<String, Object>> buttonsModel = optionsModel.keyEntry("buttons").asListOfMap();
+	
+	for (Map<String, Object> map : buttonsModel) {
+		MapModel buttonMapModel = MapModel.from(map);
+		buttons.add(new TmplElement().name(buttonMapModel.getString("key"))
+				.label(buttonMapModel.getString("label")).type(buttonMapModel.getString("type")));
+	}
 
 	for (Entry<String, Object> entry : file.getOptions().entrySet()) {
 	    if (entry.getKey().indexOf("form-input-") == 0) {
