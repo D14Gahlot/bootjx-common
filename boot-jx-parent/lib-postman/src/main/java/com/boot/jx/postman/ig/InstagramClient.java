@@ -171,7 +171,7 @@ public class InstagramClient implements MessageClient {
 		}
 	    }
 
-	    if (ArgUtil.is(outboxMessage.getMessage()) && isTemplate) {
+	    if (ArgUtil.is(outboxMessage.getMessage())) {
 	    	if (outboxMessage.options().containsKey("buttons")) {
 	    		MapModel responseModel = sendAdvanced(channelConfig, reqMessage);
 	    		if (ArgUtil.is(responseModel.get("message_id"))) {
