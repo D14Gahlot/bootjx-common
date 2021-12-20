@@ -81,6 +81,7 @@ public class InstagramClient implements MessageClient {
     public OutboxMessage send(ChannelConfig channelConfig, OutboxMessage outboxMessage) {
 	String csid = outboxMessage.contact().getCsid();
 	String lane = outboxMessage.contact().getLane();
+	Boolean isTemplate = false;
 
 	InstagramMessageResp resp = null;
 	StringJoiner msgIds = new StringJoiner(",");
@@ -92,6 +93,7 @@ public class InstagramClient implements MessageClient {
 	if (outboxMessage.options().containsKey("buttons")) {
 		List<TmplElement> buttons = new MapModel(outboxMessage.options()).entry("buttons").asList(TmplElement.class);
 		if(buttons.size() > 3) {
+			isTemplate = true;
 			reqMessage.put("messaging_type" , "RESPONSE"); 
 			MapModel messageModel = MapModel.createInstance();
 			if (ArgUtil.is(outboxMessage.getMessage())) {
@@ -105,6 +107,7 @@ public class InstagramClient implements MessageClient {
 			messageModel.put("quick_replies", quickreplies.list());
 			reqMessage.put("message", messageModel.toMap());
 		}else {
+			isTemplate = true;
 			MapModel messageModel = MapModel.createInstance();
 			messageModel.put(new JsonPath("/attachment/type"), "template");
 			MapModel payloadModel = MapModel.createInstance();
@@ -168,10 +171,10 @@ public class InstagramClient implements MessageClient {
 		}
 	    }
 
-	    if (ArgUtil.is(outboxMessage.getMessage())) {
+	    if (ArgUtil.is(outboxMessage.getMessage()) && isTemplate) {
 	    	if (outboxMessage.options().containsKey("buttons")) {
 	    		MapModel responseModel = sendAdvanced(channelConfig, reqMessage);
-	    		if (ArgUtil.is(responseModel.get("message_id")))
+	    		if (ArgUtil.is(responseModel.get("message_id"))) {
 	    		    msgIds.add(ArgUtil.parseAsString(responseModel.get("message_id")));
 	    	    }
 	    	}else {
@@ -184,6 +187,7 @@ public class InstagramClient implements MessageClient {
 	    		    msgIds.add(ArgUtil.parseAsString(resp.getMessageId()));
 	    	    }
 	    	}
+	    }
 		
 	} catch (HttpStatusCodeException | AmxException e) {
 	    if (e instanceof HttpStatusCodeException)
