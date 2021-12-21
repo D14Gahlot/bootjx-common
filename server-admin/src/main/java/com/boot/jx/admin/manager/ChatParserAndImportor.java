@@ -181,8 +181,7 @@ public class ChatParserAndImportor {
 	return request;
     }
 
-    public ApiResponse<ChatSessionDTO, Map<String, Object>> getChats(MultipartFile file, ContactType contactType,
-	    String clientDate, String format) {
+    public ApiResponse<ChatSessionDTO, Map<String, Object>> getChats(MultipartFile file, ContactType contactType,String clientDate, String format) {
 
 	CommonDateTimeParser dtp = new CommonDateTimeParser()
 		.formatter(ArgUtil.nonEmpty(format, "ccc LLL dd yyyy HH:mm:ss 'GMT'Z (zzzz)")).date(clientDate)
@@ -209,7 +208,6 @@ public class ChatParserAndImportor {
 	String senderB = null;
 
 	for (ChatParserDto item : list) {
-
 	    ChatMessageDTO msg = new ChatMessageDTO();
 	    msg.setSender(item.getAuther());
 	    msg.setTimestamp(dtp.date(item.getDate().trim()).toUTCTimeStamp());
@@ -264,7 +262,8 @@ public class ChatParserAndImportor {
 	if (ArgUtil.is(duplicates)) {
 	    meta.put("duplicates", importChatSession);
 	}
-
+	return ApiResponse.buildResults(sessions, meta);
+}
 	public List<ChatParserDto> getParseFileUsingRegExp(MultipartFile file, ImportChatSessionDoc importChatSessionDoc) {
 		InputStream is = null;
 		BufferedReader br = null;
