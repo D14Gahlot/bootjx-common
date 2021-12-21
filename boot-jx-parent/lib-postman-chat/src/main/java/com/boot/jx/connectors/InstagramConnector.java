@@ -28,6 +28,9 @@ import com.boot.jx.postman.plugin.InstagramPlugin.InstagramConfig;
 import com.boot.jx.postman.query.ChatContactQuery;
 import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
 
 @Component
 @ConnectorMapping(contactType = ContactType.INSTAGRAM)
@@ -83,7 +86,12 @@ public class InstagramConnector extends AbstractConnector<InstagramConfig, Insta
 	event.contact().setChannelType(CHANNEL_TYPE.INSTAGRAM);
 	event.setFrom(id);
 	event.contact().setCsid(id);
-	event.setMessage(m.getMessage().getText());
+	if (ArgUtil.is(m.getPostBack()) && ArgUtil.is(m.getPostBack().getTitle())) {
+		event.setMessage(m.getPostBack().getTitle());
+	}else {
+		event.setMessage(m.getMessage().getText());		
+	}
+	
 	event.to().add(m.getRecipient().get("id"));
 	event.contact().type(ContactType.INSTAGRAM);
 	event.contact().setLane(lane);
