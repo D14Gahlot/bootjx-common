@@ -64,7 +64,7 @@ public final class DateUtil {
 	private static final String AMPM_FORMAT = " hh:mm:ss aaa ";
 
 	/** The Constant NON_AMPM_FORMAT. */
-	private static final String NON_AMPM_FORMAT = " HH:mm:ss ";
+	public static final String NON_AMPM_FORMAT = " HH:mm:ss ";
 
 	/** The Constant WEEK_DAY. */
 	private static final String WEEK_DAY = "EEE";
