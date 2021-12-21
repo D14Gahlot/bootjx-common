@@ -5,7 +5,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Component;
 
+import com.boot.jx.AppConfig;
 import com.boot.jx.AppContextUtil;
+import com.boot.jx.http.CommonHttpRequest;
 import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.utils.ArgUtil;
@@ -35,8 +37,8 @@ public class PMClientConfig {
     @Value("${postman.contact.details.url}")
     private String contactDetailsUrl;
 
-    @Value("${postman.chat.dummy.user.enabled}")
-    boolean chatDummyUserEnabled;
+    @Value("${app.local.dummy.bot.enabled}")
+    boolean localDummyBotEnabled;
 
     @Value("${postman.chat.idle.timeout}")
     private String chatIdleTimeout;
@@ -53,12 +55,18 @@ public class PMClientConfig {
     @Autowired
     private PMEnvironment environment;
 
-    public boolean isChatDummyUserEnabled() {
-	return chatDummyUserEnabled;
-    }
+    @Autowired
+    private CommonHttpRequest commonHttpRequest;
+
+    @Autowired
+    private AppConfig appConfig;
 
     public String getAgentUrl() {
 	return agentUrl;
+    }
+
+    public boolean isLocalDummyBotEnabled() {
+	return localDummyBotEnabled;
     }
 
     public String getDefaultSender() {
@@ -97,8 +105,13 @@ public class PMClientConfig {
     public String getWebhookBase(ChannelConfig channelConfig) {
 	String webhookUrl = channelConfig.getWebhookUrl();
 	if (!ArgUtil.is(webhookUrl)) {
-	    webhookUrl = String.format("https://%s.%s/postman", AppContextUtil.getTenant(),
-		    environment.keyEntry("mry.prop.service.domain").asString());
+	    if (isLocalDummyBotEnabled()) {
+		webhookUrl = String.format("%s%s", commonHttpRequest.getServerHost(), appConfig.getAppPrefix(),
+			environment.keyEntry("mry.prop.service.domain").asString());
+	    } else {
+		webhookUrl = String.format("https://%s.%s/postman", AppContextUtil.getTenant(),
+			environment.keyEntry("mry.prop.service.domain").asString());
+	    }
 	}
 	return webhookUrl;
     }

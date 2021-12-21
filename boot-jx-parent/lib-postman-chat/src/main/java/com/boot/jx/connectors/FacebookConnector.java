@@ -12,7 +12,6 @@ import com.boot.jx.postman.PMConstants.CHANNEL_TYPE;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.fb.FacebooClient;
-import com.boot.jx.postman.fb.FacebookConfigDetails;
 import com.boot.jx.postman.fb.FacebookHookRequest;
 import com.boot.jx.postman.fb.FacebookMessaging;
 import com.boot.jx.postman.fb.FacebookUserProfile;
@@ -25,6 +24,7 @@ import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.postman.plugin.ChannelPluginProvider;
 import com.boot.jx.postman.plugin.FacebookPlugin;
+import com.boot.jx.postman.plugin.FacebookPlugin.FacebookConfigDetails;
 import com.boot.jx.postman.query.ChatContactQuery;
 import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
@@ -43,7 +43,7 @@ public class FacebookConnector extends AbstractConnector<FacebookConfigDetails, 
     private FacebooClient facebooClient;
 
     @Override
-    public void registerWebHook(ChannelConfig channelConfig) {
+    public void onChannelUpdate(ChannelConfig channelConfig) {
 	ApiResponseUtil.addWarning("Set webhook URL manually from Facebook Developer Portal.");
     }
 
@@ -67,7 +67,8 @@ public class FacebookConnector extends AbstractConnector<FacebookConfigDetails, 
 
     @Override
     public boolean initSession(ChatSessionDoc session, InboxMessage inboxMessage) {
-	FacebookUserProfile profile = facebooClient.getUserProfile(inboxMessage.contact());
+	ChannelConfig config = getChannelConfig(inboxMessage);
+	FacebookUserProfile profile = facebooClient.getUserProfile(config, inboxMessage.contact());
 	ChatContactQuery contactQuery = messageContext.getChatContactQuery();
 	contactQuery.setProfilePic(profile.getProfilePic());
 	contactQuery.setName(profile.getFirstName() + " " + profile.getLastName());

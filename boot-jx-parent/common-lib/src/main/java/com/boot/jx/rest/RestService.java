@@ -416,14 +416,29 @@ public class RestService {
 	    });
 	}
 
-	public MapModel asMapModel() {
-	    return MapModel.from(this.as(new ParameterizedTypeReference<Map<String, Object>>() {
-	    }));
+	public List<Object> asList() {
+	    return this.as(new ParameterizedTypeReference<List<Object>>() {
+	    });
 	}
 
 	public <T> Map<String, T> asMap(Class<T> valueType) {
 	    return this.as(new ParameterizedTypeReference<Map<String, T>>() {
 	    });
+	}
+
+	public <T> List<T> asList(Class<T> valueType) {
+	    return this.as(new ParameterizedTypeReference<List<T>>() {
+	    });
+	}
+
+	public MapModel asMapModel() {
+	    return MapModel.from(this.as(new ParameterizedTypeReference<Map<String, Object>>() {
+	    }));
+	}
+
+	public MapModel asListModel() {
+	    return MapModel.from(this.as(new ParameterizedTypeReference<List<Object>>() {
+	    }));
 	}
 
 	public ApiResponse<Object, Object> asApiResponse() {

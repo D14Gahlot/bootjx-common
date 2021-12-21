@@ -10,7 +10,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -34,7 +33,6 @@ import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.doc.MessageDocWA;
 import com.boot.jx.postman.dto.ChatMessageDTO;
 import com.boot.jx.postman.dto.ChatSessionDTO;
-import com.boot.jx.postman.gupshup.GupShupConfigDetails;
 import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.Message;
 import com.boot.jx.postman.store.SessionStore;
@@ -52,231 +50,219 @@ import com.boot.utils.UniqueID;
 @Component
 public class ChatParserAndImportor {
 
-	@Autowired
-	private SessionStore sessionStore;
+    @Autowired
+    private SessionStore sessionStore;
 
-	@Autowired
-	private PMEnvironment environment;
+    @Autowired
+    private PMEnvironment environment;
 
-	@Autowired
-	private MongoTemplate mongoTemplate;
+    @Autowired
+    private MongoTemplate mongoTemplate;
 
-	@Autowired
-	private CommonMongoTemplate commpnMongoTemplate;
+    @Autowired
+    private CommonMongoTemplate commpnMongoTemplate;
 
-	@Autowired
-	private AuditDetailProvider auditDetailProvider;
+    @Autowired
+    private AuditDetailProvider auditDetailProvider;
 
-	public ApiResponse<ImportChatSessionDoc, Object> trashChat(ImportChatSessionDoc doc) {
-		ImportChatSessionDoc docs = commpnMongoTemplate.findByIdString(doc.getId(), ImportChatSessionDoc.class);
+    public ApiResponse<ImportChatSessionDoc, Object> trashChat(ImportChatSessionDoc doc) {
+	ImportChatSessionDoc docs = commpnMongoTemplate.findByIdString(doc.getId(), ImportChatSessionDoc.class);
 
-		if (ArgUtil.is(docs)) {
-			for (String sessionId : docs.getSessions()) {
-				ChatSessionDoc session = new ChatSessionDoc();
-				session.setSessionId(sessionId);
-				session.setContactType(ArgUtil.parseAsString(docs.getContactType()));
-				sessionStore.deleteSession(session);
-			}
-			docs.setStatus("DELETED");
-			commpnMongoTemplate.save(docs);
-		}
-		return ApiResponse.buildResults(commpnMongoTemplate.findAll(ImportChatSessionDoc.class));
+	if (ArgUtil.is(docs)) {
+	    for (String sessionId : docs.getSessions()) {
+		ChatSessionDoc session = new ChatSessionDoc();
+		session.setSessionId(sessionId);
+		session.setContactType(ArgUtil.parseAsString(docs.getContactType()));
+		sessionStore.deleteSession(session);
+	    }
+	    docs.setStatus("DELETED");
+	    commpnMongoTemplate.save(docs);
+	}
+	return ApiResponse.buildResults(commpnMongoTemplate.findAll(ImportChatSessionDoc.class));
+    }
+
+    public ApiResponse<ChatSessionDTO, Map<String, Object>> importChat(
+	    ApiResponse<ChatSessionDTO, Map<String, Object>> request) {
+
+	MapModel meta = MapModel.from(request.getMeta());
+	String contactMobile = meta.getString("contactMobile");
+	String contactName = meta.getString("contactName");
+	String contact = meta.getString("contact");
+	String sender = meta.getString("sender");
+	String lane = meta.getString("lane");
+	ContactType contactType = meta.getAsEnum("contactType", ContactType.class);
+	String contactId = PostManUtil.createContactId(contactType, contactMobile, lane);
+
+	ImportChatSessionDoc importDetails = meta.getAs("importDetails", ImportChatSessionDoc.class);
+
+	ChatContactDoc chatContactDoc = sessionStore.getContact(contactId);
+
+	if (ArgUtil.isEmpty(chatContactDoc)) {
+	    chatContactDoc = new ChatContactDoc();
+	    chatContactDoc.setContactId(contactId);
+	    chatContactDoc.setContactType(ArgUtil.parseAsString(contactType));
+	    chatContactDoc.setChannelType("IMPORT");
+	    chatContactDoc.setLane(lane);
+	    chatContactDoc.setCsid(contactMobile);
+	    chatContactDoc.setName(contactName);
+	    sessionStore.save(chatContactDoc);
 	}
 
-	public ApiResponse<ChatSessionDTO, Map<String, Object>> importChat(
-			ApiResponse<ChatSessionDTO, Map<String, Object>> request) {
+	List<String> sessionIds = new ArrayList<String>();
+	for (ChatSessionDTO session : request.getResults()) {
 
-		MapModel meta = MapModel.from(request.getMeta());
-		String contactMobile = meta.getString("contactMobile");
-		String contactName = meta.getString("contactName");
-		String contact = meta.getString("contact");
-		String sender = meta.getString("sender");
-		String lane = meta.getString("lane");
-		ContactType contactType = meta.getAsEnum("contactType", ContactType.class);
-		String contactId = PostManUtil.createContactId(contactType, contactMobile, lane);
+	    ChatSessionDoc chatSessionDoc = EntityDtoUtil.dtoToEntity(session, new ChatSessionDoc());
+	    chatSessionDoc.setContactId(chatContactDoc.getContactId());
+	    chatSessionDoc.setContactType(chatContactDoc.getContactType());
+	    chatSessionDoc.setChannel(chatContactDoc.getChannelType());
+	    chatSessionDoc.setLane(chatContactDoc.getLane());
 
-		ImportChatSessionDoc importDetails = meta.getAs("importDetails", ImportChatSessionDoc.class);
+	    chatSessionDoc.setResolved(true);
+	    chatSessionDoc.setResolveSessionStamp(chatSessionDoc.getCloseSessionStamp());
+	    chatSessionDoc.setCloseSessionStamp(chatSessionDoc.getCloseSessionStamp());
+	    chatSessionDoc.setExpired(true);
+	    chatSessionDoc.setAssignedToAgent(sender);
+	    chatSessionDoc.setContactName(contactName);
 
-		ChatContactDoc chatContactDoc = sessionStore.getContact(contactId);
+	    // chatSessionDoc.setStartSessionStamp(session.getStartSessionStamp());
 
-		if (ArgUtil.isEmpty(chatContactDoc)) {
-			chatContactDoc = new ChatContactDoc();
-			chatContactDoc.setContactId(contactId);
-			chatContactDoc.setContactType(ArgUtil.parseAsString(contactType));
-			chatContactDoc.setChannelType("IMPORT");
-			chatContactDoc.setLane(lane);
-			chatContactDoc.setCsid(contactMobile);
-			chatContactDoc.setName(contactName);
-			sessionStore.save(chatContactDoc);
+	    sessionStore.save(chatSessionDoc);
+
+	    long getFistResponseStamp = 0L;
+	    long getLastInComingStamp = 0L;
+	    long getLastResponseStamp = 0L;
+
+	    List<MessageDoc> messageDocs = new ArrayList<MessageDoc>();
+	    for (ChatMessageDTO message : session.getMessages()) {
+		MessageDocWA messageDoc = new MessageDocWA();
+		if (contact.equals(message.getSender())) {
+		    messageDoc.setType("Ii");
+		    getLastInComingStamp = Math.max(message.getTimestamp(), getLastInComingStamp);
+
+		} else if (sender.equals(message.getSender())) {
+		    messageDoc.setType("Oi");
+		    messageDoc.setStatus(Message.Status.SENT.toString());
+		    if (getFistResponseStamp == 0L) {
+			getFistResponseStamp = message.getTimestamp();
+		    }
+		    getFistResponseStamp = Math.min(message.getTimestamp(), getFistResponseStamp);
+		    getLastResponseStamp = Math.max(message.getTimestamp(), getLastResponseStamp);
+		    messageDoc.setAgent(message.getSender());
 		}
+		messageDoc.setMessage(message.getText());
+		messageDoc.setTimestamp(message.getTimestamp());
+		messageDoc.setAttachments(message.getAttachments());
+		messageDoc.setContactId(chatSessionDoc.getContactId());
+		messageDoc.setSessionId(chatSessionDoc.getSessionId());
 
-		List<String> sessionIds = new ArrayList<String>();
-		for (ChatSessionDTO session : request.getResults()) {
+		messageDocs.add(messageDoc);
+	    }
+	    mongoTemplate.insertAll(messageDocs);
 
-			ChatSessionDoc chatSessionDoc = EntityDtoUtil.dtoToEntity(session, new ChatSessionDoc());
-			chatSessionDoc.setContactId(chatContactDoc.getContactId());
-			chatSessionDoc.setContactType(chatContactDoc.getContactType());
-			chatSessionDoc.setChannel(chatContactDoc.getChannelType());
-			chatSessionDoc.setLane(chatContactDoc.getLane());
+	    chatSessionDoc.setFistResponseStamp(getFistResponseStamp);
+	    chatSessionDoc.setLastInComingStamp(getLastInComingStamp);
+	    chatSessionDoc.setLastResponseStamp(getLastResponseStamp);
 
-			chatSessionDoc.setResolved(true);
-			chatSessionDoc.setResolveSessionStamp(chatSessionDoc.getCloseSessionStamp());
-			chatSessionDoc.setCloseSessionStamp(chatSessionDoc.getCloseSessionStamp());
-			chatSessionDoc.setExpired(true);
-			chatSessionDoc.setAssignedToAgent(sender);
-			chatSessionDoc.setContactName(contactName);
-
-			// chatSessionDoc.setStartSessionStamp(session.getStartSessionStamp());
-
-			sessionStore.save(chatSessionDoc);
-
-			long getFistResponseStamp = 0L;
-			long getLastInComingStamp = 0L;
-			long getLastResponseStamp = 0L;
-
-			List<MessageDoc> messageDocs = new ArrayList<MessageDoc>();
-			for (ChatMessageDTO message : session.getMessages()) {
-				MessageDocWA messageDoc = new MessageDocWA();
-				if (contact.equals(message.getSender())) {
-					messageDoc.setType("Ii");
-					getLastInComingStamp = Math.max(message.getTimestamp(), getLastInComingStamp);
-
-				} else if (sender.equals(message.getSender())) {
-					messageDoc.setType("Oi");
-					messageDoc.setStatus(Message.Status.SENT.toString());
-					if (getFistResponseStamp == 0L) {
-						getFistResponseStamp = message.getTimestamp();
-					}
-					getFistResponseStamp = Math.min(message.getTimestamp(), getFistResponseStamp);
-					getLastResponseStamp = Math.max(message.getTimestamp(), getLastResponseStamp);
-					messageDoc.setAgent(message.getSender());
-				}
-				messageDoc.setMessage(message.getText());
-				messageDoc.setTimestamp(message.getTimestamp());
-				messageDoc.setAttachments(message.getAttachments());
-				messageDoc.setContactId(chatSessionDoc.getContactId());
-				messageDoc.setSessionId(chatSessionDoc.getSessionId());
-
-				messageDocs.add(messageDoc);
-			}
-			mongoTemplate.insertAll(messageDocs);
-
-			chatSessionDoc.setFistResponseStamp(getFistResponseStamp);
-			chatSessionDoc.setLastInComingStamp(getLastInComingStamp);
-			chatSessionDoc.setLastResponseStamp(getLastResponseStamp);
-
-			sessionStore.save(chatSessionDoc);
-			sessionIds.add(chatSessionDoc.getSessionId());
-		}
-
-		importDetails.setSessions(sessionIds);
-		importDetails.setContact(contact);
-		importDetails.setContactId(contactId);
-		importDetails.setContactMobile(contactMobile);
-		importDetails.setContactName(contactName);
-		importDetails.setContactType(contactType);
-		importDetails.setLane(lane);
-		importDetails.setSender(sender);
-		importDetails.setStatus("COMPLETED");
-		mongoTemplate.save(importDetails);
-
-		return request;
+	    sessionStore.save(chatSessionDoc);
+	    sessionIds.add(chatSessionDoc.getSessionId());
 	}
 
-	public ApiResponse<ChatSessionDTO, Map<String, Object>> getChats(MultipartFile file, ContactType contactType,
-			String clientDate, String format) {
+	importDetails.setSessions(sessionIds);
+	importDetails.setContact(contact);
+	importDetails.setContactId(contactId);
+	importDetails.setContactMobile(contactMobile);
+	importDetails.setContactName(contactName);
+	importDetails.setContactType(contactType);
+	importDetails.setLane(lane);
+	importDetails.setSender(sender);
+	importDetails.setStatus("COMPLETED");
+	mongoTemplate.save(importDetails);
 
-		CommonDateTimeParser dtp = new CommonDateTimeParser()
-				.formatter(ArgUtil.nonEmpty(format, "ccc LLL dd yyyy HH:mm:ss 'GMT'Z (zzzz)")).date(clientDate)
-				.calculateZone().formatter("M/d/yy, h:mm a").withZone();
+	return request;
+    }
 
-		List<ChatSessionDTO> sessions = new ArrayList<ChatSessionDTO>();
-		Map<String, Object> meta = new HashMap<String, Object>();
+    public ApiResponse<ChatSessionDTO, Map<String, Object>> getChats(MultipartFile file, ContactType contactType,
+	    String clientDate, String format) {
 
-		ImportChatSessionDoc importChatSession = new ImportChatSessionDoc();
-		importChatSession.setContactType(contactType);
-		importChatSession.setCreatedBy(auditDetailProvider.getAuditUser());
-		importChatSession.setCreatedStamp(System.currentTimeMillis());
+	CommonDateTimeParser dtp = new CommonDateTimeParser()
+		.formatter(ArgUtil.nonEmpty(format, "ccc LLL dd yyyy HH:mm:ss 'GMT'Z (zzzz)")).date(clientDate)
+		.calculateZone().formatter("M/d/yy, h:mm a").withZone();
 
-		List<ChatParserDto> list = this.getParseFileUsingRegExp(file, importChatSession);
+	List<ChatSessionDTO> sessions = new ArrayList<ChatSessionDTO>();
+	Map<String, Object> meta = new HashMap<String, Object>();
 
-		ChatSessionDTO session = null;
+	ImportChatSessionDoc importChatSession = new ImportChatSessionDoc();
+	importChatSession.setContactType(contactType);
+	importChatSession.setCreatedBy(auditDetailProvider.getAuditUser());
+	importChatSession.setCreatedStamp(System.currentTimeMillis());
 
-		long lastMessageStamp = 0L;
-		long sessionSeperatorLower = 1 * 24 * 60 * 60 * 1000L;
-		long sessionSeperatorUpper = 30 * 24 * 60 * 60 * 1000L;
-		long sessionMessageLimitLower = 30;
+	List<ChatParserDto> list = this.getParseFileUsingRegExp(file, importChatSession);
 
-		String senderA = null;
-		String senderB = null;
+	ChatSessionDTO session = null;
 
-		for (ChatParserDto item : list) {
+	long lastMessageStamp = 0L;
+	long sessionSeperatorLower = 1 * 24 * 60 * 60 * 1000L;
+	long sessionSeperatorUpper = 30 * 24 * 60 * 60 * 1000L;
+	long sessionMessageLimitLower = 30;
 
-			ChatMessageDTO msg = new ChatMessageDTO();
-			msg.setSender(item.getAuther());
-			msg.setTimestamp(dtp.date(item.getDate().trim()).toUTCTimeStamp());
-			if ("<Media omitted>".equalsIgnoreCase(item.getMessage())) {
-				msg.setAttachments(CollectionUtil.getList(new Attachment().mediaCaption(item.getMessage())));
-			} else if ("Missed voice call".equalsIgnoreCase(item.getMessage())
-					|| "Missed video call".equalsIgnoreCase(item.getMessage())
-					|| "Missed group voice call".equalsIgnoreCase(item.getMessage())) {
-				continue;
-			} else {
-				msg.setText(item.getMessage());
-			}
-			long diffStamp = msg.getTimestamp() - lastMessageStamp;
-			if (ArgUtil.isEmpty(session) // Current Session is Empty
-					|| diffStamp > sessionSeperatorUpper // Its more than upper limit
-					|| (diffStamp > sessionSeperatorLower // Its more than lower limit
-							&& session.getMessages().size() > sessionMessageLimitLower // Current session has
-																						// More message
-					)) {
-				session = new ChatSessionDTO();
-				session.setMessages(new ArrayList<ChatMessageDTO>());
-				session.setStartSessionStamp(msg.getTimestamp());
-				sessions.add(session);
-			}
-			lastMessageStamp = msg.getTimestamp();
-			if (ArgUtil.isEmpty(senderA)) {
-				senderA = msg.getSender();
-			} else if (ArgUtil.isEmpty(senderB) && !senderA.equalsIgnoreCase(msg.getSender())) {
-				senderB = msg.getSender();
-			}
+	String senderA = null;
+	String senderB = null;
 
-			session.getMessages().add(msg);
-			session.setCloseSessionStamp(msg.getTimestamp());
-		}
+	for (ChatParserDto item : list) {
 
-		meta.put("senderA", ArgUtil.parseAsString(senderA, Constants.BLANK));
-		meta.put("senderB", ArgUtil.parseAsString(senderB, Constants.BLANK));
-		meta.put("contactType", contactType);
-		meta.put("timezone", dtp.getZone());
+	    ChatMessageDTO msg = new ChatMessageDTO();
+	    msg.setSender(item.getAuther());
+	    msg.setTimestamp(dtp.date(item.getDate().trim()).toUTCTimeStamp());
+	    if ("<Media omitted>".equalsIgnoreCase(item.getMessage())) {
+		msg.setAttachments(CollectionUtil.getList(new Attachment().mediaCaption(item.getMessage())));
+	    } else if ("Missed voice call".equalsIgnoreCase(item.getMessage())
+		    || "Missed video call".equalsIgnoreCase(item.getMessage())
+		    || "Missed group voice call".equalsIgnoreCase(item.getMessage())) {
+		continue;
+	    } else {
+		msg.setText(item.getMessage());
+	    }
+	    long diffStamp = msg.getTimestamp() - lastMessageStamp;
+	    if (ArgUtil.isEmpty(session) // Current Session is Empty
+		    || diffStamp > sessionSeperatorUpper // Its more than upper limit
+		    || (diffStamp > sessionSeperatorLower // Its more than lower limit
+			    && session.getMessages().size() > sessionMessageLimitLower // Current session has
+										       // More message
+		    )) {
+		session = new ChatSessionDTO();
+		session.setMessages(new ArrayList<ChatMessageDTO>());
+		session.setStartSessionStamp(msg.getTimestamp());
+		sessions.add(session);
+	    }
+	    lastMessageStamp = msg.getTimestamp();
+	    if (ArgUtil.isEmpty(senderA)) {
+		senderA = msg.getSender();
+	    } else if (ArgUtil.isEmpty(senderB) && !senderA.equalsIgnoreCase(msg.getSender())) {
+		senderB = msg.getSender();
+	    }
 
-		List<String> lanes = new ArrayList<String>();
-		if (ContactType.WHATSAPP.equals(contactType)) {
-			for (Entry<String, GupShupConfigDetails> conifg : environment.config().gupshup().entrySet()) {
-				lanes.add(conifg.getValue().getNumber());
-			}
+	    session.getMessages().add(msg);
+	    session.setCloseSessionStamp(msg.getTimestamp());
+	}
 
-		}
-		meta.put("lanes", lanes);
+	meta.put("senderA", ArgUtil.parseAsString(senderA, Constants.BLANK));
+	meta.put("senderB", ArgUtil.parseAsString(senderB, Constants.BLANK));
+	meta.put("contactType", contactType);
+	meta.put("timezone", dtp.getZone());
 
-		importChatSession.setCountSessions(sessions.size());
-		importChatSession.setCountMessages(list.size());
-		importChatSession.setTimezone(dtp.getZone().toString());
-		importChatSession.setStatus("CREATED");
-		mongoTemplate.save(importChatSession);
+	importChatSession.setCountSessions(sessions.size());
+	importChatSession.setCountMessages(list.size());
+	importChatSession.setTimezone(dtp.getZone().toString());
+	importChatSession.setStatus("CREATED");
+	mongoTemplate.save(importChatSession);
 
-		meta.put("importDetails", importChatSession);
+	meta.put("importDetails", importChatSession);
 
-		CommonMongoQueryBuilder qb = new CommonMongoQueryBuilder().with(
-				CommonMongoCriteria.where("fileMD5").is(importChatSession.getFileMD5()).and("status").is("COMPLETED"));
-		List<ImportChatSessionDoc> duplicates = mongoTemplate.find(qb.getQuery(), ImportChatSessionDoc.class);
-		if (ArgUtil.is(duplicates)) {
-			meta.put("duplicates", importChatSession);
-		}
-
-		return ApiResponse.buildResults(sessions, meta);
+	CommonMongoQueryBuilder qb = new CommonMongoQueryBuilder().with(
+		CommonMongoCriteria.where("fileMD5").is(importChatSession.getFileMD5()).and("status").is("COMPLETED"));
+	List<ImportChatSessionDoc> duplicates = mongoTemplate.find(qb.getQuery(), ImportChatSessionDoc.class);
+	if (ArgUtil.is(duplicates)) {
+	    meta.put("duplicates", importChatSession);
 	}
 
 	public List<ChatParserDto> getParseFileUsingRegExp(MultipartFile file, ImportChatSessionDoc importChatSessionDoc) {

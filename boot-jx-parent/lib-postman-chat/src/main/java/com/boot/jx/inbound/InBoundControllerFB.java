@@ -12,9 +12,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.boot.jx.connectors.FacebookConnector;
+import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.fb.FacebooClient;
 import com.boot.jx.postman.fb.FacebookHookRequest;
 import com.boot.jx.postman.model.InboxMessage;
+import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.scope.vendor.VendorContext.ApiVendorHeaders;
 
 @RestController
@@ -31,16 +33,18 @@ public class InBoundControllerFB {
     @Autowired
     private FacebookConnector facebookConnector;
 
-    @RequestMapping(
-	    value = { "/ext/inbound/fb/callback", "/ext/inbound/v2/fb/callback/{accountKey}/{channelId}/{channelKey}" },
+    @Autowired
+    private PMEnvironment pmEnvironment;
+
+    @RequestMapping(value = { "/ext/inbound/v2/fb/callback/{accountKey}/{channelId}/{channelKey}" },
 	    method = RequestMethod.GET)
     public Object get(@RequestParam(name = "hub.verify_token") String token,
-	    @RequestParam(name = "hub.challenge") String challenge, @RequestParam(required = false) String lane,
+	    @RequestParam(name = "hub.challenge") String challenge,
 	    @RequestHeader(required = false, value = "X-Hub-Signature") String signature,
-	    // V2Params
-	    @PathVariable(required = false) String channelType, @PathVariable(required = false) String accountKey,
-	    @PathVariable(required = false) String channelId, @PathVariable(required = false) String channelKey) {
-	return facebooClient.registerWebhook(token, challenge, lane, channelId);
+	    @PathVariable(required = false) String accountKey, @PathVariable(required = false) String channelId,
+	    @PathVariable(required = false) String channelKey) {
+	ChannelConfig channelConfig = pmEnvironment.config().channels(channelId);
+	return facebooClient.registerWebhook(channelConfig, token, challenge);
     }
 
     @Deprecated

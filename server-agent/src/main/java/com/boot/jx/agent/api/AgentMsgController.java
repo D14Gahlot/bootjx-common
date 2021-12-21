@@ -1,14 +1,16 @@
 package com.boot.jx.agent.api;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.boot.jx.agent.AgentService;
@@ -31,10 +33,8 @@ import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.dto.ChatMessageDTO;
 import com.boot.jx.postman.dto.ChatSessionDTO;
-import com.boot.jx.postman.dto.ContactDTO;
 import com.boot.jx.postman.manager.ChatSessionManager;
 import com.boot.jx.postman.model.OutboxMessage;
-import com.boot.jx.postman.model.MessageDefinitions.Contactable;
 import com.boot.jx.postman.service.ChatDTOUtil;
 import com.boot.jx.postman.store.SessionStore;
 import com.boot.utils.ArgUtil;
@@ -72,20 +72,21 @@ public class AgentMsgController {
     public ApiResponse<ChatSessionDTO, AgentSessionDoc> getSessionsAssignments(
 	    @RequestParam(defaultValue = "false") boolean withMessage, @RequestParam(required = false) Boolean status,
 	    @RequestParam(required = false) Boolean away,
-	    @RequestParam(required = false, defaultValue = "HISTORY") String tab) {
+	    @RequestParam(required = false, defaultValue = "HISTORY") String tab,
+	    @RequestParam(required = false) String search) {
 
 	List<ChatSessionDTO> chatSessionDtos = new ArrayList<ChatSessionDTO>();
 	if (agentSession.isLoggedIn() && ArgUtil.is(agentSession.getAgentDept())) {
 	    List<ChatSessionDoc> sessions = null;
 	    long historyPeriod = environment.keyEntry(KEY.POSTMAN_AGENT_TAB_HISTORY_PERIOD).asLong(0L);
 	    if (historyPeriod > 0L && "HISTORY".equals(tab)) {
-		sessions = sessionStore.findChatSessionDocByAgentAndUnAssigned(agentSession.getAgentCode(),
-			agentSession.getAgentDept(),
+		sessions = chatSessionManager.findChatSessionDocByAgentAndUnAssigned(agentSession.getAgentCode(),
+			agentSession.getAgentDept(), search,
 			PMConstants.DEFAULT_VALUES.POSTMAN_AGENT_TAB_HISTORY_PERIOD + historyPeriod);
 	    } else {
 		ApiResponseUtil.addLog("Only Active Chats");
-		sessions = sessionStore.findChatSessionDocByAgentAndUnAssigned(agentSession.getAgentCode(),
-			agentSession.getAgentDept());
+		sessions = chatSessionManager.findChatSessionDocByAgentAndUnAssigned(agentSession.getAgentCode(),
+			agentSession.getAgentDept(), search);
 	    }
 
 	    for (ChatSessionDoc chatSessionDoc : sessions) {
@@ -146,13 +147,29 @@ public class AgentMsgController {
 
     @RequestMapping(value = "/api/sessions/search", method = { RequestMethod.POST })
     public ApiResponse<ChatSessionDTO, Object> searchSessions(@RequestBody SessionSearchRequest query) {
-	List<ChatSessionDTO> chatSessionDtos = new ArrayList<ChatSessionDTO>();
+	List<ChatSessionDTO> chatSessionDtos = new ArrayList<ChatSessionDTO>();	
 	List<ChatSessionDoc> sessions = chatSessionManager.searchBy(query.status, query.tags, query.fromStamp,
 		query.toStamp);
 	for (ChatSessionDoc chatSessionDoc : sessions) {
-	    ChatSessionDTO chatSessionDto = chatArchive.withContact(chatSessionDoc);
+		ChatSessionDTO chatSessionDto = chatArchive.withContact(chatSessionDoc);
 	    chatSessionDtos.add(chatSessionDto);
+	}
+	/**remove duplicate /multiple Session for each contact  we can filter based on name , phone number on any field **/
+	if(chatSessionDtos!=null &&  !chatSessionDtos.isEmpty()) {
+		Set<String> chatSessionSet = new HashSet<>();
+		chatSessionDtos=chatSessionDtos.stream().filter(e->chatSessionSet.add(e.getPhone())).collect(Collectors.toList());
 	}
 	return ApiResponse.buildResults(chatSessionDtos);
     }
+
+    @RequestMapping(value = "/api/sessions/primary", method = { RequestMethod.POST })
+    public ApiResponse<ChatSessionDTO, Object> searchPrimarySessions(@RequestBody SessionSearchRequest query) {
+	List<ChatSessionDTO> chatSessionDtos = new ArrayList<ChatSessionDTO>();
+	List<ChatSessionDoc> sessions = chatSessionManager.searchPrimary(query.text);
+	for (ChatSessionDoc chatSessionDoc : sessions) {
+	    ChatSessionDTO chatSessionDto = chatArchive.getChatSession(chatSessionDoc);
+	    chatSessionDtos.add(chatSessionDto);
+	}
+	return ApiResponse.buildResults(chatSessionDtos);
+    } 
 }

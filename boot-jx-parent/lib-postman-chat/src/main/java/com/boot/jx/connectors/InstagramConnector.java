@@ -12,7 +12,6 @@ import com.boot.jx.postman.PMConstants.CHANNEL_TYPE;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.ig.InstagramClient;
-import com.boot.jx.postman.ig.InstagramConfig;
 import com.boot.jx.postman.ig.InstagramHookRequest;
 import com.boot.jx.postman.ig.InstagramMessaging;
 import com.boot.jx.postman.ig.InstagramUserProfile;
@@ -25,6 +24,7 @@ import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.postman.plugin.ChannelPluginProvider;
 import com.boot.jx.postman.plugin.InstagramPlugin;
+import com.boot.jx.postman.plugin.InstagramPlugin.InstagramConfig;
 import com.boot.jx.postman.query.ChatContactQuery;
 import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
@@ -43,7 +43,7 @@ public class InstagramConnector extends AbstractConnector<InstagramConfig, Insta
     private InstagramClient instaClient;
 
     @Override
-    public void registerWebHook(ChannelConfig channelConfig) {
+    public void onChannelUpdate(ChannelConfig channelConfig) {
 	ApiResponseUtil.addWarning("Set webhook URL manually from Facebook Developer Portal.");
     }
 
@@ -68,7 +68,8 @@ public class InstagramConnector extends AbstractConnector<InstagramConfig, Insta
 
     @Override
     public boolean initSession(ChatSessionDoc session, InboxMessage inboxMessage) {
-	InstagramUserProfile profile = instaClient.getUserProfile(inboxMessage.contact());
+	ChannelConfig config = getChannelConfig(inboxMessage);
+	InstagramUserProfile profile = instaClient.getUserProfile(config,inboxMessage.contact());
 	ChatContactQuery contactQuery = messageContext.getChatContactQuery();
 	contactQuery.setProfilePic(profile.getProfilePic());
 	contactQuery.setName(profile.getName());

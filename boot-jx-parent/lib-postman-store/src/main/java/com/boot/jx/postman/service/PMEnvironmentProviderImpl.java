@@ -11,7 +11,6 @@ import org.springframework.stereotype.Component;
 import com.boot.jx.AppConfigPackage.AppSharedConfig;
 import com.boot.jx.AppContextUtil;
 import com.boot.jx.postman.PMConfiguration;
-import com.boot.jx.postman.PMEnvironment.AChannelDetails;
 import com.boot.jx.postman.PMEnvironment.PMConfigurationObject;
 import com.boot.jx.postman.PMEnvironment.PMEnvironmentProvider;
 import com.boot.jx.postman.doc.PMConfigurationDoc;
@@ -19,8 +18,6 @@ import com.boot.jx.postman.doc.config.ChannelConfigDoc;
 import com.boot.jx.postman.doc.config.ClientKeyConfigDoc;
 import com.boot.jx.postman.doc.config.PrefsConfigDoc;
 import com.boot.jx.postman.plugin.ChannelConfig;
-import com.boot.jx.postman.plugin.ChannelPluginProvider;
-import com.boot.jx.postman.plugin.ChannelPluginProvider.ChannelPlugin;
 import com.boot.jx.postman.store.ConfigStore;
 import com.boot.jx.scope.tnt.Tenants;
 import com.boot.utils.ArgUtil;
@@ -69,9 +66,9 @@ public class PMEnvironmentProviderImpl implements PMEnvironmentProvider, AppShar
 	    if (Tenants.isDefault(tnt)) {
 		PMConfigurationDoc newSharedConfiguration = new PMConfigurationDoc();
 		for (Entry<String, PMConfigurationObject> entry : prefs.prefs().entrySet()) {
-		    //if (entry.getValue().isShared()) {
-			newSharedConfiguration.setPref(entry.getValue());
-		    //}
+		    // if (entry.getValue().isShared()) {
+		    newSharedConfiguration.setPref(entry.getValue());
+		    // }
 		}
 		sharedConfiguration = newSharedConfiguration;
 	    }
@@ -79,28 +76,6 @@ public class PMEnvironmentProviderImpl implements PMEnvironmentProvider, AppShar
 	    return prefs;
 	}
 	return null;
-    }
-
-    @Deprecated
-    public void config(PMConfiguration config) {
-	if (ArgUtil.is(configStore)) {
-	    for (Entry<String, ChannelPlugin<? extends AChannelDetails>> pluginEntry : ChannelPluginProvider.MAP
-		    .entrySet()) {
-		ChannelPlugin<? extends AChannelDetails> plugin = pluginEntry.getValue();
-		Map<String, ? extends AChannelDetails> multipleDetails = plugin.getDetails(config);
-		if (ArgUtil.is(multipleDetails)) {
-		    for (Entry<String, ? extends AChannelDetails> configEntry : multipleDetails.entrySet()) {
-			configInternal(plugin.fromDetails(new ChannelConfigDoc(), configEntry.getValue()));
-		    }
-		}
-
-	    }
-
-	    PMConfigurationDoc doc = EntityDtoUtil.dtoToEntity(config, new PMConfigurationDoc());
-	    doc.setTenant(AppContextUtil.getTenant());
-	    configStore.saveConfiguration(doc);
-	}
-
     }
 
     public void configInternal(ChannelConfig config) {
@@ -116,26 +91,19 @@ public class PMEnvironmentProviderImpl implements PMEnvironmentProvider, AppShar
     @Override
     public void config(ChannelConfig config) {
 	configInternal(config);
-
-	// @Deperecated - Start
-	// This code is only for backward compatibility not to be written for New
-	// Channels
-	PMConfigurationDoc doc = getPMConfigurationDoc();
-	ChannelPlugin<?> plugin = ChannelPluginProvider.MAP.get(config.getChannelType());
-	if (ArgUtil.is(plugin)) {
-	    plugin.setConfig(doc, config);
-	}
-	configStore.save(doc);
-	// @Deperecated - Ends
     }
 
     @Override
     public void remove(ChannelConfig config) {
-	ChannelConfigDoc configDoc = EntityDtoUtil.dtoToEntity(config, new ChannelConfigDoc());
-	configStore.remove(configDoc);
-	PMConfigurationDoc doc = getPMConfigurationDoc();
-	doc.channels().remove(config.getChannelId());
-	configStore.save(doc);
+	if (ArgUtil.is(config)) {
+	    ChannelConfigDoc configDoc = EntityDtoUtil.dtoToEntity(config, new ChannelConfigDoc());
+	    configStore.remove(configDoc);
+	    PMConfigurationDoc doc = getPMConfigurationDoc();
+	    doc.channels().remove(config.getChannelId());
+	    configStore.save(doc);
+	} else {
+	    System.out.println("No Channel to delete");
+	}
     }
 
     private PMConfigurationDoc getPMConfigurationDoc() {

@@ -26,13 +26,14 @@ import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.postman.plugin.ChannelPluginProvider;
 import com.boot.jx.postman.plugin.TelegramPlugin;
+import com.boot.jx.postman.plugin.TelegramPlugin.TelegramConfigDetails;
 import com.boot.jx.postman.query.ChatContactQuery;
 import com.boot.jx.postman.tg.TelegramClient;
-import com.boot.jx.postman.tg.TelegramConfigDetails;
 import com.boot.jx.postman.tg.TelegramModels.TGFile;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.Constants;
 import com.boot.utils.JsonUtil;
 
 @Component
@@ -53,7 +54,7 @@ public class TelegramConnector extends AbstractConnector<TelegramConfigDetails, 
     private PMFileStoreClient pmFileStoreClient;
 
     @Override
-    public void registerWebHook(ChannelConfig channelConfig, String webhookUrl) {
+    public void registerWebhook(ChannelConfig channelConfig, String webhookUrl) {
 	telegramClient.registerWebHook(channelConfig, webhookUrl);
     }
 
@@ -67,7 +68,6 @@ public class TelegramConnector extends AbstractConnector<TelegramConfigDetails, 
 	    outboxMessage.logs().add(e.getMessage());
 	    LOGGER.error("SEND ERROR", e);
 	}
-
     }
 
     @Override
@@ -92,7 +92,15 @@ public class TelegramConnector extends AbstractConnector<TelegramConfigDetails, 
 	inboxMessage.setOriginalMessage(update);
 	inboxMessage.setMessageIdExt(
 		String.format("%s-%s", update.getMessage().getChatId(), update.getMessage().getMessageId()));
-	inboxMessage.setMessage(update.getMessage().getText());
+
+
+	String text = ArgUtil.parseAsString(update.getMessage().getText(),Constants.BLANK);
+	
+	if(text.startsWith("/start ")) {
+	    inboxMessage.setMessage(text.replace("/start ", ""));
+	} else {
+	    inboxMessage.setMessage(text);
+	}
 
 	if (ArgUtil.is(update.getMessage().getPhoto())) {
 	    Optional<PhotoSize> photo = update.getMessage().getPhoto().stream()

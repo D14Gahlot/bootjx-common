@@ -29,9 +29,9 @@ import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.postman.plugin.ChannelPluginProvider;
 import com.boot.jx.postman.plugin.WA360Plugin;
+import com.boot.jx.postman.plugin.WA360Plugin.WA360ConfigDetails;
 import com.boot.jx.postman.query.ChatContactQuery;
 import com.boot.jx.postman.wa360.WA360Client;
-import com.boot.jx.postman.wa360.WA360ConfigDetails;
 import com.boot.jx.postman.wa360.WA360Constants;
 import com.boot.jx.postman.wa360.WA360Constants.InBoundWrapperPaths;
 import com.boot.jx.postman.wa360.WA360InboundMedia;
@@ -70,7 +70,7 @@ public class WA360Connector extends AbstractConnector<WA360ConfigDetails, WA360P
     PMClientConfig pmClientConfig;
 
     @Override
-    public void registerWebHook(ChannelConfig channelConfig) {
+    public void onChannelUpdate(ChannelConfig channelConfig) {
 	String webhookUrl = pmClientConfig.getWebhookUrl(channelConfig);
 	restService.ajax(WA360Constants.BASE_URL).path("v1/configs/webhook")
 		.header(WA360Constants.D360_API_KEY, channelConfig.getWa360d().getApiKey())
