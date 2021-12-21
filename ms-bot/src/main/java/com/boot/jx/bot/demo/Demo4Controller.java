@@ -1,27 +1,18 @@
 
 package com.boot.jx.bot.demo;
 
-import java.text.SimpleDateFormat;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.TimeZone;
-import java.util.regex.Pattern;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.amazonaws.services.pinpointemail.model.SendEmailRequest;
 import com.boot.jx.bot.BotController;
 import com.boot.jx.bot.ChatContext;
 import com.boot.jx.bot.ChatMapping;
 import com.boot.jx.bot.alex.CommonBotController;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.OutboxMessage;
-import com.boot.utils.ArgUtil;
-import com.boot.utils.DateUtil;
-import com.boot.utils.JsonUtil;
 import com.boot.utils.StringUtils.StringMatcher;
 
 @BotController(name = "DemoBot", tenant = { "app", "demo", "sandbox" })
@@ -45,10 +36,6 @@ public class Demo4Controller extends CommonBotController {
     
     @ChatMapping(key = "menu-5-dept-onselect")
     public void panOnSelect(InboxMessage inboxMessage, StringMatcher matcher) {
-System.out.println("inboxMessage :"+inboxMessage.getMessage());
-System.out.println("Name :"+chatContext.getContact().getName());
-System.out.println("Phone No :"+chatContext.getContact().getPhone());
-
 
 	switch (inboxMessage.getMessage().toLowerCase()) {
 	
@@ -91,15 +78,12 @@ System.out.println("Phone No :"+chatContext.getContact().getPhone());
     	try {
     		 LocalTime now = LocalTime.now(ZoneId.of("Asia/Kolkata"));
     	     String isoTime = now.format(DateTimeFormatter.ISO_TIME); 
-    	    System.out.println("time in ISO TIME format : " + isoTime);
     	    LocalTime currTime = LocalTime.parse(isoTime,DateTimeFormatter.ISO_TIME);
-             System.out.println("currTime :"+currTime); 
             LocalTime start = LocalTime.of( 8 , 0 );
             LocalTime stop = LocalTime.of( 21 , 0 );
-            
+           
              isNowInRange = ( ! currTime.isBefore( start ) ) && currTime.isBefore( stop ) ;
     		
-             System.out.println("isNowInRange :"+isNowInRange);
     	} catch (Exception e) {
     	    e.printStackTrace();
     	}
