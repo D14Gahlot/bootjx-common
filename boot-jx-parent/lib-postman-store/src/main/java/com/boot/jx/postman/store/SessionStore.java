@@ -179,10 +179,14 @@ public class SessionStore extends CommonDocStore {
 
 	    closeAllPreviousSessions(contactId);
 
+	    if (!ArgUtil.is(chatContactDoc)) {
+		chatContactDoc = mongoTemplate.findById(contactId, ChatContactDoc.class);
+	    }
+
 	    // SESSION CREATION
 	    chatSessionDoc = new ChatSessionDoc();
 	    chatSessionDoc.setContactId(contactId);
-	    chatSessionDoc.setContactType(ArgUtil.parseAsString(sessionMessage.contact().type()));
+	    chatSessionDoc.setContactType(sessionMessage.contact().getContactType());
 	    chatSessionDoc.setChannel(sessionMessage.contact().getChannelType());
 	    chatSessionDoc.setLane(sessionMessage.contact().getLane());
 
