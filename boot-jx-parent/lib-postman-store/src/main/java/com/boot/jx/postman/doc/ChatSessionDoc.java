@@ -13,6 +13,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import com.boot.jx.mongo.CommonDocInterfaces.TimeStamp.UpdatedTimeStampDoc;
 import com.boot.jx.mongo.CommonDocInterfaces.TimeStamp.UpdatedTimeStampSupport;
+import com.boot.jx.postman.model.MessageDefinitions.Contactable;
 import com.boot.jx.swagger.ApiMockModelProperty;
 import com.boot.utils.ArgUtil;
 
@@ -32,10 +33,15 @@ public class ChatSessionDoc extends UpdatedTimeStampDoc implements Serializable 
 	    value = "format like {{ContactType.getShortCode}}{{csid}}_{{lane}}")
     @Indexed
     private String contactId;
+
+    @Deprecated
     private String contactType;
+    @Deprecated
     private String channel;
+    @Deprecated
     private String lane;
 
+    @Deprecated
     private String contactName;
 
     private ContactDetailDoc contact;
@@ -266,26 +272,41 @@ public class ChatSessionDoc extends UpdatedTimeStampDoc implements Serializable 
 	this.resolved = resolved;
     }
 
+    @Deprecated
     public String getContactType() {
+	if (!ArgUtil.is(contactType)) {
+	    return this.contact().getContactType();
+	}
 	return contactType;
     }
 
+    @Deprecated
     public void setContactType(String contactType) {
 	this.contactType = contactType;
     }
 
+    @Deprecated
     public String getChannel() {
+	if (!ArgUtil.is(channel)) {
+	    return this.contact().getChannelType();
+	}
 	return channel;
     }
 
+    @Deprecated
     public void setChannel(String channel) {
 	this.channel = channel;
     }
 
+    @Deprecated
     public String getLane() {
+	if (!ArgUtil.is(lane)) {
+	    return this.contact().getLane();
+	}
 	return lane;
     }
 
+    @Deprecated
     public void setLane(String lane) {
 	this.lane = lane;
     }
@@ -436,5 +457,12 @@ public class ChatSessionDoc extends UpdatedTimeStampDoc implements Serializable 
 
     public void setContact(ContactDetailDoc contact) {
 	this.contact = contact;
+    }
+
+    public Contactable contact() {
+	if (this.contact == null) {
+	    this.contact = new ContactDetailDoc();
+	}
+	return this.contact;
     }
 }
