@@ -12,9 +12,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.boot.jx.connectors.InstagramConnector;
+import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.ig.InstagramClient;
 import com.boot.jx.postman.ig.InstagramHookRequest;
 import com.boot.jx.postman.model.InboxMessage;
+import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.scope.vendor.VendorContext.ApiVendorHeaders;
 
 @RestController
@@ -30,6 +32,9 @@ public class InBoundControllerIG {
 
     @Autowired
     private InstagramConnector instaConnector;
+    
+    @Autowired
+    private PMEnvironment pmEnvironment;
 
     @RequestMapping(
 	    value = { "/ext/inbound/ig/callback", "/ext/inbound/v2/ig/callback/{accountKey}/{channelId}/{channelKey}" },
@@ -40,7 +45,8 @@ public class InBoundControllerIG {
 	    // V2Params
 	    @PathVariable(required = false) String channelType, @PathVariable(required = false) String accountKey,
 	    @PathVariable(required = false) String channelId, @PathVariable(required = false) String channelKey) {
-	return instaClient.registerWebhook(token, challenge, lane, channelId);
+    	ChannelConfig channelConfig = pmEnvironment.config().channels(channelId);
+    	return instaClient.registerWebhook(channelConfig, token, challenge);
     }
 
     @Deprecated

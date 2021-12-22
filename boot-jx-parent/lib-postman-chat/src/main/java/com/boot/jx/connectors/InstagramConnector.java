@@ -112,8 +112,14 @@ public class InstagramConnector extends AbstractConnector<InstagramConfig, Insta
 	inboxMessage.to().add(m.getRecipient().get("id"));
 
 	// Extract Message Details
-	inboxMessage.setMessageIdExt(m.getMessage().getMid());
-	inboxMessage.setMessage(m.getMessage().getText());
+	if (ArgUtil.is(m.getPostBack()) && ArgUtil.is(m.getPostBack().getTitle())) {
+		inboxMessage.setMessageIdExt(m.getPostBack().getMid());
+		inboxMessage.setMessage(m.getPostBack().getTitle());
+	}else {
+		inboxMessage.setMessageIdExt(m.getMessage().getMid());
+		inboxMessage.setMessage(m.getMessage().getText());
+	}
+	
 
 	return inboxMessage;
     }
@@ -132,11 +138,12 @@ public class InstagramConnector extends AbstractConnector<InstagramConfig, Insta
 
     @Override
     public MessageBoxEvent inboundMessageBoxEvent(ChannelConfig channelConfig, MapModel requestMap,
-	    MessageBoxEvent messageBoxEvent) {
+	    MessageBoxEvent messageBoxEvent) {    	
 	InstagramHookRequest request = requestMap.as(InstagramHookRequest.class);
+	requestMap.toJson();
 	request.getEntry().forEach(pageEntry -> {
 	    pageEntry.getMessaging().forEach(m -> {
-		if (ArgUtil.is(m.getMessage())) {
+		if (ArgUtil.is(m.getMessage())  || ArgUtil.is(m.getPostBack())) {
 		    messageBoxEvent.addInboxMessage(toInboxMessage(m, channelConfig));
 		} else if (ArgUtil.is(m.getRead())) {
 		    messageBoxEvent.addMessageReport(toMessageReport(m, channelConfig));

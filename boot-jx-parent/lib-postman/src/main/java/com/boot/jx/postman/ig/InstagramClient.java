@@ -21,6 +21,8 @@ import com.boot.jx.postman.model.MessageDefinitions.Contactable;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.model.TmplElement;
 import com.boot.jx.postman.plugin.ChannelConfig;
+import com.boot.jx.postman.plugin.FacebookPlugin.FacebookConfigDetails;
+import com.boot.jx.postman.plugin.InstagramPlugin.InstagramConfig;
 import com.boot.jx.rest.RestService;
 import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
@@ -44,15 +46,16 @@ public class InstagramClient implements MessageClient {
     @Autowired
     private ExtUtilService extUtilService;
 
-    public String registerWebhook(String token, String challenge, String lane, String channelId) {
-//	InstagramConfig config = getConfig(lane, channelId);
-	String verifyToken = "TOKEN";
-	if (token != null && !token.isEmpty() && token.equals(verifyToken)) {
-	    return challenge;
-	} else {
-	    return "Wrong Token";
+    
+    public String registerWebhook(ChannelConfig channelConfig, String token, String challenge) {
+    	InstagramConfig config = channelConfig.getInstagram();
+    	String verifyToken = config.getVerifyToken();
+    	if (token != null && !token.isEmpty() && token.equals(verifyToken)) {
+    	    return challenge;
+    	} else {
+    	    return "Wrong Token";
+    	}
 	}
-    }
 
     private InstagramMessageResp sendReply(ChannelConfig config, InstagramMessageRequest resp) {
 	return restService
@@ -206,5 +209,7 @@ public class InstagramClient implements MessageClient {
 
 	return outboxMessage;
     }
+
+	
 
 }
