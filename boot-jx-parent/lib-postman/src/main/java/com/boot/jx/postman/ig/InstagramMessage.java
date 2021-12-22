@@ -10,6 +10,7 @@ public class InstagramMessage implements Serializable {
 	private String mid;
 	private Long seq;
 	private String text;
+	private boolean is_echo;
 
 	public String getMid() {
 		return mid;
@@ -34,4 +35,14 @@ public class InstagramMessage implements Serializable {
 	public void setText(String text) {
 		this.text = text;
 	}
+
+	public boolean isIs_echo() {
+		return is_echo;
+	}
+
+	public void setIs_echo(boolean is_echo) {
+		this.is_echo = is_echo;
+	}
+	
+	
 }

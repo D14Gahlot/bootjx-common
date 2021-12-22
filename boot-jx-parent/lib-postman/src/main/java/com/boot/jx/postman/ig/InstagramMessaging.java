@@ -39,7 +39,7 @@ public class InstagramMessaging implements Serializable {
     }
 
     public InstagramMessage getMessage() {
-	return message;
+    	return message;
     }
 
     public void setMessage(InstagramMessage message) {
@@ -70,5 +70,10 @@ public class InstagramMessaging implements Serializable {
 		return ArgUtil.parseAsLong(this.read.get("watermark"));
 	}
 	return 0L;
+    }
+    
+    
+    public boolean isValidCustomerMessage() {
+    	return (ArgUtil.is(this.message) && !this.message.isIs_echo());
     }
 }
