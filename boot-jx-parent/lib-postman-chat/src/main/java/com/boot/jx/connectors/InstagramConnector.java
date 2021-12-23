@@ -28,6 +28,9 @@ import com.boot.jx.postman.plugin.InstagramPlugin.InstagramConfig;
 import com.boot.jx.postman.query.ChatContactQuery;
 import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
 
 @Component
 @ConnectorMapping(contactType = ContactType.INSTAGRAM)
@@ -83,7 +86,12 @@ public class InstagramConnector extends AbstractConnector<InstagramConfig, Insta
 	event.contact().setChannelType(CHANNEL_TYPE.INSTAGRAM);
 	event.setFrom(id);
 	event.contact().setCsid(id);
-	event.setMessage(m.getMessage().getText());
+	if (ArgUtil.is(m.getPostBack()) && ArgUtil.is(m.getPostBack().getTitle())) {
+		event.setMessage(m.getPostBack().getTitle());
+	}else {
+		event.setMessage(m.getMessage().getText());		
+	}
+	
 	event.to().add(m.getRecipient().get("id"));
 	event.contact().type(ContactType.INSTAGRAM);
 	event.contact().setLane(lane);
@@ -104,8 +112,14 @@ public class InstagramConnector extends AbstractConnector<InstagramConfig, Insta
 	inboxMessage.to().add(m.getRecipient().get("id"));
 
 	// Extract Message Details
-	inboxMessage.setMessageIdExt(m.getMessage().getMid());
-	inboxMessage.setMessage(m.getMessage().getText());
+	if (ArgUtil.is(m.getPostBack()) && ArgUtil.is(m.getPostBack().getTitle())) {
+		inboxMessage.setMessageIdExt(m.getPostBack().getMid());
+		inboxMessage.setMessage(m.getPostBack().getTitle());
+	}else {
+		inboxMessage.setMessageIdExt(m.getMessage().getMid());
+		inboxMessage.setMessage(m.getMessage().getText());
+	}
+	
 
 	return inboxMessage;
     }
@@ -124,11 +138,12 @@ public class InstagramConnector extends AbstractConnector<InstagramConfig, Insta
 
     @Override
     public MessageBoxEvent inboundMessageBoxEvent(ChannelConfig channelConfig, MapModel requestMap,
-	    MessageBoxEvent messageBoxEvent) {
+	    MessageBoxEvent messageBoxEvent) {    	
 	InstagramHookRequest request = requestMap.as(InstagramHookRequest.class);
+	requestMap.toJson();
 	request.getEntry().forEach(pageEntry -> {
 	    pageEntry.getMessaging().forEach(m -> {
-		if (ArgUtil.is(m.getMessage())) {
+		if (ArgUtil.is(m.getMessage())  || ArgUtil.is(m.getPostBack())) {
 		    messageBoxEvent.addInboxMessage(toInboxMessage(m, channelConfig));
 		} else if (ArgUtil.is(m.getRead())) {
 		    messageBoxEvent.addMessageReport(toMessageReport(m, channelConfig));
