@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.boot.jx.postman.model.MessageDefinitions.Contactable;
+import com.boot.utils.ArgUtil;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -86,6 +87,9 @@ public class ChatSessionDTO implements Serializable {
     }
 
     public String getContactType() {
+	if (!ArgUtil.is(contactType)) {
+	    return this.contact().getContactType();
+	}
 	return contactType;
     }
 
@@ -316,4 +320,10 @@ public class ChatSessionDTO implements Serializable {
 	this.primary = primary;
     }
 
+    public Contactable contact() {
+	if (this.contact == null) {
+	    this.contact = new ContactDTO();
+	}
+	return this.contact;
+    }
 }
