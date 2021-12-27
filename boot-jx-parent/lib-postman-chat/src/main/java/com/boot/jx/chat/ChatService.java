@@ -61,6 +61,9 @@ public class ChatService {
 
     @Autowired
     private SessionStore sessionStore;
+    
+    
+   
 
     public InboxMessage getInboxMessage() {
 	return chatContext.getInboxMessage();
@@ -366,4 +369,5 @@ public class ChatService {
 	chatStatusReportService.process(null);
     }
 
+    
 }
