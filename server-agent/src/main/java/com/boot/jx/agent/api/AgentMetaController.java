@@ -19,7 +19,7 @@ import com.boot.jx.api.ApiResponse;
 import com.boot.jx.common.doc.AgentSessionDoc;
 import com.boot.jx.common.store.AgentStore;
 import com.boot.jx.postman.PMEnvironment;
-import com.boot.jx.postman.doc.HSMTemplate;
+import com.boot.jx.postman.doc.HSMTemplateDoc;
 import com.boot.jx.postman.doc.QuickAction;
 import com.boot.jx.postman.doc.QuickLabel;
 import com.boot.jx.postman.doc.QuickMedia;
@@ -110,9 +110,9 @@ public class AgentMetaController {
 
     @ResponseBody
     @RequestMapping(value = "/api/tmpl/pushtemplate", method = { RequestMethod.GET })
-    public ApiResponse<HSMTemplate, Object> listPushTemplates(@RequestParam String channelId) {
+    public ApiResponse<HSMTemplateDoc, Object> listPushTemplates(@RequestParam String channelId) {
 	ChannelConfig channelConfig = pmEnvironment.config().channels(channelId);
 
-	return ApiResponse.buildResults(mongoTemplate.findAll(HSMTemplate.class));
+	return ApiResponse.buildResults(mongoTemplate.findAll(HSMTemplateDoc.class));
     }
 }

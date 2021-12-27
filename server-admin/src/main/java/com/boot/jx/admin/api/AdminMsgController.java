@@ -113,7 +113,7 @@ public class AdminMsgController {
     public ApiResponse<ChatSessionDTO, Map<String, Object>> getChatDetails(
 	    @RequestParam(name = "file") MultipartFile file, @RequestParam String clientDate,
 	    @RequestParam(required = false) String clientDateFormat, @RequestParam ContactType contactType) {
-	return chatParseManager.getChats(file, contactType, clientDate, clientDateFormat);
+    	return chatParseManager.getChats(file, contactType, clientDate, clientDateFormat);
     }
 
     @RequestMapping(value = "/api/message/session/import", method = { RequestMethod.POST })

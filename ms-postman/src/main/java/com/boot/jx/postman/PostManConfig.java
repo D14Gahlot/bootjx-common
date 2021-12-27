@@ -87,8 +87,8 @@ public class PostManConfig {
      * @return the local
      */
     public Locale getLocal(CommonFile file) {
-	if (file != null && file.getLang() != null) {
-	    return new Locale(file.getLang());
+	if (file != null && file.template().getLang() != null) {
+	    return new Locale(file.template().getLang());
 	}
 	if (tenantLang != null) {
 	    new Locale(tenantLang.getCode());
@@ -97,10 +97,10 @@ public class PostManConfig {
     }
 
     public Locale getLocal(Message<?> msg) {
-	if (msg == null || msg.getLang() == null) {
+	if (msg == null || msg.template().getLang() == null) {
 	    return new Locale(tenantLang.getCode());
 	}
-	return new Locale(msg.getLang());
+	return new Locale(msg.template().getLang());
     }
 
     /**

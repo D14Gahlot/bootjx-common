@@ -1,5 +1,6 @@
 package com.boot.jx.postman;
 
+import com.boot.jx.def.CommonInterfaces.ICommonTemplate;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.model.CommonFile;
 import com.boot.jx.postman.model.ITemplates.BasicTemplate;
@@ -16,6 +17,8 @@ public class PostmanPackages {
 
     public static interface TemplateResolver {
 	public BasicTemplate get(String templateId);
+
+	public BasicTemplate get(ICommonTemplate template);
     }
 
     public static interface MessageClient {
