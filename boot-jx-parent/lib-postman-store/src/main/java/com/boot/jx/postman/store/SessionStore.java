@@ -41,11 +41,6 @@ import com.boot.jx.utils.PostManUtil;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.EntityDtoUtil;
 import com.boot.utils.TimeUtils;
-import com.mongodb.BasicDBObject;
-import com.mongodb.BulkWriteOperation;
-import com.mongodb.BulkWriteResult;
-import com.mongodb.DBCollection;
-import com.mongodb.DBObject;
 
 @Component
 public class SessionStore extends CommonDocStore {
@@ -61,7 +56,7 @@ public class SessionStore extends CommonDocStore {
     @Autowired
     private MessageContext messageContext;
 
-    public ChatContactDoc getContact(IMessageExtended inboxMessage) {
+    public ChatContactDoc getContact(IMessage inboxMessage) {
 	String contactId = PostManUtil.createContactId(inboxMessage);
 	ChatContactDoc chatContactDoc = mongoTemplate.findById(contactId, ChatContactDoc.class);
 	return chatContactDoc;
@@ -74,17 +69,6 @@ public class SessionStore extends CommonDocStore {
     public ChatContactDoc save(ChatContactDoc chatContactDoc) {
 	mongoTemplate.save(chatContactDoc);
 	return chatContactDoc;
-    }
-
-    public ChatContactDoc getContact(Contactable contactMeta) {
-	if (ArgUtil.isEmpty(contactMeta.getContactId())) {
-	    return null;
-	}
-	return mongoTemplate.findById(contactMeta.getContactId(), ChatContactDoc.class);
-    }
-
-    public ChatContactDoc getContact(IMessage inboxMessage) {
-	return getContact(inboxMessage.contact());
     }
 
     public ChatSessionDoc getSession(String sessionId) {
@@ -179,10 +163,14 @@ public class SessionStore extends CommonDocStore {
 
 	    closeAllPreviousSessions(contactId);
 
+	    if (!ArgUtil.is(chatContactDoc)) {
+		chatContactDoc = mongoTemplate.findById(contactId, ChatContactDoc.class);
+	    }
+
 	    // SESSION CREATION
 	    chatSessionDoc = new ChatSessionDoc();
 	    chatSessionDoc.setContactId(contactId);
-	    chatSessionDoc.setContactType(ArgUtil.parseAsString(sessionMessage.contact().type()));
+	    chatSessionDoc.setContactType(sessionMessage.contact().getContactType());
 	    chatSessionDoc.setChannel(sessionMessage.contact().getChannelType());
 	    chatSessionDoc.setLane(sessionMessage.contact().getLane());
 
