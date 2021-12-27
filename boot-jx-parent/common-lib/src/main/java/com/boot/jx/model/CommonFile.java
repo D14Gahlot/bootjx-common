@@ -24,9 +24,9 @@ import org.slf4j.Logger;
 import org.springframework.integration.http.multipart.UploadedMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.boot.jx.def.CommonInterfaces.ICommonTemplate;
 import com.boot.jx.dict.FileFormat;
 import com.boot.jx.dict.FileType;
-import com.boot.jx.dict.Language;
 import com.boot.jx.logger.LoggerService;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.JsonUtil;
@@ -41,23 +41,8 @@ public class CommonFile implements Serializable {
 
     private static Logger LOGGER = LoggerService.getLogger(CommonFile.class);
 
-    String lang = null;
-
-    public String getLang() {
-	return lang;
-    }
-
-    public void setLang(String lang) {
-	this.lang = lang;
-    }
-
-    public CommonFile lang(String lang) {
-	this.setLang(lang);
-	return this;
-    }
-
-    public CommonFile lang(Language lang) {
-	this.lang = ArgUtil.parseAsString(lang);
+    public CommonFile lang(Object lang) {
+	this.template.setLang(ArgUtil.parseAsString(lang));
 	return this;
     }
 
@@ -70,8 +55,7 @@ public class CommonFile implements Serializable {
     private String extension;
     private String password;
     private String url;
-    private String template = null;
-    private String templateId;
+    private ICommonTemplate template = null;
     private Map<String, Object> model = new HashMap<String, Object>();
     private Map<String, Object> options = new HashMap<String, Object>();
     private Map<String, String> headers;
@@ -138,13 +122,35 @@ public class CommonFile implements Serializable {
 	this.content = content;
     }
 
-    public String getTemplate() {
+    public ICommonTemplate getTemplate() {
 	return template;
     }
 
-    @JsonSetter
-    public void setTemplate(String template) {
+    public void setTemplate(ICommonTemplate template) {
 	this.template = template;
+    }
+
+    @JsonSetter
+    public ICommonTemplate template() {
+	if (!ArgUtil.is(this.template)) {
+	    this.template = new CommonTemplate();
+	}
+	return this.template;
+    }
+
+    public CommonFile template(ICommonTemplate template) {
+	this.template = template;
+	return this;
+    }
+
+    public CommonFile template(String template) {
+	this.template().setCode(template);
+	return this;
+    }
+
+    public CommonFile templateId(String templateId) {
+	this.template().setCode(templateId);
+	return this;
     }
 
     /**
@@ -318,7 +324,7 @@ public class CommonFile implements Serializable {
 	    if (body != null) {
 		outputStream = response.getOutputStream();
 		outputStream.write(this.body);
-		LOGGER.info("PDF created successfully :  Template {} {}", this.getTemplate(), this.getLang());
+		LOGGER.info("PDF created successfully :  Template {}", this.getTemplate());
 	    }
 	} finally {
 	    if (outputStream != null) {
@@ -391,14 +397,6 @@ public class CommonFile implements Serializable {
 	    e.printStackTrace();
 	}
 	return null;
-    }
-
-    public String getTemplateId() {
-	return templateId;
-    }
-
-    public void setTemplateId(String templateId) {
-	this.templateId = templateId;
     }
 
     public Map<String, String> getHeaders() {

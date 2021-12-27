@@ -26,7 +26,7 @@ import com.boot.jx.postman.PMEnvironment.PMConfigurationObject;
 import com.boot.jx.postman.doc.HSMContentType;
 import com.boot.jx.postman.doc.HSMLanguage;
 import com.boot.jx.postman.doc.HSMMessageType;
-import com.boot.jx.postman.doc.HSMTemplate;
+import com.boot.jx.postman.doc.HSMTemplateDoc;
 import com.boot.jx.postman.plugin.ChannelPluginProvider;
 import com.boot.jx.postman.plugin.ChannelPluginProvider.ChannelPlugin;
 import com.boot.utils.ArgUtil;
@@ -81,8 +81,8 @@ public class ConfigOptionMetaController {
     }
 
     @RequestMapping(value = "/api/options/tmpl/hsm", method = { RequestMethod.GET })
-    public ApiResponse<HSMTemplate, Object> listPushTemplateslistHsmTmpl() {
-	return ApiResponse.buildResults(commonMongoTemplate.findAll(HSMTemplate.class));
+    public ApiResponse<HSMTemplateDoc, Object> listPushTemplateslistHsmTmpl() {
+	return ApiResponse.buildResults(commonMongoTemplate.findAll(HSMTemplateDoc.class));
     }
 
     // Config APIS

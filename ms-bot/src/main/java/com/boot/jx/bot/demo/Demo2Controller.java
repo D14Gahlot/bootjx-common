@@ -22,7 +22,7 @@ public class Demo2Controller extends CommonBotController {
     private ChatContext chatContext;
 
     public void start(InboxMessage inboxMessage, StringMatcher matcher) {
-	reply(new OutboxMessage().template("menu-3").put("name", chatContext.getContact().getName()));
+	reply(new OutboxMessage().templateCode("menu-3").put("name", chatContext.getContact().getName()));
 	// reply(new OutboxMessage().template("menu-3-1").put("name",
 	// chatContext.getContact().getName()));
 	next("menu-3-1-onselect");
@@ -30,7 +30,7 @@ public class Demo2Controller extends CommonBotController {
 
     @ChatMapping(key = "menu-3-1-onselect")
     public void option1(InboxMessage inboxMessage, StringMatcher matcher) {
-	reply(new OutboxMessage().template("menu-3-1-resp").put("name", chatContext.getContact().getName())
+	reply(new OutboxMessage().templateCode("menu-3-1-resp").put("name", chatContext.getContact().getName())
 		.attachment(new Attachment().mediaURL(
 			"https://cdn.jsdelivr.net/gh/mehery-soccom/mehery-content@main/sample-receipt/zen-residence-compressed.pdf")
 			.mediaCaption("Floor Plan").mediaType(FileType.DOCUMENT.toString())));
@@ -43,7 +43,7 @@ public class Demo2Controller extends CommonBotController {
 	switch (inboxMessage.getMessage().toLowerCase()) {
 	case "yes":
 	case "y":
-	    reply(new OutboxMessage().template("menu-3-2-2-yes"));
+	    reply(new OutboxMessage().templateCode("menu-3-2-2-yes"));
 	    next("menu-3-2-2-onselect");
 	    break;
 	default:
@@ -59,7 +59,7 @@ public class Demo2Controller extends CommonBotController {
 	switch (inboxMessage.getMessage().toLowerCase()) {
 	case "yes":
 	case "y":
-	    reply(new OutboxMessage().template("menu-3-3-1").attachment(new Attachment().mediaURL(
+	    reply(new OutboxMessage().templateCode("menu-3-3-1").attachment(new Attachment().mediaURL(
 		    "https://cdn.jsdelivr.net/gh/mehery-soccom/mehery-content@main/sample-receipt/zen-residence-compressed.pdf")
 		    .mediaCaption("Amenities").mediaType(FileType.DOCUMENT.toString())));
 	    next("menu-3-3-1-onselect");
@@ -76,7 +76,7 @@ public class Demo2Controller extends CommonBotController {
 	switch (inboxMessage.getMessage().toLowerCase()) {
 	case "yes":
 	case "y":
-	    reply(new OutboxMessage().template("menu-3-3-2-yes"));
+	    reply(new OutboxMessage().templateCode("menu-3-3-2-yes"));
 	default:
 	    this.botScore(0);
 	    this.transferToAgent(inboxMessage, matcher);

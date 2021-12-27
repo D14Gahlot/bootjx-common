@@ -31,7 +31,7 @@ public class AccountVerifyController extends ChatController {
 	@ChatMapping(key = AlexBotConstants.KEY.ROUTE_NUMBER, pattern = "^route([ ]*)(\\d{5,15})([ ]*)$")
 	public void routeNumber(InboxMessage inboxMessage, StringMatcher matcher) {
 		contactCleanerService.addWhatsAppTest(inboxMessage.getFrom());
-		reply(new OutboxMessage().template(inboxMessage.getFrom() + " is added to dev testing"));
+		reply(new OutboxMessage().templateCode(inboxMessage.getFrom() + " is added to dev testing"));
 	}
 
 	@ChatMapping(key = AlexBotConstants.KEY.PING, pattern = "^PING$")

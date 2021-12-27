@@ -127,7 +127,7 @@ public class EmpAuthService {
 
 	String app = admin ? "admin" : "agent";
 	String domain = AppContextUtil.getTenant();
-	postManClient.send(new MessageBox().push(new Email().to(agent.getAgent_email()).template("agent-reset-pass")
+	postManClient.send(new MessageBox().push(new Email().to(agent.getAgent_email()).templateCode("agent-reset-pass")
 		.put("otp", agent.getAgent_otp()).put("username", agent.getAgent_code())
 		.put("logo", pmEnvironment.keyEntry("mry.prop.logo.bg-x-icon").asString())
 		.put("website", pmEnvironment.keyEntry("mry.prop.service.website").asString())

@@ -14,7 +14,7 @@ import com.boot.jx.api.ApiResponse;
 import com.boot.jx.logger.AuditDetailProvider;
 import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.jx.postman.PMEnvironment;
-import com.boot.jx.postman.doc.HSMTemplate;
+import com.boot.jx.postman.doc.HSMTemplateDoc;
 import com.boot.jx.postman.doc.HSMTemplate3rdParty;
 import com.boot.jx.postman.manager.ThirdPartyTemplateManager;
 import com.boot.jx.postman.plugin.ChannelConfig;
@@ -50,14 +50,14 @@ public class TmplHSMController {
     }
 
     @RequestMapping(value = "/api/tmpl/hsm/meta", method = { RequestMethod.POST })
-    public ApiResponse<HSMTemplate, Object> updateHsmMeta(@RequestParam String templateId,
+    public ApiResponse<HSMTemplateDoc, Object> updateHsmMeta(@RequestParam String templateId,
 	    @RequestBody Map<String, Object> newMata) {
-	HSMTemplate template = mongoTemplate.findById(templateId, HSMTemplate.class);
+	HSMTemplateDoc template = mongoTemplate.findById(templateId, HSMTemplateDoc.class);
 	if (ArgUtil.is(template)) {
 	    template.meta().putAll(newMata);
 	    mongoTemplate.save(template);
 	}
-	return new ApiResponse<HSMTemplate, Object>().result(template);
+	return new ApiResponse<HSMTemplateDoc, Object>().result(template);
     }
 
     @RequestMapping(value = "/api/tmpl/hsm/waba_templates", method = { RequestMethod.GET })
@@ -111,30 +111,30 @@ public class TmplHSMController {
 
     // HSMTemplate
     @RequestMapping(value = "/api/tmpl/hsm", method = { RequestMethod.GET })
-    public ApiResponse<HSMTemplate, Object> listPushTemplates() {
-	return ApiResponse.buildResults(mongoTemplate.findAll(HSMTemplate.class));
+    public ApiResponse<HSMTemplateDoc, Object> listPushTemplates() {
+	return ApiResponse.buildResults(mongoTemplate.findAll(HSMTemplateDoc.class));
     }
 
     @RequestMapping(value = "/api/tmpl/hsm", method = { RequestMethod.DELETE })
-    public ApiResponse<HSMTemplate, Object> deletePushTemplates(@RequestParam String id) {
-	HSMTemplate qr = mongoTemplate.findById(id, HSMTemplate.class);
+    public ApiResponse<HSMTemplateDoc, Object> deletePushTemplates(@RequestParam String id) {
+	HSMTemplateDoc qr = mongoTemplate.findById(id, HSMTemplateDoc.class);
 	mongoTemplate.trash(qr);
-	return ApiResponse.buildResults(mongoTemplate.findAll(HSMTemplate.class)).data(qr)
+	return ApiResponse.buildResults(mongoTemplate.findAll(HSMTemplateDoc.class)).data(qr)
 		.message("PushTemplate deleted");
     }
 
     @RequestMapping(value = "/api/tmpl/hsm", method = { RequestMethod.POST })
-    public ApiResponse<HSMTemplate, Object> createPushTemplates(@RequestBody HSMTemplate newVersion) {
+    public ApiResponse<HSMTemplateDoc, Object> createPushTemplates(@RequestBody HSMTemplateDoc newVersion) {
 
 	if (ArgUtil.is(newVersion.getId())) {
-	    HSMTemplate oldVersion = mongoTemplate.findById(newVersion.getId(), HSMTemplate.class);
+	    HSMTemplateDoc oldVersion = mongoTemplate.findById(newVersion.getId(), HSMTemplateDoc.class);
 	    if (ArgUtil.is(oldVersion)) {
 		mongoTemplate.archive(oldVersion);
 	    }
 	}
 	auditDetailProvider.audit(newVersion);
 	mongoTemplate.save(newVersion);
-	return ApiResponse.buildResults(mongoTemplate.findAll(HSMTemplate.class)).data(newVersion)
+	return ApiResponse.buildResults(mongoTemplate.findAll(HSMTemplateDoc.class)).data(newVersion)
 		.message("QuickReply created");
     }
 }

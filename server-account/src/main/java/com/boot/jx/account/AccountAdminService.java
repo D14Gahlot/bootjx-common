@@ -113,7 +113,7 @@ public class AccountAdminService implements LogoutHandler {
 
     public void sendResetMail(BusinessUserDoc accountDoc, String emailTemplate) {
 	postManClient.send(new MessageBox().push(new Email().to(accountDoc.getContact().getEmail())
-		.template(emailTemplate).put("logo", pmEnvironment.keyEntry("mry.prop.logo.bg-x-icon").asString())
+		.templateCode(emailTemplate).put("logo", pmEnvironment.keyEntry("mry.prop.logo.bg-x-icon").asString())
 		.put("website", pmEnvironment.keyEntry("mry.prop.service.website").asString())
 		.put("service", pmEnvironment.keyEntry("mry.prop.service.name").asString())
 		.put("servicedomain", pmEnvironment.keyEntry("mry.prop.service.domain").asString())
@@ -126,7 +126,7 @@ public class AccountAdminService implements LogoutHandler {
     
     public void sendMailToSalesTeam(BusinessUserDoc accountDoc, String emailTemplate) {
     	postManClient.send(new MessageBox().push(new Email().to("rabiluddin@mehery.com")
-    		.template(emailTemplate).put("logo", pmEnvironment.keyEntry("mry.prop.logo.bg-x-icon").asString())
+    		.templateCode(emailTemplate).put("logo", pmEnvironment.keyEntry("mry.prop.logo.bg-x-icon").asString())
     		.put("website", pmEnvironment.keyEntry("mry.prop.service.website").asString())
     		.put("service", pmEnvironment.keyEntry("mry.prop.service.name").asString())
     		.put("servicedomain", pmEnvironment.keyEntry("mry.prop.service.domain").asString())

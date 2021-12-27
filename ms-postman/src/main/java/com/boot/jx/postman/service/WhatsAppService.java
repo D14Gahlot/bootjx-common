@@ -67,14 +67,13 @@ public class WhatsAppService {
 	}
 
 	public WAMessage resolveTemplate(WAMessage waMessage) {
-		if (ArgUtil.isEmpty(waMessage.getMessage()) && waMessage.getTemplate() != null) {
+		if (ArgUtil.isEmpty(waMessage.getMessage()) && waMessage.getTemplateCode() != null) {
 			Context context = new Context(postManConfig.getLocal(waMessage));
 			context.setVariables(waMessage.getModel());
 
 			PostManFile file = new PostManFile();
 			file.setTemplate(waMessage.getTemplate());
 			file.setModel(waMessage.getModel());
-			file.setLang(waMessage.getLang());
 
 			String msg = fileService.create(file, ContactType.WHATSAPP).getContent();
 			waMessage.setMessage(msg);
@@ -194,7 +193,7 @@ public class WhatsAppService {
 			return false;
 		}
 		if (ArgUtil.isEmpty(msg.getTo()) || (msg.getTo().size() == 0) || ArgUtil.isEmpty(msg.getTo().get(0))
-				|| (ArgUtil.isEmpty(msg.getMessage()) && ArgUtil.isEmpty(msg.getTemplate()))) {
+				|| (ArgUtil.isEmpty(msg.getMessage()) && ArgUtil.isEmpty(msg.getTemplateCode()))) {
 			PMGaugeEvent pMGaugeEvent = new PMGaugeEvent(PMGaugeEvent.Type.SEND_WHATSAPP).set(msg);
 			pMGaugeEvent.setTo(msg.getTo());
 			pMGaugeEvent.setMessage(msg.getMessage());

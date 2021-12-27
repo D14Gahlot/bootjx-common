@@ -90,7 +90,7 @@ public class PushMessageTests { // Noncompliant
 
     private static void everyOne() {
 	PushMessage msg = new PushMessage();
-	msg.setLang(Language.HI.name());
+	msg.template().setLang(Language.HI.name());
 	msg.addToEveryone();
 	ContactMeta c = PushMessage.toContact(msg.getTo().get(0));
 	print("everyOne", c);
@@ -98,7 +98,7 @@ public class PushMessageTests { // Noncompliant
 
     private static void everyOne(String lang) {
 	PushMessage msg = new PushMessage();
-	msg.setLang(lang);
+	msg.template().setLang(lang);
 	msg.addToTenant(tnt, Language.fromString(lang));
 	ContactMeta c = PushMessage.toContact(msg.getTo().get(0));
 	print("everyOne", c);
@@ -106,7 +106,7 @@ public class PushMessageTests { // Noncompliant
 
     private static void customer() {
 	PushMessage msg = new PushMessage();
-	msg.setLang(Language.HI.toString());
+	msg.template().setLang(Language.HI.toString());
 	msg.addToUser(customer);
 	ContactMeta c = PushMessage.toContact(msg.getTo().get(0));
 	print("customer", c);

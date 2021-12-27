@@ -6,8 +6,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.boot.jx.def.CommonInterfaces.ICommonTemplate;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.dict.Language;
+import com.boot.jx.model.CommonTemplate;
 import com.boot.jx.postman.model.ITemplates.BasicExternalTemplate;
 import com.boot.jx.postman.model.ITemplates.ITemplate;
 import com.boot.jx.postman.model.MessageDefinitions.Contactable;
@@ -51,7 +53,8 @@ public class Message<T extends Message<T>> implements Serializable, MessageOptio
     protected List<String> to = null;
     protected List<ContactMeta> contacts = null;
     private String templateId = null;
-    private String template = null;
+    private String templateCode = null;
+    private ICommonTemplate template;
     private BasicExternalTemplate templateExt;
     private String action = null;
     private String type = null;
@@ -142,30 +145,23 @@ public class Message<T extends Message<T>> implements Serializable, MessageOptio
 	this.message = text;
     }
 
-    public String getTemplate() {
-	return template;
+    public String getTemplateCode() {
+	return templateCode;
     }
 
-    public void setTemplate(String template) {
-	this.template = template;
+    public void setTemplateCode(String template) {
+	this.templateCode = template;
+	this.template().setCode(template);
     }
 
     @JsonIgnore
     public void setITemplate(ITemplate template) {
-	this.template = template.toString();
+	this.templateCode = template.toString();
     }
 
     @JsonIgnore
     public ITemplate getITemplate() {
-	return ITemplates.getTemplate(this.template);
-    }
-
-    public String getLang() {
-	return lang;
-    }
-
-    public void setLang(String lang) {
-	this.lang = lang;
+	return ITemplates.getTemplate(this.templateCode);
     }
 
     public Message() {
@@ -340,8 +336,8 @@ public class Message<T extends Message<T>> implements Serializable, MessageOptio
     }
 
     @SuppressWarnings("unchecked")
-    public T template(String template) {
-	this.setTemplate(template);
+    public T templateCode(String template) {
+	this.setTemplateCode(template);
 	return (T) this;
     }
 
@@ -489,6 +485,9 @@ public class Message<T extends Message<T>> implements Serializable, MessageOptio
     }
 
     public String getTemplateId() {
+	if (ArgUtil.is(this.template)) {
+	    return ArgUtil.nonEmpty(this.template.getId(), templateId);
+	}
 	return templateId;
     }
 
@@ -499,9 +498,10 @@ public class Message<T extends Message<T>> implements Serializable, MessageOptio
     @SuppressWarnings("unchecked")
     public T templateId(String templateId) {
 	this.templateId = templateId;
+	this.template().setId(templateId);
 	return (T) this;
     }
-    
+
     public Contactable getContact() {
 	return contact;
     }
@@ -578,6 +578,27 @@ public class Message<T extends Message<T>> implements Serializable, MessageOptio
 
     public void setFormatSubType(String formatSubType) {
 	this.formatSubType = formatSubType;
+    }
+
+    public ICommonTemplate getTemplate() {
+	return template;
+    }
+
+    public void setTemplate(ICommonTemplate hsmTemplate) {
+	this.template = hsmTemplate;
+    }
+
+    public ICommonTemplate template() {
+	if (this.template == null) {
+	    this.template = new CommonTemplate();
+	}
+	return this.template;
+    }
+
+    @SuppressWarnings("unchecked")
+    public T template(ICommonTemplate template) {
+	this.template = template;
+	return (T) this;
     }
 
 }

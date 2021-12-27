@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.boot.jx.postman.model.ext.CommonMsgLocation;
 import com.boot.jx.postman.model.ext.CommonMsgText;
+import com.boot.jx.postman.model.ext.HSMTemplate;
 import com.boot.jx.swagger.ApiMockModelProperty;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -54,7 +55,7 @@ public class OutBoundMsgBasic implements Serializable {
 	public CommonMsgLocation location;
 
 	@ApiMockModelProperty(required = false)
-	public OutBoundMsgTemplate template;
+	public HSMTemplate template;
 
 	public CommonMsgText getText() {
 	    return text;
@@ -112,11 +113,11 @@ public class OutBoundMsgBasic implements Serializable {
 	    this.location = location;
 	}
 
-	public OutBoundMsgTemplate getTemplate() {
+	public HSMTemplate getTemplate() {
 	    return template;
 	}
 
-	public void setTemplate(OutBoundMsgTemplate template) {
+	public void setTemplate(HSMTemplate template) {
 	    this.template = template;
 	}
     }

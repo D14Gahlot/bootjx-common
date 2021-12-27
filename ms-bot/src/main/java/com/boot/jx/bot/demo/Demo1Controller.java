@@ -36,11 +36,11 @@ public class Demo1Controller extends CommonBotController {
 	if (ArgUtil.is(prevMenu)) {
 	    switch (prevMenu) {
 	    case "1":
-		reply(new OutboxMessage().template("menu-1").put("name", chatContext.getContact().getName()));
+		reply(new OutboxMessage().templateCode("menu-1").put("name", chatContext.getContact().getName()));
 		next("menu-1-onselect");
 		return;
 	    case "2":
-		reply(new OutboxMessage().template("menu-2").put("name", chatContext.getContact().getName()));
+		reply(new OutboxMessage().templateCode("menu-2").put("name", chatContext.getContact().getName()));
 		next("menu-2-onselect");
 		return;
 	    case "3":
@@ -53,7 +53,7 @@ public class Demo1Controller extends CommonBotController {
 		break;
 	    }
 	}
-	reply(new OutboxMessage().template("menu-0").put("name", chatContext.getContact().getName()));
+	reply(new OutboxMessage().templateCode("menu-0").put("name", chatContext.getContact().getName()));
 	next("menu-0-onselect");
     }
 
@@ -109,35 +109,35 @@ public class Demo1Controller extends CommonBotController {
     public void menu2OnSelect(InboxMessage inboxMessage, StringMatcher matcher) {
 	switch (inboxMessage.getMessage().toLowerCase()) {
 	case "1":
-	    reply(new OutboxMessage().template("today-credits").put("name", chatContext.getContact().getName())
+	    reply(new OutboxMessage().templateCode("today-credits").put("name", chatContext.getContact().getName())
 		    .attachment(new Attachment().mediaURL(
 			    "https://cdn.jsdelivr.net/gh/mehery-soccom/mehery-content@main/sample-receipt/mehery-sample-template.pdf")
 			    .mediaType(FileType.DOCUMENT.toString())));
 	    next("more-onselect");
 	    break;
 	case "2":
-	    reply(new OutboxMessage().template("today-debits").put("name", chatContext.getContact().getName())
+	    reply(new OutboxMessage().templateCode("today-debits").put("name", chatContext.getContact().getName())
 		    .attachment(new Attachment().mediaURL(
 			    "https://cdn.jsdelivr.net/gh/mehery-soccom/mehery-content@main/sample-receipt/mehery-sample-template.pdf")
 			    .mediaType(FileType.DOCUMENT.toString())));
 	    next("more-onselect");
 	    break;
 	case "3":
-	    reply(new OutboxMessage().template("today-trnx").put("name", chatContext.getContact().getName())
+	    reply(new OutboxMessage().templateCode("today-trnx").put("name", chatContext.getContact().getName())
 		    .attachment(new Attachment().mediaURL(
 			    "https://cdn.jsdelivr.net/gh/mehery-soccom/mehery-content@main/sample-receipt/mehery-sample-template.pdf")
 			    .mediaType(FileType.DOCUMENT.toString())));
 	    next("more-onselect");
 	    break;
 	case "4":
-	    reply(new OutboxMessage().template("today-trnx").put("name", chatContext.getContact().getName())
+	    reply(new OutboxMessage().templateCode("today-trnx").put("name", chatContext.getContact().getName())
 		    .attachment(new Attachment().mediaURL(
 			    "https://www.mehery.com/wp-content/uploads/2021/02/Screenshot-2021-02-03-at-10.12.29-PM.png")
 			    .mediaType(FileType.IMAGE.toString())));
 	    next("more-onselect");
 	    break;
 	case "*":
-	    reply(new OutboxMessage().template("feedback").put("name", chatContext.getContact().getName()));
+	    reply(new OutboxMessage().templateCode("feedback").put("name", chatContext.getContact().getName()));
 	    next("feedback-onselect");
 	    break;
 	case "#":
@@ -155,35 +155,35 @@ public class Demo1Controller extends CommonBotController {
     public void menu3OnSelect(InboxMessage inboxMessage, StringMatcher matcher) {
 	switch (inboxMessage.getMessage().toLowerCase()) {
 	case "1":
-	    reply(new OutboxMessage().template("menu-2-today-offers").put("name", chatContext.getContact().getName())
+	    reply(new OutboxMessage().templateCode("menu-2-today-offers").put("name", chatContext.getContact().getName())
 		    .attachment(new Attachment().mediaURL(
 			    "https://cdn.jsdelivr.net/gh/mehery-soccom/mehery-content@main/sample-receipt/mehery-sample-template.pdf")
 			    .mediaType(FileType.DOCUMENT.toString())));
 	    next("more-onselect-menu-2");
 	    break;
 	case "2":
-	    reply(new OutboxMessage().template("menu-2-weekly-offers").put("name", chatContext.getContact().getName())
+	    reply(new OutboxMessage().templateCode("menu-2-weekly-offers").put("name", chatContext.getContact().getName())
 		    .attachment(new Attachment().mediaURL(
 			    "https://cdn.jsdelivr.net/gh/mehery-soccom/mehery-content@main/sample-receipt/mehery-sample-template.pdf")
 			    .mediaType(FileType.DOCUMENT.toString())));
 	    next("more-onselect-menu-2");
 	    break;
 	case "3":
-	    reply(new OutboxMessage().template("menu-2-retail-branch").put("name", chatContext.getContact().getName())
+	    reply(new OutboxMessage().templateCode("menu-2-retail-branch").put("name", chatContext.getContact().getName())
 		    .attachment(new Attachment().mediaURL(
 			    "https://cdn.jsdelivr.net/gh/mehery-soccom/mehery-content@main/sample-receipt/mehery-sample-template.pdf")
 			    .mediaType(FileType.DOCUMENT.toString())));
 	    next("more-onselect-menu-2");
 	    break;
 	case "4":
-	    reply(new OutboxMessage().template("today-trnx").put("name", chatContext.getContact().getName())
+	    reply(new OutboxMessage().templateCode("today-trnx").put("name", chatContext.getContact().getName())
 		    .attachment(new Attachment().mediaURL(
 			    "https://www.mehery.com/wp-content/uploads/2021/02/Screenshot-2021-02-03-at-10.12.29-PM.png")
 			    .mediaType(FileType.IMAGE.toString())));
 	    next("more-onselect-menu-2");
 	    break;
 	case "*":
-	    reply(new OutboxMessage().template("feedback").put("name", chatContext.getContact().getName()));
+	    reply(new OutboxMessage().templateCode("feedback").put("name", chatContext.getContact().getName()));
 	    next("feedback-onselect");
 	    break;
 	case "#":
@@ -201,13 +201,13 @@ public class Demo1Controller extends CommonBotController {
 	case "YES":
 	case "Y":
 	case "1":
-	    reply(new OutboxMessage().template("menu-1").put("name", chatContext.getContact().getName()));
+	    reply(new OutboxMessage().templateCode("menu-1").put("name", chatContext.getContact().getName()));
 	    next("menu-1-onselect");
 	    break;
 	case "NO":
 	case "N":
 	case "2":
-	    reply(new OutboxMessage().template("feedback").put("name", chatContext.getContact().getName()));
+	    reply(new OutboxMessage().templateCode("feedback").put("name", chatContext.getContact().getName()));
 	    next("feedback-onselect");
 	    break;
 	default:
@@ -222,13 +222,13 @@ public class Demo1Controller extends CommonBotController {
 	case "YES":
 	case "Y":
 	case "1":
-	    reply(new OutboxMessage().template("menu-2").put("name", chatContext.getContact().getName()));
+	    reply(new OutboxMessage().templateCode("menu-2").put("name", chatContext.getContact().getName()));
 	    next("menu-2-onselect");
 	    break;
 	case "NO":
 	case "N":
 	case "2":
-	    reply(new OutboxMessage().template("feedback").put("name", chatContext.getContact().getName()));
+	    reply(new OutboxMessage().templateCode("feedback").put("name", chatContext.getContact().getName()));
 	    next("feedback-onselect");
 	    break;
 	default:
@@ -287,7 +287,7 @@ public class Demo1Controller extends CommonBotController {
 
     private boolean handleGlobalOptionOrInvalid(InboxMessage inboxMessage, StringMatcher matcher) {
 	if (!handleGlobalOption(inboxMessage, matcher)) {
-	    reply(new OutboxMessage().template("invalid-options"));
+	    reply(new OutboxMessage().templateCode("invalid-options"));
 	    return false;
 	}
 	return true;
@@ -298,21 +298,21 @@ public class Demo1Controller extends CommonBotController {
 
 	if (ArgUtil.is(inboxMessage.getTags()) && ArgUtil.is(inboxMessage.getTags().getCategories())) {
 	    if (inboxMessage.getTags().getCategories().indexOf("today-credits") > -1) {
-		reply(new OutboxMessage().template("today-credits").put("name", chatContext.getContact().getName())
+		reply(new OutboxMessage().templateCode("today-credits").put("name", chatContext.getContact().getName())
 			.attachment(new Attachment().mediaURL(
 				"https://cdn.jsdelivr.net/gh/mehery-soccom/mehery-content@main/sample-receipt/mehery-sample-template.pdf")
 				.mediaType(FileType.DOCUMENT.toString())));
 		next("more-onselect");
 		return true;
 	    } else if (inboxMessage.getTags().getCategories().indexOf("today-debits") > -1) {
-		reply(new OutboxMessage().template("today-debits").put("name", chatContext.getContact().getName())
+		reply(new OutboxMessage().templateCode("today-debits").put("name", chatContext.getContact().getName())
 			.attachment(new Attachment().mediaURL(
 				"https://cdn.jsdelivr.net/gh/mehery-soccom/mehery-content@main/sample-receipt/mehery-sample-template.pdf")
 				.mediaType(FileType.DOCUMENT.toString())));
 		next("more-onselect");
 		return true;
 	    } else if (inboxMessage.getTags().getCategories().indexOf("today-trnx") > -1) {
-		reply(new OutboxMessage().template("today-trnx").put("name", chatContext.getContact().getName())
+		reply(new OutboxMessage().templateCode("today-trnx").put("name", chatContext.getContact().getName())
 			.attachment(new Attachment().mediaURL(
 				"https://cdn.jsdelivr.net/gh/mehery-soccom/mehery-content@main/sample-receipt/mehery-sample-template.pdf")
 				.mediaType(FileType.DOCUMENT.toString())));
@@ -366,7 +366,7 @@ public class Demo1Controller extends CommonBotController {
 	case "EXIT":
 	case "/EXIT_CHAT":
 	    chatContext.sessionData().data().remove(CURRENT_DEMO);
-	    reply(new OutboxMessage().template("feedback").put("name",
+	    reply(new OutboxMessage().templateCode("feedback").put("name",
 		    ArgUtil.nonEmpty(chatContext.getContact().getName(), "WhatsApp User")));
 	    next("feedback-onselect");
 	    return true;

@@ -80,8 +80,8 @@ public class WAGupShupConnector extends AbstractConnector<GupShupConfigDetails, 
     private PMFileStoreClient pmFileStoreClient;
 
     private OutboxMessage resolveTemplate(OutboxMessage outboxMessage) {
-	if (ArgUtil.is(outboxMessage.getTemplate())) {
-	    QuickMedia templateReply = mongoTemplate.findById(outboxMessage.getTemplate(), QuickMedia.class);
+	if (ArgUtil.is(outboxMessage.getTemplateCode())) {
+	    QuickMedia templateReply = mongoTemplate.findById(outboxMessage.getTemplateCode(), QuickMedia.class);
 	    if (ArgUtil.is(templateReply)) {
 		if ("image".equalsIgnoreCase(templateReply.getType())) {
 		    outboxMessage.attachment(

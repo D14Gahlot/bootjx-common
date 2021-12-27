@@ -53,311 +53,311 @@ import com.boot.utils.Utils;
 @Component
 public class EmailService {
 
-	static final String FAILED_EMAIL_QUEUE = "FAILED_EMAIL_QUEUE";
+    static final String FAILED_EMAIL_QUEUE = "FAILED_EMAIL_QUEUE";
 
-	/** The Constant LOGGER. */
-	private static final Logger LOGGER = LoggerFactory.getLogger(EmailService.class);
+    /** The Constant LOGGER. */
+    private static final Logger LOGGER = LoggerFactory.getLogger(EmailService.class);
 
-	public static final Pattern pattern = Pattern.compile("^(.*)<(.*)>$");
-	public static final Pattern PATTERN_CID = Pattern.compile("src=\"cid:(.*?)\"");
-	public static final Pattern PATTERN_SUBJECT = Pattern.compile("<title>(.*?)</title>");
+    public static final Pattern pattern = Pattern.compile("^(.*)<(.*)>$");
+    public static final Pattern PATTERN_CID = Pattern.compile("src=\"cid:(.*?)\"");
+    public static final Pattern PATTERN_SUBJECT = Pattern.compile("<title>(.*?)</title>");
 
-	/** The template utils. */
-	@Autowired
-	private TemplateUtils templateUtils;
+    /** The template utils. */
+    @Autowired
+    private TemplateUtils templateUtils;
 
-	/** The file service. */
-	@Autowired
-	private FileService fileService;
+    /** The file service. */
+    @Autowired
+    private FileService fileService;
 
-	/** The mail sender. */
-	private JavaMailSender mailSender;
+    /** The mail sender. */
+    private JavaMailSender mailSender;
 
-	/** The default mail sender. */
-	@Autowired
-	private JavaMailSender defaultMailSender;
+    /** The default mail sender. */
+    @Autowired
+    private JavaMailSender defaultMailSender;
 
-	/** The post man config. */
-	@Autowired
-	private PostManConfig postManConfig;
+    /** The post man config. */
+    @Autowired
+    private PostManConfig postManConfig;
 
-	@Autowired
-	private ContactCleanerService contactService;
+    @Autowired
+    private ContactCleanerService contactService;
 
-	/** The slack service. */
-	@Autowired
-	private SlackService slackService;
+    /** The slack service. */
+    @Autowired
+    private SlackService slackService;
 
-	/** The audit service. */
-	@Autowired
-	private AuditService auditService;
+    /** The audit service. */
+    @Autowired
+    private AuditService auditService;
 
-	@Autowired
-	private AppConfig appConfig;
+    @Autowired
+    private AppConfig appConfig;
 
-	@Autowired(required = false)
-	RedissonClient redisson;
+    @Autowired(required = false)
+    RedissonClient redisson;
 
-	public static final int RESEND_INTERVAL = 1 * 60 * 1000;
+    public static final int RESEND_INTERVAL = 1 * 60 * 1000;
 
-	/**
-	 * Gets the mail sender.
-	 *
-	 * @return the mail sender
-	 */
-	public JavaMailSender getMailSender() {
-		if (mailSender == null) {
-			if (postManConfig.getTenant() != null) {
-				LOGGER.info("Using {} mailSender", postManConfig.getTenant());
-				JavaMailSenderImpl javaMailSender = new JavaMailSenderImpl();
-				javaMailSender.setHost(postManConfig.getMailHost());
-				javaMailSender.setPort(postManConfig.getMailPort());
-				javaMailSender.setUsername(postManConfig.getMailUsername());
-				javaMailSender.setPassword(postManConfig.getMailPassword());
-				Properties mailProp = new Properties();
-				mailProp.put("mail.smtp.auth", postManConfig.isMailSmtpAuth());
-				mailProp.put("mail.smtp.starttls.enable", postManConfig.isMailSmtpTls());
-				javaMailSender.setJavaMailProperties(mailProp);
-				javaMailSender.setProtocol(postManConfig.getMailProtocol());
-				javaMailSender.setDefaultEncoding(postManConfig.getMailDefaultEncoding());
-				this.mailSender = javaMailSender;
-			} else {
-				LOGGER.info("Using Default mailSender");
-				this.mailSender = defaultMailSender;
-				// this.mailFrom = postManConfig.getMailDefaultSender();
+    /**
+     * Gets the mail sender.
+     *
+     * @return the mail sender
+     */
+    public JavaMailSender getMailSender() {
+	if (mailSender == null) {
+	    if (postManConfig.getTenant() != null) {
+		LOGGER.info("Using {} mailSender", postManConfig.getTenant());
+		JavaMailSenderImpl javaMailSender = new JavaMailSenderImpl();
+		javaMailSender.setHost(postManConfig.getMailHost());
+		javaMailSender.setPort(postManConfig.getMailPort());
+		javaMailSender.setUsername(postManConfig.getMailUsername());
+		javaMailSender.setPassword(postManConfig.getMailPassword());
+		Properties mailProp = new Properties();
+		mailProp.put("mail.smtp.auth", postManConfig.isMailSmtpAuth());
+		mailProp.put("mail.smtp.starttls.enable", postManConfig.isMailSmtpTls());
+		javaMailSender.setJavaMailProperties(mailProp);
+		javaMailSender.setProtocol(postManConfig.getMailProtocol());
+		javaMailSender.setDefaultEncoding(postManConfig.getMailDefaultEncoding());
+		this.mailSender = javaMailSender;
+	    } else {
+		LOGGER.info("Using Default mailSender");
+		this.mailSender = defaultMailSender;
+		// this.mailFrom = postManConfig.getMailDefaultSender();
+	    }
+	}
+	return this.mailSender;
+    }
+
+    /**
+     * Send email.
+     *
+     * @param email the email
+     * @return the email
+     * @throws PostManException the post man exception
+     */
+    @Async(ExecutorConfig.EXECUTER_GOLD)
+    public Email sendEmail(Email email) throws PostManException {
+
+	PMGaugeEvent pMGaugeEvent = new PMGaugeEvent(PMGaugeEvent.Type.SEND_EMAIL);
+	String to = null;
+	Email emailClone = null;
+	try {
+	    emailClone = email.clone();
+	} catch (CloneNotSupportedException e1) {
+	    LOGGER.error("Clonning exception {} Email to {}", email.getTemplateCode(),
+		    Utils.commaConcat(email.getTo()));
+	}
+	try {
+	    if (LOGGER.isDebugEnabled()) {
+		LOGGER.debug("Sending {} Email to {}", email.getTemplateCode(), Utils.commaConcat(email.getTo()));
+	    }
+
+	    to = email.getTo() != null ? email.getTo().get(0) : null;
+
+	    if (ArgUtil.isEmpty(to)) {
+		email.updateStatus(Status.NSENT);
+		auditService.log(pMGaugeEvent.set(AuditEvent.Result.REJECTED).set(email));
+	    } else if (contactService.isEmailBlackListed(to)) {
+		email.updateStatus(Status.BLCKD);
+		auditService.log(pMGaugeEvent.set(AuditEvent.Result.REJECTED).set(email));
+	    } else {
+		if (email.getTemplateCode() != null) {
+		    PostManFile file = new PostManFile();
+		    file.setTemplate(email.getTemplate());
+		    file.setModel(email.getModel());
+
+		    email.setMessage(fileService.create(file, ContactType.EMAIL).getContent());
+
+		    if (ArgUtil.isEmptyString(email.getSubject())) {
+			email.setSubject(file.getTitle());
+		    }
+		}
+
+		if (email.getFiles() != null && email.getFiles().size() > 0) {
+		    for (PostManFile file : email.getFiles()) {
+			if (file.template().getLang() == null) {
+			    file.template().setLang(email.template().getLang());
 			}
+			fileService.create(file);
+		    }
 		}
-		return this.mailSender;
+		this.send(email);
+		email.updateStatus(Status.SENT);
+		auditService.log(pMGaugeEvent.set(AuditEvent.Result.DONE).set(email));
+	    }
+
+	} catch (Throwable e) {
+	    auditService.excep(pMGaugeEvent.set(AuditEvent.Result.ERROR).set(email), LOGGER, e);
+	    // slackService.sendException(to, e);
 	}
 
-	/**
-	 * Send email.
-	 *
-	 * @param email the email
-	 * @return the email
-	 * @throws PostManException the post man exception
-	 */
-	@Async(ExecutorConfig.EXECUTER_GOLD)
-	public Email sendEmail(Email email) throws PostManException {
-
-		PMGaugeEvent pMGaugeEvent = new PMGaugeEvent(PMGaugeEvent.Type.SEND_EMAIL);
-		String to = null;
-		Email emailClone = null;
-		try {
-			emailClone = email.clone();
-		} catch (CloneNotSupportedException e1) {
-			LOGGER.error("Clonning exception {} Email to {}", email.getTemplate(), Utils.commaConcat(email.getTo()));
-		}
-		try {
-			if (LOGGER.isDebugEnabled()) {
-				LOGGER.debug("Sending {} Email to {}", email.getTemplate(), Utils.commaConcat(email.getTo()));
-			}
-
-			to = email.getTo() != null ? email.getTo().get(0) : null;
-
-			if (ArgUtil.isEmpty(to)) {
-				email.updateStatus(Status.NSENT);
-				auditService.log(pMGaugeEvent.set(AuditEvent.Result.REJECTED).set(email));
-			} else if (contactService.isEmailBlackListed(to)) {
-				email.updateStatus(Status.BLCKD);
-				auditService.log(pMGaugeEvent.set(AuditEvent.Result.REJECTED).set(email));
-			} else {
-				if (email.getTemplate() != null) {
-					PostManFile file = new PostManFile();
-					file.setTemplate(email.getTemplate());
-					file.setModel(email.getModel());
-					file.setLang(email.getLang());
-
-					email.setMessage(fileService.create(file, ContactType.EMAIL).getContent());
-
-					if (ArgUtil.isEmptyString(email.getSubject())) {
-						email.setSubject(file.getTitle());
-					}
-				}
-
-				if (email.getFiles() != null && email.getFiles().size() > 0) {
-					for (PostManFile file : email.getFiles()) {
-						if (file.getLang() == null) {
-							file.setLang(email.getLang());
-						}
-						fileService.create(file);
-					}
-				}
-				this.send(email);
-				email.updateStatus(Status.SENT);
-				auditService.log(pMGaugeEvent.set(AuditEvent.Result.DONE).set(email));
-			}
-
-		} catch (Throwable e) {
-			auditService.excep(pMGaugeEvent.set(AuditEvent.Result.ERROR).set(email), LOGGER, e);
-			// slackService.sendException(to, e);
-		}
-
-		if (!ArgUtil.isEmpty(emailClone) && !Status.SENT.equals(email.getStatus())
-				&& !Status.NSENT.equals(email.getStatus()) && !Status.BLCKD.equals(email.getStatus())
-				&& redisson != null) {
-			AppContext context = AppContextUtil.getContext();
-			TunnelMessage<Email> tunnelMessage = new TunnelMessage<Email>(emailClone, context);
-			RQueue<TunnelMessage<Email>> emailQueue = redisson.getQueue(FAILED_EMAIL_QUEUE + "_"
-					+ TimeUtils.getRotationNumber(RESEND_INTERVAL, 0x1) + "_" + postManConfig.getEmailRetryPush());
-			emailQueue.add(tunnelMessage);
-		}
-
-		return email;
+	if (!ArgUtil.isEmpty(emailClone) && !Status.SENT.equals(email.getStatus())
+		&& !Status.NSENT.equals(email.getStatus()) && !Status.BLCKD.equals(email.getStatus())
+		&& redisson != null) {
+	    AppContext context = AppContextUtil.getContext();
+	    TunnelMessage<Email> tunnelMessage = new TunnelMessage<Email>(emailClone, context);
+	    RQueue<TunnelMessage<Email>> emailQueue = redisson.getQueue(FAILED_EMAIL_QUEUE + "_"
+		    + TimeUtils.getRotationNumber(RESEND_INTERVAL, 0x1) + "_" + postManConfig.getEmailRetryPush());
+	    emailQueue.add(tunnelMessage);
 	}
 
-	/**
-	 * Send.
-	 *
-	 * @param eParams the e params
-	 * @return the email
-	 * @throws MessagingException the messaging exception
-	 * @throws IOException        Signals that an I/O exception has occurred.
-	 */
-	private Email send(Email email) throws MessagingException, IOException {
-		String tos = null;
+	return email;
+    }
 
-		if (email.isHtml()) {
-			tos = String.join(",", sendHtmlMail(email));
-		} else {
-			tos = String.join(",", sendPlainTextMail(email));
-		}
+    /**
+     * Send.
+     *
+     * @param eParams the e params
+     * @return the email
+     * @throws MessagingException the messaging exception
+     * @throws IOException        Signals that an I/O exception has occurred.
+     */
+    private Email send(Email email) throws MessagingException, IOException {
+	String tos = null;
 
-		if (!appConfig.isProdMode() && !ArgUtil.isEmpty(email.getITemplate())
-				&& !ArgUtil.isEmpty(email.getITemplate().getChannel())) {
-			Notipy msg = new Notipy();
-			msg.setSubject(email.getSubject());
-			msg.setAuthor(String.format("%s = %s", email.getTo().get(0), tos));
-			msg.setMessage(String.format("%s", email.getModel().toString()));
-			msg.setIChannel(email.getITemplate().getChannel());
-			msg.addField("ENV", appConfig.getAppEnv());
-			msg.addField("TRACE-ID", AppContextUtil.getTraceId());
-			msg.addField("TEMPLATE", email.getITemplate().toString());
-			msg.setColor("#" + CryptoUtil.toHex(6, email.getITemplate().toString()));
-			slackService.sendNotification(msg);
-		}
-
-		return email;
+	if (email.isHtml()) {
+	    tos = String.join(",", sendHtmlMail(email));
+	} else {
+	    tos = String.join(",", sendPlainTextMail(email));
 	}
 
-	private InternetAddress getInternetAddress(String email) throws UnsupportedEncodingException {
-		String fromEmail = null;
-		String fromTitle = null;
-
-		Matcher matcher = pattern.matcher(email);
-		if (matcher.find()) {
-			fromEmail = matcher.group(2);
-			fromTitle = matcher.group(1);
-		} else {
-			fromEmail = email;
-			fromTitle = email;
-		}
-		return new InternetAddress(fromEmail, fromTitle);
+	if (!appConfig.isProdMode() && !ArgUtil.isEmpty(email.getITemplate())
+		&& !ArgUtil.isEmpty(email.getITemplate().getChannel())) {
+	    Notipy msg = new Notipy();
+	    msg.setSubject(email.getSubject());
+	    msg.setAuthor(String.format("%s = %s", email.getTo().get(0), tos));
+	    msg.setMessage(String.format("%s", email.getModel().toString()));
+	    msg.setIChannel(email.getITemplate().getChannel());
+	    msg.addField("ENV", appConfig.getAppEnv());
+	    msg.addField("TRACE-ID", AppContextUtil.getTraceId());
+	    msg.addField("TEMPLATE", email.getITemplate().toString());
+	    msg.setColor("#" + CryptoUtil.toHex(6, email.getITemplate().toString()));
+	    slackService.sendNotification(msg);
 	}
 
-	/**
-	 * Send html mail.
-	 *
-	 * @param eParams the e params
-	 * @return
-	 * @throws MessagingException the messaging exception
-	 * @throws IOException        Signals that an I/O exception has occurred.
-	 */
-	private String[] sendHtmlMail(Email eParams) throws MessagingException, IOException {
+	return email;
+    }
 
-		boolean isHtml = true;
+    private InternetAddress getInternetAddress(String email) throws UnsupportedEncodingException {
+	String fromEmail = null;
+	String fromTitle = null;
 
-		MimeMessage message = getMailSender().createMimeMessage();
-		MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+	Matcher matcher = pattern.matcher(email);
+	if (matcher.find()) {
+	    fromEmail = matcher.group(2);
+	    fromTitle = matcher.group(1);
+	} else {
+	    fromEmail = email;
+	    fromTitle = email;
+	}
+	return new InternetAddress(fromEmail, fromTitle);
+    }
 
-		String[] tos = contactService.getEmail(eParams.getTo());
+    /**
+     * Send html mail.
+     *
+     * @param eParams the e params
+     * @return
+     * @throws MessagingException the messaging exception
+     * @throws IOException        Signals that an I/O exception has occurred.
+     */
+    private String[] sendHtmlMail(Email eParams) throws MessagingException, IOException {
 
-		if (ArgUtil.isEmpty(tos) || tos.length == 0) {
-			return tos;
-		}
+	boolean isHtml = true;
 
-		helper.setTo(tos);
-		// helper.setTo(emailsTo.toArray(new String[emailsTo.size()]));
-		// helper.setReplyTo(eParams.getFrom());
+	MimeMessage message = getMailSender().createMimeMessage();
+	MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
 
-		if (eParams.getFrom() == null || Constants.DEFAULT_STRING.equals(eParams.getFrom())) {
-			eParams.setFrom(postManConfig.getMailFrom());
-		}
+	String[] tos = contactService.getEmail(eParams.getTo());
 
-		InternetAddress fromInternetAddress = getInternetAddress(eParams.getFrom());
-
-		if (eParams.getReplyTo() == null || Constants.DEFAULT_STRING.equals(eParams.getReplyTo())) {
-			eParams.setReplyTo(eParams.getFrom());
-		}
-
-		helper.setFrom(fromInternetAddress);
-		helper.setReplyTo(eParams.getReplyTo());
-
-		String messageStr = eParams.getMessage();
-
-		String subject = eParams.getSubject();
-		if (ArgUtil.isEmptyString(subject)) {
-			Matcher mtitle = PATTERN_SUBJECT.matcher(messageStr);
-
-			if (mtitle.find()) {
-				subject = mtitle.group(1);
-			}
-			subject = ArgUtil.isEmptyString(subject) ? "No Subject" : subject;
-		}
-		helper.setSubject(subject);
-		helper.setText(eParams.getMessage(), isHtml);
-
-		if (eParams.getCc().size() > 0) {
-			helper.setCc(eParams.getCc().toArray(new String[eParams.getCc().size()]));
-		}
-
-		Matcher m = PATTERN_CID.matcher(messageStr);
-		while (m.find()) {
-			String contentId = m.group(1);
-			helper.addInline(contentId, templateUtils.readAsResource(contentId));
-		}
-
-		if (eParams.getFiles() != null && eParams.getFiles().size() > 0) {
-			for (CommonFile file : eParams.getFiles()) {
-				helper.addAttachment(file.getName(), fileService.toDataSource(file));
-			}
-		}
-
-		getMailSender().send(message);
-
-		return tos;
+	if (ArgUtil.isEmpty(tos) || tos.length == 0) {
+	    return tos;
 	}
 
-	/**
-	 * Send plain text mail.
-	 *
-	 * @param eParams the e params
-	 * @return
-	 * @throws UnsupportedEncodingException
-	 */
-	private String[] sendPlainTextMail(Email eParams) throws UnsupportedEncodingException {
-		SimpleMailMessage mailMessage = new SimpleMailMessage();
+	helper.setTo(tos);
+	// helper.setTo(emailsTo.toArray(new String[emailsTo.size()]));
+	// helper.setReplyTo(eParams.getFrom());
 
-		String[] tos = contactService.getEmail(eParams.getTo());
-		// InternetAddress fromInternetAddress = getInternetAddress(eParams.getFrom());
-
-		if (ArgUtil.isEmpty(tos) || tos.length == 0) {
-			return tos;
-		}
-
-		// eParams.getTo().toArray(new String[eParams.getTo().size()]);
-		mailMessage.setTo(tos);
-		mailMessage.setReplyTo(eParams.getFrom());
-		mailMessage.setFrom(eParams.getFrom());
-		mailMessage.setSubject(eParams.getSubject());
-		mailMessage.setText(eParams.getMessage());
-
-		if (eParams.getCc().size() > 0) {
-			mailMessage.setCc(eParams.getCc().toArray(new String[eParams.getCc().size()]));
-		}
-
-		getMailSender().send(mailMessage);
-		return tos;
+	if (eParams.getFrom() == null || Constants.DEFAULT_STRING.equals(eParams.getFrom())) {
+	    eParams.setFrom(postManConfig.getMailFrom());
 	}
+
+	InternetAddress fromInternetAddress = getInternetAddress(eParams.getFrom());
+
+	if (eParams.getReplyTo() == null || Constants.DEFAULT_STRING.equals(eParams.getReplyTo())) {
+	    eParams.setReplyTo(eParams.getFrom());
+	}
+
+	helper.setFrom(fromInternetAddress);
+	helper.setReplyTo(eParams.getReplyTo());
+
+	String messageStr = eParams.getMessage();
+
+	String subject = eParams.getSubject();
+	if (ArgUtil.isEmptyString(subject)) {
+	    Matcher mtitle = PATTERN_SUBJECT.matcher(messageStr);
+
+	    if (mtitle.find()) {
+		subject = mtitle.group(1);
+	    }
+	    subject = ArgUtil.isEmptyString(subject) ? "No Subject" : subject;
+	}
+	helper.setSubject(subject);
+	helper.setText(eParams.getMessage(), isHtml);
+
+	if (eParams.getCc().size() > 0) {
+	    helper.setCc(eParams.getCc().toArray(new String[eParams.getCc().size()]));
+	}
+
+	Matcher m = PATTERN_CID.matcher(messageStr);
+	while (m.find()) {
+	    String contentId = m.group(1);
+	    helper.addInline(contentId, templateUtils.readAsResource(contentId));
+	}
+
+	if (eParams.getFiles() != null && eParams.getFiles().size() > 0) {
+	    for (CommonFile file : eParams.getFiles()) {
+		helper.addAttachment(file.getName(), fileService.toDataSource(file));
+	    }
+	}
+
+	getMailSender().send(message);
+
+	return tos;
+    }
+
+    /**
+     * Send plain text mail.
+     *
+     * @param eParams the e params
+     * @return
+     * @throws UnsupportedEncodingException
+     */
+    private String[] sendPlainTextMail(Email eParams) throws UnsupportedEncodingException {
+	SimpleMailMessage mailMessage = new SimpleMailMessage();
+
+	String[] tos = contactService.getEmail(eParams.getTo());
+	// InternetAddress fromInternetAddress = getInternetAddress(eParams.getFrom());
+
+	if (ArgUtil.isEmpty(tos) || tos.length == 0) {
+	    return tos;
+	}
+
+	// eParams.getTo().toArray(new String[eParams.getTo().size()]);
+	mailMessage.setTo(tos);
+	mailMessage.setReplyTo(eParams.getFrom());
+	mailMessage.setFrom(eParams.getFrom());
+	mailMessage.setSubject(eParams.getSubject());
+	mailMessage.setText(eParams.getMessage());
+
+	if (eParams.getCc().size() > 0) {
+	    mailMessage.setCc(eParams.getCc().toArray(new String[eParams.getCc().size()]));
+	}
+
+	getMailSender().send(mailMessage);
+	return tos;
+    }
 
 }

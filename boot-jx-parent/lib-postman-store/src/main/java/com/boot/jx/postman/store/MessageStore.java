@@ -166,7 +166,7 @@ public class MessageStore extends CommonDocStore {
     private MessageDoc updateMessageDoc(OutboxMessage outMessage, MessageDoc doc) {
 	doc.setAgent(outMessage.session().getAgent());
 	// if (ArgUtil.is(outMessage.getTemplate())) {
-	doc.setTemplate(outMessage.getTemplate());
+	doc.setTemplate(outMessage.getTemplateCode());
 	doc.setModel(outMessage.getModel());
 	// } else {
 	doc.setMessage(outMessage.getMessage());

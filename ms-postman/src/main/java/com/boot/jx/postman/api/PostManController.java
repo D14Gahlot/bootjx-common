@@ -62,22 +62,22 @@ public class PostManController {
      * @return the lang
      */
     public String getLang(CommonFile file) {
-	if (ArgUtil.isEmpty(file) || ArgUtil.isEmpty(file.getLang())) {
+	if (ArgUtil.isEmpty(file) || ArgUtil.isEmpty(file.template().getLang())) {
 	    String langString = request.getParameter(PostManServiceImpl.PARAM_LANG);// localeResolver.resolveLocale(request).toString();
 	    Language lang = ArgUtil.parseAsEnumT(langString, postManConfig.getTenantLang(), Language.class);
 	    file.lang(lang);
 	}
-	return file.getLang();
+	return file.template().getLang();
     }
 
     @SuppressWarnings("rawtypes")
     private String getLang(Message sms) {
-	if (ArgUtil.isEmpty(sms) || ArgUtil.isEmpty(sms.getLang())) {
+	if (ArgUtil.isEmpty(sms) || ArgUtil.isEmpty(sms.template().getLang())) {
 	    String langString = request.getParameter(PostManServiceImpl.PARAM_LANG);// localeResolver.resolveLocale(request).toString();
 	    Language lang = ArgUtil.parseAsEnumT(langString, postManConfig.getTenantLang(), Language.class);
 	    sms.lang(lang);
 	}
-	return sms.getLang();
+	return sms.template().getLang();
     }
 
     /**
