@@ -28,11 +28,15 @@ public class Demo1Controller extends CommonBotController {
 
     @Autowired
     Demo2Controller demo3Controller;
+    
+    @Autowired
+    Demo4Controller demo5Controller;
 
     @ChatMapping(key = AlexBotConstants.KEY.INITIATE + "menu", pattern = "^menu$")
     private void showDemoMenu(InboxMessage inboxMessage, StringMatcher matcher) {
 	String prevMenu = ArgUtil.parseAsString(chatContext.sessionData().data().get(CURRENT_DEMO), Constants.BLANK)
 		.toLowerCase();
+	
 	if (ArgUtil.is(prevMenu)) {
 	    switch (prevMenu) {
 	    case "1":
@@ -48,6 +52,9 @@ public class Demo1Controller extends CommonBotController {
 		return;
 	    case "4":
 		demo4Controller.start(inboxMessage, matcher);
+		return;
+	    case "5":
+		demo5Controller.start(inboxMessage, matcher);
 		return;
 	    default:
 		break;
@@ -94,6 +101,12 @@ public class Demo1Controller extends CommonBotController {
 	    chatContext.sessionData().data().put(CURRENT_DEMO, "4");
 	    showDemoMenu(inboxMessage, matcher);
 	    break;
+	case "SALES INQUIRY": 
+	case "SALES":
+	case "5":
+	    chatContext.sessionData().data().put(CURRENT_DEMO, "5");
+	    showDemoMenu(inboxMessage, matcher);
+	    break;    
 	case "TALK TO AGENT":
 	case "TALKTOAGENT":
 	case "#":

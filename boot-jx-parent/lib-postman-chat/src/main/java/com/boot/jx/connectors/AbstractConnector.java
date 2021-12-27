@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.boot.jx.chat.ConnectorHandlerFactory;
 import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorHandler;
 import com.boot.jx.dict.ContactType;
-import com.boot.jx.dict.FileType;
 import com.boot.jx.mongo.CommonMongoQueryBuilder;
 import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.jx.postman.PMClientConfig;
@@ -17,8 +16,6 @@ import com.boot.jx.postman.PMEnvironment.AChannelDetails;
 import com.boot.jx.postman.client.TmplClient;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.HSMTemplate3rdParty;
-import com.boot.jx.postman.doc.QuickMedia;
-import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.MessageDefinitions.IMessage;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.plugin.ChannelConfig;
@@ -78,19 +75,22 @@ public abstract class AbstractConnector<CD extends AChannelDetails, P extends Ch
 
     @Override
     public OutboxMessage template(ChannelConfig channelConfig, OutboxMessage outboxMessage) {
-	if (ArgUtil.is(outboxMessage.getTemplate())) {
-	    QuickMedia templateReply = commonMongoTemplate.findById(outboxMessage.getTemplate(), QuickMedia.class);
-	    if (ArgUtil.is(templateReply)) {
-		if ("image".equalsIgnoreCase(templateReply.getType())) {
-		    outboxMessage.attachment(new Attachment().mediaURL(templateReply.getUrl())
-			    .mediaType(FileType.IMAGE.toString()).mediaCaption(templateReply.getTitle()));
-		    return outboxMessage;
-		}
-	    } else {
-		process(channelConfig, outboxMessage);
-		return outboxMessage;
-	    }
-	} else if (ArgUtil.is(outboxMessage.getTemplateId())) {
+//	if (ArgUtil.is(outboxMessage.getMedia())) {
+//	    QuickMedia templateReply = commonMongoTemplate.findById(outboxMessage.getTemplate().getMedia(),
+//		    QuickMedia.class);
+//	    if (ArgUtil.is(templateReply)) {
+//		if ("image".equalsIgnoreCase(templateReply.getType())) {
+//		    outboxMessage.attachment(new Attachment().mediaURL(templateReply.getUrl())
+//			    .mediaType(FileType.IMAGE.toString()).mediaCaption(templateReply.getTitle()));
+//		    return outboxMessage;
+//		}
+//	    } else {
+//		process(channelConfig, outboxMessage);
+//		return outboxMessage;
+//	    }
+//	} else
+//	    
+	if (ArgUtil.is(outboxMessage.getTemplateId()) || ArgUtil.is(outboxMessage.getTemplate())) {
 	    // outboxMessage.setMessage(tmplClient.process(hsmTemplate.getTemplate(),
 	    // outboxMessage.getModel()));
 	    process(channelConfig, outboxMessage);
@@ -98,7 +98,6 @@ public abstract class AbstractConnector<CD extends AChannelDetails, P extends Ch
 	} else {
 	    return outboxMessage;
 	}
-	return outboxMessage;
     }
 
     private OutboxMessage process(ChannelConfig channelConfig, OutboxMessage outboxMessage) {
@@ -113,7 +112,7 @@ public abstract class AbstractConnector<CD extends AChannelDetails, P extends Ch
 		    HSMTemplate3rdParty resolvedTemplate = null;
 		    if (temps.size() > 1) {
 			for (HSMTemplate3rdParty hsmTemplate3rdParty : temps) {
-			    if (ArgUtil.areEqual(hsmTemplate3rdParty.getLang(), outboxMessage.getLang())) {
+			    if (ArgUtil.areEqual(hsmTemplate3rdParty.getLang(), outboxMessage.template().getLang())) {
 				resolvedTemplate = hsmTemplate3rdParty;
 				break;
 			    } else if (ArgUtil.is(hsmTemplate3rdParty.getLang())) {

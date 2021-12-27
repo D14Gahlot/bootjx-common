@@ -20,67 +20,67 @@ import com.boot.jx.scope.tnt.TenantValue;
 @PropertySource("classpath:application-tmpl.properties")
 public class TmplConfig {
 
-	@Value("${jax.static.url}")
-	String jaxStaticUrl;
+    @Value("${jax.static.url}")
+    String jaxStaticUrl;
 
-	@Value("${jax.static.context}")
-	String jaxStaticContext;
+    @Value("${jax.static.context}")
+    String jaxStaticContext;
 
-	/** The tenant. */
-	@TenantValue("${tenant}")
-	private String tenant;
+    /** The tenant. */
+    @TenantValue("${tenant}")
+    private String tenant;
 
-	/** The tenant lang. */
-	@TenantValue("${tenant.lang}")
-	private Language tenantLang;
+    /** The tenant lang. */
+    @TenantValue("${tenant.lang}")
+    private Language tenantLang;
 
-	/**
-	 * Gets the tenant.
-	 *
-	 * @return the tenant
-	 */
-	public String getTenant() {
-		return tenant;
+    /**
+     * Gets the tenant.
+     *
+     * @return the tenant
+     */
+    public String getTenant() {
+	return tenant;
+    }
+
+    /**
+     * Gets the tenant lang.
+     *
+     * @return the tenant lang
+     */
+    public Language getTenantLang() {
+	return tenantLang;
+    }
+
+    /**
+     * Gets the local.
+     *
+     * @param file the file
+     * @return the local
+     */
+    public Locale getLocal(CommonFile file) {
+	if (file != null && file.template().getLang() != null) {
+	    return new Locale(file.template().getLang());
 	}
-
-	/**
-	 * Gets the tenant lang.
-	 *
-	 * @return the tenant lang
-	 */
-	public Language getTenantLang() {
-		return tenantLang;
+	if (tenantLang != null) {
+	    new Locale(tenantLang.getCode());
 	}
+	return new Locale(Language.EN.getCode());
+    }
 
-	/**
-	 * Gets the local.
-	 *
-	 * @param file the file
-	 * @return the local
-	 */
-	public Locale getLocal(CommonFile file) {
-		if (file != null && file.getLang() != null) {
-			return new Locale(file.getLang());
-		}
-		if (tenantLang != null) {
-			new Locale(tenantLang.getCode());
-		}
-		return new Locale(Language.EN.getCode());
+    public Locale getLocal(Message<?> msg) {
+	if (msg == null || msg.template().getLang() == null) {
+	    return new Locale(tenantLang.getCode());
 	}
+	return new Locale(msg.template().getLang());
+    }
 
-	public Locale getLocal(Message<?> msg) {
-		if (msg == null || msg.getLang() == null) {
-			return new Locale(tenantLang.getCode());
-		}
-		return new Locale(msg.getLang());
-	}
+    public String getStaticUrl() {
+	return jaxStaticUrl;
+    }
 
-	public String getStaticUrl() {
-		return jaxStaticUrl;
-	}
-
-	public String getStaticContext() {
-		return jaxStaticContext;
-	}
+    public String getStaticContext() {
+	return jaxStaticContext;
+    }
 
 }

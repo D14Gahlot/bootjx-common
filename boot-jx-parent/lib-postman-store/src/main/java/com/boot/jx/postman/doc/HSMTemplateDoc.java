@@ -20,10 +20,10 @@ import com.boot.jx.postman.model.ITemplates.BasicTemplate;
 import com.boot.jx.postman.model.ResourceMeta;
 import com.boot.utils.ArgUtil;
 
-@Document(collection = HSMTemplate.COLLECTION_NAME)
+@Document(collection = HSMTemplateDoc.COLLECTION_NAME)
 @TypeAlias("HSMTemplate")
-public class HSMTemplate
-	implements Serializable, OldDocVersion<HSMTemplate>, BasicTemplate, AuditableEntity, ResourceMeta {
+public class HSMTemplateDoc
+	implements Serializable, OldDocVersion<HSMTemplateDoc>, BasicTemplate, AuditableEntity, ResourceMeta {
 
     public static final String COLLECTION_NAME = "DICT_HSM_TEMPLATES";
     public static final String COLLECTION_NAME_TRASH = "TRASH_DICT_HSM_TEMPLATES";
@@ -64,7 +64,7 @@ public class HSMTemplate
 
     @Field("oldVersions")
     @Reference
-    private List<HSMTemplate> oldVersions;
+    private List<HSMTemplateDoc> oldVersions;
 
     private String createdBy;
     private Long createdStamp;
@@ -105,12 +105,12 @@ public class HSMTemplate
     }
 
     @Override
-    public List<HSMTemplate> getOldVersions() {
+    public List<HSMTemplateDoc> getOldVersions() {
 	return oldVersions;
     }
 
     @Override
-    public void setOldVersions(List<HSMTemplate> oldVersions) {
+    public void setOldVersions(List<HSMTemplateDoc> oldVersions) {
 	this.oldVersions = oldVersions;
     }
 
@@ -219,7 +219,7 @@ public class HSMTemplate
 	return attachments;
     }
 
-    public HSMTemplate attachment(Attachment... attachments) {
+    public HSMTemplateDoc attachment(Attachment... attachments) {
 	for (Attachment file : attachments) {
 	    this.attachments().add(file);
 	}
