@@ -6,13 +6,21 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.core.MongoTemplate;
 
 import com.boot.jx.bot.BotController;
 import com.boot.jx.bot.ChatContext;
 import com.boot.jx.bot.ChatMapping;
 import com.boot.jx.bot.alex.CommonBotController;
+import com.boot.jx.dict.ContactType;
+import com.boot.jx.dict.UserClient.Channel;
+import com.boot.jx.postman.doc.ChatSessionDoc;
+import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.OutboxMessage;
+import com.boot.jx.postman.store.MessageStore;
+import com.boot.jx.postman.store.SessionStore;
+import com.boot.utils.ArgUtil;
 import com.boot.utils.StringUtils.StringMatcher;
 
 @BotController(name = "DemoBot", tenant = { "app", "demo", "sandbox" })
@@ -21,6 +29,18 @@ public class Demo4Controller extends CommonBotController {
     private static final String CURRENT_DEMO = "current_menu";
     @Autowired
     private ChatContext chatContext;
+    
+    
+    @Autowired
+    private MongoTemplate mongoTemplate;
+
+    @Autowired
+    private MessageStore messageStore;
+    
+    @Autowired
+    private SessionStore sessionStore;
+
+
 
     public void start(InboxMessage inboxMessage, StringMatcher matcher) {
 	reply(new OutboxMessage().template("menu-5").put("name", chatContext.getContact().getName()));
@@ -55,9 +75,11 @@ public class Demo4Controller extends CommonBotController {
 	default:
 	    if (timeCheck()) {
 		reply(new OutboxMessage().template("menu-5-dept-time-1"));
+		send();
 		next("menu-5-dept-onselect");
 	    } else {
 		reply(new OutboxMessage().template("menu-5-dept-time-2"));
+		send();
 		next("menu-5-dept-onselect");
 	    }
 	    break;
@@ -88,6 +110,18 @@ public class Demo4Controller extends CommonBotController {
     	    e.printStackTrace();
     	}
     	return isNowInRange;
-  
+    }
+    
+    public void send() {
+    	OutboxMessage outboxMessage = new OutboxMessage();
+    	outboxMessage.setMessage("Hi, a prospect {{contact.name}}, using {{contact.phone}}, \\nhas reached out to us. \\nPlease log into customer.mehery.com and respond to the customer ASAP.\\n\",");
+    	outboxMessage.contact().type(ContactType.WHATSAPP);
+    	//outboxMessage.contact().setChannelType(Channel.);
+    	outboxMessage.contact().setLane("918828218374"); //918828218374
+    	//outboxMessage.contact().setEmail("rabiluddin@mehery");
+    	outboxMessage.contact().setPhone("96551780410");
+    	//outboxMessage.contact().setContactId(msg.getContact().getContactId());
+    	send(outboxMessage);
+    	
     }
 }
