@@ -10,6 +10,7 @@ import com.boot.jx.postman.doc.ChatPromise;
 import com.boot.jx.postman.doc.ChatPromise.PromiseCondition;
 import com.boot.jx.postman.doc.ChatPromise.Result;
 import com.boot.jx.postman.doc.ChatPromise.State;
+import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.manager.ChatSessionManager;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.OutboxMessage;
@@ -32,6 +33,8 @@ public class ChatController {
     
     
 
+    @Autowired
+    SessionStore sessionStore;
 
     @Autowired
     SessionStore sessionStore;
