@@ -17,7 +17,7 @@ import com.boot.jx.api.ApiResponse;
 import com.boot.jx.aws.AWSFileStore;
 import com.boot.jx.logger.AuditDetailProvider;
 import com.boot.jx.mongo.CommonMongoTemplate;
-import com.boot.jx.postman.doc.HSMTemplate;
+import com.boot.jx.postman.doc.HSMTemplateDoc;
 import com.boot.jx.postman.doc.QuickAction;
 import com.boot.jx.postman.doc.QuickLabel;
 import com.boot.jx.postman.doc.QuickMedia;
