@@ -81,7 +81,7 @@ public class InBoundControllerWeb {
 				OutboxMessage outboxMessage = new OutboxMessage();
 				outboxMessage.setTimestamp(messageDoc.getTimestamp());
 				outboxMessage.setMessage(messageDoc.getMessage());
-				outboxMessage.setTemplate(messageDoc.getTemplate());
+				outboxMessage.template(messageDoc.getTemplate());
 				outboxMessage.setAttachments(messageDoc.getAttachments());
 				if (ArgUtil.isEqual(messageDoc.getType(), "I")) {
 					outboxMessage.addTo(messageDoc.getContactId());

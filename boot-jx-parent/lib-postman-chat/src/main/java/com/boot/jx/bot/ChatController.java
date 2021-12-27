@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.boot.jx.agent.AgentService;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.chat.ChatService;
+import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatPromise;
 import com.boot.jx.postman.doc.ChatPromise.PromiseCondition;
 import com.boot.jx.postman.doc.ChatPromise.Result;
@@ -12,6 +13,7 @@ import com.boot.jx.postman.doc.ChatPromise.State;
 import com.boot.jx.postman.manager.ChatSessionManager;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.OutboxMessage;
+import com.boot.jx.postman.store.SessionStore;
 import com.boot.utils.ArgUtil;
 
 public class ChatController {
@@ -28,6 +30,8 @@ public class ChatController {
     @Autowired
     private ChatSessionManager chatSessionManager;
 
+    @Autowired
+    private SessionStore sessionStore;
 
     public void reply(String message) {
 	try {
@@ -48,7 +52,12 @@ public class ChatController {
 
     public void send(OutboxMessage waMessage) {
 	waMessage.session().setAgent(chatService.getClientConfig().getDefaultSender());
-	chatService.send(chatContext.getContact(), waMessage);
+	if (ArgUtil.is(waMessage.getContact())) {
+	    ChatContactDoc chatContactDoc = sessionStore.getContact(waMessage);
+	    chatService.send(chatContactDoc, waMessage);
+	} else {
+	    chatService.send(chatContext.getContact(), waMessage);
+	}
     }
 
     public ApiResponse<InboxMessage, Object> assignToAgent(String deptName) {

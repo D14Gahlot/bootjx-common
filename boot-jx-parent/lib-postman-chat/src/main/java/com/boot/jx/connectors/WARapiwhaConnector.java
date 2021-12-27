@@ -63,8 +63,8 @@ public class WARapiwhaConnector extends AbstractConnector<WebConfigDetails, WebP
 
 	outboxMessage.contact().setChannelType(outboxMessage.contact().getChannelType());
 	String text = outboxMessage.getMessage();
-	if (ArgUtil.is(outboxMessage.getTemplate())) {
-	    QuickMedia mediaReply = mongoTemplate.findById(outboxMessage.getTemplate(), QuickMedia.class);
+	if (ArgUtil.is(outboxMessage.templateCode())) {
+	    QuickMedia mediaReply = mongoTemplate.findById(outboxMessage.templateCode(), QuickMedia.class);
 	    if (ArgUtil.is(mediaReply)) {
 		if ("image".equalsIgnoreCase(mediaReply.getType())) {
 		    outboxMessage.attachment(

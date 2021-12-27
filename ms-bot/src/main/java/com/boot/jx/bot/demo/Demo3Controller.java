@@ -22,7 +22,7 @@ public class Demo3Controller extends CommonBotController {
     private ChatContext chatContext;
 
     public void start(InboxMessage inboxMessage, StringMatcher matcher) {
-	reply(new OutboxMessage().template("menu-4").put("name", chatContext.getContact().getName()));
+    	reply(new OutboxMessage().template("menu-4").put("name", chatContext.getContact().getName()));
 	// reply(new OutboxMessage().template("menu-4-1-email-1-ask").put("name",
 	// chatContext.getContact().getName()));
 	next("menu-4-1-email-onselect");
@@ -45,8 +45,7 @@ public class Demo3Controller extends CommonBotController {
 
     @ChatMapping(key = "menu-4-2-pan-onselect")
     public void panOnSelect(InboxMessage inboxMessage, StringMatcher matcher) {
-
-	switch (inboxMessage.getMessage().toLowerCase()) {
+ 	switch (inboxMessage.getMessage().toLowerCase()) {
 
 	case "h":
 	case "need help":
@@ -70,8 +69,7 @@ public class Demo3Controller extends CommonBotController {
     }
 
     @ChatMapping(key = "menu-4-2-date-onselect")
-    public void dateOnSelect(InboxMessage inboxMessage, StringMatcher matcher) throws InterruptedException {
-
+    public void dateOnSelect(InboxMessage inboxMessage, StringMatcher matcher) throws InterruptedException {  
 	switch (inboxMessage.getMessage().toLowerCase()) {
 
 	case "h":

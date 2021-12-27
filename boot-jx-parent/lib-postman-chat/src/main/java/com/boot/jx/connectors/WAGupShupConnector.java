@@ -20,7 +20,6 @@ import com.boot.jx.postman.client.PMFileStoreClient;
 import com.boot.jx.postman.client.TmplClient;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
-import com.boot.jx.postman.doc.QuickMedia;
 import com.boot.jx.postman.gupshup.GupShupClientChat;
 import com.boot.jx.postman.gupshup.GupShupClientNotify;
 import com.boot.jx.postman.gupshup.GupShupDeliveryResp;
@@ -79,30 +78,6 @@ public class WAGupShupConnector extends AbstractConnector<GupShupConfigDetails, 
     @Autowired
     private PMFileStoreClient pmFileStoreClient;
 
-    private OutboxMessage resolveTemplate(OutboxMessage outboxMessage) {
-	if (ArgUtil.is(outboxMessage.getTemplate())) {
-	    QuickMedia templateReply = mongoTemplate.findById(outboxMessage.getTemplate(), QuickMedia.class);
-	    if (ArgUtil.is(templateReply)) {
-		if ("image".equalsIgnoreCase(templateReply.getType())) {
-		    outboxMessage.attachment(
-			    new Attachment().mediaURL(templateReply.getUrl()).mediaType(FileType.IMAGE.toString()));
-		    return outboxMessage;
-		}
-	    } else {
-		tmplClient.process(outboxMessage);
-		return outboxMessage;
-	    }
-	} else if (ArgUtil.is(outboxMessage.getTemplateId())) {
-	    // outboxMessage.setMessage(tmplClient.process(hsmTemplate.getTemplate(),
-	    // outboxMessage.getModel()));
-	    tmplClient.process(outboxMessage);
-	    return outboxMessage;
-	} else {
-	    return outboxMessage;
-	}
-	return outboxMessage;
-    }
-
     public void sendInternal(ChannelConfig channelConfig, OutboxMessage outboxMessage, boolean isPushMessage) {
 	LOGGER.debug("sendInternal(OutboxMessage {}, boolean {})", outboxMessage, isPushMessage);
 	try {
@@ -123,7 +98,7 @@ public class WAGupShupConnector extends AbstractConnector<GupShupConfigDetails, 
     public void send(ChannelConfig channelConfig, ChatContactDoc chatContactDoc, OutboxMessage outboxMessage) {
 	outboxMessage.contact().setChannelType(chatContactDoc.getChannelType());
 	outboxMessage.contact().setLane(chatContactDoc.getLane());
-	resolveTemplate(outboxMessage);
+	template(channelConfig, outboxMessage);
 
 	if (TimeUtils.isExpired(chatContactDoc.getLastInBoundStamp(), DEFAULT_SESISON_PERIOD)
 		&& outboxMessage.optionsAsModel().entry("wa-template-id").exists()) {
@@ -143,7 +118,7 @@ public class WAGupShupConnector extends AbstractConnector<GupShupConfigDetails, 
     @Override
     public void reply(ChannelConfig channelConfig, ChatContactDoc chatContactDoc, OutboxMessage outboxMessage,
 	    IMessageExtended inboxMessage) {
-	resolveTemplate(outboxMessage);
+	template(channelConfig, outboxMessage);
 	this.sendInternal(channelConfig, outboxMessage, false);
     }
 
