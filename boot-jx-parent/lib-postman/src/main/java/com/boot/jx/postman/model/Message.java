@@ -52,7 +52,6 @@ public class Message<T extends Message<T>> implements Serializable, MessageOptio
 
     protected List<String> to = null;
     protected List<ContactMeta> contacts = null;
-    private String templateId = null;
     private ICommonTemplate template;
     private BasicExternalTemplate templateExt;
     private String action = null;
@@ -452,24 +451,6 @@ public class Message<T extends Message<T>> implements Serializable, MessageOptio
 	this.stamps().put(ArgUtil.parseAsString(status), System.currentTimeMillis());
     }
 
-    public String getTemplateId() {
-	if (ArgUtil.is(this.template)) {
-	    return ArgUtil.nonEmpty(this.template.getId(), templateId);
-	}
-	return templateId;
-    }
-
-    public void setTemplateId(String templateId) {
-	this.templateId = templateId;
-    }
-
-    @SuppressWarnings("unchecked")
-    public T templateId(String templateId) {
-	this.templateId = templateId;
-	this.template().setId(templateId);
-	return (T) this;
-    }
-
     public Contactable getContact() {
 	return contact;
     }
@@ -577,7 +558,7 @@ public class Message<T extends Message<T>> implements Serializable, MessageOptio
 
     @SuppressWarnings("unchecked")
     public T template(String template) {
-	this.template.setCode(template);
+	this.template().setCode(template);
 	return (T) this;
     }
 
@@ -593,5 +574,15 @@ public class Message<T extends Message<T>> implements Serializable, MessageOptio
     @JsonIgnore
     public ITemplate getITemplate() {
 	return ITemplates.getTemplate(this.template().getCode());
+    }
+
+    public String getTemplateId() {
+	return this.template().getId();
+    }
+
+    @SuppressWarnings("unchecked")
+    public T templateId(String templateId) {
+	this.template().setId(templateId);
+	return (T) this;
     }
 }

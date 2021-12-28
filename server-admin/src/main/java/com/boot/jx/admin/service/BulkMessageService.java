@@ -152,7 +152,7 @@ public class BulkMessageService extends QueuedTaskExecuter {
 	outboxMessage.setMessageId(msg.getMessageId());
 	outboxMessage.setMessage(msg.getMessage());
 	outboxMessage.template(msg.getTemplate());
-	outboxMessage.setTemplateId(msg.getTemplateId());
+	outboxMessage.templateId(msg.getTemplateId());
 	outboxMessage.contact().type(contactType);
 	outboxMessage.contact().setChannelType(channel);
 	outboxMessage.contact().setLane(lane);
