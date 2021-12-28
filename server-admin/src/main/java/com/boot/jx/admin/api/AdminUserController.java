@@ -41,7 +41,7 @@ public class AdminUserController {
     @RequestMapping(value = "/api/admins/agent", method = { RequestMethod.POST })
     public ApiResponse<AgentResponseAdminDto, Object> createOrUpdateAgent(@RequestBody AgentResponseAdminDto dto) {
 	return ApiResponse.buildResults(adminService.createOrUpdateAgent(dto))
-		.message(ArgUtil.is(dto.getAgent_id()) ? "Agent Updated" : "Agent Created");
+		.message(ArgUtil.is(dto.getId()) ? "Agent Updated" : "Agent Created");
     }
 
     @RequestMapping(value = "/api/admins/agent", method = { RequestMethod.DELETE })
