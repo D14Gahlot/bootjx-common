@@ -113,15 +113,24 @@ public class Demo4Controller extends CommonBotController {
     }
     
     public void send() {
+    	
     	OutboxMessage outboxMessage = new OutboxMessage();
-    	outboxMessage.setMessage("Hi, a prospect {{contact.name}}, using {{contact.phone}}, \\nhas reached out to us. \\nPlease log into customer.mehery.com and respond to the customer ASAP.\\n\",");
+    	
+    	outboxMessage.template().setCode("sales_inquiry");
+    	//outboxMessage.setMessage("Hi, a prospect {{contact.name}}, using {{contact.phone}}, \\nhas reached out to us. \\nPlease log into customer.mehery.com and respond to the customer ASAP.\\n\",");
     	outboxMessage.contact().type(ContactType.WHATSAPP);
-    	//outboxMessage.contact().setChannelType(Channel.);
-    	outboxMessage.contact().setLane("918828218374"); //918828218374
-    	//outboxMessage.contact().setEmail("rabiluddin@mehery");
-    	outboxMessage.contact().setPhone("96551780410");
-    	//outboxMessage.contact().setContactId(msg.getContact().getContactId());
+    	outboxMessage.contact().setLane("918828218374");
+    	//outboxMessage.contact().setPhone("96551780410");
+    	outboxMessage.contact().setCsid("919619203759");
     	send(outboxMessage);
+    	
+    	OutboxMessage outboxMessage1 = new OutboxMessage();
+    	outboxMessage1.template().setCode("sales_inquiry");
+    	outboxMessage1.contact().type(ContactType.WHATSAPP);
+    	outboxMessage1.contact().setLane("918828218374");
+    	//outboxMessage.contact().setPhone("96551780410");
+    	outboxMessage1.contact().setCsid("96551780410");
+    	send(outboxMessage1);
     	
     }
 }
