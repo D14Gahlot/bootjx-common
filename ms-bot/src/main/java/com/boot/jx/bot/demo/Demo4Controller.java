@@ -75,10 +75,12 @@ public class Demo4Controller extends CommonBotController {
 	default:
 	    if (timeCheck()) {
 		reply(new OutboxMessage().template("menu-5-dept-time-1"));
+		this.transferToAgent(inboxMessage,matcher);
 		send();
 		next("menu-5-dept-onselect");
 	    } else {
 		reply(new OutboxMessage().template("menu-5-dept-time-2"));
+		this.transferToAgent(inboxMessage,matcher);
 		send();
 		next("menu-5-dept-onselect");
 	    }
@@ -131,6 +133,8 @@ public class Demo4Controller extends CommonBotController {
     	//outboxMessage.contact().setPhone("96551780410");
     	outboxMessage1.contact().setCsid("96551780410");
     	send(outboxMessage1);
+    	
+    	
     	
     }
 }
