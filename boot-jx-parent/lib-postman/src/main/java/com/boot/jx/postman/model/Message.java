@@ -52,7 +52,7 @@ public class Message<T extends Message<T>> implements Serializable, MessageOptio
 
     protected List<String> to = null;
     protected List<ContactMeta> contacts = null;
-    private ICommonTemplate template;
+    private ICommonTemplate hsm;
     private BasicExternalTemplate templateExt;
     private String action = null;
     private String type = null;
@@ -328,7 +328,7 @@ public class Message<T extends Message<T>> implements Serializable, MessageOptio
 
     @SuppressWarnings("unchecked")
     public T data(String key, Object value) {
-	this.template().data().put(key, value);
+	this.hsm().data().put(key, value);
 	return (T) this;
     }
 
@@ -535,34 +535,34 @@ public class Message<T extends Message<T>> implements Serializable, MessageOptio
 	this.formatSubType = formatSubType;
     }
 
-    public ICommonTemplate getTemplate() {
-	return template;
+    public ICommonTemplate getHsm() {
+	return hsm;
     }
 
-    public void setTemplate(ICommonTemplate hsmTemplate) {
-	this.template = hsmTemplate;
+    public void setHsm(ICommonTemplate hsmTemplate) {
+	this.hsm = hsmTemplate;
     }
 
-    public ICommonTemplate template() {
-	if (this.template == null) {
-	    this.template = new CommonTemplate();
+    public ICommonTemplate hsm() {
+	if (this.hsm == null) {
+	    this.hsm = new CommonTemplate();
 	}
-	return this.template;
+	return this.hsm;
     }
 
     public String templateId() {
-	return this.template.getId();
+	return this.hsm().getId();
     }
 
     @SuppressWarnings("unchecked")
     public T templateId(String templateId) {
-	this.template().setId(templateId);
+	this.hsm().setId(templateId);
 	return (T) this;
     }
 
     @SuppressWarnings("unchecked")
-    public T template(ICommonTemplate template) {
-	this.template = template;
+    public T hsm(CommonTemplate template) {
+	this.hsm = template;
 	return (T) this;
     }
 
@@ -574,21 +574,21 @@ public class Message<T extends Message<T>> implements Serializable, MessageOptio
 
     @SuppressWarnings("unchecked")
     public T template(String template) {
-	this.template.setCode(template);
+	this.hsm.setCode(template);
 	return (T) this;
     }
 
     public String templateCode() {
-	return this.template().getCode();
+	return this.hsm().getCode();
     }
 
     @JsonIgnore
     public void setITemplate(ITemplate template) {
-	this.template().setCode(template.toString());
+	this.hsm().setCode(template.toString());
     }
 
     @JsonIgnore
     public ITemplate getITemplate() {
-	return ITemplates.getTemplate(this.template().getCode());
+	return ITemplates.getTemplate(this.hsm().getCode());
     }
 }

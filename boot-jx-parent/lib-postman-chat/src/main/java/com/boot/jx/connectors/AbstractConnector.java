@@ -113,7 +113,7 @@ public abstract class AbstractConnector<CD extends AChannelDetails, P extends Ch
 		    HSMTemplate3rdParty resolvedTemplate = null;
 		    if (temps.size() > 1) {
 			for (HSMTemplate3rdParty hsmTemplate3rdParty : temps) {
-			    if (ArgUtil.areEqual(hsmTemplate3rdParty.getLang(), outboxMessage.template().getLang())) {
+			    if (ArgUtil.areEqual(hsmTemplate3rdParty.getLang(), outboxMessage.hsm().getLang())) {
 				resolvedTemplate = hsmTemplate3rdParty;
 				break;
 			    } else if (ArgUtil.is(hsmTemplate3rdParty.getLang())) {

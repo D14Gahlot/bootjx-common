@@ -161,7 +161,7 @@ public class SMService {
 				context.setVariables(sms.getModel());
 
 				PostManFile file = new PostManFile();
-				file.setTemplate(sms.getTemplate());
+				file.setTemplate(sms.getHsm());
 				file.setModel(sms.getModel());
 
 				sms.setMessage(fileService.create(file, ContactType.SMS).getContent()

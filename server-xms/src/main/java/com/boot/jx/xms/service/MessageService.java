@@ -52,7 +52,7 @@ public class MessageService {
 		ApiResponseUtil.throwInputException(new ApiFieldError().field("template").obzect("OutBoundMsg")
 			.codeKey("TEMPLATE_DETAILS_MISSING").description("Template details is missing"));
 	    }
-	    outboxMessage.setTemplate(message.getTemplate());
+	    outboxMessage.setHsm(message.getTemplate());
 	    outboxMessage.setModelData(message.getTemplate().data);
 	}
 

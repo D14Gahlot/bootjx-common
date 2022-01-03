@@ -97,10 +97,10 @@ public class PostManConfig {
     }
 
     public Locale getLocal(Message<?> msg) {
-	if (msg == null || msg.template().getLang() == null) {
+	if (msg == null || msg.hsm().getLang() == null) {
 	    return new Locale(tenantLang.getCode());
 	}
-	return new Locale(msg.template().getLang());
+	return new Locale(msg.hsm().getLang());
     }
 
     /**

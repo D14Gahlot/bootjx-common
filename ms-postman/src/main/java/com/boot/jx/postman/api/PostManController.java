@@ -72,12 +72,12 @@ public class PostManController {
 
     @SuppressWarnings("rawtypes")
     private String getLang(Message sms) {
-	if (ArgUtil.isEmpty(sms) || ArgUtil.isEmpty(sms.template().getLang())) {
+	if (ArgUtil.isEmpty(sms) || ArgUtil.isEmpty(sms.hsm().getLang())) {
 	    String langString = request.getParameter(PostManServiceImpl.PARAM_LANG);// localeResolver.resolveLocale(request).toString();
 	    Language lang = ArgUtil.parseAsEnumT(langString, postManConfig.getTenantLang(), Language.class);
 	    sms.lang(lang);
 	}
-	return sms.template().getLang();
+	return sms.hsm().getLang();
     }
 
     /**

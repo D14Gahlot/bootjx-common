@@ -165,7 +165,7 @@ public class EmailService {
 	    } else {
 		if (email.templateCode() != null) {
 		    PostManFile file = new PostManFile();
-		    file.setTemplate(email.getTemplate());
+		    file.setTemplate(email.getHsm());
 		    file.setModel(email.getModel());
 
 		    email.setMessage(fileService.create(file, ContactType.EMAIL).getContent());
@@ -178,7 +178,7 @@ public class EmailService {
 		if (email.getFiles() != null && email.getFiles().size() > 0) {
 		    for (PostManFile file : email.getFiles()) {
 			if (file.template().getLang() == null) {
-			    file.template().setLang(email.template().getLang());
+			    file.template().setLang(email.hsm().getLang());
 			}
 			fileService.create(file);
 		    }
