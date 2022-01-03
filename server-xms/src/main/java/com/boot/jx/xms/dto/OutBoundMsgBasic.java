@@ -7,11 +7,12 @@ import com.boot.jx.postman.model.ext.CommonMsgLocation;
 import com.boot.jx.postman.model.ext.CommonMsgText;
 import com.boot.jx.postman.model.ext.HSMTemplate;
 import com.boot.jx.swagger.ApiMockModelProperty;
+import com.boot.model.UtilityModels.JsonIgnoreUnknown;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class OutBoundMsgBasic implements Serializable {
+public class OutBoundMsgBasic implements Serializable, JsonIgnoreUnknown {
     private static final long serialVersionUID = 8095410793094848402L;
 
     @JsonProperty("channelId")
