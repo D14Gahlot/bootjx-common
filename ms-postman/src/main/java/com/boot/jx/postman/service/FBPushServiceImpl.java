@@ -137,7 +137,7 @@ public class FBPushServiceImpl implements IPushNotifyService {
 
 			if (msg.templateCode() != null) {
 				PostManFile file = new PostManFile();
-				file.setTemplate(msg.getTemplate());
+				file.setTemplate(msg.getHsm());
 				file.setModel(msg.getModel());
 				file.setFileFormat(FileFormat.JSON);
 

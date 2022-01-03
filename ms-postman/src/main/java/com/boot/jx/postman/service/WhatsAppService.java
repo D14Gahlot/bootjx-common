@@ -72,7 +72,7 @@ public class WhatsAppService {
 			context.setVariables(waMessage.getModel());
 
 			PostManFile file = new PostManFile();
-			file.setTemplate(waMessage.getTemplate());
+			file.setTemplate(waMessage.getHsm());
 			file.setModel(waMessage.getModel());
 
 			String msg = fileService.create(file, ContactType.WHATSAPP).getContent();

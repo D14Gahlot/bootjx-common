@@ -2,9 +2,11 @@ package com.boot.jx.def;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.Map;
 
 import com.boot.jx.model.CommonTemplate;
+import com.boot.utils.ArgUtil;
 import com.boot.utils.JsonUtil;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -33,6 +35,15 @@ public class CommonInterfaces {
 	public Map<String, Object> getData();
 
 	public void setData(Map<String, Object> data);
+
+	default public Map<String, Object> data() {
+	    Map<String, Object> data = this.getData();
+	    if (!ArgUtil.is(data)) {
+		data = new HashMap<String, Object>();
+		setData(data);
+	    }
+	    return data;
+	}
 
     }
 

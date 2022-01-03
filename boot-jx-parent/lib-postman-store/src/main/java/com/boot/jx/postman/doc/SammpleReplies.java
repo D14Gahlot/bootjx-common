@@ -61,7 +61,7 @@ public class SammpleReplies {
 			temp5 = new QuickMedia();
 		}
 
-		temp5.setName(name);
+		temp5.setId(name);
 		temp5.setTitle(title);
 		temp5.setType("IMAGE");
 		temp5.setCategory(category);

@@ -59,7 +59,7 @@ public class BulkMessageService extends QueuedTaskExecuter {
 	BulkSessionDoc session = new BulkSessionDoc();
 
 	session.setMessage(bulkMessage.getMessage());
-	session.setTemplateId(bulkMessage.getTemplateId());
+	session.setTemplateId(bulkMessage.templateId());
 	session.setTemplate(bulkMessage.templateCode());
 	session.setMessageCount(bulkMessage.getTo().size());
 	session.setContactType(bulkMessage.contact().type());
@@ -81,7 +81,7 @@ public class BulkMessageService extends QueuedTaskExecuter {
 	    to = String.format("%s%s", phoneNumber.getCountryCode(), phoneNumber.getNationalNumber());
 	    doc.getContact().setPhone(to);
 	    doc.setMessage(bulkMessage.getMessage());
-	    doc.setTemplateId(bulkMessage.getTemplateId());
+	    doc.setTemplateId(bulkMessage.templateId());
 	    doc.setTemplate(bulkMessage.templateCode());
 	    docs.add(doc);
 	}
