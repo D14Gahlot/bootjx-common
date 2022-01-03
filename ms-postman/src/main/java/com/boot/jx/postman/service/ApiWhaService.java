@@ -47,7 +47,7 @@ public class ApiWhaService {
 		PMGaugeEvent pMGaugeEvent = new PMGaugeEvent(PMGaugeEvent.Type.SEND_WHATSAPP);
 		try {
 			to = message.getTo() != null ? message.getTo().get(0) : null;
-			if (message.getTemplateCode() != null) {
+			if (message.templateCode() != null) {
 				Context context = new Context(postManConfig.getLocal(message));
 				context.setVariables(message.getModel());
 				PostManFile file = new PostManFile();

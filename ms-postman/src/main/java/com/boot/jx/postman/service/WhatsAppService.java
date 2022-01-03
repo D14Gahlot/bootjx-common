@@ -67,7 +67,7 @@ public class WhatsAppService {
 	}
 
 	public WAMessage resolveTemplate(WAMessage waMessage) {
-		if (ArgUtil.isEmpty(waMessage.getMessage()) && waMessage.getTemplateCode() != null) {
+		if (ArgUtil.isEmpty(waMessage.getMessage()) && waMessage.templateCode() != null) {
 			Context context = new Context(postManConfig.getLocal(waMessage));
 			context.setVariables(waMessage.getModel());
 
@@ -193,7 +193,7 @@ public class WhatsAppService {
 			return false;
 		}
 		if (ArgUtil.isEmpty(msg.getTo()) || (msg.getTo().size() == 0) || ArgUtil.isEmpty(msg.getTo().get(0))
-				|| (ArgUtil.isEmpty(msg.getMessage()) && ArgUtil.isEmpty(msg.getTemplateCode()))) {
+				|| (ArgUtil.isEmpty(msg.getMessage()) && ArgUtil.isEmpty(msg.templateCode()))) {
 			PMGaugeEvent pMGaugeEvent = new PMGaugeEvent(PMGaugeEvent.Type.SEND_WHATSAPP).set(msg);
 			pMGaugeEvent.setTo(msg.getTo());
 			pMGaugeEvent.setMessage(msg.getMessage());

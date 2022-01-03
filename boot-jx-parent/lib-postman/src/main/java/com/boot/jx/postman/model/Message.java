@@ -53,7 +53,6 @@ public class Message<T extends Message<T>> implements Serializable, MessageOptio
     protected List<String> to = null;
     protected List<ContactMeta> contacts = null;
     private String templateId = null;
-    private String templateCode = null;
     private ICommonTemplate template;
     private BasicExternalTemplate templateExt;
     private String action = null;
@@ -143,25 +142,6 @@ public class Message<T extends Message<T>> implements Serializable, MessageOptio
 
     public void setMessage(String text) {
 	this.message = text;
-    }
-
-    public String getTemplateCode() {
-	return templateCode;
-    }
-
-    public void setTemplateCode(String template) {
-	this.templateCode = template;
-	this.template().setCode(template);
-    }
-
-    @JsonIgnore
-    public void setITemplate(ITemplate template) {
-	this.templateCode = template.toString();
-    }
-
-    @JsonIgnore
-    public ITemplate getITemplate() {
-	return ITemplates.getTemplate(this.templateCode);
     }
 
     public Message() {
@@ -326,18 +306,6 @@ public class Message<T extends Message<T>> implements Serializable, MessageOptio
     @SuppressWarnings("unchecked")
     public T message(String message) {
 	this.setMessage(message);
-	return (T) this;
-    }
-
-    @SuppressWarnings("unchecked")
-    public T template(ITemplate template) {
-	this.setITemplate(template);
-	return (T) this;
-    }
-
-    @SuppressWarnings("unchecked")
-    public T templateCode(String template) {
-	this.setTemplateCode(template);
 	return (T) this;
     }
 
@@ -601,4 +569,29 @@ public class Message<T extends Message<T>> implements Serializable, MessageOptio
 	return (T) this;
     }
 
+    @SuppressWarnings("unchecked")
+    public T template(ITemplate template) {
+	this.setITemplate(template);
+	return (T) this;
+    }
+
+    @SuppressWarnings("unchecked")
+    public T template(String template) {
+	this.template.setCode(template);
+	return (T) this;
+    }
+
+    public String templateCode() {
+	return this.template().getCode();
+    }
+
+    @JsonIgnore
+    public void setITemplate(ITemplate template) {
+	this.template().setCode(template.toString());
+    }
+
+    @JsonIgnore
+    public ITemplate getITemplate() {
+	return ITemplates.getTemplate(this.template().getCode());
+    }
 }

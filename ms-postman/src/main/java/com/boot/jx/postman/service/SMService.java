@@ -151,12 +151,12 @@ public class SMService {
 		PMGaugeEvent pMGaugeEvent = new PMGaugeEvent(PMGaugeEvent.Type.SEND_SMS);
 		try {
 			if (LOGGER.isDebugEnabled()) {
-				LOGGER.debug("Sending {} SMS to {}", sms.getTemplateCode(), Utils.commaConcat(sms.getTo()));
+				LOGGER.debug("Sending {} SMS to {}", sms.templateCode(), Utils.commaConcat(sms.getTo()));
 			}
 
 			to = sms.getTo() != null ? sms.getTo().get(0) : null;
 
-			if (sms.getTemplateCode() != null) {
+			if (sms.templateCode() != null) {
 				Context context = new Context(postManConfig.getLocal(sms));
 				context.setVariables(sms.getModel());
 

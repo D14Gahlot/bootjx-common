@@ -186,14 +186,14 @@ public class PMGaugeEvent extends AuditEvent<PMGaugeEvent> {
      * @return the PM gauge event
      */
     public PMGaugeEvent set(SMS sms) {
-	this.template = sms.getTemplateCode();
+	this.template = sms.templateCode();
 	this.to = sms.getTo();
 	this.attmept = sms.getAttempt();
 	return this;
     }
 
     public PMGaugeEvent set(SMS sms, String responseText) {
-	this.template = sms.getTemplateCode();
+	this.template = sms.templateCode();
 	this.to = sms.getTo();
 	this.responseText = responseText;
 	this.attmept = sms.getAttempt();
@@ -208,7 +208,7 @@ public class PMGaugeEvent extends AuditEvent<PMGaugeEvent> {
      * @return the PM gauge event
      */
     public PMGaugeEvent set(Email email) {
-	this.template = email.getTemplateCode();
+	this.template = email.templateCode();
 	this.to = email.getTo();
 	this.attmept = email.getAttempt();
 	return this;
@@ -227,7 +227,7 @@ public class PMGaugeEvent extends AuditEvent<PMGaugeEvent> {
 	this.to = msg.getTo();
 	this.responseText = responseText;
 	this.attmept = msg.getAttempt();
-	this.template = msg.getTemplateCode();
+	this.template = msg.templateCode();
 	if (ArgUtil.isEmpty(this.template)) {
 	    this.message = message;
 	}
@@ -237,7 +237,7 @@ public class PMGaugeEvent extends AuditEvent<PMGaugeEvent> {
     public PMGaugeEvent set(WAMessage msg) {
 	this.to = msg.getTo();
 	this.channel = msg.contact().getChannelType();
-	this.template = msg.getTemplateCode();
+	this.template = msg.templateCode();
 	if (ArgUtil.isEmpty(this.template)) {
 	    this.message = msg.getMessage();
 	}

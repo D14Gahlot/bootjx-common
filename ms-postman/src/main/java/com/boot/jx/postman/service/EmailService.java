@@ -146,12 +146,12 @@ public class EmailService {
 	try {
 	    emailClone = email.clone();
 	} catch (CloneNotSupportedException e1) {
-	    LOGGER.error("Clonning exception {} Email to {}", email.getTemplateCode(),
+	    LOGGER.error("Clonning exception {} Email to {}", email.templateCode(),
 		    Utils.commaConcat(email.getTo()));
 	}
 	try {
 	    if (LOGGER.isDebugEnabled()) {
-		LOGGER.debug("Sending {} Email to {}", email.getTemplateCode(), Utils.commaConcat(email.getTo()));
+		LOGGER.debug("Sending {} Email to {}", email.templateCode(), Utils.commaConcat(email.getTo()));
 	    }
 
 	    to = email.getTo() != null ? email.getTo().get(0) : null;
@@ -163,7 +163,7 @@ public class EmailService {
 		email.updateStatus(Status.BLCKD);
 		auditService.log(pMGaugeEvent.set(AuditEvent.Result.REJECTED).set(email));
 	    } else {
-		if (email.getTemplateCode() != null) {
+		if (email.templateCode() != null) {
 		    PostManFile file = new PostManFile();
 		    file.setTemplate(email.getTemplate());
 		    file.setModel(email.getModel());
