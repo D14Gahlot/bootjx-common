@@ -577,7 +577,7 @@ public class Message<T extends Message<T>> implements Serializable, MessageOptio
 
     @SuppressWarnings("unchecked")
     public T template(String template) {
-	this.template.setCode(template);
+	this.template().setCode(template);
 	return (T) this;
     }
 
