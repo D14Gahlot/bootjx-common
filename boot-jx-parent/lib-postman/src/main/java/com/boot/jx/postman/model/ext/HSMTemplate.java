@@ -4,7 +4,9 @@ import java.util.Map;
 
 import com.boot.jx.def.CommonInterfaces.ICommonTemplate;
 import com.boot.jx.swagger.ApiMockModelProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
+@JsonDeserialize(as = HSMTemplate.class)
 public class HSMTemplate implements ICommonTemplate {
 
     private static final long serialVersionUID = -7807618398296479402L;
