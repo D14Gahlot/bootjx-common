@@ -1,0 +1,43 @@
+package com.boot.jx.xms.api;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.boot.jx.api.ApiResponse;
+import com.boot.jx.common.config.ConfigConstants;
+import com.boot.jx.common.config.ConfigManager;
+import com.boot.jx.postman.PMEnvironment;
+import com.boot.jx.postman.PMEnvironment.PMConfigurationObject;
+import com.boot.jx.xms.XmsConstants.ApiClientParams;
+import com.boot.jx.xms.dto.WebhookUrlRequest;
+
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+
+@Api(tags = "Config APIs", description = "API's for configuration")
+@Controller
+public class ConfigApiV1 {
+
+    @Autowired
+    private ConfigManager configManager;
+
+    @Autowired
+    private PMEnvironment pmEnvironment;
+
+    @ApiOperation(value = "Set Webhook URL",
+	    notes = "The webhook URL is a URL where the WhatsApp Business API "
+		    + "sends the notifications to, triggered by specific events")
+    @ApiClientParams
+    @ResponseBody
+    @RequestMapping(value = "/api/v1/config/webhook", method = { RequestMethod.POST })
+    public ApiResponse<PMConfigurationObject, Object> setWebhookUrl(@RequestBody WebhookUrlRequest req) {
+	PMConfigurationObject config = pmEnvironment.keyEntry(ConfigConstants.KEY.POSTMAN_CHAT_INBOUND_WEBHOOK);
+	config.setValue(req.url);
+	configManager.save(config);
+	return ApiResponse.buildResults(config).meta(req);
+    }
+}
