@@ -6,7 +6,6 @@ import java.util.Map;
 
 import com.boot.jx.AppContextUtil;
 import com.boot.jx.common.impl.ConfigMeta;
-import com.boot.jx.postman.PMConfiguration;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PMEnvironment.AChannelDetails;
 import com.boot.jx.postman.PMEnvironment.ChannelTypeSpecificProps;

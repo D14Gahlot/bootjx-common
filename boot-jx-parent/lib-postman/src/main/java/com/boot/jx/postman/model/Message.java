@@ -6,7 +6,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.boot.jx.def.CommonInterfaces.ICommonTemplate;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.dict.Language;
 import com.boot.jx.model.CommonTemplate;
@@ -42,7 +41,6 @@ public class Message<T extends Message<T>> implements Serializable, MessageOptio
 
     protected long timestamp;
     protected int attempt;
-    protected String lang = null;
     protected String subject;
     protected String message = null;
     protected String footer;
@@ -52,7 +50,7 @@ public class Message<T extends Message<T>> implements Serializable, MessageOptio
 
     protected List<String> to = null;
     protected List<ContactMeta> contacts = null;
-    private ICommonTemplate hsm;
+    private CommonTemplate hsm;
     private BasicExternalTemplate templateExt;
     private String action = null;
     private String type = null;
@@ -310,7 +308,7 @@ public class Message<T extends Message<T>> implements Serializable, MessageOptio
 
     @SuppressWarnings("unchecked")
     public T lang(Language lang) {
-	this.lang = ArgUtil.parseAsString(lang);
+	this.hsm().setLang(ArgUtil.parseAsString(lang));
 	return (T) this;
     }
 
@@ -535,15 +533,7 @@ public class Message<T extends Message<T>> implements Serializable, MessageOptio
 	this.formatSubType = formatSubType;
     }
 
-    public ICommonTemplate getHsm() {
-	return hsm;
-    }
-
-    public void setHsm(ICommonTemplate hsmTemplate) {
-	this.hsm = hsmTemplate;
-    }
-
-    public ICommonTemplate hsm() {
+    public CommonTemplate hsm() {
 	if (this.hsm == null) {
 	    this.hsm = new CommonTemplate();
 	}
@@ -574,7 +564,7 @@ public class Message<T extends Message<T>> implements Serializable, MessageOptio
 
     @SuppressWarnings("unchecked")
     public T template(String template) {
-	this.hsm.setCode(template);
+	this.hsm().setCode(template);
 	return (T) this;
     }
 
@@ -590,5 +580,13 @@ public class Message<T extends Message<T>> implements Serializable, MessageOptio
     @JsonIgnore
     public ITemplate getITemplate() {
 	return ITemplates.getTemplate(this.hsm().getCode());
+    }
+
+    public CommonTemplate getHsm() {
+        return hsm;
+    }
+
+    public void setHsm(CommonTemplate hsm) {
+        this.hsm = hsm;
     }
 }

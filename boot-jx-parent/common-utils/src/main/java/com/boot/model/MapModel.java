@@ -321,12 +321,14 @@ public class MapModel implements JsonSerializerType<Object> {
     }
 
     public MapModel putAll(Map<? extends String, ? extends Object> source) {
-	this.map().putAll(source);
+	if (source != null)
+	    this.map().putAll(source);
 	return this;
     }
 
     public MapModel putAll(MapModel source) {
-	this.map().putAll(source.toMap());
+	if (source != null)
+	    this.map().putAll(source.toMap());
 	return this;
     }
 
@@ -344,7 +346,7 @@ public class MapModel implements JsonSerializerType<Object> {
 	jsonPath.save(this.map(), value);
 	return this;
     }
-    
+
     public MapModel remove(String key) {
 	this.map().remove(key);
 	return this;
@@ -356,6 +358,5 @@ public class MapModel implements JsonSerializerType<Object> {
 	}
 	return this.map.containsKey(key);
     }
-    
-    
+
 }

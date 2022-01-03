@@ -85,8 +85,10 @@ public class MsgController {
     public ApiResponse<ChatMessageDTO, Object> sendSessionMessage(@RequestBody OutboxMessage outboxMessage)
 	    throws InterruptedException {
 
+	System.out.println(outboxMessage.getHsm());
+	
 	ChatSessionDoc sessionDoc = sessionStore.createSession(outboxMessage);
-
+	
 	// Session Stuff Logging <
 	if (ArgUtil.isEmpty(sessionDoc.getAssignedToAgent())) {
 	    AgentSessionDoc agent = mongoTemplate.findById(agentSession.getAgentCode(), AgentSessionDoc.class);

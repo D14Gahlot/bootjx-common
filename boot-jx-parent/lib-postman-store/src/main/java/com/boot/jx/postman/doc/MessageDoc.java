@@ -11,7 +11,7 @@ import org.springframework.data.annotation.TypeAlias;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import com.boot.jx.def.CommonInterfaces.ICommonTemplate;
+import com.boot.jx.model.CommonTemplate;
 import com.boot.jx.mongo.CommonDocInterfaces.Patchable;
 import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.Message.Status;
@@ -43,7 +43,7 @@ public class MessageDoc implements Serializable, Patchable<MessageDoc> {
     private String type;
     private String template;
     private String templateId;
-    private ICommonTemplate hsm;
+    private CommonTemplate hsm;
 
     private String action;
     private String handler;
@@ -344,11 +344,11 @@ public class MessageDoc implements Serializable, Patchable<MessageDoc> {
 	this.formatSubType = formatSubType;
     }
 
-    public ICommonTemplate getHsm() {
+    public CommonTemplate getHsm() {
 	return hsm;
     }
 
-    public void setHsm(ICommonTemplate hsm) {
+    public void setHsm(CommonTemplate hsm) {
 	this.hsm = hsm;
     }
 }

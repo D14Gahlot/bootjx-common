@@ -1,11 +1,9 @@
 package com.boot.jx.postman.plugin;
 
 import java.util.List;
-import java.util.Map;
 
 import com.boot.jx.common.impl.ConfigMeta;
 import com.boot.jx.dict.ContactType;
-import com.boot.jx.postman.PMConfiguration;
 import com.boot.jx.postman.PMConstants.CHANNEL_TYPE;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PMEnvironment.AChannelDetails;

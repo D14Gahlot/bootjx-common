@@ -3,9 +3,9 @@ package com.boot.jx.xms.dto;
 import java.io.Serializable;
 import java.util.List;
 
+import com.boot.jx.model.CommonTemplate;
 import com.boot.jx.postman.model.ext.CommonMsgLocation;
 import com.boot.jx.postman.model.ext.CommonMsgText;
-import com.boot.jx.postman.model.ext.HSMTemplate;
 import com.boot.jx.swagger.ApiMockModelProperty;
 import com.boot.model.UtilityModels.JsonIgnoreUnknown;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -56,7 +56,7 @@ public class OutBoundMsgBasic implements Serializable, JsonIgnoreUnknown {
 	public CommonMsgLocation location;
 
 	@ApiMockModelProperty(required = false)
-	public HSMTemplate template;
+	public CommonTemplate template;
 
 	public CommonMsgText getText() {
 	    return text;
@@ -114,11 +114,11 @@ public class OutBoundMsgBasic implements Serializable, JsonIgnoreUnknown {
 	    this.location = location;
 	}
 
-	public HSMTemplate getTemplate() {
+	public CommonTemplate getTemplate() {
 	    return template;
 	}
 
-	public void setTemplate(HSMTemplate template) {
+	public void setTemplate(CommonTemplate template) {
 	    this.template = template;
 	}
     }

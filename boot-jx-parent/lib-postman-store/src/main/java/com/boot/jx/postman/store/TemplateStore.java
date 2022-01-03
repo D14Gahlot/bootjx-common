@@ -5,7 +5,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.boot.jx.def.CommonInterfaces.ICommonTemplate;
+import com.boot.jx.model.CommonTemplate;
 import com.boot.jx.mongo.CommonMongoQueryBuilder;
 import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.jx.postman.PostmanPackages.TemplateResolver;
@@ -25,7 +25,7 @@ public class TemplateStore implements TemplateResolver {
 	return x;
     }
 
-    public BasicTemplate resolve(ICommonTemplate template) {
+    public BasicTemplate resolve(CommonTemplate template) {
 	if (ArgUtil.is(template.getId())) {
 	    return get(template.getId());
 	} else if (ArgUtil.is(template.getCode())) {
@@ -52,7 +52,7 @@ public class TemplateStore implements TemplateResolver {
     }
 
     @Override
-    public BasicTemplate get(ICommonTemplate template) {
+    public BasicTemplate get(CommonTemplate template) {
 	BasicTemplate basicTemplate = resolve(template);
 	if (ArgUtil.is(basicTemplate)) {
 	    template.setCode(basicTemplate.getCode());

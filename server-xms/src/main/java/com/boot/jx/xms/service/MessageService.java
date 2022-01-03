@@ -53,7 +53,7 @@ public class MessageService {
 			.codeKey("TEMPLATE_DETAILS_MISSING").description("Template details is missing"));
 	    }
 	    outboxMessage.setHsm(message.getTemplate());
-	    outboxMessage.setModelData(message.getTemplate().data);
+	    outboxMessage.setModelData(message.getTemplate().data());
 	}
 
 	if ("document".equalsIgnoreCase(message.getType())) {

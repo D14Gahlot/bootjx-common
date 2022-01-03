@@ -9,7 +9,6 @@ import java.util.Map.Entry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Component;
 
@@ -61,10 +60,10 @@ public class TmplClient {
 
 	// Model Data Merge
 	MapModel model = MapModel.from(outboxMessage.getModel());
-	Map<String, Object> data = new HashMap<String, Object>();
+	MapModel data = MapModel.createInstance();
 	data.putAll(model.keyEntry(Message.DATA_KEY).asMap());
 	data.putAll(outboxMessage.hsm().data());
-	model.put(Message.DATA_KEY, data);
+	model.put(Message.DATA_KEY, data.toMap());
 	outboxMessage.setModel(model.toMap());
 
 	file.setModel(outboxMessage.getModel());
