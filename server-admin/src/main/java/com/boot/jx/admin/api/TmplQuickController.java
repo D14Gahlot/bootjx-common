@@ -172,7 +172,7 @@ public class TmplQuickController {
     AWSFileStore fileStore;
 
     @RequestMapping(value = "/api/tmpl/quickmedia", method = { RequestMethod.POST })
-    public ApiResponse<QuickMedia, Object> createQuickMedia(@RequestParam(required = false) String name,
+    public ApiResponse<QuickMedia, Object> createQuickMedia(@RequestParam(required = false) String id,
 	    @RequestParam String category, @RequestParam String title, @RequestParam(required = false) String url,
 	    @RequestParam(name = "file", required = false) MultipartFile file) {
 
@@ -185,11 +185,11 @@ public class TmplQuickController {
 	    throw new IllegalStateException("Cannot upload empty file");
 	}
 	QuickMedia newVersion = new QuickMedia();
-	if (ArgUtil.is(name)) {
-	    QuickMedia oldVersion = mongoTemplate.findById(name, QuickMedia.class);
+	if (ArgUtil.is(id)) {
+	    QuickMedia oldVersion = mongoTemplate.findById(id, QuickMedia.class);
 	    if (ArgUtil.is(oldVersion)) {
 		newVersion.oldVersion(oldVersion);
-		newVersion.setName(name);
+		newVersion.setId(id);
 	    }
 	}
 
