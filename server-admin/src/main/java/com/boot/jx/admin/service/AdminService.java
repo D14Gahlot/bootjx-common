@@ -119,7 +119,7 @@ public class AdminService {
 	List<AgentResponseAdminDto> agentList = new AgentResponseAdminDto().importFrom(lstOfAgent);
 	for (AgentResponseAdminDto agentResponseDto : agentList) {
 	    agentResponseDto.setAgent_password(null);
-	    if (ArgUtil.is(agentResponseDto.getAgent_id())) {
+	    if (ArgUtil.is(agentResponseDto.getId())) {
 		agentResponseDto.setDept(new DepartmentResponseAdminDto().importFrom(CollectionUtil
 			.getOne(adminManager.fetchDept(ArgUtil.parseAsString(agentResponseDto.getDept_id())))));
 	    }

@@ -23,6 +23,7 @@ import org.springframework.stereotype.Component;
 
 import com.boot.jx.AppContextUtil;
 import com.boot.jx.chat.ChatService;
+import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.doc.ChatPromise;
 import com.boot.jx.postman.doc.ChatPromise.State;
 import com.boot.jx.postman.model.InboxMessage;
@@ -52,6 +53,9 @@ public class BotEngine {
 
     @Autowired
     private ChatService botService;
+
+    @Autowired
+    private PMEnvironment pmEnvironment;
 
     private boolean chatBotDefined;
 
@@ -130,21 +134,21 @@ public class BotEngine {
      */
     protected MethodWrapper getMethodWithMatchingPatternAndFilterUnmatchedMethods(InboxMessage event) {
 
-	if (ArgUtil.isEmpty(event.getMessage())
-		&& ArgUtil.isEmpty(event.getAttachments())) {
+	if (ArgUtil.isEmpty(event.getMessage()) && ArgUtil.isEmpty(event.getAttachments())) {
 	    return null;
 	}
 
-	String text = ArgUtil.nonEmpty(event.getMessage(),Constants.BLANK).toUpperCase();
+	String text = ArgUtil.nonEmpty(event.getMessage(), Constants.BLANK).toUpperCase();
 	StringMatcher matcher = new StringMatcher(text);
 
 	String tenant = AppContextUtil.getTenant();
+	String botFlow = pmEnvironment.keyEntry("postman.bot.flow").asString(tenant);
 
 	for (MethodWrapper methodWrapper : eventToMethodsList) {
 	    Pattern[] patterns = methodWrapper.getPattern();
 	    if (patterns.length > 0) {
 		for (int i = 0; i < patterns.length; i++) {
-		    if (ArgUtil.isEqual(tenant, methodWrapper.getTenant())) {
+		    if (ArgUtil.isEqual(botFlow, methodWrapper.getTenant())) {
 			if (matcher.isMatch(patterns[i]) && ArgUtil.is(ArgUtil.parseAsString(patterns[i]))) {
 			    event.setMatcher(matcher);
 			    return methodWrapper;
@@ -160,7 +164,7 @@ public class BotEngine {
 		for (int i = 0; i < patterns.length; i++) {
 		    if (ArgUtil.isEmptyArray(methodWrapper.getTenant())
 			    || ArgUtil.isEqual(Constants.BLANK, methodWrapper.getTenant())
-			    || ArgUtil.isEqual(tenant, methodWrapper.getTenant())) {
+			    || ArgUtil.isEqual(botFlow, methodWrapper.getTenant())) {
 			if (matcher.isMatch(patterns[i]) && ArgUtil.is(ArgUtil.parseAsString(patterns[i]))) {
 			    event.setMatcher(matcher);
 			    return methodWrapper;
