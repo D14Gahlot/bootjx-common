@@ -90,7 +90,8 @@ public abstract class AbstractConnector<CD extends AChannelDetails, P extends Ch
 //	    }
 //	} else
 //	    
-	if (ArgUtil.is(outboxMessage.getTemplateId()) || ArgUtil.is(outboxMessage.getTemplate())) {
+
+	if (ArgUtil.is(outboxMessage.templateId()) || ArgUtil.is(outboxMessage.templateCode())) {
 	    // outboxMessage.setMessage(tmplClient.process(hsmTemplate.getTemplate(),
 	    // outboxMessage.getModel()));
 	    process(channelConfig, outboxMessage);
@@ -103,11 +104,11 @@ public abstract class AbstractConnector<CD extends AChannelDetails, P extends Ch
     private OutboxMessage process(ChannelConfig channelConfig, OutboxMessage outboxMessage) {
 
 	tmplClient.process(outboxMessage);
-	if (ArgUtil.is(outboxMessage.getTemplateId())) {
+	if (ArgUtil.is(outboxMessage.templateId())) {
 	    if (MESSAGE_SEND_TYPE.PUSH_MESSAGE.equals(outboxMessage.messageMetaWrapper().sendType())
 		    && channelConfig.isPushAllowed() && channelConfig.isPushOnlyApproved()) {
 		List<HSMTemplate3rdParty> temps = commonMongoTemplate.find(CommonMongoQueryBuilder
-			.collection(HSMTemplate3rdParty.class).where("hsmTemplateId", outboxMessage.getTemplateId()));
+			.collection(HSMTemplate3rdParty.class).where("hsmTemplateId", outboxMessage.templateId()));
 		if (ArgUtil.is(temps)) {
 		    HSMTemplate3rdParty resolvedTemplate = null;
 		    if (temps.size() > 1) {
