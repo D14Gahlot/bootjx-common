@@ -25,8 +25,7 @@ public class TemplateStore implements TemplateResolver {
 	return x;
     }
 
-    @Override
-    public BasicTemplate get(ICommonTemplate template) {
+    public BasicTemplate resolve(ICommonTemplate template) {
 	if (ArgUtil.is(template.getId())) {
 	    return get(template.getId());
 	} else if (ArgUtil.is(template.getCode())) {
@@ -50,6 +49,16 @@ public class TemplateStore implements TemplateResolver {
 	    }
 	}
 	return null;
+    }
+
+    @Override
+    public BasicTemplate get(ICommonTemplate template) {
+	BasicTemplate basicTemplate = resolve(template);
+	if (ArgUtil.is(basicTemplate)) {
+	    template.setCode(basicTemplate.getCode());
+	    template.setId(basicTemplate.getId());
+	}
+	return basicTemplate;
     }
 
 }
