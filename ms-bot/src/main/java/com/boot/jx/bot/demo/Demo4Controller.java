@@ -4,6 +4,8 @@ package com.boot.jx.bot.demo;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -115,24 +117,29 @@ public class Demo4Controller extends CommonBotController {
     }
     
     public void send() {
-    	
-    	OutboxMessage outboxMessage = new OutboxMessage();
-    	
-    	outboxMessage.template().setCode("sales_inquiry");
-    	//outboxMessage.setMessage("Hi, a prospect {{contact.name}}, using {{contact.phone}}, \\nhas reached out to us. \\nPlease log into customer.mehery.com and respond to the customer ASAP.\\n\",");
-    	outboxMessage.contact().type(ContactType.WHATSAPP);
-    	outboxMessage.contact().setLane("918828218374");
-    	//outboxMessage.contact().setPhone("96551780410");
-    	outboxMessage.contact().setCsid("919619203759");
-    	send(outboxMessage);
+    	Map<String,Object> data = new HashMap<String,Object>();
+    	data.put("name", chatContext.getContact().getName());
+    	data.put("phone", chatContext.getContact().getPhone());
+    	System.out.println("data { }:"+data);
     	
     	OutboxMessage outboxMessage1 = new OutboxMessage();
     	outboxMessage1.template().setCode("sales_inquiry");
     	outboxMessage1.contact().type(ContactType.WHATSAPP);
     	outboxMessage1.contact().setLane("918828218374");
-    	//outboxMessage.contact().setPhone("96551780410");
     	outboxMessage1.contact().setCsid("96551780410");
+    	outboxMessage1.data(data);
     	send(outboxMessage1);
+    	
+    	/*OutboxMessage outboxMessage = new OutboxMessage();
+    	outboxMessage.template().setCode("sales_inquiry");
+    	outboxMessage.contact().type(ContactType.WHATSAPP);
+    	outboxMessage.contact().setLane("918828218374");
+    	outboxMessage.contact().setCsid("919619203759");
+    	outboxMessage.data(data); //pass map
+    	
+    	send(outboxMessage);*/
+    	
+    	
     	
     	
     }
