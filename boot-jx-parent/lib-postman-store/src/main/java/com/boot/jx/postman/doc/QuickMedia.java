@@ -19,7 +19,7 @@ public class QuickMedia implements Serializable, OldDocVersion<QuickMedia>, Audi
     private static final long serialVersionUID = 7942286016346691701L;
 
     @Id
-    private String name;
+    private String id;
 
     private String type;
 
@@ -38,12 +38,12 @@ public class QuickMedia implements Serializable, OldDocVersion<QuickMedia>, Audi
     private String createdBy;
     private Long createdStamp;
 
-    public String getName() {
-	return name;
+    public String getId() {
+	return id;
     }
 
-    public void setName(String name) {
-	this.name = name;
+    public void setId(String name) {
+	this.id = name;
     }
 
     public String getType() {

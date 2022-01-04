@@ -24,7 +24,6 @@ import org.slf4j.Logger;
 import org.springframework.integration.http.multipart.UploadedMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.boot.jx.def.CommonInterfaces.ICommonTemplate;
 import com.boot.jx.dict.FileFormat;
 import com.boot.jx.dict.FileType;
 import com.boot.jx.logger.LoggerService;
@@ -55,7 +54,7 @@ public class CommonFile implements Serializable {
     private String extension;
     private String password;
     private String url;
-    private ICommonTemplate template = null;
+    private CommonTemplate template = null;
     private Map<String, Object> model = new HashMap<String, Object>();
     private Map<String, Object> options = new HashMap<String, Object>();
     private Map<String, String> headers;
@@ -122,23 +121,23 @@ public class CommonFile implements Serializable {
 	this.content = content;
     }
 
-    public ICommonTemplate getTemplate() {
+    public CommonTemplate getTemplate() {
 	return template;
     }
 
-    public void setTemplate(ICommonTemplate template) {
+    public void setTemplate(CommonTemplate template) {
 	this.template = template;
     }
 
     @JsonSetter
-    public ICommonTemplate template() {
+    public CommonTemplate template() {
 	if (!ArgUtil.is(this.template)) {
 	    this.template = new CommonTemplate();
 	}
 	return this.template;
     }
 
-    public CommonFile template(ICommonTemplate template) {
+    public CommonFile template(CommonTemplate template) {
 	this.template = template;
 	return this;
     }

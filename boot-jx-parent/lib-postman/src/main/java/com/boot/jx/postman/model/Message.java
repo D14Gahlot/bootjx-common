@@ -6,7 +6,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.boot.jx.def.CommonInterfaces.ICommonTemplate;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.dict.Language;
 import com.boot.jx.model.CommonTemplate;
@@ -42,7 +41,6 @@ public class Message<T extends Message<T>> implements Serializable, MessageOptio
 
     protected long timestamp;
     protected int attempt;
-    protected String lang = null;
     protected String subject;
     protected String message = null;
     protected String footer;
@@ -52,8 +50,7 @@ public class Message<T extends Message<T>> implements Serializable, MessageOptio
 
     protected List<String> to = null;
     protected List<ContactMeta> contacts = null;
-    private String templateId = null;
-    private ICommonTemplate template;
+    private CommonTemplate hsm;
     private BasicExternalTemplate templateExt;
     private String action = null;
     private String type = null;
@@ -311,7 +308,7 @@ public class Message<T extends Message<T>> implements Serializable, MessageOptio
 
     @SuppressWarnings("unchecked")
     public T lang(Language lang) {
-	this.lang = ArgUtil.parseAsString(lang);
+	this.hsm().setLang(ArgUtil.parseAsString(lang));
 	return (T) this;
     }
 
@@ -324,6 +321,12 @@ public class Message<T extends Message<T>> implements Serializable, MessageOptio
     @SuppressWarnings("unchecked")
     public T data(Object value) {
 	this.getModel().put("data", value);
+	return (T) this;
+    }
+
+    @SuppressWarnings("unchecked")
+    public T data(String key, Object value) {
+	this.hsm().data().put(key, value);
 	return (T) this;
     }
 
@@ -452,24 +455,6 @@ public class Message<T extends Message<T>> implements Serializable, MessageOptio
 	this.stamps().put(ArgUtil.parseAsString(status), System.currentTimeMillis());
     }
 
-    public String getTemplateId() {
-	if (ArgUtil.is(this.template)) {
-	    return ArgUtil.nonEmpty(this.template.getId(), templateId);
-	}
-	return templateId;
-    }
-
-    public void setTemplateId(String templateId) {
-	this.templateId = templateId;
-    }
-
-    @SuppressWarnings("unchecked")
-    public T templateId(String templateId) {
-	this.templateId = templateId;
-	this.template().setId(templateId);
-	return (T) this;
-    }
-
     public Contactable getContact() {
 	return contact;
     }
@@ -548,24 +533,26 @@ public class Message<T extends Message<T>> implements Serializable, MessageOptio
 	this.formatSubType = formatSubType;
     }
 
-    public ICommonTemplate getTemplate() {
-	return template;
-    }
-
-    public void setTemplate(ICommonTemplate hsmTemplate) {
-	this.template = hsmTemplate;
-    }
-
-    public ICommonTemplate template() {
-	if (this.template == null) {
-	    this.template = new CommonTemplate();
+    public CommonTemplate hsm() {
+	if (this.hsm == null) {
+	    this.hsm = new CommonTemplate();
 	}
-	return this.template;
+	return this.hsm;
+    }
+
+    public String templateId() {
+	return this.hsm().getId();
     }
 
     @SuppressWarnings("unchecked")
-    public T template(ICommonTemplate template) {
-	this.template = template;
+    public T templateId(String templateId) {
+	this.hsm().setId(templateId);
+	return (T) this;
+    }
+
+    @SuppressWarnings("unchecked")
+    public T hsm(CommonTemplate template) {
+	this.hsm = template;
 	return (T) this;
     }
 
@@ -577,21 +564,29 @@ public class Message<T extends Message<T>> implements Serializable, MessageOptio
 
     @SuppressWarnings("unchecked")
     public T template(String template) {
-	this.template.setCode(template);
+	this.hsm().setCode(template);
 	return (T) this;
     }
 
     public String templateCode() {
-	return this.template().getCode();
+	return this.hsm().getCode();
     }
 
     @JsonIgnore
     public void setITemplate(ITemplate template) {
-	this.template().setCode(template.toString());
+	this.hsm().setCode(template.toString());
     }
 
     @JsonIgnore
     public ITemplate getITemplate() {
-	return ITemplates.getTemplate(this.template().getCode());
+	return ITemplates.getTemplate(this.hsm().getCode());
+    }
+
+    public CommonTemplate getHsm() {
+        return hsm;
+    }
+
+    public void setHsm(CommonTemplate hsm) {
+        this.hsm = hsm;
     }
 }

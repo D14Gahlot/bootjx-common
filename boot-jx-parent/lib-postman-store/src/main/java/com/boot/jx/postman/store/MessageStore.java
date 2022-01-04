@@ -167,6 +167,8 @@ public class MessageStore extends CommonDocStore {
 	doc.setAgent(outMessage.session().getAgent());
 	// if (ArgUtil.is(outMessage.getTemplate())) {
 	doc.setTemplate(outMessage.templateCode());
+	doc.setTemplateId(outMessage.templateId());
+	doc.setHsm(outMessage.getHsm());
 	doc.setModel(outMessage.getModel());
 	// } else {
 	doc.setMessage(outMessage.getMessage());

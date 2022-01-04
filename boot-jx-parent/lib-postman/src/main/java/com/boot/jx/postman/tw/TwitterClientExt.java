@@ -1,30 +1,16 @@
 package com.boot.jx.postman.tw;
 
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.handler;
-
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.StringJoiner;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Component;
 
-import com.boot.jx.dict.FileType;
-import com.boot.jx.postman.PostManException;
-import com.boot.jx.postman.model.Attachment;
-import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.rest.RestService;
 import com.boot.model.MapModel;
-import com.boot.utils.ArgUtil;
-import com.boot.utils.CollectionUtil;
 import com.boot.utils.JsonPath;
-
-import twitter4j.DirectMessage;
-import twitter4j.Twitter;
-import twitter4j.TwitterException;
 
 /**
  * This is a twitter client written from scratch

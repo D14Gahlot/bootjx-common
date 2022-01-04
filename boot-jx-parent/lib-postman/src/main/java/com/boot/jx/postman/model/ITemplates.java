@@ -19,6 +19,10 @@ public class ITemplates {
 
 	public String getName();
 
+	public String getCode();
+
+	public String getId();
+
     }
 
     public interface BasicExternalTemplate {
@@ -126,6 +130,16 @@ public class ITemplates {
 	@Override
 	public String getName() {
 	    return this.fileName;
+	}
+
+	@Override
+	public String getCode() {
+	    return null;
+	}
+
+	@Override
+	public String getId() {
+	    return null;
 	}
     }
 
@@ -240,7 +254,17 @@ public class ITemplates {
 
 	@Override
 	public String getName() {
-	    return null;
+	    return fileName;
+	}
+
+	@Override
+	public String getCode() {
+	    return this.name();
+	}
+
+	@Override
+	public String getId() {
+	    return fileName;
 	}
 
     }
