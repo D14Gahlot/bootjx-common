@@ -102,13 +102,17 @@ public class WA360Client {
 			    String path = (String) headerParameter.get("path");
 			    headerComponentReq.parameter("text", model.pathEntry(path).asString());
 			}
-			components.add(headerComponentReq.build().map());
+			if (headerComponentReq.parameters().size() > 0) {
+			    components.add(headerComponentReq.build().map());
+			}
 		    }
 		} else if (ArgUtil.is(outboxMessage.getAttachments())) {
 		    String lowerFormat = extTemplateComponentFormat.toLowerCase();
 		    WA360OutBoundMedia media = createMedia(lowerFormat, outboxMessage.getAttachments().get(0));
 		    headerComponentReq.parameter(lowerFormat, media);
-		    components.add(headerComponentReq.build().map());
+		    if (headerComponentReq.parameters().size() > 0) {
+			components.add(headerComponentReq.build().map());
+		    }
 		}
 
 	    } else if ("BODY".equals(extTemplateComponentType)) {
@@ -316,7 +320,8 @@ public class WA360Client {
 	try {
 	    MapModel resp = restService.ajax(WA360Constants.BASE_URL).path("v1/contacts")
 		    .header(WA360Constants.D360_API_KEY, channelConfig.getWa360d().getApiKey())
-		    .post(MapModel.createInstance().put("blocking", "wait").put(OutBoundWrapperPaths.FETCH_CONTACTS_DETAILS, contact).toMap())
+		    .post(MapModel.createInstance().put("blocking", "wait")
+			    .put(OutBoundWrapperPaths.FETCH_CONTACTS_DETAILS, contact).toMap())
 		    .asMapModel();
 	    return resp.path(OutBoundWrapperPaths.FETCH_CONTACTS_DETAILS).asMapModel();
 	} catch (ApiHttpException e) {

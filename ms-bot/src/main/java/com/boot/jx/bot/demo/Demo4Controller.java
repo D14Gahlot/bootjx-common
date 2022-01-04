@@ -19,6 +19,7 @@ import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.store.MessageStore;
 import com.boot.jx.postman.store.SessionStore;
+import com.boot.utils.ArgUtil;
 import com.boot.utils.StringUtils.StringMatcher;
 
 @BotController(name = "DemoBot", tenant = { "app", "demo", "sandbox" })
@@ -109,8 +110,7 @@ public class Demo4Controller extends CommonBotController {
     public void send() {
     	Map<String,Object> data = new HashMap<String,Object>();
     	data.put("name", chatContext.getContact().getName());
-    	data.put("phone", chatContext.getContact().getPhone());
-    	System.out.println("data { }:"+data);
+    	data.put("phone", ArgUtil.nonEmpty(chatContext.getContact().getPhone(), chatContext.getContact().getEmail()));
     	String templateCode="sales_inquiry_alert";
     	
     	OutboxMessage outboxMessage1 = new OutboxMessage();
@@ -120,7 +120,7 @@ public class Demo4Controller extends CommonBotController {
     	//alert phone number
     	outboxMessage1.contact().setCsid("96551780410");
     	outboxMessage1.data(data);
-    	send(outboxMessage1);
+    	//send(outboxMessage1);
     	
     	OutboxMessage outboxMessage = new OutboxMessage();
     	outboxMessage.hsm().setCode(templateCode);
@@ -129,7 +129,7 @@ public class Demo4Controller extends CommonBotController {
     	//alert phone number
     	outboxMessage.contact().setCsid("919619203759");
     	outboxMessage.data(data); 
-    	send(outboxMessage);
+    	//send(outboxMessage);
     	
     	OutboxMessage outboxMessage2 = new OutboxMessage();
     	outboxMessage2.hsm().setCode(templateCode);
