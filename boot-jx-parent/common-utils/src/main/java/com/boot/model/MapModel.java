@@ -23,10 +23,10 @@ public class MapModel implements JsonSerializerType<Object> {
 	public String getKey();
     }
 
-    public static class MapEntry {
-	private Object value;
+    public static class NodeEntry<T> {
+	private T value;
 
-	public MapEntry(Object value) {
+	public NodeEntry(T value) {
 	    this.value = value;
 	}
 
@@ -140,12 +140,20 @@ public class MapModel implements JsonSerializerType<Object> {
 	    return ArgUtil.areEqual(this.value, compare);
 	}
 
-	public Object getValue() {
+	public T getValue() {
 	    return value;
 	}
 
-	public void setValue(Object value) {
+	public void setValue(T value) {
 	    this.value = value;
+	}
+
+    }
+
+    public static class MapEntry extends NodeEntry<Object> {
+
+	public MapEntry(Object value) {
+	    super(value);
 	}
 
     }

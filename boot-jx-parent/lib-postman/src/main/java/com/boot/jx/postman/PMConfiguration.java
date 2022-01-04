@@ -23,6 +23,7 @@ public class PMConfiguration implements Serializable {
     private Map<String, ClientApiKey> clientApiKeys;
 
     private Map<String, PMConfigurationObject> prefs;
+    private Map<String, Object> companyVars;
 
     private AgentConfig agent;
     private String accountKey;
@@ -139,6 +140,13 @@ public class PMConfiguration implements Serializable {
 
     public void setAccountKey(String accountKey) {
 	this.accountKey = accountKey;
+    }
+
+    public SafeKeyHashMap<Object> company() {
+	if (ArgUtil.isEmpty(companyVars)) {
+	    companyVars = new HashMap<String, Object>();
+	}
+	return new SafeKeyHashMap<Object>(companyVars);
     }
 
 }
