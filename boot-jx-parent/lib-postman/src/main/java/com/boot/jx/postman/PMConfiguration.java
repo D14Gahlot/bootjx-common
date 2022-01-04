@@ -142,7 +142,7 @@ public class PMConfiguration implements Serializable {
 	this.accountKey = accountKey;
     }
 
-    public SafeKeyHashMap<Object> company() {
+    public SafeKeyHashMap<Object> global() {
 	if (ArgUtil.isEmpty(companyVars)) {
 	    companyVars = new HashMap<String, Object>();
 	}

@@ -110,7 +110,7 @@ public abstract class AbstractConnector<CD extends AChannelDetails, P extends Ch
 	    OutboxMessage outboxMessage) {
 
 	outboxMessage.model().put("contact", ChatDTOUtil.getContactMeta(chatContactDoc));
-	outboxMessage.model().put("company", environment.config().company().toObject());
+	outboxMessage.model().put("global", environment.config().global().toObject());
 	
 	// Model Data Merge
 	MapModel model = MapModel.from(outboxMessage.getModel());

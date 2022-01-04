@@ -64,7 +64,7 @@ public class PMEnvironmentProviderImpl implements PMEnvironmentProvider, AppShar
 
 	    List<CompanyVarsConfigDoc> companyVars = configStore.findAll(CompanyVarsConfigDoc.class);
 
-	    SafeKeyHashMap<Object> company = prefs.company();
+	    SafeKeyHashMap<Object> company = prefs.global();
 
 	    for (CompanyVarsConfigDoc companyVar : companyVars) {
 		company.put(companyVar.getKey(), companyVar.getValue());
