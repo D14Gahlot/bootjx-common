@@ -3,6 +3,7 @@ package com.boot.jx.connectors;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.core.query.Criteria;
 
 import com.boot.jx.chat.ConnectorHandlerFactory;
 import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorHandler;
@@ -108,7 +109,8 @@ public abstract class AbstractConnector<CD extends AChannelDetails, P extends Ch
 	    if (MESSAGE_SEND_TYPE.PUSH_MESSAGE.equals(outboxMessage.messageMetaWrapper().sendType())
 		    && channelConfig.isPushAllowed() && channelConfig.isPushOnlyApproved()) {
 		List<HSMTemplate3rdParty> temps = commonMongoTemplate.find(CommonMongoQueryBuilder
-			.collection(HSMTemplate3rdParty.class).where("hsmTemplateId", outboxMessage.templateId()));
+			.collection(HSMTemplate3rdParty.class).with(Criteria.where("hsmTemplateId")
+				.is(outboxMessage.templateId()).and("channelId").is(channelConfig.getChannelId())));
 		if (ArgUtil.is(temps)) {
 		    HSMTemplate3rdParty resolvedTemplate = null;
 		    if (temps.size() > 1) {
