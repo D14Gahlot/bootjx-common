@@ -184,7 +184,7 @@ public class ConnectorHandlerFactory extends ScopedBeanFactory<String, Connector
 
 	public ChannelConfig getChannelConfig(IMessage outboxMessage);
 
-	public OutboxMessage template(ChannelConfig channelConfig, OutboxMessage outboxMessage);
+	public OutboxMessage template(ChannelConfig channelConfig, ChatContactDoc chatContactDoc, OutboxMessage outboxMessage);
 
 	boolean optin(ChannelConfig channelConfig, ChatContactDoc chatContactDoc);
 

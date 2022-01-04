@@ -60,7 +60,7 @@ public class TelegramConnector extends AbstractConnector<TelegramConfigDetails, 
 
     public void onSend(ChannelConfig channelConfig, ChatContactDoc chatContactDoc, OutboxMessage outboxMessage) {
 	try {
-	    template(channelConfig, outboxMessage);
+	    template(channelConfig, chatContactDoc, outboxMessage);
 	    telegramClient.send(channelConfig, outboxMessage);
 	    outboxMessage.updateStatus(OutboxMessage.Status.SENT);
 	} catch (Exception e) {

@@ -132,7 +132,7 @@ public class ChatService {
 	    outboxMessage.session().setMode(inboxMessage.session().getMode());
 	}
 
-	outboxMessage.model().put("contact", ChatDTOUtil.getContactMeta(chatContactDoc));
+	//outboxMessage.model().put("contact", ChatDTOUtil.getContactMeta(chatContactDoc));
 	MessageDoc messageDoc = messageStore.createOrUpdate(outboxMessage);
 	connectorHandlerFactory.message(MESSAGE_COMPOSE_TYPE.REPLY, chatContactDoc, outboxMessage, inboxMessage);
 	sessionStore.push(messageDoc, outboxMessage);
@@ -154,7 +154,7 @@ public class ChatService {
 	outboxMessage.contact().setContactId(chatContactDoc.getContactId());
 	outboxMessage.setSessionId(chatContactDoc.getSessionId());
 
-	outboxMessage.model().put("contact", ChatDTOUtil.getContactMeta(chatContactDoc));
+	//outboxMessage.model().put("contact", ChatDTOUtil.getContactMeta(chatContactDoc));
 	MessageDoc messageDoc = messageStore.createOrUpdate(outboxMessage);
 	connectorHandlerFactory.message(MESSAGE_COMPOSE_TYPE.SEND, chatContactDoc, outboxMessage, null);
 	sessionStore.push(messageDoc, outboxMessage);

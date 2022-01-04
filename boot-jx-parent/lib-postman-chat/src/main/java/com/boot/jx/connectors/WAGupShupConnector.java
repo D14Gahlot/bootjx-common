@@ -98,7 +98,7 @@ public class WAGupShupConnector extends AbstractConnector<GupShupConfigDetails, 
     public void send(ChannelConfig channelConfig, ChatContactDoc chatContactDoc, OutboxMessage outboxMessage) {
 	outboxMessage.contact().setChannelType(chatContactDoc.getChannelType());
 	outboxMessage.contact().setLane(chatContactDoc.getLane());
-	template(channelConfig, outboxMessage);
+	template(channelConfig, chatContactDoc, outboxMessage);
 
 	if (TimeUtils.isExpired(chatContactDoc.getLastInBoundStamp(), DEFAULT_SESISON_PERIOD)
 		&& outboxMessage.optionsAsModel().entry("wa-template-id").exists()) {
@@ -118,7 +118,7 @@ public class WAGupShupConnector extends AbstractConnector<GupShupConfigDetails, 
     @Override
     public void reply(ChannelConfig channelConfig, ChatContactDoc chatContactDoc, OutboxMessage outboxMessage,
 	    IMessageExtended inboxMessage) {
-	template(channelConfig, outboxMessage);
+	template(channelConfig, chatContactDoc, outboxMessage);
 	this.sendInternal(channelConfig, outboxMessage, false);
     }
 

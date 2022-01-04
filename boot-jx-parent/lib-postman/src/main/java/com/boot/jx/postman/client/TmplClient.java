@@ -58,14 +58,6 @@ public class TmplClient {
     public OutboxMessage process(OutboxMessage outboxMessage) {
 	CommonFile file = new PostManFile();
 
-	// Model Data Merge
-	MapModel model = MapModel.from(outboxMessage.getModel());
-	MapModel data = MapModel.createInstance();
-	data.putAll(model.keyEntry(Message.DATA_KEY).asMap());
-	data.putAll(outboxMessage.hsm().data());
-	model.put(Message.DATA_KEY, data.toMap());
-	outboxMessage.setModel(model.toMap());
-
 	file.setModel(outboxMessage.getModel());
 	file.setTemplate(outboxMessage.getHsm());
 	file = this.process(file, outboxMessage.contact().type()).getResult();

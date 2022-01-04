@@ -49,7 +49,7 @@ public class FacebookConnector extends AbstractConnector<FacebookConfigDetails, 
 
     public void onSend(ChannelConfig channelConfig, ChatContactDoc chatContactDoc, OutboxMessage outboxMessage) {
 	try {
-	    template(channelConfig, outboxMessage);
+	    template(channelConfig, chatContactDoc, outboxMessage);
 	    facebooClient.send(channelConfig, outboxMessage);
 	    outboxMessage.updateStatus(Message.Status.SENT);
 	} catch (Exception e) {

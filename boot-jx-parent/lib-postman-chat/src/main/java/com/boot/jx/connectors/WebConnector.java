@@ -80,7 +80,7 @@ public class WebConnector extends DefaultConnector<WebConfigDetails, WebPlugin> 
     public void onSend(ChannelConfig channelConfig, ChatContactDoc chatContactDoc, OutboxMessage outboxMessage) {
 	String to = CollectionUtil.getOne(outboxMessage.getTo());
 
-	template(channelConfig, outboxMessage);
+	template(channelConfig, chatContactDoc, outboxMessage);
 	if (redisson == null) {
 	    try {
 		messageQueue.enqueue(outboxMessage);

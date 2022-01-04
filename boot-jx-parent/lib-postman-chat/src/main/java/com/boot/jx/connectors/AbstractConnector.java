@@ -18,11 +18,14 @@ import com.boot.jx.postman.client.TmplClient;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.HSMTemplate3rdParty;
 import com.boot.jx.postman.model.MessageDefinitions.IMessage;
+import com.boot.jx.postman.model.Message;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.postman.plugin.ChannelPluginProvider.ChannelPlugin;
+import com.boot.jx.postman.service.ChatDTOUtil;
 import com.boot.jx.postman.store.MessageContext;
 import com.boot.jx.utils.PostManUtil;
+import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
 
 public abstract class AbstractConnector<CD extends AChannelDetails, P extends ChannelPlugin<CD>>
@@ -75,7 +78,8 @@ public abstract class AbstractConnector<CD extends AChannelDetails, P extends Ch
     }
 
     @Override
-    public OutboxMessage template(ChannelConfig channelConfig, OutboxMessage outboxMessage) {
+    public OutboxMessage template(ChannelConfig channelConfig, ChatContactDoc chatContactDoc,
+	    OutboxMessage outboxMessage) {
 //	if (ArgUtil.is(outboxMessage.getMedia())) {
 //	    QuickMedia templateReply = commonMongoTemplate.findById(outboxMessage.getTemplate().getMedia(),
 //		    QuickMedia.class);
@@ -95,14 +99,26 @@ public abstract class AbstractConnector<CD extends AChannelDetails, P extends Ch
 	if (ArgUtil.is(outboxMessage.templateId()) || ArgUtil.is(outboxMessage.templateCode())) {
 	    // outboxMessage.setMessage(tmplClient.process(hsmTemplate.getTemplate(),
 	    // outboxMessage.getModel()));
-	    process(channelConfig, outboxMessage);
+	    process(channelConfig, chatContactDoc, outboxMessage);
 	    return outboxMessage;
 	} else {
 	    return outboxMessage;
 	}
     }
 
-    private OutboxMessage process(ChannelConfig channelConfig, OutboxMessage outboxMessage) {
+    private OutboxMessage process(ChannelConfig channelConfig, ChatContactDoc chatContactDoc,
+	    OutboxMessage outboxMessage) {
+
+	outboxMessage.model().put("contact", ChatDTOUtil.getContactMeta(chatContactDoc));
+	outboxMessage.model().put("company", environment.config().company().toObject());
+	
+	// Model Data Merge
+	MapModel model = MapModel.from(outboxMessage.getModel());
+	MapModel data = MapModel.createInstance();
+	data.putAll(model.keyEntry(Message.DATA_KEY).asMap());
+	data.putAll(outboxMessage.hsm().data());
+	model.put(Message.DATA_KEY, data.toMap());
+	outboxMessage.setModel(model.toMap());
 
 	tmplClient.process(outboxMessage);
 	if (ArgUtil.is(outboxMessage.templateId())) {
