@@ -16,10 +16,12 @@ import com.boot.jx.postman.PMEnvironment.PMEnvironmentProvider;
 import com.boot.jx.postman.doc.PMConfigurationDoc;
 import com.boot.jx.postman.doc.config.ChannelConfigDoc;
 import com.boot.jx.postman.doc.config.ClientKeyConfigDoc;
+import com.boot.jx.postman.doc.config.CompanyVarsConfigDoc;
 import com.boot.jx.postman.doc.config.PrefsConfigDoc;
 import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.postman.store.ConfigStore;
 import com.boot.jx.scope.tnt.Tenants;
+import com.boot.model.SafeKeyHashMap;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.EntityDtoUtil;
 import com.boot.utils.StringUtils;
@@ -41,6 +43,7 @@ public class PMEnvironmentProviderImpl implements PMEnvironmentProvider, AppShar
 	if (localConfigMap.containsKey(tnt)) {
 	    return localConfigMap.get(tnt);
 	}
+
 	if (ArgUtil.is(configStore)) {
 	    PMConfigurationDoc prefs = getPMConfigurationDoc();
 
@@ -57,6 +60,14 @@ public class PMEnvironmentProviderImpl implements PMEnvironmentProvider, AppShar
 	    List<ClientKeyConfigDoc> clientKeys = configStore.findAll(ClientKeyConfigDoc.class);
 	    for (ClientKeyConfigDoc clientKey : clientKeys) {
 		prefs.clientApiKey(clientKey);
+	    }
+
+	    List<CompanyVarsConfigDoc> companyVars = configStore.findAll(CompanyVarsConfigDoc.class);
+
+	    SafeKeyHashMap<Object> company = prefs.company();
+
+	    for (CompanyVarsConfigDoc companyVar : companyVars) {
+		company.put(companyVar.getKey(), companyVar.getValue());
 	    }
 
 	    if (ArgUtil.is(prefs)) {

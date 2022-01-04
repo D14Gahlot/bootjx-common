@@ -23,10 +23,10 @@ public class MapModel implements JsonSerializerType<Object> {
 	public String getKey();
     }
 
-    public static class MapEntry {
-	private Object value;
+    public static class NodeEntry<T> {
+	private T value;
 
-	public MapEntry(Object value) {
+	public NodeEntry(T value) {
 	    this.value = value;
 	}
 
@@ -140,12 +140,20 @@ public class MapModel implements JsonSerializerType<Object> {
 	    return ArgUtil.areEqual(this.value, compare);
 	}
 
-	public Object getValue() {
+	public T getValue() {
 	    return value;
 	}
 
-	public void setValue(Object value) {
+	public void setValue(T value) {
 	    this.value = value;
+	}
+
+    }
+
+    public static class MapEntry extends NodeEntry<Object> {
+
+	public MapEntry(Object value) {
+	    super(value);
 	}
 
     }
@@ -321,12 +329,14 @@ public class MapModel implements JsonSerializerType<Object> {
     }
 
     public MapModel putAll(Map<? extends String, ? extends Object> source) {
-	this.map().putAll(source);
+	if (source != null)
+	    this.map().putAll(source);
 	return this;
     }
 
     public MapModel putAll(MapModel source) {
-	this.map().putAll(source.toMap());
+	if (source != null)
+	    this.map().putAll(source.toMap());
 	return this;
     }
 
@@ -344,7 +354,7 @@ public class MapModel implements JsonSerializerType<Object> {
 	jsonPath.save(this.map(), value);
 	return this;
     }
-    
+
     public MapModel remove(String key) {
 	this.map().remove(key);
 	return this;
@@ -356,6 +366,5 @@ public class MapModel implements JsonSerializerType<Object> {
 	}
 	return this.map.containsKey(key);
     }
-    
-    
+
 }

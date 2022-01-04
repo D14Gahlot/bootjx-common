@@ -26,6 +26,7 @@ import com.boot.jx.postman.PMEnvironment.PMConfigurationObject;
 import com.boot.jx.postman.doc.PMConfigurationDoc;
 import com.boot.jx.postman.doc.config.ChannelConfigDoc;
 import com.boot.jx.postman.doc.config.ClientKeyConfigDoc;
+import com.boot.jx.postman.doc.config.CompanyVarsConfigDoc;
 import com.boot.jx.postman.doc.config.PrefsConfigDoc;
 import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.postman.plugin.ChannelPluginProvider;
@@ -59,7 +60,7 @@ public class ConfigManager {
     private ConnectorHandlerFactory connectorHandlerFactory;
 
     @Autowired
-    PMClientConfig pmClientConfig;
+    private PMClientConfig pmClientConfig;
 
     public List<Map<String, Object>> getSetupConfigs() {
 	List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
@@ -193,6 +194,19 @@ public class ConfigManager {
 
     public ClientKeyConfigDoc remove(ClientKeyConfigDoc clientApiKey) {
 	mongoTemplate.remove(clientApiKey);
+	this.refresh();
+	return clientApiKey;
+    }
+
+    public CompanyVarsConfigDoc save(CompanyVarsConfigDoc clientApiKey) {
+	configStore.saveCompanyVar(clientApiKey);
+	this.refresh();
+	return clientApiKey;
+    }
+
+    public CompanyVarsConfigDoc remove(CompanyVarsConfigDoc clientApiKey) {
+	mongoTemplate.remove(clientApiKey);
+	this.refresh();
 	return clientApiKey;
     }
 

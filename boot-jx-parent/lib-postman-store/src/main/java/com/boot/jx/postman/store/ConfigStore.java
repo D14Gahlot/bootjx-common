@@ -8,6 +8,7 @@ import com.boot.jx.mongo.CommonMongoTemplateAbstract;
 import com.boot.jx.postman.doc.PMConfigurationDoc;
 import com.boot.jx.postman.doc.config.ChannelConfigDoc;
 import com.boot.jx.postman.doc.config.ClientKeyConfigDoc;
+import com.boot.jx.postman.doc.config.CompanyVarsConfigDoc;
 import com.boot.jx.postman.doc.config.PrefsConfigDoc;
 
 @Component
@@ -32,6 +33,14 @@ public class ConfigStore extends CommonMongoTemplateAbstract {
     public void saveClientKeyConfig(ClientKeyConfigDoc clientApiKey) {
 	try {
 	    save(clientApiKey);
+	} catch (Exception e) {
+	    LOGGER.error("saveClientKeyConfig", e);
+	}
+    }
+
+    public void saveCompanyVar(CompanyVarsConfigDoc companyVarsConfig) {
+	try {
+	    save(companyVarsConfig);
 	} catch (Exception e) {
 	    LOGGER.error("saveClientKeyConfig", e);
 	}

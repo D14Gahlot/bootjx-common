@@ -9,7 +9,6 @@ import java.util.Map.Entry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Component;
 
@@ -18,6 +17,7 @@ import com.boot.jx.dict.ContactType;
 import com.boot.jx.model.CommonFile;
 import com.boot.jx.postman.PostManException;
 import com.boot.jx.postman.PostmanPackages.ICommonTmplPackage;
+import com.boot.jx.postman.model.Message;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.model.PostManFile;
 import com.boot.jx.postman.model.TmplElement;
@@ -57,8 +57,17 @@ public class TmplClient {
 
     public OutboxMessage process(OutboxMessage outboxMessage) {
 	CommonFile file = new PostManFile();
+
+	// Model Data Merge
+	MapModel model = MapModel.from(outboxMessage.getModel());
+	MapModel data = MapModel.createInstance();
+	data.putAll(model.keyEntry(Message.DATA_KEY).asMap());
+	data.putAll(outboxMessage.hsm().data());
+	model.put(Message.DATA_KEY, data.toMap());
+	outboxMessage.setModel(model.toMap());
+
 	file.setModel(outboxMessage.getModel());
-	file.setTemplate(outboxMessage.getTemplate());
+	file.setTemplate(outboxMessage.getHsm());
 	file = this.process(file, outboxMessage.contact().type()).getResult();
 
 	outboxMessage.setMessage(file.getContent());

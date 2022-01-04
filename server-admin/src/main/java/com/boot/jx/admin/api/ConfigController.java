@@ -17,6 +17,7 @@ import com.boot.jx.common.config.ConfigManager;
 import com.boot.jx.postman.PMConstants.CHANNEL_TYPE_ENUM;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.doc.config.ClientKeyConfigDoc;
+import com.boot.jx.postman.doc.config.CompanyVarsConfigDoc;
 import com.boot.jx.postman.plugin.ChannelConfig;
 import com.fasterxml.jackson.annotation.JsonView;
 
@@ -76,6 +77,29 @@ public class ConfigController {
 	ClientKeyConfigDoc clientApiKey = new ClientKeyConfigDoc();
 	clientApiKey.setId(id);
 	return ApiResponse.buildResults(adminConfigService.remove(clientApiKey));
+    }
+
+    @JsonView(PMEnvironment.PublicProperty.class)
+    @ResponseBody
+    @RequestMapping(value = { "/api/config/companyvar" }, method = { RequestMethod.GET })
+    public ApiResponse<CompanyVarsConfigDoc, Object> getCompanyVars() {
+	return ApiResponse.buildResults(mongoTemplate.findAll(CompanyVarsConfigDoc.class));
+    }
+
+    @JsonView(PMEnvironment.OneTimeVisibleProperty.class)
+    @ResponseBody
+    @RequestMapping(value = { "/api/config/companyvar" }, method = { RequestMethod.POST })
+    public ApiResponse<CompanyVarsConfigDoc, Object> updateCompanyVars(@RequestBody CompanyVarsConfigDoc companyVar) {
+	return ApiResponse.buildData(adminConfigService.save(companyVar));
+    }
+
+    @JsonView(PMEnvironment.PublicProperty.class)
+    @ResponseBody
+    @RequestMapping(value = { "/api/config/companyvar" }, method = { RequestMethod.DELETE })
+    public ApiResponse<CompanyVarsConfigDoc, Object> removeCompanyVars(@RequestParam String id) {
+	CompanyVarsConfigDoc companyVar = new CompanyVarsConfigDoc();
+	companyVar.setId(id);
+	return ApiResponse.buildResults(adminConfigService.remove(companyVar));
     }
 
 }
