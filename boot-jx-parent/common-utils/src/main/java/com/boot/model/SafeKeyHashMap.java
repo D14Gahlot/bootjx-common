@@ -53,7 +53,10 @@ public class SafeKeyHashMap<V> implements JsonSerializerType<Object>, Serializab
     }
 
     public V put(String key, V value) {
-	return this.map().put(sanitizeKey(key), value);
+	if (ArgUtil.is(key)) {
+	    return this.map().put(sanitizeKey(key), value);
+	}
+	return null;
     }
 
     public V get(Object key) {
