@@ -367,4 +367,13 @@ public class MapModel implements JsonSerializerType<Object> {
 	return this.map.containsKey(key);
     }
 
+    public int size() {
+	if (this.list != null) {
+	    return this.list.size();
+	} else if (this.map != null) {
+	    return this.map.size();
+	}
+	return 0;
+    }
+
 }

@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.core.MongoTemplate;
 
 import com.boot.jx.AppContextUtil;
 import com.boot.jx.bot.BotController;
@@ -99,8 +100,7 @@ public class Demo4Controller extends CommonBotController {
     public void send() {
     	Map<String,Object> data = new HashMap<String,Object>();
     	data.put("name", chatContext.getContact().getName());
-    	data.put("phone", chatContext.getContact().getPhone());
-    	System.out.println("data { }:"+data);
+    	data.put("phone", ArgUtil.nonEmpty(chatContext.getContact().getPhone(), chatContext.getContact().getEmail()));
     	String templateCode="sales_inquiry_alert";
     	String lane="918828218374";
     	if (ArgUtil.is(AppContextUtil.getTenant())
@@ -134,6 +134,9 @@ public class Demo4Controller extends CommonBotController {
     	outboxMessage2.contact().setCsid("918587874877");
     	outboxMessage2.data(data); 
     	send(outboxMessage2);
+    	
+    	
+    	
     	
     }
 }
