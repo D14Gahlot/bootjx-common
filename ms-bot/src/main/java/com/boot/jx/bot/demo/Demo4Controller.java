@@ -8,8 +8,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.mongodb.core.MongoTemplate;
 
+import com.boot.jx.AppContextUtil;
 import com.boot.jx.bot.BotController;
 import com.boot.jx.bot.ChatContext;
 import com.boot.jx.bot.ChatMapping;
@@ -17,8 +17,7 @@ import com.boot.jx.bot.alex.CommonBotController;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.OutboxMessage;
-import com.boot.jx.postman.store.MessageStore;
-import com.boot.jx.postman.store.SessionStore;
+import com.boot.utils.ArgUtil;
 import com.boot.utils.StringUtils.StringMatcher;
 
 @BotController(name = "DemoBot", tenant = { "app", "demo", "sandbox" })
@@ -28,14 +27,7 @@ public class Demo4Controller extends CommonBotController {
     @Autowired
     private ChatContext chatContext;
 
-    @Autowired
-    private MongoTemplate mongoTemplate;
 
-    @Autowired
-    private MessageStore messageStore;
-
-    @Autowired
-    private SessionStore sessionStore;
 
     public void start(InboxMessage inboxMessage, StringMatcher matcher) {
 	reply(new OutboxMessage().template("menu-5").put("name", chatContext.getContact().getName()));
@@ -69,12 +61,10 @@ public class Demo4Controller extends CommonBotController {
 	default:
 	    if (timeCheck()) {
 		reply(new OutboxMessage().template("menu-5-dept-time-1"));
-		// this.transferToAgent(inboxMessage,matcher);
 		send();
 		next("menu-5-dept-onselect");
 	    } else {
 		reply(new OutboxMessage().template("menu-5-dept-time-2"));
-		// this.transferToAgent(inboxMessage,matcher);
 		send();
 		next("menu-5-dept-onselect");
 	    }
@@ -112,11 +102,16 @@ public class Demo4Controller extends CommonBotController {
     	data.put("phone", chatContext.getContact().getPhone());
     	System.out.println("data { }:"+data);
     	String templateCode="sales_inquiry_alert";
+    	String lane="918828218374";
+    	if (ArgUtil.is(AppContextUtil.getTenant())
+    			&& !AppContextUtil.getTenant().equalsIgnoreCase("demo")){
+    		lane="917304856205";
+    	}
     	
     	OutboxMessage outboxMessage1 = new OutboxMessage();
     	outboxMessage1.hsm().setCode(templateCode);
     	outboxMessage1.contact().type(ContactType.WHATSAPP);
-    	outboxMessage1.contact().setLane("918828218374");
+    	outboxMessage1.contact().setLane(lane);
     	//alert phone number
     	outboxMessage1.contact().setCsid("96551780410");
     	outboxMessage1.data(data);
@@ -125,7 +120,7 @@ public class Demo4Controller extends CommonBotController {
     	OutboxMessage outboxMessage = new OutboxMessage();
     	outboxMessage.hsm().setCode(templateCode);
     	outboxMessage.contact().type(ContactType.WHATSAPP);
-    	outboxMessage.contact().setLane("918828218374");
+    	outboxMessage.contact().setLane(lane);
     	//alert phone number
     	outboxMessage.contact().setCsid("919619203759");
     	outboxMessage.data(data); 
@@ -134,14 +129,11 @@ public class Demo4Controller extends CommonBotController {
     	OutboxMessage outboxMessage2 = new OutboxMessage();
     	outboxMessage2.hsm().setCode(templateCode);
     	outboxMessage2.contact().type(ContactType.WHATSAPP);
-    	outboxMessage2.contact().setLane("918828218374");
+    	outboxMessage2.contact().setLane(lane);
     	//alert phone number
     	outboxMessage2.contact().setCsid("918587874877");
     	outboxMessage2.data(data); 
     	send(outboxMessage2);
-    	
-    	
-    	
     	
     }
 }
