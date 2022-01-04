@@ -16,9 +16,12 @@ import com.boot.jx.bot.ChatContext;
 import com.boot.jx.bot.ChatMapping;
 import com.boot.jx.bot.alex.CommonBotController;
 import com.boot.jx.dict.ContactType;
+import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.OutboxMessage;
+import com.boot.model.SafeKeyHashMap;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.StringUtils;
 import com.boot.utils.StringUtils.StringMatcher;
 
 @BotController(name = "DemoBot", tenant = { "app", "demo", "sandbox" })
@@ -28,7 +31,8 @@ public class Demo4Controller extends CommonBotController {
     @Autowired
     private ChatContext chatContext;
 
-
+    @Autowired
+    PMEnvironment pmEnvironment;
 
     public void start(InboxMessage inboxMessage, StringMatcher matcher) {
 	reply(new OutboxMessage().template("menu-5").put("name", chatContext.getContact().getName()));
@@ -98,45 +102,35 @@ public class Demo4Controller extends CommonBotController {
     }
 
     public void send() {
-    	Map<String,Object> data = new HashMap<String,Object>();
-    	data.put("name", chatContext.getContact().getName());
-    	data.put("phone", ArgUtil.nonEmpty(chatContext.getContact().getPhone(), chatContext.getContact().getEmail()));
-    	String templateCode="sales_inquiry_alert";
-    	String lane="918828218374";
-    	if (ArgUtil.is(AppContextUtil.getTenant())
-    			&& !AppContextUtil.getTenant().equalsIgnoreCase("demo")){
-    		lane="917304856205";
-    	}
-    	
-    	OutboxMessage outboxMessage1 = new OutboxMessage();
-    	outboxMessage1.hsm().setCode(templateCode);
-    	outboxMessage1.contact().type(ContactType.WHATSAPP);
-    	outboxMessage1.contact().setLane(lane);
-    	//alert phone number
-    	outboxMessage1.contact().setCsid("96551780410");
-    	outboxMessage1.data(data);
-    	send(outboxMessage1);
-    	
-    	OutboxMessage outboxMessage = new OutboxMessage();
-    	outboxMessage.hsm().setCode(templateCode);
-    	outboxMessage.contact().type(ContactType.WHATSAPP);
-    	outboxMessage.contact().setLane(lane);
-    	//alert phone number
-    	outboxMessage.contact().setCsid("919619203759");
-    	outboxMessage.data(data); 
-    	send(outboxMessage);
-    	
-    	OutboxMessage outboxMessage2 = new OutboxMessage();
-    	outboxMessage2.hsm().setCode(templateCode);
-    	outboxMessage2.contact().type(ContactType.WHATSAPP);
-    	outboxMessage2.contact().setLane(lane);
-    	//alert phone number
-    	outboxMessage2.contact().setCsid("918587874877");
-    	outboxMessage2.data(data); 
-    	send(outboxMessage2);
-    	
-    	
-    	
-    	
+	Map<String, Object> data = new HashMap<String, Object>();
+	data.put("name", chatContext.getContact().getName());
+	data.put("phone", ArgUtil.nonEmpty(chatContext.getContact().getPhone(), chatContext.getContact().getEmail()));
+
+	SafeKeyHashMap<Object> companyVars = pmEnvironment.config().company();
+	String templateCode = companyVars.keyEntry("sales_alert_template").asString();
+
+	String lane = companyVars.keyEntry("sales_alert_channel").asString();
+
+//	String lane = "918828218374";
+//	if (ArgUtil.is(AppContextUtil.getTenant()) && !AppContextUtil.getTenant().equalsIgnoreCase("demo")) {
+//	    lane = "917304856205";
+//	}
+
+	String[] contacts = StringUtils.split(companyVars.keyEntry("sales_alert_contact").asString(),",");
+	for (String contact : contacts) {
+	    contact = StringUtils.trim(contact);
+	    if (ArgUtil.is(contact)) {
+		OutboxMessage outboxMessage1 = new OutboxMessage();
+		outboxMessage1.hsm().setCode(templateCode);
+		outboxMessage1.contact().type(ContactType.WHATSAPP);
+		outboxMessage1.contact().setLane(lane);
+		// alert phone number
+		outboxMessage1.contact().setPhone(contact);
+		//outboxMessage1.contact().setCsid(contact);
+		outboxMessage1.data(data);
+		send(outboxMessage1);
+	    }
+	}
+
     }
 }

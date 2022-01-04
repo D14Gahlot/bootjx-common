@@ -11,7 +11,6 @@ import com.boot.jx.dict.ContactType;
 import com.boot.jx.postman.PMConstants;
 import com.boot.jx.postman.model.MessageDefinitions.Contactable;
 import com.boot.jx.postman.model.MessageDefinitions.IMessageExtended;
-import com.boot.utils.ArgUtil;
 import com.boot.utils.StringUtils.StringMatcher;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -247,14 +246,6 @@ public class InboxMessage implements Serializable, IMessageExtended {
 	    this.session = new MessageSession();
 	}
 	return this.session;
-    }
-
-    @Override
-    public String forContact() {
-	if (ArgUtil.is(this.contact().getCsid())) {
-	    return this.contact().getCsid();
-	}
-	return this.from;
     }
 
     public List<Attachment> getAttachments() {

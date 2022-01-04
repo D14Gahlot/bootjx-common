@@ -35,6 +35,8 @@ import com.boot.jx.postman.dto.ChatMessageDTO;
 import com.boot.jx.postman.dto.ChatSessionDTO;
 import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.Message;
+import com.boot.jx.postman.model.MessageDefinitions.Contact;
+import com.boot.jx.postman.model.MessageDefinitions.Contactable;
 import com.boot.jx.postman.store.SessionStore;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.model.MapModel;
@@ -91,7 +93,13 @@ public class ChatParserAndImportor {
 	String sender = meta.getString("sender");
 	String lane = meta.getString("lane");
 	ContactType contactType = meta.getAsEnum("contactType", ContactType.class);
-	String contactId = PostManUtil.createContactId(contactType, contactMobile, lane);
+
+	Contactable c = Contactable.instance();
+	c.type(contactType);
+	c.setPhone(contactMobile);
+	c.setLane(lane);
+
+	String contactId = PostManUtil.createContactId(c);
 
 	ImportChatSessionDoc importDetails = meta.getAs("importDetails", ImportChatSessionDoc.class);
 
@@ -181,7 +189,8 @@ public class ChatParserAndImportor {
 	return request;
     }
 
-    public ApiResponse<ChatSessionDTO, Map<String, Object>> getChats(MultipartFile file, ContactType contactType,String clientDate, String format) {
+    public ApiResponse<ChatSessionDTO, Map<String, Object>> getChats(MultipartFile file, ContactType contactType,
+	    String clientDate, String format) {
 
 	CommonDateTimeParser dtp = new CommonDateTimeParser()
 		.formatter(ArgUtil.nonEmpty(format, "ccc LLL dd yyyy HH:mm:ss 'GMT'Z (zzzz)")).date(clientDate)
@@ -263,94 +272,96 @@ public class ChatParserAndImportor {
 	    meta.put("duplicates", importChatSession);
 	}
 	return ApiResponse.buildResults(sessions, meta);
-}
-	public List<ChatParserDto> getParseFileUsingRegExp(MultipartFile file, ImportChatSessionDoc importChatSessionDoc) {
-		InputStream is = null;
-		BufferedReader br = null;
-		DigestInputStream dis = null;
-		List<ChatParserDto> chatLst = new ArrayList<ChatParserDto>();
-		try {
+    }
 
-			MessageDigest md = MessageDigest.getInstance("MD5");
+    public List<ChatParserDto> getParseFileUsingRegExp(MultipartFile file, ImportChatSessionDoc importChatSessionDoc) {
+	InputStream is = null;
+	BufferedReader br = null;
+	DigestInputStream dis = null;
+	List<ChatParserDto> chatLst = new ArrayList<ChatParserDto>();
+	try {
 
-			is = file.getInputStream();
-			br = new BufferedReader(new InputStreamReader(is));
-			dis = new DigestInputStream(is, md);
+	    MessageDigest md = MessageDigest.getInstance("MD5");
 
-			String regex = "(\\d+/\\d+/\\d+, \\d+:\\d+\\d+ [A-Z]*) - (.*?): (.*)";
+	    is = file.getInputStream();
+	    br = new BufferedReader(new InputStreamReader(is));
+	    dis = new DigestInputStream(is, md);
 
-			String sCurrentLine;
+	    String regex = "(\\d+/\\d+/\\d+, \\d+:\\d+\\d+ [A-Z]*) - (.*?): (.*)";
 
-			Pattern r = Pattern.compile(regex, Pattern.CASE_INSENSITIVE | Pattern.DOTALL); // REGEX required for
-																							// extracting data
-			String lineSeparator = System.getProperty("line.separator");
+	    String sCurrentLine;
 
-			ChatParserDto lastMessage = null;
-			while ((sCurrentLine = br.readLine()) != null) {
-				if(ArgUtil.is(sCurrentLine)  && sCurrentLine.charAt(0)=='[') {
-					String sCurrentLines = sCurrentLine.replace("[","").replace("]", " -");
-					sCurrentLine=parsingStringValue(sCurrentLines); 
-				}
-				Matcher m = r.matcher(sCurrentLine);
-				
-				if (m.find()) {
-					// System.out.println("======" + sCurrentLine);
-					// New Message
-					lastMessage = new ChatParserDto();
-					String date = m.group(1);
-					
-					String auther = m.group(2);
-					String msg = m.group(3);
-					lastMessage.setDate(date);
-					lastMessage.setAuther(auther);
-					lastMessage.setMessage(msg);
-					if (lastMessage != null && ArgUtil.is(lastMessage.getDate())) {
-						chatLst.add(lastMessage);
-					}
-				} else if (ArgUtil.is(lastMessage)) {
-					// System.out.println(" " + sCurrentLine);
-					lastMessage.setMessage(lastMessage.getMessage() + lineSeparator + sCurrentLine);
-				}
-			}
+	    Pattern r = Pattern.compile(regex, Pattern.CASE_INSENSITIVE | Pattern.DOTALL); // REGEX required for
+											   // extracting data
+	    String lineSeparator = System.getProperty("line.separator");
 
-			byte[] digest = dis.getMessageDigest().digest();
-
-			BigInteger bigInt = new BigInteger(1, digest);
-			String hashtext = bigInt.toString(16);
-			// Pad it to get full 32 chars.
-			while (hashtext.length() < 32) {
-				hashtext = "0" + hashtext;
-			}
-			importChatSessionDoc.setFileMD5(hashtext);
-			importChatSessionDoc.setFileName(file.getOriginalFilename());
-			importChatSessionDoc.setFileSize(ArgUtil.parseAsString(file.getSize()));
-			importChatSessionDoc.setFileId(UniqueID.generateString62());
-		} catch (Exception e) {
-			e.printStackTrace();
-		} finally {
-			CloseUtil.close(br);
-			CloseUtil.close(is);
-			CloseUtil.close(dis);
+	    ChatParserDto lastMessage = null;
+	    while ((sCurrentLine = br.readLine()) != null) {
+		if (ArgUtil.is(sCurrentLine) && sCurrentLine.charAt(0) == '[') {
+		    String sCurrentLines = sCurrentLine.replace("[", "").replace("]", " -");
+		    sCurrentLine = parsingStringValue(sCurrentLines);
 		}
-		return chatLst;
+		Matcher m = r.matcher(sCurrentLine);
 
+		if (m.find()) {
+		    // System.out.println("======" + sCurrentLine);
+		    // New Message
+		    lastMessage = new ChatParserDto();
+		    String date = m.group(1);
+
+		    String auther = m.group(2);
+		    String msg = m.group(3);
+		    lastMessage.setDate(date);
+		    lastMessage.setAuther(auther);
+		    lastMessage.setMessage(msg);
+		    if (lastMessage != null && ArgUtil.is(lastMessage.getDate())) {
+			chatLst.add(lastMessage);
+		    }
+		} else if (ArgUtil.is(lastMessage)) {
+		    // System.out.println(" " + sCurrentLine);
+		    lastMessage.setMessage(lastMessage.getMessage() + lineSeparator + sCurrentLine);
+		}
+	    }
+
+	    byte[] digest = dis.getMessageDigest().digest();
+
+	    BigInteger bigInt = new BigInteger(1, digest);
+	    String hashtext = bigInt.toString(16);
+	    // Pad it to get full 32 chars.
+	    while (hashtext.length() < 32) {
+		hashtext = "0" + hashtext;
+	    }
+	    importChatSessionDoc.setFileMD5(hashtext);
+	    importChatSessionDoc.setFileName(file.getOriginalFilename());
+	    importChatSessionDoc.setFileSize(ArgUtil.parseAsString(file.getSize()));
+	    importChatSessionDoc.setFileId(UniqueID.generateString62());
+	} catch (Exception e) {
+	    e.printStackTrace();
+	} finally {
+	    CloseUtil.close(br);
+	    CloseUtil.close(is);
+	    CloseUtil.close(dis);
 	}
-	private String parsingStringValue(String str) {
-		String strDate = null;
-		int pos1 = str.indexOf("-");
-		String dateStr = str.substring(0,pos1);
-		String[] spl = dateStr.split(",");
-    	String dateS =spl[0];
-    	String time =spl[1];
-    	int remove = time.lastIndexOf(':');
-    	String hhMM = time.substring(0,remove) + time.substring(remove+3);
-    	String[] dt = dateS.split("/");
-    	String dd =dt[0];
-    	String mm=dt[1];
-    	String yy=dt[2];
-    	String finalDateStr =mm+"/"+dd+"/"+yy+","+hhMM;
-    	strDate = finalDateStr+"-"+str.substring(pos1+1);
-		return strDate ; 
-	}
+	return chatLst;
+
+    }
+
+    private String parsingStringValue(String str) {
+	String strDate = null;
+	int pos1 = str.indexOf("-");
+	String dateStr = str.substring(0, pos1);
+	String[] spl = dateStr.split(",");
+	String dateS = spl[0];
+	String time = spl[1];
+	int remove = time.lastIndexOf(':');
+	String hhMM = time.substring(0, remove) + time.substring(remove + 3);
+	String[] dt = dateS.split("/");
+	String dd = dt[0];
+	String mm = dt[1];
+	String yy = dt[2];
+	String finalDateStr = mm + "/" + dd + "/" + yy + "," + hhMM;
+	strDate = finalDateStr + "-" + str.substring(pos1 + 1);
+	return strDate;
+    }
 
 }

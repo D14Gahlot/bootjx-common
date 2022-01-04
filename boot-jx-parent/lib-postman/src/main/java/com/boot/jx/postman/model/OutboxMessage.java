@@ -76,13 +76,4 @@ public class OutboxMessage extends Message<OutboxMessage> implements WAMessageOp
 	this.contact().setCsid(csid);
     }
 
-    @Override
-    @JsonIgnore
-    public String forContact() {
-	if (ArgUtil.is(this.getCsid())) {
-	    return this.getCsid();
-	}
-	return CollectionUtil.getOne(this.to);
-    }
-
 }
