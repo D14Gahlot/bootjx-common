@@ -4,44 +4,53 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.boot.jx.def.CommonInterfaces.ICommonTemplate;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.boot.jx.swagger.ApiMockModelProperty;
+import com.boot.model.UtilityModels.JsonIgnoreUnknown;
+import com.boot.utils.ArgUtil;
 
-@JsonIgnoreProperties(ignoreUnknown = true)
-public class CommonTemplate implements Serializable, ICommonTemplate {
+public class CommonTemplate implements Serializable, JsonIgnoreUnknown {
 
-    private static final long serialVersionUID = -254665668785648863L;
-    private String lang;
-    private String code;
+    private static final long serialVersionUID = -77493889473952472L;
+
+    @ApiMockModelProperty(example = "60d236c6142e53561cb7716c", required = false, value = "Unique Template Id",
+	    notes = "Explicit template.id to be used for message")
     private String id;
-    private Map<String, Object> data = new HashMap<String, Object>();
 
-    @Override
+    @ApiMockModelProperty(example = "FEEDBACK", required = false, value = "Code of Template", hidden = true,
+	    notes = "Template Code will be searched in the repository and match will be served."
+		    + "\n code will be ignored in case template.id is provided")
+    private String code;
+
+    @ApiMockModelProperty(example = "en_US", required = false, value = "Language of Template to pick", hidden = true,
+	    notes = "Language is an optional param which fallback to en, in all the scenarios of missing params/template"
+		    + "\n lang is ignored when template.id is provided")
+    private String lang;
+
+    @ApiMockModelProperty(example = "{ \"amount\" : 10, \"currency\" : \"INR\" }", required = false,
+	    value = "Data will be used to resolve placeholders in template, in case of missing value blank will be attempted, "
+		    + "\n Kindly note Template may be rejected in case it does not match the approved format")
+    private Map<String, Object> data;
+
     public String getCode() {
 	return code;
     }
 
-    @Override
     public void setCode(String code) {
 	this.code = code;
     }
 
-    @Override
     public String getId() {
 	return id;
     }
 
-    @Override
     public void setId(String id) {
 	this.id = id;
     }
 
-    @Override
     public String getLang() {
 	return lang;
     }
 
-    @Override
     public void setLang(String lang) {
 	this.lang = lang;
     }
@@ -56,5 +65,32 @@ public class CommonTemplate implements Serializable, ICommonTemplate {
 
     public void setData(Map<String, Object> data) {
 	this.data = data;
+    }
+
+    public Map<String, Object> data() {
+	if (!ArgUtil.is(data)) {
+	    this.data = new HashMap<String, Object>();
+	}
+	return data;
+    }
+
+    public CommonTemplate id(String id) {
+	this.id = id;
+	return this;
+    }
+
+    public CommonTemplate code(String code) {
+	this.code = code;
+	return this;
+    }
+
+    public CommonTemplate lang(String lang) {
+	this.lang = lang;
+	return this;
+    }
+
+    public CommonTemplate data(Map<String, Object> data) {
+	this.data = data;
+	return this;
     }
 }

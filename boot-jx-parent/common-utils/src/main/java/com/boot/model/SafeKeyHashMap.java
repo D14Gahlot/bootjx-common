@@ -8,6 +8,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import com.boot.json.JsonSerializerType;
+import com.boot.model.MapModel.NodeEntry;
 import com.boot.utils.ArgExceptions;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.Constants;
@@ -15,96 +16,100 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class SafeKeyHashMap<V> implements JsonSerializerType<Object>, Serializable {
-	private static final long serialVersionUID = 5570692867938930622L;
+    private static final long serialVersionUID = 5570692867938930622L;
 
-	protected Map<String, V> map;
+    protected Map<String, V> map;
 
-	public String sanitizeKey(Object key) {
-		if (key == null) {
-			throw ArgExceptions.paramMissingOrInvalid(null, null, key);
-		}
-		if (key instanceof String) {
-			return (ArgUtil.parseAsString(key, Constants.BLANK).replaceAll("[\\.@$]", "_"));
-		}
-		return (String) key;
+    public String sanitizeKey(Object key) {
+	if (key == null) {
+	    throw ArgExceptions.paramMissingOrInvalid(null, null, key);
 	}
-
-	public SafeKeyHashMap() {
-		super();
-		this.map = new HashMap<String, V>();
+	if (key instanceof String) {
+	    return (ArgUtil.parseAsString(key, Constants.BLANK).replaceAll("[\\.@$]", "_"));
 	}
+	return (String) key;
+    }
 
-	public SafeKeyHashMap(Map<String, V> newmap) {
-		super();
-		if (newmap != null) {
-			if (newmap instanceof SafeKeyHashMap) {
-				map = ((SafeKeyHashMap) newmap).map();
-			} else {
-				this.map = newmap;
-			}
-		}
-	}
+    public SafeKeyHashMap() {
+	super();
+	this.map = new HashMap<String, V>();
+    }
 
-	private Map<String, V> map() {
-		if (this.map == null)
-			this.map = new HashMap<String, V>();
-		return this.map;
+    public SafeKeyHashMap(Map<String, V> newmap) {
+	super();
+	if (newmap != null) {
+	    if (newmap instanceof SafeKeyHashMap) {
+		map = ((SafeKeyHashMap) newmap).map();
+	    } else {
+		this.map = newmap;
+	    }
 	}
+    }
 
-	public V put(String key, V value) {
-		return this.map().put(sanitizeKey(key), value);
-	}
+    private Map<String, V> map() {
+	if (this.map == null)
+	    this.map = new HashMap<String, V>();
+	return this.map;
+    }
 
-	public V get(Object key) {
-		return this.map().get(sanitizeKey(key));
-	}
+    public V put(String key, V value) {
+	return this.map().put(sanitizeKey(key), value);
+    }
 
-	public V remove(Object key) {
-		return this.map().remove(sanitizeKey(key));
-	}
+    public V get(Object key) {
+	return this.map().get(sanitizeKey(key));
+    }
 
-	public V getOrDefault(Object key, V defaultValue) {
-		return this.map().getOrDefault(sanitizeKey(key), defaultValue);
-	}
+    public NodeEntry<V> keyEntry(Object key) {
+	return new NodeEntry<V>(this.map().get(sanitizeKey(key)));
+    }
 
-	@Override
-	public Object toObject() {
-		return this.map();
-	}
+    public V remove(Object key) {
+	return this.map().remove(sanitizeKey(key));
+    }
 
-	public int size() {
-		return 0;
-	}
+    public V getOrDefault(Object key, V defaultValue) {
+	return this.map().getOrDefault(sanitizeKey(key), defaultValue);
+    }
 
-	public boolean isEmpty() {
-		return this.map().isEmpty();
-	}
+    @Override
+    public Object toObject() {
+	return this.map();
+    }
 
-	public boolean containsKey(Object key) {
-		return this.map().containsKey(sanitizeKey(key));
-	}
+    public int size() {
+	return 0;
+    }
 
-	public boolean containsValue(Object value) {
-		return this.map().containsValue(value);
-	}
+    public boolean isEmpty() {
+	return this.map().isEmpty();
+    }
 
-	public void putAll(Map<? extends String, ? extends V> m) {
-		this.map().putAll(m);
-	}
+    public boolean containsKey(Object key) {
+	return this.map().containsKey(sanitizeKey(key));
+    }
 
-	public void clear() {
-		this.map().clear();
-	}
+    public boolean containsValue(Object value) {
+	return this.map().containsValue(value);
+    }
 
-	public Set<String> keySet() {
-		return this.map().keySet();
-	}
+    public void putAll(Map<? extends String, ? extends V> m) {
+	this.map().putAll(m);
+    }
 
-	public Collection<V> values() {
-		return this.map().values();
-	}
+    public void clear() {
+	this.map().clear();
+    }
 
-	public Set<Entry<String, V>> entrySet() {
-		return this.map().entrySet();
-	}
+    public Set<String> keySet() {
+	return this.map().keySet();
+    }
+
+    public Collection<V> values() {
+	return this.map().values();
+    }
+
+    public Set<Entry<String, V>> entrySet() {
+	return this.map().entrySet();
+    }
 }

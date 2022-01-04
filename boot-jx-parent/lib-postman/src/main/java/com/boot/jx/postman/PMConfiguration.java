@@ -11,11 +11,6 @@ import com.boot.jx.agent.AgentConfig;
 import com.boot.jx.postman.PMEnvironment.AChannelDetails;
 import com.boot.jx.postman.PMEnvironment.PMConfigurationObject;
 import com.boot.jx.postman.plugin.ChannelConfig;
-import com.boot.jx.postman.plugin.FacebookPlugin.FacebookConfigDetails;
-import com.boot.jx.postman.plugin.InstagramPlugin.InstagramConfig;
-import com.boot.jx.postman.plugin.TelegramPlugin.TelegramConfigDetails;
-import com.boot.jx.postman.plugin.TwitterPlugin.TwitterConfigDetails;
-import com.boot.jx.postman.plugin.WAGupShupPlugin.GupShupConfigDetails;
 import com.boot.model.SafeKeyHashMap;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.Random;
@@ -28,6 +23,7 @@ public class PMConfiguration implements Serializable {
     private Map<String, ClientApiKey> clientApiKeys;
 
     private Map<String, PMConfigurationObject> prefs;
+    private Map<String, Object> companyVars;
 
     private AgentConfig agent;
     private String accountKey;
@@ -144,6 +140,13 @@ public class PMConfiguration implements Serializable {
 
     public void setAccountKey(String accountKey) {
 	this.accountKey = accountKey;
+    }
+
+    public SafeKeyHashMap<Object> company() {
+	if (ArgUtil.isEmpty(companyVars)) {
+	    companyVars = new HashMap<String, Object>();
+	}
+	return new SafeKeyHashMap<Object>(companyVars);
     }
 
 }

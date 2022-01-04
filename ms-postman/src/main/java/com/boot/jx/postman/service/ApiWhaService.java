@@ -51,7 +51,7 @@ public class ApiWhaService {
 				Context context = new Context(postManConfig.getLocal(message));
 				context.setVariables(message.getModel());
 				PostManFile file = new PostManFile();
-				file.template(message.getTemplate());
+				file.template(message.getHsm());
 				file.setModel(message.getModel());
 				message.setMessage(fileService.create(file).getContent());
 			}
