@@ -114,7 +114,7 @@ public class Demo4Controller extends CommonBotController {
     	String templateCode="sales_inquiry_alert";
     	
     	OutboxMessage outboxMessage1 = new OutboxMessage();
-    	outboxMessage1.template().setCode(templateCode);
+    	outboxMessage1.hsm().setCode(templateCode);
     	outboxMessage1.contact().type(ContactType.WHATSAPP);
     	outboxMessage1.contact().setLane("918828218374");
     	//alert phone number
@@ -123,7 +123,7 @@ public class Demo4Controller extends CommonBotController {
     	send(outboxMessage1);
     	
     	OutboxMessage outboxMessage = new OutboxMessage();
-    	outboxMessage.template().setCode(templateCode);
+    	outboxMessage.hsm().setCode(templateCode);
     	outboxMessage.contact().type(ContactType.WHATSAPP);
     	outboxMessage.contact().setLane("918828218374");
     	//alert phone number
@@ -132,7 +132,7 @@ public class Demo4Controller extends CommonBotController {
     	send(outboxMessage);
     	
     	OutboxMessage outboxMessage2 = new OutboxMessage();
-    	outboxMessage2.template().setCode(templateCode);
+    	outboxMessage2.hsm().setCode(templateCode);
     	outboxMessage2.contact().type(ContactType.WHATSAPP);
     	outboxMessage2.contact().setLane("918828218374");
     	//alert phone number
