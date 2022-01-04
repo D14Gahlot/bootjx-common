@@ -104,17 +104,17 @@ public class Demo4Controller extends CommonBotController {
 	data.put("name", chatContext.getContact().getName());
 	data.put("phone", ArgUtil.nonEmpty(chatContext.getContact().getPhone(), chatContext.getContact().getEmail()));
 
-	SafeKeyHashMap<Object> companyVars = pmEnvironment.config().global();
-	String templateCode = companyVars.keyEntry("sales_alert_template").asString();
+	SafeKeyHashMap<Object> globalVars = pmEnvironment.config().global();
+	String templateCode = globalVars.keyEntry("sales_alert_template").asString();
 
-	String lane = companyVars.keyEntry("sales_alert_channel").asString();
+	String lane = globalVars.keyEntry("sales_alert_channel").asString();
 
 //	String lane = "918828218374";
 //	if (ArgUtil.is(AppContextUtil.getTenant()) && !AppContextUtil.getTenant().equalsIgnoreCase("demo")) {
 //	    lane = "917304856205";
 //	}
 
-	String[] contacts = StringUtils.split(companyVars.keyEntry("sales_alert_contact").asString(),",");
+	String[] contacts = StringUtils.split(globalVars.keyEntry("sales_alert_contact").asString(),",");
 	for (String contact : contacts) {
 	    contact = StringUtils.trim(contact);
 	    if (ArgUtil.is(contact)) {
