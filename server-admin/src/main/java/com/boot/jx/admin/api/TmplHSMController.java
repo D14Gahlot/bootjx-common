@@ -108,6 +108,11 @@ public class TmplHSMController {
 
     }
 
+    @RequestMapping(value = "/api/tmpl/hsm/waba_templates", method = { RequestMethod.DELETE })
+    public ApiResponse<HSMTemplate3rdParty, Object> deleteWabaTemplate(@RequestParam String id) {
+	return new ApiResponse<HSMTemplate3rdParty, Object>().data(thirdPartyTmplManager.deleteTemplates(id));
+    }
+
     // HSMTemplate
     @RequestMapping(value = "/api/tmpl/hsm", method = { RequestMethod.GET })
     public ApiResponse<HSMTemplateDoc, Object> listPushTemplates() {

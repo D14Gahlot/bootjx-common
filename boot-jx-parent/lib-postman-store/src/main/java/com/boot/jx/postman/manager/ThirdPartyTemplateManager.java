@@ -77,6 +77,13 @@ public class ThirdPartyTemplateManager {
 	return this.getTemplates(channelConfig, null);
     }
 
+    public HSMTemplate3rdParty deleteTemplates(String id) {
+	HSMTemplate3rdParty t = new HSMTemplate3rdParty();
+	t.setId(id);
+	commonMongoTemplate.remove(t);
+	return t;
+    }
+
     public HSMTemplate3rdParty link(String thirdPartyTemplateId, String hsmTemplateId) {
 	HSMTemplate3rdParty thirdPartyTemplate = commonMongoTemplate.findById(thirdPartyTemplateId,
 		HSMTemplate3rdParty.class);
