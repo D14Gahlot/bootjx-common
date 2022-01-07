@@ -170,7 +170,8 @@ public class WA360Connector extends AbstractConnector<WA360ConfigDetails, WA360P
     @Override
     public void onSend(ChannelConfig channelConfig, ChatContactDoc chatContactDoc, OutboxMessage outboxMessage) {
 	try {
-	    template(channelConfig, chatContactDoc, outboxMessage); // TODO:- This is common for all connector, make it generic
+	    template(channelConfig, chatContactDoc, outboxMessage); // TODO:- This is common for all connector, make it
+								    // generic
 
 	    boolean isValidContact = true;
 	    if (outboxMessage.messageMetaWrapper().composeTypeIs(MESSAGE_COMPOSE_TYPE.SEND_CODE)) {
@@ -215,6 +216,9 @@ public class WA360Connector extends AbstractConnector<WA360ConfigDetails, WA360P
 	} else if ("failed".equals(status)) {
 	    report.setStatus(Status.FAILD);
 	    String errorCode = requestMap.pathEntry("errors/[0]/code").asString();
+	    if (ArgUtil.areEqual(errorCode, "470")) {
+		report.setStatus(Status.CCWIN);
+	    }
 	    report.setReason("Code:" + errorCode);
 	}
 
