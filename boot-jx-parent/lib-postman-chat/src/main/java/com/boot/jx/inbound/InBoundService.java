@@ -131,7 +131,6 @@ public class InBoundService {
 		AppContextUtil.getTraceId(true, true);
 		AppContextUtil.resetTraceTime();
 		AppContextUtil.init();
-
 	    }
 
 	}
