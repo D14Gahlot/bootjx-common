@@ -289,7 +289,7 @@ public class ChatService {
     public boolean initSession(InboxMessage inboxMessage, ChatSessionDoc session) {
 	boolean initd = session.isInitd();
 	if (initd) {
-	   // return true;
+	   return true;
 	}
 	ConnectorHandler connector = connectorHandlerFactory.get(inboxMessage.contact().type(),
 		inboxMessage.contact().getChannelType());

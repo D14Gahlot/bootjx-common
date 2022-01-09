@@ -66,7 +66,7 @@ public class FacebooClient implements MessageClient {
     
     public MapModel sendAdvanced(ChannelConfig config, MapModel map) {
     	String url = "https://graph.facebook.com/v2.6/me/messages?access_token="
-    			+ config.getInstagram().getAccessToken();
+    			+ config.getFacebook().getAccessToken();
     	
     	return restService.ajax(url).post(map.toMap()).asMapModel();
      }
