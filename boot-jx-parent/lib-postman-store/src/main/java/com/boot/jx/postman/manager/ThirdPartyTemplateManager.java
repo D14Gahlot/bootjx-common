@@ -63,6 +63,13 @@ public class ThirdPartyTemplateManager {
 	return toHSM3rdParty(channelConfig, resp.as(WA360Template.class));
     }
 
+    public HSMTemplate3rdParty deleteWA360Templates(ChannelConfig channelConfig, HSMTemplate3rdParty temp) {
+	WA360Template x = JsonUtil.toObject(temp.getTemplate(), WA360Template.class);
+	wa360Client.deleteTemplates(channelConfig, x.getName());
+	commonMongoTemplate.remove(temp);
+	return temp;
+    }
+
     public List<HSMTemplate3rdParty> getTemplates(ChannelConfig channelConfig, String code) {
 	CommonMongoQueryBuilder q = new CommonMongoQueryBuilder().where("channelId", channelConfig.getChannelId());
 
@@ -75,13 +82,6 @@ public class ThirdPartyTemplateManager {
 
     public List<HSMTemplate3rdParty> getTemplates(ChannelConfig channelConfig) {
 	return this.getTemplates(channelConfig, null);
-    }
-
-    public HSMTemplate3rdParty deleteTemplates(String id) {
-	HSMTemplate3rdParty t = new HSMTemplate3rdParty();
-	t.setId(id);
-	commonMongoTemplate.remove(t);
-	return t;
     }
 
     public HSMTemplate3rdParty link(String thirdPartyTemplateId, String hsmTemplateId) {
