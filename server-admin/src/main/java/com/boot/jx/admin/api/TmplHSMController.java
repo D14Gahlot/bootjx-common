@@ -108,10 +108,12 @@ public class TmplHSMController {
     }
 
     @RequestMapping(value = "/api/tmpl/hsm/waba_templates", method = { RequestMethod.DELETE })
-    public ApiResponse<HSMTemplate3rdParty, Object> deleteWabaTemplate(@RequestParam String id) {
+    public ApiResponse<HSMTemplate3rdParty, Object> deleteWabaTemplate(@RequestParam String id,
+	    @RequestParam(required = false) String channelId) {
 	HSMTemplate3rdParty temp = mongoTemplate.findById(id, HSMTemplate3rdParty.class);
 	if (ArgUtil.is(temp)) {
-	    ChannelConfig channelConfig = pmEnvironment.config().channels(temp.getChannelId());
+	    ChannelConfig channelConfig = pmEnvironment.config()
+		    .channels(ArgUtil.nonEmpty(channelId, temp.getChannelId()));
 	    thirdPartyTmplManager.deleteWA360Templates(channelConfig, temp);
 	}
 	return new ApiResponse<HSMTemplate3rdParty, Object>().data(temp);
