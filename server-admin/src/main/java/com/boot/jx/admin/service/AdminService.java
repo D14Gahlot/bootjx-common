@@ -129,7 +129,7 @@ public class AdminService {
 
     public List<AgentResponseAdminDto> agentResetPass(String agentId) throws NoSuchAlgorithmException {
 	AgentDoc agent = agentStore.findById(agentId);
-	empAuthService.resetPassword(agent.getAgent_code(), false);
+	empAuthService.resetPassword(agent.getAgent_code(), agent.isAdmin());
 	return buildAgentDto(CollectionUtil.asList(agent));
     }
 

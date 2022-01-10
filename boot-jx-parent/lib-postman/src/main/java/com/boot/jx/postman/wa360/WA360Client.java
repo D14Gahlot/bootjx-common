@@ -360,8 +360,7 @@ public class WA360Client {
     public MapModel deleteTemplates(ChannelConfig channelConfig, String templateName) {
 	MapModel resp = restService.ajax(WA360Constants.BASE_URL).path("v1/configs/templates/{templateName}")
 		.header(WA360Constants.D360_API_KEY, channelConfig.getWa360d().getApiKey())
-		.pathParam("templateName", templateName)
-		.get().asMapModel();
+		.pathParam("templateName", templateName).delete().asMapModel();
 	return resp;
     }
 

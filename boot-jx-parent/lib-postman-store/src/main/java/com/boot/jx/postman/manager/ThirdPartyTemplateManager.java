@@ -4,8 +4,11 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.stereotype.Component;
 
+import com.boot.jx.mongo.CommonMongoQB;
+import com.boot.jx.mongo.CommonMongoQB.CommonMongoQBimpl;
 import com.boot.jx.mongo.CommonMongoQueryBuilder;
 import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.jx.postman.doc.HSMTemplate3rdParty;
@@ -29,6 +32,11 @@ public class ThirdPartyTemplateManager {
 	MapModel resp = wa360Client.fetchTemplates(channelConfig);
 
 	List<WA360Template> wabaTemplates = resp.keyEntry("waba_templates").asList(WA360Template.class);
+
+	CommonMongoQBimpl<HSMTemplate3rdParty> cmqb = CommonMongoQueryBuilder.collection(HSMTemplate3rdParty.class)
+		.with(Criteria.where("channelId").is(channelConfig.getChannelId())).set("template.status", "deleted");
+
+	commonMongoTemplate.update(cmqb);
 
 	for (WA360Template wa360Template : wabaTemplates) {
 	    HSMTemplate3rdParty thirdPartyTemplate = toHSM3rdParty(channelConfig, wa360Template);
@@ -65,19 +73,24 @@ public class ThirdPartyTemplateManager {
 
     public HSMTemplate3rdParty deleteWA360Templates(ChannelConfig channelConfig, HSMTemplate3rdParty temp) {
 	WA360Template x = JsonUtil.toObject(temp.getTemplate(), WA360Template.class);
-	wa360Client.deleteTemplates(channelConfig, x.getName());
-	commonMongoTemplate.remove(temp);
+	if (ArgUtil.is(x)) {
+	    if (!"deleted".equalsIgnoreCase(x.getStatus())) {
+		wa360Client.deleteTemplates(channelConfig, x.getName());
+	    }
+	    commonMongoTemplate.remove(temp);
+	}
 	return temp;
     }
 
     public List<HSMTemplate3rdParty> getTemplates(ChannelConfig channelConfig, String code) {
-	CommonMongoQueryBuilder q = new CommonMongoQueryBuilder().where("channelId", channelConfig.getChannelId());
+	CommonMongoQBimpl<HSMTemplate3rdParty> q = CommonMongoQB.collection(HSMTemplate3rdParty.class)
+		.with(Criteria.where("channelId").is(channelConfig.getChannelId()));
 
 	if (ArgUtil.is(code)) {
 	    q.where("code", code);
 	}
 
-	return commonMongoTemplate.find(q, HSMTemplate3rdParty.class);
+	return commonMongoTemplate.find(q);
     }
 
     public List<HSMTemplate3rdParty> getTemplates(ChannelConfig channelConfig) {
