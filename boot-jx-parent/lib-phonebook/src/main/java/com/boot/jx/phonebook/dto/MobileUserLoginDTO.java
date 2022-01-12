@@ -1,4 +1,4 @@
-package com.boot.jx.postman.contack;
+package com.boot.jx.phonebook.dto;
 
 import java.io.Serializable;
 

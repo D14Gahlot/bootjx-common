@@ -85,8 +85,6 @@ public class MsgController {
     public ApiResponse<ChatMessageDTO, Object> sendSessionMessage(@RequestBody OutboxMessage outboxMessage)
 	    throws InterruptedException {
 
-	System.out.println(outboxMessage.getHsm());
-	
 	ChatSessionDoc sessionDoc = sessionStore.createSession(outboxMessage);
 	
 	// Session Stuff Logging <

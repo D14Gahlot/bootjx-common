@@ -202,6 +202,8 @@ public class WA360Client {
 	    req.put("video", wa360OutBoundMedia);
 	} else if (ArgUtil.areEqual(attachment.getMediaType(), FileType.AUDIO.toString())) {
 	    req.put(OutBoundWrapperPaths.MESSAGE_TYPE, "audio");
+	    wa360OutBoundMedia.setCaption(null);
+	    wa360OutBoundMedia.setFilename(null);
 	    req.put("audio", wa360OutBoundMedia);
 	} else {
 	    req.put(OutBoundWrapperPaths.MESSAGE_TYPE, "document");
@@ -279,6 +281,11 @@ public class WA360Client {
 	    } else if (ArgUtil.areEqual(attachment.getMediaType(), FileType.VIDEO.toString())) {
 		intr.put(OutBoundWrapperPaths.MESSAGE_TYPE, "video");
 		intr.put("video", wa360OutBoundMedia);
+	    } else if (ArgUtil.areEqual(attachment.getMediaType(), FileType.AUDIO.toString())) {
+		intr.put(OutBoundWrapperPaths.MESSAGE_TYPE, "audio");
+		wa360OutBoundMedia.setCaption(null);
+		wa360OutBoundMedia.setFilename(null);
+		intr.put("audio", wa360OutBoundMedia);
 	    } else {
 		intr.put(OutBoundWrapperPaths.MESSAGE_TYPE, "document");
 		intr.put("document", wa360OutBoundMedia);
