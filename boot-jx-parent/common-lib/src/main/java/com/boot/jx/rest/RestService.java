@@ -375,8 +375,18 @@ public class RestService {
 	    return this;
 	}
 
+	private Ajax delete(HttpEntity<Object> requestEntity) {
+	    this.method = HttpMethod.DELETE;
+	    this.requestEntity = requestEntity;
+	    return this;
+	}
+
 	public Ajax get() {
 	    return this.get(new HttpEntity<Object>(null, processdHeaders()));
+	}
+
+	public Ajax delete() {
+	    return this.delete(new HttpEntity<Object>(null, processdHeaders()));
 	}
 
 	public Ajax call(RestMethod method) {

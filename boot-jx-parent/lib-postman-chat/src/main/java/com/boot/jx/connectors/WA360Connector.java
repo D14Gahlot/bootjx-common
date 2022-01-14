@@ -189,9 +189,9 @@ public class WA360Connector extends AbstractConnector<WA360ConfigDetails, WA360P
 	    outboxMessage.updateStatus(OutboxMessage.Status.SENT_ERR);
 	    String log = null;
 	    if (e instanceof AmxApiException) {
-		log = ((AmxApiException) e).getErrorKey();
+		outboxMessage.logs().add(((AmxApiException) e).getErrorKey());
 	    }
-	    outboxMessage.logs().add(ArgUtil.parseAsString(log, e.getMessage()));
+	    outboxMessage.logs().add(e.getMessage());
 	    LOGGER.error("SEND ERROR", e);
 	}
     }

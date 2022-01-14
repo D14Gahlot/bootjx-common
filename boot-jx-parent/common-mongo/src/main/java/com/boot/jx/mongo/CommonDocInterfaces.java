@@ -8,6 +8,8 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
+import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
 
 import com.boot.jx.model.AuditableEntity;
 import com.boot.utils.ArgUtil;
@@ -17,6 +19,20 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 public class CommonDocInterfaces {
+
+    public static interface MongoQueryBuilder<T> {
+	public boolean isUpdatedTimeStampSupport();
+
+	public void updatedStamp();
+
+	public Update getUpdate();
+
+	public void setUpdate(Update object);
+
+	public Query getQuery();
+
+	public Class<T> getDocClass();
+    }
 
     public static interface Patchable<T extends Patchable<T>> {
 	public T patch();

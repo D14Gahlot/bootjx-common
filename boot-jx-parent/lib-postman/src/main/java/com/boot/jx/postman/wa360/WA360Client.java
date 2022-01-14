@@ -202,6 +202,8 @@ public class WA360Client {
 	    req.put("video", wa360OutBoundMedia);
 	} else if (ArgUtil.areEqual(attachment.getMediaType(), FileType.AUDIO.toString())) {
 	    req.put(OutBoundWrapperPaths.MESSAGE_TYPE, "audio");
+	    wa360OutBoundMedia.setCaption(null);
+	    wa360OutBoundMedia.setFilename(null);
 	    req.put("audio", wa360OutBoundMedia);
 	} else {
 	    req.put(OutBoundWrapperPaths.MESSAGE_TYPE, "document");
@@ -279,6 +281,11 @@ public class WA360Client {
 	    } else if (ArgUtil.areEqual(attachment.getMediaType(), FileType.VIDEO.toString())) {
 		intr.put(OutBoundWrapperPaths.MESSAGE_TYPE, "video");
 		intr.put("video", wa360OutBoundMedia);
+	    } else if (ArgUtil.areEqual(attachment.getMediaType(), FileType.AUDIO.toString())) {
+		intr.put(OutBoundWrapperPaths.MESSAGE_TYPE, "audio");
+		wa360OutBoundMedia.setCaption(null);
+		wa360OutBoundMedia.setFilename(null);
+		intr.put("audio", wa360OutBoundMedia);
 	    } else {
 		intr.put(OutBoundWrapperPaths.MESSAGE_TYPE, "document");
 		intr.put("document", wa360OutBoundMedia);
@@ -354,6 +361,13 @@ public class WA360Client {
     public MapModel fetchTemplates(ChannelConfig channelConfig) {
 	MapModel resp = restService.ajax(WA360Constants.BASE_URL).path("v1/configs/templates")
 		.header(WA360Constants.D360_API_KEY, channelConfig.getWa360d().getApiKey()).get().asMapModel();
+	return resp;
+    }
+
+    public MapModel deleteTemplates(ChannelConfig channelConfig, String templateName) {
+	MapModel resp = restService.ajax(WA360Constants.BASE_URL).path("v1/configs/templates/{templateName}")
+		.header(WA360Constants.D360_API_KEY, channelConfig.getWa360d().getApiKey())
+		.pathParam("templateName", templateName).delete().asMapModel();
 	return resp;
     }
 
