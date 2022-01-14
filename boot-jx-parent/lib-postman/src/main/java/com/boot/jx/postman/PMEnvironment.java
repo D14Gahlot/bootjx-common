@@ -10,7 +10,6 @@ import com.boot.jx.AppContextUtil;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.scope.tnt.Tenants;
-import com.boot.jx.utils.PostManUtil;
 import com.boot.model.MapModel.EntryMeta;
 import com.boot.model.MapModel.MapEntry;
 import com.boot.utils.ArgUtil;
@@ -31,13 +30,9 @@ public class PMEnvironment {
 
     public static interface PMEnvironmentProvider {
 
-	@Deprecated
 	public PMConfiguration config();
 
 	public PMConfiguration shared();
-
-	@Deprecated
-	public void config(PMConfiguration configuration);
 
 	public void config(ChannelConfig config);
 
@@ -46,16 +41,7 @@ public class PMEnvironment {
 	public void initConfig();
     }
 
-    public static interface ChannelDetails extends Serializable {
-
-	@JsonView(PublicProperty.class)
-	public String getLane();
-
-	@JsonView(PublicProperty.class)
-	public default String getChannel() {
-	    return null;
-	}
-
+    public static interface ChannelTypeSpecificProps {
 	@JsonView(PublicProperty.class)
 	public boolean isPushAllowed();
 
@@ -69,7 +55,21 @@ public class PMEnvironment {
 	public boolean isPushToNewContactAllowed();
 
 	@JsonView(PublicProperty.class)
+	public default String getChannel() {
+	    return null;
+	}
+
+	@JsonView(PublicProperty.class)
 	public ContactType getContactType();
+
+	@JsonView(PublicProperty.class)
+	public String getChannelType();
+    }
+
+    public static interface ChannelDetails extends Serializable {
+
+	@JsonView(PublicProperty.class)
+	public String getLane();
 
     }
 
@@ -78,19 +78,22 @@ public class PMEnvironment {
 
 	private static final long serialVersionUID = -5531902306230415784L;
 
-	protected String name;
+    }
+
+    public static abstract class AChannelConfig extends AChannelDetails implements ChannelTypeSpecificProps {
+
+	private static final long serialVersionUID = 1950315645271368433L;
+
 	protected ContactType contactType;
 	protected String channelType;
-
-	@Deprecated
-	protected String channel;
 	protected String channelKey;
+	protected String name;
 
 	@JsonView(PMEnvironment.PublicProperty.class)
 	protected String webhookUrl;
 
-	public AChannelDetails(String channelType) {
-	    this.channelType = channelType;
+	public AChannelConfig() {
+	    this.channelType = "WEBSITE";
 	}
 
 	public ContactType getContactType() {
@@ -101,16 +104,7 @@ public class PMEnvironment {
 	    this.contactType = contactType;
 	}
 
-	@Deprecated
-	public String getChannel() {
-	    return channel;
-	}
-
-	@Deprecated
-	public void setChannel(String channel) {
-	    this.channel = channel;
-	}
-
+	@Override
 	public String getChannelType() {
 	    return channelType;
 	}
@@ -119,10 +113,11 @@ public class PMEnvironment {
 	    this.channelType = channelType;
 	}
 
+	public String getChannelId() {
+	    return String.format("%s:%s", this.getChannelType(), this.getLane()).toLowerCase();
+	}
+
 	public String getChannelKey() {
-	    if (!ArgUtil.is(this.channelKey)) {
-		this.channelKey = PostManUtil.UNIQUE_API_KEY();
-	    }
 	    return channelKey;
 	}
 
@@ -149,23 +144,10 @@ public class PMEnvironment {
 	    this.webhookUrl = webhookUrl;
 	}
 
-    }
-
-    public static abstract class AChannelConfig extends AChannelDetails {
-
-	private static final long serialVersionUID = 1950315645271368433L;
-
-	public AChannelConfig() {
-	    super("WEBSITE");
-	}
-
-	public String getChannelId() {
-	    return String.format("%s:%s", this.getChannelType(), this.getLane());
-	}
-
 	public String toString() {
 	    return this.getChannelId();
 	}
+
     }
 
     public static class PMConfigurationObject extends MapEntry implements Serializable {
@@ -233,13 +215,6 @@ public class PMEnvironment {
 	    config = new PMConfiguration();
 	}
 	return config;
-    }
-
-    @Deprecated
-    public void config(PMConfiguration config) {
-	if (ArgUtil.is(provider)) {
-	    provider.config(config);
-	}
     }
 
     public void config(ChannelConfig config) {

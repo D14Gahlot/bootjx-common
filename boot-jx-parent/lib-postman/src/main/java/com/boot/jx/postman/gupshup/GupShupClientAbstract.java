@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.boot.jx.dict.FileType;
+import com.boot.jx.postman.PMConstants.CHANNEL_TYPE;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PostManException;
 import com.boot.jx.postman.gupshup.GupShupConstants.SessionType;
@@ -18,6 +19,7 @@ import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.rest.RestService;
 import com.boot.jx.rest.RestService.Ajax;
+import com.boot.jx.utils.PostManUtil;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
 import com.boot.utils.CryptoUtil;
@@ -46,25 +48,28 @@ public abstract class GupShupClientAbstract {
 	    throw new PostManException("No lane " + req.getWaNumber());
 	}
 
-	GupShupConfigDetails config = environment.config().gupshup(req.getWaNumber());
+	String channelId = PostManUtil.CHANNEL_ID(CHANNEL_TYPE.WA_GUPSHUP, req.getWaNumber());
+
+	ChannelConfig config = environment.config().channels(channelId);
 
 	if (ArgUtil.isEmpty(config)) {
 	    throw new PostManException("No Config for lane " + req.getWaNumber());
 	}
 
 	if (getSessionType() == SessionType.NOTIFICATION) {
-	    if (ArgUtil.isEmpty(config.getNotifyId()) || ArgUtil.isEmpty(config.getNotifyPass())) {
+	    if (ArgUtil.isEmpty(config.getGupshup().getNotifyId())
+		    || ArgUtil.isEmpty(config.getGupshup().getNotifyPass())) {
 		throw new PostManException("Notification Not Configured for this lane " + req.getWaNumber());
 	    }
-	    ajax.field("userid", config.getNotifyId());
-	    req.password(config.getNotifyPass());
+	    ajax.field("userid", config.getGupshup().getNotifyId());
+	    req.password(config.getGupshup().getNotifyPass());
 	} else {
-	    ajax.field("userid", config.getChatId());
-	    req.password(config.getChatPass());
+	    ajax.field("userid", config.getGupshup().getChatId());
+	    req.password(config.getGupshup().getChatPass());
 	}
 	if (encrypt) {
-	    ajax.field("encrdata",
-		    CryptoUtil.getEncoder().obzect(req.password(config.getChatPass())).encodeBase64().toString());
+	    ajax.field("encrdata", CryptoUtil.getEncoder().obzect(req.password(config.getGupshup().getChatPass()))
+		    .encodeBase64().toString());
 	} else {
 	    Map<String, Object> reqMap = JsonUtil.toMap(req);
 	    for (Entry<String, Object> entrySet : reqMap.entrySet()) {

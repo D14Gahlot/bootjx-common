@@ -88,6 +88,12 @@
 
 		<dependency>
 			<groupId>com.boot.jx</groupId>
+			<artifactId>lib-phonebook</artifactId>
+		</dependency>
+		
+		
+		<dependency>
+			<groupId>com.boot.jx</groupId>
 			<artifactId>boot-ext-jar</artifactId>
 			<type>pom</type>
 		</dependency>

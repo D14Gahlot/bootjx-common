@@ -34,6 +34,8 @@ public class LogManager {
 	outboxMessage.contact().setChannelType(sessionDoc.getChannel());
 	outboxMessage.contact().setLane(sessionDoc.getLane());
 	outboxMessage.contact().setContactId(sessionDoc.getContactId());
+	outboxMessage.contact().copyFrom(sessionDoc.getContact());
+	
 	outboxMessage.setSessionId(sessionDoc.getSessionId());
 	outboxMessage.setType("N");
 	return messageStore.note(outboxMessage, getCurrenUser());

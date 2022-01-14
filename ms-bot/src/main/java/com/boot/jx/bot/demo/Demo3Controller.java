@@ -7,22 +7,22 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.boot.jx.bot.BotController;
 import com.boot.jx.bot.ChatContext;
-import com.boot.jx.bot.ChatController;
 import com.boot.jx.bot.ChatMapping;
+import com.boot.jx.bot.alex.CommonBotController;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.StringUtils.StringMatcher;
 
-@BotController(name = "DemoBot", tenant = { "app", "demo", "sandbox" })
-public class Demo3Controller extends ChatController {
+@BotController(name = "DemoBot", tenant = { "app", "demo", "sandbox", "customer" })
+public class Demo3Controller extends CommonBotController {
 
     private static final String CURRENT_DEMO = "current_menu";
     @Autowired
     private ChatContext chatContext;
 
     public void start(InboxMessage inboxMessage, StringMatcher matcher) {
-	reply(new OutboxMessage().template("menu-4").put("name", chatContext.getContact().getName()));
+    	reply(new OutboxMessage().template("menu-4").put("name", chatContext.getContact().getName()));
 	// reply(new OutboxMessage().template("menu-4-1-email-1-ask").put("name",
 	// chatContext.getContact().getName()));
 	next("menu-4-1-email-onselect");
@@ -45,8 +45,7 @@ public class Demo3Controller extends ChatController {
 
     @ChatMapping(key = "menu-4-2-pan-onselect")
     public void panOnSelect(InboxMessage inboxMessage, StringMatcher matcher) {
-
-	switch (inboxMessage.getMessage().toLowerCase()) {
+ 	switch (inboxMessage.getMessage().toLowerCase()) {
 
 	case "h":
 	case "need help":
@@ -70,8 +69,7 @@ public class Demo3Controller extends ChatController {
     }
 
     @ChatMapping(key = "menu-4-2-date-onselect")
-    public void dateOnSelect(InboxMessage inboxMessage, StringMatcher matcher) throws InterruptedException {
-
+    public void dateOnSelect(InboxMessage inboxMessage, StringMatcher matcher) throws InterruptedException {  
 	switch (inboxMessage.getMessage().toLowerCase()) {
 
 	case "h":
@@ -92,7 +90,7 @@ public class Demo3Controller extends ChatController {
 		// Thread.sleep(2000);
 
 		// reply(new OutboxMessage().template("menu-4-7-welcome"));
-		chatContext.getSession().data().remove(CURRENT_DEMO);
+		chatContext.sessionData().data().remove(CURRENT_DEMO);
 	    } else {
 		reply(new OutboxMessage().template("menu-4-4-date-1-nok"));
 		next("menu-4-2-date-onselect");
@@ -104,16 +102,7 @@ public class Demo3Controller extends ChatController {
 
     @ChatMapping(key = "menu-4-8-talk2agent")
     public void transferToAgent(InboxMessage inboxMessage, StringMatcher matcher) {
-	try {
-	    chatContext.getSession().data().remove(CURRENT_DEMO);
-	    InboxMessage agentAssignResp = assignToAgent().getResult();
-	    if (ArgUtil.is(agentAssignResp.session().getAgent())) {
-		reply(new OutboxMessage().template("menu-4-8-talk2agent"));
-	    } else {
-		reply("All the agents are busy or online, we will connect you whenever someone is available.");
-	    }
-	} catch (Exception e) {
-	    reply("Some Tech Issues");
-	}
+	chatContext.sessionData().data().remove(CURRENT_DEMO);
+	commonTransferToAgent(inboxMessage, matcher);
     }
 }

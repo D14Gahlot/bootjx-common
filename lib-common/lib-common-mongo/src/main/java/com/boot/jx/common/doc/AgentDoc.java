@@ -18,11 +18,10 @@ import com.boot.utils.StringUtils;
 public class AgentDoc implements IDocument, DocVersion {
 
     @Id
-    private String agent_id;
+    private String id;
     @Indexed(unique = true)
     private String agent_code;
     private String agent_name;
-    private String agent_department;
     @Indexed(unique = true)
     private String agent_email;
     private String agent_number;
@@ -53,14 +52,6 @@ public class AgentDoc implements IDocument, DocVersion {
 
     public void setAgent_name(String agent_name) {
 	this.agent_name = agent_name;
-    }
-
-    public String getAgent_department() {
-	return agent_department;
-    }
-
-    public void setAgent_department(String agent_department) {
-	this.agent_department = agent_department;
     }
 
     public String getAgent_email() {
@@ -127,12 +118,12 @@ public class AgentDoc implements IDocument, DocVersion {
 	this.agent_code = agent_code;
     }
 
-    public String getAgent_id() {
-	return agent_id;
+    public String getId() {
+	return id;
     }
 
-    public void setAgent_id(String agent_id) {
-	this.agent_id = agent_id;
+    public void setId(String id) {
+	this.id = id;
     }
 
     public String getAgent_password() {

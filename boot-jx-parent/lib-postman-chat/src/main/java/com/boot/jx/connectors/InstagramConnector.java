@@ -3,17 +3,15 @@ package com.boot.jx.connectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Component;
 
 import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorMapping;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.postman.PMConstants.CHANNEL_TYPE;
-import com.boot.jx.postman.client.TmplClient;
+import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.ig.InstagramClient;
-import com.boot.jx.postman.ig.InstagramConfig;
 import com.boot.jx.postman.ig.InstagramHookRequest;
 import com.boot.jx.postman.ig.InstagramMessaging;
 import com.boot.jx.postman.ig.InstagramUserProfile;
@@ -26,6 +24,7 @@ import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.postman.plugin.ChannelPluginProvider;
 import com.boot.jx.postman.plugin.InstagramPlugin;
+import com.boot.jx.postman.plugin.InstagramPlugin.InstagramConfig;
 import com.boot.jx.postman.query.ChatContactQuery;
 import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
@@ -44,13 +43,14 @@ public class InstagramConnector extends AbstractConnector<InstagramConfig, Insta
     private InstagramClient instaClient;
 
     @Override
-    public void registerWebHook(ChannelConfig channelConfig) {
+    public void onChannelUpdate(ChannelConfig channelConfig) {
 	ApiResponseUtil.addWarning("Set webhook URL manually from Facebook Developer Portal.");
     }
 
-    public void send(ChannelConfig channelConfig, OutboxMessage outboxMessage) {
+    @Override
+    public void onSend(ChannelConfig channelConfig, ChatContactDoc chatContactDoc, OutboxMessage outboxMessage) {
 	try {
-	    template(channelConfig, outboxMessage);
+	    template(channelConfig, chatContactDoc, outboxMessage);
 	    instaClient.send(channelConfig, outboxMessage);
 	    outboxMessage.updateStatus(Message.Status.SENT);
 	} catch (Exception e) {
@@ -68,7 +68,8 @@ public class InstagramConnector extends AbstractConnector<InstagramConfig, Insta
 
     @Override
     public boolean initSession(ChatSessionDoc session, InboxMessage inboxMessage) {
-	InstagramUserProfile profile = instaClient.getUserProfile(inboxMessage.contact());
+	ChannelConfig config = getChannelConfig(inboxMessage);
+	InstagramUserProfile profile = instaClient.getUserProfile(config,inboxMessage.contact());
 	ChatContactQuery contactQuery = messageContext.getChatContactQuery();
 	contactQuery.setProfilePic(profile.getProfilePic());
 	contactQuery.setName(profile.getName());
@@ -82,7 +83,12 @@ public class InstagramConnector extends AbstractConnector<InstagramConfig, Insta
 	event.contact().setChannelType(CHANNEL_TYPE.INSTAGRAM);
 	event.setFrom(id);
 	event.contact().setCsid(id);
-	event.setMessage(m.getMessage().getText());
+	if (ArgUtil.is(m.getPostBack()) && ArgUtil.is(m.getPostBack().getTitle())) {
+		event.setMessage(m.getPostBack().getTitle());
+	}else {
+		event.setMessage(m.getMessage().getText());		
+	}
+	
 	event.to().add(m.getRecipient().get("id"));
 	event.contact().type(ContactType.INSTAGRAM);
 	event.contact().setLane(lane);
@@ -103,8 +109,14 @@ public class InstagramConnector extends AbstractConnector<InstagramConfig, Insta
 	inboxMessage.to().add(m.getRecipient().get("id"));
 
 	// Extract Message Details
-	inboxMessage.setMessageIdExt(m.getMessage().getMid());
-	inboxMessage.setMessage(m.getMessage().getText());
+	if (ArgUtil.is(m.getPostBack()) && ArgUtil.is(m.getPostBack().getTitle())) {
+		inboxMessage.setMessageIdExt(m.getPostBack().getMid());
+		inboxMessage.setMessage(m.getPostBack().getTitle());
+	}else {
+		inboxMessage.setMessageIdExt(m.getMessage().getMid());
+		inboxMessage.setMessage(m.getMessage().getText());
+	}
+	
 
 	return inboxMessage;
     }
@@ -123,11 +135,12 @@ public class InstagramConnector extends AbstractConnector<InstagramConfig, Insta
 
     @Override
     public MessageBoxEvent inboundMessageBoxEvent(ChannelConfig channelConfig, MapModel requestMap,
-	    MessageBoxEvent messageBoxEvent) {
-    	InstagramHookRequest request = requestMap.as(InstagramHookRequest.class);
+	    MessageBoxEvent messageBoxEvent) {    	
+	InstagramHookRequest request = requestMap.as(InstagramHookRequest.class);
+	requestMap.toJson();
 	request.getEntry().forEach(pageEntry -> {
 	    pageEntry.getMessaging().forEach(m -> {
-		if (ArgUtil.is(m.getMessage())) {
+		if (ArgUtil.is(m.getMessage())  || ArgUtil.is(m.getPostBack())) {
 		    messageBoxEvent.addInboxMessage(toInboxMessage(m, channelConfig));
 		} else if (ArgUtil.is(m.getRead())) {
 		    messageBoxEvent.addMessageReport(toMessageReport(m, channelConfig));

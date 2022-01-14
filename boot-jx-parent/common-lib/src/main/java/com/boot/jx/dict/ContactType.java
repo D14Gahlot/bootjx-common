@@ -32,6 +32,7 @@ public enum ContactType {
 
 	WEBSITE("web"), TWITTER("tw", "Twitter"),
 	INSTAGRAM("ig","Instagram"),
+	
 	// Default Null Value
 	DUMMY("dummy"), EMPTY("");
 

@@ -375,8 +375,18 @@ public class RestService {
 	    return this;
 	}
 
+	private Ajax delete(HttpEntity<Object> requestEntity) {
+	    this.method = HttpMethod.DELETE;
+	    this.requestEntity = requestEntity;
+	    return this;
+	}
+
 	public Ajax get() {
 	    return this.get(new HttpEntity<Object>(null, processdHeaders()));
+	}
+
+	public Ajax delete() {
+	    return this.delete(new HttpEntity<Object>(null, processdHeaders()));
 	}
 
 	public Ajax call(RestMethod method) {
@@ -416,14 +426,29 @@ public class RestService {
 	    });
 	}
 
-	public MapModel asMapModel() {
-	    return MapModel.from(this.as(new ParameterizedTypeReference<Map<String, Object>>() {
-	    }));
+	public List<Object> asList() {
+	    return this.as(new ParameterizedTypeReference<List<Object>>() {
+	    });
 	}
 
 	public <T> Map<String, T> asMap(Class<T> valueType) {
 	    return this.as(new ParameterizedTypeReference<Map<String, T>>() {
 	    });
+	}
+
+	public <T> List<T> asList(Class<T> valueType) {
+	    return this.as(new ParameterizedTypeReference<List<T>>() {
+	    });
+	}
+
+	public MapModel asMapModel() {
+	    return MapModel.from(this.as(new ParameterizedTypeReference<Map<String, Object>>() {
+	    }));
+	}
+
+	public MapModel asListModel() {
+	    return MapModel.from(this.as(new ParameterizedTypeReference<List<Object>>() {
+	    }));
 	}
 
 	public ApiResponse<Object, Object> asApiResponse() {

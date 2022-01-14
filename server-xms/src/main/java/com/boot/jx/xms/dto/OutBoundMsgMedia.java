@@ -10,7 +10,7 @@ public class OutBoundMsgMedia implements Serializable {
 
     private static final long serialVersionUID = -654441367316876851L;
 
-    @ApiMockModelProperty(example = "5do9756xbso34578", required = false, value = "Media Id",
+    @ApiMockModelProperty(example = "5do9756xbso34578", required = false, value = "Media Id", hidden = true,
 	    notes = "Required when type is audio, document, image, sticker, or video and you are not using a link."
 		    + "\n The media object ID. This is returned when the media is successfully uploaded to the "
 		    + "WhatsApp Business API client via the media endpoint.\n"

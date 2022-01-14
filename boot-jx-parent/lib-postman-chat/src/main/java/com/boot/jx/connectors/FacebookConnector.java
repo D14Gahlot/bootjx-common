@@ -3,17 +3,15 @@ package com.boot.jx.connectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Component;
 
 import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorMapping;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.postman.PMConstants.CHANNEL_TYPE;
-import com.boot.jx.postman.client.TmplClient;
+import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.fb.FacebooClient;
-import com.boot.jx.postman.fb.FacebookConfigDetails;
 import com.boot.jx.postman.fb.FacebookHookRequest;
 import com.boot.jx.postman.fb.FacebookMessaging;
 import com.boot.jx.postman.fb.FacebookUserProfile;
@@ -26,6 +24,7 @@ import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.postman.plugin.ChannelPluginProvider;
 import com.boot.jx.postman.plugin.FacebookPlugin;
+import com.boot.jx.postman.plugin.FacebookPlugin.FacebookConfigDetails;
 import com.boot.jx.postman.query.ChatContactQuery;
 import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
@@ -44,13 +43,13 @@ public class FacebookConnector extends AbstractConnector<FacebookConfigDetails, 
     private FacebooClient facebooClient;
 
     @Override
-    public void registerWebHook(ChannelConfig channelConfig) {
+    public void onChannelUpdate(ChannelConfig channelConfig) {
 	ApiResponseUtil.addWarning("Set webhook URL manually from Facebook Developer Portal.");
     }
 
-    public void send(ChannelConfig channelConfig, OutboxMessage outboxMessage) {
+    public void onSend(ChannelConfig channelConfig, ChatContactDoc chatContactDoc, OutboxMessage outboxMessage) {
 	try {
-	    template(channelConfig, outboxMessage);
+	    template(channelConfig, chatContactDoc, outboxMessage);
 	    facebooClient.send(channelConfig, outboxMessage);
 	    outboxMessage.updateStatus(Message.Status.SENT);
 	} catch (Exception e) {
@@ -68,7 +67,8 @@ public class FacebookConnector extends AbstractConnector<FacebookConfigDetails, 
 
     @Override
     public boolean initSession(ChatSessionDoc session, InboxMessage inboxMessage) {
-	FacebookUserProfile profile = facebooClient.getUserProfile(inboxMessage.contact());
+	ChannelConfig config = getChannelConfig(inboxMessage);
+	FacebookUserProfile profile = facebooClient.getUserProfile(config, inboxMessage.contact());
 	ChatContactQuery contactQuery = messageContext.getChatContactQuery();
 	contactQuery.setProfilePic(profile.getProfilePic());
 	contactQuery.setName(profile.getFirstName() + " " + profile.getLastName());
@@ -105,7 +105,13 @@ public class FacebookConnector extends AbstractConnector<FacebookConfigDetails, 
 
 	// Extract Message Details
 	inboxMessage.setMessageIdExt(m.getMessage().getMid());
-	inboxMessage.setMessage(m.getMessage().getText());
+	if (ArgUtil.is(m.getPostBack()) && ArgUtil.is(m.getPostBack().getTitle())) {
+		inboxMessage.setMessageIdExt(m.getPostBack().getMid());
+		inboxMessage.setMessage(m.getPostBack().getTitle());
+	}else {
+		inboxMessage.setMessageIdExt(m.getMessage().getMid());
+		inboxMessage.setMessage(m.getMessage().getText());
+	}
 
 	return inboxMessage;
     }

@@ -1,0 +1,91 @@
+package com.boot.jx.postman;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import com.boot.jx.chat.ChatClient;
+import com.boot.jx.common.config.ConfigConstants;
+import com.boot.jx.inbound.InBound.InBoundHandler;
+import com.boot.jx.postman.PMConstants.MESSAGE_FORMAT_TYPE;
+import com.boot.jx.postman.PMEnvironment.PMConfigurationObject;
+import com.boot.jx.postman.model.Attachment;
+import com.boot.jx.postman.model.InboxMessage;
+import com.boot.jx.postman.model.ext.CommonMsgText;
+import com.boot.jx.postman.model.ext.InBoundContact;
+import com.boot.jx.postman.model.ext.InBoundMsg;
+import com.boot.jx.postman.model.ext.InBoundMsgMedia;
+import com.boot.jx.postman.model.ext.InBoundWrapper;
+import com.boot.jx.rest.RestService;
+import com.boot.utils.ArgUtil;
+import com.boot.utils.CollectionUtil;
+
+@Component
+public class PostManInBoundHandler implements InBoundHandler {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(PostManInBoundHandler.class);
+
+    @Autowired
+    private ChatClient chatClient;
+
+    @Autowired
+    public PMEnvironment pmEnvironment;
+
+    @Autowired
+    private RestService restService;
+
+    @Override
+    public void handle(InboxMessage inboxMessage) {
+	PMConfigurationObject webhookEntry = pmEnvironment.keyEntry(ConfigConstants.KEY.POSTMAN_CHAT_INBOUND_WEBHOOK);
+	if (webhookEntry.exists()) {
+	    LOGGER.debug("Forwarding InboxMessage to Xternal Service ");
+	    try {
+
+		InBoundMsg msg = new InBoundMsg();
+		msg.messageId = inboxMessage.getMessageId();
+		msg.messageIdExt = inboxMessage.getMessageIdExt();
+		msg.contactFrom = inboxMessage.contact().getPhone();
+		msg.contactId = inboxMessage.contact().getContactId();
+		msg.timestamp = inboxMessage.getTimestamp();
+		msg.tags = inboxMessage.getTags();
+		msg.input = inboxMessage.form();
+
+		if (ArgUtil.is(inboxMessage.getAttachments())) {
+		    Attachment atth = inboxMessage.attachments().get(0);
+		    InBoundMsgMedia media = InBoundMsgMedia.from(atth);
+		    if (MESSAGE_FORMAT_TYPE.IMAGE.equals(inboxMessage.getFormatType())) {
+			msg.image = media;
+		    } else if (MESSAGE_FORMAT_TYPE.STICKER.equals(inboxMessage.getFormatType())) {
+			msg.sticker = media;
+		    } else if (MESSAGE_FORMAT_TYPE.VIDEO.equals(inboxMessage.getFormatType())) {
+			msg.video = media;
+		    } else if (MESSAGE_FORMAT_TYPE.AUDIO.equals(inboxMessage.getFormatType())) {
+			msg.audio = media;
+		    } else if (MESSAGE_FORMAT_TYPE.VOICE.equals(inboxMessage.getFormatType())) {
+			msg.voice = media;
+		    } else {
+			msg.document = media;
+		    }
+		} else {
+		    msg.type = MESSAGE_FORMAT_TYPE.TEXT;
+		    msg.text = new CommonMsgText();
+		    msg.text.type = inboxMessage.getFormatSubType();
+		    msg.text.body = inboxMessage.getMessage();
+		}
+
+		InBoundWrapper wrap = new InBoundWrapper();
+		wrap.contacts = CollectionUtil.asList(InBoundContact.from(inboxMessage.contact()));
+		wrap.messages = CollectionUtil.asList(msg);
+		restService.ajax(webhookEntry.asString()).post(wrap).asMapModel();
+	    } catch (Exception e) {
+		throw new PostManException(e);
+	    }
+
+	} else {
+	    chatClient.forward(inboxMessage);
+	}
+
+    }
+
+}

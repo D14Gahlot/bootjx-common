@@ -26,6 +26,7 @@ import com.boot.jx.postman.PMEnvironment.PMConfigurationObject;
 import com.boot.jx.postman.doc.PMConfigurationDoc;
 import com.boot.jx.postman.doc.config.ChannelConfigDoc;
 import com.boot.jx.postman.doc.config.ClientKeyConfigDoc;
+import com.boot.jx.postman.doc.config.CompanyVarsConfigDoc;
 import com.boot.jx.postman.doc.config.PrefsConfigDoc;
 import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.postman.plugin.ChannelPluginProvider;
@@ -59,7 +60,7 @@ public class ConfigManager {
     private ConnectorHandlerFactory connectorHandlerFactory;
 
     @Autowired
-    PMClientConfig pmClientConfig;
+    private PMClientConfig pmClientConfig;
 
     public List<Map<String, Object>> getSetupConfigs() {
 	List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
@@ -81,7 +82,8 @@ public class ConfigManager {
 
 		break;
 	    default:
-		list.add(MapBuilder.map().put("meta", meta).put("config", pmEnvironment.keyEntry(meta.getKey())).toMap());
+		list.add(MapBuilder.map().put("meta", meta).put("config", pmEnvironment.keyEntry(meta.getKey()))
+			.toMap());
 		break;
 	    }
 	}
@@ -177,16 +179,10 @@ public class ConfigManager {
 	this.refresh();
     }
 
-    @Deprecated
-    public void saveConfigs(PMConfiguration config) {
-	pmEnvironment.config(config);
-	this.refresh();
-    }
-
     public void save(ChannelConfig config) {
 	pmEnvironment.config(config);
 	this.refresh();
-	connectorHandlerFactory.registerWebHook(config.getChannelType(), config.getLane());
+	connectorHandlerFactory.onChannelUpdate(config.getChannelType(), config.getLane());
     }
 
     public ClientKeyConfigDoc save(ClientKeyConfigDoc clientApiKey) {
@@ -198,17 +194,20 @@ public class ConfigManager {
 
     public ClientKeyConfigDoc remove(ClientKeyConfigDoc clientApiKey) {
 	mongoTemplate.remove(clientApiKey);
+	this.refresh();
 	return clientApiKey;
     }
 
-    public void save(AChannelDetails details, boolean disabled) {
-	ChannelPlugin<? extends AChannelDetails> plugin = ChannelPluginProvider.MAP.get(details.getChannelType());
-	if (ArgUtil.is(plugin)) {
-	    ChannelConfig config = new ChannelConfig();
-	    plugin.fromDetails(config, details);
-	    config.disabled(disabled);
-	    save(config);
-	}
+    public CompanyVarsConfigDoc save(CompanyVarsConfigDoc clientApiKey) {
+	configStore.saveCompanyVar(clientApiKey);
+	this.refresh();
+	return clientApiKey;
+    }
+
+    public CompanyVarsConfigDoc remove(CompanyVarsConfigDoc clientApiKey) {
+	mongoTemplate.remove(clientApiKey);
+	this.refresh();
+	return clientApiKey;
     }
 
     public ChannelConfig getChannelConfig(String channelId) {
@@ -228,20 +227,17 @@ public class ConfigManager {
 
     public ChannelConfig saveChannelConfig(String channelType, boolean disabled, Map<String, Object> data) {
 	MapModel map = MapModel.from(data);
-	ChannelPlugin<? extends AChannelDetails> plugin = ChannelPluginProvider.MAP.get(channelType);
+	ChannelPlugin<? extends AChannelDetails> plugin = ChannelPluginProvider.PLUGIN_MAPPING.get(channelType);
 	String channelId = map.getString("channelId");
 	if (ArgUtil.is(data)) {
-	    AChannelDetails configDetails = null;
-	    if (ArgUtil.is(channelId)) {
-		ChannelConfig channelConfig = pmEnvironment.config().channels(channelId);
-		configDetails = plugin.getDetails(channelConfig);
-		plugin.extractChannelDetailsFromMap(configDetails, map, channelType);
-	    } else {
-		configDetails = plugin.getChannelDetailsFromMap(map);
+	    ChannelConfig config = pmEnvironment.config().channels(channelId);
+	    if (config == null) {
+		config = new ChannelConfig();
 	    }
-	    configDetails.setName(map.getString("name", configDetails.getName()));
-	    configDetails.setChannelKey(map.getString("channelKey", configDetails.getChannelKey()));
-	    save(configDetails, disabled);
+	    plugin.importChannelConfigFromMap(config, map, channelType);
+	    config.disabled(disabled);
+	    save(config);
+
 	}
 	return getChannelConfig(channelId);
     }

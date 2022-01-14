@@ -11,6 +11,7 @@ import org.springframework.data.annotation.TypeAlias;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import com.boot.jx.model.CommonTemplate;
 import com.boot.jx.mongo.CommonDocInterfaces.Patchable;
 import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.Message.Status;
@@ -42,9 +43,15 @@ public class MessageDoc implements Serializable, Patchable<MessageDoc> {
     private String type;
     private String template;
     private String templateId;
+    private CommonTemplate hsm;
+
     private String action;
     private String handler;
     private String message;
+
+    private String formatType;
+    private String formatSubType;
+
     private String status;
     private ContactDetailDoc contact;
     private String agent;
@@ -319,5 +326,29 @@ public class MessageDoc implements Serializable, Patchable<MessageDoc> {
 
     public void setReplyId(String replyId) {
 	this.replyId = replyId;
+    }
+
+    public String getFormatType() {
+	return formatType;
+    }
+
+    public void setFormatType(String formatType) {
+	this.formatType = formatType;
+    }
+
+    public String getFormatSubType() {
+	return formatSubType;
+    }
+
+    public void setFormatSubType(String formatSubType) {
+	this.formatSubType = formatSubType;
+    }
+
+    public CommonTemplate getHsm() {
+	return hsm;
+    }
+
+    public void setHsm(CommonTemplate hsm) {
+	this.hsm = hsm;
     }
 }

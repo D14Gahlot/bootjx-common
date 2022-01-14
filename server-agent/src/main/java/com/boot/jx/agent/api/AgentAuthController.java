@@ -8,10 +8,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.web.authentication.WebAuthenticationDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -25,14 +21,14 @@ import com.boot.jx.agent.AgentAuthProvider;
 import com.boot.jx.agent.AgentSessionBean;
 import com.boot.jx.agent.AgentSessionService;
 import com.boot.jx.api.ApiResponse;
+import com.boot.jx.common.config.ConfigConstants;
 import com.boot.jx.common.doc.AgentSessionDoc;
 import com.boot.jx.common.dto.AgentResponseAuthDto;
 import com.boot.jx.common.service.EmpAuthService;
 import com.boot.jx.http.CommonHttpRequest;
-import com.boot.jx.postman.PMConstants.DEFAULT;
 import com.boot.jx.postman.PMEnvironment;
+import com.boot.jx.postman.PMEnvironment.PMConfigurationObject;
 import com.boot.jx.rest.RestService;
-import com.boot.jx.stomp.StompQuery;
 import com.boot.jx.stomp.StompTunnelSessionManager;
 import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
@@ -68,11 +64,23 @@ public class AgentAuthController {
     @Autowired
     private EmpAuthService authService;
 
+    @RequestMapping(value = { "/app/unauthorized", "/app/unauthorized/**" },
+	    method = { RequestMethod.POST, RequestMethod.GET })
+    public String unauthorized(Model model) {
+	model.addAllAttributes(appCommonConfig.appAttributes());
+	model.addAttribute("APP_DEPT", agentSession.getAgentDept());
+	return "app-unauthorized";
+    }
+
     @RequestMapping(value = { "/app/home", "/", "", "/app/**", "/auth/**" },
 	    method = { RequestMethod.POST, RequestMethod.GET })
     public String home(HttpServletRequest request, Model model, @RequestParam(required = false) String domainName,
 	    @RequestParam(required = false) String domainId, @RequestParam(required = false) String domainToken,
 	    @RequestParam(required = false) String domainUser) throws NoSuchAlgorithmException {
+
+	if (pmEnvironment.keyEntry(ConfigConstants.KEY.POSTMAN_CHAT_INBOUND_WEBHOOK).exists()) {
+	    return unauthorized(model);
+	}
 
 	if (ArgUtil.is(domainName) && ArgUtil.is(domainId) && ArgUtil.is(domainToken)) {
 	    AgentResponseAuthDto agent = authService.loginByDomainToken(domainUser, domainName, domainId, domainToken,
@@ -95,15 +103,6 @@ public class AgentAuthController {
 	return "app-agent";
     }
 
-    @RequestMapping(value = "/app/home1", method = { RequestMethod.POST, RequestMethod.GET })
-    public String home2(Model model) {
-	model.addAllAttributes(appCommonConfig.appAttributes());
-
-	model.addAttribute("APP_USER", agentSession.getAgentCode());
-	model.addAttribute("APP_DEPT", agentSession.getAgentDept());
-	return "whatsweb";
-    }
-
     @RequestMapping(value = "/pub/customer/{page}", method = { RequestMethod.POST, RequestMethod.GET })
     public String customertest(Model model, @RequestParam String page) {
 	model.addAllAttributes(appCommonConfig.appAttributes());
@@ -115,6 +114,10 @@ public class AgentAuthController {
 
     @RequestMapping(value = { "/auth/login", "/auth/resetpass" }, method = { RequestMethod.POST, RequestMethod.GET })
     public String login(Model model, HttpServletRequest request, HttpServletResponse httpServletResponse) {
+
+	if (pmEnvironment.keyEntry(ConfigConstants.KEY.POSTMAN_CHAT_INBOUND_WEBHOOK).exists()) {
+	    return unauthorized(model);
+	}
 
 	model.addAllAttributes(appCommonConfig.appAttributes());
 	model.addAttribute("APP_USER", agentSession.getAgentCode());
@@ -215,7 +218,7 @@ public class AgentAuthController {
 	    x.redirectUrl(appConfig.getAppPrefix() + "/app/home");
 	    AgentResponseAuthDto agent = x.getMeta();
 	    if (ArgUtil.is(agent)) {
-		
+
 		sessionService.login(request, agent, password);
 //		UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(
 //			agent.getAgent_code(), password);
@@ -225,7 +228,7 @@ public class AgentAuthController {
 //		sessionService.updateLogin(agent);
 //		stompTunnelSessionManager.registerUser(agent.getAgent_code(), agent.getDept().getDept_code(),
 //			DEFAULT.NO_DEPT, StompQuery.PING_TAG);
-		
+
 		boolean rememberme = ArgUtil.parseAsBoolean(commonHttpRequest.get("rememberme"), false);
 		if (rememberme) {
 		    String xRemSession = CryptoUtil.getEncoder()

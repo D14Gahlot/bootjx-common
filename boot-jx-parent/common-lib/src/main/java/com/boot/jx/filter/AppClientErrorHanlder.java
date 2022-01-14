@@ -48,9 +48,9 @@ public class AppClientErrorHanlder implements ResponseErrorHandler {
 	String apiErrorJson = ArgUtil.parseAsString(response.getHeaders().getFirst(AppConstants.ERROR_HEADER_KEY));
 	AmxApiError apiError = throwError(apiErrorJson, ApiStatusCodes.UNKNOWN);
 
-	if (response.getStatusCode() == HttpStatus.NOT_FOUND) {
-	    throw new ApiHttpNotFoundException(statusCode);
-	}
+//	if (response.getStatusCode() == HttpStatus.NOT_FOUND) {
+//	    throw new ApiHttpNotFoundException(statusCode);
+//	}
 	boolean hasExceptionHeader = !ArgUtil
 		.isEmpty(response.getHeaders().getFirst(AppConstants.EXCEPTION_HEADER_KEY));
 
@@ -66,7 +66,11 @@ public class AppClientErrorHanlder implements ResponseErrorHandler {
 	} else if (response.getStatusCode().series() == HttpStatus.Series.CLIENT_ERROR) {
 	    String body2 = IoUtils.inputstream_to_string(response.getBody());
 	    apiError = throwError(body2, ApiStatusCodes.UNKNOWN_CLIENT_ERROR);
-	    throw new ApiHttpClientException(statusCode, apiError);
+	    if (response.getStatusCode() == HttpStatus.NOT_FOUND) {
+		throw new ApiHttpNotFoundException(statusCode,apiError);
+	    } else {
+		throw new ApiHttpClientException(statusCode, apiError);
+	    }
 	} else if (hasExceptionHeader) {
 	    String body = IoUtils.inputstream_to_string(response.getBody());
 	    apiError = throwError(body, ApiStatusCodes.UNKNOWN);

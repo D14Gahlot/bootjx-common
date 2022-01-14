@@ -8,7 +8,7 @@ import com.boot.jx.postman.PMConfiguration;
 import com.boot.jx.postman.model.ContactMeta;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.model.PushMessage;
-import com.boot.jx.postman.tw.TwitterConfigDetails;
+import com.boot.jx.postman.plugin.TwitterPlugin.TwitterConfigDetails;
 import com.boot.jx.scope.tnt.Tenants;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.JsonUtil;
@@ -22,18 +22,12 @@ public class PushMessageTests { // Noncompliant
 
     public static void main(String[] args) throws ParseException {
 	PMConfiguration config = new PMConfiguration();
-
 	String key = "@$test.s";
-
 	TwitterConfigDetails tw = new TwitterConfigDetails();
 	tw.setHandler(key);
-	config.twitter(tw, false);
 	String json = JsonUtil.toJson(config);
 	System.out.println(json);
-
 	System.out.println(JsonUtil.toJson(JsonUtil.parse(json, PMConfiguration.class)));
-	System.out.println(JsonUtil.toJson(JsonUtil.parse(json, PMConfiguration.class).twitter(key)));
-	System.out.println(JsonUtil.toJson(JsonUtil.parse(json, PMConfiguration.class).twitter(key).getHandler()));
 
     }
 
@@ -96,7 +90,7 @@ public class PushMessageTests { // Noncompliant
 
     private static void everyOne() {
 	PushMessage msg = new PushMessage();
-	msg.setLang(Language.HI.name());
+	msg.hsm().setLang(Language.HI.name());
 	msg.addToEveryone();
 	ContactMeta c = PushMessage.toContact(msg.getTo().get(0));
 	print("everyOne", c);
@@ -104,7 +98,7 @@ public class PushMessageTests { // Noncompliant
 
     private static void everyOne(String lang) {
 	PushMessage msg = new PushMessage();
-	msg.setLang(lang);
+	msg.hsm().setLang(lang);
 	msg.addToTenant(tnt, Language.fromString(lang));
 	ContactMeta c = PushMessage.toContact(msg.getTo().get(0));
 	print("everyOne", c);
@@ -112,7 +106,7 @@ public class PushMessageTests { // Noncompliant
 
     private static void customer() {
 	PushMessage msg = new PushMessage();
-	msg.setLang(Language.HI.toString());
+	msg.hsm().setLang(Language.HI.toString());
 	msg.addToUser(customer);
 	ContactMeta c = PushMessage.toContact(msg.getTo().get(0));
 	print("customer", c);

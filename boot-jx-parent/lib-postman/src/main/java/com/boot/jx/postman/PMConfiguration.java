@@ -10,12 +10,7 @@ import java.util.Map.Entry;
 import com.boot.jx.agent.AgentConfig;
 import com.boot.jx.postman.PMEnvironment.AChannelDetails;
 import com.boot.jx.postman.PMEnvironment.PMConfigurationObject;
-import com.boot.jx.postman.fb.FacebookConfigDetails;
-import com.boot.jx.postman.gupshup.GupShupConfigDetails;
 import com.boot.jx.postman.plugin.ChannelConfig;
-import com.boot.jx.postman.tg.TelegramConfigDetails;
-import com.boot.jx.postman.tw.TwitterConfigDetails;
-import com.boot.jx.postman.ig.InstagramConfig;
 import com.boot.model.SafeKeyHashMap;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.Random;
@@ -24,16 +19,11 @@ public class PMConfiguration implements Serializable {
 
     private static final long serialVersionUID = -5432956433673368768L;
 
-    private Map<String, FacebookConfigDetails> facebook;
-    private Map<String, TwitterConfigDetails> twitter;
-    private Map<String, TelegramConfigDetails> telegram;
-    private Map<String, GupShupConfigDetails> gupshup;
-    private Map<String,InstagramConfig> instagram;
-
     private Map<String, ChannelConfig> channels;
     private Map<String, ClientApiKey> clientApiKeys;
 
     private Map<String, PMConfigurationObject> prefs;
+    private Map<String, Object> companyVars;
 
     private AgentConfig agent;
     private String accountKey;
@@ -65,7 +55,7 @@ public class PMConfiguration implements Serializable {
 	    this.facebook().put(config.getPageId(), config);
 	return this;
     }
-    
+
 
     //INSTAGRAM
     public SafeKeyHashMap<InstagramConfig> instagram() {
@@ -197,6 +187,9 @@ public class PMConfiguration implements Serializable {
     }
 
     public ChannelConfig channels(String channelId) {
+	if (!ArgUtil.is(channelId)) {
+	    return null;
+	}
 	return channels().get(channelId);
     }
 
@@ -272,33 +265,6 @@ public class PMConfiguration implements Serializable {
 	return this;
     }
 
-    public List<AChannelDetails> connectors() {
-	List<AChannelDetails> list = new ArrayList<AChannelDetails>();
-	if (this.facebook != null) {
-	    for (Entry<String, FacebookConfigDetails> configEntry : this.facebook.entrySet()) {
-		list.add(configEntry.getValue());
-	    }
-	}
-	if (this.gupshup != null) {
-	    for (Entry<String, GupShupConfigDetails> configEntry : this.gupshup.entrySet()) {
-		list.add(configEntry.getValue());
-	    }
-	}
-
-	if (this.twitter != null) {
-	    for (Entry<String, TwitterConfigDetails> configEntry : this.twitter.entrySet()) {
-		list.add(configEntry.getValue());
-	    }
-	}
-
-	if (this.telegram != null) {
-	    for (Entry<String, TelegramConfigDetails> configEntry : this.telegram.entrySet()) {
-		list.add(configEntry.getValue());
-	    }
-	}
-	return list;
-    }
-
     public List<AChannelDetails> listChannels() {
 	List<AChannelDetails> list = new ArrayList<AChannelDetails>();
 	for (Entry<String, ChannelConfig> aChannelDetails : this.channels().entrySet()) {
@@ -316,6 +282,13 @@ public class PMConfiguration implements Serializable {
 
     public void setAccountKey(String accountKey) {
 	this.accountKey = accountKey;
+    }
+
+    public SafeKeyHashMap<Object> global() {
+	if (ArgUtil.isEmpty(companyVars)) {
+	    companyVars = new HashMap<String, Object>();
+	}
+	return new SafeKeyHashMap<Object>(companyVars);
     }
 
 }

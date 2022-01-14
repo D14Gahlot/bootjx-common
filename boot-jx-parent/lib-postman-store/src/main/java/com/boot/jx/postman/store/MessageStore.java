@@ -6,6 +6,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
@@ -66,6 +68,9 @@ public class MessageStore extends CommonDocStore {
 	doc.setContactId(PostManUtil.createContactId(inboxMessage));
 	doc.setType("I");
 	doc.setTimestamp(System.currentTimeMillis());
+
+	doc.setFormatType(inboxMessage.getFormatType());
+	doc.setFormatSubType(inboxMessage.getFormatSubType());
 
 	ContactDetailDoc contact = new ContactDetailDoc();
 	contact.setPhone(inboxMessage.getFrom());
@@ -161,7 +166,9 @@ public class MessageStore extends CommonDocStore {
     private MessageDoc updateMessageDoc(OutboxMessage outMessage, MessageDoc doc) {
 	doc.setAgent(outMessage.session().getAgent());
 	// if (ArgUtil.is(outMessage.getTemplate())) {
-	doc.setTemplate(outMessage.getTemplate());
+	doc.setTemplate(outMessage.templateCode());
+	doc.setTemplateId(outMessage.templateId());
+	doc.setHsm(outMessage.getHsm());
 	doc.setModel(outMessage.getModel());
 	// } else {
 	doc.setMessage(outMessage.getMessage());
@@ -246,14 +253,16 @@ public class MessageStore extends CommonDocStore {
 
     public List<MessageDoc> findBySessionId(String sessionId, String contactType) {
 	Query query2 = new Query();
-	query2.addCriteria(Criteria.where("sessionId").is(sessionId));
+	query2.addCriteria(Criteria.where("sessionId").is(sessionId))
+	.with(new Sort(Direction.ASC, "timestamp"));
 	List<MessageDoc> messages = mongoTemplate.find(query2, MessageDoc.class, getCollectionName(contactType));
 	return messages;
     }
 
     public List<MessageDoc> findByBulkSessionId(String bulkSessionId, ContactType contactType) {
 	Query query2 = new Query();
-	query2.addCriteria(Criteria.where("bulkSessionId").is(bulkSessionId));
+	query2.addCriteria(Criteria.where("bulkSessionId").is(bulkSessionId))
+		.with(new Sort(Direction.ASC, "timestamp"));
 	List<MessageDoc> messages = mongoTemplate.find(query2, MessageDoc.class, getCollectionName(contactType));
 	return messages;
     }

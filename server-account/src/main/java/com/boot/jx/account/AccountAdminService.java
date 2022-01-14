@@ -123,6 +123,16 @@ public class AccountAdminService implements LogoutHandler {
 				accountDoc.getMeta().getEmailVerificationCode(), accountDoc.getId()))
 		.put("contactName", accountDoc.getContact().getName())));
     }
+    
+    public void sendMailToSalesTeam(BusinessUserDoc accountDoc, String emailTemplate) {
+    	postManClient.send(new MessageBox().push(new Email().to("sales@mehery.com")
+    		.template(emailTemplate).put("logo", pmEnvironment.keyEntry("mry.prop.logo.bg-x-icon").asString())
+    		.put("website", pmEnvironment.keyEntry("mry.prop.service.website").asString())
+    		.put("service", pmEnvironment.keyEntry("mry.prop.service.name").asString())
+    		.put("servicedomain", pmEnvironment.keyEntry("mry.prop.service.domain").asString())
+    	
+    		.put("contactName", accountDoc.getContact().getName())));
+        }
 
     public static Authentication getAuthentication() {
 	Authentication auth = SecurityContextHolder.getContext().getAuthentication();

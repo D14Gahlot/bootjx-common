@@ -1,7 +1,6 @@
 package com.amx.tests;
 
 import java.net.URL;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -12,7 +11,6 @@ import com.boot.jx.postman.wa360.WA360Template;
 import com.boot.model.MapModel;
 import com.boot.utils.FileUtil;
 import com.boot.utils.JsonUtil;
-import com.fasterxml.jackson.core.type.TypeReference;
 
 public class JsonPathTests {
 

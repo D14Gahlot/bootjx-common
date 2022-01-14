@@ -9,7 +9,6 @@ import java.util.Map.Entry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Component;
 
@@ -18,10 +17,12 @@ import com.boot.jx.dict.ContactType;
 import com.boot.jx.model.CommonFile;
 import com.boot.jx.postman.PostManException;
 import com.boot.jx.postman.PostmanPackages.ICommonTmplPackage;
+import com.boot.jx.postman.model.Message;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.model.PostManFile;
 import com.boot.jx.postman.model.TmplElement;
 import com.boot.jx.rest.RestService;
+import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
 
@@ -40,15 +41,8 @@ public class TmplClient {
     @Autowired
     private PostManClient postManClient;
 
-    @Value("${app.tmpl.local}")
-    private boolean isTmplLocal;
-
     @Autowired(required = false)
     private ICommonTmplPackage iCommonTmplPackage;
-
-    public String process(String templateContent, Object model) {
-	return iCommonTmplPackage.process(templateContent, model);
-    }
 
     public ApiResponse<CommonFile, Object> process(CommonFile file, ContactType contactType) throws PostManException {
 	if (ArgUtil.is(iCommonTmplPackage)) {
@@ -63,12 +57,11 @@ public class TmplClient {
 
     public OutboxMessage process(OutboxMessage outboxMessage) {
 	CommonFile file = new PostManFile();
-	file.setModel(outboxMessage.getModel());
-	file.setTemplate(outboxMessage.getTemplate());
-	file.setTemplateId(outboxMessage.getTemplateId());
-	file.setLang(outboxMessage.getLang());
 
+	file.setModel(outboxMessage.getModel());
+	file.setTemplate(outboxMessage.getHsm());
 	file = this.process(file, outboxMessage.contact().type()).getResult();
+
 	outboxMessage.setMessage(file.getContent());
 
 	if (!ArgUtil.is(outboxMessage.getSubject())) {
@@ -78,6 +71,15 @@ public class TmplClient {
 	Map<String, Object> options = new HashMap<String, Object>();
 	List<TmplElement> buttons = new ArrayList<TmplElement>();
 	List<TmplElement> inputs = new ArrayList<TmplElement>();
+
+	MapModel optionsModel = MapModel.from(file.options());
+	List<Map<String, Object>> buttonsModel = optionsModel.keyEntry("buttons").asListOfMap();
+
+	for (Map<String, Object> map : buttonsModel) {
+	    MapModel buttonMapModel = MapModel.from(map);
+	    buttons.add(new TmplElement().name(buttonMapModel.getString("key")).label(buttonMapModel.getString("label"))
+		    .type(buttonMapModel.getString("type")));
+	}
 
 	for (Entry<String, Object> entry : file.getOptions().entrySet()) {
 	    if (entry.getKey().indexOf("form-input-") == 0) {

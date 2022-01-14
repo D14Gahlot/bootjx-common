@@ -11,6 +11,7 @@ public class InstagramMessaging implements Serializable {
     private Map<String, String> recipient;
     private Long timestamp;
     private InstagramMessage message;
+    private InstagramPostback postBack;
     private Map<String, Object> read;
 
     public Map<String, String> getSender() {
@@ -38,11 +39,19 @@ public class InstagramMessaging implements Serializable {
     }
 
     public InstagramMessage getMessage() {
-	return message;
+    	return message;
     }
 
     public void setMessage(InstagramMessage message) {
 	this.message = message;
+    }
+    
+    public InstagramPostback getPostBack() {
+    	return postBack;
+    }
+
+    public void setPostback(InstagramPostback postBack) {
+    	this.postBack = postBack;
     }
 
     public Map<String, Object> getRead() {
@@ -57,6 +66,14 @@ public class InstagramMessaging implements Serializable {
 	if (this.read == null) {
 	    return 0L;
 	}
-	return ArgUtil.parseAsLong(this.read.get("watermark"));
+	if (ArgUtil.is(read.get("watermark"))) {
+		return ArgUtil.parseAsLong(this.read.get("watermark"));
+	}
+	return 0L;
+    }
+    
+    
+    public boolean isValidCustomerMessage() {
+    	return (ArgUtil.is(this.message) && !this.message.isIs_echo());
     }
 }

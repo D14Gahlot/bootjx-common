@@ -15,78 +15,65 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class OutboxMessage extends Message<OutboxMessage> implements WAMessageOptions, IMessage {
 
-	private static final long serialVersionUID = 3115992767625612005L;
+    private static final long serialVersionUID = 3115992767625612005L;
 
-	public static enum Channel implements IChannel {
-		TWILIO, APIWHA, DEFAULT, GUPSHUP, DUMMY
+    private BigDecimal queue;
+    private MessageSession session;
+    private List<String> logs;
+
+    public OutboxMessage(ContactType contactType) {
+	super(contactType);
+    }
+
+    public OutboxMessage() {
+	super();
+    }
+
+    public BigDecimal getQueue() {
+	return queue;
+    }
+
+    public void setQueue(BigDecimal queue) {
+	this.queue = queue;
+    }
+
+    public MessageSession getSession() {
+	return session;
+    }
+
+    public void setSession(MessageSession session) {
+	this.session = session;
+    }
+
+    @Override
+    public MessageSession session() {
+	if (session == null) {
+	    this.session = new MessageSession();
 	}
+	return this.session;
+    }
 
-	private BigDecimal queue;
-	private MessageSession session;
-	private List<String> logs;
+    public List<String> getLogs() {
+	return logs;
+    }
 
-	public OutboxMessage(ContactType contactType) {
-		super(contactType);
+    public void setLogs(List<String> logs) {
+	this.logs = logs;
+    }
+
+    public List<String> logs() {
+	if (this.logs == null) {
+	    this.logs = new ArrayList<String>();
 	}
+	return this.logs;
+    }
 
-	public OutboxMessage() {
-		super();
-	}
+    public String getCsid() {
+	return this.contact().getCsid();
+    }
 
-	public BigDecimal getQueue() {
-		return queue;
-	}
-
-	public void setQueue(BigDecimal queue) {
-		this.queue = queue;
-	}
-
-	public MessageSession getSession() {
-		return session;
-	}
-
-	public void setSession(MessageSession session) {
-		this.session = session;
-	}
-
-	@Override
-	public MessageSession session() {
-		if (session == null) {
-			this.session = new MessageSession();
-		}
-		return this.session;
-	}
-
-	public List<String> getLogs() {
-		return logs;
-	}
-
-	public void setLogs(List<String> logs) {
-		this.logs = logs;
-	}
-
-	public List<String> logs() {
-		if (this.logs == null) {
-			this.logs = new ArrayList<String>();
-		}
-		return this.logs;
-	}
-
-	public String getCsid() {
-		return this.contact().getCsid();
-	}
-
-	public void setCsid(String csid) {
-		this.contact().setCsid(csid);
-	}
-
-	@Override
-	@JsonIgnore
-	public String forContact() {
-		if (ArgUtil.is(this.getCsid())) {
-			return this.getCsid();
-		}
-		return CollectionUtil.getOne(this.to);
-	}
+    public void setCsid(String csid) {
+	this.contact().setCsid(csid);
+    }
 
 }

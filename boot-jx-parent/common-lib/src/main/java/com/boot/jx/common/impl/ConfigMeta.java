@@ -3,7 +3,6 @@ package com.boot.jx.common.impl;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 public class ConfigMeta implements Serializable {
 
@@ -90,6 +89,8 @@ public class ConfigMeta implements Serializable {
     private Object defaultValue;
     private boolean optional;
     private boolean readonly;
+    private boolean createonly;
+    private boolean writeonly;
     private boolean hidden;
     private boolean deprecated;
 
@@ -98,6 +99,7 @@ public class ConfigMeta implements Serializable {
     private CONVERT_TYPE converterType;
 
     private List<ConfigOption> options;
+    private String source;
 
     public ConfigMeta() {
     }
@@ -132,16 +134,22 @@ public class ConfigMeta implements Serializable {
     }
 
     public List<ConfigOption> options() {
+	if (this.inputType == null) {
+	    this.inputType = OPTIONS_TYPE.OPTIONS;
+	}
 	if (this.options == null) {
 	    this.options = new ArrayList<ConfigOption>();
 	}
 	return this.options;
     }
 
+    public ConfigMeta options(String src) {
+	this.options = this.options();
+	this.source = src;
+	return this;
+    }
+
     public ConfigMeta options(ConfigOption... options) {
-	if (this.inputType == null) {
-	    this.inputType = OPTIONS_TYPE.OPTIONS;
-	}
 	this.options = this.options();
 	for (ConfigOption configOption : options) {
 	    this.options.add(configOption);
@@ -150,9 +158,6 @@ public class ConfigMeta implements Serializable {
     }
 
     public ConfigMeta optionValues(Object... optionValues) {
-	if (this.inputType == null) {
-	    this.inputType = OPTIONS_TYPE.OPTIONS;
-	}
 	this.options = this.options();
 	for (Object optionValue : optionValues) {
 	    this.options.add(new ConfigOption(optionValue));
@@ -160,8 +165,17 @@ public class ConfigMeta implements Serializable {
 	return this;
     }
 
-    public ConfigMeta optionValues(Set<Object> options) {
-	return this.optionValues(options.toArray());
+    public String getSource() {
+	return source;
+    }
+
+    public void setSource(String src) {
+	this.source = src;
+    }
+
+    public ConfigMeta source(String src) {
+	this.source = src;
+	return this;
     }
 
     public ConfigMeta optionsOnOff() {
@@ -299,4 +313,29 @@ public class ConfigMeta implements Serializable {
 	return this;
     }
 
+    public ConfigMeta createonly() {
+	this.createonly = true;
+	return this;
+    }
+
+    public boolean isCreateonly() {
+	return createonly;
+    }
+
+    public void setCreateonly(boolean createonly) {
+	this.createonly = createonly;
+    }
+
+    public boolean isWriteonly() {
+	return writeonly;
+    }
+
+    public void setWriteonly(boolean writeonly) {
+	this.writeonly = writeonly;
+    }
+
+    public ConfigMeta writeonly() {
+	this.writeonly = true;
+	return this;
+    }
 }

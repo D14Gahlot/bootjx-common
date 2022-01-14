@@ -19,7 +19,12 @@ import com.boot.jx.cache.CacheBox;
 import com.boot.jx.chat.ChatClient;
 import com.boot.jx.chat.ChatService;
 import com.boot.jx.def.ICacheBox;
+import com.boot.jx.inbound.InBound.InBoundFilter;
+import com.boot.jx.inbound.InBound.InBoundHandler;
+import com.boot.jx.inbound.InBound.InBoundProcessor;
 import com.boot.jx.postman.PMClientConfig;
+import com.boot.jx.postman.PMEnvironment;
+import com.boot.jx.postman.PMEnvironment.PMConfigurationObject;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.ErrorObject;
 import com.boot.jx.postman.doc.MessageDoc;
@@ -40,10 +45,13 @@ public class InBoundService {
     public static final Pattern UNPROXY = Pattern.compile("\\/unproxy\\ ([a-zA-Z0-9_\\-]+)$");
 
     @Autowired(required = false)
-    private InBoundHandler inBoundHandler;
+    private InBoundProcessor inBoundProcessor;
 
     @Autowired(required = false)
     private InBoundFilter inBoundFilter;
+
+    @Autowired(required = false)
+    private InBoundHandler inBoundHandler;
 
     @Autowired
     private BotEngine botEngine;
@@ -69,6 +77,9 @@ public class InBoundService {
     @Autowired
     private MessageContext messageContext;
 
+    @Autowired
+    private PMEnvironment pmEnvironment;
+
     @Autowired(required = false)
     private RedissonClient redisson;
     private CacheBox<String> proxyManager;
@@ -93,8 +104,10 @@ public class InBoundService {
 
     public InboxMessage invokeMethods(InboxMessage inboxMessageOriginal) {
 
-	if (AppContextUtil.getTenant().equals("app") && ArgUtil.is(inboxMessageOriginal.getMessage())
-		&& ArgUtil.is(redisson)) {
+	PMConfigurationObject proxyConfig = pmEnvironment.keyEntry("mry.proxy.enabled");
+
+	if ((AppContextUtil.getTenant().equals("app") || proxyConfig.asBoolean())
+		&& ArgUtil.is(inboxMessageOriginal.getMessage()) && ArgUtil.is(redisson)) {
 	    String contactId = PostManUtil.createContactId(inboxMessageOriginal.contact());
 	    String proxy = null;
 
@@ -118,7 +131,6 @@ public class InBoundService {
 		AppContextUtil.getTraceId(true, true);
 		AppContextUtil.resetTraceTime();
 		AppContextUtil.init();
-
 	    }
 
 	}
@@ -162,15 +174,18 @@ public class InBoundService {
 	}
 
 	if (ArgUtil.isEmpty(inBoundFilter) || inBoundFilter.onFilter(inboxMessageOriginal)) {
-	    if (ArgUtil.is(inBoundHandler)) {
-		inBoundHandler.onHandle(inboxMessageOriginal);
+	    if (ArgUtil.is(inBoundProcessor)) {
+		inBoundProcessor.process(inboxMessageOriginal);
 	    }
-
-	    if (agentService.onMessageSupported(inboxMessageOriginal)) {
-		agentService.onMessage(inboxMessageOriginal);
-	    } else if (botEngine.isChatBotDefined()) {
+	    if (chatClientConfig.isLocalDummyBotEnabled()) {
 		botEngine.invokeMethodsAsync(inboxMessageOriginal);
-	    } else {
+	    } else if (ArgUtil.is(inBoundHandler)) {
+		inBoundHandler.handle(inboxMessageOriginal);
+	    } else if (agentService.onMessageSupported(inboxMessageOriginal)) { // TODO:-- TO be removed
+		agentService.onMessage(inboxMessageOriginal);
+	    } else if (botEngine.isChatBotDefined()) { // TODO:-- TO be removed
+		botEngine.invokeMethodsAsync(inboxMessageOriginal);
+	    } else { // TODO:-- TO be removed
 		chatClient.forward(inboxMessageOriginal);
 	    }
 	}

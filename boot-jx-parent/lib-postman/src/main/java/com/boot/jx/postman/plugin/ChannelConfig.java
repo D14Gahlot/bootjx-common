@@ -1,15 +1,13 @@
 package com.boot.jx.postman.plugin;
 
 import com.boot.jx.postman.PMEnvironment.AChannelConfig;
-import com.boot.jx.postman.PMEnvironment.AChannelDetails;
-import com.boot.jx.postman.fb.FacebookConfigDetails;
-import com.boot.jx.postman.gupshup.GupShupConfigDetails;
-import com.boot.jx.postman.ig.InstagramConfig;
+import com.boot.jx.postman.plugin.FacebookPlugin.FacebookConfigDetails;
+import com.boot.jx.postman.plugin.InstagramPlugin.InstagramConfig;
+import com.boot.jx.postman.plugin.TelegramPlugin.TelegramConfigDetails;
+import com.boot.jx.postman.plugin.TwitterPlugin.TwitterConfigDetails;
+import com.boot.jx.postman.plugin.WA360Plugin.WA360ConfigDetails;
+import com.boot.jx.postman.plugin.WAGupShupPlugin.GupShupConfigDetails;
 import com.boot.jx.postman.plugin.WebPlugin.WebConfigDetails;
-import com.boot.jx.postman.tg.TelegramConfigDetails;
-import com.boot.jx.postman.tw.TwitterConfigDetails;
-import com.boot.jx.postman.wa360.WA360ConfigDetails;
-import com.boot.utils.ArgUtil;
 
 public class ChannelConfig extends AChannelConfig {
 
@@ -31,21 +29,6 @@ public class ChannelConfig extends AChannelConfig {
     private boolean isPushToNewContactAllowed;
 
     private String callbackPath;
-
-    public void copy(AChannelDetails channelConfig) {
-	this.name = channelConfig.getName();
-	this.contactType = channelConfig.getContactType();
-	this.channelType = channelConfig.getChannelType();
-	this.channel = channelConfig.getChannel();
-	this.channelKey = channelConfig.getChannelKey();
-	this.lane = channelConfig.getLane();
-	this.isPushAllowed = channelConfig.isPushAllowed();
-	this.isPushOnlyApproved = channelConfig.isPushOnlyApproved();
-	this.isPushFreeTextAllowed = channelConfig.isPushFreeTextAllowed();
-	this.isPushToNewContactAllowed = channelConfig.isPushToNewContactAllowed();
-	this.webhookUrl = ArgUtil.nonEmpty(channelConfig.getWebhookUrl(), this.webhookUrl);
-
-    }
 
     public String getLane() {
 	return lane;
@@ -77,18 +60,18 @@ public class ChannelConfig extends AChannelConfig {
 
     public FacebookConfigDetails getFacebook() {
 	return facebook;
-    }       
+    }
 
     public void setFacebook(FacebookConfigDetails facebook) {
 	this.facebook = facebook;
     }
-    
+
     public InstagramConfig getInstagram() {
-    	return instagram;
-     }
-    
+	return instagram;
+    }
+
     public void setInstagram(InstagramConfig instagram) {
-    	this.instagram = instagram;
+	this.instagram = instagram;
     }
 
     public TwitterConfigDetails getTwitter() {
@@ -115,37 +98,6 @@ public class ChannelConfig extends AChannelConfig {
 	this.gupshup = gupshup;
     }
 
-    public ChannelConfig from(FacebookConfigDetails facebook) {
-	this.copy(facebook);
-	this.facebook = facebook;
-	return this;
-    }
-    
-    
-    public ChannelConfig from(InstagramConfig instagram) {
-    	this.copy(instagram);
-    	this.instagram = instagram;
-    	return this;
-    }
-
-    public ChannelConfig from(TwitterConfigDetails twitter) {
-	this.copy(twitter);
-	this.twitter = twitter;
-	return this;
-    }
-
-    public ChannelConfig from(TelegramConfigDetails telegram) {
-	this.copy(telegram);
-	this.telegram = telegram;
-	return this;
-    }
-
-    public ChannelConfig from(GupShupConfigDetails gupshup) {
-	this.copy(gupshup);
-	this.gupshup = gupshup;
-	return this;
-    }
-
     public boolean isDisabled() {
 	return isDisabled;
     }
@@ -167,14 +119,6 @@ public class ChannelConfig extends AChannelConfig {
 	this.wa360d = wa360d;
     }
 
-    public String getChannelKey() {
-	return channelKey;
-    }
-
-    public void setChannelKey(String channelKey) {
-	this.channelKey = channelKey;
-    }
-
     public WebConfigDetails getWeb() {
 	return web;
     }
@@ -192,19 +136,19 @@ public class ChannelConfig extends AChannelConfig {
     }
 
     public void setPushAllowed(boolean isPushAllowed) {
-        this.isPushAllowed = isPushAllowed;
+	this.isPushAllowed = isPushAllowed;
     }
 
     public void setPushOnlyApproved(boolean isPushOnlyApproved) {
-        this.isPushOnlyApproved = isPushOnlyApproved;
+	this.isPushOnlyApproved = isPushOnlyApproved;
     }
 
     public void setPushFreeTextAllowed(boolean isPushFreeTextAllowed) {
-        this.isPushFreeTextAllowed = isPushFreeTextAllowed;
+	this.isPushFreeTextAllowed = isPushFreeTextAllowed;
     }
 
     public void setPushToNewContactAllowed(boolean isPushToNewContactAllowed) {
-        this.isPushToNewContactAllowed = isPushToNewContactAllowed;
+	this.isPushToNewContactAllowed = isPushToNewContactAllowed;
     }
 
 }

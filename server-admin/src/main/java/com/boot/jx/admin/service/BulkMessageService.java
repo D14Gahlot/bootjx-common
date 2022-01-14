@@ -59,8 +59,8 @@ public class BulkMessageService extends QueuedTaskExecuter {
 	BulkSessionDoc session = new BulkSessionDoc();
 
 	session.setMessage(bulkMessage.getMessage());
-	session.setTemplateId(bulkMessage.getTemplateId());
-	session.setTemplate(bulkMessage.getTemplate());
+	session.setTemplateId(bulkMessage.templateId());
+	session.setTemplate(bulkMessage.templateCode());
 	session.setMessageCount(bulkMessage.getTo().size());
 	session.setContactType(bulkMessage.contact().type());
 	session.setLane(bulkMessage.contact().getLane());
@@ -81,8 +81,8 @@ public class BulkMessageService extends QueuedTaskExecuter {
 	    to = String.format("%s%s", phoneNumber.getCountryCode(), phoneNumber.getNationalNumber());
 	    doc.getContact().setPhone(to);
 	    doc.setMessage(bulkMessage.getMessage());
-	    doc.setTemplateId(bulkMessage.getTemplateId());
-	    doc.setTemplate(bulkMessage.getTemplate());
+	    doc.setTemplateId(bulkMessage.templateId());
+	    doc.setTemplate(bulkMessage.templateCode());
 	    docs.add(doc);
 	}
 
@@ -151,8 +151,8 @@ public class BulkMessageService extends QueuedTaskExecuter {
 	OutboxMessage outboxMessage = new OutboxMessage();
 	outboxMessage.setMessageId(msg.getMessageId());
 	outboxMessage.setMessage(msg.getMessage());
-	outboxMessage.setTemplate(msg.getTemplate());
-	outboxMessage.setTemplateId(msg.getTemplateId());
+	outboxMessage.template(msg.getTemplate());
+	outboxMessage.templateId(msg.getTemplateId());
 	outboxMessage.contact().type(contactType);
 	outboxMessage.contact().setChannelType(channel);
 	outboxMessage.contact().setLane(lane);

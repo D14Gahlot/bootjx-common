@@ -12,10 +12,14 @@ import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorMapping;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.dict.FileFormat;
 import com.boot.jx.dict.FileType;
+import com.boot.jx.exception.AmxApiException;
 import com.boot.jx.model.CommonFile;
 import com.boot.jx.postman.PMClientConfig;
 import com.boot.jx.postman.PMConstants.CHANNEL_TYPE;
+import com.boot.jx.postman.PMConstants.MESSAGE_COMPOSE_TYPE;
+import com.boot.jx.postman.PMConstants.MESSAGE_FORMAT_TYPE;
 import com.boot.jx.postman.client.PMFileStoreClient;
+import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.Message.Status;
@@ -25,8 +29,9 @@ import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.postman.plugin.ChannelPluginProvider;
 import com.boot.jx.postman.plugin.WA360Plugin;
+import com.boot.jx.postman.plugin.WA360Plugin.WA360ConfigDetails;
+import com.boot.jx.postman.query.ChatContactQuery;
 import com.boot.jx.postman.wa360.WA360Client;
-import com.boot.jx.postman.wa360.WA360ConfigDetails;
 import com.boot.jx.postman.wa360.WA360Constants;
 import com.boot.jx.postman.wa360.WA360Constants.InBoundWrapperPaths;
 import com.boot.jx.postman.wa360.WA360InboundMedia;
@@ -36,10 +41,15 @@ import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.Constants;
 import com.boot.utils.JsonPath;
+import com.google.i18n.phonenumbers.NumberParseException;
+import com.google.i18n.phonenumbers.PhoneNumberUtil;
+import com.google.i18n.phonenumbers.Phonenumber.PhoneNumber;
 
 @Component
 @ConnectorMapping(contactType = ContactType.WHATSAPP, channel = CHANNEL_TYPE.WA_360D)
 public class WA360Connector extends AbstractConnector<WA360ConfigDetails, WA360Plugin> {
+
+    public static final PhoneNumberUtil PHONE_NUMBER_UTIL = PhoneNumberUtil.getInstance();
 
     @Override
     public WA360Plugin getPlugin() {
@@ -60,7 +70,7 @@ public class WA360Connector extends AbstractConnector<WA360ConfigDetails, WA360P
     PMClientConfig pmClientConfig;
 
     @Override
-    public void registerWebHook(ChannelConfig channelConfig) {
+    public void onChannelUpdate(ChannelConfig channelConfig) {
 	String webhookUrl = pmClientConfig.getWebhookUrl(channelConfig);
 	restService.ajax(WA360Constants.BASE_URL).path("v1/configs/webhook")
 		.header(WA360Constants.D360_API_KEY, channelConfig.getWa360d().getApiKey())
@@ -91,8 +101,10 @@ public class WA360Connector extends AbstractConnector<WA360ConfigDetails, WA360P
 	String messageType = map.entry(InBoundWrapperPaths.MESSAGE_TYPE).asString();
 
 	if ("text".equals(messageType)) {
+	    inboxMessage.setFormatType(MESSAGE_FORMAT_TYPE.TEXT);
 	    inboxMessage.setMessage(map.entry(InBoundWrapperPaths.MESSAGE_TEXT).asString());
 	} else if ("interactive".equals(messageType)) {
+	    inboxMessage.setFormatType(MESSAGE_FORMAT_TYPE.TEXT);
 	    String interactiveType = map.entry(InBoundWrapperPaths.INTERACTIVE_TYPE).asString();
 	    if ("button_reply".equals(interactiveType)) {
 		inboxMessage.form().put("reply_id", map.entry(InBoundWrapperPaths.INTERACTIVE_BUTTON_ID).asString());
@@ -112,18 +124,25 @@ public class WA360Connector extends AbstractConnector<WA360ConfigDetails, WA360P
 
 	    inboxMessage.setMessage(ArgUtil.parseAsString(inboxMessage.form().get("reply_title"), Constants.BLANK));
 	} else if ("image".equals(messageType)) {
+	    inboxMessage.setFormatType(MESSAGE_FORMAT_TYPE.IMAGE);
 	    formatMedia(inboxMessage, map, channelConfig, InBoundWrapperPaths.IMAGE, FileType.IMAGE);
 	} else if ("document".equals(messageType)) {
+	    inboxMessage.setFormatType(MESSAGE_FORMAT_TYPE.DOCUMENT);
 	    formatMedia(inboxMessage, map, channelConfig, InBoundWrapperPaths.DOCUMENT, FileType.DOCUMENT);
 	} else if ("audio".equals(messageType)) {
+	    inboxMessage.setFormatType(MESSAGE_FORMAT_TYPE.AUDIO);
 	    formatMedia(inboxMessage, map, channelConfig, InBoundWrapperPaths.AUDIO, FileType.AUDIO);
 	} else if ("voice".equals(messageType)) {
+	    inboxMessage.setFormatType(MESSAGE_FORMAT_TYPE.VOICE);
 	    formatMedia(inboxMessage, map, channelConfig, InBoundWrapperPaths.VOICE, FileType.AUDIO);
 	} else if ("video".equals(messageType)) {
+	    inboxMessage.setFormatType(MESSAGE_FORMAT_TYPE.VIDEO);
 	    formatMedia(inboxMessage, map, channelConfig, InBoundWrapperPaths.VIDEO, FileType.VIDEO);
 	} else if ("sticker".equals(messageType)) {
+	    inboxMessage.setFormatType(MESSAGE_FORMAT_TYPE.STICKER);
 	    formatMedia(inboxMessage, map, channelConfig, InBoundWrapperPaths.STICKER, FileType.IMAGE);
 	}
+	inboxMessage.setFormatSubType(messageType);
 
 	String replyIdExt = map.entry(InBoundWrapperPaths.CONTEXT_ID).asString();
 	if (ArgUtil.is(replyIdExt)) {
@@ -144,17 +163,34 @@ public class WA360Connector extends AbstractConnector<WA360ConfigDetails, WA360P
 		PostManUtil.createContactId(inboxMessage), inboxMessage.getMessageIdExt());
 
 	inboxMessage.attachment(new Attachment().mediaURL(dstFile.getUrl()).mediaType(dstFile.getFileType())
-		.mediaSrc(srcFile.getUrl()).mediaCaption(media.getCaption()).mediaName(media.getFilename()));
+		.mediaSrc(srcFile.getUrl()).mediaCaption(media.getCaption()).mediaName(media.getFilename())
+		.mediaMimeType(media.getMimeType()));
     }
 
     @Override
-    public void send(ChannelConfig channelConfig, OutboxMessage outboxMessage) {
+    public void onSend(ChannelConfig channelConfig, ChatContactDoc chatContactDoc, OutboxMessage outboxMessage) {
 	try {
-	    template(channelConfig, outboxMessage);
-	    wa360Client.send(channelConfig,outboxMessage);
-	    outboxMessage.updateStatus(OutboxMessage.Status.SENT);
+	    template(channelConfig, chatContactDoc, outboxMessage); // TODO:- This is common for all connector, make it
+								    // generic
+
+	    boolean isValidContact = true;
+	    if (outboxMessage.messageMetaWrapper().composeTypeIs(MESSAGE_COMPOSE_TYPE.SEND_CODE)) {
+		isValidContact = optin(channelConfig, chatContactDoc);
+	    }
+
+	    if (isValidContact) {
+		wa360Client.send(channelConfig, outboxMessage);
+		outboxMessage.updateStatus(OutboxMessage.Status.SENT);
+	    } else {
+		outboxMessage.logs().add(String.format("Invalid Contact for %s", chatContactDoc));
+	    }
+
 	} catch (Exception e) {
 	    outboxMessage.updateStatus(OutboxMessage.Status.SENT_ERR);
+	    String log = null;
+	    if (e instanceof AmxApiException) {
+		outboxMessage.logs().add(((AmxApiException) e).getErrorKey());
+	    }
 	    outboxMessage.logs().add(e.getMessage());
 	    LOGGER.error("SEND ERROR", e);
 	}
@@ -180,6 +216,9 @@ public class WA360Connector extends AbstractConnector<WA360ConfigDetails, WA360P
 	} else if ("failed".equals(status)) {
 	    report.setStatus(Status.FAILD);
 	    String errorCode = requestMap.pathEntry("errors/[0]/code").asString();
+	    if (ArgUtil.areEqual(errorCode, "470")) {
+		report.setStatus(Status.CCWIN);
+	    }
 	    report.setReason("Code:" + errorCode);
 	}
 
@@ -202,6 +241,36 @@ public class WA360Connector extends AbstractConnector<WA360ConfigDetails, WA360P
 	}
 
 	return messageBoxEvent;
+    }
+
+    @Override
+    public boolean optin(ChannelConfig channelConfig, ChatContactDoc chatContactDoc) {
+
+	if (ArgUtil.isEmptyValue(chatContactDoc.getLastOptInStamp())) {
+	    String defaultRegion = environment.keyEntry("postman.phonebook.region").asString("IN");
+	    String phone = chatContactDoc.getPhone();
+	    try {
+		phone = phone.replace(" ", "").replaceAll("^[\\+0\\s]+(?!$)", "").trim();
+		PhoneNumber phoneNumber = PHONE_NUMBER_UTIL.parse("+" + phone, defaultRegion);
+		phone = String.format("+%s%s", phoneNumber.getCountryCode(), phoneNumber.getNationalNumber());
+	    } catch (NumberParseException e) {
+		phone = String.format("+%s", phone);
+	    }
+
+	    MapModel resp = wa360Client.fetchContact(phone, channelConfig);
+	    String waId = resp.getString("wa_id");
+
+	    String input = resp.getString("input");
+	    String status = resp.getString("status");
+
+	    if ("valid".equals(status)) {
+		ChatContactQuery chatContactQuery = new ChatContactQuery(chatContactDoc);
+		chatContactQuery.updateLastOptInStamp();
+		commonMongoTemplate.updateFirst(chatContactQuery);
+		return true;
+	    }
+	}
+	return !ArgUtil.isEmptyValue(chatContactDoc.getLastOptInStamp());
     }
 
 }

@@ -147,6 +147,9 @@ public class DefaultSwaggerConfig {
     @Autowired
     AppConfig appConfig;
 
+    @Value("${swagger.title}")
+    String swaggerTitle;
+
     @Value("${swagger.description}")
     String swaggerDescription;
 
@@ -160,7 +163,7 @@ public class DefaultSwaggerConfig {
     String swaggerContactEmail;
 
     private ApiInfo metaData() {
-	return new ApiInfo(appConfig.getAppName(),
+	return new ApiInfo(ArgUtil.nonEmpty(swaggerTitle, appConfig.getAppName()),
 		ArgUtil.nonEmpty(swaggerDescription,
 			String.format("%s#%s#%s", appConfig.getAppEnv(), appConfig.getAppGroup(),
 				appConfig.getAppId())),

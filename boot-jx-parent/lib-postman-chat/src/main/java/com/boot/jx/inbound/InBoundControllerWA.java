@@ -196,7 +196,7 @@ public class InBoundControllerWA {
     @RequestMapping(value = "/ext/inbound/wa360/registerwebhook", method = RequestMethod.GET)
     public ApiResponse<Object, Object> registerWebHook(@RequestParam(required = false) String lane)
 	    throws InterruptedException {
-	connectorHandlerFactory.registerWebHook(CHANNEL_TYPE.WA_360D, lane);
+	connectorHandlerFactory.onChannelUpdate(CHANNEL_TYPE.WA_360D, lane);
 	return ApiResponse.build();
     }
 

@@ -8,6 +8,7 @@ import java.util.Map;
 
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.dict.Language;
+import com.boot.jx.model.CommonTemplate;
 import com.boot.jx.postman.model.ITemplates.BasicExternalTemplate;
 import com.boot.jx.postman.model.ITemplates.ITemplate;
 import com.boot.jx.postman.model.MessageDefinitions.Contactable;
@@ -26,7 +27,7 @@ public class Message<T extends Message<T>> implements Serializable, MessageOptio
     public static final String RESULTS_KEY = "results";
 
     public static enum Status {
-	SCHLD, CRTD, INIT, SENT, SENT_ERR, SENTX, SENTX_ERR, DLVRD, READ, NSENT, BLCKD, FAILD, DELTD;
+	SCHLD, CRTD, INIT, SENT, SENT_ERR, SENTX, SENTX_ERR, DLVRD, READ, NSENT, BLCKD, FAILD, DELTD, CCWIN;
     }
 
     public static class Priority {
@@ -40,14 +41,16 @@ public class Message<T extends Message<T>> implements Serializable, MessageOptio
 
     protected long timestamp;
     protected int attempt;
-    protected String lang = null;
     protected String subject;
     protected String message = null;
     protected String footer;
+
+    private String formatType;
+    private String formatSubType;
+
     protected List<String> to = null;
     protected List<ContactMeta> contacts = null;
-    private String templateId = null;
-    private String template = null;
+    private CommonTemplate hsm;
     private BasicExternalTemplate templateExt;
     private String action = null;
     private String type = null;
@@ -55,6 +58,7 @@ public class Message<T extends Message<T>> implements Serializable, MessageOptio
     private Map<String, Object> model = new HashMap<String, Object>();
     protected Map<String, Object> options = new HashMap<String, Object>();
     protected Map<String, Object> meta;
+
     private MessageType messageType = null;
 
     private List<PostManFile> files = null;
@@ -135,32 +139,6 @@ public class Message<T extends Message<T>> implements Serializable, MessageOptio
 
     public void setMessage(String text) {
 	this.message = text;
-    }
-
-    public String getTemplate() {
-	return template;
-    }
-
-    public void setTemplate(String template) {
-	this.template = template;
-    }
-
-    @JsonIgnore
-    public void setITemplate(ITemplate template) {
-	this.template = template.toString();
-    }
-
-    @JsonIgnore
-    public ITemplate getITemplate() {
-	return ITemplates.getTemplate(this.template);
-    }
-
-    public String getLang() {
-	return lang;
-    }
-
-    public void setLang(String lang) {
-	this.lang = lang;
     }
 
     public Message() {
@@ -329,20 +307,8 @@ public class Message<T extends Message<T>> implements Serializable, MessageOptio
     }
 
     @SuppressWarnings("unchecked")
-    public T template(ITemplate template) {
-	this.setITemplate(template);
-	return (T) this;
-    }
-
-    @SuppressWarnings("unchecked")
-    public T template(String template) {
-	this.setTemplate(template);
-	return (T) this;
-    }
-
-    @SuppressWarnings("unchecked")
     public T lang(Language lang) {
-	this.lang = ArgUtil.parseAsString(lang);
+	this.hsm().setLang(ArgUtil.parseAsString(lang));
 	return (T) this;
     }
 
@@ -355,6 +321,12 @@ public class Message<T extends Message<T>> implements Serializable, MessageOptio
     @SuppressWarnings("unchecked")
     public T data(Object value) {
 	this.getModel().put("data", value);
+	return (T) this;
+    }
+
+    @SuppressWarnings("unchecked")
+    public T data(String key, Object value) {
+	this.hsm().data().put(key, value);
 	return (T) this;
     }
 
@@ -483,14 +455,6 @@ public class Message<T extends Message<T>> implements Serializable, MessageOptio
 	this.stamps().put(ArgUtil.parseAsString(status), System.currentTimeMillis());
     }
 
-    public String getTemplateId() {
-	return templateId;
-    }
-
-    public void setTemplateId(String templateId) {
-	this.templateId = templateId;
-    }
-
     public Contactable getContact() {
 	return contact;
     }
@@ -553,4 +517,76 @@ public class Message<T extends Message<T>> implements Serializable, MessageOptio
 	this.templateExt = templateExt;
     }
 
+    public String getFormatType() {
+	return formatType;
+    }
+
+    public void setFormatType(String formatType) {
+	this.formatType = formatType;
+    }
+
+    public String getFormatSubType() {
+	return formatSubType;
+    }
+
+    public void setFormatSubType(String formatSubType) {
+	this.formatSubType = formatSubType;
+    }
+
+    public CommonTemplate hsm() {
+	if (this.hsm == null) {
+	    this.hsm = new CommonTemplate();
+	}
+	return this.hsm;
+    }
+
+    public String templateId() {
+	return this.hsm().getId();
+    }
+
+    @SuppressWarnings("unchecked")
+    public T templateId(String templateId) {
+	this.hsm().setId(templateId);
+	return (T) this;
+    }
+
+    @SuppressWarnings("unchecked")
+    public T hsm(CommonTemplate template) {
+	this.hsm = template;
+	return (T) this;
+    }
+
+    @SuppressWarnings("unchecked")
+    public T template(ITemplate template) {
+	this.setITemplate(template);
+	return (T) this;
+    }
+
+    @SuppressWarnings("unchecked")
+    public T template(String template) {
+	this.hsm().setCode(template);
+	return (T) this;
+    }
+
+    public String templateCode() {
+	return this.hsm().getCode();
+    }
+
+    @JsonIgnore
+    public void setITemplate(ITemplate template) {
+	this.hsm().setCode(template.toString());
+    }
+
+    @JsonIgnore
+    public ITemplate getITemplate() {
+	return ITemplates.getTemplate(this.hsm().getCode());
+    }
+
+    public CommonTemplate getHsm() {
+        return hsm;
+    }
+
+    public void setHsm(CommonTemplate hsm) {
+        this.hsm = hsm;
+    }
 }
