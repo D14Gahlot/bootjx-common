@@ -105,7 +105,13 @@ public class FacebookConnector extends AbstractConnector<FacebookConfigDetails, 
 
 	// Extract Message Details
 	inboxMessage.setMessageIdExt(m.getMessage().getMid());
-	inboxMessage.setMessage(m.getMessage().getText());
+	if (ArgUtil.is(m.getPostBack()) && ArgUtil.is(m.getPostBack().getTitle())) {
+		inboxMessage.setMessageIdExt(m.getPostBack().getMid());
+		inboxMessage.setMessage(m.getPostBack().getTitle());
+	}else {
+		inboxMessage.setMessageIdExt(m.getMessage().getMid());
+		inboxMessage.setMessage(m.getMessage().getText());
+	}
 
 	return inboxMessage;
     }
