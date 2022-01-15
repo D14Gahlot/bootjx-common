@@ -55,6 +55,9 @@ public class DefaultSwaggerConfig {
     @Value("${swagger.package}")
     String swaggerPackage;
 
+    @Value("${swagger.groupName}")
+    String swaggerDefaultGroup;
+
     @Bean
     public Docket productApi(@Autowired(required = false) List<MockParam> mockParams) {
 
@@ -62,7 +65,9 @@ public class DefaultSwaggerConfig {
 	    return docketWrapper.getDocket();
 	}
 
-	Docket docket = new Docket(DocumentationType.SWAGGER_2).select()
+	Docket docket = new Docket(DocumentationType.SWAGGER_2)
+		.groupName(swaggerDefaultGroup)
+		.select()
 		.apis(RequestHandlerSelectors.basePackage(swaggerPackage))
 		// .paths(regex("/product.*"))
 		.build();

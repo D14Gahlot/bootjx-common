@@ -20,14 +20,14 @@ import com.boot.jx.xms.service.MessageService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
-@Api(tags = "OutBound Messages", description = "API's to send OutBound Messages")
+@Api(tags = "Outbound Messages", description = "API's to send OutBound Messages")
 @Controller
 public class OutboundApiV1 {
 
     @Autowired
     private MessageService messageService;
 
-    @ApiOperation(value = "Send Message", notes = "This API can be used to Send Message")
+    @ApiOperation(value = "Send Message", notes = "${swagger.OutboundApiV1.sendMessage.description}")
     @ApiClientParams
     @ResponseBody
     @RequestMapping(value = "/api/v1/message/send", method = { RequestMethod.POST })
