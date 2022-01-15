@@ -88,7 +88,9 @@
                     if (swaggerUi.options.url) {
                         $('#input_baseUrl').val(swaggerUi.options.url);
                     }
-                     $('.scope-selector').hide();
+                     $('.token-generator').html(
+						'<i><b>Base URL</b> <span class="myDomain"></span></i>'
+					);
                     
                     if (swaggerUi.options.apiKey) {
                         $('#input_apiKey').val(swaggerUi.options.apiKey);
@@ -96,7 +98,11 @@
 
                     $("[data-toggle='tooltip']").tooltip();
 
-                    addApiKeyAuthorization();
+                    //addApiKeyAuthorization();
+                    console.log("swaggerApi, swaggerUi)",swaggerApi, swaggerUi);
+                     $(".myTitle").text(swaggerApi.info.title);
+                     $(".myDomain").text(location.protocol + "//" + swaggerApi.host + swaggerApi.basePath);
+                     document.title = swaggerApi.info.title;
                 },
                 onFailure: function (data) {
                     log("Unable to Load SwaggerUI");
@@ -234,7 +240,7 @@
                 <ul class="nav navbar-nav navbar-left">
                     <li class="li-why">
                     <a  th:href="${APP_CONTEXT} + '/'" style="font-size: 25px; padding-left: 0px">
-                    	<span th:text="${APP_NAME}">Swagger explorer</span>
+                    	<span th:text="${APP_NAME}" class="myTitle">Swagger explorer</span>
                     </a></li>
 
                 </ul>
