@@ -83,7 +83,11 @@ public class FacebookConnector extends AbstractConnector<FacebookConfigDetails, 
 	event.contact().setChannelType(CHANNEL_TYPE.FACEBOOK);
 	event.setFrom(id);
 	event.contact().setCsid(id);
-	event.setMessage(m.getMessage().getText());
+	if (ArgUtil.is(m.getPostBack()) && ArgUtil.is(m.getPostBack().getTitle())) {
+		event.setMessage(m.getPostBack().getTitle());
+	}else {
+		event.setMessage(m.getMessage().getText());		
+	}
 	event.to().add(m.getRecipient().get("id"));
 	event.contact().type(ContactType.FACEBOOK);
 	event.contact().setLane(lane);
@@ -134,7 +138,7 @@ public class FacebookConnector extends AbstractConnector<FacebookConfigDetails, 
 	FacebookHookRequest request = requestMap.as(FacebookHookRequest.class);
 	request.getEntry().forEach(pageEntry -> {
 	    pageEntry.getMessaging().forEach(m -> {
-		if (ArgUtil.is(m.getMessage())) {
+		if (ArgUtil.is(m.getMessage())|| ArgUtil.is(m.getPostBack())) {
 		    messageBoxEvent.addInboxMessage(toInboxMessage(m, channelConfig));
 		} else if (ArgUtil.is(m.getRead())) {
 		    messageBoxEvent.addMessageReport(toMessageReport(m, channelConfig));
