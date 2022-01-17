@@ -179,7 +179,7 @@ public class InBoundService {
 	    if (ArgUtil.is(inBoundProcessor)) {
 		inBoundProcessor.process(inboxMessageOriginal);
 	    }
-	    if (chatClientConfig.isLocalDummyBotEnabled()) {
+	    if (chatClientConfig.isLocalDummyBotEnabled() && false) {
 		botEngine.invokeMethodsAsync(inboxMessageOriginal);
 	    } else if (ArgUtil.is(inBoundHandler)) {
 		inBoundHandler.handle(inboxMessageOriginal);
