@@ -79,9 +79,8 @@ public class PostManInBoundHandler implements InBoundHandler {
 		wrap.messages = CollectionUtil.asList(msg);
 		restService.ajax(webhookEntry.asString()).post(wrap).asMapModel();
 	    } catch (Exception e) {
-		throw new PostManException(e);
+		LOGGER.error("Error while Trying to HIT " + webhookEntry.asString(), e);
 	    }
-
 	} else {
 	    chatClient.forward(inboxMessage);
 	}

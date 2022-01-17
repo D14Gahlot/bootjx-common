@@ -23,8 +23,7 @@ public class DigitalApiV1 {
     @Autowired
     ApiService apiService;
 
-    @ApiOperation(value = "Push Customer Data", notes = "This API can be used to upload customer details",
-	    hidden = true)
+    @ApiOperation(value = "Push Customer Data", notes = "This API can be used to upload customer details")
     @ApiClientParams
     @ResponseBody
     @RequestMapping(value = "/api/v1/data/push", method = { RequestMethod.POST })
@@ -33,11 +32,11 @@ public class DigitalApiV1 {
 	return ApiResponse.buildResult(digitalObjectDto);
     }
 
+    @ApiOperation(value = "Push Customer Event", notes = "This API can be used to upload customer event")
     @ApiClientParams
     @ResponseBody
     @RequestMapping(value = "/api/v1/event/push", method = { RequestMethod.POST })
     public ApiResponse<DigitalEventDto, Object> dataEvent(@RequestBody DigitalEventDto digitalEventDto) {
-
 	apiService.saveDigitalEvent(digitalEventDto);
 	return ApiResponse.buildResult(digitalEventDto);
     }

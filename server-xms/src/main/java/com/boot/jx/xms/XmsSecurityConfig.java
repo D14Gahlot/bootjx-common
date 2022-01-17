@@ -34,6 +34,7 @@ public class XmsSecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity httpSecurity) throws Exception {
 	httpSecurity.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
 		// Publics Calls
+		.and().authorizeRequests().antMatchers("/**").permitAll()
 		.and().authorizeRequests().antMatchers("/pub/**").permitAll()
 		// Login Calls
 		.and().authorizeRequests().antMatchers("/auth/**").permitAll()
@@ -92,7 +93,7 @@ public class XmsSecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     public void configure(WebSecurity web) throws Exception {
 	web.ignoring().antMatchers("/resources/**", "/static/**", "/css/**", "/js/**", "/images/**", "/assets/**",
-		"/v2/api-docs", "/configuration/ui", "/swagger-resources/**", "/configuration/security",
+		"/v2/**", "/configuration/ui", "/swagger-resources/**", "/configuration/security",
 		"/swagger-ui.html", "/webjars/**", "/favicon.ico");
     }
 

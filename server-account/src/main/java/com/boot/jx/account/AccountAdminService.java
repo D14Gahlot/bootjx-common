@@ -130,8 +130,10 @@ public class AccountAdminService implements LogoutHandler {
     		.put("website", pmEnvironment.keyEntry("mry.prop.service.website").asString())
     		.put("service", pmEnvironment.keyEntry("mry.prop.service.name").asString())
     		.put("servicedomain", pmEnvironment.keyEntry("mry.prop.service.domain").asString())
-    	
-    		.put("contactName", accountDoc.getContact().getName())));
+    		.put("contactName", accountDoc.getContact().getName())
+    		.put("email", accountDoc.getContact().getEmail())
+    		.put("phone", accountDoc.getContact().getPhone())
+			.put("company", accountDoc.getContact().getCompany())));
         }
 
     public static Authentication getAuthentication() {

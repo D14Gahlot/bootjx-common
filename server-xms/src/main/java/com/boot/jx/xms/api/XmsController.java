@@ -37,11 +37,11 @@ public class XmsController {
     private boolean isLoggedIn() {
 	String apiId = commonHttpRequest.get("swagger.auth.apiId");
 	String token = commonHttpRequest.get("swagger.auth.token");
+	String apiKey = commonHttpRequest.get("swagger.auth.apiKey");
 	HashBuilder builder = new HashBuilder().interval(300).secret(swaggerAuthPassword).message(apiId);
 	if (ArgUtil.is(token) && builder.validate(token)) {
 	    return true;
 	}
-	String apiKey = commonHttpRequest.get("swagger.auth.apiKey");
 
 	if (!ArgUtil.is(apiKey)) {
 	    return false;

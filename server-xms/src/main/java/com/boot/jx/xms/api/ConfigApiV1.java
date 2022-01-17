@@ -18,7 +18,7 @@ import com.boot.jx.xms.dto.WebhookUrlRequest;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
-@Api(tags = "Config APIs", description = "API's for configuration")
+@Api(tags = "Config APIs", description = "API's for configuration management")
 @Controller
 public class ConfigApiV1 {
 
@@ -28,9 +28,7 @@ public class ConfigApiV1 {
     @Autowired
     private PMEnvironment pmEnvironment;
 
-    @ApiOperation(value = "Set Webhook URL",
-	    notes = "The webhook URL is a URL where the WhatsApp Business API "
-		    + "sends the notifications to, triggered by specific events")
+    @ApiOperation(value = "Set Webhook URL", notes = "${swagger.ConfigApiV1.setWebhookUrl.description}")
     @ApiClientParams
     @ResponseBody
     @RequestMapping(value = "/api/v1/config/webhook", method = { RequestMethod.POST })

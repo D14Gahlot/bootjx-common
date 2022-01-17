@@ -34,6 +34,7 @@ import com.boot.jx.postman.store.MessageStore;
 import com.boot.jx.postman.store.SessionStore;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.Constants;
 import com.boot.utils.StringUtils.StringMatcher;
 import com.boot.utils.UniqueID;
 
@@ -107,11 +108,12 @@ public class InBoundService {
 	PMConfigurationObject proxyConfig = pmEnvironment.keyEntry("mry.proxy.enabled");
 
 	if ((AppContextUtil.getTenant().equals("app") || proxyConfig.asBoolean())
-		&& ArgUtil.is(inboxMessageOriginal.getMessage()) && ArgUtil.is(redisson)) {
+		&& ArgUtil.is(redisson)) {
 	    String contactId = PostManUtil.createContactId(inboxMessageOriginal.contact());
 	    String proxy = null;
+	    String message = ArgUtil.nonEmpty(inboxMessageOriginal.getMessage(),Constants.BLANK);
 
-	    StringMatcher matcher = new StringMatcher(inboxMessageOriginal.getMessage());
+	    StringMatcher matcher = new StringMatcher(message);
 	    if (matcher.isMatch(PROXY)) {
 		proxy = matcher.group(1);
 		proxy().put(contactId, proxy);

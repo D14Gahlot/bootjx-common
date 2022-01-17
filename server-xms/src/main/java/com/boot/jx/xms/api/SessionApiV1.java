@@ -11,23 +11,24 @@ import com.boot.jx.api.ApiResponse;
 import com.boot.jx.common.store.ChatArchiveService;
 import com.boot.jx.postman.dto.ChatMessageDTO;
 import com.boot.jx.postman.dto.ChatSessionDTO;
+import com.boot.jx.xms.XmsConstants;
 import com.boot.jx.xms.XmsConstants.ApiClientParams;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
-@Api(tags = "Session APIs", description = "API's for Session Management")
+@Api(tags = "Session Management", description = XmsConstants.SESSION_MNGMNT_DESCRIPTION)
 @Controller
 public class SessionApiV1 {
 
     @Autowired
     private ChatArchiveService chatArchive;
 
-    @ApiOperation(value = "Read all messages for a session")
+    @ApiOperation(value = "Fetch session messages")
     @ApiClientParams
     @ResponseBody
     @RequestMapping(value = "/api/v1/session/messages", method = { RequestMethod.GET })
-    public ApiResponse<ChatMessageDTO, Object> setWebhookUrl(@RequestParam String sessionId) {
+    public ApiResponse<ChatMessageDTO, Object> getSessionMessages(@RequestParam String sessionId) {
 	ChatSessionDTO session = new ChatSessionDTO();
 	session.setSessionId(sessionId);
 	session = chatArchive.withMessages(session);
