@@ -28,7 +28,7 @@ public class Demo1Controller extends CommonBotController {
 
     @Autowired
     Demo2Controller demo3Controller;
-    
+
     @Autowired
     Demo4Controller demo5Controller;
 
@@ -36,7 +36,7 @@ public class Demo1Controller extends CommonBotController {
     private void showDemoMenu(InboxMessage inboxMessage, StringMatcher matcher) {
 	String prevMenu = ArgUtil.parseAsString(chatContext.sessionData().data().get(CURRENT_DEMO), Constants.BLANK)
 		.toLowerCase();
-	
+
 	if (ArgUtil.is(prevMenu)) {
 	    switch (prevMenu) {
 	    case "1":
@@ -101,12 +101,12 @@ public class Demo1Controller extends CommonBotController {
 	    chatContext.sessionData().data().put(CURRENT_DEMO, "4");
 	    showDemoMenu(inboxMessage, matcher);
 	    break;
-	case "SALES INQUIRY": 
+	case "SALES INQUIRY":
 	case "SALES":
 	case "5":
 	    chatContext.sessionData().data().put(CURRENT_DEMO, "5");
 	    showDemoMenu(inboxMessage, matcher);
-	    break;    
+	    break;
 	case "TALK TO AGENT":
 	case "TALKTOAGENT":
 	case "#":
@@ -307,7 +307,8 @@ public class Demo1Controller extends CommonBotController {
     }
 
     private boolean handleGlobalOption(InboxMessage inboxMessage, StringMatcher matcher) {
-	String thisMessage = inboxMessage.getMessage().toUpperCase().replace(" ", "");
+	String thisMessage = ArgUtil.nonEmpty(inboxMessage.getMessage(), Constants.BLANK).toUpperCase().replace(" ",
+		"");
 
 	if (ArgUtil.is(inboxMessage.getTags()) && ArgUtil.is(inboxMessage.getTags().getCategories())) {
 	    if (inboxMessage.getTags().getCategories().indexOf("today-credits") > -1) {
