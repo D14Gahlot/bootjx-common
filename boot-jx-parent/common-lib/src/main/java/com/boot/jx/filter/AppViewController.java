@@ -11,7 +11,6 @@ import com.boot.jx.AppConfig;
 import com.boot.jx.AppConfigPackage.AppCommonConfig;
 import com.boot.jx.http.CommonHttpRequest;
 import com.boot.utils.ArgUtil;
-import com.boot.utils.CryptoUtil;
 import com.boot.utils.CryptoUtil.HashBuilder;
 
 @Controller

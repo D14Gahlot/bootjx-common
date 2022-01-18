@@ -32,7 +32,7 @@ public class XmsController {
     @Autowired
     private CommonHttpRequest commonHttpRequest;
 
-    @Autowired
+    @Autowired(required = false)
     private AppCommonConfig appCommonConfig;
 
     @Value("${swagger.auth.password}")
@@ -67,8 +67,10 @@ public class XmsController {
 
 	model.addAttribute("APP_NAME", appConfig.getAppName());
 	model.addAttribute("APP_CONTEXT", appConfig.getAppPrefix());
-
-	model.addAllAttributes(appCommonConfig.appAttributes());
+	model.addAttribute("CDN_URL", appConfig.getAppPrefix());
+	if (ArgUtil.is(appCommonConfig)) {
+	    model.addAllAttributes(appCommonConfig.appAttributes());
+	}
 
 	if (!isLoggedIn()) {
 	    return "app-xms";
