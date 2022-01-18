@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import com.boot.jx.AppConfig;
+import com.boot.jx.AppConfigPackage.AppCommonConfig;
 import com.boot.jx.http.CommonHttpRequest;
 import com.boot.jx.postman.ClientApiKey;
 import com.boot.jx.postman.PMEnvironment;
@@ -29,7 +30,10 @@ public class XmsController {
     private PMEnvironment pmEnvironment;
 
     @Autowired
-    CommonHttpRequest commonHttpRequest;
+    private CommonHttpRequest commonHttpRequest;
+
+    @Autowired
+    private AppCommonConfig appCommonConfig;
 
     @Value("${swagger.auth.password}")
     String swaggerAuthPassword;
@@ -63,6 +67,8 @@ public class XmsController {
 
 	model.addAttribute("APP_NAME", appConfig.getAppName());
 	model.addAttribute("APP_CONTEXT", appConfig.getAppPrefix());
+
+	model.addAllAttributes(appCommonConfig.appAttributes());
 
 	if (!isLoggedIn()) {
 	    return "app-xms";
