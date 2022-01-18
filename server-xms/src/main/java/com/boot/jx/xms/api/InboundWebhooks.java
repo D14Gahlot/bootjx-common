@@ -17,7 +17,7 @@ import com.boot.jx.xms.dto.ContactInfoUpdate;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
-@Api(tags = "Webhooks", description = XmsConstants.INBOUND_WEBHOOKS_DESCRIPTION)
+@Api(tags = "Inbound Requests", description = XmsConstants.INBOUND_WEBHOOKS_DESCRIPTION)
 @Controller
 public class InboundWebhooks {
 
