@@ -25,7 +25,7 @@ public class ConfigConstants {
 
     public static enum APP_KEY implements EntryMeta {
 
-	PROP_SERVICE_DOMAIN(new ConfigMeta("Service", "postman.bot.name"))
+	PROP_SERVICE_DOMAIN(new ConfigMeta("server", "mry.prop.service.domain"))
 	// Ends here
 	;
 
