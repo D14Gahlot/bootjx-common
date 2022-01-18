@@ -15,6 +15,7 @@ import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.ext.CommonMsgText;
 import com.boot.jx.postman.model.ext.InBoundContact;
+import com.boot.jx.postman.model.ext.InBoundMeta;
 import com.boot.jx.postman.model.ext.InBoundMsg;
 import com.boot.jx.postman.model.ext.InBoundMsgMedia;
 import com.boot.jx.postman.model.ext.InBoundWrapper;
@@ -79,9 +80,8 @@ public class PostManInBoundHandler implements InBoundHandler {
 		}
 
 		InBoundWrapper wrap = new InBoundWrapper();
-		wrap.meta = MapModel.createInstance().put("domain", AppContextUtil.getTenant())
-			.put("service", pmEnvironment.keyEntry(ConfigConstants.APP_KEY.PROP_SERVICE_DOMAIN).asString())
-			.map();
+		wrap.meta = new InBoundMeta().domain(AppContextUtil.getTenant())
+			.server(pmEnvironment.keyEntry(ConfigConstants.APP_KEY.PROP_SERVICE_DOMAIN).asString());
 		wrap.contacts = CollectionUtil.asList(InBoundContact.from(inboxMessage.contact()));
 		wrap.messages = CollectionUtil.asList(msg);
 		restService.ajax(webhookEntry.asString()).post(wrap).asMapModel();
