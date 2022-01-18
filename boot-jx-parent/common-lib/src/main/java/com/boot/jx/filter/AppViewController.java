@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 import com.boot.jx.AppConfig;
+import com.boot.jx.AppConfigPackage.AppCommonConfig;
 import com.boot.jx.http.CommonHttpRequest;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CryptoUtil;
@@ -27,6 +28,9 @@ public class AppViewController {
 
     @Value("${swagger.auth.password}")
     String swaggerAuthPassword;
+
+    @Autowired(required = false)
+    private AppCommonConfig appCommonConfig;
 
     private boolean isLoggedIn() {
 	if (!ArgUtil.is(swaggerAuthPassword)) {
@@ -53,6 +57,11 @@ public class AppViewController {
 
     @RequestMapping(value = { "/swagger-ui.html" }, method = { RequestMethod.GET, RequestMethod.POST })
     public String swagger(Model model) {
+
+	if (ArgUtil.is(appCommonConfig)) {
+	    model.addAllAttributes(appCommonConfig.appAttributes());
+	}
+
 	if (!isLoggedIn()) {
 	    return "swagger-login";
 	}
@@ -61,6 +70,11 @@ public class AppViewController {
 
     @RequestMapping(value = { "/swagger-uix.html" }, method = { RequestMethod.GET, RequestMethod.POST })
     public String swagger2(Model model) {
+
+	if (ArgUtil.is(appCommonConfig)) {
+	    model.addAllAttributes(appCommonConfig.appAttributes());
+	}
+
 	if (!isLoggedIn()) {
 	    return "swagger-login";
 	}
