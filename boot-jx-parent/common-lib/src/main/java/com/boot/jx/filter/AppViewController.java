@@ -58,6 +58,7 @@ public class AppViewController {
     @RequestMapping(value = { "/swagger-ui.html" }, method = { RequestMethod.GET, RequestMethod.POST })
     public String swagger(Model model) {
 
+	model.addAttribute("CDN_URL", appConfig.getAppPrefix());
 	if (ArgUtil.is(appCommonConfig)) {
 	    model.addAllAttributes(appCommonConfig.appAttributes());
 	}
@@ -71,6 +72,7 @@ public class AppViewController {
     @RequestMapping(value = { "/swagger-uix.html" }, method = { RequestMethod.GET, RequestMethod.POST })
     public String swagger2(Model model) {
 
+	model.addAttribute("CDN_URL", appConfig.getAppPrefix());
 	if (ArgUtil.is(appCommonConfig)) {
 	    model.addAllAttributes(appCommonConfig.appAttributes());
 	}

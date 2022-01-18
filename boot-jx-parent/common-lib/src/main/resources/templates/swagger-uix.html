@@ -5,7 +5,7 @@
 
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-	<link rel="icon" th:href="${APP_CONTEXT} + '/favicon.ico'" type="image/gif" sizes="16x16">
+	<link rel="icon" th:href="${CDN_URL} + '/favicon.ico'" type="image/gif" sizes="16x16">
 
     <!--[if lt IE 9]>
     <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
@@ -17,7 +17,7 @@
     <link href='https://cherrybase.github.io/swagger-ui/dist/css/screen.css' media='screen' rel='stylesheet' type='text/css'/>
 	<style>
 		nav .navbar-brand a.favicon{
-			background: url([[${APP_CONTEXT}]]/favicon.ico) center left no-repeat!important;
+			background: url([[${CDN_URL}]]/favicon.ico) center left no-repeat!important;
 			background-size: auto 100% !important;
 		}
 	</style>
