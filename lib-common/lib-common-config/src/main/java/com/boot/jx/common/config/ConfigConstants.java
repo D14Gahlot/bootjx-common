@@ -23,11 +23,29 @@ public class ConfigConstants {
     public static final Map<String, String> APP_CONFIG = new ConcurrentHashMap<String, String>();
     public static final List<ConfigMeta> SETUP_CONFIG_LIST = new ArrayList<ConfigMeta>();
 
-    public static enum KEY implements EntryMeta {
+    public static enum APP_KEY implements EntryMeta {
+
+	PROP_SERVICE_DOMAIN(new ConfigMeta("Service", "postman.bot.name"))
+	// Ends here
+	;
+
+	private String key;
+
+	APP_KEY(ConfigMeta defaultFalse) {
+	    this.key = defaultFalse.getKey();
+	}
+
+	public String getKey() {
+	    return key;
+	}
+    }
+
+    public static enum SETUP_KEY implements EntryMeta {
 	POSTMAN_BOT_NAME(new ConfigMeta("Bot Name", "postman.bot.name")),
 	POSTMAN_CONTACT_DETAILS_URL(new ConfigMeta("Contact Details Provider Webhook", "postman.contact.details.url")),
 
-	POSTMAN_CHAT_INBOUND_WEBHOOK(new ConfigMeta("Message Inbound Webhook", "postman.chat.inbound.webhook")),
+	POSTMAN_CHAT_INBOUND_WEBHOOK(new ConfigMeta("Message Inbound Webhook", "postman.chat.inbound.webhook")
+		.desc("Inbound messages will be forwarded to this webhook")),
 
 	CHAT_TAG_ENABLED(new ConfigMeta("Chat Tag Enabled", "chat.tag.enabled").optionsOnOff()),
 
@@ -92,7 +110,7 @@ public class ConfigConstants {
 
 	private String key;
 
-	KEY(ConfigMeta defaultFalse) {
+	SETUP_KEY(ConfigMeta defaultFalse) {
 	    this.key = defaultFalse.getKey();
 	    ConfigConstants.SETUP_CONFIG_LIST.add(defaultFalse);
 	}
@@ -103,7 +121,7 @@ public class ConfigConstants {
     }
 
     static {
-	ConfigConstants.KEY.values();
+	ConfigConstants.SETUP_KEY.values();
     }
 
 }

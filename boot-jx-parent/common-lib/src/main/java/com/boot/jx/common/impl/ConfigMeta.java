@@ -85,6 +85,7 @@ public class ConfigMeta implements Serializable {
 
     private String title;
     private String key;
+    private String desc;
     private String path;
     private Object defaultValue;
     private boolean optional;
@@ -336,6 +337,19 @@ public class ConfigMeta implements Serializable {
 
     public ConfigMeta writeonly() {
 	this.writeonly = true;
+	return this;
+    }
+
+    public String getDesc() {
+	return desc;
+    }
+
+    public void setDesc(String desc) {
+	this.desc = desc;
+    }
+
+    public ConfigMeta desc(String desc) {
+	this.desc = desc;
 	return this;
     }
 }

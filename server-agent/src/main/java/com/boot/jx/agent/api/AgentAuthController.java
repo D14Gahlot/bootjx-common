@@ -78,7 +78,7 @@ public class AgentAuthController {
 	    @RequestParam(required = false) String domainId, @RequestParam(required = false) String domainToken,
 	    @RequestParam(required = false) String domainUser) throws NoSuchAlgorithmException {
 
-	if (pmEnvironment.keyEntry(ConfigConstants.KEY.POSTMAN_CHAT_INBOUND_WEBHOOK).exists()) {
+	if (pmEnvironment.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_CHAT_INBOUND_WEBHOOK).exists()) {
 	    return unauthorized(model);
 	}
 
@@ -115,7 +115,7 @@ public class AgentAuthController {
     @RequestMapping(value = { "/auth/login", "/auth/resetpass" }, method = { RequestMethod.POST, RequestMethod.GET })
     public String login(Model model, HttpServletRequest request, HttpServletResponse httpServletResponse) {
 
-	if (pmEnvironment.keyEntry(ConfigConstants.KEY.POSTMAN_CHAT_INBOUND_WEBHOOK).exists()) {
+	if (pmEnvironment.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_CHAT_INBOUND_WEBHOOK).exists()) {
 	    return unauthorized(model);
 	}
 

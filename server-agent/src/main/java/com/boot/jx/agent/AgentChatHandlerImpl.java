@@ -277,7 +277,7 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 	if (!chatSessionDoc.isResolved()) {
 	    chatSessionManager.resolveSession(chatSessionDoc);
 	    PMConfigurationObject resolvedReply = environment
-		    .keyEntry(ConfigConstants.KEY.POSTMAN_AGENT_CHAT_AUTOREPLY_RESOLVED);
+		    .keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_AGENT_CHAT_AUTOREPLY_RESOLVED);
 	    if (resolvedReply.exists()) {
 		messageDoc = chatService.send(chatSessionDoc, new OutboxMessage().templateId(resolvedReply.asString()));
 	    }

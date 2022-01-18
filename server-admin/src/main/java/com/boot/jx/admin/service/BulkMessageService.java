@@ -68,7 +68,7 @@ public class BulkMessageService extends QueuedTaskExecuter {
 
 	auditDetailProvider.audit(session);
 
-	String defaultRegion = enviroment.keyEntry(ConfigConstants.KEY.POSTMAN_PHONEBOOK_REGION).asString("IN");
+	String defaultRegion = enviroment.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_PHONEBOOK_REGION).asString("IN");
 
 	PhoneNumber phoneNumber = new PhoneNumber();
 	List<MessageDoc> docs = new ArrayList<MessageDoc>();

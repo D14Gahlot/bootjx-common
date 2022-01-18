@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.boot.jx.AppContextUtil;
 import com.boot.jx.chat.ChatClient;
 import com.boot.jx.common.config.ConfigConstants;
 import com.boot.jx.inbound.InBound.InBoundHandler;
@@ -18,6 +19,7 @@ import com.boot.jx.postman.model.ext.InBoundMsg;
 import com.boot.jx.postman.model.ext.InBoundMsgMedia;
 import com.boot.jx.postman.model.ext.InBoundWrapper;
 import com.boot.jx.rest.RestService;
+import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
 
@@ -37,7 +39,9 @@ public class PostManInBoundHandler implements InBoundHandler {
 
     @Override
     public void handle(InboxMessage inboxMessage) {
-	PMConfigurationObject webhookEntry = pmEnvironment.keyEntry(ConfigConstants.KEY.POSTMAN_CHAT_INBOUND_WEBHOOK);
+	PMConfigurationObject webhookEntry = pmEnvironment
+		.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_CHAT_INBOUND_WEBHOOK);
+
 	if (webhookEntry.exists()) {
 	    LOGGER.debug("Forwarding InboxMessage to Xternal Service ");
 	    try {
@@ -75,6 +79,9 @@ public class PostManInBoundHandler implements InBoundHandler {
 		}
 
 		InBoundWrapper wrap = new InBoundWrapper();
+		wrap.meta = MapModel.createInstance().put("domain", AppContextUtil.getTenant())
+			.put("service", pmEnvironment.keyEntry(ConfigConstants.APP_KEY.PROP_SERVICE_DOMAIN).asString())
+			.map();
 		wrap.contacts = CollectionUtil.asList(InBoundContact.from(inboxMessage.contact()));
 		wrap.messages = CollectionUtil.asList(msg);
 		restService.ajax(webhookEntry.asString()).post(wrap).asMapModel();

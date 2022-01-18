@@ -20,7 +20,7 @@ import com.boot.jx.agent.api.ControllerRequestDTOs.ChatTagUpdateRequest;
 import com.boot.jx.agent.api.ControllerRequestDTOs.SessionSearchRequest;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.api.ApiResponseUtil;
-import com.boot.jx.common.config.ConfigConstants.KEY;
+import com.boot.jx.common.config.ConfigConstants.SETUP_KEY;
 import com.boot.jx.common.doc.AgentSessionDoc;
 import com.boot.jx.common.store.ChatArchiveService;
 import com.boot.jx.common.store.DocumentUpdateListner;
@@ -78,7 +78,7 @@ public class AgentMsgController {
 	List<ChatSessionDTO> chatSessionDtos = new ArrayList<ChatSessionDTO>();
 	if (agentSession.isLoggedIn() && ArgUtil.is(agentSession.getAgentDept())) {
 	    List<ChatSessionDoc> sessions = null;
-	    long historyPeriod = environment.keyEntry(KEY.POSTMAN_AGENT_TAB_HISTORY_PERIOD).asLong(0L);
+	    long historyPeriod = environment.keyEntry(SETUP_KEY.POSTMAN_AGENT_TAB_HISTORY_PERIOD).asLong(0L);
 	    if (historyPeriod > 0L && "HISTORY".equals(tab)) {
 		sessions = chatSessionManager.findChatSessionDocByAgentAndUnAssigned(agentSession.getAgentCode(),
 			agentSession.getAgentDept(), search,

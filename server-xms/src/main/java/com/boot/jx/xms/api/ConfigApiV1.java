@@ -33,7 +33,7 @@ public class ConfigApiV1 {
     @ResponseBody
     @RequestMapping(value = "/api/v1/config/webhook", method = { RequestMethod.POST })
     public ApiResponse<PMConfigurationObject, Object> setWebhookUrl(@RequestBody WebhookUrlRequest req) {
-	PMConfigurationObject config = pmEnvironment.keyEntry(ConfigConstants.KEY.POSTMAN_CHAT_INBOUND_WEBHOOK);
+	PMConfigurationObject config = pmEnvironment.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_CHAT_INBOUND_WEBHOOK);
 	config.setValue(req.url);
 	configManager.save(config);
 	return ApiResponse.buildResults(config).meta(req);

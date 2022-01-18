@@ -26,7 +26,7 @@ public class CommonBotController extends ChatController {
 	    InboxMessage agentAssignResp = assignToAgent().getResult();
 	    if (ArgUtil.is(agentAssignResp.session().getAgent())) {
 		PMConfigurationObject transferReply = pmEnvironment
-			.keyEntry(ConfigConstants.KEY.POSTMAN_AGENT_CHAT_AUTOREPLY_TALK2AGENT);
+			.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_AGENT_CHAT_AUTOREPLY_TALK2AGENT);
 		if (transferReply.exists()) {
 		    reply(new OutboxMessage().templateId(transferReply.asString()));
 		} else if (ArgUtil.is(AppContextUtil.getTenant())
@@ -43,7 +43,7 @@ public class CommonBotController extends ChatController {
 		}
 	    } else {
 		PMConfigurationObject noAgentReply = pmEnvironment
-			.keyEntry(ConfigConstants.KEY.POSTMAN_AGENT_CHAT_AUTOREPLY_NOAGENT);
+			.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_AGENT_CHAT_AUTOREPLY_NOAGENT);
 		if (noAgentReply.exists()) {
 		    reply(new OutboxMessage().templateId(noAgentReply.asString()));
 		} else {

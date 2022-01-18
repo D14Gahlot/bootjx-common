@@ -34,7 +34,7 @@ public class DefaultChatController extends CommonBotController {
 	try {
 	    InboxMessage agentAssignResp = assignToAgent().getResult();
 	    if (ArgUtil.is(agentAssignResp.session().getAgent())) {
-		PMConfigurationObject transferReply = pmEnvironment.keyEntry(ConfigConstants.KEY.POSTMAN_AGENT_CHAT_AUTOREPLY_TALK2AGENT);
+		PMConfigurationObject transferReply = pmEnvironment.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_AGENT_CHAT_AUTOREPLY_TALK2AGENT);
 		if(transferReply.exists()) {
 		    reply(new OutboxMessage().templateId(transferReply.asString()));
 		} else if(ArgUtil.is(AppContextUtil.getTenant()) && AppContextUtil.getTenant().equalsIgnoreCase("tathkarah")) {
