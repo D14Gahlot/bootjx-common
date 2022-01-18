@@ -12,7 +12,7 @@ import com.boot.jx.swagger.MockParamBuilder.MockParamType;
 
 public class XmsConstants {
 
-    public static final String INBOUND_WEBHOOKS_DESCRIPTION = "Webhooks can be used for:\n"
+    public static final String INBOUND_WEBHOOKS_DESCRIPTION = "Inbound Request (Webhooks) can be used for:\n"
 	    + "* Inbound Message Notifications: Use it to get a notification you when you have received a message.\n"
 	    + "* Message Status Notifications: Monitor the status of sent messages.\n"
 	    + "Webhook must be implemented by client and should be available on public internet";
