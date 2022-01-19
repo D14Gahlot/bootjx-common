@@ -3,7 +3,6 @@ package com.boot.jx.postman.model.ext;
 import java.io.Serializable;
 import java.util.List;
 
-import com.boot.jx.postman.model.ext.InBoundMsgStatus.InBoundMsgStatusError;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 /**
@@ -19,5 +18,5 @@ public class InBoundWrapper implements Serializable {
     public List<InBoundContact> contacts;
     public List<InBoundMsg> messages;
     public List<InBoundAction> actions;
-    public List<InBoundMsgStatusError> statuses;
+    public List<InBoundMsgStatus> statuses;
 }
