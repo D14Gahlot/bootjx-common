@@ -51,7 +51,7 @@ public class FrontController {
 	return "app-account";
     }
 
-    @RequestMapping(value = { "/", "/front/", "/front/**" }, method = { RequestMethod.GET })
+    @RequestMapping(value = { "/", "/front/", "/front/**", "/content/", "/content/**" }, method = { RequestMethod.GET })
     public String front(Model model) {
 	String domainName = commonHttpRequest.get("domain");
 	return domainProfile(model, domainName, true);
