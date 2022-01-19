@@ -15,10 +15,9 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class InBoundWrapper implements Serializable {
     private static final long serialVersionUID = 7766790295486098869L;
-
     public InBoundMeta meta;
-
     public List<InBoundContact> contacts;
     public List<InBoundMsg> messages;
     public List<InBoundAction> actions;
+    public List<InBoundAction> statuses;
 }

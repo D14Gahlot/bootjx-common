@@ -13,7 +13,7 @@ public class InBoundMsg {
     @ApiMockModelProperty(example = "919988776655", value = "Contact of user")
     public String contactFrom;
 
-    @ApiMockModelProperty(example = "WA919988776655", value = "Unique Contact Id of user")
+    @ApiMockModelProperty(example = "wa919988776655_918828218374", value = "Unique Contact Id of user")
     public String contactId;
 
     @JsonProperty("id")

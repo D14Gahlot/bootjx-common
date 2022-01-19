@@ -37,7 +37,8 @@ public class InboundWebhooks {
 	return new ContactInfoUpdate();
     }
 
-    @ApiOperation(value = "Receiving Events", notes = "${swagger.InboundWebhooks.onActionCallback.description}")
+    @ApiOperation(value = "Receiving Events", notes = "${swagger.InboundWebhooks.onActionCallback.description}",
+	    hidden = true)
     @ResponseBody
     @ApiCallbacktParams
     @RequestMapping(value = "/api/v1/action/event", method = { RequestMethod.POST })
