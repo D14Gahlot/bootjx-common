@@ -66,13 +66,13 @@
 <div th:switch="${CDN_DEBUG}" th:remove="tag"> 
   <p th:case="'true'" th:remove="tag">
   		<!-- // load  js if debug -->
-		<script th:src="${CDN_URL}+'/app-front.js?_='+${CDN_VERSION}"></script>
+		<script th:src="${CDN_URL}+'/app-' + ${APP} + '.js?_='+${CDN_VERSION}"></script>
   </p>
   <p th:case="*" th:remove="tag">
   		<!-- // load  js if prod -->
   	  	<script th:src="${CDN_URL}+'/js/chunk-vendors.js?_='+${CDN_VERSION}"></script>
   	  	<script th:src="${CDN_URL}+'/js/chunk-common.js?_='+${CDN_VERSION}"></script>
-		<script th:src="${CDN_URL}+'/app-account.js?_='+${CDN_VERSION}"></script>
+		<script th:src="${CDN_URL}+'/app-' + ${APP} + '.js?_='+${CDN_VERSION}"></script>
   </p> 
 </div>
 
