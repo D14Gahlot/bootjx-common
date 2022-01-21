@@ -20,6 +20,7 @@ import com.boot.jx.common.impl.ConfigMeta;
 import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.jx.postman.PMClientConfig;
 import com.boot.jx.postman.PMConfiguration;
+import com.boot.jx.postman.PMConfiguration.PMConfigurationModel;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PMEnvironment.AChannelDetails;
 import com.boot.jx.postman.PMEnvironment.PMConfigurationObject;
@@ -75,7 +76,7 @@ public class ConfigManager {
 		PMConfigurationObject configObject = pmEnvironment.keyEntry("postman.bot.name");
 
 		if (!ArgUtil.is(configObject.getValue())) {
-		    configObject.setValue(pmEnvironment.config().agent().getDefaultBotName());
+		    configObject.setValue(pmEnvironment.local().agent().getDefaultBotName());
 		}
 
 		list.add(MapBuilder.map().put("meta", meta).put("config", configObject).toMap());
@@ -113,7 +114,7 @@ public class ConfigManager {
 		mapBuilder.put("meta", meta);
 	    }
 	}
-	mapBuilder.put("domain", this.pmEnvironment.config().getPref(key)) // Domain
+	mapBuilder.put("domain", this.pmEnvironment.local().getPref(key)) // Domain
 		.put("shared", this.pmEnvironment.shared().getPref(key)) // Shared
 		.put("config", this.pmEnvironment.keyEntry(key)) // Resolved
 	;
@@ -180,7 +181,7 @@ public class ConfigManager {
     }
 
     public void save(ChannelConfig config) {
-	pmEnvironment.config(config);
+	pmEnvironment.addChannel(config);
 	this.refresh();
 	connectorHandlerFactory.onChannelUpdate(config.getChannelType(), config.getLane());
     }
@@ -214,7 +215,7 @@ public class ConfigManager {
 	if (ArgUtil.is(channelId)) {
 	    ChannelConfigDoc channelConfig = mongoTemplate.findById(channelId, ChannelConfigDoc.class);
 	    if (ArgUtil.is(channelConfig)) {
-		PMConfiguration config = pmEnvironment.config();
+		PMConfigurationModel config = pmEnvironment.local();
 		if (!ArgUtil.is(channelConfig.getWebhookUrl())) {
 		    channelConfig.setWebhookUrl(pmClientConfig.getWebhookBase(channelConfig));
 		}
@@ -230,7 +231,7 @@ public class ConfigManager {
 	ChannelPlugin<? extends AChannelDetails> plugin = ChannelPluginProvider.PLUGIN_MAPPING.get(channelType);
 	String channelId = map.getString("channelId");
 	if (ArgUtil.is(data)) {
-	    ChannelConfig config = pmEnvironment.config().channels(channelId);
+	    ChannelConfig config = pmEnvironment.local().channel(channelId);
 	    if (config == null) {
 		config = new ChannelConfig();
 	    }
@@ -244,8 +245,8 @@ public class ConfigManager {
 
     public ChannelConfig removeChannelConfig(String channelId) {
 	if (ArgUtil.is(channelId)) {
-	    ChannelConfig channelConfig = pmEnvironment.config().channels(channelId);
-	    pmEnvironment.remove(channelConfig);
+	    ChannelConfig channelConfig = pmEnvironment.local().channel(channelId);
+	    pmEnvironment.removeChannel(channelConfig);
 	    this.refresh();
 	    return channelConfig;
 	}

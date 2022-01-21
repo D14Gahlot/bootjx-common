@@ -93,9 +93,9 @@ public class WAGupShupAgentConnector extends AbstractConnector<GupShupConfigDeta
     @Override
     public InboxMessage assignToAgent(InboxMessage inboxMessage) {
 
-	PMConfiguration config = environment.config();
+	PMConfiguration config = environment.local();
 	String channelId = PostManUtil.CHANNEL_ID(inboxMessage.contact());
-	ChannelConfig channelConfig = config.channels(channelId);
+	ChannelConfig channelConfig = config.channel(channelId);
 
 	if (ArgUtil.isEqual(inboxMessage.contact().getChannelType(), Channel.GUPSHUPAGENT.toString())) {
 	    gupShupAgentClient.assignToAgent(inboxMessage);

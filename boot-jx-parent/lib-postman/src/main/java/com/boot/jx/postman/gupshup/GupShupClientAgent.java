@@ -29,9 +29,9 @@ public class GupShupClientAgent extends GupShupClientAbstract {
 
     public Map<String, Object> sendViaAgent(IMessageExtended inboxMessage, String message) {
 
-	PMConfiguration config = environment.config();
+	PMConfiguration config = environment.local();
 	String channelId = PostManUtil.CHANNEL_ID(inboxMessage.contact());
-	ChannelConfig channelConfig = config.channels(channelId);
+	ChannelConfig channelConfig = config.channel(channelId);
 
 	GupShupAgentReq gupShupAgentReq = new GupShupAgentReq();
 	gupShupAgentReq.setMobile(inboxMessage.getFrom());
@@ -52,9 +52,9 @@ public class GupShupClientAgent extends GupShupClientAbstract {
 
     public Map<String, Object> assignToAgent(InboxMessage inboxMessage) {
 
-	PMConfiguration config = environment.config();
+	PMConfiguration config = environment.local();
 	String channelId = PostManUtil.CHANNEL_ID(inboxMessage.contact());
-	ChannelConfig channelConfig = config.channels(channelId);
+	ChannelConfig channelConfig = config.channel(channelId);
 
 	String waNumber = inboxMessage.getTo().get(0);
 	String mobile = inboxMessage.getFrom();

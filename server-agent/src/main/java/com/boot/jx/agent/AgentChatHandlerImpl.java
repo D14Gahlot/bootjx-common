@@ -98,7 +98,7 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 
     private AgentSessionDoc getAgentSessonAssigned(InboxMessage inboxMessage) {
 
-	String stickyLogic = environment.config().getPref("postman.agent.chat.stickysession")
+	String stickyLogic = environment.local().getPref("postman.agent.chat.stickysession")
 		.asString(PMConstants.CHAT_SESSION_STICKY.NONE);
 	long timeThen = System.currentTimeMillis() - chatClientConfig.getAgentSessionTimeout().toMillis();
 
@@ -127,17 +127,17 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 	    }
 	}
 
-	String assignmentRule = environment.config().getPref("postman.agent.chat.assignment")
+	String assignmentRule = environment.local().getPref("postman.agent.chat.assignment")
 		.asString(PMConstants.ASSIGNMENT_RULE.ROUND_ROBIN);
 
 	String assignedDept = ArgUtil.nonEmpty(inboxMessage.session().getDept(),
-		environment.config().agent().getDefaultTeamCode(), DEFAULT.NO_DEPT);
+		environment.local().agent().getDefaultTeamCode(), DEFAULT.NO_DEPT);
 	inboxMessage.session().setDept(assignedDept);
 
 	LOGGER.debug("ASSIGNMENT_RULE : No Assignment {} {}", assignmentRule, assignedDept);
 
 	if (PMConstants.ASSIGNMENT_RULE.STRICT_DEFAULT.equals(assignmentRule)) {
-	    String defAgentCode = environment.config().agent().defaultAgent(assignedDept);
+	    String defAgentCode = environment.local().agent().defaultAgent(assignedDept);
 	    AgentSessionDoc agent = mongoTemplate.findById(defAgentCode, AgentSessionDoc.class);
 	    LOGGER.debug("ASSIGNMENT_RULE : Default {} : {}", defAgentCode, agent);
 	    return agent;
@@ -156,7 +156,7 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 
 	    AgentSessionDoc avaialbleAgent = CollectionUtil.getOne(agents);
 
-	    String defAgentCode = environment.config().agent().defaultAgent(inboxMessage.session().getDept());
+	    String defAgentCode = environment.local().agent().defaultAgent(inboxMessage.session().getDept());
 	    if (ArgUtil.is(defAgentCode)) {
 		for (AgentSessionDoc agentSessionDoc : agents) {
 		    if (defAgentCode.equals(agentSessionDoc.getAgentCode())) {

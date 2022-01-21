@@ -53,14 +53,14 @@ public class InBoundControllerTW {
     public Map<String, String> onReceiveMessageGet(@RequestParam String crc_token,
 	    // V2Params
 	    @PathVariable String accountKey, @PathVariable String channelId, @PathVariable String channelKey) {
-	ChannelConfig channelConfig = pmEnvironment.config().channels(channelId);
+	ChannelConfig channelConfig = pmEnvironment.local().channel(channelId);
 	return twitterClient.verifyCRC(channelConfig, crc_token);
     }
 
     @RequestMapping(value = "/ext/crc/v2/tw/callback/{accountKey}/{channelId}/{channelKey}", method = RequestMethod.GET)
     public WebhookInfo triggerCRC(@PathVariable String accountKey, @PathVariable(required = false) String channelId,
 	    @PathVariable String channelKey) throws InterruptedException, TwitterException {
-	ChannelConfig channelConfig = pmEnvironment.config().channels(channelId);
+	ChannelConfig channelConfig = pmEnvironment.local().channel(channelId);
 	TwitterClientContext ctx = twitterClient.getContext(channelConfig);
 	ctx.getWebhookManager().triggerCRC();
 	WebhookInfo x = ctx.getWebhookManager().getWebhookInfo();
@@ -72,7 +72,7 @@ public class InBoundControllerTW {
     @RequestMapping(value = "/ext/inbound/tw/callback/{channelId}", method = { RequestMethod.POST, })
     public List<InboxMessage> onReceiveMessagePost(@PathVariable String channelId,
 	    @RequestBody Map<String, Object> update) throws InterruptedException, TwitterException {
-	ChannelConfig channelConfig = pmEnvironment.config().channels(channelId);
+	ChannelConfig channelConfig = pmEnvironment.local().channel(channelId);
 	List<InboxMessage> tmr = twitterConnector.process(channelConfig, update);
 	if (tmr != null && !tmr.isEmpty()) {
 	    for (InboxMessage event : tmr) {
@@ -88,7 +88,7 @@ public class InBoundControllerTW {
     @RequestMapping(value = "/ext/inbound/tw/get", method = RequestMethod.GET)
     public List<InboxMessage> pollDirectMessages(@RequestParam(required = false) String channelId)
 	    throws InterruptedException, TwitterException {
-	ChannelConfig channelConfig = pmEnvironment.config().channels(channelId);
+	ChannelConfig channelConfig = pmEnvironment.local().channel(channelId);
 	TwitterClientContext ctx = twitterClient.getContext(channelConfig);
 	List<InboxMessage> tmr = twitterConnector.fetch(channelConfig);
 	if (tmr != null && !tmr.isEmpty()) {
@@ -103,7 +103,7 @@ public class InBoundControllerTW {
     @RequestMapping(value = "/ext/inbound/tw/registerwebhook", method = { RequestMethod.POST, RequestMethod.GET })
     public WebhookInfo registerwebhook(@RequestParam(required = false) String channelId)
 	    throws InterruptedException, TwitterException {
-	ChannelConfig channelConfig = pmEnvironment.config().channels(channelId);
+	ChannelConfig channelConfig = pmEnvironment.local().channel(channelId);
 	TwitterClientContext ctx = twitterClient.getContext(channelConfig);
 	twitterConnector.registerWebhook(channelConfig);
 	WebhookInfo x = ctx.getWebhookManager().getWebhookInfo();

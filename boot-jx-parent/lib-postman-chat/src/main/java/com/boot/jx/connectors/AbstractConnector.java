@@ -70,7 +70,7 @@ public abstract class AbstractConnector<CD extends AChannelDetails, P extends Ch
     @Override
     public ChannelConfig getChannelConfig(IMessage iMessage) {
 	String channelId = PostManUtil.CHANNEL_ID(iMessage.contact());
-	ChannelConfig channelConfig = environment.config().channels(channelId);
+	ChannelConfig channelConfig = environment.config().channel(channelId);
 	if (!ArgUtil.is(channelConfig) && !ContactType.WEBSITE.equals(iMessage.contact().type())) {
 	    ConnectorHandlerFactory.LOGGER.error(String.format("ChannelConfig not found for %s", channelId));
 	}
@@ -110,7 +110,7 @@ public abstract class AbstractConnector<CD extends AChannelDetails, P extends Ch
 	    OutboxMessage outboxMessage) {
 
 	outboxMessage.model().put("contact", ChatDTOUtil.getContactMeta(chatContactDoc));
-	outboxMessage.model().put("global", environment.config().global().toObject());
+	outboxMessage.model().put("global", environment.local().globalVars().toObject());
 	
 	// Model Data Merge
 	MapModel model = MapModel.from(outboxMessage.getModel());

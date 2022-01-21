@@ -63,7 +63,7 @@ public class TmplHSMController {
     public ApiResponse<HSMTemplate3rdParty, Object> listWabaTemplates(@RequestParam String channelId,
 	    @RequestParam(required = false) String templateCode,
 	    @RequestParam(required = false, defaultValue = "false") boolean sync) {
-	ChannelConfig channelConfig = pmEnvironment.config().channels(channelId);
+	ChannelConfig channelConfig = pmEnvironment.local().channel(channelId);
 	if (sync) {
 	    thirdPartyTmplManager.refreshWA360Templates(channelConfig);
 	}
@@ -73,7 +73,7 @@ public class TmplHSMController {
 
     @RequestMapping(value = "/api/tmpl/hsm/waba_templates", method = { RequestMethod.POST })
     public ApiResponse<HSMTemplate3rdParty, Object> createWabaTemplates(@RequestBody HSMTemplate3rdParty extTemplate) {
-	ChannelConfig channelConfig = pmEnvironment.config().channels(extTemplate.getChannelId());
+	ChannelConfig channelConfig = pmEnvironment.local().channel(extTemplate.getChannelId());
 
 	HSMTemplate3rdParty temp = null;
 	boolean editable = true;
@@ -112,8 +112,8 @@ public class TmplHSMController {
 	    @RequestParam(required = false) String channelId) {
 	HSMTemplate3rdParty temp = mongoTemplate.findById(id, HSMTemplate3rdParty.class);
 	if (ArgUtil.is(temp)) {
-	    ChannelConfig channelConfig = pmEnvironment.config()
-		    .channels(ArgUtil.nonEmpty(channelId, temp.getChannelId()));
+	    ChannelConfig channelConfig = pmEnvironment.local()
+		    .channel(ArgUtil.nonEmpty(channelId, temp.getChannelId()));
 	    thirdPartyTmplManager.deleteWA360Templates(channelConfig, temp);
 	}
 	return new ApiResponse<HSMTemplate3rdParty, Object>().data(temp);

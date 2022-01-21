@@ -51,7 +51,7 @@ public class XmsController {
 	    return false;
 	}
 
-	ClientApiKey apiKeyConfig = pmEnvironment.config().clientApiKey(apiKey);
+	ClientApiKey apiKeyConfig = pmEnvironment.local().clientApiKey(apiKey);
 	if (ArgUtil.is(apiKeyConfig) && ArgUtil.areEqual(apiKey, apiKeyConfig.getKey())) {
 	    token = builder.toHmac().output();
 	    commonHttpRequest.setCookie("swagger.auth.apiId", apiId);

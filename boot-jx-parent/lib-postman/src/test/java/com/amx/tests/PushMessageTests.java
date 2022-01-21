@@ -21,7 +21,7 @@ public class PushMessageTests { // Noncompliant
     static String FORMAT = "%10s : %-10s : %10s";
 
     public static void main(String[] args) throws ParseException {
-	PMConfiguration config = new PMConfiguration();
+	PMConfiguration config = PMConfiguration.instance();
 	String key = "@$test.s";
 	TwitterConfigDetails tw = new TwitterConfigDetails();
 	tw.setHandler(key);

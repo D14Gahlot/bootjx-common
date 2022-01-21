@@ -8,6 +8,8 @@ import org.springframework.stereotype.Component;
 import com.boot.jx.AppConfig;
 import com.boot.jx.AppContextUtil;
 import com.boot.jx.dict.ContactType;
+import com.boot.jx.postman.PMConfiguration.PMConfigurationModel;
+import com.boot.jx.postman.PMConfiguration.PMConfigurationWrappper;
 import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.scope.tnt.Tenants;
 import com.boot.model.MapModel.EntryMeta;
@@ -30,9 +32,9 @@ public class PMEnvironment {
 
     public static interface PMEnvironmentProvider {
 
-	public PMConfiguration config();
+	public PMConfigurationModel local();
 
-	public PMConfiguration shared();
+	public PMConfigurationModel shared();
 
 	public void config(ChannelConfig config);
 
@@ -195,38 +197,34 @@ public class PMEnvironment {
     @Autowired(required = false)
     private PMEnvironmentProvider provider;
 
-    public PMConfiguration config() {
-	PMConfiguration config = null;
+    public PMConfigurationModel local() {
+	PMConfigurationModel config = null;
 	if (ArgUtil.is(provider)) {
-	    config = provider.config();
+	    config = provider.local();
 	}
 	if (config == null) {
-	    config = new PMConfiguration();
+	    config = PMConfiguration.instance();
 	}
 	return config;
     }
 
-    public PMConfiguration shared() {
-	PMConfiguration config = null;
+    public PMConfigurationModel shared() {
+	PMConfigurationModel config = null;
 	if (ArgUtil.is(provider)) {
 	    config = provider.shared();
 	}
 	if (config == null) {
-	    config = new PMConfiguration();
+	    config = PMConfiguration.instance();
 	}
 	return config;
     }
 
-    public void config(ChannelConfig config) {
+    public PMConfiguration config() {
+	PMConfigurationWrappper config = new PMConfigurationWrappper().appConfig(appConfig);
 	if (ArgUtil.is(provider)) {
-	    provider.config(config);
+	    return config.local(provider.local()).shared(provider.shared());
 	}
-    }
-
-    public void remove(ChannelConfig config) {
-	if (ArgUtil.is(provider)) {
-	    provider.remove(config);
-	}
+	return config;
     }
 
     public void initConfig() {
@@ -239,7 +237,7 @@ public class PMEnvironment {
     private AppConfig appConfig;
 
     public PMConfigurationObject keyEntry(String key) {
-	PMConfigurationObject configObject = this.config().prefs().get(key);
+	PMConfigurationObject configObject = this.local().prefs().get(key);
 
 	String tnt = AppContextUtil.getTenant();
 	if (ArgUtil.isEmpty(configObject) && !Tenants.isDefault(tnt)) {
@@ -260,6 +258,18 @@ public class PMEnvironment {
 
     public PMConfigurationObject keyEntry(EntryMeta entryMeta) {
 	return keyEntry(entryMeta.getKey());
+    }
+
+    public void addChannel(ChannelConfig config) {
+	if (ArgUtil.is(provider)) {
+	    provider.config(config);
+	}
+    }
+
+    public void removeChannel(ChannelConfig config) {
+	if (ArgUtil.is(provider)) {
+	    provider.remove(config);
+	}
     }
 
 }

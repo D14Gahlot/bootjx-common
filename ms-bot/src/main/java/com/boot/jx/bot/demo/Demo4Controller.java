@@ -104,7 +104,7 @@ public class Demo4Controller extends CommonBotController {
 	data.put("name", chatContext.getContact().getName());
 	data.put("phone", ArgUtil.nonEmpty(chatContext.getContact().getPhone(), chatContext.getContact().getEmail()));
 
-	SafeKeyHashMap<Object> globalVars = pmEnvironment.config().global();
+	SafeKeyHashMap<Object> globalVars = pmEnvironment.local().globalVars();
 	String templateCode = globalVars.keyEntry("sales_alert_template").asString();
 
 	String lane = globalVars.keyEntry("sales_alert_channel").asString();

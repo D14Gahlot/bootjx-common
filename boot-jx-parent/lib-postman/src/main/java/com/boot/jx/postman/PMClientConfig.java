@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 import com.boot.jx.AppConfig;
 import com.boot.jx.AppContextUtil;
 import com.boot.jx.http.CommonHttpRequest;
+import com.boot.jx.postman.PMConfiguration.PMConfigurationModel;
 import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.utils.ArgUtil;
@@ -71,15 +72,15 @@ public class PMClientConfig {
 
     public String getDefaultSender() {
 	return environment.keyEntry("postman.bot.name")
-		.asString(ArgUtil.parseAsString(environment.config().agent().getDefaultBotName(), defaultSender));
+		.asString(ArgUtil.parseAsString(environment.local().agent().getDefaultBotName(), defaultSender));
     }
 
     public String getContactDetailsUrl() {
-	return environment.config().getPref("postman.contact.details.url").asString(contactDetailsUrl);
+	return environment.local().getPref("postman.contact.details.url").asString(contactDetailsUrl);
     }
 
     public String getChatIdleTimeout() {
-	return environment.config().getPref("postman.chat.idle.timeout").asString(chatIdleTimeout);
+	return environment.local().getPref("postman.chat.idle.timeout").asString(chatIdleTimeout);
     }
 
     public String getInboundForwardUrl() {
@@ -95,7 +96,7 @@ public class PMClientConfig {
     }
 
     public String getChatSessionTimeout() {
-	return environment.config().getPref(PROPERTIES.POSTMAN_CHAT_SESSION_TIMEOUT).asString(chatSessionTimeout);
+	return environment.local().getPref(PROPERTIES.POSTMAN_CHAT_SESSION_TIMEOUT).asString(chatSessionTimeout);
     }
 
     public TimePeriod getAgentSessionTimeout() {
@@ -117,7 +118,7 @@ public class PMClientConfig {
     }
 
     public String getWebhookUrl(ChannelConfig channelConfig) {
-	PMConfiguration config = environment.config();
+	PMConfigurationModel config = environment.local();
 	String webhookUrl = getWebhookBase(channelConfig);
 	return String.format("%s/%s", webhookUrl,
 		PostManUtil.CHANNEL_CALLBACK_PATH(config.getAccountKey(), channelConfig));

@@ -1,9 +1,11 @@
 package com.boot.jx.postman.model;
 
 import java.io.Serializable;
+import java.util.List;
 
 import com.boot.jx.postman.model.Message.Status;
 import com.boot.jx.postman.model.MessageDefinitions.Contactable;
+import com.boot.jx.swagger.ApiMockModelProperty;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -20,6 +22,7 @@ public class MessageReport implements Serializable {
     protected long watermarkStamp;
     private Status status = null;
     private String reason = null;
+    private List<MessageReportError> errors;
 
     public String getMessageId() {
 	return messageId;
@@ -90,6 +93,64 @@ public class MessageReport implements Serializable {
 
     public void setWatermarkStamp(long watermarkStamp) {
 	this.watermarkStamp = watermarkStamp;
+    }
+
+    public List<MessageReportError> getErrors() {
+	return errors;
+    }
+
+    public void setErrors(List<MessageReportError> errors) {
+	this.errors = errors;
+    }
+
+    public static class MessageReportError {
+
+	@ApiMockModelProperty(example = "470", value = "Error code.\n")
+	public String code;
+
+	@ApiMockModelProperty(
+		example = "Failed to send message because you are outside the support window for freeform messages to this user. Please use a valid HSM notification or reconsider.",
+		value = "Error code")
+	public String title;
+
+	@ApiMockModelProperty(value = "Error details provided, if available/applicable", required = false)
+	public String details;
+
+	@ApiMockModelProperty(example = "https://developers.facebook.com/docs/whatsapp/api/errors#error",
+		value = "Location for error detail", required = false)
+	public String href;
+
+	public String getCode() {
+	    return code;
+	}
+
+	public void setCode(String code) {
+	    this.code = code;
+	}
+
+	public String getTitle() {
+	    return title;
+	}
+
+	public void setTitle(String title) {
+	    this.title = title;
+	}
+
+	public String getDetails() {
+	    return details;
+	}
+
+	public void setDetails(String details) {
+	    this.details = details;
+	}
+
+	public String getHref() {
+	    return href;
+	}
+
+	public void setHref(String href) {
+	    this.href = href;
+	}
     }
 
 }

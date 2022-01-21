@@ -3,6 +3,7 @@ package com.boot.jx.postman.model.ext;
 import java.util.List;
 
 import com.boot.jx.postman.model.Message.Status;
+import com.boot.jx.postman.model.MessageReport.MessageReportError;
 import com.boot.jx.swagger.ApiMockModelProperty;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -47,6 +48,6 @@ public class InBoundMsgStatus {
 	public String href;
     }
 
-    public List<InBoundMsgStatusError> errors;
+    public List<MessageReportError> errors;
 
 }

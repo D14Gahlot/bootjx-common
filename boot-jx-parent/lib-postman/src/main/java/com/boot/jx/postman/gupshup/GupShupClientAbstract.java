@@ -50,7 +50,7 @@ public abstract class GupShupClientAbstract {
 
 	String channelId = PostManUtil.CHANNEL_ID(CHANNEL_TYPE.WA_GUPSHUP, req.getWaNumber());
 
-	ChannelConfig config = environment.config().channels(channelId);
+	ChannelConfig config = environment.config().channel(channelId);
 
 	if (ArgUtil.isEmpty(config)) {
 	    throw new PostManException("No Config for lane " + req.getWaNumber());

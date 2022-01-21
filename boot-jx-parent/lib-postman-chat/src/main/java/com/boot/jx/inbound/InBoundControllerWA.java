@@ -212,8 +212,8 @@ public class InBoundControllerWA {
 	    @PathVariable(required = false) String channelId, @PathVariable(required = false) String channelKey,
 	    @RequestBody Map<String, Object> data) {
 	MapModel map = MapModel.from(data);
-	PMConfiguration config = pmEnvironment.config();
-	ChannelConfig channelConfig = config.channels(channelId);
+	PMConfiguration config = pmEnvironment.local();
+	ChannelConfig channelConfig = config.channel(channelId);
 
 	try {
 	    MessageBoxEvent messageBoxEvent = w360Connector.inboundMessageBoxEvent(channelConfig, map,

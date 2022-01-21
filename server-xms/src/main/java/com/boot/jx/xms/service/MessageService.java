@@ -34,7 +34,7 @@ public class MessageService {
     private PMEnvironment pmEnvironment;
 
     public OutBoundReciept send(OutBoundMsg message) {
-	ChannelConfig channel = pmEnvironment.config().channels(message.getChannelId());
+	ChannelConfig channel = pmEnvironment.local().channel(message.getChannelId());
 
 	if (!ArgUtil.is(channel)) {
 	    ApiResponseUtil.throwInputException(new ApiFieldError().field("channelId").obzect("OutBoundMsg")

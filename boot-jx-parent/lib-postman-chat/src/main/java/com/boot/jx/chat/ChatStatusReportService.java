@@ -16,6 +16,8 @@ import org.springframework.stereotype.Component;
 import com.boot.jx.AppContextUtil;
 import com.boot.jx.cache.CacheBox;
 import com.boot.jx.def.ICacheBox;
+import com.boot.jx.inbound.InBound.InBoundHandler;
+import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.model.MessageReport;
 import com.boot.jx.postman.store.MessageStore;
 import com.boot.jx.stomp.StompTunnelService;
@@ -45,6 +47,9 @@ public class ChatStatusReportService {
     @Autowired(required = false)
     private RedissonClient redisson;
     private CacheBox<String> proxyManager;
+
+    @Autowired(required = false)
+    private InBoundHandler inBoundHandler;
 
     public ICacheBox<String> proxy() {
 	if (proxyManager == null) {
@@ -90,8 +95,8 @@ public class ChatStatusReportService {
 
     public void update(List<MessageReport> batch) {
 	for (MessageReport messageReport : batch) {
-	    
-	    //Check for Proxy Account
+
+	    // Check for Proxy Account
 	    String contactId = PostManUtil.createContactId(messageReport.contact());
 	    if (ArgUtil.is(contactId)) {
 		String proxy = proxy().get(contactId);
@@ -105,9 +110,15 @@ public class ChatStatusReportService {
 		    AppContextUtil.init();
 		}
 	    }
-	    
+
 	    messageStore.updateStatus(messageReport);
-	    stompTunnelService.sendToAll("/message/update/status", messageReport);
+
+	    if (ArgUtil.is(inBoundHandler)) {
+		inBoundHandler.handle(messageReport);
+	    } else {
+		stompTunnelService.sendToAll("/message/update/status", messageReport);
+	    }
+
 	}
     }
 

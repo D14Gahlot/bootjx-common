@@ -111,7 +111,7 @@ public class AgentMetaController {
     @ResponseBody
     @RequestMapping(value = "/api/tmpl/pushtemplate", method = { RequestMethod.GET })
     public ApiResponse<HSMTemplateDoc, Object> listPushTemplates(@RequestParam String channelId) {
-	ChannelConfig channelConfig = pmEnvironment.config().channels(channelId);
+	ChannelConfig channelConfig = pmEnvironment.local().channel(channelId);
 
 	return ApiResponse.buildResults(mongoTemplate.findAll(HSMTemplateDoc.class));
     }

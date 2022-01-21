@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 
 import com.boot.jx.AppConfigPackage.AppSharedConfig;
 import com.boot.jx.AppContextUtil;
-import com.boot.jx.postman.PMConfiguration;
+import com.boot.jx.postman.PMConfiguration.PMConfigurationModel;
 import com.boot.jx.postman.PMEnvironment.PMConfigurationObject;
 import com.boot.jx.postman.PMEnvironment.PMEnvironmentProvider;
 import com.boot.jx.postman.doc.PMConfigurationDoc;
@@ -38,7 +38,7 @@ public class PMEnvironmentProviderImpl implements PMEnvironmentProvider, AppShar
     private ConfigStore configStore;
 
     @Override
-    public PMConfiguration config() {
+    public PMConfigurationModel local() {
 	String tnt = AppContextUtil.getTenant();
 	if (localConfigMap.containsKey(tnt)) {
 	    return localConfigMap.get(tnt);
@@ -64,7 +64,7 @@ public class PMEnvironmentProviderImpl implements PMEnvironmentProvider, AppShar
 
 	    List<CompanyVarsConfigDoc> companyVars = configStore.findAll(CompanyVarsConfigDoc.class);
 
-	    SafeKeyHashMap<Object> company = prefs.global();
+	    SafeKeyHashMap<Object> company = prefs.globalVars();
 
 	    for (CompanyVarsConfigDoc companyVar : companyVars) {
 		company.put(companyVar.getKey(), companyVar.getValue());
@@ -81,6 +81,13 @@ public class PMEnvironmentProviderImpl implements PMEnvironmentProvider, AppShar
 		    newSharedConfiguration.setPref(entry.getValue());
 		    // }
 		}
+		List<ChannelConfigDoc> sandboxChannels = configStore.findAll(ChannelConfigDoc.class);
+		for (ChannelConfigDoc channel : sandboxChannels) {
+		    if (channel.isSandbox()) {
+			newSharedConfiguration.channels(channel);
+		    }
+		}
+
 		sharedConfiguration = newSharedConfiguration;
 	    }
 
@@ -127,7 +134,7 @@ public class PMEnvironmentProviderImpl implements PMEnvironmentProvider, AppShar
     }
 
     @Override
-    public PMConfiguration shared() {
+    public PMConfigurationModel shared() {
 	return sharedConfiguration;
     }
 
@@ -138,7 +145,7 @@ public class PMEnvironmentProviderImpl implements PMEnvironmentProvider, AppShar
 	AppContextUtil.getTraceId(true, true);
 	AppContextUtil.resetTraceTime();
 	AppContextUtil.init();
-	config();
+	local();
     }
 
     @Override

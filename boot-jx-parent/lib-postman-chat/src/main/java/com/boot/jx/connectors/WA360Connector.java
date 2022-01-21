@@ -1,5 +1,6 @@
 package com.boot.jx.connectors;
 
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -25,6 +26,7 @@ import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.Message.Status;
 import com.boot.jx.postman.model.MessageBoxEvent;
 import com.boot.jx.postman.model.MessageReport;
+import com.boot.jx.postman.model.MessageReport.MessageReportError;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.postman.plugin.ChannelPluginProvider;
@@ -215,11 +217,18 @@ public class WA360Connector extends AbstractConnector<WA360ConfigDetails, WA360P
 	    report.setStatus(Status.DELTD);
 	} else if ("failed".equals(status)) {
 	    report.setStatus(Status.FAILD);
+
 	    String errorCode = requestMap.pathEntry("errors/[0]/code").asString();
 	    if (ArgUtil.areEqual(errorCode, "470")) {
 		report.setStatus(Status.CCWIN);
 	    }
 	    report.setReason("Code:" + errorCode);
+
+	    List<MessageReportError> errors = requestMap.keyEntry("errors")
+		    .asList(MessageReport.MessageReportError.class);
+	    if (ArgUtil.is(errors)) {
+		report.setErrors(errors);
+	    }
 	}
 
 	return report;

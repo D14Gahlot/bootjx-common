@@ -43,7 +43,7 @@ public class InBoundControllerFB {
 	    @RequestHeader(required = false, value = "X-Hub-Signature") String signature,
 	    @PathVariable(required = false) String accountKey, @PathVariable(required = false) String channelId,
 	    @PathVariable(required = false) String channelKey) {
-	ChannelConfig channelConfig = pmEnvironment.config().channels(channelId);
+	ChannelConfig channelConfig = pmEnvironment.local().channel(channelId);
 	return facebooClient.registerWebhook(channelConfig, token, challenge);
     }
 

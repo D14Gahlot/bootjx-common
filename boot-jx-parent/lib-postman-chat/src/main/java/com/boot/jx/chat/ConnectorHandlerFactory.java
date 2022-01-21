@@ -260,8 +260,8 @@ public class ConnectorHandlerFactory extends ScopedBeanFactory<String, Connector
      */
     public void onChannelUpdate(String channelType, String lane) {
 	String channelId = PostManUtil.CHANNEL_ID(channelType, lane);
-	PMConfiguration config = environment.config();
-	ChannelConfig channelConfig = config.channels(channelId);
+	PMConfiguration config = environment.local();
+	ChannelConfig channelConfig = config.channel(channelId);
 	onChannelUpdate(channelConfig);
     }
 
@@ -295,7 +295,7 @@ public class ConnectorHandlerFactory extends ScopedBeanFactory<String, Connector
 		chatContactDoc, inboxMessage, outboxMessage);
 
 	String channelId = PostManUtil.CHANNEL_ID(outboxMessage.contact());
-	ChannelConfig channelConfig = environment.config().channels(channelId);
+	ChannelConfig channelConfig = environment.local().channel(channelId);
 
 	try {
 	    if (ArgUtil.is(channelConfig) || ContactType.WEBSITE.equals(outboxMessage.contact().type())) {

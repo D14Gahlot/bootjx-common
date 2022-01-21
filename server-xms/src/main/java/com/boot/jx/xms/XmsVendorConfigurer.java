@@ -31,7 +31,7 @@ public class XmsVendorConfigurer implements TenantAuthFilter {
 	    ApiResponseUtil.addError(message);
 	    return false;
 	}
-	ClientApiKey apiKeyConfig = pmEnvironment.config().clientApiKey(apiKey);
+	ClientApiKey apiKeyConfig = pmEnvironment.local().clientApiKey(apiKey);
 	if (!ArgUtil.is(apiKeyConfig)) {
 	    String message = "Invalid " + XmsConstants.X_API_KEY;
 	    ApiResponseUtil.addError(message);

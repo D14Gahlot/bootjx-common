@@ -22,6 +22,7 @@ public class ChannelConfig extends AChannelConfig {
     private WA360ConfigDetails wa360d;
     private WebConfigDetails web;
 
+    private boolean isSandbox;
     private boolean isDisabled;
     private boolean isPushAllowed;
     private boolean isPushOnlyApproved;
@@ -149,6 +150,14 @@ public class ChannelConfig extends AChannelConfig {
 
     public void setPushToNewContactAllowed(boolean isPushToNewContactAllowed) {
 	this.isPushToNewContactAllowed = isPushToNewContactAllowed;
+    }
+
+    public boolean isSandbox() {
+	return isSandbox;
+    }
+
+    public void setSandbox(boolean isSandbox) {
+	this.isSandbox = isSandbox;
     }
 
 }

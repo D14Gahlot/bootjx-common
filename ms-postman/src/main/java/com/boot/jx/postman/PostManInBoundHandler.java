@@ -13,14 +13,15 @@ import com.boot.jx.postman.PMConstants.MESSAGE_FORMAT_TYPE;
 import com.boot.jx.postman.PMEnvironment.PMConfigurationObject;
 import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.InboxMessage;
+import com.boot.jx.postman.model.MessageReport;
 import com.boot.jx.postman.model.ext.CommonMsgText;
 import com.boot.jx.postman.model.ext.InBoundContact;
 import com.boot.jx.postman.model.ext.InBoundMeta;
 import com.boot.jx.postman.model.ext.InBoundMsg;
 import com.boot.jx.postman.model.ext.InBoundMsgMedia;
+import com.boot.jx.postman.model.ext.InBoundMsgStatus;
 import com.boot.jx.postman.model.ext.InBoundWrapper;
 import com.boot.jx.rest.RestService;
-import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
 
@@ -92,6 +93,35 @@ public class PostManInBoundHandler implements InBoundHandler {
 	    chatClient.forward(inboxMessage);
 	}
 
+    }
+
+    @Override
+    public void handle(MessageReport messageReport) {
+	PMConfigurationObject webhookEntry = pmEnvironment
+		.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_CHAT_INBOUND_WEBHOOK);
+
+	if (webhookEntry.exists()) {
+	    LOGGER.debug("Forwarding MessageReport to Xternal Service ");
+	    try {
+		InBoundMsgStatus status = new InBoundMsgStatus();
+		status.contactId = messageReport.contact().getContactId();
+		status.messageId = messageReport.getMessageId();
+		status.messageIdExt = messageReport.getMessageIdExt();
+		status.timestamp = messageReport.getChangeStamp();
+		status.status = messageReport.getStatus();
+		status.errors = messageReport.getErrors();
+
+		InBoundWrapper wrap = new InBoundWrapper();
+		wrap.meta = new InBoundMeta().domain(AppContextUtil.getTenant())
+			.server(pmEnvironment.keyEntry(ConfigConstants.APP_KEY.PROP_SERVICE_DOMAIN).asString());
+		wrap.contacts = CollectionUtil.asList(InBoundContact.from(messageReport.contact()));
+		wrap.statuses = CollectionUtil.asList(status);
+		restService.ajax(webhookEntry.asString()).post(wrap).asMapModel();
+	    } catch (Exception e) {
+		LOGGER.error("Error while Trying to HIT " + webhookEntry.asString(), e);
+	    }
+
+	}
     }
 
 }

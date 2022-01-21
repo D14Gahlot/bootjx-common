@@ -45,7 +45,7 @@ public class InBoundControllerIG {
 	    // V2Params
 	    @PathVariable(required = false) String channelType, @PathVariable(required = false) String accountKey,
 	    @PathVariable(required = false) String channelId, @PathVariable(required = false) String channelKey) {
-    	ChannelConfig channelConfig = pmEnvironment.config().channels(channelId);
+    	ChannelConfig channelConfig = pmEnvironment.local().channel(channelId);
     	return instaClient.registerWebhook(channelConfig, token, challenge);
     }
 
