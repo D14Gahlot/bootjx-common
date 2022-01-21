@@ -147,7 +147,6 @@ public class AppCommonConfigImpl implements AppCommonConfig {
 	} catch (Exception e) {
 	    LOGGER.error("pmEnvironment.reload", e);
 	}
-
     }
 
     @Override

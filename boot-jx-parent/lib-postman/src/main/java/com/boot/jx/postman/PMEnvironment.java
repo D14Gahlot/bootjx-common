@@ -38,7 +38,7 @@ public class PMEnvironment {
 
 	public void config(ChannelConfig config);
 
-	public void remove(ChannelConfig config);
+	public void update(ChannelConfig config, String action);
 
 	public void initConfig();
     }
@@ -266,9 +266,9 @@ public class PMEnvironment {
 	}
     }
 
-    public void removeChannel(ChannelConfig config) {
+    public void updateChannel(ChannelConfig config, String action) {
 	if (ArgUtil.is(provider)) {
-	    provider.remove(config);
+	    provider.update(config, action);
 	}
     }
 

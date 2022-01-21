@@ -88,7 +88,14 @@ public class CPanelController {
     @ResponseBody
     @RequestMapping(value = "/api/config/channel/{channelId}", method = { RequestMethod.DELETE })
     public ApiResponse<ChannelConfig, Object> deleteChannelConfig(@PathVariable String channelId) {
-	return ApiResponse.buildResults(configManager.removeChannelConfig(channelId));
+	return ApiResponse.buildResults(configManager.updateChannelConfig(channelId, "remove"));
+    }
+
+    @ResponseBody
+    @RequestMapping(value = "/api/config/channel/{channelId}/{action}", method = { RequestMethod.GET })
+    public ApiResponse<ChannelConfig, Object> sandboxChannelConfig(@PathVariable String channelId,
+	    @PathVariable String action) {
+	return ApiResponse.buildResults(configManager.updateChannelConfig(channelId, action));
     }
 
     @JsonView(PMEnvironment.PublicProperty.class)

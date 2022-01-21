@@ -19,7 +19,6 @@ import com.boot.jx.chat.ConnectorHandlerFactory;
 import com.boot.jx.common.impl.ConfigMeta;
 import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.jx.postman.PMClientConfig;
-import com.boot.jx.postman.PMConfiguration;
 import com.boot.jx.postman.PMConfiguration.PMConfigurationModel;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PMEnvironment.AChannelDetails;
@@ -243,10 +242,10 @@ public class ConfigManager {
 	return getChannelConfig(channelId);
     }
 
-    public ChannelConfig removeChannelConfig(String channelId) {
+    public ChannelConfig updateChannelConfig(String channelId, String action) {
 	if (ArgUtil.is(channelId)) {
 	    ChannelConfig channelConfig = pmEnvironment.local().channel(channelId);
-	    pmEnvironment.removeChannel(channelConfig);
+	    pmEnvironment.updateChannel(channelConfig, action);
 	    this.refresh();
 	    return channelConfig;
 	}

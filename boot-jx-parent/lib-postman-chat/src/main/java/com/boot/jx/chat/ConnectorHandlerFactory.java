@@ -295,7 +295,7 @@ public class ConnectorHandlerFactory extends ScopedBeanFactory<String, Connector
 		chatContactDoc, inboxMessage, outboxMessage);
 
 	String channelId = PostManUtil.CHANNEL_ID(outboxMessage.contact());
-	ChannelConfig channelConfig = environment.local().channel(channelId);
+	ChannelConfig channelConfig = environment.config().channel(channelId);
 
 	try {
 	    if (ArgUtil.is(channelConfig) || ContactType.WEBSITE.equals(outboxMessage.contact().type())) {

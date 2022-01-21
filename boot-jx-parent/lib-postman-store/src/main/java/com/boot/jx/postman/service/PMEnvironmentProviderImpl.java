@@ -112,13 +112,27 @@ public class PMEnvironmentProviderImpl implements PMEnvironmentProvider, AppShar
     }
 
     @Override
-    public void remove(ChannelConfig config) {
+    public void update(ChannelConfig config, String action) {
 	if (ArgUtil.is(config)) {
 	    ChannelConfigDoc configDoc = EntityDtoUtil.dtoToEntity(config, new ChannelConfigDoc());
-	    configStore.remove(configDoc);
-	    PMConfigurationDoc doc = getPMConfigurationDoc();
-	    doc.channels().remove(config.getChannelId());
-	    configStore.save(doc);
+	    if ("remove".equalsIgnoreCase(action)) {
+		configStore.remove(configDoc);
+		PMConfigurationDoc doc = getPMConfigurationDoc();
+		doc.channels().remove(config.getChannelId());
+		configStore.save(doc);
+	    } else if ("disable".equalsIgnoreCase(action)) {
+		configDoc.disabled(true);
+		configStore.save(configDoc);
+	    } else if ("enable".equalsIgnoreCase(action)) {
+		configDoc.disabled(false);
+		configStore.save(configDoc);
+	    } else if ("enable_sanbox".equalsIgnoreCase(action)) {
+		configDoc.setSandbox(true);
+		configStore.save(configDoc);
+	    } else if ("disable_sanbox".equalsIgnoreCase(action)) {
+		configDoc.setSandbox(false);
+		configStore.save(configDoc);
+	    }
 	} else {
 	    System.out.println("No Channel to delete");
 	}
