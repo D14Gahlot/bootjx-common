@@ -53,7 +53,7 @@ public class ConfigController {
     @ResponseBody
     @RequestMapping(value = "/api/config/channel/{channelId}", method = { RequestMethod.DELETE })
     public ApiResponse<ChannelConfig, Object> deleteChannelConfig(@PathVariable String channelId) {
-	return ApiResponse.buildResults(configManager.removeChannelConfig(channelId));
+	return ApiResponse.buildResults(configManager.updateChannelConfig(channelId, "remove"));
     }
 
     @JsonView(PMEnvironment.PublicProperty.class)
