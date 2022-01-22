@@ -48,11 +48,15 @@ public class PostManInBoundHandler implements InBoundHandler {
 	    LOGGER.debug("Forwarding InboxMessage to Xternal Service ");
 	    try {
 
+		InBoundContact contact = InBoundContact.from(inboxMessage.contact());
+
 		InBoundMsg msg = new InBoundMsg();
 		msg.messageId = inboxMessage.getMessageId();
 		msg.messageIdExt = inboxMessage.getMessageIdExt();
-		msg.contactFrom = inboxMessage.contact().getPhone();
-		msg.contactId = inboxMessage.contact().getContactId();
+		msg.contactFrom = ArgUtil.nonEmpty(inboxMessage.contact().getPhone(),
+			inboxMessage.contact().getEmail());
+		msg.contactId = contact.contactId;
+
 		msg.timestamp = inboxMessage.getTimestamp();
 		msg.tags = inboxMessage.getTags();
 		msg.input = inboxMessage.form();
@@ -83,7 +87,7 @@ public class PostManInBoundHandler implements InBoundHandler {
 		InBoundWrapper wrap = new InBoundWrapper();
 		wrap.meta = new InBoundMeta().domain(AppContextUtil.getTenant())
 			.server(pmEnvironment.keyEntry(ConfigConstants.APP_KEY.PROP_SERVICE_DOMAIN).asString());
-		wrap.contacts = CollectionUtil.asList(InBoundContact.from(inboxMessage.contact()));
+		wrap.contacts = CollectionUtil.asList(contact);
 		wrap.messages = CollectionUtil.asList(msg);
 		restService.ajax(webhookEntry.asString()).post(wrap).asMapModel();
 	    } catch (Exception e) {
