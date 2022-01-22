@@ -16,6 +16,7 @@ import com.boot.jx.postman.PMEnvironment.AChannelDetails;
 import com.boot.jx.postman.PMEnvironment.PMConfigurationObject;
 import com.boot.jx.xms.XmsConstants.ApiClientParams;
 import com.boot.jx.xms.dto.WebhookUrlRequest;
+import com.fasterxml.jackson.annotation.JsonView;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -45,8 +46,9 @@ public class ConfigApiV1 {
     @ApiClientParams
     @ResponseBody
     @RequestMapping(value = "/api/v1/config/channels", method = { RequestMethod.POST })
+    @JsonView(PMEnvironment.PublicProperty.class)
     public ApiResponse<AChannelDetails, Object> getChannels(
 	    @RequestParam(required = false, defaultValue = "false") boolean sabdnox) {
-	return ApiResponse.buildResults(pmEnvironment.local().listChannels());
+	return ApiResponse.buildResults(pmEnvironment.config().listChannels());
     }
 }

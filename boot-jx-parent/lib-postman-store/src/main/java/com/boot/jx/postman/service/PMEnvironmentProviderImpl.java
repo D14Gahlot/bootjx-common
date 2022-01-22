@@ -126,10 +126,10 @@ public class PMEnvironmentProviderImpl implements PMEnvironmentProvider, AppShar
 	    } else if ("enable".equalsIgnoreCase(action)) {
 		configDoc.disabled(false);
 		configStore.save(configDoc);
-	    } else if ("enable_sanbox".equalsIgnoreCase(action)) {
+	    } else if ("sandbox_enable".equalsIgnoreCase(action)) {
 		configDoc.setSandbox(true);
 		configStore.save(configDoc);
-	    } else if ("disable_sanbox".equalsIgnoreCase(action)) {
+	    } else if ("sandbox_disable".equalsIgnoreCase(action)) {
 		configDoc.setSandbox(false);
 		configStore.save(configDoc);
 	    }

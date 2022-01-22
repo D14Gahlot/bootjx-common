@@ -38,6 +38,7 @@ public class ConfigController {
 
     @ResponseBody
     @RequestMapping(value = "/api/config/channel/{channelType}", method = { RequestMethod.POST })
+    @JsonView(PMEnvironment.PublicProperty.class)
     public ApiResponse<ChannelConfig, Object> saveChannelConfig(@PathVariable CHANNEL_TYPE_ENUM channelType,
 	    @RequestParam(defaultValue = "false", required = false) boolean disabled,
 	    @RequestBody Map<String, Object> data) {
@@ -46,12 +47,14 @@ public class ConfigController {
 
     @ResponseBody
     @RequestMapping(value = "/api/config/channel/{channelId}", method = { RequestMethod.GET })
+    @JsonView(PMEnvironment.PublicProperty.class)
     public ApiResponse<ChannelConfig, Object> getChannelConfig(@PathVariable String channelId) {
 	return ApiResponse.buildResults(configManager.getChannelConfig(channelId));
     }
 
     @ResponseBody
     @RequestMapping(value = "/api/config/channel/{channelId}/{action}", method = { RequestMethod.GET })
+    @JsonView(PMEnvironment.PublicProperty.class)
     public ApiResponse<ChannelConfig, Object> updateChannelConfig(@PathVariable String channelId,
 	    @PathVariable String action) {
 	return ApiResponse.buildResults(configManager.updateChannelConfig(channelId, action));
@@ -59,6 +62,7 @@ public class ConfigController {
 
     @ResponseBody
     @RequestMapping(value = "/api/config/channel/{channelId}", method = { RequestMethod.DELETE })
+    @JsonView(PMEnvironment.PublicProperty.class)
     public ApiResponse<ChannelConfig, Object> deleteChannelConfig(@PathVariable String channelId) {
 	return ApiResponse.buildResults(configManager.updateChannelConfig(channelId, "remove"));
     }
