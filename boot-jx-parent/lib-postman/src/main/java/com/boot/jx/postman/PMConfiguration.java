@@ -40,6 +40,7 @@ public interface PMConfiguration extends Serializable {
 
 	private AgentConfig agent;
 	private String accountKey;
+	private long updateStamp;
 
 	// All Channels
 	public SafeKeyHashMap<ChannelConfig> channels() {
@@ -153,6 +154,14 @@ public interface PMConfiguration extends Serializable {
 
 	public void setAccountKey(String accountKey) {
 	    this.accountKey = accountKey;
+	}
+
+	public long getUpdateStamp() {
+	    return updateStamp;
+	}
+
+	public void setUpdateStamp(long updateStamp) {
+	    this.updateStamp = updateStamp;
 	}
 
 	public SafeKeyHashMap<Object> globalVars() {

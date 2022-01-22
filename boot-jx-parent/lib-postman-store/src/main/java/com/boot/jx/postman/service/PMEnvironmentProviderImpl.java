@@ -71,6 +71,7 @@ public class PMEnvironmentProviderImpl implements PMEnvironmentProvider, AppShar
 	    }
 
 	    if (ArgUtil.is(prefs)) {
+		prefs.setUpdateStamp(System.currentTimeMillis());
 		localConfigMap.put(tnt, prefs);
 	    }
 
