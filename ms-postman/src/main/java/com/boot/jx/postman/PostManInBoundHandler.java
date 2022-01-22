@@ -14,7 +14,7 @@ import com.boot.jx.postman.PMEnvironment.PMConfigurationObject;
 import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.MessageReport;
-import com.boot.jx.postman.model.ext.CommonMsgText;
+import com.boot.jx.postman.model.ext.CommonMsgText.InBoundMsgText;
 import com.boot.jx.postman.model.ext.InBoundContact;
 import com.boot.jx.postman.model.ext.InBoundMeta;
 import com.boot.jx.postman.model.ext.InBoundMsg;
@@ -79,9 +79,9 @@ public class PostManInBoundHandler implements InBoundHandler {
 		    }
 		} else {
 		    msg.type = MESSAGE_FORMAT_TYPE.TEXT;
-		    msg.text = new CommonMsgText();
+		    msg.text = new InBoundMsgText();
 		    msg.text.type = inboxMessage.getFormatSubType();
-		    msg.text.body = inboxMessage.getMessage();
+		    msg.text.setBody(inboxMessage.getMessage());
 		}
 
 		InBoundWrapper wrap = new InBoundWrapper();

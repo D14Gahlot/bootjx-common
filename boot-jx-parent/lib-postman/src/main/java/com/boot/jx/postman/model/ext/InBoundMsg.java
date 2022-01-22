@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.boot.jx.postman.model.TagDocument;
+import com.boot.jx.postman.model.ext.CommonMsgText.InBoundMsgText;
 import com.boot.jx.swagger.ApiMockModelProperty;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -30,9 +31,9 @@ public class InBoundMsg {
 	    allowableValues = "audio,document,image,location,system,text,video,voice")
     public String type;
 
-    public CommonMsgText text;
+    public InBoundMsgText text;
     @ApiMockModelProperty(hidden = true)
-    public CommonMsgText system;
+    public InBoundMsgText system;
     public InBoundMsgMedia video;
     public InBoundMsgMedia voice;
     public InBoundMsgMedia audio;
