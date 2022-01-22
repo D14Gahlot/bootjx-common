@@ -113,8 +113,8 @@ public class ConfigManager {
 		mapBuilder.put("meta", meta);
 	    }
 	}
-	mapBuilder.put("domain", this.pmEnvironment.local().getPref(key)) // Domain
-		.put("shared", this.pmEnvironment.shared().getPref(key)) // Shared
+	mapBuilder.put("domain", this.pmEnvironment.local().keyEntry(key)) // Domain
+		.put("shared", this.pmEnvironment.shared().keyEntry(key)) // Shared
 		.put("config", this.pmEnvironment.keyEntry(key)) // Resolved
 	;
 
@@ -160,7 +160,7 @@ public class ConfigManager {
 	case "postman.default.sender":
 	    doc.agent().setDefaultBotName(config.asString());
 	default:
-	    PMConfigurationObject configObject = doc.getPref(config.getKey());
+	    PMConfigurationObject configObject = doc.keyEntry(config.getKey());
 	    configObject.setKey(config.getKey());
 	    configObject.setValue(config.getValue());
 	    configObject.setShared(config.isShared());

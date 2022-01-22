@@ -23,7 +23,7 @@ public interface PMConfiguration extends Serializable {
 
     public ChannelConfig channel(String channelId);
 
-    public NodeEntry<Object> getPref(String string);
+    public NodeEntry<Object> keyEntry(String string);
 
     public List<AChannelDetails> listChannels();
 
@@ -122,7 +122,7 @@ public interface PMConfiguration extends Serializable {
 	    return new SafeKeyHashMap<PMConfigurationObject>(prefs);
 	}
 
-	public PMConfigurationObject getPref(String key) {
+	public PMConfigurationObject keyEntry(String key) {
 	    return prefs().getOrDefault(key, new PMConfigurationObject(key, null));
 	}
 
@@ -209,7 +209,7 @@ public interface PMConfiguration extends Serializable {
 	}
 
 	@Override
-	public PMConfigurationObject getPref(String key) {
+	public PMConfigurationObject keyEntry(String key) {
 	    PMConfigurationObject configObject = this.local().prefs().get(key);
 	    String tnt = AppContextUtil.getTenant();
 	    if (ArgUtil.isEmpty(configObject) && !Tenants.isDefault(tnt)) {
@@ -230,7 +230,11 @@ public interface PMConfiguration extends Serializable {
 
 	@Override
 	public List<AChannelDetails> listChannels() {
-	    return this.local().listChannels();
+	    List<AChannelDetails> list = this.local().listChannels();
+	    if (keyEntry("postman.chat.channel.sandbox").asBoolean()) {
+		list.addAll(this.shared().listChannels());
+	    }
+	    return list;
 	}
 
     }

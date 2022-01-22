@@ -51,6 +51,13 @@ public class ConfigController {
     }
 
     @ResponseBody
+    @RequestMapping(value = "/api/config/channel/{channelId}/{action}", method = { RequestMethod.GET })
+    public ApiResponse<ChannelConfig, Object> updateChannelConfig(@PathVariable String channelId,
+	    @PathVariable String action) {
+	return ApiResponse.buildResults(configManager.updateChannelConfig(channelId, action));
+    }
+
+    @ResponseBody
     @RequestMapping(value = "/api/config/channel/{channelId}", method = { RequestMethod.DELETE })
     public ApiResponse<ChannelConfig, Object> deleteChannelConfig(@PathVariable String channelId) {
 	return ApiResponse.buildResults(configManager.updateChannelConfig(channelId, "remove"));

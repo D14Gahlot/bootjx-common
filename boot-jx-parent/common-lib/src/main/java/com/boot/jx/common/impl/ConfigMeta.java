@@ -86,6 +86,7 @@ public class ConfigMeta implements Serializable {
     private String title;
     private String key;
     private String desc;
+    private String group;
     private String path;
     private Object defaultValue;
     private boolean optional;
@@ -350,6 +351,19 @@ public class ConfigMeta implements Serializable {
 
     public ConfigMeta desc(String desc) {
 	this.desc = desc;
+	return this;
+    }
+
+    public String getGroup() {
+	return group;
+    }
+
+    public void setGroup(String group) {
+	this.group = group;
+    }
+
+    public ConfigMeta group(String group) {
+	this.group = group;
 	return this;
     }
 }

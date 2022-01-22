@@ -5,12 +5,14 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.common.config.ConfigConstants;
 import com.boot.jx.common.config.ConfigManager;
 import com.boot.jx.postman.PMEnvironment;
+import com.boot.jx.postman.PMEnvironment.AChannelDetails;
 import com.boot.jx.postman.PMEnvironment.PMConfigurationObject;
 import com.boot.jx.xms.XmsConstants.ApiClientParams;
 import com.boot.jx.xms.dto.WebhookUrlRequest;
@@ -37,5 +39,14 @@ public class ConfigApiV1 {
 	config.setValue(req.url);
 	configManager.save(config);
 	return ApiResponse.buildResults(config).meta(req);
+    }
+
+    @ApiOperation(value = "Get Channels", notes = "${swagger.ConfigApiV1.getChannels.description}")
+    @ApiClientParams
+    @ResponseBody
+    @RequestMapping(value = "/api/v1/config/channels", method = { RequestMethod.POST })
+    public ApiResponse<AChannelDetails, Object> getChannels(
+	    @RequestParam(required = false, defaultValue = "false") boolean sabdnox) {
+	return ApiResponse.buildResults(pmEnvironment.local().listChannels());
     }
 }
