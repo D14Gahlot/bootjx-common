@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.boot.jx.api.AmxResponseSchemes.ApiDataMetaResponse;
+import com.boot.jx.api.AmxResponseSchemes.ApiResultsMetaCompactResponse;
 import com.boot.jx.api.AmxResponseSchemes.ApiResultsMetaResponse;
 import com.boot.jx.exception.IExceptionEnum;
 import com.boot.utils.CollectionUtil;
@@ -14,8 +15,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class ApiResponse<T, M> extends AResponse<M>
-	implements ApiDataMetaResponse<T, M>, ApiResultsMetaResponse<T, M>, Serializable {
+public class ApiResponse<T, M> extends AResponse<M> implements ApiDataMetaResponse<T, M>, ApiResultsMetaResponse<T, M>,
+	ApiResultsMetaCompactResponse<T, M>, Serializable {
 
     private static final long serialVersionUID = 2026047322050489651L;
 

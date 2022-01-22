@@ -7,14 +7,14 @@ import java.util.Map;
 
 import org.springframework.http.HttpStatus;
 
-import com.boot.jx.api.AmxResponseSchemes.ApiMetaResponse;
+import com.boot.jx.api.AmxResponseSchemes.ApiMetaDetailsResponse;
 import com.boot.jx.exception.ApiHttpExceptions.ApiStatusCodes;
 import com.boot.jx.exception.IExceptionEnum;
 import com.boot.jx.swagger.ApiMockModelProperty;
 import com.boot.utils.ArgUtil;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-public abstract class AResponse<M> implements ApiMetaResponse<M> {
+public abstract class AResponse<M> implements ApiMetaDetailsResponse<M> {
 
     protected Long timestamp;
 

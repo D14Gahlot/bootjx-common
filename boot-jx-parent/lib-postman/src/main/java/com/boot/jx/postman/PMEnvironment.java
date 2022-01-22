@@ -77,9 +77,7 @@ public class PMEnvironment {
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static abstract class AChannelDetails implements ChannelDetails {
-
 	private static final long serialVersionUID = -5531902306230415784L;
-
     }
 
     public static abstract class AChannelConfig extends AChannelDetails implements ChannelTypeSpecificProps {
@@ -90,6 +88,9 @@ public class PMEnvironment {
 	protected String channelType;
 	protected String channelKey;
 	protected String name;
+
+	private boolean isSandbox;
+	private boolean isDisabled;
 
 	@JsonView(PMEnvironment.PublicProperty.class)
 	protected String webhookUrl;
@@ -148,6 +149,22 @@ public class PMEnvironment {
 
 	public String toString() {
 	    return this.getChannelId();
+	}
+
+	public boolean isSandbox() {
+	    return isSandbox;
+	}
+
+	public void setSandbox(boolean isSandbox) {
+	    this.isSandbox = isSandbox;
+	}
+
+	public boolean isDisabled() {
+	    return isDisabled;
+	}
+
+	public void setDisabled(boolean isDisabled) {
+	    this.isDisabled = isDisabled;
 	}
 
     }

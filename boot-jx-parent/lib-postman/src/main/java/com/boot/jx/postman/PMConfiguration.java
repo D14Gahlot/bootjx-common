@@ -10,6 +10,7 @@ import java.util.Map.Entry;
 import com.boot.jx.AppConfig;
 import com.boot.jx.AppContextUtil;
 import com.boot.jx.agent.AgentConfig;
+import com.boot.jx.postman.PMEnvironment.AChannelConfig;
 import com.boot.jx.postman.PMEnvironment.AChannelDetails;
 import com.boot.jx.postman.PMEnvironment.PMConfigurationObject;
 import com.boot.jx.postman.plugin.ChannelConfig;
@@ -25,7 +26,7 @@ public interface PMConfiguration extends Serializable {
 
     public NodeEntry<Object> keyEntry(String string);
 
-    public List<AChannelDetails> listChannels();
+    public List<AChannelConfig> listChannels();
 
     public static class PMConfigurationModel implements PMConfiguration {
 
@@ -135,8 +136,8 @@ public interface PMConfiguration extends Serializable {
 	    return this;
 	}
 
-	public List<AChannelDetails> listChannels() {
-	    List<AChannelDetails> list = new ArrayList<AChannelDetails>();
+	public List<AChannelConfig> listChannels() {
+	    List<AChannelConfig> list = new ArrayList<AChannelConfig>();
 	    for (Entry<String, ChannelConfig> aChannelDetails : this.channels().entrySet()) {
 		list.add(aChannelDetails.getValue());
 	    }
@@ -229,8 +230,8 @@ public interface PMConfiguration extends Serializable {
 	}
 
 	@Override
-	public List<AChannelDetails> listChannels() {
-	    List<AChannelDetails> list = this.local().listChannels();
+	public List<AChannelConfig> listChannels() {
+	    List<AChannelConfig> list = this.local().listChannels();
 	    if (keyEntry("postman.chat.channel.sandbox").asBoolean()) {
 		list.addAll(this.shared().listChannels());
 	    }
