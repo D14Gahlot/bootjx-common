@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.boot.jx.admin.dto.ContactTypeSummaryDto;
 import com.boot.jx.admin.dto.DashBoardRequestDto;
 import com.boot.jx.admin.dto.DashBoardResponseDto;
 import com.boot.jx.admin.dto.TagDocumentDto;
@@ -68,6 +69,11 @@ public class AdminDashBoardContoller {
 		//HashSet<String> set = adminDbMgr.fetchUniqueMonth();
 		Map<Object, Object> set =adminDbMgr.fetchUniqueMonth(); 
 		return  ApiResponse.buildResult(set);
+	}
+	@RequestMapping(value = "/admin/monthwise-summary-count", method = { RequestMethod.GET })
+	public ApiResponse<ContactTypeSummaryDto, Object> getMonthLst(long timestamp) {
+		ContactTypeSummaryDto summary =adminDbMgr.getMonthWiseCount(timestamp); 
+		return  ApiResponse.buildResult(summary);
 	}
 
 }

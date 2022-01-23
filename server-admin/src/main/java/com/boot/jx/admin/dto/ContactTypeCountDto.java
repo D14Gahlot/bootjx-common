@@ -1,6 +1,6 @@
 package com.boot.jx.admin.dto;
 
-public class MessageTypeDto {
+public class ContactTypeCountDto {
 	Object type;
 	long totalCount;
 	long timestamp;

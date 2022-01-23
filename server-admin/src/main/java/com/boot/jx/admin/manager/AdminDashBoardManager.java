@@ -47,17 +47,24 @@ import com.amazonaws.services.route53domains.model.ContactType;
 import com.boot.jx.admin.dto.DashBoardRequestDto;
 import com.boot.jx.admin.dto.DashBoardResponseDto;
 import com.boot.jx.admin.dto.LeadMessanger;
-import com.boot.jx.admin.dto.MessageTypeDto;
-import com.boot.jx.admin.dto.MonthDto;
+import com.boot.jx.admin.dto.ContactTypeCountDto;
+import com.boot.jx.admin.dto.ContactTypeSummaryDto;
 import com.boot.jx.admin.dto.PeakLoadDto;
 import com.boot.jx.admin.dto.TagDocumentDto;
 import com.boot.jx.admin.dto.TagDocumentLst;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.model.TagDocument;
+import com.boot.jx.postman.model.Message.Status;
+import com.boot.jx.postman.store.MessageStore;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.DateUtil;
 import com.boot.utils.JsonUtil;
+import com.mongodb.AggregationOptions;
+import com.mongodb.Cursor;
+import com.mongodb.DBCollection;
+import com.mongodb.DBObject;
+import com.mongodb.AggregationOptions.OutputMode;
 
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
@@ -1125,7 +1132,7 @@ public class AdminDashBoardManager {
 				long timestamp=(docTimeStamp-(docTimeStamp%(DateUtil.ONEDAY))); 
 				String monthStr = DateUtil.foramtTimeStampDateAsString(timestamp, null);
 				if(!map.containsValue(monthStr)) {
-					 getMonthWiseCount(timestamp);
+					// getMonthWiseCount(timestamp);
 					map.put(timestamp,monthStr);
 					// getMonthWiseCount(timestamp);
 				}
@@ -1140,36 +1147,23 @@ public class AdminDashBoardManager {
 		return map;
 	}
 	
-	public void getMonthWiseCount(long timestamp) {
+	public ContactTypeSummaryDto getMonthWiseCount(long timestamp) {
+		ContactTypeSummaryDto dto = new ContactTypeSummaryDto();
 		List<String> lst = getListOfContactType();
 		Date dateTi = new Date(timestamp);
-		String ddMMyyyyFormat = new SimpleDateFormat("dd/MM/yyyy").format(dateTi);
+		String monthYear = new SimpleDateFormat(DateUtil.MMM_YYYY_FORMAT).format(dateTi);
 		Calendar cal = Calendar.getInstance();
 		cal.setTimeInMillis(timestamp);
-		System.out.println("Day: " + cal.get(Calendar.DATE));
-	    System.out.println("Month: " + cal.get(Calendar.MONTH));
-	    System.out.println("Year: " + cal.get(Calendar.YEAR));
+	    System.out.println("Year: " + cal.get(Calendar.YEAR)+"\t Month :" + cal.get(Calendar.MONTH));
 	    int month = cal.get(Calendar.MONTH);
 	    int year = cal.get(Calendar.YEAR);
 	    long monthMinTimeStamp =DateUtil.getStartTimestamp(month,year).getTime();
-	    long monthMaxTimeStamp =DateUtil.getEndTimestamp(month, year).getTime();		
+	    long monthMaxTimeStamp =DateUtil.getEndTimestamp(month, year).getTime();
+	   
+	    Map<Object,List<ContactTypeCountDto>> map = new HashMap<>();
 		for(String contactType:lst) {
-		
-		
-			// grouping by prductName
-			//  GroupOperation groupOperation = Aggregation.group("type").count().as("totalCount");
-			// projection operation
-			// ProjectionOperation projectionOperation = Aggregation.project("totalCount").and("type").previousOperation();
-			// MatchOperation filterStates = match(new Criteria("timestamp").gt(monthMinTimeStamp).lt(monthMaxTimeStamp));
-			// sorting in ascending
-			// SortOperation sortOperation = Aggregation.sort(Sort.Direction.DESC, "totalCount");
-			// aggregating all 3 operations using newAggregation() function
-			// Aggregation aggregation =Aggregation.newAggregation(groupOperation,projectionOperation ,sortOperation);
-			// putting in a list 
-			// "products" is collection name
-			// AggregationResults<MessageTypeDto> result = mongoTemplate.aggregate(aggregation, contactType.toString(), MessageTypeDto.class);  
-			//.out.println("Json :"+JsonUtil.toJson(result));
-			
+		 List<ContactTypeCountDto> messageTypeLst =new ArrayList<ContactTypeCountDto>();
+		/*
 			//// grouping by prductName
 			AggregationOperation group = Aggregation.group("type").count().as("totalCount");
 			// projection operation
@@ -1178,37 +1172,43 @@ public class AdminDashBoardManager {
 			MatchOperation matchOperation = match(new Criteria("timestamp").gt(monthMinTimeStamp).lt(monthMaxTimeStamp));
 			
 			Aggregation aggregation = Aggregation.newAggregation(group,matchOperation,project);
-			
-			//Aggregation aggregation = Aggregation.newAggregation(group,matchOperation,project).withOptions(new AggregationOptions(allowDiskUse,explain,cursor));
-			
 			AggregationResults<MessageTypeDto> result = mongoTemplate.aggregate(aggregation, contactType.toString(), MessageTypeDto.class);  
 			//List<MessageTypeDto> contactInfo = mongoTemplate.aggregate(aggregation, mongoTemplate.getCollectionName(MessageDoc.class), MessageTypeDto.class).getMappedResults();
 			List<MessageTypeDto> contactInfo =null;
 			if(result!=null)
 				contactInfo = result.getMappedResults();
+       */
 			
-			for(MessageTypeDto dto:contactInfo) {
-				System.out.println("Json :"+JsonUtil.toJson(dto));
-			}
+				List<DBObject> list = new ArrayList<DBObject>();
+				//Match condtion 
+				list.add(Aggregation.match(new Criteria("timestamp").gt(monthMinTimeStamp).lt(monthMaxTimeStamp)).toDBObject(Aggregation.DEFAULT_CONTEXT));
+				list.add(Aggregation.group("type").count().as("count").toDBObject(Aggregation.DEFAULT_CONTEXT));
+
+				DBCollection col = mongoTemplate.getCollection(contactType);
+				Cursor cursor = col.aggregate(list,AggregationOptions.builder().allowDiskUse(true).outputMode(OutputMode.CURSOR).build());
+				
+				while (cursor.hasNext()) {
+					ContactTypeCountDto contactDto = new ContactTypeCountDto();
+				    DBObject object = cursor.next();
+				    if (ArgUtil.is(object)) {
+					 String type = ArgUtil.parseAsString(object.get("_id"));
+					 long count = ArgUtil.parseAsLong(object.get("count"), 0L);
+					 contactDto.setType(type);
+					 contactDto.setTotalCount(count);
+				    }
+				    messageTypeLst.add(contactDto);
+				}
+				
+				map.put(contactType, messageTypeLst);
+	}
+		dto.setMap(map);
+		dto.setMonth(monthYear);
+		dto.setMonthMinTimeStamp(monthMinTimeStamp);
+		dto.setMonthMaxTimeStamp(monthMaxTimeStamp);
 	
-		/*
-		 * Aggregation aggregation = Aggregation.newAggregation(group).withOptions( new AggregationOptions(allowDiskUse, explain, cursor));
-
-		 * 
-		 * 
-		 * Aggregation agg = newAggregation(match(Criteria.where("timestamp").gt(dateRange1).lt(dateRange2)),
-				group("timestamp").count().as("total"), project("total").and("timestamp").previousOperation(),
-				sort(Sort.Direction.DESC, "total", "timestamp"));
-		// Convert the aggregation result into a List
-		AggregationResults<PeakLoadDto> groupResults = mongoTemplate.aggregate(agg, contactType.toString(),
-				PeakLoadDto.class);
-		PeakLoadDto peakLoadResult = null;
-		if (groupResults != null && !groupResults.getMappedResults().isEmpty()) {
-			peakLoadResult = groupResults.getMappedResults().get(0);
-		}
-		 */
+			return dto;
 		
-	}
-	}
-
+}
+	
+	
 }
