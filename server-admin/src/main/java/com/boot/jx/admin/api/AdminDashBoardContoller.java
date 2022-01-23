@@ -1,6 +1,8 @@
 package com.boot.jx.admin.api;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -58,6 +60,14 @@ public class AdminDashBoardContoller {
 	public ApiResponse<TagDocumentLst, Object> getTagAnalytics(@RequestBody DashBoardRequestDto req) {
 		TagDocumentDto lst = adminDbMgr.getTagDocumentDetails(req);
 		return ApiResponse.buildResults(lst.getLstTagDocument());
+	}
+	
+	
+	@RequestMapping(value = "/admin/fetch-month", method = { RequestMethod.GET })
+	public ApiResponse<Map<Object, Object>, Object> getMonthLst() {
+		//HashSet<String> set = adminDbMgr.fetchUniqueMonth();
+		Map<Object, Object> set =adminDbMgr.fetchUniqueMonth(); 
+		return  ApiResponse.buildResult(set);
 	}
 
 }

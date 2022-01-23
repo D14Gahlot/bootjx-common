@@ -90,6 +90,8 @@
 			<artifactId>lib-common-config</artifactId>
 			<version>${jax.version}</version>
 		</dependency>
+		
+		
 
 		<dependency>
 			<groupId>com.boot.jx</groupId>
@@ -110,7 +112,15 @@
 			<groupId>com.boot.jx</groupId>
 			<artifactId>common-mongo</artifactId>
 		</dependency>
+		
+		<dependency>
+			<groupId>com.boot.jx</groupId>
+			<artifactId>lib-phonebook</artifactId>
+		</dependency>
+		
 	</dependencies>
+	
+	
 
 	<build>
 		<plugins>

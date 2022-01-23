@@ -89,11 +89,11 @@ public class AgentAnalyticsManager {
 				date2 =todayEndTime();
 			}
 			
-		System.out.println("Agent List");
+		
 		 if(req!=null && (ArgUtil.isEmptyString(req.getAgent()) || req.getAgent().equalsIgnoreCase(DEFAULT_AGENT))) {
 			 allAgent = getAgentList(date1,date2); 
 		 }
-		System.out.println("Analytics List");
+		
 		 if(allAgent !=null && !allAgent.isEmpty()) {
 			 for(Object chatSess : allAgent) {
 				 dto = new DashBoardResponseDto();

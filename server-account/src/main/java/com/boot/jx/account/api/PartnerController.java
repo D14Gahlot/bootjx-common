@@ -234,21 +234,27 @@ public class PartnerController {
 	if (!ArgUtil.is(domainDoc.getCompany())) {
 	    domainDoc.setCompany(new CompanyDoc());
 	}
-	if (!ArgUtil.is(domainDoc.getCompany().getConactEmail())) {
-	    domainDoc.getCompany().setConactEmail(domainUser.getContact().getEmail());
-	}
+	//if (!ArgUtil.is(domainDoc.getCompany().getConactEmail())) {
+	  //  domainDoc.getCompany().setConactEmail(domainUser.getContact().getEmail());
+	//}
 
-	if (!ArgUtil.is(domainDoc.getCompany().getConactPhone())) {
-	    domainDoc.getCompany().setConactPhone(domainUser.getContact().getPhone());
-	}
+	//if (!ArgUtil.is(domainDoc.getCompany().getConactPhone())) {
+	  //  domainDoc.getCompany().setConactPhone(domainUser.getContact().getPhone());
+	//}
 
-	if (!ArgUtil.is(domainDoc.getCompany().getBusinessName())) {
-	    domainDoc.getCompany().setBusinessName(domainUser.getContact().getCompany());
-	}
+	//if (!ArgUtil.is(domainDoc.getCompany().getBusinessName())) {
+	  //  domainDoc.getCompany().setBusinessName(domainUser.getContact().getCompany());
+	//}
 
-	if (!ArgUtil.is(domainDoc.getCompany().getConactCountry())) {
-	    domainDoc.getCompany().setConactCountry(domainUser.getContact().getCountry());
-	}
+	//if (!ArgUtil.is(domainDoc.getCompany().getConactCountry())) {
+	  //  domainDoc.getCompany().setConactCountry(domainUser.getContact().getCountry());
+	//}
+	
+	//if (!ArgUtil.is(domainDoc.getCompany().getPho)) {
+	  //  domainDoc.getCompany().setPhone(null)
+	//}
+
+	
 
 	return ApiResponse.buildResult(domainDoc);
     }

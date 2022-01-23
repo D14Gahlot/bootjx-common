@@ -28,6 +28,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 import org.apache.commons.beanutils.PropertyUtils;
@@ -37,16 +38,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.domain.Sort.Order;
-import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.data.mongodb.core.aggregation.Aggregation;
-import org.springframework.data.mongodb.core.aggregation.AggregationResults;
+
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Component;
 
+import com.amazonaws.services.route53domains.model.ContactType;
 import com.boot.jx.admin.dto.DashBoardRequestDto;
 import com.boot.jx.admin.dto.DashBoardResponseDto;
 import com.boot.jx.admin.dto.LeadMessanger;
+import com.boot.jx.admin.dto.MessageTypeDto;
+import com.boot.jx.admin.dto.MonthDto;
 import com.boot.jx.admin.dto.PeakLoadDto;
 import com.boot.jx.admin.dto.TagDocumentDto;
 import com.boot.jx.admin.dto.TagDocumentLst;
@@ -54,6 +56,24 @@ import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.model.TagDocument;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.DateUtil;
+import com.boot.utils.JsonUtil;
+
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
+import org.springframework.data.domain.Sort.Order;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.aggregation.Aggregation;
+import org.springframework.data.mongodb.core.aggregation.AggregationOperation;
+import org.springframework.data.mongodb.core.aggregation.AggregationResults;
+import org.springframework.data.mongodb.core.aggregation.GroupOperation;
+import org.springframework.data.mongodb.core.aggregation.MatchOperation;
+import org.springframework.data.mongodb.core.aggregation.ProjectionOperation;
+import org.springframework.data.mongodb.core.aggregation.SortOperation;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.stereotype.Component;
+
 
 @Component
 public class AdminDashBoardManager {
@@ -1087,6 +1107,108 @@ public class AdminDashBoardManager {
 			}
 		}
 		return list;
+	}
+	
+
+	@SuppressWarnings("unchecked")
+	//public HashSet<String> fetchUniqueMonth() {
+	public Map<Object, Object> fetchUniqueMonth() {
+		List<String> lst = getListOfContactType();
+		 HashSet<String> set = new HashSet<>();
+		 Map<Object, Object> map= new HashMap<Object, Object>();
+		for(String contactType:lst) {
+			Query query = new Query();
+			query.with(new Sort(new Order(Direction.DESC, "timestamp")));
+			query.fields().include("timestamp");
+			List<Long> msgDocLst = mongoTemplate.getCollection(contactType.toString()).distinct("timestamp",query.getQueryObject());
+			for(Long docTimeStamp :msgDocLst) {
+				long timestamp=(docTimeStamp-(docTimeStamp%(DateUtil.ONEDAY))); 
+				String monthStr = DateUtil.foramtTimeStampDateAsString(timestamp, null);
+				if(!map.containsValue(monthStr)) {
+					 getMonthWiseCount(timestamp);
+					map.put(timestamp,monthStr);
+					// getMonthWiseCount(timestamp);
+				}
+			}
+		}
+		Map<Object, Object> treeMap = new TreeMap<>(map);
+		for (Object str : treeMap.keySet()) {
+		    System.out.println(str);
+		   
+		}
+		
+		return map;
+	}
+	
+	public void getMonthWiseCount(long timestamp) {
+		List<String> lst = getListOfContactType();
+		Date dateTi = new Date(timestamp);
+		String ddMMyyyyFormat = new SimpleDateFormat("dd/MM/yyyy").format(dateTi);
+		Calendar cal = Calendar.getInstance();
+		cal.setTimeInMillis(timestamp);
+		System.out.println("Day: " + cal.get(Calendar.DATE));
+	    System.out.println("Month: " + cal.get(Calendar.MONTH));
+	    System.out.println("Year: " + cal.get(Calendar.YEAR));
+	    int month = cal.get(Calendar.MONTH);
+	    int year = cal.get(Calendar.YEAR);
+	    long monthMinTimeStamp =DateUtil.getStartTimestamp(month,year).getTime();
+	    long monthMaxTimeStamp =DateUtil.getEndTimestamp(month, year).getTime();		
+		for(String contactType:lst) {
+		
+		
+			// grouping by prductName
+			//  GroupOperation groupOperation = Aggregation.group("type").count().as("totalCount");
+			// projection operation
+			// ProjectionOperation projectionOperation = Aggregation.project("totalCount").and("type").previousOperation();
+			// MatchOperation filterStates = match(new Criteria("timestamp").gt(monthMinTimeStamp).lt(monthMaxTimeStamp));
+			// sorting in ascending
+			// SortOperation sortOperation = Aggregation.sort(Sort.Direction.DESC, "totalCount");
+			// aggregating all 3 operations using newAggregation() function
+			// Aggregation aggregation =Aggregation.newAggregation(groupOperation,projectionOperation ,sortOperation);
+			// putting in a list 
+			// "products" is collection name
+			// AggregationResults<MessageTypeDto> result = mongoTemplate.aggregate(aggregation, contactType.toString(), MessageTypeDto.class);  
+			//.out.println("Json :"+JsonUtil.toJson(result));
+			
+			//// grouping by prductName
+			AggregationOperation group = Aggregation.group("type").count().as("totalCount");
+			// projection operation
+			AggregationOperation project = Aggregation.project("totalCount").and("type").previousOperation();
+			//matching operation
+			MatchOperation matchOperation = match(new Criteria("timestamp").gt(monthMinTimeStamp).lt(monthMaxTimeStamp));
+			
+			Aggregation aggregation = Aggregation.newAggregation(group,matchOperation,project);
+			
+			//Aggregation aggregation = Aggregation.newAggregation(group,matchOperation,project).withOptions(new AggregationOptions(allowDiskUse,explain,cursor));
+			
+			AggregationResults<MessageTypeDto> result = mongoTemplate.aggregate(aggregation, contactType.toString(), MessageTypeDto.class);  
+			//List<MessageTypeDto> contactInfo = mongoTemplate.aggregate(aggregation, mongoTemplate.getCollectionName(MessageDoc.class), MessageTypeDto.class).getMappedResults();
+			List<MessageTypeDto> contactInfo =null;
+			if(result!=null)
+				contactInfo = result.getMappedResults();
+			
+			for(MessageTypeDto dto:contactInfo) {
+				System.out.println("Json :"+JsonUtil.toJson(dto));
+			}
+	
+		/*
+		 * Aggregation aggregation = Aggregation.newAggregation(group).withOptions( new AggregationOptions(allowDiskUse, explain, cursor));
+
+		 * 
+		 * 
+		 * Aggregation agg = newAggregation(match(Criteria.where("timestamp").gt(dateRange1).lt(dateRange2)),
+				group("timestamp").count().as("total"), project("total").and("timestamp").previousOperation(),
+				sort(Sort.Direction.DESC, "total", "timestamp"));
+		// Convert the aggregation result into a List
+		AggregationResults<PeakLoadDto> groupResults = mongoTemplate.aggregate(agg, contactType.toString(),
+				PeakLoadDto.class);
+		PeakLoadDto peakLoadResult = null;
+		if (groupResults != null && !groupResults.getMappedResults().isEmpty()) {
+			peakLoadResult = groupResults.getMappedResults().get(0);
+		}
+		 */
+		
+	}
 	}
 
 }

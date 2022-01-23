@@ -170,5 +170,7 @@ public class PMConstants {
 	public static final String DOC_SCAN_ID = "/scan/id";
 
     }
+    public static final String COLLECTION_NAME = "MESSAGE_";
+    public static final String CHAT_SESSION = "CHAT_SESSION";
 
 }

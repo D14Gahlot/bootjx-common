@@ -32,4 +32,8 @@ public class AccountStore extends CommonMongoTemplateAbstract {
     public DomainDoc findDomainByName(String domain) {
 	return findOneByKey("domain", domain, DomainDoc.class);
     }
+    
+    public List<DomainDoc> findAllDomains(String domain) {
+    	return findByKey("domain",domain, DomainDoc.class);
+        }
 }

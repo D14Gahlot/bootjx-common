@@ -2,6 +2,12 @@ package com.boot.jx.account.doc;
 
 import java.io.Serializable;
 
+import com.boot.jx.phonebook.model.PBAddress;
+import com.boot.jx.phonebook.model.PBEmail;
+import com.boot.jx.phonebook.model.PBPhone;
+import com.boot.jx.phonebook.model.PBTax;
+import com.boot.jx.phonebook.model.PBWebsite;
+
 public class CompanyDoc implements Serializable {
 
     private static final long serialVersionUID = -3354844112176554561L;
@@ -9,15 +15,16 @@ public class CompanyDoc implements Serializable {
     private String businessName;
     private String businessType;
     private String websiteUrl;
-    private String conactEmail;
-
-    private String conactAddress;
-    private String conactCity;
-    private String conactPhone;
-    private String conactCountry;
-    private String conactPostalCode;
-
     private String businessAbout;
+    //Type --Company , Billing
+    private PBAddress address;
+    private PBPhone phone;
+    private PBPhone phoneAlt;
+    private PBEmail email;
+    private PBEmail emailAlt;
+    private PBTax tax;
+    private PBWebsite website;
+    
 
     public String getBusinessName() {
 	return businessName;
@@ -43,45 +50,6 @@ public class CompanyDoc implements Serializable {
 	this.websiteUrl = websiteUrl;
     }
 
-    public String getConactEmail() {
-	return conactEmail;
-    }
-
-    public void setConactEmail(String conactEmail) {
-	this.conactEmail = conactEmail;
-    }
-
-    public String getConactAddress() {
-	return conactAddress;
-    }
-
-    public void setConactAddress(String conactAddress) {
-	this.conactAddress = conactAddress;
-    }
-
-    public String getConactCity() {
-	return conactCity;
-    }
-
-    public void setConactCity(String conactCity) {
-	this.conactCity = conactCity;
-    }
-
-    public String getConactCountry() {
-	return conactCountry;
-    }
-
-    public void setConactCountry(String conactCountry) {
-	this.conactCountry = conactCountry;
-    }
-
-    public String getConactPostalCode() {
-	return conactPostalCode;
-    }
-
-    public void setConactPostalCode(String conactPostalCode) {
-	this.conactPostalCode = conactPostalCode;
-    }
 
     public String getBusinessAbout() {
 	return businessAbout;
@@ -91,12 +59,67 @@ public class CompanyDoc implements Serializable {
 	this.businessAbout = businessAbout;
     }
 
-    public String getConactPhone() {
-        return conactPhone;
-    }
+	public PBAddress getAddress() {
+		return address;
+	}
 
-    public void setConactPhone(String conactPhone) {
-        this.conactPhone = conactPhone;
-    }
+	public void setAddress(PBAddress address) {
+		this.address = address;
+	}
 
+	public PBPhone getPhone() {
+		return phone;
+	}
+
+	public void setPhone(PBPhone phone) {
+		this.phone = phone;
+	}
+
+	public PBPhone getPhoneAlt() {
+		return phoneAlt;
+	}
+
+	public void setPhoneAlt(PBPhone phoneAlt) {
+		this.phoneAlt = phoneAlt;
+	}
+
+	public PBEmail getEmail() {
+		return email;
+	}
+
+	public void setEmail(PBEmail email) {
+		this.email = email;
+	}
+
+	public PBEmail getEmailAlt() {
+		return emailAlt;
+	}
+
+	public void setEmailAlt(PBEmail emailAlt) {
+		this.emailAlt = emailAlt;
+	}
+
+	public PBTax getTax() {
+		return tax;
+	}
+
+	public void setTax(PBTax tax) {
+		this.tax = tax;
+	}
+
+	public PBWebsite getWebsite() {
+		return website;
+	}
+
+	public void setWebsite(PBWebsite website) {
+		this.website = website;
+	}
+
+   
+	
+
+	
+	
+
+	
 }

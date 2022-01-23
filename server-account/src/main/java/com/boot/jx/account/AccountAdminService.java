@@ -26,6 +26,7 @@ import com.boot.jx.postman.model.Email;
 import com.boot.jx.postman.model.MessageBox;
 import com.boot.jx.rest.RestService;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.JsonUtil;
 
 @Component
 public class AccountAdminService implements LogoutHandler {
@@ -122,6 +123,7 @@ public class AccountAdminService implements LogoutHandler {
 				pmEnvironment.keyEntry("mry.prop.service.domain").asString(),
 				accountDoc.getMeta().getEmailVerificationCode(), accountDoc.getId()))
 		.put("contactName", accountDoc.getContact().getName())));
+	
     }
     
     public void sendMailToSalesTeam(BusinessUserDoc accountDoc, String emailTemplate) {

@@ -1,11 +1,13 @@
 package com.boot.utils;
 
+import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.YearMonth;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -76,6 +78,9 @@ public final class DateUtil {
 	public static final String DATE_FORMAT_DD_MM_YYYYY = "dd/MM/yyyy";
 
 	public static final String DATE_FORMAT_MMMM_DD_YYYY = "MMMM dd yyyy";
+	
+	/** month: 'MMM YYYY',  'Nov 2021' **/ 
+	public static final String MMM_YYYY_FORMAT = "MMM YYYY";
 
 	/**
 	 * Instantiates a new date util.
@@ -1062,5 +1067,84 @@ public final class DateUtil {
 		return date.after(today) || date.equals(today);
 	}
 	
+	/**
+	 * today date min epochtimestamp value
+	 * @return
+	 */
+	public static long todayStartTime() {
+		ZonedDateTime todayStartTime = ZonedDateTime.now().minusDays(0).with(LocalTime.MIN);
+		// use the same datetime to create the end of the day using the maximum time for
+		long longTodayStartTime = todayStartTime.toInstant().toEpochMilli();
+		return longTodayStartTime;
+	}
+	/**
+	 * today date max epochtimestamp value
+	 * @return
+	 */
+	public static long todayEndTime() {
+		ZonedDateTime todayEndTime = ZonedDateTime.now().minusDays(0).with(LocalTime.MAX);
+		// use the same datetime to create the end of the day using the maximum time for
+		long longTodayendTime = todayEndTime.toInstant().toEpochMilli();
+		return longTodayendTime;
+	}
+	/**
+	 * Current month start Time in long
+	 */
+	/** remove hour min,second from timestamp **/
+	
+	public static String foramtTimeStampDateAsString(long timeStamp,String  dateformat) {
+		if (ArgUtil.isEmptyString(dateformat))
+			dateformat =MMM_YYYY_FORMAT; 
+		String dateString = null;
+		try {
+			 Date dateTimeStamp=new Date(timeStamp);
+			 SimpleDateFormat format = new SimpleDateFormat(dateformat);
+			 dateString = format.format(dateTimeStamp);
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return dateString;
+	}
+	
+	public static Timestamp getStartTimestamp(int month,int year) { 
+		  Calendar calendar = Calendar.getInstance(); 
+		  calendar.setTime(new Date()); 
+		  calendar.set(Calendar.MONTH, month);
+		  calendar.set(Calendar.DAY_OF_MONTH, calendar.getActualMinimum(Calendar.DAY_OF_MONTH)); 
+		  calendar.set(Calendar.YEAR,year);
+		  calendar.set(Calendar.HOUR_OF_DAY, 0); 
+		  calendar.set(Calendar.MINUTE, 0); 
+		  calendar.set(Calendar.SECOND, 0); 
+		  calendar.set(Calendar.MILLISECOND, 0); 
+		  return new Timestamp(calendar.getTimeInMillis()); 
+		}
+	
+	public static Timestamp getEndTimestamp(int month,int year) { 
+		  Calendar calendar = Calendar.getInstance(); 
+		  calendar.setTime(new Date()); 
+		  calendar.set(Calendar.MONTH, month);
+		  calendar.set(Calendar.DAY_OF_MONTH, calendar.getActualMaximum(Calendar.DAY_OF_MONTH)); 
+		  calendar.set(Calendar.YEAR,year);
+		  calendar.set(Calendar.HOUR_OF_DAY, 0); 
+		  calendar.set(Calendar.MINUTE, 0); 
+		  calendar.set(Calendar.SECOND, 0); 
+		  calendar.set(Calendar.MILLISECOND, 0); 
+		  return new Timestamp(calendar.getTimeInMillis()); 
+		}
+	
+	public static int getMonthValue(String monthName) {
+		String monthNumber="0";
+		try {
+		SimpleDateFormat inputFormat = new SimpleDateFormat("MMM");
+		Calendar cal = Calendar.getInstance();
+		cal.setTime(inputFormat.parse(monthName));
+		SimpleDateFormat outputFormat = new SimpleDateFormat("MM"); // 01-12
+		 monthNumber =outputFormat.format(cal.getTime()); 
+		}catch(Exception e) {	// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return Integer.parseInt(monthNumber);
+	}
 	
 }
