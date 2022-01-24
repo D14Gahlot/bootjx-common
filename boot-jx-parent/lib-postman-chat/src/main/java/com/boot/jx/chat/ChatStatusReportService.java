@@ -110,9 +110,7 @@ public class ChatStatusReportService {
 		    AppContextUtil.init();
 		}
 	    }
-
 	    messageStore.updateStatus(messageReport);
-
 	    if (ArgUtil.is(inBoundHandler)) {
 		inBoundHandler.handle(messageReport);
 	    } else {

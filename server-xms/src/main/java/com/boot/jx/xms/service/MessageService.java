@@ -120,7 +120,7 @@ public class MessageService {
 	}
 
 	String messageId = outboxMessage.getMessageId();
-	return new OutBoundReciept().id(messageId).messageIdExt(outboxMessage.getMessageIdExt());
+	return new OutBoundReciept().id(messageId);
     }
 
 }

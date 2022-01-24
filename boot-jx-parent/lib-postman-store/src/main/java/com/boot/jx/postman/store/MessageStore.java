@@ -29,6 +29,7 @@ import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
 import com.boot.utils.TimeUtils;
 import com.google.common.collect.Lists;
+import com.mongodb.WriteResult;
 
 @Component
 public class MessageStore extends CommonDocStore {
@@ -253,8 +254,7 @@ public class MessageStore extends CommonDocStore {
 
     public List<MessageDoc> findBySessionId(String sessionId, String contactType) {
 	Query query2 = new Query();
-	query2.addCriteria(Criteria.where("sessionId").is(sessionId))
-	.with(new Sort(Direction.ASC, "timestamp"));
+	query2.addCriteria(Criteria.where("sessionId").is(sessionId)).with(new Sort(Direction.ASC, "timestamp"));
 	List<MessageDoc> messages = mongoTemplate.find(query2, MessageDoc.class, getCollectionName(contactType));
 	return messages;
     }
@@ -325,13 +325,31 @@ public class MessageStore extends CommonDocStore {
 		builder.update().push("logs", messageReport.getReason());
 	    }
 
+	    String collectionName = getCollectionName(messageReport.contact().getContactType());
+
+	    WriteResult result;
+
 	    if (multi) {
-		mongoTemplate.updateMulti(builder.getQuery(), builder.getUpdate(), MessageDoc.class,
-			getCollectionName(messageReport.contact().getContactType()));
+		result = mongoTemplate.updateMulti(builder.getQuery(), builder.getUpdate(), MessageDoc.class,
+			collectionName);
 	    } else {
-		mongoTemplate.updateFirst(builder.getQuery(), builder.getUpdate(), MessageDoc.class,
-			getCollectionName((messageReport.contact().getContactType())));
+		result = mongoTemplate.updateFirst(builder.getQuery(), builder.getUpdate(), MessageDoc.class,
+			collectionName);
 	    }
+
+	    if (result.getN() > 1) {
+		builder.limit(result.getN());
+		List<MessageDoc> messsages = mongoTemplate.find(builder.getQuery(), MessageDoc.class, collectionName);
+		if (ArgUtil.is(messsages) && ArgUtil.is(messsages.get(0))) {
+		    messageReport.setMessageId(messsages.get(0).getMessageId());
+		}
+	    } else {
+		MessageDoc m = mongoTemplate.findOne(builder.getQuery(), MessageDoc.class, collectionName);
+		if (ArgUtil.is(m)) {
+		    messageReport.setMessageId(m.getMessageId());
+		}
+	    }
+
 	    // LOGGER.info(JsonUtil.toJson(builder));
 	}
     }
