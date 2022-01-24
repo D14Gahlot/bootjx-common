@@ -15,6 +15,9 @@ public class OutBoundReciept implements JsonIgnoreUnknown {
     @ApiMockModelProperty(example = "gBEGkYiEB1VXAglK1ZEqA1YKPrU")
     public String id;
 
+    @ApiMockModelProperty(example = "lK1ZEqA1YKPrUgBEGkYiEB1VXAg")
+    public String messageIdExt;
+
     public String getId() {
 	return id;
     }
@@ -25,6 +28,19 @@ public class OutBoundReciept implements JsonIgnoreUnknown {
 
     public OutBoundReciept id(String id) {
 	this.id = id;
+	return this;
+    }
+
+    public String getMessageIdExt() {
+	return messageIdExt;
+    }
+
+    public void setMessageIdExt(String messageIdExt) {
+	this.messageIdExt = messageIdExt;
+    }
+
+    public OutBoundReciept messageIdExt(String messageIdExt) {
+	this.messageIdExt = messageIdExt;
 	return this;
     }
 }

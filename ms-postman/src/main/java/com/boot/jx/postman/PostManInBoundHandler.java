@@ -107,8 +107,10 @@ public class PostManInBoundHandler implements InBoundHandler {
 	if (webhookEntry.exists()) {
 	    LOGGER.debug("Forwarding MessageReport to Xternal Service ");
 	    try {
+		InBoundContact contact = InBoundContact.from(messageReport.contact());
+		
 		InBoundMsgStatus status = new InBoundMsgStatus();
-		status.contactId = messageReport.contact().getContactId();
+		status.contactId = contact.contactId;
 		status.messageId = messageReport.getMessageId();
 		status.messageIdExt = messageReport.getMessageIdExt();
 		status.timestamp = messageReport.getChangeStamp();
