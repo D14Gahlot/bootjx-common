@@ -120,7 +120,7 @@ public class PostManInBoundHandler implements InBoundHandler {
 		InBoundWrapper wrap = new InBoundWrapper();
 		wrap.meta = new InBoundMeta().domain(AppContextUtil.getTenant())
 			.server(pmEnvironment.keyEntry(ConfigConstants.APP_KEY.PROP_SERVICE_DOMAIN).asString());
-		wrap.contacts = CollectionUtil.asList(InBoundContact.from(messageReport.contact()));
+		wrap.contacts = CollectionUtil.asList(contact);
 		wrap.statuses = CollectionUtil.asList(status);
 		restService.ajax(webhookEntry.asString()).post(wrap).asMapModel();
 	    } catch (Exception e) {

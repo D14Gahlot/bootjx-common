@@ -34,7 +34,7 @@ public class InBoundContact {
 	InBoundContact contact = new InBoundContact();
 	contact.contactType = contactable.type();
 	contact.lane = contactable.getLane();
-	contact.contactId = contactable.getContactId();
+	contact.contactId = PostManUtil.CONTACT_ID(contactable);
 	contact.csid = contactable.getCsid();
 	contact.channelId = PostManUtil.CHANNEL_ID(contactable);
 	return contact;
