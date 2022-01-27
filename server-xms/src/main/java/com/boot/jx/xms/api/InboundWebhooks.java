@@ -29,7 +29,7 @@ public class InboundWebhooks {
 	return new InBoundMsg();
     }
 
-    @ApiOperation(value = "Contact Information", notes = "${swagger.InboundWebhooks.onMessageCallback.description}")
+    @ApiOperation(value = "Contact Information", notes = "${swagger.InboundWebhooks.onProfileCallback.description}")
     @ResponseBody
     @ApiCallbacktParams
     @RequestMapping(value = "/api/v1/contact/info", method = { RequestMethod.POST })

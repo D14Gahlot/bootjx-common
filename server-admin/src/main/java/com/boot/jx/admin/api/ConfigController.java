@@ -3,7 +3,6 @@ package com.boot.jx.admin.api;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -14,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.common.config.ConfigManager;
+import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.jx.postman.PMConstants.CHANNEL_TYPE_ENUM;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.doc.config.ClientKeyConfigDoc;
@@ -25,13 +25,10 @@ import com.fasterxml.jackson.annotation.JsonView;
 public class ConfigController {
 
     @Autowired
-    private MongoTemplate mongoTemplate;
+    private CommonMongoTemplate mongoTemplate;
 
     @Autowired
     private ConfigManager adminConfigService;
-
-    @Autowired
-    private PMEnvironment pmEnvironment;
 
     @Autowired
     private ConfigManager configManager;
@@ -89,6 +86,21 @@ public class ConfigController {
 	clientApiKey.setId(id);
 	return ApiResponse.buildResults(adminConfigService.remove(clientApiKey));
     }
+
+    /***************************
+     * Inbound Queues
+     ***************************/
+
+    @JsonView(PMEnvironment.PublicProperty.class)
+    @ResponseBody
+    @RequestMapping(value = { "/api/config/inbound_queue" }, method = { RequestMethod.GET })
+    public ApiResponse<ClientKeyConfigDoc, Object> getInboundQueues() {
+	return ApiResponse.buildResults(mongoTemplate.findAll(ClientKeyConfigDoc.class));
+    }
+
+    /***************************
+     * CompanyVars
+     ***************************/
 
     @JsonView(PMEnvironment.PublicProperty.class)
     @ResponseBody

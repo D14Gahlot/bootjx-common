@@ -14,10 +14,10 @@ import org.springframework.security.web.authentication.logout.LogoutHandler;
 import org.springframework.stereotype.Component;
 
 import com.boot.jx.AppConfig;
-import com.boot.jx.AppConfigPackage.AppCommonConfig;
 import com.boot.jx.AppContextUtil;
 import com.boot.jx.account.doc.BusinessUserDoc;
 import com.boot.jx.api.ApiResponse;
+import com.boot.jx.common.config.AppCommonConfigImpl;
 import com.boot.jx.http.CommonHttpRequest;
 import com.boot.jx.postman.PMConstants;
 import com.boot.jx.postman.PMEnvironment;
@@ -46,7 +46,7 @@ public class AccountAdminService implements LogoutHandler {
     private RestService restService;
 
     @Autowired
-    private AppCommonConfig appCommonConfig;
+    private AppCommonConfigImpl appCommonConfig;
 
     @Value("${mry.app.url}")
     private String appServiceUrl;
@@ -123,18 +123,17 @@ public class AccountAdminService implements LogoutHandler {
 				accountDoc.getMeta().getEmailVerificationCode(), accountDoc.getId()))
 		.put("contactName", accountDoc.getContact().getName())));
     }
-    
+
     public void sendMailToSalesTeam(BusinessUserDoc accountDoc, String emailTemplate) {
-    	postManClient.send(new MessageBox().push(new Email().to("sales@mehery.com")
-    		.template(emailTemplate).put("logo", pmEnvironment.keyEntry("mry.prop.logo.bg-x-icon").asString())
-    		.put("website", pmEnvironment.keyEntry("mry.prop.service.website").asString())
-    		.put("service", pmEnvironment.keyEntry("mry.prop.service.name").asString())
-    		.put("servicedomain", pmEnvironment.keyEntry("mry.prop.service.domain").asString())
-    		.put("contactName", accountDoc.getContact().getName())
-    		.put("email", accountDoc.getContact().getEmail())
-    		.put("phone", accountDoc.getContact().getPhone())
-			.put("company", accountDoc.getContact().getCompany())));
-        }
+	postManClient.send(new MessageBox().push(new Email().to("sales@mehery.com").template(emailTemplate)
+		.put("logo", pmEnvironment.keyEntry("mry.prop.logo.bg-x-icon").asString())
+		.put("website", pmEnvironment.keyEntry("mry.prop.service.website").asString())
+		.put("service", pmEnvironment.keyEntry("mry.prop.service.name").asString())
+		.put("servicedomain", pmEnvironment.keyEntry("mry.prop.service.domain").asString())
+		.put("contactName", accountDoc.getContact().getName()).put("email", accountDoc.getContact().getEmail())
+		.put("phone", accountDoc.getContact().getPhone())
+		.put("company", accountDoc.getContact().getCompany())));
+    }
 
     public static Authentication getAuthentication() {
 	Authentication auth = SecurityContextHolder.getContext().getAuthentication();

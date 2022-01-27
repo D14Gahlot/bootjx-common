@@ -9,7 +9,7 @@ import com.boot.jx.AppConfigPackage;
 import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.http.CommonHttpRequest;
 import com.boot.jx.http.CommonHttpRequest.ApiRequestDetail;
-import com.boot.jx.postman.ClientApiKey;
+import com.boot.jx.postman.ClientApp;
 import com.boot.jx.postman.PMConfiguration.PMConfigurationModel;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.scope.tnt.TenantAuthContext.TenantAuthFilter;
@@ -40,7 +40,7 @@ public class XmsVendorConfigurer implements TenantAuthFilter {
 	    return false;
 	}
 	PMConfigurationModel config = pmEnvironment.local();
-	ClientApiKey apiKeyConfig = config.clientApiKey(apiKey);
+	ClientApp apiKeyConfig = config.clientApiKey(apiKey);
 	if (!ArgUtil.is(apiKeyConfig)) {
 	    if (TimeUtils.isExpired(config.getUpdateStamp(), CONFIG_REFRESH_TIME)) {
 		appConfigPackage.clear(null);

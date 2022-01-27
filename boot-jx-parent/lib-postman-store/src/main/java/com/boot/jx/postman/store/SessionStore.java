@@ -24,6 +24,7 @@ import com.boot.jx.postman.PMConstants;
 import com.boot.jx.postman.PMConstants.CHAT_MODE;
 import com.boot.jx.postman.PMConstants.CHAT_STATUS;
 import com.boot.jx.postman.PMConstants.DEFAULT_VALUES;
+import com.boot.jx.postman.PMEnvironmentConfig;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.ChatUserProfileDoc;
@@ -55,6 +56,9 @@ public class SessionStore extends CommonDocStore {
 
     @Autowired
     private MessageContext messageContext;
+
+    @Autowired
+    private PMEnvironmentConfig pmEnvironmentConfig;
 
     public ChatContactDoc getContact(IMessage inboxMessage) {
 	String contactId = PostManUtil.createContactId(inboxMessage);
@@ -215,13 +219,6 @@ public class SessionStore extends CommonDocStore {
 	    return null;
 	}
 
-	inboxMessage.contact().setContactId(chatSessionDoc.getContactId());
-	inboxMessage.setSessionId(chatSessionDoc.getSessionId());
-	inboxMessage.session().setAgent(chatSessionDoc.getAssignedToAgent());
-	inboxMessage.session().setDept(chatSessionDoc.getAssignedToDept());
-	inboxMessage.session().setMode(chatSessionDoc.getMode());
-	inboxMessage.session().setResolved(chatSessionDoc.isResolved());
-
 	if (PostManUtil.isInBound(inboxMessage)) {
 	    chatSessionDoc.setLastInComingStamp(inboxMessage.getTimestamp());
 	    // Query Update for Session
@@ -230,6 +227,12 @@ public class SessionStore extends CommonDocStore {
 
 	    if (ArgUtil.isEmptyValue(chatSessionDoc.getFirstInComingStamp())) {
 		chatSessionDocQuery.setFirstInComingStamp(inboxMessage.getTimestamp());
+	    }
+
+	    // Assign Queue
+	    if (ArgUtil.isEmptyValue(chatSessionDoc.getAssignedToQueue())
+		    && ArgUtil.is(pmEnvironmentConfig.getDefaultInboundQueue())) {
+		chatSessionDocQuery.setQueue(pmEnvironmentConfig.getDefaultInboundQueue());
 	    }
 
 	    commonMongoTemplate.updateFirst(chatSessionDocQuery);
@@ -243,12 +246,20 @@ public class SessionStore extends CommonDocStore {
 
 	}
 
+	inboxMessage.contact().setContactId(chatSessionDoc.getContactId());
+	inboxMessage.setSessionId(chatSessionDoc.getSessionId());
+	inboxMessage.session().setQueue(chatSessionDoc.getAssignedToQueue());
+	inboxMessage.session().setAgent(chatSessionDoc.getAssignedToAgent());
+	inboxMessage.session().setDept(chatSessionDoc.getAssignedToDept());
+	inboxMessage.session().setMode(chatSessionDoc.getMode());
+	inboxMessage.session().setResolved(chatSessionDoc.isResolved());
+
 	return chatSessionDoc;
     }
 
     public ChatSessionDoc linkSession(IMessage inboxMessage) {
 	ChatSessionDoc chatSessionDoc = this.createSession(inboxMessage);
-	linkSession(chatSessionDoc, inboxMessage);
+	chatSessionDoc = linkSession(chatSessionDoc, inboxMessage);
 	return chatSessionDoc;
     }
 
@@ -264,6 +275,7 @@ public class SessionStore extends CommonDocStore {
 	inboxMessage.setSessionId(contact.getSessionId());
 	inboxMessage.contact().setContactId(contact.getContactId());
 
+	inboxMessage.session().setQueue(session.getAssignedToQueue());
 	inboxMessage.session().setMode(session.getMode());
 	inboxMessage.session().setAgent(session.getAssignedToAgent());
 	inboxMessage.session().setDept(session.getAssignedToDept());

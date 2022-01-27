@@ -15,7 +15,7 @@ import com.boot.jx.logger.LoggerService;
 import com.boot.jx.model.AuditableEntity;
 import com.boot.jx.mongo.CommonDocInterfaces.DocVersion;
 import com.boot.jx.mongo.CommonDocInterfaces.MongoQueryBuilder;
-import com.boot.jx.mongo.CommonDocInterfaces.TrashDocument;
+import com.boot.jx.mongo.CommonDocInterfaces.AuditActivityDoc;
 import com.boot.utils.ArgUtil;
 import com.mongodb.WriteResult;
 
@@ -136,16 +136,23 @@ public class CommonMongoTemplateAbstract extends CommonMongoTemplateDefault {
 	if (object instanceof AuditableEntity && ArgUtil.is(auditDetailProvider)) {
 	    String collectionName = "ZTRASH_" + mongoTemplate.getCollectionName(object.getClass());
 	    auditDetailProvider.audit((AuditableEntity) object);
-	    mongoTemplate.save(new TrashDocument().doc(object), collectionName);
+	    mongoTemplate.save(new AuditActivityDoc().doc(object), collectionName);
 	}
 	return getCommonMongoTemplate().remove(object);
     }
 
     public void archive(Object oldDocument) {
 	String collectionName = "ZCHANGED_" + mongoTemplate.getCollectionName(oldDocument.getClass());
-	TrashDocument oldDocumentArchived = new TrashDocument().doc(oldDocument);
+	AuditActivityDoc oldDocumentArchived = new AuditActivityDoc().doc(oldDocument);
 	auditDetailProvider.audit(oldDocumentArchived);
 	mongoTemplate.save(oldDocumentArchived, collectionName);
     }
 
+    public void log(Object oldDocument, String comment) {
+	String collectionName = mongoTemplate.getCollectionName(oldDocument.getClass());
+	AuditActivityDoc oldDocumentArchived = new AuditActivityDoc().collection(collectionName).doc(oldDocument)
+		.comment(comment);
+	auditDetailProvider.audit(oldDocumentArchived);
+	mongoTemplate.save(oldDocumentArchived, "ZACTIVITY_LOGS");
+    }
 }

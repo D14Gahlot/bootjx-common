@@ -115,7 +115,7 @@ public class CPanelController {
     public ApiResponse<ClientKeyConfigDoc, Object> createClientApiKey(@RequestBody ClientKeyConfigDoc clientApiKey) {
 	return ApiResponse.buildData(configManager.save(clientApiKey));
     }
-
+    
     @ApiRequest(rules = PMConstants.USER_ROLE.BUSINESS_USER)
     @ResponseBody
     @RequestMapping(value = { "/api/collection/drop" }, method = { RequestMethod.POST })

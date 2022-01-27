@@ -48,6 +48,7 @@ public class ChatSessionDoc extends UpdatedTimeStampDoc implements Serializable 
 
     private String assignedToDept;
     private String assignedToAgent;
+    private String assignedToQueue;
 
     private boolean active;
     private boolean initd;
@@ -465,4 +466,13 @@ public class ChatSessionDoc extends UpdatedTimeStampDoc implements Serializable 
 	}
 	return this.contact;
     }
+
+    public String getAssignedToQueue() {
+	return assignedToQueue;
+    }
+
+    public void setAssignedToQueue(String assignedToQueue) {
+	this.assignedToQueue = assignedToQueue;
+    }
+
 }

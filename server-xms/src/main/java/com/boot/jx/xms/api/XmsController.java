@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import com.boot.jx.AppConfig;
 import com.boot.jx.AppConfigPackage.AppCommonConfig;
 import com.boot.jx.http.CommonHttpRequest;
-import com.boot.jx.postman.ClientApiKey;
+import com.boot.jx.postman.ClientApp;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.Constants;
@@ -51,7 +51,7 @@ public class XmsController {
 	    return false;
 	}
 
-	ClientApiKey apiKeyConfig = pmEnvironment.local().clientApiKey(apiKey);
+	ClientApp apiKeyConfig = pmEnvironment.local().clientApiKey(apiKey);
 	if (ArgUtil.is(apiKeyConfig) && ArgUtil.areEqual(apiKey, apiKeyConfig.getKey())) {
 	    token = builder.toHmac().output();
 	    commonHttpRequest.setCookie("swagger.auth.apiId", apiId);

@@ -14,6 +14,7 @@ import org.springframework.data.mongodb.core.query.Update;
 import com.boot.jx.model.AuditableEntity;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.EntityDtoUtil;
+import com.boot.utils.JsonUtil;
 import com.boot.utils.TimeUtils;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -126,14 +127,16 @@ public class CommonDocInterfaces {
 	ADocumentDTO<T> newInstance();
     }
 
-    @Document(collection = "TRASH")
-    public static class TrashDocument implements AuditableEntity, Serializable {
+    @Document(collection = "ACTIVITY_LOGS")
+    public static class AuditActivityDoc implements AuditableEntity, Serializable {
 	private static final long serialVersionUID = -8573412950623297045L;
 	@Id
 	private String id;
 	private Object doc;
 	private String createdBy;
 	private Long createdStamp;
+	private String collection;
+	private String comment;
 
 	public String getId() {
 	    return id;
@@ -167,8 +170,34 @@ public class CommonDocInterfaces {
 	    this.createdStamp = createdStamp;
 	}
 
-	public TrashDocument doc(Object doc) {
-	    this.doc = doc;
+	public AuditActivityDoc doc(Object doc) {
+	    this.doc = JsonUtil.toMap(doc);
+	    return this;
+	}
+
+	public AuditActivityDoc collection(String collection) {
+	    this.collection = collection;
+	    return this;
+	}
+
+	public String getCollection() {
+	    return collection;
+	}
+
+	public void setCollection(String collection) {
+	    this.collection = collection;
+	}
+
+	public String getComment() {
+	    return comment;
+	}
+
+	public void setComment(String comment) {
+	    this.comment = comment;
+	}
+
+	public AuditActivityDoc comment(String comment) {
+	    this.comment = comment;
 	    return this;
 	}
 

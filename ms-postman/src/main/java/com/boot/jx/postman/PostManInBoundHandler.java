@@ -37,59 +37,36 @@ public class PostManInBoundHandler implements InBoundHandler {
     public PMEnvironment pmEnvironment;
 
     @Autowired
+    public PMEnvironmentConfig pmEnvironmentConfig;
+
+    @Autowired
     private RestService restService;
 
     @Override
     public void handle(InboxMessage inboxMessage) {
+
+	String assignedQueue = inboxMessage.session().getQueue();
+
+	if (!ArgUtil.is(assignedQueue)) {
+	    assignedQueue = pmEnvironmentConfig.getDefaultInboundQueue();
+	}
+
+	if (ArgUtil.is(assignedQueue)) {
+	    ClientApp defaultClient = pmEnvironment.local().clientApiKey(assignedQueue);
+	    if (ArgUtil.is(defaultClient) && ArgUtil.areEqual("WEBHOOK", defaultClient.getAppType())) {
+		LOGGER.debug("Forwarding InboxMessage to Xternal Queue ");
+		String forwardUrl = defaultClient.getWebhook();
+		forward2Webhook(inboxMessage, forwardUrl);
+		return;
+	    }
+	}
+
 	PMConfigurationObject webhookEntry = pmEnvironment
 		.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_CHAT_INBOUND_WEBHOOK);
-
 	if (webhookEntry.exists()) {
 	    LOGGER.debug("Forwarding InboxMessage to Xternal Service ");
 	    try {
-
-		InBoundContact contact = InBoundContact.from(inboxMessage.contact());
-
-		InBoundMsg msg = new InBoundMsg();
-		msg.messageId = inboxMessage.getMessageId();
-		msg.messageIdExt = inboxMessage.getMessageIdExt();
-		msg.contactFrom = ArgUtil.nonEmpty(inboxMessage.contact().getPhone(),
-			inboxMessage.contact().getEmail());
-		msg.contactId = contact.contactId;
-
-		msg.timestamp = inboxMessage.getTimestamp();
-		msg.tags = inboxMessage.getTags();
-		msg.input = inboxMessage.form();
-
-		if (ArgUtil.is(inboxMessage.getAttachments())) {
-		    Attachment atth = inboxMessage.attachments().get(0);
-		    InBoundMsgMedia media = InBoundMsgMedia.from(atth);
-		    if (MESSAGE_FORMAT_TYPE.IMAGE.equals(inboxMessage.getFormatType())) {
-			msg.image = media;
-		    } else if (MESSAGE_FORMAT_TYPE.STICKER.equals(inboxMessage.getFormatType())) {
-			msg.sticker = media;
-		    } else if (MESSAGE_FORMAT_TYPE.VIDEO.equals(inboxMessage.getFormatType())) {
-			msg.video = media;
-		    } else if (MESSAGE_FORMAT_TYPE.AUDIO.equals(inboxMessage.getFormatType())) {
-			msg.audio = media;
-		    } else if (MESSAGE_FORMAT_TYPE.VOICE.equals(inboxMessage.getFormatType())) {
-			msg.voice = media;
-		    } else {
-			msg.document = media;
-		    }
-		} else {
-		    msg.type = MESSAGE_FORMAT_TYPE.TEXT;
-		    msg.text = new InBoundMsgText();
-		    msg.text.type = inboxMessage.getFormatSubType();
-		    msg.text.setBody(inboxMessage.getMessage());
-		}
-
-		InBoundWrapper wrap = new InBoundWrapper();
-		wrap.meta = new InBoundMeta().domain(AppContextUtil.getTenant())
-			.server(pmEnvironment.keyEntry(ConfigConstants.APP_KEY.PROP_SERVICE_DOMAIN).asString());
-		wrap.contacts = CollectionUtil.asList(contact);
-		wrap.messages = CollectionUtil.asList(msg);
-		restService.ajax(webhookEntry.asString()).post(wrap).asMapModel();
+		forward2Webhook(inboxMessage, webhookEntry.asString());
 	    } catch (Exception e) {
 		LOGGER.error("Error while Trying to HIT " + webhookEntry.asString(), e);
 	    }
@@ -97,6 +74,50 @@ public class PostManInBoundHandler implements InBoundHandler {
 	    chatClient.forward(inboxMessage);
 	}
 
+    }
+
+    private void forward2Webhook(InboxMessage inboxMessage, String forwardUrl) {
+	InBoundContact contact = InBoundContact.from(inboxMessage.contact());
+
+	InBoundMsg msg = new InBoundMsg();
+	msg.messageId = inboxMessage.getMessageId();
+	msg.messageIdExt = inboxMessage.getMessageIdExt();
+	msg.contactFrom = ArgUtil.nonEmpty(inboxMessage.contact().getPhone(), inboxMessage.contact().getEmail());
+	msg.contactId = contact.contactId;
+
+	msg.timestamp = inboxMessage.getTimestamp();
+	msg.tags = inboxMessage.getTags();
+	msg.input = inboxMessage.form();
+
+	if (ArgUtil.is(inboxMessage.getAttachments())) {
+	    Attachment atth = inboxMessage.attachments().get(0);
+	    InBoundMsgMedia media = InBoundMsgMedia.from(atth);
+	    if (MESSAGE_FORMAT_TYPE.IMAGE.equals(inboxMessage.getFormatType())) {
+		msg.image = media;
+	    } else if (MESSAGE_FORMAT_TYPE.STICKER.equals(inboxMessage.getFormatType())) {
+		msg.sticker = media;
+	    } else if (MESSAGE_FORMAT_TYPE.VIDEO.equals(inboxMessage.getFormatType())) {
+		msg.video = media;
+	    } else if (MESSAGE_FORMAT_TYPE.AUDIO.equals(inboxMessage.getFormatType())) {
+		msg.audio = media;
+	    } else if (MESSAGE_FORMAT_TYPE.VOICE.equals(inboxMessage.getFormatType())) {
+		msg.voice = media;
+	    } else {
+		msg.document = media;
+	    }
+	} else {
+	    msg.type = MESSAGE_FORMAT_TYPE.TEXT;
+	    msg.text = new InBoundMsgText();
+	    msg.text.type = inboxMessage.getFormatSubType();
+	    msg.text.setBody(inboxMessage.getMessage());
+	}
+
+	InBoundWrapper wrap = new InBoundWrapper();
+	wrap.meta = new InBoundMeta().domain(AppContextUtil.getTenant())
+		.server(pmEnvironment.keyEntry(ConfigConstants.APP_KEY.PROP_SERVICE_DOMAIN).asString());
+	wrap.contacts = CollectionUtil.asList(contact);
+	wrap.messages = CollectionUtil.asList(msg);
+	restService.ajax(forwardUrl).post(wrap).asMapModel();
     }
 
     @Override
@@ -108,7 +129,7 @@ public class PostManInBoundHandler implements InBoundHandler {
 	    LOGGER.debug("Forwarding MessageReport to Xternal Service ");
 	    try {
 		InBoundContact contact = InBoundContact.from(messageReport.contact());
-		
+
 		InBoundMsgStatus status = new InBoundMsgStatus();
 		status.contactId = contact.contactId;
 		status.messageId = messageReport.getMessageId();

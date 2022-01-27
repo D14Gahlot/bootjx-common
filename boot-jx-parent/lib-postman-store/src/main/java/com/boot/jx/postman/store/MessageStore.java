@@ -54,6 +54,7 @@ public class MessageStore extends CommonDocStore {
     private MessageDoc updateMessageDoc(InboxMessage inboxMessage, MessageDoc doc) {
 	doc.setMessage(inboxMessage.getMessage());
 	doc.setSessionId(inboxMessage.getSessionId());
+	doc.setQueue(inboxMessage.session().getQueue());
 	doc.setTags(inboxMessage.getTags());
 	doc.setMessageIdExt(inboxMessage.getMessageIdExt());
 	doc.setReplyIdExt(inboxMessage.getReplyIdExt());

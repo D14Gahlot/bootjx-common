@@ -53,7 +53,10 @@ public class AppCommonConfigImpl implements AppCommonConfig {
     private String app;
 
     @Autowired
-    CDNBuilder cdnBuilder;
+    private CDNBuilder cdnBuilder;
+
+    @Autowired
+    private PMEnvironment pmEnvironment;
 
     public String getCdnServer() {
 
@@ -133,9 +136,6 @@ public class AppCommonConfigImpl implements AppCommonConfig {
 	return map;
     }
 
-    @Autowired
-    private PMEnvironment pmEnvironment;
-
     public String getAppLoginSecret() {
 	return appLoginSecret;
     }
@@ -149,7 +149,6 @@ public class AppCommonConfigImpl implements AppCommonConfig {
 	}
     }
 
-    @Override
     public String getDuperEmail() {
 	return duperEmail;
     }

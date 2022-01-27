@@ -107,4 +107,10 @@ public class ChatSessionQuery extends DocQueryBuilder<ChatSessionDoc> {
 	return this;
     }
 
+    public ChatSessionQuery setQueue(String queue) {
+	this.doc.setAssignedToQueue(queue);
+	this.set("assignedToQueue", queue);
+	return this;
+    }
+
 }

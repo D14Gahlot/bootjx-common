@@ -8,7 +8,6 @@ import java.util.Map.Entry;
 import javax.annotation.PostConstruct;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.EnumerablePropertySource;
 import org.springframework.core.env.Environment;
@@ -17,7 +16,6 @@ import org.springframework.stereotype.Service;
 import com.boot.jx.AppContextUtil;
 import com.boot.jx.chat.ConnectorHandlerFactory;
 import com.boot.jx.common.impl.ConfigMeta;
-import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.jx.postman.PMClientConfig;
 import com.boot.jx.postman.PMConfiguration.PMConfigurationModel;
 import com.boot.jx.postman.PMEnvironment;
@@ -41,11 +39,7 @@ import com.boot.utils.MapBuilder;
 import com.boot.utils.MapBuilder.BuilderMap;
 
 @Service
-@PropertySource("classpath:application.app.properties")
 public class ConfigManager {
-
-    @Autowired
-    private CommonMongoTemplate mongoTemplate;
 
     @Autowired
     public ConfigStore configStore;
@@ -124,7 +118,7 @@ public class ConfigManager {
     }
 
     public void deleteAdminConfigs(String key) {
-	PMConfigurationDoc doc = mongoTemplate.findById(AppContextUtil.getTenant(), PMConfigurationDoc.class);
+	PMConfigurationDoc doc = configStore.findById(AppContextUtil.getTenant(), PMConfigurationDoc.class);
 
 	if (ArgUtil.isEmpty(doc)) {
 	    doc = new PMConfigurationDoc();
@@ -148,7 +142,7 @@ public class ConfigManager {
     }
 
     public void save(PMConfigurationObject config) {
-	PMConfigurationDoc doc = mongoTemplate.findById(AppContextUtil.getTenant(), PMConfigurationDoc.class);
+	PMConfigurationDoc doc = configStore.findById(AppContextUtil.getTenant(), PMConfigurationDoc.class);
 
 	if (ArgUtil.isEmpty(doc)) {
 	    doc = new PMConfigurationDoc();
@@ -186,33 +180,32 @@ public class ConfigManager {
     }
 
     public ClientKeyConfigDoc save(ClientKeyConfigDoc clientApiKey) {
-	clientApiKey.setKey(PostManUtil.UNIQUE_API_KEY());
 	configStore.saveClientKeyConfig(clientApiKey);
 	this.refresh();
 	return clientApiKey;
     }
 
     public ClientKeyConfigDoc remove(ClientKeyConfigDoc clientApiKey) {
-	mongoTemplate.remove(clientApiKey);
+	configStore.remove(clientApiKey);
 	this.refresh();
 	return clientApiKey;
     }
 
-    public CompanyVarsConfigDoc save(CompanyVarsConfigDoc clientApiKey) {
-	configStore.saveCompanyVar(clientApiKey);
+    public CompanyVarsConfigDoc save(CompanyVarsConfigDoc companyVarsConfig) {
+	configStore.saveCompanyVar(companyVarsConfig);
 	this.refresh();
-	return clientApiKey;
+	return companyVarsConfig;
     }
 
-    public CompanyVarsConfigDoc remove(CompanyVarsConfigDoc clientApiKey) {
-	mongoTemplate.remove(clientApiKey);
+    public CompanyVarsConfigDoc remove(CompanyVarsConfigDoc companyVarsConfig) {
+	configStore.remove(companyVarsConfig);
 	this.refresh();
-	return clientApiKey;
+	return companyVarsConfig;
     }
 
     public ChannelConfig getChannelConfig(String channelId) {
 	if (ArgUtil.is(channelId)) {
-	    ChannelConfigDoc channelConfig = mongoTemplate.findById(channelId, ChannelConfigDoc.class);
+	    ChannelConfigDoc channelConfig = configStore.findById(channelId, ChannelConfigDoc.class);
 	    if (ArgUtil.is(channelConfig)) {
 		PMConfigurationModel config = pmEnvironment.local();
 		if (!ArgUtil.is(channelConfig.getWebhookUrl())) {

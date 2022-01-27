@@ -49,8 +49,12 @@ public class ConfigConstants {
 	POSTMAN_CHAT_INBOUND_WEBHOOK(new ConfigMeta("Message Inbound Webhook", "postman.chat.inbound.webhook")
 		.desc("Inbound messages will be forwarded to this webhook")),
 
-	POSTMAN_CHAT_CHANNEL_SANDBAX(new ConfigMeta("Enable Sandbox Channels", "postman.chat.channel.sandbox")
-		.desc("Sandbox channels are preconfigured communication channles").optionsOnOff()),
+	POSTMAN_CHAT_INBOUND_QUEUE(new ConfigMeta("Message Inbound Queue", "postman.chat.inbound.queue")
+		.desc("Inbound messages will be forwarded to this Queue by default")
+		.options("getx:/api/config/inbound_queue")),
+
+	POSTMAN_CHAT_CHANNEL_SANDBOX(new ConfigMeta("Enable Sandbox Channels", "postman.chat.channel.sandbox")
+		.desc("Sandbox channels are preconfigured communication channels").optionsOnOff()),
 
 	// Agent Properties
 	CHAT_TAG_ENABLED(new ConfigMeta("Chat Tag Enabled", "chat.tag.enabled").optionsOnOff().group(GROUP_AGENT)),
