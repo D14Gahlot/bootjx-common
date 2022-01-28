@@ -1,6 +1,6 @@
 package com.boot.jx.mongo;
 
-import com.boot.jx.mongo.CommonDocInterfaces.TimeStamp.UpdatedTimeStampSupport;
+import com.boot.jx.mongo.CommonDocInterfaces.TimeStampIndex.UpdatedTimeStampIndexSupport;
 import com.boot.utils.ArgUtil;
 
 public class CommonMongoQueryBuilder extends CommonMongoQB<CommonMongoQueryBuilder, Object> {
@@ -45,7 +45,7 @@ public class CommonMongoQueryBuilder extends CommonMongoQB<CommonMongoQueryBuild
 	@Override
 	public boolean isUpdatedTimeStampSupport() {
 	    if (ArgUtil.is(this.doc)) {
-		return this.doc instanceof UpdatedTimeStampSupport;
+		return this.doc instanceof UpdatedTimeStampIndexSupport;
 	    }
 	    return super.isUpdatedTimeStampSupport();
 	}

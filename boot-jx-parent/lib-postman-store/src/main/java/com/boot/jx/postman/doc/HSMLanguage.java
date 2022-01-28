@@ -12,12 +12,12 @@ import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
-import com.boot.jx.model.AuditableEntity;
+import com.boot.jx.model.AuditCreateEntity;
 import com.boot.jx.mongo.CommonDocInterfaces.OldDocVersion;
 
 @Document(collection = HSMLanguage.COLLECTION_NAME)
 @TypeAlias("HSMLanguage")
-public class HSMLanguage implements Serializable, OldDocVersion<HSMLanguage>, AuditableEntity {
+public class HSMLanguage implements Serializable, OldDocVersion<HSMLanguage>, AuditCreateEntity {
 
     public static final List<HSMLanguage> LIST = new ArrayList<HSMLanguage>();
     public static final String COLLECTION_NAME = "DICT_HSM_LANGUAGE";

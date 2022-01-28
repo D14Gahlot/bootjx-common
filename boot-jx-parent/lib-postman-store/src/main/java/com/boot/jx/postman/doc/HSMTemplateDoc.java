@@ -13,7 +13,7 @@ import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
-import com.boot.jx.model.AuditableEntity;
+import com.boot.jx.model.AuditCreateEntity;
 import com.boot.jx.mongo.CommonDocInterfaces.OldDocVersion;
 import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.ITemplates.BasicTemplate;
@@ -23,7 +23,7 @@ import com.boot.utils.ArgUtil;
 @Document(collection = HSMTemplateDoc.COLLECTION_NAME)
 @TypeAlias("HSMTemplate")
 public class HSMTemplateDoc
-	implements Serializable, OldDocVersion<HSMTemplateDoc>, BasicTemplate, AuditableEntity, ResourceMeta {
+	implements Serializable, OldDocVersion<HSMTemplateDoc>, BasicTemplate, AuditCreateEntity, ResourceMeta {
 
     public static final String COLLECTION_NAME = "DICT_HSM_TEMPLATES";
     public static final String COLLECTION_NAME_TRASH = "TRASH_DICT_HSM_TEMPLATES";

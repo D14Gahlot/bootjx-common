@@ -78,7 +78,7 @@ public class TmplQuickController {
 	newVersion.setTitle(title);
 	newVersion.setTemplate(template);
 
-	auditDetailProvider.audit(newVersion);
+	auditDetailProvider.auditCreate(newVersion);
 	mongoTemplate.save(newVersion);
 	return ApiResponse.buildResults(mongoTemplate.findAll(QuickReply.class)).data(newVersion)
 		.message("QuickReply created");
@@ -114,7 +114,7 @@ public class TmplQuickController {
 	newVersion.setCategory(category);
 	newVersion.setTitle(title);
 	newVersion.setAction(code);
-	auditDetailProvider.audit(newVersion);
+	auditDetailProvider.auditCreate(newVersion);
 	mongoTemplate.save(newVersion);
 	return ApiResponse.buildResults(mongoTemplate.findAll(QuickAction.class)).data(newVersion)
 		.message("QuickAction created");
@@ -148,7 +148,7 @@ public class TmplQuickController {
 	newVersion.setCategory(category);
 	newVersion.setTitle(title);
 	newVersion.setCode(code);
-	auditDetailProvider.audit(newVersion);
+	auditDetailProvider.auditCreate(newVersion);
 	mongoTemplate.save(newVersion);
 	return ApiResponse.buildResults(mongoTemplate.findAll(QuickLabel.class)).data(newVersion)
 		.message("QuickLabel created");
@@ -198,7 +198,7 @@ public class TmplQuickController {
 	newVersion.setCategory(category);
 	newVersion.setUrl(url);
 
-	auditDetailProvider.audit(newVersion);
+	auditDetailProvider.auditCreate(newVersion);
 	mongoTemplate.save(newVersion);
 
 	return ApiResponse.buildResults(mongoTemplate.findAll(QuickMedia.class)).data(newVersion)
@@ -235,7 +235,7 @@ public class TmplQuickController {
 	newVersion.setCategory(category);
 	newVersion.setTitle(title);
 	newVersion.setCode(code);
-	auditDetailProvider.audit(newVersion);
+	auditDetailProvider.auditCreate(newVersion);
 	mongoTemplate.save(newVersion);
 	return ApiResponse.buildResults(mongoTemplate.findAll(QuickTag.class)).data(newVersion)
 		.message("QuickTag created");

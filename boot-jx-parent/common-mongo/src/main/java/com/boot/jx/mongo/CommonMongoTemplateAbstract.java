@@ -12,10 +12,13 @@ import org.springframework.data.mongodb.core.query.Query;
 
 import com.boot.jx.logger.AuditDetailProvider;
 import com.boot.jx.logger.LoggerService;
-import com.boot.jx.model.AuditableEntity;
+import com.boot.jx.model.AuditCreateEntity;
+import com.boot.jx.mongo.CommonDocInterfaces.AuditActivityDoc;
+import com.boot.jx.mongo.CommonDocInterfaces.AuditableByIdEntity;
 import com.boot.jx.mongo.CommonDocInterfaces.DocVersion;
 import com.boot.jx.mongo.CommonDocInterfaces.MongoQueryBuilder;
-import com.boot.jx.mongo.CommonDocInterfaces.AuditActivityDoc;
+import com.boot.jx.mongo.CommonDocInterfaces.TimeStampIndex;
+import com.boot.jx.mongo.CommonDocInterfaces.TimeStampIndex.UpdatedTimeStampIndexSupport;
 import com.boot.utils.ArgUtil;
 import com.mongodb.WriteResult;
 
@@ -33,6 +36,35 @@ public class CommonMongoTemplateAbstract extends CommonMongoTemplateDefault {
 
     protected MongoTemplate getCommonMongoTemplate() {
 	return mongoTemplate;
+    }
+
+    public void beforeSaveInternal(Object objectToSave, String collectionName) {
+	if (objectToSave instanceof UpdatedTimeStampIndexSupport) {
+	    ((UpdatedTimeStampIndexSupport) objectToSave).setUpdated(TimeStampIndex.now());
+	}
+	if (objectToSave instanceof AuditableByIdEntity) {
+	    AuditableByIdEntity auditableByIdEntity = (AuditableByIdEntity) objectToSave;
+	    auditDetailProvider.auditUpdate(auditableByIdEntity);
+	    if (!ArgUtil.is(auditableByIdEntity.getId())) {
+		auditableByIdEntity.setCreatedBy(auditableByIdEntity.getUpdatedBy());
+		auditableByIdEntity.setCreatedStamp(auditableByIdEntity.getUpdatedStamp());
+	    } else {
+		/**
+		 * 'Creation' audit can be compromized here as it is being save directly. Should
+		 * actually fetch old document and make sure created date is not being
+		 * overridden, but can be ignored as log(Object oldDocument, String comment) is
+		 * being used everywhere, which anyway is tracjing creation details, and here we
+		 * can focus on last update only, in case creation gets oeverriden we can
+		 * implement later, as it will have some performance impact.
+		 */
+//		if (!ArgUtil.is(collectionName)) {
+//		    collectionName = mongoTemplate.getCollectionName(objectToSave.getClass());
+//		}
+//		Object objectToReplace = findById(auditableByIdEntity.getId(), null);
+	    }
+
+	}
+
     }
 
     public <T> T findByIdString(String id, Class<T> clazz) {
@@ -133,9 +165,9 @@ public class CommonMongoTemplateAbstract extends CommonMongoTemplateDefault {
     }
 
     public WriteResult trash(Object object) {
-	if (object instanceof AuditableEntity && ArgUtil.is(auditDetailProvider)) {
+	if (object instanceof AuditCreateEntity && ArgUtil.is(auditDetailProvider)) {
 	    String collectionName = "ZTRASH_" + mongoTemplate.getCollectionName(object.getClass());
-	    auditDetailProvider.audit((AuditableEntity) object);
+	    auditDetailProvider.auditCreate((AuditCreateEntity) object);
 	    mongoTemplate.save(new AuditActivityDoc().doc(object), collectionName);
 	}
 	return getCommonMongoTemplate().remove(object);
@@ -144,7 +176,7 @@ public class CommonMongoTemplateAbstract extends CommonMongoTemplateDefault {
     public void archive(Object oldDocument) {
 	String collectionName = "ZCHANGED_" + mongoTemplate.getCollectionName(oldDocument.getClass());
 	AuditActivityDoc oldDocumentArchived = new AuditActivityDoc().doc(oldDocument);
-	auditDetailProvider.audit(oldDocumentArchived);
+	auditDetailProvider.auditCreate(oldDocumentArchived);
 	mongoTemplate.save(oldDocumentArchived, collectionName);
     }
 
@@ -152,7 +184,7 @@ public class CommonMongoTemplateAbstract extends CommonMongoTemplateDefault {
 	String collectionName = mongoTemplate.getCollectionName(oldDocument.getClass());
 	AuditActivityDoc oldDocumentArchived = new AuditActivityDoc().collection(collectionName).doc(oldDocument)
 		.comment(comment);
-	auditDetailProvider.audit(oldDocumentArchived);
+	auditDetailProvider.auditCreate(oldDocumentArchived);
 	mongoTemplate.save(oldDocumentArchived, "ZACTIVITY_LOGS");
     }
 }

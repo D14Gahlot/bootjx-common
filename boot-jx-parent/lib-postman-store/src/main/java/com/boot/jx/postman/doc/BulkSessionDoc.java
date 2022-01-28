@@ -9,11 +9,11 @@ import org.springframework.data.annotation.TypeAlias;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import com.boot.jx.dict.ContactType;
-import com.boot.jx.model.AuditableEntity;
+import com.boot.jx.model.AuditCreateEntity;
 
 @Document(collection = "BULK_SESSION")
 @TypeAlias("BulkSessionDoc")
-public class BulkSessionDoc implements AuditableEntity, Serializable {
+public class BulkSessionDoc implements AuditCreateEntity, Serializable {
 
 	private static final long serialVersionUID = 2126642970366757413L;
 

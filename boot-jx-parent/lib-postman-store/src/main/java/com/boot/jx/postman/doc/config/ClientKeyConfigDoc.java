@@ -5,7 +5,8 @@ import org.springframework.data.annotation.TypeAlias;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import com.boot.jx.model.AuditableEntity;
+import com.boot.jx.model.AuditCreateEntity;
+import com.boot.jx.mongo.CommonDocInterfaces.AuditableByIdEntity;
 import com.boot.jx.mongo.CommonDocInterfaces.IDocument;
 import com.boot.jx.postman.ClientApp;
 import com.boot.model.UtilityModels.JsonIgnoreUnknown;
@@ -13,7 +14,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 @Document(collection = "CONFIG_CLIENT_KEY")
 @TypeAlias("ClientKeyConfig")
-public class ClientKeyConfigDoc implements IDocument, AuditableEntity, ClientApp, JsonIgnoreUnknown {
+public class ClientKeyConfigDoc implements IDocument, AuditableByIdEntity, ClientApp, JsonIgnoreUnknown {
 
     private static final long serialVersionUID = -3070718912315245729L;
 
@@ -30,6 +31,10 @@ public class ClientKeyConfigDoc implements IDocument, AuditableEntity, ClientApp
 
     private String createdBy;
     private Long createdStamp;
+
+    private String updatedBy;
+    private Long updatedStamp;
+
     private String key;
     private String keyVersion;
 
@@ -109,6 +114,22 @@ public class ClientKeyConfigDoc implements IDocument, AuditableEntity, ClientApp
 
     public void setQueue(String queue) {
 	this.queue = queue;
+    }
+
+    public String getUpdatedBy() {
+	return updatedBy;
+    }
+
+    public void setUpdatedBy(String updatedBy) {
+	this.updatedBy = updatedBy;
+    }
+
+    public Long getUpdatedStamp() {
+	return updatedStamp;
+    }
+
+    public void setUpdatedStamp(Long updatedStamp) {
+	this.updatedStamp = updatedStamp;
     }
 
 }

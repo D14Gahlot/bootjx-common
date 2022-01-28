@@ -3,6 +3,9 @@ package com.boot.jx.admin.api;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -68,7 +71,8 @@ public class ConfigController {
     @ResponseBody
     @RequestMapping(value = { "/api/config/clientapikey" }, method = { RequestMethod.GET })
     public ApiResponse<ClientKeyConfigDoc, Object> createClientApiKey() {
-	return ApiResponse.buildResults(mongoTemplate.findAll(ClientKeyConfigDoc.class));
+	return ApiResponse.buildResults(mongoTemplate.find(new Query().with(new Sort(Direction.ASC, "createdStamp")),
+		ClientKeyConfigDoc.class));
     }
 
     @JsonView(PMEnvironment.OneTimeVisibleProperty.class)

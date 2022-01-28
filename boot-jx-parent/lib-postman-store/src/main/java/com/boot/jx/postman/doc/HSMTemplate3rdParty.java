@@ -7,12 +7,12 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.TypeAlias;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import com.boot.jx.model.AuditableEntity;
+import com.boot.jx.model.AuditCreateEntity;
 import com.boot.jx.postman.model.ITemplates.BasicExternalTemplate;
 
 @Document(collection = HSMTemplate3rdParty.COLLECTION_NAME)
 @TypeAlias("HSMTemplate3rdParty")
-public class HSMTemplate3rdParty implements Serializable, AuditableEntity, BasicExternalTemplate {
+public class HSMTemplate3rdParty implements Serializable, AuditCreateEntity, BasicExternalTemplate {
 
     public static final String COLLECTION_NAME = "DICT_HSM_TEMPLATES_3RD";
     public static final String COLLECTION_NAME_TRASH = "TRASH_DICT_HSM_TEMPLATES_3RD";

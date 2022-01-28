@@ -11,7 +11,7 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 
 import com.boot.jx.mongo.CommonDocInterfaces.MongoQueryBuilder;
-import com.boot.jx.mongo.CommonDocInterfaces.TimeStamp.UpdatedTimeStampSupport;
+import com.boot.jx.mongo.CommonDocInterfaces.TimeStampIndex.UpdatedTimeStampIndexSupport;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.TimeUtils;
 
@@ -137,7 +137,7 @@ public class CommonMongoQB<M extends CommonMongoQB<M, T>, T> implements MongoQue
     }
 
     public boolean isUpdatedTimeStampSupport() {
-	return UpdatedTimeStampSupport.class.isAssignableFrom(this.docClass);
+	return UpdatedTimeStampIndexSupport.class.isAssignableFrom(this.docClass);
     }
 
     public void updatedStamp() {

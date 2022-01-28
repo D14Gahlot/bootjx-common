@@ -7,12 +7,12 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.TypeAlias;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import com.boot.jx.model.AuditableEntity;
+import com.boot.jx.model.AuditCreateEntity;
 import com.boot.jx.mongo.CommonDocInterfaces.OldDocVersion;
 
 @Document(collection = "DICT_QUICK_REPS")
 @TypeAlias("QuickReply")
-public class QuickReply implements Serializable, OldDocVersion<QuickReply>, AuditableEntity {
+public class QuickReply implements Serializable, OldDocVersion<QuickReply>, AuditCreateEntity {
 	private static final long serialVersionUID = -5649094988762846983L;
 
 	@Id

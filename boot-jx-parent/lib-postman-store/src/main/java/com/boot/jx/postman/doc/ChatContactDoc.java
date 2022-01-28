@@ -9,7 +9,7 @@ import org.springframework.data.annotation.TypeAlias;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import com.boot.jx.model.AuditableEntity;
+import com.boot.jx.model.AuditCreateEntity;
 import com.boot.jx.postman.dto.ChatUserProfileDTO;
 import com.boot.jx.postman.model.MessageDefinitions.Contactable;
 import com.boot.jx.swagger.ApiMockModelProperty;
@@ -18,7 +18,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 @Document(collection = "CHAT_CONTACT")
 @TypeAlias("ChatContactDoc")
-public class ChatContactDoc implements Serializable, Contactable, AuditableEntity {
+public class ChatContactDoc implements Serializable, Contactable, AuditCreateEntity {
     private static final long serialVersionUID = 1L;
 
     @Id
