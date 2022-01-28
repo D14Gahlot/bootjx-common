@@ -37,6 +37,12 @@ public class InBoundContact {
 	contact.contactId = PostManUtil.CONTACT_ID(contactable);
 	contact.csid = contactable.getCsid();
 	contact.channelId = PostManUtil.CHANNEL_ID(contactable);
+
+	contact.profile = new InBoundContactProfile();
+	contact.profile.name = contactable.getName();
+	contact.profile.email = contactable.getEmail();
+	contact.profile.phone = contactable.getPhone();
+
 	return contact;
     }
 
