@@ -86,6 +86,9 @@ public interface PMConfiguration extends Serializable {
 	    if (ArgUtil.is(clientApiKey.getQueue())) {
 		this.clientApiKeys().put(clientApiKey.getQueue(), clientApiKey);
 	    }
+	    if (ArgUtil.is(clientApiKey.getId())) {
+		this.clientApiKeys().put(clientApiKey.getId(), clientApiKey);
+	    }
 	    return this;
 	}
 

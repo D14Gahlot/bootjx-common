@@ -11,7 +11,7 @@ import com.ulisesbocchio.jasyptspringboot.annotation.EnableEncryptableProperties
 @Configuration
 @EnableEncryptableProperties
 @PropertySource("classpath:application.app.properties")
-public class PMEnvironmentConfigImpl implements PMDomainConfig {
+public class PMDomainConfigImpl implements PMDomainConfig {
 
     @Autowired
     private PMEnvironment environment;

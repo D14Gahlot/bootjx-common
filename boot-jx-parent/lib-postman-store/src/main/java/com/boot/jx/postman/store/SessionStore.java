@@ -230,9 +230,11 @@ public class SessionStore extends CommonMongoTemplateAbstract {
 	    }
 
 	    // Assign Queue
-	    if (ArgUtil.isEmptyValue(chatSessionDoc.getAssignedToQueue())
-		    && ArgUtil.is(pmDomainConfig.getDefaultInboundQueue())) {
-		chatSessionDocQuery.setQueue(pmDomainConfig.getDefaultInboundQueue());
+	    if (ArgUtil.isEmptyValue(chatSessionDoc.getAssignedToQueue())) {
+		String defaultQueue = pmDomainConfig.getDefaultInboundQueue();
+		if (ArgUtil.is(defaultQueue)) {
+		    chatSessionDocQuery.setQueue(pmDomainConfig.getDefaultInboundQueue());
+		}
 	    }
 
 	    updateFirst(chatSessionDocQuery);
