@@ -8,9 +8,11 @@ import com.boot.jx.AppConfigPackage;
 import com.boot.jx.tunnel.DBEvent;
 import com.boot.jx.tunnel.ITunnelSubscriber;
 import com.boot.jx.tunnel.TunnelEventMapping;
+import com.boot.jx.tunnel.TunnelEventXchange;
 import com.boot.jx.tunnel.TunnelService;
 
-@TunnelEventMapping(topic = SysTunnelEventsDict.Names.SHARED_CONFIG_UPDATE)
+@TunnelEventMapping(topic = SysTunnelEventsDict.Names.SHARED_CONFIG_UPDATE, scheme = TunnelEventXchange.SHOUT_LISTNER,
+	integrity = false)
 public class SharedConfigManager implements ITunnelSubscriber<DBEvent> {
 
     private final Logger LOGGER = LoggerFactory.getLogger(getClass());
