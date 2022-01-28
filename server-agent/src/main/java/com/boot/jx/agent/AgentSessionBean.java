@@ -1,5 +1,7 @@
 package com.boot.jx.agent;
 
+import java.io.Serializable;
+
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.stereotype.Component;
@@ -10,7 +12,7 @@ import com.boot.utils.ArgUtil;
 
 @Component
 @Scope(value = "session", proxyMode = ScopedProxyMode.TARGET_CLASS)
-public class AgentSessionBean implements AuditDetailProvider {
+public class AgentSessionBean implements AuditDetailProvider, Serializable {
 
     private static final long serialVersionUID = 5850744656958653564L;
     private String agentCode;

@@ -42,7 +42,7 @@ public class CommonMongoTemplateAbstract extends CommonMongoTemplateDefault {
 	if (objectToSave instanceof UpdatedTimeStampIndexSupport) {
 	    ((UpdatedTimeStampIndexSupport) objectToSave).setUpdated(TimeStampIndex.now());
 	}
-	if (objectToSave instanceof AuditableByIdEntity) {
+	if (objectToSave instanceof AuditableByIdEntity && ArgUtil.is(auditDetailProvider)) {
 	    AuditableByIdEntity auditableByIdEntity = (AuditableByIdEntity) objectToSave;
 	    auditDetailProvider.auditUpdate(auditableByIdEntity);
 	    if (!ArgUtil.is(auditableByIdEntity.getId())) {

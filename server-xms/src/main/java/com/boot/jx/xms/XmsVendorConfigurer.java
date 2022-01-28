@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.boot.jx.AppConfigPackage;
+import com.boot.jx.AppContextUtil;
 import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.http.CommonHttpRequest;
 import com.boot.jx.http.CommonHttpRequest.ApiRequestDetail;
@@ -31,6 +32,10 @@ public class XmsVendorConfigurer implements TenantAuthFilter {
     @Autowired
     private AppConfigPackage appConfigPackage;
 
+    public static ClientApp getClientApp() {
+	return AppContextUtil.get("XmsVendorConfigurer:ClientApp");
+    }
+
     @Override
     public boolean filterTenantRequest(ApiRequestDetail apiRequest, CommonHttpRequest req, String traceId) {
 	String apiKey = req.get(XmsConstants.X_API_KEY);
@@ -52,7 +57,11 @@ public class XmsVendorConfigurer implements TenantAuthFilter {
 		return false;
 	    }
 	}
-	return ArgUtil.areEqual(apiKey, apiKeyConfig.getKey());
+	if (ArgUtil.areEqual(apiKey, apiKeyConfig.getKey())) {
+	    AppContextUtil.set("XmsVendorConfigurer:ClientApp", apiKeyConfig);
+	    return true;
+	}
+	return false;
     }
 
 }

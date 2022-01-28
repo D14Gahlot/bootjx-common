@@ -1,5 +1,7 @@
 package com.boot.jx.admin;
 
+import java.io.Serializable;
+
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.stereotype.Component;
@@ -11,7 +13,7 @@ import com.boot.utils.ArgUtil;
 
 @Component
 @Scope(value = "session", proxyMode = ScopedProxyMode.TARGET_CLASS)
-public class AdminSessionBean extends AppCommonAuthUser implements AuditDetailProvider {
+public class AdminSessionBean extends AppCommonAuthUser implements AuditDetailProvider, Serializable {
 
     private static final long serialVersionUID = 3090820592497487481L;
     private AgentResponseAuthDto profile;

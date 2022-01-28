@@ -18,7 +18,7 @@ import com.mongodb.WriteResult;
 public class ConfigStore extends CommonMongoTemplateAbstract {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ConfigStore.class);
-
+    
     public void saveConfiguration(PMConfigurationDoc doc) {
 	doc.getAccountKey(); // Populate Keys of not exists
 	save(doc);

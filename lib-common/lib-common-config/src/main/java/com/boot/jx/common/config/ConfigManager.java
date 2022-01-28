@@ -56,6 +56,10 @@ public class ConfigManager {
     @Autowired
     private PMClientConfig pmClientConfig;
 
+    public <T> T findById(Object id, Class<T> entityClass) {
+	return configStore.findById(id, entityClass);
+    }
+
     public List<Map<String, Object>> getSetupConfigs() {
 	List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
 
