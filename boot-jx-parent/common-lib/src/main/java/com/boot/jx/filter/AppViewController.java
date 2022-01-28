@@ -91,7 +91,7 @@ public class AppViewController {
 
     @PostMapping(value = "/favicon.ico")
     @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<Object> handleNotifications(@RequestParam("notification") String itemid) {
+    public ResponseEntity<Object> handlefavicon() {
 	return ResponseEntity.ok().build();
     }
 
