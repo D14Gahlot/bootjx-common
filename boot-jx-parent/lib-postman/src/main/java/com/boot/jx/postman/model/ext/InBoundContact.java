@@ -24,11 +24,9 @@ public class InBoundContact {
     @ApiMockModelProperty(example = "91YOURNUMBER", value = "Channel Specific ID", required = false)
     public String csid;
 
-    @ApiMockModelProperty(example = "C34567", value = "Unique Id assigned to Contact by Core Business Application",
-	    required = false)
-    public String profileId;
-
     public InBoundContactProfile profile;
+
+    public ContactBusinessProfile businessProfile;
 
     public static InBoundContact from(Contactable contactable) {
 	InBoundContact contact = new InBoundContact();
