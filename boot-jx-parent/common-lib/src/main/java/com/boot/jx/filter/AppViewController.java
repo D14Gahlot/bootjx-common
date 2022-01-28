@@ -83,4 +83,5 @@ public class AppViewController {
 	model.addAttribute("APP_CONTEXT", appConfig.getAppPrefix());
 	return "swagger-uix";
     }
+
 }
