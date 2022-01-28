@@ -26,6 +26,7 @@ public class ChatSessionDTO implements Serializable {
 
     private String assignedToDept;
     private String assignedToAgent;
+    private String assignedToQueue;
 
     private long startSessionStamp;
     private long fistResponseStamp;
@@ -325,5 +326,13 @@ public class ChatSessionDTO implements Serializable {
 	    this.contact = new ContactDTO();
 	}
 	return this.contact;
+    }
+
+    public String getAssignedToQueue() {
+        return assignedToQueue;
+    }
+
+    public void setAssignedToQueue(String assignedToQueue) {
+        this.assignedToQueue = assignedToQueue;
     }
 }
