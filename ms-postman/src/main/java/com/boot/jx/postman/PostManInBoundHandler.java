@@ -7,10 +7,13 @@ import org.springframework.stereotype.Component;
 
 import com.boot.jx.AppContextUtil;
 import com.boot.jx.chat.ChatClient;
+import com.boot.jx.chat.ChatClient.PATH;
 import com.boot.jx.common.config.ConfigConstants;
 import com.boot.jx.inbound.InBound.InBoundHandler;
 import com.boot.jx.postman.PMConstants.MESSAGE_FORMAT_TYPE;
+import com.boot.jx.postman.PMEnvironment.PMCommonConfig;
 import com.boot.jx.postman.PMEnvironment.PMConfigurationObject;
+import com.boot.jx.postman.PMEnvironment.PMDomainConfig;
 import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.MessageReport;
@@ -37,7 +40,10 @@ public class PostManInBoundHandler implements InBoundHandler {
     public PMEnvironment pmEnvironment;
 
     @Autowired
-    public PMEnvironmentConfig pmEnvironmentConfig;
+    public PMDomainConfig pmDomainConfig;
+
+    @Autowired
+    public PMCommonConfig pmCommonConfig;
 
     @Autowired
     private RestService restService;
@@ -48,17 +54,36 @@ public class PostManInBoundHandler implements InBoundHandler {
 	String assignedQueue = inboxMessage.session().getQueue();
 
 	if (!ArgUtil.is(assignedQueue)) {
-	    assignedQueue = pmEnvironmentConfig.getDefaultInboundQueue();
+	    assignedQueue = pmDomainConfig.getDefaultInboundQueue();
 	}
 
 	if (ArgUtil.is(assignedQueue)) {
 	    ClientApp defaultClient = pmEnvironment.local().clientApiKey(assignedQueue);
-	    if (ArgUtil.is(defaultClient) && ArgUtil.areEqual("WEBHOOK", defaultClient.getAppType())) {
-		LOGGER.debug("Forwarding InboxMessage to Xternal Queue ");
-		String forwardUrl = defaultClient.getWebhook();
-		forward2Webhook(inboxMessage, forwardUrl);
-		return;
+	    if (ArgUtil.is(defaultClient)) {
+
+		// WEBHOOOK HANDLING
+		if (ArgUtil.areEqual("WEBHOOK", defaultClient.getAppType())) {
+		    LOGGER.debug("Forwarding InboxMessage to Xternal Queue ");
+		    String forwardUrl = defaultClient.getWebhook();
+		    forward2Webhook(inboxMessage, forwardUrl);
+		    return;
+		}
+
+		// INTERNAL AGENT HANDLING
+		if (ArgUtil.areEqual("AGENT", defaultClient.getAppType())) {
+		    LOGGER.debug("Forwarding InboxMessage to internal Agent ");
+		    chatClient.forward(pmCommonConfig.getAgentUrl() + PATH.INBOUND_FRWRD, inboxMessage);
+		    return;
+		}
+
+		// INTERNAL BOT HANDLING
+		if (ArgUtil.areEqual("BOT", defaultClient.getAppType())) {
+		    LOGGER.debug("Forwarding InboxMessage to internal Bot ");
+		    chatClient.forward(pmCommonConfig.getBotUrl() + PATH.INBOUND_FRWRD, inboxMessage);
+		    return;
+		}
 	    }
+
 	}
 
 	PMConfigurationObject webhookEntry = pmEnvironment

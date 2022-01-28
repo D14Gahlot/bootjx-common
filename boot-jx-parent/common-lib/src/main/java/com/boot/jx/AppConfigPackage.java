@@ -22,8 +22,6 @@ public class AppConfigPackage {
 
 	public Map<String, Object> configAttributes();
 
-	public String getCdnServer();
-
 	public Map<String, Object> appAttributes();
 
     }

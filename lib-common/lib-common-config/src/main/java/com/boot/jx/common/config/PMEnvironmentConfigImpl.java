@@ -5,13 +5,13 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 
 import com.boot.jx.postman.PMEnvironment;
-import com.boot.jx.postman.PMEnvironmentConfig;
+import com.boot.jx.postman.PMEnvironment.PMDomainConfig;
 import com.ulisesbocchio.jasyptspringboot.annotation.EnableEncryptableProperties;
 
 @Configuration
 @EnableEncryptableProperties
 @PropertySource("classpath:application.app.properties")
-public class PMEnvironmentConfigImpl implements PMEnvironmentConfig {
+public class PMEnvironmentConfigImpl implements PMDomainConfig {
 
     @Autowired
     private PMEnvironment environment;

@@ -24,7 +24,7 @@ import com.boot.jx.postman.PMConstants;
 import com.boot.jx.postman.PMConstants.CHAT_MODE;
 import com.boot.jx.postman.PMConstants.CHAT_STATUS;
 import com.boot.jx.postman.PMConstants.DEFAULT_VALUES;
-import com.boot.jx.postman.PMEnvironmentConfig;
+import com.boot.jx.postman.PMEnvironment.PMDomainConfig;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.ChatUserProfileDoc;
@@ -58,7 +58,7 @@ public class SessionStore extends CommonDocStore {
     private MessageContext messageContext;
 
     @Autowired
-    private PMEnvironmentConfig pmEnvironmentConfig;
+    private PMDomainConfig pmDomainConfig;
 
     public ChatContactDoc getContact(IMessage inboxMessage) {
 	String contactId = PostManUtil.createContactId(inboxMessage);
@@ -231,8 +231,8 @@ public class SessionStore extends CommonDocStore {
 
 	    // Assign Queue
 	    if (ArgUtil.isEmptyValue(chatSessionDoc.getAssignedToQueue())
-		    && ArgUtil.is(pmEnvironmentConfig.getDefaultInboundQueue())) {
-		chatSessionDocQuery.setQueue(pmEnvironmentConfig.getDefaultInboundQueue());
+		    && ArgUtil.is(pmDomainConfig.getDefaultInboundQueue())) {
+		chatSessionDocQuery.setQueue(pmDomainConfig.getDefaultInboundQueue());
 	    }
 
 	    commonMongoTemplate.updateFirst(chatSessionDocQuery);

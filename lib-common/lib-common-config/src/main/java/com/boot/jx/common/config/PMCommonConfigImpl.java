@@ -13,13 +13,13 @@ import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
 import com.boot.jx.AppConfig;
-import com.boot.jx.AppConfigPackage.AppCommonConfig;
 import com.boot.jx.AppContextUtil;
 import com.boot.jx.common.impl.ConfigMeta;
 import com.boot.jx.http.CommonHttpRequest;
 import com.boot.jx.logger.LoggerService;
 import com.boot.jx.postman.PMClientConfig;
 import com.boot.jx.postman.PMEnvironment;
+import com.boot.jx.postman.PMEnvironment.PMCommonConfig;
 import com.boot.model.SafeKeyHashMap;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.JsonUtil;
@@ -27,9 +27,9 @@ import com.boot.utils.TimeUtils;
 
 @Component
 @PropertySource("classpath:application-common.properties")
-public class AppCommonConfigImpl implements AppCommonConfig {
+public class PMCommonConfigImpl implements PMCommonConfig {
 
-    private static final Logger LOGGER = LoggerService.getLogger(AppCommonConfigImpl.class);
+    private static final Logger LOGGER = LoggerService.getLogger(PMCommonConfigImpl.class);
 
     @Autowired
     private PMClientConfig chatClientConfig;
@@ -51,6 +51,12 @@ public class AppCommonConfigImpl implements AppCommonConfig {
 
     @Value("${common.const.app}")
     private String app;
+
+    @Value("${postman.bot.url}")
+    private String botUrl;
+
+    @Value("${postman.agent.url}")
+    private String agentUrl;
 
     @Autowired
     private CDNBuilder cdnBuilder;
@@ -151,6 +157,15 @@ public class AppCommonConfigImpl implements AppCommonConfig {
 
     public String getDuperEmail() {
 	return duperEmail;
+    }
+
+    public String getBotUrl() {
+	return botUrl;
+    }
+
+    @Override
+    public String getAgentUrl() {
+	return agentUrl;
     }
 
 }

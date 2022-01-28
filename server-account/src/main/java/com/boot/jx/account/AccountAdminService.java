@@ -17,7 +17,7 @@ import com.boot.jx.AppConfig;
 import com.boot.jx.AppContextUtil;
 import com.boot.jx.account.doc.BusinessUserDoc;
 import com.boot.jx.api.ApiResponse;
-import com.boot.jx.common.config.AppCommonConfigImpl;
+import com.boot.jx.common.config.PMCommonConfigImpl;
 import com.boot.jx.http.CommonHttpRequest;
 import com.boot.jx.postman.PMConstants;
 import com.boot.jx.postman.PMEnvironment;
@@ -46,7 +46,7 @@ public class AccountAdminService implements LogoutHandler {
     private RestService restService;
 
     @Autowired
-    private AppCommonConfigImpl appCommonConfig;
+    private PMCommonConfigImpl appCommonConfig;
 
     @Value("${mry.app.url}")
     private String appServiceUrl;
