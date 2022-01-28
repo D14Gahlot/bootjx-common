@@ -101,7 +101,8 @@ public class ConfigMeta implements Serializable {
     private CONVERT_TYPE converterType;
 
     private List<ConfigOption> options;
-    private String source;
+    private String optionsKey;
+    private String optionsSource;
 
     public ConfigMeta() {
     }
@@ -145,12 +146,6 @@ public class ConfigMeta implements Serializable {
 	return this.options;
     }
 
-    public ConfigMeta options(String src) {
-	this.options = this.options();
-	this.source = src;
-	return this;
-    }
-
     public ConfigMeta options(ConfigOption... options) {
 	this.options = this.options();
 	for (ConfigOption configOption : options) {
@@ -167,17 +162,18 @@ public class ConfigMeta implements Serializable {
 	return this;
     }
 
-    public String getSource() {
-	return source;
-    }
-
-    public void setSource(String src) {
-	this.source = src;
-    }
-
-    public ConfigMeta source(String src) {
-	this.source = src;
+    public ConfigMeta optionsSource(String src) {
+	this.options = this.options();
+	this.optionsSource = src;
 	return this;
+    }
+
+    public String getOptionsSource() {
+	return optionsSource;
+    }
+
+    public void setOptionsSource(String src) {
+	this.optionsSource = src;
     }
 
     public ConfigMeta optionsOnOff() {
@@ -364,6 +360,19 @@ public class ConfigMeta implements Serializable {
 
     public ConfigMeta group(String group) {
 	this.group = group;
+	return this;
+    }
+
+    public String getOptionsKey() {
+	return optionsKey;
+    }
+
+    public void setOptionsKey(String optionKey) {
+	this.optionsKey = optionKey;
+    }
+
+    public ConfigMeta optionsKey(String optionKey) {
+	this.optionsKey = optionKey;
 	return this;
     }
 }
