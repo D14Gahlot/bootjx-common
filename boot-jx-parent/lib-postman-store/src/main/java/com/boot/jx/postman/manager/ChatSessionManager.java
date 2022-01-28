@@ -13,9 +13,16 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Component;
 
+import com.boot.jx.api.ApiFieldError;
+import com.boot.jx.api.ApiResponseUtil;
+import com.boot.jx.mongo.CommonMongoQueryBuilder;
+import com.boot.jx.postman.ClientApp;
+import com.boot.jx.postman.PMConfiguration.PMConfigurationModel;
 import com.boot.jx.postman.PMConstants;
+import com.boot.jx.postman.PMConstants.CHAT_MODE;
 import com.boot.jx.postman.PMConstants.CHAT_STATUS;
 import com.boot.jx.postman.PMConstants.DEFAULT_VALUES;
+import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.QuickTag;
 import com.boot.jx.postman.store.MessageStore.EVENTS;
@@ -33,6 +40,9 @@ public class ChatSessionManager {
 
     @Autowired
     private SessionStore sessionStore;
+
+    @Autowired
+    private PMEnvironment pmEnvironment;
 
     public boolean resolveSession(ChatSessionDoc session) {
 	if (!ArgUtil.isEmptyValue(session.getResolveSessionStamp())) {
@@ -193,4 +203,39 @@ public class ChatSessionManager {
 	return sessionStore.find(query, ChatSessionDoc.class);
     }
 
+    public ChatSessionDoc assignToQueue(ChatSessionDoc chatSessionDoc, String queueCode) {
+	if (!ArgUtil.is(chatSessionDoc)) {
+	    LOGGER.error("Session Cannot Be Empty for queueCode {}", queueCode);
+	    return chatSessionDoc;
+	}
+
+	if (ArgUtil.is(queueCode)) {
+	    PMConfigurationModel config = pmEnvironment.local();
+	    ClientApp apiKeyConfig = config.clientApiKey(queueCode);
+	    if (ArgUtil.is(apiKeyConfig)) {
+		queueCode = apiKeyConfig.getQueue();
+		chatSessionDoc.setAssignedToQueue(queueCode);
+		chatSessionDoc.setMode(apiKeyConfig.getAppType());
+	    } else {
+		ApiResponseUtil.throwInputException(new ApiFieldError().field("queue").codeKey("INVALID_QUEUE")
+			.description("Invalid Queue Code " + queueCode));
+		return chatSessionDoc;
+	    }
+	} else {
+	    chatSessionDoc.setAssignedToQueue(null);
+	    chatSessionDoc.setMode(null);
+	}
+	CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder().whereId(chatSessionDoc.getSessionId());
+	builder.set("assignedToQueue", chatSessionDoc.getAssignedToQueue());
+	builder.set("mode", chatSessionDoc.getMode());
+	sessionStore.updateFirst(builder.getQuery(), builder.getUpdate(), ChatSessionDoc.class);
+	logManager.log(chatSessionDoc, EVENTS.ASGND_TO_QUEUE, queueCode);
+	return chatSessionDoc;
+
+    }
+
+    public ChatSessionDoc assignToQueue(String sessionId, String queueCode) {
+	ChatSessionDoc sessionDoc = sessionStore.getSession(sessionId);
+	return this.assignToQueue(sessionDoc, queueCode);
+    }
 }

@@ -37,8 +37,8 @@ public class MessageStore extends CommonDocStore {
     private static final Logger LOGGER = LoggerFactory.getLogger(MessageStore.class);
 
     public static enum EVENTS {
-	ASGND_TO_DEPT, ASGND_TO_AGENT, UNASGND, PICKED_BY_AGENT, CLOSED_BY_AGENT, LABEL_ADDED, LABEL_REMOVED,
-	STATUS_CHANGED, TAG_ADDED, TAG_REMOVED
+	ASGND_TO_DEPT, ASGND_TO_AGENT, ASGND_TO_QUEUE, UNASGND, PICKED_BY_AGENT, CLOSED_BY_AGENT, LABEL_ADDED,
+	LABEL_REMOVED, STATUS_CHANGED, TAG_ADDED, TAG_REMOVED
     }
 
     @Autowired

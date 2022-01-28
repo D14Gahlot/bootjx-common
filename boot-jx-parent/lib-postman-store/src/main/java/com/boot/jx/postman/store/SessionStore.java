@@ -16,9 +16,9 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Component;
 
-import com.boot.jx.mongo.CommonDocStore;
 import com.boot.jx.mongo.CommonMongoQB.CommonMongoCriteria;
 import com.boot.jx.mongo.CommonMongoQueryBuilder;
+import com.boot.jx.mongo.CommonMongoTemplateAbstract;
 import com.boot.jx.postman.PMClientConfig;
 import com.boot.jx.postman.PMConstants;
 import com.boot.jx.postman.PMConstants.CHAT_MODE;
@@ -44,7 +44,7 @@ import com.boot.utils.EntityDtoUtil;
 import com.boot.utils.TimeUtils;
 
 @Component
-public class SessionStore extends CommonDocStore {
+public class SessionStore extends CommonMongoTemplateAbstract {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SessionStore.class);
 
@@ -197,10 +197,10 @@ public class SessionStore extends CommonDocStore {
 	    chatContactQuery.updateCreatedStamp();
 	    // CONTACT CREATION - needs creation or updation if
 	    if (ArgUtil.isEmpty(chatContactDoc)) {
-		commonMongoTemplate.upsert(chatContactQuery);
+		upsert(chatContactQuery);
 	    } else {
 		// CONTACT UPDATE
-		commonMongoTemplate.updateFirst(chatContactQuery);
+		updateFirst(chatContactQuery);
 	    }
 	} else {
 	    // SESSION UPDATE
@@ -209,7 +209,7 @@ public class SessionStore extends CommonDocStore {
 	    if (!ArgUtil.is(chatSessionDoc.getContactName())) {
 		chatSessionDocQuery.setContactName(chatSessionDoc.getContactName());
 	    }
-	    commonMongoTemplate.updateFirst(chatSessionDocQuery);
+	    updateFirst(chatSessionDocQuery);
 	}
 	return chatSessionDoc;
     }
@@ -235,13 +235,13 @@ public class SessionStore extends CommonDocStore {
 		chatSessionDocQuery.setQueue(pmDomainConfig.getDefaultInboundQueue());
 	    }
 
-	    commonMongoTemplate.updateFirst(chatSessionDocQuery);
+	    updateFirst(chatSessionDocQuery);
 
 	    // Query Update for Contact
 	    ChatContactQuery chatContactQuery = new ChatContactQuery(chatSessionDoc.getContactId());
 	    chatContactQuery.setLastInBoundStamp(inboxMessage.getTimestamp());
 	    chatContactQuery.update(inboxMessage.contact());
-	    commonMongoTemplate.updateFirst(chatContactQuery);
+	    updateFirst(chatContactQuery);
 	} else if (PostManUtil.isOutBound(inboxMessage)) {
 
 	}
@@ -389,17 +389,17 @@ public class SessionStore extends CommonDocStore {
 	    if (ArgUtil.isEmpty(chatSessionDoc.getStartSessionStamp()) || chatSessionDoc.getStartSessionStamp() == 0L) {
 		chatSessionDoc.setStartSessionStamp(System.currentTimeMillis());
 	    }
-	    commonMongoTemplate.save(chatSessionDoc);
+	    save(chatSessionDoc);
 	} catch (Exception e) {
 	    ChatSessionDoc chatSessionDoc2 = mongoTemplate.findById(chatSessionDoc.getSessionId(),
 		    ChatSessionDoc.class);
 	    LOGGER.error(chatSessionDoc.getVersion() + " ~ " + chatSessionDoc2.getVersion(), e);
 	    if (chatSessionDoc.getVersion() == null) {
 		// chatSessionDoc.setVersion(0);
-		commonMongoTemplate.save(chatSessionDoc);
+		save(chatSessionDoc);
 	    } else {
 		// chatSessionDoc.setVersion(chatSessionDoc2.getVersion()+1);
-		commonMongoTemplate.save(chatSessionDoc);
+		save(chatSessionDoc);
 	    }
 	}
     }
@@ -530,7 +530,7 @@ public class SessionStore extends CommonDocStore {
 	builder.set("assignedToAgent", chatSessionDoc.getAssignedToAgent());
 	builder.set("assignedAgentStamp", chatSessionDoc.getAssignedAgentStamp());
 	builder.set("agentSessionStamp", chatSessionDoc.getAgentSessionStamp());
-	commonMongoTemplate.updateFirst(builder);
+	updateFirst(builder);
     }
 
     public void assignToBot(ChatSessionDoc chatSessionDoc, String botName) {
@@ -555,7 +555,7 @@ public class SessionStore extends CommonDocStore {
 		ChatSessionQuery chatSessionDocQuery = new ChatSessionQuery(msgDoc.getSessionId());
 		if (PostManUtil.isInBound(msgDoc.getType())) {
 		    chatSessionDocQuery.setLastInBoundMsg(msgDoc, iMessage.contact().getContactType());
-		    commonMongoTemplate.updateFirst(chatSessionDocQuery);
+		    updateFirst(chatSessionDocQuery);
 		} else if (PostManUtil.isOutBound(msgDoc.getType())) {
 		    if (PostManUtil.isAgentMode(iMessage)) {
 			chatSessionDocQuery.setLastAgentReply(msgDoc, iMessage.contact().getContactType());
@@ -566,7 +566,7 @@ public class SessionStore extends CommonDocStore {
 		    }
 		}
 		chatSessionDocQuery.setLastMsg(msgDoc, iMessage.contact().getContactType());
-		commonMongoTemplate.updateFirst(chatSessionDocQuery);
+		updateFirst(chatSessionDocQuery);
 	    } catch (Exception e) {
 		LOGGER.error("SessionStore.push", e);
 	    }

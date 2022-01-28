@@ -10,6 +10,7 @@ import com.boot.jx.chat.ChatClient;
 import com.boot.jx.chat.ChatClient.PATH;
 import com.boot.jx.common.config.ConfigConstants;
 import com.boot.jx.inbound.InBound.InBoundHandler;
+import com.boot.jx.postman.PMConstants.CHAT_MODE;
 import com.boot.jx.postman.PMConstants.MESSAGE_FORMAT_TYPE;
 import com.boot.jx.postman.PMEnvironment.PMCommonConfig;
 import com.boot.jx.postman.PMEnvironment.PMConfigurationObject;
@@ -24,6 +25,7 @@ import com.boot.jx.postman.model.ext.InBoundMsg;
 import com.boot.jx.postman.model.ext.InBoundMsgMedia;
 import com.boot.jx.postman.model.ext.InBoundMsgStatus;
 import com.boot.jx.postman.model.ext.InBoundWrapper;
+import com.boot.jx.postman.model.ext.MsgSession;
 import com.boot.jx.rest.RestService;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
@@ -62,7 +64,7 @@ public class PostManInBoundHandler implements InBoundHandler {
 	    if (ArgUtil.is(defaultClient)) {
 
 		// WEBHOOOK HANDLING
-		if (ArgUtil.areEqual("WEBHOOK", defaultClient.getAppType())) {
+		if (ArgUtil.areEqual(CHAT_MODE.WEBHOOK.toString(), defaultClient.getAppType())) {
 		    LOGGER.debug("Forwarding InboxMessage to Xternal Queue ");
 		    String forwardUrl = defaultClient.getWebhook();
 		    forward2Webhook(inboxMessage, forwardUrl);
@@ -70,14 +72,14 @@ public class PostManInBoundHandler implements InBoundHandler {
 		}
 
 		// INTERNAL AGENT HANDLING
-		if (ArgUtil.areEqual("AGENT", defaultClient.getAppType())) {
+		if (ArgUtil.areEqual(CHAT_MODE.AGENT.toString(), defaultClient.getAppType())) {
 		    LOGGER.debug("Forwarding InboxMessage to internal Agent ");
 		    chatClient.forward(pmCommonConfig.getAgentUrl() + PATH.INBOUND_FRWRD, inboxMessage);
 		    return;
 		}
 
 		// INTERNAL BOT HANDLING
-		if (ArgUtil.areEqual("BOT", defaultClient.getAppType())) {
+		if (ArgUtil.areEqual(CHAT_MODE.BOT.toString(), defaultClient.getAppType())) {
 		    LOGGER.debug("Forwarding InboxMessage to internal Bot ");
 		    chatClient.forward(pmCommonConfig.getBotUrl() + PATH.INBOUND_FRWRD, inboxMessage);
 		    return;
@@ -109,6 +111,8 @@ public class PostManInBoundHandler implements InBoundHandler {
 	msg.messageIdExt = inboxMessage.getMessageIdExt();
 	msg.contactFrom = ArgUtil.nonEmpty(inboxMessage.contact().getPhone(), inboxMessage.contact().getEmail());
 	msg.contactId = contact.contactId;
+	msg.session = new MsgSession();
+	msg.session.sessionId = inboxMessage.getSessionId();
 
 	msg.timestamp = inboxMessage.getTimestamp();
 	msg.tags = inboxMessage.getTags();

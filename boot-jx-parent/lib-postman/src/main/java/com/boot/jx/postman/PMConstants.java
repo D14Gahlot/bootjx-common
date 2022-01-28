@@ -47,7 +47,7 @@ public class PMConstants {
     }
 
     public static enum CHAT_MODE {
-	AGENT, BOT, PUSH;
+	AGENT, BOT, PUSH, WEBHOOK;
     }
 
     public static class MESSAGE_COMPOSE_TYPE {
