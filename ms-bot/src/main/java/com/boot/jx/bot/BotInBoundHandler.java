@@ -1,4 +1,4 @@
-package com.boot.jx.agent;
+package com.boot.jx.bot;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,12 +11,11 @@ import com.boot.jx.postman.PMEnvironment.PMCommonConfig;
 import com.boot.jx.postman.PMEnvironment.PMDomainConfig;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.MessageReport;
-import com.boot.utils.ArgUtil;
 
 @Component
-public class AgentInBoundHandler implements InBoundHandler {
+public class BotInBoundHandler implements InBoundHandler {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AgentInBoundHandler.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(BotInBoundHandler.class);
 
     @Autowired
     public PMEnvironment pmEnvironment;
@@ -28,19 +27,16 @@ public class AgentInBoundHandler implements InBoundHandler {
     public PMCommonConfig pmCommonConfig;
 
     @Autowired
-    private AgentChatHandler agentChatHandler;
+    private BotEngine botEngine;
 
     @Override
     public void handle(InboxMessage inboxMessage) {
-	if (ArgUtil.isEmpty(inboxMessage.session().getMode())) {
-	    agentChatHandler.onAssign(inboxMessage);
-	}
-	agentChatHandler.onMessageReceive(inboxMessage);
+	botEngine.invokeMethodsAsync(inboxMessage);
     }
 
     @Override
     public void handle(MessageReport messageReport) {
-	LOGGER.debug("No Handling Required for Status on AgentSide");
+	LOGGER.debug("No Handling Required for Status on BotSide");
     }
 
 }
