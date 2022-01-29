@@ -1,5 +1,6 @@
 package com.boot.jx.inbound;
 
+import java.util.List;
 import java.util.regex.Pattern;
 
 import org.apache.commons.lang.StringUtils;
@@ -18,6 +19,7 @@ import com.boot.jx.bot.ChatMapping;
 import com.boot.jx.cache.CacheBox;
 import com.boot.jx.chat.ChatClient;
 import com.boot.jx.chat.ChatService;
+import com.boot.jx.chat.ChatStatusService;
 import com.boot.jx.def.ICacheBox;
 import com.boot.jx.inbound.InBound.InBoundFilter;
 import com.boot.jx.inbound.InBound.InBoundHandler;
@@ -29,6 +31,7 @@ import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.ErrorObject;
 import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.model.InboxMessage;
+import com.boot.jx.postman.model.MessageReport;
 import com.boot.jx.postman.store.MessageContext;
 import com.boot.jx.postman.store.MessageStore;
 import com.boot.jx.postman.store.SessionStore;
@@ -65,6 +68,9 @@ public class InBoundService {
 
     @Autowired
     private ChatService chatService;
+
+    @Autowired
+    private ChatStatusService chatStatusService;
 
     @Autowired
     private AgentService agentService;
@@ -107,11 +113,10 @@ public class InBoundService {
 
 	PMConfigurationObject proxyConfig = pmEnvironment.keyEntry("mry.proxy.enabled");
 
-	if ((AppContextUtil.getTenant().equals("app") || proxyConfig.asBoolean())
-		&& ArgUtil.is(redisson)) {
+	if ((AppContextUtil.getTenant().equals("app") || proxyConfig.asBoolean()) && ArgUtil.is(redisson)) {
 	    String contactId = PostManUtil.createContactId(inboxMessageOriginal.contact());
 	    String proxy = null;
-	    String message = ArgUtil.nonEmpty(inboxMessageOriginal.getMessage(),Constants.BLANK);
+	    String message = ArgUtil.nonEmpty(inboxMessageOriginal.getMessage(), Constants.BLANK);
 
 	    StringMatcher matcher = new StringMatcher(message);
 	    if (matcher.isMatch(PROXY)) {
@@ -196,6 +201,16 @@ public class InBoundService {
 
     public ApiResponse<InboxMessage, ?> assignToAgent(InboxMessage inboxMessageOriginal) {
 	return agentService.assignToAgent(inboxMessageOriginal);
+    }
+
+    public void updateBatch(List<MessageReport> messageReports) {
+	chatStatusService.offer(messageReports);
+	chatStatusService.process(null);
+    }
+
+    @Async
+    public void updateAsync(List<MessageReport> messageReports) {
+	chatStatusService.update(messageReports);
     }
 
 }

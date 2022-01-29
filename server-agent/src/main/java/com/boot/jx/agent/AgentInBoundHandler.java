@@ -34,29 +34,8 @@ public class AgentInBoundHandler implements InBoundHandler {
     @Autowired
     private AgentChatHandler agentChatHandler;
 
-//    @Autowired(required = false)
-//    private ChatService chatService;
-
-    public void reply(String message) {
-//	try {
-//	    if (ArgUtil.is(chatService)) {
-//		chatService.reply(new OutboxMessage().message(message));
-//	    }
-//	} catch (InterruptedException e) {
-//	    e.printStackTrace();
-//	}
-    }
-
-    public void reply(OutboxMessage message) {
-//	try {
-//	    if (ArgUtil.is(chatService)) {
-//		message.session().setAgent(chatService.getClientConfig().getDefaultSender());
-//		chatService.reply(message);
-//	    }
-//	} catch (InterruptedException e) {
-//	    e.printStackTrace();
-//	}
-    }
+    @Autowired(required = false)
+    private ChatService chatService;
 
     @Override
     public void handle(InboxMessage inboxMessage) {
@@ -67,18 +46,24 @@ public class AgentInBoundHandler implements InBoundHandler {
 		    PMConfigurationObject transferReply = pmEnvironment
 			    .keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_AGENT_CHAT_AUTOREPLY_TALK2AGENT);
 		    if (transferReply.exists()) {
-			reply(new OutboxMessage().templateId(transferReply.asString()));
+			chatService.reply(inboxMessage, new OutboxMessage().templateId(transferReply.asString()));
 		    } else {
-			reply("Connecting you to one of our customer representatives. Give us a moment.");
+			chatService.reply(inboxMessage, new OutboxMessage()
+				.message("Connecting you to one of our customer representatives. Give us a moment."));
 		    }
 		} else {
-		    reply("All agents are busy or online, we will connect you whenever someone is available.");
+		    chatService.reply(inboxMessage, new OutboxMessage().message(
+			    "All agents are busy or online, we will connect you whenever someone is available."));
 		}
 	    } catch (Exception e) {
-		reply("We are having some issues trying connect you to one of our customer representatives. Please be patient");
-		LOGGER.error("Erro while Connecting to Agent", e);
+		LOGGER.error("Error ONE while Connecting to Agent", e);
+		try {
+		    chatService.reply(inboxMessage, new OutboxMessage().message(
+			    "We are having some issues trying connect you to one of our customer representatives. Please be patient"));
+		} catch (InterruptedException e1) {
+		    LOGGER.error("Error TWO  while Sending Failure", e1);
+		}
 	    }
-
 	}
 	agentChatHandler.onMessageReceive(inboxMessage);
     }

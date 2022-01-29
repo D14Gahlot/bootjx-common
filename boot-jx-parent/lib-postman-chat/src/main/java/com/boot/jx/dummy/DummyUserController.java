@@ -68,19 +68,6 @@ public class DummyUserController {
 	return event;
     }
 
-    @RequestMapping(value = "/dummy/user", method = RequestMethod.GET)
-    public String dummyUser(@RequestParam String number, Model model) throws InterruptedException {
-	model.addAttribute("APP_CONTEXT", appConfig.getAppPrefix());
-	model.addAttribute("POSTMAN_CONTEXT", appConfig.getAppPrefix());
-	model.addAttribute("POSTMAN_AGENT_SCHEME_COLOR",
-		pmEnvironment.keyEntry("postman.agent.scheme.color").asString());
-	if (pmCommonConfig != null) {
-	    model.addAttribute("CDN_URL",
-		    ArgUtil.parseAsString(commonHttpRequest.get("CDN_URL"), pmCommonConfig.getCdnServer()));
-	}
-	return "dummyuser";
-    }
-
     @RequestMapping(value = "/dummy/customer", method = RequestMethod.GET)
     public String dummyCustomer(Model model, @RequestParam(required = false) String contacyType)
 	    throws InterruptedException {
@@ -93,19 +80,43 @@ public class DummyUserController {
     }
 
     @RequestMapping(value = "/plugin/customer/**", method = RequestMethod.GET)
-    public String pluginCustomer(Model model, @RequestParam(required = false) String contacyType)
+    public String pluginCustomer(Model model, @RequestParam(required = false) String contacyType,
+	    @RequestParam(required = false, defaultValue = "/plugin/customer") String path)
 	    throws InterruptedException {
 	commonHttpRequest.setCookie("contactType", ArgUtil.parseAsString(contacyType, ContactType.WEBSITE.toString()));
 	model.addAttribute("APP_CONTEXT", appConfig.getAppPrefix());
 	model.addAttribute("POSTMAN_CONTEXT", appConfig.getAppPrefix());
-	model.addAttribute("WEBAPP_BASE", appConfig.getAppPrefix() + "/plugin/customer");
+	model.addAttribute("WEBAPP_BASE", appConfig.getAppPrefix() + path);
 	model.addAttribute("POSTMAN_AGENT_SCHEME_COLOR",
 		pmEnvironment.keyEntry("postman.agent.scheme.color").asString());
 
 	if (pmCommonConfig != null) {
 	    model.addAllAttributes(pmCommonConfig.appAttributes());
 	}
-
 	return "app-customer";
+    }
+
+    @RequestMapping(value = "/pub/plugin/customer/**", method = RequestMethod.GET)
+    public String pluginCustomerPub(Model model, @RequestParam(required = false) String contacyType)
+	    throws InterruptedException {
+	return pluginCustomer(model, contacyType, "/pub/plugin/customer");
+    }
+
+    @RequestMapping(value = { "/dummy/user", "/pub/customer" }, method = RequestMethod.GET)
+    public String dummyUser(@RequestParam String number, Model model) throws InterruptedException {
+	model.addAttribute("LOCAL_PATH", appConfig.getAppPrefix() + "/pub");
+	model.addAttribute("POSTMAN_CONTEXT", appConfig.getAppPrefix());
+
+	if (pmCommonConfig != null) {
+	    model.addAllAttributes(pmCommonConfig.appAttributes());
+	}
+
+	model.addAttribute("POSTMAN_AGENT_SCHEME_COLOR",
+		pmEnvironment.keyEntry("postman.agent.scheme.color").asString());
+	if (pmCommonConfig != null) {
+	    model.addAttribute("CDN_URL",
+		    ArgUtil.parseAsString(commonHttpRequest.get("CDN_URL"), pmCommonConfig.getCdnServer()));
+	}
+	return "dummyuser";
     }
 }

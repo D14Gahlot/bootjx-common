@@ -1,4 +1,4 @@
-package com.boot.jx.inbound;
+package com.boot.jx.chat;
 
 import java.util.Collections;
 import java.util.Comparator;
@@ -16,6 +16,7 @@ import org.springframework.stereotype.Component;
 import com.boot.jx.AppContextUtil;
 import com.boot.jx.cache.CacheBox;
 import com.boot.jx.def.ICacheBox;
+import com.boot.jx.inbound.InBound;
 import com.boot.jx.inbound.InBound.InBoundHandler;
 import com.boot.jx.postman.model.MessageReport;
 import com.boot.jx.postman.store.MessageStore;
@@ -25,8 +26,8 @@ import com.boot.utils.ArgUtil;
 import com.boot.utils.UniqueID;
 
 @Component
-public class InBoundStatusService {
-    private static final Logger LOGGER = LoggerFactory.getLogger(InBoundStatusService.class);
+public class ChatStatusService {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ChatStatusService.class);
 
     ConcurrentLinkedQueue<MessageReport> queue = new ConcurrentLinkedQueue<MessageReport>();
 
@@ -94,7 +95,6 @@ public class InBoundStatusService {
 
     public void update(List<MessageReport> batch) {
 	for (MessageReport messageReport : batch) {
-
 	    // Check for Proxy Account
 	    String contactId = PostManUtil.createContactId(messageReport.contact());
 	    if (ArgUtil.is(contactId)) {

@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.chat.ChatClient;
 import com.boot.jx.chat.ConnectorHandlerFactory;
+import com.boot.jx.chat.ChatStatusService;
 import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorHandler;
 import com.boot.jx.logger.AuditService;
 import com.boot.jx.postman.PMAuditEvent;
@@ -81,7 +82,7 @@ public class InBoundController {
     static AtomicInteger counter = new AtomicInteger(1);
 
     @Autowired
-    private InBoundStatusService inBoundStatusService;
+    private ChatStatusService inBoundStatusService;
 
     @ApiVendorHeaders
     @RequestMapping(value = "/int/status/callback", method = RequestMethod.POST)

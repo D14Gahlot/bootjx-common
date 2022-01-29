@@ -251,8 +251,8 @@ height:40px;
 
 <script th:src="${CDN_URL} + '/plugins/customer.js?theme=bubble'">
   {
-	"local" : "[[${APP_CONTEXT}]]",
-    "entity" : "api",
+	"local" : "[[${LOCAL_PATH}]]",
+    "entity" : "[[${TENANT}]]",
     "account" : "MainWebsite",
     "accountToken" : "AXCYTEMM##$$$$",
     "config" : {
