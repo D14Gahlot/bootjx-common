@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.chat.ChatClient;
-import com.boot.jx.chat.ChatStatusReportService;
 import com.boot.jx.chat.ConnectorHandlerFactory;
 import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorHandler;
 import com.boot.jx.logger.AuditService;
@@ -82,7 +81,7 @@ public class InBoundController {
     static AtomicInteger counter = new AtomicInteger(1);
 
     @Autowired
-    private ChatStatusReportService chatStatusReportService;
+    private InBoundStatusService inBoundStatusService;
 
     @ApiVendorHeaders
     @RequestMapping(value = "/int/status/callback", method = RequestMethod.POST)
@@ -98,8 +97,8 @@ public class InBoundController {
 	    report.setChangeStamp(Random.getInt(100, 999));
 	    list.add(report);
 	}
-	chatStatusReportService.offer(list);
-	chatStatusReportService.process(ser);
+	inBoundStatusService.offer(list);
+	inBoundStatusService.process(ser);
 	return list;
     }
 
@@ -130,7 +129,7 @@ public class InBoundController {
 		connector.onReadInboxMessage(channelConfig, messageBoxEvent.getInboxMessages());
 	    } else if (ArgUtil.is(messageBoxEvent.getMessageReports())) {
 		connector.onMessageReports(channelConfig, messageBoxEvent.getMessageReports());
-		chatStatusReportService.update(messageBoxEvent.getMessageReports());
+		inBoundStatusService.update(messageBoxEvent.getMessageReports());
 	    }
 	} catch (Exception e) {
 	    auditService.excep(new PMAuditEvent(PMAuditEvent.Type.INBOUND_ERROR).data(data), LOGGER, e);

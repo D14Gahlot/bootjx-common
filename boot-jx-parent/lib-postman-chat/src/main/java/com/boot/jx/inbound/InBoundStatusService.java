@@ -1,4 +1,4 @@
-package com.boot.jx.chat;
+package com.boot.jx.inbound;
 
 import java.util.Collections;
 import java.util.Comparator;
@@ -17,7 +17,6 @@ import com.boot.jx.AppContextUtil;
 import com.boot.jx.cache.CacheBox;
 import com.boot.jx.def.ICacheBox;
 import com.boot.jx.inbound.InBound.InBoundHandler;
-import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.model.MessageReport;
 import com.boot.jx.postman.store.MessageStore;
 import com.boot.jx.stomp.StompTunnelService;
@@ -26,8 +25,8 @@ import com.boot.utils.ArgUtil;
 import com.boot.utils.UniqueID;
 
 @Component
-public class ChatStatusReportService {
-    private static final Logger LOGGER = LoggerFactory.getLogger(ChatStatusReportService.class);
+public class InBoundStatusService {
+    private static final Logger LOGGER = LoggerFactory.getLogger(InBoundStatusService.class);
 
     ConcurrentLinkedQueue<MessageReport> queue = new ConcurrentLinkedQueue<MessageReport>();
 

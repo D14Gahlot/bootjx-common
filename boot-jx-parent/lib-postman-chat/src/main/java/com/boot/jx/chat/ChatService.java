@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 
 import com.boot.jx.bot.ChatContext;
 import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorHandler;
+import com.boot.jx.inbound.InBoundStatusService;
 import com.boot.jx.logger.LoggerService;
 import com.boot.jx.postman.PMClientConfig;
 import com.boot.jx.postman.PMConstants;
@@ -362,11 +363,11 @@ public class ChatService {
     }
 
     @Autowired
-    private ChatStatusReportService chatStatusReportService;
+    private InBoundStatusService inboundStatusService;
 
     public void updateMessageStatus(List<MessageReport> updateDeliveryStatus) {
-	chatStatusReportService.offer(updateDeliveryStatus);
-	chatStatusReportService.process(null);
+	inboundStatusService.offer(updateDeliveryStatus);
+	inboundStatusService.process(null);
     }
 
     

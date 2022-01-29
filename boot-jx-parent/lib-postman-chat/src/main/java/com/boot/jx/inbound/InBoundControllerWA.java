@@ -19,7 +19,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.chat.ChatService;
-import com.boot.jx.chat.ChatStatusReportService;
 import com.boot.jx.chat.ConnectorHandlerFactory;
 import com.boot.jx.connectors.WA360Connector;
 import com.boot.jx.connectors.WAGupShupAgentConnector;
@@ -201,7 +200,7 @@ public class InBoundControllerWA {
     }
 
     @Autowired
-    private ChatStatusReportService chatStatusReportService;
+    private InBoundStatusService inBoundStatusService;
 
     @Autowired
     private AuditService auditService;
@@ -225,7 +224,7 @@ public class InBoundControllerWA {
 		w360Connector.onReadInboxMessage(channelConfig, messageBoxEvent.getInboxMessages());
 	    } else if (ArgUtil.is(messageBoxEvent.getMessageReports())) {
 		w360Connector.onMessageReports(channelConfig, messageBoxEvent.getMessageReports());
-		chatStatusReportService.update(messageBoxEvent.getMessageReports());
+		inBoundStatusService.update(messageBoxEvent.getMessageReports());
 	    }
 	} catch (Exception e) {
 	    auditService.excep(new PMAuditEvent(PMAuditEvent.Type.INBOUND_ERROR).data(data), LOGGER, e);

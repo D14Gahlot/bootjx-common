@@ -6,9 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.boot.jx.inbound.InBound.InBoundHandler;
-import com.boot.jx.postman.PMEnvironment;
-import com.boot.jx.postman.PMEnvironment.PMCommonConfig;
-import com.boot.jx.postman.PMEnvironment.PMDomainConfig;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.MessageReport;
 
@@ -16,15 +13,6 @@ import com.boot.jx.postman.model.MessageReport;
 public class BotInBoundHandler implements InBoundHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BotInBoundHandler.class);
-
-    @Autowired
-    public PMEnvironment pmEnvironment;
-
-    @Autowired
-    public PMDomainConfig pmDomainConfig;
-
-    @Autowired
-    public PMCommonConfig pmCommonConfig;
 
     @Autowired
     private BotEngine botEngine;
