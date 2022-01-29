@@ -89,7 +89,7 @@ public class DummyUserController {
 	model.addAttribute("WEBAPP_BASE", appConfig.getAppPrefix() + path);
 	model.addAttribute("POSTMAN_AGENT_SCHEME_COLOR",
 		pmEnvironment.keyEntry("postman.agent.scheme.color").asString());
-
+	
 	if (pmCommonConfig != null) {
 	    model.addAllAttributes(pmCommonConfig.appAttributes());
 	}
@@ -110,6 +110,7 @@ public class DummyUserController {
 	if (pmCommonConfig != null) {
 	    model.addAllAttributes(pmCommonConfig.appAttributes());
 	}
+	model.addAttribute("APP", "CUSTOMER");
 
 	model.addAttribute("POSTMAN_AGENT_SCHEME_COLOR",
 		pmEnvironment.keyEntry("postman.agent.scheme.color").asString());

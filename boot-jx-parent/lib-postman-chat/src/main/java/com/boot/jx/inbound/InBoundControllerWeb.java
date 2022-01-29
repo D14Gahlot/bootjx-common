@@ -33,117 +33,117 @@ import com.boot.utils.ArgUtil;
 @Controller
 public class InBoundControllerWeb {
 
-	@Autowired
-	private InBoundService inBoundEngine;
+    @Autowired
+    private InBoundService inBoundEngine;
 
-	@Autowired(required = false)
-	private WebConnector dummyConnector;
+    @Autowired(required = false)
+    private WebConnector dummyConnector;
 
-	@Autowired(required = false)
-	private AgentChatHandler agentChatHandler;
+    @Autowired(required = false)
+    private AgentChatHandler agentChatHandler;
 
-	@Autowired
-	CommonHttpRequest commonHttpRequest;
+    @Autowired
+    CommonHttpRequest commonHttpRequest;
 
-	@Autowired
-	AppConfig appConfig;
+    @Autowired
+    AppConfig appConfig;
 
-	@Autowired
-	SessionStore sessionStore;
+    @Autowired
+    SessionStore sessionStore;
 
-	@Autowired
-	MessageStore messageStore;
+    @Autowired
+    MessageStore messageStore;
 
-	@Autowired
-	WebConnector webConnector;
+    @Autowired
+    WebConnector webConnector;
 
-	@ApiRequest(type = RequestType.POLL)
-	@ResponseBody
-	@RequestMapping(value = "/ext/outbound/web/callback", method = RequestMethod.GET)
-	public OutboxMessage onReceiveMessage(@RequestParam String number) throws InterruptedException {
-		return dummyConnector.pollUnreadMessage(number);
+    @ApiRequest(type = RequestType.POLL)
+    @ResponseBody
+    @RequestMapping(value = "/ext/outbound/web/callback", method = RequestMethod.GET)
+    public OutboxMessage onReceiveMessage(@RequestParam String number) throws InterruptedException {
+	return dummyConnector.pollUnreadMessage(number);
+    }
+
+    @ResponseBody
+    @RequestMapping(value = "/ext/outbound/web/auth", method = RequestMethod.GET)
+    public ApiResponse<OutboxMessage, Object> onAuth(@RequestParam String number) throws InterruptedException {
+	String webSessionId = commonHttpRequest.get("web-session-id");
+
+	ChatSessionDoc session = null;
+	if (ArgUtil.is(webSessionId)) {
+	    session = sessionStore.getValidSession(webSessionId);
+	}
+	List<OutboxMessage> msgs = new ArrayList<OutboxMessage>();
+	if (ArgUtil.is(session)) {
+	    List<MessageDoc> messages = messageStore.findBySessionId(webSessionId, ContactType.WEBSITE.toString());
+	    for (MessageDoc messageDoc : messages) {
+		OutboxMessage outboxMessage = new OutboxMessage();
+		outboxMessage.setTimestamp(messageDoc.getTimestamp());
+		outboxMessage.setMessage(messageDoc.getMessage());
+		outboxMessage.template(messageDoc.getTemplate());
+		outboxMessage.setAttachments(messageDoc.getAttachments());
+		if (ArgUtil.isEqual(messageDoc.getType(), "I")) {
+		    outboxMessage.addTo(messageDoc.getContactId());
+		} else {
+		    // webConnector.process(outboxMessage);
+		}
+		msgs.add(outboxMessage);
+	    }
 	}
 
-	@ResponseBody
-	@RequestMapping(value = "/ext/outbound/web/auth", method = RequestMethod.GET)
-	public ApiResponse<OutboxMessage, Object> onAuth(@RequestParam String number) throws InterruptedException {
-		String webSessionId = commonHttpRequest.get("web-session-id");
+	return ApiResponse.buildResults(msgs);
+    }
 
-		ChatSessionDoc session = null;
-		if (ArgUtil.is(webSessionId)) {
-			session = sessionStore.getValidSession(webSessionId);
-		}
-		List<OutboxMessage> msgs = new ArrayList<OutboxMessage>();
-		if (ArgUtil.is(session)) {
-			List<MessageDoc> messages = messageStore.findBySessionId(webSessionId, ContactType.WEBSITE.toString());
-			for (MessageDoc messageDoc : messages) {
-				OutboxMessage outboxMessage = new OutboxMessage();
-				outboxMessage.setTimestamp(messageDoc.getTimestamp());
-				outboxMessage.setMessage(messageDoc.getMessage());
-				outboxMessage.template(messageDoc.getTemplate());
-				outboxMessage.setAttachments(messageDoc.getAttachments());
-				if (ArgUtil.isEqual(messageDoc.getType(), "I")) {
-					outboxMessage.addTo(messageDoc.getContactId());
-				} else {
-					// webConnector.process(outboxMessage);
-				}
-				msgs.add(outboxMessage);
-			}
-		}
+    @ResponseBody
+    @RequestMapping(value = "/ext/outbound/web/auth/v2", method = RequestMethod.GET)
+    public ApiResponse<ChatMessageDTO, Object> onAuthV2(@RequestParam String number) throws InterruptedException {
+	String webSessionId = commonHttpRequest.get("web-session-id");
 
-		return ApiResponse.buildResults(msgs);
+	ChatSessionDoc session = null;
+	if (ArgUtil.is(webSessionId)) {
+	    session = sessionStore.getValidSession(webSessionId);
+	}
+	List<ChatMessageDTO> msgs = new ArrayList<ChatMessageDTO>();
+	if (ArgUtil.is(session)) {
+	    List<MessageDoc> messages = messageStore.findBySessionId(webSessionId, ContactType.WEBSITE.toString());
+	    for (MessageDoc messageDoc : messages) {
+		ChatMessageDTO outboxMessage = ChatDTOUtil.getChatMessageDTO(messageDoc);
+		if (ArgUtil.isEqual(messageDoc.getType(), "I", "O")) {
+		    msgs.add(outboxMessage);
+		}
+	    }
 	}
 
-	@ResponseBody
-	@RequestMapping(value = "/ext/outbound/web/auth/v2", method = RequestMethod.GET)
-	public ApiResponse<ChatMessageDTO, Object> onAuthV2(@RequestParam String number) throws InterruptedException {
-		String webSessionId = commonHttpRequest.get("web-session-id");
+	return ApiResponse.buildResults(msgs);
+    }
 
-		ChatSessionDoc session = null;
-		if (ArgUtil.is(webSessionId)) {
-			session = sessionStore.getValidSession(webSessionId);
-		}
-		List<ChatMessageDTO> msgs = new ArrayList<ChatMessageDTO>();
-		if (ArgUtil.is(session)) {
-			List<MessageDoc> messages = messageStore.findBySessionId(webSessionId, ContactType.WEBSITE.toString());
-			for (MessageDoc messageDoc : messages) {
-				ChatMessageDTO outboxMessage = ChatDTOUtil.getChatMessageDTO(messageDoc);
-				if (ArgUtil.isEqual(messageDoc.getType(), "I", "O")) {
-					msgs.add(outboxMessage);
-				}
-			}
-		}
+    @ResponseBody
+    @RequestMapping(value = "/ext/inbound/web/callback", method = RequestMethod.POST)
+    public InboxMessage onReceiveMessage(@RequestBody InboxMessage event) throws InterruptedException {
+	event.contact().setContactType(ContactType.WEBSITE.toString());
+	event.contact().setLane("MainSite");
 
-		return ApiResponse.buildResults(msgs);
+	// event.contact().setContactType(ContactType.TELEGRAM.toString());
+	// event.contact().setLane("MeheryDemoBot");
+	// event.setLane("919082854885");
+	// event.setChannel("GUPSHUPW");
+	// event.setFrom("919930104050");
+	// event.setFromName("Lalit Tanwar");
+
+	// Cleaning
+	// event.setSessionId("600edc822743742e916202b9");
+	event.setSessionId(null);
+	event.setMessageId(null);
+	event.contact().setCsid(event.getFrom());
+	event.session().setAgent(null);
+	event.session().setDept(null);
+	inBoundEngine.invokeMethods(event);
+
+	String webSessionId = commonHttpRequest.get("web-session-id");
+	if (!ArgUtil.is(webSessionId) || !webSessionId.equalsIgnoreCase(event.getSessionId())) {
+	    commonHttpRequest.setCookie("web-session-id", event.getSessionId());
 	}
-
-	@ResponseBody
-	@RequestMapping(value = "/ext/inbound/web/callback", method = RequestMethod.POST)
-	public InboxMessage onReceiveMessage(@RequestBody InboxMessage event) throws InterruptedException {
-		event.contact().setContactType(ContactType.WEBSITE.toString());
-		event.contact().setLane("MainSite");
-
-		//event.contact().setContactType(ContactType.TELEGRAM.toString());
-		//event.contact().setLane("MeheryDemoBot");
-		// event.setLane("919082854885");
-		// event.setChannel("GUPSHUPW");
-		// event.setFrom("919930104050");
-		// event.setFromName("Lalit Tanwar");
-		
-		// Cleaning
-		// event.setSessionId("600edc822743742e916202b9");
-		event.setSessionId(null);
-		event.setMessageId(null);
-		event.contact().setCsid(event.getFrom());
-		event.session().setAgent(null);
-		event.session().setDept(null);
-		inBoundEngine.invokeMethods(event);
-
-		String webSessionId = commonHttpRequest.get("web-session-id");
-		if (!ArgUtil.is(webSessionId) || !webSessionId.equalsIgnoreCase(event.getSessionId())) {
-			commonHttpRequest.setCookie("web-session-id", event.getSessionId());
-		}
-		return event;
-	}
+	return event;
+    }
 
 }
