@@ -47,7 +47,9 @@ import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.model.Message;
 import com.boot.jx.postman.model.MessageMetaWrapper;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.CollectionUtil;
 import com.boot.utils.JsonUtil;
+import com.mongodb.client.DistinctIterable;
 
 @Component
 public class AgentAnalyticsManager {
@@ -301,17 +303,16 @@ public class AgentAnalyticsManager {
 	}
 	
 	public List<ChatSessionDoc> getAgentList() {
-		List<ChatSessionDoc> distinceAgentList = mongoTemplate.getCollection("CHAT_SESSION").distinct("assignedToAgent");
-		return distinceAgentList;
+		DistinctIterable<ChatSessionDoc> distinceAgentList = mongoTemplate.getCollection("CHAT_SESSION").distinct("assignedToAgent",ChatSessionDoc.class);
+		return CollectionUtil.asList(distinceAgentList) ;
 	}
 	
-	
-
 	public List<ChatSessionDoc> getAgentList(long dateRange1, long dateRange2) {
 		Query query = new Query();
 		query.addCriteria(Criteria.where("assignedAgentStamp").gt(dateRange1).lt(dateRange2));
-		List<ChatSessionDoc> distinceAgentList = mongoTemplate.getCollection("CHAT_SESSION").distinct("assignedToAgent",query.getQueryObject());
-		return distinceAgentList;
+		DistinctIterable<ChatSessionDoc> distinceAgentList = 
+			mongoTemplate.getCollection("CHAT_SESSION").distinct("assignedToAgent",query.getQueryObject(),ChatSessionDoc.class);
+		return CollectionUtil.asList(distinceAgentList);
 	}
 	
 	
@@ -321,11 +322,9 @@ public class AgentAnalyticsManager {
 		query.addCriteria(Criteria.where("assignedToAgent").is(agent));
 		query.addCriteria(Criteria.where("assignedAgentStamp").gt(dateRange1).lt(dateRange2));
 		removeChatSessField(query);
-		List<ChatSessionDoc> distinctIdList = mongoTemplate.getCollection(CHAT_SESSION).distinct("contactId",query.getQueryObject());
-		for(Object chat :distinctIdList) {
-			LOGGER.debug("Chat doc :"+(String)chat);
-		}
-		return distinctIdList;
+		DistinctIterable<ChatSessionDoc> distinctIdList = 
+			mongoTemplate.getCollection(CHAT_SESSION).distinct("contactId",query.getQueryObject(),ChatSessionDoc.class);
+		return CollectionUtil.asList(distinctIdList);
 	}
 	
 	public List<ChatSessionDoc> getAgentWiseTotalMsgExchanged(String agent,long dateRange1, long dateRange2){

@@ -71,6 +71,12 @@ public class CommonMongoQB<M extends CommonMongoQB<M, T>, T> implements MongoQue
 	return (M) this;
     }
 
+    @SuppressWarnings("unchecked")
+    public M limit(long modifiedCount) {
+	this.query().limit(ArgUtil.parseAsInteger(modifiedCount));
+	return (M) this;
+    }
+
     /**
      * This is fail Safe '_id' based Search, if Document has 'id' as field
      * 

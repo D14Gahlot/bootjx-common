@@ -38,7 +38,7 @@ public class PostManApplication {
     public DelegatingFilterProxyRegistrationBean securityFilterChainRegistration(
 	    SecurityProperties securityProperties) {
 	DelegatingFilterProxyRegistrationBean registration = new DelegatingFilterProxyRegistrationBean("checkSession");
-	registration.setOrder(securityProperties.getFilterOrder());
+	registration.setOrder(securityProperties.getFilter().getOrder());
 	return registration;
     }
 

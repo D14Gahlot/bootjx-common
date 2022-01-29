@@ -30,6 +30,7 @@ import com.boot.utils.CollectionUtil;
 import com.boot.utils.TimeUtils;
 import com.google.common.collect.Lists;
 import com.mongodb.WriteResult;
+import com.mongodb.client.result.UpdateResult;
 
 @Component
 public class MessageStore extends CommonDocStore {
@@ -328,7 +329,7 @@ public class MessageStore extends CommonDocStore {
 
 	    String collectionName = getCollectionName(messageReport.contact().getContactType());
 
-	    WriteResult result;
+	    UpdateResult result;
 
 	    if (multi) {
 		result = mongoTemplate.updateMulti(builder.getQuery(), builder.getUpdate(), MessageDoc.class,
@@ -338,8 +339,8 @@ public class MessageStore extends CommonDocStore {
 			collectionName);
 	    }
 
-	    if (result.getN() > 1) {
-		builder.limit(result.getN());
+	    if (result.isModifiedCountAvailable() && result.getModifiedCount() > 1) {
+		builder.limit(result.getModifiedCount());
 		List<MessageDoc> messsages = mongoTemplate.find(builder.getQuery(), MessageDoc.class, collectionName);
 		if (ArgUtil.is(messsages) && ArgUtil.is(messsages.get(0))) {
 		    messageReport.setMessageId(messsages.get(0).getMessageId());

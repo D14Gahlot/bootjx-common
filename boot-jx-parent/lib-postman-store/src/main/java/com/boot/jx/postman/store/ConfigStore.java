@@ -13,12 +13,13 @@ import com.boot.jx.postman.doc.config.PrefsConfigDoc;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.utils.ArgUtil;
 import com.mongodb.WriteResult;
+import com.mongodb.client.result.DeleteResult;
 
 @Component
 public class ConfigStore extends CommonMongoTemplateAbstract {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ConfigStore.class);
-    
+
     public void saveConfiguration(PMConfigurationDoc doc) {
 	doc.getAccountKey(); // Populate Keys of not exists
 	save(doc);
@@ -55,8 +56,8 @@ public class ConfigStore extends CommonMongoTemplateAbstract {
 	}
     }
 
-    public WriteResult remove(Object object) {
-	WriteResult r = super.remove(object);
+    public DeleteResult remove(Object object) {
+	DeleteResult r = super.remove(object);
 	log(object, "deleted");
 	return r;
     }

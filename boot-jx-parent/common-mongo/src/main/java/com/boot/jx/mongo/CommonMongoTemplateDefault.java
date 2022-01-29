@@ -84,11 +84,6 @@ public abstract class CommonMongoTemplateDefault {
 	return getCommonMongoTemplate().execute(collectionName, action);
     }
 
-    @SuppressWarnings("deprecation")
-    public <T> T executeInSession(DbCallback<T> action) {
-	return getCommonMongoTemplate().executeInSession(action);
-    }
-
     public <T> CloseableIterator<T> stream(Query query, Class<T> entityType) {
 	return getCommonMongoTemplate().stream(query, entityType);
     }
