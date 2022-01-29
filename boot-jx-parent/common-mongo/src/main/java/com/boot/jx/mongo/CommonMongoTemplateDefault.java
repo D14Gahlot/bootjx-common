@@ -33,6 +33,12 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.data.util.CloseableIterator;
 
+import com.boot.jx.mongo.CommonDocInterfaces.TimeStampIndex;
+import com.boot.jx.mongo.CommonDocInterfaces.TimeStampIndex.UpdatedTimeStampIndexSupport;
+import com.mongodb.CommandResult;
+import com.mongodb.DB;
+import com.mongodb.DBCollection;
+import com.mongodb.DBObject;
 import com.mongodb.ReadPreference;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
@@ -42,6 +48,8 @@ import com.mongodb.client.result.UpdateResult;
 public abstract class CommonMongoTemplateDefault {
 
     protected abstract MongoTemplate getCommonMongoTemplate();
+
+    protected abstract void beforeSaveInternal(Object objectToSave, String collectionName);
 
     public String getCollectionName(Class<?> entityClass) {
 	return getCommonMongoTemplate().getCollectionName(entityClass);
@@ -74,6 +82,11 @@ public abstract class CommonMongoTemplateDefault {
 
     public <T> T execute(String collectionName, CollectionCallback<T> action) {
 	return getCommonMongoTemplate().execute(collectionName, action);
+    }
+
+    @SuppressWarnings("deprecation")
+    public <T> T executeInSession(DbCallback<T> action) {
+	return getCommonMongoTemplate().executeInSession(action);
     }
 
     public <T> CloseableIterator<T> stream(Query query, Class<T> entityType) {
@@ -302,10 +315,12 @@ public abstract class CommonMongoTemplateDefault {
     }
 
     public void save(Object objectToSave) {
+	beforeSaveInternal(objectToSave, null);
 	getCommonMongoTemplate().save(objectToSave);
     }
 
     public void save(Object objectToSave, String collectionName) {
+	beforeSaveInternal(objectToSave, collectionName);
 	getCommonMongoTemplate().save(objectToSave, collectionName);
     }
 

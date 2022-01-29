@@ -30,7 +30,7 @@ public class AccountSecurityConfig extends WebSecurityConfigurerAdapter {
 	ExpressionUrlAuthorizationConfigurer<HttpSecurity>.ExpressionInterceptUrlRegistry sec = http.sessionManagement()
 		.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
 		// Swagger
-		.and().authorizeRequests().antMatchers("/swagger-ui.html").permitAll();
+		.and().authorizeRequests().antMatchers("/swagger-ui.html", "/favicon.ico").permitAll();
 
 	for (String context : CONTEXTS) {
 	    // Publics Calls
@@ -85,6 +85,6 @@ public class AccountSecurityConfig extends WebSecurityConfigurerAdapter {
     public void configure(WebSecurity web) throws Exception {
 	web.ignoring().antMatchers("/resources/**", "/static/**", "/css/**", "/js/**", "/images/**", "/assets/**",
 		"/v2/api-docs", "/configuration/ui", "/swagger-resources/**", "/configuration/security",
-		"/swagger-ui.html", "/webjars/**");
+		"/swagger-ui.html", "/webjars/**", "/favicon.ico");
     }
 }

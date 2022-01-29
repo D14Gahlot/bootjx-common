@@ -18,7 +18,7 @@ public class MessageDefinitions {
 
     @JsonDeserialize(as = ContactMeta.class, keyUsing = ContactMetaKeyDeserializer.class)
     @JsonIgnoreProperties(ignoreUnknown = true)
-    public interface Contact extends Serializable {
+    public static interface Contact extends Serializable {
 	public String getName();
 
 	public void setName(String name);
@@ -37,11 +37,15 @@ public class MessageDefinitions {
 	    this.setEmail(contactable.getEmail());
 	}
 
+	public static Contact instance() {
+	    return new ContactMeta();
+	}
+	
     }
 
     @JsonDeserialize(as = ContactMeta.class, keyUsing = ContactMetaKeyDeserializer.class)
     @JsonIgnoreProperties(ignoreUnknown = true)
-    public interface Contactable extends Contact {
+    public static interface Contactable extends Contact {
 	public String getContactType();
 
 	public String getLane();
@@ -83,6 +87,9 @@ public class MessageDefinitions {
 	    this.setContactId(contactable.getContactId());
 	}
 
+	public static Contactable instance() {
+	    return new ContactMeta();
+	}
     }
 
     // External attributes
@@ -115,11 +122,13 @@ public class MessageDefinitions {
 
 	public long getTimestamp();
 
-	public String forContact();
-
 	public String getType();
 
 	public String toString();
+
+	public String getFormatType();
+
+	public String getFormatSubType();
 
     }
 

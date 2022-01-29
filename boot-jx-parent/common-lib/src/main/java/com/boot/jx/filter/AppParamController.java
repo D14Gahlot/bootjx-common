@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.boot.jx.AppConfig;
+import com.boot.jx.AppConfigPackage;
 import com.boot.jx.AppConfigPackage.AppSharedConfig;
 import com.boot.jx.AppParam;
 import com.boot.jx.AppTenantConfig;
@@ -73,41 +74,26 @@ public class AppParamController {
     List<IndicatorListner> listners;
 
     @ApiRequest(type = RequestType.NO_TRACK_PING)
-    @RequestMapping(value = "/int/pub/boot/ping", method = RequestMethod.GET)
+    @RequestMapping(value = { PUB_AMX_PREFIX + "/ping" }, method = RequestMethod.GET)
     public ApiResponse<Object, Object> intPubPing() {
 	return ApiResponse.build().message("pong");
     }
 
     @ApiRequest(type = RequestType.NO_TRACK_PING)
-    @RequestMapping(value = "/int/pub/boot/metric", method = RequestMethod.GET)
+    @RequestMapping(value = { "/int/pub/boot/metric", METRIC_URL }, method = RequestMethod.GET)
     public ApiResponse<Object, Object> intPubMetric() {
-	Map<String, Object> map = new HashMap<String, Object>();
+	ApiResponse<Object, Object> response = ApiResponse.build();
 	for (AppParam eachAppParam : AppParam.values()) {
-	    map.put(eachAppParam.toString(), eachAppParam);
+	    response.addResult(eachAppParam);
 	}
+	Map<String, Object> map = new HashMap<String, Object>();
 	GaugeIndicator gaugeIndicator = new GaugeIndicator();
 	if (!ArgUtil.isEmpty(listners)) {
 	    for (IndicatorListner eachListner : listners) {
 		map.putAll(eachListner.getIndicators(gaugeIndicator));
 	    }
 	}
-	return ApiResponse.build().data(map);
-    }
-
-    @ApiRequest(type = RequestType.NO_TRACK_PING)
-    @RequestMapping(value = METRIC_URL, method = RequestMethod.GET)
-    public Map<String, Object> metric() {
-	Map<String, Object> map = new HashMap<String, Object>();
-	for (AppParam eachAppParam : AppParam.values()) {
-	    map.put(eachAppParam.toString(), eachAppParam);
-	}
-	GaugeIndicator gaugeIndicator = new GaugeIndicator();
-	if (!ArgUtil.isEmpty(listners)) {
-	    for (IndicatorListner eachListner : listners) {
-		map.putAll(eachListner.getIndicators(gaugeIndicator));
-	    }
-	}
-	return map;
+	return response.data(map);
     }
 
     @ApiRequest(type = RequestType.NO_TRACK_PING)
@@ -145,17 +131,13 @@ public class AppParamController {
 	return ArgUtil.parseAsString(value);
     }
 
-    @Autowired(required = false)
-    private List<AppSharedConfig> listAppSharedConfig;
+    @Autowired
+    private AppConfigPackage appConfigPackage;
 
     @RequestMapping(value = "/pub/amx/config/shared/clear", method = RequestMethod.GET)
     public ApiResponse<BoolRespModel, Object> clearSharedConfig() {
-	if (ArgUtil.is(listAppSharedConfig)) {
-	    for (AppSharedConfig appSharedConfig : listAppSharedConfig) {
-		appSharedConfig.clear(null);
-	    }
-	}
-	return ApiResponse.build(new BoolRespModel(true));
+	appConfigPackage.clear(null);
+	return ApiResponse.buildData(new BoolRespModel(true));
     }
 
     @Autowired(required = false)
@@ -260,11 +242,6 @@ public class AppParamController {
 	return error;
     }
 
-    @RequestMapping(value = "/ext/pub/ping", method = RequestMethod.GET)
-    public ApiResponse<Object, Object> extPubPing() {
-	return ApiResponse.build().message("pong");
-    }
-
     @RequestMapping(value = "/ext/pub/logger", method = RequestMethod.GET)
     public ApiResponse<Object, Object> toggleLogger(@RequestParam(required = false) String loggerName,
 	    @RequestParam(required = false, defaultValue = "info") String level) {
@@ -288,13 +265,7 @@ public class AppParamController {
 
     @RequestMapping(value = EXT_PUB_CONFIG_CLIENT, method = RequestMethod.GET)
     public ApiResponse<Map<String, Object>, Object> extPubConfig() {
-	Map<String, Object> config = new HashMap<String, Object>();
-	if (ArgUtil.is(listAppSharedConfig)) {
-	    for (AppSharedConfig appSharedConfig : listAppSharedConfig) {
-		appSharedConfig.getExternalConfig(config);
-	    }
-	}
-	return ApiResponse.buildData(config);
+	return ApiResponse.buildData(appConfigPackage.getExternalConfig());
     }
 
 }

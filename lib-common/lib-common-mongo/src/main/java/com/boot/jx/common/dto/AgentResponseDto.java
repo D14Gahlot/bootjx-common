@@ -11,7 +11,7 @@ public class AgentResponseDto<T extends AgentResponseDto<T>> implements ADocumen
 
 	private static final long serialVersionUID = -5273371227763139845L;
 	@JsonProperty("id")
-	private String agent_id;
+	private String id;
 	@JsonProperty("code")
 	private String agent_code;
 	@JsonProperty("name")
@@ -37,12 +37,12 @@ public class AgentResponseDto<T extends AgentResponseDto<T>> implements ADocumen
 	@JsonProperty("dept_id")
 	private String dept_id;
 
-	public String getAgent_id() {
-		return agent_id;
+	public String getId() {
+		return id;
 	}
 
-	public void setAgent_id(String agent_id) {
-		this.agent_id = agent_id;
+	public void setId(String agent_id) {
+		this.id = agent_id;
 	}
 
 	public String getAgent_code() {

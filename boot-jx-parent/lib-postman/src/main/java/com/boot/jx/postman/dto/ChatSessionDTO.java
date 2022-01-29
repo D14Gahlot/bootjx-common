@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.boot.jx.postman.model.MessageDefinitions.Contactable;
+import com.boot.utils.ArgUtil;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -24,6 +26,7 @@ public class ChatSessionDTO implements Serializable {
 
     private String assignedToDept;
     private String assignedToAgent;
+    private String assignedToQueue;
 
     private long startSessionStamp;
     private long fistResponseStamp;
@@ -46,10 +49,13 @@ public class ChatSessionDTO implements Serializable {
     private boolean resolved;
     private boolean expired;
 
+    private boolean primary;
+
     private String mode;
     private String status;
+    private List<String> tagId;
 
-    private ContactDTO contact;
+    private Contactable contact;
 
     private List<ChatMessageDTO> messages;
 
@@ -82,6 +88,9 @@ public class ChatSessionDTO implements Serializable {
     }
 
     public String getContactType() {
+	if (!ArgUtil.is(contactType)) {
+	    return this.contact().getContactType();
+	}
 	return contactType;
     }
 
@@ -217,11 +226,11 @@ public class ChatSessionDTO implements Serializable {
 	this.closeSessionStamp = closeSessionStamp;
     }
 
-    public ContactDTO getContact() {
+    public Contactable getContact() {
 	return contact;
     }
 
-    public void setContact(ContactDTO contact) {
+    public void setContact(Contactable contact) {
 	this.contact = contact;
     }
 
@@ -296,4 +305,34 @@ public class ChatSessionDTO implements Serializable {
 	this.updatedStamp = updatedStamp;
     }
 
+    public List<String> getTagId() {
+	return tagId;
+    }
+
+    public void setTagId(List<String> tagId) {
+	this.tagId = tagId;
+    }
+
+    public boolean isPrimary() {
+	return primary;
+    }
+
+    public void setPrimary(boolean primary) {
+	this.primary = primary;
+    }
+
+    public Contactable contact() {
+	if (this.contact == null) {
+	    this.contact = new ContactDTO();
+	}
+	return this.contact;
+    }
+
+    public String getAssignedToQueue() {
+        return assignedToQueue;
+    }
+
+    public void setAssignedToQueue(String assignedToQueue) {
+        this.assignedToQueue = assignedToQueue;
+    }
 }

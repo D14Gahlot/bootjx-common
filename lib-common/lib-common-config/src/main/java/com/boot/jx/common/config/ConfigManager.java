@@ -8,7 +8,6 @@ import java.util.Map.Entry;
 import javax.annotation.PostConstruct;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.EnumerablePropertySource;
 import org.springframework.core.env.Environment;
@@ -17,15 +16,15 @@ import org.springframework.stereotype.Service;
 import com.boot.jx.AppContextUtil;
 import com.boot.jx.chat.ConnectorHandlerFactory;
 import com.boot.jx.common.impl.ConfigMeta;
-import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.jx.postman.PMClientConfig;
-import com.boot.jx.postman.PMConfiguration;
+import com.boot.jx.postman.PMConfiguration.PMConfigurationModel;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PMEnvironment.AChannelDetails;
 import com.boot.jx.postman.PMEnvironment.PMConfigurationObject;
 import com.boot.jx.postman.doc.PMConfigurationDoc;
 import com.boot.jx.postman.doc.config.ChannelConfigDoc;
 import com.boot.jx.postman.doc.config.ClientKeyConfigDoc;
+import com.boot.jx.postman.doc.config.CompanyVarsConfigDoc;
 import com.boot.jx.postman.doc.config.PrefsConfigDoc;
 import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.postman.plugin.ChannelPluginProvider;
@@ -40,11 +39,7 @@ import com.boot.utils.MapBuilder;
 import com.boot.utils.MapBuilder.BuilderMap;
 
 @Service
-@PropertySource("classpath:application.app.properties")
 public class ConfigManager {
-
-    @Autowired
-    private CommonMongoTemplate mongoTemplate;
 
     @Autowired
     public ConfigStore configStore;
@@ -59,11 +54,14 @@ public class ConfigManager {
     private ConnectorHandlerFactory connectorHandlerFactory;
 
     @Autowired
-    PMClientConfig pmClientConfig;
+    private PMClientConfig pmClientConfig;
+
+    public <T> T findById(Object id, Class<T> entityClass) {
+	return configStore.findById(id, entityClass);
+    }
 
     public List<Map<String, Object>> getSetupConfigs() {
 	List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
-	PMConfigurationDoc doc = mongoTemplate.findById(AppContextUtil.getTenant(), PMConfigurationDoc.class);
 
 	for (ConfigMeta meta : ConfigConstants.SETUP_CONFIG_LIST) {
 
@@ -72,17 +70,18 @@ public class ConfigManager {
 	    case "postman.bot.name":
 	    case "postman.default.sender":
 
-		PMConfigurationObject configObject = pmEnvironment.get("postman.bot.name");
+		PMConfigurationObject configObject = pmEnvironment.keyEntry("postman.bot.name");
 
 		if (!ArgUtil.is(configObject.getValue())) {
-		    configObject.setValue(pmEnvironment.config().agent().getDefaultBotName());
+		    configObject.setValue(pmEnvironment.local().agent().getDefaultBotName());
 		}
 
 		list.add(MapBuilder.map().put("meta", meta).put("config", configObject).toMap());
 
 		break;
 	    default:
-		list.add(MapBuilder.map().put("meta", meta).put("config", pmEnvironment.get(meta.getKey())).toMap());
+		list.add(MapBuilder.map().put("meta", meta).put("config", pmEnvironment.keyEntry(meta.getKey()))
+			.toMap());
 		break;
 	    }
 	}
@@ -92,7 +91,7 @@ public class ConfigManager {
     public List<Map<String, Object>> getAppConfigs() {
 	List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
 	for (Entry<String, String> entry : ConfigConstants.APP_CONFIG.entrySet()) {
-	    list.add(MapBuilder.map().put("config", pmEnvironment.get(entry.getKey())).toMap());
+	    list.add(MapBuilder.map().put("config", pmEnvironment.keyEntry(entry.getKey())).toMap());
 	}
 	return list;
     }
@@ -112,9 +111,9 @@ public class ConfigManager {
 		mapBuilder.put("meta", meta);
 	    }
 	}
-	mapBuilder.put("domain", this.pmEnvironment.config().get(key)) // Domain
-		.put("shared", this.pmEnvironment.shared().get(key)) // Shared
-		.put("config", this.pmEnvironment.get(key)) // Resolved
+	mapBuilder.put("domain", this.pmEnvironment.local().keyEntry(key)) // Domain
+		.put("shared", this.pmEnvironment.shared().keyEntry(key)) // Shared
+		.put("config", this.pmEnvironment.keyEntry(key)) // Resolved
 	;
 
 	list.add(mapBuilder.toMap());
@@ -123,7 +122,7 @@ public class ConfigManager {
     }
 
     public void deleteAdminConfigs(String key) {
-	PMConfigurationDoc doc = mongoTemplate.findById(AppContextUtil.getTenant(), PMConfigurationDoc.class);
+	PMConfigurationDoc doc = configStore.findById(AppContextUtil.getTenant(), PMConfigurationDoc.class);
 
 	if (ArgUtil.isEmpty(doc)) {
 	    doc = new PMConfigurationDoc();
@@ -135,7 +134,7 @@ public class ConfigManager {
 	case "postman.default.sender":
 	    doc.agent().setDefaultBotName(null);
 	default:
-	    doc.map().remove(key);
+	    doc.prefs().remove(key);
 	    PrefsConfigDoc prefsConfigDoc = new PrefsConfigDoc();
 	    prefsConfigDoc.setId(key);
 	    configStore.remove(prefsConfigDoc);
@@ -143,11 +142,11 @@ public class ConfigManager {
 	}
 
 	configStore.save(doc);
-	sharedConfigManager.clear();
+	this.refresh();
     }
 
     public void save(PMConfigurationObject config) {
-	PMConfigurationDoc doc = mongoTemplate.findById(AppContextUtil.getTenant(), PMConfigurationDoc.class);
+	PMConfigurationDoc doc = configStore.findById(AppContextUtil.getTenant(), PMConfigurationDoc.class);
 
 	if (ArgUtil.isEmpty(doc)) {
 	    doc = new PMConfigurationDoc();
@@ -159,12 +158,12 @@ public class ConfigManager {
 	case "postman.default.sender":
 	    doc.agent().setDefaultBotName(config.asString());
 	default:
-	    PMConfigurationObject configObject = doc.get(config.getKey());
+	    PMConfigurationObject configObject = doc.keyEntry(config.getKey());
 	    configObject.setKey(config.getKey());
 	    configObject.setValue(config.getValue());
 	    configObject.setShared(config.isShared());
 
-	    doc.set(configObject);
+	    doc.setPref(configObject);
 
 	    PrefsConfigDoc prefsConfigDoc = new PrefsConfigDoc();
 	    prefsConfigDoc.setId(configObject.getKey());
@@ -175,48 +174,44 @@ public class ConfigManager {
 	}
 
 	configStore.saveConfiguration(doc);
-	sharedConfigManager.clear();
-    }
-
-    @Deprecated
-    public void saveConfigs(PMConfiguration config) {
-	pmEnvironment.config(config);
-	sharedConfigManager.clear();
+	this.refresh();
     }
 
     public void save(ChannelConfig config) {
-	pmEnvironment.config(config);
-	sharedConfigManager.clear();
-	connectorHandlerFactory.registerWebHook(config.getChannelType(), config.getLane());
+	pmEnvironment.addChannel(config);
+	this.refresh();
+	connectorHandlerFactory.onChannelUpdate(config.getChannelType(), config.getLane());
     }
 
     public ClientKeyConfigDoc save(ClientKeyConfigDoc clientApiKey) {
-	clientApiKey.setKey(PostManUtil.UNIQUE_API_KEY());
 	configStore.saveClientKeyConfig(clientApiKey);
-	sharedConfigManager.clear();
+	this.refresh();
 	return clientApiKey;
     }
 
     public ClientKeyConfigDoc remove(ClientKeyConfigDoc clientApiKey) {
-	mongoTemplate.remove(clientApiKey);
+	configStore.remove(clientApiKey);
+	this.refresh();
 	return clientApiKey;
     }
 
-    public void save(AChannelDetails details, boolean disabled) {
-	ChannelPlugin<? extends AChannelDetails> plugin = ChannelPluginProvider.MAP.get(details.getChannelType());
-	if (ArgUtil.is(plugin)) {
-	    ChannelConfig config = new ChannelConfig();
-	    plugin.fromDetails(config, details);
-	    config.disabled(disabled);
-	    save(config);
-	}
+    public CompanyVarsConfigDoc save(CompanyVarsConfigDoc companyVarsConfig) {
+	configStore.saveCompanyVar(companyVarsConfig);
+	this.refresh();
+	return companyVarsConfig;
+    }
+
+    public CompanyVarsConfigDoc remove(CompanyVarsConfigDoc companyVarsConfig) {
+	configStore.remove(companyVarsConfig);
+	this.refresh();
+	return companyVarsConfig;
     }
 
     public ChannelConfig getChannelConfig(String channelId) {
 	if (ArgUtil.is(channelId)) {
-	    ChannelConfigDoc channelConfig = mongoTemplate.findById(channelId, ChannelConfigDoc.class);
+	    ChannelConfigDoc channelConfig = configStore.findById(channelId, ChannelConfigDoc.class);
 	    if (ArgUtil.is(channelConfig)) {
-		PMConfiguration config = pmEnvironment.config();
+		PMConfigurationModel config = pmEnvironment.local();
 		if (!ArgUtil.is(channelConfig.getWebhookUrl())) {
 		    channelConfig.setWebhookUrl(pmClientConfig.getWebhookBase(channelConfig));
 		}
@@ -229,32 +224,33 @@ public class ConfigManager {
 
     public ChannelConfig saveChannelConfig(String channelType, boolean disabled, Map<String, Object> data) {
 	MapModel map = MapModel.from(data);
-	ChannelPlugin<? extends AChannelDetails> plugin = ChannelPluginProvider.MAP.get(channelType);
+	ChannelPlugin<? extends AChannelDetails> plugin = ChannelPluginProvider.PLUGIN_MAPPING.get(channelType);
 	String channelId = map.getString("channelId");
 	if (ArgUtil.is(data)) {
-	    AChannelDetails configDetails = null;
-	    if (ArgUtil.is(channelId)) {
-		ChannelConfig channelConfig = pmEnvironment.config().channels(channelId);
-		configDetails = plugin.getDetails(channelConfig);
-		plugin.extractChannelDetailsFromMap(configDetails, map, channelType);
-	    } else {
-		configDetails = plugin.getChannelDetailsFromMap(map);
+	    ChannelConfig config = pmEnvironment.local().channel(channelId);
+	    if (config == null) {
+		config = new ChannelConfig();
 	    }
-	    configDetails.setName(map.getString("name", configDetails.getName()));
-	    configDetails.setChannelKey(map.getString("channelKey", configDetails.getChannelKey()));
-	    save(configDetails, disabled);
+	    plugin.importChannelConfigFromMap(config, map, channelType);
+	    config.disabled(disabled);
+	    save(config);
+
 	}
 	return getChannelConfig(channelId);
     }
 
-    public ChannelConfig removeChannelConfig(String channelId) {
+    public ChannelConfig updateChannelConfig(String channelId, String action) {
 	if (ArgUtil.is(channelId)) {
-	    ChannelConfig channelConfig = pmEnvironment.config().channels(channelId);
-	    pmEnvironment.remove(channelConfig);
-	    sharedConfigManager.clear();
+	    ChannelConfig channelConfig = pmEnvironment.local().channel(channelId);
+	    pmEnvironment.updateChannel(channelConfig, action);
+	    this.refresh();
 	    return channelConfig;
 	}
 	return null;
+    }
+
+    public void refresh() {
+	sharedConfigManager.clear();
     }
 
     @Autowired

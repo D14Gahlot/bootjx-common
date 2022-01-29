@@ -12,6 +12,15 @@ import com.boot.jx.swagger.MockParamBuilder.MockParamType;
 
 public class XmsConstants {
 
+    public static final String INBOUND_WEBHOOKS_DESCRIPTION = "Inbound Request (Webhooks) can be used for:\n"
+	    + "* Inbound Message Notifications: Use it to get a notification you when you have received a message.\n"
+	    + "* Message Status Notifications: Monitor the status of sent messages.\n"
+	    + "Webhook must be implemented by client and should be available on public internet";
+
+    public static final String SESSION_MNGMNT_DESCRIPTION = "Session API can be used:\n"
+	    + "* to fetch all session messages.\n"
+	    + "A session usually starts with first messages and stays active for 24 hours by default.";
+
     public static final String X_API_KEY = "x-api-key";
 
     @Target({ ElementType.TYPE, ElementType.METHOD })

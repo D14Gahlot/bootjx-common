@@ -37,14 +37,6 @@ public class MCQIndicator implements IndicatorListner {
 		Map<String, Object> map = new HashMap<String, Object>();
 		map.put("tunnel.listner", MCQIndicator.getStatus());
 
-		Map<String, Object> propMap = new HashMap<String, Object>();
-		for (AppParam eachAppParam : AppParam.values()) {
-			if(ArgUtil.is(eachAppParam.getProperty())){
-				propMap.put(eachAppParam.getProperty(), eachAppParam.getValue());				
-			}
-		}
-		map.put("properties", propMap);
-		
 		Map<String, Object> cacheMap = new HashMap<String, Object>();
 		cacheMap.put("status", "UP");
 		

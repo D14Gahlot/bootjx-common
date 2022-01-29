@@ -10,9 +10,7 @@
 
 <link rel="shortcut icon" th:href="${CDN_URL}+'/favicon.ico'" />
 
-<title>Mehery - Agent</title>
-
-
+<title>[[${CONFIG.PROP_SERVICE_NAME}]] - AgentDesk</title>
 
 <style type="text/css">
 :root {
@@ -309,9 +307,9 @@ html.loadable .dot-pulse::after {
 	<div id=app></div>
 
 <script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js'></script>	
-<script th:src="${APP_CONTEXT}+'/js/sockjs.min.js'"></script>
-<script th:src="${APP_CONTEXT}+'/js/stomp.4.0.8.min.js'"></script>
-<script th:src="${APP_CONTEXT}+'/js/tunnel.client.js'"></script>
+<script th:src="${CDN_URL}+'/_common/lib/sockjs.min.js'"></script>
+<script th:src="${CDN_URL}+'/_common/lib/stomp.4.0.8.min.js'"></script>
+<script th:src="${CDN_URL}+'/_common/lib/tunnel.client.js'"></script>
 
 <div th:switch="${CDN_DEBUG}" th:remove="tag"> 
   <p th:case="'true'" th:remove="tag">

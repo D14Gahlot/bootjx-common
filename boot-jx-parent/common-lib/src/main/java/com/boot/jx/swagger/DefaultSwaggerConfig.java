@@ -55,6 +55,9 @@ public class DefaultSwaggerConfig {
     @Value("${swagger.package}")
     String swaggerPackage;
 
+    @Value("${swagger.groupName}")
+    String swaggerDefaultGroup;
+
     @Bean
     public Docket productApi(@Autowired(required = false) List<MockParam> mockParams) {
 
@@ -62,7 +65,9 @@ public class DefaultSwaggerConfig {
 	    return docketWrapper.getDocket();
 	}
 
-	Docket docket = new Docket(DocumentationType.SWAGGER_2).select()
+	Docket docket = new Docket(DocumentationType.SWAGGER_2)
+		.groupName(swaggerDefaultGroup)
+		.select()
 		.apis(RequestHandlerSelectors.basePackage(swaggerPackage))
 		// .paths(regex("/product.*"))
 		.build();
@@ -147,6 +152,9 @@ public class DefaultSwaggerConfig {
     @Autowired
     AppConfig appConfig;
 
+    @Value("${swagger.title}")
+    String swaggerTitle;
+
     @Value("${swagger.description}")
     String swaggerDescription;
 
@@ -160,7 +168,7 @@ public class DefaultSwaggerConfig {
     String swaggerContactEmail;
 
     private ApiInfo metaData() {
-	return new ApiInfo(appConfig.getAppName(),
+	return new ApiInfo(ArgUtil.nonEmpty(swaggerTitle, appConfig.getAppName()),
 		ArgUtil.nonEmpty(swaggerDescription,
 			String.format("%s#%s#%s", appConfig.getAppEnv(), appConfig.getAppGroup(),
 				appConfig.getAppId())),

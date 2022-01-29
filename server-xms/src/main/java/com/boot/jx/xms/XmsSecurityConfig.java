@@ -20,21 +20,25 @@ import org.springframework.security.web.authentication.SimpleUrlAuthenticationSu
 
 import com.boot.jx.exception.AmxApiError;
 import com.boot.jx.exception.ApiHttpExceptions.ApiStatusCodes;
+import com.boot.jx.logger.AuditDetailProvider;
+import com.boot.jx.postman.ClientApp;
 import com.boot.jx.exception.ExceptionMessageKey;
 import com.boot.jx.swagger.MockParamBuilder;
 import com.boot.jx.swagger.MockParamBuilder.MockParam;
+import com.boot.utils.ArgUtil;
 import com.boot.utils.JsonUtil;
 
 @Configuration
 @EnableWebSecurity
 @Order(99)
-public class XmsSecurityConfig extends WebSecurityConfigurerAdapter {
+public class XmsSecurityConfig extends WebSecurityConfigurerAdapter implements AuditDetailProvider {
 
     @Override
     protected void configure(HttpSecurity httpSecurity) throws Exception {
 	httpSecurity.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
 		// Publics Calls
-		.and().authorizeRequests().antMatchers("/pub/**").permitAll()
+		.and().authorizeRequests().antMatchers("/**").permitAll().and().authorizeRequests()
+		.antMatchers("/pub/**").permitAll()
 		// Login Calls
 		.and().authorizeRequests().antMatchers("/auth/**").permitAll()
 		// API Calls
@@ -91,7 +95,9 @@ public class XmsSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     public void configure(WebSecurity web) throws Exception {
-	web.ignoring().antMatchers("/resources/**", "/static/**", "/css/**", "/js/**", "/images/**");
+	web.ignoring().antMatchers("/resources/**", "/static/**", "/css/**", "/js/**", "/images/**", "/assets/**",
+		"/v2/**", "/configuration/ui", "/swagger-resources/**", "/configuration/security", "/swagger-ui.html",
+		"/webjars/**", "/favicon.ico");
     }
 
     @Bean
@@ -99,6 +105,15 @@ public class XmsSecurityConfig extends WebSecurityConfigurerAdapter {
 	return new MockParamBuilder().name("x-api-key").description("API Key").defaultValue("")
 		.parameterType(MockParamBuilder.MockParamType.HEADER).securityScheme("APIKEY").build();
 
+    }
+
+    @Override
+    public String getAuditUser() {
+	ClientApp x = XmsVendorConfigurer.getClientApp();
+	if (ArgUtil.is(x)) {
+	    return x.getKeyName();
+	}
+	return null;
     }
 
 }

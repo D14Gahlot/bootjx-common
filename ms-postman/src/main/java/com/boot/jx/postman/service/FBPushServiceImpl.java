@@ -135,11 +135,10 @@ public class FBPushServiceImpl implements IPushNotifyService {
 				throw new PostManException(PostManException.ErrorCode.NO_RECIPIENT_DEFINED);
 			}
 
-			if (msg.getTemplate() != null) {
+			if (msg.templateCode() != null) {
 				PostManFile file = new PostManFile();
-				file.setTemplate(msg.getTemplate());
+				file.setTemplate(msg.getHsm());
 				file.setModel(msg.getModel());
-				file.setLang(msg.getLang());
 				file.setFileFormat(FileFormat.JSON);
 
 				@SuppressWarnings("unchecked")
@@ -179,7 +178,7 @@ public class FBPushServiceImpl implements IPushNotifyService {
 			userMessageEvent.setMessage(msg.getMessage());
 			userMessageEvent.setImage(msg.getImage());
 			userMessageEvent.setLink(msg.getLink());
-			userMessageEvent.setTemplate(msg.getTemplate());
+			userMessageEvent.template(msg.templateCode());
 			userMessageEvent.contact().type(msg.contact().type());
 			userMessageEvent.setTimestamp(msg.getTimestamp());
 			userMessageEvent.setContacts(msg.getContacts());

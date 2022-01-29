@@ -11,7 +11,6 @@ import com.boot.jx.dict.ContactType;
 import com.boot.jx.postman.PMConstants;
 import com.boot.jx.postman.model.MessageDefinitions.Contactable;
 import com.boot.jx.postman.model.MessageDefinitions.IMessageExtended;
-import com.boot.utils.ArgUtil;
 import com.boot.utils.StringUtils.StringMatcher;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -19,299 +18,328 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class InboxMessage implements Serializable, IMessageExtended {
 
-	private static final long serialVersionUID = -4488174520614920589L;
+    private static final long serialVersionUID = -4488174520614920589L;
 
-	private String messageId;
-	private String messageIdExt;
-	protected List<String> to;
-	private String from;
-	private String fromName;
-	private String sessionId;
+    private String messageId;
+    private String messageIdExt;
+    protected List<String> to;
+    private String from;
+    private String fromName;
+    private String sessionId;
 
-	private Contactable contact;
-	private BigDecimal queue;
+    private Contactable contact;
+    private BigDecimal queue;
 
-	private long timestamp;
-	private String message;
+    private long timestamp;
+    private String message;
+    private String formatType;
+    private String formatSubType;
 
-	@JsonIgnore
-	private StringMatcher matcher;
+    @JsonIgnore
+    private StringMatcher matcher;
 
-	private String checksum;
+    private String checksum;
 
-	private Object originalMessage;
-	private MessageSession session;
+    private Object originalMessage;
+    private MessageSession session;
 
-	protected Map<String, Object> form = new HashMap<String, Object>();
-	protected Map<String, Object> data = new HashMap<String, Object>();
-	protected TagDocument tags;
-	private List<Attachment> attachments = null;
+    protected Map<String, Object> form = new HashMap<String, Object>();
+    protected Map<String, Object> data = new HashMap<String, Object>();
+    protected TagDocument tags;
+    private List<Attachment> attachments = null;
 
-	public InboxMessage() {
-		this.timestamp = System.currentTimeMillis();
+    private String replyId;
+    private String replyIdExt;
+
+    public InboxMessage() {
+	this.timestamp = System.currentTimeMillis();
+    }
+
+    public String getFrom() {
+	return from;
+    }
+
+    public void setFrom(String from) {
+	this.from = from;
+    }
+
+    public String getMessage() {
+	return message;
+    }
+
+    public void setMessage(String message) {
+	this.message = message;
+    }
+
+    public BigDecimal getQueue() {
+	return queue;
+    }
+
+    public void setQueue(BigDecimal queue) {
+	this.queue = queue;
+    }
+
+    public WAMessage replyWAMessage(String message) {
+	WAMessage reply = new WAMessage();
+	reply.setQueue(this.getQueue());
+	reply.addTo(this.getFrom());
+	reply.setMessage(message);
+	return reply;
+    }
+
+    public Message<?> replyMessage(String message) {
+	if (ContactType.WHATSAPP.toString().equals(this.contact().getContactType())) {
+	    WAMessage reply = new WAMessage();
+	    reply.setQueue(this.getQueue());
+	    reply.contact().setChannelType(this.contact().getChannelType());
+	    reply.addTo(this.getFrom());
+	    reply.setMessage(message);
+	    return reply;
+	} else if (ContactType.TELEGRAM.toString().equals(this.contact().getContactType())) {
+	    TGMessage reply = new TGMessage();
+	    reply.setQueue(this.getQueue());
+	    reply.contact().setChannelType(this.contact().getChannelType());
+	    reply.addTo(this.getFrom());
+	    reply.setMessage(message);
+	    return reply;
+	} else {
+	    OutboxMessage reply = new OutboxMessage();
+	    reply.setQueue(this.getQueue());
+	    reply.contact().setChannelType(this.contact().getChannelType());
+	    reply.addTo(this.getFrom());
+	    reply.setMessage(message);
+	    reply.contact().setContactType(this.contact().getContactType());
+	    return reply;
 	}
+    }
 
-	public String getFrom() {
-		return from;
-	}
+    // Builder Functions
+    public InboxMessage to(String to) {
+	this.to().add(to);
+	return this;
+    }
 
-	public void setFrom(String from) {
-		this.from = from;
-	}
+    public InboxMessage from(String from) {
+	this.setFrom(from);
+	return this;
+    }
 
-	public String getMessage() {
-		return message;
-	}
+    public InboxMessage message(String message) {
+	this.setMessage(message);
+	return this;
+    }
 
-	public void setMessage(String message) {
-		this.message = message;
-	}
+    @JsonIgnore
+    public StringMatcher getMatcher() {
+	return matcher;
+    }
 
-	public BigDecimal getQueue() {
-		return queue;
-	}
+    @JsonIgnore
+    public void setMatcher(StringMatcher matcher) {
+	this.matcher = matcher;
+    }
 
-	public void setQueue(BigDecimal queue) {
-		this.queue = queue;
-	}
+    public String getMessageId() {
+	return messageId;
+    }
 
-	public WAMessage replyWAMessage(String message) {
-		WAMessage reply = new WAMessage();
-		reply.setQueue(this.getQueue());
-		reply.addTo(this.getFrom());
-		reply.setMessage(message);
-		return reply;
-	}
+    public void setMessageId(String messageId) {
+	this.messageId = messageId;
+    }
 
-	public Message<?> replyMessage(String message) {
-		if (ContactType.WHATSAPP.toString().equals(this.contact().getContactType())) {
-			WAMessage reply = new WAMessage();
-			reply.setQueue(this.getQueue());
-			reply.contact().setChannelType(this.contact().getChannelType());
-			reply.addTo(this.getFrom());
-			reply.setMessage(message);
-			return reply;
-		} else if (ContactType.TELEGRAM.toString().equals(this.contact().getContactType())) {
-			TGMessage reply = new TGMessage();
-			reply.setQueue(this.getQueue());
-			reply.contact().setChannelType(this.contact().getChannelType());
-			reply.addTo(this.getFrom());
-			reply.setMessage(message);
-			return reply;
-		} else {
-			OutboxMessage reply = new OutboxMessage();
-			reply.setQueue(this.getQueue());
-			reply.contact().setChannelType(this.contact().getChannelType());
-			reply.addTo(this.getFrom());
-			reply.setMessage(message);
-			reply.contact().setContactType(this.contact().getContactType());
-			return reply;
-		}
-	}
+    public String getFromName() {
+	return fromName;
+    }
 
-	// Builder Functions
-	public InboxMessage to(String to) {
-		this.to().add(to);
-		return this;
-	}
+    public void setFromName(String fromName) {
+	this.fromName = fromName;
+    }
 
-	public InboxMessage from(String from) {
-		this.setFrom(from);
-		return this;
-	}
+    public String getMessageIdExt() {
+	return messageIdExt;
+    }
 
-	public InboxMessage message(String message) {
-		this.setMessage(message);
-		return this;
-	}
+    public void setMessageIdExt(String messageIdExt) {
+	this.messageIdExt = messageIdExt;
+    }
 
-	@JsonIgnore
-	public StringMatcher getMatcher() {
-		return matcher;
-	}
+    public String getSessionId() {
+	return sessionId;
+    }
 
-	@JsonIgnore
-	public void setMatcher(StringMatcher matcher) {
-		this.matcher = matcher;
-	}
+    public void setSessionId(String sessionId) {
+	this.sessionId = sessionId;
+    }
 
-	public String getMessageId() {
-		return messageId;
-	}
+    public String getChecksum() {
+	return checksum;
+    }
 
-	public void setMessageId(String messageId) {
-		this.messageId = messageId;
-	}
+    public void setChecksum(String checksum) {
+	this.checksum = checksum;
+    }
 
-	public String getFromName() {
-		return fromName;
-	}
+    public Map<String, Object> getForm() {
+	return form;
+    }
 
-	public void setFromName(String fromName) {
-		this.fromName = fromName;
-	}
+    public void setForm(Map<String, Object> form) {
+	this.form = form;
+    }
 
-	public String getMessageIdExt() {
-		return messageIdExt;
+    public Map<String, Object> form() {
+	if (form == null) {
+	    this.form = new HashMap<String, Object>();
 	}
+	return this.form;
+    }
 
-	public void setMessageIdExt(String messageIdExt) {
-		this.messageIdExt = messageIdExt;
-	}
+    public Map<String, Object> getData() {
+	return data;
+    }
 
-	public String getSessionId() {
-		return sessionId;
-	}
+    public void setData(Map<String, Object> data) {
+	this.data = data;
+    }
 
-	public void setSessionId(String sessionId) {
-		this.sessionId = sessionId;
+    public Map<String, Object> data() {
+	if (data == null) {
+	    this.data = new HashMap<String, Object>();
 	}
+	return this.data;
+    }
 
-	public String getChecksum() {
-		return checksum;
-	}
+    public Object getOriginalMessage() {
+	return originalMessage;
+    }
 
-	public void setChecksum(String checksum) {
-		this.checksum = checksum;
-	}
+    public void setOriginalMessage(Object originalMessage) {
+	this.originalMessage = originalMessage;
+    }
 
-	public Map<String, Object> getForm() {
-		return form;
-	}
+    public TagDocument getTags() {
+	return tags;
+    }
 
-	public void setForm(Map<String, Object> form) {
-		this.form = form;
-	}
+    public void setTags(TagDocument tags) {
+	this.tags = tags;
+    }
 
-	public Map<String, Object> form() {
-		if (form == null) {
-			this.form = new HashMap<String, Object>();
-		}
-		return this.form;
-	}
+    public MessageSession getSession() {
+	return session;
+    }
 
-	public Map<String, Object> getData() {
-		return data;
-	}
+    public void setSession(MessageSession session) {
+	this.session = session;
+    }
 
-	public void setData(Map<String, Object> data) {
-		this.data = data;
+    @Override
+    public List<String> to() {
+	if (to == null) {
+	    this.to = new ArrayList<String>();
 	}
+	return this.to;
+    }
 
-	public Map<String, Object> data() {
-		if (data == null) {
-			this.data = new HashMap<String, Object>();
-		}
-		return this.data;
+    public MessageSession session() {
+	if (session == null) {
+	    this.session = new MessageSession();
 	}
+	return this.session;
+    }
 
-	public Object getOriginalMessage() {
-		return originalMessage;
-	}
+    public List<Attachment> getAttachments() {
+	return attachments;
+    }
 
-	public void setOriginalMessage(Object originalMessage) {
-		this.originalMessage = originalMessage;
-	}
+    public void setAttachments(List<Attachment> attachments) {
+	this.attachments = attachments;
+    }
 
-	public TagDocument getTags() {
-		return tags;
+    public List<Attachment> attachments() {
+	if (this.attachments == null) {
+	    this.attachments = new ArrayList<Attachment>();
 	}
+	return attachments;
+    }
 
-	public void setTags(TagDocument tags) {
-		this.tags = tags;
+    public InboxMessage attachment(Attachment... attachments) {
+	for (Attachment file : attachments) {
+	    this.attachments().add(file);
 	}
+	return this;
+    }
 
-	public MessageSession getSession() {
-		return session;
-	}
+    @Override
+    public String getType() {
+	return PMConstants.MESSAGE_BOUND_TYPE.INBOUND;
+    }
 
-	public void setSession(MessageSession session) {
-		this.session = session;
-	}
+    public long getTimestamp() {
+	return timestamp;
+    }
 
-	@Override
-	public List<String> to() {
-		if (to == null) {
-			this.to = new ArrayList<String>();
-		}
-		return this.to;
-	}
+    public void setTimestamp(long timestamp) {
+	this.timestamp = timestamp;
+    }
 
-	public MessageSession session() {
-		if (session == null) {
-			this.session = new MessageSession();
-		}
-		return this.session;
-	}
+    public List<String> getTo() {
+	return to;
+    }
 
-	@Override
-	public String forContact() {
-		if (ArgUtil.is(this.contact().getCsid())) {
-			return this.contact().getCsid();
-		}
-		return this.from;
-	}
+    public void setTo(List<String> to) {
+	this.to = to;
+    }
 
-	public List<Attachment> getAttachments() {
-		return attachments;
-	}
+    public Contactable getContact() {
+	return contact;
+    }
 
-	public void setAttachments(List<Attachment> attachments) {
-		this.attachments = attachments;
-	}
+    public void setContact(Contactable contact) {
+	this.contact = contact;
+    }
 
-	public List<Attachment> attachments() {
-		if (this.attachments == null) {
-			this.attachments = new ArrayList<Attachment>();
-		}
-		return attachments;
+    public Contactable contact() {
+	if (this.contact == null) {
+	    this.contact = new ContactMeta();
 	}
+	return this.contact;
+    }
 
-	public InboxMessage attachment(Attachment... attachments) {
-		for (Attachment file : attachments) {
-			this.attachments().add(file);
-		}
-		return this;
-	}
+    @Override
+    public String toString() {
+	return String.format("[messageId:%s]", this.messageId);
+    }
 
-	@Override
-	public String getType() {
-		return PMConstants.MESSAGE_BOUND_TYPE.INBOUND;
-	}
+    public String getReplyId() {
+	return replyId;
+    }
 
-	public long getTimestamp() {
-		return timestamp;
-	}
+    public void setReplyId(String replyId) {
+	this.replyId = replyId;
+    }
 
-	public void setTimestamp(long timestamp) {
-		this.timestamp = timestamp;
-	}
+    public String getReplyIdExt() {
+	return replyIdExt;
+    }
 
-	public List<String> getTo() {
-		return to;
-	}
+    public void setReplyIdExt(String replyIdExt) {
+	this.replyIdExt = replyIdExt;
+    }
 
-	public void setTo(List<String> to) {
-		this.to = to;
-	}
+    public String getFormatType() {
+	return formatType;
+    }
 
-	public Contactable getContact() {
-		return contact;
-	}
+    public void setFormatType(String formatType) {
+	this.formatType = formatType;
+    }
 
-	public void setContact(Contactable contact) {
-		this.contact = contact;
-	}
+    public String getFormatSubType() {
+	return formatSubType;
+    }
 
-	public Contactable contact() {
-		if (this.contact == null) {
-			this.contact = new ContactMeta();
-		}
-		return this.contact;
-	}
-
-	@Override
-	public String toString() {
-		return String.format("[messageId:%s]", this.messageId);
-	}
+    public void setFormatSubType(String formatSubType) {
+	this.formatSubType = formatSubType;
+    }
 }

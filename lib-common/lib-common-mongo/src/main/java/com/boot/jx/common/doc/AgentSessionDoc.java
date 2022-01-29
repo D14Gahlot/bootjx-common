@@ -8,82 +8,107 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @TypeAlias("AgentSessionDoc")
 public class AgentSessionDoc {
 
-	@Id
-	private String agentCode;
+    @Id
+    private String agentCode;
 
-	private String agentDept;
+    private String agentDept;
 
-	private Boolean isLoggedIn;
+    private Boolean isLoggedIn;
 
-	private Boolean isOnline;
+    private Boolean isOnline;
 
-	private Boolean isEnabled;
+    private Boolean isAway;
 
-	private Long lastOnlineStamp;
+    private Boolean isEnabled;
 
-	private Long lastAssignStamp;
+    private Long lastOnlineStamp;
 
-	public String getAgentCode() {
-		return agentCode;
-	}
+    private Long lastAssignStamp;
 
-	public void setAgentCode(String agentCode) {
-		this.agentCode = agentCode;
-	}
+    private String domain;
 
-	public void setLoggedIn(Boolean isLoggedIn) {
-		this.isLoggedIn = isLoggedIn;
-	}
+    public String getAgentCode() {
+	return agentCode;
+    }
 
-	public void setOnline(Boolean isOnline) {
-		this.isOnline = isOnline;
-	}
+    public void setAgentCode(String agentCode) {
+	this.agentCode = agentCode;
+    }
 
-	public Long getLastOnlineStamp() {
-		return lastOnlineStamp;
-	}
+    public void setLoggedIn(Boolean isLoggedIn) {
+	this.isLoggedIn = isLoggedIn;
+    }
 
-	public void setLastOnlineStamp(Long lastOnlineStamp) {
-		this.lastOnlineStamp = lastOnlineStamp;
-	}
+    public void setOnline(Boolean isOnline) {
+	this.isOnline = isOnline;
+    }
 
-	public String getAgentDept() {
-		return agentDept;
-	}
+    public Long getLastOnlineStamp() {
+	return lastOnlineStamp;
+    }
 
-	public void setAgentDept(String agentDept) {
-		this.agentDept = agentDept;
-	}
+    public void setLastOnlineStamp(Long lastOnlineStamp) {
+	this.lastOnlineStamp = lastOnlineStamp;
+    }
 
-	public Long getLastAssignStamp() {
-		return lastAssignStamp;
-	}
+    public String getAgentDept() {
+	return agentDept;
+    }
 
-	public void setLastAssignStamp(Long lastAssignStamp) {
-		this.lastAssignStamp = lastAssignStamp;
-	}
+    public void setAgentDept(String agentDept) {
+	this.agentDept = agentDept;
+    }
 
-	public Boolean getIsEnabled() {
-		return isEnabled;
-	}
+    public Long getLastAssignStamp() {
+	return lastAssignStamp;
+    }
 
-	public void setIsEnabled(Boolean isEnabled) {
-		this.isEnabled = isEnabled;
-	}
+    public void setLastAssignStamp(Long lastAssignStamp) {
+	this.lastAssignStamp = lastAssignStamp;
+    }
 
-	public Boolean getIsLoggedIn() {
-		return isLoggedIn;
-	}
+    public Boolean getIsEnabled() {
+	return isEnabled;
+    }
 
-	public void setIsLoggedIn(Boolean isLoggedIn) {
-		this.isLoggedIn = isLoggedIn;
-	}
+    public void setIsEnabled(Boolean isEnabled) {
+	this.isEnabled = isEnabled;
+    }
 
-	public Boolean getIsOnline() {
-		return isOnline;
-	}
+    public Boolean getIsLoggedIn() {
+	return isLoggedIn;
+    }
 
-	public void setIsOnline(Boolean isOnline) {
-		this.isOnline = isOnline;
-	}
+    public void setIsLoggedIn(Boolean isLoggedIn) {
+	this.isLoggedIn = isLoggedIn;
+    }
+
+    public Boolean getIsOnline() {
+	return isOnline;
+    }
+
+    public void setIsOnline(Boolean isOnline) {
+	this.isOnline = isOnline;
+    }
+
+    public String toString() {
+	return String.format("AgentSessionDoc(%s,%s,%s)", this.agentCode, this.isLoggedIn, this.isOnline);
+    }
+
+    public Boolean getIsAway() {
+	return isAway;
+    }
+
+    public void setIsAway(Boolean isAway) {
+	this.isAway = isAway;
+    }
+
+    public String getDomain() {
+	return domain;
+    }
+
+    public void setDomain(String domain) {
+	this.domain = domain;
+    }
+
 }

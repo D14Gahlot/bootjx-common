@@ -1,105 +1,12 @@
 package com.boot.jx.mongo;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import org.bson.types.ObjectId;
-import org.springframework.data.mongodb.core.query.Criteria;
-import org.springframework.data.mongodb.core.query.Query;
-import org.springframework.data.mongodb.core.query.Update;
-
+import com.boot.jx.mongo.CommonDocInterfaces.TimeStampIndex.UpdatedTimeStampIndexSupport;
 import com.boot.utils.ArgUtil;
 
-public class CommonMongoQueryBuilder {
+public class CommonMongoQueryBuilder extends CommonMongoQB<CommonMongoQueryBuilder, Object> {
 
-    public static class CommonMongoCriteria extends Criteria {
-	public static Criteria whereId(Object id) {
-	    return where("_id").is(id);
-	}
-    }
+    public static abstract class DocQueryBuilder<T> extends CommonMongoQB<DocQueryBuilder<T>, T> {
 
-    Query query;
-    Update update;
-
-    public Query query() {
-	if (this.query == null) {
-	    query = new Query();
-	}
-	return query;
-    }
-
-    public Update update() {
-	if (this.update == null) {
-	    update = new Update();
-	}
-	return update;
-    }
-
-    public CommonMongoQueryBuilder with(Criteria criteria) {
-	query().addCriteria(criteria);
-	return this;
-    }
-
-    public CommonMongoQueryBuilder where(String key, Object o) {
-	query().addCriteria(Criteria.where(key).is(o));
-	return this;
-    }
-
-    /**
-     * This is fail Safe '_id' based Search, if Document has 'id' as field
-     * 
-     * @param id
-     * @return
-     */
-    public CommonMongoQueryBuilder whereIdSafe(Object id) {
-	Criteria c = Criteria.where("_id").is(id);
-	String idStr = ArgUtil.parseAsString(id);
-	if (idStr != null && ObjectId.isValid(idStr)) {
-	    Criteria altC = Criteria.where("_id").is(new ObjectId(idStr));
-	    c = new Criteria().orOperator(c, altC);
-	}
-	return this.with(c);
-    }
-
-    public CommonMongoQueryBuilder whereId(Object id) {
-	return this.with(CommonMongoCriteria.whereId(id));
-    }
-
-    public CommonMongoQueryBuilder whereAll() {
-	query().addCriteria(new Criteria());
-	return this;
-    }
-
-    public CommonMongoQueryBuilder set(String key, Object o) {
-	update().set(key, o);
-	return this;
-    }
-
-    public CommonMongoQueryBuilder ref(String key, String id, String collectionName) {
-	Map<String, Object> ref = new HashMap<String, Object>();
-	ref.put("$ref", collectionName);
-	ref.put("$id", new ObjectId(id));
-	update().set(key, ref);
-	return this;
-    }
-
-    public Query getQuery() {
-	return query;
-    }
-
-    public void setQuery(Query query) {
-	this.query = query;
-    }
-
-    public Update getUpdate() {
-	return update;
-    }
-
-    public void setUpdate(Update update) {
-	this.update = update;
-    }
-
-    public static abstract class DocQueryBuilder<T> extends CommonMongoQueryBuilder {
 	protected T doc;
 	protected boolean synced;
 	private long updatedStamp;
@@ -113,10 +20,6 @@ public class CommonMongoQueryBuilder {
 	public DocQueryBuilder(String id) {
 	    this.doc = this.newDoc(id);
 	    whereId(id);
-	}
-
-	public Class<?> getDocClass() {
-	    return this.doc.getClass();
 	}
 
 	public abstract T newDoc(String id);
@@ -139,8 +42,20 @@ public class CommonMongoQueryBuilder {
 	    this.updatedStamp = updatedStamp;
 	}
 
-	public void updatedStamp() {
-	    this.set("updatedStamp", System.currentTimeMillis());
+	@Override
+	public boolean isUpdatedTimeStampSupport() {
+	    if (ArgUtil.is(this.doc)) {
+		return this.doc instanceof UpdatedTimeStampIndexSupport;
+	    }
+	    return super.isUpdatedTimeStampSupport();
+	}
+
+	@SuppressWarnings("unchecked")
+	public Class<T> getDocClass() {
+	    if (docClass == null) {
+		this.docClass = this.doc == null ? null : (Class<T>) this.doc.getClass();
+	    }
+	    return docClass;
 	}
     }
 

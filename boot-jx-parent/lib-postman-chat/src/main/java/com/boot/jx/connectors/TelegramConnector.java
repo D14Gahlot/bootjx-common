@@ -6,82 +6,68 @@ import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.PhotoSize;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
 import com.boot.jx.api.ApiResponseUtil;
-import com.boot.jx.chat.ConnectorHandlerFactory.AbstractConnector;
 import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorMapping;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.dict.FileType;
 import com.boot.jx.model.CommonFile;
 import com.boot.jx.postman.client.PMFileStoreClient;
-import com.boot.jx.postman.client.TmplClient;
+import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
-import com.boot.jx.postman.doc.QuickMedia;
 import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.MessageBoxEvent;
 import com.boot.jx.postman.model.MessageDefinitions.Contactable;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.plugin.ChannelConfig;
+import com.boot.jx.postman.plugin.ChannelPluginProvider;
+import com.boot.jx.postman.plugin.TelegramPlugin;
+import com.boot.jx.postman.plugin.TelegramPlugin.TelegramConfigDetails;
 import com.boot.jx.postman.query.ChatContactQuery;
 import com.boot.jx.postman.tg.TelegramClient;
 import com.boot.jx.postman.tg.TelegramModels.TGFile;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.Constants;
 import com.boot.utils.JsonUtil;
 
 @Component
 @ConnectorMapping(contactType = ContactType.TELEGRAM)
-public class TelegramConnector extends AbstractConnector {
+public class TelegramConnector extends AbstractConnector<TelegramConfigDetails, TelegramPlugin> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TelegramConnector.class);
+
+    @Override
+    public TelegramPlugin getPlugin() {
+	return ChannelPluginProvider.TELEGRAM;
+    }
 
     @Autowired
     private TelegramClient telegramClient;
 
     @Autowired
-    private MongoTemplate mongoTemplate;
-
-    @Autowired
-    private TmplClient tmplClient;
-
-    @Autowired
     private PMFileStoreClient pmFileStoreClient;
 
     @Override
-    public void registerWebHook(ChannelConfig channelConfig, String webhookUrl) {
+    public void registerWebhook(ChannelConfig channelConfig, String webhookUrl) {
 	telegramClient.registerWebHook(channelConfig, webhookUrl);
     }
 
-    public void send(ChannelConfig channelConfig, OutboxMessage outboxMessage) {
+    public void onSend(ChannelConfig channelConfig, ChatContactDoc chatContactDoc, OutboxMessage outboxMessage) {
 	try {
-	    if (ArgUtil.is(outboxMessage.getTemplate())) {
-		QuickMedia mediaReply = mongoTemplate.findById(outboxMessage.getTemplate(), QuickMedia.class);
-		if (ArgUtil.is(mediaReply)) {
-		    if ("image".equalsIgnoreCase(mediaReply.getType())) {
-			outboxMessage.attachment(new Attachment().mediaURL(mediaReply.getUrl())
-				.mediaType(FileType.IMAGE.toString()).mediaCaption(mediaReply.getTitle()));
-			telegramClient.send(channelConfig, outboxMessage);
-		    }
-		} else {
-		    tmplClient.process(outboxMessage);
-		    telegramClient.send(channelConfig, outboxMessage);
-		}
-	    } else {
-		telegramClient.send(channelConfig, outboxMessage);
-	    }
+	    template(channelConfig, chatContactDoc, outboxMessage);
+	    telegramClient.send(channelConfig, outboxMessage);
 	    outboxMessage.updateStatus(OutboxMessage.Status.SENT);
 	} catch (Exception e) {
 	    outboxMessage.updateStatus(OutboxMessage.Status.SENT_ERR);
 	    outboxMessage.logs().add(e.getMessage());
 	    LOGGER.error("SEND ERROR", e);
 	}
-
     }
 
     @Override
@@ -106,7 +92,15 @@ public class TelegramConnector extends AbstractConnector {
 	inboxMessage.setOriginalMessage(update);
 	inboxMessage.setMessageIdExt(
 		String.format("%s-%s", update.getMessage().getChatId(), update.getMessage().getMessageId()));
-	inboxMessage.setMessage(update.getMessage().getText());
+
+
+	String text = ArgUtil.parseAsString(update.getMessage().getText(),Constants.BLANK);
+	
+	if(text.startsWith("/start ")) {
+	    inboxMessage.setMessage(text.replace("/start ", ""));
+	} else {
+	    inboxMessage.setMessage(text);
+	}
 
 	if (ArgUtil.is(update.getMessage().getPhoto())) {
 	    Optional<PhotoSize> photo = update.getMessage().getPhoto().stream()

@@ -1,6 +1,7 @@
 package com.boot.jx;
 
 import java.lang.reflect.Field;
+import java.security.NoSuchAlgorithmException;
 import java.util.Collections;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -31,6 +32,7 @@ import com.boot.jx.scope.tnt.TenantProperties;
 import com.boot.jx.scope.tnt.Tenants;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.Constants;
+import com.boot.utils.CryptoUtil;
 import com.boot.utils.JsonUtil.JsonUtilConfigurable;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -75,21 +77,15 @@ public class AppConfig {
     public static final String JAX_CDN_URL = "${jax.cdn.url}";
     public static final String JAX_CDN_CONTEXT = "${jax.cdn.context}";
     public static final String JAX_APP_URL = "${jax.app.url}";
-    public static final String JAX_SERVICE_URL = "${jax.service.url}";
     public static final String JAX_POSTMAN_URL = "${jax.postman.url}";
 
-    public static final String JAX_PAYMENT_URL = "${jax.payment.url}";
     public static final String JAX_LOGGER_URL = "${jax.logger.url}";
     public static final String JAX_SSO_URL = "${jax.sso.url}";
     public static final String JAX_AUTH_URL = "${jax.auth.url}";
-    public static final String JAX_RADAR_URL = "${jax.radar.url}";
 
     public static final String SPRING_REDIS_HOST = "${spring.redis.host}";
     public static final String SPRING_REDIS_PORT = "${spring.redis.port}";
-    public static final String JAX_PRICER_URL = "${jax.pricer.url}";
     public static final String JAX_SERVICE_PROVIDER_URL = "${jax.service-provider.url}";
-    public static final String JAX_CASHIER_URL = "${jax.cashier.url}";
-    public static final String JAX_DROOL_URL = "${jax.drools.url}";
 
     @Value(APP_ENV)
     @AppParamKey(AppParam.APP_ENV)
@@ -186,21 +182,9 @@ public class AppConfig {
     @Value(JAX_CDN_CONTEXT)
     private String cdnContext;
 
-    @Value(JAX_APP_URL)
-    @AppParamKey(AppParam.JAX_APP_URL)
-    private String appURL;
-
-    @Value(JAX_SERVICE_URL)
-    @AppParamKey(AppParam.JAX_SERVICE_URL)
-    private String jaxURL;
-
     @Value(JAX_POSTMAN_URL)
     @AppParamKey(AppParam.JAX_POSTMAN_URL)
     private String postmapURL;
-
-    @Value(JAX_PAYMENT_URL)
-    @AppParamKey(AppParam.JAX_PAYMENT_URL)
-    private String paygURL;
 
     @Value(JAX_LOGGER_URL)
     @AppParamKey(AppParam.JAX_LOGGER_URL)
@@ -214,10 +198,6 @@ public class AppConfig {
     @AppParamKey(AppParam.JAX_AUTH_URL)
     private String authURL;
 
-    @Value(JAX_RADAR_URL)
-    @AppParamKey(AppParam.JAX_RADAR_URL)
-    private String radarURL;
-
     @Value(SPRING_REDIS_HOST)
     @AppParamKey(AppParam.SPRING_REDIS_HOST)
     private String redisSpringHost;
@@ -226,25 +206,9 @@ public class AppConfig {
     @AppParamKey(AppParam.SPRING_REDIS_PORT)
     private String redisSpringPort;
 
-    @Value(JAX_PRICER_URL)
-    @AppParamKey(AppParam.JAX_PRICER_URL)
-    private String pricerURL;
-
     @Value(APP_CONTEXT_PREFIX)
     @AppParamKey(AppParam.APP_CONTEXT_PREFIX)
     private String appPrefix;
-
-    @Value(JAX_SERVICE_PROVIDER_URL)
-    @AppParamKey(AppParam.JAX_SERVICE_PROVIDER_URL)
-    private String serviceProviderURL;
-
-    @Value(JAX_CASHIER_URL)
-    @AppParamKey(AppParam.JAX_CASHIER_URL)
-    private String cashierURL;
-
-    @Value(JAX_DROOL_URL)
-    @AppParamKey(AppParam.JAX_DROOL_URL)
-    private String jaxDroolUrl;
 
     @Value("${app.response.ok}")
     private boolean appResponseOK;
@@ -310,20 +274,8 @@ public class AppConfig {
 	return cdnContext;
     }
 
-    public String getAppURL() {
-	return appURL;
-    }
-
-    public String getJaxURL() {
-	return jaxURL;
-    }
-
     public String getPostmapURL() {
 	return postmapURL;
-    }
-
-    public String getPaygURL() {
-	return paygURL;
     }
 
     public String getLoggerURL() {
@@ -362,6 +314,13 @@ public class AppConfig {
 	    }
 	}
 
+	try {
+	    AppParam.APP_INSTANCE_ID
+		    .setValue(CryptoUtil.getMD5Hash(String.format("%s#%s#%s#%s", AppParam.APP_ENV.getValue(),
+			    AppParam.APP_GROUP.getValue(), AppParam.APP_NAME.getValue(), AppParam.APP_ID.getValue())));
+	} catch (NoSuchAlgorithmException e) {
+	    e.printStackTrace();
+	}
 	return null;
     }
 
@@ -398,22 +357,6 @@ public class AppConfig {
 
     public void setAuthURL(String authURL) {
 	this.authURL = authURL;
-    }
-
-    public String getPricerURL() {
-	return pricerURL;
-    }
-
-    public void setPricerURL(String pricerURL) {
-	this.pricerURL = pricerURL;
-    }
-
-    public String getCashierURL() {
-	return cashierURL;
-    }
-
-    public void setCashierURL(String cashierURL) {
-	this.cashierURL = cashierURL;
     }
 
     public String getAppAuthKey() {
@@ -482,10 +425,6 @@ public class AppConfig {
 	return springAppName;
     }
 
-    public String getRadarURL() {
-	return radarURL;
-    }
-
     public String getAppSpecifcDecryptedProp() {
 	return appSpecifcDecryptedProp;
     }
@@ -506,14 +445,6 @@ public class AppConfig {
 	return appResponseOK;
     }
 
-    public String getServiceProviderURL() {
-	return serviceProviderURL;
-    }
-
-    public void setServiceProviderURL(String serviceProviderURL) {
-	this.serviceProviderURL = serviceProviderURL;
-    }
-
     public Language getDefaultLang() {
 	return defaultLang;
     }
@@ -532,14 +463,6 @@ public class AppConfig {
 
     public AppType getDefaultAppType() {
 	return defaultAppType;
-    }
-
-    public String getJaxDroolUrl() {
-	return jaxDroolUrl;
-    }
-
-    public void setJaxDroolUrl(String jaxDroolUrl) {
-	this.jaxDroolUrl = jaxDroolUrl;
     }
 
     public String getAppAppBuildStamp() {

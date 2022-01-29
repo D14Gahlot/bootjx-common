@@ -6,8 +6,16 @@ import java.util.List;
 
 public class ConfigMeta implements Serializable {
 
-    public static enum InputType {
+    public static enum OPTIONS_TYPE {
 	TEXT, OPTIONS, RANGE, NUMBER, COLOR, COLOR_PALLETE
+    }
+
+    public static enum DATA_TYPE {
+	TIMESPAN
+    }
+
+    public static enum CONVERT_TYPE {
+	TIME_MILLIS
     }
 
     public static class ConfigOption {
@@ -77,15 +85,24 @@ public class ConfigMeta implements Serializable {
 
     private String title;
     private String key;
+    private String desc;
+    private String group;
     private String path;
     private Object defaultValue;
     private boolean optional;
     private boolean readonly;
+    private boolean createonly;
+    private boolean writeonly;
     private boolean hidden;
+    private boolean deprecated;
 
-    private InputType inputType;
+    private OPTIONS_TYPE inputType;
+    private DATA_TYPE dataType;
+    private CONVERT_TYPE converterType;
 
     private List<ConfigOption> options;
+    private String optionsKey;
+    private String optionsSource;
 
     public ConfigMeta() {
     }
@@ -120,6 +137,9 @@ public class ConfigMeta implements Serializable {
     }
 
     public List<ConfigOption> options() {
+	if (this.inputType == null) {
+	    this.inputType = OPTIONS_TYPE.OPTIONS;
+	}
 	if (this.options == null) {
 	    this.options = new ArrayList<ConfigOption>();
 	}
@@ -127,9 +147,6 @@ public class ConfigMeta implements Serializable {
     }
 
     public ConfigMeta options(ConfigOption... options) {
-	if (this.inputType == null) {
-	    this.inputType = InputType.OPTIONS;
-	}
 	this.options = this.options();
 	for (ConfigOption configOption : options) {
 	    this.options.add(configOption);
@@ -138,9 +155,6 @@ public class ConfigMeta implements Serializable {
     }
 
     public ConfigMeta optionValues(Object... optionValues) {
-	if (this.inputType == null) {
-	    this.inputType = InputType.OPTIONS;
-	}
 	this.options = this.options();
 	for (Object optionValue : optionValues) {
 	    this.options.add(new ConfigOption(optionValue));
@@ -148,19 +162,33 @@ public class ConfigMeta implements Serializable {
 	return this;
     }
 
+    public ConfigMeta optionsSource(String src) {
+	this.options = this.options();
+	this.optionsSource = src;
+	return this;
+    }
+
+    public String getOptionsSource() {
+	return optionsSource;
+    }
+
+    public void setOptionsSource(String src) {
+	this.optionsSource = src;
+    }
+
     public ConfigMeta optionsOnOff() {
 	return this.options(ConfigOption.ON, ConfigOption.OFF);
     }
 
-    public InputType getInputType() {
+    public OPTIONS_TYPE getInputType() {
 	return inputType;
     }
 
-    public void setInputType(InputType inputType) {
+    public void setInputType(OPTIONS_TYPE inputType) {
 	this.inputType = inputType;
     }
 
-    public ConfigMeta inputType(InputType inputType) {
+    public ConfigMeta inputType(OPTIONS_TYPE inputType) {
 	this.inputType = inputType;
 	return this;
     }
@@ -175,6 +203,16 @@ public class ConfigMeta implements Serializable {
 
     public ConfigMeta defaultValue(Object defaultValue) {
 	this.defaultValue = defaultValue;
+	return this;
+    }
+
+    public ConfigMeta defaultFalse() {
+	this.defaultValue = Boolean.FALSE;
+	return this;
+    }
+
+    public ConfigMeta defaultTrue() {
+	this.defaultValue = Boolean.TRUE;
 	return this;
     }
 
@@ -244,4 +282,97 @@ public class ConfigMeta implements Serializable {
 	return this;
     }
 
+    public DATA_TYPE getDataType() {
+	return dataType;
+    }
+
+    public void setDataType(DATA_TYPE dataType) {
+	this.dataType = dataType;
+    }
+
+    public CONVERT_TYPE getConverterType() {
+	return converterType;
+    }
+
+    public void setConverterType(CONVERT_TYPE converterType) {
+	this.converterType = converterType;
+    }
+
+    public boolean isDeprecated() {
+	return deprecated;
+    }
+
+    public void setDeprecated(boolean deprecated) {
+	this.deprecated = deprecated;
+    }
+
+    public ConfigMeta deprecated() {
+	this.deprecated = true;
+	return this;
+    }
+
+    public ConfigMeta createonly() {
+	this.createonly = true;
+	return this;
+    }
+
+    public boolean isCreateonly() {
+	return createonly;
+    }
+
+    public void setCreateonly(boolean createonly) {
+	this.createonly = createonly;
+    }
+
+    public boolean isWriteonly() {
+	return writeonly;
+    }
+
+    public void setWriteonly(boolean writeonly) {
+	this.writeonly = writeonly;
+    }
+
+    public ConfigMeta writeonly() {
+	this.writeonly = true;
+	return this;
+    }
+
+    public String getDesc() {
+	return desc;
+    }
+
+    public void setDesc(String desc) {
+	this.desc = desc;
+    }
+
+    public ConfigMeta desc(String desc) {
+	this.desc = desc;
+	return this;
+    }
+
+    public String getGroup() {
+	return group;
+    }
+
+    public void setGroup(String group) {
+	this.group = group;
+    }
+
+    public ConfigMeta group(String group) {
+	this.group = group;
+	return this;
+    }
+
+    public String getOptionsKey() {
+	return optionsKey;
+    }
+
+    public void setOptionsKey(String optionKey) {
+	this.optionsKey = optionKey;
+    }
+
+    public ConfigMeta optionsKey(String optionKey) {
+	this.optionsKey = optionKey;
+	return this;
+    }
 }

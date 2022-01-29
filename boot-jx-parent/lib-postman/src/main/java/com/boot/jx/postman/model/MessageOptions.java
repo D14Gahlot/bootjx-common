@@ -12,53 +12,49 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public interface MessageOptions {
 
-	@JsonIgnore
-	public Map<String, Object> options();
+    @JsonIgnore
+    public Map<String, Object> options();
+
+    @JsonIgnore
+    default public MessageOptions option(String key, Object value) {
+	this.options().put(key, value);
+	return this;
+    }
+
+    @JsonIgnore
+    default public List<TmplElement> optionActionButtons() {
+	if (this.options().containsKey("buttons")) {
+	    return new MapModel(this.options()).entry("buttons").asList(TmplElement.class);
+	}
+	return new ArrayList<TmplElement>();
+    }
+
+    @JsonIgnore
+    default public MapModel optionsAsModel() {
+	return MapModel.from(this.options());
+    }
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static interface WAMessageOptions extends MessageOptions {
 
 	@JsonIgnore
-	default public MessageOptions option(String key, Object value) {
-		this.options().put(key, value);
-		return this;
+	default public String getMsgType() {
+	    return ArgUtil.parseAsString(this.options().get("msg_type"));
 	}
 
 	@JsonIgnore
-	default public List<TmplElement> optionActionButtons() {
-		if (this.options().containsKey("buttons")) {
-			return new MapModel(this.options()).entry("buttons").asList(new TmplElement());
-		}
-		return new ArrayList<TmplElement>();
+	default public boolean isTemplateMsg() {
+	    return ArgUtil.parseAsBoolean(this.options().get("isTemplate"), false);
 	}
 
 	@JsonIgnore
-	default public MapModel optionsAsModel() {
-		return MapModel.from(this.options());
+	default public boolean isQRButtons() {
+	    return ArgUtil.parseAsBoolean(this.options().get("isQRButtons"), false);
 	}
 
-	@JsonIgnoreProperties(ignoreUnknown = true)
-	public static interface WAMessageOptions extends MessageOptions {
-		@JsonIgnore
-		default public boolean isHSM() {
-			return ArgUtil.parseAsBoolean(this.options().get("isHSM"), false);
-		}
-
-		@JsonIgnore
-		default public String getMsgType() {
-			return ArgUtil.parseAsString(this.options().get("msg_type"));
-		}
-
-		@JsonIgnore
-		default public boolean isTemplateMsg() {
-			return ArgUtil.parseAsBoolean(this.options().get("isTemplate"), false);
-		}
-
-		@JsonIgnore
-		default public boolean isQRButtons() {
-			return ArgUtil.parseAsBoolean(this.options().get("isQRButtons"), false);
-		}
-
-		@JsonIgnore
-		default public boolean isViaAgent() {
-			return ArgUtil.parseAsBoolean(this.options().get("isViaAgent"), false);
-		}
+	@JsonIgnore
+	default public boolean isViaAgent() {
+	    return ArgUtil.parseAsBoolean(this.options().get("isViaAgent"), false);
 	}
+    }
 }

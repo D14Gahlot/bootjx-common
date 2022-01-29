@@ -58,9 +58,6 @@ public class PostManServiceImpl implements PostManService {
 	@Autowired
 	private WhatsAppService whatsAppService;
 
-	@Autowired
-	private TelegramService telegramService;
-
 	/** The slack service. */
 	@Autowired
 	private SlackService slackService;
@@ -267,10 +264,6 @@ public class PostManServiceImpl implements PostManService {
 
 		for (WAMessage waMessage : messageBox.getWaBucket()) {
 			whatsAppService.send(waMessage);
-		}
-
-		for (TGMessage taMessage : messageBox.getTgBucket()) {
-			telegramService.send(taMessage);
 		}
 
 		for (PushMessage pushMessage : messageBox.getPushBucket()) {

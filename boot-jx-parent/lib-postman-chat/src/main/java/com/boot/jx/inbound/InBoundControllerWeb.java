@@ -68,7 +68,6 @@ public class InBoundControllerWeb {
 	@RequestMapping(value = "/ext/outbound/web/auth", method = RequestMethod.GET)
 	public ApiResponse<OutboxMessage, Object> onAuth(@RequestParam String number) throws InterruptedException {
 		String webSessionId = commonHttpRequest.get("web-session-id");
-		String contactId = PostManUtil.createContactId(ContactType.WEBSITE, number, null);
 
 		ChatSessionDoc session = null;
 		if (ArgUtil.is(webSessionId)) {
@@ -81,7 +80,7 @@ public class InBoundControllerWeb {
 				OutboxMessage outboxMessage = new OutboxMessage();
 				outboxMessage.setTimestamp(messageDoc.getTimestamp());
 				outboxMessage.setMessage(messageDoc.getMessage());
-				outboxMessage.setTemplate(messageDoc.getTemplate());
+				outboxMessage.template(messageDoc.getTemplate());
 				outboxMessage.setAttachments(messageDoc.getAttachments());
 				if (ArgUtil.isEqual(messageDoc.getType(), "I")) {
 					outboxMessage.addTo(messageDoc.getContactId());
@@ -99,7 +98,6 @@ public class InBoundControllerWeb {
 	@RequestMapping(value = "/ext/outbound/web/auth/v2", method = RequestMethod.GET)
 	public ApiResponse<ChatMessageDTO, Object> onAuthV2(@RequestParam String number) throws InterruptedException {
 		String webSessionId = commonHttpRequest.get("web-session-id");
-		String contactId = PostManUtil.createContactId(ContactType.WEBSITE, number, null);
 
 		ChatSessionDoc session = null;
 		if (ArgUtil.is(webSessionId)) {

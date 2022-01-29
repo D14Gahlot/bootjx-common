@@ -5,10 +5,14 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Component;
 
+import com.boot.jx.AppConfig;
 import com.boot.jx.AppContextUtil;
+import com.boot.jx.http.CommonHttpRequest;
+import com.boot.jx.postman.PMConfiguration.PMConfigurationModel;
 import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.TimeUtils.TimePeriod;
 
 @Component
 @PropertySource("classpath:application-postman.properties")
@@ -34,8 +38,8 @@ public class PMClientConfig {
     @Value("${postman.contact.details.url}")
     private String contactDetailsUrl;
 
-    @Value("${postman.chat.dummy.user.enabled}")
-    boolean chatDummyUserEnabled;
+    @Value("${app.local.dummy.bot.enabled}")
+    boolean localDummyBotEnabled;
 
     @Value("${postman.chat.idle.timeout}")
     private String chatIdleTimeout;
@@ -52,25 +56,31 @@ public class PMClientConfig {
     @Autowired
     private PMEnvironment environment;
 
-    public boolean isChatDummyUserEnabled() {
-	return chatDummyUserEnabled;
-    }
+    @Autowired
+    private CommonHttpRequest commonHttpRequest;
+
+    @Autowired
+    private AppConfig appConfig;
 
     public String getAgentUrl() {
 	return agentUrl;
     }
 
+    public boolean isLocalDummyBotEnabled() {
+	return localDummyBotEnabled;
+    }
+
     public String getDefaultSender() {
-	return environment.get("postman.bot.name")
-		.asString(ArgUtil.parseAsString(environment.config().agent().getDefaultBotName(), defaultSender));
+	return environment.keyEntry("postman.bot.name")
+		.asString(ArgUtil.parseAsString(environment.local().agent().getDefaultBotName(), defaultSender));
     }
 
     public String getContactDetailsUrl() {
-	return environment.config().get("postman.contact.details.url").asString(contactDetailsUrl);
+	return environment.local().keyEntry("postman.contact.details.url").asString(contactDetailsUrl);
     }
 
     public String getChatIdleTimeout() {
-	return environment.config().get("postman.chat.idle.timeout").asString(chatIdleTimeout);
+	return environment.local().keyEntry("postman.chat.idle.timeout").asString(chatIdleTimeout);
     }
 
     public String getInboundForwardUrl() {
@@ -86,24 +96,29 @@ public class PMClientConfig {
     }
 
     public String getChatSessionTimeout() {
-	return environment.config().get(PROPERTIES.POSTMAN_CHAT_SESSION_TIMEOUT).asString(chatSessionTimeout);
+	return environment.local().keyEntry(PROPERTIES.POSTMAN_CHAT_SESSION_TIMEOUT).asString(chatSessionTimeout);
     }
 
-    public String getAgentSessionTimeout() {
-	return agentSessionTimeout;
+    public TimePeriod getAgentSessionTimeout() {
+	return TimePeriod.from(agentSessionTimeout);
     }
 
     public String getWebhookBase(ChannelConfig channelConfig) {
 	String webhookUrl = channelConfig.getWebhookUrl();
 	if (!ArgUtil.is(webhookUrl)) {
-	    webhookUrl = String.format("https://%s.%s/postman", AppContextUtil.getTenant(),
-		    environment.get("mry.prop.service.domain").asString());
+	    if (isLocalDummyBotEnabled()) {
+		webhookUrl = String.format("%s%s", commonHttpRequest.getServerHost(), appConfig.getAppPrefix(),
+			environment.keyEntry("mry.prop.service.domain").asString());
+	    } else {
+		webhookUrl = String.format("https://%s.%s/postman", AppContextUtil.getTenant(),
+			environment.keyEntry("mry.prop.service.domain").asString());
+	    }
 	}
 	return webhookUrl;
     }
 
     public String getWebhookUrl(ChannelConfig channelConfig) {
-	PMConfiguration config = environment.config();
+	PMConfigurationModel config = environment.local();
 	String webhookUrl = getWebhookBase(channelConfig);
 	return String.format("%s/%s", webhookUrl,
 		PostManUtil.CHANNEL_CALLBACK_PATH(config.getAccountKey(), channelConfig));

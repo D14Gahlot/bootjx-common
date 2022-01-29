@@ -3,7 +3,6 @@ package com.boot.jx.admin.service;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
@@ -13,9 +12,11 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import com.boot.jx.chat.ChatService;
+import com.boot.jx.common.config.ConfigConstants;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.logger.AuditDetailProvider;
-import com.boot.jx.mongo.CommonMongoQueryBuilder.CommonMongoCriteria;
+import com.boot.jx.mongo.CommonMongoQB.CommonMongoCriteria;
+import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.doc.BulkSessionDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.MessageDoc;
@@ -31,21 +32,15 @@ import com.boot.jx.tunnel.task.QueuedTaskExecuter;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.UniqueID;
 import com.google.i18n.phonenumbers.NumberParseException;
-import com.google.i18n.phonenumbers.PhoneNumberUtil;
 import com.google.i18n.phonenumbers.Phonenumber.PhoneNumber;
 import com.mongodb.AggregationOptions;
 import com.mongodb.AggregationOptions.OutputMode;
 import com.mongodb.Cursor;
 import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
-import com.mongodb.client.AggregateIterable;
-import com.mongodb.client.MongoCollection;
-import com.mongodb.client.MongoCursor;
 
 @Component
 public class BulkMessageService extends QueuedTaskExecuter {
-
-    private static final PhoneNumberUtil PHONE_NUMBER_UTIL = PhoneNumberUtil.getInstance();
 
     @Autowired
     private MongoTemplate mongoTemplate;
@@ -56,19 +51,24 @@ public class BulkMessageService extends QueuedTaskExecuter {
     @Autowired
     private AuditDetailProvider auditDetailProvider;
 
+    @Autowired
+    private PMEnvironment enviroment;
+
     public BulkSessionDoc send(OutboxMessage bulkMessage) throws NumberParseException {
 
 	BulkSessionDoc session = new BulkSessionDoc();
 
 	session.setMessage(bulkMessage.getMessage());
-	session.setTemplateId(bulkMessage.getTemplateId());
-	session.setTemplate(bulkMessage.getTemplate());
+	session.setTemplateId(bulkMessage.templateId());
+	session.setTemplate(bulkMessage.templateCode());
 	session.setMessageCount(bulkMessage.getTo().size());
 	session.setContactType(bulkMessage.contact().type());
 	session.setLane(bulkMessage.contact().getLane());
 	session.setBulkSessionId(UniqueID.generateString62());
 
-	auditDetailProvider.audit(session);
+	auditDetailProvider.auditCreate(session);
+
+	String defaultRegion = enviroment.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_PHONEBOOK_REGION).asString("IN");
 
 	PhoneNumber phoneNumber = new PhoneNumber();
 	List<MessageDoc> docs = new ArrayList<MessageDoc>();
@@ -77,12 +77,12 @@ public class BulkMessageService extends QueuedTaskExecuter {
 	    doc.setContactId(null);
 	    doc.updateStatus(Status.SCHLD);
 	    doc.setBulkSessionId(session.getBulkSessionId());
-	    PHONE_NUMBER_UTIL.parse(to, "IN", phoneNumber);
+	    ConfigConstants.PHONE_NUMBER_UTIL.parse(to, defaultRegion, phoneNumber);
 	    to = String.format("%s%s", phoneNumber.getCountryCode(), phoneNumber.getNationalNumber());
 	    doc.getContact().setPhone(to);
 	    doc.setMessage(bulkMessage.getMessage());
-	    doc.setTemplateId(bulkMessage.getTemplateId());
-	    doc.setTemplate(bulkMessage.getTemplate());
+	    doc.setTemplateId(bulkMessage.templateId());
+	    doc.setTemplate(bulkMessage.templateCode());
 	    docs.add(doc);
 	}
 
@@ -151,8 +151,8 @@ public class BulkMessageService extends QueuedTaskExecuter {
 	OutboxMessage outboxMessage = new OutboxMessage();
 	outboxMessage.setMessageId(msg.getMessageId());
 	outboxMessage.setMessage(msg.getMessage());
-	outboxMessage.setTemplate(msg.getTemplate());
-	outboxMessage.setTemplateId(msg.getTemplateId());
+	outboxMessage.template(msg.getTemplate());
+	outboxMessage.templateId(msg.getTemplateId());
 	outboxMessage.contact().type(contactType);
 	outboxMessage.contact().setChannelType(channel);
 	outboxMessage.contact().setLane(lane);

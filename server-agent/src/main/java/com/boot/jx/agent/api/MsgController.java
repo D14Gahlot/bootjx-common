@@ -20,15 +20,14 @@ import com.boot.jx.agent.AgentSessionService;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.api.ListRequestModel;
 import com.boot.jx.aws.AWSFileStore;
-import com.boot.jx.chat.ChatArchiveBuilder;
-import com.boot.jx.chat.ChatArchiveService;
-import com.boot.jx.chat.ChatService;
 import com.boot.jx.common.doc.AgentDoc;
 import com.boot.jx.common.doc.AgentSessionDoc;
 import com.boot.jx.common.store.AgentStore;
+import com.boot.jx.common.store.ChatArchiveBuilder;
+import com.boot.jx.common.store.ChatArchiveService;
 import com.boot.jx.model.CommonFile;
 import com.boot.jx.postman.PMConstants;
-import com.boot.jx.postman.PMConstants.DEFAULT;
+import com.boot.jx.postman.PMConstants.CHAT_STATUS;
 import com.boot.jx.postman.client.PMFileStoreClient;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
@@ -36,6 +35,8 @@ import com.boot.jx.postman.doc.QuickLabel;
 import com.boot.jx.postman.dto.ChatMessageDTO;
 import com.boot.jx.postman.dto.ChatSessionDTO;
 import com.boot.jx.postman.dto.ContactDTO;
+import com.boot.jx.postman.manager.ChatSessionManager;
+import com.boot.jx.postman.manager.LogManager;
 import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.service.ChatDTOUtil;
@@ -43,7 +44,6 @@ import com.boot.jx.postman.store.MessageStore.EVENTS;
 import com.boot.jx.postman.store.SessionStore;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
-import com.boot.utils.Constants;
 import com.boot.utils.JsonUtil;
 import com.boot.utils.MapBuilder;
 
@@ -52,6 +52,9 @@ public class MsgController {
 
     @Autowired
     private SessionStore sessionStore;
+    
+    @Autowired
+    ChatSessionManager chatSessionManager;
 
     @Autowired
     private AgentSessionBean agentSession;
@@ -66,46 +69,24 @@ public class MsgController {
     private AgentService agentService;
 
     @Autowired
-    private ChatService chatService;
-
-    @Autowired
     private ChatArchiveService chatArchive;
 
     @Autowired
-    private AgentSessionService agentSessionService;
+    private ChatArchiveBuilder chatArchiveBuilder;
 
-    @ResponseBody
-    @RequestMapping(value = "/api/sessions/assigned", method = { RequestMethod.GET })
-    public ApiResponse<ChatSessionDTO, Object> getSessionsAssignedToMe(
-	    @RequestParam(defaultValue = "true") boolean withMessage) {
-	List<ChatSessionDTO> chatSessionDtos = new ArrayList<ChatSessionDTO>();
-	if (agentSession.isLoggedIn() && ArgUtil.is(agentSession.getAgentDept())) {
-	    List<ChatSessionDoc> sessions = sessionStore
-		    .findChatSessionDocByAgentAndUnAssigned(agentSession.getAgentCode(), agentSession.getAgentDept());
-	    for (ChatSessionDoc chatSessionDoc : sessions) {
-		ChatSessionDTO chatSessionDto = chatArchive.getChatSession(chatSessionDoc);
-		chatSessionDto = chatArchive.withContact(chatSessionDto);
-		if (withMessage
-			&& ArgUtil.isEqual(chatSessionDto.getAssignedToDept(), DEFAULT.NO_DEPT,
-				agentSession.getAgentDept(), null, Constants.BLANK)
-			&& ArgUtil.isEqual(chatSessionDto.getAssignedToAgent(), agentSession.getAgentCode(), null)) {
-		    chatSessionDto = chatArchive.withMessages(chatSessionDto);
-		}
-		chatSessionDtos.add(chatSessionDto);
-	    }
-	}
-	agentSessionService.refreshOnline();
-	return ApiResponse.buildResults(chatSessionDtos, MapBuilder.map().put("isOnline", agentSession.isOnline())
-		.put("profile", agentSession.getProfile()).build());
-    }
+    @Autowired
+    private LogManager logManager;
+
+    @Autowired
+    private AgentSessionService agentSessionService;
 
     @ResponseBody
     @RequestMapping(value = "/api/sessions/message/send", method = { RequestMethod.POST })
     public ApiResponse<ChatMessageDTO, Object> sendSessionMessage(@RequestBody OutboxMessage outboxMessage)
 	    throws InterruptedException {
 
-	ChatSessionDoc sessionDoc = sessionStore.getSession(outboxMessage.getSessionId());
-
+	ChatSessionDoc sessionDoc = sessionStore.createSession(outboxMessage);
+	
 	// Session Stuff Logging <
 	if (ArgUtil.isEmpty(sessionDoc.getAssignedToAgent())) {
 	    AgentSessionDoc agent = mongoTemplate.findById(agentSession.getAgentCode(), AgentSessionDoc.class);
@@ -126,7 +107,8 @@ public class MsgController {
 	    // messageDto.setMessageId(outboxMessage.getMessageId());
 
 	    agentSessionService.refreshOnline();
-	    return ApiResponse.buildResult(messageDto);
+	    return new ApiResponse<ChatMessageDTO, Object>().result(messageDto)
+		    .meta(chatArchiveBuilder.buildChatSessionDTO().from(sessionDoc).get());
 	} else {
 	    agentSessionService.refreshOnline();
 	    return new ApiResponse<ChatMessageDTO, Object>().message("Only assignee can respond to chat.");
@@ -157,11 +139,13 @@ public class MsgController {
 
     @ResponseBody
     @RequestMapping(value = "/api/sessions/contact", method = { RequestMethod.GET })
-    public ApiResponse<ChatSessionDTO, Object> getSessionsForContact(@RequestParam String contactId) {
+    public ApiResponse<ChatSessionDTO, Object> getSessionsForContact(@RequestParam String contactId,
+	    @RequestParam(defaultValue = "0", required = false) Long fromStamp,
+	    @RequestParam(defaultValue = "0", required = false) Long toStamp) {
 
 	List<ChatSessionDTO> chatSessionDtos = new ArrayList<ChatSessionDTO>();
 
-	List<ChatSessionDoc> sessions = sessionStore.findSimilarChatSessionForContactId(contactId);
+	List<ChatSessionDoc> sessions = sessionStore.findSimilarChatSessionForContactId(contactId, fromStamp, toStamp);
 	for (ChatSessionDoc chatSessionDoc : sessions) {
 	    ChatSessionDTO chatSessionDto = chatArchive.withContact(chatSessionDoc);
 	    chatSessionDtos.add(chatSessionDto);
@@ -196,9 +180,6 @@ public class MsgController {
     @Autowired
     private AgentStore agentStore;
 
-    @Autowired
-    private ChatArchiveBuilder chatArchiveBuilder;
-
     @ResponseBody
     @RequestMapping(value = { "/api/session/agent", "/api/session/agent/assign" }, method = { RequestMethod.POST })
     public ApiResponse<ChatSessionDTO, Object> assignAgent(@RequestParam String sessionId,
@@ -231,13 +212,13 @@ public class MsgController {
 	List<String> removedItems = new ArrayList<String>(oldList);
 	removedItems.removeAll(newList);
 	if (ArgUtil.is(removedItems)) {
-	    chatService.log(sessionDoc, EVENTS.LABEL_REMOVED, removedItems.toArray(new String[0]));
+	    logManager.log(sessionDoc, EVENTS.LABEL_REMOVED, removedItems.toArray(new String[0]));
 	}
 
 	List<String> addedItems = new ArrayList<String>(newList);
 	addedItems.removeAll(oldList);
 	if (ArgUtil.is(addedItems)) {
-	    chatService.log(sessionDoc, EVENTS.LABEL_ADDED, addedItems.toArray(new String[0]));
+	    logManager.log(sessionDoc, EVENTS.LABEL_ADDED, addedItems.toArray(new String[0]));
 	}
 	return ApiResponse.buildData(ChatDTOUtil.getContactDTO(contact));
     }
@@ -248,4 +229,54 @@ public class MsgController {
 	    @RequestParam PMConstants.CHAT_STATUS status) {
 	return ApiResponse.buildResult(agentChatHandlerImpl.updateChatSessionStatus(sessionId, status));
     }
+
+    /*
+     * search by status
+     * 
+     * @ResponseBody
+     * 
+     * @RequestMapping(value = "/api/sessions/searchby/status", method = {
+     * RequestMethod.GET }) public ApiResponse<ChatSessionDTO, Object>
+     * getByStatus(@RequestParam(required = false,defaultValue ="OPEN") CHAT_STATUS
+     * status) { List<ChatSessionDTO> chatSessionDtos = new
+     * ArrayList<ChatSessionDTO>(); List<ChatSessionDoc> sessions =
+     * sessionStore.findByStatus(status); for (ChatSessionDoc chatSessionDoc :
+     * sessions) { ChatSessionDTO chatSessionDto =
+     * chatArchive.withContact(chatSessionDoc); chatSessionDtos.add(chatSessionDto);
+     * 
+     * }
+     * 
+     * return ApiResponse.buildResults(chatSessionDtos); } // search by tagCategory
+     * 
+     * @ResponseBody
+     * 
+     * @RequestMapping(value = "/api/sessions/searchby/category", method = {
+     * RequestMethod.GET }) public ApiResponse<ChatSessionDTO, Object>
+     * getByTagCategory(@RequestParam(required= false) String tagCategory) {
+     * List<ChatSessionDTO> chatSessionDtos = new ArrayList<ChatSessionDTO>();
+     * List<ChatSessionDoc> sessions = sessionStore.findByTagCategory(tagCategory);
+     * for (ChatSessionDoc chatSessionDoc : sessions) { ChatSessionDTO
+     * chatSessionDto = chatArchive.withContact(chatSessionDoc);
+     * chatSessionDtos.add(chatSessionDto);
+     * 
+     * } return ApiResponse.buildResults(chatSessionDtos); }
+     */
+    /** search by status or tagCategory **/
+    @ResponseBody
+    @Deprecated
+    @RequestMapping(value = "/api/sessions/searchby/statusorcategory", method = { RequestMethod.GET })
+    public ApiResponse<ChatSessionDTO, Object> getByStatusOrCategory(
+	    @RequestParam(required = false) List<CHAT_STATUS> status,
+	    @RequestParam(required = false) List<String> tagCategory, @RequestParam(required = false) long dateRange1,
+	    @RequestParam(required = false) long dateRange2) {
+	List<ChatSessionDTO> chatSessionDtos = new ArrayList<ChatSessionDTO>();
+	List<ChatSessionDoc> sessions = sessionStore.findByStatusOrQuickTag(status, tagCategory, dateRange1,
+		dateRange2);
+	for (ChatSessionDoc chatSessionDoc : sessions) {
+	    ChatSessionDTO chatSessionDto = chatArchive.withContact(chatSessionDoc);
+	    chatSessionDtos.add(chatSessionDto);
+	}
+	return ApiResponse.buildResults(chatSessionDtos);
+    }
+
 }

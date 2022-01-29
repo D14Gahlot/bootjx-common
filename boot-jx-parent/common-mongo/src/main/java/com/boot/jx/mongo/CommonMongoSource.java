@@ -32,6 +32,9 @@ public class CommonMongoSource {
     @Value("${spring.data.mongodb.uri}")
     String globalDataSourceUrl;
 
+    @Value("${spring.data.mongodb.prefix}")
+    String globalDBProfix;
+
     @TenantValue("${spring.data.mongodb.username}")
     String dataSourceUsername;
 
@@ -61,7 +64,7 @@ public class CommonMongoSource {
 	String tnt = AppContextUtil.getTenant();
 	MongoClientURI mongoClientURI = new MongoClientURI(dataSourceUrl);
 	String dataBaseName = (!ArgUtil.areEqual(StringUtils.trim(dataSourceUrl), StringUtils.trim(globalDataSourceUrl))
-		|| Tenants.isDefault(tnt)) ? mongoClientURI.getDatabase() : ("tnt_" + tnt);
+		|| Tenants.isDefault(tnt)) ? mongoClientURI.getDatabase() : (globalDBProfix + "_" + tnt);
 	LOGGER.info("MONGODB: {}:{}", dataBaseName, Tenants.isDefault(tnt));
 	return new SimpleMongoDbFactory(new MongoClient(mongoClientURI), dataBaseName);
 

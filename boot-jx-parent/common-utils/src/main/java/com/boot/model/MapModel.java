@@ -1,6 +1,7 @@
 package com.boot.model;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -13,14 +14,19 @@ import com.boot.utils.JsonPath;
 import com.boot.utils.JsonUtil;
 import com.boot.utils.TimeUtils;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.core.type.TypeReference;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class MapModel implements JsonSerializerType<Object> {
 
-    public static class MapEntry {
-	private Object value;
+    public static interface EntryMeta {
+	public String getKey();
+    }
 
-	public MapEntry(Object value) {
+    public static class NodeEntry<T> {
+	private T value;
+
+	public NodeEntry(T value) {
 	    this.value = value;
 	}
 
@@ -92,30 +98,69 @@ public class MapModel implements JsonSerializerType<Object> {
 	    return ArgUtil.parseAsT(value, defaultValue, false);
 	}
 
-	@SuppressWarnings("unchecked")
-	public <T> List<T> asList(T listItem) {
-	    return ArgUtil.parseAsListOfT(value, listItem, ((List<T>) Constants.EMPTY_LIST), false);
-	}
-
 	public <T> T as(Class<T> clazz) {
 	    return JsonUtil.getMapper().convertValue(value, clazz);
+	}
+
+	public <T> T as(TypeReference<T> toValueTypeRef) {
+	    return JsonUtil.getMapper().convertValue(value, toValueTypeRef);
+	}
+
+	public <T> List<T> asList(Class<T> clazz) {
+	    List<Object> list = this.asList();
+	    List<T> newList = new ArrayList<T>();
+	    for (Object object : list) {
+		newList.add(JsonUtil.parse(object, clazz));
+	    }
+	    return newList;
+	}
+
+	public List<Object> asList() {
+	    return ArgUtil.parseAsListOfT(value, new Object(), Constants.EMPTY_LIST, false);
+	}
+
+	public List<Map<String, Object>> asListOfMap() {
+	    return ArgUtil.parseAsListOfT(value, new HashMap<String, Object>(), new ArrayList<Map<String, Object>>(),
+		    false);
+	}
+
+	public Map<String, Object> asMap() {
+	    return JsonUtil.toMap(this.value);
+	}
+
+	public MapModel asMapModel() {
+	    return MapModel.from(this.asMap());
 	}
 
 	public boolean exists() {
 	    return ArgUtil.is(value);
 	}
 
-	public Object getValue() {
+	public boolean is(Object compare) {
+	    return ArgUtil.areEqual(this.value, compare);
+	}
+
+	public T getValue() {
 	    return value;
 	}
 
-	public void setValue(Object value) {
+	public void setValue(T value) {
 	    this.value = value;
 	}
 
     }
 
+    public static class MapEntry extends NodeEntry<Object> {
+
+	public MapEntry(Object value) {
+	    super(value);
+	}
+
+    }
+
     protected Map<String, Object> map;
+    protected List<Object> list;
+    protected Map<String, Object> elem;
 
     public MapModel() {
 	this.map = new HashMap<String, Object>();
@@ -130,6 +175,10 @@ public class MapModel implements JsonSerializerType<Object> {
 	this.map = JsonUtil.fromJson(json, Map.class);
     }
 
+    public MapModel(List<Object> list) {
+	this.list = list;
+    }
+
     public MapEntry entry(String key) {
 	return new MapEntry(this.map().get(key));
     }
@@ -138,11 +187,11 @@ public class MapModel implements JsonSerializerType<Object> {
 	return new MapEntry(jsonPath.load(this.map, null));
     }
 
-    public MapEntry key(String key) {
+    public MapEntry keyEntry(String key) {
 	return this.entry(key);
     }
 
-    public MapEntry path(String path) {
+    public MapEntry pathEntry(String path) {
 	return this.entry(new JsonPath(path));
     }
 
@@ -163,8 +212,14 @@ public class MapModel implements JsonSerializerType<Object> {
     }
 
     public Object getFirst() {
-	for (Entry<String, Object> iterable_element : map().entrySet()) {
-	    return iterable_element.getValue();
+	if (this.list != null) {
+	    return list.get(0);
+	}
+
+	if (this.map != null) {
+	    for (Entry<String, Object> iterable_element : map().entrySet()) {
+		return iterable_element.getValue();
+	    }
 	}
 	return null;
     }
@@ -216,6 +271,13 @@ public class MapModel implements JsonSerializerType<Object> {
 
     @Override
     public Object toObject() {
+	if (this.list != null) {
+	    return list;
+	}
+
+	if (this.map != null) {
+	    return this.map;
+	}
 	return this.map();
     }
 
@@ -231,12 +293,19 @@ public class MapModel implements JsonSerializerType<Object> {
 	return this.map;
     }
 
+    public List<Object> list() {
+	if (this.list == null) {
+	    this.list = new ArrayList<Object>();
+	}
+	return this.list;
+    }
+
     public Map<String, Object> toMap() {
 	return this.map();
     }
 
     public String toJson() {
-	return JsonUtil.toJson(this.map());
+	return JsonUtil.toJson(this.toObject());
     }
 
     public <T> T as(Class<T> clazz) {
@@ -247,17 +316,27 @@ public class MapModel implements JsonSerializerType<Object> {
 	return new MapModel(map);
     }
 
+    public static MapModel from(List<Object> list) {
+	return new MapModel(list);
+    }
+
+    public static MapModel from(String json) {
+	return new MapModel(json);
+    }
+
     public static MapModel createInstance() {
 	return new MapModel(new HashMap<String, Object>());
     }
 
     public MapModel putAll(Map<? extends String, ? extends Object> source) {
-	this.map().putAll(source);
+	if (source != null)
+	    this.map().putAll(source);
 	return this;
     }
 
     public MapModel putAll(MapModel source) {
-	this.map().putAll(source.toMap());
+	if (source != null)
+	    this.map().putAll(source.toMap());
 	return this;
     }
 
@@ -266,8 +345,35 @@ public class MapModel implements JsonSerializerType<Object> {
 	return this;
     }
 
+    public MapModel add(Object value) {
+	this.list().add(value);
+	return this;
+    }
+
     public MapModel put(JsonPath jsonPath, Object value) {
 	jsonPath.save(this.map(), value);
 	return this;
     }
+
+    public MapModel remove(String key) {
+	this.map().remove(key);
+	return this;
+    }
+
+    public boolean containsKey(String key) {
+	if (this.map == null) {
+	    return false;
+	}
+	return this.map.containsKey(key);
+    }
+
+    public int size() {
+	if (this.list != null) {
+	    return this.list.size();
+	} else if (this.map != null) {
+	    return this.map.size();
+	}
+	return 0;
+    }
+
 }

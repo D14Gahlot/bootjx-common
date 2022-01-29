@@ -9,7 +9,7 @@ import com.boot.jx.bot.ChatContext;
 import com.boot.jx.chat.ChatClient;
 import com.boot.jx.chat.ConnectorHandlerFactory;
 import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorHandler;
-import com.boot.jx.chat.ConnectorHandlerFactory.DefaultConnector;
+import com.boot.jx.connectors.AbstractConnector;
 import com.boot.jx.postman.PMClientConfig;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.dto.ChatMessageDTO;
@@ -33,7 +33,7 @@ public class AgentService {
 	private ConnectorHandlerFactory connectorHandlerFactory;
 
 	@Autowired(required = false)
-	private DefaultConnector defaultConnector;
+	private AbstractConnector.DefaultConnector defaultConnector;
 
 	@Autowired
 	private ChatContext chatContext;

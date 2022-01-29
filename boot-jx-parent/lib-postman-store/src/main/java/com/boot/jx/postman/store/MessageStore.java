@@ -6,6 +6,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
@@ -27,6 +29,7 @@ import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
 import com.boot.utils.TimeUtils;
 import com.google.common.collect.Lists;
+import com.mongodb.WriteResult;
 
 @Component
 public class MessageStore extends CommonDocStore {
@@ -34,8 +37,8 @@ public class MessageStore extends CommonDocStore {
     private static final Logger LOGGER = LoggerFactory.getLogger(MessageStore.class);
 
     public static enum EVENTS {
-	ASGND_TO_DEPT, ASGND_TO_AGENT, UNASGND, PICKED_BY_AGENT, CLOSED_BY_AGENT, LABEL_ADDED, LABEL_REMOVED,
-	STATUS_CHANGED
+	ASGND_TO_DEPT, ASGND_TO_AGENT, ASGND_TO_QUEUE, UNASGND, PICKED_BY_AGENT, CLOSED_BY_AGENT, LABEL_ADDED,
+	LABEL_REMOVED, STATUS_CHANGED, TAG_ADDED, TAG_REMOVED
     }
 
     @Autowired
@@ -51,8 +54,10 @@ public class MessageStore extends CommonDocStore {
     private MessageDoc updateMessageDoc(InboxMessage inboxMessage, MessageDoc doc) {
 	doc.setMessage(inboxMessage.getMessage());
 	doc.setSessionId(inboxMessage.getSessionId());
+	doc.setQueue(inboxMessage.session().getQueue());
 	doc.setTags(inboxMessage.getTags());
 	doc.setMessageIdExt(inboxMessage.getMessageIdExt());
+	doc.setReplyIdExt(inboxMessage.getReplyIdExt());
 
 	// Additonals
 	doc.setAttachments(inboxMessage.getAttachments());
@@ -65,6 +70,9 @@ public class MessageStore extends CommonDocStore {
 	doc.setContactId(PostManUtil.createContactId(inboxMessage));
 	doc.setType("I");
 	doc.setTimestamp(System.currentTimeMillis());
+
+	doc.setFormatType(inboxMessage.getFormatType());
+	doc.setFormatSubType(inboxMessage.getFormatSubType());
 
 	ContactDetailDoc contact = new ContactDetailDoc();
 	contact.setPhone(inboxMessage.getFrom());
@@ -160,7 +168,9 @@ public class MessageStore extends CommonDocStore {
     private MessageDoc updateMessageDoc(OutboxMessage outMessage, MessageDoc doc) {
 	doc.setAgent(outMessage.session().getAgent());
 	// if (ArgUtil.is(outMessage.getTemplate())) {
-	doc.setTemplate(outMessage.getTemplate());
+	doc.setTemplate(outMessage.templateCode());
+	doc.setTemplateId(outMessage.templateId());
+	doc.setHsm(outMessage.getHsm());
 	doc.setModel(outMessage.getModel());
 	// } else {
 	doc.setMessage(outMessage.getMessage());
@@ -245,14 +255,15 @@ public class MessageStore extends CommonDocStore {
 
     public List<MessageDoc> findBySessionId(String sessionId, String contactType) {
 	Query query2 = new Query();
-	query2.addCriteria(Criteria.where("sessionId").is(sessionId));
+	query2.addCriteria(Criteria.where("sessionId").is(sessionId)).with(new Sort(Direction.ASC, "timestamp"));
 	List<MessageDoc> messages = mongoTemplate.find(query2, MessageDoc.class, getCollectionName(contactType));
 	return messages;
     }
 
     public List<MessageDoc> findByBulkSessionId(String bulkSessionId, ContactType contactType) {
 	Query query2 = new Query();
-	query2.addCriteria(Criteria.where("bulkSessionId").is(bulkSessionId));
+	query2.addCriteria(Criteria.where("bulkSessionId").is(bulkSessionId))
+		.with(new Sort(Direction.ASC, "timestamp"));
 	List<MessageDoc> messages = mongoTemplate.find(query2, MessageDoc.class, getCollectionName(contactType));
 	return messages;
     }
@@ -281,7 +292,7 @@ public class MessageStore extends CommonDocStore {
 
     public void updateStatus(MessageReport messageReport) {
 
-	LOGGER.debug("updateStatus {} {} {}", messageReport.getMessageId(), messageReport.getContactType(),
+	LOGGER.debug("updateStatus {} {} {}", messageReport.getMessageId(), messageReport.contact().getChannelType(),
 		messageReport.getStatus());
 
 	CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder();
@@ -315,13 +326,31 @@ public class MessageStore extends CommonDocStore {
 		builder.update().push("logs", messageReport.getReason());
 	    }
 
+	    String collectionName = getCollectionName(messageReport.contact().getContactType());
+
+	    WriteResult result;
+
 	    if (multi) {
-		mongoTemplate.updateMulti(builder.getQuery(), builder.getUpdate(), MessageDoc.class,
-			getCollectionName(messageReport.getContactType()));
+		result = mongoTemplate.updateMulti(builder.getQuery(), builder.getUpdate(), MessageDoc.class,
+			collectionName);
 	    } else {
-		mongoTemplate.updateFirst(builder.getQuery(), builder.getUpdate(), MessageDoc.class,
-			getCollectionName(messageReport.getContactType()));
+		result = mongoTemplate.updateFirst(builder.getQuery(), builder.getUpdate(), MessageDoc.class,
+			collectionName);
 	    }
+
+	    if (result.getN() > 1) {
+		builder.limit(result.getN());
+		List<MessageDoc> messsages = mongoTemplate.find(builder.getQuery(), MessageDoc.class, collectionName);
+		if (ArgUtil.is(messsages) && ArgUtil.is(messsages.get(0))) {
+		    messageReport.setMessageId(messsages.get(0).getMessageId());
+		}
+	    } else {
+		MessageDoc m = mongoTemplate.findOne(builder.getQuery(), MessageDoc.class, collectionName);
+		if (ArgUtil.is(m)) {
+		    messageReport.setMessageId(m.getMessageId());
+		}
+	    }
+
 	    // LOGGER.info(JsonUtil.toJson(builder));
 	}
     }

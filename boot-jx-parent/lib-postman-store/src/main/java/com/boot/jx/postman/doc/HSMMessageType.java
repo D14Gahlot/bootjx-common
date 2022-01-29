@@ -11,12 +11,12 @@ import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
-import com.boot.jx.model.AuditableEntity;
+import com.boot.jx.model.AuditCreateEntity;
 import com.boot.jx.mongo.CommonDocInterfaces.OldDocVersion;
 
 @Document(collection = HSMMessageType.COLLECTION_NAME)
 @TypeAlias("HSMMessageType")
-public class HSMMessageType implements Serializable, OldDocVersion<HSMMessageType>, AuditableEntity {
+public class HSMMessageType implements Serializable, OldDocVersion<HSMMessageType>, AuditCreateEntity {
 
 	public static final List<HSMMessageType> LIST = new ArrayList<HSMMessageType>();
 	public static final String COLLECTION_NAME = "DICT_HSM_MESSAGE_TYPE";
@@ -150,7 +150,7 @@ public class HSMMessageType implements Serializable, OldDocVersion<HSMMessageTyp
 		LIST.add(new HSMMessageType().id("shipping_update").label("Shipping Update")
 				.desc("Send shipping updates to customers about their orders.").icon("fa fa-truck"));
 
-		LIST.add(new HSMMessageType().id("ticket_finance_update").label("Ticket Finance Update")
+		LIST.add(new HSMMessageType().id("ticket_update").label("Ticket Update")
 				.desc("Send ticketing information or updates to customers.").icon("fa fa-ticket"));
 
 		LIST.add(new HSMMessageType().id("transportation_update").label("Transportation Update")

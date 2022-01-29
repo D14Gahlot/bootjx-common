@@ -129,13 +129,13 @@ public class EmpAuthService {
 	String domain = AppContextUtil.getTenant();
 	postManClient.send(new MessageBox().push(new Email().to(agent.getAgent_email()).template("agent-reset-pass")
 		.put("otp", agent.getAgent_otp()).put("username", agent.getAgent_code())
-		.put("logo", pmEnvironment.get("mry.prop.logo.bg-x-icon").asString())
-		.put("website", pmEnvironment.get("mry.prop.service.website").asString())
-		.put("service", pmEnvironment.get("mry.prop.service.name").asString())
-		.put("serviceDomain", pmEnvironment.get("mry.prop.service.domain").asString())
+		.put("logo", pmEnvironment.keyEntry("mry.prop.logo.bg-x-icon").asString())
+		.put("website", pmEnvironment.keyEntry("mry.prop.service.website").asString())
+		.put("service", pmEnvironment.keyEntry("mry.prop.service.name").asString())
+		.put("serviceDomain", pmEnvironment.keyEntry("mry.prop.service.domain").asString())
 		.put("link",
-			String.format("https://%s.%s.com/%s/auth/resetpass?page=setpass&username=%s&token=%s&stamp=0",
-				domain, pmEnvironment.get("mry.prop.service.domain").asString(), app,
+			String.format("https://%s.%s/%s/auth/resetpass?page=setpass&username=%s&token=%s&stamp=0",
+				domain, pmEnvironment.keyEntry("mry.prop.service.domain").asString(), app,
 				agent.getAgent_code(), agent.getAgent_otp()))
 		.put("tnt", domain).put("panel", app).put("contactName", agent.getAgent_name())));
 	return true;

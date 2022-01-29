@@ -54,10 +54,16 @@ public class FrontController {
     @RequestMapping(value = { "/", "/front/", "/front/**" }, method = { RequestMethod.GET })
     public String front(Model model) {
 	String domainName = commonHttpRequest.get("domain");
-	return domainProfile(model, domainName, true);
+	return domainProfile(model, domainName, true, "front");
     }
 
-    private String domainProfile(Model model, String domainName, boolean setDefault) {
+    @RequestMapping(value = { "/content/", "/content/**" }, method = { RequestMethod.GET })
+    public String content(Model model) {
+	String domainName = commonHttpRequest.get("domain");
+	return domainProfile(model, domainName, true, "content");
+    }
+
+    private String domainProfile(Model model, String domainName, boolean setDefault, String app) {
 	model.addAllAttributes(appCommonConfig.appAttributes());
 	String tnt = AppContextUtil.getTenant();
 	String domainId = null;
@@ -93,12 +99,12 @@ public class FrontController {
 	    model.addAttribute("APP_USER_ROLE", "GUEST");
 	}
 
-	model.addAttribute("APP", "front");
+	model.addAttribute("APP", app);
 	return "app-front";
     }
 
     @RequestMapping(value = { "/@{domain}", "/{domain:^.*(?!swagger-ui.html)}" }, method = { RequestMethod.GET })
     public String domain(Model model, @PathVariable @ValidAlphaNum String domain) {
-	return domainProfile(model, domain, false);
+	return domainProfile(model, domain, false, "front");
     }
 }

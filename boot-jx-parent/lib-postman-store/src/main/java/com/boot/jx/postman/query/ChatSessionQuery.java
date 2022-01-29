@@ -1,5 +1,7 @@
 package com.boot.jx.postman.query;
 
+import java.util.List;
+
 import com.boot.jx.mongo.CommonMongoQueryBuilder.DocQueryBuilder;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.MessageDoc;
@@ -33,15 +35,27 @@ public class ChatSessionQuery extends DocQueryBuilder<ChatSessionDoc> {
 	return this;
     }
 
-    public ChatSessionQuery setLastInComingStamp(long timestamp) {
-	this.doc.setLastInComingStamp(timestamp);
-	this.set("lastInComingStamp", timestamp);
+    public ChatSessionQuery setFirstInComingStamp(long firstInComingStamp) {
+	this.doc.setFirstInComingStamp(firstInComingStamp);
+	this.set("firstInComingStamp", firstInComingStamp);
+	return this;
+    }
+
+    public ChatSessionQuery setFirstOutGoingStamp(long firstOutGoingStamp) {
+	this.doc.setFirstOutGoingStamp(firstOutGoingStamp);
+	this.set("firstOutGoingStamp", firstOutGoingStamp);
 	return this;
     }
 
     public ChatSessionQuery setLastResponseStamp(long timestamp) {
 	this.doc.setLastResponseStamp(timestamp);
 	this.set("lastResponseStamp", timestamp);
+	return this;
+    }
+
+    public ChatSessionQuery setLastInComingStamp(long timestamp) {
+	this.doc.setLastInComingStamp(timestamp);
+	this.set("lastInComingStamp", timestamp);
 	return this;
     }
 
@@ -84,6 +98,18 @@ public class ChatSessionQuery extends DocQueryBuilder<ChatSessionDoc> {
     public ChatSessionQuery setLastMsg(MessageDoc lastMsg, String contactType) {
 	this.doc.setLastMsg(lastMsg);
 	this.ref("lastMsg", lastMsg.getMessageId(), MessageStore.getCollectionName(contactType));
+	return this;
+    }
+
+    public ChatSessionQuery setTagId(List<String> tagIds) {
+	this.doc.setTagId(tagIds);
+	this.set("tagId", tagIds);
+	return this;
+    }
+
+    public ChatSessionQuery setQueue(String queue) {
+	this.doc.setAssignedToQueue(queue);
+	this.set("assignedToQueue", queue);
 	return this;
     }
 

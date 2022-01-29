@@ -19,12 +19,15 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.chat.ChatService;
+import com.boot.jx.chat.ChatStatusReportService;
 import com.boot.jx.chat.ConnectorHandlerFactory;
 import com.boot.jx.connectors.WA360Connector;
 import com.boot.jx.connectors.WAGupShupAgentConnector;
 import com.boot.jx.connectors.WAGupShupConnector;
 import com.boot.jx.connectors.WARapiwhaConnector;
 import com.boot.jx.http.CommonHttpRequest;
+import com.boot.jx.logger.AuditService;
+import com.boot.jx.postman.PMAuditEvent;
 import com.boot.jx.postman.PMConfiguration;
 import com.boot.jx.postman.PMConstants.CHANNEL_TYPE;
 import com.boot.jx.postman.PMEnvironment;
@@ -33,6 +36,7 @@ import com.boot.jx.postman.gupshup.GupShupDeliveryResp.GupShupDeliveryDto;
 import com.boot.jx.postman.gupshup.GupShupInbound;
 import com.boot.jx.postman.gupshup.GupShupInboundV2;
 import com.boot.jx.postman.model.InboxMessage;
+import com.boot.jx.postman.model.MessageBoxEvent;
 import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.scope.vendor.VendorContext.ApiVendorHeaders;
 import com.boot.model.MapModel;
@@ -192,9 +196,15 @@ public class InBoundControllerWA {
     @RequestMapping(value = "/ext/inbound/wa360/registerwebhook", method = RequestMethod.GET)
     public ApiResponse<Object, Object> registerWebHook(@RequestParam(required = false) String lane)
 	    throws InterruptedException {
-	connectorHandlerFactory.registerWebHook(CHANNEL_TYPE.WA_360D, lane);
+	connectorHandlerFactory.onChannelUpdate(CHANNEL_TYPE.WA_360D, lane);
 	return ApiResponse.build();
     }
+
+    @Autowired
+    private ChatStatusReportService chatStatusReportService;
+
+    @Autowired
+    private AuditService auditService;
 
     @RequestMapping(value = "/ext/inbound/wa360/callback/{accountKey}/{channelId}/{channelKey}",
 	    method = { RequestMethod.POST })
@@ -202,10 +212,25 @@ public class InBoundControllerWA {
 	    @PathVariable(required = false) String channelId, @PathVariable(required = false) String channelKey,
 	    @RequestBody Map<String, Object> data) {
 	MapModel map = MapModel.from(data);
-	PMConfiguration config = pmEnvironment.config();
-	ChannelConfig channelConfig = config.channels(channelId);
-	InboxMessage inboundMessage = w360Connector.toInboxMessage(channelConfig, map);
-	inBoundService.invokeMethodsAsync(inboundMessage);
+	PMConfiguration config = pmEnvironment.local();
+	ChannelConfig channelConfig = config.channel(channelId);
+
+	try {
+	    MessageBoxEvent messageBoxEvent = w360Connector.inboundMessageBoxEvent(channelConfig, map,
+		    new MessageBoxEvent());
+	    if (ArgUtil.is(messageBoxEvent.getInboxMessages())) {
+		messageBoxEvent.getInboxMessages().forEach(inboxMessage -> {
+		    inBoundService.invokeMethodsAsync(inboxMessage);
+		});
+		w360Connector.onReadInboxMessage(channelConfig, messageBoxEvent.getInboxMessages());
+	    } else if (ArgUtil.is(messageBoxEvent.getMessageReports())) {
+		w360Connector.onMessageReports(channelConfig, messageBoxEvent.getMessageReports());
+		chatStatusReportService.update(messageBoxEvent.getMessageReports());
+	    }
+	} catch (Exception e) {
+	    auditService.excep(new PMAuditEvent(PMAuditEvent.Type.INBOUND_ERROR).data(data), LOGGER, e);
+	}
+
 	return ApiResponse.build();
     }
 }

@@ -15,6 +15,7 @@ import com.boot.jx.postman.model.ContactMeta;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.MessageDefinitions.Contactable;
 import com.boot.jx.postman.model.MessageDefinitions.IMessage;
+import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CryptoUtil;
 import com.boot.utils.Random;
@@ -52,7 +53,7 @@ public class PostManUtil {
 	return contact.getCsid();
     }
 
-    public static String createContactId(ContactType contactType, String id, String lane) {
+    private static String createContactId(ContactType contactType, String id, String lane) {
 	if (ContactType.WHATSAPP.equals(contactType)) {
 	    return "wa" + id + "_" + lane;
 	} else if (ContactType.FACEBOOK.equals(contactType)) {
@@ -67,14 +68,6 @@ public class PostManUtil {
 	return id;
     }
 
-    public static String createContactId(IMessage inboxMessage) {
-	if (ArgUtil.is(inboxMessage.contact().getContactId())) {
-	    return inboxMessage.contact().getContactId();
-	}
-	return createContactId(inboxMessage.contact().type(), inboxMessage.forContact(),
-		inboxMessage.contact().getLane());
-    }
-
     public static String createContactId(Contactable contact) {
 	if (ArgUtil.is(contact.getContactId())) {
 	    return contact.getContactId();
@@ -82,6 +75,10 @@ public class PostManUtil {
 	String csid = createCsid(contact);
 	return createContactId(ArgUtil.parseAsEnumT(contact.getContactType(), ContactType.class), csid,
 		contact.getLane());
+    }
+
+    public static String createContactId(IMessage inboxMessage) {
+	return createContactId(inboxMessage.contact());
     }
 
     public static Contactable updateContactMeta(Contactable contact) {
@@ -93,8 +90,7 @@ public class PostManUtil {
 		&& ArgUtil.is(contact.getCsid()) // CSID is for contactId
 		&& ArgUtil.is(contact.getLane()) // Lane is for contactId
 	) {
-	    contact.setContactId(createContactId(ArgUtil.parseAsEnumT(contact.getContactType(), ContactType.class),
-		    contact.getCsid(), contact.getLane()));
+	    contact.setContactId(createContactId(contact));
 	}
 	return contact;
     }
@@ -126,7 +122,10 @@ public class PostManUtil {
     }
 
     public static boolean isInBound(IMessage inboxMessage) {
-	return isInBound(inboxMessage.getType());
+	if (ArgUtil.is(inboxMessage.getType())) {
+	    return isInBound(inboxMessage.getType());
+	}
+	return inboxMessage instanceof InboxMessage;
     }
 
     public static boolean isOutBound(String type) {
@@ -135,7 +134,10 @@ public class PostManUtil {
     }
 
     public static boolean isOutBound(IMessage inboxMessage) {
-	return isInBound(inboxMessage.getType());
+	if (ArgUtil.is(inboxMessage.getType())) {
+	    return isOutBound(inboxMessage.getType());
+	}
+	return inboxMessage instanceof OutboxMessage;
     }
 
     public static boolean isBotMode(IMessage inboxMessage) {
@@ -154,7 +156,7 @@ public class PostManUtil {
 	if (CHANNEL_TYPE.WA_GUPSHUP_LEGACY.equals(chanelType)) {
 	    chanelType = CHANNEL_TYPE.WA_GUPSHUP;
 	}
-	return String.format("%s:%s", chanelType, lane);
+	return String.format("%s:%s", chanelType, lane).toLowerCase();
     }
 
     public static String CHANNEL_ID(Contactable contactable) {

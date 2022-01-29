@@ -1,8 +1,10 @@
 package com.boot.jx.mongo;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.convert.MongoConverter;
+import org.springframework.data.mongodb.core.query.Query;
 
 public class CommonDocStore {
 
@@ -10,6 +12,9 @@ public class CommonDocStore {
     protected MongoConverter mongoConverter;
 
     @Autowired
-    protected MongoTemplate mongoTemplate;
+    protected CommonMongoTemplate commonMongoTemplate;
 
+    public <T> List<T> find(Query query, Class<T> entityClass) {
+	return commonMongoTemplate.find(query, entityClass);
+    }
 }

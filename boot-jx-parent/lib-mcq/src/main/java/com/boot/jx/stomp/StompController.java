@@ -4,16 +4,21 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.annotation.SubscribeMapping;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.boot.jx.AppConstants;
 import com.boot.jx.stomp.StompSessionCache.StompSession;
+import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
 
 @Controller
+@ConditionalOnProperty("app.stomp")
 public class StompController {
 
     @Autowired
@@ -52,6 +57,18 @@ public class StompController {
 	Map<String, String> map = new HashMap<String, String>();
 	map.put("message", "Hey baby ping pong!");
 	stompTunnelService.sendToAll("/pong", map);
+	return map;
+    }
+
+    @ResponseBody
+    @RequestMapping("/stomp/tunnel/ping")
+    public Map<String, String> tunnelPing() {
+	Map<String, String> map = new HashMap<String, String>();
+	map.put("message", "Hey baby ping pong!");
+	stompTunnelService.sendToAll("/stomp/tunnel/pong",
+		MapModel.createInstance().put("message", "sendToAll/ping_pong").toMap());
+	stompTunnelService.sendToTag(StompQuery.PING_TAG, "/stomp/tunnel/pong",
+		MapModel.createInstance().put("message", "sendToTag:ping_tag/ping_pong").toMap());
 	return map;
     }
 }

@@ -3,12 +3,17 @@ package com.boot.jx.xms.dto;
 import java.io.Serializable;
 import java.util.List;
 
+import com.boot.jx.model.CommonTemplate;
+import com.boot.jx.postman.model.ext.CommonMsgLocation;
+import com.boot.jx.postman.model.ext.CommonMsgText.InBoundMsgText;
+import com.boot.jx.postman.model.ext.CommonMsgText.OutBoundMsgText;
 import com.boot.jx.swagger.ApiMockModelProperty;
+import com.boot.model.UtilityModels.JsonIgnoreUnknown;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class OutBoundMsgBasic implements Serializable {
+public class OutBoundMsgBasic implements Serializable, JsonIgnoreUnknown {
     private static final long serialVersionUID = 8095410793094848402L;
 
     @JsonProperty("channelId")
@@ -33,7 +38,7 @@ public class OutBoundMsgBasic implements Serializable {
 	private static final long serialVersionUID = 5358190519262995012L;
 
 	@ApiMockModelProperty(required = false)
-	public CommonMsgText text;
+	public OutBoundMsgText text;
 
 	@ApiMockModelProperty(required = false)
 	public OutBoundMsgMedia audio;
@@ -52,13 +57,13 @@ public class OutBoundMsgBasic implements Serializable {
 	public CommonMsgLocation location;
 
 	@ApiMockModelProperty(required = false)
-	public OutBoundMsgTemplate template;
+	public CommonTemplate template;
 
-	public CommonMsgText getText() {
+	public OutBoundMsgText getText() {
 	    return text;
 	}
 
-	public void setText(CommonMsgText text) {
+	public void setText(OutBoundMsgText text) {
 	    this.text = text;
 	}
 
@@ -110,11 +115,11 @@ public class OutBoundMsgBasic implements Serializable {
 	    this.location = location;
 	}
 
-	public OutBoundMsgTemplate getTemplate() {
+	public CommonTemplate getTemplate() {
 	    return template;
 	}
 
-	public void setTemplate(OutBoundMsgTemplate template) {
+	public void setTemplate(CommonTemplate template) {
 	    this.template = template;
 	}
     }

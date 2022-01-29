@@ -1,5 +1,6 @@
 package com.boot.jx.postman.wa360;
 
+import com.boot.model.MapModel;
 import com.boot.utils.JsonPath;
 
 public class WA360Constants {
@@ -21,6 +22,9 @@ public class WA360Constants {
 		"messages/[0]/interactive/button_reply/title");
 	public static final JsonPath INTERACTIVE_BUTTON_ID = new JsonPath("messages/[0]/interactive/button_reply/id");
 
+	public static final JsonPath SIMPLE_BUTTON_REPLY = new JsonPath("messages/[0]/button/text");
+	public static final JsonPath SIMPLE_BUTTON_PAYLOAD = new JsonPath("messages/[0]/button/payload");
+
 	public static final JsonPath IMAGE = new JsonPath("messages/[0]/image");
 	public static final JsonPath IMAGE_ID = new JsonPath("messages/[0]/image/id");
 	public static final JsonPath IMAGE_TYPE = new JsonPath("messages/[0]/image/mime_type");
@@ -40,6 +44,8 @@ public class WA360Constants {
 	public static final JsonPath VOICE = new JsonPath("messages/[0]/voice");
 	public static final JsonPath VIDEO = new JsonPath("messages/[0]/video");
 	public static final JsonPath STICKER = new JsonPath("messages/[0]/sticker");
+	
+	public static final JsonPath CONTEXT_ID = new JsonPath("messages/[0]/context/id");
 
     }
 
@@ -62,12 +68,73 @@ public class WA360Constants {
 	public static final JsonPath RESPONSE_ERROR_CODE = new JsonPath("errors/[0]/code");
 	public static final JsonPath RESPONSE_ERROR_TITLE = new JsonPath("errors/[0]/title");
 	public static final JsonPath RESPONSE_ERROR_DETAILS = new JsonPath("errors/[0]/details");
+
+	public static final JsonPath TEMPLATE_NAMESPACE = new JsonPath("template/namespace");
+	public static final JsonPath TEMPLATE_LANGUAGE_POLICY = new JsonPath("template/language/policy");
+	public static final JsonPath TEMPLATE_LANGUAGE_CODE = new JsonPath("template/language/code");
+	public static final JsonPath TEMPLATE_NAME = new JsonPath("template/name");
+	public static final JsonPath TEMPLATE_COMPONENTS = new JsonPath("template/components");
+	
+	
+	public static final JsonPath FETCH_CONTACTS_DETAILS = new JsonPath("contacts/[0]");
+
     }
+
+    public static final String[] componentTypes = { "header", "body", "button" };
+    public static final String[] componentButtonSubTypes = { "quick_reply", "url" };
+    public static final String[] componentParameterTypes = { // parameters types
+	    "text", // for component:body and component:button
+	    "currency", "date_time", // for component:body
+	    "payload" // only for component:button Used for sub_type = "quick_reply
+    };
 
     public static final String D360_API_KEY = "D360-API-KEY";
     public static final String BASE_URL = "https://waba.360dialog.io";
 
     public static String MEDIA_URL(String mediaId) {
 	return BASE_URL + "/v1/media/" + mediaId;
+    }
+
+    public static class TmplComponent extends MapModel {
+	MapModel parameters;
+
+	public TmplComponent create(String type) {
+	    this.put("type", type);
+	    this.parameters = MapModel.createInstance();
+	    return this;
+	}
+
+	public TmplComponent body() {
+	    return this.create("body");
+	}
+
+	public TmplComponent header() {
+	    return this.create("header");
+	}
+
+	public TmplComponent button(String subType, int index) {
+	    this.put("type", "button");
+	    this.parameters = MapModel.createInstance();
+	    return this;
+	}
+
+	public TmplComponent parameter(String type, Object value) {
+	    this.parameters.add(MapModel.createInstance().put("type", type).put(type, value).toMap());
+	    return this;
+	}
+
+	public MapModel parameters() {
+	    return this.parameters;
+	}
+	
+	public static TmplComponent createInstance() {
+	    return new TmplComponent();
+	}
+
+	public TmplComponent build() {
+	    this.put("parameters", parameters.list());
+	    return this;
+	}
+
     }
 }

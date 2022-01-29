@@ -5,16 +5,36 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
+import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
 
-import com.boot.jx.model.AuditableEntity;
+import com.boot.jx.model.AuditCreateEntity;
+import com.boot.jx.model.AuditCreateEntity.AuditUpdateEntity;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.EntityDtoUtil;
+import com.boot.utils.JsonUtil;
+import com.boot.utils.TimeUtils;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 public class CommonDocInterfaces {
+
+    public static interface MongoQueryBuilder<T> {
+	public boolean isUpdatedTimeStampSupport();
+
+	public void updatedStamp();
+
+	public Update getUpdate();
+
+	public void setUpdate(Update object);
+
+	public Query getQuery();
+
+	public Class<T> getDocClass();
+    }
 
     public static interface Patchable<T extends Patchable<T>> {
 	public T patch();
@@ -108,14 +128,16 @@ public class CommonDocInterfaces {
 	ADocumentDTO<T> newInstance();
     }
 
-    @Document(collection = "TRASH")
-    public static class TrashDocument implements AuditableEntity, Serializable {
+    @Document(collection = "ACTIVITY_LOGS")
+    public static class AuditActivityDoc implements AuditCreateEntity, Serializable {
 	private static final long serialVersionUID = -8573412950623297045L;
 	@Id
 	private String id;
 	private Object doc;
 	private String createdBy;
 	private Long createdStamp;
+	private String collection;
+	private String comment;
 
 	public String getId() {
 	    return id;
@@ -149,15 +171,41 @@ public class CommonDocInterfaces {
 	    this.createdStamp = createdStamp;
 	}
 
-	public TrashDocument doc(Object doc) {
-	    this.doc = doc;
+	public AuditActivityDoc doc(Object doc) {
+	    this.doc = JsonUtil.toMap(doc);
+	    return this;
+	}
+
+	public AuditActivityDoc collection(String collection) {
+	    this.collection = collection;
+	    return this;
+	}
+
+	public String getCollection() {
+	    return collection;
+	}
+
+	public void setCollection(String collection) {
+	    this.collection = collection;
+	}
+
+	public String getComment() {
+	    return comment;
+	}
+
+	public void setComment(String comment) {
+	    this.comment = comment;
+	}
+
+	public AuditActivityDoc comment(String comment) {
+	    this.comment = comment;
 	    return this;
 	}
 
     }
 
     public static class BasicDocument<T extends BasicDocument<T>>
-	    implements OldDocVersion<T>, IDocument, AuditableEntity, Serializable {
+	    implements OldDocVersion<T>, IDocument, AuditCreateEntity, Serializable {
 
 	private static final long serialVersionUID = 3330736275464700381L;
 	private String createdBy;
@@ -192,6 +240,84 @@ public class CommonDocInterfaces {
 	    this.createdStamp = createdStamp;
 	}
 
+    }
+
+    public interface AuditableByIdEntity extends AuditCreateEntity, AuditUpdateEntity {
+	public String getId();
+    }
+
+    public static class TimeStampIndex implements Serializable {
+
+	private static final long serialVersionUID = 9114924334759684396L;
+	private long stamp;
+	@Indexed
+	private long hour;
+	@Indexed
+	private long day;
+	@Indexed
+	private long week;
+
+	public long getStamp() {
+	    return stamp;
+	}
+
+	public void setStamp(long stamp) {
+	    this.stamp = stamp;
+	}
+
+	public long getHour() {
+	    return hour;
+	}
+
+	public void setHour(long hour) {
+	    this.hour = hour;
+	}
+
+	public long getDay() {
+	    return day;
+	}
+
+	public void setDay(long day) {
+	    this.day = day;
+	}
+
+	public long getWeek() {
+	    return week;
+	}
+
+	public void setWeek(long week) {
+	    this.week = week;
+	}
+
+	public static TimeStampIndex from(long stamp) {
+	    TimeStampIndex timeStamp = new TimeStampIndex();
+	    timeStamp.setHour(stamp / TimeUtils.Constants.MILLIS_IN_HOUR);
+	    timeStamp.setDay(stamp / TimeUtils.Constants.MILLIS_IN_DAY);
+	    timeStamp.setWeek(stamp / TimeUtils.Constants.MILLIS_IN_WEEK);
+	    return timeStamp;
+	}
+
+	public static TimeStampIndex now() {
+	    return from(System.currentTimeMillis());
+	}
+
+	public interface UpdatedTimeStampIndexSupport {
+	    public TimeStampIndex getUpdated();
+
+	    public void setUpdated(TimeStampIndex updated);
+	}
+
+	public static class UpdatedTimeStampDoc implements UpdatedTimeStampIndexSupport {
+	    private TimeStampIndex updated;
+
+	    public TimeStampIndex getUpdated() {
+		return updated;
+	    }
+
+	    public void setUpdated(TimeStampIndex updated) {
+		this.updated = updated;
+	    }
+	}
     }
 
 }

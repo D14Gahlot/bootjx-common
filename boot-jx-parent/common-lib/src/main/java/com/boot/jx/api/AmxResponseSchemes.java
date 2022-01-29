@@ -44,6 +44,9 @@ public class AmxResponseSchemes {
 	public M getMeta();
 
 	public void setMeta(M reta);
+    }
+
+    public interface ApiMetaDetailsResponse<M> extends ApiWrapperResponse, ApiMetaResponse<M> {
 
 	public List<M> getDetails();
 
@@ -62,9 +65,13 @@ public class AmxResponseSchemes {
 	public void setData(T data);
     }
 
-    public interface ApiResultsMetaResponse<T, M> extends ApiResultsResponse<T>, ApiMetaResponse<M> {
+    public interface ApiResultsMetaResponse<T, M> extends ApiResultsResponse<T>, ApiMetaDetailsResponse<M> {
     }
 
-    public interface ApiDataMetaResponse<T, M> extends ApiDataResponse<T>, ApiMetaResponse<M> {
+    public interface ApiDataMetaResponse<T, M> extends ApiDataResponse<T>, ApiMetaDetailsResponse<M> {
     }
+
+    public interface ApiResultsMetaCompactResponse<T, M> extends ApiResultsResponse<T>, ApiMetaResponse<M> {
+    }
+
 }

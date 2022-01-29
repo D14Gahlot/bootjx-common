@@ -11,15 +11,20 @@ public class DashBoardResponseDto {
 	long totalInMsgExchanged;
 	long totalOutMsgExchanged;
 	long totalMsgExchanged;
+	long totalTemplateMsgSent;
+	long totalTemplateMsgDelivered;
 	long uniqueConversation;
 	long openConversation;
+	long resolvedConversation;
 	long converDuration;
 	double startLag;
 	long botScore=0;
 	double botClosure=0;
 	PeakLoadDto peakLoad;
 	Map<Object,Object> graphApiDetails;
+	Map<Object,Object> graphApiDetailsV1;
 	LeadMessanger leadMessanger;
+	
 	
 	
 
@@ -53,6 +58,22 @@ public class DashBoardResponseDto {
 
 	public void setTotalMsgExchanged(long totalMsgExchanged) {
 		this.totalMsgExchanged = totalMsgExchanged;
+	}
+	
+	public long getTotalTemplateMsgSent() {
+		return totalTemplateMsgSent;
+	}
+
+	public void setTotalTemplateMsgSent(long totalTemplateMsgSent) {
+		this.totalTemplateMsgSent = totalTemplateMsgSent;
+	}
+	
+	public long getTotalTemplateMsgDelivered() {
+		return totalTemplateMsgDelivered;
+	}
+
+	public void setTotalTemplateMsgDelivered(long totalTemplateMsgDelivered) {
+		this.totalTemplateMsgDelivered = totalTemplateMsgDelivered;
 	}
 
 	public long getUniqueConversation() {
@@ -143,6 +164,22 @@ public class DashBoardResponseDto {
 
 	public void setBotClosure(double botClosure) {
 		this.botClosure = botClosure;
+	}
+
+	public long getResolvedConversation() {
+		return resolvedConversation;
+	}
+
+	public void setResolvedConversation(long resolvedConversation) {
+		this.resolvedConversation = resolvedConversation;
+	}
+
+	public Map<Object, Object> getGraphApiDetailsV1() {
+		return graphApiDetailsV1;
+	}
+
+	public void setGraphApiDetailsV1(Map<Object, Object> graphApiDetailsV1) {
+		this.graphApiDetailsV1 = graphApiDetailsV1;
 	}
 
 	

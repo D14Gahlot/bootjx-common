@@ -1,19 +1,106 @@
 package com.boot.jx.postman.plugin;
 
 import java.util.List;
-import java.util.Map;
 
 import com.boot.jx.common.impl.ConfigMeta;
-import com.boot.jx.postman.PMConfiguration;
+import com.boot.jx.dict.ContactType;
+import com.boot.jx.postman.PMConstants.CHANNEL_TYPE;
+import com.boot.jx.postman.PMEnvironment;
+import com.boot.jx.postman.PMEnvironment.AChannelDetails;
 import com.boot.jx.postman.plugin.ChannelPluginProvider.ChannelPlugin;
-import com.boot.jx.postman.tw.TwitterConfigDetails;
+import com.boot.jx.postman.plugin.TwitterPlugin.TwitterConfigDetails;
 import com.boot.model.MapModel;
+import com.fasterxml.jackson.annotation.JsonView;
 
 public class TwitterPlugin implements ChannelPlugin<TwitterConfigDetails> {
 
     @Override
-    public Map<String, TwitterConfigDetails> getDetails(PMConfiguration config) {
-	return config.getTwitter();
+    public ContactType getContactType() {
+	return ContactType.TWITTER;
+    }
+
+    @Override
+    public String getChannelType() {
+	return CHANNEL_TYPE.TWITTER;
+    }
+
+    public static class TwitterConfigDetails extends AChannelDetails {
+
+	private static final long serialVersionUID = -2397678752642150000L;
+	private String handler;
+	private String type;
+	private String envName;
+
+	@JsonView(PMEnvironment.ProtectedProperty.class)
+	private String consumerKey;
+	@JsonView(PMEnvironment.ProtectedProperty.class)
+	private String consumerSecret;
+	@JsonView(PMEnvironment.ProtectedProperty.class)
+	private String accessToken;
+	@JsonView(PMEnvironment.ProtectedProperty.class)
+	private String accessTokenSecret;
+
+	public String getHandler() {
+	    return handler;
+	}
+
+	public void setHandler(String handler) {
+	    this.handler = handler;
+	}
+
+	public String getType() {
+	    return type;
+	}
+
+	public void setType(String type) {
+	    this.type = type;
+	}
+
+	public String getEnvName() {
+	    return envName;
+	}
+
+	public void setEnvName(String envName) {
+	    this.envName = envName;
+	}
+
+	public String getConsumerKey() {
+	    return consumerKey;
+	}
+
+	public void setConsumerKey(String consumerKey) {
+	    this.consumerKey = consumerKey;
+	}
+
+	public String getConsumerSecret() {
+	    return consumerSecret;
+	}
+
+	public void setConsumerSecret(String consumerSecret) {
+	    this.consumerSecret = consumerSecret;
+	}
+
+	public String getAccessToken() {
+	    return accessToken;
+	}
+
+	public void setAccessToken(String accessToken) {
+	    this.accessToken = accessToken;
+	}
+
+	public String getAccessTokenSecret() {
+	    return accessTokenSecret;
+	}
+
+	public void setAccessTokenSecret(String accessTokenSecret) {
+	    this.accessTokenSecret = accessTokenSecret;
+	}
+
+	@Override
+	public String getLane() {
+	    return this.handler;
+	}
+
     }
 
     @Override
@@ -27,37 +114,51 @@ public class TwitterPlugin implements ChannelPlugin<TwitterConfigDetails> {
     }
 
     @Override
-    public void setConfig(PMConfiguration configuration, ChannelConfig config) {
-	configuration.twitter(config.getTwitter(), config.isDisabled());
-    }
-
-    @Override
-    public TwitterConfigDetails getChannelDetails() {
+    public TwitterConfigDetails newChannelDetails() {
 	return new TwitterConfigDetails();
     }
 
     @Override
     public void addConfigMeta(List<ConfigMeta> configMetaList) {
-	configMetaList.add(new ConfigMeta().path("twitter.handler").title("Handler"));
+	configMetaList.add(new ConfigMeta().path("twitter.handler").title("Handler").createonly());
 	configMetaList.add(new ConfigMeta().path("twitter.type").title("Type").hidden());
 	configMetaList.add(new ConfigMeta().path("twitter.envName").title("Env").optional());
-	configMetaList.add(new ConfigMeta().path("twitter.accessToken").title("Access Token"));
-	configMetaList.add(new ConfigMeta().path("twitter.accessTokenSecret").title("Access Token Secret"));
-	configMetaList.add(new ConfigMeta().path("twitter.consumerKey").title("Consumer Key"));
-	configMetaList.add(new ConfigMeta().path("twitter.consumerSecret").title("Consumer Secret"));
+	configMetaList.add(new ConfigMeta().path("twitter.accessToken").title("Access Token").writeonly());
+	configMetaList.add(new ConfigMeta().path("twitter.accessTokenSecret").title("Access Token Secret").writeonly());
+	configMetaList.add(new ConfigMeta().path("twitter.consumerKey").title("Consumer/Api Key").writeonly());
+	configMetaList.add(new ConfigMeta().path("twitter.consumerSecret").title("Consumer/Api Secret").writeonly());
     }
 
     @Override
-    public void extractChannelDetailsFromMap(TwitterConfigDetails channelDetails, MapModel map) {
-	channelDetails.setHandler(map.path("twitter.handler").asString(channelDetails.getHandler()));
-	channelDetails.setType(map.path("twitter.type").asString(channelDetails.getType()));
-	channelDetails.setEnvName(map.path("twitter.envName").asString(channelDetails.getEnvName()));
-	channelDetails.setAccessToken(map.path("twitter.accessToken").asString(channelDetails.getAccessToken()));
+    public void importChannelDetailsFromMap(TwitterConfigDetails channelDetails, MapModel map) {
+	channelDetails.setHandler(map.pathEntry("twitter.handler").asString(channelDetails.getHandler()));
+	channelDetails.setType(map.pathEntry("twitter.type").asString(channelDetails.getType()));
+	channelDetails.setEnvName(map.pathEntry("twitter.envName").asString(channelDetails.getEnvName()));
+	channelDetails.setAccessToken(map.pathEntry("twitter.accessToken").asString(channelDetails.getAccessToken()));
 	channelDetails.setAccessTokenSecret(
-		map.path("twitter.accessTokenSecret").asString(channelDetails.getAccessTokenSecret()));
-	channelDetails.setConsumerKey(map.path("twitter.consumerKey").asString(channelDetails.getConsumerKey()));
-	channelDetails
-		.setConsumerSecret(map.path("twitter.consumerSecret").asString(channelDetails.getConsumerSecret()));
+		map.pathEntry("twitter.accessTokenSecret").asString(channelDetails.getAccessTokenSecret()));
+	channelDetails.setConsumerKey(map.pathEntry("twitter.consumerKey").asString(channelDetails.getConsumerKey()));
+	channelDetails.setConsumerSecret(
+		map.pathEntry("twitter.consumerSecret").asString(channelDetails.getConsumerSecret()));
     }
 
+    @Override
+    public boolean isPushAllowed() {
+	return true;
+    }
+
+    @Override
+    public boolean isPushOnlyApproved() {
+	return false;
+    }
+
+    @Override
+    public boolean isPushFreeTextAllowed() {
+	return true;
+    }
+
+    @Override
+    public boolean isPushToNewContactAllowed() {
+	return false;
+    }
 }
