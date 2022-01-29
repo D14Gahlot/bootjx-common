@@ -5,11 +5,6 @@ import com.boot.jx.model.AuditCreateEntity.AuditUpdateEntity;
 
 public interface AuditDetailProvider {
 
-    @Deprecated
-    public default AuditActor getActor() {
-	return null;
-    };
-
     public String getAuditUser();
 
     public default <T extends AuditCreateEntity> T auditCreate(T entity) {

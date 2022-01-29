@@ -51,7 +51,7 @@ public class AgentSessionService implements LogoutHandler, ApplicationListener<S
      * APIs for currently logged in user only
      */
 
-    @Autowired
+    @Autowired(required = false)
     private AgentSessionBean agentSessionBean;
 
     @Autowired
@@ -68,26 +68,27 @@ public class AgentSessionService implements LogoutHandler, ApplicationListener<S
 	return mongoTemplate.find(builder.getQuery(), AgentSessionDoc.class);
     }
 
-    public void updateSession(boolean publish) {
-	CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder().whereId(agentSessionBean.getAgentCode());
-	builder.set("agentCode", agentSessionBean.getAgentCode());
-	builder.set("agentDept", agentSessionBean.getAgentDept());
-	builder.set("isLoggedIn", agentSessionBean.isLoggedIn());
-	builder.set("isOnline", agentSessionBean.isOnline());
-	builder.set("isAway", agentSessionBean.isAway());
-	builder.set("lastOnlineStamp", agentSessionBean.getLastOnlineStamp());
+    public void updateSession(boolean publish, AgentSessionBean agentSession) {
+
+	CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder().whereId(agentSession.getAgentCode());
+	builder.set("agentCode", agentSession.getAgentCode());
+	builder.set("agentDept", agentSession.getAgentDept());
+	builder.set("isLoggedIn", agentSession.isLoggedIn());
+	builder.set("isOnline", agentSession.isOnline());
+	builder.set("isAway", agentSession.isAway());
+	builder.set("lastOnlineStamp", agentSession.getLastOnlineStamp());
 	builder.set("domain", AppContextUtil.getTenant());
 
-	if (ArgUtil.is(agentSessionBean.getProfile())) {
-	    builder.set("isEnabled", agentSessionBean.getProfile().isEnabled());
+	if (ArgUtil.is(agentSession.getProfile())) {
+	    builder.set("isEnabled", agentSession.getProfile().isEnabled());
 	}
 	mongoTemplate.upsert(builder.getQuery(), builder.getUpdate(), AgentSessionDoc.class);
 
 	if (publish) {
-	    documentUpdateListner.onAgentSessionUpdate(agentSessionBean.getAgentCode());
+	    documentUpdateListner.onAgentSessionUpdate(agentSession.getAgentCode());
 	}
 
-	agentSessionBean.setLastSyncStamp(System.currentTimeMillis());
+	agentSession.setLastSyncStamp(System.currentTimeMillis());
     }
 
     /**
@@ -96,7 +97,7 @@ public class AgentSessionService implements LogoutHandler, ApplicationListener<S
     public void refreshOnline() {
 	if (TimeUtils.isExpired(agentSessionBean.getLastSyncStamp(),
 		chatClientConfig.getAgentSessionTimeout().toMillis())) {
-	    this.updateSession(true);
+	    this.updateSession(true, agentSessionBean);
 	}
     }
 
@@ -109,9 +110,9 @@ public class AgentSessionService implements LogoutHandler, ApplicationListener<S
 	agentSessionBean.setOnline(isOnline);
 	agentSessionBean.setLastOnlineStamp(System.currentTimeMillis());
 	if (oldOnline != isOnline) {
-	    this.updateSession(true);
+	    this.updateSession(true, agentSessionBean);
 	} else {
-	    this.updateSession(false);
+	    this.updateSession(false, agentSessionBean);
 	}
     }
 
@@ -124,7 +125,7 @@ public class AgentSessionService implements LogoutHandler, ApplicationListener<S
 	}
 	agentSessionBean.setOnline(true);
 	agentSessionBean.setLastOnlineStamp(System.currentTimeMillis());
-	this.updateSession(true);
+	this.updateSession(true, agentSessionBean);
     }
 
     /**
@@ -133,11 +134,13 @@ public class AgentSessionService implements LogoutHandler, ApplicationListener<S
      * @param username
      */
     public void updateLogout(AgentPrincipal agentPrincipal) {
-	agentSessionBean.setLoggedIn(false);
-	agentSessionBean.setOnline(false);
-	agentSessionBean.setAgentCode(agentPrincipal.getAgentCode());
+	AgentSessionBean agentSession = ArgUtil.is(agentSessionBean) ? agentSessionBean : new AgentSessionBean();
+	agentSession.setLoggedIn(false);
+	agentSession.setOnline(false);
+	agentSession.setAway(true);
+	agentSession.setAgentCode(agentPrincipal.getAgentCode());
 	// agentSessionBean.setAgentDept("ONLINE");
-	this.updateSession(true);
+	this.updateSession(true, agentSession);
     }
 
     public void login(HttpServletRequest request, AgentResponseAuthDto agent, String passhash) {
