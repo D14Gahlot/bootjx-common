@@ -26,6 +26,7 @@ import com.boot.jx.common.doc.AgentSessionDoc;
 import com.boot.jx.common.dto.AgentResponseAuthDto;
 import com.boot.jx.common.store.DocumentUpdateListner;
 import com.boot.jx.http.CommonHttpRequest;
+import com.boot.jx.logger.AuditDetailProvider;
 import com.boot.jx.logger.LoggerService;
 import com.boot.jx.mongo.CommonMongoQueryBuilder;
 import com.boot.jx.postman.PMClientConfig;
@@ -36,7 +37,8 @@ import com.boot.utils.ArgUtil;
 import com.boot.utils.TimeUtils;
 
 @Component
-public class AgentSessionService implements LogoutHandler, ApplicationListener<SessionDestroyedEvent> {
+public class AgentSessionService
+	implements LogoutHandler, ApplicationListener<SessionDestroyedEvent>, AuditDetailProvider {
 
     public static final Logger LOGGER = LoggerService.getLogger(AgentSessionService.class);
     @Autowired
@@ -217,6 +219,17 @@ public class AgentSessionService implements LogoutHandler, ApplicationListener<S
 	public String getName() {
 	    return this.agentCode;
 	}
+    }
+
+    @Override
+    public String getAuditUser() {
+	if (ArgUtil.is(agentSessionBean)) {
+	    if (!ArgUtil.is(agentSessionBean.getAgentCode()) && ArgUtil.is(agentSessionBean.getProfile())) {
+		return agentSessionBean.getProfile().getAgent_code();
+	    }
+	    return agentSessionBean.getAgentCode();
+	}
+	return "_NOUSER_";
     }
 
 }

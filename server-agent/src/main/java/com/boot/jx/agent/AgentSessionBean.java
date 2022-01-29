@@ -12,7 +12,7 @@ import com.boot.utils.ArgUtil;
 
 @Component
 @Scope(value = "session", proxyMode = ScopedProxyMode.TARGET_CLASS)
-public class AgentSessionBean implements AuditDetailProvider, Serializable {
+public class AgentSessionBean implements Serializable {
 
     private static final long serialVersionUID = 5850744656958653564L;
     private String agentCode;
@@ -88,14 +88,6 @@ public class AgentSessionBean implements AuditDetailProvider, Serializable {
 
     public void setProfile(AgentResponseAuthDto profile) {
 	this.profile = profile;
-    }
-
-    @Override
-    public String getAuditUser() {
-	if (!ArgUtil.is(this.agentCode) && ArgUtil.is(this.profile)) {
-	    return this.profile.getAgent_code();
-	}
-	return this.agentCode;
     }
 
     public long getLastSyncStamp() {
