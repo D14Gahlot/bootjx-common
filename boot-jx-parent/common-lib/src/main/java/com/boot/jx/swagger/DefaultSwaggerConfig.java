@@ -65,9 +65,7 @@ public class DefaultSwaggerConfig {
 	    return docketWrapper.getDocket();
 	}
 
-	Docket docket = new Docket(DocumentationType.SWAGGER_2)
-		.groupName(swaggerDefaultGroup)
-		.select()
+	Docket docket = new Docket(DocumentationType.SWAGGER_2).groupName(swaggerDefaultGroup).select()
 		.apis(RequestHandlerSelectors.basePackage(swaggerPackage))
 		// .paths(regex("/product.*"))
 		.build();
@@ -78,11 +76,9 @@ public class DefaultSwaggerConfig {
 	if (ArgUtil.is(mockParams))
 	    for (MockParam mockParam : mockParams) {
 
-		if (ArgUtil.areEqual(mockParam.getSecurityScheme(), "APIKEY")) {
-
-		    securitySchemes.add(new ApiKey(mockParam.getDescription(), mockParam.getName(),
+		if (ArgUtil.is(mockParam.getSecurityScheme())) {
+		    securitySchemes.add(new ApiKey(mockParam.getSecurityScheme(), mockParam.getName(),
 			    StringUtils.toLowerCase(ArgUtil.parseAsString(mockParam.getType()))));
-
 		} else {
 		    AllowableValues allowableValues = null;
 		    if (mockParam.getValues() != null) {

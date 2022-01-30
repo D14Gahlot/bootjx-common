@@ -102,8 +102,8 @@ public class XmsSecurityConfig extends WebSecurityConfigurerAdapter implements A
 
     @Bean
     public MockParam swaggerApiKeyParam() {
-	return new MockParamBuilder().name("x-api-key").description("API Key").defaultValue("")
-		.parameterType(MockParamBuilder.MockParamType.HEADER).securityScheme("APIKEY").build();
+	return new MockParamBuilder().id("X_API_KEY").name("x-api-key").description("API Key").defaultValue("")
+		.parameterType(MockParamBuilder.MockParamType.HEADER).securityScheme("X_API_KEY").build();
 
     }
 

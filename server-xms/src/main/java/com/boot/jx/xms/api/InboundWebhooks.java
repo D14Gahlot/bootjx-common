@@ -1,10 +1,9 @@
 package com.boot.jx.xms.api;
 
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 
 import com.boot.jx.postman.model.ext.InBoundAction;
 import com.boot.jx.postman.model.ext.InBoundContact;
@@ -18,11 +17,10 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
 @Api(tags = "Inbound Requests", description = XmsConstants.INBOUND_WEBHOOKS_DESCRIPTION)
-@Controller
+@RestController
 public class InboundWebhooks {
 
     @ApiOperation(value = "Receiving Messages", notes = "${swagger.InboundWebhooks.onMessageCallback.description}")
-    @ResponseBody
     @ApiCallbacktParams
     @RequestMapping(value = "/api/v1/message/receive", method = { RequestMethod.POST })
     public InBoundMsg onMessageCallback(@RequestBody InBoundWrapper inboxMessage) {
@@ -30,7 +28,6 @@ public class InboundWebhooks {
     }
 
     @ApiOperation(value = "Contact Information", notes = "${swagger.InboundWebhooks.onProfileCallback.description}")
-    @ResponseBody
     @ApiCallbacktParams
     @RequestMapping(value = "/api/v1/contact/info", method = { RequestMethod.POST })
     public ContactInfoUpdate onProfileCallback(@RequestBody InBoundContact contactInfoRequest) {
@@ -39,7 +36,6 @@ public class InboundWebhooks {
 
     @ApiOperation(value = "Receiving Events", notes = "${swagger.InboundWebhooks.onActionCallback.description}",
 	    hidden = true)
-    @ResponseBody
     @ApiCallbacktParams
     @RequestMapping(value = "/api/v1/action/event", method = { RequestMethod.POST })
     public InBoundAction onActionCallback(@RequestBody InBoundAction actionInfo) {

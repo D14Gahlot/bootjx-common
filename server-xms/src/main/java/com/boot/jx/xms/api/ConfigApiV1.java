@@ -3,27 +3,24 @@ package com.boot.jx.xms.api;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 
 import com.boot.jx.api.AmxResponseSchemes.ApiResultsMetaCompactResponse;
 import com.boot.jx.api.ApiFieldError;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.api.ApiResponseUtil;
-import com.boot.jx.common.config.ConfigConstants;
 import com.boot.jx.common.config.ConfigManager;
 import com.boot.jx.postman.ClientApp;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PMEnvironment.AChannelConfig;
-import com.boot.jx.postman.PMEnvironment.PMConfigurationObject;
 import com.boot.jx.postman.doc.config.ClientKeyConfigDoc;
 import com.boot.jx.postman.model.ext.MsgChannel;
 import com.boot.jx.postman.store.ConfigStore;
-import com.boot.jx.xms.XmsConstants.ApiClientParams;
+import com.boot.jx.xms.XmsConstants.XMSClientAuth;
 import com.boot.jx.xms.XmsVendorConfigurer;
 import com.boot.jx.xms.dto.WebhookUrlRequest;
 import com.boot.utils.ArgUtil;
@@ -33,9 +30,11 @@ import com.fasterxml.jackson.annotation.JsonView;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.Authorization;
 
-@Api(tags = "Config APIs", description = "API's for configuration management")
-@Controller
+@Api(tags = "Configuration", description = "API's for configuration management",
+	authorizations = @Authorization("X_API_KEY"))
+@RestController
 public class ConfigApiV1 {
 
     @Autowired
@@ -47,9 +46,9 @@ public class ConfigApiV1 {
     @Autowired
     private PMEnvironment pmEnvironment;
 
-    @ApiOperation(value = "Set Webhook URL", notes = "${swagger.ConfigApiV1.setWebhookUrl.description}")
-    @ApiClientParams
-    @ResponseBody
+    @ApiOperation(value = "Set Webhook", notes = "${swagger.ConfigApiV1.setWebhookUrl.description}",
+	    authorizations = @Authorization("X_API_KEY"))
+    @XMSClientAuth
     @JsonView(PMEnvironment.PublicProperty.class)
     @RequestMapping(value = "/api/v1/config/webhook", method = { RequestMethod.POST })
     public ApiResponse<ClientApp, Object> setWebhookUrl(@RequestBody WebhookUrlRequest req) {
@@ -72,9 +71,9 @@ public class ConfigApiV1 {
 	return ApiResponse.buildResults(x).meta(req);
     }
 
-    @ApiOperation(value = "Get Channels", notes = "${swagger.ConfigApiV1.getChannels.description}")
-    @ApiClientParams
-    @ResponseBody
+    @ApiOperation(value = "Channels List", notes = "${swagger.ConfigApiV1.getChannels.description}",
+	    authorizations = @Authorization("X_API_KEY"))
+    @XMSClientAuth
     @RequestMapping(value = "/api/v1/config/channels", method = { RequestMethod.POST })
     @JsonView(PMEnvironment.PublicProperty.class)
     public ApiResultsMetaCompactResponse<MsgChannel, Object> getChannels(
