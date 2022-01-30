@@ -15,6 +15,8 @@ import com.boot.jx.postman.ClientApp;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.Constants;
+import com.boot.utils.CryptoUtil;
+import com.boot.utils.CryptoUtil.CrypToken;
 import com.boot.utils.CryptoUtil.HashBuilder;
 
 import io.swagger.annotations.Api;
@@ -40,22 +42,33 @@ public class XmsController {
 
     private boolean isLoggedIn() {
 	String apiId = commonHttpRequest.get("swagger.auth.apiId");
+	String hash = commonHttpRequest.get("swagger.auth.hash");
 	String token = commonHttpRequest.get("swagger.auth.token");
 	String apiKey = commonHttpRequest.get("swagger.auth.apiKey");
 	HashBuilder builder = new HashBuilder().interval(300).secret(swaggerAuthPassword).message(apiId);
-	if (ArgUtil.is(token) && builder.validate(token)) {
+	if (ArgUtil.is(hash) && builder.validate(hash)) {
 	    return true;
 	}
 
 	if (!ArgUtil.is(apiKey)) {
-	    return false;
+	    if (ArgUtil.is(token)) {
+		CrypToken xToken = CryptoUtil.getEncoder().message(token).decrypt().toToken();
+		if (ArgUtil.is(xToken) && !xToken.isExpired()) {
+		    apiKey = xToken.message;
+		}
+	    }
+	    if (!ArgUtil.is(apiKey)) {
+		return false;
+	    }
 	}
 
 	ClientApp apiKeyConfig = pmEnvironment.local().clientApiKey(apiKey);
 	if (ArgUtil.is(apiKeyConfig) && ArgUtil.areEqual(apiKey, apiKeyConfig.getKey())) {
-	    token = builder.toHmac().output();
-	    commonHttpRequest.setCookie("swagger.auth.apiId", apiId);
-	    commonHttpRequest.setCookie("swagger.auth.token", token);
+	    hash = builder.toHmac().output();
+	    token = CryptoUtil.getEncoder().message(apiKey).tokenize(300).encrypt().toString();
+	    commonHttpRequest.setCookie("swagger.auth.apiId", apiId, 300);
+	    commonHttpRequest.setCookie("swagger.auth.hash", hash, 300);
+	    commonHttpRequest.setCookie("swagger.auth.token", token, 300);
 	    return true;
 	}
 	return false;
