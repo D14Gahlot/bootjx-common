@@ -91,10 +91,4 @@ public class XmsController {
 	return "swagger-uix";
     }
 
-    @ApiOperation(value = "Try docs", hidden = true)
-    @RequestMapping(value = { "/docs" }, method = { RequestMethod.GET, RequestMethod.POST })
-    public String docs(Model model, @RequestParam(required = false) String path) {
-	return "redirect:" + pmEnvironment.keyEntry("mry.prop.service.docs.link").asString()
-		+ ArgUtil.nonEmpty(path, Constants.BLANK);
-    }
 }

@@ -1,10 +1,12 @@
 package com.boot.jx.dummy;
 
 import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -20,6 +22,9 @@ import com.boot.jx.postman.PMEnvironment.PMCommonConfig;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.Constants;
+
+import io.swagger.annotations.ApiOperation;
 
 @Controller
 public class DummyUserController {
@@ -89,7 +94,7 @@ public class DummyUserController {
 	model.addAttribute("WEBAPP_BASE", appConfig.getAppPrefix() + path);
 	model.addAttribute("POSTMAN_AGENT_SCHEME_COLOR",
 		pmEnvironment.keyEntry("postman.agent.scheme.color").asString());
-	
+
 	if (pmCommonConfig != null) {
 	    model.addAllAttributes(pmCommonConfig.appAttributes());
 	}
@@ -119,5 +124,24 @@ public class DummyUserController {
 		    ArgUtil.parseAsString(commonHttpRequest.get("CDN_URL"), pmCommonConfig.getCdnServer()));
 	}
 	return "dummyuser";
+    }
+
+    @ApiOperation(value = "Try docs", hidden = true)
+    @RequestMapping(value = { "/docs" }, method = { RequestMethod.GET, RequestMethod.POST })
+    public String docs(Model model, @RequestParam(required = false) String path) {
+	return "redirect:" + pmEnvironment.keyEntry("mry.prop.service.docs.link").asString()
+		+ ArgUtil.nonEmpty(path, Constants.BLANK);
+    }
+
+    @ApiOperation(value = "Try docs", hidden = true)
+    @RequestMapping(value = { "/server-{xms}/**" }, method = { RequestMethod.GET, RequestMethod.POST })
+    public String serverXmsDocs(Model model, @PathVariable String xms, HttpServletRequest request) {
+	
+	String[] paths = request.getRequestURI().split(request.getContextPath() 
+		//+ "/server-"+ xms
+	);
+	String path = paths.length>1 ? paths[1] : Constants.BLANK;
+	return "redirect:" + pmEnvironment.keyEntry("mry.prop.service.docs.link").asString()
+		+ ArgUtil.nonEmpty(path, Constants.BLANK);
     }
 }
