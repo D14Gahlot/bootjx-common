@@ -1,14 +1,13 @@
 package com.boot.jx.postman;
 
 import java.io.Serializable;
-import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.boot.jx.AppConfig;
-import com.boot.jx.AppContextUtil;
 import com.boot.jx.AppConfigPackage.AppCommonConfig;
+import com.boot.jx.AppContextUtil;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.postman.PMConfiguration.PMConfigurationModel;
 import com.boot.jx.postman.PMConfiguration.PMConfigurationWrappper;
@@ -238,7 +237,7 @@ public class PMEnvironment {
 	return config;
     }
 
-    public PMConfiguration config() {
+    public PMConfigurationWrappper config() {
 	PMConfigurationWrappper config = new PMConfigurationWrappper().appConfig(appConfig);
 	if (ArgUtil.is(provider)) {
 	    return config.local(provider.local()).shared(provider.shared());
