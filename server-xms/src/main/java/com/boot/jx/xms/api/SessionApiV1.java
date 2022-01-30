@@ -44,7 +44,7 @@ public class SessionApiV1 {
     @ApiOperation(value = "Session Routing", notes = "${swagger.SessionApiV1.sessionRouting.description}",
 	    authorizations = @Authorization("X_API_KEY"))
     @XMSClientAuth
-    @RequestMapping(value = "/api/v1/session/queue", method = { RequestMethod.POST })
+    @RequestMapping(value = "/api/v1/session/routing", method = { RequestMethod.POST })
     public ApiResponse<ChatSessionDTO, Object> sessionRouting(@RequestBody SessionQueueAssignment req) {
 	return ApiResponse
 		.buildResults(chatArchive.getChatSession(chatSessionManager.assignToQueue(req.sessionId, req.queue)));
