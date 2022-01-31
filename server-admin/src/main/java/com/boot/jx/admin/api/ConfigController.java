@@ -31,18 +31,14 @@ public class ConfigController {
     private CommonMongoTemplate mongoTemplate;
 
     @Autowired
-    private ConfigManager adminConfigService;
-
-    @Autowired
     private ConfigManager configManager;
 
     @ResponseBody
     @RequestMapping(value = "/api/config/channel/{channelType}", method = { RequestMethod.POST })
     @JsonView(PMEnvironment.PublicProperty.class)
     public ApiResponse<ChannelConfig, Object> saveChannelConfig(@PathVariable CHANNEL_TYPE_ENUM channelType,
-	    @RequestParam(defaultValue = "false", required = false) boolean disabled,
 	    @RequestBody Map<String, Object> data) {
-	return ApiResponse.buildResults(configManager.saveChannelConfig(channelType.toString(), disabled, data));
+	return ApiResponse.buildResults(configManager.saveChannelConfig(channelType.toString(), data));
     }
 
     @ResponseBody
@@ -79,7 +75,7 @@ public class ConfigController {
     @ResponseBody
     @RequestMapping(value = { "/api/config/clientapikey" }, method = { RequestMethod.POST })
     public ApiResponse<ClientKeyConfigDoc, Object> createClientApiKey(@RequestBody ClientKeyConfigDoc clientApiKey) {
-	return ApiResponse.buildData(adminConfigService.save(clientApiKey));
+	return ApiResponse.buildData(configManager.save(clientApiKey));
     }
 
     @JsonView(PMEnvironment.PublicProperty.class)
@@ -88,7 +84,7 @@ public class ConfigController {
     public ApiResponse<ClientKeyConfigDoc, Object> deleteClientApiKey(@RequestParam String id) {
 	ClientKeyConfigDoc clientApiKey = new ClientKeyConfigDoc();
 	clientApiKey.setId(id);
-	return ApiResponse.buildResults(adminConfigService.remove(clientApiKey));
+	return ApiResponse.buildResults(configManager.remove(clientApiKey));
     }
 
     /***************************
@@ -117,7 +113,7 @@ public class ConfigController {
     @ResponseBody
     @RequestMapping(value = { "/api/config/companyvar" }, method = { RequestMethod.POST })
     public ApiResponse<CompanyVarsConfigDoc, Object> updateCompanyVars(@RequestBody CompanyVarsConfigDoc companyVar) {
-	return ApiResponse.buildData(adminConfigService.save(companyVar));
+	return ApiResponse.buildData(configManager.save(companyVar));
     }
 
     @JsonView(PMEnvironment.PublicProperty.class)
@@ -126,7 +122,7 @@ public class ConfigController {
     public ApiResponse<CompanyVarsConfigDoc, Object> removeCompanyVars(@RequestParam String id) {
 	CompanyVarsConfigDoc companyVar = new CompanyVarsConfigDoc();
 	companyVar.setId(id);
-	return ApiResponse.buildResults(adminConfigService.remove(companyVar));
+	return ApiResponse.buildResults(configManager.remove(companyVar));
     }
 
 }

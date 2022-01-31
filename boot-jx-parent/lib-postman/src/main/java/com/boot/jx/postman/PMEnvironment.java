@@ -37,9 +37,9 @@ public class PMEnvironment {
 
 	public PMConfigurationModel shared();
 
-	public void config(ChannelConfig config);
+	public void addChannel(ChannelConfig config);
 
-	public void update(ChannelConfig config, String action);
+	public void updateChannel(ChannelConfig config, String action);
 
 	public void initConfig();
     }
@@ -56,6 +56,9 @@ public class PMEnvironment {
 
 	@JsonView(PublicProperty.class)
 	public boolean isPushToNewContactAllowed();
+
+	@JsonView(PublicProperty.class)
+	public boolean isWebhookManual();
 
 	@JsonView(PublicProperty.class)
 	public default String getChannel() {
@@ -87,7 +90,10 @@ public class PMEnvironment {
 
 	protected ContactType contactType;
 	protected String channelType;
+
+	@JsonView(PMEnvironment.ProtectedProperty.class)
 	protected String channelKey;
+
 	protected String name;
 
 	private boolean isSandbox;
@@ -166,6 +172,10 @@ public class PMEnvironment {
 
 	public void setDisabled(boolean isDisabled) {
 	    this.isDisabled = isDisabled;
+	}
+
+	public boolean isReadOnly() {
+	    return false;
 	}
 
     }
@@ -280,13 +290,13 @@ public class PMEnvironment {
 
     public void addChannel(ChannelConfig config) {
 	if (ArgUtil.is(provider)) {
-	    provider.config(config);
+	    provider.addChannel(config);
 	}
     }
 
     public void updateChannel(ChannelConfig config, String action) {
 	if (ArgUtil.is(provider)) {
-	    provider.update(config, action);
+	    provider.updateChannel(config, action);
 	}
     }
 

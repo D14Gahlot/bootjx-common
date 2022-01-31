@@ -160,4 +160,9 @@ public class FacebookPlugin implements ChannelPlugin<FacebookConfigDetails> {
 	return false;
     }
 
+    @Override
+    public boolean isWebhookManual() {
+	return true;
+    }
+
 }

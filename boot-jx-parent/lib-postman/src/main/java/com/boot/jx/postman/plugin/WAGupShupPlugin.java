@@ -148,4 +148,9 @@ public class WAGupShupPlugin implements ChannelPlugin<GupShupConfigDetails> {
     public boolean isPushToNewContactAllowed() {
 	return true;
     }
+
+    @Override
+    public boolean isWebhookManual() {
+	return true;
+    }
 }

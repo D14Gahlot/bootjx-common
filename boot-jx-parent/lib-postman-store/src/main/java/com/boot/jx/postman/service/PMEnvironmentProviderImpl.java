@@ -54,6 +54,7 @@ public class PMEnvironmentProviderImpl implements PMEnvironmentProvider, AppShar
 
 	    List<ChannelConfigDoc> channels = configStore.findAll(ChannelConfigDoc.class);
 	    for (ChannelConfigDoc channel : channels) {
+		channel.setDomain(tnt);
 		prefs.channels(channel);
 	    }
 
@@ -84,6 +85,8 @@ public class PMEnvironmentProviderImpl implements PMEnvironmentProvider, AppShar
 		}
 		List<ChannelConfigDoc> sandboxChannels = configStore.findAll(ChannelConfigDoc.class);
 		for (ChannelConfigDoc channel : sandboxChannels) {
+		    channel.setDomain(tnt);
+		    ;
 		    if (channel.isSandbox()) {
 			newSharedConfiguration.channels(channel);
 		    }
@@ -100,20 +103,16 @@ public class PMEnvironmentProviderImpl implements PMEnvironmentProvider, AppShar
     public void configInternal(ChannelConfig config) {
 	ChannelConfigDoc doc = EntityDtoUtil.dtoToEntity(config, new ChannelConfigDoc());
 	doc.setId(StringUtils.toLowerCase(doc.getChannelId()));
-	if (config.isDisabled()) {
-	    doc.setDisabled(config.isDisabled());
-	} else
-	    doc.setDisabled(false);
 	configStore.saveChannelConfig(doc);
     }
 
     @Override
-    public void config(ChannelConfig config) {
+    public void addChannel(ChannelConfig config) {
 	configInternal(config);
     }
 
     @Override
-    public void update(ChannelConfig config, String action) {
+    public void updateChannel(ChannelConfig config, String action) {
 	if (ArgUtil.is(config)) {
 	    ChannelConfigDoc configDoc = EntityDtoUtil.dtoToEntity(config, new ChannelConfigDoc());
 	    if ("remove".equalsIgnoreCase(action)) {
