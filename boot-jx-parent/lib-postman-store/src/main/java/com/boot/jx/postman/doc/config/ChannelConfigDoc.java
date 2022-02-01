@@ -28,7 +28,7 @@ public class ChannelConfigDoc extends ChannelConfig {
     }
 
     public boolean isReadOnly() {
-	return this.isSandbox() && !ArgUtil.areEqual(domain, AppContextUtil.getTenant());
+	return (this.isSandbox() || this.isShared()) && !ArgUtil.areEqual(domain, AppContextUtil.getTenant());
     }
 
     public String getDomain() {

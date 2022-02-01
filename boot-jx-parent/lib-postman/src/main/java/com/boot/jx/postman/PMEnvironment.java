@@ -97,6 +97,7 @@ public class PMEnvironment {
 	protected String name;
 
 	private boolean isSandbox;
+	private boolean isShared;
 	private boolean isDisabled;
 
 	@JsonView(PMEnvironment.PublicProperty.class)
@@ -176,6 +177,14 @@ public class PMEnvironment {
 
 	public boolean isReadOnly() {
 	    return false;
+	}
+
+	public boolean isShared() {
+	    return isShared;
+	}
+
+	public void setShared(boolean isShared) {
+	    this.isShared = isShared;
 	}
 
     }

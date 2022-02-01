@@ -146,7 +146,7 @@ public class PostManInBoundHandler implements InBoundHandler {
 		.server(pmEnvironment.keyEntry(ConfigConstants.APP_KEY.PROP_SERVICE_DOMAIN).asString());
 	wrap.contacts = CollectionUtil.asList(contact);
 	wrap.messages = CollectionUtil.asList(msg);
-	restService.ajax(forwardUrl).post(wrap).asMapModel();
+	restService.ajax(forwardUrl).post(wrap).asNone();
     }
 
     @Override
@@ -172,7 +172,7 @@ public class PostManInBoundHandler implements InBoundHandler {
 			.server(pmEnvironment.keyEntry(ConfigConstants.APP_KEY.PROP_SERVICE_DOMAIN).asString());
 		wrap.contacts = CollectionUtil.asList(contact);
 		wrap.statuses = CollectionUtil.asList(status);
-		restService.ajax(webhookEntry.asString()).post(wrap).asMapModel();
+		restService.ajax(webhookEntry.asString()).post(wrap).asNone();
 	    } catch (Exception e) {
 		LOGGER.error("Error while Trying to HIT " + webhookEntry.asString(), e);
 	    }

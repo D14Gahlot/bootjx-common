@@ -536,9 +536,9 @@ animate();
 <script th:src="${CDN_URL} + '/plugins/customer.js?theme=bubble'">
   {
 	"local" : "[[${LOCAL_PATH}]]",
-    "entity" : "[[${TENANT}]]",
-    "account" : "MainWebsite",
-    "accountToken" : "AXCYTEMM##$$$$",
+    "domain" : "[[${TENANT}]].[[${CONFIG.PROP_SERVICE_DOMAIN}]]",
+    "channelId" : "[[${CHANNEL_ID}]]",
+    "channelKey" : "[[${CHANNEL_KEY}]]",
     "config" : {
       "header.bg.color" : "#000",
       "header.text.color" : "#ffffff",

@@ -156,10 +156,23 @@ public class WebConnector extends DefaultConnector<WebConfigDetails, WebPlugin> 
 	return true;
     }
 
+    public InboxMessage toInboxMessage(ChannelConfig channelConfig, MapModel map) {
+	// Create Default Message from Channel
+	InboxMessage inboxMessage = this.createInboxMessage(channelConfig, map.as(InboxMessage.class));
+	inboxMessage.setSessionId(null);
+	inboxMessage.setMessageId(null);
+
+	inboxMessage.contact().setCsid(inboxMessage.getFrom());
+	inboxMessage.session().setAgent(null);
+	inboxMessage.session().setDept(null);
+
+	return inboxMessage;
+    }
+
     @Override
     public MessageBoxEvent inboundMessageBoxEvent(ChannelConfig channelConfig, MapModel requestMap,
 	    MessageBoxEvent messageBoxEvent) {
-	return messageBoxEvent.addInboxMessage(new InboxMessage());
+	return messageBoxEvent.addInboxMessage(toInboxMessage(channelConfig, requestMap));
     }
 
 }

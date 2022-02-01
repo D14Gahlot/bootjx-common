@@ -24,6 +24,7 @@ import com.boot.model.SafeKeyHashMap;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.JsonUtil;
 import com.boot.utils.TimeUtils;
+import com.boot.utils.UniqueID;
 
 @Component
 @PropertySource("classpath:application-common.properties")
@@ -138,7 +139,7 @@ public class PMCommonConfigImpl implements PMCommonConfig {
 	map.put("STAMP", System.currentTimeMillis());
 	map.put("APP_TITLE", appConfig.getAppTitle());
 	map.put("TENANT", AppContextUtil.getTenant());
-
+	map.put("NOUNCE", UniqueID.generateString62());
 	return map;
     }
 

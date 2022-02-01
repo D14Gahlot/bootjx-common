@@ -106,10 +106,14 @@ public class InBoundService {
      */
     @Async
     public void invokeMethodsAsync(InboxMessage inboxMessageOriginal) {
-	invokeMethods(inboxMessageOriginal);
+	invokeMethodsInternal(inboxMessageOriginal, true);
     }
 
     public InboxMessage invokeMethods(InboxMessage inboxMessageOriginal) {
+	return this.invokeMethodsInternal(inboxMessageOriginal, false);
+    }
+
+    private InboxMessage invokeMethodsInternal(InboxMessage inboxMessageOriginal, boolean newThread) {
 
 	PMConfigurationObject proxyConfig = pmEnvironment.keyEntry("mry.proxy.enabled");
 
@@ -187,7 +191,11 @@ public class InBoundService {
 	    if (chatClientConfig.isLocalDummyBotEnabled()) {
 		botEngine.invokeMethodsAsync(inboxMessageOriginal);
 	    } else if (ArgUtil.is(inBoundHandler)) {
-		inBoundHandler.handle(inboxMessageOriginal);
+		if (newThread) {
+		    inBoundHandler.handle(inboxMessageOriginal);
+		} else {
+		    inBoundHandler.handleAsync(inboxMessageOriginal);
+		}
 	    } else if (agentService.onMessageSupported(inboxMessageOriginal)) { // TODO:-- TO be removed
 		agentService.onMessage(inboxMessageOriginal);
 	    } else if (botEngine.isChatBotDefined()) { // TODO:-- TO be removed

@@ -146,7 +146,8 @@ html.loadable.loading .fullloader {
 		CONTEXT: '[[${APP_CONTEXT}]]',
 		CONFIG : ([(${CONFIG_JSON})]),
 		WEBAPP_BASE : '[[${WEBAPP_BASE}]]',
-		POSTMAN : '[[${POSTMAN_CONTEXT}]]'
+		POSTMAN : '[[${POSTMAN_CONTEXT}]]',
+		NOUNCE : '[[${NOUNCE}]]'
 	};
 	var initFingerprintJS = function initFingerprintJS() {
 		FingerprintJS.load().then(fp => {

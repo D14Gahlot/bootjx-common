@@ -86,8 +86,7 @@ public class PMEnvironmentProviderImpl implements PMEnvironmentProvider, AppShar
 		List<ChannelConfigDoc> sandboxChannels = configStore.findAll(ChannelConfigDoc.class);
 		for (ChannelConfigDoc channel : sandboxChannels) {
 		    channel.setDomain(tnt);
-		    ;
-		    if (channel.isSandbox()) {
+		    if (channel.isSandbox() || channel.isShared()) {
 			newSharedConfiguration.channels(channel);
 		    }
 		}
@@ -131,6 +130,12 @@ public class PMEnvironmentProviderImpl implements PMEnvironmentProvider, AppShar
 		configStore.save(configDoc);
 	    } else if ("sandbox_disable".equalsIgnoreCase(action)) {
 		configDoc.setSandbox(false);
+		configStore.save(configDoc);
+	    } else if ("shared_enable".equalsIgnoreCase(action)) {
+		configDoc.setShared(true);
+		configStore.save(configDoc);
+	    } else if ("shared_disable".equalsIgnoreCase(action)) {
+		configDoc.setShared(false);
 		configStore.save(configDoc);
 	    }
 	} else {
