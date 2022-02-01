@@ -33,6 +33,7 @@ import com.boot.jx.postman.PMEnvironment.PMCommonConfig;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.dto.ChatMessageDTO;
+import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.MessageBoxEvent;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.plugin.ChannelConfig;
@@ -169,9 +170,10 @@ public class InBoundControllerWeb {
 	return ApiResponse.buildResults(msgs);
     }
 
+    @ResponseBody
     @RequestMapping(value = "/ext/inbound/v2/web/callback/{nounce}/{channelId}/{channelKey}",
 	    method = { RequestMethod.POST })
-    public ApiResponse<Object, Object> inboundMessageBoxEvent(@PathVariable(required = false) String nounce,
+    public ApiResponse<InboxMessage, Object> inboundMessageBoxEvent(@PathVariable(required = false) String nounce,
 	    @PathVariable(required = false) String channelId, @PathVariable(required = false) String channelKey,
 	    @RequestBody Map<String, Object> data) {
 	MapModel map = MapModel.from(data);
@@ -195,6 +197,7 @@ public class InBoundControllerWeb {
 		    inBoundService.invokeMethods(inboxMessage);
 		});
 		connector.onReadInboxMessage(channelConfig, messageBoxEvent.getInboxMessages());
+		return ApiResponse.buildResults(messageBoxEvent.getInboxMessages());
 	    } else if (ArgUtil.is(messageBoxEvent.getMessageReports())) {
 		connector.onMessageReports(channelConfig, messageBoxEvent.getMessageReports());
 		inBoundStatusService.update(messageBoxEvent.getMessageReports());

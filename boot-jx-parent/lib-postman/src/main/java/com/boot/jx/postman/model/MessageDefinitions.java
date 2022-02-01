@@ -40,23 +40,39 @@ public class MessageDefinitions {
 	public static Contact instance() {
 	    return new ContactMeta();
 	}
-	
     }
 
     @JsonDeserialize(as = ContactMeta.class, keyUsing = ContactMetaKeyDeserializer.class)
     @JsonIgnoreProperties(ignoreUnknown = true)
-    public static interface Contactable extends Contact {
+    public static interface ContactID extends Contact {
+	public void setContactId(String contactId);
+
+	public String getContactId();
+
+	public default void copyFrom(Contactable contactable) {
+	    // Contact
+	    this.setName(contactable.getName());
+	    this.setPhone(contactable.getPhone());
+	    this.setEmail(contactable.getEmail());
+	    // ContactID
+	    this.setContactId(contactable.getContactId());
+	}
+
+	public static ContactID instance() {
+	    return new ContactMeta();
+	}
+    }
+
+    @JsonDeserialize(as = ContactMeta.class, keyUsing = ContactMetaKeyDeserializer.class)
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static interface Contactable extends ContactID {
 	public String getContactType();
 
 	public String getLane();
 
 	public String getCsid();
 
-	public String getContactId();
-
 	public void setCsid(String createCsid);
-
-	public void setContactId(String contactId);
 
 	public void setContactType(String contactType);
 
@@ -79,12 +95,13 @@ public class MessageDefinitions {
 	    this.setName(contactable.getName());
 	    this.setPhone(contactable.getPhone());
 	    this.setEmail(contactable.getEmail());
+	    // ContactID
+	    this.setContactId(contactable.getContactId());
 	    // Contactable
 	    this.setContactType(contactable.getContactType());
 	    this.setChannelType(contactable.getChannelType());
 	    this.setLane(contactable.getLane());
 	    this.setCsid(contactable.getCsid());
-	    this.setContactId(contactable.getContactId());
 	}
 
 	public static Contactable instance() {
@@ -147,11 +164,11 @@ public class MessageDefinitions {
     }
 
     public class ContactMetaKeyDeserializer extends KeyDeserializer {
-
 	@Override
 	public Object deserializeKey(String key, DeserializationContext deserializationContext)
 		throws IOException, JsonProcessingException {
 	    return JsonUtil.getMapper().readValue(key, ContactMeta.class);
 	}
     }
+
 }
