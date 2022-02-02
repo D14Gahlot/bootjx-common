@@ -10,7 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.domain.Sort.Order;
-import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
@@ -94,7 +93,7 @@ public class SessionStore extends CommonMongoTemplateAbstract {
     }
 
     public ChatSessionDoc getValidSession(String sessionId) {
-	ChatSessionDoc chatSessionDoc = super.findById(sessionId, ChatSessionDoc.class);
+	ChatSessionDoc chatSessionDoc = getSession(sessionId);
 	if (isSessionValid(chatSessionDoc)) {
 	    return chatSessionDoc;
 	}
@@ -115,6 +114,42 @@ public class SessionStore extends CommonMongoTemplateAbstract {
      * @return
      */
     public ChatSessionDoc createSession(SessionMessage sessionMessage) {
+	return createSessionOld(sessionMessage);
+    }
+
+    public ChatSessionDoc createSessionNew(SessionMessage sessionMessage) {
+	Contactable contact = PostManUtil.getContactMeta(sessionMessage.contact());
+
+	String sessionId = sessionMessage.getSessionId();
+	String contactId = contact.getContactId();
+
+	ChatSessionDoc chatSessionDoc = null;
+	ChatContactDoc chatContactDoc = null;
+
+	if (ArgUtil.is(sessionId)) {
+	    chatSessionDoc = getSession(sessionId);
+	    if (ArgUtil.isEmpty(chatSessionDoc)) {
+		// Session Not found
+		return null;
+	    }
+	    if (!isSessionValid(chatSessionDoc)) {
+		contactId = ArgUtil.nonEmpty(contactId, chatSessionDoc.getContactId());
+	    }
+	    if (ArgUtil.isEmpty(contactId)) {
+		// Contact Not found
+		return null;
+	    }
+	    chatContactDoc = super.findById(contactId, ChatContactDoc.class);
+	}
+
+	if (!isSessionValid(chatSessionDoc)) {
+
+	}
+
+	return chatSessionDoc;
+    }
+
+    public ChatSessionDoc createSessionOld(SessionMessage sessionMessage) {
 	Contactable contact = PostManUtil.getContactMeta(sessionMessage.contact());
 
 	String sessionId = sessionMessage.getSessionId();
@@ -124,18 +159,20 @@ public class SessionStore extends CommonMongoTemplateAbstract {
 	ChatContactDoc chatContactDoc = null;
 
 	if (ArgUtil.isEmpty(contactId)) {
-	    // If these conact & session are not present there is nothing we can do about
-	    // this message
 	    if (ArgUtil.isEmpty(sessionId)) {
+		// If these conact & session are not present there is nothing we can do about
+		// this message
 		return null;
 	    }
 	    chatSessionDoc = getSession(sessionId);
 
 	    if (ArgUtil.isEmpty(chatSessionDoc)) {
+		// Session Not found
 		return null;
 	    }
 
 	    if (!isSessionValid(chatSessionDoc)) {
+		// Session Found but invalid
 		contactId = chatSessionDoc.getContactId();
 		chatContactDoc = super.findById(contactId, ChatContactDoc.class);
 		contact.copyFrom(chatContactDoc);
@@ -151,7 +188,6 @@ public class SessionStore extends CommonMongoTemplateAbstract {
 		    sessionId = chatContactDoc.getSessionId();
 		}
 	    }
-
 	    if (ArgUtil.is(sessionId)) {
 		chatSessionDoc = getValidSession(sessionId);
 	    }
@@ -180,14 +216,14 @@ public class SessionStore extends CommonMongoTemplateAbstract {
 	    chatSessionDoc.setPrimary(true);
 
 	    if (ArgUtil.is(chatContactDoc)) {
-		if (ArgUtil.is(chatContactDoc.getName())) {
-		    chatSessionDoc.setContactName(chatContactDoc.getName());
-		}
 		chatSessionDoc.setContact(new ContactDetailDoc());
+		if (ArgUtil.is(chatContactDoc.getName())) {
+		    chatSessionDoc.contact().setName(chatContactDoc.getName());
+		}
 		chatSessionDoc.getContact().copyFrom(chatContactDoc);
 	    }
 
-	    save(chatSessionDoc);
+	    saveSession(chatSessionDoc);
 	    chatContactQuery.setSessionId(chatSessionDoc.getSessionId());
 
 	    chatContactQuery.update(contact);
@@ -245,6 +281,9 @@ public class SessionStore extends CommonMongoTemplateAbstract {
 
 	}
 
+	if (ArgUtil.isEmpty(inboxMessage.contact().getName())) {
+	    inboxMessage.contact().setName(chatSessionDoc.contact().getName());
+	}
 	inboxMessage.contact().setContactId(chatSessionDoc.getContactId());
 	inboxMessage.setSessionId(chatSessionDoc.getSessionId());
 	inboxMessage.session().setQueue(chatSessionDoc.getAssignedToQueue());
@@ -383,15 +422,14 @@ public class SessionStore extends CommonMongoTemplateAbstract {
 	return super.find(query2, ChatSessionDoc.class);
     }
 
-    public void save(ChatSessionDoc chatSessionDoc) {
+    public ChatSessionDoc saveSession(ChatSessionDoc chatSessionDoc) {
 	try {
 	    if (ArgUtil.isEmpty(chatSessionDoc.getStartSessionStamp()) || chatSessionDoc.getStartSessionStamp() == 0L) {
 		chatSessionDoc.setStartSessionStamp(System.currentTimeMillis());
 	    }
 	    super.save(chatSessionDoc);
 	} catch (Exception e) {
-	    ChatSessionDoc chatSessionDoc2 = super.findById(chatSessionDoc.getSessionId(),
-		    ChatSessionDoc.class);
+	    ChatSessionDoc chatSessionDoc2 = super.findById(chatSessionDoc.getSessionId(), ChatSessionDoc.class);
 	    LOGGER.error(chatSessionDoc.getVersion() + " ~ " + chatSessionDoc2.getVersion(), e);
 	    if (chatSessionDoc.getVersion() == null) {
 		// chatSessionDoc.setVersion(0);
@@ -401,6 +439,7 @@ public class SessionStore extends CommonMongoTemplateAbstract {
 		super.save(chatSessionDoc);
 	    }
 	}
+	return chatSessionDoc;
     }
 
     public ChatSessionDoc initSession(ChatSessionDoc chatSessionDoc) {

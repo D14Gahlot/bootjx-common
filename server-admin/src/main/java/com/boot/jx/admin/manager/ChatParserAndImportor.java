@@ -134,7 +134,7 @@ public class ChatParserAndImportor {
 
 	    // chatSessionDoc.setStartSessionStamp(session.getStartSessionStamp());
 
-	    sessionStore.save(chatSessionDoc);
+	    sessionStore.saveSession(chatSessionDoc);
 
 	    long getFistResponseStamp = 0L;
 	    long getLastInComingStamp = 0L;
@@ -171,7 +171,7 @@ public class ChatParserAndImportor {
 	    chatSessionDoc.setLastInComingStamp(getLastInComingStamp);
 	    chatSessionDoc.setLastResponseStamp(getLastResponseStamp);
 
-	    sessionStore.save(chatSessionDoc);
+	    sessionStore.saveSession(chatSessionDoc);
 	    sessionIds.add(chatSessionDoc.getSessionId());
 	}
 

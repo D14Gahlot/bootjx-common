@@ -57,6 +57,10 @@ public class CommonMongoQueryBuilder extends CommonMongoQB<CommonMongoQueryBuild
 	    }
 	    return docClass;
 	}
+
+	public T getDoc() {
+	    return doc;
+	}
     }
 
 }

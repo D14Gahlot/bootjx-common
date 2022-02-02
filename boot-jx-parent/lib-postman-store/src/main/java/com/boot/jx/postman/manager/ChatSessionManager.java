@@ -25,7 +25,11 @@ import com.boot.jx.postman.PMConstants.DEFAULT_VALUES;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.QuickTag;
+import com.boot.jx.postman.model.InboxMessage;
+import com.boot.jx.postman.model.MessageDefinitions.Contactable;
+import com.boot.jx.postman.model.MessageDefinitions.SessionMessage;
 import com.boot.jx.postman.store.MessageStore.EVENTS;
+import com.boot.jx.utils.PostManUtil;
 import com.boot.jx.postman.store.SessionStore;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
@@ -238,4 +242,5 @@ public class ChatSessionManager {
 	ChatSessionDoc sessionDoc = sessionStore.getSession(sessionId);
 	return this.assignToQueue(sessionDoc, queueCode);
     }
+
 }

@@ -68,6 +68,8 @@ public class ChatSessionQuery extends DocQueryBuilder<ChatSessionDoc> {
     public ChatSessionQuery setContactName(String contactName) {
 	this.doc.setContactName(contactName);
 	this.set("contactName", contactName);
+	this.doc.contact().setName(contactName);
+	this.set("contact.name", contactName);
 	return this;
     }
 

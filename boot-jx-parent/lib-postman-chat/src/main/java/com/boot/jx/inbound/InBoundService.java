@@ -19,6 +19,7 @@ import com.boot.jx.bot.ChatMapping;
 import com.boot.jx.cache.CacheBox;
 import com.boot.jx.chat.ChatClient;
 import com.boot.jx.chat.ChatService;
+import com.boot.jx.chat.ChatSessionFactory;
 import com.boot.jx.chat.ChatStatusService;
 import com.boot.jx.def.ICacheBox;
 import com.boot.jx.inbound.InBound.InBoundFilter;
@@ -34,7 +35,6 @@ import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.MessageReport;
 import com.boot.jx.postman.store.MessageContext;
 import com.boot.jx.postman.store.MessageStore;
-import com.boot.jx.postman.store.SessionStore;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.Constants;
@@ -76,7 +76,7 @@ public class InBoundService {
     private AgentService agentService;
 
     @Autowired
-    private SessionStore sessionStore;
+    private ChatSessionFactory chatSessionFactory;
 
     @Autowired
     private MessageStore messageStore;
@@ -150,9 +150,9 @@ public class InBoundService {
 	boolean locallySessionAssigned = false;
 	if (ArgUtil.isEmpty(inboxMessageOriginal.getSessionId())
 		|| "POSTMAN".equalsIgnoreCase(chatClientConfig.getPostmanType())) {
-	    session = sessionStore.createSession(inboxMessageOriginal);
+	    session = chatSessionFactory.getChatSession(inboxMessageOriginal);
 	    if (ArgUtil.is(session)) {
-		sessionStore.linkSession(session, inboxMessageOriginal);
+		chatSessionFactory.linkSession(session, inboxMessageOriginal);
 		locallySessionAssigned = true;
 	    } else {
 		ErrorObject error = new ErrorObject();
@@ -167,7 +167,7 @@ public class InBoundService {
 	if (ArgUtil.isEmpty(inboxMessageOriginal.getMessageId())) {
 	    inboxMessageOriginal.setMessage(StringUtils.trim(inboxMessageOriginal.getMessage()));
 	    MessageDoc messageDoc = messageStore.createOrUpdate(inboxMessageOriginal);
-	    sessionStore.push(messageDoc, inboxMessageOriginal);
+	    chatSessionFactory.push(messageDoc, inboxMessageOriginal);
 	}
 
 	messageContext.setMessage(inboxMessageOriginal);

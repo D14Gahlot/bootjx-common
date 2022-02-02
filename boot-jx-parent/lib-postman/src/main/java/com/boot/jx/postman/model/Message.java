@@ -583,10 +583,10 @@ public class Message<T extends Message<T>> implements Serializable, MessageOptio
     }
 
     public CommonTemplate getHsm() {
-        return hsm;
+	return hsm;
     }
 
     public void setHsm(CommonTemplate hsm) {
-        this.hsm = hsm;
+	this.hsm = hsm;
     }
 }

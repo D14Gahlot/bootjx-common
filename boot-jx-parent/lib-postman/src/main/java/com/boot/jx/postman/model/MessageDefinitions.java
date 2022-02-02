@@ -49,7 +49,7 @@ public class MessageDefinitions {
 
 	public String getContactId();
 
-	public default void copyFrom(Contactable contactable) {
+	public default void copyFrom(ContactID contactable) {
 	    // Contact
 	    this.setName(contactable.getName());
 	    this.setPhone(contactable.getPhone());

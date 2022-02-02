@@ -40,6 +40,8 @@ import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.postman.service.ChatDTOUtil;
 import com.boot.jx.postman.store.MessageStore;
 import com.boot.jx.postman.store.SessionStore;
+import com.boot.jx.stomp.StompTunnelSessionManager;
+import com.boot.jx.utils.PostManUtil;
 import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.UniqueID;
@@ -48,6 +50,7 @@ import com.boot.utils.UniqueID;
 public class InBoundControllerWeb {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(InBoundControllerWeb.class);
+    private static final String WEB_SESSION_ID = "web-session-id";
 
     @Autowired
     private InBoundService inBoundService;
@@ -82,6 +85,9 @@ public class InBoundControllerWeb {
     @Autowired
     private AppConfig appConfig;
 
+    @Autowired
+    private StompTunnelSessionManager stompTunnelSessionManager;
+
     @RequestMapping(value = "/plugin/customer/**", method = RequestMethod.GET)
     public String pluginCustomer(Model model, @RequestParam(required = false) String contacyType,
 	    @RequestParam(required = false, defaultValue = "/plugin/customer") String path)
@@ -100,6 +106,7 @@ public class InBoundControllerWeb {
 	String nounce = UniqueID.generateString62();
 	model.addAttribute("NOUNCE", nounce);
 	commonHttpRequest.setCookie("NOUNCE", nounce);
+	model.addAttribute("APP_USER", "APP_USER" + nounce);
 
 	return "app-customer";
     }
@@ -113,44 +120,20 @@ public class InBoundControllerWeb {
     @ApiRequest(type = RequestType.POLL)
     @ResponseBody
     @RequestMapping(value = "/ext/outbound/web/callback", method = RequestMethod.GET)
-    public OutboxMessage onReceiveMessage(@RequestParam String number) throws InterruptedException {
-	return dummyConnector.pollUnreadMessage(number);
-    }
-
-    @ResponseBody
-    @RequestMapping(value = "/ext/outbound/web/auth", method = RequestMethod.GET)
-    public ApiResponse<OutboxMessage, Object> onAuth(@RequestParam String number) throws InterruptedException {
-	String webSessionId = commonHttpRequest.get("web-session-id");
-
-	ChatSessionDoc session = null;
-	if (ArgUtil.is(webSessionId)) {
-	    session = sessionStore.getValidSession(webSessionId);
-	}
-	List<OutboxMessage> msgs = new ArrayList<OutboxMessage>();
-	if (ArgUtil.is(session)) {
-	    List<MessageDoc> messages = messageStore.findBySessionId(webSessionId, ContactType.WEBSITE.toString());
-	    for (MessageDoc messageDoc : messages) {
-		OutboxMessage outboxMessage = new OutboxMessage();
-		outboxMessage.setTimestamp(messageDoc.getTimestamp());
-		outboxMessage.setMessage(messageDoc.getMessage());
-		outboxMessage.template(messageDoc.getTemplate());
-		outboxMessage.setAttachments(messageDoc.getAttachments());
-		if (ArgUtil.isEqual(messageDoc.getType(), "I")) {
-		    outboxMessage.addTo(messageDoc.getContactId());
-		} else {
-		    // webConnector.process(outboxMessage);
-		}
-		msgs.add(outboxMessage);
-	    }
-	}
-
-	return ApiResponse.buildResults(msgs);
+    public OutboxMessage onReceiveMessage(@RequestParam(required = false) String number,
+	    @RequestParam(required = false) String csid) throws InterruptedException {
+	return dummyConnector.pollUnreadMessage(ArgUtil.nonEmpty(csid, number));
     }
 
     @ResponseBody
     @RequestMapping(value = "/ext/outbound/web/auth/v2", method = RequestMethod.GET)
-    public ApiResponse<ChatMessageDTO, Object> onAuthV2(@RequestParam String number) throws InterruptedException {
-	String webSessionId = commonHttpRequest.get("web-session-id");
+    public ApiResponse<ChatMessageDTO, Object> onAuthV2(@RequestParam(required = false) String user,
+	    @RequestParam(required = false) String number, @RequestParam(required = false) String csid,
+	    @RequestParam(required = false) String channelId, @RequestParam(required = false) String channelKey)
+	    throws InterruptedException {
+	String webSessionId = commonHttpRequest.get(WEB_SESSION_ID);
+	csid = ArgUtil.nonEmpty(csid, number);
+	ChannelConfig channelConfig = pmEnvironment.config().channel(channelId);
 
 	ChatSessionDoc session = null;
 	if (ArgUtil.is(webSessionId)) {
@@ -166,7 +149,10 @@ public class InBoundControllerWeb {
 		}
 	    }
 	}
-
+	if (ArgUtil.is(channelConfig)) {
+	    stompTunnelSessionManager.registerUser(user, PostManUtil.CONTACT_ID(channelConfig, csid), csid,
+		    webSessionId);
+	}
 	return ApiResponse.buildResults(msgs);
     }
 
@@ -193,10 +179,18 @@ public class InBoundControllerWeb {
 	    MessageBoxEvent messageBoxEvent = connector.inboundMessageBoxEvent(channelConfig, map,
 		    new MessageBoxEvent());
 	    if (ArgUtil.is(messageBoxEvent.getInboxMessages())) {
+		InboxMessage sessionMessage = new InboxMessage();
+
 		messageBoxEvent.getInboxMessages().forEach(inboxMessage -> {
 		    inBoundService.invokeMethods(inboxMessage);
+		    sessionMessage.setSessionId(inboxMessage.getSessionId());
+		    sessionMessage.setContact(sessionMessage.getContact());
 		});
 		connector.onReadInboxMessage(channelConfig, messageBoxEvent.getInboxMessages());
+		String webSessionId = commonHttpRequest.get(WEB_SESSION_ID);
+		if (!ArgUtil.is(webSessionId) || !webSessionId.equalsIgnoreCase(sessionMessage.getSessionId())) {
+		    commonHttpRequest.setCookie(WEB_SESSION_ID, sessionMessage.getSessionId());
+		}
 		return ApiResponse.buildResults(messageBoxEvent.getInboxMessages());
 	    } else if (ArgUtil.is(messageBoxEvent.getMessageReports())) {
 		connector.onMessageReports(channelConfig, messageBoxEvent.getMessageReports());

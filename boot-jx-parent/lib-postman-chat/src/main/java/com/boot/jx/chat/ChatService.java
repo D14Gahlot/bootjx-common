@@ -58,6 +58,9 @@ public class ChatService {
     @Autowired
     private SessionStore sessionStore;
 
+    @Autowired
+    private ChatSessionFactory chatSessionFactory;
+
     public InboxMessage getInboxMessage() {
 	return chatContext.getInboxMessage();
     }
@@ -99,7 +102,7 @@ public class ChatService {
 
 	MessageDoc messageDoc = messageStore.createOrUpdate(outboxMessage);
 	connectorHandlerFactory.message(MESSAGE_COMPOSE_TYPE.ACTION, chatContactDoc, outboxMessage, null);
-	sessionStore.push(messageDoc, outboxMessage);
+	chatSessionFactory.push(messageDoc, outboxMessage);
 	return messageDoc;
     }
 
@@ -129,7 +132,7 @@ public class ChatService {
 	// ChatDTOUtil.getContactMeta(chatContactDoc));
 	MessageDoc messageDoc = messageStore.createOrUpdate(outboxMessage);
 	connectorHandlerFactory.message(MESSAGE_COMPOSE_TYPE.REPLY, chatContactDoc, outboxMessage, inboxMessage);
-	sessionStore.push(messageDoc, outboxMessage);
+	chatSessionFactory.push(messageDoc, outboxMessage);
 	return messageDoc;
     }
 
@@ -152,7 +155,7 @@ public class ChatService {
 	// ChatDTOUtil.getContactMeta(chatContactDoc));
 	MessageDoc messageDoc = messageStore.createOrUpdate(outboxMessage);
 	connectorHandlerFactory.message(MESSAGE_COMPOSE_TYPE.SEND, chatContactDoc, outboxMessage, null);
-	sessionStore.push(messageDoc, outboxMessage);
+	chatSessionFactory.push(messageDoc, outboxMessage);
 	return messageDoc;
     }
 
