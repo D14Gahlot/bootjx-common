@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.amazonaws.services.codebuild.model.Report;
 import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorMapping;
 import com.boot.jx.dict.ContactType;
@@ -129,6 +130,10 @@ public class InstagramConnector extends AbstractConnector<InstagramConfig, Insta
 	if (ArgUtil.is(m.getRead())) {
 	    report.setChangeStamp(m.getReadWatermark());
 	    report.setStatus(Status.READ);
+	}else if(ArgUtil.is(m.getMessage().isIs_deleted())) {
+		report.setMessageIdExt(m.getMessage().getMid());
+		report.setChangeStamp(m.getTimestamp());
+	    report.setStatus(Status.DELTD);
 	}
 	return report;
     }
@@ -140,7 +145,13 @@ public class InstagramConnector extends AbstractConnector<InstagramConfig, Insta
 	requestMap.toJson();
 	request.getEntry().forEach(pageEntry -> {
 	    pageEntry.getMessaging().forEach(m -> {
-		if (ArgUtil.is(m.getMessage())  || ArgUtil.is(m.getPostBack())) {
+    	if(ArgUtil.is(m.getMessage())) {
+    		if(m.getMessage().isIs_deleted() == true) {
+    			messageBoxEvent.addMessageReport(toMessageReport(m, channelConfig));
+    		}else {
+    			messageBoxEvent.addInboxMessage(toInboxMessage(m, channelConfig));
+    		}
+    	}else if (ArgUtil.is(m.getPostBack())) {
 		    messageBoxEvent.addInboxMessage(toInboxMessage(m, channelConfig));
 		} else if (ArgUtil.is(m.getRead())) {
 		    messageBoxEvent.addMessageReport(toMessageReport(m, channelConfig));
