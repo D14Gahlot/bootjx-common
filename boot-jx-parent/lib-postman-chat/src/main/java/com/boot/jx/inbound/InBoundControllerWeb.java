@@ -111,22 +111,23 @@ public class InBoundControllerWeb {
 	return "app-customer";
     }
 
-    @RequestMapping(value = "/pub/plugin/customer/**", method = RequestMethod.GET)
+    @RequestMapping(value = "/ext/plugin/customer/**", method = RequestMethod.GET)
     public String pluginCustomerPub(Model model, @RequestParam(required = false) String contacyType)
 	    throws InterruptedException {
-	return pluginCustomer(model, contacyType, "/pub/plugin/customer");
+	return pluginCustomer(model, contacyType, "/ext/plugin/customer");
     }
 
     @ApiRequest(type = RequestType.POLL)
     @ResponseBody
-    @RequestMapping(value = "/ext/outbound/web/callback", method = RequestMethod.GET)
+    @RequestMapping(value = { "/ext/outbound/web/callback", "/ext/plugin/outbound/web/callback" },
+	    method = RequestMethod.GET)
     public OutboxMessage onReceiveMessage(@RequestParam(required = false) String number,
 	    @RequestParam(required = false) String csid) throws InterruptedException {
 	return dummyConnector.pollUnreadMessage(ArgUtil.nonEmpty(csid, number));
     }
 
     @ResponseBody
-    @RequestMapping(value = "/ext/outbound/web/auth/v2", method = RequestMethod.GET)
+    @RequestMapping(value = "/ext/plugin/outbound/web/auth/v2", method = RequestMethod.GET)
     public ApiResponse<ChatMessageDTO, Object> onAuthV2(@RequestParam(required = false) String user,
 	    @RequestParam(required = false) String number, @RequestParam(required = false) String csid,
 	    @RequestParam(required = false) String channelId, @RequestParam(required = false) String channelKey)
@@ -150,14 +151,13 @@ public class InBoundControllerWeb {
 	    }
 	}
 	if (ArgUtil.is(channelConfig)) {
-	    stompTunnelSessionManager.registerUser(user, PostManUtil.CONTACT_ID(channelConfig, csid), csid,
-		    webSessionId);
+	    stompTunnelSessionManager.registerUser(user, PostManUtil.CONTACT_ID(channelConfig, csid), csid);
 	}
 	return ApiResponse.buildResults(msgs);
     }
 
     @ResponseBody
-    @RequestMapping(value = "/ext/inbound/v2/web/callback/{nounce}/{channelId}/{channelKey}",
+    @RequestMapping(value = "/ext/plugin/inbound/v2/web/callback/{nounce}/{channelId}/{channelKey}",
 	    method = { RequestMethod.POST })
     public ApiResponse<InboxMessage, Object> inboundMessageBoxEvent(@PathVariable(required = false) String nounce,
 	    @PathVariable(required = false) String channelId, @PathVariable(required = false) String channelKey,
