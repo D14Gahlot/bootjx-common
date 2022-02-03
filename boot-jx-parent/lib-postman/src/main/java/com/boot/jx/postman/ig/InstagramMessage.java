@@ -11,6 +11,7 @@ public class InstagramMessage implements Serializable {
 	private Long seq;
 	private String text;
 	private boolean is_echo;
+	private boolean is_deleted;
 
 	public String getMid() {
 		return mid;
@@ -44,5 +45,12 @@ public class InstagramMessage implements Serializable {
 		this.is_echo = is_echo;
 	}
 	
+	public boolean isIs_deleted() {
+		return is_deleted;
+	}
+
+	public void setIs_deleted(boolean is_deleted) {
+		this.is_deleted = is_deleted;
+	}
 	
 }

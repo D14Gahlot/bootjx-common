@@ -325,6 +325,10 @@ public class MessageStore extends CommonDocStore {
 	    if (ArgUtil.is(messageReport.getReason())) {
 		builder.update().push("logs", messageReport.getReason());
 	    }
+	    
+	    if (ArgUtil.is(messageReport.getStatus() == Status.DELTD)){
+	    	builder.set("message",null);
+	    }
 
 	    String collectionName = getCollectionName(messageReport.contact().getContactType());
 
