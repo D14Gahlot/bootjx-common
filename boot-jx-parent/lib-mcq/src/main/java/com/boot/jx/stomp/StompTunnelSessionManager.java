@@ -2,6 +2,8 @@ package com.boot.jx.stomp;
 
 import java.util.Map.Entry;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
@@ -16,6 +18,8 @@ import com.boot.utils.CryptoUtil;
 @Component
 @Service
 public class StompTunnelSessionManager {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(StompTunnelSessionManager.class);
 
     /*
      * Map for <httpSessionId, stompUID>
@@ -126,9 +130,13 @@ public class StompTunnelSessionManager {
     }
 
     public StompSession getStompSessionByHttpSessionId(String httpSessionId) {
-	String stompUID = http2stompUIdMap.get(httpSessionId);
-	if (ArgUtil.is(stompUID)) {
-	    return stompSessionCache.get(stompUID);
+	if (ArgUtil.is(httpSessionId)) {
+	    String stompUID = http2stompUIdMap.get(httpSessionId);
+	    if (ArgUtil.is(stompUID)) {
+		return stompSessionCache.get(stompUID);
+	    }
+	} else {
+	    LOGGER.error("httpSessionId cannot be null");
 	}
 	return null;
     }
