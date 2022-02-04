@@ -38,7 +38,13 @@ public class MessageStore extends CommonDocStore {
 
     public static enum EVENTS {
 	ASGND_TO_DEPT, ASGND_TO_AGENT, ASGND_TO_QUEUE, UNASGND, PICKED_BY_AGENT, CLOSED_BY_AGENT, LABEL_ADDED,
-	LABEL_REMOVED, STATUS_CHANGED, TAG_ADDED, TAG_REMOVED
+	LABEL_REMOVED, STATUS_CHANGED, TAG_ADDED, TAG_REMOVED,
+
+	// OTHER ERROS
+	INBOUND_FORWARD_ERROR,
+
+	// ENDS
+	DEFAULT;
     }
 
     @Autowired
@@ -325,9 +331,9 @@ public class MessageStore extends CommonDocStore {
 	    if (ArgUtil.is(messageReport.getReason())) {
 		builder.update().push("logs", messageReport.getReason());
 	    }
-	    
-	    if (ArgUtil.is(messageReport.getStatus() == Status.DELTD)){
-	    	builder.set("message",null);
+
+	    if (ArgUtil.is(messageReport.getStatus() == Status.DELTD)) {
+		builder.set("message", null);
 	    }
 
 	    String collectionName = getCollectionName(messageReport.contact().getContactType());

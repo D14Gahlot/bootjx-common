@@ -22,6 +22,7 @@ public class InboxMessage implements Serializable, IMessageExtended {
 
     private String messageId;
     private String messageIdExt;
+    private String messageIdRef;
     protected List<String> to;
     private String from;
     private String fromName;
@@ -341,5 +342,13 @@ public class InboxMessage implements Serializable, IMessageExtended {
 
     public void setFormatSubType(String formatSubType) {
 	this.formatSubType = formatSubType;
+    }
+
+    public String getMessageIdRef() {
+        return messageIdRef;
+    }
+
+    public void setMessageIdRef(String messageIdRef) {
+        this.messageIdRef = messageIdRef;
     }
 }
