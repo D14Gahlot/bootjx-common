@@ -1,8 +1,5 @@
 package com.boot.jx.postman.manager;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -10,8 +7,8 @@ import com.boot.jx.AppContextUtil;
 import com.boot.jx.logger.AuditDetailProvider;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.MessageDoc;
-import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.MessageDefinitions.IMessageExtended;
+import com.boot.jx.postman.model.MessageDefinitions.LogMessage;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.store.MessageStore;
 import com.boot.jx.postman.store.MessageStore.EVENTS;
@@ -77,14 +74,14 @@ public class LogManager {
 	return event(sessionDoc, getCurrenUser(), event, logs);
     }
 
-    public void error(InboxMessage inboxMessage, Exception e) {
+    public void error(LogMessage inboxMessage, Exception e) {
 	MessageDoc doc = new MessageDoc();
 	doc.setSessionId(inboxMessage.getSessionId());
 	doc.setMessageId(inboxMessage.getMessageId());
 	doc.setMessageId(inboxMessage.getMessageId());
 	doc.setMessageIdExt(inboxMessage.getMessageIdExt());
 	doc.setMessageIdRef(inboxMessage.getMessageIdRef());
-	doc.setContactId(PostManUtil.createContactId(inboxMessage));
+	doc.setContactId(PostManUtil.createContactId(inboxMessage.contact()));
 	doc.setType("E");
 	doc.setTimestamp(System.currentTimeMillis());
 	doc.setTraceId(AppContextUtil.getTraceId());

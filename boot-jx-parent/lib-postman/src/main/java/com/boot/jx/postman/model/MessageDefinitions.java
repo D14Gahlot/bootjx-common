@@ -123,6 +123,20 @@ public class MessageDefinitions {
 
     // External attributes
     @JsonIgnoreProperties(ignoreUnknown = true)
+    public interface IMessageId extends Serializable {
+	public String getMessageId();
+
+	public void setMessageId(String messageId);
+
+	public String getMessageIdExt();
+
+	public void setMessageIdExt(String messageIdExt);
+
+	String getMessageIdRef();
+    }
+
+    // External attributes
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public interface SessionMessage extends Serializable {
 	// Internal attributes
 	public String getSessionId();
@@ -135,7 +149,7 @@ public class MessageDefinitions {
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
-    public interface IMessage extends IMessageExternal, IMessageInternal, SessionMessage {
+    public interface IMessage extends IMessageExternal, IMessageInternal, SessionMessage, IMessageId {
 
 	public long getTimestamp();
 
@@ -171,4 +185,7 @@ public class MessageDefinitions {
 	}
     }
 
+    public interface LogMessage extends SessionMessage, IMessageId {
+
+    }
 }

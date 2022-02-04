@@ -30,7 +30,8 @@ public class Message<T extends Message<T>> implements Serializable, MessageOptio
 	SCHLD, CRTD, INIT, SENT, SENT_ERR, SENTX, SENTX_ERR, DLVRD, READ, NSENT, BLCKD, FAILD, DELTD, CCWIN,
 
 	// INBOUND STATUS
-	RECEIVD, FORWARDED, FORWARD_ERR;
+	RECEIVD, FORWARDED, FORWARD_ERR, STATUS_FORWARD_ERR;
+	;
     }
 
     public static class Priority {

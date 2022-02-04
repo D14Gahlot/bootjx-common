@@ -128,6 +128,7 @@ public class PostManInBoundHandler implements InBoundHandler {
 	messageReport.setMessageIdExt(inboxMessage.getMessageIdExt());
 	messageReport.setMessageIdRef(inboxMessage.getMessageIdRef());
 	messageReport.setStatus(status);
+
 	if (ArgUtil.is(e)) {
 	    messageReport.setReason(e.getMessage());
 	}
@@ -213,8 +214,7 @@ public class PostManInBoundHandler implements InBoundHandler {
 		wrap.statuses = CollectionUtil.asList(status);
 		restService.ajax(webhookEntry.asString()).post(wrap).asNone();
 	    } catch (Exception e) {
-		LOGGER.error("Error while Trying to HIT " + webhookEntry.asString(), e);
-		LOGGER.error("NO Response");
+		logManager.error(messageReport, e);
 	    }
 
 	}
