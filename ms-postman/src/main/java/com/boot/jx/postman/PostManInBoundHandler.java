@@ -86,7 +86,6 @@ public class PostManInBoundHandler implements InBoundHandler {
 		    if (ArgUtil.areEqual(CHAT_MODE.AGENT.toString(), defaultClient.getAppType())) {
 			LOGGER.debug("Forwarding InboxMessage to internal Agent ");
 			chatClient.forward(pmCommonConfig.getAgentUrl() + PATH.INBOUND_FRWRD, inboxMessage);
-			updateStatus(inboxMessage, Status.FORWARDED);
 			return;
 		    }
 
@@ -94,7 +93,6 @@ public class PostManInBoundHandler implements InBoundHandler {
 		    if (ArgUtil.areEqual(CHAT_MODE.BOT.toString(), defaultClient.getAppType())) {
 			LOGGER.debug("Forwarding InboxMessage to internal Bot ");
 			chatClient.forward(pmCommonConfig.getBotUrl() + PATH.INBOUND_FRWRD, inboxMessage);
-			updateStatus(inboxMessage, Status.FORWARDED);
 			return;
 		    }
 
@@ -112,9 +110,10 @@ public class PostManInBoundHandler implements InBoundHandler {
 	    LOGGER.debug("Forwarding InboxMessage to Xternal Service ");
 	    try {
 		forward2Webhook(inboxMessage, webhookEntry.asString());
+		updateStatus(inboxMessage, Status.FORWARDED);
 	    } catch (Exception e) {
-
 		LOGGER.error("Error while Trying to HIT " + webhookEntry.asString(), e);
+		updateStatus(inboxMessage, Status.FORWARD_ERR, e.getMessage());
 	    }
 	} else {
 	    chatClient.forward(inboxMessage);
