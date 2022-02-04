@@ -53,7 +53,7 @@ public class ChatSessionManager {
 	    return false;
 	}
 	session = sessionStore.resolveSession(session);
-	logManager.log(session, EVENTS.STATUS_CHANGED, session.getStatus(),
+	logManager.event(session, EVENTS.STATUS_CHANGED, session.getStatus(),
 		PMConstants.CHAT_STATUS.RESOLVED.toString());
 	return true;
     }
@@ -63,7 +63,7 @@ public class ChatSessionManager {
 	    return false;
 	}
 	session = sessionStore.closeSession(session);
-	logManager.log(session, EVENTS.STATUS_CHANGED, session.getStatus(), PMConstants.CHAT_STATUS.CLOSED.toString());
+	logManager.event(session, EVENTS.STATUS_CHANGED, session.getStatus(), PMConstants.CHAT_STATUS.CLOSED.toString());
 	return true;
     }
 
@@ -82,7 +82,7 @@ public class ChatSessionManager {
 	    return this.closeSession(sessionDoc);
 	} else {
 	    sessionStore.changeStatus(sessionDoc, status);
-	    logManager.log(sessionDoc, EVENTS.STATUS_CHANGED, oldStatus, status.toString());
+	    logManager.event(sessionDoc, EVENTS.STATUS_CHANGED, oldStatus, status.toString());
 	}
 	return true;
     }
@@ -106,14 +106,14 @@ public class ChatSessionManager {
 	removedItems.removeAll(newList);
 	if (ArgUtil.is(removedItems)) {
 	    updated = true;
-	    logManager.log(sessionDoc, EVENTS.TAG_REMOVED, removedItems.toArray(new String[0]));
+	    logManager.event(sessionDoc, EVENTS.TAG_REMOVED, removedItems.toArray(new String[0]));
 	}
 
 	List<String> addedItems = new ArrayList<String>(newList);
 	addedItems.removeAll(oldList);
 	if (ArgUtil.is(addedItems)) {
 	    updated = true;
-	    logManager.log(sessionDoc, EVENTS.TAG_ADDED, addedItems.toArray(new String[0]));
+	    logManager.event(sessionDoc, EVENTS.TAG_ADDED, addedItems.toArray(new String[0]));
 	}
 	return updated;
     }
@@ -233,7 +233,7 @@ public class ChatSessionManager {
 	builder.set("assignedToQueue", chatSessionDoc.getAssignedToQueue());
 	builder.set("mode", chatSessionDoc.getMode());
 	sessionStore.updateFirst(builder.getQuery(), builder.getUpdate(), ChatSessionDoc.class);
-	logManager.log(chatSessionDoc, EVENTS.ASGND_TO_QUEUE, queueCode);
+	logManager.event(chatSessionDoc, EVENTS.ASGND_TO_QUEUE, queueCode);
 	return chatSessionDoc;
 
     }

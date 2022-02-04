@@ -13,14 +13,14 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Component;
 
+import com.boot.jx.AppContextUtil;
 import com.boot.jx.dict.ContactType;
-import com.boot.jx.mongo.CommonDocStore;
 import com.boot.jx.mongo.CommonMongoQueryBuilder;
+import com.boot.jx.mongo.CommonMongoTemplateAbstract;
 import com.boot.jx.postman.doc.ContactDetailDoc;
 import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.Message.Status;
-import com.boot.jx.postman.model.MessageDefinitions.IMessage;
 import com.boot.jx.postman.model.MessageReport;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.model.TagDocument;
@@ -32,7 +32,7 @@ import com.google.common.collect.Lists;
 import com.mongodb.WriteResult;
 
 @Component
-public class MessageStore extends CommonDocStore {
+public class MessageStore extends CommonMongoTemplateAbstract {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MessageStore.class);
 
@@ -73,6 +73,7 @@ public class MessageStore extends CommonDocStore {
 
     private MessageDoc createMessageDoc(InboxMessage inboxMessage) {
 	MessageDoc doc = new MessageDoc();
+	doc.setTraceId(AppContextUtil.getTraceId());
 	doc.setContactId(PostManUtil.createContactId(inboxMessage));
 	doc.setType("I");
 	doc.setTimestamp(System.currentTimeMillis());
@@ -153,23 +154,6 @@ public class MessageStore extends CommonDocStore {
 	inboxMessage.setMessageId(doc.getMessageId());
     }
 
-    public MessageDoc log(IMessage inboxMessage, String actorAgent, EVENTS eventName, String... logMessage) {
-	MessageDoc doc = new MessageDoc();
-	doc.setContactId(PostManUtil.createContactId(inboxMessage));
-	doc.setType("L");
-	doc.setTimestamp(System.currentTimeMillis());
-	if (ArgUtil.is(logMessage)) {
-	    for (String string : logMessage) {
-		doc.logs().add(string);
-	    }
-	}
-	doc.setAction(ArgUtil.parseAsString(eventName));
-	doc.setSessionId(inboxMessage.getSessionId());
-	doc.setAgent(actorAgent);
-	mongoTemplate.save(doc, getCollectionName(inboxMessage.contact().type()));
-	return doc;
-    }
-
     // Out Going Messages
     private MessageDoc updateMessageDoc(OutboxMessage outMessage, MessageDoc doc) {
 	doc.setAgent(outMessage.session().getAgent());
@@ -198,6 +182,8 @@ public class MessageStore extends CommonDocStore {
 
     public MessageDoc createMessageDoc(OutboxMessage outMessage) {
 	MessageDoc doc = new MessageDoc();
+	doc.setTraceId(AppContextUtil.getTraceId());
+
 	if (ArgUtil.is(outMessage.getAction())) {
 	    doc.setType(ArgUtil.nonEmpty(outMessage.getType(), "A"));
 	    doc.setAction(outMessage.getAction());

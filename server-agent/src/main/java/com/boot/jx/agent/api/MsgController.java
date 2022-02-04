@@ -212,13 +212,13 @@ public class MsgController {
 	List<String> removedItems = new ArrayList<String>(oldList);
 	removedItems.removeAll(newList);
 	if (ArgUtil.is(removedItems)) {
-	    logManager.log(sessionDoc, EVENTS.LABEL_REMOVED, removedItems.toArray(new String[0]));
+	    logManager.event(sessionDoc, EVENTS.LABEL_REMOVED, removedItems.toArray(new String[0]));
 	}
 
 	List<String> addedItems = new ArrayList<String>(newList);
 	addedItems.removeAll(oldList);
 	if (ArgUtil.is(addedItems)) {
-	    logManager.log(sessionDoc, EVENTS.LABEL_ADDED, addedItems.toArray(new String[0]));
+	    logManager.event(sessionDoc, EVENTS.LABEL_ADDED, addedItems.toArray(new String[0]));
 	}
 	return ApiResponse.buildData(ChatDTOUtil.getContactDTO(contact));
     }

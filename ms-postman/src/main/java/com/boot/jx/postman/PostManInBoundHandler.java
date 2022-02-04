@@ -97,7 +97,7 @@ public class PostManInBoundHandler implements InBoundHandler {
 		    }
 
 		} catch (Exception e) {
-		    updateStatus(inboxMessage, Status.FORWARD_ERR, e.getMessage());
+		    updateStatus(inboxMessage, Status.FORWARD_ERR, e);
 		}
 
 	    }
@@ -112,8 +112,7 @@ public class PostManInBoundHandler implements InBoundHandler {
 		forward2Webhook(inboxMessage, webhookEntry.asString());
 		updateStatus(inboxMessage, Status.FORWARDED);
 	    } catch (Exception e) {
-		LOGGER.error("Error while Trying to HIT " + webhookEntry.asString(), e);
-		updateStatus(inboxMessage, Status.FORWARD_ERR, e.getMessage());
+		updateStatus(inboxMessage, Status.FORWARD_ERR, e);
 	    }
 	} else {
 	    chatClient.forward(inboxMessage);
@@ -121,7 +120,7 @@ public class PostManInBoundHandler implements InBoundHandler {
 
     }
 
-    private void updateStatus(InboxMessage inboxMessage, Status status, String reason) {
+    private void updateStatus(InboxMessage inboxMessage, Status status, Exception e) {
 	MessageReport messageReport = new MessageReport();
 	messageReport.contact().copyFrom(inboxMessage.getContact());
 	messageReport.setChangeStamp(System.currentTimeMillis());
@@ -129,8 +128,14 @@ public class PostManInBoundHandler implements InBoundHandler {
 	messageReport.setMessageIdExt(inboxMessage.getMessageIdExt());
 	messageReport.setMessageIdRef(inboxMessage.getMessageIdRef());
 	messageReport.setStatus(status);
-	messageReport.setReason(reason);
+	if (ArgUtil.is(e)) {
+	    messageReport.setReason(e.getMessage());
+	}
 	messageStore.updateStatus(messageReport);
+
+	if (ArgUtil.is(e)) {
+	    logManager.error(inboxMessage, e);
+	}
     }
 
     private void updateStatus(InboxMessage inboxMessage, Status status) {

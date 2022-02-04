@@ -31,6 +31,7 @@ public class MessageDoc implements Serializable, Patchable<MessageDoc> {
     @Indexed
     private String messageIdExt;
     private String messageIdRef;
+    private String traceId;
 
     @Indexed
     private String sessionId;
@@ -362,5 +363,13 @@ public class MessageDoc implements Serializable, Patchable<MessageDoc> {
 
     public void setQueue(String queue) {
 	this.queue = queue;
+    }
+
+    public String getTraceId() {
+	return traceId;
+    }
+
+    public void setTraceId(String traceId) {
+	this.traceId = traceId;
     }
 }
