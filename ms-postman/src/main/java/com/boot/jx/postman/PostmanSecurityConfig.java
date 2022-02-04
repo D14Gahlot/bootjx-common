@@ -35,7 +35,9 @@ public class PostmanSecurityConfig {
 	protected void configure(HttpSecurity httpSecurity) throws Exception {
 	    httpSecurity.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
 		    // Permit all
-		    .and().authorizeRequests().antMatchers("/**").permitAll();
+		    .and().authorizeRequests().antMatchers("/**").permitAll()
+		    // CSRF
+		    .and().csrf().disable().headers().disable();;
 	}
 
 	@Override
