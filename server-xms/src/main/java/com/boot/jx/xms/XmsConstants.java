@@ -5,10 +5,15 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import org.springframework.core.annotation.AliasFor;
+
 import com.boot.jx.http.ApiRequest;
 import com.boot.jx.swagger.ApiMockParam;
 import com.boot.jx.swagger.ApiMockParams;
 import com.boot.jx.swagger.MockParamBuilder.MockParamType;
+
+import io.swagger.annotations.Api;
+import io.swagger.annotations.Authorization;
 
 public class XmsConstants {
 
@@ -26,19 +31,17 @@ public class XmsConstants {
     @Target({ ElementType.TYPE, ElementType.METHOD })
     @Retention(RetentionPolicy.RUNTIME)
     @ApiRequest(authenticateTenant = true)
-    @ApiMockParams({
-//	    @ApiMockParam(name = "x-consumer-key", value = "Consumer Key", defaultValue = "abcvernorx",
-//		    paramType = MockParamType.HEADER),
-//	    @ApiMockParam(name = "x-consumer-token", value = "Consumer Token", defaultValue = "kje34kipdghkjwww",
-//		    paramType = MockParamType.HEADER),
-//	    @ApiMockParam(name = "x-access-key", value = "Access Key", defaultValue = "agent1",
-//		    paramType = MockParamType.HEADER),
-//	    @ApiMockParam(name = "x-access-token", value = "Access Token", defaultValue = "s1agenttoken$$$",
-//		    paramType = MockParamType.HEADER),
-	    @ApiMockParam(name = X_API_KEY, value = "API Key", defaultValue = "thisduMmykEy4maTD0NTUsEit",
-		    paramType = MockParamType.HEADER) })
-    public @interface ApiClientParams {
-
+    @ApiMockParams({ @ApiMockParam(name = X_API_KEY, value = "API Key", paramType = MockParamType.HEADER) })
+    @Api(authorizations = @Authorization("X_API_KEY"))
+    public @interface XMSClientAuth {
+//	@AliasFor(annotation = ApiOperation.class, attribute = "value")
+//	String summary() default "";
+//
+//	@AliasFor(annotation = ApiOperation.class, attribute = "notes")
+//	String notes() default "";
+//
+	@AliasFor(annotation = Api.class, attribute = "authorizations")
+	Authorization[] authorizations() default @Authorization(value = "X_API_KEY");
     }
 
     @Target({ ElementType.TYPE, ElementType.METHOD })

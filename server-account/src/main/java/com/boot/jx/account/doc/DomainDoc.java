@@ -6,7 +6,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.TypeAlias;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import com.boot.jx.model.AuditableEntity;
+import com.boot.jx.model.AuditCreateEntity;
 import com.boot.jx.mongo.CommonDocInterfaces.IDocument;
 import com.boot.jx.validation.AlphaNumValidator.ValidAlphaNum;
 import com.boot.utils.ArgUtil;
@@ -14,7 +14,7 @@ import com.boot.utils.Constants;
 
 @Document(collection = "DOMAIN")
 @TypeAlias("DomainDoc")
-public class DomainDoc implements IDocument, AuditableEntity, Serializable, Comparable<DomainDoc> {
+public class DomainDoc implements IDocument, AuditCreateEntity, Serializable, Comparable<DomainDoc> {
 
     private static final long serialVersionUID = -3354844112176554561L;
 

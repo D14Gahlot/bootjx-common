@@ -4,14 +4,20 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.boot.jx.AppConfig;
 import com.boot.jx.AppConfigPackage.AppCommonConfig;
 import com.boot.jx.http.CommonHttpRequest;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.Constants;
 import com.boot.utils.CryptoUtil.HashBuilder;
+
+import io.swagger.annotations.ApiOperation;
 
 @Controller
 public class AppViewController {
@@ -83,4 +89,10 @@ public class AppViewController {
 	model.addAttribute("APP_CONTEXT", appConfig.getAppPrefix());
 	return "swagger-uix";
     }
+
+    @GetMapping({ "favicon.ico", "/favicon.ico", "/favicon.icon", "/favicon.**" })
+    @ResponseBody
+    void returnNoFavicon() {
+    }
+
 }

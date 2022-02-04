@@ -49,8 +49,12 @@ public class ConfigConstants {
 	POSTMAN_CHAT_INBOUND_WEBHOOK(new ConfigMeta("Message Inbound Webhook", "postman.chat.inbound.webhook")
 		.desc("Inbound messages will be forwarded to this webhook")),
 
-	POSTMAN_CHAT_CHANNEL_SANDBAX(new ConfigMeta("Enable Sandbox Channels", "postman.chat.channel.sandbox")
-		.desc("Sandbox channels are preconfigured communication channles").optionsOnOff()),
+	POSTMAN_CHAT_INBOUND_QUEUE(new ConfigMeta("Message Inbound Queue", "postman.chat.inbound.queue")
+		.desc("Inbound messages will be forwarded to this Queue by default")
+		.optionsSource("getx:/api/config/inbound_queue").optionsKey("code")),
+
+	POSTMAN_CHAT_CHANNEL_SANDBOX(new ConfigMeta("Enable Sandbox Channels", "postman.chat.channel.sandbox")
+		.desc("Sandbox channels are preconfigured communication channels").optionsOnOff()),
 
 	// Agent Properties
 	CHAT_TAG_ENABLED(new ConfigMeta("Chat Tag Enabled", "chat.tag.enabled").optionsOnOff().group(GROUP_AGENT)),
@@ -101,14 +105,14 @@ public class ConfigConstants {
 		.optionValues(PHONE_NUMBER_UTIL.getSupportedRegions().toArray()).defaultValue("IN")),
 
 	POSTMAN_AGENT_CHAT_AUTOREPLY_TALK2AGENT(new ConfigMeta("Message to customer while chat is transferred to agent",
-		"postman.agent.chat.autoreply.talk2agent").options("getx:/api/tmpl/hsm").group(GROUP_AGENT)),
+		"postman.agent.chat.autoreply.talk2agent").optionsSource("getx:/api/tmpl/hsm").group(GROUP_AGENT)),
 
 	POSTMAN_AGENT_CHAT_AUTOREPLY_RESOLVED(new ConfigMeta("Message to customer when chat is resolevd by agent",
-		"postman.agent.chat.autoreply.resolved").options("getx:/api/tmpl/hsm").group(GROUP_AGENT)),
+		"postman.agent.chat.autoreply.resolved").optionsSource("getx:/api/tmpl/hsm").group(GROUP_AGENT)),
 
 	POSTMAN_AGENT_CHAT_AUTOREPLY_NOAGENT(
 		new ConfigMeta("Message to customer when agent avaialble", "postman.agent.chat.autoreply.noagent")
-			.options("getx:/api/tmpl/hsm").group(GROUP_AGENT)),
+			.optionsSource("getx:/api/tmpl/hsm").group(GROUP_AGENT)),
 
 	// Ends here
 	;

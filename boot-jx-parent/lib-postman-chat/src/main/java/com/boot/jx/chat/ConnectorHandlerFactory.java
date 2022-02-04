@@ -133,13 +133,18 @@ public class ConnectorHandlerFactory extends ScopedBeanFactory<String, Connector
 	    LOGGER.error("WEBHOOK REGISTRATION NOT FOUND ");
 	}
 
-	default InboxMessage createInboxMessage(ChannelConfig channelConfig) {
-	    InboxMessage inboxMessage = new InboxMessage();
+	default InboxMessage createInboxMessage(ChannelConfig channelConfig, InboxMessage inboxMessage) {
 	    if (ArgUtil.is(channelConfig)) {
 		inboxMessage.contact().type(channelConfig.getContactType());
 		inboxMessage.contact().setChannelType(channelConfig.getChannelType());
 		inboxMessage.contact().setLane(channelConfig.getLane());
 	    }
+	    return inboxMessage;
+	}
+
+	default InboxMessage createInboxMessage(ChannelConfig channelConfig) {
+	    InboxMessage inboxMessage = new InboxMessage();
+	    createInboxMessage(channelConfig, inboxMessage);
 	    return inboxMessage;
 	}
 
@@ -184,7 +189,8 @@ public class ConnectorHandlerFactory extends ScopedBeanFactory<String, Connector
 
 	public ChannelConfig getChannelConfig(IMessage outboxMessage);
 
-	public OutboxMessage template(ChannelConfig channelConfig, ChatContactDoc chatContactDoc, OutboxMessage outboxMessage);
+	public OutboxMessage template(ChannelConfig channelConfig, ChatContactDoc chatContactDoc,
+		OutboxMessage outboxMessage);
 
 	boolean optin(ChannelConfig channelConfig, ChatContactDoc chatContactDoc);
 

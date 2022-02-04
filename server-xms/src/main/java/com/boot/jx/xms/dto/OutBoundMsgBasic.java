@@ -5,7 +5,8 @@ import java.util.List;
 
 import com.boot.jx.model.CommonTemplate;
 import com.boot.jx.postman.model.ext.CommonMsgLocation;
-import com.boot.jx.postman.model.ext.CommonMsgText;
+import com.boot.jx.postman.model.ext.CommonMsgText.InBoundMsgText;
+import com.boot.jx.postman.model.ext.CommonMsgText.OutBoundMsgText;
 import com.boot.jx.swagger.ApiMockModelProperty;
 import com.boot.model.UtilityModels.JsonIgnoreUnknown;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -37,7 +38,7 @@ public class OutBoundMsgBasic implements Serializable, JsonIgnoreUnknown {
 	private static final long serialVersionUID = 5358190519262995012L;
 
 	@ApiMockModelProperty(required = false)
-	public CommonMsgText text;
+	public OutBoundMsgText text;
 
 	@ApiMockModelProperty(required = false)
 	public OutBoundMsgMedia audio;
@@ -58,11 +59,11 @@ public class OutBoundMsgBasic implements Serializable, JsonIgnoreUnknown {
 	@ApiMockModelProperty(required = false)
 	public CommonTemplate template;
 
-	public CommonMsgText getText() {
+	public OutBoundMsgText getText() {
 	    return text;
 	}
 
-	public void setText(CommonMsgText text) {
+	public void setText(OutBoundMsgText text) {
 	    this.text = text;
 	}
 

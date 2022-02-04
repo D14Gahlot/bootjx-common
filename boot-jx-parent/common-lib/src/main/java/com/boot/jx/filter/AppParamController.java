@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.boot.jx.AppConfig;
+import com.boot.jx.AppConfigPackage;
 import com.boot.jx.AppConfigPackage.AppSharedConfig;
 import com.boot.jx.AppParam;
 import com.boot.jx.AppTenantConfig;
@@ -130,16 +131,12 @@ public class AppParamController {
 	return ArgUtil.parseAsString(value);
     }
 
-    @Autowired(required = false)
-    private List<AppSharedConfig> listAppSharedConfig;
+    @Autowired
+    private AppConfigPackage appConfigPackage;
 
     @RequestMapping(value = "/pub/amx/config/shared/clear", method = RequestMethod.GET)
     public ApiResponse<BoolRespModel, Object> clearSharedConfig() {
-	if (ArgUtil.is(listAppSharedConfig)) {
-	    for (AppSharedConfig appSharedConfig : listAppSharedConfig) {
-		appSharedConfig.clear(null);
-	    }
-	}
+	appConfigPackage.clear(null);
 	return ApiResponse.buildData(new BoolRespModel(true));
     }
 
@@ -268,13 +265,7 @@ public class AppParamController {
 
     @RequestMapping(value = EXT_PUB_CONFIG_CLIENT, method = RequestMethod.GET)
     public ApiResponse<Map<String, Object>, Object> extPubConfig() {
-	Map<String, Object> config = new HashMap<String, Object>();
-	if (ArgUtil.is(listAppSharedConfig)) {
-	    for (AppSharedConfig appSharedConfig : listAppSharedConfig) {
-		appSharedConfig.getExternalConfig(config);
-	    }
-	}
-	return ApiResponse.buildData(config);
+	return ApiResponse.buildData(appConfigPackage.getExternalConfig());
     }
 
 }

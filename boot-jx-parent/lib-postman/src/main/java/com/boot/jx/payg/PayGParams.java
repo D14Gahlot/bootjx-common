@@ -48,22 +48,6 @@ public class PayGParams implements Serializable {
 	
 	private KioskParamsDetails kiosk;
 	
-	private WireTransferParamsDetails wireTransfer;
-	
-	@Deprecated
-	public WireTransferParamsDetails getWireTransferStatus() {
-		return wireTransfer;
-	}
-	
-
-	public WireTransferParamsDetails getWireTransfer() {
-		return wireTransfer;
-	}
-
-	public void setWireTransfer(WireTransferParamsDetails wireTransfer) {
-		this.wireTransfer = wireTransfer;
-	}
-
 	public KioskParamsDetails getKiosk() {
 		return kiosk;
 	}

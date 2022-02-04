@@ -8,9 +8,6 @@ import com.boot.model.UtilityModels.JsonIgnoreUnknown;
 
 public class MsgChannel implements Serializable, JsonIgnoreUnknown {
 
-    /**
-     * 
-     */
     private static final long serialVersionUID = -476861137283561876L;
 
     @ApiMockModelProperty(example = "WHATSAPP", value = "Contact Type")

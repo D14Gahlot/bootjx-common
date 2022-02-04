@@ -7,13 +7,13 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.TypeAlias;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import com.boot.jx.model.AuditableEntity;
+import com.boot.jx.model.AuditCreateEntity;
 import com.boot.jx.mongo.CommonDocInterfaces.OldDocVersion;
 import com.boot.utils.ArgUtil;
 
 @Document(collection = "DICT_QUICK_AXN")
 @TypeAlias("QuickAction")
-public class QuickAction implements Serializable, OldDocVersion<QuickAction>, AuditableEntity {
+public class QuickAction implements Serializable, OldDocVersion<QuickAction>, AuditCreateEntity {
 	private static final long serialVersionUID = -5649094988762846983L;
 
 	@Id

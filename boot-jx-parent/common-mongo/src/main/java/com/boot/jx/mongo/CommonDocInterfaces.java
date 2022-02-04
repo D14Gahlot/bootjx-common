@@ -11,9 +11,11 @@ import org.springframework.data.mongodb.core.mapping.Field;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 
-import com.boot.jx.model.AuditableEntity;
+import com.boot.jx.model.AuditCreateEntity;
+import com.boot.jx.model.AuditCreateEntity.AuditUpdateEntity;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.EntityDtoUtil;
+import com.boot.utils.JsonUtil;
 import com.boot.utils.TimeUtils;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -126,14 +128,16 @@ public class CommonDocInterfaces {
 	ADocumentDTO<T> newInstance();
     }
 
-    @Document(collection = "TRASH")
-    public static class TrashDocument implements AuditableEntity, Serializable {
+    @Document(collection = "ACTIVITY_LOGS")
+    public static class AuditActivityDoc implements AuditCreateEntity, Serializable {
 	private static final long serialVersionUID = -8573412950623297045L;
 	@Id
 	private String id;
 	private Object doc;
 	private String createdBy;
 	private Long createdStamp;
+	private String collection;
+	private String comment;
 
 	public String getId() {
 	    return id;
@@ -167,15 +171,41 @@ public class CommonDocInterfaces {
 	    this.createdStamp = createdStamp;
 	}
 
-	public TrashDocument doc(Object doc) {
-	    this.doc = doc;
+	public AuditActivityDoc doc(Object doc) {
+	    this.doc = JsonUtil.toMap(doc);
+	    return this;
+	}
+
+	public AuditActivityDoc collection(String collection) {
+	    this.collection = collection;
+	    return this;
+	}
+
+	public String getCollection() {
+	    return collection;
+	}
+
+	public void setCollection(String collection) {
+	    this.collection = collection;
+	}
+
+	public String getComment() {
+	    return comment;
+	}
+
+	public void setComment(String comment) {
+	    this.comment = comment;
+	}
+
+	public AuditActivityDoc comment(String comment) {
+	    this.comment = comment;
 	    return this;
 	}
 
     }
 
     public static class BasicDocument<T extends BasicDocument<T>>
-	    implements OldDocVersion<T>, IDocument, AuditableEntity, Serializable {
+	    implements OldDocVersion<T>, IDocument, AuditCreateEntity, Serializable {
 
 	private static final long serialVersionUID = 3330736275464700381L;
 	private String createdBy;
@@ -212,7 +242,11 @@ public class CommonDocInterfaces {
 
     }
 
-    public static class TimeStamp implements Serializable {
+    public interface AuditableByIdEntity extends AuditCreateEntity, AuditUpdateEntity {
+	public String getId();
+    }
+
+    public static class TimeStampIndex implements Serializable {
 
 	private static final long serialVersionUID = 9114924334759684396L;
 	private long stamp;
@@ -255,32 +289,32 @@ public class CommonDocInterfaces {
 	    this.week = week;
 	}
 
-	public static TimeStamp from(long stamp) {
-	    TimeStamp timeStamp = new TimeStamp();
+	public static TimeStampIndex from(long stamp) {
+	    TimeStampIndex timeStamp = new TimeStampIndex();
 	    timeStamp.setHour(stamp / TimeUtils.Constants.MILLIS_IN_HOUR);
 	    timeStamp.setDay(stamp / TimeUtils.Constants.MILLIS_IN_DAY);
 	    timeStamp.setWeek(stamp / TimeUtils.Constants.MILLIS_IN_WEEK);
 	    return timeStamp;
 	}
 
-	public static TimeStamp now() {
+	public static TimeStampIndex now() {
 	    return from(System.currentTimeMillis());
 	}
 
-	public interface UpdatedTimeStampSupport {
-	    public TimeStamp getUpdated();
+	public interface UpdatedTimeStampIndexSupport {
+	    public TimeStampIndex getUpdated();
 
-	    public void setUpdated(TimeStamp updated);
+	    public void setUpdated(TimeStampIndex updated);
 	}
 
-	public static class UpdatedTimeStampDoc implements UpdatedTimeStampSupport {
-	    private TimeStamp updated;
+	public static class UpdatedTimeStampDoc implements UpdatedTimeStampIndexSupport {
+	    private TimeStampIndex updated;
 
-	    public TimeStamp getUpdated() {
+	    public TimeStampIndex getUpdated() {
 		return updated;
 	    }
 
-	    public void setUpdated(TimeStamp updated) {
+	    public void setUpdated(TimeStampIndex updated) {
 		this.updated = updated;
 	    }
 	}

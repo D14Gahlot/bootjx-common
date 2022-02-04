@@ -8,16 +8,17 @@ import com.boot.utils.ArgUtil;
 
 public interface AgentChatHandler {
 
-	public boolean onAssignSupported(InboxMessage inboxMessage);
+    public boolean onAssignSupported(InboxMessage inboxMessage);
 
-	default public boolean onMessageSupported(InboxMessage inboxMessage) {
-		return "AGENT".equalsIgnoreCase(inboxMessage.session().getMode())
-				&& ArgUtil.isEmptyValue(inboxMessage.session().isResolved());
-	}
+    @Deprecated
+    default public boolean onMessageSupported(InboxMessage inboxMessage) {
+	return "AGENT".equalsIgnoreCase(inboxMessage.session().getMode())
+		&& ArgUtil.isEmptyValue(inboxMessage.session().isResolved());
+    }
 
-	public InboxMessage onAssign(InboxMessage inboxMessage);
+    public InboxMessage onAssign(InboxMessage inboxMessage);
 
-	public InboxMessage onMessageReceive(InboxMessage inboxMessage);
+    public InboxMessage onMessageReceive(InboxMessage inboxMessage);
 
-	public ChatMessageDTO onSend(ChatSessionDoc sessionDoc, OutboxMessage outboxMessage);
+    public ChatMessageDTO onSend(ChatSessionDoc sessionDoc, OutboxMessage outboxMessage);
 }

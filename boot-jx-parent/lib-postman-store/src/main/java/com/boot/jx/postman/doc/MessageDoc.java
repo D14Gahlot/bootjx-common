@@ -31,6 +31,7 @@ public class MessageDoc implements Serializable, Patchable<MessageDoc> {
     @Indexed
     private String messageIdExt;
     private String messageIdRef;
+    private String traceId;
 
     @Indexed
     private String sessionId;
@@ -54,7 +55,11 @@ public class MessageDoc implements Serializable, Patchable<MessageDoc> {
 
     private String status;
     private ContactDetailDoc contact;
+
+    @Indexed
+    private String queue;
     private String agent;
+
     private TagDocument tags;
     private Map<String, Object> model;
     private Map<String, Object> meta;
@@ -350,5 +355,21 @@ public class MessageDoc implements Serializable, Patchable<MessageDoc> {
 
     public void setHsm(CommonTemplate hsm) {
 	this.hsm = hsm;
+    }
+
+    public String getQueue() {
+	return queue;
+    }
+
+    public void setQueue(String queue) {
+	this.queue = queue;
+    }
+
+    public String getTraceId() {
+	return traceId;
+    }
+
+    public void setTraceId(String traceId) {
+	this.traceId = traceId;
     }
 }

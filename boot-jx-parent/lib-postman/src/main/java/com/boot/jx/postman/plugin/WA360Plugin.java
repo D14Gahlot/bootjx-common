@@ -101,4 +101,9 @@ public class WA360Plugin implements ChannelPlugin<WA360ConfigDetails> {
 	return true;
     }
 
+    @Override
+    public boolean isWebhookManual() {
+	return false;
+    }
+
 }

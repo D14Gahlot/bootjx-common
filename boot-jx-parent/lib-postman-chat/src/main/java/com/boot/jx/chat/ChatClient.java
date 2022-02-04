@@ -23,6 +23,7 @@ public class ChatClient {
 
     public static class PATH {
 	public static final String ASSIGN_TO_AGENT = "/int/assign/agent";
+	public static final String INBOUND_FRWRD = "/int/inbound/callback";
     }
 
     @Autowired
@@ -31,12 +32,12 @@ public class ChatClient {
     @Autowired
     private PMClientConfig chatClientConfig;
 
-    public ApiResponse<InboxMessage, Object> forward(InboxMessage inboxMessage) {
+    public ApiResponse<InboxMessage, Object> forward(String inboundForwardUrl, InboxMessage inboxMessage) {
 	LOGGER.debug("Forwarding InboxMessage to other Service ");
 	try {
-	    if (ArgUtil.is(chatClientConfig.getInboundForwardUrl())) {
+	    if (ArgUtil.is(inboundForwardUrl)) {
 		inboxMessage.setChecksum(PostManUtil.generateCheckSum(inboxMessage));
-		return restService.ajax(chatClientConfig.getInboundForwardUrl()).post(inboxMessage)
+		return restService.ajax(inboundForwardUrl).post(inboxMessage)
 			.as(new ParameterizedTypeReference<ApiResponse<InboxMessage, Object>>() {
 			});
 	    }
@@ -44,6 +45,10 @@ public class ChatClient {
 	    throw new PostManException(e);
 	}
 	return ApiResponse.buildResult(inboxMessage);
+    }
+
+    public ApiResponse<InboxMessage, Object> forward(InboxMessage inboxMessage) {
+	return this.forward(chatClientConfig.getInboundForwardUrl(), inboxMessage);
     }
 
     public ApiResponse<InboxMessage, Object> assignToAgent(InboxMessage inboxMessage) {

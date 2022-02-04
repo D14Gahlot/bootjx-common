@@ -8,25 +8,21 @@ import com.boot.jx.xms.dto.DigitalDocStore;
 import com.boot.jx.xms.dto.DigitalEventDto;
 import com.boot.jx.xms.dto.DigitalObjectDto;
 
-
 @Component
 public class ApiService {
 
+    @Autowired
+    MongoTemplate mongoTemplate;
 
-	@Autowired
-	MongoTemplate mongoTemplate;
-	
-	@Autowired
-	DigitalDocStore digitalDocStore;
-	
-	
-	public  void saveDigitalInfo(DigitalObjectDto digitalObjectDto) {
-		digitalDocStore.createAndUpdateDigitalDoc(digitalObjectDto);
-	}
-	
-	public void saveDigitalEvent(DigitalEventDto digitalEventDto) {
-		digitalDocStore.insertDigitalEvent(digitalEventDto);
-	}
-	
-	
+    @Autowired
+    DigitalDocStore digitalDocStore;
+
+    public void saveDigitalInfo(DigitalObjectDto digitalObjectDto) {
+	digitalDocStore.createAndUpdateDigitalDoc(digitalObjectDto);
+    }
+
+    public void saveDigitalEvent(DigitalEventDto digitalEventDto) {
+	digitalDocStore.insertDigitalEvent(digitalEventDto);
+    }
+
 }

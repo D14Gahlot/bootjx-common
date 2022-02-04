@@ -421,6 +421,15 @@ public class RestService {
 	    return this.as(Object.class);
 	}
 
+	/**
+	 * Ignore resposne
+	 * 
+	 * @return
+	 */
+	public void asNone() {
+	    this.as(Void.class);
+	}
+
 	public Map<String, Object> asMap() {
 	    return this.as(new ParameterizedTypeReference<Map<String, Object>>() {
 	    });

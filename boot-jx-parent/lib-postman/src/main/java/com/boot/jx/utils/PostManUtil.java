@@ -16,6 +16,7 @@ import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.MessageDefinitions.Contactable;
 import com.boot.jx.postman.model.MessageDefinitions.IMessage;
 import com.boot.jx.postman.model.OutboxMessage;
+import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CryptoUtil;
 import com.boot.utils.Random;
@@ -150,6 +151,10 @@ public class PostManUtil {
 
     public static String CONTACT_ID(Contactable contactable) {
 	return createContactId(contactable);
+    }
+
+    public static String CONTACT_ID(ChannelConfig channelConfig, String csid) {
+	return createContactId(channelConfig.getContactType(), csid, channelConfig.getLane());
     }
 
     public static String CHANNEL_ID(String chanelType, String lane) {

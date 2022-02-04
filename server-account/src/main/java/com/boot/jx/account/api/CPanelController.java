@@ -74,9 +74,8 @@ public class CPanelController {
     @RequestMapping(value = "/api/config/channel/{channelType}", method = { RequestMethod.POST })
     @JsonView(PMEnvironment.PublicProperty.class)
     public ApiResponse<ChannelConfig, Object> saveChannelConfig(@PathVariable CHANNEL_TYPE_ENUM channelType,
-	    @RequestParam(defaultValue = "false", required = false) boolean disabled,
 	    @RequestBody Map<String, Object> data) {
-	return ApiResponse.buildResults(configManager.saveChannelConfig(channelType.toString(), disabled, data));
+	return ApiResponse.buildResults(configManager.saveChannelConfig(channelType.toString(), data));
     }
 
     @ResponseBody

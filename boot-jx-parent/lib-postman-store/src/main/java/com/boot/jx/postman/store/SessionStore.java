@@ -10,20 +10,20 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.domain.Sort.Order;
-import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Component;
 
-import com.boot.jx.mongo.CommonDocStore;
 import com.boot.jx.mongo.CommonMongoQB.CommonMongoCriteria;
 import com.boot.jx.mongo.CommonMongoQueryBuilder;
+import com.boot.jx.mongo.CommonMongoTemplateAbstract;
 import com.boot.jx.postman.PMClientConfig;
 import com.boot.jx.postman.PMConstants;
 import com.boot.jx.postman.PMConstants.CHAT_MODE;
 import com.boot.jx.postman.PMConstants.CHAT_STATUS;
 import com.boot.jx.postman.PMConstants.DEFAULT_VALUES;
+import com.boot.jx.postman.PMEnvironment.PMDomainConfig;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.ChatUserProfileDoc;
@@ -43,12 +43,9 @@ import com.boot.utils.EntityDtoUtil;
 import com.boot.utils.TimeUtils;
 
 @Component
-public class SessionStore extends CommonDocStore {
+public class SessionStore extends CommonMongoTemplateAbstract {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SessionStore.class);
-
-    @Autowired
-    public MongoTemplate mongoTemplate;
 
     @Autowired
     public PMClientConfig pmClientConfig;
@@ -56,23 +53,26 @@ public class SessionStore extends CommonDocStore {
     @Autowired
     private MessageContext messageContext;
 
+    @Autowired
+    private PMDomainConfig pmDomainConfig;
+
     public ChatContactDoc getContact(IMessage inboxMessage) {
 	String contactId = PostManUtil.createContactId(inboxMessage);
-	ChatContactDoc chatContactDoc = mongoTemplate.findById(contactId, ChatContactDoc.class);
+	ChatContactDoc chatContactDoc = super.findById(contactId, ChatContactDoc.class);
 	return chatContactDoc;
     }
 
     public ChatContactDoc getContact(String contactId) {
-	return mongoTemplate.findById(contactId, ChatContactDoc.class);
+	return super.findById(contactId, ChatContactDoc.class);
     }
 
     public ChatContactDoc save(ChatContactDoc chatContactDoc) {
-	mongoTemplate.save(chatContactDoc);
+	super.save(chatContactDoc);
 	return chatContactDoc;
     }
 
     public ChatSessionDoc getSession(String sessionId) {
-	return mongoTemplate.findById(sessionId, ChatSessionDoc.class);
+	return super.findById(sessionId, ChatSessionDoc.class);
     }
 
     public boolean isSessionValid(ChatSessionDoc chatSessionDoc) {
@@ -93,7 +93,7 @@ public class SessionStore extends CommonDocStore {
     }
 
     public ChatSessionDoc getValidSession(String sessionId) {
-	ChatSessionDoc chatSessionDoc = mongoTemplate.findById(sessionId, ChatSessionDoc.class);
+	ChatSessionDoc chatSessionDoc = getSession(sessionId);
 	if (isSessionValid(chatSessionDoc)) {
 	    return chatSessionDoc;
 	}
@@ -114,6 +114,42 @@ public class SessionStore extends CommonDocStore {
      * @return
      */
     public ChatSessionDoc createSession(SessionMessage sessionMessage) {
+	return createSessionOld(sessionMessage);
+    }
+
+    public ChatSessionDoc createSessionNew(SessionMessage sessionMessage) {
+	Contactable contact = PostManUtil.getContactMeta(sessionMessage.contact());
+
+	String sessionId = sessionMessage.getSessionId();
+	String contactId = contact.getContactId();
+
+	ChatSessionDoc chatSessionDoc = null;
+	ChatContactDoc chatContactDoc = null;
+
+	if (ArgUtil.is(sessionId)) {
+	    chatSessionDoc = getSession(sessionId);
+	    if (ArgUtil.isEmpty(chatSessionDoc)) {
+		// Session Not found
+		return null;
+	    }
+	    if (!isSessionValid(chatSessionDoc)) {
+		contactId = ArgUtil.nonEmpty(contactId, chatSessionDoc.getContactId());
+	    }
+	    if (ArgUtil.isEmpty(contactId)) {
+		// Contact Not found
+		return null;
+	    }
+	    chatContactDoc = super.findById(contactId, ChatContactDoc.class);
+	}
+
+	if (!isSessionValid(chatSessionDoc)) {
+
+	}
+
+	return chatSessionDoc;
+    }
+
+    public ChatSessionDoc createSessionOld(SessionMessage sessionMessage) {
 	Contactable contact = PostManUtil.getContactMeta(sessionMessage.contact());
 
 	String sessionId = sessionMessage.getSessionId();
@@ -123,20 +159,22 @@ public class SessionStore extends CommonDocStore {
 	ChatContactDoc chatContactDoc = null;
 
 	if (ArgUtil.isEmpty(contactId)) {
-	    // If these conact & session are not present there is nothing we can do about
-	    // this message
 	    if (ArgUtil.isEmpty(sessionId)) {
+		// If these conact & session are not present there is nothing we can do about
+		// this message
 		return null;
 	    }
 	    chatSessionDoc = getSession(sessionId);
 
 	    if (ArgUtil.isEmpty(chatSessionDoc)) {
+		// Session Not found
 		return null;
 	    }
 
 	    if (!isSessionValid(chatSessionDoc)) {
+		// Session Found but invalid
 		contactId = chatSessionDoc.getContactId();
-		chatContactDoc = mongoTemplate.findById(contactId, ChatContactDoc.class);
+		chatContactDoc = super.findById(contactId, ChatContactDoc.class);
 		contact.copyFrom(chatContactDoc);
 	    }
 
@@ -145,12 +183,11 @@ public class SessionStore extends CommonDocStore {
 	// Find Out Chat Session
 	if (ArgUtil.isEmpty(chatSessionDoc)) {
 	    if (ArgUtil.isEmpty(sessionId)) {
-		chatContactDoc = mongoTemplate.findById(contactId, ChatContactDoc.class);
+		chatContactDoc = super.findById(contactId, ChatContactDoc.class);
 		if (ArgUtil.is(chatContactDoc)) {
 		    sessionId = chatContactDoc.getSessionId();
 		}
 	    }
-
 	    if (ArgUtil.is(sessionId)) {
 		chatSessionDoc = getValidSession(sessionId);
 	    }
@@ -164,7 +201,7 @@ public class SessionStore extends CommonDocStore {
 	    closeAllPreviousSessions(contactId);
 
 	    if (!ArgUtil.is(chatContactDoc)) {
-		chatContactDoc = mongoTemplate.findById(contactId, ChatContactDoc.class);
+		chatContactDoc = super.findById(contactId, ChatContactDoc.class);
 	    }
 
 	    // SESSION CREATION
@@ -179,24 +216,24 @@ public class SessionStore extends CommonDocStore {
 	    chatSessionDoc.setPrimary(true);
 
 	    if (ArgUtil.is(chatContactDoc)) {
-		if (ArgUtil.is(chatContactDoc.getName())) {
-		    chatSessionDoc.setContactName(chatContactDoc.getName());
-		}
 		chatSessionDoc.setContact(new ContactDetailDoc());
+		if (ArgUtil.is(chatContactDoc.getName())) {
+		    chatSessionDoc.contact().setName(chatContactDoc.getName());
+		}
 		chatSessionDoc.getContact().copyFrom(chatContactDoc);
 	    }
 
-	    save(chatSessionDoc);
+	    saveSession(chatSessionDoc);
 	    chatContactQuery.setSessionId(chatSessionDoc.getSessionId());
 
 	    chatContactQuery.update(contact);
 	    chatContactQuery.updateCreatedStamp();
 	    // CONTACT CREATION - needs creation or updation if
 	    if (ArgUtil.isEmpty(chatContactDoc)) {
-		commonMongoTemplate.upsert(chatContactQuery);
+		upsert(chatContactQuery);
 	    } else {
 		// CONTACT UPDATE
-		commonMongoTemplate.updateFirst(chatContactQuery);
+		updateFirst(chatContactQuery);
 	    }
 	} else {
 	    // SESSION UPDATE
@@ -205,7 +242,7 @@ public class SessionStore extends CommonDocStore {
 	    if (!ArgUtil.is(chatSessionDoc.getContactName())) {
 		chatSessionDocQuery.setContactName(chatSessionDoc.getContactName());
 	    }
-	    commonMongoTemplate.updateFirst(chatSessionDocQuery);
+	    updateFirst(chatSessionDocQuery);
 	}
 	return chatSessionDoc;
     }
@@ -214,13 +251,6 @@ public class SessionStore extends CommonDocStore {
 	if (!ArgUtil.is(chatSessionDoc)) {
 	    return null;
 	}
-
-	inboxMessage.contact().setContactId(chatSessionDoc.getContactId());
-	inboxMessage.setSessionId(chatSessionDoc.getSessionId());
-	inboxMessage.session().setAgent(chatSessionDoc.getAssignedToAgent());
-	inboxMessage.session().setDept(chatSessionDoc.getAssignedToDept());
-	inboxMessage.session().setMode(chatSessionDoc.getMode());
-	inboxMessage.session().setResolved(chatSessionDoc.isResolved());
 
 	if (PostManUtil.isInBound(inboxMessage)) {
 	    chatSessionDoc.setLastInComingStamp(inboxMessage.getTimestamp());
@@ -232,23 +262,42 @@ public class SessionStore extends CommonDocStore {
 		chatSessionDocQuery.setFirstInComingStamp(inboxMessage.getTimestamp());
 	    }
 
-	    commonMongoTemplate.updateFirst(chatSessionDocQuery);
+	    // Assign Queue
+	    if (ArgUtil.isEmptyValue(chatSessionDoc.getAssignedToQueue())) {
+		String defaultQueue = pmDomainConfig.getDefaultInboundQueue();
+		if (ArgUtil.is(defaultQueue)) {
+		    chatSessionDocQuery.setQueue(pmDomainConfig.getDefaultInboundQueue());
+		}
+	    }
+
+	    updateFirst(chatSessionDocQuery);
 
 	    // Query Update for Contact
 	    ChatContactQuery chatContactQuery = new ChatContactQuery(chatSessionDoc.getContactId());
 	    chatContactQuery.setLastInBoundStamp(inboxMessage.getTimestamp());
 	    chatContactQuery.update(inboxMessage.contact());
-	    commonMongoTemplate.updateFirst(chatContactQuery);
+	    updateFirst(chatContactQuery);
 	} else if (PostManUtil.isOutBound(inboxMessage)) {
 
 	}
+
+	if (ArgUtil.isEmpty(inboxMessage.contact().getName())) {
+	    inboxMessage.contact().setName(chatSessionDoc.contact().getName());
+	}
+	inboxMessage.contact().setContactId(chatSessionDoc.getContactId());
+	inboxMessage.setSessionId(chatSessionDoc.getSessionId());
+	inboxMessage.session().setQueue(chatSessionDoc.getAssignedToQueue());
+	inboxMessage.session().setAgent(chatSessionDoc.getAssignedToAgent());
+	inboxMessage.session().setDept(chatSessionDoc.getAssignedToDept());
+	inboxMessage.session().setMode(chatSessionDoc.getMode());
+	inboxMessage.session().setResolved(chatSessionDoc.isResolved());
 
 	return chatSessionDoc;
     }
 
     public ChatSessionDoc linkSession(IMessage inboxMessage) {
 	ChatSessionDoc chatSessionDoc = this.createSession(inboxMessage);
-	linkSession(chatSessionDoc, inboxMessage);
+	chatSessionDoc = linkSession(chatSessionDoc, inboxMessage);
 	return chatSessionDoc;
     }
 
@@ -264,6 +313,7 @@ public class SessionStore extends CommonDocStore {
 	inboxMessage.setSessionId(contact.getSessionId());
 	inboxMessage.contact().setContactId(contact.getContactId());
 
+	inboxMessage.session().setQueue(session.getAssignedToQueue());
 	inboxMessage.session().setMode(session.getMode());
 	inboxMessage.session().setAgent(session.getAssignedToAgent());
 	inboxMessage.session().setDept(session.getAssignedToDept());
@@ -280,18 +330,18 @@ public class SessionStore extends CommonDocStore {
 		Criteria.where("primary").is(true)));
 	Update update = new Update().set("active", false).set("primary", false).set("closeSessionStamp",
 		System.currentTimeMillis());
-	mongoTemplate.updateMulti(query2, update, ChatSessionDoc.class);
+	super.updateMulti(query2, update, ChatSessionDoc.class);
 	return true;
     }
 
     public List<ChatSessionDoc> findChatSessionDocByAgent(String agentCode) {
 	Query query2 = new Query();
 	query2.addCriteria(Criteria.where("assignedToAgent").is(agentCode).and("active").is(true));
-	return mongoTemplate.find(query2, ChatSessionDoc.class);
+	return super.find(query2, ChatSessionDoc.class);
     }
 
     public List<ChatSessionDoc> findChatSessionDocByQuery(Query query) {
-	return mongoTemplate.find(query, ChatSessionDoc.class);
+	return super.find(query, ChatSessionDoc.class);
     }
 
     public void expireChatSession() {
@@ -305,7 +355,7 @@ public class SessionStore extends CommonDocStore {
 			    .andOperator(new Criteria().orOperator(Criteria.where("resolved").exists(false),
 				    Criteria.where("resolved").is(false))))
 		    .set("expired", true).set("active", false).set("closeSessionStamp", System.currentTimeMillis());
-	    mongoTemplate.updateFirst(cmqb.getQuery(), cmqb.getUpdate(), ChatSessionDoc.class);
+	    super.updateFirst(cmqb.getQuery(), cmqb.getUpdate(), ChatSessionDoc.class);
 	}
     }
 
@@ -326,7 +376,7 @@ public class SessionStore extends CommonDocStore {
 		orExpression.add(Criteria.where("profileId").is(contact.getProfileId()));
 	    }
 	    query1.addCriteria(new Criteria().orOperator(orExpression.toArray(new Criteria[orExpression.size()])));
-	    contacts = mongoTemplate.find(query1, ChatContactDoc.class);
+	    contacts = super.find(query1, ChatContactDoc.class);
 	}
 
 	Calendar timeout = Calendar.getInstance();
@@ -358,7 +408,7 @@ public class SessionStore extends CommonDocStore {
 	query2.addCriteria(tymCriteria.orOperator(orExpression.toArray(new Criteria[orExpression.size()])));
 	// LOGGER.info(query2.toString());
 	removeMsgFields(query2);
-	return mongoTemplate.find(query2, ChatSessionDoc.class);
+	return super.find(query2, ChatSessionDoc.class);
     }
 
     private void removeMsgFields(Query query2) {
@@ -369,27 +419,27 @@ public class SessionStore extends CommonDocStore {
     public List<ChatSessionDoc> findActiveChatSessionForContactId(String contactId) {
 	Query query2 = new Query();
 	query2.addCriteria(Criteria.where("contactId").is(contactId).and("active").is(true));
-	return mongoTemplate.find(query2, ChatSessionDoc.class);
+	return super.find(query2, ChatSessionDoc.class);
     }
 
-    public void save(ChatSessionDoc chatSessionDoc) {
+    public ChatSessionDoc saveSession(ChatSessionDoc chatSessionDoc) {
 	try {
 	    if (ArgUtil.isEmpty(chatSessionDoc.getStartSessionStamp()) || chatSessionDoc.getStartSessionStamp() == 0L) {
 		chatSessionDoc.setStartSessionStamp(System.currentTimeMillis());
 	    }
-	    commonMongoTemplate.save(chatSessionDoc);
+	    super.save(chatSessionDoc);
 	} catch (Exception e) {
-	    ChatSessionDoc chatSessionDoc2 = mongoTemplate.findById(chatSessionDoc.getSessionId(),
-		    ChatSessionDoc.class);
+	    ChatSessionDoc chatSessionDoc2 = super.findById(chatSessionDoc.getSessionId(), ChatSessionDoc.class);
 	    LOGGER.error(chatSessionDoc.getVersion() + " ~ " + chatSessionDoc2.getVersion(), e);
 	    if (chatSessionDoc.getVersion() == null) {
 		// chatSessionDoc.setVersion(0);
-		commonMongoTemplate.save(chatSessionDoc);
+		super.save(chatSessionDoc);
 	    } else {
 		// chatSessionDoc.setVersion(chatSessionDoc2.getVersion()+1);
-		commonMongoTemplate.save(chatSessionDoc);
+		super.save(chatSessionDoc);
 	    }
 	}
+	return chatSessionDoc;
     }
 
     public ChatSessionDoc initSession(ChatSessionDoc chatSessionDoc) {
@@ -402,7 +452,7 @@ public class SessionStore extends CommonDocStore {
 	CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder().whereId(chatSessionDoc.getSessionId());
 	builder.set("initd", chatSessionDoc.isInitd());
 	builder.set("contactName", ArgUtil.nonEmpty(chatSessionDoc.getContactName(), contactDoc.getName()));
-	mongoTemplate.updateFirst(builder.getQuery(), builder.getUpdate(), ChatSessionDoc.class);
+	super.updateFirst(builder.getQuery(), builder.getUpdate(), ChatSessionDoc.class);
 
 	return chatSessionDoc;
     }
@@ -412,7 +462,7 @@ public class SessionStore extends CommonDocStore {
 	chatSessionDoc.setStatus(status.toString());
 	CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder().whereId(chatSessionDoc.getSessionId());
 	builder.set("status", status.toString());
-	mongoTemplate.updateFirst(builder.getQuery(), builder.getUpdate(), ChatSessionDoc.class);
+	super.updateFirst(builder.getQuery(), builder.getUpdate(), ChatSessionDoc.class);
 	return chatSessionDoc;
     }
 
@@ -425,7 +475,7 @@ public class SessionStore extends CommonDocStore {
 	builder.set("resolveSessionStamp", chatSessionDoc.getResolveSessionStamp());
 	builder.set("resolved", chatSessionDoc.isResolved());
 	builder.set("status", PMConstants.CHAT_STATUS.RESOLVED);
-	mongoTemplate.updateFirst(builder.getQuery(), builder.getUpdate(), ChatSessionDoc.class);
+	super.updateFirst(builder.getQuery(), builder.getUpdate(), ChatSessionDoc.class);
 	return chatSessionDoc;
     }
 
@@ -437,7 +487,7 @@ public class SessionStore extends CommonDocStore {
 	builder.set("closeSessionStamp", chatSessionDoc.getCloseSessionStamp());
 	builder.set("active", chatSessionDoc.isActive());
 	builder.set("status", PMConstants.CHAT_STATUS.CLOSED);
-	mongoTemplate.updateFirst(builder.getQuery(), builder.getUpdate(), ChatSessionDoc.class);
+	super.updateFirst(builder.getQuery(), builder.getUpdate(), ChatSessionDoc.class);
 
 	return chatSessionDoc;
     }
@@ -445,11 +495,11 @@ public class SessionStore extends CommonDocStore {
     public ChatSessionDoc deleteSession(ChatSessionDoc chatSessionDoc) {
 	CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder()
 		.with(CommonMongoCriteria.whereId(chatSessionDoc.getSessionId()).and("channel").is("IMPORT"));
-	mongoTemplate.remove(builder.getQuery(), ChatSessionDoc.class);
+	super.remove(builder.getQuery(), ChatSessionDoc.class);
 
 	CommonMongoQueryBuilder builder2 = new CommonMongoQueryBuilder()
 		.with(CommonMongoCriteria.where("sessionId").is(chatSessionDoc.getSessionId()));
-	mongoTemplate.remove(builder2.getQuery(), MessageDoc.class,
+	super.remove(builder2.getQuery(), MessageDoc.class,
 		MessageStore.getCollectionName(chatSessionDoc.getContactType()));
 	return chatSessionDoc;
     }
@@ -459,7 +509,7 @@ public class SessionStore extends CommonDocStore {
 
 	CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder().whereId(chatSessionDoc.getSessionId());
 	builder.set("botScore", chatSessionDoc.getBotScore());
-	mongoTemplate.updateFirst(builder.getQuery(), builder.getUpdate(), ChatSessionDoc.class);
+	super.updateFirst(builder.getQuery(), builder.getUpdate(), ChatSessionDoc.class);
 
 	return chatSessionDoc;
     }
@@ -469,13 +519,13 @@ public class SessionStore extends CommonDocStore {
 
 	CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder().whereId(chatSessionDoc.getSessionId());
 	builder.set("agentScore", chatSessionDoc.getAgentScore());
-	mongoTemplate.updateFirst(builder.getQuery(), builder.getUpdate(), ChatSessionDoc.class);
+	super.updateFirst(builder.getQuery(), builder.getUpdate(), ChatSessionDoc.class);
 
 	return chatSessionDoc;
     }
 
     public ChatUserProfileDoc save(ChatUserProfileDoc doc) {
-	mongoTemplate.save(doc);
+	super.save(doc);
 	return doc;
     }
 
@@ -494,7 +544,7 @@ public class SessionStore extends CommonDocStore {
 	CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder().whereId(chatSessionDoc.getSessionId());
 	builder.set("fistResponseStamp", chatSessionDoc.getFistResponseStamp());
 	builder.set("lastResponseStamp", chatSessionDoc.getLastResponseStamp());
-	mongoTemplate.updateFirst(builder.getQuery(), builder.getUpdate(), ChatSessionDoc.class);
+	super.updateFirst(builder.getQuery(), builder.getUpdate(), ChatSessionDoc.class);
     }
 
     public void assignToAgent(ChatSessionDoc chatSessionDoc, String agentDept, String agentCode) {
@@ -518,7 +568,7 @@ public class SessionStore extends CommonDocStore {
 	builder.set("assignedToAgent", chatSessionDoc.getAssignedToAgent());
 	builder.set("assignedAgentStamp", chatSessionDoc.getAssignedAgentStamp());
 	builder.set("agentSessionStamp", chatSessionDoc.getAgentSessionStamp());
-	commonMongoTemplate.updateFirst(builder);
+	updateFirst(builder);
     }
 
     public void assignToBot(ChatSessionDoc chatSessionDoc, String botName) {
@@ -533,7 +583,7 @@ public class SessionStore extends CommonDocStore {
 	CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder().whereId(chatSessionDoc.getSessionId());
 	builder.set("mode", chatSessionDoc.getMode());
 	builder.set("assignedToAgent", chatSessionDoc.getAssignedToAgent());
-	mongoTemplate.updateFirst(builder.getQuery(), builder.getUpdate(), ChatSessionDoc.class);
+	super.updateFirst(builder.getQuery(), builder.getUpdate(), ChatSessionDoc.class);
 
     }
 
@@ -543,7 +593,7 @@ public class SessionStore extends CommonDocStore {
 		ChatSessionQuery chatSessionDocQuery = new ChatSessionQuery(msgDoc.getSessionId());
 		if (PostManUtil.isInBound(msgDoc.getType())) {
 		    chatSessionDocQuery.setLastInBoundMsg(msgDoc, iMessage.contact().getContactType());
-		    commonMongoTemplate.updateFirst(chatSessionDocQuery);
+		    updateFirst(chatSessionDocQuery);
 		} else if (PostManUtil.isOutBound(msgDoc.getType())) {
 		    if (PostManUtil.isAgentMode(iMessage)) {
 			chatSessionDocQuery.setLastAgentReply(msgDoc, iMessage.contact().getContactType());
@@ -554,7 +604,7 @@ public class SessionStore extends CommonDocStore {
 		    }
 		}
 		chatSessionDocQuery.setLastMsg(msgDoc, iMessage.contact().getContactType());
-		commonMongoTemplate.updateFirst(chatSessionDocQuery);
+		updateFirst(chatSessionDocQuery);
 	    } catch (Exception e) {
 		LOGGER.error("SessionStore.push", e);
 	    }
@@ -566,7 +616,7 @@ public class SessionStore extends CommonDocStore {
 	chatSessionDoc.setTagId(tagIds);
 	CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder().whereId(chatSessionDoc.getSessionId());
 	builder.set("tagId", tagIds);
-	mongoTemplate.updateFirst(builder.getQuery(), builder.getUpdate(), ChatSessionDoc.class);
+	super.updateFirst(builder.getQuery(), builder.getUpdate(), ChatSessionDoc.class);
 	return chatSessionDoc;
     }
 
@@ -581,7 +631,7 @@ public class SessionStore extends CommonDocStore {
 	if (ArgUtil.is(status)) {
 	    query2.addCriteria(Criteria.where("status").is(status.toString()));
 	}
-	return mongoTemplate.find(query2, ChatSessionDoc.class);
+	return super.find(query2, ChatSessionDoc.class);
     }
 
     /**
@@ -595,7 +645,7 @@ public class SessionStore extends CommonDocStore {
 	if (ArgUtil.is(tagCategory)) {
 	    query2.addCriteria(Criteria.where("tagId").is(tagCategory));
 	}
-	return mongoTemplate.find(query2, ChatSessionDoc.class);
+	return super.find(query2, ChatSessionDoc.class);
     }
 
     /**
@@ -635,14 +685,14 @@ public class SessionStore extends CommonDocStore {
 	query.with(new Sort(new Order(Direction.DESC, "assignedAgentStamp")));
 	removeMsgFields(query);
 	LOGGER.debug("query {===}" + query);
-	return mongoTemplate.find(query, ChatSessionDoc.class);
+	return super.find(query, ChatSessionDoc.class);
     }
 
     public String getLastAssignedAgent(Contactable contact) {
 	CommonMongoQueryBuilder cmqb = new CommonMongoQueryBuilder().with(Criteria.where("contactId")
 		.is(contact.getContactId()).and("assignedToAgent").exists(true).and("mode").is(CHAT_MODE.AGENT));
 	cmqb.getQuery().with(new Sort(Direction.DESC, "startSessionStamp")).limit(1);
-	ChatSessionDoc lastSession = mongoTemplate.findOne(cmqb.getQuery(), ChatSessionDoc.class);
+	ChatSessionDoc lastSession = super.findOne(cmqb.getQuery(), ChatSessionDoc.class);
 	if (ArgUtil.is(lastSession)) {
 	    return lastSession.getAssignedToAgent();
 	}

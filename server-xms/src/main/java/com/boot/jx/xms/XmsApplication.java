@@ -3,7 +3,6 @@ package com.boot.jx.xms;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
-import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.servlet.DelegatingFilterProxyRegistrationBean;
@@ -19,7 +18,7 @@ import org.springframework.web.context.request.RequestContextListener;
  * The Class WebApplication.
  */
 @ServletComponentScan
-@SpringBootApplication(exclude = DataSourceAutoConfiguration.class)
+@SpringBootApplication
 @ComponentScan("com.boot.jx")
 @EnableAsync(proxyTargetClass = true)
 @EnableCaching
@@ -64,5 +63,4 @@ public class XmsApplication extends SpringBootServletInitializer {
     public RequestContextListener requestContextListener() {
 	return new RequestContextListener();
     }
-
 }

@@ -11,8 +11,8 @@ import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import com.boot.jx.mongo.CommonDocInterfaces.TimeStamp.UpdatedTimeStampDoc;
-import com.boot.jx.mongo.CommonDocInterfaces.TimeStamp.UpdatedTimeStampSupport;
+import com.boot.jx.mongo.CommonDocInterfaces.TimeStampIndex.UpdatedTimeStampDoc;
+import com.boot.jx.mongo.CommonDocInterfaces.TimeStampIndex.UpdatedTimeStampIndexSupport;
 import com.boot.jx.postman.model.MessageDefinitions.Contactable;
 import com.boot.jx.swagger.ApiMockModelProperty;
 import com.boot.utils.ArgUtil;
@@ -48,6 +48,7 @@ public class ChatSessionDoc extends UpdatedTimeStampDoc implements Serializable 
 
     private String assignedToDept;
     private String assignedToAgent;
+    private String assignedToQueue;
 
     private boolean active;
     private boolean initd;
@@ -79,7 +80,7 @@ public class ChatSessionDoc extends UpdatedTimeStampDoc implements Serializable 
     private long closeSessionStamp;
 
     /**
-     * @deprecated Use {@link UpdatedTimeStampSupport#getUpdated()}
+     * @deprecated Use {@link UpdatedTimeStampIndexSupport#getUpdated()}
      */
     @Deprecated
     private long updatedStamp;
@@ -398,7 +399,7 @@ public class ChatSessionDoc extends UpdatedTimeStampDoc implements Serializable 
 
     /**
      * @deprecated Use
-     *             {@link UpdatedTimeStampSupport#setUpdated(com.boot.jx.mongo.CommonDocInterfaces.TimeStamp)}
+     *             {@link UpdatedTimeStampIndexSupport#setUpdated(com.boot.jx.mongo.CommonDocInterfaces.TimeStampIndex)}
      */
     @Deprecated
     public void setUpdatedStamp(long updatedStamp) {
@@ -465,4 +466,13 @@ public class ChatSessionDoc extends UpdatedTimeStampDoc implements Serializable 
 	}
 	return this.contact;
     }
+
+    public String getAssignedToQueue() {
+	return assignedToQueue;
+    }
+
+    public void setAssignedToQueue(String assignedToQueue) {
+	this.assignedToQueue = assignedToQueue;
+    }
+
 }

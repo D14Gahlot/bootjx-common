@@ -5,14 +5,20 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.boot.jx.AppConfigPackage;
+import com.boot.jx.AppContextUtil;
 import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.http.CommonHttpRequest;
 import com.boot.jx.http.CommonHttpRequest.ApiRequestDetail;
-import com.boot.jx.postman.ClientApiKey;
+import com.boot.jx.postman.ClientApp;
+import com.boot.jx.postman.PMConfiguration.PMConfigurationModel;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.scope.tnt.TenantAuthContext.TenantAuthFilter;
 import com.boot.jx.scope.tnt.TenantSpecific;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.CryptoUtil;
+import com.boot.utils.TimeUtils;
+import com.boot.utils.CryptoUtil.CrypToken;
 
 @Component
 @TenantSpecific("*")
@@ -20,24 +26,57 @@ public class XmsVendorConfigurer implements TenantAuthFilter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(XmsVendorConfigurer.class);
 
+    private static long CONFIG_REFRESH_TIME = TimeUtils.toMillis("5min");
+
     @Autowired
     private PMEnvironment pmEnvironment;
+
+    @Autowired
+    private AppConfigPackage appConfigPackage;
+
+    public static ClientApp getClientApp() {
+	return AppContextUtil.get("XmsVendorConfigurer:ClientApp");
+    }
 
     @Override
     public boolean filterTenantRequest(ApiRequestDetail apiRequest, CommonHttpRequest req, String traceId) {
 	String apiKey = req.get(XmsConstants.X_API_KEY);
+
+	// For Swagger Handling
+	if (!ArgUtil.is(apiKey)) {
+	    String token = req.get("swagger.auth.token");
+	    if (ArgUtil.is(token)) {
+		CrypToken xToken = CryptoUtil.getEncoder().message(token).decrypt().toToken();
+		if (ArgUtil.is(xToken) && !xToken.isExpired()) {
+		    apiKey = xToken.message;
+		}
+	    }
+	}
+
 	if (!ArgUtil.is(apiKey)) {
 	    String message = "Missing " + XmsConstants.X_API_KEY;
 	    ApiResponseUtil.addError(message);
 	    return false;
 	}
-	ClientApiKey apiKeyConfig = pmEnvironment.local().clientApiKey(apiKey);
+
+	PMConfigurationModel config = pmEnvironment.local();
+	ClientApp apiKeyConfig = config.clientApiKey(apiKey);
 	if (!ArgUtil.is(apiKeyConfig)) {
-	    String message = "Invalid " + XmsConstants.X_API_KEY;
-	    ApiResponseUtil.addError(message);
-	    return false;
+	    if (TimeUtils.isExpired(config.getUpdateStamp(), CONFIG_REFRESH_TIME)) {
+		appConfigPackage.clear(null);
+		config = pmEnvironment.local();
+	    }
+	    if (!ArgUtil.is(apiKeyConfig)) {
+		String message = "Invalid " + XmsConstants.X_API_KEY;
+		ApiResponseUtil.addError(message);
+		return false;
+	    }
 	}
-	return ArgUtil.areEqual(apiKey, apiKeyConfig.getKey());
+	if (ArgUtil.areEqual(apiKey, apiKeyConfig.getKey())) {
+	    AppContextUtil.set("XmsVendorConfigurer:ClientApp", apiKeyConfig);
+	    return true;
+	}
+	return false;
     }
 
 }

@@ -68,6 +68,8 @@ public class ChatSessionQuery extends DocQueryBuilder<ChatSessionDoc> {
     public ChatSessionQuery setContactName(String contactName) {
 	this.doc.setContactName(contactName);
 	this.set("contactName", contactName);
+	this.doc.contact().setName(contactName);
+	this.set("contact.name", contactName);
 	return this;
     }
 
@@ -104,6 +106,12 @@ public class ChatSessionQuery extends DocQueryBuilder<ChatSessionDoc> {
     public ChatSessionQuery setTagId(List<String> tagIds) {
 	this.doc.setTagId(tagIds);
 	this.set("tagId", tagIds);
+	return this;
+    }
+
+    public ChatSessionQuery setQueue(String queue) {
+	this.doc.setAssignedToQueue(queue);
+	this.set("assignedToQueue", queue);
 	return this;
     }
 

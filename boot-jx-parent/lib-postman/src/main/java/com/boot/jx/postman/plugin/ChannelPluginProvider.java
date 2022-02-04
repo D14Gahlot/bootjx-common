@@ -45,6 +45,7 @@ public class ChannelPluginProvider {
 	    config.setPushOnlyApproved(this.isPushOnlyApproved());
 	    config.setPushFreeTextAllowed(this.isPushFreeTextAllowed());
 	    config.setPushToNewContactAllowed(this.isPushToNewContactAllowed());
+	    config.setWebhookManual(this.isWebhookManual());
 
 	    // Channel Specific Properties
 	    config.setLane(details.getLane());

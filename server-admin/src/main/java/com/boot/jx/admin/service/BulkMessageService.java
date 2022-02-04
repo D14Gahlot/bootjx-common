@@ -66,7 +66,7 @@ public class BulkMessageService extends QueuedTaskExecuter {
 	session.setLane(bulkMessage.contact().getLane());
 	session.setBulkSessionId(UniqueID.generateString62());
 
-	auditDetailProvider.audit(session);
+	auditDetailProvider.auditCreate(session);
 
 	String defaultRegion = enviroment.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_PHONEBOOK_REGION).asString("IN");
 

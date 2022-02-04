@@ -27,7 +27,10 @@ public class Message<T extends Message<T>> implements Serializable, MessageOptio
     public static final String RESULTS_KEY = "results";
 
     public static enum Status {
-	SCHLD, CRTD, INIT, SENT, SENT_ERR, SENTX, SENTX_ERR, DLVRD, READ, NSENT, BLCKD, FAILD, DELTD, CCWIN;
+	SCHLD, CRTD, INIT, SENT, SENT_ERR, SENTX, SENTX_ERR, DLVRD, READ, NSENT, BLCKD, FAILD, DELTD, CCWIN,
+
+	// INBOUND STATUS
+	RECEIVD, FORWARDED, FORWARD_ERR;
     }
 
     public static class Priority {
@@ -583,10 +586,10 @@ public class Message<T extends Message<T>> implements Serializable, MessageOptio
     }
 
     public CommonTemplate getHsm() {
-        return hsm;
+	return hsm;
     }
 
     public void setHsm(CommonTemplate hsm) {
-        this.hsm = hsm;
+	this.hsm = hsm;
     }
 }

@@ -11,7 +11,6 @@ import com.boot.jx.AppConfig;
 import com.boot.jx.AppContextUtil;
 import com.boot.jx.agent.AgentConfig;
 import com.boot.jx.postman.PMEnvironment.AChannelConfig;
-import com.boot.jx.postman.PMEnvironment.AChannelDetails;
 import com.boot.jx.postman.PMEnvironment.PMConfigurationObject;
 import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.scope.tnt.Tenants;
@@ -33,13 +32,14 @@ public interface PMConfiguration extends Serializable {
 	private static final long serialVersionUID = -5432956433673368768L;
 
 	private Map<String, ChannelConfig> channels;
-	private Map<String, ClientApiKey> clientApiKeys;
+	private Map<String, ClientApp> clientApiKeys;
 
 	private Map<String, PMConfigurationObject> prefs;
 	private Map<String, Object> globalVars;
 
 	private AgentConfig agent;
 	private String accountKey;
+	private long updateStamp;
 
 	// All Channels
 	public SafeKeyHashMap<ChannelConfig> channels() {
@@ -70,19 +70,25 @@ public interface PMConfiguration extends Serializable {
 	}
 
 	// All A:PI Ckeys
-	public SafeKeyHashMap<ClientApiKey> clientApiKeys() {
+	public SafeKeyHashMap<ClientApp> clientApiKeys() {
 	    if (ArgUtil.isEmpty(clientApiKeys)) {
-		clientApiKeys = new HashMap<String, ClientApiKey>();
+		clientApiKeys = new HashMap<String, ClientApp>();
 	    }
-	    return new SafeKeyHashMap<ClientApiKey>(clientApiKeys);
+	    return new SafeKeyHashMap<ClientApp>(clientApiKeys);
 	}
 
-	public ClientApiKey clientApiKey(String apiKey) {
+	public ClientApp clientApiKey(String apiKey) {
 	    return clientApiKeys().get(apiKey);
 	}
 
-	public PMConfiguration clientApiKey(ClientApiKey clientApiKey) {
+	public PMConfiguration clientApiKey(ClientApp clientApiKey) {
 	    this.clientApiKeys().put(clientApiKey.getKey(), clientApiKey);
+	    if (ArgUtil.is(clientApiKey.getQueue())) {
+		this.clientApiKeys().put(clientApiKey.getQueue(), clientApiKey);
+	    }
+	    if (ArgUtil.is(clientApiKey.getId())) {
+		this.clientApiKeys().put(clientApiKey.getId(), clientApiKey);
+	    }
 	    return this;
 	}
 
@@ -153,6 +159,14 @@ public interface PMConfiguration extends Serializable {
 
 	public void setAccountKey(String accountKey) {
 	    this.accountKey = accountKey;
+	}
+
+	public long getUpdateStamp() {
+	    return updateStamp;
+	}
+
+	public void setUpdateStamp(long updateStamp) {
+	    this.updateStamp = updateStamp;
 	}
 
 	public SafeKeyHashMap<Object> globalVars() {

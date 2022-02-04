@@ -9,12 +9,12 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.TypeAlias;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import com.boot.jx.model.AuditableEntity;
+import com.boot.jx.model.AuditCreateEntity;
 import com.boot.jx.mongo.CommonDocInterfaces.OldDocVersion;
 
 @Document(collection = "DICT_TEMPLATES")
 @TypeAlias("QuickMedia")
-public class QuickMedia implements Serializable, OldDocVersion<QuickMedia>, AuditableEntity {
+public class QuickMedia implements Serializable, OldDocVersion<QuickMedia>, AuditCreateEntity {
 
     private static final long serialVersionUID = 7942286016346691701L;
 

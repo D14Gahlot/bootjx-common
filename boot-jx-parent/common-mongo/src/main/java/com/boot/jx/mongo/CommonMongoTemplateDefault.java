@@ -29,8 +29,8 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.data.util.CloseableIterator;
 
-import com.boot.jx.mongo.CommonDocInterfaces.TimeStamp;
-import com.boot.jx.mongo.CommonDocInterfaces.TimeStamp.UpdatedTimeStampSupport;
+import com.boot.jx.mongo.CommonDocInterfaces.TimeStampIndex;
+import com.boot.jx.mongo.CommonDocInterfaces.TimeStampIndex.UpdatedTimeStampIndexSupport;
 import com.mongodb.CommandResult;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
@@ -41,6 +41,8 @@ import com.mongodb.WriteResult;
 public abstract class CommonMongoTemplateDefault {
 
     protected abstract MongoTemplate getCommonMongoTemplate();
+
+    protected abstract void beforeSaveInternal(Object objectToSave, String collectionName);
 
     public String getCollectionName(Class<?> entityClass) {
 	return getCommonMongoTemplate().getCollectionName(entityClass);
@@ -311,16 +313,12 @@ public abstract class CommonMongoTemplateDefault {
     }
 
     public void save(Object objectToSave) {
-	if (objectToSave instanceof UpdatedTimeStampSupport) {
-	    ((UpdatedTimeStampSupport) objectToSave).setUpdated(TimeStamp.now());
-	}
+	beforeSaveInternal(objectToSave, null);
 	getCommonMongoTemplate().save(objectToSave);
     }
 
     public void save(Object objectToSave, String collectionName) {
-	if (objectToSave instanceof UpdatedTimeStampSupport) {
-	    ((UpdatedTimeStampSupport) objectToSave).setUpdated(TimeStamp.now());
-	}
+	beforeSaveInternal(objectToSave, collectionName);
 	getCommonMongoTemplate().save(objectToSave, collectionName);
     }
 
@@ -399,5 +397,4 @@ public abstract class CommonMongoTemplateDefault {
     public DB getDb() {
 	return getCommonMongoTemplate().getDb();
     }
-
 }

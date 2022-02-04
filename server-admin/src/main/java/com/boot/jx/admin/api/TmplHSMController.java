@@ -142,7 +142,7 @@ public class TmplHSMController {
 		mongoTemplate.archive(oldVersion);
 	    }
 	}
-	auditDetailProvider.audit(newVersion);
+	auditDetailProvider.auditCreate(newVersion);
 	mongoTemplate.save(newVersion);
 	return ApiResponse.buildResults(mongoTemplate.findAll(HSMTemplateDoc.class)).data(newVersion)
 		.message("QuickReply created");

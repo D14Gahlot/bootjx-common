@@ -1,7 +1,5 @@
 package com.boot.jx.chat;
 
-import java.util.List;
-
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -26,10 +24,8 @@ import com.boot.jx.postman.manager.LogManager;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.Message;
 import com.boot.jx.postman.model.MessageDefinitions.IMessageExtended;
-import com.boot.jx.postman.model.MessageReport;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.query.ChatContactQuery;
-import com.boot.jx.postman.service.ChatDTOUtil;
 import com.boot.jx.postman.store.MessageContext;
 import com.boot.jx.postman.store.MessageStore;
 import com.boot.jx.postman.store.SessionStore;
@@ -61,9 +57,9 @@ public class ChatService {
 
     @Autowired
     private SessionStore sessionStore;
-    
-    
-   
+
+    @Autowired
+    private ChatSessionFactory chatSessionFactory;
 
     public InboxMessage getInboxMessage() {
 	return chatContext.getInboxMessage();
@@ -106,7 +102,7 @@ public class ChatService {
 
 	MessageDoc messageDoc = messageStore.createOrUpdate(outboxMessage);
 	connectorHandlerFactory.message(MESSAGE_COMPOSE_TYPE.ACTION, chatContactDoc, outboxMessage, null);
-	sessionStore.push(messageDoc, outboxMessage);
+	chatSessionFactory.push(messageDoc, outboxMessage);
 	return messageDoc;
     }
 
@@ -132,10 +128,11 @@ public class ChatService {
 	    outboxMessage.session().setMode(inboxMessage.session().getMode());
 	}
 
-	//outboxMessage.model().put("contact", ChatDTOUtil.getContactMeta(chatContactDoc));
+	// outboxMessage.model().put("contact",
+	// ChatDTOUtil.getContactMeta(chatContactDoc));
 	MessageDoc messageDoc = messageStore.createOrUpdate(outboxMessage);
 	connectorHandlerFactory.message(MESSAGE_COMPOSE_TYPE.REPLY, chatContactDoc, outboxMessage, inboxMessage);
-	sessionStore.push(messageDoc, outboxMessage);
+	chatSessionFactory.push(messageDoc, outboxMessage);
 	return messageDoc;
     }
 
@@ -154,15 +151,15 @@ public class ChatService {
 	outboxMessage.contact().setContactId(chatContactDoc.getContactId());
 	outboxMessage.setSessionId(chatContactDoc.getSessionId());
 
-	//outboxMessage.model().put("contact", ChatDTOUtil.getContactMeta(chatContactDoc));
+	// outboxMessage.model().put("contact",
+	// ChatDTOUtil.getContactMeta(chatContactDoc));
 	MessageDoc messageDoc = messageStore.createOrUpdate(outboxMessage);
 	connectorHandlerFactory.message(MESSAGE_COMPOSE_TYPE.SEND, chatContactDoc, outboxMessage, null);
-	sessionStore.push(messageDoc, outboxMessage);
+	chatSessionFactory.push(messageDoc, outboxMessage);
 	return messageDoc;
     }
 
-    public MessageDoc reply(OutboxMessage outboxMessage) throws InterruptedException {
-	InboxMessage inboxMessage = chatContext.getInboxMessage();
+    public MessageDoc reply(InboxMessage inboxMessage, OutboxMessage outboxMessage) throws InterruptedException {
 	ChatContactDoc chatContactDoc = sessionStore.getContact(inboxMessage.contact().getContactId());
 
 	if (ArgUtil.isEmpty(outboxMessage.session().getAgent())) {
@@ -174,7 +171,6 @@ public class ChatService {
 	if (ArgUtil.is(actionDco)) {
 	    return actionDco;
 	}
-
 	return replyIntenal(chatContactDoc, outboxMessage, inboxMessage);
     }
 
@@ -289,7 +285,7 @@ public class ChatService {
     public boolean initSession(InboxMessage inboxMessage, ChatSessionDoc session) {
 	boolean initd = session.isInitd();
 	if (initd) {
-	   return true;
+	    return true;
 	}
 	ConnectorHandler connector = connectorHandlerFactory.get(inboxMessage.contact().type(),
 		inboxMessage.contact().getChannelType());
@@ -361,13 +357,4 @@ public class ChatService {
 	return true;
     }
 
-    @Autowired
-    private ChatStatusReportService chatStatusReportService;
-
-    public void updateMessageStatus(List<MessageReport> updateDeliveryStatus) {
-	chatStatusReportService.offer(updateDeliveryStatus);
-	chatStatusReportService.process(null);
-    }
-
-    
 }

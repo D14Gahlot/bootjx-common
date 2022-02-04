@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.boot.jx.AppConfig;
+import com.boot.jx.AppConfigPackage.AppCommonConfig;
 import com.boot.jx.AppContextUtil;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.postman.PMConfiguration.PMConfigurationModel;
@@ -36,9 +37,9 @@ public class PMEnvironment {
 
 	public PMConfigurationModel shared();
 
-	public void config(ChannelConfig config);
+	public void addChannel(ChannelConfig config);
 
-	public void update(ChannelConfig config, String action);
+	public void updateChannel(ChannelConfig config, String action);
 
 	public void initConfig();
     }
@@ -55,6 +56,9 @@ public class PMEnvironment {
 
 	@JsonView(PublicProperty.class)
 	public boolean isPushToNewContactAllowed();
+
+	@JsonView(PublicProperty.class)
+	public boolean isWebhookManual();
 
 	@JsonView(PublicProperty.class)
 	public default String getChannel() {
@@ -86,10 +90,14 @@ public class PMEnvironment {
 
 	protected ContactType contactType;
 	protected String channelType;
+
+	@JsonView(PMEnvironment.ProtectedProperty.class)
 	protected String channelKey;
+
 	protected String name;
 
 	private boolean isSandbox;
+	private boolean isShared;
 	private boolean isDisabled;
 
 	@JsonView(PMEnvironment.PublicProperty.class)
@@ -167,6 +175,18 @@ public class PMEnvironment {
 	    this.isDisabled = isDisabled;
 	}
 
+	public boolean isReadOnly() {
+	    return false;
+	}
+
+	public boolean isShared() {
+	    return isShared;
+	}
+
+	public void setShared(boolean isShared) {
+	    this.isShared = isShared;
+	}
+
     }
 
     public static class PMConfigurationObject extends MapEntry implements Serializable {
@@ -236,7 +256,7 @@ public class PMEnvironment {
 	return config;
     }
 
-    public PMConfiguration config() {
+    public PMConfigurationWrappper config() {
 	PMConfigurationWrappper config = new PMConfigurationWrappper().appConfig(appConfig);
 	if (ArgUtil.is(provider)) {
 	    return config.local(provider.local()).shared(provider.shared());
@@ -279,14 +299,25 @@ public class PMEnvironment {
 
     public void addChannel(ChannelConfig config) {
 	if (ArgUtil.is(provider)) {
-	    provider.config(config);
+	    provider.addChannel(config);
 	}
     }
 
     public void updateChannel(ChannelConfig config, String action) {
 	if (ArgUtil.is(provider)) {
-	    provider.update(config, action);
+	    provider.updateChannel(config, action);
 	}
     }
 
+    public interface PMCommonConfig extends AppCommonConfig {
+	public String getCdnServer();
+
+	public String getBotUrl();
+
+	public String getAgentUrl();
+    }
+
+    public interface PMDomainConfig {
+	public String getDefaultInboundQueue();
+    }
 }
