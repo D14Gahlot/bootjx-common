@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.boot.jx.AppConfigPackage.AppCommonConfig;
-import com.boot.jx.account.AccountAdminService;
+import com.boot.jx.account.AccountAuthService;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.common.dto.UserLoginToken;
 import com.boot.jx.common.service.EmpAuthService;
@@ -32,7 +32,7 @@ public class UserController {
     public String home(Model model, @RequestParam(required = false) String theme) {
 	model.addAllAttributes(appCommonConfig.appAttributes());
 
-	Authentication auth = AccountAdminService.getAuthentication();
+	Authentication auth = AccountAuthService.getAuthentication();
 	if (ArgUtil.is(auth)) {
 	    model.addAttribute("APP_USER", auth.getName());
 	    model.addAttribute("APP_USER_ROLE", "ACCOUNT_ADMIN");

@@ -99,7 +99,6 @@ public class ConfigApiV1 {
     @ApiOperation(value = "HSM Templates", notes = "${swagger.ConfigApiV1.getHSMTemplates.description}",
 	    authorizations = @Authorization("X_API_KEY"))
     @XMSClientAuth
-    @JsonView(PMEnvironment.PublicProperty.class)
     @RequestMapping(value = "/api/v1/config/tmpl/hsm", method = { RequestMethod.GET })
     public ApiResponse<HSMTemplateDoc, Object> getHSMTemplates(@RequestParam(required = false) String channelId) {
 

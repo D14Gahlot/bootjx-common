@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 
 import com.boot.jx.AppConfigPackage.AppCommonConfig;
 import com.boot.jx.AppContextUtil;
-import com.boot.jx.account.AccountAdminService;
+import com.boot.jx.account.AccountAuthService;
 import com.boot.jx.account.AccountSessionBean;
 import com.boot.jx.account.doc.AccountStore;
 import com.boot.jx.account.doc.DomainDoc;
@@ -39,7 +39,7 @@ public class FrontController {
     public String account(Model model) {
 	model.addAllAttributes(appCommonConfig.appAttributes());
 
-	Authentication auth = AccountAdminService.getAuthentication();
+	Authentication auth = AccountAuthService.getAuthentication();
 	if (ArgUtil.is(auth)) {
 	    model.addAttribute("APP_USER", auth.getName());
 	    model.addAttribute("APP_USER_ROLE", adminSessionBean.getRole());
@@ -90,7 +90,7 @@ public class FrontController {
 	    model.addAttribute("APP_DOMAIN", Constants.BLANK);
 	}
 
-	Authentication auth = AccountAdminService.getAuthentication();
+	Authentication auth = AccountAuthService.getAuthentication();
 	if (ArgUtil.is(auth)) {
 	    model.addAttribute("APP_USER", auth.getName());
 	    model.addAttribute("APP_USER_ROLE", adminSessionBean.getRole());

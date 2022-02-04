@@ -19,10 +19,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.boot.jx.AppConfig;
 import com.boot.jx.AppConfigPackage.AppCommonConfig;
 import com.boot.jx.AppContextUtil;
-import com.boot.jx.account.AccountAdminService;
+import com.boot.jx.account.AccountAuthService;
 import com.boot.jx.account.AccountSessionBean;
 import com.boot.jx.account.doc.AccountMeta;
 import com.boot.jx.account.doc.AccountStore;
@@ -47,16 +46,13 @@ import com.boot.utils.CryptoUtil;
 public class PartnerController {
 
     @Autowired
-    private AppConfig appConfig;
-
-    @Autowired
     private CommonHttpRequest commonHttpRequest;
 
     @Autowired
     private AppCommonConfig appCommonConfig;
 
     @Autowired
-    private AccountAdminService sessionService;
+    private AccountAuthService sessionService;
 
     @Autowired
     private AccountSessionBean adminSessionBean;
@@ -79,7 +75,7 @@ public class PartnerController {
 	}
 
 	model.addAllAttributes(appCommonConfig.appAttributes());
-	Authentication auth = AccountAdminService.getAuthentication();
+	Authentication auth = AccountAuthService.getAuthentication();
 	if (ArgUtil.is(auth) && ArgUtil.is(adminSessionBean.domainUser())) {
 	    model.addAttribute("APP_USER", auth.getName());
 	    model.addAttribute("APP_USER_NAME", adminSessionBean.domainUser().getContact().getName());

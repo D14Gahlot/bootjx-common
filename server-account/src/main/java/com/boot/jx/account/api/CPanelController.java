@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.boot.jx.AppConfigPackage.AppCommonConfig;
-import com.boot.jx.account.AccountAdminService;
+import com.boot.jx.account.AccountAuthService;
 import com.boot.jx.account.AccountSessionBean;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.common.config.ConfigManager;
@@ -45,7 +45,7 @@ public class CPanelController {
     private AppCommonConfig appCommonConfig;
 
     @Autowired
-    private AccountAdminService accountAdminService;
+    private AccountAuthService accountAdminService;
 
     @Autowired
     private AccountSessionBean sessionBean;
@@ -55,7 +55,7 @@ public class CPanelController {
 
 	model.addAllAttributes(appCommonConfig.appAttributes());
 
-	Authentication auth = AccountAdminService.getAuthentication();
+	Authentication auth = AccountAuthService.getAuthentication();
 
 	if (ArgUtil.is(auth)) {
 	    model.addAttribute("APP_USER", auth.getName());
