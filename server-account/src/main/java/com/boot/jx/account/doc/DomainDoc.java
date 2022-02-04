@@ -32,6 +32,7 @@ public class DomainDoc implements IDocument, AuditableEntity, Serializable, Comp
     private Long modifiedStamp;
     private String modifiedBy;
     private Boolean isActive;
+   
 
     public Long getCreatedStamp() {
 	return createdStamp;
@@ -110,5 +111,7 @@ public class DomainDoc implements IDocument, AuditableEntity, Serializable, Comp
     public void setSocial(SocialDoc social) {
 	this.social = social;
     }
+
+	
 
 }

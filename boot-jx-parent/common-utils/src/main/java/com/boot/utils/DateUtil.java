@@ -81,6 +81,9 @@ public final class DateUtil {
 	
 	/** month: 'MMM YYYY',  'Nov 2021' **/ 
 	public static final String MMM_YYYY_FORMAT = "MMM YYYY";
+	/** yyyyMMdd format **/
+	public static final String YYYYMMDD_DATE_FORMAT = "yyyyMMdd";
+
 
 	/**
 	 * Instantiates a new date util.

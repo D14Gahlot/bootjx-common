@@ -36,6 +36,10 @@ public class BusinessUserDoc implements IDocument, DocVersion, AuditableEntity, 
 
     @DBRef
     private Set<DomainDoc> domains;
+    
+    @DBRef
+    private Set<DomainLicenseDoc> domainLicense;
+    
 
     private List<DocVersion> oldVersions;
 
@@ -133,5 +137,17 @@ public class BusinessUserDoc implements IDocument, DocVersion, AuditableEntity, 
     public void setRole(String role) {
 	this.role = role;
     }
+
+	public Set<DomainLicenseDoc> domainLicense() {
+		if (!ArgUtil.is(domainLicense)) {
+		    this.domains = new TreeSet<DomainDoc>();
+		}
+		return this.domainLicense;
+		
+	}
+
+	public void setDomainLicense(Set<DomainLicenseDoc> domainLicense) {
+		this.domainLicense = domainLicense;
+	}
 
 }

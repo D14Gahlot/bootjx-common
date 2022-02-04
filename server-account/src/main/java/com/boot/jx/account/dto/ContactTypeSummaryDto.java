@@ -1,4 +1,4 @@
-package com.boot.jx.admin.dto;
+package com.boot.jx.account.dto;
 
 import java.util.List;
 import java.util.Map;

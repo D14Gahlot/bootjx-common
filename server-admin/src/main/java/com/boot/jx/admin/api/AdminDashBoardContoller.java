@@ -66,7 +66,6 @@ public class AdminDashBoardContoller {
 	
 	@RequestMapping(value = "/admin/fetch-month", method = { RequestMethod.GET })
 	public ApiResponse<Map<Object, Object>, Object> getMonthLst() {
-		//HashSet<String> set = adminDbMgr.fetchUniqueMonth();
 		Map<Object, Object> set =adminDbMgr.fetchUniqueMonth(); 
 		return  ApiResponse.buildResult(set);
 	}
