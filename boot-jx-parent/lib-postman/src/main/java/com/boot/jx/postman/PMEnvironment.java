@@ -95,6 +95,7 @@ public class PMEnvironment {
 	protected String channelKey;
 
 	protected String name;
+	protected String inboundQueue;
 
 	private boolean isSandbox;
 	private boolean isShared;
@@ -185,6 +186,14 @@ public class PMEnvironment {
 
 	public void setShared(boolean isShared) {
 	    this.isShared = isShared;
+	}
+
+	public String getInboundQueue() {
+	    return inboundQueue;
+	}
+
+	public void setInboundQueue(String inboundQueue) {
+	    this.inboundQueue = inboundQueue;
 	}
 
     }
