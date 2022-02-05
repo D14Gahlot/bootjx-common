@@ -37,6 +37,15 @@ public class ChannelPluginProvider {
 	 */
 	@SuppressWarnings("unchecked")
 	public default ChannelConfig updateChannelConfig(ChannelConfig config, AChannelDetails details) {
+	    updatePluginSpecs(config);
+	    // Channel Specific Properties
+	    config.setLane(details.getLane());
+
+	    setDetails(config, (C) details);
+	    return config;
+	}
+
+	public default void updatePluginSpecs(ChannelConfig config) {
 	    // Plugin Specific Properties
 	    config.setContactType(this.getContactType());
 	    config.setChannelType(this.getChannelType());
@@ -46,12 +55,6 @@ public class ChannelPluginProvider {
 	    config.setPushFreeTextAllowed(this.isPushFreeTextAllowed());
 	    config.setPushToNewContactAllowed(this.isPushToNewContactAllowed());
 	    config.setWebhookManual(this.isWebhookManual());
-
-	    // Channel Specific Properties
-	    config.setLane(details.getLane());
-
-	    setDetails(config, (C) details);
-	    return config;
 	}
 
 	/**
@@ -72,7 +75,7 @@ public class ChannelPluginProvider {
 	    list.add(new ConfigMeta().key("channelKey").title("Channel Key").readonly().hidden()
 		    .defaultValue(PostManUtil.UNIQUE_API_KEY()));
 	    list.add(new ConfigMeta().key("inboundQueue").title("Default Queue").readonly().optional()
-		    .optionsSource("getx:/api/config/inbound_queue").optionsKey("code"));
+		    .optionsSource("getx:/api/config/inbound_queue").optionsKey("code").order(100));
 
 	    String serviceDomain = pmEnvironment.keyEntry("mry.prop.service.domain").asString();
 	    String clientDomain = AppContextUtil.getTenant();

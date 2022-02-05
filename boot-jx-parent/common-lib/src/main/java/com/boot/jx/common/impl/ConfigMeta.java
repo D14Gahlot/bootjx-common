@@ -95,6 +95,7 @@ public class ConfigMeta implements Serializable {
     private boolean writeonly;
     private boolean hidden;
     private boolean deprecated;
+    private Integer order;
 
     private OPTIONS_TYPE inputType;
     private DATA_TYPE dataType;
@@ -373,6 +374,19 @@ public class ConfigMeta implements Serializable {
 
     public ConfigMeta optionsKey(String optionKey) {
 	this.optionsKey = optionKey;
+	return this;
+    }
+
+    public Integer getOrder() {
+	return order;
+    }
+
+    public void setOrder(Integer order) {
+	this.order = order;
+    }
+
+    public ConfigMeta order(Integer order) {
+	this.order = order;
 	return this;
     }
 }
