@@ -58,7 +58,7 @@ public class XmsInBoundHandler implements InBoundHandler {
 	String assignedQueue = inboxMessage.session().getQueue();
 
 	if (!ArgUtil.is(assignedQueue)) {
-	    assignedQueue = pmDomainConfig.getDefaultInboundQueue();
+	    assignedQueue = pmDomainConfig.getDefaultInboundQueue(inboxMessage.contact());
 	}
 
 	if (ArgUtil.is(assignedQueue)) {

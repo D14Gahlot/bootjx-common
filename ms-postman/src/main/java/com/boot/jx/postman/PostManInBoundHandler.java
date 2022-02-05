@@ -28,10 +28,8 @@ import com.boot.jx.postman.model.ext.InBoundMsgMedia;
 import com.boot.jx.postman.model.ext.InBoundMsgStatus;
 import com.boot.jx.postman.model.ext.InBoundWrapper;
 import com.boot.jx.postman.model.ext.MsgSession;
-import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.postman.store.MessageStore;
 import com.boot.jx.rest.RestService;
-import com.boot.jx.utils.PostManUtil;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
 
@@ -67,12 +65,7 @@ public class PostManInBoundHandler implements InBoundHandler {
 	String assignedQueue = inboxMessage.session().getQueue();
 
 	if (!ArgUtil.is(assignedQueue)) {
-	    ChannelConfig channel = pmEnvironment.config().channel(PostManUtil.CHANNEL_ID(inboxMessage.contact()));
-	    if (ArgUtil.is(channel) && ArgUtil.is(channel.getInboundQueue())) {
-		assignedQueue = channel.getInboundQueue();
-	    } else {
-		assignedQueue = pmDomainConfig.getDefaultInboundQueue();
-	    }
+	    assignedQueue = pmDomainConfig.getDefaultInboundQueue(inboxMessage.contact());
 	}
 
 	if (ArgUtil.is(assignedQueue)) {
