@@ -29,7 +29,7 @@ import com.boot.utils.ArgUtil;
 import com.boot.utils.JsonUtil;
 
 @Component
-public class AccountAdminService implements LogoutHandler {
+public class AccountAuthService implements LogoutHandler {
 
     /*
      * Below APIs are
@@ -164,7 +164,7 @@ public class AccountAdminService implements LogoutHandler {
 	if (ArgUtil.is(authentication)) {
 	    updateLogout(ArgUtil.parseAsString(authentication.getPrincipal()));
 	}
-	commonHttpRequest.instance(request, response, appConfig).setCookie("JXSESSIONID", "JXSESSIONID", 0);
+	commonHttpRequest.instance(request, response, appConfig).setCookie("ACCTSESSIONID", "ACCTSESSIONID", 0);
     }
 
 }

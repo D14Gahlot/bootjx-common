@@ -64,6 +64,11 @@ public class AgentAuthController {
     @Autowired
     private EmpAuthService authService;
 
+    private boolean isAdminPanelBlocked() {
+	return false;
+	//return pmEnvironment.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_CHAT_INBOUND_WEBHOOK).exists();
+    }
+
     @RequestMapping(value = { "/app/unauthorized", "/app/unauthorized/**" },
 	    method = { RequestMethod.POST, RequestMethod.GET })
     public String unauthorized(Model model) {
@@ -78,7 +83,7 @@ public class AgentAuthController {
 	    @RequestParam(required = false) String domainId, @RequestParam(required = false) String domainToken,
 	    @RequestParam(required = false) String domainUser) throws NoSuchAlgorithmException {
 
-	if (pmEnvironment.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_CHAT_INBOUND_WEBHOOK).exists()) {
+	if (isAdminPanelBlocked()) {
 	    return unauthorized(model);
 	}
 
@@ -115,7 +120,7 @@ public class AgentAuthController {
     @RequestMapping(value = { "/auth/login", "/auth/resetpass" }, method = { RequestMethod.POST, RequestMethod.GET })
     public String login(Model model, HttpServletRequest request, HttpServletResponse httpServletResponse) {
 
-	if (pmEnvironment.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_CHAT_INBOUND_WEBHOOK).exists()) {
+	if (isAdminPanelBlocked()) {
 	    return unauthorized(model);
 	}
 

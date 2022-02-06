@@ -32,7 +32,6 @@ import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.postman.plugin.ChannelPluginProvider;
 import com.boot.jx.postman.plugin.ChannelPluginProvider.ChannelPlugin;
 import com.boot.jx.postman.store.ConfigStore;
-import com.boot.jx.scope.tnt.Tenants;
 import com.boot.jx.tunnel.sys.SharedConfigManager;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.model.MapModel;
@@ -207,14 +206,23 @@ public class ConfigManager {
     public ChannelConfig getChannelConfig(String channelId) {
 	if (ArgUtil.is(channelId)) {
 	    ChannelConfigDoc channelConfig = configStore.findById(channelId, ChannelConfigDoc.class);
-	    if (ArgUtil.is(channelConfig) && !channelConfig.isReadOnly()) {
-		PMConfigurationModel config = pmEnvironment.local();
-		if (!ArgUtil.is(channelConfig.getWebhookUrl())) {
-		    channelConfig.setWebhookUrl(pmClientConfig.getWebhookBase(channelConfig));
-		}
-		channelConfig.setCallbackPath(PostManUtil.CHANNEL_CALLBACK_PATH(config.getAccountKey(), channelConfig));
-		return channelConfig;
+	    if (!ArgUtil.is(channelConfig)) {
+		return null;
 	    }
+	    ChannelPlugin<? extends AChannelDetails> plugin = ChannelPluginProvider.PLUGIN_MAPPING
+		    .get(channelConfig.getChannelType());
+	    plugin.updatePluginSpecs(channelConfig);
+	    if (!channelConfig.isReadOnly()) {
+		if (plugin.isWebhookManual()) {
+		    PMConfigurationModel config = pmEnvironment.local();
+		    if (!ArgUtil.is(channelConfig.getWebhookUrl())) {
+			channelConfig.setWebhookUrl(pmClientConfig.getWebhookBase(channelConfig));
+			channelConfig.setCallbackPath(
+				PostManUtil.CHANNEL_CALLBACK_PATH(config.getAccountKey(), channelConfig));
+		    }
+		}
+	    }
+	    return channelConfig;
 	}
 	return null;
     }

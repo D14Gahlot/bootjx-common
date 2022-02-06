@@ -86,13 +86,13 @@ public class ChatSessionFactory {
 	// CONTACT FIND BY SESSION_ID
 	ChatContactDoc chatContactDoc = sessionStore.getContact(contact.getContactId());
 
-	//CONTACT CREATION
+	// CONTACT CREATION
 	if (ArgUtil.isEmpty(chatContactDoc)) {
 	    System.out.println("CONTACT CREATION");
 	    ChatContactQuery chatContactQuery = new ChatContactQuery(contact.getContactId());
 	    chatContactQuery.update(contact);
 	    chatContactQuery.updateCreatedStamp();
-	    //chatContactDoc = sessionStore.save(chatContactQuery.getDoc());
+	    // chatContactDoc = sessionStore.save(chatContactQuery.getDoc());
 	    chatContactDoc = sessionStore.save(chatContactQuery);
 	}
 
@@ -104,8 +104,8 @@ public class ChatSessionFactory {
 	}
 
 	sessionStore.closeAllPreviousSessions(contact.getContactId());
-	
-	//SESSION CREATION
+
+	// SESSION CREATION
 	System.out.println("SESSION CREATION");
 	chatSessionDoc = new ChatSessionDoc();
 	chatSessionDoc.setContactId(contact.getContactId());
@@ -136,9 +136,9 @@ public class ChatSessionFactory {
 
 	    // Assign Queue
 	    if (ArgUtil.isEmptyValue(chatSessionDoc.getAssignedToQueue())) {
-		String defaultQueue = pmDomainConfig.getDefaultInboundQueue();
+		String defaultQueue = pmDomainConfig.getDefaultInboundQueue(inboxMessage.contact());
 		if (ArgUtil.is(defaultQueue)) {
-		    chatSessionDocQuery.setQueue(pmDomainConfig.getDefaultInboundQueue());
+		    chatSessionDocQuery.setQueue(defaultQueue);
 		}
 	    }
 

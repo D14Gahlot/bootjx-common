@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.boot.jx.AppContextUtil;
 import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorMapping;
 import com.boot.jx.connectors.AbstractConnector.DefaultConnector;
 import com.boot.jx.dict.ContactType;
@@ -86,6 +87,8 @@ public class WebConnector extends DefaultConnector<WebConfigDetails, WebPlugin> 
 
 	template(channelConfig, chatContactDoc, outboxMessage);
 
+	String contactIdWeb = AppContextUtil.getTenant() + "/" + contactId;
+
 	if (redisson == null) {
 	    try {
 		messageQueue.enqueue(outboxMessage);
@@ -95,12 +98,13 @@ public class WebConnector extends DefaultConnector<WebConfigDetails, WebPlugin> 
 		outboxMessage.logs().add(e.getMessage());
 		e.printStackTrace();
 	    }
-	} else if (stompEnabled) {
-	    stompTunnelService.sendToTag(contactId, "/message/receive/new", outboxMessage);
 	} else {
-	    LOGGER.debug("sendReply to " + contactId);
-	    RBlockingQueue<String> messageQueue = redisson.getBlockingQueue(WEB_USER_MESSAGE_STR + contactId);
-	    messageQueue.add(JsonUtil.toJson(outboxMessage));
+	    if (!stompEnabled) {
+		LOGGER.debug("sendReply to " + contactIdWeb);
+		RBlockingQueue<String> messageQueue = redisson.getBlockingQueue(WEB_USER_MESSAGE_STR + contactIdWeb);
+		messageQueue.add(JsonUtil.toJson(outboxMessage));
+	    }
+	    stompTunnelService.sendToTag(contactIdWeb, "/message/receive/new", outboxMessage);
 	}
     }
 
@@ -116,7 +120,7 @@ public class WebConnector extends DefaultConnector<WebConfigDetails, WebPlugin> 
     @Autowired
     private StompTunnelService stompTunnelService;
 
-    public OutboxMessage pollUnreadMessage(String number) throws InterruptedException {
+    public OutboxMessage pollUnreadMessage(String contactId) throws InterruptedException {
 	if (redisson == null) {
 	    try {
 		return messageQueue.dequeue();
@@ -124,7 +128,7 @@ public class WebConnector extends DefaultConnector<WebConfigDetails, WebPlugin> 
 		e.printStackTrace();
 	    }
 	}
-	RBlockingQueue<String> messageQueue = redisson.getBlockingQueue(WEB_USER_MESSAGE_STR + number);
+	RBlockingQueue<String> messageQueue = redisson.getBlockingQueue(WEB_USER_MESSAGE_STR + contactId);
 	String x = messageQueue.poll(5, TimeUnit.SECONDS);
 
 	if (ArgUtil.is(x)) {

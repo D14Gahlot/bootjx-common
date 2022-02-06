@@ -11,12 +11,13 @@ import com.boot.jx.dict.ContactType;
 import com.boot.jx.postman.PMConstants;
 import com.boot.jx.postman.model.MessageDefinitions.Contactable;
 import com.boot.jx.postman.model.MessageDefinitions.IMessageExtended;
+import com.boot.jx.postman.model.MessageDefinitions.LogMessage;
 import com.boot.utils.StringUtils.StringMatcher;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class InboxMessage implements Serializable, IMessageExtended {
+public class InboxMessage implements Serializable, IMessageExtended, LogMessage {
 
     private static final long serialVersionUID = -4488174520614920589L;
 
@@ -345,10 +346,10 @@ public class InboxMessage implements Serializable, IMessageExtended {
     }
 
     public String getMessageIdRef() {
-        return messageIdRef;
+	return messageIdRef;
     }
 
     public void setMessageIdRef(String messageIdRef) {
-        this.messageIdRef = messageIdRef;
+	this.messageIdRef = messageIdRef;
     }
 }

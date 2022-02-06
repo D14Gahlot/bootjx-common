@@ -7,6 +7,7 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.boot.jx.AppConfig;
+import com.boot.jx.AppContextUtil;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.chat.ChatStatusService;
@@ -88,6 +90,9 @@ public class InBoundControllerWeb {
     @Autowired
     private StompTunnelSessionManager stompTunnelSessionManager;
 
+    @Value("${app.stomp}")
+    boolean stompEnabled;
+
     @RequestMapping(value = "/plugin/customer/**", method = RequestMethod.GET)
     public String pluginCustomer(Model model, @RequestParam(required = false) String contacyType,
 	    @RequestParam(required = false, defaultValue = "/plugin/customer") String path)
@@ -106,7 +111,8 @@ public class InBoundControllerWeb {
 	String nounce = UniqueID.generateString62();
 	model.addAttribute("NOUNCE", nounce);
 	commonHttpRequest.setCookie("NOUNCE", nounce);
-	model.addAttribute("APP_USER", "APP_USER" + nounce);
+
+	model.addAttribute("STOMP_ENABLED", stompEnabled);
 
 	return "app-customer";
     }
@@ -122,8 +128,11 @@ public class InBoundControllerWeb {
     @RequestMapping(value = { "/ext/outbound/web/callback", "/ext/plugin/outbound/web/callback" },
 	    method = RequestMethod.GET)
     public OutboxMessage onReceiveMessage(@RequestParam(required = false) String number,
-	    @RequestParam(required = false) String csid) throws InterruptedException {
-	return dummyConnector.pollUnreadMessage(ArgUtil.nonEmpty(csid, number));
+	    @RequestParam(required = false) String csid, @RequestParam(required = false) String channelId,
+	    @RequestParam(required = false) String channelKey) throws InterruptedException {
+	ChannelConfig channelConfig = pmEnvironment.config().channel(channelId);
+	return dummyConnector
+		.pollUnreadMessage(AppContextUtil.getTenant() + "/" + PostManUtil.CONTACT_ID(channelConfig, csid));
     }
 
     @ResponseBody

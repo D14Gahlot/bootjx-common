@@ -264,9 +264,9 @@ public class SessionStore extends CommonMongoTemplateAbstract {
 
 	    // Assign Queue
 	    if (ArgUtil.isEmptyValue(chatSessionDoc.getAssignedToQueue())) {
-		String defaultQueue = pmDomainConfig.getDefaultInboundQueue();
+		String defaultQueue = pmDomainConfig.getDefaultInboundQueue(inboxMessage.contact());
 		if (ArgUtil.is(defaultQueue)) {
-		    chatSessionDocQuery.setQueue(pmDomainConfig.getDefaultInboundQueue());
+		    chatSessionDocQuery.setQueue(defaultQueue);
 		}
 	    }
 
