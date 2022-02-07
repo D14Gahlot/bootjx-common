@@ -102,7 +102,7 @@ public class TwitterConnector extends AbstractConnector<TwitterConfigDetails, Tw
     }
 
     @Override
-    public boolean initSession(ChatSessionDoc session, InboxMessage inboxMessage) {
+    public OutboxMessage initSession(ChatSessionDoc session, InboxMessage inboxMessage) {
 	if (ArgUtil.is(inboxMessage.getOriginalMessage())) {
 	    try {
 		DirectMessageLocalImpl dm = JsonUtil.parse(inboxMessage.getOriginalMessage(),
@@ -117,7 +117,7 @@ public class TwitterConnector extends AbstractConnector<TwitterConfigDetails, Tw
 		LOGGER.error("Twitter Init Session Data Parse Errror", e);
 	    }
 	}
-	return true;
+	return null;
     }
 
     public List<InboxMessage> messageConverter(ResponseList<DirectMessage> dml, ChannelConfig channelConfig) {

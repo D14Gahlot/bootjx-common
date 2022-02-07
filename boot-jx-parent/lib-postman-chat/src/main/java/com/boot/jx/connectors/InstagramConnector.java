@@ -68,13 +68,13 @@ public class InstagramConnector extends AbstractConnector<InstagramConfig, Insta
     }
 
     @Override
-    public boolean initSession(ChatSessionDoc session, InboxMessage inboxMessage) {
+    public OutboxMessage initSession(ChatSessionDoc session, InboxMessage inboxMessage) {
 	ChannelConfig config = getChannelConfig(inboxMessage);
 	InstagramUserProfile profile = instaClient.getUserProfile(config,inboxMessage.contact());
 	ChatContactQuery contactQuery = messageContext.getChatContactQuery();
 	contactQuery.setProfilePic(profile.getProfilePic());
 	contactQuery.setName(profile.getName());
-	return true;
+	return null;
     }
 
     @Deprecated

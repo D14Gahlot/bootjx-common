@@ -7,15 +7,14 @@ import java.util.List;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.postman.model.MessageDefinitions.IMessage;
 import com.boot.jx.postman.model.MessageOptions.WAMessageOptions;
-import com.boot.utils.ArgUtil;
-import com.boot.utils.CollectionUtil;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class OutboxMessage extends Message<OutboxMessage> implements WAMessageOptions, IMessage {
 
     private static final long serialVersionUID = 3115992767625612005L;
+
+    public static final OutboxMessage NO_MESSAGE = new OutboxMessage();
 
     private BigDecimal queue;
     private MessageSession session;

@@ -66,14 +66,14 @@ public class FacebookConnector extends AbstractConnector<FacebookConfigDetails, 
     }
 
     @Override
-    public boolean initSession(ChatSessionDoc session, InboxMessage inboxMessage) {
+    public OutboxMessage initSession(ChatSessionDoc session, InboxMessage inboxMessage) {
 	ChannelConfig config = getChannelConfig(inboxMessage);
 	FacebookUserProfile profile = facebooClient.getUserProfile(config, inboxMessage.contact());
 	ChatContactQuery contactQuery = messageContext.getChatContactQuery();
 	contactQuery.setProfilePic(profile.getProfilePic());
 	contactQuery.setName(profile.getFirstName() + " " + profile.getLastName());
 	contactQuery.setEmail(profile.getEmail());
-	return true;
+	return null;
     }
 
     @Deprecated

@@ -144,6 +144,8 @@ public class InBoundControllerWeb {
 	String webSessionId = commonHttpRequest.get(WEB_SESSION_ID);
 	csid = ArgUtil.nonEmpty(csid, number);
 	ChannelConfig channelConfig = pmEnvironment.config().channel(channelId);
+	String contactId = PostManUtil.CONTACT_ID(channelConfig, csid);
+	String contactIdWeb = AppContextUtil.getTenant() + "/" + contactId;
 
 	ChatSessionDoc session = null;
 	if (ArgUtil.is(webSessionId)) {
@@ -160,7 +162,7 @@ public class InBoundControllerWeb {
 	    }
 	}
 	if (ArgUtil.is(channelConfig)) {
-	    stompTunnelSessionManager.registerUser(user, PostManUtil.CONTACT_ID(channelConfig, csid), csid);
+	    stompTunnelSessionManager.registerUser(ArgUtil.nonEmpty(user, csid), contactIdWeb, csid);
 	}
 	return ApiResponse.buildResults(msgs);
     }

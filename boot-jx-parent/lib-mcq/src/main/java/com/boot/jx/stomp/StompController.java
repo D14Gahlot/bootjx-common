@@ -38,6 +38,11 @@ public class StompController {
 	String httpsSessionId = ArgUtil
 		.parseAsString(headerAccessor.getSessionAttributes().get(AppConstants.SESSION_ID_XKEY));
 
+	if (!ArgUtil.is(httpsSessionId)) {
+	    LOGGER.warn("httpsSessionId is Empty");
+	    return map;
+	}
+
 	StompSession stompSession = stompTunnelSessionManager.getStompSessionByHttpSessionId(httpsSessionId);
 
 	if (ArgUtil.is(stompSession)) {
@@ -54,6 +59,7 @@ public class StompController {
 	map.put(AppConstants.SESSION_UID_XKEY, stompTunnelSessionManager.createSessionMapping(
 		headerAccessor.getSessionId(), httpsSessionId,
 		ArgUtil.parseAsString(headerAccessor.getSessionAttributes().get(AppConstants.SESSION_UID_XKEY))));
+
 	return map;
     }
 
