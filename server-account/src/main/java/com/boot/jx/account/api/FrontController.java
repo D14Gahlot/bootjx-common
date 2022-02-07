@@ -15,7 +15,9 @@ import com.boot.jx.account.AccountSessionBean;
 import com.boot.jx.account.doc.AccountStore;
 import com.boot.jx.account.doc.DomainDoc;
 import com.boot.jx.http.CommonHttpRequest;
+import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.scope.tnt.Tenants;
+import com.boot.jx.scope.tnt.Tenants.TenantResolver;
 import com.boot.jx.validation.AlphaNumValidator.ValidAlphaNum;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.Constants;
@@ -33,8 +35,14 @@ public class FrontController {
     private CommonHttpRequest commonHttpRequest;
 
     @Autowired
-    AccountStore accountStore;
+    private  AccountStore accountStore;
 
+    @Autowired
+    private TenantResolver tenantResolver;
+
+    @Autowired
+    private PMEnvironment env;
+    
     @RequestMapping(value = { "/account", "/account/**" }, method = { RequestMethod.GET })
     public String account(Model model) {
 	model.addAllAttributes(appCommonConfig.appAttributes());
@@ -53,6 +61,12 @@ public class FrontController {
 
     @RequestMapping(value = { "/", "/front/", "/front/**" }, method = { RequestMethod.GET })
     public String front(Model model) {
+
+	if (!tenantResolver.isValid()) {
+	    return "redirect:" + String.format("https://app.%s%s", env.keyEntry("mry.prop.service.domain").asString(),
+		    commonHttpRequest.getRequestURI());
+	}
+
 	String domainName = commonHttpRequest.get("domain");
 	return domainProfile(model, domainName, true, "front");
     }
