@@ -12,7 +12,6 @@ import org.springframework.stereotype.Component;
 import com.boot.jx.AppConfig;
 import com.boot.jx.rest.RestService;
 import com.boot.jx.scope.tnt.Tenants;
-import com.boot.jx.scope.tnt.Tenants.Tenant;
 import com.boot.jx.scope.tnt.Tenants.TenantResolver;
 import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
@@ -32,7 +31,15 @@ public class TenantClientResolver extends TenantResolver {
     @Value("mry.account.url")
     String accountUrl;
 
+    @Value("default.tenant.static")
+    String tenantStatic;
+
     public String resolve(String tnt) {
+
+	if (ArgUtil.is(tenantStatic)) {
+	    return tenantStatic;
+	}
+
 	if (ArgUtil.is(tnt) && tntMapping.containsKey(tnt)) {
 	    return tntMapping.get(tnt);
 	}
@@ -50,7 +57,7 @@ public class TenantClientResolver extends TenantResolver {
 	}
 
 	if (ArgUtil.is(accountUrl) && !Tenants.isDefault(tnt)) {
-	    MapModel resp = restService.ajax(accountUrl).path("/api/domain/exists").queryParam("tnt", tnt)
+	    MapModel resp = restService.ajax(accountUrl).path("/partner/api/domain/exists").queryParam("tnt", tnt)
 		    .queryParam("domain", tnt).asMapModel();
 	    if (resp.keyEntry("meta").is(tnt)) {
 		tntMapping.put(tnt, tnt);
