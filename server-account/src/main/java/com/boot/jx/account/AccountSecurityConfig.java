@@ -65,8 +65,8 @@ public class AccountSecurityConfig extends WebSecurityConfigurerAdapter {
 		// .loginProcessingUrl("/auth/login/submit").permitAll()
 		// Logout Pages
 		.and().logout().permitAll().addLogoutHandler(agentLogoutHandler).logoutUrl("/common/auth/logout")
-		.logoutSuccessUrl("/common/auth/login?logout").logoutSuccessHandler(logoutSuccessHandler())
-		.deleteCookies("JSESSIONID", "JXSESSIONID", "ADMINSESSIONID").invalidateHttpSession(true).permitAll()
+		.logoutSuccessHandler(logoutSuccessHandler()).logoutSuccessUrl("/?logout")
+		.deleteCookies("JSESSIONID", "JXSESSIONID", "ACCTSESSIONID").invalidateHttpSession(true).permitAll()
 		.and().exceptionHandling().accessDeniedPage("/403").and().csrf().disable().headers().disable();
     }
 
