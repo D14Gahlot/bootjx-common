@@ -73,7 +73,7 @@ public class Tenants {
 	    return tnt;
 	}
 
-	boolean isValid() {
+	public boolean isValid() {
 	    return true;
 	}
 

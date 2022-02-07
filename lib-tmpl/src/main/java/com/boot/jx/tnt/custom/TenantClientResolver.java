@@ -80,8 +80,7 @@ public class TenantClientResolver extends TenantResolver {
     }
 
     @Override
-    @Override
-    boolean isValid() {
+    public boolean isValid() {
 	String tnt = AppContextUtil.getTenant();
 	String mappedTnt = tntMapping.get(tnt);
 	return ArgUtil.is(mappedTnt) && mappedTnt.equalsIgnoreCase(tnt);
