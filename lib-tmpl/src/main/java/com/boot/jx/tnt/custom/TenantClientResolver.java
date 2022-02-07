@@ -6,10 +6,15 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.boot.jx.AppConfig;
+import com.boot.jx.rest.RestService;
+import com.boot.jx.scope.tnt.Tenants;
+import com.boot.jx.scope.tnt.Tenants.Tenant;
 import com.boot.jx.scope.tnt.Tenants.TenantResolver;
+import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
 
 @Component
@@ -20,6 +25,12 @@ public class TenantClientResolver extends TenantResolver {
 
     @Autowired
     AppConfig appConfig;
+
+    @Autowired
+    RestService restService;
+
+    @Value("mry.account.url")
+    String accountUrl;
 
     public String resolve(String tnt) {
 	if (ArgUtil.is(tnt) && tntMapping.containsKey(tnt)) {
@@ -35,6 +46,14 @@ public class TenantClientResolver extends TenantResolver {
 	    Matcher matcher = pattern.matcher(tnt);
 	    if (matcher.find()) {
 		return "demo";
+	    }
+	}
+
+	if (ArgUtil.is(accountUrl) && !Tenants.isDefault(tnt)) {
+	    MapModel resp = restService.ajax(accountUrl).path("/api/domain/exists").queryParam("tnt", tnt)
+		    .queryParam("domain", tnt).asMapModel();
+	    if (resp.keyEntry("meta").is(tnt)) {
+		tntMapping.put(tnt, tnt);
 	    }
 	}
 

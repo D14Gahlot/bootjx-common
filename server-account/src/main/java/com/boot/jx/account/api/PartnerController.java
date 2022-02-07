@@ -250,6 +250,18 @@ public class PartnerController {
     }
 
     @ResponseBody
+    @RequestMapping(value = { "/api/domain/exists" }, method = { RequestMethod.GET })
+    public ApiResponse<Object, Object> sisExists(@RequestParam @Valid String domain) throws NoSuchAlgorithmException {
+	DomainDoc domainDoc = accountStore.findDomainByName(domain);
+	if (ArgUtil.is(domainDoc)) {
+	    domainDoc = new DomainDoc();
+	    domainDoc.setDomain(domainDoc.getDomain());
+	    return ApiResponse.buildMeta(domainDoc.getDomain());
+	}
+	return ApiResponse.buildMeta(null).statusKey("400");
+    }
+
+    @ResponseBody
     @RequestMapping(value = { "/api/domain/check" }, method = { RequestMethod.POST })
     public ApiResponse<Object, Object> checkDomain(@RequestParam @Valid String domain) throws NoSuchAlgorithmException {
 
