@@ -262,7 +262,7 @@ public class PartnerController {
     }
 
     @ResponseBody
-    @RequestMapping(value = { "/api/domain/check" }, method = { RequestMethod.POST })
+    @RequestMapping(value = { "/api/domain/check", "/pub/domain/check" }, method = { RequestMethod.POST })
     public ApiResponse<Object, Object> checkDomain(@RequestParam @Valid String domain) throws NoSuchAlgorithmException {
 
 	DomainDoc domainDoc = accountStore.findDomainByName(domain);

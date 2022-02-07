@@ -19,6 +19,7 @@ import com.boot.utils.ArgUtil;
 @Component
 public class TenantClientResolver extends TenantResolver {
 
+    private static final String NODOMAIN = "nodomain";
     public static final Map<String, String> tntMapping = new HashMap<String, String>();
     public static final Pattern pattern = Pattern.compile("^(.+?)-(.+?)-(.+?)-(.+?)-(.+?)$");
 
@@ -40,12 +41,13 @@ public class TenantClientResolver extends TenantResolver {
 	    return tenantStatic;
 	}
 
-	if (ArgUtil.is(tnt) && tntMapping.containsKey(tnt)) {
-	    return tntMapping.get(tnt);
+	if (!ArgUtil.is(tnt)) {
+	    return NODOMAIN;
 	}
 
-	String mappedTnt = appConfig.prop("tenant." + tnt);
-	if (ArgUtil.is(mappedTnt)) {
+	String mappedTnt = tntMapping.get(tnt);
+
+	if (ArgUtil.is(mappedTnt) && !NODOMAIN.equalsIgnoreCase(mappedTnt)) {
 	    return mappedTnt;
 	}
 
@@ -62,11 +64,15 @@ public class TenantClientResolver extends TenantResolver {
 			.queryParam("domain", tnt).asMapModel();
 		if (resp.keyEntry("meta").is(tnt)) {
 		    tntMapping.put(tnt, tnt);
+		} else {
+		    tntMapping.put(tnt, NODOMAIN);
+		    return NODOMAIN;
 		}
 	    } catch (Exception e) {
 		e.printStackTrace();
+		tntMapping.put(tnt, NODOMAIN);
+		return NODOMAIN;
 	    }
-
 	}
 
 	return tnt;
