@@ -60,10 +60,11 @@ public class TenantClientResolver extends TenantResolver {
 
 	if (ArgUtil.is(accountUrl) && !Tenants.isDefault(tnt)) {
 	    try {
-		MapModel resp = restService.ajax(accountUrl).path("/partner/api/domain/exists").queryParam("tnt", tnt)
+		MapModel resp = restService.ajax(accountUrl).path("/partner/pub/domain/exists").queryParam("tnt", tnt)
 			.queryParam("domain", tnt).asMapModel();
 		if (resp.keyEntry("meta").is(tnt)) {
 		    tntMapping.put(tnt, tnt);
+		    return tnt;
 		} else {
 		    tntMapping.put(tnt, NODOMAIN);
 		    return NODOMAIN;
@@ -74,7 +75,6 @@ public class TenantClientResolver extends TenantResolver {
 		return NODOMAIN;
 	    }
 	}
-
 	return tnt;
     }
 
@@ -82,10 +82,5 @@ public class TenantClientResolver extends TenantResolver {
 	tntMapping.put("app", "app");
 	tntMapping.put("api", "app");
 	tntMapping.put("local", "local");
-	tntMapping.put("8d5c-115-111-75-48", "app");
-	tntMapping.put("1a11-115-111-75-27", "app");
-	tntMapping.put("5a99-115-111-75-27", "app");
-	tntMapping.put("f3ac-45-112-40-98", "demo");
-
     }
 }
