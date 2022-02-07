@@ -30,10 +30,10 @@ public class TenantClientResolver extends TenantResolver {
     @Autowired
     RestService restService;
 
-    @Value("mry.account.url")
+    @Value("${mry.account.url}")
     String accountUrl;
 
-    @Value("default.tenant.static")
+    @Value("${default.tenant.static}")
     String tenantStatic;
 
     public String resolve(String tnt) {

@@ -37,6 +37,7 @@ import com.boot.jx.common.dto.UserLoginToken;
 import com.boot.jx.common.service.EmpAuthService;
 import com.boot.jx.http.CommonHttpRequest;
 import com.boot.jx.postman.PMEnvironment;
+import com.boot.jx.scope.tnt.Tenants;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
 import com.boot.utils.CryptoUtil;
@@ -250,12 +251,11 @@ public class PartnerController {
     }
 
     @ResponseBody
-    @RequestMapping(value = { "/api/domain/exists" }, method = { RequestMethod.GET })
+    @RequestMapping(value = { "/api/domain/exists", "/pub/domain/exists" }, method = { RequestMethod.GET })
     public ApiResponse<Object, Object> sisExists(@RequestParam @Valid String domain) throws NoSuchAlgorithmException {
+	AppContextUtil.setTenant(Tenants.getDefault());
 	DomainDoc domainDoc = accountStore.findDomainByName(domain);
 	if (ArgUtil.is(domainDoc)) {
-	    domainDoc = new DomainDoc();
-	    domainDoc.setDomain(domainDoc.getDomain());
 	    return ApiResponse.buildMeta(domainDoc.getDomain());
 	}
 	return ApiResponse.buildMeta(null).statusKey("400");
