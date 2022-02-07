@@ -57,11 +57,16 @@ public class TenantClientResolver extends TenantResolver {
 	}
 
 	if (ArgUtil.is(accountUrl) && !Tenants.isDefault(tnt)) {
-	    MapModel resp = restService.ajax(accountUrl).path("/partner/api/domain/exists").queryParam("tnt", tnt)
-		    .queryParam("domain", tnt).asMapModel();
-	    if (resp.keyEntry("meta").is(tnt)) {
-		tntMapping.put(tnt, tnt);
+	    try {
+		MapModel resp = restService.ajax(accountUrl).path("/partner/api/domain/exists").queryParam("tnt", tnt)
+			.queryParam("domain", tnt).asMapModel();
+		if (resp.keyEntry("meta").is(tnt)) {
+		    tntMapping.put(tnt, tnt);
+		}
+	    } catch (Exception e) {
+		e.printStackTrace();
 	    }
+
 	}
 
 	return tnt;
