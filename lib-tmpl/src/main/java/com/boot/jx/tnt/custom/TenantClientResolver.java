@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.boot.jx.AppConfig;
+import com.boot.jx.AppContextUtil;
 import com.boot.jx.rest.RestService;
 import com.boot.jx.scope.tnt.Tenants;
 import com.boot.jx.scope.tnt.Tenants.TenantResolver;
@@ -76,6 +77,14 @@ public class TenantClientResolver extends TenantResolver {
 	    }
 	}
 	return tnt;
+    }
+
+    @Override
+    @Override
+    boolean isValid() {
+	String tnt = AppContextUtil.getTenant();
+	String mappedTnt = tntMapping.get(tnt);
+	return ArgUtil.is(mappedTnt) && mappedTnt.equalsIgnoreCase(tnt);
     }
 
     static {
