@@ -1,48 +1,37 @@
 package com.boot.jx.tunnel.sys;
 
-import java.util.List;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.boot.jx.AppConfigPackage.AppSharedConfig;
+import com.boot.jx.AppConfigPackage;
 import com.boot.jx.tunnel.DBEvent;
 import com.boot.jx.tunnel.ITunnelSubscriber;
 import com.boot.jx.tunnel.TunnelEventMapping;
+import com.boot.jx.tunnel.TunnelEventXchange;
 import com.boot.jx.tunnel.TunnelService;
-import com.boot.utils.ArgUtil;
-import com.boot.utils.ClazzUtil;
 
-@TunnelEventMapping(topic = SysTunnelEventsDict.Names.SHARED_CONFIG_UPDATE)
+@TunnelEventMapping(topic = SysTunnelEventsDict.Names.SHARED_CONFIG_UPDATE, scheme = TunnelEventXchange.SHOUT_LISTNER,
+	integrity = false)
 public class SharedConfigManager implements ITunnelSubscriber<DBEvent> {
 
     private final Logger LOGGER = LoggerFactory.getLogger(getClass());
 
-    @Autowired(required = false)
-    private List<AppSharedConfig> listAppSharedConfig;
-
     @Autowired
     TunnelService tunnelService;
 
+    @Autowired
+    AppConfigPackage appConfigPackage;
+
     @Override
     public void onMessage(String channel, DBEvent brokerEvent) {
-	if (ArgUtil.is(listAppSharedConfig)) {
-	    for (AppSharedConfig appSharedConfig : listAppSharedConfig) {
-		appSharedConfig.clear(brokerEvent.getData());
-		LOGGER.info("for class {}", ClazzUtil.getUltimateClassName(appSharedConfig));
-	    }
-	}
+	appConfigPackage.clear(brokerEvent.getData());
     }
 
     public void clear() {
 	DBEvent e = new DBEvent();
 	e.setEventCode(SysTunnelEventsDict.Names.SHARED_CONFIG_UPDATE);
-	if (ArgUtil.is(listAppSharedConfig)) {
-	    for (AppSharedConfig appSharedConfig : listAppSharedConfig) {
-		appSharedConfig.clear(e.getData());
-	    }
-	}
+	appConfigPackage.clear(e.getData());
 	tunnelService.shout(SysTunnelEventsDict.Names.SHARED_CONFIG_UPDATE, e);
     }
 

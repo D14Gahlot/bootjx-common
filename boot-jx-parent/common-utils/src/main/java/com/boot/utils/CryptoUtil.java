@@ -604,9 +604,19 @@ public final class CryptoUtil {
 	textEncryptor.setPasswordCharArray("ZNEAYuVTsC".toCharArray());
     }
 
+    public static class CrypToken {
+	public String message;
+	public long expireAt;
+
+	public boolean isExpired() {
+	    return System.currentTimeMillis() > expireAt;
+	}
+    }
+
     public static class Encoder {
 	private String output;
 	private String hash;
+	private CrypToken token;
 
 	public Encoder message(String message) {
 	    this.output = message;
@@ -662,7 +672,24 @@ public final class CryptoUtil {
 	}
 
 	public Encoder decrypt() {
-	    this.output = textEncryptor.decrypt(this.output);
+	    try {
+		this.output = textEncryptor.decrypt(this.output);
+	    } catch (Exception e) {
+		LOGGER.error("invalid message from decryption", e);
+	    }
+	    return this;
+	}
+
+	/**
+	 * 
+	 * @param validity in seconds
+	 * @return
+	 */
+	public Encoder tokenize(long validity) {
+	    token = new CrypToken();
+	    token.message = this.output;
+	    token.expireAt = System.currentTimeMillis() + validity * 1000;
+	    this.output = JsonUtil.toJson(token);
 	    return this;
 	}
 
@@ -686,6 +713,10 @@ public final class CryptoUtil {
 
 	public <T> T toObzect(Class<T> type) {
 	    return JsonUtil.fromJson(this.output, type);
+	}
+
+	public CrypToken toToken() {
+	    return JsonUtil.fromJson(this.output, CrypToken.class, true);
 	}
 
 	public String toString() {

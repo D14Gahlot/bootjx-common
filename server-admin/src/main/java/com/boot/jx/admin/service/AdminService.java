@@ -119,7 +119,7 @@ public class AdminService {
 	List<AgentResponseAdminDto> agentList = new AgentResponseAdminDto().importFrom(lstOfAgent);
 	for (AgentResponseAdminDto agentResponseDto : agentList) {
 	    agentResponseDto.setAgent_password(null);
-	    if (ArgUtil.is(agentResponseDto.getAgent_id())) {
+	    if (ArgUtil.is(agentResponseDto.getId())) {
 		agentResponseDto.setDept(new DepartmentResponseAdminDto().importFrom(CollectionUtil
 			.getOne(adminManager.fetchDept(ArgUtil.parseAsString(agentResponseDto.getDept_id())))));
 	    }
@@ -129,7 +129,7 @@ public class AdminService {
 
     public List<AgentResponseAdminDto> agentResetPass(String agentId) throws NoSuchAlgorithmException {
 	AgentDoc agent = agentStore.findById(agentId);
-	empAuthService.resetPassword(agent.getAgent_code(), false);
+	empAuthService.resetPassword(agent.getAgent_code(), agent.isAdmin());
 	return buildAgentDto(CollectionUtil.asList(agent));
     }
 

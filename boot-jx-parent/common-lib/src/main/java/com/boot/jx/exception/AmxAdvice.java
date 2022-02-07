@@ -49,6 +49,7 @@ import com.boot.jx.api.ApiFieldError;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.exception.ApiHttpExceptions.ApiHttpArgException;
+import com.boot.jx.exception.ApiHttpExceptions.ApiHttpException;
 import com.boot.jx.exception.ApiHttpExceptions.ApiStatusCodes;
 import com.boot.jx.http.ApiRequest.ResponeError;
 import com.boot.jx.http.CommonHttpRequest.ApiRequestDetail;
@@ -182,8 +183,8 @@ public abstract class AmxAdvice implements ResponseBodyAdvice<ApiResponse<?, ?>>
 	    HttpServletResponse response) {
 	List<ApiFieldError> errors = ApiResponseUtil.getErrors();
 	ResponseEntity<AmxApiError> respEntity = badRequest(ex, errors, request, response, ex.getError());
-	
-	if(ArgUtil.is(ex.getMessage()))
+
+	if (ArgUtil.is(ex.getMessage()))
 	    respEntity.getBody().setMessage(ex.getMessage());
 	return respEntity;
     }
@@ -273,7 +274,29 @@ public abstract class AmxAdvice implements ResponseBodyAdvice<ApiResponse<?, ?>>
 	}
 	return badRequest(exception, errors, request, response, ApiStatusCodes.PARAM_ILLEGAL);
     }
-    
+
+    @ExceptionHandler(ApiHttpException.class)
+    @ResponseBody
+    protected ResponseEntity<AmxApiError> handle(ApiHttpException ex, HttpServletRequest request,
+	    HttpServletResponse response) {
+	List<ApiFieldError> errors = ApiResponseUtil.getErrors();
+
+	AmxApiError apiError = new AmxApiError();
+	apiError.setHttpStatus(ex.getHttpStatus());
+	apiError.setMessage(ex.getMessage());
+	apiError.setStatusKey(ex.getStatusKey());
+	apiError.setErrors(errors);
+	apiError.setException(ApiHttpArgException.class.getName());
+	ExceptionMessageKey.resolveLocalMessage(apiError);
+	response.setHeader(AppConstants.EXCEPTION_HEADER_KEY, apiError.getException());
+	for (ApiFieldError warning : ApiResponseUtil.getWarnings()) {
+	    apiError.addWarning(warning);
+	}
+	for (String log : ApiResponseUtil.getLogs()) {
+	    apiError.addLog(log);
+	}
+	return new ResponseEntity<AmxApiError>(apiError, ex.getHttpStatus());
+    }
 
     @Override
     public boolean supports(MethodParameter returnType, Class<? extends HttpMessageConverter<?>> converterType) {

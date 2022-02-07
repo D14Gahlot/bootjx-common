@@ -1,7 +1,5 @@
 package com.boot.jx.chat;
 
-import java.util.List;
-
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -13,6 +11,7 @@ import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorHandler;
 import com.boot.jx.logger.LoggerService;
 import com.boot.jx.postman.PMClientConfig;
 import com.boot.jx.postman.PMConstants;
+import com.boot.jx.postman.PMConstants.MESSAGE_COMPOSE_TYPE;
 import com.boot.jx.postman.PostManException;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatContextDoc;
@@ -25,13 +24,10 @@ import com.boot.jx.postman.manager.LogManager;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.Message;
 import com.boot.jx.postman.model.MessageDefinitions.IMessageExtended;
-import com.boot.jx.postman.model.MessageReport;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.query.ChatContactQuery;
-import com.boot.jx.postman.service.ChatDTOUtil;
 import com.boot.jx.postman.store.MessageContext;
 import com.boot.jx.postman.store.MessageStore;
-import com.boot.jx.postman.store.MessageStore.EVENTS;
 import com.boot.jx.postman.store.SessionStore;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.TimeUtils;
@@ -61,6 +57,9 @@ public class ChatService {
 
     @Autowired
     private SessionStore sessionStore;
+
+    @Autowired
+    private ChatSessionFactory chatSessionFactory;
 
     public InboxMessage getInboxMessage() {
 	return chatContext.getInboxMessage();
@@ -95,11 +94,15 @@ public class ChatService {
 
 	outboxMessage.updateStatus(Message.Status.INIT);
 	outboxMessage.contact().setContactType(chatContactDoc.getContactType());
+	outboxMessage.contact().setChannelType(chatContactDoc.getChannelType());
+	outboxMessage.contact().setLane(chatContactDoc.getLane());
+	outboxMessage.contact().setCsid(chatContactDoc.getCsid());
 	outboxMessage.contact().setContactId(chatContactDoc.getContactId());
+	outboxMessage.setSessionId(chatContactDoc.getSessionId());
 
 	MessageDoc messageDoc = messageStore.createOrUpdate(outboxMessage);
-	connectorHandlerFactory.message("ACTION", chatContactDoc, outboxMessage, null);
-	sessionStore.push(messageDoc, outboxMessage);
+	connectorHandlerFactory.message(MESSAGE_COMPOSE_TYPE.ACTION, chatContactDoc, outboxMessage, null);
+	chatSessionFactory.push(messageDoc, outboxMessage);
 	return messageDoc;
     }
 
@@ -125,9 +128,11 @@ public class ChatService {
 	    outboxMessage.session().setMode(inboxMessage.session().getMode());
 	}
 
+	// outboxMessage.model().put("contact",
+	// ChatDTOUtil.getContactMeta(chatContactDoc));
 	MessageDoc messageDoc = messageStore.createOrUpdate(outboxMessage);
-	connectorHandlerFactory.message("REPLY", chatContactDoc, outboxMessage, inboxMessage);
-	sessionStore.push(messageDoc, outboxMessage);
+	connectorHandlerFactory.message(MESSAGE_COMPOSE_TYPE.REPLY, chatContactDoc, outboxMessage, inboxMessage);
+	chatSessionFactory.push(messageDoc, outboxMessage);
 	return messageDoc;
     }
 
@@ -146,14 +151,15 @@ public class ChatService {
 	outboxMessage.contact().setContactId(chatContactDoc.getContactId());
 	outboxMessage.setSessionId(chatContactDoc.getSessionId());
 
+	// outboxMessage.model().put("contact",
+	// ChatDTOUtil.getContactMeta(chatContactDoc));
 	MessageDoc messageDoc = messageStore.createOrUpdate(outboxMessage);
-	connectorHandlerFactory.message("SEND", chatContactDoc, outboxMessage, null);
-	sessionStore.push(messageDoc, outboxMessage);
+	connectorHandlerFactory.message(MESSAGE_COMPOSE_TYPE.SEND, chatContactDoc, outboxMessage, null);
+	chatSessionFactory.push(messageDoc, outboxMessage);
 	return messageDoc;
     }
 
-    public MessageDoc reply(OutboxMessage outboxMessage) throws InterruptedException {
-	InboxMessage inboxMessage = chatContext.getInboxMessage();
+    public MessageDoc reply(InboxMessage inboxMessage, OutboxMessage outboxMessage) throws InterruptedException {
 	ChatContactDoc chatContactDoc = sessionStore.getContact(inboxMessage.contact().getContactId());
 
 	if (ArgUtil.isEmpty(outboxMessage.session().getAgent())) {
@@ -165,31 +171,6 @@ public class ChatService {
 	if (ArgUtil.is(actionDco)) {
 	    return actionDco;
 	}
-
-	outboxMessage.model().put("contact", ChatDTOUtil.getContactDTO(chatContactDoc));
-	return replyIntenal(chatContactDoc, outboxMessage, inboxMessage);
-    }
-
-    public MessageDoc reply(ChatSessionDoc sessionDoc, OutboxMessage outboxMessage) {
-	IMessageExtended inboxMessage = sessionStore.toSessionMessage(sessionDoc);
-	ChatContactDoc chatContactDoc = sessionStore.getContact(sessionDoc.getContactId());
-
-	if (ArgUtil.isEmpty(outboxMessage.session().getAgent())) {
-	    outboxMessage.session().setAgent(sessionDoc.getAssignedToAgent());
-	}
-
-	if (ArgUtil.isEmpty(outboxMessage.session().getDept())) {
-	    outboxMessage.session().setAgent(sessionDoc.getAssignedToDept());
-	}
-
-	// Action Only
-	MessageDoc actionDto = actionIntenal(chatContactDoc, outboxMessage);
-	if (ArgUtil.is(actionDto)) {
-	    return actionDto;
-	}
-
-	outboxMessage.model().put("contact", ChatDTOUtil.getContactDTO(chatContactDoc));
-
 	return replyIntenal(chatContactDoc, outboxMessage, inboxMessage);
     }
 
@@ -206,14 +187,17 @@ public class ChatService {
 	}
 
 	// Action Only
-	// Action Only
 	MessageDoc actionDto = actionIntenal(chatContactDoc, outboxMessage);
 	if (ArgUtil.is(actionDto)) {
 	    return actionDto;
 	}
 
-	outboxMessage.model().put("contact", ChatDTOUtil.getContactDTO(chatContactDoc));
-	return sendIntenal(chatContactDoc, outboxMessage);
+	if (ArgUtil.isEmptyValue(sessionDoc.getLastInComingStamp())) {
+	    return sendIntenal(chatContactDoc, outboxMessage);
+	} else {
+	    IMessageExtended inboxMessage = sessionStore.toSessionMessage(sessionDoc);
+	    return replyIntenal(chatContactDoc, outboxMessage, inboxMessage);
+	}
     }
 
     public MessageDoc send(ChatContactDoc chatContactDoc, OutboxMessage outboxMessage) {
@@ -228,7 +212,6 @@ public class ChatService {
 	    return actionDto;
 	}
 
-	outboxMessage.model().put("contact", ChatDTOUtil.getContactDTO(chatContactDoc));
 	return sendIntenal(chatContactDoc, outboxMessage);
     }
 
@@ -256,17 +239,17 @@ public class ChatService {
 
 	ChatContextDoc doc = mongoTemplate.findById(contactId, ChatContextDoc.class);
 	if (ArgUtil.is(doc)) {
-	    chatContext.getStore().loadUser(doc.getUser());
+	    chatContext.getDataStore().loadUserData(doc.getUser());
 	    if (ArgUtil.is(doc.getMeta()) && !TimeUtils.isExpired(doc.getMeta().getUpdateStamp(), "5min")) {
 		chatContext.setMeta(doc.getMeta());
-		chatContext.getStore().loadSession(doc.getSession());
+		chatContext.getDataStore().loadSessionData(doc.getSession());
 	    } else {
-		chatContext.getStore().loadSession(null);
+		chatContext.getDataStore().loadSessionData(null);
 		chatContext.setMeta(new ChatMeta());
 	    }
 	} else {
-	    chatContext.getStore().loadUser(null);
-	    chatContext.getStore().loadSession(null);
+	    chatContext.getDataStore().loadUserData(null);
+	    chatContext.getDataStore().loadSessionData(null);
 	    chatContext.setMeta(new ChatMeta());
 	}
 	chatContext.setInboxMessage(inboxMessage);
@@ -280,8 +263,8 @@ public class ChatService {
 	chatContext.meta().setPrevHandler(prevHandler);
 	chatContext.meta().setUpdateStamp(System.currentTimeMillis());
 
-	doc.setUser(chatContext.getStore().getUser());
-	doc.setSession(chatContext.getStore().getSession());
+	doc.setUser(chatContext.getDataStore().getUserData());
+	doc.setSession(chatContext.getDataStore().getSessionData());
 	doc.setMeta(chatContext.getMeta());
 
 	if (ArgUtil.is(prevHandler)) {
@@ -308,9 +291,21 @@ public class ChatService {
 		inboxMessage.contact().getChannelType());
 
 	if (ArgUtil.is(connector)) {
-	    initd = connector.initSession(session, inboxMessage);
+	    OutboxMessage reply = connector.initSession(session, inboxMessage);
+	    if (ArgUtil.is(reply)) {
+		try {
+		    if (!OutboxMessage.NO_MESSAGE.equals(reply))
+			this.reply(inboxMessage, reply);
+		    initd = false;
+		} catch (InterruptedException e) {
+		    LOGGER.error("Errror While Replying To Sesion Init Message", e);
+		}
+	    } else {
+		initd = false;
+	    }
 	    messageContext.commitChatContactQuery();
 	}
+
 	if (initd) {
 	    session = sessionStore.initSession(session);
 	}
@@ -371,24 +366,6 @@ public class ChatService {
 
     public boolean agentScore(ChatSessionDoc session, Integer botScore) {
 	session = sessionStore.agentScore(session, botScore);
-	return true;
-    }
-
-    @Autowired
-    private ChatStatusReportService chatStatusReportService;
-
-    public void updateMessageStatus(List<MessageReport> updateDeliveryStatus) {
-	chatStatusReportService.offer(updateDeliveryStatus);
-	chatStatusReportService.process(null);
-    }
-
-    public boolean updateTagCategoryStatus(ChatSessionDoc sessionDoc, String tagCategory) {
-	String oldTagCategory = null;
-	if (ArgUtil.is(sessionDoc.getTagCategory())) {
-	    oldTagCategory = sessionDoc.getTagCategory();
-	}
-	sessionStore.updateQuickTag(sessionDoc, tagCategory);
-	logManager.log(sessionDoc, EVENTS.TAG_ADDED, oldTagCategory, tagCategory);
 	return true;
     }
 

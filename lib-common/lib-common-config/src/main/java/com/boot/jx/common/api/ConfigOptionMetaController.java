@@ -21,12 +21,13 @@ import com.boot.jx.http.ApiRequest;
 import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.jx.postman.PMConstants.CHANNEL_TYPE_ENUM;
 import com.boot.jx.postman.PMEnvironment;
+import com.boot.jx.postman.PMEnvironment.AChannelConfig;
 import com.boot.jx.postman.PMEnvironment.AChannelDetails;
 import com.boot.jx.postman.PMEnvironment.PMConfigurationObject;
 import com.boot.jx.postman.doc.HSMContentType;
 import com.boot.jx.postman.doc.HSMLanguage;
 import com.boot.jx.postman.doc.HSMMessageType;
-import com.boot.jx.postman.doc.HSMTemplate;
+import com.boot.jx.postman.doc.HSMTemplateDoc;
 import com.boot.jx.postman.plugin.ChannelPluginProvider;
 import com.boot.jx.postman.plugin.ChannelPluginProvider.ChannelPlugin;
 import com.boot.utils.ArgUtil;
@@ -62,12 +63,13 @@ public class ConfigOptionMetaController {
 
     @RequestMapping(value = "/api/meta/channel_types", method = { RequestMethod.GET })
     public ApiResponse<AChannelDetails, Object> channel() {
-	return ApiResponse.buildResults(new ArrayList<AChannelDetails>(ChannelPluginProvider.DETAILS.values()));
+	return ApiResponse.buildResults(new ArrayList<AChannelDetails>(ChannelPluginProvider.DETAILS_MAPPING.values()));
     }
 
     @RequestMapping(value = "/api/meta/channel_configs/{channelType}", method = { RequestMethod.GET })
     public ApiResponse<ConfigMeta, Object> channelConfig(@PathVariable CHANNEL_TYPE_ENUM channelType) {
-	ChannelPlugin<? extends AChannelDetails> plugin = ChannelPluginProvider.MAP.get(channelType.toString());
+	ChannelPlugin<? extends AChannelDetails> plugin = ChannelPluginProvider.PLUGIN_MAPPING
+		.get(channelType.toString());
 	List<ConfigMeta> configs = plugin.listConfigMeta(pmEnvironment);
 	return ApiResponse.buildResults(configs);
     }
@@ -76,13 +78,13 @@ public class ConfigOptionMetaController {
 
     @JsonView(PMEnvironment.PublicProperty.class)
     @RequestMapping(value = { "/api/options/channels" }, method = { RequestMethod.GET })
-    public ApiResponse<AChannelDetails, Object> listActiveLanes() {
+    public ApiResponse<AChannelConfig, Object> listActiveLanes() {
 	return ApiResponse.buildResults(pmEnvironment.config().listChannels());
     }
 
     @RequestMapping(value = "/api/options/tmpl/hsm", method = { RequestMethod.GET })
-    public ApiResponse<HSMTemplate, Object> listPushTemplateslistHsmTmpl() {
-	return ApiResponse.buildResults(commonMongoTemplate.findAll(HSMTemplate.class));
+    public ApiResponse<HSMTemplateDoc, Object> listPushTemplateslistHsmTmpl() {
+	return ApiResponse.buildResults(commonMongoTemplate.findAll(HSMTemplateDoc.class));
     }
 
     // Config APIS

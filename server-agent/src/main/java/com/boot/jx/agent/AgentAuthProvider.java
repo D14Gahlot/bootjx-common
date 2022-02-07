@@ -16,7 +16,7 @@ public class AgentAuthProvider implements AuthenticationProvider {
 		if (auth.getCredentials() != null) {
 			password = auth.getCredentials().toString();
 		}
-		return new UsernamePasswordAuthenticationToken(username, password, Collections.emptyList());
+		return new UsernamePasswordAuthenticationToken(auth.getPrincipal(), password, Collections.emptyList());
 	}
 
 	@Override

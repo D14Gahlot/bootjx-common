@@ -11,6 +11,7 @@ public class MessageSession implements Serializable {
     private String dept;
     private String agent;
     private String mode;
+    private String queue;
     private boolean resolved;
 
     public String getDept() {
@@ -50,4 +51,13 @@ public class MessageSession implements Serializable {
     public void setResolved(boolean resolved) {
 	this.resolved = resolved;
     }
+
+    public String getQueue() {
+	return queue;
+    }
+
+    public void setQueue(String queue) {
+	this.queue = queue;
+    }
+
 }

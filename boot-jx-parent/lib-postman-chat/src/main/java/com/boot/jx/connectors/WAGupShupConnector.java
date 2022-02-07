@@ -20,10 +20,8 @@ import com.boot.jx.postman.client.PMFileStoreClient;
 import com.boot.jx.postman.client.TmplClient;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
-import com.boot.jx.postman.doc.QuickMedia;
 import com.boot.jx.postman.gupshup.GupShupClientChat;
 import com.boot.jx.postman.gupshup.GupShupClientNotify;
-import com.boot.jx.postman.gupshup.GupShupConfigDetails;
 import com.boot.jx.postman.gupshup.GupShupDeliveryResp;
 import com.boot.jx.postman.gupshup.GupShupDeliveryResp.GupShupDeliveryDto;
 import com.boot.jx.postman.gupshup.GupShupInbound;
@@ -39,6 +37,7 @@ import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.postman.plugin.ChannelPluginProvider;
 import com.boot.jx.postman.plugin.WAGupShupPlugin;
+import com.boot.jx.postman.plugin.WAGupShupPlugin.GupShupConfigDetails;
 import com.boot.jx.postman.query.ChatContactQuery;
 import com.boot.jx.postman.store.MessageContext;
 import com.boot.jx.utils.PostManUtil;
@@ -79,31 +78,7 @@ public class WAGupShupConnector extends AbstractConnector<GupShupConfigDetails, 
     @Autowired
     private PMFileStoreClient pmFileStoreClient;
 
-    private OutboxMessage resolveTemplate(OutboxMessage outboxMessage) {
-	if (ArgUtil.is(outboxMessage.getTemplate())) {
-	    QuickMedia templateReply = mongoTemplate.findById(outboxMessage.getTemplate(), QuickMedia.class);
-	    if (ArgUtil.is(templateReply)) {
-		if ("image".equalsIgnoreCase(templateReply.getType())) {
-		    outboxMessage.attachment(
-			    new Attachment().mediaURL(templateReply.getUrl()).mediaType(FileType.IMAGE.toString()));
-		    return outboxMessage;
-		}
-	    } else {
-		tmplClient.process(outboxMessage);
-		return outboxMessage;
-	    }
-	} else if (ArgUtil.is(outboxMessage.getTemplateId())) {
-	    // outboxMessage.setMessage(tmplClient.process(hsmTemplate.getTemplate(),
-	    // outboxMessage.getModel()));
-	    tmplClient.process(outboxMessage);
-	    return outboxMessage;
-	} else {
-	    return outboxMessage;
-	}
-	return outboxMessage;
-    }
-
-    public void sendInternal(OutboxMessage outboxMessage, boolean isPushMessage) {
+    public void sendInternal(ChannelConfig channelConfig, OutboxMessage outboxMessage, boolean isPushMessage) {
 	LOGGER.debug("sendInternal(OutboxMessage {}, boolean {})", outboxMessage, isPushMessage);
 	try {
 	    if (isPushMessage) {
@@ -123,7 +98,7 @@ public class WAGupShupConnector extends AbstractConnector<GupShupConfigDetails, 
     public void send(ChannelConfig channelConfig, ChatContactDoc chatContactDoc, OutboxMessage outboxMessage) {
 	outboxMessage.contact().setChannelType(chatContactDoc.getChannelType());
 	outboxMessage.contact().setLane(chatContactDoc.getLane());
-	resolveTemplate(outboxMessage);
+	template(channelConfig, chatContactDoc, outboxMessage);
 
 	if (TimeUtils.isExpired(chatContactDoc.getLastInBoundStamp(), DEFAULT_SESISON_PERIOD)
 		&& outboxMessage.optionsAsModel().entry("wa-template-id").exists()) {
@@ -133,17 +108,18 @@ public class WAGupShupConnector extends AbstractConnector<GupShupConfigDetails, 
 			new ChatContactQuery(chatContactDoc).setLastOptInStamp(System.currentTimeMillis()));
 	    }
 	    outboxMessage.messageMetaWrapper().sendType("PM"); // Push Message
-	    this.sendInternal(outboxMessage, true);
+	    this.sendInternal(channelConfig, outboxMessage, true);
 	} else {
 	    outboxMessage.messageMetaWrapper().sendType("SM"); // Session Message
-	    this.sendInternal(outboxMessage, false);
+	    this.sendInternal(channelConfig, outboxMessage, false);
 	}
     }
 
     @Override
-    public void reply(ChannelConfig channelConfig, ChatContactDoc chatContactDoc, OutboxMessage outboxMessage, IMessageExtended inboxMessage) {
-	resolveTemplate(outboxMessage);
-	this.sendInternal(outboxMessage, false);
+    public void reply(ChannelConfig channelConfig, ChatContactDoc chatContactDoc, OutboxMessage outboxMessage,
+	    IMessageExtended inboxMessage) {
+	template(channelConfig, chatContactDoc, outboxMessage);
+	this.sendInternal(channelConfig, outboxMessage, false);
     }
 
     @Override
@@ -152,14 +128,14 @@ public class WAGupShupConnector extends AbstractConnector<GupShupConfigDetails, 
     }
 
     @Override
-    public boolean initSession(ChatSessionDoc session, InboxMessage inboxMessage) {
+    public OutboxMessage initSession(ChatSessionDoc session, InboxMessage inboxMessage) {
 	if (ArgUtil.is(inboxMessage.getOriginalMessage())) {
 	    GupShupInbound dm = JsonUtil.parse(inboxMessage.getOriginalMessage(), GupShupInbound.class);
 	    ChatContactQuery contactQuery = messageContext.getChatContactQuery();
 	    contactQuery.setName(dm.getName());
 	    contactQuery.setPhone(dm.getMobile());
 	}
-	return true;
+	return null;
     }
 
     public InboxMessage toInboxMessage(GupShupInbound inbound) {
@@ -206,7 +182,7 @@ public class WAGupShupConnector extends AbstractConnector<GupShupConfigDetails, 
     }
 
     @Override
-    public void send(ChannelConfig channelConfig, OutboxMessage outboxMessage) {
+    public void onSend(ChannelConfig channelConfig, ChatContactDoc chatContactDoc, OutboxMessage outboxMessage) {
 	// TODO Auto-generated method stub
     }
 
@@ -214,7 +190,7 @@ public class WAGupShupConnector extends AbstractConnector<GupShupConfigDetails, 
 	List<MessageReport> batch = new LinkedList<MessageReport>();
 	for (GupShupDeliveryDto gupShupDelivery : status.getResponse()) {
 	    MessageReport report = new MessageReport();
-	    report.setContactType(ContactType.WHATSAPP);
+	    report.contact().type(ContactType.WHATSAPP);
 	    report.setChangeStamp(gupShupDelivery.getEventTs());
 
 	    report.setMessageIdExt(gupShupDelivery.getExternalId());

@@ -16,9 +16,6 @@ import org.springframework.web.context.request.RequestContextListener;
 
 /**
  * The Class WebApplication.
- * 
- * @EnableTransactionManagement
- * @EnableCaching
  */
 @ServletComponentScan
 @SpringBootApplication
@@ -45,11 +42,6 @@ public class AdminOWS extends SpringBootServletInitializer {
      */
     protected SpringApplicationBuilder configure(SpringApplicationBuilder applicationBuilder) {
 	return applicationBuilder.sources(AdminOWS.class);
-    }
-
-    public void run(String... args) {
-	System.out.println("\nfindById(1L)");
-	System.out.println("\nfindByName('Node')");
     }
 
     /**

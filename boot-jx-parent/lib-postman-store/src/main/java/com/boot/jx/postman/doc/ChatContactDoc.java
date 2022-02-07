@@ -6,10 +6,10 @@ import java.util.List;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.TypeAlias;
-import org.springframework.data.mongodb.core.index.TextIndexed;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import com.boot.jx.model.AuditableEntity;
+import com.boot.jx.model.AuditCreateEntity;
 import com.boot.jx.postman.dto.ChatUserProfileDTO;
 import com.boot.jx.postman.model.MessageDefinitions.Contactable;
 import com.boot.jx.swagger.ApiMockModelProperty;
@@ -18,14 +18,16 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 @Document(collection = "CHAT_CONTACT")
 @TypeAlias("ChatContactDoc")
-public class ChatContactDoc implements Serializable, Contactable, AuditableEntity {
+public class ChatContactDoc implements Serializable, Contactable, AuditCreateEntity {
     private static final long serialVersionUID = 1L;
 
     @Id
-    @ApiMockModelProperty(example = "wa919930104050", required = false)
+    @ApiMockModelProperty(example = "wa919930104050_918828218374", required = false,
+	    value = "format like {{ContactType.getShortCode}}{{csid}}_{{lane}}")
     @JsonProperty("contactId")
     private String contactId;
 
+    @Indexed
     private String csid;
 
     private String contactType;
@@ -34,6 +36,7 @@ public class ChatContactDoc implements Serializable, Contactable, AuditableEntit
     @Deprecated
     private String channel;
 
+    @Indexed
     private String lane;
 
     private long firstInBoundStamp;
@@ -44,21 +47,27 @@ public class ChatContactDoc implements Serializable, Contactable, AuditableEntit
     private long lastReplyStamp;
 
     private long lastOptInStamp;
+    private long lastSentXStamp;
 
     private String sessionId;
 
-    @TextIndexed(weight = 10)
+    // @TextIndexed(weight = 10)
     private String name;
 
-    @TextIndexed(weight = 1)
+    // @TextIndexed(weight = 1)
+    @Indexed
     private String email;
 
-    @TextIndexed(weight = 5)
+    // @TextIndexed(weight = 5)
+    @Indexed
     private String phone;
 
     private String profilePic;
+    @Indexed
     private List<String> labelId;
     private ChatUserProfileDTO profile;
+
+    @Indexed
     private String profileId;
 
     private Long createdStamp;
@@ -262,4 +271,13 @@ public class ChatContactDoc implements Serializable, Contactable, AuditableEntit
     public void setCreatedBy(String createdBy) {
 	this.createdBy = createdBy;
     }
+
+    public long getLastSentXStamp() {
+	return lastSentXStamp;
+    }
+
+    public void setLastSentXStamp(long lastSentXStamp) {
+	this.lastSentXStamp = lastSentXStamp;
+    }
+
 }

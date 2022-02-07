@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.boot.jx.AppConfigPackage.AppCommonConfig;
-import com.boot.jx.account.AccountAdminService;
+import com.boot.jx.account.AccountAuthService;
 import com.boot.jx.account.AccountSessionBean;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.common.config.ConfigManager;
@@ -23,7 +23,6 @@ import com.boot.jx.http.ApiRequest;
 import com.boot.jx.postman.PMConstants;
 import com.boot.jx.postman.PMConstants.CHANNEL_TYPE_ENUM;
 import com.boot.jx.postman.PMEnvironment;
-import com.boot.jx.postman.PMEnvironment.AChannelDetails;
 import com.boot.jx.postman.doc.config.ClientKeyConfigDoc;
 import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.utils.ArgUtil;
@@ -46,7 +45,7 @@ public class CPanelController {
     private AppCommonConfig appCommonConfig;
 
     @Autowired
-    private AccountAdminService accountAdminService;
+    private AccountAuthService accountAdminService;
 
     @Autowired
     private AccountSessionBean sessionBean;
@@ -56,7 +55,7 @@ public class CPanelController {
 
 	model.addAllAttributes(appCommonConfig.appAttributes());
 
-	Authentication auth = AccountAdminService.getAuthentication();
+	Authentication auth = AccountAuthService.getAuthentication();
 
 	if (ArgUtil.is(auth)) {
 	    model.addAttribute("APP_USER", auth.getName());
@@ -73,14 +72,15 @@ public class CPanelController {
 
     @ResponseBody
     @RequestMapping(value = "/api/config/channel/{channelType}", method = { RequestMethod.POST })
+    @JsonView(PMEnvironment.PublicProperty.class)
     public ApiResponse<ChannelConfig, Object> saveChannelConfig(@PathVariable CHANNEL_TYPE_ENUM channelType,
-	    @RequestParam(defaultValue = "false", required = false) boolean disabled,
 	    @RequestBody Map<String, Object> data) {
-	return ApiResponse.buildResults(configManager.saveChannelConfig(channelType.toString(), disabled, data));
+	return ApiResponse.buildResults(configManager.saveChannelConfig(channelType.toString(), data));
     }
 
     @ResponseBody
     @RequestMapping(value = "/api/config/channel/{channelId}", method = { RequestMethod.GET })
+    @JsonView(PMEnvironment.PublicProperty.class)
     public ApiResponse<ChannelConfig, Object> getChannelConfig(@PathVariable String channelId,
 	    @RequestParam(defaultValue = "false", required = false) boolean disabled) {
 	return ApiResponse.buildResults(configManager.getChannelConfig(channelId));
@@ -88,15 +88,17 @@ public class CPanelController {
 
     @ResponseBody
     @RequestMapping(value = "/api/config/channel/{channelId}", method = { RequestMethod.DELETE })
+    @JsonView(PMEnvironment.PublicProperty.class)
     public ApiResponse<ChannelConfig, Object> deleteChannelConfig(@PathVariable String channelId) {
-	return ApiResponse.buildResults(configManager.removeChannelConfig(channelId));
+	return ApiResponse.buildResults(configManager.updateChannelConfig(channelId, "remove"));
     }
 
-    @JsonView(PMEnvironment.PublicProperty.class)
     @ResponseBody
-    @RequestMapping(value = { "/api/options/lanes" }, method = { RequestMethod.GET })
-    public ApiResponse<AChannelDetails, Object> listActiveLanes() {
-	return ApiResponse.buildResults(pmEnvironment.config().connectors());
+    @RequestMapping(value = "/api/config/channel/{channelId}/{action}", method = { RequestMethod.GET })
+    @JsonView(PMEnvironment.PublicProperty.class)
+    public ApiResponse<ChannelConfig, Object> sandboxChannelConfig(@PathVariable String channelId,
+	    @PathVariable String action) {
+	return ApiResponse.buildResults(configManager.updateChannelConfig(channelId, action));
     }
 
     @JsonView(PMEnvironment.PublicProperty.class)

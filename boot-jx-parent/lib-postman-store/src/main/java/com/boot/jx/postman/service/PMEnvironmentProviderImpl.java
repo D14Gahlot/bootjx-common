@@ -10,19 +10,18 @@ import org.springframework.stereotype.Component;
 
 import com.boot.jx.AppConfigPackage.AppSharedConfig;
 import com.boot.jx.AppContextUtil;
-import com.boot.jx.postman.PMConfiguration;
-import com.boot.jx.postman.PMEnvironment.AChannelDetails;
+import com.boot.jx.postman.PMConfiguration.PMConfigurationModel;
 import com.boot.jx.postman.PMEnvironment.PMConfigurationObject;
 import com.boot.jx.postman.PMEnvironment.PMEnvironmentProvider;
 import com.boot.jx.postman.doc.PMConfigurationDoc;
 import com.boot.jx.postman.doc.config.ChannelConfigDoc;
 import com.boot.jx.postman.doc.config.ClientKeyConfigDoc;
+import com.boot.jx.postman.doc.config.CompanyVarsConfigDoc;
 import com.boot.jx.postman.doc.config.PrefsConfigDoc;
 import com.boot.jx.postman.plugin.ChannelConfig;
-import com.boot.jx.postman.plugin.ChannelPluginProvider;
-import com.boot.jx.postman.plugin.ChannelPluginProvider.ChannelPlugin;
 import com.boot.jx.postman.store.ConfigStore;
 import com.boot.jx.scope.tnt.Tenants;
+import com.boot.model.SafeKeyHashMap;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.EntityDtoUtil;
 import com.boot.utils.StringUtils;
@@ -39,11 +38,12 @@ public class PMEnvironmentProviderImpl implements PMEnvironmentProvider, AppShar
     private ConfigStore configStore;
 
     @Override
-    public PMConfiguration config() {
+    public PMConfigurationModel local() {
 	String tnt = AppContextUtil.getTenant();
 	if (localConfigMap.containsKey(tnt)) {
 	    return localConfigMap.get(tnt);
 	}
+
 	if (ArgUtil.is(configStore)) {
 	    PMConfigurationDoc prefs = getPMConfigurationDoc();
 
@@ -54,6 +54,7 @@ public class PMEnvironmentProviderImpl implements PMEnvironmentProvider, AppShar
 
 	    List<ChannelConfigDoc> channels = configStore.findAll(ChannelConfigDoc.class);
 	    for (ChannelConfigDoc channel : channels) {
+		channel.setDomain(tnt);
 		prefs.channels(channel);
 	    }
 
@@ -62,17 +63,34 @@ public class PMEnvironmentProviderImpl implements PMEnvironmentProvider, AppShar
 		prefs.clientApiKey(clientKey);
 	    }
 
+	    List<CompanyVarsConfigDoc> companyVars = configStore.findAll(CompanyVarsConfigDoc.class);
+
+	    SafeKeyHashMap<Object> company = prefs.globalVars();
+
+	    for (CompanyVarsConfigDoc companyVar : companyVars) {
+		company.put(companyVar.getKey(), companyVar.getValue());
+	    }
+
 	    if (ArgUtil.is(prefs)) {
+		prefs.setUpdateStamp(System.currentTimeMillis());
 		localConfigMap.put(tnt, prefs);
 	    }
 
 	    if (Tenants.isDefault(tnt)) {
 		PMConfigurationDoc newSharedConfiguration = new PMConfigurationDoc();
 		for (Entry<String, PMConfigurationObject> entry : prefs.prefs().entrySet()) {
-		    //if (entry.getValue().isShared()) {
-			newSharedConfiguration.setPref(entry.getValue());
-		    //}
+		    // if (entry.getValue().isShared()) {
+		    newSharedConfiguration.setPref(entry.getValue());
+		    // }
 		}
+		List<ChannelConfigDoc> sandboxChannels = configStore.findAll(ChannelConfigDoc.class);
+		for (ChannelConfigDoc channel : sandboxChannels) {
+		    channel.setDomain(tnt);
+		    if (channel.isSandbox() || channel.isShared()) {
+			newSharedConfiguration.channels(channel);
+		    }
+		}
+
 		sharedConfiguration = newSharedConfiguration;
 	    }
 
@@ -81,61 +99,48 @@ public class PMEnvironmentProviderImpl implements PMEnvironmentProvider, AppShar
 	return null;
     }
 
-    @Deprecated
-    public void config(PMConfiguration config) {
-	if (ArgUtil.is(configStore)) {
-	    for (Entry<String, ChannelPlugin<? extends AChannelDetails>> pluginEntry : ChannelPluginProvider.MAP
-		    .entrySet()) {
-		ChannelPlugin<? extends AChannelDetails> plugin = pluginEntry.getValue();
-		Map<String, ? extends AChannelDetails> multipleDetails = plugin.getDetails(config);
-		if (ArgUtil.is(multipleDetails)) {
-		    for (Entry<String, ? extends AChannelDetails> configEntry : multipleDetails.entrySet()) {
-			configInternal(plugin.fromDetails(new ChannelConfigDoc(), configEntry.getValue()));
-		    }
-		}
-
-	    }
-
-	    PMConfigurationDoc doc = EntityDtoUtil.dtoToEntity(config, new PMConfigurationDoc());
-	    doc.setTenant(AppContextUtil.getTenant());
-	    configStore.saveConfiguration(doc);
-	}
-
-    }
-
     public void configInternal(ChannelConfig config) {
 	ChannelConfigDoc doc = EntityDtoUtil.dtoToEntity(config, new ChannelConfigDoc());
 	doc.setId(StringUtils.toLowerCase(doc.getChannelId()));
-	if (config.isDisabled()) {
-	    doc.setDisabled(config.isDisabled());
-	} else
-	    doc.setDisabled(false);
 	configStore.saveChannelConfig(doc);
     }
 
     @Override
-    public void config(ChannelConfig config) {
+    public void addChannel(ChannelConfig config) {
 	configInternal(config);
-
-	// @Deperecated - Start
-	// This code is only for backward compatibility not to be written for New
-	// Channels
-	PMConfigurationDoc doc = getPMConfigurationDoc();
-	ChannelPlugin<?> plugin = ChannelPluginProvider.MAP.get(config.getChannelType());
-	if (ArgUtil.is(plugin)) {
-	    plugin.setConfig(doc, config);
-	}
-	configStore.save(doc);
-	// @Deperecated - Ends
     }
 
     @Override
-    public void remove(ChannelConfig config) {
-	ChannelConfigDoc configDoc = EntityDtoUtil.dtoToEntity(config, new ChannelConfigDoc());
-	configStore.remove(configDoc);
-	PMConfigurationDoc doc = getPMConfigurationDoc();
-	doc.channels().remove(config.getChannelId());
-	configStore.save(doc);
+    public void updateChannel(ChannelConfig config, String action) {
+	if (ArgUtil.is(config)) {
+	    ChannelConfigDoc configDoc = EntityDtoUtil.dtoToEntity(config, new ChannelConfigDoc());
+	    if ("remove".equalsIgnoreCase(action)) {
+		configStore.remove(configDoc);
+		PMConfigurationDoc doc = getPMConfigurationDoc();
+		doc.channels().remove(config.getChannelId());
+		configStore.save(doc);
+	    } else if ("disable".equalsIgnoreCase(action)) {
+		configDoc.disabled(true);
+		configStore.save(configDoc);
+	    } else if ("enable".equalsIgnoreCase(action)) {
+		configDoc.disabled(false);
+		configStore.save(configDoc);
+	    } else if ("sandbox_enable".equalsIgnoreCase(action)) {
+		configDoc.setSandbox(true);
+		configStore.save(configDoc);
+	    } else if ("sandbox_disable".equalsIgnoreCase(action)) {
+		configDoc.setSandbox(false);
+		configStore.save(configDoc);
+	    } else if ("shared_enable".equalsIgnoreCase(action)) {
+		configDoc.setShared(true);
+		configStore.save(configDoc);
+	    } else if ("shared_disable".equalsIgnoreCase(action)) {
+		configDoc.setShared(false);
+		configStore.save(configDoc);
+	    }
+	} else {
+	    System.out.println("No Channel to delete");
+	}
     }
 
     private PMConfigurationDoc getPMConfigurationDoc() {
@@ -148,7 +153,7 @@ public class PMEnvironmentProviderImpl implements PMEnvironmentProvider, AppShar
     }
 
     @Override
-    public PMConfiguration shared() {
+    public PMConfigurationModel shared() {
 	return sharedConfiguration;
     }
 
@@ -159,7 +164,7 @@ public class PMEnvironmentProviderImpl implements PMEnvironmentProvider, AppShar
 	AppContextUtil.getTraceId(true, true);
 	AppContextUtil.resetTraceTime();
 	AppContextUtil.init();
-	config();
+	local();
     }
 
     @Override

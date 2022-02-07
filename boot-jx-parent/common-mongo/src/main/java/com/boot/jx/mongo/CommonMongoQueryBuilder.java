@@ -1,8 +1,12 @@
 package com.boot.jx.mongo;
 
+import com.boot.jx.mongo.CommonDocInterfaces.TimeStampIndex.UpdatedTimeStampIndexSupport;
+import com.boot.utils.ArgUtil;
+
 public class CommonMongoQueryBuilder extends CommonMongoQB<CommonMongoQueryBuilder, Object> {
 
     public static abstract class DocQueryBuilder<T> extends CommonMongoQB<DocQueryBuilder<T>, T> {
+
 	protected T doc;
 	protected boolean synced;
 	private long updatedStamp;
@@ -38,8 +42,12 @@ public class CommonMongoQueryBuilder extends CommonMongoQB<CommonMongoQueryBuild
 	    this.updatedStamp = updatedStamp;
 	}
 
-	public void updatedStamp() {
-	    this.set("updatedStamp", System.currentTimeMillis());
+	@Override
+	public boolean isUpdatedTimeStampSupport() {
+	    if (ArgUtil.is(this.doc)) {
+		return this.doc instanceof UpdatedTimeStampIndexSupport;
+	    }
+	    return super.isUpdatedTimeStampSupport();
 	}
 
 	@SuppressWarnings("unchecked")
@@ -48,6 +56,10 @@ public class CommonMongoQueryBuilder extends CommonMongoQB<CommonMongoQueryBuild
 		this.docClass = this.doc == null ? null : (Class<T>) this.doc.getClass();
 	    }
 	    return docClass;
+	}
+
+	public T getDoc() {
+	    return doc;
 	}
     }
 

@@ -4,13 +4,18 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.bson.types.ObjectId;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 
+import com.boot.jx.mongo.CommonDocInterfaces.MongoQueryBuilder;
+import com.boot.jx.mongo.CommonDocInterfaces.TimeStampIndex.UpdatedTimeStampIndexSupport;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.TimeUtils;
 
-public class CommonMongoQB<M extends CommonMongoQB<M, T>, T> {
+public class CommonMongoQB<M extends CommonMongoQB<M, T>, T> implements MongoQueryBuilder<T> {
 
     public static class CommonMongoCriteria extends Criteria {
 	public static Criteria whereId(Object id) {
@@ -45,6 +50,24 @@ public class CommonMongoQB<M extends CommonMongoQB<M, T>, T> {
     @SuppressWarnings("unchecked")
     public M where(String key, Object o) {
 	query().addCriteria(Criteria.where(key).is(o));
+	return (M) this;
+    }
+
+    @SuppressWarnings("unchecked")
+    public M sortBy(String byField) {
+	this.query().with(new Sort(Direction.ASC, byField));
+	return (M) this;
+    }
+
+    @SuppressWarnings("unchecked")
+    public M sortBy(String byField, Direction inDir) {
+	this.query().with(new Sort(inDir, byField));
+	return (M) this;
+    }
+
+    @SuppressWarnings("unchecked")
+    public M limit(int limit) {
+	this.query().limit(limit);
 	return (M) this;
     }
 
@@ -113,8 +136,22 @@ public class CommonMongoQB<M extends CommonMongoQB<M, T>, T> {
 	this.docClass = docClass;
     }
 
-    public static class CommonMongoQBimpl<R> extends CommonMongoQB<CommonMongoQBimpl<R>, R> {
+    public boolean isUpdatedTimeStampSupport() {
+	return UpdatedTimeStampIndexSupport.class.isAssignableFrom(this.docClass);
+    }
 
+    public void updatedStamp() {
+	long updatedStamp = System.currentTimeMillis();
+	if (this.isUpdatedTimeStampSupport()) {
+	    this.set("updated.stamp", updatedStamp);
+	    this.set("updated.hour", updatedStamp / TimeUtils.Constants.MILLIS_IN_HOUR);
+	    this.set("updated.day", updatedStamp / TimeUtils.Constants.MILLIS_IN_DAY);
+	    this.set("updated.week", updatedStamp / TimeUtils.Constants.MILLIS_IN_WEEK);
+	}
+	this.set("updatedStamp", updatedStamp);
+    }
+
+    public static class CommonMongoQBimpl<R> extends CommonMongoQB<CommonMongoQBimpl<R>, R> {
     }
 
     public static <T> CommonMongoQB<CommonMongoQBimpl<T>, T> collection(Class<T> docClass) {

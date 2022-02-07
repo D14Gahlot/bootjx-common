@@ -35,15 +35,27 @@ public class ChatSessionQuery extends DocQueryBuilder<ChatSessionDoc> {
 	return this;
     }
 
-    public ChatSessionQuery setLastInComingStamp(long timestamp) {
-	this.doc.setLastInComingStamp(timestamp);
-	this.set("lastInComingStamp", timestamp);
+    public ChatSessionQuery setFirstInComingStamp(long firstInComingStamp) {
+	this.doc.setFirstInComingStamp(firstInComingStamp);
+	this.set("firstInComingStamp", firstInComingStamp);
+	return this;
+    }
+
+    public ChatSessionQuery setFirstOutGoingStamp(long firstOutGoingStamp) {
+	this.doc.setFirstOutGoingStamp(firstOutGoingStamp);
+	this.set("firstOutGoingStamp", firstOutGoingStamp);
 	return this;
     }
 
     public ChatSessionQuery setLastResponseStamp(long timestamp) {
 	this.doc.setLastResponseStamp(timestamp);
 	this.set("lastResponseStamp", timestamp);
+	return this;
+    }
+
+    public ChatSessionQuery setLastInComingStamp(long timestamp) {
+	this.doc.setLastInComingStamp(timestamp);
+	this.set("lastInComingStamp", timestamp);
 	return this;
     }
 
@@ -56,6 +68,8 @@ public class ChatSessionQuery extends DocQueryBuilder<ChatSessionDoc> {
     public ChatSessionQuery setContactName(String contactName) {
 	this.doc.setContactName(contactName);
 	this.set("contactName", contactName);
+	this.doc.contact().setName(contactName);
+	this.set("contact.name", contactName);
 	return this;
     }
 
@@ -92,6 +106,12 @@ public class ChatSessionQuery extends DocQueryBuilder<ChatSessionDoc> {
     public ChatSessionQuery setTagId(List<String> tagIds) {
 	this.doc.setTagId(tagIds);
 	this.set("tagId", tagIds);
+	return this;
+    }
+
+    public ChatSessionQuery setQueue(String queue) {
+	this.doc.setAssignedToQueue(queue);
+	this.set("assignedToQueue", queue);
 	return this;
     }
 

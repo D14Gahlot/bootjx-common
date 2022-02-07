@@ -19,8 +19,7 @@ import com.boot.jx.api.ApiResponse;
 import com.boot.jx.common.doc.AgentSessionDoc;
 import com.boot.jx.common.store.AgentStore;
 import com.boot.jx.postman.PMEnvironment;
-import com.boot.jx.postman.PMEnvironment.AChannelDetails;
-import com.boot.jx.postman.doc.HSMTemplate;
+import com.boot.jx.postman.doc.HSMTemplateDoc;
 import com.boot.jx.postman.doc.QuickAction;
 import com.boot.jx.postman.doc.QuickLabel;
 import com.boot.jx.postman.doc.QuickMedia;
@@ -31,7 +30,6 @@ import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.postman.service.ChatDTOUtil;
 import com.boot.jx.postman.store.ContactStore;
 import com.boot.utils.ArgUtil;
-import com.fasterxml.jackson.annotation.JsonView;
 
 @Controller
 public class AgentMetaController {
@@ -67,13 +65,6 @@ public class AgentMetaController {
 		ChatDTOUtil.getContactDTO( // Convert to DTO
 			contactStore.searchContacts(search, lane) // Search Docs
 		));
-    }
-
-    @JsonView(PMEnvironment.PublicProperty.class)
-    @ResponseBody
-    @RequestMapping(value = { "/api/options/lanes" }, method = { RequestMethod.GET })
-    public ApiResponse<AChannelDetails, Object> listActiveLanes() {
-	return ApiResponse.buildResults(pmEnvironment.config().connectors());
     }
 
     @ResponseBody
@@ -119,9 +110,9 @@ public class AgentMetaController {
 
     @ResponseBody
     @RequestMapping(value = "/api/tmpl/pushtemplate", method = { RequestMethod.GET })
-    public ApiResponse<HSMTemplate, Object> listPushTemplates(@RequestParam String channelId) {
-	ChannelConfig channelConfig = pmEnvironment.config().channels(channelId);
+    public ApiResponse<HSMTemplateDoc, Object> listPushTemplates(@RequestParam String channelId) {
+	ChannelConfig channelConfig = pmEnvironment.local().channel(channelId);
 
-	return ApiResponse.buildResults(mongoTemplate.findAll(HSMTemplate.class));
+	return ApiResponse.buildResults(mongoTemplate.findAll(HSMTemplateDoc.class));
     }
 }

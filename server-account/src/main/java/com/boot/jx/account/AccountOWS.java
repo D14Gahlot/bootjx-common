@@ -7,7 +7,6 @@ import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.servlet.DelegatingFilterProxyRegistrationBean;
 import org.springframework.boot.web.servlet.ServletComponentScan;
-import org.springframework.boot.web.support.SpringBootServletInitializer;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -27,7 +26,7 @@ import org.springframework.web.context.request.RequestContextListener;
 @EnableAsync(proxyTargetClass = true)
 @EnableCaching
 @EnableMongoRepositories("com.boot.jx")
-public class AccountOWS extends SpringBootServletInitializer {
+public class AccountOWS {
 
     /**
      * The main method.

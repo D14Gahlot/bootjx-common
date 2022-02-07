@@ -3,12 +3,11 @@ package com.boot.jx.bot.demo;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.boot.jx.AppContextUtil;
 import com.boot.jx.bot.BotController;
 import com.boot.jx.bot.ChatContext;
-import com.boot.jx.bot.ChatController;
 import com.boot.jx.bot.ChatMapping;
 import com.boot.jx.bot.alex.AlexBotConstants;
+import com.boot.jx.bot.alex.CommonBotController;
 import com.boot.jx.dict.FileType;
 import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.InboxMessage;
@@ -17,8 +16,8 @@ import com.boot.utils.ArgUtil;
 import com.boot.utils.Constants;
 import com.boot.utils.StringUtils.StringMatcher;
 
-@BotController(name = "DemoBot", tenant = { "app", "demo", "sandbox" })
-public class Demo1Controller extends ChatController {
+@BotController(name = "DemoBot", tenant = { "app", "demo", "sandbox", "customer" })
+public class Demo1Controller extends CommonBotController {
 
     private static final String CURRENT_DEMO = "current_menu";
     @Autowired
@@ -30,10 +29,14 @@ public class Demo1Controller extends ChatController {
     @Autowired
     Demo2Controller demo3Controller;
 
+    @Autowired
+    Demo4Controller demo5Controller;
+
     @ChatMapping(key = AlexBotConstants.KEY.INITIATE + "menu", pattern = "^menu$")
     private void showDemoMenu(InboxMessage inboxMessage, StringMatcher matcher) {
-	String prevMenu = ArgUtil.parseAsString(chatContext.getSession().data().get(CURRENT_DEMO), Constants.BLANK)
+	String prevMenu = ArgUtil.parseAsString(chatContext.sessionData().data().get(CURRENT_DEMO), Constants.BLANK)
 		.toLowerCase();
+
 	if (ArgUtil.is(prevMenu)) {
 	    switch (prevMenu) {
 	    case "1":
@@ -49,6 +52,9 @@ public class Demo1Controller extends ChatController {
 		return;
 	    case "4":
 		demo4Controller.start(inboxMessage, matcher);
+		return;
+	    case "5":
+		demo5Controller.start(inboxMessage, matcher);
 		return;
 	    default:
 		break;
@@ -76,23 +82,29 @@ public class Demo1Controller extends ChatController {
 	case "ASSET MANAGEMENT":
 	case "ASSETMANAGMENT":
 	case "1":
-	    chatContext.getSession().data().put(CURRENT_DEMO, "1");
+	    chatContext.sessionData().data().put(CURRENT_DEMO, "1");
 	    showDemoMenu(inboxMessage, matcher);
 	    break;
 	case "RETAIL":
 	case "2":
-	    chatContext.getSession().data().put(CURRENT_DEMO, "2");
+	    chatContext.sessionData().data().put(CURRENT_DEMO, "2");
 	    showDemoMenu(inboxMessage, matcher);
 	    break;
 	case "REALSTATE":
 	case "PROPERTYBKCMUMBAI":
 	case "3":
-	    chatContext.getSession().data().put(CURRENT_DEMO, "3");
+	    chatContext.sessionData().data().put(CURRENT_DEMO, "3");
 	    showDemoMenu(inboxMessage, matcher);
 	    break;
 	case "NEWACCOUNTOPEN":
 	case "4":
-	    chatContext.getSession().data().put(CURRENT_DEMO, "4");
+	    chatContext.sessionData().data().put(CURRENT_DEMO, "4");
+	    showDemoMenu(inboxMessage, matcher);
+	    break;
+	case "SALES INQUIRY":
+	case "SALES":
+	case "5":
+	    chatContext.sessionData().data().put(CURRENT_DEMO, "5");
 	    showDemoMenu(inboxMessage, matcher);
 	    break;
 	case "TALK TO AGENT":
@@ -266,27 +278,8 @@ public class Demo1Controller extends ChatController {
 
     @ChatMapping(key = "transfer-to-agent")
     public void transferToAgent(InboxMessage inboxMessage, StringMatcher matcher) {
-	try {
-	    chatContext.getSession().data().remove(CURRENT_DEMO);
-	    InboxMessage agentAssignResp = assignToAgent().getResult();
-	    if (ArgUtil.is(agentAssignResp.session().getAgent())) {
-	    	if(ArgUtil.is(AppContextUtil.getTenant()) && AppContextUtil.getTenant().equalsIgnoreCase("tathkarah")) {
-	    		 reply("، عميلنا العزيز\r\n"
-	    		 		+ "\r\n"
-	    		 		+ "مرحباً بك في تطبيق تذكره!\r\n"
-	    		 		+ "\r\n"
-	    		 		+ "لحظات وسيتم توصيلك بأحد ممثلي خدمة العملاء. \r\n"
-	    		 		+ "\r\n"
-	    		 		+ " …..شكرا لانتظارك");
-	    	}else {
-	    	 reply("Connecting you to one of our customer representatives. Give us a moment.");
-	    	}
-	    } else {
-		reply("All agents are busy or online, we will connect you whenever someone is available.");
-	    }
-	} catch (Exception e) {
-	    reply("Some Tech Issues");
-	}
+	chatContext.sessionData().data().remove(CURRENT_DEMO);
+	commonTransferToAgent(inboxMessage, matcher);
     }
 
     @ChatMapping(key = AlexBotConstants.KEY.INITIATE + "*", pattern = "^*$")
@@ -314,7 +307,8 @@ public class Demo1Controller extends ChatController {
     }
 
     private boolean handleGlobalOption(InboxMessage inboxMessage, StringMatcher matcher) {
-	String thisMessage = inboxMessage.getMessage().toUpperCase().replace(" ", "");
+	String thisMessage = ArgUtil.nonEmpty(inboxMessage.getMessage(), Constants.BLANK).toUpperCase().replace(" ",
+		"");
 
 	if (ArgUtil.is(inboxMessage.getTags()) && ArgUtil.is(inboxMessage.getTags().getCategories())) {
 	    if (inboxMessage.getTags().getCategories().indexOf("today-credits") > -1) {
@@ -355,25 +349,25 @@ public class Demo1Controller extends ChatController {
 
 	case "/ASSETMANAGMENT":
 	case "ASSETMANAGMENT":
-	    chatContext.getSession().data().put(CURRENT_DEMO, "1");
+	    chatContext.sessionData().data().put(CURRENT_DEMO, "1");
 	    showDemoMenu(inboxMessage, matcher);
 	    return true;
 
 	case "/RETAIL":
 	case "RETAIL":
-	    chatContext.getSession().data().put(CURRENT_DEMO, "2");
+	    chatContext.sessionData().data().put(CURRENT_DEMO, "2");
 	    showDemoMenu(inboxMessage, matcher);
 	    return true;
 
 	case "/PROPERTYBKCMUMBAI":
 	case "REALSTATE":
-	    chatContext.getSession().data().put(CURRENT_DEMO, "3");
+	    chatContext.sessionData().data().put(CURRENT_DEMO, "3");
 	    showDemoMenu(inboxMessage, matcher);
 	    return true;
 
 	case "/NEWACCOUNTOPEN":
 	case "NEWACCOUNTOPEN":
-	    chatContext.getSession().data().put(CURRENT_DEMO, "4");
+	    chatContext.sessionData().data().put(CURRENT_DEMO, "4");
 	    showDemoMenu(inboxMessage, matcher);
 	    return true;
 
@@ -385,7 +379,7 @@ public class Demo1Controller extends ChatController {
 	case "*":
 	case "EXIT":
 	case "/EXIT_CHAT":
-	    chatContext.getSession().data().remove(CURRENT_DEMO);
+	    chatContext.sessionData().data().remove(CURRENT_DEMO);
 	    reply(new OutboxMessage().template("feedback").put("name",
 		    ArgUtil.nonEmpty(chatContext.getContact().getName(), "WhatsApp User")));
 	    next("feedback-onselect");

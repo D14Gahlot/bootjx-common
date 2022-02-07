@@ -19,6 +19,7 @@ import com.boot.jx.logger.LoggerService;
 import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.jx.postman.PMConfiguration;
 import com.boot.jx.postman.PMConstants;
+import com.boot.jx.postman.PMConstants.MESSAGE_COMPOSE_TYPE;
 import com.boot.jx.postman.PMConstants.MESSAGE_SEND_TYPE;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.doc.ChatContactDoc;
@@ -56,24 +57,46 @@ public class ConnectorHandlerFactory extends ScopedBeanFactory<String, Connector
 
 	default public void reply(ChannelConfig channelConfig, ChatContactDoc chatContactDoc,
 		OutboxMessage outboxMessage, IMessageExtended inboxMessage) {
+	    if (!ArgUtil.is(channelConfig)) {
+		channelConfig = getChannelConfig(outboxMessage);
+	    }
+
+	    if (!ArgUtil.is(chatContactDoc)) {
+		chatContactDoc = getChatContact(outboxMessage);
+	    }
+
 	    outboxMessage.addTo(inboxMessage.getFrom());
 	    outboxMessage.contact().setLane(inboxMessage.contact().getLane());
-	    this.send(channelConfig, outboxMessage);
+	    this.onSend(channelConfig, chatContactDoc, outboxMessage);
 	}
 
+	/**
+	 * Message to be send while initiating new session
+	 * 
+	 * @param channelConfig
+	 * @param chatContactDoc
+	 * @param outboxMessage
+	 */
 	default public void send(ChannelConfig channelConfig, ChatContactDoc chatContactDoc,
 		OutboxMessage outboxMessage) {
+	    if (!ArgUtil.is(channelConfig)) {
+		channelConfig = getChannelConfig(outboxMessage);
+	    }
+
+	    if (!ArgUtil.is(chatContactDoc)) {
+		chatContactDoc = getChatContact(outboxMessage);
+	    }
 	    outboxMessage.addTo(chatContactDoc.getCsid());
 	    outboxMessage.contact().setLane(chatContactDoc.getLane());
-	    this.send(channelConfig, outboxMessage);
+	    this.onSend(channelConfig, chatContactDoc, outboxMessage);
 	}
 
 	default public InboxMessage assignToAgent(InboxMessage inboxMessage) {
 	    return inboxMessage;
 	}
 
-	default public boolean initSession(ChatSessionDoc session, InboxMessage inboxMessage) {
-	    return true;
+	default public OutboxMessage initSession(ChatSessionDoc session, InboxMessage inboxMessage) {
+	    return null;
 	}
 
 	default public boolean initSession(ChatContactQuery contactQuery, ChatSessionDoc session,
@@ -96,14 +119,14 @@ public class ConnectorHandlerFactory extends ScopedBeanFactory<String, Connector
 		    chatContactDoc, inboxMessage, outboxMessage);
 	    try {
 		switch (messageType) {
-		case "SEND":
-		    outboxMessage.messageMetaWrapper().composeType("N"); // is a New Message
+		case MESSAGE_COMPOSE_TYPE.SEND:
+		    outboxMessage.messageMetaWrapper().composeType(MESSAGE_COMPOSE_TYPE.SEND_CODE); // is a New Message
 		    this.meta(channelConfig, messageType, chatContactDoc, inboxMessage, outboxMessage);
 		    this.send(channelConfig, chatContactDoc, outboxMessage);
 		    outboxMessage.updateStatus(Message.Status.SENT);
 		    break;
-		case "REPLY":
-		    outboxMessage.messageMetaWrapper().composeType("R"); // Its a Reply
+		case MESSAGE_COMPOSE_TYPE.REPLY:
+		    outboxMessage.messageMetaWrapper().composeType(MESSAGE_COMPOSE_TYPE.REPLY_CODE); // Its a Reply
 		    this.meta(channelConfig, messageType, chatContactDoc, inboxMessage, outboxMessage);
 		    this.reply(channelConfig, chatContactDoc, outboxMessage, inboxMessage);
 		    outboxMessage.updateStatus(Message.Status.SENT);
@@ -119,19 +142,24 @@ public class ConnectorHandlerFactory extends ScopedBeanFactory<String, Connector
 
 	}
 
-	void send(ChannelConfig channelConfig, OutboxMessage outboxMessage);
+	void onSend(ChannelConfig channelConfig, ChatContactDoc chatContactDoc, OutboxMessage outboxMessage);
 
-	default void registerWebHook(ChannelConfig channelConfig) {
+	default void onChannelUpdate(ChannelConfig channelConfig) {
 	    LOGGER.error("WEBHOOK REGISTRATION NOT FOUND ");
 	}
 
-	default InboxMessage createInboxMessage(ChannelConfig channelConfig) {
-	    InboxMessage inboxMessage = new InboxMessage();
+	default InboxMessage createInboxMessage(ChannelConfig channelConfig, InboxMessage inboxMessage) {
 	    if (ArgUtil.is(channelConfig)) {
 		inboxMessage.contact().type(channelConfig.getContactType());
 		inboxMessage.contact().setChannelType(channelConfig.getChannelType());
 		inboxMessage.contact().setLane(channelConfig.getLane());
 	    }
+	    return inboxMessage;
+	}
+
+	default InboxMessage createInboxMessage(ChannelConfig channelConfig) {
+	    InboxMessage inboxMessage = new InboxMessage();
+	    createInboxMessage(channelConfig, inboxMessage);
 	    return inboxMessage;
 	}
 
@@ -176,7 +204,13 @@ public class ConnectorHandlerFactory extends ScopedBeanFactory<String, Connector
 
 	public ChannelConfig getChannelConfig(IMessage outboxMessage);
 
-	public OutboxMessage template(ChannelConfig channelConfig, OutboxMessage outboxMessage);
+	public ChatContactDoc getChatContact(IMessage outboxMessage);
+
+	public OutboxMessage template(ChannelConfig channelConfig, ChatContactDoc chatContactDoc,
+		OutboxMessage outboxMessage);
+
+	boolean optin(ChannelConfig channelConfig, ChatContactDoc chatContactDoc);
+
     }
 
     @Retention(RetentionPolicy.RUNTIME)
@@ -247,17 +281,23 @@ public class ConnectorHandlerFactory extends ScopedBeanFactory<String, Connector
      * @param channelType
      * @param lane
      */
-    public void registerWebHook(String channelType, String lane) {
+    public void onChannelUpdate(String channelType, String lane) {
 	String channelId = PostManUtil.CHANNEL_ID(channelType, lane);
-	PMConfiguration config = environment.config();
-	ChannelConfig channelConfig = config.channels(channelId);
-	registerWebHook(channelConfig);
+	PMConfiguration config = environment.local();
+	ChannelConfig channelConfig = config.channel(channelId);
+	onChannelUpdate(channelConfig);
     }
 
-    public void registerWebHook(ChannelConfig channelConfig) {
-	ConnectorHandler connector = get(channelConfig.getContactType(), channelConfig.getChannelType());
-	if (ArgUtil.is(connector)) {
-	    connector.registerWebHook(channelConfig);
+    public void onChannelUpdate(ChannelConfig channelConfig) {
+	if (ArgUtil.is(channelConfig)) {
+	    ConnectorHandler connector = get(channelConfig.getContactType(), channelConfig.getChannelType());
+	    if (ArgUtil.is(connector)) {
+		try {
+		    connector.onChannelUpdate(channelConfig);
+		} catch (Exception e) {
+		    LOGGER.error("error onChannelUpdate " + channelConfig, e);
+		}
+	    }
 	}
     }
 
@@ -278,7 +318,7 @@ public class ConnectorHandlerFactory extends ScopedBeanFactory<String, Connector
 		chatContactDoc, inboxMessage, outboxMessage);
 
 	String channelId = PostManUtil.CHANNEL_ID(outboxMessage.contact());
-	ChannelConfig channelConfig = environment.config().channels(channelId);
+	ChannelConfig channelConfig = environment.config().channel(channelId);
 
 	try {
 	    if (ArgUtil.is(channelConfig) || ContactType.WEBSITE.equals(outboxMessage.contact().type())) {
@@ -299,23 +339,35 @@ public class ConnectorHandlerFactory extends ScopedBeanFactory<String, Connector
 	MessageDoc messageDoc = messageStore.createOrUpdate(outboxMessage);
 
 	if (ArgUtil.isEqual(messageType, "REPLY", "SEND")) {
-	    ChatContactQuery chatContactQuery = new ChatContactQuery(outboxMessage.contact().getContactId());
+	    ChatContactQuery chatContactQuery = ArgUtil.is(chatContactDoc) ? new ChatContactQuery(chatContactDoc)
+		    : new ChatContactQuery(outboxMessage.contact().getContactId());
 	    ChatSessionQuery chatSessionQuery = new ChatSessionQuery(outboxMessage.getSessionId());
 	    long now = System.currentTimeMillis();
 	    chatContactQuery.setLastOutBoundStamp(now);
 	    chatSessionQuery.setLastOutGoingStamp(now);
 
+	    if (ArgUtil.is(chatContactDoc)) {
+		if (ArgUtil.isEmptyValue(chatContactDoc.getFirstOutBoundStamp())) {
+		    chatContactQuery.setFirstOutBoundStamp(now);
+		}
+	    }
+
 	    switch (messageType) {
-	    case "REPLY":
+	    case MESSAGE_COMPOSE_TYPE.REPLY:
 		chatContactQuery.setLastReplyStamp(now);
 		chatSessionQuery.setLastResponseStamp(now);
 		break;
-	    case "SEND":
+	    case MESSAGE_COMPOSE_TYPE.SEND:
 		chatContactQuery.setLastPushStamp(now);
 		break;
 	    default:
 		break;
 	    }
+
+	    if (ArgUtil.is(inboxMessage) && ArgUtil.is(inboxMessage.contact())) {
+		chatContactQuery.update(inboxMessage.contact());
+	    }
+
 	    commonMongoTemplate.updateFirst(chatSessionQuery);
 	    commonMongoTemplate.updateFirst(chatContactQuery);
 	}

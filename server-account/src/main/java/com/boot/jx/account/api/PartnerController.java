@@ -19,10 +19,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.boot.jx.AppConfig;
 import com.boot.jx.AppConfigPackage.AppCommonConfig;
 import com.boot.jx.AppContextUtil;
-import com.boot.jx.account.AccountAdminService;
+import com.boot.jx.account.AccountAuthService;
 import com.boot.jx.account.AccountSessionBean;
 import com.boot.jx.account.doc.AccountMeta;
 import com.boot.jx.account.doc.AccountStore;
@@ -38,6 +37,8 @@ import com.boot.jx.common.dto.UserLoginToken;
 import com.boot.jx.common.service.EmpAuthService;
 import com.boot.jx.http.CommonHttpRequest;
 import com.boot.jx.postman.PMEnvironment;
+import com.boot.jx.postman.PMEnvironment.PMCommonConfig;
+import com.boot.jx.scope.tnt.Tenants;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
 import com.boot.utils.CryptoUtil;
@@ -47,16 +48,13 @@ import com.boot.utils.CryptoUtil;
 public class PartnerController {
 
     @Autowired
-    private AppConfig appConfig;
-
-    @Autowired
     private CommonHttpRequest commonHttpRequest;
 
     @Autowired
     private AppCommonConfig appCommonConfig;
 
     @Autowired
-    private AccountAdminService sessionService;
+    private AccountAuthService sessionService;
 
     @Autowired
     private AccountSessionBean adminSessionBean;
@@ -68,18 +66,20 @@ public class PartnerController {
     private PMEnvironment env;
 
     @Autowired
+    private PMCommonConfig pmCommonConfig;
+
+    @Autowired
     private EmpAuthService empAuthService;
 
     @RequestMapping(value = { "", "/", "/**", "/auth/**", "/app/**" }, method = { RequestMethod.GET })
     public String home(Model model, @RequestParam(required = false) String theme) {
 	String tnt = AppContextUtil.getTenant();
-	if (!tnt.equals("app")) {
-	    return "redirect:" + String.format("https://app.%s%s", env.keyEntry("mry.prop.service.domain").asString(),
-		    commonHttpRequest.getRequestURI());
+	if (!Tenants.isDefault(tnt)) {
+	    return pmCommonConfig.mainDomainRedirect();
 	}
 
 	model.addAllAttributes(appCommonConfig.appAttributes());
-	Authentication auth = AccountAdminService.getAuthentication();
+	Authentication auth = AccountAuthService.getAuthentication();
 	if (ArgUtil.is(auth) && ArgUtil.is(adminSessionBean.domainUser())) {
 	    model.addAttribute("APP_USER", auth.getName());
 	    model.addAttribute("APP_USER_NAME", adminSessionBean.domainUser().getContact().getName());
@@ -99,9 +99,9 @@ public class PartnerController {
     public String gotopanel(Model model, @PathVariable String domain, @PathVariable String panel)
 	    throws NoSuchAlgorithmException {
 	String tnt = AppContextUtil.getTenant();
-	if (!tnt.equals("app")) {
-	    return "redirect:" + String.format("https://app.%s/%s/auth/direct",
-		    env.keyEntry("mry.prop.service.domain").asString(), commonHttpRequest.getRequestURI());
+
+	if (!Tenants.isDefault(tnt)) {
+	    return pmCommonConfig.mainDomainRedirect(commonHttpRequest.getRequestURI() + "/auth/direct");
 	}
 
 	model.addAllAttributes(appCommonConfig.appAttributes());
@@ -145,7 +145,8 @@ public class PartnerController {
 
 	accountStore.save(account);
 	sessionService.sendResetMail(account, "tenant-verify-email");
-
+	sessionService.sendMailToSalesTeam(account, "new-customer-register-email");
+//Customer registers on our website
 	return ApiResponse.build().message("Verification email sent");
     }
 
@@ -253,7 +254,18 @@ public class PartnerController {
     }
 
     @ResponseBody
-    @RequestMapping(value = { "/api/domain/check" }, method = { RequestMethod.POST })
+    @RequestMapping(value = { "/api/domain/exists", "/pub/domain/exists" }, method = { RequestMethod.GET })
+    public ApiResponse<Object, Object> sisExists(@RequestParam @Valid String domain) throws NoSuchAlgorithmException {
+	AppContextUtil.setTenant(Tenants.getDefault());
+	DomainDoc domainDoc = accountStore.findDomainByName(domain);
+	if (ArgUtil.is(domainDoc)) {
+	    return ApiResponse.buildMeta(domainDoc.getDomain());
+	}
+	return ApiResponse.buildMeta(null).statusKey("400");
+    }
+
+    @ResponseBody
+    @RequestMapping(value = { "/api/domain/check", "/pub/domain/check" }, method = { RequestMethod.POST })
     public ApiResponse<Object, Object> checkDomain(@RequestParam @Valid String domain) throws NoSuchAlgorithmException {
 
 	DomainDoc domainDoc = accountStore.findDomainByName(domain);

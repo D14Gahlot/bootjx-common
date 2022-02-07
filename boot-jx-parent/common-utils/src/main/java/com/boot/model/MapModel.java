@@ -23,10 +23,10 @@ public class MapModel implements JsonSerializerType<Object> {
 	public String getKey();
     }
 
-    public static class MapEntry {
-	private Object value;
+    public static class NodeEntry<T> {
+	private T value;
 
-	public MapEntry(Object value) {
+	public NodeEntry(T value) {
 	    this.value = value;
 	}
 
@@ -124,22 +124,43 @@ public class MapModel implements JsonSerializerType<Object> {
 		    false);
 	}
 
+	public Map<String, Object> asMap() {
+	    return JsonUtil.toMap(this.value);
+	}
+
+	public MapModel asMapModel() {
+	    return MapModel.from(this.asMap());
+	}
+
 	public boolean exists() {
 	    return ArgUtil.is(value);
 	}
 
-	public Object getValue() {
+	public boolean is(Object compare) {
+	    return ArgUtil.areEqual(this.value, compare);
+	}
+
+	public T getValue() {
 	    return value;
 	}
 
-	public void setValue(Object value) {
+	public void setValue(T value) {
 	    this.value = value;
+	}
+
+    }
+
+    public static class MapEntry extends NodeEntry<Object> {
+
+	public MapEntry(Object value) {
+	    super(value);
 	}
 
     }
 
     protected Map<String, Object> map;
     protected List<Object> list;
+    protected Map<String, Object> elem;
 
     public MapModel() {
 	this.map = new HashMap<String, Object>();
@@ -191,8 +212,14 @@ public class MapModel implements JsonSerializerType<Object> {
     }
 
     public Object getFirst() {
-	for (Entry<String, Object> iterable_element : map().entrySet()) {
-	    return iterable_element.getValue();
+	if (this.list != null) {
+	    return list.get(0);
+	}
+
+	if (this.map != null) {
+	    for (Entry<String, Object> iterable_element : map().entrySet()) {
+		return iterable_element.getValue();
+	    }
 	}
 	return null;
     }
@@ -244,6 +271,13 @@ public class MapModel implements JsonSerializerType<Object> {
 
     @Override
     public Object toObject() {
+	if (this.list != null) {
+	    return list;
+	}
+
+	if (this.map != null) {
+	    return this.map;
+	}
 	return this.map();
     }
 
@@ -271,7 +305,7 @@ public class MapModel implements JsonSerializerType<Object> {
     }
 
     public String toJson() {
-	return JsonUtil.toJson(this.map());
+	return JsonUtil.toJson(this.toObject());
     }
 
     public <T> T as(Class<T> clazz) {
@@ -282,17 +316,27 @@ public class MapModel implements JsonSerializerType<Object> {
 	return new MapModel(map);
     }
 
+    public static MapModel from(List<Object> list) {
+	return new MapModel(list);
+    }
+
+    public static MapModel from(String json) {
+	return new MapModel(json);
+    }
+
     public static MapModel createInstance() {
 	return new MapModel(new HashMap<String, Object>());
     }
 
     public MapModel putAll(Map<? extends String, ? extends Object> source) {
-	this.map().putAll(source);
+	if (source != null)
+	    this.map().putAll(source);
 	return this;
     }
 
     public MapModel putAll(MapModel source) {
-	this.map().putAll(source.toMap());
+	if (source != null)
+	    this.map().putAll(source.toMap());
 	return this;
     }
 
@@ -322,4 +366,14 @@ public class MapModel implements JsonSerializerType<Object> {
 	}
 	return this.map.containsKey(key);
     }
+
+    public int size() {
+	if (this.list != null) {
+	    return this.list.size();
+	} else if (this.map != null) {
+	    return this.map.size();
+	}
+	return 0;
+    }
+
 }

@@ -53,12 +53,12 @@ public class TmplController {
      * @return the lang
      */
     private String getLang(CommonFile file) {
-	if (ArgUtil.isEmpty(file) || ArgUtil.isEmpty(file.getLang())) {
+	if (ArgUtil.isEmpty(file) || ArgUtil.isEmpty(file.template().getLang())) {
 	    String langString = request.getParameter(PostManServiceImpl.PARAM_LANG);// localeResolver.resolveLocale(request).toString();
 	    Language lang = ArgUtil.parseAsEnumT(langString, postManConfig.getTenantLang(), Language.class);
 	    file.lang(lang);
 	}
-	return file.getLang();
+	return file.template().getLang();
     }
 
     /**

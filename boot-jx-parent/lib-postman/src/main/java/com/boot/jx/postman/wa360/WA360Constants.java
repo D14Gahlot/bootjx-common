@@ -22,6 +22,9 @@ public class WA360Constants {
 		"messages/[0]/interactive/button_reply/title");
 	public static final JsonPath INTERACTIVE_BUTTON_ID = new JsonPath("messages/[0]/interactive/button_reply/id");
 
+	public static final JsonPath SIMPLE_BUTTON_REPLY = new JsonPath("messages/[0]/button/text");
+	public static final JsonPath SIMPLE_BUTTON_PAYLOAD = new JsonPath("messages/[0]/button/payload");
+
 	public static final JsonPath IMAGE = new JsonPath("messages/[0]/image");
 	public static final JsonPath IMAGE_ID = new JsonPath("messages/[0]/image/id");
 	public static final JsonPath IMAGE_TYPE = new JsonPath("messages/[0]/image/mime_type");
@@ -41,6 +44,8 @@ public class WA360Constants {
 	public static final JsonPath VOICE = new JsonPath("messages/[0]/voice");
 	public static final JsonPath VIDEO = new JsonPath("messages/[0]/video");
 	public static final JsonPath STICKER = new JsonPath("messages/[0]/sticker");
+	
+	public static final JsonPath CONTEXT_ID = new JsonPath("messages/[0]/context/id");
 
     }
 
@@ -69,6 +74,9 @@ public class WA360Constants {
 	public static final JsonPath TEMPLATE_LANGUAGE_CODE = new JsonPath("template/language/code");
 	public static final JsonPath TEMPLATE_NAME = new JsonPath("template/name");
 	public static final JsonPath TEMPLATE_COMPONENTS = new JsonPath("template/components");
+	
+	
+	public static final JsonPath FETCH_CONTACTS_DETAILS = new JsonPath("contacts/[0]");
 
     }
 
@@ -111,10 +119,14 @@ public class WA360Constants {
 	}
 
 	public TmplComponent parameter(String type, Object value) {
-	    this.parameters.add(MapModel.createInstance().put("type", type).put(type, value));
+	    this.parameters.add(MapModel.createInstance().put("type", type).put(type, value).toMap());
 	    return this;
 	}
 
+	public MapModel parameters() {
+	    return this.parameters;
+	}
+	
 	public static TmplComponent createInstance() {
 	    return new TmplComponent();
 	}

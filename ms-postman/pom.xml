@@ -44,6 +44,16 @@
 			<version>3.0.0.RELEASE</version>
 		</dependency>
 
+		<dependency>
+			<groupId>org.springframework.session</groupId>
+			<artifactId>spring-session</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-security</artifactId>
+		</dependency>
+		
 		<!-- AMX -->
 		<dependency>
 			<groupId>com.boot.jx</groupId>
@@ -86,6 +96,12 @@
 			<artifactId>lib-postman-nlp</artifactId>
 		</dependency>
 
+		<dependency>
+			<groupId>com.boot.jx</groupId>
+			<artifactId>lib-phonebook</artifactId>
+		</dependency>
+		
+		
 		<dependency>
 			<groupId>com.boot.jx</groupId>
 			<artifactId>boot-ext-jar</artifactId>

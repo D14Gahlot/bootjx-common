@@ -1,5 +1,6 @@
 package com.boot.jx.inbound;
 
+import java.util.List;
 import java.util.regex.Pattern;
 
 import org.apache.commons.lang.StringUtils;
@@ -18,17 +19,25 @@ import com.boot.jx.bot.ChatMapping;
 import com.boot.jx.cache.CacheBox;
 import com.boot.jx.chat.ChatClient;
 import com.boot.jx.chat.ChatService;
+import com.boot.jx.chat.ChatSessionFactory;
+import com.boot.jx.chat.ChatStatusService;
 import com.boot.jx.def.ICacheBox;
+import com.boot.jx.inbound.InBound.InBoundFilter;
+import com.boot.jx.inbound.InBound.InBoundHandler;
+import com.boot.jx.inbound.InBound.InBoundProcessor;
 import com.boot.jx.postman.PMClientConfig;
+import com.boot.jx.postman.PMEnvironment;
+import com.boot.jx.postman.PMEnvironment.PMConfigurationObject;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.ErrorObject;
 import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.model.InboxMessage;
+import com.boot.jx.postman.model.MessageReport;
 import com.boot.jx.postman.store.MessageContext;
 import com.boot.jx.postman.store.MessageStore;
-import com.boot.jx.postman.store.SessionStore;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.Constants;
 import com.boot.utils.StringUtils.StringMatcher;
 import com.boot.utils.UniqueID;
 
@@ -40,10 +49,13 @@ public class InBoundService {
     public static final Pattern UNPROXY = Pattern.compile("\\/unproxy\\ ([a-zA-Z0-9_\\-]+)$");
 
     @Autowired(required = false)
-    private InBoundHandler inBoundHandler;
+    private InBoundProcessor inBoundProcessor;
 
     @Autowired(required = false)
     private InBoundFilter inBoundFilter;
+
+    @Autowired(required = false)
+    private InBoundHandler inBoundHandler;
 
     @Autowired
     private BotEngine botEngine;
@@ -58,16 +70,22 @@ public class InBoundService {
     private ChatService chatService;
 
     @Autowired
+    private ChatStatusService chatStatusService;
+
+    @Autowired
     private AgentService agentService;
 
     @Autowired
-    private SessionStore sessionStore;
+    private ChatSessionFactory chatSessionFactory;
 
     @Autowired
     private MessageStore messageStore;
 
     @Autowired
     private MessageContext messageContext;
+
+    @Autowired
+    private PMEnvironment pmEnvironment;
 
     @Autowired(required = false)
     private RedissonClient redisson;
@@ -88,17 +106,23 @@ public class InBoundService {
      */
     @Async
     public void invokeMethodsAsync(InboxMessage inboxMessageOriginal) {
-	invokeMethods(inboxMessageOriginal);
+	invokeMethodsInternal(inboxMessageOriginal, true);
     }
 
     public InboxMessage invokeMethods(InboxMessage inboxMessageOriginal) {
+	return this.invokeMethodsInternal(inboxMessageOriginal, false);
+    }
 
-	if (AppContextUtil.getTenant().equals("app") && ArgUtil.is(inboxMessageOriginal.getMessage())
-		&& ArgUtil.is(redisson)) {
+    private InboxMessage invokeMethodsInternal(InboxMessage inboxMessageOriginal, boolean newThread) {
+
+	PMConfigurationObject proxyConfig = pmEnvironment.keyEntry("mry.proxy.enabled");
+
+	if ((AppContextUtil.getTenant().equals("app") || proxyConfig.asBoolean()) && ArgUtil.is(redisson)) {
 	    String contactId = PostManUtil.createContactId(inboxMessageOriginal.contact());
 	    String proxy = null;
+	    String message = ArgUtil.nonEmpty(inboxMessageOriginal.getMessage(), Constants.BLANK);
 
-	    StringMatcher matcher = new StringMatcher(inboxMessageOriginal.getMessage());
+	    StringMatcher matcher = new StringMatcher(message);
 	    if (matcher.isMatch(PROXY)) {
 		proxy = matcher.group(1);
 		proxy().put(contactId, proxy);
@@ -118,7 +142,6 @@ public class InBoundService {
 		AppContextUtil.getTraceId(true, true);
 		AppContextUtil.resetTraceTime();
 		AppContextUtil.init();
-
 	    }
 
 	}
@@ -127,9 +150,9 @@ public class InBoundService {
 	boolean locallySessionAssigned = false;
 	if (ArgUtil.isEmpty(inboxMessageOriginal.getSessionId())
 		|| "POSTMAN".equalsIgnoreCase(chatClientConfig.getPostmanType())) {
-	    session = sessionStore.createSession(inboxMessageOriginal);
+	    session = chatSessionFactory.getChatSession(inboxMessageOriginal);
 	    if (ArgUtil.is(session)) {
-		sessionStore.linkSession(session, inboxMessageOriginal);
+		chatSessionFactory.linkSession(session, inboxMessageOriginal);
 		locallySessionAssigned = true;
 	    } else {
 		ErrorObject error = new ErrorObject();
@@ -144,7 +167,7 @@ public class InBoundService {
 	if (ArgUtil.isEmpty(inboxMessageOriginal.getMessageId())) {
 	    inboxMessageOriginal.setMessage(StringUtils.trim(inboxMessageOriginal.getMessage()));
 	    MessageDoc messageDoc = messageStore.createOrUpdate(inboxMessageOriginal);
-	    sessionStore.push(messageDoc, inboxMessageOriginal);
+	    chatSessionFactory.push(messageDoc, inboxMessageOriginal);
 	}
 
 	messageContext.setMessage(inboxMessageOriginal);
@@ -162,15 +185,22 @@ public class InBoundService {
 	}
 
 	if (ArgUtil.isEmpty(inBoundFilter) || inBoundFilter.onFilter(inboxMessageOriginal)) {
-	    if (ArgUtil.is(inBoundHandler)) {
-		inBoundHandler.onHandle(inboxMessageOriginal);
+	    if (ArgUtil.is(inBoundProcessor)) {
+		inBoundProcessor.process(inboxMessageOriginal);
 	    }
-
-	    if (agentService.onMessageSupported(inboxMessageOriginal)) {
-		agentService.onMessage(inboxMessageOriginal);
-	    } else if (botEngine.isChatBotDefined()) {
+	    if (chatClientConfig.isLocalDummyBotEnabled()) {
 		botEngine.invokeMethodsAsync(inboxMessageOriginal);
-	    } else {
+	    } else if (ArgUtil.is(inBoundHandler)) {
+		if (newThread) {
+		    inBoundHandler.handle(inboxMessageOriginal);
+		} else {
+		    inBoundHandler.handleAsync(inboxMessageOriginal);
+		}
+	    } else if (agentService.onMessageSupported(inboxMessageOriginal)) { // TODO:-- TO be removed
+		agentService.onMessage(inboxMessageOriginal);
+	    } else if (botEngine.isChatBotDefined()) { // TODO:-- TO be removed
+		botEngine.invokeMethodsAsync(inboxMessageOriginal);
+	    } else { // TODO:-- TO be removed
 		chatClient.forward(inboxMessageOriginal);
 	    }
 	}
@@ -179,6 +209,16 @@ public class InBoundService {
 
     public ApiResponse<InboxMessage, ?> assignToAgent(InboxMessage inboxMessageOriginal) {
 	return agentService.assignToAgent(inboxMessageOriginal);
+    }
+
+    public void updateBatch(List<MessageReport> messageReports) {
+	chatStatusService.offer(messageReports);
+	chatStatusService.process(null);
+    }
+
+    @Async
+    public void updateAsync(List<MessageReport> messageReports) {
+	chatStatusService.update(messageReports);
     }
 
 }

@@ -1,27 +1,32 @@
 package com.boot.jx.postman.model;
 
 import java.io.Serializable;
+import java.util.List;
 
-import com.boot.jx.dict.ContactType;
 import com.boot.jx.postman.model.Message.Status;
 import com.boot.jx.postman.model.MessageDefinitions.Contactable;
+import com.boot.jx.postman.model.MessageDefinitions.LogMessage;
+import com.boot.jx.swagger.ApiMockModelProperty;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class MessageReport implements Serializable {
+public class MessageReport implements LogMessage, Serializable {
 
     private static final long serialVersionUID = -9039777977577457215L;
 
     private String messageId;
     private String messageIdExt;
     private String messageIdRef;
+    private String sessionId;
     private Contactable contact;
 
     protected long changeStamp;
     protected long watermarkStamp;
-    private ContactType contactType;
     private Status status = null;
     private String reason = null;
+    private List<MessageReportError> errors;
+
+    private MessageSession session;
 
     public String getMessageId() {
 	return messageId;
@@ -63,14 +68,6 @@ public class MessageReport implements Serializable {
 	this.changeStamp = changeStamp;
     }
 
-    public ContactType getContactType() {
-	return contactType;
-    }
-
-    public void setContactType(ContactType contactType) {
-	this.contactType = contactType;
-    }
-
     public String getReason() {
 	return reason;
     }
@@ -100,6 +97,87 @@ public class MessageReport implements Serializable {
 
     public void setWatermarkStamp(long watermarkStamp) {
 	this.watermarkStamp = watermarkStamp;
+    }
+
+    public List<MessageReportError> getErrors() {
+	return errors;
+    }
+
+    public void setErrors(List<MessageReportError> errors) {
+	this.errors = errors;
+    }
+
+    public static class MessageReportError {
+
+	@ApiMockModelProperty(example = "470", value = "Error code.\n")
+	public String code;
+
+	@ApiMockModelProperty(
+		example = "Failed to send message because you are outside the support window for freeform messages to this user. Please use a valid HSM notification or reconsider.",
+		value = "Error code")
+	public String title;
+
+	@ApiMockModelProperty(value = "Error details provided, if available/applicable", required = false)
+	public String details;
+
+	@ApiMockModelProperty(example = "https://developers.facebook.com/docs/whatsapp/api/errors#error",
+		value = "Location for error detail", required = false)
+	public String href;
+
+	public String getCode() {
+	    return code;
+	}
+
+	public void setCode(String code) {
+	    this.code = code;
+	}
+
+	public String getTitle() {
+	    return title;
+	}
+
+	public void setTitle(String title) {
+	    this.title = title;
+	}
+
+	public String getDetails() {
+	    return details;
+	}
+
+	public void setDetails(String details) {
+	    this.details = details;
+	}
+
+	public String getHref() {
+	    return href;
+	}
+
+	public void setHref(String href) {
+	    this.href = href;
+	}
+    }
+
+    public String getSessionId() {
+	return sessionId;
+    }
+
+    public void setSessionId(String sessionId) {
+	this.sessionId = sessionId;
+    }
+
+    public MessageSession session() {
+	if (session == null) {
+	    this.session = new MessageSession();
+	}
+	return this.session;
+    }
+
+    public MessageSession getSession() {
+	return session;
+    }
+
+    public void setSession(MessageSession session) {
+	this.session = session;
     }
 
 }

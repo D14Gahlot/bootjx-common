@@ -1,5 +1,7 @@
 package com.boot.jx.agent;
 
+import java.io.Serializable;
+
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.stereotype.Component;
@@ -10,7 +12,7 @@ import com.boot.utils.ArgUtil;
 
 @Component
 @Scope(value = "session", proxyMode = ScopedProxyMode.TARGET_CLASS)
-public class AgentSessionBean implements AuditDetailProvider {
+public class AgentSessionBean implements Serializable {
 
     private static final long serialVersionUID = 5850744656958653564L;
     private String agentCode;
@@ -19,6 +21,7 @@ public class AgentSessionBean implements AuditDetailProvider {
     private boolean isLoggedIn;
 
     private boolean isOnline;
+    private boolean isAway;
 
     private long lastOnlineStamp;
 
@@ -87,14 +90,6 @@ public class AgentSessionBean implements AuditDetailProvider {
 	this.profile = profile;
     }
 
-    @Override
-    public String getAuditUser() {
-	if (!ArgUtil.is(this.agentCode) && ArgUtil.is(this.profile)) {
-	    return this.profile.getAgent_code();
-	}
-	return this.agentCode;
-    }
-
     public long getLastSyncStamp() {
 	return lastSyncStamp;
     }
@@ -105,6 +100,14 @@ public class AgentSessionBean implements AuditDetailProvider {
 
     public boolean isAdmin() {
 	return getProfile().isAdmin();
+    }
+
+    public boolean isAway() {
+	return isAway;
+    }
+
+    public void setAway(boolean isAway) {
+	this.isAway = isAway;
     }
 
 }

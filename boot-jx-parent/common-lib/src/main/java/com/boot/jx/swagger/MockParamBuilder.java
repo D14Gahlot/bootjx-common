@@ -17,6 +17,7 @@ public class MockParamBuilder {
 
     public static class MockParam {
 	MockParamType type;
+	String id;
 	String name;
 	String description;
 	String defaultValue;
@@ -28,6 +29,10 @@ public class MockParamBuilder {
 
 	public String getDefaultValue() {
 	    return defaultValue;
+	}
+
+	public String getId() {
+	    return id;
 	}
 
 	public String getName() {
@@ -76,6 +81,11 @@ public class MockParamBuilder {
 
     public MockParamBuilder() {
 	this.mockParam = new MockParam();
+    }
+
+    public MockParamBuilder id(String id) {
+	this.mockParam.id = id;
+	return this;
     }
 
     public MockParamBuilder name(String name) {

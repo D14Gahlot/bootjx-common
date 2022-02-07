@@ -8,10 +8,12 @@ import java.util.StringJoiner;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.HttpStatusCodeException;
 
+import com.boot.jx.api.ApiFieldError;
+import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.dict.FileType;
-import com.boot.jx.postman.PMConfiguration;
-import com.boot.jx.postman.PMEnvironment;
+import com.boot.jx.exception.ApiHttpExceptions.ApiHttpException;
 import com.boot.jx.postman.PostManException;
 import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.OutboxMessage;
@@ -20,7 +22,6 @@ import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.postman.wa360.WA360Constants.OutBoundWrapperPaths;
 import com.boot.jx.postman.wa360.WA360Constants.TmplComponent;
 import com.boot.jx.rest.RestService;
-import com.boot.jx.utils.PostManUtil;
 import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.Constants;
@@ -30,15 +31,9 @@ import com.boot.utils.JsonPath;
 public class WA360Client {
 
     @Autowired
-    private PMEnvironment environment;
-
-    @Autowired
     private RestService restService;
 
-    public OutboxMessage send(OutboxMessage outboxMessage) {
-	PMConfiguration config = environment.config();
-	String channelId = PostManUtil.CHANNEL_ID(outboxMessage.contact());
-	ChannelConfig channelConfig = config.channels(channelId);
+    public OutboxMessage send(ChannelConfig channelConfig, OutboxMessage outboxMessage) {
 	StringJoiner msgIds = new StringJoiner(",");
 
 	if (ArgUtil.is(outboxMessage.getTemplateExt())) {
@@ -107,13 +102,17 @@ public class WA360Client {
 			    String path = (String) headerParameter.get("path");
 			    headerComponentReq.parameter("text", model.pathEntry(path).asString());
 			}
-			components.add(headerComponentReq.build().map());
+			if (headerComponentReq.parameters().size() > 0) {
+			    components.add(headerComponentReq.build().map());
+			}
 		    }
-		} else if(ArgUtil.is(outboxMessage.getAttachments())) {
+		} else if (ArgUtil.is(outboxMessage.getAttachments())) {
 		    String lowerFormat = extTemplateComponentFormat.toLowerCase();
 		    WA360OutBoundMedia media = createMedia(lowerFormat, outboxMessage.getAttachments().get(0));
 		    headerComponentReq.parameter(lowerFormat, media);
-		    components.add(headerComponentReq.build().map());
+		    if (headerComponentReq.parameters().size() > 0) {
+			components.add(headerComponentReq.build().map());
+		    }
 		}
 
 	    } else if ("BODY".equals(extTemplateComponentType)) {
@@ -203,6 +202,8 @@ public class WA360Client {
 	    req.put("video", wa360OutBoundMedia);
 	} else if (ArgUtil.areEqual(attachment.getMediaType(), FileType.AUDIO.toString())) {
 	    req.put(OutBoundWrapperPaths.MESSAGE_TYPE, "audio");
+	    wa360OutBoundMedia.setCaption(null);
+	    wa360OutBoundMedia.setFilename(null);
 	    req.put("audio", wa360OutBoundMedia);
 	} else {
 	    req.put(OutBoundWrapperPaths.MESSAGE_TYPE, "document");
@@ -280,6 +281,11 @@ public class WA360Client {
 	    } else if (ArgUtil.areEqual(attachment.getMediaType(), FileType.VIDEO.toString())) {
 		intr.put(OutBoundWrapperPaths.MESSAGE_TYPE, "video");
 		intr.put("video", wa360OutBoundMedia);
+	    } else if (ArgUtil.areEqual(attachment.getMediaType(), FileType.AUDIO.toString())) {
+		intr.put(OutBoundWrapperPaths.MESSAGE_TYPE, "audio");
+		wa360OutBoundMedia.setCaption(null);
+		wa360OutBoundMedia.setFilename(null);
+		intr.put("audio", wa360OutBoundMedia);
 	    } else {
 		intr.put(OutBoundWrapperPaths.MESSAGE_TYPE, "document");
 		intr.put("document", wa360OutBoundMedia);
@@ -307,10 +313,27 @@ public class WA360Client {
     }
 
     private MapModel send(MapModel req, ChannelConfig channelConfig) {
-	MapModel resp = restService.ajax(WA360Constants.BASE_URL).path("v1/messages")
-		.header(WA360Constants.D360_API_KEY, channelConfig.getWa360d().getApiKey()).post(req.toMap())
-		.asMapModel();
-	return resp;
+	try {
+	    MapModel resp = restService.ajax(WA360Constants.BASE_URL).path("v1/messages")
+		    .header(WA360Constants.D360_API_KEY, channelConfig.getWa360d().getApiKey()).post(req.toMap())
+		    .asMapModel();
+	    return resp;
+	} catch (ApiHttpException e) {
+	    return MapModel.from(e.getResponse().getBody());
+	}
+    }
+
+    public MapModel fetchContact(String contact, ChannelConfig channelConfig) {
+	try {
+	    MapModel resp = restService.ajax(WA360Constants.BASE_URL).path("v1/contacts")
+		    .header(WA360Constants.D360_API_KEY, channelConfig.getWa360d().getApiKey())
+		    .post(MapModel.createInstance().put("blocking", "wait")
+			    .put(OutBoundWrapperPaths.FETCH_CONTACTS_DETAILS, contact).toMap())
+		    .asMapModel();
+	    return resp.path(OutBoundWrapperPaths.FETCH_CONTACTS_DETAILS).asMapModel();
+	} catch (ApiHttpException e) {
+	    return MapModel.from(e.getResponse().getBody());
+	}
     }
 
     private String getMessageId(MapModel resp) {
@@ -319,7 +342,18 @@ public class WA360Client {
 	if (ArgUtil.is(errorCode)) {
 	    String errorTitle = resp.entry(OutBoundWrapperPaths.RESPONSE_ERROR_TITLE).asString();
 	    String errorDetails = resp.entry(OutBoundWrapperPaths.RESPONSE_ERROR_DETAILS).asString();
-	    throw new PostManException(String.format("%s : %s / %s / %s ", id, errorCode, errorTitle, errorDetails));
+
+	    ApiFieldError error = new ApiFieldError();
+	    error.code(errorCode);
+	    error.codeKey(errorTitle);
+	    error.setDescription(String.format("%s : %s / %s / %s ", id, errorCode, errorTitle, errorDetails));
+	    if ("1006".equals(errorCode)) {
+		error.setDescriptionKey("File or resource not found");
+		if ("unknown contact".equals(errorDetails)) {
+		    error.field("to").code(PostManException.ErrorCode.CONTACT_NOTFOUND);
+		}
+	    }
+	    ApiResponseUtil.throwException(error);
 	}
 	return id;
     }
@@ -328,6 +362,30 @@ public class WA360Client {
 	MapModel resp = restService.ajax(WA360Constants.BASE_URL).path("v1/configs/templates")
 		.header(WA360Constants.D360_API_KEY, channelConfig.getWa360d().getApiKey()).get().asMapModel();
 	return resp;
+    }
+
+    public MapModel deleteTemplates(ChannelConfig channelConfig, String templateName) {
+	MapModel resp = restService.ajax(WA360Constants.BASE_URL).path("v1/configs/templates/{templateName}")
+		.header(WA360Constants.D360_API_KEY, channelConfig.getWa360d().getApiKey())
+		.pathParam("templateName", templateName).delete().asMapModel();
+	return resp;
+    }
+
+    public MapModel createTemplates(ChannelConfig channelConfig, MapModel req) {
+	try {
+	    MapModel resp = restService.ajax(WA360Constants.BASE_URL).path("v1/configs/templates")
+		    .header(WA360Constants.D360_API_KEY, channelConfig.getWa360d().getApiKey()).post(req.toMap())
+		    .asMapModel();
+
+	    return resp;
+	} catch (HttpStatusCodeException | ApiHttpException e) {
+	    if (e instanceof HttpStatusCodeException)
+		ApiResponseUtil.addError(((HttpStatusCodeException) e).getResponseBodyAsString());
+	    else
+		ApiResponseUtil.addError(((ApiHttpException) e));
+	    throw e;
+	}
+
     }
 
 }

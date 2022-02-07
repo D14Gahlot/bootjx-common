@@ -129,7 +129,8 @@ public class TwitterClientContext {
 		}
 		webhookManager.removeWebhook();
 		StatusCode statusCode = webhookManager.addWebhook(java.net.URI.create(webhookUrl));
-		webhookManager.registerCurrentUser();
+		if(!statusCode.isError)
+		    webhookManager.registerCurrentUser();
 		return statusCode;
 	}
 }

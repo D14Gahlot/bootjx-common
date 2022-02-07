@@ -3,18 +3,15 @@ package com.boot.jx.connectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorHandler;
 import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorMapping;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.postman.PMConfiguration;
-import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.client.PostManClient;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.gupshup.GupShupClientAgent;
 import com.boot.jx.postman.gupshup.GupShupClientChat;
 import com.boot.jx.postman.gupshup.GupShupClientNotify;
-import com.boot.jx.postman.gupshup.GupShupConfigDetails;
 import com.boot.jx.postman.gupshup.GupShupInboundV2;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.Message;
@@ -25,8 +22,8 @@ import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.model.WAMessage.Channel;
 import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.postman.plugin.ChannelPluginProvider;
-import com.boot.jx.postman.plugin.TwitterPlugin;
 import com.boot.jx.postman.plugin.WAGupShupPlugin;
+import com.boot.jx.postman.plugin.WAGupShupPlugin.GupShupConfigDetails;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
@@ -60,9 +57,9 @@ public class WAGupShupAgentConnector extends AbstractConnector<GupShupConfigDeta
 	    if (outboxMessage.isViaAgent() && ArgUtil.isEmpty(outboxMessage.getFiles())) {
 		gupShupChatClient.sendMessage(chatContactDoc.getCsid(), outboxMessage.getMessage());
 	    } else if (outboxMessage.isTemplateMsg() || outboxMessage.isQRButtons()) {
-		gupShupNotifyClient.send(null, outboxMessage);
+		gupShupNotifyClient.send(channelConfig, outboxMessage);
 	    } else {
-		gupShupChatClient.send(null, outboxMessage);
+		gupShupChatClient.send(channelConfig, outboxMessage);
 	    }
 	} else if (ArgUtil.isEqual(outboxMessage.contact().getChannelType(), Channel.DEFAULT.toString())) {
 	    MessageBox mb = new MessageBox();
@@ -72,7 +69,8 @@ public class WAGupShupAgentConnector extends AbstractConnector<GupShupConfigDeta
     }
 
     @Override
-    public void reply(ChannelConfig channelConfig, ChatContactDoc chatContactDoc, OutboxMessage outboxMessage, IMessageExtended inboxMessage) {
+    public void reply(ChannelConfig channelConfig, ChatContactDoc chatContactDoc, OutboxMessage outboxMessage,
+	    IMessageExtended inboxMessage) {
 	outboxMessage.contact().setChannelType(inboxMessage.contact().getChannelType());
 	outboxMessage.contact().setLane(inboxMessage.contact().getLane());
 	if (ArgUtil.isEqual(inboxMessage.contact().getChannelType(), Channel.GUPSHUPAGENT.toString())) {
@@ -80,9 +78,9 @@ public class WAGupShupAgentConnector extends AbstractConnector<GupShupConfigDeta
 		gupShupAgentClient.sendViaAgent(inboxMessage, outboxMessage.getMessage());
 	    } else if (outboxMessage.isTemplateMsg() || outboxMessage.isQRButtons()) {
 		// gupShupNotifyClient.optIn(inboxMessage.getFrom());
-		gupShupNotifyClient.send(null, outboxMessage);
+		gupShupNotifyClient.send(channelConfig, outboxMessage);
 	    } else {
-		gupShupChatClient.send(null, outboxMessage);
+		gupShupChatClient.send(channelConfig, outboxMessage);
 	    }
 	} else if (ArgUtil.isEqual(inboxMessage.contact().getChannelType(), Channel.DEFAULT.toString())) {
 	    Message<?> reply = inboxMessage.replyMessage(outboxMessage.getMessage());
@@ -95,9 +93,9 @@ public class WAGupShupAgentConnector extends AbstractConnector<GupShupConfigDeta
     @Override
     public InboxMessage assignToAgent(InboxMessage inboxMessage) {
 
-	PMConfiguration config = environment.config();
+	PMConfiguration config = environment.local();
 	String channelId = PostManUtil.CHANNEL_ID(inboxMessage.contact());
-	ChannelConfig channelConfig = config.channels(channelId);
+	ChannelConfig channelConfig = config.channel(channelId);
 
 	if (ArgUtil.isEqual(inboxMessage.contact().getChannelType(), Channel.GUPSHUPAGENT.toString())) {
 	    gupShupAgentClient.assignToAgent(inboxMessage);
@@ -111,8 +109,8 @@ public class WAGupShupAgentConnector extends AbstractConnector<GupShupConfigDeta
     }
 
     @Override
-    public boolean initSession(ChatSessionDoc session, InboxMessage inboxMessage) {
-	return true;
+    public OutboxMessage initSession(ChatSessionDoc session, InboxMessage inboxMessage) {
+	return null;
     }
 
     public InboxMessage toInboxMessage(GupShupInboundV2 inboundV2) {
@@ -138,7 +136,7 @@ public class WAGupShupAgentConnector extends AbstractConnector<GupShupConfigDeta
     }
 
     @Override
-    public void send(ChannelConfig channelConfig, OutboxMessage outboxMessage) {
+    public void onSend(ChannelConfig channelConfig, ChatContactDoc chatContactDoc, OutboxMessage outboxMessage) {
 	// TODO Auto-generated method stub
     }
 

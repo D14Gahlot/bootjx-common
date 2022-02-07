@@ -27,4 +27,5 @@ public class OutBoundReciept implements JsonIgnoreUnknown {
 	this.id = id;
 	return this;
     }
+
 }

@@ -34,7 +34,7 @@ public class MessageService {
     private PMEnvironment pmEnvironment;
 
     public OutBoundReciept send(OutBoundMsg message) {
-	ChannelConfig channel = pmEnvironment.config().channels(message.getChannelId());
+	ChannelConfig channel = pmEnvironment.config().channel(message.getChannelId());
 
 	if (!ArgUtil.is(channel)) {
 	    ApiResponseUtil.throwInputException(new ApiFieldError().field("channelId").obzect("OutBoundMsg")
@@ -44,7 +44,7 @@ public class MessageService {
 	OutboxMessage outboxMessage = new OutboxMessage();
 
 	if ("text".equalsIgnoreCase(message.getType())) {
-	    outboxMessage.setMessage(message.getText().body);
+	    outboxMessage.setMessage(message.getText().getBody());
 	}
 
 	if ("template".equalsIgnoreCase(message.getType())) {
@@ -52,10 +52,8 @@ public class MessageService {
 		ApiResponseUtil.throwInputException(new ApiFieldError().field("template").obzect("OutBoundMsg")
 			.codeKey("TEMPLATE_DETAILS_MISSING").description("Template details is missing"));
 	    }
-	    outboxMessage.setTemplateId(message.getTemplate().id);
-	    outboxMessage.setTemplate(message.getTemplate().code);
-	    outboxMessage.setLang(message.getTemplate().lang);
-	    outboxMessage.setModelData(message.getTemplate().data);
+	    outboxMessage.setHsm(message.getTemplate());
+	    outboxMessage.setModelData(message.getTemplate().data());
 	}
 
 	if ("document".equalsIgnoreCase(message.getType())) {
@@ -119,8 +117,11 @@ public class MessageService {
 	if (ArgUtil.is(chatSessionDoc)) {
 	    chatService.initSession(outboxMessage, chatSessionDoc);
 	    chatService.send(chatSessionDoc, outboxMessage);
+	} else {
+	    ApiResponseUtil.throwInputException(
+		    new ApiFieldError().field("to").obzect("OutBoundMsg").codeKey("INSUFFICIENT_CONTACT_DETAILS")
+			    .description("Session Cannot be initialized for given contact"));
 	}
-
 	String messageId = outboxMessage.getMessageId();
 	return new OutBoundReciept().id(messageId);
     }

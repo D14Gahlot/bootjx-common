@@ -3,6 +3,8 @@ package com.boot.jx.stomp;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -21,6 +23,8 @@ import com.boot.utils.ArgUtil;
 @ConditionalOnProperty("app.stomp")
 public class StompController {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(StompTunnelSessionManager.class);
+
     @Autowired
     StompTunnelSessionManager stompTunnelSessionManager;
 
@@ -34,6 +38,11 @@ public class StompController {
 	String httpsSessionId = ArgUtil
 		.parseAsString(headerAccessor.getSessionAttributes().get(AppConstants.SESSION_ID_XKEY));
 
+	if (!ArgUtil.is(httpsSessionId)) {
+	    LOGGER.warn("httpsSessionId is Empty");
+	    return map;
+	}
+
 	StompSession stompSession = stompTunnelSessionManager.getStompSessionByHttpSessionId(httpsSessionId);
 
 	if (ArgUtil.is(stompSession)) {
@@ -43,11 +52,14 @@ public class StompController {
 	    if (ArgUtil.is(stompSession.getTenantToken())) {
 		map.put("x-tenant-token", stompSession.getTenantToken());
 	    }
+	} else {
+	    LOGGER.warn("stompSession is Empty");
 	}
 
 	map.put(AppConstants.SESSION_UID_XKEY, stompTunnelSessionManager.createSessionMapping(
 		headerAccessor.getSessionId(), httpsSessionId,
 		ArgUtil.parseAsString(headerAccessor.getSessionAttributes().get(AppConstants.SESSION_UID_XKEY))));
+
 	return map;
     }
 

@@ -1,11 +1,9 @@
 package com.boot.jx.admin.api;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -17,7 +15,6 @@ import com.boot.jx.api.ApiResponse;
 import com.boot.jx.aws.AWSFileStore;
 import com.boot.jx.logger.AuditDetailProvider;
 import com.boot.jx.mongo.CommonMongoTemplate;
-import com.boot.jx.postman.doc.HSMTemplate;
 import com.boot.jx.postman.doc.QuickAction;
 import com.boot.jx.postman.doc.QuickLabel;
 import com.boot.jx.postman.doc.QuickMedia;
@@ -81,7 +78,7 @@ public class TmplQuickController {
 	newVersion.setTitle(title);
 	newVersion.setTemplate(template);
 
-	auditDetailProvider.audit(newVersion);
+	auditDetailProvider.auditCreate(newVersion);
 	mongoTemplate.save(newVersion);
 	return ApiResponse.buildResults(mongoTemplate.findAll(QuickReply.class)).data(newVersion)
 		.message("QuickReply created");
@@ -117,7 +114,7 @@ public class TmplQuickController {
 	newVersion.setCategory(category);
 	newVersion.setTitle(title);
 	newVersion.setAction(code);
-	auditDetailProvider.audit(newVersion);
+	auditDetailProvider.auditCreate(newVersion);
 	mongoTemplate.save(newVersion);
 	return ApiResponse.buildResults(mongoTemplate.findAll(QuickAction.class)).data(newVersion)
 		.message("QuickAction created");
@@ -151,7 +148,7 @@ public class TmplQuickController {
 	newVersion.setCategory(category);
 	newVersion.setTitle(title);
 	newVersion.setCode(code);
-	auditDetailProvider.audit(newVersion);
+	auditDetailProvider.auditCreate(newVersion);
 	mongoTemplate.save(newVersion);
 	return ApiResponse.buildResults(mongoTemplate.findAll(QuickLabel.class)).data(newVersion)
 		.message("QuickLabel created");
@@ -175,7 +172,7 @@ public class TmplQuickController {
     AWSFileStore fileStore;
 
     @RequestMapping(value = "/api/tmpl/quickmedia", method = { RequestMethod.POST })
-    public ApiResponse<QuickMedia, Object> createQuickMedia(@RequestParam(required = false) String name,
+    public ApiResponse<QuickMedia, Object> createQuickMedia(@RequestParam(required = false) String id,
 	    @RequestParam String category, @RequestParam String title, @RequestParam(required = false) String url,
 	    @RequestParam(name = "file", required = false) MultipartFile file) {
 
@@ -188,11 +185,11 @@ public class TmplQuickController {
 	    throw new IllegalStateException("Cannot upload empty file");
 	}
 	QuickMedia newVersion = new QuickMedia();
-	if (ArgUtil.is(name)) {
-	    QuickMedia oldVersion = mongoTemplate.findById(name, QuickMedia.class);
+	if (ArgUtil.is(id)) {
+	    QuickMedia oldVersion = mongoTemplate.findById(id, QuickMedia.class);
 	    if (ArgUtil.is(oldVersion)) {
 		newVersion.oldVersion(oldVersion);
-		newVersion.setName(name);
+		newVersion.setId(id);
 	    }
 	}
 
@@ -201,61 +198,11 @@ public class TmplQuickController {
 	newVersion.setCategory(category);
 	newVersion.setUrl(url);
 
-	auditDetailProvider.audit(newVersion);
+	auditDetailProvider.auditCreate(newVersion);
 	mongoTemplate.save(newVersion);
 
 	return ApiResponse.buildResults(mongoTemplate.findAll(QuickMedia.class)).data(newVersion)
 		.message("Quick Media created");
-    }
-
-    // HSMTemplate
-    @RequestMapping(value = "/api/tmpl/pushtemplate", method = { RequestMethod.GET })
-    public ApiResponse<HSMTemplate, Object> listPushTemplates() {
-	return ApiResponse.buildResults(mongoTemplate.findAll(HSMTemplate.class));
-    }
-
-    @RequestMapping(value = "/api/tmpl/pushtemplate", method = { RequestMethod.DELETE })
-    public ApiResponse<HSMTemplate, Object> deletePushTemplates(@RequestParam String id) {
-	HSMTemplate qr = mongoTemplate.findById(id, HSMTemplate.class);
-	mongoTemplate.trash(qr);
-	return ApiResponse.buildResults(mongoTemplate.findAll(HSMTemplate.class)).data(qr)
-		.message("PushTemplate deleted");
-    }
-
-    @RequestMapping(value = "/api/tmpl/pushtemplate", method = { RequestMethod.POST })
-    public ApiResponse<HSMTemplate, Object> createPushTemplates(@RequestBody HSMTemplate hsmTemplateRequest) {
-
-	HSMTemplate newVersion = new HSMTemplate();
-	if (ArgUtil.is(hsmTemplateRequest.getId())) {
-	    HSMTemplate oldVersion = mongoTemplate.findById(hsmTemplateRequest.getId(), HSMTemplate.class);
-	    if (ArgUtil.is(oldVersion)) {
-		newVersion.oldVersion(oldVersion);
-		newVersion.setId(hsmTemplateRequest.getId());
-	    }
-	}
-	// newVersion.setId(null);
-	newVersion.setCategory(hsmTemplateRequest.getCategory());
-	newVersion.setTitle(hsmTemplateRequest.getTitle());
-	newVersion.setDesc(hsmTemplateRequest.getDesc());
-
-	newVersion.setCode(hsmTemplateRequest.getCode());
-	newVersion.setContactType(hsmTemplateRequest.getContactType());
-	newVersion.setLang(hsmTemplateRequest.getLang());
-	newVersion.setName(hsmTemplateRequest.getName());
-
-	newVersion.setTemplate(hsmTemplateRequest.getTemplate());
-
-	newVersion.meta().putAll(hsmTemplateRequest.meta());
-	newVersion.options().putAll(hsmTemplateRequest.options());
-
-	newVersion.setData(hsmTemplateRequest.getData());
-	newVersion.setOldVersions(new ArrayList<HSMTemplate>());
-
-	auditDetailProvider.audit(newVersion);
-	mongoTemplate.save(newVersion);
-
-	return ApiResponse.buildResults(mongoTemplate.findAll(HSMTemplate.class)).data(newVersion)
-		.message("QuickReply created");
     }
 
     /** for adding quick Tag category e.g flight,train ,etc */
@@ -288,7 +235,7 @@ public class TmplQuickController {
 	newVersion.setCategory(category);
 	newVersion.setTitle(title);
 	newVersion.setCode(code);
-	auditDetailProvider.audit(newVersion);
+	auditDetailProvider.auditCreate(newVersion);
 	mongoTemplate.save(newVersion);
 	return ApiResponse.buildResults(mongoTemplate.findAll(QuickTag.class)).data(newVersion)
 		.message("QuickTag created");

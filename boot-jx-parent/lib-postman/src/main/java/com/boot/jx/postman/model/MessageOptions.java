@@ -36,10 +36,6 @@ public interface MessageOptions {
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static interface WAMessageOptions extends MessageOptions {
-	@JsonIgnore
-	default public boolean isHSM() {
-	    return ArgUtil.parseAsBoolean(this.options().get("isHSM"), false);
-	}
 
 	@JsonIgnore
 	default public String getMsgType() {

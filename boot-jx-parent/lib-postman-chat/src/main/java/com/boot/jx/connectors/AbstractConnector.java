@@ -3,11 +3,11 @@ package com.boot.jx.connectors;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.core.query.Criteria;
 
 import com.boot.jx.chat.ConnectorHandlerFactory;
 import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorHandler;
 import com.boot.jx.dict.ContactType;
-import com.boot.jx.dict.FileType;
 import com.boot.jx.mongo.CommonMongoQueryBuilder;
 import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.jx.postman.PMClientConfig;
@@ -15,15 +15,17 @@ import com.boot.jx.postman.PMConstants.MESSAGE_SEND_TYPE;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PMEnvironment.AChannelDetails;
 import com.boot.jx.postman.client.TmplClient;
+import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.HSMTemplate3rdParty;
-import com.boot.jx.postman.doc.QuickMedia;
-import com.boot.jx.postman.model.Attachment;
+import com.boot.jx.postman.model.Message;
 import com.boot.jx.postman.model.MessageDefinitions.IMessage;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.postman.plugin.ChannelPluginProvider.ChannelPlugin;
+import com.boot.jx.postman.service.ChatDTOUtil;
 import com.boot.jx.postman.store.MessageContext;
 import com.boot.jx.utils.PostManUtil;
+import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
 
 public abstract class AbstractConnector<CD extends AChannelDetails, P extends ChannelPlugin<CD>>
@@ -50,20 +52,25 @@ public abstract class AbstractConnector<CD extends AChannelDetails, P extends Ch
     @Autowired
     protected TmplClient tmplClient;
 
-    @Override
-    public void registerWebHook(ChannelConfig channelConfig) {
-	String webhookUrl = pmClientConfig.getWebhookUrl(channelConfig);
-	registerWebHook(channelConfig, webhookUrl);
+    public void registerWebhook(ChannelConfig channelConfig, String webhookUrl) {
+	ConnectorHandlerFactory.LOGGER.error("WEBHOOK REGISTRATION NOT DEFINED for URL");
     }
 
-    public void registerWebHook(ChannelConfig channelConfig, String webhookUrl) {
-	ConnectorHandlerFactory.LOGGER.error("WEBHOOK REGISTRATION NOT DEFINED for URL");
+    public void registerWebhook(ChannelConfig channelConfig) {
+	String webhookUrl = pmClientConfig.getWebhookUrl(channelConfig);
+	this.registerWebhook(channelConfig, webhookUrl);
+    }
+
+    @Override
+    public void onChannelUpdate(ChannelConfig channelConfig) {
+	// Register Webhook URL
+	this.registerWebhook(channelConfig);
     }
 
     @Override
     public ChannelConfig getChannelConfig(IMessage iMessage) {
 	String channelId = PostManUtil.CHANNEL_ID(iMessage.contact());
-	ChannelConfig channelConfig = environment.config().channels(channelId);
+	ChannelConfig channelConfig = environment.config().channel(channelId);
 	if (!ArgUtil.is(channelConfig) && !ContactType.WEBSITE.equals(iMessage.contact().type())) {
 	    ConnectorHandlerFactory.LOGGER.error(String.format("ChannelConfig not found for %s", channelId));
 	}
@@ -71,42 +78,65 @@ public abstract class AbstractConnector<CD extends AChannelDetails, P extends Ch
     }
 
     @Override
-    public OutboxMessage template(ChannelConfig channelConfig, OutboxMessage outboxMessage) {
-	if (ArgUtil.is(outboxMessage.getTemplate())) {
-	    QuickMedia templateReply = commonMongoTemplate.findById(outboxMessage.getTemplate(), QuickMedia.class);
-	    if (ArgUtil.is(templateReply)) {
-		if ("image".equalsIgnoreCase(templateReply.getType())) {
-		    outboxMessage.attachment(new Attachment().mediaURL(templateReply.getUrl())
-			    .mediaType(FileType.IMAGE.toString()).mediaCaption(templateReply.getTitle()));
-		    return outboxMessage;
-		}
-	    } else {
-		process(channelConfig, outboxMessage);
-		return outboxMessage;
-	    }
-	} else if (ArgUtil.is(outboxMessage.getTemplateId())) {
+    public ChatContactDoc getChatContact(IMessage iMessage) {
+	return messageContext.getChatContactDoc();
+    }
+
+    @Override
+    public OutboxMessage template(ChannelConfig channelConfig, ChatContactDoc chatContactDoc,
+	    OutboxMessage outboxMessage) {
+//	if (ArgUtil.is(outboxMessage.getMedia())) {
+//	    QuickMedia templateReply = commonMongoTemplate.findById(outboxMessage.getTemplate().getMedia(),
+//		    QuickMedia.class);
+//	    if (ArgUtil.is(templateReply)) {
+//		if ("image".equalsIgnoreCase(templateReply.getType())) {
+//		    outboxMessage.attachment(new Attachment().mediaURL(templateReply.getUrl())
+//			    .mediaType(FileType.IMAGE.toString()).mediaCaption(templateReply.getTitle()));
+//		    return outboxMessage;
+//		}
+//	    } else {
+//		process(channelConfig, outboxMessage);
+//		return outboxMessage;
+//	    }
+//	} else
+//	    
+
+	if (ArgUtil.is(outboxMessage.templateId()) || ArgUtil.is(outboxMessage.templateCode())) {
 	    // outboxMessage.setMessage(tmplClient.process(hsmTemplate.getTemplate(),
 	    // outboxMessage.getModel()));
-	    process(channelConfig, outboxMessage);
+	    process(channelConfig, chatContactDoc, outboxMessage);
 	    return outboxMessage;
 	} else {
 	    return outboxMessage;
 	}
-	return outboxMessage;
     }
 
-    private OutboxMessage process(ChannelConfig channelConfig, OutboxMessage outboxMessage) {
+    private OutboxMessage process(ChannelConfig channelConfig, ChatContactDoc chatContactDoc,
+	    OutboxMessage outboxMessage) {
+
+	outboxMessage.model().put("contact", ChatDTOUtil.getContactMeta(chatContactDoc));
+	outboxMessage.model().put("global", environment.local().globalVars().toObject());
+
+	// Model Data Merge
+	MapModel model = MapModel.from(outboxMessage.getModel());
+	MapModel data = MapModel.createInstance();
+	data.putAll(model.keyEntry(Message.DATA_KEY).asMap());
+	data.putAll(outboxMessage.hsm().data());
+	model.put(Message.DATA_KEY, data.toMap());
+	outboxMessage.setModel(model.toMap());
+
 	tmplClient.process(outboxMessage);
-	if (ArgUtil.is(outboxMessage.getTemplateId())) {
+	if (ArgUtil.is(outboxMessage.templateId())) {
 	    if (MESSAGE_SEND_TYPE.PUSH_MESSAGE.equals(outboxMessage.messageMetaWrapper().sendType())
 		    && channelConfig.isPushAllowed() && channelConfig.isPushOnlyApproved()) {
 		List<HSMTemplate3rdParty> temps = commonMongoTemplate.find(CommonMongoQueryBuilder
-			.collection(HSMTemplate3rdParty.class).where("hsmTemplateId", outboxMessage.getTemplateId()));
+			.collection(HSMTemplate3rdParty.class).with(Criteria.where("hsmTemplateId")
+				.is(outboxMessage.templateId()).and("channelId").is(channelConfig.getChannelId())));
 		if (ArgUtil.is(temps)) {
 		    HSMTemplate3rdParty resolvedTemplate = null;
 		    if (temps.size() > 1) {
 			for (HSMTemplate3rdParty hsmTemplate3rdParty : temps) {
-			    if (ArgUtil.areEqual(hsmTemplate3rdParty.getLang(), outboxMessage.getLang())) {
+			    if (ArgUtil.areEqual(hsmTemplate3rdParty.getLang(), outboxMessage.hsm().getLang())) {
 				resolvedTemplate = hsmTemplate3rdParty;
 				break;
 			    } else if (ArgUtil.is(hsmTemplate3rdParty.getLang())) {
@@ -123,4 +153,10 @@ public abstract class AbstractConnector<CD extends AChannelDetails, P extends Ch
 	}
 	return outboxMessage;
     }
+
+    @Override
+    public boolean optin(ChannelConfig channelConfig, ChatContactDoc chatContactDoc) {
+	return ArgUtil.is(chatContactDoc.getCsid());
+    }
+
 }

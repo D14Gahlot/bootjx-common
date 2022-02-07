@@ -7,16 +7,19 @@ import java.util.List;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.TypeAlias;
 import org.springframework.data.annotation.Version;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import com.boot.jx.mongo.CommonDocInterfaces.APatchableIndexed;
+import com.boot.jx.mongo.CommonDocInterfaces.TimeStampIndex.UpdatedTimeStampDoc;
+import com.boot.jx.mongo.CommonDocInterfaces.TimeStampIndex.UpdatedTimeStampIndexSupport;
+import com.boot.jx.postman.model.MessageDefinitions.Contactable;
 import com.boot.jx.swagger.ApiMockModelProperty;
 import com.boot.utils.ArgUtil;
 
 @Document(collection = "CHAT_SESSION")
 @TypeAlias("ChatSessionDoc")
-public class ChatSessionDoc extends APatchableIndexed<ChatSessionDoc, String> implements Serializable {
+public class ChatSessionDoc extends UpdatedTimeStampDoc implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -26,46 +29,72 @@ public class ChatSessionDoc extends APatchableIndexed<ChatSessionDoc, String> im
     @Version
     private Long version;
 
-    @ApiMockModelProperty(example = "wa919930104050", required = false)
+    @ApiMockModelProperty(example = "wa919930104050_918828218374", required = false,
+	    value = "format like {{ContactType.getShortCode}}{{csid}}_{{lane}}")
+    @Indexed
     private String contactId;
+
+    @Deprecated
     private String contactType;
+    @Deprecated
     private String channel;
+    @Deprecated
     private String lane;
 
+    @Deprecated
     private String contactName;
+
+    private ContactDetailDoc contact;
 
     private String assignedToDept;
     private String assignedToAgent;
+    private String assignedToQueue;
 
     private boolean active;
     private boolean initd;
     private boolean resolved;
     private boolean expired;
+    @Indexed
+    private boolean primary;
 
     private long startSessionStamp;
     private long fistResponseStamp;
 
+    @Indexed
     private long agentSessionStamp;
 
+    private long firstInComingStamp;
+    private long firstOutGoingStamp;
+
+    @Indexed
     private long lastInComingStamp;
+    @Indexed
     private long lastOutGoingStamp;
 
     private long assignedDeptStamp;
+    @Indexed
     private long assignedAgentStamp;
 
     private long lastResponseStamp;
     private long resolveSessionStamp;
     private long closeSessionStamp;
 
+    /**
+     * @deprecated Use {@link UpdatedTimeStampIndexSupport#getUpdated()}
+     */
+    @Deprecated
     private long updatedStamp;
 
     private Integer agentScore;
     private Integer botScore;
 
+    @Indexed
     private String mode;
     private String status;
     @Deprecated
     private String tagCategory;
+
+    @Indexed
     private List<String> tagId;
 
     // MessageStats
@@ -244,43 +273,43 @@ public class ChatSessionDoc extends APatchableIndexed<ChatSessionDoc, String> im
 	this.resolved = resolved;
     }
 
+    @Deprecated
     public String getContactType() {
+	if (!ArgUtil.is(contactType)) {
+	    return this.contact().getContactType();
+	}
 	return contactType;
     }
 
+    @Deprecated
     public void setContactType(String contactType) {
 	this.contactType = contactType;
     }
 
+    @Deprecated
     public String getChannel() {
+	if (!ArgUtil.is(channel)) {
+	    return this.contact().getChannelType();
+	}
 	return channel;
     }
 
+    @Deprecated
     public void setChannel(String channel) {
 	this.channel = channel;
     }
 
+    @Deprecated
     public String getLane() {
+	if (!ArgUtil.is(lane)) {
+	    return this.contact().getLane();
+	}
 	return lane;
     }
 
+    @Deprecated
     public void setLane(String lane) {
 	this.lane = lane;
-    }
-
-    @Override
-    public ChatSessionDoc newInstance() {
-	return new ChatSessionDoc();
-    }
-
-    @Override
-    public void id(String id) {
-	this.sessionId = id;
-    }
-
-    @Override
-    public String id() {
-	return this.sessionId;
     }
 
     public boolean isExpired() {
@@ -360,10 +389,19 @@ public class ChatSessionDoc extends APatchableIndexed<ChatSessionDoc, String> im
 	this.lastMsg = lastMsg;
     }
 
+    /**
+     * @deprecated Use {@link UpdatedTimeStampSupport#getUpdated())}
+     */
+    @Deprecated
     public long getUpdatedStamp() {
 	return updatedStamp;
     }
 
+    /**
+     * @deprecated Use
+     *             {@link UpdatedTimeStampIndexSupport#setUpdated(com.boot.jx.mongo.CommonDocInterfaces.TimeStampIndex)}
+     */
+    @Deprecated
     public void setUpdatedStamp(long updatedStamp) {
 	this.updatedStamp = updatedStamp;
     }
@@ -389,4 +427,52 @@ public class ChatSessionDoc extends APatchableIndexed<ChatSessionDoc, String> im
 	    this.tagId = new ArrayList<String>();
 	return tagId;
     }
+
+    public long getFirstInComingStamp() {
+	return firstInComingStamp;
+    }
+
+    public void setFirstInComingStamp(long firstInComingStamp) {
+	this.firstInComingStamp = firstInComingStamp;
+    }
+
+    public long getFirstOutGoingStamp() {
+	return firstOutGoingStamp;
+    }
+
+    public void setFirstOutGoingStamp(long firstOutGoingStamp) {
+	this.firstOutGoingStamp = firstOutGoingStamp;
+    }
+
+    public boolean isPrimary() {
+	return primary;
+    }
+
+    public void setPrimary(boolean primary) {
+	this.primary = primary;
+    }
+
+    public ContactDetailDoc getContact() {
+	return contact;
+    }
+
+    public void setContact(ContactDetailDoc contact) {
+	this.contact = contact;
+    }
+
+    public Contactable contact() {
+	if (this.contact == null) {
+	    this.contact = new ContactDetailDoc();
+	}
+	return this.contact;
+    }
+
+    public String getAssignedToQueue() {
+	return assignedToQueue;
+    }
+
+    public void setAssignedToQueue(String assignedToQueue) {
+	this.assignedToQueue = assignedToQueue;
+    }
+
 }
