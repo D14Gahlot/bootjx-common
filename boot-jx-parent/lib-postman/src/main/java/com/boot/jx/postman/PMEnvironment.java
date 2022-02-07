@@ -325,6 +325,14 @@ public class PMEnvironment {
 	public String getBotUrl();
 
 	public String getAgentUrl();
+
+	public boolean isValidDomain();
+
+	public boolean isDefaultDomain();
+
+	public String mainDomainRedirect();
+
+	public String mainDomainRedirect(String path);
     }
 
     public interface PMDomainConfig {

@@ -20,6 +20,8 @@ import com.boot.jx.logger.LoggerService;
 import com.boot.jx.postman.PMClientConfig;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PMEnvironment.PMCommonConfig;
+import com.boot.jx.scope.tnt.Tenants;
+import com.boot.jx.scope.tnt.Tenants.TenantResolver;
 import com.boot.model.SafeKeyHashMap;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.JsonUtil;
@@ -37,6 +39,9 @@ public class PMCommonConfigImpl implements PMCommonConfig {
 
     @Autowired
     private CommonHttpRequest commonHttpRequest;
+
+    @Autowired
+    private TenantResolver tenantResolver;
 
     @Autowired
     private AppConfig appConfig;
@@ -167,6 +172,29 @@ public class PMCommonConfigImpl implements PMCommonConfig {
     @Override
     public String getAgentUrl() {
 	return agentUrl;
+    }
+
+    @Override
+    public boolean isValidDomain() {
+	return tenantResolver.isValid();
+    }
+
+    @Override
+    public boolean isDefaultDomain() {
+	return Tenants.isDefault(AppContextUtil.getTenant());
+    }
+
+    @Override
+    public String mainDomainRedirect() {
+	return "redirect:" + String.format("https://app.%s%s",
+		pmEnvironment.keyEntry("mry.prop.service.domain").asString(), commonHttpRequest.getRequestURI());
+    }
+
+    @Override
+    public String mainDomainRedirect(String path) {
+	return "redirect:" + String.format("https://app.%s/%s/auth/direct",
+		pmEnvironment.keyEntry("mry.prop.service.domain").asString(), commonHttpRequest.getRequestURI());
+
     }
 
 }

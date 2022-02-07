@@ -37,6 +37,7 @@ import com.boot.jx.common.dto.UserLoginToken;
 import com.boot.jx.common.service.EmpAuthService;
 import com.boot.jx.http.CommonHttpRequest;
 import com.boot.jx.postman.PMEnvironment;
+import com.boot.jx.postman.PMEnvironment.PMCommonConfig;
 import com.boot.jx.scope.tnt.Tenants;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
@@ -65,14 +66,16 @@ public class PartnerController {
     private PMEnvironment env;
 
     @Autowired
+    private PMCommonConfig pmCommonConfig;
+
+    @Autowired
     private EmpAuthService empAuthService;
 
     @RequestMapping(value = { "", "/", "/**", "/auth/**", "/app/**" }, method = { RequestMethod.GET })
     public String home(Model model, @RequestParam(required = false) String theme) {
 	String tnt = AppContextUtil.getTenant();
-	if (!tnt.equals("app")) {
-	    return "redirect:" + String.format("https://app.%s%s", env.keyEntry("mry.prop.service.domain").asString(),
-		    commonHttpRequest.getRequestURI());
+	if (!Tenants.isDefault(tnt)) {
+	    return pmCommonConfig.mainDomainRedirect();
 	}
 
 	model.addAllAttributes(appCommonConfig.appAttributes());
@@ -96,9 +99,9 @@ public class PartnerController {
     public String gotopanel(Model model, @PathVariable String domain, @PathVariable String panel)
 	    throws NoSuchAlgorithmException {
 	String tnt = AppContextUtil.getTenant();
-	if (!tnt.equals("app")) {
-	    return "redirect:" + String.format("https://app.%s/%s/auth/direct",
-		    env.keyEntry("mry.prop.service.domain").asString(), commonHttpRequest.getRequestURI());
+
+	if (!Tenants.isDefault(tnt)) {
+	    return pmCommonConfig.mainDomainRedirect(commonHttpRequest.getRequestURI() + "/auth/direct");
 	}
 
 	model.addAllAttributes(appCommonConfig.appAttributes());
