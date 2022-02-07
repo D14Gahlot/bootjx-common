@@ -75,6 +75,8 @@ public class TenantClientResolver extends TenantResolver {
 		tntMapping.put(tnt, NODOMAIN);
 		return tnt;
 	    }
+	} else {
+	    tntMapping.put(tnt, tnt);
 	}
 	return tnt;
     }
