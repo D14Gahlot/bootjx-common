@@ -73,7 +73,7 @@ public class TenantClientResolver extends TenantResolver {
 	    } catch (Exception e) {
 		e.printStackTrace();
 		tntMapping.put(tnt, NODOMAIN);
-		return NODOMAIN;
+		return tnt;
 	    }
 	}
 	return tnt;

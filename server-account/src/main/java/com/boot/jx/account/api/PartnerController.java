@@ -100,6 +100,7 @@ public class PartnerController {
 	    throws NoSuchAlgorithmException {
 	String tnt = AppContextUtil.getTenant();
 
+	
 	if (!Tenants.isDefault(tnt)) {
 	    return pmCommonConfig.mainDomainRedirect(commonHttpRequest.getRequestURI() + "/auth/direct");
 	}
