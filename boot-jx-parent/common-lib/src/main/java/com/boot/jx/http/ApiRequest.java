@@ -45,4 +45,6 @@ public @interface ApiRequest {
      */
     boolean initFlow() default false;
 
+    boolean session() default false;
+
 }

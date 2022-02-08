@@ -17,8 +17,31 @@ public class PostmanSecurityConfig {
 
 	@Override
 	protected void configure(HttpSecurity httpSecurity) throws Exception {
-	    httpSecurity.antMatcher("/ext/plugin/**").sessionManagement()
-		    .sessionCreationPolicy(SessionCreationPolicy.ALWAYS)
+	    httpSecurity.antMatcher("/ext/plugin/**")
+		    // .addFilterBefore(new SameSiteFilter(),
+		    // UsernamePasswordAuthenticationFilter.class)
+		    // filter that adds Same-Site cookie attribute (must be added in right place )
+		    .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.ALWAYS)
+		    // Permit all
+		    .and().authorizeRequests().antMatchers("/**").permitAll()
+		    // CSRF
+		    .and().csrf().disable().headers().disable();
+	}
+
+    }
+
+    @Configuration
+    @EnableWebSecurity
+    @Order(95)
+    public static class StatelessWebSecurityConfigurerAdapterForStomp extends WebSecurityConfigurerAdapter {
+
+	@Override
+	protected void configure(HttpSecurity httpSecurity) throws Exception {
+	    httpSecurity.antMatcher("/stomp-tunnel/**")
+		    // .addFilterBefore(new SameSiteFilter(),
+		    // UsernamePasswordAuthenticationFilter.class)
+		    // filter that adds Same-Site cookie attribute (must be added in right place )
+		    .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.ALWAYS)
 		    // Permit all
 		    .and().authorizeRequests().antMatchers("/**").permitAll()
 		    // CSRF
@@ -37,7 +60,8 @@ public class PostmanSecurityConfig {
 		    // Permit all
 		    .and().authorizeRequests().antMatchers("/**").permitAll()
 		    // CSRF
-		    .and().csrf().disable().headers().disable();;
+		    .and().csrf().disable().headers().disable();
+	    ;
 	}
 
 	@Override

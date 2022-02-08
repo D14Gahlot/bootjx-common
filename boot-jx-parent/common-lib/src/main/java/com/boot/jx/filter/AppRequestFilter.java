@@ -1,6 +1,7 @@
 package com.boot.jx.filter;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -20,6 +21,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
@@ -295,7 +297,7 @@ public class AppRequestFilter implements Filter {
 		setFlow(req, apiRequest);
 		String flowFix = AppContextUtil.getFlowfix();
 
-		HttpSession session = req.getSession(appConfig.isAppSessionEnabled());
+		HttpSession session = req.getSession(apiRequest.isSession() || appConfig.isAppSessionEnabled());
 		if (ArgUtil.isEmpty(sessionId)) {
 		    if (ArgUtil.isEmpty(fp)) {
 			fp = localCommonHttpRequest.getRequestParam(AppConstants.DEVICE_XID_KEY);
@@ -348,7 +350,10 @@ public class AppRequestFilter implements Filter {
 		    if (ArgUtil.is(apiRequest.getDeprecated())) {
 			ApiResponseUtil.addWarning(apiRequest.getDeprecated());
 		    }
-		    chain.doFilter(req, new AppResponseWrapper(resp));
+		    AppResponseWrapper wresp = new AppResponseWrapper(resp);
+		    addSameSiteCookieAttribute(wresp);
+		    chain.doFilter(req, wresp);
+
 		} else {
 		    resp.setStatus(HttpServletResponse.SC_FORBIDDEN);
 		    resp.setContentType(MediaType.APPLICATION_JSON_VALUE);
@@ -371,6 +376,19 @@ public class AppRequestFilter implements Filter {
 	    // Tear down MDC data:
 	    // ( Important! Cleans up the ThreadLocal data again )
 	    AppContextUtil.clear();
+	}
+    }
+
+    private void addSameSiteCookieAttribute(HttpServletResponse response) {
+	Collection<String> headers = response.getHeaders(HttpHeaders.SET_COOKIE);
+	boolean firstHeader = true;
+	for (String header : headers) { // there can be multiple Set-Cookie attributes
+	    if (firstHeader) {
+		response.setHeader(HttpHeaders.SET_COOKIE, String.format("%s; %s", header, "SameSite=None"));
+		firstHeader = false;
+		continue;
+	    }
+	    response.addHeader(HttpHeaders.SET_COOKIE, String.format("%s; %s", header, "SameSite=None"));
 	}
     }
 

@@ -45,7 +45,9 @@ public class WebSocketSessionListener {
 		if (!ArgUtil.isEmpty(sha.getSessionAttributes())) {
 			String httpSessionId = ArgUtil.parseAsString(sha.getSessionAttributes().get(AppConstants.SESSION_ID_XKEY));
 			logger.info("WS_DESTROYED http:{}, ws:{}", sha.getSessionId(), httpSessionId);
-			stompTunnelSessionManager.delinkWs2Http(httpSessionId, sha.getSessionId());
+			if(ArgUtil.is(httpSessionId)) {
+			    stompTunnelSessionManager.delinkWs2Http(httpSessionId, sha.getSessionId());
+			}
 		}
 	}
 
