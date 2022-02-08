@@ -55,7 +55,7 @@ public class DummyUserController {
     @RequestMapping(value = { "/dummy/user", "/pub/customer" }, method = RequestMethod.GET)
     public String dummyUser(@RequestParam(required = false) String number, Model model) throws InterruptedException {
 
-	model.addAttribute("LOCAL_PATH", appConfig.getAppPrefix() + "/ext");
+	model.addAttribute("LOCAL_PATH", appConfig.getAppPrefix());
 	model.addAttribute("POSTMAN_CONTEXT", appConfig.getAppPrefix());
 
 	if (pmCommonConfig != null) {

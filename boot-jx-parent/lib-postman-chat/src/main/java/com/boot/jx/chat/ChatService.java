@@ -301,7 +301,7 @@ public class ChatService {
 		    LOGGER.error("Errror While Replying To Sesion Init Message", e);
 		}
 	    } else {
-		initd = false;
+		initd = true;
 	    }
 	    messageContext.commitChatContactQuery();
 	}
