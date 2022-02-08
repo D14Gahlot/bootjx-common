@@ -93,10 +93,9 @@ public class TelegramConnector extends AbstractConnector<TelegramConfigDetails, 
 	inboxMessage.setMessageIdExt(
 		String.format("%s-%s", update.getMessage().getChatId(), update.getMessage().getMessageId()));
 
+	String text = ArgUtil.parseAsString(update.getMessage().getText(), Constants.BLANK);
 
-	String text = ArgUtil.parseAsString(update.getMessage().getText(),Constants.BLANK);
-	
-	if(text.startsWith("/start ")) {
+	if (text.startsWith("/start ")) {
 	    inboxMessage.setMessage(text.replace("/start ", ""));
 	} else {
 	    inboxMessage.setMessage(text);
@@ -135,7 +134,7 @@ public class TelegramConnector extends AbstractConnector<TelegramConfigDetails, 
     }
 
     @Override
-    public boolean initSession(ChatSessionDoc session, InboxMessage inboxMessage) {
+    public OutboxMessage initSession(ChatSessionDoc session, InboxMessage inboxMessage) {
 
 	Update update = JsonUtil.parse(inboxMessage.getOriginalMessage(), Update.class);
 
@@ -160,9 +159,9 @@ public class TelegramConnector extends AbstractConnector<TelegramConfigDetails, 
 	    ChannelConfig config = getChannelConfig(inboxMessage);
 	    telegramClient.promptShareNumber(config, inboxMessage.getFrom(),
 		    "Confirm that you would like to share your contact number and continue, by clicking on the button below");
-	    return false;
+	    return OutboxMessage.NO_MESSAGE;
 	}
-	return true;
+	return null;
     }
 
     @Override

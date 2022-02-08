@@ -25,7 +25,7 @@ public class TmplConfig {
 
     @Value("${jax.static.context}")
     String jaxStaticContext;
-
+    
     /** The tenant. */
     @TenantValue("${tenant}")
     private String tenant;

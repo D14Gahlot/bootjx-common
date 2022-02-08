@@ -37,6 +37,8 @@ import com.boot.jx.common.dto.UserLoginToken;
 import com.boot.jx.common.service.EmpAuthService;
 import com.boot.jx.http.CommonHttpRequest;
 import com.boot.jx.postman.PMEnvironment;
+import com.boot.jx.postman.PMEnvironment.PMCommonConfig;
+import com.boot.jx.scope.tnt.Tenants;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
 import com.boot.utils.CryptoUtil;
@@ -64,14 +66,16 @@ public class PartnerController {
     private PMEnvironment env;
 
     @Autowired
+    private PMCommonConfig pmCommonConfig;
+
+    @Autowired
     private EmpAuthService empAuthService;
 
     @RequestMapping(value = { "", "/", "/**", "/auth/**", "/app/**" }, method = { RequestMethod.GET })
     public String home(Model model, @RequestParam(required = false) String theme) {
 	String tnt = AppContextUtil.getTenant();
-	if (!tnt.equals("app")) {
-	    return "redirect:" + String.format("https://app.%s%s", env.keyEntry("mry.prop.service.domain").asString(),
-		    commonHttpRequest.getRequestURI());
+	if (!Tenants.isDefault(tnt)) {
+	    return pmCommonConfig.mainDomainRedirect();
 	}
 
 	model.addAllAttributes(appCommonConfig.appAttributes());
@@ -95,9 +99,10 @@ public class PartnerController {
     public String gotopanel(Model model, @PathVariable String domain, @PathVariable String panel)
 	    throws NoSuchAlgorithmException {
 	String tnt = AppContextUtil.getTenant();
-	if (!tnt.equals("app")) {
-	    return "redirect:" + String.format("https://app.%s/%s/auth/direct",
-		    env.keyEntry("mry.prop.service.domain").asString(), commonHttpRequest.getRequestURI());
+
+	
+	if (!Tenants.isDefault(tnt)) {
+	    return pmCommonConfig.mainDomainRedirect(commonHttpRequest.getRequestURI() + "/auth/direct");
 	}
 
 	model.addAllAttributes(appCommonConfig.appAttributes());
@@ -256,7 +261,18 @@ public class PartnerController {
     }
 
     @ResponseBody
-    @RequestMapping(value = { "/api/domain/check" }, method = { RequestMethod.POST })
+    @RequestMapping(value = { "/api/domain/exists", "/pub/domain/exists" }, method = { RequestMethod.GET })
+    public ApiResponse<Object, Object> sisExists(@RequestParam @Valid String domain) throws NoSuchAlgorithmException {
+	AppContextUtil.setTenant(Tenants.getDefault());
+	DomainDoc domainDoc = accountStore.findDomainByName(domain);
+	if (ArgUtil.is(domainDoc)) {
+	    return ApiResponse.buildMeta(domainDoc.getDomain());
+	}
+	return ApiResponse.buildMeta(null).statusKey("400");
+    }
+
+    @ResponseBody
+    @RequestMapping(value = { "/api/domain/check", "/pub/domain/check" }, method = { RequestMethod.POST })
     public ApiResponse<Object, Object> checkDomain(@RequestParam @Valid String domain) throws NoSuchAlgorithmException {
 
 	DomainDoc domainDoc = accountStore.findDomainByName(domain);

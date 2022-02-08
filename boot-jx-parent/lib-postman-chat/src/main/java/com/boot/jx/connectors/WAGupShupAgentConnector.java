@@ -109,8 +109,8 @@ public class WAGupShupAgentConnector extends AbstractConnector<GupShupConfigDeta
     }
 
     @Override
-    public boolean initSession(ChatSessionDoc session, InboxMessage inboxMessage) {
-	return true;
+    public OutboxMessage initSession(ChatSessionDoc session, InboxMessage inboxMessage) {
+	return null;
     }
 
     public InboxMessage toInboxMessage(GupShupInboundV2 inboundV2) {

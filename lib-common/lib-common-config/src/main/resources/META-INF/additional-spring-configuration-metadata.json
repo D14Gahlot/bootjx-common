@@ -1,5 +1,10 @@
 {"properties": [
   {
+    "name": "mry.account.url",
+    "type": "java.lang.String",
+    "description": "A description for 'mry.account.url'"
+  },
+  {
     "name": "mry.bot.url",
     "type": "java.lang.String",
     "description": "A description for 'mry.bot.url'"

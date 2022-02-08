@@ -4,6 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -93,9 +96,10 @@ public class InBoundControllerWeb {
     @Value("${app.stomp}")
     boolean stompEnabled;
 
+    @ApiRequest(session = true)
     @RequestMapping(value = "/plugin/customer/**", method = RequestMethod.GET)
     public String pluginCustomer(Model model, @RequestParam(required = false) String contacyType,
-	    @RequestParam(required = false, defaultValue = "/plugin/customer") String path)
+	    @RequestParam(required = false, defaultValue = "/plugin/customer") String path, HttpServletRequest request)
 	    throws InterruptedException {
 	commonHttpRequest.setCookie("contactType", ArgUtil.parseAsString(contacyType, ContactType.WEBSITE.toString()));
 	model.addAttribute("APP_CONTEXT", appConfig.getAppPrefix());
@@ -111,19 +115,18 @@ public class InBoundControllerWeb {
 	String nounce = UniqueID.generateString62();
 	model.addAttribute("NOUNCE", nounce);
 	commonHttpRequest.setCookie("NOUNCE", nounce);
-
 	model.addAttribute("STOMP_ENABLED", stompEnabled);
-
 	return "app-customer";
     }
 
+    @ApiRequest(session = true)
     @RequestMapping(value = "/ext/plugin/customer/**", method = RequestMethod.GET)
-    public String pluginCustomerPub(Model model, @RequestParam(required = false) String contacyType)
-	    throws InterruptedException {
-	return pluginCustomer(model, contacyType, "/ext/plugin/customer");
+    public String pluginCustomerPub(Model model, @RequestParam(required = false) String contacyType,
+	    HttpServletRequest request) throws InterruptedException {
+	return pluginCustomer(model, contacyType, "/ext/plugin/customer", request);
     }
 
-    @ApiRequest(type = RequestType.POLL)
+    @ApiRequest(type = RequestType.POLL,session = true)
     @ResponseBody
     @RequestMapping(value = { "/ext/outbound/web/callback", "/ext/plugin/outbound/web/callback" },
 	    method = RequestMethod.GET)
@@ -135,6 +138,7 @@ public class InBoundControllerWeb {
 		.pollUnreadMessage(AppContextUtil.getTenant() + "/" + PostManUtil.CONTACT_ID(channelConfig, csid));
     }
 
+    @ApiRequest(session = true)
     @ResponseBody
     @RequestMapping(value = "/ext/plugin/outbound/web/auth/v2", method = RequestMethod.GET)
     public ApiResponse<ChatMessageDTO, Object> onAuthV2(@RequestParam(required = false) String user,
@@ -144,6 +148,8 @@ public class InBoundControllerWeb {
 	String webSessionId = commonHttpRequest.get(WEB_SESSION_ID);
 	csid = ArgUtil.nonEmpty(csid, number);
 	ChannelConfig channelConfig = pmEnvironment.config().channel(channelId);
+	String contactId = PostManUtil.CONTACT_ID(channelConfig, csid);
+	String contactIdWeb = AppContextUtil.getTenant() + "/" + contactId;
 
 	ChatSessionDoc session = null;
 	if (ArgUtil.is(webSessionId)) {
@@ -160,11 +166,12 @@ public class InBoundControllerWeb {
 	    }
 	}
 	if (ArgUtil.is(channelConfig)) {
-	    stompTunnelSessionManager.registerUser(user, PostManUtil.CONTACT_ID(channelConfig, csid), csid);
+	    stompTunnelSessionManager.registerUser(ArgUtil.nonEmpty(user, csid), contactIdWeb, csid);
 	}
 	return ApiResponse.buildResults(msgs);
     }
 
+    @ApiRequest(session = true)
     @ResponseBody
     @RequestMapping(value = "/ext/plugin/inbound/v2/web/callback/{nounce}/{channelId}/{channelKey}",
 	    method = { RequestMethod.POST })

@@ -73,6 +73,10 @@ public class Tenants {
 	    return tnt;
 	}
 
+	public boolean isValid() {
+	    return true;
+	}
+
     }
 
     public static Map<String, Tenant> strMapping = new HashMap<String, Tenant>();

@@ -88,7 +88,7 @@ public class ChatSessionFactory {
 
 	// CONTACT CREATION
 	if (ArgUtil.isEmpty(chatContactDoc)) {
-	    System.out.println("CONTACT CREATION");
+	    //System.out.println("CONTACT CREATION");
 	    ChatContactQuery chatContactQuery = new ChatContactQuery(contact.getContactId());
 	    chatContactQuery.update(contact);
 	    chatContactQuery.updateCreatedStamp();
@@ -106,7 +106,7 @@ public class ChatSessionFactory {
 	sessionStore.closeAllPreviousSessions(contact.getContactId());
 
 	// SESSION CREATION
-	System.out.println("SESSION CREATION");
+	//System.out.println("SESSION CREATION");
 	chatSessionDoc = new ChatSessionDoc();
 	chatSessionDoc.setContactId(contact.getContactId());
 	chatSessionDoc.setContactType(sessionMessage.contact().getContactType());

@@ -84,11 +84,8 @@ public class WebConnector extends DefaultConnector<WebConfigDetails, WebPlugin> 
     @Override
     public void onSend(ChannelConfig channelConfig, ChatContactDoc chatContactDoc, OutboxMessage outboxMessage) {
 	String contactId = outboxMessage.contact().getContactId();
-
 	template(channelConfig, chatContactDoc, outboxMessage);
-
 	String contactIdWeb = AppContextUtil.getTenant() + "/" + contactId;
-
 	if (redisson == null) {
 	    try {
 		messageQueue.enqueue(outboxMessage);
@@ -138,7 +135,7 @@ public class WebConnector extends DefaultConnector<WebConfigDetails, WebPlugin> 
     }
 
     @Override
-    public boolean initSession(ChatSessionDoc session, InboxMessage inboxMessage) {
+    public OutboxMessage initSession(ChatSessionDoc session, InboxMessage inboxMessage) {
 
 	ChatContactQuery contactQuery = messageContext.getChatContactQuery();
 	ChatContactDoc chatContactDoc = messageContext.getChatContactDoc();
@@ -155,19 +152,17 @@ public class WebConnector extends DefaultConnector<WebConfigDetails, WebPlugin> 
 	List<TmplElement> inputs = new ArrayList<TmplElement>();
 	if (ArgUtil.isEmpty(chatContactDoc.getName())) {
 	    inputs.add(new TmplElement().name("name").label("Name").type("TEXT"));
-	    reply(null, null, (OutboxMessage) inboxMessage.replyMessage("Please fill below inputs to continue")
-		    .option("inputs", inputs), inboxMessage);
-	    return false;
+	    return (OutboxMessage) inboxMessage.replyMessage("Please fill below inputs to continue").option("inputs",
+		    inputs);
 	}
 
 	if (ArgUtil.isEmpty(chatContactDoc.getEmail())) {
 	    inputs.add(new TmplElement().name("email").label("Email").type("EMAIL"));
-	    reply(null, null, (OutboxMessage) inboxMessage.replyMessage("Please fill below inputs to continue")
-		    .option("inputs", inputs), inboxMessage);
-	    return false;
+	    return (OutboxMessage) inboxMessage.replyMessage("Please fill below inputs to continue").option("inputs",
+		    inputs);
 	}
 
-	return true;
+	return null;
     }
 
     public InboxMessage toInboxMessage(ChannelConfig channelConfig, MapModel map) {

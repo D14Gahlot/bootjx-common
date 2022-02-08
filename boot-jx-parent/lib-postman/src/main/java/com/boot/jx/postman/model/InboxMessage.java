@@ -7,7 +7,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.boot.jx.dict.ContactType;
 import com.boot.jx.postman.PMConstants;
 import com.boot.jx.postman.model.MessageDefinitions.Contactable;
 import com.boot.jx.postman.model.MessageDefinitions.IMessageExtended;
@@ -89,30 +88,14 @@ public class InboxMessage implements Serializable, IMessageExtended, LogMessage 
 	return reply;
     }
 
-    public Message<?> replyMessage(String message) {
-	if (ContactType.WHATSAPP.toString().equals(this.contact().getContactType())) {
-	    WAMessage reply = new WAMessage();
-	    reply.setQueue(this.getQueue());
-	    reply.contact().setChannelType(this.contact().getChannelType());
-	    reply.addTo(this.getFrom());
-	    reply.setMessage(message);
-	    return reply;
-	} else if (ContactType.TELEGRAM.toString().equals(this.contact().getContactType())) {
-	    TGMessage reply = new TGMessage();
-	    reply.setQueue(this.getQueue());
-	    reply.contact().setChannelType(this.contact().getChannelType());
-	    reply.addTo(this.getFrom());
-	    reply.setMessage(message);
-	    return reply;
-	} else {
-	    OutboxMessage reply = new OutboxMessage();
-	    reply.setQueue(this.getQueue());
-	    reply.contact().setChannelType(this.contact().getChannelType());
-	    reply.addTo(this.getFrom());
-	    reply.setMessage(message);
-	    reply.contact().setContactType(this.contact().getContactType());
-	    return reply;
-	}
+    public OutboxMessage replyMessage(String message) {
+	OutboxMessage reply = new OutboxMessage();
+	reply.setQueue(this.getQueue());
+	reply.contact().setChannelType(this.contact().getChannelType());
+	reply.addTo(this.getFrom());
+	reply.setMessage(message);
+	reply.contact().copyFrom(this.contact());
+	return reply;
     }
 
     // Builder Functions

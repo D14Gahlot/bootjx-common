@@ -291,9 +291,21 @@ public class ChatService {
 		inboxMessage.contact().getChannelType());
 
 	if (ArgUtil.is(connector)) {
-	    initd = connector.initSession(session, inboxMessage);
+	    OutboxMessage reply = connector.initSession(session, inboxMessage);
+	    if (ArgUtil.is(reply)) {
+		try {
+		    if (!OutboxMessage.NO_MESSAGE.equals(reply))
+			this.reply(inboxMessage, reply);
+		    initd = false;
+		} catch (InterruptedException e) {
+		    LOGGER.error("Errror While Replying To Sesion Init Message", e);
+		}
+	    } else {
+		initd = true;
+	    }
 	    messageContext.commitChatContactQuery();
 	}
+
 	if (initd) {
 	    session = sessionStore.initSession(session);
 	}
