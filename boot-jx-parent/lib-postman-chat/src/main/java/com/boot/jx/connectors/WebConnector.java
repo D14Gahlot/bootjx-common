@@ -149,8 +149,6 @@ public class WebConnector extends DefaultConnector<WebConfigDetails, WebPlugin> 
 	    }
 	}
 
-	ChannelConfig config = getChannelConfig(inboxMessage);
-
 	List<TmplElement> inputs = new ArrayList<TmplElement>();
 	if (ArgUtil.isEmpty(chatContactDoc.getName())) {
 	    inputs.add(new TmplElement().name("name").label("Name").type("TEXT"));

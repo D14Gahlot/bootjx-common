@@ -199,6 +199,7 @@ public class WA360Client {
 	    req.put("image", wa360OutBoundMedia);
 	} else if (ArgUtil.areEqual(attachment.getMediaType(), FileType.VIDEO.toString())) {
 	    req.put(OutBoundWrapperPaths.MESSAGE_TYPE, "video");
+	    wa360OutBoundMedia.setFilename(null);
 	    req.put("video", wa360OutBoundMedia);
 	} else if (ArgUtil.areEqual(attachment.getMediaType(), FileType.AUDIO.toString())) {
 	    req.put(OutBoundWrapperPaths.MESSAGE_TYPE, "audio");
