@@ -109,7 +109,7 @@ public class PostManInBoundHandler implements InBoundHandler {
 	if (webhookEntry.exists()) {
 	    LOGGER.debug("Forwarding InboxMessage to Xternal Service ");
 	    try {
-		forward2Webhook(inboxMessage, webhookEntry.asString());
+		forward2Webhook(inboxMessage, webhookEntry.asString(), null);
 		updateStatus(inboxMessage, Status.FORWARDED);
 	    } catch (Exception e) {
 		updateStatus(inboxMessage, Status.FORWARD_ERR, e);
