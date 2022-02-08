@@ -77,7 +77,7 @@ public class PostManInBoundHandler implements InBoundHandler {
 		    if (ArgUtil.areEqual(CHAT_MODE.WEBHOOK.toString(), defaultClient.getAppType())) {
 			LOGGER.debug("Forwarding InboxMessage to Xternal Queue ");
 			String forwardUrl = defaultClient.getWebhook();
-			forward2Webhook(inboxMessage, forwardUrl);
+			forward2Webhook(inboxMessage, forwardUrl, defaultClient.getId());
 			updateStatus(inboxMessage, Status.FORWARDED);
 			return;
 		    }
@@ -143,7 +143,7 @@ public class PostManInBoundHandler implements InBoundHandler {
 	updateStatus(inboxMessage, status, null);
     }
 
-    private void forward2Webhook(InboxMessage inboxMessage, String forwardUrl) {
+    private void forward2Webhook(InboxMessage inboxMessage, String forwardUrl, String clientAppId) {
 	InBoundContact contact = InBoundContact.from(inboxMessage.contact());
 
 	InBoundMsg msg = new InBoundMsg();
@@ -183,7 +183,9 @@ public class PostManInBoundHandler implements InBoundHandler {
 
 	InBoundWrapper wrap = new InBoundWrapper();
 	wrap.meta = new InBoundMeta().domain(AppContextUtil.getTenant())
-		.server(pmEnvironment.keyEntry(ConfigConstants.APP_KEY.PROP_SERVICE_DOMAIN).asString());
+		.server(pmEnvironment.keyEntry(ConfigConstants.APP_KEY.PROP_SERVICE_DOMAIN).asString())
+		.appId(clientAppId);
+
 	wrap.contacts = CollectionUtil.asList(contact);
 	wrap.messages = CollectionUtil.asList(msg);
 	restService.ajax(forwardUrl).post(wrap).asNone();
