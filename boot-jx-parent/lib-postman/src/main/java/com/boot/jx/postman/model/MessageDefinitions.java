@@ -133,6 +133,14 @@ public class MessageDefinitions {
 	public void setMessageIdExt(String messageIdExt);
 
 	String getMessageIdRef();
+
+	public void setMessageIdRef(String messageIdRef);
+
+	public default void from(IMessageId message) {
+	    setMessageId(message.getMessageId());
+	    setMessageIdExt(message.getMessageIdExt());
+	    setMessageIdRef(message.getMessageIdRef());
+	}
     }
 
     // External attributes

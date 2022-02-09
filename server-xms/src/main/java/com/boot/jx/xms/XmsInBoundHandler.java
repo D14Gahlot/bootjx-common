@@ -15,10 +15,11 @@ import com.boot.jx.postman.PMConstants.CHAT_MODE;
 import com.boot.jx.postman.PMConstants.MESSAGE_FORMAT_TYPE;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PMEnvironment.PMCommonConfig;
-import com.boot.jx.postman.PMEnvironment.PMConfigurationObject;
 import com.boot.jx.postman.PMEnvironment.PMDomainConfig;
+import com.boot.jx.postman.manager.LogManager;
 import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.InboxMessage;
+import com.boot.jx.postman.model.Message.Status;
 import com.boot.jx.postman.model.MessageReport;
 import com.boot.jx.postman.model.ext.CommonMsgText.InBoundMsgText;
 import com.boot.jx.postman.model.ext.InBoundContact;
@@ -28,7 +29,9 @@ import com.boot.jx.postman.model.ext.InBoundMsgMedia;
 import com.boot.jx.postman.model.ext.InBoundMsgStatus;
 import com.boot.jx.postman.model.ext.InBoundWrapper;
 import com.boot.jx.postman.model.ext.MsgSession;
+import com.boot.jx.postman.store.MessageStore;
 import com.boot.jx.rest.RestService;
+import com.boot.jx.stomp.StompTunnelService;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
 
@@ -52,6 +55,15 @@ public class XmsInBoundHandler implements InBoundHandler {
     @Autowired
     private RestService restService;
 
+    @Autowired
+    private LogManager logManager;
+
+    @Autowired
+    private MessageStore messageStore;
+
+    @Autowired
+    private StompTunnelService stompTunnelService;
+
     @Override
     public void handle(InboxMessage inboxMessage) {
 
@@ -64,48 +76,79 @@ public class XmsInBoundHandler implements InBoundHandler {
 	if (ArgUtil.is(assignedQueue)) {
 	    ClientApp defaultClient = pmEnvironment.local().clientApiKey(assignedQueue);
 	    if (ArgUtil.is(defaultClient)) {
+		try {
 
-		// WEBHOOOK HANDLING
-		if (ArgUtil.areEqual(CHAT_MODE.WEBHOOK.toString(), defaultClient.getAppType())) {
-		    LOGGER.debug("Forwarding InboxMessage to Xternal Queue ");
-		    String forwardUrl = defaultClient.getWebhook();
-		    forward2Webhook(inboxMessage, forwardUrl);
-		    return;
+		    // WEBHOOOK HANDLING
+		    if (ArgUtil.areEqual(CHAT_MODE.WEBHOOK.toString(), defaultClient.getAppType())) {
+			LOGGER.debug("Forwarding InboxMessage to Xternal Queue ");
+			String forwardUrl = defaultClient.getWebhook();
+			forward2Webhook(inboxMessage, forwardUrl, defaultClient.getId());
+			updateStatus(inboxMessage, Status.FORWARDED);
+			return;
+		    }
+
+		    // INTERNAL AGENT HANDLING
+		    if (ArgUtil.areEqual(CHAT_MODE.AGENT.toString(), defaultClient.getAppType())) {
+			LOGGER.debug("Forwarding InboxMessage to internal Agent ");
+			chatClient.forward(pmCommonConfig.getAgentUrl() + PATH.INBOUND_FRWRD, inboxMessage);
+			return;
+		    }
+
+		    // INTERNAL BOT HANDLING
+		    if (ArgUtil.areEqual(CHAT_MODE.BOT.toString(), defaultClient.getAppType())) {
+			LOGGER.debug("Forwarding InboxMessage to internal Bot ");
+			chatClient.forward(pmCommonConfig.getBotUrl() + PATH.INBOUND_FRWRD, inboxMessage);
+			return;
+		    }
+
+		} catch (Exception e) {
+		    updateStatus(inboxMessage, Status.FORWARD_ERR, e);
 		}
 
-		// INTERNAL AGENT HANDLING
-		if (ArgUtil.areEqual(CHAT_MODE.AGENT.toString(), defaultClient.getAppType())) {
-		    LOGGER.debug("Forwarding InboxMessage to internal Agent ");
-		    chatClient.forward(pmCommonConfig.getAgentUrl() + PATH.INBOUND_FRWRD, inboxMessage);
-		    return;
-		}
-
-		// INTERNAL BOT HANDLING
-		if (ArgUtil.areEqual(CHAT_MODE.BOT.toString(), defaultClient.getAppType())) {
-		    LOGGER.debug("Forwarding InboxMessage to internal Bot ");
-		    chatClient.forward(pmCommonConfig.getBotUrl() + PATH.INBOUND_FRWRD, inboxMessage);
-		    return;
-		}
 	    }
 
 	}
 
-	PMConfigurationObject webhookEntry = pmEnvironment
-		.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_CHAT_INBOUND_WEBHOOK);
-	if (webhookEntry.exists()) {
-	    LOGGER.debug("Forwarding InboxMessage to Xternal Service ");
-	    try {
-		forward2Webhook(inboxMessage, webhookEntry.asString());
-	    } catch (Exception e) {
-		LOGGER.error("Error while Trying to HIT " + webhookEntry.asString(), e);
-	    }
-	} else {
-	    chatClient.forward(inboxMessage);
-	}
+//	PMConfigurationObject webhookEntry = pmEnvironment
+//		.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_CHAT_INBOUND_WEBHOOK);
+//	if (webhookEntry.exists()) {
+//	    LOGGER.debug("Forwarding InboxMessage to Xternal Service ");
+//	    try {
+//		forward2Webhook(inboxMessage, webhookEntry.asString(), null);
+//		updateStatus(inboxMessage, Status.FORWARDED);
+//	    } catch (Exception e) {
+//		updateStatus(inboxMessage, Status.FORWARD_ERR, e);
+//	    }
+//	} else {
+	chatClient.forward(inboxMessage);
+//	}
 
     }
 
-    private void forward2Webhook(InboxMessage inboxMessage, String forwardUrl) {
+    private void updateStatus(InboxMessage inboxMessage, Status status, Exception e) {
+	MessageReport messageReport = new MessageReport();
+	messageReport.contact().copyFrom(inboxMessage.getContact());
+	messageReport.setChangeStamp(System.currentTimeMillis());
+	messageReport.setMessageId(inboxMessage.getMessageId());
+	messageReport.setMessageIdExt(inboxMessage.getMessageIdExt());
+	messageReport.setMessageIdRef(inboxMessage.getMessageIdRef());
+	messageReport.setStatus(status);
+
+	if (ArgUtil.is(e)) {
+	    messageReport.setReason(e.getMessage());
+	}
+	messageStore.updateStatus(messageReport);
+
+	if (ArgUtil.is(e)) {
+	    logManager.error(inboxMessage, e);
+	}
+    }
+
+    private void updateStatus(InboxMessage inboxMessage, Status status) {
+	updateStatus(inboxMessage, status, null);
+    }
+
+    private void forward2Webhook(InboxMessage inboxMessage, String forwardUrl, String clientAppId) {
 	InBoundContact contact = InBoundContact.from(inboxMessage.contact());
 
 	InBoundMsg msg = new InBoundMsg();
@@ -145,7 +188,9 @@ public class XmsInBoundHandler implements InBoundHandler {
 
 	InBoundWrapper wrap = new InBoundWrapper();
 	wrap.meta = new InBoundMeta().domain(AppContextUtil.getTenant())
-		.server(pmEnvironment.keyEntry(ConfigConstants.APP_KEY.PROP_SERVICE_DOMAIN).asString());
+		.server(pmEnvironment.keyEntry(ConfigConstants.APP_KEY.PROP_SERVICE_DOMAIN).asString())
+		.appId(clientAppId);
+
 	wrap.contacts = CollectionUtil.asList(contact);
 	wrap.messages = CollectionUtil.asList(msg);
 	restService.ajax(forwardUrl).post(wrap).asNone();
@@ -153,33 +198,44 @@ public class XmsInBoundHandler implements InBoundHandler {
 
     @Override
     public void handle(MessageReport messageReport) {
-	PMConfigurationObject webhookEntry = pmEnvironment
-		.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_CHAT_INBOUND_WEBHOOK);
 
-	if (webhookEntry.exists()) {
-	    LOGGER.debug("Forwarding MessageReport to Xternal Service ");
-	    try {
-		InBoundContact contact = InBoundContact.from(messageReport.contact());
+	String assignedQueue = messageReport.session().getQueue();
 
-		InBoundMsgStatus status = new InBoundMsgStatus();
-		status.contactId = contact.contactId;
-		status.messageId = messageReport.getMessageId();
-		status.messageIdExt = messageReport.getMessageIdExt();
-		status.timestamp = messageReport.getChangeStamp();
-		status.status = messageReport.getStatus();
-		status.errors = messageReport.getErrors();
-
-		InBoundWrapper wrap = new InBoundWrapper();
-		wrap.meta = new InBoundMeta().domain(AppContextUtil.getTenant())
-			.server(pmEnvironment.keyEntry(ConfigConstants.APP_KEY.PROP_SERVICE_DOMAIN).asString());
-		wrap.contacts = CollectionUtil.asList(contact);
-		wrap.statuses = CollectionUtil.asList(status);
-		restService.ajax(webhookEntry.asString()).post(wrap).asNone();
-	    } catch (Exception e) {
-		LOGGER.error("Error while Trying to HIT " + webhookEntry.asString(), e);
-	    }
-
+	if (!ArgUtil.is(assignedQueue)) {
+	    assignedQueue = pmDomainConfig.getDefaultInboundQueue(messageReport.contact());
 	}
-    }
 
+	if (ArgUtil.is(assignedQueue)) {
+	    ClientApp defaultClient = pmEnvironment.local().clientApiKey(assignedQueue);
+	    if (ArgUtil.is(defaultClient)) {
+
+		if (ArgUtil.areEqual(CHAT_MODE.WEBHOOK.toString(), defaultClient.getAppType())) {
+		    LOGGER.debug("Forwarding MessageReport to Xternal Service ");
+		    try {
+			InBoundContact contact = InBoundContact.from(messageReport.contact());
+
+			InBoundMsgStatus status = new InBoundMsgStatus();
+			status.contactId = contact.contactId;
+			status.messageId = messageReport.getMessageId();
+			status.messageIdExt = messageReport.getMessageIdExt();
+			status.timestamp = messageReport.getChangeStamp();
+			status.status = messageReport.getStatus();
+			status.errors = messageReport.getErrors();
+
+			InBoundWrapper wrap = new InBoundWrapper();
+			wrap.meta = new InBoundMeta().domain(AppContextUtil.getTenant())
+				.server(pmEnvironment.keyEntry(ConfigConstants.APP_KEY.PROP_SERVICE_DOMAIN).asString());
+			wrap.contacts = CollectionUtil.asList(contact);
+			wrap.statuses = CollectionUtil.asList(status);
+			restService.ajax(defaultClient.getWebhook()).post(wrap).asNone();
+		    } catch (Exception e) {
+			logManager.error(messageReport, e);
+		    }
+		    return;
+		}
+
+	    }
+	}
+	stompTunnelService.sendToAll("/message/update/status", messageReport);
+    }
 }

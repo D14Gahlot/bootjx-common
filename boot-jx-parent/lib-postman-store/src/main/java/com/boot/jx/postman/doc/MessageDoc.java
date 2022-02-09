@@ -15,13 +15,14 @@ import com.boot.jx.model.CommonTemplate;
 import com.boot.jx.mongo.CommonDocInterfaces.Patchable;
 import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.Message.Status;
+import com.boot.jx.postman.model.MessageDefinitions.IMessageId;
 import com.boot.jx.postman.model.MessageMetaWrapper;
 import com.boot.jx.postman.model.TagDocument;
 import com.boot.utils.ArgUtil;
 
 @Document(collection = MessageDoc.COLLECTION_NAME)
 @TypeAlias("MessageDoc")
-public class MessageDoc implements Serializable, Patchable<MessageDoc> {
+public class MessageDoc implements Serializable, Patchable<MessageDoc>, IMessageId {
     private static final long serialVersionUID = -7003453286628859075L;
     public static final String COLLECTION_NAME = "MESSAGE";
 
