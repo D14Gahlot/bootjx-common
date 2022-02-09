@@ -104,19 +104,19 @@ public class PostManInBoundHandler implements InBoundHandler {
 
 	}
 
-	PMConfigurationObject webhookEntry = pmEnvironment
-		.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_CHAT_INBOUND_WEBHOOK);
-	if (webhookEntry.exists()) {
-	    LOGGER.debug("Forwarding InboxMessage to Xternal Service ");
-	    try {
-		forward2Webhook(inboxMessage, webhookEntry.asString(), null);
-		updateStatus(inboxMessage, Status.FORWARDED);
-	    } catch (Exception e) {
-		updateStatus(inboxMessage, Status.FORWARD_ERR, e);
-	    }
-	} else {
+//	PMConfigurationObject webhookEntry = pmEnvironment
+//		.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_CHAT_INBOUND_WEBHOOK);
+//	if (webhookEntry.exists()) {
+//	    LOGGER.debug("Forwarding InboxMessage to Xternal Service ");
+//	    try {
+//		forward2Webhook(inboxMessage, webhookEntry.asString(), null);
+//		updateStatus(inboxMessage, Status.FORWARDED);
+//	    } catch (Exception e) {
+//		updateStatus(inboxMessage, Status.FORWARD_ERR, e);
+//	    }
+//	} else {
 	    chatClient.forward(inboxMessage);
-	}
+//	}
 
     }
 
