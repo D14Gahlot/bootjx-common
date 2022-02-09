@@ -311,7 +311,7 @@ public class Message<T extends Message<T>> implements Serializable, MessageOptio
     }
 
     @SuppressWarnings("unchecked")
-    public T lang(Language lang) {
+    public T lang(Object lang) {
 	this.hsm().setLang(ArgUtil.parseAsString(lang));
 	return (T) this;
     }
