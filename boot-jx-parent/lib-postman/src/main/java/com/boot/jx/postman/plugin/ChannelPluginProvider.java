@@ -104,7 +104,7 @@ public class ChannelPluginProvider {
 	    config.setChannelKey(map.getString("channelKey",
 		    ArgUtil.nonEmpty(config.getChannelKey(), PostManUtil.UNIQUE_API_KEY())));
 
-	    config.setInboundQueue(map.getString("inboundQueue", config.getInboundQueue()));
+	    config.setInboundQueue(map.getString("inboundQueue"));
 
 	    config.setWebhookUrl(map.getString("webhookUrl", config.getWebhookUrl()));
 	    updateChannelConfig(config, channelDetails);
