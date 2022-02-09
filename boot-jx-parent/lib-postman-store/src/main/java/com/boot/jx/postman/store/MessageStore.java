@@ -352,7 +352,7 @@ public class MessageStore extends CommonMongoTemplateAbstract {
     }
 
     private void updateMessageReport(MessageReport messageReport, MessageDoc m) {
-	messageReport.setMessageId(m.getMessageId());
+	messageReport.from(m);
 	messageReport.session().setQueue(m.getQueue());
     }
 
