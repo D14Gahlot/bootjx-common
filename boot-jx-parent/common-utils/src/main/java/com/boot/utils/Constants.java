@@ -163,6 +163,7 @@ public class Constants {
 	public static final String NONE = "NONE";
 	public static final String BRANCH = "BRANCH";
 
+	public static final String COLLECTION_NAME = "MESSAGE_";
 	
 
 }

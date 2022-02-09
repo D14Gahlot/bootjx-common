@@ -45,7 +45,7 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Component;
 
-import com.amazonaws.services.route53domains.model.ContactType;
+import com.boot.jx.AppContextUtil;
 import com.boot.jx.admin.dto.ContactTypeCountDto;
 import com.boot.jx.admin.dto.ContactTypeSummaryDto;
 import com.boot.jx.admin.dto.DashBoardRequestDto;
@@ -55,11 +55,13 @@ import com.boot.jx.admin.dto.PeakLoadDto;
 import com.boot.jx.admin.dto.SummaryDocDto;
 import com.boot.jx.admin.dto.TagDocumentDto;
 import com.boot.jx.admin.dto.TagDocumentLst;
+import com.boot.jx.dict.ContactType;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.model.TagDocument;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.DateUtil;
+import com.boot.utils.JsonUtil;
 import com.mongodb.AggregationOptions;
 import com.mongodb.AggregationOptions.OutputMode;
 import com.mongodb.Cursor;
@@ -1103,7 +1105,6 @@ public class AdminDashBoardManager {
 	
 
 	@SuppressWarnings("unchecked")
-	//public HashSet<String> fetchUniqueMonth() {
 	public Map<Object, Object> fetchUniqueMonth() {
 		List<String> lst = getListOfContactType();
 		 HashSet<String> set = new HashSet<>();
@@ -1179,11 +1180,13 @@ public class AdminDashBoardManager {
 	    summaryMap =summaryMsgLstCount.stream().collect(Collectors.groupingBy(ContactTypeCountDto::getType,Collectors.summingLong(ContactTypeCountDto::getTotalCount)));
 		
 		dto.setSummaryCount(summaryMap);
+		summaryV1(timestamp);
 	
 		return dto;
 		
 }
 	public void summaryV1(long timestamp) {
+		 String tnt = AppContextUtil.getTenant();
 		List<String> lst = getListOfContactType();
 		Date dateTi = new Date(timestamp);
 		String monthYear = new SimpleDateFormat(DateUtil.MMM_YYYY_FORMAT).format(dateTi);
@@ -1210,33 +1213,36 @@ public class AdminDashBoardManager {
 				dto.setChannel(contactType.toString());
 				dto.setMeta(doc.getMeta());
 				String id = getSummaryId(dto);
-				
+				dto.setId(id);
+				dto.setDomain(tnt);
+				System.out.println("datewaise data :"+JsonUtil.toJson(dto));
+				lstSummDto.add(dto);
 			}
 	    	
 	    	
 	    }
-		
+	    Map<Object,Long> summaryMap = new HashMap<>();
+	 //   summaryMap =lstSummDto.stream().collect(Collectors.groupingBy(SummaryDocDto::getId,SummaryDocDto::getType.summingLong(SummaryDocDto::getTotalCount)));
+
+
 	}
 	
 	
 	//demo_20210226_wa(tnt_yyyymmdd_channel)
 	
 	public String getSummaryId(SummaryDocDto dto) {
-		
-		if (ContactType.WHATSAPP.contains(dto.getChannel())) {
-		    return "wa" + id + "_" + lane;
-		} else if (ContactType.FACEBOOK.equals(contactType)) {
-		    return "fb" + id + "_" + lane;
-		} else if (ContactType.TWITTER.equals(contactType)) {
-		    return "tw" + id + "_" + lane;
-		} else if (ContactType.TELEGRAM.equals(contactType)) {
-		    return "tg" + id + "_" + lane;
-		} else if (ArgUtil.is(contactType)) {
-		    return contactType.getShortCode() + id + "_" + lane;
+		String tenant ="demo";
+		if (dto.getChannel().contains(ContactType.WHATSAPP.name())) {
+		    return   tenant+"_"+dto.getDate()+"_"+"wa";
+		} else if (dto.getChannel().contains(ContactType.FACEBOOK.name())) {
+		    return   tenant+"_"+dto.getDate()+"_"+"fb";
+		} else if (dto.getChannel().contains(ContactType.TWITTER.name())) {
+			 return   tenant+"_"+dto.getDate()+"_"+"tw";
+		} else if (dto.getChannel().contains(ContactType.TELEGRAM.name())) {
+			 return   tenant+"_"+dto.getDate()+"_"+"tg";
+		} else if (dto.getChannel().contains(ContactType.INSTAGRAM.name())) {
+			 return   tenant+"_"+dto.getDate()+"_"+"ig";
 		}
-		return id;
-		
-		
 		return null;
 	}
 	

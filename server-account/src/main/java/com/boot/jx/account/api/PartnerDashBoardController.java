@@ -1,21 +1,21 @@
 package com.boot.jx.account.api;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.boot.jx.AppConfig;
 import com.boot.jx.AppConfigPackage.AppCommonConfig;
-import com.boot.jx.account.AccountAdminService;
 import com.boot.jx.account.AccountSessionBean;
 import com.boot.jx.account.doc.AccountStore;
 import com.boot.jx.account.doc.DomainDoc;
 import com.boot.jx.account.dto.AccountDashBoardResponseDto;
+import com.boot.jx.account.dto.ContactTypeSummaryDto;
 import com.boot.jx.account.manager.AccountDashBoardManager;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.http.CommonHttpRequest;
@@ -33,8 +33,8 @@ public class PartnerDashBoardController {
     @Autowired
     private AppCommonConfig appCommonConfig;
 
-    @Autowired
-    private AccountAdminService sessionService;
+   // @Autowired
+   // private AccountAdminService sessionService;
 
     @Autowired
     private AccountSessionBean adminSessionBean;
@@ -52,6 +52,18 @@ public class PartnerDashBoardController {
 	List<DomainDoc> domainDocLst =dashBMgr.getAllDomainAccount();
 	return ApiResponse.buildResults(domainDocLst);
     }
+    
+    @RequestMapping(value = "/pub/admin/fetch-month", method = { RequestMethod.GET })
+	public ApiResponse<Map<Object, Object>, Object> getMonthLst() {
+		Map<Object, Object> set =dashBMgr.fetchUniqueMonth(); 
+		return  ApiResponse.buildResult(set);
+	}
+	@RequestMapping(value = "/pub/admin/monthwise-summary-count", method = { RequestMethod.GET })
+	public ApiResponse<ContactTypeSummaryDto, Object> getMonthWiseSummary(long timestamp) {
+		ContactTypeSummaryDto summary =dashBMgr.getMonthWiseCount(timestamp); 
+		return  ApiResponse.buildResult(summary);
+	}
+
     
     
     @ResponseBody

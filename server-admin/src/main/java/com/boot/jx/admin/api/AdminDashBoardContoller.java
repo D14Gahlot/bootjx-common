@@ -74,5 +74,12 @@ public class AdminDashBoardContoller {
 		ContactTypeSummaryDto summary =adminDbMgr.getMonthWiseCount(timestamp); 
 		return  ApiResponse.buildResult(summary);
 	}
+	
+	@RequestMapping(value = "/admin/monthwise-summary-save", method = { RequestMethod.GET })
+	public ApiResponse<ContactTypeSummaryDto, Object> getMonthWiseSaving(long timestamp) {
+		ContactTypeSummaryDto summary =null;
+				adminDbMgr.summaryV1(timestamp); 
+		return  ApiResponse.buildResult(summary);
+	}
 
 }

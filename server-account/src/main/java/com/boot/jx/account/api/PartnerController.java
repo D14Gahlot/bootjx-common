@@ -28,6 +28,7 @@ import com.boot.jx.account.doc.AccountStore;
 import com.boot.jx.account.doc.BusinessUserDoc;
 import com.boot.jx.account.doc.CompanyDoc;
 import com.boot.jx.account.doc.DomainDoc;
+import com.boot.jx.account.doc.DomainLicenseDoc;
 import com.boot.jx.account.doc.SignupContact;
 import com.boot.jx.api.ApiFieldError;
 import com.boot.jx.api.ApiResponse;
@@ -218,7 +219,7 @@ public class PartnerController {
     }
 
     @ResponseBody
-    @RequestMapping(value = { "/api/domain" }, method = { RequestMethod.GET })
+    @RequestMapping(value = { "/api/domain","/pub/domain" }, method = { RequestMethod.GET })
     public ApiResponse<DomainDoc, Object> getDomain() {
 	BusinessUserDoc domainUser = adminSessionBean.domainUser();
 
@@ -227,6 +228,7 @@ public class PartnerController {
 	}
 
 	DomainDoc domainDoc = CollectionUtil.first(domainUser.getDomains());
+	DomainLicenseDoc domainLicDoc = accountStore.findDomainLicenseByName(domainDoc.getDomain()); 
 
 	if (!ArgUtil.is(domainDoc)) {
 	    domainDoc = new DomainDoc();
@@ -235,6 +237,10 @@ public class PartnerController {
 	if (!ArgUtil.is(domainDoc.getCompany())) {
 	    domainDoc.setCompany(new CompanyDoc());
 	}
+	
+	//if(ArgUtil.is(domainLicDoc)) {
+	//	domainDoc.setDomainLicDoc(domainLicDoc);
+//	}
 	//if (!ArgUtil.is(domainDoc.getCompany().getConactEmail())) {
 	  //  domainDoc.getCompany().setConactEmail(domainUser.getContact().getEmail());
 	//}
@@ -261,18 +267,7 @@ public class PartnerController {
     }
 
     @ResponseBody
-    @RequestMapping(value = { "/api/domain/exists", "/pub/domain/exists" }, method = { RequestMethod.GET })
-    public ApiResponse<Object, Object> sisExists(@RequestParam @Valid String domain) throws NoSuchAlgorithmException {
-	AppContextUtil.setTenant(Tenants.getDefault());
-	DomainDoc domainDoc = accountStore.findDomainByName(domain);
-	if (ArgUtil.is(domainDoc)) {
-	    return ApiResponse.buildMeta(domainDoc.getDomain());
-	}
-	return ApiResponse.buildMeta(null).statusKey("400");
-    }
-
-    @ResponseBody
-    @RequestMapping(value = { "/api/domain/check", "/pub/domain/check" }, method = { RequestMethod.POST })
+    @RequestMapping(value = { "/api/domain/check","/pub/domain/check" }, method = { RequestMethod.POST })
     public ApiResponse<Object, Object> checkDomain(@RequestParam @Valid String domain) throws NoSuchAlgorithmException {
 
 	DomainDoc domainDoc = accountStore.findDomainByName(domain);
@@ -340,5 +335,55 @@ public class PartnerController {
 		file.getOriginalFilename()).getUrl();
 	return ApiResponse.buildResults(url).message("Logo uplodaed");
     }
+    /** Domain License creation/Updataion/View **/
+    
+    @ResponseBody
+    @RequestMapping(value = { "/api/domain/license","/pub/domain/license" }, method = { RequestMethod.POST })
+    public ApiResponse<Object, Object> createDomainLicense(Model model, HttpServletRequest request,
+	    HttpServletResponse httpServletResponse, @RequestBody @Valid DomainLicenseDoc domainLicense,
+	    @RequestParam(required = false) boolean create) throws NoSuchAlgorithmException {
+    	
+    	BusinessUserDoc domainUser = adminSessionBean.domainUser();
+    	DomainDoc domainDoc = accountStore.findDomainByName(domainLicense.getDomain());
+    	
 
-}
+    	if (!ArgUtil.is(domainDoc)) {
+    		 ApiResponseUtil.throwException("Invalid Domain.");
+    	}
+    	
+    		
+    		DomainLicenseDoc domainLicDoc = accountStore.findDomainLicenseByName(domainLicense.getDomain());
+    		if(!ArgUtil.is(domainLicDoc)) {
+    			domainLicDoc = new DomainLicenseDoc();
+        		domainLicDoc.setDomain(domainLicense.getDomain());
+        		domainLicDoc.setFrequency(domainLicense.getFrequency());
+        		domainLicDoc.setLicenseName(domainLicense.getLicenseName());
+        		domainLicDoc.setLicenseAggrementStamp(System.currentTimeMillis());
+        		domainLicDoc.setCreatedStamp(System.currentTimeMillis());
+        		domainLicDoc.setIsActive(true);
+        		accountStore.save(domainLicDoc);
+        		//domainUser.domainLicense().add(domainLicDoc);
+        		//accountStore.save(domainUser);
+        	return ApiResponse.build().message("Domain license created");
+    		}else {
+    			
+    			    domainLicDoc.setDomain(domainLicense.getDomain());
+    	    		domainLicDoc.setFrequency(domainLicense.getFrequency());
+    	    		domainLicDoc.setLicenseName(domainLicense.getLicenseName());
+    	    		domainLicDoc.setModifiedStamp(System.currentTimeMillis());
+    	    		domainLicDoc.setIsActive(true);
+    	    		accountStore.save(domainLicDoc);
+    		return ApiResponse.build().message("Details updated");
+    		}
+    		
+    }	
+    
+    @ResponseBody
+    @RequestMapping(value = { "/pub/domainLicense" }, method = { RequestMethod.GET })
+    public ApiResponse<DomainLicenseDoc, Object> getDomainLicense(@RequestParam String domain) {
+	DomainLicenseDoc domainLicDoc = accountStore.findDomainLicenseByName(domain);
+	return ApiResponse.buildResult(domainLicDoc);
+    }
+
+    
+}  

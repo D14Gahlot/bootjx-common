@@ -45,7 +45,7 @@ public class Demo4Controller extends CommonBotController {
 
     @ChatMapping(key = "menu-5-dept-onselect")
     public void panOnSelect(InboxMessage inboxMessage, StringMatcher matcher) {
-
+    
 	switch (inboxMessage.getMessage().toLowerCase()) {
 
 	case "*":
@@ -109,10 +109,7 @@ public class Demo4Controller extends CommonBotController {
 
 	String lane = globalVars.keyEntry("sales_alert_channel").asString();
 
-//	String lane = "918828218374";
-//	if (ArgUtil.is(AppContextUtil.getTenant()) && !AppContextUtil.getTenant().equalsIgnoreCase("demo")) {
-//	    lane = "917304856205";
-//	}
+
 
 	String[] contacts = StringUtils.split(globalVars.keyEntry("sales_alert_contact").asString(),",");
 	for (String contact : contacts) {
