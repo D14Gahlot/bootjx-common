@@ -13,7 +13,6 @@ import com.boot.jx.inbound.InBound.InBoundHandler;
 import com.boot.jx.postman.PMConstants.CHAT_MODE;
 import com.boot.jx.postman.PMConstants.MESSAGE_FORMAT_TYPE;
 import com.boot.jx.postman.PMEnvironment.PMCommonConfig;
-import com.boot.jx.postman.PMEnvironment.PMConfigurationObject;
 import com.boot.jx.postman.PMEnvironment.PMDomainConfig;
 import com.boot.jx.postman.manager.LogManager;
 import com.boot.jx.postman.model.Attachment;
@@ -30,6 +29,7 @@ import com.boot.jx.postman.model.ext.InBoundWrapper;
 import com.boot.jx.postman.model.ext.MsgSession;
 import com.boot.jx.postman.store.MessageStore;
 import com.boot.jx.rest.RestService;
+import com.boot.jx.stomp.StompTunnelService;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
 
@@ -58,6 +58,9 @@ public class PostManInBoundHandler implements InBoundHandler {
 
     @Autowired
     private MessageStore messageStore;
+
+    @Autowired
+    private StompTunnelService stompTunnelService;
 
     @Override
     public void handle(InboxMessage inboxMessage) {
@@ -115,7 +118,7 @@ public class PostManInBoundHandler implements InBoundHandler {
 //		updateStatus(inboxMessage, Status.FORWARD_ERR, e);
 //	    }
 //	} else {
-	    chatClient.forward(inboxMessage);
+	chatClient.forward(inboxMessage);
 //	}
 
     }
@@ -193,33 +196,45 @@ public class PostManInBoundHandler implements InBoundHandler {
 
     @Override
     public void handle(MessageReport messageReport) {
-	PMConfigurationObject webhookEntry = pmEnvironment
-		.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_CHAT_INBOUND_WEBHOOK);
 
-	if (webhookEntry.exists()) {
-	    LOGGER.debug("Forwarding MessageReport to Xternal Service ");
-	    try {
-		InBoundContact contact = InBoundContact.from(messageReport.contact());
+	String assignedQueue = messageReport.session().getQueue();
 
-		InBoundMsgStatus status = new InBoundMsgStatus();
-		status.contactId = contact.contactId;
-		status.messageId = messageReport.getMessageId();
-		status.messageIdExt = messageReport.getMessageIdExt();
-		status.timestamp = messageReport.getChangeStamp();
-		status.status = messageReport.getStatus();
-		status.errors = messageReport.getErrors();
-
-		InBoundWrapper wrap = new InBoundWrapper();
-		wrap.meta = new InBoundMeta().domain(AppContextUtil.getTenant())
-			.server(pmEnvironment.keyEntry(ConfigConstants.APP_KEY.PROP_SERVICE_DOMAIN).asString());
-		wrap.contacts = CollectionUtil.asList(contact);
-		wrap.statuses = CollectionUtil.asList(status);
-		restService.ajax(webhookEntry.asString()).post(wrap).asNone();
-	    } catch (Exception e) {
-		logManager.error(messageReport, e);
-	    }
-
+	if (!ArgUtil.is(assignedQueue)) {
+	    assignedQueue = pmDomainConfig.getDefaultInboundQueue(messageReport.contact());
 	}
+
+	if (ArgUtil.is(assignedQueue)) {
+	    ClientApp defaultClient = pmEnvironment.local().clientApiKey(assignedQueue);
+	    if (ArgUtil.is(defaultClient)) {
+
+		if (ArgUtil.areEqual(CHAT_MODE.WEBHOOK.toString(), defaultClient.getAppType())) {
+		    LOGGER.debug("Forwarding MessageReport to Xternal Service ");
+		    try {
+			InBoundContact contact = InBoundContact.from(messageReport.contact());
+
+			InBoundMsgStatus status = new InBoundMsgStatus();
+			status.contactId = contact.contactId;
+			status.messageId = messageReport.getMessageId();
+			status.messageIdExt = messageReport.getMessageIdExt();
+			status.timestamp = messageReport.getChangeStamp();
+			status.status = messageReport.getStatus();
+			status.errors = messageReport.getErrors();
+
+			InBoundWrapper wrap = new InBoundWrapper();
+			wrap.meta = new InBoundMeta().domain(AppContextUtil.getTenant())
+				.server(pmEnvironment.keyEntry(ConfigConstants.APP_KEY.PROP_SERVICE_DOMAIN).asString());
+			wrap.contacts = CollectionUtil.asList(contact);
+			wrap.statuses = CollectionUtil.asList(status);
+			restService.ajax(defaultClient.getWebhook()).post(wrap).asNone();
+		    } catch (Exception e) {
+			logManager.error(messageReport, e);
+		    }
+		    return;
+		}
+
+	    }
+	}
+	stompTunnelService.sendToAll("/message/update/status", messageReport);
     }
 
 }

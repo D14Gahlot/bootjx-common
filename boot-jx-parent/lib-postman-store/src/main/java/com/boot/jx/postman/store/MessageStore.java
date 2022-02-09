@@ -338,17 +338,22 @@ public class MessageStore extends CommonMongoTemplateAbstract {
 		builder.limit(result.getN());
 		List<MessageDoc> messsages = mongoTemplate.find(builder.getQuery(), MessageDoc.class, collectionName);
 		if (ArgUtil.is(messsages) && ArgUtil.is(messsages.get(0))) {
-		    messageReport.setMessageId(messsages.get(0).getMessageId());
+		    updateMessageReport(messageReport, messsages.get(0));
 		}
 	    } else {
 		MessageDoc m = mongoTemplate.findOne(builder.getQuery(), MessageDoc.class, collectionName);
 		if (ArgUtil.is(m)) {
-		    messageReport.setMessageId(m.getMessageId());
+		    updateMessageReport(messageReport, m);
 		}
 	    }
 
 	    // LOGGER.info(JsonUtil.toJson(builder));
 	}
+    }
+
+    private void updateMessageReport(MessageReport messageReport, MessageDoc m) {
+	messageReport.setMessageId(m.getMessageId());
+	messageReport.session().setQueue(m.getQueue());
     }
 
     public void insert(List<MessageDoc> messages, ContactType contactType) {
