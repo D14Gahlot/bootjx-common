@@ -318,7 +318,7 @@ public class MessageStore extends CommonMongoTemplateAbstract {
 		builder.update().push("logs", messageReport.getReason());
 	    }
 
-	    if (ArgUtil.is(messageReport.getStatus() == Status.DELTD)) {
+	    if (messageReport.getStatus() == Status.DELTD) {
 		builder.set("message", null);
 	    }
 
