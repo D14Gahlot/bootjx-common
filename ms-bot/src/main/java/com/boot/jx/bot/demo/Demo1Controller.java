@@ -3,6 +3,7 @@ package com.boot.jx.bot.demo;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.boot.jx.AppContextUtil;
 import com.boot.jx.bot.BotController;
 import com.boot.jx.bot.ChatContext;
 import com.boot.jx.bot.ChatMapping;
@@ -16,7 +17,7 @@ import com.boot.utils.ArgUtil;
 import com.boot.utils.Constants;
 import com.boot.utils.StringUtils.StringMatcher;
 
-@BotController(name = "DemoBot", tenant = { "app", "demo", "sandbox", "customer" })
+@BotController(name = "DemoBot", tenant = { "app", "demo", "sandbox", "customer" ,"chakli"})
 public class Demo1Controller extends CommonBotController {
 
     private static final String CURRENT_DEMO = "current_menu";
@@ -31,6 +32,9 @@ public class Demo1Controller extends CommonBotController {
 
     @Autowired
     Demo4Controller demo5Controller;
+    
+    @Autowired
+    Demo5Controller demo6Controller;
 
     @ChatMapping(key = AlexBotConstants.KEY.INITIATE + "menu", pattern = "^menu$")
     private void showDemoMenu(InboxMessage inboxMessage, StringMatcher matcher) {
@@ -59,6 +63,9 @@ public class Demo1Controller extends CommonBotController {
 	    default:
 		break;
 	    }
+	}else if(AppContextUtil.getTenant().equalsIgnoreCase("chakli")) {
+		demo6Controller.start(inboxMessage, matcher);
+		return;
 	}
 	reply(new OutboxMessage().template("menu-0").put("name", chatContext.getContact().getName()));
 	next("menu-0-onselect");
