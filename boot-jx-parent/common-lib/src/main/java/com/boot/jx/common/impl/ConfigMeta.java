@@ -103,6 +103,7 @@ public class ConfigMeta implements Serializable {
 
     private List<ConfigOption> options;
     private String optionsKey;
+    private String optionsLabel;
     private String optionsSource;
 
     public ConfigMeta() {
@@ -387,6 +388,19 @@ public class ConfigMeta implements Serializable {
 
     public ConfigMeta order(Integer order) {
 	this.order = order;
+	return this;
+    }
+
+    public String getOptionsLabel() {
+	return optionsLabel;
+    }
+
+    public void setOptionsLabel(String optionsLabel) {
+	this.optionsLabel = optionsLabel;
+    }
+
+    public ConfigMeta optionsLabel(String optionsLabel) {
+	this.optionsLabel = optionsLabel;
 	return this;
     }
 }
