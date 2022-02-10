@@ -21,6 +21,7 @@ import com.boot.jx.postman.model.Message.Status;
 import com.boot.jx.postman.model.MessageReport;
 import com.boot.jx.postman.model.ext.CommonMsgText.InBoundMsgText;
 import com.boot.jx.postman.model.ext.InBoundContact;
+import com.boot.jx.postman.model.ext.InBoundEvent;
 import com.boot.jx.postman.model.ext.InBoundMeta;
 import com.boot.jx.postman.model.ext.InBoundMsg;
 import com.boot.jx.postman.model.ext.InBoundMsgMedia;
@@ -237,4 +238,8 @@ public class PostManInBoundHandler implements InBoundHandler {
 	stompTunnelService.sendToAll("/message/update/status", messageReport);
     }
 
+    @Override
+    public void handle(InBoundEvent inBoundEvent) {
+
+    }
 }

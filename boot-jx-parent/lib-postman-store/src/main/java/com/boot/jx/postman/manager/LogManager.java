@@ -10,6 +10,7 @@ import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.model.MessageDefinitions.IMessageExtended;
 import com.boot.jx.postman.model.MessageDefinitions.LogMessage;
 import com.boot.jx.postman.model.OutboxMessage;
+import com.boot.jx.postman.model.ext.InBoundEvent;
 import com.boot.jx.postman.store.MessageStore;
 import com.boot.jx.postman.store.MessageStore.EVENTS;
 import com.boot.jx.postman.store.SessionStore;
@@ -78,7 +79,6 @@ public class LogManager {
 	MessageDoc doc = new MessageDoc();
 	doc.setSessionId(inboxMessage.getSessionId());
 	doc.setMessageId(inboxMessage.getMessageId());
-	doc.setMessageId(inboxMessage.getMessageId());
 	doc.setMessageIdExt(inboxMessage.getMessageIdExt());
 	doc.setMessageIdRef(inboxMessage.getMessageIdRef());
 	doc.setContactId(PostManUtil.createContactId(inboxMessage.contact()));
@@ -96,6 +96,27 @@ public class LogManager {
 	}
 
 	messageStore.save(doc, MessageStore.getCollectionName("LOGS"));
+    }
+
+    public void error(InBoundEvent inBoundEvent, Exception e) {
+	MessageDoc doc = new MessageDoc();
+	doc.setSessionId(inBoundEvent.sessionId);
+	doc.setContactId(inBoundEvent.contactId);
+	doc.setType("E");
+	doc.setTimestamp(System.currentTimeMillis());
+	doc.setTraceId(AppContextUtil.getTraceId());
+	doc.setMessage(e.getMessage());
+
+	StackTraceElement[] traces = e.getStackTrace();
+
+	if (traces.length > 0 && traces[0].toString().length() > 0) {
+	    for (StackTraceElement trace : traces) {
+		doc.logs().add(trace.toString());
+	    }
+	}
+
+	messageStore.save(doc, MessageStore.getCollectionName("LOGS"));
+
     }
 
 }

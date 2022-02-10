@@ -19,17 +19,14 @@ import com.boot.jx.mongo.CommonMongoQueryBuilder;
 import com.boot.jx.postman.ClientApp;
 import com.boot.jx.postman.PMConfiguration.PMConfigurationModel;
 import com.boot.jx.postman.PMConstants;
-import com.boot.jx.postman.PMConstants.CHAT_MODE;
 import com.boot.jx.postman.PMConstants.CHAT_STATUS;
 import com.boot.jx.postman.PMConstants.DEFAULT_VALUES;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.QuickTag;
-import com.boot.jx.postman.model.InboxMessage;
-import com.boot.jx.postman.model.MessageDefinitions.Contactable;
-import com.boot.jx.postman.model.MessageDefinitions.SessionMessage;
+import com.boot.jx.postman.model.ext.InBoundEvent;
+import com.boot.jx.postman.model.ext.InBoundEvent.SessionRouted;
 import com.boot.jx.postman.store.MessageStore.EVENTS;
-import com.boot.jx.utils.PostManUtil;
 import com.boot.jx.postman.store.SessionStore;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
@@ -63,7 +60,8 @@ public class ChatSessionManager {
 	    return false;
 	}
 	session = sessionStore.closeSession(session);
-	logManager.event(session, EVENTS.STATUS_CHANGED, session.getStatus(), PMConstants.CHAT_STATUS.CLOSED.toString());
+	logManager.event(session, EVENTS.STATUS_CHANGED, session.getStatus(),
+		PMConstants.CHAT_STATUS.CLOSED.toString());
 	return true;
     }
 
@@ -207,10 +205,18 @@ public class ChatSessionManager {
 	return sessionStore.find(query, ChatSessionDoc.class);
     }
 
-    public ChatSessionDoc assignToQueue(ChatSessionDoc chatSessionDoc, String queueCode) {
+    public InBoundEvent assignToQueue(ChatSessionDoc chatSessionDoc, String queueCode) {
+
+	InBoundEvent inBoundEvent = new InBoundEvent().eventCode(InBoundEvent.SESSION_ROUTED);
+	inBoundEvent.sessionRouted = new SessionRouted();
+	inBoundEvent.sessionId = chatSessionDoc.getSessionId();
+	inBoundEvent.contactId = chatSessionDoc.getContactId();
+	inBoundEvent.sessionRouted.sourceQueue = chatSessionDoc.getAssignedToQueue();
+	inBoundEvent.contact().copyFrom(chatSessionDoc.contact());
+
 	if (!ArgUtil.is(chatSessionDoc)) {
 	    LOGGER.error("Session Cannot Be Empty for queueCode {}", queueCode);
-	    return chatSessionDoc;
+	    return inBoundEvent;
 	}
 
 	if (ArgUtil.is(queueCode)) {
@@ -223,7 +229,7 @@ public class ChatSessionManager {
 	    } else {
 		ApiResponseUtil.throwInputException(new ApiFieldError().field("queue").codeKey("INVALID_QUEUE")
 			.description("Invalid Queue Code " + queueCode));
-		return chatSessionDoc;
+		return inBoundEvent;
 	    }
 	} else {
 	    chatSessionDoc.setAssignedToQueue(null);
@@ -234,11 +240,14 @@ public class ChatSessionManager {
 	builder.set("mode", chatSessionDoc.getMode());
 	sessionStore.updateFirst(builder.getQuery(), builder.getUpdate(), ChatSessionDoc.class);
 	logManager.event(chatSessionDoc, EVENTS.ASGND_TO_QUEUE, queueCode);
-	return chatSessionDoc;
+
+	inBoundEvent.sessionRouted.targetQueue = chatSessionDoc.getAssignedToQueue();
+
+	return inBoundEvent;
 
     }
 
-    public ChatSessionDoc assignToQueue(String sessionId, String queueCode) {
+    public InBoundEvent assignToQueue(String sessionId, String queueCode) {
 	ChatSessionDoc sessionDoc = sessionStore.getSession(sessionId);
 	return this.assignToQueue(sessionDoc, queueCode);
     }
