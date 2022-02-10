@@ -46,8 +46,8 @@ public class ConfigConstants {
 	POSTMAN_BOT_NAME(new ConfigMeta("Bot Name", "postman.bot.name")),
 	POSTMAN_CONTACT_DETAILS_URL(new ConfigMeta("Contact Details Provider Webhook", "postman.contact.details.url")),
 
-//	POSTMAN_CHAT_INBOUND_WEBHOOK(new ConfigMeta("Message Inbound Webhook", "postman.chat.inbound.webhook")
-//		.desc("Inbound messages will be forwarded to this webhook")),
+//	POSTMAN_CHAT_INBOUND_WEBHOOK(new ConfigMeta("Fallback Webhook", "postman.chat.inbound.webhook")
+//		.desc("Inbound messages will be forwarded to this webhook, by default if oth")),
 
 	POSTMAN_CHAT_INBOUND_QUEUE(new ConfigMeta("Message Inbound Queue", "postman.chat.inbound.queue")
 		.desc("Inbound messages will be forwarded to this Queue by default")
