@@ -223,7 +223,8 @@ public class PostManInBoundHandler implements InBoundHandler {
 
 			InBoundWrapper wrap = new InBoundWrapper();
 			wrap.meta = new InBoundMeta().domain(AppContextUtil.getTenant())
-				.server(pmEnvironment.keyEntry(ConfigConstants.APP_KEY.PROP_SERVICE_DOMAIN).asString());
+				.server(pmEnvironment.keyEntry(ConfigConstants.APP_KEY.PROP_SERVICE_DOMAIN).asString())
+				.appId(defaultClient.getId());
 			wrap.contacts = CollectionUtil.asList(contact);
 			wrap.statuses = CollectionUtil.asList(status);
 			restService.ajax(defaultClient.getWebhook()).post(wrap).asNone();
@@ -241,5 +242,32 @@ public class PostManInBoundHandler implements InBoundHandler {
     @Override
     public void handle(InBoundEvent inBoundEvent) {
 
+	String assignedQueue;
+	if (InBoundEvent.SESSION_ROUTED.equals(inBoundEvent.eventCode)) {
+	    assignedQueue = inBoundEvent.sessionRouted.targetQueue;
+	    if (!ArgUtil.is(assignedQueue)) {
+		ClientApp defaultClient = pmEnvironment.local().clientApiKey(assignedQueue);
+		if (ArgUtil.is(defaultClient)) {
+		    if (ArgUtil.areEqual(CHAT_MODE.WEBHOOK.toString(), defaultClient.getAppType())) {
+			LOGGER.debug("Forwarding Session Routing Event to Xternal Service ");
+			try {
+			    InBoundContact contact = InBoundContact.from(inBoundEvent.contact());
+
+			    InBoundWrapper wrap = new InBoundWrapper();
+			    wrap.meta = new InBoundMeta()
+				    .domain(AppContextUtil.getTenant()).server(pmEnvironment
+					    .keyEntry(ConfigConstants.APP_KEY.PROP_SERVICE_DOMAIN).asString())
+				    .appId(defaultClient.getId());
+			    wrap.contacts = CollectionUtil.asList(contact);
+			    wrap.events = CollectionUtil.asList(inBoundEvent);
+			    restService.ajax(defaultClient.getWebhook()).post(wrap).asNone();
+			} catch (Exception e) {
+			    logManager.error(inBoundEvent, e);
+			}
+			return;
+		    }
+		}
+	    }
+	}
     }
 }

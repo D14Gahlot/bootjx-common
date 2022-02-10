@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 import com.boot.jx.inbound.InBound.InBoundHandler;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.MessageReport;
+import com.boot.jx.postman.model.ext.InBoundEvent;
 
 @Component
 public class BotInBoundHandler implements InBoundHandler {
@@ -25,6 +26,11 @@ public class BotInBoundHandler implements InBoundHandler {
     @Override
     public void handle(MessageReport messageReport) {
 	LOGGER.debug("No Handling Required for Status on BotSide");
+    }
+
+    @Override
+    public void handle(InBoundEvent inBoundEvent) {
+	// TODO Auto-generated method stub
     }
 
 }
