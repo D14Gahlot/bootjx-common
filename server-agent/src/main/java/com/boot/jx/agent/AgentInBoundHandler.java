@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 
 import com.boot.jx.chat.ChatService;
 import com.boot.jx.common.config.ConfigConstants;
-import com.boot.jx.inbound.InBound.InBoundHandler;
+import com.boot.jx.common.config.DefaultInBoundHandler;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PMEnvironment.PMCommonConfig;
 import com.boot.jx.postman.PMEnvironment.PMConfigurationObject;
@@ -15,10 +15,11 @@ import com.boot.jx.postman.PMEnvironment.PMDomainConfig;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.MessageReport;
 import com.boot.jx.postman.model.OutboxMessage;
+import com.boot.jx.postman.model.ext.InBoundEvent;
 import com.boot.utils.ArgUtil;
 
 @Component
-public class AgentInBoundHandler implements InBoundHandler {
+public class AgentInBoundHandler extends DefaultInBoundHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AgentInBoundHandler.class);
 
@@ -71,6 +72,11 @@ public class AgentInBoundHandler implements InBoundHandler {
     @Override
     public void handle(MessageReport messageReport) {
 	LOGGER.debug("No Handling Required for Status on AgentSide");
+    }
+
+    @Override
+    public void handle(InBoundEvent inBoundEvent) {
+	super.handle(inBoundEvent);
     }
 
 }

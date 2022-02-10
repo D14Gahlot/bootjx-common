@@ -21,6 +21,7 @@ import com.boot.jx.admin.manager.ChatParserAndImportor;
 import com.boot.jx.admin.service.BulkMessageService;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.common.doc.ImportChatSessionDoc;
+import com.boot.jx.common.service.ChatSessionService;
 import com.boot.jx.common.store.ChatArchiveService;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.mongo.CommonMongoQB.CommonMongoCriteria;
@@ -55,6 +56,9 @@ public class AdminMsgController {
 
     @Autowired
     private MessageStore messageStore;
+
+    @Autowired
+    private ChatSessionService chatSessionService;
 
     @RequestMapping(value = "/api/message/session", method = { RequestMethod.GET })
     public ApiResponse<ChatSessionDoc, Object> fetchSession(@RequestParam String startStamp,
@@ -103,6 +107,13 @@ public class AdminMsgController {
 	return ApiResponse.buildData(chatSessionDto);
     }
 
+    @RequestMapping(value = "/api/message/session/close", method = { RequestMethod.POST })
+    public ApiResponse<ChatSessionDoc, Object> closeChatSesson(@RequestBody ChatSessionDoc chatSessionDoc) {
+	chatSessionDoc = sessionStore.getSession(chatSessionDoc.getSessionId());
+	chatSessionService.closeChatSession(chatSessionDoc);
+	return ApiResponse.buildData(chatSessionDoc);
+    }
+
     @RequestMapping(value = "/api/message/session/remove", method = { RequestMethod.POST })
     public ApiResponse<ChatSessionDoc, Object> getChatDetails(@RequestBody ChatSessionDoc chatSessionDoc) {
 	sessionStore.deleteSession(chatSessionDoc);
@@ -113,7 +124,7 @@ public class AdminMsgController {
     public ApiResponse<ChatSessionDTO, Map<String, Object>> getChatDetails(
 	    @RequestParam(name = "file") MultipartFile file, @RequestParam String clientDate,
 	    @RequestParam(required = false) String clientDateFormat, @RequestParam ContactType contactType) {
-    	return chatParseManager.getChats(file, contactType, clientDate, clientDateFormat);
+	return chatParseManager.getChats(file, contactType, clientDate, clientDateFormat);
     }
 
     @RequestMapping(value = "/api/message/session/import", method = { RequestMethod.POST })
