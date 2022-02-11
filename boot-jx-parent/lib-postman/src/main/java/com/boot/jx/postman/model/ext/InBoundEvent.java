@@ -8,6 +8,8 @@ public class InBoundEvent {
 
     public static final String SESSION_ROUTED = "SESSION_ROUTED";
 
+    public static final String SESSION_INIT = "SESSION_INIT";
+
     @ApiMockModelProperty(example = "SESSION_ROUTED", value = "Event Triggered by App/Service")
     public String eventCode;
 

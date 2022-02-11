@@ -21,11 +21,14 @@ import com.boot.jx.postman.PMConfiguration.PMConfigurationModel;
 import com.boot.jx.postman.PMConstants;
 import com.boot.jx.postman.PMConstants.CHAT_STATUS;
 import com.boot.jx.postman.PMConstants.DEFAULT_VALUES;
+import com.boot.jx.postman.PMEnvironment.PMDomainConfig;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.QuickTag;
+import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.ext.InBoundEvent;
 import com.boot.jx.postman.model.ext.InBoundEvent.SessionRouted;
+import com.boot.jx.postman.query.ChatSessionQuery;
 import com.boot.jx.postman.store.MessageStore.EVENTS;
 import com.boot.jx.postman.store.SessionStore;
 import com.boot.utils.ArgUtil;
@@ -44,6 +47,9 @@ public class ChatSessionManager {
 
     @Autowired
     private PMEnvironment pmEnvironment;
+
+    @Autowired
+    private PMDomainConfig pmDomainConfig;
 
     public boolean resolveSession(ChatSessionDoc session) {
 	if (!ArgUtil.isEmptyValue(session.getResolveSessionStamp())) {
@@ -250,6 +256,24 @@ public class ChatSessionManager {
     public InBoundEvent assignToQueue(String sessionId, String queueCode) {
 	ChatSessionDoc sessionDoc = sessionStore.getSession(sessionId);
 	return this.assignToQueue(sessionDoc, queueCode);
+    }
+
+    public InBoundEvent initSession(InboxMessage inboxMessage, ChatSessionDoc session) {
+	InBoundEvent inBoundEvent = new InBoundEvent().eventCode(InBoundEvent.SESSION_INIT);
+	inBoundEvent.sessionId = session.getSessionId();
+	inBoundEvent.contactId = session.getContactId();
+
+	session = sessionStore.initSession(session);
+
+	ChatSessionQuery chatSessionDocQuery = new ChatSessionQuery(session);
+
+	// Assign Queue
+	if (ArgUtil.isEmptyValue(session.getAssignedToQueue()) || ArgUtil.isEmptyValue(session.getMode())) {
+	    String defaultQueue = pmDomainConfig.getDefaultInboundQueue(inboxMessage.contact());
+	    assignToQueue(session, defaultQueue);
+	}
+	sessionStore.updateFirst(chatSessionDocQuery);
+	return inBoundEvent;
     }
 
 }
