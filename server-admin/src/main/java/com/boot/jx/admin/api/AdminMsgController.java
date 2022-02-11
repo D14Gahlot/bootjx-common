@@ -117,7 +117,7 @@ public class AdminMsgController {
 
     @RequestMapping(value = "/api/message/session/route", method = { RequestMethod.POST })
     public ApiResponse<InBoundEvent, Object> routeChatSesson(@RequestParam String sessionId,
-	    @RequestParam(required = false) String queue) {
+	    @RequestParam(required = false, defaultValue = "") String queue) {
 	InBoundEvent event = chatSessionService.routeChatSession(sessionId, queue, null);
 	return ApiResponse.buildData(event);
     }
