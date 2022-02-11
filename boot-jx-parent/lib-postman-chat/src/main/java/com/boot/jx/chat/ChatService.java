@@ -20,6 +20,7 @@ import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.dto.ChatUserProfileDTO;
 import com.boot.jx.postman.dto.ChatUserProfileDTO.ChatUserProfileRequest;
+import com.boot.jx.postman.manager.ChatSessionManager;
 import com.boot.jx.postman.manager.LogManager;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.Message;
@@ -57,6 +58,9 @@ public class ChatService {
 
     @Autowired
     private SessionStore sessionStore;
+
+    @Autowired
+    private ChatSessionManager chatSessionManager;
 
     @Autowired
     private ChatSessionFactory chatSessionFactory;
@@ -307,7 +311,7 @@ public class ChatService {
 	}
 
 	if (initd) {
-	    session = sessionStore.initSession(session);
+	    chatSessionManager.initSession(inboxMessage, session);
 	}
 	return session.isInitd();
     }
