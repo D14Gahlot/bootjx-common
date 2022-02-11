@@ -260,6 +260,9 @@ public class ChatSessionManager {
 
     public InBoundEvent initSession(InboxMessage inboxMessage, ChatSessionDoc session) {
 	InBoundEvent inBoundEvent = new InBoundEvent().eventCode(InBoundEvent.SESSION_INIT);
+	inBoundEvent.sessionId = session.getSessionId();
+	inBoundEvent.contactId = session.getContactId();
+
 	session = sessionStore.initSession(session);
 
 	ChatSessionQuery chatSessionDocQuery = new ChatSessionQuery(session);
