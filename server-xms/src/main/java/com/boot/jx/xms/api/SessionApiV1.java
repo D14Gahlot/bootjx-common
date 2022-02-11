@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.boot.jx.api.ApiResponse;
+import com.boot.jx.common.service.ChatSessionService;
 import com.boot.jx.common.store.ChatArchiveService;
 import com.boot.jx.inbound.InBound.InBoundHandler;
 import com.boot.jx.postman.dto.ChatMessageDTO;
@@ -31,7 +32,7 @@ public class SessionApiV1 {
     private ChatArchiveService chatArchive;
 
     @Autowired
-    private ChatSessionManager chatSessionManager;
+    private ChatSessionService chatSessionService;
 
     @Autowired(required = false)
     private InBoundHandler inBoundHandler;
@@ -52,11 +53,7 @@ public class SessionApiV1 {
     @XMSClientAuth
     @RequestMapping(value = "/api/v1/session/routing", method = { RequestMethod.POST })
     public ApiResponse<InBoundEvent, Object> sessionRouting(@RequestBody SessionQueueAssignment req) {
-	InBoundEvent event = chatSessionManager.assignToQueue(req.sessionId, req.queue);
-	event.sessionRouted.params = req.params;
-	if (ArgUtil.is(inBoundHandler)) {
-	    inBoundHandler.handleAsync(event);
-	}
+	InBoundEvent event = chatSessionService.routeChatSession(req.sessionId, req.queue, req.params);
 	return ApiResponse.buildResults(event);
     }
 

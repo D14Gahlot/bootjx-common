@@ -8,15 +8,15 @@ import com.boot.jx.chat.ChatService;
 import com.boot.jx.common.config.CDNBuilder;
 import com.boot.jx.common.config.ConfigConstants;
 import com.boot.jx.common.store.ChatArchiveBuilder;
-import com.boot.jx.common.store.ChatArchiveService;
+import com.boot.jx.inbound.InBound.InBoundHandler;
 import com.boot.jx.logger.LoggerService;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PMEnvironment.PMConfigurationObject;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.MessageDoc;
-import com.boot.jx.postman.dto.ChatMessageDTO;
 import com.boot.jx.postman.manager.ChatSessionManager;
 import com.boot.jx.postman.model.OutboxMessage;
+import com.boot.jx.postman.model.ext.InBoundEvent;
 import com.boot.jx.stomp.StompTunnelService;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.utils.ArgUtil;
@@ -41,6 +41,9 @@ public class ChatSessionService {
     @Autowired
     private ChatArchiveBuilder chatArchiveBuilder;
 
+    @Autowired(required = false)
+    private InBoundHandler inBoundHandler;
+
     public MessageDoc closeChatSession(ChatSessionDoc chatSessionDoc) {
 	MessageDoc messageDoc = null;
 
@@ -59,6 +62,15 @@ public class ChatSessionService {
 		chatArchiveBuilder.buildChatSessionDTO().from(chatSessionDoc).withContact()
 			.isAssigned(chatSessionDoc.getAssignedToAgent()).get());
 	return messageDoc;
+    }
+
+    public InBoundEvent routeChatSession(String sessionId, String queue, Object params) {
+	InBoundEvent event = chatSessionManager.assignToQueue(sessionId, queue);
+	event.sessionRouted.params = params;
+	if (ArgUtil.is(inBoundHandler)) {
+	    inBoundHandler.handleAsync(event);
+	}
+	return event;
     }
 
 }

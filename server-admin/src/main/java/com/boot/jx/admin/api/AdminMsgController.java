@@ -32,6 +32,7 @@ import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.dto.ChatMessageDTO;
 import com.boot.jx.postman.dto.ChatSessionDTO;
 import com.boot.jx.postman.model.OutboxMessage;
+import com.boot.jx.postman.model.ext.InBoundEvent;
 import com.boot.jx.postman.service.ChatDTOUtil;
 import com.boot.jx.postman.store.MessageStore;
 import com.boot.jx.postman.store.SessionStore;
@@ -112,6 +113,13 @@ public class AdminMsgController {
 	chatSessionDoc = sessionStore.getSession(chatSessionDoc.getSessionId());
 	chatSessionService.closeChatSession(chatSessionDoc);
 	return ApiResponse.buildData(chatSessionDoc);
+    }
+
+    @RequestMapping(value = "/api/message/session/route", method = { RequestMethod.POST })
+    public ApiResponse<InBoundEvent, Object> routeChatSesson(@RequestBody String sessionId,
+	    @RequestParam(required = false) String queue) {
+	InBoundEvent event = chatSessionService.routeChatSession(sessionId, queue, null);
+	return ApiResponse.buildData(event);
     }
 
     @RequestMapping(value = "/api/message/session/remove", method = { RequestMethod.POST })
