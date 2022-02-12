@@ -1,6 +1,7 @@
 package com.boot.jx.account.api;
 
 import java.security.NoSuchAlgorithmException;
+import java.util.Set;
 import java.util.UUID;
 
 import javax.servlet.http.HttpServletRequest;
@@ -100,7 +101,6 @@ public class PartnerController {
 	    throws NoSuchAlgorithmException {
 	String tnt = AppContextUtil.getTenant();
 
-	
 	if (!Tenants.isDefault(tnt)) {
 	    return pmCommonConfig.mainDomainRedirect(commonHttpRequest.getRequestURI() + "/auth/direct");
 	}
@@ -218,43 +218,6 @@ public class PartnerController {
     }
 
     @ResponseBody
-    @RequestMapping(value = { "/api/domain" }, method = { RequestMethod.GET })
-    public ApiResponse<DomainDoc, Object> getDomain() {
-	BusinessUserDoc domainUser = adminSessionBean.domainUser();
-
-	if (!ArgUtil.is(domainUser)) {
-	    ApiResponseUtil.throwException("Access Denied");
-	}
-
-	DomainDoc domainDoc = CollectionUtil.first(domainUser.getDomains());
-
-	if (!ArgUtil.is(domainDoc)) {
-	    domainDoc = new DomainDoc();
-	}
-
-	if (!ArgUtil.is(domainDoc.getCompany())) {
-	    domainDoc.setCompany(new CompanyDoc());
-	}
-	if (!ArgUtil.is(domainDoc.getCompany().getConactEmail())) {
-	    domainDoc.getCompany().setConactEmail(domainUser.getContact().getEmail());
-	}
-
-	if (!ArgUtil.is(domainDoc.getCompany().getConactPhone())) {
-	    domainDoc.getCompany().setConactPhone(domainUser.getContact().getPhone());
-	}
-
-	if (!ArgUtil.is(domainDoc.getCompany().getBusinessName())) {
-	    domainDoc.getCompany().setBusinessName(domainUser.getContact().getCompany());
-	}
-
-	if (!ArgUtil.is(domainDoc.getCompany().getConactCountry())) {
-	    domainDoc.getCompany().setConactCountry(domainUser.getContact().getCountry());
-	}
-
-	return ApiResponse.buildResult(domainDoc);
-    }
-
-    @ResponseBody
     @RequestMapping(value = { "/api/domain/exists", "/pub/domain/exists" }, method = { RequestMethod.GET })
     public ApiResponse<Object, Object> sisExists(@RequestParam @Valid String domain) throws NoSuchAlgorithmException {
 	AppContextUtil.setTenant(Tenants.getDefault());
@@ -279,6 +242,51 @@ public class PartnerController {
 	domainDoc = new DomainDoc();
 	domainDoc.setDomain(domainDoc.getDomain());
 	return ApiResponse.build().message("Domain available");
+    }
+
+    @ResponseBody
+    @RequestMapping(value = { "/api/domain" }, method = { RequestMethod.GET })
+    public ApiResponse<DomainDoc, Object> getDomain() {
+	BusinessUserDoc domainUser = adminSessionBean.domainUser();
+
+	if (!ArgUtil.is(domainUser)) {
+	    ApiResponseUtil.throwException("Access Denied");
+	}
+
+	Set<DomainDoc> domainDocs = domainUser.getDomains();
+
+	ApiResponse<DomainDoc, Object> resp = ApiResponse.instance(DomainDoc.class);
+
+	for (DomainDoc domainDoc : domainDocs) {
+	    // DomainDoc domainDoc = CollectionUtil.first(domainUser.getDomains());
+
+	    if (!ArgUtil.is(domainDoc)) {
+		domainDoc = new DomainDoc();
+	    }
+
+	    if (!ArgUtil.is(domainDoc.getCompany())) {
+		domainDoc.setCompany(new CompanyDoc());
+	    }
+	    if (!ArgUtil.is(domainDoc.getCompany().getConactEmail())) {
+		domainDoc.getCompany().setConactEmail(domainUser.getContact().getEmail());
+	    }
+
+	    if (!ArgUtil.is(domainDoc.getCompany().getConactPhone())) {
+		domainDoc.getCompany().setConactPhone(domainUser.getContact().getPhone());
+	    }
+
+	    if (!ArgUtil.is(domainDoc.getCompany().getBusinessName())) {
+		domainDoc.getCompany().setBusinessName(domainUser.getContact().getCompany());
+	    }
+
+	    if (!ArgUtil.is(domainDoc.getCompany().getConactCountry())) {
+		domainDoc.getCompany().setConactCountry(domainUser.getContact().getCountry());
+	    }
+
+	    resp.addResult(domainDoc);
+	}
+
+	return resp;
     }
 
     @ResponseBody
