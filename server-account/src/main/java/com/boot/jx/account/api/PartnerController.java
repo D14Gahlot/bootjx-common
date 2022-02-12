@@ -1,8 +1,10 @@
 package com.boot.jx.account.api;
 
 import java.security.NoSuchAlgorithmException;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Predicate;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -298,18 +300,18 @@ public class PartnerController {
 	BusinessUserDoc domainUser = adminSessionBean.domainUser();
 
 	if (ArgUtil.is(domainUser.getDomains())) {
-	    DomainDoc domainDoc = CollectionUtil.first(domainUser.getDomains());
-	    if (!domainDoc.getDomain().equals(domain.getDomain())) {
+
+	    Optional<DomainDoc> domaiNational = domainUser.getDomains().stream()
+		    .filter(d -> d.getDomain().equals(domain.getDomain())).findFirst();
+	    if (!domaiNational.isPresent() || !domaiNational.get().getDomain().equals(domain.getDomain())) {
 		ApiResponseUtil.throwInputException(new ApiFieldError().field("domain").codeKey("ValidDomainMultiple")
 			.description("Domain Change Not Allowed"));
 	    }
-	    domainDoc.setCompany(domain.getCompany());
-	    domainDoc.setSocial(domain.getSocial());
-	    accountStore.save(domainDoc);
+	    domaiNational.get().setCompany(domain.getCompany());
+	    domaiNational.get().setSocial(domain.getSocial());
+	    accountStore.save(domaiNational.get());
 	    accountStore.save(domainUser);
-
 	    return ApiResponse.build().message("Details updated");
-
 	} else {
 	    checkDomain(domain.getDomain());
 
