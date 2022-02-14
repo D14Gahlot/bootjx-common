@@ -198,13 +198,13 @@ public class Demo5Controller extends CommonBotController {
 			case "existing client":
 			case "عميل حالي":	
 			    reply(new OutboxMessage().template("dc_date_and_time_request").lang(lang));
-			    next("dc_date_time");
+				next("dc_cs_to_contact");
 			    break;  
 			    
 			case "previous client":
 			case "عميل سابق":	
 			    reply(new OutboxMessage().template("dc_date_and_time_request").lang(lang));
-			    next("dc_date_time");
+				next("dc_cs_to_contact");
 			    break;   
 	    	}
 	    }
@@ -231,9 +231,8 @@ public class Demo5Controller extends CommonBotController {
 	    
 	    @ChatMapping(key = "dc_date_time")
 	    public void specifyDateAndTime(InboxMessage inboxMessage, StringMatcher matcher) {
-	    	//reply(new OutboxMessage().template("dc_date_and_time_request").lang(lang));
-	    	//next("dc_cs_to_contact");
-	    	this.transferToAgent(inboxMessage, matcher);
+	    	reply(new OutboxMessage().template("dc_date_and_time_request").lang(lang));
+	    	next("dc_cs_to_contact");
 	    }
 	    
 	    @ChatMapping(key = "dc_cs_to_contact")
