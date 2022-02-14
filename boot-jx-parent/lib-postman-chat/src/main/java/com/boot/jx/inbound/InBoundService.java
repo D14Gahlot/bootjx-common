@@ -200,8 +200,6 @@ public class InBoundService {
 		agentService.onMessage(inboxMessageOriginal);
 	    } else if (botEngine.isChatBotDefined()) { // TODO:-- TO be removed
 		botEngine.invokeMethodsAsync(inboxMessageOriginal);
-	    } else { // TODO:-- TO be removed
-		chatClient.forward(inboxMessageOriginal);
 	    }
 	}
 	return inboxMessageOriginal;

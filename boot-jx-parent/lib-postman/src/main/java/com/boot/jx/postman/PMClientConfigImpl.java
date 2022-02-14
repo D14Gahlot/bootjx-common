@@ -32,9 +32,6 @@ public class PMClientConfigImpl implements PMClientConfig {
     @Value("${postman.app.type}")
     private String postmanType;
 
-    @Value("${postman.inbound.forward.url}")
-    private String inboundForwardUrl;
-
     @Value("${postman.contact.details.url}")
     private String contactDetailsUrl;
 
@@ -81,16 +78,6 @@ public class PMClientConfigImpl implements PMClientConfig {
     @Override
     public String getChatIdleTimeout() {
 	return environment.local().keyEntry("postman.chat.idle.timeout").asString(chatIdleTimeout);
-    }
-
-    @Override
-    public String getInboundForwardUrl() {
-	return inboundForwardUrl;
-    }
-
-    @Override
-    public void setInboundForwardUrl(String inboundForwardUrl) {
-	this.inboundForwardUrl = inboundForwardUrl;
     }
 
     @Override

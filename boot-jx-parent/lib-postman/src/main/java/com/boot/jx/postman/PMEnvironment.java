@@ -358,10 +358,6 @@ public class PMEnvironment {
 
 	String getPostmanType();
 
-	void setInboundForwardUrl(String inboundForwardUrl);
-
-	String getInboundForwardUrl();
-
 	boolean isLocalDummyBotEnabled();
 
 	String getDefaultSender();

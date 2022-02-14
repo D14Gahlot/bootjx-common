@@ -126,11 +126,14 @@ public class DefaultInBoundHandler implements InBoundHandler {
 		updateStatus(inboxMessage, Status.FORWARD_ERR, e);
 	    }
 	    return;
-
 	}
 
-	chatClient.forward(inboxMessage);
-
+	if ("AGENT".equalsIgnoreCase(inboxMessage.session().getMode())
+		&& ArgUtil.isEmptyValue(inboxMessage.session().isResolved())) {
+	    chatClient.forward(pmCommonConfig.getAgentUrl() + PATH.INBOUND_FRWRD, inboxMessage);
+	} else {
+	    chatClient.forward(pmCommonConfig.getBotUrl() + PATH.INBOUND_FRWRD, inboxMessage);
+	}
     }
 
     private void updateStatus(InboxMessage inboxMessage, Status status, Exception e) {

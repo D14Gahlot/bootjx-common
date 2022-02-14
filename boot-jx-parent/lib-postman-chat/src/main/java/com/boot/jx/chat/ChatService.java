@@ -278,14 +278,6 @@ public class ChatService {
 	chatContext.commitContact();
     }
 
-    public InboxMessage forward() {
-	return chatClient.forward(getInboxMessage()).getResult();
-    }
-
-    public InboxMessage forward(InboxMessage inboxMessage) {
-	return chatClient.forward(inboxMessage).getResult();
-    }
-
     public boolean initSession(InboxMessage inboxMessage, ChatSessionDoc session) {
 	boolean initd = session.isInitd();
 	if (initd) {

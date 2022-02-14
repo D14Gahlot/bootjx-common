@@ -51,10 +51,6 @@ public class ChatClient {
 	return ApiResponse.buildResult(inboxMessage);
     }
 
-    public ApiResponse<InboxMessage, Object> forward(InboxMessage inboxMessage) {
-	return this.forward(chatClientConfig.getInboundForwardUrl(), inboxMessage);
-    }
-
     public ApiResponse<InboxMessage, Object> assignToAgent(InboxMessage inboxMessage) {
 	LOGGER.debug("Assign InboxMessage Session to other Agent ");
 	if (ArgUtil.is(pmCommonConfig.getAgentUrl())) {
