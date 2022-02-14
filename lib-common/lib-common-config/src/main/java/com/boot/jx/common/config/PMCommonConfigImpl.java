@@ -58,10 +58,10 @@ public class PMCommonConfigImpl implements PMCommonConfig {
     @Value("${common.const.app}")
     private String app;
 
-    @Value("${postman.bot.url}")
+    @Value("${mry.bot.url}")
     private String botUrl;
 
-    @Value("${postman.agent.url}")
+    @Value("${mry.agent.url}")
     private String agentUrl;
 
     @Autowired

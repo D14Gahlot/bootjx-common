@@ -79,9 +79,7 @@ public class AppConfig {
     public static final String JAX_APP_URL = "${jax.app.url}";
     public static final String JAX_POSTMAN_URL = "${jax.postman.url}";
 
-    public static final String JAX_LOGGER_URL = "${jax.logger.url}";
     public static final String JAX_SSO_URL = "${jax.sso.url}";
-    public static final String JAX_AUTH_URL = "${jax.auth.url}";
 
     public static final String SPRING_REDIS_HOST = "${spring.redis.host}";
     public static final String SPRING_REDIS_PORT = "${spring.redis.port}";
@@ -185,17 +183,9 @@ public class AppConfig {
     @AppParamKey(AppParam.JAX_POSTMAN_URL)
     private String postmapURL;
 
-    @Value(JAX_LOGGER_URL)
-    @AppParamKey(AppParam.JAX_LOGGER_URL)
-    private String loggerURL;
-
     @Value(JAX_SSO_URL)
     @AppParamKey(AppParam.JAX_SSO_URL)
     private String ssoURL;
-
-    @Value(JAX_AUTH_URL)
-    @AppParamKey(AppParam.JAX_AUTH_URL)
-    private String authURL;
 
     @Value(SPRING_REDIS_HOST)
     @AppParamKey(AppParam.SPRING_REDIS_HOST)
@@ -277,10 +267,6 @@ public class AppConfig {
 	return postmapURL;
     }
 
-    public String getLoggerURL() {
-	return loggerURL;
-    }
-
     @Bean
     public AppParam loadAppParams() {
 
@@ -348,14 +334,6 @@ public class AppConfig {
 
     public String getSsoURL() {
 	return ssoURL;
-    }
-
-    public String getAuthURL() {
-	return authURL;
-    }
-
-    public void setAuthURL(String authURL) {
-	this.authURL = authURL;
     }
 
     public String getAppAuthKey() {
