@@ -59,7 +59,7 @@ public class TenantClientResolver extends TenantResolver {
 	    }
 	}
 
-	if (ArgUtil.is(accountUrl) && !Tenants.isDefault(tnt)) {
+	if (ArgUtil.is(accountUrl) && !Tenants.isDefault(tnt) && false) {
 	    try {
 		MapModel resp = restService.ajax(accountUrl).path("/partner/pub/domain/exists")
 			.queryParam("tnt", Tenants.getDefault()).queryParam("domain", tnt).get().asMapModel();
