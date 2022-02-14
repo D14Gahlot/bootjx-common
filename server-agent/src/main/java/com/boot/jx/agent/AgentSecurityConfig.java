@@ -15,6 +15,11 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.logout.LogoutHandler;
+import org.springframework.session.web.http.CookieHttpSessionStrategy;
+import org.springframework.session.web.http.HeaderHttpSessionStrategy;
+import org.springframework.session.web.http.HttpSessionStrategy;
+
+import com.boot.jx.session.SmartHttpSessionStrategy;
 
 @Configuration
 @EnableWebSecurity
@@ -27,6 +32,7 @@ public class AgentSecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
 	http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
+		//.sessionFixation().none()
 		// Publics Calls
 		.and().authorizeRequests().antMatchers("/pub/**").permitAll() // Public URLs
 		.and().authorizeRequests().antMatchers("/ext/**").permitAll() // External URLS
@@ -80,4 +86,5 @@ public class AgentSecurityConfig extends WebSecurityConfigurerAdapter {
 		"/v2/api-docs", "/configuration/ui", "/swagger-resources/**", "/configuration/security",
 		"/swagger-ui.html", "/webjars/**");
     }
+
 }

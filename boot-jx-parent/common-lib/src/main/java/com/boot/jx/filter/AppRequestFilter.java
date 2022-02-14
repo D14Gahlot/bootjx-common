@@ -96,7 +96,7 @@ public class AppRequestFilter implements Filter {
 
     @Autowired(required = false)
     TenantAuthContext tenantAuthContext;
-
+    
     // @Autowired(required = false)
     // VendorAuthFilter vendorAuthFilter;
 
@@ -337,6 +337,10 @@ public class AppRequestFilter implements Filter {
 	    } else {
 		AppContextUtil.loadTraceId(traceId);
 		AppContextUtil.init();
+	    }
+
+	    if (ArgUtil.is(req.getSession(false))) {
+		AppContextUtil.setJSessionId(req.getSession().getId());
 	    }
 
 	    // Actual Request Handling
