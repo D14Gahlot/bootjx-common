@@ -17,8 +17,8 @@ import com.boot.jx.AppContextUtil;
 import com.boot.jx.common.impl.ConfigMeta;
 import com.boot.jx.http.CommonHttpRequest;
 import com.boot.jx.logger.LoggerService;
-import com.boot.jx.postman.PMClientConfig;
 import com.boot.jx.postman.PMEnvironment;
+import com.boot.jx.postman.PMEnvironment.PMClientConfig;
 import com.boot.jx.postman.PMEnvironment.PMCommonConfig;
 import com.boot.jx.scope.tnt.Tenants;
 import com.boot.jx.scope.tnt.Tenants.TenantResolver;
@@ -58,10 +58,10 @@ public class PMCommonConfigImpl implements PMCommonConfig {
     @Value("${common.const.app}")
     private String app;
 
-    @Value("${postman.bot.url}")
+    @Value("${mry.bot.url}")
     private String botUrl;
 
-    @Value("${postman.agent.url}")
+    @Value("${mry.agent.url}")
     private String agentUrl;
 
     @Autowired

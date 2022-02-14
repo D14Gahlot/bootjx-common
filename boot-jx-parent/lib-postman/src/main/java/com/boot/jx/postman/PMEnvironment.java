@@ -17,6 +17,7 @@ import com.boot.jx.scope.tnt.Tenants;
 import com.boot.model.MapModel.EntryMeta;
 import com.boot.model.MapModel.MapEntry;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.TimeUtils.TimePeriod;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonView;
 
@@ -341,5 +342,31 @@ public class PMEnvironment {
 	public String getDefaultInboundQueue(String channelId);
 
 	public String getDefaultInboundQueue(Contactable contact);
+    }
+
+    public interface PMClientConfig {
+
+	String getWebhookBase(ChannelConfig channelConfig);
+
+	String getChatSessionTimeout();
+
+	TimePeriod getAgentSessionTimeout();
+
+	String getWebhookUrl(ChannelConfig channelConfig);
+
+	String getChatIdleTimeout();
+
+	String getPostmanType();
+
+	void setInboundForwardUrl(String inboundForwardUrl);
+
+	String getInboundForwardUrl();
+
+	boolean isLocalDummyBotEnabled();
+
+	String getDefaultSender();
+
+	String getContactDetailsUrl();
+
     }
 }

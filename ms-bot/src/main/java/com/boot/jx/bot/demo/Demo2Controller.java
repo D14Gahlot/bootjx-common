@@ -11,7 +11,6 @@ import com.boot.jx.dict.FileType;
 import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.OutboxMessage;
-import com.boot.utils.ArgUtil;
 import com.boot.utils.StringUtils.StringMatcher;
 
 @BotController(name = "DemoBot", tenant = { "app", "demo", "sandbox", "customer"  })

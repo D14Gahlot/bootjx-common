@@ -107,14 +107,16 @@ public class DefaultInBoundHandler implements InBoundHandler {
 		}
 
 		// INTERNAL AGENT HANDLING
-		if (ArgUtil.areEqual(CHAT_MODE.AGENT.toString(), defaultClient.getAppType())) {
+		if (ArgUtil.areEqual(CHAT_MODE.AGENT.toString(), defaultClient.getAppType())
+			&& ArgUtil.is(pmCommonConfig.getAgentUrl())) {
 		    LOGGER.debug("Forwarding InboxMessage to internal Agent ");
 		    chatClient.forward(pmCommonConfig.getAgentUrl() + PATH.INBOUND_FRWRD, inboxMessage);
 		    return;
 		}
 
 		// INTERNAL BOT HANDLING
-		if (ArgUtil.areEqual(CHAT_MODE.BOT.toString(), defaultClient.getAppType())) {
+		if (ArgUtil.areEqual(CHAT_MODE.BOT.toString(), defaultClient.getAppType())
+			&& ArgUtil.is(pmCommonConfig.getBotUrl())) {
 		    LOGGER.debug("Forwarding InboxMessage to internal Bot ");
 		    chatClient.forward(pmCommonConfig.getBotUrl() + PATH.INBOUND_FRWRD, inboxMessage);
 		    return;

@@ -48,10 +48,5 @@
     "name": "jax.payment.url",
     "type": "java.lang.String",
     "description": "A description for 'jax.payment.url'"
-  },
-  {
-    "name": "jax.logger.url",
-    "type": "java.lang.String",
-    "description": "A description for 'jax.logger.url'"
   }
 ]}

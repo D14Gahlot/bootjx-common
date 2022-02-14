@@ -6,7 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.boot.jx.logger.AuditDetailProvider;
-import com.boot.jx.postman.PMClientConfig;
+import com.boot.jx.postman.PMEnvironment.PMClientConfig;
 
 @Component
 public class BotSessionBean implements AuditDetailProvider, Serializable {

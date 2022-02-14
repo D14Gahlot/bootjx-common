@@ -7,7 +7,8 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Component;
 
 import com.boot.jx.api.ApiResponse;
-import com.boot.jx.postman.PMClientConfig;
+import com.boot.jx.postman.PMEnvironment.PMClientConfig;
+import com.boot.jx.postman.PMEnvironment.PMCommonConfig;
 import com.boot.jx.postman.PostManException;
 import com.boot.jx.postman.dto.ChatUserProfileDTO;
 import com.boot.jx.postman.dto.ChatUserProfileDTO.ChatUserProfileRequest;
@@ -32,6 +33,9 @@ public class ChatClient {
     @Autowired
     private PMClientConfig chatClientConfig;
 
+    @Autowired
+    private PMCommonConfig pmCommonConfig;
+
     public ApiResponse<InboxMessage, Object> forward(String inboundForwardUrl, InboxMessage inboxMessage) {
 	LOGGER.debug("Forwarding InboxMessage to other Service ");
 	try {
@@ -53,9 +57,9 @@ public class ChatClient {
 
     public ApiResponse<InboxMessage, Object> assignToAgent(InboxMessage inboxMessage) {
 	LOGGER.debug("Assign InboxMessage Session to other Agent ");
-	if (ArgUtil.is(chatClientConfig.getAgentUrl())) {
+	if (ArgUtil.is(pmCommonConfig.getAgentUrl())) {
 	    inboxMessage.setChecksum(PostManUtil.generateCheckSum(inboxMessage));
-	    return restService.ajax(chatClientConfig.getAgentUrl()).path(PATH.ASSIGN_TO_AGENT).post(inboxMessage)
+	    return restService.ajax(pmCommonConfig.getAgentUrl()).path(PATH.ASSIGN_TO_AGENT).post(inboxMessage)
 		    .as(new ParameterizedTypeReference<ApiResponse<InboxMessage, Object>>() {
 		    });
 	} else {
