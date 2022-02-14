@@ -29,9 +29,6 @@ public class PMClientConfig {
     @Value("${postman.app.type}")
     private String postmanType;
 
-    @Value("${postman.agent.url}")
-    private String agentUrl;
-
     @Value("${postman.inbound.forward.url}")
     private String inboundForwardUrl;
 
@@ -61,10 +58,6 @@ public class PMClientConfig {
 
     @Autowired
     private AppConfig appConfig;
-
-    public String getAgentUrl() {
-	return agentUrl;
-    }
 
     public boolean isLocalDummyBotEnabled() {
 	return localDummyBotEnabled;

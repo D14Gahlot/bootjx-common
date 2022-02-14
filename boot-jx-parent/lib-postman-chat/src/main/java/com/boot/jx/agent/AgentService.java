@@ -10,7 +10,7 @@ import com.boot.jx.chat.ChatClient;
 import com.boot.jx.chat.ConnectorHandlerFactory;
 import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorHandler;
 import com.boot.jx.connectors.AbstractConnector;
-import com.boot.jx.postman.PMClientConfig;
+import com.boot.jx.postman.PMEnvironment.PMCommonConfig;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.dto.ChatMessageDTO;
 import com.boot.jx.postman.model.InboxMessage;
@@ -27,7 +27,7 @@ public class AgentService {
     private ChatClient chatClient;
 
     @Autowired
-    private PMClientConfig chatClientConfig;
+    public PMCommonConfig pmCommonConfig;
 
     @Autowired
     private ConnectorHandlerFactory connectorHandlerFactory;
@@ -41,7 +41,7 @@ public class AgentService {
     public ApiResponse<InboxMessage, Object> assignToAgent(InboxMessage inboxMessage) {
 	if (ArgUtil.is(agentChatHandler) && agentChatHandler.onAssignSupported(inboxMessage)) {
 	    return ApiResponse.buildResult(agentChatHandler.onAssign(inboxMessage));
-	} else if (ArgUtil.is(chatClientConfig.getAgentUrl())) {
+	} else if (ArgUtil.is(pmCommonConfig.getAgentUrl())) {
 	    return chatClient.assignToAgent(inboxMessage);
 	} else {
 	    ConnectorHandler connector = connectorHandlerFactory.get(inboxMessage.contact().type(),
