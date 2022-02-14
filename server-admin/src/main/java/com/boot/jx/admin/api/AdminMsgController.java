@@ -32,6 +32,7 @@ import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.dto.ChatMessageDTO;
 import com.boot.jx.postman.dto.ChatSessionDTO;
 import com.boot.jx.postman.model.OutboxMessage;
+import com.boot.jx.postman.model.ext.InBoundEvent;
 import com.boot.jx.postman.service.ChatDTOUtil;
 import com.boot.jx.postman.store.MessageStore;
 import com.boot.jx.postman.store.SessionStore;
@@ -102,16 +103,24 @@ public class AdminMsgController {
 
     @RequestMapping(value = "/api/message/messages", method = { RequestMethod.POST })
     public ApiResponse<ChatSessionDTO, Object> getMessagesForSession(@RequestBody ChatSessionDTO chatSessionDto) {
+	chatSessionDto = chatArchive.getChatSession(chatSessionDto);
 	chatSessionDto = chatArchive.withContact(chatSessionDto);
 	chatSessionDto = chatArchive.withMessages(chatSessionDto);
 	return ApiResponse.buildData(chatSessionDto);
     }
 
     @RequestMapping(value = "/api/message/session/close", method = { RequestMethod.POST })
-    public ApiResponse<ChatSessionDoc, Object> closeChatSesson(@RequestBody ChatSessionDoc chatSessionDoc) {
-	chatSessionDoc = sessionStore.getSession(chatSessionDoc.getSessionId());
+    public ApiResponse<ChatSessionDoc, Object> closeChatSesson(@RequestParam String sessionId) {
+	ChatSessionDoc chatSessionDoc = sessionStore.getSession(sessionId);
 	chatSessionService.closeChatSession(chatSessionDoc);
 	return ApiResponse.buildData(chatSessionDoc);
+    }
+
+    @RequestMapping(value = "/api/message/session/route", method = { RequestMethod.POST })
+    public ApiResponse<InBoundEvent, Object> routeChatSesson(@RequestParam String sessionId,
+	    @RequestParam(required = false, defaultValue = "") String queue) {
+	InBoundEvent event = chatSessionService.routeChatSession(sessionId, queue, null);
+	return ApiResponse.buildData(event);
     }
 
     @RequestMapping(value = "/api/message/session/remove", method = { RequestMethod.POST })

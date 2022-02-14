@@ -1,7 +1,10 @@
 package com.boot.jx.account.api;
 
 import java.security.NoSuchAlgorithmException;
+import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
+import java.util.function.Predicate;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -100,7 +103,6 @@ public class PartnerController {
 	    throws NoSuchAlgorithmException {
 	String tnt = AppContextUtil.getTenant();
 
-	
 	if (!Tenants.isDefault(tnt)) {
 	    return pmCommonConfig.mainDomainRedirect(commonHttpRequest.getRequestURI() + "/auth/direct");
 	}
@@ -218,43 +220,6 @@ public class PartnerController {
     }
 
     @ResponseBody
-    @RequestMapping(value = { "/api/domain" }, method = { RequestMethod.GET })
-    public ApiResponse<DomainDoc, Object> getDomain() {
-	BusinessUserDoc domainUser = adminSessionBean.domainUser();
-
-	if (!ArgUtil.is(domainUser)) {
-	    ApiResponseUtil.throwException("Access Denied");
-	}
-
-	DomainDoc domainDoc = CollectionUtil.first(domainUser.getDomains());
-
-	if (!ArgUtil.is(domainDoc)) {
-	    domainDoc = new DomainDoc();
-	}
-
-	if (!ArgUtil.is(domainDoc.getCompany())) {
-	    domainDoc.setCompany(new CompanyDoc());
-	}
-	if (!ArgUtil.is(domainDoc.getCompany().getConactEmail())) {
-	    domainDoc.getCompany().setConactEmail(domainUser.getContact().getEmail());
-	}
-
-	if (!ArgUtil.is(domainDoc.getCompany().getConactPhone())) {
-	    domainDoc.getCompany().setConactPhone(domainUser.getContact().getPhone());
-	}
-
-	if (!ArgUtil.is(domainDoc.getCompany().getBusinessName())) {
-	    domainDoc.getCompany().setBusinessName(domainUser.getContact().getCompany());
-	}
-
-	if (!ArgUtil.is(domainDoc.getCompany().getConactCountry())) {
-	    domainDoc.getCompany().setConactCountry(domainUser.getContact().getCountry());
-	}
-
-	return ApiResponse.buildResult(domainDoc);
-    }
-
-    @ResponseBody
     @RequestMapping(value = { "/api/domain/exists", "/pub/domain/exists" }, method = { RequestMethod.GET })
     public ApiResponse<Object, Object> sisExists(@RequestParam @Valid String domain) throws NoSuchAlgorithmException {
 	AppContextUtil.setTenant(Tenants.getDefault());
@@ -282,6 +247,51 @@ public class PartnerController {
     }
 
     @ResponseBody
+    @RequestMapping(value = { "/api/domain" }, method = { RequestMethod.GET })
+    public ApiResponse<DomainDoc, Object> getDomain() {
+	BusinessUserDoc domainUser = adminSessionBean.domainUser();
+
+	if (!ArgUtil.is(domainUser)) {
+	    ApiResponseUtil.throwException("Access Denied");
+	}
+
+	Set<DomainDoc> domainDocs = domainUser.getDomains();
+
+	ApiResponse<DomainDoc, Object> resp = ApiResponse.instance(DomainDoc.class);
+
+	for (DomainDoc domainDoc : domainDocs) {
+	    // DomainDoc domainDoc = CollectionUtil.first(domainUser.getDomains());
+
+	    if (!ArgUtil.is(domainDoc)) {
+		domainDoc = new DomainDoc();
+	    }
+
+	    if (!ArgUtil.is(domainDoc.getCompany())) {
+		domainDoc.setCompany(new CompanyDoc());
+	    }
+	    if (!ArgUtil.is(domainDoc.getCompany().getConactEmail())) {
+		domainDoc.getCompany().setConactEmail(domainUser.getContact().getEmail());
+	    }
+
+	    if (!ArgUtil.is(domainDoc.getCompany().getConactPhone())) {
+		domainDoc.getCompany().setConactPhone(domainUser.getContact().getPhone());
+	    }
+
+	    if (!ArgUtil.is(domainDoc.getCompany().getBusinessName())) {
+		domainDoc.getCompany().setBusinessName(domainUser.getContact().getCompany());
+	    }
+
+	    if (!ArgUtil.is(domainDoc.getCompany().getConactCountry())) {
+		domainDoc.getCompany().setConactCountry(domainUser.getContact().getCountry());
+	    }
+
+	    resp.addResult(domainDoc);
+	}
+
+	return resp;
+    }
+
+    @ResponseBody
     @RequestMapping(value = { "/api/domain" }, method = { RequestMethod.POST })
     public ApiResponse<Object, Object> createDomain(Model model, HttpServletRequest request,
 	    HttpServletResponse httpServletResponse, @RequestBody @Valid DomainDoc domain,
@@ -290,18 +300,18 @@ public class PartnerController {
 	BusinessUserDoc domainUser = adminSessionBean.domainUser();
 
 	if (ArgUtil.is(domainUser.getDomains())) {
-	    DomainDoc domainDoc = CollectionUtil.first(domainUser.getDomains());
-	    if (!domainDoc.getDomain().equals(domain.getDomain())) {
+
+	    Optional<DomainDoc> domaiNational = domainUser.getDomains().stream()
+		    .filter(d -> d.getDomain().equals(domain.getDomain())).findFirst();
+	    if (!domaiNational.isPresent() || !domaiNational.get().getDomain().equals(domain.getDomain())) {
 		ApiResponseUtil.throwInputException(new ApiFieldError().field("domain").codeKey("ValidDomainMultiple")
 			.description("Domain Change Not Allowed"));
 	    }
-	    domainDoc.setCompany(domain.getCompany());
-	    domainDoc.setSocial(domain.getSocial());
-	    accountStore.save(domainDoc);
+	    domaiNational.get().setCompany(domain.getCompany());
+	    domaiNational.get().setSocial(domain.getSocial());
+	    accountStore.save(domaiNational.get());
 	    accountStore.save(domainUser);
-
 	    return ApiResponse.build().message("Details updated");
-
 	} else {
 	    checkDomain(domain.getDomain());
 

@@ -88,7 +88,8 @@ public class AccountSecurityConfig extends WebSecurityConfigurerAdapter {
 		    referrer = Urly.parse(referrer).getRelativeURL();
 		    for (String context : CONTEXTS) {
 			if (referrer.startsWith(context, 1)) {
-			    redirectResponse(request, response, "/" + context + "/auth/login?logout");
+			    redirectResponse(request, response,
+				    "/" + context + "/auth/login?logout?_=" + System.currentTimeMillis());
 			}
 		    }
 
@@ -100,7 +101,7 @@ public class AccountSecurityConfig extends WebSecurityConfigurerAdapter {
 
 	    private void redirectResponse(HttpServletRequest request, HttpServletResponse response,
 		    String destination) {
-		response.setStatus(HttpServletResponse.SC_MOVED_PERMANENTLY);
+		response.setStatus(HttpServletResponse.SC_MOVED_TEMPORARILY);
 		response.setHeader("Location", destination);
 	    }
 	};
