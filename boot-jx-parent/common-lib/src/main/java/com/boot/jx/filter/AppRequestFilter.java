@@ -56,6 +56,7 @@ import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.Constants;
 import com.boot.utils.CryptoUtil;
+import com.boot.utils.HttpUtils;
 import com.boot.utils.JsonUtil;
 import com.boot.utils.StringUtils;
 import com.boot.utils.UniqueID;
@@ -96,7 +97,7 @@ public class AppRequestFilter implements Filter {
 
     @Autowired(required = false)
     TenantAuthContext tenantAuthContext;
-    
+
     // @Autowired(required = false)
     // VendorAuthFilter vendorAuthFilter;
 
@@ -192,7 +193,7 @@ public class AppRequestFilter implements Filter {
 	    if (StringUtils.isEmpty(siteId)) {
 		siteId = ArgUtil.parseAsString(localCommonHttpRequest.getRequestParam(TenantContextHolder.TENANT));
 		if (siteId == null) {
-		    siteId = Urly.getSubDomainName(request.getServerName());
+		    siteId = HttpUtils.getSubDomain(req);
 		}
 	    }
 
