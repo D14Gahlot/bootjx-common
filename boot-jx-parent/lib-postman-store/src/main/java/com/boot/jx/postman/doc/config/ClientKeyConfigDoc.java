@@ -5,7 +5,6 @@ import org.springframework.data.annotation.TypeAlias;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import com.boot.jx.model.AuditCreateEntity;
 import com.boot.jx.mongo.CommonDocInterfaces.AuditableByIdEntity;
 import com.boot.jx.mongo.CommonDocInterfaces.IDocument;
 import com.boot.jx.postman.ClientApp;

@@ -1,6 +1,5 @@
 package com.boot.jx.connectors;
 
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -15,10 +14,10 @@ import com.boot.jx.dict.FileFormat;
 import com.boot.jx.dict.FileType;
 import com.boot.jx.exception.AmxApiException;
 import com.boot.jx.model.CommonFile;
-import com.boot.jx.postman.PMClientConfig;
 import com.boot.jx.postman.PMConstants.CHANNEL_TYPE;
 import com.boot.jx.postman.PMConstants.MESSAGE_COMPOSE_TYPE;
 import com.boot.jx.postman.PMConstants.MESSAGE_FORMAT_TYPE;
+import com.boot.jx.postman.PMEnvironment.PMClientConfig;
 import com.boot.jx.postman.client.PMFileStoreClient;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.model.Attachment;

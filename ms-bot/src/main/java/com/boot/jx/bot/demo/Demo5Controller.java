@@ -6,7 +6,6 @@ import java.time.format.DateTimeFormatter;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.boot.jx.AppContextUtil;
 import com.boot.jx.bot.BotController;
 import com.boot.jx.bot.ChatContext;
 import com.boot.jx.bot.ChatMapping;

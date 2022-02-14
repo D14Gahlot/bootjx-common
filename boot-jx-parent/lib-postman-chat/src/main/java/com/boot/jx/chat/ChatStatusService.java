@@ -16,7 +16,6 @@ import org.springframework.stereotype.Component;
 import com.boot.jx.AppContextUtil;
 import com.boot.jx.cache.CacheBox;
 import com.boot.jx.def.ICacheBox;
-import com.boot.jx.inbound.InBound;
 import com.boot.jx.inbound.InBound.InBoundHandler;
 import com.boot.jx.postman.model.MessageReport;
 import com.boot.jx.postman.store.MessageStore;

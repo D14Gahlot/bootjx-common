@@ -7,7 +7,7 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Component;
 
 import com.boot.jx.api.ApiResponse;
-import com.boot.jx.postman.PMClientConfig;
+import com.boot.jx.postman.PMEnvironment.PMClientConfig;
 import com.boot.jx.postman.PMEnvironment.PMCommonConfig;
 import com.boot.jx.postman.PostManException;
 import com.boot.jx.postman.dto.ChatUserProfileDTO;

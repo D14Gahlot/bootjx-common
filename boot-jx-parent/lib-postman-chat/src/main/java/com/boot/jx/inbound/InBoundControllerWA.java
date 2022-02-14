@@ -20,7 +20,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.chat.ChatService;
 import com.boot.jx.chat.ConnectorHandlerFactory;
-import com.boot.jx.chat.ChatStatusService;
 import com.boot.jx.connectors.WA360Connector;
 import com.boot.jx.connectors.WAGupShupAgentConnector;
 import com.boot.jx.connectors.WAGupShupConnector;
