@@ -78,13 +78,13 @@ public class Demo5Controller extends CommonBotController {
 		case "customer service":
 		case "خدمة العملاء":
 		    reply(new OutboxMessage().template("dc_cs_to_contact").lang(lang));
-		    next("customer-onselect");
+		    next("dc_cs_to_contact");
 		    break;    
 		
 		case "menu selection":
 		case "المنيوخيارات":
 		    reply(new OutboxMessage().template("dc_cs_to_contact").lang(lang));
-		    next("menu-onselect");
+		    next("dc_cs_to_contact");
 		    break;
 		case "clinic locations":
 		case "مواقع العيادات":
@@ -231,11 +231,12 @@ public class Demo5Controller extends CommonBotController {
 	    
 	    @ChatMapping(key = "dc_date_time")
 	    public void specifyDateAndTime(InboxMessage inboxMessage, StringMatcher matcher) {
-	    	reply(new OutboxMessage().template("dc_date_and_time_request").lang(lang));
-	    	next("talk2agent");
+	    	//reply(new OutboxMessage().template("dc_date_and_time_request").lang(lang));
+	    	//next("dc_cs_to_contact");
+	    	this.transferToAgent(inboxMessage, matcher);
 	    }
 	    
-	    @ChatMapping(key = "talk2agent")
+	    @ChatMapping(key = "dc_cs_to_contact")
 	    public void transferToAgent(InboxMessage inboxMessage, StringMatcher matcher) {
 		commonTransferToAgent(inboxMessage, matcher);
 	    }
