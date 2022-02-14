@@ -85,7 +85,6 @@ public class AppConfig {
 
     public static final String SPRING_REDIS_HOST = "${spring.redis.host}";
     public static final String SPRING_REDIS_PORT = "${spring.redis.port}";
-    public static final String JAX_SERVICE_PROVIDER_URL = "${jax.service-provider.url}";
 
     @Value(APP_ENV)
     @AppParamKey(AppParam.APP_ENV)
