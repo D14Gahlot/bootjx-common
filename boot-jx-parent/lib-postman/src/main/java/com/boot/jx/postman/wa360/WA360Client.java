@@ -248,7 +248,7 @@ public class WA360Client {
 	    Map<String, Object> row = new HashMap<String, Object>();
 	    row.put("id", button.getName());
 	    row.put("title", button.getLabel());
-	    row.put("description", button.getType());
+	   // row.put("description", button.getType());
 	    rows.add(row);
 
 	    if (rows.size() > 9) {
