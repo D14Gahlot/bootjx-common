@@ -317,9 +317,9 @@ public class MessageStore extends CommonMongoTemplateAbstract {
 	    if (ArgUtil.is(messageReport.getReason())) {
 		builder.update().push("logs", messageReport.getReason());
 	    }
-
-	    if (messageReport.getStatus() == Status.DELTD) {
-		builder.set("message", null);
+	    
+	    if (ArgUtil.is(messageReport.getStatus()) && messageReport.getStatus() == Status.DELTD){
+	    	builder.set("message",null);
 	    }
 
 	    String collectionName = getCollectionName(messageReport.contact().getContactType());
