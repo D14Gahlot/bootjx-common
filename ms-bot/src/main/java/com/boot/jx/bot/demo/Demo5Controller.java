@@ -76,14 +76,16 @@ public class Demo5Controller extends CommonBotController {
 		    break;    
 		case "customer service":
 		case "خدمة العملاء":
-		    reply(new OutboxMessage().template("dc_cs_to_contact").lang(lang));
-		    next("dc_cs_to_contact");
+		   // reply(new OutboxMessage().template("dc_cs_to_contact").lang(lang));
+		    //next("dc_cs_to_contact");
+			 this.transferToAgent(inboxMessage, matcher);	
 		    break;    
 		
 		case "menu selection":
 		case "المنيوخيارات":
-		    reply(new OutboxMessage().template("dc_cs_to_contact").lang(lang));
-		    next("dc_cs_to_contact");
+		   // reply(new OutboxMessage().template("dc_cs_to_contact").lang(lang));
+		    //next("dc_cs_to_contact");
+			 this.transferToAgent(inboxMessage, matcher);	
 		    break;
 		case "clinic locations":
 		case "مواقع العيادات":
@@ -95,7 +97,7 @@ public class Demo5Controller extends CommonBotController {
 		    next("feedback-onselect");
 		    break;    
 		default :
-			  reply(new OutboxMessage().template("dc_cs_to_contact").lang(lang));
+			 // reply(new OutboxMessage().template("dc_cs_to_contact").lang(lang));
 			  this.transferToAgent(inboxMessage, matcher);
 		    break;    
 	   
@@ -107,7 +109,7 @@ public class Demo5Controller extends CommonBotController {
 	    	switch (inboxMessage.getMessage().toLowerCase().trim()) {
 			case "new member":
 			case "مشترك جديد":
-			    reply(new OutboxMessage().template("dc_cs_to_contact").lang(lang));
+			   // reply(new OutboxMessage().template("dc_cs_to_contact").lang(lang));
 			    this.transferToAgent(inboxMessage, matcher);
 			    break;
 			case "current member":
@@ -117,7 +119,7 @@ public class Demo5Controller extends CommonBotController {
 			    break;
 			case "previous member":
 			case "مشترك سابق":
-			    reply(new OutboxMessage().template("dc_cs_to_contact").lang(lang));
+			   // reply(new OutboxMessage().template("dc_cs_to_contact").lang(lang));
 			    this.transferToAgent(inboxMessage, matcher);
 			    break;      
 			    
@@ -131,12 +133,12 @@ public class Demo5Controller extends CommonBotController {
 	    	switch (inboxMessage.getMessage().toLowerCase().trim()) {
 	    	case "renew membership":
 			case "تجديد نوع الحالي":
-			    reply(new OutboxMessage().template("dc_cs_to_contact").lang(lang));
+			   // reply(new OutboxMessage().template("dc_cs_to_contact").lang(lang));
 			    this.transferToAgent(inboxMessage, matcher);
 			    break;
 			case "change membership":
 			case "تغيير نوع الاشتراك":
-				  reply(new OutboxMessage().template("dc_cs_to_contact").lang(lang));
+				 // reply(new OutboxMessage().template("dc_cs_to_contact").lang(lang));
 				  this.transferToAgent(inboxMessage, matcher);
 			    break;
 	    	}
