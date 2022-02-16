@@ -155,7 +155,7 @@ public class Demo5Controller extends CommonBotController {
 			    reply(new OutboxMessage().template("dc_location_link_timing_sharq").lang(lang));
 			    next("clinics-onselect");
 			    break;
-			case "bairaq_mall":
+			case "bairaq mall":
 			case "البيرق مجمع":
 			    reply(new OutboxMessage().template("dc_location_link_timing_bairaq_mall").lang(lang));
 			    next("clinics-onselect");
@@ -177,7 +177,7 @@ public class Demo5Controller extends CommonBotController {
 			    reply(new OutboxMessage().template("dc_location_link_timing_360mall").lang(lang));
 			    next("clinics-onselect");
 			    break;
-			case "avenues":
+			case "avenues mall":
 			case "الأفنيوز مجمع":	
 			    reply(new OutboxMessage().template("dc_location_link_timing_avenues").lang(lang));
 			    next("clinics-onselect");
