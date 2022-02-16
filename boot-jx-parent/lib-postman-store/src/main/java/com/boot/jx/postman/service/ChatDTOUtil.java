@@ -69,7 +69,7 @@ public class ChatDTOUtil {
 		.collect(Collectors.toList());
     }
 
-    public static ChatMessageDTO getChatMessageDTO(MessageDoc messageDoc, String contactName, String agentName) {
+    public static ChatMessageDTO getChatMessageDTO(MessageDoc messageDoc, String contactName, String defaultSender) {
 	ChatMessageDTO messageDto = new ChatMessageDTO();
 	if (!ArgUtil.is(messageDoc)) {
 	    return messageDto;
@@ -108,11 +108,11 @@ public class ChatDTOUtil {
 	}
 
 	if (PostManUtil.isOutBound(messageDoc.getType())) {
-	    messageDto.setSender(ArgUtil.nonEmpty(messageDoc.getAgent(), agentName));
+	    messageDto.setSender(ArgUtil.nonEmpty(messageDoc.getAgent(), messageDoc.getQueue(), defaultSender));
 	} else if (PostManUtil.isInBound(messageDoc.getType())) {
 	    messageDto.setSender(ArgUtil.nonEmpty(messageDto.getName(), contactName));
 	} else {
-	    messageDto.setSender(ArgUtil.nonEmpty(messageDoc.getAgent(), agentName));
+	    messageDto.setSender(ArgUtil.nonEmpty(messageDoc.getAgent(), defaultSender));
 	}
 
 	if (ArgUtil.isEmpty(messageDto.getName())) {
@@ -121,12 +121,12 @@ public class ChatDTOUtil {
 
 	return messageDto;
     }
-    
+
     public static ChatMessageDTO getChatMessageDTO(MessageDoc messageDoc) {
 	if (!ArgUtil.is(messageDoc)) {
 	    return null;
 	}
-	return getChatMessageDTO(messageDoc, null, messageDoc.getAgent());
+	return getChatMessageDTO(messageDoc, null, ArgUtil.nonEmpty(messageDoc.getAgent(), messageDoc.getQueue()));
     }
 
     public static List<ChatMessageDTO> getChatMessageDTO(List<MessageDoc> messageDocs, String contactName,
