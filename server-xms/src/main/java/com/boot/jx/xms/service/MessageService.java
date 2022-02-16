@@ -41,6 +41,12 @@ public class MessageService {
 		    .codeKey("CHANNEL_NOT_FOUND").description("Channel : " + message.getChannelId() + " is Not Setup"));
 	}
 
+	if (!ArgUtil.is(message.getType())) {
+	    ApiResponseUtil.throwInputException(new ApiFieldError().field("type").obzect("OutBoundMsg")
+		    .codeKey("TYPE_MISSING").description("Message Type is missing")
+		    .possibleValues("text", "template", "audio", "video", "image", "document"));
+	}
+
 	OutboxMessage outboxMessage = new OutboxMessage();
 
 	if ("text".equalsIgnoreCase(message.getType())) {
