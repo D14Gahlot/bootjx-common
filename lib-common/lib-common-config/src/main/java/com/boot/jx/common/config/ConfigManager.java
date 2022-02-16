@@ -244,6 +244,7 @@ public class ConfigManager {
 	    }
 	    plugin.importChannelConfigFromMap(config, map, channelType);
 	    save(config);
+	    channelId = config.getChannelId();
 
 	}
 	return getChannelConfig(channelId);

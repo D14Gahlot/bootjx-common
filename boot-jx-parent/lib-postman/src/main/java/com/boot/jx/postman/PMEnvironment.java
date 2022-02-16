@@ -39,7 +39,7 @@ public class PMEnvironment {
 
 	public PMConfigurationModel shared();
 
-	public void addChannel(ChannelConfig config);
+	public ChannelConfig addChannel(ChannelConfig config);
 
 	public void updateChannel(ChannelConfig config, String action);
 
