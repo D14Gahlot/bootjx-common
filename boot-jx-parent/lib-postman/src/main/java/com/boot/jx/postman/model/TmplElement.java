@@ -10,7 +10,7 @@ public class TmplElement implements Serializable {
     private String label;
     private String type;
     private String desc;
-    private String link;
+    private String url;
 
     public String getName() {
 	return name;
@@ -50,6 +50,12 @@ public class TmplElement implements Serializable {
 	this.type = type;
 	return this;
     }
+    
+
+    public TmplElement url(String url) {
+	this.url = url;
+	return this;
+    }
 
     public String getDesc() {
 	return desc;
@@ -59,11 +65,11 @@ public class TmplElement implements Serializable {
 	this.desc = desc;
     }
 
-    public String getLink() {
-	return link;
+    public String getUrl() {
+	return url;
     }
 
-    public void setLink(String link) {
-	this.link = link;
+    public void setUrl(String url) {
+	this.url = url;
     }
 }

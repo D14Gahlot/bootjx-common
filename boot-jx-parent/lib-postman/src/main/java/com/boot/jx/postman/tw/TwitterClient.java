@@ -143,9 +143,9 @@ public class TwitterClient implements MessageClient {
 		MapModel options = MapModel.createInstance();
 		MapModel ctas = MapModel.createInstance();
 		for (TmplElement button : buttons) {
-		    if (ArgUtil.is(button.getLink())) {
+		    if (ArgUtil.is(button.getUrl())) {
 			ctas.add(MapModel.createInstance().put("label", button.getLabel()).put("type", "web_url")
-				.put("url", button.getLink()).toMap());
+				.put("url", button.getUrl()).toMap());
 		    } else {
 			options.add(MapModel.createInstance().put("label", button.getLabel())
 				.put("description", button.getDesc()).put("metadata", button.getName()).toMap());
