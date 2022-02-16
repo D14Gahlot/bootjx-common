@@ -249,6 +249,9 @@ public class WA360Client {
 	    row.put("id", button.getName());
 	    row.put("title", button.getLabel());
 	   // row.put("description", button.getType());
+	    if(ArgUtil.is(button.getDesc())) {
+	        row.put("description", button.getDesc());
+	        }
 	    rows.add(row);
 
 	    if (rows.size() > 9) {
