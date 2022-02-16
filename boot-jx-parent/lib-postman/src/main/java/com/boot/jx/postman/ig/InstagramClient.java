@@ -132,9 +132,9 @@ public class InstagramClient implements MessageClient {
 			
 			
 			for (TmplElement button : buttons) {
-			    if (ArgUtil.is(button.getLink())) {
+			    if (ArgUtil.is(button.getUrl())) {
 			    	elementButtons.add(MapModel.createInstance().put("title", button.getLabel()).put("type", "web_url")
-					.put("url", button.getLink()).toMap());
+					.put("url", button.getUrl()).toMap());
 			    } else {
 			    	elementButtons.add(MapModel.createInstance().put("title", button.getLabel())
 					.put("type", "postback").put("payload", button.getName()).toMap());
