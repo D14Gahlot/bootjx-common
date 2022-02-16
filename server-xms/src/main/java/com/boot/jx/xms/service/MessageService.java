@@ -62,6 +62,13 @@ public class MessageService {
 		ApiResponseUtil.throwInputException(new ApiFieldError().field("template").obzect("OutBoundMsg")
 			.codeKey("TEMPLATE_DETAILS_MISSING").description("Template details is missing"));
 	    }
+
+	    if (!ArgUtil.is(message.getTemplate().getId()) && !ArgUtil.is(message.getTemplate().getCode())) {
+		ApiResponseUtil.throwInputException(
+			new ApiFieldError().field("template").obzect("OutBoundMsg").codeKey("TEMPLATE_DETAILS_MISSING")
+				.description("Either template.id or template.code is required"));
+	    }
+
 	    outboxMessage.setHsm(message.getTemplate());
 	    outboxMessage.setModelData(message.getTemplate().data());
 	}
