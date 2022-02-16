@@ -132,8 +132,15 @@ public class PMCommonConfigImpl implements PMCommonConfig {
 	map.put("CONFIG", config);
 	map.put("CONFIG_JSON", JsonUtil.toJson(config));
 	map.put("APP", app);
-	map.put("CDN_URL", ArgUtil.parseAsString(commonHttpRequest.get("CDN_URL"), getCdnServer()));
-	map.put("CDN_DEBUG", ArgUtil.parseAsString(commonHttpRequest.get("CDN_DEBUG"), "false"));
+	String debugCdnUrl = commonHttpRequest.get("CDN_URL");
+	map.put("CDN_URL", ArgUtil.parseAsString(debugCdnUrl, getCdnServer()));
+
+	if (ArgUtil.is(debugCdnUrl) && (debugCdnUrl.contains("127.0.0.1") || debugCdnUrl.contains("localhost"))) {
+	    map.put("CDN_DEBUG", ArgUtil.parseAsString(commonHttpRequest.get("CDN_DEBUG"), "true"));
+	} else {
+	    map.put("CDN_DEBUG", ArgUtil.parseAsString(commonHttpRequest.get("CDN_DEBUG"), "false"));
+	}
+
 	map.put("CDN_VERSION", "V3");
 	map.put("CDN_VERSION", getVersion());
 

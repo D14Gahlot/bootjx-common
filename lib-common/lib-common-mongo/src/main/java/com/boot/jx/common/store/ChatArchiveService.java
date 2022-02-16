@@ -41,12 +41,12 @@ public class ChatArchiveService {
 	    ChatUserProfileDoc profileDoc = mongoTemplate.findById(contact.getProfileId(), ChatUserProfileDoc.class);
 	    ChatUserProfileDTO profileDTO = ChatDTOUtil.getProfileDTO(profileDoc);
 	    dto.setProfile(profileDTO);
-	}else if(ArgUtil.is(contact.getPhone())) {
-		Query query =new Query();
-		query.addCriteria(Criteria.where("mobile").is(contact.getPhone()));
-		ChatUserProfileDoc profileDoc = mongoTemplate.findOne(query, ChatUserProfileDoc.class);
-		ChatUserProfileDTO profileDTO = ChatDTOUtil.getProfileDTO(profileDoc);
-		dto.setProfile(profileDTO);
+	} else if (ArgUtil.is(contact.getPhone())) {
+	    Query query = new Query();
+	    query.addCriteria(Criteria.where("mobile").is(contact.getPhone()));
+	    ChatUserProfileDoc profileDoc = mongoTemplate.findOne(query, ChatUserProfileDoc.class);
+	    ChatUserProfileDTO profileDTO = ChatDTOUtil.getProfileDTO(profileDoc);
+	    dto.setProfile(profileDTO);
 	}
 	return dto;
     }
@@ -76,13 +76,17 @@ public class ChatArchiveService {
 
     public ChatMessageDTO getMessage(MessageDoc messageDoc, ChatSessionDoc chatSessionDoc) {
 	ChatMessageDTO messageDto = ChatDTOUtil.getChatMessageDTO(messageDoc, chatSessionDoc.getContactName(),
-		messageDoc.getAgent());
+		ArgUtil.nonEmpty(messageDoc.getAgent(), messageDoc.getQueue(), chatSessionDoc.getAssignedToAgent(),
+			chatSessionDoc.getAssignedToQueue())
+
+	);
 	return messageDto;
     }
 
     public ChatMessageDTO getMessage(MessageDoc messageDoc, ChatSessionDTO chatSessionDto) {
 	ChatMessageDTO messageDto = ChatDTOUtil.getChatMessageDTO(messageDoc, chatSessionDto.getName(),
-		messageDoc.getAgent());
+		ArgUtil.nonEmpty(messageDoc.getAgent(), messageDoc.getQueue(), chatSessionDto.getAssignedToAgent(),
+			chatSessionDto.getAssignedToQueue()));
 	return messageDto;
     }
 

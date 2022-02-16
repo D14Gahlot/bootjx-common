@@ -41,9 +41,19 @@ public class MessageService {
 		    .codeKey("CHANNEL_NOT_FOUND").description("Channel : " + message.getChannelId() + " is Not Setup"));
 	}
 
+	if (!ArgUtil.is(message.getType())) {
+	    ApiResponseUtil.throwInputException(new ApiFieldError().field("type").obzect("OutBoundMsg")
+		    .codeKey("TYPE_MISSING").description("Message Type is missing")
+		    .possibleValues("text", "template", "audio", "video", "image", "document"));
+	}
+
 	OutboxMessage outboxMessage = new OutboxMessage();
 
 	if ("text".equalsIgnoreCase(message.getType())) {
+	    if (!ArgUtil.is(message.getText()) || !ArgUtil.is(message.getText().getBody())) {
+		ApiResponseUtil.throwInputException(new ApiFieldError().field("text").obzect("OutBoundMsg")
+			.codeKey("TEXT_DETAILS_MISSING").description("Text Body is missing"));
+	    }
 	    outboxMessage.setMessage(message.getText().getBody());
 	}
 
@@ -52,6 +62,13 @@ public class MessageService {
 		ApiResponseUtil.throwInputException(new ApiFieldError().field("template").obzect("OutBoundMsg")
 			.codeKey("TEMPLATE_DETAILS_MISSING").description("Template details is missing"));
 	    }
+
+	    if (!ArgUtil.is(message.getTemplate().getId()) && !ArgUtil.is(message.getTemplate().getCode())) {
+		ApiResponseUtil.throwInputException(
+			new ApiFieldError().field("template").obzect("OutBoundMsg").codeKey("TEMPLATE_DETAILS_MISSING")
+				.description("Either template.id or template.code is required"));
+	    }
+
 	    outboxMessage.setHsm(message.getTemplate());
 	    outboxMessage.setModelData(message.getTemplate().data());
 	}
