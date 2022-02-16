@@ -44,6 +44,10 @@ public class MessageService {
 	OutboxMessage outboxMessage = new OutboxMessage();
 
 	if ("text".equalsIgnoreCase(message.getType())) {
+	    if (!ArgUtil.is(message.getText()) || !ArgUtil.is(message.getText().getBody())) {
+		ApiResponseUtil.throwInputException(new ApiFieldError().field("text").obzect("OutBoundMsg")
+			.codeKey("TEXT_DETAILS_MISSING").description("Text Body is missing"));
+	    }
 	    outboxMessage.setMessage(message.getText().getBody());
 	}
 
