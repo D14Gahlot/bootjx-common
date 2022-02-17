@@ -15,4 +15,8 @@ public class WebhookUrlRequest implements Serializable {
 	    value = "The webhook URL can either be: " + "- the URL from your own application" + "- or the partner")
     public String url;
 
+    @ApiMockModelProperty(example = "https://www.example.com/webhook", required = false, hidden = true,
+	    value = "The Forward URL can either be: " + "- the URL from your own application" + "- or the partner")
+    public String forward;
+
 }

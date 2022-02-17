@@ -39,6 +39,7 @@ public class ClientKeyConfigDoc implements IDocument, AuditableByIdEntity, Clien
 
     private String appType;
     private String webhook;
+    private String forward;
 
     public String getId() {
 	return id;
@@ -129,6 +130,14 @@ public class ClientKeyConfigDoc implements IDocument, AuditableByIdEntity, Clien
 
     public void setUpdatedStamp(Long updatedStamp) {
 	this.updatedStamp = updatedStamp;
+    }
+
+    public String getForward() {
+        return forward;
+    }
+
+    public void setForward(String forward) {
+        this.forward = forward;
     }
 
 }

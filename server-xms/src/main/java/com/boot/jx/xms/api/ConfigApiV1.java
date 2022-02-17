@@ -66,6 +66,7 @@ public class ConfigApiV1 {
 	    ClientKeyConfigDoc xo = configStore.findById(x.getId(), ClientKeyConfigDoc.class);
 	    if (ArgUtil.areEqual(xo.getAppType(), ClientApp.APP_TYPE_WEBHOOK)) {
 		xo.setWebhook(req.url);
+		xo.setForward(req.forward);
 		configManager.save(xo);
 		configManager.refresh();
 	    } else {

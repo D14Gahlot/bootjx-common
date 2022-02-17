@@ -26,6 +26,7 @@ import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.Constants;
 import com.boot.utils.JsonPath;
+import com.boot.utils.JsonUtil;
 
 @Component
 public class WA360Client {
@@ -50,8 +51,21 @@ public class WA360Client {
 	    }
 
 	    if (isList) {
-		MapModel resp = sendList(channelConfig, outboxMessage, buttons);
-		msgIds.add(getMessageId(resp));
+		if (buttons.size() <= 10) {
+		    MapModel resp = sendList(channelConfig, outboxMessage, buttons);
+		    msgIds.add(getMessageId(resp));
+		} else if (buttons.size() <= 13) {
+		    MapModel resp = sendButton(channelConfig, outboxMessage, buttons.subList(0, 3));
+		    msgIds.add(getMessageId(resp));
+
+		    MapModel respMore = sendList(channelConfig, outboxMessage, buttons.subList(3, buttons.size()));
+		    msgIds.add(getMessageId(respMore));
+		} else {
+		    List<TmplElement> newButtons = buttons.subList(0, 9);
+		    newButtons.add(new TmplElement().label("More Options").name("_more#"+outboxMessage.getITemplate().getId()));
+		    MapModel resp = sendList(channelConfig, outboxMessage, newButtons);
+		    msgIds.add(getMessageId(resp));
+		}
 	    } else if (isButton) {
 		MapModel resp = sendButton(channelConfig, outboxMessage, buttons);
 		msgIds.add(getMessageId(resp));
@@ -237,6 +251,7 @@ public class WA360Client {
 	for (TmplElement button : buttons) {
 	    if (section == null) {
 		section = new HashMap<String, Object>();
+		// section.put("title", "Menu " + (sections.size() + 1));
 		sections.add(section);
 	    }
 	    if (rows == null) {
@@ -248,7 +263,9 @@ public class WA360Client {
 	    Map<String, Object> row = new HashMap<String, Object>();
 	    row.put("id", button.getName());
 	    row.put("title", button.getLabel());
-	   // row.put("description", button.getType());
+	    if (ArgUtil.is(button.getDesc())) {
+		row.put("description", button.getDesc());
+	    }
 	    rows.add(row);
 
 	    if (rows.size() > 9) {
