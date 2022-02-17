@@ -149,6 +149,8 @@ public class WA360Connector extends AbstractConnector<WA360ConfigDetails, WA360P
 	if (ArgUtil.is(replyIdExt)) {
 	    inboxMessage.setReplyIdExt(replyIdExt);
 	}
+	
+	inboxMessage.setOriginalMessage(map.map());
 
 	return inboxMessage;
     }

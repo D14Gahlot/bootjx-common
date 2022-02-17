@@ -54,15 +54,11 @@ public class WA360Client {
 		if (buttons.size() <= 10) {
 		    MapModel resp = sendList(channelConfig, outboxMessage, buttons);
 		    msgIds.add(getMessageId(resp));
-		} else if (buttons.size() <= 13) {
-		    MapModel resp = sendButton(channelConfig, outboxMessage, buttons.subList(0, 3));
-		    msgIds.add(getMessageId(resp));
-
-		    MapModel respMore = sendList(channelConfig, outboxMessage, buttons.subList(3, buttons.size()));
-		    msgIds.add(getMessageId(respMore));
 		} else {
 		    List<TmplElement> newButtons = buttons.subList(0, 9);
-		    newButtons.add(new TmplElement().label("More Options").name("_more#"+outboxMessage.getITemplate().getId()));
+		    newButtons.add(new TmplElement().label("More Options")
+			    .name("_more#" + outboxMessage.getITemplate().getId()));
+		    outboxMessage.options().put("list_option_title", "Select");
 		    MapModel resp = sendList(channelConfig, outboxMessage, newButtons);
 		    msgIds.add(getMessageId(resp));
 		}
@@ -232,6 +228,8 @@ public class WA360Client {
 	MapModel req = MapModel.createInstance().put("recipient_type", "individual").put("to",
 		outboxMessage.contact().getCsid());
 
+	MapModel options = outboxMessage.optionsAsModel();
+
 	req.put(OutBoundWrapperPaths.MESSAGE_TYPE, "interactive");
 
 	req.put(new JsonPath("/interactive/type"), "list");
@@ -242,7 +240,7 @@ public class WA360Client {
 	req.put(OutBoundWrapperPaths.INTERACTIVE_BODY_TEXT, outboxMessage.getMessage());
 	req.put(OutBoundWrapperPaths.INTERACTIVE_FOOTER_TEXT,
 		ArgUtil.parseAsString(outboxMessage.getFooter(), Constants.BLANK));
-	req.put(OutBoundWrapperPaths.INTERACTIVE_ACTION_BUTTON, "menu");
+	req.put(OutBoundWrapperPaths.INTERACTIVE_ACTION_BUTTON, options.get("list_option_title", "menu"));
 
 	List<Object> sections = new ArrayList<Object>();
 	Map<String, Object> section = null;

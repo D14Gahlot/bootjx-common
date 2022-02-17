@@ -101,7 +101,10 @@ public class DefaultInBoundHandler implements InBoundHandler {
 		// WEBHOOOK HANDLING
 		if (ArgUtil.areEqual(CHAT_MODE.WEBHOOK.toString(), defaultClient.getAppType())) {
 		    LOGGER.debug("Forwarding InboxMessage to Xternal Queue ");
-		    if (ArgUtil.is(defaultClient.getForward())) {
+		    if (ArgUtil.is(defaultClient.getForward()) && ArgUtil.is(inboxMessage.getOriginalMessage())) {
+			// This code is only for local debugging for inbounds will not execute in
+			// production
+			inboxMessage.setOriginalMessage(null);
 			chatClient.forward(defaultClient.getForward() + PATH.INBOUND_FRWRD, inboxMessage);
 		    } else if (ArgUtil.is(defaultClient.getWebhook())) {
 			forward2Webhook(inboxMessage, defaultClient.getWebhook(), defaultClient.getId());
