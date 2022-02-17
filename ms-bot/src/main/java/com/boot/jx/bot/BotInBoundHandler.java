@@ -19,18 +19,18 @@ public class BotInBoundHandler extends DefaultInBoundHandler {
     private BotEngine botEngine;
 
     @Override
-    public void handle(InboxMessage inboxMessage) {
+    public void doHandle(InboxMessage inboxMessage) {
 	botEngine.invokeMethodsAsync(inboxMessage);
     }
 
     @Override
-    public void handle(MessageReport messageReport) {
+    public void doHandle(MessageReport messageReport) {
 	LOGGER.debug("No Handling Required for Status on BotSide");
     }
 
     @Override
-    public void handle(InBoundEvent inBoundEvent) {
-	super.handle(inBoundEvent);
+    public void doHandle(InBoundEvent inBoundEvent) {
+	super.doHandle(inBoundEvent);
     }
 
 }

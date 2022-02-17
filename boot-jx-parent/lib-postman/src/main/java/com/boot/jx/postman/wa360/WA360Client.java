@@ -16,6 +16,7 @@ import com.boot.jx.dict.FileType;
 import com.boot.jx.exception.ApiHttpExceptions.ApiHttpException;
 import com.boot.jx.postman.PostManException;
 import com.boot.jx.postman.model.Attachment;
+import com.boot.jx.postman.model.MessagePrompt;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.model.TmplElement;
 import com.boot.jx.postman.plugin.ChannelConfig;
@@ -26,7 +27,6 @@ import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.Constants;
 import com.boot.utils.JsonPath;
-import com.boot.utils.JsonUtil;
 
 @Component
 public class WA360Client {
@@ -55,10 +55,29 @@ public class WA360Client {
 		    MapModel resp = sendList(channelConfig, outboxMessage, buttons);
 		    msgIds.add(getMessageId(resp));
 		} else {
-		    List<TmplElement> newButtons = buttons.subList(0, 9);
-		    newButtons.add(new TmplElement().label("More Options")
-			    .name("_more#" + outboxMessage.getITemplate().getId()));
-		    outboxMessage.options().put("list_option_title", "Select");
+		    MessagePrompt prompt = new MessagePrompt();
+		    if (ArgUtil.is(outboxMessage.getPrompt()) && MessagePrompt.TYPE.MOREOPTIONS.equals(outboxMessage.getPrompt().type)) {
+			prompt = outboxMessage.getPrompt();
+			prompt.pageIndex++;
+		    }
+		    prompt.type = MessagePrompt.TYPE.MOREOPTIONS;
+		    prompt.messageId = outboxMessage.getMessageId();
+
+		    int start = prompt.pageIndex * 9;
+		    int pending = buttons.size() - start;
+		    int end = Math.min((start + 9), buttons.size());
+		    List<TmplElement> newButtons;
+
+		    if (pending < 10) {
+			newButtons = buttons.subList(start, end);
+		    } else if (pending == 10) {
+			newButtons = buttons.subList(start, end + 1);
+		    } else {
+			newButtons = buttons.subList(start, end);
+			newButtons.add(new TmplElement().label("More Options").name(prompt.toString()));
+		    }
+
+		    outboxMessage.options().put("list_option_title", "List " + (prompt.pageIndex + 1));
 		    MapModel resp = sendList(channelConfig, outboxMessage, newButtons);
 		    msgIds.add(getMessageId(resp));
 		}

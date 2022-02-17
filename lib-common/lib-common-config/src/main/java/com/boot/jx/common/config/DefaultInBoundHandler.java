@@ -36,7 +36,7 @@ import com.boot.jx.stomp.StompTunnelService;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
 
-public class DefaultInBoundHandler implements InBoundHandler {
+public abstract class DefaultInBoundHandler implements InBoundHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultInBoundHandler.class);
 
@@ -92,7 +92,7 @@ public class DefaultInBoundHandler implements InBoundHandler {
     }
 
     @Override
-    public void handle(InboxMessage inboxMessage) {
+    public void doHandle(InboxMessage inboxMessage) {
 
 	ClientApp defaultClient = getDefaultInboundApp(inboxMessage.session().getQueue(), inboxMessage.contact());
 	if (ArgUtil.is(defaultClient)) {
@@ -217,7 +217,7 @@ public class DefaultInBoundHandler implements InBoundHandler {
     }
 
     @Override
-    public void handle(MessageReport messageReport) {
+    public void doHandle(MessageReport messageReport) {
 
 	ClientApp defaultClient = getDefaultInboundApp(messageReport.session().getQueue(), messageReport.contact());
 
@@ -253,7 +253,7 @@ public class DefaultInBoundHandler implements InBoundHandler {
     }
 
     @Override
-    public void handle(InBoundEvent inBoundEvent) {
+    public void doHandle(InBoundEvent inBoundEvent) {
 
 	if (InBoundEvent.SESSION_ROUTED.equals(inBoundEvent.eventCode)) {
 

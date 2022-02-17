@@ -24,7 +24,6 @@ import com.boot.jx.logger.AuditService;
 import com.boot.jx.postman.PMAuditEvent;
 import com.boot.jx.postman.PMConfiguration;
 import com.boot.jx.postman.PMEnvironment;
-import com.boot.jx.postman.PMEnvironment.PMClientConfig;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.Message;
 import com.boot.jx.postman.model.MessageBoxEvent;
@@ -45,9 +44,6 @@ public class InBoundController {
     private InBoundService inBoundService;
 
     @Autowired
-    private PMClientConfig chatClientConfig;
-
-    @Autowired
     private PMEnvironment pmEnvironment;
 
     @Autowired
@@ -62,6 +58,11 @@ public class InBoundController {
 	    @RequestParam(required = false, defaultValue = "false") boolean routed) throws InterruptedException {
 	// botService.arhive(inbound);
 	if (PostManUtil.hasValidCheckSum(inboxMessage)) {
+//	    PMConfiguration config = pmEnvironment.config();
+//	    String channelId = PostManUtil.CHANNEL_ID(inboxMessage.contact());
+//	    ChannelConfig channelConfig = config.channel(channelId);
+//	    ConnectorHandler connector = connectorHandlerFactory.get(channelConfig);
+//	    connector.prompt(inboxMessage);
 	    inBoundService.invokeMethods(inboxMessage);
 	}
 	return inboxMessage;
@@ -113,6 +114,7 @@ public class InBoundController {
 		    new MessageBoxEvent());
 	    if (ArgUtil.is(messageBoxEvent.getInboxMessages())) {
 		messageBoxEvent.getInboxMessages().forEach(inboxMessage -> {
+		    connector.prompt(inboxMessage);
 		    inBoundService.invokeMethodsAsync(inboxMessage);
 		});
 		connector.onReadInboxMessage(channelConfig, messageBoxEvent.getInboxMessages());

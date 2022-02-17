@@ -61,9 +61,6 @@ public class InBoundService {
     private BotEngine botEngine;
 
     @Autowired
-    private ChatClient chatClient;
-
-    @Autowired
     private PMClientConfig chatClientConfig;
 
     @Autowired
@@ -184,7 +181,7 @@ public class InBoundService {
 
 	}
 
-	if (ArgUtil.isEmpty(inBoundFilter) || inBoundFilter.onFilter(inboxMessageOriginal)) {
+	if (ArgUtil.isEmpty(inBoundFilter) || inBoundFilter.doFilter(inboxMessageOriginal)) {
 	    if (ArgUtil.is(inBoundProcessor)) {
 		inBoundProcessor.process(inboxMessageOriginal);
 	    }
@@ -192,7 +189,7 @@ public class InBoundService {
 		botEngine.invokeMethodsAsync(inboxMessageOriginal);
 	    } else if (ArgUtil.is(inBoundHandler)) {
 		if (newThread) {
-		    inBoundHandler.handle(inboxMessageOriginal);
+		    inBoundHandler.doHandle(inboxMessageOriginal);
 		} else {
 		    inBoundHandler.handleAsync(inboxMessageOriginal);
 		}

@@ -18,6 +18,7 @@ public class OutboxMessage extends Message<OutboxMessage> implements WAMessageOp
 
     private BigDecimal queue;
     private MessageSession session;
+    private MessagePrompt prompt;
     private List<String> logs;
 
     public OutboxMessage(ContactType contactType) {
@@ -73,6 +74,19 @@ public class OutboxMessage extends Message<OutboxMessage> implements WAMessageOp
 
     public void setCsid(String csid) {
 	this.contact().setCsid(csid);
+    }
+
+    public MessagePrompt getPrompt() {
+	return prompt;
+    }
+
+    public void setPrompt(MessagePrompt prompt) {
+	this.prompt = prompt;
+    }
+
+    public OutboxMessage prompt(MessagePrompt prompt) {
+	this.prompt = prompt;
+	return this;
     }
 
 }

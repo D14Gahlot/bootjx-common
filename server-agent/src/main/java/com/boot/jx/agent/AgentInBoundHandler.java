@@ -39,7 +39,7 @@ public class AgentInBoundHandler extends DefaultInBoundHandler {
     private ChatService chatService;
 
     @Override
-    public void handle(InboxMessage inboxMessage) {
+    public void doHandle(InboxMessage inboxMessage) {
 	if (ArgUtil.isEmpty(inboxMessage.session().getMode())) {
 	    try {
 		InboxMessage agentAssignResp = agentChatHandler.onAssign(inboxMessage);
@@ -70,13 +70,13 @@ public class AgentInBoundHandler extends DefaultInBoundHandler {
     }
 
     @Override
-    public void handle(MessageReport messageReport) {
+    public void doHandle(MessageReport messageReport) {
 	LOGGER.debug("No Handling Required for Status on AgentSide");
     }
 
     @Override
-    public void handle(InBoundEvent inBoundEvent) {
-	super.handle(inBoundEvent);
+    public void doHandle(InBoundEvent inBoundEvent) {
+	super.doHandle(inBoundEvent);
     }
 
 }

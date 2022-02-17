@@ -17,8 +17,10 @@ import com.boot.jx.postman.PMEnvironment.PMClientConfig;
 import com.boot.jx.postman.client.TmplClient;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.HSMTemplate3rdParty;
+import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.Message;
 import com.boot.jx.postman.model.MessageDefinitions.IMessage;
+import com.boot.jx.postman.model.MessagePrompt;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.postman.plugin.ChannelPluginProvider.ChannelPlugin;
@@ -99,7 +101,6 @@ public abstract class AbstractConnector<CD extends AChannelDetails, P extends Ch
 //		return outboxMessage;
 //	    }
 //	} else
-//	    
 
 	if (ArgUtil.is(outboxMessage.templateId()) || ArgUtil.is(outboxMessage.templateCode())) {
 	    // outboxMessage.setMessage(tmplClient.process(hsmTemplate.getTemplate(),
@@ -157,6 +158,31 @@ public abstract class AbstractConnector<CD extends AChannelDetails, P extends Ch
     @Override
     public boolean optin(ChannelConfig channelConfig, ChatContactDoc chatContactDoc) {
 	return ArgUtil.is(chatContactDoc.getCsid());
+    }
+
+    @Override
+    public void prompt(InboxMessage inboxMessage) {
+
+	if (!ArgUtil.is(inboxMessage.form())) {
+	    return;
+	}
+
+	String replyId = ArgUtil.parseAsString(inboxMessage.form().get("reply_id"));
+
+	if (ArgUtil.is(replyId)) {
+	    if (replyId.startsWith("#")) {
+		String[] params = replyId.split("#");
+		if (params.length == 4) {
+		    if (MessagePrompt.TYPE.MOREOPTIONS.equals(params[1])) {
+			MessagePrompt prompt = new MessagePrompt();
+			prompt.type = params[1];
+			prompt.pageIndex = ArgUtil.parseAsInteger(params[2]);
+			prompt.messageId = params[3];
+			inboxMessage.setPrompt(prompt);
+		    }
+		}
+	    }
+	}
     }
 
 }

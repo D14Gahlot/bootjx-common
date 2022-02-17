@@ -211,6 +211,8 @@ public class ConnectorHandlerFactory extends ScopedBeanFactory<String, Connector
 
 	boolean optin(ChannelConfig channelConfig, ChatContactDoc chatContactDoc);
 
+	void prompt(InboxMessage inboxMessage);
+
     }
 
     @Retention(RetentionPolicy.RUNTIME)

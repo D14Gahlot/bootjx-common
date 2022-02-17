@@ -110,7 +110,7 @@ public class ChatStatusService {
 	    }
 	    messageStore.updateStatus(messageReport);
 	    if (ArgUtil.is(inBoundHandler)) {
-		inBoundHandler.handle(messageReport);
+		inBoundHandler.doHandle(messageReport);
 	    } else {
 		stompTunnelService.sendToAll("/message/update/status", messageReport);
 	    }
