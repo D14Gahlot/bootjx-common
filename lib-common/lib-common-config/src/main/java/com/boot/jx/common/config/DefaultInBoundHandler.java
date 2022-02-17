@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.boot.jx.AppContextUtil;
+import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.chat.ChatClient;
 import com.boot.jx.chat.ChatClient.PATH;
 import com.boot.jx.inbound.InBound.InBoundHandler;
@@ -100,8 +101,13 @@ public class DefaultInBoundHandler implements InBoundHandler {
 		// WEBHOOOK HANDLING
 		if (ArgUtil.areEqual(CHAT_MODE.WEBHOOK.toString(), defaultClient.getAppType())) {
 		    LOGGER.debug("Forwarding InboxMessage to Xternal Queue ");
-		    String forwardUrl = defaultClient.getWebhook();
-		    forward2Webhook(inboxMessage, forwardUrl, defaultClient.getId());
+		    if (ArgUtil.is(defaultClient.getForward())) {
+			chatClient.forward(defaultClient.getForward() + PATH.INBOUND_FRWRD, inboxMessage);
+		    } else if (ArgUtil.is(defaultClient.getWebhook())) {
+			forward2Webhook(inboxMessage, defaultClient.getWebhook(), defaultClient.getId());
+		    } else {
+			ApiResponseUtil.throwException("Forward URL missing");
+		    }
 		    updateStatus(inboxMessage, Status.FORWARDED);
 		    return;
 		}

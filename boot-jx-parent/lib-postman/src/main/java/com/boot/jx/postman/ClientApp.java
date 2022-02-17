@@ -25,4 +25,6 @@ public interface ClientApp extends Serializable {
 
     public String getWebhook();
 
+    public String getForward();
+
 }
