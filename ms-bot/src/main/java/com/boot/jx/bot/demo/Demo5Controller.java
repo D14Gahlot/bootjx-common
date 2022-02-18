@@ -39,7 +39,7 @@ public class Demo5Controller extends CommonBotController {
 	    @ChatMapping(key = "select-language")
 	    public void languageOnSelect(InboxMessage inboxMessage, StringMatcher matcher) {
 	    String language = inboxMessage.getMessage().toLowerCase();
-	     chatContext.sessionData().put("lang", "eng");
+	     chatContext.sessionData().put("lang", "en");
 	    // if(!timeCheck()) {
 	    //	 reply(new OutboxMessage().template("working_hours_update").lang("eng"));
 	    //	 this.transferToAgent(inboxMessage, matcher);
@@ -47,15 +47,15 @@ public class Demo5Controller extends CommonBotController {
 	   //  }
 	     
 		    if(language.equalsIgnoreCase("english")) {
-		    	 chatContext.sessionData().put("lang", "eng");
-		    	 reply(new OutboxMessage().template("dc_services").lang("eng"));
+		    	 chatContext.sessionData().put("lang", "en");
+		    	 reply(new OutboxMessage().template("dc_services").lang("en"));
 		    	 next("select-service");
 		    }else if(language.equalsIgnoreCase("العربية")) {
-		    	chatContext.sessionData().put("lang", "ara");
-		    	reply(new OutboxMessage().template("dc_services").lang("ara"));
+		    	chatContext.sessionData().put("lang", "ar");
+		    	reply(new OutboxMessage().template("dc_services").lang("ar"));
 		    	 next("select-service");
 		    } else{
-		    	reply(new OutboxMessage().template("dc_services").lang("eng"));
+		    	reply(new OutboxMessage().template("dc_services").lang("en"));
 		    	 next("select-service");
 		    }
 	    }
@@ -219,7 +219,7 @@ public class Demo5Controller extends CommonBotController {
 	    @ChatMapping(key = "newclient-onselect")
 	    public void newclientOnSelect(InboxMessage inboxMessage, StringMatcher matcher) {
 	    	switch (inboxMessage.getMessage().toLowerCase().trim()) {
-			case "dietitian":
+			case "dietician":
 			case "اختيار الأخصائي":
 			    reply(new OutboxMessage().template("dc_dietitian_list_feb2022").lang(lang));
 			    next("dc_date_time");
