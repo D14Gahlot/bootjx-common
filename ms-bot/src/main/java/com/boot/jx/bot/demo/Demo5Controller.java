@@ -83,8 +83,6 @@ public class Demo5Controller extends CommonBotController {
 		
 		case "menu selection":
 		case "المنيوخيارات":
-		   // reply(new OutboxMessage().template("dc_cs_to_contact").lang(lang));
-		    //next("dc_cs_to_contact");
 			 this.transferToAgent(inboxMessage, matcher);	
 		    break;
 		case "clinic locations":
@@ -119,7 +117,6 @@ public class Demo5Controller extends CommonBotController {
 			    break;
 			case "previous member":
 			case "مشترك سابق":
-			   // reply(new OutboxMessage().template("dc_cs_to_contact").lang(lang));
 			    this.transferToAgent(inboxMessage, matcher);
 			    break;      
 			    
@@ -138,7 +135,6 @@ public class Demo5Controller extends CommonBotController {
 			    break;
 			case "change membership":
 			case "تغيير نوع الاشتراك":
-				 // reply(new OutboxMessage().template("dc_cs_to_contact").lang(lang));
 				  this.transferToAgent(inboxMessage, matcher);
 			    break;
 	    	}
@@ -153,12 +149,12 @@ public class Demo5Controller extends CommonBotController {
 			case "sharq":
 			case "شرق":	
 			    reply(new OutboxMessage().template("dc_location_link_timing_sharq").lang(lang));
-			    next("clinics-onselect");
+			    next("select-language");
 			    break;
 			case "bairaq mall":
 			case "البيرق مجمع":
 			    reply(new OutboxMessage().template("dc_location_link_timing_bairaq_mall").lang(lang));
-			    next("clinics-onselect");
+			    next("select-language");
 			    break;
 			case "salmiya":
 			case "السالمية":
@@ -169,23 +165,24 @@ public class Demo5Controller extends CommonBotController {
 			case "jahra":
 			case "الجهراء":	
 			    reply(new OutboxMessage().template("dc_location_link_timing_jahra").lang(lang));
-			    next("clinics-onselect");
+			    next("select-language");
 			    break;
 			    
 			case "360 mall":
 			case "360 مجمع":	
 			    reply(new OutboxMessage().template("dc_location_link_timing_360mall").lang(lang));
-			    next("clinics-onselect");
+			    next("select-language");
 			    break;
 			case "avenues mall":
 			case "الأفنيوز مجمع":	
 			    reply(new OutboxMessage().template("dc_location_link_timing_avenues").lang(lang));
-			    next("clinics-onselect");
+			    next("select-language");
 			    break;
 			case "aqaila":
 			case "العقيلة":	
 			    reply(new OutboxMessage().template("dc_location_link_timing_aqaila").lang(lang));
-			    next("clinics-onselect");
+			    //next("clinics-onselect");
+			    next("select-language");
 			    break;    
 			      
 			
