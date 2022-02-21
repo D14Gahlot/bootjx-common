@@ -27,7 +27,7 @@ public class Demo5Controller extends CommonBotController {
 	    @Autowired
 	    PMEnvironment pmEnvironment;
 	    
-	    String lang = null;
+	    String lang = "en";
 
 	    @ChatMapping(key = AlexBotConstants.KEY.INITIATE + "*", pattern = "^*$")
 	    public void start(InboxMessage inboxMessage, StringMatcher matcher) {
@@ -39,18 +39,19 @@ public class Demo5Controller extends CommonBotController {
 	    @ChatMapping(key = "select-language")
 	    public void languageOnSelect(InboxMessage inboxMessage, StringMatcher matcher) {
 	    String language = inboxMessage.getMessage().toLowerCase();
-	     chatContext.sessionData().put("lang", "en");
+	    lang = ArgUtil.parseAsString(chatContext.sessionData().get("lang"));
+	    
 	    // if(!timeCheck()) {
-	    //	 reply(new OutboxMessage().template("working_hours_update").lang("eng"));
+	    //	 reply(new OutboxMessage().template("working_hours_update").lang("en"));
 	    //	 this.transferToAgent(inboxMessage, matcher);
 	    	 
 	   //  }
 	     
-		    if(language.equalsIgnoreCase("english")) {
+		    if(language.equalsIgnoreCase("english") || (lang!=null && lang.equalsIgnoreCase("en"))) {
 		    	 chatContext.sessionData().put("lang", "en");
 		    	 reply(new OutboxMessage().template("dc_services").lang("en"));
 		    	 next("select-service");
-		    }else if(language.equalsIgnoreCase("العربية")) {
+		    }else if(language.equalsIgnoreCase("العربية") || (lang!=null &&  lang.equalsIgnoreCase("ar"))) {
 		    	chatContext.sessionData().put("lang", "ar");
 		    	reply(new OutboxMessage().template("dc_services").lang("ar"));
 		    	 next("select-service");
