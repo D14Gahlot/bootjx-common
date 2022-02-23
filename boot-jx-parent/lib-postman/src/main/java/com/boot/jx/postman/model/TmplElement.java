@@ -6,6 +6,11 @@ public class TmplElement implements Serializable {
 
     private static final long serialVersionUID = 8844236002971255681L;
 
+    public static class TYPES {
+	public static final String QUICK_REPLY = "QUICK_REPLY";
+	public static final String URL = "URL";
+    }
+
     private String name;
     private String label;
     private String type;
@@ -50,7 +55,6 @@ public class TmplElement implements Serializable {
 	this.type = type;
 	return this;
     }
-    
 
     public TmplElement url(String url) {
 	this.url = url;

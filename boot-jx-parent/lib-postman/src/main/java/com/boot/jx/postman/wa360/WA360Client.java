@@ -43,11 +43,24 @@ public class WA360Client {
 	} else {
 	    boolean isList = false;
 	    boolean isButton = false;
+	    int buttonsCount = 0;
+	    String bodyTextAppend = Constants.BLANK;
 	    List<TmplElement> buttons = null;
 	    if (outboxMessage.options().containsKey("buttons")) {
 		buttons = new MapModel(outboxMessage.options()).entry("buttons").asList(TmplElement.class);
-		isList = (buttons.size() > 3);
-		isButton = (buttons.size() > 0) && (buttons.size() < 4);
+		for (TmplElement b : buttons) {
+		    if (ArgUtil.areEqual(b.getType(), TmplElement.TYPES.URL)) {
+			bodyTextAppend = bodyTextAppend + "\n" + b.getUrl() + "\n";
+		    } else {
+			buttonsCount++;
+		    }
+		}
+		isList = (buttonsCount > 0) && (buttonsCount > 3);
+		isButton = (buttonsCount > 0) && (buttonsCount < 4);
+	    }
+
+	    if (ArgUtil.is(bodyTextAppend)) {
+		outboxMessage.setMessage(outboxMessage.getMessage() + "\n" + bodyTextAppend);
 	    }
 
 	    if (isList) {
@@ -56,7 +69,8 @@ public class WA360Client {
 		    msgIds.add(getMessageId(resp));
 		} else {
 		    MessagePrompt prompt = new MessagePrompt();
-		    if (ArgUtil.is(outboxMessage.getPrompt()) && MessagePrompt.TYPE.MOREOPTIONS.equals(outboxMessage.getPrompt().type)) {
+		    if (ArgUtil.is(outboxMessage.getPrompt())
+			    && MessagePrompt.TYPE.MOREOPTIONS.equals(outboxMessage.getPrompt().type)) {
 			prompt = outboxMessage.getPrompt();
 			prompt.pageIndex++;
 		    }
@@ -208,7 +222,7 @@ public class WA360Client {
 		outboxMessage.contact().getCsid());
 
 	req.put(OutBoundWrapperPaths.MESSAGE_TYPE, "text");
-	req.put(OutBoundWrapperPaths.MESSAGE_TEXT, outboxMessage.getMessage());
+	req.put(OutBoundWrapperPaths.MESSAGE_TEXT_BODY, outboxMessage.getMessage());
 
 	return send(req, channelConfig);
     }
@@ -301,8 +315,8 @@ public class WA360Client {
 	req.put(OutBoundWrapperPaths.MESSAGE_TYPE, "interactive");
 	req.put(new JsonPath("/interactive/type"), "button");
 
-	MapModel intr = MapModel.createInstance();
 	if (ArgUtil.is(outboxMessage.getAttachments())) {
+	    MapModel intr = MapModel.createInstance();
 	    Attachment attachment = outboxMessage.getAttachments().get(0);
 	    WA360OutBoundMedia wa360OutBoundMedia = new WA360OutBoundMedia();
 	    // wa360OutBoundMedia.setCaption(ArgUtil.nonEmpty(attachment.getMediaCaption(),
@@ -325,12 +339,12 @@ public class WA360Client {
 		intr.put(OutBoundWrapperPaths.MESSAGE_TYPE, "document");
 		intr.put("document", wa360OutBoundMedia);
 	    }
-	} else {
-	    intr.put(OutBoundWrapperPaths.INTERACTIVE_HEADER_TYPE, "text");
-	    intr.put(OutBoundWrapperPaths.INTERACTIVE_HEADER_TEXT,
-		    ArgUtil.nonEmpty(outboxMessage.getSubject(), Constants.BLANK));
+	    req.put(new JsonPath("interactive/header"), intr.toMap());
+	} else if (ArgUtil.is(outboxMessage.getSubject())) {
+	    MapModel intr = MapModel.createInstance();
+	    intr.put(OutBoundWrapperPaths.MESSAGE_TYPE, "text");
+	    intr.put(OutBoundWrapperPaths.MESSAGE_TEXT, ArgUtil.nonEmpty(outboxMessage.getSubject(), Constants.BLANK));
 	}
-	req.put(new JsonPath("interactive/header"), intr.toMap());
 
 	req.put(OutBoundWrapperPaths.INTERACTIVE_BODY_TEXT, outboxMessage.getMessage());
 	req.put(OutBoundWrapperPaths.INTERACTIVE_FOOTER_TEXT,
