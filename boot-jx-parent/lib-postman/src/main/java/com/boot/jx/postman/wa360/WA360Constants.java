@@ -51,7 +51,8 @@ public class WA360Constants {
 
     public static class OutBoundWrapperPaths {
 	public static final String MESSAGE_TYPE = "type";
-	public static final JsonPath MESSAGE_TEXT = new JsonPath("text/body");
+	public static final String MESSAGE_TEXT = "text";
+	public static final JsonPath MESSAGE_TEXT_BODY = new JsonPath("text/body");
 
 	public static final JsonPath INTERACTIVE_HEADER_TYPE = new JsonPath("interactive/header/type");
 	public static final JsonPath INTERACTIVE_HEADER_TEXT = new JsonPath("interactive/header/text");
