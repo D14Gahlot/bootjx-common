@@ -273,7 +273,7 @@ public class WA360Client {
 	req.put(OutBoundWrapperPaths.INTERACTIVE_BODY_TEXT, outboxMessage.getMessage());
 	req.put(OutBoundWrapperPaths.INTERACTIVE_FOOTER_TEXT,
 		ArgUtil.parseAsString(outboxMessage.getFooter(), Constants.BLANK));
-	req.put(OutBoundWrapperPaths.INTERACTIVE_ACTION_BUTTON, options.get("list_option_title", "menu"));
+	req.put(OutBoundWrapperPaths.INTERACTIVE_ACTION_BUTTON, options.get("list_option_title", "Menu"));
 
 	List<Object> sections = new ArrayList<Object>();
 	Map<String, Object> section = null;
