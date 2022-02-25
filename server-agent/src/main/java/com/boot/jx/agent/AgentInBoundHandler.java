@@ -7,11 +7,12 @@ import org.springframework.stereotype.Component;
 
 import com.boot.jx.chat.ChatService;
 import com.boot.jx.common.config.ConfigConstants;
-import com.boot.jx.common.config.DefaultInBoundHandler;
+import com.boot.jx.common.config.DefaultChatBoundHandler;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PMEnvironment.PMCommonConfig;
 import com.boot.jx.postman.PMEnvironment.PMConfigurationObject;
 import com.boot.jx.postman.PMEnvironment.PMDomainConfig;
+import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.MessageReport;
 import com.boot.jx.postman.model.OutboxMessage;
@@ -19,7 +20,7 @@ import com.boot.jx.postman.model.ext.InBoundEvent;
 import com.boot.utils.ArgUtil;
 
 @Component
-public class AgentInBoundHandler extends DefaultInBoundHandler {
+public class AgentInBoundHandler extends DefaultChatBoundHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AgentInBoundHandler.class);
 
@@ -78,5 +79,6 @@ public class AgentInBoundHandler extends DefaultInBoundHandler {
     public void doHandle(InBoundEvent inBoundEvent) {
 	super.doHandle(inBoundEvent);
     }
+
 
 }

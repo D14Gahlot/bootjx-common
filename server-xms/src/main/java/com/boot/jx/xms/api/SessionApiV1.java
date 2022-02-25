@@ -8,17 +8,15 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.boot.jx.api.ApiResponse;
-import com.boot.jx.common.service.ChatSessionService;
+import com.boot.jx.chat.ChatSessionService;
 import com.boot.jx.common.store.ChatArchiveService;
 import com.boot.jx.inbound.InBound.InBoundHandler;
 import com.boot.jx.postman.dto.ChatMessageDTO;
 import com.boot.jx.postman.dto.ChatSessionDTO;
-import com.boot.jx.postman.manager.ChatSessionManager;
 import com.boot.jx.postman.model.ext.InBoundEvent;
 import com.boot.jx.xms.XmsConstants;
 import com.boot.jx.xms.XmsConstants.XMSClientAuth;
 import com.boot.jx.xms.dto.SessionQueueAssignment;
-import com.boot.utils.ArgUtil;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;

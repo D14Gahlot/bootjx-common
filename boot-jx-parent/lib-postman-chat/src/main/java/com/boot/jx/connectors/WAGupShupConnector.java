@@ -131,7 +131,7 @@ public class WAGupShupConnector extends AbstractConnector<GupShupConfigDetails, 
     public OutboxMessage initSession(ChatSessionDoc session, InboxMessage inboxMessage) {
 	if (ArgUtil.is(inboxMessage.getOriginalMessage())) {
 	    GupShupInbound dm = JsonUtil.parse(inboxMessage.getOriginalMessage(), GupShupInbound.class);
-	    ChatContactQuery contactQuery = messageContext.getChatContactQuery();
+	    ChatContactQuery contactQuery = messageContext.contact();
 	    contactQuery.setName(dm.getName());
 	    contactQuery.setPhone(dm.getMobile());
 	}

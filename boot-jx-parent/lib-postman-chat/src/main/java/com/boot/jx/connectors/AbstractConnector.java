@@ -81,7 +81,7 @@ public abstract class AbstractConnector<CD extends AChannelDetails, P extends Ch
 
     @Override
     public ChatContactDoc getChatContact(IMessage iMessage) {
-	return messageContext.getChatContactDoc();
+	return messageContext.contact().getDoc();
     }
 
     @Override

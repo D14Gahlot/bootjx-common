@@ -17,9 +17,9 @@ import com.boot.jx.api.ApiResponse;
 import com.boot.jx.bot.BotEngine;
 import com.boot.jx.bot.ChatMapping;
 import com.boot.jx.cache.CacheBox;
-import com.boot.jx.chat.ChatClient;
 import com.boot.jx.chat.ChatService;
 import com.boot.jx.chat.ChatSessionFactory;
+import com.boot.jx.chat.ChatSessionService;
 import com.boot.jx.chat.ChatStatusService;
 import com.boot.jx.def.ICacheBox;
 import com.boot.jx.inbound.InBound.InBoundFilter;
@@ -68,6 +68,9 @@ public class InBoundService {
 
     @Autowired
     private ChatStatusService chatStatusService;
+    
+    @Autowired
+    private ChatSessionService chatSessionService;
 
     @Autowired
     private AgentService agentService;
@@ -171,12 +174,12 @@ public class InBoundService {
 
 	if (locallySessionAssigned && ArgUtil.is(session)) {
 	    boolean wasSessionInitd = session.isInitd();
-	    boolean isSessionInitd = chatService.initSession(inboxMessageOriginal, session);
+	    boolean isSessionInitd = chatSessionService.initSession(inboxMessageOriginal, session);
 	    if (!isSessionInitd) {
 		return inboxMessageOriginal;
 	    }
 	    if (isSessionInitd && (wasSessionInitd != isSessionInitd)) {
-		chatService.initSessionPost(inboxMessageOriginal, session);
+		chatSessionService.initSessionPost(inboxMessageOriginal, session);
 	    }
 
 	}

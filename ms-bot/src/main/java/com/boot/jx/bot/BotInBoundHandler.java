@@ -5,13 +5,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.boot.jx.common.config.DefaultInBoundHandler;
+import com.boot.jx.common.config.DefaultChatBoundHandler;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.MessageReport;
 import com.boot.jx.postman.model.ext.InBoundEvent;
 
 @Component
-public class BotInBoundHandler extends DefaultInBoundHandler {
+public class BotInBoundHandler extends DefaultChatBoundHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BotInBoundHandler.class);
 

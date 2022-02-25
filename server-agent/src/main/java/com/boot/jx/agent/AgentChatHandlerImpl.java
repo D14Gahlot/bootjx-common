@@ -13,9 +13,9 @@ import org.springframework.stereotype.Component;
 
 import com.boot.jx.chat.ChatCommands;
 import com.boot.jx.chat.ChatService;
+import com.boot.jx.chat.ChatSessionService;
 import com.boot.jx.common.doc.AgentDoc;
 import com.boot.jx.common.doc.AgentSessionDoc;
-import com.boot.jx.common.service.ChatSessionService;
 import com.boot.jx.common.store.AgentStore;
 import com.boot.jx.common.store.ChatArchiveBuilder;
 import com.boot.jx.common.store.ChatArchiveService;
