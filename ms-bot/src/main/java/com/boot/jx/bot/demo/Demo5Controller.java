@@ -31,7 +31,7 @@ public class Demo5Controller extends CommonBotController {
 
 	    @ChatMapping(key = AlexBotConstants.KEY.INITIATE + "*", pattern = "^*$")
 	    public void start(InboxMessage inboxMessage, StringMatcher matcher) {
-		reply(new OutboxMessage().template("dc_welcome_message").put("name", chatContext.getContact().getName()));
+		reply(new OutboxMessage().template("dc_welcome_message").put("name", chatContext.contact().getName()));
 		next("select-language");
 	    }
 	    
@@ -39,7 +39,7 @@ public class Demo5Controller extends CommonBotController {
 	    @ChatMapping(key = "select-language")
 	    public void languageOnSelect(InboxMessage inboxMessage, StringMatcher matcher) {
 	    String language = inboxMessage.getMessage().toLowerCase();
-	    lang = ArgUtil.parseAsString(chatContext.sessionData().get("lang"));
+	    lang = ArgUtil.parseAsString(chatContext.contact().getLang());
 	    
 	    // if(!timeCheck()) {
 	    //	 reply(new OutboxMessage().template("working_hours_update").lang("en"));
@@ -48,11 +48,11 @@ public class Demo5Controller extends CommonBotController {
 	   //  }
 	     
 		    if(language.equalsIgnoreCase("english") || (lang!=null && lang.equalsIgnoreCase("en"))) {
-		    	 chatContext.sessionData().put("lang", "en");
+		    	 chatContext.contact().setLang("en");
 		    	 reply(new OutboxMessage().template("dc_services").lang("en"));
 		    	 next("select-service");
 		    }else if(language.equalsIgnoreCase("العربية") || (lang!=null &&  lang.equalsIgnoreCase("ar"))) {
-		    	chatContext.sessionData().put("lang", "ar");
+		    	chatContext.contact().setLang("ar");
 		    	reply(new OutboxMessage().template("dc_services").lang("ar"));
 		    	 next("select-service");
 		    } else{
@@ -63,7 +63,7 @@ public class Demo5Controller extends CommonBotController {
 	    
 	    @ChatMapping(key = "select-service")
 	    public void seviceOnSelect(InboxMessage inboxMessage, StringMatcher matcher) {
-	    lang = ArgUtil.parseAsString(chatContext.sessionData().get("lang"));	
+	    lang = ArgUtil.parseAsString(chatContext.session().get("lang"));	
 	    switch (inboxMessage.getMessage().toLowerCase().trim()) {
 		case "memberships":
 		case "الاشتراكات":

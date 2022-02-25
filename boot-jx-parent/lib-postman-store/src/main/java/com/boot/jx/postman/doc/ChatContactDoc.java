@@ -2,7 +2,9 @@ package com.boot.jx.postman.doc;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.TypeAlias;
@@ -68,6 +70,7 @@ public class ChatContactDoc implements Serializable, Contactable, AuditCreateEnt
     private List<String> labelId;
     private ChatUserProfileDTO profile;
     private ContactPrefsDTO prefs;
+    private Map<String, Object> store;
 
     @Indexed
     private String profileId;
@@ -295,6 +298,21 @@ public class ChatContactDoc implements Serializable, Contactable, AuditCreateEnt
 	    this.prefs = new ContactPrefsDTO();
 	}
 	return prefs;
+    }
+
+    public Map<String, Object> getStore() {
+	return store;
+    }
+
+    public void setStore(Map<String, Object> store) {
+	this.store = store;
+    }
+
+    public Map<String, Object> store() {
+	if (this.store == null) {
+	    this.store = new HashMap<String, Object>();
+	}
+	return store;
     }
 
 }

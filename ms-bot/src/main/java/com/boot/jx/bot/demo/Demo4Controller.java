@@ -33,7 +33,7 @@ public class Demo4Controller extends CommonBotController {
     PMEnvironment pmEnvironment;
 
     public void start(InboxMessage inboxMessage, StringMatcher matcher) {
-	reply(new OutboxMessage().template("menu-5").put("name", chatContext.getContact().getName()));
+	reply(new OutboxMessage().template("menu-5").put("name", chatContext.contact().getName()));
 	next("menu-5-dept");
     }
 
@@ -49,7 +49,7 @@ public class Demo4Controller extends CommonBotController {
 	switch (inboxMessage.getMessage().toLowerCase()) {
 
 	case "*":
-	    reply(new OutboxMessage().template("feedback").put("name", chatContext.getContact().getName()));
+	    reply(new OutboxMessage().template("feedback").put("name", chatContext.contact().getName()));
 	    next("feedback-onselect");
 	    break;
 	case "#":
@@ -78,7 +78,7 @@ public class Demo4Controller extends CommonBotController {
 
     @ChatMapping(key = "menu-4-8-talk2agent")
     public void transferToAgent(InboxMessage inboxMessage, StringMatcher matcher) {
-	chatContext.sessionData().data().remove(CURRENT_DEMO);
+	chatContext.session().remove(CURRENT_DEMO);
 	commonTransferToAgent(inboxMessage, matcher);
     }
 
@@ -101,8 +101,8 @@ public class Demo4Controller extends CommonBotController {
 
     public void send() {
 	Map<String, Object> data = new HashMap<String, Object>();
-	data.put("name", chatContext.getContact().getName());
-	data.put("phone", ArgUtil.nonEmpty(chatContext.getContact().getPhone(), chatContext.getContact().getEmail()));
+	data.put("name", chatContext.contact().getName());
+	data.put("phone", ArgUtil.nonEmpty(chatContext.contact().getPhone(), chatContext.contact().getEmail()));
 
 	SafeKeyHashMap<Object> globalVars = pmEnvironment.local().globalVars();
 	String templateCode = globalVars.keyEntry("sales_alert_template").asString();
