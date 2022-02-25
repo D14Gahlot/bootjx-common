@@ -1,5 +1,8 @@
 package com.boot.jx.postman.doc.config;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.TypeAlias;
 import org.springframework.data.mongodb.core.index.Indexed;
@@ -40,6 +43,9 @@ public class ClientKeyConfigDoc implements IDocument, AuditableByIdEntity, Clien
     private String appType;
     private String webhook;
     private String forward;
+
+    private Map<String, Object> secret;
+    private Map<String, Object> props;
 
     public String getId() {
 	return id;
@@ -133,11 +139,40 @@ public class ClientKeyConfigDoc implements IDocument, AuditableByIdEntity, Clien
     }
 
     public String getForward() {
-        return forward;
+	return forward;
     }
 
     public void setForward(String forward) {
-        this.forward = forward;
+	this.forward = forward;
     }
 
+    public Map<String, Object> getSecret() {
+	return secret;
+    }
+
+    public void setSecret(Map<String, Object> secret) {
+	this.secret = secret;
+    }
+
+    public Map<String, Object> getProps() {
+	return props;
+    }
+
+    public void setProps(Map<String, Object> props) {
+	this.props = props;
+    }
+
+    public Map<String, Object> props() {
+	if (this.props == null) {
+	    this.props = new HashMap<String, Object>();
+	}
+	return props;
+    }
+
+    public Map<String, Object> secret() {
+	if (this.secret == null) {
+	    this.secret = new HashMap<String, Object>();
+	}
+	return secret;
+    }
 }

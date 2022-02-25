@@ -28,7 +28,6 @@ import com.boot.jx.postman.doc.QuickTag;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.ext.InBoundEvent;
 import com.boot.jx.postman.model.ext.InBoundEvent.SessionRouted;
-import com.boot.jx.postman.query.ChatSessionQuery;
 import com.boot.jx.postman.store.MessageStore.EVENTS;
 import com.boot.jx.postman.store.SessionStore;
 import com.boot.utils.ArgUtil;
@@ -211,6 +210,14 @@ public class ChatSessionManager {
 	return sessionStore.find(query, ChatSessionDoc.class);
     }
 
+    public InBoundEvent initSession(InboxMessage inboxMessage, ChatSessionDoc session) {
+	InBoundEvent inBoundEvent = new InBoundEvent().eventCode(InBoundEvent.SESSION_INIT);
+	inBoundEvent.sessionId = session.getSessionId();
+	inBoundEvent.contactId = session.getContactId();
+	session = sessionStore.initSession(session);
+	return inBoundEvent;
+    }
+
     public InBoundEvent assignToQueue(ChatSessionDoc chatSessionDoc, String queueCode) {
 
 	InBoundEvent inBoundEvent = new InBoundEvent().eventCode(InBoundEvent.SESSION_ROUTED);
@@ -256,24 +263,6 @@ public class ChatSessionManager {
     public InBoundEvent assignToQueue(String sessionId, String queueCode) {
 	ChatSessionDoc sessionDoc = sessionStore.getSession(sessionId);
 	return this.assignToQueue(sessionDoc, queueCode);
-    }
-
-    public InBoundEvent initSession(InboxMessage inboxMessage, ChatSessionDoc session) {
-	InBoundEvent inBoundEvent = new InBoundEvent().eventCode(InBoundEvent.SESSION_INIT);
-	inBoundEvent.sessionId = session.getSessionId();
-	inBoundEvent.contactId = session.getContactId();
-
-	session = sessionStore.initSession(session);
-
-	ChatSessionQuery chatSessionDocQuery = new ChatSessionQuery(session);
-
-	// Assign Queue
-	if (ArgUtil.isEmptyValue(session.getAssignedToQueue()) || ArgUtil.isEmptyValue(session.getMode())) {
-	    String defaultQueue = pmDomainConfig.getDefaultInboundQueue(inboxMessage.contact());
-	    assignToQueue(session, defaultQueue);
-	}
-	sessionStore.updateFirst(chatSessionDocQuery);
-	return inBoundEvent;
     }
 
 }

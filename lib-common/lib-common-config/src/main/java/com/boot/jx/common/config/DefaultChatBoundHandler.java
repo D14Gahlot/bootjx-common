@@ -19,6 +19,7 @@ import com.boot.jx.postman.PMEnvironment.PMCommonConfig;
 import com.boot.jx.postman.PMEnvironment.PMDomainConfig;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.manager.LogManager;
+import com.boot.jx.postman.mitel.MitelClient;
 import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.Message.Status;
@@ -71,6 +72,9 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
     @Autowired
     private ChatArchiveBuilder chatArchiveBuilder;
 
+    @Autowired
+    MitelClient mitelClient;
+
     public ClientApp getDefaultInboundApp(String assignedQueue, Contactable contactable) {
 	ClientApp defaultClient = null;
 	if (ArgUtil.is(assignedQueue)) {
@@ -105,7 +109,7 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 	if (ArgUtil.is(defaultClient)) {
 	    try {
 
-		APP_TYPE appType = ArgUtil.parseAsEnumT(defaultClient.getAppType(), APP_TYPE.class, APP_TYPE.NONE);
+		APP_TYPE appType = APP_TYPE.from(defaultClient.getAppType());
 
 		// WEBHOOOK HANDLING
 		if (CHAT_MODE.WEBHOOK.equals(appType.getMode())) {
@@ -260,13 +264,14 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
     }
 
     @Override
-    public void doHandle(InBoundEvent inBoundEvent) {
+    public void onSessionRoute(InBoundEvent inBoundEvent) {
 
 	if (InBoundEvent.SESSION_ROUTED.equals(inBoundEvent.eventCode)) {
 
 	    ClientApp defaultClient = getDefaultInboundApp(inBoundEvent.sessionRouted.targetQueue, null);
 	    if (ArgUtil.is(defaultClient)) {
-		if (ArgUtil.areEqual(CHAT_MODE.WEBHOOK.toString(), defaultClient.getAppType())) {
+		APP_TYPE appType = APP_TYPE.from(defaultClient.getAppType());
+		if (APP_TYPE.WEBHOOK.equals(appType)) {
 		    LOGGER.debug("Forwarding Session Routing Event to Xternal Service ");
 		    try {
 			InBoundContact contact = InBoundContact.from(inBoundEvent.contact());
@@ -282,9 +287,20 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 			logManager.error(inBoundEvent, e);
 		    }
 		    return;
+		} else if (APP_TYPE.MITEL.equals(appType)) {
+		    try {
+			mitelClient.send(defaultClient, inBoundEvent.sessionId, inBoundEvent.contactId);
+		    } catch (Exception e) {
+			logManager.error(inBoundEvent, e);
+		    }
 		}
 	    }
 	}
+    }
+
+    @Override
+    public void onSessionInit(InBoundEvent event, ChatSessionDoc chatSessionDoc) {
+
     }
 
     @Override
@@ -293,4 +309,5 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 		chatArchiveBuilder.buildChatSessionDTO().from(chatSessionDoc).withContact()
 			.isAssigned(chatSessionDoc.getAssignedToAgent()).get());
     }
+
 }

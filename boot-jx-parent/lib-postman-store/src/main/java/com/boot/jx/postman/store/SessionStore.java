@@ -117,38 +117,6 @@ public class SessionStore extends CommonMongoTemplateAbstract {
 	return createSessionOld(sessionMessage);
     }
 
-    public ChatSessionDoc createSessionNew(SessionMessage sessionMessage) {
-	Contactable contact = PostManUtil.getContactMeta(sessionMessage.contact());
-
-	String sessionId = sessionMessage.getSessionId();
-	String contactId = contact.getContactId();
-
-	ChatSessionDoc chatSessionDoc = null;
-	ChatContactDoc chatContactDoc = null;
-
-	if (ArgUtil.is(sessionId)) {
-	    chatSessionDoc = getSession(sessionId);
-	    if (ArgUtil.isEmpty(chatSessionDoc)) {
-		// Session Not found
-		return null;
-	    }
-	    if (!isSessionValid(chatSessionDoc)) {
-		contactId = ArgUtil.nonEmpty(contactId, chatSessionDoc.getContactId());
-	    }
-	    if (ArgUtil.isEmpty(contactId)) {
-		// Contact Not found
-		return null;
-	    }
-	    chatContactDoc = super.findById(contactId, ChatContactDoc.class);
-	}
-
-	if (!isSessionValid(chatSessionDoc)) {
-
-	}
-
-	return chatSessionDoc;
-    }
-
     public ChatSessionDoc createSessionOld(SessionMessage sessionMessage) {
 	Contactable contact = PostManUtil.getContactMeta(sessionMessage.contact());
 

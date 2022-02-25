@@ -45,8 +45,7 @@ public class ChatContactQuery extends DocQueryBuilder<ChatContactDoc> {
     }
 
     public Object get(String key) {
-	this.doc.store().get(key);
-	return this;
+	return this.doc.store().get(key);
     }
 
     public ChatContactQuery put(String key, String object) {

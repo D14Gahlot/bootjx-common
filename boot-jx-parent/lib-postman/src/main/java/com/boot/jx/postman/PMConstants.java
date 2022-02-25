@@ -63,6 +63,10 @@ public class PMConstants {
 	public CHAT_MODE getMode() {
 	    return this.chatMode;
 	}
+
+	public static APP_TYPE from(Object appType) {
+	    return ArgUtil.parseAsEnumT(appType, APP_TYPE.class, APP_TYPE.NONE);
+	}
     }
 
     public static class MESSAGE_COMPOSE_TYPE {

@@ -344,6 +344,8 @@ public class PMEnvironment {
 	public String getDefaultInboundQueue(Contactable contact);
 
 	public PMConfigurationObject getResolveReply();
+
+	String getDomainUrl();
     }
 
     public interface PMClientConfig {

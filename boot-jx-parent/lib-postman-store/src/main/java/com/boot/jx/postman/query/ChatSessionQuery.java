@@ -30,8 +30,7 @@ public class ChatSessionQuery extends DocQueryBuilder<ChatSessionDoc> {
     }
 
     public Object get(String key) {
-	this.doc.store().get(key);
-	return this;
+	return this.doc.store().get(key);
     }
 
     public ChatSessionQuery put(String key, String object) {
