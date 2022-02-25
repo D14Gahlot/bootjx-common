@@ -11,6 +11,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import com.boot.jx.model.AuditCreateEntity;
 import com.boot.jx.postman.dto.ChatUserProfileDTO;
+import com.boot.jx.postman.dto.ContactPrefsDTO;
 import com.boot.jx.postman.model.MessageDefinitions.Contactable;
 import com.boot.jx.swagger.ApiMockModelProperty;
 import com.boot.utils.ArgUtil;
@@ -66,6 +67,7 @@ public class ChatContactDoc implements Serializable, Contactable, AuditCreateEnt
     @Indexed
     private List<String> labelId;
     private ChatUserProfileDTO profile;
+    private ContactPrefsDTO prefs;
 
     @Indexed
     private String profileId;
@@ -278,6 +280,21 @@ public class ChatContactDoc implements Serializable, Contactable, AuditCreateEnt
 
     public void setLastSentXStamp(long lastSentXStamp) {
 	this.lastSentXStamp = lastSentXStamp;
+    }
+
+    public ContactPrefsDTO getPrefs() {
+	return prefs;
+    }
+
+    public void setPrefs(ContactPrefsDTO prefs) {
+	this.prefs = prefs;
+    }
+
+    public ContactPrefsDTO prefs() {
+	if (this.prefs == null) {
+	    this.prefs = new ContactPrefsDTO();
+	}
+	return prefs;
     }
 
 }
