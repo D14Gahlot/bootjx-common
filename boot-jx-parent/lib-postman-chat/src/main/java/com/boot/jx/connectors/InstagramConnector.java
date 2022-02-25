@@ -70,7 +70,7 @@ public class InstagramConnector extends AbstractConnector<InstagramConfig, Insta
     public OutboxMessage initSession(ChatSessionDoc session, InboxMessage inboxMessage) {
 	ChannelConfig config = getChannelConfig(inboxMessage);
 	InstagramUserProfile profile = instaClient.getUserProfile(config,inboxMessage.contact());
-	ChatContactQuery contactQuery = messageContext.getChatContactQuery();
+	ChatContactQuery contactQuery = messageContext.contact();
 	contactQuery.setProfilePic(profile.getProfilePic());
 	contactQuery.setName(profile.getName());
 	return null;

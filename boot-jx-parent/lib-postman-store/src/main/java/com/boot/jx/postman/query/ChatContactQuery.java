@@ -28,6 +28,45 @@ public class ChatContactQuery extends DocQueryBuilder<ChatContactDoc> {
 	return doc;
     }
 
+    public String getName() {
+	return this.getDoc().getName();
+    }
+
+    public String getPhone() {
+	return this.getDoc().getPhone();
+    }
+
+    public String getEmail() {
+	return this.getDoc().getEmail();
+    }
+
+    public String getLang() {
+	return this.getDoc().prefs().getLang();
+    }
+
+    public Object get(String key) {
+	this.doc.store().get(key);
+	return this;
+    }
+
+    public ChatContactQuery put(String key, String object) {
+	this.doc.store().put(key, object);
+	this.set("store." + key, object);
+	return this;
+    }
+
+    public ChatContactQuery remove(String key) {
+	this.doc.store().remove(key);
+	this.unset("store." + key);
+	return this;
+    }
+
+    public ChatContactQuery setLang(String lang) {
+	this.doc.prefs().setLang(lang);
+	this.set("prefs.lang", lang);
+	return this;
+    }
+
     public ChatContactQuery setLastInBoundStamp(long timestamp) {
 	this.doc.setLastInBoundStamp(timestamp);
 	this.set("lastInBoundStamp", timestamp);

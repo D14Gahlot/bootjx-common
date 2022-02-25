@@ -64,7 +64,8 @@ public class AgentAuthController {
 
     private boolean isAdminPanelBlocked() {
 	return false;
-	//return pmEnvironment.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_CHAT_INBOUND_WEBHOOK).exists();
+	// return
+	// pmEnvironment.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_CHAT_INBOUND_WEBHOOK).exists();
     }
 
     @RequestMapping(value = { "/app/unauthorized", "/app/unauthorized/**" },
@@ -104,6 +105,54 @@ public class AgentAuthController {
 	model.addAttribute("APP_DEPT", agentSession.getAgentDept());
 
 	return "app-agent";
+    }
+
+    @RequestMapping(value = { "/plug/**", "/plug" }, method = { RequestMethod.POST, RequestMethod.GET })
+    public String plugOlin(HttpServletRequest request, Model model) throws NoSuchAlgorithmException {
+
+	String action = ArgUtil.parseAsString(commonHttpRequest.get("action"), "none");
+	String username = commonHttpRequest.get("username");
+	String password = commonHttpRequest.get("password");
+	boolean rememberme = ArgUtil.parseAsBoolean(commonHttpRequest.get("rememberme"), false);
+	String jxSessionId = ArgUtil.parseAsString(commonHttpRequest.get("JXSESSIONID"), Constants.BLANK);
+
+	if ("login".equals(action)) {
+	    ApiResponse<Map<String, Object>, AgentResponseAuthDto> x = authService.empLogin(username, password, false);
+	    if (ArgUtil.parseAsBoolean(x.getData().get("success"), false)) {
+		AgentResponseAuthDto agent = x.getMeta();
+		if (ArgUtil.is(agent)) {
+		    sessionService.login(request, agent, password);
+		    if (rememberme) {
+			String xRemSession = CryptoUtil.getEncoder()
+				.obzect(MapBuilder.map().put("username", username).put("password", password).toMap())
+				.encodeBase64().encrypt().toString();
+			commonHttpRequest.setCookie("JXSESSIONID", xRemSession);
+		    }
+		}
+	    }
+	}
+
+	if (!agentSession.isLoggedIn() && ArgUtil.is(jxSessionId)) {
+	    @SuppressWarnings("unchecked")
+	    MapModel map = MapModel
+		    .from(CryptoUtil.getEncoder().message(jxSessionId).decrypt().decodeBase64().toObzect(Map.class));
+	    ApiResponse<Map<String, Object>, AgentResponseAuthDto> x = authService.empLogin(map.getString("username"),
+		    map.getString("password"), false);
+	    if (ArgUtil.parseAsBoolean(x.getData().get("success"), false)) {
+		AgentResponseAuthDto agent = x.getMeta();
+		if (ArgUtil.is(agent)) {
+		    sessionService.login(request, agent, password);
+		}
+	    }
+	}
+
+	model.addAllAttributes(appCommonConfig.appAttributes());
+	if (agentSession.isLoggedIn() && ArgUtil.is(agentSession.getAgentDept())) {
+	    model.addAttribute("APP_USER", agentSession.getAgentCode());
+	    model.addAttribute("APP_DEPT", agentSession.getAgentDept());
+	    return "app-agent";
+	}
+	return "app-agent-plugin";
     }
 
     @RequestMapping(value = "/pub/customer/{page}", method = { RequestMethod.POST, RequestMethod.GET })

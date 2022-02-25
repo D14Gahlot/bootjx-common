@@ -22,7 +22,7 @@ public class Demo3Controller extends CommonBotController {
     private ChatContext chatContext;
 
     public void start(InboxMessage inboxMessage, StringMatcher matcher) {
-    	reply(new OutboxMessage().template("menu-4").put("name", chatContext.getContact().getName()));
+    	reply(new OutboxMessage().template("menu-4").put("name", chatContext.contact().getName()));
 	// reply(new OutboxMessage().template("menu-4-1-email-1-ask").put("name",
 	// chatContext.getContact().getName()));
 	next("menu-4-1-email-onselect");
@@ -90,7 +90,7 @@ public class Demo3Controller extends CommonBotController {
 		// Thread.sleep(2000);
 
 		// reply(new OutboxMessage().template("menu-4-7-welcome"));
-		chatContext.sessionData().data().remove(CURRENT_DEMO);
+		chatContext.session().remove(CURRENT_DEMO);
 	    } else {
 		reply(new OutboxMessage().template("menu-4-4-date-1-nok"));
 		next("menu-4-2-date-onselect");
@@ -102,7 +102,7 @@ public class Demo3Controller extends CommonBotController {
 
     @ChatMapping(key = "menu-4-8-talk2agent")
     public void transferToAgent(InboxMessage inboxMessage, StringMatcher matcher) {
-	chatContext.sessionData().data().remove(CURRENT_DEMO);
+	chatContext.session().remove(CURRENT_DEMO);
 	commonTransferToAgent(inboxMessage, matcher);
     }
 }

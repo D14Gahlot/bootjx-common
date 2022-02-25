@@ -5,6 +5,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 
 import com.boot.jx.postman.PMEnvironment;
+import com.boot.jx.postman.PMEnvironment.PMConfigurationObject;
 import com.boot.jx.postman.PMEnvironment.PMDomainConfig;
 import com.boot.jx.postman.model.MessageDefinitions.Contactable;
 import com.boot.jx.postman.plugin.ChannelConfig;
@@ -38,6 +39,11 @@ public class PMDomainConfigImpl implements PMDomainConfig {
     @Override
     public String getDefaultInboundQueue(Contactable contact) {
 	return getDefaultInboundQueue(PostManUtil.CHANNEL_ID(contact));
+    }
+
+    @Override
+    public PMConfigurationObject getResolveReply() {
+	return environment.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_AGENT_CHAT_AUTOREPLY_RESOLVED);
     }
 
 }

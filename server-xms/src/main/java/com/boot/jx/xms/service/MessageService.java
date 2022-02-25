@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 import com.boot.jx.api.ApiFieldError;
 import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.chat.ChatService;
+import com.boot.jx.chat.ChatSessionService;
 import com.boot.jx.dict.FileType;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.doc.ChatSessionDoc;
@@ -26,6 +27,9 @@ public class MessageService {
 
     @Autowired
     private ChatService chatService;
+
+    @Autowired
+    private ChatSessionService chatSessionService;
 
     @Autowired
     private SessionStore sessionStore;
@@ -132,7 +136,7 @@ public class MessageService {
 
 	ChatSessionDoc chatSessionDoc = sessionStore.linkSession(outboxMessage);
 	if (ArgUtil.is(chatSessionDoc)) {
-	    chatService.initSession(outboxMessage, chatSessionDoc);
+	    chatSessionService.initSession(outboxMessage, chatSessionDoc);
 	    chatService.send(chatSessionDoc, outboxMessage);
 	} else {
 	    ApiResponseUtil.throwInputException(

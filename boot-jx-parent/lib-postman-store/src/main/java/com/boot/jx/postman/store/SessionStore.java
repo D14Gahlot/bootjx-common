@@ -444,7 +444,7 @@ public class SessionStore extends CommonMongoTemplateAbstract {
 
     public ChatSessionDoc initSession(ChatSessionDoc chatSessionDoc) {
 
-	ChatContactDoc contactDoc = messageContext.getChatContactDoc();
+	ChatContactDoc contactDoc = messageContext.contact().getDoc();
 
 	chatSessionDoc.setInitd(true);
 	chatSessionDoc.setContactName(contactDoc.getName());

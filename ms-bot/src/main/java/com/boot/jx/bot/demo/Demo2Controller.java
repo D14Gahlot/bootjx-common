@@ -21,7 +21,7 @@ public class Demo2Controller extends CommonBotController {
     private ChatContext chatContext;
 
     public void start(InboxMessage inboxMessage, StringMatcher matcher) {
-	reply(new OutboxMessage().template("menu-3").put("name", chatContext.getContact().getName()));
+	reply(new OutboxMessage().template("menu-3").put("name", chatContext.contact().getName()));
 	// reply(new OutboxMessage().template("menu-3-1").put("name",
 	// chatContext.getContact().getName()));
 	next("menu-3-1-onselect");
@@ -29,7 +29,7 @@ public class Demo2Controller extends CommonBotController {
 
     @ChatMapping(key = "menu-3-1-onselect")
     public void option1(InboxMessage inboxMessage, StringMatcher matcher) {
-	reply(new OutboxMessage().template("menu-3-1-resp").put("name", chatContext.getContact().getName())
+	reply(new OutboxMessage().template("menu-3-1-resp").put("name", chatContext.contact().getName())
 		.attachment(new Attachment().mediaURL(
 			"https://cdn.jsdelivr.net/gh/mehery-soccom/mehery-content@main/sample-receipt/zen-residence-compressed.pdf")
 			.mediaCaption("Floor Plan").mediaType(FileType.DOCUMENT.toString())));
@@ -85,7 +85,7 @@ public class Demo2Controller extends CommonBotController {
 
     @ChatMapping(key = "menu-4-8-talk2agent")
     public void transferToAgent(InboxMessage inboxMessage, StringMatcher matcher) {
-	chatContext.sessionData().data().remove(CURRENT_DEMO);
+	chatContext.session().remove(CURRENT_DEMO);
 	commonTransferToAgent(inboxMessage, matcher);
     }
 }

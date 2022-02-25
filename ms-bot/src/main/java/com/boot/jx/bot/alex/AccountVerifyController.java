@@ -41,7 +41,7 @@ public class AccountVerifyController extends ChatController {
 
 	@ChatMapping(key = AlexBotConstants.KEY.INITIATE, pattern = "^HI$")
 	public void greet(InboxMessage inboxMessage, StringMatcher matcher) {
-		String name = chatContext.getContact().getName();
+		String name = chatContext.contact().getDoc().getName();
 		if (ArgUtil.is(name)) {
 			reply("Hello " + name);
 			reply("Type menu to see options");
@@ -54,7 +54,7 @@ public class AccountVerifyController extends ChatController {
 	@ChatMapping(key = AlexBotConstants.KEY.SAVE_NAME_ONENTER)
 	public void saveNameOnConfirm(InboxMessage inboxMessage, StringMatcher matcher) {
 		String name = inboxMessage.getMessage();
-		chatContext.sessionData().put("_name", name);
+		chatContext.session().put("_name", name);
 
 		ChatPromise x = require(AlexBotConstants.KEY.SAVE_NAME_CONFIRM);
 		switch (x.getResult()) {
@@ -73,7 +73,7 @@ public class AccountVerifyController extends ChatController {
 
 	@ChatMapping(key = AlexBotConstants.KEY.SAVE_NAME_CONFIRM)
 	public void savenameOCnifmr(InboxMessage inboxMessage, StringMatcher matcher) {
-		String name = ArgUtil.parseAsString(chatContext.sessionData().get("_name"));
+		String name = ArgUtil.parseAsString(chatContext.session().get("_name"));
 		reply("Is your name '" + name + "' ? 'YES' to confirm. 'NO' to exit. or You can just type your name");
 		next(AlexBotConstants.KEY.SAVE_NAME_CONFIRM_ONSELECT);
 	}
@@ -82,9 +82,9 @@ public class AccountVerifyController extends ChatController {
 	public void confirmName(InboxMessage inboxMessage, StringMatcher matcher) {
 		switch (inboxMessage.getMessage().toUpperCase()) {
 		case "YES":
-			String _name = ArgUtil.parseAsString(chatContext.sessionData().get("_name"));
-			chatContext.getContact().setName(_name);
-			chatContext.getUserData().put("name", _name);
+			String _name = ArgUtil.parseAsString(chatContext.session().get("_name"));
+			chatContext.contact().getDoc().setName(_name);
+			chatContext.contact().put("name", _name);
 			reply("Hello " + _name + "! Your name has been updated");
 			resolve(AlexBotConstants.KEY.SAVE_NAME_CONFIRM);
 			resolve(AlexBotConstants.KEY.SAVE_NAME_CONFIRM_ONSELECT);
@@ -94,7 +94,7 @@ public class AccountVerifyController extends ChatController {
 			resolve(AlexBotConstants.KEY.SAVE_NAME_CONFIRM_ONSELECT);
 			break;
 		default:
-			chatContext.sessionData().put("_name", inboxMessage.getMessage());
+			chatContext.session().put("_name", inboxMessage.getMessage());
 			reply("Is your name '" + inboxMessage.getMessage()
 					+ "' ? 'YES' to confirm. 'NO' to exit. or You can just type your name");
 			next(AlexBotConstants.KEY.SAVE_NAME_CONFIRM_ONSELECT);

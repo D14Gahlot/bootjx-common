@@ -91,7 +91,7 @@ public class WARapiwhaConnector extends AbstractConnector<WebConfigDetails, WebP
 	Object x = inboxMessage.getOriginalMessage();
 	if (ArgUtil.is(x)) {
 	    Map<String, Object> map = JsonUtil.toMap(x);
-	    ChatContactQuery contactQuery = messageContext.getChatContactQuery();
+	    ChatContactQuery contactQuery = messageContext.contact();
 	    contactQuery.setProfilePic(ArgUtil.parseAsString(map.get("profilepicture"), Constants.BLANK));
 	    contactQuery.setName(ArgUtil.parseAsString(map.get("pushname"), Constants.BLANK));
 	}

@@ -2,7 +2,9 @@ package com.boot.jx.postman.doc;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.TypeAlias;
@@ -96,6 +98,8 @@ public class ChatSessionDoc extends UpdatedTimeStampDoc implements Serializable 
 
     @Indexed
     private List<String> tagId;
+
+    private Map<String, Object> store;
 
     // MessageStats
     @DBRef
@@ -473,6 +477,21 @@ public class ChatSessionDoc extends UpdatedTimeStampDoc implements Serializable 
 
     public void setAssignedToQueue(String assignedToQueue) {
 	this.assignedToQueue = assignedToQueue;
+    }
+
+    public Map<String, Object> getStore() {
+	return store;
+    }
+
+    public void setStore(Map<String, Object> store) {
+	this.store = store;
+    }
+
+    public Map<String, Object> store() {
+	if (this.store == null) {
+	    this.store = new HashMap<String, Object>();
+	}
+	return store;
     }
 
 }

@@ -137,8 +137,8 @@ public class WebConnector extends DefaultConnector<WebConfigDetails, WebPlugin> 
     @Override
     public OutboxMessage initSession(ChatSessionDoc session, InboxMessage inboxMessage) {
 
-	ChatContactQuery contactQuery = messageContext.getChatContactQuery();
-	ChatContactDoc chatContactDoc = messageContext.getChatContactDoc();
+	ChatContactQuery contactQuery = messageContext.contact();
+	ChatContactDoc chatContactDoc = messageContext.contact().getDoc();
 
 	if (ArgUtil.is(inboxMessage.getForm())) {
 	    if (ArgUtil.is(inboxMessage.getForm().get("name"))) {

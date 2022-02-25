@@ -81,7 +81,7 @@ public abstract class AbstractConnector<CD extends AChannelDetails, P extends Ch
 
     @Override
     public ChatContactDoc getChatContact(IMessage iMessage) {
-	return messageContext.getChatContactDoc();
+	return messageContext.contact().getDoc();
     }
 
     @Override
@@ -126,8 +126,13 @@ public abstract class AbstractConnector<CD extends AChannelDetails, P extends Ch
 	model.put(Message.DATA_KEY, data.toMap());
 	outboxMessage.setModel(model.toMap());
 
+	if (ArgUtil.isEmpty(outboxMessage.hsm().getLang())) {
+	    outboxMessage.hsm().lang(chatContactDoc.prefs().getLang());
+	}
+
 	tmplClient.process(outboxMessage);
 	if (ArgUtil.is(outboxMessage.templateId())) {
+
 	    if (MESSAGE_SEND_TYPE.PUSH_MESSAGE.equals(outboxMessage.messageMetaWrapper().sendType())
 		    && channelConfig.isPushAllowed() && channelConfig.isPushOnlyApproved()) {
 		List<HSMTemplate3rdParty> temps = commonMongoTemplate.find(CommonMongoQueryBuilder

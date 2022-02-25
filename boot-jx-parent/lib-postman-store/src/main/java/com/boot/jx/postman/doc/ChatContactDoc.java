@@ -2,7 +2,9 @@ package com.boot.jx.postman.doc;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.TypeAlias;
@@ -11,6 +13,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import com.boot.jx.model.AuditCreateEntity;
 import com.boot.jx.postman.dto.ChatUserProfileDTO;
+import com.boot.jx.postman.dto.ContactPrefsDTO;
 import com.boot.jx.postman.model.MessageDefinitions.Contactable;
 import com.boot.jx.swagger.ApiMockModelProperty;
 import com.boot.utils.ArgUtil;
@@ -66,6 +69,8 @@ public class ChatContactDoc implements Serializable, Contactable, AuditCreateEnt
     @Indexed
     private List<String> labelId;
     private ChatUserProfileDTO profile;
+    private ContactPrefsDTO prefs;
+    private Map<String, Object> store;
 
     @Indexed
     private String profileId;
@@ -278,6 +283,36 @@ public class ChatContactDoc implements Serializable, Contactable, AuditCreateEnt
 
     public void setLastSentXStamp(long lastSentXStamp) {
 	this.lastSentXStamp = lastSentXStamp;
+    }
+
+    public ContactPrefsDTO getPrefs() {
+	return prefs;
+    }
+
+    public void setPrefs(ContactPrefsDTO prefs) {
+	this.prefs = prefs;
+    }
+
+    public ContactPrefsDTO prefs() {
+	if (this.prefs == null) {
+	    this.prefs = new ContactPrefsDTO();
+	}
+	return prefs;
+    }
+
+    public Map<String, Object> getStore() {
+	return store;
+    }
+
+    public void setStore(Map<String, Object> store) {
+	this.store = store;
+    }
+
+    public Map<String, Object> store() {
+	if (this.store == null) {
+	    this.store = new HashMap<String, Object>();
+	}
+	return store;
     }
 
 }

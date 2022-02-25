@@ -2,10 +2,10 @@ package com.boot.jx.inbound;
 
 import org.springframework.scheduling.annotation.Async;
 
+import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.MessageReport;
 import com.boot.jx.postman.model.ext.InBoundEvent;
-import com.boot.utils.ArgUtil;
 
 public class InBound {
 
@@ -36,6 +36,8 @@ public class InBound {
 	default public void handleAsync(InBoundEvent inBoundEvent) {
 	    this.doHandle(inBoundEvent);
 	}
+
+	public void onSessionClose(ChatSessionDoc chatSessionDoc);
 
     }
 

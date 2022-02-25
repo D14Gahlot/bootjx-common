@@ -342,6 +342,8 @@ public class PMEnvironment {
 	public String getDefaultInboundQueue(String channelId);
 
 	public String getDefaultInboundQueue(Contactable contact);
+
+	public PMConfigurationObject getResolveReply();
     }
 
     public interface PMClientConfig {

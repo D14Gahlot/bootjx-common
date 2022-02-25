@@ -8,13 +8,16 @@ import com.boot.jx.AppContextUtil;
 import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.chat.ChatClient;
 import com.boot.jx.chat.ChatClient.PATH;
+import com.boot.jx.common.store.ChatArchiveBuilder;
 import com.boot.jx.inbound.InBound.InBoundHandler;
 import com.boot.jx.postman.ClientApp;
+import com.boot.jx.postman.PMConstants.APP_TYPE;
 import com.boot.jx.postman.PMConstants.CHAT_MODE;
 import com.boot.jx.postman.PMConstants.MESSAGE_FORMAT_TYPE;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PMEnvironment.PMCommonConfig;
 import com.boot.jx.postman.PMEnvironment.PMDomainConfig;
+import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.manager.LogManager;
 import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.InboxMessage;
@@ -33,12 +36,13 @@ import com.boot.jx.postman.model.ext.MsgSession;
 import com.boot.jx.postman.store.MessageStore;
 import com.boot.jx.rest.RestService;
 import com.boot.jx.stomp.StompTunnelService;
+import com.boot.jx.utils.PostManUtil;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
 
-public abstract class DefaultInBoundHandler implements InBoundHandler {
+public abstract class DefaultChatBoundHandler implements InBoundHandler {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(DefaultInBoundHandler.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(DefaultChatBoundHandler.class);
 
     @Autowired
     private ChatClient chatClient;
@@ -63,6 +67,9 @@ public abstract class DefaultInBoundHandler implements InBoundHandler {
 
     @Autowired
     private StompTunnelService stompTunnelService;
+
+    @Autowired
+    private ChatArchiveBuilder chatArchiveBuilder;
 
     public ClientApp getDefaultInboundApp(String assignedQueue, Contactable contactable) {
 	ClientApp defaultClient = null;
@@ -98,8 +105,10 @@ public abstract class DefaultInBoundHandler implements InBoundHandler {
 	if (ArgUtil.is(defaultClient)) {
 	    try {
 
+		APP_TYPE appType = ArgUtil.parseAsEnumT(defaultClient.getAppType(), APP_TYPE.class, APP_TYPE.NONE);
+
 		// WEBHOOOK HANDLING
-		if (ArgUtil.areEqual(CHAT_MODE.WEBHOOK.toString(), defaultClient.getAppType())) {
+		if (CHAT_MODE.WEBHOOK.equals(appType.getMode())) {
 		    LOGGER.debug("Forwarding InboxMessage to Xternal Queue ");
 		    if (ArgUtil.is(defaultClient.getForward()) && ArgUtil.is(inboxMessage.getOriginalMessage())) {
 			// This code is only for local debugging for inbounds will not execute in
@@ -116,16 +125,14 @@ public abstract class DefaultInBoundHandler implements InBoundHandler {
 		}
 
 		// INTERNAL AGENT HANDLING
-		if (ArgUtil.areEqual(CHAT_MODE.AGENT.toString(), defaultClient.getAppType())
-			&& ArgUtil.is(pmCommonConfig.getAgentUrl())) {
+		if (CHAT_MODE.AGENT.equals(appType.getMode()) && ArgUtil.is(pmCommonConfig.getAgentUrl())) {
 		    LOGGER.debug("Forwarding InboxMessage to internal Agent ");
 		    chatClient.forward(pmCommonConfig.getAgentUrl() + PATH.INBOUND_FRWRD, inboxMessage);
 		    return;
 		}
 
 		// INTERNAL BOT HANDLING
-		if (ArgUtil.areEqual(CHAT_MODE.BOT.toString(), defaultClient.getAppType())
-			&& ArgUtil.is(pmCommonConfig.getBotUrl())) {
+		if (CHAT_MODE.BOT.equals(appType.getMode()) && ArgUtil.is(pmCommonConfig.getBotUrl())) {
 		    LOGGER.debug("Forwarding InboxMessage to internal Bot ");
 		    chatClient.forward(pmCommonConfig.getBotUrl() + PATH.INBOUND_FRWRD, inboxMessage);
 		    return;
@@ -280,4 +287,10 @@ public abstract class DefaultInBoundHandler implements InBoundHandler {
 	}
     }
 
+    @Override
+    public void onSessionClose(ChatSessionDoc chatSessionDoc) {
+	stompTunnelService.sendToAll(PostManUtil.ON_DEPT_ASSIGN_TOPIC(chatSessionDoc.getAssignedToDept()),
+		chatArchiveBuilder.buildChatSessionDTO().from(chatSessionDoc).withContact()
+			.isAssigned(chatSessionDoc.getAssignedToAgent()).get());
+    }
 }
