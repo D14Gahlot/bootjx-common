@@ -18,10 +18,10 @@ import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.chat.ConnectorHandlerFactory;
 import com.boot.jx.common.impl.ConfigMeta;
 import com.boot.jx.exception.ApiHttpExceptions.ApiStatusCodes;
-import com.boot.jx.postman.PMClientConfig;
 import com.boot.jx.postman.PMConfiguration.PMConfigurationModel;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PMEnvironment.AChannelDetails;
+import com.boot.jx.postman.PMEnvironment.PMClientConfig;
 import com.boot.jx.postman.PMEnvironment.PMConfigurationObject;
 import com.boot.jx.postman.doc.PMConfigurationDoc;
 import com.boot.jx.postman.doc.config.ChannelConfigDoc;
@@ -244,6 +244,7 @@ public class ConfigManager {
 	    }
 	    plugin.importChannelConfigFromMap(config, map, channelType);
 	    save(config);
+	    channelId = config.getChannelId();
 
 	}
 	return getChannelConfig(channelId);

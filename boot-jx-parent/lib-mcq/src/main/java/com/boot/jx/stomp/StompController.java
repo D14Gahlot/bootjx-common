@@ -37,15 +37,18 @@ public class StompController {
     public Map<String, Object> meta(SimpMessageHeaderAccessor headerAccessor) {
 	Map<String, Object> map = new HashMap<String, Object>();
 
-	String httpsSessionId = ArgUtil
+	String xSessionId = ArgUtil
 		.parseAsString(headerAccessor.getSessionAttributes().get(AppConstants.SESSION_ID_XKEY));
 
-	if (!ArgUtil.is(httpsSessionId)) {
-	    LOGGER.warn("httpsSessionId is Empty");
+	String jSessionId = ArgUtil
+		.parseAsString(headerAccessor.getSessionAttributes().get(AppConstants.SESSION_JID_XKEY));
+
+	if (!ArgUtil.is(xSessionId) && !ArgUtil.is(jSessionId)) {
+	    LOGGER.warn("xSessionId/jSessionId is Empty");
 	    return map;
 	}
 
-	StompSession stompSession = stompTunnelSessionManager.getStompSessionByHttpSessionId(httpsSessionId);
+	StompSession stompSession = stompTunnelSessionManager.getStompSessionByHttpSessionId(xSessionId, jSessionId);
 
 	if (ArgUtil.is(stompSession)) {
 	    if (ArgUtil.is(stompSession.getTags())) {
@@ -59,7 +62,7 @@ public class StompController {
 	}
 
 	map.put(AppConstants.SESSION_UID_XKEY, stompTunnelSessionManager.createSessionMapping(
-		headerAccessor.getSessionId(), httpsSessionId,
+		headerAccessor.getSessionId(), xSessionId, jSessionId,
 		ArgUtil.parseAsString(headerAccessor.getSessionAttributes().get(AppConstants.SESSION_UID_XKEY))));
 
 	return map;

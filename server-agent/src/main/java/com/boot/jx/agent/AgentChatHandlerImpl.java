@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 
 import com.boot.jx.chat.ChatCommands;
 import com.boot.jx.chat.ChatService;
-import com.boot.jx.common.config.ConfigConstants;
+import com.boot.jx.chat.ChatSessionService;
 import com.boot.jx.common.doc.AgentDoc;
 import com.boot.jx.common.doc.AgentSessionDoc;
 import com.boot.jx.common.store.AgentStore;
@@ -22,12 +22,11 @@ import com.boot.jx.common.store.ChatArchiveService;
 import com.boot.jx.common.store.DocumentUpdateListner;
 import com.boot.jx.logger.LoggerService;
 import com.boot.jx.mongo.CommonMongoQueryBuilder;
-import com.boot.jx.postman.PMClientConfig;
 import com.boot.jx.postman.PMConstants;
 import com.boot.jx.postman.PMConstants.CHAT_SESSION_ACTIONS;
 import com.boot.jx.postman.PMConstants.DEFAULT;
 import com.boot.jx.postman.PMEnvironment;
-import com.boot.jx.postman.PMEnvironment.PMConfigurationObject;
+import com.boot.jx.postman.PMEnvironment.PMClientConfig;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.dto.ChatMessageDTO;
@@ -75,6 +74,9 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 
     @Autowired
     private ChatArchiveService chatArchive;
+
+    @Autowired
+    private ChatSessionService chatSessionService;
 
     @Autowired
     private ChatArchiveBuilder chatArchiveBuilder;
@@ -272,25 +274,10 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
     }
 
     public ChatMessageDTO exitAgentMode(ChatSessionDoc chatSessionDoc, OutboxMessage outboxMessage) {
-	MessageDoc messageDoc = null;
-
-	if (!chatSessionDoc.isResolved()) {
-	    chatSessionManager.resolveSession(chatSessionDoc);
-	    PMConfigurationObject resolvedReply = environment
-		    .keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_AGENT_CHAT_AUTOREPLY_RESOLVED);
-	    if (resolvedReply.exists()) {
-		messageDoc = chatService.send(chatSessionDoc, new OutboxMessage().templateId(resolvedReply.asString()));
-	    }
-
-	}
-
+	MessageDoc messageDoc = chatSessionService.closeChatSession(chatSessionDoc);
 	if (ArgUtil.is(outboxMessage)) {
 	    messageDoc = chatService.send(chatSessionDoc, outboxMessage);
 	}
-	chatSessionManager.closeSession(chatSessionDoc);
-	stompTunnelService.sendToAll(PostManUtil.ON_DEPT_ASSIGN_TOPIC(chatSessionDoc.getAssignedToDept()),
-		chatArchiveBuilder.buildChatSessionDTO().from(chatSessionDoc).withContact()
-			.isAssigned(chatSessionDoc.getAssignedToAgent()).get());
 	return chatArchive.getMessage(messageDoc, chatSessionDoc);
     }
 

@@ -107,7 +107,7 @@ public class TwitterConnector extends AbstractConnector<TwitterConfigDetails, Tw
 	    try {
 		DirectMessageLocalImpl dm = JsonUtil.parse(inboxMessage.getOriginalMessage(),
 			DirectMessageLocalImpl.class);
-		ChatContactQuery contactQuery = messageContext.getChatContactQuery();
+		ChatContactQuery contactQuery = messageContext.contact();
 		contactQuery.setProfilePic(dm.getSender().getProfileImageURLHttps());
 		contactQuery.setName(dm.getSender().getName());
 //		ChannelConfig config = getChannelConfig(inboxMessage);

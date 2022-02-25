@@ -32,6 +32,7 @@ public class ApiFieldError implements Serializable {
      * Added but yet to be used for parameterized descriptionKey
      */
     private Object[] descriptionArgs;
+    private Object[] possibleValues;
 
     public String getCode() {
 	return code;
@@ -184,6 +185,19 @@ public class ApiFieldError implements Serializable {
 
     public void setBody(Object body) {
 	this.body = body;
+    }
+
+    public Object[] getPossibleValues() {
+	return possibleValues;
+    }
+
+    public void setPossibleValues(Object[] possibleValues) {
+	this.possibleValues = possibleValues;
+    }
+
+    public ApiFieldError possibleValues(Object... possibleValues) {
+	this.possibleValues = possibleValues;
+	return this;
     }
 
     /*

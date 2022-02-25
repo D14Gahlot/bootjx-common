@@ -143,7 +143,7 @@ public class TelegramConnector extends AbstractConnector<TelegramConfigDetails, 
 
 	    if (ArgUtil.isEqual(update.getMessage().getFrom().getId(), update.getMessage().getContact().getUserID())) {
 
-		ChatContactQuery contactQuery = messageContext.getChatContactQuery();
+		ChatContactQuery contactQuery = messageContext.contact();
 
 		contactQuery.setName(update.getMessage().getFrom().getFirstName() + " "
 			+ update.getMessage().getFrom().getLastName());
@@ -153,7 +153,7 @@ public class TelegramConnector extends AbstractConnector<TelegramConfigDetails, 
 
 	}
 
-	Contactable contactDoc = messageContext.getChatContactDoc();
+	Contactable contactDoc = messageContext.contact().getDoc();
 
 	if (ArgUtil.isEmpty(contactDoc.getPhone())) {
 	    ChannelConfig config = getChannelConfig(inboxMessage);

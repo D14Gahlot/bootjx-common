@@ -16,6 +16,7 @@ import com.boot.jx.dict.FileType;
 import com.boot.jx.exception.ApiHttpExceptions.ApiHttpException;
 import com.boot.jx.postman.PostManException;
 import com.boot.jx.postman.model.Attachment;
+import com.boot.jx.postman.model.MessagePrompt;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.model.TmplElement;
 import com.boot.jx.postman.plugin.ChannelConfig;
@@ -42,16 +43,58 @@ public class WA360Client {
 	} else {
 	    boolean isList = false;
 	    boolean isButton = false;
+	    int buttonsCount = 0;
+	    String bodyTextAppend = Constants.BLANK;
 	    List<TmplElement> buttons = null;
 	    if (outboxMessage.options().containsKey("buttons")) {
 		buttons = new MapModel(outboxMessage.options()).entry("buttons").asList(TmplElement.class);
-		isList = (buttons.size() > 3);
-		isButton = (buttons.size() > 0) && (buttons.size() < 4);
+		for (TmplElement b : buttons) {
+		    if (ArgUtil.areEqual(b.getType(), TmplElement.TYPES.URL)) {
+			bodyTextAppend = bodyTextAppend + "\n" + b.getUrl() + "\n";
+		    } else {
+			buttonsCount++;
+		    }
+		}
+		isList = (buttonsCount > 0) && (buttonsCount > 3);
+		isButton = (buttonsCount > 0) && (buttonsCount < 4);
+	    }
+
+	    if (ArgUtil.is(bodyTextAppend)) {
+		outboxMessage.setMessage(outboxMessage.getMessage() + "\n" + bodyTextAppend);
 	    }
 
 	    if (isList) {
-		MapModel resp = sendList(channelConfig, outboxMessage, buttons);
-		msgIds.add(getMessageId(resp));
+		if (buttons.size() <= 10) {
+		    MapModel resp = sendList(channelConfig, outboxMessage, buttons);
+		    msgIds.add(getMessageId(resp));
+		} else {
+		    MessagePrompt prompt = new MessagePrompt();
+		    if (ArgUtil.is(outboxMessage.getPrompt())
+			    && MessagePrompt.TYPE.MOREOPTIONS.equals(outboxMessage.getPrompt().type)) {
+			prompt = outboxMessage.getPrompt();
+			prompt.pageIndex++;
+		    }
+		    prompt.type = MessagePrompt.TYPE.MOREOPTIONS;
+		    prompt.messageId = outboxMessage.getMessageId();
+
+		    int start = prompt.pageIndex * 9;
+		    int pending = buttons.size() - start;
+		    int end = Math.min((start + 9), buttons.size());
+		    List<TmplElement> newButtons;
+
+		    if (pending < 10) {
+			newButtons = buttons.subList(start, end);
+		    } else if (pending == 10) {
+			newButtons = buttons.subList(start, end + 1);
+		    } else {
+			newButtons = buttons.subList(start, end);
+			newButtons.add(new TmplElement().label("More Options").name(prompt.toString()));
+		    }
+
+		    outboxMessage.options().put("list_option_title", "List " + (prompt.pageIndex + 1));
+		    MapModel resp = sendList(channelConfig, outboxMessage, newButtons);
+		    msgIds.add(getMessageId(resp));
+		}
 	    } else if (isButton) {
 		MapModel resp = sendButton(channelConfig, outboxMessage, buttons);
 		msgIds.add(getMessageId(resp));
@@ -179,7 +222,7 @@ public class WA360Client {
 		outboxMessage.contact().getCsid());
 
 	req.put(OutBoundWrapperPaths.MESSAGE_TYPE, "text");
-	req.put(OutBoundWrapperPaths.MESSAGE_TEXT, outboxMessage.getMessage());
+	req.put(OutBoundWrapperPaths.MESSAGE_TEXT_BODY, outboxMessage.getMessage());
 
 	return send(req, channelConfig);
     }
@@ -218,6 +261,8 @@ public class WA360Client {
 	MapModel req = MapModel.createInstance().put("recipient_type", "individual").put("to",
 		outboxMessage.contact().getCsid());
 
+	MapModel options = outboxMessage.optionsAsModel();
+
 	req.put(OutBoundWrapperPaths.MESSAGE_TYPE, "interactive");
 
 	req.put(new JsonPath("/interactive/type"), "list");
@@ -228,7 +273,7 @@ public class WA360Client {
 	req.put(OutBoundWrapperPaths.INTERACTIVE_BODY_TEXT, outboxMessage.getMessage());
 	req.put(OutBoundWrapperPaths.INTERACTIVE_FOOTER_TEXT,
 		ArgUtil.parseAsString(outboxMessage.getFooter(), Constants.BLANK));
-	req.put(OutBoundWrapperPaths.INTERACTIVE_ACTION_BUTTON, "menu");
+	req.put(OutBoundWrapperPaths.INTERACTIVE_ACTION_BUTTON, options.get("list_option_title", "menu"));
 
 	List<Object> sections = new ArrayList<Object>();
 	Map<String, Object> section = null;
@@ -237,6 +282,7 @@ public class WA360Client {
 	for (TmplElement button : buttons) {
 	    if (section == null) {
 		section = new HashMap<String, Object>();
+		// section.put("title", "Menu " + (sections.size() + 1));
 		sections.add(section);
 	    }
 	    if (rows == null) {
@@ -248,7 +294,9 @@ public class WA360Client {
 	    Map<String, Object> row = new HashMap<String, Object>();
 	    row.put("id", button.getName());
 	    row.put("title", button.getLabel());
-	    row.put("description", button.getType());
+	    if (ArgUtil.is(button.getDesc())) {
+		row.put("description", button.getDesc());
+	    }
 	    rows.add(row);
 
 	    if (rows.size() > 9) {
@@ -267,8 +315,8 @@ public class WA360Client {
 	req.put(OutBoundWrapperPaths.MESSAGE_TYPE, "interactive");
 	req.put(new JsonPath("/interactive/type"), "button");
 
-	MapModel intr = MapModel.createInstance();
 	if (ArgUtil.is(outboxMessage.getAttachments())) {
+	    MapModel intr = MapModel.createInstance();
 	    Attachment attachment = outboxMessage.getAttachments().get(0);
 	    WA360OutBoundMedia wa360OutBoundMedia = new WA360OutBoundMedia();
 	    // wa360OutBoundMedia.setCaption(ArgUtil.nonEmpty(attachment.getMediaCaption(),
@@ -291,12 +339,12 @@ public class WA360Client {
 		intr.put(OutBoundWrapperPaths.MESSAGE_TYPE, "document");
 		intr.put("document", wa360OutBoundMedia);
 	    }
-	} else {
-	    intr.put(OutBoundWrapperPaths.INTERACTIVE_HEADER_TYPE, "text");
-	    intr.put(OutBoundWrapperPaths.INTERACTIVE_HEADER_TEXT,
-		    ArgUtil.nonEmpty(outboxMessage.getSubject(), Constants.BLANK));
+	    req.put(new JsonPath("interactive/header"), intr.toMap());
+	} else if (ArgUtil.is(outboxMessage.getSubject())) {
+	    MapModel intr = MapModel.createInstance();
+	    intr.put(OutBoundWrapperPaths.MESSAGE_TYPE, "text");
+	    intr.put(OutBoundWrapperPaths.MESSAGE_TEXT, ArgUtil.nonEmpty(outboxMessage.getSubject(), Constants.BLANK));
 	}
-	req.put(new JsonPath("interactive/header"), intr.toMap());
 
 	req.put(OutBoundWrapperPaths.INTERACTIVE_BODY_TEXT, outboxMessage.getMessage());
 	req.put(OutBoundWrapperPaths.INTERACTIVE_FOOTER_TEXT,

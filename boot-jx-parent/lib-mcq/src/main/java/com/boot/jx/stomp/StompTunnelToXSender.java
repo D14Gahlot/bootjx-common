@@ -34,8 +34,8 @@ public class StompTunnelToXSender implements ITunnelSubscriber<StompTunnelEvent>
 
     @Override
     public void onMessage(String channel, StompTunnelEvent msg) {
-	if (!ArgUtil.isEmpty(msg.getHttpSessionId())) {
-	    String sessionUId = stompTunnelSessionManager.getSessionUId(msg.getHttpSessionId());
+	if (!ArgUtil.isEmpty(msg.getXsessionId())) {
+	    String sessionUId = stompTunnelSessionManager.getSessionUId(msg.getXsessionId(), msg.getJsessionId());
 	    if (!ArgUtil.isEmpty(sessionUId)) {
 		messagingTemplate.convertAndSend("/queue/" + sessionUId + msg.getTopic(), msg.getData());
 	    } else {

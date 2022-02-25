@@ -1,6 +1,5 @@
 package com.boot.jx.connectors;
 
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -15,16 +14,17 @@ import com.boot.jx.dict.FileFormat;
 import com.boot.jx.dict.FileType;
 import com.boot.jx.exception.AmxApiException;
 import com.boot.jx.model.CommonFile;
-import com.boot.jx.postman.PMClientConfig;
 import com.boot.jx.postman.PMConstants.CHANNEL_TYPE;
 import com.boot.jx.postman.PMConstants.MESSAGE_COMPOSE_TYPE;
 import com.boot.jx.postman.PMConstants.MESSAGE_FORMAT_TYPE;
+import com.boot.jx.postman.PMEnvironment.PMClientConfig;
 import com.boot.jx.postman.client.PMFileStoreClient;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.Message.Status;
 import com.boot.jx.postman.model.MessageBoxEvent;
+import com.boot.jx.postman.model.MessagePrompt;
 import com.boot.jx.postman.model.MessageReport;
 import com.boot.jx.postman.model.MessageReport.MessageReportError;
 import com.boot.jx.postman.model.OutboxMessage;
@@ -108,17 +108,21 @@ public class WA360Connector extends AbstractConnector<WA360ConfigDetails, WA360P
 	} else if ("interactive".equals(messageType)) {
 	    inboxMessage.setFormatType(MESSAGE_FORMAT_TYPE.TEXT);
 	    String interactiveType = map.entry(InBoundWrapperPaths.INTERACTIVE_TYPE).asString();
+	    String replyId = null;
 	    if ("button_reply".equals(interactiveType)) {
-		inboxMessage.form().put("reply_id", map.entry(InBoundWrapperPaths.INTERACTIVE_BUTTON_ID).asString());
+		replyId = map.entry(InBoundWrapperPaths.INTERACTIVE_BUTTON_ID).asString();
+		inboxMessage.form().put("reply_id", replyId);
 		inboxMessage.form().put("reply_title",
 			map.entry(InBoundWrapperPaths.INTERACTIVE_BUTTON_REPLY).asString());
 		inboxMessage.setMessage(ArgUtil.parseAsString(inboxMessage.form().get("reply_title"), Constants.BLANK));
 	    } else if ("list_reply".equals(interactiveType)) {
-		inboxMessage.form().put("reply_id", map.entry(InBoundWrapperPaths.INTERACTIVE_LIST_ID).asString());
+		replyId = map.entry(InBoundWrapperPaths.INTERACTIVE_LIST_ID).asString();
+		inboxMessage.form().put("reply_id", replyId);
 		inboxMessage.form().put("reply_title",
 			map.entry(InBoundWrapperPaths.INTERACTIVE_LIST_REPLY).asString());
 		inboxMessage.form().put("reply_desc", map.entry(InBoundWrapperPaths.INTERACTIVE_LIST_DESC).asString());
 	    }
+
 	    inboxMessage.setMessage(ArgUtil.parseAsString(inboxMessage.form().get("reply_title"), Constants.BLANK));
 	} else if ("button".equals(messageType)) {
 	    inboxMessage.form().put("reply_title", map.entry(InBoundWrapperPaths.SIMPLE_BUTTON_REPLY).asString());
@@ -150,6 +154,8 @@ public class WA360Connector extends AbstractConnector<WA360ConfigDetails, WA360P
 	if (ArgUtil.is(replyIdExt)) {
 	    inboxMessage.setReplyIdExt(replyIdExt);
 	}
+
+	inboxMessage.setOriginalMessage(map.map());
 
 	return inboxMessage;
     }

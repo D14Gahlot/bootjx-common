@@ -27,8 +27,10 @@ public class AgentSecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
 	http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
+		//.sessionFixation().none()
 		// Publics Calls
 		.and().authorizeRequests().antMatchers("/pub/**").permitAll() // Public URLs
+		.and().authorizeRequests().antMatchers("/plug/**").permitAll() // Public URLs
 		.and().authorizeRequests().antMatchers("/ext/**").permitAll() // External URLS
 		.and().authorizeRequests().antMatchers("/int/**").permitAll() // Internal URLs
 		.and().authorizeRequests().antMatchers("/stomp-tunnel/**").permitAll() // Stomp Calls
@@ -80,4 +82,5 @@ public class AgentSecurityConfig extends WebSecurityConfigurerAdapter {
 		"/v2/api-docs", "/configuration/ui", "/swagger-resources/**", "/configuration/security",
 		"/swagger-ui.html", "/webjars/**");
     }
+
 }

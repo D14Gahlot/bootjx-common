@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+	<base th:href="${APP_CONTEXT} + '/'" />
+
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+	<title th:text="${APP_TITLE}">Agent Plugin</title>
+
+
+	<link rel="shortcut icon" th:href="${CDN_URL}+'/favicon.ico'" />
+
+	<link
+		href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i,800,800i&display=swap"
+		rel="stylesheet">
+
+	<style type="text/css">
+		:root {
+			--scheme-color: [[${POSTMAN_AGENT_SCHEME_COLOR}]];
+		}
+	</style>
+
+	<link href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
+	<link rel="stylesheet" type="text/css" th:href="${CDN_URL}+'/plugins/agent/login.css'" />
+
+	<script>
+		window.CONST = {
+			CONTEXT: '[[${APP_CONTEXT}]]'
+		}
+	</script>
+
+</head>
+
+<body class="form-login-body">
+
+	<div class="container">
+		<div class="row">
+			<div class="col-sm-6 col-md-4 col-md-offset-4">
+				<h1 class="text-center login-title hide">Sign in to continue to Bootsnipp</h1>
+				<div class="account-wall">
+					<img class="profile-img"
+						src="https://lh5.googleusercontent.com/-b0-k99FZlyE/AAAAAAAAAAI/AAAAAAAAAAA/eu7opA4byxI/photo.jpg?sz=120"
+						alt="">
+					<form class="form-signin" method="post">
+						<input type="hidden" value="login" required autofocus name="action">
+						<input type="text" class="form-control" placeholder="Username" required autofocus name="username">
+						<input type="password" class="form-control" placeholder="Password" required name="password">
+						<button class="btn btn-lg btn-primary btn-block" type="submit">
+							Sign in</button>
+						<label class="checkbox pull-left">
+							<input name="rememberme" type="checkbox" value="true" >
+							Keep me logged in
+						</label>
+						<a href="#" class="pull-right need-help hide">Need help? </a><span class="clearfix"></span>
+					</form>
+				</div>
+				<a href="#" class="text-center new-account hide">Create an account </a>
+			</div>
+		</div>
+	</div>
+	<br/>
+	<footer>
+		<center>
+			<small> Copyright © MeherY SocCom. All Rights Reserved.<small>
+		</center>
+	</footer>
+</body>
+
+<script src="//code.jquery.com/jquery-1.11.1.min.js"></script>
+<script src="//netdna.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.min.js"></script>
+
+</html>

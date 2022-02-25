@@ -12,6 +12,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import com.boot.jx.chat.ChatService;
+import com.boot.jx.chat.ChatSessionService;
 import com.boot.jx.common.config.ConfigConstants;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.logger.AuditDetailProvider;
@@ -137,6 +138,9 @@ public class BulkMessageService extends QueuedTaskExecuter {
     private ChatService chatService;
 
     @Autowired
+    private ChatSessionService chatSessionService;
+
+    @Autowired
     private SessionStore sessionStore;
 
     @Override
@@ -162,7 +166,7 @@ public class BulkMessageService extends QueuedTaskExecuter {
 
 	ChatSessionDoc chatSessionDoc = sessionStore.linkSession(outboxMessage);
 	if (ArgUtil.is(chatSessionDoc)) {
-	    chatService.initSession(outboxMessage, chatSessionDoc);
+	    chatSessionService.initSession(outboxMessage, chatSessionDoc);
 	    chatService.send(chatSessionDoc, outboxMessage);
 	} else {
 	    messageStore.updateStatus(contactType, msg, Status.NSENT, "Cannot create session");

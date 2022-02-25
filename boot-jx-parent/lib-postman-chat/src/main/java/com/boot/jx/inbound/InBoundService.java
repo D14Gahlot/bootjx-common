@@ -17,16 +17,16 @@ import com.boot.jx.api.ApiResponse;
 import com.boot.jx.bot.BotEngine;
 import com.boot.jx.bot.ChatMapping;
 import com.boot.jx.cache.CacheBox;
-import com.boot.jx.chat.ChatClient;
 import com.boot.jx.chat.ChatService;
 import com.boot.jx.chat.ChatSessionFactory;
+import com.boot.jx.chat.ChatSessionService;
 import com.boot.jx.chat.ChatStatusService;
 import com.boot.jx.def.ICacheBox;
 import com.boot.jx.inbound.InBound.InBoundFilter;
 import com.boot.jx.inbound.InBound.InBoundHandler;
 import com.boot.jx.inbound.InBound.InBoundProcessor;
-import com.boot.jx.postman.PMClientConfig;
 import com.boot.jx.postman.PMEnvironment;
+import com.boot.jx.postman.PMEnvironment.PMClientConfig;
 import com.boot.jx.postman.PMEnvironment.PMConfigurationObject;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.ErrorObject;
@@ -61,9 +61,6 @@ public class InBoundService {
     private BotEngine botEngine;
 
     @Autowired
-    private ChatClient chatClient;
-
-    @Autowired
     private PMClientConfig chatClientConfig;
 
     @Autowired
@@ -71,6 +68,9 @@ public class InBoundService {
 
     @Autowired
     private ChatStatusService chatStatusService;
+    
+    @Autowired
+    private ChatSessionService chatSessionService;
 
     @Autowired
     private AgentService agentService;
@@ -174,17 +174,17 @@ public class InBoundService {
 
 	if (locallySessionAssigned && ArgUtil.is(session)) {
 	    boolean wasSessionInitd = session.isInitd();
-	    boolean isSessionInitd = chatService.initSession(inboxMessageOriginal, session);
+	    boolean isSessionInitd = chatSessionService.initSession(inboxMessageOriginal, session);
 	    if (!isSessionInitd) {
 		return inboxMessageOriginal;
 	    }
 	    if (isSessionInitd && (wasSessionInitd != isSessionInitd)) {
-		chatService.initSessionPost(inboxMessageOriginal, session);
+		chatSessionService.initSessionPost(inboxMessageOriginal, session);
 	    }
 
 	}
 
-	if (ArgUtil.isEmpty(inBoundFilter) || inBoundFilter.onFilter(inboxMessageOriginal)) {
+	if (ArgUtil.isEmpty(inBoundFilter) || inBoundFilter.doFilter(inboxMessageOriginal)) {
 	    if (ArgUtil.is(inBoundProcessor)) {
 		inBoundProcessor.process(inboxMessageOriginal);
 	    }
@@ -192,7 +192,7 @@ public class InBoundService {
 		botEngine.invokeMethodsAsync(inboxMessageOriginal);
 	    } else if (ArgUtil.is(inBoundHandler)) {
 		if (newThread) {
-		    inBoundHandler.handle(inboxMessageOriginal);
+		    inBoundHandler.doHandle(inboxMessageOriginal);
 		} else {
 		    inBoundHandler.handleAsync(inboxMessageOriginal);
 		}
@@ -200,8 +200,6 @@ public class InBoundService {
 		agentService.onMessage(inboxMessageOriginal);
 	    } else if (botEngine.isChatBotDefined()) { // TODO:-- TO be removed
 		botEngine.invokeMethodsAsync(inboxMessageOriginal);
-	    } else { // TODO:-- TO be removed
-		chatClient.forward(inboxMessageOriginal);
 	    }
 	}
 	return inboxMessageOriginal;

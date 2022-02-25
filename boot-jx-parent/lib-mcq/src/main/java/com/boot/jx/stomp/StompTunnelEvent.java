@@ -6,7 +6,8 @@ public class StompTunnelEvent extends TunnelEvent {
     private static final long serialVersionUID = 1426912782817649062L;
 
     private String topic;
-    private String httpSessionId;
+    private String xsessionId;
+    private String jsessionId;
     private String tagId;
     private String tenantToken;
     private Object data;
@@ -27,12 +28,12 @@ public class StompTunnelEvent extends TunnelEvent {
 	this.data = data;
     }
 
-    public String getHttpSessionId() {
-	return httpSessionId;
+    public String getXsessionId() {
+	return xsessionId;
     }
 
-    public void setHttpSessionId(String httpSessionId) {
-	this.httpSessionId = httpSessionId;
+    public void setXsessionId(String xsessionId) {
+	this.xsessionId = xsessionId;
     }
 
     public String getTagId() {
@@ -49,6 +50,14 @@ public class StompTunnelEvent extends TunnelEvent {
 
     public void setTenantToken(String tenantToken) {
 	this.tenantToken = tenantToken;
+    }
+
+    public String getJsessionId() {
+	return jsessionId;
+    }
+
+    public void setJsessionId(String jsessionId) {
+	this.jsessionId = jsessionId;
     }
 
 }

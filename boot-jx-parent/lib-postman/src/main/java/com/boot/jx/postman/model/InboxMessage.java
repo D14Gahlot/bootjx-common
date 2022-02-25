@@ -43,6 +43,7 @@ public class InboxMessage implements Serializable, IMessageExtended, LogMessage 
 
     private Object originalMessage;
     private MessageSession session;
+    private MessagePrompt prompt;
 
     protected Map<String, Object> form = new HashMap<String, Object>();
     protected Map<String, Object> data = new HashMap<String, Object>();
@@ -334,5 +335,13 @@ public class InboxMessage implements Serializable, IMessageExtended, LogMessage 
 
     public void setMessageIdRef(String messageIdRef) {
 	this.messageIdRef = messageIdRef;
+    }
+
+    public MessagePrompt getPrompt() {
+	return prompt;
+    }
+
+    public void setPrompt(MessagePrompt prompt) {
+	this.prompt = prompt;
     }
 }

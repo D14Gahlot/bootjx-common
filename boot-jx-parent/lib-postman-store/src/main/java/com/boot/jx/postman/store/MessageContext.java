@@ -29,10 +29,6 @@ public class MessageContext {
 
     // DTOs
     private IMessage message;
-    private Contactable contactable;
-
-    // DOCs
-    private ChatContactDoc chatContactDoc;
 
     // QUERYs
     private ChatContactQuery chatContactQuery;
@@ -42,23 +38,18 @@ public class MessageContext {
     }
 
     private Contactable getContactable() {
-	if (this.contactable == null) {
-	    if (message != null) {
-		this.contactable = PostManUtil.getContactMeta(message.contact());
-	    }
+	if (message != null) {
+	    return PostManUtil.getContactMeta(message.contact());
 	}
-	return this.contactable;
+	return null;
     }
 
-    public ChatContactDoc getChatContactDoc() {
-	if (this.chatContactDoc == null) {
-	    Contactable c = getContactable();
-	    this.chatContactDoc = commonMongoTemplate.findById(c.getContactId(), ChatContactDoc.class);
-	}
-	return this.chatContactDoc;
+    private ChatContactDoc getChatContactDoc() {
+	Contactable c = getContactable();
+	return commonMongoTemplate.findById(c.getContactId(), ChatContactDoc.class);
     }
 
-    public ChatContactQuery getChatContactQuery() {
+    public ChatContactQuery contact() {
 	if (this.chatContactQuery == null) {
 	    ChatContactDoc chatContactDoc = this.getChatContactDoc();
 	    this.chatContactQuery = new ChatContactQuery(chatContactDoc);
@@ -69,7 +60,6 @@ public class MessageContext {
     public void commitChatContactQuery() {
 	if (this.chatContactQuery != null) {
 	    commonMongoTemplate.updateFirst(this.chatContactQuery);
-	    this.chatContactDoc = null;
 	}
     }
 

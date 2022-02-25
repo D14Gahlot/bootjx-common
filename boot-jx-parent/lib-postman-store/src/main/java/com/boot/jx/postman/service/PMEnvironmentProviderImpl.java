@@ -99,15 +99,16 @@ public class PMEnvironmentProviderImpl implements PMEnvironmentProvider, AppShar
 	return null;
     }
 
-    public void configInternal(ChannelConfig config) {
+    public ChannelConfig configInternal(ChannelConfig config) {
 	ChannelConfigDoc doc = EntityDtoUtil.dtoToEntity(config, new ChannelConfigDoc());
 	doc.setId(StringUtils.toLowerCase(doc.getChannelId()));
 	configStore.saveChannelConfig(doc);
+	return doc;
     }
 
     @Override
-    public void addChannel(ChannelConfig config) {
-	configInternal(config);
+    public ChannelConfig addChannel(ChannelConfig config) {
+	return configInternal(config);
     }
 
     @Override

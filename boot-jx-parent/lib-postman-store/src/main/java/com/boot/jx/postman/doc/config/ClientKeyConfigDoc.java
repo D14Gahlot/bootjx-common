@@ -5,7 +5,6 @@ import org.springframework.data.annotation.TypeAlias;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import com.boot.jx.model.AuditCreateEntity;
 import com.boot.jx.mongo.CommonDocInterfaces.AuditableByIdEntity;
 import com.boot.jx.mongo.CommonDocInterfaces.IDocument;
 import com.boot.jx.postman.ClientApp;
@@ -40,6 +39,7 @@ public class ClientKeyConfigDoc implements IDocument, AuditableByIdEntity, Clien
 
     private String appType;
     private String webhook;
+    private String forward;
 
     public String getId() {
 	return id;
@@ -130,6 +130,14 @@ public class ClientKeyConfigDoc implements IDocument, AuditableByIdEntity, Clien
 
     public void setUpdatedStamp(Long updatedStamp) {
 	this.updatedStamp = updatedStamp;
+    }
+
+    public String getForward() {
+        return forward;
+    }
+
+    public void setForward(String forward) {
+        this.forward = forward;
     }
 
 }

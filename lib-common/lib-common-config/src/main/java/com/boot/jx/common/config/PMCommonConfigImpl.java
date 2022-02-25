@@ -17,8 +17,8 @@ import com.boot.jx.AppContextUtil;
 import com.boot.jx.common.impl.ConfigMeta;
 import com.boot.jx.http.CommonHttpRequest;
 import com.boot.jx.logger.LoggerService;
-import com.boot.jx.postman.PMClientConfig;
 import com.boot.jx.postman.PMEnvironment;
+import com.boot.jx.postman.PMEnvironment.PMClientConfig;
 import com.boot.jx.postman.PMEnvironment.PMCommonConfig;
 import com.boot.jx.scope.tnt.Tenants;
 import com.boot.jx.scope.tnt.Tenants.TenantResolver;
@@ -58,10 +58,10 @@ public class PMCommonConfigImpl implements PMCommonConfig {
     @Value("${common.const.app}")
     private String app;
 
-    @Value("${postman.bot.url}")
+    @Value("${mry.bot.url}")
     private String botUrl;
 
-    @Value("${postman.agent.url}")
+    @Value("${mry.agent.url}")
     private String agentUrl;
 
     @Autowired
@@ -132,8 +132,15 @@ public class PMCommonConfigImpl implements PMCommonConfig {
 	map.put("CONFIG", config);
 	map.put("CONFIG_JSON", JsonUtil.toJson(config));
 	map.put("APP", app);
-	map.put("CDN_URL", ArgUtil.parseAsString(commonHttpRequest.get("CDN_URL"), getCdnServer()));
-	map.put("CDN_DEBUG", ArgUtil.parseAsString(commonHttpRequest.get("CDN_DEBUG"), "false"));
+	String debugCdnUrl = commonHttpRequest.get("CDN_URL");
+	map.put("CDN_URL", ArgUtil.parseAsString(debugCdnUrl, getCdnServer()));
+
+	if (ArgUtil.is(debugCdnUrl) && (debugCdnUrl.contains("127.0.0.1") || debugCdnUrl.contains("localhost"))) {
+	    map.put("CDN_DEBUG", ArgUtil.parseAsString(commonHttpRequest.get("CDN_DEBUG"), "true"));
+	} else {
+	    map.put("CDN_DEBUG", ArgUtil.parseAsString(commonHttpRequest.get("CDN_DEBUG"), "false"));
+	}
+
 	map.put("CDN_VERSION", "V3");
 	map.put("CDN_VERSION", getVersion());
 
