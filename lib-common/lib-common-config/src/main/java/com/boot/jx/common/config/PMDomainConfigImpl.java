@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 
+import com.boot.jx.AppContextUtil;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PMEnvironment.PMConfigurationObject;
 import com.boot.jx.postman.PMEnvironment.PMDomainConfig;
@@ -44,6 +45,12 @@ public class PMDomainConfigImpl implements PMDomainConfig {
     @Override
     public PMConfigurationObject getResolveReply() {
 	return environment.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_AGENT_CHAT_AUTOREPLY_RESOLVED);
+    }
+
+    @Override
+    public String getDomainUrl() {
+	return String.format("https://%s.%s", AppContextUtil.getTenant(),
+		environment.keyEntry("mry.prop.service.domain").asString());
     }
 
 }

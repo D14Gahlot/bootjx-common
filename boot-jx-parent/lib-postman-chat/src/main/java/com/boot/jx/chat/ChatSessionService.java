@@ -78,7 +78,11 @@ public class ChatSessionService {
 	}
 
 	if (initd) {
-	    chatSessionManager.initSession(inboxMessage, session);
+	    InBoundEvent sessionInitEvent = chatSessionManager.initSession(inboxMessage, session);
+	    if (ArgUtil.is(inBoundHandler)) {
+		inBoundHandler.onSessionInit(sessionInitEvent, session);
+	    }
+	    this.routeSession(session);
 	}
 	return session.isInitd();
     }
@@ -151,13 +155,26 @@ public class ChatSessionService {
 	return messageDoc;
     }
 
-    public InBoundEvent routeChatSession(String sessionId, String queue, Object params) {
-	InBoundEvent event = chatSessionManager.assignToQueue(sessionId, queue);
+    public InBoundEvent routeSession(ChatSessionDoc sessionDoc, String queue, Object params) {
+	InBoundEvent event = chatSessionManager.assignToQueue(sessionDoc, queue);
 	event.sessionRouted.params = params;
 	if (ArgUtil.is(inBoundHandler)) {
-	    inBoundHandler.handleAsync(event);
+	    inBoundHandler.onSessionRouteAsync(event);
 	}
 	return event;
+    }
+
+    public InBoundEvent routeSession(ChatSessionDoc session) {
+	if (ArgUtil.isEmptyValue(session.getAssignedToQueue()) || ArgUtil.isEmptyValue(session.getMode())) {
+	    String defaultQueue = pmDomainConfig.getDefaultInboundQueue(session.contact());
+	    return routeSession(session, defaultQueue, null);
+	}
+	return null;
+    }
+
+    public InBoundEvent routeSession(String sessionId, String queue, Object params) {
+	ChatSessionDoc sessionDoc = sessionStore.getSession(sessionId);
+	return routeSession(sessionDoc, queue, params);
     }
 
 }

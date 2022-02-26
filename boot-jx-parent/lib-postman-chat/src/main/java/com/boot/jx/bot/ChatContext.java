@@ -66,6 +66,9 @@ public class ChatContext {
 	if (chatContactQuery != null) {
 	    sessionStore.update(chatContactQuery);
 	}
+	if (chatSessionQuery != null) {
+	    sessionStore.update(chatSessionQuery);
+	}
 	return null;
     }
 

@@ -29,8 +29,8 @@ public class BotInBoundHandler extends DefaultChatBoundHandler {
     }
 
     @Override
-    public void doHandle(InBoundEvent inBoundEvent) {
-	super.doHandle(inBoundEvent);
+    public void onSessionRoute(InBoundEvent inBoundEvent) {
+	super.onSessionRoute(inBoundEvent);
     }
 
 }
