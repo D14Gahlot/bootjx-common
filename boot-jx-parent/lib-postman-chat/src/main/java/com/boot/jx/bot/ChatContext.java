@@ -7,9 +7,9 @@ import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatMeta;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.model.InboxMessage;
+import com.boot.jx.postman.query.ChatContactQuery;
+import com.boot.jx.postman.query.ChatSessionQuery;
 import com.boot.jx.postman.store.BasicChatDataStore;
-import com.boot.jx.postman.store.BasicChatDataStore.BasicChatSessionData;
-import com.boot.jx.postman.store.BasicChatDataStore.BasicChatUserData;
 import com.boot.jx.postman.store.SessionStore;
 import com.boot.jx.scope.ThreadScoped;
 
@@ -22,8 +22,8 @@ public class ChatContext {
     private ChatMeta meta;
 
     private InboxMessage inboxMessage;
-    private ChatContactDoc chatContactDoc;
-    private ChatSessionDoc chatSessionDoc;
+    private ChatContactQuery chatContactQuery;
+    private ChatSessionQuery chatSessionQuery;
 
     @Autowired
     private SessionStore sessionStore;
@@ -45,31 +45,29 @@ public class ChatContext {
 	this.inboxMessage = inboxMessage;
     }
 
-    public ChatContactDoc getContact() {
-	if (chatContactDoc == null) {
-	    chatContactDoc = sessionStore.getContact(inboxMessage);
+    public ChatContactQuery contact() {
+	if (chatContactQuery == null) {
+	    ChatContactDoc chatContactDoc = sessionStore.getContact(inboxMessage);
+	    chatContactQuery = new ChatContactQuery(chatContactDoc);
 	}
-	return chatContactDoc;
+	return chatContactQuery;
     }
 
-    public ChatSessionDoc getChatSession() {
-	if (chatSessionDoc == null) {
+    public ChatSessionQuery session() {
+	if (chatSessionQuery == null) {
+	    ChatSessionDoc chatSessionDoc;
 	    chatSessionDoc = sessionStore.getSession(inboxMessage.getSessionId());
+	    chatSessionQuery = new ChatSessionQuery(chatSessionDoc);
 	}
-	return chatSessionDoc;
-    }
-
-    public BasicChatUserData getUserData() {
-	return getDataStore().getUserData();
-    }
-
-    public BasicChatSessionData sessionData() {
-	return getDataStore().getSessionData();
+	return chatSessionQuery;
     }
 
     public ChatContactDoc commitContact() {
-	if (chatContactDoc != null) {
-	    sessionStore.save(chatContactDoc);
+	if (chatContactQuery != null) {
+	    sessionStore.update(chatContactQuery);
+	}
+	if (chatSessionQuery != null) {
+	    sessionStore.update(chatSessionQuery);
 	}
 	return null;
     }

@@ -110,6 +110,12 @@ public class CommonMongoQB<M extends CommonMongoQB<M, T>, T> implements MongoQue
     }
 
     @SuppressWarnings("unchecked")
+    public M unset(String key) {
+	update().unset(key);
+	return (M) this;
+    }
+
+    @SuppressWarnings("unchecked")
     public M ref(String key, String id, String collectionName) {
 	Map<String, Object> ref = new HashMap<String, Object>();
 	ref.put("$ref", collectionName);

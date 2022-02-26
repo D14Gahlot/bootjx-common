@@ -10,11 +10,12 @@ import org.springframework.web.bind.annotation.RequestMethod;
 
 import com.boot.jx.AppConfigPackage.AppCommonConfig;
 import com.boot.jx.AppContextUtil;
-import com.boot.jx.account.AccountAdminService;
+import com.boot.jx.account.AccountAuthService;
 import com.boot.jx.account.AccountSessionBean;
 import com.boot.jx.account.doc.AccountStore;
 import com.boot.jx.account.doc.DomainDoc;
 import com.boot.jx.http.CommonHttpRequest;
+import com.boot.jx.postman.PMEnvironment.PMCommonConfig;
 import com.boot.jx.scope.tnt.Tenants;
 import com.boot.jx.validation.AlphaNumValidator.ValidAlphaNum;
 import com.boot.utils.ArgUtil;
@@ -33,13 +34,16 @@ public class FrontController {
     private CommonHttpRequest commonHttpRequest;
 
     @Autowired
-    AccountStore accountStore;
+    private AccountStore accountStore;
+
+    @Autowired
+    private PMCommonConfig pmCommonConfig;
 
     @RequestMapping(value = { "/account", "/account/**" }, method = { RequestMethod.GET })
     public String account(Model model) {
 	model.addAllAttributes(appCommonConfig.appAttributes());
 
-	Authentication auth = AccountAdminService.getAuthentication();
+	Authentication auth = AccountAuthService.getAuthentication();
 	if (ArgUtil.is(auth)) {
 	    model.addAttribute("APP_USER", auth.getName());
 	    model.addAttribute("APP_USER_ROLE", adminSessionBean.getRole());
@@ -53,6 +57,9 @@ public class FrontController {
 
     @RequestMapping(value = { "/", "/front/", "/front/**" }, method = { RequestMethod.GET })
     public String front(Model model) {
+	if (!pmCommonConfig.isValidDomain()) {
+	    return pmCommonConfig.mainDomainRedirect();
+	}
 	String domainName = commonHttpRequest.get("domain");
 	return domainProfile(model, domainName, true, "front");
     }
@@ -90,7 +97,7 @@ public class FrontController {
 	    model.addAttribute("APP_DOMAIN", Constants.BLANK);
 	}
 
-	Authentication auth = AccountAdminService.getAuthentication();
+	Authentication auth = AccountAuthService.getAuthentication();
 	if (ArgUtil.is(auth)) {
 	    model.addAttribute("APP_USER", auth.getName());
 	    model.addAttribute("APP_USER_ROLE", adminSessionBean.getRole());

@@ -137,6 +137,7 @@ html.loadable.loading .fullloader {
 
 
 <script th:inline="text" >
+    function none(n){ return !!n;}
 	window.CONST = {
 		TENANT : '[[${TENANT}]]',
 		dev : '[[${CDN_DEBUG}]]',
@@ -146,7 +147,9 @@ html.loadable.loading .fullloader {
 		CONTEXT: '[[${APP_CONTEXT}]]',
 		CONFIG : ([(${CONFIG_JSON})]),
 		WEBAPP_BASE : '[[${WEBAPP_BASE}]]',
-		POSTMAN : '[[${POSTMAN_CONTEXT}]]'
+		POSTMAN : '[[${POSTMAN_CONTEXT}]]',
+		NOUNCE : '[[${NOUNCE}]]', STOMP_ENABLED : none([[${STOMP_ENABLED}]]),
+		APP_USER : '[[${APP_USER}]]',
 	};
 	var initFingerprintJS = function initFingerprintJS() {
 		FingerprintJS.load().then(fp => {
@@ -170,9 +173,9 @@ html.loadable.loading .fullloader {
 	<div id=app></div>
 
 <script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js'></script>	
-<script th:src="${APP_CONTEXT}+'/js/sockjs.min.js'"></script>
-<script th:src="${APP_CONTEXT}+'/js/stomp.min.js'"></script>
-<script th:src="${APP_CONTEXT}+'/js/tunnel.client.js'"></script>
+<script th:src="${CDN_URL}+'/_common/lib/sockjs.min.js'"></script>
+<script th:src="${CDN_URL}+'/_common/lib/stomp.4.0.8.min.js'"></script>
+<script th:src="${CDN_URL}+'/_common/lib/tunnel.client.js'"></script>
 <script async src="//cdn.jsdelivr.net/npm/@fingerprintjs/fingerprintjs@3/dist/fp.min.js"
   onload="initFingerprintJS()"></script>
 

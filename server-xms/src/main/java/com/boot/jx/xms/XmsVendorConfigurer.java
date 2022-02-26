@@ -15,7 +15,10 @@ import com.boot.jx.postman.PMConfiguration.PMConfigurationModel;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.scope.tnt.TenantAuthContext.TenantAuthFilter;
 import com.boot.jx.scope.tnt.TenantSpecific;
+import com.boot.jx.scope.tnt.Tenants.TenantResolver;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.CryptoUtil;
+import com.boot.utils.CryptoUtil.CrypToken;
 import com.boot.utils.TimeUtils;
 
 @Component
@@ -32,18 +35,40 @@ public class XmsVendorConfigurer implements TenantAuthFilter {
     @Autowired
     private AppConfigPackage appConfigPackage;
 
+    @Autowired
+    private TenantResolver tenantResolver;
+
     public static ClientApp getClientApp() {
 	return AppContextUtil.get("XmsVendorConfigurer:ClientApp");
     }
 
     @Override
     public boolean filterTenantRequest(ApiRequestDetail apiRequest, CommonHttpRequest req, String traceId) {
+
+	if (!tenantResolver.isValid()) {
+	    ApiResponseUtil.addError("Invalid Domain");
+	    return false;
+	}
+
 	String apiKey = req.get(XmsConstants.X_API_KEY);
+
+	// For Swagger Handling
+	if (!ArgUtil.is(apiKey)) {
+	    String token = req.get("swagger.auth.token");
+	    if (ArgUtil.is(token)) {
+		CrypToken xToken = CryptoUtil.getEncoder().message(token).decrypt().toToken();
+		if (ArgUtil.is(xToken) && !xToken.isExpired()) {
+		    apiKey = xToken.message;
+		}
+	    }
+	}
+
 	if (!ArgUtil.is(apiKey)) {
 	    String message = "Missing " + XmsConstants.X_API_KEY;
 	    ApiResponseUtil.addError(message);
 	    return false;
 	}
+
 	PMConfigurationModel config = pmEnvironment.local();
 	ClientApp apiKeyConfig = config.clientApiKey(apiKey);
 	if (!ArgUtil.is(apiKeyConfig)) {

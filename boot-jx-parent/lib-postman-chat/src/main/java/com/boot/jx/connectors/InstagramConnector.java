@@ -67,13 +67,13 @@ public class InstagramConnector extends AbstractConnector<InstagramConfig, Insta
     }
 
     @Override
-    public boolean initSession(ChatSessionDoc session, InboxMessage inboxMessage) {
+    public OutboxMessage initSession(ChatSessionDoc session, InboxMessage inboxMessage) {
 	ChannelConfig config = getChannelConfig(inboxMessage);
 	InstagramUserProfile profile = instaClient.getUserProfile(config,inboxMessage.contact());
-	ChatContactQuery contactQuery = messageContext.getChatContactQuery();
+	ChatContactQuery contactQuery = messageContext.contact();
 	contactQuery.setProfilePic(profile.getProfilePic());
 	contactQuery.setName(profile.getName());
-	return true;
+	return null;
     }
 
     @Deprecated
@@ -129,6 +129,10 @@ public class InstagramConnector extends AbstractConnector<InstagramConfig, Insta
 	if (ArgUtil.is(m.getRead())) {
 	    report.setChangeStamp(m.getReadWatermark());
 	    report.setStatus(Status.READ);
+	}else if(ArgUtil.is(m.getMessage().isIs_deleted())) {
+		report.setMessageIdExt(m.getMessage().getMid());
+		report.setChangeStamp(m.getTimestamp());
+	    report.setStatus(Status.DELTD);
 	}
 	return report;
     }
@@ -140,7 +144,13 @@ public class InstagramConnector extends AbstractConnector<InstagramConfig, Insta
 	requestMap.toJson();
 	request.getEntry().forEach(pageEntry -> {
 	    pageEntry.getMessaging().forEach(m -> {
-		if (ArgUtil.is(m.getMessage())  || ArgUtil.is(m.getPostBack())) {
+    	if(ArgUtil.is(m.getMessage())) {
+    		if(m.getMessage().isIs_deleted() == true) {
+    			messageBoxEvent.addMessageReport(toMessageReport(m, channelConfig));
+    		}else {
+    			messageBoxEvent.addInboxMessage(toInboxMessage(m, channelConfig));
+    		}
+    	}else if (ArgUtil.is(m.getPostBack())) {
 		    messageBoxEvent.addInboxMessage(toInboxMessage(m, channelConfig));
 		} else if (ArgUtil.is(m.getRead())) {
 		    messageBoxEvent.addMessageReport(toMessageReport(m, channelConfig));

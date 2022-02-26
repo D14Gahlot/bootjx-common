@@ -88,4 +88,9 @@ public class WebPlugin implements ChannelPlugin<WebConfigDetails> {
 	return false;
     }
 
+    @Override
+    public boolean isWebhookManual() {
+	return true;
+    }
+
 }

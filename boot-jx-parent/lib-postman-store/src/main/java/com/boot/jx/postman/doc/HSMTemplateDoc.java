@@ -7,14 +7,11 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.data.annotation.Id;
-import org.springframework.data.annotation.Reference;
 import org.springframework.data.annotation.TypeAlias;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
-import org.springframework.data.mongodb.core.mapping.Field;
 
 import com.boot.jx.model.AuditCreateEntity;
-import com.boot.jx.mongo.CommonDocInterfaces.OldDocVersion;
 import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.ITemplates.BasicTemplate;
 import com.boot.jx.postman.model.ResourceMeta;
@@ -22,8 +19,7 @@ import com.boot.utils.ArgUtil;
 
 @Document(collection = HSMTemplateDoc.COLLECTION_NAME)
 @TypeAlias("HSMTemplate")
-public class HSMTemplateDoc
-	implements Serializable, OldDocVersion<HSMTemplateDoc>, BasicTemplate, AuditCreateEntity, ResourceMeta {
+public class HSMTemplateDoc implements Serializable, BasicTemplate, AuditCreateEntity, ResourceMeta {
 
     public static final String COLLECTION_NAME = "DICT_HSM_TEMPLATES";
     public static final String COLLECTION_NAME_TRASH = "TRASH_DICT_HSM_TEMPLATES";
@@ -62,9 +58,12 @@ public class HSMTemplateDoc
     private Map<String, Object> meta;
     protected Map<String, Object> model;
 
-    @Field("oldVersions")
-    @Reference
-    private List<HSMTemplateDoc> oldVersions;
+    public static class ApprovedChannels {
+	public String channelId;
+	public String templateId;
+    }
+
+    private List<ApprovedChannels> approved;
 
     private String createdBy;
     private Long createdStamp;
@@ -102,16 +101,6 @@ public class HSMTemplateDoc
 
     public void setTemplate(String template) {
 	this.template = template;
-    }
-
-    @Override
-    public List<HSMTemplateDoc> getOldVersions() {
-	return oldVersions;
-    }
-
-    @Override
-    public void setOldVersions(List<HSMTemplateDoc> oldVersions) {
-	this.oldVersions = oldVersions;
     }
 
     public String getId() {
@@ -271,4 +260,30 @@ public class HSMTemplateDoc
     public void setModel(Map<String, Object> model) {
 	this.model = model;
     }
+
+    public List<ApprovedChannels> getApproved() {
+	return approved;
+    }
+
+    public void setApproved(List<ApprovedChannels> approved) {
+	this.approved = approved;
+    }
+
+    public HSMTemplateDoc approved(String channelId, String templateId) {
+	if (this.approved == null) {
+	    this.approved = new ArrayList<ApprovedChannels>();
+	}
+	for (ApprovedChannels approvedChannels : approved) {
+	    if (ArgUtil.areEqual(approvedChannels.channelId, channelId)) {
+		approvedChannels.templateId = templateId;
+		return this;
+	    }
+	}
+	ApprovedChannels approvedChannel = new ApprovedChannels();
+	approvedChannel.channelId = channelId;
+	approvedChannel.templateId = templateId;
+	this.approved.add(approvedChannel);
+	return this;
+    }
+
 }

@@ -21,13 +21,11 @@ import com.boot.jx.agent.AgentAuthProvider;
 import com.boot.jx.agent.AgentSessionBean;
 import com.boot.jx.agent.AgentSessionService;
 import com.boot.jx.api.ApiResponse;
-import com.boot.jx.common.config.ConfigConstants;
 import com.boot.jx.common.doc.AgentSessionDoc;
 import com.boot.jx.common.dto.AgentResponseAuthDto;
 import com.boot.jx.common.service.EmpAuthService;
 import com.boot.jx.http.CommonHttpRequest;
 import com.boot.jx.postman.PMEnvironment;
-import com.boot.jx.postman.PMEnvironment.PMConfigurationObject;
 import com.boot.jx.rest.RestService;
 import com.boot.jx.stomp.StompTunnelSessionManager;
 import com.boot.model.MapModel;
@@ -64,6 +62,12 @@ public class AgentAuthController {
     @Autowired
     private EmpAuthService authService;
 
+    private boolean isAdminPanelBlocked() {
+	return false;
+	// return
+	// pmEnvironment.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_CHAT_INBOUND_WEBHOOK).exists();
+    }
+
     @RequestMapping(value = { "/app/unauthorized", "/app/unauthorized/**" },
 	    method = { RequestMethod.POST, RequestMethod.GET })
     public String unauthorized(Model model) {
@@ -78,7 +82,7 @@ public class AgentAuthController {
 	    @RequestParam(required = false) String domainId, @RequestParam(required = false) String domainToken,
 	    @RequestParam(required = false) String domainUser) throws NoSuchAlgorithmException {
 
-	if (pmEnvironment.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_CHAT_INBOUND_WEBHOOK).exists()) {
+	if (isAdminPanelBlocked()) {
 	    return unauthorized(model);
 	}
 
@@ -103,6 +107,54 @@ public class AgentAuthController {
 	return "app-agent";
     }
 
+    @RequestMapping(value = { "/plug/**", "/plug" }, method = { RequestMethod.POST, RequestMethod.GET })
+    public String plugOlin(HttpServletRequest request, Model model) throws NoSuchAlgorithmException {
+
+	String action = ArgUtil.parseAsString(commonHttpRequest.get("action"), "none");
+	String username = commonHttpRequest.get("username");
+	String password = commonHttpRequest.get("password");
+	boolean rememberme = ArgUtil.parseAsBoolean(commonHttpRequest.get("rememberme"), false);
+	String jxSessionId = ArgUtil.parseAsString(commonHttpRequest.get("JXSESSIONID"), Constants.BLANK);
+
+	if ("login".equals(action)) {
+	    ApiResponse<Map<String, Object>, AgentResponseAuthDto> x = authService.empLogin(username, password, false);
+	    if (ArgUtil.parseAsBoolean(x.getData().get("success"), false)) {
+		AgentResponseAuthDto agent = x.getMeta();
+		if (ArgUtil.is(agent)) {
+		    sessionService.login(request, agent, password);
+		    if (rememberme) {
+			String xRemSession = CryptoUtil.getEncoder()
+				.obzect(MapBuilder.map().put("username", username).put("password", password).toMap())
+				.encodeBase64().encrypt().toString();
+			commonHttpRequest.setCookie("JXSESSIONID", xRemSession);
+		    }
+		}
+	    }
+	}
+
+	if (!agentSession.isLoggedIn() && ArgUtil.is(jxSessionId)) {
+	    @SuppressWarnings("unchecked")
+	    MapModel map = MapModel
+		    .from(CryptoUtil.getEncoder().message(jxSessionId).decrypt().decodeBase64().toObzect(Map.class));
+	    ApiResponse<Map<String, Object>, AgentResponseAuthDto> x = authService.empLogin(map.getString("username"),
+		    map.getString("password"), false);
+	    if (ArgUtil.parseAsBoolean(x.getData().get("success"), false)) {
+		AgentResponseAuthDto agent = x.getMeta();
+		if (ArgUtil.is(agent)) {
+		    sessionService.login(request, agent, password);
+		}
+	    }
+	}
+
+	model.addAllAttributes(appCommonConfig.appAttributes());
+	if (agentSession.isLoggedIn() && ArgUtil.is(agentSession.getAgentDept())) {
+	    model.addAttribute("APP_USER", agentSession.getAgentCode());
+	    model.addAttribute("APP_DEPT", agentSession.getAgentDept());
+	    return "app-agent";
+	}
+	return "app-agent-plugin";
+    }
+
     @RequestMapping(value = "/pub/customer/{page}", method = { RequestMethod.POST, RequestMethod.GET })
     public String customertest(Model model, @RequestParam String page) {
 	model.addAllAttributes(appCommonConfig.appAttributes());
@@ -115,7 +167,7 @@ public class AgentAuthController {
     @RequestMapping(value = { "/auth/login", "/auth/resetpass" }, method = { RequestMethod.POST, RequestMethod.GET })
     public String login(Model model, HttpServletRequest request, HttpServletResponse httpServletResponse) {
 
-	if (pmEnvironment.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_CHAT_INBOUND_WEBHOOK).exists()) {
+	if (isAdminPanelBlocked()) {
 	    return unauthorized(model);
 	}
 

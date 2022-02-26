@@ -161,4 +161,9 @@ public class TwitterPlugin implements ChannelPlugin<TwitterConfigDetails> {
     public boolean isPushToNewContactAllowed() {
 	return false;
     }
+
+    @Override
+    public boolean isWebhookManual() {
+	return false;
+    }
 }

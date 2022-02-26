@@ -54,6 +54,7 @@ public class PMEnvironmentProviderImpl implements PMEnvironmentProvider, AppShar
 
 	    List<ChannelConfigDoc> channels = configStore.findAll(ChannelConfigDoc.class);
 	    for (ChannelConfigDoc channel : channels) {
+		channel.setDomain(tnt);
 		prefs.channels(channel);
 	    }
 
@@ -84,7 +85,8 @@ public class PMEnvironmentProviderImpl implements PMEnvironmentProvider, AppShar
 		}
 		List<ChannelConfigDoc> sandboxChannels = configStore.findAll(ChannelConfigDoc.class);
 		for (ChannelConfigDoc channel : sandboxChannels) {
-		    if (channel.isSandbox()) {
+		    channel.setDomain(tnt);
+		    if (channel.isSandbox() || channel.isShared()) {
 			newSharedConfiguration.channels(channel);
 		    }
 		}
@@ -97,23 +99,20 @@ public class PMEnvironmentProviderImpl implements PMEnvironmentProvider, AppShar
 	return null;
     }
 
-    public void configInternal(ChannelConfig config) {
+    public ChannelConfig configInternal(ChannelConfig config) {
 	ChannelConfigDoc doc = EntityDtoUtil.dtoToEntity(config, new ChannelConfigDoc());
 	doc.setId(StringUtils.toLowerCase(doc.getChannelId()));
-	if (config.isDisabled()) {
-	    doc.setDisabled(config.isDisabled());
-	} else
-	    doc.setDisabled(false);
 	configStore.saveChannelConfig(doc);
+	return doc;
     }
 
     @Override
-    public void config(ChannelConfig config) {
-	configInternal(config);
+    public ChannelConfig addChannel(ChannelConfig config) {
+	return configInternal(config);
     }
 
     @Override
-    public void update(ChannelConfig config, String action) {
+    public void updateChannel(ChannelConfig config, String action) {
 	if (ArgUtil.is(config)) {
 	    ChannelConfigDoc configDoc = EntityDtoUtil.dtoToEntity(config, new ChannelConfigDoc());
 	    if ("remove".equalsIgnoreCase(action)) {
@@ -132,6 +131,12 @@ public class PMEnvironmentProviderImpl implements PMEnvironmentProvider, AppShar
 		configStore.save(configDoc);
 	    } else if ("sandbox_disable".equalsIgnoreCase(action)) {
 		configDoc.setSandbox(false);
+		configStore.save(configDoc);
+	    } else if ("shared_enable".equalsIgnoreCase(action)) {
+		configDoc.setShared(true);
+		configStore.save(configDoc);
+	    } else if ("shared_disable".equalsIgnoreCase(action)) {
+		configDoc.setShared(false);
 		configStore.save(configDoc);
 	    }
 	} else {

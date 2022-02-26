@@ -2,6 +2,7 @@ package com.boot.jx.postman.model.ext;
 
 import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.swagger.ApiMockModelProperty;
+import com.boot.utils.ArgUtil;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class InBoundMsgMedia extends CommonMsg {
@@ -14,8 +15,11 @@ public class InBoundMsgMedia extends CommonMsg {
 	    notes = "Can be used to delete the media if stored locally on the client.")
     public String id;
 
-    @ApiMockModelProperty(example = "http(s)://link-to-media-file-url", value = "link-to-audio-file")
+    @ApiMockModelProperty(example = "http(s)://link-to-media-file-url", value = "link-to-file")
     public String link;
+
+    @ApiMockModelProperty(example = "https://link-to-media-file-url", value = "secure-link-to-file")
+    public String linkSecure;
 
     @JsonProperty("mime_type")
     @ApiMockModelProperty(example = "video/mp4", value = "Mime type of the media.")
@@ -39,6 +43,9 @@ public class InBoundMsgMedia extends CommonMsg {
 	media.caption = attachment.getMediaCaption();
 	media.filename = attachment.getMediaName();
 	media.link = attachment.getMediaURL();
+	if (ArgUtil.is(attachment.getMediaURL())) {
+	    media.linkSecure = attachment.getMediaURL().replaceFirst("http://", "https://");
+	}
 	media.mimeType = attachment.getMediaMimeType();
 	return media;
     }

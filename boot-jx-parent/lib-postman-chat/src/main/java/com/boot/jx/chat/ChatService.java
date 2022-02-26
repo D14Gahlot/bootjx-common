@@ -1,36 +1,26 @@
 package com.boot.jx.chat;
 
-import java.util.List;
-
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 import com.boot.jx.bot.ChatContext;
-import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorHandler;
 import com.boot.jx.logger.LoggerService;
-import com.boot.jx.postman.PMClientConfig;
 import com.boot.jx.postman.PMConstants;
 import com.boot.jx.postman.PMConstants.MESSAGE_COMPOSE_TYPE;
+import com.boot.jx.postman.PMEnvironment.PMClientConfig;
 import com.boot.jx.postman.PostManException;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatContextDoc;
 import com.boot.jx.postman.doc.ChatMeta;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.MessageDoc;
-import com.boot.jx.postman.dto.ChatUserProfileDTO;
-import com.boot.jx.postman.dto.ChatUserProfileDTO.ChatUserProfileRequest;
 import com.boot.jx.postman.manager.LogManager;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.Message;
 import com.boot.jx.postman.model.MessageDefinitions.IMessageExtended;
-import com.boot.jx.postman.model.MessageReport;
 import com.boot.jx.postman.model.OutboxMessage;
-import com.boot.jx.postman.query.ChatContactQuery;
-import com.boot.jx.postman.service.ChatDTOUtil;
-import com.boot.jx.postman.store.MessageContext;
 import com.boot.jx.postman.store.MessageStore;
 import com.boot.jx.postman.store.SessionStore;
 import com.boot.utils.ArgUtil;
@@ -57,13 +47,10 @@ public class ChatService {
     private MessageStore messageStore;
 
     @Autowired
-    private MessageContext messageContext;
+    private SessionStore sessionStore;
 
     @Autowired
-    private SessionStore sessionStore;
-    
-    
-   
+    private ChatSessionFactory chatSessionFactory;
 
     public InboxMessage getInboxMessage() {
 	return chatContext.getInboxMessage();
@@ -106,7 +93,7 @@ public class ChatService {
 
 	MessageDoc messageDoc = messageStore.createOrUpdate(outboxMessage);
 	connectorHandlerFactory.message(MESSAGE_COMPOSE_TYPE.ACTION, chatContactDoc, outboxMessage, null);
-	sessionStore.push(messageDoc, outboxMessage);
+	chatSessionFactory.push(messageDoc, outboxMessage);
 	return messageDoc;
     }
 
@@ -132,10 +119,11 @@ public class ChatService {
 	    outboxMessage.session().setMode(inboxMessage.session().getMode());
 	}
 
-	//outboxMessage.model().put("contact", ChatDTOUtil.getContactMeta(chatContactDoc));
+	// outboxMessage.model().put("contact",
+	// ChatDTOUtil.getContactMeta(chatContactDoc));
 	MessageDoc messageDoc = messageStore.createOrUpdate(outboxMessage);
 	connectorHandlerFactory.message(MESSAGE_COMPOSE_TYPE.REPLY, chatContactDoc, outboxMessage, inboxMessage);
-	sessionStore.push(messageDoc, outboxMessage);
+	chatSessionFactory.push(messageDoc, outboxMessage);
 	return messageDoc;
     }
 
@@ -154,15 +142,15 @@ public class ChatService {
 	outboxMessage.contact().setContactId(chatContactDoc.getContactId());
 	outboxMessage.setSessionId(chatContactDoc.getSessionId());
 
-	//outboxMessage.model().put("contact", ChatDTOUtil.getContactMeta(chatContactDoc));
+	// outboxMessage.model().put("contact",
+	// ChatDTOUtil.getContactMeta(chatContactDoc));
 	MessageDoc messageDoc = messageStore.createOrUpdate(outboxMessage);
 	connectorHandlerFactory.message(MESSAGE_COMPOSE_TYPE.SEND, chatContactDoc, outboxMessage, null);
-	sessionStore.push(messageDoc, outboxMessage);
+	chatSessionFactory.push(messageDoc, outboxMessage);
 	return messageDoc;
     }
 
-    public MessageDoc reply(OutboxMessage outboxMessage) throws InterruptedException {
-	InboxMessage inboxMessage = chatContext.getInboxMessage();
+    public MessageDoc reply(InboxMessage inboxMessage, OutboxMessage outboxMessage) throws InterruptedException {
 	ChatContactDoc chatContactDoc = sessionStore.getContact(inboxMessage.contact().getContactId());
 
 	if (ArgUtil.isEmpty(outboxMessage.session().getAgent())) {
@@ -174,7 +162,6 @@ public class ChatService {
 	if (ArgUtil.is(actionDco)) {
 	    return actionDco;
 	}
-
 	return replyIntenal(chatContactDoc, outboxMessage, inboxMessage);
     }
 
@@ -278,78 +265,6 @@ public class ChatService {
 	chatContext.commitContact();
     }
 
-    public InboxMessage forward() {
-	return chatClient.forward(getInboxMessage()).getResult();
-    }
-
-    public InboxMessage forward(InboxMessage inboxMessage) {
-	return chatClient.forward(inboxMessage).getResult();
-    }
-
-    public boolean initSession(InboxMessage inboxMessage, ChatSessionDoc session) {
-	boolean initd = session.isInitd();
-	if (initd) {
-	   return true;
-	}
-	ConnectorHandler connector = connectorHandlerFactory.get(inboxMessage.contact().type(),
-		inboxMessage.contact().getChannelType());
-
-	if (ArgUtil.is(connector)) {
-	    initd = connector.initSession(session, inboxMessage);
-	    messageContext.commitChatContactQuery();
-	}
-	if (initd) {
-	    session = sessionStore.initSession(session);
-	}
-	return session.isInitd();
-    }
-
-    public boolean initSession(OutboxMessage outboxMessage, ChatSessionDoc session) {
-	boolean initd = session.isInitd();
-	if (initd) {
-	    return true;
-	}
-	ConnectorHandler connector = connectorHandlerFactory.get(outboxMessage.contact().type(),
-		outboxMessage.contact().getChannelType());
-
-	messageContext.setMessage(outboxMessage);
-	ChatContactQuery contactQuery = messageContext.getChatContactQuery();
-	if (ArgUtil.is(connector)) {
-	    initd = connector.initSession(contactQuery, session, outboxMessage);
-	    // TODO:-- Validate if saving is required in case of outbound
-	    // sessionStore.save(contact);
-	}
-	if (initd) {
-	    session = sessionStore.initSession(session);
-	}
-	return session.isInitd();
-    }
-
-    @Async
-    public void initSessionPost(InboxMessage inboxMessage, ChatSessionDoc session) {
-	ChatContactDoc contact = sessionStore.getContact(inboxMessage);
-	try {
-	    ChatUserProfileRequest chatUserProfileRequest = new ChatUserProfileRequest();
-	    chatUserProfileRequest.setEmail(contact.getEmail());
-	    chatUserProfileRequest.setMobile(contact.getPhone());
-	    chatUserProfileRequest.setContactId(contact.getContactId());
-	    chatUserProfileRequest.setContactType(contact.getContactType());
-	    chatUserProfileRequest.setLane(contact.getLane());
-	    chatUserProfileRequest.setProfileId(contact.getProfileId());
-	    ChatUserProfileDTO profile = chatClient.fetchContactDetails(chatUserProfileRequest);
-
-	    contact = sessionStore.getContact(inboxMessage);
-	    if (ArgUtil.is(profile.getProfileId())) {
-		sessionStore.save(profile);
-		contact.setProfileId(profile.getProfileId());
-	    } else {
-		contact.setProfile(profile);
-	    }
-	    sessionStore.save(contact);
-	} catch (Exception e) {
-
-	}
-    }
 
     public boolean botScore(ChatSessionDoc session, Integer botScore) {
 	session = sessionStore.botScore(session, botScore);
@@ -361,13 +276,4 @@ public class ChatService {
 	return true;
     }
 
-    @Autowired
-    private ChatStatusReportService chatStatusReportService;
-
-    public void updateMessageStatus(List<MessageReport> updateDeliveryStatus) {
-	chatStatusReportService.offer(updateDeliveryStatus);
-	chatStatusReportService.process(null);
-    }
-
-    
 }

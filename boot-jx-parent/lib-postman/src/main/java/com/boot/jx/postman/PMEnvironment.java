@@ -1,22 +1,23 @@
 package com.boot.jx.postman;
 
 import java.io.Serializable;
-import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.boot.jx.AppConfig;
-import com.boot.jx.AppContextUtil;
 import com.boot.jx.AppConfigPackage.AppCommonConfig;
+import com.boot.jx.AppContextUtil;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.postman.PMConfiguration.PMConfigurationModel;
 import com.boot.jx.postman.PMConfiguration.PMConfigurationWrappper;
+import com.boot.jx.postman.model.MessageDefinitions.Contactable;
 import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.scope.tnt.Tenants;
 import com.boot.model.MapModel.EntryMeta;
 import com.boot.model.MapModel.MapEntry;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.TimeUtils.TimePeriod;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonView;
 
@@ -38,9 +39,9 @@ public class PMEnvironment {
 
 	public PMConfigurationModel shared();
 
-	public void config(ChannelConfig config);
+	public ChannelConfig addChannel(ChannelConfig config);
 
-	public void update(ChannelConfig config, String action);
+	public void updateChannel(ChannelConfig config, String action);
 
 	public void initConfig();
     }
@@ -57,6 +58,9 @@ public class PMEnvironment {
 
 	@JsonView(PublicProperty.class)
 	public boolean isPushToNewContactAllowed();
+
+	@JsonView(PublicProperty.class)
+	public boolean isWebhookManual();
 
 	@JsonView(PublicProperty.class)
 	public default String getChannel() {
@@ -88,10 +92,15 @@ public class PMEnvironment {
 
 	protected ContactType contactType;
 	protected String channelType;
+
+	@JsonView(PMEnvironment.ProtectedProperty.class)
 	protected String channelKey;
+
 	protected String name;
+	protected String inboundQueue;
 
 	private boolean isSandbox;
+	private boolean isShared;
 	private boolean isDisabled;
 
 	@JsonView(PMEnvironment.PublicProperty.class)
@@ -169,6 +178,26 @@ public class PMEnvironment {
 	    this.isDisabled = isDisabled;
 	}
 
+	public boolean isReadOnly() {
+	    return false;
+	}
+
+	public boolean isShared() {
+	    return isShared;
+	}
+
+	public void setShared(boolean isShared) {
+	    this.isShared = isShared;
+	}
+
+	public String getInboundQueue() {
+	    return inboundQueue;
+	}
+
+	public void setInboundQueue(String inboundQueue) {
+	    this.inboundQueue = inboundQueue;
+	}
+
     }
 
     public static class PMConfigurationObject extends MapEntry implements Serializable {
@@ -238,7 +267,7 @@ public class PMEnvironment {
 	return config;
     }
 
-    public PMConfiguration config() {
+    public PMConfigurationWrappper config() {
 	PMConfigurationWrappper config = new PMConfigurationWrappper().appConfig(appConfig);
 	if (ArgUtil.is(provider)) {
 	    return config.local(provider.local()).shared(provider.shared());
@@ -281,13 +310,13 @@ public class PMEnvironment {
 
     public void addChannel(ChannelConfig config) {
 	if (ArgUtil.is(provider)) {
-	    provider.config(config);
+	    provider.addChannel(config);
 	}
     }
 
     public void updateChannel(ChannelConfig config, String action) {
 	if (ArgUtil.is(provider)) {
-	    provider.update(config, action);
+	    provider.updateChannel(config, action);
 	}
     }
 
@@ -297,9 +326,47 @@ public class PMEnvironment {
 	public String getBotUrl();
 
 	public String getAgentUrl();
+
+	public boolean isValidDomain();
+
+	public boolean isDefaultDomain();
+
+	public String mainDomainRedirect();
+
+	public String mainDomainRedirect(String path);
     }
 
     public interface PMDomainConfig {
 	public String getDefaultInboundQueue();
+
+	public String getDefaultInboundQueue(String channelId);
+
+	public String getDefaultInboundQueue(Contactable contact);
+
+	public PMConfigurationObject getResolveReply();
+
+	String getDomainUrl();
+    }
+
+    public interface PMClientConfig {
+
+	String getWebhookBase(ChannelConfig channelConfig);
+
+	String getChatSessionTimeout();
+
+	TimePeriod getAgentSessionTimeout();
+
+	String getWebhookUrl(ChannelConfig channelConfig);
+
+	String getChatIdleTimeout();
+
+	String getPostmanType();
+
+	boolean isLocalDummyBotEnabled();
+
+	String getDefaultSender();
+
+	String getContactDetailsUrl();
+
     }
 }

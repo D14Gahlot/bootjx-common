@@ -19,7 +19,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.chat.ChatService;
-import com.boot.jx.chat.ChatStatusReportService;
 import com.boot.jx.chat.ConnectorHandlerFactory;
 import com.boot.jx.connectors.WA360Connector;
 import com.boot.jx.connectors.WAGupShupAgentConnector;
@@ -161,7 +160,7 @@ public class InBoundControllerWA {
 
     @RequestMapping(value = "/ext/status/gupshup/callback", method = { RequestMethod.POST, RequestMethod.GET })
     public GupShupDeliveryResp onStatusMessage(@RequestBody GupShupDeliveryResp status) throws InterruptedException {
-	chatService.updateMessageStatus(waGupShupConnector.updateDeliveryStatus(status));
+	inBoundService.updateBatch(waGupShupConnector.updateDeliveryStatus(status));
 	return status;
     }
 
@@ -201,9 +200,6 @@ public class InBoundControllerWA {
     }
 
     @Autowired
-    private ChatStatusReportService chatStatusReportService;
-
-    @Autowired
     private AuditService auditService;
 
     @RequestMapping(value = "/ext/inbound/wa360/callback/{accountKey}/{channelId}/{channelKey}",
@@ -225,7 +221,7 @@ public class InBoundControllerWA {
 		w360Connector.onReadInboxMessage(channelConfig, messageBoxEvent.getInboxMessages());
 	    } else if (ArgUtil.is(messageBoxEvent.getMessageReports())) {
 		w360Connector.onMessageReports(channelConfig, messageBoxEvent.getMessageReports());
-		chatStatusReportService.update(messageBoxEvent.getMessageReports());
+		inBoundService.updateAsync(messageBoxEvent.getMessageReports());
 	    }
 	} catch (Exception e) {
 	    auditService.excep(new PMAuditEvent(PMAuditEvent.Type.INBOUND_ERROR).data(data), LOGGER, e);

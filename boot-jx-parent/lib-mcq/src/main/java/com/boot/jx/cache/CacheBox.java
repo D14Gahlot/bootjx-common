@@ -74,6 +74,7 @@ public class CacheBox<T> implements ICacheBox<T> {
     }
 
     String cahceName = null;
+    int version;
 
     public String getCahceName() {
 	return cahceName;
@@ -85,6 +86,11 @@ public class CacheBox<T> implements ICacheBox<T> {
 
     protected CacheBox(String name) {
 	this.cahceName = name;
+    }
+
+    protected CacheBox(String name, int version) {
+	this.cahceName = name;
+	this.version = version;
     }
 
     protected CacheBox() {
@@ -99,6 +105,13 @@ public class CacheBox<T> implements ICacheBox<T> {
 	    LOGGER.error("REDIS_SAVE_EXCEPTION KEY:" + key + " = " + JsonUtil.toJson(value), e);
 	    throw new MCQStatusError(MCQStatusCodes.DATA_SAVE_ERROR, "REDIS_SAVE_EXCEPTION KEY:" + key);
 	}
+    }
+
+    public T putSafe(String key, T value) {
+	if (ArgUtil.is(key) && ArgUtil.is(value)) {
+	    return put(key, value);
+	}
+	return null;
     }
 
     @Override
@@ -117,6 +130,13 @@ public class CacheBox<T> implements ICacheBox<T> {
 	    // "REDIS_READ_EXCEPTION KEY:" + key);
 	    return null;
 	}
+    }
+
+    public T getSafe(String key) {
+	if (ArgUtil.is(key)) {
+	    return get(key);
+	}
+	return null;
     }
 
     @Override
@@ -224,7 +244,7 @@ public class CacheBox<T> implements ICacheBox<T> {
     }
 
     public Object version() {
-	return 0;
+	return version;
     }
 
     public static <CB> CacheBox<CB> getInstance(String name, RedissonClient redisson) {
@@ -235,7 +255,7 @@ public class CacheBox<T> implements ICacheBox<T> {
 
     public static class StringCacheBox extends CacheBox<String> {
 	public StringCacheBox(String name) {
-	    super(StringCacheBox.class.getName() + name + "V3");
+	    super(StringCacheBox.class.getName() + name + "V4", 4);
 	}
     }
 

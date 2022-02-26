@@ -5,35 +5,22 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.boot.jx.AppContextUtil;
-import com.boot.jx.chat.ChatClient;
-import com.boot.jx.chat.ChatClient.PATH;
+import com.boot.jx.chat.ChatService;
 import com.boot.jx.common.config.ConfigConstants;
-import com.boot.jx.inbound.InBound.InBoundHandler;
-import com.boot.jx.postman.ClientApp;
-import com.boot.jx.postman.PMConstants.CHAT_MODE;
-import com.boot.jx.postman.PMConstants.MESSAGE_FORMAT_TYPE;
+import com.boot.jx.common.config.DefaultChatBoundHandler;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PMEnvironment.PMCommonConfig;
 import com.boot.jx.postman.PMEnvironment.PMConfigurationObject;
 import com.boot.jx.postman.PMEnvironment.PMDomainConfig;
-import com.boot.jx.postman.model.Attachment;
+import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.MessageReport;
-import com.boot.jx.postman.model.ext.CommonMsgText.InBoundMsgText;
-import com.boot.jx.postman.model.ext.InBoundContact;
-import com.boot.jx.postman.model.ext.InBoundMeta;
-import com.boot.jx.postman.model.ext.InBoundMsg;
-import com.boot.jx.postman.model.ext.InBoundMsgMedia;
-import com.boot.jx.postman.model.ext.InBoundMsgStatus;
-import com.boot.jx.postman.model.ext.InBoundWrapper;
-import com.boot.jx.postman.model.ext.MsgSession;
-import com.boot.jx.rest.RestService;
+import com.boot.jx.postman.model.OutboxMessage;
+import com.boot.jx.postman.model.ext.InBoundEvent;
 import com.boot.utils.ArgUtil;
-import com.boot.utils.CollectionUtil;
 
 @Component
-public class AgentInBoundHandler implements InBoundHandler {
+public class AgentInBoundHandler extends DefaultChatBoundHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AgentInBoundHandler.class);
 
@@ -47,45 +34,51 @@ public class AgentInBoundHandler implements InBoundHandler {
     public PMCommonConfig pmCommonConfig;
 
     @Autowired
-    private RestService restService;
-    
-    @Autowired
     private AgentChatHandler agentChatHandler;
 
+    @Autowired(required = false)
+    private ChatService chatService;
+
     @Override
-    public void handle(InboxMessage inboxMessage) {
+    public void doHandle(InboxMessage inboxMessage) {
+	if (ArgUtil.isEmpty(inboxMessage.session().getMode())) {
+	    try {
+		InboxMessage agentAssignResp = agentChatHandler.onAssign(inboxMessage);
+		if (ArgUtil.is(agentAssignResp.session().getAgent())) {
+		    PMConfigurationObject transferReply = pmEnvironment
+			    .keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_AGENT_CHAT_AUTOREPLY_TALK2AGENT);
+		    if (transferReply.exists()) {
+			chatService.reply(inboxMessage, new OutboxMessage().templateId(transferReply.asString()));
+		    } else {
+			chatService.reply(inboxMessage, new OutboxMessage()
+				.message("Connecting you to one of our customer representatives. Give us a moment."));
+		    }
+		} else {
+		    chatService.reply(inboxMessage, new OutboxMessage().message(
+			    "All agents are busy or online, we will connect you whenever someone is available."));
+		}
+	    } catch (Exception e) {
+		LOGGER.error("Error ONE while Connecting to Agent", e);
+		try {
+		    chatService.reply(inboxMessage, new OutboxMessage().message(
+			    "We are having some issues trying connect you to one of our customer representatives. Please be patient"));
+		} catch (InterruptedException e1) {
+		    LOGGER.error("Error TWO  while Sending Failure", e1);
+		}
+	    }
+	}
 	agentChatHandler.onMessageReceive(inboxMessage);
     }
 
     @Override
-    public void handle(MessageReport messageReport) {
-	PMConfigurationObject webhookEntry = pmEnvironment
-		.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_CHAT_INBOUND_WEBHOOK);
-
-	if (webhookEntry.exists()) {
-	    LOGGER.debug("Forwarding MessageReport to Xternal Service ");
-	    try {
-		InBoundContact contact = InBoundContact.from(messageReport.contact());
-
-		InBoundMsgStatus status = new InBoundMsgStatus();
-		status.contactId = contact.contactId;
-		status.messageId = messageReport.getMessageId();
-		status.messageIdExt = messageReport.getMessageIdExt();
-		status.timestamp = messageReport.getChangeStamp();
-		status.status = messageReport.getStatus();
-		status.errors = messageReport.getErrors();
-
-		InBoundWrapper wrap = new InBoundWrapper();
-		wrap.meta = new InBoundMeta().domain(AppContextUtil.getTenant())
-			.server(pmEnvironment.keyEntry(ConfigConstants.APP_KEY.PROP_SERVICE_DOMAIN).asString());
-		wrap.contacts = CollectionUtil.asList(contact);
-		wrap.statuses = CollectionUtil.asList(status);
-		restService.ajax(webhookEntry.asString()).post(wrap).asMapModel();
-	    } catch (Exception e) {
-		LOGGER.error("Error while Trying to HIT " + webhookEntry.asString(), e);
-	    }
-
-	}
+    public void doHandle(MessageReport messageReport) {
+	LOGGER.debug("No Handling Required for Status on AgentSide");
     }
+
+    @Override
+    public void onSessionRoute(InBoundEvent inBoundEvent) {
+	super.onSessionRoute(inBoundEvent);
+    }
+
 
 }

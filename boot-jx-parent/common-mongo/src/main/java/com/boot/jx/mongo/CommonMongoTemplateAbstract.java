@@ -19,6 +19,7 @@ import com.boot.jx.mongo.CommonDocInterfaces.DocVersion;
 import com.boot.jx.mongo.CommonDocInterfaces.MongoQueryBuilder;
 import com.boot.jx.mongo.CommonDocInterfaces.TimeStampIndex;
 import com.boot.jx.mongo.CommonDocInterfaces.TimeStampIndex.UpdatedTimeStampIndexSupport;
+import com.boot.jx.mongo.CommonMongoQueryBuilder.DocQueryBuilder;
 import com.boot.utils.ArgUtil;
 import com.mongodb.WriteResult;
 import com.mongodb.client.result.DeleteResult;
@@ -67,6 +68,12 @@ public class CommonMongoTemplateAbstract extends CommonMongoTemplateDefault {
 
 	}
 
+    }
+
+    public <T> T save(DocQueryBuilder<T> builder) {
+	T doc = builder.getDoc();
+	save(doc);
+	return doc;
     }
 
     public <T> T findByIdString(String id, Class<T> clazz) {

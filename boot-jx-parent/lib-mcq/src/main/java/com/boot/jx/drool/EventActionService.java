@@ -20,80 +20,80 @@ import com.boot.utils.ArgUtil;
 @Component
 public class EventActionService implements DEventActionService {
 
-	@Value("${jax.drools.url}")
-	private String droolUrl;
+    @Value("${jax.drools.url:nourl}")
+    private String droolUrl;
 
-	@Autowired
-	RestService restService;
+    @Autowired
+    RestService restService;
 
-	@Autowired
-	EventActionBeanFactory eventActionBeanFactory;
+    @Autowired
+    EventActionBeanFactory eventActionBeanFactory;
 
-	@Autowired
-	EventCallbackBeanFactory eventCallbackBeanFactory;
+    @Autowired
+    EventCallbackBeanFactory eventCallbackBeanFactory;
 
-	@SuppressWarnings("unchecked")
-	private <T extends DEvent> void process(String eventName, T event, String path) {
-		try {
-			event.setState(State.SENT);
-			DEvent dEvent = restService.ajax(droolUrl).path(path).pathParam(Param.EVENT_NAME, eventName).post(event)
-					.as(DEvent.class);
-			event.setState(State.RECEIVED);
-			event.setActions(dEvent.getActions());
-			event.setStatus(Status.SUCCESS);
-		} catch (Exception e) {
-			event.setStatus(Status.FAILED);
-		}
-
-		if (ArgUtil.is(event.getActions())) {
-			for (Entry<String, DAction> item : event.getActions().entrySet()) {
-				DEventActionHandler<T> dEventActionHandler = (DEventActionHandler<T>) eventActionBeanFactory
-						.get(item.getKey());
-				if (ArgUtil.is(dEventActionHandler)) {
-					dEventActionHandler.handle(event, item.getValue());
-				}
-			}
-		}
-		event.setState(State.PROCESSED);
+    @SuppressWarnings("unchecked")
+    private <T extends DEvent> void process(String eventName, T event, String path) {
+	try {
+	    event.setState(State.SENT);
+	    DEvent dEvent = restService.ajax(droolUrl).path(path).pathParam(Param.EVENT_NAME, eventName).post(event)
+		    .as(DEvent.class);
+	    event.setState(State.RECEIVED);
+	    event.setActions(dEvent.getActions());
+	    event.setStatus(Status.SUCCESS);
+	} catch (Exception e) {
+	    event.setStatus(Status.FAILED);
 	}
 
-	@Override
-	@SuppressWarnings("unchecked")
-	public <T extends DEvent> void beforeEvent(String eventName, T event) {
-		event.setEventName(eventName);
-		event.setEventType(DEvent.Types.BEFORE);
-		process(eventName, event, Path.BEFORE_EVENT_PATH);
-		DEventCallbackHandler<T> dEventCallbackHandler = eventCallbackBeanFactory.get(eventName);
-		if (ArgUtil.is(dEventCallbackHandler)) {
-			dEventCallbackHandler.beforeEventCallback(event);
+	if (ArgUtil.is(event.getActions())) {
+	    for (Entry<String, DAction> item : event.getActions().entrySet()) {
+		DEventActionHandler<T> dEventActionHandler = (DEventActionHandler<T>) eventActionBeanFactory
+			.get(item.getKey());
+		if (ArgUtil.is(dEventActionHandler)) {
+		    dEventActionHandler.handle(event, item.getValue());
 		}
-		event.setState(State.COMPLETED);
+	    }
 	}
+	event.setState(State.PROCESSED);
+    }
 
-	@Override
-	@SuppressWarnings("unchecked")
-	public <T extends DEvent> void onEvent(String eventName, T event) {
-		event.setEventName(eventName);
-		event.setEventType(DEvent.Types.ON);
-		process(eventName, event, Path.ON_EVENT_PATH);
-		DEventCallbackHandler<T> dEventCallbackHandler = eventCallbackBeanFactory.get(eventName);
-		if (ArgUtil.is(dEventCallbackHandler)) {
-			dEventCallbackHandler.onEventCallback(event);
-		}
-		event.setState(State.COMPLETED);
+    @Override
+    @SuppressWarnings("unchecked")
+    public <T extends DEvent> void beforeEvent(String eventName, T event) {
+	event.setEventName(eventName);
+	event.setEventType(DEvent.Types.BEFORE);
+	process(eventName, event, Path.BEFORE_EVENT_PATH);
+	DEventCallbackHandler<T> dEventCallbackHandler = eventCallbackBeanFactory.get(eventName);
+	if (ArgUtil.is(dEventCallbackHandler)) {
+	    dEventCallbackHandler.beforeEventCallback(event);
 	}
+	event.setState(State.COMPLETED);
+    }
 
-	@Override
-	@SuppressWarnings("unchecked")
-	@Async
-	public <T extends DEvent> void afterEvent(String eventName, T event) {
-		event.setEventName(eventName);
-		event.setEventType(DEvent.Types.AFTER);
-		process(eventName, event, Path.AFTER_EVENT_PATH);
-		DEventCallbackHandler<T> dEventCallbackHandler = eventCallbackBeanFactory.get(eventName);
-		if (ArgUtil.is(dEventCallbackHandler)) {
-			dEventCallbackHandler.afterEventCallback(event);
-		}
-		event.setState(State.COMPLETED);
+    @Override
+    @SuppressWarnings("unchecked")
+    public <T extends DEvent> void onEvent(String eventName, T event) {
+	event.setEventName(eventName);
+	event.setEventType(DEvent.Types.ON);
+	process(eventName, event, Path.ON_EVENT_PATH);
+	DEventCallbackHandler<T> dEventCallbackHandler = eventCallbackBeanFactory.get(eventName);
+	if (ArgUtil.is(dEventCallbackHandler)) {
+	    dEventCallbackHandler.onEventCallback(event);
 	}
+	event.setState(State.COMPLETED);
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    @Async
+    public <T extends DEvent> void afterEvent(String eventName, T event) {
+	event.setEventName(eventName);
+	event.setEventType(DEvent.Types.AFTER);
+	process(eventName, event, Path.AFTER_EVENT_PATH);
+	DEventCallbackHandler<T> dEventCallbackHandler = eventCallbackBeanFactory.get(eventName);
+	if (ArgUtil.is(dEventCallbackHandler)) {
+	    dEventCallbackHandler.afterEventCallback(event);
+	}
+	event.setState(State.COMPLETED);
+    }
 }

@@ -26,7 +26,8 @@ public class ChannelConfig extends AChannelConfig {
     private boolean isPushOnlyApproved;
     private boolean isPushFreeTextAllowed;
     private boolean isPushToNewContactAllowed;
-
+    private boolean isWebhookManual;
+    
     private String callbackPath;
 
     public String getLane() {
@@ -140,6 +141,15 @@ public class ChannelConfig extends AChannelConfig {
 
     public void setPushToNewContactAllowed(boolean isPushToNewContactAllowed) {
 	this.isPushToNewContactAllowed = isPushToNewContactAllowed;
+    }
+
+    @Override
+    public boolean isWebhookManual() {
+	return this.isWebhookManual;
+    }
+
+    public void setWebhookManual(boolean isWebhookManual) {
+	this.isWebhookManual = isWebhookManual;
     }
 
 }

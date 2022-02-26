@@ -20,6 +20,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.boot.jx.admin.manager.ChatParserAndImportor;
 import com.boot.jx.admin.service.BulkMessageService;
 import com.boot.jx.api.ApiResponse;
+import com.boot.jx.chat.ChatSessionService;
 import com.boot.jx.common.doc.ImportChatSessionDoc;
 import com.boot.jx.common.store.ChatArchiveService;
 import com.boot.jx.dict.ContactType;
@@ -31,6 +32,7 @@ import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.dto.ChatMessageDTO;
 import com.boot.jx.postman.dto.ChatSessionDTO;
 import com.boot.jx.postman.model.OutboxMessage;
+import com.boot.jx.postman.model.ext.InBoundEvent;
 import com.boot.jx.postman.service.ChatDTOUtil;
 import com.boot.jx.postman.store.MessageStore;
 import com.boot.jx.postman.store.SessionStore;
@@ -55,6 +57,9 @@ public class AdminMsgController {
 
     @Autowired
     private MessageStore messageStore;
+
+    @Autowired
+    private ChatSessionService chatSessionService;
 
     @RequestMapping(value = "/api/message/session", method = { RequestMethod.GET })
     public ApiResponse<ChatSessionDoc, Object> fetchSession(@RequestParam String startStamp,
@@ -98,9 +103,24 @@ public class AdminMsgController {
 
     @RequestMapping(value = "/api/message/messages", method = { RequestMethod.POST })
     public ApiResponse<ChatSessionDTO, Object> getMessagesForSession(@RequestBody ChatSessionDTO chatSessionDto) {
+	chatSessionDto = chatArchive.getChatSession(chatSessionDto);
 	chatSessionDto = chatArchive.withContact(chatSessionDto);
 	chatSessionDto = chatArchive.withMessages(chatSessionDto);
 	return ApiResponse.buildData(chatSessionDto);
+    }
+
+    @RequestMapping(value = "/api/message/session/close", method = { RequestMethod.POST })
+    public ApiResponse<ChatSessionDoc, Object> closeChatSesson(@RequestParam String sessionId) {
+	ChatSessionDoc chatSessionDoc = sessionStore.getSession(sessionId);
+	chatSessionService.closeChatSession(chatSessionDoc);
+	return ApiResponse.buildData(chatSessionDoc);
+    }
+
+    @RequestMapping(value = "/api/message/session/route", method = { RequestMethod.POST })
+    public ApiResponse<InBoundEvent, Object> routeChatSesson(@RequestParam String sessionId,
+	    @RequestParam(required = false, defaultValue = "") String queue) {
+	InBoundEvent event = chatSessionService.routeSession(sessionId, queue, null);
+	return ApiResponse.buildData(event);
     }
 
     @RequestMapping(value = "/api/message/session/remove", method = { RequestMethod.POST })
@@ -113,7 +133,7 @@ public class AdminMsgController {
     public ApiResponse<ChatSessionDTO, Map<String, Object>> getChatDetails(
 	    @RequestParam(name = "file") MultipartFile file, @RequestParam String clientDate,
 	    @RequestParam(required = false) String clientDateFormat, @RequestParam ContactType contactType) {
-    	return chatParseManager.getChats(file, contactType, clientDate, clientDateFormat);
+	return chatParseManager.getChats(file, contactType, clientDate, clientDateFormat);
     }
 
     @RequestMapping(value = "/api/message/session/import", method = { RequestMethod.POST })

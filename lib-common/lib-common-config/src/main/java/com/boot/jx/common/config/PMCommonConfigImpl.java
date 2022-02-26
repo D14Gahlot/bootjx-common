@@ -17,13 +17,16 @@ import com.boot.jx.AppContextUtil;
 import com.boot.jx.common.impl.ConfigMeta;
 import com.boot.jx.http.CommonHttpRequest;
 import com.boot.jx.logger.LoggerService;
-import com.boot.jx.postman.PMClientConfig;
 import com.boot.jx.postman.PMEnvironment;
+import com.boot.jx.postman.PMEnvironment.PMClientConfig;
 import com.boot.jx.postman.PMEnvironment.PMCommonConfig;
+import com.boot.jx.scope.tnt.Tenants;
+import com.boot.jx.scope.tnt.Tenants.TenantResolver;
 import com.boot.model.SafeKeyHashMap;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.JsonUtil;
 import com.boot.utils.TimeUtils;
+import com.boot.utils.UniqueID;
 
 @Component
 @PropertySource("classpath:application-common.properties")
@@ -36,6 +39,9 @@ public class PMCommonConfigImpl implements PMCommonConfig {
 
     @Autowired
     private CommonHttpRequest commonHttpRequest;
+
+    @Autowired
+    private TenantResolver tenantResolver;
 
     @Autowired
     private AppConfig appConfig;
@@ -52,10 +58,10 @@ public class PMCommonConfigImpl implements PMCommonConfig {
     @Value("${common.const.app}")
     private String app;
 
-    @Value("${postman.bot.url}")
+    @Value("${mry.bot.url}")
     private String botUrl;
 
-    @Value("${postman.agent.url}")
+    @Value("${mry.agent.url}")
     private String agentUrl;
 
     @Autowired
@@ -126,8 +132,15 @@ public class PMCommonConfigImpl implements PMCommonConfig {
 	map.put("CONFIG", config);
 	map.put("CONFIG_JSON", JsonUtil.toJson(config));
 	map.put("APP", app);
-	map.put("CDN_URL", ArgUtil.parseAsString(commonHttpRequest.get("CDN_URL"), getCdnServer()));
-	map.put("CDN_DEBUG", ArgUtil.parseAsString(commonHttpRequest.get("CDN_DEBUG"), "false"));
+	String debugCdnUrl = commonHttpRequest.get("CDN_URL");
+	map.put("CDN_URL", ArgUtil.parseAsString(debugCdnUrl, getCdnServer()));
+
+	if (ArgUtil.is(debugCdnUrl) && (debugCdnUrl.contains("127.0.0.1") || debugCdnUrl.contains("localhost"))) {
+	    map.put("CDN_DEBUG", ArgUtil.parseAsString(commonHttpRequest.get("CDN_DEBUG"), "true"));
+	} else {
+	    map.put("CDN_DEBUG", ArgUtil.parseAsString(commonHttpRequest.get("CDN_DEBUG"), "false"));
+	}
+
 	map.put("CDN_VERSION", "V3");
 	map.put("CDN_VERSION", getVersion());
 
@@ -138,7 +151,7 @@ public class PMCommonConfigImpl implements PMCommonConfig {
 	map.put("STAMP", System.currentTimeMillis());
 	map.put("APP_TITLE", appConfig.getAppTitle());
 	map.put("TENANT", AppContextUtil.getTenant());
-
+	map.put("NOUNCE", UniqueID.generateString62());
 	return map;
     }
 
@@ -166,6 +179,29 @@ public class PMCommonConfigImpl implements PMCommonConfig {
     @Override
     public String getAgentUrl() {
 	return agentUrl;
+    }
+
+    @Override
+    public boolean isValidDomain() {
+	return tenantResolver.isValid();
+    }
+
+    @Override
+    public boolean isDefaultDomain() {
+	return Tenants.isDefault(AppContextUtil.getTenant());
+    }
+
+    @Override
+    public String mainDomainRedirect() {
+	return "redirect:" + String.format("https://app.%s%s",
+		pmEnvironment.keyEntry("mry.prop.service.domain").asString(), commonHttpRequest.getRequestURI());
+    }
+
+    @Override
+    public String mainDomainRedirect(String path) {
+	return "redirect:" + String.format("https://app.%s/%s",
+		pmEnvironment.keyEntry("mry.prop.service.domain").asString(), path);
+
     }
 
 }

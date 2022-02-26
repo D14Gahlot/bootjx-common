@@ -16,14 +16,14 @@ public class CommonTemplate implements Serializable, JsonIgnoreUnknown {
 	    notes = "Explicit template.id to be used for message")
     private String id;
 
-    @ApiMockModelProperty(example = "FEEDBACK", required = false, value = "Code of Template", hidden = true,
+    @ApiMockModelProperty(example = "FEEDBACK", required = false, value = "Code of Template",
 	    notes = "Template Code will be searched in the repository and match will be served."
 		    + "\n code will be ignored in case template.id is provided")
     private String code;
 
-    @ApiMockModelProperty(example = "en_US", required = false, value = "Language of Template to pick", hidden = true,
+    @ApiMockModelProperty(example = "en_US", required = false, value = "Language of Template to pick",
 	    notes = "Language is an optional param which fallback to en, in all the scenarios of missing params/template"
-		    + "\n lang is ignored when template.id is provided")
+		    + "\n lang will ignored when template.id is provided")
     private String lang;
 
     @ApiMockModelProperty(example = "{ \"amount\" : 10, \"currency\" : \"INR\" }", required = false,

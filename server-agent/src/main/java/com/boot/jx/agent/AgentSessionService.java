@@ -19,6 +19,7 @@ import org.springframework.security.core.session.SessionDestroyedEvent;
 import org.springframework.security.web.authentication.WebAuthenticationDetails;
 import org.springframework.security.web.authentication.logout.LogoutHandler;
 import org.springframework.stereotype.Component;
+import org.springframework.web.context.request.RequestContextHolder;
 
 import com.boot.jx.AppConfig;
 import com.boot.jx.AppContextUtil;
@@ -29,8 +30,8 @@ import com.boot.jx.http.CommonHttpRequest;
 import com.boot.jx.logger.AuditDetailProvider;
 import com.boot.jx.logger.LoggerService;
 import com.boot.jx.mongo.CommonMongoQueryBuilder;
-import com.boot.jx.postman.PMClientConfig;
 import com.boot.jx.postman.PMConstants.DEFAULT;
+import com.boot.jx.postman.PMEnvironment.PMClientConfig;
 import com.boot.jx.stomp.StompQuery;
 import com.boot.jx.stomp.StompTunnelSessionManager;
 import com.boot.utils.ArgUtil;
@@ -223,12 +224,15 @@ public class AgentSessionService
 
     @Override
     public String getAuditUser() {
-	if (ArgUtil.is(agentSessionBean)) {
-	    if (!ArgUtil.is(agentSessionBean.getAgentCode()) && ArgUtil.is(agentSessionBean.getProfile())) {
-		return agentSessionBean.getProfile().getAgent_code();
+	if (RequestContextHolder.getRequestAttributes() != null) {
+	    if (ArgUtil.is(agentSessionBean)) {
+		if (!ArgUtil.is(agentSessionBean.getAgentCode()) && ArgUtil.is(agentSessionBean.getProfile())) {
+		    return agentSessionBean.getProfile().getAgent_code();
+		}
+		return agentSessionBean.getAgentCode();
 	    }
-	    return agentSessionBean.getAgentCode();
 	}
+
 	return "_NOUSER_";
     }
 

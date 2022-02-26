@@ -87,15 +87,15 @@ public class WARapiwhaConnector extends AbstractConnector<WebConfigDetails, WebP
     }
 
     @Override
-    public boolean initSession(ChatSessionDoc session, InboxMessage inboxMessage) {
+    public OutboxMessage initSession(ChatSessionDoc session, InboxMessage inboxMessage) {
 	Object x = inboxMessage.getOriginalMessage();
 	if (ArgUtil.is(x)) {
 	    Map<String, Object> map = JsonUtil.toMap(x);
-	    ChatContactQuery contactQuery = messageContext.getChatContactQuery();
+	    ChatContactQuery contactQuery = messageContext.contact();
 	    contactQuery.setProfilePic(ArgUtil.parseAsString(map.get("profilepicture"), Constants.BLANK));
 	    contactQuery.setName(ArgUtil.parseAsString(map.get("pushname"), Constants.BLANK));
 	}
-	return true;
+	return null;
     }
 
     public InboxMessage toInboxMessage(Map<String, Object> dataMap, String lane) {

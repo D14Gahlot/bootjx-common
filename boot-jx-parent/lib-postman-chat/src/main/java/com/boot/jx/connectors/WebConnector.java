@@ -10,8 +10,10 @@ import org.redisson.api.RedissonClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.boot.jx.AppContextUtil;
 import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorMapping;
 import com.boot.jx.connectors.AbstractConnector.DefaultConnector;
 import com.boot.jx.dict.ContactType;
@@ -26,9 +28,9 @@ import com.boot.jx.postman.plugin.ChannelPluginProvider;
 import com.boot.jx.postman.plugin.WebPlugin;
 import com.boot.jx.postman.plugin.WebPlugin.WebConfigDetails;
 import com.boot.jx.postman.query.ChatContactQuery;
+import com.boot.jx.stomp.StompTunnelService;
 import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
-import com.boot.utils.CollectionUtil;
 import com.boot.utils.JsonUtil;
 
 @Component
@@ -37,6 +39,9 @@ public class WebConnector extends DefaultConnector<WebConfigDetails, WebPlugin> 
 
     private static final String WEB_USER_MESSAGE_STR = "WEB_USER_MESSAGE_STR_";
     private static final Logger LOGGER = LoggerFactory.getLogger(WebConnector.class);
+
+    @Value("${app.stomp}")
+    boolean stompEnabled;
 
     @Override
     public WebPlugin getPlugin() {
@@ -78,9 +83,9 @@ public class WebConnector extends DefaultConnector<WebConfigDetails, WebPlugin> 
 
     @Override
     public void onSend(ChannelConfig channelConfig, ChatContactDoc chatContactDoc, OutboxMessage outboxMessage) {
-	String to = CollectionUtil.getOne(outboxMessage.getTo());
-
+	String contactId = outboxMessage.contact().getContactId();
 	template(channelConfig, chatContactDoc, outboxMessage);
+	String contactIdWeb = AppContextUtil.getTenant() + "/" + contactId;
 	if (redisson == null) {
 	    try {
 		messageQueue.enqueue(outboxMessage);
@@ -91,9 +96,12 @@ public class WebConnector extends DefaultConnector<WebConfigDetails, WebPlugin> 
 		e.printStackTrace();
 	    }
 	} else {
-	    LOGGER.debug("sendReply to " + to);
-	    RBlockingQueue<String> messageQueue = redisson.getBlockingQueue(WEB_USER_MESSAGE_STR + to);
-	    messageQueue.add(JsonUtil.toJson(outboxMessage));
+	    if (!stompEnabled) {
+		LOGGER.debug("sendReply to " + contactIdWeb);
+		RBlockingQueue<String> messageQueue = redisson.getBlockingQueue(WEB_USER_MESSAGE_STR + contactIdWeb);
+		messageQueue.add(JsonUtil.toJson(outboxMessage));
+	    }
+	    stompTunnelService.sendToTag(contactIdWeb, "/message/receive/new", outboxMessage);
 	}
     }
 
@@ -106,7 +114,10 @@ public class WebConnector extends DefaultConnector<WebConfigDetails, WebPlugin> 
     @Autowired(required = false)
     RedissonClient redisson;
 
-    public OutboxMessage pollUnreadMessage(String number) throws InterruptedException {
+    @Autowired
+    private StompTunnelService stompTunnelService;
+
+    public OutboxMessage pollUnreadMessage(String contactId) throws InterruptedException {
 	if (redisson == null) {
 	    try {
 		return messageQueue.dequeue();
@@ -114,7 +125,7 @@ public class WebConnector extends DefaultConnector<WebConfigDetails, WebPlugin> 
 		e.printStackTrace();
 	    }
 	}
-	RBlockingQueue<String> messageQueue = redisson.getBlockingQueue(WEB_USER_MESSAGE_STR + number);
+	RBlockingQueue<String> messageQueue = redisson.getBlockingQueue(WEB_USER_MESSAGE_STR + contactId);
 	String x = messageQueue.poll(5, TimeUnit.SECONDS);
 
 	if (ArgUtil.is(x)) {
@@ -124,10 +135,10 @@ public class WebConnector extends DefaultConnector<WebConfigDetails, WebPlugin> 
     }
 
     @Override
-    public boolean initSession(ChatSessionDoc session, InboxMessage inboxMessage) {
+    public OutboxMessage initSession(ChatSessionDoc session, InboxMessage inboxMessage) {
 
-	ChatContactQuery contactQuery = messageContext.getChatContactQuery();
-	ChatContactDoc chatContactDoc = messageContext.getChatContactDoc();
+	ChatContactQuery contactQuery = messageContext.contact();
+	ChatContactDoc chatContactDoc = messageContext.contact().getDoc();
 
 	if (ArgUtil.is(inboxMessage.getForm())) {
 	    if (ArgUtil.is(inboxMessage.getForm().get("name"))) {
@@ -141,25 +152,36 @@ public class WebConnector extends DefaultConnector<WebConfigDetails, WebPlugin> 
 	List<TmplElement> inputs = new ArrayList<TmplElement>();
 	if (ArgUtil.isEmpty(chatContactDoc.getName())) {
 	    inputs.add(new TmplElement().name("name").label("Name").type("TEXT"));
-	    reply(null, null, (OutboxMessage) inboxMessage.replyMessage("Please fill below inputs to continue")
-		    .option("inputs", inputs), inboxMessage);
-	    return false;
+	    return (OutboxMessage) inboxMessage.replyMessage("Please fill below inputs to continue").option("inputs",
+		    inputs);
 	}
 
 	if (ArgUtil.isEmpty(chatContactDoc.getEmail())) {
 	    inputs.add(new TmplElement().name("email").label("Email").type("EMAIL"));
-	    reply(null, null, (OutboxMessage) inboxMessage.replyMessage("Please fill below inputs to continue")
-		    .option("inputs", inputs), inboxMessage);
-	    return false;
+	    return (OutboxMessage) inboxMessage.replyMessage("Please fill below inputs to continue").option("inputs",
+		    inputs);
 	}
 
-	return true;
+	return null;
+    }
+
+    public InboxMessage toInboxMessage(ChannelConfig channelConfig, MapModel map) {
+	// Create Default Message from Channel
+	InboxMessage inboxMessage = this.createInboxMessage(channelConfig, map.as(InboxMessage.class));
+	inboxMessage.setSessionId(null);
+	inboxMessage.setMessageId(null);
+
+	inboxMessage.contact().setCsid(inboxMessage.getFrom());
+	inboxMessage.session().setAgent(null);
+	inboxMessage.session().setDept(null);
+
+	return inboxMessage;
     }
 
     @Override
     public MessageBoxEvent inboundMessageBoxEvent(ChannelConfig channelConfig, MapModel requestMap,
 	    MessageBoxEvent messageBoxEvent) {
-	return messageBoxEvent.addInboxMessage(new InboxMessage());
+	return messageBoxEvent.addInboxMessage(toInboxMessage(channelConfig, requestMap));
     }
 
 }

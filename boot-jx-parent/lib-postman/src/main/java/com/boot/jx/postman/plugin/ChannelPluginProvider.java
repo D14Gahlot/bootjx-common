@@ -37,6 +37,15 @@ public class ChannelPluginProvider {
 	 */
 	@SuppressWarnings("unchecked")
 	public default ChannelConfig updateChannelConfig(ChannelConfig config, AChannelDetails details) {
+	    updatePluginSpecs(config);
+	    // Channel Specific Properties
+	    config.setLane(details.getLane());
+
+	    setDetails(config, (C) details);
+	    return config;
+	}
+
+	public default void updatePluginSpecs(ChannelConfig config) {
 	    // Plugin Specific Properties
 	    config.setContactType(this.getContactType());
 	    config.setChannelType(this.getChannelType());
@@ -45,12 +54,7 @@ public class ChannelPluginProvider {
 	    config.setPushOnlyApproved(this.isPushOnlyApproved());
 	    config.setPushFreeTextAllowed(this.isPushFreeTextAllowed());
 	    config.setPushToNewContactAllowed(this.isPushToNewContactAllowed());
-
-	    // Channel Specific Properties
-	    config.setLane(details.getLane());
-
-	    setDetails(config, (C) details);
-	    return config;
+	    config.setWebhookManual(this.isWebhookManual());
 	}
 
 	/**
@@ -70,10 +74,14 @@ public class ChannelPluginProvider {
 	    list.add(new ConfigMeta().key("name").title("Desc"));
 	    list.add(new ConfigMeta().key("channelKey").title("Channel Key").readonly().hidden()
 		    .defaultValue(PostManUtil.UNIQUE_API_KEY()));
+	    list.add(new ConfigMeta().key("inboundQueue").title("Default Queue").optional()
+		    .optionsSource("getx:/api/config/inbound_queue").optionsKey("code").order(100));
+
 	    String serviceDomain = pmEnvironment.keyEntry("mry.prop.service.domain").asString();
 	    String clientDomain = AppContextUtil.getTenant();
 	    list.add(new ConfigMeta().key("webhookUrl").title("Webhook URL").hidden()
 		    .defaultValue(String.format("https://%s.%s/postman", clientDomain, serviceDomain)));
+
 	    this.addConfigMeta(list);
 	    return list;
 	}
@@ -95,6 +103,8 @@ public class ChannelPluginProvider {
 	    config.setName(map.getString("name", ArgUtil.nonEmpty(config.getName(), getDefaultName(config))));
 	    config.setChannelKey(map.getString("channelKey",
 		    ArgUtil.nonEmpty(config.getChannelKey(), PostManUtil.UNIQUE_API_KEY())));
+
+	    config.setInboundQueue(map.getString("inboundQueue"));
 
 	    config.setWebhookUrl(map.getString("webhookUrl", config.getWebhookUrl()));
 	    updateChannelConfig(config, channelDetails);

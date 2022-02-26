@@ -112,4 +112,9 @@ public class TelegramPlugin implements ChannelPlugin<TelegramConfigDetails> {
     public boolean isPushToNewContactAllowed() {
 	return false;
     }
+
+    @Override
+    public boolean isWebhookManual() {
+	return false;
+    }
 }

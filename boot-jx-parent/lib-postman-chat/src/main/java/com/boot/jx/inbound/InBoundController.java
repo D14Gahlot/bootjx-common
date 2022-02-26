@@ -17,12 +17,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.chat.ChatClient;
-import com.boot.jx.chat.ChatStatusReportService;
+import com.boot.jx.chat.ChatStatusService;
 import com.boot.jx.chat.ConnectorHandlerFactory;
 import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorHandler;
 import com.boot.jx.logger.AuditService;
 import com.boot.jx.postman.PMAuditEvent;
-import com.boot.jx.postman.PMClientConfig;
 import com.boot.jx.postman.PMConfiguration;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.model.InboxMessage;
@@ -45,9 +44,6 @@ public class InBoundController {
     private InBoundService inBoundService;
 
     @Autowired
-    private PMClientConfig chatClientConfig;
-
-    @Autowired
     private PMEnvironment pmEnvironment;
 
     @Autowired
@@ -57,23 +53,16 @@ public class InBoundController {
     private AuditService auditService;
 
     @ApiVendorHeaders
-    @RequestMapping(value = "/int/webhook/callback", method = RequestMethod.POST)
-    public String setWebHook(@RequestParam(required = false) String callbackUrl) throws InterruptedException {
-	chatClientConfig.setInboundForwardUrl(callbackUrl);
-	return callbackUrl;
-    }
-
-    @RequestMapping(value = "/int/webhook/callback", method = RequestMethod.GET)
-    public String getWebHook() throws InterruptedException {
-	return chatClientConfig.getInboundForwardUrl();
-    }
-
-    @ApiVendorHeaders
     @RequestMapping(value = "/int/inbound/callback", method = RequestMethod.POST)
     public InboxMessage onInboundCallback(@RequestBody InboxMessage inboxMessage,
 	    @RequestParam(required = false, defaultValue = "false") boolean routed) throws InterruptedException {
 	// botService.arhive(inbound);
 	if (PostManUtil.hasValidCheckSum(inboxMessage)) {
+//	    PMConfiguration config = pmEnvironment.config();
+//	    String channelId = PostManUtil.CHANNEL_ID(inboxMessage.contact());
+//	    ChannelConfig channelConfig = config.channel(channelId);
+//	    ConnectorHandler connector = connectorHandlerFactory.get(channelConfig);
+//	    connector.prompt(inboxMessage);
 	    inBoundService.invokeMethods(inboxMessage);
 	}
 	return inboxMessage;
@@ -82,7 +71,7 @@ public class InBoundController {
     static AtomicInteger counter = new AtomicInteger(1);
 
     @Autowired
-    private ChatStatusReportService chatStatusReportService;
+    private ChatStatusService inBoundStatusService;
 
     @ApiVendorHeaders
     @RequestMapping(value = "/int/status/callback", method = RequestMethod.POST)
@@ -98,8 +87,8 @@ public class InBoundController {
 	    report.setChangeStamp(Random.getInt(100, 999));
 	    list.add(report);
 	}
-	chatStatusReportService.offer(list);
-	chatStatusReportService.process(ser);
+	inBoundStatusService.offer(list);
+	inBoundStatusService.process(ser);
 	return list;
     }
 
@@ -125,12 +114,13 @@ public class InBoundController {
 		    new MessageBoxEvent());
 	    if (ArgUtil.is(messageBoxEvent.getInboxMessages())) {
 		messageBoxEvent.getInboxMessages().forEach(inboxMessage -> {
+		    connector.prompt(inboxMessage);
 		    inBoundService.invokeMethodsAsync(inboxMessage);
 		});
 		connector.onReadInboxMessage(channelConfig, messageBoxEvent.getInboxMessages());
 	    } else if (ArgUtil.is(messageBoxEvent.getMessageReports())) {
 		connector.onMessageReports(channelConfig, messageBoxEvent.getMessageReports());
-		chatStatusReportService.update(messageBoxEvent.getMessageReports());
+		inBoundStatusService.update(messageBoxEvent.getMessageReports());
 	    }
 	} catch (Exception e) {
 	    auditService.excep(new PMAuditEvent(PMAuditEvent.Type.INBOUND_ERROR).data(data), LOGGER, e);

@@ -14,12 +14,14 @@ import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 
 import com.boot.jx.AppContextUtil;
+import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.chat.ConnectorHandlerFactory;
 import com.boot.jx.common.impl.ConfigMeta;
-import com.boot.jx.postman.PMClientConfig;
+import com.boot.jx.exception.ApiHttpExceptions.ApiStatusCodes;
 import com.boot.jx.postman.PMConfiguration.PMConfigurationModel;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PMEnvironment.AChannelDetails;
+import com.boot.jx.postman.PMEnvironment.PMClientConfig;
 import com.boot.jx.postman.PMEnvironment.PMConfigurationObject;
 import com.boot.jx.postman.doc.PMConfigurationDoc;
 import com.boot.jx.postman.doc.config.ChannelConfigDoc;
@@ -177,12 +179,6 @@ public class ConfigManager {
 	this.refresh();
     }
 
-    public void save(ChannelConfig config) {
-	pmEnvironment.addChannel(config);
-	this.refresh();
-	connectorHandlerFactory.onChannelUpdate(config.getChannelType(), config.getLane());
-    }
-
     public ClientKeyConfigDoc save(ClientKeyConfigDoc clientApiKey) {
 	configStore.saveClientKeyConfig(clientApiKey);
 	this.refresh();
@@ -210,19 +206,34 @@ public class ConfigManager {
     public ChannelConfig getChannelConfig(String channelId) {
 	if (ArgUtil.is(channelId)) {
 	    ChannelConfigDoc channelConfig = configStore.findById(channelId, ChannelConfigDoc.class);
-	    if (ArgUtil.is(channelConfig)) {
-		PMConfigurationModel config = pmEnvironment.local();
-		if (!ArgUtil.is(channelConfig.getWebhookUrl())) {
-		    channelConfig.setWebhookUrl(pmClientConfig.getWebhookBase(channelConfig));
-		}
-		channelConfig.setCallbackPath(PostManUtil.CHANNEL_CALLBACK_PATH(config.getAccountKey(), channelConfig));
-		return channelConfig;
+	    if (!ArgUtil.is(channelConfig)) {
+		return null;
 	    }
+	    ChannelPlugin<? extends AChannelDetails> plugin = ChannelPluginProvider.PLUGIN_MAPPING
+		    .get(channelConfig.getChannelType());
+	    plugin.updatePluginSpecs(channelConfig);
+	    if (!channelConfig.isReadOnly()) {
+		if (plugin.isWebhookManual()) {
+		    PMConfigurationModel config = pmEnvironment.local();
+		    if (!ArgUtil.is(channelConfig.getWebhookUrl())) {
+			channelConfig.setWebhookUrl(pmClientConfig.getWebhookBase(channelConfig));
+			channelConfig.setCallbackPath(
+				PostManUtil.CHANNEL_CALLBACK_PATH(config.getAccountKey(), channelConfig));
+		    }
+		}
+	    }
+	    return channelConfig;
 	}
 	return null;
     }
 
-    public ChannelConfig saveChannelConfig(String channelType, boolean disabled, Map<String, Object> data) {
+    public void save(ChannelConfig config) {
+	pmEnvironment.addChannel(config);
+	this.refresh();
+	connectorHandlerFactory.onChannelUpdate(config.getChannelType(), config.getLane());
+    }
+
+    public ChannelConfig saveChannelConfig(String channelType, Map<String, Object> data) {
 	MapModel map = MapModel.from(data);
 	ChannelPlugin<? extends AChannelDetails> plugin = ChannelPluginProvider.PLUGIN_MAPPING.get(channelType);
 	String channelId = map.getString("channelId");
@@ -232,8 +243,8 @@ public class ConfigManager {
 		config = new ChannelConfig();
 	    }
 	    plugin.importChannelConfigFromMap(config, map, channelType);
-	    config.disabled(disabled);
 	    save(config);
+	    channelId = config.getChannelId();
 
 	}
 	return getChannelConfig(channelId);
@@ -242,6 +253,14 @@ public class ConfigManager {
     public ChannelConfig updateChannelConfig(String channelId, String action) {
 	if (ArgUtil.is(channelId)) {
 	    ChannelConfig channelConfig = pmEnvironment.local().channel(channelId);
+
+	    if (!ArgUtil.is(channelConfig)) {
+		ApiResponseUtil.throwInputException(ApiStatusCodes.PARAM_INVALID, "Invalid Channel");
+	    }
+
+	    if (channelConfig.isReadOnly()) {
+		ApiResponseUtil.throwUnAuthorizedException("Cannot Edit Sandbox Channel");
+	    }
 	    pmEnvironment.updateChannel(channelConfig, action);
 	    this.refresh();
 	    return channelConfig;

@@ -40,23 +40,39 @@ public class MessageDefinitions {
 	public static Contact instance() {
 	    return new ContactMeta();
 	}
-	
     }
 
     @JsonDeserialize(as = ContactMeta.class, keyUsing = ContactMetaKeyDeserializer.class)
     @JsonIgnoreProperties(ignoreUnknown = true)
-    public static interface Contactable extends Contact {
+    public static interface ContactID extends Contact {
+	public void setContactId(String contactId);
+
+	public String getContactId();
+
+	public default void copyFrom(ContactID contactable) {
+	    // Contact
+	    this.setName(contactable.getName());
+	    this.setPhone(contactable.getPhone());
+	    this.setEmail(contactable.getEmail());
+	    // ContactID
+	    this.setContactId(contactable.getContactId());
+	}
+
+	public static ContactID instance() {
+	    return new ContactMeta();
+	}
+    }
+
+    @JsonDeserialize(as = ContactMeta.class, keyUsing = ContactMetaKeyDeserializer.class)
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static interface Contactable extends ContactID {
 	public String getContactType();
 
 	public String getLane();
 
 	public String getCsid();
 
-	public String getContactId();
-
 	public void setCsid(String createCsid);
-
-	public void setContactId(String contactId);
 
 	public void setContactType(String contactType);
 
@@ -79,12 +95,13 @@ public class MessageDefinitions {
 	    this.setName(contactable.getName());
 	    this.setPhone(contactable.getPhone());
 	    this.setEmail(contactable.getEmail());
+	    // ContactID
+	    this.setContactId(contactable.getContactId());
 	    // Contactable
 	    this.setContactType(contactable.getContactType());
 	    this.setChannelType(contactable.getChannelType());
 	    this.setLane(contactable.getLane());
 	    this.setCsid(contactable.getCsid());
-	    this.setContactId(contactable.getContactId());
 	}
 
 	public static Contactable instance() {
@@ -106,6 +123,28 @@ public class MessageDefinitions {
 
     // External attributes
     @JsonIgnoreProperties(ignoreUnknown = true)
+    public interface IMessageId extends Serializable {
+	public String getMessageId();
+
+	public void setMessageId(String messageId);
+
+	public String getMessageIdExt();
+
+	public void setMessageIdExt(String messageIdExt);
+
+	String getMessageIdRef();
+
+	public void setMessageIdRef(String messageIdRef);
+
+	public default void from(IMessageId message) {
+	    setMessageId(message.getMessageId());
+	    setMessageIdExt(message.getMessageIdExt());
+	    setMessageIdRef(message.getMessageIdRef());
+	}
+    }
+
+    // External attributes
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public interface SessionMessage extends Serializable {
 	// Internal attributes
 	public String getSessionId();
@@ -118,7 +157,7 @@ public class MessageDefinitions {
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
-    public interface IMessage extends IMessageExternal, IMessageInternal, SessionMessage {
+    public interface IMessage extends IMessageExternal, IMessageInternal, SessionMessage, IMessageId {
 
 	public long getTimestamp();
 
@@ -147,11 +186,14 @@ public class MessageDefinitions {
     }
 
     public class ContactMetaKeyDeserializer extends KeyDeserializer {
-
 	@Override
 	public Object deserializeKey(String key, DeserializationContext deserializationContext)
 		throws IOException, JsonProcessingException {
 	    return JsonUtil.getMapper().readValue(key, ContactMeta.class);
 	}
+    }
+
+    public interface LogMessage extends SessionMessage, IMessageId {
+
     }
 }

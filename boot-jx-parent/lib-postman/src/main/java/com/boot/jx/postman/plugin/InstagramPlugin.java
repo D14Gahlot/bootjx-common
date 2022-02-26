@@ -159,4 +159,9 @@ public class InstagramPlugin implements ChannelPlugin<InstagramConfig> {
     public boolean isPushToNewContactAllowed() {
 	return false;
     }
+
+    @Override
+    public boolean isWebhookManual() {
+	return true;
+    }
 }

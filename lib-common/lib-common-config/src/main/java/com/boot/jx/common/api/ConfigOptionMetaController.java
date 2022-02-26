@@ -79,7 +79,7 @@ public class ConfigOptionMetaController {
     @JsonView(PMEnvironment.PublicProperty.class)
     @RequestMapping(value = { "/api/options/channels" }, method = { RequestMethod.GET })
     public ApiResponse<AChannelConfig, Object> listActiveLanes() {
-	return ApiResponse.buildResults(pmEnvironment.local().listChannels());
+	return ApiResponse.buildResults(pmEnvironment.config().listChannels());
     }
 
     @RequestMapping(value = "/api/options/tmpl/hsm", method = { RequestMethod.GET })

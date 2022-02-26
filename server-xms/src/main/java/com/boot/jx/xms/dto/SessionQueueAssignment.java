@@ -14,4 +14,6 @@ public class SessionQueueAssignment implements Serializable {
     @ApiMockModelProperty(example = "external_bot", required = true,
 	    value = "Next queue where session should be routed")
     public String queue;
+
+    public Object params;
 }

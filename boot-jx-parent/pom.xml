@@ -103,7 +103,12 @@
 				<groupId>com.boot.jx</groupId>
 				<artifactId>common-lib-rbac</artifactId>
 				<version>${boot.jx.version}</version>
-			</dependency>			
+			</dependency>	
+			<dependency>
+				<groupId>com.boot.jx</groupId>
+				<artifactId>common-lib-session</artifactId>
+				<version>${boot.jx.version}</version>
+			</dependency>	
 			<dependency>
 				<groupId>com.boot.jx</groupId>
 				<artifactId>boot-ext-jar</artifactId>
@@ -174,6 +179,7 @@
 		<module>common-mongo</module>
 		<module>common-tmpl</module>
 		<module>common-lib-rbac</module>
+		<module>common-lib-session</module>
 		<module>../boot-ext-jar</module>
 		<module>lib-mcq</module>
 		<module>lib-aws</module>

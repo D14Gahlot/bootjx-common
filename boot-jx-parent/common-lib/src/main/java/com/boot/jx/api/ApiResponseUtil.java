@@ -238,4 +238,12 @@ public class ApiResponseUtil {
 	throwInputException(ApiStatusCodes.PARAM_DUPLICATE);
     }
 
+    public static void throwUnAuthorizedException(String description) {
+	throwException(new ApiHttpArgException(ApiStatusCodes.UNAUTHORIZED, description));
+    }
+
+    public static void throwAccessDeniedException(String description) {
+	throwException(new ApiHttpArgException(ApiStatusCodes.ACCESS_DENIED, description));
+    }
+
 }

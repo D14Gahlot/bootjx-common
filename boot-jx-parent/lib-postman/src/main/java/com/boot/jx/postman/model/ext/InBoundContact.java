@@ -4,9 +4,13 @@ import com.boot.jx.dict.ContactType;
 import com.boot.jx.postman.model.MessageDefinitions.Contactable;
 import com.boot.jx.swagger.ApiMockModelProperty;
 import com.boot.jx.utils.PostManUtil;
+import com.boot.model.UtilityModels.JsonIgnoreNull;
+import com.boot.model.UtilityModels.JsonIgnoreUnknown;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class InBoundContact {
+public class InBoundContact implements JsonIgnoreUnknown, JsonIgnoreNull {
+    private static final long serialVersionUID = 7064422892950497366L;
+
     @ApiMockModelProperty(example = "WHATSAPP", value = "Contact Type")
     public ContactType contactType;
 

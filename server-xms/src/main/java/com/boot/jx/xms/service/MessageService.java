@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 import com.boot.jx.api.ApiFieldError;
 import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.chat.ChatService;
+import com.boot.jx.chat.ChatSessionService;
 import com.boot.jx.dict.FileType;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.doc.ChatSessionDoc;
@@ -28,6 +29,9 @@ public class MessageService {
     private ChatService chatService;
 
     @Autowired
+    private ChatSessionService chatSessionService;
+
+    @Autowired
     private SessionStore sessionStore;
 
     @Autowired
@@ -41,9 +45,19 @@ public class MessageService {
 		    .codeKey("CHANNEL_NOT_FOUND").description("Channel : " + message.getChannelId() + " is Not Setup"));
 	}
 
+	if (!ArgUtil.is(message.getType())) {
+	    ApiResponseUtil.throwInputException(new ApiFieldError().field("type").obzect("OutBoundMsg")
+		    .codeKey("TYPE_MISSING").description("Message Type is missing")
+		    .possibleValues("text", "template", "audio", "video", "image", "document"));
+	}
+
 	OutboxMessage outboxMessage = new OutboxMessage();
 
 	if ("text".equalsIgnoreCase(message.getType())) {
+	    if (!ArgUtil.is(message.getText()) || !ArgUtil.is(message.getText().getBody())) {
+		ApiResponseUtil.throwInputException(new ApiFieldError().field("text").obzect("OutBoundMsg")
+			.codeKey("TEXT_DETAILS_MISSING").description("Text Body is missing"));
+	    }
 	    outboxMessage.setMessage(message.getText().getBody());
 	}
 
@@ -52,6 +66,13 @@ public class MessageService {
 		ApiResponseUtil.throwInputException(new ApiFieldError().field("template").obzect("OutBoundMsg")
 			.codeKey("TEMPLATE_DETAILS_MISSING").description("Template details is missing"));
 	    }
+
+	    if (!ArgUtil.is(message.getTemplate().getId()) && !ArgUtil.is(message.getTemplate().getCode())) {
+		ApiResponseUtil.throwInputException(
+			new ApiFieldError().field("template").obzect("OutBoundMsg").codeKey("TEMPLATE_DETAILS_MISSING")
+				.description("Either template.id or template.code is required"));
+	    }
+
 	    outboxMessage.setHsm(message.getTemplate());
 	    outboxMessage.setModelData(message.getTemplate().data());
 	}
@@ -115,10 +136,13 @@ public class MessageService {
 
 	ChatSessionDoc chatSessionDoc = sessionStore.linkSession(outboxMessage);
 	if (ArgUtil.is(chatSessionDoc)) {
-	    chatService.initSession(outboxMessage, chatSessionDoc);
+	    chatSessionService.initSession(outboxMessage, chatSessionDoc);
 	    chatService.send(chatSessionDoc, outboxMessage);
+	} else {
+	    ApiResponseUtil.throwInputException(
+		    new ApiFieldError().field("to").obzect("OutBoundMsg").codeKey("INSUFFICIENT_CONTACT_DETAILS")
+			    .description("Session Cannot be initialized for given contact"));
 	}
-
 	String messageId = outboxMessage.getMessageId();
 	return new OutBoundReciept().id(messageId);
     }

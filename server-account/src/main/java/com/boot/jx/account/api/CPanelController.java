@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.boot.jx.AppConfigPackage.AppCommonConfig;
-import com.boot.jx.account.AccountAdminService;
+import com.boot.jx.account.AccountAuthService;
 import com.boot.jx.account.AccountSessionBean;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.common.config.ConfigManager;
@@ -45,7 +45,7 @@ public class CPanelController {
     private AppCommonConfig appCommonConfig;
 
     @Autowired
-    private AccountAdminService accountAdminService;
+    private AccountAuthService accountAdminService;
 
     @Autowired
     private AccountSessionBean sessionBean;
@@ -55,7 +55,7 @@ public class CPanelController {
 
 	model.addAllAttributes(appCommonConfig.appAttributes());
 
-	Authentication auth = AccountAdminService.getAuthentication();
+	Authentication auth = AccountAuthService.getAuthentication();
 
 	if (ArgUtil.is(auth)) {
 	    model.addAttribute("APP_USER", auth.getName());
@@ -74,9 +74,8 @@ public class CPanelController {
     @RequestMapping(value = "/api/config/channel/{channelType}", method = { RequestMethod.POST })
     @JsonView(PMEnvironment.PublicProperty.class)
     public ApiResponse<ChannelConfig, Object> saveChannelConfig(@PathVariable CHANNEL_TYPE_ENUM channelType,
-	    @RequestParam(defaultValue = "false", required = false) boolean disabled,
 	    @RequestBody Map<String, Object> data) {
-	return ApiResponse.buildResults(configManager.saveChannelConfig(channelType.toString(), disabled, data));
+	return ApiResponse.buildResults(configManager.saveChannelConfig(channelType.toString(), data));
     }
 
     @ResponseBody
@@ -115,7 +114,7 @@ public class CPanelController {
     public ApiResponse<ClientKeyConfigDoc, Object> createClientApiKey(@RequestBody ClientKeyConfigDoc clientApiKey) {
 	return ApiResponse.buildData(configManager.save(clientApiKey));
     }
-    
+
     @ApiRequest(rules = PMConstants.USER_ROLE.BUSINESS_USER)
     @ResponseBody
     @RequestMapping(value = { "/api/collection/drop" }, method = { RequestMethod.POST })

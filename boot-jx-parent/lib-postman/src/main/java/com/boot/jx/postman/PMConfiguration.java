@@ -246,9 +246,14 @@ public interface PMConfiguration extends Serializable {
 	@Override
 	public List<AChannelConfig> listChannels() {
 	    List<AChannelConfig> list = this.local().listChannels();
-	    if (keyEntry("postman.chat.channel.sandbox").asBoolean()) {
-		list.addAll(this.shared().listChannels());
+	    List<AChannelConfig> cs = this.shared().listChannels();
+	    for (AChannelConfig aChannelConfig : cs) {
+		if (aChannelConfig.isShared()
+			|| (aChannelConfig.isSandbox() && keyEntry("postman.chat.channel.sandbox").asBoolean())) {
+		    list.add(aChannelConfig);
+		}
 	    }
+
 	    return list;
 	}
 

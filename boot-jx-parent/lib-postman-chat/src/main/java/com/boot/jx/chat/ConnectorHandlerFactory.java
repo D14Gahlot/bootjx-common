@@ -57,6 +57,14 @@ public class ConnectorHandlerFactory extends ScopedBeanFactory<String, Connector
 
 	default public void reply(ChannelConfig channelConfig, ChatContactDoc chatContactDoc,
 		OutboxMessage outboxMessage, IMessageExtended inboxMessage) {
+	    if (!ArgUtil.is(channelConfig)) {
+		channelConfig = getChannelConfig(outboxMessage);
+	    }
+
+	    if (!ArgUtil.is(chatContactDoc)) {
+		chatContactDoc = getChatContact(outboxMessage);
+	    }
+
 	    outboxMessage.addTo(inboxMessage.getFrom());
 	    outboxMessage.contact().setLane(inboxMessage.contact().getLane());
 	    this.onSend(channelConfig, chatContactDoc, outboxMessage);
@@ -71,6 +79,13 @@ public class ConnectorHandlerFactory extends ScopedBeanFactory<String, Connector
 	 */
 	default public void send(ChannelConfig channelConfig, ChatContactDoc chatContactDoc,
 		OutboxMessage outboxMessage) {
+	    if (!ArgUtil.is(channelConfig)) {
+		channelConfig = getChannelConfig(outboxMessage);
+	    }
+
+	    if (!ArgUtil.is(chatContactDoc)) {
+		chatContactDoc = getChatContact(outboxMessage);
+	    }
 	    outboxMessage.addTo(chatContactDoc.getCsid());
 	    outboxMessage.contact().setLane(chatContactDoc.getLane());
 	    this.onSend(channelConfig, chatContactDoc, outboxMessage);
@@ -80,8 +95,8 @@ public class ConnectorHandlerFactory extends ScopedBeanFactory<String, Connector
 	    return inboxMessage;
 	}
 
-	default public boolean initSession(ChatSessionDoc session, InboxMessage inboxMessage) {
-	    return true;
+	default public OutboxMessage initSession(ChatSessionDoc session, InboxMessage inboxMessage) {
+	    return null;
 	}
 
 	default public boolean initSession(ChatContactQuery contactQuery, ChatSessionDoc session,
@@ -133,13 +148,18 @@ public class ConnectorHandlerFactory extends ScopedBeanFactory<String, Connector
 	    LOGGER.error("WEBHOOK REGISTRATION NOT FOUND ");
 	}
 
-	default InboxMessage createInboxMessage(ChannelConfig channelConfig) {
-	    InboxMessage inboxMessage = new InboxMessage();
+	default InboxMessage createInboxMessage(ChannelConfig channelConfig, InboxMessage inboxMessage) {
 	    if (ArgUtil.is(channelConfig)) {
 		inboxMessage.contact().type(channelConfig.getContactType());
 		inboxMessage.contact().setChannelType(channelConfig.getChannelType());
 		inboxMessage.contact().setLane(channelConfig.getLane());
 	    }
+	    return inboxMessage;
+	}
+
+	default InboxMessage createInboxMessage(ChannelConfig channelConfig) {
+	    InboxMessage inboxMessage = new InboxMessage();
+	    createInboxMessage(channelConfig, inboxMessage);
 	    return inboxMessage;
 	}
 
@@ -184,9 +204,14 @@ public class ConnectorHandlerFactory extends ScopedBeanFactory<String, Connector
 
 	public ChannelConfig getChannelConfig(IMessage outboxMessage);
 
-	public OutboxMessage template(ChannelConfig channelConfig, ChatContactDoc chatContactDoc, OutboxMessage outboxMessage);
+	public ChatContactDoc getChatContact(IMessage outboxMessage);
+
+	public OutboxMessage template(ChannelConfig channelConfig, ChatContactDoc chatContactDoc,
+		OutboxMessage outboxMessage);
 
 	boolean optin(ChannelConfig channelConfig, ChatContactDoc chatContactDoc);
+
+	void prompt(InboxMessage inboxMessage);
 
     }
 
