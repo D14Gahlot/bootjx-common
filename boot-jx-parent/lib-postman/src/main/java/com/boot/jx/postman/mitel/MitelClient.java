@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 import com.boot.jx.postman.ClientApp;
 import com.boot.jx.postman.PMEnvironment.PMDomainConfig;
 import com.boot.jx.rest.RestService;
+import com.boot.jx.rest.RestService.Ajax;
 import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.TimeUtils;
@@ -33,12 +34,21 @@ public class MitelClient {
 	defaultClient.secret().put("accessTokenStamp", System.currentTimeMillis());
 
 	String endPoint = ArgUtil.parseAsString(defaultClient.props().get("end_point"));
-	String grantType = ArgUtil.parseAsString(defaultClient.props().get("grant_type"));
-	String clientId = ArgUtil.parseAsString(defaultClient.props().get("client_id"));
-	String clientSecret = ArgUtil.parseAsString(defaultClient.secret().get("client_secret"));
-	accessToken = restService.ajax(endPoint).path("/AuthorizationServer/Token").field("grant_type", grantType)
-		.field("client_id", clientId).field("client_secret", clientSecret).asMapModel().keyEntry("access_token")
-		.asString();
+	String grantType = ArgUtil.parseAsString(defaultClient.props().get("grant_type"), "client_credentials");
+
+	Ajax ajax = restService.ajax(endPoint).path("/AuthorizationServer/Token").field("grant_type", grantType);
+
+	if (ArgUtil.areEqual(grantType, "password")) {
+	    String username = ArgUtil.parseAsString(defaultClient.props().get("username"));
+	    String password = ArgUtil.parseAsString(defaultClient.secret().get("password"));
+	    ajax.field("username", username).field("password", password);
+	} else {
+	    String clientId = ArgUtil.parseAsString(defaultClient.props().get("client_id"));
+	    String clientSecret = ArgUtil.parseAsString(defaultClient.secret().get("client_secret"));
+	    ajax.field("client_id", clientId).field("client_secret", clientSecret);
+	}
+
+	accessToken = ajax.asMapModel().keyEntry("access_token").asString();
 
 	defaultClient.secret().put("accessToken", accessToken);
 	defaultClient.secret().put("accessTokenStamp", System.currentTimeMillis());
