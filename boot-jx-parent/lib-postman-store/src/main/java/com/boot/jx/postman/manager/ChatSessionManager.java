@@ -50,6 +50,26 @@ public class ChatSessionManager {
     @Autowired
     private PMDomainConfig pmDomainConfig;
 
+    public InBoundEvent updateStatus(ChatSessionDoc session, PMConstants.CHAT_STATUS status) {
+	if (!ArgUtil.is(status)) {
+	    return null;
+	}
+
+	String oldStatus = session.getStatus();
+	if (status.toString().equalsIgnoreCase(oldStatus)) {
+	    return null;
+	}
+
+	InBoundEvent inBoundEvent = new InBoundEvent().eventCode(InBoundEvent.SESSION_STATUS);
+	inBoundEvent.sessionRouted = new SessionRouted();
+	inBoundEvent.sessionId = session.getSessionId();
+	inBoundEvent.contactId = session.getContactId();
+	inBoundEvent.contact().copyFrom(session.contact());
+	sessionStore.changeStatus(session, status);
+	logManager.event(session, EVENTS.STATUS_CHANGED, oldStatus, status.toString());
+	return inBoundEvent;
+    }
+
     public boolean resolveSession(ChatSessionDoc session) {
 	if (!ArgUtil.isEmptyValue(session.getResolveSessionStamp())) {
 	    return false;
@@ -60,34 +80,22 @@ public class ChatSessionManager {
 	return true;
     }
 
-    public boolean closeSession(ChatSessionDoc session) {
+    public InBoundEvent closeSession(ChatSessionDoc session) {
 	if (!session.isActive()) {
-	    return false;
+	    return null;
 	}
+
+	InBoundEvent inBoundEvent = new InBoundEvent().eventCode(InBoundEvent.SESSION_CLOSED);
+	inBoundEvent.sessionRouted = new SessionRouted();
+	inBoundEvent.sessionId = session.getSessionId();
+	inBoundEvent.contactId = session.getContactId();
+	inBoundEvent.contact().copyFrom(session.contact());
+
 	session = sessionStore.closeSession(session);
 	logManager.event(session, EVENTS.STATUS_CHANGED, session.getStatus(),
 		PMConstants.CHAT_STATUS.CLOSED.toString());
-	return true;
-    }
 
-    public boolean updateSessionStatus(ChatSessionDoc sessionDoc, PMConstants.CHAT_STATUS status) {
-	if (!ArgUtil.is(status)) {
-	    return false;
-	}
-
-	String oldStatus = sessionDoc.getStatus();
-	if (status.toString().equalsIgnoreCase(oldStatus)) {
-	    return false;
-	}
-	if (status == PMConstants.CHAT_STATUS.RESOLVED) {
-	    return this.resolveSession(sessionDoc);
-	} else if (status == PMConstants.CHAT_STATUS.CLOSED) {
-	    return this.closeSession(sessionDoc);
-	} else {
-	    sessionStore.changeStatus(sessionDoc, status);
-	    logManager.event(sessionDoc, EVENTS.STATUS_CHANGED, oldStatus, status.toString());
-	}
-	return true;
+	return inBoundEvent;
     }
 
     public boolean updateSessionTags(ChatSessionDoc sessionDoc, List<QuickTag> tags) {

@@ -58,6 +58,9 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
     private ChatSessionManager chatSessionManager;
 
     @Autowired
+    private ChatSessionService chatSessionService;
+
+    @Autowired
     private LogManager logManager;
 
     @Autowired
@@ -74,9 +77,6 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 
     @Autowired
     private ChatArchiveService chatArchive;
-
-    @Autowired
-    private ChatSessionService chatSessionService;
 
     @Autowired
     private ChatArchiveBuilder chatArchiveBuilder;
@@ -283,7 +283,7 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 
     public ChatSessionDTO updateChatSessionStatus(String sessionId, PMConstants.CHAT_STATUS status) {
 	ChatSessionDoc sessionDoc = sessionStore.getSession(sessionId);
-	if (chatSessionManager.updateSessionStatus(sessionDoc, status)) {
+	if (chatSessionService.updateSessionStatus(sessionDoc, status)) {
 	    ChatSessionDTO dto = chatArchive.getChatSession(sessionDoc);
 	    stompTunnelService.sendToTag(sessionDoc.getAssignedToDept(), "/chat/session/update", dto);
 	    return dto;

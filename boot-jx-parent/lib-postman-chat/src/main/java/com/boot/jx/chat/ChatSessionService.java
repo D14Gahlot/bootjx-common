@@ -8,6 +8,8 @@ import org.springframework.stereotype.Component;
 import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorHandler;
 import com.boot.jx.inbound.InBound.InBoundHandler;
 import com.boot.jx.logger.LoggerService;
+import com.boot.jx.postman.PMConstants;
+import com.boot.jx.postman.PMConstants.CHAT_STATUS;
 import com.boot.jx.postman.PMEnvironment.PMConfigurationObject;
 import com.boot.jx.postman.PMEnvironment.PMDomainConfig;
 import com.boot.jx.postman.doc.ChatContactDoc;
@@ -134,32 +136,11 @@ public class ChatSessionService {
 	}
     }
 
-    public MessageDoc closeChatSession(ChatSessionDoc chatSessionDoc) {
-	MessageDoc messageDoc = null;
-
-	if (!chatSessionDoc.isResolved()) {
-	    chatSessionManager.resolveSession(chatSessionDoc);
-
-	    PMConfigurationObject resolvedReply = pmDomainConfig.getResolveReply();
-	    if (resolvedReply.exists()) {
-		messageDoc = chatService.send(chatSessionDoc, new OutboxMessage().templateId(resolvedReply.asString()));
-	    }
-
-	}
-	chatSessionManager.closeSession(chatSessionDoc);
-
-	if (ArgUtil.is(inBoundHandler)) {
-	    inBoundHandler.onSessionClose(chatSessionDoc);
-	}
-
-	return messageDoc;
-    }
-
     public InBoundEvent routeSession(ChatSessionDoc sessionDoc, String queue, Object params) {
 	InBoundEvent event = chatSessionManager.assignToQueue(sessionDoc, queue);
 	event.sessionRouted.params = params;
 	if (ArgUtil.is(inBoundHandler)) {
-	    inBoundHandler.onSessionRouteAsync(sessionDoc, event);
+	    inBoundHandler.onSessionRouteAsync(event, sessionDoc);
 	}
 	return event;
     }
@@ -177,4 +158,41 @@ public class ChatSessionService {
 	return routeSession(sessionDoc, queue, params);
     }
 
+    public boolean updateSessionStatus(ChatSessionDoc sessionDoc, CHAT_STATUS status) {
+	if (!ArgUtil.is(status)) {
+	    return false;
+	}
+
+	String oldStatus = sessionDoc.getStatus();
+	if (status.toString().equalsIgnoreCase(oldStatus)) {
+	    return false;
+	}
+	if (status == PMConstants.CHAT_STATUS.RESOLVED) {
+	    return chatSessionManager.resolveSession(sessionDoc);
+	} else if (status == PMConstants.CHAT_STATUS.CLOSED) {
+	    InBoundEvent event = chatSessionManager.closeSession(sessionDoc);
+	    if (ArgUtil.is(inBoundHandler)) {
+		inBoundHandler.onSessionCloseAsync(event, sessionDoc);
+	    }
+	    return ArgUtil.is(event);
+	} else {
+	    InBoundEvent event = chatSessionManager.updateStatus(sessionDoc, status);
+	    return ArgUtil.is(event);
+	}
+    }
+
+    public MessageDoc closeChatSession(ChatSessionDoc chatSessionDoc) {
+	MessageDoc messageDoc = null;
+
+	if (!chatSessionDoc.isResolved()) {
+	    updateSessionStatus(chatSessionDoc, PMConstants.CHAT_STATUS.RESOLVED);
+	    PMConfigurationObject resolvedReply = pmDomainConfig.getResolveReply();
+	    if (resolvedReply.exists()) {
+		messageDoc = chatService.send(chatSessionDoc, new OutboxMessage().templateId(resolvedReply.asString()));
+	    }
+
+	}
+	updateSessionStatus(chatSessionDoc, PMConstants.CHAT_STATUS.CLOSED);
+	return messageDoc;
+    }
 }

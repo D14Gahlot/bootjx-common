@@ -34,10 +34,13 @@ import com.boot.jx.postman.model.ext.InBoundMsgMedia;
 import com.boot.jx.postman.model.ext.InBoundMsgStatus;
 import com.boot.jx.postman.model.ext.InBoundWrapper;
 import com.boot.jx.postman.model.ext.MsgSession;
+import com.boot.jx.postman.query.ChatSessionQuery;
 import com.boot.jx.postman.store.MessageStore;
+import com.boot.jx.postman.store.SessionStore;
 import com.boot.jx.rest.RestService;
 import com.boot.jx.stomp.StompTunnelService;
 import com.boot.jx.utils.PostManUtil;
+import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
 
@@ -65,6 +68,9 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 
     @Autowired
     private MessageStore messageStore;
+
+    @Autowired
+    private SessionStore sessionStore;
 
     @Autowired
     private StompTunnelService stompTunnelService;
@@ -264,34 +270,26 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
     }
 
     @Override
-    public void onSessionRoute(ChatSessionDoc sessionDoc, InBoundEvent inBoundEvent) {
+    public void onSessionRoute(InBoundEvent event, ChatSessionDoc sessionDoc) {
 
-	if (InBoundEvent.SESSION_ROUTED.equals(inBoundEvent.eventCode)) {
+	if (InBoundEvent.SESSION_ROUTED.equals(event.eventCode)) {
 
-	    ClientApp defaultClient = getDefaultInboundApp(inBoundEvent.sessionRouted.targetQueue, null);
+	    ClientApp defaultClient = getDefaultInboundApp(event.sessionRouted.targetQueue, null);
 	    if (ArgUtil.is(defaultClient)) {
 		APP_TYPE appType = APP_TYPE.from(defaultClient.getAppType());
 		if (APP_TYPE.WEBHOOK.equals(appType)) {
-		    LOGGER.debug("Forwarding Session Routing Event to Xternal Service ");
-		    try {
-			InBoundContact contact = InBoundContact.from(inBoundEvent.contact());
-
-			InBoundWrapper wrap = new InBoundWrapper();
-			wrap.meta = new InBoundMeta().domain(AppContextUtil.getTenant())
-				.server(pmEnvironment.keyEntry(ConfigConstants.APP_KEY.PROP_SERVICE_DOMAIN).asString())
-				.appId(defaultClient.getId());
-			wrap.contacts = CollectionUtil.asList(contact);
-			wrap.events = CollectionUtil.asList(inBoundEvent);
-			restService.ajax(defaultClient.getWebhook()).post(wrap).asNone();
-		    } catch (Exception e) {
-			logManager.error(inBoundEvent, e);
-		    }
+		    sendEventWebhook(event, defaultClient);
 		    return;
 		} else if (APP_TYPE.MITEL.equals(appType)) {
 		    try {
-			mitelClient.send(defaultClient, sessionDoc.contact(), sessionDoc.getSessionId());
+			MapModel mitel = mitelClient.send(defaultClient, sessionDoc.contact(),
+				sessionDoc.getSessionId());
+			ChatSessionQuery q = new ChatSessionQuery(sessionDoc);
+			q.set("meta.mitel.omid", mitel.getString("id")).set("meta.mitel.queue_id",
+				mitel.getString("queueId"));
+			sessionStore.updateFirst(q);
 		    } catch (Exception e) {
-			logManager.error(inBoundEvent, e);
+			logManager.error(event, e);
 		    }
 		}
 	    }
@@ -304,10 +302,43 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
     }
 
     @Override
-    public void onSessionClose(ChatSessionDoc chatSessionDoc) {
-	stompTunnelService.sendToAll(PostManUtil.ON_DEPT_ASSIGN_TOPIC(chatSessionDoc.getAssignedToDept()),
-		chatArchiveBuilder.buildChatSessionDTO().from(chatSessionDoc).withContact()
-			.isAssigned(chatSessionDoc.getAssignedToAgent()).get());
+    public void onSessionClose(InBoundEvent event, ChatSessionDoc sessionDoc) {
+
+	ClientApp defaultClient = getDefaultInboundApp(sessionDoc.getAssignedToQueue(), null);
+	if (ArgUtil.is(defaultClient)) {
+	    APP_TYPE appType = APP_TYPE.from(defaultClient.getAppType());
+	    if (APP_TYPE.WEBHOOK.equals(appType)) {
+		sendEventWebhook(event, defaultClient);
+		return;
+	    } else if (APP_TYPE.MITEL.equals(appType)) {
+		try {
+		    MapModel meta = new MapModel(sessionDoc.getMeta());
+		    mitelClient.openMediaAction(defaultClient, meta.pathEntry("omid").asString(), "Complete");
+		} catch (Exception e) {
+		    logManager.error(event, e);
+		}
+	    }
+	}
+	stompTunnelService.sendToAll(PostManUtil.ON_DEPT_ASSIGN_TOPIC(sessionDoc.getAssignedToDept()),
+		chatArchiveBuilder.buildChatSessionDTO().from(sessionDoc).withContact()
+			.isAssigned(sessionDoc.getAssignedToAgent()).get());
+    }
+
+    private void sendEventWebhook(InBoundEvent event, ClientApp defaultClient) {
+	LOGGER.debug("Forwarding Session Routing Event to Xternal Service ");
+	try {
+	    InBoundContact contact = InBoundContact.from(event.contact());
+
+	    InBoundWrapper wrap = new InBoundWrapper();
+	    wrap.meta = new InBoundMeta().domain(AppContextUtil.getTenant())
+		    .server(pmEnvironment.keyEntry(ConfigConstants.APP_KEY.PROP_SERVICE_DOMAIN).asString())
+		    .appId(defaultClient.getId());
+	    wrap.contacts = CollectionUtil.asList(contact);
+	    wrap.events = CollectionUtil.asList(event);
+	    restService.ajax(defaultClient.getWebhook()).post(wrap).asNone();
+	} catch (Exception e) {
+	    logManager.error(event, e);
+	}
     }
 
 }

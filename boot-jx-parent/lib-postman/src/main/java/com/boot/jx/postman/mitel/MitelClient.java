@@ -57,7 +57,7 @@ public class MitelClient {
 
     }
 
-    public void send(ClientApp defaultClient, Contactable contactable, String sessionId) {
+    public MapModel send(ClientApp defaultClient, Contactable contactable, String sessionId) {
 	String accessToken = getToken(defaultClient);
 	String endPoint = ArgUtil.parseAsString(defaultClient.props().get("end_point"));
 	String queue = ArgUtil.parseAsString(defaultClient.props().get("queue"));
@@ -66,11 +66,20 @@ public class MitelClient {
 
 	String url = String.format("%s/agent/plug/chat/%s/%s/%s/hide/CHATBOX", pmDomainConfig.getDomainUrl(),
 		contactable.getContactId(), sessionId, contactable.getContactId());
-	restService.ajax(endPoint).path("/MiccSdk/api/v1/openmedia").header("Authorization", "Bearer " + accessToken)
+	return restService.ajax(endPoint).path("/MiccSdk/api/v1/openmedia")
+		.header("Authorization", "Bearer " + accessToken)
 		.post(MapModel.createInstance().put("targetUri", url).put("targetUriEmbedded", true)
 			.put("previewUrl", url).put("historyUrl", url).put("queue", queue).put("from", from)
 			.put("to", to).put("subject", contactable.getName()).toMap())
-		.asNone();
+		.asMapModel();
+    }
+
+    public MapModel openMediaAction(ClientApp defaultClient, String openmediaId, String action) {
+	String accessToken = getToken(defaultClient);
+	String endPoint = ArgUtil.parseAsString(defaultClient.props().get("end_point"));
+	return restService.ajax(endPoint).path("/MiccSdk/api/v1/openmedia/{id}").pathParam("id", openmediaId)
+		.header("Authorization", "Bearer " + accessToken)
+		.post(MapModel.createInstance().put("action", action).toMap()).asMapModel();
     }
 
 }

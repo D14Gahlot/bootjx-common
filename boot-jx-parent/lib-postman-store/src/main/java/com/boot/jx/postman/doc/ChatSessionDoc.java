@@ -100,6 +100,7 @@ public class ChatSessionDoc extends UpdatedTimeStampDoc implements Serializable 
     private List<String> tagId;
 
     private Map<String, Object> store;
+    private Map<String, Object> meta;
 
     // MessageStats
     @DBRef
@@ -492,6 +493,14 @@ public class ChatSessionDoc extends UpdatedTimeStampDoc implements Serializable 
 	    this.store = new HashMap<String, Object>();
 	}
 	return store;
+    }
+
+    public Map<String, Object> getMeta() {
+        return meta;
+    }
+
+    public void setMeta(Map<String, Object> meta) {
+        this.meta = meta;
     }
 
 }
