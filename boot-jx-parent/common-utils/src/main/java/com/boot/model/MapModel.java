@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import com.boot.json.JsonSerializerType;
+import com.boot.json.MapModelDeserializer;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.Constants;
 import com.boot.utils.JsonPath;
@@ -15,8 +16,10 @@ import com.boot.utils.JsonUtil;
 import com.boot.utils.TimeUtils;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
+@JsonDeserialize(using = MapModelDeserializer.class)
 public class MapModel implements JsonSerializerType<Object> {
 
     public static interface EntryMeta {

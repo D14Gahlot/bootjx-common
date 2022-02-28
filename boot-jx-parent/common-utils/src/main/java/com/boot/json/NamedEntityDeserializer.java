@@ -24,80 +24,80 @@ import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 @JsonComponent
 public class NamedEntityDeserializer extends StdDeserializer<NamedMapModel> {
 
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	@JsonDeserialize(as = NamedMapModel.class, using = NamedEntityDeserializer.class)
-	@JsonIgnoreProperties(ignoreUnknown = true)
-	public interface NamedEntity {
-		public String name(String key);
-	}
+    @JsonDeserialize(as = NamedMapModel.class, using = NamedEntityDeserializer.class)
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public interface NamedEntity {
+	public String name(String key);
+    }
 
-	@JsonDeserialize(using = NamedEntityDeserializer.class)
-	public static class NamedMapModel extends MapModel implements NamedEntity {
+    @JsonDeserialize(using = NamedEntityDeserializer.class)
+    public static class NamedMapModel extends MapModel implements NamedEntity {
 
-		private String defaultTokenValue;
+	private String defaultTokenValue;
 
-		public NamedMapModel(Map<String, Object> map, String defaultTokenValue) {
-			super(map);
-			this.defaultTokenValue = defaultTokenValue;
-		}
-
-		@Override
-		public String name(String key) {
-			return this.getString(key, defaultTokenValue);
-		}
-
-		public String name() {
-			return this.getString("name", defaultTokenValue);
-		}
-
-		public String id() {
-			return this.getString("id", defaultTokenValue);
-		}
-	}
-
-	protected NamedEntityDeserializer(Class<?> vc) {
-		super(vc);
-	}
-
-	public NamedEntityDeserializer() {
-		this(null);
+	public NamedMapModel(Map<String, Object> map, String defaultTokenValue) {
+	    super(map);
+	    this.defaultTokenValue = defaultTokenValue;
 	}
 
 	@Override
-	public NamedMapModel deserialize(JsonParser jp, DeserializationContext ctxt)
-			throws IOException, JsonProcessingException {
-		JsonNode jsonNode = jp.getCodec().readTree(jp);
-		String text = jsonNode.asText();
-		Map<String, Object> map = null;
-		if (ArgUtil.isEmpty(text)) {
-			map = JsonUtil.getMapper().convertValue(jsonNode, new TypeReference<Map<String, Object>>() {
-			});
-		}
-		return new NamedMapModel(map, text);
+	public String name(String key) {
+	    return this.getString(key, defaultTokenValue);
 	}
 
-	public static class NamedEntityEditor extends PropertyEditorSupport {
-
-		private ObjectMapper objectMapper;
-
-		public NamedEntityEditor(ObjectMapper objectMapper) {
-			this.objectMapper = objectMapper;
-		}
-
-		public NamedEntityEditor() {
-		}
-
-		@Override
-		public void setAsText(String text) throws IllegalArgumentException {
-			if (StringUtils.isEmpty(text)) {
-				setValue(new NamedMapModel(null, null));
-			} else {
-				NamedMapModel prod = JsonUtil.parse(text, NamedMapModel.class);
-				setValue(prod);
-			}
-		}
-
+	public String name() {
+	    return this.getString("name", defaultTokenValue);
 	}
+
+	public String id() {
+	    return this.getString("id", defaultTokenValue);
+	}
+    }
+
+    protected NamedEntityDeserializer(Class<?> vc) {
+	super(vc);
+    }
+
+    public NamedEntityDeserializer() {
+	this(null);
+    }
+
+    @Override
+    public NamedMapModel deserialize(JsonParser jp, DeserializationContext ctxt)
+	    throws IOException, JsonProcessingException {
+	JsonNode jsonNode = jp.getCodec().readTree(jp);
+	String text = jsonNode.asText();
+	Map<String, Object> map = null;
+	if (ArgUtil.isEmpty(text)) {
+	    map = JsonUtil.getMapper().convertValue(jsonNode, new TypeReference<Map<String, Object>>() {
+	    });
+	}
+	return new NamedMapModel(map, text);
+    }
+
+    public static class NamedEntityEditor extends PropertyEditorSupport {
+
+	private ObjectMapper objectMapper;
+
+	public NamedEntityEditor(ObjectMapper objectMapper) {
+	    this.objectMapper = objectMapper;
+	}
+
+	public NamedEntityEditor() {
+	}
+
+	@Override
+	public void setAsText(String text) throws IllegalArgumentException {
+	    if (StringUtils.isEmpty(text)) {
+		setValue(new NamedMapModel(null, null));
+	    } else {
+		NamedMapModel prod = JsonUtil.parse(text, NamedMapModel.class);
+		setValue(prod);
+	    }
+	}
+
+    }
 
 }

@@ -39,6 +39,7 @@ import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
 
+import com.boot.json.MapModelDeserializer.MapModelEditor;
 import com.boot.json.NamedEntityDeserializer.NamedEntityEditor;
 import com.boot.json.NamedEntityDeserializer.NamedMapModel;
 import com.boot.jx.AppConfig;
@@ -56,6 +57,7 @@ import com.boot.jx.http.CommonHttpRequest.ApiRequestDetail;
 import com.boot.jx.logger.AuditService;
 import com.boot.jx.logger.LoggerService;
 import com.boot.jx.logger.events.ApiAuditEvent;
+import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.HttpUtils;
 import com.fasterxml.jackson.databind.JsonMappingException.Reference;
@@ -73,6 +75,7 @@ public abstract class AmxAdvice implements ResponseBodyAdvice<ApiResponse<?, ?>>
 
     @InitBinder
     public void registerCustomEditors(WebDataBinder binder, WebRequest request) {
+	binder.registerCustomEditor(MapModel.class, new MapModelEditor());
 	binder.registerCustomEditor(NamedMapModel.class, new NamedEntityEditor());
     }
 

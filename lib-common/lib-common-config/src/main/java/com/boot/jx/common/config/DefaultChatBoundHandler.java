@@ -264,7 +264,7 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
     }
 
     @Override
-    public void onSessionRoute(InBoundEvent inBoundEvent) {
+    public void onSessionRoute(ChatSessionDoc sessionDoc, InBoundEvent inBoundEvent) {
 
 	if (InBoundEvent.SESSION_ROUTED.equals(inBoundEvent.eventCode)) {
 
@@ -289,7 +289,7 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 		    return;
 		} else if (APP_TYPE.MITEL.equals(appType)) {
 		    try {
-			mitelClient.send(defaultClient, inBoundEvent.sessionId, inBoundEvent.contactId);
+			mitelClient.send(defaultClient, sessionDoc.contact(), sessionDoc.getSessionId());
 		    } catch (Exception e) {
 			logManager.error(inBoundEvent, e);
 		    }

@@ -30,11 +30,11 @@ public class InBound {
 
 	public void doHandle(MessageReport messageReport);
 
-	void onSessionRoute(InBoundEvent inBoundEvent);
+	void onSessionRoute(ChatSessionDoc sessionDoc, InBoundEvent inBoundEvent);
 
 	@Async
-	default public void onSessionRouteAsync(InBoundEvent inBoundEvent) {
-	    this.onSessionRoute(inBoundEvent);
+	default public void onSessionRouteAsync(ChatSessionDoc sessionDoc, InBoundEvent inBoundEvent) {
+	    this.onSessionRoute(sessionDoc, inBoundEvent);
 	}
 
 	public void onSessionClose(ChatSessionDoc chatSessionDoc);

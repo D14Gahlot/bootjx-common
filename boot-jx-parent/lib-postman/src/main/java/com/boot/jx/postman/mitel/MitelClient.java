@@ -5,6 +5,7 @@ import org.springframework.stereotype.Component;
 
 import com.boot.jx.postman.ClientApp;
 import com.boot.jx.postman.PMEnvironment.PMDomainConfig;
+import com.boot.jx.postman.model.MessageDefinitions.Contactable;
 import com.boot.jx.rest.RestService;
 import com.boot.jx.rest.RestService.Ajax;
 import com.boot.model.MapModel;
@@ -27,7 +28,7 @@ public class MitelClient {
 	String accessToken = ArgUtil.parseAsString(defaultClient.secret().get("accessToken"));
 	Long accessTokenStamp = ArgUtil.parseAsLong(defaultClient.secret().get("accessTokenStamp"), 0L);
 
-	if (ArgUtil.is(accessTokenStamp) && TimeUtils.isExpired(accessTokenStamp, TOKEN_EXPIRY)) {
+	if (ArgUtil.is(accessToken) && !TimeUtils.isExpired(accessTokenStamp, TOKEN_EXPIRY)) {
 	    return accessToken;
 	}
 
@@ -48,7 +49,7 @@ public class MitelClient {
 	    ajax.field("client_id", clientId).field("client_secret", clientSecret);
 	}
 
-	accessToken = ajax.asMapModel().keyEntry("access_token").asString();
+	accessToken = ajax.postForm().asMapModel().keyEntry("access_token").asString();
 
 	defaultClient.secret().put("accessToken", accessToken);
 	defaultClient.secret().put("accessTokenStamp", System.currentTimeMillis());
@@ -56,19 +57,19 @@ public class MitelClient {
 
     }
 
-    public void send(ClientApp defaultClient, String sessionId, String contactId) {
+    public void send(ClientApp defaultClient, Contactable contactable, String sessionId) {
 	String accessToken = getToken(defaultClient);
 	String endPoint = ArgUtil.parseAsString(defaultClient.props().get("end_point"));
 	String queue = ArgUtil.parseAsString(defaultClient.props().get("queue"));
-	String from = ArgUtil.parseAsString(defaultClient.props().get("from"), contactId);
+	String from = ArgUtil.parseAsString(defaultClient.props().get("from"), contactable.getName());
 	String to = ArgUtil.parseAsString(defaultClient.props().get("to"));
 
-	String url = String.format("%s/agent/plug/chat/%s/%s/%s/hide/CHATBOX", pmDomainConfig.getDomainUrl(), contactId,
-		sessionId, contactId);
+	String url = String.format("%s/agent/plug/chat/%s/%s/%s/hide/CHATBOX", pmDomainConfig.getDomainUrl(),
+		contactable.getContactId(), sessionId, contactable.getContactId());
 	restService.ajax(endPoint).path("/MiccSdk/api/v1/openmedia").header("Authorization", "Bearer " + accessToken)
 		.post(MapModel.createInstance().put("targetUri", url).put("targetUriEmbedded", true)
 			.put("previewUrl", url).put("historyUrl", url).put("queue", queue).put("from", from)
-			.put("to", to).put("subject", contactId).toMap())
+			.put("to", to).put("subject", contactable.getName()).toMap())
 		.asNone();
     }
 

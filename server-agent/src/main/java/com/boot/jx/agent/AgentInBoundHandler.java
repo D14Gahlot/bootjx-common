@@ -76,8 +76,8 @@ public class AgentInBoundHandler extends DefaultChatBoundHandler {
     }
 
     @Override
-    public void onSessionRoute(InBoundEvent inBoundEvent) {
-	super.onSessionRoute(inBoundEvent);
+    public void onSessionRoute(ChatSessionDoc sessionDoc, InBoundEvent inBoundEvent) {
+	super.onSessionRoute(sessionDoc, inBoundEvent);
     }
 
 
