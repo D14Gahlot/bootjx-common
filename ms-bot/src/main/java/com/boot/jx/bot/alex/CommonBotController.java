@@ -28,7 +28,7 @@ public class CommonBotController extends ChatController {
 		PMConfigurationObject transferReply = pmEnvironment
 			.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_AGENT_CHAT_AUTOREPLY_TALK2AGENT);
 		if (transferReply.exists()) {
-		    reply(new OutboxMessage().templateId(transferReply.asString()));
+		    reply(new OutboxMessage().template(transferReply.asString()));
 		} else if (ArgUtil.is(AppContextUtil.getTenant())
 			&& AppContextUtil.getTenant().equalsIgnoreCase("tathkarah")) {
 		    reply("، عميلنا العزيز\r\n" // \n
@@ -45,7 +45,7 @@ public class CommonBotController extends ChatController {
 		PMConfigurationObject noAgentReply = pmEnvironment
 			.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_AGENT_CHAT_AUTOREPLY_NOAGENT);
 		if (noAgentReply.exists()) {
-		    reply(new OutboxMessage().templateId(noAgentReply.asString()));
+		    reply(new OutboxMessage().template(noAgentReply.asString()));
 		} else {
 		    reply("All agents are busy or online, we will connect you whenever someone is available.");
 		}

@@ -105,10 +105,10 @@ public class ConfigConstants {
 		.optionValues(PHONE_NUMBER_UTIL.getSupportedRegions().toArray()).defaultValue("IN")),
 
 	POSTMAN_AGENT_CHAT_AUTOREPLY_TALK2AGENT(new ConfigMeta("Message to customer while chat is transferred to agent",
-		"postman.agent.chat.autoreply.talk2agent").optionsSource("getx:/api/tmpl/hsm").group(GROUP_AGENT)),
+		"postman.agent.chat.autoreply.talk2agent").optionsSource("getx:/api/tmpl/hsm").optionsKey("code").optionsLabel("name").group(GROUP_AGENT)),
 
 	POSTMAN_AGENT_CHAT_AUTOREPLY_RESOLVED(new ConfigMeta("Message to customer when chat is resolevd by agent",
-		"postman.agent.chat.autoreply.resolved").optionsSource("getx:/api/tmpl/hsm").group(GROUP_AGENT)),
+		"postman.agent.chat.autoreply.resolved").optionsSource("getx:/api/tmpl/hsm").optionsKey("code").optionsLabel("name").group(GROUP_AGENT)),
 
 	POSTMAN_AGENT_CHAT_AUTOREPLY_NOAGENT(
 		new ConfigMeta("Message to customer when agent avaialble", "postman.agent.chat.autoreply.noagent")
