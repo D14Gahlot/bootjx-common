@@ -46,11 +46,11 @@ public class Demo5Controller extends CommonBotController {
 	    	 reply(new OutboxMessage().template("working_hours_update"));
 	    	 //this.transferToAgent(inboxMessage, matcher);
 	     }else {
-		    if(language.equalsIgnoreCase("english") || (lang!=null && lang.equalsIgnoreCase("en"))) {
+		    if(language.equalsIgnoreCase("en") || (lang!=null && lang.equalsIgnoreCase("en"))) {
 		    	 chatContext.contact().setLang("en");
 		    	 reply(new OutboxMessage().template("dc_services"));
 		    	 next("select-service");
-		    }else if(language.equalsIgnoreCase("العربية") || (lang!=null &&  lang.equalsIgnoreCase("ar"))) {
+		    }else if(language.equalsIgnoreCase("ar") || (lang!=null &&  lang.equalsIgnoreCase("ar"))) {
 		    	 chatContext.contact().setLang("ar");
 		    	reply(new OutboxMessage().template("dc_services"));
 		    	 next("select-service");
@@ -64,7 +64,7 @@ public class Demo5Controller extends CommonBotController {
 	    
 	    @ChatMapping(key = "select-service")
 	    public void seviceOnSelect(InboxMessage inboxMessage, StringMatcher matcher) {
-	    String lang = ArgUtil.parseAsString(chatContext.contact().getLang());	
+	   // String lang = ArgUtil.parseAsString(chatContext.contact().getLang());	
 	    switch (inboxMessage.getMessage().toLowerCase().trim()) {
 		case "memberships":
 		case "الاشتراكات":
@@ -76,18 +76,18 @@ public class Demo5Controller extends CommonBotController {
 		    reply(new OutboxMessage().template("dc_appointments_opt"));
 		    next("appointments-onselect");
 		    break;    
-		case "customer service":
+		case "customer_service":
 		case "خدمة العملاء":
 		   // reply(new OutboxMessage().template("dc_cs_to_contact"));
 		    //next("dc_cs_to_contact");
 			 this.transferToAgent(inboxMessage, matcher);	
 		    break;    
 		
-		case "menu selection":
+		case "menu_selection":
 		case "المنيوخيارات":
 			 this.transferToAgent(inboxMessage, matcher);	
 		    break;
-		case "clinic locations":
+		case "clinic_locations":
 		case "مواقع العيادات":
 		    reply(new OutboxMessage().template("dc_location_option"));
 		    next("clinics-onselect");
@@ -107,17 +107,17 @@ public class Demo5Controller extends CommonBotController {
 	    @ChatMapping(key = "memberships-onselect")
 	    public void membershipsOnSelect(InboxMessage inboxMessage, StringMatcher matcher) {
 	    	switch (inboxMessage.getMessage().toLowerCase().trim()) {
-			case "new member":
+			case "new_member":
 			case "مشترك جديد":
 			   // reply(new OutboxMessage().template("dc_cs_to_contact"));
 			    this.transferToAgent(inboxMessage, matcher);
 			    break;
-			case "current member":
+			case "current_member":
 			case "مشترك حالي":
 			    reply(new OutboxMessage().template("dc_current_member_options"));
 			    next("currentmember-onselect");
 			    break;
-			case "previous member":
+			case "previous_member":
 			case "مشترك سابق":
 			    this.transferToAgent(inboxMessage, matcher);
 			    break;  
@@ -135,13 +135,13 @@ public class Demo5Controller extends CommonBotController {
 	    public void currentmemberOnSelect(InboxMessage inboxMessage, StringMatcher matcher) {
 	    	System.out.println("currentmember :"+inboxMessage.getMessage().toLowerCase().trim());
 	    	switch (inboxMessage.getMessage().toLowerCase().trim()) {
-	    	case "renew membership":
+	    	case "renew_membership":
 			case "تجديد نوع الحالي":
 			case "تجديد نفس الاشتراك":	
 			   // reply(new OutboxMessage().template("dc_cs_to_contact"));
 			    this.transferToAgent(inboxMessage, matcher);
 			    break;
-			case "change membership":
+			case "change_membership":
 			case "تغيير نوع الاشتراك":
 				  this.transferToAgent(inboxMessage, matcher);
 			    break;
@@ -163,7 +163,7 @@ public class Demo5Controller extends CommonBotController {
 			    reply(new OutboxMessage().template("dc_location_link_timing_sharq"));
 			    next("select-language");
 			    break;
-			case "bairaq mall":
+			case "bairaq_mall":
 			case "البيرق مجمع":
 			    reply(new OutboxMessage().template("dc_location_link_timing_bairaq_mall"));
 			    next("select-language");
@@ -180,12 +180,12 @@ public class Demo5Controller extends CommonBotController {
 			    next("select-language");
 			    break;
 			    
-			case "360 mall":
+			case "360_mall":
 			case "360 مجمع":	
 			    reply(new OutboxMessage().template("dc_location_link_timing_360mall"));
 			    next("select-language");
 			    break;
-			case "avenues mall":
+			case "avenues_mall":
 			case "الأفنيوز مجمع":	
 			    reply(new OutboxMessage().template("dc_location_link_timing_avenues"));
 			    next("select-language");
@@ -207,19 +207,19 @@ public class Demo5Controller extends CommonBotController {
 	    @ChatMapping(key = "appointments-onselect")
 	    public void appointmentOptionsOnSelect(InboxMessage inboxMessage, StringMatcher matcher) {
 	    	switch (inboxMessage.getMessage().toLowerCase().trim()) {
-			case "new client":
+			case "new_client":
 			case "عميل جديد":	
 			    reply(new OutboxMessage().template("dc_appt_diet_location_opt"));
 			    next("newclient-onselect");
 			    break;
-			case "existing client":
-			case "current client":
+			case "existing_client":
+			case "current_client":
 			case "عميل حالي":	
 			    reply(new OutboxMessage().template("dc_date_and_time_request"));
 				next("dc_cs_to_contact");
 			    break;  
 			    
-			case "previous client":
+			case "previous_client":
 			case "عميل سابق":	
 			    reply(new OutboxMessage().template("dc_date_and_time_request"));
 				next("dc_cs_to_contact");
@@ -281,16 +281,16 @@ public class Demo5Controller extends CommonBotController {
 		    reply(new OutboxMessage().template("dc_appointments_opt"));
 		    next("appointments-onselect");
 		    break;    
-		case "customer service":
+		case "customer_service":
 		case "خدمة العملاء":
 			 this.transferToAgent(inboxMessage, matcher);	
 		    break;    
 		
-		case "menu selection":
+		case "menu_selection":
 		case "المنيوخيارات":
 			 this.transferToAgent(inboxMessage, matcher);	
 		    break;
-		case "clinic locations":
+		case "clinic_locations":
 		case "مواقع العيادات":
 		    reply(new OutboxMessage().template("dc_location_option"));
 		    next("clinics-onselect");

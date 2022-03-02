@@ -90,8 +90,11 @@ public class WA360Client {
 			newButtons = buttons.subList(start, end);
 			newButtons.add(new TmplElement().label("More Options").name(prompt.toString()));
 		    }
-
-		    outboxMessage.options().put("list_option_title", "List " + (prompt.pageIndex + 1));
+		    if(outboxMessage.options().containsKey("list_option_title")){
+		    	outboxMessage.options().put("list_option_title", outboxMessage.options().get("list_option_title").toString() + (prompt.pageIndex + 1));
+		    }else {
+		    	outboxMessage.options().put("list_option_title", "List " + (prompt.pageIndex + 1));
+		    }
 		    MapModel resp = sendList(channelConfig, outboxMessage, newButtons);
 		    msgIds.add(getMessageId(resp));
 		}

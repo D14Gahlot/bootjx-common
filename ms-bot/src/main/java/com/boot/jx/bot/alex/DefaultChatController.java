@@ -36,7 +36,7 @@ public class DefaultChatController extends CommonBotController {
 		PMConfigurationObject transferReply = pmEnvironment
 			.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_AGENT_CHAT_AUTOREPLY_TALK2AGENT);
 		if (transferReply.exists()) {
-		    reply(new OutboxMessage().templateId(transferReply.asString()));
+		    reply(new OutboxMessage().template(transferReply.asString()));
 		} else if (ArgUtil.is(AppContextUtil.getTenant())
 			&& AppContextUtil.getTenant().equalsIgnoreCase("tathkarah")) {
 		    reply("، عميلنا العزيز\r\n" + "\r\n" + "مرحباً بك في تطبيق تذكره!\r\n" + "\r\n"
