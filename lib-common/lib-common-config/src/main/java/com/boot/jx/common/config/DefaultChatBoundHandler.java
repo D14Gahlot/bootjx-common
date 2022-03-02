@@ -313,7 +313,7 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 	    } else if (APP_TYPE.MITEL.equals(appType)) {
 		try {
 		    MapModel meta = new MapModel(sessionDoc.getMeta());
-		    mitelClient.openMediaAction(defaultClient, meta.pathEntry("omid").asString(), "Complete");
+		    mitelClient.openMediaAction(defaultClient, meta.pathEntry("mitel.omid").asString(), "Complete");
 		} catch (Exception e) {
 		    logManager.error(event, e);
 		}

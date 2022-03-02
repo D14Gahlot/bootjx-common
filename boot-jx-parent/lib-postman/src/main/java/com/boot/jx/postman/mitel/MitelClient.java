@@ -79,7 +79,7 @@ public class MitelClient {
 	String endPoint = ArgUtil.parseAsString(defaultClient.props().get("end_point"));
 	return restService.ajax(endPoint).path("/MiccSdk/api/v1/openmedia/{id}").pathParam("id", openmediaId)
 		.header("Authorization", "Bearer " + accessToken)
-		.post(MapModel.createInstance().put("action", action).toMap()).asMapModel();
+		.put(MapModel.createInstance().put("action", action).toMap()).asMapModel();
     }
 
 }
