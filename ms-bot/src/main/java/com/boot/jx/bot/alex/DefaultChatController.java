@@ -37,10 +37,6 @@ public class DefaultChatController extends CommonBotController {
 			.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_AGENT_CHAT_AUTOREPLY_TALK2AGENT);
 		if (transferReply.exists()) {
 		    reply(new OutboxMessage().templateId(transferReply.asString()));
-		} else if (ArgUtil.is(AppContextUtil.getTenant())
-			&& AppContextUtil.getTenant().equalsIgnoreCase("tathkarah")) {
-		    reply("، عميلنا العزيز\r\n" + "\r\n" + "مرحباً بك في تطبيق تذكره!\r\n" + "\r\n"
-			    + "لحظات وسيتم توصيلك بأحد ممثلي خدمة العملاء. \r\n" + "\r\n" + " …..شكرا لانتظارك");
 		} else {
 		    reply("Connecting you to one of our customer representatives. Give us a moment.");
 		}

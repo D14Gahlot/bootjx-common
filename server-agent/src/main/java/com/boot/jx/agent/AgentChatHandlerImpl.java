@@ -148,7 +148,7 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 	if (PMConstants.ASSIGNMENT_RULE.ROUND_ROBIN.equals(assignmentRule)) {
 	    Query query = new Query();
 	    Criteria c = Criteria.where("isOnline").is(true).and("isLoggedIn").is(true).and("lastOnlineStamp")
-		    .gt(timeThen);
+		    .gt(timeThen).and("isEnabled").is(true);
 	    if (ArgUtil.is(inboxMessage.session().getDept())) {
 		c.and("agentDept").is(assignedDept);
 	    }
