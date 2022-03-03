@@ -87,8 +87,12 @@ public class WA360Client {
 		    } else if (pending == 10) {
 			newButtons = buttons.subList(start, end + 1);
 		    } else {
-			newButtons = buttons.subList(start, end);
-			newButtons.add(new TmplElement().label("More Options").name(prompt.toString()));
+			   newButtons = buttons.subList(start, end);
+				if(outboxMessage.options().containsKey("more_option_title")){
+				newButtons.add(new TmplElement().label(outboxMessage.options().get("more_option_title").toString()).name(prompt.toString()));
+				}else {
+					newButtons.add(new TmplElement().label("More Options").name(prompt.toString()));
+				}
 		    }
 		    if(outboxMessage.options().containsKey("list_option_title")){
 		    	outboxMessage.options().put("list_option_title", outboxMessage.options().get("list_option_title").toString() + (prompt.pageIndex + 1));
