@@ -21,6 +21,8 @@ import com.boot.utils.StringUtils.StringMatcher;
 @BotController(name = "DemoBot", tenant = { "chakli" })
 public class Demo5Controller extends CommonBotController {
 	
+	public static final String REPLAY_ID = "replay_id";	
+
 	  
 	    @Autowired
 	    private ChatContext chatContext;
@@ -38,7 +40,9 @@ public class Demo5Controller extends CommonBotController {
 	    
 	    @ChatMapping(key = "select-language")
 	    public void languageOnSelect(InboxMessage inboxMessage, StringMatcher matcher) {
-	    String language = inboxMessage.getMessage().toLowerCase();
+	    	
+	    String language = inboxMessage.form().get(REPLAY_ID)==null?"en":
+	    	 inboxMessage.form().get(REPLAY_ID).toString().toLowerCase().trim();
 	    String lang = ArgUtil.parseAsString(chatContext.contact().getLang());
 	    
 	     if(!timeCheck()) {
@@ -64,8 +68,9 @@ public class Demo5Controller extends CommonBotController {
 	    
 	    @ChatMapping(key = "select-service")
 	    public void seviceOnSelect(InboxMessage inboxMessage, StringMatcher matcher) {
-	   // String lang = ArgUtil.parseAsString(chatContext.contact().getLang());	
-	    switch (inboxMessage.getMessage().toLowerCase().trim()) {
+	  
+	    	switch (inboxMessage.form().get(REPLAY_ID)==null?"":
+	    		inboxMessage.form().get(REPLAY_ID).toString().toLowerCase().trim()) {
 		case "memberships":
 		case "الاشتراكات":
 		    reply(new OutboxMessage().template("dc_membership_options"));
@@ -93,11 +98,10 @@ public class Demo5Controller extends CommonBotController {
 		    next("clinics-onselect");
 		    break;
 		case "*":
-		    reply(new OutboxMessage().template("end_chat_message"));
-		    next("feedback-onselect");
-		    break;    
+			reply(new OutboxMessage().template("dc_services_rechoose"));
+			next("select-service-rechoose");
+			break;
 		default :
-			 // reply(new OutboxMessage().template("dc_cs_to_contact"));
 			  this.transferToAgent(inboxMessage, matcher);
 		    break;    
 	   
@@ -106,10 +110,10 @@ public class Demo5Controller extends CommonBotController {
 	    
 	    @ChatMapping(key = "memberships-onselect")
 	    public void membershipsOnSelect(InboxMessage inboxMessage, StringMatcher matcher) {
-	    	switch (inboxMessage.getMessage().toLowerCase().trim()) {
+	    	switch (inboxMessage.form().get(REPLAY_ID)==null?"":
+	    		inboxMessage.form().get(REPLAY_ID).toString().toLowerCase().trim()) {
 			case "new_member":
 			case "مشترك جديد":
-			   // reply(new OutboxMessage().template("dc_cs_to_contact"));
 			    this.transferToAgent(inboxMessage, matcher);
 			    break;
 			case "current_member":
@@ -120,7 +124,14 @@ public class Demo5Controller extends CommonBotController {
 			case "previous_member":
 			case "مشترك سابق":
 			    this.transferToAgent(inboxMessage, matcher);
-			    break;  
+			    break; 
+			case "*":
+				reply(new OutboxMessage().template("dc_services_rechoose"));
+				next("select-service-rechoose");
+				break; 
+			case "#"	:
+				this.transferToAgent(inboxMessage, matcher);
+			    break; 
 			default :
 				reply(new OutboxMessage().template("dc_services_rechoose"));
 				next("select-service-rechoose");
@@ -134,17 +145,24 @@ public class Demo5Controller extends CommonBotController {
 	    @ChatMapping(key = "currentmember-onselect")
 	    public void currentmemberOnSelect(InboxMessage inboxMessage, StringMatcher matcher) {
 	    	System.out.println("currentmember :"+inboxMessage.getMessage().toLowerCase().trim());
-	    	switch (inboxMessage.getMessage().toLowerCase().trim()) {
+	    	switch (inboxMessage.form().get(REPLAY_ID)==null?"":
+	    		inboxMessage.form().get(REPLAY_ID).toString().toLowerCase().trim()) {
 	    	case "renew_membership":
 			case "تجديد نوع الحالي":
 			case "تجديد نفس الاشتراك":	
-			   // reply(new OutboxMessage().template("dc_cs_to_contact"));
 			    this.transferToAgent(inboxMessage, matcher);
 			    break;
 			case "change_membership":
 			case "تغيير نوع الاشتراك":
 				  this.transferToAgent(inboxMessage, matcher);
 			    break;
+			case "*":
+				reply(new OutboxMessage().template("dc_services_rechoose"));
+				next("select-service-rechoose");
+				break; 
+			case "#"	:
+				this.transferToAgent(inboxMessage, matcher);
+			    break;   
 			default :
 				reply(new OutboxMessage().template("dc_services_rechoose"));
 				next("select-service-rechoose");
@@ -157,7 +175,8 @@ public class Demo5Controller extends CommonBotController {
 	    
 	    @ChatMapping(key = "clinics-onselect")
 	    public void clinicOnSelect(InboxMessage inboxMessage, StringMatcher matcher) {
-	    	switch (inboxMessage.getMessage().toLowerCase().trim()) {
+	    	switch (inboxMessage.form().get(REPLAY_ID)==null?"":
+	    		inboxMessage.form().get(REPLAY_ID).toString().toLowerCase().trim()) {
 			case "sharq":
 			case "شرق":	
 			    reply(new OutboxMessage().template("dc_location_link_timing_sharq"));
@@ -194,6 +213,13 @@ public class Demo5Controller extends CommonBotController {
 			case "العقيلة":	
 			    reply(new OutboxMessage().template("dc_location_link_timing_aqaila"));
 			    next("select-language");
+			    break;  
+			case "*":
+				reply(new OutboxMessage().template("dc_services_rechoose"));
+				next("select-service-rechoose");
+				break; 
+			case "#"	:
+				this.transferToAgent(inboxMessage, matcher);
 			    break;   
 			default :
 				reply(new OutboxMessage().template("dc_services_rechoose"));
@@ -206,7 +232,8 @@ public class Demo5Controller extends CommonBotController {
 	  
 	    @ChatMapping(key = "appointments-onselect")
 	    public void appointmentOptionsOnSelect(InboxMessage inboxMessage, StringMatcher matcher) {
-	    	switch (inboxMessage.getMessage().toLowerCase().trim()) {
+	    	switch (inboxMessage.form().get(REPLAY_ID)==null?"":
+	    		inboxMessage.form().get(REPLAY_ID).toString().toLowerCase().trim()) {
 			case "new_client":
 			case "عميل جديد":	
 			    reply(new OutboxMessage().template("dc_appt_diet_location_opt"));
@@ -223,7 +250,14 @@ public class Demo5Controller extends CommonBotController {
 			case "عميل سابق":	
 			    reply(new OutboxMessage().template("dc_date_and_time_request"));
 				next("dc_cs_to_contact");
-			    break;  
+			    break; 
+			case "*":
+				reply(new OutboxMessage().template("dc_services_rechoose"));
+				next("select-service-rechoose");
+				break; 
+			case "#"	:
+				this.transferToAgent(inboxMessage, matcher);
+			    break;   
 			default :
 				reply(new OutboxMessage().template("dc_services_rechoose"));
 				next("select-service-rechoose");
@@ -233,7 +267,8 @@ public class Demo5Controller extends CommonBotController {
 	    
 	    @ChatMapping(key = "newclient-onselect")
 	    public void newclientOnSelect(InboxMessage inboxMessage, StringMatcher matcher) {
-	    	switch (inboxMessage.getMessage().toLowerCase().trim()) {
+	    	switch (inboxMessage.form().get(REPLAY_ID)==null?"":
+	    		inboxMessage.form().get(REPLAY_ID).toString().toLowerCase().trim()) {
 			case "dieticians":
 			case "dietitians":
 			case "اختيار الأخصائي":
@@ -246,6 +281,13 @@ public class Demo5Controller extends CommonBotController {
 			    reply(new OutboxMessage().template("dc_location_option"));
 			    next("dc_date_time");
 			    break; 
+			case "*":
+				reply(new OutboxMessage().template("dc_services_rechoose"));
+				next("select-service-rechoose");
+				break; 
+			case "#"	:
+				this.transferToAgent(inboxMessage, matcher);
+			    break;   
 			default :
 				reply(new OutboxMessage().template("dc_services_rechoose"));
 				next("select-service-rechoose");
@@ -270,7 +312,8 @@ public class Demo5Controller extends CommonBotController {
 	    
 	    @ChatMapping(key = "select-service-rechoose")
 	    public void seviceOnSelectRechoose(InboxMessage inboxMessage, StringMatcher matcher) {
-	    switch (inboxMessage.getMessage().toLowerCase().trim()) {
+	    	switch (inboxMessage.form().get(REPLAY_ID)==null?"":
+	    		inboxMessage.form().get(REPLAY_ID).toString().toLowerCase().trim()) {
 		case "memberships":
 		case "الاشتراكات":
 		    reply(new OutboxMessage().template("dc_membership_options"));
@@ -295,6 +338,13 @@ public class Demo5Controller extends CommonBotController {
 		    reply(new OutboxMessage().template("dc_location_option"));
 		    next("clinics-onselect");
 		    break;
+		case "*":
+			reply(new OutboxMessage().template("dc_services_rechoose"));
+			next("select-service-rechoose");
+			break; 
+		case "#"	:
+			this.transferToAgent(inboxMessage, matcher);
+		    break;   
 		default :
 			reply(new OutboxMessage().template("dc_services_rechoose"));
 			next("select-service-rechoose");
