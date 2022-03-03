@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.api.BoolRespModel;
 import com.boot.jx.cache.test.RedisSampleTxCacheBox.RedisSampleData;
-import com.boot.jx.tunnel.ITunnelDefs.ITunnelEventLimiter;
+import com.boot.jx.tunnel.ITunnelDefs.ITaskLimiter;
 import com.boot.jx.tunnel.TunnelService;
 import com.boot.jx.tunnel.sys.SharedConfigManager;
 import com.boot.jx.tunnel.sys.SysTunnelEventsDict;
@@ -33,7 +33,7 @@ public class RedisController {
     private TunnelService tunnelService;
 
     @Autowired(required = false)
-    private List<ITunnelEventLimiter> dbEventLimiters;
+    private List<ITaskLimiter> dbEventLimiters;
 
     @Autowired
     SharedConfigManager sharedConfigManager;
@@ -58,7 +58,7 @@ public class RedisController {
     public Map<String, Object> getStats() {
 	Map<String, Object> propMap = new HashMap<String, Object>();
 	if (ArgUtil.is(dbEventLimiters)) {
-	    for (ITunnelEventLimiter iTunnelEventLimiter : dbEventLimiters) {
+	    for (ITaskLimiter iTunnelEventLimiter : dbEventLimiters) {
 		Map<String, Object> stats = iTunnelEventLimiter.getStats();
 		if (ArgUtil.is(stats)) {
 		    propMap.put(iTunnelEventLimiter.getName(), stats);
