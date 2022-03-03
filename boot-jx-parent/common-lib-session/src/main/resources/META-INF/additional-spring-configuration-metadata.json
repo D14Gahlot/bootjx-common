@@ -1,0 +1,7 @@
+{"properties": [
+  {
+    "name": "postman.app.type",
+    "type": "java.lang.String",
+    "description": "POSTMAN,AGENT,BOT,OTHER"
+  }
+]}

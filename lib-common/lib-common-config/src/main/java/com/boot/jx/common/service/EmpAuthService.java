@@ -5,6 +5,7 @@ import java.util.Map;
 
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
@@ -27,8 +28,6 @@ import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.client.PostManClient;
 import com.boot.jx.postman.model.Email;
 import com.boot.jx.postman.model.MessageBox;
-import com.boot.jx.scope.tnt.TenantScoped;
-import com.boot.jx.scope.tnt.TenantValue;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
 import com.boot.utils.CryptoUtil;
@@ -37,7 +36,6 @@ import com.boot.utils.MapBuilder;
 import com.boot.utils.Random;
 
 @Component
-@TenantScoped
 public class EmpAuthService {
 
     private static final Logger LOGGER = LoggerService.getLogger(CDNBuilder.class);
@@ -51,10 +49,10 @@ public class EmpAuthService {
     @Autowired
     private AgentStore agentStore;
 
-    @TenantValue("${mry.superadmin.user}")
+    @Value("${mry.superadmin.user}")
     private String superAdminUser;
 
-    @TenantValue("${mry.superadmin.pass}")
+    @Value("${mry.superadmin.pass}")
     private String superAdminPass;
 
     @Autowired

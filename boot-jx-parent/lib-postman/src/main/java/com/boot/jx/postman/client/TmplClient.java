@@ -78,7 +78,7 @@ public class TmplClient {
 	for (Map<String, Object> map : buttonsModel) {
 	    MapModel buttonMapModel = MapModel.from(map);
 	    buttons.add(new TmplElement().name(buttonMapModel.getString("key")).label(buttonMapModel.getString("label"))
-		    .type(buttonMapModel.getString("type")));
+		    .type(buttonMapModel.getString("type")).url(buttonMapModel.getString("url")));
 	}
 
 	for (Entry<String, Object> entry : file.getOptions().entrySet()) {

@@ -47,7 +47,26 @@ public class PMConstants {
     }
 
     public static enum CHAT_MODE {
-	AGENT, BOT, PUSH, WEBHOOK;
+	AGENT, BOT, PUSH, WEBHOOK, NONE;
+    }
+
+    public static enum APP_TYPE {
+	AGENT(CHAT_MODE.AGENT), BOT(CHAT_MODE.BOT), WEBHOOK(CHAT_MODE.WEBHOOK), MITEL(CHAT_MODE.AGENT),
+	NONE(CHAT_MODE.NONE);
+
+	private CHAT_MODE chatMode;
+
+	APP_TYPE(CHAT_MODE chatMode) {
+	    this.chatMode = chatMode;
+	}
+
+	public CHAT_MODE getMode() {
+	    return this.chatMode;
+	}
+
+	public static APP_TYPE from(Object appType) {
+	    return ArgUtil.parseAsEnumT(appType, APP_TYPE.class, APP_TYPE.NONE);
+	}
     }
 
     public static class MESSAGE_COMPOSE_TYPE {

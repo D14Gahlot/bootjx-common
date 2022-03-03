@@ -7,18 +7,20 @@ import org.springframework.stereotype.Component;
 
 import com.boot.jx.chat.ChatService;
 import com.boot.jx.common.config.ConfigConstants;
-import com.boot.jx.inbound.InBound.InBoundHandler;
+import com.boot.jx.common.config.DefaultChatBoundHandler;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PMEnvironment.PMCommonConfig;
 import com.boot.jx.postman.PMEnvironment.PMConfigurationObject;
 import com.boot.jx.postman.PMEnvironment.PMDomainConfig;
+import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.MessageReport;
 import com.boot.jx.postman.model.OutboxMessage;
+import com.boot.jx.postman.model.ext.InBoundEvent;
 import com.boot.utils.ArgUtil;
 
 @Component
-public class AgentInBoundHandler implements InBoundHandler {
+public class AgentInBoundHandler extends DefaultChatBoundHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AgentInBoundHandler.class);
 
@@ -38,7 +40,7 @@ public class AgentInBoundHandler implements InBoundHandler {
     private ChatService chatService;
 
     @Override
-    public void handle(InboxMessage inboxMessage) {
+    public void doHandle(InboxMessage inboxMessage) {
 	if (ArgUtil.isEmpty(inboxMessage.session().getMode())) {
 	    try {
 		InboxMessage agentAssignResp = agentChatHandler.onAssign(inboxMessage);
@@ -69,8 +71,14 @@ public class AgentInBoundHandler implements InBoundHandler {
     }
 
     @Override
-    public void handle(MessageReport messageReport) {
+    public void doHandle(MessageReport messageReport) {
 	LOGGER.debug("No Handling Required for Status on AgentSide");
     }
+
+    @Override
+    public void onSessionRoute(InBoundEvent inBoundEvent, ChatSessionDoc sessionDoc) {
+	super.onSessionRoute(inBoundEvent, sessionDoc);
+    }
+
 
 }

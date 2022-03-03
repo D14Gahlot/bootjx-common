@@ -517,6 +517,7 @@ public class CommonHttpRequest extends ACommonHttpRequest {
 	Channel channel;
 	boolean initFlow;
 	boolean authenticateTenant;
+	boolean session;
 
 	public boolean isAuthenticateTenant() {
 	    return authenticateTenant;
@@ -614,6 +615,14 @@ public class CommonHttpRequest extends ACommonHttpRequest {
 	    this.rules = new HashSet<String>(Arrays.asList(rules));
 	}
 
+	public boolean isSession() {
+	    return session;
+	}
+
+	public void setSession(boolean session) {
+	    this.session = session;
+	}
+
     }
 
     public ApiRequestDetail getApiRequest(HttpServletRequest req) {
@@ -632,6 +641,7 @@ public class CommonHttpRequest extends ACommonHttpRequest {
 	    detail.setInitFlow(x.initFlow());
 	    detail.setAuthenticateTenant(x.authenticateTenant());
 	    detail.setRules(x.rules());
+	    detail.setSession(x.session());
 	}
 
 	if (ArgUtil.isEmpty(detail.getType()) || RequestType.DEFAULT.equals(detail.getType())) {

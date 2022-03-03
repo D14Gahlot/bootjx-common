@@ -21,7 +21,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.boot.jx.AppConfig;
 import com.boot.jx.AppConfigPackage;
-import com.boot.jx.AppConfigPackage.AppSharedConfig;
 import com.boot.jx.AppParam;
 import com.boot.jx.AppTenantConfig;
 import com.boot.jx.api.ApiResponse;
@@ -41,6 +40,7 @@ import com.boot.jx.scope.vendor.VendorContext;
 import com.boot.jx.scope.vendor.VendorContext.ApiVendorHeaders;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CryptoUtil.HashBuilder;
+import com.boot.utils.HttpUtils;
 import com.boot.utils.JsonUtil;
 import com.fasterxml.jackson.core.type.TypeReference;
 
@@ -167,6 +167,7 @@ public class AppParamController {
 	map.put("request.getRemoteAddr()", request.getRemoteAddr());
 	map.put("request.getLocalAddr()", request.getLocalAddr());
 	map.put("request.getScheme()", request.getScheme());
+	map.put("request.getSubdomain()", HttpUtils.getSubDomain(request));
 
 	if (!ArgUtil.isEmpty(key)) {
 	    map.put(key, prop(key));

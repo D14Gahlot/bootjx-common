@@ -1,7 +1,10 @@
 package com.boot.jx.account.api;
 
 import java.security.NoSuchAlgorithmException;
+import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
+import java.util.function.Predicate;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -19,10 +22,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.boot.jx.AppConfig;
 import com.boot.jx.AppConfigPackage.AppCommonConfig;
 import com.boot.jx.AppContextUtil;
-import com.boot.jx.account.AccountAdminService;
+import com.boot.jx.account.AccountAuthService;
 import com.boot.jx.account.AccountSessionBean;
 import com.boot.jx.account.doc.AccountMeta;
 import com.boot.jx.account.doc.AccountStore;
@@ -38,6 +40,8 @@ import com.boot.jx.common.dto.UserLoginToken;
 import com.boot.jx.common.service.EmpAuthService;
 import com.boot.jx.http.CommonHttpRequest;
 import com.boot.jx.postman.PMEnvironment;
+import com.boot.jx.postman.PMEnvironment.PMCommonConfig;
+import com.boot.jx.scope.tnt.Tenants;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
 import com.boot.utils.CryptoUtil;
@@ -47,16 +51,13 @@ import com.boot.utils.CryptoUtil;
 public class PartnerController {
 
     @Autowired
-    private AppConfig appConfig;
-
-    @Autowired
     private CommonHttpRequest commonHttpRequest;
 
     @Autowired
     private AppCommonConfig appCommonConfig;
 
     @Autowired
-    private AccountAdminService sessionService;
+    private AccountAuthService sessionService;
 
     @Autowired
     private AccountSessionBean adminSessionBean;
@@ -68,18 +69,20 @@ public class PartnerController {
     private PMEnvironment env;
 
     @Autowired
+    private PMCommonConfig pmCommonConfig;
+
+    @Autowired
     private EmpAuthService empAuthService;
 
     @RequestMapping(value = { "", "/", "/**", "/auth/**", "/app/**" }, method = { RequestMethod.GET })
     public String home(Model model, @RequestParam(required = false) String theme) {
 	String tnt = AppContextUtil.getTenant();
-	if (!tnt.equals("app")) {
-	    return "redirect:" + String.format("https://app.%s%s", env.keyEntry("mry.prop.service.domain").asString(),
-		    commonHttpRequest.getRequestURI());
+	if (!Tenants.isDefault(tnt)) {
+	    return pmCommonConfig.mainDomainRedirect();
 	}
 
 	model.addAllAttributes(appCommonConfig.appAttributes());
-	Authentication auth = AccountAdminService.getAuthentication();
+	Authentication auth = AccountAuthService.getAuthentication();
 	if (ArgUtil.is(auth) && ArgUtil.is(adminSessionBean.domainUser())) {
 	    model.addAttribute("APP_USER", auth.getName());
 	    model.addAttribute("APP_USER_NAME", adminSessionBean.domainUser().getContact().getName());
@@ -99,9 +102,9 @@ public class PartnerController {
     public String gotopanel(Model model, @PathVariable String domain, @PathVariable String panel)
 	    throws NoSuchAlgorithmException {
 	String tnt = AppContextUtil.getTenant();
-	if (!tnt.equals("app")) {
-	    return "redirect:" + String.format("https://app.%s/%s/auth/direct",
-		    env.keyEntry("mry.prop.service.domain").asString(), commonHttpRequest.getRequestURI());
+
+	if (!Tenants.isDefault(tnt)) {
+	    return pmCommonConfig.mainDomainRedirect(commonHttpRequest.getRequestURI() + "/auth/direct");
 	}
 
 	model.addAllAttributes(appCommonConfig.appAttributes());
@@ -217,44 +220,18 @@ public class PartnerController {
     }
 
     @ResponseBody
-    @RequestMapping(value = { "/api/domain" }, method = { RequestMethod.GET })
-    public ApiResponse<DomainDoc, Object> getDomain() {
-	BusinessUserDoc domainUser = adminSessionBean.domainUser();
-
-	if (!ArgUtil.is(domainUser)) {
-	    ApiResponseUtil.throwException("Access Denied");
+    @RequestMapping(value = { "/api/domain/exists", "/pub/domain/exists" }, method = { RequestMethod.GET })
+    public ApiResponse<Object, Object> sisExists(@RequestParam @Valid String domain) throws NoSuchAlgorithmException {
+	AppContextUtil.setTenant(Tenants.getDefault());
+	DomainDoc domainDoc = accountStore.findDomainByName(domain);
+	if (ArgUtil.is(domainDoc)) {
+	    return ApiResponse.buildMeta(domainDoc.getDomain());
 	}
-
-	DomainDoc domainDoc = CollectionUtil.first(domainUser.getDomains());
-
-	if (!ArgUtil.is(domainDoc)) {
-	    domainDoc = new DomainDoc();
-	}
-
-	if (!ArgUtil.is(domainDoc.getCompany())) {
-	    domainDoc.setCompany(new CompanyDoc());
-	}
-	if (!ArgUtil.is(domainDoc.getCompany().getConactEmail())) {
-	    domainDoc.getCompany().setConactEmail(domainUser.getContact().getEmail());
-	}
-
-	if (!ArgUtil.is(domainDoc.getCompany().getConactPhone())) {
-	    domainDoc.getCompany().setConactPhone(domainUser.getContact().getPhone());
-	}
-
-	if (!ArgUtil.is(domainDoc.getCompany().getBusinessName())) {
-	    domainDoc.getCompany().setBusinessName(domainUser.getContact().getCompany());
-	}
-
-	if (!ArgUtil.is(domainDoc.getCompany().getConactCountry())) {
-	    domainDoc.getCompany().setConactCountry(domainUser.getContact().getCountry());
-	}
-
-	return ApiResponse.buildResult(domainDoc);
+	return ApiResponse.buildMeta(null).statusKey("400");
     }
 
     @ResponseBody
-    @RequestMapping(value = { "/api/domain/check" }, method = { RequestMethod.POST })
+    @RequestMapping(value = { "/api/domain/check", "/pub/domain/check" }, method = { RequestMethod.POST })
     public ApiResponse<Object, Object> checkDomain(@RequestParam @Valid String domain) throws NoSuchAlgorithmException {
 
 	DomainDoc domainDoc = accountStore.findDomainByName(domain);
@@ -270,6 +247,51 @@ public class PartnerController {
     }
 
     @ResponseBody
+    @RequestMapping(value = { "/api/domain" }, method = { RequestMethod.GET })
+    public ApiResponse<DomainDoc, Object> getDomain() {
+	BusinessUserDoc domainUser = adminSessionBean.domainUser();
+
+	if (!ArgUtil.is(domainUser)) {
+	    ApiResponseUtil.throwException("Access Denied");
+	}
+
+	Set<DomainDoc> domainDocs = domainUser.getDomains();
+
+	ApiResponse<DomainDoc, Object> resp = ApiResponse.instance(DomainDoc.class);
+
+	for (DomainDoc domainDoc : domainDocs) {
+	    // DomainDoc domainDoc = CollectionUtil.first(domainUser.getDomains());
+
+	    if (!ArgUtil.is(domainDoc)) {
+		domainDoc = new DomainDoc();
+	    }
+
+	    if (!ArgUtil.is(domainDoc.getCompany())) {
+		domainDoc.setCompany(new CompanyDoc());
+	    }
+	    if (!ArgUtil.is(domainDoc.getCompany().getConactEmail())) {
+		domainDoc.getCompany().setConactEmail(domainUser.getContact().getEmail());
+	    }
+
+	    if (!ArgUtil.is(domainDoc.getCompany().getConactPhone())) {
+		domainDoc.getCompany().setConactPhone(domainUser.getContact().getPhone());
+	    }
+
+	    if (!ArgUtil.is(domainDoc.getCompany().getBusinessName())) {
+		domainDoc.getCompany().setBusinessName(domainUser.getContact().getCompany());
+	    }
+
+	    if (!ArgUtil.is(domainDoc.getCompany().getConactCountry())) {
+		domainDoc.getCompany().setConactCountry(domainUser.getContact().getCountry());
+	    }
+
+	    resp.addResult(domainDoc);
+	}
+
+	return resp;
+    }
+
+    @ResponseBody
     @RequestMapping(value = { "/api/domain" }, method = { RequestMethod.POST })
     public ApiResponse<Object, Object> createDomain(Model model, HttpServletRequest request,
 	    HttpServletResponse httpServletResponse, @RequestBody @Valid DomainDoc domain,
@@ -278,18 +300,18 @@ public class PartnerController {
 	BusinessUserDoc domainUser = adminSessionBean.domainUser();
 
 	if (ArgUtil.is(domainUser.getDomains())) {
-	    DomainDoc domainDoc = CollectionUtil.first(domainUser.getDomains());
-	    if (!domainDoc.getDomain().equals(domain.getDomain())) {
+
+	    Optional<DomainDoc> domaiNational = domainUser.getDomains().stream()
+		    .filter(d -> d.getDomain().equals(domain.getDomain())).findFirst();
+	    if (!domaiNational.isPresent() || !domaiNational.get().getDomain().equals(domain.getDomain())) {
 		ApiResponseUtil.throwInputException(new ApiFieldError().field("domain").codeKey("ValidDomainMultiple")
 			.description("Domain Change Not Allowed"));
 	    }
-	    domainDoc.setCompany(domain.getCompany());
-	    domainDoc.setSocial(domain.getSocial());
-	    accountStore.save(domainDoc);
+	    domaiNational.get().setCompany(domain.getCompany());
+	    domaiNational.get().setSocial(domain.getSocial());
+	    accountStore.save(domaiNational.get());
 	    accountStore.save(domainUser);
-
 	    return ApiResponse.build().message("Details updated");
-
 	} else {
 	    checkDomain(domain.getDomain());
 

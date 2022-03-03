@@ -7,21 +7,22 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.boot.jx.dict.ContactType;
 import com.boot.jx.postman.PMConstants;
 import com.boot.jx.postman.model.MessageDefinitions.Contactable;
 import com.boot.jx.postman.model.MessageDefinitions.IMessageExtended;
+import com.boot.jx.postman.model.MessageDefinitions.LogMessage;
 import com.boot.utils.StringUtils.StringMatcher;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class InboxMessage implements Serializable, IMessageExtended {
+public class InboxMessage implements Serializable, IMessageExtended, LogMessage {
 
     private static final long serialVersionUID = -4488174520614920589L;
 
     private String messageId;
     private String messageIdExt;
+    private String messageIdRef;
     protected List<String> to;
     private String from;
     private String fromName;
@@ -42,6 +43,7 @@ public class InboxMessage implements Serializable, IMessageExtended {
 
     private Object originalMessage;
     private MessageSession session;
+    private MessagePrompt prompt;
 
     protected Map<String, Object> form = new HashMap<String, Object>();
     protected Map<String, Object> data = new HashMap<String, Object>();
@@ -88,30 +90,14 @@ public class InboxMessage implements Serializable, IMessageExtended {
 	return reply;
     }
 
-    public Message<?> replyMessage(String message) {
-	if (ContactType.WHATSAPP.toString().equals(this.contact().getContactType())) {
-	    WAMessage reply = new WAMessage();
-	    reply.setQueue(this.getQueue());
-	    reply.contact().setChannelType(this.contact().getChannelType());
-	    reply.addTo(this.getFrom());
-	    reply.setMessage(message);
-	    return reply;
-	} else if (ContactType.TELEGRAM.toString().equals(this.contact().getContactType())) {
-	    TGMessage reply = new TGMessage();
-	    reply.setQueue(this.getQueue());
-	    reply.contact().setChannelType(this.contact().getChannelType());
-	    reply.addTo(this.getFrom());
-	    reply.setMessage(message);
-	    return reply;
-	} else {
-	    OutboxMessage reply = new OutboxMessage();
-	    reply.setQueue(this.getQueue());
-	    reply.contact().setChannelType(this.contact().getChannelType());
-	    reply.addTo(this.getFrom());
-	    reply.setMessage(message);
-	    reply.contact().setContactType(this.contact().getContactType());
-	    return reply;
-	}
+    public OutboxMessage replyMessage(String message) {
+	OutboxMessage reply = new OutboxMessage();
+	reply.setQueue(this.getQueue());
+	reply.contact().setChannelType(this.contact().getChannelType());
+	reply.addTo(this.getFrom());
+	reply.setMessage(message);
+	reply.contact().copyFrom(this.contact());
+	return reply;
     }
 
     // Builder Functions
@@ -353,5 +339,21 @@ public class InboxMessage implements Serializable, IMessageExtended {
 
     public void setFormatSubType(String formatSubType) {
 	this.formatSubType = formatSubType;
+    }
+
+    public String getMessageIdRef() {
+	return messageIdRef;
+    }
+
+    public void setMessageIdRef(String messageIdRef) {
+	this.messageIdRef = messageIdRef;
+    }
+
+    public MessagePrompt getPrompt() {
+	return prompt;
+    }
+
+    public void setPrompt(MessagePrompt prompt) {
+	this.prompt = prompt;
     }
 }

@@ -2,6 +2,8 @@ package com.boot.jx.stomp;
 
 import java.util.Map.Entry;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
@@ -17,6 +19,8 @@ import com.boot.utils.CryptoUtil;
 @Service
 public class StompTunnelSessionManager {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(StompTunnelSessionManager.class);
+
     /*
      * Map for <httpSessionId, stompUID>
      */
@@ -24,7 +28,7 @@ public class StompTunnelSessionManager {
 //	    .synchronizedMap(new HashMap<String, String>());
 //    
     @Autowired
-    private StringCacheBox http2sessionUIdMap;
+    private StringCacheBox http2GSessionIdMap;
 
 //    public static final Map<String, String> http2stompUIdMap = Collections
 //	    .synchronizedMap(new HashMap<String, String>());
@@ -38,7 +42,10 @@ public class StompTunnelSessionManager {
 //    public static final Map<String, String> ws2httpMap = Collections.synchronizedMap(new HashMap<String, String>());
 
     @Autowired
-    private StringCacheBox ws2httpMap;
+    private StringCacheBox ws2xSessionMap;
+
+    @Autowired
+    private StringCacheBox ws2jSessionMap;
 
     /*
      * Map for <stompUID, stompSession>
@@ -50,51 +57,81 @@ public class StompTunnelSessionManager {
 	return AppParam.APP_INSTANCE_ID.getValue();
     }
 
-    public String createSessionMapping(String wsSessionID, String httpSessionId, String sessionUID) {
-	if (ArgUtil.isEmpty(sessionUID)) {
-	    sessionUID = http2sessionUIdMap.get(httpSessionId);
-	    if (ArgUtil.isEmpty(sessionUID)) {
-		sessionUID = String.format("%s-%s-%s", getMSInstanceId(), httpSessionId, wsSessionID);
-		http2sessionUIdMap.put(httpSessionId, sessionUID);
+    public String createSessionMapping(String wsSessionID, String xSessionId, String jSessionId, String gSessionId) {
+	if (ArgUtil.isEmpty(gSessionId)) {
+
+	    gSessionId = http2GSessionIdMap.getSafe(xSessionId);
+
+	    if (ArgUtil.isEmpty(gSessionId)) {
+		gSessionId = http2GSessionIdMap.getSafe(jSessionId);
 	    }
+
+	    if (ArgUtil.isEmpty(gSessionId)) {
+		gSessionId = String.format("%s-%s-%s", getMSInstanceId(), xSessionId, wsSessionID);
+		http2GSessionIdMap.putSafe(xSessionId, gSessionId);
+		http2GSessionIdMap.putSafe(jSessionId, gSessionId);
+	    }
+
 	}
-	ws2httpMap.put(wsSessionID, httpSessionId);
-	return sessionUID;
+	ws2xSessionMap.put(wsSessionID, xSessionId);
+	ws2jSessionMap.put(wsSessionID, jSessionId);
+	return gSessionId;
     }
 
     /**
      * Returns SessionUID for httpSessionId
      * 
-     * @param httpSessionId
+     * @param xSessionId
      * @return
      */
-    public String getSessionUId(String httpSessionId) {
-	return http2sessionUIdMap.get(httpSessionId);
+    public String getSessionUId(String xSessionId, String jSessionId) {
+	String sessionUId = http2GSessionIdMap.get(xSessionId);
+	if (!ArgUtil.is(sessionUId)) {
+	    return http2GSessionIdMap.getSafe(jSessionId);
+	}
+	return sessionUId;
     }
 
-    public void delinkWs2Http(String httpSessionId, String wsSessionID) {
-	ws2httpMap.remove(wsSessionID);
+    public void delinkWs2Http(String xSessionId, String jSessionId, String wsSessionID) {
+	ws2xSessionMap.remove(wsSessionID);
 	boolean isExists = false;
-	for (Entry<String, String> entry : ws2httpMap.readAllEntrySet()) {
-	    if (entry.getValue().equals(httpSessionId)) {
-		isExists = true;
+
+	if (ArgUtil.is(xSessionId)) {
+	    for (Entry<String, String> entry : ws2xSessionMap.readAllEntrySet()) {
+		if (entry.getValue().equals(xSessionId)) {
+		    isExists = true;
+		}
+	    }
+	    if (!isExists) {
+		http2GSessionIdMap.remove(xSessionId);
 	    }
 	}
-	if (!isExists) {
-	    http2sessionUIdMap.remove(httpSessionId);
+
+	if (ArgUtil.is(jSessionId)) {
+	    ws2jSessionMap.remove(wsSessionID);
+	    isExists = false;
+	    for (Entry<String, String> entry : ws2jSessionMap.readAllEntrySet()) {
+		if (entry.getValue().equals(jSessionId)) {
+		    isExists = true;
+		}
+	    }
+	    if (!isExists) {
+		http2GSessionIdMap.remove(jSessionId);
+	    }
 	}
     }
 
     /**
      * 
-     * @param stompUID      - only one session with one stompUID can exists, if you
-     *                      want to support multiple, change accordingly
-     * @param httpSessionId
+     * @param stompUID   - only one session with one stompUID can exists, if you
+     *                   want to support multiple, change accordingly
+     * @param xSessionId
      */
-    public void mapHTTPSession(String stompUID, String httpSessionId, String... tags) {
+    public void mapHTTPSession(String stompUID, String xSessionId, String jSessionId, String... tags) {
 	StompSession stompSession = new StompSession();
 	stompSession.setPrefix(getMSInstanceId());
-	stompSession.setHttpSessionId(httpSessionId);
+	stompSession.setXsessionId(xSessionId);
+	stompSession.setJsessionId(jSessionId);
 
 	if (tags != null && tags.length > 0) {
 	    String[] etags = new String[tags.length];
@@ -104,8 +141,10 @@ public class StompTunnelSessionManager {
 	    stompSession.setTags(etags);
 	}
 	stompSession.setTenantToken(createTagId(AppContextUtil.getTenant()));
-	http2stompUIdMap.put(httpSessionId, stompUID);
-	stompSessionCache.put(stompUID, stompSession);
+
+	http2stompUIdMap.putSafe(xSessionId, stompUID);
+	http2stompUIdMap.putSafe(jSessionId, stompUID);
+	stompSessionCache.putSafe(stompUID, stompSession);
     }
 
     /**
@@ -114,21 +153,37 @@ public class StompTunnelSessionManager {
      * @param stompUID
      */
     public void registerUser(String stompUID) {
-	mapHTTPSession(stompUID, AppContextUtil.getSessionId(true));
+	mapHTTPSession(stompUID, AppContextUtil.getSessionId(true), AppContextUtil.getJSessionId());
     }
 
     public void registerUser(String stompUID, String... tags) {
-	mapHTTPSession(stompUID, AppContextUtil.getSessionId(true), tags);
+	mapHTTPSession(stompUID, AppContextUtil.getSessionId(true), AppContextUtil.getJSessionId(), tags);
     }
 
     public StompSession getStompSession(String stompUID) {
 	return stompSessionCache.get(stompUID);
     }
 
-    public StompSession getStompSessionByHttpSessionId(String httpSessionId) {
-	String stompUID = http2stompUIdMap.get(httpSessionId);
-	if (ArgUtil.is(stompUID)) {
-	    return stompSessionCache.get(stompUID);
+    public StompSession getStompSessionByHttpSessionId(String xSessionId, String jSessionId) {
+	boolean bothIdEmpty = true;
+	if (ArgUtil.is(xSessionId)) {
+	    bothIdEmpty = false;
+	    String stompUID = http2stompUIdMap.get(xSessionId);
+	    if (ArgUtil.is(stompUID)) {
+		return stompSessionCache.get(stompUID);
+	    }
+	}
+
+	if (ArgUtil.is(jSessionId)) {
+	    bothIdEmpty = false;
+	    String stompUID = http2stompUIdMap.get(jSessionId);
+	    if (ArgUtil.is(stompUID)) {
+		return stompSessionCache.get(stompUID);
+	    }
+	}
+
+	if (bothIdEmpty) {
+	    LOGGER.error("xSessionId & jSessionId both Null");
 	}
 	return null;
     }

@@ -1,5 +1,13 @@
 package com.boot.jx.account;
 
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -10,17 +18,21 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.annotation.web.configurers.ExpressionUrlAuthorizationConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.logout.LogoutHandler;
+import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
+
+import com.boot.utils.Urly;
 
 @Configuration
 @EnableWebSecurity
 public class AccountSecurityConfig extends WebSecurityConfigurerAdapter {
 
-    public static final String[] CONTEXTS = new String[] { "account", "partner", "front", "cpanel" };
+    public static final String[] CONTEXTS = new String[] { "common", "account", "partner", "front", "cpanel" };
 
     @Autowired
     private LogoutHandler agentLogoutHandler;
@@ -52,9 +64,9 @@ public class AccountSecurityConfig extends WebSecurityConfigurerAdapter {
 		.failureUrl("/front/auth/login?error").permitAll()
 		// .loginProcessingUrl("/auth/login/submit").permitAll()
 		// Logout Pages
-		.and().logout().permitAll().addLogoutHandler(agentLogoutHandler).logoutUrl("/front/auth/logout")
-		.logoutSuccessUrl("/front/auth/login?logout")
-		.deleteCookies("JSESSIONID", "JXSESSIONID", "ADMINSESSIONID").invalidateHttpSession(true).permitAll()
+		.and().logout().permitAll().addLogoutHandler(agentLogoutHandler).logoutUrl("/common/auth/logout")
+		.logoutSuccessHandler(logoutSuccessHandler()).logoutSuccessUrl("/front/auth/login?logout")
+		.deleteCookies("JSESSIONID", "JXSESSIONID", "ACCTSESSIONID").invalidateHttpSession(true).permitAll()
 		.and().exceptionHandling().accessDeniedPage("/403").and().csrf().disable().headers().disable();
     }
 
@@ -63,6 +75,36 @@ public class AccountSecurityConfig extends WebSecurityConfigurerAdapter {
 	SimpleUrlAuthenticationSuccessHandler handler = new SimpleUrlAuthenticationSuccessHandler();
 	handler.setUseReferer(true);
 	return handler;
+    }
+
+    public LogoutSuccessHandler logoutSuccessHandler() {
+	return new LogoutSuccessHandler() {
+	    @Override
+	    public void onLogoutSuccess(HttpServletRequest request, HttpServletResponse response,
+		    Authentication authentication) throws IOException, ServletException {
+
+		String referrer = request.getHeader("referer");
+		try {
+		    referrer = Urly.parse(referrer).getRelativeURL();
+		    for (String context : CONTEXTS) {
+			if (referrer.startsWith(context, 1)) {
+			    redirectResponse(request, response,
+				    "/" + context + "/auth/login?logout?_=" + System.currentTimeMillis());
+			}
+		    }
+
+		} catch (MalformedURLException | URISyntaxException e) {
+		    e.printStackTrace();
+		}
+
+	    }
+
+	    private void redirectResponse(HttpServletRequest request, HttpServletResponse response,
+		    String destination) {
+		response.setStatus(HttpServletResponse.SC_MOVED_TEMPORARILY);
+		response.setHeader("Location", destination);
+	    }
+	};
     }
 
     @Autowired

@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 
 import com.boot.jx.chat.ChatCommands;
 import com.boot.jx.chat.ChatService;
-import com.boot.jx.common.config.ConfigConstants;
+import com.boot.jx.chat.ChatSessionService;
 import com.boot.jx.common.doc.AgentDoc;
 import com.boot.jx.common.doc.AgentSessionDoc;
 import com.boot.jx.common.store.AgentStore;
@@ -22,12 +22,11 @@ import com.boot.jx.common.store.ChatArchiveService;
 import com.boot.jx.common.store.DocumentUpdateListner;
 import com.boot.jx.logger.LoggerService;
 import com.boot.jx.mongo.CommonMongoQueryBuilder;
-import com.boot.jx.postman.PMClientConfig;
 import com.boot.jx.postman.PMConstants;
 import com.boot.jx.postman.PMConstants.CHAT_SESSION_ACTIONS;
 import com.boot.jx.postman.PMConstants.DEFAULT;
 import com.boot.jx.postman.PMEnvironment;
-import com.boot.jx.postman.PMEnvironment.PMConfigurationObject;
+import com.boot.jx.postman.PMEnvironment.PMClientConfig;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.dto.ChatMessageDTO;
@@ -57,6 +56,9 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 
     @Autowired
     private ChatSessionManager chatSessionManager;
+
+    @Autowired
+    private ChatSessionService chatSessionService;
 
     @Autowired
     private LogManager logManager;
@@ -202,21 +204,21 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 
 	if (ArgUtil.is(inboxMessage.session().getDept()) && ArgUtil.is(inboxMessage.session().getAgent())) {
 	    assignToAgent(chatSessionDoc, inboxMessage.session().getDept(), inboxMessage.session().getAgent());
-	    logManager.log(inboxMessage, MessageStore.EVENTS.ASGND_TO_DEPT, inboxMessage.session().getDept());
+	    logManager.event(inboxMessage, MessageStore.EVENTS.ASGND_TO_DEPT, inboxMessage.session().getDept());
 	}
 
 	AgentSessionDoc avaialbleAgent = getAgentSessonAssignedAndActive(inboxMessage);
 
 	if (ArgUtil.is(avaialbleAgent)) {
 	    assignToAgent(chatSessionDoc, avaialbleAgent.getAgentDept(), avaialbleAgent.getAgentCode());
-	    logManager.log(inboxMessage, MessageStore.EVENTS.ASGND_TO_AGENT, avaialbleAgent.getAgentCode(),
+	    logManager.event(inboxMessage, MessageStore.EVENTS.ASGND_TO_AGENT, avaialbleAgent.getAgentCode(),
 		    avaialbleAgent.getAgentDept());
 
 	    inboxMessage.session().setAgent(avaialbleAgent.getAgentCode());
 	    inboxMessage.session().setDept(avaialbleAgent.getAgentDept());
 	} else {
 	    assignToAgent(chatSessionDoc, inboxMessage.session().getDept(), null);
-	    logManager.log(inboxMessage, MessageStore.EVENTS.ASGND_TO_DEPT, inboxMessage.session().getDept());
+	    logManager.event(inboxMessage, MessageStore.EVENTS.ASGND_TO_DEPT, inboxMessage.session().getDept());
 	}
 
 	stompTunnelService.sendToAll(PostManUtil.ON_DEPT_ASSIGN_TOPIC(inboxMessage.session().getDept()),
@@ -238,7 +240,7 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
     private void onAssign(ChatSessionDoc chatSessionDoc, String agentDept, String agentCode) {
 	if (!ArgUtil.areEqual(chatSessionDoc.getAssignedToAgent(), agentCode)) {
 	    assignToAgent(chatSessionDoc, agentDept, agentCode);
-	    MessageDoc messageDoc = logManager.log(chatSessionDoc, MessageStore.EVENTS.ASGND_TO_AGENT, agentCode,
+	    MessageDoc messageDoc = logManager.event(chatSessionDoc, MessageStore.EVENTS.ASGND_TO_AGENT, agentCode,
 		    agentDept);
 	    stompTunnelService.sendToAll(PostManUtil.ON_DEPT_ASSIGN_TOPIC(agentDept),
 		    chatArchiveBuilder.buildChatSessionDTO().from(chatSessionDoc).withContact()
@@ -272,31 +274,16 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
     }
 
     public ChatMessageDTO exitAgentMode(ChatSessionDoc chatSessionDoc, OutboxMessage outboxMessage) {
-	MessageDoc messageDoc = null;
-
-	if (!chatSessionDoc.isResolved()) {
-	    chatSessionManager.resolveSession(chatSessionDoc);
-	    PMConfigurationObject resolvedReply = environment
-		    .keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_AGENT_CHAT_AUTOREPLY_RESOLVED);
-	    if (resolvedReply.exists()) {
-		messageDoc = chatService.send(chatSessionDoc, new OutboxMessage().templateId(resolvedReply.asString()));
-	    }
-
-	}
-
+	MessageDoc messageDoc = chatSessionService.closeChatSession(chatSessionDoc);
 	if (ArgUtil.is(outboxMessage)) {
 	    messageDoc = chatService.send(chatSessionDoc, outboxMessage);
 	}
-	chatSessionManager.closeSession(chatSessionDoc);
-	stompTunnelService.sendToAll(PostManUtil.ON_DEPT_ASSIGN_TOPIC(chatSessionDoc.getAssignedToDept()),
-		chatArchiveBuilder.buildChatSessionDTO().from(chatSessionDoc).withContact()
-			.isAssigned(chatSessionDoc.getAssignedToAgent()).get());
 	return chatArchive.getMessage(messageDoc, chatSessionDoc);
     }
 
     public ChatSessionDTO updateChatSessionStatus(String sessionId, PMConstants.CHAT_STATUS status) {
 	ChatSessionDoc sessionDoc = sessionStore.getSession(sessionId);
-	if (chatSessionManager.updateSessionStatus(sessionDoc, status)) {
+	if (chatSessionService.updateSessionStatus(sessionDoc, status)) {
 	    ChatSessionDTO dto = chatArchive.getChatSession(sessionDoc);
 	    stompTunnelService.sendToTag(sessionDoc.getAssignedToDept(), "/chat/session/update", dto);
 	    return dto;
@@ -313,7 +300,7 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 	if (ArgUtil.is(inboxMessage.getMessage()) && inboxMessage.getMessage().equalsIgnoreCase("/exit_chat")) {
 	    ChatSessionDoc chatSessionDoc = sessionStore.getSession(inboxMessage.getSessionId());
 	    exitAgentMode(chatSessionDoc, null);
-	    logManager.log(inboxMessage, MessageStore.EVENTS.UNASGND);
+	    logManager.event(inboxMessage, MessageStore.EVENTS.UNASGND);
 	}
 	return inboxMessage;
     }

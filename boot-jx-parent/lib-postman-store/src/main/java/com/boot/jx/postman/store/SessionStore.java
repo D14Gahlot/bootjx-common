@@ -18,11 +18,11 @@ import org.springframework.stereotype.Component;
 import com.boot.jx.mongo.CommonMongoQB.CommonMongoCriteria;
 import com.boot.jx.mongo.CommonMongoQueryBuilder;
 import com.boot.jx.mongo.CommonMongoTemplateAbstract;
-import com.boot.jx.postman.PMClientConfig;
 import com.boot.jx.postman.PMConstants;
 import com.boot.jx.postman.PMConstants.CHAT_MODE;
 import com.boot.jx.postman.PMConstants.CHAT_STATUS;
 import com.boot.jx.postman.PMConstants.DEFAULT_VALUES;
+import com.boot.jx.postman.PMEnvironment.PMClientConfig;
 import com.boot.jx.postman.PMEnvironment.PMDomainConfig;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
@@ -115,38 +115,6 @@ public class SessionStore extends CommonMongoTemplateAbstract {
      */
     public ChatSessionDoc createSession(SessionMessage sessionMessage) {
 	return createSessionOld(sessionMessage);
-    }
-
-    public ChatSessionDoc createSessionNew(SessionMessage sessionMessage) {
-	Contactable contact = PostManUtil.getContactMeta(sessionMessage.contact());
-
-	String sessionId = sessionMessage.getSessionId();
-	String contactId = contact.getContactId();
-
-	ChatSessionDoc chatSessionDoc = null;
-	ChatContactDoc chatContactDoc = null;
-
-	if (ArgUtil.is(sessionId)) {
-	    chatSessionDoc = getSession(sessionId);
-	    if (ArgUtil.isEmpty(chatSessionDoc)) {
-		// Session Not found
-		return null;
-	    }
-	    if (!isSessionValid(chatSessionDoc)) {
-		contactId = ArgUtil.nonEmpty(contactId, chatSessionDoc.getContactId());
-	    }
-	    if (ArgUtil.isEmpty(contactId)) {
-		// Contact Not found
-		return null;
-	    }
-	    chatContactDoc = super.findById(contactId, ChatContactDoc.class);
-	}
-
-	if (!isSessionValid(chatSessionDoc)) {
-
-	}
-
-	return chatSessionDoc;
     }
 
     public ChatSessionDoc createSessionOld(SessionMessage sessionMessage) {
@@ -264,9 +232,9 @@ public class SessionStore extends CommonMongoTemplateAbstract {
 
 	    // Assign Queue
 	    if (ArgUtil.isEmptyValue(chatSessionDoc.getAssignedToQueue())) {
-		String defaultQueue = pmDomainConfig.getDefaultInboundQueue();
+		String defaultQueue = pmDomainConfig.getDefaultInboundQueue(inboxMessage.contact());
 		if (ArgUtil.is(defaultQueue)) {
-		    chatSessionDocQuery.setQueue(pmDomainConfig.getDefaultInboundQueue());
+		    chatSessionDocQuery.setQueue(defaultQueue);
 		}
 	    }
 
@@ -444,7 +412,7 @@ public class SessionStore extends CommonMongoTemplateAbstract {
 
     public ChatSessionDoc initSession(ChatSessionDoc chatSessionDoc) {
 
-	ChatContactDoc contactDoc = messageContext.getChatContactDoc();
+	ChatContactDoc contactDoc = messageContext.contact().getDoc();
 
 	chatSessionDoc.setInitd(true);
 	chatSessionDoc.setContactName(contactDoc.getName());

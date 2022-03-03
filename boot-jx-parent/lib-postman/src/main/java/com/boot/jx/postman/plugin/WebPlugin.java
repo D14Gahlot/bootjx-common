@@ -90,7 +90,7 @@ public class WebPlugin implements ChannelPlugin<WebConfigDetails> {
 
     @Override
     public boolean isWebhookManual() {
-	return false;
+	return true;
     }
 
 }

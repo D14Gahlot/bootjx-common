@@ -21,5 +21,6 @@ public class InBoundWrapper implements Serializable {
     public List<InBoundContact> contacts;
     public List<InBoundMsg> messages;
     public List<InBoundAction> actions;
+    public List<InBoundEvent> events;
     public List<InBoundMsgStatus> statuses;
 }

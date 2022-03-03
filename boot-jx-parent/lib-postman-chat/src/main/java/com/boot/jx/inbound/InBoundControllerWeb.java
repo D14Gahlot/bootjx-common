@@ -4,9 +4,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -17,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.boot.jx.AppConfig;
+import com.boot.jx.AppContextUtil;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.chat.ChatStatusService;
@@ -88,9 +92,13 @@ public class InBoundControllerWeb {
     @Autowired
     private StompTunnelSessionManager stompTunnelSessionManager;
 
+    @Value("${app.stomp}")
+    boolean stompEnabled;
+
+    @ApiRequest(session = true)
     @RequestMapping(value = "/plugin/customer/**", method = RequestMethod.GET)
     public String pluginCustomer(Model model, @RequestParam(required = false) String contacyType,
-	    @RequestParam(required = false, defaultValue = "/plugin/customer") String path)
+	    @RequestParam(required = false, defaultValue = "/plugin/customer") String path, HttpServletRequest request)
 	    throws InterruptedException {
 	commonHttpRequest.setCookie("contactType", ArgUtil.parseAsString(contacyType, ContactType.WEBSITE.toString()));
 	model.addAttribute("APP_CONTEXT", appConfig.getAppPrefix());
@@ -106,27 +114,32 @@ public class InBoundControllerWeb {
 	String nounce = UniqueID.generateString62();
 	model.addAttribute("NOUNCE", nounce);
 	commonHttpRequest.setCookie("NOUNCE", nounce);
-	model.addAttribute("APP_USER", "APP_USER" + nounce);
-
+	model.addAttribute("STOMP_ENABLED", stompEnabled);
 	return "app-customer";
     }
 
-    @RequestMapping(value = "/pub/plugin/customer/**", method = RequestMethod.GET)
-    public String pluginCustomerPub(Model model, @RequestParam(required = false) String contacyType)
-	    throws InterruptedException {
-	return pluginCustomer(model, contacyType, "/pub/plugin/customer");
+    @ApiRequest(session = true)
+    @RequestMapping(value = "/ext/plugin/customer/**", method = RequestMethod.GET)
+    public String pluginCustomerPub(Model model, @RequestParam(required = false) String contacyType,
+	    HttpServletRequest request) throws InterruptedException {
+	return pluginCustomer(model, contacyType, "/ext/plugin/customer", request);
     }
 
-    @ApiRequest(type = RequestType.POLL)
+    @ApiRequest(type = RequestType.POLL,session = true)
     @ResponseBody
-    @RequestMapping(value = "/ext/outbound/web/callback", method = RequestMethod.GET)
+    @RequestMapping(value = { "/ext/outbound/web/callback", "/ext/plugin/outbound/web/callback" },
+	    method = RequestMethod.GET)
     public OutboxMessage onReceiveMessage(@RequestParam(required = false) String number,
-	    @RequestParam(required = false) String csid) throws InterruptedException {
-	return dummyConnector.pollUnreadMessage(ArgUtil.nonEmpty(csid, number));
+	    @RequestParam(required = false) String csid, @RequestParam(required = false) String channelId,
+	    @RequestParam(required = false) String channelKey) throws InterruptedException {
+	ChannelConfig channelConfig = pmEnvironment.config().channel(channelId);
+	return dummyConnector
+		.pollUnreadMessage(AppContextUtil.getTenant() + "/" + PostManUtil.CONTACT_ID(channelConfig, csid));
     }
 
+    @ApiRequest(session = true)
     @ResponseBody
-    @RequestMapping(value = "/ext/outbound/web/auth/v2", method = RequestMethod.GET)
+    @RequestMapping(value = "/ext/plugin/outbound/web/auth/v2", method = RequestMethod.GET)
     public ApiResponse<ChatMessageDTO, Object> onAuthV2(@RequestParam(required = false) String user,
 	    @RequestParam(required = false) String number, @RequestParam(required = false) String csid,
 	    @RequestParam(required = false) String channelId, @RequestParam(required = false) String channelKey)
@@ -134,6 +147,8 @@ public class InBoundControllerWeb {
 	String webSessionId = commonHttpRequest.get(WEB_SESSION_ID);
 	csid = ArgUtil.nonEmpty(csid, number);
 	ChannelConfig channelConfig = pmEnvironment.config().channel(channelId);
+	String contactId = PostManUtil.CONTACT_ID(channelConfig, csid);
+	String contactIdWeb = AppContextUtil.getTenant() + "/" + contactId;
 
 	ChatSessionDoc session = null;
 	if (ArgUtil.is(webSessionId)) {
@@ -150,14 +165,14 @@ public class InBoundControllerWeb {
 	    }
 	}
 	if (ArgUtil.is(channelConfig)) {
-	    stompTunnelSessionManager.registerUser(user, PostManUtil.CONTACT_ID(channelConfig, csid), csid,
-		    webSessionId);
+	    stompTunnelSessionManager.registerUser(ArgUtil.nonEmpty(user, csid), contactIdWeb, csid);
 	}
 	return ApiResponse.buildResults(msgs);
     }
 
+    @ApiRequest(session = true)
     @ResponseBody
-    @RequestMapping(value = "/ext/inbound/v2/web/callback/{nounce}/{channelId}/{channelKey}",
+    @RequestMapping(value = "/ext/plugin/inbound/v2/web/callback/{nounce}/{channelId}/{channelKey}",
 	    method = { RequestMethod.POST })
     public ApiResponse<InboxMessage, Object> inboundMessageBoxEvent(@PathVariable(required = false) String nounce,
 	    @PathVariable(required = false) String channelId, @PathVariable(required = false) String channelKey,

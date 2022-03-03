@@ -14,9 +14,14 @@ import com.boot.jx.api.ApiFieldError;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.common.config.ConfigManager;
+import com.boot.jx.mongo.CommonMongoQB;
+import com.boot.jx.mongo.CommonMongoQB.CommonMongoQBimpl;
+import com.boot.jx.mongo.CommonMongoQueryBuilder;
+import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.jx.postman.ClientApp;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PMEnvironment.AChannelConfig;
+import com.boot.jx.postman.doc.HSMTemplateDoc;
 import com.boot.jx.postman.doc.config.ClientKeyConfigDoc;
 import com.boot.jx.postman.model.ext.MsgChannel;
 import com.boot.jx.postman.store.ConfigStore;
@@ -46,6 +51,9 @@ public class ConfigApiV1 {
     @Autowired
     private PMEnvironment pmEnvironment;
 
+    @Autowired
+    private CommonMongoTemplate commonMongoTemplate;
+
     @ApiOperation(value = "Set Webhook", notes = "${swagger.ConfigApiV1.setWebhookUrl.description}",
 	    authorizations = @Authorization("X_API_KEY"))
     @XMSClientAuth
@@ -58,6 +66,7 @@ public class ConfigApiV1 {
 	    ClientKeyConfigDoc xo = configStore.findById(x.getId(), ClientKeyConfigDoc.class);
 	    if (ArgUtil.areEqual(xo.getAppType(), ClientApp.APP_TYPE_WEBHOOK)) {
 		xo.setWebhook(req.url);
+		xo.setForward(req.forward);
 		configManager.save(xo);
 		configManager.refresh();
 	    } else {
@@ -74,7 +83,7 @@ public class ConfigApiV1 {
     @ApiOperation(value = "Channels List", notes = "${swagger.ConfigApiV1.getChannels.description}",
 	    authorizations = @Authorization("X_API_KEY"))
     @XMSClientAuth
-    @RequestMapping(value = "/api/v1/config/channels", method = { RequestMethod.POST })
+    @RequestMapping(value = "/api/v1/config/channels", method = { RequestMethod.GET })
     @JsonView(PMEnvironment.PublicProperty.class)
     public ApiResultsMetaCompactResponse<MsgChannel, Object> getChannels(
 	    @RequestParam(required = false, defaultValue = "false") boolean sabdnox) {
@@ -86,5 +95,21 @@ public class ConfigApiV1 {
 	    newList.add(channel);
 	}
 	return ApiResponse.buildResults(newList);
+    }
+
+    @ApiOperation(value = "HSM Templates", notes = "${swagger.ConfigApiV1.getHSMTemplates.description}",
+	    authorizations = @Authorization("X_API_KEY"))
+    @XMSClientAuth
+    @RequestMapping(value = "/api/v1/config/tmpl/hsm", method = { RequestMethod.GET })
+    public ApiResponse<HSMTemplateDoc, Object> getHSMTemplates(@RequestParam(required = false) String channelId) {
+
+	CommonMongoQB<CommonMongoQBimpl<HSMTemplateDoc>, HSMTemplateDoc> cmq = CommonMongoQueryBuilder
+		.collection(HSMTemplateDoc.class);
+
+	if (ArgUtil.is(channelId)) {
+	    cmq.where("approved.channelId", channelId);
+	}
+
+	return ApiResponse.buildResults(commonMongoTemplate.find(cmq));
     }
 }

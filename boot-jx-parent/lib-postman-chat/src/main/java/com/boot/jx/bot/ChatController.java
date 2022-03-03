@@ -56,7 +56,7 @@ public class ChatController {
 	    ChatContactDoc chatContactDoc = sessionStore.getContact(waMessage);
 	    chatService.send(chatContactDoc, waMessage);
 	} else {
-	    chatService.send(chatContext.getContact(), waMessage);
+	    chatService.send(chatContext.contact().getDoc(), waMessage);
 	}
     }
 
@@ -74,19 +74,19 @@ public class ChatController {
     }
 
     public void botScore(Integer botScore) {
-	chatService.botScore(chatContext.getChatSession(), botScore);
+	chatService.botScore(chatContext.session().getDoc(), botScore);
     }
 
     public void agentScore(Integer agentScore) {
-	chatService.agentScore(chatContext.getChatSession(), agentScore);
+	chatService.agentScore(chatContext.session().getDoc(), agentScore);
     }
 
     public void resolveSession() {
-	chatSessionManager.resolveSession(chatContext.getChatSession());
+	chatSessionManager.resolveSession(chatContext.session().getDoc());
     }
 
     public void closeSession() {
-	chatSessionManager.closeSession(chatContext.getChatSession());
+	chatSessionManager.closeSession(chatContext.session().getDoc());
     }
 
     public void next(String key) {

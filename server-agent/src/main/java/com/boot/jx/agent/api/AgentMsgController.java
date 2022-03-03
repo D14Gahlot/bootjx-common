@@ -20,6 +20,7 @@ import com.boot.jx.agent.api.ControllerRequestDTOs.ChatTagUpdateRequest;
 import com.boot.jx.agent.api.ControllerRequestDTOs.SessionSearchRequest;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.api.ApiResponseUtil;
+import com.boot.jx.chat.ChatSessionService;
 import com.boot.jx.common.config.ConfigConstants.SETUP_KEY;
 import com.boot.jx.common.doc.AgentSessionDoc;
 import com.boot.jx.common.store.ChatArchiveService;
@@ -57,6 +58,9 @@ public class AgentMsgController {
 
     @Autowired
     private ChatSessionManager chatSessionManager;
+    
+    @Autowired
+    private ChatSessionService chatSessionService;
 
     @Autowired
     private DocumentUpdateListner documentUpdateListner;
@@ -114,7 +118,7 @@ public class AgentMsgController {
     @RequestMapping(value = { "/api/session/tag" }, method = { RequestMethod.POST })
     public ApiResponse<ChatSessionDTO, Object> addSessionTags(@RequestBody ChatTagUpdateRequest updateRequest) {
 	ChatSessionDoc sessionDoc = sessionStore.getSession(updateRequest.sessionId);
-	if (chatSessionManager.updateSessionStatus(sessionDoc, updateRequest.status)
+	if (chatSessionService.updateSessionStatus(sessionDoc, updateRequest.status)
 		| chatSessionManager.updateSessionTags(sessionDoc, updateRequest.tags)) {
 	    documentUpdateListner.onChatSessionUpdate(sessionDoc);
 	}

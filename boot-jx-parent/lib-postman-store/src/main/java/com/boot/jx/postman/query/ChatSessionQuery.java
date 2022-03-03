@@ -29,6 +29,22 @@ public class ChatSessionQuery extends DocQueryBuilder<ChatSessionDoc> {
 	return doc.getSessionId();
     }
 
+    public Object get(String key) {
+	return this.doc.store().get(key);
+    }
+
+    public ChatSessionQuery put(String key, String object) {
+	this.doc.store().put(key, object);
+	this.set("store." + key, object);
+	return this;
+    }
+
+    public ChatSessionQuery remove(String key) {
+	this.doc.store().remove(key);
+	this.unset("store." + key);
+	return this;
+    }
+
     public ChatSessionQuery setActive(boolean active) {
 	this.doc.setActive(active);
 	this.set("active", active);

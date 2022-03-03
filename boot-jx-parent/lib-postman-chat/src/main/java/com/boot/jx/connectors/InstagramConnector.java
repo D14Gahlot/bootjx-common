@@ -8,7 +8,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.amazonaws.services.codebuild.model.Report;
 import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorMapping;
 import com.boot.jx.dict.ContactType;
@@ -71,13 +70,13 @@ public class InstagramConnector extends AbstractConnector<InstagramConfig, Insta
     }
 
     @Override
-    public boolean initSession(ChatSessionDoc session, InboxMessage inboxMessage) {
+    public OutboxMessage initSession(ChatSessionDoc session, InboxMessage inboxMessage) {
 	ChannelConfig config = getChannelConfig(inboxMessage);
 	InstagramUserProfile profile = instaClient.getUserProfile(config,inboxMessage.contact());
-	ChatContactQuery contactQuery = messageContext.getChatContactQuery();
+	ChatContactQuery contactQuery = messageContext.contact();
 	contactQuery.setProfilePic(profile.getProfilePic());
 	contactQuery.setName(profile.getName());
-	return true;
+	return null;
     }
 
     @Deprecated

@@ -82,7 +82,8 @@ public class StompTunnelService {
 
 	    StompSession stompSession = stompTunnelSessionManager.getStompSession(stompUID);
 	    if (!ArgUtil.isEmpty(stompSession)) {
-		event.setHttpSessionId(stompSession.getHttpSessionId());
+		event.setXsessionId(stompSession.getXsessionId());
+		event.setJsessionId(stompSession.getJsessionId());
 		Map<String, Object> messageData = new HashMap<String, Object>();
 		messageData.put("data", message);
 		event.setData(JsonUtil.toJsonMap(messageData));

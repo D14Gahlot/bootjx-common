@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.boot.jx.AppContextUtil;
 import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorMapping;
 import com.boot.jx.connectors.AbstractConnector.DefaultConnector;
 import com.boot.jx.dict.ContactType;
@@ -83,9 +84,8 @@ public class WebConnector extends DefaultConnector<WebConfigDetails, WebPlugin> 
     @Override
     public void onSend(ChannelConfig channelConfig, ChatContactDoc chatContactDoc, OutboxMessage outboxMessage) {
 	String contactId = outboxMessage.contact().getContactId();
-
 	template(channelConfig, chatContactDoc, outboxMessage);
-
+	String contactIdWeb = AppContextUtil.getTenant() + "/" + contactId;
 	if (redisson == null) {
 	    try {
 		messageQueue.enqueue(outboxMessage);
@@ -95,12 +95,13 @@ public class WebConnector extends DefaultConnector<WebConfigDetails, WebPlugin> 
 		outboxMessage.logs().add(e.getMessage());
 		e.printStackTrace();
 	    }
-	} else if (stompEnabled) {
-	    stompTunnelService.sendToTag(contactId, "/message/receive/new", outboxMessage);
 	} else {
-	    LOGGER.debug("sendReply to " + contactId);
-	    RBlockingQueue<String> messageQueue = redisson.getBlockingQueue(WEB_USER_MESSAGE_STR + contactId);
-	    messageQueue.add(JsonUtil.toJson(outboxMessage));
+	    if (!stompEnabled) {
+		LOGGER.debug("sendReply to " + contactIdWeb);
+		RBlockingQueue<String> messageQueue = redisson.getBlockingQueue(WEB_USER_MESSAGE_STR + contactIdWeb);
+		messageQueue.add(JsonUtil.toJson(outboxMessage));
+	    }
+	    stompTunnelService.sendToTag(contactIdWeb, "/message/receive/new", outboxMessage);
 	}
     }
 
@@ -116,7 +117,7 @@ public class WebConnector extends DefaultConnector<WebConfigDetails, WebPlugin> 
     @Autowired
     private StompTunnelService stompTunnelService;
 
-    public OutboxMessage pollUnreadMessage(String number) throws InterruptedException {
+    public OutboxMessage pollUnreadMessage(String contactId) throws InterruptedException {
 	if (redisson == null) {
 	    try {
 		return messageQueue.dequeue();
@@ -124,7 +125,7 @@ public class WebConnector extends DefaultConnector<WebConfigDetails, WebPlugin> 
 		e.printStackTrace();
 	    }
 	}
-	RBlockingQueue<String> messageQueue = redisson.getBlockingQueue(WEB_USER_MESSAGE_STR + number);
+	RBlockingQueue<String> messageQueue = redisson.getBlockingQueue(WEB_USER_MESSAGE_STR + contactId);
 	String x = messageQueue.poll(5, TimeUnit.SECONDS);
 
 	if (ArgUtil.is(x)) {
@@ -134,10 +135,10 @@ public class WebConnector extends DefaultConnector<WebConfigDetails, WebPlugin> 
     }
 
     @Override
-    public boolean initSession(ChatSessionDoc session, InboxMessage inboxMessage) {
+    public OutboxMessage initSession(ChatSessionDoc session, InboxMessage inboxMessage) {
 
-	ChatContactQuery contactQuery = messageContext.getChatContactQuery();
-	ChatContactDoc chatContactDoc = messageContext.getChatContactDoc();
+	ChatContactQuery contactQuery = messageContext.contact();
+	ChatContactDoc chatContactDoc = messageContext.contact().getDoc();
 
 	if (ArgUtil.is(inboxMessage.getForm())) {
 	    if (ArgUtil.is(inboxMessage.getForm().get("name"))) {
@@ -151,19 +152,17 @@ public class WebConnector extends DefaultConnector<WebConfigDetails, WebPlugin> 
 	List<TmplElement> inputs = new ArrayList<TmplElement>();
 	if (ArgUtil.isEmpty(chatContactDoc.getName())) {
 	    inputs.add(new TmplElement().name("name").label("Name").type("TEXT"));
-	    reply(null, null, (OutboxMessage) inboxMessage.replyMessage("Please fill below inputs to continue")
-		    .option("inputs", inputs), inboxMessage);
-	    return false;
+	    return (OutboxMessage) inboxMessage.replyMessage("Please fill below inputs to continue").option("inputs",
+		    inputs);
 	}
 
 	if (ArgUtil.isEmpty(chatContactDoc.getEmail())) {
 	    inputs.add(new TmplElement().name("email").label("Email").type("EMAIL"));
-	    reply(null, null, (OutboxMessage) inboxMessage.replyMessage("Please fill below inputs to continue")
-		    .option("inputs", inputs), inboxMessage);
-	    return false;
+	    return (OutboxMessage) inboxMessage.replyMessage("Please fill below inputs to continue").option("inputs",
+		    inputs);
 	}
 
-	return true;
+	return null;
     }
 
     public InboxMessage toInboxMessage(ChannelConfig channelConfig, MapModel map) {

@@ -54,10 +54,14 @@ public class DummyUserController {
 
     @RequestMapping(value = { "/dummy/user", "/pub/customer" }, method = RequestMethod.GET)
     public String dummyUser(@RequestParam(required = false) String number, Model model) throws InterruptedException {
-	model.addAttribute("LOCAL_PATH", appConfig.getAppPrefix() + "/pub");
+
+	model.addAttribute("LOCAL_PATH", appConfig.getAppPrefix());
 	model.addAttribute("POSTMAN_CONTEXT", appConfig.getAppPrefix());
 
 	if (pmCommonConfig != null) {
+	    if (!pmCommonConfig.isValidDomain()) {
+		return pmCommonConfig.mainDomainRedirect();
+	    }
 	    model.addAllAttributes(pmCommonConfig.appAttributes());
 	}
 	model.addAttribute("APP", "CUSTOMER");
@@ -70,7 +74,7 @@ public class DummyUserController {
 	}
 
 	ChannelConfig channelConfig = pmEnvironment.config().channel("web:page");
-	if(ArgUtil.is(channelConfig)) {
+	if (ArgUtil.is(channelConfig)) {
 	    model.addAttribute("CHANNEL_ID", channelConfig.getChannelId());
 	    model.addAttribute("CHANNEL_KEY", channelConfig.getChannelKey());
 	}

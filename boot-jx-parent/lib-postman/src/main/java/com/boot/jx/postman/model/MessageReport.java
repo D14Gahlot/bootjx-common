@@ -5,17 +5,19 @@ import java.util.List;
 
 import com.boot.jx.postman.model.Message.Status;
 import com.boot.jx.postman.model.MessageDefinitions.Contactable;
+import com.boot.jx.postman.model.MessageDefinitions.LogMessage;
 import com.boot.jx.swagger.ApiMockModelProperty;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class MessageReport implements Serializable {
+public class MessageReport implements LogMessage, Serializable {
 
     private static final long serialVersionUID = -9039777977577457215L;
 
     private String messageId;
     private String messageIdExt;
     private String messageIdRef;
+    private String sessionId;
     private Contactable contact;
 
     protected long changeStamp;
@@ -23,6 +25,8 @@ public class MessageReport implements Serializable {
     private Status status = null;
     private String reason = null;
     private List<MessageReportError> errors;
+
+    private MessageSession session;
 
     public String getMessageId() {
 	return messageId;
@@ -151,6 +155,29 @@ public class MessageReport implements Serializable {
 	public void setHref(String href) {
 	    this.href = href;
 	}
+    }
+
+    public String getSessionId() {
+	return sessionId;
+    }
+
+    public void setSessionId(String sessionId) {
+	this.sessionId = sessionId;
+    }
+
+    public MessageSession session() {
+	if (session == null) {
+	    this.session = new MessageSession();
+	}
+	return this.session;
+    }
+
+    public MessageSession getSession() {
+	return session;
+    }
+
+    public void setSession(MessageSession session) {
+	this.session = session;
     }
 
 }

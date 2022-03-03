@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 
 import com.boot.jx.mongo.CommonDocStore;
 import com.boot.jx.mongo.CommonMongoTemplate;
-import com.boot.jx.postman.PMClientConfig;
+import com.boot.jx.postman.PMEnvironment.PMClientConfig;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.model.MessageDefinitions.Contactable;
 import com.boot.jx.utils.PostManUtil;

@@ -27,7 +27,7 @@ public class ChannelConfig extends AChannelConfig {
     private boolean isPushFreeTextAllowed;
     private boolean isPushToNewContactAllowed;
     private boolean isWebhookManual;
-
+    
     private String callbackPath;
 
     public String getLane() {
