@@ -143,6 +143,10 @@ public class MapModel implements JsonSerializerType<Object> {
 	    return ArgUtil.areEqual(this.value, compare);
 	}
 
+	public boolean in(Object... compare) {
+	    return ArgUtil.isEqual(this.value, compare);
+	}
+
 	public T getValue() {
 	    return value;
 	}

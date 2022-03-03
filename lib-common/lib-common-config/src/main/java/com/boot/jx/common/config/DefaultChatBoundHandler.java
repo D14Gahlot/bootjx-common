@@ -109,7 +109,7 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
     }
 
     @Override
-    public void doHandle(InboxMessage inboxMessage) {
+    public void onMessage(InboxMessage inboxMessage, ChatSessionDoc session) {
 
 	ClientApp defaultClient = getDefaultInboundApp(inboxMessage.session().getQueue(), inboxMessage.contact());
 	if (ArgUtil.is(defaultClient)) {
@@ -138,6 +138,22 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 		if (CHAT_MODE.AGENT.equals(appType.getMode()) && ArgUtil.is(pmCommonConfig.getAgentUrl())) {
 		    LOGGER.debug("Forwarding InboxMessage to internal Agent ");
 		    chatClient.forward(pmCommonConfig.getAgentUrl() + PATH.INBOUND_FRWRD, inboxMessage);
+
+		    if (ArgUtil.is(session) && APP_TYPE.MITEL.equals(appType)) {
+			MapModel meta = new MapModel(session.getMeta());
+			String omid = meta.pathEntry("mitel.omid").asString();
+			if (ArgUtil.is(omid)) {
+			    MapModel mitel = mitelClient.resend(defaultClient, session.contact(),
+				    session.getSessionId(), omid);
+			    String newomid = mitel.getString("id");
+			    if (!ArgUtil.areEqual(newomid, omid)) {
+				ChatSessionQuery q = new ChatSessionQuery(session);
+				q.set("meta.mitel.omid", newomid).set("meta.mitel.queue_id",
+					mitel.getString("queueId"));
+				sessionStore.updateFirst(q);
+			    }
+			}
+		    }
 		    return;
 		}
 

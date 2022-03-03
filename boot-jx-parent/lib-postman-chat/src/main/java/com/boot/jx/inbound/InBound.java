@@ -21,11 +21,11 @@ public class InBound {
 
     public interface InBoundHandler {
 
-	public void doHandle(InboxMessage inboxMessage);
+	public void onMessage(InboxMessage inboxMessage, ChatSessionDoc session);
 
 	@Async
-	default public void handleAsync(InboxMessage inboxMessage) {
-	    this.doHandle(inboxMessage);
+	default public void onMessageAsync(InboxMessage inboxMessage, ChatSessionDoc session) {
+	    this.onMessage(inboxMessage, session);
 	}
 
 	public void doHandle(MessageReport messageReport);

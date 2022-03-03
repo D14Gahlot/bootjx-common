@@ -20,7 +20,7 @@ public class BotInBoundHandler extends DefaultChatBoundHandler {
     private BotEngine botEngine;
 
     @Override
-    public void doHandle(InboxMessage inboxMessage) {
+    public void onMessage(InboxMessage inboxMessage, ChatSessionDoc session) {
 	botEngine.invokeMethodsAsync(inboxMessage);
     }
 
