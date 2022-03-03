@@ -12,6 +12,7 @@ public class InstagramMessage implements Serializable {
 	private String text;
 	private boolean is_echo;
 	private boolean is_deleted;
+	private InstagramAttachment[] attachments;
 
 	public String getMid() {
 		return mid;
@@ -52,5 +53,13 @@ public class InstagramMessage implements Serializable {
 	public void setIs_deleted(boolean is_deleted) {
 		this.is_deleted = is_deleted;
 	}
+	
+	public InstagramAttachment[] getAttachments() {
+    	return attachments;
+    }
+
+    public void setAttachments(InstagramAttachment[] attachments) {
+    	this.attachments = attachments;
+    }
 	
 }

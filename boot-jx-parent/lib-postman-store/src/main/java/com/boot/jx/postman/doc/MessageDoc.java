@@ -72,6 +72,7 @@ public class MessageDoc implements Serializable, Patchable<MessageDoc> {
 
     private Map<String, Long> stamps;
     public List<String> logs;
+    private Map<String, Object> reply;
 
     @Indexed
     private String contactId;
@@ -362,5 +363,16 @@ public class MessageDoc implements Serializable, Patchable<MessageDoc> {
 
     public void setQueue(String queue) {
 	this.queue = queue;
+    }
+    
+    public void setReply(Map<String, Object> reply) {
+    	this.reply = reply;
+    }
+
+    public Map<String, Object> getReply() {
+		if (this.reply == null) {
+		    this.reply = new HashMap<String, Object>();
+		}
+		return this.reply;
     }
 }
