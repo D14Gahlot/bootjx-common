@@ -37,6 +37,13 @@ public class InBound {
 	    this.onSessionRoute(inBoundEvent, sessionDoc);
 	}
 
+	public void onSessionResolve(InBoundEvent event, ChatSessionDoc chatSessionDoc);
+
+	@Async
+	default public void onSessionResolveAsync(InBoundEvent inBoundEvent, ChatSessionDoc sessionDoc) {
+	    this.onSessionResolve(inBoundEvent, sessionDoc);
+	}
+
 	public void onSessionClose(InBoundEvent event, ChatSessionDoc chatSessionDoc);
 
 	@Async

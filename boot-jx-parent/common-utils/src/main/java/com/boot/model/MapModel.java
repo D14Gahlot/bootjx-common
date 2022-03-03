@@ -29,6 +29,10 @@ public class MapModel implements JsonSerializerType<Object> {
     public static class NodeEntry<T> {
 	private T value;
 
+	public NodeEntry() {
+	    this.value = null;
+	}
+
 	public NodeEntry(T value) {
 	    this.value = value;
 	}
@@ -151,8 +155,17 @@ public class MapModel implements JsonSerializerType<Object> {
 	    return value;
 	}
 
+	public T value() {
+	    return value;
+	}
+
 	public void setValue(T value) {
 	    this.value = value;
+	}
+
+	public NodeEntry<T> value(T value) {
+	    this.value = value;
+	    return this;
 	}
 
     }

@@ -58,7 +58,7 @@ public class AgentMsgController {
 
     @Autowired
     private ChatSessionManager chatSessionManager;
-    
+
     @Autowired
     private ChatSessionService chatSessionService;
 
@@ -118,7 +118,7 @@ public class AgentMsgController {
     @RequestMapping(value = { "/api/session/tag" }, method = { RequestMethod.POST })
     public ApiResponse<ChatSessionDTO, Object> addSessionTags(@RequestBody ChatTagUpdateRequest updateRequest) {
 	ChatSessionDoc sessionDoc = sessionStore.getSession(updateRequest.sessionId);
-	if (chatSessionService.updateSessionStatus(sessionDoc, updateRequest.status)
+	if (chatSessionService.updateSessionStatus(sessionDoc, updateRequest.status).exists()
 		| chatSessionManager.updateSessionTags(sessionDoc, updateRequest.tags)) {
 	    documentUpdateListner.onChatSessionUpdate(sessionDoc);
 	}
@@ -151,17 +151,21 @@ public class AgentMsgController {
 
     @RequestMapping(value = "/api/sessions/search", method = { RequestMethod.POST })
     public ApiResponse<ChatSessionDTO, Object> searchSessions(@RequestBody SessionSearchRequest query) {
-	List<ChatSessionDTO> chatSessionDtos = new ArrayList<ChatSessionDTO>();	
+	List<ChatSessionDTO> chatSessionDtos = new ArrayList<ChatSessionDTO>();
 	List<ChatSessionDoc> sessions = chatSessionManager.searchBy(query.status, query.tags, query.fromStamp,
 		query.toStamp);
 	for (ChatSessionDoc chatSessionDoc : sessions) {
-		ChatSessionDTO chatSessionDto = chatArchive.withContact(chatSessionDoc);
+	    ChatSessionDTO chatSessionDto = chatArchive.withContact(chatSessionDoc);
 	    chatSessionDtos.add(chatSessionDto);
 	}
-	/**remove duplicate /multiple Session for each contact  we can filter based on name , phone number on any field **/
-	if(chatSessionDtos!=null &&  !chatSessionDtos.isEmpty()) {
-		Set<String> chatSessionSet = new HashSet<>();
-		chatSessionDtos=chatSessionDtos.stream().filter(e->chatSessionSet.add(e.getPhone())).collect(Collectors.toList());
+	/**
+	 * remove duplicate /multiple Session for each contact we can filter based on
+	 * name , phone number on any field
+	 **/
+	if (chatSessionDtos != null && !chatSessionDtos.isEmpty()) {
+	    Set<String> chatSessionSet = new HashSet<>();
+	    chatSessionDtos = chatSessionDtos.stream().filter(e -> chatSessionSet.add(e.getPhone()))
+		    .collect(Collectors.toList());
 	}
 	return ApiResponse.buildResults(chatSessionDtos);
     }
@@ -175,5 +179,5 @@ public class AgentMsgController {
 	    chatSessionDtos.add(chatSessionDto);
 	}
 	return ApiResponse.buildResults(chatSessionDtos);
-    } 
+    }
 }

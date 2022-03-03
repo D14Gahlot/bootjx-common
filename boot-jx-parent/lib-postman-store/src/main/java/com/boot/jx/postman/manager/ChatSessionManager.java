@@ -29,6 +29,7 @@ import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.ext.InBoundEvent;
 import com.boot.jx.postman.model.ext.InBoundEvent.SessionRouted;
 import com.boot.jx.postman.store.MessageStore.EVENTS;
+import com.boot.model.MapModel.NodeEntry;
 import com.boot.jx.postman.store.SessionStore;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
@@ -70,14 +71,23 @@ public class ChatSessionManager {
 	return inBoundEvent;
     }
 
-    public boolean resolveSession(ChatSessionDoc session) {
+    public NodeEntry<InBoundEvent> resolveSession(ChatSessionDoc session) {
+	NodeEntry<InBoundEvent> eventEntry = new NodeEntry<InBoundEvent>();
+
 	if (!ArgUtil.isEmptyValue(session.getResolveSessionStamp())) {
-	    return false;
+	    return eventEntry;
 	}
+
 	session = sessionStore.resolveSession(session);
+	InBoundEvent inBoundEvent = new InBoundEvent().eventCode(InBoundEvent.SESSION_STATUS);
+	inBoundEvent.sessionRouted = new SessionRouted();
+	inBoundEvent.sessionId = session.getSessionId();
+	inBoundEvent.contactId = session.getContactId();
+	inBoundEvent.contact().copyFrom(session.contact());
+
 	logManager.event(session, EVENTS.STATUS_CHANGED, session.getStatus(),
 		PMConstants.CHAT_STATUS.RESOLVED.toString());
-	return true;
+	return eventEntry.value(inBoundEvent);
     }
 
     public InBoundEvent closeSession(ChatSessionDoc session) {

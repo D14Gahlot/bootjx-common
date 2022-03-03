@@ -8,6 +8,7 @@ import com.boot.jx.AppContextUtil;
 import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.chat.ChatClient;
 import com.boot.jx.chat.ChatClient.PATH;
+import com.boot.jx.chat.ChatService;
 import com.boot.jx.common.store.ChatArchiveBuilder;
 import com.boot.jx.inbound.InBound.InBoundHandler;
 import com.boot.jx.postman.ClientApp;
@@ -16,6 +17,7 @@ import com.boot.jx.postman.PMConstants.CHAT_MODE;
 import com.boot.jx.postman.PMConstants.MESSAGE_FORMAT_TYPE;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PMEnvironment.PMCommonConfig;
+import com.boot.jx.postman.PMEnvironment.PMConfigurationObject;
 import com.boot.jx.postman.PMEnvironment.PMDomainConfig;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.manager.LogManager;
@@ -25,6 +27,7 @@ import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.Message.Status;
 import com.boot.jx.postman.model.MessageDefinitions.Contactable;
 import com.boot.jx.postman.model.MessageReport;
+import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.model.ext.CommonMsgText.InBoundMsgText;
 import com.boot.jx.postman.model.ext.InBoundContact;
 import com.boot.jx.postman.model.ext.InBoundEvent;
@@ -80,6 +83,9 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 
     @Autowired
     MitelClient mitelClient;
+
+    @Autowired(required = false)
+    private ChatService chatService;
 
     public ClientApp getDefaultInboundApp(String assignedQueue, Contactable contactable) {
 	ClientApp defaultClient = null;
@@ -315,6 +321,14 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
     }
 
     @Override
+    public void onSessionResolve(InBoundEvent event, ChatSessionDoc chatSessionDoc) {
+	PMConfigurationObject resolvedReply = pmDomainConfig.getResolveReply();
+	if (resolvedReply.exists()) {
+	    chatService.send(chatSessionDoc, new OutboxMessage().templateId(resolvedReply.asString()));
+	}
+    }
+
+    @Override
     public void onSessionClose(InBoundEvent event, ChatSessionDoc sessionDoc) {
 
 	ClientApp defaultClient = getDefaultInboundApp(sessionDoc.getAssignedToQueue(), null);
@@ -333,7 +347,7 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 	    }
 	}
 	stompTunnelService.sendToAll(PostManUtil.ON_DEPT_ASSIGN_TOPIC(sessionDoc.getAssignedToDept()),
-		chatArchiveBuilder.buildChatSessionDTO().from(sessionDoc).withContact()
+		chatArchiveBuilder.sessionDTO().from(sessionDoc).withContact()
 			.isAssigned(sessionDoc.getAssignedToAgent()).get());
     }
 

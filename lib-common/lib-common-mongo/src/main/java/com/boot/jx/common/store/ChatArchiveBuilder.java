@@ -19,7 +19,7 @@ public class ChatArchiveBuilder {
     @Autowired
     private ChatArchiveService chatArchive;
 
-    public ChatSessionDTOBuilder buildChatSessionDTO() {
+    public ChatSessionDTOBuilder sessionDTO() {
 	return new ChatSessionDTOBuilder().archive(chatArchive);
     }
 
@@ -38,6 +38,10 @@ public class ChatArchiveBuilder {
 	    this.chatSessionDoc = chatSessionDoc;
 	    this.chatSessionDTO = ChatDTOUtil.getChatSessionDTO(chatSessionDoc);
 	    return this;
+	}
+
+	public ChatSessionDTOBuilder from(String sessionId) {
+	    return this.from(archive.getChatSessionDoc(sessionId));
 	}
 
 	public ChatSessionDTOBuilder withMessages() {
