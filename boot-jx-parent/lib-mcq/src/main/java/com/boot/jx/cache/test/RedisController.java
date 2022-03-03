@@ -1,6 +1,7 @@
 package com.boot.jx.cache.test;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.slf4j.Logger;
@@ -14,56 +15,62 @@ import org.springframework.web.bind.annotation.RestController;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.api.BoolRespModel;
 import com.boot.jx.cache.test.RedisSampleTxCacheBox.RedisSampleData;
-import com.boot.jx.tunnel.TunnelDBEventLimiter;
+import com.boot.jx.tunnel.ITunnelDefs.ITunnelEventLimiter;
 import com.boot.jx.tunnel.TunnelService;
 import com.boot.jx.tunnel.sys.SharedConfigManager;
 import com.boot.jx.tunnel.sys.SysTunnelEventsDict;
+import com.boot.utils.ArgUtil;
 
 @RestController
 public class RedisController {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(RedisController.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(RedisController.class);
 
-	@Autowired
-	private RedisSampleTxCacheBox redisSampleCacheBox;
+    @Autowired
+    private RedisSampleTxCacheBox redisSampleCacheBox;
 
-	@Autowired
-	private TunnelService tunnelService;
+    @Autowired
+    private TunnelService tunnelService;
 
-	@Autowired(required = false)
-	private TunnelDBEventLimiter dbEventLimiter;
+    @Autowired(required = false)
+    private List<ITunnelEventLimiter> dbEventLimiters;
 
-	@Autowired
-	SharedConfigManager sharedConfigManager;
+    @Autowired
+    SharedConfigManager sharedConfigManager;
 
-	@RequestMapping(value = "/pub/redis/test", method = RequestMethod.PUT)
-	public RedisSampleData cacheTestGet(@RequestBody RedisSampleData status) {
-		redisSampleCacheBox.fastPut(status);
-		return status;
-	}
+    @RequestMapping(value = "/pub/redis/test", method = RequestMethod.PUT)
+    public RedisSampleData cacheTestGet(@RequestBody RedisSampleData status) {
+	redisSampleCacheBox.fastPut(status);
+	return status;
+    }
 
-	@RequestMapping(value = "/pub/redis/test", method = RequestMethod.GET)
-	public RedisSampleData cacheTestGet() {
-		return redisSampleCacheBox.get();
-	}
+    @RequestMapping(value = "/pub/redis/test", method = RequestMethod.GET)
+    public RedisSampleData cacheTestGet() {
+	return redisSampleCacheBox.get();
+    }
 
-	@RequestMapping(value = "/pub/redis/test", method = RequestMethod.POST)
-	public long cacheTestPost(@RequestBody RedisSampleData status) {
-		return tunnelService.shout(SysTunnelEventsDict.Names.TEST_TOPIC, status);
-	}
+    @RequestMapping(value = "/pub/redis/test", method = RequestMethod.POST)
+    public long cacheTestPost(@RequestBody RedisSampleData status) {
+	return tunnelService.shout(SysTunnelEventsDict.Names.TEST_TOPIC, status);
+    }
 
-	@RequestMapping(value = "/pub/stats/tunnel-limiter", method = RequestMethod.GET)
-	public Map<String, Object> getStats() {
-		Map<String, Object> propMap = new HashMap<String, Object>();
-		if (dbEventLimiter != null) {
-			propMap = dbEventLimiter.getStats();
+    @RequestMapping(value = "/pub/stats/tunnel-limiter", method = RequestMethod.GET)
+    public Map<String, Object> getStats() {
+	Map<String, Object> propMap = new HashMap<String, Object>();
+	if (ArgUtil.is(dbEventLimiters)) {
+	    for (ITunnelEventLimiter iTunnelEventLimiter : dbEventLimiters) {
+		Map<String, Object> stats = iTunnelEventLimiter.getStats();
+		if (ArgUtil.is(stats)) {
+		    propMap.put(iTunnelEventLimiter.getName(), stats);
 		}
-		return propMap;
+	    }
 	}
+	return propMap;
+    }
 
-	@RequestMapping(value = "/pub/amx/config/shared/clear/all", method = RequestMethod.GET)
-	public ApiResponse<BoolRespModel, Object> clearSharedConfig() {
-		sharedConfigManager.clear();
-		return ApiResponse.build(new BoolRespModel(true));
-	}
+    @RequestMapping(value = "/pub/amx/config/shared/clear/all", method = RequestMethod.GET)
+    public ApiResponse<BoolRespModel, Object> clearSharedConfig() {
+	sharedConfigManager.clear();
+	return ApiResponse.build(new BoolRespModel(true));
+    }
 }
