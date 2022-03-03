@@ -192,17 +192,17 @@ public abstract class ATunnelEventLimiter<T> implements ITunnelEventLimiter {
 		if (info.getTimestamp() <= matureCutoffStamp) {
 		    RLocalCachedMap<String, TunnelMessage<T>> cache = getCache();
 		    try {
-			TunnelMessage<T> x = cache.get(info.getThrottleKey());
-			if (ArgUtil.is(x)) {
+			TunnelMessage<T> latest = cache.get(info.getThrottleKey());
+			if (ArgUtil.is(latest)) {
 			    // logger.info("x {} {} {}", x.getTopic(), info.getThrottleKey(),
 			    // x.getTimestamp());
-			    if ((x.getTimestamp() <= matureCutoffStamp)) {
-				AppContextUtil.setContext(x.getContext());
+			    if ((latest.getTimestamp() <= matureCutoffStamp)) {
+				AppContextUtil.setContext(latest.getContext());
 				AppContextUtil.init();
-				tunnelService.task(x.getTopic(), x.getData());
+				tunnelService.task(latest.getTopic(), latest.getData());
 				// logger.info("===== {} {} {}", x.getTopic(), info.getThrottleKey(), "==");
 				// JsonUtil.toJson(x.getData()));
-				logger.debug("Q:{}, Bi:{} T:{} Tk:{}", pollQNum, i, x.getTopic(),
+				logger.debug("Q:{}, Bi:{} T:{} Tk:{}", pollQNum, i, latest.getTopic(),
 					info.getThrottleKey());
 				AppContextUtil.clear();
 				cache.fastRemove(info.getThrottleKey());

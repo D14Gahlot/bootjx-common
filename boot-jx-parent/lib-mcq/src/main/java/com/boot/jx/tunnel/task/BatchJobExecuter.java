@@ -27,12 +27,12 @@ import com.boot.utils.ClazzUtil;
 import com.boot.utils.TimeUtils;
 import com.boot.utils.UniqueID;
 
-public abstract class QueuedTaskExecuter {
+public abstract class BatchJobExecuter {
 
     public static final long JOB_RESOLVE_EXPIRY = 1000 * 60 * 15;
     public static final long JOB_TALLY_TIMEOUT = JOB_RESOLVE_EXPIRY / 10;
 
-    public static Logger LOGGER = LoggerService.getLogger(QueuedTaskExecuter.class);
+    public static Logger LOGGER = LoggerService.getLogger(BatchJobExecuter.class);
 
     private static Map<String, Candidate> LOCK_MAP = Collections.synchronizedMap(new HashMap<String, Candidate>());
 

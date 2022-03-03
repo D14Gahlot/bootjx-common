@@ -142,16 +142,13 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 		    if (ArgUtil.is(session) && APP_TYPE.MITEL.equals(appType)) {
 			MapModel meta = new MapModel(session.getMeta());
 			String omid = meta.pathEntry("mitel.omid").asString();
-			if (ArgUtil.is(omid)) {
-			    MapModel mitel = mitelClient.resend(defaultClient, session.contact(),
-				    session.getSessionId(), omid);
-			    String newomid = mitel.getString("id");
-			    if (!ArgUtil.areEqual(newomid, omid)) {
-				ChatSessionQuery q = new ChatSessionQuery(session);
-				q.set("meta.mitel.omid", newomid).set("meta.mitel.queue_id",
-					mitel.getString("queueId"));
-				sessionStore.updateFirst(q);
-			    }
+			MapModel mitel = mitelClient.resend(defaultClient, session.contact(), session.getSessionId(),
+				omid);
+			String newomid = mitel.getString("id");
+			if (!ArgUtil.areEqual(newomid, omid)) {
+			    ChatSessionQuery q = new ChatSessionQuery(session);
+			    q.set("meta.mitel.omid", newomid).set("meta.mitel.queue_id", mitel.getString("queueId"));
+			    sessionStore.updateFirst(q);
 			}
 		    }
 		    return;

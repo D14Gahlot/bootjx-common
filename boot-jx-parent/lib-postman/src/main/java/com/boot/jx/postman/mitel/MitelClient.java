@@ -2,6 +2,7 @@ package com.boot.jx.postman.mitel;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.ResourceAccessException;
 
 import com.boot.jx.postman.ClientApp;
 import com.boot.jx.postman.PMEnvironment.PMDomainConfig;
@@ -60,13 +61,19 @@ public class MitelClient {
     public MapModel resend(ClientApp defaultClient, Contactable contactable, String sessionId, String openmediaId) {
 	String accessToken = getToken(defaultClient);
 	String endPoint = ArgUtil.parseAsString(defaultClient.props().get("end_point"));
-
-	MapModel resp = restService.ajax(endPoint).path("/MiccSdk/api/v1/openmedia/{id}").pathParam("id", openmediaId)
-		.header("Authorization", "Bearer " + accessToken).get().asMapModel();
-	if (resp.keyEntry("conversationState").in("Ended", "Abandoned")) {
-	    return this.send(defaultClient, contactable, sessionId);
+	if (ArgUtil.is(openmediaId)) {
+	    try {
+		MapModel resp = restService.ajax(endPoint).path("/MiccSdk/api/v1/openmedia/{id}")
+			.pathParam("id", openmediaId)
+			.header("Authorization", "Bearer " + accessToken).get().asMapModel();
+		if (!resp.keyEntry("conversationState").in("Ended", "Abandoned")) {
+		    return resp;
+		}
+	    } catch (ResourceAccessException e) {
+		return this.send(defaultClient, contactable, sessionId);
+	    }
 	}
-	return resp;
+	return this.send(defaultClient, contactable, sessionId);
     }
 
     public MapModel send(ClientApp defaultClient, Contactable contactable, String sessionId) {
