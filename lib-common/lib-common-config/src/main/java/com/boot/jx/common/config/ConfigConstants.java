@@ -112,7 +112,7 @@ public class ConfigConstants {
 
 	POSTMAN_AGENT_CHAT_AUTOREPLY_NOAGENT(
 		new ConfigMeta("Message to customer when agent avaialble", "postman.agent.chat.autoreply.noagent")
-			.optionsSource("getx:/api/tmpl/hsm").group(GROUP_AGENT)),
+			.optionsSource("getx:/api/tmpl/hsm").optionsKey("code").optionsLabel("name").group(GROUP_AGENT)),
 
 	// Ends here
 	;
