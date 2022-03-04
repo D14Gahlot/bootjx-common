@@ -5,6 +5,8 @@ import java.util.Iterator;
 
 import org.redisson.api.RQueue;
 
+import com.boot.jx.tunnel.ITunnelDefs.TunnelQueue;
+
 /**
  * WIP
  * 

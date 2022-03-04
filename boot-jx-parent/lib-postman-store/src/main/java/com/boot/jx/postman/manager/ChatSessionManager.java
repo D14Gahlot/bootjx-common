@@ -29,6 +29,7 @@ import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.ext.InBoundEvent;
 import com.boot.jx.postman.model.ext.InBoundEvent.SessionRouted;
 import com.boot.jx.postman.store.MessageStore.EVENTS;
+import com.boot.model.MapModel.NodeEntry;
 import com.boot.jx.postman.store.SessionStore;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
@@ -70,14 +71,23 @@ public class ChatSessionManager {
 	return inBoundEvent;
     }
 
-    public boolean resolveSession(ChatSessionDoc session) {
+    public NodeEntry<InBoundEvent> resolveSession(ChatSessionDoc session) {
+	NodeEntry<InBoundEvent> eventEntry = new NodeEntry<InBoundEvent>();
+
 	if (!ArgUtil.isEmptyValue(session.getResolveSessionStamp())) {
-	    return false;
+	    return eventEntry;
 	}
+
 	session = sessionStore.resolveSession(session);
+	InBoundEvent inBoundEvent = new InBoundEvent().eventCode(InBoundEvent.SESSION_STATUS);
+	inBoundEvent.sessionRouted = new SessionRouted();
+	inBoundEvent.sessionId = session.getSessionId();
+	inBoundEvent.contactId = session.getContactId();
+	inBoundEvent.contact().copyFrom(session.contact());
+
 	logManager.event(session, EVENTS.STATUS_CHANGED, session.getStatus(),
 		PMConstants.CHAT_STATUS.RESOLVED.toString());
-	return true;
+	return eventEntry.value(inBoundEvent);
     }
 
     public InBoundEvent closeSession(ChatSessionDoc session) {
@@ -150,14 +160,14 @@ public class ChatSessionManager {
 
 	Criteria localCriteria = new Criteria().andOperator(
 		// is Active
-		Criteria.where("active").is(true),
+		Criteria.where("active").is(true), //("primary").is(true),
 		// Agent Session Start
 		// Criteria.where("agentSessionStamp").gt(watermarkStamp),
 		new Criteria().orOperator(
 			//
-			Criteria.where("agentSessionStamp").gt(watermarkStamp),
+			//Criteria.where("agentSessionStamp").gt(watermarkStamp),
 			// @deprecated condition
-			Criteria.where("updatedStamp").gt(watermarkStamp),
+			//Criteria.where("updatedStamp").gt(watermarkStamp),
 			// new Condition
 			Criteria.where("updated.day").gt(watermarkStampDay)),
 		// Criteria.where("updatedStamp").gt(watermarkStamp),
@@ -184,13 +194,12 @@ public class ChatSessionManager {
 		    Criteria.where("contact.name").regex("" + search + "", "i"),
 		    Criteria.where("contact.phone").regex("" + search + "", "i"),
 		    Criteria.where("contact.email").regex("" + search + "", "i"));
-
-	    query2.addCriteria(Criteria.where("mode").is("AGENT").orOperator(localCriteria, archiveCriteria));
+	    query2.addCriteria(Criteria.where("mode").is("AGENT").andOperator(archiveCriteria));
 	} else {
 	    query2.addCriteria(Criteria.where("mode").is("AGENT").andOperator(localCriteria));
 	}
 	query2.with(new Sort(Direction.DESC, "updated.day")).limit(100);
-	// System.out.println(query2.toString());
+	//System.out.println(query2.toString());
 	LOGGER.debug(query2.toString());
 	return sessionStore.find(query2, ChatSessionDoc.class);
     }

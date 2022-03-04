@@ -24,6 +24,7 @@ import com.boot.jx.postman.model.ext.InBoundEvent;
 import com.boot.jx.postman.query.ChatContactQuery;
 import com.boot.jx.postman.store.MessageContext;
 import com.boot.jx.postman.store.SessionStore;
+import com.boot.model.MapModel.NodeEntry;
 import com.boot.utils.ArgUtil;
 
 @Component
@@ -158,29 +159,48 @@ public class ChatSessionService {
 	return routeSession(sessionDoc, queue, params);
     }
 
-    public boolean updateSessionStatus(ChatSessionDoc sessionDoc, CHAT_STATUS status) {
+    public NodeEntry<InBoundEvent> updateSessionStatus(ChatSessionDoc sessionDoc, CHAT_STATUS status) {
+	NodeEntry<InBoundEvent> eventEntry = new NodeEntry<InBoundEvent>();
+
 	if (!ArgUtil.is(status)) {
-	    return false;
+	    return eventEntry;
 	}
 
 	String oldStatus = sessionDoc.getStatus();
 	if (status.toString().equalsIgnoreCase(oldStatus)) {
-	    return false;
+	    return eventEntry;
 	}
 	if (status == PMConstants.CHAT_STATUS.RESOLVED) {
-	    return chatSessionManager.resolveSession(sessionDoc);
+	    NodeEntry<InBoundEvent> eventEntry2 = chatSessionManager.resolveSession(sessionDoc);
+	    if (ArgUtil.is(inBoundHandler)) {
+		inBoundHandler.onSessionResolveAsync(eventEntry2.getValue(), sessionDoc);
+	    }
+	    return eventEntry2;
 	} else if (status == PMConstants.CHAT_STATUS.CLOSED) {
 	    InBoundEvent event = chatSessionManager.closeSession(sessionDoc);
 	    if (ArgUtil.is(inBoundHandler)) {
 		inBoundHandler.onSessionCloseAsync(event, sessionDoc);
 	    }
-	    return ArgUtil.is(event);
+	    return eventEntry.value(event);
 	} else {
 	    InBoundEvent event = chatSessionManager.updateStatus(sessionDoc, status);
-	    return ArgUtil.is(event);
+	    return eventEntry.value(event);
 	}
     }
 
+    public NodeEntry<InBoundEvent> closeSession(ChatSessionDoc chatSessionDoc) {
+	if (!chatSessionDoc.isResolved()) {
+	    updateSessionStatus(chatSessionDoc, PMConstants.CHAT_STATUS.RESOLVED);
+	}
+	return updateSessionStatus(chatSessionDoc, PMConstants.CHAT_STATUS.CLOSED);
+    }
+
+    public NodeEntry<InBoundEvent> closeSession(String sessionId) {
+	ChatSessionDoc sessionDoc = sessionStore.getSession(sessionId);
+	return closeSession(sessionDoc);
+    }
+
+    @Deprecated
     public MessageDoc closeChatSession(ChatSessionDoc chatSessionDoc) {
 	MessageDoc messageDoc = null;
 
@@ -190,9 +210,9 @@ public class ChatSessionService {
 	    if (resolvedReply.exists()) {
 		messageDoc = chatService.send(chatSessionDoc, new OutboxMessage().templateId(resolvedReply.asString()));
 	    }
-
 	}
 	updateSessionStatus(chatSessionDoc, PMConstants.CHAT_STATUS.CLOSED);
 	return messageDoc;
     }
+
 }

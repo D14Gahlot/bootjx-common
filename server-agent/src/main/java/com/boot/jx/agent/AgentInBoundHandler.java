@@ -40,7 +40,7 @@ public class AgentInBoundHandler extends DefaultChatBoundHandler {
     private ChatService chatService;
 
     @Override
-    public void doHandle(InboxMessage inboxMessage) {
+    public void onMessage(InboxMessage inboxMessage, ChatSessionDoc session) {
 	if (ArgUtil.isEmpty(inboxMessage.session().getMode())) {
 	    try {
 		InboxMessage agentAssignResp = agentChatHandler.onAssign(inboxMessage);
