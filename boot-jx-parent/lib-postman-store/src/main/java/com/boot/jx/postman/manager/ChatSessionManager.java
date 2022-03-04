@@ -160,14 +160,14 @@ public class ChatSessionManager {
 
 	Criteria localCriteria = new Criteria().andOperator(
 		// is Active
-		Criteria.where("active").is(true),
+		Criteria.where("active").is(true), //("primary").is(true),
 		// Agent Session Start
 		// Criteria.where("agentSessionStamp").gt(watermarkStamp),
 		new Criteria().orOperator(
 			//
-			Criteria.where("agentSessionStamp").gt(watermarkStamp),
+			//Criteria.where("agentSessionStamp").gt(watermarkStamp),
 			// @deprecated condition
-			Criteria.where("updatedStamp").gt(watermarkStamp),
+			//Criteria.where("updatedStamp").gt(watermarkStamp),
 			// new Condition
 			Criteria.where("updated.day").gt(watermarkStampDay)),
 		// Criteria.where("updatedStamp").gt(watermarkStamp),
@@ -194,13 +194,12 @@ public class ChatSessionManager {
 		    Criteria.where("contact.name").regex("" + search + "", "i"),
 		    Criteria.where("contact.phone").regex("" + search + "", "i"),
 		    Criteria.where("contact.email").regex("" + search + "", "i"));
-
-	    query2.addCriteria(Criteria.where("mode").is("AGENT").orOperator(localCriteria, archiveCriteria));
+	    query2.addCriteria(Criteria.where("mode").is("AGENT").andOperator(archiveCriteria));
 	} else {
 	    query2.addCriteria(Criteria.where("mode").is("AGENT").andOperator(localCriteria));
 	}
 	query2.with(new Sort(Direction.DESC, "updated.day")).limit(100);
-	// System.out.println(query2.toString());
+	//System.out.println(query2.toString());
 	LOGGER.debug(query2.toString());
 	return sessionStore.find(query2, ChatSessionDoc.class);
     }
