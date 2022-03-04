@@ -82,15 +82,22 @@ public class AgentMsgController {
 	List<ChatSessionDTO> chatSessionDtos = new ArrayList<ChatSessionDTO>();
 	if (agentSession.isLoggedIn() && ArgUtil.is(agentSession.getAgentDept())) {
 	    List<ChatSessionDoc> sessions = null;
-	    long historyPeriod = environment.keyEntry(SETUP_KEY.POSTMAN_AGENT_TAB_HISTORY_PERIOD).asLong(0L);
-	    if (historyPeriod > 0L && "HISTORY".equals(tab)) {
-		sessions = chatSessionManager.findChatSessionDocByAgentAndUnAssigned(agentSession.getAgentCode(),
-			agentSession.getAgentDept(), search,
-			PMConstants.DEFAULT_VALUES.POSTMAN_AGENT_TAB_HISTORY_PERIOD + historyPeriod);
-	    } else {
-		ApiResponseUtil.addLog("Only Active Chats");
+
+	    if (ArgUtil.is(search)) {
+		ApiResponseUtil.addLog("Search Results");
 		sessions = chatSessionManager.findChatSessionDocByAgentAndUnAssigned(agentSession.getAgentCode(),
 			agentSession.getAgentDept(), search);
+	    } else {
+		long historyPeriod = environment.keyEntry(SETUP_KEY.POSTMAN_AGENT_TAB_HISTORY_PERIOD).asLong(0L);
+		if (historyPeriod > 0L && "HISTORY".equals(tab)) {
+		    sessions = chatSessionManager.findChatSessionDocByAgentAndUnAssigned(agentSession.getAgentCode(),
+			    agentSession.getAgentDept(), search,
+			    PMConstants.DEFAULT_VALUES.POSTMAN_AGENT_TAB_HISTORY_PERIOD + historyPeriod);
+		} else {
+		    ApiResponseUtil.addLog("Only Active Chats");
+		    sessions = chatSessionManager.findChatSessionDocByAgentAndUnAssigned(agentSession.getAgentCode(),
+			    agentSession.getAgentDept(), search);
+		}
 	    }
 
 	    for (ChatSessionDoc chatSessionDoc : sessions) {
