@@ -79,7 +79,11 @@ public class ITunnelDefs {
 	}
 
 	public MapModel data() {
-	    return MapModel.from(this.data);
+	    MapModel x = MapModel.from(this.data);
+	    if (this.data == null) {
+		this.data = x.map();
+	    }
+	    return x;
 	}
 
     }

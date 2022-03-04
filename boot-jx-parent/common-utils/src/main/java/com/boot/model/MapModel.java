@@ -178,6 +178,51 @@ public class MapModel implements JsonSerializerType<Object> {
 
     }
 
+    public static class MapPathEntry extends MapEntry {
+
+	JsonPath jsonPath;
+	String key;
+	protected Map<String, Object> map;
+
+	public MapPathEntry() {
+	    super(null);
+	}
+
+	public MapPathEntry map(Map<String, Object> map) {
+	    this.map = map;
+	    return this;
+	}
+
+	public MapPathEntry path(JsonPath jsonPath) {
+	    this.jsonPath = jsonPath;
+	    return this;
+	}
+
+	public MapPathEntry key(String key) {
+	    this.key = key;
+	    return this;
+	}
+
+	public MapPathEntry load(Object defaultValue) {
+	    if (ArgUtil.is(key)) {
+		this.value(this.map.getOrDefault(key, defaultValue));
+	    } else if (ArgUtil.is(jsonPath)) {
+		this.value(jsonPath.load(this.map, defaultValue));
+	    }
+	    return this;
+	}
+
+	public MapPathEntry save(Object value) {
+	    if (ArgUtil.is(key)) {
+		this.value(this.map.put(key, value));
+	    } else if (ArgUtil.is(jsonPath)) {
+		jsonPath.save(map, value);
+	    }
+	    return this;
+	}
+
+    }
+
     protected Map<String, Object> map;
     protected List<Object> list;
     protected Map<String, Object> elem;
@@ -199,23 +244,23 @@ public class MapModel implements JsonSerializerType<Object> {
 	this.list = list;
     }
 
-    public MapEntry entry(String key) {
-	return new MapEntry(this.map().get(key));
+    public MapPathEntry entry(String key) {
+	return new MapPathEntry().map(this.map()).key(key).load(null);
     }
 
-    public MapEntry entry(JsonPath jsonPath) {
-	return new MapEntry(jsonPath.load(this.map, null));
+    public MapPathEntry entry(JsonPath jsonPath) {
+	return new MapPathEntry().map(this.map()).path(jsonPath).load(null);
     }
 
-    public MapEntry keyEntry(String key) {
+    public MapPathEntry keyEntry(String key) {
 	return this.entry(key);
     }
 
-    public MapEntry pathEntry(String path) {
+    public MapPathEntry pathEntry(String path) {
 	return this.entry(new JsonPath(path));
     }
 
-    public MapEntry path(JsonPath jsonPath) {
+    public MapPathEntry path(JsonPath jsonPath) {
 	return this.entry(jsonPath);
     }
 
@@ -361,7 +406,9 @@ public class MapModel implements JsonSerializerType<Object> {
     }
 
     public MapModel put(String key, Object value) {
-	this.map().put(key, value);
+	if (value != null) {
+	    this.map().put(key, value);
+	}
 	return this;
     }
 

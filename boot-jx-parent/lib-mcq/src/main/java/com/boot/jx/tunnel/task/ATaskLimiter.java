@@ -171,16 +171,19 @@ public abstract class ATaskLimiter implements ITaskLimiter {
 	}
 	// Push to Map
 	AppContext context = AppContextUtil.getContext();
+	String taskUid = String.format("%s/%s/%s", context.getTenant(), task.getName(),
+		ArgUtil.nonEmpty(task.getId(), context.getTraceId()));
+
 	TunnelMessage<TunnelTask> tunnelMessage = new TunnelMessage<TunnelTask>(task, context);
 	tunnelMessage.setTopic(task.getName());
 	RLocalCachedMap<String, TunnelMessage<TunnelTask>> cache = getCache();
-	cache.put(task.getId(), tunnelMessage);
+	cache.put(taskUid, tunnelMessage);
 
 	// Push To Turn Queue
 	TaskInfo info = new TaskInfo();
 	info.setTimestamp(tunnelMessage.getTimestamp());
 	info.setInterval(task.getInterval() * 1000);
-	info.setKey(task.getId());
+	info.setKey(taskUid);
 	RQueue<TaskInfo> limiterQ = getQueue(1);
 	limiterQ.add(info);
     }

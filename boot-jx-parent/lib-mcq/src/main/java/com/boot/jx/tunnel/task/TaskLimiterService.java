@@ -9,14 +9,16 @@ import org.redisson.api.RedissonClient;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
 
 import com.boot.jx.logger.LoggerService;
 import com.boot.jx.tunnel.ITunnelDefs.ITaskLimiter;
 import com.boot.utils.ArgUtil;
 
-public abstract class ATaskLimiterService {
+@Component
+public class TaskLimiterService {
 
-    Logger logger = LoggerService.getLogger(ATaskLimiterService.class);
+    Logger logger = LoggerService.getLogger(TaskLimiterService.class);
     public static final int POLL_INTERVAL = 1 * 1000;
 
     @Autowired(required = false)
