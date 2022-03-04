@@ -79,12 +79,12 @@ public class ChatArchiveService {
     }
 
     public ChatMessageDTO getMessage(MessageDoc messageDoc, ChatSessionDoc chatSessionDoc) {
-	ChatMessageDTO messageDto = ChatDTOUtil.getChatMessageDTO(messageDoc, chatSessionDoc.getContactName(),
-		ArgUtil.nonEmpty(messageDoc.getAgent(), messageDoc.getQueue(), chatSessionDoc.getAssignedToAgent(),
-			chatSessionDoc.getAssignedToQueue())
-
-	);
-	return messageDto;
+	if (ArgUtil.is(messageDoc)) {
+	    return ChatDTOUtil.getChatMessageDTO(messageDoc, chatSessionDoc.getContactName(),
+		    ArgUtil.nonEmpty(messageDoc.getAgent(), messageDoc.getQueue(), chatSessionDoc.getAssignedToAgent(),
+			    chatSessionDoc.getAssignedToQueue()));
+	}
+	return new ChatMessageDTO();
     }
 
     public ChatMessageDTO getMessage(MessageDoc messageDoc, ChatSessionDTO chatSessionDto) {

@@ -10,11 +10,9 @@ import com.boot.jx.inbound.InBound.InBoundHandler;
 import com.boot.jx.logger.LoggerService;
 import com.boot.jx.postman.PMConstants;
 import com.boot.jx.postman.PMConstants.CHAT_STATUS;
-import com.boot.jx.postman.PMEnvironment.PMConfigurationObject;
 import com.boot.jx.postman.PMEnvironment.PMDomainConfig;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
-import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.dto.ChatUserProfileDTO;
 import com.boot.jx.postman.dto.ChatUserProfileDTO.ChatUserProfileRequest;
 import com.boot.jx.postman.manager.ChatSessionManager;
@@ -198,21 +196,6 @@ public class ChatSessionService {
     public NodeEntry<InBoundEvent> closeSession(String sessionId) {
 	ChatSessionDoc sessionDoc = sessionStore.getSession(sessionId);
 	return closeSession(sessionDoc);
-    }
-
-    @Deprecated
-    public MessageDoc closeChatSession(ChatSessionDoc chatSessionDoc) {
-	MessageDoc messageDoc = null;
-
-	if (!chatSessionDoc.isResolved()) {
-	    updateSessionStatus(chatSessionDoc, PMConstants.CHAT_STATUS.RESOLVED);
-	    PMConfigurationObject resolvedReply = pmDomainConfig.getResolveReply();
-	    if (resolvedReply.exists()) {
-		messageDoc = chatService.send(chatSessionDoc, new OutboxMessage().template(resolvedReply.asString()));
-	    }
-	}
-	updateSessionStatus(chatSessionDoc, PMConstants.CHAT_STATUS.CLOSED);
-	return messageDoc;
     }
 
 }
