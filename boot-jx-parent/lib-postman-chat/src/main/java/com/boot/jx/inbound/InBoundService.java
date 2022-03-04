@@ -192,9 +192,9 @@ public class InBoundService {
 		botEngine.invokeMethodsAsync(inboxMessageOriginal);
 	    } else if (ArgUtil.is(inBoundHandler)) {
 		if (newThread) {
-		    inBoundHandler.doHandle(inboxMessageOriginal);
+		    inBoundHandler.onMessage(inboxMessageOriginal, session);
 		} else {
-		    inBoundHandler.handleAsync(inboxMessageOriginal);
+		    inBoundHandler.onMessageAsync(inboxMessageOriginal, session);
 		}
 	    } else if (agentService.onMessageSupported(inboxMessageOriginal)) { // TODO:-- TO be removed
 		agentService.onMessage(inboxMessageOriginal);

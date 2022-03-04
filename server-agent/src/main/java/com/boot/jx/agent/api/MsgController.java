@@ -108,7 +108,7 @@ public class MsgController {
 
 	    agentSessionService.refreshOnline();
 	    return new ApiResponse<ChatMessageDTO, Object>().result(messageDto)
-		    .meta(chatArchiveBuilder.buildChatSessionDTO().from(sessionDoc).get());
+		    .meta(chatArchiveBuilder.sessionDTO().from(sessionDoc).get());
 	} else {
 	    agentSessionService.refreshOnline();
 	    return new ApiResponse<ChatMessageDTO, Object>().message("Only assignee can respond to chat.");
@@ -187,7 +187,7 @@ public class MsgController {
 	ChatSessionDoc chatSessionDoc = sessionStore.getSession(sessionId);
 	AgentDoc agent = agentStore.findById(agentId);
 	agentChatHandlerImpl.onAssign(agent, chatSessionDoc);
-	ChatSessionDTO chatSessionDto = chatArchiveBuilder.buildChatSessionDTO().from(chatSessionDoc).withContact()
+	ChatSessionDTO chatSessionDto = chatArchiveBuilder.sessionDTO().from(chatSessionDoc).withContact()
 		.isAssigned(agentSession.getAgentCode()).withMessages().get();
 	return ApiResponse.buildResult(chatSessionDto);
     }

@@ -40,7 +40,7 @@ public class AgentInBoundHandler extends DefaultChatBoundHandler {
     private ChatService chatService;
 
     @Override
-    public void doHandle(InboxMessage inboxMessage) {
+    public void onMessage(InboxMessage inboxMessage, ChatSessionDoc session) {
 	if (ArgUtil.isEmpty(inboxMessage.session().getMode())) {
 	    try {
 		InboxMessage agentAssignResp = agentChatHandler.onAssign(inboxMessage);
@@ -48,14 +48,20 @@ public class AgentInBoundHandler extends DefaultChatBoundHandler {
 		    PMConfigurationObject transferReply = pmEnvironment
 			    .keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_AGENT_CHAT_AUTOREPLY_TALK2AGENT);
 		    if (transferReply.exists()) {
-			chatService.reply(inboxMessage, new OutboxMessage().templateId(transferReply.asString()));
+			chatService.reply(inboxMessage, new OutboxMessage().template(transferReply.asString()));
 		    } else {
 			chatService.reply(inboxMessage, new OutboxMessage()
 				.message("Connecting you to one of our customer representatives. Give us a moment."));
 		    }
 		} else {
-		    chatService.reply(inboxMessage, new OutboxMessage().message(
-			    "All agents are busy or online, we will connect you whenever someone is available."));
+		    PMConfigurationObject noAgentReply = pmEnvironment
+			    .keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_AGENT_CHAT_AUTOREPLY_NOAGENT);
+		    if (noAgentReply.exists()) {
+			chatService.reply(inboxMessage, new OutboxMessage().template(noAgentReply.asString()));
+		    } else {
+			chatService.reply(inboxMessage, new OutboxMessage().message(
+				"All agents are busy or online, we will connect you whenever someone is available."));
+		    }
 		}
 	    } catch (Exception e) {
 		LOGGER.error("Error ONE while Connecting to Agent", e);
@@ -79,6 +85,5 @@ public class AgentInBoundHandler extends DefaultChatBoundHandler {
     public void onSessionRoute(InBoundEvent inBoundEvent, ChatSessionDoc sessionDoc) {
 	super.onSessionRoute(inBoundEvent, sessionDoc);
     }
-
 
 }
