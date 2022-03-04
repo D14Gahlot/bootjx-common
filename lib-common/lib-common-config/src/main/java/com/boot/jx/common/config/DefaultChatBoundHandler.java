@@ -26,6 +26,7 @@ import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.Message.Status;
 import com.boot.jx.postman.model.MessageDefinitions.Contactable;
+import com.boot.jx.postman.model.MessageDefinitions.LogMessage;
 import com.boot.jx.postman.model.MessageReport;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.model.ext.CommonMsgText.InBoundMsgText;
@@ -46,6 +47,7 @@ import com.boot.jx.utils.PostManUtil;
 import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
+import com.boot.utils.JsonPath;
 
 public abstract class DefaultChatBoundHandler implements InBoundHandler {
 
@@ -144,18 +146,8 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 		if (CHAT_MODE.AGENT.equals(appType.getMode()) && ArgUtil.is(pmCommonConfig.getAgentUrl())) {
 		    LOGGER.debug("Forwarding InboxMessage to internal Agent ");
 		    chatClient.forward(pmCommonConfig.getAgentUrl() + PATH.INBOUND_FRWRD, inboxMessage);
-
 		    if (ArgUtil.is(session) && APP_TYPE.MITEL.equals(appType)) {
-			MapModel meta = new MapModel(session.getMeta());
-			String omid = meta.pathEntry("mitel.omid").asString();
-			MapModel mitel = mitelClient.resend(defaultClient, session.contact(), session.getSessionId(),
-				omid);
-			String newomid = mitel.getString("id");
-			if (!ArgUtil.areEqual(newomid, omid)) {
-			    ChatSessionQuery q = new ChatSessionQuery(session);
-			    q.set("meta.mitel.omid", newomid).set("meta.mitel.queue_id", mitel.getString("queueId"));
-			    sessionStore.updateFirst(q);
-			}
+			mitelRouting(session, defaultClient);
 		    }
 		    return;
 		}
@@ -179,6 +171,20 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 	} else {
 	    chatClient.forward(pmCommonConfig.getBotUrl() + PATH.INBOUND_FRWRD, inboxMessage);
 	}
+    }
+
+    private void mitelRouting(ChatSessionDoc session, ClientApp defaultClient) {
+	MapModel meta = new MapModel(session.getMeta());
+	String omid = meta.pathEntry("mitel.omid").asString();
+	MapModel mitel = mitelClient.resend(defaultClient, session.contact(), session.getSessionId(), omid);
+	String newomid = mitel.getString("id");
+	if (!ArgUtil.areEqual(newomid, omid)) {
+	    ChatSessionQuery q = new ChatSessionQuery(session);
+	    meta.put(JsonPath.create("mitel.omid"), newomid);
+	    q.set("meta.mitel.omid", newomid).set("meta.mitel.queue_id", mitel.getString("queueId"));
+	    sessionStore.updateFirst(q);
+	}
+
     }
 
     private void updateStatus(InboxMessage inboxMessage, Status status, Exception e) {
@@ -301,12 +307,7 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 		    return;
 		} else if (APP_TYPE.MITEL.equals(appType)) {
 		    try {
-			MapModel mitel = mitelClient.send(defaultClient, sessionDoc.contact(),
-				sessionDoc.getSessionId());
-			ChatSessionQuery q = new ChatSessionQuery(sessionDoc);
-			q.set("meta.mitel.omid", mitel.getString("id")).set("meta.mitel.queue_id",
-				mitel.getString("queueId"));
-			sessionStore.updateFirst(q);
+			mitelRouting(sessionDoc, defaultClient);
 		    } catch (Exception e) {
 			logManager.error(event, e);
 		    }
