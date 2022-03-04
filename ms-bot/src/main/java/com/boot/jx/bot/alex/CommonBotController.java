@@ -4,7 +4,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.boot.jx.AppContextUtil;
 import com.boot.jx.bot.ChatController;
 import com.boot.jx.common.config.ConfigConstants;
 import com.boot.jx.postman.PMEnvironment;
@@ -29,15 +28,6 @@ public class CommonBotController extends ChatController {
 			.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_AGENT_CHAT_AUTOREPLY_TALK2AGENT);
 		if (transferReply.exists()) {
 		    reply(new OutboxMessage().template(transferReply.asString()));
-		} else if (ArgUtil.is(AppContextUtil.getTenant())
-			&& AppContextUtil.getTenant().equalsIgnoreCase("tathkarah")) {
-		    reply("، عميلنا العزيز\r\n" // \n
-			    + "\r\n" // \n
-			    + "مرحباً بك في تطبيق تذكره!\r\n" // \n
-			    + "\r\n" // \n
-			    + "لحظات وسيتم توصيلك بأحد ممثلي خدمة العملاء. \r\n" // \n
-			    + "\r\n"// \n
-			    + " …..شكرا لانتظارك");// \n
 		} else {
 		    reply("Connecting you to one of our customer representatives. Give us a moment.");
 		}
