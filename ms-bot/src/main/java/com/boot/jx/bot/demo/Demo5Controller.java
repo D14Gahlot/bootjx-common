@@ -21,7 +21,7 @@ import com.boot.utils.StringUtils.StringMatcher;
 @BotController(name = "DemoBot", tenant = { "chakli" })
 public class Demo5Controller extends CommonBotController {
 	
-	public static final String REPLAY_ID = "replay_id";	
+	public static final String REPLY_ID = "reply_id";	
 
 	  
 	    @Autowired
@@ -388,8 +388,8 @@ public class Demo5Controller extends CommonBotController {
 	    
 	    
 	    public String toReplyEnum(InboxMessage inboxMessage) {
-	    	String codeValue = inboxMessage.form().get(REPLAY_ID)==null?inboxMessage.getMessage():
-		    	 inboxMessage.form().get(REPLAY_ID).toString();
+	    	String codeValue = inboxMessage.form().get(REPLY_ID)==null?inboxMessage.getMessage():
+		    	 inboxMessage.form().get(REPLY_ID).toString();
 	    	if(ArgUtil.is(codeValue)) {
 	    		codeValue=codeValue.toLowerCase().trim(); 
 	    	}
