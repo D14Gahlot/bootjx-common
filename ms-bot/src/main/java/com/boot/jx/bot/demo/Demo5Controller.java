@@ -41,20 +41,19 @@ public class Demo5Controller extends CommonBotController {
 	    @ChatMapping(key = "select-language")
 	    public void languageOnSelect(InboxMessage inboxMessage, StringMatcher matcher) {
 	    	
-	    String language = inboxMessage.form().get(REPLAY_ID)==null?"en":
-	    	 inboxMessage.form().get(REPLAY_ID).toString().toLowerCase().trim();
-	    String lang = ArgUtil.parseAsString(chatContext.contact().getLang());
-	    
+	    String lang =toReplyEnum(inboxMessage); 
+	 	  if(!ArgUtil.is(lang)) {
+	 		 lang= ArgUtil.parseAsString(chatContext.contact().getLang());
+	 	  }
+	 	 
 	     if(!timeCheck()) {
-	    	 chatContext.contact().setLang("en");
 	    	 reply(new OutboxMessage().template("working_hours_update"));
-	    	 //this.transferToAgent(inboxMessage, matcher);
 	     }else {
-		    if(language.equalsIgnoreCase("en") || (lang!=null && lang.equalsIgnoreCase("en"))) {
+		    if(lang.equalsIgnoreCase("english") || (lang!=null && lang.equalsIgnoreCase("en"))) {
 		    	 chatContext.contact().setLang("en");
 		    	 reply(new OutboxMessage().template("dc_services"));
 		    	 next("select-service");
-		    }else if(language.equalsIgnoreCase("ar") || (lang!=null &&  lang.equalsIgnoreCase("ar"))) {
+		    }else if(lang.equalsIgnoreCase("العربية") || (lang!=null &&  lang.equalsIgnoreCase("ar"))) {
 		    	 chatContext.contact().setLang("ar");
 		    	reply(new OutboxMessage().template("dc_services"));
 		    	 next("select-service");
@@ -68,9 +67,7 @@ public class Demo5Controller extends CommonBotController {
 	    
 	    @ChatMapping(key = "select-service")
 	    public void seviceOnSelect(InboxMessage inboxMessage, StringMatcher matcher) {
-	  
-	    	switch (inboxMessage.form().get(REPLAY_ID)==null?"":
-	    		inboxMessage.form().get(REPLAY_ID).toString().toLowerCase().trim()) {
+	  switch(toReplyEnum(inboxMessage)) {
 		case "memberships":
 		case "الاشتراكات":
 		    reply(new OutboxMessage().template("dc_membership_options"));
@@ -82,6 +79,7 @@ public class Demo5Controller extends CommonBotController {
 		    next("appointments-onselect");
 		    break;    
 		case "customer_service":
+		case "customer service":	
 		case "خدمة العملاء":
 		   // reply(new OutboxMessage().template("dc_cs_to_contact"));
 		    //next("dc_cs_to_contact");
@@ -89,10 +87,12 @@ public class Demo5Controller extends CommonBotController {
 		    break;    
 		
 		case "menu_selection":
+		case "menu selection":	
 		case "المنيوخيارات":
 			 this.transferToAgent(inboxMessage, matcher);	
 		    break;
 		case "clinic_locations":
+		case "clinic locations":	
 		case "مواقع العيادات":
 		    reply(new OutboxMessage().template("dc_location_option"));
 		    next("clinics-onselect");
@@ -110,18 +110,20 @@ public class Demo5Controller extends CommonBotController {
 	    
 	    @ChatMapping(key = "memberships-onselect")
 	    public void membershipsOnSelect(InboxMessage inboxMessage, StringMatcher matcher) {
-	    	switch (inboxMessage.form().get(REPLAY_ID)==null?"":
-	    		inboxMessage.form().get(REPLAY_ID).toString().toLowerCase().trim()) {
+	    	switch(toReplyEnum(inboxMessage)) {
 			case "new_member":
+			case "new member":	
 			case "مشترك جديد":
 			    this.transferToAgent(inboxMessage, matcher);
 			    break;
 			case "current_member":
+			case "current member":	
 			case "مشترك حالي":
 			    reply(new OutboxMessage().template("dc_current_member_options"));
 			    next("currentmember-onselect");
 			    break;
 			case "previous_member":
+			case "previous member":	
 			case "مشترك سابق":
 			    this.transferToAgent(inboxMessage, matcher);
 			    break; 
@@ -144,15 +146,15 @@ public class Demo5Controller extends CommonBotController {
 	    
 	    @ChatMapping(key = "currentmember-onselect")
 	    public void currentmemberOnSelect(InboxMessage inboxMessage, StringMatcher matcher) {
-	    	System.out.println("currentmember :"+inboxMessage.getMessage().toLowerCase().trim());
-	    	switch (inboxMessage.form().get(REPLAY_ID)==null?"":
-	    		inboxMessage.form().get(REPLAY_ID).toString().toLowerCase().trim()) {
+	    	switch(toReplyEnum(inboxMessage)) {
 	    	case "renew_membership":
+	    	case "renew membership":	
 			case "تجديد نوع الحالي":
 			case "تجديد نفس الاشتراك":	
 			    this.transferToAgent(inboxMessage, matcher);
 			    break;
 			case "change_membership":
+			case "change membership":	
 			case "تغيير نوع الاشتراك":
 				  this.transferToAgent(inboxMessage, matcher);
 			    break;
@@ -175,14 +177,14 @@ public class Demo5Controller extends CommonBotController {
 	    
 	    @ChatMapping(key = "clinics-onselect")
 	    public void clinicOnSelect(InboxMessage inboxMessage, StringMatcher matcher) {
-	    	switch (inboxMessage.form().get(REPLAY_ID)==null?"":
-	    		inboxMessage.form().get(REPLAY_ID).toString().toLowerCase().trim()) {
+	    	switch(toReplyEnum(inboxMessage)) {
 			case "sharq":
 			case "شرق":	
 			    reply(new OutboxMessage().template("dc_location_link_timing_sharq"));
 			    next("select-language");
 			    break;
 			case "bairaq_mall":
+			case "bairaq mall":	
 			case "البيرق مجمع":
 			    reply(new OutboxMessage().template("dc_location_link_timing_bairaq_mall"));
 			    next("select-language");
@@ -200,11 +202,13 @@ public class Demo5Controller extends CommonBotController {
 			    break;
 			    
 			case "360_mall":
+			case "360 mall":	
 			case "360 مجمع":	
 			    reply(new OutboxMessage().template("dc_location_link_timing_360mall"));
 			    next("select-language");
 			    break;
 			case "avenues_mall":
+			case "avenues mall":	
 			case "الأفنيوز مجمع":	
 			    reply(new OutboxMessage().template("dc_location_link_timing_avenues"));
 			    next("select-language");
@@ -232,21 +236,23 @@ public class Demo5Controller extends CommonBotController {
 	  
 	    @ChatMapping(key = "appointments-onselect")
 	    public void appointmentOptionsOnSelect(InboxMessage inboxMessage, StringMatcher matcher) {
-	    	switch (inboxMessage.form().get(REPLAY_ID)==null?"":
-	    		inboxMessage.form().get(REPLAY_ID).toString().toLowerCase().trim()) {
+	    	switch(toReplyEnum(inboxMessage)) {
 			case "new_client":
+			case "new client":	
 			case "عميل جديد":	
 			    reply(new OutboxMessage().template("dc_appt_diet_location_opt"));
 			    next("newclient-onselect");
 			    break;
 			case "existing_client":
 			case "current_client":
+			case "current client":	
 			case "عميل حالي":	
 			    reply(new OutboxMessage().template("dc_date_and_time_request"));
 				next("dc_cs_to_contact");
 			    break;  
 			    
 			case "previous_client":
+			case "previous client":	
 			case "عميل سابق":	
 			    reply(new OutboxMessage().template("dc_date_and_time_request"));
 				next("dc_cs_to_contact");
@@ -267,8 +273,7 @@ public class Demo5Controller extends CommonBotController {
 	    
 	    @ChatMapping(key = "newclient-onselect")
 	    public void newclientOnSelect(InboxMessage inboxMessage, StringMatcher matcher) {
-	    	switch (inboxMessage.form().get(REPLAY_ID)==null?"":
-	    		inboxMessage.form().get(REPLAY_ID).toString().toLowerCase().trim()) {
+	    	switch (toReplyEnum(inboxMessage)) {
 			case "dieticians":
 			case "dietitians":
 			case "اختيار الأخصائي":
@@ -312,8 +317,7 @@ public class Demo5Controller extends CommonBotController {
 	    
 	    @ChatMapping(key = "select-service-rechoose")
 	    public void seviceOnSelectRechoose(InboxMessage inboxMessage, StringMatcher matcher) {
-	    	switch (inboxMessage.form().get(REPLAY_ID)==null?"":
-	    		inboxMessage.form().get(REPLAY_ID).toString().toLowerCase().trim()) {
+	    switch (toReplyEnum(inboxMessage)) {
 		case "memberships":
 		case "الاشتراكات":
 		    reply(new OutboxMessage().template("dc_membership_options"));
@@ -325,15 +329,18 @@ public class Demo5Controller extends CommonBotController {
 		    next("appointments-onselect");
 		    break;    
 		case "customer_service":
+		case "customer service":	
 		case "خدمة العملاء":
 			 this.transferToAgent(inboxMessage, matcher);	
 		    break;    
 		
 		case "menu_selection":
+		case "menu selection":	
 		case "المنيوخيارات":
 			 this.transferToAgent(inboxMessage, matcher);	
 		    break;
 		case "clinic_locations":
+		case "clinic locations":	
 		case "مواقع العيادات":
 		    reply(new OutboxMessage().template("dc_location_option"));
 		    next("clinics-onselect");
@@ -379,4 +386,13 @@ public class Demo5Controller extends CommonBotController {
 	    	return isNowInRange;
 	        }
 	    
+	    
+	    public String toReplyEnum(InboxMessage inboxMessage) {
+	    	String codeValue = inboxMessage.form().get(REPLAY_ID)==null?inboxMessage.getMessage():
+		    	 inboxMessage.form().get(REPLAY_ID).toString();
+	    	if(ArgUtil.is(codeValue)) {
+	    		codeValue=codeValue.toLowerCase().trim(); 
+	    	}
+	    	return codeValue ;
+	    }
 }
