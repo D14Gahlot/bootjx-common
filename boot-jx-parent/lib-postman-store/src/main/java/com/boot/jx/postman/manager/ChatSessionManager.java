@@ -149,43 +149,11 @@ public class ChatSessionManager {
 
     public List<ChatSessionDoc> findChatSessionDocByAgentAndUnAssigned(String agentCode, String agentDept,
 	    String search, long period) {
+	
 	Query query2 = new Query();
-	Calendar timeout = Calendar.getInstance();
-	timeout.setTimeInMillis(timeout.getTimeInMillis() - period);
-	long watermarkStamp = timeout.getTimeInMillis();
-	long watermarkStampDay = timeout.getTimeInMillis() / TimeUtils.Constants.MILLIS_IN_DAY;
-
-	timeout.setTimeInMillis(timeout.getTimeInMillis() - period);
-	long graceStamp = timeout.getTimeInMillis();
-
-	Criteria localCriteria = new Criteria().andOperator(
-		// is Active
-		Criteria.where("active").is(true), //("primary").is(true),
-		// Agent Session Start
-		// Criteria.where("agentSessionStamp").gt(watermarkStamp),
-		new Criteria().orOperator(
-			//
-			//Criteria.where("agentSessionStamp").gt(watermarkStamp),
-			// @deprecated condition
-			//Criteria.where("updatedStamp").gt(watermarkStamp),
-			// new Condition
-			Criteria.where("updated.day").gt(watermarkStampDay)),
-		// Criteria.where("updatedStamp").gt(watermarkStamp),
-		// Additional Stamps
-		new Criteria().andOperator(
-			//
-			new Criteria().orOperator(
-				// Customer has replied within CustomerCareWindow
-				Criteria.where("lastInComingStamp").gt(graceStamp),
-				// Agent Has been Assigned to it
-				Criteria.where("lastOutGoingStamp").gt(graceStamp)),
-			// Is not resolved yet
-			new Criteria().orOperator(Criteria.where("resolved").exists(false),
-				Criteria.where("resolved").is(false)))
-
-	);
-
+	
 	if (ArgUtil.is(search)) {
+	    
 	    search = search.replace("*", "").trim();
 	    Criteria archiveCriteria = Criteria.where("primary").is(true).orOperator(
 		    // Check all fields
@@ -195,11 +163,47 @@ public class ChatSessionManager {
 		    Criteria.where("contact.phone").regex("" + search + "", "i"),
 		    Criteria.where("contact.email").regex("" + search + "", "i"));
 	    query2.addCriteria(Criteria.where("mode").is("AGENT").andOperator(archiveCriteria));
+	    
 	} else {
+	    
+	    Calendar timeout = Calendar.getInstance();
+	    timeout.setTimeInMillis(timeout.getTimeInMillis() - period);
+	    long watermarkStamp = timeout.getTimeInMillis();
+	    long watermarkStampDay = timeout.getTimeInMillis() / TimeUtils.Constants.MILLIS_IN_DAY;
+
+	    timeout.setTimeInMillis(timeout.getTimeInMillis() - period);
+	    long graceStamp = timeout.getTimeInMillis();
+
+	    Criteria localCriteria = new Criteria().andOperator(
+		    // is Active
+		    Criteria.where("active").is(true).and("primary").is(true),
+		    // Agent Session Start
+		    // Criteria.where("agentSessionStamp").gt(watermarkStamp),
+		    new Criteria().orOperator(
+			    //
+			    // Criteria.where("agentSessionStamp").gt(watermarkStamp),
+			    // @deprecated condition
+			    // Criteria.where("updatedStamp").gt(watermarkStamp),
+			    // new Condition
+			    Criteria.where("updated.day").gt(watermarkStampDay)),
+		    // Criteria.where("updatedStamp").gt(watermarkStamp),
+		    // Additional Stamps
+		    new Criteria().andOperator(
+			    //
+			    new Criteria().orOperator(
+				    // Customer has replied within CustomerCareWindow
+				    Criteria.where("lastInComingStamp").gt(graceStamp),
+				    // Agent Has been Assigned to it
+				    Criteria.where("lastOutGoingStamp").gt(graceStamp)),
+			    // Is not resolved yet
+			    new Criteria().orOperator(Criteria.where("resolved").exists(false),
+				    Criteria.where("resolved").is(false)))
+
+	    );
 	    query2.addCriteria(Criteria.where("mode").is("AGENT").andOperator(localCriteria));
 	}
 	query2.with(new Sort(Direction.DESC, "updated.day")).limit(100);
-	//System.out.println(query2.toString());
+	// System.out.println(query2.toString());
 	LOGGER.debug(query2.toString());
 	return sessionStore.find(query2, ChatSessionDoc.class);
     }
