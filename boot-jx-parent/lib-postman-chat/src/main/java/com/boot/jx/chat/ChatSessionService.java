@@ -208,7 +208,7 @@ public class ChatSessionService {
 	    updateSessionStatus(chatSessionDoc, PMConstants.CHAT_STATUS.RESOLVED);
 	    PMConfigurationObject resolvedReply = pmDomainConfig.getResolveReply();
 	    if (resolvedReply.exists()) {
-		messageDoc = chatService.send(chatSessionDoc, new OutboxMessage().templateId(resolvedReply.asString()));
+		messageDoc = chatService.send(chatSessionDoc, new OutboxMessage().template(resolvedReply.asString()));
 	    }
 	}
 	updateSessionStatus(chatSessionDoc, PMConstants.CHAT_STATUS.CLOSED);

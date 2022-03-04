@@ -297,7 +297,7 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
     public void onSessionResolve(InBoundEvent event, ChatSessionDoc chatSessionDoc) {
 	PMConfigurationObject resolvedReply = pmDomainConfig.getResolveReply();
 	if (resolvedReply.exists()) {
-	    chatService.send(chatSessionDoc, new OutboxMessage().templateId(resolvedReply.asString()));
+	    chatService.send(chatSessionDoc, new OutboxMessage().template(resolvedReply.asString()));
 	}
     }
 
