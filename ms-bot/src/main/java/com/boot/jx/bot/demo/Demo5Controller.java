@@ -51,14 +51,17 @@ public class Demo5Controller extends CommonBotController {
 	     }else {
 		    if(lang.equalsIgnoreCase("english") || (lang!=null && lang.equalsIgnoreCase("en"))) {
 		    	 chatContext.contact().setLang("en");
+		    	 chatContext.commitContact();
 		    	 reply(new OutboxMessage().template("dc_services"));
 		    	 next("select-service");
 		    }else if(lang.equalsIgnoreCase("العربية") || (lang!=null &&  lang.equalsIgnoreCase("ar"))) {
 		    	 chatContext.contact().setLang("ar");
+		    	 chatContext.commitContact();
 		    	reply(new OutboxMessage().template("dc_services"));
 		    	 next("select-service");
 		    } else{
 		    	chatContext.contact().setLang("en");
+		    	 chatContext.commitContact();
 		    	reply(new OutboxMessage().template("dc_services"));
 		    	next("select-service");
 		    }
