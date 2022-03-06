@@ -21,6 +21,7 @@ import com.boot.jx.common.doc.AgentDoc;
 import com.boot.jx.common.doc.DepartmentDoc;
 import com.boot.jx.common.store.AgentStore;
 import com.boot.jx.logger.AuditDetailProvider;
+import com.boot.jx.mongo.CommonMongoQueryBuilder;
 import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.utils.ArgUtil;
 
@@ -83,7 +84,7 @@ public class AdminManager {
 	    AgentDoc agent = mongoTemplate.findOne(new Query(Criteria.where("_id").is(agentId)), AgentDoc.class);
 	    agentList.add(agent);
 	} else {
-	    agentList = commonMongoTemplate.findAll(AgentDoc.class);
+	    agentList = commonMongoTemplate.find(CommonMongoQueryBuilder.collection(AgentDoc.class).sortBy("agent_code"));
 	}
 	return agentList;
     }

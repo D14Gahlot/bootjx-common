@@ -39,7 +39,7 @@ public class AgentDoc implements IDocument, DocVersion {
     private boolean admin;
     private boolean isSuperAdmin;
     private boolean isDefaultValue;
-    private boolean isEnabled;
+    private Boolean isEnabled;
 
     private List<String> channels;
     private String dept_id;
@@ -217,10 +217,6 @@ public class AgentDoc implements IDocument, DocVersion {
 	this.modifiedStamp = modifiedStamp;
     }
 
-    public boolean isEnabled() {
-	return isEnabled;
-    }
-
     public void setEnabled(boolean isEnabled) {
 	this.isEnabled = isEnabled;
     }
@@ -231,6 +227,14 @@ public class AgentDoc implements IDocument, DocVersion {
 
     public void setAuthKey(String authKey) {
 	this.authKey = authKey;
+    }
+
+    public Boolean getIsEnabled() {
+	return ArgUtil.isEqual(isactive, "Y") || ArgUtil.nullAsTrue(isEnabled);
+    }
+
+    public void setIsEnabled(Boolean isEnabled) {
+	this.isEnabled = isEnabled;
     }
 
 }

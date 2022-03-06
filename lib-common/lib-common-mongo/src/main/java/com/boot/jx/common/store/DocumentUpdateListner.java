@@ -36,7 +36,7 @@ public class DocumentUpdateListner {
 
 	if (ArgUtil.is(agentDoc)) {
 	    CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder().whereId(agentDoc.getAgent_code());
-	    builder.set("isEnabled", agentDoc.isEnabled());
+	    builder.set("isEnabled", agentDoc.getIsEnabled());
 	    mongoTemplate.upsert(builder.getQuery(), builder.getUpdate(), AgentSessionDoc.class);
 	    onAgentSessionUpdate(agentDoc.getAgent_code());
 	}

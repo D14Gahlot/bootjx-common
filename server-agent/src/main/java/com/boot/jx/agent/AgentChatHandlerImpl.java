@@ -177,7 +177,7 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 	AgentSessionDoc avaialbleAgent = this.getAgentSessonAssigned(inboxMessage);
 	if (ArgUtil.is(avaialbleAgent)) {
 	    AgentDoc agent = agentStore.findByCode(avaialbleAgent.getAgentCode());
-	    if (agent.isEnabled()) {
+	    if (agent.getIsEnabled()) {
 		return avaialbleAgent;
 	    }
 	}
