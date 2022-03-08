@@ -3,8 +3,13 @@ package com.boot.jx.bot.demo;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 
 import com.boot.jx.bot.BotController;
 import com.boot.jx.bot.ChatContext;
@@ -12,6 +17,8 @@ import com.boot.jx.bot.ChatMapping;
 import com.boot.jx.bot.alex.AlexBotConstants;
 import com.boot.jx.bot.alex.CommonBotController;
 import com.boot.jx.postman.PMEnvironment;
+import com.boot.jx.postman.doc.ChatSessionDoc;
+import com.boot.jx.postman.doc.HSMTemplateDoc;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.model.SafeKeyHashMap;
@@ -30,7 +37,9 @@ public class Demo5Controller extends CommonBotController {
 	    @Autowired
 	    PMEnvironment pmEnvironment;
 	   
-
+	    @Autowired
+		MongoTemplate mongoTemplate;
+	    
 	    @ChatMapping(key = AlexBotConstants.KEY.INITIATE + "*", pattern = "^*$")
 	    public void start(InboxMessage inboxMessage, StringMatcher matcher) {
 		reply(new OutboxMessage().template("dc_welcome_message").put("name", chatContext.contact().getName()));
@@ -70,7 +79,9 @@ public class Demo5Controller extends CommonBotController {
 	    
 	    @ChatMapping(key = "select-service")
 	    public void seviceOnSelect(InboxMessage inboxMessage, StringMatcher matcher) {
-	  switch(toReplyEnum(inboxMessage)) {
+	    	checkValue("dc_services",toReplyEnum(inboxMessage));
+	    	switch(toReplyEnum(inboxMessage)) {
+	  
 		case "memberships":
 		case "الاشتراكات":
 		    reply(new OutboxMessage().template("dc_membership_options"));
@@ -84,11 +95,8 @@ public class Demo5Controller extends CommonBotController {
 		case "customer_service":
 		case "customer service":	
 		case "خدمة العملاء":
-		   // reply(new OutboxMessage().template("dc_cs_to_contact"));
-		    //next("dc_cs_to_contact");
-			 this.transferToAgent(inboxMessage, matcher);	
+		 	 this.transferToAgent(inboxMessage, matcher);	
 		    break;    
-		
 		case "menu_selection":
 		case "menu selection":	
 		case "المنيوخيارات":
@@ -104,9 +112,13 @@ public class Demo5Controller extends CommonBotController {
 			reply(new OutboxMessage().template("dc_services_rechoose"));
 			next("select-service-rechoose");
 			break;
-		default :
+		case "#":
 			  this.transferToAgent(inboxMessage, matcher);
-		    break;    
+		    break;   
+		default :
+		    reply(new OutboxMessage().template("invalid_input_response_std"));
+		    reply(new OutboxMessage().template("dc_services"));
+		    break; 
 	   
 	    }
 	   }
@@ -131,21 +143,21 @@ public class Demo5Controller extends CommonBotController {
 			    this.transferToAgent(inboxMessage, matcher);
 			    break; 
 			case "*":
-				reply(new OutboxMessage().template("dc_services_rechoose"));
-				next("select-service-rechoose");
+				this.goToMainMenu(inboxMessage, matcher);
 				break; 
 			case "#"	:
 				this.transferToAgent(inboxMessage, matcher);
 			    break; 
 			default :
-				reply(new OutboxMessage().template("dc_services_rechoose"));
-				next("select-service-rechoose");
-			    break;     
+			    reply(new OutboxMessage().template("invalid_input_response_std"));
+			    reply(new OutboxMessage().template("dc_membership_options"));
+			    next("memberships-onselect");
+			    break; 
+		   
+		    }	    
 			    
 	    }
-	    
-	    }
-	    
+
 	    
 	    @ChatMapping(key = "currentmember-onselect")
 	    public void currentmemberOnSelect(InboxMessage inboxMessage, StringMatcher matcher) {
@@ -162,16 +174,16 @@ public class Demo5Controller extends CommonBotController {
 				  this.transferToAgent(inboxMessage, matcher);
 			    break;
 			case "*":
-				reply(new OutboxMessage().template("dc_services_rechoose"));
-				next("select-service-rechoose");
+				this.goToMainMenu(inboxMessage, matcher);
 				break; 
 			case "#"	:
 				this.transferToAgent(inboxMessage, matcher);
-			    break;   
+			    break;  
 			default :
-				reply(new OutboxMessage().template("dc_services_rechoose"));
-				next("select-service-rechoose");
-			    break;        
+			    reply(new OutboxMessage().template("invalid_input_response_std"));
+			    reply(new OutboxMessage().template("dc_current_member_options"));
+			    next("currentmember-onselect");
+			    break;     
 	    	}
 	   
 	    
@@ -222,16 +234,17 @@ public class Demo5Controller extends CommonBotController {
 			    next("select-language");
 			    break;  
 			case "*":
-				reply(new OutboxMessage().template("dc_services_rechoose"));
-				next("select-service-rechoose");
+				this.goToMainMenu(inboxMessage, matcher);
 				break; 
 			case "#"	:
 				this.transferToAgent(inboxMessage, matcher);
-			    break;   
-			default :
-				reply(new OutboxMessage().template("dc_services_rechoose"));
-				next("select-service-rechoose");
 			    break; 
+			default :
+				reply(new OutboxMessage().template("invalid_input_response_std"));
+				reply(new OutboxMessage().template("dc_location_option"));
+				next("clinics-onselect");	
+			    break;     
+	    	
 	    }
 	    
 	    }
@@ -261,35 +274,128 @@ public class Demo5Controller extends CommonBotController {
 				next("dc_cs_to_contact");
 			    break; 
 			case "*":
-				reply(new OutboxMessage().template("dc_services_rechoose"));
-				next("select-service-rechoose");
+				this.goToMainMenu(inboxMessage, matcher);
 				break; 
 			case "#"	:
 				this.transferToAgent(inboxMessage, matcher);
-			    break;   
+			    break;
 			default :
-				reply(new OutboxMessage().template("dc_services_rechoose"));
-				next("select-service-rechoose");
-			    break;     
+			    reply(new OutboxMessage().template("invalid_input_response_std"));
+			    reply(new OutboxMessage().template("dc_appointments_opt"));
+			    next("appointments-onselect");
+			    break; 
 	    	}
 	    }
 	    
 	    @ChatMapping(key = "newclient-onselect")
 	    public void newclientOnSelect(InboxMessage inboxMessage, StringMatcher matcher) {
+	    	checkValue("dc_dietitian_list_feb2022",toReplyEnum(inboxMessage));
 	    	switch (toReplyEnum(inboxMessage)) {
 			case "dieticians":
 			case "dietitians":
 			case "اختيار الأخصائي":
 			    reply(new OutboxMessage().template("dc_dietitian_list_feb2022"));
-			    next("dc_date_time");
+			    next("select-dietician");
 			    break;
 			case "locations":
 			case "branch":
 			case "اختيار الموقع":	
 			    reply(new OutboxMessage().template("dc_location_option"));
-			    next("dc_date_time");
+			    next("select-location-withdatetime");
 			    break; 
 			case "*":
+				this.goToMainMenu(inboxMessage, matcher);
+				break; 
+			case "#"	:
+				this.transferToAgent(inboxMessage, matcher);
+			    break;   
+			default :
+			    reply(new OutboxMessage().template("invalid_input_response_std"));
+			    reply(new OutboxMessage().template("dc_appt_diet_location_opt"));
+			    next("newclient-onselect");
+			    break; 
+	    	}
+	    }
+	    
+@ChatMapping(key = "select-dietician")	    
+public void selectDateTime(InboxMessage inboxMessage, StringMatcher matcher) {
+	String reply=toReplyEnum(inboxMessage);
+	switch (reply) {
+	case "*":
+		this.goToMainMenu(inboxMessage, matcher);
+		break; 
+	case "#"	:
+		this.transferToAgent(inboxMessage, matcher);
+	    break;   
+	default :
+		if(checkValue("dc_dietitian_list_feb2022", reply)) {
+		reply(new OutboxMessage().template("dc_date_and_time_request"));
+		next("dc_cs_to_contact");
+		}else {
+			reply(new OutboxMessage().template("invalid_input_response_std"));
+			reply(new OutboxMessage().template("dc_dietitian_list_feb2022"));
+		    next("select-dietician");
+		    break; 
+		}
+	}
+}
+
+@ChatMapping(key = "select-location-withdatetime")	    
+public void selectLocationDateTime(InboxMessage inboxMessage, StringMatcher matcher) {
+	String reply=toReplyEnum(inboxMessage);
+	switch (reply) {
+	case "*":
+		this.goToMainMenu(inboxMessage, matcher);
+		break; 
+	case "#"	:
+		this.transferToAgent(inboxMessage, matcher);
+	    break;   
+	default :
+		if(checkValue("dc_location_option", reply)) {
+		reply(new OutboxMessage().template("dc_date_and_time_request"));
+		next("dc_cs_to_contact");
+		}else {
+			reply(new OutboxMessage().template("invalid_input_response_std"));
+			reply(new OutboxMessage().template("dc_location_option"));
+		    next("select-location-withdatetime");
+		    break; 
+		}
+	}
+}
+
+	   
+	    
+	    @ChatMapping(key = "dc_date_time")
+	    public void specifyDateAndTime(InboxMessage inboxMessage, StringMatcher matcher) {
+	    	switch (toReplyEnum(inboxMessage)) {
+	    	case "*":
+				this.goToMainMenu(inboxMessage, matcher);
+				break; 
+			case "#"	:
+				this.transferToAgent(inboxMessage, matcher);
+			    break;   
+			default :
+				reply(new OutboxMessage().template("dc_date_and_time_request"));
+				next("dc_cs_to_contact");
+	    	}
+	    }
+	    
+	    @ChatMapping(key = "dc_cs_to_contact")
+	    public void transferToAgent(InboxMessage inboxMessage, StringMatcher matcher) {
+		commonTransferToAgent(inboxMessage, matcher);
+	    }
+	    
+	    public void goToMainMenu(InboxMessage inboxMessage, StringMatcher matcher) {
+	    	reply(new OutboxMessage().template("dc_services_rechoose"));
+			next("select-service-rechoose");
+	    }
+	    
+	    
+	    
+	    @ChatMapping(key = "invalid_input")
+	    public void invalidinput(InboxMessage inboxMessage, StringMatcher matcher) {
+	    	switch (toReplyEnum(inboxMessage)) {
+	    	case "*":
 				reply(new OutboxMessage().template("dc_services_rechoose"));
 				next("select-service-rechoose");
 				break; 
@@ -301,22 +407,7 @@ public class Demo5Controller extends CommonBotController {
 				next("select-service-rechoose");
 			    break;    
 	    	}
-	    }
-	    
-
-	   
-	    
-	    @ChatMapping(key = "dc_date_time")
-	    public void specifyDateAndTime(InboxMessage inboxMessage, StringMatcher matcher) {
-	    	reply(new OutboxMessage().template("dc_date_and_time_request"));
-	    	next("dc_cs_to_contact");
-	    }
-	    
-	    @ChatMapping(key = "dc_cs_to_contact")
-	    public void transferToAgent(InboxMessage inboxMessage, StringMatcher matcher) {
-		commonTransferToAgent(inboxMessage, matcher);
-	    }
-	    
+	    	}
 	    
 	    @ChatMapping(key = "select-service-rechoose")
 	    public void seviceOnSelectRechoose(InboxMessage inboxMessage, StringMatcher matcher) {
@@ -349,8 +440,7 @@ public class Demo5Controller extends CommonBotController {
 		    next("clinics-onselect");
 		    break;
 		case "*":
-			reply(new OutboxMessage().template("dc_services_rechoose"));
-			next("select-service-rechoose");
+			this.goToMainMenu(inboxMessage, matcher);
 			break; 
 		case "#"	:
 			this.transferToAgent(inboxMessage, matcher);
@@ -398,5 +488,22 @@ public class Demo5Controller extends CommonBotController {
 	    	}
 	    	System.out.println("codeValue :"+codeValue);
 	    	return codeValue ;
+	    }
+	    @SuppressWarnings("unchecked")
+	    private Boolean checkValue(String tmplCode,String userInput) {
+	    	Boolean booValue=false;
+	    	 String lang= ArgUtil.parseAsString(chatContext.contact().getLang());
+	    	Query query = new Query();
+			query.addCriteria(Criteria.where("code").is(tmplCode).and("lang").is(lang));
+			HSMTemplateDoc hsmTmpl =mongoTemplate.findOne(query,HSMTemplateDoc.class,"DICT_HSM_TEMPLATES");
+			if(ArgUtil.is(hsmTmpl)) {
+				Map<String, Object> options = hsmTmpl.getOptions();
+				if(ArgUtil.is(options)) {
+					List<Map<String, Object>> extTemCom =(List<Map<String, Object>>) options.get("buttons");//.asListOfMap();
+					 booValue = extTemCom.stream().anyMatch(map -> map.containsValue(userInput));
+				}
+			}
+	    	return booValue;
+	    	
 	    }
 }
