@@ -149,23 +149,25 @@ public class ChatSessionManager {
 
     public List<ChatSessionDoc> findChatSessionDocByAgentAndUnAssigned(String agentCode, String agentDept,
 	    String search, long period) {
-	
+
+	period = Math.min(DEFAULT_VALUES.POSTMAN_AGENT_TAB_HISTORY_PERIOD_MAX, period);
+
 	Query query2 = new Query();
-	
+
 	if (ArgUtil.is(search)) {
-	    
+
 	    search = search.replace("*", "").trim();
 	    Criteria archiveCriteria = Criteria.where("primary").is(true).orOperator(
 		    // Check all fields
 		    Criteria.where("contactId").regex("" + search + "", "i"),
-		    Criteria.where("contactName").regex("" + search + "", "i"),
+		    Criteria.where("contactName").regex("" + search + "", "i"), // @Deprecated
 		    Criteria.where("contact.name").regex("" + search + "", "i"),
 		    Criteria.where("contact.phone").regex("" + search + "", "i"),
 		    Criteria.where("contact.email").regex("" + search + "", "i"));
 	    query2.addCriteria(Criteria.where("mode").is("AGENT").andOperator(archiveCriteria));
-	    
+
 	} else {
-	    
+
 	    Calendar timeout = Calendar.getInstance();
 	    timeout.setTimeInMillis(timeout.getTimeInMillis() - period);
 	    long watermarkStamp = timeout.getTimeInMillis();
