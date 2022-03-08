@@ -236,7 +236,7 @@ public class ChatSessionManager {
 	    query2.addCriteria(
 		    Criteria.where("mode").is("AGENT").andOperator(criterias.toArray(new Criteria[criterias.size()])));
 	}
-	query2.with(new Sort(Direction.DESC, "updated.hour")).limit(100);
+	query2.with(new Sort(Direction.DESC, "updated.hour")).limit(150);
 	// System.out.println(query2.toString());
 	LOGGER.debug(query2.toString());
 	return sessionStore.find(query2, ChatSessionDoc.class);
