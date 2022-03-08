@@ -101,18 +101,24 @@ public class ConfigConstants {
 			new ConfigOption(TimeUtils.toMillis("7d")).label("+7Days"))
 		.defaultValue(0).group(GROUP_AGENT)),
 
+	POSTMAN_AGENT_TAB_HISTORY_LAZY(new ConfigMeta("Lazy Load History", "postman.agent.tab.history.lazy")
+		.desc("Loads History Lazily").optionsOnOff().group(GROUP_AGENT)),
+
 	POSTMAN_PHONEBOOK_REGION(new ConfigMeta("Default ISD Country", "postman.phonebook.region")
 		.optionValues(PHONE_NUMBER_UTIL.getSupportedRegions().toArray()).defaultValue("IN")),
 
 	POSTMAN_AGENT_CHAT_AUTOREPLY_TALK2AGENT(new ConfigMeta("Message to customer while chat is transferred to agent",
-		"postman.agent.chat.autoreply.talk2agent").optionsSource("getx:/api/tmpl/hsm").optionsKey("code").optionsLabel("name").group(GROUP_AGENT)),
+		"postman.agent.chat.autoreply.talk2agent").optionsSource("getx:/api/tmpl/hsm").optionsKey("code")
+			.optionsLabel("name").group(GROUP_AGENT)),
 
 	POSTMAN_AGENT_CHAT_AUTOREPLY_RESOLVED(new ConfigMeta("Message to customer when chat is resolevd by agent",
-		"postman.agent.chat.autoreply.resolved").optionsSource("getx:/api/tmpl/hsm").optionsKey("code").optionsLabel("name").group(GROUP_AGENT)),
+		"postman.agent.chat.autoreply.resolved").optionsSource("getx:/api/tmpl/hsm").optionsKey("code")
+			.optionsLabel("name").group(GROUP_AGENT)),
 
 	POSTMAN_AGENT_CHAT_AUTOREPLY_NOAGENT(
 		new ConfigMeta("Message to customer when agent avaialble", "postman.agent.chat.autoreply.noagent")
-			.optionsSource("getx:/api/tmpl/hsm").optionsKey("code").optionsLabel("name").group(GROUP_AGENT)),
+			.optionsSource("getx:/api/tmpl/hsm").optionsKey("code").optionsLabel("name")
+			.group(GROUP_AGENT)),
 
 	// Ends here
 	;
