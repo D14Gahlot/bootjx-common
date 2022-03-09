@@ -62,4 +62,9 @@ public class PMDomainConfigImpl implements PMDomainConfig {
     public PMConfigurationObject isAgentHistoryLazy() {
 	return environment.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_AGENT_TAB_HISTORY_LAZY);
     }
+
+    @Override
+    public PMConfigurationObject getAgentHistoryCount() {
+	return environment.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_AGENT_TAB_HISTORY_LIMIT);
+    }
 }

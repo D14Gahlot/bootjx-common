@@ -349,6 +349,8 @@ public class PMEnvironment {
 
 	PMConfigurationObject getAgentHistoryPeriod();
 
+	PMConfigurationObject getAgentHistoryCount();
+
 	PMConfigurationObject isAgentHistoryLazy();
     }
 
