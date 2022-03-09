@@ -13,6 +13,7 @@ public class InstagramMessaging implements Serializable {
     private InstagramMessage message;
     private InstagramPostback postBack;
     private Map<String, Object> read;
+    
 
     public Map<String, String> getSender() {
 	return sender;
@@ -71,6 +72,7 @@ public class InstagramMessaging implements Serializable {
 	}
 	return 0L;
     }
+    
     
     
     public boolean isValidCustomerMessage() {

@@ -322,7 +322,7 @@ public final class ArgUtil {
      * @param value the value
      * @return : Integer object if valid else null
      */
-    public static Integer parseAsInteger(Object value) {
+    public static Integer parseAsInteger(Object value, Integer defaultValue) {
 	if (value instanceof Integer) {
 	    return ((Integer) value);
 	} else if (value instanceof Number) {
@@ -337,10 +337,14 @@ public final class ArgUtil {
 		    return Integer.valueOf(Integer.parseInt((String) value));
 		}
 	    } catch (NumberFormatException e) {
-		return null;
+		return defaultValue;
 	    }
 	}
-	return null;
+	return defaultValue;
+    }
+
+    public static Integer parseAsInteger(Object value) {
+	return parseAsInteger(value, null);
     }
 
     /**

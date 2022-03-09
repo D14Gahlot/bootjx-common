@@ -346,6 +346,12 @@ public class PMEnvironment {
 	public PMConfigurationObject getResolveReply();
 
 	String getDomainUrl();
+
+	PMConfigurationObject getAgentHistoryPeriod();
+
+	PMConfigurationObject getAgentHistoryCount();
+
+	PMConfigurationObject isAgentHistoryLazy();
     }
 
     public interface PMClientConfig {

@@ -29,8 +29,8 @@ import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.ext.InBoundEvent;
 import com.boot.jx.postman.model.ext.InBoundEvent.SessionRouted;
 import com.boot.jx.postman.store.MessageStore.EVENTS;
-import com.boot.model.MapModel.NodeEntry;
 import com.boot.jx.postman.store.SessionStore;
+import com.boot.model.MapModel.NodeEntry;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
 import com.boot.utils.TimeUtils;
@@ -147,7 +147,7 @@ public class ChatSessionManager {
 	return sessionStore.findByStatusOrQuickTag(status, newList, fromStamp, toStamp);
     }
 
-    public List<ChatSessionDoc> findChatSessionDocByAgentAndUnAssigned(String agentCode, String agentDept,
+    public List<ChatSessionDoc> findChatSessionDocByAgentAndUnAssigned(String tab, String agentCode, String agentDept,
 	    String search, long period) {
 
 	period = Math.min(DEFAULT_VALUES.POSTMAN_AGENT_TAB_HISTORY_PERIOD_MAX, period);
@@ -170,11 +170,12 @@ public class ChatSessionManager {
 
 	    Calendar timeout = Calendar.getInstance();
 	    timeout.setTimeInMillis(timeout.getTimeInMillis() - period);
-	    long watermarkStamp = timeout.getTimeInMillis();
 	    long watermarkStampDay = timeout.getTimeInMillis() / TimeUtils.Constants.MILLIS_IN_DAY;
 
 	    timeout.setTimeInMillis(timeout.getTimeInMillis() - period);
 	    long graceStamp = timeout.getTimeInMillis();
+
+	    List<Criteria> criterias = new ArrayList<Criteria>();
 
 	    Criteria localCriteria = new Criteria().andOperator(
 		    // is Active
@@ -202,17 +203,57 @@ public class ChatSessionManager {
 				    Criteria.where("resolved").is(false)))
 
 	    );
-	    query2.addCriteria(Criteria.where("mode").is("AGENT").andOperator(localCriteria));
+	    criterias.add(localCriteria);
+
+	    if (pmDomainConfig.isAgentHistoryLazy().asBoolean(false)) {
+		if (ArgUtil.areEqual("ME", tab)) {
+		    criterias.add(new Criteria().orOperator(
+			    // Assigned to Me
+			    Criteria.where("assignedToAgent").is(agentCode),
+			    // Assigned to None
+			    Criteria.where("assignedToAgent").is(null), Criteria.where("assignedToAgent").exists(false)
+		    //
+		    ));
+		} else if (ArgUtil.areEqual("TEAM", tab)) {
+		    criterias.add(new Criteria().orOperator(
+			    // Not Assigned to Me
+			    Criteria.where("assignedToAgent").ne(agentCode)
+		    //
+		    ));
+		} else if (ArgUtil.areEqual("HISTORY", tab)) {
+		    Calendar hisotryTimeout = Calendar.getInstance();
+		    hisotryTimeout.setTimeInMillis(hisotryTimeout.getTimeInMillis()
+			    - PMConstants.DEFAULT_VALUES.POSTMAN_AGENT_TAB_HISTORY_PERIOD);
+		    criterias.add(new Criteria().orOperator(
+			    // Updated before to Me
+			    Criteria.where("updated.day")
+				    .lte(hisotryTimeout.getTimeInMillis() / TimeUtils.Constants.MILLIS_IN_DAY)
+		    //
+		    ));
+		}
+	    }
+
+	    query2.addCriteria(
+		    Criteria.where("mode").is("AGENT").andOperator(criterias.toArray(new Criteria[criterias.size()])));
 	}
-	query2.with(new Sort(Direction.DESC, "updated.day")).limit(100);
+
+	Integer limit = pmDomainConfig.getAgentHistoryCount().asInteger(150);
+
+	query2.with(new Sort(Direction.DESC, "updated.hour")).limit(limit);
 	// System.out.println(query2.toString());
 	LOGGER.debug(query2.toString());
 	return sessionStore.find(query2, ChatSessionDoc.class);
     }
 
-    public List<ChatSessionDoc> findChatSessionDocByAgentAndUnAssigned(String agentCode, String agentDept,
+    public List<ChatSessionDoc> findChatSessionDocByAgentAndUnAssigned(String tab, String agentCode, String agentDept,
 	    String search) {
-	return findChatSessionDocByAgentAndUnAssigned(agentCode, agentDept, search,
+
+	long historyPeriod = pmDomainConfig.getAgentHistoryPeriod().asLong(0L);
+	if (historyPeriod > 0L && ArgUtil.areEqual("HISTORY", tab)) {
+	    return findChatSessionDocByAgentAndUnAssigned(tab, agentCode, agentDept, search,
+		    PMConstants.DEFAULT_VALUES.POSTMAN_AGENT_TAB_HISTORY_PERIOD + historyPeriod);
+	}
+	return findChatSessionDocByAgentAndUnAssigned(tab, agentCode, agentDept, search,
 		DEFAULT_VALUES.POSTMAN_AGENT_TAB_HISTORY_PERIOD);
     }
 

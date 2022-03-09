@@ -53,4 +53,18 @@ public class PMDomainConfigImpl implements PMDomainConfig {
 		environment.keyEntry("mry.prop.service.domain").asString());
     }
 
+    @Override
+    public PMConfigurationObject getAgentHistoryPeriod() {
+	return environment.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_AGENT_TAB_HISTORY_PERIOD);
+    }
+
+    @Override
+    public PMConfigurationObject isAgentHistoryLazy() {
+	return environment.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_AGENT_TAB_HISTORY_LAZY);
+    }
+
+    @Override
+    public PMConfigurationObject getAgentHistoryCount() {
+	return environment.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_AGENT_TAB_HISTORY_LIMIT);
+    }
 }

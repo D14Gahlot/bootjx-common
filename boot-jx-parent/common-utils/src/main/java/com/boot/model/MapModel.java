@@ -56,7 +56,7 @@ public class MapModel implements JsonSerializerType<Object> {
 	}
 
 	/**
-	 * Save as {@link #defaultValue(Object)} but type is always {@link Long}
+	 * Same as {@link #defaultValue(Object)} but type is always {@link Long}
 	 * 
 	 * @param defaultvalue
 	 * @return
@@ -65,12 +65,20 @@ public class MapModel implements JsonSerializerType<Object> {
 	    return ArgUtil.parseAsLong(value, defaultvalue);
 	}
 
+	public Integer asInteger() {
+	    return ArgUtil.parseAsInteger(value);
+	}
+
+	public Integer asInteger(Integer defaultvalue) {
+	    return ArgUtil.parseAsInteger(value, defaultvalue);
+	}
+
 	public BigDecimal asBigDecimal() {
 	    return ArgUtil.parseAsBigDecimal(value);
 	}
 
 	/**
-	 * Save as {@link #defaultValue(Object)} but type is always {@link BigDecimal}
+	 * Same as {@link #defaultValue(Object)} but type is always {@link BigDecimal}
 	 * 
 	 * @param defaultvalue
 	 * @return
