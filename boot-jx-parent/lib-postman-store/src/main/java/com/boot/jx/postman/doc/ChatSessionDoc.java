@@ -44,6 +44,7 @@ public class ChatSessionDoc extends UpdatedTimeStampDoc implements Serializable 
     private String lane;
 
     @Deprecated
+    @Indexed
     private String contactName;
 
     private ContactDetailDoc contact;
@@ -52,8 +53,10 @@ public class ChatSessionDoc extends UpdatedTimeStampDoc implements Serializable 
     private String assignedToAgent;
     private String assignedToQueue;
 
+    @Indexed
     private boolean active;
     private boolean initd;
+    @Indexed
     private boolean resolved;
     private boolean expired;
     @Indexed

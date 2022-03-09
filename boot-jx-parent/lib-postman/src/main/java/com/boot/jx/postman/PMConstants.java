@@ -141,6 +141,7 @@ public class PMConstants {
 
     public static class DEFAULT_VALUES {
 	public static final long POSTMAN_AGENT_TAB_HISTORY_PERIOD = TimeUtils.toMillis("1d");
+	public static final long POSTMAN_AGENT_TAB_HISTORY_PERIOD_MAX = TimeUtils.toMillis("30d");
     }
 
     public final class PostManUrls {

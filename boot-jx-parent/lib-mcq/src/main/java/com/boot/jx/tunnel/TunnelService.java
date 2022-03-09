@@ -16,6 +16,7 @@ import com.boot.jx.AppContext;
 import com.boot.jx.AppContextUtil;
 import com.boot.jx.logger.client.AuditServiceClient;
 import com.boot.jx.logger.events.RequestTrackEvent;
+import com.boot.jx.tunnel.ITunnelDefs.TunnelQueue;
 import com.boot.utils.JsonUtil;
 import com.fasterxml.jackson.core.type.TypeReference;
 

@@ -21,13 +21,11 @@ import com.boot.jx.agent.api.ControllerRequestDTOs.SessionSearchRequest;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.chat.ChatSessionService;
-import com.boot.jx.common.config.ConfigConstants.SETUP_KEY;
 import com.boot.jx.common.doc.AgentSessionDoc;
 import com.boot.jx.common.store.ChatArchiveService;
 import com.boot.jx.common.store.DocumentUpdateListner;
 import com.boot.jx.http.ApiRequest;
 import com.boot.jx.http.RequestType;
-import com.boot.jx.postman.PMConstants;
 import com.boot.jx.postman.PMConstants.CHAT_SESSION_ACTIONS;
 import com.boot.jx.postman.PMConstants.DEFAULT;
 import com.boot.jx.postman.PMEnvironment;
@@ -58,7 +56,7 @@ public class AgentMsgController {
 
     @Autowired
     private ChatSessionManager chatSessionManager;
-    
+
     @Autowired
     private ChatSessionService chatSessionService;
 
@@ -82,16 +80,10 @@ public class AgentMsgController {
 	List<ChatSessionDTO> chatSessionDtos = new ArrayList<ChatSessionDTO>();
 	if (agentSession.isLoggedIn() && ArgUtil.is(agentSession.getAgentDept())) {
 	    List<ChatSessionDoc> sessions = null;
-	    long historyPeriod = environment.keyEntry(SETUP_KEY.POSTMAN_AGENT_TAB_HISTORY_PERIOD).asLong(0L);
-	    if (historyPeriod > 0L && "HISTORY".equals(tab)) {
-		sessions = chatSessionManager.findChatSessionDocByAgentAndUnAssigned(agentSession.getAgentCode(),
-			agentSession.getAgentDept(), search,
-			PMConstants.DEFAULT_VALUES.POSTMAN_AGENT_TAB_HISTORY_PERIOD + historyPeriod);
-	    } else {
-		ApiResponseUtil.addLog("Only Active Chats");
-		sessions = chatSessionManager.findChatSessionDocByAgentAndUnAssigned(agentSession.getAgentCode(),
-			agentSession.getAgentDept(), search);
-	    }
+
+	    ApiResponseUtil.addLog("Search Results");
+	    sessions = chatSessionManager.findChatSessionDocByAgentAndUnAssigned(tab, agentSession.getAgentCode(),
+		    agentSession.getAgentDept(), search);
 
 	    for (ChatSessionDoc chatSessionDoc : sessions) {
 		ChatSessionDTO chatSessionDto = chatArchive.getChatSession(chatSessionDoc);
@@ -118,7 +110,7 @@ public class AgentMsgController {
     @RequestMapping(value = { "/api/session/tag" }, method = { RequestMethod.POST })
     public ApiResponse<ChatSessionDTO, Object> addSessionTags(@RequestBody ChatTagUpdateRequest updateRequest) {
 	ChatSessionDoc sessionDoc = sessionStore.getSession(updateRequest.sessionId);
-	if (chatSessionService.updateSessionStatus(sessionDoc, updateRequest.status)
+	if (chatSessionService.updateSessionStatus(sessionDoc, updateRequest.status).exists()
 		| chatSessionManager.updateSessionTags(sessionDoc, updateRequest.tags)) {
 	    documentUpdateListner.onChatSessionUpdate(sessionDoc);
 	}
@@ -151,17 +143,21 @@ public class AgentMsgController {
 
     @RequestMapping(value = "/api/sessions/search", method = { RequestMethod.POST })
     public ApiResponse<ChatSessionDTO, Object> searchSessions(@RequestBody SessionSearchRequest query) {
-	List<ChatSessionDTO> chatSessionDtos = new ArrayList<ChatSessionDTO>();	
+	List<ChatSessionDTO> chatSessionDtos = new ArrayList<ChatSessionDTO>();
 	List<ChatSessionDoc> sessions = chatSessionManager.searchBy(query.status, query.tags, query.fromStamp,
 		query.toStamp);
 	for (ChatSessionDoc chatSessionDoc : sessions) {
-		ChatSessionDTO chatSessionDto = chatArchive.withContact(chatSessionDoc);
+	    ChatSessionDTO chatSessionDto = chatArchive.withContact(chatSessionDoc);
 	    chatSessionDtos.add(chatSessionDto);
 	}
-	/**remove duplicate /multiple Session for each contact  we can filter based on name , phone number on any field **/
-	if(chatSessionDtos!=null &&  !chatSessionDtos.isEmpty()) {
-		Set<String> chatSessionSet = new HashSet<>();
-		chatSessionDtos=chatSessionDtos.stream().filter(e->chatSessionSet.add(e.getPhone())).collect(Collectors.toList());
+	/**
+	 * remove duplicate /multiple Session for each contact we can filter based on
+	 * name , phone number on any field
+	 **/
+	if (chatSessionDtos != null && !chatSessionDtos.isEmpty()) {
+	    Set<String> chatSessionSet = new HashSet<>();
+	    chatSessionDtos = chatSessionDtos.stream().filter(e -> chatSessionSet.add(e.getPhone()))
+		    .collect(Collectors.toList());
 	}
 	return ApiResponse.buildResults(chatSessionDtos);
     }
@@ -175,5 +171,5 @@ public class AgentMsgController {
 	    chatSessionDtos.add(chatSessionDto);
 	}
 	return ApiResponse.buildResults(chatSessionDtos);
-    } 
+    }
 }

@@ -8,6 +8,8 @@ import com.boot.jx.AppContextUtil;
 import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.chat.ChatClient;
 import com.boot.jx.chat.ChatClient.PATH;
+import com.boot.jx.chat.ChatService;
+import com.boot.jx.common.service.SessionRouter;
 import com.boot.jx.common.store.ChatArchiveBuilder;
 import com.boot.jx.inbound.InBound.InBoundHandler;
 import com.boot.jx.postman.ClientApp;
@@ -16,6 +18,7 @@ import com.boot.jx.postman.PMConstants.CHAT_MODE;
 import com.boot.jx.postman.PMConstants.MESSAGE_FORMAT_TYPE;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PMEnvironment.PMCommonConfig;
+import com.boot.jx.postman.PMEnvironment.PMConfigurationObject;
 import com.boot.jx.postman.PMEnvironment.PMDomainConfig;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.manager.LogManager;
@@ -23,8 +26,8 @@ import com.boot.jx.postman.mitel.MitelClient;
 import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.Message.Status;
-import com.boot.jx.postman.model.MessageDefinitions.Contactable;
 import com.boot.jx.postman.model.MessageReport;
+import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.model.ext.CommonMsgText.InBoundMsgText;
 import com.boot.jx.postman.model.ext.InBoundContact;
 import com.boot.jx.postman.model.ext.InBoundEvent;
@@ -34,13 +37,14 @@ import com.boot.jx.postman.model.ext.InBoundMsgMedia;
 import com.boot.jx.postman.model.ext.InBoundMsgStatus;
 import com.boot.jx.postman.model.ext.InBoundWrapper;
 import com.boot.jx.postman.model.ext.MsgSession;
-import com.boot.jx.postman.query.ChatSessionQuery;
 import com.boot.jx.postman.store.MessageStore;
 import com.boot.jx.postman.store.SessionStore;
 import com.boot.jx.rest.RestService;
 import com.boot.jx.stomp.StompTunnelService;
+import com.boot.jx.tunnel.ITunnelDefs.TunnelTask;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.model.MapModel;
+import com.boot.model.MapModel.MapPathEntry;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
 
@@ -52,13 +56,13 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
     private ChatClient chatClient;
 
     @Autowired
-    public PMEnvironment pmEnvironment;
+    private PMEnvironment pmEnvironment;
 
     @Autowired
-    public PMDomainConfig pmDomainConfig;
+    private PMDomainConfig pmDomainConfig;
 
     @Autowired
-    public PMCommonConfig pmCommonConfig;
+    private PMCommonConfig pmCommonConfig;
 
     @Autowired
     private RestService restService;
@@ -81,37 +85,17 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
     @Autowired
     MitelClient mitelClient;
 
-    public ClientApp getDefaultInboundApp(String assignedQueue, Contactable contactable) {
-	ClientApp defaultClient = null;
-	if (ArgUtil.is(assignedQueue)) {
-	    defaultClient = pmEnvironment.local().clientApiKey(assignedQueue);
+    @Autowired
+    SessionRouter mitelRouter;
 
-	    if (ArgUtil.is(defaultClient)) {
-		return defaultClient;
-	    }
-
-	}
-
-	if (!ArgUtil.is(contactable)) {
-	    return defaultClient;
-	}
-	assignedQueue = pmDomainConfig.getDefaultInboundQueue(contactable);
-
-	if (ArgUtil.is(assignedQueue)) {
-	    defaultClient = pmEnvironment.local().clientApiKey(assignedQueue);
-
-	    if (ArgUtil.is(defaultClient)) {
-		return defaultClient;
-	    }
-	}
-
-	return defaultClient;
-    }
+    @Autowired(required = false)
+    private ChatService chatService;
 
     @Override
-    public void doHandle(InboxMessage inboxMessage) {
+    public void onMessage(InboxMessage inboxMessage, ChatSessionDoc session) {
 
-	ClientApp defaultClient = getDefaultInboundApp(inboxMessage.session().getQueue(), inboxMessage.contact());
+	ClientApp defaultClient = mitelRouter.getDefaultInboundApp(inboxMessage.session().getQueue(),
+		inboxMessage.contact());
 	if (ArgUtil.is(defaultClient)) {
 	    try {
 
@@ -138,6 +122,9 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 		if (CHAT_MODE.AGENT.equals(appType.getMode()) && ArgUtil.is(pmCommonConfig.getAgentUrl())) {
 		    LOGGER.debug("Forwarding InboxMessage to internal Agent ");
 		    chatClient.forward(pmCommonConfig.getAgentUrl() + PATH.INBOUND_FRWRD, inboxMessage);
+		    if (ArgUtil.is(session) && APP_TYPE.MITEL.equals(appType)) {
+			mitelRouting(session, defaultClient, 5);
+		    }
 		    return;
 		}
 
@@ -160,6 +147,15 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 	} else {
 	    chatClient.forward(pmCommonConfig.getBotUrl() + PATH.INBOUND_FRWRD, inboxMessage);
 	}
+    }
+
+    private void mitelRouting(ChatSessionDoc session, ClientApp defaultClient, int delay) {
+	MapModel meta = new MapModel(session.getMeta());
+	MapPathEntry omidEntry = meta.pathEntry("mitel.omid");
+	String omid = omidEntry.asString();
+	TunnelTask task = new TunnelTask().name("MITEL_ROUTER").id(session.getSessionId()).interval(delay);
+	task.data().put("sessionId", session.getSessionId()).put("omid", omid).put("queue", defaultClient.getQueue());
+	mitelRouter.debounce(task);
     }
 
     private void updateStatus(InboxMessage inboxMessage, Status status, Exception e) {
@@ -236,7 +232,8 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
     @Override
     public void doHandle(MessageReport messageReport) {
 
-	ClientApp defaultClient = getDefaultInboundApp(messageReport.session().getQueue(), messageReport.contact());
+	ClientApp defaultClient = mitelRouter.getDefaultInboundApp(messageReport.session().getQueue(),
+		messageReport.contact());
 
 	if (ArgUtil.is(defaultClient)) {
 	    if (ArgUtil.areEqual(CHAT_MODE.WEBHOOK.toString(), defaultClient.getAppType())) {
@@ -274,7 +271,7 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 
 	if (InBoundEvent.SESSION_ROUTED.equals(event.eventCode)) {
 
-	    ClientApp defaultClient = getDefaultInboundApp(event.sessionRouted.targetQueue, null);
+	    ClientApp defaultClient = mitelRouter.getDefaultInboundApp(event.sessionRouted.targetQueue, null);
 	    if (ArgUtil.is(defaultClient)) {
 		APP_TYPE appType = APP_TYPE.from(defaultClient.getAppType());
 		if (APP_TYPE.WEBHOOK.equals(appType)) {
@@ -282,12 +279,7 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 		    return;
 		} else if (APP_TYPE.MITEL.equals(appType)) {
 		    try {
-			MapModel mitel = mitelClient.send(defaultClient, sessionDoc.contact(),
-				sessionDoc.getSessionId());
-			ChatSessionQuery q = new ChatSessionQuery(sessionDoc);
-			q.set("meta.mitel.omid", mitel.getString("id")).set("meta.mitel.queue_id",
-				mitel.getString("queueId"));
-			sessionStore.updateFirst(q);
+			mitelRouting(sessionDoc, defaultClient, 1);
 		    } catch (Exception e) {
 			logManager.error(event, e);
 		    }
@@ -302,9 +294,17 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
     }
 
     @Override
+    public void onSessionResolve(InBoundEvent event, ChatSessionDoc chatSessionDoc) {
+	PMConfigurationObject resolvedReply = pmDomainConfig.getResolveReply();
+	if (resolvedReply.exists()) {
+	    chatService.send(chatSessionDoc, new OutboxMessage().template(resolvedReply.asString()));
+	}
+    }
+
+    @Override
     public void onSessionClose(InBoundEvent event, ChatSessionDoc sessionDoc) {
 
-	ClientApp defaultClient = getDefaultInboundApp(sessionDoc.getAssignedToQueue(), null);
+	ClientApp defaultClient = mitelRouter.getDefaultInboundApp(sessionDoc.getAssignedToQueue(), null);
 	if (ArgUtil.is(defaultClient)) {
 	    APP_TYPE appType = APP_TYPE.from(defaultClient.getAppType());
 	    if (APP_TYPE.WEBHOOK.equals(appType)) {
@@ -320,7 +320,7 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 	    }
 	}
 	stompTunnelService.sendToAll(PostManUtil.ON_DEPT_ASSIGN_TOPIC(sessionDoc.getAssignedToDept()),
-		chatArchiveBuilder.buildChatSessionDTO().from(sessionDoc).withContact()
+		chatArchiveBuilder.sessionDTO().from(sessionDoc).withContact()
 			.isAssigned(sessionDoc.getAssignedToAgent()).get());
     }
 

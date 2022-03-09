@@ -66,8 +66,12 @@ public class ChatArchiveService {
 	return chatSessionDto;
     }
 
+    public ChatSessionDoc getChatSessionDoc(String sessionId) {
+	return sessionStore.getSession(sessionId);
+    }
+
     public ChatSessionDTO getChatSession(String sessionId) {
-	return ChatDTOUtil.getChatSessionDTO(sessionStore.getSession(sessionId));
+	return ChatDTOUtil.getChatSessionDTO(getChatSessionDoc(sessionId));
     }
 
     public ChatSessionDTO getChatSession(ChatSessionDTO chatSessionDto) {
@@ -75,12 +79,12 @@ public class ChatArchiveService {
     }
 
     public ChatMessageDTO getMessage(MessageDoc messageDoc, ChatSessionDoc chatSessionDoc) {
-	ChatMessageDTO messageDto = ChatDTOUtil.getChatMessageDTO(messageDoc, chatSessionDoc.getContactName(),
-		ArgUtil.nonEmpty(messageDoc.getAgent(), messageDoc.getQueue(), chatSessionDoc.getAssignedToAgent(),
-			chatSessionDoc.getAssignedToQueue())
-
-	);
-	return messageDto;
+	if (ArgUtil.is(messageDoc)) {
+	    return ChatDTOUtil.getChatMessageDTO(messageDoc, chatSessionDoc.getContactName(),
+		    ArgUtil.nonEmpty(messageDoc.getAgent(), messageDoc.getQueue(), chatSessionDoc.getAssignedToAgent(),
+			    chatSessionDoc.getAssignedToQueue()));
+	}
+	return new ChatMessageDTO();
     }
 
     public ChatMessageDTO getMessage(MessageDoc messageDoc, ChatSessionDTO chatSessionDto) {
@@ -91,12 +95,14 @@ public class ChatArchiveService {
     }
 
     public List<ChatMessageDTO> getMessages(ChatSessionDTO chatSessionDto) {
+
 	if (ArgUtil.isEmpty(chatSessionDto.getContactType())) {
 	    chatSessionDto = withContact(chatSessionDto);
 	}
 
 	List<MessageDoc> messages = messageStore.findBySessionId(chatSessionDto.getSessionId(),
 		chatSessionDto.getContactType());
+
 	List<ChatMessageDTO> messageDtos = new ArrayList<ChatMessageDTO>();
 	for (MessageDoc messageDoc : messages) {
 	    ChatMessageDTO messageDto = getMessage(messageDoc, chatSessionDto);

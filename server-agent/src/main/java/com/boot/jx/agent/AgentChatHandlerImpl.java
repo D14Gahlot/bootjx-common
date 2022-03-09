@@ -148,7 +148,7 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 	if (PMConstants.ASSIGNMENT_RULE.ROUND_ROBIN.equals(assignmentRule)) {
 	    Query query = new Query();
 	    Criteria c = Criteria.where("isOnline").is(true).and("isLoggedIn").is(true).and("lastOnlineStamp")
-		    .gt(timeThen);
+		    .gt(timeThen).and("isEnabled").is(true);
 	    if (ArgUtil.is(inboxMessage.session().getDept())) {
 		c.and("agentDept").is(assignedDept);
 	    }
@@ -177,7 +177,7 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 	AgentSessionDoc avaialbleAgent = this.getAgentSessonAssigned(inboxMessage);
 	if (ArgUtil.is(avaialbleAgent)) {
 	    AgentDoc agent = agentStore.findByCode(avaialbleAgent.getAgentCode());
-	    if (agent.isEnabled()) {
+	    if (agent.getIsEnabled()) {
 		return avaialbleAgent;
 	    }
 	}
@@ -222,7 +222,7 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 	}
 
 	stompTunnelService.sendToAll(PostManUtil.ON_DEPT_ASSIGN_TOPIC(inboxMessage.session().getDept()),
-		chatArchiveBuilder.buildChatSessionDTO().from(chatSessionDoc).withContact()
+		chatArchiveBuilder.sessionDTO().from(chatSessionDoc).withContact()
 			.isAssigned(inboxMessage.session().getAgent()).get());
 
 	return inboxMessage;
@@ -243,7 +243,7 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 	    MessageDoc messageDoc = logManager.event(chatSessionDoc, MessageStore.EVENTS.ASGND_TO_AGENT, agentCode,
 		    agentDept);
 	    stompTunnelService.sendToAll(PostManUtil.ON_DEPT_ASSIGN_TOPIC(agentDept),
-		    chatArchiveBuilder.buildChatSessionDTO().from(chatSessionDoc).withContact()
+		    chatArchiveBuilder.sessionDTO().from(chatSessionDoc).withContact()
 			    .isAssigned(chatSessionDoc.getAssignedToAgent()).addMessage(messageDoc).get());
 	}
     }
@@ -274,7 +274,8 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
     }
 
     public ChatMessageDTO exitAgentMode(ChatSessionDoc chatSessionDoc, OutboxMessage outboxMessage) {
-	MessageDoc messageDoc = chatSessionService.closeChatSession(chatSessionDoc);
+	chatSessionService.closeSession(chatSessionDoc);
+	MessageDoc messageDoc = null;
 	if (ArgUtil.is(outboxMessage)) {
 	    messageDoc = chatService.send(chatSessionDoc, outboxMessage);
 	}
@@ -283,7 +284,7 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 
     public ChatSessionDTO updateChatSessionStatus(String sessionId, PMConstants.CHAT_STATUS status) {
 	ChatSessionDoc sessionDoc = sessionStore.getSession(sessionId);
-	if (chatSessionService.updateSessionStatus(sessionDoc, status)) {
+	if (chatSessionService.updateSessionStatus(sessionDoc, status).exists()) {
 	    ChatSessionDTO dto = chatArchive.getChatSession(sessionDoc);
 	    stompTunnelService.sendToTag(sessionDoc.getAssignedToDept(), "/chat/session/update", dto);
 	    return dto;

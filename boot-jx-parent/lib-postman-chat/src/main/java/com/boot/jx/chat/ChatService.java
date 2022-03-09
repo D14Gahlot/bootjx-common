@@ -174,7 +174,7 @@ public class ChatService {
 	}
 
 	if (ArgUtil.isEmpty(outboxMessage.session().getDept())) {
-	    outboxMessage.session().setAgent(sessionDoc.getAssignedToDept());
+	    outboxMessage.session().setDept(sessionDoc.getAssignedToDept());
 	}
 
 	// Action Only

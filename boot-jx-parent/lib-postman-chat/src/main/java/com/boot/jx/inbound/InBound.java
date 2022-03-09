@@ -21,11 +21,11 @@ public class InBound {
 
     public interface InBoundHandler {
 
-	public void doHandle(InboxMessage inboxMessage);
+	public void onMessage(InboxMessage inboxMessage, ChatSessionDoc session);
 
 	@Async
-	default public void handleAsync(InboxMessage inboxMessage) {
-	    this.doHandle(inboxMessage);
+	default public void onMessageAsync(InboxMessage inboxMessage, ChatSessionDoc session) {
+	    this.onMessage(inboxMessage, session);
 	}
 
 	public void doHandle(MessageReport messageReport);
@@ -35,6 +35,13 @@ public class InBound {
 	@Async
 	default public void onSessionRouteAsync(InBoundEvent inBoundEvent, ChatSessionDoc sessionDoc) {
 	    this.onSessionRoute(inBoundEvent, sessionDoc);
+	}
+
+	public void onSessionResolve(InBoundEvent event, ChatSessionDoc chatSessionDoc);
+
+	@Async
+	default public void onSessionResolveAsync(InBoundEvent inBoundEvent, ChatSessionDoc sessionDoc) {
+	    this.onSessionResolve(inBoundEvent, sessionDoc);
 	}
 
 	public void onSessionClose(InBoundEvent event, ChatSessionDoc chatSessionDoc);

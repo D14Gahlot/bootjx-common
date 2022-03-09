@@ -46,6 +46,9 @@ public class StompTunnelService {
     @Async
     public void sendToTag(String tag, String topic, Object message) {
 	try {
+	    if (!ArgUtil.is(tag)) {
+		return;
+	    }
 	    StompTunnelEvent event = new StompTunnelEvent();
 	    event.setTopic(topic);
 	    event.setTenantToken(stompTunnelSessionManager.createTagId(AppContextUtil.getTenant()));

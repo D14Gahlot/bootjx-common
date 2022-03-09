@@ -112,7 +112,7 @@ public class AdminMsgController {
     @RequestMapping(value = "/api/message/session/close", method = { RequestMethod.POST })
     public ApiResponse<ChatSessionDoc, Object> closeChatSesson(@RequestParam String sessionId) {
 	ChatSessionDoc chatSessionDoc = sessionStore.getSession(sessionId);
-	chatSessionService.closeChatSession(chatSessionDoc);
+	chatSessionService.closeSession(chatSessionDoc);
 	return ApiResponse.buildData(chatSessionDoc);
     }
 
