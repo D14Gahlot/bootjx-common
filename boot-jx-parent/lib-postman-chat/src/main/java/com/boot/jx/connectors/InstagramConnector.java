@@ -114,7 +114,7 @@ public class InstagramConnector extends AbstractConnector<InstagramConfig, Insta
 	if(ArgUtil.is(m.getMessage().getAttachments()) && ArgUtil.is(m.getMessage().getAttachments()[0].getPayload())) {
 		if(ArgUtil.is(m.getMessage().getAttachments()[0].getPayload().getUrl())) {
 			Map<String,Object> replyMap = new HashMap<>();
-			replyMap.put("url", m.getMessage().getAttachments()[0].getPayload().getUrl());
+			replyMap.put("post_url", m.getMessage().getAttachments()[0].getPayload().getUrl());
 			replyMap.put("type", m.getMessage().getAttachments()[0].getType());
 			inboxMessage.setReply(replyMap);
 		}

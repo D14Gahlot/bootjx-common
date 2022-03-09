@@ -74,7 +74,7 @@ public class MessageDoc implements Serializable, Patchable<MessageDoc>, IMessage
 
     private Map<String, Long> stamps;
     public List<String> logs;
-    private Map<String, Object> reply;
+    private Map<String, Object> reply_to;
 
     @Indexed
     private String contactId;
@@ -367,15 +367,16 @@ public class MessageDoc implements Serializable, Patchable<MessageDoc>, IMessage
 	this.queue = queue;
     }
 
-    public void setReply(Map<String, Object> reply) {
-    	this.reply = reply;
+    public void setReply(Map<String, Object> reply_to) {
+    	this.reply_to = reply_to;
     }
 
     public Map<String, Object> getReply() {
-		if (this.reply == null) {
-		    this.reply = new HashMap<String, Object>();
+		if (this.reply_to == null) {
+		    this.reply_to = new HashMap<String, Object>();
 		}
-		return this.reply;
+		return this.reply_to;
+    }
 
     public String getTraceId() {
 	return traceId;
