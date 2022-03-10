@@ -186,7 +186,7 @@ public class ChatSessionManager {
 			    //
 			    // Criteria.where("agentSessionStamp").gt(watermarkStamp),
 			    // @deprecated condition
-			    // Criteria.where("updatedStamp").gt(watermarkStamp),
+			    //Criteria.where("updatedStamp").gt(watermarkStamp),
 			    // new Condition
 			    Criteria.where("updated.day").gt(watermarkStampDay)),
 		    // Criteria.where("updatedStamp").gt(watermarkStamp),
@@ -240,21 +240,16 @@ public class ChatSessionManager {
 	Integer limit = pmDomainConfig.getAgentHistoryCount().asInteger(150);
 
 	query2.with(new Sort(Direction.DESC, "updated.hour")).limit(limit);
-	// System.out.println(query2.toString());
+	//System.out.println(query2.toString());
 	LOGGER.debug(query2.toString());
 	return sessionStore.find(query2, ChatSessionDoc.class);
     }
 
     public List<ChatSessionDoc> findChatSessionDocByAgentAndUnAssigned(String tab, String agentCode, String agentDept,
 	    String search) {
-
 	long historyPeriod = pmDomainConfig.getAgentHistoryPeriod().asLong(0L);
-	if (historyPeriod > 0L && ArgUtil.areEqual("HISTORY", tab)) {
 	    return findChatSessionDocByAgentAndUnAssigned(tab, agentCode, agentDept, search,
 		    PMConstants.DEFAULT_VALUES.POSTMAN_AGENT_TAB_HISTORY_PERIOD + historyPeriod);
-	}
-	return findChatSessionDocByAgentAndUnAssigned(tab, agentCode, agentDept, search,
-		DEFAULT_VALUES.POSTMAN_AGENT_TAB_HISTORY_PERIOD);
     }
 
     public List<ChatSessionDoc> searchPrimary(String search) {
