@@ -524,13 +524,14 @@ public class SessionStore extends CommonMongoTemplateAbstract {
 	chatSessionDoc.setAssignedToDept(agentDept);
 	chatSessionDoc.setAssignedAgentStamp(System.currentTimeMillis());
 	chatSessionDoc.setAssignedToAgent(agentCode);
-
+	chatSessionDoc.setAssignedToQueue(null);
 	if (chatSessionDoc.getAgentSessionStamp() == 0L) {
 	    chatSessionDoc.setAgentSessionStamp(chatSessionDoc.getAssignedAgentStamp());
 	}
 
 	ChatSessionQuery builder = new ChatSessionQuery(chatSessionDoc.getSessionId());
 	builder.set("mode", chatSessionDoc.getMode());
+	builder.set("assignedToQueue", chatSessionDoc.getAssignedToQueue());
 	builder.set("assignedToDept", chatSessionDoc.getAssignedToDept());
 	builder.set("assignedDeptStamp", chatSessionDoc.getAssignedDeptStamp());
 	builder.set("assignedToAgent", chatSessionDoc.getAssignedToAgent());
