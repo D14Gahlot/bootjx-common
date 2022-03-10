@@ -37,4 +37,8 @@ public interface ClientApp extends Serializable {
 
     public Map<String, Object> secret();
 
+    boolean isShared();
+
+    boolean isReadOnly();
+
 }

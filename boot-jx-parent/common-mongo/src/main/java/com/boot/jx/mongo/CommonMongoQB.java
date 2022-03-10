@@ -1,11 +1,13 @@
 package com.boot.jx.mongo;
 
+import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.bson.types.ObjectId;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
+import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
@@ -39,6 +41,12 @@ public class CommonMongoQB<M extends CommonMongoQB<M, T>, T> implements MongoQue
 	    update = new Update();
 	}
 	return update;
+    }
+
+    @SuppressWarnings("unchecked")
+    public M query(Query query) {
+	this.query = query;
+	return (M) this;
     }
 
     @SuppressWarnings("unchecked")
@@ -115,6 +123,25 @@ public class CommonMongoQB<M extends CommonMongoQB<M, T>, T> implements MongoQue
 	ref.put("$ref", collectionName);
 	ref.put("$id", new ObjectId(id));
 	update().set(key, ref);
+	return (M) this;
+    }
+
+    @SuppressWarnings("unchecked")
+    public M skipDBRef() {
+	if (ArgUtil.is(this.getDocClass())) {
+	    org.springframework.data.mongodb.core.query.Field fields = this.query().fields();
+	    for (Field field : this.getDocClass().getDeclaredFields()) {
+		if (field.isAnnotationPresent(DBRef.class)) {
+		    fields.exclude(field.getName());
+		}
+	    }
+	}
+	return (M) this;
+    }
+
+    @SuppressWarnings("unchecked")
+    public M includeDBRef(String field) {
+	this.query().fields().include(field);
 	return (M) this;
     }
 

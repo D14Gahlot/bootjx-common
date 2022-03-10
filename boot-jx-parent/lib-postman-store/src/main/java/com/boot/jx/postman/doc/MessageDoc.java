@@ -60,6 +60,8 @@ public class MessageDoc implements Serializable, Patchable<MessageDoc>, IMessage
     @Indexed
     private String queue;
     private String agent;
+    @Indexed
+    private String mode;
 
     private TagDocument tags;
     private Map<String, Object> model;
@@ -74,7 +76,7 @@ public class MessageDoc implements Serializable, Patchable<MessageDoc>, IMessage
 
     private Map<String, Long> stamps;
     public List<String> logs;
-    private Map<String, Object> reply_to;
+    private Map<String, Object> replyTo;
 
     @Indexed
     private String contactId;
@@ -367,15 +369,19 @@ public class MessageDoc implements Serializable, Patchable<MessageDoc>, IMessage
 	this.queue = queue;
     }
 
-    public void setReply(Map<String, Object> reply_to) {
-    	this.reply_to = reply_to;
+    public void setReply(Map<String, Object> replyTo) {
+	this.replyTo = replyTo;
     }
 
     public Map<String, Object> getReply() {
-		if (this.reply_to == null) {
-		    this.reply_to = new HashMap<String, Object>();
-		}
-		return this.reply_to;
+	return this.replyTo;
+    }
+
+    public Map<String, Object> reply() {
+	if (this.replyTo == null) {
+	    this.replyTo = new HashMap<String, Object>();
+	}
+	return this.replyTo;
     }
 
     public String getTraceId() {
@@ -384,5 +390,13 @@ public class MessageDoc implements Serializable, Patchable<MessageDoc>, IMessage
 
     public void setTraceId(String traceId) {
 	this.traceId = traceId;
+    }
+
+    public String getMode() {
+	return mode;
+    }
+
+    public void setMode(String mode) {
+	this.mode = mode;
     }
 }
