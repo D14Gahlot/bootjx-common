@@ -1,6 +1,8 @@
 package com.boot.jx.bot;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Lazy;
 
 import com.boot.jx.agent.AgentService;
 import com.boot.jx.api.ApiResponse;
@@ -34,6 +36,7 @@ public class ChatController {
     @Autowired
     private SessionStore sessionStore;
     
+    @Lazy
     @Autowired
     private ChatSessionService chatSessionService;
     
