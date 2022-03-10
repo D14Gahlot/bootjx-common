@@ -524,7 +524,7 @@ public class SessionStore extends CommonMongoTemplateAbstract {
 	chatSessionDoc.setAssignedToDept(agentDept);
 	chatSessionDoc.setAssignedAgentStamp(System.currentTimeMillis());
 	chatSessionDoc.setAssignedToAgent(agentCode);
-	chatSessionDoc.setAssignedToQueue(null);
+	chatSessionDoc.setAssignedToQueue(PMConstants.DEFAULT.AGENT_QUEUE_CODE);
 	if (chatSessionDoc.getAgentSessionStamp() == 0L) {
 	    chatSessionDoc.setAgentSessionStamp(chatSessionDoc.getAssignedAgentStamp());
 	}

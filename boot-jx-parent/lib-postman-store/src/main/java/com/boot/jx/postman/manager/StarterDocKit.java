@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Component;
 
+import com.boot.jx.postman.PMConstants;
 import com.boot.jx.postman.PMConstants.APP_TYPE;
 import com.boot.jx.postman.doc.QuickMedia;
 import com.boot.jx.postman.doc.QuickReply;
@@ -90,9 +91,9 @@ public class StarterDocKit {
 	mongoTemplate.save(createQuickReply("5", "You're welcome.", "conversation-complete"));
 
 	ClientAppConfigDoc agentApp = new ClientAppConfigDoc();
-	agentApp.setId("default_agent_desk");
+	agentApp.setId(PMConstants.DEFAULT.AGENT_QUEUE_CODE);
 	agentApp.setKeyName("Agent Desk");
-	agentApp.setQueue("default_agent_desk");
+	agentApp.setQueue(PMConstants.DEFAULT.AGENT_QUEUE_CODE);
 	agentApp.setAppType(APP_TYPE.AGENT.name());
 	agentApp.setKey(PostManUtil.UNIQUE_API_KEY());
 	agentApp.setKeyVersion("v2");
@@ -100,9 +101,9 @@ public class StarterDocKit {
 	createClientApp(agentApp);
 
 	ClientAppConfigDoc botApp = new ClientAppConfigDoc();
-	botApp.setId("default_basic_bot");
+	botApp.setId(PMConstants.DEFAULT.BOT_QUEUE_CODE);
 	botApp.setKeyName("Basic Bot");
-	botApp.setQueue("default_basic_bot");
+	botApp.setQueue(PMConstants.DEFAULT.BOT_QUEUE_CODE);
 	botApp.setAppType(APP_TYPE.BOT.name());
 	botApp.setKey(PostManUtil.UNIQUE_API_KEY());
 	botApp.setKeyVersion("v2");
