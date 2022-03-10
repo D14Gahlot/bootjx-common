@@ -29,6 +29,8 @@ import com.boot.utils.StringUtils.StringMatcher;
 public class Demo5Controller extends CommonBotController {
 	
 	public static final String REPLY_ID = "reply_id";	
+	
+	public static final String TALK_TO_AGENT = "";	
 
 	  
 	    @Autowired
@@ -42,8 +44,10 @@ public class Demo5Controller extends CommonBotController {
 	    
 	    @ChatMapping(key = AlexBotConstants.KEY.INITIATE + "*", pattern = "^*$")
 	    public void start(InboxMessage inboxMessage, StringMatcher matcher) {
-		reply(new OutboxMessage().template("dc_welcome_message").put("name", chatContext.contact().getName()));
-		next("select-language");
+		
+	    	reply(new OutboxMessage().template("dc_welcome_message").put("name", chatContext.contact().getName()));
+	    	next("select-language");
+	
 	    }
 	    
 	    
@@ -95,11 +99,13 @@ public class Demo5Controller extends CommonBotController {
 		case "customer_service":
 		case "customer service":	
 		case "خدمة العملاء":
+			 //chatContext.session().put(TALK_TO_AGENT, "#");
 		 	 this.transferToAgent(inboxMessage, matcher);	
 		    break;    
 		case "menu_selection":
 		case "menu selection":	
 		case "المنيوخيارات":
+			// chatContext.session().put(TALK_TO_AGENT, "#");
 			 this.transferToAgent(inboxMessage, matcher);	
 		    break;
 		case "clinic_locations":
@@ -382,7 +388,8 @@ public void selectLocationDateTime(InboxMessage inboxMessage, StringMatcher matc
 	    
 	    @ChatMapping(key = "dc_cs_to_contact")
 	    public void transferToAgent(InboxMessage inboxMessage, StringMatcher matcher) {
-		commonTransferToAgent(inboxMessage, matcher);
+	    	routeSession("agendsk");
+	    	//commonTransferToAgent(inboxMessage, matcher);
 	    }
 	    
 	    public void goToMainMenu(InboxMessage inboxMessage, StringMatcher matcher) {

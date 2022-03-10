@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.boot.jx.agent.AgentService;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.chat.ChatService;
+import com.boot.jx.chat.ChatSessionService;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatPromise;
 import com.boot.jx.postman.doc.ChatPromise.PromiseCondition;
@@ -32,6 +33,10 @@ public class ChatController {
 
     @Autowired
     private SessionStore sessionStore;
+    
+    @Autowired
+    private ChatSessionService chatSessionService;
+    
 
     public void reply(String message) {
 	try {
@@ -146,6 +151,10 @@ public class ChatController {
 	    x.setState(State.CAPTURED);
 	}
 	return x;
+    }
+    
+    public void routeSession(String queueCode) {
+    	chatSessionService.routeSession(chatContext.session().getDoc(), queueCode, null);
     }
 
 }
