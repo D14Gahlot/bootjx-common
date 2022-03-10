@@ -139,6 +139,20 @@ public class ChatDTOUtil {
 	return messageDtos;
     }
 
+    public static MessageDoc latestMessage(MessageDoc messageDoc1, MessageDoc messageDoc2) {
+	if (!ArgUtil.is(messageDoc1)) {
+	    return messageDoc2;
+	}
+	if (!ArgUtil.is(messageDoc2)) {
+	    return messageDoc1;
+	}
+
+	if (messageDoc1.getTimestamp() > messageDoc2.getTimestamp()) {
+	    return messageDoc1;
+	}
+	return messageDoc2;
+    }
+
     public static ChatSessionDTO getChatSessionDTO(ChatSessionDoc chatSessionDoc) {
 	ChatSessionDTO chatSessionDto = EntityDtoUtil.entityToDto(chatSessionDoc, new ChatSessionDTO());
 	chatSessionDto.setSessionId(chatSessionDto.getSessionId());
@@ -167,10 +181,10 @@ public class ChatDTOUtil {
 		chatSessionDto.getLastInComingStamp(), chatSessionDto.getLastResponseStamp()));
 
 	chatSessionDto.msg().put("lastInBoundMsg", getChatMessageDTO(chatSessionDoc.getLastInBoundMsg()));
-	chatSessionDto.msg().put("lastBotReply", getChatMessageDTO(chatSessionDoc.getLastBotReply()));
-	chatSessionDto.msg().put("lastAgentReply", getChatMessageDTO(chatSessionDoc.getLastAgentReply()));
 	chatSessionDto.msg().put("lastOutBoundMsg", getChatMessageDTO(chatSessionDoc.getLastOutBoundMsg()));
-	chatSessionDto.msg().put("lastMsg", getChatMessageDTO(chatSessionDoc.getLastMsg()));
+
+	chatSessionDto.msg().put("lastMsg", getChatMessageDTO(latestMessage(chatSessionDoc.getLastInBoundMsg(),
+		ArgUtil.nonEmpty(chatSessionDoc.getLastOutBoundMsg(), chatSessionDoc.getLastMsg()))));
 
 	if (!ArgUtil.is(chatSessionDto.getStatus())) {
 	    if (chatSessionDto.isExpired()) {

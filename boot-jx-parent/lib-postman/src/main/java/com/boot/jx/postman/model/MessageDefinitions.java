@@ -169,6 +169,8 @@ public class MessageDefinitions {
 
 	public String getFormatSubType();
 
+	public MessageRoute route();
+
     }
 
     public static interface IMessageExtended extends IMessage {

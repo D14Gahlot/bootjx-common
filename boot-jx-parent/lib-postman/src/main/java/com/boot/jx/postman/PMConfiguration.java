@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.apache.commons.collections.list.TreeList;
+
 import com.boot.jx.AppConfig;
 import com.boot.jx.AppContextUtil;
 import com.boot.jx.agent.AgentConfig;
@@ -26,6 +28,8 @@ public interface PMConfiguration extends Serializable {
     public NodeEntry<Object> keyEntry(String string);
 
     public List<AChannelConfig> listChannels();
+
+    public List<ClientApp> listApps();
 
     public static class PMConfigurationModel implements PMConfiguration {
 
@@ -150,6 +154,17 @@ public interface PMConfiguration extends Serializable {
 	    return list;
 	}
 
+	@Override
+	public List<ClientApp> listApps() {
+	    List<ClientApp> list = new ArrayList<ClientApp>();
+	    for (Entry<String, ClientApp> aChannelDetails : this.clientApiKeys().entrySet()) {
+		if (!list.contains(aChannelDetails.getValue())) {
+		    list.add(aChannelDetails.getValue());
+		}
+	    }
+	    return list;
+	}
+
 	public String getAccountKey() {
 	    if (!ArgUtil.is(this.accountKey)) {
 		this.accountKey = Random.randomAlphaNumeric(10);
@@ -175,6 +190,7 @@ public interface PMConfiguration extends Serializable {
 	    }
 	    return new SafeKeyHashMap<Object>(globalVars);
 	}
+
     }
 
     public static PMConfigurationModel instance() {
@@ -254,6 +270,18 @@ public interface PMConfiguration extends Serializable {
 		}
 	    }
 
+	    return list;
+	}
+
+	@Override
+	public List<ClientApp> listApps() {
+	    List<ClientApp> list = this.local().listApps();
+	    List<ClientApp> cs = this.shared().listApps();
+	    for (ClientApp aChannelConfig : cs) {
+		if (aChannelConfig.isShared()) {
+		    list.add(aChannelConfig);
+		}
+	    }
 	    return list;
 	}
 

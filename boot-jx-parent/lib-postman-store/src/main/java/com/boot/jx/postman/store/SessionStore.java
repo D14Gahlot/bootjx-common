@@ -562,15 +562,8 @@ public class SessionStore extends CommonMongoTemplateAbstract {
 		ChatSessionQuery chatSessionDocQuery = new ChatSessionQuery(msgDoc.getSessionId());
 		if (PostManUtil.isInBound(msgDoc.getType())) {
 		    chatSessionDocQuery.setLastInBoundMsg(msgDoc, iMessage.contact().getContactType());
-		    updateFirst(chatSessionDocQuery);
 		} else if (PostManUtil.isOutBound(msgDoc.getType())) {
-		    if (PostManUtil.isAgentMode(iMessage)) {
-			chatSessionDocQuery.setLastAgentReply(msgDoc, iMessage.contact().getContactType());
-		    } else if (PostManUtil.isBotMode(iMessage)) {
-			chatSessionDocQuery.setLastBotReply(msgDoc, iMessage.contact().getContactType());
-		    } else {
-			chatSessionDocQuery.setLastOutBoundMsg(msgDoc, iMessage.contact().getContactType());
-		    }
+		    chatSessionDocQuery.setLastOutBoundMsg(msgDoc, iMessage.contact().getContactType());
 		}
 		chatSessionDocQuery.setLastMsg(msgDoc, iMessage.contact().getContactType());
 		updateFirst(chatSessionDocQuery);
@@ -660,7 +653,7 @@ public class SessionStore extends CommonMongoTemplateAbstract {
     public String getLastAssignedAgent(Contactable contact) {
 	CommonMongoQueryBuilder cmqb = new CommonMongoQueryBuilder().with(Criteria.where("contactId")
 		.is(contact.getContactId()).and("assignedToAgent").exists(true).and("mode").is(CHAT_MODE.AGENT));
-	cmqb.getQuery().with(new Sort(Direction.DESC, "startSessionStamp")).limit(1);
+	cmqb.sortBy("startSessionStamp", Direction.DESC).limit(1).skipDBRef();
 	ChatSessionDoc lastSession = super.findOne(cmqb.getQuery(), ChatSessionDoc.class);
 	if (ArgUtil.is(lastSession)) {
 	    return lastSession.getAssignedToAgent();

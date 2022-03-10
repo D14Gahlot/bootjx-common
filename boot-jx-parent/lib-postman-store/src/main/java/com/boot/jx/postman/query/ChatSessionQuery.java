@@ -91,19 +91,8 @@ public class ChatSessionQuery extends DocQueryBuilder<ChatSessionDoc> {
 
     public ChatSessionQuery setLastInBoundMsg(MessageDoc lastInBoundMsg, String contactType) {
 	this.doc.setLastInBoundMsg(lastInBoundMsg);
+	this.set("lastInBoundMsgId", lastInBoundMsg.getMessageId());
 	this.ref("lastInBoundMsg", lastInBoundMsg.getMessageId(), MessageStore.getCollectionName(contactType));
-	return this;
-    }
-
-    public ChatSessionQuery setLastAgentReply(MessageDoc lastAgentReply, String contactType) {
-	this.doc.setLastAgentReply(lastAgentReply);
-	this.ref("lastAgentReply", lastAgentReply.getMessageId(), MessageStore.getCollectionName(contactType));
-	return this;
-    }
-
-    public ChatSessionQuery setLastBotReply(MessageDoc lastBotReply, String contactType) {
-	this.doc.setLastBotReply(lastBotReply);
-	this.ref("lastBotReply", lastBotReply.getMessageId(), MessageStore.getCollectionName(contactType));
 	return this;
     }
 
@@ -114,7 +103,7 @@ public class ChatSessionQuery extends DocQueryBuilder<ChatSessionDoc> {
     }
 
     public ChatSessionQuery setLastMsg(MessageDoc lastMsg, String contactType) {
-	this.doc.setLastMsg(lastMsg);
+	// this.doc.setLastMsg(lastMsg);
 	this.ref("lastMsg", lastMsg.getMessageId(), MessageStore.getCollectionName(contactType));
 	return this;
     }

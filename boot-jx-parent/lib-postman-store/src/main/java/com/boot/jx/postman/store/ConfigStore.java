@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 import com.boot.jx.mongo.CommonMongoTemplateAbstract;
 import com.boot.jx.postman.doc.PMConfigurationDoc;
 import com.boot.jx.postman.doc.config.ChannelConfigDoc;
-import com.boot.jx.postman.doc.config.ClientKeyConfigDoc;
+import com.boot.jx.postman.doc.config.ClientAppConfigDoc;
 import com.boot.jx.postman.doc.config.CompanyVarsConfigDoc;
 import com.boot.jx.postman.doc.config.PrefsConfigDoc;
 import com.boot.jx.utils.PostManUtil;
@@ -35,14 +35,14 @@ public class ConfigStore extends CommonMongoTemplateAbstract {
 	log(doc, "updated");
     }
 
-    public void saveClientKeyConfig(ClientKeyConfigDoc clientApiKey) {
+    public void saveClientKeyConfig(ClientAppConfigDoc clientApiKey) {
 	try {
 	    boolean generated = false;
 	    if (!ArgUtil.is(clientApiKey.getId()) || !ArgUtil.is(clientApiKey.getKey())) {
 		clientApiKey.setKey(PostManUtil.UNIQUE_API_KEY());
 		generated = true;
 	    } else {
-		ClientKeyConfigDoc oldDoc = findByIdString(clientApiKey.getId(), ClientKeyConfigDoc.class);
+		ClientAppConfigDoc oldDoc = findByIdString(clientApiKey.getId(), ClientAppConfigDoc.class);
 		clientApiKey.setKey(oldDoc.getKey());
 	    }
 	    save(clientApiKey);
