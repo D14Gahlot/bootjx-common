@@ -34,7 +34,7 @@ public class ChatController {
     @Autowired
     private SessionStore sessionStore;
     
-    @Autowired
+    //@Autowired
     private ChatSessionService chatSessionService;
     
 
