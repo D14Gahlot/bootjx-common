@@ -188,7 +188,7 @@ public class ChatSessionManager {
 			    // @deprecated condition
 			    //Criteria.where("updatedStamp").gt(watermarkStamp),
 			    // new Condition
-			    Criteria.where("updated.day").gt(watermarkStampDay)),
+			    Criteria.where("updated.day").gte(watermarkStampDay)),
 		    // Criteria.where("updatedStamp").gt(watermarkStamp),
 		    // Additional Stamps
 		    new Criteria().andOperator(
@@ -248,8 +248,12 @@ public class ChatSessionManager {
     public List<ChatSessionDoc> findChatSessionDocByAgentAndUnAssigned(String tab, String agentCode, String agentDept,
 	    String search) {
 	long historyPeriod = pmDomainConfig.getAgentHistoryPeriod().asLong(0L);
+	if (historyPeriod > 0L && ArgUtil.areEqual("HISTORY", tab)) {
 	    return findChatSessionDocByAgentAndUnAssigned(tab, agentCode, agentDept, search,
 		    PMConstants.DEFAULT_VALUES.POSTMAN_AGENT_TAB_HISTORY_PERIOD + historyPeriod);
+	}
+	return findChatSessionDocByAgentAndUnAssigned(tab, agentCode, agentDept, search,
+		DEFAULT_VALUES.POSTMAN_AGENT_TAB_HISTORY_PERIOD * 3/2);
     }
 
     public List<ChatSessionDoc> searchPrimary(String search) {
