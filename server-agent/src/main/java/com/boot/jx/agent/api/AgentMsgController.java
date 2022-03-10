@@ -75,7 +75,7 @@ public class AgentMsgController {
 	    @RequestParam(defaultValue = "false") boolean withMessage, @RequestParam(required = false) Boolean status,
 	    @RequestParam(required = false) Boolean away,
 	    @RequestParam(required = false, defaultValue = "HISTORY") String tab,
-	    @RequestParam(required = false) String search) {
+	    @RequestParam(required = false) String search, @RequestParam(required = false) String searchStatus) {
 
 	List<ChatSessionDTO> chatSessionDtos = new ArrayList<ChatSessionDTO>();
 	if (agentSession.isLoggedIn() && ArgUtil.is(agentSession.getAgentDept())) {
@@ -83,7 +83,7 @@ public class AgentMsgController {
 
 	    ApiResponseUtil.addLog("Search Results");
 	    sessions = chatSessionManager.findChatSessionDocByAgentAndUnAssigned(tab, agentSession.getAgentCode(),
-		    agentSession.getAgentDept(), search);
+		    agentSession.getAgentDept(), search, searchStatus);
 
 	    for (ChatSessionDoc chatSessionDoc : sessions) {
 		ChatSessionDTO chatSessionDto = chatArchive.getChatSession(chatSessionDoc);

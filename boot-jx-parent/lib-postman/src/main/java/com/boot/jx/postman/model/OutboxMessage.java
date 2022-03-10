@@ -18,6 +18,7 @@ public class OutboxMessage extends Message<OutboxMessage> implements WAMessageOp
 
     private BigDecimal queue;
     private MessageSession session;
+    private MessageRoute route;
     private MessagePrompt prompt;
     private List<String> logs;
 
@@ -89,4 +90,19 @@ public class OutboxMessage extends Message<OutboxMessage> implements WAMessageOp
 	return this;
     }
 
+    public MessageRoute getRoute() {
+	return route;
+    }
+
+    public void setRoute(MessageRoute route) {
+	this.route = route;
+    }
+
+    @Override
+    public MessageRoute route() {
+	if (route == null) {
+	    this.route = new MessageRoute();
+	}
+	return this.route;
+    }
 }

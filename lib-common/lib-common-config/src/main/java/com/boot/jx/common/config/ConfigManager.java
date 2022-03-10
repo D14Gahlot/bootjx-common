@@ -18,6 +18,7 @@ import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.chat.ConnectorHandlerFactory;
 import com.boot.jx.common.impl.ConfigMeta;
 import com.boot.jx.exception.ApiHttpExceptions.ApiStatusCodes;
+import com.boot.jx.postman.ClientApp;
 import com.boot.jx.postman.PMConfiguration.PMConfigurationModel;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PMEnvironment.AChannelDetails;
@@ -25,7 +26,7 @@ import com.boot.jx.postman.PMEnvironment.PMClientConfig;
 import com.boot.jx.postman.PMEnvironment.PMConfigurationObject;
 import com.boot.jx.postman.doc.PMConfigurationDoc;
 import com.boot.jx.postman.doc.config.ChannelConfigDoc;
-import com.boot.jx.postman.doc.config.ClientKeyConfigDoc;
+import com.boot.jx.postman.doc.config.ClientAppConfigDoc;
 import com.boot.jx.postman.doc.config.CompanyVarsConfigDoc;
 import com.boot.jx.postman.doc.config.PrefsConfigDoc;
 import com.boot.jx.postman.plugin.ChannelConfig;
@@ -179,13 +180,21 @@ public class ConfigManager {
 	this.refresh();
     }
 
-    public ClientKeyConfigDoc save(ClientKeyConfigDoc clientApiKey) {
+    public ClientAppConfigDoc save(ClientAppConfigDoc clientApiKey) {
+	ClientApp app = pmEnvironment.shared().clientApiKey(clientApiKey.getQueue());
+	if (app.isReadOnly()) {
+	    ApiResponseUtil.throwUnAuthorizedException("ReadOnly App");
+	}
 	configStore.saveClientKeyConfig(clientApiKey);
 	this.refresh();
 	return clientApiKey;
     }
 
-    public ClientKeyConfigDoc remove(ClientKeyConfigDoc clientApiKey) {
+    public ClientAppConfigDoc remove(ClientAppConfigDoc clientApiKey) {
+	ClientApp app = pmEnvironment.shared().clientApiKey(clientApiKey.getQueue());
+	if (app.isReadOnly()) {
+	    ApiResponseUtil.throwUnAuthorizedException("ReadOnly App");
+	}
 	configStore.remove(clientApiKey);
 	this.refresh();
 	return clientApiKey;

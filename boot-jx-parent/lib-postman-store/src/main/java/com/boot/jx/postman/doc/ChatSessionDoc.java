@@ -110,12 +110,6 @@ public class ChatSessionDoc extends UpdatedTimeStampDoc implements Serializable 
     private MessageDoc lastInBoundMsg;
 
     @DBRef
-    private MessageDoc lastBotReply;
-
-    @DBRef
-    private MessageDoc lastAgentReply;
-
-    @DBRef
     private MessageDoc lastOutBoundMsg;
 
     @DBRef
@@ -365,22 +359,6 @@ public class ChatSessionDoc extends UpdatedTimeStampDoc implements Serializable 
 	this.lastInBoundMsg = lastInBoundMsg;
     }
 
-    public MessageDoc getLastAgentReply() {
-	return lastAgentReply;
-    }
-
-    public void setLastAgentReply(MessageDoc lastAgentReply) {
-	this.lastAgentReply = lastAgentReply;
-    }
-
-    public MessageDoc getLastBotReply() {
-	return lastBotReply;
-    }
-
-    public void setLastBotReply(MessageDoc lastBotReply) {
-	this.lastBotReply = lastBotReply;
-    }
-
     public MessageDoc getLastOutBoundMsg() {
 	return lastOutBoundMsg;
     }
@@ -499,11 +477,11 @@ public class ChatSessionDoc extends UpdatedTimeStampDoc implements Serializable 
     }
 
     public Map<String, Object> getMeta() {
-        return meta;
+	return meta;
     }
 
     public void setMeta(Map<String, Object> meta) {
-        this.meta = meta;
+	this.meta = meta;
     }
 
 }

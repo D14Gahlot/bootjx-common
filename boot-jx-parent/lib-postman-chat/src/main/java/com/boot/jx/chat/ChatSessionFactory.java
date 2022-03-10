@@ -88,7 +88,7 @@ public class ChatSessionFactory {
 
 	// CONTACT CREATION
 	if (ArgUtil.isEmpty(chatContactDoc)) {
-	    //System.out.println("CONTACT CREATION");
+	    // System.out.println("CONTACT CREATION");
 	    ChatContactQuery chatContactQuery = new ChatContactQuery(contact.getContactId());
 	    chatContactQuery.update(contact);
 	    chatContactQuery.updateCreatedStamp();
@@ -106,7 +106,7 @@ public class ChatSessionFactory {
 	sessionStore.closeAllPreviousSessions(contact.getContactId());
 
 	// SESSION CREATION
-	//System.out.println("SESSION CREATION");
+	// System.out.println("SESSION CREATION");
 	chatSessionDoc = new ChatSessionDoc();
 	chatSessionDoc.setContactId(contact.getContactId());
 	chatSessionDoc.setContactType(sessionMessage.contact().getContactType());
@@ -177,15 +177,8 @@ public class ChatSessionFactory {
 		ChatSessionQuery chatSessionDocQuery = new ChatSessionQuery(msgDoc.getSessionId());
 		if (PostManUtil.isInBound(msgDoc.getType())) {
 		    chatSessionDocQuery.setLastInBoundMsg(msgDoc, iMessage.contact().getContactType());
-		    sessionStore.updateFirst(chatSessionDocQuery);
 		} else if (PostManUtil.isOutBound(msgDoc.getType())) {
-		    if (PostManUtil.isAgentMode(iMessage)) {
-			chatSessionDocQuery.setLastAgentReply(msgDoc, iMessage.contact().getContactType());
-		    } else if (PostManUtil.isBotMode(iMessage)) {
-			chatSessionDocQuery.setLastBotReply(msgDoc, iMessage.contact().getContactType());
-		    } else {
-			chatSessionDocQuery.setLastOutBoundMsg(msgDoc, iMessage.contact().getContactType());
-		    }
+		    chatSessionDocQuery.setLastOutBoundMsg(msgDoc, iMessage.contact().getContactType());
 		}
 		chatSessionDocQuery.setLastMsg(msgDoc, iMessage.contact().getContactType());
 		sessionStore.updateFirst(chatSessionDocQuery);

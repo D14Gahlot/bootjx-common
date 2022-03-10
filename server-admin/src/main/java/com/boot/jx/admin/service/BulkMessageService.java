@@ -18,6 +18,7 @@ import com.boot.jx.dict.ContactType;
 import com.boot.jx.logger.AuditDetailProvider;
 import com.boot.jx.mongo.CommonMongoQB.CommonMongoCriteria;
 import com.boot.jx.postman.PMEnvironment;
+import com.boot.jx.postman.PMConstants.CHAT_MODE;
 import com.boot.jx.postman.doc.BulkSessionDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.MessageDoc;
@@ -163,6 +164,7 @@ public class BulkMessageService extends BatchJobExecuter {
 	outboxMessage.contact().setEmail(msg.getContact().getEmail());
 	outboxMessage.contact().setPhone(msg.getContact().getPhone());
 	outboxMessage.contact().setContactId(msg.getContact().getContactId());
+	outboxMessage.route().setSendMode(CHAT_MODE.PUSH.name());
 
 	ChatSessionDoc chatSessionDoc = sessionStore.linkSession(outboxMessage);
 	if (ArgUtil.is(chatSessionDoc)) {
