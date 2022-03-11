@@ -2,10 +2,13 @@ package com.boot.jx.postman.manager;
 
 import javax.annotation.PostConstruct;
 
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Component;
 
+import com.boot.jx.agent.AgentChatHandlerImpl;
+import com.boot.jx.logger.LoggerService;
 import com.boot.jx.postman.PMConstants;
 import com.boot.jx.postman.PMConstants.APP_TYPE;
 import com.boot.jx.postman.doc.QuickMedia;
@@ -16,6 +19,8 @@ import com.boot.utils.ArgUtil;
 
 @Component
 public class StarterDocKit {
+
+    public static final Logger LOGGER = LoggerService.getLogger(StarterDocKit.class);
 
     @Autowired
     MongoTemplate mongoTemplate;
@@ -48,7 +53,11 @@ public class StarterDocKit {
     private void createClientApp(ClientAppConfigDoc clientAppConfig) {
 	ClientAppConfigDoc app = mongoTemplate.findById(clientAppConfig.getId(), ClientAppConfigDoc.class);
 	if (ArgUtil.isEmpty(app) || !ArgUtil.areEqual(app.getKeyVersion(), clientAppConfig.getKeyVersion())) {
-	    mongoTemplate.save(clientAppConfig);
+	    try {
+		mongoTemplate.save(clientAppConfig);
+	    } catch (Exception e) {
+		LOGGER.error("createClientAppErrror:" + clientAppConfig.getKeyName(), e);
+	    }
 	}
     }
 
