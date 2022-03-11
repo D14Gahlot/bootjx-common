@@ -104,7 +104,7 @@ public class StarterDocKit {
 	agentApp.setQueue(PMConstants.DEFAULT.AGENT_QUEUE_CODE);
 	agentApp.setAppType(APP_TYPE.AGENT.name());
 	agentApp.setKey(PostManUtil.UNIQUE_API_KEY());
-	agentApp.setKeyVersion("v2");
+	agentApp.setKeyVersion("v3");
 	agentApp.setShared(true);
 	createClientApp(agentApp);
 
@@ -114,7 +114,7 @@ public class StarterDocKit {
 	botApp.setQueue(PMConstants.DEFAULT.BOT_QUEUE_CODE);
 	botApp.setAppType(APP_TYPE.BOT.name());
 	botApp.setKey(PostManUtil.UNIQUE_API_KEY());
-	botApp.setKeyVersion("v2");
+	botApp.setKeyVersion("v3");
 	botApp.setShared(true);
 	createClientApp(botApp);
     }

@@ -10,8 +10,8 @@ public class PMConstants {
 	public static final String SYSTEM = "__SYSTEM__";
 	public static final String NO_DEPT = "__DEPT__";
 	public static final String NO_USER = "__USER__";
-	public static final String BOT_QUEUE_CODE = "__BASIC_BOT__";
-	public static final String AGENT_QUEUE_CODE = "__AGENT_DESK__";
+	public static final String BOT_QUEUE_CODE = "basic_bot";
+	public static final String AGENT_QUEUE_CODE = "agent_desk";
     }
 
     public final class USER_ROLE {

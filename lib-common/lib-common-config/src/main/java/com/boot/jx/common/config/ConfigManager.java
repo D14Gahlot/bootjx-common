@@ -181,7 +181,7 @@ public class ConfigManager {
     }
 
     public ClientAppConfigDoc save(ClientAppConfigDoc clientApiKey) {
-	ClientApp app = pmEnvironment.shared().clientApiKey(clientApiKey.getQueue());
+	ClientApp app = pmEnvironment.config().clientApiKey(clientApiKey.getQueue());
 	if (app.isReadOnly()) {
 	    ApiResponseUtil.throwUnAuthorizedException("ReadOnly App");
 	}
@@ -191,7 +191,7 @@ public class ConfigManager {
     }
 
     public ClientAppConfigDoc remove(ClientAppConfigDoc clientApiKey) {
-	ClientApp app = pmEnvironment.shared().clientApiKey(clientApiKey.getQueue());
+	ClientApp app = pmEnvironment.config().clientApiKey(clientApiKey.getQueue());
 	if (app.isReadOnly()) {
 	    ApiResponseUtil.throwUnAuthorizedException("ReadOnly App");
 	}
