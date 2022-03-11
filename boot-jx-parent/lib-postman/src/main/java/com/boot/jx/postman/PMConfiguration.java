@@ -25,6 +25,8 @@ public interface PMConfiguration extends Serializable {
 
     public ChannelConfig channel(String channelId);
 
+    public ClientApp clientApiKey(String assignedQueue);
+
     public NodeEntry<Object> keyEntry(String string);
 
     public List<AChannelConfig> listChannels();
@@ -237,6 +239,15 @@ public interface PMConfiguration extends Serializable {
 		return x;
 	    }
 	    return this.shared().channel(channelId);
+	}
+
+	@Override
+	public ClientApp clientApiKey(String assignedQueue) {
+	    ClientApp x = this.local().clientApiKey(assignedQueue);
+	    if (ArgUtil.is(x)) {
+		return x;
+	    }
+	    return this.shared().clientApiKey(assignedQueue);
 	}
 
 	@Override
