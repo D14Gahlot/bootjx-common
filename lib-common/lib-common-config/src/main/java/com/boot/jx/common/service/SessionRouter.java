@@ -35,7 +35,7 @@ public class SessionRouter extends ATaskLimiter {
     public ClientApp getDefaultInboundApp(String assignedQueue, Contactable contactable) {
 	ClientApp defaultClient = null;
 	if (ArgUtil.is(assignedQueue)) {
-	    defaultClient = pmEnvironment.local().clientApiKey(assignedQueue);
+	    defaultClient = pmEnvironment.shared().clientApiKey(assignedQueue);
 
 	    if (ArgUtil.is(defaultClient)) {
 		return defaultClient;
@@ -49,7 +49,7 @@ public class SessionRouter extends ATaskLimiter {
 	assignedQueue = pmDomainConfig.getDefaultInboundQueue(contactable);
 
 	if (ArgUtil.is(assignedQueue)) {
-	    defaultClient = pmEnvironment.local().clientApiKey(assignedQueue);
+	    defaultClient = pmEnvironment.shared().clientApiKey(assignedQueue);
 
 	    if (ArgUtil.is(defaultClient)) {
 		return defaultClient;
