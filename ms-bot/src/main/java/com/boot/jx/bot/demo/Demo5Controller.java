@@ -99,13 +99,11 @@ public class Demo5Controller extends CommonBotController {
 		case "customer_service":
 		case "customer service":	
 		case "خدمة العملاء":
-			 //chatContext.session().put(TALK_TO_AGENT, "#");
 		 	 this.transferToAgent(inboxMessage, matcher);	
 		    break;    
 		case "menu_selection":
 		case "menu selection":	
 		case "المنيوخيارات":
-			// chatContext.session().put(TALK_TO_AGENT, "#");
 			 this.transferToAgent(inboxMessage, matcher);	
 		    break;
 		case "clinic_locations":
@@ -202,42 +200,43 @@ public class Demo5Controller extends CommonBotController {
 			case "sharq":
 			case "شرق":	
 			    reply(new OutboxMessage().template("dc_location_link_timing_sharq"));
-			    next("select-language");
+			    next("dc_location_link_timing");
 			    break;
 			case "bairaq_mall":
 			case "bairaq mall":	
 			case "البيرق مجمع":
 			    reply(new OutboxMessage().template("dc_location_link_timing_bairaq_mall"));
-			    next("select-language");
+			    next("dc_location_link_timing");
 			    break;
 			case "salmiya":
 			case "السالمية":
 			    reply(new OutboxMessage().template("dc_location_link_timing_salmiya"));
-			    next("clinics-onselect");
+			   // next("clinics-onselect");
+			    next("dc_location_link_timing");
 			    break;
 			    
 			case "jahra":
 			case "الجهراء":	
 			    reply(new OutboxMessage().template("dc_location_link_timing_jahra"));
-			    next("select-language");
+			    next("dc_location_link_timing");
 			    break;
 			    
 			case "360_mall":
 			case "360 mall":	
 			case "360 مجمع":	
 			    reply(new OutboxMessage().template("dc_location_link_timing_360mall"));
-			    next("select-language");
+			    next("dc_location_link_timing");
 			    break;
 			case "avenues_mall":
 			case "avenues mall":	
 			case "الأفنيوز مجمع":	
 			    reply(new OutboxMessage().template("dc_location_link_timing_avenues"));
-			    next("select-language");
+			    next("dc_location_link_timing");
 			    break;
 			case "aqaila":
 			case "العقيلة":	
 			    reply(new OutboxMessage().template("dc_location_link_timing_aqaila"));
-			    next("select-language");
+			    next("dc_location_link_timing");
 			    break;  
 			case "*":
 				this.goToMainMenu(inboxMessage, matcher);
@@ -368,7 +367,23 @@ public void selectLocationDateTime(InboxMessage inboxMessage, StringMatcher matc
 		}
 	}
 }
+@ChatMapping(key = "dc_location_link_timing")
+public void locationLinkTiming(InboxMessage inboxMessage, StringMatcher matcher) {
+	switch (toReplyEnum(inboxMessage)) {
+	case "*":
+		this.goToMainMenu(inboxMessage, matcher);
+		break; 
+	case "#"	:
+		this.transferToAgent(inboxMessage, matcher);
+	    break;   
+	default :
+		reply(new OutboxMessage().template("invalid_input_response_std"));
+		reply(new OutboxMessage().template("dc_location_option"));
+		next("clinics-onselect");	
+	    break;     
 
+	}
+}
 	   
 	    
 	    @ChatMapping(key = "dc_date_time")
