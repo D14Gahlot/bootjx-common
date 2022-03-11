@@ -143,13 +143,17 @@ public class MessageDefinitions {
 	}
     }
 
-    // External attributes
     @JsonIgnoreProperties(ignoreUnknown = true)
-    public interface SessionMessage extends Serializable {
+    public interface SessionId extends Serializable {
 	// Internal attributes
 	public String getSessionId();
 
 	public void setSessionId(String sessionId);
+    }
+
+    // External attributes
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public interface SessionMessage extends SessionId, Serializable {
 
 	public MessageSession session();
 

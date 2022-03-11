@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.chat.ChatClient;
+import com.boot.jx.chat.ChatSessionService;
 import com.boot.jx.chat.ChatStatusService;
 import com.boot.jx.chat.ConnectorHandlerFactory;
 import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorHandler;
@@ -28,6 +29,8 @@ import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.Message;
 import com.boot.jx.postman.model.MessageBoxEvent;
 import com.boot.jx.postman.model.MessageReport;
+import com.boot.jx.postman.model.PMParams;
+import com.boot.jx.postman.model.ext.InBoundEvent;
 import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.scope.vendor.VendorContext.ApiVendorHeaders;
 import com.boot.jx.utils.PostManUtil;
@@ -51,6 +54,9 @@ public class InBoundController {
 
     @Autowired
     private AuditService auditService;
+
+    @Autowired
+    private ChatSessionService chatSessionService;
 
     @ApiVendorHeaders
     @RequestMapping(value = "/int/inbound/callback", method = RequestMethod.POST)
@@ -93,10 +99,9 @@ public class InBoundController {
     }
 
     @ApiVendorHeaders
-    @RequestMapping(value = ChatClient.PATH.ASSIGN_TO_AGENT, method = RequestMethod.POST)
-    public ApiResponse<InboxMessage, ?> assignToAgent(@RequestBody InboxMessage inboxMessage)
-	    throws InterruptedException {
-	return inBoundService.assignToAgent(inboxMessage);
+    @RequestMapping(value = ChatClient.PATH.ASSIGN_TO_AGENT_V2, method = RequestMethod.POST)
+    public InBoundEvent assignToAgentV2(@RequestBody PMParams params) {
+	return chatSessionService.assignSessionToAgent(params).value();
     }
 
     @RequestMapping(value = "/ext/inbound/v2/{channelType}/callback/{accountKey}/{channelId}/{channelKey}",

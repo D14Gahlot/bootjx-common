@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 
 import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorHandler;
 import com.boot.jx.inbound.InBound.InBoundHandler;
+import com.boot.jx.inbound.InBound.SessionAssginHandler;
 import com.boot.jx.logger.LoggerService;
 import com.boot.jx.postman.PMConstants;
 import com.boot.jx.postman.PMConstants.CHAT_STATUS;
@@ -18,6 +19,7 @@ import com.boot.jx.postman.dto.ChatUserProfileDTO.ChatUserProfileRequest;
 import com.boot.jx.postman.manager.ChatSessionManager;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.OutboxMessage;
+import com.boot.jx.postman.model.PMParams;
 import com.boot.jx.postman.model.ext.InBoundEvent;
 import com.boot.jx.postman.query.ChatContactQuery;
 import com.boot.jx.postman.store.MessageContext;
@@ -196,6 +198,14 @@ public class ChatSessionService {
     public NodeEntry<InBoundEvent> closeSession(String sessionId) {
 	ChatSessionDoc sessionDoc = sessionStore.getSession(sessionId);
 	return closeSession(sessionDoc);
+    }
+
+    public NodeEntry<InBoundEvent> assignSessionToAgent(PMParams params) {
+	return inBoundHandler.assignSessionToAgent(params);
+    }
+
+    public NodeEntry<InBoundEvent> assignSessionToAgent(ChatSessionDoc sessionDoc, String agentDept, String agentCode) {
+	return inBoundHandler.assignSessionToAgent(sessionDoc, agentDept, agentCode);
     }
 
 }

@@ -547,7 +547,7 @@ public class SessionStore extends CommonMongoTemplateAbstract {
 	}
 
 	chatSessionDoc.setMode(PMConstants.CHAT_MODE.BOT.toString());
-	chatSessionDoc.setAssignedToAgent(botName);
+	chatSessionDoc.setAssignedToBot(botName);
 
 	CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder().whereId(chatSessionDoc.getSessionId());
 	builder.set("mode", chatSessionDoc.getMode());

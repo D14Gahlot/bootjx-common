@@ -5,7 +5,9 @@ import org.springframework.scheduling.annotation.Async;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.MessageReport;
+import com.boot.jx.postman.model.PMParams;
 import com.boot.jx.postman.model.ext.InBoundEvent;
+import com.boot.model.MapModel.NodeEntry;
 
 public class InBound {
 
@@ -53,6 +55,14 @@ public class InBound {
 
 	public void onSessionInit(InBoundEvent event, ChatSessionDoc chatSessionDoc);
 
+	public NodeEntry<InBoundEvent> assignSessionToAgent(PMParams params);
+
+	public NodeEntry<InBoundEvent> assignSessionToAgent(ChatSessionDoc session, String deptCode, String agentCode);
+
+    }
+
+    public interface SessionAssginHandler {
+	public NodeEntry<InBoundEvent> doAssignAgent(PMParams pmParams);
     }
 
 }
