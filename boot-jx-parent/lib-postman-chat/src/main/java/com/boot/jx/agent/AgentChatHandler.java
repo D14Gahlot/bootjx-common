@@ -16,9 +16,8 @@ public interface AgentChatHandler {
 		&& ArgUtil.isEmptyValue(inboxMessage.session().isResolved());
     }
 
-    public InboxMessage onAssign(InboxMessage inboxMessage);
-
     public InboxMessage onMessageReceive(InboxMessage inboxMessage);
 
     public ChatMessageDTO onSend(ChatSessionDoc sessionDoc, OutboxMessage outboxMessage);
+
 }

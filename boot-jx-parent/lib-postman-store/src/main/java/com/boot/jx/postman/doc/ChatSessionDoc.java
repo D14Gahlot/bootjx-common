@@ -51,6 +51,7 @@ public class ChatSessionDoc extends UpdatedTimeStampDoc implements Serializable 
 
     private String assignedToDept;
     private String assignedToAgent;
+    private String assignedToBot;
     private String assignedToQueue;
 
     @Indexed
@@ -482,6 +483,14 @@ public class ChatSessionDoc extends UpdatedTimeStampDoc implements Serializable 
 
     public void setMeta(Map<String, Object> meta) {
 	this.meta = meta;
+    }
+
+    public String getAssignedToBot() {
+        return assignedToBot;
+    }
+
+    public void setAssignedToBot(String assignedToBot) {
+        this.assignedToBot = assignedToBot;
     }
 
 }

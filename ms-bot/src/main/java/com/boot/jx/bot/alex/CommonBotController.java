@@ -10,6 +10,7 @@ import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PMEnvironment.PMConfigurationObject;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.OutboxMessage;
+import com.boot.jx.postman.model.ext.InBoundEvent;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.StringUtils.StringMatcher;
 
@@ -22,8 +23,8 @@ public class CommonBotController extends ChatController {
 
     public void commonTransferToAgent(InboxMessage inboxMessage, StringMatcher matcher) {
 	try {
-	    InboxMessage agentAssignResp = assignToAgent().getResult();
-	    if (ArgUtil.is(agentAssignResp.session().getAgent())) {
+	    InBoundEvent assignEvent = assignToAgent().value();
+	    if (ArgUtil.is(assignEvent.sessionAssigned().newAgent)) {
 		PMConfigurationObject transferReply = pmEnvironment
 			.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_AGENT_CHAT_AUTOREPLY_TALK2AGENT);
 		if (transferReply.exists()) {

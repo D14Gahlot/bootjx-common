@@ -12,6 +12,8 @@ public class InBoundEvent {
     public static final String SESSION_CLOSED = "SESSION_CLOSED";
     public static final String SESSION_STATUS = "SESSION_STATUS";
 
+    public static final String SESSION_ASSIGNED = "SESSION_ASSIGNED";
+
     @ApiMockModelProperty(example = "SESSION_ROUTED", value = "Event Triggered by App/Service")
     public String eventCode;
 
@@ -31,7 +33,18 @@ public class InBoundEvent {
 	public Object params;
     }
 
+    public static class SessionAssigned {
+	public String oldDept;
+	public String newDept;
+	public String oldAgent;
+	public String newAgent;
+	public String oldBot;
+	public String newBot;
+    }
+
     public SessionRouted sessionRouted;
+
+    public SessionAssigned sessionAssigned;
 
     private Contactable contact;
 
@@ -40,5 +53,12 @@ public class InBoundEvent {
 	    this.contact = new ContactMeta();
 	}
 	return this.contact;
+    }
+
+    public SessionAssigned sessionAssigned() {
+	if (this.sessionAssigned == null) {
+	    this.sessionAssigned = new SessionAssigned();
+	}
+	return this.sessionAssigned;
     }
 }

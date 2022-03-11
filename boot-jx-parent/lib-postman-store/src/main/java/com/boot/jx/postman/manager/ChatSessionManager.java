@@ -328,5 +328,7 @@ public class ChatSessionManager {
 	ChatSessionDoc sessionDoc = sessionStore.getSession(sessionId);
 	return this.assignToQueue(sessionDoc, queueCode);
     }
+    
+
 
 }

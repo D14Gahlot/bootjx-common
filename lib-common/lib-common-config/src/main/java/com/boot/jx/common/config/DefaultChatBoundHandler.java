@@ -28,6 +28,7 @@ import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.Message.Status;
 import com.boot.jx.postman.model.MessageReport;
 import com.boot.jx.postman.model.OutboxMessage;
+import com.boot.jx.postman.model.PMParams;
 import com.boot.jx.postman.model.ext.CommonMsgText.InBoundMsgText;
 import com.boot.jx.postman.model.ext.InBoundContact;
 import com.boot.jx.postman.model.ext.InBoundEvent;
@@ -38,13 +39,13 @@ import com.boot.jx.postman.model.ext.InBoundMsgStatus;
 import com.boot.jx.postman.model.ext.InBoundWrapper;
 import com.boot.jx.postman.model.ext.MsgSession;
 import com.boot.jx.postman.store.MessageStore;
-import com.boot.jx.postman.store.SessionStore;
 import com.boot.jx.rest.RestService;
 import com.boot.jx.stomp.StompTunnelService;
 import com.boot.jx.tunnel.ITunnelDefs.TunnelTask;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.model.MapModel;
 import com.boot.model.MapModel.MapPathEntry;
+import com.boot.model.MapModel.NodeEntry;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
 
@@ -74,19 +75,16 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
     private MessageStore messageStore;
 
     @Autowired
-    private SessionStore sessionStore;
-
-    @Autowired
     private StompTunnelService stompTunnelService;
 
     @Autowired
     private ChatArchiveBuilder chatArchiveBuilder;
 
     @Autowired
-    MitelClient mitelClient;
+    private MitelClient mitelClient;
 
     @Autowired
-    SessionRouter mitelRouter;
+    private SessionRouter mitelRouter;
 
     @Autowired(required = false)
     private ChatService chatService;
@@ -267,25 +265,40 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
     }
 
     @Override
+    public NodeEntry<InBoundEvent> assignSessionToAgent(PMParams params) {
+	return new NodeEntry<InBoundEvent>().value(chatClient.assignToAgentV2(params));
+    }
+
+    @Override
+    public NodeEntry<InBoundEvent> assignSessionToAgent(ChatSessionDoc session, String deptCode, String agentCode) {
+	return assignSessionToAgent(new PMParams().sessionId(session.getSessionId()).contact(session.contact())
+		.assignToDeptCode(deptCode).assignToAgentCode(agentCode));
+    }
+
+    @Override
     public void onSessionRoute(InBoundEvent event, ChatSessionDoc sessionDoc) {
 
 	if (InBoundEvent.SESSION_ROUTED.equals(event.eventCode)) {
-
 	    ClientApp defaultClient = mitelRouter.getDefaultInboundApp(event.sessionRouted.targetQueue, null);
 	    if (ArgUtil.is(defaultClient)) {
 		APP_TYPE appType = APP_TYPE.from(defaultClient.getAppType());
 		if (APP_TYPE.WEBHOOK.equals(appType)) {
 		    sendEventWebhook(event, defaultClient);
 		    return;
-		} else if (APP_TYPE.MITEL.equals(appType)) {
-		    try {
-			mitelRouting(sessionDoc, defaultClient, 1);
-		    } catch (Exception e) {
-			logManager.error(event, e);
+		} else if (CHAT_MODE.AGENT.equals(appType.getMode())) {
+		    MapModel props = new MapModel(defaultClient.props());
+		    assignSessionToAgent(sessionDoc, props.getString("deptCode"), props.getString("agentCode"));
+		    if (APP_TYPE.MITEL.equals(appType)) {
+			try {
+			    mitelRouting(sessionDoc, defaultClient, 1);
+			} catch (Exception e) {
+			    logManager.error(event, e);
+			}
 		    }
 		}
 	    }
 	}
+
     }
 
     @Override

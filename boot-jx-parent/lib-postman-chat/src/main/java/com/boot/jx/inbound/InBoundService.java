@@ -13,7 +13,6 @@ import org.springframework.stereotype.Component;
 
 import com.boot.jx.AppContextUtil;
 import com.boot.jx.agent.AgentService;
-import com.boot.jx.api.ApiResponse;
 import com.boot.jx.bot.BotEngine;
 import com.boot.jx.bot.ChatMapping;
 import com.boot.jx.cache.CacheBox;
@@ -68,7 +67,7 @@ public class InBoundService {
 
     @Autowired
     private ChatStatusService chatStatusService;
-    
+
     @Autowired
     private ChatSessionService chatSessionService;
 
@@ -203,10 +202,6 @@ public class InBoundService {
 	    }
 	}
 	return inboxMessageOriginal;
-    }
-
-    public ApiResponse<InboxMessage, ?> assignToAgent(InboxMessage inboxMessageOriginal) {
-	return agentService.assignToAgent(inboxMessageOriginal);
     }
 
     public void updateBatch(List<MessageReport> messageReports) {
