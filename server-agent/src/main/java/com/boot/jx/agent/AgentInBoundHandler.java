@@ -96,39 +96,46 @@ public class AgentInBoundHandler extends DefaultChatBoundHandler {
 
     @Override
     public void onMessage(InboxMessage inboxMessage, ChatSessionDoc session) {
-	if (ArgUtil.isEmpty(inboxMessage.session().getMode())) {
-	    try {
-		InBoundEvent assignEvent = assignSessionToAgent(session, null, null).value();
-		if (ArgUtil.is(assignEvent.sessionAssigned().newAgent)) {
-		    PMConfigurationObject transferReply = pmEnvironment
-			    .keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_AGENT_CHAT_AUTOREPLY_TALK2AGENT);
-		    if (transferReply.exists()) {
-			chatService.reply(inboxMessage, new OutboxMessage().template(transferReply.asString()));
-		    } else {
-			chatService.reply(inboxMessage, new OutboxMessage()
-				.message("Connecting you to one of our customer representatives. Give us a moment."));
-		    }
-		} else {
-		    PMConfigurationObject noAgentReply = pmEnvironment
-			    .keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_AGENT_CHAT_AUTOREPLY_NOAGENT);
-		    if (noAgentReply.exists()) {
-			chatService.reply(inboxMessage, new OutboxMessage().template(noAgentReply.asString()));
-		    } else {
-			chatService.reply(inboxMessage, new OutboxMessage().message(
-				"All agents are busy or online, we will connect you whenever someone is available."));
-		    }
-		}
-	    } catch (Exception e) {
-		LOGGER.error("Error ONE while Connecting to Agent", e);
-		try {
-		    chatService.reply(inboxMessage, new OutboxMessage().message(
-			    "We are having some issues trying connect you to one of our customer representatives. Please be patient"));
-		} catch (InterruptedException e1) {
-		    LOGGER.error("Error TWO  while Sending Failure", e1);
-		}
+	if (ArgUtil.isEmpty(inboxMessage.session().getMode()) && ArgUtil.isEmpty(inboxMessage.session().getQueue())) {
+	    if (!ArgUtil.is(session)) {
+		session = sessionStore.getSession(inboxMessage.getSessionId());
 	    }
+	   // InBoundEvent assignEvent = assignSessionToAgent(session, null, null).value();
 	}
 	agentChatHandler.onMessageReceive(inboxMessage);
+    }
+
+    private void onAssign(ChatSessionDoc session, InBoundEvent assignEvent) {
+	try {
+
+	    if (ArgUtil.is(assignEvent.sessionAssigned().newAgent)) {
+		PMConfigurationObject transferReply = pmEnvironment
+			.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_AGENT_CHAT_AUTOREPLY_TALK2AGENT);
+		if (transferReply.exists()) {
+		    chatService.reply(session, new OutboxMessage().template(transferReply.asString()));
+		} else {
+		    chatService.reply(session, new OutboxMessage()
+			    .message("Connecting you to one of our customer representatives. Give us a moment."));
+		}
+	    } else {
+		PMConfigurationObject noAgentReply = pmEnvironment
+			.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_AGENT_CHAT_AUTOREPLY_NOAGENT);
+		if (noAgentReply.exists()) {
+		    chatService.reply(session, new OutboxMessage().template(noAgentReply.asString()));
+		} else {
+		    chatService.reply(session, new OutboxMessage().message(
+			    "All agents are busy or online, we will connect you whenever someone is available."));
+		}
+	    }
+	} catch (Exception e) {
+	    LOGGER.error("Error ONE while Connecting to Agent", e);
+	    try {
+		chatService.reply(session, new OutboxMessage().message(
+			"We are having some issues trying connect you to one of our customer representatives. Please be patient"));
+	    } catch (InterruptedException e1) {
+		LOGGER.error("Error TWO  while Sending Failure", e1);
+	    }
+	}
     }
 
     @Override
@@ -291,6 +298,7 @@ public class AgentInBoundHandler extends DefaultChatBoundHandler {
 	    agentAssignEvent.sessionAssigned().newDept = params.getAssignToDeptCode();
 	    agentAssignEvent.sessionAssigned().newAgent = params.getAssignToAgentCode();
 	}
+	onAssign(session, agentAssignEvent);
 	return eventEntry.value(agentAssignEvent);
     }
 

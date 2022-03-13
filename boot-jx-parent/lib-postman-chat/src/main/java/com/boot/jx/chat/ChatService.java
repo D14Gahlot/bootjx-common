@@ -150,6 +150,22 @@ public class ChatService {
 	return messageDoc;
     }
 
+    public MessageDoc reply(ChatSessionDoc sessionDoc, OutboxMessage outboxMessage) throws InterruptedException {
+	ChatContactDoc chatContactDoc = sessionStore.getContact(sessionDoc.contact().getContactId());
+	IMessageExtended inboxMessage = sessionStore.toSessionMessage(sessionDoc);
+
+	if (ArgUtil.isEmpty(outboxMessage.session().getAgent())) {
+	    outboxMessage.session().setAgent(chatClientConfig.getDefaultSender());
+	}
+
+	// Action Only
+	MessageDoc actionDco = actionIntenal(chatContactDoc, outboxMessage);
+	if (ArgUtil.is(actionDco)) {
+	    return actionDco;
+	}
+	return replyIntenal(chatContactDoc, outboxMessage, inboxMessage);
+    }
+
     public MessageDoc reply(InboxMessage inboxMessage, OutboxMessage outboxMessage) throws InterruptedException {
 	ChatContactDoc chatContactDoc = sessionStore.getContact(inboxMessage.contact().getContactId());
 
@@ -264,7 +280,6 @@ public class ChatService {
 	mongoTemplate.save(doc);
 	chatContext.commitContact();
     }
-
 
     public boolean botScore(ChatSessionDoc session, Integer botScore) {
 	session = sessionStore.botScore(session, botScore);

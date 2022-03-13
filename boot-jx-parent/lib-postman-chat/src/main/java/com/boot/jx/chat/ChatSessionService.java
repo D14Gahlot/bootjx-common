@@ -87,6 +87,12 @@ public class ChatSessionService {
 	    }
 	    this.routeSession(session);
 	}
+
+	inboxMessage.session().setQueue(session.getAssignedToQueue());
+	inboxMessage.session().setDept(session.getAssignedToDept());
+	inboxMessage.session().setAgent(session.getAssignedToAgent());
+	inboxMessage.session().setBot(session.getAssignedToBot());
+
 	return session.isInitd();
     }
 

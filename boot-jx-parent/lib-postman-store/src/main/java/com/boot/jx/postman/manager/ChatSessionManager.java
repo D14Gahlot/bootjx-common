@@ -19,6 +19,7 @@ import com.boot.jx.mongo.CommonMongoQueryBuilder;
 import com.boot.jx.postman.ClientApp;
 import com.boot.jx.postman.PMConfiguration.PMConfigurationModel;
 import com.boot.jx.postman.PMConstants;
+import com.boot.jx.postman.PMConstants.APP_TYPE;
 import com.boot.jx.postman.PMConstants.CHAT_STATUS;
 import com.boot.jx.postman.PMConstants.DEFAULT_VALUES;
 import com.boot.jx.postman.PMEnvironment;
@@ -302,7 +303,8 @@ public class ChatSessionManager {
 	    if (ArgUtil.is(apiKeyConfig)) {
 		queueCode = apiKeyConfig.getQueue();
 		chatSessionDoc.setAssignedToQueue(queueCode);
-		chatSessionDoc.setMode(apiKeyConfig.getAppType());
+		APP_TYPE appType = APP_TYPE.from(apiKeyConfig.getAppType());
+		chatSessionDoc.setMode(appType.getMode().name());
 	    } else {
 		ApiResponseUtil.throwInputException(new ApiFieldError().field("queue").codeKey("INVALID_QUEUE")
 			.description("Invalid Queue Code " + queueCode));
