@@ -100,7 +100,7 @@ public class AgentInBoundHandler extends DefaultChatBoundHandler {
 	    if (!ArgUtil.is(session)) {
 		session = sessionStore.getSession(inboxMessage.getSessionId());
 	    }
-	   // InBoundEvent assignEvent = assignSessionToAgent(session, null, null).value();
+	    // InBoundEvent assignEvent = assignSessionToAgent(session, null, null).value();
 	}
 	agentChatHandler.onMessageReceive(inboxMessage);
     }
@@ -108,25 +108,29 @@ public class AgentInBoundHandler extends DefaultChatBoundHandler {
     private void onAssign(ChatSessionDoc session, InBoundEvent assignEvent) {
 	try {
 
-	    if (ArgUtil.is(assignEvent.sessionAssigned().newAgent)) {
-		PMConfigurationObject transferReply = pmEnvironment
-			.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_AGENT_CHAT_AUTOREPLY_TALK2AGENT);
-		if (transferReply.exists()) {
-		    chatService.reply(session, new OutboxMessage().template(transferReply.asString()));
+	    if (!ArgUtil.is(assignEvent.sessionAssigned().oldAgent)) {
+		if (ArgUtil.is(assignEvent.sessionAssigned().newAgent)) {
+		    PMConfigurationObject transferReply = pmEnvironment
+			    .keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_AGENT_CHAT_AUTOREPLY_TALK2AGENT);
+		    if (transferReply.exists()) {
+			chatService.reply(session, new OutboxMessage().template(transferReply.asString()));
+		    } else {
+			chatService.reply(session, new OutboxMessage()
+				.message("Connecting you to one of our customer representatives. Give us a moment."));
+		    }
 		} else {
-		    chatService.reply(session, new OutboxMessage()
-			    .message("Connecting you to one of our customer representatives. Give us a moment."));
+		    PMConfigurationObject noAgentReply = pmEnvironment
+			    .keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_AGENT_CHAT_AUTOREPLY_NOAGENT);
+		    if (noAgentReply.exists()) {
+			chatService.reply(session, new OutboxMessage().template(noAgentReply.asString()));
+		    } else {
+			chatService.reply(session, new OutboxMessage().message(
+				"All agents are busy or online, we will connect you whenever someone is available."));
+		    }
 		}
-	    } else {
-		PMConfigurationObject noAgentReply = pmEnvironment
-			.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_AGENT_CHAT_AUTOREPLY_NOAGENT);
-		if (noAgentReply.exists()) {
-		    chatService.reply(session, new OutboxMessage().template(noAgentReply.asString()));
-		} else {
-		    chatService.reply(session, new OutboxMessage().message(
-			    "All agents are busy or online, we will connect you whenever someone is available."));
-		}
+
 	    }
+
 	} catch (Exception e) {
 	    LOGGER.error("Error ONE while Connecting to Agent", e);
 	    try {
@@ -264,21 +268,23 @@ public class AgentInBoundHandler extends DefaultChatBoundHandler {
 
 	if (ArgUtil.is(params.getAssignToDeptCode()) && ArgUtil.is(params.getAssignToAgentCode())) {
 	    assignToAgent(chatSessionDoc, params.getAssignToDeptCode(), params.getAssignToAgentCode());
-	    logManager.event(chatSessionDoc, MessageStore.EVENTS.ASGND_TO_DEPT, params.getAssignToDeptCode());
-	}
-
-	AgentSessionDoc avaialbleAgent = getAgentSessonAssignedAndActive(params);
-
-	if (ArgUtil.is(avaialbleAgent)) {
-	    assignToAgent(chatSessionDoc, avaialbleAgent.getAgentDept(), avaialbleAgent.getAgentCode());
-	    logManager.event(chatSessionDoc, MessageStore.EVENTS.ASGND_TO_AGENT, avaialbleAgent.getAgentCode(),
-		    avaialbleAgent.getAgentDept());
-
-	    params.setAssignToAgentCode(avaialbleAgent.getAgentCode());
-	    params.setAssignToDeptCode(avaialbleAgent.getAgentDept());
+	    logManager.event(chatSessionDoc, MessageStore.EVENTS.ASGND_TO_AGENT, params.getAssignToDeptCode(),
+		    params.getAssignToAgentCode());
 	} else {
-	    assignToAgent(chatSessionDoc, params.getAssignToDeptCode(), null);
-	    logManager.event(chatSessionDoc, MessageStore.EVENTS.ASGND_TO_DEPT, params.getAssignToDeptCode());
+	    AgentSessionDoc avaialbleAgent = getAgentSessonAssignedAndActive(params);
+
+	    if (ArgUtil.is(avaialbleAgent)) {
+		assignToAgent(chatSessionDoc, avaialbleAgent.getAgentDept(), avaialbleAgent.getAgentCode());
+		logManager.event(chatSessionDoc, MessageStore.EVENTS.ASGND_TO_AGENT, avaialbleAgent.getAgentCode(),
+			avaialbleAgent.getAgentDept());
+
+		params.setAssignToAgentCode(avaialbleAgent.getAgentCode());
+		params.setAssignToDeptCode(avaialbleAgent.getAgentDept());
+	    } else {
+		assignToAgent(chatSessionDoc, params.getAssignToDeptCode(), null);
+		logManager.event(chatSessionDoc, MessageStore.EVENTS.ASGND_TO_DEPT, params.getAssignToDeptCode());
+	    }
+
 	}
 
 	stompTunnelService.sendToAll(PostManUtil.ON_DEPT_ASSIGN_TOPIC(params.getAssignToDeptCode()), chatArchiveBuilder
