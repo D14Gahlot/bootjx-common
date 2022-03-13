@@ -76,6 +76,10 @@ public class ConfigConstants {
 		new ConfigMeta("Agent can initiate chat with new contact", "postman.agent.chat.init.contact")
 			.optionsOnOff().group(GROUP_AGENT)),
 
+	POSTMAN_AGENT_CHAT_REASSIGNMENT_AUTO(
+		new ConfigMeta("Auto Re-Assign Session", "postman.agent.chat.reassignment.auto").optionsOnOff()
+			.group(GROUP_AGENT)),
+
 	POSTMAN_AGENT_CHAT_ASSIGNMENT(new ConfigMeta("Agent Assignment", "postman.agent.chat.assignment")
 		.optionValues(PMConstants.ASSIGNMENT_RULE.ROUND_ROBIN, PMConstants.ASSIGNMENT_RULE.MANUAL,
 			PMConstants.ASSIGNMENT_RULE.STRICT_DEFAULT)
@@ -85,6 +89,7 @@ public class ConfigConstants {
 		.optionValues(PMConstants.CHAT_SESSION_STICKY.NONE, PMConstants.CHAT_SESSION_STICKY.ONAVAILABLE,
 			PMConstants.CHAT_SESSION_STICKY.STRICT)
 		.defaultValue(PMConstants.CHAT_SESSION_STICKY.NONE).group(GROUP_AGENT)),
+
 	POSTMAN_UI_BETA(new ConfigMeta("Enable Beta UI", "postman.ui.beta").optionsOnOff()
 		.defaultValue(ConfigOption.OFF).group(GROUP_AGENT)),
 
