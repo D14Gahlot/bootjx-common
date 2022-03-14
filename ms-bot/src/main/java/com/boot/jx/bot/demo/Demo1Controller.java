@@ -64,11 +64,8 @@ public class Demo1Controller extends CommonBotController {
 	    default:
 		break;
 	    }
-	}//else if(AppContextUtil.getTenant().equalsIgnoreCase("chakli")) {
-	//	demo6Controller.start(inboxMessage, matcher);
-	//	return;
-	//}
-	reply(new OutboxMessage().template("menu-0").put("name", chatContext.getContact().getName()));
+	}
+	reply(new OutboxMessage().template("menu-0").put("name", chatContext.contact().getName()));
 	next("menu-0-onselect");
     }
 

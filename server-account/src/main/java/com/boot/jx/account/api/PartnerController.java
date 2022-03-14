@@ -238,28 +238,6 @@ public class PartnerController {
 	    domainDoc.setCompany(new CompanyDoc());
 	}
 	
-	//if(ArgUtil.is(domainLicDoc)) {
-	//	domainDoc.setDomainLicDoc(domainLicDoc);
-//	}
-	//if (!ArgUtil.is(domainDoc.getCompany().getConactEmail())) {
-	  //  domainDoc.getCompany().setConactEmail(domainUser.getContact().getEmail());
-	//}
-
-	//if (!ArgUtil.is(domainDoc.getCompany().getConactPhone())) {
-	  //  domainDoc.getCompany().setConactPhone(domainUser.getContact().getPhone());
-	//}
-
-	//if (!ArgUtil.is(domainDoc.getCompany().getBusinessName())) {
-	  //  domainDoc.getCompany().setBusinessName(domainUser.getContact().getCompany());
-	//}
-
-	//if (!ArgUtil.is(domainDoc.getCompany().getConactCountry())) {
-	  //  domainDoc.getCompany().setConactCountry(domainUser.getContact().getCountry());
-	//}
-	
-	//if (!ArgUtil.is(domainDoc.getCompany().getPho)) {
-	  //  domainDoc.getCompany().setPhone(null)
-	//}
 
 	
 
@@ -291,7 +269,7 @@ public class PartnerController {
 	domainDoc.setDomain(domainDoc.getDomain());
 	return ApiResponse.build().message("Domain available");
     }
-
+/*
     @ResponseBody
     @RequestMapping(value = { "/api/domain" }, method = { RequestMethod.GET })
     public ApiResponse<DomainDoc, Object> getDomain() {
@@ -335,7 +313,7 @@ public class PartnerController {
 	}
 
 	return resp;
-    }
+    }*/
 
     @ResponseBody
     @RequestMapping(value = { "/api/domain" }, method = { RequestMethod.POST })
