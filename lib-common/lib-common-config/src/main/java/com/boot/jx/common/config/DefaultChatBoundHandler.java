@@ -38,6 +38,7 @@ import com.boot.jx.postman.model.ext.InBoundMsgMedia;
 import com.boot.jx.postman.model.ext.InBoundMsgStatus;
 import com.boot.jx.postman.model.ext.InBoundWrapper;
 import com.boot.jx.postman.model.ext.MsgSession;
+import com.boot.jx.postman.store.MessageContext;
 import com.boot.jx.postman.store.MessageStore;
 import com.boot.jx.rest.RestService;
 import com.boot.jx.stomp.StompTunnelService;
@@ -84,16 +85,23 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
     private MitelClient mitelClient;
 
     @Autowired
-    private SessionRouter mitelRouter;
+    private SessionRouter sessionRouter;
 
     @Autowired(required = false)
     private ChatService chatService;
 
+    @Autowired(required = false)
+    private MessageContext messageContext;
+
+    @Override
+    public MessageContext context() {
+	return messageContext;
+    }
+
     @Override
     public void onMessage(InboxMessage inboxMessage, ChatSessionDoc session) {
 
-	ClientApp defaultClient = mitelRouter.getDefaultInboundApp(inboxMessage.session().getQueue(),
-		inboxMessage.contact());
+	ClientApp defaultClient = context().clientApp(inboxMessage.session().getQueue(), inboxMessage.contact());
 	if (ArgUtil.is(defaultClient)) {
 	    try {
 
@@ -153,7 +161,12 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 	String omid = omidEntry.asString();
 	TunnelTask task = new TunnelTask().name("MITEL_ROUTER").id(session.getSessionId()).interval(delay);
 	task.data().put("sessionId", session.getSessionId()).put("omid", omid).put("queue", defaultClient.getQueue());
-	mitelRouter.debounce(task);
+	sessionRouter.debounce(task);
+
+	TunnelTask closeTask = new TunnelTask().name("MITEL_CLOSE_CHECK").id(session.getSessionId()).interval(60 * 10);
+	closeTask.data().put("sessionId", session.getSessionId()).put("omid", omid).put("queue",
+		defaultClient.getQueue());
+	sessionRouter.debounce(closeTask);
     }
 
     private void updateStatus(InboxMessage inboxMessage, Status status, Exception e) {
@@ -230,8 +243,7 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
     @Override
     public void doHandle(MessageReport messageReport) {
 
-	ClientApp defaultClient = mitelRouter.getDefaultInboundApp(messageReport.session().getQueue(),
-		messageReport.contact());
+	ClientApp defaultClient = context().clientApp(messageReport.session().getQueue(), messageReport.contact());
 
 	if (ArgUtil.is(defaultClient)) {
 	    if (ArgUtil.areEqual(CHAT_MODE.WEBHOOK.toString(), defaultClient.getAppType())) {
@@ -279,7 +291,7 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
     public void onSessionRoute(InBoundEvent event, ChatSessionDoc sessionDoc) {
 
 	if (InBoundEvent.SESSION_ROUTED.equals(event.eventCode)) {
-	    ClientApp defaultClient = mitelRouter.getDefaultInboundApp(event.sessionRouted.targetQueue, null);
+	    ClientApp defaultClient = context().clientApp(event.sessionRouted.targetQueue, null);
 	    if (ArgUtil.is(defaultClient)) {
 		APP_TYPE appType = APP_TYPE.from(defaultClient.getAppType());
 		if (APP_TYPE.WEBHOOK.equals(appType)) {
@@ -317,7 +329,7 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
     @Override
     public void onSessionClose(InBoundEvent event, ChatSessionDoc sessionDoc) {
 
-	ClientApp defaultClient = mitelRouter.getDefaultInboundApp(sessionDoc.getAssignedToQueue(), null);
+	ClientApp defaultClient = context().clientApp(sessionDoc.getAssignedToQueue(), null);
 	if (ArgUtil.is(defaultClient)) {
 	    APP_TYPE appType = APP_TYPE.from(defaultClient.getAppType());
 	    if (APP_TYPE.WEBHOOK.equals(appType)) {

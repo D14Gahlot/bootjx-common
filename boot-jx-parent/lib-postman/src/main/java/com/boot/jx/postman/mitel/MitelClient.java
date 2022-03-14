@@ -58,20 +58,29 @@ public class MitelClient {
 
     }
 
-    public MapModel resend(ClientApp defaultClient, Contactable contactable, String sessionId, String openmediaId) {
+    public MapModel openMediaGetActive(ClientApp defaultClient, Contactable contactable, String sessionId,
+	    String openmediaId) {
 	String accessToken = getToken(defaultClient);
 	String endPoint = ArgUtil.parseAsString(defaultClient.props().get("end_point"));
 	if (ArgUtil.is(openmediaId)) {
 	    try {
 		MapModel resp = restService.ajax(endPoint).path("/MiccSdk/api/v1/openmedia/{id}")
-			.pathParam("id", openmediaId)
-			.header("Authorization", "Bearer " + accessToken).get().asMapModel();
+			.pathParam("id", openmediaId).header("Authorization", "Bearer " + accessToken).get()
+			.asMapModel();
 		if (!resp.keyEntry("conversationState").in("Ended", "Abandoned")) {
 		    return resp;
 		}
 	    } catch (ResourceAccessException e) {
-		return this.send(defaultClient, contactable, sessionId);
+		return null;
 	    }
+	}
+	return null;
+    }
+
+    public MapModel resend(ClientApp defaultClient, Contactable contactable, String sessionId, String openmediaId) {
+	MapModel resp = openMediaGetActive(defaultClient, contactable, sessionId, openmediaId);
+	if (ArgUtil.is(resp)) {
+	    return resp;
 	}
 	return this.send(defaultClient, contactable, sessionId);
     }

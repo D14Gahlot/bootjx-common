@@ -58,8 +58,8 @@ public class ITunnelDefs {
 	    this.interval = interval;
 	}
 
-	public TunnelTask interval(long interval) {
-	    this.setInterval(interval);
+	public TunnelTask interval(long seconds) {
+	    this.setInterval(seconds);
 	    return this;
 	}
 

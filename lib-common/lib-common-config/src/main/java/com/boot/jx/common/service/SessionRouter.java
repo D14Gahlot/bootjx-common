@@ -1,15 +1,15 @@
 package com.boot.jx.common.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
+import com.boot.jx.chat.ChatSessionService;
 import com.boot.jx.postman.ClientApp;
-import com.boot.jx.postman.PMEnvironment;
-import com.boot.jx.postman.PMEnvironment.PMDomainConfig;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.mitel.MitelClient;
-import com.boot.jx.postman.model.MessageDefinitions.Contactable;
 import com.boot.jx.postman.query.ChatSessionQuery;
+import com.boot.jx.postman.store.MessageContext;
 import com.boot.jx.postman.store.SessionStore;
 import com.boot.jx.tunnel.ITunnelDefs.TunnelTask;
 import com.boot.jx.tunnel.task.ATaskLimiter;
@@ -21,50 +21,27 @@ import com.boot.utils.ArgUtil;
 public class SessionRouter extends ATaskLimiter {
 
     @Autowired
-    private PMEnvironment pmEnvironment;
-
-    @Autowired
-    private PMDomainConfig pmDomainConfig;
-
-    @Autowired
     private MitelClient mitelClient;
 
     @Autowired
     private SessionStore sessionStore;
 
-    public ClientApp getDefaultInboundApp(String assignedQueue, Contactable contactable) {
-	ClientApp defaultClient = null;
-	if (ArgUtil.is(assignedQueue)) {
-	    defaultClient = pmEnvironment.config().clientApiKey(assignedQueue);
+    @Autowired
+    private MessageContext messageContext;
 
-	    if (ArgUtil.is(defaultClient)) {
-		return defaultClient;
-	    }
-	}
-
-	if (!ArgUtil.is(contactable)) {
-	    return defaultClient;
-	}
-
-	assignedQueue = pmDomainConfig.getDefaultInboundQueue(contactable);
-
-	if (ArgUtil.is(assignedQueue)) {
-	    defaultClient = pmEnvironment.config().clientApiKey(assignedQueue);
-
-	    if (ArgUtil.is(defaultClient)) {
-		return defaultClient;
-	    }
-	}
-
-	return defaultClient;
-    }
+    @Lazy
+    @Autowired
+    private ChatSessionService chatSessionService;
 
     @Override
     public void doTask(TunnelTask task) {
 
 	switch (task.getName()) {
 	case "MITEL_ROUTER":
-	    mitelRouting(task);
+	    doMitelRouting(task);
+	    break;
+	case "MITEL_CLOSE_CHECK":
+	    doMitelClosing(task);
 	    break;
 	default:
 	    break;
@@ -72,11 +49,27 @@ public class SessionRouter extends ATaskLimiter {
 
     }
 
-    private void mitelRouting(TunnelTask task) {
+    private void doMitelClosing(TunnelTask task) {
+	MapModel data = task.data();
+	ChatSessionDoc session = sessionStore.getSession(data.getString("sessionId"));
+	ClientApp defaultClient = messageContext.clientApp(data.getString("queue"), null);
+
+	MapModel meta = new MapModel(session.getMeta());
+	MapPathEntry omidEntry = meta.pathEntry("mitel.omid");
+	String omid = omidEntry.asString();
+	MapModel mitel = mitelClient.openMediaGetActive(defaultClient, session.contact(), session.getSessionId(), omid);
+	String newomid = mitel.getString("id");
+
+	if (!ArgUtil.is(mitel) || mitel.keyEntry("id").exists()) {
+	    chatSessionService.closeSession(session);
+	}
+    }
+
+    private void doMitelRouting(TunnelTask task) {
 
 	MapModel data = task.data();
 	ChatSessionDoc session = sessionStore.getSession(data.getString("sessionId"));
-	ClientApp defaultClient = getDefaultInboundApp(data.getString("queue"), null);
+	ClientApp defaultClient = messageContext.clientApp(data.getString("queue"), null);
 
 	MapModel meta = new MapModel(session.getMeta());
 	MapPathEntry omidEntry = meta.pathEntry("mitel.omid");

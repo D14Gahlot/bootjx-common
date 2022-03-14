@@ -35,6 +35,7 @@ import com.boot.jx.postman.model.MessageReport;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.model.PMParams;
 import com.boot.jx.postman.model.ext.InBoundEvent;
+import com.boot.jx.postman.store.MessageContext;
 import com.boot.jx.postman.store.MessageStore;
 import com.boot.jx.postman.store.SessionStore;
 import com.boot.jx.stomp.StompTunnelService;
@@ -307,5 +308,6 @@ public class AgentInBoundHandler extends DefaultChatBoundHandler {
 	onAssign(session, agentAssignEvent);
 	return eventEntry.value(agentAssignEvent);
     }
+
 
 }

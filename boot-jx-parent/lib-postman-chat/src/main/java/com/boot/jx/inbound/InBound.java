@@ -7,6 +7,7 @@ import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.MessageReport;
 import com.boot.jx.postman.model.PMParams;
 import com.boot.jx.postman.model.ext.InBoundEvent;
+import com.boot.jx.postman.store.MessageContext;
 import com.boot.model.MapModel.NodeEntry;
 
 public class InBound {
@@ -23,6 +24,8 @@ public class InBound {
 
     public interface InBoundHandler {
 
+	public MessageContext context();
+	
 	public void onMessage(InboxMessage inboxMessage, ChatSessionDoc session);
 
 	@Async
