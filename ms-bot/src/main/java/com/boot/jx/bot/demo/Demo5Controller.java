@@ -404,7 +404,7 @@ public void locationLinkTiming(InboxMessage inboxMessage, StringMatcher matcher)
 	    @ChatMapping(key = "dc_cs_to_contact")
 	    public void transferToAgent(InboxMessage inboxMessage, StringMatcher matcher) {
 	    	routeSession("agendsk");
-	    	reply(new OutboxMessage().template("dc_cs_to_contact"));
+	    	//reply(new OutboxMessage().template("dc_cs_to_contact"));
 	    	//commonTransferToAgent(inboxMessage, matcher);
 	    }
 	    
