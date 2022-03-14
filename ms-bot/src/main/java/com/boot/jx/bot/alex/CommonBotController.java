@@ -56,3 +56,4 @@ public class CommonBotController extends ChatController {
 	}
     }
 }
+

@@ -8,7 +8,6 @@
 	<name>ms-postman</name>
 	<url>http://maven.apache.org</url>
 	<description>Common Notificationa nd Templating Service</description>
-
 	<parent>
 		<groupId>com.boot.jx</groupId>
 		<artifactId>boot-jx-parent</artifactId>

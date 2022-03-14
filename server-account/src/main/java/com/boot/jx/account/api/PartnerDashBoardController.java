@@ -33,8 +33,7 @@ public class PartnerDashBoardController {
     @Autowired
     private AppCommonConfig appCommonConfig;
 
-   // @Autowired
-   // private AccountAdminService sessionService;
+
 
     @Autowired
     private AccountSessionBean adminSessionBean;
@@ -45,6 +44,7 @@ public class PartnerDashBoardController {
     @Autowired
     AccountDashBoardManager dashBMgr;
   
+
     
     @ResponseBody
     @RequestMapping(value = { "/pub/domain" }, method = { RequestMethod.GET })
@@ -53,12 +53,14 @@ public class PartnerDashBoardController {
 	return ApiResponse.buildResults(domainDocLst);
     }
     
-    @RequestMapping(value = "/pub/admin/fetch-month", method = { RequestMethod.GET })
+    @ResponseBody
+    @RequestMapping(value = {"/pub/admin/fetch-month"}, method = { RequestMethod.GET })
 	public ApiResponse<Map<Object, Object>, Object> getMonthLst() {
 		Map<Object, Object> set =dashBMgr.fetchUniqueMonth(); 
 		return  ApiResponse.buildResult(set);
 	}
-	@RequestMapping(value = "/pub/admin/monthwise-summary-count", method = { RequestMethod.GET })
+    @ResponseBody
+	@RequestMapping(value = {"/pub/admin/monthwise-summary-count"}, method = { RequestMethod.GET })
 	public ApiResponse<ContactTypeSummaryDto, Object> getMonthWiseSummary(long timestamp) {
 		ContactTypeSummaryDto summary =dashBMgr.getMonthWiseCount(timestamp); 
 		return  ApiResponse.buildResult(summary);
@@ -72,6 +74,14 @@ public class PartnerDashBoardController {
 	AccountDashBoardResponseDto response =null;//dashBMgr.getAccountDashBoardDetails();
 	return ApiResponse.buildResult(response);
     }
+   
+    @ResponseBody
+	@RequestMapping(value = {"/pub/monthwise-summary-save"}, method = { RequestMethod.GET })
+	public ApiResponse<ContactTypeSummaryDto, Object> getMonthWiseSaving(long timestamp) {
+		ContactTypeSummaryDto summary =dashBMgr.summaryV1(timestamp); 
+		return  ApiResponse.buildResult(summary);
+	}
+
     
 
 }

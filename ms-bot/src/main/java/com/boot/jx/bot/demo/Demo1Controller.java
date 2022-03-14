@@ -3,6 +3,7 @@ package com.boot.jx.bot.demo;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.boot.jx.AppContextUtil;
 import com.boot.jx.bot.BotController;
 import com.boot.jx.bot.ChatContext;
 import com.boot.jx.bot.ChatMapping;
@@ -40,6 +41,7 @@ public class Demo1Controller extends CommonBotController {
 	String prevMenu = ArgUtil.parseAsString(chatContext.session().get(CURRENT_DEMO), Constants.BLANK)
 		.toLowerCase();
 
+	 
 	if (ArgUtil.is(prevMenu)) {
 	    switch (prevMenu) {
 	    case "1":
@@ -62,11 +64,11 @@ public class Demo1Controller extends CommonBotController {
 	    default:
 		break;
 	    }
-	}/*else if(AppContextUtil.getTenant().equalsIgnoreCase("chakli")) {
-		demo6Controller.start(inboxMessage, matcher);
-		return;
-	}*/
-	reply(new OutboxMessage().template("menu-0").put("name", chatContext.contact().getName()));
+	}//else if(AppContextUtil.getTenant().equalsIgnoreCase("chakli")) {
+	//	demo6Controller.start(inboxMessage, matcher);
+	//	return;
+	//}
+	reply(new OutboxMessage().template("menu-0").put("name", chatContext.getContact().getName()));
 	next("menu-0-onselect");
     }
 

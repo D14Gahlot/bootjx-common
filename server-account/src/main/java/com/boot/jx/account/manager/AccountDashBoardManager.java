@@ -31,15 +31,21 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Component;
 
+import com.boot.jx.AppContextUtil;
 import com.boot.jx.account.doc.DomainDoc;
 import com.boot.jx.account.dto.AccountDashBoardRequestDto;
 import com.boot.jx.account.dto.AccountDashBoardResponseDto;
 import com.boot.jx.account.dto.TypeCount;
+
+import com.boot.jx.dict.ContactType;
 import com.boot.jx.account.dto.ContactTypeCountDto;
 import com.boot.jx.account.dto.ContactTypeSummaryDto;
+import com.boot.jx.account.dto.SummaryDocDto;
 import com.boot.jx.postman.PMConstants;
+import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.DateUtil;
+import com.boot.utils.JsonUtil;
 import com.mongodb.AggregationOptions;
 import com.mongodb.Cursor;
 import com.mongodb.DBCollection;
@@ -186,7 +192,81 @@ public class AccountDashBoardManager {
 	
 	
 		
-	
+		public ContactTypeSummaryDto summaryV1(long timestamp) {
+			String tnt = AppContextUtil.getTenant();
+			List<String> lst = getListOfContactType();
+			Date dateTi = new Date(timestamp);
+			String monthYear = new SimpleDateFormat(DateUtil.MMM_YYYY_FORMAT).format(dateTi);
+			Calendar cal = Calendar.getInstance();
+			cal.setTimeInMillis(timestamp);
+			System.out.println("Year: " + cal.get(Calendar.YEAR) + "\t Month :" + cal.get(Calendar.MONTH));
+			int month = cal.get(Calendar.MONTH);
+			int year = cal.get(Calendar.YEAR);
+			long monthMinTimeStamp = DateUtil.getStartTimestamp(month, year).getTime();
+			long monthMaxTimeStamp = DateUtil.getEndTimestamp(month, year).getTime();
+			List<SummaryDocDto> lstSummDto = new ArrayList<>();
+
+			for (String contactType : lst) {
+				Query query = new Query();
+				query.addCriteria(Criteria.where("timestamp").gt(monthMinTimeStamp).lt(monthMaxTimeStamp));
+				query.with(new Sort(new Order(Direction.DESC, "timestamp")));
+				query.fields().include("timestamp").include("type").include("meta");
+				List<MessageDoc> msgDocLst = mongoTemplate.find(query, MessageDoc.class, contactType.toString());
+				for (MessageDoc doc : msgDocLst) {
+					SummaryDocDto dto = new SummaryDocDto();
+					String yyyyMMdd = DateUtil.foramtTimeStampDateAsString(doc.getTimestamp(),
+							DateUtil.YYYYMMDD_DATE_FORMAT);
+					dto.setDate(yyyyMMdd);
+					dto.setType(doc.getType());
+					dto.setChannel(contactType.toString());
+					dto.setMeta(doc.getMeta());
+					dto.setDomain(tnt);
+					String id = getSummaryId(dto);
+					dto.setId(id);
+					
+					System.out.println("datewaise data :" + JsonUtil.toJson(dto));
+					lstSummDto.add(dto);
+				}
+
+			}
+			Map<Object, Long> summaryMap = new HashMap<>();
+			// summaryMap
+			// =lstSummDto.stream().collect(Collectors.groupingBy(SummaryDocDto::getId,SummaryDocDto::getType.summingLong(SummaryDocDto::getTotalCount)));
+
+			Map<String, Map<String, Long>> datwWiseCount = lstSummDto.stream().collect(Collectors.groupingBy(SummaryDocDto::getId, Collectors.groupingBy(SummaryDocDto::getType, Collectors.counting())));
+			
+			summaryMap = lstSummDto.stream().collect(Collectors.groupingBy(SummaryDocDto::getType,Collectors.counting()));
+			
+			// printing the count based on the designation and gender.
+			System.out.println("Group by on multiple properties" + datwWiseCount);
+
+			ContactTypeSummaryDto dto = new ContactTypeSummaryDto();
+			dto.setMonth(monthYear);
+			dto.setDateWiseSummaryCount(datwWiseCount);
+			dto.setSummaryCount(summaryMap);
+
+			return dto;
+		}
+
+		
+
+		public String getSummaryId(SummaryDocDto dto) {
+			String tenant =dto.getDomain();
+			if (dto.getChannel().contains(ContactType.WHATSAPP.name())) {
+				return tenant + "_" + dto.getDate() + "_" + "wa";
+			} else if (dto.getChannel().contains(ContactType.FACEBOOK.name())) {
+				return tenant + "_" + dto.getDate() + "_" + "fb";
+			} else if (dto.getChannel().contains(ContactType.TWITTER.name())) {
+				return tenant + "_" + dto.getDate() + "_" + "tw";
+			} else if (dto.getChannel().contains(ContactType.TELEGRAM.name())) {
+				return tenant + "_" + dto.getDate() + "_" + "tg";
+			} else if (dto.getChannel().contains(ContactType.INSTAGRAM.name())) {
+				return tenant + "_" + dto.getDate() + "_" + "ig";
+			} else if (dto.getChannel().contains(ContactType.WEBSITE.name())) {
+				return tenant + "_" + dto.getDate() + "_" + "web";
+			}
+			return null;
+		}
 		
 	public List<String> getListOfContactType() {
 		List<String> listContactType = new ArrayList<String>();

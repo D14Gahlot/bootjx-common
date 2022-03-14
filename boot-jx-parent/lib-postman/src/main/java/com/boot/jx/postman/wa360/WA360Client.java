@@ -294,9 +294,10 @@ public class WA360Client {
 	    Map<String, Object> row = new HashMap<String, Object>();
 	    row.put("id", button.getName());
 	    row.put("title", button.getLabel());
-	    if (ArgUtil.is(button.getDesc())) {
-		row.put("description", button.getDesc());
-	    }
+	    //row.put("description", button.getType());
+	     if(ArgUtil.is(button.getDesc())) {
+	        row.put("description", button.getDesc());
+	        }
 	    rows.add(row);
 
 	    if (rows.size() > 9) {

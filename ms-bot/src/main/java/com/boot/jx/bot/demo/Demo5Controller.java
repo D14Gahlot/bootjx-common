@@ -24,7 +24,7 @@ import com.boot.utils.StringUtils.StringMatcher;
 @BotController(name = "DemoBot", tenant = { "chakli" })
 public class Demo5Controller extends CommonBotController {
 	
-	    private static final String CURRENT_DEMO = "current_menu";
+	   
 	    @Autowired
 	    private ChatContext chatContext;
 	
@@ -122,6 +122,7 @@ public class Demo5Controller extends CommonBotController {
 			    break;
 			case "previous member":
 			case "مشترك سابق":
+			    reply(new OutboxMessage().template("dc_cs_to_contact").lang(lang));
 			    this.transferToAgent(inboxMessage, matcher);
 			    break;      
 			    
@@ -135,11 +136,12 @@ public class Demo5Controller extends CommonBotController {
 	    	switch (inboxMessage.getMessage().toLowerCase().trim()) {
 	    	case "renew membership":
 			case "تجديد نوع الحالي":
-			   // reply(new OutboxMessage().template("dc_cs_to_contact"));
+			    reply(new OutboxMessage().template("dc_cs_to_contact").lang(lang));
 			    this.transferToAgent(inboxMessage, matcher);
 			    break;
 			case "change membership":
 			case "تغيير نوع الاشتراك":
+				  reply(new OutboxMessage().template("dc_cs_to_contact").lang(lang));
 				  this.transferToAgent(inboxMessage, matcher);
 			    break;
 	    	}
@@ -180,16 +182,14 @@ public class Demo5Controller extends CommonBotController {
 			    break;
 			case "avenues mall":
 			case "الأفنيوز مجمع":	
-			    reply(new OutboxMessage().template("dc_location_link_timing_avenues"));
-			    next("select-language");
+			    reply(new OutboxMessage().template("dc_location_link_timing_avenues").lang(lang));
+			    next("clinics-onselect");
 			    break;
 			case "aqaila":
 			case "العقيلة":	
-			    reply(new OutboxMessage().template("dc_location_link_timing_aqaila"));
-			    //next("clinics-onselect");
-			    next("select-language");
-			    break;    
-			      
+			    reply(new OutboxMessage().template("dc_location_link_timing_aqaila").lang(lang));
+			    next("clinics-onselect");
+			    break;     
 			
 	    }
 	    
@@ -201,18 +201,18 @@ public class Demo5Controller extends CommonBotController {
 	    	switch (inboxMessage.getMessage().toLowerCase().trim()) {
 			case "new client":
 			case "عميل جديد":	
-			    reply(new OutboxMessage().template("dc_appt_diet_location_opt"));
+			    reply(new OutboxMessage().template("dc_appt_diet_location_opt").lang(lang));
 			    next("newclient-onselect");
 			    break;
 			case "existing client":
 			case "عميل حالي":	
-			    reply(new OutboxMessage().template("dc_date_and_time_request"));
+			    reply(new OutboxMessage().template("dc_date_and_time_request").lang(lang));
 				next("dc_cs_to_contact");
 			    break;  
 			    
 			case "previous client":
 			case "عميل سابق":	
-			    reply(new OutboxMessage().template("dc_date_and_time_request"));
+			    reply(new OutboxMessage().template("dc_date_and_time_request").lang(lang));
 				next("dc_cs_to_contact");
 			    break;   
 	    	}
@@ -221,15 +221,15 @@ public class Demo5Controller extends CommonBotController {
 	    @ChatMapping(key = "newclient-onselect")
 	    public void newclientOnSelect(InboxMessage inboxMessage, StringMatcher matcher) {
 	    	switch (inboxMessage.getMessage().toLowerCase().trim()) {
-			case "dietician":
+			case "dietitian":
 			case "اختيار الأخصائي":
-			    reply(new OutboxMessage().template("dc_dietitian_list_feb2022"));
+			    reply(new OutboxMessage().template("dc_dietitian_list_feb2022").lang(lang));
 			    next("dc_date_time");
 			    break;
 			case "location":
 			case "branch":
 			case "اختيار الموقع":	
-			    reply(new OutboxMessage().template("dc_location_option"));
+			    reply(new OutboxMessage().template("dc_location_option").lang(lang));
 			    next("dc_date_time");
 			    break;  
 	    	}
@@ -240,7 +240,7 @@ public class Demo5Controller extends CommonBotController {
 	    
 	    @ChatMapping(key = "dc_date_time")
 	    public void specifyDateAndTime(InboxMessage inboxMessage, StringMatcher matcher) {
-	    	reply(new OutboxMessage().template("dc_date_and_time_request"));
+	    	reply(new OutboxMessage().template("dc_date_and_time_request").lang(lang));
 	    	next("dc_cs_to_contact");
 	    }
 	    

@@ -51,7 +51,7 @@ public class DefaultChatController extends CommonBotController {
 	    reply("We are having some issues trying connect you to one of our customer representatives. Please be patient");
 	    LOGGER.error("Erro while Connecting to Agent", e);
 	}
-    }
+   }
 
     @ChatMapping(key = AlexBotConstants.KEY.INITIATE + "*", pattern = "^*$")
     public void defaultHandler(InboxMessage inboxMessage, StringMatcher matcher) {

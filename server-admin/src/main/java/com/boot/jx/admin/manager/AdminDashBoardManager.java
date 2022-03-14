@@ -68,7 +68,6 @@ import com.mongodb.Cursor;
 import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
 
-
 @Component
 public class AdminDashBoardManager {
 	private static final Logger LOGGER = LoggerFactory.getLogger(AdminDashBoardManager.class);
@@ -651,8 +650,8 @@ public class AdminDashBoardManager {
 			List<MessageDoc> msgDocLst = getTotalMsgCount(contactType, dateRange1, dateRange2);
 			leasMsgLst.put(contactType, msgDocLst.size());
 		}
-	
-		if (leasMsgLst!=null && ArgUtil.is(leasMsgLst)) {
+
+		if (leasMsgLst != null && ArgUtil.is(leasMsgLst)) {
 			Object maxEntryKey = Collections.max(leasMsgLst.entrySet(), Map.Entry.comparingByValue()).getKey();
 			Integer maxEntryKeyValue = leasMsgLst.get(maxEntryKey);
 			Integer sumOfAllContactMsg = leasMsgLst.values().stream().mapToInt(i -> i).sum();
@@ -675,7 +674,7 @@ public class AdminDashBoardManager {
 
 		Query queryAll = new Query();
 		queryAll.addCriteria(Criteria.where("timestamp").gt(dateRange1).lt(dateRange2));
-		queryAll.addCriteria(Criteria.where("type").in("I","O"));
+		queryAll.addCriteria(Criteria.where("type").in("I", "O"));
 		queryAll.with(new Sort(new Order(Direction.ASC, "timestamp")));
 		agentAnaMgr.removeMsgFields(queryAll);
 		List<MessageDoc> totalMsgDoc = mongoTemplate.find(queryAll, MessageDoc.class, contactType.toString());
@@ -743,7 +742,7 @@ public class AdminDashBoardManager {
 			String formattedDateH = sdfH.format(date);
 			dateWithTimeList.add(dateWithTime);
 			hourList.add(Integer.parseInt(formattedDateH));
-			
+
 		}
 		Collections.sort(dateWithTimeList);
 
@@ -751,20 +750,20 @@ public class AdminDashBoardManager {
 		for (Object key : dateWithTimeWiseCount) {
 			mapLst.put(key, Collections.frequency(dateWithTimeList, key));
 		}
-		if (mapLst!=null && ArgUtil.is(mapLst) && !mapLst.isEmpty()) {
+		if (mapLst != null && ArgUtil.is(mapLst) && !mapLst.isEmpty()) {
 			Object maxEntryKey = Collections.max(mapLst.entrySet(), Map.Entry.comparingByValue()).getKey();
 			Integer maxEntryKeyValue = mapLst.get(maxEntryKey);
 			// System.out.println("Peak Load Date Time and Value:"+maxEntryKey +"-
 			// "+maxEntryKeyValue);
-			SimpleDateFormat df = new SimpleDateFormat("dd-MM-yyyy hh:mm"); 
+			SimpleDateFormat df = new SimpleDateFormat("dd-MM-yyyy hh:mm");
 			try {
-			    Date d = df.parse(maxEntryKey.toString());
-			    long milliseconds = d.getTime();
-			    if(milliseconds != 0) {
-			    	peakLoadResult.setEpochStamp(milliseconds);
-			    }
+				Date d = df.parse(maxEntryKey.toString());
+				long milliseconds = d.getTime();
+				if (milliseconds != 0) {
+					peakLoadResult.setEpochStamp(milliseconds);
+				}
 			} catch (Exception e) {
-			    e.printStackTrace();
+				e.printStackTrace();
 			}
 			peakLoadResult.setTimestamp(maxEntryKey);
 			peakLoadResult.setTotal(maxEntryKeyValue.longValue());
@@ -793,8 +792,8 @@ public class AdminDashBoardManager {
 	public List<MessageDoc> getUniqueConversation(Object contactType, long dateRange1, long dateRange2) {
 		Query query = new Query();
 		query.addCriteria(Criteria.where("timestamp").gt(dateRange1).lt(dateRange2));
-		query.addCriteria(Criteria.where("type").in("O","I"));
-		
+		query.addCriteria(Criteria.where("type").in("O", "I"));
+
 		List<MessageDoc> distinctIdList = mongoTemplate.getCollection(contactType.toString()).distinct("contactId",
 				query.getQueryObject());
 		return distinctIdList;
@@ -803,7 +802,7 @@ public class AdminDashBoardManager {
 	/** Timestamp **/
 
 	public Map<Object, Object> getHourWiseCount(List<MessageDoc> msgLst) {
-		//List<Long> hourList = new ArrayList<Long>();
+		// List<Long> hourList = new ArrayList<Long>();
 		List<String> hourList = new ArrayList<String>();
 		List<Object> dateWiseList = new ArrayList<Object>();
 		Map<Object, Object> mapLst = new HashMap<Object, Object>();
@@ -815,11 +814,11 @@ public class AdminDashBoardManager {
 			SimpleDateFormat sdfH = new SimpleDateFormat("hh aa");
 			String formattedDateH = sdfH.format(date);
 			dateWiseList.add(ddMMyyyyFormat);
-			//LOGGER.info("getHourWiseCount :"+formattedDateH);
+			// LOGGER.info("getHourWiseCount :"+formattedDateH);
 			/** 1 hr gap **/
-			//long hourTimeSamp = (long) (timeStamp / (60 * 1000));
-			//long hh = timeStamp / hourTimeSamp;
-			//hourList.add(hh);
+			// long hourTimeSamp = (long) (timeStamp / (60 * 1000));
+			// long hh = timeStamp / hourTimeSamp;
+			// hourList.add(hh);
 			// hourList.add(Long.parseLong(formattedDateH));// hour wise count
 			hourList.add(formattedDateH);
 		}
@@ -840,8 +839,8 @@ public class AdminDashBoardManager {
 		Map<Object, Object> mapLst = new HashMap<Object, Object>();
 		for (MessageDoc msg : msgLst) {
 			long timeStamp = msg.getTimestamp();
-			timeStamp =(timeStamp-(timeStamp%(1000*60*60)));
-			 hourList.add(timeStamp);// hour wise count
+			timeStamp = (timeStamp - (timeStamp % (1000 * 60 * 60)));
+			hourList.add(timeStamp);// hour wise count
 		}
 		Collections.sort(hourList);
 		Set<Object> hourWiseCount = new HashSet<Object>(hourList);
@@ -851,7 +850,7 @@ public class AdminDashBoardManager {
 
 		return mapLst;
 	}
-	
+
 	/** date wise count **/
 	public Map<Object, Object> getDateWiseCount(List<MessageDoc> msgLst) {
 		List<Object> dateWiseList = new ArrayList<Object>();
@@ -859,7 +858,7 @@ public class AdminDashBoardManager {
 		for (MessageDoc msg : msgLst) {
 			long timeStamp = msg.getTimestamp();
 			Date date = new Date(timeStamp);
-			//String ddMMyyyyFormat = new SimpleDateFormat("dd-MM-yyyy").format(date);
+			// String ddMMyyyyFormat = new SimpleDateFormat("dd-MM-yyyy").format(date);
 			String ddMMyyyyFormat = new SimpleDateFormat("d").format(date);
 			dateWiseList.add(ddMMyyyyFormat);
 		}
@@ -873,15 +872,14 @@ public class AdminDashBoardManager {
 
 		return mapLst;
 	}
-	
-	
+
 	/** date wise count **/
 	public Map<Object, Object> getTimeStampWiseCount(List<MessageDoc> msgLst) {
 		List<Object> dateWiseTimeStampList = new ArrayList<Object>();
 		Map<Object, Object> mapLst = new HashMap<Object, Object>();
 		for (MessageDoc msg : msgLst) {
 			long timeStamp = msg.getTimestamp();
-			timeStamp =(timeStamp-(timeStamp%(1000*60*60*24)));  
+			timeStamp = (timeStamp - (timeStamp % (1000 * 60 * 60 * 24)));
 			dateWiseTimeStampList.add(timeStamp);
 		}
 
@@ -902,15 +900,15 @@ public class AdminDashBoardManager {
 		for (MessageDoc msg : msgLst) {
 			long timeStamp = msg.getTimestamp();
 			Date date = new Date(timeStamp);
-			/*String ddMMyyyyFormat = new SimpleDateFormat("dd-MM-yyyy").format(date);
-			cal.setTime(date);
-			String month = cal.getDisplayName(Calendar.MONTH, Calendar.LONG, Locale.getDefault()).toUpperCase();
-			int weekOfMonth = cal.get(Calendar.WEEK_OF_MONTH);
-			// int weekOfYear = cal.get(Calendar.WEEK_OF_MONTH);
-			String str = month + "  " + weekOfMonth;
-			weekWiseList.add(str);
-		  */
-			String monthWise=new SimpleDateFormat("MMM").format(date);
+			/*
+			 * String ddMMyyyyFormat = new SimpleDateFormat("dd-MM-yyyy").format(date);
+			 * cal.setTime(date); String month = cal.getDisplayName(Calendar.MONTH,
+			 * Calendar.LONG, Locale.getDefault()).toUpperCase(); int weekOfMonth =
+			 * cal.get(Calendar.WEEK_OF_MONTH); // int weekOfYear =
+			 * cal.get(Calendar.WEEK_OF_MONTH); String str = month + "  " + weekOfMonth;
+			 * weekWiseList.add(str);
+			 */
+			String monthWise = new SimpleDateFormat("MMM").format(date);
 			weekWiseList.add(monthWise);
 		}
 
@@ -922,7 +920,7 @@ public class AdminDashBoardManager {
 
 		return mapLst;
 	}
-	
+
 	/** week wise count **/
 	public Map<Object, Object> getWeekWiseCountV1(List<MessageDoc> msgLst) {
 		List<Object> weekWiseList = new ArrayList<Object>();
@@ -930,7 +928,7 @@ public class AdminDashBoardManager {
 		Calendar cal = Calendar.getInstance();
 		for (MessageDoc msg : msgLst) {
 			long timeStamp = msg.getTimestamp();
-			timeStamp =(timeStamp-(timeStamp%(1000*60*60*24)));  
+			timeStamp = (timeStamp - (timeStamp % (1000 * 60 * 60 * 24)));
 			weekWiseList.add(timeStamp);
 		}
 
@@ -943,7 +941,6 @@ public class AdminDashBoardManager {
 
 		return mapLst;
 	}
-	
 
 	// Open conversation
 	public List<ChatSessionDoc> getOpenConversation(Object contactType, long dateRange1, long dateRange2) {
@@ -1102,35 +1099,35 @@ public class AdminDashBoardManager {
 		}
 		return list;
 	}
-	
 
 	@SuppressWarnings("unchecked")
 	public Map<Object, Object> fetchUniqueMonth() {
 		List<String> lst = getListOfContactType();
-		 HashSet<String> set = new HashSet<>();
-		 Map<Object, Object> map= new HashMap<Object, Object>();
-		for(String contactType:lst) {
+		HashSet<String> set = new HashSet<>();
+		Map<Object, Object> map = new HashMap<Object, Object>();
+		for (String contactType : lst) {
 			Query query = new Query();
 			query.with(new Sort(new Order(Direction.DESC, "timestamp")));
 			query.fields().include("timestamp");
-			List<Long> msgDocLst = mongoTemplate.getCollection(contactType.toString()).distinct("timestamp",query.getQueryObject());
-			for(Long docTimeStamp :msgDocLst) {
-				long timestamp=(docTimeStamp-(docTimeStamp%(DateUtil.ONEDAY))); 
+			List<Long> msgDocLst = mongoTemplate.getCollection(contactType.toString()).distinct("timestamp",
+					query.getQueryObject());
+			for (Long docTimeStamp : msgDocLst) {
+				long timestamp = (docTimeStamp - (docTimeStamp % (DateUtil.ONEDAY)));
 				String monthStr = DateUtil.foramtTimeStampDateAsString(timestamp, null);
-				if(!map.containsValue(monthStr)) {
-					map.put(timestamp,monthStr);
+				if (!map.containsValue(monthStr)) {
+					map.put(timestamp, monthStr);
 				}
 			}
 		}
 		Map<Object, Object> treeMap = new TreeMap<>(map);
 		for (Object str : treeMap.keySet()) {
-		    System.out.println(str);
-		   
+			System.out.println(str);
+
 		}
-		
+
 		return map;
 	}
-	
+
 	public ContactTypeSummaryDto getMonthWiseCount(long timestamp) {
 		ContactTypeSummaryDto dto = new ContactTypeSummaryDto();
 		List<String> lst = getListOfContactType();
@@ -1138,114 +1135,130 @@ public class AdminDashBoardManager {
 		String monthYear = new SimpleDateFormat(DateUtil.MMM_YYYY_FORMAT).format(dateTi);
 		Calendar cal = Calendar.getInstance();
 		cal.setTimeInMillis(timestamp);
-	    System.out.println("Year: " + cal.get(Calendar.YEAR)+"\t Month :" + cal.get(Calendar.MONTH));
-	    int month = cal.get(Calendar.MONTH);
-	    int year = cal.get(Calendar.YEAR);
-	    long monthMinTimeStamp =DateUtil.getStartTimestamp(month,year).getTime();
-	    long monthMaxTimeStamp =DateUtil.getEndTimestamp(month, year).getTime();
-	    Map<Object,Long> summaryMap = new HashMap<>();
-	    List<ContactTypeCountDto> summaryMsgLstCount =new ArrayList<ContactTypeCountDto>();
-	   
-	    Map<Object,List<ContactTypeCountDto>> map = new HashMap<>();
-		for(String contactType:lst) {
-		 List<ContactTypeCountDto> messageTypeLst =new ArrayList<ContactTypeCountDto>();
-				List<DBObject> list = new ArrayList<DBObject>();
-				//Match condtion 
-				list.add(Aggregation.match(new Criteria("timestamp").gt(monthMinTimeStamp).lt(monthMaxTimeStamp)).toDBObject(Aggregation.DEFAULT_CONTEXT));
-				list.add(Aggregation.group("type").count().as("count").toDBObject(Aggregation.DEFAULT_CONTEXT));
+		System.out.println("Year: " + cal.get(Calendar.YEAR) + "\t Month :" + cal.get(Calendar.MONTH));
+		int month = cal.get(Calendar.MONTH);
+		int year = cal.get(Calendar.YEAR);
+		long monthMinTimeStamp = DateUtil.getStartTimestamp(month, year).getTime();
+		long monthMaxTimeStamp = DateUtil.getEndTimestamp(month, year).getTime();
+		Map<Object, Long> summaryMap = new HashMap<>();
+		List<ContactTypeCountDto> summaryMsgLstCount = new ArrayList<ContactTypeCountDto>();
 
-				DBCollection col = mongoTemplate.getCollection(contactType);
-				Cursor cursor = col.aggregate(list,AggregationOptions.builder().allowDiskUse(true).outputMode(OutputMode.CURSOR).build());
-				
-				while (cursor.hasNext()) {
-					ContactTypeCountDto contactDto = new ContactTypeCountDto();
-				    DBObject object = cursor.next();
-				    if (ArgUtil.is(object)) {
-					 String type = ArgUtil.parseAsString(object.get("_id"));
-					 long count = ArgUtil.parseAsLong(object.get("count"), 0L);
-					 contactDto.setType(type);
-					 contactDto.setTotalCount(count);
-				    }
-				    messageTypeLst.add(contactDto);
+		Map<Object, List<ContactTypeCountDto>> map = new HashMap<>();
+		for (String contactType : lst) {
+			List<ContactTypeCountDto> messageTypeLst = new ArrayList<ContactTypeCountDto>();
+			List<DBObject> list = new ArrayList<DBObject>();
+			// Match condtion
+			list.add(Aggregation.match(new Criteria("timestamp").gt(monthMinTimeStamp).lt(monthMaxTimeStamp))
+					.toDBObject(Aggregation.DEFAULT_CONTEXT));
+			list.add(Aggregation.group("type").count().as("count").toDBObject(Aggregation.DEFAULT_CONTEXT));
+
+			DBCollection col = mongoTemplate.getCollection(contactType);
+			Cursor cursor = col.aggregate(list,
+					AggregationOptions.builder().allowDiskUse(true).outputMode(OutputMode.CURSOR).build());
+
+			while (cursor.hasNext()) {
+				ContactTypeCountDto contactDto = new ContactTypeCountDto();
+				DBObject object = cursor.next();
+				if (ArgUtil.is(object)) {
+					String type = ArgUtil.parseAsString(object.get("_id"));
+					long count = ArgUtil.parseAsLong(object.get("count"), 0L);
+					contactDto.setType(type);
+					contactDto.setTotalCount(count);
 				}
-				summaryMsgLstCount.addAll(messageTypeLst);
-				map.put(contactType, messageTypeLst);
-	}
+				messageTypeLst.add(contactDto);
+			}
+			summaryMsgLstCount.addAll(messageTypeLst);
+			map.put(contactType, messageTypeLst);
+		}
 		dto.setMap(map);
 		dto.setMonth(monthYear);
 		dto.setMonthMinTimeStamp(monthMinTimeStamp);
 		dto.setMonthMaxTimeStamp(monthMaxTimeStamp);
-		
 
-	    summaryMap =summaryMsgLstCount.stream().collect(Collectors.groupingBy(ContactTypeCountDto::getType,Collectors.summingLong(ContactTypeCountDto::getTotalCount)));
-		
+		summaryMap = summaryMsgLstCount.stream().collect(Collectors.groupingBy(ContactTypeCountDto::getType,
+				Collectors.summingLong(ContactTypeCountDto::getTotalCount)));
+
 		dto.setSummaryCount(summaryMap);
 		summaryV1(timestamp);
-	
+
 		return dto;
-		
-}
-	public void summaryV1(long timestamp) {
-		 String tnt = AppContextUtil.getTenant();
+
+	}
+
+	public ContactTypeSummaryDto summaryV1(long timestamp) {
+		String tnt = AppContextUtil.getTenant();
 		List<String> lst = getListOfContactType();
 		Date dateTi = new Date(timestamp);
 		String monthYear = new SimpleDateFormat(DateUtil.MMM_YYYY_FORMAT).format(dateTi);
 		Calendar cal = Calendar.getInstance();
 		cal.setTimeInMillis(timestamp);
-	    System.out.println("Year: " + cal.get(Calendar.YEAR)+"\t Month :" + cal.get(Calendar.MONTH));
-	    int month = cal.get(Calendar.MONTH);
-	    int year = cal.get(Calendar.YEAR);
-	    long monthMinTimeStamp =DateUtil.getStartTimestamp(month,year).getTime();
-	    long monthMaxTimeStamp =DateUtil.getEndTimestamp(month, year).getTime();
-	    List<SummaryDocDto> lstSummDto = new ArrayList<>();
-	    
-	    for(String contactType:lst) {
-	    	Query query= new Query();
-	    	query.addCriteria(Criteria.where("timestamp").gt(monthMinTimeStamp).lt(monthMaxTimeStamp));
-	    	query.with(new Sort(new Order(Direction.DESC, "timestamp")));
+		System.out.println("Year: " + cal.get(Calendar.YEAR) + "\t Month :" + cal.get(Calendar.MONTH));
+		int month = cal.get(Calendar.MONTH);
+		int year = cal.get(Calendar.YEAR);
+		long monthMinTimeStamp = DateUtil.getStartTimestamp(month, year).getTime();
+		long monthMaxTimeStamp = DateUtil.getEndTimestamp(month, year).getTime();
+		List<SummaryDocDto> lstSummDto = new ArrayList<>();
+
+		for (String contactType : lst) {
+			Query query = new Query();
+			query.addCriteria(Criteria.where("timestamp").gt(monthMinTimeStamp).lt(monthMaxTimeStamp));
+			query.with(new Sort(new Order(Direction.DESC, "timestamp")));
 			query.fields().include("timestamp").include("type").include("meta");
 			List<MessageDoc> msgDocLst = mongoTemplate.find(query, MessageDoc.class, contactType.toString());
-			for(MessageDoc doc:msgDocLst) {
+			for (MessageDoc doc : msgDocLst) {
 				SummaryDocDto dto = new SummaryDocDto();
-				String yyyyMMdd = DateUtil.foramtTimeStampDateAsString(doc.getTimestamp(),DateUtil.YYYYMMDD_DATE_FORMAT);
+				String yyyyMMdd = DateUtil.foramtTimeStampDateAsString(doc.getTimestamp(),
+						DateUtil.YYYYMMDD_DATE_FORMAT);
 				dto.setDate(yyyyMMdd);
 				dto.setType(doc.getType());
 				dto.setChannel(contactType.toString());
 				dto.setMeta(doc.getMeta());
+				dto.setDomain(tnt);
 				String id = getSummaryId(dto);
 				dto.setId(id);
-				dto.setDomain(tnt);
-				System.out.println("datewaise data :"+JsonUtil.toJson(dto));
+				
+				System.out.println("datewaise data :" + JsonUtil.toJson(dto));
 				lstSummDto.add(dto);
 			}
-	    	
-	    	
-	    }
-	    Map<Object,Long> summaryMap = new HashMap<>();
-	 //   summaryMap =lstSummDto.stream().collect(Collectors.groupingBy(SummaryDocDto::getId,SummaryDocDto::getType.summingLong(SummaryDocDto::getTotalCount)));
 
+		}
+		Map<Object, Long> summaryMap = new HashMap<>();
+		// summaryMap
+		// =lstSummDto.stream().collect(Collectors.groupingBy(SummaryDocDto::getId,SummaryDocDto::getType.summingLong(SummaryDocDto::getTotalCount)));
 
+		Map<String, Map<String, Long>> datwWiseCount = lstSummDto.stream().collect(Collectors.groupingBy(SummaryDocDto::getId, Collectors.groupingBy(SummaryDocDto::getType, Collectors.counting())));
+		
+		summaryMap = lstSummDto.stream().collect(Collectors.groupingBy(SummaryDocDto::getType,Collectors.counting()));
+		
+		// printing the count based on the designation and gender.
+		System.out.println("Group by on multiple properties" + datwWiseCount);
+
+		ContactTypeSummaryDto dto = new ContactTypeSummaryDto();
+		dto.setMonth(monthYear);
+		dto.setDateWiseSummaryCount(datwWiseCount);
+		dto.setSummaryCount(summaryMap);
+
+		return dto;
 	}
+
 	
-	
-	//demo_20210226_wa(tnt_yyyymmdd_channel)
-	
+
 	public String getSummaryId(SummaryDocDto dto) {
-		String tenant ="demo";
+		String tenant =dto.getDomain();
 		if (dto.getChannel().contains(ContactType.WHATSAPP.name())) {
-		    return   tenant+"_"+dto.getDate()+"_"+"wa";
+			return tenant + "_" + dto.getDate() + "_" + "wa";
 		} else if (dto.getChannel().contains(ContactType.FACEBOOK.name())) {
-		    return   tenant+"_"+dto.getDate()+"_"+"fb";
+			return tenant + "_" + dto.getDate() + "_" + "fb";
 		} else if (dto.getChannel().contains(ContactType.TWITTER.name())) {
-			 return   tenant+"_"+dto.getDate()+"_"+"tw";
+			return tenant + "_" + dto.getDate() + "_" + "tw";
 		} else if (dto.getChannel().contains(ContactType.TELEGRAM.name())) {
-			 return   tenant+"_"+dto.getDate()+"_"+"tg";
+			return tenant + "_" + dto.getDate() + "_" + "tg";
 		} else if (dto.getChannel().contains(ContactType.INSTAGRAM.name())) {
-			 return   tenant+"_"+dto.getDate()+"_"+"ig";
+			return tenant + "_" + dto.getDate() + "_" + "ig";
+		} else if (dto.getChannel().contains(ContactType.WEBSITE.name())) {
+			return tenant + "_" + dto.getDate() + "_" + "web";
 		}
 		return null;
 	}
-	
-}
-	
 
+}

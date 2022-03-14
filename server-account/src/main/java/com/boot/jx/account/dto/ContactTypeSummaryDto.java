@@ -10,6 +10,7 @@ public class ContactTypeSummaryDto {
 	long  monthMaxTimeStamp;
 	Map<Object,Long> summaryCount;
 	Map<Object,List<ContactTypeCountDto>> map;
+	Map<String, Map<String, Long>> dateWiseSummaryCount;
 	
 	public String getTenant() {
 		return tenant;
@@ -46,6 +47,12 @@ public class ContactTypeSummaryDto {
 	}
 	public void setSummaryCount(Map<Object, Long> summaryCount) {
 		this.summaryCount = summaryCount;
+	}
+	public Map<String, Map<String, Long>> getDateWiseSummaryCount() {
+		return dateWiseSummaryCount;
+	}
+	public void setDateWiseSummaryCount(Map<String, Map<String, Long>> dateWiseSummaryCount) {
+		this.dateWiseSummaryCount = dateWiseSummaryCount;
 	}
 	
 }

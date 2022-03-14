@@ -183,9 +183,9 @@ public class InBoundControllerWeb {
 	// ConnectorHandler connector = connectorHandlerFactory.get(channelConfig);
 	try {
 
-	    if (!ArgUtil.areEqual(nounce, commonHttpRequest.get("NOUNCE"))) {
-		ApiResponseUtil.throwUnAuthorizedException("Invalid API");
-	    }
+	   // if (!ArgUtil.areEqual(nounce, commonHttpRequest.get("NOUNCE"))) {
+		//ApiResponseUtil.throwUnAuthorizedException("Invalid API");
+	  //  }
 
 	    if (!ArgUtil.is(channelConfig) || !ArgUtil.areEqual(channelConfig.getChannelKey(), channelKey)) {
 		ApiResponseUtil.throwAccessDeniedException("Invalid Channel");
