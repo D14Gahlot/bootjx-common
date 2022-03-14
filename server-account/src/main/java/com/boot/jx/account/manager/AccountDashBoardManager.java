@@ -32,7 +32,11 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Component;
 
 import com.boot.jx.AppContextUtil;
+import com.boot.jx.account.doc.AccountStore;
 import com.boot.jx.account.doc.DomainDoc;
+import com.boot.jx.account.doc.DomainSummaryMessageDoc;
+import com.boot.jx.account.doc.DomainSummaryMetaDoc;
+import com.boot.jx.account.doc.DomainSummaryMetaStore;
 import com.boot.jx.account.dto.AccountDashBoardRequestDto;
 import com.boot.jx.account.dto.AccountDashBoardResponseDto;
 import com.boot.jx.account.dto.TypeCount;
@@ -58,6 +62,9 @@ public class AccountDashBoardManager {
 	private static final Logger LOGGER = LoggerFactory.getLogger(AccountDashBoardManager.class);
 	@Autowired
 	MongoTemplate mongoTemplate;
+	
+	 @Autowired
+	 private DomainSummaryMetaStore domSumMetaStore;
 
 	
 	
@@ -230,9 +237,6 @@ public class AccountDashBoardManager {
 
 			}
 			Map<Object, Long> summaryMap = new HashMap<>();
-			// summaryMap
-			// =lstSummDto.stream().collect(Collectors.groupingBy(SummaryDocDto::getId,SummaryDocDto::getType.summingLong(SummaryDocDto::getTotalCount)));
-
 			Map<String, Map<String, Long>> datwWiseCount = lstSummDto.stream().collect(Collectors.groupingBy(SummaryDocDto::getId, Collectors.groupingBy(SummaryDocDto::getType, Collectors.counting())));
 			
 			summaryMap = lstSummDto.stream().collect(Collectors.groupingBy(SummaryDocDto::getType,Collectors.counting()));
@@ -241,10 +245,11 @@ public class AccountDashBoardManager {
 			System.out.println("Group by on multiple properties" + datwWiseCount);
 
 			ContactTypeSummaryDto dto = new ContactTypeSummaryDto();
+			dto.setTenant(tnt);
 			dto.setMonth(monthYear);
 			dto.setDateWiseSummaryCount(datwWiseCount);
 			dto.setSummaryCount(summaryMap);
-
+			saveDomainSummary(dto);
 			return dto;
 		}
 
@@ -283,7 +288,39 @@ public class AccountDashBoardManager {
 		return listContactType;
 	}
 	
+	public void saveDomainSummary(ContactTypeSummaryDto dto) {
+		DomainSummaryMessageDoc domSumMsgDoc =domSumMetaStore.findDomainAndByName(dto.getTenant(),dto.getMonth());
+		if(ArgUtil.is(domSumMsgDoc)) {
+			domSumMsgDoc.setDateWiseSummaryCount(dto.getDateWiseSummaryCount());
+			domSumMsgDoc.setSummaryCount(dto.getSummaryCount());
+			mongoTemplate.save(domSumMsgDoc);
+			saveAndUpdateDomainSummaryMeta(dto);
+		}else {
+			domSumMsgDoc =new DomainSummaryMessageDoc();
+			domSumMsgDoc.setDomain(dto.getTenant());
+			domSumMsgDoc.setDate(dto.getMonth());
+			domSumMsgDoc.setDateWiseSummaryCount(dto.getDateWiseSummaryCount());
+			domSumMsgDoc.setSummaryCount(dto.getSummaryCount());
+			mongoTemplate.save(domSumMsgDoc);
+			saveAndUpdateDomainSummaryMeta(dto);
+		}
+				
+				
+		
+				
+	}
 	
-	
-	
+	public void saveAndUpdateDomainSummaryMeta(ContactTypeSummaryDto dto) {
+		DomainSummaryMetaDoc metaSummDoc =domSumMetaStore.findDomainByName(dto.getTenant());
+		if(ArgUtil.is(metaSummDoc)){
+			metaSummDoc.setDomainUpdatedStamp(System.currentTimeMillis());
+			mongoTemplate.save(metaSummDoc);
+		}else {
+			metaSummDoc =new DomainSummaryMetaDoc();
+			metaSummDoc.setDomain(dto.getTenant());
+			metaSummDoc.setTimeStamp(System.currentTimeMillis());
+			metaSummDoc.setDomainUpdatedStamp(System.currentTimeMillis());
+			mongoTemplate.save(metaSummDoc);
+		}
+	}
 }
