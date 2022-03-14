@@ -173,7 +173,7 @@ public class InBoundService {
 
 	if (locallySessionAssigned && ArgUtil.is(session)) {
 	    boolean wasSessionInitd = session.isInitd();
-	    boolean isSessionInitd =chatService.initSession(inboxMessageOriginal, session);
+	    boolean isSessionInitd = chatSessionService.initSession(inboxMessageOriginal, session);
 	    if (!isSessionInitd) {
 		return inboxMessageOriginal;
 	    }
@@ -199,8 +199,6 @@ public class InBoundService {
 		agentService.onMessage(inboxMessageOriginal);
 	    } else if (botEngine.isChatBotDefined()) { // TODO:-- TO be removed
 		botEngine.invokeMethodsAsync(inboxMessageOriginal);
-	    } else { // TODO:-- TO be removed
-		chatClient.forward(inboxMessageOriginal);
 	    }
 	}
 	return inboxMessageOriginal;
