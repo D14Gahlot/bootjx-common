@@ -18,6 +18,7 @@ import com.boot.jx.dict.ContactType;
 import com.boot.jx.logger.AuditDetailProvider;
 import com.boot.jx.mongo.CommonMongoQB.CommonMongoCriteria;
 import com.boot.jx.postman.PMEnvironment;
+import com.boot.jx.postman.PMConstants.CHAT_MODE;
 import com.boot.jx.postman.doc.BulkSessionDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.MessageDoc;
@@ -29,7 +30,7 @@ import com.boot.jx.tunnel.task.JobTaskModel;
 import com.boot.jx.tunnel.task.JobTaskModel.BatchJob;
 import com.boot.jx.tunnel.task.JobTaskModel.JOB_STATUS;
 import com.boot.jx.tunnel.task.JobTaskModel.Tasklet;
-import com.boot.jx.tunnel.task.QueuedTaskExecuter;
+import com.boot.jx.tunnel.task.BatchJobExecuter;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.UniqueID;
 import com.google.i18n.phonenumbers.NumberParseException;
@@ -41,7 +42,7 @@ import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
 
 @Component
-public class BulkMessageService extends QueuedTaskExecuter {
+public class BulkMessageService extends BatchJobExecuter {
 
     @Autowired
     private MongoTemplate mongoTemplate;
@@ -163,6 +164,7 @@ public class BulkMessageService extends QueuedTaskExecuter {
 	outboxMessage.contact().setEmail(msg.getContact().getEmail());
 	outboxMessage.contact().setPhone(msg.getContact().getPhone());
 	outboxMessage.contact().setContactId(msg.getContact().getContactId());
+	outboxMessage.route().setSendMode(CHAT_MODE.PUSH.name());
 
 	ChatSessionDoc chatSessionDoc = sessionStore.linkSession(outboxMessage);
 	if (ArgUtil.is(chatSessionDoc)) {

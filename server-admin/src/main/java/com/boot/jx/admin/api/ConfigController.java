@@ -3,9 +3,6 @@ package com.boot.jx.admin.api;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.domain.Sort.Direction;
-import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -17,9 +14,10 @@ import org.springframework.web.bind.annotation.RestController;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.common.config.ConfigManager;
 import com.boot.jx.mongo.CommonMongoTemplate;
+import com.boot.jx.postman.ClientApp;
 import com.boot.jx.postman.PMConstants.CHANNEL_TYPE_ENUM;
 import com.boot.jx.postman.PMEnvironment;
-import com.boot.jx.postman.doc.config.ClientKeyConfigDoc;
+import com.boot.jx.postman.doc.config.ClientAppConfigDoc;
 import com.boot.jx.postman.doc.config.CompanyVarsConfigDoc;
 import com.boot.jx.postman.plugin.ChannelConfig;
 import com.fasterxml.jackson.annotation.JsonView;
@@ -32,6 +30,9 @@ public class ConfigController {
 
     @Autowired
     private ConfigManager configManager;
+
+    @Autowired
+    public PMEnvironment pmEnvironment;
 
     @ResponseBody
     @RequestMapping(value = "/api/config/channel/{channelType}", method = { RequestMethod.POST })
@@ -66,23 +67,22 @@ public class ConfigController {
     @JsonView(PMEnvironment.PublicProperty.class)
     @ResponseBody
     @RequestMapping(value = { "/api/config/clientapikey" }, method = { RequestMethod.GET })
-    public ApiResponse<ClientKeyConfigDoc, Object> createClientApiKey() {
-	return ApiResponse.buildResults(mongoTemplate.find(new Query().with(new Sort(Direction.ASC, "createdStamp")),
-		ClientKeyConfigDoc.class));
+    public ApiResponse<ClientApp, Object> createClientApiKey() {
+	return ApiResponse.buildResults(pmEnvironment.config().listApps());
     }
 
     @JsonView(PMEnvironment.OneTimeVisibleProperty.class)
     @ResponseBody
     @RequestMapping(value = { "/api/config/clientapikey" }, method = { RequestMethod.POST })
-    public ApiResponse<ClientKeyConfigDoc, Object> createClientApiKey(@RequestBody ClientKeyConfigDoc clientApiKey) {
+    public ApiResponse<ClientAppConfigDoc, Object> createClientApiKey(@RequestBody ClientAppConfigDoc clientApiKey) {
 	return ApiResponse.buildData(configManager.save(clientApiKey));
     }
 
     @JsonView(PMEnvironment.PublicProperty.class)
     @ResponseBody
     @RequestMapping(value = { "/api/config/clientapikey" }, method = { RequestMethod.DELETE })
-    public ApiResponse<ClientKeyConfigDoc, Object> deleteClientApiKey(@RequestParam String id) {
-	ClientKeyConfigDoc clientApiKey = new ClientKeyConfigDoc();
+    public ApiResponse<ClientAppConfigDoc, Object> deleteClientApiKey(@RequestParam String id) {
+	ClientAppConfigDoc clientApiKey = new ClientAppConfigDoc();
 	clientApiKey.setId(id);
 	return ApiResponse.buildResults(configManager.remove(clientApiKey));
     }
@@ -94,8 +94,8 @@ public class ConfigController {
     @JsonView(PMEnvironment.PublicProperty.class)
     @ResponseBody
     @RequestMapping(value = { "/api/config/inbound_queue" }, method = { RequestMethod.GET })
-    public ApiResponse<ClientKeyConfigDoc, Object> getInboundQueues() {
-	return ApiResponse.buildResults(mongoTemplate.findAll(ClientKeyConfigDoc.class));
+    public ApiResponse<ClientAppConfigDoc, Object> getInboundQueues() {
+	return ApiResponse.buildResults(mongoTemplate.findAll(ClientAppConfigDoc.class));
     }
 
     /***************************

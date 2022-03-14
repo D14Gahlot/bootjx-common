@@ -43,10 +43,12 @@ public class InboxMessage implements Serializable, IMessageExtended, LogMessage 
 
     private Object originalMessage;
     private MessageSession session;
+    private MessageRoute route;
     private MessagePrompt prompt;
 
     protected Map<String, Object> form = new HashMap<String, Object>();
     protected Map<String, Object> data = new HashMap<String, Object>();
+    private Map<String, Object> reply = new HashMap<String, Object>();
     protected TagDocument tags;
     private List<Attachment> attachments = null;
 
@@ -193,6 +195,17 @@ public class InboxMessage implements Serializable, IMessageExtended, LogMessage 
 	    this.data = new HashMap<String, Object>();
 	}
 	return this.data;
+    }
+
+    public void setReply(Map<String, Object> reply) {
+	this.reply = reply;
+    }
+
+    public Map<String, Object> getReply() {
+	if (reply == null) {
+	    this.reply = new HashMap<String, Object>();
+	}
+	return this.reply;
     }
 
     public Object getOriginalMessage() {
@@ -343,5 +356,21 @@ public class InboxMessage implements Serializable, IMessageExtended, LogMessage 
 
     public void setPrompt(MessagePrompt prompt) {
 	this.prompt = prompt;
+    }
+
+    public MessageRoute getRoute() {
+	return route;
+    }
+
+    public void setRoute(MessageRoute route) {
+	this.route = route;
+    }
+
+    @Override
+    public MessageRoute route() {
+	if (route == null) {
+	    this.route = new MessageRoute();
+	}
+	return this.route;
     }
 }

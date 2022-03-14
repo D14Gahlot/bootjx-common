@@ -76,6 +76,10 @@ public class ConfigConstants {
 		new ConfigMeta("Agent can initiate chat with new contact", "postman.agent.chat.init.contact")
 			.optionsOnOff().group(GROUP_AGENT)),
 
+	POSTMAN_AGENT_CHAT_REASSIGNMENT_AUTO(
+		new ConfigMeta("Auto Re-Assign Session", "postman.agent.chat.reassignment.auto").optionsOnOff()
+			.group(GROUP_AGENT)),
+
 	POSTMAN_AGENT_CHAT_ASSIGNMENT(new ConfigMeta("Agent Assignment", "postman.agent.chat.assignment")
 		.optionValues(PMConstants.ASSIGNMENT_RULE.ROUND_ROBIN, PMConstants.ASSIGNMENT_RULE.MANUAL,
 			PMConstants.ASSIGNMENT_RULE.STRICT_DEFAULT)
@@ -85,6 +89,7 @@ public class ConfigConstants {
 		.optionValues(PMConstants.CHAT_SESSION_STICKY.NONE, PMConstants.CHAT_SESSION_STICKY.ONAVAILABLE,
 			PMConstants.CHAT_SESSION_STICKY.STRICT)
 		.defaultValue(PMConstants.CHAT_SESSION_STICKY.NONE).group(GROUP_AGENT)),
+
 	POSTMAN_UI_BETA(new ConfigMeta("Enable Beta UI", "postman.ui.beta").optionsOnOff()
 		.defaultValue(ConfigOption.OFF).group(GROUP_AGENT)),
 
@@ -101,18 +106,30 @@ public class ConfigConstants {
 			new ConfigOption(TimeUtils.toMillis("7d")).label("+7Days"))
 		.defaultValue(0).group(GROUP_AGENT)),
 
+	POSTMAN_AGENT_TAB_HISTORY_LAZY(new ConfigMeta("Lazy Load History", "postman.agent.tab.history.lazy")
+		.desc("Loads History Lazily").optionsOnOff().group(GROUP_AGENT).hidden()),
+
+	POSTMAN_AGENT_TAB_HISTORY_LIMIT(
+		new ConfigMeta("Show Chat Count Limit", "postman.agent.tab.history.limit")
+			.options(new ConfigOption(100).label("100 Chats"), new ConfigOption(150).label("150 Chats"),
+				new ConfigOption(200).label("200 Chats"))
+			.defaultValue(100).group(GROUP_AGENT).hidden()),
+
 	POSTMAN_PHONEBOOK_REGION(new ConfigMeta("Default ISD Country", "postman.phonebook.region")
 		.optionValues(PHONE_NUMBER_UTIL.getSupportedRegions().toArray()).defaultValue("IN")),
 
 	POSTMAN_AGENT_CHAT_AUTOREPLY_TALK2AGENT(new ConfigMeta("Message to customer while chat is transferred to agent",
-		"postman.agent.chat.autoreply.talk2agent").optionsSource("getx:/api/tmpl/hsm").group(GROUP_AGENT)),
+		"postman.agent.chat.autoreply.talk2agent").optionsSource("getx:/api/tmpl/hsm").optionsKey("code")
+			.optionsLabel("name").group(GROUP_AGENT)),
 
 	POSTMAN_AGENT_CHAT_AUTOREPLY_RESOLVED(new ConfigMeta("Message to customer when chat is resolevd by agent",
-		"postman.agent.chat.autoreply.resolved").optionsSource("getx:/api/tmpl/hsm").group(GROUP_AGENT)),
+		"postman.agent.chat.autoreply.resolved").optionsSource("getx:/api/tmpl/hsm").optionsKey("code")
+			.optionsLabel("name").group(GROUP_AGENT)),
 
 	POSTMAN_AGENT_CHAT_AUTOREPLY_NOAGENT(
-		new ConfigMeta("Message to customer when agent avaialble", "postman.agent.chat.autoreply.noagent")
-			.optionsSource("getx:/api/tmpl/hsm").group(GROUP_AGENT)),
+		new ConfigMeta("Message to customer when no agent avaialble", "postman.agent.chat.autoreply.noagent")
+			.optionsSource("getx:/api/tmpl/hsm").optionsKey("code").optionsLabel("name")
+			.group(GROUP_AGENT)),
 
 	// Ends here
 	;

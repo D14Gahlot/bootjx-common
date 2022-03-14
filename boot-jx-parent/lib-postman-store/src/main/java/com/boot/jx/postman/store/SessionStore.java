@@ -117,38 +117,6 @@ public class SessionStore extends CommonMongoTemplateAbstract {
 	return createSessionOld(sessionMessage);
     }
 
-    public ChatSessionDoc createSessionNew(SessionMessage sessionMessage) {
-	Contactable contact = PostManUtil.getContactMeta(sessionMessage.contact());
-
-	String sessionId = sessionMessage.getSessionId();
-	String contactId = contact.getContactId();
-
-	ChatSessionDoc chatSessionDoc = null;
-	ChatContactDoc chatContactDoc = null;
-
-	if (ArgUtil.is(sessionId)) {
-	    chatSessionDoc = getSession(sessionId);
-	    if (ArgUtil.isEmpty(chatSessionDoc)) {
-		// Session Not found
-		return null;
-	    }
-	    if (!isSessionValid(chatSessionDoc)) {
-		contactId = ArgUtil.nonEmpty(contactId, chatSessionDoc.getContactId());
-	    }
-	    if (ArgUtil.isEmpty(contactId)) {
-		// Contact Not found
-		return null;
-	    }
-	    chatContactDoc = super.findById(contactId, ChatContactDoc.class);
-	}
-
-	if (!isSessionValid(chatSessionDoc)) {
-
-	}
-
-	return chatSessionDoc;
-    }
-
     public ChatSessionDoc createSessionOld(SessionMessage sessionMessage) {
 	Contactable contact = PostManUtil.getContactMeta(sessionMessage.contact());
 
@@ -556,13 +524,14 @@ public class SessionStore extends CommonMongoTemplateAbstract {
 	chatSessionDoc.setAssignedToDept(agentDept);
 	chatSessionDoc.setAssignedAgentStamp(System.currentTimeMillis());
 	chatSessionDoc.setAssignedToAgent(agentCode);
-
+	//chatSessionDoc.setAssignedToQueue(PMConstants.DEFAULT.AGENT_QUEUE_CODE);
 	if (chatSessionDoc.getAgentSessionStamp() == 0L) {
 	    chatSessionDoc.setAgentSessionStamp(chatSessionDoc.getAssignedAgentStamp());
 	}
 
 	ChatSessionQuery builder = new ChatSessionQuery(chatSessionDoc.getSessionId());
-	builder.set("mode", chatSessionDoc.getMode());
+	//builder.set("mode", chatSessionDoc.getMode());
+	builder.set("assignedToQueue", chatSessionDoc.getAssignedToQueue());
 	builder.set("assignedToDept", chatSessionDoc.getAssignedToDept());
 	builder.set("assignedDeptStamp", chatSessionDoc.getAssignedDeptStamp());
 	builder.set("assignedToAgent", chatSessionDoc.getAssignedToAgent());
@@ -578,7 +547,7 @@ public class SessionStore extends CommonMongoTemplateAbstract {
 	}
 
 	chatSessionDoc.setMode(PMConstants.CHAT_MODE.BOT.toString());
-	chatSessionDoc.setAssignedToAgent(botName);
+	chatSessionDoc.setAssignedToBot(botName);
 
 	CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder().whereId(chatSessionDoc.getSessionId());
 	builder.set("mode", chatSessionDoc.getMode());
@@ -593,15 +562,8 @@ public class SessionStore extends CommonMongoTemplateAbstract {
 		ChatSessionQuery chatSessionDocQuery = new ChatSessionQuery(msgDoc.getSessionId());
 		if (PostManUtil.isInBound(msgDoc.getType())) {
 		    chatSessionDocQuery.setLastInBoundMsg(msgDoc, iMessage.contact().getContactType());
-		    updateFirst(chatSessionDocQuery);
 		} else if (PostManUtil.isOutBound(msgDoc.getType())) {
-		    if (PostManUtil.isAgentMode(iMessage)) {
-			chatSessionDocQuery.setLastAgentReply(msgDoc, iMessage.contact().getContactType());
-		    } else if (PostManUtil.isBotMode(iMessage)) {
-			chatSessionDocQuery.setLastBotReply(msgDoc, iMessage.contact().getContactType());
-		    } else {
-			chatSessionDocQuery.setLastOutBoundMsg(msgDoc, iMessage.contact().getContactType());
-		    }
+		    chatSessionDocQuery.setLastOutBoundMsg(msgDoc, iMessage.contact().getContactType());
 		}
 		chatSessionDocQuery.setLastMsg(msgDoc, iMessage.contact().getContactType());
 		updateFirst(chatSessionDocQuery);
@@ -691,7 +653,7 @@ public class SessionStore extends CommonMongoTemplateAbstract {
     public String getLastAssignedAgent(Contactable contact) {
 	CommonMongoQueryBuilder cmqb = new CommonMongoQueryBuilder().with(Criteria.where("contactId")
 		.is(contact.getContactId()).and("assignedToAgent").exists(true).and("mode").is(CHAT_MODE.AGENT));
-	cmqb.getQuery().with(new Sort(Direction.DESC, "startSessionStamp")).limit(1);
+	cmqb.sortBy("startSessionStamp", Direction.DESC).limit(1).skipDBRef();
 	ChatSessionDoc lastSession = super.findOne(cmqb.getQuery(), ChatSessionDoc.class);
 	if (ArgUtil.is(lastSession)) {
 	    return lastSession.getAssignedToAgent();

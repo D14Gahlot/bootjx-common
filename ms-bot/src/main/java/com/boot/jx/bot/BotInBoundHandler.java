@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.boot.jx.common.config.DefaultChatBoundHandler;
+import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.MessageReport;
 import com.boot.jx.postman.model.ext.InBoundEvent;
@@ -19,7 +20,7 @@ public class BotInBoundHandler extends DefaultChatBoundHandler {
     private BotEngine botEngine;
 
     @Override
-    public void doHandle(InboxMessage inboxMessage) {
+    public void onMessage(InboxMessage inboxMessage, ChatSessionDoc session) {
 	botEngine.invokeMethodsAsync(inboxMessage);
     }
 
@@ -29,8 +30,8 @@ public class BotInBoundHandler extends DefaultChatBoundHandler {
     }
 
     @Override
-    public void doHandle(InBoundEvent inBoundEvent) {
-	super.doHandle(inBoundEvent);
+    public void onSessionRoute(InBoundEvent inBoundEvent, ChatSessionDoc sessionDoc) {
+	super.onSessionRoute(inBoundEvent, sessionDoc);
     }
 
 }

@@ -15,7 +15,7 @@ import com.boot.jx.postman.PMEnvironment.PMConfigurationObject;
 import com.boot.jx.postman.PMEnvironment.PMEnvironmentProvider;
 import com.boot.jx.postman.doc.PMConfigurationDoc;
 import com.boot.jx.postman.doc.config.ChannelConfigDoc;
-import com.boot.jx.postman.doc.config.ClientKeyConfigDoc;
+import com.boot.jx.postman.doc.config.ClientAppConfigDoc;
 import com.boot.jx.postman.doc.config.CompanyVarsConfigDoc;
 import com.boot.jx.postman.doc.config.PrefsConfigDoc;
 import com.boot.jx.postman.plugin.ChannelConfig;
@@ -58,8 +58,8 @@ public class PMEnvironmentProviderImpl implements PMEnvironmentProvider, AppShar
 		prefs.channels(channel);
 	    }
 
-	    List<ClientKeyConfigDoc> clientKeys = configStore.findAll(ClientKeyConfigDoc.class);
-	    for (ClientKeyConfigDoc clientKey : clientKeys) {
+	    List<ClientAppConfigDoc> clientKeys = configStore.findAll(ClientAppConfigDoc.class);
+	    for (ClientAppConfigDoc clientKey : clientKeys) {
 		prefs.clientApiKey(clientKey);
 	    }
 
@@ -91,6 +91,13 @@ public class PMEnvironmentProviderImpl implements PMEnvironmentProvider, AppShar
 		    }
 		}
 
+		List<ClientAppConfigDoc> sharedApps = configStore.findAll(ClientAppConfigDoc.class);
+		for (ClientAppConfigDoc sharedApp : sharedApps) {
+		    sharedApp.setDomain(tnt);
+		    if (sharedApp.isShared()) {
+			newSharedConfiguration.clientApiKey(sharedApp);
+		    }
+		}
 		sharedConfiguration = newSharedConfiguration;
 	    }
 

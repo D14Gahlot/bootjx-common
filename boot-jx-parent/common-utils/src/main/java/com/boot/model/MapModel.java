@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import com.boot.json.JsonSerializerType;
+import com.boot.json.MapModelDeserializer;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.Constants;
 import com.boot.utils.JsonPath;
@@ -15,8 +16,10 @@ import com.boot.utils.JsonUtil;
 import com.boot.utils.TimeUtils;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
+@JsonDeserialize(using = MapModelDeserializer.class)
 public class MapModel implements JsonSerializerType<Object> {
 
     public static interface EntryMeta {
@@ -25,6 +28,10 @@ public class MapModel implements JsonSerializerType<Object> {
 
     public static class NodeEntry<T> {
 	private T value;
+
+	public NodeEntry() {
+	    this.value = null;
+	}
 
 	public NodeEntry(T value) {
 	    this.value = value;
@@ -49,7 +56,7 @@ public class MapModel implements JsonSerializerType<Object> {
 	}
 
 	/**
-	 * Save as {@link #defaultValue(Object)} but type is always {@link Long}
+	 * Same as {@link #defaultValue(Object)} but type is always {@link Long}
 	 * 
 	 * @param defaultvalue
 	 * @return
@@ -58,12 +65,20 @@ public class MapModel implements JsonSerializerType<Object> {
 	    return ArgUtil.parseAsLong(value, defaultvalue);
 	}
 
+	public Integer asInteger() {
+	    return ArgUtil.parseAsInteger(value);
+	}
+
+	public Integer asInteger(Integer defaultvalue) {
+	    return ArgUtil.parseAsInteger(value, defaultvalue);
+	}
+
 	public BigDecimal asBigDecimal() {
 	    return ArgUtil.parseAsBigDecimal(value);
 	}
 
 	/**
-	 * Save as {@link #defaultValue(Object)} but type is always {@link BigDecimal}
+	 * Same as {@link #defaultValue(Object)} but type is always {@link BigDecimal}
 	 * 
 	 * @param defaultvalue
 	 * @return
@@ -140,12 +155,25 @@ public class MapModel implements JsonSerializerType<Object> {
 	    return ArgUtil.areEqual(this.value, compare);
 	}
 
+	public boolean in(Object... compare) {
+	    return ArgUtil.isEqual(this.value, compare);
+	}
+
 	public T getValue() {
+	    return value;
+	}
+
+	public T value() {
 	    return value;
 	}
 
 	public void setValue(T value) {
 	    this.value = value;
+	}
+
+	public NodeEntry<T> value(T value) {
+	    this.value = value;
+	    return this;
 	}
 
     }
@@ -154,6 +182,51 @@ public class MapModel implements JsonSerializerType<Object> {
 
 	public MapEntry(Object value) {
 	    super(value);
+	}
+
+    }
+
+    public static class MapPathEntry extends MapEntry {
+
+	JsonPath jsonPath;
+	String key;
+	protected Map<String, Object> map;
+
+	public MapPathEntry() {
+	    super(null);
+	}
+
+	public MapPathEntry map(Map<String, Object> map) {
+	    this.map = map;
+	    return this;
+	}
+
+	public MapPathEntry path(JsonPath jsonPath) {
+	    this.jsonPath = jsonPath;
+	    return this;
+	}
+
+	public MapPathEntry key(String key) {
+	    this.key = key;
+	    return this;
+	}
+
+	public MapPathEntry load(Object defaultValue) {
+	    if (ArgUtil.is(key)) {
+		this.value(this.map.getOrDefault(key, defaultValue));
+	    } else if (ArgUtil.is(jsonPath)) {
+		this.value(jsonPath.load(this.map, defaultValue));
+	    }
+	    return this;
+	}
+
+	public MapPathEntry save(Object value) {
+	    if (ArgUtil.is(key)) {
+		this.value(this.map.put(key, value));
+	    } else if (ArgUtil.is(jsonPath)) {
+		jsonPath.save(map, value);
+	    }
+	    return this;
 	}
 
     }
@@ -179,23 +252,23 @@ public class MapModel implements JsonSerializerType<Object> {
 	this.list = list;
     }
 
-    public MapEntry entry(String key) {
-	return new MapEntry(this.map().get(key));
+    public MapPathEntry entry(String key) {
+	return new MapPathEntry().map(this.map()).key(key).load(null);
     }
 
-    public MapEntry entry(JsonPath jsonPath) {
-	return new MapEntry(jsonPath.load(this.map, null));
+    public MapPathEntry entry(JsonPath jsonPath) {
+	return new MapPathEntry().map(this.map()).path(jsonPath).load(null);
     }
 
-    public MapEntry keyEntry(String key) {
+    public MapPathEntry keyEntry(String key) {
 	return this.entry(key);
     }
 
-    public MapEntry pathEntry(String path) {
+    public MapPathEntry pathEntry(String path) {
 	return this.entry(new JsonPath(path));
     }
 
-    public MapEntry path(JsonPath jsonPath) {
+    public MapPathEntry path(JsonPath jsonPath) {
 	return this.entry(jsonPath);
     }
 
@@ -341,7 +414,9 @@ public class MapModel implements JsonSerializerType<Object> {
     }
 
     public MapModel put(String key, Object value) {
-	this.map().put(key, value);
+	if (value != null) {
+	    this.map().put(key, value);
+	}
 	return this;
     }
 

@@ -44,16 +44,20 @@ public class ChatSessionDoc extends UpdatedTimeStampDoc implements Serializable 
     private String lane;
 
     @Deprecated
+    @Indexed
     private String contactName;
 
     private ContactDetailDoc contact;
 
     private String assignedToDept;
     private String assignedToAgent;
+    private String assignedToBot;
     private String assignedToQueue;
 
+    @Indexed
     private boolean active;
     private boolean initd;
+    @Indexed
     private boolean resolved;
     private boolean expired;
     @Indexed
@@ -100,16 +104,11 @@ public class ChatSessionDoc extends UpdatedTimeStampDoc implements Serializable 
     private List<String> tagId;
 
     private Map<String, Object> store;
+    private Map<String, Object> meta;
 
     // MessageStats
     @DBRef
     private MessageDoc lastInBoundMsg;
-
-    @DBRef
-    private MessageDoc lastBotReply;
-
-    @DBRef
-    private MessageDoc lastAgentReply;
 
     @DBRef
     private MessageDoc lastOutBoundMsg;
@@ -361,22 +360,6 @@ public class ChatSessionDoc extends UpdatedTimeStampDoc implements Serializable 
 	this.lastInBoundMsg = lastInBoundMsg;
     }
 
-    public MessageDoc getLastAgentReply() {
-	return lastAgentReply;
-    }
-
-    public void setLastAgentReply(MessageDoc lastAgentReply) {
-	this.lastAgentReply = lastAgentReply;
-    }
-
-    public MessageDoc getLastBotReply() {
-	return lastBotReply;
-    }
-
-    public void setLastBotReply(MessageDoc lastBotReply) {
-	this.lastBotReply = lastBotReply;
-    }
-
     public MessageDoc getLastOutBoundMsg() {
 	return lastOutBoundMsg;
     }
@@ -492,6 +475,22 @@ public class ChatSessionDoc extends UpdatedTimeStampDoc implements Serializable 
 	    this.store = new HashMap<String, Object>();
 	}
 	return store;
+    }
+
+    public Map<String, Object> getMeta() {
+	return meta;
+    }
+
+    public void setMeta(Map<String, Object> meta) {
+	this.meta = meta;
+    }
+
+    public String getAssignedToBot() {
+        return assignedToBot;
+    }
+
+    public void setAssignedToBot(String assignedToBot) {
+        this.assignedToBot = assignedToBot;
     }
 
 }

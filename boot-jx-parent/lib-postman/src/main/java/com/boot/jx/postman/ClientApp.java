@@ -1,6 +1,7 @@
 package com.boot.jx.postman;
 
 import java.io.Serializable;
+import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonView;
 
@@ -26,5 +27,18 @@ public interface ClientApp extends Serializable {
     public String getWebhook();
 
     public String getForward();
+
+    public Map<String, Object> getProps();
+
+    public Map<String, Object> props();
+
+    @JsonView(PMEnvironment.ProtectedProperty.class)
+    public Map<String, Object> getSecret();
+
+    public Map<String, Object> secret();
+
+    boolean isShared();
+
+    boolean isReadOnly();
 
 }

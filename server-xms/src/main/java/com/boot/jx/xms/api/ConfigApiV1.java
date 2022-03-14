@@ -22,7 +22,7 @@ import com.boot.jx.postman.ClientApp;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PMEnvironment.AChannelConfig;
 import com.boot.jx.postman.doc.HSMTemplateDoc;
-import com.boot.jx.postman.doc.config.ClientKeyConfigDoc;
+import com.boot.jx.postman.doc.config.ClientAppConfigDoc;
 import com.boot.jx.postman.model.ext.MsgChannel;
 import com.boot.jx.postman.store.ConfigStore;
 import com.boot.jx.xms.XmsConstants.XMSClientAuth;
@@ -63,7 +63,7 @@ public class ConfigApiV1 {
 
 	ClientApp x = XmsVendorConfigurer.getClientApp();
 	if (ArgUtil.is(x)) {
-	    ClientKeyConfigDoc xo = configStore.findById(x.getId(), ClientKeyConfigDoc.class);
+	    ClientAppConfigDoc xo = configStore.findById(x.getId(), ClientAppConfigDoc.class);
 	    if (ArgUtil.areEqual(xo.getAppType(), ClientApp.APP_TYPE_WEBHOOK)) {
 		xo.setWebhook(req.url);
 		xo.setForward(req.forward);

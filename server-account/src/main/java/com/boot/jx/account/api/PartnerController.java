@@ -4,7 +4,6 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-import java.util.function.Predicate;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -44,7 +43,6 @@ import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PMEnvironment.PMCommonConfig;
 import com.boot.jx.scope.tnt.Tenants;
 import com.boot.utils.ArgUtil;
-import com.boot.utils.CollectionUtil;
 import com.boot.utils.CryptoUtil;
 
 @Controller
@@ -114,9 +112,9 @@ public class PartnerController {
 
 	if (ArgUtil.is(adminSessionBean.domainUser())) {
 	    for (DomainDoc domainDoc : adminSessionBean.domainUser().getDomains()) {
-		UserLoginToken userLoginToken = empAuthService.createSuperLoginToken("superadmin", domain,
-			domainDoc.getId(), "admin");
 		if (ArgUtil.isEqual(domainDoc.getDomain(), domain)) {
+		    UserLoginToken userLoginToken = empAuthService.createSuperLoginToken("superadmin", domain,
+			    domainDoc.getId(), "admin");
 		    model.addAttribute("DOMAIN_USER", userLoginToken.getDomainUser());
 		    model.addAttribute("DOMAIN_NAME", userLoginToken.getDomainName());
 		    model.addAttribute("DOMAIN_ID", userLoginToken.getDomainId());
@@ -375,6 +373,37 @@ public class PartnerController {
 
 	    return ApiResponse.build().message("Domain created");
 	}
+
+    }
+
+    @ResponseBody
+    @RequestMapping(value = { "/api/domain/user" }, method = { RequestMethod.POST })
+    public ApiResponse<Object, Object> domainUser(Model model, HttpServletRequest request,
+	    HttpServletResponse httpServletResponse, @RequestParam String email, @RequestParam String domain)
+	    throws NoSuchAlgorithmException {
+
+	BusinessUserDoc domainUser = adminSessionBean.domainUser();
+
+	if (!ArgUtil.is(domainUser.getDomains())) {
+	    ApiResponseUtil.throwInputException(
+		    new ApiFieldError().field("domain").codeKey("ValidDomainNotFound").description("Domain Not found"));
+	}
+
+	Optional<DomainDoc> domaiNational = domainUser.getDomains().stream().filter(d -> d.getDomain().equals(domain))
+		.findFirst();
+	if (!domaiNational.isPresent() || !domaiNational.get().getDomain().equals(domain)) {
+	    ApiResponseUtil.throwInputException(
+		    new ApiFieldError().field("domain").codeKey("ValidDomainNotFound").description("Domain Not found"));
+	}
+	BusinessUserDoc account = accountStore.findOneByEmail(email, BusinessUserDoc.class);
+	if (!ArgUtil.is(account)) {
+	    ApiResponseUtil.throwInputException(new ApiFieldError().field("email").codeKey("ValidAccountNotFound")
+		    .description("No Account with email."));
+	}
+
+	account.domains().add(domaiNational.get());
+	accountStore.save(account);
+	return ApiResponse.build().message("Account Mapped");
 
     }
 

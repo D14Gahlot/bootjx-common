@@ -341,37 +341,37 @@ public class ConnectorHandlerFactory extends ScopedBeanFactory<String, Connector
 	MessageDoc messageDoc = messageStore.createOrUpdate(outboxMessage);
 
 	if (ArgUtil.isEqual(messageType, "REPLY", "SEND")) {
-	    ChatContactQuery chatContactQuery = ArgUtil.is(chatContactDoc) ? new ChatContactQuery(chatContactDoc)
+	    ChatContactQuery contactQuery = ArgUtil.is(chatContactDoc) ? new ChatContactQuery(chatContactDoc)
 		    : new ChatContactQuery(outboxMessage.contact().getContactId());
-	    ChatSessionQuery chatSessionQuery = new ChatSessionQuery(outboxMessage.getSessionId());
+	    ChatSessionQuery sessionQuery = new ChatSessionQuery(outboxMessage.getSessionId());
 	    long now = System.currentTimeMillis();
-	    chatContactQuery.setLastOutBoundStamp(now);
-	    chatSessionQuery.setLastOutGoingStamp(now);
+	    contactQuery.setLastOutBoundStamp(now);
+	    sessionQuery.setLastOutGoingStamp(now);
 
 	    if (ArgUtil.is(chatContactDoc)) {
 		if (ArgUtil.isEmptyValue(chatContactDoc.getFirstOutBoundStamp())) {
-		    chatContactQuery.setFirstOutBoundStamp(now);
+		    contactQuery.setFirstOutBoundStamp(now);
 		}
 	    }
 
 	    switch (messageType) {
 	    case MESSAGE_COMPOSE_TYPE.REPLY:
-		chatContactQuery.setLastReplyStamp(now);
-		chatSessionQuery.setLastResponseStamp(now);
+		contactQuery.setLastReplyStamp(now);
+		sessionQuery.setLastResponseStamp(now);
 		break;
 	    case MESSAGE_COMPOSE_TYPE.SEND:
-		chatContactQuery.setLastPushStamp(now);
+		contactQuery.setLastPushStamp(now);
 		break;
 	    default:
 		break;
 	    }
 
 	    if (ArgUtil.is(inboxMessage) && ArgUtil.is(inboxMessage.contact())) {
-		chatContactQuery.update(inboxMessage.contact());
+		contactQuery.update(inboxMessage.contact());
 	    }
 
-	    commonMongoTemplate.updateFirst(chatSessionQuery);
-	    commonMongoTemplate.updateFirst(chatContactQuery);
+	    commonMongoTemplate.updateFirst(sessionQuery);
+	    commonMongoTemplate.updateFirst(contactQuery);
 	}
 
 	if (PMConstants.CHAT_MODE.AGENT.toString().equals(outboxMessage.session().getMode())

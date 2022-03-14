@@ -23,6 +23,7 @@ public class DomainDoc implements IDocument, AuditCreateEntity, Serializable, Co
 
     @ValidAlphaNum
     private String domain;
+    private String primaryManager;
 
     private CompanyDoc company;
     private SocialDoc social;
@@ -112,6 +113,12 @@ public class DomainDoc implements IDocument, AuditCreateEntity, Serializable, Co
 	this.social = social;
     }
 
-	
+    public String getPrimaryManager() {
+	return primaryManager;
+    }
+
+    public void setPrimaryManager(String primaryManager) {
+	this.primaryManager = primaryManager;
+    }
 
 }

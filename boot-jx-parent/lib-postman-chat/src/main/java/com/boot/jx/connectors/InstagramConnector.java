@@ -1,5 +1,8 @@
 package com.boot.jx.connectors;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -107,6 +110,15 @@ public class InstagramConnector extends AbstractConnector<InstagramConfig, Insta
 	// Set Additional info
 	inboxMessage.setFrom(csid);
 	inboxMessage.to().add(m.getRecipient().get("id"));
+	
+	if(ArgUtil.is(m.getMessage().getAttachments()) && ArgUtil.is(m.getMessage().getAttachments()[0].getPayload())) {
+		if(ArgUtil.is(m.getMessage().getAttachments()[0].getPayload().getUrl())) {
+			Map<String,Object> replyMap = new HashMap<>();
+			replyMap.put("post_url", m.getMessage().getAttachments()[0].getPayload().getUrl());
+			replyMap.put("type", m.getMessage().getAttachments()[0].getType());
+			inboxMessage.setReply(replyMap);
+		}
+	}
 
 	// Extract Message Details
 	if (ArgUtil.is(m.getPostBack()) && ArgUtil.is(m.getPostBack().getTitle())) {

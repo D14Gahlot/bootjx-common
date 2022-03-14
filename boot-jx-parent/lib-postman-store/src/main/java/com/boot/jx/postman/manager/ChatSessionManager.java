@@ -19,6 +19,7 @@ import com.boot.jx.mongo.CommonMongoQueryBuilder;
 import com.boot.jx.postman.ClientApp;
 import com.boot.jx.postman.PMConfiguration.PMConfigurationModel;
 import com.boot.jx.postman.PMConstants;
+import com.boot.jx.postman.PMConstants.APP_TYPE;
 import com.boot.jx.postman.PMConstants.CHAT_STATUS;
 import com.boot.jx.postman.PMConstants.DEFAULT_VALUES;
 import com.boot.jx.postman.PMEnvironment;
@@ -31,6 +32,7 @@ import com.boot.jx.postman.model.ext.InBoundEvent.SessionRouted;
 import com.boot.jx.postman.query.ChatSessionQuery;
 import com.boot.jx.postman.store.MessageStore.EVENTS;
 import com.boot.jx.postman.store.SessionStore;
+import com.boot.model.MapModel.NodeEntry;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
 import com.boot.utils.TimeUtils;
@@ -51,44 +53,61 @@ public class ChatSessionManager {
     @Autowired
     private PMDomainConfig pmDomainConfig;
 
-    public boolean resolveSession(ChatSessionDoc session) {
-	if (!ArgUtil.isEmptyValue(session.getResolveSessionStamp())) {
-	    return false;
+    public InBoundEvent updateStatus(ChatSessionDoc session, PMConstants.CHAT_STATUS status) {
+	if (!ArgUtil.is(status)) {
+	    return null;
 	}
-	session = sessionStore.resolveSession(session);
-	logManager.event(session, EVENTS.STATUS_CHANGED, session.getStatus(),
-		PMConstants.CHAT_STATUS.RESOLVED.toString());
-	return true;
+
+	String oldStatus = session.getStatus();
+	if (status.toString().equalsIgnoreCase(oldStatus)) {
+	    return null;
+	}
+
+	InBoundEvent inBoundEvent = new InBoundEvent().eventCode(InBoundEvent.SESSION_STATUS);
+	inBoundEvent.sessionRouted = new SessionRouted();
+	inBoundEvent.sessionId = session.getSessionId();
+	inBoundEvent.contactId = session.getContactId();
+	inBoundEvent.contact().copyFrom(session.contact());
+	sessionStore.changeStatus(session, status);
+	logManager.event(session, EVENTS.STATUS_CHANGED, oldStatus, status.toString());
+	return inBoundEvent;
     }
 
-    public boolean closeSession(ChatSessionDoc session) {
-	if (!session.isActive()) {
-	    return false;
+    public NodeEntry<InBoundEvent> resolveSession(ChatSessionDoc session) {
+	NodeEntry<InBoundEvent> eventEntry = new NodeEntry<InBoundEvent>();
+
+	if (!ArgUtil.isEmptyValue(session.getResolveSessionStamp())) {
+	    return eventEntry;
 	}
+
+	session = sessionStore.resolveSession(session);
+	InBoundEvent inBoundEvent = new InBoundEvent().eventCode(InBoundEvent.SESSION_STATUS);
+	inBoundEvent.sessionRouted = new SessionRouted();
+	inBoundEvent.sessionId = session.getSessionId();
+	inBoundEvent.contactId = session.getContactId();
+	inBoundEvent.contact().copyFrom(session.contact());
+
+	logManager.event(session, EVENTS.STATUS_CHANGED, session.getStatus(),
+		PMConstants.CHAT_STATUS.RESOLVED.toString());
+	return eventEntry.value(inBoundEvent);
+    }
+
+    public InBoundEvent closeSession(ChatSessionDoc session) {
+	if (!session.isActive()) {
+	    return null;
+	}
+
+	InBoundEvent inBoundEvent = new InBoundEvent().eventCode(InBoundEvent.SESSION_CLOSED);
+	inBoundEvent.sessionRouted = new SessionRouted();
+	inBoundEvent.sessionId = session.getSessionId();
+	inBoundEvent.contactId = session.getContactId();
+	inBoundEvent.contact().copyFrom(session.contact());
+
 	session = sessionStore.closeSession(session);
 	logManager.event(session, EVENTS.STATUS_CHANGED, session.getStatus(),
 		PMConstants.CHAT_STATUS.CLOSED.toString());
-	return true;
-    }
 
-    public boolean updateSessionStatus(ChatSessionDoc sessionDoc, PMConstants.CHAT_STATUS status) {
-	if (!ArgUtil.is(status)) {
-	    return false;
-	}
-
-	String oldStatus = sessionDoc.getStatus();
-	if (status.toString().equalsIgnoreCase(oldStatus)) {
-	    return false;
-	}
-	if (status == PMConstants.CHAT_STATUS.RESOLVED) {
-	    return this.resolveSession(sessionDoc);
-	} else if (status == PMConstants.CHAT_STATUS.CLOSED) {
-	    return this.closeSession(sessionDoc);
-	} else {
-	    sessionStore.changeStatus(sessionDoc, status);
-	    logManager.event(sessionDoc, EVENTS.STATUS_CHANGED, oldStatus, status.toString());
-	}
-	return true;
+	return inBoundEvent;
     }
 
     public boolean updateSessionTags(ChatSessionDoc sessionDoc, List<QuickTag> tags) {
@@ -130,68 +149,113 @@ public class ChatSessionManager {
 	return sessionStore.findByStatusOrQuickTag(status, newList, fromStamp, toStamp);
     }
 
-    public List<ChatSessionDoc> findChatSessionDocByAgentAndUnAssigned(String agentCode, String agentDept,
-	    String search, long period) {
-	Query query2 = new Query();
+    public List<ChatSessionDoc> findChatSessionDocByAgentAndUnAssigned(String tab, String agentCode, String agentDept,
+	    String search, long period, String searchStatus) {
+
+	period = Math.min(DEFAULT_VALUES.POSTMAN_AGENT_TAB_HISTORY_PERIOD_MAX, period);
 	Calendar timeout = Calendar.getInstance();
 	timeout.setTimeInMillis(timeout.getTimeInMillis() - period);
-	long watermarkStamp = timeout.getTimeInMillis();
 	long watermarkStampDay = timeout.getTimeInMillis() / TimeUtils.Constants.MILLIS_IN_DAY;
 
 	timeout.setTimeInMillis(timeout.getTimeInMillis() - period);
 	long graceStamp = timeout.getTimeInMillis();
 
-	Criteria localCriteria = new Criteria().andOperator(
-		// is Active
-		Criteria.where("active").is(true),
-		// Agent Session Start
-		// Criteria.where("agentSessionStamp").gt(watermarkStamp),
-		new Criteria().orOperator(
-			//
-			Criteria.where("agentSessionStamp").gt(watermarkStamp),
-			// @deprecated condition
-			Criteria.where("updatedStamp").gt(watermarkStamp),
-			// new Condition
-			Criteria.where("updated.day").gt(watermarkStampDay)),
-		// Criteria.where("updatedStamp").gt(watermarkStamp),
-		// Additional Stamps
-		new Criteria().andOperator(
-			//
-			new Criteria().orOperator(
-				// Customer has replied within CustomerCareWindow
-				Criteria.where("lastInComingStamp").gt(graceStamp),
-				// Agent Has been Assigned to it
-				Criteria.where("lastOutGoingStamp").gt(graceStamp)),
-			// Is not resolved yet
-			new Criteria().orOperator(Criteria.where("resolved").exists(false),
-				Criteria.where("resolved").is(false)))
+	Query query2 = new Query();
 
-	);
+	List<Criteria> criterias = new ArrayList<Criteria>();
 
 	if (ArgUtil.is(search)) {
 	    search = search.replace("*", "").trim();
-	    Criteria archiveCriteria = Criteria.where("primary").is(true).orOperator(
+
+	    timeout.setTimeInMillis(
+		    timeout.getTimeInMillis() - DEFAULT_VALUES.POSTMAN_AGENT_TAB_HISTORY_PERIOD_MAX * 5);
+	    long searchableStampDay = timeout.getTimeInMillis() / TimeUtils.Constants.MILLIS_IN_DAY;
+	    criterias.add(Criteria.where("updated.day").gte(searchableStampDay).orOperator(
 		    // Check all fields
 		    Criteria.where("contactId").regex("" + search + "", "i"),
-		    Criteria.where("contactName").regex("" + search + "", "i"),
+		    Criteria.where("contactName").regex("" + search + "", "i"), // @Deprecated
 		    Criteria.where("contact.name").regex("" + search + "", "i"),
 		    Criteria.where("contact.phone").regex("" + search + "", "i"),
-		    Criteria.where("contact.email").regex("" + search + "", "i"));
-
-	    query2.addCriteria(Criteria.where("mode").is("AGENT").orOperator(localCriteria, archiveCriteria));
+		    Criteria.where("contact.email").regex("" + search + "", "i")));
 	} else {
-	    query2.addCriteria(Criteria.where("mode").is("AGENT").andOperator(localCriteria));
+
+	    if (ArgUtil.areEqual("CLOSED", searchStatus)) {
+		criterias.add(Criteria.where("active").is(false).and("resolved").is(true));
+	    } else {
+		criterias.add(Criteria.where("active").is(true).orOperator(Criteria.where("resolved").exists(false),
+			Criteria.where("resolved").is(false)));
+	    }
+
+	    criterias.add(
+		    // Within Watermark
+		    Criteria.where("updated.day").gte(watermarkStampDay).orOperator(
+			    // Customer has replied within CustomerCareWindow
+			    Criteria.where("lastInComingStamp").gt(graceStamp),
+			    // Agent Has been Assigned to it
+			    Criteria.where("lastOutGoingStamp").gt(graceStamp)));
+
+	    if (pmDomainConfig.isAgentHistoryLazy().asBoolean(false)) {
+		if (ArgUtil.areEqual("ME", tab)) {
+		    criterias.add(new Criteria().orOperator(
+			    // Assigned to Me
+			    Criteria.where("assignedToAgent").is(agentCode),
+			    // Assigned to None
+			    Criteria.where("assignedToAgent").is(null), Criteria.where("assignedToAgent").exists(false)
+		    //
+		    ));
+		} else if (ArgUtil.areEqual("TEAM", tab)) {
+		    criterias.add(new Criteria().orOperator(
+			    // Not Assigned to Me
+			    Criteria.where("assignedToDept").is(agentDept).and("assignedToAgent").ne(agentCode)
+		    //
+		    ));
+		} else if (ArgUtil.areEqual("ORG", tab)) {
+		    criterias.add(new Criteria().orOperator(
+			    // Not Assigned to Me
+			    Criteria.where("assignedToDept").ne(agentDept),
+			    // Assigned to No-Org
+			    Criteria.where("assignedToDept").is(null), Criteria.where("assignedToDept").exists(false)
+		    //
+		    ));
+		} else if (ArgUtil.areEqual("HISTORY", tab)) {
+		    Calendar hisotryTimeout = Calendar.getInstance();
+		    hisotryTimeout.setTimeInMillis(hisotryTimeout.getTimeInMillis()
+			    - PMConstants.DEFAULT_VALUES.POSTMAN_AGENT_TAB_HISTORY_PERIOD);
+		    criterias.add(new Criteria().orOperator(
+			    // Updated before to Me
+			    Criteria.where("updated.day")
+				    .lte(hisotryTimeout.getTimeInMillis() / TimeUtils.Constants.MILLIS_IN_DAY)
+		    //
+		    ));
+		}
+	    }
 	}
-	query2.with(new Sort(Direction.DESC, "updated.day")).limit(100);
+
+	Integer limit = pmDomainConfig.getAgentHistoryCount().asInteger(150);
+	query2.addCriteria(
+		// Only Agent Chats
+		Criteria.where("mode").is("AGENT").and("primary").is(true)
+			// Add Selected Criteria
+			.andOperator(criterias.toArray(new Criteria[criterias.size()])))
+		// Limit
+		.with(new Sort(Direction.DESC, "updated.hour")).limit(limit);
 	// System.out.println(query2.toString());
 	LOGGER.debug(query2.toString());
-	return sessionStore.find(query2, ChatSessionDoc.class);
+	return sessionStore.find(CommonMongoQueryBuilder.collection(ChatSessionDoc.class).query(query2));
     }
 
-    public List<ChatSessionDoc> findChatSessionDocByAgentAndUnAssigned(String agentCode, String agentDept,
-	    String search) {
-	return findChatSessionDocByAgentAndUnAssigned(agentCode, agentDept, search,
-		DEFAULT_VALUES.POSTMAN_AGENT_TAB_HISTORY_PERIOD);
+    public List<ChatSessionDoc> findChatSessionDocByAgentAndUnAssigned(String tab, String agentCode, String agentDept,
+	    String search, String searchStatus) {
+	long historyPeriod = pmDomainConfig.getAgentHistoryPeriod().asLong(0L);
+	if (historyPeriod > 0L && ArgUtil.areEqual("HISTORY", tab)) {
+	    return findChatSessionDocByAgentAndUnAssigned(tab, agentCode, agentDept, search,
+		    PMConstants.DEFAULT_VALUES.POSTMAN_AGENT_TAB_HISTORY_PERIOD + historyPeriod, searchStatus);
+	} else if (historyPeriod > 0L && ArgUtil.areEqual("STALE", searchStatus)) {
+	    return findChatSessionDocByAgentAndUnAssigned(tab, agentCode, agentDept, search,
+		    PMConstants.DEFAULT_VALUES.POSTMAN_AGENT_TAB_HISTORY_PERIOD + historyPeriod, searchStatus);
+	}
+	return findChatSessionDocByAgentAndUnAssigned(tab, agentCode, agentDept, search,
+		DEFAULT_VALUES.POSTMAN_AGENT_TAB_HISTORY_PERIOD * 3 / 2, searchStatus);
     }
 
     public List<ChatSessionDoc> searchPrimary(String search) {
@@ -209,6 +273,14 @@ public class ChatSessionManager {
 		// New Criteria
 		.addCriteria(c);
 	return sessionStore.find(query, ChatSessionDoc.class);
+    }
+
+    public InBoundEvent initSession(InboxMessage inboxMessage, ChatSessionDoc session) {
+	InBoundEvent inBoundEvent = new InBoundEvent().eventCode(InBoundEvent.SESSION_INIT);
+	inBoundEvent.sessionId = session.getSessionId();
+	inBoundEvent.contactId = session.getContactId();
+	session = sessionStore.initSession(session);
+	return inBoundEvent;
     }
 
     public InBoundEvent assignToQueue(ChatSessionDoc chatSessionDoc, String queueCode) {
@@ -231,7 +303,8 @@ public class ChatSessionManager {
 	    if (ArgUtil.is(apiKeyConfig)) {
 		queueCode = apiKeyConfig.getQueue();
 		chatSessionDoc.setAssignedToQueue(queueCode);
-		chatSessionDoc.setMode(apiKeyConfig.getAppType());
+		APP_TYPE appType = APP_TYPE.from(apiKeyConfig.getAppType());
+		chatSessionDoc.setMode(appType.getMode().name());
 	    } else {
 		ApiResponseUtil.throwInputException(new ApiFieldError().field("queue").codeKey("INVALID_QUEUE")
 			.description("Invalid Queue Code " + queueCode));
@@ -257,23 +330,7 @@ public class ChatSessionManager {
 	ChatSessionDoc sessionDoc = sessionStore.getSession(sessionId);
 	return this.assignToQueue(sessionDoc, queueCode);
     }
+    
 
-    public InBoundEvent initSession(InboxMessage inboxMessage, ChatSessionDoc session) {
-	InBoundEvent inBoundEvent = new InBoundEvent().eventCode(InBoundEvent.SESSION_INIT);
-	inBoundEvent.sessionId = session.getSessionId();
-	inBoundEvent.contactId = session.getContactId();
-
-	session = sessionStore.initSession(session);
-
-	ChatSessionQuery chatSessionDocQuery = new ChatSessionQuery(session);
-
-	// Assign Queue
-	if (ArgUtil.isEmptyValue(session.getAssignedToQueue()) || ArgUtil.isEmptyValue(session.getMode())) {
-	    String defaultQueue = pmDomainConfig.getDefaultInboundQueue(inboxMessage.contact());
-	    assignToQueue(session, defaultQueue);
-	}
-	sessionStore.updateFirst(chatSessionDocQuery);
-	return inBoundEvent;
-    }
 
 }

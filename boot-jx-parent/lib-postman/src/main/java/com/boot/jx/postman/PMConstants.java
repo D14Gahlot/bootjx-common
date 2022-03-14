@@ -10,6 +10,8 @@ public class PMConstants {
 	public static final String SYSTEM = "__SYSTEM__";
 	public static final String NO_DEPT = "__DEPT__";
 	public static final String NO_USER = "__USER__";
+	public static final String BOT_QUEUE_CODE = "basic_bot";
+	public static final String AGENT_QUEUE_CODE = "agent_desk";
     }
 
     public final class USER_ROLE {
@@ -62,6 +64,10 @@ public class PMConstants {
 
 	public CHAT_MODE getMode() {
 	    return this.chatMode;
+	}
+
+	public static APP_TYPE from(Object appType) {
+	    return ArgUtil.parseAsEnumT(appType, APP_TYPE.class, APP_TYPE.NONE);
 	}
     }
 
@@ -137,6 +143,7 @@ public class PMConstants {
 
     public static class DEFAULT_VALUES {
 	public static final long POSTMAN_AGENT_TAB_HISTORY_PERIOD = TimeUtils.toMillis("1d");
+	public static final long POSTMAN_AGENT_TAB_HISTORY_PERIOD_MAX = TimeUtils.toMillis("30d");
     }
 
     public final class PostManUrls {

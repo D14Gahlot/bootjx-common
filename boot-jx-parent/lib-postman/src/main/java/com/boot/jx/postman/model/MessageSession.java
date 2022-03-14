@@ -10,6 +10,7 @@ public class MessageSession implements Serializable {
     private static final long serialVersionUID = -5472557093277982501L;
     private String dept;
     private String agent;
+    private String bot;
     private String mode;
     private String queue;
     private boolean resolved;
@@ -58,6 +59,14 @@ public class MessageSession implements Serializable {
 
     public void setQueue(String queue) {
 	this.queue = queue;
+    }
+
+    public String getBot() {
+	return bot;
+    }
+
+    public void setBot(String bot) {
+	this.bot = bot;
     }
 
 }

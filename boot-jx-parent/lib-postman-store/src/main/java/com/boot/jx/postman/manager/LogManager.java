@@ -7,9 +7,12 @@ import com.boot.jx.AppContextUtil;
 import com.boot.jx.logger.AuditDetailProvider;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.MessageDoc;
+import com.boot.jx.postman.model.MessageDefinitions.IMessage;
 import com.boot.jx.postman.model.MessageDefinitions.IMessageExtended;
 import com.boot.jx.postman.model.MessageDefinitions.LogMessage;
+import com.boot.jx.postman.model.MessageDefinitions.SessionMessage;
 import com.boot.jx.postman.model.OutboxMessage;
+import com.boot.jx.postman.model.PMParams;
 import com.boot.jx.postman.model.ext.InBoundEvent;
 import com.boot.jx.postman.store.MessageStore;
 import com.boot.jx.postman.store.MessageStore.EVENTS;
@@ -45,9 +48,9 @@ public class LogManager {
 	return messageStore.note(outboxMessage, getCurrenUser());
     }
 
-    public MessageDoc event(IMessageExtended inboxMessage, String actorAgent, EVENTS eventName, String... logMessage) {
+    public MessageDoc event(SessionMessage inboxMessage, String actorAgent, EVENTS eventName, String... logMessage) {
 	MessageDoc doc = new MessageDoc();
-	doc.setContactId(PostManUtil.createContactId(inboxMessage));
+	doc.setContactId(PostManUtil.createContactId(inboxMessage.contact()));
 	doc.setType("L");
 	doc.setTimestamp(System.currentTimeMillis());
 	if (ArgUtil.is(logMessage)) {
@@ -62,7 +65,7 @@ public class LogManager {
 	return doc;
     }
 
-    public MessageDoc event(IMessageExtended inboxMessage, EVENTS event, String... logs) {
+    public MessageDoc event(SessionMessage inboxMessage, EVENTS event, String... logs) {
 	return event(inboxMessage, inboxMessage.session().getAgent(), event, logs);
     }
 

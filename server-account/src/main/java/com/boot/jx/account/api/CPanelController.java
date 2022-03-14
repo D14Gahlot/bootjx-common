@@ -23,7 +23,7 @@ import com.boot.jx.http.ApiRequest;
 import com.boot.jx.postman.PMConstants;
 import com.boot.jx.postman.PMConstants.CHANNEL_TYPE_ENUM;
 import com.boot.jx.postman.PMEnvironment;
-import com.boot.jx.postman.doc.config.ClientKeyConfigDoc;
+import com.boot.jx.postman.doc.config.ClientAppConfigDoc;
 import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.utils.ArgUtil;
 import com.fasterxml.jackson.annotation.JsonView;
@@ -104,14 +104,14 @@ public class CPanelController {
     @JsonView(PMEnvironment.PublicProperty.class)
     @ResponseBody
     @RequestMapping(value = { "/api/config/clientapikey" }, method = { RequestMethod.GET })
-    public ApiResponse<ClientKeyConfigDoc, Object> createClientApiKey() {
-	return ApiResponse.buildResults(mongoTemplate.findAll(ClientKeyConfigDoc.class));
+    public ApiResponse<ClientAppConfigDoc, Object> createClientApiKey() {
+	return ApiResponse.buildResults(mongoTemplate.findAll(ClientAppConfigDoc.class));
     }
 
     @JsonView(PMEnvironment.OneTimeVisibleProperty.class)
     @ResponseBody
     @RequestMapping(value = { "/api/config/clientapikey" }, method = { RequestMethod.POST })
-    public ApiResponse<ClientKeyConfigDoc, Object> createClientApiKey(@RequestBody ClientKeyConfigDoc clientApiKey) {
+    public ApiResponse<ClientAppConfigDoc, Object> createClientApiKey(@RequestBody ClientAppConfigDoc clientApiKey) {
 	return ApiResponse.buildData(configManager.save(clientApiKey));
     }
 

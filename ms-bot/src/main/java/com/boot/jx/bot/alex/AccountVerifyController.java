@@ -9,6 +9,7 @@ import com.boot.jx.bot.ChatMapping;
 import com.boot.jx.postman.doc.ChatPromise;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.OutboxMessage;
+import com.boot.jx.postman.model.ext.InBoundEvent;
 import com.boot.jx.postman.service.ContactCleanerService;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.StringUtils.StringMatcher;
@@ -134,8 +135,8 @@ public class AccountVerifyController extends ChatController {
 			next(AlexBotConstants.KEY.SERVICE_SELECTOR);
 			break;
 		case "4":
-			InboxMessage agentAssignResp = assignToAgent().getResult();
-			if (ArgUtil.is(agentAssignResp.session().getAgent())) {
+			InBoundEvent agentAssignResp = assignToAgent().getValue();
+			if (ArgUtil.is(agentAssignResp.sessionAssigned().newAgent)) {
 				reply("One of our agent will attend you shortly");
 			} else {
 				reply("All agents are busy or online, we will connect you whenever someone is avaialable.");

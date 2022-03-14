@@ -4,13 +4,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.boot.jx.AppContextUtil;
 import com.boot.jx.bot.ChatController;
 import com.boot.jx.common.config.ConfigConstants;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PMEnvironment.PMConfigurationObject;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.OutboxMessage;
+import com.boot.jx.postman.model.ext.InBoundEvent;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.StringUtils.StringMatcher;
 
@@ -23,21 +23,12 @@ public class CommonBotController extends ChatController {
 
     public void commonTransferToAgent(InboxMessage inboxMessage, StringMatcher matcher) {
 	try {
-	    InboxMessage agentAssignResp = assignToAgent().getResult();
-	    if (ArgUtil.is(agentAssignResp.session().getAgent())) {
+	    InBoundEvent assignEvent = assignToAgent().value();
+	    if (ArgUtil.is(assignEvent.sessionAssigned().newAgent)) {
 		PMConfigurationObject transferReply = pmEnvironment
 			.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_AGENT_CHAT_AUTOREPLY_TALK2AGENT);
 		if (transferReply.exists()) {
-		    reply(new OutboxMessage().templateId(transferReply.asString()));
-		} else if (ArgUtil.is(AppContextUtil.getTenant())
-			&& AppContextUtil.getTenant().equalsIgnoreCase("tathkarah")) {
-		    reply("، عميلنا العزيز\r\n" // \n
-			    + "\r\n" // \n
-			    + "مرحباً بك في تطبيق تذكره!\r\n" // \n
-			    + "\r\n" // \n
-			    + "لحظات وسيتم توصيلك بأحد ممثلي خدمة العملاء. \r\n" // \n
-			    + "\r\n"// \n
-			    + " …..شكرا لانتظارك");// \n
+		    reply(new OutboxMessage().template(transferReply.asString()));
 		} else {
 		    reply("Connecting you to one of our customer representatives. Give us a moment.");
 		}
@@ -45,7 +36,7 @@ public class CommonBotController extends ChatController {
 		PMConfigurationObject noAgentReply = pmEnvironment
 			.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_AGENT_CHAT_AUTOREPLY_NOAGENT);
 		if (noAgentReply.exists()) {
-		    reply(new OutboxMessage().templateId(noAgentReply.asString()));
+		    reply(new OutboxMessage().template(noAgentReply.asString()));
 		} else {
 		    reply("All agents are busy or online, we will connect you whenever someone is available.");
 		}

@@ -20,6 +20,7 @@ import com.boot.jx.agent.AgentSessionService;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.api.ListRequestModel;
 import com.boot.jx.aws.AWSFileStore;
+import com.boot.jx.common.config.ConfigConstants;
 import com.boot.jx.common.doc.AgentDoc;
 import com.boot.jx.common.doc.AgentSessionDoc;
 import com.boot.jx.common.store.AgentStore;
@@ -28,6 +29,7 @@ import com.boot.jx.common.store.ChatArchiveService;
 import com.boot.jx.model.CommonFile;
 import com.boot.jx.postman.PMConstants;
 import com.boot.jx.postman.PMConstants.CHAT_STATUS;
+import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.client.PMFileStoreClient;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
@@ -52,7 +54,7 @@ public class MsgController {
 
     @Autowired
     private SessionStore sessionStore;
-    
+
     @Autowired
     ChatSessionManager chatSessionManager;
 
@@ -80,15 +82,20 @@ public class MsgController {
     @Autowired
     private AgentSessionService agentSessionService;
 
+    @Autowired
+    private PMEnvironment environment;
+
     @ResponseBody
     @RequestMapping(value = "/api/sessions/message/send", method = { RequestMethod.POST })
     public ApiResponse<ChatMessageDTO, Object> sendSessionMessage(@RequestBody OutboxMessage outboxMessage)
 	    throws InterruptedException {
 
 	ChatSessionDoc sessionDoc = sessionStore.createSession(outboxMessage);
-	
+
 	// Session Stuff Logging <
-	if (ArgUtil.isEmpty(sessionDoc.getAssignedToAgent())) {
+	if (ArgUtil.isEmpty(sessionDoc.getAssignedToAgent())
+		|| (environment.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_AGENT_CHAT_REASSIGNMENT_AUTO).asBoolean()
+			&& !ArgUtil.areEqual(sessionDoc.getAssignedToAgent(), agentSession.getAgentCode()))) {
 	    AgentSessionDoc agent = mongoTemplate.findById(agentSession.getAgentCode(), AgentSessionDoc.class);
 	    agentChatHandlerImpl.onAssign(agent, sessionDoc);
 	}
@@ -108,7 +115,7 @@ public class MsgController {
 
 	    agentSessionService.refreshOnline();
 	    return new ApiResponse<ChatMessageDTO, Object>().result(messageDto)
-		    .meta(chatArchiveBuilder.buildChatSessionDTO().from(sessionDoc).get());
+		    .meta(chatArchiveBuilder.sessionDTO().from(sessionDoc).get());
 	} else {
 	    agentSessionService.refreshOnline();
 	    return new ApiResponse<ChatMessageDTO, Object>().message("Only assignee can respond to chat.");
@@ -187,7 +194,7 @@ public class MsgController {
 	ChatSessionDoc chatSessionDoc = sessionStore.getSession(sessionId);
 	AgentDoc agent = agentStore.findById(agentId);
 	agentChatHandlerImpl.onAssign(agent, chatSessionDoc);
-	ChatSessionDTO chatSessionDto = chatArchiveBuilder.buildChatSessionDTO().from(chatSessionDoc).withContact()
+	ChatSessionDTO chatSessionDto = chatArchiveBuilder.sessionDTO().from(chatSessionDoc).withContact()
 		.isAssigned(agentSession.getAgentCode()).withMessages().get();
 	return ApiResponse.buildResult(chatSessionDto);
     }

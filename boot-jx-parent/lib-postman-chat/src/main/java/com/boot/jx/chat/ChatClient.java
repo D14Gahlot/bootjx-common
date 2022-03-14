@@ -13,6 +13,8 @@ import com.boot.jx.postman.PostManException;
 import com.boot.jx.postman.dto.ChatUserProfileDTO;
 import com.boot.jx.postman.dto.ChatUserProfileDTO.ChatUserProfileRequest;
 import com.boot.jx.postman.model.InboxMessage;
+import com.boot.jx.postman.model.PMParams;
+import com.boot.jx.postman.model.ext.InBoundEvent;
 import com.boot.jx.rest.RestService;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.utils.ArgUtil;
@@ -24,6 +26,7 @@ public class ChatClient {
 
     public static class PATH {
 	public static final String ASSIGN_TO_AGENT = "/int/assign/agent";
+	public static final String ASSIGN_TO_AGENT_V2 = "/int/assign/v2/agent/";
 	public static final String INBOUND_FRWRD = "/int/inbound/callback";
     }
 
@@ -51,12 +54,25 @@ public class ChatClient {
 	return ApiResponse.buildResult(inboxMessage);
     }
 
+    @Deprecated
     public ApiResponse<InboxMessage, Object> assignToAgent(InboxMessage inboxMessage) {
 	LOGGER.debug("Assign InboxMessage Session to other Agent ");
 	if (ArgUtil.is(pmCommonConfig.getAgentUrl())) {
 	    inboxMessage.setChecksum(PostManUtil.generateCheckSum(inboxMessage));
 	    return restService.ajax(pmCommonConfig.getAgentUrl()).path(PATH.ASSIGN_TO_AGENT).post(inboxMessage)
 		    .as(new ParameterizedTypeReference<ApiResponse<InboxMessage, Object>>() {
+		    });
+	} else {
+	    return null;
+	}
+    }
+
+    public InBoundEvent assignToAgentV2(PMParams params) {
+	LOGGER.debug("Assign InboxMessage Session to other Agent ");
+	if (ArgUtil.is(pmCommonConfig.getAgentUrl())) {
+	    params.setChecksum(PostManUtil.generateCheckSum(params));
+	    return restService.ajax(pmCommonConfig.getAgentUrl()).path(PATH.ASSIGN_TO_AGENT_V2).post(params)
+		    .as(new ParameterizedTypeReference<InBoundEvent>() {
 		    });
 	} else {
 	    return null;

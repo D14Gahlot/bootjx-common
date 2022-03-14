@@ -101,6 +101,13 @@ public class ApiResponse<T, M> extends AResponse<M> implements ApiDataMetaRespon
 	this.results.add(result);
     }
 
+    public ApiResponse<T, M> addResults(List<T> results) {
+	for (T result : results) {
+	    this.addResult(result);
+	}
+	return this;
+    }
+
     public ApiResponse<T, M> result(T result) {
 	this.addResult(result);
 	return this;
