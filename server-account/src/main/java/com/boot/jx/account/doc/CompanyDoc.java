@@ -16,7 +16,7 @@ public class CompanyDoc implements Serializable {
     private String businessType;
     private String websiteUrl;
     private String businessAbout;
-    //Type --Company , Billing
+    // Type --Company , Billing
     private PBAddress address;
     private PBPhone phone;
     private PBPhone phoneAlt;
@@ -24,7 +24,6 @@ public class CompanyDoc implements Serializable {
     private PBEmail emailAlt;
     private PBTax tax;
     private PBWebsite website;
-    
 
     public String getBusinessName() {
 	return businessName;
@@ -50,7 +49,6 @@ public class CompanyDoc implements Serializable {
 	this.websiteUrl = websiteUrl;
     }
 
-
     public String getBusinessAbout() {
 	return businessAbout;
     }
@@ -59,67 +57,60 @@ public class CompanyDoc implements Serializable {
 	this.businessAbout = businessAbout;
     }
 
-	public PBAddress getAddress() {
-		return address;
-	}
+    public PBAddress getAddress() {
+	return address;
+    }
 
-	public void setAddress(PBAddress address) {
-		this.address = address;
-	}
+    public void setAddress(PBAddress address) {
+	this.address = address;
+    }
 
-	public PBPhone getPhone() {
-		return phone;
-	}
+    public PBPhone getPhone() {
+	return phone;
+    }
 
-	public void setPhone(PBPhone phone) {
-		this.phone = phone;
-	}
+    public void setPhone(PBPhone phone) {
+	this.phone = phone;
+    }
 
-	public PBPhone getPhoneAlt() {
-		return phoneAlt;
-	}
+    public PBPhone getPhoneAlt() {
+	return phoneAlt;
+    }
 
-	public void setPhoneAlt(PBPhone phoneAlt) {
-		this.phoneAlt = phoneAlt;
-	}
+    public void setPhoneAlt(PBPhone phoneAlt) {
+	this.phoneAlt = phoneAlt;
+    }
 
-	public PBEmail getEmail() {
-		return email;
-	}
+    public PBEmail getEmail() {
+	return email;
+    }
 
-	public void setEmail(PBEmail email) {
-		this.email = email;
-	}
+    public void setEmail(PBEmail email) {
+	this.email = email;
+    }
 
-	public PBEmail getEmailAlt() {
-		return emailAlt;
-	}
+    public PBEmail getEmailAlt() {
+	return emailAlt;
+    }
 
-	public void setEmailAlt(PBEmail emailAlt) {
-		this.emailAlt = emailAlt;
-	}
+    public void setEmailAlt(PBEmail emailAlt) {
+	this.emailAlt = emailAlt;
+    }
 
-	public PBTax getTax() {
-		return tax;
-	}
+    public PBTax getTax() {
+	return tax;
+    }
 
-	public void setTax(PBTax tax) {
-		this.tax = tax;
-	}
+    public void setTax(PBTax tax) {
+	this.tax = tax;
+    }
 
-	public PBWebsite getWebsite() {
-		return website;
-	}
+    public PBWebsite getWebsite() {
+	return website;
+    }
 
-	public void setWebsite(PBWebsite website) {
-		this.website = website;
-	}
+    public void setWebsite(PBWebsite website) {
+	this.website = website;
+    }
 
-   
-	
-
-	
-	
-
-	
 }
