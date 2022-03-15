@@ -80,8 +80,8 @@ public class ConfigController {
 
     @JsonView(PMEnvironment.PublicProperty.class)
     @ResponseBody
-    @RequestMapping(value = { "/api/config/clientapikey" }, method = { RequestMethod.DELETE })
-    public ApiResponse<ClientAppConfigDoc, Object> deleteClientApiKey(@RequestParam String id) {
+    @RequestMapping(value = { "/api/config/clientapikey/{id}" }, method = { RequestMethod.DELETE })
+    public ApiResponse<ClientAppConfigDoc, Object> deleteClientApiKey(@PathVariable String id) {
 	ClientAppConfigDoc clientApiKey = new ClientAppConfigDoc();
 	clientApiKey.setId(id);
 	return ApiResponse.buildResults(configManager.remove(clientApiKey));
