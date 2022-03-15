@@ -51,7 +51,7 @@ public class ConfigConstants {
 
 	POSTMAN_CHAT_INBOUND_QUEUE(new ConfigMeta("Message Inbound Queue", "postman.chat.inbound.queue")
 		.desc("Inbound messages will be forwarded to this Queue by default")
-		.optionsSource("getx:/api/config/inbound_queue").optionsKey("code").optionsLabel("code")),
+		.optionsSource("getx:/api/options/inbound_queue").optionsKey("code").optionsLabel("code")),
 
 	POSTMAN_CHAT_CHANNEL_SANDBOX(new ConfigMeta("Enable Sandbox Channels", "postman.chat.channel.sandbox")
 		.desc("Sandbox channels are preconfigured communication channels").optionsOnOff()),
