@@ -91,6 +91,7 @@ public class ConfigController {
      * Inbound Queues
      ***************************/
 
+    @Deprecated
     @JsonView(PMEnvironment.PublicProperty.class)
     @ResponseBody
     @RequestMapping(value = { "/api/config/inbound_queue" }, method = { RequestMethod.GET })

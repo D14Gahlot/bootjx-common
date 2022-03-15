@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.boot.jx.api.ApiResponse;
@@ -19,6 +20,7 @@ import com.boot.jx.common.config.ConfigManager;
 import com.boot.jx.common.impl.ConfigMeta;
 import com.boot.jx.http.ApiRequest;
 import com.boot.jx.mongo.CommonMongoTemplate;
+import com.boot.jx.postman.ClientApp;
 import com.boot.jx.postman.PMConstants.CHANNEL_TYPE_ENUM;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PMEnvironment.AChannelConfig;
@@ -28,6 +30,7 @@ import com.boot.jx.postman.doc.HSMContentType;
 import com.boot.jx.postman.doc.HSMLanguage;
 import com.boot.jx.postman.doc.HSMMessageType;
 import com.boot.jx.postman.doc.HSMTemplateDoc;
+import com.boot.jx.postman.doc.config.ClientAppConfigDoc;
 import com.boot.jx.postman.plugin.ChannelPluginProvider;
 import com.boot.jx.postman.plugin.ChannelPluginProvider.ChannelPlugin;
 import com.boot.utils.ArgUtil;
@@ -85,6 +88,13 @@ public class ConfigOptionMetaController {
     @RequestMapping(value = "/api/options/tmpl/hsm", method = { RequestMethod.GET })
     public ApiResponse<HSMTemplateDoc, Object> listPushTemplateslistHsmTmpl() {
 	return ApiResponse.buildResults(commonMongoTemplate.findAll(HSMTemplateDoc.class));
+    }
+
+    @JsonView(PMEnvironment.PublicProperty.class)
+    @ResponseBody
+    @RequestMapping(value = { "/api/options/inbound_queue" }, method = { RequestMethod.GET })
+    public ApiResponse<ClientApp, Object> getInboundQueues() {
+	return ApiResponse.buildResults(pmEnvironment.config().listApps());
     }
 
     // Config APIS
