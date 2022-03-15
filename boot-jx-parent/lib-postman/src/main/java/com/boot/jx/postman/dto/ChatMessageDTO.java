@@ -38,6 +38,7 @@ public class ChatMessageDTO implements Serializable {
     private Contactable contact;
 
     private Map<String, Object> meta;
+    private Map<String, Object> replyTo;
 
     public String getText() {
 	return text;
@@ -220,5 +221,13 @@ public class ChatMessageDTO implements Serializable {
 
     public void setReplyId(String replyId) {
 	this.replyId = replyId;
+    }
+
+    public Map<String, Object> getReplyTo() {
+        return replyTo;
+    }
+
+    public void setReplyTo(Map<String, Object> replyTo) {
+        this.replyTo = replyTo;
     }
 }
