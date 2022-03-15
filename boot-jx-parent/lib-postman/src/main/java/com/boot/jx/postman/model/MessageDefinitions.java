@@ -3,6 +3,7 @@ package com.boot.jx.postman.model;
 import java.io.IOException;
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 
 import com.boot.jx.dict.ContactType;
@@ -200,6 +201,15 @@ public class MessageDefinitions {
     }
 
     public interface LogMessage extends SessionMessage, IMessageId {
+	public List<String> getLogs();
 
+	public void setLogs(List<String> logs);
+
+	public default List<String> logs() {
+	    if (this.getLogs() == null) {
+		this.setLogs(new ArrayList<String>());
+	    }
+	    return this.getLogs();
+	}
     }
 }

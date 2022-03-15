@@ -15,6 +15,7 @@ import com.boot.jx.postman.fb.FacebooClient;
 import com.boot.jx.postman.fb.FacebookHookRequest;
 import com.boot.jx.postman.fb.FacebookMessaging;
 import com.boot.jx.postman.fb.FacebookUserProfile;
+import com.boot.jx.postman.manager.LogManager;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.Message;
 import com.boot.jx.postman.model.Message.Status;
@@ -41,6 +42,9 @@ public class FacebookConnector extends AbstractConnector<FacebookConfigDetails, 
 
     @Autowired
     private FacebooClient facebooClient;
+
+    @Autowired
+    private LogManager logManager;
 
     @Override
     public void onChannelUpdate(ChannelConfig channelConfig) {
@@ -84,9 +88,9 @@ public class FacebookConnector extends AbstractConnector<FacebookConfigDetails, 
 	event.setFrom(id);
 	event.contact().setCsid(id);
 	if (ArgUtil.is(m.getPostBack()) && ArgUtil.is(m.getPostBack().getTitle())) {
-		event.setMessage(m.getPostBack().getTitle());
-	}else {
-		event.setMessage(m.getMessage().getText());		
+	    event.setMessage(m.getPostBack().getTitle());
+	} else {
+	    event.setMessage(m.getMessage().getText());
 	}
 	event.to().add(m.getRecipient().get("id"));
 	event.contact().type(ContactType.FACEBOOK);
@@ -110,11 +114,11 @@ public class FacebookConnector extends AbstractConnector<FacebookConfigDetails, 
 	// Extract Message Details
 	inboxMessage.setMessageIdExt(m.getMessage().getMid());
 	if (ArgUtil.is(m.getPostBack()) && ArgUtil.is(m.getPostBack().getTitle())) {
-		inboxMessage.setMessageIdExt(m.getPostBack().getMid());
-		inboxMessage.setMessage(m.getPostBack().getTitle());
-	}else {
-		inboxMessage.setMessageIdExt(m.getMessage().getMid());
-		inboxMessage.setMessage(m.getMessage().getText());
+	    inboxMessage.setMessageIdExt(m.getPostBack().getMid());
+	    inboxMessage.setMessage(m.getPostBack().getTitle());
+	} else {
+	    inboxMessage.setMessageIdExt(m.getMessage().getMid());
+	    inboxMessage.setMessage(m.getMessage().getText());
 	}
 
 	return inboxMessage;
@@ -138,7 +142,7 @@ public class FacebookConnector extends AbstractConnector<FacebookConfigDetails, 
 	FacebookHookRequest request = requestMap.as(FacebookHookRequest.class);
 	request.getEntry().forEach(pageEntry -> {
 	    pageEntry.getMessaging().forEach(m -> {
-		if (ArgUtil.is(m.getMessage())|| ArgUtil.is(m.getPostBack())) {
+		if (ArgUtil.is(m.getMessage()) || ArgUtil.is(m.getPostBack())) {
 		    messageBoxEvent.addInboxMessage(toInboxMessage(m, channelConfig));
 		} else if (ArgUtil.is(m.getRead())) {
 		    messageBoxEvent.addMessageReport(toMessageReport(m, channelConfig));

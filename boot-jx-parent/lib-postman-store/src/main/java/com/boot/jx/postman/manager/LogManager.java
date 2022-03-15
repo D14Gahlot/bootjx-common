@@ -99,6 +99,8 @@ public class LogManager {
 	}
 
 	messageStore.save(doc, MessageStore.getCollectionName("LOGS"));
+	inboxMessage.logs().add(e.getMessage());
+	inboxMessage.logs().add("trail:" + doc.getMessageId());
     }
 
     public void error(InBoundEvent inBoundEvent, Exception e) {

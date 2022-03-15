@@ -20,11 +20,11 @@ import com.boot.jx.postman.PMConstants.MESSAGE_FORMAT_TYPE;
 import com.boot.jx.postman.PMEnvironment.PMClientConfig;
 import com.boot.jx.postman.client.PMFileStoreClient;
 import com.boot.jx.postman.doc.ChatContactDoc;
+import com.boot.jx.postman.manager.LogManager;
 import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.Message.Status;
 import com.boot.jx.postman.model.MessageBoxEvent;
-import com.boot.jx.postman.model.MessagePrompt;
 import com.boot.jx.postman.model.MessageReport;
 import com.boot.jx.postman.model.MessageReport.MessageReportError;
 import com.boot.jx.postman.model.OutboxMessage;
@@ -43,7 +43,6 @@ import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.Constants;
 import com.boot.utils.JsonPath;
-import com.boot.utils.JsonUtil;
 import com.google.i18n.phonenumbers.NumberParseException;
 import com.google.i18n.phonenumbers.PhoneNumberUtil;
 import com.google.i18n.phonenumbers.Phonenumber.PhoneNumber;
@@ -70,8 +69,8 @@ public class WA360Connector extends AbstractConnector<WA360ConfigDetails, WA360P
     private WA360Client wa360Client;
 
     @Autowired
-    PMClientConfig pmClientConfig;
-
+    private PMClientConfig pmClientConfig;
+    
     @Override
     public void onChannelUpdate(ChannelConfig channelConfig) {
 	String webhookUrl = pmClientConfig.getWebhookUrl(channelConfig);
@@ -186,7 +185,6 @@ public class WA360Connector extends AbstractConnector<WA360ConfigDetails, WA360P
 	    if (outboxMessage.messageMetaWrapper().composeTypeIs(MESSAGE_COMPOSE_TYPE.SEND_CODE)) {
 		isValidContact = optin(channelConfig, chatContactDoc);
 	    }
-System.out.println("outboxMessage "+JsonUtil.toJson(outboxMessage));
 	    if (isValidContact) {
 		wa360Client.send(channelConfig, outboxMessage);
 		outboxMessage.updateStatus(OutboxMessage.Status.SENT);
