@@ -12,7 +12,7 @@ public class MethodWrapper implements Comparable<MethodWrapper> {
 	private String controller;
 	private Method method;
 	private Pattern[] pattern;
-	private String[] tenant;
+	private String[] botCode;
 	private String lane;
 	private Matcher matcher;
 	private String next;
@@ -129,12 +129,12 @@ public class MethodWrapper implements Comparable<MethodWrapper> {
 		this.length = length;
 	}
 
-	public String[] getTenant() {
-		return tenant;
+	public String[] getBotCode() {
+		return botCode;
 	}
 
-	public void setTenant(String[] tenant) {
-		this.tenant = tenant;
+	public void setBotCode(String[] botCode) {
+		this.botCode = botCode;
 	}
 
 }

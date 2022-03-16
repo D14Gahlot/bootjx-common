@@ -109,7 +109,7 @@ public class BotEngine {
 		    methodWrapper.setController(controllerName);
 		    methodWrapper.setKey(key);
 		    methodWrapper.setLane(botControllerAnnot.lane());
-		    methodWrapper.setTenant(botControllerAnnot.code());
+		    methodWrapper.setBotCode(botControllerAnnot.code());
 
 		    // for (String event : events) {
 		    eventToMethodsList.add(methodWrapper);
@@ -161,7 +161,7 @@ public class BotEngine {
 	    Pattern[] patterns = methodWrapper.getPattern();
 	    if (patterns.length > 0) {
 		for (int i = 0; i < patterns.length; i++) {
-		    if (ArgUtil.isEqual(botFlow, methodWrapper.getTenant())) {
+		    if (ArgUtil.isEqual(botFlow, methodWrapper.getBotCode())) {
 			if (matcher.isMatch(patterns[i]) && ArgUtil.is(ArgUtil.parseAsString(patterns[i]))) {
 			    event.setMatcher(matcher);
 			    return methodWrapper;
@@ -175,9 +175,9 @@ public class BotEngine {
 	    Pattern[] patterns = methodWrapper.getPattern();
 	    if (patterns.length > 0) {
 		for (int i = 0; i < patterns.length; i++) {
-		    if (ArgUtil.isEmptyArray(methodWrapper.getTenant())
-			    || ArgUtil.isEqual(Constants.BLANK, methodWrapper.getTenant())
-			    || ArgUtil.isEqual(botFlow, methodWrapper.getTenant())) {
+		    if (ArgUtil.isEmptyArray(methodWrapper.getBotCode())
+			    || ArgUtil.isEqual(Constants.BLANK, methodWrapper.getBotCode())
+			    || ArgUtil.isEqual(botFlow, methodWrapper.getBotCode())) {
 			if (matcher.isMatch(patterns[i]) && ArgUtil.is(ArgUtil.parseAsString(patterns[i]))) {
 			    event.setMatcher(matcher);
 			    return methodWrapper;
