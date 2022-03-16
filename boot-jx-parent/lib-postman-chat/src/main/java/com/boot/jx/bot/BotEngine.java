@@ -23,10 +23,12 @@ import org.springframework.stereotype.Component;
 
 import com.boot.jx.AppContextUtil;
 import com.boot.jx.chat.ChatService;
+import com.boot.jx.postman.ClientApp;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.doc.ChatPromise;
 import com.boot.jx.postman.doc.ChatPromise.State;
 import com.boot.jx.postman.model.InboxMessage;
+import com.boot.jx.postman.store.MessageContext;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.ClazzUtil;
@@ -56,6 +58,9 @@ public class BotEngine {
 
     @Autowired
     private PMEnvironment pmEnvironment;
+
+    @Autowired
+    private MessageContext messageContext;
 
     private boolean chatBotDefined;
 
@@ -142,7 +147,8 @@ public class BotEngine {
 	StringMatcher matcher = new StringMatcher(text);
 
 	String tenant = AppContextUtil.getTenant();
-	String botFlow = pmEnvironment.keyEntry("postman.bot.flow").asString(tenant);
+	ClientApp app = messageContext.clientApp();
+	String botFlow = ArgUtil.parseAsString(app.props().get("flow"), tenant);
 
 	for (MethodWrapper methodWrapper : eventToMethodsList) {
 	    Pattern[] patterns = methodWrapper.getPattern();
