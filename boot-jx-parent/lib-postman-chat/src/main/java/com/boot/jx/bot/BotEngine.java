@@ -109,7 +109,7 @@ public class BotEngine {
 		    methodWrapper.setController(controllerName);
 		    methodWrapper.setKey(key);
 		    methodWrapper.setLane(botControllerAnnot.lane());
-		    methodWrapper.setTenant(botControllerAnnot.code());
+		    methodWrapper.setBotCode(botControllerAnnot.code());
 
 		    // for (String event : events) {
 		    eventToMethodsList.add(methodWrapper);
@@ -146,22 +146,25 @@ public class BotEngine {
 	String text = ArgUtil.nonEmpty(event.getMessage(), Constants.BLANK).toUpperCase();
 	StringMatcher matcher = new StringMatcher(text);
 
-	ClientApp app = messageContext.clientApp();
-
 	String botCode = pmEnvironment.keyEntry("postman.bot.code").asString(AppContextUtil.getTenant());
 
-	String botFlow = ArgUtil.parseAsString(app.props().get("flow"));
-	if (ArgUtil.is(botFlow)) {
-	    botFlow = botCode + "_" + botFlow;
-	} else {
-	    botFlow = botCode;
+	ClientApp app = messageContext.clientApp();
+
+	String botFlow = botCode;
+	if (ArgUtil.is(app)) {
+	    botFlow = ArgUtil.parseAsString(app.props().get("flow"));
+	    if (ArgUtil.is(botFlow)) {
+		botFlow = botCode + "_" + botFlow;
+	    } else {
+		botFlow = botCode;
+	    }
 	}
 
 	for (MethodWrapper methodWrapper : eventToMethodsList) {
 	    Pattern[] patterns = methodWrapper.getPattern();
 	    if (patterns.length > 0) {
 		for (int i = 0; i < patterns.length; i++) {
-		    if (ArgUtil.isEqual(botFlow, methodWrapper.getTenant())) {
+		    if (ArgUtil.isEqual(botFlow, methodWrapper.getBotCode())) {
 			if (matcher.isMatch(patterns[i]) && ArgUtil.is(ArgUtil.parseAsString(patterns[i]))) {
 			    event.setMatcher(matcher);
 			    return methodWrapper;
@@ -175,9 +178,9 @@ public class BotEngine {
 	    Pattern[] patterns = methodWrapper.getPattern();
 	    if (patterns.length > 0) {
 		for (int i = 0; i < patterns.length; i++) {
-		    if (ArgUtil.isEmptyArray(methodWrapper.getTenant())
-			    || ArgUtil.isEqual(Constants.BLANK, methodWrapper.getTenant())
-			    || ArgUtil.isEqual(botFlow, methodWrapper.getTenant())) {
+		    if (ArgUtil.isEmptyArray(methodWrapper.getBotCode())
+			    || ArgUtil.isEqual(Constants.BLANK, methodWrapper.getBotCode())
+			    || ArgUtil.isEqual(botFlow, methodWrapper.getBotCode())) {
 			if (matcher.isMatch(patterns[i]) && ArgUtil.is(ArgUtil.parseAsString(patterns[i]))) {
 			    event.setMatcher(matcher);
 			    return methodWrapper;
