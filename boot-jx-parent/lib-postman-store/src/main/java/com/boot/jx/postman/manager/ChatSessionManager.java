@@ -18,6 +18,7 @@ import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.mongo.CommonMongoQueryBuilder;
 import com.boot.jx.postman.ClientApp;
 import com.boot.jx.postman.PMConfiguration.PMConfigurationModel;
+import com.boot.jx.postman.PMConfiguration.PMConfigurationWrappper;
 import com.boot.jx.postman.PMConstants;
 import com.boot.jx.postman.PMConstants.APP_TYPE;
 import com.boot.jx.postman.PMConstants.CHAT_STATUS;
@@ -298,7 +299,7 @@ public class ChatSessionManager {
 	}
 
 	if (ArgUtil.is(queueCode)) {
-	    PMConfigurationModel config = pmEnvironment.local();
+	    PMConfigurationWrappper config = pmEnvironment.config();
 	    ClientApp apiKeyConfig = config.clientApiKey(queueCode);
 	    if (ArgUtil.is(apiKeyConfig)) {
 		queueCode = apiKeyConfig.getQueue();
@@ -330,7 +331,5 @@ public class ChatSessionManager {
 	ChatSessionDoc sessionDoc = sessionStore.getSession(sessionId);
 	return this.assignToQueue(sessionDoc, queueCode);
     }
-    
-
 
 }

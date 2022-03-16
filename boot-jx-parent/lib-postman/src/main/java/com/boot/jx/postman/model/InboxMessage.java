@@ -52,6 +52,8 @@ public class InboxMessage implements Serializable, IMessageExtended, LogMessage 
     protected TagDocument tags;
     private List<Attachment> attachments = null;
 
+    private List<String> logs;
+
     private String replyId;
     private String replyIdExt;
 
@@ -372,5 +374,13 @@ public class InboxMessage implements Serializable, IMessageExtended, LogMessage 
 	    this.route = new MessageRoute();
 	}
 	return this.route;
+    }
+
+    public List<String> getLogs() {
+	return logs;
+    }
+
+    public void setLogs(List<String> logs) {
+	this.logs = logs;
     }
 }

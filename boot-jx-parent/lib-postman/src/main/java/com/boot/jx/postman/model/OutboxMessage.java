@@ -6,11 +6,12 @@ import java.util.List;
 
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.postman.model.MessageDefinitions.IMessage;
+import com.boot.jx.postman.model.MessageDefinitions.LogMessage;
 import com.boot.jx.postman.model.MessageOptions.WAMessageOptions;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class OutboxMessage extends Message<OutboxMessage> implements WAMessageOptions, IMessage {
+public class OutboxMessage extends Message<OutboxMessage> implements WAMessageOptions, IMessage, LogMessage {
 
     private static final long serialVersionUID = 3115992767625612005L;
 

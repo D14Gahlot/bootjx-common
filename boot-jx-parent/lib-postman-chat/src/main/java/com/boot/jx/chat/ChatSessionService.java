@@ -7,7 +7,6 @@ import org.springframework.stereotype.Component;
 
 import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorHandler;
 import com.boot.jx.inbound.InBound.InBoundHandler;
-import com.boot.jx.inbound.InBound.SessionAssginHandler;
 import com.boot.jx.logger.LoggerService;
 import com.boot.jx.postman.PMConstants;
 import com.boot.jx.postman.PMConstants.CHAT_STATUS;
@@ -17,6 +16,7 @@ import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.dto.ChatUserProfileDTO;
 import com.boot.jx.postman.dto.ChatUserProfileDTO.ChatUserProfileRequest;
 import com.boot.jx.postman.manager.ChatSessionManager;
+import com.boot.jx.postman.manager.LogManager;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.model.PMParams;
@@ -56,6 +56,9 @@ public class ChatSessionService {
     @Autowired(required = false)
     private InBoundHandler inBoundHandler;
 
+    @Autowired
+    private LogManager logManager;
+
     public boolean initSession(InboxMessage inboxMessage, ChatSessionDoc session) {
 	boolean initd = session.isInitd();
 	if (initd) {
@@ -65,17 +68,21 @@ public class ChatSessionService {
 		inboxMessage.contact().getChannelType());
 
 	if (ArgUtil.is(connector)) {
-	    OutboxMessage reply = connector.initSession(session, inboxMessage);
-	    if (ArgUtil.is(reply)) {
-		try {
-		    if (!OutboxMessage.NO_MESSAGE.equals(reply))
-			chatService.reply(inboxMessage, reply);
-		    initd = false;
-		} catch (InterruptedException e) {
-		    LOGGER.error("Errror While Replying To Sesion Init Message", e);
+	    try {
+		OutboxMessage reply = connector.initSession(session, inboxMessage);
+		if (ArgUtil.is(reply)) {
+		    try {
+			if (!OutboxMessage.NO_MESSAGE.equals(reply))
+			    chatService.reply(inboxMessage, reply);
+			initd = false;
+		    } catch (InterruptedException e) {
+			LOGGER.error("Errror While Replying To Sesion Init Message", e);
+		    }
+		} else {
+		    initd = true;
 		}
-	    } else {
-		initd = true;
+	    } catch (Exception e) {
+		logManager.error(inboxMessage, e);
 	    }
 	    messageContext.commitChatContactQuery();
 	}

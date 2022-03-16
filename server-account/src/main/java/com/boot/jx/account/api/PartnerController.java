@@ -39,6 +39,9 @@ import com.boot.jx.aws.AWSFileStore;
 import com.boot.jx.common.dto.UserLoginToken;
 import com.boot.jx.common.service.EmpAuthService;
 import com.boot.jx.http.CommonHttpRequest;
+import com.boot.jx.phonebook.model.PBAddress;
+import com.boot.jx.phonebook.model.PBEmail;
+import com.boot.jx.phonebook.model.PBPhone;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PMEnvironment.PMCommonConfig;
 import com.boot.jx.scope.tnt.Tenants;
@@ -212,40 +215,7 @@ public class PartnerController {
 	return ApiResponse.build().message("Login Success");
     }
 
-    @ResponseBody
-    @RequestMapping(value = { "/pub/domain" }, method = { RequestMethod.GET })
-    public ApiResponse<DomainDoc, Object> getDomain(@RequestParam String domain) {
-	DomainDoc domainDoc = accountStore.findDomainByName(domain);
-	return ApiResponse.buildResult(domainDoc);
-    }
-
-    @ResponseBody
-    @RequestMapping(value = { "/api/domain","/pub/domain" }, method = { RequestMethod.GET })
-    public ApiResponse<DomainDoc, Object> getDomain() {
-	BusinessUserDoc domainUser = adminSessionBean.domainUser();
-
-	if (!ArgUtil.is(domainUser)) {
-	    ApiResponseUtil.throwException("Access Denied");
-	}
-
-	DomainDoc domainDoc = CollectionUtil.first(domainUser.getDomains());
-	DomainLicenseDoc domainLicDoc = accountStore.findDomainLicenseByName(domainDoc.getDomain()); 
-
-	if (!ArgUtil.is(domainDoc)) {
-	    domainDoc = new DomainDoc();
-	}
-
-	if (!ArgUtil.is(domainDoc.getCompany())) {
-	    domainDoc.setCompany(new CompanyDoc());
-	}
-	
-
-	
-
-	return ApiResponse.buildResult(domainDoc);
-    }
-
-     @RequestMapping(value = { "/api/domain/exists", "/pub/domain/exists" }, method = { RequestMethod.GET })
+    @RequestMapping(value = { "/api/domain/exists", "/pub/domain/exists" }, method = { RequestMethod.GET })
     public ApiResponse<Object, Object> sisExists(@RequestParam @Valid String domain) throws NoSuchAlgorithmException {
 	AppContextUtil.setTenant(Tenants.getDefault());
 	DomainDoc domainDoc = accountStore.findDomainByName(domain);
@@ -270,7 +240,14 @@ public class PartnerController {
 	domainDoc.setDomain(domainDoc.getDomain());
 	return ApiResponse.build().message("Domain available");
     }
-/*
+
+    @ResponseBody
+    @RequestMapping(value = { "/pub/domain" }, method = { RequestMethod.GET })
+    public ApiResponse<DomainDoc, Object> getDomain(@RequestParam String domain) {
+	DomainDoc domainDoc = accountStore.findDomainByName(domain);
+	return ApiResponse.buildResult(domainDoc);
+    }
+
     @ResponseBody
     @RequestMapping(value = { "/api/domain" }, method = { RequestMethod.GET })
     public ApiResponse<DomainDoc, Object> getDomain() {
@@ -284,8 +261,8 @@ public class PartnerController {
 
 	ApiResponse<DomainDoc, Object> resp = ApiResponse.instance(DomainDoc.class);
 
-	for (DomainDoc domainDoc : domainDocs) {
-	    // DomainDoc domainDoc = CollectionUtil.first(domainUser.getDomains());
+	for (DomainDoc domainDoc : domainDocs) { // DomainDoc domainDoc =
+	    CollectionUtil.first(domainUser.getDomains());
 
 	    if (!ArgUtil.is(domainDoc)) {
 		domainDoc = new DomainDoc();
@@ -294,27 +271,27 @@ public class PartnerController {
 	    if (!ArgUtil.is(domainDoc.getCompany())) {
 		domainDoc.setCompany(new CompanyDoc());
 	    }
-	    if (!ArgUtil.is(domainDoc.getCompany().getConactEmail())) {
-		domainDoc.getCompany().setConactEmail(domainUser.getContact().getEmail());
+	    if (!ArgUtil.is(domainDoc.getCompany().getEmail())) {
+		domainDoc.getCompany().setEmail(new PBEmail().email(domainUser.getContact().getEmail()));
 	    }
 
-	    if (!ArgUtil.is(domainDoc.getCompany().getConactPhone())) {
-		domainDoc.getCompany().setConactPhone(domainUser.getContact().getPhone());
+	    if (!ArgUtil.is(domainDoc.getCompany().getPhone())) {
+		domainDoc.getCompany().setPhone(new PBPhone().phone(domainUser.getContact().getPhone()));
 	    }
 
 	    if (!ArgUtil.is(domainDoc.getCompany().getBusinessName())) {
 		domainDoc.getCompany().setBusinessName(domainUser.getContact().getCompany());
 	    }
 
-	    if (!ArgUtil.is(domainDoc.getCompany().getConactCountry())) {
-		domainDoc.getCompany().setConactCountry(domainUser.getContact().getCountry());
+	    if (!ArgUtil.is(domainDoc.getCompany().getAddress())) {
+		domainDoc.getCompany().setAddress(new PBAddress().country(domainUser.getContact().getCountry()));
 	    }
 
 	    resp.addResult(domainDoc);
 	}
 
 	return resp;
-    }*/
+    }
 
     @ResponseBody
     @RequestMapping(value = { "/api/domain" }, method = { RequestMethod.POST })
@@ -400,49 +377,48 @@ public class PartnerController {
 		file.getOriginalFilename()).getUrl();
 	return ApiResponse.buildResults(url).message("Logo uplodaed");
     }
+
     /** Domain License creation/Updataion/View **/
-    
+
     @ResponseBody
-    @RequestMapping(value = { "/api/domain/license","/pub/domain/license" }, method = { RequestMethod.POST })
+    @RequestMapping(value = { "/api/domain/license", "/pub/domain/license" }, method = { RequestMethod.POST })
     public ApiResponse<Object, Object> createDomainLicense(Model model, HttpServletRequest request,
 	    HttpServletResponse httpServletResponse, @RequestBody @Valid DomainLicenseDoc domainLicense,
 	    @RequestParam(required = false) boolean create) throws NoSuchAlgorithmException {
-    	
-    	BusinessUserDoc domainUser = adminSessionBean.domainUser();
-    	DomainDoc domainDoc = accountStore.findDomainByName(domainLicense.getDomain());
-    	
 
-    	if (!ArgUtil.is(domainDoc)) {
-    		 ApiResponseUtil.throwException("Invalid Domain.");
-    	}
-    	
-    		
-    		DomainLicenseDoc domainLicDoc = accountStore.findDomainLicenseByName(domainLicense.getDomain());
-    		if(!ArgUtil.is(domainLicDoc)) {
-    			domainLicDoc = new DomainLicenseDoc();
-        		domainLicDoc.setDomain(domainLicense.getDomain());
-        		domainLicDoc.setFrequency(domainLicense.getFrequency());
-        		domainLicDoc.setLicenseName(domainLicense.getLicenseName());
-        		domainLicDoc.setLicenseAggrementStamp(System.currentTimeMillis());
-        		domainLicDoc.setCreatedStamp(System.currentTimeMillis());
-        		domainLicDoc.setIsActive(true);
-        		accountStore.save(domainLicDoc);
-        		//domainUser.domainLicense().add(domainLicDoc);
-        		//accountStore.save(domainUser);
-        	return ApiResponse.build().message("Domain license created");
-    		}else {
-    			
-    			    domainLicDoc.setDomain(domainLicense.getDomain());
-    	    		domainLicDoc.setFrequency(domainLicense.getFrequency());
-    	    		domainLicDoc.setLicenseName(domainLicense.getLicenseName());
-    	    		domainLicDoc.setModifiedStamp(System.currentTimeMillis());
-    	    		domainLicDoc.setIsActive(true);
-    	    		accountStore.save(domainLicDoc);
-    		return ApiResponse.build().message("Details updated");
-    		}
-    		
-    }	
-    
+	BusinessUserDoc domainUser = adminSessionBean.domainUser();
+	DomainDoc domainDoc = accountStore.findDomainByName(domainLicense.getDomain());
+
+	if (!ArgUtil.is(domainDoc)) {
+	    ApiResponseUtil.throwException("Invalid Domain.");
+	}
+
+	DomainLicenseDoc domainLicDoc = accountStore.findDomainLicenseByName(domainLicense.getDomain());
+	if (!ArgUtil.is(domainLicDoc)) {
+	    domainLicDoc = new DomainLicenseDoc();
+	    domainLicDoc.setDomain(domainLicense.getDomain());
+	    domainLicDoc.setFrequency(domainLicense.getFrequency());
+	    domainLicDoc.setLicenseName(domainLicense.getLicenseName());
+	    domainLicDoc.setLicenseAggrementStamp(System.currentTimeMillis());
+	    domainLicDoc.setCreatedStamp(System.currentTimeMillis());
+	    domainLicDoc.setIsActive(true);
+	    accountStore.save(domainLicDoc);
+	    // domainUser.domainLicense().add(domainLicDoc);
+	    // accountStore.save(domainUser);
+	    return ApiResponse.build().message("Domain license created");
+	} else {
+
+	    domainLicDoc.setDomain(domainLicense.getDomain());
+	    domainLicDoc.setFrequency(domainLicense.getFrequency());
+	    domainLicDoc.setLicenseName(domainLicense.getLicenseName());
+	    domainLicDoc.setModifiedStamp(System.currentTimeMillis());
+	    domainLicDoc.setIsActive(true);
+	    accountStore.save(domainLicDoc);
+	    return ApiResponse.build().message("Details updated");
+	}
+
+    }
+
     @ResponseBody
     @RequestMapping(value = { "/pub/domainLicense" }, method = { RequestMethod.GET })
     public ApiResponse<DomainLicenseDoc, Object> getDomainLicense(@RequestParam String domain) {
@@ -450,5 +426,4 @@ public class PartnerController {
 	return ApiResponse.buildResult(domainLicDoc);
     }
 
-    
-}  
+}

@@ -1,8 +1,6 @@
 package com.boot.jx.admin.api;
 
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -10,7 +8,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.boot.jx.admin.dto.ContactTypeSummaryDto;
 import com.boot.jx.admin.dto.DashBoardRequestDto;
 import com.boot.jx.admin.dto.DashBoardResponseDto;
 import com.boot.jx.admin.dto.TagDocumentDto;
@@ -64,21 +61,6 @@ public class AdminDashBoardContoller {
 	}
 	
 	
-	@RequestMapping(value = "/admin/fetch-month", method = { RequestMethod.GET })
-	public ApiResponse<Map<Object, Object>, Object> getMonthLst() {
-		Map<Object, Object> set =adminDbMgr.fetchUniqueMonth(); 
-		return  ApiResponse.buildResult(set);
-	}
-	@RequestMapping(value = "/admin/monthwise-summary-count", method = { RequestMethod.GET })
-	public ApiResponse<ContactTypeSummaryDto, Object> getMonthLst(long timestamp) {
-		ContactTypeSummaryDto summary =adminDbMgr.getMonthWiseCount(timestamp); 
-		return  ApiResponse.buildResult(summary);
-	}
 	
-	@RequestMapping(value = "/admin/monthwise-summary-save", method = { RequestMethod.GET })
-	public ApiResponse<ContactTypeSummaryDto, Object> getMonthWiseSaving(long timestamp) {
-		ContactTypeSummaryDto summary =adminDbMgr.summaryV1(timestamp); 
-		return  ApiResponse.buildResult(summary);
-	}
 
 }
