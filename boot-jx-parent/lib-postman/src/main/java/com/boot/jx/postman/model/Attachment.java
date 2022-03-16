@@ -6,14 +6,19 @@ import org.apache.commons.io.FilenameUtils;
 
 import com.boot.jx.swagger.ApiMockModelProperty;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.Constants;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Attachment implements Serializable {
     private static final long serialVersionUID = 6420347322076291226L;
 
-    @ApiMockModelProperty(example = "IMAGE", value = "Media Type", allowableValues = "IMAGE,DOCUMENT,TEXT,PDF,VIDEO")
+    @ApiMockModelProperty(example = "IMAGE", value = "Media Type",
+	    allowableValues = "IMAGE,DOCUMENT,TEXT,PDF,VIDEO,URL")
     String mediaType;
+
+    @ApiMockModelProperty(example = "IMAGE", value = "Media SubType Type", allowableValues = "STORY_MENTION,SHARE etc")
+    String mediaSubType;
 
     @ApiMockModelProperty(example = "image/png", value = "Mime Type")
     String mediaMimeType;
@@ -58,6 +63,11 @@ public class Attachment implements Serializable {
 
     public Attachment mediaType(Object mediaTypeLocal) {
 	this.mediaType = ArgUtil.parseAsString(mediaTypeLocal);
+	return this;
+    }
+
+    public Attachment mediaSubType(Object mediaSubType) {
+	this.mediaSubType = ArgUtil.parseAsString(mediaSubType, Constants.BLANK).toUpperCase();
 	return this;
     }
 
@@ -127,6 +137,14 @@ public class Attachment implements Serializable {
 
     public void setMediaMimeType(String mediaMimeType) {
 	this.mediaMimeType = mediaMimeType;
+    }
+
+    public String getMediaSubType() {
+	return mediaSubType;
+    }
+
+    public void setMediaSubType(String mediaSubType) {
+	this.mediaSubType = mediaSubType;
     }
 
 }

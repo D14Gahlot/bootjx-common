@@ -125,14 +125,11 @@ public class InstagramConnector extends AbstractConnector<InstagramConfig, Insta
 			inboxMessage.setFormatType(attachmentType.toString().toLowerCase());
 			inboxMessage.attachment(new Attachment().mediaURL(attchment.getPayload().getUrl())
 				.mediaType(attachmentType).mediaSrc(attchment.getPayload().getUrl()));
-		    } else if ("story_mention".equals(attchment.getType())) {
+		    } else if (ArgUtil.isEqual(attchment.getType(), "story_mention", "share")) {
 			inboxMessage.attachment(new Attachment().mediaURL(attchment.getPayload().getUrl())
-				.mediaCaption(attchment.getPayload().getTitle())
-				.mediaSrc(attchment.getPayload().getUrl()));
-		    } else if ("share".equals(attchment.getType())) {
-			inboxMessage.attachment(new Attachment().mediaURL(attchment.getPayload().getUrl())
-				.mediaCaption(attchment.getPayload().getTitle())
-				.mediaSrc(attchment.getPayload().getUrl()));
+				.mediaCaption(attchment.getPayload().getTitle()).mediaType(m)
+				.mediaSrc(attchment.getPayload().getUrl()).mediaType(FileType.URL)
+				.mediaSubType(attchment.getType()));
 		    }
 		}
 	    }

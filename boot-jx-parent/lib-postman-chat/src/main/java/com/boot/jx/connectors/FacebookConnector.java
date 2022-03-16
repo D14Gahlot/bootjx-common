@@ -135,7 +135,8 @@ public class FacebookConnector extends AbstractConnector<FacebookConfigDetails, 
 		    } else if ("fallback".equals(attchment.getType())) {
 			inboxMessage.attachment(new Attachment().mediaURL(attchment.getPayload().getUrl())
 				.mediaCaption(attchment.getPayload().getTitle())
-				.mediaSrc(attchment.getPayload().getUrl()));
+				.mediaSrc(attchment.getPayload().getUrl()).mediaType(FileType.URL)
+				.mediaSubType(attchment.getType()));
 		    }
 		}
 	    }
