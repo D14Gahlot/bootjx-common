@@ -146,15 +146,18 @@ public class BotEngine {
 	String text = ArgUtil.nonEmpty(event.getMessage(), Constants.BLANK).toUpperCase();
 	StringMatcher matcher = new StringMatcher(text);
 
-	ClientApp app = messageContext.clientApp();
-
 	String botCode = pmEnvironment.keyEntry("postman.bot.code").asString(AppContextUtil.getTenant());
 
-	String botFlow = ArgUtil.parseAsString(app.props().get("flow"));
-	if (ArgUtil.is(botFlow)) {
-	    botFlow = botCode + "_" + botFlow;
-	} else {
-	    botFlow = botCode;
+	ClientApp app = messageContext.clientApp();
+
+	String botFlow = botCode;
+	if (ArgUtil.is(app)) {
+	    botFlow = ArgUtil.parseAsString(app.props().get("flow"));
+	    if (ArgUtil.is(botFlow)) {
+		botFlow = botCode + "_" + botFlow;
+	    } else {
+		botFlow = botCode;
+	    }
 	}
 
 	for (MethodWrapper methodWrapper : eventToMethodsList) {
