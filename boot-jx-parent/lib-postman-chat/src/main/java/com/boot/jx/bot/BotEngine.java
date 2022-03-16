@@ -148,7 +148,13 @@ public class BotEngine {
 
 	String tenant = AppContextUtil.getTenant();
 	ClientApp app = messageContext.clientApp();
-	String botFlow = ArgUtil.parseAsString(app.props().get("flow"), tenant);
+
+	String botFlow = ArgUtil.parseAsString(app.props().get("flow"));
+	if (ArgUtil.is(botFlow)) {
+	    botFlow = tenant + "_" + botFlow;
+	} else {
+	    botFlow = tenant;
+	}
 
 	for (MethodWrapper methodWrapper : eventToMethodsList) {
 	    Pattern[] patterns = methodWrapper.getPattern();
