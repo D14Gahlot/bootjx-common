@@ -13,8 +13,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.boot.jx.connectors.InstagramConnector;
 import com.boot.jx.postman.PMEnvironment;
-import com.boot.jx.postman.ig.InstagramClient;
-import com.boot.jx.postman.ig.InstagramHookRequest;
+import com.boot.jx.postman.fb.FacebookHookRequest;
+import com.boot.jx.postman.fb.InstagramClient;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.scope.vendor.VendorContext.ApiVendorHeaders;
@@ -32,7 +32,7 @@ public class InBoundControllerIG {
 
     @Autowired
     private InstagramConnector instaConnector;
-    
+
     @Autowired
     private PMEnvironment pmEnvironment;
 
@@ -45,15 +45,15 @@ public class InBoundControllerIG {
 	    // V2Params
 	    @PathVariable(required = false) String channelType, @PathVariable(required = false) String accountKey,
 	    @PathVariable(required = false) String channelId, @PathVariable(required = false) String channelKey) {
-    	ChannelConfig channelConfig = pmEnvironment.local().channel(channelId);
-    	return instaClient.registerWebhook(channelConfig, token, challenge);
+	ChannelConfig channelConfig = pmEnvironment.local().channel(channelId);
+	return instaClient.registerWebhook(channelConfig, token, challenge);
     }
 
     @Deprecated
     // @ApiRequest(feature = "WA_GUPSHUP_INBOUND")
     @ApiVendorHeaders
     @RequestMapping(value = "/ext/inbound/ig/callback", method = RequestMethod.POST)
-    public InstagramHookRequest onReceiveMessage(@RequestBody InstagramHookRequest request,
+    public FacebookHookRequest onReceiveMessage(@RequestBody FacebookHookRequest request,
 	    @RequestParam(required = false) String lane,
 	    @RequestHeader(required = false, value = "X-Hub-Signature") String signature) throws InterruptedException {
 	request.getEntry().forEach(pageEntry -> {
@@ -69,8 +69,8 @@ public class InBoundControllerIG {
     @Deprecated
     @ApiVendorHeaders
     @RequestMapping(value = "/ext/inbound/ig/callback/{lane}", method = RequestMethod.POST)
-    public InstagramHookRequest onReceiveMessageLane(@RequestBody InstagramHookRequest request,
-	    @PathVariable String lane) throws InterruptedException {
+    public FacebookHookRequest onReceiveMessageLane(@RequestBody FacebookHookRequest request, @PathVariable String lane)
+	    throws InterruptedException {
 	request.getEntry().forEach(pageEntry -> {
 	    pageEntry.getMessaging().forEach(m -> {
 		InboxMessage event = instaConnector.toInboxMessage(m, pageEntry.getId());

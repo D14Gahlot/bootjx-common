@@ -1,11 +1,11 @@
-package com.boot.jx.postman.ig;
+package com.boot.jx.postman.fb;
 
 import java.io.Serializable;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class InstagramPayload implements Serializable {
+public class FacebookPayload implements Serializable {
     private static final long serialVersionUID = 260395496229953084L;
     private String url;
     private String title;
@@ -19,10 +19,10 @@ public class InstagramPayload implements Serializable {
     }
 
     public String getTitle() {
-        return title;
+	return title;
     }
 
     public void setTitle(String title) {
-        this.title = title;
+	this.title = title;
     }
 }

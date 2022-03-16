@@ -3,7 +3,6 @@ package com.boot.jx.postman.fb;
 import java.io.Serializable;
 import java.util.Map;
 
-import com.boot.jx.postman.ig.InstagramPostback;
 import com.boot.utils.ArgUtil;
 
 public class FacebookMessaging implements Serializable {
@@ -14,6 +13,7 @@ public class FacebookMessaging implements Serializable {
     private FacebookMessage message;
     private FacebookPostback postBack;
     private Map<String, Object> read;
+    
 
     public Map<String, String> getSender() {
 	return sender;
@@ -40,7 +40,7 @@ public class FacebookMessaging implements Serializable {
     }
 
     public FacebookMessage getMessage() {
-	return message;
+    	return message;
     }
 
     public void setMessage(FacebookMessage message) {
@@ -67,6 +67,15 @@ public class FacebookMessaging implements Serializable {
 	if (this.read == null) {
 	    return 0L;
 	}
-	return ArgUtil.parseAsLong(this.read.get("watermark"));
+	if (ArgUtil.is(read.get("watermark"))) {
+		return ArgUtil.parseAsLong(this.read.get("watermark"));
+	}
+	return 0L;
+    }
+    
+    
+    
+    public boolean isValidCustomerMessage() {
+    	return (ArgUtil.is(this.message) && !this.message.isIs_echo());
     }
 }

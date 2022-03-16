@@ -204,6 +204,10 @@ public class InboxMessage implements Serializable, IMessageExtended, LogMessage 
     }
 
     public Map<String, Object> getReply() {
+	return this.reply;
+    }
+
+    public Map<String, Object> reply() {
 	if (reply == null) {
 	    this.reply = new HashMap<String, Object>();
 	}

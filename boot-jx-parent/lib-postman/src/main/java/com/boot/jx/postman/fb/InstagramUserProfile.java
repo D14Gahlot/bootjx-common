@@ -1,4 +1,4 @@
-package com.boot.jx.postman.ig;
+package com.boot.jx.postman.fb;
 
 import java.io.Serializable;
 
