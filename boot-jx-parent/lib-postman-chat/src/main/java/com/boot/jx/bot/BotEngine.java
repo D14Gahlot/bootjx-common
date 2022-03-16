@@ -109,7 +109,7 @@ public class BotEngine {
 		    methodWrapper.setController(controllerName);
 		    methodWrapper.setKey(key);
 		    methodWrapper.setLane(botControllerAnnot.lane());
-		    methodWrapper.setTenant(botControllerAnnot.tenant());
+		    methodWrapper.setTenant(botControllerAnnot.code());
 
 		    // for (String event : events) {
 		    eventToMethodsList.add(methodWrapper);
@@ -146,14 +146,15 @@ public class BotEngine {
 	String text = ArgUtil.nonEmpty(event.getMessage(), Constants.BLANK).toUpperCase();
 	StringMatcher matcher = new StringMatcher(text);
 
-	String tenant = AppContextUtil.getTenant();
 	ClientApp app = messageContext.clientApp();
+
+	String botCode = pmEnvironment.keyEntry("postman.bot.code").asString(AppContextUtil.getTenant());
 
 	String botFlow = ArgUtil.parseAsString(app.props().get("flow"));
 	if (ArgUtil.is(botFlow)) {
-	    botFlow = tenant + "_" + botFlow;
+	    botFlow = botCode + "_" + botFlow;
 	} else {
-	    botFlow = tenant;
+	    botFlow = botCode;
 	}
 
 	for (MethodWrapper methodWrapper : eventToMethodsList) {

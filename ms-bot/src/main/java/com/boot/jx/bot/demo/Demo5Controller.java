@@ -23,7 +23,7 @@ import com.boot.model.SafeKeyHashMap;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.StringUtils.StringMatcher;
 
-@BotController(name = "DemoBot", tenant = { "chakli" })
+@BotController(name = "DemoBot", code = { "chakli" })
 public class Demo5Controller extends CommonBotController {
 	
 	public static final String REPLY_ID = "reply_id";	

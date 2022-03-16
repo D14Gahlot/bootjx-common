@@ -22,7 +22,7 @@ import com.boot.utils.ArgUtil;
 import com.boot.utils.StringUtils;
 import com.boot.utils.StringUtils.StringMatcher;
 
-@BotController(name = "DemoBot", tenant = { "app", "demo", "sandbox" })
+@BotController(name = "DemoBot", code = { "app", "demo", "sandbox" })
 public class Demo4Controller extends CommonBotController {
 
     private static final String CURRENT_DEMO = "current_menu";
