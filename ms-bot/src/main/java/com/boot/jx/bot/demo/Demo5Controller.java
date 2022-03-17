@@ -142,7 +142,6 @@ public class Demo5Controller extends CommonBotController {
 			case "previous_member":
 			case "previous member":	
 			case "مشترك سابق":
-			    reply(new OutboxMessage().template("dc_cs_to_contact"));
 			    this.transferToAgent(inboxMessage, matcher);
 			    break; 
 			case "*":
@@ -174,8 +173,7 @@ public class Demo5Controller extends CommonBotController {
 			case "change_membership":
 			case "change membership":	
 			case "تغيير نوع الاشتراك":
-				  reply(new OutboxMessage().template("dc_cs_to_contact"));
-				  this.transferToAgent(inboxMessage, matcher);
+				this.transferToAgent(inboxMessage, matcher);
 			    break;
 			case "*":
 				this.goToMainMenu(inboxMessage, matcher);
