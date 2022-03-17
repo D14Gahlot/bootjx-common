@@ -14,6 +14,7 @@ import com.boot.jx.api.ApiFieldError;
 import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.dict.FileType;
 import com.boot.jx.exception.ApiHttpExceptions.ApiHttpException;
+import com.boot.jx.exception.ApiHttpExceptions.ApiHttpServerException;
 import com.boot.jx.postman.PostManException;
 import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.MessagePrompt;
@@ -87,17 +88,20 @@ public class WA360Client {
 		    } else if (pending == 10) {
 			newButtons = buttons.subList(start, end + 1);
 		    } else {
-			   newButtons = buttons.subList(start, end);
-				if(outboxMessage.options().containsKey("more_option_title")){
-				newButtons.add(new TmplElement().label(outboxMessage.options().get("more_option_title").toString()).name(prompt.toString()));
-				}else {
-					newButtons.add(new TmplElement().label("More Options").name(prompt.toString()));
-				}
+			newButtons = buttons.subList(start, end);
+			if (outboxMessage.options().containsKey("more_option_title")) {
+			    newButtons.add(
+				    new TmplElement().label(outboxMessage.options().get("more_option_title").toString())
+					    .name(prompt.toString()));
+			} else {
+			    newButtons.add(new TmplElement().label("More Options").name(prompt.toString()));
+			}
 		    }
-		    if(outboxMessage.options().containsKey("list_option_title")){
-		    	outboxMessage.options().put("list_option_title", outboxMessage.options().get("list_option_title").toString() + (prompt.pageIndex + 1));
-		    }else {
-		    	outboxMessage.options().put("list_option_title", "List " + (prompt.pageIndex + 1));
+		    if (outboxMessage.options().containsKey("list_option_title")) {
+			outboxMessage.options().put("list_option_title",
+				outboxMessage.options().get("list_option_title").toString() + (prompt.pageIndex + 1));
+		    } else {
+			outboxMessage.options().put("list_option_title", "List " + (prompt.pageIndex + 1));
 		    }
 		    MapModel resp = sendList(channelConfig, outboxMessage, newButtons);
 		    msgIds.add(getMessageId(resp));
@@ -301,10 +305,10 @@ public class WA360Client {
 	    Map<String, Object> row = new HashMap<String, Object>();
 	    row.put("id", button.getName());
 	    row.put("title", button.getLabel());
-	    //row.put("description", button.getType());
-	     if(ArgUtil.is(button.getDesc())) {
-	        row.put("description", button.getDesc());
-	        }
+	    // row.put("description", button.getType());
+	    if (ArgUtil.is(button.getDesc())) {
+		row.put("description", button.getDesc());
+	    }
 	    rows.add(row);
 
 	    if (rows.size() > 9) {
@@ -375,6 +379,9 @@ public class WA360Client {
 		    .header(WA360Constants.D360_API_KEY, channelConfig.getWa360d().getApiKey()).post(req.toMap())
 		    .asMapModel();
 	    return resp;
+	} catch (ApiHttpServerException e) {
+	    return MapModel.from(e.getResponse().getBody()).put(OutBoundWrapperPaths.RESPONSE_ERROR_CODE,
+		    e.getHttpStatus().value());
 	} catch (ApiHttpException e) {
 	    return MapModel.from(e.getResponse().getBody());
 	}
@@ -388,6 +395,9 @@ public class WA360Client {
 			    .put(OutBoundWrapperPaths.FETCH_CONTACTS_DETAILS, contact).toMap())
 		    .asMapModel();
 	    return resp.path(OutBoundWrapperPaths.FETCH_CONTACTS_DETAILS).asMapModel();
+	} catch (ApiHttpServerException e) {
+	    return MapModel.from(e.getResponse().getBody()).put(OutBoundWrapperPaths.RESPONSE_ERROR_CODE,
+		    e.getHttpStatus().value());
 	} catch (ApiHttpException e) {
 	    return MapModel.from(e.getResponse().getBody());
 	}
