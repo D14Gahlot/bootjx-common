@@ -10,6 +10,7 @@ import com.boot.jx.postman.ClientApp;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.MessageReport;
+import com.boot.jx.postman.model.PMArgs;
 import com.boot.jx.postman.model.ext.InBoundEvent;
 
 @Component
@@ -31,8 +32,8 @@ public class BotInBoundHandler extends DefaultChatBoundHandler {
     }
 
     @Override
-    public void onSessionRoute(InBoundEvent inBoundEvent, ChatSessionDoc sessionDoc) {
-	super.onSessionRoute(inBoundEvent, sessionDoc);
+    public void onSessionRoute(InBoundEvent inBoundEvent, ChatSessionDoc sessionDoc, PMArgs pmArgs) {
+	super.onSessionRoute(inBoundEvent, sessionDoc, pmArgs);
     }
 
 }

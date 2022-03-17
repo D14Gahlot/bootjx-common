@@ -14,7 +14,7 @@ import com.boot.jx.postman.doc.ChatPromise.State;
 import com.boot.jx.postman.manager.ChatSessionManager;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.OutboxMessage;
-import com.boot.jx.postman.model.PMParams;
+import com.boot.jx.postman.model.PMArgs;
 import com.boot.jx.postman.model.ext.InBoundEvent;
 import com.boot.jx.postman.store.SessionStore;
 import com.boot.model.MapModel.NodeEntry;
@@ -70,12 +70,12 @@ public class ChatController {
 
     public NodeEntry<InBoundEvent> assignToAgent(String deptCode) {
 	InboxMessage inboxMessage = chatContext.getInboxMessage();
-	PMParams params = new PMParams();
+	PMArgs params = new PMArgs();
 	if (ArgUtil.is(inboxMessage)) {
 	    params.assignToDeptCode(deptCode).contact(inboxMessage.contact()).sessionId(inboxMessage.getSessionId());
 	    inboxMessage.session().setDept(deptCode);
 	}
-	return chatSessionService.assignSessionToAgent(params);
+	return chatSessionService.assignSessionToAgent(chatContext.session().getDoc(), params);
     }
 
     public NodeEntry<InBoundEvent> assignToAgent() {
@@ -158,7 +158,7 @@ public class ChatController {
     }
 
     public void routeSession(String queueCode) {
-	chatSessionService.routeSession(chatContext.session().getDoc(), queueCode, null);
+	chatSessionService.routeSession(chatContext.session().getDoc(), new PMArgs().assignToQueueCode(queueCode));
     }
 
 }

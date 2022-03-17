@@ -8,18 +8,12 @@ import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.dto.ChatMessageDTO;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.OutboxMessage;
-import com.boot.utils.ArgUtil;
 
 @Component
 public class AgentService {
 
     @Autowired(required = false)
     private AgentChatHandler agentChatHandler;
-
-    @Deprecated
-    public boolean onMessageSupported(InboxMessage inboxMessage) {
-	return (ArgUtil.is(agentChatHandler) && agentChatHandler.onMessageSupported(inboxMessage));
-    }
 
     public InboxMessage onMessage(InboxMessage inboxMessage) {
 	return agentChatHandler.onMessageReceive(inboxMessage);

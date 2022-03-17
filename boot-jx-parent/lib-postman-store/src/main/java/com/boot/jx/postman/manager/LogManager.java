@@ -12,7 +12,7 @@ import com.boot.jx.postman.model.MessageDefinitions.IMessageExtended;
 import com.boot.jx.postman.model.MessageDefinitions.LogMessage;
 import com.boot.jx.postman.model.MessageDefinitions.SessionMessage;
 import com.boot.jx.postman.model.OutboxMessage;
-import com.boot.jx.postman.model.PMParams;
+import com.boot.jx.postman.model.PMArgs;
 import com.boot.jx.postman.model.ext.InBoundEvent;
 import com.boot.jx.postman.store.MessageStore;
 import com.boot.jx.postman.store.MessageStore.EVENTS;

@@ -20,6 +20,7 @@ import com.boot.jx.agent.AgentSessionService;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.api.ListRequestModel;
 import com.boot.jx.aws.AWSFileStore;
+import com.boot.jx.chat.ChatSessionFactory;
 import com.boot.jx.common.config.ConfigConstants;
 import com.boot.jx.common.doc.AgentDoc;
 import com.boot.jx.common.doc.AgentSessionDoc;
@@ -37,7 +38,6 @@ import com.boot.jx.postman.doc.QuickLabel;
 import com.boot.jx.postman.dto.ChatMessageDTO;
 import com.boot.jx.postman.dto.ChatSessionDTO;
 import com.boot.jx.postman.dto.ContactDTO;
-import com.boot.jx.postman.manager.ChatSessionManager;
 import com.boot.jx.postman.manager.LogManager;
 import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.OutboxMessage;
@@ -56,7 +56,7 @@ public class MsgController {
     private SessionStore sessionStore;
 
     @Autowired
-    ChatSessionManager chatSessionManager;
+    private ChatSessionFactory chatSessionFactory;
 
     @Autowired
     private AgentSessionBean agentSession;
@@ -90,7 +90,7 @@ public class MsgController {
     public ApiResponse<ChatMessageDTO, Object> sendSessionMessage(@RequestBody OutboxMessage outboxMessage)
 	    throws InterruptedException {
 
-	ChatSessionDoc sessionDoc = sessionStore.createSession(outboxMessage);
+	ChatSessionDoc sessionDoc = chatSessionFactory.linkSession(outboxMessage);
 
 	// Session Stuff Logging <
 	if (ArgUtil.isEmpty(sessionDoc.getAssignedToAgent())

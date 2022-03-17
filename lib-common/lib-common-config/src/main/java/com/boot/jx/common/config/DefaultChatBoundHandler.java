@@ -28,7 +28,7 @@ import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.Message.Status;
 import com.boot.jx.postman.model.MessageReport;
 import com.boot.jx.postman.model.OutboxMessage;
-import com.boot.jx.postman.model.PMParams;
+import com.boot.jx.postman.model.PMArgs;
 import com.boot.jx.postman.model.ext.CommonMsgText.InBoundMsgText;
 import com.boot.jx.postman.model.ext.InBoundContact;
 import com.boot.jx.postman.model.ext.InBoundEvent;
@@ -277,18 +277,14 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
     }
 
     @Override
-    public NodeEntry<InBoundEvent> assignSessionToAgent(PMParams params) {
-	return new NodeEntry<InBoundEvent>().value(chatClient.assignToAgentV2(params));
+    public NodeEntry<InBoundEvent> assignSessionToAgent(PMArgs params, ChatSessionDoc session) {
+	return new NodeEntry<InBoundEvent>().value(chatClient.assignToAgentV2(new PMArgs()
+		.sessionId(session.getSessionId()).contact(session.contact())
+		.assignToDeptCode(params.getAssignToDeptCode()).assignToAgentCode(params.getAssignToAgentCode())));
     }
 
     @Override
-    public NodeEntry<InBoundEvent> assignSessionToAgent(ChatSessionDoc session, String deptCode, String agentCode) {
-	return assignSessionToAgent(new PMParams().sessionId(session.getSessionId()).contact(session.contact())
-		.assignToDeptCode(deptCode).assignToAgentCode(agentCode));
-    }
-
-    @Override
-    public void onSessionRoute(InBoundEvent event, ChatSessionDoc sessionDoc) {
+    public void onSessionRoute(InBoundEvent event, ChatSessionDoc sessionDoc, PMArgs pmArgs) {
 
 	if (InBoundEvent.SESSION_ROUTED.equals(event.eventCode)) {
 	    ClientApp defaultClient = context().clientApp(event.sessionRouted.targetQueue, null);
@@ -299,7 +295,12 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 		    return;
 		} else if (CHAT_MODE.AGENT.equals(appType.getMode())) {
 		    MapModel props = new MapModel(defaultClient.props());
-		    assignSessionToAgent(sessionDoc, props.getString("deptCode"), props.getString("agentCode"));
+		    assignSessionToAgent(new PMArgs()
+			    .assignToDeptCode(
+				    ArgUtil.nonEmpty(pmArgs.getAssignToDeptCode(), props.getString("deptCode")))
+			    .assignToAgentCode(
+				    ArgUtil.nonEmpty(pmArgs.getAssignToAgentCode(), props.getString("agentCode"))),
+			    sessionDoc);
 		    if (APP_TYPE.MITEL.equals(appType)) {
 			try {
 			    mitelRouting(sessionDoc, defaultClient, 1);

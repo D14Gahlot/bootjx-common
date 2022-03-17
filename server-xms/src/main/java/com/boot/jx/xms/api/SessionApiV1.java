@@ -14,6 +14,7 @@ import com.boot.jx.common.store.ChatArchiveBuilder;
 import com.boot.jx.inbound.InBound.InBoundHandler;
 import com.boot.jx.postman.dto.ChatMessageDTO;
 import com.boot.jx.postman.dto.ChatSessionDTO;
+import com.boot.jx.postman.model.PMArgs;
 import com.boot.jx.postman.model.ext.InBoundEvent;
 import com.boot.jx.xms.XmsConstants;
 import com.boot.jx.xms.XmsConstants.XMSClientAuth;
@@ -61,7 +62,8 @@ public class SessionApiV1 {
     @XMSClientAuth
     @RequestMapping(value = "/api/v1/session/routing", method = { RequestMethod.POST })
     public ApiResultsMetaCompactResponse<InBoundEvent, Object> sessionRouting(@RequestBody SessionQueueAssignment req) {
-	InBoundEvent event = chatSessionService.routeSession(req.sessionId, req.queue, req.params);
+	InBoundEvent event = chatSessionService.routeSession(req.sessionId,
+		new PMArgs().assignToQueueCode(req.queue).params(req.params));
 	return ApiResponse.buildResults(event);
     }
 

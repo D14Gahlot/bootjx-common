@@ -8,9 +8,11 @@ import javax.annotation.PostConstruct;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
+import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.model.TagDocument;
 import com.boot.utils.ArgUtil;
 
@@ -22,100 +24,113 @@ import edu.stanford.nlp.pipeline.StanfordCoreNLP;
 @ConditionalOnProperty(value = "postman.nlp.corenlp.enabled", havingValue = "true")
 public class CoreNLPService {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(CoreNLPService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(CoreNLPService.class);
 
-	StanfordCoreNLP sentimentPipeline;
+    StanfordCoreNLP sentimentPipeline;
 
-	StanfordCoreNLP tokenizerPipeline;
+    StanfordCoreNLP tokenizerPipeline;
 
-	StanfordCoreNLP nerPipeline;
+    StanfordCoreNLP nerPipeline;
 
-	private boolean initd;
+    private boolean initd;
 
-	@PostConstruct
-	public void init() {
-		try {
-			// Sentiments
-			Properties sentimentProps = new Properties();
-			sentimentProps.setProperty("annotators", "parse, sentiment");
-			sentimentProps.setProperty("parse.binaryTrees", "true");
-			sentimentProps.setProperty("enforceRequirements", "false");
-			this.sentimentPipeline = new StanfordCoreNLP(sentimentProps);
+    @Autowired
+    PMEnvironment pmEnvironment;
 
-			// Tokenizer
-			Properties tokenizerProps = new Properties();
-			tokenizerProps.setProperty("annotators", "tokenize ssplit");
-			this.tokenizerPipeline = new StanfordCoreNLP(tokenizerProps);
+    @PostConstruct
+    public void init() {
+	try {
+	    // Sentiments
+	    Properties sentimentProps = new Properties();
+	    sentimentProps.setProperty("annotators", "parse, sentiment");
+	    sentimentProps.setProperty("parse.binaryTrees", "true");
+	    sentimentProps.setProperty("enforceRequirements", "false");
+	    this.sentimentPipeline = new StanfordCoreNLP(sentimentProps);
 
-			Properties nerProps = new Properties();
-			nerProps.setProperty("annotators", "tokenize,ssplit,pos,lemma,ner");
+	    // Tokenizer
+	    Properties tokenizerProps = new Properties();
+	    tokenizerProps.setProperty("annotators", "tokenize ssplit");
+	    this.tokenizerPipeline = new StanfordCoreNLP(tokenizerProps);
 
-			this.nerPipeline = new StanfordCoreNLP(nerProps);
-			this.initd = true;
+	    Properties nerProps = new Properties();
+	    nerProps.setProperty("annotators", "tokenize,ssplit,pos,lemma,ner");
 
-		} catch (Throwable e) {
-			LOGGER.error("CoreNLPService NOT Working", e);
-		}
+	    this.nerPipeline = new StanfordCoreNLP(nerProps);
+	    this.initd = true;
 
+	} catch (Throwable e) {
+	    LOGGER.error("CoreNLPService NOT Working", e);
 	}
 
-	public TagDocument addTags(String line, TagDocument tagDocument) {
+    }
 
-		if (!initd) {
-			return tagDocument;
-		}
+    public TagDocument addTags(String line, TagDocument tagDocument) {
 
-		try {
-
-			LOGGER.debug("SENTIMENT<");
-			CoreDocument sentimentDoc = this.tokenizerPipeline.processToCoreDocument(line);
-			sentimentPipeline.annotate(sentimentDoc);
-			// normal output
-			List<String> sencs = sentimentDoc.sentences().stream().map(mapper -> mapper.sentiment())
-					.collect(Collectors.toCollection(() -> tagDocument.sentiments()));
-			LOGGER.debug("SENTIMENT>");
-
-			if (ArgUtil.is(line)) {
-				// return;
-			}
-
-			LOGGER.debug("TAGS<");
-			CoreDocument doc = nerPipeline.processToCoreDocument(line);
-			// pipeline2.annotate(doc);
-
-			if (ArgUtil.is(doc.entityMentions())) {
-				for (CoreEntityMention em : doc.entityMentions()) {
-					switch (em.entityType()) {
-					case "PERSON":
-						tagDocument.persons().add(em.text());
-						break;
-					case "COUNTRY":
-						tagDocument.countries().add(em.text());
-						break;
-					case "CITY":
-						tagDocument.cities().add(em.text());
-						break;
-					default:
-						break;
-					}
-				}
-			}
-			LOGGER.debug("TAGS>");
-
-		} catch (Exception e) {
-			LOGGER.error("Error While Adding Tag", e);
-		}
-
-		return tagDocument;
+	if (!initd || !pmEnvironment.keyEntry("postman.nlp.corenlp.enabled").asBoolean()) {
+	    return tagDocument;
 	}
-	/**
-	 * public static void main(String[] args) throws FileNotFoundException,
-	 * IOException { CoreNLPService service = new CoreNLPService(); service.init();
-	 * service.addTags("Amazingly grateful beautiful friends are fulfilling an
-	 * incredibly joyful accomplishment." + " What an truly terrible idea. John will
-	 * kill you");
-	 * 
-	 * service.addTags("John is 26 years old. His best friend's " + "name is Lalit.
-	 * He has a sister named Penny. And he lives in Mumbai india maharashtra"); }
-	 **/
+
+	boolean detectSentiment = pmEnvironment.keyEntry("postman.nlp.detect.sentiment").asBoolean();
+	boolean detectPersons = pmEnvironment.keyEntry("postman.nlp.detect.persons").asBoolean();
+	boolean detectCountries = pmEnvironment.keyEntry("postman.nlp.detect.countries").asBoolean();
+	boolean detectCities = pmEnvironment.keyEntry("postman.nlp.detect.cities").asBoolean();
+
+	try {
+
+	    if (detectSentiment) {
+		LOGGER.debug("SENTIMENT<");
+		CoreDocument sentimentDoc = this.tokenizerPipeline.processToCoreDocument(line);
+		sentimentPipeline.annotate(sentimentDoc);
+		// normal output
+		List<String> sencs = sentimentDoc.sentences().stream().map(mapper -> mapper.sentiment())
+			.collect(Collectors.toCollection(() -> tagDocument.sentiments()));
+		LOGGER.debug("SENTIMENT>");
+	    }
+
+	    if (ArgUtil.is(line)) {
+		// return;
+	    }
+
+	    LOGGER.debug("TAGS<");
+	    CoreDocument doc = nerPipeline.processToCoreDocument(line);
+	    // pipeline2.annotate(doc);
+
+	    if (ArgUtil.is(doc.entityMentions()) && (detectPersons || detectCountries || detectCities)) {
+		for (CoreEntityMention em : doc.entityMentions()) {
+		    switch (em.entityType()) {
+		    case "PERSON":
+			if (detectPersons)
+			    tagDocument.persons().add(em.text());
+			break;
+		    case "COUNTRY":
+			if (detectCountries)
+			    tagDocument.countries().add(em.text());
+			break;
+		    case "CITY":
+			if (detectCities)
+			    tagDocument.cities().add(em.text());
+			break;
+		    default:
+			break;
+		    }
+		}
+	    }
+	    LOGGER.debug("TAGS>");
+
+	} catch (Exception e) {
+	    LOGGER.error("Error While Adding Tag", e);
+	}
+
+	return tagDocument;
+    }
+    /**
+     * public static void main(String[] args) throws FileNotFoundException,
+     * IOException { CoreNLPService service = new CoreNLPService(); service.init();
+     * service.addTags("Amazingly grateful beautiful friends are fulfilling an
+     * incredibly joyful accomplishment." + " What an truly terrible idea. John will
+     * kill you");
+     * 
+     * service.addTags("John is 26 years old. His best friend's " + "name is Lalit.
+     * He has a sister named Penny. And he lives in Mumbai india maharashtra"); }
+     **/
 }
