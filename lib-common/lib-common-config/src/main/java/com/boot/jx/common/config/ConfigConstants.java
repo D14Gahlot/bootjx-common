@@ -113,6 +113,9 @@ public class ConfigConstants {
 			new ConfigOption(TimeUtils.toMillis("3w")).label("+3Weeks"))
 		.defaultValue(0).group(GROUP_AGENT)),
 
+	POSTMAN_AGENT_TAB_ORG(new ConfigMeta("Agent can see Other Teams Chats", "postman.agent.tab.org")
+		.desc("Enables Other tab in Agent Panel").optionsOnOff().group(GROUP_AGENT)),
+
 	POSTMAN_AGENT_TAB_HISTORY_LAZY(new ConfigMeta("Lazy Load History", "postman.agent.tab.history.lazy")
 		.desc("Loads History Lazily").optionsOnOff().group(GROUP_AGENT).hidden()),
 
