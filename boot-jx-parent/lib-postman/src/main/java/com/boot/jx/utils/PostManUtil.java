@@ -16,7 +16,7 @@ import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.MessageDefinitions.Contactable;
 import com.boot.jx.postman.model.MessageDefinitions.IMessage;
 import com.boot.jx.postman.model.OutboxMessage;
-import com.boot.jx.postman.model.PMParams;
+import com.boot.jx.postman.model.PMArgs;
 import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CryptoUtil;
@@ -118,7 +118,7 @@ public class PostManUtil {
 	return ArgUtil.areEqual(inboxMessage.getChecksum(), generateCheckSum(inboxMessage));
     }
 
-    public static String generateCheckSum(PMParams params) {
+    public static String generateCheckSum(PMArgs params) {
 	String checkString = params.contact().getContactId() + params.getSessionId();
 	try {
 	    return CryptoUtil.getMD5Hash(checkString);
@@ -128,7 +128,7 @@ public class PostManUtil {
 	}
     }
 
-    public static boolean hasValidCheckSum(PMParams params) {
+    public static boolean hasValidCheckSum(PMArgs params) {
 	return ArgUtil.areEqual(params.getChecksum(), generateCheckSum(params));
     }
 

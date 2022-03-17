@@ -3,7 +3,7 @@ package com.boot.jx.agent;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.boot.jx.inbound.InBound.SessionAssginHandler;
-import com.boot.jx.postman.model.PMParams;
+import com.boot.jx.postman.model.PMArgs;
 import com.boot.jx.postman.model.ext.InBoundEvent;
 import com.boot.jx.postman.store.SessionStore;
 import com.boot.model.MapModel.NodeEntry;
@@ -17,7 +17,7 @@ public class AssignAgentHandler implements SessionAssginHandler {
     private AgentChatHandlerImpl agentChatHandlerImpl;
 
     @Override
-    public NodeEntry<InBoundEvent> doAssignAgent(PMParams params) {
+    public NodeEntry<InBoundEvent> doAssignAgent(PMArgs params) {
 //	NodeEntry<InBoundEvent> eventEntry = new NodeEntry<InBoundEvent>();
 //	InBoundEvent agentAssignEvent = new InBoundEvent();
 //	ChatSessionDoc chatSessionDoc = sessionStore.getSession(params.getSessionId());

@@ -13,7 +13,7 @@ import com.boot.jx.postman.PostManException;
 import com.boot.jx.postman.dto.ChatUserProfileDTO;
 import com.boot.jx.postman.dto.ChatUserProfileDTO.ChatUserProfileRequest;
 import com.boot.jx.postman.model.InboxMessage;
-import com.boot.jx.postman.model.PMParams;
+import com.boot.jx.postman.model.PMArgs;
 import com.boot.jx.postman.model.ext.InBoundEvent;
 import com.boot.jx.rest.RestService;
 import com.boot.jx.utils.PostManUtil;
@@ -67,7 +67,7 @@ public class ChatClient {
 	}
     }
 
-    public InBoundEvent assignToAgentV2(PMParams params) {
+    public InBoundEvent assignToAgentV2(PMArgs params) {
 	LOGGER.debug("Assign InboxMessage Session to other Agent ");
 	if (ArgUtil.is(pmCommonConfig.getAgentUrl())) {
 	    params.setChecksum(PostManUtil.generateCheckSum(params));

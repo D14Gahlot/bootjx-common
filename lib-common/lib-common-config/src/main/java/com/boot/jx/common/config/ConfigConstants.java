@@ -54,6 +54,10 @@ public class ConfigConstants {
 		.desc("Inbound messages will be forwarded to this Queue by default")
 		.optionsSource("getx:/api/options/inbound_queue").optionsKey("code").optionsLabel("code")),
 
+	POSTMAN_CHAT_AGENT_QUEUE(
+		new ConfigMeta("Default Agent Queue", "postman.chat.agent.queue").desc("Default Agent App")
+			.optionsSource("getx:/api/options/agent_queue").optionsKey("code").optionsLabel("code")),
+
 	POSTMAN_CHAT_CHANNEL_SANDBOX(new ConfigMeta("Enable Sandbox Channels", "postman.chat.channel.sandbox")
 		.desc("Sandbox channels are preconfigured communication channels").optionsOnOff()),
 
@@ -104,7 +108,9 @@ public class ConfigConstants {
 		.options(new ConfigOption(0).label("OFF"), new ConfigOption(TimeUtils.toMillis("1d")).label("+1Days"),
 			new ConfigOption(TimeUtils.toMillis("3d")).label("+3Days"),
 			new ConfigOption(TimeUtils.toMillis("5d")).label("+5Days"),
-			new ConfigOption(TimeUtils.toMillis("7d")).label("+7Days"))
+			new ConfigOption(TimeUtils.toMillis("7d")).label("+7Days"),
+			new ConfigOption(TimeUtils.toMillis("2w")).label("+2Weeks"),
+			new ConfigOption(TimeUtils.toMillis("3w")).label("+3Weeks"))
 		.defaultValue(0).group(GROUP_AGENT)),
 
 	POSTMAN_AGENT_TAB_HISTORY_LAZY(new ConfigMeta("Lazy Load History", "postman.agent.tab.history.lazy")
