@@ -120,15 +120,15 @@ public class ConfigConstants {
 
 	POSTMAN_AGENT_CHAT_AUTOREPLY_TALK2AGENT(new ConfigMeta("Message to customer while chat is transferred to agent",
 		"postman.agent.chat.autoreply.talk2agent").optionsSource("getx:/api/tmpl/hsm").optionsKey("code")
-			.optionsLabel("name").group(GROUP_AGENT)),
+			.optionsLabel("desc").group(GROUP_AGENT)),
 
 	POSTMAN_AGENT_CHAT_AUTOREPLY_RESOLVED(new ConfigMeta("Message to customer when chat is resolevd by agent",
 		"postman.agent.chat.autoreply.resolved").optionsSource("getx:/api/tmpl/hsm").optionsKey("code")
-			.optionsLabel("name").group(GROUP_AGENT)),
+			.optionsLabel("desc").group(GROUP_AGENT)),
 
 	POSTMAN_AGENT_CHAT_AUTOREPLY_NOAGENT(
 		new ConfigMeta("Message to customer when no agent avaialble", "postman.agent.chat.autoreply.noagent")
-			.optionsSource("getx:/api/tmpl/hsm").optionsKey("code").optionsLabel("name")
+			.optionsSource("getx:/api/tmpl/hsm").optionsKey("code").optionsLabel("desc")
 			.group(GROUP_AGENT)),
 
 	// Ends here
