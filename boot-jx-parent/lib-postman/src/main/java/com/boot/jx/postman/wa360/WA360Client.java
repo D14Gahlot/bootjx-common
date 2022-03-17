@@ -406,7 +406,7 @@ public class WA360Client {
     private String getMessageId(MapModel resp) {
 	String id = resp.entry(OutBoundWrapperPaths.RESPONSE_MSG_ID).asString();
 	String errorCode = resp.entry(OutBoundWrapperPaths.RESPONSE_ERROR_CODE).asString();
-	if (ArgUtil.is(errorCode)) {
+	if (ArgUtil.is(errorCode) || !ArgUtil.is(id)) {
 	    String errorTitle = resp.entry(OutBoundWrapperPaths.RESPONSE_ERROR_TITLE).asString();
 	    String errorDetails = resp.entry(OutBoundWrapperPaths.RESPONSE_ERROR_DETAILS).asString();
 
