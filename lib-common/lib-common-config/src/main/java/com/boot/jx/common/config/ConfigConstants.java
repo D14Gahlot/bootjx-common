@@ -95,14 +95,13 @@ public class ConfigConstants {
 			PMConstants.CHAT_SESSION_STICKY.STRICT)
 		.defaultValue(PMConstants.CHAT_SESSION_STICKY.NONE).group(GROUP_AGENT)),
 
-	POSTMAN_UI_BETA(new ConfigMeta("Enable Beta UI", "postman.ui.beta").optionsOnOff()
-		.defaultValue(ConfigOption.OFF).group(GROUP_AGENT)),
-
 	POSTMAN_AGENT_SCHEME_COLOR(new ConfigMeta("Agent Panel Color Scheme", "postman.agent.scheme.color")
 		.inputType(OPTIONS_TYPE.COLOR).defaultValue("#4267b2").group(GROUP_AGENT)),
 
-	POSTMAN_AGENT_SCHEME2_COLOR(new ConfigMeta("Agent Color Scheme 2", "postman.agent.scheme2.color")
-		.inputType(OPTIONS_TYPE.COLOR_PALLETE).defaultValue(new ConfigMeta.ColorPalette()).group(GROUP_AGENT)),
+//	POSTMAN_UI_BETA(new ConfigMeta("Enable Beta UI", "postman.ui.beta").optionsOnOff()
+//		.defaultValue(ConfigOption.OFF).group(GROUP_AGENT)),
+//	POSTMAN_AGENT_SCHEME2_COLOR(new ConfigMeta("Agent Color Scheme 2", "postman.agent.scheme2.color")
+//		.inputType(OPTIONS_TYPE.COLOR_PALLETE).defaultValue(new ConfigMeta.ColorPalette()).group(GROUP_AGENT)),
 
 	POSTMAN_AGENT_TAB_HISTORY_PERIOD(new ConfigMeta("Show History Period", "postman.agent.tab.history.period")
 		.options(new ConfigOption(0).label("OFF"), new ConfigOption(TimeUtils.toMillis("1d")).label("+1Days"),
