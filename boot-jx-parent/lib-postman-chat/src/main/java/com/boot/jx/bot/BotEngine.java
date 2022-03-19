@@ -146,28 +146,42 @@ public class BotEngine {
 	String text = ArgUtil.nonEmpty(event.getMessage(), Constants.BLANK).toUpperCase();
 	StringMatcher matcher = new StringMatcher(text);
 
-	String botCode = pmEnvironment.keyEntry("postman.bot.code").asString(AppContextUtil.getTenant());
+	String botCodePrefix = pmEnvironment.keyEntry("postman.bot.code").asString(AppContextUtil.getTenant());
 
 	ClientApp app = messageContext.clientApp();
 
-	String botFlow = botCode;
+	String botFlow = botCodePrefix;
 	if (ArgUtil.is(app)) {
-	    botFlow = ArgUtil.parseAsString(app.props().get("flow"));
+	    botFlow = ArgUtil.parseAsString(app.props().get("flow"), app.getQueue());
 	    if (ArgUtil.is(botFlow)) {
-		botFlow = botCode + "_" + botFlow;
-	    } else {
-		botFlow = botCode;
+		botFlow = botCodePrefix + "_" + botFlow;
+	    }
+	    for (MethodWrapper methodWrapper : eventToMethodsList) {
+		Pattern[] patterns = methodWrapper.getPattern();
+		if (patterns.length > 0) {
+		    for (int i = 0; i < patterns.length; i++) {
+			if (ArgUtil.isEqual(botFlow, methodWrapper.getBotCode())) {
+			    if (matcher.isMatch(patterns[i]) && ArgUtil.is(ArgUtil.parseAsString(patterns[i]))) {
+				event.setMatcher(matcher);
+				return methodWrapper;
+			    }
+			}
+		    }
+		}
 	    }
 	}
 
-	for (MethodWrapper methodWrapper : eventToMethodsList) {
-	    Pattern[] patterns = methodWrapper.getPattern();
-	    if (patterns.length > 0) {
-		for (int i = 0; i < patterns.length; i++) {
-		    if (ArgUtil.isEqual(botFlow, methodWrapper.getBotCode())) {
-			if (matcher.isMatch(patterns[i]) && ArgUtil.is(ArgUtil.parseAsString(patterns[i]))) {
-			    event.setMatcher(matcher);
-			    return methodWrapper;
+	// DO NOT USE ELSE CONDITION HERE, this is FALLBACK to botlow
+	if (!ArgUtil.areEqual(botFlow, botCodePrefix)) {
+	    for (MethodWrapper methodWrapper : eventToMethodsList) {
+		Pattern[] patterns = methodWrapper.getPattern();
+		if (patterns.length > 0) {
+		    for (int i = 0; i < patterns.length; i++) {
+			if (ArgUtil.isEqual(botCodePrefix, methodWrapper.getBotCode())) {
+			    if (matcher.isMatch(patterns[i]) && ArgUtil.is(ArgUtil.parseAsString(patterns[i]))) {
+				event.setMatcher(matcher);
+				return methodWrapper;
+			    }
 			}
 		    }
 		}
@@ -180,7 +194,7 @@ public class BotEngine {
 		for (int i = 0; i < patterns.length; i++) {
 		    if (ArgUtil.isEmptyArray(methodWrapper.getBotCode())
 			    || ArgUtil.isEqual(Constants.BLANK, methodWrapper.getBotCode())
-			    || ArgUtil.isEqual(botFlow, methodWrapper.getBotCode())) {
+			    || ArgUtil.isEqual(methodWrapper.getBotCode(), botFlow, botCodePrefix)) {
 			if (matcher.isMatch(patterns[i]) && ArgUtil.is(ArgUtil.parseAsString(patterns[i]))) {
 			    event.setMatcher(matcher);
 			    return methodWrapper;
