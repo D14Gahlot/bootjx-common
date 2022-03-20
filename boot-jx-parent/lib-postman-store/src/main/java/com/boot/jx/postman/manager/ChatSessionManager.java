@@ -181,10 +181,19 @@ public class ChatSessionManager {
 	} else {
 
 	    if (ArgUtil.areEqual("CLOSED", searchStatus)) {
-		criterias.add(Criteria.where("active").is(false).and("resolved").is(true));
+		criterias.add(Criteria.where("mode").is("AGENT").and("active").is(false).and("resolved").is(true));
+
+	    } else if (ArgUtil.areEqual("OUTBOUND", searchStatus)) {
+		criterias.add(Criteria.where("mode").is("AGENT").and("active").is(true).and("lastInBoundMsg")
+			.exists(false)
+			.orOperator(Criteria.where("resolved").exists(false), Criteria.where("resolved").is(false)));
+	    } else if (ArgUtil.areEqual("STALE", searchStatus)) {
+		criterias.add(Criteria.where("mode").is("AGENT").and("active").is(true)
+			.orOperator(Criteria.where("resolved").exists(false), Criteria.where("resolved").is(false)));
 	    } else {
-		criterias.add(Criteria.where("active").is(true).orOperator(Criteria.where("resolved").exists(false),
-			Criteria.where("resolved").is(false)));
+		criterias.add(Criteria.where("mode").is("AGENT").and("active").is(true).and("lastInBoundMsg")
+			.exists(true)
+			.orOperator(Criteria.where("resolved").exists(false), Criteria.where("resolved").is(false)));
 	    }
 
 	    criterias.add(
@@ -235,7 +244,7 @@ public class ChatSessionManager {
 	Integer limit = pmDomainConfig.getAgentHistoryCount().asInteger(150);
 	query2.addCriteria(
 		// Only Agent Chats
-		Criteria.where("mode").is("AGENT").and("primary").is(true)
+		Criteria.where("primary").is(true)
 			// Add Selected Criteria
 			.andOperator(criterias.toArray(new Criteria[criterias.size()])))
 		// Limit

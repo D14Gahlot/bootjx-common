@@ -24,6 +24,7 @@ public class ConfigConstants {
     public static final List<ConfigMeta> SETUP_CONFIG_LIST = new ArrayList<ConfigMeta>();
 
     public static final String GROUP_AGENT = "AGENT";
+    public static final String GROUP_NLP = "NLP";
 
     public static enum APP_KEY implements EntryMeta {
 
@@ -52,6 +53,10 @@ public class ConfigConstants {
 	POSTMAN_CHAT_INBOUND_QUEUE(new ConfigMeta("Message Inbound Queue", "postman.chat.inbound.queue")
 		.desc("Inbound messages will be forwarded to this Queue by default")
 		.optionsSource("getx:/api/options/inbound_queue").optionsKey("code").optionsLabel("code")),
+
+	POSTMAN_CHAT_AGENT_QUEUE(
+		new ConfigMeta("Default Agent Queue", "postman.chat.agent.queue").desc("Default Agent App")
+			.optionsSource("getx:/api/options/agent_queue").optionsKey("code").optionsLabel("code")),
 
 	POSTMAN_CHAT_CHANNEL_SANDBOX(new ConfigMeta("Enable Sandbox Channels", "postman.chat.channel.sandbox")
 		.desc("Sandbox channels are preconfigured communication channels").optionsOnOff()),
@@ -90,21 +95,25 @@ public class ConfigConstants {
 			PMConstants.CHAT_SESSION_STICKY.STRICT)
 		.defaultValue(PMConstants.CHAT_SESSION_STICKY.NONE).group(GROUP_AGENT)),
 
-	POSTMAN_UI_BETA(new ConfigMeta("Enable Beta UI", "postman.ui.beta").optionsOnOff()
-		.defaultValue(ConfigOption.OFF).group(GROUP_AGENT)),
-
 	POSTMAN_AGENT_SCHEME_COLOR(new ConfigMeta("Agent Panel Color Scheme", "postman.agent.scheme.color")
 		.inputType(OPTIONS_TYPE.COLOR).defaultValue("#4267b2").group(GROUP_AGENT)),
 
-	POSTMAN_AGENT_SCHEME2_COLOR(new ConfigMeta("Agent Color Scheme 2", "postman.agent.scheme2.color")
-		.inputType(OPTIONS_TYPE.COLOR_PALLETE).defaultValue(new ConfigMeta.ColorPalette()).group(GROUP_AGENT)),
+//	POSTMAN_UI_BETA(new ConfigMeta("Enable Beta UI", "postman.ui.beta").optionsOnOff()
+//		.defaultValue(ConfigOption.OFF).group(GROUP_AGENT)),
+//	POSTMAN_AGENT_SCHEME2_COLOR(new ConfigMeta("Agent Color Scheme 2", "postman.agent.scheme2.color")
+//		.inputType(OPTIONS_TYPE.COLOR_PALLETE).defaultValue(new ConfigMeta.ColorPalette()).group(GROUP_AGENT)),
 
 	POSTMAN_AGENT_TAB_HISTORY_PERIOD(new ConfigMeta("Show History Period", "postman.agent.tab.history.period")
 		.options(new ConfigOption(0).label("OFF"), new ConfigOption(TimeUtils.toMillis("1d")).label("+1Days"),
 			new ConfigOption(TimeUtils.toMillis("3d")).label("+3Days"),
 			new ConfigOption(TimeUtils.toMillis("5d")).label("+5Days"),
-			new ConfigOption(TimeUtils.toMillis("7d")).label("+7Days"))
+			new ConfigOption(TimeUtils.toMillis("7d")).label("+7Days"),
+			new ConfigOption(TimeUtils.toMillis("2w")).label("+2Weeks"),
+			new ConfigOption(TimeUtils.toMillis("3w")).label("+3Weeks"))
 		.defaultValue(0).group(GROUP_AGENT)),
+
+	POSTMAN_AGENT_TAB_ORG(new ConfigMeta("Agent can see Other Teams Chats", "postman.agent.tab.org")
+		.desc("Enables Other tab in Agent Panel").optionsOnOff().group(GROUP_AGENT)),
 
 	POSTMAN_AGENT_TAB_HISTORY_LAZY(new ConfigMeta("Lazy Load History", "postman.agent.tab.history.lazy")
 		.desc("Loads History Lazily").optionsOnOff().group(GROUP_AGENT).hidden()),
@@ -120,16 +129,32 @@ public class ConfigConstants {
 
 	POSTMAN_AGENT_CHAT_AUTOREPLY_TALK2AGENT(new ConfigMeta("Message to customer while chat is transferred to agent",
 		"postman.agent.chat.autoreply.talk2agent").optionsSource("getx:/api/tmpl/hsm").optionsKey("code")
-			.optionsLabel("name").group(GROUP_AGENT)),
+			.optionsLabel("desc").group(GROUP_AGENT)),
 
 	POSTMAN_AGENT_CHAT_AUTOREPLY_RESOLVED(new ConfigMeta("Message to customer when chat is resolevd by agent",
 		"postman.agent.chat.autoreply.resolved").optionsSource("getx:/api/tmpl/hsm").optionsKey("code")
-			.optionsLabel("name").group(GROUP_AGENT)),
+			.optionsLabel("desc").group(GROUP_AGENT)),
 
 	POSTMAN_AGENT_CHAT_AUTOREPLY_NOAGENT(
 		new ConfigMeta("Message to customer when no agent avaialble", "postman.agent.chat.autoreply.noagent")
-			.optionsSource("getx:/api/tmpl/hsm").optionsKey("code").optionsLabel("name")
+			.optionsSource("getx:/api/tmpl/hsm").optionsKey("code").optionsLabel("desc")
 			.group(GROUP_AGENT)),
+
+	// NLP
+	POSTMAN_NLP_SENTIMENT(new ConfigMeta("Enable Detect Sentiment", "postman.nlp.detect.sentiment").optionsOnOff()
+		.defaultValue(ConfigOption.OFF).group(GROUP_NLP)),
+	POSTMAN_NLP_CATEGORIES(new ConfigMeta("Enable Detect Categories", "postman.nlp.detect.categories")
+		.optionsOnOff().defaultValue(ConfigOption.OFF).group(GROUP_NLP)),
+	POSTMAN_NLP_PERSONS(new ConfigMeta("Enable Detect Persons", "postman.nlp.detect.persons").optionsOnOff()
+		.defaultValue(ConfigOption.OFF).group(GROUP_NLP)),
+	POSTMAN_NLP_ORGANIZATIONS(new ConfigMeta("Enable Detect Organizations", "postman.nlp.detect.organizations")
+		.optionsOnOff().defaultValue(ConfigOption.OFF).group(GROUP_NLP)),
+	POSTMAN_NLP_COUNTRIES(new ConfigMeta("Enable Detect Countries", "postman.nlp.detect.countries").optionsOnOff()
+		.defaultValue(ConfigOption.OFF).group(GROUP_NLP)),
+	POSTMAN_NLP_CITIES(new ConfigMeta("Enable Detect Cities", "postman.nlp.detect.cities").optionsOnOff()
+		.defaultValue(ConfigOption.OFF).group(GROUP_NLP)),
+	POSTMAN_NLP_LOCATIONS(new ConfigMeta("Enable Detect Locations", "postman.nlp.detect.locations").optionsOnOff()
+		.defaultValue(ConfigOption.OFF).group(GROUP_NLP)),
 
 	// Ends here
 	;

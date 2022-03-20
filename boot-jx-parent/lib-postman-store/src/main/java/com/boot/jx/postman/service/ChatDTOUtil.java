@@ -39,27 +39,30 @@ public class ChatDTOUtil {
 
     public static ContactDTO getContactDTO(ChatContactDoc chatContactDoc) {
 	ContactDTO contact = new ContactDTO();
-	contact.setContactId(chatContactDoc.getContactId());
-	contact.setContactType(chatContactDoc.getContactType());
-	contact.setChannelType(chatContactDoc.getChannelType());
-	contact.setName(chatContactDoc.getName());
-	contact.setPhone(chatContactDoc.getPhone());
-	contact.setEmail(chatContactDoc.getEmail());
-	contact.setLabelId(chatContactDoc.getLabelId());
-	contact.setProfilePic(chatContactDoc.getProfilePic());
-	contact.setProfile(chatContactDoc.getProfile());
-	contact.setLane(chatContactDoc.getLane());
-	contact.setCsid(chatContactDoc.getCsid());
 
-	contact.setCreatedBy(chatContactDoc.getCreatedBy());
-	contact.setCreatedStamp(chatContactDoc.getCreatedStamp());
-	contact.setLastInBoundStamp(chatContactDoc.getLastInBoundStamp());
-	contact.setLastOutBoundStamp(chatContactDoc.getLastOutBoundStamp());
-	contact.setLastOptInStamp(chatContactDoc.getLastOptInStamp());
-	contact.setLastPushStamp(chatContactDoc.getLastPushStamp());
-	contact.setLastReplyStamp(chatContactDoc.getLastReplyStamp());
+	if (ArgUtil.is(chatContactDoc)) {
+	    contact.setContactId(chatContactDoc.getContactId());
+	    contact.setContactType(chatContactDoc.getContactType());
+	    contact.setChannelType(chatContactDoc.getChannelType());
+	    contact.setName(chatContactDoc.getName());
+	    contact.setPhone(chatContactDoc.getPhone());
+	    contact.setEmail(chatContactDoc.getEmail());
+	    contact.setLabelId(chatContactDoc.getLabelId());
+	    contact.setProfilePic(chatContactDoc.getProfilePic());
+	    contact.setProfile(chatContactDoc.getProfile());
+	    contact.setLane(chatContactDoc.getLane());
+	    contact.setCsid(chatContactDoc.getCsid());
 
-	contact.setSessionId(chatContactDoc.getSessionId());
+	    contact.setCreatedBy(chatContactDoc.getCreatedBy());
+	    contact.setCreatedStamp(chatContactDoc.getCreatedStamp());
+	    contact.setLastInBoundStamp(chatContactDoc.getLastInBoundStamp());
+	    contact.setLastOutBoundStamp(chatContactDoc.getLastOutBoundStamp());
+	    contact.setLastOptInStamp(chatContactDoc.getLastOptInStamp());
+	    contact.setLastPushStamp(chatContactDoc.getLastPushStamp());
+	    contact.setLastReplyStamp(chatContactDoc.getLastReplyStamp());
+
+	    contact.setSessionId(chatContactDoc.getSessionId());
+	}
 
 	return contact;
     }

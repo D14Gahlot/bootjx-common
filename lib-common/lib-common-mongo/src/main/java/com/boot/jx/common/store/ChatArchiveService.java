@@ -37,16 +37,19 @@ public class ChatArchiveService {
     public ContactDTO getContact(ChatSessionDTO chatSessionDto) {
 	ChatContactDoc contact = mongoTemplate.findById(chatSessionDto.getContactId(), ChatContactDoc.class);
 	ContactDTO dto = ChatDTOUtil.getContactDTO(contact);
-	if (ArgUtil.is(contact.getProfileId())) {
-	    ChatUserProfileDoc profileDoc = mongoTemplate.findById(contact.getProfileId(), ChatUserProfileDoc.class);
-	    ChatUserProfileDTO profileDTO = ChatDTOUtil.getProfileDTO(profileDoc);
-	    dto.setProfile(profileDTO);
-	} else if (ArgUtil.is(contact.getPhone())) {
-	    Query query = new Query();
-	    query.addCriteria(Criteria.where("mobile").is(contact.getPhone()));
-	    ChatUserProfileDoc profileDoc = mongoTemplate.findOne(query, ChatUserProfileDoc.class);
-	    ChatUserProfileDTO profileDTO = ChatDTOUtil.getProfileDTO(profileDoc);
-	    dto.setProfile(profileDTO);
+	if (ArgUtil.is(contact)) {
+	    if (ArgUtil.is(contact.getProfileId())) {
+		ChatUserProfileDoc profileDoc = mongoTemplate.findById(contact.getProfileId(),
+			ChatUserProfileDoc.class);
+		ChatUserProfileDTO profileDTO = ChatDTOUtil.getProfileDTO(profileDoc);
+		dto.setProfile(profileDTO);
+	    } else if (ArgUtil.is(contact.getPhone())) {
+		Query query = new Query();
+		query.addCriteria(Criteria.where("mobile").is(contact.getPhone()));
+		ChatUserProfileDoc profileDoc = mongoTemplate.findOne(query, ChatUserProfileDoc.class);
+		ChatUserProfileDTO profileDTO = ChatDTOUtil.getProfileDTO(profileDoc);
+		dto.setProfile(profileDTO);
+	    }
 	}
 	return dto;
     }

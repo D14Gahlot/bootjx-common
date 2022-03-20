@@ -19,7 +19,7 @@ import com.boot.jx.postman.manager.ChatSessionManager;
 import com.boot.jx.postman.manager.LogManager;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.OutboxMessage;
-import com.boot.jx.postman.model.PMParams;
+import com.boot.jx.postman.model.PMArgs;
 import com.boot.jx.postman.model.ext.InBoundEvent;
 import com.boot.jx.postman.query.ChatContactQuery;
 import com.boot.jx.postman.store.MessageContext;
@@ -150,11 +150,11 @@ public class ChatSessionService {
 	}
     }
 
-    public InBoundEvent routeSession(ChatSessionDoc sessionDoc, String queue, Object params) {
-	InBoundEvent event = chatSessionManager.assignToQueue(sessionDoc, queue);
-	event.sessionRouted.params = params;
+    public InBoundEvent routeSession(ChatSessionDoc sessionDoc, PMArgs pmArgs) {
+	InBoundEvent event = chatSessionManager.assignToQueue(sessionDoc, pmArgs.getAssignToQueueCode());
+	event.sessionRouted.params = pmArgs.getParams();
 	if (ArgUtil.is(inBoundHandler)) {
-	    inBoundHandler.onSessionRouteAsync(event, sessionDoc);
+	    inBoundHandler.onSessionRouteAsync(event, sessionDoc, pmArgs);
 	}
 	return event;
     }
@@ -162,14 +162,14 @@ public class ChatSessionService {
     public InBoundEvent routeSession(ChatSessionDoc session) {
 	if (ArgUtil.isEmptyValue(session.getAssignedToQueue()) || ArgUtil.isEmptyValue(session.getMode())) {
 	    String defaultQueue = pmDomainConfig.getDefaultInboundQueue(session.contact());
-	    return routeSession(session, defaultQueue, null);
+	    return routeSession(session, new PMArgs().assignToQueueCode(defaultQueue));
 	}
 	return null;
     }
 
-    public InBoundEvent routeSession(String sessionId, String queue, Object params) {
+    public InBoundEvent routeSession(String sessionId, PMArgs pmArgs) {
 	ChatSessionDoc sessionDoc = sessionStore.getSession(sessionId);
-	return routeSession(sessionDoc, queue, params);
+	return routeSession(sessionDoc, pmArgs);
     }
 
     public NodeEntry<InBoundEvent> updateSessionStatus(ChatSessionDoc sessionDoc, CHAT_STATUS status) {
@@ -213,12 +213,13 @@ public class ChatSessionService {
 	return closeSession(sessionDoc);
     }
 
-    public NodeEntry<InBoundEvent> assignSessionToAgent(PMParams params) {
-	return inBoundHandler.assignSessionToAgent(params);
+    public NodeEntry<InBoundEvent> assignSessionToAgent(PMArgs params) {
+	ChatSessionDoc sessionDoc = sessionStore.getSession(params.getSessionId());
+	return inBoundHandler.assignSessionToAgent(params, sessionDoc);
     }
 
-    public NodeEntry<InBoundEvent> assignSessionToAgent(ChatSessionDoc sessionDoc, String agentDept, String agentCode) {
-	return inBoundHandler.assignSessionToAgent(sessionDoc, agentDept, agentCode);
+    public NodeEntry<InBoundEvent> assignSessionToAgent(ChatSessionDoc sessionDoc, PMArgs params) {
+	return inBoundHandler.assignSessionToAgent(params, sessionDoc);
     }
 
 }

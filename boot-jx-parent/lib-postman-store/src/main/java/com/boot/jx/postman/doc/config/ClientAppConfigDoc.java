@@ -12,6 +12,8 @@ import com.boot.jx.AppContextUtil;
 import com.boot.jx.mongo.CommonDocInterfaces.AuditableByIdEntity;
 import com.boot.jx.mongo.CommonDocInterfaces.IDocument;
 import com.boot.jx.postman.ClientApp;
+import com.boot.jx.postman.PMConstants.APP_TYPE;
+import com.boot.jx.postman.PMConstants.CHAT_MODE;
 import com.boot.model.UtilityModels.JsonIgnoreUnknown;
 import com.boot.utils.ArgUtil;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -201,5 +203,10 @@ public class ClientAppConfigDoc implements IDocument, AuditableByIdEntity, Clien
     @Override
     public boolean isReadOnly() {
 	return (this.isShared()) && !ArgUtil.areEqual(domain, AppContextUtil.getTenant());
+    }
+
+    @Override
+    public boolean isAgentApp() {
+	return ArgUtil.parseAsEnumT(getAppType(), APP_TYPE.class, APP_TYPE.NONE).getMode() == CHAT_MODE.AGENT;
     }
 }

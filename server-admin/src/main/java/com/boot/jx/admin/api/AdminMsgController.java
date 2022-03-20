@@ -32,6 +32,7 @@ import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.dto.ChatMessageDTO;
 import com.boot.jx.postman.dto.ChatSessionDTO;
 import com.boot.jx.postman.model.OutboxMessage;
+import com.boot.jx.postman.model.PMArgs;
 import com.boot.jx.postman.model.ext.InBoundEvent;
 import com.boot.jx.postman.service.ChatDTOUtil;
 import com.boot.jx.postman.store.MessageStore;
@@ -119,7 +120,7 @@ public class AdminMsgController {
     @RequestMapping(value = "/api/message/session/route", method = { RequestMethod.POST })
     public ApiResponse<InBoundEvent, Object> routeChatSesson(@RequestParam String sessionId,
 	    @RequestParam(required = false, defaultValue = "") String queue) {
-	InBoundEvent event = chatSessionService.routeSession(sessionId, queue, null);
+	InBoundEvent event = chatSessionService.routeSession(sessionId, new PMArgs().assignToQueueCode(queue));
 	return ApiResponse.buildData(event);
     }
 

@@ -6,15 +6,17 @@ import com.boot.jx.postman.model.MessageDefinitions.Contactable;
 import com.boot.jx.postman.model.MessageDefinitions.SessionId;
 import com.boot.model.MapModel;
 
-public class PMParams implements SessionId, Serializable {
+public class PMArgs implements SessionId, Serializable {
     private static final long serialVersionUID = -1002441635191227105L;
 
     private String checksum;
     private String sessionId;
+    private String assignToQueueCode;
     private String assignToDeptCode;
     private String assignToAgentCode;
     private Contactable contact;
     private MapModel data;
+    private Object params;
 
     public MapModel data() {
 	if (this.data == null) {
@@ -23,22 +25,32 @@ public class PMParams implements SessionId, Serializable {
 	return this.data;
     }
 
-    public PMParams sessionId(String sessionId) {
+    public PMArgs params(Object params) {
+	this.params = params;
+	return this;
+    }
+
+    public PMArgs sessionId(String sessionId) {
 	this.sessionId = sessionId;
 	return this;
     }
 
-    public PMParams assignToDeptCode(String deptCode) {
+    public PMArgs assignToQueueCode(String queueCode) {
+	this.assignToQueueCode = queueCode;
+	return this;
+    }
+
+    public PMArgs assignToDeptCode(String deptCode) {
 	this.assignToDeptCode = deptCode;
 	return this;
     }
 
-    public PMParams assignToAgentCode(String agentCode) {
+    public PMArgs assignToAgentCode(String agentCode) {
 	this.assignToAgentCode = agentCode;
 	return this;
     }
 
-    public PMParams contact(Contactable contact) {
+    public PMArgs contact(Contactable contact) {
 	this.contact = contact;
 	return this;
     }
@@ -96,6 +108,22 @@ public class PMParams implements SessionId, Serializable {
 
     public void setChecksum(String checksum) {
 	this.checksum = checksum;
+    }
+
+    public Object getParams() {
+	return params;
+    }
+
+    public void setParams(Object params) {
+	this.params = params;
+    }
+
+    public String getAssignToQueueCode() {
+	return assignToQueueCode;
+    }
+
+    public void setAssignToQueueCode(String assignToQueueCode) {
+	this.assignToQueueCode = assignToQueueCode;
     }
 
 }

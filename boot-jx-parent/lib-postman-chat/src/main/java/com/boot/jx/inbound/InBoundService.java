@@ -195,8 +195,6 @@ public class InBoundService {
 		} else {
 		    inBoundHandler.onMessageAsync(inboxMessageOriginal, session);
 		}
-	    } else if (agentService.onMessageSupported(inboxMessageOriginal)) { // TODO:-- TO be removed
-		agentService.onMessage(inboxMessageOriginal);
 	    } else if (botEngine.isChatBotDefined()) { // TODO:-- TO be removed
 		botEngine.invokeMethodsAsync(inboxMessageOriginal);
 	    }

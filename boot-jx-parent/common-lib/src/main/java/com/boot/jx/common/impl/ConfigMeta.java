@@ -4,6 +4,8 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.boot.utils.ArgUtil;
+
 public class ConfigMeta implements Serializable {
 
     public static enum OPTIONS_TYPE {
@@ -204,17 +206,21 @@ public class ConfigMeta implements Serializable {
     }
 
     public ConfigMeta defaultValue(Object defaultValue) {
-	this.defaultValue = defaultValue;
+	if (ArgUtil.is(defaultValue) && defaultValue instanceof ConfigOption) {
+	    this.defaultValue = ((ConfigOption) defaultValue).getValue();
+	} else {
+	    this.defaultValue = defaultValue;
+	}
 	return this;
     }
 
     public ConfigMeta defaultFalse() {
-	this.defaultValue = Boolean.FALSE;
+	this.defaultValue(Boolean.FALSE);
 	return this;
     }
 
     public ConfigMeta defaultTrue() {
-	this.defaultValue = Boolean.TRUE;
+	this.defaultValue(Boolean.TRUE);
 	return this;
     }
 

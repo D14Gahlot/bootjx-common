@@ -41,4 +41,6 @@ public interface ClientApp extends Serializable {
 
     boolean isReadOnly();
 
+    boolean isAgentApp();
+
 }

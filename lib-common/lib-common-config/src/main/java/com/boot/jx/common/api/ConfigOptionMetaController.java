@@ -3,6 +3,7 @@ package com.boot.jx.common.api;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -30,7 +31,6 @@ import com.boot.jx.postman.doc.HSMContentType;
 import com.boot.jx.postman.doc.HSMLanguage;
 import com.boot.jx.postman.doc.HSMMessageType;
 import com.boot.jx.postman.doc.HSMTemplateDoc;
-import com.boot.jx.postman.doc.config.ClientAppConfigDoc;
 import com.boot.jx.postman.plugin.ChannelPluginProvider;
 import com.boot.jx.postman.plugin.ChannelPluginProvider.ChannelPlugin;
 import com.boot.utils.ArgUtil;
@@ -95,6 +95,14 @@ public class ConfigOptionMetaController {
     @RequestMapping(value = { "/api/options/inbound_queue" }, method = { RequestMethod.GET })
     public ApiResponse<ClientApp, Object> getInboundQueues() {
 	return ApiResponse.buildResults(pmEnvironment.config().listApps());
+    }
+
+    @JsonView(PMEnvironment.PublicProperty.class)
+    @ResponseBody
+    @RequestMapping(value = { "/api/options/agent_queue" }, method = { RequestMethod.GET })
+    public ApiResponse<ClientApp, Object> getAgentQueues() {
+	return ApiResponse.buildResults(
+		pmEnvironment.config().listApps().stream().filter(ClientApp::isAgentApp).collect(Collectors.toList()));
     }
 
     // Config APIS
