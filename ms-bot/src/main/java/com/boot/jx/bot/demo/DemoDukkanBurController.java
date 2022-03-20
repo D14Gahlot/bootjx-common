@@ -97,7 +97,7 @@ public static final String REPLY_ID = "reply_id";
 		    reply(new OutboxMessage().template("db_working_hrs_ans"));
 		    next("next_menu");
 		    break;
-		case "help":
+		case "db_help":
 		    reply(new OutboxMessage().template("db_help_ans"));
 		    next("next_menu");
 		    break; 
