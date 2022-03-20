@@ -11,7 +11,7 @@ import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.utils.StringUtils.StringMatcher;
 
-@BotController(name = "DemoBot", code = { "chakli_dietcaredlv" })
+@BotController(name = "almamaalholding", code = { "chakli_dietcaredlv" })
 public class DemoDietcaredlvController extends CommonBotController {
 	 
 	@Autowired

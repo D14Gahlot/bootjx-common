@@ -78,6 +78,7 @@ public class BotEngine {
 	    chatBotDefined = true;
 	    Class<?> c = AopProxyUtils.ultimateTargetClass(chatController);
 	    String controllerName = c.getName();
+	    chatController.setMeta(controllerName);
 
 	    BotController botControllerAnnot = ClazzUtil.getAnnotation(c, BotController.class);
 
@@ -109,6 +110,7 @@ public class BotEngine {
 		    methodWrapper.setController(controllerName);
 		    methodWrapper.setKey(key);
 		    methodWrapper.setLane(botControllerAnnot.lane());
+		    methodWrapper.setBotName(botControllerAnnot.name());
 		    methodWrapper.setBotCode(botControllerAnnot.code());
 
 		    // for (String event : events) {
@@ -121,7 +123,7 @@ public class BotEngine {
 	}
 	Collections.sort(eventToMethodsList);
 	for (MethodWrapper methodWrapper : eventToMethodsList) {
-	    eventToMethodsMap.put(methodWrapper.getKey(), methodWrapper);
+	    eventToMethodsMap.put(methodWrapper.getController() + "#" + methodWrapper.getKey(), methodWrapper);
 	}
 
     }

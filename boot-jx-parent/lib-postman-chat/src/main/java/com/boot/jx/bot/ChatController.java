@@ -41,6 +41,8 @@ public class ChatController {
     @Autowired
     private ChatSessionService chatSessionService;
 
+    public String controllerName;
+
     public void reply(String message) {
 	try {
 	    chatService.reply(chatContext.getInboxMessage(), new OutboxMessage().message(message));
@@ -99,7 +101,11 @@ public class ChatController {
     }
 
     public void next(String key) {
-	chatService.getChatContext().meta().setNextHandler(key);
+	String handelrName = key;
+	if (ArgUtil.is(this.controllerName)) {
+	    handelrName = this.controllerName + "#" + key;
+	}
+	chatService.getChatContext().meta().setNextHandler(handelrName);
     }
 
     public boolean previous(String key) {
@@ -159,6 +165,10 @@ public class ChatController {
 
     public void routeSession(String queueCode) {
 	chatSessionService.routeSession(chatContext.session().getDoc(), new PMArgs().assignToQueueCode(queueCode));
+    }
+
+    public void setMeta(String controllerName) {
+	this.controllerName = controllerName;
     }
 
 }

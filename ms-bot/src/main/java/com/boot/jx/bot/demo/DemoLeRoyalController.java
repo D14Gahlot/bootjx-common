@@ -11,17 +11,15 @@ import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.utils.StringUtils.StringMatcher;
 
-@BotController(name = "DemoBot", code = { "chakli_jaipur" })
+@BotController(name = "almamaalholding", code = { "chakli_jaipur" })
 public class DemoLeRoyalController extends CommonBotController {
-	 
-	@Autowired
-	  private ChatContext chatContext;
-	 
-	
-	@ChatMapping(key = AlexBotConstants.KEY.INITIATE + "*", pattern = "^*$")
-	    public void start(InboxMessage inboxMessage, StringMatcher matcher) {
-	  	reply(new OutboxMessage().template("jd_welcome_msg").put("name", chatContext.contact().getName()));
-	    	next("select-language");
-	
-	    }
+
+    @Autowired
+    private ChatContext chatContext;
+
+    @ChatMapping(key = AlexBotConstants.KEY.INITIATE + "*", pattern = "^*$")
+    public void start(InboxMessage inboxMessage, StringMatcher matcher) {
+	reply(new OutboxMessage().template("jd_welcome_msg").put("name", chatContext.contact().getName()));
+	next("select-language");
+    }
 }
