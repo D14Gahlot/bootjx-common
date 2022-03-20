@@ -105,7 +105,7 @@ public class DemoAlMarsaController extends CommonBotController {
 		    reply(new OutboxMessage().template("ma_catering_ans"));
 		    next("next_menu");
 		    break;
-		case "help":
+		case "ma_help":
 		    reply(new OutboxMessage().template("ma_help_ans"));
 		    next("next_menu");
 		    break; 

@@ -100,11 +100,11 @@ public class DemoJihanController extends CommonBotController {
 		    reply(new OutboxMessage().template("jd_working_hrs_ans"));
 		    next("next_menu");
 		    break;
-		case "for_catering":
+		case "jd_catering":
 		    reply(new OutboxMessage().template("jd_catering_ans"));
 		    next("next_menu");
 		    break;
-		case "help":
+		case "jd_help":
 		    reply(new OutboxMessage().template("jd_help_ans"));
 		    next("next_menu");
 		    break; 
