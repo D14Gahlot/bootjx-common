@@ -28,6 +28,7 @@ import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.doc.ChatPromise;
 import com.boot.jx.postman.doc.ChatPromise.State;
 import com.boot.jx.postman.model.InboxMessage;
+import com.boot.jx.postman.model.ext.InBoundEvent;
 import com.boot.jx.postman.store.MessageContext;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.utils.ArgUtil;
@@ -35,6 +36,8 @@ import com.boot.utils.ClazzUtil;
 import com.boot.utils.Constants;
 import com.boot.utils.EntityDtoUtil;
 import com.boot.utils.StringUtils.StringMatcher;
+
+import io.reactivex.internal.observers.ForEachWhileObserver;
 
 @Component
 public class BotEngine {
@@ -82,7 +85,7 @@ public class BotEngine {
 
 	    BotController botControllerAnnot = ClazzUtil.getAnnotation(c, BotController.class);
 
-	    filtersMap.put(controllerName, chatController);
+	    filtersMap.put("controllerName#" + controllerName, chatController);
 	    Method[] methods = c.getMethods();
 	    for (Method method : methods) {
 		if (method.isAnnotationPresent(ChatMapping.class)) {
@@ -112,6 +115,10 @@ public class BotEngine {
 		    methodWrapper.setLane(botControllerAnnot.lane());
 		    methodWrapper.setBotName(botControllerAnnot.name());
 		    methodWrapper.setBotCode(botControllerAnnot.code());
+
+		    for (String botCode : botControllerAnnot.code()) {
+			filtersMap.put("botCode#" + botCode, chatController);
+		    }
 
 		    // for (String event : events) {
 		    eventToMethodsList.add(methodWrapper);
@@ -280,7 +287,7 @@ public class BotEngine {
 		LOGGER.debug("Handler: " + nextHandler);
 		botService.getChatContext().setCurrentHandler(nextHandler);
 		Method method = matchedMethod.getMethod();
-		ChatController controller = filtersMap.get(matchedMethod.getController());
+		ChatController controller = filtersMap.get("controllerName#" + matchedMethod.getController());
 		// LOGGER.info("Target Handler : " + method.getName());
 		List<Class<?>> prmTyps = Arrays.asList(method.getParameterTypes());
 		if (prmTyps.contains(InboxMessage.class) && prmTyps.contains(StringMatcher.class)) {
@@ -301,4 +308,5 @@ public class BotEngine {
 	botService.commitChatContext(contactId, nextHandler, inboxMessage);
 	return nextHandler;
     }
+
 }

@@ -15,6 +15,7 @@ import com.boot.jx.postman.model.ContactMeta;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.MessageDefinitions.Contactable;
 import com.boot.jx.postman.model.MessageDefinitions.IMessage;
+import com.boot.jx.postman.model.ext.InBoundEvent;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.model.PMArgs;
 import com.boot.jx.postman.plugin.ChannelConfig;
@@ -130,6 +131,20 @@ public class PostManUtil {
 
     public static boolean hasValidCheckSum(PMArgs params) {
 	return ArgUtil.areEqual(params.getChecksum(), generateCheckSum(params));
+    }
+
+    public static String generateCheckSum(InBoundEvent event) {
+	String checkString = event.contact().getContactId() + event.getSessionId() + event.eventCode;
+	try {
+	    return CryptoUtil.getMD5Hash(checkString);
+	} catch (NoSuchAlgorithmException e) {
+	    e.printStackTrace();
+	    return e.getMessage();
+	}
+    }
+
+    public static boolean hasValidCheckSum(InBoundEvent event) {
+	return ArgUtil.areEqual(event.getChecksum(), generateCheckSum(event));
     }
 
     public static boolean isInBound(String type) {

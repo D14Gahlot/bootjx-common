@@ -32,7 +32,6 @@ import com.boot.jx.postman.model.MessageReport;
 import com.boot.jx.postman.model.PMArgs;
 import com.boot.jx.postman.model.ext.InBoundEvent;
 import com.boot.jx.postman.plugin.ChannelConfig;
-import com.boot.jx.postman.store.SessionStore;
 import com.boot.jx.scope.vendor.VendorContext.ApiVendorHeaders;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.model.MapModel;
@@ -58,7 +57,7 @@ public class InBoundController {
 
     @Autowired
     private ChatSessionService chatSessionService;
-    
+
     @ApiVendorHeaders
     @RequestMapping(value = "/int/inbound/callback", method = RequestMethod.POST)
     public InboxMessage onInboundCallback(@RequestBody InboxMessage inboxMessage,
@@ -103,6 +102,14 @@ public class InBoundController {
     @RequestMapping(value = ChatClient.PATH.ASSIGN_TO_AGENT_V2, method = RequestMethod.POST)
     public InBoundEvent assignToAgentV2(@RequestBody PMArgs params) {
 	return chatSessionService.assignSessionToAgent(params).value();
+    }
+
+    @ApiVendorHeaders
+    @RequestMapping(value = ChatClient.PATH.SESSION_EVENT, method = RequestMethod.POST)
+    public InBoundEvent inboundEvent(@RequestBody MapModel map) {
+	PMArgs pmArgs = map.keyEntry("pmArgs").as(PMArgs.class);
+	InBoundEvent event = map.keyEntry("event").as(InBoundEvent.class);
+	return chatSessionService.sessionEvent(event, pmArgs);
     }
 
     @RequestMapping(value = "/ext/inbound/v2/{channelType}/callback/{accountKey}/{channelId}/{channelKey}",

@@ -14,6 +14,7 @@ public class PMArgs implements SessionId, Serializable {
     private String assignToQueueCode;
     private String assignToDeptCode;
     private String assignToAgentCode;
+    private String assignToBotCode;
     private Contactable contact;
     private MapModel data;
     private Object params;
@@ -47,6 +48,12 @@ public class PMArgs implements SessionId, Serializable {
 
     public PMArgs assignToAgentCode(String agentCode) {
 	this.assignToAgentCode = agentCode;
+	return this;
+    }
+    
+
+    public PMArgs assignToBotCode(String botCode) {
+	this.assignToBotCode = botCode;
 	return this;
     }
 
@@ -124,6 +131,14 @@ public class PMArgs implements SessionId, Serializable {
 
     public void setAssignToQueueCode(String assignToQueueCode) {
 	this.assignToQueueCode = assignToQueueCode;
+    }
+
+    public String getAssignToBotCode() {
+	return assignToBotCode;
+    }
+
+    public void setAssignToBotCode(String assignToBotCode) {
+	this.assignToBotCode = assignToBotCode;
     }
 
 }

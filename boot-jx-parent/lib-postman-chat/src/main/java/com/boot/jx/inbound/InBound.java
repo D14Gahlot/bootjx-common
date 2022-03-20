@@ -35,7 +35,9 @@ public class InBound {
 
 	public void doHandle(MessageReport messageReport);
 
-	void onSessionRoute(InBoundEvent inBoundEvent, ChatSessionDoc sessionDoc, PMArgs pmArgs);
+	public InBoundEvent onSessionEvent(InBoundEvent inBoundEvent, PMArgs pmArgs);
+
+	public void onSessionRoute(InBoundEvent inBoundEvent, ChatSessionDoc sessionDoc, PMArgs pmArgs);
 
 	@Async
 	default public void onSessionRouteAsync(InBoundEvent inBoundEvent, ChatSessionDoc sessionDoc, PMArgs pmArgs) {

@@ -284,6 +284,15 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
     }
 
     @Override
+    public InBoundEvent onSessionEvent(InBoundEvent event, PMArgs pmArgs) {
+	if (InBoundEvent.SESSION_ROUTED.equals(event.eventCode)) {
+	    ChatSessionDoc sessionDoc = context().session().getDoc();
+	    this.onSessionRoute(event, sessionDoc, pmArgs);
+	}
+	return event;
+    }
+
+    @Override
     public void onSessionRoute(InBoundEvent event, ChatSessionDoc sessionDoc, PMArgs pmArgs) {
 
 	if (InBoundEvent.SESSION_ROUTED.equals(event.eventCode)) {
@@ -308,6 +317,8 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 			    logManager.error(event, e);
 			}
 		    }
+		} else if (CHAT_MODE.BOT.equals(appType.getMode())) {
+		    chatClient.sessionEvent(pmCommonConfig.getBotUrl() + PATH.SESSION_EVENT, event, pmArgs);
 		}
 	    }
 	}

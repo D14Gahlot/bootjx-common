@@ -171,4 +171,8 @@ public class ChatController {
 	this.controllerName = controllerName;
     }
 
+    public void onAssign(InBoundEvent assignEvent) {
+
+    }
+
 }

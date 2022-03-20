@@ -17,6 +17,7 @@ import com.boot.jx.postman.model.PMArgs;
 import com.boot.jx.postman.model.ext.InBoundEvent;
 import com.boot.jx.rest.RestService;
 import com.boot.jx.utils.PostManUtil;
+import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
 
 @Component
@@ -28,6 +29,7 @@ public class ChatClient {
 	public static final String ASSIGN_TO_AGENT = "/int/assign/agent";
 	public static final String ASSIGN_TO_AGENT_V2 = "/int/assign/v2/agent/";
 	public static final String INBOUND_FRWRD = "/int/inbound/callback";
+	public static final String SESSION_EVENT = "/int/session/event";
     }
 
     @Autowired
@@ -77,6 +79,14 @@ public class ChatClient {
 	} else {
 	    return null;
 	}
+    }
+
+    public void sessionEvent(String inboundForwardUrl, InBoundEvent event, PMArgs pmArgs) {
+	LOGGER.debug("Assign InboxMessage Session to other BotCode ");
+	event.setChecksum(PostManUtil.generateCheckSum(event));
+	pmArgs.setChecksum(PostManUtil.generateCheckSum(pmArgs));
+	restService.ajax(pmCommonConfig.getBotUrl()).path(PATH.SESSION_EVENT)
+		.post(MapModel.createInstance().put("event", event).put("pmArgs", pmArgs)).asNone();
     }
 
     public ChatUserProfileDTO fetchContactDetails(ChatUserProfileRequest chatUserProfileRequest) {

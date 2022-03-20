@@ -83,25 +83,27 @@ public class WA360Client {
 		    int end = Math.min((start + 9), buttons.size());
 		    List<TmplElement> newButtons;
 
+		    MapModel optipns = MapModel.from(outboxMessage.options());
+
 		    if (pending < 10) {
 			newButtons = buttons.subList(start, end);
 		    } else if (pending == 10) {
 			newButtons = buttons.subList(start, end + 1);
 		    } else {
 			newButtons = buttons.subList(start, end);
-			if (outboxMessage.options().containsKey("more_option_title")) {
-			    newButtons.add(
-				    new TmplElement().label(outboxMessage.options().get("more_option_title").toString())
-					    .name(prompt.toString()));
+
+			if (optipns.containsKey("more_option_title")) {
+			    newButtons.add(new TmplElement().label(optipns.getString("more_option_title"))
+				    .name(prompt.toString()));
 			} else {
 			    newButtons.add(new TmplElement().label("More Options").name(prompt.toString()));
 			}
 		    }
-		    if (outboxMessage.options().containsKey("list_option_title")) {
-			outboxMessage.options().put("list_option_title",
-				outboxMessage.options().get("list_option_title").toString() + (prompt.pageIndex + 1));
+		    if (optipns.containsKey("list_option_title")) {
+			optipns.put("list_option_title",
+				optipns.getString("list_option_title") + (prompt.pageIndex + 1));
 		    } else {
-			outboxMessage.options().put("list_option_title", "List " + (prompt.pageIndex + 1));
+			optipns.put("list_option_title", "List " + (prompt.pageIndex + 1));
 		    }
 		    MapModel resp = sendList(channelConfig, outboxMessage, newButtons);
 		    msgIds.add(getMessageId(resp));
@@ -284,7 +286,7 @@ public class WA360Client {
 	req.put(OutBoundWrapperPaths.INTERACTIVE_BODY_TEXT, outboxMessage.getMessage());
 	req.put(OutBoundWrapperPaths.INTERACTIVE_FOOTER_TEXT,
 		ArgUtil.parseAsString(outboxMessage.getFooter(), Constants.BLANK));
-	req.put(OutBoundWrapperPaths.INTERACTIVE_ACTION_BUTTON, options.get("list_option_title", "Menu"));
+	req.put(OutBoundWrapperPaths.INTERACTIVE_ACTION_BUTTON, options.getString("list_option_title", "Menu"));
 
 	List<Object> sections = new ArrayList<Object>();
 	Map<String, Object> section = null;

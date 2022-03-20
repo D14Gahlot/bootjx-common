@@ -222,4 +222,8 @@ public class ChatSessionService {
 	return inBoundHandler.assignSessionToAgent(params, sessionDoc);
     }
 
+    public InBoundEvent sessionEvent(InBoundEvent event, PMArgs params) {
+	return inBoundHandler.onSessionEvent(event, params);
+    }
+
 }
