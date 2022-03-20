@@ -44,10 +44,8 @@ public class DemoJihanController extends CommonBotController {
 	    
 	    @ChatMapping(key = AlexBotConstants.KEY.INITIATE + "*", pattern = "^*$")
 	    public void start(InboxMessage inboxMessage, StringMatcher matcher) {
-		
-	    	reply(new OutboxMessage().template("jd_welcome_msg").put("name", chatContext.contact().getName()));
+	   	reply(new OutboxMessage().template("jd_welcome_msg").put("name", chatContext.contact().getName()));
 	    	next("select-language");
-	
 	    }
 	    
 	    
@@ -86,24 +84,23 @@ public class DemoJihanController extends CommonBotController {
 	    switch(toReplyEnum(inboxMessage)) {
 		case "jd_new_order":
 			    reply(new OutboxMessage().template("jd_new_order_ans"));
-			    next("memberships-onselect");
 			    break;
 		case "jd_edit_order":
-		case "jd_order_follow_up":
-		case "jd_reservation":
-		case "jd_edit_reservation":	
+		case "jd_ord_follow_up":
+		case "jd_reserv":
+		case "jd_edit_reserv":	
 			 this.transferToAgent(inboxMessage, matcher);	
 			 break; 
-		case "jd_our_location":
+		case "jd_location":
 		    reply(new OutboxMessage().template("jd_our_location_ans"));
 		    next("our_location");
 		    break;
-		case "jd_working_hours":
-		    reply(new OutboxMessage().template("jd_working_hours_ans"));
+		case "jd_working_hrs":
+		    reply(new OutboxMessage().template("jd_working_hrs_ans"));
 		    next("working_hours");
 		    break;
 		case "for_catering":
-		    reply(new OutboxMessage().template("jd_for_catering_ans"));
+		    reply(new OutboxMessage().template("jd_catering_ans"));
 		    next("for_catering");
 		    break;
 		case "help":

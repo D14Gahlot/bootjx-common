@@ -45,9 +45,8 @@ public class DemoAlMarsaController extends CommonBotController {
 	    @ChatMapping(key = AlexBotConstants.KEY.INITIATE + "*", pattern = "^*$")
 	    public void start(InboxMessage inboxMessage, StringMatcher matcher) {
 		
-	    	reply(new OutboxMessage().template("jd_welcome_msg").put("name", chatContext.contact().getName()));
+	    	reply(new OutboxMessage().template("ma_welcome_msg").put("name", chatContext.contact().getName()));
 	    	next("select-language");
-	
 	    }
 	    
 	    
@@ -64,17 +63,17 @@ public class DemoAlMarsaController extends CommonBotController {
 		    if(lang.equalsIgnoreCase("english") || (lang!=null && lang.equalsIgnoreCase("en"))) {
 		    	 chatContext.contact().setLang("en");
 		    	 chatContext.commitContact();
-		    	 reply(new OutboxMessage().template("jd_question"));
+		    	 reply(new OutboxMessage().template("ma_question"));
 		    	 next("select-question");
 		    }else if(lang.equalsIgnoreCase("العربية") || (lang!=null &&  lang.equalsIgnoreCase("ar"))) {
 		    	 chatContext.contact().setLang("ar");
 		    	 chatContext.commitContact();
-		    	reply(new OutboxMessage().template("jd_question"));
+		    	reply(new OutboxMessage().template("ma_question"));
 		    	 next("select-question");
 		    } else{
 		    	chatContext.contact().setLang("en");
 		    	 chatContext.commitContact();
-		    	reply(new OutboxMessage().template("jd_question"));
+		    	reply(new OutboxMessage().template("ma_question"));
 		    	next("select-question");
 		    }
 	     //} 
@@ -82,32 +81,32 @@ public class DemoAlMarsaController extends CommonBotController {
 	  
 	    @ChatMapping(key = "select-question")
 	    public void seviceOnSelect(InboxMessage inboxMessage, StringMatcher matcher) {
-	    checkValue("jd_question",toReplyEnum(inboxMessage));
+	    checkValue("ma_question",toReplyEnum(inboxMessage));
 	    switch(toReplyEnum(inboxMessage)) {
-		case "jd_new_order":
-			    reply(new OutboxMessage().template("jd_new_order_ans"));
+		case "ma_new_order":
+			    reply(new OutboxMessage().template("ma_new_order_ans"));
 			    next("memberships-onselect");
 			    break;
-		case "jd_edit_order":
-		case "jd_order_follow_up":
-		case "jd_reservation":
-		case "jd_edit_reservation":	
+		case "ma_edit_order":
+		case "ma_order_follow_up":
+		case "ma_reservation":
+		case "ma_edit_reservation":	
 			 this.transferToAgent(inboxMessage, matcher);	
 			 break; 
-		case "jd_our_location":
-		    reply(new OutboxMessage().template("jd_our_location_ans"));
+		case "ma_location":
+		    reply(new OutboxMessage().template("ma_location_ans"));
 		    next("our_location");
 		    break;
-		case "jd_working_hours":
-		    reply(new OutboxMessage().template("jd_working_hours_ans"));
+		case "ma_working_hours":
+		    reply(new OutboxMessage().template("ma_working_hrs_ans"));
 		    next("working_hours");
 		    break;
-		case "for_catering":
-		    reply(new OutboxMessage().template("jd_for_catering_ans"));
+		case "ma_catering":
+		    reply(new OutboxMessage().template("ma_catering_ans"));
 		    next("for_catering");
 		    break;
 		case "help":
-		    reply(new OutboxMessage().template("jd_help_ans"));
+		    reply(new OutboxMessage().template("ma_help_ans"));
 		    next("help");
 		    break; 
 		case "*":
@@ -117,8 +116,8 @@ public class DemoAlMarsaController extends CommonBotController {
 			  this.transferToAgent(inboxMessage, matcher);
 		    break;   
 		default :
-		    reply(new OutboxMessage().template("jd_invalid_option"));
-		    reply(new OutboxMessage().template("jd_question"));
+		    reply(new OutboxMessage().template("ma_invalid_option"));
+		    reply(new OutboxMessage().template("ma_question"));
 		    break; 
 	   
 	    }
@@ -135,7 +134,7 @@ public class DemoAlMarsaController extends CommonBotController {
 		    break;   
 		default :
 			reply(new OutboxMessage().template("invalid_input_response_std"));
-			reply(new OutboxMessage().template("dc_location_option"));
+			reply(new OutboxMessage().template("ma_location_option"));
 			next("clinics-onselect");	
 		    break;     
 	
@@ -149,13 +148,13 @@ public class DemoAlMarsaController extends CommonBotController {
 	    }
 	    
 	    public void goToMainMenu(InboxMessage inboxMessage, StringMatcher matcher) {
-	    	reply(new OutboxMessage().template("jd_question"));
+	    	reply(new OutboxMessage().template("ma_question"));
 			next("select-service-rechoose");
 	    }
 	    
 	    
 	    
-	    @ChatMapping(key = "jd_invalid_input")
+	    @ChatMapping(key = "ma_invalid_input")
 	    public void invalidinput(InboxMessage inboxMessage, StringMatcher matcher) {
 	    	switch (toReplyEnum(inboxMessage)) {
 	    	case "*":
@@ -166,7 +165,7 @@ public class DemoAlMarsaController extends CommonBotController {
 				this.transferToAgent(inboxMessage, matcher);
 			    break;   
 			default :
-				reply(new OutboxMessage().template("dc_services_rechoose"));
+				reply(new OutboxMessage().template("ma_services_rechoose"));
 				next("select-question");
 			    break;    
 	    	}

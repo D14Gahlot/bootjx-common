@@ -47,6 +47,8 @@ public class DemoAlAamalController extends CommonBotController {
 	@Autowired
 	DemoCafeBazzaController cafeBazzaController;
 	
+	
+	
 	@ChatMapping(key = AlexBotConstants.KEY.INITIATE + "*", pattern = "^*$")
     public void start(InboxMessage inboxMessage, StringMatcher matcher) {
     	reply(new OutboxMessage().template("alaamal_menu").put("name", chatContext.contact().getName()));
@@ -62,36 +64,43 @@ public class DemoAlAamalController extends CommonBotController {
 	    switch (prevMenu) {	   
 	    case "1":
 	    case "JIHAN":
-	    jihanController.start(inboxMessage, matcher);
+	    	routeSession("jihanbot");
+	    	jihanController.start(inboxMessage, matcher);
 		return;
 	    case "2":
 	    case "ALMARSA":
-	    marsaController.start(inboxMessage, matcher);
+	    	routeSession("marsabot");
+	    	marsaController.start(inboxMessage, matcher);
 		return;
 	    case "3":
 	    case "DUKKANBURGER"	:
-	    dukkanBurController.start(inboxMessage, matcher);
+	    	routeSession("dukkanburgerbot");
 		return;
 	    case "4":
-	    case "GREENSKWT"	:
-	    greensKwtController.start(inboxMessage, matcher);
+	    case "ARABI"	:
+	    	routeSession("arabibot");
 		return;
 	    case "5":
+	    case "GREENSKWT"	:
+	    	routeSession("greenskwtbot");
+		return;
+	    case "6":
 	    case "JAIPUR"	:
-	    jaipurController.start(inboxMessage, matcher);
+	    	routeSession("jaipurbot");
 		return;
 	    case "8":
 	    case "CAFEBAZZA"	:
-	    cafeBazzaController.start(inboxMessage, matcher);
+	    routeSession("cafebazzabot");
 		return;
 	    case "9":
 	    case "dietcaredlv"	:
-	    	dietCareDlvController.start(inboxMessage, matcher);
+	    	routeSession("cafebazzabot");
 		return;
 	    case "10":
 	    case "DIETCARECLINIC"	:
 	    	routeSession("dietcareclinicbot");
-	    	//dietCareController.start(inboxMessage, matcher);
+	    	dietCareController.start(inboxMessage, matcher);
+	    	
 		return;
 	    default:
 		break;

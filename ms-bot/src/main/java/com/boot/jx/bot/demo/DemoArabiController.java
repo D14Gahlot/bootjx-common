@@ -22,6 +22,5 @@ public class DemoArabiController extends CommonBotController {
 	    public void start(InboxMessage inboxMessage, StringMatcher matcher) {
 	  	reply(new OutboxMessage().template("jd_welcome_msg").put("name", chatContext.contact().getName()));
 	    	next("select-language");
-	
 	    }
 }
