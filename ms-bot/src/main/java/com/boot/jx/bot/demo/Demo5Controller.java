@@ -23,7 +23,8 @@ import com.boot.model.SafeKeyHashMap;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.StringUtils.StringMatcher;
 
-@BotController(name = "DemoBot", code = { "chakli" })
+//@BotController(name = "DemoBot", code = { "chakli" })
+@BotController(name = "DemoBot", code = { "chakli_dietcareclinicbot" })
 public class Demo5Controller extends CommonBotController {
 	
 	public static final String REPLY_ID = "reply_id";	
@@ -142,7 +143,7 @@ public class Demo5Controller extends CommonBotController {
 			case "previous_member":
 			case "previous member":	
 			case "مشترك سابق":
-			    this.transferToAgent(inboxMessage, matcher);
+				this.transferToAgent(inboxMessage, matcher);
 			    break; 
 			case "*":
 				this.goToMainMenu(inboxMessage, matcher);
