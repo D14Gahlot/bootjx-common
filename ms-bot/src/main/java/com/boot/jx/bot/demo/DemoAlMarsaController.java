@@ -85,7 +85,7 @@ public class DemoAlMarsaController extends CommonBotController {
 	    switch(toReplyEnum(inboxMessage)) {
 		case "ma_new_order":
 			    reply(new OutboxMessage().template("ma_new_order_ans"));
-			    next("memberships-onselect");
+			    next("next_menu");
 			    break;
 		case "ma_edit_order":
 		case "ma_order_follow_up":
@@ -99,15 +99,15 @@ public class DemoAlMarsaController extends CommonBotController {
 		    break;
 		case "ma_working_hours":
 		    reply(new OutboxMessage().template("ma_working_hrs_ans"));
-		    next("working_hours");
+		    next("next_menu");
 		    break;
 		case "ma_catering":
 		    reply(new OutboxMessage().template("ma_catering_ans"));
-		    next("for_catering");
+		    next("next_menu");
 		    break;
 		case "help":
 		    reply(new OutboxMessage().template("ma_help_ans"));
-		    next("help");
+		    next("next_menu");
 		    break; 
 		case "*":
 			this.goToMainMenu(inboxMessage, matcher);
@@ -123,7 +123,7 @@ public class DemoAlMarsaController extends CommonBotController {
 	    }
 	   }
 	  
-	@ChatMapping(key = "dc_location_link_timing")
+	@ChatMapping(key = "next_menu")
 	public void locationLinkTiming(InboxMessage inboxMessage, StringMatcher matcher) {
 		switch (toReplyEnum(inboxMessage)) {
 		case "*":
@@ -133,16 +133,12 @@ public class DemoAlMarsaController extends CommonBotController {
 			this.transferToAgent(inboxMessage, matcher);
 		    break;   
 		default :
-			reply(new OutboxMessage().template("invalid_input_response_std"));
-			reply(new OutboxMessage().template("ma_location_option"));
-			next("clinics-onselect");	
+			this.goToMainMenu(inboxMessage, matcher);
 		    break;     
 	
 		}
 	}
 		   
-		
-	    @ChatMapping(key = "jd_cs_to_contact")
 	    public void transferToAgent(InboxMessage inboxMessage, StringMatcher matcher) {
 	    	routeSession("agendsk");
 	    }

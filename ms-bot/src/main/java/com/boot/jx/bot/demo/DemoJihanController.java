@@ -84,6 +84,7 @@ public class DemoJihanController extends CommonBotController {
 	    switch(toReplyEnum(inboxMessage)) {
 		case "jd_new_order":
 			    reply(new OutboxMessage().template("jd_new_order_ans"));
+			    next("next_menu");
 			    break;
 		case "jd_edit_order":
 		case "jd_ord_follow_up":
@@ -93,19 +94,19 @@ public class DemoJihanController extends CommonBotController {
 			 break; 
 		case "jd_location":
 		    reply(new OutboxMessage().template("jd_our_location_ans"));
-		    next("our_location");
+		    next("next_menu");
 		    break;
 		case "jd_working_hrs":
 		    reply(new OutboxMessage().template("jd_working_hrs_ans"));
-		    next("working_hours");
+		    next("next_menu");
 		    break;
 		case "for_catering":
 		    reply(new OutboxMessage().template("jd_catering_ans"));
-		    next("for_catering");
+		    next("next_menu");
 		    break;
 		case "help":
 		    reply(new OutboxMessage().template("jd_help_ans"));
-		    next("help");
+		    next("next_menu");
 		    break; 
 		case "*":
 			this.goToMainMenu(inboxMessage, matcher);
@@ -121,7 +122,7 @@ public class DemoJihanController extends CommonBotController {
 	    }
 	   }
 	  
-	@ChatMapping(key = "dc_location_link_timing")
+	@ChatMapping(key = "next_menu")
 	public void locationLinkTiming(InboxMessage inboxMessage, StringMatcher matcher) {
 		switch (toReplyEnum(inboxMessage)) {
 		case "*":
@@ -131,9 +132,7 @@ public class DemoJihanController extends CommonBotController {
 			this.transferToAgent(inboxMessage, matcher);
 		    break;   
 		default :
-			reply(new OutboxMessage().template("invalid_input_response_std"));
-			reply(new OutboxMessage().template("dc_location_option"));
-			next("clinics-onselect");	
+			this.goToMainMenu(inboxMessage, matcher);
 		    break;     
 	
 		}
@@ -147,7 +146,7 @@ public class DemoJihanController extends CommonBotController {
 	    
 	    public void goToMainMenu(InboxMessage inboxMessage, StringMatcher matcher) {
 	    	reply(new OutboxMessage().template("jd_question"));
-			next("select-service-rechoose");
+	    	next("select-question");
 	    }
 	    
 	    
@@ -163,8 +162,7 @@ public class DemoJihanController extends CommonBotController {
 				this.transferToAgent(inboxMessage, matcher);
 			    break;   
 			default :
-				reply(new OutboxMessage().template("dc_services_rechoose"));
-				next("select-question");
+				this.goToMainMenu(inboxMessage, matcher);
 			    break;    
 	    	}
 	    	}

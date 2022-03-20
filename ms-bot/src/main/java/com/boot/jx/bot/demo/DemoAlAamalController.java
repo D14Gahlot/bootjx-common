@@ -47,6 +47,9 @@ public class DemoAlAamalController extends CommonBotController {
 	@Autowired
 	DemoCafeBazzaController cafeBazzaController;
 	
+	@Autowired
+	DemoArabiController arabiController;
+	
 	
 	
 	@ChatMapping(key = AlexBotConstants.KEY.INITIATE + "*", pattern = "^*$")
@@ -75,32 +78,37 @@ public class DemoAlAamalController extends CommonBotController {
 	    case "3":
 	    case "DUKKANBURGER"	:
 	    	routeSession("dukkanburgerbot");
+	    	dukkanBurController.start(inboxMessage, matcher);
 		return;
 	    case "4":
 	    case "ARABI"	:
 	    	routeSession("arabibot");
+	    	arabiController.start(inboxMessage, matcher);
 		return;
 	    case "5":
 	    case "GREENSKWT"	:
 	    	routeSession("greenskwtbot");
+	    	greensKwtController.start(inboxMessage, matcher);
 		return;
 	    case "6":
 	    case "JAIPUR"	:
 	    	routeSession("jaipurbot");
+	    	jaipurController.start(inboxMessage, matcher);
 		return;
 	    case "8":
 	    case "CAFEBAZZA"	:
 	    routeSession("cafebazzabot");
+	    cafeBazzaController.start(inboxMessage, matcher);
 		return;
 	    case "9":
 	    case "dietcaredlv"	:
 	    	routeSession("cafebazzabot");
+	    	dietCareDlvController.start(inboxMessage, matcher);
 		return;
 	    case "10":
 	    case "DIETCARECLINIC"	:
 	    	routeSession("dietcareclinicbot");
 	    	dietCareController.start(inboxMessage, matcher);
-	    	
 		return;
 	    default:
 		break;
