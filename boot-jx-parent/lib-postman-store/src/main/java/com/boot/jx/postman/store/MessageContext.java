@@ -11,10 +11,14 @@ import com.boot.jx.postman.ClientApp;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PMEnvironment.PMDomainConfig;
 import com.boot.jx.postman.doc.ChatContactDoc;
+import com.boot.jx.postman.doc.ChatMeta;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.ErrorObject;
+import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.MessageDefinitions.Contactable;
-import com.boot.jx.postman.model.MessageDefinitions.IMessageExtended;
+import com.boot.jx.postman.model.MessageDefinitions.IMessage;
+import com.boot.jx.postman.model.OutboxMessage;
+import com.boot.jx.postman.model.ext.InBoundEvent;
 import com.boot.jx.postman.query.ChatContactQuery;
 import com.boot.jx.postman.query.ChatSessionQuery;
 import com.boot.jx.scope.ThreadScoped;
@@ -25,118 +29,186 @@ import com.boot.utils.ArgUtil;
 @ThreadScoped
 public class MessageContext {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(MessageContext.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(MessageContext.class);
 
-    @Autowired
-    public MongoTemplate mongoTemplate;
+	private String currentHandler;
 
-    @Autowired
-    public CommonMongoTemplate commonMongoTemplate;
+	private ChatMeta meta;
 
-    // DTOs
-    private IMessageExtended message;
+	@Autowired
+	public MongoTemplate mongoTemplate;
 
-    @Autowired
-    private PMEnvironment pmEnvironment;
+	@Autowired
+	public CommonMongoTemplate commonMongoTemplate;
 
-    @Autowired
-    private PMDomainConfig pmDomainConfig;
+	@Autowired
+	private PMEnvironment pmEnvironment;
 
-    // QUERYs
-    private ChatContactQuery chatContactQuery;
-    private ChatSessionQuery chatSessionQuery;
-    @Autowired
-    private SessionStore sessionStore;
+	@Autowired
+	private PMDomainConfig pmDomainConfig;
 
-    public void setMessage(IMessageExtended message) {
-	this.message = message;
-    }
+	// DTOs
+	private OutboxMessage outboxMessage;
+	private InboxMessage inboxMessage;
+	private InBoundEvent event;
+	private Contactable contactable;
 
-    private Contactable getContactable() {
-	if (message != null) {
-	    return PostManUtil.getContactMeta(message.contact());
+	// QUERYs
+	private ChatContactQuery chatContactQuery;
+	private ChatSessionQuery chatSessionQuery;
+	@Autowired
+	private SessionStore sessionStore;
+
+	public void setOutboxMessage(OutboxMessage message) {
+		this.outboxMessage = message;
 	}
-	return null;
-    }
 
-    private ChatContactDoc getChatContactDoc() {
-	Contactable c = getContactable();
-	return commonMongoTemplate.findById(c.getContactId(), ChatContactDoc.class);
-    }
-
-    public ChatContactQuery contact() {
-	if (this.chatContactQuery == null) {
-	    ChatContactDoc chatContactDoc = this.getChatContactDoc();
-	    this.chatContactQuery = new ChatContactQuery(chatContactDoc);
+	public InboxMessage getInboxMessage() {
+		return inboxMessage;
 	}
-	return this.chatContactQuery;
-    }
 
-    public ChatSessionQuery session() {
-	if (chatSessionQuery == null) {
-	    ChatSessionDoc chatSessionDoc;
-	    chatSessionDoc = sessionStore.getSession(message.getSessionId());
-	    chatSessionQuery = new ChatSessionQuery(chatSessionDoc);
+	public void setInboxMessage(InboxMessage inboxMessage) {
+		this.inboxMessage = inboxMessage;
 	}
-	return chatSessionQuery;
-    }
 
-    public void commitChatContactQuery() {
-	if (this.chatContactQuery != null) {
-	    commonMongoTemplate.updateFirst(this.chatContactQuery);
+	public IMessage getMessage() {
+		if (ArgUtil.is(this.inboxMessage)) {
+			return this.inboxMessage;
+		} else {
+			return this.outboxMessage;
+		}
 	}
-    }
 
-    public ChatContactDoc commit() {
-	if (chatContactQuery != null) {
-	    sessionStore.update(chatContactQuery);
+	private Contactable getContactable() {
+		if (this.contactable == null) {
+			if (getMessage() != null) {
+				this.contactable = PostManUtil.getContactMeta(getMessage().contact());
+			} else if (this.event != null) {
+				this.contactable = PostManUtil.getContactMeta(this.event.contact());
+			}
+		}
+		return this.contactable;
 	}
-	if (chatSessionQuery != null) {
-	    sessionStore.update(chatSessionQuery);
+
+	private String getSessionId() {
+		if (getMessage() != null) {
+			return getMessage().getSessionId();
+		} else if (this.event != null) {
+			return this.event.sessionId;
+		}
+		return null;
 	}
-	return null;
-    }
 
-    public void log(ErrorObject error) {
-	commonMongoTemplate.save(error);
-    }
+	private String getQueueCode() {
+		if (getMessage() != null) {
+			return getMessage().session().getQueue();
+		} else if (this.event != null && this.event.sessionRouted != null) {
+			return this.event.sessionRouted.targetQueue;
+		}
+		return null;
+	}
 
-    public ClientApp clientApp(String assignedQueue, Contactable contactable) {
-	ClientApp defaultClient = null;
-	if (ArgUtil.is(assignedQueue)) {
-	    defaultClient = pmEnvironment.config().clientApiKey(assignedQueue);
+	private ChatContactDoc getChatContactDoc() {
+		Contactable c = getContactable();
+		return commonMongoTemplate.findById(c.getContactId(), ChatContactDoc.class);
+	}
 
-	    if (ArgUtil.is(defaultClient)) {
+	public ChatContactQuery contact() {
+		if (this.chatContactQuery == null) {
+			ChatContactDoc chatContactDoc = this.getChatContactDoc();
+			this.chatContactQuery = new ChatContactQuery(chatContactDoc);
+		}
+		return this.chatContactQuery;
+	}
+
+	public ChatSessionQuery session() {
+		if (chatSessionQuery == null) {
+			ChatSessionDoc chatSessionDoc;
+			chatSessionDoc = sessionStore.getSession(getSessionId());
+			chatSessionQuery = new ChatSessionQuery(chatSessionDoc);
+		}
+		return chatSessionQuery;
+	}
+
+	public void commitChatContactQuery() {
+		if (this.chatContactQuery != null) {
+			commonMongoTemplate.updateFirst(this.chatContactQuery);
+		}
+	}
+
+	public ChatContactDoc commit() {
+		if (chatContactQuery != null) {
+			sessionStore.update(chatContactQuery);
+		}
+		if (chatSessionQuery != null) {
+			sessionStore.update(chatSessionQuery);
+		}
+		return null;
+	}
+
+	public void log(ErrorObject error) {
+		commonMongoTemplate.save(error);
+	}
+
+	public ClientApp clientApp(String assignedQueue, Contactable contactable) {
+		ClientApp defaultClient = null;
+		if (ArgUtil.is(assignedQueue)) {
+			defaultClient = pmEnvironment.config().clientApiKey(assignedQueue);
+
+			if (ArgUtil.is(defaultClient)) {
+				return defaultClient;
+			}
+		}
+
+		if (!ArgUtil.is(contactable)) {
+			return defaultClient;
+		}
+
+		assignedQueue = pmDomainConfig.getDefaultInboundQueue(contactable);
+
+		if (ArgUtil.is(assignedQueue)) {
+			defaultClient = pmEnvironment.config().clientApiKey(assignedQueue);
+
+			if (ArgUtil.is(defaultClient)) {
+				return defaultClient;
+			}
+		}
+
 		return defaultClient;
-	    }
 	}
 
-	if (!ArgUtil.is(contactable)) {
-	    return defaultClient;
+	public ClientApp clientApp() {
+		if (ArgUtil.is(getMessage())) {
+			return this.clientApp(getQueueCode(), getContactable());
+		}
+		return this.clientApp(null, null);
 	}
 
-	assignedQueue = pmDomainConfig.getDefaultInboundQueue(contactable);
-
-	if (ArgUtil.is(assignedQueue)) {
-	    defaultClient = pmEnvironment.config().clientApiKey(assignedQueue);
-
-	    if (ArgUtil.is(defaultClient)) {
-		return defaultClient;
-	    }
+	public ChatMeta meta() {
+		if (this.meta == null) {
+			this.meta = new ChatMeta();
+		}
+		return meta;
 	}
 
-	return defaultClient;
-    }
-
-    public ClientApp clientApp() {
-	if (ArgUtil.is(message)) {
-	    return this.clientApp(message.session().getQueue(), message.contact());
+	public ChatMeta getMeta() {
+		return meta;
 	}
-	return this.clientApp(null, null);
-    }
 
-    public IMessageExtended getMessage() {
-	return message;
-    }
+	public void setMeta(ChatMeta meta) {
+		this.meta = meta;
+	}
+
+	public String getCurrentHandler() {
+		return currentHandler;
+	}
+
+	public void setCurrentHandler(String currentHandler) {
+		this.currentHandler = currentHandler;
+	}
+
+	public void setInBoundEvent(InBoundEvent event) {
+		this.event = event;
+	}
 
 }

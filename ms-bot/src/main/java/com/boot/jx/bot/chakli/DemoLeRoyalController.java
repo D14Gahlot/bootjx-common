@@ -1,9 +1,6 @@
 package com.boot.jx.bot.chakli;
 
-import org.springframework.beans.factory.annotation.Autowired;
-
 import com.boot.jx.bot.BotController;
-import com.boot.jx.bot.ChatContext;
 import com.boot.jx.bot.ChatMapping;
 import com.boot.jx.bot.alex.AlexBotConstants;
 import com.boot.jx.bot.alex.CommonBotController;

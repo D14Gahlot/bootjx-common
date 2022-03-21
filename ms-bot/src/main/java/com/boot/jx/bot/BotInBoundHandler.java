@@ -20,33 +20,33 @@ import com.boot.utils.ArgUtil;
 @Component
 public class BotInBoundHandler extends DefaultChatBoundHandler {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(BotInBoundHandler.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(BotInBoundHandler.class);
 
-    @Autowired
-    private BotEngine botEngine;
+	@Autowired
+	private BotEngine botEngine;
 
-    @Override
-    public void onMessage(InboxMessage inboxMessage, ChatSessionDoc session) {
-	botEngine.invokeMethodsAsync(inboxMessage);
-    }
-
-    @Override
-    public void doHandle(MessageReport messageReport) {
-	LOGGER.debug("No Handling Required for Status on BotSide");
-    }
-
-    @Override
-    public void onSessionRoute(InBoundEvent event, ChatSessionDoc sessionDoc, PMArgs pmArgs) {
-	ClientApp defaultClient = context().clientApp(event.sessionRouted.targetQueue, null);
-	if (ArgUtil.is(defaultClient)) {
-	    APP_TYPE appType = APP_TYPE.from(defaultClient.getAppType());
-	    if (CHAT_MODE.BOT.equals(appType.getMode())) {
-		//Bot Specific
-	    } else {
-		super.onSessionRoute(event, sessionDoc, pmArgs);
-	    }
+	@Override
+	public void onMessage(InboxMessage inboxMessage, ChatSessionDoc session) {
+		botEngine.invokeMethodsAsync(inboxMessage);
 	}
 
-    }
+	@Override
+	public void doHandle(MessageReport messageReport) {
+		LOGGER.debug("No Handling Required for Status on BotSide");
+	}
+
+	@Override
+	public void onSessionRoute(InBoundEvent event, ChatSessionDoc sessionDoc, PMArgs pmArgs) {
+		ClientApp defaultClient = context().clientApp(event.sessionRouted.targetQueue, null);
+		if (ArgUtil.is(defaultClient)) {
+			APP_TYPE appType = APP_TYPE.from(defaultClient.getAppType());
+			if (CHAT_MODE.BOT.equals(appType.getMode())) {
+				botEngine.routeSession(sessionDoc, event);
+			} else {
+				super.onSessionRoute(event, sessionDoc, pmArgs);
+			}
+		}
+
+	}
 
 }

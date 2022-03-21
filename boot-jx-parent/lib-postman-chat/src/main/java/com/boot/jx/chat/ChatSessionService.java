@@ -30,200 +30,200 @@ import com.boot.utils.ArgUtil;
 @Component
 public class ChatSessionService {
 
-    private static final Logger LOGGER = LoggerService.getLogger(ChatSessionService.class);
+	private static final Logger LOGGER = LoggerService.getLogger(ChatSessionService.class);
 
-    @Autowired
-    private PMDomainConfig pmDomainConfig;
+	@Autowired
+	private PMDomainConfig pmDomainConfig;
 
-    @Autowired
-    private ChatSessionManager chatSessionManager;
+	@Autowired
+	private ChatSessionManager chatSessionManager;
 
-    @Autowired
-    private ConnectorHandlerFactory connectorHandlerFactory;
+	@Autowired
+	private ConnectorHandlerFactory connectorHandlerFactory;
 
-    @Autowired
-    private ChatService chatService;
+	@Autowired
+	private ChatService chatService;
 
-    @Autowired
-    private MessageContext messageContext;
+	@Autowired
+	private MessageContext messageContext;
 
-    @Autowired
-    private SessionStore sessionStore;
+	@Autowired
+	private SessionStore sessionStore;
 
-    @Autowired
-    private ChatClient chatClient;
+	@Autowired
+	private ChatClient chatClient;
 
-    @Autowired(required = false)
-    private InBoundHandler inBoundHandler;
+	@Autowired(required = false)
+	private InBoundHandler inBoundHandler;
 
-    @Autowired
-    private LogManager logManager;
+	@Autowired
+	private LogManager logManager;
 
-    public boolean initSession(InboxMessage inboxMessage, ChatSessionDoc session) {
-	boolean initd = session.isInitd();
-	if (initd) {
-	    return true;
-	}
-	ConnectorHandler connector = connectorHandlerFactory.get(inboxMessage.contact().type(),
-		inboxMessage.contact().getChannelType());
-
-	if (ArgUtil.is(connector)) {
-	    try {
-		OutboxMessage reply = connector.initSession(session, inboxMessage);
-		if (ArgUtil.is(reply)) {
-		    try {
-			if (!OutboxMessage.NO_MESSAGE.equals(reply))
-			    chatService.reply(inboxMessage, reply);
-			initd = false;
-		    } catch (InterruptedException e) {
-			LOGGER.error("Errror While Replying To Sesion Init Message", e);
-		    }
-		} else {
-		    initd = true;
+	public boolean initSession(InboxMessage inboxMessage, ChatSessionDoc session) {
+		boolean initd = session.isInitd();
+		if (initd) {
+			return true;
 		}
-	    } catch (Exception e) {
-		logManager.error(inboxMessage, e);
-	    }
-	    messageContext.commitChatContactQuery();
+		ConnectorHandler connector = connectorHandlerFactory.get(inboxMessage.contact().type(),
+				inboxMessage.contact().getChannelType());
+
+		if (ArgUtil.is(connector)) {
+			try {
+				OutboxMessage reply = connector.initSession(session, inboxMessage);
+				if (ArgUtil.is(reply)) {
+					try {
+						if (!OutboxMessage.NO_MESSAGE.equals(reply))
+							chatService.reply(inboxMessage, reply);
+						initd = false;
+					} catch (InterruptedException e) {
+						LOGGER.error("Errror While Replying To Sesion Init Message", e);
+					}
+				} else {
+					initd = true;
+				}
+			} catch (Exception e) {
+				logManager.error(inboxMessage, e);
+			}
+			messageContext.commitChatContactQuery();
+		}
+
+		if (initd) {
+			InBoundEvent sessionInitEvent = chatSessionManager.initSession(inboxMessage, session);
+			if (ArgUtil.is(inBoundHandler)) {
+				inBoundHandler.onSessionInit(sessionInitEvent, session);
+			}
+			this.routeSession(session);
+		}
+
+		inboxMessage.session().setQueue(session.getAssignedToQueue());
+		inboxMessage.session().setDept(session.getAssignedToDept());
+		inboxMessage.session().setAgent(session.getAssignedToAgent());
+		inboxMessage.session().setBot(session.getAssignedToBot());
+
+		return session.isInitd();
 	}
 
-	if (initd) {
-	    InBoundEvent sessionInitEvent = chatSessionManager.initSession(inboxMessage, session);
-	    if (ArgUtil.is(inBoundHandler)) {
-		inBoundHandler.onSessionInit(sessionInitEvent, session);
-	    }
-	    this.routeSession(session);
+	public boolean initSession(OutboxMessage outboxMessage, ChatSessionDoc session) {
+		boolean initd = session.isInitd();
+		if (initd) {
+			return true;
+		}
+		ConnectorHandler connector = connectorHandlerFactory.get(outboxMessage.contact().type(),
+				outboxMessage.contact().getChannelType());
+
+		messageContext.setOutboxMessage(outboxMessage);
+		ChatContactQuery contactQuery = messageContext.contact();
+		if (ArgUtil.is(connector)) {
+			initd = connector.initSession(contactQuery, session, outboxMessage);
+			// TODO:-- Validate if saving is required in case of outbound
+			// sessionStore.save(contact);
+		}
+		if (initd) {
+			session = sessionStore.initSession(session);
+		}
+		return session.isInitd();
 	}
 
-	inboxMessage.session().setQueue(session.getAssignedToQueue());
-	inboxMessage.session().setDept(session.getAssignedToDept());
-	inboxMessage.session().setAgent(session.getAssignedToAgent());
-	inboxMessage.session().setBot(session.getAssignedToBot());
+	@Async
+	public void initSessionPost(InboxMessage inboxMessage, ChatSessionDoc session) {
+		ChatContactDoc contact = sessionStore.getContact(inboxMessage);
+		try {
+			ChatUserProfileRequest chatUserProfileRequest = new ChatUserProfileRequest();
+			chatUserProfileRequest.setEmail(contact.getEmail());
+			chatUserProfileRequest.setMobile(contact.getPhone());
+			chatUserProfileRequest.setContactId(contact.getContactId());
+			chatUserProfileRequest.setContactType(contact.getContactType());
+			chatUserProfileRequest.setLane(contact.getLane());
+			chatUserProfileRequest.setProfileId(contact.getProfileId());
+			ChatUserProfileDTO profile = chatClient.fetchContactDetails(chatUserProfileRequest);
 
-	return session.isInitd();
-    }
+			contact = sessionStore.getContact(inboxMessage);
+			if (ArgUtil.is(profile.getProfileId())) {
+				sessionStore.save(profile);
+				contact.setProfileId(profile.getProfileId());
+			} else {
+				contact.setProfile(profile);
+			}
+			sessionStore.save(contact);
+		} catch (Exception e) {
 
-    public boolean initSession(OutboxMessage outboxMessage, ChatSessionDoc session) {
-	boolean initd = session.isInitd();
-	if (initd) {
-	    return true;
-	}
-	ConnectorHandler connector = connectorHandlerFactory.get(outboxMessage.contact().type(),
-		outboxMessage.contact().getChannelType());
-
-	messageContext.setMessage(outboxMessage);
-	ChatContactQuery contactQuery = messageContext.contact();
-	if (ArgUtil.is(connector)) {
-	    initd = connector.initSession(contactQuery, session, outboxMessage);
-	    // TODO:-- Validate if saving is required in case of outbound
-	    // sessionStore.save(contact);
-	}
-	if (initd) {
-	    session = sessionStore.initSession(session);
-	}
-	return session.isInitd();
-    }
-
-    @Async
-    public void initSessionPost(InboxMessage inboxMessage, ChatSessionDoc session) {
-	ChatContactDoc contact = sessionStore.getContact(inboxMessage);
-	try {
-	    ChatUserProfileRequest chatUserProfileRequest = new ChatUserProfileRequest();
-	    chatUserProfileRequest.setEmail(contact.getEmail());
-	    chatUserProfileRequest.setMobile(contact.getPhone());
-	    chatUserProfileRequest.setContactId(contact.getContactId());
-	    chatUserProfileRequest.setContactType(contact.getContactType());
-	    chatUserProfileRequest.setLane(contact.getLane());
-	    chatUserProfileRequest.setProfileId(contact.getProfileId());
-	    ChatUserProfileDTO profile = chatClient.fetchContactDetails(chatUserProfileRequest);
-
-	    contact = sessionStore.getContact(inboxMessage);
-	    if (ArgUtil.is(profile.getProfileId())) {
-		sessionStore.save(profile);
-		contact.setProfileId(profile.getProfileId());
-	    } else {
-		contact.setProfile(profile);
-	    }
-	    sessionStore.save(contact);
-	} catch (Exception e) {
-
-	}
-    }
-
-    public InBoundEvent routeSession(ChatSessionDoc sessionDoc, PMArgs pmArgs) {
-	InBoundEvent event = chatSessionManager.assignToQueue(sessionDoc, pmArgs.getAssignToQueueCode());
-	event.sessionRouted.params = pmArgs.getParams();
-	if (ArgUtil.is(inBoundHandler)) {
-	    inBoundHandler.onSessionRouteAsync(event, sessionDoc, pmArgs);
-	}
-	return event;
-    }
-
-    public InBoundEvent routeSession(ChatSessionDoc session) {
-	if (ArgUtil.isEmptyValue(session.getAssignedToQueue()) || ArgUtil.isEmptyValue(session.getMode())) {
-	    String defaultQueue = pmDomainConfig.getDefaultInboundQueue(session.contact());
-	    return routeSession(session, new PMArgs().assignToQueueCode(defaultQueue));
-	}
-	return null;
-    }
-
-    public InBoundEvent routeSession(String sessionId, PMArgs pmArgs) {
-	ChatSessionDoc sessionDoc = sessionStore.getSession(sessionId);
-	return routeSession(sessionDoc, pmArgs);
-    }
-
-    public NodeEntry<InBoundEvent> updateSessionStatus(ChatSessionDoc sessionDoc, CHAT_STATUS status) {
-	NodeEntry<InBoundEvent> eventEntry = new NodeEntry<InBoundEvent>();
-
-	if (!ArgUtil.is(status)) {
-	    return eventEntry;
+		}
 	}
 
-	String oldStatus = sessionDoc.getStatus();
-	if (status.toString().equalsIgnoreCase(oldStatus)) {
-	    return eventEntry;
+	public InBoundEvent routeSession(ChatSessionDoc sessionDoc, PMArgs pmArgs) {
+		InBoundEvent event = chatSessionManager.assignToQueue(sessionDoc, pmArgs.getAssignToQueueCode());
+		event.sessionRouted.params = pmArgs.getParams();
+		if (ArgUtil.is(inBoundHandler)) {
+			inBoundHandler.onSessionRouteAsync(event, sessionDoc, pmArgs);
+		}
+		return event;
 	}
-	if (status == PMConstants.CHAT_STATUS.RESOLVED) {
-	    NodeEntry<InBoundEvent> eventEntry2 = chatSessionManager.resolveSession(sessionDoc);
-	    if (ArgUtil.is(inBoundHandler)) {
-		inBoundHandler.onSessionResolveAsync(eventEntry2.getValue(), sessionDoc);
-	    }
-	    return eventEntry2;
-	} else if (status == PMConstants.CHAT_STATUS.CLOSED) {
-	    InBoundEvent event = chatSessionManager.closeSession(sessionDoc);
-	    if (ArgUtil.is(inBoundHandler)) {
-		inBoundHandler.onSessionCloseAsync(event, sessionDoc);
-	    }
-	    return eventEntry.value(event);
-	} else {
-	    InBoundEvent event = chatSessionManager.updateStatus(sessionDoc, status);
-	    return eventEntry.value(event);
+
+	public InBoundEvent routeSession(ChatSessionDoc session) {
+		if (ArgUtil.isEmptyValue(session.getAssignedToQueue()) || ArgUtil.isEmptyValue(session.getMode())) {
+			String defaultQueue = pmDomainConfig.getDefaultInboundQueue(session.contact());
+			return routeSession(session, new PMArgs().assignToQueueCode(defaultQueue));
+		}
+		return null;
 	}
-    }
 
-    public NodeEntry<InBoundEvent> closeSession(ChatSessionDoc chatSessionDoc) {
-	if (!chatSessionDoc.isResolved()) {
-	    updateSessionStatus(chatSessionDoc, PMConstants.CHAT_STATUS.RESOLVED);
+	public InBoundEvent routeSession(String sessionId, PMArgs pmArgs) {
+		ChatSessionDoc sessionDoc = sessionStore.getSession(sessionId);
+		return routeSession(sessionDoc, pmArgs);
 	}
-	return updateSessionStatus(chatSessionDoc, PMConstants.CHAT_STATUS.CLOSED);
-    }
 
-    public NodeEntry<InBoundEvent> closeSession(String sessionId) {
-	ChatSessionDoc sessionDoc = sessionStore.getSession(sessionId);
-	return closeSession(sessionDoc);
-    }
+	public NodeEntry<InBoundEvent> updateSessionStatus(ChatSessionDoc sessionDoc, CHAT_STATUS status) {
+		NodeEntry<InBoundEvent> eventEntry = new NodeEntry<InBoundEvent>();
 
-    public NodeEntry<InBoundEvent> assignSessionToAgent(PMArgs params) {
-	ChatSessionDoc sessionDoc = sessionStore.getSession(params.getSessionId());
-	return inBoundHandler.assignSessionToAgent(params, sessionDoc);
-    }
+		if (!ArgUtil.is(status)) {
+			return eventEntry;
+		}
 
-    public NodeEntry<InBoundEvent> assignSessionToAgent(ChatSessionDoc sessionDoc, PMArgs params) {
-	return inBoundHandler.assignSessionToAgent(params, sessionDoc);
-    }
+		String oldStatus = sessionDoc.getStatus();
+		if (status.toString().equalsIgnoreCase(oldStatus)) {
+			return eventEntry;
+		}
+		if (status == PMConstants.CHAT_STATUS.RESOLVED) {
+			NodeEntry<InBoundEvent> eventEntry2 = chatSessionManager.resolveSession(sessionDoc);
+			if (ArgUtil.is(inBoundHandler)) {
+				inBoundHandler.onSessionResolveAsync(eventEntry2.getValue(), sessionDoc);
+			}
+			return eventEntry2;
+		} else if (status == PMConstants.CHAT_STATUS.CLOSED) {
+			InBoundEvent event = chatSessionManager.closeSession(sessionDoc);
+			if (ArgUtil.is(inBoundHandler)) {
+				inBoundHandler.onSessionCloseAsync(event, sessionDoc);
+			}
+			return eventEntry.value(event);
+		} else {
+			InBoundEvent event = chatSessionManager.updateStatus(sessionDoc, status);
+			return eventEntry.value(event);
+		}
+	}
 
-    public InBoundEvent sessionEvent(InBoundEvent event, PMArgs params) {
-	return inBoundHandler.onSessionEvent(event, params);
-    }
+	public NodeEntry<InBoundEvent> closeSession(ChatSessionDoc chatSessionDoc) {
+		if (!chatSessionDoc.isResolved()) {
+			updateSessionStatus(chatSessionDoc, PMConstants.CHAT_STATUS.RESOLVED);
+		}
+		return updateSessionStatus(chatSessionDoc, PMConstants.CHAT_STATUS.CLOSED);
+	}
+
+	public NodeEntry<InBoundEvent> closeSession(String sessionId) {
+		ChatSessionDoc sessionDoc = sessionStore.getSession(sessionId);
+		return closeSession(sessionDoc);
+	}
+
+	public NodeEntry<InBoundEvent> assignSessionToAgent(PMArgs params) {
+		ChatSessionDoc sessionDoc = sessionStore.getSession(params.getSessionId());
+		return inBoundHandler.assignSessionToAgent(params, sessionDoc);
+	}
+
+	public NodeEntry<InBoundEvent> assignSessionToAgent(ChatSessionDoc sessionDoc, PMArgs params) {
+		return inBoundHandler.assignSessionToAgent(params, sessionDoc);
+	}
+
+	public InBoundEvent sessionEvent(InBoundEvent event, PMArgs params) {
+		return inBoundHandler.onSessionEvent(event, params);
+	}
 
 }

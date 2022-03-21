@@ -86,7 +86,7 @@ public class ChatClient {
 	event.setChecksum(PostManUtil.generateCheckSum(event));
 	pmArgs.setChecksum(PostManUtil.generateCheckSum(pmArgs));
 	restService.ajax(pmCommonConfig.getBotUrl()).path(PATH.SESSION_EVENT)
-		.post(MapModel.createInstance().put("event", event).put("pmArgs", pmArgs)).asNone();
+		.post(MapModel.createInstance().put("event", event).put("pmArgs", pmArgs).toMap()).asNone();
     }
 
     public ChatUserProfileDTO fetchContactDetails(ChatUserProfileRequest chatUserProfileRequest) {

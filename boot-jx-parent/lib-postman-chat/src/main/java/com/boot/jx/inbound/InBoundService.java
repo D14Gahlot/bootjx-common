@@ -169,7 +169,7 @@ public class InBoundService {
 	    chatSessionFactory.push(messageDoc, inboxMessageOriginal);
 	}
 
-	messageContext.setMessage(inboxMessageOriginal);
+	messageContext.setInboxMessage(inboxMessageOriginal);
 
 	if (locallySessionAssigned && ArgUtil.is(session)) {
 	    boolean wasSessionInitd = session.isInitd();

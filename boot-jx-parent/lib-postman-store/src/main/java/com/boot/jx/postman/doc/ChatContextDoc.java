@@ -21,24 +21,6 @@ public class ChatContextDoc implements Serializable {
     private String contactId;
 
     ChatMeta meta;
-    Object session;
-    Object user;
-
-    public Object getSession() {
-	return session;
-    }
-
-    public void setSession(Object session) {
-	this.session = session;
-    }
-
-    public Object getUser() {
-	return user;
-    }
-
-    public void setUser(Object user) {
-	this.user = user;
-    }
 
     public ChatMeta getMeta() {
 	return meta;

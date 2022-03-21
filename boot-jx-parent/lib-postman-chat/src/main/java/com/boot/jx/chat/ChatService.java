@@ -5,7 +5,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Component;
 
-import com.boot.jx.bot.ChatContext;
 import com.boot.jx.logger.LoggerService;
 import com.boot.jx.postman.PMConstants;
 import com.boot.jx.postman.PMConstants.MESSAGE_COMPOSE_TYPE;
@@ -19,9 +18,9 @@ import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.manager.LogManager;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.Message;
-import com.boot.jx.postman.model.MessageDefinitions.IMessage;
 import com.boot.jx.postman.model.MessageDefinitions.IMessageExtended;
 import com.boot.jx.postman.model.OutboxMessage;
+import com.boot.jx.postman.store.MessageContext;
 import com.boot.jx.postman.store.MessageStore;
 import com.boot.jx.postman.store.SessionStore;
 import com.boot.utils.ArgUtil;
@@ -36,7 +35,7 @@ public class ChatService {
     private MongoTemplate mongoTemplate;
 
     @Autowired
-    private ChatContext chatContext;
+    private MessageContext messageContext;
 
     @Autowired
     private ChatClient chatClient;
@@ -54,14 +53,14 @@ public class ChatService {
     private ChatSessionFactory chatSessionFactory;
 
     public InboxMessage getInboxMessage() {
-	return chatContext.getInboxMessage();
+	return messageContext.getInboxMessage();
     }
 
     @Autowired
     private ConnectorHandlerFactory connectorHandlerFactory;
 
-    public ChatContext getChatContext() {
-	return chatContext;
+    public MessageContext context() {
+	return messageContext;
     }
 
     public ChatClient getClient() {
@@ -224,13 +223,13 @@ public class ChatService {
     }
 
     public boolean beforeMessageHandler() {
-	InboxMessage inboxMessage = chatContext.getInboxMessage();
+	InboxMessage inboxMessage = messageContext.getInboxMessage();
 	if (ArgUtil.is(inboxMessage)) {
 	}
 	return true;
     }
 
-    public ChatContext loadChatContext(String contactId, InboxMessage inboxMessage) {
+    public MessageContext loadChatContext(String contactId, InboxMessage inboxMessage) {
 
 	if (!ArgUtil.is(inboxMessage.session().getMode())) {
 	    ChatSessionDoc sessionDoc = sessionStore.getSession(inboxMessage.getSessionId());
@@ -247,39 +246,32 @@ public class ChatService {
 
 	ChatContextDoc doc = mongoTemplate.findById(contactId, ChatContextDoc.class);
 	if (ArgUtil.is(doc)) {
-	    chatContext.getDataStore().loadUserData(doc.getUser());
 	    if (ArgUtil.is(doc.getMeta()) && !TimeUtils.isExpired(doc.getMeta().getUpdateStamp(), "5min")) {
-		chatContext.setMeta(doc.getMeta());
-		chatContext.getDataStore().loadSessionData(doc.getSession());
+		messageContext.setMeta(doc.getMeta());
 	    } else {
-		chatContext.getDataStore().loadSessionData(null);
-		chatContext.setMeta(new ChatMeta());
+		messageContext.setMeta(new ChatMeta());
 	    }
 	} else {
-	    chatContext.getDataStore().loadUserData(null);
-	    chatContext.getDataStore().loadSessionData(null);
-	    chatContext.setMeta(new ChatMeta());
+	    messageContext.setMeta(new ChatMeta());
 	}
-	chatContext.setInboxMessage(inboxMessage);
+	messageContext.setInboxMessage(inboxMessage);
 	// messageStore.create(inboxMessage);
-	return chatContext;
+	return messageContext;
     }
 
     public void commitChatContext(String contactId, String prevHandler, InboxMessage inboxMessage) {
 	ChatContextDoc doc = new ChatContextDoc();
 	doc.setContactId(contactId);
-	chatContext.meta().setPrevHandler(prevHandler);
-	chatContext.meta().setUpdateStamp(System.currentTimeMillis());
+	messageContext.meta().setPrevHandler(prevHandler);
+	messageContext.meta().setUpdateStamp(System.currentTimeMillis());
 
-	doc.setUser(chatContext.getDataStore().getUserData());
-	doc.setSession(chatContext.getDataStore().getSessionData());
-	doc.setMeta(chatContext.getMeta());
+	doc.setMeta(messageContext.getMeta());
 
 	if (ArgUtil.is(prevHandler)) {
 	    messageStore.setHandler(inboxMessage, prevHandler);
 	}
 	mongoTemplate.save(doc);
-	chatContext.commit();
+	messageContext.commit();
     }
 
     public boolean botScore(ChatSessionDoc session, Integer botScore) {
