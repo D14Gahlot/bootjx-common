@@ -213,5 +213,13 @@ public class DemoDukkanBurController extends CommonBotController {
 	}
 	return booValue;
     }
+    
+    public void next(String key) {
+		String handelrName = key;
+		if (ArgUtil.is(this.controllerName)) {
+			handelrName = this.controllerName + "#" + key;
+		}
+		context().meta().setNextHandler(handelrName);
+	}
 
 }

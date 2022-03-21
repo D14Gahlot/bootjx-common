@@ -94,7 +94,6 @@ public class DemoAlAamalController extends CommonBotController {
 	    case "10":
 	    case "DIETCARECLINIC":
 		routeSession("dietcareclinicbot");
-		//dietCareController.start(inboxMessage, matcher);
 		return;
 	    default:
 		break;

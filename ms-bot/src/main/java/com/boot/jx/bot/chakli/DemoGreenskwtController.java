@@ -66,7 +66,7 @@ public class DemoGreenskwtController extends CommonBotController {
 	if (lang.equalsIgnoreCase("english") || (lang != null && lang.equalsIgnoreCase("en"))) {
 	    context().contact().setLang("en");
 	    context().commit();
-	    reply(new OutboxMessage().template("ar_question"));
+	    reply(new OutboxMessage().template("gr_question"));
 	    next("select-question");
 	} else if (lang.equalsIgnoreCase("العربية") || (lang != null && lang.equalsIgnoreCase("ar"))) {
 	    context().contact().setLang("ar");
