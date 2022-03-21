@@ -7,6 +7,7 @@ import com.boot.jx.bot.BotController;
 import com.boot.jx.bot.ChatMapping;
 import com.boot.jx.bot.alex.AlexBotConstants;
 import com.boot.jx.bot.alex.CommonBotController;
+import com.boot.jx.bot.chakli.Demo5Controller;
 import com.boot.jx.dict.FileType;
 import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.InboxMessage;

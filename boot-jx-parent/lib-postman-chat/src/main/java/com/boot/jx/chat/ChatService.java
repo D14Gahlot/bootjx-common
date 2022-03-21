@@ -279,7 +279,7 @@ public class ChatService {
 	    messageStore.setHandler(inboxMessage, prevHandler);
 	}
 	mongoTemplate.save(doc);
-	chatContext.commitContact();
+	chatContext.commit();
     }
 
     public boolean botScore(ChatSessionDoc session, Integer botScore) {

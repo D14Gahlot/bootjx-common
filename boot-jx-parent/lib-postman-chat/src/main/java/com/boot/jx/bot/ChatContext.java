@@ -7,10 +7,8 @@ import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatMeta;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.query.ChatContactQuery;
-import com.boot.jx.postman.query.ChatSessionQuery;
 import com.boot.jx.postman.store.BasicChatDataStore;
 import com.boot.jx.postman.store.MessageContext;
-import com.boot.jx.postman.store.SessionStore;
 import com.boot.jx.scope.ThreadScoped;
 
 @Component
@@ -47,7 +45,7 @@ public class ChatContext {
 	return messageContext.contact();
     }
 
-    public ChatContactDoc commitContact() {
+    public ChatContactDoc commit() {
 	return messageContext.commit();
     }
 

@@ -1,4 +1,4 @@
-package com.boot.jx.bot.demo;
+package com.boot.jx.bot.chakli;
 
 import java.time.LocalTime;
 import java.time.ZoneId;
@@ -12,7 +12,6 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 
 import com.boot.jx.bot.BotController;
-import com.boot.jx.bot.ChatContext;
 import com.boot.jx.bot.ChatMapping;
 import com.boot.jx.bot.alex.AlexBotConstants;
 import com.boot.jx.bot.alex.CommonBotController;
@@ -24,17 +23,13 @@ import com.boot.model.SafeKeyHashMap;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.StringUtils.StringMatcher;
 
-@BotController(name = "DemoBot", code = { "chakli_dukkanburgerbot" })
-public class DemoDukkanBurController extends CommonBotController {
+@BotController(name = "almamaalholding", code = { "chakli_marsabot" })
+public class DemoAlMarsaController extends CommonBotController {
 	
-public static final String REPLY_ID = "reply_id";	
+	public static final String REPLY_ID = "reply_id";	
 	
 	public static final String TALK_TO_AGENT = "";	
 
-	  
-	    @Autowired
-	    private ChatContext chatContext;
-	
 	    @Autowired
 	    PMEnvironment pmEnvironment;
 	   
@@ -43,7 +38,8 @@ public static final String REPLY_ID = "reply_id";
 	    
 	    @ChatMapping(key = AlexBotConstants.KEY.INITIATE + "*", pattern = "^*$")
 	    public void start(InboxMessage inboxMessage, StringMatcher matcher) {
-	   	reply(new OutboxMessage().template("db_welcome_msg").put("name", chatContext.contact().getName()));
+		
+	    	reply(new OutboxMessage().template("ma_welcome_msg").put("name", context().contact().getName()));
 	    	next("select-language");
 	    }
 	    
@@ -52,26 +48,26 @@ public static final String REPLY_ID = "reply_id";
 	    public void languageOnSelect(InboxMessage inboxMessage, StringMatcher matcher) {
 	    String lang =toReplyEnum(inboxMessage); 
 	 	  if(!ArgUtil.is(lang)) {
-	 		 lang= ArgUtil.parseAsString(chatContext.contact().getLang());
+	 		 lang= ArgUtil.parseAsString(context().contact().getLang());
 	 	  }
 	 	 
 	     //if(!timeCheck()) {
 	    //	 reply(new OutboxMessage().template("working_hours_update"));
 	    // }else {
 		    if(lang.equalsIgnoreCase("english") || (lang!=null && lang.equalsIgnoreCase("en"))) {
-		    	 chatContext.contact().setLang("en");
-		    	 chatContext.commitContact();
-		    	 reply(new OutboxMessage().template("db_question"));
+		    	 context().contact().setLang("en");
+		    	 context().commit();
+		    	 reply(new OutboxMessage().template("ma_question"));
 		    	 next("select-question");
 		    }else if(lang.equalsIgnoreCase("العربية") || (lang!=null &&  lang.equalsIgnoreCase("ar"))) {
-		    	 chatContext.contact().setLang("ar");
-		    	 chatContext.commitContact();
-		    	reply(new OutboxMessage().template("db_question"));
+		    	 context().contact().setLang("ar");
+		    	 context().commit();
+		    	reply(new OutboxMessage().template("ma_question"));
 		    	 next("select-question");
 		    } else{
-		    	chatContext.contact().setLang("en");
-		    	 chatContext.commitContact();
-		    	reply(new OutboxMessage().template("db_question"));
+		    	context().contact().setLang("en");
+		    	 context().commit();
+		    	reply(new OutboxMessage().template("ma_question"));
 		    	next("select-question");
 		    }
 	     //} 
@@ -79,26 +75,32 @@ public static final String REPLY_ID = "reply_id";
 	  
 	    @ChatMapping(key = "select-question")
 	    public void seviceOnSelect(InboxMessage inboxMessage, StringMatcher matcher) {
-	    checkValue("db_question",toReplyEnum(inboxMessage));
+	    checkValue("ma_question",toReplyEnum(inboxMessage));
 	    switch(toReplyEnum(inboxMessage)) {
-		case "db_new_order":
-			    reply(new OutboxMessage().template("db_new_order_ans"));
+		case "ma_new_order":
+			    reply(new OutboxMessage().template("ma_new_order_ans"));
 			    next("next_menu");
 			    break;
-		case "db_edit_order":
-		case "db_ord_follow_up":
+		case "ma_edit_order":
+		case "ma_order_follow_up":
+		case "ma_reservation":
+		case "ma_edit_reservation":	
 			 this.transferToAgent(inboxMessage, matcher);	
 			 break; 
-		case "db_location":
-		    reply(new OutboxMessage().template("db_our_location_ans"));
+		case "ma_location":
+		    reply(new OutboxMessage().template("ma_location_ans"));
 		    next("next_menu");
 		    break;
-		case "db_working_hrs":
-		    reply(new OutboxMessage().template("db_working_hrs_ans"));
+		case "ma_working_hours":
+		    reply(new OutboxMessage().template("ma_working_hrs_ans"));
 		    next("next_menu");
 		    break;
-		case "db_help":
-		    reply(new OutboxMessage().template("db_help_ans"));
+		case "ma_catering":
+		    reply(new OutboxMessage().template("ma_catering_ans"));
+		    next("next_menu");
+		    break;
+		case "ma_help":
+		    reply(new OutboxMessage().template("ma_help_ans"));
 		    next("next_menu");
 		    break; 
 		case "*":
@@ -108,8 +110,8 @@ public static final String REPLY_ID = "reply_id";
 			  this.transferToAgent(inboxMessage, matcher);
 		    break;   
 		default :
-		    reply(new OutboxMessage().template("db_invalid_option"));
-		    reply(new OutboxMessage().template("db_question"));
+		    reply(new OutboxMessage().template("ma_invalid_option"));
+		    reply(new OutboxMessage().template("ma_question"));
 		    break; 
 	   
 	    }
@@ -131,20 +133,18 @@ public static final String REPLY_ID = "reply_id";
 		}
 	}
 		   
-		
-	    @ChatMapping(key = "jd_cs_to_contact")
 	    public void transferToAgent(InboxMessage inboxMessage, StringMatcher matcher) {
 	    	routeSession("agendsk");
 	    }
 	    
 	    public void goToMainMenu(InboxMessage inboxMessage, StringMatcher matcher) {
-	    	reply(new OutboxMessage().template("db_question"));
-			next("select-question");
+	    	reply(new OutboxMessage().template("ma_question"));
+			next("select-service-rechoose");
 	    }
 	    
 	    
 	    
-	    @ChatMapping(key = "db_invalid_input")
+	    @ChatMapping(key = "ma_invalid_input")
 	    public void invalidinput(InboxMessage inboxMessage, StringMatcher matcher) {
 	    	switch (toReplyEnum(inboxMessage)) {
 	    	case "*":
@@ -155,7 +155,8 @@ public static final String REPLY_ID = "reply_id";
 				this.transferToAgent(inboxMessage, matcher);
 			    break;   
 			default :
-				this.goToMainMenu(inboxMessage, matcher);
+				reply(new OutboxMessage().template("ma_services_rechoose"));
+				next("select-question");
 			    break;    
 	    	}
 	    	}
@@ -200,7 +201,7 @@ public static final String REPLY_ID = "reply_id";
 	    @SuppressWarnings("unchecked")
 	    private Boolean checkValue(String tmplCode,String userInput) {
 	    	Boolean booValue=false;
-	    	 String lang= ArgUtil.parseAsString(chatContext.contact().getLang());
+	    	 String lang= ArgUtil.parseAsString(context().contact().getLang());
 	    	Query query = new Query();
 			query.addCriteria(Criteria.where("code").is(tmplCode).and("lang").is(lang));
 			HSMTemplateDoc hsmTmpl =mongoTemplate.findOne(query,HSMTemplateDoc.class,"DICT_HSM_TEMPLATES");
@@ -213,4 +214,6 @@ public static final String REPLY_ID = "reply_id";
 			}
 	    	return booValue;
 	    }
+
+
 }

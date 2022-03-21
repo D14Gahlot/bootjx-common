@@ -1,4 +1,4 @@
-package com.boot.jx.bot.demo;
+package com.boot.jx.bot.chakli;
 
 import java.time.LocalTime;
 import java.time.ZoneId;

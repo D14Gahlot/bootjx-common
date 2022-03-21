@@ -1,4 +1,4 @@
-package com.boot.jx.bot.demo;
+package com.boot.jx.bot.chakli;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
