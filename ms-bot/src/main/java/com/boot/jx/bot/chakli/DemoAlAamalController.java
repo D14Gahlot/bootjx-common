@@ -1,11 +1,20 @@
 package com.boot.jx.bot.chakli;
 
+import java.util.List;
+import java.util.Map;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 
 import com.boot.jx.bot.BotController;
 import com.boot.jx.bot.ChatMapping;
 import com.boot.jx.bot.alex.AlexBotConstants;
 import com.boot.jx.bot.alex.CommonBotController;
+import com.boot.jx.postman.doc.HSMTemplateDoc;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.utils.ArgUtil;
@@ -14,6 +23,8 @@ import com.boot.utils.StringUtils.StringMatcher;
 
 @BotController(name = "almamaalholding", code = { "chakli" })
 public class DemoAlAamalController extends CommonBotController {
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(DemoAlAamalController.class);
 
     private static final String CURRENT_DEMO = "current_menu";
 
@@ -45,6 +56,9 @@ public class DemoAlAamalController extends CommonBotController {
 
     @Autowired
     DemoArabiController arabiController;
+    
+    @Autowired
+	MongoTemplate mongoTemplate;
 
     @ChatMapping(key = AlexBotConstants.KEY.INITIATE + "*", pattern = "^*$")
     public void start(InboxMessage inboxMessage, StringMatcher matcher) {
@@ -164,7 +178,7 @@ public class DemoAlAamalController extends CommonBotController {
 	    this.transferToAgent(inboxMessage, matcher);
 	    break;
 	default:
-	    // handleGlobalOptionOrInvalidAndNext(inboxMessage, matcher, "menu-0-onselect");
+	    //handleGlobalOptionOrInvalidAndNext(inboxMessage, matcher, "menu-0-onselect");
 	    return;
 	}
     }
@@ -179,16 +193,53 @@ public class DemoAlAamalController extends CommonBotController {
 	if (ArgUtil.is(codeValue)) {
 	    codeValue = codeValue.toLowerCase().trim();
 	}
-	System.out.println("codeValue :" + codeValue);
+	LOGGER.info("codeValue :" + codeValue);
 	return codeValue;
     }
     
-    public void next(String key) {
+    private boolean handleGlobalOptionOrInvalidAndNext(InboxMessage inboxMessage, StringMatcher matcher,String nextHandler) {
+    	if (!handleGlobalOptionOrInvalid(inboxMessage, nextHandler)) {
+    	    next(nextHandler);
+    	    return false;
+    	}
+    	return true;
+        }
+    
+    private boolean handleGlobalOptionOrInvalid(InboxMessage inboxMessage, String templateCode) {
+    	String userInput = toReplyEnum(inboxMessage);
+    	if (!handleGlobalOption(templateCode, userInput)) {
+    	    reply(new OutboxMessage().template("alaml-invalid-options"));
+    	    return false;
+    	}
+    	return true;
+        }
+    
+    @SuppressWarnings("unchecked")
+    private Boolean handleGlobalOption(String tmplCode,String userInput) {
+    	Boolean booValue=false;
+    	 String lang= ArgUtil.parseAsString(context().contact().getLang());
+    	Query query = new Query();
+		query.addCriteria(Criteria.where("code").is(tmplCode).and("lang").is(lang));
+		HSMTemplateDoc hsmTmpl =mongoTemplate.findOne(query,HSMTemplateDoc.class,"DICT_HSM_TEMPLATES");
+		if(ArgUtil.is(hsmTmpl)) {
+			Map<String, Object> options = hsmTmpl.getOptions();
+			if(ArgUtil.is(options)) {
+				List<Map<String, Object>> extTemCom =(List<Map<String, Object>>) options.get("buttons");
+				 booValue = extTemCom.stream().anyMatch(map -> map.containsValue(userInput));
+			}
+		}
+    	return booValue;
+    	
+    }
+
+ public void next(String key) {
 		String handelrName = key;
 		if (ArgUtil.is(this.controllerName)) {
 			handelrName = this.controllerName + "#" + key;
 		}
 		context().meta().setNextHandler(handelrName);
 	}
+
+
 
 }

@@ -6,6 +6,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -26,7 +28,8 @@ import com.boot.utils.StringUtils.StringMatcher;
 
 @BotController(name = "almamaalholding", code = { "chakli_greenskwtbot" })
 public class DemoGreenskwtController extends CommonBotController {
-
+	private  final Logger LOGGER = LoggerFactory.getLogger(getClass());
+	
     public static final String REPLY_ID = "reply_id";
 
     public static final String TALK_TO_AGENT = "";
@@ -198,7 +201,7 @@ public class DemoGreenskwtController extends CommonBotController {
 	if (ArgUtil.is(codeValue)) {
 	    codeValue = codeValue.toLowerCase().trim();
 	}
-	System.out.println("codeValue :" + codeValue);
+	LOGGER.info("codeValue :" + codeValue);
 	return codeValue;
     }
 

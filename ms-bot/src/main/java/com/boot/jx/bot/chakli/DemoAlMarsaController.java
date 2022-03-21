@@ -6,6 +6,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -27,6 +29,8 @@ import com.boot.utils.StringUtils.StringMatcher;
 @BotController(name = "almamaalholding", code = { "chakli_marsabot" })
 public class DemoAlMarsaController extends CommonBotController {
 	
+	private  final Logger LOGGER = LoggerFactory.getLogger(getClass());
+
 	public static final String REPLY_ID = "reply_id";	
 	
 	public static final String TALK_TO_AGENT = "";	
@@ -119,7 +123,6 @@ public class DemoAlMarsaController extends CommonBotController {
 			  this.transferToAgent(inboxMessage, matcher);
 		    break;   
 		default :
-		    reply(new OutboxMessage().template("ma_invalid_option"));
 		    reply(new OutboxMessage().template("ma_question"));
 		    break; 
 	   
@@ -148,7 +151,7 @@ public class DemoAlMarsaController extends CommonBotController {
 	    
 	    public void goToMainMenu(InboxMessage inboxMessage, StringMatcher matcher) {
 	    	reply(new OutboxMessage().template("ma_question"));
-			next("select-service-rechoose");
+	    	next("select-question");
 	    }
 	    
 	    
@@ -164,7 +167,7 @@ public class DemoAlMarsaController extends CommonBotController {
 				this.transferToAgent(inboxMessage, matcher);
 			    break;   
 			default :
-				reply(new OutboxMessage().template("ma_services_rechoose"));
+				reply(new OutboxMessage().template("ma_question"));
 				next("select-question");
 			    break;    
 	    	}

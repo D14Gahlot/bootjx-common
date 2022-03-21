@@ -149,7 +149,7 @@ public static final String REPLY_ID = "reply_id";
 	    
 	    public void goToMainMenu(InboxMessage inboxMessage, StringMatcher matcher) {
 	    	reply(new OutboxMessage().template("cb_question"));
-			next("select-service-rechoose");
+	    	next("select-question");
 	    }
 	    
 	    
@@ -165,7 +165,7 @@ public static final String REPLY_ID = "reply_id";
 				this.transferToAgent(inboxMessage, matcher);
 			    break;   
 			default :
-				reply(new OutboxMessage().template("cb_services_rechoose"));
+				reply(new OutboxMessage().template("cb_question"));
 				next("select-question");
 			    break;    
 	    	}
