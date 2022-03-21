@@ -24,7 +24,7 @@ import com.boot.model.SafeKeyHashMap;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.StringUtils.StringMatcher;
 
-//@BotController(name = "DemoBot", code = { "chakli" })
+
 @BotController(name = "DemoBot", code = { "chakli_dietcareclinicbot" })
 public class Demo5Controller extends CommonBotController {
 

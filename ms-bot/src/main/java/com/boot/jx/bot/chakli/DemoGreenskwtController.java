@@ -19,6 +19,7 @@ import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.doc.HSMTemplateDoc;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.OutboxMessage;
+import com.boot.jx.postman.model.ext.InBoundEvent;
 import com.boot.model.SafeKeyHashMap;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.StringUtils.StringMatcher;
@@ -36,11 +37,21 @@ public class DemoGreenskwtController extends CommonBotController {
     @Autowired
     MongoTemplate mongoTemplate;
 
-    @ChatMapping(key = AlexBotConstants.KEY.INITIATE + "*", pattern = "^*$")
-    public void start(InboxMessage inboxMessage, StringMatcher matcher) {
-	reply(new OutboxMessage().template("gr_welcome_msg").put("name", context().contact().getName()));
-	next("select-language");
-    }
+    private void resolveLanguage() {
+		reply(new OutboxMessage().template("gr_welcome_msg").put("name", context().contact().getName()));
+		next("select-language");
+	}
+    
+	@Override
+	public void onSessionRoute(InBoundEvent assignEvent) {
+		resolveLanguage();
+	}
+
+	@ChatMapping(key = AlexBotConstants.KEY.INITIATE + "*", pattern = "^*$")
+	public void start(InboxMessage inboxMessage, StringMatcher matcher) {
+		resolveLanguage();
+	}
+
 
     @ChatMapping(key = "select-language")
     public void languageOnSelect(InboxMessage inboxMessage, StringMatcher matcher) {
@@ -91,6 +102,10 @@ public class DemoGreenskwtController extends CommonBotController {
 	    reply(new OutboxMessage().template("gr_working_hrs_ans"));
 	    next("next_menu");
 	    break;
+	case "gr_catering":
+	    reply(new OutboxMessage().template("gr_catering_ans"));
+	    next("next_menu");
+	    break; 
 	case "gr_help":
 	    reply(new OutboxMessage().template("gr_help_ans"));
 	    next("next_menu");
@@ -203,5 +218,13 @@ public class DemoGreenskwtController extends CommonBotController {
 	}
 	return booValue;
     }
+    
+    public void next(String key) {
+		String handelrName = key;
+		if (ArgUtil.is(this.controllerName)) {
+			handelrName = this.controllerName + "#" + key;
+		}
+		context().meta().setNextHandler(handelrName);
+	}
 
 }

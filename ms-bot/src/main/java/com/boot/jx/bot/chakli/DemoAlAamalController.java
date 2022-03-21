@@ -48,9 +48,9 @@ public class DemoAlAamalController extends CommonBotController {
 
     @ChatMapping(key = AlexBotConstants.KEY.INITIATE + "*", pattern = "^*$")
     public void start(InboxMessage inboxMessage, StringMatcher matcher) {
-	reply(new OutboxMessage().template("alaamal_menu").put("name", context().contact().getName()));
+    context().session().remove(CURRENT_DEMO);
+    reply(new OutboxMessage().template("alaamal_menu").put("name", context().contact().getName()));
 	next("menu-0-onselect");
-
     }
 
     @ChatMapping(key = AlexBotConstants.KEY.INITIATE + "menu", pattern = "^menu$")
@@ -62,42 +62,34 @@ public class DemoAlAamalController extends CommonBotController {
 	    case "1":
 	    case "JIHAN":
 		routeSession("jihanbot");
-		jihanController.start(inboxMessage, matcher);
 		return;
 	    case "2":
 	    case "ALMARSA":
 		routeSession("marsabot");
-		marsaController.start(inboxMessage, matcher);
 		return;
 	    case "3":
 	    case "DUKKANBURGER":
 		routeSession("dukkanburgerbot");
-		dukkanBurController.start(inboxMessage, matcher);
 		return;
 	    case "4":
 	    case "ARABI":
 		routeSession("arabibot");
-		arabiController.start(inboxMessage, matcher);
 		return;
 	    case "5":
 	    case "GREENSKWT":
 		routeSession("greenskwtbot");
-		greensKwtController.start(inboxMessage, matcher);
 		return;
 	    case "6":
 	    case "JAIPUR":
 		routeSession("jaipurbot");
-		jaipurController.start(inboxMessage, matcher);
 		return;
 	    case "8":
 	    case "CAFEBAZZA":
 		routeSession("cafebazzabot");
-		cafeBazzaController.start(inboxMessage, matcher);
 		return;
 	    case "9":
 	    case "dietcaredlv":
 		routeSession("cafebazzabot");
-		dietCareDlvController.start(inboxMessage, matcher);
 		return;
 	    case "10":
 	    case "DIETCARECLINIC":
@@ -191,5 +183,13 @@ public class DemoAlAamalController extends CommonBotController {
 	System.out.println("codeValue :" + codeValue);
 	return codeValue;
     }
+    
+    public void next(String key) {
+		String handelrName = key;
+		if (ArgUtil.is(this.controllerName)) {
+			handelrName = this.controllerName + "#" + key;
+		}
+		context().meta().setNextHandler(handelrName);
+	}
 
 }
