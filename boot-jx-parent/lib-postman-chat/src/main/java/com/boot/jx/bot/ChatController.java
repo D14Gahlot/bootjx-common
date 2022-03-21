@@ -12,10 +12,11 @@ import com.boot.jx.postman.doc.ChatPromise.PromiseCondition;
 import com.boot.jx.postman.doc.ChatPromise.Result;
 import com.boot.jx.postman.doc.ChatPromise.State;
 import com.boot.jx.postman.manager.ChatSessionManager;
-import com.boot.jx.postman.model.InboxMessage;
+import com.boot.jx.postman.model.MessageDefinitions.IMessage;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.model.PMArgs;
 import com.boot.jx.postman.model.ext.InBoundEvent;
+import com.boot.jx.postman.store.MessageContext;
 import com.boot.jx.postman.store.SessionStore;
 import com.boot.model.MapModel.NodeEntry;
 import com.boot.utils.ArgUtil;
@@ -27,6 +28,9 @@ public class ChatController {
 
     @Autowired
     private ChatContext chatContext;
+
+    @Autowired
+    private MessageContext messageContext;
 
     @Autowired
     private AgentService agentService;
@@ -66,18 +70,18 @@ public class ChatController {
 	    ChatContactDoc chatContactDoc = sessionStore.getContact(waMessage);
 	    chatService.send(chatContactDoc, waMessage);
 	} else {
-	    chatService.send(chatContext.contact().getDoc(), waMessage);
+	    chatService.send(messageContext.contact().getDoc(), waMessage);
 	}
     }
 
     public NodeEntry<InBoundEvent> assignToAgent(String deptCode) {
-	InboxMessage inboxMessage = chatContext.getInboxMessage();
+	IMessage inboxMessage = chatContext.getInboxMessage();
 	PMArgs params = new PMArgs();
 	if (ArgUtil.is(inboxMessage)) {
 	    params.assignToDeptCode(deptCode).contact(inboxMessage.contact()).sessionId(inboxMessage.getSessionId());
 	    inboxMessage.session().setDept(deptCode);
 	}
-	return chatSessionService.assignSessionToAgent(chatContext.session().getDoc(), params);
+	return chatSessionService.assignSessionToAgent(messageContext.session().getDoc(), params);
     }
 
     public NodeEntry<InBoundEvent> assignToAgent() {
@@ -85,19 +89,19 @@ public class ChatController {
     }
 
     public void botScore(Integer botScore) {
-	chatService.botScore(chatContext.session().getDoc(), botScore);
+	chatService.botScore(messageContext.session().getDoc(), botScore);
     }
 
     public void agentScore(Integer agentScore) {
-	chatService.agentScore(chatContext.session().getDoc(), agentScore);
+	chatService.agentScore(messageContext.session().getDoc(), agentScore);
     }
 
     public void resolveSession() {
-	chatSessionManager.resolveSession(chatContext.session().getDoc());
+	chatSessionManager.resolveSession(messageContext.session().getDoc());
     }
 
     public void closeSession() {
-	chatSessionManager.closeSession(chatContext.session().getDoc());
+	chatSessionManager.closeSession(messageContext.session().getDoc());
     }
 
     public void next(String key) {
@@ -164,7 +168,7 @@ public class ChatController {
     }
 
     public void routeSession(String queueCode) {
-	chatSessionService.routeSession(chatContext.session().getDoc(), new PMArgs().assignToQueueCode(queueCode));
+	chatSessionService.routeSession(messageContext.session().getDoc(), new PMArgs().assignToQueueCode(queueCode));
     }
 
     public void setMeta(String controllerName) {
@@ -173,6 +177,10 @@ public class ChatController {
 
     public void onAssign(InBoundEvent assignEvent) {
 
+    }
+
+    public MessageContext context() {
+	return this.messageContext;
     }
 
 }

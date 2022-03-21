@@ -5,11 +5,11 @@ import org.springframework.stereotype.Component;
 
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatMeta;
-import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.query.ChatContactQuery;
 import com.boot.jx.postman.query.ChatSessionQuery;
 import com.boot.jx.postman.store.BasicChatDataStore;
+import com.boot.jx.postman.store.MessageContext;
 import com.boot.jx.postman.store.SessionStore;
 import com.boot.jx.scope.ThreadScoped;
 
@@ -22,11 +22,9 @@ public class ChatContext {
     private ChatMeta meta;
 
     private InboxMessage inboxMessage;
-    private ChatContactQuery chatContactQuery;
-    private ChatSessionQuery chatSessionQuery;
 
     @Autowired
-    private SessionStore sessionStore;
+    private MessageContext messageContext;
 
     private BasicChatDataStore chatDataStore;
 
@@ -42,34 +40,15 @@ public class ChatContext {
     }
 
     public void setInboxMessage(InboxMessage inboxMessage) {
-	this.inboxMessage = inboxMessage;
+	messageContext.setMessage(inboxMessage);
     }
 
     public ChatContactQuery contact() {
-	if (chatContactQuery == null) {
-	    ChatContactDoc chatContactDoc = sessionStore.getContact(inboxMessage);
-	    chatContactQuery = new ChatContactQuery(chatContactDoc);
-	}
-	return chatContactQuery;
-    }
-
-    public ChatSessionQuery session() {
-	if (chatSessionQuery == null) {
-	    ChatSessionDoc chatSessionDoc;
-	    chatSessionDoc = sessionStore.getSession(inboxMessage.getSessionId());
-	    chatSessionQuery = new ChatSessionQuery(chatSessionDoc);
-	}
-	return chatSessionQuery;
+	return messageContext.contact();
     }
 
     public ChatContactDoc commitContact() {
-	if (chatContactQuery != null) {
-	    sessionStore.update(chatContactQuery);
-	}
-	if (chatSessionQuery != null) {
-	    sessionStore.update(chatSessionQuery);
-	}
-	return null;
+	return messageContext.commit();
     }
 
     public ChatMeta meta() {

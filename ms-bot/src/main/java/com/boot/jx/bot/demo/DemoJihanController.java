@@ -33,8 +33,6 @@ public class DemoJihanController extends CommonBotController {
 	public static final String TALK_TO_AGENT = "";	
 
 	  
-	    @Autowired
-	    private ChatContext chatContext;
 	
 	    @Autowired
 	    PMEnvironment pmEnvironment;
@@ -44,7 +42,7 @@ public class DemoJihanController extends CommonBotController {
 	    
 	    @ChatMapping(key = AlexBotConstants.KEY.INITIATE + "*", pattern = "^*$")
 	    public void start(InboxMessage inboxMessage, StringMatcher matcher) {
-	   	reply(new OutboxMessage().template("jd_welcome_msg").put("name", chatContext.contact().getName()));
+	   	reply(new OutboxMessage().template("jd_welcome_msg").put("name", context().contact().getName()));
 	    	next("select-language");
 	    }
 	    
@@ -53,25 +51,25 @@ public class DemoJihanController extends CommonBotController {
 	    public void languageOnSelect(InboxMessage inboxMessage, StringMatcher matcher) {
 	    String lang =toReplyEnum(inboxMessage); 
 	 	  if(!ArgUtil.is(lang)) {
-	 		 lang= ArgUtil.parseAsString(chatContext.contact().getLang());
+	 		 lang= ArgUtil.parseAsString(context().contact().getLang());
 	 	  }
 	 	 
 	     //if(!timeCheck()) {
 	    //	 reply(new OutboxMessage().template("working_hours_update"));
 	    // }else {
 		    if(lang.equalsIgnoreCase("english") || (lang!=null && lang.equalsIgnoreCase("en"))) {
-		    	 chatContext.contact().setLang("en");
-		    	 chatContext.commitContact();
+		    	 context().contact().setLang("en");
+		    	 context().commit();
 		    	 reply(new OutboxMessage().template("jd_question"));
 		    	 next("select-question");
 		    }else if(lang.equalsIgnoreCase("العربية") || (lang!=null &&  lang.equalsIgnoreCase("ar"))) {
-		    	 chatContext.contact().setLang("ar");
-		    	 chatContext.commitContact();
+		    	 context().contact().setLang("ar");
+		    	 context().commit();
 		    	reply(new OutboxMessage().template("jd_question"));
 		    	 next("select-question");
 		    } else{
-		    	chatContext.contact().setLang("en");
-		    	 chatContext.commitContact();
+		    	context().contact().setLang("en");
+		    	 context().commit();
 		    	reply(new OutboxMessage().template("jd_question"));
 		    	next("select-question");
 		    }
@@ -207,7 +205,7 @@ public class DemoJihanController extends CommonBotController {
 	    @SuppressWarnings("unchecked")
 	    private Boolean checkValue(String tmplCode,String userInput) {
 	    	Boolean booValue=false;
-	    	 String lang= ArgUtil.parseAsString(chatContext.contact().getLang());
+	    	 String lang= ArgUtil.parseAsString(context().contact().getLang());
 	    	Query query = new Query();
 			query.addCriteria(Criteria.where("code").is(tmplCode).and("lang").is(lang));
 			HSMTemplateDoc hsmTmpl =mongoTemplate.findOne(query,HSMTemplateDoc.class,"DICT_HSM_TEMPLATES");
@@ -220,4 +218,6 @@ public class DemoJihanController extends CommonBotController {
 			}
 	    	return booValue;
 	    }
+
+
 }

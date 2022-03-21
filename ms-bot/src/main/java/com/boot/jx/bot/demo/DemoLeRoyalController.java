@@ -14,12 +14,9 @@ import com.boot.utils.StringUtils.StringMatcher;
 @BotController(name = "almamaalholding", code = { "chakli_jaipur" })
 public class DemoLeRoyalController extends CommonBotController {
 
-    @Autowired
-    private ChatContext chatContext;
-
     @ChatMapping(key = AlexBotConstants.KEY.INITIATE + "*", pattern = "^*$")
     public void start(InboxMessage inboxMessage, StringMatcher matcher) {
-	reply(new OutboxMessage().template("jd_welcome_msg").put("name", chatContext.contact().getName()));
+	reply(new OutboxMessage().template("jd_welcome_msg").put("name", context().contact().getName()));
 	next("select-language");
     }
 }

@@ -31,9 +31,6 @@ public class Demo5Controller extends CommonBotController {
 	
 	public static final String TALK_TO_AGENT = "";	
 
-	  
-	    @Autowired
-	    private ChatContext chatContext;
 	
 	    @Autowired
 	    PMEnvironment pmEnvironment;
@@ -44,7 +41,7 @@ public class Demo5Controller extends CommonBotController {
 	    @ChatMapping(key = AlexBotConstants.KEY.INITIATE + "*", pattern = "^*$")
 	    public void start(InboxMessage inboxMessage, StringMatcher matcher) {
 		
-	    	reply(new OutboxMessage().template("dc_welcome_message").put("name", chatContext.contact().getName()));
+	    	reply(new OutboxMessage().template("dc_welcome_message").put("name", context().contact().getName()));
 	    	next("select-language");
 	
 	    }
@@ -55,25 +52,25 @@ public class Demo5Controller extends CommonBotController {
 	    	
 	    String lang =toReplyEnum(inboxMessage); 
 	 	  if(!ArgUtil.is(lang)) {
-	 		 lang= ArgUtil.parseAsString(chatContext.contact().getLang());
+	 		 lang= ArgUtil.parseAsString(context().contact().getLang());
 	 	  }
 	 	 
 	     if(!timeCheck()) {
 	    	 reply(new OutboxMessage().template("working_hours_update"));
 	     }else {
 		    if(lang.equalsIgnoreCase("english") || (lang!=null && lang.equalsIgnoreCase("en"))) {
-		    	 chatContext.contact().setLang("en");
-		    	 chatContext.commitContact();
+		    	 context().contact().setLang("en");
+		    	 context().commit();
 		    	 reply(new OutboxMessage().template("dc_services"));
 		    	 next("select-service");
 		    }else if(lang.equalsIgnoreCase("العربية") || (lang!=null &&  lang.equalsIgnoreCase("ar"))) {
-		    	 chatContext.contact().setLang("ar");
-		    	 chatContext.commitContact();
+		    	 context().contact().setLang("ar");
+		    	 context().commit();
 		    	reply(new OutboxMessage().template("dc_services"));
 		    	 next("select-service");
 		    } else{
-		    	chatContext.contact().setLang("en");
-		    	 chatContext.commitContact();
+		    	context().contact().setLang("en");
+		    	 context().commit();
 		    	reply(new OutboxMessage().template("dc_services"));
 		    	next("select-service");
 		    }
@@ -514,7 +511,7 @@ public void locationLinkTiming(InboxMessage inboxMessage, StringMatcher matcher)
 	    @SuppressWarnings("unchecked")
 	    private Boolean checkValue(String tmplCode,String userInput) {
 	    	Boolean booValue=false;
-	    	 String lang= ArgUtil.parseAsString(chatContext.contact().getLang());
+	    	 String lang= ArgUtil.parseAsString(context().contact().getLang());
 	    	Query query = new Query();
 			query.addCriteria(Criteria.where("code").is(tmplCode).and("lang").is(lang));
 			HSMTemplateDoc hsmTmpl =mongoTemplate.findOne(query,HSMTemplateDoc.class,"DICT_HSM_TEMPLATES");
@@ -528,4 +525,6 @@ public void locationLinkTiming(InboxMessage inboxMessage, StringMatcher matcher)
 	    	return booValue;
 	    	
 	    }
+
+
 }

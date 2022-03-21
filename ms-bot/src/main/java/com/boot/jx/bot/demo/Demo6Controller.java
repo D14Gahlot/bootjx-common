@@ -12,12 +12,10 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 
 import com.boot.jx.bot.BotController;
-import com.boot.jx.bot.ChatContext;
 import com.boot.jx.bot.ChatMapping;
 import com.boot.jx.bot.alex.AlexBotConstants;
 import com.boot.jx.bot.alex.CommonBotController;
 import com.boot.jx.postman.PMEnvironment;
-import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.HSMTemplateDoc;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.OutboxMessage;
@@ -32,10 +30,6 @@ public class Demo6Controller extends CommonBotController {
 	
 	public static final String TALK_TO_AGENT = "";	
 
-	  
-	    @Autowired
-	    private ChatContext chatContext;
-	
 	    @Autowired
 	    PMEnvironment pmEnvironment;
 	   
@@ -45,7 +39,7 @@ public class Demo6Controller extends CommonBotController {
 	    @ChatMapping(key = AlexBotConstants.KEY.INITIATE + "*", pattern = "^*$")
 	    public void start(InboxMessage inboxMessage, StringMatcher matcher) {
 		
-	    	reply(new OutboxMessage().template("jd_welcome_msg").put("name", chatContext.contact().getName()));
+	    	reply(new OutboxMessage().template("jd_welcome_msg").put("name", context().contact().getName()));
 	    	next("select-language");
 	
 	    }
@@ -55,25 +49,25 @@ public class Demo6Controller extends CommonBotController {
 	    public void languageOnSelect(InboxMessage inboxMessage, StringMatcher matcher) {
 	    String lang =toReplyEnum(inboxMessage); 
 	 	  if(!ArgUtil.is(lang)) {
-	 		 lang= ArgUtil.parseAsString(chatContext.contact().getLang());
+	 		 lang= ArgUtil.parseAsString(context().contact().getLang());
 	 	  }
 	 	 
 	     //if(!timeCheck()) {
 	    //	 reply(new OutboxMessage().template("working_hours_update"));
 	    // }else {
 		    if(lang.equalsIgnoreCase("english") || (lang!=null && lang.equalsIgnoreCase("en"))) {
-		    	 chatContext.contact().setLang("en");
-		    	 chatContext.commitContact();
+		    	 context().contact().setLang("en");
+		    	 context().commit();
 		    	 reply(new OutboxMessage().template("jd_question"));
 		    	 next("select-question");
 		    }else if(lang.equalsIgnoreCase("العربية") || (lang!=null &&  lang.equalsIgnoreCase("ar"))) {
-		    	 chatContext.contact().setLang("ar");
-		    	 chatContext.commitContact();
+		    	 context().contact().setLang("ar");
+		    	 context().commit();
 		    	reply(new OutboxMessage().template("jd_question"));
 		    	 next("select-question");
 		    } else{
-		    	chatContext.contact().setLang("en");
-		    	 chatContext.commitContact();
+		    	context().contact().setLang("en");
+		    	 context().commit();
 		    	reply(new OutboxMessage().template("jd_question"));
 		    	next("select-question");
 		    }
@@ -513,7 +507,7 @@ public void locationLinkTiming(InboxMessage inboxMessage, StringMatcher matcher)
 	    @SuppressWarnings("unchecked")
 	    private Boolean checkValue(String tmplCode,String userInput) {
 	    	Boolean booValue=false;
-	    	 String lang= ArgUtil.parseAsString(chatContext.contact().getLang());
+	    	 String lang= ArgUtil.parseAsString(context().contact().getLang());
 	    	Query query = new Query();
 			query.addCriteria(Criteria.where("code").is(tmplCode).and("lang").is(lang));
 			HSMTemplateDoc hsmTmpl =mongoTemplate.findOne(query,HSMTemplateDoc.class,"DICT_HSM_TEMPLATES");
@@ -527,4 +521,6 @@ public void locationLinkTiming(InboxMessage inboxMessage, StringMatcher matcher)
 	    	return booValue;
 	    	
 	    }
+
+
 }

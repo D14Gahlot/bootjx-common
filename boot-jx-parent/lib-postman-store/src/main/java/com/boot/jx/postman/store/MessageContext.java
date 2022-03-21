@@ -14,7 +14,7 @@ import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.ErrorObject;
 import com.boot.jx.postman.model.MessageDefinitions.Contactable;
-import com.boot.jx.postman.model.MessageDefinitions.IMessage;
+import com.boot.jx.postman.model.MessageDefinitions.IMessageExtended;
 import com.boot.jx.postman.query.ChatContactQuery;
 import com.boot.jx.postman.query.ChatSessionQuery;
 import com.boot.jx.scope.ThreadScoped;
@@ -34,7 +34,7 @@ public class MessageContext {
     public CommonMongoTemplate commonMongoTemplate;
 
     // DTOs
-    private IMessage message;
+    private IMessageExtended message;
 
     @Autowired
     private PMEnvironment pmEnvironment;
@@ -48,7 +48,7 @@ public class MessageContext {
     @Autowired
     private SessionStore sessionStore;
 
-    public void setMessage(IMessage message) {
+    public void setMessage(IMessageExtended message) {
 	this.message = message;
     }
 
@@ -87,6 +87,16 @@ public class MessageContext {
 	}
     }
 
+    public ChatContactDoc commit() {
+	if (chatContactQuery != null) {
+	    sessionStore.update(chatContactQuery);
+	}
+	if (chatSessionQuery != null) {
+	    sessionStore.update(chatSessionQuery);
+	}
+	return null;
+    }
+
     public void log(ErrorObject error) {
 	commonMongoTemplate.save(error);
     }
@@ -123,6 +133,10 @@ public class MessageContext {
 	    return this.clientApp(message.session().getQueue(), message.contact());
 	}
 	return this.clientApp(null, null);
+    }
+
+    public IMessageExtended getMessage() {
+	return message;
     }
 
 }

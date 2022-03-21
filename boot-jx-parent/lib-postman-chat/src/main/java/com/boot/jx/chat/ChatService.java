@@ -19,8 +19,8 @@ import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.manager.LogManager;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.Message;
+import com.boot.jx.postman.model.MessageDefinitions.IMessage;
 import com.boot.jx.postman.model.MessageDefinitions.IMessageExtended;
-import com.boot.jx.postman.model.ext.InBoundEvent;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.store.MessageStore;
 import com.boot.jx.postman.store.SessionStore;
@@ -167,7 +167,7 @@ public class ChatService {
 	return replyIntenal(chatContactDoc, outboxMessage, inboxMessage);
     }
 
-    public MessageDoc reply(InboxMessage inboxMessage, OutboxMessage outboxMessage) throws InterruptedException {
+    public MessageDoc reply(IMessageExtended inboxMessage, OutboxMessage outboxMessage) throws InterruptedException {
 	ChatContactDoc chatContactDoc = sessionStore.getContact(inboxMessage.contact().getContactId());
 
 	if (ArgUtil.isEmpty(outboxMessage.session().getAgent())) {
