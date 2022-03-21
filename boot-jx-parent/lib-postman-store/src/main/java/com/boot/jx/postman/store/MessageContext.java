@@ -84,7 +84,7 @@ public class MessageContext {
 			if (getMessage() != null) {
 				this.contactable = PostManUtil.getContactMeta(getMessage().contact());
 			} else if (this.event != null) {
-				this.contactable = PostManUtil.getContactMeta(this.event.contact());
+				this.contactable = PostManUtil.getContactMeta(this.event.contact(),this.event.contactId);
 			}
 		}
 		return this.contactable;
@@ -116,7 +116,11 @@ public class MessageContext {
 	public ChatContactQuery contact() {
 		if (this.chatContactQuery == null) {
 			ChatContactDoc chatContactDoc = this.getChatContactDoc();
-			this.chatContactQuery = new ChatContactQuery(chatContactDoc);
+			if(!ArgUtil.is(chatContactDoc)) {
+				LOGGER.error("NO CONTACT FOUND");
+			} else {
+				this.chatContactQuery = new ChatContactQuery(chatContactDoc);
+			}
 		}
 		return this.chatContactQuery;
 	}
