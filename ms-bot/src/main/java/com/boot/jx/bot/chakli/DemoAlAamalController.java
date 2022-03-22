@@ -113,7 +113,7 @@ public class DemoAlAamalController extends CommonBotController {
 		break;
 	    }
 	}
-	reply(new OutboxMessage().template("alaamal-menu").put("name", context().contact().getName()));
+	reply(new OutboxMessage().template("alaamal_menu").put("name", context().contact().getName()));
 	next("menu-0-onselect");
     }
 
