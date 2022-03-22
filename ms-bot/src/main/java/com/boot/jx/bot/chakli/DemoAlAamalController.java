@@ -184,7 +184,7 @@ public class DemoAlAamalController extends CommonBotController {
     }
 
     public void transferToAgent(InboxMessage inboxMessage, StringMatcher matcher) {
-	routeSession("agendsk");
+    	commonTransferToAgent(inboxMessage, matcher);
     }
 
     public String toReplyEnum(InboxMessage inboxMessage) {

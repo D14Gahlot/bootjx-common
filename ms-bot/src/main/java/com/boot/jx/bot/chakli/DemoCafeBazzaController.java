@@ -144,7 +144,7 @@ public static final String REPLY_ID = "reply_id";
 	}
 		   
 	    public void transferToAgent(InboxMessage inboxMessage, StringMatcher matcher) {
-	    	routeSession("agendsk");
+	    	commonTransferToAgent(inboxMessage, matcher);
 	    }
 	    
 	    public void goToMainMenu(InboxMessage inboxMessage, StringMatcher matcher) {

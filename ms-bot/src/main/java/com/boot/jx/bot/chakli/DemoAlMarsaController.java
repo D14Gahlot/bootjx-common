@@ -146,7 +146,7 @@ public class DemoAlMarsaController extends CommonBotController {
 	}
 		   
 	    public void transferToAgent(InboxMessage inboxMessage, StringMatcher matcher) {
-	    	routeSession("agendsk");
+	    	commonTransferToAgent(inboxMessage, matcher);
 	    }
 	    
 	    public void goToMainMenu(InboxMessage inboxMessage, StringMatcher matcher) {

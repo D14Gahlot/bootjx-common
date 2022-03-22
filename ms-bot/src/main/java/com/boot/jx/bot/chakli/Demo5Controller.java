@@ -401,7 +401,7 @@ public class Demo5Controller extends CommonBotController {
 
 	@ChatMapping(key = "dc_cs_to_contact")
 	public void transferToAgent(InboxMessage inboxMessage, StringMatcher matcher) {
-		routeSession("agendsk");
+		commonTransferToAgent(inboxMessage, matcher);
 		// reply(new OutboxMessage().template("dc_cs_to_contact"));
 		// commonTransferToAgent(inboxMessage, matcher);
 	}

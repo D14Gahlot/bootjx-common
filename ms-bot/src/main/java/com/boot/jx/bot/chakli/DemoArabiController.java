@@ -142,7 +142,7 @@ public class DemoArabiController extends CommonBotController {
 
     @ChatMapping(key = "jd_cs_to_contact")
     public void transferToAgent(InboxMessage inboxMessage, StringMatcher matcher) {
-	routeSession("agendsk");
+    	commonTransferToAgent(inboxMessage, matcher);
     }
 
     public void goToMainMenu(InboxMessage inboxMessage, StringMatcher matcher) {
