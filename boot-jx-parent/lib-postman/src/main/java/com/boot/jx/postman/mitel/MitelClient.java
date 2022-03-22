@@ -96,7 +96,7 @@ public class MitelClient {
 				contactable.getContactId(), sessionId, contactable.getContactId());
 		return restService.ajax(endPoint).path("/MiccSdk/api/v1/openmedia")
 				.header("Authorization", "Bearer " + accessToken)
-				.post(MapModel.createInstance().put("targetUri", url).put("targetUriEmbedded", true)
+				.postJson(MapModel.createInstance().put("targetUri", url).put("targetUriEmbedded", true)
 						.put("previewUrl", url).put("historyUrl", url).put("queue", queue).put("from", from)
 						.put("to", to).put("subject", contactable.getName()).toMap())
 				.asMapModel();
@@ -107,7 +107,7 @@ public class MitelClient {
 		String endPoint = ArgUtil.parseAsString(defaultClient.props().get("end_point"));
 		return restService.ajax(endPoint).path("/MiccSdk/api/v1/openmedia/{id}").pathParam("id", openmediaId)
 				.header("Authorization", "Bearer " + accessToken)
-				.put(MapModel.createInstance().put("action", action).toMap()).asMapModel();
+				.putJson(MapModel.createInstance().put("action", action).toMap()).asMapModel();
 	}
 
 }

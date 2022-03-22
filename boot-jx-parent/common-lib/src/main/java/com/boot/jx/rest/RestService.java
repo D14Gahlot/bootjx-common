@@ -368,6 +368,10 @@ public class RestService {
 		public <T> Ajax postJson(T body) {
 			return this.header("content-type", "application/json").post(body);
 		}
+		
+		public <T> Ajax putJson(T body) {
+			return this.header("content-type", "application/json").put(body);
+		}
 
 		public Ajax get(HttpEntity<?> requestEntity) {
 			this.method = HttpMethod.GET;
