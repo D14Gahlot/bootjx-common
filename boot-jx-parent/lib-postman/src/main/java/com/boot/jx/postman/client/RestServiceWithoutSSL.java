@@ -7,6 +7,7 @@ import java.security.cert.X509Certificate;
 
 import javax.net.ssl.SSLContext;
 
+import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.conn.ssl.TrustStrategy;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -33,7 +34,8 @@ public class RestServiceWithoutSSL {
 				sslContext = org.apache.http.ssl.SSLContexts.custom().loadTrustMaterial(null, acceptingTrustStrategy)
 						.build();
 
-				SSLConnectionSocketFactory csf = new SSLConnectionSocketFactory(sslContext);
+				SSLConnectionSocketFactory csf = new SSLConnectionSocketFactory(sslContext,
+						NoopHostnameVerifier.INSTANCE);
 
 				CloseableHttpClient httpClient = HttpClients.custom().setSSLSocketFactory(csf).build();
 
@@ -41,6 +43,8 @@ public class RestServiceWithoutSSL {
 
 				requestFactory.setHttpClient(httpClient);
 				restTemplate = new RestTemplate(requestFactory);
+				restService.getLocalRestTemplate(restTemplate);
+				
 			} catch (KeyManagementException | NoSuchAlgorithmException | KeyStoreException e) {
 				e.printStackTrace();
 			}
