@@ -11,7 +11,7 @@ import com.boot.jx.postman.ClientApp;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PMEnvironment.PMDomainConfig;
 import com.boot.jx.postman.doc.ChatContactDoc;
-import com.boot.jx.postman.doc.ChatMeta;
+import com.boot.jx.postman.doc.ChatContextDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.ErrorObject;
 import com.boot.jx.postman.model.InboxMessage;
@@ -20,6 +20,7 @@ import com.boot.jx.postman.model.MessageDefinitions.IMessage;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.model.ext.InBoundEvent;
 import com.boot.jx.postman.query.ChatContactQuery;
+import com.boot.jx.postman.query.ChatContextQuery;
 import com.boot.jx.postman.query.ChatSessionQuery;
 import com.boot.jx.scope.ThreadScoped;
 import com.boot.jx.utils.PostManUtil;
@@ -32,8 +33,6 @@ public class MessageContext {
 	private static final Logger LOGGER = LoggerFactory.getLogger(MessageContext.class);
 
 	private String currentHandler;
-
-	private ChatMeta meta;
 
 	@Autowired
 	public MongoTemplate mongoTemplate;
@@ -56,6 +55,7 @@ public class MessageContext {
 	// QUERYs
 	private ChatContactQuery chatContactQuery;
 	private ChatSessionQuery chatSessionQuery;
+	private ChatContextQuery chatContextQuery;
 	@Autowired
 	private SessionStore sessionStore;
 
@@ -84,7 +84,7 @@ public class MessageContext {
 			if (getMessage() != null) {
 				this.contactable = PostManUtil.getContactMeta(getMessage().contact());
 			} else if (this.event != null) {
-				this.contactable = PostManUtil.getContactMeta(this.event.contact(),this.event.contactId);
+				this.contactable = PostManUtil.getContactMeta(this.event.contact(), this.event.contactId);
 			}
 		}
 		return this.contactable;
@@ -116,7 +116,7 @@ public class MessageContext {
 	public ChatContactQuery contact() {
 		if (this.chatContactQuery == null) {
 			ChatContactDoc chatContactDoc = this.getChatContactDoc();
-			if(!ArgUtil.is(chatContactDoc)) {
+			if (!ArgUtil.is(chatContactDoc)) {
 				LOGGER.error("NO CONTACT FOUND");
 			} else {
 				this.chatContactQuery = new ChatContactQuery(chatContactDoc);
@@ -146,6 +146,9 @@ public class MessageContext {
 		}
 		if (chatSessionQuery != null) {
 			sessionStore.update(chatSessionQuery);
+		}
+		if (chatContextQuery != null) {
+			sessionStore.update(chatContextQuery);
 		}
 		return null;
 	}
@@ -188,19 +191,23 @@ public class MessageContext {
 		return this.clientApp(null, null);
 	}
 
-	public ChatMeta meta() {
-		if (this.meta == null) {
-			this.meta = new ChatMeta();
+	public ChatContextQuery chat() {
+		if (this.chatContextQuery == null) {
+			Contactable c = getContactable();
+			String contactId = c.getContactId();
+			if (ArgUtil.is(contactId)) {
+				ChatContextDoc doc = mongoTemplate.findById(contactId, ChatContextDoc.class);
+				if (!ArgUtil.is(doc)) {
+					doc = new ChatContextDoc();
+					doc.setContactId(contactId);
+				} else {
+					this.chatContextQuery = new ChatContextQuery(doc);
+				}
+			} else {
+				LOGGER.error("NO CONTACT FOUND");
+			}
 		}
-		return meta;
-	}
-
-	public ChatMeta getMeta() {
-		return meta;
-	}
-
-	public void setMeta(ChatMeta meta) {
-		this.meta = meta;
+		return this.chatContextQuery;
 	}
 
 	public String getCurrentHandler() {
@@ -213,6 +220,10 @@ public class MessageContext {
 
 	public void setInBoundEvent(InBoundEvent event) {
 		this.event = event;
+	}
+
+	public void setChatConext(ChatContextDoc doc) {
+		this.chatContextQuery = new ChatContextQuery(doc);
 	}
 
 }

@@ -11,10 +11,10 @@ import com.boot.utils.StringUtils.StringMatcher;
 @BotController(name = "almamaalholding", code = { "chakli_dietcaredlv" })
 public class DemoDietcaredlvController extends CommonBotController {
 
-    @ChatMapping(key = AlexBotConstants.KEY.INITIATE + "*", pattern = "^*$")
-    public void start(InboxMessage inboxMessage, StringMatcher matcher) {
-	reply(new OutboxMessage().template("jd_welcome_msg").put("name", context().contact().getName()));
-	next("select-language");
+	@ChatMapping(key = AlexBotConstants.KEY.INITIATE + "*", pattern = "^*$")
+	public void start(InboxMessage inboxMessage, StringMatcher matcher) {
+		reply(new OutboxMessage().template("jd_welcome_msg").put("name", context().contact().getName()));
+		next("select-language");
 
-    }
+	}
 }

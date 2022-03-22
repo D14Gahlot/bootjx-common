@@ -13,29 +13,36 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @TypeAlias("ChatContextDoc")
 public class ChatContextDoc implements Serializable {
 
-    private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
 
-    @Id
-    @ApiMockModelProperty(example = "wa919930104050", required = false)
-    @JsonProperty("contactId")
-    private String contactId;
+	@Id
+	@ApiMockModelProperty(example = "wa919930104050", required = false)
+	@JsonProperty("contactId")
+	private String contactId;
 
-    ChatMeta meta;
+	ChatMeta meta;
 
-    public ChatMeta getMeta() {
-	return meta;
-    }
+	public ChatMeta getMeta() {
+		return meta;
+	}
 
-    public void setMeta(ChatMeta meta) {
-	this.meta = meta;
-    }
+	public void setMeta(ChatMeta meta) {
+		this.meta = meta;
+	}
 
-    public String getContactId() {
-	return contactId;
-    }
+	public String getContactId() {
+		return contactId;
+	}
 
-    public void setContactId(String contactId) {
-	this.contactId = contactId;
-    }
+	public void setContactId(String contactId) {
+		this.contactId = contactId;
+	}
+
+	public ChatMeta meta() {
+		if (this.meta == null) {
+			this.meta = new ChatMeta();
+		}
+		return this.meta;
+	}
 
 }

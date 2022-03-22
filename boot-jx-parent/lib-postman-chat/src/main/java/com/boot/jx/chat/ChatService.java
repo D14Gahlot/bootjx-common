@@ -20,6 +20,7 @@ import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.Message;
 import com.boot.jx.postman.model.MessageDefinitions.IMessageExtended;
 import com.boot.jx.postman.model.OutboxMessage;
+import com.boot.jx.postman.model.ext.InBoundEvent;
 import com.boot.jx.postman.store.MessageContext;
 import com.boot.jx.postman.store.MessageStore;
 import com.boot.jx.postman.store.SessionStore;
@@ -253,32 +254,27 @@ public class ChatService {
 		}
 
 		ChatContextDoc doc = mongoTemplate.findById(contactId, ChatContextDoc.class);
-		if (ArgUtil.is(doc)) {
-			if (ArgUtil.is(doc.getMeta()) && !TimeUtils.isExpired(doc.getMeta().getUpdateStamp(), "5min")) {
-				messageContext.setMeta(doc.getMeta());
-			} else {
-				messageContext.setMeta(new ChatMeta());
-			}
-		} else {
-			messageContext.setMeta(new ChatMeta());
+		messageContext.setChatConext(doc);
+		if (!ArgUtil.is(doc) || !ArgUtil.is(doc.getMeta())
+				|| TimeUtils.isExpired(doc.getMeta().getUpdateStamp(), "5min")) {
+			doc.setMeta(new ChatMeta());
 		}
+
 		messageContext.setInboxMessage(inboxMessage);
 		// messageStore.create(inboxMessage);
 		return messageContext;
 	}
 
 	public void commitChatContext(String contactId, String prevHandler, InboxMessage inboxMessage) {
-		ChatContextDoc doc = new ChatContextDoc();
-		doc.setContactId(contactId);
-		messageContext.meta().setPrevHandler(prevHandler);
-		messageContext.meta().setUpdateStamp(System.currentTimeMillis());
-
-		doc.setMeta(messageContext.getMeta());
-
+		messageContext.chat().setPrevHandler(prevHandler);
+		messageContext.chat().setUpdateStamp(System.currentTimeMillis());
 		if (ArgUtil.is(prevHandler)) {
 			messageStore.setHandler(inboxMessage, prevHandler);
 		}
-		mongoTemplate.save(doc);
+		messageContext.commit();
+	}
+
+	public void commitChatContext(ChatSessionDoc sessionDoc, InBoundEvent assignEvent) {
 		messageContext.commit();
 	}
 

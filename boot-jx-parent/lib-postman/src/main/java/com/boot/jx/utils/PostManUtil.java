@@ -84,6 +84,13 @@ public class PostManUtil {
 		return createContactId(inboxMessage.contact());
 	}
 
+	public static String createContactId(InBoundEvent assignEvent) {
+		if (ArgUtil.is(assignEvent.contactId)) {
+			return assignEvent.contactId;
+		}
+		return createContactId(assignEvent.contact());
+	}
+
 	public static Contactable updateContactMeta(Contactable contact) {
 		if (!ArgUtil.is(contact.getCsid())) {
 			contact.setCsid(createCsid(contact));

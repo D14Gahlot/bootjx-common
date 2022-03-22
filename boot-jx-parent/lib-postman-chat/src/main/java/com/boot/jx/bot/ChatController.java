@@ -106,11 +106,11 @@ public class ChatController {
 		if (ArgUtil.is(this.controllerName)) {
 			handelrName = this.controllerName + "#" + key;
 		}
-		context().meta().setNextHandler(handelrName);
+		context().chat().setNextHandler(handelrName);
 	}
 
 	public boolean previous(String key) {
-		return ArgUtil.areEqual(context().meta().getPrevHandler(), key);
+		return ArgUtil.areEqual(context().chat().getPrevHandler(), key);
 	}
 
 	public ChatPromise require(String key, ChatPromise.PromiseCondition... conditions) {
@@ -125,7 +125,7 @@ public class ChatController {
 			}
 		}
 
-		ChatPromise promise = context().meta().promise().get(key);
+		ChatPromise promise = context().chat().promise().get(key);
 		if (ArgUtil.is(promise) && State.RETURNED.equals(promise.getState())) {
 			promise.setState(State.COMPLETED);
 			return promise;
@@ -141,13 +141,13 @@ public class ChatController {
 			promise.setResult(Result.NONE);
 			promise.setState(State.CREATED);
 			promise.setTarget(key);
-			context().meta().promise().put(key, promise);
+			context().chat().promise().put(key, promise);
 			throw new ChatException(key).targetHandler(key);
 		}
 	}
 
 	public ChatPromise resolve(String key) {
-		ChatPromise promise = context().meta().promise().get(key);
+		ChatPromise promise = context().chat().promise().get(key);
 		if (ArgUtil.is(promise)) {
 			promise.setResult(Result.RESOLVED);
 			promise.setState(State.CAPTURED);
@@ -156,7 +156,7 @@ public class ChatController {
 	}
 
 	public ChatPromise reject(String key) {
-		ChatPromise x = context().meta().promise().get(key);
+		ChatPromise x = context().chat().promise().get(key);
 		if (ArgUtil.is(x)) {
 			x.setResult(Result.REJECTED);
 			x.setState(State.CAPTURED);

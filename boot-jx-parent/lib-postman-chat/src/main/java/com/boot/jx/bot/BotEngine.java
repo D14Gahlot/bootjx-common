@@ -220,8 +220,8 @@ public class BotEngine {
 			return;
 		}
 
-		String nextHandler = messageContext.meta().getNextHandler();
-		messageContext.meta().setNextHandler(null);
+		String nextHandler = messageContext.chat().getNextHandler();
+		messageContext.chat().setNextHandler(null);
 		invokeMethods(contactId, inboxMessage, nextHandler);
 
 		int limit = 10;
@@ -241,7 +241,7 @@ public class BotEngine {
 				inboxMessageCompleted.setMessageId(promise.getMessageId());
 				nextHandler = invokeMethods(contactId, inboxMessageCompleted, promise.getSource());
 			} else if (State.COMPLETED.equals(promise.getState())) {
-				botService.context().getMeta().getPromise().remove(promise.getTarget());
+				botService.context().chat().getPromise().remove(promise.getTarget());
 				botService.commitChatContext(contactId, nextHandler, inboxMessageOriginal);
 			}
 			limit--;
@@ -251,7 +251,7 @@ public class BotEngine {
 	}
 
 	private ChatPromise nextPromise() {
-		Map<String, ChatPromise> promises = botService.context().getMeta().getPromise();
+		Map<String, ChatPromise> promises = botService.context().chat().getPromise();
 
 		if (ArgUtil.is(promises)) {
 			for (Entry<String, ChatPromise> promiseEntry : promises.entrySet()) {
@@ -322,6 +322,7 @@ public class BotEngine {
 			}
 			ChatController controller = filtersMap.get("botCode#" + botCode);
 			controller.onSessionRoute(assignEvent);
+			botService.commitChatContext(sessionDoc, assignEvent);
 		} catch (ChatException ce) {
 			LOGGER.info("Target Handler : " + ce.getTargetHandler());
 		} catch (Exception e) {
