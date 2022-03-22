@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.mongo.CommonMongoTemplateAbstract;
 import com.boot.jx.postman.doc.PMConfigurationDoc;
 import com.boot.jx.postman.doc.config.ChannelConfigDoc;
@@ -17,57 +18,59 @@ import com.mongodb.WriteResult;
 @Component
 public class ConfigStore extends CommonMongoTemplateAbstract {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ConfigStore.class);
-    
-    public void saveConfiguration(PMConfigurationDoc doc) {
-	doc.getAccountKey(); // Populate Keys of not exists
-	save(doc);
-    }
+	private static final Logger LOGGER = LoggerFactory.getLogger(ConfigStore.class);
 
-    public void savePrefsConfig(PrefsConfigDoc prefsConfigDoc) {
-	save(prefsConfigDoc);
-	log(prefsConfigDoc, "updated");
-    }
-
-    public void saveChannelConfig(ChannelConfigDoc doc) {
-	doc.getChannelKey(); // Populate Keys of not exists
-	save(doc);
-	log(doc, "updated");
-    }
-
-    public void saveClientKeyConfig(ClientAppConfigDoc clientApiKey) {
-	try {
-	    boolean generated = false;
-	    if (!ArgUtil.is(clientApiKey.getId()) || !ArgUtil.is(clientApiKey.getKey())) {
-		clientApiKey.setKey(PostManUtil.UNIQUE_API_KEY());
-		generated = true;
-	    } else {
-		ClientAppConfigDoc oldDoc = findByIdString(clientApiKey.getId(), ClientAppConfigDoc.class);
-		clientApiKey.setKey(oldDoc.getKey());
-	    }
-	    save(clientApiKey);
-	    log(clientApiKey, "updated");
-	    if (generated == false) {
-		clientApiKey.setKey("");
-	    }
-	} catch (Exception e) {
-	    LOGGER.error("saveClientKeyConfig", e);
+	public void saveConfiguration(PMConfigurationDoc doc) {
+		doc.getAccountKey(); // Populate Keys of not exists
+		save(doc);
 	}
-    }
 
-    public WriteResult remove(Object object) {
-	WriteResult r = super.remove(object);
-	log(object, "deleted");
-	return r;
-    }
-
-    public void saveCompanyVar(CompanyVarsConfigDoc companyVarsConfig) {
-	try {
-	    save(companyVarsConfig);
-	    log(companyVarsConfig, "updated");
-	} catch (Exception e) {
-	    LOGGER.error("saveClientKeyConfig", e);
+	public void savePrefsConfig(PrefsConfigDoc prefsConfigDoc) {
+		save(prefsConfigDoc);
+		log(prefsConfigDoc, "updated");
 	}
-    }
+
+	public void saveChannelConfig(ChannelConfigDoc doc) {
+		doc.getChannelKey(); // Populate Keys of not exists
+		save(doc);
+		log(doc, "updated");
+	}
+
+	public void saveClientKeyConfig(ClientAppConfigDoc clientApiKey) {
+		try {
+			boolean generated = false;
+			if (!ArgUtil.is(clientApiKey.getId()) || !ArgUtil.is(clientApiKey.getKey())) {
+				clientApiKey.setKey(PostManUtil.UNIQUE_API_KEY());
+				generated = true;
+			} else {
+				ClientAppConfigDoc oldDoc = findByIdString(clientApiKey.getId(), ClientAppConfigDoc.class);
+				clientApiKey.setKey(oldDoc.getKey());
+			}
+			save(clientApiKey);
+			log(clientApiKey, "updated");
+			if (generated == false) {
+				clientApiKey.setKey("");
+			}
+		} catch ( org.springframework.dao.DuplicateKeyException e) {
+			throw e;
+		} catch (Exception e) {
+			LOGGER.error("saveClientKeyConfig", e);
+		}
+	}
+
+	public WriteResult remove(Object object) {
+		WriteResult r = super.remove(object);
+		log(object, "deleted");
+		return r;
+	}
+
+	public void saveCompanyVar(CompanyVarsConfigDoc companyVarsConfig) {
+		try {
+			save(companyVarsConfig);
+			log(companyVarsConfig, "updated");
+		} catch (Exception e) {
+			LOGGER.error("saveClientKeyConfig", e);
+		}
+	}
 
 }
