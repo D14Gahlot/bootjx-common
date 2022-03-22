@@ -1,49 +1,19 @@
 package com.boot.jx.bot.chakli;
 
-import java.time.LocalTime;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
-import java.util.List;
-import java.util.Map;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.data.mongodb.core.query.Criteria;
-import org.springframework.data.mongodb.core.query.Query;
-
 import com.boot.jx.bot.BotController;
 import com.boot.jx.bot.ChatMapping;
 import com.boot.jx.bot.alex.AlexBotConstants;
-import com.boot.jx.bot.alex.CommonBotController;
-import com.boot.jx.postman.PMEnvironment;
-import com.boot.jx.postman.doc.HSMTemplateDoc;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.OutboxMessage;
-import com.boot.model.SafeKeyHashMap;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.StringUtils.StringMatcher;
 
 @BotController(name = "almamaalholding", code = { "chakli_jihanbot" })
-public class DemoJihanController extends CommonBotController {
-
-	public static final String REPLY_ID = "reply_id";
-
-	public static final String TALK_TO_AGENT = "";
-
-	@Autowired
-	PMEnvironment pmEnvironment;
-
-	@Autowired
-	MongoTemplate mongoTemplate;
-
-	private void resolveLanguage() {
-		reply(new OutboxMessage().template("jd_welcome_msg").put("name", context().contact().getName()));
-		next("select-language");
-	}
+public class DemoJihanController extends DefaultChakliController {
 
 	@ChatMapping(key = AlexBotConstants.KEY.INITIATE + "*", pattern = "^*$")
 	public void start(InboxMessage inboxMessage, StringMatcher matcher) {
-		resolveLanguage();
+		resolveLanguage("jd_welcome_msg");
 	}
 
 	@ChatMapping(key = "select-language")
@@ -159,59 +129,6 @@ public class DemoJihanController extends CommonBotController {
 			this.goToMainMenu(inboxMessage, matcher);
 			break;
 		}
-	}
-
-	public boolean timeCheck() {
-		SafeKeyHashMap<Object> globalVars = pmEnvironment.local().globalVars();
-		String officeTimeFlag = globalVars.keyEntry("office_time_msg").asString();
-		boolean isNowInRange = false;
-		if (officeTimeFlag.equalsIgnoreCase("true")) {
-			String startTime = globalVars.keyEntry("office_start_time").asString();
-			String endTime = globalVars.keyEntry("office_start_time").asString();
-
-			try {
-				LocalTime now = LocalTime.now(ZoneId.of("Asia/Kuwait"));
-				String isoTime = now.format(DateTimeFormatter.ISO_TIME);
-				LocalTime currTime = LocalTime.parse(isoTime, DateTimeFormatter.ISO_TIME);
-				LocalTime start = LocalTime.of(Integer.valueOf(startTime), 0);
-				LocalTime stop = LocalTime.of(Integer.valueOf(endTime), 0);
-
-				isNowInRange = (!currTime.isBefore(start)) && currTime.isBefore(stop);
-
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		} else {
-			isNowInRange = true;
-		}
-		return isNowInRange;
-	}
-
-	public String toReplyEnum(InboxMessage inboxMessage) {
-		String codeValue = inboxMessage.form().get(REPLY_ID) == null ? inboxMessage.getMessage()
-				: inboxMessage.form().get(REPLY_ID).toString();
-		if (ArgUtil.is(codeValue)) {
-			codeValue = codeValue.toLowerCase().trim();
-		}
-		System.out.println("codeValue :" + codeValue);
-		return codeValue;
-	}
-
-	@SuppressWarnings("unchecked")
-	private Boolean checkValue(String tmplCode, String userInput) {
-		Boolean booValue = false;
-		String lang = ArgUtil.parseAsString(context().contact().getLang());
-		Query query = new Query();
-		query.addCriteria(Criteria.where("code").is(tmplCode).and("lang").is(lang));
-		HSMTemplateDoc hsmTmpl = mongoTemplate.findOne(query, HSMTemplateDoc.class, "DICT_HSM_TEMPLATES");
-		if (ArgUtil.is(hsmTmpl)) {
-			Map<String, Object> options = hsmTmpl.getOptions();
-			if (ArgUtil.is(options)) {
-				List<Map<String, Object>> extTemCom = (List<Map<String, Object>>) options.get("buttons");
-				booValue = extTemCom.stream().anyMatch(map -> map.containsValue(userInput));
-			}
-		}
-		return booValue;
 	}
 
 }

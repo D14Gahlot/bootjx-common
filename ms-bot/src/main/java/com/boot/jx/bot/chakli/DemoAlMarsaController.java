@@ -19,14 +19,6 @@ public class DemoAlMarsaController extends DefaultChakliController {
 
 	private final Logger LOGGER = LoggerFactory.getLogger(getClass());
 
-	public static final String TALK_TO_AGENT = "";
-
-	@Autowired
-	PMEnvironment pmEnvironment;
-
-	@Autowired
-	MongoTemplate mongoTemplate;
-
 	@ChatMapping(key = AlexBotConstants.KEY.INITIATE + "*", pattern = "^*$")
 	public void start(InboxMessage inboxMessage, StringMatcher matcher) {
 		resolveLanguage("ma_welcome_msg");

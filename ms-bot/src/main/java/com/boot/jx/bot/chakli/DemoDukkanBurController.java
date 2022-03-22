@@ -26,27 +26,13 @@ import com.boot.utils.ArgUtil;
 import com.boot.utils.StringUtils.StringMatcher;
 
 @BotController(name = "DemoBot", code = { "chakli_dukkanburgerbot" })
-public class DemoDukkanBurController extends CommonBotController {
+public class DemoDukkanBurController extends DefaultChakliController {
 
 	private final Logger LOGGER = LoggerFactory.getLogger(getClass());
-	public static final String REPLY_ID = "reply_id";
-
-	public static final String TALK_TO_AGENT = "";
-
-	@Autowired
-	PMEnvironment pmEnvironment;
-
-	@Autowired
-	MongoTemplate mongoTemplate;
-
-	private void resolveLanguage() {
-		reply(new OutboxMessage().template("db_welcome_msg").put("name", context().contact().getName()));
-		next("select-language");
-	}
 
 	@ChatMapping(key = AlexBotConstants.KEY.INITIATE + "*", pattern = "^*$")
 	public void start(InboxMessage inboxMessage, StringMatcher matcher) {
-		resolveLanguage();
+		resolveLanguage("db_welcome_msg");
 	}
 
 	@ChatMapping(key = "select-language")
@@ -156,59 +142,6 @@ public class DemoDukkanBurController extends CommonBotController {
 			this.goToMainMenu(inboxMessage, matcher);
 			break;
 		}
-	}
-
-	public boolean timeCheck() {
-		SafeKeyHashMap<Object> globalVars = pmEnvironment.local().globalVars();
-		String officeTimeFlag = globalVars.keyEntry("office_time_msg").asString();
-		boolean isNowInRange = false;
-		if (officeTimeFlag.equalsIgnoreCase("true")) {
-			String startTime = globalVars.keyEntry("office_start_time").asString();
-			String endTime = globalVars.keyEntry("office_start_time").asString();
-
-			try {
-				LocalTime now = LocalTime.now(ZoneId.of("Asia/Kuwait"));
-				String isoTime = now.format(DateTimeFormatter.ISO_TIME);
-				LocalTime currTime = LocalTime.parse(isoTime, DateTimeFormatter.ISO_TIME);
-				LocalTime start = LocalTime.of(Integer.valueOf(startTime), 0);
-				LocalTime stop = LocalTime.of(Integer.valueOf(endTime), 0);
-
-				isNowInRange = (!currTime.isBefore(start)) && currTime.isBefore(stop);
-
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		} else {
-			isNowInRange = true;
-		}
-		return isNowInRange;
-	}
-
-	public String toReplyEnum(InboxMessage inboxMessage) {
-		String codeValue = inboxMessage.form().get(REPLY_ID) == null ? inboxMessage.getMessage()
-				: inboxMessage.form().get(REPLY_ID).toString();
-		if (ArgUtil.is(codeValue)) {
-			codeValue = codeValue.toLowerCase().trim();
-		}
-		LOGGER.info("codeValue :" + codeValue);
-		return codeValue;
-	}
-
-	@SuppressWarnings("unchecked")
-	private Boolean checkValue(String tmplCode, String userInput) {
-		Boolean booValue = false;
-		String lang = ArgUtil.parseAsString(context().contact().getLang());
-		Query query = new Query();
-		query.addCriteria(Criteria.where("code").is(tmplCode).and("lang").is(lang));
-		HSMTemplateDoc hsmTmpl = mongoTemplate.findOne(query, HSMTemplateDoc.class, "DICT_HSM_TEMPLATES");
-		if (ArgUtil.is(hsmTmpl)) {
-			Map<String, Object> options = hsmTmpl.getOptions();
-			if (ArgUtil.is(options)) {
-				List<Map<String, Object>> extTemCom = (List<Map<String, Object>>) options.get("buttons");
-				booValue = extTemCom.stream().anyMatch(map -> map.containsValue(userInput));
-			}
-		}
-		return booValue;
 	}
 
 }
