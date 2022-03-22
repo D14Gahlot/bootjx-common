@@ -3,6 +3,8 @@ package com.boot.jx.bot.chakli;
 import java.util.List;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -22,7 +24,8 @@ import com.boot.utils.StringUtils.StringMatcher;
 
 @BotController(name = "almamaalholding", code = { "chakli_hotelleroyalbot" })
 public class DemoLeRoyalController extends CommonBotController {
-
+	private  final Logger LOGGER = LoggerFactory.getLogger(getClass());
+	  
 	public static final String REPLY_ID = "reply_id";
 
     public static final String TALK_TO_AGENT = "";
@@ -87,18 +90,15 @@ public class DemoLeRoyalController extends CommonBotController {
 	    next("next_menu");
 	    break;
 	case "lr_reserv":
-	    reply(new OutboxMessage().template("lr_reserv_ans"));
-	    next("next_menu");
+	case "lr_edit_reserv":	
+		this.transferToAgent(inboxMessage, matcher);
 	    break;  
-	case "lr_edit_order":
-	    this.transferToAgent(inboxMessage, matcher);
-	    break;
 	case "lr_location":
 	    reply(new OutboxMessage().template("lr_our_location_ans"));
 	    next("next_menu");
 	    break;
 	case "lr_hotel_serv":
-	    reply(new OutboxMessage().template("lr_hotel_serv"));
+	    reply(new OutboxMessage().template("lr_hotel_serv_ans"));
 	    next("next_menu");
 	    break;
 	case "lr_help":
@@ -141,6 +141,7 @@ public class DemoLeRoyalController extends CommonBotController {
 	if (ArgUtil.is(codeValue)) {
 	    codeValue = codeValue.toLowerCase().trim();
 	}
+	LOGGER.info("codeValue :" + codeValue);
 	return codeValue;
     }
 

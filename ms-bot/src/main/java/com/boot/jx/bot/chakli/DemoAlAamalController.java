@@ -97,6 +97,10 @@ public class DemoAlAamalController extends CommonBotController {
 	    case "JAIPUR":
 		routeSession("jaipurbot");
 		return;
+	    case "7":
+	    case "LEROYAL":
+		routeSession("hotelleroyalbot");
+		return;
 	    case "8":
 	    case "CAFEBAZZA":
 		routeSession("cafebazzabot");
