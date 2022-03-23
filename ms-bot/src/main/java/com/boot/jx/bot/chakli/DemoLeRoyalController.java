@@ -65,7 +65,7 @@ public class DemoLeRoyalController extends DefaultChakliController {
 			next("next_menu");
 			break;
 		case "lr_hotel_serv":
-			reply(new OutboxMessage().template("lr_hotel_serv"));
+			reply(new OutboxMessage().template("lr_hotel_serv_ans"));
 			next("next_menu");
 			break;
 		case "lr_help":
