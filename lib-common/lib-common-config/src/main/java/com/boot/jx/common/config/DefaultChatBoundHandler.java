@@ -162,13 +162,13 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 		TunnelTask task = new TunnelTask().name("MITEL_ROUTER").id(session.getSessionId()).interval(delay);
 		task.data().put("sessionId", session.getSessionId()).put("omid", omid).put("queue", defaultClient.getQueue());
 		sessionRouter.debounce(task);
-		//sessionRouter.doTask(task);
+		// sessionRouter.doTask(task);
 
 		TunnelTask closeTask = new TunnelTask().name("MITEL_CLOSE_CHECK").id(session.getSessionId()).interval(60 * 10);
 		closeTask.data().put("sessionId", session.getSessionId()).put("omid", omid).put("queue",
 				defaultClient.getQueue());
 		sessionRouter.debounce(closeTask);
-		//sessionRouter.doTask(closeTask);
+		// sessionRouter.doTask(closeTask);
 	}
 
 	private void updateStatus(InboxMessage inboxMessage, Status status, Exception e) {
