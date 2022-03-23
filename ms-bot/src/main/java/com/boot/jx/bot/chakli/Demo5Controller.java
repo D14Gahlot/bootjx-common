@@ -369,8 +369,6 @@ public class Demo5Controller extends DefaultChakliController {
 	@ChatMapping(key = "dc_cs_to_contact")
 	public void transferToAgent(InboxMessage inboxMessage, StringMatcher matcher) {
 		commonTransferToAgent(inboxMessage, matcher);
-		// reply(new OutboxMessage().template("dc_cs_to_contact"));
-		// commonTransferToAgent(inboxMessage, matcher);
 	}
 
 	public void goToMainMenu(InboxMessage inboxMessage, StringMatcher matcher) {

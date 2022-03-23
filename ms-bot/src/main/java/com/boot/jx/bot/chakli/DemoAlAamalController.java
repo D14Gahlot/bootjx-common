@@ -59,6 +59,9 @@ public class DemoAlAamalController extends CommonBotController {
 
 	@Autowired
 	MongoTemplate mongoTemplate;
+	
+	@Autowired
+	DemoLeRoyalController leRoyalController;
 
 	@ChatMapping(key = AlexBotConstants.KEY.INITIATE + "*", pattern = "^*$")
 	public void start(InboxMessage inboxMessage, StringMatcher matcher) {
@@ -103,6 +106,11 @@ public class DemoAlAamalController extends CommonBotController {
 				routeSession("jaipurbot");
 				jaipurController.start(inboxMessage, matcher);
 				return;
+			case "7":
+		    case "LEROYAL":
+			routeSession("hotelleroyalbot");
+			leRoyalController.start(inboxMessage, matcher);
+			return;	
 			case "8":
 			case "CAFEBAZZA":
 				routeSession("cafebazzabot");
