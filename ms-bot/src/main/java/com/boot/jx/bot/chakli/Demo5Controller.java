@@ -1,12 +1,8 @@
 package com.boot.jx.bot.chakli;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.mongodb.core.MongoTemplate;
-
 import com.boot.jx.bot.BotController;
 import com.boot.jx.bot.ChatMapping;
 import com.boot.jx.bot.alex.AlexBotConstants;
-import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.utils.ArgUtil;
@@ -18,12 +14,6 @@ public class Demo5Controller extends DefaultChakliController {
 	public static final String REPLY_ID = "reply_id";
 
 	public static final String TALK_TO_AGENT = "";
-
-	@Autowired
-	PMEnvironment pmEnvironment;
-
-	@Autowired
-	MongoTemplate mongoTemplate;
 
 	@ChatMapping(key = AlexBotConstants.KEY.INITIATE + "*", pattern = "^*$")
 	public void start(InboxMessage inboxMessage, StringMatcher matcher) {

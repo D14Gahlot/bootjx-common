@@ -1,45 +1,19 @@
 package com.boot.jx.bot.chakli;
 
-import java.util.List;
-import java.util.Map;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.data.mongodb.core.query.Criteria;
-import org.springframework.data.mongodb.core.query.Query;
-
 import com.boot.jx.bot.BotController;
 import com.boot.jx.bot.ChatMapping;
 import com.boot.jx.bot.alex.AlexBotConstants;
-import com.boot.jx.bot.alex.CommonBotController;
-import com.boot.jx.postman.PMEnvironment;
-import com.boot.jx.postman.doc.HSMTemplateDoc;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.StringUtils.StringMatcher;
 
 @BotController(name = "almamaalholding", code = { "chakli_hotelleroyalbot" })
-public class DemoLeRoyalController extends CommonBotController {
-
-	public static final String REPLY_ID = "reply_id";
-
-	public static final String TALK_TO_AGENT = "";
-
-	@Autowired
-	PMEnvironment pmEnvironment;
-
-	@Autowired
-	MongoTemplate mongoTemplate;
-
-	private void resolveLanguage() {
-		reply(new OutboxMessage().template("lr_welcome_msg").put("name", context().contact().getName()));
-		next("select-language");
-	}
+public class DemoLeRoyalController extends DefaultChakliController {
 
 	@ChatMapping(key = AlexBotConstants.KEY.INITIATE + "*", pattern = "^*$")
 	public void start(InboxMessage inboxMessage, StringMatcher matcher) {
-		resolveLanguage();
+		resolveLanguage("lr_welcome_msg");
 	}
 
 	@ChatMapping(key = "select-language")
@@ -128,15 +102,6 @@ public class DemoLeRoyalController extends CommonBotController {
 		}
 	}
 
-	public String toReplyEnum(InboxMessage inboxMessage) {
-		String codeValue = inboxMessage.form().get(REPLY_ID) == null ? inboxMessage.getMessage()
-				: inboxMessage.form().get(REPLY_ID).toString();
-		if (ArgUtil.is(codeValue)) {
-			codeValue = codeValue.toLowerCase().trim();
-		}
-		return codeValue;
-	}
-
 	@ChatMapping(key = "jd_cs_to_contact")
 	public void transferToAgent(InboxMessage inboxMessage, StringMatcher matcher) {
 		commonTransferToAgent(inboxMessage, matcher);
@@ -145,23 +110,6 @@ public class DemoLeRoyalController extends CommonBotController {
 	public void goToMainMenu(InboxMessage inboxMessage, StringMatcher matcher) {
 		reply(new OutboxMessage().template("lr_question"));
 		next("select-question");
-	}
-
-	@SuppressWarnings("unchecked")
-	private Boolean checkValue(String tmplCode, String userInput) {
-		Boolean booValue = false;
-		String lang = ArgUtil.parseAsString(context().contact().getLang());
-		Query query = new Query();
-		query.addCriteria(Criteria.where("code").is(tmplCode).and("lang").is(lang));
-		HSMTemplateDoc hsmTmpl = mongoTemplate.findOne(query, HSMTemplateDoc.class, "DICT_HSM_TEMPLATES");
-		if (ArgUtil.is(hsmTmpl)) {
-			Map<String, Object> options = hsmTmpl.getOptions();
-			if (ArgUtil.is(options)) {
-				List<Map<String, Object>> extTemCom = (List<Map<String, Object>>) options.get("buttons");
-				booValue = extTemCom.stream().anyMatch(map -> map.containsValue(userInput));
-			}
-		}
-		return booValue;
 	}
 
 }
