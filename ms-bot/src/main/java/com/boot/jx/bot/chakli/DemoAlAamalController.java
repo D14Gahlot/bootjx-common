@@ -49,7 +49,7 @@ public class DemoAlAamalController extends CommonBotController {
 	DemoJaipurController jaipurController;
 
 	@Autowired
-	DemoDietcaredlvController dietCareDlvController;
+	DemoDietCareBoutController dietCareBoutController;
 
 	@Autowired
 	DemoCafeBazzaController cafeBazzaController;
@@ -117,9 +117,9 @@ public class DemoAlAamalController extends CommonBotController {
 				cafeBazzaController.start(inboxMessage, matcher);
 				return;
 			case "9":
-			case "dietcaredlv":
-				routeSession("cafebazzabot");
-				dietCareDlvController.start(inboxMessage, matcher);
+			case "DIETCAREBOUT":
+				routeSession("dietcareboutbot");
+				dietCareBoutController.start(inboxMessage, matcher);
 				return;
 			case "10":
 			case "DIETCARECLINIC":
@@ -179,7 +179,7 @@ public class DemoAlAamalController extends CommonBotController {
 			context().session().put(CURRENT_DEMO, "8");
 			showDemoMenu(inboxMessage, matcher);
 			break;
-		case "dietcaredlv":
+		case "dietcarebout":
 		case "9":
 			context().session().put(CURRENT_DEMO, "9");
 			showDemoMenu(inboxMessage, matcher);
