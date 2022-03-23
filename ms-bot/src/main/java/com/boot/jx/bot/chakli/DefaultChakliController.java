@@ -67,9 +67,9 @@ public class DefaultChakliController extends CommonBotController {
 
 	public boolean timeCheck() {
 		SafeKeyHashMap<Object> globalVars = pmEnvironment.local().globalVars();
-		String officeTimeFlag = globalVars.keyEntry("office_time_msg").asString();
+		boolean officeTimeFlag = globalVars.keyEntry("office_time_msg").asBoolean();
 		boolean isNowInRange = false;
-		if (officeTimeFlag.equalsIgnoreCase("true")) {
+		if (officeTimeFlag) {
 			String startTime = globalVars.keyEntry("office_start_time").asString();
 			String endTime = globalVars.keyEntry("office_start_time").asString();
 
