@@ -6,7 +6,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import com.boot.jx.AppConfig;
 import com.boot.jx.AppConfigPackage.AppCommonConfig;
@@ -14,7 +13,6 @@ import com.boot.jx.http.CommonHttpRequest;
 import com.boot.jx.postman.ClientApp;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.utils.ArgUtil;
-import com.boot.utils.Constants;
 import com.boot.utils.CryptoUtil;
 import com.boot.utils.CryptoUtil.CrypToken;
 import com.boot.utils.CryptoUtil.HashBuilder;
