@@ -57,7 +57,7 @@ public class DemoLeRoyalController extends DefaultChakliController {
 			reply(new OutboxMessage().template("lr_reserv_ans"));
 			next("next_menu");
 			break;
-		case "lr_edit_order":
+		case "lr_edit_reserv":
 			this.transferToAgent(inboxMessage, matcher);
 			break;
 		case "lr_location":
