@@ -165,6 +165,8 @@ public class ChatSessionManager {
 
 		List<Criteria> criterias = new ArrayList<Criteria>();
 
+		Criteria primaryCriteria = Criteria.where("primary").is(true);
+
 		if (ArgUtil.is(search)) {
 			search = search.replace("*", "").trim();
 
@@ -204,6 +206,7 @@ public class ChatSessionManager {
 
 			if (pmDomainConfig.isAgentHistoryLazy().asBoolean(false)) {
 				if (ArgUtil.areEqual("ME", tab)) {
+					primaryCriteria = primaryCriteria.and("mode").is("AGENT");
 					criterias.add(new Criteria().orOperator(
 							// Assigned to Me
 							Criteria.where("assignedToAgent").is(agentCode),
@@ -212,6 +215,7 @@ public class ChatSessionManager {
 					//
 					));
 				} else if (ArgUtil.areEqual("TEAM", tab)) {
+					primaryCriteria = primaryCriteria.and("mode").is("AGENT");
 					criterias.add(new Criteria().orOperator(
 							// Not Assigned to Me
 							Criteria.where("assignedToDept").is(agentDept).and("assignedToAgent").ne(agentCode)
@@ -226,6 +230,7 @@ public class ChatSessionManager {
 					//
 					));
 				} else if (ArgUtil.areEqual("HISTORY", tab)) {
+					primaryCriteria = primaryCriteria.and("mode").is("AGENT");
 					Calendar hisotryTimeout = Calendar.getInstance();
 					hisotryTimeout.setTimeInMillis(hisotryTimeout.getTimeInMillis()
 							- PMConstants.DEFAULT_VALUES.POSTMAN_AGENT_TAB_HISTORY_PERIOD);
@@ -242,7 +247,7 @@ public class ChatSessionManager {
 		Integer limit = pmDomainConfig.getAgentHistoryCount().asInteger(150);
 		query2.addCriteria(
 				// Only Agent Chats
-				Criteria.where("primary").is(true).and("mode").is("AGENT")
+				primaryCriteria
 						// Add Selected Criteria
 						.andOperator(criterias.toArray(new Criteria[criterias.size()])))
 				// Limit

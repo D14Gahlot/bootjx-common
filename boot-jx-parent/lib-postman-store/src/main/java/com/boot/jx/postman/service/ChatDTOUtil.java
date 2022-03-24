@@ -162,6 +162,7 @@ public class ChatDTOUtil {
 	chatSessionDto.setSessionId(chatSessionDto.getSessionId());
 	chatSessionDto.setAssignedToAgent(chatSessionDoc.getAssignedToAgent());
 	chatSessionDto.setAssignedToDept(chatSessionDoc.getAssignedToDept());
+	chatSessionDto.setAssignedToBot(chatSessionDoc.getAssignedToBot());
 	chatSessionDto.setActive(chatSessionDoc.isActive());
 	chatSessionDto.setStatus(chatSessionDoc.getStatus());
 	chatSessionDto.setName(chatSessionDoc.getContactName());
