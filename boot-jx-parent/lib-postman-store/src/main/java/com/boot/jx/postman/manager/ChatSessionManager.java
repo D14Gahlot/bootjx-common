@@ -204,7 +204,7 @@ public class ChatSessionManager {
 							// Agent Has been Assigned to it
 							Criteria.where("lastOutGoingStamp").gt(graceStamp)));
 
-			if (pmDomainConfig.isAgentHistoryLazy().asBoolean(false)) {
+			if (pmDomainConfig.isAgentHistoryLazy().asBoolean(true)) {
 				if (ArgUtil.areEqual("ME", tab)) {
 					primaryCriteria = primaryCriteria.and("mode").is("AGENT");
 					criterias.add(new Criteria().orOperator(
