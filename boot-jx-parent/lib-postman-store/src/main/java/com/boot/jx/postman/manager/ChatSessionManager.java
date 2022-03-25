@@ -252,7 +252,7 @@ public class ChatSessionManager {
 						.andOperator(criterias.toArray(new Criteria[criterias.size()])))
 				// Limit
 				.with(new Sort(Direction.DESC, "updated.hour")).limit(limit);
-		// System.out.println(query2.toString());
+		//System.out.println(query2.toString());
 		LOGGER.debug(query2.toString());
 		return sessionStore.find(CommonMongoQueryBuilder.collection(ChatSessionDoc.class).query(query2));
 	}
@@ -263,7 +263,7 @@ public class ChatSessionManager {
 		if (historyPeriod > 0L && ArgUtil.areEqual("HISTORY", tab)) {
 			return findChatSessionDocByAgentAndUnAssigned(tab, agentCode, agentDept, search,
 					PMConstants.DEFAULT_VALUES.POSTMAN_AGENT_TAB_HISTORY_PERIOD + historyPeriod, searchStatus);
-		} else if (historyPeriod > 0L && ArgUtil.areEqual("STALE", searchStatus)) {
+		} else if (historyPeriod > 0L && ArgUtil.isEqual(searchStatus,"STALE","CLOSED")) {
 			return findChatSessionDocByAgentAndUnAssigned(tab, agentCode, agentDept, search,
 					PMConstants.DEFAULT_VALUES.POSTMAN_AGENT_TAB_HISTORY_PERIOD + historyPeriod, searchStatus);
 		}
