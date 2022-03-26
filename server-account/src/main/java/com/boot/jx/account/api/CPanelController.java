@@ -32,95 +32,95 @@ import com.fasterxml.jackson.annotation.JsonView;
 @RequestMapping("/cpanel")
 public class CPanelController {
 
-    @Autowired
-    private MongoTemplate mongoTemplate;
+	@Autowired
+	private MongoTemplate mongoTemplate;
 
-    @Autowired
-    private ConfigManager configManager;
+	@Autowired
+	private ConfigManager configManager;
 
-    @Autowired
-    private PMEnvironment pmEnvironment;
+	@Autowired
+	private PMEnvironment pmEnvironment;
 
-    @Autowired
-    private AppCommonConfig appCommonConfig;
+	@Autowired
+	private AppCommonConfig appCommonConfig;
 
-    @Autowired
-    private AccountAuthService accountAdminService;
+	@Autowired
+	private AccountAuthService accountAdminService;
 
-    @Autowired
-    private AccountSessionBean sessionBean;
+	@Autowired
+	private AccountSessionBean sessionBean;
 
-    @RequestMapping(value = { "/app", "/app/**", "/app/*" }, method = { RequestMethod.POST, RequestMethod.GET })
-    public String cpanel(Model model, @RequestParam(required = false) String authToken) {
+	@RequestMapping(value = { "/app", "/app/**", "/app/*" }, method = { RequestMethod.POST, RequestMethod.GET })
+	public String cpanel(Model model, @RequestParam(required = false) String authToken) {
 
-	model.addAllAttributes(appCommonConfig.appAttributes());
+		model.addAllAttributes(appCommonConfig.appAttributes());
 
-	Authentication auth = AccountAuthService.getAuthentication();
+		Authentication auth = AccountAuthService.getAuthentication();
 
-	if (ArgUtil.is(auth)) {
-	    model.addAttribute("APP_USER", auth.getName());
-	    model.addAttribute("APP_USER_ROLE", sessionBean.getRole());
-	} else {
-	    model.addAttribute("APP_USER", "");
-	    model.addAttribute("APP_USER_ROLE", "GUEST");
+		if (ArgUtil.is(auth)) {
+			model.addAttribute("APP_USER", auth.getName());
+			model.addAttribute("APP_USER_ROLE", sessionBean.getRole());
+		} else {
+			model.addAttribute("APP_USER", "");
+			model.addAttribute("APP_USER_ROLE", "GUEST");
+		}
+
+		model.addAttribute("APP", "cpanel");
+
+		return "app-cpanel";
 	}
 
-	model.addAttribute("APP", "account");
+	@ResponseBody
+	@RequestMapping(value = "/api/config/channel/{channelType}", method = { RequestMethod.POST })
+	@JsonView(PMEnvironment.PublicProperty.class)
+	public ApiResponse<ChannelConfig, Object> saveChannelConfig(@PathVariable CHANNEL_TYPE_ENUM channelType,
+			@RequestBody Map<String, Object> data) {
+		return ApiResponse.buildResults(configManager.saveChannelConfig(channelType.toString(), data));
+	}
 
-	return "app-cpanel";
-    }
+	@ResponseBody
+	@RequestMapping(value = "/api/config/channel/{channelId}", method = { RequestMethod.GET })
+	@JsonView(PMEnvironment.PublicProperty.class)
+	public ApiResponse<ChannelConfig, Object> getChannelConfig(@PathVariable String channelId,
+			@RequestParam(defaultValue = "false", required = false) boolean disabled) {
+		return ApiResponse.buildResults(configManager.getChannelConfig(channelId));
+	}
 
-    @ResponseBody
-    @RequestMapping(value = "/api/config/channel/{channelType}", method = { RequestMethod.POST })
-    @JsonView(PMEnvironment.PublicProperty.class)
-    public ApiResponse<ChannelConfig, Object> saveChannelConfig(@PathVariable CHANNEL_TYPE_ENUM channelType,
-	    @RequestBody Map<String, Object> data) {
-	return ApiResponse.buildResults(configManager.saveChannelConfig(channelType.toString(), data));
-    }
+	@ResponseBody
+	@RequestMapping(value = "/api/config/channel/{channelId}", method = { RequestMethod.DELETE })
+	@JsonView(PMEnvironment.PublicProperty.class)
+	public ApiResponse<ChannelConfig, Object> deleteChannelConfig(@PathVariable String channelId) {
+		return ApiResponse.buildResults(configManager.updateChannelConfig(channelId, "remove"));
+	}
 
-    @ResponseBody
-    @RequestMapping(value = "/api/config/channel/{channelId}", method = { RequestMethod.GET })
-    @JsonView(PMEnvironment.PublicProperty.class)
-    public ApiResponse<ChannelConfig, Object> getChannelConfig(@PathVariable String channelId,
-	    @RequestParam(defaultValue = "false", required = false) boolean disabled) {
-	return ApiResponse.buildResults(configManager.getChannelConfig(channelId));
-    }
+	@ResponseBody
+	@RequestMapping(value = "/api/config/channel/{channelId}/{action}", method = { RequestMethod.GET })
+	@JsonView(PMEnvironment.PublicProperty.class)
+	public ApiResponse<ChannelConfig, Object> sandboxChannelConfig(@PathVariable String channelId,
+			@PathVariable String action) {
+		return ApiResponse.buildResults(configManager.updateChannelConfig(channelId, action));
+	}
 
-    @ResponseBody
-    @RequestMapping(value = "/api/config/channel/{channelId}", method = { RequestMethod.DELETE })
-    @JsonView(PMEnvironment.PublicProperty.class)
-    public ApiResponse<ChannelConfig, Object> deleteChannelConfig(@PathVariable String channelId) {
-	return ApiResponse.buildResults(configManager.updateChannelConfig(channelId, "remove"));
-    }
+	@JsonView(PMEnvironment.PublicProperty.class)
+	@ResponseBody
+	@RequestMapping(value = { "/api/config/clientapikey" }, method = { RequestMethod.GET })
+	public ApiResponse<ClientAppConfigDoc, Object> createClientApiKey() {
+		return ApiResponse.buildResults(mongoTemplate.findAll(ClientAppConfigDoc.class));
+	}
 
-    @ResponseBody
-    @RequestMapping(value = "/api/config/channel/{channelId}/{action}", method = { RequestMethod.GET })
-    @JsonView(PMEnvironment.PublicProperty.class)
-    public ApiResponse<ChannelConfig, Object> sandboxChannelConfig(@PathVariable String channelId,
-	    @PathVariable String action) {
-	return ApiResponse.buildResults(configManager.updateChannelConfig(channelId, action));
-    }
+	@JsonView(PMEnvironment.OneTimeVisibleProperty.class)
+	@ResponseBody
+	@RequestMapping(value = { "/api/config/clientapikey" }, method = { RequestMethod.POST })
+	public ApiResponse<ClientAppConfigDoc, Object> createClientApiKey(@RequestBody ClientAppConfigDoc clientApiKey) {
+		return ApiResponse.buildData(configManager.save(clientApiKey));
+	}
 
-    @JsonView(PMEnvironment.PublicProperty.class)
-    @ResponseBody
-    @RequestMapping(value = { "/api/config/clientapikey" }, method = { RequestMethod.GET })
-    public ApiResponse<ClientAppConfigDoc, Object> createClientApiKey() {
-	return ApiResponse.buildResults(mongoTemplate.findAll(ClientAppConfigDoc.class));
-    }
-
-    @JsonView(PMEnvironment.OneTimeVisibleProperty.class)
-    @ResponseBody
-    @RequestMapping(value = { "/api/config/clientapikey" }, method = { RequestMethod.POST })
-    public ApiResponse<ClientAppConfigDoc, Object> createClientApiKey(@RequestBody ClientAppConfigDoc clientApiKey) {
-	return ApiResponse.buildData(configManager.save(clientApiKey));
-    }
-
-    @ApiRequest(rules = PMConstants.USER_ROLE.BUSINESS_USER)
-    @ResponseBody
-    @RequestMapping(value = { "/api/collection/drop" }, method = { RequestMethod.POST })
-    public ApiResponse<Object, Object> dropCollection(@RequestParam String collectionName) {
-	mongoTemplate.dropCollection(collectionName);
-	return ApiResponse.build();
-    }
+	@ApiRequest(rules = PMConstants.USER_ROLE.BUSINESS_USER)
+	@ResponseBody
+	@RequestMapping(value = { "/api/collection/drop" }, method = { RequestMethod.POST })
+	public ApiResponse<Object, Object> dropCollection(@RequestParam String collectionName) {
+		mongoTemplate.dropCollection(collectionName);
+		return ApiResponse.build();
+	}
 
 }
