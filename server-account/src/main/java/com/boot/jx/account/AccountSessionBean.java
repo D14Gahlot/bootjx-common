@@ -15,23 +15,23 @@ import com.boot.utils.ArgUtil;
 @Scope(value = "session", proxyMode = ScopedProxyMode.TARGET_CLASS)
 public class AccountSessionBean extends AppCommonAuthUser implements AuditDetailProvider, Serializable {
 
-    private static final long serialVersionUID = 3090820592497487481L;
-    private BusinessUserDoc account;
+	private static final long serialVersionUID = 3090820592497487481L;
+	private BusinessUserDoc account;
 
-    @Override
-    public String getAuditUser() {
-	if (ArgUtil.is(this.account)) {
-	    return this.account.getContact().getEmail();
+	@Override
+	public String getAuditUser() {
+		if (ArgUtil.is(this.account)) {
+			return this.account.getContact().getEmail();
+		}
+		return null;
 	}
-	return null;
-    }
 
-    public BusinessUserDoc domainUser() {
-	return account;
-    }
+	public BusinessUserDoc domainUser() {
+		return account;
+	}
 
-    public void domainUser(BusinessUserDoc account) {
-	this.account = account;
-    }
+	public void domainUser(BusinessUserDoc account) {
+		this.account = account;
+	}
 
 }

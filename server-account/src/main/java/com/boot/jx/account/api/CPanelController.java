@@ -17,16 +17,23 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.boot.jx.AppConfigPackage.AppCommonConfig;
 import com.boot.jx.account.AccountAuthService;
 import com.boot.jx.account.AccountSessionBean;
+import com.boot.jx.account.doc.AccountStore;
+import com.boot.jx.account.doc.BusinessUserDoc;
 import com.boot.jx.api.ApiResponse;
+import com.boot.jx.common.config.AppCommonAuthFilter.ACCESS_RULES;
 import com.boot.jx.common.config.ConfigManager;
 import com.boot.jx.http.ApiRequest;
 import com.boot.jx.postman.PMConstants;
 import com.boot.jx.postman.PMConstants.CHANNEL_TYPE_ENUM;
+import com.boot.jx.postman.PMConstants.USER_ROLE;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.doc.config.ClientAppConfigDoc;
 import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.JsonUtil;
 import com.fasterxml.jackson.annotation.JsonView;
+
+import io.swagger.annotations.ApiParam;
 
 @Controller
 @RequestMapping("/cpanel")
@@ -39,21 +46,16 @@ public class CPanelController {
 	private ConfigManager configManager;
 
 	@Autowired
-	private PMEnvironment pmEnvironment;
-
-	@Autowired
 	private AppCommonConfig appCommonConfig;
 
 	@Autowired
-	private AccountAuthService accountAdminService;
+	private AccountStore accountStore;
 
 	@Autowired
 	private AccountSessionBean adminSessionBean;
 
-	@Autowired
-	private AccountSessionBean sessionBean;
-
-	@RequestMapping(value = { "/app", "/app/**", "/app/*" }, method = { RequestMethod.POST, RequestMethod.GET })
+	@RequestMapping(value = { "", "/", "/**", "/app", "/app/**", "/app/*" },
+			method = { RequestMethod.POST, RequestMethod.GET })
 	public String cpanel(Model model, @RequestParam(required = false) String authToken) {
 
 		model.addAllAttributes(appCommonConfig.appAttributes());
@@ -63,16 +65,33 @@ public class CPanelController {
 		if (ArgUtil.is(auth)) {
 			model.addAttribute("APP_USER", auth.getName());
 			model.addAttribute("APP_USER_NAME", adminSessionBean.domainUser().getContact().getName());
-			model.addAttribute("APP_USER_ROLE", sessionBean.getRole());
+			model.addAttribute("APP_USER_ROLE", JsonUtil.toJson(adminSessionBean.getRole()));
 		} else {
 			model.addAttribute("APP_USER", "");
 			model.addAttribute("APP_USER_NAME", "");
-			model.addAttribute("APP_USER_ROLE", "GUEST");
+			model.addAttribute("APP_USER_ROLE", "['GUEST']");
 		}
 
 		model.addAttribute("APP", "cpanel");
 
 		return "app-cpanel";
+	}
+
+	@ApiRequest(rules = ACCESS_RULES.ONLY_DUPERUSER)
+	@ResponseBody
+	@RequestMapping(value = "/api/manage/user/role", method = { RequestMethod.POST })
+	@JsonView(PMEnvironment.PublicProperty.class)
+	public ApiResponse<Object, Object> manageUserRol(
+			@ApiParam(allowableValues = USER_ROLE.ALLOWED) @RequestParam String role, @RequestParam String email,
+			@RequestParam boolean assign) {
+		BusinessUserDoc user = accountStore.findOneByEmail(email, BusinessUserDoc.class);
+		if (assign) {
+			user.role().add(role);
+		} else {
+			user.role().remove(role);
+		}
+		accountStore.save(user);
+		return ApiResponse.build().message("Role Modified");
 	}
 
 	@ResponseBody

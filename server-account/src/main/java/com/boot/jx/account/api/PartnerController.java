@@ -48,6 +48,7 @@ import com.boot.jx.scope.tnt.Tenants;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
 import com.boot.utils.CryptoUtil;
+import com.boot.utils.JsonUtil;
 
 @Controller
 @RequestMapping("/partner")
@@ -89,11 +90,11 @@ public class PartnerController {
 		if (ArgUtil.is(auth) && ArgUtil.is(adminSessionBean.domainUser())) {
 			model.addAttribute("APP_USER", auth.getName());
 			model.addAttribute("APP_USER_NAME", adminSessionBean.domainUser().getContact().getName());
-			model.addAttribute("APP_USER_ROLE", adminSessionBean.getRole());
+			model.addAttribute("APP_USER_ROLE", JsonUtil.toJson(adminSessionBean.getRole()));
 		} else {
 			model.addAttribute("APP_USER", "");
 			model.addAttribute("APP_USER_NAME", "");
-			model.addAttribute("APP_USER_ROLE", "GUEST");
+			model.addAttribute("APP_USER_ROLE", "['GUEST']");
 		}
 
 		model.addAttribute("APP", "partner");
