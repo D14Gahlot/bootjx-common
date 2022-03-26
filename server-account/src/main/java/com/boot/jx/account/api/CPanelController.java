@@ -48,6 +48,9 @@ public class CPanelController {
 	private AccountAuthService accountAdminService;
 
 	@Autowired
+	private AccountSessionBean adminSessionBean;
+
+	@Autowired
 	private AccountSessionBean sessionBean;
 
 	@RequestMapping(value = { "/app", "/app/**", "/app/*" }, method = { RequestMethod.POST, RequestMethod.GET })
@@ -59,9 +62,11 @@ public class CPanelController {
 
 		if (ArgUtil.is(auth)) {
 			model.addAttribute("APP_USER", auth.getName());
+			model.addAttribute("APP_USER_NAME", adminSessionBean.domainUser().getContact().getName());
 			model.addAttribute("APP_USER_ROLE", sessionBean.getRole());
 		} else {
 			model.addAttribute("APP_USER", "");
+			model.addAttribute("APP_USER_NAME", "");
 			model.addAttribute("APP_USER_ROLE", "GUEST");
 		}
 
