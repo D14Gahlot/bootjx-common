@@ -19,131 +19,138 @@ import com.boot.utils.ArgUtil;
 @TypeAlias("DomainUser")
 public class BusinessUserDoc implements IDocument, DocVersion, AuditCreateEntity, Serializable {
 
-    private static final long serialVersionUID = -3354844112176554561L;
+	private static final long serialVersionUID = -3354844112176554561L;
 
-    @Id
-    private String id;
+	@Id
+	private String id;
 
-    private SignupContact contact;
-    private AccountMeta meta;
-    private String role;
+	private SignupContact contact;
+	private AccountMeta meta;
+	private Set<String> role;
 
-    private Long createdStamp;
-    private String createdBy;
-    private Long modifiedStamp;
-    private String modifiedBy;
-    private Boolean isActive;
+	private Long createdStamp;
+	private String createdBy;
+	private Long modifiedStamp;
+	private String modifiedBy;
+	private Boolean isActive;
 
-    @DBRef
-    private Set<DomainDoc> domains;
-    
-    @DBRef
-    private Set<DomainLicenseDoc> domainLicense;
-    
+	@DBRef
+	private Set<DomainDoc> domains;
 
-    private List<DocVersion> oldVersions;
+	@DBRef
+	private Set<DomainLicenseDoc> domainLicense;
 
-    public List<DocVersion> getOldVersions() {
-	return oldVersions;
-    }
+	private List<DocVersion> oldVersions;
 
-    public void setOldVersions(List<DocVersion> oldVersions) {
-	this.oldVersions = oldVersions;
-    }
-
-    public Long getCreatedStamp() {
-	return createdStamp;
-    }
-
-    public void setCreatedStamp(Long createdStamp) {
-	this.createdStamp = createdStamp;
-    }
-
-    public Long getModifiedStamp() {
-	return modifiedStamp;
-    }
-
-    public void setModifiedStamp(Long modifiedStamp) {
-	this.modifiedStamp = modifiedStamp;
-    }
-
-    public String getId() {
-	return id;
-    }
-
-    public void setId(String id) {
-	this.id = id;
-    }
-
-    public SignupContact getContact() {
-	return contact;
-    }
-
-    public void setContact(SignupContact contact) {
-	this.contact = contact;
-    }
-
-    public Boolean getIsActive() {
-	return isActive;
-    }
-
-    public void setIsActive(Boolean isActive) {
-	this.isActive = isActive;
-    }
-
-    public String getModifiedBy() {
-	return modifiedBy;
-    }
-
-    public void setModifiedBy(String modifiedBy) {
-	this.modifiedBy = modifiedBy;
-    }
-
-    public String getCreatedBy() {
-	return createdBy;
-    }
-
-    public void setCreatedBy(String createdBy) {
-	this.createdBy = createdBy;
-    }
-
-    public AccountMeta getMeta() {
-	return meta;
-    }
-
-    public void setMeta(AccountMeta accountKeys) {
-	this.meta = accountKeys;
-    }
-
-    public Set<DomainDoc> getDomains() {
-	return domains;
-    }
-
-    public Set<DomainDoc> domains() {
-	if (!ArgUtil.is(domains)) {
-	    this.domains = new TreeSet<DomainDoc>();
+	public List<DocVersion> getOldVersions() {
+		return oldVersions;
 	}
-	return this.domains;
-    }
 
-    public void setDomains(Set<DomainDoc> domains) {
-	this.domains = domains;
-    }
+	public void setOldVersions(List<DocVersion> oldVersions) {
+		this.oldVersions = oldVersions;
+	}
 
-    public String getRole() {
-	return role;
-    }
+	public Long getCreatedStamp() {
+		return createdStamp;
+	}
 
-    public void setRole(String role) {
-	this.role = role;
-    }
+	public void setCreatedStamp(Long createdStamp) {
+		this.createdStamp = createdStamp;
+	}
+
+	public Long getModifiedStamp() {
+		return modifiedStamp;
+	}
+
+	public void setModifiedStamp(Long modifiedStamp) {
+		this.modifiedStamp = modifiedStamp;
+	}
+
+	public String getId() {
+		return id;
+	}
+
+	public void setId(String id) {
+		this.id = id;
+	}
+
+	public SignupContact getContact() {
+		return contact;
+	}
+
+	public void setContact(SignupContact contact) {
+		this.contact = contact;
+	}
+
+	public Boolean getIsActive() {
+		return isActive;
+	}
+
+	public void setIsActive(Boolean isActive) {
+		this.isActive = isActive;
+	}
+
+	public String getModifiedBy() {
+		return modifiedBy;
+	}
+
+	public void setModifiedBy(String modifiedBy) {
+		this.modifiedBy = modifiedBy;
+	}
+
+	public String getCreatedBy() {
+		return createdBy;
+	}
+
+	public void setCreatedBy(String createdBy) {
+		this.createdBy = createdBy;
+	}
+
+	public AccountMeta getMeta() {
+		return meta;
+	}
+
+	public void setMeta(AccountMeta accountKeys) {
+		this.meta = accountKeys;
+	}
+
+	public Set<DomainDoc> getDomains() {
+		return domains;
+	}
+
+	public Set<DomainDoc> domains() {
+		if (!ArgUtil.is(domains)) {
+			this.domains = new TreeSet<DomainDoc>();
+		}
+		return this.domains;
+	}
+
+	public void setDomains(Set<DomainDoc> domains) {
+		this.domains = domains;
+	}
+
+	public Set<String> getRole() {
+		return role;
+	}
+
+	public void setRole(Set<String> role) {
+		this.role = role;
+	}
+
+	public Set<String> role() {
+		if (!ArgUtil.is(role)) {
+			this.role = new TreeSet<String>();
+		}
+		return this.role;
+
+	}
 
 	public Set<DomainLicenseDoc> domainLicense() {
 		if (!ArgUtil.is(domainLicense)) {
-		    this.domains = new TreeSet<DomainDoc>();
+			this.domains = new TreeSet<DomainDoc>();
 		}
 		return this.domainLicense;
-		
+
 	}
 
 	public void setDomainLicense(Set<DomainLicenseDoc> domainLicense) {

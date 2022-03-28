@@ -10,6 +10,7 @@ public class TmplElement implements Serializable {
 	public static final String QUICK_REPLY = "QUICK_REPLY";
 	public static final String URL = "URL";
     }
+    
 
     private String name;
     private String label;

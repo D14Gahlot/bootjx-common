@@ -8,14 +8,18 @@ import org.springframework.stereotype.Component;
 import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorMapping;
 import com.boot.jx.dict.ContactType;
+import com.boot.jx.dict.FileType;
 import com.boot.jx.postman.PMConstants.CHANNEL_TYPE;
+import com.boot.jx.postman.client.PMFileStoreClient;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.fb.FacebooClient;
 import com.boot.jx.postman.fb.FacebookHookRequest;
-import com.boot.jx.postman.fb.FacebookMessaging;
 import com.boot.jx.postman.fb.FacebookUserProfile;
+import com.boot.jx.postman.fb.FacbookAttachment;
+import com.boot.jx.postman.fb.FacebookMessaging;
 import com.boot.jx.postman.manager.LogManager;
+import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.Message;
 import com.boot.jx.postman.model.Message.Status;
@@ -45,6 +49,9 @@ public class FacebookConnector extends AbstractConnector<FacebookConfigDetails, 
 
     @Autowired
     private LogManager logManager;
+
+    @Autowired
+    private PMFileStoreClient pmFileStoreClient;
 
     @Override
     public void onChannelUpdate(ChannelConfig channelConfig) {
@@ -111,14 +118,47 @@ public class FacebookConnector extends AbstractConnector<FacebookConfigDetails, 
 	inboxMessage.setFrom(csid);
 	inboxMessage.to().add(m.getRecipient().get("id"));
 
-	// Extract Message Details
-	inboxMessage.setMessageIdExt(m.getMessage().getMid());
-	if (ArgUtil.is(m.getPostBack()) && ArgUtil.is(m.getPostBack().getTitle())) {
-	    inboxMessage.setMessageIdExt(m.getPostBack().getMid());
-	    inboxMessage.setMessage(m.getPostBack().getTitle());
-	} else {
+	/**
+	 * https://developers.facebook.com/docs/messenger-platform/reference/webhook-events/messages
+	 */
+
+	if (ArgUtil.is(m.getMessage())) {
+	    if (ArgUtil.is(m.getMessage().getAttachments())
+		    && ArgUtil.is(m.getMessage().getAttachments()[0].getPayload())) {
+		if (ArgUtil.is(m.getMessage().getAttachments()[0].getPayload().getUrl())) {
+		    FacbookAttachment attchment = m.getMessage().getAttachments()[0];
+		    FileType attachmentType = ArgUtil.parseAsEnumT(attchment.getType(), FileType.class);
+		    if (ArgUtil.is(attachmentType)) {
+			inboxMessage.setFormatType(attachmentType.toString().toLowerCase());
+			inboxMessage.attachment(new Attachment().mediaURL(attchment.getPayload().getUrl())
+				.mediaType(attachmentType).mediaSrc(attchment.getPayload().getUrl()));
+		    } else if ("fallback".equals(attchment.getType())) {
+			inboxMessage.attachment(new Attachment().mediaURL(attchment.getPayload().getUrl())
+				.mediaCaption(attchment.getPayload().getTitle())
+				.mediaSrc(attchment.getPayload().getUrl()).mediaType(FileType.URL)
+				.mediaSubType(attchment.getType()));
+		    }
+		}
+	    }
+	    // Extract Message Details
 	    inboxMessage.setMessageIdExt(m.getMessage().getMid());
 	    inboxMessage.setMessage(m.getMessage().getText());
+
+	    MapModel qr = m.getMessage().getQuickReply();
+	    if (ArgUtil.is(qr)) {
+		inboxMessage.form().put("reply_id", qr.getString("payload"));
+		inboxMessage.form().put("reply_title", m.getMessage().getText());
+	    }
+
+	    MapModel rt = m.getMessage().getReplyTo();
+	    if (ArgUtil.is(rt)) {
+		inboxMessage.setReplyIdExt(rt.getString("mid"));
+	    }
+	} else if (ArgUtil.is(m.getPostBack()) && ArgUtil.is(m.getPostBack().getTitle())) {
+	    inboxMessage.setMessageIdExt(m.getPostBack().getMid());
+	    inboxMessage.setMessage(m.getPostBack().getTitle());
+	    inboxMessage.form().put("reply_id", m.getPostBack().getPayload());
+	    inboxMessage.form().put("reply_title", m.getPostBack().getTitle());
 	}
 
 	return inboxMessage;

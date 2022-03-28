@@ -5,7 +5,7 @@ import org.springframework.scheduling.annotation.Async;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.MessageReport;
-import com.boot.jx.postman.model.PMParams;
+import com.boot.jx.postman.model.PMArgs;
 import com.boot.jx.postman.model.ext.InBoundEvent;
 import com.boot.jx.postman.store.MessageContext;
 import com.boot.model.MapModel.NodeEntry;
@@ -25,7 +25,7 @@ public class InBound {
     public interface InBoundHandler {
 
 	public MessageContext context();
-	
+
 	public void onMessage(InboxMessage inboxMessage, ChatSessionDoc session);
 
 	@Async
@@ -35,11 +35,13 @@ public class InBound {
 
 	public void doHandle(MessageReport messageReport);
 
-	void onSessionRoute(InBoundEvent inBoundEvent, ChatSessionDoc sessionDoc);
+	public InBoundEvent onSessionEvent(InBoundEvent inBoundEvent, PMArgs pmArgs);
+
+	public void onSessionRoute(InBoundEvent inBoundEvent, ChatSessionDoc sessionDoc, PMArgs pmArgs);
 
 	@Async
-	default public void onSessionRouteAsync(InBoundEvent inBoundEvent, ChatSessionDoc sessionDoc) {
-	    this.onSessionRoute(inBoundEvent, sessionDoc);
+	default public void onSessionRouteAsync(InBoundEvent inBoundEvent, ChatSessionDoc sessionDoc, PMArgs pmArgs) {
+	    this.onSessionRoute(inBoundEvent, sessionDoc, pmArgs);
 	}
 
 	public void onSessionResolve(InBoundEvent event, ChatSessionDoc chatSessionDoc);
@@ -58,14 +60,12 @@ public class InBound {
 
 	public void onSessionInit(InBoundEvent event, ChatSessionDoc chatSessionDoc);
 
-	public NodeEntry<InBoundEvent> assignSessionToAgent(PMParams params);
-
-	public NodeEntry<InBoundEvent> assignSessionToAgent(ChatSessionDoc session, String deptCode, String agentCode);
+	public NodeEntry<InBoundEvent> assignSessionToAgent(PMArgs params, ChatSessionDoc session);
 
     }
 
     public interface SessionAssginHandler {
-	public NodeEntry<InBoundEvent> doAssignAgent(PMParams pmParams);
+	public NodeEntry<InBoundEvent> doAssignAgent(PMArgs pmParams);
     }
 
 }

@@ -80,7 +80,18 @@ public class ChatSessionFactory {
 
 	if (!ArgUtil.is(contact.getContactId())) {
 	    // CONTACT CONNANOT BE FOUND
-	    return null;
+	    if (ArgUtil.is(sessionMessage.getSessionId())) {
+		chatSessionDoc = sessionStore.getSession(sessionMessage.getSessionId());
+		if (ArgUtil.is(chatSessionDoc)) {
+		    contact.copyFrom(chatSessionDoc.contact());
+		    contact.setContactId(chatSessionDoc.getContactId());
+		}
+	    }
+
+	    if (!ArgUtil.is(contact.getContactId())) {
+		return null;
+	    }
+
 	}
 
 	// CONTACT FIND BY SESSION_ID
@@ -169,6 +180,11 @@ public class ChatSessionFactory {
 	inboxMessage.session().setResolved(chatSessionDoc.isResolved());
 
 	return chatSessionDoc;
+    }
+
+    public ChatSessionDoc linkSession(IMessage inboxMessage) {
+	ChatSessionDoc session = getChatSession(inboxMessage);
+	return linkSession(session, inboxMessage);
     }
 
     public void push(MessageDoc msgDoc, IMessage iMessage) {

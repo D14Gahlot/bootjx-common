@@ -35,6 +35,6 @@ public @interface BotController {
 
 	String lane() default "";
 
-	String[] tenant() default "";
+	String[] code() default "";
 
 }

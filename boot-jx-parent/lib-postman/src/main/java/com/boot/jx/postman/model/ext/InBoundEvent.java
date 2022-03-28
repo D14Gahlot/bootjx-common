@@ -17,6 +17,8 @@ public class InBoundEvent {
     @ApiMockModelProperty(example = "SESSION_ROUTED", value = "Event Triggered by App/Service")
     public String eventCode;
 
+    private String checksum;
+
     public String sessionId;
     public String contactId;
 
@@ -60,5 +62,21 @@ public class InBoundEvent {
 	    this.sessionAssigned = new SessionAssigned();
 	}
 	return this.sessionAssigned;
+    }
+
+    public String getChecksum() {
+	return checksum;
+    }
+
+    public void setChecksum(String checksum) {
+	this.checksum = checksum;
+    }
+
+    public String getSessionId() {
+	return sessionId;
+    }
+
+    public void setSessionId(String sessionId) {
+	this.sessionId = sessionId;
     }
 }

@@ -6,12 +6,14 @@ import java.util.List;
 
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.postman.model.MessageDefinitions.IMessage;
+import com.boot.jx.postman.model.MessageDefinitions.IMessageExtended;
 import com.boot.jx.postman.model.MessageDefinitions.LogMessage;
 import com.boot.jx.postman.model.MessageOptions.WAMessageOptions;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class OutboxMessage extends Message<OutboxMessage> implements WAMessageOptions, IMessage, LogMessage {
+public class OutboxMessage extends Message<OutboxMessage>
+	implements WAMessageOptions, IMessage, LogMessage, IMessageExtended {
 
     private static final long serialVersionUID = 3115992767625612005L;
 
@@ -105,5 +107,20 @@ public class OutboxMessage extends Message<OutboxMessage> implements WAMessageOp
 	    this.route = new MessageRoute();
 	}
 	return this.route;
+    }
+
+    @Override
+    public String getFrom() {
+	return null;
+    }
+
+    @Override
+    public String getFromName() {
+	return null;
+    }
+
+    @Override
+    public Message<?> replyMessage(String message) {
+	return null;
     }
 }

@@ -1,9 +1,12 @@
 package com.boot.jx.postman.fb;
 
+import com.boot.utils.JsonPath;
+
 public class FacebookConstants {
 
     public static class InBoundWrapperPaths {
-
+	public static final JsonPath STORY_ID = new JsonPath("story/id");
+	public static final JsonPath STORY_URL = new JsonPath("story/url");
     }
 
     public static class OutBoundWrapperPaths {

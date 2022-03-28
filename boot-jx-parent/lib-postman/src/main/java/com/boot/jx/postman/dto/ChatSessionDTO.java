@@ -27,6 +27,7 @@ public class ChatSessionDTO implements Serializable {
     private String assignedToDept;
     private String assignedToAgent;
     private String assignedToQueue;
+    private String assignedToBot;
 
     private long startSessionStamp;
     private long fistResponseStamp;
@@ -335,4 +336,12 @@ public class ChatSessionDTO implements Serializable {
     public void setAssignedToQueue(String assignedToQueue) {
         this.assignedToQueue = assignedToQueue;
     }
+
+	public String getAssignedToBot() {
+		return assignedToBot;
+	}
+
+	public void setAssignedToBot(String assignedToBot) {
+		this.assignedToBot = assignedToBot;
+	}
 }

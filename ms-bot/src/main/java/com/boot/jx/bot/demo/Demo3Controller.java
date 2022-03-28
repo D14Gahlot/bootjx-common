@@ -3,10 +3,7 @@ package com.boot.jx.bot.demo;
 
 import java.util.regex.Pattern;
 
-import org.springframework.beans.factory.annotation.Autowired;
-
 import com.boot.jx.bot.BotController;
-import com.boot.jx.bot.ChatContext;
 import com.boot.jx.bot.ChatMapping;
 import com.boot.jx.bot.alex.CommonBotController;
 import com.boot.jx.postman.model.InboxMessage;
@@ -14,17 +11,15 @@ import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.StringUtils.StringMatcher;
 
-@BotController(name = "DemoBot", tenant = { "app", "demo", "sandbox", "customer" })
+@BotController(name = "DemoBot", code = { "app", "demo", "sandbox", "customer" })
 public class Demo3Controller extends CommonBotController {
 
     private static final String CURRENT_DEMO = "current_menu";
-    @Autowired
-    private ChatContext chatContext;
 
     public void start(InboxMessage inboxMessage, StringMatcher matcher) {
-    	reply(new OutboxMessage().template("menu-4").put("name", chatContext.contact().getName()));
+    	reply(new OutboxMessage().template("menu-4").put("name", context().contact().getName()));
 	// reply(new OutboxMessage().template("menu-4-1-email-1-ask").put("name",
-	// chatContext.getContact().getName()));
+	// conext().getContact().getName()));
 	next("menu-4-1-email-onselect");
     }
 
@@ -90,7 +85,7 @@ public class Demo3Controller extends CommonBotController {
 		// Thread.sleep(2000);
 
 		// reply(new OutboxMessage().template("menu-4-7-welcome"));
-		chatContext.session().remove(CURRENT_DEMO);
+		context().session().remove(CURRENT_DEMO);
 	    } else {
 		reply(new OutboxMessage().template("menu-4-4-date-1-nok"));
 		next("menu-4-2-date-onselect");
@@ -102,7 +97,7 @@ public class Demo3Controller extends CommonBotController {
 
     @ChatMapping(key = "menu-4-8-talk2agent")
     public void transferToAgent(InboxMessage inboxMessage, StringMatcher matcher) {
-	chatContext.session().remove(CURRENT_DEMO);
+	context().session().remove(CURRENT_DEMO);
 	commonTransferToAgent(inboxMessage, matcher);
     }
 }

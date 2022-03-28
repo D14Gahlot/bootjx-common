@@ -5,7 +5,6 @@ import java.util.List;
 
 import com.boot.jx.model.CommonTemplate;
 import com.boot.jx.postman.model.ext.CommonMsgLocation;
-import com.boot.jx.postman.model.ext.CommonMsgText.InBoundMsgText;
 import com.boot.jx.postman.model.ext.CommonMsgText.OutBoundMsgText;
 import com.boot.jx.swagger.ApiMockModelProperty;
 import com.boot.model.UtilityModels.JsonIgnoreUnknown;

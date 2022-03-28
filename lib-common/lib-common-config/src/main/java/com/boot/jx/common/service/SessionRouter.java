@@ -58,7 +58,6 @@ public class SessionRouter extends ATaskLimiter {
 	MapPathEntry omidEntry = meta.pathEntry("mitel.omid");
 	String omid = omidEntry.asString();
 	MapModel mitel = mitelClient.openMediaGetActive(defaultClient, session.contact(), session.getSessionId(), omid);
-	String newomid = mitel.getString("id");
 
 	if (!ArgUtil.is(mitel) || mitel.keyEntry("id").exists()) {
 	    chatSessionService.closeSession(session);
