@@ -48,382 +48,390 @@ import com.boot.jx.scope.tnt.Tenants;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
 import com.boot.utils.CryptoUtil;
+import com.boot.utils.JsonUtil;
 
 @Controller
 @RequestMapping("/partner")
 public class PartnerController {
 
-    @Autowired
-    private CommonHttpRequest commonHttpRequest;
+	@Autowired
+	private CommonHttpRequest commonHttpRequest;
 
-    @Autowired
-    private AppCommonConfig appCommonConfig;
+	@Autowired
+	private AppCommonConfig appCommonConfig;
 
-    @Autowired
-    private AccountAuthService sessionService;
+	@Autowired
+	private AccountAuthService sessionService;
 
-    @Autowired
-    private AccountSessionBean adminSessionBean;
+	@Autowired
+	private AccountSessionBean adminSessionBean;
 
-    @Autowired
-    private AccountStore accountStore;
+	@Autowired
+	private AccountStore accountStore;
 
-    @Autowired
-    private PMEnvironment env;
+	@Autowired
+	private PMEnvironment env;
 
-    @Autowired
-    private PMCommonConfig pmCommonConfig;
+	@Autowired
+	private PMCommonConfig pmCommonConfig;
 
-    @Autowired
-    private EmpAuthService empAuthService;
+	@Autowired
+	private EmpAuthService empAuthService;
 
-    @RequestMapping(value = { "", "/", "/**", "/auth/**", "/app/**" }, method = { RequestMethod.GET })
-    public String home(Model model, @RequestParam(required = false) String theme) {
-	String tnt = AppContextUtil.getTenant();
-	if (!Tenants.isDefault(tnt)) {
-	    return pmCommonConfig.mainDomainRedirect();
-	}
-
-	model.addAllAttributes(appCommonConfig.appAttributes());
-	Authentication auth = AccountAuthService.getAuthentication();
-	if (ArgUtil.is(auth) && ArgUtil.is(adminSessionBean.domainUser())) {
-	    model.addAttribute("APP_USER", auth.getName());
-	    model.addAttribute("APP_USER_NAME", adminSessionBean.domainUser().getContact().getName());
-	    model.addAttribute("APP_USER_ROLE", adminSessionBean.getRole());
-	} else {
-	    model.addAttribute("APP_USER", "");
-	    model.addAttribute("APP_USER_NAME", "");
-	    model.addAttribute("APP_USER_ROLE", "GUEST");
-	}
-
-	model.addAttribute("APP", "partner");
-
-	return "app-partner";
-    }
-
-    @RequestMapping(value = { "/app/goto/{domain}/{panel}" }, method = { RequestMethod.GET })
-    public String gotopanel(Model model, @PathVariable String domain, @PathVariable String panel)
-	    throws NoSuchAlgorithmException {
-	String tnt = AppContextUtil.getTenant();
-
-	if (!Tenants.isDefault(tnt)) {
-	    return pmCommonConfig.mainDomainRedirect(commonHttpRequest.getRequestURI() + "/auth/direct");
-	}
-
-	model.addAllAttributes(appCommonConfig.appAttributes());
-	model.addAttribute("FORM_URL", String.format("https://%s.%s/%s/auth/direct", domain,
-		env.keyEntry("mry.prop.service.domain").asString(), panel));
-
-	if (ArgUtil.is(adminSessionBean.domainUser())) {
-	    for (DomainDoc domainDoc : adminSessionBean.domainUser().getDomains()) {
-		if (ArgUtil.isEqual(domainDoc.getDomain(), domain)) {
-		    UserLoginToken userLoginToken = empAuthService.createSuperLoginToken("superadmin", domain,
-			    domainDoc.getId(), "admin");
-		    model.addAttribute("DOMAIN_USER", userLoginToken.getDomainUser());
-		    model.addAttribute("DOMAIN_NAME", userLoginToken.getDomainName());
-		    model.addAttribute("DOMAIN_ID", userLoginToken.getDomainId());
-		    model.addAttribute("DOMAIN_TOKEN", userLoginToken.getDomainToken());
+	@RequestMapping(value = { "", "/", "/**", "/auth/**", "/app/**" }, method = { RequestMethod.GET })
+	public String home(Model model, @RequestParam(required = false) String theme) {
+		String tnt = AppContextUtil.getTenant();
+		if (!Tenants.isDefault(tnt)) {
+			return pmCommonConfig.mainDomainRedirect();
 		}
-	    }
+
+		model.addAllAttributes(appCommonConfig.appAttributes());
+		Authentication auth = AccountAuthService.getAuthentication();
+		if (ArgUtil.is(auth) && ArgUtil.is(adminSessionBean.domainUser())) {
+			model.addAttribute("APP_USER", auth.getName());
+			model.addAttribute("APP_USER_NAME", adminSessionBean.domainUser().getContact().getName());
+			model.addAttribute("APP_USER_ROLE", JsonUtil.toJson(adminSessionBean.getRole()));
+		} else {
+			model.addAttribute("APP_USER", "");
+			model.addAttribute("APP_USER_NAME", "");
+			model.addAttribute("APP_USER_ROLE", "['GUEST']");
+		}
+
+		model.addAttribute("APP", "partner");
+
+		return "app-partner";
 	}
 
-	return "app-goto";
-    }
+	@RequestMapping(value = { "/app/goto/{domain}/{panel}" }, method = { RequestMethod.GET })
+	public String gotopanel(Model model, @PathVariable String domain, @PathVariable String panel)
+			throws NoSuchAlgorithmException {
+		String tnt = AppContextUtil.getTenant();
 
-    @ResponseBody
-    @RequestMapping(value = { "/pub/register" }, method = { RequestMethod.POST })
-    public ApiResponse<Object, Object> register(Model model, HttpServletRequest request,
-	    HttpServletResponse httpServletResponse, @RequestBody @Valid SignupContact signupContact) {
+		if (!Tenants.isDefault(tnt)) {
+			return pmCommonConfig.mainDomainRedirect(commonHttpRequest.getRequestURI() + "/auth/direct");
+		}
 
-	BusinessUserDoc account = accountStore.findOneByEmail(signupContact.getEmail(), BusinessUserDoc.class);
-	if (ArgUtil.is(account)) {
-	    ApiResponseUtil.throwDuplicateInputException("Email address already in use. Try reset password.",
-		    new ApiFieldError().obzect("signupContact").field("email").codeKey("ValidEmailDuplicate")
-			    .description("Email address already in use."));
+		model.addAllAttributes(appCommonConfig.appAttributes());
+		model.addAttribute("FORM_URL", String.format("https://%s.%s/%s/auth/direct", domain,
+				env.keyEntry("mry.prop.service.domain").asString(), panel));
+
+		if (ArgUtil.is(adminSessionBean.domainUser())) {
+			for (DomainDoc domainDoc : adminSessionBean.domainUser().getDomains()) {
+				if (ArgUtil.isEqual(domainDoc.getDomain(), domain)) {
+					UserLoginToken userLoginToken = empAuthService.createSuperLoginToken("superadmin", domain,
+							domainDoc.getId(), "admin");
+					model.addAttribute("DOMAIN_USER", userLoginToken.getDomainUser());
+					model.addAttribute("DOMAIN_NAME", userLoginToken.getDomainName());
+					model.addAttribute("DOMAIN_ID", userLoginToken.getDomainId());
+					model.addAttribute("DOMAIN_TOKEN", userLoginToken.getDomainToken());
+				}
+			}
+		}
+
+		return "app-goto";
 	}
 
-	AccountMeta keys = new AccountMeta();
-	keys.setEmailVerificationCode(UUID.randomUUID().toString());
+	@ResponseBody
+	@RequestMapping(value = { "/pub/register" }, method = { RequestMethod.POST })
+	public ApiResponse<Object, Object> register(Model model, HttpServletRequest request,
+			HttpServletResponse httpServletResponse, @RequestBody @Valid SignupContact signupContact) {
 
-	account = new BusinessUserDoc();
-	account.setContact(signupContact);
-	account.setMeta(keys);
+		BusinessUserDoc account = accountStore.findOneByEmail(signupContact.getEmail(), BusinessUserDoc.class);
+		if (ArgUtil.is(account)) {
+			ApiResponseUtil.throwDuplicateInputException("Email address already in use. Try reset password.",
+					new ApiFieldError().obzect("signupContact").field("email").codeKey("ValidEmailDuplicate")
+							.description("Email address already in use."));
+		}
 
-	accountStore.save(account);
-	sessionService.sendResetMail(account, "tenant-verify-email");
-	sessionService.sendMailToSalesTeam(account, "new-customer-register-email");
+		AccountMeta keys = new AccountMeta();
+		keys.setEmailVerificationCode(UUID.randomUUID().toString());
+
+		account = new BusinessUserDoc();
+		account.setContact(signupContact);
+		account.setMeta(keys);
+
+		accountStore.save(account);
+		sessionService.sendResetMail(account, "tenant-verify-email");
+		sessionService.sendMailToSalesTeam(account, "new-customer-register-email");
 //Customer registers on our website
-	return ApiResponse.build().message("Verification email sent");
-    }
-
-    @ResponseBody
-    @RequestMapping(value = { "/pub/set/pass" }, method = { RequestMethod.POST })
-    public ApiResponse<Object, Object> verifyEmail(Model model, HttpServletRequest request,
-	    HttpServletResponse httpServletResponse, @RequestParam String code, @RequestParam String account,
-	    @RequestParam String newpass) throws NoSuchAlgorithmException {
-
-	BusinessUserDoc accountDoc = accountStore.findById(account, BusinessUserDoc.class);
-	if (!ArgUtil.is(accountDoc) || !ArgUtil.is(accountDoc.getMeta())
-		|| !ArgUtil.is(accountDoc.getMeta().getEmailVerificationCode())
-		|| !accountDoc.getMeta().getEmailVerificationCode().equals(code)) {
-	    ApiResponseUtil.throwException("Invalid Link");
+		return ApiResponse.build().message("Verification email sent");
 	}
 
-	accountDoc.getMeta().setEmailVerificationCode(null);
-	accountDoc.getMeta().setEmailVerified(true);
-	accountDoc.getMeta().setPassword(CryptoUtil.getSHA2Hash(newpass));
+	@ResponseBody
+	@RequestMapping(value = { "/pub/set/pass" }, method = { RequestMethod.POST })
+	public ApiResponse<Object, Object> verifyEmail(Model model, HttpServletRequest request,
+			HttpServletResponse httpServletResponse, @RequestParam String code, @RequestParam String account,
+			@RequestParam String newpass) throws NoSuchAlgorithmException {
 
-	sessionService.login(accountDoc, request);
+		BusinessUserDoc accountDoc = accountStore.findById(account, BusinessUserDoc.class);
+		if (!ArgUtil.is(accountDoc) || !ArgUtil.is(accountDoc.getMeta())
+				|| !ArgUtil.is(accountDoc.getMeta().getEmailVerificationCode())
+				|| !accountDoc.getMeta().getEmailVerificationCode().equals(code)) {
+			ApiResponseUtil.throwException("Invalid Link");
+		}
 
-	accountStore.save(accountDoc);
-	return ApiResponse.build().message("Password set successfuly");
-    }
+		accountDoc.getMeta().setEmailVerificationCode(null);
+		accountDoc.getMeta().setEmailVerified(true);
+		accountDoc.getMeta().setPassword(CryptoUtil.getSHA2Hash(newpass));
 
-    @ResponseBody
-    @RequestMapping(value = { "/pub/forgot/pass" }, method = { RequestMethod.POST })
-    public ApiResponse<Object, Object> forgotPass(Model model, HttpServletRequest request,
-	    HttpServletResponse httpServletResponse, @RequestParam String email) throws NoSuchAlgorithmException {
+		sessionService.login(accountDoc, request);
 
-	BusinessUserDoc accountDoc = accountStore.findOneByEmail(email, BusinessUserDoc.class);
-
-	if (!ArgUtil.is(accountDoc)) {
-	    ApiResponseUtil.throwException("Email not registered");
+		accountStore.save(accountDoc);
+		return ApiResponse.build().message("Password set successfuly");
 	}
 
-	accountDoc.getMeta().setEmailVerificationCode(UUID.randomUUID().toString());
-	accountStore.save(accountDoc);
-	sessionService.sendResetMail(accountDoc, "tenant-reset-pass");
+	@ResponseBody
+	@RequestMapping(value = { "/pub/forgot/pass" }, method = { RequestMethod.POST })
+	public ApiResponse<Object, Object> forgotPass(Model model, HttpServletRequest request,
+			HttpServletResponse httpServletResponse, @RequestParam String email) throws NoSuchAlgorithmException {
 
-	return ApiResponse.build().message("Password Reset Email Sent");
-    }
+		BusinessUserDoc accountDoc = accountStore.findOneByEmail(email, BusinessUserDoc.class);
 
-    @ResponseBody
-    @RequestMapping(value = { "/pub/login" }, method = { RequestMethod.POST })
-    public ApiResponse<Object, Object> login(Model model, HttpServletRequest request,
-	    HttpServletResponse httpServletResponse, @RequestParam String email, @RequestParam String password,
-	    @RequestParam String newpass) throws NoSuchAlgorithmException {
+		if (!ArgUtil.is(accountDoc)) {
+			ApiResponseUtil.throwException("Email not registered");
+		}
 
-	BusinessUserDoc accountDoc = accountStore.findOneByEmail(email, BusinessUserDoc.class);
+		accountDoc.getMeta().setEmailVerificationCode(UUID.randomUUID().toString());
+		accountStore.save(accountDoc);
+		sessionService.sendResetMail(accountDoc, "tenant-reset-pass");
 
-	if (!ArgUtil.is(accountDoc)
-		|| !ArgUtil.areEqual(CryptoUtil.getSHA2Hash(newpass), accountDoc.getMeta().getPassword())) {
-	    ApiResponseUtil.throwInputException(new ApiFieldError().obzect("login").field("password")
-		    .codeKey("ValidCredentials").description("Invalid Email or Password"));
+		return ApiResponse.build().message("Password Reset Email Sent");
 	}
 
-	sessionService.login(accountDoc, request);
-	return ApiResponse.build().message("Login Success");
-    }
+	@ResponseBody
+	@RequestMapping(value = { "/pub/login" }, method = { RequestMethod.POST })
+	public ApiResponse<Object, Object> login(Model model, HttpServletRequest request,
+			HttpServletResponse httpServletResponse, @RequestParam String email, @RequestParam String password,
+			@RequestParam String newpass) throws NoSuchAlgorithmException {
 
-    @RequestMapping(value = { "/api/domain/exists", "/pub/domain/exists" }, method = { RequestMethod.GET })
-    public ApiResponse<Object, Object> sisExists(@RequestParam @Valid String domain) throws NoSuchAlgorithmException {
-	AppContextUtil.setTenant(Tenants.getDefault());
-	DomainDoc domainDoc = accountStore.findDomainByName(domain);
-	if (ArgUtil.is(domainDoc)) {
-	    return ApiResponse.buildMeta(domainDoc.getDomain());
-	}
-	return ApiResponse.buildMeta(null).statusKey("400");
-    }
+		BusinessUserDoc accountDoc = accountStore.findOneByEmail(email, BusinessUserDoc.class);
 
-    @ResponseBody
-    @RequestMapping(value = { "/api/domain/check", "/pub/domain/check" }, method = { RequestMethod.POST })
-    public ApiResponse<Object, Object> checkDomain(@RequestParam @Valid String domain) throws NoSuchAlgorithmException {
+		if (!ArgUtil.is(accountDoc)
+				|| !ArgUtil.areEqual(CryptoUtil.getSHA2Hash(newpass), accountDoc.getMeta().getPassword())) {
+			ApiResponseUtil.throwInputException(new ApiFieldError().obzect("login").field("password")
+					.codeKey("ValidCredentials").description("Invalid Email or Password"));
+		}
 
-	DomainDoc domainDoc = accountStore.findDomainByName(domain);
-
-	if (ArgUtil.is(domainDoc)) {
-	    ApiResponseUtil.throwDuplicateInputException("Domain already taken. Try different", new ApiFieldError()
-		    .field("domain").codeKey("ValidDomainDuplicate").description("Domain already taken."));
+		sessionService.login(accountDoc, request);
+		return ApiResponse.build().message("Login Success");
 	}
 
-	domainDoc = new DomainDoc();
-	domainDoc.setDomain(domainDoc.getDomain());
-	return ApiResponse.build().message("Domain available");
-    }
-
-    @ResponseBody
-    @RequestMapping(value = { "/pub/domain" }, method = { RequestMethod.GET })
-    public ApiResponse<DomainDoc, Object> getDomain(@RequestParam String domain) {
-	DomainDoc domainDoc = accountStore.findDomainByName(domain);
-	return ApiResponse.buildResult(domainDoc);
-    }
-
-    @ResponseBody
-    @RequestMapping(value = { "/api/domain" }, method = { RequestMethod.GET })
-    public ApiResponse<DomainDoc, Object> getDomain() {
-	BusinessUserDoc domainUser = adminSessionBean.domainUser();
-
-	if (!ArgUtil.is(domainUser)) {
-	    ApiResponseUtil.throwException("Access Denied");
+	@RequestMapping(value = { "/api/domain/exists", "/pub/domain/exists" }, method = { RequestMethod.GET })
+	public ApiResponse<Object, Object> sisExists(@RequestParam @Valid String domain) throws NoSuchAlgorithmException {
+		AppContextUtil.setTenant(Tenants.getDefault());
+		DomainDoc domainDoc = accountStore.findDomainByName(domain);
+		if (ArgUtil.is(domainDoc)) {
+			return ApiResponse.buildMeta(domainDoc.getDomain());
+		}
+		return ApiResponse.buildMeta(null).statusKey("400");
 	}
 
-	Set<DomainDoc> domainDocs = domainUser.getDomains();
+	@ResponseBody
+	@RequestMapping(value = { "/api/domain/check", "/pub/domain/check" }, method = { RequestMethod.POST })
+	public ApiResponse<Object, Object> checkDomain(@RequestParam @Valid String domain) throws NoSuchAlgorithmException {
 
-	ApiResponse<DomainDoc, Object> resp = ApiResponse.instance(DomainDoc.class);
+		DomainDoc domainDoc = accountStore.findDomainByName(domain);
 
-	for (DomainDoc domainDoc : domainDocs) { // DomainDoc domainDoc =
-	    CollectionUtil.first(domainUser.getDomains());
+		if (ArgUtil.is(domainDoc)) {
+			ApiResponseUtil.throwDuplicateInputException("Domain already taken. Try different", new ApiFieldError()
+					.field("domain").codeKey("ValidDomainDuplicate").description("Domain already taken."));
+		}
 
-	    if (!ArgUtil.is(domainDoc)) {
 		domainDoc = new DomainDoc();
-	    }
-
-	    if (!ArgUtil.is(domainDoc.getCompany())) {
-		domainDoc.setCompany(new CompanyDoc());
-	    }
-	    if (!ArgUtil.is(domainDoc.getCompany().getEmail())) {
-		domainDoc.getCompany().setEmail(new PBEmail().email(domainUser.getContact().getEmail()));
-	    }
-
-	    if (!ArgUtil.is(domainDoc.getCompany().getPhone())) {
-		domainDoc.getCompany().setPhone(new PBPhone().phone(domainUser.getContact().getPhone()));
-	    }
-
-	    if (!ArgUtil.is(domainDoc.getCompany().getBusinessName())) {
-		domainDoc.getCompany().setBusinessName(domainUser.getContact().getCompany());
-	    }
-
-	    if (!ArgUtil.is(domainDoc.getCompany().getAddress())) {
-		domainDoc.getCompany().setAddress(new PBAddress().country(domainUser.getContact().getCountry()));
-	    }
-
-	    resp.addResult(domainDoc);
+		domainDoc.setDomain(domainDoc.getDomain());
+		return ApiResponse.build().message("Domain available");
 	}
 
-	return resp;
-    }
-
-    @ResponseBody
-    @RequestMapping(value = { "/api/domain" }, method = { RequestMethod.POST })
-    public ApiResponse<Object, Object> createDomain(Model model, HttpServletRequest request,
-	    HttpServletResponse httpServletResponse, @RequestBody @Valid DomainDoc domain,
-	    @RequestParam(required = false) boolean create) throws NoSuchAlgorithmException {
-
-	BusinessUserDoc domainUser = adminSessionBean.domainUser();
-
-	if (ArgUtil.is(domainUser.getDomains())) {
-
-	    Optional<DomainDoc> domaiNational = domainUser.getDomains().stream()
-		    .filter(d -> d.getDomain().equals(domain.getDomain())).findFirst();
-	    if (!domaiNational.isPresent() || !domaiNational.get().getDomain().equals(domain.getDomain())) {
-		ApiResponseUtil.throwInputException(new ApiFieldError().field("domain").codeKey("ValidDomainMultiple")
-			.description("Domain Change Not Allowed"));
-	    }
-	    domaiNational.get().setCompany(domain.getCompany());
-	    domaiNational.get().setSocial(domain.getSocial());
-	    accountStore.save(domaiNational.get());
-	    accountStore.save(domainUser);
-	    return ApiResponse.build().message("Details updated");
-	} else {
-	    checkDomain(domain.getDomain());
-
-	    DomainDoc domainDoc = new DomainDoc();
-	    domainDoc.setDomain(domain.getDomain());
-	    domainDoc.setCompany(domain.getCompany());
-	    domainDoc.setSocial(domain.getSocial());
-
-	    accountStore.save(domainDoc);
-
-	    domainUser.domains().add(domainDoc);
-	    accountStore.save(domainUser);
-
-	    return ApiResponse.build().message("Domain created");
+	@ResponseBody
+	@RequestMapping(value = { "/pub/domain" }, method = { RequestMethod.GET })
+	public ApiResponse<DomainDoc, Object> getDomain(@RequestParam String domain) {
+		DomainDoc domainDoc = accountStore.findDomainByName(domain);
+		return ApiResponse.buildResult(domainDoc);
 	}
 
-    }
+	@ResponseBody
+	@RequestMapping(value = { "/api/domain" }, method = { RequestMethod.GET })
+	public ApiResponse<DomainDoc, Object> getDomain() {
+		BusinessUserDoc domainUser = adminSessionBean.domainUser();
 
-    @ResponseBody
-    @RequestMapping(value = { "/api/domain/user" }, method = { RequestMethod.POST })
-    public ApiResponse<Object, Object> domainUser(Model model, HttpServletRequest request,
-	    HttpServletResponse httpServletResponse, @RequestParam String email, @RequestParam String domain)
-	    throws NoSuchAlgorithmException {
+		if (!ArgUtil.is(domainUser)) {
+			ApiResponseUtil.throwException("Access Denied");
+		}
 
-	BusinessUserDoc domainUser = adminSessionBean.domainUser();
+		Set<DomainDoc> domainDocs = domainUser.getDomains();
 
-	if (!ArgUtil.is(domainUser.getDomains())) {
-	    ApiResponseUtil.throwInputException(
-		    new ApiFieldError().field("domain").codeKey("ValidDomainNotFound").description("Domain Not found"));
+		ApiResponse<DomainDoc, Object> resp = ApiResponse.instance(DomainDoc.class);
+
+		if (ArgUtil.is(domainDocs)) {
+			for (DomainDoc domainDoc : domainDocs) { // DomainDoc domainDoc =
+				CollectionUtil.first(domainUser.getDomains());
+				domainDoc = defaultDomain(domainUser, domainDoc);
+				resp.addResult(domainDoc);
+			}
+		} else {
+			resp.addResult(defaultDomain(domainUser, new DomainDoc()));
+		}
+
+		return resp;
 	}
 
-	Optional<DomainDoc> domaiNational = domainUser.getDomains().stream().filter(d -> d.getDomain().equals(domain))
-		.findFirst();
-	if (!domaiNational.isPresent() || !domaiNational.get().getDomain().equals(domain)) {
-	    ApiResponseUtil.throwInputException(
-		    new ApiFieldError().field("domain").codeKey("ValidDomainNotFound").description("Domain Not found"));
-	}
-	BusinessUserDoc account = accountStore.findOneByEmail(email, BusinessUserDoc.class);
-	if (!ArgUtil.is(account)) {
-	    ApiResponseUtil.throwInputException(new ApiFieldError().field("email").codeKey("ValidAccountNotFound")
-		    .description("No Account with email."));
-	}
+	private DomainDoc defaultDomain(BusinessUserDoc domainUser, DomainDoc domainDoc) {
+		if (!ArgUtil.is(domainDoc)) {
+			domainDoc = new DomainDoc();
+		}
 
-	account.domains().add(domaiNational.get());
-	accountStore.save(account);
-	return ApiResponse.build().message("Account Mapped");
+		if (!ArgUtil.is(domainDoc.getCompany())) {
+			domainDoc.setCompany(new CompanyDoc());
+		}
+		if (!ArgUtil.is(domainDoc.getCompany().getEmail())) {
+			domainDoc.getCompany().setEmail(new PBEmail().email(domainUser.getContact().getEmail()));
+		}
 
-    }
+		if (!ArgUtil.is(domainDoc.getCompany().getPhone())) {
+			domainDoc.getCompany().setPhone(new PBPhone().phone(domainUser.getContact().getPhone()));
+		}
 
-    @Autowired
-    AWSFileStore fileStore;
+		if (!ArgUtil.is(domainDoc.getCompany().getBusinessName())) {
+			domainDoc.getCompany().setBusinessName(domainUser.getContact().getCompany());
+		}
 
-    @ResponseBody
-    @RequestMapping(value = "/api/domain/logo", method = { RequestMethod.POST })
-    public ApiResponse<String, Object> upploadDomainLogo(
-	    @RequestParam(name = "file", required = false) MultipartFile file) {
-	BusinessUserDoc domainUser = adminSessionBean.domainUser();
-	String domainUserId = domainUser.getId();
-	String url = fileStore.upload1(file,
-		String.format("%s/docs/%s/logo/%s", AppContextUtil.getTenant(), domainUserId, UUID.randomUUID()),
-		file.getOriginalFilename()).getUrl();
-	return ApiResponse.buildResults(url).message("Logo uplodaed");
-    }
-
-    /** Domain License creation/Updataion/View **/
-
-    @ResponseBody
-    @RequestMapping(value = { "/api/domain/license", "/pub/domain/license" }, method = { RequestMethod.POST })
-    public ApiResponse<Object, Object> createDomainLicense(Model model, HttpServletRequest request,
-	    HttpServletResponse httpServletResponse, @RequestBody @Valid DomainLicenseDoc domainLicense,
-	    @RequestParam(required = false) boolean create) throws NoSuchAlgorithmException {
-
-	BusinessUserDoc domainUser = adminSessionBean.domainUser();
-	DomainDoc domainDoc = accountStore.findDomainByName(domainLicense.getDomain());
-
-	if (!ArgUtil.is(domainDoc)) {
-	    ApiResponseUtil.throwException("Invalid Domain.");
+		if (!ArgUtil.is(domainDoc.getCompany().getAddress())) {
+			domainDoc.getCompany().setAddress(new PBAddress().country(domainUser.getContact().getCountry()));
+		}
+		return domainDoc;
 	}
 
-	DomainLicenseDoc domainLicDoc = accountStore.findDomainLicenseByName(domainLicense.getDomain());
-	if (!ArgUtil.is(domainLicDoc)) {
-	    domainLicDoc = new DomainLicenseDoc();
-	    domainLicDoc.setDomain(domainLicense.getDomain());
-	    domainLicDoc.setFrequency(domainLicense.getFrequency());
-	    domainLicDoc.setLicenseName(domainLicense.getLicenseName());
-	    domainLicDoc.setLicenseAggrementStamp(System.currentTimeMillis());
-	    domainLicDoc.setCreatedStamp(System.currentTimeMillis());
-	    domainLicDoc.setIsActive(true);
-	    accountStore.save(domainLicDoc);
-	    // domainUser.domainLicense().add(domainLicDoc);
-	    // accountStore.save(domainUser);
-	    return ApiResponse.build().message("Domain license created");
-	} else {
+	@ResponseBody
+	@RequestMapping(value = { "/api/domain" }, method = { RequestMethod.POST })
+	public ApiResponse<Object, Object> createDomain(Model model, HttpServletRequest request,
+			HttpServletResponse httpServletResponse, @RequestBody @Valid DomainDoc domain,
+			@RequestParam(required = false) boolean create) throws NoSuchAlgorithmException {
 
-	    domainLicDoc.setDomain(domainLicense.getDomain());
-	    domainLicDoc.setFrequency(domainLicense.getFrequency());
-	    domainLicDoc.setLicenseName(domainLicense.getLicenseName());
-	    domainLicDoc.setModifiedStamp(System.currentTimeMillis());
-	    domainLicDoc.setIsActive(true);
-	    accountStore.save(domainLicDoc);
-	    return ApiResponse.build().message("Details updated");
+		BusinessUserDoc domainUser = adminSessionBean.domainUser();
+
+		if (ArgUtil.is(domainUser.getDomains())) {
+
+			Optional<DomainDoc> domaiNational = domainUser.getDomains().stream()
+					.filter(d -> d.getDomain().equals(domain.getDomain())).findFirst();
+			if (!domaiNational.isPresent() || !domaiNational.get().getDomain().equals(domain.getDomain())) {
+				ApiResponseUtil.throwInputException(new ApiFieldError().field("domain").codeKey("ValidDomainMultiple")
+						.description("Domain Change Not Allowed"));
+			}
+			domaiNational.get().setCompany(domain.getCompany());
+			domaiNational.get().setSocial(domain.getSocial());
+			accountStore.save(domaiNational.get());
+			accountStore.save(domainUser);
+			return ApiResponse.build().message("Details updated");
+		} else {
+			checkDomain(domain.getDomain());
+
+			DomainDoc domainDoc = new DomainDoc();
+			domainDoc.setDomain(domain.getDomain());
+			domainDoc.setCompany(domain.getCompany());
+			domainDoc.setSocial(domain.getSocial());
+
+			accountStore.save(domainDoc);
+
+			domainUser.domains().add(domainDoc);
+			accountStore.save(domainUser);
+
+			return ApiResponse.build().message("Domain created");
+		}
+
 	}
 
-    }
+	@ResponseBody
+	@RequestMapping(value = { "/api/domain/user" }, method = { RequestMethod.POST })
+	public ApiResponse<Object, Object> domainUser(Model model, HttpServletRequest request,
+			HttpServletResponse httpServletResponse, @RequestParam String email, @RequestParam String domain)
+			throws NoSuchAlgorithmException {
 
-    @ResponseBody
-    @RequestMapping(value = { "/pub/domainLicense" }, method = { RequestMethod.GET })
-    public ApiResponse<DomainLicenseDoc, Object> getDomainLicense(@RequestParam String domain) {
-	DomainLicenseDoc domainLicDoc = accountStore.findDomainLicenseByName(domain);
-	return ApiResponse.buildResult(domainLicDoc);
-    }
+		BusinessUserDoc domainUser = adminSessionBean.domainUser();
+
+		if (!ArgUtil.is(domainUser.getDomains())) {
+			ApiResponseUtil.throwInputException(
+					new ApiFieldError().field("domain").codeKey("ValidDomainNotFound").description("Domain Not found"));
+		}
+
+		Optional<DomainDoc> domaiNational = domainUser.getDomains().stream().filter(d -> d.getDomain().equals(domain))
+				.findFirst();
+		if (!domaiNational.isPresent() || !domaiNational.get().getDomain().equals(domain)) {
+			ApiResponseUtil.throwInputException(
+					new ApiFieldError().field("domain").codeKey("ValidDomainNotFound").description("Domain Not found"));
+		}
+		BusinessUserDoc account = accountStore.findOneByEmail(email, BusinessUserDoc.class);
+		if (!ArgUtil.is(account)) {
+			ApiResponseUtil.throwInputException(new ApiFieldError().field("email").codeKey("ValidAccountNotFound")
+					.description("No Account with email."));
+		}
+
+		account.domains().add(domaiNational.get());
+		accountStore.save(account);
+		return ApiResponse.build().message("Account Mapped");
+
+	}
+
+	@Autowired
+	AWSFileStore fileStore;
+
+	@ResponseBody
+	@RequestMapping(value = "/api/domain/logo", method = { RequestMethod.POST })
+	public ApiResponse<String, Object> upploadDomainLogo(
+			@RequestParam(name = "file", required = false) MultipartFile file) {
+		BusinessUserDoc domainUser = adminSessionBean.domainUser();
+		String domainUserId = domainUser.getId();
+		String url = fileStore.upload1(file,
+				String.format("%s/docs/%s/logo/%s", AppContextUtil.getTenant(), domainUserId, UUID.randomUUID()),
+				file.getOriginalFilename()).getUrl();
+		return ApiResponse.buildResults(url).message("Logo uplodaed");
+	}
+
+	/** Domain License creation/Updataion/View **/
+
+	@ResponseBody
+	@RequestMapping(value = { "/api/domain/license", "/pub/domain/license" }, method = { RequestMethod.POST })
+	public ApiResponse<Object, Object> createDomainLicense(Model model, HttpServletRequest request,
+			HttpServletResponse httpServletResponse, @RequestBody @Valid DomainLicenseDoc domainLicense,
+			@RequestParam(required = false) boolean create) throws NoSuchAlgorithmException {
+
+		BusinessUserDoc domainUser = adminSessionBean.domainUser();
+		DomainDoc domainDoc = accountStore.findDomainByName(domainLicense.getDomain());
+
+		if (!ArgUtil.is(domainDoc)) {
+			ApiResponseUtil.throwException("Invalid Domain.");
+		}
+
+		DomainLicenseDoc domainLicDoc = accountStore.findDomainLicenseByName(domainLicense.getDomain());
+		if (!ArgUtil.is(domainLicDoc)) {
+			domainLicDoc = new DomainLicenseDoc();
+			domainLicDoc.setDomain(domainLicense.getDomain());
+			domainLicDoc.setFrequency(domainLicense.getFrequency());
+			domainLicDoc.setLicenseName(domainLicense.getLicenseName());
+			domainLicDoc.setLicenseAggrementStamp(System.currentTimeMillis());
+			domainLicDoc.setCreatedStamp(System.currentTimeMillis());
+			domainLicDoc.setIsActive(true);
+			accountStore.save(domainLicDoc);
+			// domainUser.domainLicense().add(domainLicDoc);
+			// accountStore.save(domainUser);
+			return ApiResponse.build().message("Domain license created");
+		} else {
+
+			domainLicDoc.setDomain(domainLicense.getDomain());
+			domainLicDoc.setFrequency(domainLicense.getFrequency());
+			domainLicDoc.setLicenseName(domainLicense.getLicenseName());
+			domainLicDoc.setModifiedStamp(System.currentTimeMillis());
+			domainLicDoc.setIsActive(true);
+			accountStore.save(domainLicDoc);
+			return ApiResponse.build().message("Details updated");
+		}
+
+	}
+
+	@ResponseBody
+	@RequestMapping(value = { "/pub/domainLicense" }, method = { RequestMethod.GET })
+	public ApiResponse<DomainLicenseDoc, Object> getDomainLicense(@RequestParam String domain) {
+		DomainLicenseDoc domainLicDoc = accountStore.findDomainLicenseByName(domain);
+		return ApiResponse.buildResult(domainLicDoc);
+	}
 
 }

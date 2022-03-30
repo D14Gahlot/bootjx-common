@@ -148,7 +148,7 @@ public class MessageContext {
 			sessionStore.update(chatSessionQuery);
 		}
 		if (chatContextQuery != null) {
-			sessionStore.update(chatContextQuery);
+			sessionStore.upsert(chatContextQuery);
 		}
 		return null;
 	}
