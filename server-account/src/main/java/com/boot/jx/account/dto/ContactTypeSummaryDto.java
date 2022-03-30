@@ -1,5 +1,6 @@
 package com.boot.jx.account.dto;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -11,6 +12,8 @@ public class ContactTypeSummaryDto {
 	Map<Object,Long> summaryCount;
 	Map<Object,List<ContactTypeCountDto>> map;
 	Map<String, Map<String, Long>> dateWiseSummaryCount;
+	
+	Map<Object,Map<Object,Object>> dateWiseCountMap = new HashMap<>();
 	
 	public String getTenant() {
 		return tenant;
@@ -53,6 +56,12 @@ public class ContactTypeSummaryDto {
 	}
 	public void setDateWiseSummaryCount(Map<String, Map<String, Long>> dateWiseSummaryCount) {
 		this.dateWiseSummaryCount = dateWiseSummaryCount;
+	}
+	public Map<Object, Map<Object, Object>> getDateWiseCountMap() {
+		return dateWiseCountMap;
+	}
+	public void setDateWiseCountMap(Map<Object, Map<Object, Object>> dateWiseCountMap) {
+		this.dateWiseCountMap = dateWiseCountMap;
 	}
 	
 }

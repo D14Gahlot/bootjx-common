@@ -48,6 +48,7 @@ import com.boot.jx.account.dto.SummaryDocDto;
 import com.boot.jx.postman.PMConstants;
 import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.Constants;
 import com.boot.utils.DateUtil;
 import com.boot.utils.JsonUtil;
 import com.mongodb.AggregationOptions;
@@ -238,6 +239,26 @@ public class AccountDashBoardManager {
 			}
 			Map<Object, Long> summaryMap = new HashMap<>();
 			Map<String, Map<String, Long>> datwWiseCount = lstSummDto.stream().collect(Collectors.groupingBy(SummaryDocDto::getId, Collectors.groupingBy(SummaryDocDto::getType, Collectors.counting())));
+		
+			Map<Object,Map<Object,Object>> dateWiseCountMap = new HashMap<>();
+			
+			for(Map.Entry<String, Map<String,Long>> keyValue:datwWiseCount.entrySet()) {
+				String key =keyValue.getKey();
+				Map<Object,Object> dateWiseCnt = new HashMap<>();
+				for(Map.Entry<String, Long> keyValueCount:keyValue.getValue().entrySet() ) {
+					String keyType = keyValueCount.getKey();
+					Object count = keyValueCount.getValue();
+					dateWiseCnt.put(keyType, count);
+				}
+				String[] keyId=key.split("_");
+				dateWiseCnt.put("domain", ArgUtil.parseAsString(keyId[0], Constants.BLANK));
+				dateWiseCnt.put("date", ArgUtil.parseAsString(keyId[1], Constants.BLANK));
+				dateWiseCnt.put("channel",ArgUtil.parseAsString(keyId[2], Constants.BLANK));
+				
+				dateWiseCountMap.put(key, dateWiseCnt);
+				
+			}
+			
 			
 			summaryMap = lstSummDto.stream().collect(Collectors.groupingBy(SummaryDocDto::getType,Collectors.counting()));
 			
@@ -247,7 +268,8 @@ public class AccountDashBoardManager {
 			ContactTypeSummaryDto dto = new ContactTypeSummaryDto();
 			dto.setTenant(tnt);
 			dto.setMonth(monthYear);
-			dto.setDateWiseSummaryCount(datwWiseCount);
+			//dto.setDateWiseSummaryCount(datwWiseCount);
+			dto.setDateWiseCountMap(dateWiseCountMap);
 			dto.setSummaryCount(summaryMap);
 			saveDomainSummary(dto);
 			return dto;
