@@ -257,18 +257,17 @@ public class WA360Connector extends AbstractConnector<WA360ConfigDetails, WA360P
 				MapModel statusModel = MapModel.from(statusMap);
 				MessageReport reprt = toMessageReport(channelConfig, statusModel);
 				messageBoxEvent.addMessageReport(reprt);
-				if (Status.DLVRD.equals(reprt.getStatus()) || Status.READ.equals(reprt.getStatus())) {
+				if (Status.SENTX.equals(reprt.getStatus())) {
 					Map<String, Object> conversation = statusModel.keyEntry("conversation").asMap();
 					if (ArgUtil.is(conversation)) {
 						String id = ArgUtil.parseAsString(conversation.get("id"));
 						WABAConversations conrsDoc = new WABAConversations();
 						conrsDoc.setId(channelConfig.getChannelId() + "_" + id);
-						conrsDoc.setChannelId(channelConfig.getChannelId());
+						conrsDoc.contact().copyFrom(reprt.contact());
 						conrsDoc.setConversation(conversation);
 						conrsDoc.setPricing(statusModel.keyEntry("pricing").asMap());
 						commonMongoTemplate.save(conrsDoc);
 					}
-
 				}
 			}
 		}

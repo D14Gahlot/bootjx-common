@@ -7,11 +7,13 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.TypeAlias;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import com.boot.jx.model.AuditCreateEntity;
-import com.boot.jx.postman.model.ITemplates.BasicExternalTemplate;
+import com.boot.jx.postman.doc.ContactDetailDoc;
+import com.boot.jx.postman.model.MessageDefinitions.Contactable;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @Document(collection = WABAConversations.COLLECTION_NAME)
 @TypeAlias("TP_WABA_CONVERSATIONS")
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class WABAConversations implements Serializable {
 
 	private static final long serialVersionUID = 4116849214262304471L;
@@ -21,7 +23,7 @@ public class WABAConversations implements Serializable {
 	@Id
 	private String id;
 
-	private String channelId;
+	private ContactDetailDoc contact;
 
 	private Map<String, Object> conversation;
 	private Map<String, Object> pricing;
@@ -32,14 +34,6 @@ public class WABAConversations implements Serializable {
 
 	public void setId(String id) {
 		this.id = id;
-	}
-
-	public String getChannelId() {
-		return channelId;
-	}
-
-	public void setChannelId(String channelId) {
-		this.channelId = channelId;
 	}
 
 	public Map<String, Object> getConversation() {
@@ -58,4 +52,18 @@ public class WABAConversations implements Serializable {
 		this.pricing = pricing;
 	}
 
+	public ContactDetailDoc getContact() {
+		return contact;
+	}
+
+	public void setContact(ContactDetailDoc contact) {
+		this.contact = contact;
+	}
+
+	public Contactable contact() {
+		if (this.contact == null) {
+			this.contact = new ContactDetailDoc();
+		}
+		return this.contact;
+	}
 }
