@@ -18,6 +18,7 @@ import com.boot.jx.mongo.CommonDocInterfaces.AuditableByIdEntity;
 import com.boot.jx.mongo.CommonDocInterfaces.DocVersion;
 import com.boot.jx.mongo.CommonDocInterfaces.MongoQueryBuilder;
 import com.boot.jx.mongo.CommonDocInterfaces.TimeStampIndex;
+import com.boot.jx.mongo.CommonDocInterfaces.TimeStampIndex.CreatedTimeStampIndexSupport;
 import com.boot.jx.mongo.CommonDocInterfaces.TimeStampIndex.UpdatedTimeStampIndexSupport;
 import com.boot.jx.mongo.CommonMongoQueryBuilder.DocQueryBuilder;
 import com.boot.utils.ArgUtil;
@@ -25,173 +26,181 @@ import com.mongodb.WriteResult;
 
 public class CommonMongoTemplateAbstract extends CommonMongoTemplateDefault {
 
-    public static final Logger LOGGER = LoggerService.getLogger(CommonMongoTemplateAbstract.class);
+	public static final Logger LOGGER = LoggerService.getLogger(CommonMongoTemplateAbstract.class);
 
-    @Autowired
-    protected MongoTemplate mongoTemplate;
+	@Autowired
+	protected MongoTemplate mongoTemplate;
 
-    protected MongoConverter mongoConverter;
+	protected MongoConverter mongoConverter;
 
-    @Autowired(required = false)
-    protected AuditDetailProvider auditDetailProvider;
+	@Autowired(required = false)
+	protected AuditDetailProvider auditDetailProvider;
 
-    protected MongoTemplate getCommonMongoTemplate() {
-	return mongoTemplate;
-    }
-
-    public void beforeSaveInternal(Object objectToSave, String collectionName) {
-	if (objectToSave instanceof UpdatedTimeStampIndexSupport) {
-	    ((UpdatedTimeStampIndexSupport) objectToSave).setUpdated(TimeStampIndex.now());
+	protected MongoTemplate getCommonMongoTemplate() {
+		return mongoTemplate;
 	}
-	if (objectToSave instanceof AuditableByIdEntity && ArgUtil.is(auditDetailProvider)) {
-	    AuditableByIdEntity auditableByIdEntity = (AuditableByIdEntity) objectToSave;
-	    auditDetailProvider.auditUpdate(auditableByIdEntity);
-	    if (!ArgUtil.is(auditableByIdEntity.getId())) {
-		auditableByIdEntity.setCreatedBy(auditableByIdEntity.getUpdatedBy());
-		auditableByIdEntity.setCreatedStamp(auditableByIdEntity.getUpdatedStamp());
-	    } else {
-		/**
-		 * 'Creation' audit can be compromized here as it is being save directly. Should
-		 * actually fetch old document and make sure created date is not being
-		 * overridden, but can be ignored as log(Object oldDocument, String comment) is
-		 * being used everywhere, which anyway is tracjing creation details, and here we
-		 * can focus on last update only, in case creation gets oeverriden we can
-		 * implement later, as it will have some performance impact.
-		 */
+
+	public void beforeSaveInternal(Object objectToSave, String collectionName) {
+		if (objectToSave instanceof UpdatedTimeStampIndexSupport) {
+			((UpdatedTimeStampIndexSupport) objectToSave).setUpdated(TimeStampIndex.now());
+		}
+
+		if (objectToSave instanceof CreatedTimeStampIndexSupport) {
+			CreatedTimeStampIndexSupport objectToSaveCreted = (CreatedTimeStampIndexSupport) objectToSave;
+			if (ArgUtil.isEmpty(objectToSaveCreted)) {
+				objectToSaveCreted.setCreated(TimeStampIndex.now());
+			}
+		}
+
+		if (objectToSave instanceof AuditableByIdEntity && ArgUtil.is(auditDetailProvider)) {
+			AuditableByIdEntity auditableByIdEntity = (AuditableByIdEntity) objectToSave;
+			auditDetailProvider.auditUpdate(auditableByIdEntity);
+			if (!ArgUtil.is(auditableByIdEntity.getId())) {
+				auditableByIdEntity.setCreatedBy(auditableByIdEntity.getUpdatedBy());
+				auditableByIdEntity.setCreatedStamp(auditableByIdEntity.getUpdatedStamp());
+			} else {
+				/**
+				 * 'Creation' audit can be compromized here as it is being save directly. Should
+				 * actually fetch old document and make sure created date is not being
+				 * overridden, but can be ignored as log(Object oldDocument, String comment) is
+				 * being used everywhere, which anyway is tracjing creation details, and here we
+				 * can focus on last update only, in case creation gets oeverriden we can
+				 * implement later, as it will have some performance impact.
+				 */
 //		if (!ArgUtil.is(collectionName)) {
 //		    collectionName = mongoTemplate.getCollectionName(objectToSave.getClass());
 //		}
 //		Object objectToReplace = findById(auditableByIdEntity.getId(), null);
-	    }
+			}
+
+		}
 
 	}
 
-    }
-
-    public <T> T save(DocQueryBuilder<T> builder) {
-	T doc = builder.getDoc();
-	save(doc);
-	return doc;
-    }
-
-    public <T> T findByIdString(String id, Class<T> clazz) {
-	if (ArgUtil.is(id)) {
-	    Criteria c = Criteria.where("_id").is(id);
-	    return getCommonMongoTemplate().findOne(new Query(c), clazz);
+	public <T> T save(DocQueryBuilder<T> builder) {
+		T doc = builder.getDoc();
+		save(doc);
+		return doc;
 	}
-	return null;
-    }
 
-    public <T> T findByIdSafeCheck(Object id, Class<T> clazz) {
-	Criteria c = Criteria.where("_id").is(id);
-	String idStr = ArgUtil.parseAsString(id);
-	if (idStr != null && ObjectId.isValid(idStr)) {
-	    Criteria altC = Criteria.where("_id").is(new ObjectId(idStr));
-	    c = new Criteria().orOperator(c, altC);
+	public <T> T findByIdString(String id, Class<T> clazz) {
+		if (ArgUtil.is(id)) {
+			Criteria c = Criteria.where("_id").is(id);
+			return getCommonMongoTemplate().findOne(new Query(c), clazz);
+		}
+		return null;
 	}
-	if (ArgUtil.is(id)) {
-	    return getCommonMongoTemplate().findOne(new Query(c), clazz);
+
+	public <T> T findByIdSafeCheck(Object id, Class<T> clazz) {
+		Criteria c = Criteria.where("_id").is(id);
+		String idStr = ArgUtil.parseAsString(id);
+		if (idStr != null && ObjectId.isValid(idStr)) {
+			Criteria altC = Criteria.where("_id").is(new ObjectId(idStr));
+			c = new Criteria().orOperator(c, altC);
+		}
+		if (ArgUtil.is(id)) {
+			return getCommonMongoTemplate().findOne(new Query(c), clazz);
+		}
+		return null;
 	}
-	return null;
-    }
 
-    public <T> List<T> find(MongoQueryBuilder<T> builder, Class<T> clazz) {
-	return find(builder.getQuery(), clazz);
-    }
-
-    public <T> List<T> find(MongoQueryBuilder<T> builder) {
-	return find(builder.getQuery(), builder.getDocClass());
-    }
-
-    public <T extends DocVersion> T creatNewDocuemnt(String id, Class<T> clazz, T newVersion) {
-	if (ArgUtil.is(id)) {
-	    T oldVersion = getCommonMongoTemplate().findOne(new Query(Criteria.where("_id").is(id)), clazz);
-	    if (ArgUtil.is(oldVersion)) {
-		newVersion.oldVersion(oldVersion);
-	    }
+	public <T> List<T> find(MongoQueryBuilder<T> builder, Class<T> clazz) {
+		return find(builder.getQuery(), clazz);
 	}
-	return newVersion;
-    }
 
-    public WriteResult updateFirst(MongoQueryBuilder<?> builder) {
-	WriteResult ret = null;
-	if (ArgUtil.is(builder.getUpdate())) {
-	    try {
-		builder.updatedStamp();
-		// LOGGER.info("Query:{}", builder.getQuery().toString());
-		// LOGGER.info("Update:{}", builder.getUpdate().toString());
-		ret = mongoTemplate.updateFirst(builder.getQuery(), builder.getUpdate(), builder.getDocClass());
-		builder.setUpdate(null);
-	    } catch (Exception e) {
-		LOGGER.debug("Query:{}", builder.getQuery().toString());
-		LOGGER.debug("Update:{}", builder.getUpdate().toString());
-		throw e;
-	    }
+	public <T> List<T> find(MongoQueryBuilder<T> builder) {
+		return find(builder.getQuery(), builder.getDocClass());
 	}
-	return ret;
-    }
 
-    public WriteResult update(MongoQueryBuilder<?> builder) {
-	WriteResult ret = null;
-	if (ArgUtil.is(builder.getUpdate())) {
-	    try {
-		builder.updatedStamp();
-		// LOGGER.info("Query:{}", builder.getQuery().toString());
-		// LOGGER.info("Update:{}", builder.getUpdate().toString());
-		ret = mongoTemplate.updateMulti(builder.getQuery(), builder.getUpdate(), builder.getDocClass());
-		builder.setUpdate(null);
-	    } catch (Exception e) {
-		LOGGER.debug("Query:{}", builder.getQuery().toString());
-		LOGGER.debug("Update:{}", builder.getUpdate().toString());
-		throw e;
-	    }
+	public <T extends DocVersion> T creatNewDocuemnt(String id, Class<T> clazz, T newVersion) {
+		if (ArgUtil.is(id)) {
+			T oldVersion = getCommonMongoTemplate().findOne(new Query(Criteria.where("_id").is(id)), clazz);
+			if (ArgUtil.is(oldVersion)) {
+				newVersion.oldVersion(oldVersion);
+			}
+		}
+		return newVersion;
 	}
-	return ret;
-    }
 
-    /**
-     * @param builder
-     * @return
-     * 
-     * @see MongoTemplate#upsert(Query,
-     *      org.springframework.data.mongodb.core.query.Update, Class, String)
-     */
-    public WriteResult upsert(MongoQueryBuilder builder) {
-	WriteResult ret = null;
-	if (ArgUtil.is(builder.getUpdate())) {
-	    try {
-		builder.updatedStamp();
-		ret = mongoTemplate.upsert(builder.getQuery(), builder.getUpdate(), builder.getDocClass());
-	    } catch (Exception e) {
-		LOGGER.debug("Query:{}", builder.getQuery().toString());
-		LOGGER.debug("Update:{}", builder.getUpdate().toString());
-		throw e;
-	    }
+	public WriteResult updateFirst(MongoQueryBuilder<?> builder) {
+		WriteResult ret = null;
+		if (ArgUtil.is(builder.getUpdate())) {
+			try {
+				builder.updatedStamp();
+				// LOGGER.info("Query:{}", builder.getQuery().toString());
+				// LOGGER.info("Update:{}", builder.getUpdate().toString());
+				ret = mongoTemplate.updateFirst(builder.getQuery(), builder.getUpdate(), builder.getDocClass());
+				builder.setUpdate(null);
+			} catch (Exception e) {
+				LOGGER.debug("Query:{}", builder.getQuery().toString());
+				LOGGER.debug("Update:{}", builder.getUpdate().toString());
+				throw e;
+			}
+		}
+		return ret;
 	}
-	return ret;
-    }
 
-    public WriteResult trash(Object object) {
-	if (object instanceof AuditCreateEntity && ArgUtil.is(auditDetailProvider)) {
-	    String collectionName = "ZTRASH_" + mongoTemplate.getCollectionName(object.getClass());
-	    auditDetailProvider.auditCreate((AuditCreateEntity) object);
-	    mongoTemplate.save(new AuditActivityDoc().doc(object), collectionName);
+	public WriteResult update(MongoQueryBuilder<?> builder) {
+		WriteResult ret = null;
+		if (ArgUtil.is(builder.getUpdate())) {
+			try {
+				builder.updatedStamp();
+				// LOGGER.info("Query:{}", builder.getQuery().toString());
+				// LOGGER.info("Update:{}", builder.getUpdate().toString());
+				ret = mongoTemplate.updateMulti(builder.getQuery(), builder.getUpdate(), builder.getDocClass());
+				builder.setUpdate(null);
+			} catch (Exception e) {
+				LOGGER.debug("Query:{}", builder.getQuery().toString());
+				LOGGER.debug("Update:{}", builder.getUpdate().toString());
+				throw e;
+			}
+		}
+		return ret;
 	}
-	return getCommonMongoTemplate().remove(object);
-    }
 
-    public void archive(Object oldDocument) {
-	String collectionName = "ZCHANGED_" + mongoTemplate.getCollectionName(oldDocument.getClass());
-	AuditActivityDoc oldDocumentArchived = new AuditActivityDoc().doc(oldDocument);
-	auditDetailProvider.auditCreate(oldDocumentArchived);
-	mongoTemplate.save(oldDocumentArchived, collectionName);
-    }
+	/**
+	 * @param builder
+	 * @return
+	 * 
+	 * @see MongoTemplate#upsert(Query,
+	 *      org.springframework.data.mongodb.core.query.Update, Class, String)
+	 */
+	public WriteResult upsert(MongoQueryBuilder<?> builder) {
+		WriteResult ret = null;
+		if (ArgUtil.is(builder.getUpdate())) {
+			try {
+				builder.updatedStamp();
+				ret = mongoTemplate.upsert(builder.getQuery(), builder.getUpdate(), builder.getDocClass());
+			} catch (Exception e) {
+				LOGGER.debug("Query:{}", builder.getQuery().toString());
+				LOGGER.debug("Update:{}", builder.getUpdate().toString());
+				throw e;
+			}
+		}
+		return ret;
+	}
 
-    public void log(Object oldDocument, String comment) {
-	String collectionName = mongoTemplate.getCollectionName(oldDocument.getClass());
-	AuditActivityDoc oldDocumentArchived = new AuditActivityDoc().collection(collectionName).doc(oldDocument)
-		.comment(comment);
-	auditDetailProvider.auditCreate(oldDocumentArchived);
-	mongoTemplate.save(oldDocumentArchived, "ZACTIVITY_LOGS");
-    }
+	public WriteResult trash(Object object) {
+		if (object instanceof AuditCreateEntity && ArgUtil.is(auditDetailProvider)) {
+			String collectionName = "ZTRASH_" + mongoTemplate.getCollectionName(object.getClass());
+			auditDetailProvider.auditCreate((AuditCreateEntity) object);
+			mongoTemplate.save(new AuditActivityDoc().doc(object), collectionName);
+		}
+		return getCommonMongoTemplate().remove(object);
+	}
+
+	public void archive(Object oldDocument) {
+		String collectionName = "ZCHANGED_" + mongoTemplate.getCollectionName(oldDocument.getClass());
+		AuditActivityDoc oldDocumentArchived = new AuditActivityDoc().doc(oldDocument);
+		auditDetailProvider.auditCreate(oldDocumentArchived);
+		mongoTemplate.save(oldDocumentArchived, collectionName);
+	}
+
+	public void log(Object oldDocument, String comment) {
+		String collectionName = mongoTemplate.getCollectionName(oldDocument.getClass());
+		AuditActivityDoc oldDocumentArchived = new AuditActivityDoc().collection(collectionName).doc(oldDocument)
+				.comment(comment);
+		auditDetailProvider.auditCreate(oldDocumentArchived);
+		mongoTemplate.save(oldDocumentArchived, "ZACTIVITY_LOGS");
+	}
 }

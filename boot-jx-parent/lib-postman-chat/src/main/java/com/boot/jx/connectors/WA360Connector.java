@@ -21,7 +21,6 @@ import com.boot.jx.postman.PMConstants.MESSAGE_FORMAT_TYPE;
 import com.boot.jx.postman.PMEnvironment.PMClientConfig;
 import com.boot.jx.postman.client.PMFileStoreClient;
 import com.boot.jx.postman.doc.ChatContactDoc;
-import com.boot.jx.postman.doc.tpo.WABAConversations;
 import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.Message.Status;
@@ -34,6 +33,7 @@ import com.boot.jx.postman.plugin.ChannelPluginProvider;
 import com.boot.jx.postman.plugin.WA360Plugin;
 import com.boot.jx.postman.plugin.WA360Plugin.WA360ConfigDetails;
 import com.boot.jx.postman.query.ChatContactQuery;
+import com.boot.jx.postman.query.WABAConversationQuery;
 import com.boot.jx.postman.wa360.WA360Client;
 import com.boot.jx.postman.wa360.WA360Constants;
 import com.boot.jx.postman.wa360.WA360Constants.InBoundWrapperPaths;
@@ -261,12 +261,11 @@ public class WA360Connector extends AbstractConnector<WA360ConfigDetails, WA360P
 					Map<String, Object> conversation = statusModel.keyEntry("conversation").asMap();
 					if (ArgUtil.is(conversation)) {
 						String id = ArgUtil.parseAsString(conversation.get("id"));
-						WABAConversations conrsDoc = new WABAConversations();
-						conrsDoc.setId(channelConfig.getChannelId() + "_" + id);
-						conrsDoc.contact().copyFrom(reprt.contact());
-						conrsDoc.setConversation(conversation);
-						conrsDoc.setPricing(statusModel.keyEntry("pricing").asMap());
-						commonMongoTemplate.save(conrsDoc);
+						WABAConversationQuery query = new WABAConversationQuery(id);
+						query.setContact(reprt.contact());
+						query.setConversation(conversation);
+						query.setPricing(statusModel.keyEntry("pricing").asMap());
+						commonMongoTemplate.upsert(query);
 					}
 				}
 			}

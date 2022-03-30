@@ -7,14 +7,17 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.TypeAlias;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import com.boot.jx.mongo.CommonDocInterfaces.TimeStampIndex;
+import com.boot.jx.mongo.CommonDocInterfaces.TimeStampIndex.CreatedTimeStampIndexSupport;
+import com.boot.jx.mongo.CommonDocInterfaces.TimeStampIndex.UpdatedTimeStampIndexSupport;
 import com.boot.jx.postman.doc.ContactDetailDoc;
 import com.boot.jx.postman.model.MessageDefinitions.Contactable;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
-@Document(collection = WABAConversations.COLLECTION_NAME)
+@Document(collection = WABAConversation.COLLECTION_NAME)
 @TypeAlias("TP_WABA_CONVERSATIONS")
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class WABAConversations implements Serializable {
+public class WABAConversation implements Serializable, CreatedTimeStampIndexSupport, UpdatedTimeStampIndexSupport {
 
 	private static final long serialVersionUID = 4116849214262304471L;
 
@@ -24,6 +27,8 @@ public class WABAConversations implements Serializable {
 	private String id;
 
 	private ContactDetailDoc contact;
+	private TimeStampIndex created;
+	private TimeStampIndex updated;
 
 	private Map<String, Object> conversation;
 	private Map<String, Object> pricing;
@@ -65,5 +70,21 @@ public class WABAConversations implements Serializable {
 			this.contact = new ContactDetailDoc();
 		}
 		return this.contact;
+	}
+
+	public TimeStampIndex getCreated() {
+		return created;
+	}
+
+	public void setCreated(TimeStampIndex created) {
+		this.created = created;
+	}
+
+	public TimeStampIndex getUpdated() {
+		return updated;
+	}
+
+	public void setUpdated(TimeStampIndex updated) {
+		this.updated = updated;
 	}
 }
