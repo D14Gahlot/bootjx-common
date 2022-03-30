@@ -9,9 +9,12 @@ import static org.springframework.data.mongodb.core.aggregation.Aggregation.sort
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -44,6 +47,7 @@ import com.boot.jx.account.dto.TypeCount;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.account.dto.ContactTypeCountDto;
 import com.boot.jx.account.dto.ContactTypeSummaryDto;
+import com.boot.jx.account.dto.MonthDtlsDto;
 import com.boot.jx.account.dto.SummaryDocDto;
 import com.boot.jx.postman.PMConstants;
 import com.boot.jx.postman.doc.MessageDoc;
@@ -76,24 +80,35 @@ public class AccountDashBoardManager {
 		return domainDocLst;
 	}
 	
-	
-	public Map<Object, Object> fetchUniqueMonth() {
-		List<String> lst = getListOfContactType();
-		 Map<Object, Object> map= new HashMap<Object, Object>();
-		for(String contactType:lst) {
-			Query query = new Query();
-			query.with(new Sort(new Order(Direction.DESC, "timestamp")));
-			query.fields().include("timestamp");
-			List<Long> msgDocLst = mongoTemplate.getCollection(contactType.toString()).distinct("timestamp",query.getQueryObject());
-			for(Long docTimeStamp :msgDocLst) {
-				long timestamp=(docTimeStamp-(docTimeStamp%(DateUtil.ONEDAY))); 
-				String monthStr = DateUtil.foramtTimeStampDateAsString(timestamp, null);
-				if(!map.containsValue(monthStr)) {
-					map.put(timestamp,monthStr);
-				}
+	@SuppressWarnings("unchecked")
+	public List<MonthDtlsDto> fetchUniqueMonth() {
+		
+		Map<Long, Object> map= new HashMap<Long, Object>();
+		Query query = new Query();
+		query.with(new Sort(new Order(Direction.DESC, "startSessionStamp")));
+		query.fields().include("startSessionStamp");
+		List<Long> msgDocLst = mongoTemplate.getCollection("CHAT_SESSION").distinct("startSessionStamp",query.getQueryObject());
+		List<MonthDtlsDto> listofMonth= new ArrayList<>();
+		for(Long docTimeStamp :msgDocLst) {
+			long timestamp=(docTimeStamp-(docTimeStamp%(DateUtil.ONEDAY))); 
+			String monthStr = DateUtil.foramtTimeStampDateAsString(timestamp, null);
+			if(!map.containsValue(monthStr)) {
+				map.put(timestamp,monthStr);
 			}
 		}
-		return map;
+		ArrayList<Long> sortedKeys= new ArrayList<Long>(map.keySet());
+        Collections.sort(sortedKeys,Collections.reverseOrder());
+       
+
+     // Display the TreeMap which is naturally sorted
+     for (Long  x : sortedKeys) {
+    	 MonthDtlsDto dto = new MonthDtlsDto();
+    	 dto.setTimestamp(x);
+    	 dto.setMonthStr(map.get(x).toString());
+    	 listofMonth.add(dto);
+         }
+  
+		return listofMonth;
 	}
 	
 	public ContactTypeSummaryDto getMonthWiseCount(long timestamp) {

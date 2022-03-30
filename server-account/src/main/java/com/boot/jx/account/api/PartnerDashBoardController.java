@@ -16,6 +16,7 @@ import com.boot.jx.account.doc.AccountStore;
 import com.boot.jx.account.doc.DomainDoc;
 import com.boot.jx.account.dto.AccountDashBoardResponseDto;
 import com.boot.jx.account.dto.ContactTypeSummaryDto;
+import com.boot.jx.account.dto.MonthDtlsDto;
 import com.boot.jx.account.manager.AccountDashBoardManager;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.http.CommonHttpRequest;
@@ -55,9 +56,9 @@ public class PartnerDashBoardController {
     
     @ResponseBody
     @RequestMapping(value = {"/pub/admin/fetch-month"}, method = { RequestMethod.GET })
-	public ApiResponse<Map<Object, Object>, Object> getMonthLst() {
-		Map<Object, Object> set =dashBMgr.fetchUniqueMonth(); 
-		return  ApiResponse.buildResult(set);
+	public ApiResponse<MonthDtlsDto, Object> getMonthLst() {
+		List<MonthDtlsDto> listofMonth = dashBMgr.fetchUniqueMonth(); 
+		return  ApiResponse.buildResults(listofMonth);
 	}
     @ResponseBody
 	@RequestMapping(value = {"/pub/admin/monthwise-summary-count"}, method = { RequestMethod.GET })

@@ -250,7 +250,7 @@ public class PartnerController {
 	}
 
 	@ResponseBody
-	@RequestMapping(value = { "/api/domain" }, method = { RequestMethod.GET })
+	@RequestMapping(value = { "/api/domain","/pub/domain" }, method = { RequestMethod.GET })
 	public ApiResponse<DomainDoc, Object> getDomain() {
 		BusinessUserDoc domainUser = adminSessionBean.domainUser();
 
