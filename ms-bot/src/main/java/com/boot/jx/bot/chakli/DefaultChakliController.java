@@ -71,7 +71,7 @@ public class DefaultChakliController extends CommonBotController {
 		boolean isNowInRange = false;
 		if (officeTimeFlag) {
 			String startTime = globalVars.keyEntry("office_start_time").asString();
-			String endTime = globalVars.keyEntry("office_start_time").asString();
+			String endTime = globalVars.keyEntry("office_end_time").asString();
 
 			try {
 				LocalTime now = LocalTime.now(ZoneId.of("Asia/Kuwait"));
