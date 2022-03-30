@@ -262,7 +262,7 @@ public class WA360Connector extends AbstractConnector<WA360ConfigDetails, WA360P
 					Map<String, Object> conversation = statusModel.keyEntry("conversation").asMap();
 					if (ArgUtil.is(conversation)) {
 						String id = ArgUtil.parseAsString(conversation.get("id"));
-						WABAConversationQuery query = new WABAConversationQuery(new WABAConversation());
+						WABAConversationQuery query = new WABAConversationQuery(id);
 						query.setContact(reprt.contact());
 						query.setConversation(conversation);
 						query.setPricing(statusModel.keyEntry("pricing").asMap());
