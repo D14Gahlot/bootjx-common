@@ -261,7 +261,7 @@ public class WA360Connector extends AbstractConnector<WA360ConfigDetails, WA360P
 				if (Status.SENTX.equals(reprt.getStatus())) {
 					Map<String, Object> conversation = statusModel.keyEntry("conversation").asMap();
 					if (ArgUtil.is(conversation)) {
-						String id = ArgUtil.parseAsString(conversation.get("id"));
+						String id = String.format("%s_%s", channelConfig.getChannelId(), conversation.get("id"));
 						WABAConversationQuery query = new WABAConversationQuery(id);
 						query.setContact(reprt.contact());
 						query.setConversation(conversation);
