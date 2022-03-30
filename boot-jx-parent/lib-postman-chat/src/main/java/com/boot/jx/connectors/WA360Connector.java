@@ -21,6 +21,7 @@ import com.boot.jx.postman.PMConstants.MESSAGE_FORMAT_TYPE;
 import com.boot.jx.postman.PMEnvironment.PMClientConfig;
 import com.boot.jx.postman.client.PMFileStoreClient;
 import com.boot.jx.postman.doc.ChatContactDoc;
+import com.boot.jx.postman.doc.tpo.WABAConversation;
 import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.Message.Status;
@@ -261,7 +262,7 @@ public class WA360Connector extends AbstractConnector<WA360ConfigDetails, WA360P
 					Map<String, Object> conversation = statusModel.keyEntry("conversation").asMap();
 					if (ArgUtil.is(conversation)) {
 						String id = ArgUtil.parseAsString(conversation.get("id"));
-						WABAConversationQuery query = new WABAConversationQuery(id);
+						WABAConversationQuery query = new WABAConversationQuery(new WABAConversation());
 						query.setContact(reprt.contact());
 						query.setConversation(conversation);
 						query.setPricing(statusModel.keyEntry("pricing").asMap());

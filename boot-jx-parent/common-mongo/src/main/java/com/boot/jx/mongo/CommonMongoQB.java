@@ -176,13 +176,20 @@ public class CommonMongoQB<M extends CommonMongoQB<M, T>, T> implements MongoQue
 		this.docClass = docClass;
 	}
 
+	@Override
 	public boolean isUpdatedTimeStampSupport() {
-		return UpdatedTimeStampIndexSupport.class.isAssignableFrom(this.docClass);
+		if (ArgUtil.is(this.docClass)) {
+			return UpdatedTimeStampIndexSupport.class.isAssignableFrom(this.docClass);
+		}
+		return false;
 	}
 
 	@Override
 	public boolean isCreatedTimeStampSupport() {
-		return CreatedTimeStampIndexSupport.class.isAssignableFrom(this.docClass);
+		if (ArgUtil.is(this.docClass)) {
+			return CreatedTimeStampIndexSupport.class.isAssignableFrom(this.docClass);
+		}
+		return false;
 	}
 
 	public void updatedStamp() {
