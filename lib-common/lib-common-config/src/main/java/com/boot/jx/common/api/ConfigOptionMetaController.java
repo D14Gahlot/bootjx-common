@@ -39,121 +39,121 @@ import com.fasterxml.jackson.annotation.JsonView;
 @RestController
 public class ConfigOptionMetaController {
 
-    @Autowired
-    private PMEnvironment pmEnvironment;
+	@Autowired
+	private PMEnvironment pmEnvironment;
 
-    @Autowired
-    private CDNBuilder cdnBuilder;
+	@Autowired
+	private CDNBuilder cdnBuilder;
 
-    @Autowired
-    CommonMongoTemplate commonMongoTemplate;
+	@Autowired
+	CommonMongoTemplate commonMongoTemplate;
 
-    // Meta APIS
-    @RequestMapping(value = "/api/meta/message_types", method = { RequestMethod.GET })
-    public ApiResponse<HSMMessageType, Object> messageType() {
-	return ApiResponse.buildResults(HSMMessageType.values());
-    }
-
-    @RequestMapping(value = "/api/meta/message_content_types", method = { RequestMethod.GET })
-    public ApiResponse<HSMContentType, Object> messageContentType() {
-	return ApiResponse.buildResults(HSMContentType.values());
-    }
-
-    @RequestMapping(value = "/api/meta/langs", method = { RequestMethod.GET })
-    public ApiResponse<HSMLanguage, Object> languages() {
-	return ApiResponse.buildResults(HSMLanguage.values());
-    }
-
-    @RequestMapping(value = "/api/meta/channel_types", method = { RequestMethod.GET })
-    public ApiResponse<AChannelDetails, Object> channel() {
-	return ApiResponse.buildResults(new ArrayList<AChannelDetails>(ChannelPluginProvider.DETAILS_MAPPING.values()));
-    }
-
-    @RequestMapping(value = "/api/meta/channel_configs/{channelType}", method = { RequestMethod.GET })
-    public ApiResponse<ConfigMeta, Object> channelConfig(@PathVariable CHANNEL_TYPE_ENUM channelType) {
-	ChannelPlugin<? extends AChannelDetails> plugin = ChannelPluginProvider.PLUGIN_MAPPING
-		.get(channelType.toString());
-	List<ConfigMeta> configs = plugin.listConfigMeta(pmEnvironment);
-	return ApiResponse.buildResults(configs);
-    }
-
-    // Option APIS
-
-    @JsonView(PMEnvironment.PublicProperty.class)
-    @RequestMapping(value = { "/api/options/channels" }, method = { RequestMethod.GET })
-    public ApiResponse<AChannelConfig, Object> listActiveLanes() {
-	return ApiResponse.buildResults(pmEnvironment.config().listChannels());
-    }
-
-    @RequestMapping(value = "/api/options/tmpl/hsm", method = { RequestMethod.GET })
-    public ApiResponse<HSMTemplateDoc, Object> listPushTemplateslistHsmTmpl() {
-	return ApiResponse.buildResults(commonMongoTemplate.findAll(HSMTemplateDoc.class));
-    }
-
-    @JsonView(PMEnvironment.PublicProperty.class)
-    @ResponseBody
-    @RequestMapping(value = { "/api/options/inbound_queue" }, method = { RequestMethod.GET })
-    public ApiResponse<ClientApp, Object> getInboundQueues() {
-	return ApiResponse.buildResults(pmEnvironment.config().listApps());
-    }
-
-    @JsonView(PMEnvironment.PublicProperty.class)
-    @ResponseBody
-    @RequestMapping(value = { "/api/options/agent_queue" }, method = { RequestMethod.GET })
-    public ApiResponse<ClientApp, Object> getAgentQueues() {
-	return ApiResponse.buildResults(
-		pmEnvironment.config().listApps().stream().filter(ClientApp::isAgentApp).collect(Collectors.toList()));
-    }
-
-    // Config APIS
-    @Autowired
-    private ConfigManager configManager;
-
-    @RequestMapping(value = "/api/config", method = { RequestMethod.POST })
-    public ApiResponse<Map<String, Object>, Object> setConfig(@RequestBody PMConfigurationObject map) {
-	configManager.save(map);
-	return ApiResponse.buildResults(configManager.getSetupConfigs());
-    }
-
-    @RequestMapping(value = "/api/config", method = { RequestMethod.GET })
-    public ApiResponse<Map<String, Object>, Object> getConfig(@RequestParam(required = false) String key) {
-	return ApiResponse.buildResults(configManager.getConfigs(key));
-    }
-
-    @ApiRequest(rules = ACCESS_RULES.ONLY_DUPERUSER)
-    @RequestMapping(value = "/api/config", method = { RequestMethod.DELETE })
-    public ApiResponse<Map<String, Object>, Object> deleteConfig(@RequestParam(required = false) String key) {
-	configManager.deleteAdminConfigs(key);
-	return ApiResponse.buildResults(configManager.getSetupConfigs());
-    }
-
-    @RequestMapping(value = { "/api/config/app" }, method = { RequestMethod.GET })
-    public ApiResponse<Map<String, Object>, Object> getAppConfigs() {
-	return ApiResponse.buildResults(configManager.getAppConfigs());
-    }
-
-    @RequestMapping(value = { "/api/config/setup" }, method = { RequestMethod.GET })
-    public ApiResponse<Map<String, Object>, Object> getSetupConfigs() {
-	return ApiResponse.buildResults(configManager.getSetupConfigs());
-    }
-
-    @RequestMapping(value = "/api/config/cdn", method = { RequestMethod.POST })
-    public ApiResponse<PMConfigurationObject, Object> updateCDN(@RequestParam(required = false) String url,
-	    @RequestParam(required = false) String version,
-	    @RequestParam(required = false, defaultValue = "false") boolean beta) {
-	PMConfigurationObject config = pmEnvironment.keyEntry(beta ? "mry.cdn.url.beta" : "mry.cdn.url");
-	String oldUrl = config.asString();
-
-	if (ArgUtil.is(version) && ArgUtil.is(oldUrl)) {
-	    url = cdnBuilder.updateVersion(oldUrl, version);
+	// Meta APIS
+	@RequestMapping(value = "/api/meta/message_types", method = { RequestMethod.GET })
+	public ApiResponse<HSMMessageType, Object> messageType() {
+		return ApiResponse.buildResults(HSMMessageType.values());
 	}
 
-	if (ArgUtil.is(url)) {
-	    config.setValue(url);
-	    configManager.save(config);
+	@RequestMapping(value = "/api/meta/message_content_types", method = { RequestMethod.GET })
+	public ApiResponse<HSMContentType, Object> messageContentType() {
+		return ApiResponse.buildResults(HSMContentType.values());
 	}
 
-	return ApiResponse.buildResults(config);
-    }
+	@RequestMapping(value = "/api/meta/langs", method = { RequestMethod.GET })
+	public ApiResponse<HSMLanguage, Object> languages() {
+		return ApiResponse.buildResults(HSMLanguage.values());
+	}
+
+	@RequestMapping(value = "/api/meta/channel_types", method = { RequestMethod.GET })
+	public ApiResponse<AChannelDetails, Object> channel() {
+		return ApiResponse.buildResults(new ArrayList<AChannelDetails>(ChannelPluginProvider.DETAILS_MAPPING.values()));
+	}
+
+	@RequestMapping(value = "/api/meta/channel_configs/{channelType}", method = { RequestMethod.GET })
+	public ApiResponse<ConfigMeta, Object> channelConfig(@PathVariable CHANNEL_TYPE_ENUM channelType) {
+		ChannelPlugin<? extends AChannelDetails> plugin = ChannelPluginProvider.PLUGIN_MAPPING
+				.get(channelType.toString());
+		List<ConfigMeta> configs = plugin.listConfigMeta(pmEnvironment);
+		return ApiResponse.buildResults(configs);
+	}
+
+	// Option APIS
+
+	@JsonView(PMEnvironment.PublicProperty.class)
+	@RequestMapping(value = { "/api/options/channels" }, method = { RequestMethod.GET })
+	public ApiResponse<AChannelConfig, Object> listActiveLanes() {
+		return ApiResponse.buildResults(pmEnvironment.config().listChannels());
+	}
+
+	@RequestMapping(value = "/api/options/tmpl/hsm", method = { RequestMethod.GET })
+	public ApiResponse<HSMTemplateDoc, Object> listPushTemplateslistHsmTmpl() {
+		return ApiResponse.buildResults(commonMongoTemplate.findAll(HSMTemplateDoc.class));
+	}
+
+	@JsonView(PMEnvironment.PublicProperty.class)
+	@ResponseBody
+	@RequestMapping(value = { "/api/options/inbound_queue" }, method = { RequestMethod.GET })
+	public ApiResponse<ClientApp, Object> getInboundQueues() {
+		return ApiResponse.buildResults(pmEnvironment.config().listApps());
+	}
+
+	@JsonView(PMEnvironment.PublicProperty.class)
+	@ResponseBody
+	@RequestMapping(value = { "/api/options/agent_queue" }, method = { RequestMethod.GET })
+	public ApiResponse<ClientApp, Object> getAgentQueues() {
+		return ApiResponse.buildResults(
+				pmEnvironment.config().listApps().stream().filter(ClientApp::isAgentApp).collect(Collectors.toList()));
+	}
+
+	// Config APIS
+	@Autowired
+	private ConfigManager configManager;
+
+	@RequestMapping(value = "/api/config", method = { RequestMethod.POST })
+	public ApiResponse<Map<String, Object>, Object> setConfig(@RequestBody PMConfigurationObject map) {
+		configManager.save(map);
+		return ApiResponse.buildResults(configManager.getSetupConfigs());
+	}
+
+	@RequestMapping(value = "/api/config", method = { RequestMethod.GET })
+	public ApiResponse<Map<String, Object>, Object> getConfig(@RequestParam(required = false) String key) {
+		return ApiResponse.buildResults(configManager.getConfigs(key));
+	}
+
+	@ApiRequest(rules = ACCESS_RULES.ONLY_DUPERUSER)
+	@RequestMapping(value = "/api/config", method = { RequestMethod.DELETE })
+	public ApiResponse<Map<String, Object>, Object> deleteConfig(@RequestParam(required = false) String key) {
+		configManager.deleteAdminConfigs(key);
+		return ApiResponse.buildResults(configManager.getSetupConfigs());
+	}
+
+	@RequestMapping(value = { "/api/config/app" }, method = { RequestMethod.GET })
+	public ApiResponse<Map<String, Object>, Object> getAppConfigs() {
+		return ApiResponse.buildResults(configManager.getAppConfigs());
+	}
+
+	@RequestMapping(value = { "/api/config/setup" }, method = { RequestMethod.GET })
+	public ApiResponse<Map<String, Object>, Object> getSetupConfigs() {
+		return ApiResponse.buildResults(configManager.getSetupConfigs());
+	}
+
+	@RequestMapping(value = "/api/config/cdn", method = { RequestMethod.POST })
+	public ApiResponse<PMConfigurationObject, Object> updateCDN(@RequestParam(required = false) String url,
+			@RequestParam(required = false) String version,
+			@RequestParam(required = false, defaultValue = "false") boolean beta) {
+		PMConfigurationObject config = pmEnvironment.keyEntry(beta ? "mry.cdn.url.beta" : "mry.cdn.url");
+		String oldUrl = config.asString();
+
+		if (ArgUtil.is(version) && ArgUtil.is(oldUrl)) {
+			url = cdnBuilder.updateVersion(oldUrl, version);
+		}
+
+		if (ArgUtil.is(url)) {
+			config.setValue(url);
+			configManager.save(config);
+		}
+
+		return ApiResponse.buildResults(config);
+	}
 
 }

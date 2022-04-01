@@ -7,6 +7,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import com.boot.jx.mongo.CommonDocInterfaces.TimeStampIndex.CreatedTimeStampIndexSupport;
+import com.boot.jx.postman.doc.tpo.WABAConversation;
+import com.boot.jx.postman.query.WABAConversationQuery;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.FileUtil;
 import com.boot.utils.IoUtils;
@@ -21,7 +24,13 @@ public class CleassCreater { // Noncompliant
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		nations();
+		testUpdated();
+	}
+
+	public static void testUpdated() {
+		WABAConversationQuery q = new WABAConversationQuery("id");
+
+		System.out.println(CreatedTimeStampIndexSupport.class.isAssignableFrom(WABAConversation.class));
 	}
 
 	public static void nations() {
@@ -37,8 +46,9 @@ public class CleassCreater { // Noncompliant
 			List<Map<String, Object>> dataList = dataPath.loadList(map, null);
 
 			for (Map<String, Object> ctry : dataList) {
-				System.out.println(String.format("%s(\"%s\",\"%s\"),",
-						ArgUtil.parseAsString(ctry.get("countryName"),"ALL").toUpperCase().replaceAll(" ", "_").replaceAll("[&)(\\,'\\.]", ""),
+				System.out.println(String.format(
+						"%s(\"%s\",\"%s\"),", ArgUtil.parseAsString(ctry.get("countryName"), "ALL").toUpperCase()
+								.replaceAll(" ", "_").replaceAll("[&)(\\,'\\.]", ""),
 						ctry.get("countryId"), ctry.get("nationality")));
 			}
 

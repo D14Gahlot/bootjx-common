@@ -254,8 +254,13 @@ public class ChatService {
 		}
 
 		ChatContextDoc doc = mongoTemplate.findById(contactId, ChatContextDoc.class);
+		
+		if(!ArgUtil.is(doc)) {
+			doc = new ChatContextDoc();
+			doc.setContactId(contactId);
+		}
 		messageContext.setChatConext(doc);
-		if (!ArgUtil.is(doc) || !ArgUtil.is(doc.getMeta())
+		if (!ArgUtil.is(doc.getMeta())
 				|| TimeUtils.isExpired(doc.getMeta().getUpdateStamp(), "5min")) {
 			doc.setMeta(new ChatMeta());
 		}
