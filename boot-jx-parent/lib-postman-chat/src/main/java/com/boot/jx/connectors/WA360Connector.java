@@ -14,12 +14,14 @@ import com.boot.jx.dict.FileFormat;
 import com.boot.jx.dict.FileType;
 import com.boot.jx.exception.AmxApiException;
 import com.boot.jx.model.CommonFile;
+import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.jx.postman.PMConstants.CHANNEL_TYPE;
 import com.boot.jx.postman.PMConstants.MESSAGE_COMPOSE_TYPE;
 import com.boot.jx.postman.PMConstants.MESSAGE_FORMAT_TYPE;
 import com.boot.jx.postman.PMEnvironment.PMClientConfig;
 import com.boot.jx.postman.client.PMFileStoreClient;
 import com.boot.jx.postman.doc.ChatContactDoc;
+import com.boot.jx.postman.doc.tpo.WABAConversation;
 import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.Message.Status;
@@ -32,6 +34,7 @@ import com.boot.jx.postman.plugin.ChannelPluginProvider;
 import com.boot.jx.postman.plugin.WA360Plugin;
 import com.boot.jx.postman.plugin.WA360Plugin.WA360ConfigDetails;
 import com.boot.jx.postman.query.ChatContactQuery;
+import com.boot.jx.postman.query.WABAConversationQuery;
 import com.boot.jx.postman.wa360.WA360Client;
 import com.boot.jx.postman.wa360.WA360Constants;
 import com.boot.jx.postman.wa360.WA360Constants.InBoundWrapperPaths;
@@ -69,6 +72,9 @@ public class WA360Connector extends AbstractConnector<WA360ConfigDetails, WA360P
 
 	@Autowired
 	private PMClientConfig pmClientConfig;
+
+	@Autowired
+	private CommonMongoTemplate commonMongoTemplate;
 
 	@Override
 	public void onChannelUpdate(ChannelConfig channelConfig) {
@@ -249,7 +255,20 @@ public class WA360Connector extends AbstractConnector<WA360ConfigDetails, WA360P
 		if (requestMap.containsKey("statuses")) {
 			List<Map<String, Object>> statusMaps = requestMap.keyEntry("statuses").asListOfMap();
 			for (Map<String, Object> statusMap : statusMaps) {
-				messageBoxEvent.addMessageReport(toMessageReport(channelConfig, MapModel.from(statusMap)));
+				MapModel statusModel = MapModel.from(statusMap);
+				MessageReport reprt = toMessageReport(channelConfig, statusModel);
+				messageBoxEvent.addMessageReport(reprt);
+				if (Status.SENTX.equals(reprt.getStatus())) {
+					Map<String, Object> conversation = statusModel.keyEntry("conversation").asMap();
+					if (ArgUtil.is(conversation)) {
+						String id = String.format("%s_%s", channelConfig.getChannelId(), conversation.get("id"));
+						WABAConversationQuery query = new WABAConversationQuery(id);
+						query.setContact(reprt.contact());
+						query.setConversation(conversation);
+						query.setPricing(statusModel.keyEntry("pricing").asMap());
+						commonMongoTemplate.upsert(query);
+					}
+				}
 			}
 		}
 

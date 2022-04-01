@@ -12,181 +12,181 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class MessageReport implements LogMessage, Serializable {
 
-    private static final long serialVersionUID = -9039777977577457215L;
+	private static final long serialVersionUID = -9039777977577457215L;
 
-    private String messageId;
-    private String messageIdExt;
-    private String messageIdRef;
-    private String sessionId;
-    private Contactable contact;
+	private String messageId;
+	private String messageIdExt;
+	private String messageIdRef;
+	private String sessionId;
+	private Contactable contact;
 
-    protected long changeStamp;
-    protected long watermarkStamp;
-    private Status status = null;
-    private String reason = null;
-    private List<String> logs;
-    private List<MessageReportError> errors;
+	protected long changeStamp;
+	protected long watermarkStamp;
+	private Status status = null;
+	private String reason = null;
+	private List<String> logs;
+	private List<MessageReportError> errors;
 
-    private MessageSession session;
+	private MessageSession session;
 
-    public String getMessageId() {
-	return messageId;
-    }
-
-    public void setMessageId(String messageId) {
-	this.messageId = messageId;
-    }
-
-    public String getMessageIdExt() {
-	return messageIdExt;
-    }
-
-    public void setMessageIdExt(String messageIdExt) {
-	this.messageIdExt = messageIdExt;
-    }
-
-    public String getMessageIdRef() {
-	return messageIdRef;
-    }
-
-    public void setMessageIdRef(String messageIdRef) {
-	this.messageIdRef = messageIdRef;
-    }
-
-    public Status getStatus() {
-	return status;
-    }
-
-    public void setStatus(Status status) {
-	this.status = status;
-    }
-
-    public long getChangeStamp() {
-	return changeStamp;
-    }
-
-    public void setChangeStamp(long changeStamp) {
-	this.changeStamp = changeStamp;
-    }
-
-    public String getReason() {
-	return reason;
-    }
-
-    public void setReason(String reason) {
-	this.reason = reason;
-    }
-
-    public Contactable getContact() {
-	return contact;
-    }
-
-    public void setContact(Contactable contact) {
-	this.contact = contact;
-    }
-
-    public Contactable contact() {
-	if (this.contact == null) {
-	    this.contact = new ContactMeta();
-	}
-	return this.contact;
-    }
-
-    public long getWatermarkStamp() {
-	return watermarkStamp;
-    }
-
-    public void setWatermarkStamp(long watermarkStamp) {
-	this.watermarkStamp = watermarkStamp;
-    }
-
-    public List<MessageReportError> getErrors() {
-	return errors;
-    }
-
-    public void setErrors(List<MessageReportError> errors) {
-	this.errors = errors;
-    }
-
-    public static class MessageReportError {
-
-	@ApiMockModelProperty(example = "470", value = "Error code.\n")
-	public String code;
-
-	@ApiMockModelProperty(
-		example = "Failed to send message because you are outside the support window for freeform messages to this user. Please use a valid HSM notification or reconsider.",
-		value = "Error code")
-	public String title;
-
-	@ApiMockModelProperty(value = "Error details provided, if available/applicable", required = false)
-	public String details;
-
-	@ApiMockModelProperty(example = "https://developers.facebook.com/docs/whatsapp/api/errors#error",
-		value = "Location for error detail", required = false)
-	public String href;
-
-	public String getCode() {
-	    return code;
+	public String getMessageId() {
+		return messageId;
 	}
 
-	public void setCode(String code) {
-	    this.code = code;
+	public void setMessageId(String messageId) {
+		this.messageId = messageId;
 	}
 
-	public String getTitle() {
-	    return title;
+	public String getMessageIdExt() {
+		return messageIdExt;
 	}
 
-	public void setTitle(String title) {
-	    this.title = title;
+	public void setMessageIdExt(String messageIdExt) {
+		this.messageIdExt = messageIdExt;
 	}
 
-	public String getDetails() {
-	    return details;
+	public String getMessageIdRef() {
+		return messageIdRef;
 	}
 
-	public void setDetails(String details) {
-	    this.details = details;
+	public void setMessageIdRef(String messageIdRef) {
+		this.messageIdRef = messageIdRef;
 	}
 
-	public String getHref() {
-	    return href;
+	public Status getStatus() {
+		return status;
 	}
 
-	public void setHref(String href) {
-	    this.href = href;
+	public void setStatus(Status status) {
+		this.status = status;
 	}
-    }
 
-    public String getSessionId() {
-	return sessionId;
-    }
-
-    public void setSessionId(String sessionId) {
-	this.sessionId = sessionId;
-    }
-
-    public MessageSession session() {
-	if (session == null) {
-	    this.session = new MessageSession();
+	public long getChangeStamp() {
+		return changeStamp;
 	}
-	return this.session;
-    }
 
-    public MessageSession getSession() {
-	return session;
-    }
+	public void setChangeStamp(long changeStamp) {
+		this.changeStamp = changeStamp;
+	}
 
-    public void setSession(MessageSession session) {
-	this.session = session;
-    }
+	public String getReason() {
+		return reason;
+	}
 
-    public List<String> getLogs() {
-	return logs;
-    }
+	public void setReason(String reason) {
+		this.reason = reason;
+	}
 
-    public void setLogs(List<String> logs) {
-	this.logs = logs;
-    }
+	public Contactable getContact() {
+		return contact;
+	}
+
+	public void setContact(Contactable contact) {
+		this.contact = contact;
+	}
+
+	public Contactable contact() {
+		if (this.contact == null) {
+			this.contact = new ContactMeta();
+		}
+		return this.contact;
+	}
+
+	public long getWatermarkStamp() {
+		return watermarkStamp;
+	}
+
+	public void setWatermarkStamp(long watermarkStamp) {
+		this.watermarkStamp = watermarkStamp;
+	}
+
+	public List<MessageReportError> getErrors() {
+		return errors;
+	}
+
+	public void setErrors(List<MessageReportError> errors) {
+		this.errors = errors;
+	}
+
+	public static class MessageReportError {
+
+		@ApiMockModelProperty(example = "470", value = "Error code.\n")
+		public String code;
+
+		@ApiMockModelProperty(
+				example = "Failed to send message because you are outside the support window for freeform messages to this user. Please use a valid HSM notification or reconsider.",
+				value = "Error code")
+		public String title;
+
+		@ApiMockModelProperty(value = "Error details provided, if available/applicable", required = false)
+		public String details;
+
+		@ApiMockModelProperty(example = "https://developers.facebook.com/docs/whatsapp/api/errors#error",
+				value = "Location for error detail", required = false)
+		public String href;
+
+		public String getCode() {
+			return code;
+		}
+
+		public void setCode(String code) {
+			this.code = code;
+		}
+
+		public String getTitle() {
+			return title;
+		}
+
+		public void setTitle(String title) {
+			this.title = title;
+		}
+
+		public String getDetails() {
+			return details;
+		}
+
+		public void setDetails(String details) {
+			this.details = details;
+		}
+
+		public String getHref() {
+			return href;
+		}
+
+		public void setHref(String href) {
+			this.href = href;
+		}
+	}
+
+	public String getSessionId() {
+		return sessionId;
+	}
+
+	public void setSessionId(String sessionId) {
+		this.sessionId = sessionId;
+	}
+
+	public MessageSession session() {
+		if (session == null) {
+			this.session = new MessageSession();
+		}
+		return this.session;
+	}
+
+	public MessageSession getSession() {
+		return session;
+	}
+
+	public void setSession(MessageSession session) {
+		this.session = session;
+	}
+
+	public List<String> getLogs() {
+		return logs;
+	}
+
+	public void setLogs(List<String> logs) {
+		this.logs = logs;
+	}
 
 }
