@@ -1,11 +1,14 @@
 package com.boot.jx.account.doc;
 
 import java.io.Serializable;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.TypeAlias;
 import org.springframework.data.mongodb.core.mapping.Document;
+
+import com.boot.jx.account.dto.ContactTypeCountDto;
 
 @Document(collection = "DOMAIN_SUMMARY_MESSAGE")
 @TypeAlias("DomainSummaryMessageDoc")
@@ -22,6 +25,8 @@ public class DomainSummaryMessageDoc implements Serializable {
 	String date;
 	String channel;
 	private Map<String, Object> messageType;
+	Map<String, Map<String, Long>> dateWiseSummaryCount;
+	Map<Object,Long> summaryCount;
 	public String getId() {
 		return id;
 	}
@@ -52,5 +57,17 @@ public class DomainSummaryMessageDoc implements Serializable {
 	public void setMessageType(Map<String, Object> messageType) {
 		this.messageType = messageType;
 	}
-
+	public Map<Object, Long> getSummaryCount() {
+		return summaryCount;
+	}
+	public void setSummaryCount(Map<Object, Long> summaryCount) {
+		this.summaryCount = summaryCount;
+	}
+	public Map<String, Map<String, Long>> getDateWiseSummaryCount() {
+		return dateWiseSummaryCount;
+	}
+	public void setDateWiseSummaryCount(Map<String, Map<String, Long>> dateWiseSummaryCount) {
+		this.dateWiseSummaryCount = dateWiseSummaryCount;
+	}
+	
 }

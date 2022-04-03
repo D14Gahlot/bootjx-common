@@ -37,7 +37,7 @@ public class PMFileStoreClient {
 	// Session based File Uploads
 	public CommonFile createSessionFile(CommonFile srcFile, String sessionId, String fileId) {
 		String folderPath = String.format("%s/session/%s", AppContextUtil.getTenant(), sessionId);
-		String fileName = String.format("%s_%s", fileId,
+		String fileName = String.format("%s/%s", fileId,
 				ArgUtil.nonEmpty(srcFile.getName(), UniqueID.generateString()));
 		return awsFileStore.createFile2(srcFile, folderPath, fileName);
 	}
@@ -48,7 +48,7 @@ public class PMFileStoreClient {
 
 	public CommonFile uploadSessionFile(MultipartFile srcFile, String sessionId, String fileId) {
 		String folderPath = String.format("%s/session/%s", AppContextUtil.getTenant(), sessionId);
-		String fileName = String.format("%s_%s", fileId, srcFile.getOriginalFilename());
+		String fileName = String.format("%s/%s", fileId, srcFile.getOriginalFilename());
 
 		return upload2(srcFile, folderPath, fileName);
 	}
