@@ -9,14 +9,14 @@ import com.boot.utils.StringUtils.StringMatcher;
 
 public class CommonBotController extends ChatController {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(CommonBotController.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(CommonBotController.class);
 
-    public void commonTransferToAgent(InboxMessage inboxMessage, StringMatcher matcher) {
-	try {
-	    routeSession("agent_desk");
-	} catch (Exception e) {
-	    reply("We are having some issues trying connect you to one of our customer representatives. Please be patient");
-	    LOGGER.error("Erro while Connecting to Agent", e);
+	public void commonTransferToAgent(InboxMessage inboxMessage, StringMatcher matcher) {
+		try {
+			routeSession("agent_desk");
+		} catch (Exception e) {
+			reply("We are having some issues trying connect you to one of our customer representatives. Please be patient");
+			LOGGER.error("Erro while Connecting to Agent", e);
+		}
 	}
-    }
 }
