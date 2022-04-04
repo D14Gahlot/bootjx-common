@@ -37,159 +37,159 @@ import com.boot.utils.ArgUtil;
 @Component
 @ConnectorMapping(contactType = ContactType.FACEBOOK)
 public class FacebookConnector extends AbstractConnector<FacebookConfigDetails, FacebookPlugin> {
-    private static final Logger LOGGER = LoggerFactory.getLogger(FacebookConnector.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(FacebookConnector.class);
 
-    @Override
-    public FacebookPlugin getPlugin() {
-	return ChannelPluginProvider.FACEBOOK;
-    }
-
-    @Autowired
-    private FacebooClient facebooClient;
-
-    @Autowired
-    private LogManager logManager;
-
-    @Autowired
-    private PMFileStoreClient pmFileStoreClient;
-
-    @Override
-    public void onChannelUpdate(ChannelConfig channelConfig) {
-	ApiResponseUtil.addWarning("Set webhook URL manually from Facebook Developer Portal.");
-    }
-
-    public void onSend(ChannelConfig channelConfig, ChatContactDoc chatContactDoc, OutboxMessage outboxMessage) {
-	try {
-	    template(channelConfig, chatContactDoc, outboxMessage);
-	    facebooClient.send(channelConfig, outboxMessage);
-	    outboxMessage.updateStatus(Message.Status.SENT);
-	} catch (Exception e) {
-	    outboxMessage.updateStatus(OutboxMessage.Status.SENT_ERR);
-	    outboxMessage.logs().add(e.getMessage());
-	    LOGGER.error("SEND ERROR", e);
+	@Override
+	public FacebookPlugin getPlugin() {
+		return ChannelPluginProvider.FACEBOOK;
 	}
-    }
 
-    @Override
-    public InboxMessage assignToAgent(InboxMessage inboxMessage) {
-	this.reply(null, null, new OutboxMessage().message("Our agent will get in touch with you"), inboxMessage);
-	return inboxMessage;
-    }
+	@Autowired
+	private FacebooClient facebooClient;
 
-    @Override
-    public OutboxMessage initSession(ChatSessionDoc session, InboxMessage inboxMessage) {
-	ChannelConfig config = getChannelConfig(inboxMessage);
-	FacebookUserProfile profile = facebooClient.getUserProfile(config, inboxMessage.contact());
-	ChatContactQuery contactQuery = messageContext.contact();
-	contactQuery.setProfilePic(profile.getProfilePic());
-	contactQuery.setName(profile.getFirstName() + " " + profile.getLastName());
-	contactQuery.setEmail(profile.getEmail());
-	return null;
-    }
+	@Autowired
+	private LogManager logManager;
 
-    @Deprecated
-    public InboxMessage toInboxMessage(FacebookMessaging m, String lane) {
-	InboxMessage event = new InboxMessage();
-	String id = m.getSender().get("id");
-	event.contact().setChannelType(CHANNEL_TYPE.FACEBOOK);
-	event.setFrom(id);
-	event.contact().setCsid(id);
-	if (ArgUtil.is(m.getPostBack()) && ArgUtil.is(m.getPostBack().getTitle())) {
-	    event.setMessage(m.getPostBack().getTitle());
-	} else {
-	    event.setMessage(m.getMessage().getText());
+	@Autowired
+	private PMFileStoreClient pmFileStoreClient;
+
+	@Override
+	public void onChannelUpdate(ChannelConfig channelConfig) {
+		ApiResponseUtil.addWarning("Set webhook URL manually from Facebook Developer Portal.");
 	}
-	event.to().add(m.getRecipient().get("id"));
-	event.contact().type(ContactType.FACEBOOK);
-	event.contact().setLane(lane);
-	return event;
-    }
 
-    public InboxMessage toInboxMessage(FacebookMessaging m, ChannelConfig channelConfig) {
-	// Create Default Message from Channel
-	InboxMessage inboxMessage = this.createInboxMessage(channelConfig);
-
-	// Set Contact info
-	String csid = m.getSender().get("id");
-
-	inboxMessage.contact().setCsid(csid);
-
-	// Set Additional info
-	inboxMessage.setFrom(csid);
-	inboxMessage.to().add(m.getRecipient().get("id"));
-
-	/**
-	 * https://developers.facebook.com/docs/messenger-platform/reference/webhook-events/messages
-	 */
-
-	if (ArgUtil.is(m.getMessage())) {
-	    if (ArgUtil.is(m.getMessage().getAttachments())
-		    && ArgUtil.is(m.getMessage().getAttachments()[0].getPayload())) {
-		if (ArgUtil.is(m.getMessage().getAttachments()[0].getPayload().getUrl())) {
-		    FacbookAttachment attchment = m.getMessage().getAttachments()[0];
-		    FileType attachmentType = ArgUtil.parseAsEnumT(attchment.getType(), FileType.class);
-		    if (ArgUtil.is(attachmentType)) {
-			inboxMessage.setFormatType(attachmentType.toString().toLowerCase());
-			inboxMessage.attachment(new Attachment().mediaURL(attchment.getPayload().getUrl())
-				.mediaType(attachmentType).mediaSrc(attchment.getPayload().getUrl()));
-		    } else if ("fallback".equals(attchment.getType())) {
-			inboxMessage.attachment(new Attachment().mediaURL(attchment.getPayload().getUrl())
-				.mediaCaption(attchment.getPayload().getTitle())
-				.mediaSrc(attchment.getPayload().getUrl()).mediaType(FileType.URL)
-				.mediaSubType(attchment.getType()));
-		    }
+	public void onSend(ChannelConfig channelConfig, ChatContactDoc chatContactDoc, OutboxMessage outboxMessage) {
+		try {
+			template(channelConfig, chatContactDoc, outboxMessage);
+			facebooClient.send(channelConfig, outboxMessage);
+			outboxMessage.updateStatus(Message.Status.SENT);
+		} catch (Exception e) {
+			outboxMessage.updateStatus(OutboxMessage.Status.SENT_ERR);
+			outboxMessage.logs().add(e.getMessage());
+			LOGGER.error("SEND ERROR", e);
 		}
-	    }
-	    // Extract Message Details
-	    inboxMessage.setMessageIdExt(m.getMessage().getMid());
-	    inboxMessage.setMessage(m.getMessage().getText());
-
-	    MapModel qr = m.getMessage().getQuickReply();
-	    if (ArgUtil.is(qr)) {
-		inboxMessage.form().put("reply_id", qr.getString("payload"));
-		inboxMessage.form().put("reply_title", m.getMessage().getText());
-	    }
-
-	    MapModel rt = m.getMessage().getReplyTo();
-	    if (ArgUtil.is(rt)) {
-		inboxMessage.setReplyIdExt(rt.getString("mid"));
-	    }
-	} else if (ArgUtil.is(m.getPostBack()) && ArgUtil.is(m.getPostBack().getTitle())) {
-	    inboxMessage.setMessageIdExt(m.getPostBack().getMid());
-	    inboxMessage.setMessage(m.getPostBack().getTitle());
-	    inboxMessage.form().put("reply_id", m.getPostBack().getPayload());
-	    inboxMessage.form().put("reply_title", m.getPostBack().getTitle());
 	}
 
-	return inboxMessage;
-    }
-
-    private MessageReport toMessageReport(FacebookMessaging m, ChannelConfig channelConfig) {
-	MessageReport report = this.createMessageReport(channelConfig);
-	String csid = m.getSender().get("id");
-	report.contact().setCsid(csid);
-	report.setChangeStamp(m.getTimestamp());
-	if (ArgUtil.is(m.getRead())) {
-	    report.setChangeStamp(m.getReadWatermark());
-	    report.setStatus(Status.READ);
+	@Override
+	public InboxMessage assignToAgent(InboxMessage inboxMessage) {
+		this.reply(null, null, new OutboxMessage().message("Our agent will get in touch with you"), inboxMessage);
+		return inboxMessage;
 	}
-	return report;
-    }
 
-    @Override
-    public MessageBoxEvent inboundMessageBoxEvent(ChannelConfig channelConfig, MapModel requestMap,
-	    MessageBoxEvent messageBoxEvent) {
-	FacebookHookRequest request = requestMap.as(FacebookHookRequest.class);
-	request.getEntry().forEach(pageEntry -> {
-	    pageEntry.getMessaging().forEach(m -> {
-		if (ArgUtil.is(m.getMessage()) || ArgUtil.is(m.getPostBack())) {
-		    messageBoxEvent.addInboxMessage(toInboxMessage(m, channelConfig));
-		} else if (ArgUtil.is(m.getRead())) {
-		    messageBoxEvent.addMessageReport(toMessageReport(m, channelConfig));
+	@Override
+	public OutboxMessage initSession(ChatSessionDoc session, InboxMessage inboxMessage) {
+		ChannelConfig config = getChannelConfig(inboxMessage);
+		FacebookUserProfile profile = facebooClient.getUserProfile(config, inboxMessage.contact());
+		ChatContactQuery contactQuery = messageContext.contact();
+		contactQuery.setProfilePic(profile.getProfilePic());
+		contactQuery.setName(profile.getName());
+		contactQuery.setEmail(profile.getEmail());
+		return null;
+	}
+
+	@Deprecated
+	public InboxMessage toInboxMessage(FacebookMessaging m, String lane) {
+		InboxMessage event = new InboxMessage();
+		String id = m.getSender().get("id");
+		event.contact().setChannelType(CHANNEL_TYPE.FACEBOOK);
+		event.setFrom(id);
+		event.contact().setCsid(id);
+		if (ArgUtil.is(m.getPostBack()) && ArgUtil.is(m.getPostBack().getTitle())) {
+			event.setMessage(m.getPostBack().getTitle());
+		} else {
+			event.setMessage(m.getMessage().getText());
 		}
-	    });
-	});
-	return messageBoxEvent;
-    }
+		event.to().add(m.getRecipient().get("id"));
+		event.contact().type(ContactType.FACEBOOK);
+		event.contact().setLane(lane);
+		return event;
+	}
+
+	public InboxMessage toInboxMessage(FacebookMessaging m, ChannelConfig channelConfig) {
+		// Create Default Message from Channel
+		InboxMessage inboxMessage = this.createInboxMessage(channelConfig);
+
+		// Set Contact info
+		String csid = m.getSender().get("id");
+
+		inboxMessage.contact().setCsid(csid);
+
+		// Set Additional info
+		inboxMessage.setFrom(csid);
+		inboxMessage.to().add(m.getRecipient().get("id"));
+
+		/**
+		 * https://developers.facebook.com/docs/messenger-platform/reference/webhook-events/messages
+		 */
+
+		if (ArgUtil.is(m.getMessage())) {
+			if (ArgUtil.is(m.getMessage().getAttachments())
+					&& ArgUtil.is(m.getMessage().getAttachments()[0].getPayload())) {
+				if (ArgUtil.is(m.getMessage().getAttachments()[0].getPayload().getUrl())) {
+					FacbookAttachment attchment = m.getMessage().getAttachments()[0];
+					FileType attachmentType = ArgUtil.parseAsEnumT(attchment.getType(), FileType.class);
+					if (ArgUtil.is(attachmentType)) {
+						inboxMessage.setFormatType(attachmentType.toString().toLowerCase());
+						inboxMessage.attachment(new Attachment().mediaURL(attchment.getPayload().getUrl())
+								.mediaType(attachmentType).mediaSrc(attchment.getPayload().getUrl()));
+					} else if ("fallback".equals(attchment.getType())) {
+						inboxMessage.attachment(new Attachment().mediaURL(attchment.getPayload().getUrl())
+								.mediaCaption(attchment.getPayload().getTitle())
+								.mediaSrc(attchment.getPayload().getUrl()).mediaType(FileType.URL)
+								.mediaSubType(attchment.getType()));
+					}
+				}
+			}
+			// Extract Message Details
+			inboxMessage.setMessageIdExt(m.getMessage().getMid());
+			inboxMessage.setMessage(m.getMessage().getText());
+
+			MapModel qr = m.getMessage().getQuickReply();
+			if (ArgUtil.is(qr)) {
+				inboxMessage.form().put("reply_id", qr.getString("payload"));
+				inboxMessage.form().put("reply_title", m.getMessage().getText());
+			}
+
+			MapModel rt = m.getMessage().getReplyTo();
+			if (ArgUtil.is(rt)) {
+				inboxMessage.setReplyIdExt(rt.getString("mid"));
+			}
+		} else if (ArgUtil.is(m.getPostBack()) && ArgUtil.is(m.getPostBack().getTitle())) {
+			inboxMessage.setMessageIdExt(m.getPostBack().getMid());
+			inboxMessage.setMessage(m.getPostBack().getTitle());
+			inboxMessage.form().put("reply_id", m.getPostBack().getPayload());
+			inboxMessage.form().put("reply_title", m.getPostBack().getTitle());
+		}
+
+		return inboxMessage;
+	}
+
+	private MessageReport toMessageReport(FacebookMessaging m, ChannelConfig channelConfig) {
+		MessageReport report = this.createMessageReport(channelConfig);
+		String csid = m.getSender().get("id");
+		report.contact().setCsid(csid);
+		report.setChangeStamp(m.getTimestamp());
+		if (ArgUtil.is(m.getRead())) {
+			report.setChangeStamp(m.getReadWatermark());
+			report.setStatus(Status.READ);
+		}
+		return report;
+	}
+
+	@Override
+	public MessageBoxEvent inboundMessageBoxEvent(ChannelConfig channelConfig, MapModel requestMap,
+			MessageBoxEvent messageBoxEvent) {
+		FacebookHookRequest request = requestMap.as(FacebookHookRequest.class);
+		request.getEntry().forEach(pageEntry -> {
+			pageEntry.getMessaging().forEach(m -> {
+				if (ArgUtil.is(m.getMessage()) || ArgUtil.is(m.getPostBack())) {
+					messageBoxEvent.addInboxMessage(toInboxMessage(m, channelConfig));
+				} else if (ArgUtil.is(m.getRead())) {
+					messageBoxEvent.addMessageReport(toMessageReport(m, channelConfig));
+				}
+			});
+		});
+		return messageBoxEvent;
+	}
 
 }

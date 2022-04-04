@@ -7,7 +7,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import com.boot.jx.common.impl.ConfigMeta;
 import com.boot.jx.common.impl.ConfigMeta.ConfigOption;
-import com.boot.jx.common.impl.ConfigMeta.OPTIONS_TYPE;
+import com.boot.jx.common.impl.ConfigMeta.INPUT_TYPE;
 import com.boot.jx.postman.PMConstants;
 import com.boot.model.MapModel.EntryMeta;
 import com.boot.utils.TimeUtils;
@@ -97,7 +97,7 @@ public class ConfigConstants {
 				.defaultValue(PMConstants.CHAT_SESSION_STICKY.NONE).group(GROUP_AGENT)),
 
 		POSTMAN_AGENT_SCHEME_COLOR(new ConfigMeta("Agent Panel Color Scheme", "postman.agent.scheme.color")
-				.inputType(OPTIONS_TYPE.COLOR).defaultValue("#4267b2").group(GROUP_AGENT)),
+				.inputType(INPUT_TYPE.COLOR).defaultValue("#4267b2").group(GROUP_AGENT)),
 
 //	POSTMAN_UI_BETA(new ConfigMeta("Enable Beta UI", "postman.ui.beta").optionsOnOff()
 //		.defaultValue(ConfigOption.OFF).group(GROUP_AGENT)),

@@ -1,6 +1,10 @@
 package com.boot.jx.common.impl;
 
 import java.io.Serializable;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -8,16 +12,16 @@ import com.boot.utils.ArgUtil;
 
 public class ConfigMeta implements Serializable {
 
-	public static enum OPTIONS_TYPE {
-		TEXT, OPTIONS, RANGE, NUMBER, COLOR, COLOR_PALLETE
+	public static enum INPUT_TYPE {
+		TEXT, OPTIONS, RANGE, NUMBER, COLOR, COLOR_PALLETE, NONE;
 	}
 
 	public static enum DATA_TYPE {
-		TIMESPAN
+		TIMESPAN, SWITCH, NONE
 	}
 
 	public static enum CONVERT_TYPE {
-		TIME_MILLIS
+		TIME_MILLIS, BOOLEAN, NONE
 	}
 
 	public static class ConfigOption {
@@ -101,7 +105,7 @@ public class ConfigMeta implements Serializable {
 	private Integer max;
 	private Integer min;
 
-	private OPTIONS_TYPE inputType;
+	private INPUT_TYPE inputType;
 	private DATA_TYPE dataType;
 	private CONVERT_TYPE converterType;
 
@@ -109,6 +113,32 @@ public class ConfigMeta implements Serializable {
 	private String optionsKey;
 	private String optionsLabel;
 	private String optionsSource;
+
+	@Target({ ElementType.FIELD })
+	@Retention(RetentionPolicy.RUNTIME)
+	public @interface ConfigMetaProperty {
+		String title() default "";
+
+		String path() default "";
+
+		boolean hidden() default false;
+
+		boolean createonly() default false;
+
+		boolean writeonly() default false;
+
+		boolean optional() default false;
+
+		boolean readonly() default false;
+
+		INPUT_TYPE inputType() default INPUT_TYPE.NONE;
+
+		DATA_TYPE dataType() default DATA_TYPE.NONE;
+
+		CONVERT_TYPE converterType() default CONVERT_TYPE.NONE;
+
+		String defaultValue() default "";
+	}
 
 	public ConfigMeta() {
 	}
@@ -144,7 +174,7 @@ public class ConfigMeta implements Serializable {
 
 	public List<ConfigOption> options() {
 		if (this.inputType == null) {
-			this.inputType = OPTIONS_TYPE.OPTIONS;
+			this.inputType = INPUT_TYPE.OPTIONS;
 		}
 		if (this.options == null) {
 			this.options = new ArrayList<ConfigOption>();
@@ -186,15 +216,15 @@ public class ConfigMeta implements Serializable {
 		return this.options(ConfigOption.ON, ConfigOption.OFF);
 	}
 
-	public OPTIONS_TYPE getInputType() {
+	public INPUT_TYPE getInputType() {
 		return inputType;
 	}
 
-	public void setInputType(OPTIONS_TYPE inputType) {
+	public void setInputType(INPUT_TYPE inputType) {
 		this.inputType = inputType;
 	}
 
-	public ConfigMeta inputType(OPTIONS_TYPE inputType) {
+	public ConfigMeta inputType(INPUT_TYPE inputType) {
 		this.inputType = inputType;
 		return this;
 	}
@@ -326,6 +356,11 @@ public class ConfigMeta implements Serializable {
 		return this;
 	}
 
+	public ConfigMeta createonly(boolean createonly) {
+		this.createonly = createonly;
+		return this;
+	}
+
 	public boolean isCreateonly() {
 		return createonly;
 	}
@@ -435,6 +470,11 @@ public class ConfigMeta implements Serializable {
 
 	public ConfigMeta min(Integer min) {
 		this.min = min;
+		return this;
+	}
+
+	public ConfigMeta writeonly(boolean writeonly) {
+		this.writeonly = writeonly;
 		return this;
 	}
 
