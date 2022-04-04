@@ -130,7 +130,7 @@ public class AccountVerifyController extends ChatController {
 			next(AlexBotConstants.KEY.SERVICE_SELECTOR);
 			break;
 		case "4":
-			assignToAgent();
+			assignToDefaultAgent();
 			break;
 		case "5":
 			send(new OutboxMessage().message("You Selected Rcpt Download"));

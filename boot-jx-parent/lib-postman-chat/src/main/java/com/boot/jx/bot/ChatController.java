@@ -6,19 +6,19 @@ import org.springframework.context.annotation.Lazy;
 import com.boot.jx.agent.AgentService;
 import com.boot.jx.chat.ChatService;
 import com.boot.jx.chat.ChatSessionService;
+import com.boot.jx.postman.PMConstants;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatPromise;
 import com.boot.jx.postman.doc.ChatPromise.PromiseCondition;
 import com.boot.jx.postman.doc.ChatPromise.Result;
 import com.boot.jx.postman.doc.ChatPromise.State;
+import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.manager.ChatSessionManager;
-import com.boot.jx.postman.model.MessageDefinitions.IMessage;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.model.PMArgs;
 import com.boot.jx.postman.model.ext.InBoundEvent;
 import com.boot.jx.postman.store.MessageContext;
 import com.boot.jx.postman.store.SessionStore;
-import com.boot.model.MapModel.NodeEntry;
 import com.boot.utils.ArgUtil;
 
 public class ChatController {
@@ -69,20 +69,6 @@ public class ChatController {
 		} else {
 			chatService.send(messageContext.contact().getDoc(), waMessage);
 		}
-	}
-
-	public NodeEntry<InBoundEvent> assignToAgent(String deptCode) {
-		IMessage inboxMessage = context().getInboxMessage();
-		PMArgs params = new PMArgs();
-		if (ArgUtil.is(inboxMessage)) {
-			params.assignToDeptCode(deptCode).contact(inboxMessage.contact()).sessionId(inboxMessage.getSessionId());
-			inboxMessage.session().setDept(deptCode);
-		}
-		return chatSessionService.assignSessionToAgent(messageContext.session().getDoc(), params);
-	}
-
-	public NodeEntry<InBoundEvent> assignToAgent() {
-		return assignToAgent(null);
 	}
 
 	public void botScore(Integer botScore) {
@@ -166,6 +152,17 @@ public class ChatController {
 
 	public void routeSession(String queueCode) {
 		chatSessionService.routeSession(messageContext.session().getDoc(), new PMArgs().assignToQueueCode(queueCode));
+	}
+
+	public void assignToAgentDepartment(String deptCode) {
+		ChatSessionDoc session = messageContext.session().getDoc();
+		chatSessionService.routeSession(messageContext.session().getDoc(),
+				new PMArgs().assignToQueueCode(PMConstants.DEFAULT.AGENT_QUEUE_CODE).assignToDeptCode(deptCode)
+						.contact(session.contact()).sessionId(session.getSessionId()));
+	}
+
+	public void assignToDefaultAgent() {
+		assignToAgentDepartment(null);
 	}
 
 	public void setMeta(String controllerName) {
