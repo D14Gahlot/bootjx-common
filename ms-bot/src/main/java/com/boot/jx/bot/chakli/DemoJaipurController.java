@@ -75,8 +75,9 @@ public class DemoJaipurController extends DefaultChakliController {
 			next("next_menu");
 			break;
 		case "ja_help":
-			reply(new OutboxMessage().template("ja_help_ans"));
-			next("next_menu");
+			//reply(new OutboxMessage().template("ja_help_ans"));
+			//next("next_menu");
+			this.commonTransferToAgent(inboxMessage, matcher);
 			break;
 		case "*":
 			this.goToMainMenu(inboxMessage, matcher);

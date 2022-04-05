@@ -74,8 +74,9 @@ public class DemoGreenskwtController extends DefaultChakliController {
 			next("next_menu");
 			break;
 		case "gr_help":
-			reply(new OutboxMessage().template("gr_help_ans"));
-			next("next_menu");
+			//reply(new OutboxMessage().template("gr_help_ans"));
+			//next("next_menu");
+			this.commonTransferToAgent(inboxMessage, matcher);
 			break;
 		case "*":
 			this.goToMainMenu(inboxMessage, matcher);

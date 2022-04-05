@@ -66,8 +66,9 @@ public class DemoDietCareBoutController extends DefaultChakliController {
 			next("next_menu");
 			break;
 		case "dcb_help":
-			reply(new OutboxMessage().template("dcb_help_ans"));
-			next("next_menu");
+			//reply(new OutboxMessage().template("dcb_help_ans"));
+			//next("next_menu");
+			this.commonTransferToAgent(inboxMessage, matcher);
 			break;
 		case "*":
 			this.goToMainMenu(inboxMessage, matcher);

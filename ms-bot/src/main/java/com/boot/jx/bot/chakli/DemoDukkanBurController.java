@@ -71,8 +71,9 @@ public class DemoDukkanBurController extends DefaultChakliController {
 			next("next_menu");
 			break;
 		case "db_help":
-			reply(new OutboxMessage().template("db_help_ans"));
-			next("next_menu");
+			//reply(new OutboxMessage().template("db_help_ans"));
+			//next("next_menu");
+			this.commonTransferToAgent(inboxMessage, matcher);
 			break;
 		case "*":
 			this.goToMainMenu(inboxMessage, matcher);

@@ -61,7 +61,6 @@ public class DefaultChakliController extends CommonBotController {
 		if (ArgUtil.is(codeValue)) {
 			codeValue = codeValue.toLowerCase().trim();
 		}
-		System.out.println("codeValue :" + codeValue);
 		return codeValue;
 	}
 

@@ -58,9 +58,12 @@ public class DemoAlMarsaController extends DefaultChakliController {
 			reply(new OutboxMessage().template("ma_new_order_ans"));
 			next("next_menu");
 			break;
+		case "ma_reservation":
+			reply(new OutboxMessage().template("ma_date_time"));
+			next("next_datetime");
+			break;
 		case "ma_edit_order":
 		case "ma_order_follow_up":
-		case "ma_reservation":
 		case "ma_edit_reservation":
 			this.commonTransferToAgent(inboxMessage, matcher);
 			break;
@@ -77,8 +80,9 @@ public class DemoAlMarsaController extends DefaultChakliController {
 			next("next_menu");
 			break;
 		case "ma_help":
-			reply(new OutboxMessage().template("ma_help_ans"));
-			next("next_menu");
+			//reply(new OutboxMessage().template("ma_help_ans"));
+			//next("next_menu");
+			this.commonTransferToAgent(inboxMessage, matcher);
 			break;
 		case "*":
 			this.goToMainMenu(inboxMessage, matcher);
@@ -127,6 +131,22 @@ public class DemoAlMarsaController extends DefaultChakliController {
 		default:
 			reply(new OutboxMessage().template("ma_question"));
 			next("select-question");
+			break;
+		}
+	}
+	
+	
+	@ChatMapping(key = "next_datetime")
+	public void specifyDateAndTime(InboxMessage inboxMessage, StringMatcher matcher) {
+		switch (toReplyEnum(inboxMessage)) {
+		case "*":
+			this.goToMainMenu(inboxMessage, matcher);
+			break;
+		case "#":
+			this.commonTransferToAgent(inboxMessage, matcher);
+			break;
+		default:
+			this.commonTransferToAgent(inboxMessage, matcher);
 			break;
 		}
 	}

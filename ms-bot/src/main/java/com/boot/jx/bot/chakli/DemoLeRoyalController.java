@@ -50,8 +50,9 @@ public class DemoLeRoyalController extends DefaultChakliController {
 		checkValue("lr_question", toReplyEnum(inboxMessage));
 		switch (toReplyEnum(inboxMessage)) {
 		case "lr_hotel_room":
-			reply(new OutboxMessage().template("lr_hotel_room_ans"));
-			next("next_menu");
+			//reply(new OutboxMessage().template("lr_hotel_room_ans"));
+			//next("next_menu");
+			this.transferToAgent(inboxMessage, matcher);
 			break;
 		case "lr_reserv":
 			reply(new OutboxMessage().template("lr_reserv_ans"));
@@ -69,8 +70,9 @@ public class DemoLeRoyalController extends DefaultChakliController {
 			next("next_menu");
 			break;
 		case "lr_help":
-			reply(new OutboxMessage().template("lr_help_ans"));
-			next("next_menu");
+			//reply(new OutboxMessage().template("lr_help_ans"));
+			//next("next_menu");
+			this.commonTransferToAgent(inboxMessage, matcher);
 			break;
 		case "*":
 			this.goToMainMenu(inboxMessage, matcher);

@@ -53,9 +53,12 @@ public class DemoJihanController extends DefaultChakliController {
 			reply(new OutboxMessage().template("jd_new_order_ans"));
 			next("next_menu");
 			break;
+		case "jd_reserv":	
+			reply(new OutboxMessage().template("jd_date_time"));
+			next("next_datetime");
+			break;
 		case "jd_edit_order":
 		case "jd_ord_follow_up":
-		case "jd_reserv":
 		case "jd_edit_reserv":
 			this.transferToAgent(inboxMessage, matcher);
 			break;
@@ -72,8 +75,9 @@ public class DemoJihanController extends DefaultChakliController {
 			next("next_menu");
 			break;
 		case "jd_help":
-			reply(new OutboxMessage().template("jd_help_ans"));
-			next("next_menu");
+			//reply(new OutboxMessage().template("jd_help_ans"));
+			//next("next_menu");
+			this.commonTransferToAgent(inboxMessage, matcher);
 			break;
 		case "*":
 			this.goToMainMenu(inboxMessage, matcher);
@@ -131,4 +135,19 @@ public class DemoJihanController extends DefaultChakliController {
 		}
 	}
 
+	@ChatMapping(key = "next_datetime")
+	public void specifyDateAndTime(InboxMessage inboxMessage, StringMatcher matcher) {
+		switch (toReplyEnum(inboxMessage)) {
+		case "*":
+			this.goToMainMenu(inboxMessage, matcher);
+			break;
+		case "#":
+			this.commonTransferToAgent(inboxMessage, matcher);
+			break;
+		default:
+			this.commonTransferToAgent(inboxMessage, matcher);
+			break;
+		}
+	}
+	
 }
