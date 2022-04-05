@@ -40,10 +40,11 @@ public class PMConstants {
 		public static final String WA_360D = "wa360";
 		public static final String WEB = "web";
 		public static final String INSTAGRAM = "ig";
+		public static final String EMAIL = "mailto";
 	}
 
 	public enum CHANNEL_TYPE_ENUM {
-		tg, tw, fb, wags, wa360, web, ig
+		tg, tw, fb, wags, wa360, web, ig, mailto
 	}
 
 	public static enum CHAT_STATUS {

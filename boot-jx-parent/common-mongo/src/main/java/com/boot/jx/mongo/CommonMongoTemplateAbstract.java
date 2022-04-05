@@ -196,11 +196,15 @@ public class CommonMongoTemplateAbstract extends CommonMongoTemplateDefault {
 		mongoTemplate.save(oldDocumentArchived, collectionName);
 	}
 
-	public void log(Object oldDocument, String comment) {
+	public void log(Object oldDocument, String activity, String comment) {
 		String collectionName = mongoTemplate.getCollectionName(oldDocument.getClass());
 		AuditActivityDoc oldDocumentArchived = new AuditActivityDoc().collection(collectionName).doc(oldDocument)
-				.comment(comment);
+				.activity(activity).comment(comment);
 		auditDetailProvider.auditCreate(oldDocumentArchived);
 		mongoTemplate.save(oldDocumentArchived, "ZACTIVITY_LOGS");
+	}
+
+	public void log(Object oldDocument, String activity) {
+		this.log(oldDocument, activity, null);
 	}
 }

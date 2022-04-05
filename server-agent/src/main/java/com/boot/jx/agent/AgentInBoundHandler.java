@@ -23,91 +23,91 @@ import com.boot.utils.ArgUtil;
 @Component
 public class AgentInBoundHandler extends DefaultChatBoundHandler {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AgentInBoundHandler.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(AgentInBoundHandler.class);
 
-    @Autowired
-    private PMEnvironment pmEnvironment;
+	@Autowired
+	private PMEnvironment pmEnvironment;
 
-    @Autowired
-    private AgentChatHandler agentChatHandler;
+	@Autowired
+	private AgentChatHandler agentChatHandler;
 
-    @Autowired(required = false)
-    private ChatService chatService;
+	@Autowired(required = false)
+	private ChatService chatService;
 
-    // @Autowired
-    protected SessionAssginHandler sessionAssginHandler;
+	// @Autowired
+	protected SessionAssginHandler sessionAssginHandler;
 
-    @Autowired
-    private SessionStore sessionStore;
+	@Autowired
+	private SessionStore sessionStore;
 
-    /**
-     * EVENTS
-     */
-    @Override
-    public void onMessage(InboxMessage inboxMessage, ChatSessionDoc session) {
-	if (ArgUtil.isEmpty(inboxMessage.session().getMode()) && ArgUtil.isEmpty(inboxMessage.session().getQueue())) {
-	    if (!ArgUtil.is(session)) {
-		session = sessionStore.getSession(inboxMessage.getSessionId());
-	    }
-	    // InBoundEvent assignEvent = assignSessionToAgent(session, null, null).value();
-	}
-	agentChatHandler.onMessageReceive(inboxMessage);
-    }
-
-    private void onAssign(ChatSessionDoc session, InBoundEvent assignEvent) {
-	try {
-
-	    if (!ArgUtil.is(assignEvent.sessionAssigned().oldAgent)) {
-		if (ArgUtil.is(assignEvent.sessionAssigned().newAgent)) {
-		    PMConfigurationObject transferReply = pmEnvironment
-			    .keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_AGENT_CHAT_AUTOREPLY_TALK2AGENT);
-		    if (transferReply.exists()) {
-			chatService.reply(session, new OutboxMessage().template(transferReply.asString()));
-		    } else {
-			chatService.reply(session, new OutboxMessage()
-				.message("Connecting you to one of our customer representatives. Give us a moment."));
-		    }
-		} else {
-		    PMConfigurationObject noAgentReply = pmEnvironment
-			    .keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_AGENT_CHAT_AUTOREPLY_NOAGENT);
-		    if (noAgentReply.exists()) {
-			chatService.reply(session, new OutboxMessage().template(noAgentReply.asString()));
-		    } else {
-			chatService.reply(session, new OutboxMessage().message(
-				"All agents are busy or online, we will connect you whenever someone is available."));
-		    }
+	/**
+	 * EVENTS
+	 */
+	@Override
+	public void onMessage(InboxMessage inboxMessage, ChatSessionDoc session) {
+		if (ArgUtil.isEmpty(inboxMessage.session().getMode()) && ArgUtil.isEmpty(inboxMessage.session().getQueue())) {
+			if (!ArgUtil.is(session)) {
+				session = sessionStore.getSession(inboxMessage.getSessionId());
+			}
+			// InBoundEvent assignEvent = assignSessionToAgent(session, null, null).value();
 		}
-
-	    }
-
-	} catch (Exception e) {
-	    LOGGER.error("Error ONE while Connecting to Agent", e);
-	    try {
-		chatService.reply(session, new OutboxMessage().message(
-			"We are having some issues trying connect you to one of our customer representatives. Please be patient"));
-	    } catch (InterruptedException e1) {
-		LOGGER.error("Error TWO  while Sending Failure", e1);
-	    }
+		agentChatHandler.onMessageReceive(inboxMessage);
 	}
-    }
 
-    /**
-     * METHODS/ACTION
-     */
-    @Override
-    public NodeEntry<InBoundEvent> assignSessionToAgent(PMArgs params, ChatSessionDoc session) {
-	NodeEntry<InBoundEvent> eventEntry = new NodeEntry<InBoundEvent>();
-	InBoundEvent agentAssignEvent = new InBoundEvent();
-	agentAssignEvent.eventCode = InBoundEvent.SESSION_ASSIGNED;
-	agentAssignEvent.sessionAssigned().oldAgent = session.getAssignedToAgent();
-	agentAssignEvent.sessionAssigned().oldDept = session.getAssignedToDept();
-	params = agentChatHandler.doAssign(session, params);
-	if (ArgUtil.is(params)) {
-	    agentAssignEvent.sessionAssigned().newDept = params.getAssignToDeptCode();
-	    agentAssignEvent.sessionAssigned().newAgent = params.getAssignToAgentCode();
+	private void onAssign(ChatSessionDoc session, InBoundEvent assignEvent) {
+		try {
+
+			if (!ArgUtil.is(assignEvent.sessionAssigned().oldAgent)) {
+				if (ArgUtil.is(assignEvent.sessionAssigned().newAgent)) {
+					PMConfigurationObject transferReply = pmEnvironment
+							.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_AGENT_CHAT_AUTOREPLY_TALK2AGENT);
+					if (transferReply.exists()) {
+						chatService.reply(session, new OutboxMessage().template(transferReply.asString()));
+					} else {
+						chatService.reply(session, new OutboxMessage()
+								.message("Connecting you to one of our customer representatives. Give us a moment."));
+					}
+				} else {
+					PMConfigurationObject noAgentReply = pmEnvironment
+							.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_AGENT_CHAT_AUTOREPLY_NOAGENT);
+					if (noAgentReply.exists()) {
+						chatService.reply(session, new OutboxMessage().template(noAgentReply.asString()));
+					} else {
+						chatService.reply(session, new OutboxMessage().message(
+								"All agents are busy or online, we will connect you whenever someone is available."));
+					}
+				}
+
+			}
+
+		} catch (Exception e) {
+			LOGGER.error("Error ONE while Connecting to Agent", e);
+			try {
+				chatService.reply(session, new OutboxMessage().message(
+						"We are having some issues trying connect you to one of our customer representatives. Please be patient"));
+			} catch (InterruptedException e1) {
+				LOGGER.error("Error TWO  while Sending Failure", e1);
+			}
+		}
 	}
-	onAssign(session, agentAssignEvent);
-	return eventEntry.value(agentAssignEvent);
-    }
+
+	/**
+	 * METHODS/ACTION
+	 */
+	@Override
+	public NodeEntry<InBoundEvent> assignSessionToAgent(PMArgs params, ChatSessionDoc session) {
+		NodeEntry<InBoundEvent> eventEntry = new NodeEntry<InBoundEvent>();
+		InBoundEvent agentAssignEvent = new InBoundEvent();
+		agentAssignEvent.eventCode = InBoundEvent.SESSION_ASSIGNED;
+		agentAssignEvent.sessionAssigned().oldAgent = session.getAssignedToAgent();
+		agentAssignEvent.sessionAssigned().oldDept = session.getAssignedToDept();
+		params = agentChatHandler.doAssign(session, params);
+		if (ArgUtil.is(params)) {
+			agentAssignEvent.sessionAssigned().newDept = params.getAssignToDeptCode();
+			agentAssignEvent.sessionAssigned().newAgent = params.getAssignToAgentCode();
+		}
+		onAssign(session, agentAssignEvent);
+		return eventEntry.value(agentAssignEvent);
+	}
 
 }

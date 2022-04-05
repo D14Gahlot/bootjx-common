@@ -139,6 +139,7 @@ public class CommonDocInterfaces {
 		private String createdBy;
 		private Long createdStamp;
 		private String collection;
+		private String activity;
 		private String comment;
 
 		public String getId() {
@@ -204,6 +205,18 @@ public class CommonDocInterfaces {
 			return this;
 		}
 
+		public String getActivity() {
+			return activity;
+		}
+
+		public void setActivity(String activity) {
+			this.activity = activity;
+		}
+
+		public AuditActivityDoc activity(String activity) {
+			this.activity = activity;
+			return this;
+		}
 	}
 
 	public static class BasicDocument<T extends BasicDocument<T>>
