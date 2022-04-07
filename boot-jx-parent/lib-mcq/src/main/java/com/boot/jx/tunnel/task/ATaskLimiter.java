@@ -29,163 +29,187 @@ import com.boot.utils.ClazzUtil;
 
 public abstract class ATaskLimiter implements ITaskLimiter {
 
-    private static final String TUNNE_LIMITER_MAP = "task-limiter-map2-";
-    private static final String TUNNE_LIMITER_Q = "task-limiter-q2-";
-    Logger logger = LoggerService.getLogger(ATaskLimiter.class);
-    public static final int POLL_INTERVAL = 1 * 1000;
+	private static final String TUNNE_LIMITER_MAP = "task-limiter-map2-";
+	private static final String TUNNE_LIMITER_Q = "task-limiter-q2-";
+	Logger logger = LoggerService.getLogger(ATaskLimiter.class);
+	public static final int POLL_INTERVAL = 1 * 1000;
 
-    LocalCachedMapOptions<String, TunnelMessage<TunnelTask>> localCacheOptions = LocalCachedMapOptions
-	    .<String, TunnelMessage<TunnelTask>>defaults().evictionPolicy(EvictionPolicy.NONE).cacheSize(5000)
-	    .reconnectionStrategy(ReconnectionStrategy.NONE).syncStrategy(SyncStrategy.INVALIDATE).timeToLive(10000)
-	    .maxIdle(10000);
+	LocalCachedMapOptions<String, TunnelMessage<TunnelTask>> localCacheOptions = LocalCachedMapOptions
+			.<String, TunnelMessage<TunnelTask>>defaults().evictionPolicy(EvictionPolicy.NONE).cacheSize(5000)
+			.reconnectionStrategy(ReconnectionStrategy.NONE).syncStrategy(SyncStrategy.INVALIDATE).timeToLive(10000)
+			.maxIdle(10000);
 
-    @Autowired(required = false)
-    RedissonClient redisson;
+	@Autowired(required = false)
+	RedissonClient redisson;
 
-    @Autowired
-    TunnelService tunnelService;
+	@Autowired
+	TunnelService tunnelService;
 
-    private String taskLimiterName;
+	private String taskLimiterName;
 
-    @Override
-    public String getName() {
-	if (this.taskLimiterName == null) {
-	    this.taskLimiterName = ClazzUtil.getUltimateClassName(this) + "V5";
-	}
-	return this.taskLimiterName;
-    }
-
-    private RLocalCachedMap<String, TunnelMessage<TunnelTask>> cache;
-    private RQueue<TaskInfo> queue;
-    private RQueue<TaskInfo> queue2;
-    private RQueue<TaskInfo> queue3;
-    private RQueue<TaskInfo> queue4;
-    private RQueue<TaskInfo> queue5;
-
-    private RLocalCachedMap<String, TunnelMessage<TunnelTask>> getCache() {
-	if (cache == null) {
-	    cache = redisson.getLocalCachedMap(AppParam.APP_ENV.getValue() + TUNNE_LIMITER_MAP + this.getName(),
-		    localCacheOptions);
-	}
-	return cache;
-    }
-
-    private RQueue<TaskInfo> getQueue(int num) {
-	switch (num) {
-	case 2:
-	    if (queue2 == null) {
-		queue2 = redisson.getQueue(AppParam.APP_ENV.getValue() + TUNNE_LIMITER_Q + "2-" + this.getName());
-	    }
-	    return queue2;
-	case 3:
-	    if (queue3 == null) {
-		queue3 = redisson.getQueue(AppParam.APP_ENV.getValue() + TUNNE_LIMITER_Q + "3-" + this.getName());
-	    }
-	    return queue3;
-	case 4:
-	    if (queue4 == null) {
-		queue4 = redisson.getQueue(AppParam.APP_ENV.getValue() + TUNNE_LIMITER_Q + "4-" + this.getName());
-	    }
-	    return queue4;
-	case 5:
-	    if (queue5 == null) {
-		queue5 = redisson.getQueue(AppParam.APP_ENV.getValue() + TUNNE_LIMITER_Q + "5-" + this.getName());
-	    }
-	    return queue5;
-	default:
-	    if (queue == null) {
-		queue = redisson.getQueue(AppParam.APP_ENV.getValue() + TUNNE_LIMITER_Q + this.getName());
-	    }
-	    return queue;
-	}
-    }
-
-    @Override
-    public Map<String, Object> getStats() {
-	Map<String, Object> propMap = new HashMap<String, Object>();
-	propMap.put("q1", getQueue(1).size());
-	propMap.put("q2", getQueue(2).size());
-	propMap.put("q3", getQueue(3).size());
-	propMap.put("q4", getQueue(4).size());
-	propMap.put("q5", getQueue(5).size());
-	return propMap;
-    }
-
-    public void doTask(int pollQNum, int pushQNum, int batchSize) {
-	if (!ArgUtil.is(this.getName())) {
-	    return;
-	}
-	if (redisson == null) {
-	    return;
-	}
-
-	RQueue<TaskInfo> limiterPollQ = getQueue(pollQNum);
-	// logger.info("{} Q-{} S-{} "
-	// ,this.eventClassName,pollQNum,limiterPollQ.size());
-
-	for (int i = 0; i < batchSize; i++) {
-	    TaskInfo info = limiterPollQ.poll();
-	    if (ArgUtil.is(info)) {
-
-		long matureCutoffStamp = System.currentTimeMillis() - info.getInterval();
-
-		if (info.getTimestamp() <= matureCutoffStamp) {
-		    RLocalCachedMap<String, TunnelMessage<TunnelTask>> cache = getCache();
-		    try {
-			TunnelMessage<TunnelTask> latest = cache.get(info.getKey());
-			if (ArgUtil.is(latest)) {
-			    // logger.info("x {} {} {}", x.getTopic(), info.getThrottleKey(),
-			    // x.getTimestamp());
-			    if ((latest.getTimestamp() <= matureCutoffStamp)) {
-				AppContextUtil.setContext(latest.getContext());
-				AppContextUtil.init();
-				try {
-				    this.doTask(latest.getData());
-				} catch (Exception e) {
-				    logger.error("LIMITER TASK EXCEPTION:" + info.getInterval(), e);
-				}
-				logger.debug("Q:{}, Bi:{} T:{} Tk:{}", pollQNum, i, latest.getTopic(), info.getKey());
-				AppContextUtil.clear();
-				cache.fastRemove(info.getKey());
-			    }
-			}
-		    } catch (Exception e) {
-			logger.error("LIMITER EXCEPTION:" + info.getKey(), e);
-		    }
-
-		} else {
-		    getQueue(pushQNum).add(info);
+	@Override
+	public String getName() {
+		if (this.taskLimiterName == null) {
+			this.taskLimiterName = ClazzUtil.getUltimateClassName(this) + "V5";
 		}
-	    } else {
-		break;
-	    }
+		return this.taskLimiterName;
 	}
-    }
 
-    public abstract void doTask(TunnelTask Task);
+	private RLocalCachedMap<String, TunnelMessage<TunnelTask>> cache;
+	private RQueue<TaskInfo> queue;
+	private RQueue<TaskInfo> queue2;
+	private RQueue<TaskInfo> queue3;
+	private RQueue<TaskInfo> queue4;
+	private RQueue<TaskInfo> queue5;
 
-    @Async
-    public void debounce(TunnelTask task) {
-	if (redisson == null) {
-	    throw new AmxException("No Redisson Avaialble");
+	private RLocalCachedMap<String, TunnelMessage<TunnelTask>> getCache() {
+		if (cache == null) {
+			cache = redisson.getLocalCachedMap(AppParam.APP_ENV.getValue() + TUNNE_LIMITER_MAP + this.getName(),
+					localCacheOptions);
+		}
+		return cache;
 	}
-	// Push to Map
-	AppContext context = AppContextUtil.getContext();
-	String taskUid = String.format("%s/%s/%s", context.getTenant(), task.getName(),
-		ArgUtil.nonEmpty(task.getId(), context.getTraceId()));
 
-	TunnelMessage<TunnelTask> tunnelMessage = new TunnelMessage<TunnelTask>(task, context);
-	tunnelMessage.setTopic(task.getName());
-	RLocalCachedMap<String, TunnelMessage<TunnelTask>> cache = getCache();
-	cache.put(taskUid, tunnelMessage);
+	private RQueue<TaskInfo> getQueue(int num) {
+		switch (num) {
+		case 2:
+			if (queue2 == null) {
+				queue2 = redisson.getQueue(AppParam.APP_ENV.getValue() + TUNNE_LIMITER_Q + "2-" + this.getName());
+			}
+			return queue2;
+		case 3:
+			if (queue3 == null) {
+				queue3 = redisson.getQueue(AppParam.APP_ENV.getValue() + TUNNE_LIMITER_Q + "3-" + this.getName());
+			}
+			return queue3;
+		case 4:
+			if (queue4 == null) {
+				queue4 = redisson.getQueue(AppParam.APP_ENV.getValue() + TUNNE_LIMITER_Q + "4-" + this.getName());
+			}
+			return queue4;
+		case 5:
+			if (queue5 == null) {
+				queue5 = redisson.getQueue(AppParam.APP_ENV.getValue() + TUNNE_LIMITER_Q + "5-" + this.getName());
+			}
+			return queue5;
+		default:
+			if (queue == null) {
+				queue = redisson.getQueue(AppParam.APP_ENV.getValue() + TUNNE_LIMITER_Q + this.getName());
+			}
+			return queue;
+		}
+	}
 
-	// Push To Turn Queue
-	TaskInfo info = new TaskInfo();
-	info.setTimestamp(tunnelMessage.getTimestamp());
-	info.setInterval(task.getInterval() * 1000);
-	info.setKey(taskUid);
-	RQueue<TaskInfo> limiterQ = getQueue(1);
-	limiterQ.add(info);
-    }
+	@Override
+	public Map<String, Object> getStats() {
+		Map<String, Object> propMap = new HashMap<String, Object>();
+		propMap.put("q1", getQueue(1).size());
+		propMap.put("q2", getQueue(2).size());
+		propMap.put("q3", getQueue(3).size());
+		propMap.put("q4", getQueue(4).size());
+		propMap.put("q5", getQueue(5).size());
+		return propMap;
+	}
+
+	public void doTask(int pollQNum, int pushQNum, int batchSize) {
+		if (!ArgUtil.is(this.getName())) {
+			return;
+		}
+		if (redisson == null) {
+			return;
+		}
+
+		RQueue<TaskInfo> limiterPollQ = getQueue(pollQNum);
+		// logger.info("{} Q-{} S-{} "
+		// ,this.eventClassName,pollQNum,limiterPollQ.size());
+
+		for (int i = 0; i < batchSize; i++) {
+			TaskInfo info = limiterPollQ.poll();
+			if (ArgUtil.is(info)) {
+
+				long matureCutoffStamp = System.currentTimeMillis() - info.getInterval();
+
+				if (info.getTimestamp() <= matureCutoffStamp) {
+					RLocalCachedMap<String, TunnelMessage<TunnelTask>> cache = getCache();
+					try {
+						TunnelMessage<TunnelTask> latest = cache.get(info.getKey());
+						if (ArgUtil.is(latest)) {
+							// logger.info("x {} {} {}", x.getTopic(), info.getThrottleKey(),
+							// x.getTimestamp());
+							if ((latest.getTimestamp() <= matureCutoffStamp)) {
+								AppContextUtil.setContext(latest.getContext());
+								AppContextUtil.init();
+								try {
+									this.doTask(latest.getData());
+								} catch (Exception e) {
+									logger.error("LIMITER TASK EXCEPTION:" + info.getInterval(), e);
+								}
+								logger.debug("Q:{}, Bi:{} T:{} Tk:{}", pollQNum, i, latest.getTopic(), info.getKey());
+								AppContextUtil.clear();
+								cache.fastRemove(info.getKey());
+							}
+						}
+					} catch (Exception e) {
+						logger.error("LIMITER EXCEPTION:" + info.getKey(), e);
+					}
+
+				} else {
+					getQueue(pushQNum).add(info);
+				}
+			} else {
+				break;
+			}
+		}
+	}
+
+	public abstract void doTask(TunnelTask Task);
+
+	@Async
+	public void debounce(TunnelTask task) {
+		if (redisson == null) {
+			throw new AmxException("No Redisson Avaialble");
+		}
+		// Push to Map
+		AppContext context = AppContextUtil.getContext();
+		String taskUid = String.format("%s/%s/%s", context.getTenant(), task.getName(),
+				ArgUtil.nonEmpty(task.getId(), context.getTraceId()));
+
+		TunnelMessage<TunnelTask> tunnelMessage = new TunnelMessage<TunnelTask>(task, context);
+		tunnelMessage.setTopic(task.getName());
+		RLocalCachedMap<String, TunnelMessage<TunnelTask>> cache = getCache();
+		cache.put(taskUid, tunnelMessage);
+
+		// Push To Turn Queue
+		TaskInfo info = new TaskInfo();
+		info.setTimestamp(tunnelMessage.getTimestamp());
+		info.setInterval(task.getInterval() * 1000);
+		info.setKey(taskUid);
+		RQueue<TaskInfo> limiterQ = getQueue(1);
+		limiterQ.add(info);
+	}
+
+	@Async
+	public void throttle(TunnelTask task) {
+		if (redisson == null) {
+			throw new AmxException("No Redisson Avaialble");
+		}
+		// Push to Map
+		AppContext context = AppContextUtil.getContext();
+		String taskUid = String.format("%s/%s/%s", context.getTenant(), task.getName(),
+				ArgUtil.nonEmpty(task.getId(), context.getTraceId()));
+
+		TunnelMessage<TunnelTask> tunnelMessage = new TunnelMessage<TunnelTask>(task, context);
+		tunnelMessage.setTopic(task.getName());
+		RLocalCachedMap<String, TunnelMessage<TunnelTask>> cache = getCache();
+		cache.put(taskUid, tunnelMessage);
+
+		// Push To Turn Queue
+		TaskInfo info = new TaskInfo();
+		info.setTimestamp(tunnelMessage.getTimestamp());
+		info.setInterval(task.getInterval() * 1000);
+		info.setKey(taskUid);
+		RQueue<TaskInfo> limiterQ = getQueue(1);
+		limiterQ.add(info);
+	}
 
 }

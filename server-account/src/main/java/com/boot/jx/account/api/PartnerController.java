@@ -1,14 +1,18 @@
 package com.boot.jx.account.api;
 
 import java.security.NoSuchAlgorithmException;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
+import org.apache.commons.collections.functors.WhileClosure;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
@@ -46,7 +50,6 @@ import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PMEnvironment.PMCommonConfig;
 import com.boot.jx.scope.tnt.Tenants;
 import com.boot.utils.ArgUtil;
-import com.boot.utils.CollectionUtil;
 import com.boot.utils.CryptoUtil;
 import com.boot.utils.JsonUtil;
 
@@ -89,7 +92,7 @@ public class PartnerController {
 		Authentication auth = AccountAuthService.getAuthentication();
 		if (ArgUtil.is(auth) && ArgUtil.is(adminSessionBean.domainUser())) {
 			model.addAttribute("APP_USER", auth.getName());
-			model.addAttribute("APP_USER_NAME", adminSessionBean.domainUser().getContact().getName());
+			model.addAttribute("APP_USER_NAME", adminSessionBean.domainUser().contact().getName());
 			model.addAttribute("APP_USER_ROLE", JsonUtil.toJson(adminSessionBean.getRole()));
 		} else {
 			model.addAttribute("APP_USER", "");
@@ -135,7 +138,12 @@ public class PartnerController {
 	@RequestMapping(value = { "/pub/register" }, method = { RequestMethod.POST })
 	public ApiResponse<Object, Object> register(Model model, HttpServletRequest request,
 			HttpServletResponse httpServletResponse, @RequestBody @Valid SignupContact signupContact) {
+		createUser(signupContact);
+//Customer registers on our website
+		return ApiResponse.build().message("Verification email sent");
+	}
 
+	private BusinessUserDoc createUser(SignupContact signupContact) {
 		BusinessUserDoc account = accountStore.findOneByEmail(signupContact.getEmail(), BusinessUserDoc.class);
 		if (ArgUtil.is(account)) {
 			ApiResponseUtil.throwDuplicateInputException("Email address already in use. Try reset password.",
@@ -153,8 +161,7 @@ public class PartnerController {
 		accountStore.save(account);
 		sessionService.sendResetMail(account, "tenant-verify-email");
 		sessionService.sendMailToSalesTeam(account, "new-customer-register-email");
-//Customer registers on our website
-		return ApiResponse.build().message("Verification email sent");
+		return account;
 	}
 
 	@ResponseBody
@@ -250,7 +257,7 @@ public class PartnerController {
 	}
 
 	@ResponseBody
-	@RequestMapping(value = { "/api/domain"}, method = { RequestMethod.GET })
+	@RequestMapping(value = { "/api/domain" }, method = { RequestMethod.GET })
 	public ApiResponse<DomainDoc, Object> getDomain() {
 		BusinessUserDoc domainUser = adminSessionBean.domainUser();
 
@@ -264,7 +271,10 @@ public class PartnerController {
 
 		if (ArgUtil.is(domainDocs)) {
 			for (DomainDoc domainDoc : domainDocs) { // DomainDoc domainDoc =
-				CollectionUtil.first(domainUser.getDomains());
+				if (ArgUtil.isEmpty(domainDoc.getPrimaryOwner())) {
+					domainDoc.setPrimaryOwner(domainUser.contact().getEmail());
+					accountStore.save(domainDoc);
+				}
 				domainDoc = defaultDomain(domainUser, domainDoc);
 				resp.addResult(domainDoc);
 			}
@@ -284,19 +294,19 @@ public class PartnerController {
 			domainDoc.setCompany(new CompanyDoc());
 		}
 		if (!ArgUtil.is(domainDoc.getCompany().getEmail())) {
-			domainDoc.getCompany().setEmail(new PBEmail().email(domainUser.getContact().getEmail()));
+			domainDoc.getCompany().setEmail(new PBEmail().email(domainUser.contact().getEmail()));
 		}
 
 		if (!ArgUtil.is(domainDoc.getCompany().getPhone())) {
-			domainDoc.getCompany().setPhone(new PBPhone().phone(domainUser.getContact().getPhone()));
+			domainDoc.getCompany().setPhone(new PBPhone().phone(domainUser.contact().getPhone()));
 		}
 
 		if (!ArgUtil.is(domainDoc.getCompany().getBusinessName())) {
-			domainDoc.getCompany().setBusinessName(domainUser.getContact().getCompany());
+			domainDoc.getCompany().setBusinessName(domainUser.contact().getCompany());
 		}
 
 		if (!ArgUtil.is(domainDoc.getCompany().getAddress())) {
-			domainDoc.getCompany().setAddress(new PBAddress().country(domainUser.getContact().getCountry()));
+			domainDoc.getCompany().setAddress(new PBAddress().country(domainUser.contact().getCountry()));
 		}
 		return domainDoc;
 	}
@@ -343,8 +353,11 @@ public class PartnerController {
 	@ResponseBody
 	@RequestMapping(value = { "/api/domain/user" }, method = { RequestMethod.POST })
 	public ApiResponse<Object, Object> domainUser(Model model, HttpServletRequest request,
-			HttpServletResponse httpServletResponse, @RequestParam String email, @RequestParam String domain)
-			throws NoSuchAlgorithmException {
+			HttpServletResponse httpServletResponse, @RequestParam String email, @RequestParam String domain,
+			@RequestParam(required = false, defaultValue = "false") boolean remove,
+			@RequestParam(required = false) String name, @RequestParam(required = false) String company
+
+	) throws NoSuchAlgorithmException {
 
 		BusinessUserDoc domainUser = adminSessionBean.domainUser();
 
@@ -359,16 +372,65 @@ public class PartnerController {
 			ApiResponseUtil.throwInputException(
 					new ApiFieldError().field("domain").codeKey("ValidDomainNotFound").description("Domain Not found"));
 		}
+
 		BusinessUserDoc account = accountStore.findOneByEmail(email, BusinessUserDoc.class);
+		if (!ArgUtil.is(account) && ArgUtil.is(email)) {
+			SignupContact newUser = new SignupContact();
+			newUser.setEmail(email);
+			newUser.setCountry(domainUser.contact().getCountry());
+			newUser.setName(name);
+			newUser.setCompany(company);
+			account = createUser(newUser);
+		}
 		if (!ArgUtil.is(account)) {
 			ApiResponseUtil.throwInputException(new ApiFieldError().field("email").codeKey("ValidAccountNotFound")
 					.description("No Account with email."));
 		}
 
-		account.domains().add(domaiNational.get());
-		accountStore.save(account);
-		return ApiResponse.build().message("Account Mapped");
+		if (remove) {
+			if (ArgUtil.isEqual(domaiNational.get().getPrimaryOwner(), email)) {
+				ApiResponseUtil.throwInputException(new ApiFieldError().field("email").codeKey("ValidAccountNotFound")
+						.description("Cannot Remove Primary Owner"));
+			}
+			List<BusinessUserDoc> domainUsers = accountStore.findAllUsersByDomainId(domaiNational.get().getId());
+			if (domainUsers.size() == 1) {
+				ApiResponseUtil.throwInputException(new ApiFieldError().field("email").codeKey("ValidAccountNotFound")
+						.description("Cannot Remove Primary Owner"));
+			}
+			Optional<DomainDoc> domainFound = account.domains().stream().filter(d -> d.getDomain().equals(domain))
+					.findFirst();
+			account.domains().remove(domainFound.get());
 
+			accountStore.save(account);
+			return ApiResponse.build().message("Owner Removed");
+		} else {
+			account.domains().add(domaiNational.get());
+			accountStore.save(account);
+			return ApiResponse.build().message("Owner Mapped");
+		}
+
+	}
+
+	@ResponseBody
+	@RequestMapping(value = { "/api/domain/users" }, method = { RequestMethod.GET })
+	public ApiResponse<Object, Object> domainUserGet(Model model, HttpServletRequest request,
+			HttpServletResponse httpServletResponse, @RequestParam String domain) throws NoSuchAlgorithmException {
+		BusinessUserDoc domainUser = adminSessionBean.domainUser();
+
+		if (!ArgUtil.is(domainUser.getDomains())) {
+			ApiResponseUtil.throwInputException(
+					new ApiFieldError().field("domain").codeKey("ValidDomainNotFound").description("Domain Not found"));
+		}
+
+		Optional<DomainDoc> domaiNational = domainUser.getDomains().stream().filter(d -> d.getDomain().equals(domain))
+				.findFirst();
+		if (!domaiNational.isPresent() || !domaiNational.get().getDomain().equals(domain)) {
+			ApiResponseUtil.throwInputException(
+					new ApiFieldError().field("domain").codeKey("ValidDomainNotFound").description("Domain Not found"));
+		}
+		List<BusinessUserDoc> domainUsers = accountStore.findAllUsersByDomainId(domaiNational.get().getId());
+
+		return ApiResponse.build().results(domainUsers.stream().map(u -> u.toDTO()).collect(Collectors.toList()));
 	}
 
 	@Autowired

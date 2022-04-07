@@ -2,6 +2,7 @@ package com.boot.jx.account.doc;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -13,6 +14,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import com.boot.jx.model.AuditCreateEntity;
 import com.boot.jx.mongo.CommonDocInterfaces.DocVersion;
 import com.boot.jx.mongo.CommonDocInterfaces.IDocument;
+import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
 
 @Document(collection = "DOMAIN_USER")
@@ -80,6 +82,13 @@ public class BusinessUserDoc implements IDocument, DocVersion, AuditCreateEntity
 
 	public void setContact(SignupContact contact) {
 		this.contact = contact;
+	}
+
+	public SignupContact contact() {
+		if (this.contact == null) {
+			this.contact = new SignupContact();
+		}
+		return contact;
 	}
 
 	public Boolean getIsActive() {
@@ -150,11 +159,13 @@ public class BusinessUserDoc implements IDocument, DocVersion, AuditCreateEntity
 			this.domains = new TreeSet<DomainDoc>();
 		}
 		return this.domainLicense;
-
 	}
 
 	public void setDomainLicense(Set<DomainLicenseDoc> domainLicense) {
 		this.domainLicense = domainLicense;
 	}
 
+	public Map<String, Object> toDTO() {
+		return MapModel.createInstance().put("contact", this.contact).put("role", this.role).toMap();
+	}
 }

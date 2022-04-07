@@ -16,109 +16,111 @@ import com.boot.utils.Constants;
 @TypeAlias("DomainDoc")
 public class DomainDoc implements IDocument, AuditCreateEntity, Serializable, Comparable<DomainDoc> {
 
-    private static final long serialVersionUID = -3354844112176554561L;
+	private static final long serialVersionUID = -3354844112176554561L;
 
-    @Id
-    private String id;
+	@Id
+	private String id;
 
-    @ValidAlphaNum
-    private String domain;
-    private String primaryManager;
+	@ValidAlphaNum
+	private String domain;
+	private String primaryOwner;
 
-    private CompanyDoc company;
-    private SocialDoc social;
+	private CompanyDoc company;
+	private SocialDoc social;
 
-    private Long createdStamp;
-    private String createdBy;
-    private Long modifiedStamp;
-    private String modifiedBy;
-    private Boolean isActive;
-   
+	private Long createdStamp;
+	private String createdBy;
+	private Long modifiedStamp;
+	private String modifiedBy;
+	private Boolean isActive;
 
-    public Long getCreatedStamp() {
-	return createdStamp;
-    }
+	public Long getCreatedStamp() {
+		return createdStamp;
+	}
 
-    public void setCreatedStamp(Long createdStamp) {
-	this.createdStamp = createdStamp;
-    }
+	public void setCreatedStamp(Long createdStamp) {
+		this.createdStamp = createdStamp;
+	}
 
-    public Long getModifiedStamp() {
-	return modifiedStamp;
-    }
+	public Long getModifiedStamp() {
+		return modifiedStamp;
+	}
 
-    public void setModifiedStamp(Long modifiedStamp) {
-	this.modifiedStamp = modifiedStamp;
-    }
+	public void setModifiedStamp(Long modifiedStamp) {
+		this.modifiedStamp = modifiedStamp;
+	}
 
-    public String getId() {
-	return id;
-    }
+	public String getId() {
+		return id;
+	}
 
-    public void setId(String id) {
-	this.id = id;
-    }
+	public void setId(String id) {
+		this.id = id;
+	}
 
-    public Boolean getIsActive() {
-	return isActive;
-    }
+	public Boolean getIsActive() {
+		return isActive;
+	}
 
-    public void setIsActive(Boolean isActive) {
-	this.isActive = isActive;
-    }
+	public void setIsActive(Boolean isActive) {
+		this.isActive = isActive;
+	}
 
-    public String getModifiedBy() {
-	return modifiedBy;
-    }
+	public String getModifiedBy() {
+		return modifiedBy;
+	}
 
-    public void setModifiedBy(String modifiedBy) {
-	this.modifiedBy = modifiedBy;
-    }
+	public void setModifiedBy(String modifiedBy) {
+		this.modifiedBy = modifiedBy;
+	}
 
-    public String getCreatedBy() {
-	return createdBy;
-    }
+	public String getCreatedBy() {
+		return createdBy;
+	}
 
-    public void setCreatedBy(String createdBy) {
-	this.createdBy = createdBy;
-    }
+	public void setCreatedBy(String createdBy) {
+		this.createdBy = createdBy;
+	}
 
-    public String getDomain() {
-	return domain;
-    }
+	public String getDomain() {
+		return domain;
+	}
 
-    public void setDomain(String domain) {
-	this.domain = domain;
-    }
+	public void setDomain(String domain) {
+		this.domain = domain;
+	}
 
-    public CompanyDoc getCompany() {
-	return company;
-    }
+	public CompanyDoc getCompany() {
+		return company;
+	}
 
-    public void setCompany(CompanyDoc company) {
-	this.company = company;
-    }
+	public void setCompany(CompanyDoc company) {
+		this.company = company;
+	}
 
-    @Override
-    public int compareTo(DomainDoc o) {
-	return ArgUtil.parseAsString(this.domain, Constants.BLANK)
-		.compareTo(ArgUtil.parseAsString(o.getDomain(), Constants.BLANK));
-    }
+	@Override
+	public int compareTo(DomainDoc o) {
+		return ArgUtil.parseAsString(this.domain, Constants.BLANK)
+				.compareTo(ArgUtil.parseAsString(o.getDomain(), Constants.BLANK));
+	}
 
-    public SocialDoc getSocial() {
-	return social;
-    }
+	public SocialDoc getSocial() {
+		return social;
+	}
 
-    public void setSocial(SocialDoc social) {
-	this.social = social;
-    }
+	public void setSocial(SocialDoc social) {
+		this.social = social;
+	}
 
-    public String getPrimaryManager() {
-	return primaryManager;
-    }
+	public String getPrimaryOwner() {
+		return primaryOwner;
+	}
 
-    public void setPrimaryManager(String primaryManager) {
-	this.primaryManager = primaryManager;
-    }
+	public void setPrimaryOwner(String primaryOwner) {
+		this.primaryOwner = primaryOwner;
+	}
 
+	public String toString() {
+		return ArgUtil.parseAsString(this.domain, Constants.BLANK);
+	}
 }
