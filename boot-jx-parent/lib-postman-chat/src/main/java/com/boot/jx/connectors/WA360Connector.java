@@ -266,7 +266,7 @@ public class WA360Connector extends AbstractConnector<WA360ConfigDetails, WA360P
 						query.setContact(reprt.contact());
 						query.setConversation(conversation);
 						query.setPricing(statusModel.keyEntry("pricing").asMap());
-						query.set("meta.toCountry", getCountryCode(reprt.contact().getCsid()));
+						query.set("meta.to_country", getCountryCode(reprt.contact().getCsid()));
 						commonMongoTemplate.upsert(query);
 					}
 				}
