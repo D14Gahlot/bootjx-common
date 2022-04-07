@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.aop.framework.AopProxyUtils;
+import org.springframework.beans.BeanUtils;
 
 import com.boot.jx.AppContextUtil;
 import com.boot.jx.common.impl.ConfigMeta;
@@ -158,10 +159,9 @@ public class ChannelPluginProvider {
 			for (Field field : clazz.getDeclaredFields()) {
 				if (field.isAnnotationPresent(ConfigMetaProperty.class)) {
 					ConfigMetaProperty annotation = field.getAnnotation(ConfigMetaProperty.class);
-
-					PropertyDescriptor pd;
-					try {
-						pd = new PropertyDescriptor(field.getName(), clazz);
+					// pd = new PropertyDescriptor(field.getName(), clazz);
+					PropertyDescriptor pd = BeanUtils.getPropertyDescriptor(clazz, field.getName());
+					if (ArgUtil.is(pd)) {
 						Method setter = pd.getWriteMethod();
 						Method getter = pd.getReadMethod();
 						Type type = field.getGenericType();
@@ -189,8 +189,6 @@ public class ChannelPluginProvider {
 						} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
 							e.printStackTrace();
 						}
-					} catch (IntrospectionException e) {
-						e.printStackTrace();
 					}
 				}
 			}
