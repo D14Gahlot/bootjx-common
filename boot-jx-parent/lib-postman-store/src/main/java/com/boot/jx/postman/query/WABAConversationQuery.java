@@ -42,4 +42,9 @@ public class WABAConversationQuery extends DocQueryBuilder<WABAConversation> {
 		this.set("pricing", pricing);
 		return this;
 	}
+
+	public WABAConversationQuery setMeta(Map<String, Object> meta) {
+		this.set("meta", meta);
+		return this;
+	}
 }

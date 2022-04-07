@@ -266,6 +266,7 @@ public class WA360Connector extends AbstractConnector<WA360ConfigDetails, WA360P
 						query.setContact(reprt.contact());
 						query.setConversation(conversation);
 						query.setPricing(statusModel.keyEntry("pricing").asMap());
+						query.set("meta.toCountry", getCountryCode(reprt.contact().getCsid()));
 						commonMongoTemplate.upsert(query);
 					}
 				}
@@ -273,6 +274,17 @@ public class WA360Connector extends AbstractConnector<WA360ConfigDetails, WA360P
 		}
 
 		return messageBoxEvent;
+	}
+
+	public String getCountryCode(String phone) {
+		String defaultRegion = environment.keyEntry("postman.phonebook.region").asString("IN");
+		PhoneNumber phoneNumber;
+		try {
+			phoneNumber = PHONE_NUMBER_UTIL.parse("+" + phone, defaultRegion);
+			return PHONE_NUMBER_UTIL.getRegionCodeForCountryCode(phoneNumber.getCountryCode());
+		} catch (NumberParseException e) {
+			return defaultRegion;
+		}
 	}
 
 	@Override
