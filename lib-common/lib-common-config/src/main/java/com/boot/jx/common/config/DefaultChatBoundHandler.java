@@ -321,7 +321,7 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 						}
 					}
 				} else if (CHAT_MODE.BOT.equals(appType.getMode())) {
-					chatClient.sessionEvent(pmCommonConfig.getBotUrl() + PATH.SESSION_EVENT, event, pmArgs);
+					chatClient.sessionEvent(pmCommonConfig.getBotUrl(), event, pmArgs);
 				}
 			}
 		}

@@ -12,16 +12,16 @@ import com.boot.utils.StringUtils.StringMatcher;
 @BotController(name = "FatherBot")
 public class DefaultChatController extends CommonBotController {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(DefaultChatController.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(DefaultChatController.class);
 
-    @ChatMapping(key = "transfer-to-agent")
-    public void transferToAgent(InboxMessage inboxMessage, StringMatcher matcher) {
-	commonTransferToAgent(inboxMessage, matcher);
-    }
+	@ChatMapping(key = "transfer-to-agent")
+	public void transferToAgent(InboxMessage inboxMessage, StringMatcher matcher) {
+		commonTransferToAgent(inboxMessage, matcher);
+	}
 
-    @ChatMapping(key = AlexBotConstants.KEY.INITIATE + "*", pattern = "^*$")
-    public void defaultHandler(InboxMessage inboxMessage, StringMatcher matcher) {
-	commonTransferToAgent(inboxMessage, matcher);
-    }
+	@ChatMapping(key = AlexBotConstants.KEY.INITIATE + "*", pattern = "^*$")
+	public void defaultHandler(InboxMessage inboxMessage, StringMatcher matcher) {
+		commonTransferToAgent(inboxMessage, matcher);
+	}
 
 }

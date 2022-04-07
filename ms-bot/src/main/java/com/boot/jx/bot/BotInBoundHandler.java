@@ -5,7 +5,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.boot.jx.chat.ChatClient.PATH;
 import com.boot.jx.common.config.DefaultChatBoundHandler;
 import com.boot.jx.postman.ClientApp;
 import com.boot.jx.postman.PMConstants.APP_TYPE;
@@ -16,8 +15,6 @@ import com.boot.jx.postman.model.MessageReport;
 import com.boot.jx.postman.model.PMArgs;
 import com.boot.jx.postman.model.ext.InBoundEvent;
 import com.boot.utils.ArgUtil;
-
-import ch.qos.logback.core.Context;
 
 @Component
 public class BotInBoundHandler extends DefaultChatBoundHandler {

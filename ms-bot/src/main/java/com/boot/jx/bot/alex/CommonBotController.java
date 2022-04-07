@@ -15,7 +15,6 @@ public class CommonBotController extends ChatController {
 	public void commonTransferToAgent(InboxMessage inboxMessage, StringMatcher matcher) {
 		try {
 			assignToDefaultAgent();
-			routeSession(PMConstants.DEFAULT.AGENT_QUEUE_CODE);
 		} catch (Exception e) {
 			reply("We are having some issues trying connect you to one of our customer representatives. Please be patient");
 			LOGGER.error("Erro while Connecting to Agent", e);

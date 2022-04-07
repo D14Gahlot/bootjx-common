@@ -23,80 +23,80 @@ import com.boot.utils.ArgUtil;
 @Component
 public class ChatClient {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ChatClient.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(ChatClient.class);
 
-    public static class PATH {
-	public static final String ASSIGN_TO_AGENT = "/int/assign/agent";
-	public static final String ASSIGN_TO_AGENT_V2 = "/int/assign/v2/agent/";
-	public static final String INBOUND_FRWRD = "/int/inbound/callback";
-	public static final String SESSION_EVENT = "/int/session/event";
-    }
-
-    @Autowired
-    private RestService restService;
-
-    @Autowired
-    private PMClientConfig chatClientConfig;
-
-    @Autowired
-    private PMCommonConfig pmCommonConfig;
-
-    public ApiResponse<InboxMessage, Object> forward(String inboundForwardUrl, InboxMessage inboxMessage) {
-	LOGGER.debug("Forwarding InboxMessage to other Service ");
-	try {
-	    if (ArgUtil.is(inboundForwardUrl)) {
-		inboxMessage.setChecksum(PostManUtil.generateCheckSum(inboxMessage));
-		return restService.ajax(inboundForwardUrl).post(inboxMessage)
-			.as(new ParameterizedTypeReference<ApiResponse<InboxMessage, Object>>() {
-			});
-	    }
-	} catch (Exception e) {
-	    throw new PostManException(e);
+	public static class PATH {
+		public static final String ASSIGN_TO_AGENT = "/int/assign/agent";
+		public static final String ASSIGN_TO_AGENT_V2 = "/int/assign/v2/agent/";
+		public static final String INBOUND_FRWRD = "/int/inbound/callback";
+		public static final String SESSION_EVENT = "/int/session/event";
 	}
-	return ApiResponse.buildResult(inboxMessage);
-    }
 
-    @Deprecated
-    public ApiResponse<InboxMessage, Object> assignToAgent(InboxMessage inboxMessage) {
-	LOGGER.debug("Assign InboxMessage Session to other Agent ");
-	if (ArgUtil.is(pmCommonConfig.getAgentUrl())) {
-	    inboxMessage.setChecksum(PostManUtil.generateCheckSum(inboxMessage));
-	    return restService.ajax(pmCommonConfig.getAgentUrl()).path(PATH.ASSIGN_TO_AGENT).post(inboxMessage)
-		    .as(new ParameterizedTypeReference<ApiResponse<InboxMessage, Object>>() {
-		    });
-	} else {
-	    return null;
+	@Autowired
+	private RestService restService;
+
+	@Autowired
+	private PMClientConfig chatClientConfig;
+
+	@Autowired
+	private PMCommonConfig pmCommonConfig;
+
+	public ApiResponse<InboxMessage, Object> forward(String inboundForwardUrl, InboxMessage inboxMessage) {
+		LOGGER.debug("Forwarding InboxMessage to other Service ");
+		try {
+			if (ArgUtil.is(inboundForwardUrl)) {
+				inboxMessage.setChecksum(PostManUtil.generateCheckSum(inboxMessage));
+				return restService.ajax(inboundForwardUrl).post(inboxMessage)
+						.as(new ParameterizedTypeReference<ApiResponse<InboxMessage, Object>>() {
+						});
+			}
+		} catch (Exception e) {
+			throw new PostManException(e);
+		}
+		return ApiResponse.buildResult(inboxMessage);
 	}
-    }
 
-    public InBoundEvent assignToAgentV2(PMArgs params) {
-	LOGGER.debug("Assign InboxMessage Session to other Agent ");
-	if (ArgUtil.is(pmCommonConfig.getAgentUrl())) {
-	    params.setChecksum(PostManUtil.generateCheckSum(params));
-	    return restService.ajax(pmCommonConfig.getAgentUrl()).path(PATH.ASSIGN_TO_AGENT_V2).post(params)
-		    .as(new ParameterizedTypeReference<InBoundEvent>() {
-		    });
-	} else {
-	    return null;
+	@Deprecated
+	public ApiResponse<InboxMessage, Object> assignToAgent(InboxMessage inboxMessage) {
+		LOGGER.debug("Assign InboxMessage Session to other Agent ");
+		if (ArgUtil.is(pmCommonConfig.getAgentUrl())) {
+			inboxMessage.setChecksum(PostManUtil.generateCheckSum(inboxMessage));
+			return restService.ajax(pmCommonConfig.getAgentUrl()).path(PATH.ASSIGN_TO_AGENT).post(inboxMessage)
+					.as(new ParameterizedTypeReference<ApiResponse<InboxMessage, Object>>() {
+					});
+		} else {
+			return null;
+		}
 	}
-    }
 
-    public void sessionEvent(String inboundForwardUrl, InBoundEvent event, PMArgs pmArgs) {
-	LOGGER.debug("Assign InboxMessage Session to other BotCode ");
-	event.setChecksum(PostManUtil.generateCheckSum(event));
-	pmArgs.setChecksum(PostManUtil.generateCheckSum(pmArgs));
-	restService.ajax(pmCommonConfig.getBotUrl()).path(PATH.SESSION_EVENT)
-		.post(MapModel.createInstance().put("event", event).put("pmArgs", pmArgs).toMap()).asNone();
-    }
-
-    public ChatUserProfileDTO fetchContactDetails(ChatUserProfileRequest chatUserProfileRequest) {
-	if (ArgUtil.is(chatClientConfig.getContactDetailsUrl())) {
-	    return restService.ajax(chatClientConfig.getContactDetailsUrl()).post(chatUserProfileRequest)
-		    .as(new ParameterizedTypeReference<ChatUserProfileDTO>() {
-		    });
-	} else {
-	    return null;
+	public InBoundEvent assignToAgentV2(PMArgs params) {
+		LOGGER.debug("Assign InboxMessage Session to other Agent ");
+		if (ArgUtil.is(pmCommonConfig.getAgentUrl())) {
+			params.setChecksum(PostManUtil.generateCheckSum(params));
+			return restService.ajax(pmCommonConfig.getAgentUrl()).path(PATH.ASSIGN_TO_AGENT_V2).post(params)
+					.as(new ParameterizedTypeReference<InBoundEvent>() {
+					});
+		} else {
+			return null;
+		}
 	}
-    }
+
+	public void sessionEvent(String inboundForwardUrl, InBoundEvent event, PMArgs pmArgs) {
+		LOGGER.debug("Assign InboxMessage Session to other BotCode ");
+		event.setChecksum(PostManUtil.generateCheckSum(event));
+		pmArgs.setChecksum(PostManUtil.generateCheckSum(pmArgs));
+		restService.ajax(inboundForwardUrl).path(PATH.SESSION_EVENT)
+				.post(MapModel.createInstance().put("event", event).put("pmArgs", pmArgs).toMap()).asNone();
+	}
+
+	public ChatUserProfileDTO fetchContactDetails(ChatUserProfileRequest chatUserProfileRequest) {
+		if (ArgUtil.is(chatClientConfig.getContactDetailsUrl())) {
+			return restService.ajax(chatClientConfig.getContactDetailsUrl()).post(chatUserProfileRequest)
+					.as(new ParameterizedTypeReference<ChatUserProfileDTO>() {
+					});
+		} else {
+			return null;
+		}
+	}
 
 }
