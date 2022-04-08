@@ -151,14 +151,15 @@ public class ChatController {
 	}
 
 	public void routeSession(String queueCode) {
-		chatSessionService.routeSession(messageContext.session().getDoc(), new PMArgs().assignToQueueCode(queueCode));
+		ChatSessionDoc session = messageContext.session().getDoc();
+		chatSessionService.routeSession(session,
+				new PMArgs().assignToQueueCode(queueCode).contact(session.contact()).sessionId(session.getSessionId()));
 	}
 
 	public void assignToAgentDepartment(String deptCode) {
 		ChatSessionDoc session = messageContext.session().getDoc();
-		chatSessionService.routeSession(messageContext.session().getDoc(),
-				new PMArgs().assignToQueueCode(PMConstants.DEFAULT.AGENT_QUEUE_CODE).assignToDeptCode(deptCode)
-						.contact(session.contact()).sessionId(session.getSessionId()));
+		chatSessionService.routeSession(session, new PMArgs().assignToQueueCode(PMConstants.DEFAULT.AGENT_QUEUE_CODE)
+				.contact(session.contact()).sessionId(session.getSessionId()).assignToDeptCode(deptCode));
 	}
 
 	public void assignToDefaultAgent() {
