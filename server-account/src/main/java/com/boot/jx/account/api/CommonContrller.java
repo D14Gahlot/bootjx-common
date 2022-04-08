@@ -31,10 +31,8 @@ public class CommonContrller {
 	@RequestMapping(value = { "", "/", "/**" }, method = { RequestMethod.GET })
 	public String cpanel(Model model, @RequestParam(required = false) String authToken, HttpServletRequest request,
 			HttpServletResponse response) {
-
 		String referrer = req.getRequestParam("referer");
 		String referrerpath = request.getRequestURI().replaceFirst("/common/", "/");
-		System.out.println(request.getRequestURI());
 		String targetContext = "/front";
 		try {
 			if (ArgUtil.is(referrer)) {
