@@ -147,6 +147,15 @@ public class CommonMongoQB<M extends CommonMongoQB<M, T>, T> implements MongoQue
 	}
 
 	@SuppressWarnings("unchecked")
+	public M skipDBRefByNames(String... fieldNames) {
+		org.springframework.data.mongodb.core.query.Field fields = this.query().fields();
+		for (String field : fieldNames) {
+			fields.exclude(field);
+		}
+		return (M) this;
+	}
+
+	@SuppressWarnings("unchecked")
 	public M includeDBRef(String field) {
 		this.query().fields().include(field);
 		return (M) this;

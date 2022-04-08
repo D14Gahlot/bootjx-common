@@ -319,8 +319,7 @@ public class PartnerController {
 
 		BusinessUserDoc domainUser = adminSessionBean.domainUser();
 
-		if (ArgUtil.is(domainUser.getDomains())) {
-
+		if (ArgUtil.is(domainUser.getDomains()) && ArgUtil.is(domain.getId())) {
 			Optional<DomainDoc> domaiNational = domainUser.getDomains().stream()
 					.filter(d -> d.getDomain().equals(domain.getDomain())).findFirst();
 			if (!domaiNational.isPresent() || !domaiNational.get().getDomain().equals(domain.getDomain())) {
@@ -332,21 +331,20 @@ public class PartnerController {
 			accountStore.save(domaiNational.get());
 			accountStore.save(domainUser);
 			return ApiResponse.build().message("Details updated");
-		} else {
-			checkDomain(domain.getDomain());
-
-			DomainDoc domainDoc = new DomainDoc();
-			domainDoc.setDomain(domain.getDomain());
-			domainDoc.setCompany(domain.getCompany());
-			domainDoc.setSocial(domain.getSocial());
-
-			accountStore.save(domainDoc);
-
-			domainUser.domains().add(domainDoc);
-			accountStore.save(domainUser);
-
-			return ApiResponse.build().message("Domain created");
 		}
+		checkDomain(domain.getDomain());
+
+		DomainDoc domainDoc = new DomainDoc();
+		domainDoc.setDomain(domain.getDomain());
+		domainDoc.setCompany(domain.getCompany());
+		domainDoc.setSocial(domain.getSocial());
+
+		accountStore.save(domainDoc);
+
+		domainUser.domains().add(domainDoc);
+		accountStore.save(domainUser);
+
+		return ApiResponse.build().message("Domain created");
 
 	}
 

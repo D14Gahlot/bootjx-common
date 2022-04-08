@@ -556,24 +556,6 @@ public class SessionStore extends CommonMongoTemplateAbstract {
 
 	}
 
-	public void push(MessageDoc msgDoc, IMessage iMessage) {
-		if (PostManUtil.isInBound(msgDoc.getType()) || PostManUtil.isOutBound(msgDoc.getType())) {
-			try {
-				ChatSessionQuery chatSessionDocQuery = new ChatSessionQuery(msgDoc.getSessionId());
-				if (PostManUtil.isInBound(msgDoc.getType())) {
-					chatSessionDocQuery.setLastInBoundMsg(msgDoc, iMessage.contact().getContactType());
-				} else if (PostManUtil.isOutBound(msgDoc.getType())) {
-					chatSessionDocQuery.setLastOutBoundMsg(msgDoc, iMessage.contact().getContactType());
-				}
-				chatSessionDocQuery.setLastMsg(msgDoc, iMessage.contact().getContactType());
-				updateFirst(chatSessionDocQuery);
-			} catch (Exception e) {
-				LOGGER.error("SessionStore.push", e);
-			}
-		}
-
-	}
-
 	public ChatSessionDoc updateQuickTags(ChatSessionDoc chatSessionDoc, List<String> tagIds) {
 		chatSessionDoc.setTagId(tagIds);
 		CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder().whereId(chatSessionDoc.getSessionId());

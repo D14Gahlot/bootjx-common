@@ -17,7 +17,6 @@ import com.boot.jx.api.ApiFieldError;
 import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.mongo.CommonMongoQueryBuilder;
 import com.boot.jx.postman.ClientApp;
-import com.boot.jx.postman.PMConfiguration.PMConfigurationModel;
 import com.boot.jx.postman.PMConfiguration.PMConfigurationWrappper;
 import com.boot.jx.postman.PMConstants;
 import com.boot.jx.postman.PMConstants.APP_TYPE;
@@ -30,7 +29,6 @@ import com.boot.jx.postman.doc.QuickTag;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.ext.InBoundEvent;
 import com.boot.jx.postman.model.ext.InBoundEvent.SessionRouted;
-import com.boot.jx.postman.query.ChatSessionQuery;
 import com.boot.jx.postman.store.MessageStore.EVENTS;
 import com.boot.jx.postman.store.SessionStore;
 import com.boot.model.MapModel.NodeEntry;
@@ -252,9 +250,10 @@ public class ChatSessionManager {
 						.andOperator(criterias.toArray(new Criteria[criterias.size()])))
 				// Limit
 				.with(new Sort(Direction.DESC, "updated.hour")).limit(limit);
-		//System.out.println(query2.toString());
+		// System.out.println(query2.toString());
 		LOGGER.debug(query2.toString());
-		return sessionStore.find(CommonMongoQueryBuilder.collection(ChatSessionDoc.class).query(query2));
+		return sessionStore.find(
+				CommonMongoQueryBuilder.collection(ChatSessionDoc.class).query(query2).skipDBRefByNames("lastMsg"));
 	}
 
 	public List<ChatSessionDoc> findChatSessionDocByAgentAndUnAssigned(String tab, String agentCode, String agentDept,
@@ -263,7 +262,7 @@ public class ChatSessionManager {
 		if (historyPeriod > 0L && ArgUtil.areEqual("HISTORY", tab)) {
 			return findChatSessionDocByAgentAndUnAssigned(tab, agentCode, agentDept, search,
 					PMConstants.DEFAULT_VALUES.POSTMAN_AGENT_TAB_HISTORY_PERIOD + historyPeriod, searchStatus);
-		} else if (historyPeriod > 0L && ArgUtil.isEqual(searchStatus,"STALE","CLOSED")) {
+		} else if (historyPeriod > 0L && ArgUtil.isEqual(searchStatus, "STALE", "CLOSED")) {
 			return findChatSessionDocByAgentAndUnAssigned(tab, agentCode, agentDept, search,
 					PMConstants.DEFAULT_VALUES.POSTMAN_AGENT_TAB_HISTORY_PERIOD + historyPeriod, searchStatus);
 		}

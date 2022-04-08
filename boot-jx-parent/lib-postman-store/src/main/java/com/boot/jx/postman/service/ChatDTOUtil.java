@@ -23,189 +23,192 @@ import com.boot.utils.NumberUtil;
 
 public class ChatDTOUtil {
 
-    public static ChatUserProfileDTO getProfileDTO(ChatUserProfileDoc profileDoc) {
-	ChatUserProfileDTO dto = EntityDtoUtil.entityToDto(profileDoc, new ChatUserProfileDTO());
-	return dto;
-    }
-
-    public static ContactMeta getContactMeta(ChatContactDoc chatContactDoc) {
-	ContactMeta contact = new ContactMeta();
-	contact.setName(chatContactDoc.getName());
-	contact.setPhone(chatContactDoc.getPhone());
-	contact.setEmail(chatContactDoc.getEmail());
-	contact.setContactType(chatContactDoc.getContactType());
-	return contact;
-    }
-
-    public static ContactDTO getContactDTO(ChatContactDoc chatContactDoc) {
-	ContactDTO contact = new ContactDTO();
-
-	if (ArgUtil.is(chatContactDoc)) {
-	    contact.setContactId(chatContactDoc.getContactId());
-	    contact.setContactType(chatContactDoc.getContactType());
-	    contact.setChannelType(chatContactDoc.getChannelType());
-	    contact.setName(chatContactDoc.getName());
-	    contact.setPhone(chatContactDoc.getPhone());
-	    contact.setEmail(chatContactDoc.getEmail());
-	    contact.setLabelId(chatContactDoc.getLabelId());
-	    contact.setProfilePic(chatContactDoc.getProfilePic());
-	    contact.setProfile(chatContactDoc.getProfile());
-	    contact.setLane(chatContactDoc.getLane());
-	    contact.setCsid(chatContactDoc.getCsid());
-
-	    contact.setCreatedBy(chatContactDoc.getCreatedBy());
-	    contact.setCreatedStamp(chatContactDoc.getCreatedStamp());
-	    contact.setLastInBoundStamp(chatContactDoc.getLastInBoundStamp());
-	    contact.setLastOutBoundStamp(chatContactDoc.getLastOutBoundStamp());
-	    contact.setLastOptInStamp(chatContactDoc.getLastOptInStamp());
-	    contact.setLastPushStamp(chatContactDoc.getLastPushStamp());
-	    contact.setLastReplyStamp(chatContactDoc.getLastReplyStamp());
-
-	    contact.setSessionId(chatContactDoc.getSessionId());
+	public static ChatUserProfileDTO getProfileDTO(ChatUserProfileDoc profileDoc) {
+		ChatUserProfileDTO dto = EntityDtoUtil.entityToDto(profileDoc, new ChatUserProfileDTO());
+		return dto;
 	}
 
-	return contact;
-    }
-
-    public static List<ContactDTO> getContactDTO(List<ChatContactDoc> chatContactDocs) {
-	return chatContactDocs.stream().map(chatContactDoc -> ChatDTOUtil.getContactDTO(chatContactDoc))
-		.collect(Collectors.toList());
-    }
-
-    public static ChatMessageDTO getChatMessageDTO(MessageDoc messageDoc, String contactName, String defaultSender) {
-	ChatMessageDTO messageDto = new ChatMessageDTO();
-	if (!ArgUtil.is(messageDoc)) {
-	    return messageDto;
+	public static ContactMeta getContactMeta(ChatContactDoc chatContactDoc) {
+		ContactMeta contact = new ContactMeta();
+		contact.setName(chatContactDoc.getName());
+		contact.setPhone(chatContactDoc.getPhone());
+		contact.setEmail(chatContactDoc.getEmail());
+		contact.setContactType(chatContactDoc.getContactType());
+		return contact;
 	}
 
-	messageDto.setType(messageDoc.getType());
-	messageDto.setText(messageDoc.getMessage());
-	messageDto.setTemplate(messageDoc.getTemplate());
-	messageDto.setTemplateId(messageDoc.getTemplateId());
-	messageDto.setTimestamp(messageDoc.getTimestamp());
-	messageDto.setSessionId(messageDoc.getSessionId());
-	messageDto.setMessageId(messageDoc.getMessageId());
-	messageDto.setMessageIdExt(messageDoc.getMessageIdExt());
-	messageDto.setMessageIdRef(messageDoc.getMessageIdRef());
+	public static ContactDTO getContactDTO(ChatContactDoc chatContactDoc) {
+		ContactDTO contact = new ContactDTO();
 
-	messageDto.setReplyId(messageDoc.getReplyId());
-	messageDto.setReplyIdExt(messageDoc.getReplyIdExt());
+		if (ArgUtil.is(chatContactDoc)) {
+			contact.setContactId(chatContactDoc.getContactId());
+			contact.setContactType(chatContactDoc.getContactType());
+			contact.setChannelType(chatContactDoc.getChannelType());
+			contact.setName(chatContactDoc.getName());
+			contact.setPhone(chatContactDoc.getPhone());
+			contact.setEmail(chatContactDoc.getEmail());
+			contact.setLabelId(chatContactDoc.getLabelId());
+			contact.setProfilePic(chatContactDoc.getProfilePic());
+			contact.setProfile(chatContactDoc.getProfile());
+			contact.setLane(chatContactDoc.getLane());
+			contact.setCsid(chatContactDoc.getCsid());
 
-	messageDto.setTags(messageDoc.getTags());
-	messageDto.setAttachments(messageDoc.getAttachments());
-	messageDto.setLogs(messageDoc.getLogs());
-	messageDto.setAction(messageDoc.getAction());
-	messageDto.setStatus(messageDoc.getStatus());
-	messageDto.setStamps(messageDoc.getStamps());
-	messageDto.setBulkSessionId(messageDoc.getBulkSessionId());
-	messageDto.setMeta(messageDoc.getMeta());
-	messageDto.setReplyTo(messageDoc.getReply());
+			contact.setCreatedBy(chatContactDoc.getCreatedBy());
+			contact.setCreatedStamp(chatContactDoc.getCreatedStamp());
+			contact.setLastInBoundStamp(chatContactDoc.getLastInBoundStamp());
+			contact.setLastOutBoundStamp(chatContactDoc.getLastOutBoundStamp());
+			contact.setLastOptInStamp(chatContactDoc.getLastOptInStamp());
+			contact.setLastPushStamp(chatContactDoc.getLastPushStamp());
+			contact.setLastReplyStamp(chatContactDoc.getLastReplyStamp());
 
-	if (ArgUtil.is(messageDoc.getContact())) {
-	    messageDto.setContact(EntityDtoUtil.entityToDto(messageDoc.getContact(), new ContactDTO()));
+			contact.setSessionId(chatContactDoc.getSessionId());
+		}
+
+		return contact;
 	}
 
-	if (ArgUtil.isEmpty(messageDto.getStamps()) && ArgUtil.is(messageDto.getStatus())) {
-	    Map<String, Long> stamps = new HashMap<String, Long>();
-	    stamps.put(messageDto.getStatus(), messageDto.getTimestamp());
-	    messageDto.setStamps(stamps);
+	public static List<ContactDTO> getContactDTO(List<ChatContactDoc> chatContactDocs) {
+		return chatContactDocs.stream().map(chatContactDoc -> ChatDTOUtil.getContactDTO(chatContactDoc))
+				.collect(Collectors.toList());
 	}
 
-	if (PostManUtil.isOutBound(messageDoc.getType())) {
-	    messageDto.setSender(ArgUtil.nonEmpty(messageDoc.getAgent(), messageDoc.getQueue(), defaultSender));
-	} else if (PostManUtil.isInBound(messageDoc.getType())) {
-	    messageDto.setSender(ArgUtil.nonEmpty(messageDto.getName(), contactName));
-	} else {
-	    messageDto.setSender(ArgUtil.nonEmpty(messageDoc.getAgent(), defaultSender));
+	public static ChatMessageDTO getChatMessageDTO(MessageDoc messageDoc, String contactName, String defaultSender) {
+		ChatMessageDTO messageDto = new ChatMessageDTO();
+		if (!ArgUtil.is(messageDoc)) {
+			return messageDto;
+		}
+
+		messageDto.setType(messageDoc.getType());
+		messageDto.setText(messageDoc.getMessage());
+		messageDto.setTemplate(messageDoc.getTemplate());
+		messageDto.setTemplateId(messageDoc.getTemplateId());
+		messageDto.setTimestamp(messageDoc.getTimestamp());
+		messageDto.setSessionId(messageDoc.getSessionId());
+		messageDto.setMessageId(messageDoc.getMessageId());
+		messageDto.setMessageIdExt(messageDoc.getMessageIdExt());
+		messageDto.setMessageIdRef(messageDoc.getMessageIdRef());
+
+		messageDto.setReplyId(messageDoc.getReplyId());
+		messageDto.setReplyIdExt(messageDoc.getReplyIdExt());
+
+		messageDto.setTags(messageDoc.getTags());
+		messageDto.setAttachments(messageDoc.getAttachments());
+		messageDto.setLogs(messageDoc.getLogs());
+		messageDto.setAction(messageDoc.getAction());
+		messageDto.setStatus(messageDoc.getStatus());
+		messageDto.setStamps(messageDoc.getStamps());
+		messageDto.setBulkSessionId(messageDoc.getBulkSessionId());
+		messageDto.setMeta(messageDoc.getMeta());
+		messageDto.setReplyTo(messageDoc.getReply());
+
+		if (ArgUtil.is(messageDoc.getContact())) {
+			messageDto.setContact(EntityDtoUtil.entityToDto(messageDoc.getContact(), new ContactDTO()));
+		}
+
+		if (ArgUtil.isEmpty(messageDto.getStamps()) && ArgUtil.is(messageDto.getStatus())) {
+			Map<String, Long> stamps = new HashMap<String, Long>();
+			stamps.put(messageDto.getStatus(), messageDto.getTimestamp());
+			messageDto.setStamps(stamps);
+		}
+
+		if (PostManUtil.isOutBound(messageDoc.getType())) {
+			messageDto.setSender(ArgUtil.nonEmpty(messageDoc.getAgent(), messageDoc.getQueue(), defaultSender));
+		} else if (PostManUtil.isInBound(messageDoc.getType())) {
+			messageDto.setSender(ArgUtil.nonEmpty(messageDto.getName(), contactName));
+		} else {
+			messageDto.setSender(ArgUtil.nonEmpty(messageDoc.getAgent(), defaultSender));
+		}
+
+		if (ArgUtil.isEmpty(messageDto.getName())) {
+			messageDto.setName(messageDto.getSender());
+		}
+
+		return messageDto;
 	}
 
-	if (ArgUtil.isEmpty(messageDto.getName())) {
-	    messageDto.setName(messageDto.getSender());
+	public static ChatMessageDTO getChatMessageDTO(MessageDoc messageDoc) {
+		if (!ArgUtil.is(messageDoc)) {
+			return null;
+		}
+		return getChatMessageDTO(messageDoc, null, ArgUtil.nonEmpty(messageDoc.getAgent(), messageDoc.getQueue()));
 	}
 
-	return messageDto;
-    }
-
-    public static ChatMessageDTO getChatMessageDTO(MessageDoc messageDoc) {
-	if (!ArgUtil.is(messageDoc)) {
-	    return null;
-	}
-	return getChatMessageDTO(messageDoc, null, ArgUtil.nonEmpty(messageDoc.getAgent(), messageDoc.getQueue()));
-    }
-
-    public static List<ChatMessageDTO> getChatMessageDTO(List<MessageDoc> messageDocs, String contactName,
-	    String agentName) {
-	List<ChatMessageDTO> messageDtos = new ArrayList<ChatMessageDTO>();
-	for (MessageDoc messageDoc : messageDocs) {
-	    ChatMessageDTO messageDto = getChatMessageDTO(messageDoc, contactName, agentName);
-	    messageDtos.add(messageDto);
-	}
-	return messageDtos;
-    }
-
-    public static MessageDoc latestMessage(MessageDoc messageDoc1, MessageDoc messageDoc2) {
-	if (!ArgUtil.is(messageDoc1)) {
-	    return messageDoc2;
-	}
-	if (!ArgUtil.is(messageDoc2)) {
-	    return messageDoc1;
+	public static List<ChatMessageDTO> getChatMessageDTO(List<MessageDoc> messageDocs, String contactName,
+			String agentName) {
+		List<ChatMessageDTO> messageDtos = new ArrayList<ChatMessageDTO>();
+		for (MessageDoc messageDoc : messageDocs) {
+			ChatMessageDTO messageDto = getChatMessageDTO(messageDoc, contactName, agentName);
+			messageDtos.add(messageDto);
+		}
+		return messageDtos;
 	}
 
-	if (messageDoc1.getTimestamp() > messageDoc2.getTimestamp()) {
-	    return messageDoc1;
-	}
-	return messageDoc2;
-    }
+	public static MessageDoc latestMessage(MessageDoc messageDoc1, MessageDoc messageDoc2) {
+		if (!ArgUtil.is(messageDoc1)) {
+			return messageDoc2;
+		}
+		if (!ArgUtil.is(messageDoc2)) {
+			return messageDoc1;
+		}
 
-    public static ChatSessionDTO getChatSessionDTO(ChatSessionDoc chatSessionDoc) {
-	ChatSessionDTO chatSessionDto = EntityDtoUtil.entityToDto(chatSessionDoc, new ChatSessionDTO());
-	chatSessionDto.setSessionId(chatSessionDto.getSessionId());
-	chatSessionDto.setAssignedToAgent(chatSessionDoc.getAssignedToAgent());
-	chatSessionDto.setAssignedToDept(chatSessionDoc.getAssignedToDept());
-	chatSessionDto.setAssignedToBot(chatSessionDoc.getAssignedToBot());
-	chatSessionDto.setActive(chatSessionDoc.isActive());
-	chatSessionDto.setStatus(chatSessionDoc.getStatus());
-	chatSessionDto.setName(chatSessionDoc.getContactName());
-
-	chatSessionDto.setAssignedAgentStamp(chatSessionDoc.getAssignedAgentStamp());
-	chatSessionDto.setAssignedDeptStamp(chatSessionDoc.getAssignedDeptStamp());
-	chatSessionDto.setLastInComingStamp(chatSessionDoc.getLastInComingStamp());
-	chatSessionDto.setLastResponseStamp(chatSessionDoc.getLastResponseStamp());
-
-	if (ArgUtil.is(chatSessionDoc.getUpdated())) {
-	    chatSessionDto.setUpdatedStamp(chatSessionDoc.getUpdated().getStamp());
-	} else {
-	    chatSessionDto.setUpdatedStamp(chatSessionDoc.getUpdatedStamp());
+		if (messageDoc1.getTimestamp() > messageDoc2.getTimestamp()) {
+			return messageDoc1;
+		}
+		return messageDoc2;
 	}
 
-	if (chatSessionDto.getAgentSessionStamp() == 0L) {
-	    chatSessionDto.setAgentSessionStamp(chatSessionDoc.getAssignedAgentStamp());
+	public static ChatSessionDTO getChatSessionDTO(ChatSessionDoc chatSessionDoc) {
+		ChatSessionDTO chatSessionDto = EntityDtoUtil.entityToDto(chatSessionDoc, new ChatSessionDTO());
+		chatSessionDto.setSessionId(chatSessionDto.getSessionId());
+		chatSessionDto.setAssignedToAgent(chatSessionDoc.getAssignedToAgent());
+		chatSessionDto.setAssignedToDept(chatSessionDoc.getAssignedToDept());
+		chatSessionDto.setAssignedToBot(chatSessionDoc.getAssignedToBot());
+		chatSessionDto.setActive(chatSessionDoc.isActive());
+		chatSessionDto.setStatus(chatSessionDoc.getStatus());
+		chatSessionDto.setName(chatSessionDoc.getContactName());
+
+		chatSessionDto.setAssignedAgentStamp(chatSessionDoc.getAssignedAgentStamp());
+		chatSessionDto.setAssignedDeptStamp(chatSessionDoc.getAssignedDeptStamp());
+		chatSessionDto.setLastInComingStamp(chatSessionDoc.getLastInComingStamp());
+		chatSessionDto.setLastResponseStamp(chatSessionDoc.getLastResponseStamp());
+
+		if (ArgUtil.is(chatSessionDoc.getUpdated())) {
+			chatSessionDto.setUpdatedStamp(chatSessionDoc.getUpdated().getStamp());
+		} else {
+			chatSessionDto.setUpdatedStamp(chatSessionDoc.getUpdatedStamp());
+		}
+
+		if (chatSessionDto.getAgentSessionStamp() == 0L) {
+			chatSessionDto.setAgentSessionStamp(chatSessionDoc.getAssignedAgentStamp());
+		}
+
+		chatSessionDto.setUpdatedStamp(NumberUtil.max(chatSessionDto.getUpdatedStamp(),
+				chatSessionDto.getLastInComingStamp(), chatSessionDto.getLastResponseStamp()));
+
+		chatSessionDto.msg().put("lastInBoundMsg", getChatMessageDTO(chatSessionDoc.getLastInBoundMsg()));
+		chatSessionDto.msg().put("lastOutBoundMsg", getChatMessageDTO(chatSessionDoc.getLastOutBoundMsg()));
+
+		chatSessionDto.msg().put("lastMsg", getChatMessageDTO(latestMessage(chatSessionDoc.getLastInBoundMsg(),
+				// Only Last Inoboud
+				chatSessionDoc.getLastOutBoundMsg())
+		// ArgUtil.nonEmpty(chatSessionDoc.getLastOutBoundMsg(),chatSessionDoc.getLastMsg()))
+		));
+
+		if (!ArgUtil.is(chatSessionDto.getStatus())) {
+			if (chatSessionDto.isExpired()) {
+				chatSessionDto.setStatus(PMConstants.CHAT_STATUS.EXPIRED.toString());
+			} else if (!chatSessionDto.isActive()) {
+				chatSessionDto.setStatus(PMConstants.CHAT_STATUS.CLOSED.toString());
+			} else if (chatSessionDto.isResolved()) {
+				chatSessionDto.setStatus(PMConstants.CHAT_STATUS.RESOLVED.toString());
+			} else if (chatSessionDto.getAssignedAgentStamp() == 0) {
+				chatSessionDto.setStatus(PMConstants.CHAT_STATUS.UNASSIGNED.toString());
+			} else {
+				chatSessionDto.setStatus(PMConstants.CHAT_STATUS.OPEN.toString());
+			}
+		}
+
+		return chatSessionDto;
 	}
-
-	chatSessionDto.setUpdatedStamp(NumberUtil.max(chatSessionDto.getUpdatedStamp(),
-		chatSessionDto.getLastInComingStamp(), chatSessionDto.getLastResponseStamp()));
-
-	chatSessionDto.msg().put("lastInBoundMsg", getChatMessageDTO(chatSessionDoc.getLastInBoundMsg()));
-	chatSessionDto.msg().put("lastOutBoundMsg", getChatMessageDTO(chatSessionDoc.getLastOutBoundMsg()));
-
-	chatSessionDto.msg().put("lastMsg", getChatMessageDTO(latestMessage(chatSessionDoc.getLastInBoundMsg(),
-		ArgUtil.nonEmpty(chatSessionDoc.getLastOutBoundMsg(), chatSessionDoc.getLastMsg()))));
-
-	if (!ArgUtil.is(chatSessionDto.getStatus())) {
-	    if (chatSessionDto.isExpired()) {
-		chatSessionDto.setStatus(PMConstants.CHAT_STATUS.EXPIRED.toString());
-	    } else if (!chatSessionDto.isActive()) {
-		chatSessionDto.setStatus(PMConstants.CHAT_STATUS.CLOSED.toString());
-	    } else if (chatSessionDto.isResolved()) {
-		chatSessionDto.setStatus(PMConstants.CHAT_STATUS.RESOLVED.toString());
-	    } else if (chatSessionDto.getAssignedAgentStamp() == 0) {
-		chatSessionDto.setStatus(PMConstants.CHAT_STATUS.UNASSIGNED.toString());
-	    } else {
-		chatSessionDto.setStatus(PMConstants.CHAT_STATUS.OPEN.toString());
-	    }
-	}
-
-	return chatSessionDto;
-    }
 
 }
