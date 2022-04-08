@@ -29,8 +29,8 @@ import com.boot.utils.ClazzUtil;
 
 public abstract class ATaskLimiter implements ITaskLimiter {
 
-	private static final String TUNNE_LIMITER_MAP = "task-limiter-map2-";
-	private static final String TUNNE_LIMITER_Q = "task-limiter-q2-";
+	private static final String TUNNE_LIMITER_MAP = "task-limiter-map3-";
+	private static final String TUNNE_LIMITER_Q = "task-limiter-q3-";
 	Logger logger = LoggerService.getLogger(ATaskLimiter.class);
 	public static final int POLL_INTERVAL = 1 * 1000;
 
@@ -127,16 +127,18 @@ public abstract class ATaskLimiter implements ITaskLimiter {
 			TaskInfo info = limiterPollQ.poll();
 			if (ArgUtil.is(info)) {
 
-				long matureCutoffStamp = System.currentTimeMillis() - info.getInterval();
+				long now = System.currentTimeMillis();
 
-				if (info.getTimestamp() <= matureCutoffStamp) {
+				if (info.getMatureStamp() <= now) {
 					RLocalCachedMap<String, TunnelMessage<TunnelTask>> cache = getCache();
 					try {
 						TunnelMessage<TunnelTask> latest = cache.get(info.getKey());
 						if (ArgUtil.is(latest)) {
 							// logger.info("x {} {} {}", x.getTopic(), info.getThrottleKey(),
 							// x.getTimestamp());
-							if ((latest.getTimestamp() <= matureCutoffStamp)) {
+							if (ArgUtil.isEmpty(latest.getData())) {
+								cache.fastRemove(info.getKey());
+							} else if (latest.getData().getMatureStamp() <= now) {
 								AppContextUtil.setContext(latest.getContext());
 								AppContextUtil.init();
 								try {
@@ -174,6 +176,8 @@ public abstract class ATaskLimiter implements ITaskLimiter {
 		String taskUid = String.format("%s/%s/%s", context.getTenant(), task.getName(),
 				ArgUtil.nonEmpty(task.getId(), context.getTraceId()));
 
+		task.setMatureStamp(System.currentTimeMillis() + (task.getInterval()));
+
 		TunnelMessage<TunnelTask> tunnelMessage = new TunnelMessage<TunnelTask>(task, context);
 		tunnelMessage.setTopic(task.getName());
 		RLocalCachedMap<String, TunnelMessage<TunnelTask>> cache = getCache();
@@ -182,7 +186,8 @@ public abstract class ATaskLimiter implements ITaskLimiter {
 		// Push To Turn Queue
 		TaskInfo info = new TaskInfo();
 		info.setTimestamp(tunnelMessage.getTimestamp());
-		info.setInterval(task.getInterval() * 1000);
+		info.setInterval(task.getInterval());
+		info.setMatureStamp(task.getMatureStamp());
 		info.setKey(taskUid);
 		RQueue<TaskInfo> limiterQ = getQueue(1);
 		limiterQ.add(info);
@@ -195,8 +200,12 @@ public abstract class ATaskLimiter implements ITaskLimiter {
 		}
 		// Push to Map
 		AppContext context = AppContextUtil.getContext();
-		String taskUid = String.format("%s/%s/%s", context.getTenant(), task.getName(),
-				ArgUtil.nonEmpty(task.getId(), context.getTraceId()));
+
+		task.setMatureStamp(
+				((System.currentTimeMillis() + task.getInterval()) / task.getInterval() * task.getInterval()));
+
+		String taskUid = String.format("%s/%s/%s/%d", context.getTenant(), task.getName(),
+				ArgUtil.nonEmpty(task.getId(), context.getTraceId()), task.getMatureStamp());
 
 		TunnelMessage<TunnelTask> tunnelMessage = new TunnelMessage<TunnelTask>(task, context);
 		tunnelMessage.setTopic(task.getName());
@@ -206,7 +215,8 @@ public abstract class ATaskLimiter implements ITaskLimiter {
 		// Push To Turn Queue
 		TaskInfo info = new TaskInfo();
 		info.setTimestamp(tunnelMessage.getTimestamp());
-		info.setInterval(task.getInterval() * 1000);
+		info.setInterval(task.getInterval());
+		info.setMatureStamp(task.getMatureStamp());
 		info.setKey(taskUid);
 		RQueue<TaskInfo> limiterQ = getQueue(1);
 		limiterQ.add(info);

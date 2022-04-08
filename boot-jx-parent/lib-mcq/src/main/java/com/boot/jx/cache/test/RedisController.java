@@ -16,61 +16,78 @@ import com.boot.jx.api.ApiResponse;
 import com.boot.jx.api.BoolRespModel;
 import com.boot.jx.cache.test.RedisSampleTxCacheBox.RedisSampleData;
 import com.boot.jx.tunnel.ITunnelDefs.ITaskLimiter;
+import com.boot.jx.tunnel.ITunnelDefs.TunnelTask;
 import com.boot.jx.tunnel.TunnelService;
 import com.boot.jx.tunnel.sys.SharedConfigManager;
 import com.boot.jx.tunnel.sys.SysTunnelEventsDict;
+import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
 
 @RestController
 public class RedisController {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(RedisController.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(RedisController.class);
 
-    @Autowired
-    private RedisSampleTxCacheBox redisSampleCacheBox;
+	@Autowired
+	private RedisSampleTxCacheBox redisSampleCacheBox;
 
-    @Autowired
-    private TunnelService tunnelService;
+	@Autowired
+	private TunnelService tunnelService;
 
-    @Autowired(required = false)
-    private List<ITaskLimiter> dbEventLimiters;
+	@Autowired(required = false)
+	private List<ITaskLimiter> dbEventLimiters;
 
-    @Autowired
-    SharedConfigManager sharedConfigManager;
+	@Autowired
+	SharedConfigManager sharedConfigManager;
 
-    @RequestMapping(value = "/pub/redis/test", method = RequestMethod.PUT)
-    public RedisSampleData cacheTestGet(@RequestBody RedisSampleData status) {
-	redisSampleCacheBox.fastPut(status);
-	return status;
-    }
+	@Autowired(required = false)
+	RedisSampleTaskLimiter redisSampleTaskLimiter;
 
-    @RequestMapping(value = "/pub/redis/test", method = RequestMethod.GET)
-    public RedisSampleData cacheTestGet() {
-	return redisSampleCacheBox.get();
-    }
-
-    @RequestMapping(value = "/pub/redis/test", method = RequestMethod.POST)
-    public long cacheTestPost(@RequestBody RedisSampleData status) {
-	return tunnelService.shout(SysTunnelEventsDict.Names.TEST_TOPIC, status);
-    }
-
-    @RequestMapping(value = "/pub/stats/tunnel-limiter", method = RequestMethod.GET)
-    public Map<String, Object> getStats() {
-	Map<String, Object> propMap = new HashMap<String, Object>();
-	if (ArgUtil.is(dbEventLimiters)) {
-	    for (ITaskLimiter iTunnelEventLimiter : dbEventLimiters) {
-		Map<String, Object> stats = iTunnelEventLimiter.getStats();
-		if (ArgUtil.is(stats)) {
-		    propMap.put(iTunnelEventLimiter.getName(), stats);
-		}
-	    }
+	@RequestMapping(value = "/pub/redis/test", method = RequestMethod.PUT)
+	public RedisSampleData cacheTestGet(@RequestBody RedisSampleData status) {
+		redisSampleCacheBox.fastPut(status);
+		return status;
 	}
-	return propMap;
-    }
 
-    @RequestMapping(value = "/pub/amx/config/shared/clear/all", method = RequestMethod.GET)
-    public ApiResponse<BoolRespModel, Object> clearSharedConfig() {
-	sharedConfigManager.clear();
-	return ApiResponse.build(new BoolRespModel(true));
-    }
+	@RequestMapping(value = "/pub/redis/test", method = RequestMethod.GET)
+	public RedisSampleData cacheTestGet() {
+		return redisSampleCacheBox.get();
+	}
+
+	@RequestMapping(value = "/pub/redis/test", method = RequestMethod.POST)
+	public long cacheTestPost(@RequestBody RedisSampleData status) {
+		return tunnelService.shout(SysTunnelEventsDict.Names.TEST_TOPIC, status);
+	}
+
+	@RequestMapping(value = "/pub/redis/test/task/limiter", method = RequestMethod.POST)
+	public long cacheTestTaskLimiter(@RequestBody MapModel map) {
+		if (ArgUtil.is(redisSampleTaskLimiter)) {
+			redisSampleTaskLimiter
+					.debounce(new TunnelTask().id(map.getString("id")).name("DEBOUNCE").intervalSeconds(5));
+			redisSampleTaskLimiter
+					.throttle(new TunnelTask().id(map.getString("id")).name("THROTTLE").intervalSeconds(5));
+			return 1L;
+		}
+		return 0L;
+	}
+
+	@RequestMapping(value = "/pub/stats/tunnel-limiter", method = RequestMethod.GET)
+	public Map<String, Object> getStats() {
+		Map<String, Object> propMap = new HashMap<String, Object>();
+		if (ArgUtil.is(dbEventLimiters)) {
+			for (ITaskLimiter iTunnelEventLimiter : dbEventLimiters) {
+				Map<String, Object> stats = iTunnelEventLimiter.getStats();
+				if (ArgUtil.is(stats)) {
+					propMap.put(iTunnelEventLimiter.getName(), stats);
+				}
+			}
+		}
+		return propMap;
+	}
+
+	@RequestMapping(value = "/pub/amx/config/shared/clear/all", method = RequestMethod.GET)
+	public ApiResponse<BoolRespModel, Object> clearSharedConfig() {
+		sharedConfigManager.clear();
+		return ApiResponse.build(new BoolRespModel(true));
+	}
 }

@@ -20,70 +20,70 @@ import com.boot.utils.ArgUtil;
 @Component
 public class SessionRouter extends ATaskLimiter {
 
-    @Autowired
-    private MitelClient mitelClient;
+	@Autowired
+	private MitelClient mitelClient;
 
-    @Autowired
-    private SessionStore sessionStore;
+	@Autowired
+	private SessionStore sessionStore;
 
-    @Autowired
-    private MessageContext messageContext;
+	@Autowired
+	private MessageContext messageContext;
 
-    @Lazy
-    @Autowired
-    private ChatSessionService chatSessionService;
+	@Lazy
+	@Autowired
+	private ChatSessionService chatSessionService;
 
-    @Override
-    public void doTask(TunnelTask task) {
+	@Override
+	public void doTask(TunnelTask task) {
 
-	switch (task.getName()) {
-	case "MITEL_ROUTER":
-	    doMitelRouting(task);
-	    break;
-	case "MITEL_CLOSE_CHECK":
-	    doMitelClosing(task);
-	    break;
-	default:
-	    break;
+		switch (task.getName()) {
+		case "MITEL_ROUTER":
+			doMitelRouting(task);
+			break;
+		case "MITEL_CLOSE_CHECK":
+			doMitelClosing(task);
+			break;
+		default:
+			break;
+		}
+
 	}
 
-    }
+	private void doMitelClosing(TunnelTask task) {
+		MapModel data = task.data();
+		ChatSessionDoc session = sessionStore.getSession(data.getString("sessionId"));
+		ClientApp defaultClient = messageContext.clientApp(data.getString("queue"), null);
 
-    private void doMitelClosing(TunnelTask task) {
-	MapModel data = task.data();
-	ChatSessionDoc session = sessionStore.getSession(data.getString("sessionId"));
-	ClientApp defaultClient = messageContext.clientApp(data.getString("queue"), null);
+		MapModel meta = new MapModel(session.getMeta());
+		MapPathEntry omidEntry = meta.pathEntry("mitel.omid");
+		String omid = omidEntry.asString();
+		MapModel mitel = mitelClient.openMediaGetActive(defaultClient, session.contact(), session.getSessionId(), omid);
 
-	MapModel meta = new MapModel(session.getMeta());
-	MapPathEntry omidEntry = meta.pathEntry("mitel.omid");
-	String omid = omidEntry.asString();
-	MapModel mitel = mitelClient.openMediaGetActive(defaultClient, session.contact(), session.getSessionId(), omid);
-
-	if (!ArgUtil.is(mitel) || mitel.keyEntry("id").exists()) {
-	    chatSessionService.closeSession(session);
-	}
-    }
-
-    private void doMitelRouting(TunnelTask task) {
-
-	MapModel data = task.data();
-	ChatSessionDoc session = sessionStore.getSession(data.getString("sessionId"));
-	ClientApp defaultClient = messageContext.clientApp(data.getString("queue"), null);
-
-	MapModel meta = new MapModel(session.getMeta());
-	MapPathEntry omidEntry = meta.pathEntry("mitel.omid");
-	String omid = omidEntry.asString();
-	MapModel mitel = mitelClient.resend(defaultClient, session.contact(), session.getSessionId(), omid);
-	String newomid = mitel.getString("id");
-
-	if (!ArgUtil.areEqual(newomid, omid)) {
-	    ChatSessionQuery q = new ChatSessionQuery(session);
-	    omidEntry.save(newomid);
-	    session.setMeta(meta.map());
-	    q.set("meta.mitel.omid", newomid).set("meta.mitel.queue_id", mitel.getString("queueId"));
-	    sessionStore.updateFirst(q);
+		if (!ArgUtil.is(mitel) || mitel.keyEntry("id").exists()) {
+			chatSessionService.closeSession(session);
+		}
 	}
 
-    }
+	private void doMitelRouting(TunnelTask task) {
+
+		MapModel data = task.data();
+		ChatSessionDoc session = sessionStore.getSession(data.getString("sessionId"));
+		ClientApp defaultClient = messageContext.clientApp(data.getString("queue"), null);
+
+		MapModel meta = new MapModel(session.getMeta());
+		MapPathEntry omidEntry = meta.pathEntry("mitel.omid");
+		String omid = omidEntry.asString();
+		MapModel mitel = mitelClient.resend(defaultClient, session.contact(), session.getSessionId(), omid);
+		String newomid = mitel.getString("id");
+
+		if (!ArgUtil.areEqual(newomid, omid)) {
+			ChatSessionQuery q = new ChatSessionQuery(session);
+			omidEntry.save(newomid);
+			session.setMeta(meta.map());
+			q.set("meta.mitel.omid", newomid).set("meta.mitel.queue_id", mitel.getString("queueId"));
+			sessionStore.updateFirst(q);
+		}
+
+	}
 
 }
