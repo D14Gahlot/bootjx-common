@@ -24,94 +24,94 @@ import com.boot.utils.Constants;
 @Controller
 public class FrontController {
 
-    @Autowired
-    private AppCommonConfig appCommonConfig;
+	@Autowired
+	private AppCommonConfig appCommonConfig;
 
-    @Autowired
-    private AccountSessionBean adminSessionBean;
+	@Autowired
+	private AccountSessionBean adminSessionBean;
 
-    @Autowired
-    private CommonHttpRequest commonHttpRequest;
+	@Autowired
+	private CommonHttpRequest commonHttpRequest;
 
-    @Autowired
-    private AccountStore accountStore;
+	@Autowired
+	private AccountStore accountStore;
 
-    @Autowired
-    private PMCommonConfig pmCommonConfig;
+	@Autowired
+	private PMCommonConfig pmCommonConfig;
 
-    @RequestMapping(value = { "/account", "/account/**" }, method = { RequestMethod.GET })
-    public String account(Model model) {
-	model.addAllAttributes(appCommonConfig.appAttributes());
+	@RequestMapping(value = { "/account", "/account/**" }, method = { RequestMethod.GET })
+	public String account(Model model) {
+		model.addAllAttributes(appCommonConfig.appAttributes());
 
-	Authentication auth = AccountAuthService.getAuthentication();
-	if (ArgUtil.is(auth)) {
-	    model.addAttribute("APP_USER", auth.getName());
-	    model.addAttribute("APP_USER_ROLE", adminSessionBean.getRole());
-	} else {
-	    model.addAttribute("APP_USER", "");
-	    model.addAttribute("APP_USER_ROLE", "GUEST");
-	}
-	model.addAttribute("APP", "account");
-	return "app-account";
-    }
-
-    @RequestMapping(value = { "/", "/front/", "/front/**" }, method = { RequestMethod.GET })
-    public String front(Model model) {
-	if (!pmCommonConfig.isValidDomain()) {
-	    return pmCommonConfig.mainDomainRedirect();
-	}
-	String domainName = commonHttpRequest.get("domain");
-	return domainProfile(model, domainName, true, "front");
-    }
-
-    @RequestMapping(value = { "/content/", "/content/**" }, method = { RequestMethod.GET })
-    public String content(Model model) {
-	String domainName = commonHttpRequest.get("domain");
-	return domainProfile(model, domainName, true, "content");
-    }
-
-    private String domainProfile(Model model, String domainName, boolean setDefault, String app) {
-	model.addAllAttributes(appCommonConfig.appAttributes());
-	String tnt = AppContextUtil.getTenant();
-	String domainId = null;
-
-	if (!Tenants.isDefault(tnt)) {
-	    domainName = tnt;
-	    AppContextUtil.setTenant(Tenants.getDefault());
+		Authentication auth = AccountAuthService.getAuthentication();
+		if (ArgUtil.is(auth)) {
+			model.addAttribute("APP_USER", auth.getName());
+			model.addAttribute("APP_USER_ROLE", adminSessionBean.getRole());
+		} else {
+			model.addAttribute("APP_USER", "");
+			model.addAttribute("APP_USER_ROLE", "GUEST");
+		}
+		model.addAttribute("APP", "account");
+		return "app-account";
 	}
 
-	if (ArgUtil.is(domainName)) {
-	    if (setDefault) {
-		commonHttpRequest.setCookie("domain", domainName);
-	    }
-	    DomainDoc domainDoc = accountStore.findDomainByName(domainName);
-	    if (ArgUtil.is(domainDoc)) {
-		domainId = domainDoc.getId();
-	    }
+	@RequestMapping(value = { "/", "/front/", "/front/**" }, method = { RequestMethod.GET })
+	public String front(Model model) {
+		if (!pmCommonConfig.isValidDomain()) {
+			return pmCommonConfig.mainDomainRedirect();
+		}
+		String domainName = commonHttpRequest.get("domain");
+		return domainProfile(model, domainName, true, "front");
 	}
 
-	if (ArgUtil.is(domainName)) {
-	    model.addAttribute("APP_DOMAIN", domainName);
-	    model.addAttribute("APP_DOMAIN_ID", domainId);
-	} else {
-	    model.addAttribute("APP_DOMAIN", Constants.BLANK);
+	@RequestMapping(value = { "/content/", "/content/**" }, method = { RequestMethod.GET })
+	public String content(Model model) {
+		String domainName = commonHttpRequest.get("domain");
+		return domainProfile(model, domainName, true, "content");
 	}
 
-	Authentication auth = AccountAuthService.getAuthentication();
-	if (ArgUtil.is(auth)) {
-	    model.addAttribute("APP_USER", auth.getName());
-	    model.addAttribute("APP_USER_ROLE", adminSessionBean.getRole());
-	} else {
-	    model.addAttribute("APP_USER", "");
-	    model.addAttribute("APP_USER_ROLE", "GUEST");
+	private String domainProfile(Model model, String domainName, boolean setDefault, String app) {
+		model.addAllAttributes(appCommonConfig.appAttributes());
+		String tnt = AppContextUtil.getTenant();
+		String domainId = null;
+
+		if (!Tenants.isDefault(tnt)) {
+			domainName = tnt;
+			AppContextUtil.setTenant(Tenants.getDefault());
+		}
+
+		if (ArgUtil.is(domainName)) {
+			if (setDefault) {
+				commonHttpRequest.setCookie("domain", domainName);
+			}
+			DomainDoc domainDoc = accountStore.findDomainByName(domainName);
+			if (ArgUtil.is(domainDoc)) {
+				domainId = domainDoc.getId();
+			}
+		}
+
+		if (ArgUtil.is(domainName)) {
+			model.addAttribute("APP_DOMAIN", domainName);
+			model.addAttribute("APP_DOMAIN_ID", domainId);
+		} else {
+			model.addAttribute("APP_DOMAIN", Constants.BLANK);
+		}
+
+		Authentication auth = AccountAuthService.getAuthentication();
+		if (ArgUtil.is(auth)) {
+			model.addAttribute("APP_USER", auth.getName());
+			model.addAttribute("APP_USER_ROLE", adminSessionBean.getRole());
+		} else {
+			model.addAttribute("APP_USER", "");
+			model.addAttribute("APP_USER_ROLE", "GUEST");
+		}
+
+		model.addAttribute("APP", app);
+		return "app-front";
 	}
 
-	model.addAttribute("APP", app);
-	return "app-front";
-    }
-
-    @RequestMapping(value = { "/@{domain}", "/{domain:^.*(?!swagger-ui.html)}" }, method = { RequestMethod.GET })
-    public String domain(Model model, @PathVariable @ValidAlphaNum String domain) {
-	return domainProfile(model, domain, false, "front");
-    }
+	@RequestMapping(value = { "/@{domain}", "/{domain:^.*(?!swagger-ui.html)}" }, method = { RequestMethod.GET })
+	public String domain(Model model, @PathVariable @ValidAlphaNum String domain) {
+		return domainProfile(model, domain, false, "front");
+	}
 }
