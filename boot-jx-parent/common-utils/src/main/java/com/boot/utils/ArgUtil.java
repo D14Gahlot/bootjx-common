@@ -884,4 +884,30 @@ public final class ArgUtil {
 		return (str == null || Constants.NULL_VALUE_STRING.equalsIgnoreCase(str.trim()));
 	}
 
+	public static boolean any(boolean... condition) {
+		for (boolean b : condition) {
+			if (b) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public static boolean all(boolean... condition) {
+		for (boolean b : condition) {
+			if (!b) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	public static boolean none(boolean... condition) {
+		return !any(condition);
+	}
+
+	public static boolean nand(boolean... condition) {
+		return !all(condition);
+	}
+
 }

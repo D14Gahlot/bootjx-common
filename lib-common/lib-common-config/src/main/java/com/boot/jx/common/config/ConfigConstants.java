@@ -142,6 +142,8 @@ public class ConfigConstants {
 						.group(GROUP_AGENT)),
 
 		// NLP
+		POSTMAN_NLP_LANGUAGE(new ConfigMeta("Enable Detect Language", "postman.nlp.detect.lang").optionsOnOff()
+				.defaultValue(ConfigOption.OFF).group(GROUP_NLP)),
 		POSTMAN_NLP_SENTIMENT(new ConfigMeta("Enable Detect Sentiment", "postman.nlp.detect.sentiment").optionsOnOff()
 				.defaultValue(ConfigOption.OFF).group(GROUP_NLP)),
 		POSTMAN_NLP_CATEGORIES(new ConfigMeta("Enable Detect Categories", "postman.nlp.detect.categories")

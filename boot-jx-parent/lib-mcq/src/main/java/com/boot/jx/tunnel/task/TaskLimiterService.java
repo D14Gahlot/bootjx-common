@@ -18,60 +18,60 @@ import com.boot.utils.ArgUtil;
 @Component
 public class TaskLimiterService {
 
-    Logger logger = LoggerService.getLogger(TaskLimiterService.class);
-    public static final int POLL_INTERVAL = 1 * 1000;
+	Logger logger = LoggerService.getLogger(TaskLimiterService.class);
+	public static final int POLL_INTERVAL = 1 * 1000;
 
-    @Autowired(required = false)
-    RedissonClient redisson;
+	@Autowired(required = false)
+	RedissonClient redisson;
 
-    @Autowired(required = false)
-    private List<ITaskLimiter> aTaskLimiters;
+	@Autowired(required = false)
+	private List<ITaskLimiter> aTaskLimiters;
 
-    public Map<String, Object> getStats() {
-	Map<String, Object> propMap = new HashMap<String, Object>();
-	if (ArgUtil.is(aTaskLimiters)) {
-	    for (ITaskLimiter iTunnelEventLimiter : aTaskLimiters) {
-		Map<String, Object> stats = iTunnelEventLimiter.getStats();
-		if (ArgUtil.is(stats)) {
-		    propMap.put(iTunnelEventLimiter.getName(), stats);
+	public Map<String, Object> getStats() {
+		Map<String, Object> propMap = new HashMap<String, Object>();
+		if (ArgUtil.is(aTaskLimiters)) {
+			for (ITaskLimiter iTunnelEventLimiter : aTaskLimiters) {
+				Map<String, Object> stats = iTunnelEventLimiter.getStats();
+				if (ArgUtil.is(stats)) {
+					propMap.put(iTunnelEventLimiter.getName(), stats);
+				}
+			}
 		}
-	    }
+		return propMap;
 	}
-	return propMap;
-    }
 
-    public void doTask(int pollQNum, int pushQNum, int batchSize) {
-	if (redisson == null) {
-	    return;
+	public void doTask(int pollQNum, int pushQNum, int batchSize) {
+		if (redisson == null) {
+			return;
+		}
+		for (ITaskLimiter aTaskLimiter : aTaskLimiters) {
+			aTaskLimiter.doTask(pollQNum, pushQNum, batchSize);
+		}
 	}
-	for (ITaskLimiter aTaskLimiter : aTaskLimiters) {
-	    aTaskLimiter.doTask(pollQNum, pushQNum, batchSize);
+
+	@Scheduled(fixedDelay = POLL_INTERVAL * 1)
+	public void doTask1() throws IOException {
+		doTask(1, 2, 5);
 	}
-    }
 
-    @Scheduled(fixedDelay = POLL_INTERVAL * 1)
-    public void doTask1() throws IOException {
-	doTask(1, 2, 5);
-    }
+	@Scheduled(fixedDelay = POLL_INTERVAL * 3)
+	public void doTask2() throws IOException {
+		doTask(2, 3, 5);
+	}
 
-    @Scheduled(fixedDelay = POLL_INTERVAL * 3)
-    public void doTask2() throws IOException {
-	doTask(2, 3, 5);
-    }
+	@Scheduled(fixedDelay = POLL_INTERVAL * 1)
+	public void doTask3() throws IOException {
+		doTask(3, 4, 5);
+	}
 
-    @Scheduled(fixedDelay = POLL_INTERVAL * 1)
-    public void doTask3() throws IOException {
-	doTask(3, 4, 5);
-    }
+	@Scheduled(fixedDelay = POLL_INTERVAL * 3)
+	public void doTask4() throws IOException {
+		doTask(4, 5, 5);
+	}
 
-    @Scheduled(fixedDelay = POLL_INTERVAL * 3)
-    public void doTask4() throws IOException {
-	doTask(4, 5, 5);
-    }
-
-    @Scheduled(fixedDelay = POLL_INTERVAL * 1)
-    public void doTask5() throws IOException {
-	doTask(5, 6, 5);
-    }
+	@Scheduled(fixedDelay = POLL_INTERVAL * 1)
+	public void doTask5() throws IOException {
+		doTask(5, 6, 5);
+	}
 
 }

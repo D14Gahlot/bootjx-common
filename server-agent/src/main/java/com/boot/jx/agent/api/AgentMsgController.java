@@ -42,134 +42,134 @@ import com.boot.utils.Constants;
 @RestController
 public class AgentMsgController {
 
-    @Autowired
-    private SessionStore sessionStore;
+	@Autowired
+	private SessionStore sessionStore;
 
-    @Autowired
-    private AgentSessionBean agentSession;
+	@Autowired
+	private AgentSessionBean agentSession;
 
-    @Autowired
-    private ChatArchiveService chatArchive;
+	@Autowired
+	private ChatArchiveService chatArchive;
 
-    @Autowired
-    private AgentSessionService agentSessionService;
+	@Autowired
+	private AgentSessionService agentSessionService;
 
-    @Autowired
-    private ChatSessionManager chatSessionManager;
+	@Autowired
+	private ChatSessionManager chatSessionManager;
 
-    @Autowired
-    private ChatSessionService chatSessionService;
+	@Autowired
+	private ChatSessionService chatSessionService;
 
-    @Autowired
-    private DocumentUpdateListner documentUpdateListner;
+	@Autowired
+	private DocumentUpdateListner documentUpdateListner;
 
-    @Autowired
-    private AgentService agentService;
+	@Autowired
+	private AgentService agentService;
 
-    @Autowired
-    private PMEnvironment environment;
+	@Autowired
+	private PMEnvironment environment;
 
-    @ApiRequest(type = RequestType.POLL)
-    @RequestMapping(value = "/api/sessions/assignments", method = { RequestMethod.GET })
-    public ApiResponse<ChatSessionDTO, AgentSessionDoc> getSessionsAssignments(
-	    @RequestParam(defaultValue = "false") boolean withMessage, @RequestParam(required = false) Boolean status,
-	    @RequestParam(required = false) Boolean away,
-	    @RequestParam(required = false, defaultValue = "HISTORY") String tab,
-	    @RequestParam(required = false) String search, @RequestParam(required = false) String searchStatus) {
+	@ApiRequest(type = RequestType.POLL)
+	@RequestMapping(value = "/api/sessions/assignments", method = { RequestMethod.GET })
+	public ApiResponse<ChatSessionDTO, AgentSessionDoc> getSessionsAssignments(
+			@RequestParam(defaultValue = "false") boolean withMessage, @RequestParam(required = false) Boolean status,
+			@RequestParam(required = false) Boolean away,
+			@RequestParam(required = false, defaultValue = "HISTORY") String tab,
+			@RequestParam(required = false) String search, @RequestParam(required = false) String searchStatus) {
 
-	List<ChatSessionDTO> chatSessionDtos = new ArrayList<ChatSessionDTO>();
-	if (agentSession.isLoggedIn() && ArgUtil.is(agentSession.getAgentDept())) {
-	    List<ChatSessionDoc> sessions = null;
+		List<ChatSessionDTO> chatSessionDtos = new ArrayList<ChatSessionDTO>();
+		if (agentSession.isLoggedIn() && ArgUtil.is(agentSession.getAgentDept())) {
+			List<ChatSessionDoc> sessions = null;
 
-	    ApiResponseUtil.addLog("Search Results");
-	    sessions = chatSessionManager.findChatSessionDocByAgentAndUnAssigned(tab, agentSession.getAgentCode(),
-		    agentSession.getAgentDept(), search, searchStatus);
+			ApiResponseUtil.addLog("Search Results");
+			sessions = chatSessionManager.findChatSessionDocByAgentAndUnAssigned(tab, agentSession.getAgentCode(),
+					agentSession.getAgentDept(), search, searchStatus);
 
-	    for (ChatSessionDoc chatSessionDoc : sessions) {
-		ChatSessionDTO chatSessionDto = chatArchive.getChatSession(chatSessionDoc);
-		chatSessionDto = chatArchive.withContact(chatSessionDto);
-		if (withMessage
-			&& ArgUtil.isEqual(chatSessionDto.getAssignedToDept(), DEFAULT.NO_DEPT,
-				agentSession.getAgentDept(), null, Constants.BLANK)
-			&& ArgUtil.isEqual(chatSessionDto.getAssignedToAgent(), agentSession.getAgentCode(), null)) {
-		    chatSessionDto = chatArchive.withMessages(chatSessionDto);
+			for (ChatSessionDoc chatSessionDoc : sessions) {
+				ChatSessionDTO chatSessionDto = chatArchive.getChatSession(chatSessionDoc);
+				chatSessionDto = chatArchive.withContact(chatSessionDto);
+				if (withMessage
+						&& ArgUtil.isEqual(chatSessionDto.getAssignedToDept(), DEFAULT.NO_DEPT,
+								agentSession.getAgentDept(), null, Constants.BLANK)
+						&& ArgUtil.isEqual(chatSessionDto.getAssignedToAgent(), agentSession.getAgentCode(), null)) {
+					chatSessionDto = chatArchive.withMessages(chatSessionDto);
+				}
+				chatSessionDtos.add(chatSessionDto);
+			}
 		}
-		chatSessionDtos.add(chatSessionDto);
-	    }
+		if (away != null) {
+			agentSessionService.setAway(away.booleanValue());
+		}
+		if (status != null) {
+			agentSessionService.setOnline(status.booleanValue());
+		}
+		return new ApiResponse<ChatSessionDTO, AgentSessionDoc>().results(chatSessionDtos)
+				.details(agentSessionService.getAgentSessions());
 	}
-	if (away != null) {
-	    agentSessionService.setAway(away.booleanValue());
-	}
-	if (status != null) {
-	    agentSessionService.setOnline(status.booleanValue());
-	}
-	return new ApiResponse<ChatSessionDTO, AgentSessionDoc>().results(chatSessionDtos)
-		.details(agentSessionService.getAgentSessions());
-    }
 
-    @RequestMapping(value = { "/api/session/tag" }, method = { RequestMethod.POST })
-    public ApiResponse<ChatSessionDTO, Object> addSessionTags(@RequestBody ChatTagUpdateRequest updateRequest) {
-	ChatSessionDoc sessionDoc = sessionStore.getSession(updateRequest.sessionId);
-	if (chatSessionService.updateSessionStatus(sessionDoc, updateRequest.status).exists()
-		| chatSessionManager.updateSessionTags(sessionDoc, updateRequest.tags)) {
-	    documentUpdateListner.onChatSessionUpdate(sessionDoc);
+	@RequestMapping(value = { "/api/session/tag" }, method = { RequestMethod.POST })
+	public ApiResponse<ChatSessionDTO, Object> addSessionTags(@RequestBody ChatTagUpdateRequest updateRequest) {
+		ChatSessionDoc sessionDoc = sessionStore.getSession(updateRequest.sessionId);
+		if (chatSessionService.updateSessionStatus(sessionDoc, updateRequest.status).exists()
+				| chatSessionManager.updateSessionTags(sessionDoc, updateRequest.tags)) {
+			documentUpdateListner.onChatSessionUpdate(sessionDoc);
+		}
+		return ApiResponse.buildData(ChatDTOUtil.getChatSessionDTO(sessionDoc));
 	}
-	return ApiResponse.buildData(ChatDTOUtil.getChatSessionDTO(sessionDoc));
-    }
 
-    @RequestMapping(value = "/api/sessions/note", method = { RequestMethod.POST })
-    public ApiResponse<ChatMessageDTO, Object> addStickyNote(@RequestBody OutboxMessage outboxMessage)
-	    throws InterruptedException {
-	ChatSessionDoc sessionDoc = sessionStore.getSession(outboxMessage.getSessionId());
+	@RequestMapping(value = "/api/sessions/note", method = { RequestMethod.POST })
+	public ApiResponse<ChatMessageDTO, Object> addStickyNote(@RequestBody OutboxMessage outboxMessage)
+			throws InterruptedException {
+		ChatSessionDoc sessionDoc = sessionStore.getSession(outboxMessage.getSessionId());
 
-	// Session Stuff Logging >
-	// if (ArgUtil.areEqual(sessionDoc.getAssignedToAgent(),
-	// agentSession.getAgentCode()) || agentSession.isAdmin()) {
-	if (ArgUtil.is(sessionDoc)) {
-	    outboxMessage.setAction(CHAT_SESSION_ACTIONS.ADD_STICKY_NOTE);
-	    ChatMessageDTO messageDto = agentService.sendMessage(sessionDoc, outboxMessage);
-	    // Evaluate if required
-	    messageDto.setName(agentSession.getAgentCode());
-	    // messageDto.setType(outboxMessage.getType());
-	    messageDto.setText(outboxMessage.getMessage());
-	    messageDto.setMessageIdRef(outboxMessage.getMessageIdRef());
-	    agentSessionService.refreshOnline();
-	    return ApiResponse.buildResult(messageDto);
-	} else {
-	    agentSessionService.refreshOnline();
-	    return new ApiResponse<ChatMessageDTO, Object>().message("Only Assignee/Admin can add StickyNote to chat.");
+		// Session Stuff Logging >
+		// if (ArgUtil.areEqual(sessionDoc.getAssignedToAgent(),
+		// agentSession.getAgentCode()) || agentSession.isAdmin()) {
+		if (ArgUtil.is(sessionDoc)) {
+			outboxMessage.setAction(CHAT_SESSION_ACTIONS.ADD_STICKY_NOTE);
+			ChatMessageDTO messageDto = agentService.sendMessage(sessionDoc, outboxMessage);
+			// Evaluate if required
+			messageDto.setName(agentSession.getAgentCode());
+			// messageDto.setType(outboxMessage.getType());
+			messageDto.setText(outboxMessage.getMessage());
+			messageDto.setMessageIdRef(outboxMessage.getMessageIdRef());
+			agentSessionService.refreshOnline();
+			return ApiResponse.buildResult(messageDto);
+		} else {
+			agentSessionService.refreshOnline();
+			return new ApiResponse<ChatMessageDTO, Object>().message("Only Assignee/Admin can add StickyNote to chat.");
+		}
 	}
-    }
 
-    @RequestMapping(value = "/api/sessions/search", method = { RequestMethod.POST })
-    public ApiResponse<ChatSessionDTO, Object> searchSessions(@RequestBody SessionSearchRequest query) {
-	List<ChatSessionDTO> chatSessionDtos = new ArrayList<ChatSessionDTO>();
-	List<ChatSessionDoc> sessions = chatSessionManager.searchBy(query.status, query.tags, query.fromStamp,
-		query.toStamp);
-	for (ChatSessionDoc chatSessionDoc : sessions) {
-	    ChatSessionDTO chatSessionDto = chatArchive.withContact(chatSessionDoc);
-	    chatSessionDtos.add(chatSessionDto);
+	@RequestMapping(value = "/api/sessions/search", method = { RequestMethod.POST })
+	public ApiResponse<ChatSessionDTO, Object> searchSessions(@RequestBody SessionSearchRequest query) {
+		List<ChatSessionDTO> chatSessionDtos = new ArrayList<ChatSessionDTO>();
+		List<ChatSessionDoc> sessions = chatSessionManager.searchBy(query.status, query.tags, query.fromStamp,
+				query.toStamp);
+		for (ChatSessionDoc chatSessionDoc : sessions) {
+			ChatSessionDTO chatSessionDto = chatArchive.withContact(chatSessionDoc);
+			chatSessionDtos.add(chatSessionDto);
+		}
+		/**
+		 * remove duplicate /multiple Session for each contact we can filter based on
+		 * name , phone number on any field
+		 **/
+		if (chatSessionDtos != null && !chatSessionDtos.isEmpty()) {
+			Set<String> chatSessionSet = new HashSet<>();
+			chatSessionDtos = chatSessionDtos.stream().filter(e -> chatSessionSet.add(e.getPhone()))
+					.collect(Collectors.toList());
+		}
+		return ApiResponse.buildResults(chatSessionDtos);
 	}
-	/**
-	 * remove duplicate /multiple Session for each contact we can filter based on
-	 * name , phone number on any field
-	 **/
-	if (chatSessionDtos != null && !chatSessionDtos.isEmpty()) {
-	    Set<String> chatSessionSet = new HashSet<>();
-	    chatSessionDtos = chatSessionDtos.stream().filter(e -> chatSessionSet.add(e.getPhone()))
-		    .collect(Collectors.toList());
-	}
-	return ApiResponse.buildResults(chatSessionDtos);
-    }
 
-    @RequestMapping(value = "/api/sessions/primary", method = { RequestMethod.POST })
-    public ApiResponse<ChatSessionDTO, Object> searchPrimarySessions(@RequestBody SessionSearchRequest query) {
-	List<ChatSessionDTO> chatSessionDtos = new ArrayList<ChatSessionDTO>();
-	List<ChatSessionDoc> sessions = chatSessionManager.searchPrimary(query.text);
-	for (ChatSessionDoc chatSessionDoc : sessions) {
-	    ChatSessionDTO chatSessionDto = chatArchive.getChatSession(chatSessionDoc);
-	    chatSessionDtos.add(chatSessionDto);
+	@RequestMapping(value = "/api/sessions/primary", method = { RequestMethod.POST })
+	public ApiResponse<ChatSessionDTO, Object> searchPrimarySessions(@RequestBody SessionSearchRequest query) {
+		List<ChatSessionDTO> chatSessionDtos = new ArrayList<ChatSessionDTO>();
+		List<ChatSessionDoc> sessions = chatSessionManager.searchPrimary(query.text);
+		for (ChatSessionDoc chatSessionDoc : sessions) {
+			ChatSessionDTO chatSessionDto = chatArchive.getChatSession(chatSessionDoc);
+			chatSessionDtos.add(chatSessionDto);
+		}
+		return ApiResponse.buildResults(chatSessionDtos);
 	}
-	return ApiResponse.buildResults(chatSessionDtos);
-    }
 }

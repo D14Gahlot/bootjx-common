@@ -127,6 +127,7 @@ public class ChatSessionFactory {
 		chatSessionDoc.setPrimary(true);
 		chatSessionDoc.contact().setName(chatContactDoc.getName());
 		chatSessionDoc.contact().copyFrom(chatContactDoc);
+		sessionMessage.session().setFirstMessage(true);
 		return sessionStore.saveSession(chatSessionDoc);
 	}
 

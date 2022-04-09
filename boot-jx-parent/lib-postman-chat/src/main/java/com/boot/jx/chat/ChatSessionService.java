@@ -10,6 +10,7 @@ import com.boot.jx.inbound.InBound.InBoundHandler;
 import com.boot.jx.logger.LoggerService;
 import com.boot.jx.postman.PMConstants;
 import com.boot.jx.postman.PMConstants.CHAT_STATUS;
+import com.boot.jx.postman.PMEnvironment.PMClientConfig;
 import com.boot.jx.postman.PMEnvironment.PMDomainConfig;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
@@ -34,6 +35,9 @@ public class ChatSessionService {
 
 	@Autowired
 	private PMDomainConfig pmDomainConfig;
+
+	@Autowired
+	private PMClientConfig pmClientConfig;
 
 	@Autowired
 	private ChatSessionManager chatSessionManager;
@@ -126,8 +130,13 @@ public class ChatSessionService {
 
 	@Async
 	public void initSessionPost(InboxMessage inboxMessage, ChatSessionDoc session) {
-		ChatContactDoc contact = sessionStore.getContact(inboxMessage);
+		if (!ArgUtil.is(pmClientConfig.getContactDetailsUrl())) {
+			return;
+		}
+
 		try {
+			ChatContactDoc contact = sessionStore.getContact(inboxMessage);
+
 			ChatUserProfileRequest chatUserProfileRequest = new ChatUserProfileRequest();
 			chatUserProfileRequest.setEmail(contact.getEmail());
 			chatUserProfileRequest.setMobile(contact.getPhone());
