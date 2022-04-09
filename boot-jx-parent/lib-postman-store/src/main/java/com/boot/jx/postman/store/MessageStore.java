@@ -75,7 +75,8 @@ public class MessageStore extends CommonMongoTemplateAbstract {
 	}
 
 	private MessageDoc createMessageDoc(InboxMessage inboxMessage) {
-		MessageDoc doc = new MessageDoc();
+		ContactType contactType = inboxMessage.contact().type();
+		MessageDoc doc = MessageDoc.instance(contactType);
 		doc.setTraceId(AppContextUtil.getTraceId());
 		doc.setContactId(PostManUtil.createContactId(inboxMessage));
 		doc.setType("I");
@@ -86,7 +87,7 @@ public class MessageStore extends CommonMongoTemplateAbstract {
 
 		ContactDetailDoc contact = new ContactDetailDoc();
 		contact.setPhone(inboxMessage.getFrom());
-		contact.setContactType(ArgUtil.parseAsString(inboxMessage.contact().type()));
+		contact.setContactType(ArgUtil.parseAsString(contactType));
 		doc.setContact(contact);
 
 		updateMessageDoc(inboxMessage, doc);
@@ -184,7 +185,8 @@ public class MessageStore extends CommonMongoTemplateAbstract {
 	}
 
 	public MessageDoc createMessageDoc(OutboxMessage outMessage) {
-		MessageDoc doc = new MessageDoc();
+		ContactType contactType = outMessage.contact().type();
+		MessageDoc doc = MessageDoc.instance(contactType);
 		doc.setTraceId(AppContextUtil.getTraceId());
 
 		if (ArgUtil.is(outMessage.getAction())) {

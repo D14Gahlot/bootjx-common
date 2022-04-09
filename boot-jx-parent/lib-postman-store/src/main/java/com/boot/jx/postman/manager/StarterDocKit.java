@@ -7,9 +7,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Component;
 
+import com.boot.jx.dict.ContactType;
 import com.boot.jx.logger.LoggerService;
 import com.boot.jx.postman.PMConstants;
 import com.boot.jx.postman.PMConstants.APP_TYPE;
+import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.doc.QuickMedia;
 import com.boot.jx.postman.doc.QuickReply;
 import com.boot.jx.postman.doc.config.ClientAppConfigDoc;
@@ -22,7 +24,7 @@ public class StarterDocKit {
 	public static final Logger LOGGER = LoggerService.getLogger(StarterDocKit.class);
 
 	@Autowired
-	MongoTemplate mongoTemplate;
+	private MongoTemplate mongoTemplate;
 
 	private QuickMedia createTemplateReply(String name, String title, String category, String content, String url) {
 		QuickMedia temp5 = mongoTemplate.findById(name, QuickMedia.class);
@@ -117,6 +119,28 @@ public class StarterDocKit {
 		botApp.setKeyVersion("v3");
 		botApp.setShared(true);
 		createClientApp(botApp);
+	}
+
+	public void createMessageIndex(ContactType contactType) {
+		MessageDoc wa = MessageDoc.instance(contactType);
+		mongoTemplate.save(wa);
+		mongoTemplate.remove(wa);
+	}
+
+	public void domain() {
+
+		/**
+		 * Required to create index
+		 * 
+		 * @param contactType
+		 */
+		createMessageIndex(ContactType.WHATSAPP);
+		createMessageIndex(ContactType.FACEBOOK);
+		createMessageIndex(ContactType.INSTAGRAM);
+		createMessageIndex(ContactType.TELEGRAM);
+		createMessageIndex(ContactType.TWITTER);
+		createMessageIndex(ContactType.WEBSITE);
+
 	}
 
 }

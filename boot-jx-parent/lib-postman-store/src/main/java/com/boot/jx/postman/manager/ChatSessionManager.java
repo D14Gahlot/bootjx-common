@@ -23,6 +23,7 @@ import com.boot.jx.postman.PMConstants.APP_TYPE;
 import com.boot.jx.postman.PMConstants.CHAT_STATUS;
 import com.boot.jx.postman.PMConstants.DEFAULT_VALUES;
 import com.boot.jx.postman.PMEnvironment;
+import com.boot.jx.postman.PMEnvironment.PMClientConfig;
 import com.boot.jx.postman.PMEnvironment.PMDomainConfig;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.QuickTag;
@@ -51,6 +52,9 @@ public class ChatSessionManager {
 
 	@Autowired
 	private PMDomainConfig pmDomainConfig;
+
+	@Autowired
+	public PMClientConfig pmClientConfig;
 
 	public InBoundEvent updateStatus(ChatSessionDoc session, PMConstants.CHAT_STATUS status) {
 		if (!ArgUtil.is(status)) {
@@ -149,7 +153,7 @@ public class ChatSessionManager {
 	}
 
 	public List<ChatSessionDoc> findChatSessionDocByAgentAndUnAssigned(String tab, String agentCode, String agentDept,
-			String search, long period, String searchStatus) {
+			String search, long period, String searchStatus, int limit) {
 
 		period = Math.min(DEFAULT_VALUES.POSTMAN_AGENT_TAB_HISTORY_PERIOD_MAX, period);
 		Calendar timeout = Calendar.getInstance();
@@ -186,9 +190,14 @@ public class ChatSessionManager {
 			} else if (ArgUtil.areEqual("OUTBOUND", searchStatus)) {
 				criterias.add(Criteria.where("active").is(true).and("lastInBoundMsg").exists(false)
 						.orOperator(Criteria.where("resolved").exists(false), Criteria.where("resolved").is(false)));
-			} else if (ArgUtil.areEqual("STALE", searchStatus)) {
-				criterias.add(Criteria.where("active").is(true).orOperator(Criteria.where("resolved").exists(false),
-						Criteria.where("resolved").is(false)));
+			} else if (ArgUtil.areEqual("STALED", searchStatus)) {
+				Calendar expiryWatermark = Calendar.getInstance();
+				expiryWatermark.setTimeInMillis(
+						expiryWatermark.getTimeInMillis() - TimeUtils.toMillis(pmClientConfig.getChatSessionTimeout()));
+				long expiryWatermarkHour = expiryWatermark.getTimeInMillis() / TimeUtils.Constants.MILLIS_IN_HOUR;
+
+				criterias.add(Criteria.where("active").is(true).and("updated.hour").lte(expiryWatermarkHour)
+						.orOperator(Criteria.where("resolved").exists(false), Criteria.where("resolved").is(false)));
 			} else {
 				criterias.add(Criteria.where("active").is(true).and("lastInBoundMsg").exists(true)
 						.orOperator(Criteria.where("resolved").exists(false), Criteria.where("resolved").is(false)));
@@ -242,7 +251,7 @@ public class ChatSessionManager {
 			}
 		}
 
-		Integer limit = pmDomainConfig.getAgentHistoryCount().asInteger(150);
+		limit = Math.min(Math.max(50, limit), pmDomainConfig.getAgentHistoryCount().asInteger(150));
 		query2.addCriteria(
 				// Only Agent Chats
 				primaryCriteria
@@ -250,24 +259,24 @@ public class ChatSessionManager {
 						.andOperator(criterias.toArray(new Criteria[criterias.size()])))
 				// Limit
 				.with(new Sort(Direction.DESC, "updated.hour")).limit(limit);
-		// System.out.println(query2.toString());
+		//System.out.println(query2.toString());
 		LOGGER.debug(query2.toString());
 		return sessionStore.find(
 				CommonMongoQueryBuilder.collection(ChatSessionDoc.class).query(query2).skipDBRefByNames("lastMsg"));
 	}
 
 	public List<ChatSessionDoc> findChatSessionDocByAgentAndUnAssigned(String tab, String agentCode, String agentDept,
-			String search, String searchStatus) {
+			String search, String searchStatus, int limit) {
 		long historyPeriod = pmDomainConfig.getAgentHistoryPeriod().asLong(0L);
 		if (historyPeriod > 0L && ArgUtil.areEqual("HISTORY", tab)) {
 			return findChatSessionDocByAgentAndUnAssigned(tab, agentCode, agentDept, search,
-					PMConstants.DEFAULT_VALUES.POSTMAN_AGENT_TAB_HISTORY_PERIOD + historyPeriod, searchStatus);
-		} else if (historyPeriod > 0L && ArgUtil.isEqual(searchStatus, "STALE", "CLOSED")) {
+					PMConstants.DEFAULT_VALUES.POSTMAN_AGENT_TAB_HISTORY_PERIOD + historyPeriod, searchStatus, limit);
+		} else if (historyPeriod > 0L && ArgUtil.isEqual(searchStatus, "STALED", "CLOSED")) {
 			return findChatSessionDocByAgentAndUnAssigned(tab, agentCode, agentDept, search,
-					PMConstants.DEFAULT_VALUES.POSTMAN_AGENT_TAB_HISTORY_PERIOD + historyPeriod, searchStatus);
+					PMConstants.DEFAULT_VALUES.POSTMAN_AGENT_TAB_HISTORY_PERIOD + historyPeriod, searchStatus, limit);
 		}
 		return findChatSessionDocByAgentAndUnAssigned(tab, agentCode, agentDept, search,
-				DEFAULT_VALUES.POSTMAN_AGENT_TAB_HISTORY_PERIOD * 3 / 2, searchStatus);
+				DEFAULT_VALUES.POSTMAN_AGENT_TAB_HISTORY_PERIOD * 3 / 2, searchStatus, limit);
 	}
 
 	public List<ChatSessionDoc> searchPrimary(String search) {
