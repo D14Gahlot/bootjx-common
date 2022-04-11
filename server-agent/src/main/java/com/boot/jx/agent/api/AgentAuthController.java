@@ -62,8 +62,8 @@ public class AgentAuthController {
 	@Autowired
 	private EmpAuthService authService;
 
-	private boolean isAgentPanelBlocked() {
-		// return false;
+	private boolean isAgentPanelActive() {
+		// return true;
 		return pmEnvironment.keyEntry("mry.domain.active").asBoolean()
 				&& pmEnvironment.keyEntry("mry.domain.agent.active").asBoolean();
 	}
@@ -82,7 +82,7 @@ public class AgentAuthController {
 			@RequestParam(required = false) String domainId, @RequestParam(required = false) String domainToken,
 			@RequestParam(required = false) String domainUser) throws NoSuchAlgorithmException {
 
-		if (isAgentPanelBlocked()) {
+		if (!isAgentPanelActive()) {
 			return unauthorized(model);
 		}
 
@@ -167,7 +167,7 @@ public class AgentAuthController {
 	@RequestMapping(value = { "/auth/login", "/auth/resetpass" }, method = { RequestMethod.POST, RequestMethod.GET })
 	public String login(Model model, HttpServletRequest request, HttpServletResponse httpServletResponse) {
 
-		if (isAgentPanelBlocked()) {
+		if (isAgentPanelActive()) {
 			return unauthorized(model);
 		}
 
