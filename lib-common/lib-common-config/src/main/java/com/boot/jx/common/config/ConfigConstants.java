@@ -63,7 +63,7 @@ public class ConfigConstants {
 				.desc("Sandbox channels are preconfigured communication channels").optionsOnOff()),
 
 		// Agent Properties
-		CHAT_TAG_ENABLED(new ConfigMeta("Chat Tag Enabled", "chat.tag.enabled").optionsOnOff().group(GROUP_AGENT)),
+		CHAT_TAG_ENABLED(new ConfigMeta("Chat Session Tags Enabled", "chat.tag.enabled").optionsOnOff().group(GROUP_AGENT)),
 
 		POSTMAN_CHAT_SESSION_TIMEOUT(new ConfigMeta("Chat Session Timeout", "postman.chat.session.timeout")
 				.optionValues("8hr", "12hr", "16hr", "20hr", "24hr")),
@@ -132,7 +132,7 @@ public class ConfigConstants {
 				"postman.agent.chat.autoreply.talk2agent").optionsSource("getx:/api/tmpl/hsm").optionsKey("code")
 						.optionsLabel("desc").group(GROUP_AGENT)),
 
-		POSTMAN_AGENT_CHAT_AUTOREPLY_RESOLVED(new ConfigMeta("Message to customer when chat is resolevd by agent",
+		POSTMAN_AGENT_CHAT_AUTOREPLY_RESOLVED(new ConfigMeta("Message to customer when chat is resolved by agent",
 				"postman.agent.chat.autoreply.resolved").optionsSource("getx:/api/tmpl/hsm").optionsKey("code")
 						.optionsLabel("desc").group(GROUP_AGENT)),
 
