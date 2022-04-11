@@ -168,4 +168,5 @@ public class BusinessUserDoc implements IDocument, DocVersion, AuditCreateEntity
 	public Map<String, Object> toDTO() {
 		return MapModel.createInstance().put("contact", this.contact).put("role", this.role).toMap();
 	}
+
 }

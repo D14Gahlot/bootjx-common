@@ -27,6 +27,7 @@ import com.boot.jx.postman.model.MessageBox;
 import com.boot.jx.rest.RestService;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
+import com.boot.utils.JsonUtil;
 
 @Component
 public class AccountAuthService implements LogoutHandler {
@@ -128,12 +129,14 @@ public class AccountAuthService implements LogoutHandler {
 	}
 
 	public void sendMailToSalesTeam(BusinessUserDoc accountDoc, String emailTemplate) {
-		postManClient.send(new MessageBox().push(new Email().to("sales@mehery.com").template(emailTemplate)
+		postManClient.send(new MessageBox().push(new Email()
+				.to(pmEnvironment.keyEntry("mry.prop.sales.email").asString()).template(emailTemplate)
 				.put("logo", pmEnvironment.keyEntry("mry.prop.logo.bg-x-icon").asString())
 				.put("website", pmEnvironment.keyEntry("mry.prop.service.website").asString())
 				.put("service", pmEnvironment.keyEntry("mry.prop.service.name").asString())
 				.put("servicedomain", pmEnvironment.keyEntry("mry.prop.service.domain").asString())
 				.put("contactName", accountDoc.getContact().getName()).put("email", accountDoc.getContact().getEmail())
+				.put("products", JsonUtil.toJson(accountDoc.getContact().getProducts()))
 				.put("phone", accountDoc.getContact().getPhone())
 				.put("company", accountDoc.getContact().getCompany())));
 	}

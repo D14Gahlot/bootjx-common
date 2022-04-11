@@ -1,6 +1,7 @@
 package com.boot.jx.account.doc;
 
 import java.io.Serializable;
+import java.util.List;
 
 import javax.validation.constraints.NotNull;
 
@@ -27,6 +28,8 @@ public class SignupContact implements Serializable {
 
 	@NotNull
 	private String role;
+
+	private List<Object> products;
 
 	@NotNull
 	private String country;
@@ -77,6 +80,14 @@ public class SignupContact implements Serializable {
 
 	public void setCountry(String country) {
 		this.country = country;
+	}
+
+	public List<Object> getProducts() {
+		return products;
+	}
+
+	public void setProducts(List<Object> products) {
+		this.products = products;
 	}
 
 }
