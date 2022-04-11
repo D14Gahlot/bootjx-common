@@ -167,7 +167,7 @@ public class AgentAuthController {
 	@RequestMapping(value = { "/auth/login", "/auth/resetpass" }, method = { RequestMethod.POST, RequestMethod.GET })
 	public String login(Model model, HttpServletRequest request, HttpServletResponse httpServletResponse) {
 
-		if (isAgentPanelActive()) {
+		if (!isAgentPanelActive()) {
 			return unauthorized(model);
 		}
 
