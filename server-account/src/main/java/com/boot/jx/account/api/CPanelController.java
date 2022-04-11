@@ -20,6 +20,7 @@ import com.boot.jx.account.AccountSessionBean;
 import com.boot.jx.account.doc.AccountStore;
 import com.boot.jx.account.doc.BusinessUserDoc;
 import com.boot.jx.api.ApiResponse;
+import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.common.config.AppCommonAuthFilter.ACCESS_RULES;
 import com.boot.jx.common.config.ConfigManager;
 import com.boot.jx.http.ApiRequest;
@@ -85,6 +86,11 @@ public class CPanelController {
 			@ApiParam(allowableValues = USER_ROLE.ALLOWED) @RequestParam String role, @RequestParam String email,
 			@RequestParam boolean assign) {
 		BusinessUserDoc user = accountStore.findOneByEmail(email, BusinessUserDoc.class);
+
+		if (!ArgUtil.is(user)) {
+			ApiResponseUtil.throwException("User Not found");
+		}
+
 		if (assign) {
 			user.role().add(role);
 		} else {
