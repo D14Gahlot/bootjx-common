@@ -89,7 +89,7 @@ public class ChannelPluginProvider {
 			list.add(new ConfigMeta().key("channelKey").title("Channel Key").readonly().hidden()
 					.defaultValue(PostManUtil.UNIQUE_API_KEY()));
 			list.add(new ConfigMeta().key("inboundQueue").title("Default Queue").optional()
-					.optionsSource("getx:/api/config/inbound_queue").optionsKey("code").order(100));
+					.optionsSource("getx:/api/options/inbound_queue").optionsKey("code").order(100));
 
 			String serviceDomain = pmEnvironment.keyEntry("mry.prop.service.domain").asString();
 			String clientDomain = AppContextUtil.getTenant();
