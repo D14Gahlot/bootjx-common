@@ -137,7 +137,7 @@ public class MessageStore extends CommonMongoTemplateAbstract {
 			doc = createMessageDoc(inboxMessage);
 			if (ArgUtil.is(doc) && ArgUtil.is(doc.getReplyIdExt()) && !ArgUtil.is(doc.getReplyId())) {
 				MessageDoc replyTo = findOneByMessageIdExt(doc.getReplyIdExt(),
-						inboxMessage.contact().getChannelType());
+						inboxMessage.contact().getContactType());
 				if (ArgUtil.is(replyTo) && ArgUtil.is(replyTo.getMessageId())) {
 					doc.setReplyId(replyTo.getMessageId());
 				}
