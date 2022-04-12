@@ -66,6 +66,11 @@ public class MessageStore extends CommonMongoTemplateAbstract {
 		doc.setTags(inboxMessage.getTags());
 		doc.setMessageIdExt(inboxMessage.getMessageIdExt());
 		doc.setReply(inboxMessage.getReply());
+
+		if (ArgUtil.is(inboxMessage.getReplyId())) {
+			doc.setReplyId(inboxMessage.getReplyId());
+		}
+
 		doc.setReplyIdExt(inboxMessage.getReplyIdExt());
 
 		// Additonals
