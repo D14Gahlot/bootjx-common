@@ -120,11 +120,11 @@ public class AgentMsgController {
 		ApiResponse<ChatMessageDTO, ChatSessionDTO> resp = ApiResponse.build();
 		ChatSessionDoc sessionDoc = sessionStore.getSession(sessionId);
 		ChatSessionDTO chatSessionDto = chatArchive.getChatSession(sessionDoc);
-		if (ArgUtil.is(messageIdExt)) {
-			MessageDoc m = messageStore.findOneByMessageIdExt(messageIdExt, sessionDoc.contact().getContactType());
-			return resp.result(chatArchive.createMessageDTO(m, chatSessionDto)).meta(chatSessionDto);
-		} else if (ArgUtil.is(messageId)) {
+		if (ArgUtil.is(messageId)) {
 			MessageDoc m = messageStore.findByMessageId(messageId, sessionDoc.contact().getContactType());
+			return resp.result(chatArchive.createMessageDTO(m, chatSessionDto)).meta(chatSessionDto);
+		} else if (ArgUtil.is(messageIdExt)) {
+			MessageDoc m = messageStore.findOneByMessageIdExt(messageIdExt, sessionDoc.contact().getContactType());
 			return resp.result(chatArchive.createMessageDTO(m, chatSessionDto)).meta(chatSessionDto);
 		} else {
 			return resp.results(chatArchive.getMessages(chatSessionDto)).meta(chatSessionDto);
