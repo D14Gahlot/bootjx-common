@@ -66,7 +66,7 @@ public class ChatArchiveBuilder {
 	}
 
 	public ChatSessionDTOBuilder addMessage(MessageDoc messageDoc) {
-	    ChatMessageDTO messageDto = archive.getMessage(messageDoc, chatSessionDTO);
+	    ChatMessageDTO messageDto = archive.createMessageDTO(messageDoc, chatSessionDTO);
 	    if (!ArgUtil.is(chatSessionDTO.getMessages())) {
 		chatSessionDTO.setMessages(CollectionUtil.getList(messageDto));
 	    } else {

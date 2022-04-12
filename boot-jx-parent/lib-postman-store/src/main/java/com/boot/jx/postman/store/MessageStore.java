@@ -99,6 +99,19 @@ public class MessageStore extends CommonMongoTemplateAbstract {
 		return mongoTemplate.findById(messageId, MessageDoc.class, getCollectionName(contactType));
 	}
 
+	public MessageDoc findOneByMessageIdExt(String messageIdExt, String contactType) {
+		Query query2 = new Query();
+		query2.addCriteria(Criteria.where("messageIdExt").is(messageIdExt)).with(new Sort(Direction.ASC, "timestamp"));
+		MessageDoc messages = mongoTemplate.findOne(query2, MessageDoc.class, getCollectionName(contactType));
+		return messages;
+	}
+
+	public List<MessageDoc> findAllByMessageIdExt(String messageIdExt, String contactType) {
+		Query query2 = new Query();
+		query2.addCriteria(Criteria.where("messageIdExt").is(messageIdExt)).with(new Sort(Direction.ASC, "timestamp"));
+		return mongoTemplate.find(query2, MessageDoc.class, getCollectionName(contactType));
+	}
+
 	private MessageDoc findMessageDoc(InboxMessage inboxMessage) {
 		if (ArgUtil.is(inboxMessage.getMessageId())) {
 			return mongoTemplate.findById(inboxMessage.getMessageId(), MessageDoc.class,
@@ -116,7 +129,14 @@ public class MessageStore extends CommonMongoTemplateAbstract {
 	public MessageDoc findOrCreateMessageDoc(InboxMessage inboxMessage) {
 		MessageDoc doc = findMessageDoc(inboxMessage);
 		if (!ArgUtil.is(doc)) {
-			return createMessageDoc(inboxMessage);
+			doc = createMessageDoc(inboxMessage);
+			if (ArgUtil.is(doc) && ArgUtil.is(doc.getReplyIdExt()) && !ArgUtil.is(doc.getReplyId())) {
+				MessageDoc replyTo = findOneByMessageIdExt(doc.getReplyIdExt(),
+						inboxMessage.contact().getChannelType());
+				if (ArgUtil.is(replyTo)) {
+					doc.setReplyId(replyTo.getMessageId());
+				}
+			}
 		}
 		return doc;
 	}

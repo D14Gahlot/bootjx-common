@@ -176,14 +176,6 @@ public class MsgController {
 		return ApiResponse.buildResults(chatSessionDtos);
 	}
 
-	@ResponseBody
-	@RequestMapping(value = "/api/sessions/messages", method = { RequestMethod.POST })
-	public ApiResponse<ChatSessionDTO, Object> getMessagesForSession(@RequestBody ChatSessionDTO chatSessionDto) {
-		chatSessionDto = chatArchive.getChatSession(chatSessionDto);
-		chatSessionDto = chatArchive.withContact(chatSessionDto);
-		return ApiResponse.buildResult(chatArchive.withMessages(chatSessionDto));
-	}
-
 	@Autowired
 	private AgentStore agentStore;
 

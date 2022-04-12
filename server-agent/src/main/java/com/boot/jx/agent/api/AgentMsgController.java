@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.boot.jx.agent.AgentService;
@@ -30,17 +31,22 @@ import com.boot.jx.postman.PMConstants.CHAT_SESSION_ACTIONS;
 import com.boot.jx.postman.PMConstants.DEFAULT;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.doc.ChatSessionDoc;
+import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.dto.ChatMessageDTO;
 import com.boot.jx.postman.dto.ChatSessionDTO;
 import com.boot.jx.postman.manager.ChatSessionManager;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.service.ChatDTOUtil;
+import com.boot.jx.postman.store.MessageStore;
 import com.boot.jx.postman.store.SessionStore;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.Constants;
 
 @RestController
 public class AgentMsgController {
+
+	@Autowired
+	private MessageStore messageStore;
 
 	@Autowired
 	private SessionStore sessionStore;
@@ -108,6 +114,23 @@ public class AgentMsgController {
 				.details(agentSessionService.getAgentSessions());
 	}
 
+	@RequestMapping(value = { "/api/session/messages" }, method = { RequestMethod.GET })
+	public ApiResponse<ChatMessageDTO, ChatSessionDTO> messageApi(@RequestParam String sessionId,
+			@RequestParam(required = false) String messageId, @RequestParam(required = false) String messageIdExt) {
+		ApiResponse<ChatMessageDTO, ChatSessionDTO> resp = ApiResponse.build();
+		ChatSessionDoc sessionDoc = sessionStore.getSession(sessionId);
+		ChatSessionDTO chatSessionDto = chatArchive.getChatSession(sessionDoc);
+		if (ArgUtil.is(messageIdExt)) {
+			MessageDoc m = messageStore.findOneByMessageIdExt(messageIdExt, sessionDoc.contact().getContactType());
+			return resp.result(chatArchive.createMessageDTO(m, chatSessionDto)).meta(chatSessionDto);
+		} else if (ArgUtil.is(messageId)) {
+			MessageDoc m = messageStore.findByMessageId(messageId, sessionDoc.contact().getContactType());
+			return resp.result(chatArchive.createMessageDTO(m, chatSessionDto)).meta(chatSessionDto);
+		} else {
+			return resp.results(chatArchive.getMessages(chatSessionDto)).meta(chatSessionDto);
+		}
+	}
+
 	@RequestMapping(value = { "/api/session/tag" }, method = { RequestMethod.POST })
 	public ApiResponse<ChatSessionDTO, Object> addSessionTags(@RequestBody ChatTagUpdateRequest updateRequest) {
 		ChatSessionDoc sessionDoc = sessionStore.getSession(updateRequest.sessionId);
@@ -116,6 +139,14 @@ public class AgentMsgController {
 			documentUpdateListner.onChatSessionUpdate(sessionDoc);
 		}
 		return ApiResponse.buildData(ChatDTOUtil.getChatSessionDTO(sessionDoc));
+	}
+
+	@ResponseBody
+	@RequestMapping(value = "/api/sessions/messages", method = { RequestMethod.POST })
+	public ApiResponse<ChatSessionDTO, Object> getMessagesForSession(@RequestBody ChatSessionDTO chatSessionDto) {
+		chatSessionDto = chatArchive.getChatSession(chatSessionDto);
+		chatSessionDto = chatArchive.withContact(chatSessionDto);
+		return ApiResponse.buildResult(chatArchive.withMessages(chatSessionDto));
 	}
 
 	@RequestMapping(value = "/api/sessions/note", method = { RequestMethod.POST })

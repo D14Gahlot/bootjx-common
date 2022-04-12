@@ -25,126 +25,128 @@ import com.boot.utils.ArgUtil;
 @Component
 public class ChatArchiveService {
 
-    @Autowired
-    private MongoTemplate mongoTemplate;
+	@Autowired
+	private MongoTemplate mongoTemplate;
 
-    @Autowired
-    private SessionStore sessionStore;
+	@Autowired
+	private SessionStore sessionStore;
 
-    @Autowired
-    private MessageStore messageStore;
+	@Autowired
+	private MessageStore messageStore;
 
-    public ContactDTO getContact(ChatSessionDTO chatSessionDto) {
-	ChatContactDoc contact = mongoTemplate.findById(chatSessionDto.getContactId(), ChatContactDoc.class);
-	ContactDTO dto = ChatDTOUtil.getContactDTO(contact);
-	if (ArgUtil.is(contact)) {
-	    if (ArgUtil.is(contact.getProfileId())) {
-		ChatUserProfileDoc profileDoc = mongoTemplate.findById(contact.getProfileId(),
-			ChatUserProfileDoc.class);
-		ChatUserProfileDTO profileDTO = ChatDTOUtil.getProfileDTO(profileDoc);
-		dto.setProfile(profileDTO);
-	    } else if (ArgUtil.is(contact.getPhone())) {
-		Query query = new Query();
-		query.addCriteria(Criteria.where("mobile").is(contact.getPhone()));
-		ChatUserProfileDoc profileDoc = mongoTemplate.findOne(query, ChatUserProfileDoc.class);
-		ChatUserProfileDTO profileDTO = ChatDTOUtil.getProfileDTO(profileDoc);
-		dto.setProfile(profileDTO);
-	    }
-	}
-	return dto;
-    }
-
-    public ChatSessionDTO withContact(ChatSessionDTO chatSessionDto) {
-
-	ContactDTO contact = getContact(chatSessionDto);
-	chatSessionDto.setContact(contact);
-
-	chatSessionDto.setContactType(contact.getContactType());
-	chatSessionDto.setName(contact.getName());
-	chatSessionDto.setProfilePic(contact.getProfilePic());
-	chatSessionDto.setEmail(contact.getEmail());
-	chatSessionDto.setPhone(contact.getPhone());
-	chatSessionDto.setContactId(contact.getContactId());
-
-	return chatSessionDto;
-    }
-
-    public ChatSessionDoc getChatSessionDoc(String sessionId) {
-	return sessionStore.getSession(sessionId);
-    }
-
-    public ChatSessionDTO getChatSession(String sessionId) {
-	return ChatDTOUtil.getChatSessionDTO(getChatSessionDoc(sessionId));
-    }
-
-    public ChatSessionDTO getChatSession(ChatSessionDTO chatSessionDto) {
-	return getChatSession(chatSessionDto.getSessionId());
-    }
-
-    public ChatMessageDTO getMessage(MessageDoc messageDoc, ChatSessionDoc chatSessionDoc) {
-	if (ArgUtil.is(messageDoc)) {
-	    return ChatDTOUtil.getChatMessageDTO(messageDoc, chatSessionDoc.getContactName(),
-		    ArgUtil.nonEmpty(messageDoc.getAgent(), messageDoc.getQueue(), chatSessionDoc.getAssignedToAgent(),
-			    chatSessionDoc.getAssignedToQueue()));
-	}
-	return new ChatMessageDTO();
-    }
-
-    public ChatMessageDTO getMessage(MessageDoc messageDoc, ChatSessionDTO chatSessionDto) {
-	ChatMessageDTO messageDto = ChatDTOUtil.getChatMessageDTO(messageDoc, chatSessionDto.getName(),
-		ArgUtil.nonEmpty(messageDoc.getAgent(), messageDoc.getQueue(), chatSessionDto.getAssignedToAgent(),
-			chatSessionDto.getAssignedToQueue()));
-	return messageDto;
-    }
-
-    public List<ChatMessageDTO> getMessages(ChatSessionDTO chatSessionDto) {
-
-	if (ArgUtil.isEmpty(chatSessionDto.getContactType())) {
-	    chatSessionDto = withContact(chatSessionDto);
+	public ContactDTO getContact(ChatSessionDTO chatSessionDto) {
+		ChatContactDoc contact = mongoTemplate.findById(chatSessionDto.getContactId(), ChatContactDoc.class);
+		ContactDTO dto = ChatDTOUtil.getContactDTO(contact);
+		if (ArgUtil.is(contact)) {
+			if (ArgUtil.is(contact.getProfileId())) {
+				ChatUserProfileDoc profileDoc = mongoTemplate.findById(contact.getProfileId(),
+						ChatUserProfileDoc.class);
+				ChatUserProfileDTO profileDTO = ChatDTOUtil.getProfileDTO(profileDoc);
+				dto.setProfile(profileDTO);
+			} else if (ArgUtil.is(contact.getPhone())) {
+				Query query = new Query();
+				query.addCriteria(Criteria.where("mobile").is(contact.getPhone()));
+				ChatUserProfileDoc profileDoc = mongoTemplate.findOne(query, ChatUserProfileDoc.class);
+				ChatUserProfileDTO profileDTO = ChatDTOUtil.getProfileDTO(profileDoc);
+				dto.setProfile(profileDTO);
+			}
+		}
+		return dto;
 	}
 
-	List<MessageDoc> messages = messageStore.findBySessionId(chatSessionDto.getSessionId(),
-		chatSessionDto.getContactType());
+	public ChatSessionDTO withContact(ChatSessionDTO chatSessionDto) {
 
-	List<ChatMessageDTO> messageDtos = new ArrayList<ChatMessageDTO>();
-	for (MessageDoc messageDoc : messages) {
-	    ChatMessageDTO messageDto = getMessage(messageDoc, chatSessionDto);
-	    messageDtos.add(messageDto);
+		ContactDTO contact = getContact(chatSessionDto);
+		chatSessionDto.setContact(contact);
+
+		chatSessionDto.setContactType(contact.getContactType());
+		chatSessionDto.setName(contact.getName());
+		chatSessionDto.setProfilePic(contact.getProfilePic());
+		chatSessionDto.setEmail(contact.getEmail());
+		chatSessionDto.setPhone(contact.getPhone());
+		chatSessionDto.setContactId(contact.getContactId());
+
+		return chatSessionDto;
 	}
-	return messageDtos;
-    }
 
-    public ChatSessionDTO withMessages(ChatSessionDTO chatSessionDto) {
-	List<ChatMessageDTO> messageDtos = getMessages(chatSessionDto);
-	chatSessionDto.setMessages(messageDtos);
-	return chatSessionDto;
-    }
+	public ChatSessionDoc getChatSessionDoc(String sessionId) {
+		return sessionStore.getSession(sessionId);
+	}
 
-    // With Doc Input
-    public ChatSessionDTO getChatSession(ChatSessionDoc chatSessionDoc) {
-	return ChatDTOUtil.getChatSessionDTO(chatSessionDoc);
-    }
+	public ChatSessionDTO getChatSession(String sessionId) {
+		return ChatDTOUtil.getChatSessionDTO(getChatSessionDoc(sessionId));
+	}
 
-    public ChatSessionDTO withContact(ChatSessionDoc chatSessionDoc) {
-	ChatSessionDTO chatSessionDto = ChatDTOUtil.getChatSessionDTO(chatSessionDoc);
-	return withContact(chatSessionDto);
-    }
+	public ChatSessionDTO getChatSession(ChatSessionDTO chatSessionDto) {
+		return getChatSession(chatSessionDto.getSessionId());
+	}
 
-    @Deprecated
-    public ChatSessionDTO getChatSessionDto(ChatSessionDoc chatSessionDoc, String agentCode) {
-	ChatSessionDTO chatSessionDto = getChatSession(chatSessionDoc);
-	chatSessionDto = withContact(chatSessionDto);
+	public ChatMessageDTO getMessage(MessageDoc messageDoc, ChatSessionDoc chatSessionDoc) {
+		if (ArgUtil.is(messageDoc)) {
+			return ChatDTOUtil.getChatMessageDTO(messageDoc, chatSessionDoc.getContactName(),
+					ArgUtil.nonEmpty(messageDoc.getAgent(), messageDoc.getQueue(), chatSessionDoc.getAssignedToAgent(),
+							chatSessionDoc.getAssignedToQueue()));
+		}
+		return new ChatMessageDTO();
+	}
 
-	chatSessionDto.setAssigned(ArgUtil.areEqual(chatSessionDoc.getAssignedToAgent(), agentCode)
-		&& ArgUtil.isEmptyValue(chatSessionDoc.getResolveSessionStamp()));
-	chatSessionDto = withMessages(chatSessionDto);
-	return chatSessionDto;
-    }
+	public ChatMessageDTO createMessageDTO(MessageDoc messageDoc, ChatSessionDTO chatSessionDto) {
+		ChatMessageDTO messageDto = ChatDTOUtil.getChatMessageDTO(messageDoc, chatSessionDto.getName(),
+				ArgUtil.nonEmpty(messageDoc.getAgent(), messageDoc.getQueue(), chatSessionDto.getAssignedToAgent(),
+						chatSessionDto.getAssignedToQueue()));
+		return messageDto;
+	}
 
-    @Deprecated
-    public ChatSessionDTO getChatSessionDto(ChatSessionDTO chatSessionDto) {
-	ChatSessionDoc sessionDoc = sessionStore.getSession(chatSessionDto.getSessionId());
-	return getChatSessionDto(sessionDoc, null);
-    }
+	public List<ChatMessageDTO> createMessageDTO(List<MessageDoc> messages, ChatSessionDTO chatSessionDto) {
+		List<ChatMessageDTO> messageDtos = new ArrayList<ChatMessageDTO>();
+		for (MessageDoc messageDoc : messages) {
+			ChatMessageDTO messageDto = createMessageDTO(messageDoc, chatSessionDto);
+			messageDtos.add(messageDto);
+		}
+		return messageDtos;
+	}
+
+	public List<ChatMessageDTO> getMessages(ChatSessionDTO chatSessionDto) {
+
+		if (ArgUtil.isEmpty(chatSessionDto.getContactType())) {
+			chatSessionDto = withContact(chatSessionDto);
+		}
+		List<MessageDoc> messages = messageStore.findBySessionId(chatSessionDto.getSessionId(),
+				chatSessionDto.getContactType());
+		return createMessageDTO(messages, chatSessionDto);
+	}
+
+	public ChatSessionDTO withMessages(ChatSessionDTO chatSessionDto) {
+		List<ChatMessageDTO> messageDtos = getMessages(chatSessionDto);
+		chatSessionDto.setMessages(messageDtos);
+		return chatSessionDto;
+	}
+
+	// With Doc Input
+	public ChatSessionDTO getChatSession(ChatSessionDoc chatSessionDoc) {
+		return ChatDTOUtil.getChatSessionDTO(chatSessionDoc);
+	}
+
+	public ChatSessionDTO withContact(ChatSessionDoc chatSessionDoc) {
+		ChatSessionDTO chatSessionDto = ChatDTOUtil.getChatSessionDTO(chatSessionDoc);
+		return withContact(chatSessionDto);
+	}
+
+	@Deprecated
+	public ChatSessionDTO getChatSessionDto(ChatSessionDoc chatSessionDoc, String agentCode) {
+		ChatSessionDTO chatSessionDto = getChatSession(chatSessionDoc);
+		chatSessionDto = withContact(chatSessionDto);
+
+		chatSessionDto.setAssigned(ArgUtil.areEqual(chatSessionDoc.getAssignedToAgent(), agentCode)
+				&& ArgUtil.isEmptyValue(chatSessionDoc.getResolveSessionStamp()));
+		chatSessionDto = withMessages(chatSessionDto);
+		return chatSessionDto;
+	}
+
+	@Deprecated
+	public ChatSessionDTO getChatSessionDto(ChatSessionDTO chatSessionDto) {
+		ChatSessionDoc sessionDoc = sessionStore.getSession(chatSessionDto.getSessionId());
+		return getChatSessionDto(sessionDoc, null);
+	}
 
 }
