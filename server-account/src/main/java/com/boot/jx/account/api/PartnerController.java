@@ -402,6 +402,12 @@ public class PartnerController {
 			accountStore.save(account);
 			return ApiResponse.build().message("Owner Removed");
 		} else {
+			Optional<DomainDoc> domainFound = account.domains().stream().filter(d -> d.getDomain().equals(domain))
+					.findFirst();
+			if (ArgUtil.is(domainFound.isPresent())) {
+				ApiResponseUtil.throwInputException(new ApiFieldError().field("email").codeKey("ValidAccountNotFound")
+						.description("Already Mapped"));
+			}
 			account.domains().add(domaiNational.get());
 			accountStore.save(account);
 			return ApiResponse.build().message("Owner Mapped");
