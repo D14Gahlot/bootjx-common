@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -86,6 +87,8 @@ public class AgentAuthController {
 			return unauthorized(model);
 		}
 
+		model.addAttribute("APP_PLUG", ArgUtil.nonEmpty(commonHttpRequest.getRequestParam("plug"), "none"));
+
 		if (ArgUtil.is(domainName) && ArgUtil.is(domainId) && ArgUtil.is(domainToken)) {
 			AgentResponseAuthDto agent = authService.loginByDomainToken(domainUser, domainName, domainId, domainToken,
 					false);
@@ -107,8 +110,12 @@ public class AgentAuthController {
 		return "app-agent";
 	}
 
-	@RequestMapping(value = { "/plug/**", "/plug" }, method = { RequestMethod.POST, RequestMethod.GET })
-	public String plugOlin(HttpServletRequest request, Model model) throws NoSuchAlgorithmException {
+	@RequestMapping(value = { "/plug/**", "/plug", "/plug_{plug}/**", "/plug_{plug}" },
+			method = { RequestMethod.POST, RequestMethod.GET })
+	public String plugOlin(HttpServletRequest request, Model model, @PathVariable(required = false) String plug)
+			throws NoSuchAlgorithmException {
+
+		model.addAttribute("APP_PLUG", ArgUtil.nonEmpty(plug, commonHttpRequest.getRequestParam("plug"), "plug"));
 
 		String action = ArgUtil.parseAsString(commonHttpRequest.get("action"), "none");
 		String username = commonHttpRequest.get("username");
@@ -122,6 +129,7 @@ public class AgentAuthController {
 				AgentResponseAuthDto agent = x.getMeta();
 				if (ArgUtil.is(agent)) {
 					sessionService.login(request, agent, password);
+					commonHttpRequest.setCookie("plug", plug);
 					if (rememberme) {
 						String xRemSession = CryptoUtil.getEncoder()
 								.obzect(MapBuilder.map().put("username", username).put("password", password).toMap())
@@ -155,6 +163,12 @@ public class AgentAuthController {
 		return "app-agent-plugin";
 	}
 
+//	@RequestMapping(value = { "/plug_mitel/**", "/plug_mitel" }, method = { RequestMethod.POST, RequestMethod.GET })
+//	public String plugOlinMitle(HttpServletRequest request, Model model, @PathVariable(required = false) String plug)
+//			throws NoSuchAlgorithmException {
+//		return this.plugOlin(request, model, "mitle");
+//	}
+
 	@RequestMapping(value = "/pub/customer/{page}", method = { RequestMethod.POST, RequestMethod.GET })
 	public String customertest(Model model, @RequestParam String page) {
 		model.addAllAttributes(appCommonConfig.appAttributes());
@@ -171,6 +185,7 @@ public class AgentAuthController {
 			return unauthorized(model);
 		}
 
+		model.addAttribute("APP_PLUG", ArgUtil.nonEmpty(commonHttpRequest.getRequestParam("plug"), "none"));
 		model.addAllAttributes(appCommonConfig.appAttributes());
 		model.addAttribute("APP_USER", agentSession.getAgentCode());
 		model.addAttribute("APP_DEPT", agentSession.getAgentDept());
