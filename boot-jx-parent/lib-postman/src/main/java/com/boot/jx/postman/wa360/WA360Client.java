@@ -56,7 +56,7 @@ public class WA360Client {
 				buttons = new MapModel(outboxMessage.options()).entry("buttons").asList(TmplElement.class);
 				for (TmplElement b : buttons) {
 					if (ArgUtil.areEqual(b.getType(), TmplElement.TYPES.URL)) {
-						bodyTextAppend = bodyTextAppend + "\n" + b.getUrl() + "\n";
+						bodyTextAppend = bodyTextAppend + "\n*" + b.getLabel() + "*\n" + b.getUrl() + "\n";
 					} else {
 						buttonsCount++;
 					}
