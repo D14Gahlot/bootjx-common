@@ -404,7 +404,7 @@ public class PartnerController {
 		} else {
 			Optional<DomainDoc> domainFound = account.domains().stream().filter(d -> d.getDomain().equals(domain))
 					.findFirst();
-			if (ArgUtil.is(domainFound.isPresent())) {
+			if (domainFound.isPresent()) {
 				ApiResponseUtil.throwInputException(new ApiFieldError().field("email").codeKey("ValidAccountNotFound")
 						.description("Already Mapped"));
 			}
