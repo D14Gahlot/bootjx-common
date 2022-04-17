@@ -32,9 +32,11 @@ public class AgentTeamController extends CommonBotController {
 	@ChatMapping(key = AlexBotConstants.KEY.INITIATE + "*", pattern = "^*$")
 	public void greet(InboxMessage inboxMessage, StringMatcher matcher) {
 		String text = toReplyEnum(inboxMessage);
-		List<DepartmentDoc> teams = commonMongoTemplate.find(CommonMongoQueryBuilder.collection(DepartmentDoc.class));
+		List<DepartmentDoc> teams = commonMongoTemplate.findAll(DepartmentDoc.class);
 		for (DepartmentDoc team : teams) {
-			if (ArgUtil.areEqual(StringUtils.toLowerCase(team.getDept_code()), text)) {
+			if (ArgUtil.areEqual(StringUtils.toLowerCase(team.getDept_code()), text)
+					|| ArgUtil.areEqual(StringUtils.toLowerCase(team.getDept_name()), text)
+					|| ArgUtil.areEqual(StringUtils.toLowerCase(team.getDept_id()), text)) {
 				assignToAgentDepartment(team.getDept_code());
 				return;
 			}
