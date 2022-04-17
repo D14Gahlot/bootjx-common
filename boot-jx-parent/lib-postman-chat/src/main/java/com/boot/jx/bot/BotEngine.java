@@ -25,6 +25,7 @@ import com.boot.jx.AppContextUtil;
 import com.boot.jx.chat.ChatService;
 import com.boot.jx.postman.ClientApp;
 import com.boot.jx.postman.PMConstants;
+import com.boot.jx.postman.PMConstants.APP_TYPE;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.doc.ChatPromise;
 import com.boot.jx.postman.doc.ChatPromise.State;
@@ -161,9 +162,13 @@ public class BotEngine {
 
 		String botCode = botCodePrefix;
 		if (ArgUtil.is(app)) {
-			String botFlow = ArgUtil.parseAsString(app.props().get("botCode"), app.getQueue());
-			if (ArgUtil.is(botFlow) && !ArgUtil.areEqual(app.getQueue(), PMConstants.DEFAULT.BOT_QUEUE_CODE)) {
-				botCode = botCodePrefix + "_" + botFlow;
+			if (!ArgUtil.areEqual(app.getAppType(), APP_TYPE.BOT.name())) {
+
+			} else {
+				String botFlow = ArgUtil.parseAsString(app.props().get("botCode"), app.getQueue());
+				if (ArgUtil.is(botFlow) && !ArgUtil.areEqual(app.getQueue(), PMConstants.DEFAULT.BOT_QUEUE_CODE)) {
+					botCode = botCodePrefix + "_" + botFlow;
+				}
 			}
 		}
 
