@@ -11,7 +11,6 @@ import com.boot.jx.bot.ChatMapping;
 import com.boot.jx.bot.alex.AlexBotConstants;
 import com.boot.jx.bot.alex.CommonBotController;
 import com.boot.jx.common.doc.DepartmentDoc;
-import com.boot.jx.mongo.CommonMongoQueryBuilder;
 import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.jx.postman.ClientApp;
 import com.boot.jx.postman.model.InboxMessage;
