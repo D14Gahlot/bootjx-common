@@ -38,6 +38,7 @@ import com.boot.utils.ArgUtil;
 import com.boot.utils.ClazzUtil;
 import com.boot.utils.Constants;
 import com.boot.utils.EntityDtoUtil;
+import com.boot.utils.StringUtils;
 import com.boot.utils.StringUtils.StringMatcher;
 
 @Component
@@ -162,8 +163,8 @@ public class BotEngine {
 
 		String botCode = botCodePrefix;
 		if (ArgUtil.is(app)) {
-			if (!ArgUtil.areEqual(app.getAppType(), APP_TYPE.BOT.name())) {
-
+			if (!APP_TYPE.BOT.name().equals(app.getAppType())) {
+				botCode = "bot_ " + StringUtils.toLowerCase(app.getAppType());
 			} else {
 				String botFlow = ArgUtil.parseAsString(app.props().get("botCode"), app.getQueue());
 				if (ArgUtil.is(botFlow) && !ArgUtil.areEqual(app.getQueue(), PMConstants.DEFAULT.BOT_QUEUE_CODE)) {
