@@ -170,11 +170,11 @@ public class WA360Connector extends AbstractConnector<WA360ConfigDetails, WA360P
 		WA360InboundMedia media = map.entry(path).as(WA360InboundMedia.class);
 		CommonFile srcFile = new CommonFile().url(WA360Constants.MEDIA_URL(media.getId())).fileType(fileType)
 				.format(FileFormat.from(media.getMimeType()))
-				.header(WA360Constants.D360_API_KEY, channelConfig.getWa360d().getApiKey());
+				.header(WA360Constants.D360_API_KEY, channelConfig.getWa360d().getApiKey())
+				.name(ArgUtil.nonEmpty(media.getFilename(), media.getCaption()));
 
 		CommonFile dstFile = pmFileStoreClient.uploadSessionFileAsync(srcFile,
-				PostManUtil.createContactId(inboxMessage),
-				inboxMessage.getMessageIdExt() + "/" + ArgUtil.nonEmpty(media.getFilename(), media.getCaption()));
+				PostManUtil.createContactId(inboxMessage), inboxMessage.getMessageIdExt());
 
 		inboxMessage.attachment(new Attachment().mediaURL(dstFile.getUrl()).mediaType(dstFile.getFileType())
 				.mediaSrc(srcFile.getUrl()).mediaCaption(media.getCaption()).mediaName(media.getFilename())
