@@ -119,15 +119,22 @@ public class WA360Client {
 				MapModel resp = sendButton(channelConfig, outboxMessage, buttons);
 				msgIds.add(getMessageId(resp));
 			} else {
-				if (ArgUtil.is(outboxMessage.getMessage())) {
-					MapModel resp = sendText(channelConfig, outboxMessage);
-					msgIds.add(getMessageId(resp));
-				}
+				String textMessage = outboxMessage.getMessage();
 				if (ArgUtil.is(outboxMessage.getAttachments())) {
 					for (Attachment attachment : outboxMessage.getAttachments()) {
+						if (ArgUtil.isEqual(attachment.getMediaType(), FileType.IMAGE.toString(),
+								FileType.VIDEO.toString())) {
+							attachment.setMediaCaption(textMessage);
+							textMessage = null;
+						}
 						MapModel resp = sendMedia(channelConfig, outboxMessage, attachment);
 						msgIds.add(getMessageId(resp));
 					}
+				}
+
+				if (ArgUtil.is(textMessage)) {
+					MapModel resp = sendText(channelConfig, outboxMessage);
+					msgIds.add(getMessageId(resp));
 				}
 			}
 		}

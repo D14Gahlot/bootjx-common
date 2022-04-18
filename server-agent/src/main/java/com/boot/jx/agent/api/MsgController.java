@@ -138,8 +138,7 @@ public class MsgController {
 		CommonFile f = pmFileStoreClient.uploadSessionFile(file, outboxMessage.getSessionId(),
 				outboxMessage.getMessageIdRef());
 
-		outboxMessage.attachment(new Attachment().mediaURL(f.getUrl()).mediaType(f.getFileType())
-				.mediaCaption(ArgUtil.nonEmpty(outboxMessage.getSubject(), file.getOriginalFilename())));
+		outboxMessage.attachment(new Attachment().mediaURL(f.getUrl()).mediaType(f.getFileType()));
 
 		return sendSessionMessage(outboxMessage);
 	}
