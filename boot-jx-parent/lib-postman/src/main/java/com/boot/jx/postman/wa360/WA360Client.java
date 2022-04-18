@@ -122,8 +122,8 @@ public class WA360Client {
 				String textMessage = outboxMessage.getMessage();
 				if (ArgUtil.is(outboxMessage.getAttachments())) {
 					for (Attachment attachment : outboxMessage.getAttachments()) {
-						if (ArgUtil.isEqual(attachment.getMediaType(), FileType.IMAGE.toString(),
-								FileType.VIDEO.toString())) {
+						if (ArgUtil.is(textMessage) && ArgUtil.isEqual(attachment.getMediaType(),
+								FileType.IMAGE.toString(), FileType.VIDEO.toString())) {
 							attachment.setMediaCaption(textMessage);
 							textMessage = null;
 						}
