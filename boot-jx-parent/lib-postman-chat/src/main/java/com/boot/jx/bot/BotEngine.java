@@ -164,7 +164,7 @@ public class BotEngine {
 		String botCode = botCodePrefix;
 		if (ArgUtil.is(app)) {
 			if (!APP_TYPE.BOT.name().equalsIgnoreCase(app.getAppType())) {
-				botCode = "bot_" + StringUtils.toLowerCase(app.getAppType());
+				botCode = "bot_" + StringUtils.trim(StringUtils.toLowerCase(app.getAppType()));
 			} else {
 				String botFlow = ArgUtil.parseAsString(app.props().get("botCode"), app.getQueue());
 				if (ArgUtil.is(botFlow) && !ArgUtil.areEqual(app.getQueue(), PMConstants.DEFAULT.BOT_QUEUE_CODE)) {
