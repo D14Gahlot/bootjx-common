@@ -49,7 +49,7 @@ public class AgentTeamController extends CommonBotController {
 			for (DepartmentDoc team : teams) {
 				buttons.add(new TmplElement().name(team.getDept_code()).label(team.getDept_name()));
 			}
-			reply(new OutboxMessage().options("buttons", buttons));
+			reply(new OutboxMessage().message("Select team").options("buttons", buttons));
 		}
 	}
 
