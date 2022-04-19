@@ -63,23 +63,15 @@ public class AgentInBoundHandler extends DefaultChatBoundHandler {
 							.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_AGENT_CHAT_AUTOREPLY_TALK2AGENT);
 					if (transferReply.exists()) {
 						chatService.reply(session, new OutboxMessage().template(transferReply.asString()));
-					} else {
-						chatService.reply(session, new OutboxMessage()
-								.message("Connecting you to one of our customer representatives. Give us a moment."));
 					}
 				} else {
 					PMConfigurationObject noAgentReply = pmEnvironment
 							.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_AGENT_CHAT_AUTOREPLY_NOAGENT);
 					if (noAgentReply.exists()) {
 						chatService.reply(session, new OutboxMessage().template(noAgentReply.asString()));
-					} else {
-						chatService.reply(session, new OutboxMessage().message(
-								"All agents are busy or online, we will connect you whenever someone is available."));
 					}
 				}
-
 			}
-
 		} catch (Exception e) {
 			LOGGER.error("Error ONE while Connecting to Agent", e);
 			try {

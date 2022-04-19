@@ -23,6 +23,7 @@ public class ConfigConstants {
 	public static final Map<String, String> APP_CONFIG = new ConcurrentHashMap<String, String>();
 	public static final List<ConfigMeta> SETUP_CONFIG_LIST = new ArrayList<ConfigMeta>();
 
+	public static final String GROUP_CUSTOMER_CHAT = "CUSTOMER CHAT";
 	public static final String GROUP_AGENT = "AGENT";
 	public static final String GROUP_NLP = "NLP";
 
@@ -63,10 +64,12 @@ public class ConfigConstants {
 				.desc("Sandbox channels are preconfigured communication channels").optionsOnOff()),
 
 		// Agent Properties
-		CHAT_TAG_ENABLED(new ConfigMeta("Chat Session Tags Enabled", "chat.tag.enabled").optionsOnOff().group(GROUP_AGENT)),
+		CHAT_TAG_ENABLED(
+				new ConfigMeta("Chat Session Tags Enabled", "chat.tag.enabled").optionsOnOff().group(GROUP_AGENT)),
 
 		POSTMAN_CHAT_SESSION_TIMEOUT(new ConfigMeta("Chat Session Timeout", "postman.chat.session.timeout")
-				.optionValues("8hr", "12hr", "16hr", "20hr", "24hr")),
+				.optionValues("8hr", "12hr", "16hr", "20hr", "24hr", "2d", "5d", "3d", "7d")
+				.group(GROUP_CUSTOMER_CHAT)),
 
 		POSTMAN_CHAT_IDLE_TIMEOUT(new ConfigMeta("Chat Alert Timer", "postman.chat.idle.timeout")
 				.optionValues("5min", "10min", "15min", "20min", "25min", "30min").group(GROUP_AGENT)),
