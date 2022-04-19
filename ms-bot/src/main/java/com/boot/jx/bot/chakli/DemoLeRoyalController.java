@@ -129,5 +129,3 @@ public class DemoLeRoyalController extends DefaultChakliController {
 	}
 	
 }
-
-}
