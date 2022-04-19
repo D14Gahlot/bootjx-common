@@ -38,7 +38,7 @@ public class FacebooClient implements MessageClient {
 	private static final Logger LOGGER = LoggerFactory.getLogger(FacebooClient.class);
 
 	@Autowired
-	RestService restService;
+	private RestService restService;
 
 	@Autowired
 	private PMEnvironment environment;
@@ -94,7 +94,16 @@ public class FacebooClient implements MessageClient {
 					.asList(TmplElement.class);
 			if (buttons.size() > 3) {
 				isTemplate = true;
-				reqMessage.put("messaging_type", "RESPONSE");
+
+				String messageTag = FacebookConstants.MESSAGE_TAG(outboxMessage.getCategoryType());
+
+				if (ArgUtil.is(messageTag)) {
+					reqMessage.put("messaging_type", "MESSAGE_TAG");
+					reqMessage.put("tag", messageTag);
+				} else {
+					reqMessage.put("messaging_type", "RESPONSE");
+				}
+
 				MapModel messageModel = MapModel.createInstance();
 				if (ArgUtil.is(outboxMessage.getMessage())) {
 					messageModel.put("text", outboxMessage.getMessage());
