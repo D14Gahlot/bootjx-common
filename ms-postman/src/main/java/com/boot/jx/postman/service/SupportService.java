@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 import com.boot.jx.postman.PostManException;
 import com.boot.jx.postman.model.Email;
 import com.boot.jx.postman.model.ITemplates.TemplateDefaultEnum;
-import com.boot.jx.postman.model.MessageType;
+import com.boot.jx.postman.model.MessageCategoryType;
 import com.boot.jx.postman.model.SupportEmail;
 import com.boot.jx.scope.tnt.TenantScoped;
 import com.boot.jx.scope.tnt.TenantValue;
@@ -44,11 +44,9 @@ public class SupportService {
 	/**
 	 * Creates the contact us email.
 	 *
-	 * @param email
-	 *            the email
+	 * @param email the email
 	 * @return the email
-	 * @throws PostManException
-	 *             the post man exception
+	 * @throws PostManException the post man exception
 	 */
 	public Email createContactUsEmail(SupportEmail email) throws PostManException {
 
@@ -74,15 +72,14 @@ public class SupportService {
 	/**
 	 * Filter message type.
 	 *
-	 * @param email
-	 *            the email
+	 * @param email the email
 	 * @return the email
 	 */
 	public Email filterMessageType(Email email) {
-		if (email.getMessageType() == null) {
-		} else if (email.getMessageType() == MessageType.SOA) {
+		if (email.getCategoryType() == null) {
+		} else if (email.getCategoryType() == MessageCategoryType.SOA) {
 			email.addAllTo(supportSAOSubject);
-		} else if (email.getMessageType() == MessageType.IT) {
+		} else if (email.getCategoryType() == MessageCategoryType.IT) {
 			email.addAllTo(supportITSubject);
 		}
 		return email;

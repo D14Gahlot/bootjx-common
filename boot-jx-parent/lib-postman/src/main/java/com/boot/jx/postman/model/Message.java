@@ -7,8 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.boot.jx.dict.ContactType;
-import com.boot.jx.dict.Language;
-import com.boot.jx.model.CommonTemplate;
+import com.boot.jx.model.CommonTemplateMeta;
 import com.boot.jx.postman.model.ITemplates.BasicExternalTemplate;
 import com.boot.jx.postman.model.ITemplates.ITemplate;
 import com.boot.jx.postman.model.MessageDefinitions.Contactable;
@@ -54,7 +53,7 @@ public class Message<T extends Message<T>> implements Serializable, MessageOptio
 
 	protected List<String> to = null;
 	protected List<ContactMeta> contacts = null;
-	private CommonTemplate hsm;
+	private CommonTemplateMeta hsm;
 	private BasicExternalTemplate templateExt;
 	private String action = null;
 	private String type = null;
@@ -63,7 +62,7 @@ public class Message<T extends Message<T>> implements Serializable, MessageOptio
 	protected Map<String, Object> options = new HashMap<String, Object>();
 	protected Map<String, Object> meta;
 
-	private MessageType messageType = null;
+	private String categoryType = null;
 
 	private List<PostManFile> files = null;
 	private List<Attachment> attachments = null;
@@ -205,12 +204,12 @@ public class Message<T extends Message<T>> implements Serializable, MessageOptio
 		this.lines = lines;
 	}
 
-	public MessageType getMessageType() {
-		return messageType;
+	public String getCategoryType() {
+		return categoryType;
 	}
 
-	public void setMessageType(MessageType messageType) {
-		this.messageType = messageType;
+	public void setCategoryType(String categoryType) {
+		this.categoryType = categoryType;
 	}
 
 	public Status getStatus() {
@@ -543,9 +542,9 @@ public class Message<T extends Message<T>> implements Serializable, MessageOptio
 		this.formatSubType = formatSubType;
 	}
 
-	public CommonTemplate hsm() {
+	public CommonTemplateMeta hsm() {
 		if (this.hsm == null) {
-			this.hsm = new CommonTemplate();
+			this.hsm = new CommonTemplateMeta();
 		}
 		return this.hsm;
 	}
@@ -561,7 +560,7 @@ public class Message<T extends Message<T>> implements Serializable, MessageOptio
 	}
 
 	@SuppressWarnings("unchecked")
-	public T hsm(CommonTemplate template) {
+	public T hsm(CommonTemplateMeta template) {
 		this.hsm = template;
 		return (T) this;
 	}
@@ -592,11 +591,11 @@ public class Message<T extends Message<T>> implements Serializable, MessageOptio
 		return ITemplates.getTemplate(this.hsm().getCode());
 	}
 
-	public CommonTemplate getHsm() {
+	public CommonTemplateMeta getHsm() {
 		return hsm;
 	}
 
-	public void setHsm(CommonTemplate hsm) {
+	public void setHsm(CommonTemplateMeta hsm) {
 		this.hsm = hsm;
 	}
 }

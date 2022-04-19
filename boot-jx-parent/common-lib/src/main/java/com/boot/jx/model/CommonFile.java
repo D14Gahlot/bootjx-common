@@ -40,11 +40,6 @@ public class CommonFile implements Serializable {
 
 	private static Logger LOGGER = LoggerService.getLogger(CommonFile.class);
 
-	public CommonFile lang(Object lang) {
-		this.template.setLang(ArgUtil.parseAsString(lang));
-		return this;
-	}
-
 	private String content;
 	private String path;
 	private String name;
@@ -54,10 +49,16 @@ public class CommonFile implements Serializable {
 	private String extension;
 	private String password;
 	private String url;
-	private CommonTemplate template = null;
+	private CommonTemplateMeta template = null;
 	private Map<String, Object> model = new HashMap<String, Object>();
 	private Map<String, Object> options = new HashMap<String, Object>();
+	private Map<String, Object> meta = new HashMap<String, Object>();
 	private Map<String, String> headers;
+
+	public CommonFile lang(Object lang) {
+		this.template.setLang(ArgUtil.parseAsString(lang));
+		return this;
+	}
 
 	public Map<String, Object> getModel() {
 		return model;
@@ -121,23 +122,23 @@ public class CommonFile implements Serializable {
 		this.content = content;
 	}
 
-	public CommonTemplate getTemplate() {
+	public CommonTemplateMeta getTemplate() {
 		return template;
 	}
 
-	public void setTemplate(CommonTemplate template) {
+	public void setTemplate(CommonTemplateMeta template) {
 		this.template = template;
 	}
 
 	@JsonSetter
-	public CommonTemplate template() {
+	public CommonTemplateMeta template() {
 		if (!ArgUtil.is(this.template)) {
-			this.template = new CommonTemplate();
+			this.template = new CommonTemplateMeta();
 		}
 		return this.template;
 	}
 
-	public CommonFile template(CommonTemplate template) {
+	public CommonFile template(CommonTemplateMeta template) {
 		this.template = template;
 		return this;
 	}
@@ -411,4 +412,18 @@ public class CommonFile implements Serializable {
 		return this;
 	}
 
+	public Map<String, Object> getMeta() {
+		return meta;
+	}
+
+	public void setMeta(Map<String, Object> meta) {
+		this.meta = meta;
+	}
+
+	public Map<String, Object> meta() {
+		if (!ArgUtil.is(this.meta)) {
+			this.meta = new HashMap<String, Object>();
+		}
+		return this.meta;
+	}
 }
