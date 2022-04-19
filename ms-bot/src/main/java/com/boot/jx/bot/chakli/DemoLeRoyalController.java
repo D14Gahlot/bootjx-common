@@ -55,8 +55,8 @@ public class DemoLeRoyalController extends DefaultChakliController {
 			this.transferToAgent(inboxMessage, matcher);
 			break;
 		case "lr_reserv":
-			reply(new OutboxMessage().template("lr_reserv_ans"));
-			next("next_menu");
+			reply(new OutboxMessage().template("lr_date_time"));
+			next("next_datetime");
 			break;
 		case "lr_edit_reserv":
 			this.transferToAgent(inboxMessage, matcher);
@@ -113,5 +113,21 @@ public class DemoLeRoyalController extends DefaultChakliController {
 		reply(new OutboxMessage().template("lr_question"));
 		next("select-question");
 	}
+	@ChatMapping(key = "next_datetime")
+	public void specifyDateAndTime(InboxMessage inboxMessage, StringMatcher matcher) {
+		switch (toReplyEnum(inboxMessage)) {
+		case "*":
+			this.goToMainMenu(inboxMessage, matcher);
+			break;
+		case "#":
+			this.commonTransferToAgent(inboxMessage, matcher);
+			break;
+		default:
+			this.commonTransferToAgent(inboxMessage, matcher);
+			break;
+		}
+	}
+	
+}
 
 }
