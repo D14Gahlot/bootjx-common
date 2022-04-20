@@ -79,15 +79,8 @@ public class MessageContext {
 		}
 	}
 
-	private Contactable getContactable() {
-		if (this.contactable == null) {
-			if (getMessage() != null) {
-				this.contactable = PostManUtil.getContactMeta(getMessage().contact());
-			} else if (this.event != null) {
-				this.contactable = PostManUtil.getContactMeta(this.event.contact(), this.event.contactId);
-			}
-		}
-		return this.contactable;
+	public void setInBoundEvent(InBoundEvent event) {
+		this.event = event;
 	}
 
 	private String getSessionId() {
@@ -99,13 +92,24 @@ public class MessageContext {
 		return null;
 	}
 
-	private String getQueueCode() {
-		if (getMessage() != null) {
-			return getMessage().session().getQueue();
-		} else if (this.event != null && this.event.sessionRouted != null) {
-			return this.event.sessionRouted.targetQueue;
+	public ChatSessionQuery session() {
+		if (chatSessionQuery == null && ArgUtil.is(getSessionId())) {
+			ChatSessionDoc chatSessionDoc;
+			chatSessionDoc = sessionStore.getSession(getSessionId());
+			chatSessionQuery = new ChatSessionQuery(chatSessionDoc);
 		}
-		return null;
+		return chatSessionQuery;
+	}
+
+	private Contactable getContactable() {
+		if (this.contactable == null) {
+			if (getMessage() != null) {
+				this.contactable = PostManUtil.getContactMeta(getMessage().contact());
+			} else if (this.event != null) {
+				this.contactable = PostManUtil.getContactMeta(this.event.contact(), this.event.contactId);
+			}
+		}
+		return this.contactable;
 	}
 
 	private ChatContactDoc getChatContactDoc() {
@@ -125,13 +129,15 @@ public class MessageContext {
 		return this.chatContactQuery;
 	}
 
-	public ChatSessionQuery session() {
-		if (chatSessionQuery == null) {
-			ChatSessionDoc chatSessionDoc;
-			chatSessionDoc = sessionStore.getSession(getSessionId());
-			chatSessionQuery = new ChatSessionQuery(chatSessionDoc);
+	private String getQueueCode() {
+		if (getMessage() != null) {
+			return getMessage().session().getQueue();
+		} else if (this.event != null && this.event.sessionRouted != null) {
+			return this.event.sessionRouted.targetQueue;
+		} else if (ArgUtil.notNull(this.session()) && ArgUtil.notNull(this.session().getDoc())) {
+			return this.session().getDoc().getAssignedToQueue();
 		}
-		return chatSessionQuery;
+		return null;
 	}
 
 	public void commitChatContactQuery() {
@@ -188,6 +194,10 @@ public class MessageContext {
 		if (ArgUtil.is(getMessage())) {
 			return this.clientApp(getQueueCode(), getContactable());
 		}
+		if (ArgUtil.notNull(session()) && ArgUtil.notNull(session().getDoc())) {
+			return this.clientApp(session().getDoc().getAssignedToQueue(), session().getDoc().contact());
+		}
+
 		return this.clientApp(null, null);
 	}
 
@@ -216,10 +226,6 @@ public class MessageContext {
 
 	public void setCurrentHandler(String currentHandler) {
 		this.currentHandler = currentHandler;
-	}
-
-	public void setInBoundEvent(InBoundEvent event) {
-		this.event = event;
 	}
 
 	public void setChatConext(ChatContextDoc doc) {

@@ -29,6 +29,11 @@ public class ChatSessionQuery extends DocQueryBuilder<ChatSessionDoc> {
 		return doc.getSessionId();
 	}
 
+	@Override
+	public String getId() {
+		return this.doc == null ? null : this.doc.getSessionId();
+	}
+
 	public Object get(String key) {
 		return this.doc.store().get(key);
 	}

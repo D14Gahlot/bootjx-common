@@ -399,6 +399,9 @@ public class MapModel implements JsonSerializerType<Object> {
 	}
 
 	public static MapModel from(Map<String, Object> map) {
+		if (map == null) {
+			return createInstance();
+		}
 		return new MapModel(map);
 	}
 
