@@ -224,6 +224,7 @@ public class ChatSessionService {
 
 	public NodeEntry<InBoundEvent> assignSessionToAgent(PMArgs params) {
 		ChatSessionDoc sessionDoc = sessionStore.getSession(params.getSessionId());
+		messageContext.session(sessionDoc);
 		return inBoundHandler.assignSessionToAgent(params, sessionDoc);
 	}
 

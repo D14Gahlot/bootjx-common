@@ -287,7 +287,7 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 
 	@Override
 	public InBoundEvent onSessionEvent(InBoundEvent event, PMArgs pmArgs) {
-		messageContext.setInBoundEvent(event);
+		context().setInBoundEvent(event);
 		if (InBoundEvent.SESSION_ROUTED.equals(event.eventCode)) {
 			ChatSessionDoc sessionDoc = context().session().getDoc();
 			this.onSessionRoute(event, sessionDoc, pmArgs);

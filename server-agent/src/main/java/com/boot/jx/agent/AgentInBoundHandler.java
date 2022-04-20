@@ -100,6 +100,7 @@ public class AgentInBoundHandler extends DefaultChatBoundHandler {
 		NodeEntry<InBoundEvent> eventEntry = new NodeEntry<InBoundEvent>();
 		InBoundEvent agentAssignEvent = new InBoundEvent();
 		agentAssignEvent.eventCode = InBoundEvent.SESSION_ASSIGNED;
+		agentAssignEvent.sessionId = session.getSessionId();
 		agentAssignEvent.sessionAssigned().oldAgent = session.getAssignedToAgent();
 		agentAssignEvent.sessionAssigned().oldDept = session.getAssignedToDept();
 		params = agentChatHandler.doAssign(session, params);

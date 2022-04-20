@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Component;
 
+import com.boot.jx.AppContextUtil;
 import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.jx.postman.ClientApp;
 import com.boot.jx.postman.PMEnvironment;
@@ -84,12 +85,20 @@ public class MessageContext {
 	}
 
 	private String getSessionId() {
-		if (getMessage() != null) {
-			return getMessage().getSessionId();
-		} else if (this.event != null) {
-			return this.event.sessionId;
+		String sessionId = AppContextUtil.get(ChatSessionDoc.class.getName());
+		if (ArgUtil.is(sessionId)) {
+			return sessionId;
+		} else {
+			if (getMessage() != null) {
+				sessionId = getMessage().getSessionId();
+			} else if (this.event != null) {
+				sessionId = this.event.sessionId;
+			}
+			if (ArgUtil.is(sessionId)) {
+				AppContextUtil.set(ChatSessionDoc.class.getName(), sessionId);
+			}
 		}
-		return null;
+		return sessionId;
 	}
 
 	public ChatSessionQuery session() {
@@ -99,6 +108,10 @@ public class MessageContext {
 			chatSessionQuery = new ChatSessionQuery(chatSessionDoc);
 		}
 		return chatSessionQuery;
+	}
+
+	public void session(ChatSessionDoc sessionDoc) {
+		chatSessionQuery = new ChatSessionQuery(sessionDoc);
 	}
 
 	private Contactable getContactable() {
