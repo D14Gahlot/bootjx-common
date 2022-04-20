@@ -148,9 +148,9 @@ public class InstagramConnector extends AbstractConnector<InstagramConfig, Insta
 			if (ArgUtil.is(rt)) {
 				inboxMessage.setReplyIdExt(rt.getString("mid"));
 				if (rt.containsKey("story")) {
-					inboxMessage.reply().put("type", "story");
-					inboxMessage.reply().put("id", rt.entry(InBoundWrapperPaths.STORY_ID).asString());
-					inboxMessage.reply().put("url", rt.entry(InBoundWrapperPaths.STORY_URL).asString());
+					inboxMessage.replyTo().put("type", "story");
+					inboxMessage.replyTo().put("id", rt.entry(InBoundWrapperPaths.STORY_ID).asString());
+					inboxMessage.replyTo().put("url", rt.entry(InBoundWrapperPaths.STORY_URL).asString());
 				}
 			}
 		} else if (ArgUtil.is(m.getPostBack()) && ArgUtil.is(m.getPostBack().getTitle())) {

@@ -95,7 +95,7 @@ public class FacebooClient implements MessageClient {
 			if (buttons.size() > 3) {
 				isTemplate = true;
 
-				String messageTag = FacebookConstants.MESSAGE_TAG(outboxMessage.getCategoryType());
+				String messageTag = FacebookConstants.MESSAGE_TAG(outboxMessage.categoryType());
 
 				if (ArgUtil.is(messageTag)) {
 					reqMessage.put("messaging_type", "MESSAGE_TAG");

@@ -48,7 +48,7 @@ public class InboxMessage implements Serializable, IMessageExtended, LogMessage 
 
 	protected Map<String, Object> form = new HashMap<String, Object>();
 	protected Map<String, Object> data = new HashMap<String, Object>();
-	private Map<String, Object> reply = new HashMap<String, Object>();
+	private Map<String, Object> replyTo = new HashMap<String, Object>();
 	protected TagDocument tags;
 	private List<Attachment> attachments = null;
 
@@ -199,19 +199,19 @@ public class InboxMessage implements Serializable, IMessageExtended, LogMessage 
 		return this.data;
 	}
 
-	public void setReply(Map<String, Object> reply) {
-		this.reply = reply;
+	public void setReplyTo(Map<String, Object> reply) {
+		this.replyTo = reply;
 	}
 
-	public Map<String, Object> getReply() {
-		return this.reply;
+	public Map<String, Object> getReplyTo() {
+		return this.replyTo;
 	}
 
-	public Map<String, Object> reply() {
-		if (reply == null) {
-			this.reply = new HashMap<String, Object>();
+	public Map<String, Object> replyTo() {
+		if (replyTo == null) {
+			this.replyTo = new HashMap<String, Object>();
 		}
-		return this.reply;
+		return this.replyTo;
 	}
 
 	public Object getOriginalMessage() {

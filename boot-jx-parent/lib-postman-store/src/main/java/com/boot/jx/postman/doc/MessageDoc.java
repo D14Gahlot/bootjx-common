@@ -17,12 +17,12 @@ import com.boot.jx.mongo.CommonDocInterfaces.Patchable;
 import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.Message.Status;
 import com.boot.jx.postman.model.MessageDefinitions.IMessageId;
-import com.boot.jx.postman.model.MessageMetaWrapper;
 import com.boot.jx.postman.model.TagDocument;
 import com.boot.utils.ArgUtil;
 
 @Document(collection = MessageDoc.COLLECTION_NAME)
 @TypeAlias("MessageDoc")
+//@CompoundIndexes({ @CompoundIndex(name = "meta_categoryType", def = "{ 'meta.categoryType': 1 }") })
 public class MessageDoc implements Serializable, Patchable<MessageDoc>, IMessageId {
 	private static final long serialVersionUID = -7003453286628859075L;
 	public static final String COLLECTION_NAME = "MESSAGE";
@@ -315,13 +315,6 @@ public class MessageDoc implements Serializable, Patchable<MessageDoc>, IMessage
 		return this.meta;
 	}
 
-	public MessageMetaWrapper messageMetaWrapper() {
-		if (this.meta == null) {
-			this.meta = new HashMap<String, Object>();
-		}
-		return new MessageMetaWrapper(this.meta);
-	}
-
 	public String getReplyIdExt() {
 		return replyIdExt;
 	}
@@ -370,15 +363,15 @@ public class MessageDoc implements Serializable, Patchable<MessageDoc>, IMessage
 		this.queue = queue;
 	}
 
-	public void setReply(Map<String, Object> replyTo) {
+	public void setReplyTo(Map<String, Object> replyTo) {
 		this.replyTo = replyTo;
 	}
 
-	public Map<String, Object> getReply() {
+	public Map<String, Object> getReplyTo() {
 		return this.replyTo;
 	}
 
-	public Map<String, Object> reply() {
+	public Map<String, Object> replyTo() {
 		if (this.replyTo == null) {
 			this.replyTo = new HashMap<String, Object>();
 		}

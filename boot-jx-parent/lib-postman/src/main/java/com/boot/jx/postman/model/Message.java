@@ -62,8 +62,6 @@ public class Message<T extends Message<T>> implements Serializable, MessageOptio
 	protected Map<String, Object> options = new HashMap<String, Object>();
 	protected Map<String, Object> meta;
 
-	private String categoryType = null;
-
 	private List<PostManFile> files = null;
 	private List<Attachment> attachments = null;
 
@@ -204,12 +202,8 @@ public class Message<T extends Message<T>> implements Serializable, MessageOptio
 		this.lines = lines;
 	}
 
-	public String getCategoryType() {
-		return categoryType;
-	}
-
-	public void setCategoryType(String categoryType) {
-		this.categoryType = categoryType;
+	public String categoryType() {
+		return ArgUtil.parseAsString(meta().get("categoryType"));
 	}
 
 	public Status getStatus() {

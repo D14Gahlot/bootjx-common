@@ -9,6 +9,7 @@ import com.boot.jx.chat.ChatService;
 import com.boot.jx.common.config.ConfigConstants;
 import com.boot.jx.common.config.DefaultChatBoundHandler;
 import com.boot.jx.inbound.InBound.SessionAssginHandler;
+import com.boot.jx.postman.ClientApp;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PMEnvironment.PMConfigurationObject;
 import com.boot.jx.postman.doc.ChatSessionDoc;
@@ -17,6 +18,8 @@ import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.model.PMArgs;
 import com.boot.jx.postman.model.ext.InBoundEvent;
 import com.boot.jx.postman.store.SessionStore;
+import com.boot.model.MapModel;
+import com.boot.model.MapModel.MapEntry;
 import com.boot.model.MapModel.NodeEntry;
 import com.boot.utils.ArgUtil;
 
@@ -54,22 +57,26 @@ public class AgentInBoundHandler extends DefaultChatBoundHandler {
 		agentChatHandler.onMessageReceive(inboxMessage);
 	}
 
+	private MapEntry getTemplate(MapModel props, ConfigConstants.SETUP_KEY KEY) {
+		MapEntry talk2agent = props.keyEntry(KEY.name());
+		if (talk2agent.exists()) {
+			return talk2agent;
+		}
+		return pmEnvironment.keyEntry(KEY);
+	}
+
 	private void onAssign(ChatSessionDoc session, InBoundEvent assignEvent) {
 		try {
-
 			if (!ArgUtil.is(assignEvent.sessionAssigned().oldAgent)) {
-				if (ArgUtil.is(assignEvent.sessionAssigned().newAgent)) {
-					PMConfigurationObject transferReply = pmEnvironment
-							.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_AGENT_CHAT_AUTOREPLY_TALK2AGENT);
-					if (transferReply.exists()) {
-						chatService.reply(session, new OutboxMessage().template(transferReply.asString()));
-					}
-				} else {
-					PMConfigurationObject noAgentReply = pmEnvironment
-							.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_AGENT_CHAT_AUTOREPLY_NOAGENT);
-					if (noAgentReply.exists()) {
-						chatService.reply(session, new OutboxMessage().template(noAgentReply.asString()));
-					}
+				ClientApp app = this.context().clientApp();
+				MapModel props = MapModel.from(app.props());
+				MapEntry templ = getTemplate(props,
+						ArgUtil.is(assignEvent.sessionAssigned().newAgent)
+								? ConfigConstants.SETUP_KEY.POSTMAN_AGENT_CHAT_AUTOREPLY_TALK2AGENT
+								: ConfigConstants.SETUP_KEY.POSTMAN_AGENT_CHAT_AUTOREPLY_NOAGENT);
+				if (templ.exists()) {
+					chatService.reply(session, new OutboxMessage().template(templ.asString()));
+					return;
 				}
 			}
 		} catch (Exception e) {

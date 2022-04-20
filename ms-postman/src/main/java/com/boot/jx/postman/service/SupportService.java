@@ -76,10 +76,10 @@ public class SupportService {
 	 * @return the email
 	 */
 	public Email filterMessageType(Email email) {
-		if (email.getCategoryType() == null) {
-		} else if (email.getCategoryType() == MessageCategoryType.SOA) {
+		if (email.categoryType() == null) {
+		} else if (email.categoryType() == MessageCategoryType.SOA) {
 			email.addAllTo(supportSAOSubject);
-		} else if (email.getCategoryType() == MessageCategoryType.IT) {
+		} else if (email.categoryType() == MessageCategoryType.IT) {
 			email.addAllTo(supportITSubject);
 		}
 		return email;

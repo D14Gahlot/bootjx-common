@@ -66,7 +66,7 @@ public class TmplClient {
 		Object categoryType = file.meta().get("categoryType");
 
 		if (ArgUtil.is(categoryType)) {
-			outboxMessage.setCategoryType(ArgUtil.parseAsString(categoryType));
+			outboxMessage.meta().put("categoryType", categoryType);
 		}
 
 		if (!ArgUtil.is(outboxMessage.getSubject())) {
