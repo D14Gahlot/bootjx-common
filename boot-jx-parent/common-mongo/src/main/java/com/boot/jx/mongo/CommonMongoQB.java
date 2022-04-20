@@ -90,7 +90,7 @@ public class CommonMongoQB<M extends CommonMongoQB<M, T>, T> implements MongoQue
 	public M page(int pageNo, int pageSize) {
 		int pageStart = pageNo * pageSize;
 		int pageEnd = pageStart + pageSize;
-		this.query().limit(pageEnd).skip(pageStart);
+		this.query().limit(pageSize).skip(pageStart);
 		return (M) this;
 	}
 

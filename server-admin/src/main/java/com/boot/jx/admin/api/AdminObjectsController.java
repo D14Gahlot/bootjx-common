@@ -33,9 +33,8 @@ public class AdminObjectsController {
 				pageSize);
 
 		if (ArgUtil.is(sortBy)) {
-			q.sortBy(sortBy, Direction.fromString(sortDir));
+			q = q.sortBy(sortBy, Direction.fromString(sortDir));
 		}
-
 		return ApiResponse.buildResults(messageStore.find(q));
 	}
 }
