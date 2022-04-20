@@ -91,9 +91,10 @@ public class InstagramClient implements MessageClient {
 		if (ArgUtil.is(outboxMessage.getTemplateExt())) {
 
 		}
-		if (outboxMessage.options().containsKey("buttons")) {
-			List<TmplElement> buttons = new MapModel(outboxMessage.options()).entry("buttons")
-					.asList(TmplElement.class);
+
+		List<TmplElement> buttons = outboxMessage.optionActionButtons();
+
+		if (buttons.size() > 0) {
 			if (buttons.size() > 3) {
 				isTemplate = true;
 				reqMessage.put("messaging_type", "RESPONSE");
@@ -172,7 +173,7 @@ public class InstagramClient implements MessageClient {
 			}
 
 			if (ArgUtil.is(outboxMessage.getMessage())) {
-				if (outboxMessage.options().containsKey("buttons") && isTemplate) {
+				if (buttons.size() > 0 && isTemplate) {
 					MapModel responseModel = sendAdvanced(channelConfig, reqMessage);
 					if (ArgUtil.is(responseModel.get("message_id"))) {
 						msgIds.add(ArgUtil.parseAsString(responseModel.get("message_id")));
