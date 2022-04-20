@@ -22,7 +22,7 @@ public class AdminObjectsController {
 
 	@RequestMapping(value = "/api/objects/logs", method = { RequestMethod.GET })
 	@JsonView(PMEnvironment.PublicProperty.class)
-	public ApiResponse<MessageDocLogs, Object> getLogs(@RequestParam String id,
+	public ApiResponse<MessageDocLogs, Object> getLogs(@RequestParam(required = false) String id,
 			@RequestParam(required = false, defaultValue = "0") int pageNo,
 			@RequestParam(required = false, defaultValue = "0") int pageSize) {
 		CommonMongoQBimpl<MessageDocLogs> q = CommonMongoQueryBuilder.collection(MessageDocLogs.class).page(pageNo,
