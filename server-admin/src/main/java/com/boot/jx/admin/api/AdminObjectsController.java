@@ -24,7 +24,7 @@ public class AdminObjectsController {
 	@JsonView(PMEnvironment.PublicProperty.class)
 	public ApiResponse<MessageDocLogs, Object> getLogs(@RequestParam(required = false) String id,
 			@RequestParam(required = false, defaultValue = "0") int pageNo,
-			@RequestParam(required = false, defaultValue = "0") int pageSize) {
+			@RequestParam(required = false, defaultValue = "25") int pageSize) {
 		CommonMongoQBimpl<MessageDocLogs> q = CommonMongoQueryBuilder.collection(MessageDocLogs.class).page(pageNo,
 				pageSize);
 		return ApiResponse.buildResults(messageStore.find(q));
