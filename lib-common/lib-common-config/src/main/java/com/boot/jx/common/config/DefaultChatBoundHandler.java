@@ -70,7 +70,7 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 	private RestService restService;
 
 	@Autowired
-	private LogManager logManager;
+	protected LogManager logManager;
 
 	@Autowired
 	private MessageStore messageStore;

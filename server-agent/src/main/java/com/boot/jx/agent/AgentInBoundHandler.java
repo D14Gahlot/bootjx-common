@@ -81,11 +81,13 @@ public class AgentInBoundHandler extends DefaultChatBoundHandler {
 			}
 		} catch (Exception e) {
 			LOGGER.error("Error ONE while Connecting to Agent", e);
+			logManager.error(assignEvent, e);
 			try {
 				chatService.reply(session, new OutboxMessage().message(
 						"We are having some issues trying connect you to one of our customer representatives. Please be patient"));
 			} catch (InterruptedException e1) {
 				LOGGER.error("Error TWO  while Sending Failure", e1);
+				logManager.error(assignEvent, e1);
 			}
 		}
 	}
