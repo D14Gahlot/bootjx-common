@@ -430,6 +430,12 @@ public class MessageDoc implements Serializable, Patchable<MessageDoc>, IMessage
 		private static final long serialVersionUID = -2175867087327783840L;
 	}
 
+	@Document(collection = COLLECTION_NAME + "_" + "LOGS")
+	@TypeAlias("MessageDocLogs")
+	public static class MessageDocLogs extends MessageDoc {
+		private static final long serialVersionUID = -2175867087327783840L;
+	}
+
 	public static MessageDoc instance(ContactType contactType) {
 		switch (contactType) {
 		case WHATSAPP:

@@ -80,6 +80,20 @@ public class CommonMongoQB<M extends CommonMongoQB<M, T>, T> implements MongoQue
 		return (M) this;
 	}
 
+	@SuppressWarnings("unchecked")
+	public M skip(int skip) {
+		this.query().skip(skip);
+		return (M) this;
+	}
+
+	@SuppressWarnings("unchecked")
+	public M page(int pageNo, int pageSize) {
+		int pageStart = pageNo * pageSize;
+		int pageEnd = pageStart + pageSize;
+		this.query().limit(pageEnd).skip(pageStart);
+		return (M) this;
+	}
+
 	/**
 	 * This is fail Safe '_id' based Search, if Document has 'id' as field
 	 * 
@@ -222,6 +236,7 @@ public class CommonMongoQB<M extends CommonMongoQB<M, T>, T> implements MongoQue
 	}
 
 	public static class CommonMongoQBimpl<R> extends CommonMongoQB<CommonMongoQBimpl<R>, R> {
+
 	}
 
 	public static <T> CommonMongoQB<CommonMongoQBimpl<T>, T> collection(Class<T> docClass) {

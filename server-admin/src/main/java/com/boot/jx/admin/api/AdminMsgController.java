@@ -193,9 +193,7 @@ public class AdminMsgController {
 					session.getContactType());
 			resp.results(ChatDTOUtil.getChatMessageDTO(msgs, null, session.getCreatedBy()));
 		}
-
 		return resp;
-
 	}
 
 	/** search by status or tagCategory **/

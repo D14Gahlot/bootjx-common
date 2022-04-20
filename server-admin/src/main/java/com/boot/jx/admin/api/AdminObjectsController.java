@@ -1,0 +1,32 @@
+package com.boot.jx.admin.api;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.boot.jx.api.ApiResponse;
+import com.boot.jx.mongo.CommonMongoQB.CommonMongoQBimpl;
+import com.boot.jx.mongo.CommonMongoQueryBuilder;
+import com.boot.jx.postman.PMEnvironment;
+import com.boot.jx.postman.doc.MessageDoc.MessageDocLogs;
+import com.boot.jx.postman.store.MessageStore;
+import com.fasterxml.jackson.annotation.JsonView;
+
+@RestController
+public class AdminObjectsController {
+
+	@Autowired
+	private MessageStore messageStore;
+
+	@RequestMapping(value = "/api/objects/logs", method = { RequestMethod.GET })
+	@JsonView(PMEnvironment.PublicProperty.class)
+	public ApiResponse<MessageDocLogs, Object> getLogs(@RequestParam String id,
+			@RequestParam(required = false, defaultValue = "0") int pageNo,
+			@RequestParam(required = false, defaultValue = "0") int pageSize) {
+		CommonMongoQBimpl<MessageDocLogs> q = CommonMongoQueryBuilder.collection(MessageDocLogs.class).page(pageNo,
+				pageSize);
+		return ApiResponse.buildResults(messageStore.find(q));
+	}
+}

@@ -7,12 +7,11 @@ import com.boot.jx.AppContextUtil;
 import com.boot.jx.logger.AuditDetailProvider;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.MessageDoc;
-import com.boot.jx.postman.model.MessageDefinitions.IMessage;
+import com.boot.jx.postman.doc.MessageDoc.MessageDocLogs;
 import com.boot.jx.postman.model.MessageDefinitions.IMessageExtended;
 import com.boot.jx.postman.model.MessageDefinitions.LogMessage;
 import com.boot.jx.postman.model.MessageDefinitions.SessionMessage;
 import com.boot.jx.postman.model.OutboxMessage;
-import com.boot.jx.postman.model.PMArgs;
 import com.boot.jx.postman.model.ext.InBoundEvent;
 import com.boot.jx.postman.store.MessageStore;
 import com.boot.jx.postman.store.MessageStore.EVENTS;
@@ -79,7 +78,7 @@ public class LogManager {
 	}
 
 	public void error(LogMessage inboxMessage, Exception e) {
-		MessageDoc doc = new MessageDoc();
+		MessageDocLogs doc = new MessageDocLogs();
 		doc.setSessionId(inboxMessage.getSessionId());
 		doc.setMessageId(inboxMessage.getMessageId());
 		doc.setMessageIdExt(inboxMessage.getMessageIdExt());
@@ -98,13 +97,13 @@ public class LogManager {
 			}
 		}
 
-		messageStore.save(doc, MessageStore.getCollectionName("LOGS"));
+		messageStore.save(doc);
 		inboxMessage.logs().add(e.getMessage());
 		inboxMessage.logs().add("trail:" + doc.getMessageId());
 	}
 
 	public void error(InBoundEvent inBoundEvent, Exception e) {
-		MessageDoc doc = new MessageDoc();
+		MessageDoc doc = new MessageDocLogs();
 		doc.setSessionId(inBoundEvent.sessionId);
 		doc.setContactId(inBoundEvent.contactId);
 		doc.setType("E");
@@ -119,9 +118,7 @@ public class LogManager {
 				doc.logs().add(trace.toString());
 			}
 		}
-
-		messageStore.save(doc, MessageStore.getCollectionName("LOGS"));
-
+		messageStore.save(doc);
 	}
 
 }
