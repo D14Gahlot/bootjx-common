@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.common.config.AppCommonAuthFilter.ACCESS_RULES;
 import com.boot.jx.common.config.CDNBuilder;
+import com.boot.jx.common.config.ClientAppConfigConstants;
 import com.boot.jx.common.config.ConfigManager;
 import com.boot.jx.common.impl.ConfigMeta;
 import com.boot.jx.http.ApiRequest;
@@ -86,9 +87,7 @@ public class ConfigOptionMetaController {
 
 	@RequestMapping(value = "/api/meta/app_types/{appType}/config", method = { RequestMethod.GET })
 	public ApiResponse<ConfigMeta, Object> appTypeConfig(@PathVariable APP_TYPE appType) {
-		ChannelPlugin<? extends AChannelDetails> plugin = ChannelPluginProvider.PLUGIN_MAPPING.get(appType.toString());
-		List<ConfigMeta> configs = plugin.listConfigMeta(pmEnvironment);
-		return ApiResponse.buildResults(configs);
+		return ApiResponse.buildResults(ClientAppConfigConstants.APP_CONFIGS.get(appType));
 	}
 
 	// Option APIS
