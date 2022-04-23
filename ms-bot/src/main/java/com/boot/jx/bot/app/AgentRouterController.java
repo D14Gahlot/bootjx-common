@@ -20,8 +20,8 @@ import com.boot.utils.ArgUtil;
 import com.boot.utils.StringUtils;
 import com.boot.utils.StringUtils.StringMatcher;
 
-@BotController(name = "AgentTeam", code = { "bot_agent_team" })
-public class AgentTeamController extends CommonBotController {
+@BotController(name = "AgentRouter", code = { "bot_agent_router" })
+public class AgentRouterController extends CommonBotController {
 
 	public static final String REPLY_ID = "reply_id";
 

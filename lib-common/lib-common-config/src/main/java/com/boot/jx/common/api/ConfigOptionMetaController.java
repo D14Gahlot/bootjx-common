@@ -22,6 +22,8 @@ import com.boot.jx.common.impl.ConfigMeta;
 import com.boot.jx.http.ApiRequest;
 import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.jx.postman.ClientApp;
+import com.boot.jx.postman.PMConstants;
+import com.boot.jx.postman.PMConstants.APP_TYPE;
 import com.boot.jx.postman.PMConstants.CHANNEL_TYPE_ENUM;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PMEnvironment.AChannelConfig;
@@ -73,6 +75,18 @@ public class ConfigOptionMetaController {
 	public ApiResponse<ConfigMeta, Object> channelConfig(@PathVariable CHANNEL_TYPE_ENUM channelType) {
 		ChannelPlugin<? extends AChannelDetails> plugin = ChannelPluginProvider.PLUGIN_MAPPING
 				.get(channelType.toString());
+		List<ConfigMeta> configs = plugin.listConfigMeta(pmEnvironment);
+		return ApiResponse.buildResults(configs);
+	}
+
+	@RequestMapping(value = "/api/meta/app_types", method = { RequestMethod.GET })
+	public ApiResponse<APP_TYPE, Object> appTypes() {
+		return ApiResponse.buildResults(PMConstants.APP_TYPE.values());
+	}
+
+	@RequestMapping(value = "/api/meta/app_types/{appType}/config", method = { RequestMethod.GET })
+	public ApiResponse<ConfigMeta, Object> appTypeConfig(@PathVariable APP_TYPE appType) {
+		ChannelPlugin<? extends AChannelDetails> plugin = ChannelPluginProvider.PLUGIN_MAPPING.get(appType.toString());
 		List<ConfigMeta> configs = plugin.listConfigMeta(pmEnvironment);
 		return ApiResponse.buildResults(configs);
 	}

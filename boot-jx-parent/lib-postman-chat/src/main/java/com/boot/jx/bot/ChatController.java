@@ -14,12 +14,15 @@ import com.boot.jx.postman.doc.ChatPromise.Result;
 import com.boot.jx.postman.doc.ChatPromise.State;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.manager.ChatSessionManager;
+import com.boot.jx.postman.manager.LogManager;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.model.PMArgs;
 import com.boot.jx.postman.model.ext.InBoundEvent;
 import com.boot.jx.postman.store.MessageContext;
 import com.boot.jx.postman.store.SessionStore;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.JsonUtil;
+import com.boot.utils.JsonUtil.JsonUtilConfigurable;
 
 public class ChatController {
 
@@ -37,6 +40,9 @@ public class ChatController {
 
 	@Autowired
 	private SessionStore sessionStore;
+
+	@Autowired
+	private LogManager logManager;
 
 	@Lazy
 	@Autowired
@@ -171,7 +177,9 @@ public class ChatController {
 	}
 
 	public void onSessionRoute(InBoundEvent assignEvent) {
-
+		logManager.debug(assignEvent,
+				String.format("%s -> %s", assignEvent.sessionRouted.targetQueue, assignEvent.sessionRouted.sourceQueue),
+				JsonUtil.toJson(assignEvent.sessionRouted));
 	}
 
 	public MessageContext context() {

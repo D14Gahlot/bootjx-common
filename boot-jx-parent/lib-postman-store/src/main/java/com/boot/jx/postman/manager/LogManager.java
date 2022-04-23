@@ -121,4 +121,23 @@ public class LogManager {
 		messageStore.save(doc);
 	}
 
+	public void debug(InBoundEvent inBoundEvent, Object... debugMessage) {
+		MessageDoc doc = new MessageDocLogs();
+		doc.setSessionId(inBoundEvent.sessionId);
+		doc.setContactId(inBoundEvent.contactId);
+		doc.setType("D");
+		doc.setTimestamp(System.currentTimeMillis());
+		doc.setTraceId(AppContextUtil.getTraceId());
+
+		if (ArgUtil.is(debugMessage)) {
+			if (debugMessage.length > 0) {
+				doc.setMessage(ArgUtil.parseAsString(debugMessage[0]));
+			}
+			for (int i = 1; i < debugMessage.length; i++) {
+				doc.logs().add(ArgUtil.parseAsString(debugMessage[i]));
+			}
+		}
+		messageStore.save(doc);
+	}
+
 }
