@@ -11,7 +11,7 @@ public class ClientAppConfigConstants {
 
 	public static final String[] APP_CONFIG_PREFIX = new String[] {
 			// PRefixe
-			"mry.prop.logo.", "mry.prop.service.", "mry.prop.social.", };
+			"mry.props.logo.", "mry.props.service.", "mry.props.social.", };
 	public static final Map<APP_TYPE, ConfigMeta[]> APP_CONFIGS = new ConcurrentHashMap<APP_TYPE, ConfigMeta[]>();
 
 	static {
@@ -19,20 +19,20 @@ public class ClientAppConfigConstants {
 		APP_CONFIGS.put(APP_TYPE.WEBHOOK, new ConfigMeta[] { new ConfigMeta().path("webhook").title("Webhook Url") });
 
 		APP_CONFIGS.put(APP_TYPE.AGENT, new ConfigMeta[] {
-				new ConfigMeta().path("prop.agent_connect_first").title("Greeting to first-time customer")
+				new ConfigMeta().path("props.agent_connect_first").title("Greeting to first-time customer")
 						.optionsSource("getx:/api/tmpl/hsm").optionsKey("code").optionsLabel("desc").group("TEMPLATES"),
-				new ConfigMeta().path("prop.agent_connect_next")
+				new ConfigMeta().path("props.agent_connect_next")
 						.title("Greeting to returning customer to start new conversation")
 						.optionsSource("getx:/api/tmpl/hsm").optionsKey("code").optionsLabel("desc").group("TEMPLATES"),
-				new ConfigMeta().path("prop.agent_connect_contiue")
+				new ConfigMeta().path("props.agent_connect_contiue")
 						.title("Greetings to returning customer to conitune last conversation")
 						.optionsSource("getx:/api/tmpl/hsm").optionsKey("code").optionsLabel("desc")
 						.group("TEMPLATES") });
 
 		APP_CONFIGS.put(APP_TYPE.MITEL,
 				new ConfigMeta[] { 
-						new ConfigMeta().path("prop.end_point").title("Mitel End Point"),
-						new ConfigMeta().path("prop.grant_type").title("Grant Type").options(
+						new ConfigMeta().path("props.end_point").title("Mitel End Point"),
+						new ConfigMeta().path("props.grant_type").title("Grant Type").options(
 								new ConfigOption("client_credentials").label("Client Credentials"),
 								new ConfigOption("password").label("Password")),
 						new ConfigMeta().path("props.client_id").title("Client Id"),
@@ -41,20 +41,20 @@ public class ClientAppConfigConstants {
 						new ConfigMeta().path("props.to").title("To").optional(),
 						new ConfigMeta().path("props.from").title("Default From").optional() });
 
-		APP_CONFIGS.put(APP_TYPE.BOT, new ConfigMeta[] { new ConfigMeta().path("prop.botCode").title("Bot Code") });
+		APP_CONFIGS.put(APP_TYPE.BOT, new ConfigMeta[] { new ConfigMeta().path("props.botCode").title("Bot Code") });
 
 		APP_CONFIGS.put(APP_TYPE.AGENT_ROUTER,
-				new ConfigMeta[] { new ConfigMeta().path("prop.template").title("Team Options").group("TEMPLATES")
+				new ConfigMeta[] { new ConfigMeta().path("props.template").title("Team Options").group("TEMPLATES")
 						.optionsSource("getx:/api/tmpl/hsm").optionsKey("code").optionsLabel("desc") });
 
-		APP_CONFIGS.put(APP_TYPE.APP_ROUTER, new ConfigMeta[] { new ConfigMeta().path("prop.connect_first")
+		APP_CONFIGS.put(APP_TYPE.APP_ROUTER, new ConfigMeta[] { new ConfigMeta().path("props.connect_first")
 				.title("First-time customer").desc("First customers, with not Last Conversation")
 				.optionsSource("getx:/api/options/inbound_queue").optionsKey("code").optionsLabel("code").group("Apps"),
-				new ConfigMeta().path("prop.connect_next").title("Returning customer to start new conversation")
+				new ConfigMeta().path("props.connect_next").title("Returning customer to start new conversation")
 						.desc("Returning customer, if last session was RESOLVED")
 						.optionsSource("getx:/api/options/inbound_queue").optionsKey("code").optionsLabel("code")
 						.group("Apps"),
-				new ConfigMeta().path("prop.connect_contiue").title("Returning customer to conitune last conversation")
+				new ConfigMeta().path("props.connect_contiue").title("Returning customer to conitune last conversation")
 						.desc("Returning customer, if last session was NOT RESOLVED")
 						.optionsSource("getx:/api/options/inbound_queue").optionsKey("code").optionsLabel("code")
 						.group("Apps") });
