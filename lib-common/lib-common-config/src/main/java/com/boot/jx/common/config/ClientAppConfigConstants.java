@@ -30,11 +30,13 @@ public class ClientAppConfigConstants {
 						.group("TEMPLATES") });
 
 		APP_CONFIGS.put(APP_TYPE.MITEL,
-				new ConfigMeta[] { new ConfigMeta().path("prop.end_point").title("Mitel End Point"),
+				new ConfigMeta[] { 
+						new ConfigMeta().path("prop.end_point").title("Mitel End Point"),
 						new ConfigMeta().path("prop.grant_type").title("Grant Type").options(
 								new ConfigOption("client_credentials").label("Client Credentials"),
 								new ConfigOption("password").label("Password")),
-						new ConfigMeta().path("secret.client_secret").title("Client Secret").createonly(),
+						new ConfigMeta().path("props.client_id").title("Client Id"),
+						new ConfigMeta().path("secret.client_secret").title("Client Secret"),
 						new ConfigMeta().path("props.queue").title("Mitel Queue"),
 						new ConfigMeta().path("props.to").title("To").optional(),
 						new ConfigMeta().path("props.from").title("Default From").optional() });
