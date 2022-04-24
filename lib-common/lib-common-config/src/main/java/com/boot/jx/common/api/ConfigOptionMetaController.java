@@ -87,7 +87,7 @@ public class ConfigOptionMetaController {
 
 	@RequestMapping(value = "/api/meta/app_types/{appType}/config", method = { RequestMethod.GET })
 	public ApiResponse<ConfigMeta, Object> appTypeConfig(@PathVariable APP_TYPE appType) {
-		return ApiResponse.buildResults(ClientAppConfigConstants.APP_CONFIGS.get(appType));
+		return ApiResponse.buildResults(ClientAppConfigConstants.APP_CONFIGS.getOrDefault(appType, new ConfigMeta[0]));
 	}
 
 	// Option APIS
