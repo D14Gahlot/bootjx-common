@@ -24,8 +24,6 @@ import com.boot.utils.StringUtils.StringMatcher;
 @BotController(name = "AgentRouter", code = { "bot_agent_router" })
 public class AgentRouterController extends CommonBotController {
 
-	public static final String REPLY_ID = "reply_id";
-
 	@Autowired
 	private CommonMongoTemplate commonMongoTemplate;
 
@@ -39,8 +37,12 @@ public class AgentRouterController extends CommonBotController {
 
 	@ChatMapping(key = AlexBotConstants.KEY.INITIATE + "*", pattern = "^*$")
 	public void greet(InboxMessage inboxMessage, StringMatcher matcher) {
-		String text = toReplyEnum(inboxMessage);
 
+	}
+
+	@ChatMapping(key = "on_team_select")
+	public void onTeamSelect(InboxMessage inboxMessage, StringMatcher matcher) {
+		String text = toReplyEnum(inboxMessage);
 		List<DepartmentDoc> teams = commonMongoTemplate.findAll(DepartmentDoc.class);
 		for (DepartmentDoc team : teams) {
 			if (ArgUtil.areEqual(StringUtils.toLowerCase(team.getDept_code()), text)
@@ -65,14 +67,7 @@ public class AgentRouterController extends CommonBotController {
 			}
 			reply(new OutboxMessage().message("Select team").options("buttons", buttons));
 		}
+		next("on_team_select");
 	}
 
-	public String toReplyEnum(InboxMessage inboxMessage) {
-		String codeValue = inboxMessage.form().get(REPLY_ID) == null ? inboxMessage.getMessage()
-				: inboxMessage.form().get(REPLY_ID).toString();
-		if (ArgUtil.is(codeValue)) {
-			codeValue = codeValue.toLowerCase().trim();
-		}
-		return codeValue;
-	}
 }
