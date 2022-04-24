@@ -320,15 +320,25 @@ public class BotEngine {
 			String botCodePrefix = pmEnvironment.keyEntry("postman.bot.code").asString(AppContextUtil.getTenant());
 			ClientApp app = messageContext.clientApp(assignEvent.sessionRouted.targetQueue, sessionDoc.contact());
 			String botCode = botCodePrefix;
+
 			if (ArgUtil.is(app)) {
-				String botFlow = ArgUtil.parseAsString(app.props().get("botCode"), app.getQueue());
-				if (ArgUtil.is(botFlow) && !ArgUtil.areEqual(app.getQueue(), PMConstants.DEFAULT.BOT_QUEUE_CODE)) {
-					botCode = botCodePrefix + "_" + botFlow;
+				if (!APP_TYPE.BOT.name().equalsIgnoreCase(app.getAppType())) {
+					botCode = "bot_" + StringUtils.trim(StringUtils.toLowerCase(app.getAppType()));
+				} else {
+					String botFlow = ArgUtil.parseAsString(app.props().get("botCode"), app.getQueue());
+					if (ArgUtil.is(botFlow) && !ArgUtil.areEqual(app.getQueue(), PMConstants.DEFAULT.BOT_QUEUE_CODE)) {
+						botCode = botCodePrefix + "_" + botFlow;
+					}
 				}
 			}
+			
 			ChatController controller = filtersMap.get("botCode#" + botCode);
-			controller.onSessionRoute(assignEvent);
-			botService.commitChatContext(sessionDoc, assignEvent);
+			if(ArgUtil.is(controller)) {
+				controller.onSessionRoute(assignEvent);
+				botService.commitChatContext(sessionDoc, assignEvent);
+			} else {
+				LOGGER.warn("No Chat Controller Matched for botCode#" + botCode);
+			}
 		} catch (ChatException ce) {
 			LOGGER.info("Target Handler : " + ce.getTargetHandler());
 		} catch (Exception e) {

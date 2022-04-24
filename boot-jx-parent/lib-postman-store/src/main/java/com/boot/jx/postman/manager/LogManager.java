@@ -1,5 +1,7 @@
 package com.boot.jx.postman.manager;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -21,6 +23,8 @@ import com.boot.utils.ArgUtil;
 
 @Component
 public class LogManager {
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(LogManager.class);
 
 	@Autowired(required = false)
 	private AuditDetailProvider auditDetailProvider;
@@ -122,22 +126,24 @@ public class LogManager {
 	}
 
 	public void debug(InBoundEvent inBoundEvent, Object... debugMessage) {
-		MessageDoc doc = new MessageDocLogs();
-		doc.setSessionId(inBoundEvent.sessionId);
-		doc.setContactId(inBoundEvent.contactId);
-		doc.setType("D");
-		doc.setTimestamp(System.currentTimeMillis());
-		doc.setTraceId(AppContextUtil.getTraceId());
+		if (LOGGER.isDebugEnabled()) {
+			MessageDoc doc = new MessageDocLogs();
+			doc.setSessionId(inBoundEvent.sessionId);
+			doc.setContactId(inBoundEvent.contactId);
+			doc.setType("D");
+			doc.setTimestamp(System.currentTimeMillis());
+			doc.setTraceId(AppContextUtil.getTraceId());
 
-		if (ArgUtil.is(debugMessage)) {
-			if (debugMessage.length > 0) {
-				doc.setMessage(ArgUtil.parseAsString(debugMessage[0]));
+			if (ArgUtil.is(debugMessage)) {
+				if (debugMessage.length > 0) {
+					doc.setMessage(ArgUtil.parseAsString(debugMessage[0]));
+				}
+				for (int i = 1; i < debugMessage.length; i++) {
+					doc.logs().add(ArgUtil.parseAsString(debugMessage[i]));
+				}
 			}
-			for (int i = 1; i < debugMessage.length; i++) {
-				doc.logs().add(ArgUtil.parseAsString(debugMessage[i]));
-			}
+			messageStore.save(doc);
 		}
-		messageStore.save(doc);
 	}
 
 }

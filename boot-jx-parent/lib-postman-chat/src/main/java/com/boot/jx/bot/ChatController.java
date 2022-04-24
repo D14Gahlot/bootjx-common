@@ -178,7 +178,7 @@ public class ChatController {
 
 	public void onSessionRoute(InBoundEvent assignEvent) {
 		logManager.debug(assignEvent,
-				String.format("%s -> %s", assignEvent.sessionRouted.targetQueue, assignEvent.sessionRouted.sourceQueue),
+				String.format("%s -> %s", assignEvent.sessionRouted.sourceQueue, assignEvent.sessionRouted.targetQueue),
 				JsonUtil.toJson(assignEvent.sessionRouted));
 	}
 

@@ -1,6 +1,8 @@
 
 package com.boot.jx.bot.app;
 
+import org.springframework.beans.factory.annotation.Autowired;
+
 import com.boot.jx.bot.BotController;
 import com.boot.jx.bot.ChatMapping;
 import com.boot.jx.bot.alex.AlexBotConstants;
@@ -17,6 +19,7 @@ public class AppRouterController extends CommonBotController {
 
 	public static final String REPLY_ID = "reply_id";
 
+	@Autowired
 	private SessionStore sessionStore;
 
 	@ChatMapping(key = AlexBotConstants.KEY.INITIATE + "*", pattern = "^*$")

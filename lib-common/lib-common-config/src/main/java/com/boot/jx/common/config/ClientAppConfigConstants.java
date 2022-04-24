@@ -30,8 +30,7 @@ public class ClientAppConfigConstants {
 						.group("TEMPLATES") });
 
 		APP_CONFIGS.put(APP_TYPE.MITEL,
-				new ConfigMeta[] { 
-						new ConfigMeta().path("props.end_point").title("Mitel End Point"),
+				new ConfigMeta[] { new ConfigMeta().path("props.end_point").title("Mitel End Point"),
 						new ConfigMeta().path("props.grant_type").title("Grant Type").options(
 								new ConfigOption("client_credentials").label("Client Credentials"),
 								new ConfigOption("password").label("Password")),
@@ -47,9 +46,12 @@ public class ClientAppConfigConstants {
 				new ConfigMeta[] { new ConfigMeta().path("props.template").title("Team Options").group("TEMPLATES")
 						.optionsSource("getx:/api/tmpl/hsm").optionsKey("code").optionsLabel("desc") });
 
-		APP_CONFIGS.put(APP_TYPE.APP_ROUTER, new ConfigMeta[] { new ConfigMeta().path("props.connect_first")
-				.title("First-time customer").desc("First customers, with not Last Conversation")
-				.optionsSource("getx:/api/options/inbound_queue").optionsKey("code").optionsLabel("code").group("Apps"),
+		APP_CONFIGS.put(APP_TYPE.APP_ROUTER, new ConfigMeta[] {
+
+				new ConfigMeta().path("props.connect_first").title("First-time customer")
+						.desc("First customers, with not Last Conversation")
+						.optionsSource("getx:/api/options/inbound_queue").optionsKey("code").optionsLabel("code")
+						.group("Apps"),
 				new ConfigMeta().path("props.connect_next").title("Returning customer to start new conversation")
 						.desc("Returning customer, if last session was RESOLVED")
 						.optionsSource("getx:/api/options/inbound_queue").optionsKey("code").optionsLabel("code")

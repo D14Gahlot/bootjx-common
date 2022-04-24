@@ -16,6 +16,7 @@ import com.boot.jx.postman.ClientApp;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.model.TmplElement;
+import com.boot.jx.postman.model.ext.InBoundEvent;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.StringUtils;
 import com.boot.utils.StringUtils.StringMatcher;
@@ -28,9 +29,18 @@ public class AgentRouterController extends CommonBotController {
 	@Autowired
 	private CommonMongoTemplate commonMongoTemplate;
 
+	@Override
+	public void onSessionRoute(InBoundEvent assignEvent) {
+		// TODO Auto-generated method stub
+		super.onSessionRoute(assignEvent);
+		List<DepartmentDoc> teams = commonMongoTemplate.findAll(DepartmentDoc.class);
+		askTeam(teams);
+	}
+
 	@ChatMapping(key = AlexBotConstants.KEY.INITIATE + "*", pattern = "^*$")
 	public void greet(InboxMessage inboxMessage, StringMatcher matcher) {
 		String text = toReplyEnum(inboxMessage);
+
 		List<DepartmentDoc> teams = commonMongoTemplate.findAll(DepartmentDoc.class);
 		for (DepartmentDoc team : teams) {
 			if (ArgUtil.areEqual(StringUtils.toLowerCase(team.getDept_code()), text)
@@ -40,6 +50,10 @@ public class AgentRouterController extends CommonBotController {
 				return;
 			}
 		}
+		askTeam(teams);
+	}
+
+	private void askTeam(List<DepartmentDoc> teams) {
 		ClientApp app = context().clientApp();
 		String template = ArgUtil.parseAsString(app.props().get("template"));
 		if (ArgUtil.is(template)) {
