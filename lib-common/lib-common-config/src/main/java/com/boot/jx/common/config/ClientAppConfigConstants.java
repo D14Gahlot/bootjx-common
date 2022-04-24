@@ -19,48 +19,57 @@ public class ClientAppConfigConstants {
 		APP_CONFIGS.put(APP_TYPE.WEBHOOK, new ConfigMeta[] { new ConfigMeta().path("webhook").title("Webhook Url") });
 
 		APP_CONFIGS.put(APP_TYPE.AGENT, new ConfigMeta[] {
-				new ConfigMeta().path("props.agent_connect_first").title("Greeting to first-time customer")
-						.optionsSource("getx:/api/tmpl/hsm").optionsKey("code").optionsLabel("desc").group("TEMPLATES"),
-				new ConfigMeta().path("props.agent_connect_next")
-						.title("Greeting to returning customer to start new conversation")
-						.optionsSource("getx:/api/tmpl/hsm").optionsKey("code").optionsLabel("desc").group("TEMPLATES"),
-				new ConfigMeta().path("props.agent_connect_contiue")
-						.title("Greetings to returning customer to conitune last conversation")
+
+				new ConfigMeta().title("Default Agent Team").path("props.agentCode")
+						.optionsSource("getx:/api/admins/dept").group("Team"),
+				new ConfigMeta().title("When Agent is connected").path("props.agent_connected")
+						.optionsSource("getx:/api/tmpl/hsm").optionsKey("code").optionsLabel("desc").group("Templates"),
+				new ConfigMeta().title("When no agent is found").path("props.agent_notfound")
+						.optionsSource("getx:/api/tmpl/hsm").optionsKey("code").optionsLabel("desc").group("Templates"),
+				new ConfigMeta().title("When chat is transferred").path("props.agent_transfer")
 						.optionsSource("getx:/api/tmpl/hsm").optionsKey("code").optionsLabel("desc")
-						.group("TEMPLATES") });
+						.group("Templates") });
 
 		APP_CONFIGS.put(APP_TYPE.MITEL,
 				new ConfigMeta[] {
-						new ConfigMeta().path("props.end_point").title("Mitel End Point")
+						new ConfigMeta().title("Mitel End Point").path("props.end_point")
 								.example("http://yourerver.com/callback_path"),
-						new ConfigMeta().path("props.grant_type").title("Grant Type").options(
+						new ConfigMeta().title("Grant Type").path("props.grant_type").options(
 								new ConfigOption("client_credentials").label("Client Credentials"),
 								new ConfigOption("password").label("Password")),
-						new ConfigMeta().path("props.client_id").title("Client Id").example("ProfessionalServices"),
-						new ConfigMeta().path("secret.client_secret").title("Client Secret"),
-						new ConfigMeta().path("props.queue").title("Mitel Queue")
+						new ConfigMeta().title("Client Id").path("props.client_id").example("ProfessionalServices"),
+						new ConfigMeta().title("Client Secret").path("secret.client_secret"),
+						new ConfigMeta().title("Mitel Queue").path("props.queue")
 								.example("6106ee72-81a1-49a7-9e10-df591d5194f3"),
-						new ConfigMeta().path("props.to").title("To").optional(),
-						new ConfigMeta().path("props.from").title("Default From").optional() });
+						new ConfigMeta().title("To").path("props.to").optional(),
+						new ConfigMeta().title("Default From").path("props.from").optional() });
 
 		APP_CONFIGS.put(APP_TYPE.BOT, new ConfigMeta[] {
-				new ConfigMeta().path("props.botCode").title("Bot Code").example("complaint_flow") });
+				new ConfigMeta().title("Bot Code").path("props.botCode").example("complaint_flow") });
 
-		APP_CONFIGS.put(APP_TYPE.AGENT_ROUTER,
-				new ConfigMeta[] { new ConfigMeta().path("props.template").title("Team Options").group("TEMPLATES")
-						.optionsSource("getx:/api/tmpl/hsm").optionsKey("code").optionsLabel("desc") });
+		APP_CONFIGS
+				.put(APP_TYPE.AGENT_ROUTER,new ConfigMeta[] { 
+								
+				new ConfigMeta().title("Team Options Template")
+						.path("props.template").group("TEMPLATES").
+						optionsSource("getx:/api/tmpl/hsm").optionsKey("code").optionsLabel("desc")
+						
+				});
 
 		APP_CONFIGS.put(APP_TYPE.APP_ROUTER, new ConfigMeta[] {
 
-				new ConfigMeta().path("props.connect_first").title("First-time customer")
+				new ConfigMeta().title("First-time customer")
+						.path("props.connect_first")
 						.desc("First customers, with not Last Conversation")
 						.optionsSource("getx:/api/options/inbound_queue").optionsKey("code").optionsLabel("code")
 						.group("Apps"),
-				new ConfigMeta().path("props.connect_next").title("Returning customer to start new conversation")
+				new ConfigMeta().title("Returning customer to start new conversation")
+						.path("props.connect_next")
 						.desc("Returning customer, if last session was RESOLVED")
 						.optionsSource("getx:/api/options/inbound_queue").optionsKey("code").optionsLabel("code")
 						.group("Apps"),
-				new ConfigMeta().path("props.connect_contiue").title("Returning customer to conitune last conversation")
+				new ConfigMeta().title("Returning customer to conitune last conversation")
+						.path("props.connect_contiue")
 						.desc("Returning customer, if last session was NOT RESOLVED")
 						.optionsSource("getx:/api/options/inbound_queue").optionsKey("code").optionsLabel("code")
 						.group("Apps") });

@@ -57,8 +57,8 @@ public class AgentInBoundHandler extends DefaultChatBoundHandler {
 		agentChatHandler.onMessageReceive(inboxMessage);
 	}
 
-	private MapEntry getTemplate(MapModel props, ConfigConstants.SETUP_KEY KEY) {
-		MapEntry talk2agent = props.keyEntry(KEY.name());
+	private MapEntry getTemplate(MapModel props, String propKey, ConfigConstants.SETUP_KEY KEY) {
+		MapEntry talk2agent = props.keyEntry(propKey);
 		if (talk2agent.exists()) {
 			return talk2agent;
 		}
@@ -67,13 +67,30 @@ public class AgentInBoundHandler extends DefaultChatBoundHandler {
 
 	private void onAssign(ChatSessionDoc session, InBoundEvent assignEvent) {
 		try {
-			if (!ArgUtil.is(assignEvent.sessionAssigned().oldAgent)) {
-				ClientApp app = this.context().clientApp();
-				MapModel props = MapModel.from(app.props());
-				MapEntry templ = getTemplate(props,
-						ArgUtil.is(assignEvent.sessionAssigned().newAgent)
-								? ConfigConstants.SETUP_KEY.POSTMAN_AGENT_CHAT_AUTOREPLY_TALK2AGENT
-								: ConfigConstants.SETUP_KEY.POSTMAN_AGENT_CHAT_AUTOREPLY_NOAGENT);
+			ClientApp app = this.context().clientApp();
+			MapModel props = MapModel.from(app.props());
+
+			if (!ArgUtil.is(assignEvent.sessionAssigned().oldAgent)
+					&& ArgUtil.is(assignEvent.sessionAssigned().newAgent)) {
+
+				MapEntry templ = getTemplate(props, "agent_connected",
+						ConfigConstants.SETUP_KEY.POSTMAN_AGENT_CHAT_AUTOREPLY_TALK2AGENT);
+				if (templ.exists()) {
+					chatService.reply(session, new OutboxMessage().template(templ.asString()));
+					return;
+				}
+			} else if (!ArgUtil.is(assignEvent.sessionAssigned().oldAgent)
+					&& !ArgUtil.is(assignEvent.sessionAssigned().newAgent)) {
+
+				MapEntry templ = getTemplate(props, "agent_notfound",
+						ConfigConstants.SETUP_KEY.POSTMAN_AGENT_CHAT_AUTOREPLY_NOAGENT);
+				if (templ.exists()) {
+					chatService.reply(session, new OutboxMessage().template(templ.asString()));
+					return;
+				}
+			} else {
+
+				MapEntry templ = props.keyEntry("agent_transfer");
 				if (templ.exists()) {
 					chatService.reply(session, new OutboxMessage().template(templ.asString()));
 					return;
