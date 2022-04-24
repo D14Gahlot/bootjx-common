@@ -30,17 +30,21 @@ public class ClientAppConfigConstants {
 						.group("TEMPLATES") });
 
 		APP_CONFIGS.put(APP_TYPE.MITEL,
-				new ConfigMeta[] { new ConfigMeta().path("props.end_point").title("Mitel End Point"),
+				new ConfigMeta[] {
+						new ConfigMeta().path("props.end_point").title("Mitel End Point")
+								.example("http://yourerver.com/callback_path"),
 						new ConfigMeta().path("props.grant_type").title("Grant Type").options(
 								new ConfigOption("client_credentials").label("Client Credentials"),
 								new ConfigOption("password").label("Password")),
-						new ConfigMeta().path("props.client_id").title("Client Id"),
+						new ConfigMeta().path("props.client_id").title("Client Id").example("ProfessionalServices"),
 						new ConfigMeta().path("secret.client_secret").title("Client Secret"),
-						new ConfigMeta().path("props.queue").title("Mitel Queue"),
+						new ConfigMeta().path("props.queue").title("Mitel Queue")
+								.example("6106ee72-81a1-49a7-9e10-df591d5194f3"),
 						new ConfigMeta().path("props.to").title("To").optional(),
 						new ConfigMeta().path("props.from").title("Default From").optional() });
 
-		APP_CONFIGS.put(APP_TYPE.BOT, new ConfigMeta[] { new ConfigMeta().path("props.botCode").title("Bot Code") });
+		APP_CONFIGS.put(APP_TYPE.BOT, new ConfigMeta[] {
+				new ConfigMeta().path("props.botCode").title("Bot Code").example("complaint_flow") });
 
 		APP_CONFIGS.put(APP_TYPE.AGENT_ROUTER,
 				new ConfigMeta[] { new ConfigMeta().path("props.template").title("Team Options").group("TEMPLATES")

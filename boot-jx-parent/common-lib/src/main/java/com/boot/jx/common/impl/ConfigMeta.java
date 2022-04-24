@@ -95,6 +95,7 @@ public class ConfigMeta implements Serializable {
 	private String group;
 	private String path;
 	private Object defaultValue;
+	private Object example;
 	private boolean optional;
 	private boolean readonly;
 	private boolean createonly;
@@ -478,4 +479,16 @@ public class ConfigMeta implements Serializable {
 		return this;
 	}
 
+	public Object getExample() {
+		return example;
+	}
+
+	public void setExample(Object example) {
+		this.example = example;
+	}
+
+	public ConfigMeta example(String example) {
+		this.example = example;
+		return this;
+	}
 }
