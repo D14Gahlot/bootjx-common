@@ -312,6 +312,11 @@ public class ChatSessionManager {
 		inBoundEvent.contactId = chatSessionDoc.getContactId();
 		inBoundEvent.sessionRouted.sourceQueue = chatSessionDoc.getAssignedToQueue();
 		inBoundEvent.contact().copyFrom(chatSessionDoc.contact());
+		
+		if(ArgUtil.is(chatSessionDoc.getContactId())) {
+			inBoundEvent.contact().setContactId(inBoundEvent.contactId);
+		}
+		
 
 		if (!ArgUtil.is(chatSessionDoc)) {
 			LOGGER.error("Session Cannot Be Empty for queueCode {}", queueCode);

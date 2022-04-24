@@ -48,7 +48,7 @@ public class InBoundEvent {
 
 	public SessionAssigned sessionAssigned;
 
-	private Contactable contact;
+	public Contactable contact;
 
 	public Contactable contact() {
 		if (this.contact == null) {
