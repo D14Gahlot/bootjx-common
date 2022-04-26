@@ -21,8 +21,8 @@ import com.boot.utils.ArgUtil;
 import com.boot.utils.StringUtils;
 import com.boot.utils.StringUtils.StringMatcher;
 
-@BotController(name = "AgentRouter", code = { "bot_agent_router" })
-public class AgentRouterController extends CommonBotController {
+@BotController(name = "TeamRouter", code = { "bot_team_router" })
+public class AgentTeamRouterController extends CommonBotController {
 
 	@Autowired
 	private CommonMongoTemplate commonMongoTemplate;

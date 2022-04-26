@@ -46,6 +46,7 @@ import com.boot.jx.http.CommonHttpRequest;
 import com.boot.jx.phonebook.model.PBAddress;
 import com.boot.jx.phonebook.model.PBEmail;
 import com.boot.jx.phonebook.model.PBPhone;
+import com.boot.jx.postman.PMConstants;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PMEnvironment.PMCommonConfig;
 import com.boot.jx.scope.tnt.Tenants;
@@ -67,7 +68,7 @@ public class PartnerController {
 	private AccountAuthService sessionService;
 
 	@Autowired
-	private AccountSessionBean adminSessionBean;
+	private AccountSessionBean userSessionBean;
 
 	@Autowired
 	private AccountStore accountStore;
@@ -90,10 +91,10 @@ public class PartnerController {
 
 		model.addAllAttributes(appCommonConfig.appAttributes());
 		Authentication auth = AccountAuthService.getAuthentication();
-		if (ArgUtil.is(auth) && ArgUtil.is(adminSessionBean.domainUser())) {
+		if (ArgUtil.is(auth) && ArgUtil.is(userSessionBean.domainUser())) {
 			model.addAttribute("APP_USER", auth.getName());
-			model.addAttribute("APP_USER_NAME", adminSessionBean.domainUser().contact().getName());
-			model.addAttribute("APP_USER_ROLE", JsonUtil.toJson(adminSessionBean.getRole()));
+			model.addAttribute("APP_USER_NAME", userSessionBean.domainUser().contact().getName());
+			model.addAttribute("APP_USER_ROLE", JsonUtil.toJson(userSessionBean.getRole()));
 		} else {
 			model.addAttribute("APP_USER", "");
 			model.addAttribute("APP_USER_NAME", "");
@@ -118,8 +119,8 @@ public class PartnerController {
 		model.addAttribute("FORM_URL", String.format("https://%s.%s/%s/auth/direct", domain,
 				env.keyEntry("mry.prop.service.domain").asString(), panel));
 
-		if (ArgUtil.is(adminSessionBean.domainUser())) {
-			for (DomainDoc domainDoc : adminSessionBean.domainUser().getDomains()) {
+		if (ArgUtil.is(userSessionBean.domainUser())) {
+			for (DomainDoc domainDoc : userSessionBean.domainUser().getDomains()) {
 				if (ArgUtil.isEqual(domainDoc.getDomain(), domain)) {
 					UserLoginToken userLoginToken = empAuthService.createSuperLoginToken("superadmin", domain,
 							domainDoc.getId(), "admin");
@@ -259,7 +260,7 @@ public class PartnerController {
 	@ResponseBody
 	@RequestMapping(value = { "/api/domain" }, method = { RequestMethod.GET })
 	public ApiResponse<DomainDoc, Object> getDomain() {
-		BusinessUserDoc domainUser = adminSessionBean.domainUser();
+		BusinessUserDoc domainUser = userSessionBean.domainUser();
 
 		if (!ArgUtil.is(domainUser)) {
 			ApiResponseUtil.throwException("Access Denied");
@@ -317,7 +318,7 @@ public class PartnerController {
 			HttpServletResponse httpServletResponse, @RequestBody @Valid DomainDoc domain,
 			@RequestParam(required = false) boolean create) throws NoSuchAlgorithmException {
 
-		BusinessUserDoc domainUser = adminSessionBean.domainUser();
+		BusinessUserDoc domainUser = userSessionBean.domainUser();
 
 		if (ArgUtil.is(domainUser.getDomains()) && ArgUtil.is(domain.getId())) {
 			Optional<DomainDoc> domaiNational = domainUser.getDomains().stream()
@@ -357,21 +358,29 @@ public class PartnerController {
 
 	) throws NoSuchAlgorithmException {
 
-		BusinessUserDoc domainUser = adminSessionBean.domainUser();
+		BusinessUserDoc domainUser = userSessionBean.domainUser();
 
-		if (!ArgUtil.is(domainUser.getDomains())) {
-			ApiResponseUtil.throwInputException(
-					new ApiFieldError().field("domain").codeKey("ValidDomainNotFound").description("Domain Not found"));
+		Optional<DomainDoc> domaiNational = Optional.empty();
+		if (userSessionBean.role().contains(PMConstants.USER_ROLE.DUPER_USER)) {
+			DomainDoc domainDoc = accountStore.findDomainByName(domain);
+			if (ArgUtil.is(domainDoc)) {
+				domaiNational = Optional.of(domainDoc);
+			}
+		} else {
+			if (!ArgUtil.is(domainUser.getDomains())) {
+				ApiResponseUtil.throwInputException(new ApiFieldError().field("domain").codeKey("ValidDomainNotFound")
+						.description("Domain Not found"));
+			}
+			domaiNational = domainUser.getDomains().stream().filter(d -> d.getDomain().equals(domain)).findFirst();
 		}
 
-		Optional<DomainDoc> domaiNational = domainUser.getDomains().stream().filter(d -> d.getDomain().equals(domain))
-				.findFirst();
 		if (!domaiNational.isPresent() || !domaiNational.get().getDomain().equals(domain)) {
 			ApiResponseUtil.throwInputException(
 					new ApiFieldError().field("domain").codeKey("ValidDomainNotFound").description("Domain Not found"));
 		}
 
 		BusinessUserDoc account = accountStore.findOneByEmail(email, BusinessUserDoc.class);
+
 		if (!ArgUtil.is(account) && ArgUtil.is(email)) {
 			SignupContact newUser = new SignupContact();
 			newUser.setEmail(email);
@@ -380,6 +389,7 @@ public class PartnerController {
 			newUser.setCompany(company);
 			account = createUser(newUser);
 		}
+
 		if (!ArgUtil.is(account)) {
 			ApiResponseUtil.throwInputException(new ApiFieldError().field("email").codeKey("ValidAccountNotFound")
 					.description("No Account with email."));
@@ -419,7 +429,7 @@ public class PartnerController {
 	@RequestMapping(value = { "/api/domain/users" }, method = { RequestMethod.GET })
 	public ApiResponse<Object, Object> domainUserGet(Model model, HttpServletRequest request,
 			HttpServletResponse httpServletResponse, @RequestParam String domain) throws NoSuchAlgorithmException {
-		BusinessUserDoc domainUser = adminSessionBean.domainUser();
+		BusinessUserDoc domainUser = userSessionBean.domainUser();
 
 		if (!ArgUtil.is(domainUser.getDomains())) {
 			ApiResponseUtil.throwInputException(
@@ -444,7 +454,7 @@ public class PartnerController {
 	@RequestMapping(value = "/api/domain/logo", method = { RequestMethod.POST })
 	public ApiResponse<String, Object> upploadDomainLogo(
 			@RequestParam(name = "file", required = false) MultipartFile file) {
-		BusinessUserDoc domainUser = adminSessionBean.domainUser();
+		BusinessUserDoc domainUser = userSessionBean.domainUser();
 		String domainUserId = domainUser.getId();
 		String url = fileStore.upload1(file,
 				String.format("%s/docs/%s/logo/%s", AppContextUtil.getTenant(), domainUserId, UUID.randomUUID()),
@@ -460,7 +470,7 @@ public class PartnerController {
 			HttpServletResponse httpServletResponse, @RequestBody @Valid DomainLicenseDoc domainLicense,
 			@RequestParam(required = false) boolean create) throws NoSuchAlgorithmException {
 
-		BusinessUserDoc domainUser = adminSessionBean.domainUser();
+		BusinessUserDoc domainUser = userSessionBean.domainUser();
 		DomainDoc domainDoc = accountStore.findDomainByName(domainLicense.getDomain());
 
 		if (!ArgUtil.is(domainDoc)) {

@@ -48,7 +48,7 @@ public class ClientAppConfigConstants {
 				new ConfigMeta().title("Bot Code").path("props.botCode").example("complaint_flow") });
 
 		APP_CONFIGS
-				.put(APP_TYPE.AGENT_ROUTER,new ConfigMeta[] { 
+				.put(APP_TYPE.TEAM_ROUTER,new ConfigMeta[] { 
 								
 				new ConfigMeta().title("Team Options Template")
 						.path("props.template").group("TEMPLATES").
