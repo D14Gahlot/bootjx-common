@@ -6,6 +6,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import com.boot.jx.common.impl.ConfigMeta;
 import com.boot.jx.common.impl.ConfigMeta.ConfigOption;
 import com.boot.jx.common.impl.ConfigMeta.INPUT_TYPE;
+import com.boot.jx.common.impl.ConfigMeta.MESSAGE_TYPE;
 import com.boot.jx.postman.PMConstants.APP_TYPE;
 
 public class ClientAppConfigConstants {
@@ -19,12 +20,12 @@ public class ClientAppConfigConstants {
 
 		APP_CONFIGS.put(APP_TYPE.NONE, new ConfigMeta[] {
 
-				new ConfigMeta().inputType(INPUT_TYPE.MESSAGE).title("Basic App")
+				new ConfigMeta().inputType(INPUT_TYPE.MESSAGE, MESSAGE_TYPE.INFO).title("Basic App")
 						.desc("Use this app to Send Messages using API End Point").group("About App") });
 
 		APP_CONFIGS.put(APP_TYPE.WEBHOOK, new ConfigMeta[] {
 
-				new ConfigMeta().inputType(INPUT_TYPE.MESSAGE).title("External Webhook")
+				new ConfigMeta().inputType(INPUT_TYPE.MESSAGE, MESSAGE_TYPE.INFO).title("External Webhook")
 						.desc("Use this app to Receive Inbound Messages on Webhook URL and Reply using API End Point")
 						.group("About App"),
 
@@ -32,7 +33,7 @@ public class ClientAppConfigConstants {
 
 		APP_CONFIGS.put(APP_TYPE.AGENT, new ConfigMeta[] {
 
-				new ConfigMeta().inputType(INPUT_TYPE.MESSAGE).title("Agent Desk")
+				new ConfigMeta().inputType(INPUT_TYPE.MESSAGE, MESSAGE_TYPE.INFO).title("Agent Desk")
 						.desc("Use this app to route session to AgentDesk.").group("About App"),
 
 				new ConfigMeta().title("Default Agent Team").path("props.agentCode")
@@ -47,7 +48,7 @@ public class ClientAppConfigConstants {
 
 		APP_CONFIGS.put(APP_TYPE.MITEL, new ConfigMeta[] {
 
-				new ConfigMeta().inputType(INPUT_TYPE.MESSAGE).title("Mitel")
+				new ConfigMeta().inputType(INPUT_TYPE.MESSAGE, MESSAGE_TYPE.INFO).title("Mitel")
 						.desc("Use this app to route session to Mitel Instance").group("About App"),
 
 				new ConfigMeta().title("Mitel End Point").path("props.end_point")
@@ -64,22 +65,20 @@ public class ClientAppConfigConstants {
 
 		APP_CONFIGS.put(APP_TYPE.BOT,
 				new ConfigMeta[] {
-						new ConfigMeta().inputType(INPUT_TYPE.MESSAGE).title("Bot")
+						new ConfigMeta().inputType(INPUT_TYPE.MESSAGE, MESSAGE_TYPE.INFO).title("Bot")
 								.desc("Use this app to route session to default BOT flow").group("About App"),
 
 						new ConfigMeta().title("Bot Code").path("props.botCode").example("complaint_flow") });
 
-		APP_CONFIGS.put(APP_TYPE.TEAM_ROUTER,
-				new ConfigMeta[] { new ConfigMeta().inputType(INPUT_TYPE.MESSAGE).title("Team Router")
+		APP_CONFIGS.put(APP_TYPE.TEAM_ROUTER, new ConfigMeta[] {
+				new ConfigMeta().inputType(INPUT_TYPE.MESSAGE, MESSAGE_TYPE.INFO).title("Team Router")
 						.desc("Use this app to route session to Team based on customer's input").group("About App"),
 
-						new ConfigMeta().title("Team Options Template").path("props.template").group("TEMPLATES")
-								.optionsSource("getx:/api/tmpl/hsm").optionsKey("code").optionsLabel("desc")
-
-				});
+				new ConfigMeta().title("Team Options Template").path("props.template").group("TEMPLATES")
+						.optionsSource("getx:/api/tmpl/hsm").optionsKey("code").optionsLabel("desc") });
 
 		APP_CONFIGS.put(APP_TYPE.APP_ROUTER, new ConfigMeta[] {
-				new ConfigMeta().inputType(INPUT_TYPE.MESSAGE).title("App Router")
+				new ConfigMeta().inputType(INPUT_TYPE.MESSAGE, MESSAGE_TYPE.INFO).title("App Router")
 						.desc("Use this app to route session based on customer's session status").group("About App"),
 
 				new ConfigMeta().title("First-time customer").path("props.connect_first")

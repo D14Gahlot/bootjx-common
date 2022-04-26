@@ -237,6 +237,12 @@ public class ConfigMeta implements Serializable {
 		return this;
 	}
 
+	public ConfigMeta inputType(INPUT_TYPE inputType, MESSAGE_TYPE messageType) {
+		this.inputType = inputType;
+		this.messageType = messageType;
+		return this;
+	}
+
 	public Object getDefaultValue() {
 		return defaultValue;
 	}
@@ -511,4 +517,5 @@ public class ConfigMeta implements Serializable {
 		this.messageType = messageType;
 		return this;
 	}
+
 }
