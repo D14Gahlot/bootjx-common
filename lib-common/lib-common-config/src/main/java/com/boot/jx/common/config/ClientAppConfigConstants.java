@@ -24,7 +24,7 @@ public class ClientAppConfigConstants {
 
 		APP_CONFIGS.put(APP_TYPE.WEBHOOK, new ConfigMeta[] {
 
-				new ConfigMeta().inputType(INPUT_TYPE.MESSAGE).title("Agent Desk")
+				new ConfigMeta().inputType(INPUT_TYPE.MESSAGE).title("External Webhook")
 						.desc("Use this app to Receive Inbound Messages on Webhook URL and Reply using API End Point")
 						.group("About App"),
 
