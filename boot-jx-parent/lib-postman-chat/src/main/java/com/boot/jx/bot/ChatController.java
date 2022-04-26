@@ -22,7 +22,6 @@ import com.boot.jx.postman.store.MessageContext;
 import com.boot.jx.postman.store.SessionStore;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.JsonUtil;
-import com.boot.utils.JsonUtil.JsonUtilConfigurable;
 
 public class ChatController {
 
@@ -166,6 +165,7 @@ public class ChatController {
 		ChatSessionDoc session = messageContext.session().getDoc();
 		chatSessionService.routeSession(session, new PMArgs().assignToQueueCode(PMConstants.DEFAULT.AGENT_QUEUE_CODE)
 				.contact(session.contact()).sessionId(session.getSessionId()).assignToDeptCode(deptCode));
+
 	}
 
 	public void assignToDefaultAgent() {

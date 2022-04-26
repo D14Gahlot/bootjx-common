@@ -30,6 +30,7 @@ import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.doc.ChatPromise;
 import com.boot.jx.postman.doc.ChatPromise.State;
 import com.boot.jx.postman.doc.ChatSessionDoc;
+import com.boot.jx.postman.manager.LogManager;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.ext.InBoundEvent;
 import com.boot.jx.postman.store.MessageContext;
@@ -66,6 +67,9 @@ public class BotEngine {
 
 	@Autowired
 	private MessageContext messageContext;
+
+	@Autowired
+	private LogManager logManager;
 
 	private boolean chatBotDefined;
 
@@ -302,14 +306,14 @@ public class BotEngine {
 					method.invoke(controller, inboxMessage);
 				}
 			} else {
-				LOGGER.info("No Chat Controller Matched");
+				warn("No Chat Controller Matched");
 			}
 		} catch (ChatException ce) {
-			LOGGER.info("Target Handler : " + ce.getTargetHandler());
+			debug("Target Handler : " + ce.getTargetHandler());
 		} catch (InvocationTargetException e) {
-			LOGGER.error("Error invoking controller: ", e.getCause());
+			error("Error invoking controller: ", e.getCause());
 		} catch (Exception e) {
-			LOGGER.error("Error invoking controller: ", e);
+			error("Error invoking controller: ", e);
 		}
 		botService.commitChatContext(contactId, nextHandler, inboxMessage);
 		return nextHandler;
@@ -331,20 +335,34 @@ public class BotEngine {
 					}
 				}
 			}
-			
+
 			ChatController controller = filtersMap.get("botCode#" + botCode);
-			if(ArgUtil.is(controller)) {
+			if (ArgUtil.is(controller)) {
 				controller.onSessionRoute(assignEvent);
 				botService.commitChatContext(sessionDoc, assignEvent);
 			} else {
-				LOGGER.warn("No Chat Controller Matched for botCode#" + botCode);
+				warn("No Chat Controller Matched for botCode#" + botCode);
 			}
 		} catch (ChatException ce) {
-			LOGGER.info("Target Handler : " + ce.getTargetHandler());
+			debug("Target Handler : " + ce.getTargetHandler());
 		} catch (Exception e) {
-			LOGGER.error("Error invoking controller: ", e);
+			error("Error invoking controller: ", e);
 		}
 
 	}
 
+	private void error(String string, Throwable cause) {
+		logManager.error(cause);
+		LOGGER.error(string, cause);
+	}
+
+	private void debug(String string) {
+		logManager.debug(string);
+		LOGGER.debug(string);
+	}
+
+	private void warn(String string) {
+		logManager.warn(string);
+		LOGGER.warn(string);
+	}
 }

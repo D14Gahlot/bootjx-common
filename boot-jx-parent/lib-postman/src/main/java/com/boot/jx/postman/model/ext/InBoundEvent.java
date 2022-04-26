@@ -2,9 +2,12 @@ package com.boot.jx.postman.model.ext;
 
 import com.boot.jx.postman.model.ContactMeta;
 import com.boot.jx.postman.model.MessageDefinitions.Contactable;
+import com.boot.jx.postman.model.MessageDefinitions.LoggableEntity;
 import com.boot.jx.swagger.ApiMockModelProperty;
+import com.boot.jx.utils.PostManUtil;
+import com.boot.utils.ArgUtil;
 
-public class InBoundEvent {
+public class InBoundEvent implements LoggableEntity {
 
 	public static final String SESSION_ROUTED = "SESSION_ROUTED";
 
@@ -78,5 +81,13 @@ public class InBoundEvent {
 
 	public void setSessionId(String sessionId) {
 		this.sessionId = sessionId;
+	}
+
+	@Override
+	public String getContactId() {
+		if (ArgUtil.is(this.contactId)) {
+			return this.contactId;
+		}
+		return PostManUtil.CONTACT_ID(this.contact());
 	}
 }

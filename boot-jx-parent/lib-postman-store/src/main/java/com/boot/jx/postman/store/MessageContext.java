@@ -17,7 +17,7 @@ import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.ErrorObject;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.MessageDefinitions.Contactable;
-import com.boot.jx.postman.model.MessageDefinitions.IMessage;
+import com.boot.jx.postman.model.MessageDefinitions.LogMessage;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.model.ext.InBoundEvent;
 import com.boot.jx.postman.query.ChatContactQuery;
@@ -72,7 +72,7 @@ public class MessageContext {
 		this.inboxMessage = inboxMessage;
 	}
 
-	public IMessage getMessage() {
+	public LogMessage getMessage() {
 		if (ArgUtil.is(this.inboxMessage)) {
 			return this.inboxMessage;
 		} else {
@@ -82,6 +82,10 @@ public class MessageContext {
 
 	public void setInBoundEvent(InBoundEvent event) {
 		this.event = event;
+	}
+
+	public InBoundEvent getInBoundEvent() {
+		return this.event;
 	}
 
 	private String getSessionId() {

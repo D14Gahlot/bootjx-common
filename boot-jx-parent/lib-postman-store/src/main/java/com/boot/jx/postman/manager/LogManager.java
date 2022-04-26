@@ -12,9 +12,11 @@ import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.doc.MessageDoc.MessageDocLogs;
 import com.boot.jx.postman.model.MessageDefinitions.IMessageExtended;
 import com.boot.jx.postman.model.MessageDefinitions.LogMessage;
+import com.boot.jx.postman.model.MessageDefinitions.LoggableEntity;
 import com.boot.jx.postman.model.MessageDefinitions.SessionMessage;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.model.ext.InBoundEvent;
+import com.boot.jx.postman.store.MessageContext;
 import com.boot.jx.postman.store.MessageStore;
 import com.boot.jx.postman.store.MessageStore.EVENTS;
 import com.boot.jx.postman.store.SessionStore;
@@ -38,6 +40,9 @@ public class LogManager {
 
 	@Autowired
 	private MessageStore messageStore;
+
+	@Autowired
+	private MessageContext messageContext;
 
 	public MessageDoc note(ChatSessionDoc sessionDoc, OutboxMessage outboxMessage) {
 		outboxMessage.contact().setContactType(sessionDoc.getContactType());
@@ -81,7 +86,7 @@ public class LogManager {
 		return event(sessionDoc, getCurrenUser(), event, logs);
 	}
 
-	public void error(LogMessage inboxMessage, Exception e) {
+	public void error(LogMessage inboxMessage, Throwable e) {
 		MessageDocLogs doc = new MessageDocLogs();
 		doc.setSessionId(inboxMessage.getSessionId());
 		doc.setMessageId(inboxMessage.getMessageId());
@@ -106,7 +111,7 @@ public class LogManager {
 		inboxMessage.logs().add("trail:" + doc.getMessageId());
 	}
 
-	public void error(InBoundEvent inBoundEvent, Exception e) {
+	public void error(InBoundEvent inBoundEvent, Throwable e) {
 		MessageDoc doc = new MessageDocLogs();
 		doc.setSessionId(inBoundEvent.sessionId);
 		doc.setContactId(inBoundEvent.contactId);
@@ -125,24 +130,81 @@ public class LogManager {
 		messageStore.save(doc);
 	}
 
-	public void debug(InBoundEvent inBoundEvent, Object... debugMessage) {
-		if (LOGGER.isDebugEnabled()) {
+	public void error(Throwable e) {
+		if (ArgUtil.is(messageContext.getMessage())) {
+			this.error(messageContext.getMessage(), e);
+		} else if (ArgUtil.is(messageContext.getInBoundEvent())) {
+			this.error(messageContext.getInBoundEvent(), e);
+		} else {
 			MessageDoc doc = new MessageDocLogs();
-			doc.setSessionId(inBoundEvent.sessionId);
-			doc.setContactId(inBoundEvent.contactId);
-			doc.setType("D");
+			doc.setType("E");
 			doc.setTimestamp(System.currentTimeMillis());
 			doc.setTraceId(AppContextUtil.getTraceId());
-
-			if (ArgUtil.is(debugMessage)) {
-				if (debugMessage.length > 0) {
-					doc.setMessage(ArgUtil.parseAsString(debugMessage[0]));
-				}
-				for (int i = 1; i < debugMessage.length; i++) {
-					doc.logs().add(ArgUtil.parseAsString(debugMessage[i]));
-				}
-			}
+			doc.setMessage(e.getMessage());
 			messageStore.save(doc);
+		}
+	}
+
+	private void log(String type, MessageDoc doc, String message, Object[] debugMessage) {
+		doc.setTimestamp(System.currentTimeMillis());
+		doc.setTraceId(AppContextUtil.getTraceId());
+		doc.setMessage(message);
+		if (ArgUtil.is(debugMessage)) {
+			for (int i = 0; i < debugMessage.length; i++) {
+				doc.logs().add(ArgUtil.parseAsString(debugMessage[i]));
+			}
+		}
+		messageStore.save(doc);
+	}
+
+	private MessageDoc messageDoc(LoggableEntity inBoundEvent) {
+		MessageDoc doc = new MessageDocLogs();
+		if (ArgUtil.is(inBoundEvent)) {
+			doc.setSessionId(inBoundEvent.getSessionId());
+			doc.setContactId(inBoundEvent.getContactId());
+		}
+		return doc;
+	}
+
+	private MessageDoc messageDoc(LogMessage message) {
+		MessageDoc doc = new MessageDocLogs();
+		if (ArgUtil.is(message)) {
+			doc.setSessionId(message.getSessionId());
+			doc.setMessageId(message.getMessageId());
+			doc.setMessageIdExt(message.getMessageIdExt());
+			doc.setMessageIdRef(message.getMessageIdRef());
+			doc.setContactId(PostManUtil.createContactId(message.contact()));
+		}
+		return doc;
+	}
+
+	public void debug(String message, Object... debugMessage) {
+		if (!LOGGER.isDebugEnabled())
+			return;
+		if (ArgUtil.is(messageContext.getMessage())) {
+			this.log("D", messageDoc(messageContext.getMessage()), message, debugMessage);
+		} else if (ArgUtil.is(messageContext.getInBoundEvent())) {
+			this.log("D", messageDoc(messageContext.getInBoundEvent()), message, debugMessage);
+		} else {
+			this.log("D", messageDoc(new InBoundEvent()), message, debugMessage);
+		}
+	}
+
+	public void debug(InBoundEvent assignEvent, String message, Object... debugMessage) {
+		if (!LOGGER.isDebugEnabled())
+			return;
+		this.log("D", messageDoc(assignEvent), message, debugMessage);
+	}
+
+	public void warn(String message, Object... debugMessage) {
+		if (!LOGGER.isWarnEnabled())
+			return;
+		if (ArgUtil.is(messageContext.getMessage())) {
+			this.log("W", messageDoc(messageContext.getMessage()), message, debugMessage);
+		} else if (ArgUtil.is(messageContext.getInBoundEvent())) {
+			this.log("W", messageDoc(messageContext.getInBoundEvent()), message, debugMessage);
+		} else {
+			this.log("W", messageDoc(new InBoundEvent()), message, debugMessage);
 		}
 	}
 
