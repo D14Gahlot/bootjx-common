@@ -41,7 +41,9 @@ public class AppRouterController extends CommonBotController {
 			if (ArgUtil.is(connect_next)) {
 				routeSession(ArgUtil.parseAsString(connect_next));
 			}
-		} else if (session.isExpired()) {
+		} else
+		// if (session.isExpired())
+		{
 			Object connect_contiue = app.props().get("connect_contiue");
 			if (ArgUtil.is(connect_contiue)) {
 				routeSession(ArgUtil.parseAsString(connect_contiue));
