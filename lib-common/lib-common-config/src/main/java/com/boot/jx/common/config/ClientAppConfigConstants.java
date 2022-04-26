@@ -5,6 +5,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import com.boot.jx.common.impl.ConfigMeta;
 import com.boot.jx.common.impl.ConfigMeta.ConfigOption;
+import com.boot.jx.common.impl.ConfigMeta.INPUT_TYPE;
 import com.boot.jx.postman.PMConstants.APP_TYPE;
 
 public class ClientAppConfigConstants {
@@ -16,9 +17,23 @@ public class ClientAppConfigConstants {
 
 	static {
 
-		APP_CONFIGS.put(APP_TYPE.WEBHOOK, new ConfigMeta[] { new ConfigMeta().path("webhook").title("Webhook Url") });
+		APP_CONFIGS.put(APP_TYPE.NONE, new ConfigMeta[] {
+
+				new ConfigMeta().inputType(INPUT_TYPE.MESSAGE).title("Basic App")
+						.desc("Use this app to Send Messages using API End Point").group("About App") });
+
+		APP_CONFIGS.put(APP_TYPE.WEBHOOK, new ConfigMeta[] {
+
+				new ConfigMeta().inputType(INPUT_TYPE.MESSAGE).title("Agent Desk")
+						.desc("Use this app to Receive Inbound Messages on Webhook URL and Reply using API End Point")
+						.group("About App"),
+
+				new ConfigMeta().path("webhook").title("Webhook Url") });
 
 		APP_CONFIGS.put(APP_TYPE.AGENT, new ConfigMeta[] {
+
+				new ConfigMeta().inputType(INPUT_TYPE.MESSAGE).title("Agent Desk")
+						.desc("Use this app to route session to AgentDesk.").group("About App"),
 
 				new ConfigMeta().title("Default Agent Team").path("props.agentCode")
 						.optionsSource("getx:/api/admins/dept").group("Team"),
@@ -30,46 +45,52 @@ public class ClientAppConfigConstants {
 						.optionsSource("getx:/api/tmpl/hsm").optionsKey("code").optionsLabel("desc")
 						.group("Templates") });
 
-		APP_CONFIGS.put(APP_TYPE.MITEL,
+		APP_CONFIGS.put(APP_TYPE.MITEL, new ConfigMeta[] {
+
+				new ConfigMeta().inputType(INPUT_TYPE.MESSAGE).title("Mitel")
+						.desc("Use this app to route session to Mitel Instance").group("About App"),
+
+				new ConfigMeta().title("Mitel End Point").path("props.end_point")
+						.example("http://yourerver.com/callback_path"),
+				new ConfigMeta().title("Grant Type").path("props.grant_type").options(
+						new ConfigOption("client_credentials").label("Client Credentials"),
+						new ConfigOption("password").label("Password")),
+				new ConfigMeta().title("Client Id").path("props.client_id").example("ProfessionalServices"),
+				new ConfigMeta().title("Client Secret").path("secret.client_secret"),
+				new ConfigMeta().title("Mitel Queue").path("props.queue")
+						.example("6106ee72-81a1-49a7-9e10-df591d5194f3"),
+				new ConfigMeta().title("To").path("props.to").optional(),
+				new ConfigMeta().title("Default From").path("props.from").optional() });
+
+		APP_CONFIGS.put(APP_TYPE.BOT,
 				new ConfigMeta[] {
-						new ConfigMeta().title("Mitel End Point").path("props.end_point")
-								.example("http://yourerver.com/callback_path"),
-						new ConfigMeta().title("Grant Type").path("props.grant_type").options(
-								new ConfigOption("client_credentials").label("Client Credentials"),
-								new ConfigOption("password").label("Password")),
-						new ConfigMeta().title("Client Id").path("props.client_id").example("ProfessionalServices"),
-						new ConfigMeta().title("Client Secret").path("secret.client_secret"),
-						new ConfigMeta().title("Mitel Queue").path("props.queue")
-								.example("6106ee72-81a1-49a7-9e10-df591d5194f3"),
-						new ConfigMeta().title("To").path("props.to").optional(),
-						new ConfigMeta().title("Default From").path("props.from").optional() });
+						new ConfigMeta().inputType(INPUT_TYPE.MESSAGE).title("Bot")
+								.desc("Use this app to route session to default BOT flow").group("About App"),
 
-		APP_CONFIGS.put(APP_TYPE.BOT, new ConfigMeta[] {
-				new ConfigMeta().title("Bot Code").path("props.botCode").example("complaint_flow") });
+						new ConfigMeta().title("Bot Code").path("props.botCode").example("complaint_flow") });
 
-		APP_CONFIGS
-				.put(APP_TYPE.TEAM_ROUTER,new ConfigMeta[] { 
-								
-				new ConfigMeta().title("Team Options Template")
-						.path("props.template").group("TEMPLATES").
-						optionsSource("getx:/api/tmpl/hsm").optionsKey("code").optionsLabel("desc")
-						
+		APP_CONFIGS.put(APP_TYPE.TEAM_ROUTER,
+				new ConfigMeta[] { new ConfigMeta().inputType(INPUT_TYPE.MESSAGE).title("Team Router")
+						.desc("Use this app to route session to Team based on customer's input").group("About App"),
+
+						new ConfigMeta().title("Team Options Template").path("props.template").group("TEMPLATES")
+								.optionsSource("getx:/api/tmpl/hsm").optionsKey("code").optionsLabel("desc")
+
 				});
 
 		APP_CONFIGS.put(APP_TYPE.APP_ROUTER, new ConfigMeta[] {
+				new ConfigMeta().inputType(INPUT_TYPE.MESSAGE).title("App Router")
+						.desc("Use this app to route session based on customer's session status").group("About App"),
 
-				new ConfigMeta().title("First-time customer")
-						.path("props.connect_first")
+				new ConfigMeta().title("First-time customer").path("props.connect_first")
 						.desc("First customers, with not Last Conversation")
 						.optionsSource("getx:/api/options/inbound_queue").optionsKey("code").optionsLabel("code")
 						.group("Apps"),
-				new ConfigMeta().title("Returning customer to start new conversation")
-						.path("props.connect_next")
+				new ConfigMeta().title("Returning customer to start new conversation").path("props.connect_next")
 						.desc("Returning customer, if last session was RESOLVED")
 						.optionsSource("getx:/api/options/inbound_queue").optionsKey("code").optionsLabel("code")
 						.group("Apps"),
-				new ConfigMeta().title("Returning customer to conitune last conversation")
-						.path("props.connect_contiue")
+				new ConfigMeta().title("Returning customer to conitune last conversation").path("props.connect_contiue")
 						.desc("Returning customer, if last session was NOT RESOLVED")
 						.optionsSource("getx:/api/options/inbound_queue").optionsKey("code").optionsLabel("code")
 						.group("Apps") });

@@ -13,15 +13,19 @@ import com.boot.utils.ArgUtil;
 public class ConfigMeta implements Serializable {
 
 	public static enum INPUT_TYPE {
-		TEXT, OPTIONS, RANGE, NUMBER, COLOR, COLOR_PALLETE, NONE;
+		TEXT, OPTIONS, RANGE, NUMBER, COLOR, COLOR_PALLETE, NONE, MESSAGE;
 	}
 
 	public static enum DATA_TYPE {
-		TIMESPAN, SWITCH, NONE
+		TIMESPAN, SWITCH, NONE;
 	}
 
 	public static enum CONVERT_TYPE {
 		TIME_MILLIS, BOOLEAN, NONE
+	}
+
+	public static enum MESSAGE_TYPE {
+		PRIMARY, SECONDARY, SUCCESS, DANGER, WARNING, INFO, DARK
 	}
 
 	public static class ConfigOption {
@@ -109,6 +113,7 @@ public class ConfigMeta implements Serializable {
 	private INPUT_TYPE inputType;
 	private DATA_TYPE dataType;
 	private CONVERT_TYPE converterType;
+	private MESSAGE_TYPE messageType;
 
 	private List<ConfigOption> options;
 	private String optionsKey;
@@ -142,9 +147,11 @@ public class ConfigMeta implements Serializable {
 	}
 
 	public ConfigMeta() {
+		this.messageType = MESSAGE_TYPE.PRIMARY;
 	}
 
 	public ConfigMeta(String title, String key) {
+		super();
 		this.key = key;
 		this.title = title;
 	}
@@ -489,6 +496,19 @@ public class ConfigMeta implements Serializable {
 
 	public ConfigMeta example(String example) {
 		this.example = example;
+		return this;
+	}
+
+	public MESSAGE_TYPE getMessageType() {
+		return messageType;
+	}
+
+	public void setMessageType(MESSAGE_TYPE messageType) {
+		this.messageType = messageType;
+	}
+
+	public ConfigMeta messageType(MESSAGE_TYPE messageType) {
+		this.messageType = messageType;
 		return this;
 	}
 }
