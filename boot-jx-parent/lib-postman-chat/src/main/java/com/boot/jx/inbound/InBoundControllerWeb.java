@@ -201,14 +201,14 @@ public class InBoundControllerWeb {
 					sessionMessage.setSessionId(inboxMessage.getSessionId());
 					sessionMessage.setContact(sessionMessage.getContact());
 				});
-				connector.onReadInboxMessage(channelConfig, messageBoxEvent.getInboxMessages());
+				connector.onReadInboxMessage(messageBoxEvent.getInboxMessages());
 				String webSessionId = commonHttpRequest.get(WEB_SESSION_ID);
 				if (!ArgUtil.is(webSessionId) || !webSessionId.equalsIgnoreCase(sessionMessage.getSessionId())) {
 					commonHttpRequest.setCookie(WEB_SESSION_ID, sessionMessage.getSessionId());
 				}
 				return ApiResponse.buildResults(messageBoxEvent.getInboxMessages());
 			} else if (ArgUtil.is(messageBoxEvent.getMessageReports())) {
-				connector.onMessageReports(channelConfig, messageBoxEvent.getMessageReports());
+				connector.onMessageReports(messageBoxEvent.getMessageReports());
 				inBoundStatusService.update(messageBoxEvent.getMessageReports());
 			}
 		} catch (Exception e) {

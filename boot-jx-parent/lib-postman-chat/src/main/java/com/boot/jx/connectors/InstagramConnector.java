@@ -13,6 +13,7 @@ import com.boot.jx.postman.PMConstants.CHANNEL_TYPE;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.fb.FacbookAttachment;
+import com.boot.jx.postman.fb.FacebookEntry;
 import com.boot.jx.postman.fb.FacebookConstants.InBoundWrapperPaths;
 import com.boot.jx.postman.fb.FacebookHookRequest;
 import com.boot.jx.postman.fb.FacebookMessaging;
@@ -185,21 +186,32 @@ public class InstagramConnector extends AbstractConnector<InstagramConfig, Insta
 		FacebookHookRequest request = requestMap.as(FacebookHookRequest.class);
 		requestMap.toJson();
 		request.getEntry().forEach(pageEntry -> {
-			pageEntry.getMessaging().forEach(m -> {
-				if (ArgUtil.is(m.getMessage())) {
-					if (m.getMessage().isIs_deleted() == true) {
-						messageBoxEvent.addMessageReport(toMessageReport(m, channelConfig));
-					} else {
-						messageBoxEvent.addInboxMessage(toInboxMessage(m, channelConfig));
-					}
-				} else if (ArgUtil.is(m.getPostBack())) {
-					messageBoxEvent.addInboxMessage(toInboxMessage(m, channelConfig));
-				} else if (ArgUtil.is(m.getRead())) {
-					messageBoxEvent.addMessageReport(toMessageReport(m, channelConfig));
-				}
-			});
+			ChannelConfig channelConfigDefault = channelConfig;
+			String pageId = pageEntry.getId();
+			if (!ArgUtil.is(channelConfig.getLane(), pageId)) {
+				channelConfigDefault = getChannelConfig(channelConfig.getChannelType(), pageId);
+			}
+			if (ArgUtil.is(channelConfigDefault)) {
+				inboundMessageBoxEvent(messageBoxEvent, pageEntry, channelConfigDefault);
+			}
 		});
 		return messageBoxEvent;
 	}
 
+	private void inboundMessageBoxEvent(MessageBoxEvent messageBoxEvent, FacebookEntry pageEntry,
+			final ChannelConfig channelConfig) {
+		pageEntry.getMessaging().forEach(m -> {
+			if (ArgUtil.is(m.getMessage())) {
+				if (m.getMessage().isIs_deleted() == true) {
+					messageBoxEvent.addMessageReport(toMessageReport(m, channelConfig));
+				} else {
+					messageBoxEvent.addInboxMessage(toInboxMessage(m, channelConfig));
+				}
+			} else if (ArgUtil.is(m.getPostBack())) {
+				messageBoxEvent.addInboxMessage(toInboxMessage(m, channelConfig));
+			} else if (ArgUtil.is(m.getRead())) {
+				messageBoxEvent.addMessageReport(toMessageReport(m, channelConfig));
+			}
+		});
+	}
 }

@@ -218,9 +218,9 @@ public class InBoundControllerWA {
 				messageBoxEvent.getInboxMessages().forEach(inboxMessage -> {
 					inBoundService.invokeMethodsAsync(inboxMessage);
 				});
-				w360Connector.onReadInboxMessage(channelConfig, messageBoxEvent.getInboxMessages());
+				w360Connector.onReadInboxMessage(messageBoxEvent.getInboxMessages());
 			} else if (ArgUtil.is(messageBoxEvent.getMessageReports())) {
-				w360Connector.onMessageReports(channelConfig, messageBoxEvent.getMessageReports());
+				w360Connector.onMessageReports(messageBoxEvent.getMessageReports());
 				inBoundService.updateAsync(messageBoxEvent.getMessageReports());
 			}
 		} catch (Exception e) {

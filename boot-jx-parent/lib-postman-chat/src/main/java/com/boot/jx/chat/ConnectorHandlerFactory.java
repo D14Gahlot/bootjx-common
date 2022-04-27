@@ -190,16 +190,15 @@ public class ConnectorHandlerFactory extends ScopedBeanFactory<String, Connector
 
 		/**
 		 * This method is invoked after message from ChannelProvider has been processed
-		 * 
-		 * @param channelConfig
 		 * @param inboxMessages
+		 * 
 		 * @return
 		 */
-		default List<InboxMessage> onReadInboxMessage(ChannelConfig channelConfig, List<InboxMessage> inboxMessages) {
+		default List<InboxMessage> onReadInboxMessage(List<InboxMessage> inboxMessages) {
 			return inboxMessages;
 		}
 
-		default void onMessageReports(ChannelConfig channelConfig, List<MessageReport> messageReports) {
+		default void onMessageReports(List<MessageReport> messageReports) {
 			// DO Nothing this method is optional
 		}
 

@@ -130,9 +130,9 @@ public class InBoundController {
 					connector.prompt(inboxMessage);
 					inBoundService.invokeMethodsAsync(inboxMessage);
 				});
-				connector.onReadInboxMessage(channelConfig, messageBoxEvent.getInboxMessages());
+				connector.onReadInboxMessage(messageBoxEvent.getInboxMessages());
 			} else if (ArgUtil.is(messageBoxEvent.getMessageReports())) {
-				connector.onMessageReports(channelConfig, messageBoxEvent.getMessageReports());
+				connector.onMessageReports(messageBoxEvent.getMessageReports());
 				inBoundStatusService.update(messageBoxEvent.getMessageReports());
 			}
 		} catch (Exception e) {

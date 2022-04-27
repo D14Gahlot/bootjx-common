@@ -189,7 +189,9 @@ public class FacebookConnector extends AbstractConnector<FacebookConfigDetails, 
 			if (!ArgUtil.is(channelConfig.getLane(), pageId)) {
 				channelConfigDefault = getChannelConfig(channelConfig.getChannelType(), pageId);
 			}
-			inboundMessageBoxEvent(messageBoxEvent, pageEntry, ArgUtil.nonEmpty(channelConfigDefault, channelConfig));
+			if (ArgUtil.is(channelConfigDefault)) {
+				inboundMessageBoxEvent(messageBoxEvent, pageEntry, channelConfigDefault);
+			}
 		});
 		return messageBoxEvent;
 	}

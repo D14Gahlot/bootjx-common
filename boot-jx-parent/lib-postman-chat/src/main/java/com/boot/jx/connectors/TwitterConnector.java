@@ -148,10 +148,11 @@ public class TwitterConnector extends AbstractConnector<TwitterConfigDetails, Tw
 	}
 
 	@Override
-	public List<InboxMessage> onReadInboxMessage(ChannelConfig channelConfig, List<InboxMessage> inboxMessages) {
+	public List<InboxMessage> onReadInboxMessage(List<InboxMessage> inboxMessages) {
 		if (inboxMessages != null && !inboxMessages.isEmpty()) {
 			for (InboxMessage event : inboxMessages) {
 				try {
+					ChannelConfig channelConfig = getChannelConfig(event);
 					twitterClient.getContext(channelConfig).getTwitter()
 							.destroyDirectMessage(Long.parseLong(event.getMessageIdExt()));
 				} catch (NumberFormatException | TwitterException e) {
