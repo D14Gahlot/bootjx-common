@@ -175,6 +175,10 @@ public class FacebookConnector extends AbstractConnector<FacebookConfigDetails, 
 		if (ArgUtil.is(m.getRead())) {
 			report.setChangeStamp(m.getReadWatermark());
 			report.setStatus(Status.READ);
+		} else if (ArgUtil.is(m.getMessage().isIs_deleted())) {
+			report.setMessageIdExt(m.getMessage().getMid());
+			report.setChangeStamp(m.getTimestamp());
+			report.setStatus(Status.DELTD);
 		}
 		return report;
 	}
