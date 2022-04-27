@@ -867,6 +867,10 @@ public final class ArgUtil {
 
 	}
 
+	public static <T> boolean is(T subject, T object) {
+		return isEqual(subject, object);
+	}
+
 	/**
 	 * use {@link #isEqual(Object, Object...)}
 	 * 

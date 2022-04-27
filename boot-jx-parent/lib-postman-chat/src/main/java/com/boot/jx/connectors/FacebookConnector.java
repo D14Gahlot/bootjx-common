@@ -10,10 +10,12 @@ import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorMapping;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.dict.FileType;
 import com.boot.jx.postman.PMConstants.CHANNEL_TYPE;
+import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.client.PMFileStoreClient;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.fb.FacebooClient;
+import com.boot.jx.postman.fb.FacebookEntry;
 import com.boot.jx.postman.fb.FacebookHookRequest;
 import com.boot.jx.postman.fb.FacebookUserProfile;
 import com.boot.jx.postman.fb.FacbookAttachment;
@@ -31,6 +33,7 @@ import com.boot.jx.postman.plugin.ChannelPluginProvider;
 import com.boot.jx.postman.plugin.FacebookPlugin;
 import com.boot.jx.postman.plugin.FacebookPlugin.FacebookConfigDetails;
 import com.boot.jx.postman.query.ChatContactQuery;
+import com.boot.jx.utils.PostManUtil;
 import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
 
@@ -181,15 +184,25 @@ public class FacebookConnector extends AbstractConnector<FacebookConfigDetails, 
 			MessageBoxEvent messageBoxEvent) {
 		FacebookHookRequest request = requestMap.as(FacebookHookRequest.class);
 		request.getEntry().forEach(pageEntry -> {
-			pageEntry.getMessaging().forEach(m -> {
-				if (ArgUtil.is(m.getMessage()) || ArgUtil.is(m.getPostBack())) {
-					messageBoxEvent.addInboxMessage(toInboxMessage(m, channelConfig));
-				} else if (ArgUtil.is(m.getRead())) {
-					messageBoxEvent.addMessageReport(toMessageReport(m, channelConfig));
-				}
-			});
+			ChannelConfig channelConfigDefault = channelConfig;
+			String pageId = pageEntry.getId();
+			if (!ArgUtil.is(channelConfig.getLane(), pageId)) {
+				channelConfigDefault = getChannelConfig(channelConfig.getChannelType(), pageId);
+			}
+			inboundMessageBoxEvent(messageBoxEvent, pageEntry, ArgUtil.nonEmpty(channelConfigDefault, channelConfig));
 		});
 		return messageBoxEvent;
+	}
+
+	private void inboundMessageBoxEvent(MessageBoxEvent messageBoxEvent, FacebookEntry pageEntry,
+			final ChannelConfig channelConfig) {
+		pageEntry.getMessaging().forEach(m -> {
+			if (ArgUtil.is(m.getMessage()) || ArgUtil.is(m.getPostBack())) {
+				messageBoxEvent.addInboxMessage(toInboxMessage(m, channelConfig));
+			} else if (ArgUtil.is(m.getRead())) {
+				messageBoxEvent.addMessageReport(toMessageReport(m, channelConfig));
+			}
+		});
 	}
 
 }

@@ -69,6 +69,11 @@ public abstract class AbstractConnector<CD extends AChannelDetails, P extends Ch
 		this.registerWebhook(channelConfig);
 	}
 
+	public ChannelConfig getChannelConfig(String channleType, String lane) {
+		String channelId = PostManUtil.CHANNEL_ID(channleType, lane);
+		return environment.config().channel(channelId);
+	}
+
 	@Override
 	public ChannelConfig getChannelConfig(IMessage iMessage) {
 		String channelId = PostManUtil.CHANNEL_ID(iMessage.contact());

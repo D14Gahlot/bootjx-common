@@ -62,6 +62,7 @@ public class PMEnvironment {
 		@JsonView(PublicProperty.class)
 		public boolean isWebhookManual();
 
+		@Deprecated
 		@JsonView(PublicProperty.class)
 		public default String getChannel() {
 			return null;
