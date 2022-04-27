@@ -201,16 +201,12 @@ public class InstagramConnector extends AbstractConnector<InstagramConfig, Insta
 	private void inboundMessageBoxEvent(MessageBoxEvent messageBoxEvent, FacebookEntry pageEntry,
 			final ChannelConfig channelConfig) {
 		pageEntry.getMessaging().forEach(m -> {
-			if (ArgUtil.is(m.getMessage())) {
-				if (m.getMessage().isIs_deleted() == true) {
-					messageBoxEvent.addMessageReport(toMessageReport(m, channelConfig));
-				} else {
-					messageBoxEvent.addInboxMessage(toInboxMessage(m, channelConfig));
-				}
-			} else if (ArgUtil.is(m.getPostBack())) {
-				messageBoxEvent.addInboxMessage(toInboxMessage(m, channelConfig));
-			} else if (ArgUtil.is(m.getRead())) {
+			if ((ArgUtil.is(m.getMessage()) && (m.getMessage().isIs_deleted())) // Message is deleted
+					|| ArgUtil.is(m.getRead()) // or Message is Read
+			) {
 				messageBoxEvent.addMessageReport(toMessageReport(m, channelConfig));
+			} else if (ArgUtil.is(m.getMessage()) || ArgUtil.is(m.getPostBack())) {
+				messageBoxEvent.addInboxMessage(toInboxMessage(m, channelConfig));
 			}
 		});
 	}
