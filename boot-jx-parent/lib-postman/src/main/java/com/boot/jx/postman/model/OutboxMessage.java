@@ -21,7 +21,7 @@ public class OutboxMessage extends Message<OutboxMessage>
 
 	private BigDecimal queue;
 	private MessageSession session;
-	private MessageRoute route;
+	private MessageRouter route;
 	private MessagePrompt prompt;
 	private List<String> logs;
 
@@ -93,18 +93,18 @@ public class OutboxMessage extends Message<OutboxMessage>
 		return this;
 	}
 
-	public MessageRoute getRoute() {
+	public MessageRouter getRoute() {
 		return route;
 	}
 
-	public void setRoute(MessageRoute route) {
+	public void setRoute(MessageRouter route) {
 		this.route = route;
 	}
 
 	@Override
-	public MessageRoute route() {
+	public MessageRouter route() {
 		if (route == null) {
-			this.route = new MessageRoute();
+			this.route = new MessageRouter();
 		}
 		return this.route;
 	}

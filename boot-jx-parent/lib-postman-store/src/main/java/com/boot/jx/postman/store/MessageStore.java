@@ -62,7 +62,10 @@ public class MessageStore extends CommonMongoTemplateAbstract {
 	private MessageDoc updateMessageDoc(InboxMessage inboxMessage, MessageDoc doc) {
 		doc.setMessage(inboxMessage.getMessage());
 		doc.setSessionId(inboxMessage.getSessionId());
-		doc.setQueue(inboxMessage.session().getQueue());
+
+		doc.setRoute(inboxMessage.getRoute());
+		doc.setQueue(ArgUtil.nonEmpty(inboxMessage.route().getQueueCode(), inboxMessage.session().getQueue()));
+
 		doc.setTags(inboxMessage.getTags());
 		doc.setMessageIdExt(inboxMessage.getMessageIdExt());
 		doc.setReplyTo(inboxMessage.getReplyTo());
@@ -185,7 +188,10 @@ public class MessageStore extends CommonMongoTemplateAbstract {
 
 	// Out Going Messages
 	private MessageDoc updateMessageDoc(OutboxMessage outMessage, MessageDoc doc) {
-		doc.setAgent(outMessage.session().getAgent());
+
+		doc.setRoute(outMessage.getRoute());
+		doc.setQueue(ArgUtil.nonEmpty(outMessage.route().getQueueCode(), outMessage.session().getQueue()));
+		doc.setAgent(ArgUtil.nonEmpty(outMessage.route().getSenderCode(), outMessage.session().getAgent()));
 		// if (ArgUtil.is(outMessage.getTemplate())) {
 		doc.setTemplate(outMessage.templateCode());
 		doc.setTemplateId(outMessage.templateId());

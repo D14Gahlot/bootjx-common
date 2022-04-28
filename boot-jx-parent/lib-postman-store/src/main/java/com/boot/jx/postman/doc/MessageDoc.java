@@ -8,6 +8,8 @@ import java.util.Map;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.TypeAlias;
+import org.springframework.data.mongodb.core.index.CompoundIndex;
+import org.springframework.data.mongodb.core.index.CompoundIndexes;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -17,12 +19,15 @@ import com.boot.jx.mongo.CommonDocInterfaces.Patchable;
 import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.Message.Status;
 import com.boot.jx.postman.model.MessageDefinitions.IMessageId;
+import com.boot.jx.postman.model.MessageRouter;
 import com.boot.jx.postman.model.TagDocument;
 import com.boot.utils.ArgUtil;
 
 @Document(collection = MessageDoc.COLLECTION_NAME)
 @TypeAlias("MessageDoc")
-//@CompoundIndexes({ @CompoundIndex(name = "meta_categoryType", def = "{ 'meta.categoryType': 1 }") })
+@CompoundIndexes({ @CompoundIndex(name = "route_queueCode", def = "{ 'route.queueCode': 1 }"),
+		@CompoundIndex(name = "route_sendMode", def = "{ 'route.sendMode': 1 }"),
+		@CompoundIndex(name = "route_senderCode", def = "{ 'route.senderCode': 1 }") })
 public class MessageDoc implements Serializable, Patchable<MessageDoc>, IMessageId {
 	private static final long serialVersionUID = -7003453286628859075L;
 	public static final String COLLECTION_NAME = "MESSAGE";
@@ -57,12 +62,11 @@ public class MessageDoc implements Serializable, Patchable<MessageDoc>, IMessage
 
 	private String status;
 	private ContactDetailDoc contact;
+	private MessageRouter route;
 
 	@Indexed
 	private String queue;
 	private String agent;
-	@Indexed
-	private String mode;
 
 	private TagDocument tags;
 	private Map<String, Object> model;
@@ -386,12 +390,19 @@ public class MessageDoc implements Serializable, Patchable<MessageDoc>, IMessage
 		this.traceId = traceId;
 	}
 
-	public String getMode() {
-		return mode;
+	public MessageRouter getRoute() {
+		return route;
 	}
 
-	public void setMode(String mode) {
-		this.mode = mode;
+	public void setRoute(MessageRouter route) {
+		this.route = route;
+	}
+
+	public MessageRouter route() {
+		if (route == null) {
+			this.route = new MessageRouter();
+		}
+		return this.route;
 	}
 
 	@Document(collection = COLLECTION_NAME + "_WHATSAPP")

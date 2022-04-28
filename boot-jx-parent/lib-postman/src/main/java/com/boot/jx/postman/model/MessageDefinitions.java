@@ -174,7 +174,7 @@ public class MessageDefinitions {
 
 		public String getFormatSubType();
 
-		public MessageRoute route();
+		public MessageRouter route();
 
 	}
 

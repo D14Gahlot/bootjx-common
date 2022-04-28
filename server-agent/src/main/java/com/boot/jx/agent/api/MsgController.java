@@ -29,6 +29,7 @@ import com.boot.jx.common.store.ChatArchiveBuilder;
 import com.boot.jx.common.store.ChatArchiveService;
 import com.boot.jx.model.CommonFile;
 import com.boot.jx.postman.PMConstants;
+import com.boot.jx.postman.PMConstants.CHAT_MODE;
 import com.boot.jx.postman.PMConstants.CHAT_STATUS;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.client.PMFileStoreClient;
@@ -102,6 +103,10 @@ public class MsgController {
 
 		// Session Stuff Logging >
 		if (ArgUtil.areEqual(sessionDoc.getAssignedToAgent(), agentSession.getAgentCode())) {
+
+			outboxMessage.route().setQueueCode(sessionDoc.getAssignedToQueue());
+			outboxMessage.route().setSendMode(CHAT_MODE.AGENT.toString());
+			outboxMessage.route().setSenderCode(agentSession.getAgentCode());
 			ChatMessageDTO messageDto = agentService.sendMessage(sessionDoc, outboxMessage);
 
 			// Evaluate if required

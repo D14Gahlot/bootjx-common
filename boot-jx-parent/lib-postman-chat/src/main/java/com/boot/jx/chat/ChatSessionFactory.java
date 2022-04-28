@@ -148,7 +148,11 @@ public class ChatSessionFactory {
 
 			// Assign Queue
 			if (ArgUtil.isEmptyValue(chatSessionDoc.getAssignedToQueue())) {
-				String defaultQueue = pmDomainConfig.getDefaultInboundQueue(inboxMessage.contact());
+
+				String defaultQueue = inboxMessage.route().getQueueCode();
+				if (!ArgUtil.is(defaultQueue)) {
+					defaultQueue = pmDomainConfig.getDefaultInboundQueue(inboxMessage.contact());
+				}
 				if (ArgUtil.is(defaultQueue)) {
 					chatSessionDocQuery.setQueue(defaultQueue);
 				}
@@ -163,23 +167,28 @@ public class ChatSessionFactory {
 			chatContactQuery.update(inboxMessage.contact());
 			sessionStore.updateFirst(chatContactQuery);
 		} else if (PostManUtil.isOutBound(inboxMessage)) {
+			ChatSessionQuery chatSessionDocQuery = new ChatSessionQuery(chatSessionDoc);
+
+			// Assign Queue
+			if (ArgUtil.isEmptyValue(chatSessionDoc.getAssignedToQueue())) {
+
+				String defaultQueue = inboxMessage.route().getQueueCode();
+				if (!ArgUtil.is(defaultQueue)) {
+					defaultQueue = pmDomainConfig.getDefaultInboundQueue(inboxMessage.contact());
+				}
+				if (ArgUtil.is(defaultQueue)) {
+					chatSessionDocQuery.setQueue(defaultQueue);
+				}
+			}
+
+			sessionStore.updateFirst(chatSessionDocQuery);
+			
 			// Query Update for Contact
 			ChatContactQuery chatContactQuery = new ChatContactQuery(chatSessionDoc.getContactId());
 			chatContactQuery.setSessionId(chatSessionDoc.getSessionId());
 			sessionStore.updateFirst(chatContactQuery);
 		}
-
-		if (ArgUtil.isEmpty(inboxMessage.contact().getName())) {
-			inboxMessage.contact().setName(chatSessionDoc.contact().getName());
-		}
-		inboxMessage.contact().setContactId(chatSessionDoc.getContactId());
-		inboxMessage.setSessionId(chatSessionDoc.getSessionId());
-		inboxMessage.session().setQueue(chatSessionDoc.getAssignedToQueue());
-		inboxMessage.session().setAgent(chatSessionDoc.getAssignedToAgent());
-		inboxMessage.session().setDept(chatSessionDoc.getAssignedToDept());
-		inboxMessage.session().setMode(chatSessionDoc.getMode());
-		inboxMessage.session().setResolved(chatSessionDoc.isResolved());
-
+		inboxMessage = sessionStore.updateMessageFromSession(chatSessionDoc, inboxMessage);
 		return chatSessionDoc;
 	}
 

@@ -13,30 +13,30 @@ import com.boot.jx.scope.tnt.TenantAuthContext.TenantAuthFilter;
 @Component
 public class TenantAuthContext extends TenantContext<TenantAuthFilter> {
 
-    private static final long serialVersionUID = 8926326964205798155L;
+	private static final long serialVersionUID = 8926326964205798155L;
 
-    public interface TenantAuthFilter {
-	public boolean filterTenantRequest(ApiRequestDetail apiRequest, CommonHttpRequest req, String traceId);
-    }
-
-    @Autowired
-    public TenantAuthContext(List<TenantAuthFilter> libs) {
-	super(libs);
-    }
-
-    @Override
-    public String getKey() {
-	String tnt = AppContextUtil.getTenant();
-	return tnt;
-    };
-
-    @Override
-    public TenantAuthFilter get() {
-	TenantAuthFilter tenantAuthFilter = super.get();
-	if (tenantAuthFilter == null) {
-	    return get("DEFAULT");
+	public interface TenantAuthFilter {
+		public boolean filterTenantRequest(ApiRequestDetail apiRequest, CommonHttpRequest req, String traceId);
 	}
-	return tenantAuthFilter;
-    };
+
+	@Autowired
+	public TenantAuthContext(List<TenantAuthFilter> libs) {
+		super(libs);
+	}
+
+	@Override
+	public String getKey() {
+		String tnt = AppContextUtil.getTenant();
+		return tnt;
+	};
+
+	@Override
+	public TenantAuthFilter get() {
+		TenantAuthFilter tenantAuthFilter = super.get();
+		if (tenantAuthFilter == null) {
+			return get("DEFAULT");
+		}
+		return tenantAuthFilter;
+	};
 
 }

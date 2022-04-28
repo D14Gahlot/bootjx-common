@@ -12,25 +12,26 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import com.boot.jx.chat.ChatService;
+import com.boot.jx.chat.ChatSessionFactory;
 import com.boot.jx.chat.ChatSessionService;
 import com.boot.jx.common.config.ConfigConstants;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.logger.AuditDetailProvider;
 import com.boot.jx.mongo.CommonMongoQB.CommonMongoCriteria;
+import com.boot.jx.postman.ClientApp;
+import com.boot.jx.postman.PMConstants;
 import com.boot.jx.postman.PMEnvironment;
-import com.boot.jx.postman.PMConstants.CHAT_MODE;
 import com.boot.jx.postman.doc.BulkSessionDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.model.Message.Status;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.store.MessageStore;
-import com.boot.jx.postman.store.SessionStore;
+import com.boot.jx.tunnel.task.BatchJobExecuter;
 import com.boot.jx.tunnel.task.JobTaskModel;
 import com.boot.jx.tunnel.task.JobTaskModel.BatchJob;
 import com.boot.jx.tunnel.task.JobTaskModel.JOB_STATUS;
 import com.boot.jx.tunnel.task.JobTaskModel.Tasklet;
-import com.boot.jx.tunnel.task.BatchJobExecuter;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.UniqueID;
 import com.google.i18n.phonenumbers.NumberParseException;
@@ -44,142 +45,148 @@ import com.mongodb.DBObject;
 @Component
 public class BulkMessageService extends BatchJobExecuter {
 
-    @Autowired
-    private MongoTemplate mongoTemplate;
+	@Autowired
+	private MongoTemplate mongoTemplate;
 
-    @Autowired
-    private MessageStore messageStore;
+	@Autowired
+	private MessageStore messageStore;
 
-    @Autowired
-    private AuditDetailProvider auditDetailProvider;
+	@Autowired
+	private AuditDetailProvider auditDetailProvider;
 
-    @Autowired
-    private PMEnvironment enviroment;
+	@Autowired
+	private PMEnvironment enviroment;
 
-    public BulkSessionDoc send(OutboxMessage bulkMessage) throws NumberParseException {
+	public BulkSessionDoc send(OutboxMessage bulkMessage) throws NumberParseException {
 
-	BulkSessionDoc session = new BulkSessionDoc();
+		BulkSessionDoc session = new BulkSessionDoc();
 
-	session.setMessage(bulkMessage.getMessage());
-	session.setTemplateId(bulkMessage.templateId());
-	session.setTemplate(bulkMessage.templateCode());
-	session.setMessageCount(bulkMessage.getTo().size());
-	session.setContactType(bulkMessage.contact().type());
-	session.setLane(bulkMessage.contact().getLane());
-	session.setBulkSessionId(UniqueID.generateString62());
+		session.setMessage(bulkMessage.getMessage());
+		session.setTemplateId(bulkMessage.templateId());
+		session.setTemplate(bulkMessage.templateCode());
+		session.setMessageCount(bulkMessage.getTo().size());
+		session.setContactType(bulkMessage.contact().type());
+		session.setLane(bulkMessage.contact().getLane());
+		session.setBulkSessionId(UniqueID.generateString62());
 
-	auditDetailProvider.auditCreate(session);
+		auditDetailProvider.auditCreate(session);
 
-	String defaultRegion = enviroment.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_PHONEBOOK_REGION).asString("IN");
+		ClientApp adminApp = enviroment.config().clientApiKey(PMConstants.DEFAULT.ADMIN_QUEUE_CODE);
+		String defaultRegion = enviroment.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_PHONEBOOK_REGION).asString("IN");
 
-	PhoneNumber phoneNumber = new PhoneNumber();
-	List<MessageDoc> docs = new ArrayList<MessageDoc>();
-	for (String to : bulkMessage.getTo()) {
-	    MessageDoc doc = messageStore.createMessageDoc(bulkMessage);
-	    doc.setContactId(null);
-	    doc.updateStatus(Status.SCHLD);
-	    doc.setBulkSessionId(session.getBulkSessionId());
-	    ConfigConstants.PHONE_NUMBER_UTIL.parse(to, defaultRegion, phoneNumber);
-	    to = String.format("%s%s", phoneNumber.getCountryCode(), phoneNumber.getNationalNumber());
-	    doc.getContact().setPhone(to);
-	    doc.setMessage(bulkMessage.getMessage());
-	    doc.setTemplateId(bulkMessage.templateId());
-	    doc.setTemplate(bulkMessage.templateCode());
-	    docs.add(doc);
+		PhoneNumber phoneNumber = new PhoneNumber();
+		List<MessageDoc> docs = new ArrayList<MessageDoc>();
+		for (String to : bulkMessage.getTo()) {
+			MessageDoc doc = messageStore.createMessageDoc(bulkMessage);
+			doc.setContactId(null);
+			doc.updateStatus(Status.SCHLD);
+			doc.setBulkSessionId(session.getBulkSessionId());
+			ConfigConstants.PHONE_NUMBER_UTIL.parse(to, defaultRegion, phoneNumber);
+			to = String.format("%s%s", phoneNumber.getCountryCode(), phoneNumber.getNationalNumber());
+			doc.getContact().setPhone(to);
+			doc.setMessage(bulkMessage.getMessage());
+			doc.setTemplateId(bulkMessage.templateId());
+			doc.setTemplate(bulkMessage.templateCode());
+
+			doc.route().setQueueCode(adminApp.getQueue());
+			doc.route().setSendMode(adminApp.getAppMode());
+			doc.route().setSenderCode(auditDetailProvider.getAuditUser());
+
+			docs.add(doc);
+		}
+
+		session.setStatus("CREATED");
+		mongoTemplate.save(session);
+		messageStore.insert(docs, bulkMessage.contact().type());
+		registerJob(JobTaskModel.newBatchJob()
+				// Set Unique Job Id
+				.jobId(session.getBulkSessionId())
+				// Contact Type for each message
+				.data("contactType", session.getContactType())
+				// Channel for each message
+				.data("channel", bulkMessage.contact().getChannelType())
+				// Lane for each message
+				.data("lane", session.getLane()));
+
+		return session;
 	}
 
-	session.setStatus("CREATED");
-	mongoTemplate.save(session);
-	messageStore.insert(docs, bulkMessage.contact().type());
-	registerJob(JobTaskModel.newBatchJob()
-		// Set Unique Job Id
-		.jobId(session.getBulkSessionId())
-		// Contact Type for each message
-		.data("contactType", session.getContactType())
-		// Channel for each message
-		.data("channel", bulkMessage.contact().getChannelType())
-		// Lane for each message
-		.data("lane", session.getLane()));
+	@Override
+	public boolean read(BatchJob currentBatchJob) {
+		BulkSessionDoc doc = mongoTemplate.findById(currentBatchJob.getJobId(), BulkSessionDoc.class);
+		Query query = new Query().addCriteria(CommonMongoCriteria.where("bulkSessionId").is(currentBatchJob.getJobId())
+				.and("status").is(Status.SCHLD.toString())).limit(10);
+		List<MessageDoc> msgs = messageStore.find(query, doc.getContactType());
 
-	return session;
-    }
+		if (!ArgUtil.is(msgs) || msgs.size() == 0) {
+			return true; // Reading is Finished
+		}
 
-    @Override
-    public boolean read(BatchJob currentBatchJob) {
-	BulkSessionDoc doc = mongoTemplate.findById(currentBatchJob.getJobId(), BulkSessionDoc.class);
-	Query query = new Query().addCriteria(CommonMongoCriteria.where("bulkSessionId").is(currentBatchJob.getJobId())
-		.and("status").is(Status.SCHLD.toString())).limit(10);
-	List<MessageDoc> msgs = messageStore.find(query, doc.getContactType());
+		if (!ArgUtil.areEqual(currentBatchJob.getStatus(), doc.getStatus())) {
+			doc.setStatus(currentBatchJob.getStatus().toString());
+			mongoTemplate.save(doc);
+		}
 
-	if (!ArgUtil.is(msgs) || msgs.size() == 0) {
-	    return true; // Reading is Finished
+		for (MessageDoc messageDoc : msgs) {
+			push(JobTaskModel.newTasklet(currentBatchJob).taskId(messageDoc.getMessageId()));
+			messageDoc.updateStatus(Status.CRTD);
+			// System.out.println("Status.CRTD"+messageDoc.getContact().getPhone());
+			messageStore.updateStatus(doc.getContactType(), messageDoc, Status.CRTD, null);
+			// messageStore.save(messageDoc, doc.getContactType());
+		}
+		return false;
 	}
 
-	if (!ArgUtil.areEqual(currentBatchJob.getStatus(), doc.getStatus())) {
-	    doc.setStatus(currentBatchJob.getStatus().toString());
-	    mongoTemplate.save(doc);
+	@Scheduled(fixedDelay = 1000)
+	public void scheduler2() {
+		this.execute();
 	}
 
-	for (MessageDoc messageDoc : msgs) {
-	    push(JobTaskModel.newTasklet(currentBatchJob).taskId(messageDoc.getMessageId()));
-	    messageDoc.updateStatus(Status.CRTD);
-	    // System.out.println("Status.CRTD"+messageDoc.getContact().getPhone());
-	    messageStore.updateStatus(doc.getContactType(), messageDoc, Status.CRTD, null);
-	    // messageStore.save(messageDoc, doc.getContactType());
+	@Autowired
+	private ChatService chatService;
+
+	@Autowired
+	private ChatSessionService chatSessionService;
+
+	@Autowired
+	private ChatSessionFactory chatSessionFactory;
+
+	@Override
+	public void execute(BatchJob taskJob, Tasklet tasklet) {
+		LOGGER.debug("execute(BatchJob {}, Tasklet {})", taskJob.getJobId(), tasklet.getTaskId());
+		String messageId = tasklet.getTaskId();
+		ContactType contactType = taskJob.data().entry("contactType").asEnum(ContactType.class);
+		String channel = taskJob.data().entry("channel").asString();
+		String lane = taskJob.data().entry("lane").asString();
+		MessageDoc msg = messageStore.findByMessageId(messageId, contactType);
+
+		OutboxMessage outboxMessage = new OutboxMessage();
+		outboxMessage.setMessageId(msg.getMessageId());
+		outboxMessage.setMessage(msg.getMessage());
+		outboxMessage.template(msg.getTemplate());
+		outboxMessage.templateId(msg.getTemplateId());
+		outboxMessage.contact().type(contactType);
+		outboxMessage.contact().setChannelType(channel);
+		outboxMessage.contact().setLane(lane);
+		outboxMessage.contact().setEmail(msg.getContact().getEmail());
+		outboxMessage.contact().setPhone(msg.getContact().getPhone());
+		outboxMessage.contact().setContactId(msg.getContact().getContactId());
+		outboxMessage.setRoute(msg.getRoute());
+
+		ChatSessionDoc chatSessionDoc = chatSessionFactory.linkSession(outboxMessage);
+		if (ArgUtil.is(chatSessionDoc)) {
+			chatSessionService.initSession(outboxMessage, chatSessionDoc);
+			chatService.send(chatSessionDoc, outboxMessage);
+		} else {
+			messageStore.updateStatus(contactType, msg, Status.NSENT, "Cannot create session");
+		}
 	}
-	return false;
-    }
 
-    @Scheduled(fixedDelay = 1000)
-    public void scheduler2() {
-	this.execute();
-    }
+	@Override
+	public boolean tally(BatchJob currentBatchJob) {
+		BulkSessionDoc doc = mongoTemplate.findById(currentBatchJob.getJobId(), BulkSessionDoc.class);
 
-    @Autowired
-    private ChatService chatService;
-
-    @Autowired
-    private ChatSessionService chatSessionService;
-
-    @Autowired
-    private SessionStore sessionStore;
-
-    @Override
-    public void execute(BatchJob taskJob, Tasklet tasklet) {
-	LOGGER.debug("execute(BatchJob {}, Tasklet {})", taskJob.getJobId(), tasklet.getTaskId());
-	String messageId = tasklet.getTaskId();
-	ContactType contactType = taskJob.data().entry("contactType").asEnum(ContactType.class);
-	String channel = taskJob.data().entry("channel").asString();
-	String lane = taskJob.data().entry("lane").asString();
-	MessageDoc msg = messageStore.findByMessageId(messageId, contactType);
-
-	OutboxMessage outboxMessage = new OutboxMessage();
-	outboxMessage.setMessageId(msg.getMessageId());
-	outboxMessage.setMessage(msg.getMessage());
-	outboxMessage.template(msg.getTemplate());
-	outboxMessage.templateId(msg.getTemplateId());
-	outboxMessage.contact().type(contactType);
-	outboxMessage.contact().setChannelType(channel);
-	outboxMessage.contact().setLane(lane);
-	outboxMessage.contact().setEmail(msg.getContact().getEmail());
-	outboxMessage.contact().setPhone(msg.getContact().getPhone());
-	outboxMessage.contact().setContactId(msg.getContact().getContactId());
-	outboxMessage.route().setSendMode(CHAT_MODE.PUSH.name());
-
-	ChatSessionDoc chatSessionDoc = sessionStore.linkSession(outboxMessage);
-	if (ArgUtil.is(chatSessionDoc)) {
-	    chatSessionService.initSession(outboxMessage, chatSessionDoc);
-	    chatService.send(chatSessionDoc, outboxMessage);
-	} else {
-	    messageStore.updateStatus(contactType, msg, Status.NSENT, "Cannot create session");
-	}
-    }
-
-    @Override
-    public boolean tally(BatchJob currentBatchJob) {
-	BulkSessionDoc doc = mongoTemplate.findById(currentBatchJob.getJobId(), BulkSessionDoc.class);
-
-	ContactType contactType = currentBatchJob.data().entry("contactType").asEnum(ContactType.class);
+		ContactType contactType = currentBatchJob.data().entry("contactType").asEnum(ContactType.class);
 
 //		Aggregation agg = Aggregation.newAggregation(
 //				Aggregation.match(Criteria.where("bulkSessionId").is((currentBatchJob.getJobId()))), // Match
@@ -188,51 +195,51 @@ public class BulkMessageService extends BatchJobExecuter {
 //		AggregationResults<Map> results = mongoTemplate.aggregate(agg, MessageStore.getCollectionName(contactType),
 //				Map.class);
 
-	List<DBObject> list = new ArrayList<DBObject>();
-	list.add(Aggregation.match(Criteria.where("bulkSessionId").is((currentBatchJob.getJobId()))) // Match
-		.toDBObject(Aggregation.DEFAULT_CONTEXT));
-	list.add(Aggregation.group("status").count().as("count").toDBObject(Aggregation.DEFAULT_CONTEXT));
+		List<DBObject> list = new ArrayList<DBObject>();
+		list.add(Aggregation.match(Criteria.where("bulkSessionId").is((currentBatchJob.getJobId()))) // Match
+				.toDBObject(Aggregation.DEFAULT_CONTEXT));
+		list.add(Aggregation.group("status").count().as("count").toDBObject(Aggregation.DEFAULT_CONTEXT));
 
-	DBCollection col = mongoTemplate.getCollection(MessageStore.getCollectionName(contactType));
-	Cursor cursor = col.aggregate(list,
-		AggregationOptions.builder().allowDiskUse(true).outputMode(OutputMode.CURSOR).build());
+		DBCollection col = mongoTemplate.getCollection(MessageStore.getCollectionName(contactType));
+		Cursor cursor = col.aggregate(list,
+				AggregationOptions.builder().allowDiskUse(true).outputMode(OutputMode.CURSOR).build());
 
-	long totalCount = 0;
-	long doneCount = 0;
-	// for (Map map : results) {
-	while (cursor.hasNext()) {
-	    DBObject object = cursor.next();
-	    if (ArgUtil.is(object)) {
-		Status status = ArgUtil.parseAsEnumT(object.get("_id"), Status.class);
-		if (ArgUtil.is(status)) {
-		    long count = ArgUtil.parseAsLong(object.get("count"), 0L);
-		    doc.stats().put(ArgUtil.parseAsString(status), count);
-		    totalCount = (totalCount + count);
-		    // Done Count
-		    if (status.ordinal() > Status.INIT.ordinal()) {
-			doneCount = (doneCount + count);
-		    }
+		long totalCount = 0;
+		long doneCount = 0;
+		// for (Map map : results) {
+		while (cursor.hasNext()) {
+			DBObject object = cursor.next();
+			if (ArgUtil.is(object)) {
+				Status status = ArgUtil.parseAsEnumT(object.get("_id"), Status.class);
+				if (ArgUtil.is(status)) {
+					long count = ArgUtil.parseAsLong(object.get("count"), 0L);
+					doc.stats().put(ArgUtil.parseAsString(status), count);
+					totalCount = (totalCount + count);
+					// Done Count
+					if (status.ordinal() > Status.INIT.ordinal()) {
+						doneCount = (doneCount + count);
+					}
+				}
+			}
+
 		}
-	    }
+		// }
 
-	}
-	// }
+		// System.out.println("TALLY : " + (totalCount == doneCount) + " -- "
+		// +currentBatchJob.getDonePercent());
+		boolean completed = (totalCount == doneCount) && (currentBatchJob.getDonePercent() == 100);
 
-	// System.out.println("TALLY : " + (totalCount == doneCount) + " -- "
-	// +currentBatchJob.getDonePercent());
-	boolean completed = (totalCount == doneCount) && (currentBatchJob.getDonePercent() == 100);
-
-	if (completed) {
-	    doc.setCompletedStamp(System.currentTimeMillis());
+		if (completed) {
+			doc.setCompletedStamp(System.currentTimeMillis());
+		}
+		if (!ArgUtil.areEqual(currentBatchJob.getStatus(), doc.getStatus())) {
+			doc.setStatus(currentBatchJob.getStatus().toString());
+			if (completed) {
+				doc.setStatus(JOB_STATUS.COMPLETED.toString());
+			}
+		}
+		mongoTemplate.save(doc);
+		return completed;
 	}
-	if (!ArgUtil.areEqual(currentBatchJob.getStatus(), doc.getStatus())) {
-	    doc.setStatus(currentBatchJob.getStatus().toString());
-	    if (completed) {
-		doc.setStatus(JOB_STATUS.COMPLETED.toString());
-	    }
-	}
-	mongoTemplate.save(doc);
-	return completed;
-    }
 
 }

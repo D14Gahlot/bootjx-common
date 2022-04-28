@@ -12,6 +12,7 @@ public class PMConstants {
 		public static final String NO_USER = "__USER__";
 		public static final String BOT_QUEUE_CODE = "basic_bot";
 		public static final String AGENT_QUEUE_CODE = "agent_desk";
+		public static final String ADMIN_QUEUE_CODE = "admin_panel";
 	}
 
 	public final class USER_ROLE {
@@ -66,7 +67,7 @@ public class PMConstants {
 
 		// FAQ(CHAT_MODE.BOT),
 
-		NONE(CHAT_MODE.NONE);
+		NONE(CHAT_MODE.PUSH);
 
 		private CHAT_MODE chatMode;
 

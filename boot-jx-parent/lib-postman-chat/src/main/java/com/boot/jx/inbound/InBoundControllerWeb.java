@@ -138,6 +138,20 @@ public class InBoundControllerWeb {
 	}
 
 	@ApiRequest(session = true)
+	@RequestMapping(value = "/ext/plugin/mobile/auth", method = RequestMethod.GET)
+	public String directAuth(@RequestParam(required = false) String csid,
+			@RequestParam(required = false) String deviceId, @RequestParam(required = false) String channelId,
+			@RequestParam(required = false) String channelKey) {
+		PMConfiguration config = pmEnvironment.config();
+		ChannelConfig channelConfig = config.channel(channelId);
+		if (!ArgUtil.is(channelConfig) || !ArgUtil.areEqual(channelConfig.getChannelKey(), channelKey)) {
+			ApiResponseUtil.throwAccessDeniedException("Invalid Channel");
+		}
+		// need to cpmplte for mobile auth
+		return "app-customer";
+	}
+
+	@ApiRequest(session = true)
 	@ResponseBody
 	@RequestMapping(value = "/ext/plugin/outbound/web/auth/v2", method = RequestMethod.GET)
 	public ApiResponse<ChatMessageDTO, Object> onAuthV2(@RequestParam(required = false) String user,

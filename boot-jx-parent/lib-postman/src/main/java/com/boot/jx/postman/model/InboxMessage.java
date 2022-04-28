@@ -43,7 +43,7 @@ public class InboxMessage implements Serializable, IMessageExtended, LogMessage 
 
 	private Object originalMessage;
 	private MessageSession session;
-	private MessageRoute route;
+	private MessageRouter route;
 	private MessagePrompt prompt;
 
 	protected Map<String, Object> form = new HashMap<String, Object>();
@@ -364,18 +364,18 @@ public class InboxMessage implements Serializable, IMessageExtended, LogMessage 
 		this.prompt = prompt;
 	}
 
-	public MessageRoute getRoute() {
+	public MessageRouter getRoute() {
 		return route;
 	}
 
-	public void setRoute(MessageRoute route) {
+	public void setRoute(MessageRouter route) {
 		this.route = route;
 	}
 
 	@Override
-	public MessageRoute route() {
+	public MessageRouter route() {
 		if (route == null) {
-			this.route = new MessageRoute();
+			this.route = new MessageRouter();
 		}
 		return this.route;
 	}

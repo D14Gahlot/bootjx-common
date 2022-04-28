@@ -3,44 +3,47 @@ package com.boot.jx.postman;
 import java.io.Serializable;
 import java.util.Map;
 
+import com.boot.jx.postman.PMConstants.APP_TYPE;
 import com.fasterxml.jackson.annotation.JsonView;
 
 public interface ClientApp extends Serializable {
 
-    public static final String APP_TYPE_WEBHOOK = "WEBHOOK";
-    public static final String APP_TYPE_AGENT = "AGENT";
-    public static final String APP_TYPE_BOT = "BOT";
+	public static final String APP_TYPE_WEBHOOK = "WEBHOOK";
+	public static final String APP_TYPE_AGENT = "AGENT";
+	public static final String APP_TYPE_BOT = "BOT";
 
-    public String getId();
+	public String getId();
 
-    @JsonView(PMEnvironment.OneTimeVisibleProperty.class)
-    public String getKey();
+	@JsonView(PMEnvironment.OneTimeVisibleProperty.class)
+	public String getKey();
 
-    public String getKeyName();
+	public String getKeyName();
 
-    public String getQueue();
+	public String getQueue();
 
-    public String getKeyVersion();
+	public String getKeyVersion();
 
-    public String getAppType();
+	public String getAppType();
 
-    public String getWebhook();
+	public String getAppMode();
 
-    public String getForward();
+	public String getWebhook();
 
-    public Map<String, Object> getProps();
+	public String getForward();
 
-    public Map<String, Object> props();
+	public Map<String, Object> getProps();
 
-    @JsonView(PMEnvironment.ProtectedProperty.class)
-    public Map<String, Object> getSecret();
+	public Map<String, Object> props();
 
-    public Map<String, Object> secret();
+	@JsonView(PMEnvironment.ProtectedProperty.class)
+	public Map<String, Object> getSecret();
 
-    boolean isShared();
+	public Map<String, Object> secret();
 
-    boolean isReadOnly();
+	boolean isShared();
 
-    boolean isAgentApp();
+	boolean isReadOnly();
+
+	boolean isAgentApp();
 
 }

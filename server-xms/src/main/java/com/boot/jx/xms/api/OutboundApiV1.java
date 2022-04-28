@@ -25,39 +25,39 @@ import io.swagger.annotations.Authorization;
 @RestController
 public class OutboundApiV1 {
 
-    @Autowired
-    private MessageService messageService;
+	@Autowired
+	private MessageService messageService;
 
-    @ApiOperation(value = "Send Message", notes = "${swagger.OutboundApiV1.sendMessage.description}",
-	    authorizations = @Authorization("X_API_KEY"))
-    @XMSClientAuth
-    @RequestMapping(value = "/api/v1/message/send", method = { RequestMethod.POST })
-    public ApiResponse<OutBoundReciept, Object> sendMessage(@RequestBody OutBoundMsg message) {
-	return ApiResponse.buildResult(messageService.send(message));
-    }
+	@ApiOperation(value = "Send Message", notes = "${swagger.OutboundApiV1.sendMessage.description}",
+			authorizations = @Authorization("X_API_KEY"))
+	@XMSClientAuth
+	@RequestMapping(value = "/api/v1/message/send", method = { RequestMethod.POST })
+	public ApiResponse<OutBoundReciept, Object> sendMessage(@RequestBody OutBoundMsg message) {
+		return ApiResponse.buildResult(messageService.send(message));
+	}
 
-    @ApiOperation(value = "Send Multipart Message",
-	    notes = "This API can be used to upload and send Message in Single Request", hidden = true,
-	    authorizations = @Authorization("X_API_KEY"))
-    @XMSClientAuth
-    @RequestMapping(value = "/api/v1/message/send.media", method = { RequestMethod.POST })
-    public ApiResponse<OutboxMessage, Object> sendMessage(OutBoundMsg message,
-	    @RequestParam(name = "document", required = false) MultipartFile document,
-	    @RequestParam(name = "audio", required = false) MultipartFile audio,
-	    @RequestParam(name = "video", required = false) MultipartFile video,
-	    @RequestParam(name = "image", required = false) MultipartFile image) {
-	return ApiResponse.buildResult(new OutboxMessage());
-    }
+	@ApiOperation(value = "Send Multipart Message",
+			notes = "This API can be used to upload and send Message in Single Request", hidden = true,
+			authorizations = @Authorization("X_API_KEY"))
+	@XMSClientAuth
+	@RequestMapping(value = "/api/v1/message/send.media", method = { RequestMethod.POST })
+	public ApiResponse<OutboxMessage, Object> sendMessage(OutBoundMsg message,
+			@RequestParam(name = "document", required = false) MultipartFile document,
+			@RequestParam(name = "audio", required = false) MultipartFile audio,
+			@RequestParam(name = "video", required = false) MultipartFile video,
+			@RequestParam(name = "image", required = false) MultipartFile image) {
+		return ApiResponse.buildResult(new OutboxMessage());
+	}
 
-    @ApiOperation(value = "Upload Media",
-	    notes = "This API can be used only to upload media,"
-		    + "You will have to use Send Message} api to actial Send Message",
-	    hidden = true)
-    @XMSClientAuth
-    @ResponseBody
-    @RequestMapping(value = "/api/v1/media/upload", method = { RequestMethod.POST })
-    public ApiResponse<Attachment, Object> uploadMedia(@RequestParam String type, @RequestParam MultipartFile file)
-	    throws Exception {
-	return ApiResponse.buildResult(new Attachment());
-    }
+	@ApiOperation(value = "Upload Media",
+			notes = "This API can be used only to upload media,"
+					+ "You will have to use Send Message} api to actial Send Message",
+			hidden = true)
+	@XMSClientAuth
+	@ResponseBody
+	@RequestMapping(value = "/api/v1/media/upload", method = { RequestMethod.POST })
+	public ApiResponse<Attachment, Object> uploadMedia(@RequestParam String type, @RequestParam MultipartFile file)
+			throws Exception {
+		return ApiResponse.buildResult(new Attachment());
+	}
 }

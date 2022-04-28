@@ -113,10 +113,12 @@ public class SessionStore extends CommonMongoTemplateAbstract {
 	 * @param sessionMessage
 	 * @return
 	 */
+	@Deprecated
 	public ChatSessionDoc createSession(SessionMessage sessionMessage) {
 		return createSessionOld(sessionMessage);
 	}
 
+	@Deprecated
 	public ChatSessionDoc createSessionOld(SessionMessage sessionMessage) {
 		Contactable contact = PostManUtil.getContactMeta(sessionMessage.contact());
 
@@ -215,24 +217,43 @@ public class SessionStore extends CommonMongoTemplateAbstract {
 		return chatSessionDoc;
 	}
 
-	public ChatSessionDoc linkSession(ChatSessionDoc chatSessionDoc, IMessage inboxMessage) {
+	public IMessage updateMessageFromSession(ChatSessionDoc chatSessionDoc, IMessage iMessage) {
+		if (ArgUtil.isEmpty(iMessage.contact().getName())) {
+			iMessage.contact().setName(chatSessionDoc.contact().getName());
+		}
+		iMessage.contact().setContactId(chatSessionDoc.getContactId());
+		iMessage.setSessionId(chatSessionDoc.getSessionId());
+		iMessage.session().setQueue(chatSessionDoc.getAssignedToQueue());
+		iMessage.session().setAgent(chatSessionDoc.getAssignedToAgent());
+		iMessage.session().setDept(chatSessionDoc.getAssignedToDept());
+		iMessage.session().setMode(chatSessionDoc.getMode());
+		iMessage.session().setResolved(chatSessionDoc.isResolved());
+		return iMessage;
+	}
+
+	@Deprecated
+	public ChatSessionDoc linkSession(ChatSessionDoc chatSessionDoc, IMessage iMessage) {
 		if (!ArgUtil.is(chatSessionDoc)) {
 			return null;
 		}
 
-		if (PostManUtil.isInBound(inboxMessage)) {
-			chatSessionDoc.setLastInComingStamp(inboxMessage.getTimestamp());
+		if (PostManUtil.isInBound(iMessage)) {
+			chatSessionDoc.setLastInComingStamp(iMessage.getTimestamp());
 			// Query Update for Session
 			ChatSessionQuery chatSessionDocQuery = new ChatSessionQuery(chatSessionDoc);
 			chatSessionDocQuery.setLastInComingStamp(chatSessionDoc.getLastInComingStamp());
 
 			if (ArgUtil.isEmptyValue(chatSessionDoc.getFirstInComingStamp())) {
-				chatSessionDocQuery.setFirstInComingStamp(inboxMessage.getTimestamp());
+				chatSessionDocQuery.setFirstInComingStamp(iMessage.getTimestamp());
 			}
 
 			// Assign Queue
 			if (ArgUtil.isEmptyValue(chatSessionDoc.getAssignedToQueue())) {
-				String defaultQueue = pmDomainConfig.getDefaultInboundQueue(inboxMessage.contact());
+
+				String defaultQueue = iMessage.route().getQueueCode();
+				if (!ArgUtil.is(defaultQueue)) {
+					defaultQueue = pmDomainConfig.getDefaultInboundQueue(iMessage.contact());
+				}
 				if (ArgUtil.is(defaultQueue)) {
 					chatSessionDocQuery.setQueue(defaultQueue);
 				}
@@ -242,30 +263,20 @@ public class SessionStore extends CommonMongoTemplateAbstract {
 
 			// Query Update for Contact
 			ChatContactQuery chatContactQuery = new ChatContactQuery(chatSessionDoc.getContactId());
-			chatContactQuery.setLastInBoundStamp(inboxMessage.getTimestamp());
-			chatContactQuery.update(inboxMessage.contact());
+			chatContactQuery.setLastInBoundStamp(iMessage.getTimestamp());
+			chatContactQuery.update(iMessage.contact());
 			updateFirst(chatContactQuery);
-		} else if (PostManUtil.isOutBound(inboxMessage)) {
+		} else if (PostManUtil.isOutBound(iMessage)) {
 
 		}
-
-		if (ArgUtil.isEmpty(inboxMessage.contact().getName())) {
-			inboxMessage.contact().setName(chatSessionDoc.contact().getName());
-		}
-		inboxMessage.contact().setContactId(chatSessionDoc.getContactId());
-		inboxMessage.setSessionId(chatSessionDoc.getSessionId());
-		inboxMessage.session().setQueue(chatSessionDoc.getAssignedToQueue());
-		inboxMessage.session().setAgent(chatSessionDoc.getAssignedToAgent());
-		inboxMessage.session().setDept(chatSessionDoc.getAssignedToDept());
-		inboxMessage.session().setMode(chatSessionDoc.getMode());
-		inboxMessage.session().setResolved(chatSessionDoc.isResolved());
-
+		updateMessageFromSession(chatSessionDoc, iMessage);
 		return chatSessionDoc;
 	}
 
-	public ChatSessionDoc linkSession(IMessage inboxMessage) {
-		ChatSessionDoc chatSessionDoc = this.createSession(inboxMessage);
-		chatSessionDoc = linkSession(chatSessionDoc, inboxMessage);
+	@Deprecated
+	public ChatSessionDoc linkSession(IMessage iMessage) {
+		ChatSessionDoc chatSessionDoc = this.createSession(iMessage);
+		chatSessionDoc = linkSession(chatSessionDoc, iMessage);
 		return chatSessionDoc;
 	}
 
