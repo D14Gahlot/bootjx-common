@@ -65,44 +65,48 @@ public class ChatSessionService {
 
 	public boolean initSession(InboxMessage inboxMessage, ChatSessionDoc session) {
 		boolean initd = session.isInitd();
-		if (initd) {
-			return true;
-		}
-		ConnectorHandler connector = connectorHandlerFactory.get(inboxMessage.contact().type(),
-				inboxMessage.contact().getChannelType());
+		if (!initd) {
+			ConnectorHandler connector = connectorHandlerFactory.get(inboxMessage.contact().type(),
+					inboxMessage.contact().getChannelType());
 
-		if (ArgUtil.is(connector)) {
-			try {
-				OutboxMessage reply = connector.initSession(session, inboxMessage);
-				if (ArgUtil.is(reply)) {
-					try {
-						if (!OutboxMessage.NO_MESSAGE.equals(reply))
-							chatService.reply(inboxMessage, reply);
-						initd = false;
-					} catch (InterruptedException e) {
-						LOGGER.error("Errror While Replying To Sesion Init Message", e);
+			if (ArgUtil.is(connector)) {
+				try {
+					OutboxMessage reply = connector.initSession(session, inboxMessage);
+					if (ArgUtil.is(reply)) {
+						try {
+							if (!OutboxMessage.NO_MESSAGE.equals(reply))
+								chatService.reply(inboxMessage, reply);
+							initd = false;
+						} catch (InterruptedException e) {
+							LOGGER.error("Errror While Replying To Sesion Init Message", e);
+						}
+					} else {
+						initd = true;
 					}
-				} else {
-					initd = true;
+				} catch (Exception e) {
+					logManager.error(inboxMessage, e);
 				}
-			} catch (Exception e) {
-				logManager.error(inboxMessage, e);
+				messageContext.commitChatContactQuery();
 			}
-			messageContext.commitChatContactQuery();
+
+			if (initd) { // Inbound Init Method
+				InBoundEvent sessionInitEvent = chatSessionManager.initSession(inboxMessage, session);
+				if (ArgUtil.is(inBoundHandler)) {
+					inBoundHandler.onSessionInit(sessionInitEvent, session);
+				}
+			}
 		}
 
 		if (initd) {
-			InBoundEvent sessionInitEvent = chatSessionManager.initSession(inboxMessage, session);
-			if (ArgUtil.is(inBoundHandler)) {
-				inBoundHandler.onSessionInit(sessionInitEvent, session);
+			if (ArgUtil.isEmptyValue(session.getAssignedToQueue())
+					|| PMConstants.CHAT_MODE.isPushOnly(session.getMode())) {
+				this.routeSession(session);
+				inboxMessage.session().setQueue(session.getAssignedToQueue());
+				inboxMessage.session().setDept(session.getAssignedToDept());
+				inboxMessage.session().setAgent(session.getAssignedToAgent());
+				inboxMessage.session().setBot(session.getAssignedToBot());
 			}
-			this.routeSession(session);
 		}
-
-		inboxMessage.session().setQueue(session.getAssignedToQueue());
-		inboxMessage.session().setDept(session.getAssignedToDept());
-		inboxMessage.session().setAgent(session.getAssignedToAgent());
-		inboxMessage.session().setBot(session.getAssignedToBot());
 
 		return session.isInitd();
 	}
@@ -169,11 +173,8 @@ public class ChatSessionService {
 	}
 
 	public InBoundEvent routeSession(ChatSessionDoc session) {
-		if (ArgUtil.isEmptyValue(session.getAssignedToQueue()) || ArgUtil.isEmptyValue(session.getMode())) {
-			String defaultQueue = pmDomainConfig.getDefaultInboundQueue(session.contact());
-			return routeSession(session, new PMArgs().assignToQueueCode(defaultQueue));
-		}
-		return null;
+		String defaultQueue = pmDomainConfig.getDefaultInboundQueue(session.contact());
+		return routeSession(session, new PMArgs().assignToQueueCode(defaultQueue));
 	}
 
 	public InBoundEvent routeSession(String sessionId, PMArgs pmArgs) {

@@ -421,6 +421,15 @@ public class MessageStore extends CommonMongoTemplateAbstract {
 		return msg;
 	}
 
+	public void reject(InboxMessage inboxMessageOriginal) {
+		String contactId = PostManUtil.CONTACT_ID(inboxMessageOriginal.contact());
+		MessageHold hold = new MessageHold();
+		hold.setInboxMessage(inboxMessageOriginal);
+		hold.setContactId(contactId);
+		hold.setTimestamp(System.currentTimeMillis());
+		mongoTemplate.save(hold, MessageHold.COLLECTION_REJECTED);
+	}
+
 	public void hold(InboxMessage inboxMessageOriginal) {
 		String contactId = PostManUtil.CONTACT_ID(inboxMessageOriginal.contact());
 		MessageHold hold = new MessageHold();

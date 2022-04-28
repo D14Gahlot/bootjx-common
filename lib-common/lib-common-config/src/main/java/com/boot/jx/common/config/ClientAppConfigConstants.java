@@ -18,7 +18,7 @@ public class ClientAppConfigConstants {
 
 	static {
 
-		APP_CONFIGS.put(APP_TYPE.NONE, new ConfigMeta[] {
+		APP_CONFIGS.put(APP_TYPE.DEFAULT, new ConfigMeta[] {
 
 				new ConfigMeta().inputType(INPUT_TYPE.MESSAGE, MESSAGE_TYPE.INFO).title("Basic App")
 						.desc("Use this app to Send Messages using API End Point").group("About App") });

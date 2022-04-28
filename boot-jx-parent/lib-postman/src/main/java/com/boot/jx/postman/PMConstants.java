@@ -54,6 +54,20 @@ public class PMConstants {
 
 	public static enum CHAT_MODE {
 		AGENT, BOT, PUSH, WEBHOOK, NONE;
+
+		public static boolean isPushOnly(String mode) {
+			if (!ArgUtil.is(mode)) {
+				return true;
+			}
+
+			switch (mode) {
+			case "PUSH":
+			case "NONE":
+				return true;
+			}
+
+			return false;
+		}
 	}
 
 	public static enum APP_TYPE {
@@ -67,7 +81,7 @@ public class PMConstants {
 
 		// FAQ(CHAT_MODE.BOT),
 
-		NONE(CHAT_MODE.PUSH);
+		DEFAULT(CHAT_MODE.PUSH);
 
 		private CHAT_MODE chatMode;
 
@@ -80,7 +94,7 @@ public class PMConstants {
 		}
 
 		public static APP_TYPE from(Object appType) {
-			return ArgUtil.parseAsEnumT(appType, APP_TYPE.class, APP_TYPE.NONE);
+			return ArgUtil.parseAsEnumT(appType, APP_TYPE.class, APP_TYPE.DEFAULT);
 		}
 	}
 

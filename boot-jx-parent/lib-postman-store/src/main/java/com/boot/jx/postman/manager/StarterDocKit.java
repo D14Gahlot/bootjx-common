@@ -124,7 +124,7 @@ public class StarterDocKit {
 		adminApp.setId(PMConstants.DEFAULT.ADMIN_QUEUE_CODE);
 		adminApp.setKeyName("Admin App");
 		adminApp.setQueue(PMConstants.DEFAULT.ADMIN_QUEUE_CODE);
-		adminApp.setAppType(APP_TYPE.NONE.name());
+		adminApp.setAppType(APP_TYPE.DEFAULT.name());
 		adminApp.setKey(PostManUtil.UNIQUE_API_KEY());
 		adminApp.setKeyVersion("v3");
 		adminApp.setShared(true);

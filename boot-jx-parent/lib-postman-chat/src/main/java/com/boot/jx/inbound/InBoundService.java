@@ -94,7 +94,7 @@ public class InBoundService {
 
 	public ICacheBox<String> hold() {
 		if (holdManager == null) {
-			this.holdManager = CacheBox.getInstance("InBoundService-Hold", redisson);
+			this.holdManager = CacheBox.getInstance("InBoundService-Hold-v2", redisson);
 		}
 		return this.holdManager;
 	}
@@ -109,13 +109,13 @@ public class InBoundService {
 	public void invokeMethodsAsync(InboxMessage inboxMessageOriginal) {
 		String contactId = PostManUtil.CONTACT_ID(inboxMessageOriginal.contact());
 		String onhold = hold().get(contactId);
-		//System.out.println("===>" + onhold);
+		// System.out.println("===>" + onhold);
 		if (ArgUtil.isEqual(onhold, "HOLDING")) {
 			messageStore.hold(inboxMessageOriginal);
 		} else {
 			hold().put(contactId, "HOLDING");
-			//messageStore.hold(inboxMessageOriginal);
-			invokeMethodsInternal(inboxMessageOriginal, true);
+			// messageStore.hold(inboxMessageOriginal);
+			invokeMethodsInternalSafely(inboxMessageOriginal, true);
 			// if (inboxMessageOriginal.session().isFirstMessage()) {
 			// this.invokeMethodsRelease(inboxMessageOriginal);
 			// }
@@ -123,7 +123,7 @@ public class InBoundService {
 		}
 		onhold = hold().get(contactId);
 		if (!ArgUtil.isEqual(onhold, "HOLDING")) {
-			//System.out.println("===<" + onhold);
+			// System.out.println("===<" + onhold);
 			this.invokeMethodsRelease(inboxMessageOriginal);
 		}
 
@@ -132,12 +132,21 @@ public class InBoundService {
 	public void invokeMethodsRelease(InboxMessage inboxMessageOriginal) {
 		List<InboxMessage> msgs = messageStore.release(inboxMessageOriginal);
 		for (InboxMessage inboxMessage : msgs) {
-			this.invokeMethodsInternal(inboxMessage, false);
+			this.invokeMethodsInternalSafely(inboxMessage, false);
 		}
 	}
 
 	public InboxMessage invokeMethods(InboxMessage inboxMessageOriginal) {
-		return this.invokeMethodsInternal(inboxMessageOriginal, false);
+		return this.invokeMethodsInternalSafely(inboxMessageOriginal, false);
+	}
+
+	private InboxMessage invokeMethodsInternalSafely(InboxMessage inboxMessageOriginal, boolean newThread) {
+		try {
+			return this.invokeMethodsInternal(inboxMessageOriginal, newThread);
+		} catch (Exception e) {
+			messageStore.reject(inboxMessageOriginal);
+		}
+		return inboxMessageOriginal;
 	}
 
 	private InboxMessage invokeMethodsInternal(InboxMessage inboxMessageOriginal, boolean newThread) {

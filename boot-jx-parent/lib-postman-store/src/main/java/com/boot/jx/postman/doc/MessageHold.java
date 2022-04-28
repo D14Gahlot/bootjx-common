@@ -16,6 +16,7 @@ public class MessageHold implements Serializable {
 	private static final long serialVersionUID = -1916969779141145310L;
 
 	public static final String COLLECTION_NAME = "MESSAGE_HOLD";
+	public static final String COLLECTION_REJECTED = "MESSAGE_REJECTED";
 
 	@Id
 	private String tempId;
