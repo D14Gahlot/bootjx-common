@@ -111,8 +111,10 @@ public class ChatDTOUtil {
 			messageDto.setStamps(stamps);
 		}
 
+		messageDto.setRoute(messageDoc.getRoute());
 		if (PostManUtil.isOutBound(messageDoc.getType())) {
-			messageDto.setSender(ArgUtil.nonEmpty(messageDoc.getAgent(), messageDoc.getQueue(), defaultSender));
+			messageDto.setSender(ArgUtil.nonEmpty(messageDoc.route().getSenderCode(), messageDoc.route().getQueueCode(),
+					messageDoc.getAgent(), messageDoc.getQueue(), defaultSender));
 		} else if (PostManUtil.isInBound(messageDoc.getType())) {
 			messageDto.setSender(ArgUtil.nonEmpty(messageDto.getName(), contactName));
 		} else {

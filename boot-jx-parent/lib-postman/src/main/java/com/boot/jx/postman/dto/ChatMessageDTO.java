@@ -7,6 +7,7 @@ import java.util.Map;
 
 import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.MessageDefinitions.Contactable;
+import com.boot.jx.postman.model.MessageRouter;
 import com.boot.jx.postman.model.TagDocument;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
@@ -39,6 +40,8 @@ public class ChatMessageDTO implements Serializable {
 
 	private Map<String, Object> meta;
 	private Map<String, Object> replyTo;
+
+	private MessageRouter route;
 
 	public String getText() {
 		return text;
@@ -229,5 +232,20 @@ public class ChatMessageDTO implements Serializable {
 
 	public void setReplyTo(Map<String, Object> replyTo) {
 		this.replyTo = replyTo;
+	}
+
+	public MessageRouter getRoute() {
+		return route;
+	}
+
+	public void setRoute(MessageRouter route) {
+		this.route = route;
+	}
+
+	public MessageRouter route() {
+		if (route == null) {
+			this.route = new MessageRouter();
+		}
+		return this.route;
 	}
 }
