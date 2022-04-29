@@ -208,7 +208,10 @@ public class FacebookConnector extends AbstractConnector<FacebookConfigDetails, 
 			) {
 				messageBoxEvent.addMessageReport(toMessageReport(m, channelConfig));
 			} else if (ArgUtil.is(m.getMessage()) || ArgUtil.is(m.getPostBack())) {
-				messageBoxEvent.addInboxMessage(toInboxMessage(m, channelConfig));
+				InboxMessage inboxMessage = toInboxMessage(m, channelConfig);
+				if(!ArgUtil.areEqual(channelConfig.getLane(), inboxMessage.contact().getCsid())) {
+					messageBoxEvent.addInboxMessage(inboxMessage);
+				}
 			}
 		});
 	}

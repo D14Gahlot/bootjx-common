@@ -16,8 +16,8 @@ public class DummyChatController extends ChatController {
 
     @ChatMapping(key = "***dummyStart***", pattern = "^*$")
     public void transferToAgent(InboxMessage inboxMessage, StringMatcher matcher) {
-	reply("Hello this is my reply to " + inboxMessage.getMessage());
-	send(new OutboxMessage().message("Hello this is my send to " + inboxMessage.getMessage()));
+    	reply("Hello this is my reply to " + inboxMessage.getMessage());
+		send(new OutboxMessage().message("Hello this is my send to " + inboxMessage.getMessage()));
     }
 
 }
