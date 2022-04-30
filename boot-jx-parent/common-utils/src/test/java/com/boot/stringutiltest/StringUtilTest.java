@@ -17,6 +17,14 @@ public class StringUtilTest {
 	}
 
 	@Test
+	public void normalizedString() {
+		assertEquals("N1", "Lalit Tanwar", "Lalit Tanwar");
+		assertEquals("N2", "Lalit    Tanwar", "Lalit Tanwar");
+		assertEquals("N3", "   Lalit   Tanwar", "Lalit Tanwar");
+		assertEquals("N4", " Lalit  Tanwar  ", "Lalit Tanwar");
+	}
+
+	@Test
 	public void replaceDot() {
 		System.out.println("3e3.343.34343.343".replaceAll("\\.", "/"));
 	}

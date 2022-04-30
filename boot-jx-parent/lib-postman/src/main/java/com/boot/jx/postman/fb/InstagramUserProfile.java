@@ -4,6 +4,7 @@ import java.io.Serializable;
 
 import com.boot.utils.ArgUtil;
 import com.boot.utils.Constants;
+import com.boot.utils.StringUtils;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -31,8 +32,8 @@ public class InstagramUserProfile implements Serializable {
 		if (ArgUtil.is(this.name)) {
 			return name;
 		}
-		return (ArgUtil.parseAsString(firstName, Constants.BLANK) + " "
-				+ ArgUtil.parseAsString(firstName, Constants.BLANK)).trim();
+		return StringUtils.normalizeSpace(ArgUtil.parseAsString(firstName, Constants.BLANK) + " "
+				+ ArgUtil.parseAsString(lastName, Constants.BLANK));
 	}
 
 	public void setName(String name) {
