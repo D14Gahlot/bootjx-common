@@ -191,9 +191,5 @@ public class EmailConnector extends AbstractConnector<EmailConfigDetails, EmailP
 		return messageBoxEvent;
 	}
 
-	@Scheduled(fixedDelay = 1000 * 60)
-	public void inboundMessageBoxPoll() {
-
-	}
 
 }

@@ -214,7 +214,7 @@ public class InstagramConnector extends AbstractConnector<InstagramConfig, Insta
 			if ((ArgUtil.is(m.getMessage()) && (m.getMessage().isIs_deleted())) // Message is deleted
 					|| ArgUtil.is(m.getRead()) // or Message is Read
 			) {
-				//messageBoxEvent.addMessageReport(toMessageReport(m, channelConfig));
+				messageBoxEvent.addMessageReport(toMessageReport(m, channelConfig));
 			} else if (ArgUtil.is(m.getMessage()) || ArgUtil.is(m.getPostBack())) {
 				InboxMessage inboxMessage = toInboxMessage(m, channelConfig);
 				if(!ArgUtil.areEqual(channelConfig.getLane(), inboxMessage.contact().getCsid())) {

@@ -63,6 +63,12 @@ public class CommonMongoQB<M extends CommonMongoQB<M, T>, T> implements MongoQue
 	}
 
 	@SuppressWarnings("unchecked")
+	public M having(String key) {
+		query().addCriteria(Criteria.where(key).exists(true));
+		return (M) this;
+	}
+
+	@SuppressWarnings("unchecked")
 	public M sortBy(String byField) {
 		this.query().with(new Sort(Direction.ASC, byField));
 		return (M) this;
