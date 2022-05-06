@@ -129,8 +129,6 @@ public class EmailConnector extends AbstractConnector<EmailConfigDetails, EmailP
 			template(channelConfig, chatContactDoc, outboxMessage); // TODO:- This is common for all connector, make it
 			// generic
 
-			wa360Client.send(channelConfig, outboxMessage);
-
 			Session session = getMailSession(channelConfig);
 
 			if (!ArgUtil.is(session)) {
