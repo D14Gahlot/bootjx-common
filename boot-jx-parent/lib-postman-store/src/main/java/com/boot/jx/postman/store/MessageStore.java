@@ -14,6 +14,7 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Component;
 
+import com.boot.jx.AppConfig;
 import com.boot.jx.AppContextUtil;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.mongo.CommonMongoQueryBuilder;
@@ -54,6 +55,9 @@ public class MessageStore extends CommonMongoTemplateAbstract {
 
 	@Value("${postman.chat.session.timeout}")
 	String chatSessionTimeout;
+	
+	@Autowired
+	AppConfig appConfig;
 
 	public static String getCollectionName(Object contactType) {
 		return (MessageDoc.COLLECTION_NAME + "_" + ArgUtil.parseAsString(contactType, "OTHERS"));
@@ -421,12 +425,14 @@ public class MessageStore extends CommonMongoTemplateAbstract {
 		return msg;
 	}
 
+	
 	public void reject(InboxMessage inboxMessageOriginal) {
 		String contactId = PostManUtil.CONTACT_ID(inboxMessageOriginal.contact());
 		MessageHold hold = new MessageHold();
 		hold.setInboxMessage(inboxMessageOriginal);
 		hold.setContactId(contactId);
 		hold.setTimestamp(System.currentTimeMillis());
+		hold.setAppType(appConfig.getAppType());
 		mongoTemplate.save(hold, MessageHold.COLLECTION_REJECTED);
 	}
 
@@ -436,6 +442,7 @@ public class MessageStore extends CommonMongoTemplateAbstract {
 		hold.setInboxMessage(inboxMessageOriginal);
 		hold.setContactId(contactId);
 		hold.setTimestamp(System.currentTimeMillis());
+		hold.setAppType(appConfig.getAppType());
 		mongoTemplate.save(hold);
 	}
 

@@ -37,21 +37,25 @@ public class DomainJobs {
 	@Autowired
 	AccountStore accountStore;
 
-	@Scheduled(fixedDelay = 15000)
+	@Scheduled(fixedDelay = 5000)
 	public void fetchEmailTask() throws InterruptedException {
 		// LOGGER.info("======= I am doing my Task @ {}", appConfig.getSpringAppName());
+		AppContextUtil.setTenant("app");
+		LOGGER.debug("Searching Domains");
 		List<DomainDoc> domainDocs = accountStore.findAll(DomainDoc.class);
-
 		CommonMongoQBimpl<ChannelConfigDoc> emailChannelsQuery = CommonMongoQueryBuilder
 				.collection(ChannelConfigDoc.class).where("contactType", ContactType.EMAIL.name());
 
 		for (DomainDoc domainDoc : domainDocs) {
 			AppContextUtil.setTenant(domainDoc.getDomain());
+			AppContextUtil.init();
+			LOGGER.debug("Searching Config {}",domainDoc.getDomain());
 			List<ChannelConfigDoc> emailChannels = accountStore.find(emailChannelsQuery);
 
 			for (ChannelConfigDoc emailChannel : emailChannels) {
 				if (!emailChannel.isDisabled()) {
 					if (ArgUtil.is(emailChannels) && emailChannels.size() > 0) {
+						LOGGER.debug("Found Config {} ---> {}",domainDoc.getDomain(),emailChannel.getChannelId());
 						inBoundPoller.throttle(new TunnelTask().name(InBoundPoller.TASK_EMAIL_POLLER)
 								.id(domainDoc.getDomain() + "_" + emailChannel.getChannelId()).intervalSeconds(15)
 								.data(MapModel.createInstance().put("channelId", emailChannel.getChannelId())));

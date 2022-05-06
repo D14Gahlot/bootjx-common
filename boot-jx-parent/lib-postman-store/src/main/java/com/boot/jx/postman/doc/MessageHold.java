@@ -27,6 +27,9 @@ public class MessageHold implements Serializable {
 	@Indexed
 	private String sessionId;
 
+	@Indexed
+	private String appType;
+
 	private long timestamp;
 
 	private InboxMessage inboxMessage;
@@ -69,6 +72,14 @@ public class MessageHold implements Serializable {
 
 	public void setTimestamp(long timestamp) {
 		this.timestamp = timestamp;
+	}
+
+	public String getAppType() {
+		return appType;
+	}
+
+	public void setAppType(String appType) {
+		this.appType = appType;
 	}
 
 }

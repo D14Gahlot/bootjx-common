@@ -47,10 +47,14 @@ public abstract class ATaskLimiter implements ITaskLimiter {
 
 	private String taskLimiterName;
 
+	public boolean isWorker() {
+		return true;
+	}
+
 	@Override
 	public String getName() {
 		if (this.taskLimiterName == null) {
-			this.taskLimiterName = ClazzUtil.getUltimateClassName(this) + "V5";
+			this.taskLimiterName = ClazzUtil.getUltimateClassName(this) + "V" + getVersion();
 		}
 		return this.taskLimiterName;
 	}
@@ -62,10 +66,14 @@ public abstract class ATaskLimiter implements ITaskLimiter {
 	private RQueue<TaskInfo> queue4;
 	private RQueue<TaskInfo> queue5;
 
+	public String getVersion() {
+		return "3";
+	}
+
 	private RLocalCachedMap<String, TunnelMessage<TunnelTask>> getCache() {
 		if (cache == null) {
-			cache = redisson.getLocalCachedMap(AppParam.APP_ENV.getValue() + TUNNE_LIMITER_MAP + this.getName(),
-					localCacheOptions);
+			cache = redisson.getLocalCachedMap(
+					AppParam.APP_ENV.getValue() + TUNNE_LIMITER_MAP + getVersion() + this.getName(), localCacheOptions);
 		}
 		return cache;
 	}
@@ -74,27 +82,32 @@ public abstract class ATaskLimiter implements ITaskLimiter {
 		switch (num) {
 		case 2:
 			if (queue2 == null) {
-				queue2 = redisson.getQueue(AppParam.APP_ENV.getValue() + TUNNE_LIMITER_Q + "2-" + this.getName());
+				queue2 = redisson
+						.getQueue(AppParam.APP_ENV.getValue() + TUNNE_LIMITER_Q + getVersion() + "2-" + this.getName());
 			}
 			return queue2;
 		case 3:
 			if (queue3 == null) {
-				queue3 = redisson.getQueue(AppParam.APP_ENV.getValue() + TUNNE_LIMITER_Q + "3-" + this.getName());
+				queue3 = redisson
+						.getQueue(AppParam.APP_ENV.getValue() + TUNNE_LIMITER_Q + getVersion() + "3-" + this.getName());
 			}
 			return queue3;
 		case 4:
 			if (queue4 == null) {
-				queue4 = redisson.getQueue(AppParam.APP_ENV.getValue() + TUNNE_LIMITER_Q + "4-" + this.getName());
+				queue4 = redisson
+						.getQueue(AppParam.APP_ENV.getValue() + TUNNE_LIMITER_Q + getVersion() + "4-" + this.getName());
 			}
 			return queue4;
 		case 5:
 			if (queue5 == null) {
-				queue5 = redisson.getQueue(AppParam.APP_ENV.getValue() + TUNNE_LIMITER_Q + "5-" + this.getName());
+				queue5 = redisson
+						.getQueue(AppParam.APP_ENV.getValue() + TUNNE_LIMITER_Q + getVersion() + "5-" + this.getName());
 			}
 			return queue5;
 		default:
 			if (queue == null) {
-				queue = redisson.getQueue(AppParam.APP_ENV.getValue() + TUNNE_LIMITER_Q + this.getName());
+				queue = redisson
+						.getQueue(AppParam.APP_ENV.getValue() + TUNNE_LIMITER_Q + getVersion() + this.getName());
 			}
 			return queue;
 		}
@@ -112,6 +125,11 @@ public abstract class ATaskLimiter implements ITaskLimiter {
 	}
 
 	public void doTask(int pollQNum, int pushQNum, int batchSize) {
+
+		if (!isWorker()) {
+			return;
+		}
+
 		if (!ArgUtil.is(this.getName())) {
 			return;
 		}
@@ -120,8 +138,8 @@ public abstract class ATaskLimiter implements ITaskLimiter {
 		}
 
 		RQueue<TaskInfo> limiterPollQ = getQueue(pollQNum);
-		// logger.info("{} Q-{} S-{} "
-		// ,this.eventClassName,pollQNum,limiterPollQ.size());
+		// logger.info("{} Q-{} S-{} ", this.getName(), pollQNum, limiterPollQ.size());
+		int size = limiterPollQ.size();
 
 		for (int i = 0; i < batchSize; i++) {
 			TaskInfo info = limiterPollQ.poll();
@@ -132,7 +150,7 @@ public abstract class ATaskLimiter implements ITaskLimiter {
 				if (info.getMatureStamp() <= now) {
 					RLocalCachedMap<String, TunnelMessage<TunnelTask>> cache = getCache();
 					try {
-						TunnelMessage<TunnelTask> latest = cache.get(info.getKey());
+						TunnelMessage<TunnelTask> latest = cache.remove(info.getKey());
 						if (ArgUtil.is(latest)) {
 							// logger.info("x {} {} {}", x.getTopic(), info.getThrottleKey(),
 							// x.getTimestamp());
@@ -142,6 +160,7 @@ public abstract class ATaskLimiter implements ITaskLimiter {
 								AppContextUtil.setContext(latest.getContext());
 								AppContextUtil.init();
 								try {
+									logger.debug("===========EXECUTED======{} x {}",size,info.getKey());
 									this.doTask(latest.getData());
 								} catch (Exception e) {
 									logger.error("LIMITER TASK EXCEPTION:" + info.getInterval(), e);
@@ -149,6 +168,8 @@ public abstract class ATaskLimiter implements ITaskLimiter {
 								logger.debug("Q:{}, Bi:{} T:{} Tk:{}", pollQNum, i, latest.getTopic(), info.getKey());
 								AppContextUtil.clear();
 								cache.fastRemove(info.getKey());
+							} else {
+								cache.putIfAbsent(info.getKey(), latest);
 							}
 						}
 					} catch (Exception e) {
@@ -191,6 +212,7 @@ public abstract class ATaskLimiter implements ITaskLimiter {
 		info.setKey(taskUid);
 		RQueue<TaskInfo> limiterQ = getQueue(1);
 		limiterQ.add(info);
+		logger.debug("===========debounce={}",info.getKey());
 	}
 
 	@Async
@@ -220,6 +242,7 @@ public abstract class ATaskLimiter implements ITaskLimiter {
 		info.setKey(taskUid);
 		RQueue<TaskInfo> limiterQ = getQueue(1);
 		limiterQ.add(info);
+		logger.debug("===========throttle={}",info.getKey());
 	}
 
 }

@@ -33,6 +33,7 @@ public class InboxMessage implements Serializable, IMessageExtended, LogMessage 
 
 	private long timestamp;
 	private String message;
+	private String subject;
 	private String formatType;
 	private String formatSubType;
 
@@ -387,4 +388,13 @@ public class InboxMessage implements Serializable, IMessageExtended, LogMessage 
 	public void setLogs(List<String> logs) {
 		this.logs = logs;
 	}
+
+	public String getSubject() {
+		return subject;
+	}
+
+	public void setSubject(String subject) {
+		this.subject = subject;
+	}
+
 }

@@ -215,7 +215,7 @@ public class InBoundControllerWeb {
 					sessionMessage.setSessionId(inboxMessage.getSessionId());
 					sessionMessage.setContact(sessionMessage.getContact());
 				});
-				connector.onReadInboxMessage(messageBoxEvent.getInboxMessages());
+				connector.onReceiveInboxMessage(messageBoxEvent.getInboxMessages());
 				String webSessionId = commonHttpRequest.get(WEB_SESSION_ID);
 				if (!ArgUtil.is(webSessionId) || !webSessionId.equalsIgnoreCase(sessionMessage.getSessionId())) {
 					commonHttpRequest.setCookie(WEB_SESSION_ID, sessionMessage.getSessionId());

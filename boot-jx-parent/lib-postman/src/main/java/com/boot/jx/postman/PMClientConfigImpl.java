@@ -31,9 +31,6 @@ public class PMClientConfigImpl implements PMClientConfig {
 		private static final String POSTMAN_CHAT_SESSION_TIMEOUT = "postman.chat.session.timeout";
 	}
 
-	@Value("${postman.app.type}")
-	private String postmanType;
-
 	@Value("${postman.contact.details.url}")
 	private String contactDetailsUrl;
 
@@ -80,11 +77,6 @@ public class PMClientConfigImpl implements PMClientConfig {
 	@Override
 	public String getChatIdleTimeout() {
 		return environment.local().keyEntry("postman.chat.idle.timeout").asString(chatIdleTimeout);
-	}
-
-	@Override
-	public String getPostmanType() {
-		return postmanType;
 	}
 
 	@Override

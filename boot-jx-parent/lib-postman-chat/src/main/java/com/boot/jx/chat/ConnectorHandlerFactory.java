@@ -194,7 +194,7 @@ public class ConnectorHandlerFactory extends ScopedBeanFactory<String, Connector
 		 * 
 		 * @return
 		 */
-		default List<InboxMessage> onReadInboxMessage(List<InboxMessage> inboxMessages) {
+		default List<InboxMessage> onReceiveInboxMessage(List<InboxMessage> inboxMessages) {
 			return inboxMessages;
 		}
 

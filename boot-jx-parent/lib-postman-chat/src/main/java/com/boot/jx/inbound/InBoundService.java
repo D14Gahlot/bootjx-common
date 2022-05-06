@@ -11,12 +11,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
+import com.boot.jx.AppConfig;
 import com.boot.jx.AppContextUtil;
-import com.boot.jx.agent.AgentService;
 import com.boot.jx.bot.BotEngine;
 import com.boot.jx.bot.ChatMapping;
 import com.boot.jx.cache.CacheBox;
-import com.boot.jx.chat.ChatService;
 import com.boot.jx.chat.ChatSessionFactory;
 import com.boot.jx.chat.ChatSessionService;
 import com.boot.jx.chat.ChatStatusService;
@@ -58,6 +57,9 @@ public class InBoundService {
 
 	@Autowired
 	private BotEngine botEngine;
+
+	@Autowired
+	private AppConfig aapConfig;
 
 	@Autowired
 	private PMClientConfig chatClientConfig;
@@ -185,7 +187,7 @@ public class InBoundService {
 		ChatSessionDoc session = null;
 		boolean locallySessionAssigned = false;
 		if (ArgUtil.isEmpty(inboxMessageOriginal.getSessionId())
-				|| "POSTMAN".equalsIgnoreCase(chatClientConfig.getPostmanType())) {
+				|| "POSTMAN".equalsIgnoreCase(aapConfig.getAppType())) {
 			session = chatSessionFactory.getChatSession(inboxMessageOriginal);
 			if (ArgUtil.is(session)) {
 				chatSessionFactory.linkSession(session, inboxMessageOriginal);

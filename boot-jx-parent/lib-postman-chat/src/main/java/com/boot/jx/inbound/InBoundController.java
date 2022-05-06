@@ -131,7 +131,7 @@ public class InBoundController {
 					connector.prompt(inboxMessage);
 					inBoundService.invokeMethodsAsync(inboxMessage);
 				});
-				connector.onReadInboxMessage(messageBoxEvent.getInboxMessages());
+				connector.onReceiveInboxMessage(messageBoxEvent.getInboxMessages());
 			} else if (ArgUtil.is(messageBoxEvent.getMessageReports())) {
 				connector.onMessageReports(messageBoxEvent.getMessageReports());
 				inBoundStatusService.update(messageBoxEvent.getMessageReports());

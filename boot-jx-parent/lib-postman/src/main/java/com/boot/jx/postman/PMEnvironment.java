@@ -376,8 +376,6 @@ public class PMEnvironment {
 
 		String getChatIdleTimeout();
 
-		String getPostmanType();
-
 		boolean isLocalDummyBotEnabled();
 
 		String getDefaultSender();

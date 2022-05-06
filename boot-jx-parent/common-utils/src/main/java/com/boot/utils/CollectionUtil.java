@@ -289,6 +289,10 @@ public final class CollectionUtil {
 		return null;
 	}
 
+	public static <T> T first(T[] list) {
+		return get(list, 0);
+	}
+
 	public static <T> T set(List<T> list, int index, T e) {
 		return set(list, index, e, null);
 	}

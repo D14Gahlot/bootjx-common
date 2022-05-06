@@ -56,6 +56,7 @@ public class MessageDoc implements Serializable, Patchable<MessageDoc>, IMessage
 	private String action;
 	private String handler;
 	private String message;
+	private String subject;
 
 	private String formatType;
 	private String formatSubType;
@@ -465,6 +466,14 @@ public class MessageDoc implements Serializable, Patchable<MessageDoc>, IMessage
 			return new MessageDoc();
 		}
 
+	}
+
+	public String getSubject() {
+		return subject;
+	}
+
+	public void setSubject(String subject) {
+		this.subject = subject;
 	}
 
 }

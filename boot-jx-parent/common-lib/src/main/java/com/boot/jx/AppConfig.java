@@ -51,6 +51,7 @@ public class AppConfig {
 	public static final String APP_ENV = "${app.env}";
 	public static final String APP_GROUP = "${app.group}";
 	public static final String APP_NAME = "${app.name}";
+	public static final String APP_TYPE = "${app.type}";
 	public static final String APP_MESSAGE = "${app.message}";
 	public static final String APP_ID = "${app.id}";
 	public static final String APP_VERSION = "${app.version}";
@@ -95,6 +96,10 @@ public class AppConfig {
 	@Value(APP_NAME)
 	@AppParamKey(AppParam.APP_NAME)
 	private String appName;
+	
+	@Value(APP_TYPE)
+	@AppParamKey(AppParam.APP_TYPE)
+	private String appType;
 
 	@Value(APP_MESSAGE)
 	@AppParamKey(AppParam.APP_MESSAGE)
@@ -448,6 +453,10 @@ public class AppConfig {
 
 	public String getAppTitle() {
 		return appTitle;
+	}
+
+	public String getAppType() {
+		return appType;
 	}
 
 }

@@ -148,7 +148,7 @@ public class TwitterConnector extends AbstractConnector<TwitterConfigDetails, Tw
 	}
 
 	@Override
-	public List<InboxMessage> onReadInboxMessage(List<InboxMessage> inboxMessages) {
+	public List<InboxMessage> onReceiveInboxMessage(List<InboxMessage> inboxMessages) {
 		if (inboxMessages != null && !inboxMessages.isEmpty()) {
 			for (InboxMessage event : inboxMessages) {
 				try {

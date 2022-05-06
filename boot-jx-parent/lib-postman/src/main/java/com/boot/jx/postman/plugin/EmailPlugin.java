@@ -32,6 +32,9 @@ public class EmailPlugin implements DefaultChannelPlugin<EmailConfigDetails> {
 		@ConfigMetaProperty(path = "email.pop3Host", title = "POP3 Host")
 		private String pop3Host;
 
+		@ConfigMetaProperty(path = "email.pop3Port", title = "POP3 Port")
+		private String pop3Port;
+
 		@ConfigMetaProperty(path = "email.pop3User", createonly = true, title = "POP3 User")
 		private String pop3User;
 
@@ -155,6 +158,14 @@ public class EmailPlugin implements DefaultChannelPlugin<EmailConfigDetails> {
 
 		public void setSmtpPass(String smtpPass) {
 			this.smtpPass = smtpPass;
+		}
+
+		public String getPop3Port() {
+			return pop3Port;
+		}
+
+		public void setPop3Port(String pop3Port) {
+			this.pop3Port = pop3Port;
 		}
 
 	}
