@@ -91,6 +91,9 @@ public class ChatArchiveService {
 	}
 
 	public ChatMessageDTO createMessageDTO(MessageDoc messageDoc, ChatSessionDTO chatSessionDto) {
+		if (!ArgUtil.is(messageDoc)) {
+			return null;
+		}
 		ChatMessageDTO messageDto = ChatDTOUtil.getChatMessageDTO(messageDoc, chatSessionDto.getName(),
 				ArgUtil.nonEmpty(messageDoc.getAgent(), messageDoc.getQueue(), chatSessionDto.getAssignedToAgent(),
 						chatSessionDto.getAssignedToQueue()));
