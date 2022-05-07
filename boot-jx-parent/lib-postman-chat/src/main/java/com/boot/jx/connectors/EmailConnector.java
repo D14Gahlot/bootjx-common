@@ -148,6 +148,9 @@ public class EmailConnector extends AbstractConnector<EmailConfigDetails, EmailP
 				// change the user and password accordingly
 				t.connect(channelConfig.getEmail().getSmtpUser(), channelConfig.getEmail().getSmtpPass());
 				t.sendMessage(replyMessage, replyMessage.getAllRecipients());
+
+				outboxMessage.setMessageIdExt(CollectionUtil.first(replyMessage.getHeader("Message-ID")));
+
 			} finally {
 				t.close();
 			}
