@@ -47,7 +47,8 @@ public class ConfigConstants {
 	public static enum SETUP_KEY implements EntryMeta {
 		POSTMAN_BOT_NAME(new ConfigMeta("Bot Name", "postman.bot.name")),
 		POSTMAN_BOT_CODE(new ConfigMeta("Bot Code Prefix", "postman.bot.code").hidden()),
-		POSTMAN_CONTACT_DETAILS_URL(new ConfigMeta("Contact Details Provider Webhook", "postman.contact.details.url")),
+		// POSTMAN_CONTACT_DETAILS_URL(new ConfigMeta("Contact Details Provider
+		// Webhook", "postman.contact.details.url")),
 
 		// POSTMAN_CHAT_INBOUND_WEBHOOK(new ConfigMeta("Fallback Webhook",
 		// "postman.chat.inbound.webhook")
