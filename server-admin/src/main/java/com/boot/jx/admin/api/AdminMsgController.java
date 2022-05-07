@@ -38,6 +38,7 @@ import com.boot.jx.postman.model.ext.InBoundEvent;
 import com.boot.jx.postman.service.ChatDTOUtil;
 import com.boot.jx.postman.store.MessageStore;
 import com.boot.jx.postman.store.SessionStore;
+import com.boot.jx.tunnel.task.JobTaskModel.BatchJob;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
 import com.google.i18n.phonenumbers.NumberParseException;
@@ -164,6 +165,12 @@ public class AdminMsgController {
 	public ApiResponse<BulkSessionDoc, Object> sendBulkMessage(@RequestBody OutboxMessage bulkMessage)
 			throws NumberParseException {
 		return ApiResponse.buildResult(bulkMessageService.send(bulkMessage)).message("Bulk Message Job Created");
+	}
+
+	@RequestMapping(value = "/api/message/bulk/push/retry", method = { RequestMethod.POST })
+	public ApiResponse<Object, Object> sendBulkMessage(@RequestParam String jobId) throws NumberParseException {
+		bulkMessageService.registerJob(jobId);
+		return ApiResponse.build().message("Bulk Message Job Retried");
 	}
 
 	@RequestMapping(value = "/api/message/bulk/push/logs", method = { RequestMethod.GET })
