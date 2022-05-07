@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.boot.jx.AppConfig;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.common.config.AppCommonAuthFilter.ACCESS_RULES;
 import com.boot.jx.common.config.CDNBuilder;
@@ -50,6 +51,9 @@ public class ConfigOptionMetaController {
 
 	@Autowired
 	CommonMongoTemplate commonMongoTemplate;
+
+	@Autowired
+	AppConfig appConfig;
 
 	// Meta APIS
 	@RequestMapping(value = "/api/meta/message_types", method = { RequestMethod.GET })
@@ -154,7 +158,8 @@ public class ConfigOptionMetaController {
 	public ApiResponse<PMConfigurationObject, Object> updateCDN(@RequestParam(required = false) String url,
 			@RequestParam(required = false) String version,
 			@RequestParam(required = false, defaultValue = "false") boolean beta) {
-		PMConfigurationObject config = pmEnvironment.keyEntry(beta ? "mry.cdn.url.beta" : "mry.cdn.url");
+		PMConfigurationObject config = pmEnvironment
+				.keyEntry(beta ? "mry.cdn.url.beta" : "mry.cdn.url." + appConfig.getAppEnv());
 		String oldUrl = config.asString();
 
 		if (ArgUtil.is(version) && ArgUtil.is(oldUrl)) {
