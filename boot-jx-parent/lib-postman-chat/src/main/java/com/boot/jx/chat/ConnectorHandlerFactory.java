@@ -8,7 +8,6 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.retry.annotation.Retryable;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
@@ -38,6 +37,7 @@ import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.postman.query.ChatContactQuery;
 import com.boot.jx.postman.query.ChatSessionQuery;
 import com.boot.jx.postman.service.ChatDTOUtil;
+import com.boot.jx.postman.store.MessageContext;
 import com.boot.jx.postman.store.MessageStore;
 import com.boot.jx.stomp.StompTunnelService;
 import com.boot.jx.utils.PostManUtil;
@@ -190,6 +190,7 @@ public class ConnectorHandlerFactory extends ScopedBeanFactory<String, Connector
 
 		/**
 		 * This method is invoked after message from ChannelProvider has been processed
+		 * 
 		 * @param inboxMessages
 		 * 
 		 * @return
@@ -278,6 +279,9 @@ public class ConnectorHandlerFactory extends ScopedBeanFactory<String, Connector
 	@Autowired
 	private PMEnvironment environment;
 
+	@Autowired
+	protected MessageContext messageContext;
+
 	/**
 	 * 
 	 * @param channelType
@@ -314,8 +318,9 @@ public class ConnectorHandlerFactory extends ScopedBeanFactory<String, Connector
 	 * @param inboxMessage
 	 */
 	@Async
-	public void message(String messageType, ChatContactDoc chatContactDoc, OutboxMessage outboxMessage,
-			IMessageExtended inboxMessage) {
+	public void message(MessageContext context, String messageType, ChatContactDoc chatContactDoc,
+			OutboxMessage outboxMessage, IMessageExtended inboxMessage) {
+		messageContext.from(context);
 		LOGGER.debug("message(String {}, ChatContactDoc {}, IMessageExtended {}, OutboxMessage {})", messageType,
 				chatContactDoc, inboxMessage, outboxMessage);
 

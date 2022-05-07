@@ -189,4 +189,19 @@ public class MessageReport implements LogMessage, Serializable {
 		this.logs = logs;
 	}
 
+	@Override
+	public String getSubject() {
+		return null;
+	}
+
+	@Override
+	public String getReplyId() {
+		return null;
+	}
+
+	@Override
+	public String getReplyIdExt() {
+		return null;
+	}
+
 }

@@ -69,6 +69,9 @@ public class Message<T extends Message<T>> implements Serializable, MessageOptio
 	private String messageId;
 	private String messageIdExt;
 	private String messageIdRef;
+	private String replyId;
+	private String replyIdExt;
+
 	private String sessionId;
 	private Contactable contact;
 
@@ -591,5 +594,21 @@ public class Message<T extends Message<T>> implements Serializable, MessageOptio
 
 	public void setHsm(CommonTemplateMeta hsm) {
 		this.hsm = hsm;
+	}
+
+	public String getReplyId() {
+		return replyId;
+	}
+
+	public void setReplyId(String replyId) {
+		this.replyId = replyId;
+	}
+
+	public String getReplyIdExt() {
+		return replyIdExt;
+	}
+
+	public void setReplyIdExt(String replyIdExt) {
+		this.replyIdExt = replyIdExt;
 	}
 }

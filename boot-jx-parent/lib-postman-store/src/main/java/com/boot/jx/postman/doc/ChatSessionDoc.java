@@ -49,6 +49,8 @@ public class ChatSessionDoc extends UpdatedTimeStampDoc implements Serializable 
 
 	private ContactDetailDoc contact;
 
+	private String subject;
+
 	private String assignedToDept;
 	private String assignedToAgent;
 	private String assignedToBot;
@@ -491,6 +493,14 @@ public class ChatSessionDoc extends UpdatedTimeStampDoc implements Serializable 
 
 	public void setAssignedToBot(String assignedToBot) {
 		this.assignedToBot = assignedToBot;
+	}
+
+	public String getSubject() {
+		return subject;
+	}
+
+	public void setSubject(String subject) {
+		this.subject = subject;
 	}
 
 }

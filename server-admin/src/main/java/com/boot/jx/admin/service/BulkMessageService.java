@@ -265,7 +265,6 @@ public class BulkMessageService extends BatchJobExecuter {
 					}
 				}
 			}
-
 		}
 		// }
 

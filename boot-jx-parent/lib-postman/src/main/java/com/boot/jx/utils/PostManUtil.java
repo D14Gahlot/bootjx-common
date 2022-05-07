@@ -15,9 +15,9 @@ import com.boot.jx.postman.model.ContactMeta;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.MessageDefinitions.Contactable;
 import com.boot.jx.postman.model.MessageDefinitions.IMessage;
-import com.boot.jx.postman.model.ext.InBoundEvent;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.model.PMArgs;
+import com.boot.jx.postman.model.ext.InBoundEvent;
 import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CryptoUtil;
@@ -231,6 +231,13 @@ public class PostManUtil {
 
 	public static String ON_DEPT_ASSIGN_TOPIC(String dept) {
 		return "/dept/onassign-" + dept;
+	}
+
+	public static boolean IS_CHANNEL_MULTISESSION(String channelType) {
+		if (PMConstants.CHANNEL_TYPE.EMAIL.equals(channelType)) {
+			return true;
+		}
+		return false;
 	}
 
 }

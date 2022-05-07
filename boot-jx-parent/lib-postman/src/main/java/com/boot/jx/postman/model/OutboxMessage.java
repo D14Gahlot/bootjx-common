@@ -123,4 +123,5 @@ public class OutboxMessage extends Message<OutboxMessage>
 	public Message<?> replyMessage(String message) {
 		return null;
 	}
+
 }

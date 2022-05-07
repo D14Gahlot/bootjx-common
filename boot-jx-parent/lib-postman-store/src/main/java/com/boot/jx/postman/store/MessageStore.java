@@ -55,7 +55,7 @@ public class MessageStore extends CommonMongoTemplateAbstract {
 
 	@Value("${postman.chat.session.timeout}")
 	String chatSessionTimeout;
-	
+
 	@Autowired
 	AppConfig appConfig;
 
@@ -64,6 +64,7 @@ public class MessageStore extends CommonMongoTemplateAbstract {
 	}
 
 	private MessageDoc updateMessageDoc(InboxMessage inboxMessage, MessageDoc doc) {
+		doc.setSubject(inboxMessage.getSubject());
 		doc.setMessage(inboxMessage.getMessage());
 		doc.setSessionId(inboxMessage.getSessionId());
 
@@ -202,6 +203,7 @@ public class MessageStore extends CommonMongoTemplateAbstract {
 		doc.setHsm(outMessage.getHsm());
 		doc.setModel(outMessage.getModel());
 		// } else {
+		doc.setSubject(outMessage.getSubject());
 		doc.setMessage(outMessage.getMessage());
 		// }
 		doc.setAttachments(outMessage.getAttachments());
@@ -425,7 +427,6 @@ public class MessageStore extends CommonMongoTemplateAbstract {
 		return msg;
 	}
 
-	
 	public void reject(InboxMessage inboxMessageOriginal) {
 		String contactId = PostManUtil.CONTACT_ID(inboxMessageOriginal.contact());
 		MessageHold hold = new MessageHold();

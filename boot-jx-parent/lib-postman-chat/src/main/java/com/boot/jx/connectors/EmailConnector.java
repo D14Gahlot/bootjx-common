@@ -23,6 +23,8 @@ import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.jx.postman.PMConstants.CHANNEL_TYPE;
 import com.boot.jx.postman.PMEnvironment.PMClientConfig;
 import com.boot.jx.postman.doc.ChatContactDoc;
+import com.boot.jx.postman.doc.ChatSessionDoc;
+import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.MessageBoxEvent;
 import com.boot.jx.postman.model.OutboxMessage;
@@ -36,6 +38,8 @@ import com.boot.jx.rest.RestService;
 import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
+
+import ch.qos.logback.core.Context;
 
 @Component
 @ConnectorMapping(contactType = ContactType.EMAIL, channel = CHANNEL_TYPE.EMAIL)
@@ -137,11 +141,30 @@ public class EmailConnector extends AbstractConnector<EmailConfigDetails, EmailP
 				return;
 			}
 
+			ChatSessionDoc chatSession = ArgUtil.is(context().session()) ? context().session().getDoc() : null;
+
+			if (!ArgUtil.is(outboxMessage.getReplyIdExt())) {
+				if (ArgUtil.is(chatSession)) {
+					MessageDoc lastMsg = chatSession.getLastMsg();
+					if (ArgUtil.is(lastMsg)) {
+						outboxMessage.setReplyIdExt(lastMsg.getMessageIdExt());
+					}
+				}
+			}
+
+			if (!ArgUtil.is(outboxMessage.getSubject())) {
+				if (ArgUtil.is(chatSession)) {
+					outboxMessage.setSubject(chatSession.getSubject());
+				}
+			}
+
 			MimeMessage replyMessage = new MimeMessage(session);
 			replyMessage.setFrom(new InternetAddress(channelConfig.getEmail().getSmtpUser(), channelConfig.getName()));
 			replyMessage.addRecipient(RecipientType.TO, new InternetAddress(outboxMessage.contact().getCsid()));
 			replyMessage.setSubject(ArgUtil.nonEmpty(outboxMessage.getSubject(), channelConfig.getName()));
 			replyMessage.setText(outboxMessage.getMessage());
+			replyMessage.addHeader("In-Reply-To", outboxMessage.getReplyIdExt());
+
 			Transport t = session.getTransport("smtp");
 			try {
 				// connect to the smpt server using transport instance

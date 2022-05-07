@@ -268,7 +268,7 @@ public abstract class BatchJobExecuter {
 				LOGGER.error("READING OR TALLY ERROR", e);
 			}
 
-			LOGGER.info("{} {} ... {}% = {}/{}", currentBatchJob.jobUUID(), currentBatchJob.getStatus(),
+			LOGGER.debug("{} {} ... {}% = {}/{}", currentBatchJob.jobUUID(), currentBatchJob.getStatus(),
 					currentBatchJob.getDonePercent(), currentBatchJob.getDoneTaskCount(),
 					currentBatchJob.getPushedTaskCount());
 

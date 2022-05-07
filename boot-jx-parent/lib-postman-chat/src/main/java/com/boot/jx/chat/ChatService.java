@@ -21,6 +21,7 @@ import com.boot.jx.postman.model.Message;
 import com.boot.jx.postman.model.MessageDefinitions.IMessageExtended;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.model.ext.InBoundEvent;
+import com.boot.jx.postman.query.ChatSessionQuery;
 import com.boot.jx.postman.store.MessageContext;
 import com.boot.jx.postman.store.MessageStore;
 import com.boot.jx.postman.store.SessionStore;
@@ -75,6 +76,13 @@ public class ChatService {
 	@Autowired
 	private LogManager logManager;
 
+	private void message(String messageType, ChatContactDoc chatContactDoc, OutboxMessage outboxMessage,
+			IMessageExtended inboxMessage) {
+
+		connectorHandlerFactory.message(new MessageContext().from(context()), messageType, chatContactDoc,
+				outboxMessage, inboxMessage);
+	}
+
 	private MessageDoc actionIntenal(ChatContactDoc chatContactDoc, OutboxMessage outboxMessage) {
 		if (!ArgUtil.is(outboxMessage.getAction())) {
 			return null;
@@ -93,7 +101,7 @@ public class ChatService {
 		outboxMessage.setSessionId(chatContactDoc.getSessionId());
 
 		MessageDoc messageDoc = messageStore.createOrUpdate(outboxMessage);
-		connectorHandlerFactory.message(MESSAGE_COMPOSE_TYPE.ACTION, chatContactDoc, outboxMessage, null);
+		message(MESSAGE_COMPOSE_TYPE.ACTION, chatContactDoc, outboxMessage, null);
 		chatSessionFactory.push(messageDoc, outboxMessage);
 		return messageDoc;
 	}
@@ -123,7 +131,7 @@ public class ChatService {
 		// outboxMessage.model().put("contact",
 		// ChatDTOUtil.getContactMeta(chatContactDoc));
 		MessageDoc messageDoc = messageStore.createOrUpdate(outboxMessage);
-		connectorHandlerFactory.message(MESSAGE_COMPOSE_TYPE.REPLY, chatContactDoc, outboxMessage, inboxMessage);
+		message(MESSAGE_COMPOSE_TYPE.REPLY, chatContactDoc, outboxMessage, inboxMessage);
 		chatSessionFactory.push(messageDoc, outboxMessage);
 		return messageDoc;
 	}
@@ -146,12 +154,14 @@ public class ChatService {
 		// outboxMessage.model().put("contact",
 		// ChatDTOUtil.getContactMeta(chatContactDoc));
 		MessageDoc messageDoc = messageStore.createOrUpdate(outboxMessage);
-		connectorHandlerFactory.message(MESSAGE_COMPOSE_TYPE.SEND, chatContactDoc, outboxMessage, null);
+		message(MESSAGE_COMPOSE_TYPE.SEND, chatContactDoc, outboxMessage, null);
 		chatSessionFactory.push(messageDoc, outboxMessage);
 		return messageDoc;
 	}
 
 	public MessageDoc reply(ChatSessionDoc sessionDoc, OutboxMessage outboxMessage) throws InterruptedException {
+		context().session(sessionDoc);
+
 		ChatContactDoc chatContactDoc = sessionStore.getContact(sessionDoc.contact().getContactId());
 		IMessageExtended inboxMessage = sessionStore.toSessionMessage(sessionDoc);
 
@@ -192,6 +202,9 @@ public class ChatService {
 
 	public MessageDoc send(ChatSessionDoc sessionDoc, OutboxMessage outboxMessage) {
 		LOGGER.debug("send(ChatSessionDoc {}, OutboxMessage {})", sessionDoc, outboxMessage);
+
+		context().session(sessionDoc);
+
 		ChatContactDoc chatContactDoc = sessionStore.getContact(sessionDoc.getContactId());
 
 		if (ArgUtil.isEmpty(outboxMessage.session().getAgent())) {
@@ -221,7 +234,6 @@ public class ChatService {
 			outboxMessage.session().setAgent(chatClientConfig.getDefaultSender());
 		}
 
-		// Action Only
 		// Action Only
 		MessageDoc actionDto = actionIntenal(chatContactDoc, outboxMessage);
 		if (ArgUtil.is(actionDto)) {
@@ -254,14 +266,13 @@ public class ChatService {
 		}
 
 		ChatContextDoc doc = mongoTemplate.findById(contactId, ChatContextDoc.class);
-		
-		if(!ArgUtil.is(doc)) {
+
+		if (!ArgUtil.is(doc)) {
 			doc = new ChatContextDoc();
 			doc.setContactId(contactId);
 		}
 		messageContext.setChatConext(doc);
-		if (!ArgUtil.is(doc.getMeta())
-				|| TimeUtils.isExpired(doc.getMeta().getUpdateStamp(), "5min")) {
+		if (!ArgUtil.is(doc.getMeta()) || TimeUtils.isExpired(doc.getMeta().getUpdateStamp(), "5min")) {
 			doc.setMeta(new ChatMeta());
 		}
 

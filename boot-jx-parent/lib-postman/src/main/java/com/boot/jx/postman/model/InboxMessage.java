@@ -317,6 +317,7 @@ public class InboxMessage implements Serializable, IMessageExtended, LogMessage 
 		return String.format("[messageId:%s]", this.messageId);
 	}
 
+	@Override
 	public String getReplyId() {
 		return replyId;
 	}
@@ -325,6 +326,7 @@ public class InboxMessage implements Serializable, IMessageExtended, LogMessage 
 		this.replyId = replyId;
 	}
 
+	@Override
 	public String getReplyIdExt() {
 		return replyIdExt;
 	}

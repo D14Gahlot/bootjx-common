@@ -57,8 +57,20 @@ public class MessageContext {
 	private ChatContactQuery chatContactQuery;
 	private ChatSessionQuery chatSessionQuery;
 	private ChatContextQuery chatContextQuery;
+
 	@Autowired
 	private SessionStore sessionStore;
+
+	public MessageContext from(MessageContext context) {
+		this.outboxMessage = context.getOutboxMessage();
+		this.inboxMessage = context.getInboxMessage();
+		this.event = context.getEvent();
+		this.contactable = context.getContactable();
+		this.chatContactQuery = context.getChatContactQuery();
+		this.chatSessionQuery = context.getChatSessionQuery();
+		this.chatContextQuery = context.getChatContextQuery();
+		return this;
+	}
 
 	public void setOutboxMessage(OutboxMessage message) {
 		this.outboxMessage = message;
@@ -247,6 +259,26 @@ public class MessageContext {
 
 	public void setChatConext(ChatContextDoc doc) {
 		this.chatContextQuery = new ChatContextQuery(doc);
+	}
+
+	public OutboxMessage getOutboxMessage() {
+		return outboxMessage;
+	}
+
+	public InBoundEvent getEvent() {
+		return event;
+	}
+
+	public ChatContactQuery getChatContactQuery() {
+		return chatContactQuery;
+	}
+
+	public ChatSessionQuery getChatSessionQuery() {
+		return chatSessionQuery;
+	}
+
+	public ChatContextQuery getChatContextQuery() {
+		return chatContextQuery;
 	}
 
 }

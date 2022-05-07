@@ -14,6 +14,7 @@ import com.boot.jx.postman.model.MessageDefinitions.IMessage;
 import com.boot.jx.postman.model.MessageDefinitions.SessionMessage;
 import com.boot.jx.postman.query.ChatContactQuery;
 import com.boot.jx.postman.query.ChatSessionQuery;
+import com.boot.jx.postman.store.MessageStore;
 import com.boot.jx.postman.store.SessionStore;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.utils.ArgUtil;
@@ -25,6 +26,9 @@ public class ChatSessionFactory {
 
 	@Autowired
 	private SessionStore sessionStore;
+
+	@Autowired
+	private MessageStore messageStore;
 
 	@Autowired
 	private PMDomainConfig pmDomainConfig;
@@ -78,6 +82,19 @@ public class ChatSessionFactory {
 
 		Contactable contact = PostManUtil.getContactMeta(sessionMessage.contact());
 
+		if (ArgUtil.is(sessionMessage.getReplyIdExt())
+				&& PostManUtil.IS_CHANNEL_MULTISESSION(contact.getChannelType())) {
+			MessageDoc prev = messageStore.findOneByMessageIdExt(sessionMessage.getReplyIdExt(),
+					contact.getContactType());
+			if (ArgUtil.is(prev) && ArgUtil.is(prev.getSessionId())) {
+				// SESSION FIND BY SESSION_ID - Try Again
+				chatSessionDoc = getChatSession(prev.getSessionId());
+				if (ArgUtil.is(chatSessionDoc)) {
+					return chatSessionDoc;
+				}
+			}
+		}
+
 		if (!ArgUtil.is(contact.getContactId())) {
 			// CONTACT CONNANOT BE FOUND
 			if (ArgUtil.is(sessionMessage.getSessionId())) {
@@ -114,7 +131,9 @@ public class ChatSessionFactory {
 			return chatSessionDoc;
 		}
 
-		sessionStore.closeAllPreviousSessions(contact.getContactId());
+		if (!PostManUtil.IS_CHANNEL_MULTISESSION(contact.getChannelType())) {
+			sessionStore.closeAllPreviousSessions(contact.getContactId());
+		}
 
 		// SESSION CREATION
 		// System.out.println("SESSION CREATION");
@@ -127,6 +146,7 @@ public class ChatSessionFactory {
 		chatSessionDoc.setPrimary(true);
 		chatSessionDoc.contact().setName(chatContactDoc.getName());
 		chatSessionDoc.contact().copyFrom(chatContactDoc);
+		chatSessionDoc.setSubject(sessionMessage.getSubject());
 		sessionMessage.session().setFirstMessage(true);
 		return sessionStore.saveSession(chatSessionDoc);
 	}
@@ -182,7 +202,7 @@ public class ChatSessionFactory {
 			}
 
 			sessionStore.updateFirst(chatSessionDocQuery);
-			
+
 			// Query Update for Contact
 			ChatContactQuery chatContactQuery = new ChatContactQuery(chatSessionDoc.getContactId());
 			chatContactQuery.setSessionId(chatSessionDoc.getSessionId());

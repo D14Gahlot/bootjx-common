@@ -113,13 +113,12 @@ public class MessageDefinitions {
 	// External attributes
 	@JsonIgnoreProperties(ignoreUnknown = true)
 	public interface IMessageExternal extends Serializable {
-		// External attributes
+
 	}
 
 	// External attributes
 	@JsonIgnoreProperties(ignoreUnknown = true)
 	public interface IMessageInternal extends Serializable {
-
 	}
 
 	// External attributes
@@ -133,9 +132,13 @@ public class MessageDefinitions {
 
 		public void setMessageIdExt(String messageIdExt);
 
-		String getMessageIdRef();
+		public String getMessageIdRef();
 
 		public void setMessageIdRef(String messageIdRef);
+
+		public String getReplyId();
+
+		public String getReplyIdExt();
 
 		public default void from(IMessageId message) {
 			setMessageId(message.getMessageId());
@@ -154,11 +157,13 @@ public class MessageDefinitions {
 
 	// External attributes
 	@JsonIgnoreProperties(ignoreUnknown = true)
-	public interface SessionMessage extends SessionId, Serializable {
+	public interface SessionMessage extends SessionId, IMessageId, Serializable {
 
 		public MessageSession session();
 
 		public Contactable contact();
+
+		public String getSubject();
 	}
 
 	@JsonIgnoreProperties(ignoreUnknown = true)
