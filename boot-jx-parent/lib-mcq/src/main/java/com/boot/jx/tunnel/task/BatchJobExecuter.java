@@ -180,7 +180,13 @@ public abstract class BatchJobExecuter {
 		}
 
 		BatchJob currentBatchJob = jobQueue().poll();
-		if (ArgUtil.is(currentBatchJob)) {
+		if(!ArgUtil.is(currentBatchJob)) {
+			return;
+		}
+		
+		BatchJob prevjob = jobStatus().get(currentBatchJob.jobUUID());
+		
+		if (ArgUtil.is(prevjob) && ArgUtil.is(prevjob.getOpenStamp(), currentBatchJob.getOpenStamp())) {
 
 			AppContextUtil.setTenant(currentBatchJob.getTenant());
 			String sessionId = UniqueID.generateString();
@@ -269,7 +275,7 @@ public abstract class BatchJobExecuter {
 			if (JOB_STATUS.COMPLETED == currentBatchJob.getStatus()) {
 				jobStatus().remove(currentBatchJob.jobUUID());
 			} else {
-				BatchJob prevjob = jobStatus().get(currentBatchJob.jobUUID());
+				prevjob = jobStatus().get(currentBatchJob.jobUUID());
 				if (ArgUtil.is(prevjob) && ArgUtil.is(prevjob.getOpenStamp(), currentBatchJob.getOpenStamp())) {
 					jobStatus().put(currentBatchJob.jobUUID(), currentBatchJob);
 					jobQueue().add(currentBatchJob);

@@ -124,6 +124,8 @@ public class BulkMessageService extends BatchJobExecuter {
 	public BatchJob resetJob(String jobId) {
 		BatchJob oldJob = stopJob(jobId);
 		BulkSessionDoc session = mongoTemplate.findById(jobId, BulkSessionDoc.class);
+		session.setStatus("CREATED");
+		mongoTemplate.save(session);
 
 		String channelId = ArgUtil.nonEmpty(session.getChannelId(),
 				PostManUtil.CHANNEL_ID(session.getContactType(), "", session.getLane()));
