@@ -70,12 +70,20 @@ public class ClientAppConfigConstants {
 
 						new ConfigMeta().title("Bot Code").path("props.botCode").example("complaint_flow") });
 
-		APP_CONFIGS.put(APP_TYPE.TEAM_ROUTER, new ConfigMeta[] {
-				new ConfigMeta().inputType(INPUT_TYPE.MESSAGE, MESSAGE_TYPE.INFO).title("Team Router")
-						.desc("Use this app to route session to Team based on customer's input").group("About App"),
+		APP_CONFIGS.put(APP_TYPE.TEAM_ROUTER, new ConfigMeta[] { new ConfigMeta()
+				.inputType(INPUT_TYPE.MESSAGE, MESSAGE_TYPE.INFO).title("Team Router")
+				.desc("Use this app to route session to Team based on customer's input. Selected template should have team code in button code")
+				.group("About App"),
 
 				new ConfigMeta().title("Team Options Template").path("props.template").group("TEMPLATES")
 						.optionsSource("getx:/api/tmpl/hsm").optionsKey("code").optionsLabel("desc") });
+
+		APP_CONFIGS.put(APP_TYPE.APP_SWITCH, new ConfigMeta[] { new ConfigMeta()
+				.inputType(INPUT_TYPE.MESSAGE, MESSAGE_TYPE.INFO).title("App Switch Menu")
+				.desc("Use this app to giver user an option menu to switch between app. Selected template should have queue code in button code")
+				.group("About App"),
+				new ConfigMeta().title("App Options Template").path("props.template").group("TEMPLATES")
+						.optionsSource("getx:/api/options/inbound_queue").optionsKey("code").optionsLabel("code") });
 
 		APP_CONFIGS.put(APP_TYPE.APP_ROUTER, new ConfigMeta[] {
 				new ConfigMeta().inputType(INPUT_TYPE.MESSAGE, MESSAGE_TYPE.INFO).title("App Router")
