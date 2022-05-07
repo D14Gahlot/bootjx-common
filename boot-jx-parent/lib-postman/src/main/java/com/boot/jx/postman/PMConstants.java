@@ -158,9 +158,13 @@ public class PMConstants {
 			if (CHANNEL_TYPE.WA_GUPSHUP_LEGACY.equals(channel)) {
 				return CHANNEL_TYPE.WA_GUPSHUP;
 			}
+			return CHANNEL_TYPE.WA_360D;
 		}
-
 		return null;
+	}
+
+	public static String CHANNEL_TYPE(ContactType contactType, String channel) {
+		return CHANNEL_TYPE(ArgUtil.parseAsString(contactType), channel);
 	}
 
 	public static class CHAT_SESSION_ACTIONS {

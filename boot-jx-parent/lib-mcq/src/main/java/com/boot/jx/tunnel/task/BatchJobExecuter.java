@@ -114,7 +114,7 @@ public abstract class BatchJobExecuter {
 		return LOCK_MAP.get(tenant);
 	}
 
-	public void registerJob(BatchJob batchJob) {
+	public BatchJob registerJob(BatchJob batchJob) {
 		try {
 			batchJob.setTenant(AppContextUtil.getTenant());
 			batchJob.setStatus(JOB_STATUS.CREATED);
@@ -124,12 +124,41 @@ public abstract class BatchJobExecuter {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		return batchJob;
 	}
 
-	public void registerJob(String jobId) {
+	public BatchJob registerJob(String jobId) {
 		BatchJob job = new BatchJob();
 		job.setJobId(jobId);
-		registerJob(job);
+		return registerJob(job);
+	}
+
+	public BatchJob resetJob(String jobId) {
+		BatchJob job = jobStatus().get(new BatchJob().jobId(jobId).jobUUID());
+		RAtomicLong pushedTaskCounter = redisson.getAtomicLong("PUSHED." + job.jobUUID());
+		RAtomicLong pushedDoneCounter = redisson.getAtomicLong("DONE." + job.jobUUID());
+		pushedTaskCounter.delete();
+		pushedDoneCounter.delete();
+		job.setDonePercent(0L);
+		job.setDoneTaskCount(0L);
+		job.setPushedTaskCount(0L);
+		jobStatus().put(job.jobUUID(), job);
+		return job;
+	}
+
+	public BatchJob refreshJob(String jobId) {
+		BatchJob job = jobStatus().get(new BatchJob().jobId(jobId).jobUUID());
+		RAtomicLong pushedTaskCounter = redisson.getAtomicLong("PUSHED." + job.jobUUID());
+		RAtomicLong pushedDoneCounter = redisson.getAtomicLong("DONE." + job.jobUUID());
+		pushedTaskCounter.delete();
+		pushedDoneCounter.delete();
+		return job;
+	}
+
+	public BatchJob stopJob(String jobId) {
+		BatchJob job = jobStatus().get(new BatchJob().jobId(jobId).jobUUID());
+		jobStatus().remove(job.jobUUID());
+		return job;
 	}
 
 	@Scheduled(fixedDelay = 2000)
@@ -225,7 +254,7 @@ public abstract class BatchJobExecuter {
 				LOGGER.error("READING OR TALLY ERROR", e);
 			}
 
-			LOGGER.debug("{} {} ... {}% = {}/{}", currentBatchJob.jobUUID(), currentBatchJob.getStatus(),
+			LOGGER.info("{} {} ... {}% = {}/{}", currentBatchJob.jobUUID(), currentBatchJob.getStatus(),
 					currentBatchJob.getDonePercent(), currentBatchJob.getDoneTaskCount(),
 					currentBatchJob.getPushedTaskCount());
 

@@ -168,9 +168,17 @@ public class AdminMsgController {
 	}
 
 	@RequestMapping(value = "/api/message/bulk/push/retry", method = { RequestMethod.POST })
-	public ApiResponse<Object, Object> sendBulkMessage(@RequestParam String jobId) throws NumberParseException {
-		bulkMessageService.registerJob(jobId);
-		return ApiResponse.build().message("Bulk Message Job Retried");
+	public ApiResponse<Object, Object> sendBulkMessage(@RequestParam String jobId, @RequestParam String action)
+			throws NumberParseException {
+
+		if (ArgUtil.is(action, "refresh")) {
+			bulkMessageService.refreshJob(jobId);
+		} else if (ArgUtil.is(action, "reset")) {
+			bulkMessageService.resetJob(jobId);
+		} else if (ArgUtil.is(action, "stop")) {
+			bulkMessageService.stopJob(jobId);
+		}
+		return ApiResponse.build().message("Bulk Message Job [" + action + "]");
 	}
 
 	@RequestMapping(value = "/api/message/bulk/push/logs", method = { RequestMethod.GET })
@@ -196,8 +204,7 @@ public class AdminMsgController {
 		resp.setMeta(session);
 
 		if (ArgUtil.is(session)) {
-			List<MessageDoc> msgs = messageStore.findByBulkSessionId(session.getBulkSessionId(),
-					session.getContactType());
+			List<MessageDoc> msgs = messageStore.findByBulkSessionId(session.getBulkSessionId(), session.contactType());
 			resp.results(ChatDTOUtil.getChatMessageDTO(msgs, null, session.getCreatedBy()));
 		}
 		return resp;

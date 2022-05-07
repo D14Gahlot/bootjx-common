@@ -26,12 +26,14 @@ import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.model.Message.Status;
 import com.boot.jx.postman.model.OutboxMessage;
+import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.postman.store.MessageStore;
 import com.boot.jx.tunnel.task.BatchJobExecuter;
 import com.boot.jx.tunnel.task.JobTaskModel;
 import com.boot.jx.tunnel.task.JobTaskModel.BatchJob;
 import com.boot.jx.tunnel.task.JobTaskModel.JOB_STATUS;
 import com.boot.jx.tunnel.task.JobTaskModel.Tasklet;
+import com.boot.jx.utils.PostManUtil;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.UniqueID;
 import com.google.i18n.phonenumbers.NumberParseException;
@@ -59,14 +61,20 @@ public class BulkMessageService extends BatchJobExecuter {
 
 	public BulkSessionDoc send(OutboxMessage bulkMessage) throws NumberParseException {
 
+		String channelId = PostManUtil.CHANNEL_ID(bulkMessage.contact());
+
+		ChannelConfig channelConfig = enviroment.config().channel(channelId);
+
 		BulkSessionDoc session = new BulkSessionDoc();
 
 		session.setMessage(bulkMessage.getMessage());
 		session.setTemplateId(bulkMessage.templateId());
 		session.setTemplate(bulkMessage.templateCode());
 		session.setMessageCount(bulkMessage.getTo().size());
-		session.setContactType(bulkMessage.contact().type());
+		session.setContactType(bulkMessage.contact().getContactType());
 		session.setLane(bulkMessage.contact().getLane());
+
+		session.setChannelId(channelId);
 		session.setBulkSessionId(UniqueID.generateString62());
 
 		auditDetailProvider.auditCreate(session);
@@ -104,7 +112,7 @@ public class BulkMessageService extends BatchJobExecuter {
 				// Contact Type for each message
 				.data("contactType", session.getContactType())
 				// Channel for each message
-				.data("channel", bulkMessage.contact().getChannelType())
+				.data("channelType", channelConfig.getChannelType())
 				// Lane for each message
 				.data("lane", session.getLane()));
 
@@ -112,11 +120,32 @@ public class BulkMessageService extends BatchJobExecuter {
 	}
 
 	@Override
+	public BatchJob resetJob(String jobId) {
+		BatchJob oldJob = stopJob(jobId);
+		BulkSessionDoc session = mongoTemplate.findById(jobId, BulkSessionDoc.class);
+
+		String channelId = ArgUtil.nonEmpty(session.getChannelId(),
+				PostManUtil.CHANNEL_ID(session.getContactType(), "", session.getLane()));
+
+		return registerJob(JobTaskModel.newBatchJob()
+				// Set Unique Job Id
+				.jobId(session.getBulkSessionId())
+				// Contact Type for each message
+				.data("contactType", session.getContactType())
+				// Channel for each message
+				.data("channelType", PMConstants.CHANNEL_TYPE(session.getContactType(), null))
+				// Lane for each message
+				.data("lane", session.getLane()));
+	}
+
+	@Override
 	public boolean read(BatchJob currentBatchJob) {
 		BulkSessionDoc doc = mongoTemplate.findById(currentBatchJob.getJobId(), BulkSessionDoc.class);
 		Query query = new Query().addCriteria(CommonMongoCriteria.where("bulkSessionId").is(currentBatchJob.getJobId())
 				.and("status").is(Status.SCHLD.toString())).limit(10);
-		List<MessageDoc> msgs = messageStore.find(query, doc.getContactType());
+
+		ContactType contactType = doc.contactType();
+		List<MessageDoc> msgs = messageStore.find(query, contactType);
 
 		if (!ArgUtil.is(msgs) || msgs.size() == 0) {
 			return true; // Reading is Finished
@@ -131,7 +160,7 @@ public class BulkMessageService extends BatchJobExecuter {
 			push(JobTaskModel.newTasklet(currentBatchJob).taskId(messageDoc.getMessageId()));
 			messageDoc.updateStatus(Status.CRTD);
 			// System.out.println("Status.CRTD"+messageDoc.getContact().getPhone());
-			messageStore.updateStatus(doc.getContactType(), messageDoc, Status.CRTD, null);
+			messageStore.updateStatus(contactType, messageDoc, Status.CRTD, null);
 			// messageStore.save(messageDoc, doc.getContactType());
 		}
 		return false;
@@ -156,29 +185,31 @@ public class BulkMessageService extends BatchJobExecuter {
 		LOGGER.debug("execute(BatchJob {}, Tasklet {})", taskJob.getJobId(), tasklet.getTaskId());
 		String messageId = tasklet.getTaskId();
 		ContactType contactType = taskJob.data().entry("contactType").asEnum(ContactType.class);
-		String channel = taskJob.data().entry("channel").asString();
+		String channelType = taskJob.data().entry("channelType").asString();
 		String lane = taskJob.data().entry("lane").asString();
 		MessageDoc msg = messageStore.findByMessageId(messageId, contactType);
 
-		OutboxMessage outboxMessage = new OutboxMessage();
-		outboxMessage.setMessageId(msg.getMessageId());
-		outboxMessage.setMessage(msg.getMessage());
-		outboxMessage.template(msg.getTemplate());
-		outboxMessage.templateId(msg.getTemplateId());
-		outboxMessage.contact().type(contactType);
-		outboxMessage.contact().setChannelType(channel);
-		outboxMessage.contact().setLane(lane);
-		outboxMessage.contact().setEmail(msg.getContact().getEmail());
-		outboxMessage.contact().setPhone(msg.getContact().getPhone());
-		outboxMessage.contact().setContactId(msg.getContact().getContactId());
-		outboxMessage.setRoute(msg.getRoute());
+		if (ArgUtil.is(msg) && !msg.stamps().containsKey("SENT")) {
+			OutboxMessage outboxMessage = new OutboxMessage();
+			outboxMessage.setMessageId(msg.getMessageId());
+			outboxMessage.setMessage(msg.getMessage());
+			outboxMessage.template(msg.getTemplate());
+			outboxMessage.templateId(msg.getTemplateId());
+			outboxMessage.contact().type(contactType);
+			outboxMessage.contact().setChannelType(channelType);
+			outboxMessage.contact().setLane(lane);
+			outboxMessage.contact().setEmail(msg.getContact().getEmail());
+			outboxMessage.contact().setPhone(msg.getContact().getPhone());
+			outboxMessage.contact().setContactId(msg.getContact().getContactId());
+			outboxMessage.setRoute(msg.getRoute());
 
-		ChatSessionDoc chatSessionDoc = chatSessionFactory.linkSession(outboxMessage);
-		if (ArgUtil.is(chatSessionDoc)) {
-			chatSessionService.initSession(outboxMessage, chatSessionDoc);
-			chatService.send(chatSessionDoc, outboxMessage);
-		} else {
-			messageStore.updateStatus(contactType, msg, Status.NSENT, "Cannot create session");
+			ChatSessionDoc chatSessionDoc = chatSessionFactory.linkSession(outboxMessage);
+			if (ArgUtil.is(chatSessionDoc)) {
+				chatSessionService.initSession(outboxMessage, chatSessionDoc);
+				chatService.send(chatSessionDoc, outboxMessage);
+			} else {
+				messageStore.updateStatus(contactType, msg, Status.NSENT, "Cannot create session");
+			}
 		}
 	}
 

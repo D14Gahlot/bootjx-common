@@ -10,6 +10,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.model.AuditCreateEntity;
+import com.boot.utils.ArgUtil;
 
 @Document(collection = "BULK_SESSION")
 @TypeAlias("BulkSessionDoc")
@@ -26,7 +27,8 @@ public class BulkSessionDoc implements AuditCreateEntity, Serializable {
 	private String templateId;
 	private String template;
 
-	private ContactType contactType;
+	private String contactType;
+	private String channelId;
 	private String lane;
 	private String message;
 
@@ -123,12 +125,16 @@ public class BulkSessionDoc implements AuditCreateEntity, Serializable {
 		this.bulkSessionId = bulkSessionId;
 	}
 
-	public ContactType getContactType() {
+	public String getContactType() {
 		return contactType;
 	}
 
-	public void setContactType(ContactType contactType) {
+	public void setContactType(String contactType) {
 		this.contactType = contactType;
+	}
+
+	public ContactType contactType() {
+		return ArgUtil.parseAsEnumT(contactType, ContactType.class);
 	}
 
 	public String getLane() {
@@ -160,6 +166,14 @@ public class BulkSessionDoc implements AuditCreateEntity, Serializable {
 
 	public void setCompletedStamp(Long completedStamp) {
 		this.completedStamp = completedStamp;
+	}
+
+	public String getChannelId() {
+		return channelId;
+	}
+
+	public void setChannelId(String channelId) {
+		this.channelId = channelId;
 	}
 
 }

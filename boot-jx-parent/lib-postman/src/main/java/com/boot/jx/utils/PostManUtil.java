@@ -202,15 +202,22 @@ public class PostManUtil {
 		return createContactId(channelConfig.getContactType(), csid, channelConfig.getLane());
 	}
 
-	public static String CHANNEL_ID(String chanelType, String lane) {
-		if (CHANNEL_TYPE.WA_GUPSHUP_LEGACY.equals(chanelType)) {
-			chanelType = CHANNEL_TYPE.WA_GUPSHUP;
+	public static String CHANNEL_ID(String contactType, String channelType, String lane) {
+		if (!ArgUtil.is(channelType)) {
+			channelType = PMConstants.CHANNEL_TYPE(contactType, channelType);
 		}
-		return String.format("%s:%s", chanelType, lane).toLowerCase();
+		if (CHANNEL_TYPE.WA_GUPSHUP_LEGACY.equals(channelType)) {
+			channelType = CHANNEL_TYPE.WA_GUPSHUP;
+		}
+		return String.format("%s:%s", channelType, lane).toLowerCase();
+	}
+
+	public static String CHANNEL_ID(String channelType, String lane) {
+		return CHANNEL_ID(null, channelType, lane);
 	}
 
 	public static String CHANNEL_ID(Contactable contactable) {
-		return CHANNEL_ID(contactable.getChannelType(), contactable.getLane());
+		return CHANNEL_ID(contactable.getChannelType(), contactable.getChannelType(), contactable.getLane());
 	}
 
 	public static String UNIQUE_API_KEY() {
