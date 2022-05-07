@@ -40,7 +40,7 @@ public abstract class BatchJobExecuter {
 
 	private String getJobName() {
 		if (this.jobName == null) {
-			this.jobName = ClazzUtil.getUltimateClassName(this) + "V5";
+			this.jobName = ClazzUtil.getUltimateClassName(this) + "V6";
 		}
 		return this.jobName;
 	}
@@ -122,6 +122,7 @@ public abstract class BatchJobExecuter {
 			batchJob.setDonePercent(0L);
 			batchJob.setDoneTaskCount(0L);
 			batchJob.setPushedTaskCount(0L);
+			batchJob.setVersion(batchJob.getOpenStamp());
 			jobQueue().add(batchJob);
 			jobStatus().put(batchJob.jobUUID(), batchJob);
 		} catch (Exception e) {
@@ -180,12 +181,12 @@ public abstract class BatchJobExecuter {
 		}
 
 		BatchJob currentBatchJob = jobQueue().poll();
-		if(!ArgUtil.is(currentBatchJob)) {
+		if (!ArgUtil.is(currentBatchJob)) {
 			return;
 		}
-		
+
 		BatchJob prevjob = jobStatus().get(currentBatchJob.jobUUID());
-		
+
 		if (ArgUtil.is(prevjob) && ArgUtil.is(prevjob.getOpenStamp(), currentBatchJob.getOpenStamp())) {
 
 			AppContextUtil.setTenant(currentBatchJob.getTenant());
