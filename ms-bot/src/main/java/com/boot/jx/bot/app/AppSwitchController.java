@@ -64,7 +64,7 @@ public class AppSwitchController extends CommonBotController {
 			for (ClientApp appTemp : apps) {
 				buttons.add(new TmplElement().name(appTemp.getQueue()).label(appTemp.getKeyName()));
 			}
-			reply(new OutboxMessage().message("Select team").options("buttons", buttons));
+			reply(new OutboxMessage().message("Select").options("buttons", buttons));
 		}
 		next("on_app_select");
 	}
