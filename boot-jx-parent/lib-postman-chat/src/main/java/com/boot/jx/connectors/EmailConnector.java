@@ -140,6 +140,7 @@ public class EmailConnector extends AbstractConnector<EmailConfigDetails, EmailP
 			MimeMessage replyMessage = new MimeMessage(session);
 			replyMessage.setFrom(new InternetAddress(channelConfig.getEmail().getSmtpUser(), channelConfig.getName()));
 			replyMessage.addRecipient(RecipientType.TO, new InternetAddress(outboxMessage.contact().getCsid()));
+			replyMessage.setSubject(ArgUtil.nonEmpty(outboxMessage.getSubject(), channelConfig.getName()));
 			replyMessage.setText(outboxMessage.getMessage());
 			Transport t = session.getTransport("smtp");
 			try {
