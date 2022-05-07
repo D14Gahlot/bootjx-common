@@ -126,6 +126,8 @@ public class BulkMessageService extends BatchJobExecuter {
 
 		String channelId = ArgUtil.nonEmpty(session.getChannelId(),
 				PostManUtil.CHANNEL_ID(session.getContactType(), "", session.getLane()));
+		
+		ChannelConfig channelConfig = enviroment.config().channel(channelId);
 
 		return registerJob(JobTaskModel.newBatchJob()
 				// Set Unique Job Id
@@ -133,7 +135,7 @@ public class BulkMessageService extends BatchJobExecuter {
 				// Contact Type for each message
 				.data("contactType", session.getContactType())
 				// Channel for each message
-				.data("channelType", PMConstants.CHANNEL_TYPE(session.getContactType(), null))
+				.data("channelType", channelConfig.getChannelType())
 				// Lane for each message
 				.data("lane", session.getLane()));
 	}

@@ -119,6 +119,9 @@ public abstract class BatchJobExecuter {
 			batchJob.setTenant(AppContextUtil.getTenant());
 			batchJob.setStatus(JOB_STATUS.CREATED);
 			batchJob.setOpenStamp(System.currentTimeMillis());
+			batchJob.setDonePercent(0L);
+			batchJob.setDoneTaskCount(0L);
+			batchJob.setPushedTaskCount(0L);
 			jobQueue().add(batchJob);
 			jobStatus().put(batchJob.jobUUID(), batchJob);
 		} catch (Exception e) {
@@ -156,7 +159,11 @@ public abstract class BatchJobExecuter {
 	}
 
 	public BatchJob stopJob(String jobId) {
-		BatchJob job = jobStatus().get(new BatchJob().jobId(jobId).jobUUID());
+		BatchJob job = new BatchJob().jobId(jobId);
+		RAtomicLong pushedTaskCounter = redisson.getAtomicLong("PUSHED." + job.jobUUID());
+		RAtomicLong pushedDoneCounter = redisson.getAtomicLong("DONE." + job.jobUUID());
+		pushedTaskCounter.delete();
+		pushedDoneCounter.delete();
 		jobStatus().remove(job.jobUUID());
 		return job;
 	}
@@ -262,8 +269,11 @@ public abstract class BatchJobExecuter {
 			if (JOB_STATUS.COMPLETED == currentBatchJob.getStatus()) {
 				jobStatus().remove(currentBatchJob.jobUUID());
 			} else {
-				jobStatus().put(currentBatchJob.jobUUID(), currentBatchJob);
-				jobQueue().add(currentBatchJob);
+				BatchJob prevjob = jobStatus().get(currentBatchJob.jobUUID());
+				if (ArgUtil.is(prevjob) && ArgUtil.is(prevjob.getOpenStamp(), currentBatchJob.getOpenStamp())) {
+					jobStatus().put(currentBatchJob.jobUUID(), currentBatchJob);
+					jobQueue().add(currentBatchJob);
+				}
 			}
 
 		}
