@@ -352,7 +352,7 @@ public abstract class BatchJobExecuter {
 
 			BatchJob taskJob = jobStatus().get(tasklet.jobUUID());
 
-			if (ArgUtil.is(taskJob)) {
+			if (ArgUtil.is(taskJob) && ArgUtil.is(taskJob.getVersion(), tasklet.getVersion())) {
 				AppContextUtil.setTenant(tasklet.getTenant());
 				String sessionId = UniqueID.generateString();
 				AppContextUtil.setSessionId(sessionId);
