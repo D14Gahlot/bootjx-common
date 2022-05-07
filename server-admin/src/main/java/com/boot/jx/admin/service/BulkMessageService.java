@@ -17,6 +17,7 @@ import com.boot.jx.chat.ChatSessionService;
 import com.boot.jx.common.config.ConfigConstants;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.logger.AuditDetailProvider;
+import com.boot.jx.mongo.CommonMongoQueryBuilder;
 import com.boot.jx.mongo.CommonMongoQB.CommonMongoCriteria;
 import com.boot.jx.postman.ClientApp;
 import com.boot.jx.postman.PMConstants;
@@ -126,8 +127,16 @@ public class BulkMessageService extends BatchJobExecuter {
 
 		String channelId = ArgUtil.nonEmpty(session.getChannelId(),
 				PostManUtil.CHANNEL_ID(session.getContactType(), "", session.getLane()));
-		
+
 		ChannelConfig channelConfig = enviroment.config().channel(channelId);
+
+		CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder();
+
+		Query query = new Query().addCriteria(
+				CommonMongoCriteria.where("bulkSessionId").is(oldJob.getJobId()).and("stamps.SENT").exists(false));
+		builder.set("status", Status.SCHLD.toString());
+
+		messageStore.updateMulti(query, builder.update(), MessageStore.getCollectionName(session.getContactType()));
 
 		return registerJob(JobTaskModel.newBatchJob()
 				// Set Unique Job Id
