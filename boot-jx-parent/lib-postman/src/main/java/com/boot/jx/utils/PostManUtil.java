@@ -217,7 +217,7 @@ public class PostManUtil {
 	}
 
 	public static String CHANNEL_ID(Contactable contactable) {
-		return CHANNEL_ID(contactable.getChannelType(), contactable.getChannelType(), contactable.getLane());
+		return CHANNEL_ID(contactable.getContactType(), contactable.getChannelType(), contactable.getLane());
 	}
 
 	public static String UNIQUE_API_KEY() {
