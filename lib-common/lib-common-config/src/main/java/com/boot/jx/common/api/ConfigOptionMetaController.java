@@ -19,6 +19,7 @@ import com.boot.jx.api.ApiResponse;
 import com.boot.jx.common.config.AppCommonAuthFilter.ACCESS_RULES;
 import com.boot.jx.common.config.CDNBuilder;
 import com.boot.jx.common.config.ClientAppConfigConstants;
+import com.boot.jx.common.config.ConfigConstants;
 import com.boot.jx.common.config.ConfigManager;
 import com.boot.jx.common.impl.ConfigMeta;
 import com.boot.jx.http.ApiRequest;
@@ -158,8 +159,11 @@ public class ConfigOptionMetaController {
 	public ApiResponse<PMConfigurationObject, Object> updateCDN(@RequestParam(required = false) String url,
 			@RequestParam(required = false) String version,
 			@RequestParam(required = false, defaultValue = "false") boolean beta) {
+
+		String domainServer = pmEnvironment.keyEntry(ConfigConstants.APP_KEY.PROP_SERVICE_SERVER).asString();
+
 		PMConfigurationObject config = pmEnvironment
-				.keyEntry(beta ? "mry.cdn.url.beta" : "mry.cdn.url." + appConfig.getAppEnv());
+				.keyEntry(beta ? "mry.cdn.url.beta" : "mry.cdn.url." + domainServer);
 		String oldUrl = config.asString();
 
 		if (ArgUtil.is(version) && ArgUtil.is(oldUrl)) {
