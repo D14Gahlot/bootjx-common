@@ -233,7 +233,7 @@ public class PostManUtil {
 		return "/dept/onassign-" + dept;
 	}
 
-	public static boolean IS_CHANNEL_MULTISESSION(String channelType) {
+	public static boolean IS_TRACK_BY_REPLY_ID(String channelType) {
 		if (PMConstants.CHANNEL_TYPE.EMAIL.equals(channelType)) {
 			return true;
 		}

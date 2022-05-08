@@ -188,6 +188,10 @@ public class ConnectorHandlerFactory extends ScopedBeanFactory<String, Connector
 		public MessageBoxEvent inboundMessageBoxEvent(ChannelConfig channelConfig, MapModel requestMap,
 				MessageBoxEvent messageBoxEvent);
 
+		default List<InboxMessage> beforeReceiveInboxMessage(List<InboxMessage> inboxMessages) {
+			return inboxMessages;
+		}
+
 		/**
 		 * This method is invoked after message from ChannelProvider has been processed
 		 * 

@@ -1,6 +1,8 @@
 package com.boot.jx.connectors;
 
+import java.util.List;
 import java.util.Properties;
+import java.util.regex.Pattern;
 
 import javax.mail.MessagingException;
 import javax.mail.Session;
@@ -35,9 +37,12 @@ import com.boot.jx.postman.plugin.EmailPlugin.EmailConfigDetails;
 import com.boot.jx.postman.wa360.WA360Client;
 import com.boot.jx.postman.wa360.WA360Constants;
 import com.boot.jx.rest.RestService;
+import com.boot.jx.utils.PostManUtil;
 import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
+import com.boot.utils.CryptoUtil;
+import com.boot.utils.StringUtils;
 
 import ch.qos.logback.core.Context;
 
@@ -51,6 +56,10 @@ public class EmailConnector extends AbstractConnector<EmailConfigDetails, EmailP
 	}
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(EmailConnector.class);
+
+	public static final String SUBJECT_CLEANER_STR = "^([\\[\\(] *)?(?i)(RE?S?|REPLY|FYI|RIF|I|FS|VB|RV|ENC|ODP|PD|YNT|ILT|SV|VS|VL|AW|WG|ΑΠ|ΣΧΕΤ|ΠΡΘ|תגובה|הועבר|主题|转发|FWD|Forward?) *([-:;)\\]][ :;\\])-]*|$)|\\]+ *$";
+	public static final Pattern SUBJECT_CLEANER = Pattern.compile(SUBJECT_CLEANER_STR);
+
 	@Autowired
 	private RestService restService;
 
@@ -124,6 +133,13 @@ public class EmailConnector extends AbstractConnector<EmailConfigDetails, EmailP
 		inboxMessage.setSubject(email.getSubject());
 		inboxMessage.setMessage(EmailReplyParser.parseReply(email.getPlainContent()));
 
+		if (ArgUtil.is(inboxMessage.getSubject())) {
+			String subject = StringUtils
+					.normalizeSpace(inboxMessage.getSubject().replaceFirst(SUBJECT_CLEANER_STR, ""));
+			String conatctid = PostManUtil.CONTACT_ID(inboxMessage.contact());
+			subject = CryptoUtil.getMD5Hash(conatctid + "-" + StringUtils.trim(subject));
+			inboxMessage.session().setTicketHash(subject);
+		}
 		return inboxMessage;
 	}
 

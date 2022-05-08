@@ -75,6 +75,12 @@ public class SessionStore extends CommonMongoTemplateAbstract {
 		return super.findById(sessionId, ChatSessionDoc.class);
 	}
 
+	public ChatSessionDoc getSessionPrimeByTicketHash(String contactId, String ticketHash) {
+		CommonMongoQueryBuilder cmqb = new CommonMongoQueryBuilder().with(
+				Criteria.where("contactId").is(contactId).and("ticketHash").is(ticketHash).and("primary").is(true));
+		return super.findOne(cmqb.getQuery(), ChatSessionDoc.class);
+	}
+
 	public boolean isSessionValid(ChatSessionDoc chatSessionDoc) {
 		if ((ArgUtil.isEmpty(chatSessionDoc) || !chatSessionDoc.isActive()) || chatSessionDoc.isExpired()) {
 			return false;
@@ -300,9 +306,18 @@ public class SessionStore extends CommonMongoTemplateAbstract {
 		return inboxMessage;
 	}
 
-	public boolean closeAllPreviousSessions(String contactId) {
+	public boolean inactiveAllPreviousSessions(String contactId, String ticketHash) {
+
+		Criteria contactQ = Criteria.where("contactId").is(contactId);
+
+		if (ArgUtil.is(ticketHash)) {
+			contactQ.and("ticketHash").is(ticketHash);
+		} else {
+			contactQ.and("ticketHash").is(null);
+		}
+
 		Query query2 = new Query();
-		query2.addCriteria(Criteria.where("contactId").is(contactId).orOperator(
+		query2.addCriteria(contactQ.orOperator(
 				// is active
 				Criteria.where("active").is(true),
 				// or primary
@@ -311,6 +326,10 @@ public class SessionStore extends CommonMongoTemplateAbstract {
 				System.currentTimeMillis());
 		super.updateMulti(query2, update, ChatSessionDoc.class);
 		return true;
+	}
+
+	public boolean closeAllPreviousSessions(String contactId) {
+		return this.inactiveAllPreviousSessions(contactId, null);
 	}
 
 	public List<ChatSessionDoc> findChatSessionDocByAgent(String agentCode) {

@@ -33,17 +33,22 @@ public class ChatSessionFactory {
 	@Autowired
 	private PMDomainConfig pmDomainConfig;
 
-	public ChatSessionDoc getChatSessionByContactId(String contactId) {
+	public ChatSessionDoc getChatSessionByContactId(String contactId, String ticketHash) {
 
 		if (!ArgUtil.is(contactId)) {
 			return null;
 		}
 
-		ChatContactDoc chatContactDoc = sessionStore.getContact(contactId);
+		ChatSessionDoc chatSessionDoc = null;
 
-		String sessionId = chatContactDoc.getSessionId();
+		if (ArgUtil.is(ticketHash)) {
+			chatSessionDoc = sessionStore.getSessionPrimeByTicketHash(contactId, ticketHash);
 
-		ChatSessionDoc chatSessionDoc = sessionStore.getSession(sessionId);
+		} else {
+			ChatContactDoc chatContactDoc = sessionStore.getContact(contactId);
+			String sessionId = chatContactDoc.getSessionId();
+			chatSessionDoc = sessionStore.getSession(sessionId);
+		}
 
 		if (sessionStore.isSessionValid(chatSessionDoc)) {
 			return chatSessionDoc;
@@ -68,7 +73,7 @@ public class ChatSessionFactory {
 			return null;
 		}
 
-		return getChatSessionByContactId(chatSessionDoc.getContactId());
+		return getChatSessionByContactId(chatSessionDoc.getContactId(), null);
 	}
 
 	public ChatSessionDoc getChatSession(SessionMessage sessionMessage) {
@@ -82,19 +87,6 @@ public class ChatSessionFactory {
 
 		Contactable contact = PostManUtil.getContactMeta(sessionMessage.contact());
 
-		if (ArgUtil.is(sessionMessage.getReplyIdExt())
-				&& PostManUtil.IS_CHANNEL_MULTISESSION(contact.getChannelType())) {
-			MessageDoc prev = messageStore.findOneByMessageIdExt(sessionMessage.getReplyIdExt(),
-					contact.getContactType());
-			if (ArgUtil.is(prev) && ArgUtil.is(prev.getSessionId())) {
-				// SESSION FIND BY SESSION_ID - Try Again
-				chatSessionDoc = getChatSession(prev.getSessionId());
-				if (ArgUtil.is(chatSessionDoc)) {
-					return chatSessionDoc;
-				}
-			}
-		}
-
 		if (!ArgUtil.is(contact.getContactId())) {
 			// CONTACT CONNANOT BE FOUND
 			if (ArgUtil.is(sessionMessage.getSessionId())) {
@@ -104,11 +96,9 @@ public class ChatSessionFactory {
 					contact.setContactId(chatSessionDoc.getContactId());
 				}
 			}
-
 			if (!ArgUtil.is(contact.getContactId())) {
 				return null;
 			}
-
 		}
 
 		// CONTACT FIND BY SESSION_ID
@@ -124,16 +114,29 @@ public class ChatSessionFactory {
 			chatContactDoc = sessionStore.save(chatContactQuery);
 		}
 
-		// SESSION FUND BY CONTACT_ID
-		chatSessionDoc = getChatSessionByContactId(contact.getContactId());
+		String ticketHash = sessionMessage.session().getTicketHash();
+
+		// SESSION FiND BY CONTACT_ID
+		chatSessionDoc = getChatSessionByContactId(contact.getContactId(), ticketHash);
 
 		if (ArgUtil.is(chatSessionDoc)) {
 			return chatSessionDoc;
 		}
 
-		if (!PostManUtil.IS_CHANNEL_MULTISESSION(contact.getChannelType())) {
-			sessionStore.closeAllPreviousSessions(contact.getContactId());
+		// Try with Reply Id
+		if (ArgUtil.is(sessionMessage.getReplyIdExt()) && PostManUtil.IS_TRACK_BY_REPLY_ID(contact.getChannelType())) {
+			MessageDoc prev = messageStore.findOneByMessageIdExt(sessionMessage.getReplyIdExt(),
+					contact.getContactType());
+			if (ArgUtil.is(prev) && ArgUtil.is(prev.getSessionId())) {
+				// SESSION FIND BY SESSION_ID - Try Again
+				chatSessionDoc = getChatSession(prev.getSessionId());
+				if (ArgUtil.is(chatSessionDoc)) {
+					return chatSessionDoc;
+				}
+			}
 		}
+
+		sessionStore.inactiveAllPreviousSessions(contact.getContactId(), ticketHash);
 
 		// SESSION CREATION
 		// System.out.println("SESSION CREATION");
@@ -146,6 +149,7 @@ public class ChatSessionFactory {
 		chatSessionDoc.setPrimary(true);
 		chatSessionDoc.contact().setName(chatContactDoc.getName());
 		chatSessionDoc.contact().copyFrom(chatContactDoc);
+		chatSessionDoc.setTicketHash(sessionMessage.session().getTicketHash());
 		chatSessionDoc.setSubject(sessionMessage.getSubject());
 		sessionMessage.session().setFirstMessage(true);
 		return sessionStore.saveSession(chatSessionDoc);

@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.boot.jx.dict.ContactType;
+import com.boot.jx.utils.PostManUtil;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.JsonUtil;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -62,6 +63,7 @@ public class MessageDefinitions {
 		public static ContactID instance() {
 			return new ContactMeta();
 		}
+
 	}
 
 	@JsonDeserialize(as = ContactMeta.class, keyUsing = ContactMetaKeyDeserializer.class)
@@ -108,6 +110,7 @@ public class MessageDefinitions {
 		public static Contactable instance() {
 			return new ContactMeta();
 		}
+
 	}
 
 	// External attributes

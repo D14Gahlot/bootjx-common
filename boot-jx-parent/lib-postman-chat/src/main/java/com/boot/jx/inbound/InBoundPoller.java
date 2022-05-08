@@ -147,6 +147,7 @@ public class InBoundPoller extends ATaskLimiter {
 			}
 
 			if (ArgUtil.is(messageBoxEvent.getInboxMessages())) {
+				emailConnector.beforeReceiveInboxMessage(messageBoxEvent.getInboxMessages());
 				messageBoxEvent.getInboxMessages().forEach(inboxMessage -> {
 					emailConnector.prompt(inboxMessage);
 					inBoundService.invokeMethodsAsync(inboxMessage);

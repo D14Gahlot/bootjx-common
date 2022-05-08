@@ -28,6 +28,9 @@ public class ChatSessionDoc extends UpdatedTimeStampDoc implements Serializable 
 	@Id
 	private String sessionId;
 
+	@Indexed
+	private String ticketHash;
+
 	@Version
 	private Long version;
 
@@ -501,6 +504,14 @@ public class ChatSessionDoc extends UpdatedTimeStampDoc implements Serializable 
 
 	public void setSubject(String subject) {
 		this.subject = subject;
+	}
+
+	public String getTicketHash() {
+		return ticketHash;
+	}
+
+	public void setTicketHash(String ticketHash) {
+		this.ticketHash = ticketHash;
 	}
 
 }
