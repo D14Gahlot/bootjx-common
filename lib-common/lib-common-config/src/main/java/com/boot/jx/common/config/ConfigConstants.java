@@ -29,7 +29,8 @@ public class ConfigConstants {
 
 	public static enum APP_KEY implements EntryMeta {
 
-		PROP_SERVICE_DOMAIN(new ConfigMeta("server", "mry.prop.service.domain"))
+		PROP_SERVICE_DOMAIN(new ConfigMeta("server", "mry.prop.service.domain")),
+		PROP_SERVICE_SERVER(new ConfigMeta("server", "mry.prop.service.server"))
 		// Ends here
 		;
 

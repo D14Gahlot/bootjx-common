@@ -48,7 +48,7 @@ public class DomainJobs {
 		AppContextUtil.setTenant("app");
 		LOGGER.debug("Searching Domains");
 
-		String serviceDomain = pmEnvironment.keyEntry(ConfigConstants.APP_KEY.PROP_SERVICE_DOMAIN).asString();
+		String serviceDomain = pmEnvironment.keyEntry(ConfigConstants.APP_KEY.PROP_SERVICE_SERVER).asString();
 
 		List<DomainDoc> domainDocs = accountStore.findAllDomainByServer(serviceDomain);
 		CommonMongoQBimpl<ChannelConfigDoc> emailChannelsQuery = CommonMongoQueryBuilder
