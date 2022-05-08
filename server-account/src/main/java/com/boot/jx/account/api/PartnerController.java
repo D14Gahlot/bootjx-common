@@ -1,7 +1,6 @@
 package com.boot.jx.account.api;
 
 import java.security.NoSuchAlgorithmException;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -12,7 +11,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
-import org.apache.commons.collections.functors.WhileClosure;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
@@ -40,6 +38,7 @@ import com.boot.jx.api.ApiFieldError;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.aws.AWSFileStore;
+import com.boot.jx.common.config.ConfigConstants;
 import com.boot.jx.common.dto.UserLoginToken;
 import com.boot.jx.common.service.EmpAuthService;
 import com.boot.jx.http.CommonHttpRequest;
@@ -339,6 +338,7 @@ public class PartnerController {
 		domainDoc.setDomain(domain.getDomain());
 		domainDoc.setCompany(domain.getCompany());
 		domainDoc.setSocial(domain.getSocial());
+		domainDoc.setServer(env.keyEntry(ConfigConstants.APP_KEY.PROP_SERVICE_DOMAIN).asString());
 
 		accountStore.save(domainDoc);
 

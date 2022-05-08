@@ -328,6 +328,7 @@ public class SessionStore extends CommonMongoTemplateAbstract {
 		return true;
 	}
 
+	@Deprecated
 	public boolean closeAllPreviousSessions(String contactId) {
 		return this.inactiveAllPreviousSessions(contactId, null);
 	}

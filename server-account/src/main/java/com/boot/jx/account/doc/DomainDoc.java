@@ -23,6 +23,8 @@ public class DomainDoc implements IDocument, AuditCreateEntity, Serializable, Co
 
 	@ValidAlphaNum
 	private String domain;
+	private String server;
+
 	private String primaryOwner;
 
 	private CompanyDoc company;
@@ -122,5 +124,13 @@ public class DomainDoc implements IDocument, AuditCreateEntity, Serializable, Co
 
 	public String toString() {
 		return ArgUtil.parseAsString(this.domain, Constants.BLANK);
+	}
+
+	public String getServer() {
+		return server;
+	}
+
+	public void setServer(String server) {
+		this.server = server;
 	}
 }

@@ -57,7 +57,7 @@ public class ChatSessionFactory {
 		return null;
 	}
 
-	public ChatSessionDoc getChatSession(String sessionId) {
+	public ChatSessionDoc getChatSession(String sessionId, String ticketHash) {
 
 		if (!ArgUtil.is(sessionId)) {
 			return null;
@@ -73,13 +73,15 @@ public class ChatSessionFactory {
 			return null;
 		}
 
-		return getChatSessionByContactId(chatSessionDoc.getContactId(), null);
+		return getChatSessionByContactId(chatSessionDoc.getContactId(), ticketHash);
 	}
 
 	public ChatSessionDoc getChatSession(SessionMessage sessionMessage) {
 
+		String ticketHash = sessionMessage.session().getTicketHash();
+
 		// SESSION FIND BY SESSION_ID
-		ChatSessionDoc chatSessionDoc = getChatSession(sessionMessage.getSessionId());
+		ChatSessionDoc chatSessionDoc = getChatSession(sessionMessage.getSessionId(), ticketHash);
 
 		if (ArgUtil.is(chatSessionDoc)) {
 			return chatSessionDoc;
@@ -114,8 +116,6 @@ public class ChatSessionFactory {
 			chatContactDoc = sessionStore.save(chatContactQuery);
 		}
 
-		String ticketHash = sessionMessage.session().getTicketHash();
-
 		// SESSION FiND BY CONTACT_ID
 		chatSessionDoc = getChatSessionByContactId(contact.getContactId(), ticketHash);
 
@@ -129,7 +129,7 @@ public class ChatSessionFactory {
 					contact.getContactType());
 			if (ArgUtil.is(prev) && ArgUtil.is(prev.getSessionId())) {
 				// SESSION FIND BY SESSION_ID - Try Again
-				chatSessionDoc = getChatSession(prev.getSessionId());
+				chatSessionDoc = getChatSession(prev.getSessionId(), ticketHash);
 				if (ArgUtil.is(chatSessionDoc)) {
 					return chatSessionDoc;
 				}
