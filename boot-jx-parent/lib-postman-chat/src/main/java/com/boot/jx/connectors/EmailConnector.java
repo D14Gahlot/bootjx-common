@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Properties;
 import java.util.regex.Pattern;
 
+import javax.activation.DataSource;
 import javax.mail.MessagingException;
 import javax.mail.Session;
 import javax.mail.Transport;
@@ -19,14 +20,19 @@ import org.springframework.stereotype.Component;
 
 import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorMapping;
 import com.boot.jx.dict.ContactType;
+import com.boot.jx.dict.FileFormat;
 import com.boot.jx.email.EmailReplyParser;
 import com.boot.jx.exception.AmxApiException;
+import com.boot.jx.model.CommonFile;
+import com.boot.jx.model.CommonFileStream;
 import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.jx.postman.PMConstants.CHANNEL_TYPE;
 import com.boot.jx.postman.PMEnvironment.PMClientConfig;
+import com.boot.jx.postman.client.PMFileStoreClient;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.MessageDoc;
+import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.MessageBoxEvent;
 import com.boot.jx.postman.model.OutboxMessage;
@@ -43,8 +49,6 @@ import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
 import com.boot.utils.CryptoUtil;
 import com.boot.utils.StringUtils;
-
-import ch.qos.logback.core.Context;
 
 @Component
 @ConnectorMapping(contactType = ContactType.EMAIL, channel = CHANNEL_TYPE.EMAIL)
@@ -71,6 +75,9 @@ public class EmailConnector extends AbstractConnector<EmailConfigDetails, EmailP
 
 	@Autowired
 	private CommonMongoTemplate commonMongoTemplate;
+
+	@Autowired
+	private PMFileStoreClient pmFileStoreClient;
 
 	@Override
 	public void onChannelUpdate(ChannelConfig channelConfig) {
@@ -140,6 +147,16 @@ public class EmailConnector extends AbstractConnector<EmailConfigDetails, EmailP
 			subject = CryptoUtil.getMD5Hash(conatctid + "-" + StringUtils.trim(subject));
 			inboxMessage.session().setTicketHash(subject);
 		}
+
+		List<DataSource> attc = email.getAttachmentList();
+		for (DataSource dataSource : attc) {
+			CommonFileStream srcFile = new CommonFileStream().from(dataSource);
+			CommonFile dstFile = pmFileStoreClient.uploadSessionFileAsync(srcFile,
+					PostManUtil.createContactId(inboxMessage), inboxMessage.getMessageIdExt());
+			inboxMessage.attachment(new Attachment().mediaURL(dstFile.getUrl()).mediaType(dstFile.getFileType())
+					.mediaSrc(srcFile.getUrl()).mediaName(srcFile.getName()).mediaMimeType(srcFile.getContentType()));
+		}
+
 		return inboxMessage;
 	}
 
