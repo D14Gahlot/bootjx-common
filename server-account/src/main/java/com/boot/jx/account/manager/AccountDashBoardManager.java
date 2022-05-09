@@ -222,7 +222,7 @@ public class AccountDashBoardManager {
 			String monthYear = new SimpleDateFormat(DateUtil.MMM_YYYY_FORMAT).format(dateTi);
 			Calendar cal = Calendar.getInstance();
 			cal.setTimeInMillis(timestamp);
-			System.out.println("Year: " + cal.get(Calendar.YEAR) + "\t Month :" + cal.get(Calendar.MONTH));
+			//System.out.println("Year: " + cal.get(Calendar.YEAR) + "\t Month :" + cal.get(Calendar.MONTH));
 			int month = cal.get(Calendar.MONTH);
 			int year = cal.get(Calendar.YEAR);
 			long monthMinTimeStamp = DateUtil.getStartTimestamp(month, year).getTime();
@@ -247,7 +247,7 @@ public class AccountDashBoardManager {
 					String id = getSummaryId(dto);
 					dto.setId(id);
 					
-					System.out.println("datewaise data :" + JsonUtil.toJson(dto));
+					//LOGGER.info("datewaise data :" + JsonUtil.toJson(dto));
 					lstSummDto.add(dto);
 				}
 
@@ -278,7 +278,7 @@ public class AccountDashBoardManager {
 			summaryMap = lstSummDto.stream().collect(Collectors.groupingBy(SummaryDocDto::getType,Collectors.counting()));
 			
 			// printing the count based on the designation and gender.
-			System.out.println("Group by on multiple properties" + datwWiseCount);
+			//LOGGER.info("Group by on multiple properties" + datwWiseCount);
 
 			ContactTypeSummaryDto dto = new ContactTypeSummaryDto();
 			dto.setTenant(tnt);
