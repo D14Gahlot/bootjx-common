@@ -100,7 +100,7 @@ public class AgentAuthController {
 								.put("domainId", domainId).put("password", domainToken).toMap())
 						.encodeBase64().encrypt().toString();
 				commonHttpRequest.setCookie("JXSESSIONID", xRemSession);
-				return "redirect:/app/home";
+				return "redirect:/app/home?_=" + System.currentTimeMillis();
 			}
 		} else if (!agentSession.isLoggedIn() && ArgUtil.is(xRemSession)) {
 			@SuppressWarnings("unchecked")
@@ -111,7 +111,7 @@ public class AgentAuthController {
 			if (ArgUtil.is(agent)) {
 				sessionService.login(request, agent, domainToken);
 				commonHttpRequest.setCookie("JXSESSIONID", xRemSession);
-				return "redirect:/app/home";
+				return "redirect:/app/home?_=" + System.currentTimeMillis();
 			} else {
 				commonHttpRequest.deleteCookie("JXSESSIONID");
 			}
