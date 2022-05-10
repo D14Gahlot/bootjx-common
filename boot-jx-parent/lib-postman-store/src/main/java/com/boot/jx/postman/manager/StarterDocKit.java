@@ -131,25 +131,17 @@ public class StarterDocKit {
 		createClientApp(adminApp);
 	}
 
-	public void createMessageIndex(ContactType contactType) {
-		MessageDoc wa = MessageDoc.instance(contactType);
-		mongoTemplate.save(wa);
-		mongoTemplate.remove(wa);
-	}
-
 	public void domain() {
-
 		/**
 		 * Required to create index
 		 * 
 		 * @param contactType
 		 */
-		createMessageIndex(ContactType.WHATSAPP);
-		createMessageIndex(ContactType.FACEBOOK);
-		createMessageIndex(ContactType.INSTAGRAM);
-		createMessageIndex(ContactType.TELEGRAM);
-		createMessageIndex(ContactType.TWITTER);
-		createMessageIndex(ContactType.WEBSITE);
+		for (ContactType contactType : ContactType.values()) {
+			MessageDoc wa = MessageDoc.instance(contactType);
+			mongoTemplate.save(wa);
+			mongoTemplate.remove(wa);
+		}
 
 	}
 
