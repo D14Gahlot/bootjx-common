@@ -300,6 +300,10 @@ public class CommonHttpRequest extends ACommonHttpRequest {
 		return WebUtils.getCookie(request, name);
 	}
 
+	public void deleteCookie(String name) {
+		setCookie(name, name, 0);
+	}
+
 	public String setBrowserId(String browserIdNew) {
 		String browserId = null;
 		if (request != null) {

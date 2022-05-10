@@ -88,30 +88,32 @@ public class AgentAuthController {
 		}
 
 		model.addAttribute("APP_PLUG", ArgUtil.nonEmpty(commonHttpRequest.getRequestParam("plug"), "none"));
-		String jxSessionId = ArgUtil.parseAsString(commonHttpRequest.get("JXSESSIONID"), Constants.BLANK);
+		String xRemSession = ArgUtil.parseAsString(commonHttpRequest.get("JXSESSIONID"), Constants.BLANK);
 
 		if (ArgUtil.is(domainName) && ArgUtil.is(domainId) && ArgUtil.is(domainToken)) {
 			AgentResponseAuthDto agent = authService.loginByDomainToken(domainUser, domainName, domainId, domainToken,
 					false);
 			if (ArgUtil.is(agent)) {
 				sessionService.login(request, agent, domainToken);
-				String xRemSession = CryptoUtil.getEncoder()
+				xRemSession = CryptoUtil.getEncoder()
 						.obzect(MapBuilder.map().put("domainUser", domainUser).put("domainName", domainName)
 								.put("domainId", domainId).put("password", domainToken).toMap())
 						.encodeBase64().encrypt().toString();
 				commonHttpRequest.setCookie("JXSESSIONID", xRemSession);
+				return "redirect:/app/home";
 			}
-			return "redirect:/app/home";
-		} else if (!agentSession.isLoggedIn() && ArgUtil.is(jxSessionId)) {
+		} else if (!agentSession.isLoggedIn() && ArgUtil.is(xRemSession)) {
 			@SuppressWarnings("unchecked")
 			MapModel map = MapModel
-					.from(CryptoUtil.getEncoder().message(jxSessionId).decrypt().decodeBase64().toObzect(Map.class));
+					.from(CryptoUtil.getEncoder().message(xRemSession).decrypt().decodeBase64().toObzect(Map.class));
 			AgentResponseAuthDto agent = authService.loginByDomainToken(map.getString(domainUser),
 					map.getString(domainName), map.getString(domainId), map.getString(domainToken), false);
 			if (ArgUtil.is(agent)) {
 				sessionService.login(request, agent, domainToken);
+				commonHttpRequest.setCookie("JXSESSIONID", xRemSession);
+				return "redirect:/app/home";
 			} else {
-				//commonHttpRequest.setCookie("JXSESSIONID", xRemSession);
+				commonHttpRequest.deleteCookie("JXSESSIONID");
 			}
 		}
 

@@ -68,16 +68,35 @@ public class AdminAuthController {
 			@RequestParam(required = false) String domainId, @RequestParam(required = false) String domainToken,
 			@RequestParam(required = false) String domainUser) throws NoSuchAlgorithmException {
 
+		String xRemSession = ArgUtil.parseAsString(commonHttpRequest.get("JXSESSIONID"), Constants.BLANK);
 		if (ArgUtil.is(domainName) && ArgUtil.is(domainId) && ArgUtil.is(domainToken)) {
 			AgentResponseAuthDto agent = authService.loginByDomainToken(domainUser, domainName, domainId, domainToken,
 					true);
 			if (ArgUtil.is(agent)) {
 				sessionService.login(request, agent, domainToken);
+				xRemSession = CryptoUtil.getEncoder()
+						.obzect(MapBuilder.map().put("domainUser", domainUser).put("domainName", domainName)
+								.put("domainId", domainId).put("password", domainToken).toMap())
+						.encodeBase64().encrypt().toString();
+				commonHttpRequest.setCookie("JXSESSIONID", xRemSession);
 				return "redirect:/app/home";
+			}
+		} else if (!adminSession.isLoggedIn() && ArgUtil.is(xRemSession)) {
+			@SuppressWarnings("unchecked")
+			MapModel map = MapModel
+					.from(CryptoUtil.getEncoder().message(xRemSession).decrypt().decodeBase64().toObzect(Map.class));
+			AgentResponseAuthDto agent = authService.loginByDomainToken(map.getString(domainUser),
+					map.getString(domainName), map.getString(domainId), map.getString(domainToken), false);
+			if (ArgUtil.is(agent)) {
+				sessionService.login(request, agent, domainToken);
+				commonHttpRequest.setCookie("JXSESSIONID", xRemSession);
+				return "redirect:/app/home";
+			} else {
+				commonHttpRequest.deleteCookie("JXSESSIONID");
 			}
 		}
 
-		if (!ArgUtil.is(adminSession.getProfile())) {
+		if (!adminSession.isLoggedIn()) {
 			return "redirect:/auth/logout";
 		}
 
