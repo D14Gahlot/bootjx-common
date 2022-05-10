@@ -44,6 +44,7 @@ public class CommonFileStream extends CommonFileAbstract<CommonFileStream> {
 
 		UploadedMultipartFile multipartFile = new UploadedMultipartFile(file, file.length(), mimeType, "formParameter",
 				this.getName());
+		
 		return multipartFile;
 	}
 

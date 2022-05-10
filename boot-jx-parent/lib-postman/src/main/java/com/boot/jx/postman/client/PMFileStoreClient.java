@@ -60,7 +60,6 @@ public class PMFileStoreClient {
 		fileId = StringUtils.removeSpecialCharacter(fileId);
 		String folderPath = String.format("%s/session/%s", AppContextUtil.getTenant(), sessionId);
 		String fileName = String.format("%s/%s", fileId, srcFile.getOriginalFilename());
-
 		return upload2(srcFile, folderPath, fileName);
 	}
 

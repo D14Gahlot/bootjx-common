@@ -1,16 +1,24 @@
 package com.boot.jx.connectors;
 
+import java.net.URL;
 import java.util.List;
 import java.util.Properties;
 import java.util.regex.Pattern;
 
+import javax.activation.DataHandler;
 import javax.activation.DataSource;
+import javax.activation.FileDataSource;
+import javax.activation.URLDataSource;
+import javax.mail.BodyPart;
 import javax.mail.MessagingException;
+import javax.mail.Multipart;
 import javax.mail.Session;
 import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMessage.RecipientType;
+import javax.mail.internet.MimeMultipart;
 
 import org.apache.commons.mail.util.MimeMessageParser;
 import org.slf4j.Logger;
@@ -20,7 +28,6 @@ import org.springframework.stereotype.Component;
 
 import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorMapping;
 import com.boot.jx.dict.ContactType;
-import com.boot.jx.dict.FileFormat;
 import com.boot.jx.email.EmailReplyParser;
 import com.boot.jx.exception.AmxApiException;
 import com.boot.jx.model.CommonFile;
@@ -49,6 +56,8 @@ import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
 import com.boot.utils.CryptoUtil;
 import com.boot.utils.StringUtils;
+import com.boot.utils.URLBuilder;
+import com.boot.utils.Urly;
 
 @Component
 @ConnectorMapping(contactType = ContactType.EMAIL, channel = CHANNEL_TYPE.EMAIL)
@@ -195,9 +204,39 @@ public class EmailConnector extends AbstractConnector<EmailConfigDetails, EmailP
 			replyMessage.setFrom(new InternetAddress(channelConfig.getEmail().getSmtpUser(), channelConfig.getName()));
 			replyMessage.addRecipient(RecipientType.TO, new InternetAddress(outboxMessage.contact().getCsid()));
 			replyMessage.setSubject(ArgUtil.nonEmpty(outboxMessage.getSubject(), channelConfig.getName()));
-			replyMessage.setText(outboxMessage.getMessage());
 			replyMessage.addHeader("In-Reply-To", outboxMessage.getReplyIdExt());
 
+			// Create a multipar message
+			Multipart multipart = new MimeMultipart();
+
+			BodyPart messageBodyPart;
+			// Create the message part
+			if (ArgUtil.is(outboxMessage.getMessage())) {
+				messageBodyPart = new MimeBodyPart();
+				messageBodyPart.setText("This is message body");
+				replyMessage.setText(outboxMessage.getMessage());
+				multipart.addBodyPart(messageBodyPart);
+			}
+
+			if (ArgUtil.is(outboxMessage.getAttachments())) {
+				int i = 0;
+				for (Attachment attch : outboxMessage.getAttachments()) {
+					messageBodyPart = new MimeBodyPart();
+					URLBuilder ub = Urly.parse(attch.getMediaURL()).protocol("https");
+					// URL url = new URL(java.net.URLEncoder.encode(attch.getMediaURL(), "UTF-8"));
+					URL url = new URL(ub.getURL());
+					URLDataSource source = new URLDataSource(url);
+					messageBodyPart.setDataHandler(new DataHandler(source));
+					messageBodyPart.setHeader("Content-ID", "attachment_" + i);
+					messageBodyPart.setDisposition(MimeBodyPart.INLINE);
+					messageBodyPart.setFileName(
+							ArgUtil.nonEmpty(attch.getMediaName(), attch.getMediaCaption(), "ATTACHMENT_" + i));
+					multipart.addBodyPart(messageBodyPart);
+					i++;
+				}
+			}
+			// Send the complete message parts
+			replyMessage.setContent(multipart);
 			Transport t = session.getTransport("smtp");
 			try {
 				// connect to the smpt server using transport instance
