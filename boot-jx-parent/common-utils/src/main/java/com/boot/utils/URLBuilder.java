@@ -3,6 +3,7 @@ package com.boot.utils;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 
 /**
  * The Class URLBuilder.
@@ -20,8 +21,13 @@ public class URLBuilder {
 	 *
 	 * @param conn the new connection type
 	 */
-	void setConnectionType(String conn) {
+	public void setConnectionType(String conn) {
 		connType = conn;
+	}
+
+	public URLBuilder protocol(String conn) {
+		connType = conn;
+		return this;
 	}
 
 	/**
@@ -171,6 +177,29 @@ public class URLBuilder {
 	public String getRelativeURL() throws URISyntaxException, MalformedURLException {
 		URI uri = new URI(null, null, folders.toString().replaceAll("/+", "/"), query(), null);
 		return uri.toString();
+	}
+
+	/**
+	 * Parses the.
+	 *
+	 * @param urlString the url string
+	 * @return the URL builder
+	 * @throws MalformedURLException the malformed URL exception
+	 */
+	public static URLBuilder parse(String urlString) throws MalformedURLException {
+		URL url;
+		URLBuilder builder;
+		if (urlString.startsWith("/")) {
+			url = new URL("https://localhost/" + urlString);
+			builder = new URLBuilder();
+		} else {
+			url = new URL(urlString);
+			builder = new URLBuilder(url.getAuthority());
+			builder.setConnectionType(url.getProtocol());
+		}
+		builder.setPath(url.getPath());
+		builder.addParameter(url.getQuery());
+		return builder;
 	}
 
 }

@@ -338,7 +338,7 @@ public class PartnerController {
 		domainDoc.setDomain(domain.getDomain());
 		domainDoc.setCompany(domain.getCompany());
 		domainDoc.setSocial(domain.getSocial());
-		domainDoc.setServer(env.keyEntry(ConfigConstants.APP_KEY.PROP_SERVICE_DOMAIN).asString());
+		domainDoc.setServer(env.keyEntry(ConfigConstants.APP_KEY.PROP_SERVICE_SERVER).asString());
 
 		accountStore.save(domainDoc);
 

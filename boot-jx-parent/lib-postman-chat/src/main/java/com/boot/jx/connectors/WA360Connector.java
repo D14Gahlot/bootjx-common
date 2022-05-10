@@ -1,5 +1,6 @@
 package com.boot.jx.connectors;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -14,6 +15,7 @@ import com.boot.jx.dict.FileFormat;
 import com.boot.jx.dict.FileType;
 import com.boot.jx.exception.AmxApiException;
 import com.boot.jx.model.CommonFile;
+import com.boot.jx.model.CommonFileStream;
 import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.jx.postman.PMConstants.CHANNEL_TYPE;
 import com.boot.jx.postman.PMConstants.MESSAGE_COMPOSE_TYPE;
@@ -21,7 +23,7 @@ import com.boot.jx.postman.PMConstants.MESSAGE_FORMAT_TYPE;
 import com.boot.jx.postman.PMEnvironment.PMClientConfig;
 import com.boot.jx.postman.client.PMFileStoreClient;
 import com.boot.jx.postman.doc.ChatContactDoc;
-import com.boot.jx.postman.doc.tpo.WABAConversation;
+import com.boot.jx.postman.manager.LogManager;
 import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.Message.Status;
@@ -167,18 +169,21 @@ public class WA360Connector extends AbstractConnector<WA360ConfigDetails, WA360P
 
 	private void formatMedia(InboxMessage inboxMessage, MapModel map, ChannelConfig channelConfig, JsonPath path,
 			FileType fileType) {
-		WA360InboundMedia media = map.entry(path).as(WA360InboundMedia.class);
-		CommonFile srcFile = new CommonFile().url(WA360Constants.MEDIA_URL(media.getId())).fileType(fileType)
-				.format(FileFormat.from(media.getMimeType()))
-				.header(WA360Constants.D360_API_KEY, channelConfig.getWa360d().getApiKey())
-				.name(ArgUtil.nonEmpty(media.getFilename(), media.getCaption()));
+		try {
+			WA360InboundMedia media = map.entry(path).as(WA360InboundMedia.class);
+			CommonFileStream srcFile = new CommonFileStream().url(WA360Constants.MEDIA_URL(media.getId()))
+					.fileType(fileType).format(FileFormat.from(media.getMimeType()))
+					.header(WA360Constants.D360_API_KEY, channelConfig.getWa360d().getApiKey())
+					.name(ArgUtil.nonEmpty(media.getFilename(), media.getCaption()));
 
-		CommonFile dstFile = pmFileStoreClient.uploadSessionFileAsync(srcFile,
-				PostManUtil.createContactId(inboxMessage), inboxMessage.getMessageIdExt());
-
-		inboxMessage.attachment(new Attachment().mediaURL(dstFile.getUrl()).mediaType(dstFile.getFileType())
-				.mediaSrc(srcFile.getUrl()).mediaCaption(media.getCaption()).mediaName(media.getFilename())
-				.mediaMimeType(media.getMimeType()));
+			CommonFile dstFile = pmFileStoreClient.uploadSessionFileAsync(srcFile,
+					PostManUtil.createContactId(inboxMessage), inboxMessage.getMessageIdExt());
+			inboxMessage.attachment(new Attachment().mediaURL(dstFile.getUrl()).mediaType(dstFile.getFileType())
+					.mediaSrc(srcFile.getUrl()).mediaCaption(media.getCaption()).mediaName(media.getFilename())
+					.mediaMimeType(media.getMimeType()));
+		} catch (IOException e) {
+			logManager.error(inboxMessage, e);
+		}
 	}
 
 	@Override

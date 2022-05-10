@@ -200,8 +200,8 @@ public class PostManControllerTest {
 	 */
 	@ResponseBody
 	@RequestMapping(value = PostManUrls.PROCESS_TEMPLATE + "/{template}.{ext}", method = RequestMethod.GET)
-	public String processTemplate(@PathVariable("template") TemplateDefaultEnum template, @PathVariable("ext") String ext,
-			@RequestParam(name = "email", required = false) String email,
+	public String processTemplate(@PathVariable("template") TemplateDefaultEnum template,
+			@PathVariable("ext") String ext, @RequestParam(name = "email", required = false) String email,
 			@RequestBody(required = false) Map<String, Object> data, @RequestParam(required = false) Tenant tnt,
 			@RequestParam(required = false) PostManFile.PDFConverter lib,
 			@RequestParam(required = false) TemplateDefaultEnum attachment)
@@ -288,13 +288,13 @@ public class PostManControllerTest {
 		Map<String, Object> map = null;
 
 		if (!appConfig.isProdMode() && appConfig.isCache()) {
-			//map = templateModelCache.get(temp.getSampleJSON());
+			// map = templateModelCache.get(temp.getSampleJSON());
 		}
 
 		if (map == null) {
 			map = readJsonWithObjectMapper("templates/dummy/" + temp.toString() + ".json");
 		}
-		
+
 		if (map == null) {
 			map = readJsonWithObjectMapper("templates/dummy/" + temp.getSampleJSON());
 		}
