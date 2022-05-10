@@ -86,7 +86,7 @@ public class AdminAuthController {
 			MapModel map = MapModel
 					.from(CryptoUtil.getEncoder().message(xRemSession).decrypt().decodeBase64().toObzect(Map.class));
 			AgentResponseAuthDto agent = authService.loginByDomainToken(map.getString(domainUser),
-					map.getString(domainName), map.getString(domainId), map.getString(domainToken), false);
+					map.getString(domainName), map.getString(domainId), map.getString(domainToken), true);
 			if (ArgUtil.is(agent)) {
 				sessionService.login(request, agent, domainToken);
 				commonHttpRequest.setCookie("JXSESSIONID", xRemSession);
