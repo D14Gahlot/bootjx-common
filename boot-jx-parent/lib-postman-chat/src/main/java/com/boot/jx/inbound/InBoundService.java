@@ -33,6 +33,8 @@ import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.MessageReport;
 import com.boot.jx.postman.store.MessageContext;
 import com.boot.jx.postman.store.MessageStore;
+import com.boot.jx.tunnel.ITunnelDefs.TunnelTask;
+import com.boot.jx.tunnel.task.ATaskLimiter;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.Constants;
@@ -40,7 +42,7 @@ import com.boot.utils.StringUtils.StringMatcher;
 import com.boot.utils.UniqueID;
 
 @Component
-public class InBoundService {
+public class InBoundService extends ATaskLimiter {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(InBoundService.class);
 	public static final Pattern PROXY = Pattern.compile("\\/proxy\\ ([a-zA-Z0-9_\\-]+)$");
@@ -114,6 +116,7 @@ public class InBoundService {
 		// System.out.println("===>" + onhold);
 		if (ArgUtil.isEqual(onhold, "HOLDING")) {
 			messageStore.hold(inboxMessageOriginal);
+			throttle(new TunnelTask().name("MESSAGE_RELEASE").id(contactId).intervalSeconds(10));
 		} else {
 			hold().put(contactId, "HOLDING");
 			// messageStore.hold(inboxMessageOriginal);
@@ -249,6 +252,18 @@ public class InBoundService {
 	@Async
 	public void updateAsync(List<MessageReport> messageReports) {
 		chatStatusService.update(messageReports);
+	}
+
+	@Override
+	public void doTask(TunnelTask task) {
+		if ("MESSAGE_RELEASE".equals(task.getName())) {
+			String contactId = task.getId();
+			hold().put(contactId, "RELEASING");
+			InboxMessage msg = new InboxMessage();
+			msg.contact().setContactId(contactId);
+			msg.setContact(msg.contact());
+			invokeMethodsRelease(msg);
+		}
 	}
 
 }
