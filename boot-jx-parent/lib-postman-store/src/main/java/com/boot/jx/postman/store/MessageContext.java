@@ -235,15 +235,17 @@ public class MessageContext {
 			Contactable c = getContactable();
 			String contactId = c.getContactId();
 			if (ArgUtil.is(contactId)) {
-				ChatContextDoc doc = mongoTemplate.findById(contactId, ChatContextDoc.class);
+				ChatContextDoc doc = commonMongoTemplate.findByIdSafeCheck(contactId, ChatContextDoc.class);
 				if (!ArgUtil.is(doc)) {
-					doc = new ChatContextDoc();
-					doc.setContactId(contactId);
+					this.chatContextQuery = new ChatContextQuery(contactId);
 				} else {
 					this.chatContextQuery = new ChatContextQuery(doc);
 				}
 			} else {
 				LOGGER.error("NO CONTACT FOUND");
+			}
+			if (!ArgUtil.is(this.chatContextQuery)) {
+				LOGGER.error("NOT Ablet to Build chatContextQuery");
 			}
 		}
 		return this.chatContextQuery;
