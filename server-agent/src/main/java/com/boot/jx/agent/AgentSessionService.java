@@ -128,6 +128,7 @@ public class AgentSessionService
 		}
 		agentSessionBean.setOnline(true);
 		agentSessionBean.setLastOnlineStamp(System.currentTimeMillis());
+		agentSessionBean.getAgentCode();
 		this.updateSession(true, agentSessionBean);
 	}
 

@@ -96,7 +96,7 @@ public class AppConfig {
 	@Value(APP_NAME)
 	@AppParamKey(AppParam.APP_NAME)
 	private String appName;
-	
+
 	@Value(APP_TYPE)
 	@AppParamKey(AppParam.APP_TYPE)
 	private String appType;
@@ -216,6 +216,9 @@ public class AppConfig {
 
 	@Value("${server.session.cookie.http-only}")
 	private boolean cookieHttpOnly;
+
+	@Value("${server.session.cookie.name}")
+	private String sessionCookieName;
 
 	@Value("${server.session.cookie.secure}")
 	private boolean cookieSecure;
@@ -457,6 +460,10 @@ public class AppConfig {
 
 	public String getAppType() {
 		return appType;
+	}
+
+	public String getSessionCookieName() {
+		return sessionCookieName;
 	}
 
 }
