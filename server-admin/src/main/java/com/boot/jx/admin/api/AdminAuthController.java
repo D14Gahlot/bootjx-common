@@ -65,22 +65,35 @@ public class AdminAuthController {
 	@RequestMapping(value = { "/pub/**", "/app/**", "/auth/**", "/" },
 			method = { RequestMethod.GET, RequestMethod.POST })
 	public String home(Model model, HttpServletRequest request, @RequestParam(required = false) String domainName,
-			@RequestParam(required = false) String domainId, @RequestParam(required = false) String domainToken,
-			@RequestParam(required = false) String domainUser) throws NoSuchAlgorithmException {
+			@RequestParam(required = false) String domainId, @RequestParam(required = false) String domainUser,
+			@RequestParam(required = false) String domainToken, @RequestParam(required = false) String domainTokenValid)
+			throws NoSuchAlgorithmException {
 
 		String xRemSession = ArgUtil.parseAsString(commonHttpRequest.get("JXSESSIONID"), Constants.BLANK);
 		if (ArgUtil.is(domainName) && ArgUtil.is(domainId) && ArgUtil.is(domainToken)) {
-			AgentResponseAuthDto agent = authService.loginByDomainToken(domainUser, domainName, domainId, domainToken,
-					true);
-			if (ArgUtil.is(agent)) {
-				sessionService.login(request, agent, domainToken);
-				xRemSession = CryptoUtil.getEncoder()
-						.obzect(MapBuilder.map().put("domainUser", domainUser).put("domainName", domainName)
-								.put("domainId", domainId).put("password", domainToken).toMap())
-						.encodeBase64().encrypt().toString();
-				commonHttpRequest.setCookie("JXSESSIONID", xRemSession);
-				return "redirect:/app/home?_=" + System.currentTimeMillis();
+			if (ArgUtil.is(domainTokenValid)) {
+				AgentResponseAuthDto agent = authService.loginByDomainToken(domainUser, domainName, domainId,
+						domainToken, true);
+				if (ArgUtil.is(agent)) {
+					sessionService.login(request, agent, domainToken);
+					xRemSession = CryptoUtil.getEncoder()
+							.obzect(MapBuilder.map().put("domainUser", domainUser).put("domainName", domainName)
+									.put("domainId", domainId).put("password", domainToken).toMap())
+							.encodeBase64().encrypt().toString();
+					commonHttpRequest.setCookie("JXSESSIONID", xRemSession);
+					return "redirect:/app/home?_=" + System.currentTimeMillis();
+				}
+			} else {
+				model.addAllAttributes(appCommonConfig.appAttributes());
+				model.addAttribute("FORM_URL", "/admin/auth/direct");
+				model.addAttribute("DOMAIN_USER", domainUser);
+				model.addAttribute("DOMAIN_NAME", domainName);
+				model.addAttribute("DOMAIN_ID", domainId);
+				model.addAttribute("DOMAIN_TOKEN", domainToken);
+				model.addAttribute("DOMAIN_TOKEN_VALID", domainToken);
+				return "app-goto";
 			}
+
 		} else if (!adminSession.isLoggedIn() && ArgUtil.is(xRemSession)) {
 			@SuppressWarnings("unchecked")
 			MapModel map = MapModel
