@@ -134,9 +134,9 @@ public class AgentAuthController {
 		String xRemSession = ArgUtil.parseAsString(commonHttpRequest.get("JXSESSIONID"), Constants.BLANK);
 
 		if (ArgUtil.is(domainName) && ArgUtil.is(domainId) && ArgUtil.is(domainToken)) {
-			request.getSession(true);
 			AgentResponseAuthDto agent = authService.loginByDomainToken(domainUser, domainName, domainId, domainToken,
 					false);
+
 			if (ArgUtil.is(agent)) {
 				sessionService.login(request, agent, domainToken);
 				xRemSession = CryptoUtil.getEncoder()
