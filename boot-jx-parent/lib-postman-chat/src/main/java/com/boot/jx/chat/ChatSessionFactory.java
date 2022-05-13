@@ -145,6 +145,7 @@ public class ChatSessionFactory {
 		chatSessionDoc.setContactType(sessionMessage.contact().getContactType());
 		chatSessionDoc.setChannel(sessionMessage.contact().getChannelType());
 		chatSessionDoc.setLane(sessionMessage.contact().getLane());
+		chatSessionDoc.setMode(sessionMessage.session().getMode());
 		chatSessionDoc.setActive(true);
 		chatSessionDoc.setPrimary(true);
 		chatSessionDoc.contact().setName(chatContactDoc.getName());

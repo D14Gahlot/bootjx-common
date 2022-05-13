@@ -91,6 +91,8 @@ public class MsgController {
 	public ApiResponse<ChatMessageDTO, Object> sendSessionMessage(@RequestBody OutboxMessage outboxMessage)
 			throws InterruptedException {
 
+		outboxMessage.route().setSendMode(CHAT_MODE.AGENT.toString());
+		outboxMessage.route().setSenderCode(agentSession.getAgentCode());
 		ChatSessionDoc sessionDoc = chatSessionFactory.linkSession(outboxMessage);
 
 		// Session Stuff Logging <
@@ -103,10 +105,7 @@ public class MsgController {
 
 		// Session Stuff Logging >
 		if (ArgUtil.areEqual(sessionDoc.getAssignedToAgent(), agentSession.getAgentCode())) {
-
 			outboxMessage.route().setQueueCode(sessionDoc.getAssignedToQueue());
-			outboxMessage.route().setSendMode(CHAT_MODE.AGENT.toString());
-			outboxMessage.route().setSenderCode(agentSession.getAgentCode());
 			ChatMessageDTO messageDto = agentService.sendMessage(sessionDoc, outboxMessage);
 
 			// Evaluate if required

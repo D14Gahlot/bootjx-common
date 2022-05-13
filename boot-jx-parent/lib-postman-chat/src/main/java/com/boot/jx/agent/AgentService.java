@@ -12,16 +12,16 @@ import com.boot.jx.postman.model.OutboxMessage;
 @Component
 public class AgentService {
 
-    @Autowired(required = false)
-    private AgentChatHandler agentChatHandler;
+	@Autowired(required = false)
+	private AgentChatHandler agentChatHandler;
 
-    public InboxMessage onMessage(InboxMessage inboxMessage) {
-	return agentChatHandler.onMessageReceive(inboxMessage);
-    }
+	public InboxMessage onMessage(InboxMessage inboxMessage) {
+		return agentChatHandler.onMessageReceive(inboxMessage);
+	}
 
-    public ChatMessageDTO sendMessage(ChatSessionDoc sessionDoc, OutboxMessage outboxMessage) {
-	outboxMessage.setMessage(StringUtils.trim(outboxMessage.getMessage()));
-	return agentChatHandler.onSend(sessionDoc, outboxMessage);
-    }
+	public ChatMessageDTO sendMessage(ChatSessionDoc sessionDoc, OutboxMessage outboxMessage) {
+		outboxMessage.setMessage(StringUtils.trim(outboxMessage.getMessage()));
+		return agentChatHandler.onSend(sessionDoc, outboxMessage);
+	}
 
 }
