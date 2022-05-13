@@ -122,6 +122,7 @@ public class AdminAuthController {
 								.put("domainId", domainId).put("domainToken", domainToken).toMap())
 						.encodeBase64().encrypt().toString();
 				commonHttpRequest.setCookie("JXSESSIONID", xRemSession);
+				return toHomePage();
 			}
 
 			if (!ArgUtil.is(domainTokenValid)) {
@@ -138,7 +139,7 @@ public class AdminAuthController {
 		} else if (!adminSession.isLoggedIn() && ArgUtil.is(xRemSession)) {
 			AgentResponseAuthDto agent = loginFromXToken(request, response, xRemSession);
 			if (ArgUtil.is(agent)) {
-				return "redirect:" + appConfig.getAppPrefix() + "/app/home" + "?_=" + System.currentTimeMillis();
+				return toHomePage();
 			} else {
 				commonHttpRequest.deleteCookie("JXSESSIONID");
 			}
@@ -157,6 +158,10 @@ public class AdminAuthController {
 			model.addAttribute("APP_USER", "");
 		}
 		return "app-admin";
+	}
+
+	private String toHomePage() {
+		return "redirect:" + appConfig.getAppPrefix() + "/app/home" + "?_=" + System.currentTimeMillis();
 	}
 
 	@RequestMapping(value = { "/auth/login", "/auth/resetpass" }, method = { RequestMethod.POST, RequestMethod.GET })
