@@ -217,7 +217,7 @@ public class AppConfig {
 	@Value("${server.session.cookie.http-only}")
 	private boolean cookieHttpOnly;
 
-	@Value("${server.session.cookie.name}")
+	@Value("${server.session.cookie.name:JSESSIONID}")
 	private String sessionCookieName;
 
 	@Value("${server.session.cookie.secure}")
