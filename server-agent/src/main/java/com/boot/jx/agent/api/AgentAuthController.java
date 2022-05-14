@@ -119,8 +119,10 @@ public class AgentAuthController {
 		return null;
 	}
 
-	private String toHomePage() {
-		return "redirect:" + appConfig.getAppPrefix() + "/app/home" + "?_=" + System.currentTimeMillis();
+	private String toHomePage(HttpServletResponse response) {
+		response.setHeader("Location", appConfig.getAppPrefix() + "/app/home");
+		response.setStatus(302);
+		return "redirect:/app/home" + "?_=" + System.currentTimeMillis();
 	}
 
 	@RequestMapping(value = { "/app/home", "/", "", "/app/**", "/auth/**" },
@@ -148,7 +150,7 @@ public class AgentAuthController {
 								.put("domainId", domainId).put("domainToken", domainToken).toMap())
 						.encodeBase64().encrypt().toString();
 				commonHttpRequest.setCookie("JXSESSIONID", xRemSession);
-				return toHomePage();
+				return toHomePage(response);
 			}
 			if (!ArgUtil.is(domainTokenValid)) {
 				model.addAllAttributes(appCommonConfig.appAttributes());
@@ -163,7 +165,7 @@ public class AgentAuthController {
 		} else if (!agentSession.isLoggedIn() && ArgUtil.is(xRemSession)) {
 			AgentResponseAuthDto agent = loginFromXToken(request, response, xRemSession);
 			if (ArgUtil.is(agent)) {
-				return toHomePage();
+				return toHomePage(response);
 			} else {
 				commonHttpRequest.deleteCookie("JXSESSIONID");
 			}
