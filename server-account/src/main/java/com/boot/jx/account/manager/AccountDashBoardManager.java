@@ -43,7 +43,7 @@ import com.boot.jx.account.doc.DomainSummaryMetaStore;
 import com.boot.jx.account.dto.AccountDashBoardRequestDto;
 import com.boot.jx.account.dto.AccountDashBoardResponseDto;
 import com.boot.jx.account.dto.TypeCount;
-
+import com.boot.jx.account.dto.WabaSummaryDocDto;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.account.dto.ContactTypeCountDto;
 import com.boot.jx.account.dto.ContactTypeSummaryDto;
@@ -51,6 +51,7 @@ import com.boot.jx.account.dto.MonthDtlsDto;
 import com.boot.jx.account.dto.SummaryDocDto;
 import com.boot.jx.postman.PMConstants;
 import com.boot.jx.postman.doc.MessageDoc;
+import com.boot.jx.postman.doc.tpo.WABAConversation;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.Constants;
 import com.boot.utils.DateUtil;
@@ -360,4 +361,49 @@ public class AccountDashBoardManager {
 			mongoTemplate.save(metaSummDoc);
 		}
 	}
+	
+	/** WABA summary count **/
+	
+	public List<WabaSummaryDocDto> wabaSummary(long timestamp) {
+		String tnt = AppContextUtil.getTenant();
+		List<String> lst = getListOfContactType();
+		Date dateTi = new Date(timestamp);
+		String monthYear = new SimpleDateFormat(DateUtil.MMM_YYYY_FORMAT).format(dateTi);
+		Calendar cal = Calendar.getInstance();
+		cal.setTimeInMillis(timestamp);
+		int month = cal.get(Calendar.MONTH);
+		int year = cal.get(Calendar.YEAR);
+		long monthMinTimeStamp = DateUtil.getStartTimestamp(month, year).getTime();
+		long monthMaxTimeStamp = DateUtil.getEndTimestamp(month, year).getTime();
+
+		List<WabaSummaryDocDto> wabaLst = new ArrayList<>();
+			Query query = new Query();
+			query.addCriteria(Criteria.where("created.stamp").gt(monthMinTimeStamp).lt(monthMaxTimeStamp));
+			query.with(new Sort(new Order(Direction.DESC, "created.stamp")));
+			//query.fields().include("timestamp").include("type").include("meta");
+			
+			List<WABAConversation> wabaDocLst = mongoTemplate.find(query, WABAConversation.class, "TP_WABA_CONVERSATIONS");
+			for(WABAConversation waba:wabaDocLst) {
+				WabaSummaryDocDto dto = new WabaSummaryDocDto();
+				String yyyyMMdd = DateUtil.foramtTimeStampDateAsString(waba.getCreated().getStamp(),
+						DateUtil.YYYYMMDD_DATE_FORMAT);
+				dto.setId(yyyyMMdd);
+				dto.setDate(monthYear);
+				dto.setCountry(waba.getMeta().get("to_country").toString());
+				dto.setLane(waba.getContact().getLane());
+				Map<String,Object> typeMap =(Map<String,Object>)waba.getConversation().get("origin"); 
+				if(typeMap!=null && !typeMap.isEmpty()) {
+				dto.setType(typeMap.get("type")==null?"":typeMap.get("type").toString());
+				}
+				dto.setChannel(waba.getContact().getContactType());
+				dto.setDomain(tnt);
+				dto.setPricing(waba.getPricing());
+				wabaLst.add(dto);
+			}
+		
+			//Map<String, Map<String, Long>> datwWiseCount = wabaLst.stream().collect(Collectors.groupingBy(WabaSummaryDocDto::getId, Collectors.groupingBy(WabaSummaryDocDto::getType, Collectors.counting())));
+			//System.out.println("waba summary:"+datwWiseCount);
+		return wabaLst;
+	}
+	
 }
