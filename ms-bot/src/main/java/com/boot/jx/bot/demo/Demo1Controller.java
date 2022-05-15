@@ -33,9 +33,6 @@ public class Demo1Controller extends CommonBotController {
 	@Autowired
 	Demo5Controller demo6Controller;
 	
-	@Autowired
-	DemoZplUpdatesController demoZplController;
-
 	@ChatMapping(key = AlexBotConstants.KEY.INITIATE + "menu", pattern = "^menu$")
 	private void showDemoMenu(InboxMessage inboxMessage, StringMatcher matcher) {
 		String prevMenu = ArgUtil.parseAsString(context().session().get(CURRENT_DEMO), Constants.BLANK).toLowerCase();
@@ -59,15 +56,11 @@ public class Demo1Controller extends CommonBotController {
 			case "5":
 				demo5Controller.start(inboxMessage, matcher);
 				return;
-			case "6":
-				demoZplController.start(inboxMessage, matcher);
-				return;						
 			default:
 				break;
 			}
 		}
-		//reply(new OutboxMessage().template("menu-0").put("name", context().contact().getName()));
-		reply(new OutboxMessage().template("zpl_updates").put("name", context().contact().getName()));
+		reply(new OutboxMessage().template("menu-0").put("name", context().contact().getName()));
 		next("menu-0-onselect");
 	}
 
@@ -114,12 +107,6 @@ public class Demo1Controller extends CommonBotController {
 			context().session().put(CURRENT_DEMO, "5");
 			showDemoMenu(inboxMessage, matcher);
 			break;
-		case "ZPL UPDATES":
-		case "ZPLUPDATES":
-		case "6":
-			context().session().put(CURRENT_DEMO, "6");
-			showDemoMenu(inboxMessage, matcher);
-			break;	
 		case "TALK TO AGENT":
 		case "TALKTOAGENT":
 		case "#":
