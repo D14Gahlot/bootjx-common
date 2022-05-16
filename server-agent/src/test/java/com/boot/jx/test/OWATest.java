@@ -7,6 +7,8 @@ import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.boot.jx.postman.model.SessionSearchQuery;
+import com.boot.utils.JsonUtil;
 import com.github.gianlucanitti.javaexpreval.ExpressionException;
 
 public class OWATest { // Noncompliant
@@ -24,8 +26,7 @@ public class OWATest { // Noncompliant
 	 * @throws URISyntaxException
 	 */
 
-	
 	public static void main(String[] args) throws MalformedURLException, URISyntaxException {
-
+		System.out.println(JsonUtil.toJson(new SessionSearchQuery().parse(":closed :WHATSAPP :email as you can see")));
 	}
 }

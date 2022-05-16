@@ -539,7 +539,6 @@ public class SessionStore extends CommonMongoTemplateAbstract {
 			chatSessionDoc.setFistResponseStamp(System.currentTimeMillis());
 		}
 		chatSessionDoc.setLastResponseStamp(System.currentTimeMillis());
-
 		CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder().whereId(chatSessionDoc.getSessionId());
 		builder.set("fistResponseStamp", chatSessionDoc.getFistResponseStamp());
 		builder.set("lastResponseStamp", chatSessionDoc.getLastResponseStamp());

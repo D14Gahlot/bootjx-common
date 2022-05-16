@@ -63,6 +63,9 @@ public class ChatSessionService {
 	@Autowired
 	private LogManager logManager;
 
+	@Autowired
+	private ChatUtility chatUtility;
+
 	public boolean initSession(InboxMessage inboxMessage, ChatSessionDoc session) {
 		boolean initd = session.isInitd();
 		if (!initd) {
@@ -98,8 +101,7 @@ public class ChatSessionService {
 		}
 
 		if (initd) {
-			if (ArgUtil.isEmptyValue(session.getAssignedToQueue())
-					|| PMConstants.CHAT_MODE.isPushOnly(session.getMode())) {
+			if (chatUtility.isPushOnly(session)) {
 				this.routeSession(session);
 				inboxMessage.session().setQueue(session.getAssignedToQueue());
 				inboxMessage.session().setDept(session.getAssignedToDept());

@@ -27,7 +27,9 @@ import com.boot.jx.common.store.ChatArchiveService;
 import com.boot.jx.common.store.DocumentUpdateListner;
 import com.boot.jx.http.ApiRequest;
 import com.boot.jx.http.RequestType;
+import com.boot.jx.postman.PMConstants.CHAT_ASSIGN_GROUP;
 import com.boot.jx.postman.PMConstants.CHAT_SESSION_ACTIONS;
+import com.boot.jx.postman.PMConstants.CHAT_STATE;
 import com.boot.jx.postman.PMConstants.DEFAULT;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.doc.ChatSessionDoc;
@@ -36,6 +38,7 @@ import com.boot.jx.postman.dto.ChatMessageDTO;
 import com.boot.jx.postman.dto.ChatSessionDTO;
 import com.boot.jx.postman.manager.ChatSessionManager;
 import com.boot.jx.postman.model.OutboxMessage;
+import com.boot.jx.postman.model.SessionSearchQuery;
 import com.boot.jx.postman.service.ChatDTOUtil;
 import com.boot.jx.postman.store.MessageStore;
 import com.boot.jx.postman.store.SessionStore;
@@ -89,8 +92,15 @@ public class AgentMsgController {
 			List<ChatSessionDoc> sessions = null;
 
 			ApiResponseUtil.addLog("Search Results");
-			sessions = chatSessionManager.findChatSessionDocByAgentAndUnAssigned(tab, agentSession.getAgentCode(),
-					agentSession.getAgentDept(), search, searchStatus, limit);
+
+			SessionSearchQuery query = new SessionSearchQuery();
+			query.parse(search);
+			query.limit = limit;
+			query.add(ArgUtil.parseAsEnumT(tab, CHAT_ASSIGN_GROUP.class));
+			query.add(ArgUtil.parseAsEnumT(searchStatus, CHAT_STATE.class));
+
+			sessions = chatSessionManager.findChatSessionDocByAgentAndUnAssigned(query, agentSession.getAgentCode(),
+					agentSession.getAgentDept());
 
 			for (ChatSessionDoc chatSessionDoc : sessions) {
 				ChatSessionDTO chatSessionDto = chatArchive.getChatSession(chatSessionDoc);
