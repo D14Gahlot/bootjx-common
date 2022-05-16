@@ -245,7 +245,7 @@ public class ChatService {
 	public MessageContext loadChatContext(String contactId, InboxMessage inboxMessage) {
 
 		if (!ArgUtil.is(inboxMessage.session().getMode())) {
-			ChatSessionDoc sessionDoc = sessionStore.getSession(inboxMessage.getSessionId());
+			ChatSessionDoc sessionDoc = messageContext.session().getDoc();
 
 			if (!ArgUtil.is(sessionDoc)) {
 				LOGGER.error("No Session Found for {}/{}", contactId, inboxMessage.getSessionId());
@@ -264,8 +264,11 @@ public class ChatService {
 			doc.setContactId(contactId);
 		}
 		messageContext.setChatConext(doc);
-		if (!ArgUtil.is(doc.getMeta()) || TimeUtils.isExpired(doc.getMeta().getUpdateStamp(), "5min")) {
+
+		if (!ArgUtil.is(doc.getMeta()) || TimeUtils.isExpired(doc.getMeta().getUpdateStamp(), "30min")
+				|| !ArgUtil.is(doc.getMeta().getQueueCode(), inboxMessage.session().getQueue())) {
 			doc.setMeta(new ChatMeta());
+			messageContext.chat().setQueueCode(inboxMessage.session().getQueue());
 		}
 
 		messageContext.setInboxMessage(inboxMessage);
