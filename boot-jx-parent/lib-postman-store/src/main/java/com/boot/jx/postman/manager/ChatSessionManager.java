@@ -188,6 +188,8 @@ public class ChatSessionManager {
 
 			if (query.contains(CHAT_STATE.CLOSED) || query.contains(CHAT_STATUS.CLOSED)) {
 				criterias.add(Criteria.where("active").is(false).and("resolved").is(true));
+			} else if (query.contains(CHAT_STATUS.RESOLVED)) {
+				criterias.add(Criteria.where("resolved").is(true));
 			} else if (query.contains(CHAT_STATE.OUTBOUND)) {
 				criterias.add(Criteria.where("active").is(true).and("lastInBoundMsg").exists(false)
 						.orOperator(Criteria.where("resolved").exists(false), Criteria.where("resolved").is(false)));
@@ -199,6 +201,10 @@ public class ChatSessionManager {
 
 				criterias.add(Criteria.where("active").is(true).and("updated.hour").lte(expiryWatermarkHour)
 						.orOperator(Criteria.where("resolved").exists(false), Criteria.where("resolved").is(false)));
+			} else if (query.contains(CHAT_ASSIGN_GROUP.UNASSIGNED) || query.contains(CHAT_STATE.UNATTENDED)) {
+				primaryCriteria = primaryCriteria.and("mode").is("AGENT");
+				criterias.add(new Criteria().orOperator(Criteria.where("assignedToAgent").is(null),
+						Criteria.where("assignedToAgent").exists(false)));
 			} else {
 				criterias.add(Criteria.where("active").is(true).and("lastInBoundMsg").exists(true)
 						.orOperator(Criteria.where("resolved").exists(false), Criteria.where("resolved").is(false)));
@@ -214,14 +220,7 @@ public class ChatSessionManager {
 
 			if (pmDomainConfig.isAgentHistoryLazy().asBoolean(true)) {
 
-				if (query.contains(CHAT_ASSIGN_GROUP.UNASSIGNED)) {
-					primaryCriteria = primaryCriteria.and("mode").is("AGENT");
-					criterias.add(new Criteria().orOperator(
-							// Assigned to None
-							Criteria.where("assignedToAgent").is(null), Criteria.where("assignedToAgent").exists(false)
-					//
-					));
-				} else if (query.contains(CHAT_ASSIGN_GROUP.ME)) {
+				if (query.contains(CHAT_ASSIGN_GROUP.ME)) {
 					primaryCriteria = primaryCriteria.and("mode").is("AGENT");
 					primaryCriteria = primaryCriteria.and("assignedToDept").is(agentDept);
 					criterias.add(new Criteria().orOperator(

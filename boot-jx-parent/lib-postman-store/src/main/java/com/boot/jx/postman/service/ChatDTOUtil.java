@@ -210,6 +210,18 @@ public class ChatDTOUtil {
 			}
 		}
 
+		if (!ArgUtil.is(chatSessionDto.getState())) {
+			if (!chatSessionDto.isExpired()) {
+				chatSessionDto.setStatus(PMConstants.CHAT_STATE.EXPIRED.toString());
+			} else if (!chatSessionDto.isActive()) {
+				chatSessionDto.setStatus(PMConstants.CHAT_STATE.CLOSED.toString());
+			} else if (chatSessionDto.getAssignedAgentStamp() == 0) {
+				chatSessionDto.setState(PMConstants.CHAT_STATE.UNATTENDED.toString());
+			} else if (!chatSessionDto.isActive()) {
+				chatSessionDto.setStatus(PMConstants.CHAT_STATE.ACTIVE.toString());
+			}
+		}
+
 		return chatSessionDto;
 	}
 
