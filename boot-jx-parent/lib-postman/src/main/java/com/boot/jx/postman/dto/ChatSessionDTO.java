@@ -56,6 +56,7 @@ public class ChatSessionDTO implements Serializable {
 
 	private String mode;
 	private String status;
+	private String state;
 	private List<String> tagId;
 
 	private Contactable contact;
@@ -361,5 +362,13 @@ public class ChatSessionDTO implements Serializable {
 
 	public void setSubject(String subject) {
 		this.subject = subject;
+	}
+
+	public String getState() {
+		return state;
+	}
+
+	public void setState(String state) {
+		this.state = state;
 	}
 }

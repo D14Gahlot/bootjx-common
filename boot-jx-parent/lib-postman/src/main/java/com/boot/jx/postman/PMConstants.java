@@ -53,11 +53,11 @@ public class PMConstants {
 	}
 
 	public static enum CHAT_ASSIGN_GROUP {
-		ME, TEAM, ORG, HISTORY;
+		UNASSIGNED, ME, TEAM, ORG, HISTORY;
 	}
 
 	public static enum CHAT_STATE {
-		ACTIVE, OUTBOUND, CLOSED, STALED, WAITING, WAITING_LONG;
+		ACTIVE, OUTBOUND, CLOSED, EXPIRED, WAITING, WAITING_LONG;
 	}
 
 	public static enum CHAT_MODE {

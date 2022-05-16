@@ -188,13 +188,10 @@ public class ChatSessionManager {
 
 			if (query.contains(CHAT_STATE.CLOSED) || query.contains(CHAT_STATUS.CLOSED)) {
 				criterias.add(Criteria.where("active").is(false).and("resolved").is(true));
-			} else if (query.contains(CHAT_STATUS.UNASSIGNED)) {
-				criterias.add(Criteria.where("active").is(false).and("resolved").is(true));
-
 			} else if (query.contains(CHAT_STATE.OUTBOUND)) {
 				criterias.add(Criteria.where("active").is(true).and("lastInBoundMsg").exists(false)
 						.orOperator(Criteria.where("resolved").exists(false), Criteria.where("resolved").is(false)));
-			} else if (query.contains(CHAT_STATE.STALED) || query.contains(CHAT_STATUS.EXPIRED)) {
+			} else if (query.contains(CHAT_STATE.EXPIRED) || query.contains(CHAT_STATUS.EXPIRED)) {
 				Calendar expiryWatermark = Calendar.getInstance();
 				expiryWatermark.setTimeInMillis(
 						expiryWatermark.getTimeInMillis() - TimeUtils.toMillis(pmClientConfig.getChatSessionTimeout()));
@@ -216,8 +213,17 @@ public class ChatSessionManager {
 							Criteria.where("lastOutGoingStamp").gt(graceStamp)));
 
 			if (pmDomainConfig.isAgentHistoryLazy().asBoolean(true)) {
-				if (query.contains(CHAT_ASSIGN_GROUP.ME)) {
+
+				if (query.contains(CHAT_ASSIGN_GROUP.UNASSIGNED)) {
 					primaryCriteria = primaryCriteria.and("mode").is("AGENT");
+					criterias.add(new Criteria().orOperator(
+							// Assigned to None
+							Criteria.where("assignedToAgent").is(null), Criteria.where("assignedToAgent").exists(false)
+					//
+					));
+				} else if (query.contains(CHAT_ASSIGN_GROUP.ME)) {
+					primaryCriteria = primaryCriteria.and("mode").is("AGENT");
+					primaryCriteria = primaryCriteria.and("assignedToDept").is(agentDept);
 					criterias.add(new Criteria().orOperator(
 							// Assigned to Me
 							Criteria.where("assignedToAgent").is(agentCode),
@@ -275,7 +281,7 @@ public class ChatSessionManager {
 		if (historyPeriod > 0L && query.contains(CHAT_ASSIGN_GROUP.HISTORY)) {
 			return findChatSessionDocByAgentAndUnAssigned(query, agentCode, agentDept,
 					PMConstants.DEFAULT_VALUES.POSTMAN_AGENT_TAB_HISTORY_PERIOD + historyPeriod);
-		} else if (historyPeriod > 0L && (query.contains(CHAT_STATE.STALED) || query.contains(CHAT_STATE.CLOSED))) {
+		} else if (historyPeriod > 0L && (query.contains(CHAT_STATE.EXPIRED) || query.contains(CHAT_STATE.CLOSED))) {
 			return findChatSessionDocByAgentAndUnAssigned(query, agentCode, agentDept,
 					PMConstants.DEFAULT_VALUES.POSTMAN_AGENT_TAB_HISTORY_PERIOD + historyPeriod);
 		}
