@@ -20,6 +20,8 @@ import com.boot.jx.postman.ClientApp;
 import com.boot.jx.postman.PMConfiguration.PMConfigurationWrappper;
 import com.boot.jx.postman.PMConstants;
 import com.boot.jx.postman.PMConstants.APP_TYPE;
+import com.boot.jx.postman.PMConstants.CHAT_ASSIGN_GROUP;
+import com.boot.jx.postman.PMConstants.CHAT_STATE;
 import com.boot.jx.postman.PMConstants.CHAT_STATUS;
 import com.boot.jx.postman.PMConstants.DEFAULT_VALUES;
 import com.boot.jx.postman.PMEnvironment;
@@ -28,6 +30,7 @@ import com.boot.jx.postman.PMEnvironment.PMDomainConfig;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.QuickTag;
 import com.boot.jx.postman.model.InboxMessage;
+import com.boot.jx.postman.model.SessionSearchQuery;
 import com.boot.jx.postman.model.ext.InBoundEvent;
 import com.boot.jx.postman.model.ext.InBoundEvent.SessionRouted;
 import com.boot.jx.postman.store.MessageStore.EVENTS;
@@ -152,8 +155,8 @@ public class ChatSessionManager {
 		return sessionStore.findByStatusOrQuickTag(status, newList, fromStamp, toStamp);
 	}
 
-	public List<ChatSessionDoc> findChatSessionDocByAgentAndUnAssigned(String tab, String agentCode, String agentDept,
-			String search, long period, String searchStatus, int limit) {
+	public List<ChatSessionDoc> findChatSessionDocByAgentAndUnAssigned(SessionSearchQuery query, String agentCode,
+			String agentDept, long period) {
 
 		period = Math.min(DEFAULT_VALUES.POSTMAN_AGENT_TAB_HISTORY_PERIOD_MAX, period);
 		Calendar timeout = Calendar.getInstance();
@@ -169,28 +172,29 @@ public class ChatSessionManager {
 
 		Criteria primaryCriteria = Criteria.where("primary").is(true);
 
-		if (ArgUtil.is(search)) {
-			search = search.replace("*", "").trim();
+		if (ArgUtil.is(query.text)) {
 
 			timeout.setTimeInMillis(
 					timeout.getTimeInMillis() - DEFAULT_VALUES.POSTMAN_AGENT_TAB_HISTORY_PERIOD_MAX * 5);
 			long searchableStampDay = timeout.getTimeInMillis() / TimeUtils.Constants.MILLIS_IN_DAY;
 			criterias.add(Criteria.where("updated.day").gte(searchableStampDay).orOperator(
 					// Check all fields
-					Criteria.where("contactId").regex("" + search + "", "i"),
-					Criteria.where("contactName").regex("" + search + "", "i"), // @Deprecated
-					Criteria.where("contact.name").regex("" + search + "", "i"),
-					Criteria.where("contact.phone").regex("" + search + "", "i"),
-					Criteria.where("contact.email").regex("" + search + "", "i")));
+					Criteria.where("contactId").regex("" + query.text + "", "i"),
+					Criteria.where("contactName").regex("" + query.text + "", "i"), // @Deprecated
+					Criteria.where("contact.name").regex("" + query.text + "", "i"),
+					Criteria.where("contact.phone").regex("" + query.text + "", "i"),
+					Criteria.where("contact.email").regex("" + query.text + "", "i")));
 		} else {
 
-			if (ArgUtil.areEqual("CLOSED", searchStatus)) {
+			if (query.contains(CHAT_STATE.CLOSED) || query.contains(CHAT_STATUS.CLOSED)) {
+				criterias.add(Criteria.where("active").is(false).and("resolved").is(true));
+			} else if (query.contains(CHAT_STATUS.UNASSIGNED)) {
 				criterias.add(Criteria.where("active").is(false).and("resolved").is(true));
 
-			} else if (ArgUtil.areEqual("OUTBOUND", searchStatus)) {
+			} else if (query.contains(CHAT_STATE.OUTBOUND)) {
 				criterias.add(Criteria.where("active").is(true).and("lastInBoundMsg").exists(false)
 						.orOperator(Criteria.where("resolved").exists(false), Criteria.where("resolved").is(false)));
-			} else if (ArgUtil.areEqual("STALED", searchStatus)) {
+			} else if (query.contains(CHAT_STATE.STALED) || query.contains(CHAT_STATUS.EXPIRED)) {
 				Calendar expiryWatermark = Calendar.getInstance();
 				expiryWatermark.setTimeInMillis(
 						expiryWatermark.getTimeInMillis() - TimeUtils.toMillis(pmClientConfig.getChatSessionTimeout()));
@@ -212,7 +216,7 @@ public class ChatSessionManager {
 							Criteria.where("lastOutGoingStamp").gt(graceStamp)));
 
 			if (pmDomainConfig.isAgentHistoryLazy().asBoolean(true)) {
-				if (ArgUtil.areEqual("ME", tab)) {
+				if (query.contains(CHAT_ASSIGN_GROUP.ME)) {
 					primaryCriteria = primaryCriteria.and("mode").is("AGENT");
 					criterias.add(new Criteria().orOperator(
 							// Assigned to Me
@@ -221,14 +225,14 @@ public class ChatSessionManager {
 							Criteria.where("assignedToAgent").is(null), Criteria.where("assignedToAgent").exists(false)
 					//
 					));
-				} else if (ArgUtil.areEqual("TEAM", tab)) {
+				} else if (query.contains(CHAT_ASSIGN_GROUP.TEAM)) {
 					primaryCriteria = primaryCriteria.and("mode").is("AGENT");
 					criterias.add(new Criteria().orOperator(
 							// Not Assigned to Me
 							Criteria.where("assignedToDept").is(agentDept).and("assignedToAgent").ne(agentCode)
 					//
 					));
-				} else if (ArgUtil.areEqual("ORG", tab)) {
+				} else if (query.contains(CHAT_ASSIGN_GROUP.ORG)) {
 					criterias.add(new Criteria().orOperator(
 							// Not Assigned to Me
 							Criteria.where("assignedToDept").ne(agentDept),
@@ -236,7 +240,7 @@ public class ChatSessionManager {
 							Criteria.where("assignedToDept").is(null), Criteria.where("assignedToDept").exists(false)
 					//
 					));
-				} else if (ArgUtil.areEqual("HISTORY", tab)) {
+				} else if (query.contains(CHAT_ASSIGN_GROUP.HISTORY)) {
 					primaryCriteria = primaryCriteria.and("mode").is("AGENT");
 					Calendar hisotryTimeout = Calendar.getInstance();
 					hisotryTimeout.setTimeInMillis(hisotryTimeout.getTimeInMillis()
@@ -251,7 +255,7 @@ public class ChatSessionManager {
 			}
 		}
 
-		limit = Math.min(Math.max(50, limit), pmDomainConfig.getAgentHistoryCount().asInteger(150));
+		int limit = Math.min(Math.max(50, query.limit), pmDomainConfig.getAgentHistoryCount().asInteger(150));
 		query2.addCriteria(
 				// Only Agent Chats
 				primaryCriteria
@@ -259,24 +263,24 @@ public class ChatSessionManager {
 						.andOperator(criterias.toArray(new Criteria[criterias.size()])))
 				// Limit
 				.with(new Sort(Direction.DESC, "updated.hour")).limit(limit);
-		//System.out.println(query2.toString());
+		// System.out.println(query2.toString());
 		LOGGER.debug(query2.toString());
 		return sessionStore.find(
 				CommonMongoQueryBuilder.collection(ChatSessionDoc.class).query(query2).skipDBRefByNames("lastMsg"));
 	}
 
-	public List<ChatSessionDoc> findChatSessionDocByAgentAndUnAssigned(String tab, String agentCode, String agentDept,
-			String search, String searchStatus, int limit) {
+	public List<ChatSessionDoc> findChatSessionDocByAgentAndUnAssigned(SessionSearchQuery query, String agentCode,
+			String agentDept) {
 		long historyPeriod = pmDomainConfig.getAgentHistoryPeriod().asLong(0L);
-		if (historyPeriod > 0L && ArgUtil.areEqual("HISTORY", tab)) {
-			return findChatSessionDocByAgentAndUnAssigned(tab, agentCode, agentDept, search,
-					PMConstants.DEFAULT_VALUES.POSTMAN_AGENT_TAB_HISTORY_PERIOD + historyPeriod, searchStatus, limit);
-		} else if (historyPeriod > 0L && ArgUtil.isEqual(searchStatus, "STALED", "CLOSED")) {
-			return findChatSessionDocByAgentAndUnAssigned(tab, agentCode, agentDept, search,
-					PMConstants.DEFAULT_VALUES.POSTMAN_AGENT_TAB_HISTORY_PERIOD + historyPeriod, searchStatus, limit);
+		if (historyPeriod > 0L && query.contains(CHAT_ASSIGN_GROUP.HISTORY)) {
+			return findChatSessionDocByAgentAndUnAssigned(query, agentCode, agentDept,
+					PMConstants.DEFAULT_VALUES.POSTMAN_AGENT_TAB_HISTORY_PERIOD + historyPeriod);
+		} else if (historyPeriod > 0L && (query.contains(CHAT_STATE.STALED) || query.contains(CHAT_STATE.CLOSED))) {
+			return findChatSessionDocByAgentAndUnAssigned(query, agentCode, agentDept,
+					PMConstants.DEFAULT_VALUES.POSTMAN_AGENT_TAB_HISTORY_PERIOD + historyPeriod);
 		}
-		return findChatSessionDocByAgentAndUnAssigned(tab, agentCode, agentDept, search,
-				DEFAULT_VALUES.POSTMAN_AGENT_TAB_HISTORY_PERIOD * 3 / 2, searchStatus, limit);
+		return findChatSessionDocByAgentAndUnAssigned(query, agentCode, agentDept,
+				DEFAULT_VALUES.POSTMAN_AGENT_TAB_HISTORY_PERIOD * 3 / 2);
 	}
 
 	public List<ChatSessionDoc> searchPrimary(String search) {
@@ -312,11 +316,10 @@ public class ChatSessionManager {
 		inBoundEvent.contactId = chatSessionDoc.getContactId();
 		inBoundEvent.sessionRouted.sourceQueue = chatSessionDoc.getAssignedToQueue();
 		inBoundEvent.contact().copyFrom(chatSessionDoc.contact());
-		
-		if(ArgUtil.is(chatSessionDoc.getContactId())) {
+
+		if (ArgUtil.is(chatSessionDoc.getContactId())) {
 			inBoundEvent.contact().setContactId(inBoundEvent.contactId);
 		}
-		
 
 		if (!ArgUtil.is(chatSessionDoc)) {
 			LOGGER.error("Session Cannot Be Empty for queueCode {}", queueCode);

@@ -195,6 +195,7 @@ public class InBoundService extends ATaskLimiter {
 			if (ArgUtil.is(session)) {
 				chatSessionFactory.linkSession(session, inboxMessageOriginal);
 				locallySessionAssigned = true;
+				messageContext.session(session);
 			} else {
 				ErrorObject error = new ErrorObject();
 				error.setIncomingMessage(inboxMessageOriginal);

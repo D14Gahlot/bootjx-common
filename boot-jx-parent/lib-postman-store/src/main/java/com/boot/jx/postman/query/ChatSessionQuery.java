@@ -5,6 +5,7 @@ import java.util.List;
 import com.boot.jx.mongo.CommonMongoQueryBuilder.DocQueryBuilder;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.MessageDoc;
+import com.boot.jx.postman.service.ChatDTOUtil;
 import com.boot.jx.postman.store.MessageStore;
 
 public class ChatSessionQuery extends DocQueryBuilder<ChatSessionDoc> {
@@ -98,18 +99,21 @@ public class ChatSessionQuery extends DocQueryBuilder<ChatSessionDoc> {
 		this.doc.setLastInBoundMsg(lastInBoundMsg);
 		this.set("lastInBoundMsgId", lastInBoundMsg.getMessageId());
 		this.ref("lastInBoundMsg", lastInBoundMsg.getMessageId(), MessageStore.getCollectionName(contactType));
+		this.set("msg.lastInBoundMsg", ChatDTOUtil.getChatMessageDTO(lastInBoundMsg));
 		return this;
 	}
 
 	public ChatSessionQuery setLastOutBoundMsg(MessageDoc lastOutBoundMsg, String contactType) {
 		this.doc.setLastOutBoundMsg(lastOutBoundMsg);
 		this.ref("lastOutBoundMsg", lastOutBoundMsg.getMessageId(), MessageStore.getCollectionName(contactType));
+		this.set("msg.lastOutBoundMsg", ChatDTOUtil.getChatMessageDTO(lastOutBoundMsg));
 		return this;
 	}
 
 	public ChatSessionQuery setLastMsg(MessageDoc lastMsg, String contactType) {
 		// this.doc.setLastMsg(lastMsg);
 		this.ref("lastMsg", lastMsg.getMessageId(), MessageStore.getCollectionName(contactType));
+		this.set("msg.lastMsg", ChatDTOUtil.getChatMessageDTO(lastMsg));
 		return this;
 	}
 

@@ -92,6 +92,6 @@ public class TenantClientResolver extends TenantResolver {
 		tntMapping.put("app", "app");
 		tntMapping.put("api", "app");
 		tntMapping.put("local", "local");
-		tntMapping.put("a6f6-18-134-58-184", "pranjal");
+		tntMapping.put("a9db-2405-201-400f-de31-4554-9ae6-932b-8d3e", "pranjal");
 	}
 }

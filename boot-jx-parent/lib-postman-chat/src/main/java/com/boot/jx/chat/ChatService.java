@@ -21,7 +21,6 @@ import com.boot.jx.postman.model.Message;
 import com.boot.jx.postman.model.MessageDefinitions.IMessageExtended;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.model.ext.InBoundEvent;
-import com.boot.jx.postman.query.ChatSessionQuery;
 import com.boot.jx.postman.store.MessageContext;
 import com.boot.jx.postman.store.MessageStore;
 import com.boot.jx.postman.store.SessionStore;
@@ -76,11 +75,13 @@ public class ChatService {
 	@Autowired
 	private LogManager logManager;
 
-	private void message(String messageType, ChatContactDoc chatContactDoc, OutboxMessage outboxMessage,
+	private MessageDoc message(String messageType, ChatContactDoc chatContactDoc, OutboxMessage outboxMessage,
 			IMessageExtended inboxMessage) {
-
+		MessageDoc messageDoc = messageStore.createOrUpdate(outboxMessage);
 		connectorHandlerFactory.message(new MessageContext().from(context()), messageType, chatContactDoc,
 				outboxMessage, inboxMessage);
+		chatSessionFactory.push(messageDoc, outboxMessage);
+		return messageDoc;
 	}
 
 	private MessageDoc actionIntenal(ChatContactDoc chatContactDoc, OutboxMessage outboxMessage) {
@@ -100,10 +101,7 @@ public class ChatService {
 		outboxMessage.contact().setContactId(chatContactDoc.getContactId());
 		outboxMessage.setSessionId(chatContactDoc.getSessionId());
 
-		MessageDoc messageDoc = messageStore.createOrUpdate(outboxMessage);
-		message(MESSAGE_COMPOSE_TYPE.ACTION, chatContactDoc, outboxMessage, null);
-		chatSessionFactory.push(messageDoc, outboxMessage);
-		return messageDoc;
+		return message(MESSAGE_COMPOSE_TYPE.ACTION, chatContactDoc, outboxMessage, null);
 	}
 
 	private MessageDoc replyIntenal(ChatContactDoc chatContactDoc, OutboxMessage outboxMessage,
@@ -130,10 +128,7 @@ public class ChatService {
 
 		// outboxMessage.model().put("contact",
 		// ChatDTOUtil.getContactMeta(chatContactDoc));
-		MessageDoc messageDoc = messageStore.createOrUpdate(outboxMessage);
-		message(MESSAGE_COMPOSE_TYPE.REPLY, chatContactDoc, outboxMessage, inboxMessage);
-		chatSessionFactory.push(messageDoc, outboxMessage);
-		return messageDoc;
+		return message(MESSAGE_COMPOSE_TYPE.REPLY, chatContactDoc, outboxMessage, inboxMessage);
 	}
 
 	private MessageDoc sendIntenal(ChatContactDoc chatContactDoc, OutboxMessage outboxMessage) {
@@ -153,10 +148,7 @@ public class ChatService {
 
 		// outboxMessage.model().put("contact",
 		// ChatDTOUtil.getContactMeta(chatContactDoc));
-		MessageDoc messageDoc = messageStore.createOrUpdate(outboxMessage);
-		message(MESSAGE_COMPOSE_TYPE.SEND, chatContactDoc, outboxMessage, null);
-		chatSessionFactory.push(messageDoc, outboxMessage);
-		return messageDoc;
+		return message(MESSAGE_COMPOSE_TYPE.SEND, chatContactDoc, outboxMessage, null);
 	}
 
 	public MessageDoc reply(ChatSessionDoc sessionDoc, OutboxMessage outboxMessage) throws InterruptedException {
