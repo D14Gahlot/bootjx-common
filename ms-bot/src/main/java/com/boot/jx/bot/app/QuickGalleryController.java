@@ -20,8 +20,8 @@ import com.boot.utils.ArgUtil;
 import com.boot.utils.StringUtils;
 import com.boot.utils.StringUtils.StringMatcher;
 
-@BotController(name = "DemoBot", code = { "bot_media_gallery" })
-public class AppGalleryController extends CommonBotController {
+@BotController(name = "DemoBot", code = { "bot_quick_gallery" })
+public class QuickGalleryController extends CommonBotController {
 
 	@Autowired
 	private QuickStore commonMongoTemplate;
