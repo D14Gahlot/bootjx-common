@@ -12,7 +12,6 @@ import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.OutboxMessage;
-import com.boot.utils.ArgUtil;
 import com.boot.utils.StringUtils.StringMatcher;
 
 @BotController(name = "DemoBot", code = { "demo_zplu" })
@@ -31,17 +30,16 @@ public class DemoZplUpdatesController extends CommonBotController {
 	public void panOnSelect(InboxMessage inboxMessage, StringMatcher matcher) {
 		switch (toReplyEnum(inboxMessage)) {
 		case "scoreboard":
-			reply(new OutboxMessage()
-					.attachment(new Attachment()
-							.mediaURL(
-									"https://cdn.jsdelivr.net/gh/mehery-soccom/mehery-content@main/zpl/scoreboard.jpg")
-							.mediaType(FileType.IMAGE.toString())));
+			reply(new OutboxMessage().attachment(new Attachment()
+					.mediaURL("https://cdn.jsdelivr.net/gh/mehery-soccom/mehery-content@main/zpl/scoreboard.jpg")
+					.mediaType(FileType.IMAGE.toString())));
+			next("menu-on-select");
 			break;
 		case "points_table":
-			reply(new OutboxMessage()
-					.attachment(new Attachment().mediaURL(
-							"https://cdn.jsdelivr.net/gh/mehery-soccom/mehery-content@main/zpl/points_table.jpg")
-							.mediaType(FileType.IMAGE.toString())));
+			reply(new OutboxMessage().attachment(new Attachment()
+					.mediaURL("https://cdn.jsdelivr.net/gh/mehery-soccom/mehery-content@main/zpl/points_table.jpg")
+					.mediaType(FileType.IMAGE.toString())));
+			next("menu-on-select");
 			break;
 		default:
 			reply(new OutboxMessage().template("zpl_updates").put("name", context().contact().getName()));
@@ -49,12 +47,4 @@ public class DemoZplUpdatesController extends CommonBotController {
 		}
 	}
 
-	public String toReplyEnum(InboxMessage inboxMessage) {
-		String codeValue = inboxMessage.form().get(REPLY_ID) == null ? inboxMessage.getMessage()
-				: inboxMessage.form().get(REPLY_ID).toString();
-		if (ArgUtil.is(codeValue)) {
-			codeValue = codeValue.toLowerCase().trim();
-		}
-		return codeValue;
-	}
 }

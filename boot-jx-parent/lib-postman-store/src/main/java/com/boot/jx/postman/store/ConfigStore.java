@@ -51,7 +51,7 @@ public class ConfigStore extends CommonMongoTemplateAbstract {
 			if (generated == false) {
 				clientApiKey.setKey("");
 			}
-		} catch ( org.springframework.dao.DuplicateKeyException e) {
+		} catch (org.springframework.dao.DuplicateKeyException e) {
 			throw e;
 		} catch (Exception e) {
 			LOGGER.error("saveClientKeyConfig", e);

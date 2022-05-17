@@ -32,6 +32,7 @@ public class StarterDocKit {
 			temp5 = new QuickMedia();
 		}
 		temp5.setId(name);
+		temp5.setCode(name);
 		temp5.setTitle(title);
 		temp5.setType("IMAGE");
 		temp5.setCategory(category);
