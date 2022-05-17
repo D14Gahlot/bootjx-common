@@ -16,49 +16,49 @@ import com.boot.utils.ArgUtil;
 @Component
 public class TemplateStore implements TemplateResolver {
 
-    @Autowired
-    protected CommonMongoTemplate commonMongoTemplate;
+	@Autowired
+	protected CommonMongoTemplate commonMongoTemplate;
 
-    @Override
-    public BasicTemplate get(String templateId) {
-	HSMTemplateDoc x = commonMongoTemplate.findById(templateId, HSMTemplateDoc.class);
-	return x;
-    }
+	@Override
+	public BasicTemplate get(String templateId) {
+		HSMTemplateDoc x = commonMongoTemplate.findById(templateId, HSMTemplateDoc.class);
+		return x;
+	}
 
-    public BasicTemplate resolve(CommonTemplateMeta template) {
-	if (ArgUtil.is(template.getId())) {
-	    return get(template.getId());
-	} else if (ArgUtil.is(template.getCode())) {
-	    List<HSMTemplateDoc> temps = commonMongoTemplate
-		    .find(CommonMongoQueryBuilder.collection(HSMTemplateDoc.class).where("code", template.getCode()));
-	    if (ArgUtil.is(temps)) {
-		HSMTemplateDoc resolvedTemplate = null;
-		if (temps.size() > 1) {
-		    for (HSMTemplateDoc hsmTemplate3rdParty : temps) {
-			if (ArgUtil.areEqual(hsmTemplate3rdParty.getLang(), template.getLang())) {
-			    resolvedTemplate = hsmTemplate3rdParty;
-			    break;
-			} else if (ArgUtil.is(hsmTemplate3rdParty.getLang())) {
-			    resolvedTemplate = hsmTemplate3rdParty;
+	public BasicTemplate resolve(CommonTemplateMeta template) {
+		if (ArgUtil.is(template.getId())) {
+			return get(template.getId());
+		} else if (ArgUtil.is(template.getCode())) {
+			List<HSMTemplateDoc> temps = commonMongoTemplate
+					.find(CommonMongoQueryBuilder.collection(HSMTemplateDoc.class).where("code", template.getCode()));
+			if (ArgUtil.is(temps)) {
+				HSMTemplateDoc resolvedTemplate = null;
+				if (temps.size() > 1) {
+					for (HSMTemplateDoc hsmTemplate3rdParty : temps) {
+						if (ArgUtil.areEqual(hsmTemplate3rdParty.getLang(), template.getLang())) {
+							resolvedTemplate = hsmTemplate3rdParty;
+							break;
+						} else if (ArgUtil.is(hsmTemplate3rdParty.getLang())) {
+							resolvedTemplate = hsmTemplate3rdParty;
+						}
+					}
+				} else {
+					resolvedTemplate = temps.get(0);
+				}
+				return resolvedTemplate;
 			}
-		    }
-		} else {
-		    resolvedTemplate = temps.get(0);
 		}
-		return resolvedTemplate;
-	    }
+		return null;
 	}
-	return null;
-    }
 
-    @Override
-    public BasicTemplate get(CommonTemplateMeta template) {
-	BasicTemplate basicTemplate = resolve(template);
-	if (ArgUtil.is(basicTemplate)) {
-	    template.setCode(basicTemplate.getCode());
-	    template.setId(basicTemplate.getId());
+	@Override
+	public BasicTemplate get(CommonTemplateMeta template) {
+		BasicTemplate basicTemplate = resolve(template);
+		if (ArgUtil.is(basicTemplate)) {
+			template.setCode(basicTemplate.getCode());
+			template.setId(basicTemplate.getId());
+		}
+		return basicTemplate;
 	}
-	return basicTemplate;
-    }
 
 }
