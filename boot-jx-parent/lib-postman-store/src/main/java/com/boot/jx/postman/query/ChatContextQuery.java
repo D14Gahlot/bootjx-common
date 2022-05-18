@@ -54,6 +54,11 @@ public class ChatContextQuery extends DocQueryBuilder<ChatContextDoc> {
 		this.set("meta.queueCode", queueCode);
 	}
 
+	public void setSessionId(String sessionId) {
+		this.doc.meta().setSessionId(sessionId);
+		this.set("meta.sessionId", sessionId);
+	}
+
 	public String getQueueCode() {
 		return this.doc.meta().getQueueCode();
 	}

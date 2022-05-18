@@ -1,27 +1,30 @@
 package com.boot.jx.postman.doc;
 
 import java.io.Serializable;
-import java.util.List;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.TypeAlias;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import com.boot.jx.model.AuditCreateEntity;
-import com.boot.jx.mongo.CommonDocInterfaces.OldDocVersion;
+import com.boot.jx.postman.store.QuickStore.QuickGalleryItem;
 
 @Document(collection = "DICT_QUICK_REPS")
 @TypeAlias("QuickReply")
-public class QuickReply implements Serializable, OldDocVersion<QuickReply>, AuditCreateEntity {
+public class QuickReply implements Serializable, AuditCreateEntity, QuickGalleryItem {
 	private static final long serialVersionUID = -5649094988762846983L;
 
 	@Id
 	private String id;
 	private String title;
+
+	@Indexed(unique = true, sparse = true)
+	private String code;
+
 	private String category;
 	private String message;
 	private String template;
-	private List<QuickReply> oldVersions;
 	private String createdBy;
 	private Long createdStamp;
 
@@ -65,14 +68,6 @@ public class QuickReply implements Serializable, OldDocVersion<QuickReply>, Audi
 		this.id = id;
 	}
 
-	public List<QuickReply> getOldVersions() {
-		return oldVersions;
-	}
-
-	public void setOldVersions(List<QuickReply> oldVersions) {
-		this.oldVersions = oldVersions;
-	}
-
 	public String getCreatedBy() {
 		return createdBy;
 	}
@@ -87,6 +82,14 @@ public class QuickReply implements Serializable, OldDocVersion<QuickReply>, Audi
 
 	public void setCreatedStamp(Long createdStamp) {
 		this.createdStamp = createdStamp;
+	}
+
+	public String getCode() {
+		return code;
+	}
+
+	public void setCode(String code) {
+		this.code = code;
 	}
 
 }

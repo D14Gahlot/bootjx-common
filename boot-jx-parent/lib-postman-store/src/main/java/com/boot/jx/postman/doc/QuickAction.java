@@ -5,22 +5,27 @@ import java.util.List;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.TypeAlias;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import com.boot.jx.model.AuditCreateEntity;
 import com.boot.jx.mongo.CommonDocInterfaces.OldDocVersion;
+import com.boot.jx.postman.store.QuickStore.QuickGalleryItem;
 import com.boot.utils.ArgUtil;
 
 @Document(collection = "DICT_QUICK_AXN")
 @TypeAlias("QuickAction")
-public class QuickAction implements Serializable, OldDocVersion<QuickAction>, AuditCreateEntity {
+public class QuickAction implements Serializable, OldDocVersion<QuickAction>, AuditCreateEntity, QuickGalleryItem {
 	private static final long serialVersionUID = -5649094988762846983L;
 
 	@Id
 	private String id;
 	private String title;
 	private String category;
+
+	@Indexed(unique = true, sparse = true)
 	private String code;
+
 	private String action;
 
 	private List<QuickAction> oldVersions;

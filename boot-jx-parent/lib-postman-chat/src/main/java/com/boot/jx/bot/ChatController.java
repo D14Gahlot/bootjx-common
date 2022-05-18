@@ -161,6 +161,11 @@ public class ChatController {
 				new PMArgs().assignToQueueCode(queueCode).contact(session.contact()).sessionId(session.getSessionId()));
 	}
 
+	public void routeSessionToDefaultQueue() {
+		ChatSessionDoc session = messageContext.session().getDoc();
+		chatSessionService.routeSession(session);
+	}
+
 	public void assignToAgentDepartment(String deptCode) {
 		ChatSessionDoc session = messageContext.session().getDoc();
 		chatSessionService.routeSession(session, new PMArgs().assignToQueueCode(PMConstants.DEFAULT.AGENT_QUEUE_CODE)
