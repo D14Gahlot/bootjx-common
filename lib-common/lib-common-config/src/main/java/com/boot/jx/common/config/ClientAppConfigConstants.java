@@ -83,9 +83,10 @@ public class ClientAppConfigConstants {
 				.desc("Use this app to giver user an option menu to switch between app. Selected template should have queue code in button code")
 				.group("About App"),
 				new ConfigMeta().title("App Options Template").path("props.template").group("TEMPLATES")
-						.optionsSource("getx:/api/options/inbound_queue").optionsKey("code").optionsLabel("code") });
+						.optionsSource("getx:/api/tmpl/hsm").optionsKey("code").optionsLabel("code") });
 
 		APP_CONFIGS.put(APP_TYPE.APP_ROUTER, new ConfigMeta[] {
+
 				new ConfigMeta().inputType(INPUT_TYPE.MESSAGE, MESSAGE_TYPE.INFO).title("App Router")
 						.desc("Use this app to route session based on customer's session status").group("About App"),
 
@@ -100,7 +101,31 @@ public class ClientAppConfigConstants {
 				new ConfigMeta().title("Returning customer to conitune last conversation").path("props.connect_contiue")
 						.desc("Returning customer, if last session was NOT RESOLVED")
 						.optionsSource("getx:/api/options/inbound_queue").optionsKey("code").optionsLabel("code")
-						.group("Apps") });
+						.group("Apps")
+
+		});
+
+		APP_CONFIGS.put(APP_TYPE.QUICK_GALLERY, new ConfigMeta[] {
+
+				new ConfigMeta().inputType(INPUT_TYPE.MESSAGE, MESSAGE_TYPE.INFO).title("App Switch Menu")
+						.desc("Use this app to giver user an option menu to Explore Quick Gallery."
+								+ " Selected template should have Item code in button code")
+						.group("About App"),
+
+				new ConfigMeta().title("Gallery Type").path("props.gallery_item_type").options(
+						new ConfigOption("QUICK_MEDIA").label("QUICK_MEDIA"),
+						new ConfigOption("QUICK_ACTION").label("QUICK_ACTION"),
+						new ConfigOption("QUICK_REPLY").label("QUICK_REPLY")),
+
+				new ConfigMeta().title("Gallery Menu Template").path("props.gallery_menu_template").group("TEMPLATES")
+						.optionsSource("getx:/api/tmpl/hsm").optionsKey("code").optionsLabel("code"),
+
+				new ConfigMeta().title("Item Menu Template").path("props.item_menu_template").group("TEMPLATES")
+						.optionsSource("getx:/api/tmpl/hsm").optionsKey("code").optionsLabel("code"),
+
+				new ConfigMeta().title("Item Menu Category").path("props.item_menu_category")
+
+		});
 
 	}
 

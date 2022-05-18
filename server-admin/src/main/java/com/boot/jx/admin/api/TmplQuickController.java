@@ -69,7 +69,7 @@ public class TmplQuickController {
 		if (ArgUtil.is(id)) {
 			QuickReply oldVersion = mongoTemplate.findById(id, QuickReply.class);
 			if (ArgUtil.is(oldVersion)) {
-				newVersion.oldVersion(oldVersion);
+				mongoTemplate.archive(oldVersion);
 				newVersion.setId(id);
 			}
 		}
@@ -189,8 +189,8 @@ public class TmplQuickController {
 			QuickMedia oldVersion = mongoTemplate.findById(id, QuickMedia.class);
 			if (ArgUtil.is(oldVersion)) {
 				mongoTemplate.archive(oldVersion);
+				newVersion.setId(id);
 			}
-			newVersion.setId(id);
 		}
 
 		newVersion.setTitle(title);

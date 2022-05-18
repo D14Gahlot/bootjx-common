@@ -3,52 +3,89 @@ package com.boot.jx.postman.store;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.bson.types.ObjectId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
-import org.springframework.data.mongodb.core.mapreduce.GroupBy;
-import org.springframework.data.mongodb.core.mapreduce.GroupByResults;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.stereotype.Component;
 
-import com.boot.jx.api.ApiResponseUtil;
+import com.boot.jx.mongo.CommonMongoQueryBuilder;
 import com.boot.jx.mongo.CommonMongoTemplateAbstract;
-import com.boot.jx.postman.doc.PMConfigurationDoc;
 import com.boot.jx.postman.doc.QuickMedia;
-import com.boot.jx.postman.doc.config.ChannelConfigDoc;
-import com.boot.jx.postman.doc.config.ClientAppConfigDoc;
-import com.boot.jx.postman.doc.config.CompanyVarsConfigDoc;
-import com.boot.jx.postman.doc.config.PrefsConfigDoc;
-import com.boot.jx.utils.PostManUtil;
-import com.boot.utils.ArgUtil;
-import com.boot.utils.JsonUtil;
 import com.mongodb.AggregationOptions;
-import com.mongodb.Cursor;
+import com.mongodb.AggregationOptions.OutputMode;
+import com.mongodb.BasicDBObject;
 import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
-import com.mongodb.WriteResult;
-import com.mongodb.AggregationOptions.OutputMode;
 
 @Component
 public class QuickStore extends CommonMongoTemplateAbstract {
 
+	public static interface QuickGalleryItem {
+		String getId();
+
+		String getCategory();
+
+		String getCode();
+
+		String getTitle();
+	}
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(QuickStore.class);
 
-	public List<QuickMedia> groupByCategory(Class<QuickMedia> clazz) {
+	@SuppressWarnings("unchecked")
+	public <T extends QuickGalleryItem> List<T> groupByCategory(Class<T> clazz) {
 		List<DBObject> list = new ArrayList<DBObject>();
-//		list.add(Aggregation.match(Criteria.where("bulkSessionId").is((currentBatchJob.getJobId()))) // Match
-//				.toDBObject(Aggregation.DEFAULT_CONTEXT));
-		list.add(Aggregation.group("category").count().as("count").toDBObject(Aggregation.DEFAULT_CONTEXT));;
-		DBCollection col = getCollection(getCollectionName(QuickStore.class));
-		col.aggregate(list, AggregationOptions.builder().allowDiskUse(true).outputMode(OutputMode.INLINE).build())
-				.forEachRemaining(doc -> System.out.println(JsonUtil.toJson(doc)));
+		// Equivalent to $project
+		DBObject projectFields = new BasicDBObject();
+		projectFields.put("_id", 0);
+		projectFields.put("category", "$_id");
+		DBObject project = new BasicDBObject("$project", projectFields);
+		List<QuickMedia> other = new ArrayList<QuickMedia>();
+		list.add(Aggregation.group("category").count().as("count").toDBObject(Aggregation.DEFAULT_CONTEXT));
+		list.add(project);
+		try {
+			DBCollection col = mongoTemplate.getCollection(mongoTemplate.getCollectionName(clazz));
+			col.aggregate(list, AggregationOptions.builder().allowDiskUse(true).outputMode(OutputMode.CURSOR).build())
+					.forEachRemaining(doc -> other.add(new QuickMedia().from(doc)));
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return (List<T>) other;
+	}
 
-		GroupByResults<QuickMedia> g = group(getCollectionName(QuickStore.class), GroupBy.key("category"),
-				QuickMedia.class);
+	public <T extends QuickGalleryItem> List<T> findByCategory(String category, Class<T> clazz) {
+		return find(CommonMongoQueryBuilder.collection(clazz).with(Criteria.where("category").regex(category, "i")));
+	}
 
-		g.iterator().forEachRemaining(doc -> System.out.println(JsonUtil.toJson(doc)));
+	public <T extends QuickGalleryItem> List<T> findGalleryItems(String text, Class<T> clazz) {
 
-		return null;
+		List<Criteria> orList = new ArrayList<Criteria>();
+		orList.add(Criteria.where("code").is(text));
+		orList.add(Criteria.where("_id").is(text));
+		if (text != null && ObjectId.isValid(text)) {
+			orList.add(Criteria.where("id").is(new ObjectId(text)));
+		}
+		orList.add(Criteria.where("title").regex(text, "i"));
+
+		return find(CommonMongoQueryBuilder.collection(clazz)
+				.with(new Criteria().orOperator(orList.toArray(new Criteria[orList.size()]))));
+	}
+
+	public <T extends QuickGalleryItem> T findByCode(String code, Class<T> clazz) {
+
+		List<Criteria> orList = new ArrayList<Criteria>();
+		orList.add(Criteria.where("code").is(code));
+		orList.add(Criteria.where("_id").is(code));
+		if (code != null && ObjectId.isValid(code)) {
+			orList.add(Criteria.where("id").is(new ObjectId(code)));
+		}
+
+		return findOne(
+				CommonMongoQueryBuilder.collection(clazz)
+						.with(new Criteria().orOperator(orList.toArray(new Criteria[orList.size()]))).getQuery(),
+				clazz);
 	}
 
 }

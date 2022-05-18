@@ -164,7 +164,8 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 		sessionRouter.debounce(task);
 		// sessionRouter.doTask(task);
 
-		TunnelTask closeTask = new TunnelTask().name("MITEL_CLOSE_CHECK").id(session.getSessionId()).intervalSeconds(60 * 10);
+		TunnelTask closeTask = new TunnelTask().name("MITEL_CLOSE_CHECK").id(session.getSessionId())
+				.intervalSeconds(60 * 10);
 		closeTask.data().put("sessionId", session.getSessionId()).put("omid", omid).put("queue",
 				defaultClient.getQueue());
 		sessionRouter.debounce(closeTask);
@@ -297,7 +298,6 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 
 	@Override
 	public void onSessionRoute(InBoundEvent event, ChatSessionDoc sessionDoc, PMArgs pmArgs) {
-
 		if (InBoundEvent.SESSION_ROUTED.equals(event.eventCode)) {
 			ClientApp defaultClient = context().clientApp(event.sessionRouted.targetQueue, null);
 			if (ArgUtil.is(defaultClient)) {
@@ -325,7 +325,6 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 				}
 			}
 		}
-
 	}
 
 	@Override

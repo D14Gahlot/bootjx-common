@@ -4,7 +4,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.boot.jx.bot.ChatController;
-import com.boot.jx.postman.PMConstants;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.StringUtils.StringMatcher;
@@ -24,6 +23,9 @@ public class CommonBotController extends ChatController {
 	}
 
 	public String toReplyEnum(InboxMessage inboxMessage) {
+		if (!ArgUtil.is(inboxMessage)) {
+			return null;
+		}
 		String codeValue = inboxMessage.form().get(REPLY_ID) == null ? inboxMessage.getMessage()
 				: inboxMessage.form().get(REPLY_ID).toString();
 		if (ArgUtil.is(codeValue)) {

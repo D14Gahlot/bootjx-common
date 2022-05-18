@@ -57,7 +57,7 @@ public class PMConstants {
 	}
 
 	public static enum CHAT_STATE {
-		ACTIVE, OUTBOUND, CLOSED, EXPIRED, WAITING, WAITING_LONG;
+		ACTIVE, OUTBOUND, CLOSED, EXPIRED, WAITING, WAITING_LONG, UNATTENDED;
 	}
 
 	public static enum CHAT_MODE {

@@ -25,7 +25,7 @@ public class CommonTemplateMeta implements Serializable, JsonIgnoreUnknown {
 			notes = "Language is an optional param which fallback to en, in all the scenarios of missing params/template"
 					+ "\n lang will ignored when template.id is provided")
 	private String lang;
-	
+
 	@ApiMockModelProperty(example = "{ \"amount\" : 10, \"currency\" : \"INR\" }", required = false,
 			value = "Data will be used to resolve placeholders in template, in case of missing value blank will be attempted, "
 					+ "\n Kindly note Template may be rejected in case it does not match the approved format")
@@ -93,4 +93,5 @@ public class CommonTemplateMeta implements Serializable, JsonIgnoreUnknown {
 		this.data = data;
 		return this;
 	}
+
 }

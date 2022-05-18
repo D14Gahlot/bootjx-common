@@ -244,6 +244,8 @@ public class ChatService {
 
 	public MessageContext loadChatContext(String contactId, InboxMessage inboxMessage) {
 
+		messageContext.setInboxMessage(inboxMessage);
+
 		if (!ArgUtil.is(inboxMessage.session().getMode())) {
 			ChatSessionDoc sessionDoc = messageContext.session().getDoc();
 
@@ -265,13 +267,13 @@ public class ChatService {
 		}
 		messageContext.setChatConext(doc);
 
-		if (!ArgUtil.is(doc.getMeta()) || TimeUtils.isExpired(doc.getMeta().getUpdateStamp(), "30min")
+		if (!ArgUtil.is(doc.getMeta()) || !ArgUtil.is(doc.getMeta().getSessionId(), inboxMessage.getSessionId())
 				|| !ArgUtil.is(doc.getMeta().getQueueCode(), inboxMessage.session().getQueue())) {
 			doc.setMeta(new ChatMeta());
 			messageContext.chat().setQueueCode(inboxMessage.session().getQueue());
+			messageContext.chat().setSessionId(inboxMessage.getSessionId());
 		}
 
-		messageContext.setInboxMessage(inboxMessage);
 		// messageStore.create(inboxMessage);
 		return messageContext;
 	}

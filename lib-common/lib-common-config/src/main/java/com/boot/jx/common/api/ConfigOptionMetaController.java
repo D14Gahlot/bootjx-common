@@ -28,6 +28,8 @@ import com.boot.jx.postman.ClientApp;
 import com.boot.jx.postman.PMConstants;
 import com.boot.jx.postman.PMConstants.APP_TYPE;
 import com.boot.jx.postman.PMConstants.CHANNEL_TYPE_ENUM;
+import com.boot.jx.postman.PMConstants.CHAT_STATE;
+import com.boot.jx.postman.PMConstants.CHAT_STATUS;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PMEnvironment.AChannelConfig;
 import com.boot.jx.postman.PMEnvironment.AChannelDetails;
@@ -178,4 +180,13 @@ public class ConfigOptionMetaController {
 		return ApiResponse.buildResults(config);
 	}
 
+	@RequestMapping(value = "/api/meta/chat_states", method = { RequestMethod.GET })
+	public ApiResponse<CHAT_STATE, Object> chatStates() {
+		return ApiResponse.buildResults(PMConstants.CHAT_STATE.values());
+	}
+
+	@RequestMapping(value = "/api/meta/chat_status", method = { RequestMethod.GET })
+	public ApiResponse<CHAT_STATUS, Object> chatStatus() {
+		return ApiResponse.buildResults(PMConstants.CHAT_STATUS.values());
+	}
 }

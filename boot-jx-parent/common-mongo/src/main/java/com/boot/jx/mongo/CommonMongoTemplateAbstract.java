@@ -96,7 +96,8 @@ public class CommonMongoTemplateAbstract extends CommonMongoTemplateDefault {
 		String idStr = ArgUtil.parseAsString(id);
 		if (idStr != null && ObjectId.isValid(idStr)) {
 			Criteria altC = Criteria.where("_id").is(new ObjectId(idStr));
-			c = new Criteria().orOperator(c, altC);
+			Criteria altC2 = Criteria.where("id").is(new ObjectId(idStr));
+			c = new Criteria().orOperator(c, altC,altC2);
 		}
 		if (ArgUtil.is(id)) {
 			return getCommonMongoTemplate().findOne(new Query(c), clazz);
@@ -109,6 +110,7 @@ public class CommonMongoTemplateAbstract extends CommonMongoTemplateDefault {
 	}
 
 	public <T> List<T> find(MongoQueryBuilder<T> builder) {
+		//System.out.println("+++"+builder.getQuery());
 		return find(builder.getQuery(), builder.getDocClass());
 	}
 

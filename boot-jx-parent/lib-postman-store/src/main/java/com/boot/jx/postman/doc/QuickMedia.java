@@ -10,10 +10,13 @@ import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import com.boot.jx.model.AuditCreateEntity;
+import com.boot.jx.postman.store.QuickStore.QuickGalleryItem;
+import com.boot.utils.ArgUtil;
+import com.mongodb.DBObject;
 
 @Document(collection = "DICT_QUICK_MEDIA")
 @TypeAlias("QuickMedia")
-public class QuickMedia implements Serializable, AuditCreateEntity {
+public class QuickMedia implements Serializable, AuditCreateEntity, QuickGalleryItem {
 
 	private static final long serialVersionUID = 7942286016346691701L;
 
@@ -24,7 +27,7 @@ public class QuickMedia implements Serializable, AuditCreateEntity {
 
 	private String title;
 
-	@Indexed(unique = true)
+	@Indexed(unique = true, sparse = true)
 	private String code;
 
 	private String category;
@@ -125,4 +128,13 @@ public class QuickMedia implements Serializable, AuditCreateEntity {
 		this.code = code;
 	}
 
+	public QuickMedia category(String category) {
+		this.category = category;
+		return this;
+	}
+
+	public QuickMedia from(DBObject doc) {
+		this.category = ArgUtil.parseAsString(doc.get("category"));
+		return this;
+	}
 }
