@@ -23,9 +23,9 @@ public class DemoDietCareBoutController extends DefaultChakliController {
 			lang = ArgUtil.parseAsString(context().contact().getLang());
 		}
 
-		// if(!timeCheck()) {
-		// reply(new OutboxMessage().template("working_hours_update"));
-		// }else {
+		if(!timeCheckV1("dcb_switch","dcb_start_time","dcb_end_time")) {
+			 reply(new OutboxMessage().template("dcb_working_hours_update"));
+		}else {
 		if (lang.equalsIgnoreCase("english") || (lang != null && lang.equalsIgnoreCase("en"))) {
 			context().contact().setLang("en");
 			context().commit();
@@ -42,7 +42,7 @@ public class DemoDietCareBoutController extends DefaultChakliController {
 			reply(new OutboxMessage().template("dcb_question"));
 			next("select-question");
 		}
-		// }
+	 }
 	}
 
 	@ChatMapping(key = "select-question")

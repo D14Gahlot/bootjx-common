@@ -28,9 +28,9 @@ public class DemoArabiController extends DefaultChakliController {
 			lang = ArgUtil.parseAsString(context().contact().getLang());
 		}
 
-		// if(!timeCheck()) {
-		// reply(new OutboxMessage().template("working_hours_update"));
-		// }else {
+		if(!timeCheckV1("ar_switch","ar_start_time","ar_end_time")) {
+			 reply(new OutboxMessage().template("ar_working_hours_update"));
+		}else {
 		if (lang.equalsIgnoreCase("english") || (lang != null && lang.equalsIgnoreCase("en"))) {
 			context().contact().setLang("en");
 			context().commit();
@@ -47,7 +47,7 @@ public class DemoArabiController extends DefaultChakliController {
 			reply(new OutboxMessage().template("ar_question"));
 			next("select-question");
 		}
-		// }
+		}
 	}
 
 	@ChatMapping(key = "select-question")

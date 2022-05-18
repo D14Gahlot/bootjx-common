@@ -28,9 +28,9 @@ public class DemoDukkanBurController extends DefaultChakliController {
 			lang = ArgUtil.parseAsString(context().contact().getLang());
 		}
 
-		// if(!timeCheck()) {
-		// reply(new OutboxMessage().template("working_hours_update"));
-		// }else {
+		 if(!timeCheckV1("db_switch","db_start_time","db_end_time")) {
+		 reply(new OutboxMessage().template("db_working_hours_update"));
+		 }else {
 		if (lang.equalsIgnoreCase("english") || (lang != null && lang.equalsIgnoreCase("en"))) {
 			context().contact().setLang("en");
 			context().commit();
@@ -47,7 +47,7 @@ public class DemoDukkanBurController extends DefaultChakliController {
 			reply(new OutboxMessage().template("db_question"));
 			next("select-question");
 		}
-		// }
+	 }
 	}
 
 	@ChatMapping(key = "select-question")
@@ -71,8 +71,6 @@ public class DemoDukkanBurController extends DefaultChakliController {
 			next("next_menu");
 			break;
 		case "db_help":
-			//reply(new OutboxMessage().template("db_help_ans"));
-			//next("next_menu");
 			this.commonTransferToAgent(inboxMessage, matcher);
 			break;
 		case "*":

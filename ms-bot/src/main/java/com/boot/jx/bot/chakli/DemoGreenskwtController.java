@@ -27,9 +27,9 @@ public class DemoGreenskwtController extends DefaultChakliController {
 			lang = ArgUtil.parseAsString(context().contact().getLang());
 		}
 
-		// if(!timeCheck()) {
-		// reply(new OutboxMessage().template("working_hours_update"));
-		// }else {
+		if(!timeCheckV1("gr_switch","gr_start_time","gr_end_time")) {
+			 reply(new OutboxMessage().template("gr_working_hours_update"));
+		}else {
 		if (lang.equalsIgnoreCase("english") || (lang != null && lang.equalsIgnoreCase("en"))) {
 			context().contact().setLang("en");
 			context().commit();
@@ -46,7 +46,7 @@ public class DemoGreenskwtController extends DefaultChakliController {
 			reply(new OutboxMessage().template("gr_question"));
 			next("select-question");
 		}
-		// }
+	 }
 	}
 
 	@ChatMapping(key = "select-question")
