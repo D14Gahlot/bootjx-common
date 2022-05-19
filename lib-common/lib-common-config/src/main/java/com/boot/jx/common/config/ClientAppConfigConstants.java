@@ -107,7 +107,7 @@ public class ClientAppConfigConstants {
 
 		APP_CONFIGS.put(APP_TYPE.QUICK_GALLERY, new ConfigMeta[] {
 
-				new ConfigMeta().inputType(INPUT_TYPE.MESSAGE, MESSAGE_TYPE.INFO).title("App Switch Menu")
+				new ConfigMeta().inputType(INPUT_TYPE.MESSAGE, MESSAGE_TYPE.INFO).title("Quick Gallery")
 						.desc("Use this app to giver user an option menu to Explore Quick Gallery."
 								+ " Selected template should have Item code in button code")
 						.group("About App"),
