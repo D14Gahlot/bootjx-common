@@ -185,31 +185,6 @@ public class ChatSessionManager {
 					Criteria.where("contact.phone").regex("" + query.text + "", "i"),
 					Criteria.where("contact.email").regex("" + query.text + "", "i")));
 		} else {
-
-			if (query.contains(CHAT_STATE.CLOSED) || query.contains(CHAT_STATUS.CLOSED)) {
-				criterias.add(Criteria.where("active").is(false).and("resolved").is(true));
-			} else if (query.contains(CHAT_STATUS.RESOLVED)) {
-				criterias.add(Criteria.where("resolved").is(true));
-			} else if (query.contains(CHAT_STATE.OUTBOUND)) {
-				criterias.add(Criteria.where("active").is(true).and("lastInBoundMsg").exists(false)
-						.orOperator(Criteria.where("resolved").exists(false), Criteria.where("resolved").is(false)));
-			} else if (query.contains(CHAT_STATE.EXPIRED) || query.contains(CHAT_STATUS.EXPIRED)) {
-				Calendar expiryWatermark = Calendar.getInstance();
-				expiryWatermark.setTimeInMillis(
-						expiryWatermark.getTimeInMillis() - TimeUtils.toMillis(pmClientConfig.getChatSessionTimeout()));
-				long expiryWatermarkHour = expiryWatermark.getTimeInMillis() / TimeUtils.Constants.MILLIS_IN_HOUR;
-
-				criterias.add(Criteria.where("active").is(true).and("updated.hour").lte(expiryWatermarkHour)
-						.orOperator(Criteria.where("resolved").exists(false), Criteria.where("resolved").is(false)));
-			} else if (query.contains(CHAT_ASSIGN_GROUP.UNASSIGNED) || query.contains(CHAT_STATE.UNATTENDED)) {
-				primaryCriteria = primaryCriteria.and("mode").is("AGENT");
-				criterias.add(new Criteria().orOperator(Criteria.where("assignedToAgent").is(null),
-						Criteria.where("assignedToAgent").exists(false)));
-			} else {
-				criterias.add(Criteria.where("active").is(true).and("lastInBoundMsg").exists(true)
-						.orOperator(Criteria.where("resolved").exists(false), Criteria.where("resolved").is(false)));
-			}
-
 			criterias.add(
 					// Within Watermark
 					Criteria.where("updated.day").gte(watermarkStampDay).orOperator(
@@ -217,47 +192,84 @@ public class ChatSessionManager {
 							Criteria.where("lastInComingStamp").gt(graceStamp),
 							// Agent Has been Assigned to it
 							Criteria.where("lastOutGoingStamp").gt(graceStamp)));
+		}
 
-			if (pmDomainConfig.isAgentHistoryLazy().asBoolean(true)) {
+		if (query.contains(CHAT_STATE.CLOSED) || query.contains(CHAT_STATUS.CLOSED)) {
+			criterias.add(Criteria.where("active").is(false).and("resolved").is(true));
+		} else if (query.contains(CHAT_STATUS.RESOLVED)) {
+			criterias.add(Criteria.where("resolved").is(true));
+		} else if (query.contains(CHAT_STATE.OUTBOUND)) {
+			criterias.add(Criteria.where("active").is(true).and("lastInBoundMsg").exists(false)
+					.orOperator(Criteria.where("resolved").exists(false), Criteria.where("resolved").is(false)));
+		} else if (query.contains(CHAT_STATE.EXPIRED) || query.contains(CHAT_STATUS.EXPIRED)) {
+			Calendar expiryWatermark = Calendar.getInstance();
+			expiryWatermark.setTimeInMillis(
+					expiryWatermark.getTimeInMillis() - TimeUtils.toMillis(pmClientConfig.getChatSessionTimeout()));
+			long expiryWatermarkHour = expiryWatermark.getTimeInMillis() / TimeUtils.Constants.MILLIS_IN_HOUR;
 
-				if (query.contains(CHAT_ASSIGN_GROUP.ME)) {
-					primaryCriteria = primaryCriteria.and("mode").is("AGENT");
-					primaryCriteria = primaryCriteria.and("assignedToDept").is(agentDept);
-					criterias.add(new Criteria().orOperator(
-							// Assigned to Me
-							Criteria.where("assignedToAgent").is(agentCode),
-							// Assigned to None
-							Criteria.where("assignedToAgent").is(null), Criteria.where("assignedToAgent").exists(false)
-					//
-					));
-				} else if (query.contains(CHAT_ASSIGN_GROUP.TEAM)) {
-					primaryCriteria = primaryCriteria.and("mode").is("AGENT");
-					criterias.add(new Criteria().orOperator(
-							// Not Assigned to Me
-							Criteria.where("assignedToDept").is(agentDept).and("assignedToAgent").ne(agentCode)
-					//
-					));
-				} else if (query.contains(CHAT_ASSIGN_GROUP.ORG)) {
-					criterias.add(new Criteria().orOperator(
-							// Not Assigned to Me
-							Criteria.where("assignedToDept").ne(agentDept),
-							// Assigned to No-Org
-							Criteria.where("assignedToDept").is(null), Criteria.where("assignedToDept").exists(false)
-					//
-					));
-				} else if (query.contains(CHAT_ASSIGN_GROUP.HISTORY)) {
-					primaryCriteria = primaryCriteria.and("mode").is("AGENT");
-					Calendar hisotryTimeout = Calendar.getInstance();
-					hisotryTimeout.setTimeInMillis(hisotryTimeout.getTimeInMillis()
-							- PMConstants.DEFAULT_VALUES.POSTMAN_AGENT_TAB_HISTORY_PERIOD);
-					criterias.add(new Criteria().orOperator(
-							// Updated before to Me
-							Criteria.where("updated.day")
-									.lte(hisotryTimeout.getTimeInMillis() / TimeUtils.Constants.MILLIS_IN_DAY)
-					//
-					));
-				}
+			criterias.add(Criteria.where("active").is(true).and("updated.hour").lte(expiryWatermarkHour)
+					.orOperator(Criteria.where("resolved").exists(false), Criteria.where("resolved").is(false)));
+		} else if (query.contains(CHAT_ASSIGN_GROUP.UNASSIGNED)) {
+			primaryCriteria = primaryCriteria.and("mode").is("AGENT");
+			criterias.add(new Criteria().orOperator(Criteria.where("assignedToAgent").is(null),
+					Criteria.where("assignedToAgent").exists(false)));
+		} else if (query.contains(CHAT_STATE.ACTIVE)) {
+			criterias.add(Criteria.where("active").is(true).and("lastInBoundMsg").exists(true)
+					.orOperator(Criteria.where("resolved").exists(false), Criteria.where("resolved").is(false)));
+		}
+
+		if (query.contains(CHAT_STATE.UNATTENDED)) {
+
+			Calendar chatIdle = Calendar.getInstance();
+			chatIdle.setTimeInMillis(chatIdle.getTimeInMillis() - pmDomainConfig.getChatIdleTimeout().asMillis() * 2);
+
+			criterias.add(Criteria.where("active").is(true).and("msg.lastMsg.type").is("I").and("msg.lastMsg.timestamp")
+					.lte(chatIdle.getTimeInMillis())
+					.orOperator(Criteria.where("resolved").exists(false), Criteria.where("resolved").is(false)));
+		}
+
+		if (pmDomainConfig.isAgentHistoryLazy().asBoolean(true)) {
+
+			if (query.contains(CHAT_ASSIGN_GROUP.ME)) {
+				primaryCriteria = primaryCriteria.and("mode").is("AGENT");
+				primaryCriteria = primaryCriteria.and("assignedToDept").is(agentDept);
+				criterias.add(new Criteria().orOperator(
+						// Assigned to Me
+						Criteria.where("assignedToAgent").is(agentCode),
+						// Assigned to None
+						Criteria.where("assignedToAgent").is(null), Criteria.where("assignedToAgent").exists(false)
+				//
+				));
+			} else if (query.contains(CHAT_ASSIGN_GROUP.TEAM)) {
+				primaryCriteria = primaryCriteria.and("mode").is("AGENT");
+				criterias.add(new Criteria().orOperator(
+						// Not Assigned to Me
+						Criteria.where("assignedToDept").is(agentDept).and("assignedToAgent").ne(agentCode)
+				//
+				));
+			} else if (query.contains(CHAT_ASSIGN_GROUP.ORG)) {
+				criterias.add(new Criteria().orOperator(
+						// Not Assigned to Me
+						Criteria.where("assignedToDept").ne(agentDept),
+						// Assigned to No-Org
+						Criteria.where("assignedToDept").is(null), Criteria.where("assignedToDept").exists(false)
+				//
+				));
 			}
+
+//			else if (query.contains(CHAT_ASSIGN_GROUP.HISTORY)) {
+//				primaryCriteria = primaryCriteria.and("mode").is("AGENT");
+//				Calendar hisotryTimeout = Calendar.getInstance();
+//				hisotryTimeout.setTimeInMillis(
+//						hisotryTimeout.getTimeInMillis() - PMConstants.DEFAULT_VALUES.POSTMAN_AGENT_TAB_HISTORY_PERIOD);
+//				criterias.add(new Criteria().orOperator(
+//						// Updated before to Me
+//						Criteria.where("updated.day")
+//								.lte(hisotryTimeout.getTimeInMillis() / TimeUtils.Constants.MILLIS_IN_DAY)
+//				//
+//				));
+//			}
+
 		}
 
 		int limit = Math.min(Math.max(50, query.limit), pmDomainConfig.getAgentHistoryCount().asInteger(150));
@@ -268,7 +280,7 @@ public class ChatSessionManager {
 						.andOperator(criterias.toArray(new Criteria[criterias.size()])))
 				// Limit
 				.with(new Sort(Direction.DESC, "updated.hour")).limit(limit);
-		// System.out.println(query2.toString());
+		//System.out.println(query2.toString());
 		LOGGER.debug(query2.toString());
 		return sessionStore.find(
 				CommonMongoQueryBuilder.collection(ChatSessionDoc.class).query(query2).skipDBRefByNames("lastMsg"));

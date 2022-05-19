@@ -17,6 +17,7 @@ import com.boot.jx.scope.tnt.Tenants;
 import com.boot.model.MapModel.EntryMeta;
 import com.boot.model.MapModel.MapEntry;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.TimeUtils;
 import com.boot.utils.TimeUtils.TimePeriod;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonView;
@@ -359,6 +360,8 @@ public class PMEnvironment {
 
 		PMConfigurationObject getAgentHistoryPeriod();
 
+		PMConfigurationObject getChatIdleTimeout();
+
 		PMConfigurationObject getAgentHistoryCount();
 
 		PMConfigurationObject isAgentHistoryLazy();
@@ -373,8 +376,6 @@ public class PMEnvironment {
 		TimePeriod getAgentSessionTimeout();
 
 		String getWebhookUrl(ChannelConfig channelConfig);
-
-		String getChatIdleTimeout();
 
 		boolean isLocalDummyBotEnabled();
 

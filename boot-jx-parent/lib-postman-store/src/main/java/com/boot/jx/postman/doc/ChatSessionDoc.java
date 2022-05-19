@@ -26,10 +26,10 @@ public class ChatSessionDoc extends UpdatedTimeStampDoc implements Serializable 
 
 	private static final long serialVersionUID = 1L;
 
-	public static final String FIRST_INBOUND_STAMP = "firstInBound";
-	public static final String LAST_INBOUND_STAMP = "lastInBound";
-	public static final String FIRST_OUTBOUND_STAMP = "firstOutBound";
-	public static final String LAST_OUTBOUND_STAMP = "lastOutBound";
+	public static final String FIRST_INBOUND_STAMP = "stamps.firstInBound";
+	public static final String LAST_INBOUND_STAMP = "stamps.lastInBound";
+	public static final String FIRST_OUTBOUND_STAMP = "stamps.firstOutBound";
+	public static final String LAST_OUTBOUND_STAMP = "stamps.lastOutBound";
 
 	@Id
 	private String sessionId;

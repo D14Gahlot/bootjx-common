@@ -67,4 +67,9 @@ public class PMDomainConfigImpl implements PMDomainConfig {
 	public PMConfigurationObject getAgentHistoryCount() {
 		return environment.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_AGENT_TAB_HISTORY_LIMIT);
 	}
+
+	@Override
+	public PMConfigurationObject getChatIdleTimeout() {
+		return environment.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_CHAT_IDLE_TIMEOUT);
+	}
 }

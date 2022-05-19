@@ -21,6 +21,7 @@ import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PMEnvironment.PMClientConfig;
 import com.boot.jx.postman.PMEnvironment.PMCommonConfig;
 import com.boot.jx.postman.PMEnvironment.PMConfigurationObject;
+import com.boot.jx.postman.PMEnvironment.PMDomainConfig;
 import com.boot.jx.scope.tnt.Tenants;
 import com.boot.jx.scope.tnt.Tenants.TenantResolver;
 import com.boot.model.SafeKeyHashMap;
@@ -37,6 +38,9 @@ public class PMCommonConfigImpl implements PMCommonConfig {
 
 	@Autowired
 	private PMClientConfig chatClientConfig;
+
+	@Autowired
+	private PMDomainConfig pmDomainConfig;
 
 	@Autowired
 	private CommonHttpRequest commonHttpRequest;
@@ -118,7 +122,7 @@ public class PMCommonConfigImpl implements PMCommonConfig {
 		Map<String, Object> map = new HashMap<String, Object>();
 		map.put("AGENT_CHAT_INIT", pmEnvironment.keyEntry("postman.agent.chat.init").asBoolean());
 		map.put("CHAT_TAG_ENABLED", pmEnvironment.local().keyEntry("chat.tag.enabled").asBoolean());
-		map.put("chatIdleTimeout", TimeUtils.toMillis(chatClientConfig.getChatIdleTimeout()));
+		map.put("chatIdleTimeout", pmDomainConfig.getChatIdleTimeout().asMillis());
 		map.put("agentSessionTimeout", chatClientConfig.getAgentSessionTimeout().toMillis());
 		map.put("chatSessionTimeout", TimeUtils.toMillis(chatClientConfig.getChatSessionTimeout()));
 		return map;

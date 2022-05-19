@@ -34,7 +34,7 @@
 		<dependency>
 			<groupId>org.thymeleaf.extras</groupId>
 			<artifactId>thymeleaf-extras-springsecurity4</artifactId>
-<!-- 			<version>3.0.0.RELEASE</version> -->
+ 			<version>3.0.0.RELEASE</version>
 		</dependency>
 
 		<!-- /thymeleaf dependencies -->
@@ -136,7 +136,7 @@
 	<repositories>
 		<repository>
 			<id>spring-milestone</id>
-			<url>https://repo.spring.io/libs-milestone</url>
+			<url>https://repo.spring.io/milestone</url>
 		</repository>
 		<repository>
 			<snapshots>

@@ -37,9 +37,6 @@ public class PMClientConfigImpl implements PMClientConfig {
 	@Value("${app.local.dummy.bot.enabled}")
 	boolean localDummyBotEnabled;
 
-	@Value("${postman.chat.idle.timeout}")
-	private String chatIdleTimeout;
-
 	@Value("${" + PROPERTIES.POSTMAN_CHAT_SESSION_TIMEOUT + "}")
 	private String chatSessionTimeout;
 
@@ -72,11 +69,6 @@ public class PMClientConfigImpl implements PMClientConfig {
 	@Override
 	public String getContactDetailsUrl() {
 		return environment.local().keyEntry("postman.contact.details.url").asString(contactDetailsUrl);
-	}
-
-	@Override
-	public String getChatIdleTimeout() {
-		return environment.local().keyEntry("postman.chat.idle.timeout").asString(chatIdleTimeout);
 	}
 
 	@Override

@@ -15,6 +15,7 @@ import com.boot.utils.Constants;
 import com.boot.utils.JsonPath;
 import com.boot.utils.JsonUtil;
 import com.boot.utils.TimeUtils;
+import com.boot.utils.TimeUtils.TimePeriod;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
@@ -94,6 +95,10 @@ public class MapModel implements JsonSerializerType<Object> {
 
 		public Long asMillis() {
 			return TimeUtils.toMillis(ArgUtil.parseAsString(value, Constants.BLANK));
+		}
+
+		public TimePeriod asTimePeriod() {
+			return TimePeriod.from(ArgUtil.parseAsString(value));
 		}
 
 		/**
