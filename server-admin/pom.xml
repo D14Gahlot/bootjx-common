@@ -147,13 +147,4 @@
 			<url>http://jcenter.bintray.com</url>
 		</repository>
 	</repositories>
-	<dependencyManagement>
-		<dependencies>
-			<dependency>
-				<groupId>com.boot.jx</groupId>
-				<artifactId>lib-postman</artifactId>
-				<version>0.0.1-SNAPSHOT</version>
-			</dependency>
-		</dependencies>
-	</dependencyManagement>
 </project>
