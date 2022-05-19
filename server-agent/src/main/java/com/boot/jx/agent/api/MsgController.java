@@ -31,6 +31,7 @@ import com.boot.jx.model.CommonFile;
 import com.boot.jx.postman.PMConstants;
 import com.boot.jx.postman.PMConstants.CHAT_MODE;
 import com.boot.jx.postman.PMConstants.CHAT_STATUS;
+import com.boot.jx.postman.PMConstants.MESSAGE_SENDER_TYPE;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.client.PMFileStoreClient;
 import com.boot.jx.postman.doc.ChatContactDoc;
@@ -93,6 +94,7 @@ public class MsgController {
 
 		outboxMessage.route().setSendMode(CHAT_MODE.AGENT.toString());
 		outboxMessage.route().setSenderCode(agentSession.getAgentCode());
+		outboxMessage.route().setSenderType(MESSAGE_SENDER_TYPE.AGENT);
 		ChatSessionDoc sessionDoc = chatSessionFactory.linkSession(outboxMessage);
 
 		// Session Stuff Logging <

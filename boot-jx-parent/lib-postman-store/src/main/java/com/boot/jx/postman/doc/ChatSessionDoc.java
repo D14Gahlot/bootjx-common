@@ -9,6 +9,8 @@ import java.util.Map;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.TypeAlias;
 import org.springframework.data.annotation.Version;
+import org.springframework.data.mongodb.core.index.CompoundIndex;
+import org.springframework.data.mongodb.core.index.CompoundIndexes;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -22,6 +24,11 @@ import com.boot.utils.ArgUtil;
 
 @Document(collection = "CHAT_SESSION")
 @TypeAlias("ChatSessionDoc")
+@CompoundIndexes({
+		// route indexs
+		@CompoundIndex(name = "lastMsg_Stamp", def = "{ 'msg.lastMsg.timestamp': 1 }"),
+		@CompoundIndex(name = "route_sendMode", def = "{ 'msg.lastMsg.route.sendMode': 1 }"),
+		@CompoundIndex(name = "route_senderType", def = "{ 'msg.lastMsg.route.senderType': 1 }") })
 public class ChatSessionDoc extends UpdatedTimeStampDoc implements Serializable {
 
 	private static final long serialVersionUID = 1L;

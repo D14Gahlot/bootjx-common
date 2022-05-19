@@ -10,6 +10,7 @@ import com.boot.jx.common.config.ConfigConstants;
 import com.boot.jx.common.config.DefaultChatBoundHandler;
 import com.boot.jx.inbound.InBound.SessionAssginHandler;
 import com.boot.jx.postman.ClientApp;
+import com.boot.jx.postman.PMConstants.MESSAGE_SENDER_TYPE;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PMEnvironment.PMConfigurationObject;
 import com.boot.jx.postman.doc.ChatSessionDoc;
@@ -66,9 +67,14 @@ public class AgentInBoundHandler extends DefaultChatBoundHandler {
 	}
 
 	private void onAssign(ChatSessionDoc session, InBoundEvent assignEvent) {
+		OutboxMessage oMsg = new OutboxMessage();
 		try {
 			ClientApp app = this.context().clientApp();
 			MapModel props = MapModel.from(app.props());
+
+			oMsg.route().setQueueCode(app.getQueue());
+			oMsg.route().setSendMode(app.getAppMode());
+			oMsg.route().setSenderType(MESSAGE_SENDER_TYPE.SYSTEM);
 
 			if (!ArgUtil.is(assignEvent.sessionAssigned().oldAgent)
 					&& ArgUtil.is(assignEvent.sessionAssigned().newAgent)) {
@@ -76,7 +82,7 @@ public class AgentInBoundHandler extends DefaultChatBoundHandler {
 				MapEntry templ = getTemplate(props, "agent_connected",
 						ConfigConstants.SETUP_KEY.POSTMAN_AGENT_CHAT_AUTOREPLY_TALK2AGENT);
 				if (templ.exists()) {
-					chatService.reply(session, new OutboxMessage().template(templ.asString()));
+					chatService.reply(session, oMsg.template(templ.asString()));
 					return;
 				}
 			} else if (!ArgUtil.is(assignEvent.sessionAssigned().oldAgent)
@@ -85,14 +91,14 @@ public class AgentInBoundHandler extends DefaultChatBoundHandler {
 				MapEntry templ = getTemplate(props, "agent_notfound",
 						ConfigConstants.SETUP_KEY.POSTMAN_AGENT_CHAT_AUTOREPLY_NOAGENT);
 				if (templ.exists()) {
-					chatService.reply(session, new OutboxMessage().template(templ.asString()));
+					chatService.reply(session, oMsg.template(templ.asString()));
 					return;
 				}
 			} else {
 
 				MapEntry templ = props.keyEntry("agent_transfer");
 				if (templ.exists()) {
-					chatService.reply(session, new OutboxMessage().template(templ.asString()));
+					chatService.reply(session, oMsg.template(templ.asString()));
 					return;
 				}
 			}
@@ -100,7 +106,7 @@ public class AgentInBoundHandler extends DefaultChatBoundHandler {
 			LOGGER.error("Error ONE while Connecting to Agent", e);
 			logManager.error(assignEvent, e);
 			try {
-				chatService.reply(session, new OutboxMessage().message(
+				chatService.reply(session, oMsg.message(
 						"We are having some issues trying connect you to one of our customer representatives. Please be patient"));
 			} catch (InterruptedException e1) {
 				LOGGER.error("Error TWO  while Sending Failure", e1);

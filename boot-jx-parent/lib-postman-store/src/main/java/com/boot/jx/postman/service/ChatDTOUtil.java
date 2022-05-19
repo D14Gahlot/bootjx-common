@@ -187,14 +187,21 @@ public class ChatDTOUtil {
 		chatSessionDto.setUpdatedStamp(NumberUtil.max(chatSessionDto.getUpdatedStamp(),
 				chatSessionDto.getLastInComingStamp(), chatSessionDto.getLastResponseStamp()));
 
-		chatSessionDto.msg().put("lastInBoundMsg", getChatMessageDTO(chatSessionDoc.getLastInBoundMsg()));
-		chatSessionDto.msg().put("lastOutBoundMsg", getChatMessageDTO(chatSessionDoc.getLastOutBoundMsg()));
+		Map<String, ChatMessageDTO> msg = chatSessionDto.msg();
 
-		chatSessionDto.msg().put("lastMsg", getChatMessageDTO(latestMessage(chatSessionDoc.getLastInBoundMsg(),
-				// Only Last Inoboud
-				chatSessionDoc.getLastOutBoundMsg())
-		// ArgUtil.nonEmpty(chatSessionDoc.getLastOutBoundMsg(),chatSessionDoc.getLastMsg()))
-		));
+		if (!msg.containsKey("lastInBoundMsg")) {
+			chatSessionDto.msg().put("lastInBoundMsg", getChatMessageDTO(chatSessionDoc.getLastInBoundMsg()));
+		}
+		if (!msg.containsKey("lastOutBoundMsg")) {
+			chatSessionDto.msg().put("lastOutBoundMsg", getChatMessageDTO(chatSessionDoc.getLastOutBoundMsg()));
+		}
+		if (!msg.containsKey("lastMsg")) {
+			chatSessionDto.msg().put("lastMsg", getChatMessageDTO(latestMessage(chatSessionDoc.getLastMsg(),
+					latestMessage(chatSessionDoc.getLastInBoundMsg(), chatSessionDoc.getLastOutBoundMsg()))
+			// Only Last Inoboud
+			// ArgUtil.nonEmpty(chatSessionDoc.getLastOutBoundMsg(),chatSessionDoc.getLastMsg()))
+			));
+		}
 
 		if (!ArgUtil.is(chatSessionDto.getStatus())) {
 			if (chatSessionDto.isExpired()) {

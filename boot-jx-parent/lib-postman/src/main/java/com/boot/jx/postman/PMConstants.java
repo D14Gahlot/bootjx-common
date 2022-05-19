@@ -121,6 +121,14 @@ public class PMConstants {
 		public static final String SESSION_MESSAGE = "SM";
 	}
 
+	public final class MESSAGE_SENDER_TYPE {
+		public static final String AGENT = "AGENT";
+		public static final String SYSTEM = "SYSTEM";
+		public static final String BOT = "BOT";
+		public static final String API = "API";
+		public static final String ADMIN = "ADMIN";
+	}
+	
 	public static class MESSAGE_FORMAT_TYPE {
 		public static final String TEXT = "text";
 		public static final String TEXT_SYSTEM = "system";

@@ -21,6 +21,7 @@ import com.boot.jx.mongo.CommonMongoQueryBuilder;
 import com.boot.jx.mongo.CommonMongoQB.CommonMongoCriteria;
 import com.boot.jx.postman.ClientApp;
 import com.boot.jx.postman.PMConstants;
+import com.boot.jx.postman.PMConstants.MESSAGE_SENDER_TYPE;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.doc.BulkSessionDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
@@ -99,6 +100,7 @@ public class BulkMessageService extends BatchJobExecuter {
 
 			doc.route().setQueueCode(adminApp.getQueue());
 			doc.route().setSendMode(adminApp.getAppMode());
+			doc.route().setSenderType(MESSAGE_SENDER_TYPE.ADMIN);
 			doc.route().setSenderCode(auditDetailProvider.getAuditUser());
 
 			docs.add(doc);

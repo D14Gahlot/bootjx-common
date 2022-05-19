@@ -9,6 +9,7 @@ public class MessageRouter implements Serializable {
 	private static final long serialVersionUID = 1875887497925865671L;
 	String queueCode;
 	String senderCode;
+	String senderType;
 	String sendMode;
 
 	public String getSendMode() {
@@ -33,5 +34,13 @@ public class MessageRouter implements Serializable {
 
 	public void setSenderCode(String senderCode) {
 		this.senderCode = senderCode;
+	}
+
+	public String getSenderType() {
+		return senderType;
+	}
+
+	public void setSenderType(String senderType) {
+		this.senderType = senderType;
 	}
 }

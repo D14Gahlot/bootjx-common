@@ -24,6 +24,7 @@ import com.boot.jx.postman.PMConstants.CHAT_ASSIGN_GROUP;
 import com.boot.jx.postman.PMConstants.CHAT_STATE;
 import com.boot.jx.postman.PMConstants.CHAT_STATUS;
 import com.boot.jx.postman.PMConstants.DEFAULT_VALUES;
+import com.boot.jx.postman.PMConstants.MESSAGE_SENDER_TYPE;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PMEnvironment.PMClientConfig;
 import com.boot.jx.postman.PMEnvironment.PMDomainConfig;
@@ -224,7 +225,7 @@ public class ChatSessionManager {
 			chatIdle.setTimeInMillis(chatIdle.getTimeInMillis() - pmDomainConfig.getChatIdleTimeout().asMillis() * 2);
 
 			criterias.add(Criteria.where("active").is(true).and("msg.lastMsg.type").is("I").and("msg.lastMsg.timestamp")
-					.lte(chatIdle.getTimeInMillis())
+					.lte(chatIdle.getTimeInMillis()).and("msg.lastMsg.route.senderType").ne(MESSAGE_SENDER_TYPE.AGENT)
 					.orOperator(Criteria.where("resolved").exists(false), Criteria.where("resolved").is(false)));
 		}
 
@@ -280,7 +281,7 @@ public class ChatSessionManager {
 						.andOperator(criterias.toArray(new Criteria[criterias.size()])))
 				// Limit
 				.with(new Sort(Direction.DESC, "updated.hour")).limit(limit);
-		//System.out.println(query2.toString());
+		// System.out.println(query2.toString());
 		LOGGER.debug(query2.toString());
 		return sessionStore.find(
 				CommonMongoQueryBuilder.collection(ChatSessionDoc.class).query(query2).skipDBRefByNames("lastMsg"));
