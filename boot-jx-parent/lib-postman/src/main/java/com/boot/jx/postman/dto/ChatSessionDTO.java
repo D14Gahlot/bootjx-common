@@ -65,6 +65,8 @@ public class ChatSessionDTO implements Serializable {
 
 	private Map<String, ChatMessageDTO> msg;
 
+	private Map<String, Long> read;
+
 	public String getSessionId() {
 		return sessionId;
 	}
@@ -370,5 +372,20 @@ public class ChatSessionDTO implements Serializable {
 
 	public void setState(String state) {
 		this.state = state;
+	}
+
+	public Map<String, Long> getRead() {
+		return read;
+	}
+
+	public void setRead(Map<String, Long> read) {
+		this.read = read;
+	}
+
+	public Map<String, Long> read() {
+		if (this.read == null) {
+			this.read = new HashMap<String, Long>();
+		}
+		return this.read;
 	}
 }

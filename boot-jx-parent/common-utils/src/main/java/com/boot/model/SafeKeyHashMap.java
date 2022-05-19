@@ -20,7 +20,7 @@ public class SafeKeyHashMap<V> implements JsonSerializerType<Object>, Serializab
 
 	protected Map<String, V> map;
 
-	public String sanitizeKey(Object key) {
+	public static String sanitizeKey(Object key) {
 		if (key == null) {
 			throw ArgExceptions.paramMissingOrInvalid(null, null, key);
 		}
@@ -35,6 +35,7 @@ public class SafeKeyHashMap<V> implements JsonSerializerType<Object>, Serializab
 		this.map = new HashMap<String, V>();
 	}
 
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public SafeKeyHashMap(Map<String, V> newmap) {
 		super();
 		if (newmap != null) {

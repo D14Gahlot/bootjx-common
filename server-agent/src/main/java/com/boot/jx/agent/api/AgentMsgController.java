@@ -39,6 +39,7 @@ import com.boot.jx.postman.dto.ChatSessionDTO;
 import com.boot.jx.postman.manager.ChatSessionManager;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.model.SessionSearchQuery;
+import com.boot.jx.postman.query.ChatSessionQuery;
 import com.boot.jx.postman.service.ChatDTOUtil;
 import com.boot.jx.postman.store.MessageStore;
 import com.boot.jx.postman.store.SessionStore;
@@ -129,14 +130,19 @@ public class AgentMsgController {
 			@RequestParam(required = false) String messageId, @RequestParam(required = false) String messageIdExt) {
 		ApiResponse<ChatMessageDTO, ChatSessionDTO> resp = ApiResponse.build();
 		ChatSessionDoc sessionDoc = sessionStore.getSession(sessionId);
-		ChatSessionDTO chatSessionDto = chatArchive.getChatSession(sessionDoc);
 		if (ArgUtil.is(messageId)) {
+			ChatSessionDTO chatSessionDto = chatArchive.getChatSession(sessionDoc);
 			MessageDoc m = messageStore.findByMessageId(messageId, sessionDoc.contact().getContactType());
 			return resp.result(chatArchive.createMessageDTO(m, chatSessionDto)).meta(chatSessionDto);
 		} else if (ArgUtil.is(messageIdExt)) {
+			ChatSessionDTO chatSessionDto = chatArchive.getChatSession(sessionDoc);
 			MessageDoc m = messageStore.findOneByMessageIdExt(messageIdExt, sessionDoc.contact().getContactType());
 			return resp.result(chatArchive.createMessageDTO(m, chatSessionDto)).meta(chatSessionDto);
 		} else {
+			if (agentSession.isLoggedIn() && ArgUtil.is(agentSession.getAgentCode())) {
+				new ChatSessionQuery(sessionDoc).read(agentSession.getAgentCode());
+			}
+			ChatSessionDTO chatSessionDto = chatArchive.getChatSession(sessionDoc);
 			return resp.results(chatArchive.getMessages(chatSessionDto)).meta(chatSessionDto);
 		}
 	}

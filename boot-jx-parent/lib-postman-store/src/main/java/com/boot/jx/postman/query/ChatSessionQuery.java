@@ -7,6 +7,7 @@ import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.service.ChatDTOUtil;
 import com.boot.jx.postman.store.MessageStore;
+import com.boot.model.SafeKeyHashMap;
 
 public class ChatSessionQuery extends DocQueryBuilder<ChatSessionDoc> {
 
@@ -126,6 +127,14 @@ public class ChatSessionQuery extends DocQueryBuilder<ChatSessionDoc> {
 	public ChatSessionQuery setQueue(String queue) {
 		this.doc.setAssignedToQueue(queue);
 		this.set("assignedToQueue", queue);
+		return this;
+	}
+
+	public ChatSessionQuery read(String agent) {
+		String key = SafeKeyHashMap.sanitizeKey(agent);
+		long now = System.currentTimeMillis();
+		this.doc.read().put(key, now);
+		this.set("read." + key, now);
 		return this;
 	}
 
