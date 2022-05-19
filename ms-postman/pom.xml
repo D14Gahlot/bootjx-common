@@ -279,6 +279,10 @@
 		<!-- <repository> <id>itext</id> <name>iText Repository - releases</name> 
 			<url>https://repo.itextsupport.com/releases</url> </repository> -->
 		<repository>
+			<id>maven</id>
+			<url>https://repo1.maven.org/maven2/</url>
+		</repository>
+		<repository>
 			<id>Adobe</id>
 			<name>Adobe Repository - releases</name>
 			<url>https://repo.adobe.com/nexus/content/repositories/public/</url>
