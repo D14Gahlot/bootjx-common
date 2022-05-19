@@ -140,7 +140,7 @@ public class AgentMsgController {
 			return resp.result(chatArchive.createMessageDTO(m, chatSessionDto)).meta(chatSessionDto);
 		} else {
 			if (agentSession.isLoggedIn() && ArgUtil.is(agentSession.getAgentCode())) {
-				new ChatSessionQuery(sessionDoc).read(agentSession.getAgentCode());
+				sessionStore.save(new ChatSessionQuery(sessionDoc).read(agentSession.getAgentCode()));
 			}
 			ChatSessionDTO chatSessionDto = chatArchive.getChatSession(sessionDoc);
 			return resp.results(chatArchive.getMessages(chatSessionDto)).meta(chatSessionDto);
