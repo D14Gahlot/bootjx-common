@@ -216,8 +216,12 @@ public class ChatSessionManager {
 			criterias.add(new Criteria().orOperator(Criteria.where("assignedToAgent").is(null),
 					Criteria.where("assignedToAgent").exists(false)));
 		} else if (query.contains(CHAT_STATE.ACTIVE)) {
-			criterias.add(Criteria.where("active").is(true).and("lastInBoundMsg").exists(true)
-					.orOperator(Criteria.where("resolved").exists(false), Criteria.where("resolved").is(false)));
+			criterias.add(new Criteria() //
+					.andOperator(Criteria.where("active").is(true) //
+							.orOperator(Criteria.where("resolved").exists(false), Criteria.where("resolved").is(false)))
+					.orOperator(Criteria.where("lastInBoundMsg").exists(true),
+							Criteria.where("msg.lastInBoundMsg").exists(true))//
+			);
 		}
 
 		if (query.contains(CHAT_STATE.UNATTENDED) || query.contains(CHAT_STATE.WAITING)
