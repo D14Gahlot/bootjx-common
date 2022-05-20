@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
+import org.springframework.data.mongodb.core.query.BasicQuery;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Component;
@@ -219,14 +220,31 @@ public class ChatSessionManager {
 					.orOperator(Criteria.where("resolved").exists(false), Criteria.where("resolved").is(false)));
 		}
 
-		if (query.contains(CHAT_STATE.UNATTENDED)) {
+		if (query.contains(CHAT_STATE.UNATTENDED) || query.contains(CHAT_STATE.WAITING)
+				|| query.contains(CHAT_STATE.WAITING_LONG)) {
+
+			primaryCriteria = primaryCriteria.and("mode").is("AGENT");
 
 			Calendar chatIdle = Calendar.getInstance();
 			chatIdle.setTimeInMillis(chatIdle.getTimeInMillis() - pmDomainConfig.getChatIdleTimeout().asMillis() * 2);
 
-			criterias.add(Criteria.where("active").is(true).and("msg.lastMsg.type").is("I").and("msg.lastMsg.timestamp")
-					.lte(chatIdle.getTimeInMillis()).and("msg.lastMsg.route.senderType").ne(MESSAGE_SENDER_TYPE.AGENT)
-					.orOperator(Criteria.where("resolved").exists(false), Criteria.where("resolved").is(false)));
+			criterias
+					.add(new Criteria()
+							.andOperator(Criteria.where("active").is(true).orOperator(
+									Criteria.where("resolved").exists(false), Criteria.where("resolved").is(false)))
+							.orOperator(
+									// Last message was inbound and outbound is older
+									Criteria.where("msg.lastMsg.type").is("I").and("msg.lastOutBoundMsg.timestamp")
+											.lte(chatIdle.getTimeInMillis()),
+									// Last message was inbound and No outbound
+									Criteria.where("msg.lastMsg.type").is("I").and("msg.lastMsg.timestamp")
+											.lte(chatIdle.getTimeInMillis()).and("msg.lastOutBoundMsg").exists(false),
+									// Last message was not from agent and its older
+									Criteria.where("msg.lastMsg.route.senderType").ne(MESSAGE_SENDER_TYPE.AGENT)
+											.and("msg.lastMsg.timestamp").lte(chatIdle.getTimeInMillis())
+							//
+							));
+
 		}
 
 		if (pmDomainConfig.isAgentHistoryLazy().asBoolean(true)) {
