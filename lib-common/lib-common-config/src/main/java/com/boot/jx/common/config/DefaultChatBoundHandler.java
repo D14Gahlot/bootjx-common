@@ -252,23 +252,25 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 			if (ArgUtil.areEqual(CHAT_MODE.WEBHOOK.toString(), defaultClient.getAppType())) {
 				LOGGER.debug("Forwarding MessageReport to Xternal Service ");
 				try {
-					InBoundContact contact = InBoundContact.from(messageReport.contact());
+					if (ArgUtil.is(defaultClient.getWebhook())) {
+						InBoundContact contact = InBoundContact.from(messageReport.contact());
+						InBoundMsgStatus status = new InBoundMsgStatus();
+						status.contactId = contact.contactId;
+						status.messageId = messageReport.getMessageId();
+						status.messageIdExt = messageReport.getMessageIdExt();
+						status.timestamp = messageReport.getChangeStamp();
+						status.status = messageReport.getStatus();
+						status.errors = messageReport.getErrors();
 
-					InBoundMsgStatus status = new InBoundMsgStatus();
-					status.contactId = contact.contactId;
-					status.messageId = messageReport.getMessageId();
-					status.messageIdExt = messageReport.getMessageIdExt();
-					status.timestamp = messageReport.getChangeStamp();
-					status.status = messageReport.getStatus();
-					status.errors = messageReport.getErrors();
+						InBoundWrapper wrap = new InBoundWrapper();
+						wrap.meta = new InBoundMeta().domain(AppContextUtil.getTenant())
+								.server(pmEnvironment.keyEntry(ConfigConstants.APP_KEY.PROP_SERVICE_DOMAIN).asString())
+								.appId(defaultClient.getId());
+						wrap.contacts = CollectionUtil.asList(contact);
+						wrap.statuses = CollectionUtil.asList(status);
+						restService.ajax(defaultClient.getWebhook()).post(wrap).asNone();
+					}
 
-					InBoundWrapper wrap = new InBoundWrapper();
-					wrap.meta = new InBoundMeta().domain(AppContextUtil.getTenant())
-							.server(pmEnvironment.keyEntry(ConfigConstants.APP_KEY.PROP_SERVICE_DOMAIN).asString())
-							.appId(defaultClient.getId());
-					wrap.contacts = CollectionUtil.asList(contact);
-					wrap.statuses = CollectionUtil.asList(status);
-					restService.ajax(defaultClient.getWebhook()).post(wrap).asNone();
 				} catch (Exception e) {
 					logManager.error(messageReport, e);
 				}
@@ -366,15 +368,17 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 	private void sendEventWebhook(InBoundEvent event, ClientApp defaultClient) {
 		LOGGER.debug("Forwarding Session Routing Event to Xternal Service ");
 		try {
-			InBoundContact contact = InBoundContact.from(event.contact());
+			if (ArgUtil.is(defaultClient.getWebhook())) {
+				InBoundContact contact = InBoundContact.from(event.contact());
 
-			InBoundWrapper wrap = new InBoundWrapper();
-			wrap.meta = new InBoundMeta().domain(AppContextUtil.getTenant())
-					.server(pmEnvironment.keyEntry(ConfigConstants.APP_KEY.PROP_SERVICE_DOMAIN).asString())
-					.appId(defaultClient.getId());
-			wrap.contacts = CollectionUtil.asList(contact);
-			wrap.events = CollectionUtil.asList(event);
-			restService.ajax(defaultClient.getWebhook()).post(wrap).asNone();
+				InBoundWrapper wrap = new InBoundWrapper();
+				wrap.meta = new InBoundMeta().domain(AppContextUtil.getTenant())
+						.server(pmEnvironment.keyEntry(ConfigConstants.APP_KEY.PROP_SERVICE_DOMAIN).asString())
+						.appId(defaultClient.getId());
+				wrap.contacts = CollectionUtil.asList(contact);
+				wrap.events = CollectionUtil.asList(event);
+				restService.ajax(defaultClient.getWebhook()).post(wrap).asNone();
+			}
 		} catch (Exception e) {
 			logManager.error(event, e);
 		}
