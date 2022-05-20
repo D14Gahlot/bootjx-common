@@ -9,13 +9,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
-import org.springframework.data.mongodb.core.query.BasicQuery;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Component;
 
 import com.boot.jx.api.ApiFieldError;
 import com.boot.jx.api.ApiResponseUtil;
+import com.boot.jx.dict.ContactType;
 import com.boot.jx.mongo.CommonMongoQueryBuilder;
 import com.boot.jx.postman.ClientApp;
 import com.boot.jx.postman.PMConfiguration.PMConfigurationWrappper;
@@ -245,6 +245,14 @@ public class ChatSessionManager {
 							//
 							));
 
+		}
+
+		if (query.contactTypes().size() > 0) {
+			List<Criteria> contactCriteris = new ArrayList<Criteria>();
+			for (ContactType contactType : query.contactTypes()) {
+				contactCriteris.add(Criteria.where("contactType").is(contactType));
+			}
+			criterias.add(new Criteria().orOperator(contactCriteris.toArray(new Criteria[contactCriteris.size()])));
 		}
 
 		if (pmDomainConfig.isAgentHistoryLazy().asBoolean(true)) {
