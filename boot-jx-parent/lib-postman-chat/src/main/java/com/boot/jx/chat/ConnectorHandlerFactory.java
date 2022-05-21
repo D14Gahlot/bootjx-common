@@ -379,6 +379,7 @@ public class ConnectorHandlerFactory extends ScopedBeanFactory<String, Connector
 				contactQuery.update(inboxMessage.contact());
 			}
 
+			sessionQuery.setLastMsg(ChatDTOUtil.getChatMessageDTO(messageDoc));
 			commonMongoTemplate.updateFirst(sessionQuery);
 			commonMongoTemplate.updateFirst(contactQuery);
 		}

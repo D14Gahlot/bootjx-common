@@ -208,9 +208,15 @@ public class ChatSessionManager {
 			expiryWatermark.setTimeInMillis(
 					expiryWatermark.getTimeInMillis() - TimeUtils.toMillis(pmClientConfig.getChatSessionTimeout()));
 			long expiryWatermarkHour = expiryWatermark.getTimeInMillis() / TimeUtils.Constants.MILLIS_IN_HOUR;
-
-			criterias.add(Criteria.where("active").is(true).and("updated.hour").lte(expiryWatermarkHour)
-					.orOperator(Criteria.where("resolved").exists(false), Criteria.where("resolved").is(false)));
+			criterias.add(Criteria.where("active").is(true)//
+					.andOperator(//
+							new Criteria().orOperator(//
+									Criteria.where("resolved").exists(false), Criteria.where("resolved").is(false)))
+					.orOperator(//
+							Criteria.where("updated.hour").lte(expiryWatermarkHour), //
+							Criteria.where("lastInComingStamp").lte(expiryWatermark.getTimeInMillis())
+									.and("msg.lastInBoundMsg").exists(true)//
+					));
 		} else if (query.contains(CHAT_ASSIGN_GROUP.UNASSIGNED)) {
 			primaryCriteria = primaryCriteria.and("mode").is("AGENT");
 			criterias.add(new Criteria().orOperator(Criteria.where("assignedToAgent").is(null),
