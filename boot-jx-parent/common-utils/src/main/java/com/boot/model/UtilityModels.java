@@ -8,41 +8,41 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 public class UtilityModels {
 
-    public interface Stringable {
-	void fromString(String testString);
-    }
-
-    public interface Indexable {
-	public String id();
-    }
-
-    /**
-     * While De-Serialization
-     * 
-     * @author lalittanwar
-     *
-     */
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    public interface JsonIgnoreUnknown extends Serializable {
-    }
-
-    /**
-     * While Serialization
-     * 
-     * @author lalittanwar
-     *
-     */
-    @JsonInclude(Include.NON_NULL)
-    public interface JsonIgnoreNull extends Serializable {
-    }
-
-    public interface JsonStringify {
-	String toJsonString();
-    }
-
-    public interface JsonObject {
-	default Object jsonObject() {
-	    return this;
+	public interface Stringable {
+		void fromString(String testString);
 	}
-    }
+
+	public interface Indexable {
+		public String id();
+	}
+
+	/**
+	 * While De-Serialization
+	 * 
+	 * @author lalittanwar
+	 *
+	 */
+	@JsonIgnoreProperties(ignoreUnknown = true)
+	public interface JsonIgnoreUnknown extends Serializable {
+	}
+
+	/**
+	 * While Serialization
+	 * 
+	 * @author lalittanwar
+	 *
+	 */
+	@JsonInclude(Include.NON_NULL)
+	public interface JsonIgnoreNull extends Serializable {
+	}
+
+	public interface JsonStringify {
+		String toJsonString();
+	}
+
+	public interface JsonObject {
+		default Object jsonObject() {
+			return this;
+		}
+	}
 }

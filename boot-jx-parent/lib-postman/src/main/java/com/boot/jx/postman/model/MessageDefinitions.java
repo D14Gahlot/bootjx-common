@@ -207,7 +207,7 @@ public class MessageDefinitions {
 			return JsonUtil.getMapper().readValue(key, ContactMeta.class);
 		}
 	}
-
+	
 	public interface LoggableEntity {
 		public String getSessionId();
 

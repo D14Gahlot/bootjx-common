@@ -13,6 +13,7 @@ import org.springframework.data.mongodb.core.query.Update;
 
 import com.boot.jx.model.AuditCreateEntity;
 import com.boot.jx.model.AuditCreateEntity.AuditUpdateEntity;
+import com.boot.model.TimeModels.ITimeStampIndex;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.EntityDtoUtil;
 import com.boot.utils.JsonUtil;
@@ -261,7 +262,7 @@ public class CommonDocInterfaces {
 		public String getId();
 	}
 
-	public static class TimeStampIndex implements Serializable {
+	public static class TimeStampIndex implements Serializable, ITimeStampIndex {
 
 		private static final long serialVersionUID = 9114924334759684396L;
 		private long stamp;
@@ -272,34 +273,42 @@ public class CommonDocInterfaces {
 		@Indexed
 		private long week;
 
+		@Override
 		public long getStamp() {
 			return stamp;
 		}
 
+		@Override
 		public void setStamp(long stamp) {
 			this.stamp = stamp;
 		}
 
+		@Override
 		public long getHour() {
 			return hour;
 		}
 
+		@Override
 		public void setHour(long hour) {
 			this.hour = hour;
 		}
 
+		@Override
 		public long getDay() {
 			return day;
 		}
 
+		@Override
 		public void setDay(long day) {
 			this.day = day;
 		}
 
+		@Override
 		public long getWeek() {
 			return week;
 		}
 
+		@Override
 		public void setWeek(long week) {
 			this.week = week;
 		}

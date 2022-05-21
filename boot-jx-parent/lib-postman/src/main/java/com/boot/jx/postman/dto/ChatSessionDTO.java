@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.boot.jx.postman.model.MessageDefinitions.Contactable;
+import com.boot.model.TimeModels.ITimeStampIndex;
 import com.boot.utils.ArgUtil;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
@@ -387,5 +388,15 @@ public class ChatSessionDTO implements Serializable {
 			this.read = new HashMap<String, Long>();
 		}
 		return this.read;
+	}
+
+	private ITimeStampIndex updated;
+
+	public ITimeStampIndex getUpdated() {
+		return updated;
+	}
+
+	public void setUpdated(ITimeStampIndex updated) {
+		this.updated = updated;
 	}
 }
