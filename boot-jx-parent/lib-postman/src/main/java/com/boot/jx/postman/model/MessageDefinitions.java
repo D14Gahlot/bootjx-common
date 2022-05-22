@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.boot.jx.dict.ContactType;
-import com.boot.jx.utils.PostManUtil;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.JsonUtil;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -158,14 +157,16 @@ public class MessageDefinitions {
 		public void setSessionId(String sessionId);
 	}
 
-	// External attributes
 	@JsonIgnoreProperties(ignoreUnknown = true)
-	public interface SessionMessage extends SessionId, IMessageId, Serializable {
-
+	public interface SessionInfo extends SessionId, Serializable {
 		public MessageSession session();
 
 		public Contactable contact();
+	}
 
+	// External attributes
+	@JsonIgnoreProperties(ignoreUnknown = true)
+	public interface SessionMessage extends SessionInfo, SessionId, IMessageId {
 		public String getSubject();
 	}
 
@@ -207,7 +208,7 @@ public class MessageDefinitions {
 			return JsonUtil.getMapper().readValue(key, ContactMeta.class);
 		}
 	}
-	
+
 	public interface LoggableEntity {
 		public String getSessionId();
 

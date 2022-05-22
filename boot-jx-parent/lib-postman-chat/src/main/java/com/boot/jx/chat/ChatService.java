@@ -19,13 +19,13 @@ import com.boot.jx.postman.manager.LogManager;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.Message;
 import com.boot.jx.postman.model.MessageDefinitions.IMessageExtended;
+import com.boot.jx.postman.model.MessageDefinitions.SessionInfo;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.model.ext.InBoundEvent;
 import com.boot.jx.postman.store.MessageContext;
 import com.boot.jx.postman.store.MessageStore;
 import com.boot.jx.postman.store.SessionStore;
 import com.boot.utils.ArgUtil;
-import com.boot.utils.TimeUtils;
 
 @Component
 public class ChatService {
@@ -242,10 +242,7 @@ public class ChatService {
 		return true;
 	}
 
-	public MessageContext loadChatContext(String contactId, InboxMessage inboxMessage) {
-
-		messageContext.setInboxMessage(inboxMessage);
-
+	private MessageContext loadChatContextInternal(String contactId, SessionInfo inboxMessage) {
 		if (!ArgUtil.is(inboxMessage.session().getMode())) {
 			ChatSessionDoc sessionDoc = messageContext.session().getDoc();
 
@@ -276,6 +273,16 @@ public class ChatService {
 
 		// messageStore.create(inboxMessage);
 		return messageContext;
+	}
+
+	public MessageContext loadChatContext(String contactId, InboxMessage inboxMessage) {
+		messageContext.setInboxMessage(inboxMessage);
+		return loadChatContextInternal(contactId, inboxMessage);
+	}
+
+	public MessageContext loadChatContext(String contactId, InBoundEvent assignEvent) {
+		messageContext.setInBoundEvent(assignEvent);
+		return loadChatContextInternal(contactId, assignEvent);
 	}
 
 	public void commitChatContext(String contactId, String prevHandler, InboxMessage inboxMessage) {

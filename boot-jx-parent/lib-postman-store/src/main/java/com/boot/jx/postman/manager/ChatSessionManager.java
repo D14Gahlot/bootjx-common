@@ -76,6 +76,7 @@ public class ChatSessionManager {
 		inBoundEvent.sessionId = session.getSessionId();
 		inBoundEvent.contactId = session.getContactId();
 		inBoundEvent.contact().copyFrom(session.contact());
+		sessionStore.updateMessageFromSession(session, inBoundEvent);
 		sessionStore.changeStatus(session, status);
 		logManager.event(session, EVENTS.STATUS_CHANGED, oldStatus, status.toString());
 		return inBoundEvent;
@@ -94,6 +95,7 @@ public class ChatSessionManager {
 		inBoundEvent.sessionId = session.getSessionId();
 		inBoundEvent.contactId = session.getContactId();
 		inBoundEvent.contact().copyFrom(session.contact());
+		sessionStore.updateMessageFromSession(session, inBoundEvent);
 
 		logManager.event(session, EVENTS.STATUS_CHANGED, session.getStatus(),
 				PMConstants.CHAT_STATUS.RESOLVED.toString());
@@ -110,6 +112,7 @@ public class ChatSessionManager {
 		inBoundEvent.sessionId = session.getSessionId();
 		inBoundEvent.contactId = session.getContactId();
 		inBoundEvent.contact().copyFrom(session.contact());
+		sessionStore.updateMessageFromSession(session, inBoundEvent);
 
 		session = sessionStore.closeSession(session);
 		logManager.event(session, EVENTS.STATUS_CHANGED, session.getStatus(),
@@ -370,6 +373,7 @@ public class ChatSessionManager {
 		inBoundEvent.contactId = chatSessionDoc.getContactId();
 		inBoundEvent.sessionRouted.sourceQueue = chatSessionDoc.getAssignedToQueue();
 		inBoundEvent.contact().copyFrom(chatSessionDoc.contact());
+		sessionStore.updateMessageFromSession(chatSessionDoc, inBoundEvent);
 
 		if (ArgUtil.is(chatSessionDoc.getContactId())) {
 			inBoundEvent.contact().setContactId(inBoundEvent.contactId);

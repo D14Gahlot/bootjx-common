@@ -21,7 +21,6 @@ public class FeedbackController extends CommonBotController {
 		String template = ArgUtil.parseAsString(app.props().get("template"));
 		if (ArgUtil.is(template)) { // item_menu_template
 			reply(new OutboxMessage().template(template));
-			return;
 		} else {
 			reply(new OutboxMessage().message("Thank you for interacting with us via WhatsApp Support.\n"
 					+ "Kindly share your feedback on a scale of 1-5."
