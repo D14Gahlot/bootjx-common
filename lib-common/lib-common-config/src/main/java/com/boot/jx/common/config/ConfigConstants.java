@@ -9,6 +9,8 @@ import com.boot.jx.common.impl.ConfigMeta;
 import com.boot.jx.common.impl.ConfigMeta.ConfigOption;
 import com.boot.jx.common.impl.ConfigMeta.INPUT_TYPE;
 import com.boot.jx.postman.PMConstants;
+import com.boot.jx.postman.PMConstants.APP_TYPE;
+import com.boot.jx.postman.PMConstants.PROPERTIES;
 import com.boot.model.MapModel.EntryMeta;
 import com.boot.utils.TimeUtils;
 import com.google.i18n.phonenumbers.PhoneNumberUtil;
@@ -63,6 +65,10 @@ public class ConfigConstants {
 		POSTMAN_CHAT_AGENT_QUEUE(
 				new ConfigMeta("Default Agent Queue", "postman.chat.agent.queue").desc("Default Agent App")
 						.optionsSource("getx:/api/options/agent_queue").optionsKey("code").optionsLabel("code")),
+
+		POSTMAN_CHAT_FEEDBACK_QUEUE(new ConfigMeta("Default Feedback Queue", PROPERTIES.POSTMAN_CHAT_FEEDBACK_QUEUE)
+				.desc("Default Feedback App").optionsSource("getx:/api/options/inbound_queue").optionsKey("code")
+				.optionsLabel("code").filter("type", APP_TYPE.FEEDBACK)),
 
 		POSTMAN_CHAT_CHANNEL_SANDBOX(new ConfigMeta("Enable Sandbox Channels", "postman.chat.channel.sandbox")
 				.desc("Sandbox channels are preconfigured communication channels").optionsOnOff()),

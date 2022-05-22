@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.Map;
 
 import com.boot.jx.postman.PMConstants.APP_TYPE;
+import com.boot.jx.postman.PMConstants.CHAT_MODE;
 import com.fasterxml.jackson.annotation.JsonView;
 
 public interface ClientApp extends Serializable {
@@ -45,5 +46,9 @@ public interface ClientApp extends Serializable {
 	boolean isReadOnly();
 
 	boolean isAgentApp();
+
+	boolean equals(CHAT_MODE mode);
+
+	boolean equals(APP_TYPE appType);
 
 }

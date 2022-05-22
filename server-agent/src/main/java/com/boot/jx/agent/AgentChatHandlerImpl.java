@@ -272,7 +272,7 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 	}
 
 	public ChatMessageDTO exitAgentMode(ChatSessionDoc chatSessionDoc, OutboxMessage outboxMessage) {
-		chatSessionService.closeSession(chatSessionDoc);
+		chatSessionService.resolveSession(chatSessionDoc);
 		MessageDoc messageDoc = null;
 		if (ArgUtil.is(outboxMessage)) {
 			messageDoc = chatService.send(chatSessionDoc, outboxMessage);

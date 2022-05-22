@@ -6,7 +6,9 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.boot.utils.ArgUtil;
 
@@ -116,6 +118,7 @@ public class ConfigMeta implements Serializable {
 	private MESSAGE_TYPE messageType;
 
 	private List<ConfigOption> options;
+	private Map<String, Object> filter;
 	private String optionsKey;
 	private String optionsLabel;
 	private String optionsSource;
@@ -518,4 +521,23 @@ public class ConfigMeta implements Serializable {
 		return this;
 	}
 
+	public Map<String, Object> getFilter() {
+		return filter;
+	}
+
+	public void setFilter(Map<String, Object> filter) {
+		this.filter = filter;
+	}
+
+	public Map<String, Object> filter() {
+		if (this.filter == null) {
+			this.filter = new HashMap<String, Object>();
+		}
+		return this.filter;
+	}
+
+	public ConfigMeta filter(String key, Object value) {
+		filter().put(key, value);
+		return this;
+	}
 }

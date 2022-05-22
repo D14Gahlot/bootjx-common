@@ -10,7 +10,10 @@ import com.boot.jx.inbound.InBound.InBoundHandler;
 import com.boot.jx.logger.LoggerService;
 import com.boot.jx.postman.PMConstants;
 import com.boot.jx.postman.PMConstants.CHAT_STATUS;
+import com.boot.jx.postman.PMConstants.PROPERTIES;
+import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PMEnvironment.PMClientConfig;
+import com.boot.jx.postman.PMEnvironment.PMConfigurationObject;
 import com.boot.jx.postman.PMEnvironment.PMDomainConfig;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
@@ -56,6 +59,9 @@ public class ChatSessionService {
 
 	@Autowired
 	private ChatClient chatClient;
+
+	@Autowired
+	private PMEnvironment env;
 
 	@Autowired(required = false)
 	private InBoundHandler inBoundHandler;
@@ -223,6 +229,24 @@ public class ChatSessionService {
 	public NodeEntry<InBoundEvent> closeSession(String sessionId) {
 		ChatSessionDoc sessionDoc = sessionStore.getSession(sessionId);
 		return closeSession(sessionDoc);
+	}
+
+	public NodeEntry<InBoundEvent> resolveSession(ChatSessionDoc chatSessionDoc) {
+		NodeEntry<InBoundEvent> eventEntry = new NodeEntry<InBoundEvent>();
+		if (!chatSessionDoc.isResolved()) {
+			if (!chatSessionDoc.isResolved()) {
+				eventEntry = updateSessionStatus(chatSessionDoc, PMConstants.CHAT_STATUS.RESOLVED);
+			}
+		}
+
+		PMConfigurationObject feedbackQueue = env.keyEntry(PROPERTIES.POSTMAN_CHAT_FEEDBACK_QUEUE);
+		if (feedbackQueue.exists()) {
+			routeSession(chatSessionDoc, new PMArgs().assignToQueueCode(feedbackQueue.asString()));
+		} else {
+			return closeSession(chatSessionDoc);
+		}
+
+		return eventEntry;
 	}
 
 	public NodeEntry<InBoundEvent> assignSessionToAgent(PMArgs params) {

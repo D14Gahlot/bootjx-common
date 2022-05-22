@@ -27,17 +27,13 @@ public class PMClientConfigImpl implements PMClientConfig {
 		public static final String ASSIGN_TO_AGENT = "/int/assign/agent";
 	}
 
-	public static class PROPERTIES {
-		private static final String POSTMAN_CHAT_SESSION_TIMEOUT = "postman.chat.session.timeout";
-	}
-
 	@Value("${postman.contact.details.url}")
 	private String contactDetailsUrl;
 
 	@Value("${app.local.dummy.bot.enabled}")
 	boolean localDummyBotEnabled;
 
-	@Value("${" + PROPERTIES.POSTMAN_CHAT_SESSION_TIMEOUT + "}")
+	@Value("${" + PMConstants.PROPERTIES.POSTMAN_CHAT_SESSION_TIMEOUT + "}")
 	private String chatSessionTimeout;
 
 	@Value("${postman.agent.session.timeout}")
@@ -73,7 +69,7 @@ public class PMClientConfigImpl implements PMClientConfig {
 
 	@Override
 	public String getChatSessionTimeout() {
-		return environment.local().keyEntry(PROPERTIES.POSTMAN_CHAT_SESSION_TIMEOUT).asString(chatSessionTimeout);
+		return environment.local().keyEntry(PMConstants.PROPERTIES.POSTMAN_CHAT_SESSION_TIMEOUT).asString(chatSessionTimeout);
 	}
 
 	@Override

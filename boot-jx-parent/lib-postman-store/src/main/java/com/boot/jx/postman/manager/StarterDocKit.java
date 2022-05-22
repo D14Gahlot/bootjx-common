@@ -102,6 +102,16 @@ public class StarterDocKit {
 		adminApp.setKeyVersion("v4");
 		adminApp.setShared(true);
 		createClientApp(adminApp);
+
+		ClientAppConfigDoc feedbackApp = new ClientAppConfigDoc();
+		feedbackApp.setId(PMConstants.DEFAULT.FEEDBACK_QUEUE_CODE);
+		feedbackApp.setKeyName("Feedback Collector");
+		feedbackApp.setQueue(PMConstants.DEFAULT.FEEDBACK_QUEUE_CODE);
+		feedbackApp.setAppType(APP_TYPE.FEEDBACK.name());
+		feedbackApp.setKey(PostManUtil.UNIQUE_API_KEY());
+		feedbackApp.setKeyVersion("v4");
+		feedbackApp.setShared(true);
+		createClientApp(feedbackApp);
 	}
 
 	private void createDefaultTemplats() {

@@ -68,6 +68,8 @@ public class ChatSessionDTO implements Serializable {
 
 	private Map<String, Long> read;
 
+	private Map<String, Object> feedback;
+
 	public String getSessionId() {
 		return sessionId;
 	}
@@ -398,5 +400,13 @@ public class ChatSessionDTO implements Serializable {
 
 	public void setUpdated(ITimeStampIndex updated) {
 		this.updated = updated;
+	}
+
+	public Map<String, Object> getFeedback() {
+		return feedback;
+	}
+
+	public void setFeedback(Map<String, Object> feedback) {
+		this.feedback = feedback;
 	}
 }
