@@ -35,7 +35,7 @@ public class TimeModels {
 	}
 
 	@JsonIgnoreProperties(ignoreUnknown = true)
-	public class ITimeStampIndexImpl implements ITimeStampIndex {
+	public static class ITimeStampIndexImpl implements ITimeStampIndex {
 
 		private static final long serialVersionUID = -923904958433975647L;
 		private long stamp;
@@ -76,7 +76,7 @@ public class TimeModels {
 		}
 	}
 
-	public class TimeStampIndexKeyDeserializer extends KeyDeserializer {
+	public static class TimeStampIndexKeyDeserializer extends KeyDeserializer {
 		@Override
 		public Object deserializeKey(String key, DeserializationContext deserializationContext)
 				throws IOException, JsonProcessingException {

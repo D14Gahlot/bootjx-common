@@ -28,7 +28,8 @@ import com.boot.utils.ArgUtil;
 		// route indexs
 		@CompoundIndex(name = "lastMsg_Stamp", def = "{ 'msg.lastMsg.timestamp': 1 }"),
 		@CompoundIndex(name = "route_sendMode", def = "{ 'msg.lastMsg.route.sendMode': 1 }"),
-		@CompoundIndex(name = "route_senderType", def = "{ 'msg.lastMsg.route.senderType': 1 }") })
+		@CompoundIndex(name = "route_senderType", def = "{ 'msg.lastMsg.route.senderType': 1 }"),
+		@CompoundIndex(name = "lastOutBoundMsg_Stamp", def = "{ 'msg.lastOutBoundMsg.timestamp': 1 }"), })
 public class ChatSessionDoc extends UpdatedTimeStampDoc implements Serializable {
 
 	private static final long serialVersionUID = 1L;
