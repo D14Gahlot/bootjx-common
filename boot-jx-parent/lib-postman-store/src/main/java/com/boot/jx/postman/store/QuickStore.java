@@ -59,15 +59,15 @@ public class QuickStore extends CommonMongoTemplateAbstract {
 		return find(CommonMongoQueryBuilder.collection(clazz).with(Criteria.where("category").regex(category, "i")));
 	}
 
-	public <T extends QuickGalleryItem> List<T> findGalleryItems(String text, Class<T> clazz) {
+	public <T extends QuickGalleryItem> List<T> findGalleryItems(String codeIdOrTitle, Class<T> clazz) {
 
 		List<Criteria> orList = new ArrayList<Criteria>();
-		orList.add(Criteria.where("code").is(text));
-		orList.add(Criteria.where("_id").is(text));
-		if (text != null && ObjectId.isValid(text)) {
-			orList.add(Criteria.where("id").is(new ObjectId(text)));
+		orList.add(Criteria.where("code").is(codeIdOrTitle));
+		orList.add(Criteria.where("_id").is(codeIdOrTitle));
+		if (codeIdOrTitle != null && ObjectId.isValid(codeIdOrTitle)) {
+			orList.add(Criteria.where("id").is(new ObjectId(codeIdOrTitle)));
 		}
-		orList.add(Criteria.where("title").regex(text, "i"));
+		orList.add(Criteria.where("title").regex(codeIdOrTitle, "i"));
 
 		return find(CommonMongoQueryBuilder.collection(clazz)
 				.with(new Criteria().orOperator(orList.toArray(new Criteria[orList.size()]))));

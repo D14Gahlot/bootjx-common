@@ -127,6 +127,20 @@ public class ClientAppConfigConstants {
 
 		});
 
+		APP_CONFIGS.put(APP_TYPE.QUICK_MENU, new ConfigMeta[] {
+
+				new ConfigMeta().inputType(INPUT_TYPE.MESSAGE, MESSAGE_TYPE.INFO).title("Menu").desc(
+						"Use this app to create Quick Menu. Selected template should have codes in button code prefixed with type of trigger."
+								+ "\n ! - HSMTemplate" //
+								+ "\n # - Team" //
+								+ "\n @ - App" //
+								+ "\n / - QuickAction"//
+								+ "\n & - QuickMedia" //
+								+ "\n % - QuickReply"//
+
+				).group("About App"),
+				new ConfigMeta().title("First Options Template").path("props.template").group("TEMPLATES")
+						.optionsSource("getx:/api/tmpl/hsm").optionsKey("code").optionsLabel("code") });
 	}
 
 }

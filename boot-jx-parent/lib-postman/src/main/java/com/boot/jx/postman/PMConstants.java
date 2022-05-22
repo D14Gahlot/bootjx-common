@@ -83,6 +83,7 @@ public class PMConstants {
 
 		// Bot modes
 		TEAM_ROUTER(CHAT_MODE.BOT), APP_ROUTER(CHAT_MODE.BOT), APP_SWITCH(CHAT_MODE.BOT), QUICK_GALLERY(CHAT_MODE.BOT),
+		QUICK_MENU(CHAT_MODE.BOT),
 
 		// Agent Mdoes
 		MITEL(CHAT_MODE.AGENT),
@@ -128,7 +129,7 @@ public class PMConstants {
 		public static final String API = "API";
 		public static final String ADMIN = "ADMIN";
 	}
-	
+
 	public static class MESSAGE_FORMAT_TYPE {
 		public static final String TEXT = "text";
 		public static final String TEXT_SYSTEM = "system";
