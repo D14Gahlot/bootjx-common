@@ -13,7 +13,7 @@ public class PMConstants {
 		public static final String BOT_QUEUE_CODE = "basic_bot";
 		public static final String AGENT_QUEUE_CODE = "agent_desk";
 		public static final String ADMIN_QUEUE_CODE = "admin_panel";
-		public static final String FEEDBACK_QUEUE_CODE = "feedback_collector";
+		public static final String FEEDBACK_QUEUE_CODE = "feedback";
 	}
 
 	public final class USER_ROLE {
