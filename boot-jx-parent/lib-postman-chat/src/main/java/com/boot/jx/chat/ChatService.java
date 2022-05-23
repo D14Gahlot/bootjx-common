@@ -243,6 +243,7 @@ public class ChatService {
 	}
 
 	private MessageContext loadChatContextInternal(String contactId, SessionInfo inboxMessage) {
+		LOGGER.debug("Loading chat conewxt");
 		if (!ArgUtil.is(inboxMessage.session().getMode())) {
 			ChatSessionDoc sessionDoc = messageContext.session().getDoc();
 
@@ -266,6 +267,7 @@ public class ChatService {
 
 		if (!ArgUtil.is(doc.getMeta()) || !ArgUtil.is(doc.getMeta().getSessionId(), inboxMessage.getSessionId())
 				|| !ArgUtil.is(doc.getMeta().getQueueCode(), inboxMessage.session().getQueue())) {
+			LOGGER.debug("Loading chat conewxt:newSession");
 			doc.setMeta(new ChatMeta());
 			messageContext.chat().setQueueCode(inboxMessage.session().getQueue());
 			messageContext.chat().setSessionId(inboxMessage.getSessionId());
