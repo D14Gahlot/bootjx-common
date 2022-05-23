@@ -76,9 +76,9 @@ public class ChatSessionManager {
 		inBoundEvent.sessionId = session.getSessionId();
 		inBoundEvent.contactId = session.getContactId();
 		inBoundEvent.contact().copyFrom(session.contact());
-		sessionStore.updateMessageFromSession(session, inBoundEvent);
 		sessionStore.changeStatus(session, status);
 		logManager.event(session, EVENTS.STATUS_CHANGED, oldStatus, status.toString());
+		sessionStore.updateMessageFromSession(session, inBoundEvent);
 		return inBoundEvent;
 	}
 
@@ -95,10 +95,9 @@ public class ChatSessionManager {
 		inBoundEvent.sessionId = session.getSessionId();
 		inBoundEvent.contactId = session.getContactId();
 		inBoundEvent.contact().copyFrom(session.contact());
-		sessionStore.updateMessageFromSession(session, inBoundEvent);
-
 		logManager.event(session, EVENTS.STATUS_CHANGED, session.getStatus(),
 				PMConstants.CHAT_STATUS.RESOLVED.toString());
+		sessionStore.updateMessageFromSession(session, inBoundEvent);
 		return eventEntry.value(inBoundEvent);
 	}
 
@@ -112,12 +111,12 @@ public class ChatSessionManager {
 		inBoundEvent.sessionId = session.getSessionId();
 		inBoundEvent.contactId = session.getContactId();
 		inBoundEvent.contact().copyFrom(session.contact());
-		sessionStore.updateMessageFromSession(session, inBoundEvent);
 
 		session = sessionStore.closeSession(session);
 		logManager.event(session, EVENTS.STATUS_CHANGED, session.getStatus(),
 				PMConstants.CHAT_STATUS.CLOSED.toString());
 
+		sessionStore.updateMessageFromSession(session, inBoundEvent);
 		return inBoundEvent;
 	}
 
@@ -408,6 +407,7 @@ public class ChatSessionManager {
 		logManager.event(chatSessionDoc, EVENTS.ASGND_TO_QUEUE, queueCode);
 
 		inBoundEvent.sessionRouted.targetQueue = chatSessionDoc.getAssignedToQueue();
+		sessionStore.updateMessageFromSession(chatSessionDoc, inBoundEvent);
 
 		return inBoundEvent;
 

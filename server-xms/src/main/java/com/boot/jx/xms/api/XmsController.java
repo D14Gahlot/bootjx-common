@@ -23,70 +23,70 @@ import io.swagger.annotations.ApiOperation;
 @Api(tags = "XMS ViewConroller", description = "API's for Messaging", hidden = true)
 @Controller
 public class XmsController {
-    @Autowired
-    AppConfig appConfig;
+	@Autowired
+	AppConfig appConfig;
 
-    @Autowired
-    private PMEnvironment pmEnvironment;
+	@Autowired
+	private PMEnvironment pmEnvironment;
 
-    @Autowired
-    private CommonHttpRequest commonHttpRequest;
+	@Autowired
+	private CommonHttpRequest commonHttpRequest;
 
-    @Autowired(required = false)
-    private AppCommonConfig appCommonConfig;
+	@Autowired(required = false)
+	private AppCommonConfig appCommonConfig;
 
-    @Value("${swagger.auth.password}")
-    String swaggerAuthPassword;
+	@Value("${swagger.auth.password}")
+	String swaggerAuthPassword;
 
-    private boolean isLoggedIn() {
-	String apiId = commonHttpRequest.get("swagger.auth.apiId");
-	String hash = commonHttpRequest.get("swagger.auth.hash");
-	String token = commonHttpRequest.get("swagger.auth.token");
-	String apiKey = commonHttpRequest.get("swagger.auth.apiKey");
-	HashBuilder builder = new HashBuilder().interval(300).secret(swaggerAuthPassword).message(apiId);
-	if (ArgUtil.is(hash) && builder.validate(hash)) {
-	    return true;
-	}
-
-	if (!ArgUtil.is(apiKey)) {
-	    if (ArgUtil.is(token)) {
-		CrypToken xToken = CryptoUtil.getEncoder().message(token).decrypt().toToken();
-		if (ArgUtil.is(xToken) && !xToken.isExpired()) {
-		    apiKey = xToken.message;
+	private boolean isLoggedIn() {
+		String apiId = commonHttpRequest.get("swagger.auth.apiId");
+		String hash = commonHttpRequest.get("swagger.auth.hash");
+		String token = commonHttpRequest.get("swagger.auth.token");
+		String apiKey = commonHttpRequest.get("swagger.auth.apiKey");
+		HashBuilder builder = new HashBuilder().interval(300).secret(swaggerAuthPassword).message(apiId);
+		if (ArgUtil.is(hash) && builder.validate(hash)) {
+			return true;
 		}
-	    }
-	    if (!ArgUtil.is(apiKey)) {
+
+		if (!ArgUtil.is(apiKey)) {
+			if (ArgUtil.is(token)) {
+				CrypToken xToken = CryptoUtil.getEncoder().message(token).decrypt().toToken();
+				if (ArgUtil.is(xToken) && !xToken.isExpired()) {
+					apiKey = xToken.message;
+				}
+			}
+			if (!ArgUtil.is(apiKey)) {
+				return false;
+			}
+		}
+
+		ClientApp apiKeyConfig = pmEnvironment.local().clientApiKey(apiKey);
+		if (ArgUtil.is(apiKeyConfig) && ArgUtil.areEqual(apiKey, apiKeyConfig.getKey())) {
+			hash = builder.toHmac().output();
+			token = CryptoUtil.getEncoder().message(apiKey).tokenize(300).encrypt().toString();
+			commonHttpRequest.setCookie("swagger.auth.apiId", apiId, 300);
+			commonHttpRequest.setCookie("swagger.auth.hash", hash, 300);
+			commonHttpRequest.setCookie("swagger.auth.token", token, 300);
+			return true;
+		}
 		return false;
-	    }
 	}
 
-	ClientApp apiKeyConfig = pmEnvironment.local().clientApiKey(apiKey);
-	if (ArgUtil.is(apiKeyConfig) && ArgUtil.areEqual(apiKey, apiKeyConfig.getKey())) {
-	    hash = builder.toHmac().output();
-	    token = CryptoUtil.getEncoder().message(apiKey).tokenize(300).encrypt().toString();
-	    commonHttpRequest.setCookie("swagger.auth.apiId", apiId, 300);
-	    commonHttpRequest.setCookie("swagger.auth.hash", hash, 300);
-	    commonHttpRequest.setCookie("swagger.auth.token", token, 300);
-	    return true;
-	}
-	return false;
-    }
+	@ApiOperation(value = "Try API's", hidden = true)
+	@RequestMapping(value = { "/" }, method = { RequestMethod.GET, RequestMethod.POST })
+	public String swagger(Model model) {
 
-    @ApiOperation(value = "Try API's", hidden = true)
-    @RequestMapping(value = { "/" }, method = { RequestMethod.GET, RequestMethod.POST })
-    public String swagger(Model model) {
+		model.addAttribute("APP_NAME", appConfig.getAppName());
+		model.addAttribute("APP_CONTEXT", appConfig.getAppPrefix());
+		model.addAttribute("CDN_URL", appConfig.getAppPrefix());
+		if (ArgUtil.is(appCommonConfig)) {
+			model.addAllAttributes(appCommonConfig.appAttributes());
+		}
 
-	model.addAttribute("APP_NAME", appConfig.getAppName());
-	model.addAttribute("APP_CONTEXT", appConfig.getAppPrefix());
-	model.addAttribute("CDN_URL", appConfig.getAppPrefix());
-	if (ArgUtil.is(appCommonConfig)) {
-	    model.addAllAttributes(appCommonConfig.appAttributes());
+		if (!isLoggedIn()) {
+			return "app-xms";
+		}
+		return "swagger-uix";
 	}
-
-	if (!isLoggedIn()) {
-	    return "app-xms";
-	}
-	return "swagger-uix";
-    }
 
 }
