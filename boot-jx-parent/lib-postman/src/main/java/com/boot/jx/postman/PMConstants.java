@@ -89,7 +89,7 @@ public class PMConstants {
 		// Agent Mdoes
 		MITEL(CHAT_MODE.AGENT),
 
-		// FAQ(CHAT_MODE.BOT),
+		FAQ(CHAT_MODE.BOT),
 
 		DEFAULT(CHAT_MODE.PUSH);
 

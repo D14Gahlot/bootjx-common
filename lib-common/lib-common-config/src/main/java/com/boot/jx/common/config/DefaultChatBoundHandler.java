@@ -16,6 +16,7 @@ import com.boot.jx.postman.ClientApp;
 import com.boot.jx.postman.PMConstants.APP_TYPE;
 import com.boot.jx.postman.PMConstants.CHAT_MODE;
 import com.boot.jx.postman.PMConstants.MESSAGE_FORMAT_TYPE;
+import com.boot.jx.postman.PMConstants.PROPERTIES;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PMEnvironment.PMCommonConfig;
 import com.boot.jx.postman.PMEnvironment.PMConfigurationObject;
@@ -340,6 +341,7 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 		if (resolvedReply.exists()) {
 			chatService.send(chatSessionDoc, new OutboxMessage().template(resolvedReply.asString()));
 		}
+
 	}
 
 	@Override
