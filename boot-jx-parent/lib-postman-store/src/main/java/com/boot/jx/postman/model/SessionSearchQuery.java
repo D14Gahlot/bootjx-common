@@ -1,6 +1,8 @@
 package com.boot.jx.postman.model;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.StringJoiner;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
@@ -111,8 +113,9 @@ public class SessionSearchQuery {
 	}
 
 	public SessionSearchQuery parse(String query) {
-		TreeSet<String> tokens = Arrays.stream(StringUtils.split(query, "\\s")).filter(token -> ArgUtil.is(token))
-				.collect(Collectors.toCollection(TreeSet::new));
+
+		List<String> tokens = Arrays.stream(StringUtils.split(query, "\\s")).filter(token -> ArgUtil.is(token))
+				.collect(Collectors.toCollection(ArrayList::new));
 
 		StringJoiner sj = new StringJoiner(" ");
 
@@ -127,7 +130,6 @@ public class SessionSearchQuery {
 					if (tab != null) {
 						this.tabs().add(tab);
 					}
-
 				}
 
 				if (ArgUtil.isEqual(tagType, null, TAG_TYPE.ON)) {
