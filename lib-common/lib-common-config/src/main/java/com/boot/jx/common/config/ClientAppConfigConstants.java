@@ -146,9 +146,8 @@ public class ClientAppConfigConstants {
 						).group("About App"),
 						new ConfigMeta().title("Feedback Message Template").path("props.template").group("TEMPLATES")
 								.optionsSource("getx:/api/tmpl/hsm").optionsKey("code").optionsLabel("code"),
-						new ConfigMeta().title("Feedback Message Template").path("props.template_close")
-								.group("TEMPLATES").optionsSource("getx:/api/tmpl/hsm").optionsKey("code")
-								.optionsLabel("code")
+						new ConfigMeta().title("Session Close Template").path("props.template_close").group("TEMPLATES")
+								.optionsSource("getx:/api/tmpl/hsm").optionsKey("code").optionsLabel("code")
 
 				});
 	}
