@@ -12,8 +12,6 @@ import com.boot.jx.postman.model.SessionSearchQuery;
 import com.boot.utils.JsonUtil;
 import com.github.gianlucanitti.javaexpreval.ExpressionException;
 
-import jodd.util.StringUtil;
-
 public class OWATest { // Noncompliant
 
 	public static final Pattern pattern = Pattern.compile("(:[\\w]+)|([\\s\\w]+)");

@@ -2,6 +2,7 @@ package com.boot.jx.postman.model;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 import java.util.StringJoiner;
 import java.util.TreeSet;
@@ -78,6 +79,15 @@ public class SessionSearchQuery {
 
 	public boolean contains(CHAT_STATE state) {
 		return this.states().contains(state);
+	}
+
+	public boolean containsAny(CHAT_STATE... state) {
+		for (CHAT_STATE chat_STATE : state) {
+			if (this.states().contains(chat_STATE)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	public boolean contains(CHAT_STATUS status) {

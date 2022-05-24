@@ -232,8 +232,8 @@ public class ChatSessionManager {
 			);
 		}
 
-		if (query.contains(CHAT_STATE.UNATTENDED) || query.contains(CHAT_STATE.WAITING)
-				|| query.contains(CHAT_STATE.WAITING_LONG)) {
+		if (query.containsAny(CHAT_STATE.UNATTENDED, CHAT_STATE.WAITING_LONG, CHAT_STATE.WAITING,
+				CHAT_STATE.NEED_ATTENTION)) {
 
 			primaryCriteria = primaryCriteria.and("mode").is("AGENT");
 
