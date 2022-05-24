@@ -145,7 +145,12 @@ public class ClientAppConfigConstants {
 						.desc("Use this app to collect feedback from customers when ticket is closed"//
 						).group("About App"),
 						new ConfigMeta().title("Feedback Message Template").path("props.template").group("TEMPLATES")
-								.optionsSource("getx:/api/tmpl/hsm").optionsKey("code").optionsLabel("code") });
+								.optionsSource("getx:/api/tmpl/hsm").optionsKey("code").optionsLabel("code"),
+						new ConfigMeta().title("Feedback Message Template").path("props.template_close")
+								.group("TEMPLATES").optionsSource("getx:/api/tmpl/hsm").optionsKey("code")
+								.optionsLabel("code")
+
+				});
 	}
 
 }
