@@ -146,7 +146,7 @@ public class ConfigConstants {
 						.optionsLabel("desc").group(GROUP_AGENT)),
 
 		POSTMAN_AGENT_CHAT_AUTOREPLY_RESOLVED(new ConfigMeta("Message to customer when chat is resolved by agent",
-				"postman.agent.chat.autoreply.resolved").optionsSource("getx:/api/tmpl/hsm").optionsKey("code")
+				PROPERTIES.POSTMAN_AGENT_CHAT_AUTOREPLY_RESOLVED).optionsSource("getx:/api/tmpl/hsm").optionsKey("code")
 						.optionsLabel("desc").group(GROUP_AGENT)),
 
 		POSTMAN_AGENT_CHAT_AUTOREPLY_NOAGENT(

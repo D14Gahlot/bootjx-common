@@ -245,6 +245,7 @@ public class PMConstants {
 	public static class PROPERTIES {
 		public static final String POSTMAN_CHAT_SESSION_TIMEOUT = "postman.chat.session.timeout";
 		public static final String POSTMAN_CHAT_FEEDBACK_QUEUE = "postman.chat.feedback.queue";
+		public static final String POSTMAN_AGENT_CHAT_AUTOREPLY_RESOLVED = "postman.agent.chat.autoreply.resolved";
 	}
 
 	public static final String COLLECTION_NAME = "MESSAGE_";

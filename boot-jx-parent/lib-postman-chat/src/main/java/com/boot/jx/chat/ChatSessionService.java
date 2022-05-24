@@ -239,13 +239,6 @@ public class ChatSessionService {
 			}
 		}
 
-		PMConfigurationObject feedbackQueue = env.keyEntry(PROPERTIES.POSTMAN_CHAT_FEEDBACK_QUEUE);
-		if (feedbackQueue.exists()) {
-			routeSession(chatSessionDoc, new PMArgs().assignToQueueCode(feedbackQueue.asString()));
-		} else {
-			return closeSession(chatSessionDoc);
-		}
-
 		return eventEntry;
 	}
 

@@ -3,12 +3,14 @@ package com.boot.jx.common.config;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 
 import com.boot.jx.AppContextUtil;
 import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.chat.ChatClient;
 import com.boot.jx.chat.ChatClient.PATH;
 import com.boot.jx.chat.ChatService;
+import com.boot.jx.chat.ChatSessionService;
 import com.boot.jx.common.service.SessionRouter;
 import com.boot.jx.common.store.ChatArchiveBuilder;
 import com.boot.jx.inbound.InBound.InBoundHandler;
@@ -90,6 +92,10 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 
 	@Autowired(required = false)
 	private ChatService chatService;
+
+	@Lazy
+	@Autowired(required = false)
+	private ChatSessionService chatSessionService;
 
 	@Autowired(required = false)
 	private MessageContext messageContext;
@@ -337,11 +343,17 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 
 	@Override
 	public void onSessionResolve(InBoundEvent event, ChatSessionDoc chatSessionDoc) {
-		PMConfigurationObject resolvedReply = pmDomainConfig.getResolveReply();
-		if (resolvedReply.exists()) {
-			chatService.send(chatSessionDoc, new OutboxMessage().template(resolvedReply.asString()));
+		PMConfigurationObject feedbackQueue = pmEnvironment.keyEntry(PROPERTIES.POSTMAN_CHAT_FEEDBACK_QUEUE);
+		if (feedbackQueue.exists()) {
+			chatSessionService.routeSession(chatSessionDoc, new PMArgs().assignToQueueCode(feedbackQueue.asString()));
+		} else {
+			PMConfigurationObject resolvedReply = pmEnvironment
+					.keyEntry(PROPERTIES.POSTMAN_AGENT_CHAT_AUTOREPLY_RESOLVED);
+			if (resolvedReply.exists()) {
+				chatService.send(chatSessionDoc, new OutboxMessage().template(resolvedReply.asString()));
+			}
+			chatSessionService.closeSession(chatSessionDoc);
 		}
-
 	}
 
 	@Override
