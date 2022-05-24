@@ -73,6 +73,7 @@ public class AgentInBoundHandler extends DefaultChatBoundHandler {
 
 			oMsg.route().setQueueCode(app.getQueue());
 			oMsg.route().setSendMode(app.getAppMode());
+			oMsg.route().setSenderApp(app.getAppType());
 			oMsg.route().setSenderType(MESSAGE_SENDER_TYPE.SYSTEM);
 
 			if (!ArgUtil.is(assignEvent.sessionAssigned().oldAgent)

@@ -56,9 +56,11 @@ public class ChatController {
 		if (ArgUtil.is(app)) {
 			waMessage.route().setQueueCode(app.getQueue());
 			waMessage.route().setSendMode(app.getAppMode());
+			waMessage.route().setSenderApp(app.getAppType());
 		} else {
 			waMessage.route().setQueueCode(PMConstants.DEFAULT.BOT_QUEUE_CODE);
 			waMessage.route().setSendMode(PMConstants.CHAT_MODE.BOT.toString());
+			waMessage.route().setSenderApp(PMConstants.APP_TYPE.BOT.name());
 		}
 		waMessage.route().setSenderType(MESSAGE_SENDER_TYPE.BOT);
 		waMessage.session().setAgent(chatService.getClientConfig().getDefaultSender());
