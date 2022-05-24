@@ -50,6 +50,11 @@ public class FeedbackController extends CommonBotController {
 		} else {
 			context().session().set("feedback.tag", StringUtils.trim(text));
 		}
+		ClientApp app = context().clientApp();
+		String template = ArgUtil.parseAsString(app.props().get("template_close"));
+		if (ArgUtil.is(template)) { // item_menu_template
+			reply(new OutboxMessage().template(template));
+		}
 		closeSession();
 	}
 
