@@ -181,6 +181,17 @@ public class MessageContext {
 		return null;
 	}
 
+	public String getActiveQueueCode() {
+		if (getMessage() != null) {
+			return getMessage().session().getQueue();
+		} else if (this.event != null && ArgUtil.is(this.event.session().getQueue())) {
+			return getMessage().session().getQueue();
+		} else if (ArgUtil.notNull(this.session()) && ArgUtil.notNull(this.session().getDoc())) {
+			return this.session().getDoc().getAssignedToQueue();
+		}
+		return null;
+	}
+
 	public void commitChatContactQuery() {
 		if (this.chatContactQuery != null) {
 			commonMongoTemplate.updateFirst(this.chatContactQuery);

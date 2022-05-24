@@ -78,7 +78,7 @@ public class LogManager {
 		return event(inboxMessage, inboxMessage.session().getAgent(), event, logs);
 	}
 
-	private MessageDoc event(ChatSessionDoc sessionDoc, String auditAgent, EVENTS event, String... logs) {
+	public MessageDoc event(ChatSessionDoc sessionDoc, String auditAgent, EVENTS event, String... logs) {
 		IMessageExtended inboxMessage = sessionStore.toSessionMessage(sessionDoc);
 		return event(inboxMessage, auditAgent, event, logs);
 	}

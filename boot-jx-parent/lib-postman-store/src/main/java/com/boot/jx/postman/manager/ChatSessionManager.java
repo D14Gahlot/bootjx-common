@@ -35,12 +35,15 @@ import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.SessionSearchQuery;
 import com.boot.jx.postman.model.ext.InBoundEvent;
 import com.boot.jx.postman.model.ext.InBoundEvent.SessionRouted;
+import com.boot.jx.postman.store.MessageContext;
 import com.boot.jx.postman.store.MessageStore.EVENTS;
 import com.boot.jx.postman.store.SessionStore;
 import com.boot.model.MapModel.NodeEntry;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
 import com.boot.utils.TimeUtils;
+
+import ch.qos.logback.core.Context;
 
 @Component
 public class ChatSessionManager {
@@ -60,6 +63,9 @@ public class ChatSessionManager {
 
 	@Autowired
 	public PMClientConfig pmClientConfig;
+
+	@Autowired
+	public MessageContext messageContext;
 
 	public InBoundEvent updateStatus(ChatSessionDoc session, PMConstants.CHAT_STATUS status) {
 		if (!ArgUtil.is(status)) {
@@ -406,7 +412,8 @@ public class ChatSessionManager {
 		builder.set("assignedToQueue", chatSessionDoc.getAssignedToQueue());
 		builder.set("mode", chatSessionDoc.getMode());
 		sessionStore.updateFirst(builder.getQuery(), builder.getUpdate(), ChatSessionDoc.class);
-		logManager.event(chatSessionDoc, EVENTS.ASGND_TO_QUEUE, queueCode);
+
+		logManager.event(chatSessionDoc, messageContext.getActiveQueueCode(), EVENTS.ASGND_TO_QUEUE, queueCode);
 
 		inBoundEvent.sessionRouted.targetQueue = chatSessionDoc.getAssignedToQueue();
 		sessionStore.updateMessageFromSession(chatSessionDoc, inBoundEvent);
