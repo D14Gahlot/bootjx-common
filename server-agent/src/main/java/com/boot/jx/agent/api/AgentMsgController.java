@@ -143,6 +143,7 @@ public class AgentMsgController {
 				sessionStore.save(new ChatSessionQuery(sessionDoc).read(agentSession.getAgentCode()));
 			}
 			ChatSessionDTO chatSessionDto = chatArchive.getChatSession(sessionDoc);
+			chatSessionDto = chatArchive.withContact(chatSessionDto);
 			return resp.results(chatArchive.getMessages(chatSessionDto)).meta(chatSessionDto);
 		}
 	}
