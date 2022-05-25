@@ -20,6 +20,7 @@ import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.model.ext.InBoundEvent;
 import com.boot.jx.postman.store.QuickStore;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.Constants;
 import com.boot.utils.StringUtils;
 import com.boot.utils.StringUtils.StringMatcher;
 
@@ -56,9 +57,10 @@ public class QuickMenuController extends CommonBotController {
 	@ChatMapping(key = "on_item_select")
 	public void onItemSelect(InboxMessage inboxMessage, StringMatcher matcher) {
 		String text = toReplyEnum(inboxMessage);
-		String[] texts = StringUtils.split(text, "#");
-		String sign = StringUtils.trim(texts[0]);
-		String code = StringUtils.trim(texts[1]);
+		String[] texts = StringUtils.split(text, " ");
+		String commond = ArgUtil.parseAsString(StringUtils.trim(texts[0]), Constants.BLANK);
+		String sign = commond.substring(0, 1);
+		String code = commond.length() > 0 ? commond.substring(1) : null;
 
 		if (ArgUtil.is(sign)) {
 			switch (sign) {
