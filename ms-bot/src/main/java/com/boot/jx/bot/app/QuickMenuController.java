@@ -56,8 +56,9 @@ public class QuickMenuController extends CommonBotController {
 	@ChatMapping(key = "on_item_select")
 	public void onItemSelect(InboxMessage inboxMessage, StringMatcher matcher) {
 		String text = toReplyEnum(inboxMessage);
-		String sign = StringUtils.trim(text.substring(0, 1));
-		String code = StringUtils.trim(text.substring(1));
+		String[] texts = StringUtils.split(text, "#");
+		String sign = StringUtils.trim(texts[0]);
+		String code = StringUtils.trim(texts[1]);
 
 		if (ArgUtil.is(sign)) {
 			switch (sign) {
