@@ -24,6 +24,7 @@ import com.boot.jx.chat.ChatSessionFactory;
 import com.boot.jx.common.config.ConfigConstants;
 import com.boot.jx.common.doc.AgentDoc;
 import com.boot.jx.common.doc.AgentSessionDoc;
+import com.boot.jx.common.doc.DepartmentDoc;
 import com.boot.jx.common.store.AgentStore;
 import com.boot.jx.common.store.ChatArchiveBuilder;
 import com.boot.jx.common.store.ChatArchiveService;
@@ -189,10 +190,19 @@ public class MsgController {
 	@ResponseBody
 	@RequestMapping(value = { "/api/session/agent", "/api/session/agent/assign" }, method = { RequestMethod.POST })
 	public ApiResponse<ChatSessionDTO, Object> assignAgent(@RequestParam String sessionId,
-			@RequestParam String agentId) {
+			@RequestParam(required = false) String agentId, @RequestParam(required = false) String agentCode,
+			@RequestParam(required = false) String deptCode, @RequestParam(required = false) String deptId) {
 		ChatSessionDoc chatSessionDoc = sessionStore.getSession(sessionId);
-		AgentDoc agent = agentStore.findById(agentId);
-		agentChatHandlerImpl.onAssign(agent, chatSessionDoc);
+		if (ArgUtil.is(agentId)) {
+			AgentDoc agent = agentStore.findById(agentId);
+			agentChatHandlerImpl.onAssign(agent, chatSessionDoc);
+		} else if (ArgUtil.is(agentCode)) {
+			AgentDoc agent = agentStore.findByCode(agentCode);
+			agentChatHandlerImpl.onAssign(agent, chatSessionDoc);
+		} else if (ArgUtil.is(deptCode)) {
+			agentChatHandlerImpl.onAssign(chatSessionDoc, agentCode, deptCode);
+		}
+
 		ChatSessionDTO chatSessionDto = chatArchiveBuilder.sessionDTO().from(chatSessionDoc).withContact()
 				.isAssigned(agentSession.getAgentCode()).withMessages().get();
 		return ApiResponse.buildResult(chatSessionDto);

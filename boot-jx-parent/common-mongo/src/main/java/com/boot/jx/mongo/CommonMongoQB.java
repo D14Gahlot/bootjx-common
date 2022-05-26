@@ -24,6 +24,10 @@ public class CommonMongoQB<M extends CommonMongoQB<M, T>, T> implements MongoQue
 		public static Criteria whereId(Object id) {
 			return where("_id").is(id);
 		}
+
+		public static Criteria whereCode(Object code) {
+			return where("code").is(code);
+		}
 	}
 
 	Query query;
@@ -118,6 +122,10 @@ public class CommonMongoQB<M extends CommonMongoQB<M, T>, T> implements MongoQue
 
 	public M whereId(Object id) {
 		return this.with(CommonMongoCriteria.whereId(id));
+	}
+
+	public M whereCode(Object code) {
+		return this.with(CommonMongoCriteria.whereCode(code));
 	}
 
 	@SuppressWarnings("unchecked")

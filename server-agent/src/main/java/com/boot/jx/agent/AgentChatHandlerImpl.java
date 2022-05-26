@@ -232,8 +232,9 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 	 * @param agentDept
 	 * @param agentCode
 	 */
-	private void onAssign(ChatSessionDoc chatSessionDoc, String agentDept, String agentCode) {
-		if (!ArgUtil.areEqual(chatSessionDoc.getAssignedToAgent(), agentCode)) {
+	public void onAssign(ChatSessionDoc chatSessionDoc, String agentDept, String agentCode) {
+		if (!ArgUtil.areEqual(chatSessionDoc.getAssignedToAgent(), agentCode)
+				|| !ArgUtil.areEqual(chatSessionDoc.getAssignedToDept(), agentDept)) {
 
 			this.doAssign(chatSessionDoc, new PMArgs().assignToDeptCode(agentDept).assignToAgentCode(agentCode));
 
