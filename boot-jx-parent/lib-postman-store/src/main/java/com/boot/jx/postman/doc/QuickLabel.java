@@ -4,6 +4,7 @@ import java.io.Serializable;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.TypeAlias;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import com.boot.jx.model.AuditCreateEntity.AuditableEntity;
@@ -17,6 +18,8 @@ public class QuickLabel implements Serializable, AuditableEntity {
 	private String id;
 	private String title;
 	private String category;
+
+	@Indexed(unique = true, sparse = true)
 	private String code;
 
 	private String createdBy;
