@@ -130,7 +130,7 @@ public class Tenants {
 					return site;
 				}
 			}
-			return new TenentGeneric(siteId);
+			return new TenentGeneric(siteIdStr);
 		}
 		return defaultValue;
 	}
