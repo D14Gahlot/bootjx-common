@@ -200,7 +200,7 @@ public class MsgController {
 			AgentDoc agent = agentStore.findByCode(agentCode);
 			agentChatHandlerImpl.onAssign(agent, chatSessionDoc);
 		} else if (ArgUtil.is(deptCode)) {
-			agentChatHandlerImpl.onAssign(chatSessionDoc, agentCode, deptCode);
+			agentChatHandlerImpl.onAssign(chatSessionDoc, deptCode, agentCode);
 		}
 
 		ChatSessionDTO chatSessionDto = chatArchiveBuilder.sessionDTO().from(chatSessionDoc).withContact()
