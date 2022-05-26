@@ -16,7 +16,7 @@ import com.boot.jx.postman.doc.ChatPromise.Result;
 import com.boot.jx.postman.doc.ChatPromise.State;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.manager.ChatSessionManager;
-import com.boot.jx.postman.manager.LogManager;
+import com.boot.jx.postman.manager.ChatLogger;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.model.PMArgs;
 import com.boot.jx.postman.model.ext.InBoundEvent;
@@ -43,7 +43,7 @@ public class ChatController {
 	private SessionStore sessionStore;
 
 	@Autowired
-	private LogManager logManager;
+	private ChatLogger logManager;
 
 	@Lazy
 	@Autowired
@@ -56,9 +56,11 @@ public class ChatController {
 		if (ArgUtil.is(app)) {
 			waMessage.route().setQueueCode(app.getQueue());
 			waMessage.route().setSendMode(app.getAppMode());
+			waMessage.route().setSenderApp(app.getAppType());
 		} else {
 			waMessage.route().setQueueCode(PMConstants.DEFAULT.BOT_QUEUE_CODE);
 			waMessage.route().setSendMode(PMConstants.CHAT_MODE.BOT.toString());
+			waMessage.route().setSenderApp(PMConstants.APP_TYPE.BOT.name());
 		}
 		waMessage.route().setSenderType(MESSAGE_SENDER_TYPE.BOT);
 		waMessage.session().setAgent(chatService.getClientConfig().getDefaultSender());

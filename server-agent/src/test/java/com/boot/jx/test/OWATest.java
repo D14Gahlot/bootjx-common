@@ -2,6 +2,7 @@ package com.boot.jx.test;
 
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.slf4j.Logger;
@@ -13,7 +14,7 @@ import com.github.gianlucanitti.javaexpreval.ExpressionException;
 
 public class OWATest { // Noncompliant
 
-	public static final Pattern pattern = Pattern.compile("^\\$\\{(.*)\\}$");
+	public static final Pattern pattern = Pattern.compile("(:[\\w]+)|([\\s\\w]+)");
 
 	private static Logger LOGGER = LoggerFactory.getLogger(OWATest.class);
 
@@ -27,6 +28,18 @@ public class OWATest { // Noncompliant
 	 */
 
 	public static void main(String[] args) throws MalformedURLException, URISyntaxException {
-		System.out.println(JsonUtil.toJson(new SessionSearchQuery().parse(":closed :WHATSAPP :email as you can see")));
+
+		System.out.println(JsonUtil.toJson(":facebook pooja p :whatsapp".split("(\\:[\\w]+)", -1)));
+
+		System.out.println(JsonUtil.toJson(pattern.split(":facebook   pooja p   :whatsapp", -2)));
+
+		Matcher m = pattern.matcher(":facebook pooja p ss :whatsapp sss");
+
+		int i = 0;
+		while (m.find()) {
+			System.out.println(m.group(i));
+		}
+
+		System.out.println(JsonUtil.toJson(new SessionSearchQuery().parse("pooja p")));
 	}
 }

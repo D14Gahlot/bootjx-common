@@ -105,7 +105,7 @@ public class AgentMsgController {
 
 			for (ChatSessionDoc chatSessionDoc : sessions) {
 				ChatSessionDTO chatSessionDto = chatArchive.getChatSession(chatSessionDoc);
-				chatSessionDto = chatArchive.withContact(chatSessionDto);
+				//chatSessionDto = chatArchive.withContact(chatSessionDto);
 				if (withMessage
 						&& ArgUtil.isEqual(chatSessionDto.getAssignedToDept(), DEFAULT.NO_DEPT,
 								agentSession.getAgentDept(), null, Constants.BLANK)
@@ -143,6 +143,7 @@ public class AgentMsgController {
 				sessionStore.save(new ChatSessionQuery(sessionDoc).read(agentSession.getAgentCode()));
 			}
 			ChatSessionDTO chatSessionDto = chatArchive.getChatSession(sessionDoc);
+			chatSessionDto = chatArchive.withContact(chatSessionDto);
 			return resp.results(chatArchive.getMessages(chatSessionDto)).meta(chatSessionDto);
 		}
 	}

@@ -1,18 +1,16 @@
 
 package com.boot.jx.bot.app;
 
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.boot.jx.bot.BotController;
 import com.boot.jx.bot.ChatMapping;
 import com.boot.jx.bot.alex.AlexBotConstants;
 import com.boot.jx.bot.alex.CommonBotController;
-import com.boot.jx.common.doc.DepartmentDoc;
 import com.boot.jx.postman.ClientApp;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.model.InboxMessage;
+import com.boot.jx.postman.model.MessageDefinitions.Contactable;
 import com.boot.jx.postman.model.ext.InBoundEvent;
 import com.boot.jx.postman.store.SessionStore;
 import com.boot.utils.ArgUtil;
@@ -24,13 +22,10 @@ public class AppRouterController extends CommonBotController {
 	@Autowired
 	private SessionStore sessionStore;
 
-	@Override
-	public void onSessionRoute(InBoundEvent assignEvent) {
-		super.onSessionRoute(assignEvent);
+	private void routeApp(Contactable contactable) {
+		ChatSessionDoc session = sessionStore.getPreviousSession(contactable);
+
 		ClientApp app = context().clientApp();
-
-		ChatSessionDoc session = sessionStore.getPreviousSession(assignEvent.contact());
-
 		if (!ArgUtil.is(session)) {
 			Object connect_first = app.props().get("connect_first");
 			if (ArgUtil.is(connect_first)) {
@@ -51,9 +46,17 @@ public class AppRouterController extends CommonBotController {
 		}
 	}
 
+	@Override
+	public void onSessionRoute(InBoundEvent assignEvent) {
+		super.onSessionRoute(assignEvent);
+		routeApp(assignEvent.contact());
+	}
+
 	@ChatMapping(key = AlexBotConstants.KEY.INITIATE + "*", pattern = "^*$")
 	public void greet(InboxMessage inboxMessage, StringMatcher matcher) {
-
+		if (!inboxMessage.session().isFirstMessage()) {
+			routeApp(inboxMessage.contact());
+		}
 	}
 
 }

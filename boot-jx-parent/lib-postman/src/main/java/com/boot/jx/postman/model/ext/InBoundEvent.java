@@ -3,11 +3,13 @@ package com.boot.jx.postman.model.ext;
 import com.boot.jx.postman.model.ContactMeta;
 import com.boot.jx.postman.model.MessageDefinitions.Contactable;
 import com.boot.jx.postman.model.MessageDefinitions.LoggableEntity;
+import com.boot.jx.postman.model.MessageDefinitions.SessionInfo;
+import com.boot.jx.postman.model.MessageSession;
 import com.boot.jx.swagger.ApiMockModelProperty;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.utils.ArgUtil;
 
-public class InBoundEvent implements LoggableEntity {
+public class InBoundEvent implements LoggableEntity, SessionInfo {
 
 	public static final String SESSION_ROUTED = "SESSION_ROUTED";
 
@@ -52,6 +54,7 @@ public class InBoundEvent implements LoggableEntity {
 	public SessionAssigned sessionAssigned;
 
 	public Contactable contact;
+	private MessageSession session;
 
 	public Contactable contact() {
 		if (this.contact == null) {
@@ -90,4 +93,21 @@ public class InBoundEvent implements LoggableEntity {
 		}
 		return PostManUtil.CONTACT_ID(this.contact());
 	}
+
+	@Override
+	public MessageSession session() {
+		if (session == null) {
+			this.session = new MessageSession();
+		}
+		return this.session;
+	}
+
+	public MessageSession getSession() {
+		return session;
+	}
+
+	public void setSession(MessageSession session) {
+		this.session = session;
+	}
+
 }

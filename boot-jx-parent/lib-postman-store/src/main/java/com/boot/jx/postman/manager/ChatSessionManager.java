@@ -35,6 +35,7 @@ import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.SessionSearchQuery;
 import com.boot.jx.postman.model.ext.InBoundEvent;
 import com.boot.jx.postman.model.ext.InBoundEvent.SessionRouted;
+import com.boot.jx.postman.store.MessageContext;
 import com.boot.jx.postman.store.MessageStore.EVENTS;
 import com.boot.jx.postman.store.SessionStore;
 import com.boot.model.MapModel.NodeEntry;
@@ -42,12 +43,14 @@ import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
 import com.boot.utils.TimeUtils;
 
+import ch.qos.logback.core.Context;
+
 @Component
 public class ChatSessionManager {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ChatSessionManager.class);
 
 	@Autowired
-	private LogManager logManager;
+	private ChatLogger logManager;
 
 	@Autowired
 	private SessionStore sessionStore;
@@ -60,6 +63,9 @@ public class ChatSessionManager {
 
 	@Autowired
 	public PMClientConfig pmClientConfig;
+
+	@Autowired
+	public MessageContext messageContext;
 
 	public InBoundEvent updateStatus(ChatSessionDoc session, PMConstants.CHAT_STATUS status) {
 		if (!ArgUtil.is(status)) {
@@ -78,6 +84,7 @@ public class ChatSessionManager {
 		inBoundEvent.contact().copyFrom(session.contact());
 		sessionStore.changeStatus(session, status);
 		logManager.event(session, EVENTS.STATUS_CHANGED, oldStatus, status.toString());
+		sessionStore.updateMessageFromSession(session, inBoundEvent);
 		return inBoundEvent;
 	}
 
@@ -94,9 +101,9 @@ public class ChatSessionManager {
 		inBoundEvent.sessionId = session.getSessionId();
 		inBoundEvent.contactId = session.getContactId();
 		inBoundEvent.contact().copyFrom(session.contact());
-
 		logManager.event(session, EVENTS.STATUS_CHANGED, session.getStatus(),
 				PMConstants.CHAT_STATUS.RESOLVED.toString());
+		sessionStore.updateMessageFromSession(session, inBoundEvent);
 		return eventEntry.value(inBoundEvent);
 	}
 
@@ -115,6 +122,7 @@ public class ChatSessionManager {
 		logManager.event(session, EVENTS.STATUS_CHANGED, session.getStatus(),
 				PMConstants.CHAT_STATUS.CLOSED.toString());
 
+		sessionStore.updateMessageFromSession(session, inBoundEvent);
 		return inBoundEvent;
 	}
 
@@ -230,8 +238,8 @@ public class ChatSessionManager {
 			);
 		}
 
-		if (query.contains(CHAT_STATE.UNATTENDED) || query.contains(CHAT_STATE.WAITING)
-				|| query.contains(CHAT_STATE.WAITING_LONG)) {
+		if (query.containsAny(CHAT_STATE.UNATTENDED, CHAT_STATE.WAITING_LONG, CHAT_STATE.WAITING,
+				CHAT_STATE.NEED_ATTENTION)) {
 
 			primaryCriteria = primaryCriteria.and("mode").is("AGENT");
 
@@ -318,7 +326,9 @@ public class ChatSessionManager {
 				// Limit
 				.with(new Sort(Direction.DESC, "updated.hour")).limit(limit);
 		// System.out.println(query2.toString());
-		LOGGER.debug(query2.toString());
+		if (LOGGER.isDebugEnabled()) {
+			ApiResponseUtil.addLog(query2.toString());
+		}
 		return sessionStore.find(
 				CommonMongoQueryBuilder.collection(ChatSessionDoc.class).query(query2).skipDBRefByNames("lastMsg"));
 	}
@@ -370,6 +380,7 @@ public class ChatSessionManager {
 		inBoundEvent.contactId = chatSessionDoc.getContactId();
 		inBoundEvent.sessionRouted.sourceQueue = chatSessionDoc.getAssignedToQueue();
 		inBoundEvent.contact().copyFrom(chatSessionDoc.contact());
+		sessionStore.updateMessageFromSession(chatSessionDoc, inBoundEvent);
 
 		if (ArgUtil.is(chatSessionDoc.getContactId())) {
 			inBoundEvent.contact().setContactId(inBoundEvent.contactId);
@@ -401,9 +412,11 @@ public class ChatSessionManager {
 		builder.set("assignedToQueue", chatSessionDoc.getAssignedToQueue());
 		builder.set("mode", chatSessionDoc.getMode());
 		sessionStore.updateFirst(builder.getQuery(), builder.getUpdate(), ChatSessionDoc.class);
-		logManager.event(chatSessionDoc, EVENTS.ASGND_TO_QUEUE, queueCode);
+
+		logManager.event(chatSessionDoc, messageContext.getActiveQueueCode(), EVENTS.ASGND_TO_QUEUE, queueCode);
 
 		inBoundEvent.sessionRouted.targetQueue = chatSessionDoc.getAssignedToQueue();
+		sessionStore.updateMessageFromSession(chatSessionDoc, inBoundEvent);
 
 		return inBoundEvent;
 

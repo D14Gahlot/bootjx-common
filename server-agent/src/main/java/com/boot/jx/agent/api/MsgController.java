@@ -29,6 +29,7 @@ import com.boot.jx.common.store.ChatArchiveBuilder;
 import com.boot.jx.common.store.ChatArchiveService;
 import com.boot.jx.model.CommonFile;
 import com.boot.jx.postman.PMConstants;
+import com.boot.jx.postman.PMConstants.APP_TYPE;
 import com.boot.jx.postman.PMConstants.CHAT_MODE;
 import com.boot.jx.postman.PMConstants.CHAT_STATUS;
 import com.boot.jx.postman.PMConstants.MESSAGE_SENDER_TYPE;
@@ -40,7 +41,7 @@ import com.boot.jx.postman.doc.QuickLabel;
 import com.boot.jx.postman.dto.ChatMessageDTO;
 import com.boot.jx.postman.dto.ChatSessionDTO;
 import com.boot.jx.postman.dto.ContactDTO;
-import com.boot.jx.postman.manager.LogManager;
+import com.boot.jx.postman.manager.ChatLogger;
 import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.service.ChatDTOUtil;
@@ -79,7 +80,7 @@ public class MsgController {
 	private ChatArchiveBuilder chatArchiveBuilder;
 
 	@Autowired
-	private LogManager logManager;
+	private ChatLogger logManager;
 
 	@Autowired
 	private AgentSessionService agentSessionService;
@@ -94,6 +95,7 @@ public class MsgController {
 
 		outboxMessage.route().setSendMode(CHAT_MODE.AGENT.toString());
 		outboxMessage.route().setSenderCode(agentSession.getAgentCode());
+		outboxMessage.route().setSenderApp(APP_TYPE.AGENT.name());
 		outboxMessage.route().setSenderType(MESSAGE_SENDER_TYPE.AGENT);
 		ChatSessionDoc sessionDoc = chatSessionFactory.linkSession(outboxMessage);
 

@@ -9,14 +9,14 @@ import org.springframework.data.annotation.TypeAlias;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import com.boot.jx.model.AuditCreateEntity;
+import com.boot.jx.model.AuditCreateEntity.AuditableEntity;
 import com.boot.jx.postman.store.QuickStore.QuickGalleryItem;
 import com.boot.utils.ArgUtil;
 import com.mongodb.DBObject;
 
 @Document(collection = "DICT_QUICK_MEDIA")
 @TypeAlias("QuickMedia")
-public class QuickMedia implements Serializable, AuditCreateEntity, QuickGalleryItem {
+public class QuickMedia implements Serializable, AuditableEntity, QuickGalleryItem {
 
 	private static final long serialVersionUID = 7942286016346691701L;
 
@@ -40,6 +40,9 @@ public class QuickMedia implements Serializable, AuditCreateEntity, QuickGallery
 
 	private String createdBy;
 	private Long createdStamp;
+
+	private String updatedBy;
+	private Long updatedStamp;
 
 	public String getId() {
 		return id;
@@ -136,5 +139,21 @@ public class QuickMedia implements Serializable, AuditCreateEntity, QuickGallery
 	public QuickMedia from(DBObject doc) {
 		this.category = ArgUtil.parseAsString(doc.get("category"));
 		return this;
+	}
+
+	public String getUpdatedBy() {
+		return updatedBy;
+	}
+
+	public void setUpdatedBy(String updatedBy) {
+		this.updatedBy = updatedBy;
+	}
+
+	public Long getUpdatedStamp() {
+		return updatedStamp;
+	}
+
+	public void setUpdatedStamp(Long updatedStamp) {
+		this.updatedStamp = updatedStamp;
 	}
 }

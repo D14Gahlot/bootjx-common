@@ -15,17 +15,17 @@ import com.boot.jx.postman.doc.ChatContextDoc;
 import com.boot.jx.postman.doc.ChatMeta;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.MessageDoc;
-import com.boot.jx.postman.manager.LogManager;
+import com.boot.jx.postman.manager.ChatLogger;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.Message;
 import com.boot.jx.postman.model.MessageDefinitions.IMessageExtended;
+import com.boot.jx.postman.model.MessageDefinitions.SessionInfo;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.model.ext.InBoundEvent;
 import com.boot.jx.postman.store.MessageContext;
 import com.boot.jx.postman.store.MessageStore;
 import com.boot.jx.postman.store.SessionStore;
 import com.boot.utils.ArgUtil;
-import com.boot.utils.TimeUtils;
 
 @Component
 public class ChatService {
@@ -73,7 +73,7 @@ public class ChatService {
 	}
 
 	@Autowired
-	private LogManager logManager;
+	private ChatLogger logManager;
 
 	private MessageDoc message(String messageType, ChatContactDoc chatContactDoc, OutboxMessage outboxMessage,
 			IMessageExtended inboxMessage) {
@@ -242,10 +242,8 @@ public class ChatService {
 		return true;
 	}
 
-	public MessageContext loadChatContext(String contactId, InboxMessage inboxMessage) {
-
-		messageContext.setInboxMessage(inboxMessage);
-
+	private MessageContext loadChatContextInternal(String contactId, SessionInfo inboxMessage) {
+		LOGGER.debug("Loading chat conewxt");
 		if (!ArgUtil.is(inboxMessage.session().getMode())) {
 			ChatSessionDoc sessionDoc = messageContext.session().getDoc();
 
@@ -269,6 +267,7 @@ public class ChatService {
 
 		if (!ArgUtil.is(doc.getMeta()) || !ArgUtil.is(doc.getMeta().getSessionId(), inboxMessage.getSessionId())
 				|| !ArgUtil.is(doc.getMeta().getQueueCode(), inboxMessage.session().getQueue())) {
+			LOGGER.debug("Loading chat conewxt:newSession");
 			doc.setMeta(new ChatMeta());
 			messageContext.chat().setQueueCode(inboxMessage.session().getQueue());
 			messageContext.chat().setSessionId(inboxMessage.getSessionId());
@@ -276,6 +275,16 @@ public class ChatService {
 
 		// messageStore.create(inboxMessage);
 		return messageContext;
+	}
+
+	public MessageContext loadChatContext(String contactId, InboxMessage inboxMessage) {
+		messageContext.setInboxMessage(inboxMessage);
+		return loadChatContextInternal(contactId, inboxMessage);
+	}
+
+	public MessageContext loadChatContext(String contactId, InBoundEvent assignEvent) {
+		messageContext.setInBoundEvent(assignEvent);
+		return loadChatContextInternal(contactId, assignEvent);
 	}
 
 	public void commitChatContext(String contactId, String prevHandler, InboxMessage inboxMessage) {

@@ -128,6 +128,7 @@ public class ChatSessionDoc extends UpdatedTimeStampDoc implements Serializable 
 	private Map<String, ChatMessageDTO> msg;
 	private Map<String, Long> stamps;
 	private Map<String, Long> read;
+	private Map<String, Object> feedback;
 
 	// MessageStats
 	@DBRef
@@ -575,5 +576,13 @@ public class ChatSessionDoc extends UpdatedTimeStampDoc implements Serializable 
 			this.read = new HashMap<String, Long>();
 		}
 		return this.read;
+	}
+
+	public Map<String, Object> getFeedback() {
+		return feedback;
+	}
+
+	public void setFeedback(Map<String, Object> feedback) {
+		this.feedback = feedback;
 	}
 }

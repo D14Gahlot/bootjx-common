@@ -100,6 +100,7 @@ public class BulkMessageService extends BatchJobExecuter {
 
 			doc.route().setQueueCode(adminApp.getQueue());
 			doc.route().setSendMode(adminApp.getAppMode());
+			doc.route().setSenderApp(adminApp.getAppType());
 			doc.route().setSenderType(MESSAGE_SENDER_TYPE.ADMIN);
 			doc.route().setSenderCode(auditDetailProvider.getAuditUser());
 

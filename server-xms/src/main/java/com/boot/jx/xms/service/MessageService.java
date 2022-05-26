@@ -11,6 +11,7 @@ import com.boot.jx.chat.ChatSessionFactory;
 import com.boot.jx.chat.ChatSessionService;
 import com.boot.jx.dict.FileType;
 import com.boot.jx.postman.ClientApp;
+import com.boot.jx.postman.PMConstants.APP_TYPE;
 import com.boot.jx.postman.PMConstants.MESSAGE_SENDER_TYPE;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.doc.ChatSessionDoc;
@@ -145,6 +146,7 @@ public class MessageService {
 
 		outboxMessage.route().setQueueCode(clientApp.getQueue());
 		outboxMessage.route().setSendMode(clientApp.getAppMode());
+		outboxMessage.route().setSenderApp(clientApp.getAppType());
 		outboxMessage.route().setSenderType(MESSAGE_SENDER_TYPE.API);
 
 		ChatSessionDoc chatSessionDoc = chatSessionFactory.linkSession(outboxMessage);

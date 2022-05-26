@@ -11,6 +11,7 @@ public class MessageRouter implements Serializable {
 	String senderCode;
 	String senderType;
 	String sendMode;
+	String senderApp;
 
 	public String getSendMode() {
 		return sendMode;
@@ -43,4 +44,13 @@ public class MessageRouter implements Serializable {
 	public void setSenderType(String senderType) {
 		this.senderType = senderType;
 	}
+
+	public String getSenderApp() {
+		return senderApp;
+	}
+
+	public void setSenderApp(String senderApp) {
+		this.senderApp = senderApp;
+	}
+
 }

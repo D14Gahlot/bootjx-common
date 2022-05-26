@@ -13,6 +13,7 @@ public class PMConstants {
 		public static final String BOT_QUEUE_CODE = "basic_bot";
 		public static final String AGENT_QUEUE_CODE = "agent_desk";
 		public static final String ADMIN_QUEUE_CODE = "admin_panel";
+		public static final String FEEDBACK_QUEUE_CODE = "feedback";
 	}
 
 	public final class USER_ROLE {
@@ -57,7 +58,7 @@ public class PMConstants {
 	}
 
 	public static enum CHAT_STATE {
-		ACTIVE, OUTBOUND, CLOSED, EXPIRED, WAITING, WAITING_LONG, UNATTENDED;
+		ACTIVE, OUTBOUND, CLOSED, EXPIRED, UNREAD, WAITING, WAITING_LONG, NEED_ATTENTION, UNATTENDED;
 	}
 
 	public static enum CHAT_MODE {
@@ -83,12 +84,12 @@ public class PMConstants {
 
 		// Bot modes
 		TEAM_ROUTER(CHAT_MODE.BOT), APP_ROUTER(CHAT_MODE.BOT), APP_SWITCH(CHAT_MODE.BOT), QUICK_GALLERY(CHAT_MODE.BOT),
-		QUICK_MENU(CHAT_MODE.BOT),
+		QUICK_MENU(CHAT_MODE.BOT), FEEDBACK(CHAT_MODE.BOT),
 
 		// Agent Mdoes
 		MITEL(CHAT_MODE.AGENT),
 
-		// FAQ(CHAT_MODE.BOT),
+		FAQ(CHAT_MODE.BOT),
 
 		DEFAULT(CHAT_MODE.PUSH);
 
@@ -239,6 +240,12 @@ public class PMConstants {
 		public static final String DOC_URL_BY_ID = "/url/{image_id}.{ext}";
 		public static final String DOC_SCAN_ID = "/scan/id";
 
+	}
+
+	public static class PROPERTIES {
+		public static final String POSTMAN_CHAT_SESSION_TIMEOUT = "postman.chat.session.timeout";
+		public static final String POSTMAN_CHAT_FEEDBACK_QUEUE = "postman.chat.feedback.queue";
+		public static final String POSTMAN_AGENT_CHAT_AUTOREPLY_RESOLVED = "postman.agent.chat.autoreply.resolved";
 	}
 
 	public static final String COLLECTION_NAME = "MESSAGE_";

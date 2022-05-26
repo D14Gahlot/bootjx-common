@@ -4,6 +4,7 @@ package com.boot.jx.bot.app;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.boot.jx.bot.BotController;
@@ -11,6 +12,7 @@ import com.boot.jx.bot.ChatMapping;
 import com.boot.jx.bot.alex.AlexBotConstants;
 import com.boot.jx.bot.alex.CommonBotController;
 import com.boot.jx.common.doc.DepartmentDoc;
+import com.boot.jx.logger.LoggerService;
 import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.jx.postman.ClientApp;
 import com.boot.jx.postman.model.InboxMessage;
@@ -24,12 +26,14 @@ import com.boot.utils.StringUtils.StringMatcher;
 @BotController(name = "TeamRouter", code = { "bot_team_router" })
 public class AgentTeamRouterController extends CommonBotController {
 
+	public static Logger LOGGER = LoggerService.getLogger(AgentTeamRouterController.class);
+
 	@Autowired
 	private CommonMongoTemplate commonMongoTemplate;
 
 	@Override
 	public void onSessionRoute(InBoundEvent assignEvent) {
-		// TODO Auto-generated method stub
+		LOGGER.debug("Loading chat :onSessionRoute");
 		super.onSessionRoute(assignEvent);
 		List<DepartmentDoc> teams = commonMongoTemplate.findAll(DepartmentDoc.class);
 		askTeam(teams);
@@ -37,7 +41,11 @@ public class AgentTeamRouterController extends CommonBotController {
 
 	@ChatMapping(key = AlexBotConstants.KEY.INITIATE + "*", pattern = "^*$")
 	public void greet(InboxMessage inboxMessage, StringMatcher matcher) {
-
+		LOGGER.debug("Loading chat :greet : isFM{}", inboxMessage.session().isFirstMessage());
+		if (!inboxMessage.session().isFirstMessage()) {
+			List<DepartmentDoc> teams = commonMongoTemplate.findAll(DepartmentDoc.class);
+			askTeam(teams);
+		}
 	}
 
 	@ChatMapping(key = "on_team_select")
@@ -56,6 +64,7 @@ public class AgentTeamRouterController extends CommonBotController {
 	}
 
 	private void askTeam(List<DepartmentDoc> teams) {
+		LOGGER.debug("Loading chat :askTeam");
 		ClientApp app = context().clientApp();
 		String template = ArgUtil.parseAsString(app.props().get("template"));
 		if (ArgUtil.is(template)) {

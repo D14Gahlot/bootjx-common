@@ -18,6 +18,7 @@ import com.boot.jx.postman.doc.ErrorObject;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.MessageDefinitions.Contactable;
 import com.boot.jx.postman.model.MessageDefinitions.LogMessage;
+import com.boot.jx.postman.model.MessageDefinitions.SessionInfo;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.model.ext.InBoundEvent;
 import com.boot.jx.postman.query.ChatContactQuery;
@@ -92,6 +93,17 @@ public class MessageContext {
 		}
 	}
 
+	public SessionInfo getSessionInfoMessage() {
+		if (ArgUtil.is(this.inboxMessage)) {
+			return this.inboxMessage;
+		} else if (ArgUtil.is(this.outboxMessage)) {
+			return this.outboxMessage;
+		} else if (ArgUtil.is(this.event)) {
+			return this.event;
+		}
+		return null;
+	}
+
 	public void setInBoundEvent(InBoundEvent event) {
 		this.event = event;
 	}
@@ -163,6 +175,17 @@ public class MessageContext {
 			return getMessage().session().getQueue();
 		} else if (this.event != null && this.event.sessionRouted != null) {
 			return this.event.sessionRouted.targetQueue;
+		} else if (ArgUtil.notNull(this.session()) && ArgUtil.notNull(this.session().getDoc())) {
+			return this.session().getDoc().getAssignedToQueue();
+		}
+		return null;
+	}
+
+	public String getActiveQueueCode() {
+		if (getMessage() != null) {
+			return getMessage().session().getQueue();
+		} else if (this.event != null && ArgUtil.is(this.event.session().getQueue())) {
+			return getMessage().session().getQueue();
 		} else if (ArgUtil.notNull(this.session()) && ArgUtil.notNull(this.session().getDoc())) {
 			return this.session().getDoc().getAssignedToQueue();
 		}

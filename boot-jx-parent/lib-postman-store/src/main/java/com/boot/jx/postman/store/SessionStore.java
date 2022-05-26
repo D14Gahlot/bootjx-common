@@ -34,6 +34,7 @@ import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.MessageDefinitions.Contactable;
 import com.boot.jx.postman.model.MessageDefinitions.IMessage;
 import com.boot.jx.postman.model.MessageDefinitions.IMessageExtended;
+import com.boot.jx.postman.model.MessageDefinitions.SessionInfo;
 import com.boot.jx.postman.model.MessageDefinitions.SessionMessage;
 import com.boot.jx.postman.query.ChatContactQuery;
 import com.boot.jx.postman.query.ChatSessionQuery;
@@ -223,7 +224,7 @@ public class SessionStore extends CommonMongoTemplateAbstract {
 		return chatSessionDoc;
 	}
 
-	public IMessage updateMessageFromSession(ChatSessionDoc chatSessionDoc, IMessage iMessage) {
+	public SessionInfo updateMessageFromSession(ChatSessionDoc chatSessionDoc, SessionInfo iMessage) {
 		if (ArgUtil.isEmpty(iMessage.contact().getName())) {
 			iMessage.contact().setName(chatSessionDoc.contact().getName());
 		}

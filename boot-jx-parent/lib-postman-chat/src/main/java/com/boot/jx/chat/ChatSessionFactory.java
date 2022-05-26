@@ -218,7 +218,7 @@ public class ChatSessionFactory {
 			chatContactQuery.setSessionId(chatSessionDoc.getSessionId());
 			sessionStore.updateFirst(chatContactQuery);
 		}
-		inboxMessage = sessionStore.updateMessageFromSession(chatSessionDoc, inboxMessage);
+		sessionStore.updateMessageFromSession(chatSessionDoc, inboxMessage);
 		return chatSessionDoc;
 	}
 

@@ -354,8 +354,6 @@ public class PMEnvironment {
 
 		public String getDefaultInboundQueue(Contactable contact);
 
-		public PMConfigurationObject getResolveReply();
-
 		String getDomainUrl();
 
 		PMConfigurationObject getAgentHistoryPeriod();

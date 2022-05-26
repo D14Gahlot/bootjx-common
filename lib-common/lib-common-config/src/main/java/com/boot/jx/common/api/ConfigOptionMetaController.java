@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.checkerframework.checker.units.qual.A;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -28,6 +29,7 @@ import com.boot.jx.postman.ClientApp;
 import com.boot.jx.postman.PMConstants;
 import com.boot.jx.postman.PMConstants.APP_TYPE;
 import com.boot.jx.postman.PMConstants.CHANNEL_TYPE_ENUM;
+import com.boot.jx.postman.PMConstants.CHAT_MODE;
 import com.boot.jx.postman.PMConstants.CHAT_STATE;
 import com.boot.jx.postman.PMConstants.CHAT_STATUS;
 import com.boot.jx.postman.PMEnvironment;
@@ -113,7 +115,14 @@ public class ConfigOptionMetaController {
 	@JsonView(PMEnvironment.PublicProperty.class)
 	@ResponseBody
 	@RequestMapping(value = { "/api/options/inbound_queue" }, method = { RequestMethod.GET })
-	public ApiResponse<ClientApp, Object> getInboundQueues() {
+	public ApiResponse<ClientApp, Object> getInboundQueues(@RequestParam(required = false) CHAT_MODE mode,
+			@RequestParam(required = false) APP_TYPE type) {
+		if (ArgUtil.is(type))
+			return ApiResponse.buildResults(pmEnvironment.config().listApps().stream().filter(app -> app.equals(type))
+					.collect(Collectors.toList()));
+		else if (ArgUtil.is(mode))
+			return ApiResponse.buildResults(pmEnvironment.config().listApps().stream().filter(app -> app.equals(mode))
+					.collect(Collectors.toList()));
 		return ApiResponse.buildResults(pmEnvironment.config().listApps());
 	}
 
