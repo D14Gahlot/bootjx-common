@@ -24,7 +24,7 @@ import com.boot.jx.postman.PMEnvironment.PMCommonConfig;
 import com.boot.jx.postman.PMEnvironment.PMConfigurationObject;
 import com.boot.jx.postman.PMEnvironment.PMDomainConfig;
 import com.boot.jx.postman.doc.ChatSessionDoc;
-import com.boot.jx.postman.manager.LogManager;
+import com.boot.jx.postman.manager.ChatLogger;
 import com.boot.jx.postman.mitel.MitelClient;
 import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.InboxMessage;
@@ -73,7 +73,7 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 	private RestService restService;
 
 	@Autowired
-	protected LogManager logManager;
+	protected ChatLogger logManager;
 
 	@Autowired
 	private MessageStore messageStore;

@@ -16,7 +16,7 @@ import com.boot.jx.postman.doc.ChatPromise.Result;
 import com.boot.jx.postman.doc.ChatPromise.State;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.manager.ChatSessionManager;
-import com.boot.jx.postman.manager.LogManager;
+import com.boot.jx.postman.manager.ChatLogger;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.model.PMArgs;
 import com.boot.jx.postman.model.ext.InBoundEvent;
@@ -43,7 +43,7 @@ public class ChatController {
 	private SessionStore sessionStore;
 
 	@Autowired
-	private LogManager logManager;
+	private ChatLogger logManager;
 
 	@Lazy
 	@Autowired

@@ -20,7 +20,7 @@ import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.dto.ChatUserProfileDTO;
 import com.boot.jx.postman.dto.ChatUserProfileDTO.ChatUserProfileRequest;
 import com.boot.jx.postman.manager.ChatSessionManager;
-import com.boot.jx.postman.manager.LogManager;
+import com.boot.jx.postman.manager.ChatLogger;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.model.PMArgs;
@@ -67,7 +67,7 @@ public class ChatSessionService {
 	private InBoundHandler inBoundHandler;
 
 	@Autowired
-	private LogManager logManager;
+	private ChatLogger logManager;
 
 	@Autowired
 	private ChatUtility chatUtility;

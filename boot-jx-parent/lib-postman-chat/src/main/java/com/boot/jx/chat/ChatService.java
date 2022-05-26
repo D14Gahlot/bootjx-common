@@ -15,7 +15,7 @@ import com.boot.jx.postman.doc.ChatContextDoc;
 import com.boot.jx.postman.doc.ChatMeta;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.MessageDoc;
-import com.boot.jx.postman.manager.LogManager;
+import com.boot.jx.postman.manager.ChatLogger;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.Message;
 import com.boot.jx.postman.model.MessageDefinitions.IMessageExtended;
@@ -73,7 +73,7 @@ public class ChatService {
 	}
 
 	@Autowired
-	private LogManager logManager;
+	private ChatLogger logManager;
 
 	private MessageDoc message(String messageType, ChatContactDoc chatContactDoc, OutboxMessage outboxMessage,
 			IMessageExtended inboxMessage) {

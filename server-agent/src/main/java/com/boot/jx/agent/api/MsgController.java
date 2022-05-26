@@ -41,7 +41,7 @@ import com.boot.jx.postman.doc.QuickLabel;
 import com.boot.jx.postman.dto.ChatMessageDTO;
 import com.boot.jx.postman.dto.ChatSessionDTO;
 import com.boot.jx.postman.dto.ContactDTO;
-import com.boot.jx.postman.manager.LogManager;
+import com.boot.jx.postman.manager.ChatLogger;
 import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.service.ChatDTOUtil;
@@ -80,7 +80,7 @@ public class MsgController {
 	private ChatArchiveBuilder chatArchiveBuilder;
 
 	@Autowired
-	private LogManager logManager;
+	private ChatLogger logManager;
 
 	@Autowired
 	private AgentSessionService agentSessionService;

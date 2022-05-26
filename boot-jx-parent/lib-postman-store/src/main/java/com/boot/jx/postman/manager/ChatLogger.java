@@ -9,8 +9,8 @@ import com.boot.jx.AppContextUtil;
 import com.boot.jx.logger.AuditDetailProvider;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.MessageDoc;
-import com.boot.jx.postman.doc.MessageDocAbstract;
 import com.boot.jx.postman.doc.MessageDoc.MessageDocLogs;
+import com.boot.jx.postman.doc.MessageDocAbstract;
 import com.boot.jx.postman.model.MessageDefinitions.IMessageExtended;
 import com.boot.jx.postman.model.MessageDefinitions.LogMessage;
 import com.boot.jx.postman.model.MessageDefinitions.LoggableEntity;
@@ -25,9 +25,9 @@ import com.boot.jx.utils.PostManUtil;
 import com.boot.utils.ArgUtil;
 
 @Component
-public class LogManager {
+public class ChatLogger {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(LogManager.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(ChatLogger.class);
 
 	@Autowired(required = false)
 	private AuditDetailProvider auditDetailProvider;

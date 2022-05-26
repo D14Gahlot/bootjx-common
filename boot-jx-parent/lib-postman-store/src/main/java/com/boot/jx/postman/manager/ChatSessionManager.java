@@ -50,7 +50,7 @@ public class ChatSessionManager {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ChatSessionManager.class);
 
 	@Autowired
-	private LogManager logManager;
+	private ChatLogger logManager;
 
 	@Autowired
 	private SessionStore sessionStore;

@@ -32,7 +32,7 @@ import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.dto.ChatMessageDTO;
 import com.boot.jx.postman.dto.ChatSessionDTO;
 import com.boot.jx.postman.manager.ChatSessionManager;
-import com.boot.jx.postman.manager.LogManager;
+import com.boot.jx.postman.manager.ChatLogger;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.model.PMArgs;
@@ -56,7 +56,7 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 	private ChatSessionManager chatSessionManager;
 
 	@Autowired
-	private LogManager logManager;
+	private ChatLogger logManager;
 
 	@Autowired
 	private ChatService chatService;
