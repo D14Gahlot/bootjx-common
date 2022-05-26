@@ -113,13 +113,28 @@ public class StompTunnelService {
 
 				StompTunnelEvent event = new StompTunnelEvent();
 				event.setTopic(stompQuery.getTopic());
+				event.setAppType(stompQuery.getAppType());
 				event.setTenantToken(stompTunnelSessionManager.createTagId(AppContextUtil.getTenant()));
 
+				// Tags
 				StringJoiner sb = new StringJoiner(",");
 				for (String tag : stompQuery.getTags()) {
 					sb.add(stompTunnelSessionManager.createTagId(tag));
 				}
 				event.setTagId(sb.toString());
+				//// Tags
+
+				Map<String, Object> messageData = new HashMap<String, Object>();
+				messageData.put("data", message);
+				event.setData(JsonUtil.toJsonMap(messageData));
+				tunnelService.shout(StompTunnelToAllSender.STOMP_TO_ALL, event);
+			}
+
+			if (stompQuery.isShout()) {
+				StompTunnelEvent event = new StompTunnelEvent();
+				event.setTopic(stompQuery.getTopic());
+				event.setAppType(stompQuery.getAppType());
+				event.setTenantToken(stompTunnelSessionManager.createTagId(AppContextUtil.getTenant()));
 
 				Map<String, Object> messageData = new HashMap<String, Object>();
 				messageData.put("data", message);

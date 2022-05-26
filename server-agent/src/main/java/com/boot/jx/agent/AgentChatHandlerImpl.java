@@ -39,6 +39,7 @@ import com.boot.jx.postman.model.PMArgs;
 import com.boot.jx.postman.service.ChatDTOUtil;
 import com.boot.jx.postman.store.MessageStore;
 import com.boot.jx.postman.store.SessionStore;
+import com.boot.jx.stomp.StompQuery;
 import com.boot.jx.stomp.StompTunnelService;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.model.MapModel;
@@ -287,8 +288,9 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 		if (chatSessionService.updateSessionStatus(sessionDoc, status).exists()) {
 			ChatSessionDTO dto = chatArchive.getChatSession(sessionDoc);
 			stompTunnelService.sendToTag(sessionDoc.getAssignedToDept(), "/chat/session/update", dto);
-			stompTunnelService.sendToAll("/chat/session/delta", MapModel.createInstance()
-					.put("sessionId", sessionDoc.getSessionId()).put("event", "status_update").toMap());
+			stompTunnelService.sendTo(StompQuery.toAll("/chat/session/delta").toSameOriginApp(),
+					MapModel.createInstance().put("sessionId", sessionDoc.getSessionId()).put("event", "status_update")
+							.toMap());
 			return dto;
 		}
 		return chatArchive.getChatSession(sessionDoc);
@@ -300,7 +302,7 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 		ChatMessageDTO messageDto = ChatDTOUtil.getChatMessageDTO(messageDoc);
 		messageDto.setName(inboxMessage.getFromName());
 		stompTunnelService.sendToTag(inboxMessage.session().getDept(), "/message/receive/new", messageDto);
-		stompTunnelService.sendToAll("/chat/session/delta", MapModel.createInstance()
+		stompTunnelService.sendTo(StompQuery.toAll("/chat/session/delta").toSameOriginApp(), MapModel.createInstance()
 				.put("sessionId", messageDoc.getSessionId()).put("event", "new_message").toMap());
 		if (ArgUtil.is(inboxMessage.getMessage()) && inboxMessage.getMessage().equalsIgnoreCase("/exit_chat")) {
 			ChatSessionDoc chatSessionDoc = sessionStore.getSession(inboxMessage.getSessionId());

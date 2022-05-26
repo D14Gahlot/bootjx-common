@@ -122,7 +122,9 @@ public class TunnelSubscriberFactory {
 
 		@Override
 		public void onMessage(CharSequence channel, TunnelMessage<M> msg) {
-			this.onMessageWrapper(ArgUtil.parseAsString(channel), msg);
+			if (!ArgUtil.is(msg.getAppType()) || ArgUtil.is(msg.getAppType(), AppParam.APP_TYPE.getValue())) {
+				this.onMessageWrapper(ArgUtil.parseAsString(channel), msg);
+			}
 		}
 
 		public void onMessageWrapper(String channel, TunnelMessage<M> msg) {
