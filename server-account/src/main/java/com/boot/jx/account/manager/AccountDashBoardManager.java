@@ -389,7 +389,9 @@ public class AccountDashBoardManager {
 						DateUtil.YYYYMMDD_DATE_FORMAT);
 				dto.setId(yyyyMMdd);
 				dto.setDate(monthYear);
+				if(waba.getMeta()!=null && waba.getMeta().get("to_country")!=null) {
 				dto.setCountry(waba.getMeta().get("to_country").toString());
+				}
 				dto.setLane(waba.getContact().getLane());
 				Map<String,Object> typeMap =(Map<String,Object>)waba.getConversation().get("origin"); 
 				if(typeMap!=null && !typeMap.isEmpty()) {
