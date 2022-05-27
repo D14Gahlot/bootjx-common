@@ -170,11 +170,11 @@ public class WA360Connector extends AbstractConnector<WA360ConfigDetails, WA360P
 		} else if ("location".equals(messageType)) {
 			inboxMessage.setFormatType(MESSAGE_FORMAT_TYPE.LOCATION);
 			PBLocation pbLocation = new PBLocation();
-			pbLocation.setAddress(map.pathEntry("/location/first_name").asString());
-			pbLocation.setLatitude(map.pathEntry("/location/latitude").asString());
-			pbLocation.setLongitude(map.pathEntry("/location/longitude").asString());
-			pbLocation.setName(map.pathEntry("/location/name").asString());
-			pbLocation.setUrl(map.pathEntry("/location/url").asString());
+			pbLocation.setName(map.pathEntry("location/name").asString());
+			pbLocation.setAddress(map.pathEntry("location/address").asString());
+			pbLocation.setLatitude(map.pathEntry("location/latitude").asString());
+			pbLocation.setLongitude(map.pathEntry("location/longitude").asString());
+			pbLocation.setUrl(map.pathEntry("location/url").asString());
 			inboxMessage.vccards().add(new PBVCard().locations(pbLocation));
 		}
 
