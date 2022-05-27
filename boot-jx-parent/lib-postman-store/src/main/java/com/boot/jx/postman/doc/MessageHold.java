@@ -7,14 +7,16 @@ import org.springframework.data.annotation.TypeAlias;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import com.boot.jx.mongo.CommonDocInterfaces.TimeStampIndex.UpdatedTimeStampDoc;
 import com.boot.jx.postman.model.InboxMessage;
 
 @Document(collection = MessageHold.COLLECTION_NAME)
 @TypeAlias("MessageHold")
-public class MessageHold implements Serializable {
+public class MessageHold extends UpdatedTimeStampDoc implements Serializable {
 
 	private static final long serialVersionUID = -1916969779141145310L;
 
+	public static final String COLLECTION_ORIGINAL = "MESSAGE_ORIGINAL";
 	public static final String COLLECTION_NAME = "MESSAGE_HOLD";
 	public static final String COLLECTION_REJECTED = "MESSAGE_REJECTED";
 

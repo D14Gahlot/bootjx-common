@@ -216,7 +216,7 @@ public class InBoundControllerWA {
 					new MessageBoxEvent());
 			if (ArgUtil.is(messageBoxEvent.getInboxMessages())) {
 				messageBoxEvent.getInboxMessages().forEach(inboxMessage -> {
-					inBoundService.invokeMethodsAsync(inboxMessage);
+					inBoundService.pushMessageToInvokeAsync(inboxMessage);
 				});
 				w360Connector.onReceiveInboxMessage(messageBoxEvent.getInboxMessages());
 			} else if (ArgUtil.is(messageBoxEvent.getMessageReports())) {

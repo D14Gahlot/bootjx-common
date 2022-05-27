@@ -110,10 +110,13 @@ public class InBoundService extends ATaskLimiter {
 	 * @param event received from facebook
 	 */
 	@Async
-	public void invokeMethodsAsync(InboxMessage inboxMessageOriginal) {
+	public void pushMessageToInvokeAsync(InboxMessage inboxMessageOriginal) {
 		String contactId = PostManUtil.CONTACT_ID(inboxMessageOriginal.contact());
 		String onhold = hold().get(contactId);
 		// System.out.println("===>" + onhold);
+
+		messageStore.original(inboxMessageOriginal);
+
 		if (ArgUtil.isEqual(onhold, "HOLDING")) {
 			messageStore.hold(inboxMessageOriginal);
 			throttle(new TunnelTask().name("MESSAGE_RELEASE").id(contactId).intervalSeconds(10));

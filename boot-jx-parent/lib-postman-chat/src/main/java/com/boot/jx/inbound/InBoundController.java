@@ -140,7 +140,7 @@ public class InBoundController {
 			if (ArgUtil.is(messageBoxEvent.getInboxMessages())) {
 				messageBoxEvent.getInboxMessages().forEach(inboxMessage -> {
 					connector.prompt(inboxMessage);
-					inBoundService.invokeMethodsAsync(inboxMessage);
+					inBoundService.pushMessageToInvokeAsync(inboxMessage);
 				});
 				connector.onReceiveInboxMessage(messageBoxEvent.getInboxMessages());
 			} else if (ArgUtil.is(messageBoxEvent.getMessageReports())) {
