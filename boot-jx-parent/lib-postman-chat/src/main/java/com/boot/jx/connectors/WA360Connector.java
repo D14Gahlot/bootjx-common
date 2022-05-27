@@ -172,7 +172,7 @@ public class WA360Connector extends AbstractConnector<WA360ConfigDetails, WA360P
 			PBLocation pbLocation = new PBLocation();
 			pbLocation.setName(map.pathEntry("messages/[0]/location/name").asString());
 			pbLocation.setAddress(map.pathEntry("messages/[0]/location/address").asString());
-			pbLocation.setLatitude(map.pathEntry("lmessages/[0]/ocation/latitude").asString());
+			pbLocation.setLatitude(map.pathEntry("messages/[0]/location/latitude").asString());
 			pbLocation.setLongitude(map.pathEntry("messages/[0]/location/longitude").asString());
 			pbLocation.setUrl(map.pathEntry("messages/[0]/location/url").asString());
 			inboxMessage.vccards().add(new PBVCard().locations(pbLocation));
