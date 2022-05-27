@@ -31,13 +31,13 @@ import com.boot.jx.postman.model.MessageReport;
 import com.boot.jx.postman.model.MessageReport.MessageReportError;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.pbook.PBAddress;
-import com.boot.jx.postman.pbook.PBVCard;
 import com.boot.jx.postman.pbook.PBDate;
 import com.boot.jx.postman.pbook.PBEmail;
 import com.boot.jx.postman.pbook.PBLocation;
 import com.boot.jx.postman.pbook.PBName;
 import com.boot.jx.postman.pbook.PBPhone;
 import com.boot.jx.postman.pbook.PBSocial;
+import com.boot.jx.postman.pbook.PBVCard;
 import com.boot.jx.postman.pbook.PBWebsite;
 import com.boot.jx.postman.pbook.PBWork;
 import com.boot.jx.postman.plugin.ChannelConfig;
@@ -53,6 +53,7 @@ import com.boot.jx.postman.wa360.WA360InboundMedia;
 import com.boot.jx.rest.RestService;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.model.MapModel;
+import com.boot.model.MapModel.MapPathEntry;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.Constants;
 import com.boot.utils.JsonPath;
@@ -242,16 +243,25 @@ public class WA360Connector extends AbstractConnector<WA360ConfigDetails, WA360P
 				pbContact.urls().add(pnWebsite);
 			}
 
-			PBWork pbWork = new PBWork();
-			pbWork.setCompany(cardMap.pathEntry("/org/company").asString());
-			pbWork.setDepartment(cardMap.pathEntry("/org/department").asString());
-			pbWork.setTitle(cardMap.pathEntry("/org/title").asString());
-			pbContact.work().add(pbWork);
+			MapPathEntry workCompany = cardMap.pathEntry("/org/company");
+			MapPathEntry workDepartment = cardMap.pathEntry("/org/department");
+			MapPathEntry workTitle = cardMap.pathEntry("/org/title");
 
-			PBDate pbDate = new PBDate();
-			pbDate.setType("birthday");
-			pbDate.setDate(cardMap.keyEntry("birthday").asString());
-			pbContact.dates().add(pbDate);
+			if (workCompany.exists() || workDepartment.exists() || workTitle.exists()) {
+				PBWork pbWork = new PBWork();
+				pbWork.setCompany(workCompany.asString());
+				pbWork.setDepartment(workDepartment.asString());
+				pbWork.setTitle(workTitle.asString());
+				pbContact.work().add(pbWork);
+			}
+
+			MapPathEntry birthday = cardMap.keyEntry("birthday");
+			if (birthday.exists()) {
+				PBDate pbDate = new PBDate();
+				pbDate.setType("birthday");
+				pbDate.setDate(birthday.asString());
+				pbContact.dates().add(pbDate);
+			}
 
 			inboxMessage.vccards().add(pbContact);
 		}
