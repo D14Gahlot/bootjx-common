@@ -44,6 +44,7 @@ public class WA360Constants {
 	public static final JsonPath VOICE = new JsonPath("messages/[0]/voice");
 	public static final JsonPath VIDEO = new JsonPath("messages/[0]/video");
 	public static final JsonPath STICKER = new JsonPath("messages/[0]/sticker");
+	public static final JsonPath VCARDS = new JsonPath("messages/[0]/contacts");
 	
 	public static final JsonPath CONTEXT_ID = new JsonPath("messages/[0]/context/id");
 

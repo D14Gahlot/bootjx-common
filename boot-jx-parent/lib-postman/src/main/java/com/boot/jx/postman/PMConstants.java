@@ -144,6 +144,7 @@ public class PMConstants {
 		public static final String IMAGE = "image";
 		public static final String STICKER = "sticker";
 		public static final String LOCATION = "location";
+		public static final String CONTACTS = "contacts";
 		public static final String VIDEO = "video";
 	}
 

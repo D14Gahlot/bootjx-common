@@ -203,13 +203,13 @@ public class ChatSessionService {
 		}
 		if (status == PMConstants.CHAT_STATUS.RESOLVED) {
 			NodeEntry<InBoundEvent> eventEntry2 = chatSessionManager.resolveSession(sessionDoc);
-			if (ArgUtil.is(inBoundHandler)) {
+			if (ArgUtil.is(inBoundHandler) && eventEntry2.exists()) {
 				inBoundHandler.onSessionResolveAsync(eventEntry2.getValue(), sessionDoc);
 			}
 			return eventEntry2;
 		} else if (status == PMConstants.CHAT_STATUS.CLOSED) {
 			InBoundEvent event = chatSessionManager.closeSession(sessionDoc);
-			if (ArgUtil.is(inBoundHandler)) {
+			if (ArgUtil.is(inBoundHandler) && ArgUtil.is(event)) {
 				inBoundHandler.onSessionCloseAsync(event, sessionDoc);
 			}
 			return eventEntry.value(event);

@@ -87,6 +87,7 @@ public class MessageStore extends CommonMongoTemplateAbstract {
 
 		// Additonals
 		doc.setAttachments(inboxMessage.getAttachments());
+		doc.setVccards(inboxMessage.getVccards());
 
 		return doc;
 	}
@@ -211,6 +212,7 @@ public class MessageStore extends CommonMongoTemplateAbstract {
 		doc.setMessage(outMessage.getMessage());
 		// }
 		doc.setAttachments(outMessage.getAttachments());
+		doc.setVccards(outMessage.getVccards());
 
 		doc.setSessionId(outMessage.getSessionId());
 		doc.setMessageIdRef(outMessage.getMessageIdRef());

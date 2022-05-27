@@ -157,6 +157,10 @@ public class MapModel implements JsonSerializerType<Object> {
 					false);
 		}
 
+		public <O> List<Map<String, O>> asListOfMapT() {
+			return ArgUtil.parseAsListOfT(value, new HashMap<String, O>(), new ArrayList<Map<String, O>>(), false);
+		}
+
 		public Map<String, Object> asMap() {
 			return JsonUtil.toMap(this.value);
 		}
