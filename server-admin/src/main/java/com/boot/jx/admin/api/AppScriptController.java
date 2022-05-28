@@ -17,12 +17,12 @@ import com.boot.utils.ArgUtil;
 import com.fasterxml.jackson.annotation.JsonView;
 
 @RestController
-public class AdminObjectsController {
+public class AppScriptController {
 
 	@Autowired
 	private MessageStore messageStore;
 
-	@RequestMapping(value = "/api/appscript/logs", method = { RequestMethod.GET })
+	@RequestMapping(value = "/api/objects/logs", method = { RequestMethod.GET })
 	@JsonView(PMEnvironment.PublicProperty.class)
 	public ApiResponse<MessageDocLogs, Object> getLogs(@RequestParam(required = false) String id,
 			@RequestParam(required = false, defaultValue = "0") int pageNo,

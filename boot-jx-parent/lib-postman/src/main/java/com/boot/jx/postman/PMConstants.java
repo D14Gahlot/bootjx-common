@@ -89,7 +89,7 @@ public class PMConstants {
 		// Agent Mdoes
 		MITEL(CHAT_MODE.AGENT),
 
-		FAQ(CHAT_MODE.BOT),
+		FAQ(CHAT_MODE.BOT), APP_SCRIPT(CHAT_MODE.WEBHOOK),
 
 		DEFAULT(CHAT_MODE.PUSH);
 

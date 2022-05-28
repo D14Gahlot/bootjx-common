@@ -13,6 +13,7 @@ import com.boot.jx.http.CommonHttpRequest.ApiRequestDetail;
 import com.boot.jx.postman.ClientApp;
 import com.boot.jx.postman.PMConfiguration.PMConfigurationModel;
 import com.boot.jx.postman.PMEnvironment;
+import com.boot.jx.postman.PMEnvironment.PMCommonConfig;
 import com.boot.jx.scope.tnt.TenantAuthContext.TenantAuthFilter;
 import com.boot.jx.scope.tnt.TenantSpecific;
 import com.boot.jx.scope.tnt.Tenants.TenantResolver;
@@ -31,6 +32,9 @@ public class XmsVendorConfigurer implements TenantAuthFilter {
 
 	@Autowired
 	private PMEnvironment pmEnvironment;
+
+	@Autowired
+	private PMCommonConfig pmCommonConfig;
 
 	@Autowired
 	private AppConfigPackage appConfigPackage;
@@ -61,6 +65,7 @@ public class XmsVendorConfigurer implements TenantAuthFilter {
 		}
 
 		String apiKey = req.get(XmsConstants.X_API_KEY);
+		String apiId = req.get(XmsConstants.X_API_ID);
 
 		// For Swagger Handling
 		if (!ArgUtil.is(apiKey)) {
@@ -80,7 +85,15 @@ public class XmsVendorConfigurer implements TenantAuthFilter {
 		}
 
 		PMConfigurationModel config = pmEnvironment.local();
-		ClientApp apiKeyConfig = config.clientApiKey(apiKey);
+		ClientApp apiKeyConfig = null;
+		if (ArgUtil.is(apiId) && apiKey.equals(pmCommonConfig.getScriptusSecret())) {
+			apiKeyConfig = config.clientApiKey(apiId);
+			if (ArgUtil.is(apiKeyConfig))
+				apiKey = apiKeyConfig.getKey();
+		} else {
+			apiKeyConfig = config.clientApiKey(apiKey);
+		}
+
 		if (!ArgUtil.is(apiKeyConfig)) {
 			if (TimeUtils.isExpired(config.getUpdateStamp(), CONFIG_REFRESH_TIME)) {
 				appConfigPackage.clear(null);

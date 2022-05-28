@@ -30,6 +30,7 @@ public class ChatClient {
 		public static final String ASSIGN_TO_AGENT_V2 = "/int/assign/v2/agent/";
 		public static final String INBOUND_FRWRD = "/int/inbound/callback";
 		public static final String SESSION_EVENT = "/int/session/event";
+		public static final String APP_SCRIPT_FRWRD = "/bot/sendMessage";
 	}
 
 	@Autowired
