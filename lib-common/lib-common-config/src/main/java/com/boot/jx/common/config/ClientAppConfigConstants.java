@@ -8,6 +8,7 @@ import com.boot.jx.common.impl.ConfigMeta.ConfigOption;
 import com.boot.jx.common.impl.ConfigMeta.INPUT_TYPE;
 import com.boot.jx.common.impl.ConfigMeta.MESSAGE_TYPE;
 import com.boot.jx.postman.PMConstants.APP_TYPE;
+import com.boot.jx.postman.PMConstants.MESSAGE_SENDER_TYPE;
 
 public class ClientAppConfigConstants {
 
@@ -148,6 +149,18 @@ public class ClientAppConfigConstants {
 								.optionsSource("getx:/api/tmpl/hsm").optionsKey("code").optionsLabel("code"),
 						new ConfigMeta().title("Session Close Template").path("props.template_close").group("TEMPLATES")
 								.optionsSource("getx:/api/tmpl/hsm").optionsKey("code").optionsLabel("code")
+
+				});
+
+		APP_CONFIGS.put(APP_TYPE.APP_SCRIPT,
+				new ConfigMeta[] { new ConfigMeta().inputType(INPUT_TYPE.MESSAGE, MESSAGE_TYPE.INFO).title("App Script")
+						.desc("Use this app to write custom handling of inbound/outboud messages using script editor "//
+						).group("About App"),
+						new ConfigMeta().title("Sender Type").path("props.sender_type").options(
+								new ConfigOption(MESSAGE_SENDER_TYPE.BOT).label("Bot"),
+								new ConfigOption(MESSAGE_SENDER_TYPE.AGENT).label("Agent"),
+								new ConfigOption(MESSAGE_SENDER_TYPE.ADMIN).label("Admin"),
+								new ConfigOption(MESSAGE_SENDER_TYPE.SYSTEM).label("System"))
 
 				});
 	}

@@ -675,7 +675,7 @@ public final class CryptoUtil {
 			try {
 				this.output = textEncryptor.decrypt(this.output);
 			} catch (Exception e) {
-				LOGGER.error("invalid message from decryption", e);
+				LOGGER.error("invalid message from decryption", e.getMessage());
 			}
 			return this;
 		}
