@@ -5,3 +5,4 @@ bash scripts/build.prod.sh admin
 bash scripts/build.prod.sh bot
 bash scripts/build.prod.sh postman
 bash scripts/build.prod.sh agent
+bash scripts/build.prod.sh xms
