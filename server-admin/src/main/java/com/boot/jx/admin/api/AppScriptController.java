@@ -46,9 +46,18 @@ public class AppScriptController {
 			@RequestParam(required = false, defaultValue = "25") int pageSize,
 			@RequestParam(required = false) String sortBy,
 			@RequestParam(required = false, defaultValue = "asc") String sortDir) {
+
+		ClientApp app = pmEnvironment.local().clientApiKey(appId);
+		if (!ArgUtil.is(app) || !(APP_TYPE.APP_SCRIPT.name().equals(app.getAppType())
+				|| APP_TYPE.WEBHOOK.name().equals(app.getAppType()))) {
+			ApiResponseUtil.throwAccessDeniedException("App Not found");
+		}
+		MapModel meta = MapModel.createInstance().put("appId", app.getQueue()).put("appQueue", app.getQueue())
+				.put("appName", app.getKeyName()).put("appMode", app.getAppMode()).put("appType", app.getAppType());
+
 		return ApiResponse.buildResults(restService.ajax(pmCommonConfig.getScriptusUrl() + "/bot/getBot")
 				.queryParam("id", appId + AppContextUtil.getTenant()).queryParam("appId", appId)
-				.queryParam("domain", AppContextUtil.getTenant()).get().asMap());
+				.queryParam("domain", AppContextUtil.getTenant()).get().asMap()).meta(meta);
 	}
 
 	@RequestMapping(value = "/api/objects/appscript/{appId}", method = { RequestMethod.POST })
