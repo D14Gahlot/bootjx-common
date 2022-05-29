@@ -10,14 +10,17 @@ import com.boot.jx.inbound.InBound.InBoundHandler;
 import com.boot.jx.logger.LoggerService;
 import com.boot.jx.postman.PMConstants;
 import com.boot.jx.postman.PMConstants.CHAT_STATUS;
+import com.boot.jx.postman.PMConstants.PROPERTIES;
+import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PMEnvironment.PMClientConfig;
+import com.boot.jx.postman.PMEnvironment.PMConfigurationObject;
 import com.boot.jx.postman.PMEnvironment.PMDomainConfig;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.dto.ChatUserProfileDTO;
 import com.boot.jx.postman.dto.ChatUserProfileDTO.ChatUserProfileRequest;
 import com.boot.jx.postman.manager.ChatSessionManager;
-import com.boot.jx.postman.manager.LogManager;
+import com.boot.jx.postman.manager.ChatLogger;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.model.PMArgs;
@@ -57,11 +60,17 @@ public class ChatSessionService {
 	@Autowired
 	private ChatClient chatClient;
 
+	@Autowired
+	private PMEnvironment env;
+
 	@Autowired(required = false)
 	private InBoundHandler inBoundHandler;
 
 	@Autowired
-	private LogManager logManager;
+	private ChatLogger logManager;
+
+	@Autowired
+	private ChatUtility chatUtility;
 
 	public boolean initSession(InboxMessage inboxMessage, ChatSessionDoc session) {
 		boolean initd = session.isInitd();
@@ -98,8 +107,7 @@ public class ChatSessionService {
 		}
 
 		if (initd) {
-			if (ArgUtil.isEmptyValue(session.getAssignedToQueue())
-					|| PMConstants.CHAT_MODE.isPushOnly(session.getMode())) {
+			if (chatUtility.isPushOnly(session)) {
 				this.routeSession(session);
 				inboxMessage.session().setQueue(session.getAssignedToQueue());
 				inboxMessage.session().setDept(session.getAssignedToDept());
@@ -195,13 +203,13 @@ public class ChatSessionService {
 		}
 		if (status == PMConstants.CHAT_STATUS.RESOLVED) {
 			NodeEntry<InBoundEvent> eventEntry2 = chatSessionManager.resolveSession(sessionDoc);
-			if (ArgUtil.is(inBoundHandler)) {
+			if (ArgUtil.is(inBoundHandler) && eventEntry2.exists()) {
 				inBoundHandler.onSessionResolveAsync(eventEntry2.getValue(), sessionDoc);
 			}
 			return eventEntry2;
 		} else if (status == PMConstants.CHAT_STATUS.CLOSED) {
 			InBoundEvent event = chatSessionManager.closeSession(sessionDoc);
-			if (ArgUtil.is(inBoundHandler)) {
+			if (ArgUtil.is(inBoundHandler) && ArgUtil.is(event)) {
 				inBoundHandler.onSessionCloseAsync(event, sessionDoc);
 			}
 			return eventEntry.value(event);
@@ -221,6 +229,17 @@ public class ChatSessionService {
 	public NodeEntry<InBoundEvent> closeSession(String sessionId) {
 		ChatSessionDoc sessionDoc = sessionStore.getSession(sessionId);
 		return closeSession(sessionDoc);
+	}
+
+	public NodeEntry<InBoundEvent> resolveSession(ChatSessionDoc chatSessionDoc) {
+		NodeEntry<InBoundEvent> eventEntry = new NodeEntry<InBoundEvent>();
+		if (!chatSessionDoc.isResolved()) {
+			if (!chatSessionDoc.isResolved()) {
+				eventEntry = updateSessionStatus(chatSessionDoc, PMConstants.CHAT_STATUS.RESOLVED);
+			}
+		}
+
+		return eventEntry;
 	}
 
 	public NodeEntry<InBoundEvent> assignSessionToAgent(PMArgs params) {

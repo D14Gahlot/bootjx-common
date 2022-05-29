@@ -17,8 +17,6 @@ public class AgentResponseDto<T extends AgentResponseDto<T>> implements ADocumen
 	@JsonProperty("name")
 	private String agent_name;
 
-	@JsonProperty("agent_channels")
-	private String agent_channels;
 	private List<String> channels;
 
 	private String isactive;
@@ -59,14 +57,6 @@ public class AgentResponseDto<T extends AgentResponseDto<T>> implements ADocumen
 
 	public void setAgent_name(String agent_name) {
 		this.agent_name = agent_name;
-	}
-
-	public String getAgent_channels() {
-		return agent_channels;
-	}
-
-	public void setAgent_channels(String agent_channels) {
-		this.agent_channels = agent_channels;
 	}
 
 	public String getIsactive() {
@@ -116,13 +106,6 @@ public class AgentResponseDto<T extends AgentResponseDto<T>> implements ADocumen
 
 	public void setDefaultValue(boolean isDefaultValue) {
 		this.isDefaultValue = isDefaultValue;
-	}
-
-	public List<String> getChannels() {
-		if (!ArgUtil.is(channels)) {
-			channels = StringUtils.toList(agent_channels);
-		}
-		return channels;
 	}
 
 	public void setChannels(List<String> channels) {

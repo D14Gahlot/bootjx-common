@@ -6,7 +6,9 @@ import org.springframework.context.annotation.Lazy;
 import com.boot.jx.agent.AgentService;
 import com.boot.jx.chat.ChatService;
 import com.boot.jx.chat.ChatSessionService;
+import com.boot.jx.postman.ClientApp;
 import com.boot.jx.postman.PMConstants;
+import com.boot.jx.postman.PMConstants.MESSAGE_SENDER_TYPE;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatPromise;
 import com.boot.jx.postman.doc.ChatPromise.PromiseCondition;
@@ -14,7 +16,7 @@ import com.boot.jx.postman.doc.ChatPromise.Result;
 import com.boot.jx.postman.doc.ChatPromise.State;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.manager.ChatSessionManager;
-import com.boot.jx.postman.manager.LogManager;
+import com.boot.jx.postman.manager.ChatLogger;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.model.PMArgs;
 import com.boot.jx.postman.model.ext.InBoundEvent;
@@ -41,7 +43,7 @@ public class ChatController {
 	private SessionStore sessionStore;
 
 	@Autowired
-	private LogManager logManager;
+	private ChatLogger logManager;
 
 	@Lazy
 	@Autowired
@@ -49,25 +51,36 @@ public class ChatController {
 
 	public String controllerName;
 
-	public void reply(String message) {
-		try {
-			chatService.reply(context().getInboxMessage(), new OutboxMessage().message(message));
-		} catch (InterruptedException e) {
-			e.printStackTrace();
+	private void setRoutingDetails(OutboxMessage waMessage) {
+		ClientApp app = context().clientApp();
+		if (ArgUtil.is(app)) {
+			waMessage.route().setQueueCode(app.getQueue());
+			waMessage.route().setSendMode(app.getAppMode());
+			waMessage.route().setSenderApp(app.getAppType());
+		} else {
+			waMessage.route().setQueueCode(PMConstants.DEFAULT.BOT_QUEUE_CODE);
+			waMessage.route().setSendMode(PMConstants.CHAT_MODE.BOT.toString());
+			waMessage.route().setSenderApp(PMConstants.APP_TYPE.BOT.name());
 		}
+		waMessage.route().setSenderType(MESSAGE_SENDER_TYPE.BOT);
+		waMessage.session().setAgent(chatService.getClientConfig().getDefaultSender());
 	}
 
 	public void reply(OutboxMessage message) {
 		try {
-			message.session().setAgent(chatService.getClientConfig().getDefaultSender());
+			setRoutingDetails(message);
 			chatService.reply(context().getInboxMessage(), message);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
 	}
 
+	public void reply(String message) {
+		reply(new OutboxMessage().message(message));
+	}
+
 	public void send(OutboxMessage waMessage) {
-		waMessage.session().setAgent(chatService.getClientConfig().getDefaultSender());
+		setRoutingDetails(waMessage);
 		if (ArgUtil.is(waMessage.getContact())) {
 			ChatContactDoc chatContactDoc = sessionStore.getContact(waMessage);
 			chatService.send(chatContactDoc, waMessage);
@@ -159,6 +172,11 @@ public class ChatController {
 		ChatSessionDoc session = messageContext.session().getDoc();
 		chatSessionService.routeSession(session,
 				new PMArgs().assignToQueueCode(queueCode).contact(session.contact()).sessionId(session.getSessionId()));
+	}
+
+	public void routeSessionToDefaultQueue() {
+		ChatSessionDoc session = messageContext.session().getDoc();
+		chatSessionService.routeSession(session);
 	}
 
 	public void assignToAgentDepartment(String deptCode) {

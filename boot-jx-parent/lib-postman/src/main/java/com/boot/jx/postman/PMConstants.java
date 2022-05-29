@@ -13,6 +13,7 @@ public class PMConstants {
 		public static final String BOT_QUEUE_CODE = "basic_bot";
 		public static final String AGENT_QUEUE_CODE = "agent_desk";
 		public static final String ADMIN_QUEUE_CODE = "admin_panel";
+		public static final String FEEDBACK_QUEUE_CODE = "feedback";
 	}
 
 	public final class USER_ROLE {
@@ -52,6 +53,14 @@ public class PMConstants {
 		OPEN, UNASSIGNED, URGENT, ONHOLD, ATTENTION, EXPIRED, RESOLVED, CLOSED;
 	}
 
+	public static enum CHAT_ASSIGN_GROUP {
+		UNASSIGNED, ME, TEAM, ORG, HISTORY;
+	}
+
+	public static enum CHAT_STATE {
+		ACTIVE, OUTBOUND, CLOSED, EXPIRED, UNREAD, WAITING, WAITING_LONG, NEED_ATTENTION, UNATTENDED;
+	}
+
 	public static enum CHAT_MODE {
 		AGENT, BOT, PUSH, WEBHOOK, NONE;
 
@@ -74,12 +83,13 @@ public class PMConstants {
 		AGENT(CHAT_MODE.AGENT), BOT(CHAT_MODE.BOT), WEBHOOK(CHAT_MODE.WEBHOOK),
 
 		// Bot modes
-		TEAM_ROUTER(CHAT_MODE.BOT), APP_ROUTER(CHAT_MODE.BOT), APP_SWITCH(CHAT_MODE.BOT),
+		TEAM_ROUTER(CHAT_MODE.BOT), APP_ROUTER(CHAT_MODE.BOT), APP_SWITCH(CHAT_MODE.BOT), QUICK_GALLERY(CHAT_MODE.BOT),
+		QUICK_MENU(CHAT_MODE.BOT), FEEDBACK(CHAT_MODE.BOT),
 
 		// Agent Mdoes
 		MITEL(CHAT_MODE.AGENT),
 
-		// FAQ(CHAT_MODE.BOT),
+		FAQ(CHAT_MODE.BOT), APP_SCRIPT(CHAT_MODE.WEBHOOK),
 
 		DEFAULT(CHAT_MODE.PUSH);
 
@@ -113,6 +123,14 @@ public class PMConstants {
 		public static final String SESSION_MESSAGE = "SM";
 	}
 
+	public final class MESSAGE_SENDER_TYPE {
+		public static final String AGENT = "AGENT";
+		public static final String SYSTEM = "SYSTEM";
+		public static final String BOT = "BOT";
+		public static final String API = "API";
+		public static final String ADMIN = "ADMIN";
+	}
+
 	public static class MESSAGE_FORMAT_TYPE {
 		public static final String TEXT = "text";
 		public static final String TEXT_SYSTEM = "system";
@@ -126,6 +144,7 @@ public class PMConstants {
 		public static final String IMAGE = "image";
 		public static final String STICKER = "sticker";
 		public static final String LOCATION = "location";
+		public static final String CONTACTS = "contacts";
 		public static final String VIDEO = "video";
 	}
 
@@ -222,6 +241,12 @@ public class PMConstants {
 		public static final String DOC_URL_BY_ID = "/url/{image_id}.{ext}";
 		public static final String DOC_SCAN_ID = "/scan/id";
 
+	}
+
+	public static class PROPERTIES {
+		public static final String POSTMAN_CHAT_SESSION_TIMEOUT = "postman.chat.session.timeout";
+		public static final String POSTMAN_CHAT_FEEDBACK_QUEUE = "postman.chat.feedback.queue";
+		public static final String POSTMAN_AGENT_CHAT_AUTOREPLY_RESOLVED = "postman.agent.chat.autoreply.resolved";
 	}
 
 	public static final String COLLECTION_NAME = "MESSAGE_";

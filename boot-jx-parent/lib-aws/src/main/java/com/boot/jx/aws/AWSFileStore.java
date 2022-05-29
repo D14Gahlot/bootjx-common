@@ -1,5 +1,6 @@
 package com.boot.jx.aws;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -16,6 +17,8 @@ import com.amazonaws.services.s3.model.S3ObjectInputStream;
 import com.amazonaws.util.IOUtils;
 import com.boot.jx.dict.FileFormat;
 import com.boot.jx.model.CommonFile;
+import com.boot.jx.model.CommonFileAbstract;
+import com.boot.jx.model.CommonFileStream;
 import com.boot.utils.ArgUtil;
 
 @Component
@@ -34,7 +37,7 @@ public class AWSFileStore {
 	}
 
 	private CommonFile createFile(AmazonS3 amazonS3, String bucketName, String pathFolder, String fileName,
-			CommonFile srcFile) {
+			CommonFileAbstract<?> srcFile) {
 
 		if (!ArgUtil.is(srcFile.getContentType())) {
 			throw new IllegalStateException("File uploaded is not an accepted format");
@@ -94,7 +97,7 @@ public class AWSFileStore {
 		return upload(awsConfig.getS3B2(), awsConfig.getS3B2Name(), pathFolder, fileName, file);
 	}
 
-	public CommonFile createFile2(CommonFile srcFile, String pathFolder, String fileName) {
+	public CommonFile createFile2(CommonFileAbstract<?> srcFile, String pathFolder, String fileName) {
 		return createFile(awsConfig.getS3B2(), awsConfig.getS3B2Name(), pathFolder, fileName, srcFile);
 	}
 
@@ -104,9 +107,12 @@ public class AWSFileStore {
 	}
 
 	@Async
-	public CommonFile commitFile2(CommonFile srcFile, CommonFile dstFile) {
-		MultipartFile srcMultipartFile = new CommonFile().url(srcFile.getUrl()).headers(srcFile.getHeaders())
-				.format(dstFile.getFileFormat()).name(dstFile.getName()).toMultipartFile();
+	public CommonFile commitFile2(CommonFileAbstract<?> srcFile, CommonFile dstFile)
+			throws FileNotFoundException, IOException {
+
+		MultipartFile srcMultipartFile = new CommonFileStream().url(srcFile.getUrl()).headers(srcFile.getHeaders())
+				.format(dstFile.getFileFormat()).name(dstFile.getName()).toMultipartFile(srcFile.toInputStream());
+
 		return commitFile(awsConfig.getS3B2(), awsConfig.getS3B2Name(), dstFile, srcMultipartFile);
 	}
 

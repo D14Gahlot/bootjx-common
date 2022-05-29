@@ -29,6 +29,7 @@ import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.Message;
 import com.boot.jx.postman.model.MessageBoxEvent;
+import com.boot.jx.postman.model.MessageDefinitions.Contactable;
 import com.boot.jx.postman.model.MessageReport;
 import com.boot.jx.postman.model.PMArgs;
 import com.boot.jx.postman.model.ext.InBoundEvent;
@@ -113,6 +114,16 @@ public class InBoundController {
 		return chatSessionService.sessionEvent(event, pmArgs);
 	}
 
+	@RequestMapping(value = "/ext/release/v2/", method = { RequestMethod.POST })
+	public ApiResponse<Contactable, Object> inboundMessageBoxRelease(@RequestBody Contactable contact) {
+		String contactId = PostManUtil.CONTACT_ID(contact);
+		inBoundService.hold().put(contactId, "RELEASING");
+		InboxMessage msg = new InboxMessage();
+		msg.setContact(contact);
+		inBoundService.invokeMethodsRelease(msg);
+		return ApiResponse.buildResult(contact).meta(contactId);
+	}
+
 	@RequestMapping(value = "/ext/inbound/v2/{channelType}/callback/{accountKey}/{channelId}/{channelKey}",
 			method = { RequestMethod.POST })
 	public ApiResponse<Object, Object> inboundMessageBoxEvent(@PathVariable(required = false) String channelType,
@@ -129,7 +140,7 @@ public class InBoundController {
 			if (ArgUtil.is(messageBoxEvent.getInboxMessages())) {
 				messageBoxEvent.getInboxMessages().forEach(inboxMessage -> {
 					connector.prompt(inboxMessage);
-					inBoundService.invokeMethodsAsync(inboxMessage);
+					inBoundService.pushMessageToInvokeAsync(inboxMessage);
 				});
 				connector.onReceiveInboxMessage(messageBoxEvent.getInboxMessages());
 			} else if (ArgUtil.is(messageBoxEvent.getMessageReports())) {

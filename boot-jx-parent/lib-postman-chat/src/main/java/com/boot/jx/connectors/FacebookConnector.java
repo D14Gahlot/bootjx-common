@@ -20,7 +20,7 @@ import com.boot.jx.postman.fb.FacebookHookRequest;
 import com.boot.jx.postman.fb.FacebookUserProfile;
 import com.boot.jx.postman.fb.FacbookAttachment;
 import com.boot.jx.postman.fb.FacebookMessaging;
-import com.boot.jx.postman.manager.LogManager;
+import com.boot.jx.postman.manager.ChatLogger;
 import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.Message;
@@ -51,7 +51,7 @@ public class FacebookConnector extends AbstractConnector<FacebookConfigDetails, 
 	private FacebooClient facebooClient;
 
 	@Autowired
-	private LogManager logManager;
+	private ChatLogger logManager;
 
 	@Autowired
 	private PMFileStoreClient pmFileStoreClient;

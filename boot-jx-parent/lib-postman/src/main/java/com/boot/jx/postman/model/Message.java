@@ -11,6 +11,7 @@ import com.boot.jx.model.CommonTemplateMeta;
 import com.boot.jx.postman.model.ITemplates.BasicExternalTemplate;
 import com.boot.jx.postman.model.ITemplates.ITemplate;
 import com.boot.jx.postman.model.MessageDefinitions.Contactable;
+import com.boot.jx.postman.pbook.PBVCard;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
 import com.boot.utils.JsonUtil;
@@ -64,6 +65,7 @@ public class Message<T extends Message<T>> implements Serializable, MessageOptio
 
 	private List<PostManFile> files = null;
 	private List<Attachment> attachments = null;
+	private List<PBVCard> vccards;
 
 	private String id;
 	private String messageId;
@@ -610,5 +612,13 @@ public class Message<T extends Message<T>> implements Serializable, MessageOptio
 
 	public void setReplyIdExt(String replyIdExt) {
 		this.replyIdExt = replyIdExt;
+	}
+
+	public List<PBVCard> getVccards() {
+		return vccards;
+	}
+
+	public void setVccards(List<PBVCard> vccards) {
+		this.vccards = vccards;
 	}
 }

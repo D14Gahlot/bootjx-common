@@ -27,8 +27,9 @@ public class DemoAlMarsaController extends DefaultChakliController {
 		if (!ArgUtil.is(lang)) {
 			lang = ArgUtil.parseAsString(context().contact().getLang());
 		}
-
-		
+		if(!timeCheckV1("ma_switch","ma_start_time","ma_end_time")) {
+			 reply(new OutboxMessage().template("ma_working_hours_update"));
+		}else {
 		if (lang.equalsIgnoreCase("english") || (lang != null && lang.equalsIgnoreCase("en"))) {
 			context().contact().setLang("en");
 			context().commit();
@@ -45,7 +46,7 @@ public class DemoAlMarsaController extends DefaultChakliController {
 			reply(new OutboxMessage().template("ma_question"));
 			next("select-question");
 		}
-		
+		}
 	}
 
 	@ChatMapping(key = "select-question")

@@ -8,6 +8,7 @@ import com.boot.jx.common.impl.ConfigMeta.ConfigOption;
 import com.boot.jx.common.impl.ConfigMeta.INPUT_TYPE;
 import com.boot.jx.common.impl.ConfigMeta.MESSAGE_TYPE;
 import com.boot.jx.postman.PMConstants.APP_TYPE;
+import com.boot.jx.postman.PMConstants.MESSAGE_SENDER_TYPE;
 
 public class ClientAppConfigConstants {
 
@@ -83,9 +84,10 @@ public class ClientAppConfigConstants {
 				.desc("Use this app to giver user an option menu to switch between app. Selected template should have queue code in button code")
 				.group("About App"),
 				new ConfigMeta().title("App Options Template").path("props.template").group("TEMPLATES")
-						.optionsSource("getx:/api/options/inbound_queue").optionsKey("code").optionsLabel("code") });
+						.optionsSource("getx:/api/tmpl/hsm").optionsKey("code").optionsLabel("code") });
 
 		APP_CONFIGS.put(APP_TYPE.APP_ROUTER, new ConfigMeta[] {
+
 				new ConfigMeta().inputType(INPUT_TYPE.MESSAGE, MESSAGE_TYPE.INFO).title("App Router")
 						.desc("Use this app to route session based on customer's session status").group("About App"),
 
@@ -100,8 +102,67 @@ public class ClientAppConfigConstants {
 				new ConfigMeta().title("Returning customer to conitune last conversation").path("props.connect_contiue")
 						.desc("Returning customer, if last session was NOT RESOLVED")
 						.optionsSource("getx:/api/options/inbound_queue").optionsKey("code").optionsLabel("code")
-						.group("Apps") });
+						.group("Apps")
 
+		});
+
+		APP_CONFIGS.put(APP_TYPE.QUICK_GALLERY, new ConfigMeta[] {
+
+				new ConfigMeta().inputType(INPUT_TYPE.MESSAGE, MESSAGE_TYPE.INFO).title("Quick Gallery")
+						.desc("Use this app to giver user an option menu to Explore Quick Gallery."
+								+ " Selected template should have Item code in button code")
+						.group("About App"),
+
+				new ConfigMeta().title("Item Type").path("props.gallery_item_type").options(
+						new ConfigOption("QUICK_MEDIA").label("QUICK_MEDIA"),
+						new ConfigOption("QUICK_ACTION").label("QUICK_ACTION"),
+						new ConfigOption("QUICK_REPLY").label("QUICK_REPLY")),
+
+				new ConfigMeta().title("Category Menu Template").path("props.gallery_menu_template").group("TEMPLATES")
+						.optionsSource("getx:/api/tmpl/hsm").optionsKey("code").optionsLabel("code"),
+
+				new ConfigMeta().title("Item Menu Template").path("props.item_menu_template").group("TEMPLATES")
+						.optionsSource("getx:/api/tmpl/hsm").optionsKey("code").optionsLabel("code"),
+
+				new ConfigMeta().title("Item Menu Category").path("props.item_menu_category")
+
+		});
+
+		APP_CONFIGS.put(APP_TYPE.QUICK_MENU, new ConfigMeta[] { new ConfigMeta()
+				.inputType(INPUT_TYPE.MESSAGE, MESSAGE_TYPE.INFO).title("Quick Menu")
+				.desc("Use this app to create Quick Menu. Selected template should have codes in button code prefixed with type of trigger."
+						+ "\n[ ! HSMTemplate ] " //
+						+ "\n[ # Team] " //
+						+ "\n[ @ App] " //
+						+ "\n[ / QuickAction] "//
+						+ "\n[ & QuickMedia] " //
+						+ "\n[ % QuickReply] "//
+				).group("About App"),
+				new ConfigMeta().title("First Options Template").path("props.template").group("TEMPLATES")
+						.optionsSource("getx:/api/tmpl/hsm").optionsKey("code").optionsLabel("code") });
+
+		APP_CONFIGS.put(APP_TYPE.FEEDBACK,
+				new ConfigMeta[] { new ConfigMeta().inputType(INPUT_TYPE.MESSAGE, MESSAGE_TYPE.INFO).title("Feedback")
+						.desc("Use this app to collect feedback from customers when ticket is closed"//
+						).group("About App"),
+						new ConfigMeta().title("Feedback Message Template").path("props.template").group("TEMPLATES")
+								.optionsSource("getx:/api/tmpl/hsm").optionsKey("code").optionsLabel("code"),
+						new ConfigMeta().title("Session Close Template").path("props.template_close").group("TEMPLATES")
+								.optionsSource("getx:/api/tmpl/hsm").optionsKey("code").optionsLabel("code")
+
+				});
+
+		APP_CONFIGS.put(APP_TYPE.APP_SCRIPT,
+				new ConfigMeta[] { new ConfigMeta().inputType(INPUT_TYPE.MESSAGE, MESSAGE_TYPE.INFO).title("App Script")
+						.desc("Use this app to write custom handling of inbound/outboud messages using script editor "//
+						).group("About App"),
+						new ConfigMeta().title("Sender Type").path("props.sender_type").options(
+								new ConfigOption(MESSAGE_SENDER_TYPE.BOT).label("Bot"),
+								new ConfigOption(MESSAGE_SENDER_TYPE.AGENT).label("Agent"),
+								new ConfigOption(MESSAGE_SENDER_TYPE.ADMIN).label("Admin"),
+								new ConfigOption(MESSAGE_SENDER_TYPE.SYSTEM).label("System"))
+
+				});
 	}
 
 }

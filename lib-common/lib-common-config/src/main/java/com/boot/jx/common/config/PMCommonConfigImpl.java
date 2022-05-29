@@ -21,6 +21,7 @@ import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PMEnvironment.PMClientConfig;
 import com.boot.jx.postman.PMEnvironment.PMCommonConfig;
 import com.boot.jx.postman.PMEnvironment.PMConfigurationObject;
+import com.boot.jx.postman.PMEnvironment.PMDomainConfig;
 import com.boot.jx.scope.tnt.Tenants;
 import com.boot.jx.scope.tnt.Tenants.TenantResolver;
 import com.boot.model.SafeKeyHashMap;
@@ -37,6 +38,9 @@ public class PMCommonConfigImpl implements PMCommonConfig {
 
 	@Autowired
 	private PMClientConfig chatClientConfig;
+
+	@Autowired
+	private PMDomainConfig pmDomainConfig;
 
 	@Autowired
 	private CommonHttpRequest commonHttpRequest;
@@ -65,6 +69,15 @@ public class PMCommonConfigImpl implements PMCommonConfig {
 	@Value("${mry.agent.url}")
 	private String agentUrl;
 
+	@Value("${mry.scriptus.url}")
+	private String scriptusUrl;
+
+	@Value("${mry.scriptus.secret}")
+	private String scriptusSecret;
+
+	@Value("${mry.prop.service.server}")
+	private String serviceServer;
+
 	@Autowired
 	private CDNBuilder cdnBuilder;
 
@@ -85,7 +98,9 @@ public class PMCommonConfigImpl implements PMCommonConfig {
 			}
 		}
 
-		PMConfigurationObject envCDN = pmEnvironment.keyEntry("mry.cdn.url." + appConfig.getAppEnv());
+		String domainServer = pmEnvironment.keyEntry(ConfigConstants.APP_KEY.PROP_SERVICE_SERVER).asString();
+
+		PMConfigurationObject envCDN = pmEnvironment.keyEntry("mry.cdn.url." + domainServer);
 		if (envCDN.exists()) {
 			return cdnBuilder.latest(envCDN.asString());
 		}
@@ -116,7 +131,7 @@ public class PMCommonConfigImpl implements PMCommonConfig {
 		Map<String, Object> map = new HashMap<String, Object>();
 		map.put("AGENT_CHAT_INIT", pmEnvironment.keyEntry("postman.agent.chat.init").asBoolean());
 		map.put("CHAT_TAG_ENABLED", pmEnvironment.local().keyEntry("chat.tag.enabled").asBoolean());
-		map.put("chatIdleTimeout", TimeUtils.toMillis(chatClientConfig.getChatIdleTimeout()));
+		map.put("chatIdleTimeout", pmDomainConfig.getChatIdleTimeout().asMillis());
 		map.put("agentSessionTimeout", chatClientConfig.getAgentSessionTimeout().toMillis());
 		map.put("chatSessionTimeout", TimeUtils.toMillis(chatClientConfig.getChatSessionTimeout()));
 		return map;
@@ -206,7 +221,21 @@ public class PMCommonConfigImpl implements PMCommonConfig {
 	public String mainDomainRedirect(String path) {
 		return "redirect:" + String.format("https://app.%s/%s",
 				pmEnvironment.keyEntry("mry.prop.service.domain").asString(), path);
+	}
 
+	@Override
+	public String getScriptusUrl() {
+		return this.scriptusUrl;
+	}
+
+	@Override
+	public String getScriptusSecret() {
+		return scriptusSecret;
+	}
+
+	@Override
+	public String getServiceServer() {
+		return pmEnvironment.keyEntry(ConfigConstants.APP_KEY.PROP_SERVICE_SERVER).asString();
 	}
 
 }

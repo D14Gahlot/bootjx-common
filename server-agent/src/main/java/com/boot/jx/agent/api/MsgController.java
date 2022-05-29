@@ -24,13 +24,16 @@ import com.boot.jx.chat.ChatSessionFactory;
 import com.boot.jx.common.config.ConfigConstants;
 import com.boot.jx.common.doc.AgentDoc;
 import com.boot.jx.common.doc.AgentSessionDoc;
+import com.boot.jx.common.doc.DepartmentDoc;
 import com.boot.jx.common.store.AgentStore;
 import com.boot.jx.common.store.ChatArchiveBuilder;
 import com.boot.jx.common.store.ChatArchiveService;
 import com.boot.jx.model.CommonFile;
 import com.boot.jx.postman.PMConstants;
+import com.boot.jx.postman.PMConstants.APP_TYPE;
 import com.boot.jx.postman.PMConstants.CHAT_MODE;
 import com.boot.jx.postman.PMConstants.CHAT_STATUS;
+import com.boot.jx.postman.PMConstants.MESSAGE_SENDER_TYPE;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.client.PMFileStoreClient;
 import com.boot.jx.postman.doc.ChatContactDoc;
@@ -39,7 +42,7 @@ import com.boot.jx.postman.doc.QuickLabel;
 import com.boot.jx.postman.dto.ChatMessageDTO;
 import com.boot.jx.postman.dto.ChatSessionDTO;
 import com.boot.jx.postman.dto.ContactDTO;
-import com.boot.jx.postman.manager.LogManager;
+import com.boot.jx.postman.manager.ChatLogger;
 import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.service.ChatDTOUtil;
@@ -78,7 +81,7 @@ public class MsgController {
 	private ChatArchiveBuilder chatArchiveBuilder;
 
 	@Autowired
-	private LogManager logManager;
+	private ChatLogger logManager;
 
 	@Autowired
 	private AgentSessionService agentSessionService;
@@ -91,6 +94,10 @@ public class MsgController {
 	public ApiResponse<ChatMessageDTO, Object> sendSessionMessage(@RequestBody OutboxMessage outboxMessage)
 			throws InterruptedException {
 
+		outboxMessage.route().setSendMode(CHAT_MODE.AGENT.toString());
+		outboxMessage.route().setSenderCode(agentSession.getAgentCode());
+		outboxMessage.route().setSenderApp(APP_TYPE.AGENT.name());
+		outboxMessage.route().setSenderType(MESSAGE_SENDER_TYPE.AGENT);
 		ChatSessionDoc sessionDoc = chatSessionFactory.linkSession(outboxMessage);
 
 		// Session Stuff Logging <
@@ -103,10 +110,7 @@ public class MsgController {
 
 		// Session Stuff Logging >
 		if (ArgUtil.areEqual(sessionDoc.getAssignedToAgent(), agentSession.getAgentCode())) {
-
 			outboxMessage.route().setQueueCode(sessionDoc.getAssignedToQueue());
-			outboxMessage.route().setSendMode(CHAT_MODE.AGENT.toString());
-			outboxMessage.route().setSenderCode(agentSession.getAgentCode());
 			ChatMessageDTO messageDto = agentService.sendMessage(sessionDoc, outboxMessage);
 
 			// Evaluate if required
@@ -186,10 +190,19 @@ public class MsgController {
 	@ResponseBody
 	@RequestMapping(value = { "/api/session/agent", "/api/session/agent/assign" }, method = { RequestMethod.POST })
 	public ApiResponse<ChatSessionDTO, Object> assignAgent(@RequestParam String sessionId,
-			@RequestParam String agentId) {
+			@RequestParam(required = false) String agentId, @RequestParam(required = false) String agentCode,
+			@RequestParam(required = false) String deptCode, @RequestParam(required = false) String deptId) {
 		ChatSessionDoc chatSessionDoc = sessionStore.getSession(sessionId);
-		AgentDoc agent = agentStore.findById(agentId);
-		agentChatHandlerImpl.onAssign(agent, chatSessionDoc);
+		if (ArgUtil.is(agentId)) {
+			AgentDoc agent = agentStore.findById(agentId);
+			agentChatHandlerImpl.onAssign(agent, chatSessionDoc);
+		} else if (ArgUtil.is(agentCode)) {
+			AgentDoc agent = agentStore.findByCode(agentCode);
+			agentChatHandlerImpl.onAssign(agent, chatSessionDoc);
+		} else if (ArgUtil.is(deptCode)) {
+			agentChatHandlerImpl.onAssign(chatSessionDoc, deptCode, agentCode);
+		}
+
 		ChatSessionDTO chatSessionDto = chatArchiveBuilder.sessionDTO().from(chatSessionDoc).withContact()
 				.isAssigned(agentSession.getAgentCode()).withMessages().get();
 		return ApiResponse.buildResult(chatSessionDto);

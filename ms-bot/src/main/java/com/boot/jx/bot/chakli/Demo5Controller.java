@@ -100,19 +100,13 @@ public class Demo5Controller extends DefaultChakliController {
 	public void membershipsOnSelect(InboxMessage inboxMessage, StringMatcher matcher) {
 		switch (toReplyEnum(inboxMessage)) {
 		case "new_member":
-		case "new member":
-		case "مشترك جديد":
 			this.transferToAgent(inboxMessage, matcher);
 			break;
 		case "current_member":
-		case "current member":
-		case "مشترك حالي":
 			reply(new OutboxMessage().template("dc_current_member_options"));
 			next("currentmember-onselect");
 			break;
 		case "previous_member":
-		case "previous member":
-		case "مشترك سابق":
 			this.transferToAgent(inboxMessage, matcher);
 			break;
 		case "*":

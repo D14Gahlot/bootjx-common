@@ -32,7 +32,7 @@ public class Demo1Controller extends CommonBotController {
 
 	@Autowired
 	Demo5Controller demo6Controller;
-
+	
 	@ChatMapping(key = AlexBotConstants.KEY.INITIATE + "menu", pattern = "^menu$")
 	private void showDemoMenu(InboxMessage inboxMessage, StringMatcher matcher) {
 		String prevMenu = ArgUtil.parseAsString(context().session().get(CURRENT_DEMO), Constants.BLANK).toLowerCase();

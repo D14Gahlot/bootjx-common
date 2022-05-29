@@ -208,7 +208,17 @@ public class ClientAppConfigDoc implements IDocument, AuditableByIdEntity, Clien
 
 	@Override
 	public boolean isAgentApp() {
-		return CHAT_MODE.AGENT.toString().equals(getAppType());
+		return CHAT_MODE.AGENT.toString().equals(getAppMode());
+	}
+
+	@Override
+	public boolean equals(CHAT_MODE mode) {
+		return mode.toString().equals(getAppMode());
+	}
+
+	@Override
+	public boolean equals(APP_TYPE appType) {
+		return appType.toString().equals(getAppType());
 	}
 
 	@Override

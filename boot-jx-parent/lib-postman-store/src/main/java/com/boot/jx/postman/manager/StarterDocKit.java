@@ -32,6 +32,7 @@ public class StarterDocKit {
 			temp5 = new QuickMedia();
 		}
 		temp5.setId(name);
+		temp5.setCode(name);
 		temp5.setTitle(title);
 		temp5.setType("IMAGE");
 		temp5.setCategory(category);
@@ -65,6 +66,55 @@ public class StarterDocKit {
 	@PostConstruct
 	public void init() {
 
+		try {
+			createDefaultTemplats();
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		ClientAppConfigDoc agentApp = new ClientAppConfigDoc();
+		agentApp.setId(PMConstants.DEFAULT.AGENT_QUEUE_CODE);
+		agentApp.setKeyName("Agent Desk");
+		agentApp.setQueue(PMConstants.DEFAULT.AGENT_QUEUE_CODE);
+		agentApp.setAppType(APP_TYPE.AGENT.name());
+		agentApp.setKey(PostManUtil.UNIQUE_API_KEY());
+		agentApp.setKeyVersion("v3");
+		agentApp.setShared(true);
+		createClientApp(agentApp);
+
+		ClientAppConfigDoc botApp = new ClientAppConfigDoc();
+		botApp.setId(PMConstants.DEFAULT.BOT_QUEUE_CODE);
+		botApp.setKeyName("Basic Bot");
+		botApp.setQueue(PMConstants.DEFAULT.BOT_QUEUE_CODE);
+		botApp.setAppType(APP_TYPE.BOT.name());
+		botApp.setKey(PostManUtil.UNIQUE_API_KEY());
+		botApp.setKeyVersion("v3");
+		botApp.setShared(true);
+		createClientApp(botApp);
+
+		ClientAppConfigDoc adminApp = new ClientAppConfigDoc();
+		adminApp.setId(PMConstants.DEFAULT.ADMIN_QUEUE_CODE);
+		adminApp.setKeyName("Admin App");
+		adminApp.setQueue(PMConstants.DEFAULT.ADMIN_QUEUE_CODE);
+		adminApp.setAppType(APP_TYPE.DEFAULT.name());
+		adminApp.setKey(PostManUtil.UNIQUE_API_KEY());
+		adminApp.setKeyVersion("v4");
+		adminApp.setShared(true);
+		createClientApp(adminApp);
+
+		ClientAppConfigDoc feedbackApp = new ClientAppConfigDoc();
+		feedbackApp.setId(PMConstants.DEFAULT.FEEDBACK_QUEUE_CODE);
+		feedbackApp.setKeyName("Feedback Collector");
+		feedbackApp.setQueue(PMConstants.DEFAULT.FEEDBACK_QUEUE_CODE);
+		feedbackApp.setAppType(APP_TYPE.FEEDBACK.name());
+		feedbackApp.setKey(PostManUtil.UNIQUE_API_KEY());
+		feedbackApp.setKeyVersion("v4");
+		feedbackApp.setShared(true);
+		createClientApp(feedbackApp);
+	}
+
+	private void createDefaultTemplats() {
 		mongoTemplate.save(createTemplateReply("GIRL_AND_BIKE", "Girl and bike", "Gallery1", "See this Nice Pic",
 				"https://res.cloudinary.com/www-mehery-com/image/upload/v1611688334/samples/bike.jpg"));
 
@@ -99,57 +149,19 @@ public class StarterDocKit {
 		mongoTemplate.save(createQuickReply("3", "Very Good Evening", "greeting-evening"));
 		mongoTemplate.save(createQuickReply("4", "Nice talking too.", "conversation-complete"));
 		mongoTemplate.save(createQuickReply("5", "You're welcome.", "conversation-complete"));
-
-		ClientAppConfigDoc agentApp = new ClientAppConfigDoc();
-		agentApp.setId(PMConstants.DEFAULT.AGENT_QUEUE_CODE);
-		agentApp.setKeyName("Agent Desk");
-		agentApp.setQueue(PMConstants.DEFAULT.AGENT_QUEUE_CODE);
-		agentApp.setAppType(APP_TYPE.AGENT.name());
-		agentApp.setKey(PostManUtil.UNIQUE_API_KEY());
-		agentApp.setKeyVersion("v3");
-		agentApp.setShared(true);
-		createClientApp(agentApp);
-
-		ClientAppConfigDoc botApp = new ClientAppConfigDoc();
-		botApp.setId(PMConstants.DEFAULT.BOT_QUEUE_CODE);
-		botApp.setKeyName("Basic Bot");
-		botApp.setQueue(PMConstants.DEFAULT.BOT_QUEUE_CODE);
-		botApp.setAppType(APP_TYPE.BOT.name());
-		botApp.setKey(PostManUtil.UNIQUE_API_KEY());
-		botApp.setKeyVersion("v3");
-		botApp.setShared(true);
-		createClientApp(botApp);
-
-		ClientAppConfigDoc adminApp = new ClientAppConfigDoc();
-		adminApp.setId(PMConstants.DEFAULT.ADMIN_QUEUE_CODE);
-		adminApp.setKeyName("Admin App");
-		adminApp.setQueue(PMConstants.DEFAULT.ADMIN_QUEUE_CODE);
-		adminApp.setAppType(APP_TYPE.DEFAULT.name());
-		adminApp.setKey(PostManUtil.UNIQUE_API_KEY());
-		adminApp.setKeyVersion("v4");
-		adminApp.setShared(true);
-		createClientApp(adminApp);
-	}
-
-	public void createMessageIndex(ContactType contactType) {
-		MessageDoc wa = MessageDoc.instance(contactType);
-		mongoTemplate.save(wa);
-		mongoTemplate.remove(wa);
 	}
 
 	public void domain() {
-
 		/**
 		 * Required to create index
 		 * 
 		 * @param contactType
 		 */
-		createMessageIndex(ContactType.WHATSAPP);
-		createMessageIndex(ContactType.FACEBOOK);
-		createMessageIndex(ContactType.INSTAGRAM);
-		createMessageIndex(ContactType.TELEGRAM);
-		createMessageIndex(ContactType.TWITTER);
-		createMessageIndex(ContactType.WEBSITE);
+		for (ContactType contactType : ContactType.values()) {
+			MessageDoc wa = MessageDoc.instance(contactType);
+			mongoTemplate.save(wa);
+			mongoTemplate.remove(wa);
+		}
 
 	}
 

@@ -33,6 +33,8 @@ import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.MessageReport;
 import com.boot.jx.postman.store.MessageContext;
 import com.boot.jx.postman.store.MessageStore;
+import com.boot.jx.tunnel.ITunnelDefs.TunnelTask;
+import com.boot.jx.tunnel.task.ATaskLimiter;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.Constants;
@@ -40,7 +42,7 @@ import com.boot.utils.StringUtils.StringMatcher;
 import com.boot.utils.UniqueID;
 
 @Component
-public class InBoundService {
+public class InBoundService extends ATaskLimiter {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(InBoundService.class);
 	public static final Pattern PROXY = Pattern.compile("\\/proxy\\ ([a-zA-Z0-9_\\-]+)$");
@@ -108,12 +110,16 @@ public class InBoundService {
 	 * @param event received from facebook
 	 */
 	@Async
-	public void invokeMethodsAsync(InboxMessage inboxMessageOriginal) {
+	public void pushMessageToInvokeAsync(InboxMessage inboxMessageOriginal) {
 		String contactId = PostManUtil.CONTACT_ID(inboxMessageOriginal.contact());
 		String onhold = hold().get(contactId);
 		// System.out.println("===>" + onhold);
+
+		messageStore.original(inboxMessageOriginal);
+
 		if (ArgUtil.isEqual(onhold, "HOLDING")) {
 			messageStore.hold(inboxMessageOriginal);
+			throttle(new TunnelTask().name("MESSAGE_RELEASE").id(contactId).intervalSeconds(10));
 		} else {
 			hold().put(contactId, "HOLDING");
 			// messageStore.hold(inboxMessageOriginal);
@@ -192,6 +198,7 @@ public class InBoundService {
 			if (ArgUtil.is(session)) {
 				chatSessionFactory.linkSession(session, inboxMessageOriginal);
 				locallySessionAssigned = true;
+				messageContext.session(session);
 			} else {
 				ErrorObject error = new ErrorObject();
 				error.setIncomingMessage(inboxMessageOriginal);
@@ -249,6 +256,18 @@ public class InBoundService {
 	@Async
 	public void updateAsync(List<MessageReport> messageReports) {
 		chatStatusService.update(messageReports);
+	}
+
+	@Override
+	public void doTask(TunnelTask task) {
+		if ("MESSAGE_RELEASE".equals(task.getName())) {
+			String contactId = task.getId();
+			hold().put(contactId, "RELEASING");
+			InboxMessage msg = new InboxMessage();
+			msg.contact().setContactId(contactId);
+			msg.setContact(msg.contact());
+			invokeMethodsRelease(msg);
+		}
 	}
 
 }

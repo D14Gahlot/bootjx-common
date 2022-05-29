@@ -10,6 +10,7 @@ import com.boot.jx.logger.AuditDetailProvider;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.doc.MessageDoc.MessageDocLogs;
+import com.boot.jx.postman.doc.MessageDocAbstract;
 import com.boot.jx.postman.model.MessageDefinitions.IMessageExtended;
 import com.boot.jx.postman.model.MessageDefinitions.LogMessage;
 import com.boot.jx.postman.model.MessageDefinitions.LoggableEntity;
@@ -24,9 +25,9 @@ import com.boot.jx.utils.PostManUtil;
 import com.boot.utils.ArgUtil;
 
 @Component
-public class LogManager {
+public class ChatLogger {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(LogManager.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(ChatLogger.class);
 
 	@Autowired(required = false)
 	private AuditDetailProvider auditDetailProvider;
@@ -77,7 +78,7 @@ public class LogManager {
 		return event(inboxMessage, inboxMessage.session().getAgent(), event, logs);
 	}
 
-	private MessageDoc event(ChatSessionDoc sessionDoc, String auditAgent, EVENTS event, String... logs) {
+	public MessageDoc event(ChatSessionDoc sessionDoc, String auditAgent, EVENTS event, String... logs) {
 		IMessageExtended inboxMessage = sessionStore.toSessionMessage(sessionDoc);
 		return event(inboxMessage, auditAgent, event, logs);
 	}
@@ -112,7 +113,7 @@ public class LogManager {
 	}
 
 	public void error(InBoundEvent inBoundEvent, Throwable e) {
-		MessageDoc doc = new MessageDocLogs();
+		MessageDocLogs doc = new MessageDocLogs();
 		doc.setSessionId(inBoundEvent.sessionId);
 		doc.setContactId(inBoundEvent.contactId);
 		doc.setType("E");
@@ -136,7 +137,7 @@ public class LogManager {
 		} else if (ArgUtil.is(messageContext.getInBoundEvent())) {
 			this.error(messageContext.getInBoundEvent(), e);
 		} else {
-			MessageDoc doc = new MessageDocLogs();
+			MessageDocLogs doc = new MessageDocLogs();
 			doc.setType("E");
 			doc.setTimestamp(System.currentTimeMillis());
 			doc.setTraceId(AppContextUtil.getTraceId());
@@ -145,7 +146,7 @@ public class LogManager {
 		}
 	}
 
-	private void log(String type, MessageDoc doc, String message, Object[] debugMessage) {
+	private void log(String type, MessageDocAbstract doc, String message, Object[] debugMessage) {
 		doc.setTimestamp(System.currentTimeMillis());
 		doc.setTraceId(AppContextUtil.getTraceId());
 		doc.setMessage(message);
@@ -157,8 +158,8 @@ public class LogManager {
 		messageStore.save(doc);
 	}
 
-	private MessageDoc messageDoc(LoggableEntity inBoundEvent) {
-		MessageDoc doc = new MessageDocLogs();
+	private MessageDocAbstract messageDoc(LoggableEntity inBoundEvent) {
+		MessageDocLogs doc = new MessageDocLogs();
 		if (ArgUtil.is(inBoundEvent)) {
 			doc.setSessionId(inBoundEvent.getSessionId());
 			doc.setContactId(inBoundEvent.getContactId());
@@ -166,8 +167,8 @@ public class LogManager {
 		return doc;
 	}
 
-	private MessageDoc messageDoc(LogMessage message) {
-		MessageDoc doc = new MessageDocLogs();
+	private MessageDocAbstract messageDoc(LogMessage message) {
+		MessageDocAbstract doc = new MessageDocLogs();
 		if (ArgUtil.is(message)) {
 			doc.setSessionId(message.getSessionId());
 			doc.setMessageId(message.getMessageId());

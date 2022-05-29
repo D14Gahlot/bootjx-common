@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.checkerframework.checker.units.qual.A;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -19,6 +20,7 @@ import com.boot.jx.api.ApiResponse;
 import com.boot.jx.common.config.AppCommonAuthFilter.ACCESS_RULES;
 import com.boot.jx.common.config.CDNBuilder;
 import com.boot.jx.common.config.ClientAppConfigConstants;
+import com.boot.jx.common.config.ConfigConstants;
 import com.boot.jx.common.config.ConfigManager;
 import com.boot.jx.common.impl.ConfigMeta;
 import com.boot.jx.http.ApiRequest;
@@ -27,6 +29,9 @@ import com.boot.jx.postman.ClientApp;
 import com.boot.jx.postman.PMConstants;
 import com.boot.jx.postman.PMConstants.APP_TYPE;
 import com.boot.jx.postman.PMConstants.CHANNEL_TYPE_ENUM;
+import com.boot.jx.postman.PMConstants.CHAT_MODE;
+import com.boot.jx.postman.PMConstants.CHAT_STATE;
+import com.boot.jx.postman.PMConstants.CHAT_STATUS;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PMEnvironment.AChannelConfig;
 import com.boot.jx.postman.PMEnvironment.AChannelDetails;
@@ -110,7 +115,14 @@ public class ConfigOptionMetaController {
 	@JsonView(PMEnvironment.PublicProperty.class)
 	@ResponseBody
 	@RequestMapping(value = { "/api/options/inbound_queue" }, method = { RequestMethod.GET })
-	public ApiResponse<ClientApp, Object> getInboundQueues() {
+	public ApiResponse<ClientApp, Object> getInboundQueues(@RequestParam(required = false) CHAT_MODE mode,
+			@RequestParam(required = false) APP_TYPE type) {
+		if (ArgUtil.is(type))
+			return ApiResponse.buildResults(pmEnvironment.config().listApps().stream().filter(app -> app.equals(type))
+					.collect(Collectors.toList()));
+		else if (ArgUtil.is(mode))
+			return ApiResponse.buildResults(pmEnvironment.config().listApps().stream().filter(app -> app.equals(mode))
+					.collect(Collectors.toList()));
 		return ApiResponse.buildResults(pmEnvironment.config().listApps());
 	}
 
@@ -158,8 +170,11 @@ public class ConfigOptionMetaController {
 	public ApiResponse<PMConfigurationObject, Object> updateCDN(@RequestParam(required = false) String url,
 			@RequestParam(required = false) String version,
 			@RequestParam(required = false, defaultValue = "false") boolean beta) {
+
+		String domainServer = pmEnvironment.keyEntry(ConfigConstants.APP_KEY.PROP_SERVICE_SERVER).asString();
+
 		PMConfigurationObject config = pmEnvironment
-				.keyEntry(beta ? "mry.cdn.url.beta" : "mry.cdn.url." + appConfig.getAppEnv());
+				.keyEntry(beta ? "mry.cdn.url.beta" : "mry.cdn.url." + domainServer);
 		String oldUrl = config.asString();
 
 		if (ArgUtil.is(version) && ArgUtil.is(oldUrl)) {
@@ -174,4 +189,13 @@ public class ConfigOptionMetaController {
 		return ApiResponse.buildResults(config);
 	}
 
+	@RequestMapping(value = "/api/meta/chat_states", method = { RequestMethod.GET })
+	public ApiResponse<CHAT_STATE, Object> chatStates() {
+		return ApiResponse.buildResults(PMConstants.CHAT_STATE.values());
+	}
+
+	@RequestMapping(value = "/api/meta/chat_status", method = { RequestMethod.GET })
+	public ApiResponse<CHAT_STATUS, Object> chatStatus() {
+		return ApiResponse.buildResults(PMConstants.CHAT_STATUS.values());
+	}
 }

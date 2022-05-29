@@ -15,18 +15,17 @@ import com.boot.jx.postman.doc.ChatContextDoc;
 import com.boot.jx.postman.doc.ChatMeta;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.MessageDoc;
-import com.boot.jx.postman.manager.LogManager;
+import com.boot.jx.postman.manager.ChatLogger;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.Message;
 import com.boot.jx.postman.model.MessageDefinitions.IMessageExtended;
+import com.boot.jx.postman.model.MessageDefinitions.SessionInfo;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.model.ext.InBoundEvent;
-import com.boot.jx.postman.query.ChatSessionQuery;
 import com.boot.jx.postman.store.MessageContext;
 import com.boot.jx.postman.store.MessageStore;
 import com.boot.jx.postman.store.SessionStore;
 import com.boot.utils.ArgUtil;
-import com.boot.utils.TimeUtils;
 
 @Component
 public class ChatService {
@@ -74,13 +73,15 @@ public class ChatService {
 	}
 
 	@Autowired
-	private LogManager logManager;
+	private ChatLogger logManager;
 
-	private void message(String messageType, ChatContactDoc chatContactDoc, OutboxMessage outboxMessage,
+	private MessageDoc message(String messageType, ChatContactDoc chatContactDoc, OutboxMessage outboxMessage,
 			IMessageExtended inboxMessage) {
-
+		MessageDoc messageDoc = messageStore.createOrUpdate(outboxMessage);
 		connectorHandlerFactory.message(new MessageContext().from(context()), messageType, chatContactDoc,
 				outboxMessage, inboxMessage);
+		chatSessionFactory.push(messageDoc, outboxMessage);
+		return messageDoc;
 	}
 
 	private MessageDoc actionIntenal(ChatContactDoc chatContactDoc, OutboxMessage outboxMessage) {
@@ -100,10 +101,7 @@ public class ChatService {
 		outboxMessage.contact().setContactId(chatContactDoc.getContactId());
 		outboxMessage.setSessionId(chatContactDoc.getSessionId());
 
-		MessageDoc messageDoc = messageStore.createOrUpdate(outboxMessage);
-		message(MESSAGE_COMPOSE_TYPE.ACTION, chatContactDoc, outboxMessage, null);
-		chatSessionFactory.push(messageDoc, outboxMessage);
-		return messageDoc;
+		return message(MESSAGE_COMPOSE_TYPE.ACTION, chatContactDoc, outboxMessage, null);
 	}
 
 	private MessageDoc replyIntenal(ChatContactDoc chatContactDoc, OutboxMessage outboxMessage,
@@ -130,10 +128,7 @@ public class ChatService {
 
 		// outboxMessage.model().put("contact",
 		// ChatDTOUtil.getContactMeta(chatContactDoc));
-		MessageDoc messageDoc = messageStore.createOrUpdate(outboxMessage);
-		message(MESSAGE_COMPOSE_TYPE.REPLY, chatContactDoc, outboxMessage, inboxMessage);
-		chatSessionFactory.push(messageDoc, outboxMessage);
-		return messageDoc;
+		return message(MESSAGE_COMPOSE_TYPE.REPLY, chatContactDoc, outboxMessage, inboxMessage);
 	}
 
 	private MessageDoc sendIntenal(ChatContactDoc chatContactDoc, OutboxMessage outboxMessage) {
@@ -153,10 +148,7 @@ public class ChatService {
 
 		// outboxMessage.model().put("contact",
 		// ChatDTOUtil.getContactMeta(chatContactDoc));
-		MessageDoc messageDoc = messageStore.createOrUpdate(outboxMessage);
-		message(MESSAGE_COMPOSE_TYPE.SEND, chatContactDoc, outboxMessage, null);
-		chatSessionFactory.push(messageDoc, outboxMessage);
-		return messageDoc;
+		return message(MESSAGE_COMPOSE_TYPE.SEND, chatContactDoc, outboxMessage, null);
 	}
 
 	public MessageDoc reply(ChatSessionDoc sessionDoc, OutboxMessage outboxMessage) throws InterruptedException {
@@ -250,10 +242,10 @@ public class ChatService {
 		return true;
 	}
 
-	public MessageContext loadChatContext(String contactId, InboxMessage inboxMessage) {
-
+	private MessageContext loadChatContextInternal(String contactId, SessionInfo inboxMessage) {
+		LOGGER.debug("Loading chat conewxt");
 		if (!ArgUtil.is(inboxMessage.session().getMode())) {
-			ChatSessionDoc sessionDoc = sessionStore.getSession(inboxMessage.getSessionId());
+			ChatSessionDoc sessionDoc = messageContext.session().getDoc();
 
 			if (!ArgUtil.is(sessionDoc)) {
 				LOGGER.error("No Session Found for {}/{}", contactId, inboxMessage.getSessionId());
@@ -272,13 +264,27 @@ public class ChatService {
 			doc.setContactId(contactId);
 		}
 		messageContext.setChatConext(doc);
-		if (!ArgUtil.is(doc.getMeta()) || TimeUtils.isExpired(doc.getMeta().getUpdateStamp(), "5min")) {
+
+		if (!ArgUtil.is(doc.getMeta()) || !ArgUtil.is(doc.getMeta().getSessionId(), inboxMessage.getSessionId())
+				|| !ArgUtil.is(doc.getMeta().getQueueCode(), inboxMessage.session().getQueue())) {
+			LOGGER.debug("Loading chat conewxt:newSession");
 			doc.setMeta(new ChatMeta());
+			messageContext.chat().setQueueCode(inboxMessage.session().getQueue());
+			messageContext.chat().setSessionId(inboxMessage.getSessionId());
 		}
 
-		messageContext.setInboxMessage(inboxMessage);
 		// messageStore.create(inboxMessage);
 		return messageContext;
+	}
+
+	public MessageContext loadChatContext(String contactId, InboxMessage inboxMessage) {
+		messageContext.setInboxMessage(inboxMessage);
+		return loadChatContextInternal(contactId, inboxMessage);
+	}
+
+	public MessageContext loadChatContext(String contactId, InBoundEvent assignEvent) {
+		messageContext.setInBoundEvent(assignEvent);
+		return loadChatContextInternal(contactId, assignEvent);
 	}
 
 	public void commitChatContext(String contactId, String prevHandler, InboxMessage inboxMessage) {

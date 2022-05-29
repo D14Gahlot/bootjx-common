@@ -337,6 +337,12 @@ public class PMEnvironment {
 
 		public String getAgentUrl();
 
+		public String getScriptusUrl();
+
+		public String getServiceServer();
+
+		public String getScriptusSecret();
+
 		public boolean isValidDomain();
 
 		public boolean isDefaultDomain();
@@ -353,11 +359,11 @@ public class PMEnvironment {
 
 		public String getDefaultInboundQueue(Contactable contact);
 
-		public PMConfigurationObject getResolveReply();
-
 		String getDomainUrl();
 
 		PMConfigurationObject getAgentHistoryPeriod();
+
+		PMConfigurationObject getChatIdleTimeout();
 
 		PMConfigurationObject getAgentHistoryCount();
 
@@ -373,8 +379,6 @@ public class PMEnvironment {
 		TimePeriod getAgentSessionTimeout();
 
 		String getWebhookUrl(ChannelConfig channelConfig);
-
-		String getChatIdleTimeout();
 
 		boolean isLocalDummyBotEnabled();
 

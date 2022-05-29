@@ -32,15 +32,17 @@ import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.dto.ChatMessageDTO;
 import com.boot.jx.postman.dto.ChatSessionDTO;
 import com.boot.jx.postman.manager.ChatSessionManager;
-import com.boot.jx.postman.manager.LogManager;
+import com.boot.jx.postman.manager.ChatLogger;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.model.PMArgs;
 import com.boot.jx.postman.service.ChatDTOUtil;
 import com.boot.jx.postman.store.MessageStore;
 import com.boot.jx.postman.store.SessionStore;
+import com.boot.jx.stomp.StompQuery;
 import com.boot.jx.stomp.StompTunnelService;
 import com.boot.jx.utils.PostManUtil;
+import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
 
@@ -56,7 +58,7 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 	private ChatSessionManager chatSessionManager;
 
 	@Autowired
-	private LogManager logManager;
+	private ChatLogger logManager;
 
 	@Autowired
 	private ChatService chatService;
@@ -232,8 +234,9 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 	 * @param agentDept
 	 * @param agentCode
 	 */
-	private void onAssign(ChatSessionDoc chatSessionDoc, String agentDept, String agentCode) {
-		if (!ArgUtil.areEqual(chatSessionDoc.getAssignedToAgent(), agentCode)) {
+	public void onAssign(ChatSessionDoc chatSessionDoc, String agentDept, String agentCode) {
+		if (!ArgUtil.areEqual(chatSessionDoc.getAssignedToAgent(), agentCode)
+				|| !ArgUtil.areEqual(chatSessionDoc.getAssignedToDept(), agentDept)) {
 
 			this.doAssign(chatSessionDoc, new PMArgs().assignToDeptCode(agentDept).assignToAgentCode(agentCode));
 
@@ -272,7 +275,7 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 	}
 
 	public ChatMessageDTO exitAgentMode(ChatSessionDoc chatSessionDoc, OutboxMessage outboxMessage) {
-		chatSessionService.closeSession(chatSessionDoc);
+		chatSessionService.resolveSession(chatSessionDoc);
 		MessageDoc messageDoc = null;
 		if (ArgUtil.is(outboxMessage)) {
 			messageDoc = chatService.send(chatSessionDoc, outboxMessage);
@@ -285,6 +288,9 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 		if (chatSessionService.updateSessionStatus(sessionDoc, status).exists()) {
 			ChatSessionDTO dto = chatArchive.getChatSession(sessionDoc);
 			stompTunnelService.sendToTag(sessionDoc.getAssignedToDept(), "/chat/session/update", dto);
+			stompTunnelService.sendTo(StompQuery.toAll("/chat/session/delta").toSameOriginApp(),
+					MapModel.createInstance().put("sessionId", sessionDoc.getSessionId()).put("event", "status_update")
+							.toMap());
 			return dto;
 		}
 		return chatArchive.getChatSession(sessionDoc);
@@ -296,6 +302,8 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 		ChatMessageDTO messageDto = ChatDTOUtil.getChatMessageDTO(messageDoc);
 		messageDto.setName(inboxMessage.getFromName());
 		stompTunnelService.sendToTag(inboxMessage.session().getDept(), "/message/receive/new", messageDto);
+		stompTunnelService.sendTo(StompQuery.toAll("/chat/session/delta").toSameOriginApp(), MapModel.createInstance()
+				.put("sessionId", messageDoc.getSessionId()).put("event", "new_message").toMap());
 		if (ArgUtil.is(inboxMessage.getMessage()) && inboxMessage.getMessage().equalsIgnoreCase("/exit_chat")) {
 			ChatSessionDoc chatSessionDoc = sessionStore.getSession(inboxMessage.getSessionId());
 			exitAgentMode(chatSessionDoc, null);

@@ -97,6 +97,11 @@ public class FrontController {
 			model.addAttribute("APP_DOMAIN", Constants.BLANK);
 		}
 
+		String appView = ArgUtil.parseAsString(commonHttpRequest.get("APP_VIEW"), "DEFAULT");
+		commonHttpRequest.setCookie("APP_VIEW", appView);
+
+		model.addAttribute("APP_VIEW", appView);
+
 		Authentication auth = AccountAuthService.getAuthentication();
 		if (ArgUtil.is(auth)) {
 			model.addAttribute("APP_USER", auth.getName());

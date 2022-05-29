@@ -3,12 +3,14 @@ package com.boot.jx.common.config;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 
 import com.boot.jx.AppContextUtil;
 import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.chat.ChatClient;
 import com.boot.jx.chat.ChatClient.PATH;
 import com.boot.jx.chat.ChatService;
+import com.boot.jx.chat.ChatSessionService;
 import com.boot.jx.common.service.SessionRouter;
 import com.boot.jx.common.store.ChatArchiveBuilder;
 import com.boot.jx.inbound.InBound.InBoundHandler;
@@ -16,12 +18,13 @@ import com.boot.jx.postman.ClientApp;
 import com.boot.jx.postman.PMConstants.APP_TYPE;
 import com.boot.jx.postman.PMConstants.CHAT_MODE;
 import com.boot.jx.postman.PMConstants.MESSAGE_FORMAT_TYPE;
+import com.boot.jx.postman.PMConstants.PROPERTIES;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PMEnvironment.PMCommonConfig;
 import com.boot.jx.postman.PMEnvironment.PMConfigurationObject;
 import com.boot.jx.postman.PMEnvironment.PMDomainConfig;
 import com.boot.jx.postman.doc.ChatSessionDoc;
-import com.boot.jx.postman.manager.LogManager;
+import com.boot.jx.postman.manager.ChatLogger;
 import com.boot.jx.postman.mitel.MitelClient;
 import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.InboxMessage;
@@ -70,7 +73,7 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 	private RestService restService;
 
 	@Autowired
-	protected LogManager logManager;
+	protected ChatLogger logManager;
 
 	@Autowired
 	private MessageStore messageStore;
@@ -89,6 +92,10 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 
 	@Autowired(required = false)
 	private ChatService chatService;
+
+	@Lazy
+	@Autowired(required = false)
+	private ChatSessionService chatSessionService;
 
 	@Autowired(required = false)
 	private MessageContext messageContext;
@@ -116,7 +123,12 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 						inboxMessage.setOriginalMessage(null);
 						chatClient.forward(defaultClient.getForward() + PATH.INBOUND_FRWRD, inboxMessage);
 					} else if (ArgUtil.is(defaultClient.getWebhook())) {
-						forward2Webhook(inboxMessage, defaultClient.getWebhook(), defaultClient.getId());
+						if (APP_TYPE.APP_SCRIPT.equals(appType)) {
+							forward2Webhook(inboxMessage, pmCommonConfig.getScriptusUrl() + PATH.APP_SCRIPT_FRWRD,
+									defaultClient.getId());
+						} else {
+							forward2Webhook(inboxMessage, defaultClient.getWebhook(), defaultClient.getId());
+						}
 					} else {
 						ApiResponseUtil.throwException("Forward URL missing");
 					}
@@ -164,7 +176,8 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 		sessionRouter.debounce(task);
 		// sessionRouter.doTask(task);
 
-		TunnelTask closeTask = new TunnelTask().name("MITEL_CLOSE_CHECK").id(session.getSessionId()).intervalSeconds(60 * 10);
+		TunnelTask closeTask = new TunnelTask().name("MITEL_CLOSE_CHECK").id(session.getSessionId())
+				.intervalSeconds(60 * 10);
 		closeTask.data().put("sessionId", session.getSessionId()).put("omid", omid).put("queue",
 				defaultClient.getQueue());
 		sessionRouter.debounce(closeTask);
@@ -234,7 +247,7 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 
 		InBoundWrapper wrap = new InBoundWrapper();
 		wrap.meta = new InBoundMeta().domain(AppContextUtil.getTenant())
-				.server(pmEnvironment.keyEntry(ConfigConstants.APP_KEY.PROP_SERVICE_DOMAIN).asString())
+				.server(pmEnvironment.keyEntry(ConfigConstants.APP_KEY.PROP_SERVICE_SERVER).asString())
 				.appId(clientAppId);
 
 		wrap.contacts = CollectionUtil.asList(contact);
@@ -251,23 +264,25 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 			if (ArgUtil.areEqual(CHAT_MODE.WEBHOOK.toString(), defaultClient.getAppType())) {
 				LOGGER.debug("Forwarding MessageReport to Xternal Service ");
 				try {
-					InBoundContact contact = InBoundContact.from(messageReport.contact());
+					if (ArgUtil.is(defaultClient.getWebhook())) {
+						InBoundContact contact = InBoundContact.from(messageReport.contact());
+						InBoundMsgStatus status = new InBoundMsgStatus();
+						status.contactId = contact.contactId;
+						status.messageId = messageReport.getMessageId();
+						status.messageIdExt = messageReport.getMessageIdExt();
+						status.timestamp = messageReport.getChangeStamp();
+						status.status = messageReport.getStatus();
+						status.errors = messageReport.getErrors();
 
-					InBoundMsgStatus status = new InBoundMsgStatus();
-					status.contactId = contact.contactId;
-					status.messageId = messageReport.getMessageId();
-					status.messageIdExt = messageReport.getMessageIdExt();
-					status.timestamp = messageReport.getChangeStamp();
-					status.status = messageReport.getStatus();
-					status.errors = messageReport.getErrors();
+						InBoundWrapper wrap = new InBoundWrapper();
+						wrap.meta = new InBoundMeta().domain(AppContextUtil.getTenant())
+								.server(pmEnvironment.keyEntry(ConfigConstants.APP_KEY.PROP_SERVICE_DOMAIN).asString())
+								.appId(defaultClient.getId());
+						wrap.contacts = CollectionUtil.asList(contact);
+						wrap.statuses = CollectionUtil.asList(status);
+						restService.ajax(defaultClient.getWebhook()).post(wrap).asNone();
+					}
 
-					InBoundWrapper wrap = new InBoundWrapper();
-					wrap.meta = new InBoundMeta().domain(AppContextUtil.getTenant())
-							.server(pmEnvironment.keyEntry(ConfigConstants.APP_KEY.PROP_SERVICE_DOMAIN).asString())
-							.appId(defaultClient.getId());
-					wrap.contacts = CollectionUtil.asList(contact);
-					wrap.statuses = CollectionUtil.asList(status);
-					restService.ajax(defaultClient.getWebhook()).post(wrap).asNone();
 				} catch (Exception e) {
 					logManager.error(messageReport, e);
 				}
@@ -297,7 +312,6 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 
 	@Override
 	public void onSessionRoute(InBoundEvent event, ChatSessionDoc sessionDoc, PMArgs pmArgs) {
-
 		if (InBoundEvent.SESSION_ROUTED.equals(event.eventCode)) {
 			ClientApp defaultClient = context().clientApp(event.sessionRouted.targetQueue, null);
 			if (ArgUtil.is(defaultClient)) {
@@ -325,7 +339,6 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 				}
 			}
 		}
-
 	}
 
 	@Override
@@ -335,9 +348,16 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 
 	@Override
 	public void onSessionResolve(InBoundEvent event, ChatSessionDoc chatSessionDoc) {
-		PMConfigurationObject resolvedReply = pmDomainConfig.getResolveReply();
-		if (resolvedReply.exists()) {
-			chatService.send(chatSessionDoc, new OutboxMessage().template(resolvedReply.asString()));
+		PMConfigurationObject feedbackQueue = pmEnvironment.keyEntry(PROPERTIES.POSTMAN_CHAT_FEEDBACK_QUEUE);
+		if (feedbackQueue.exists()) {
+			chatSessionService.routeSession(chatSessionDoc, new PMArgs().assignToQueueCode(feedbackQueue.asString()));
+		} else {
+			PMConfigurationObject resolvedReply = pmEnvironment
+					.keyEntry(PROPERTIES.POSTMAN_AGENT_CHAT_AUTOREPLY_RESOLVED);
+			if (resolvedReply.exists()) {
+				chatService.send(chatSessionDoc, new OutboxMessage().template(resolvedReply.asString()));
+			}
+			chatSessionService.closeSession(chatSessionDoc);
 		}
 	}
 
@@ -367,15 +387,17 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 	private void sendEventWebhook(InBoundEvent event, ClientApp defaultClient) {
 		LOGGER.debug("Forwarding Session Routing Event to Xternal Service ");
 		try {
-			InBoundContact contact = InBoundContact.from(event.contact());
+			if (ArgUtil.is(defaultClient.getWebhook())) {
+				InBoundContact contact = InBoundContact.from(event.contact());
 
-			InBoundWrapper wrap = new InBoundWrapper();
-			wrap.meta = new InBoundMeta().domain(AppContextUtil.getTenant())
-					.server(pmEnvironment.keyEntry(ConfigConstants.APP_KEY.PROP_SERVICE_DOMAIN).asString())
-					.appId(defaultClient.getId());
-			wrap.contacts = CollectionUtil.asList(contact);
-			wrap.events = CollectionUtil.asList(event);
-			restService.ajax(defaultClient.getWebhook()).post(wrap).asNone();
+				InBoundWrapper wrap = new InBoundWrapper();
+				wrap.meta = new InBoundMeta().domain(AppContextUtil.getTenant())
+						.server(pmEnvironment.keyEntry(ConfigConstants.APP_KEY.PROP_SERVICE_DOMAIN).asString())
+						.appId(defaultClient.getId());
+				wrap.contacts = CollectionUtil.asList(contact);
+				wrap.events = CollectionUtil.asList(event);
+				restService.ajax(defaultClient.getWebhook()).post(wrap).asNone();
+			}
 		} catch (Exception e) {
 			logManager.error(event, e);
 		}

@@ -23,9 +23,9 @@ public class DemoCafeBazzaController extends DefaultChakliController {
 			lang = ArgUtil.parseAsString(context().contact().getLang());
 		}
 
-		// if(!timeCheck()) {
-		// reply(new OutboxMessage().template("working_hours_update"));
-		// }else {
+		if(!timeCheckV1("cb_switch","cb_start_time","cb_end_time")) {
+			 reply(new OutboxMessage().template("cb_working_hours_update"));
+		}else {
 		if (lang.equalsIgnoreCase("english") || (lang != null && lang.equalsIgnoreCase("en"))) {
 			context().contact().setLang("en");
 			context().commit();
@@ -42,7 +42,7 @@ public class DemoCafeBazzaController extends DefaultChakliController {
 			reply(new OutboxMessage().template("cb_question"));
 			next("select-question");
 		}
-		// }
+	 }
 	}
 
 	@ChatMapping(key = "select-question")
@@ -72,8 +72,8 @@ public class DemoCafeBazzaController extends DefaultChakliController {
 			next("next_menu");
 			break;
 		case "cb_help":
-			//reply(new OutboxMessage().template("cb_help_ans"));
-			//next("next_menu");
+			// reply(new OutboxMessage().template("cb_help_ans"));
+			// next("next_menu");
 			this.commonTransferToAgent(inboxMessage, matcher);
 			break;
 		case "*":

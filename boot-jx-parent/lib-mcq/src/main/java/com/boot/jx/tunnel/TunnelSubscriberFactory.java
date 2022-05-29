@@ -75,7 +75,7 @@ public class TunnelSubscriberFactory {
 				} else if (ArgUtil.is(listenerTarget) && ArgUtil.is(listenerTarget.getTopic())) {
 					eventTopic = listenerTarget.getTopic();
 				}
-				
+
 				boolean integrity = tunnelEvent.integrity();
 				TunnelEventXchange scheme = tunnelEvent.scheme();
 				if (scheme == TunnelEventXchange.TASK_WORKER) {
@@ -122,7 +122,9 @@ public class TunnelSubscriberFactory {
 
 		@Override
 		public void onMessage(CharSequence channel, TunnelMessage<M> msg) {
-			this.onMessageWrapper(ArgUtil.parseAsString(channel), msg);
+			if (!ArgUtil.is(msg.getAppType()) || ArgUtil.is(msg.getAppType(), AppParam.APP_TYPE.getValue())) {
+				this.onMessageWrapper(ArgUtil.parseAsString(channel), msg);
+			}
 		}
 
 		public void onMessageWrapper(String channel, TunnelMessage<M> msg) {
@@ -158,20 +160,22 @@ public class TunnelSubscriberFactory {
 					String integrityKey = appConfig.getAppName() + "#" + listentName + "#" + msg.getId();
 					String prevObject = map.put(integrityKey, msg.getId(), TIME_TO_EXPIRE, UNIT_OF_TIME);
 					if (prevObject == null) { // Hey I got it first :) OR it doesn't matter
-						this.doMessage(channel, msg);
+						this.doMessage(channel, msg, false);
 						map.put(integrityKey, "DONE", TIME_TO_EXPIRE, UNIT_OF_TIME);
 					} else { // I hope, other guy (The Lucky Bugger) is doing his job, right.
 						LOGGER.debug("IGNORED EVENT : {} : {}", channel, msg.getId());
 						MCQIndicator.messageIgnored(channel);
 					}
 				} else {
-					this.doMessage(channel, msg);
+					this.doMessage(channel, msg, true);
 				}
 			}
 
-			public void doMessage(String channel, TunnelMessage<M> msg) {
-				AuditServiceClient.trackStatic(
-						new RequestTrackEvent(RequestTrackEvent.Type.SUB_IN, TunnelEventXchange.SHOUT_LISTNER, msg));
+			public void doMessage(String channel, TunnelMessage<M> msg, boolean silent) {
+				if (!silent) {
+					AuditServiceClient.trackStatic(new RequestTrackEvent(RequestTrackEvent.Type.SUB_IN,
+							TunnelEventXchange.SHOUT_LISTNER, msg));
+				}
 				try {
 					this.subscriber.onMessage(channel, msg.getData());
 					MCQIndicator.messageProcessed(channel);

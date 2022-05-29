@@ -34,7 +34,7 @@
 		<dependency>
 			<groupId>org.thymeleaf.extras</groupId>
 			<artifactId>thymeleaf-extras-springsecurity4</artifactId>
-			<version>3.0.0.RELEASE</version>
+ 			<version>3.0.0.RELEASE</version>
 		</dependency>
 
 		<!-- /thymeleaf dependencies -->
@@ -134,9 +134,13 @@
 	</build>
 
 	<repositories>
-		<repository>
+<!-- 		<repository>
 			<id>spring-milestone</id>
-			<url>https://repo.spring.io/libs-milestone</url>
+			<url>https://repo.spring.io/milestone</url>
+		</repository> -->
+		<repository>
+			<id>maven</id>
+			<url>https://repo1.maven.org/maven2/</url>
 		</repository>
 		<repository>
 			<snapshots>
@@ -147,13 +151,4 @@
 			<url>http://jcenter.bintray.com</url>
 		</repository>
 	</repositories>
-	<dependencyManagement>
-		<dependencies>
-			<dependency>
-				<groupId>com.boot.jx</groupId>
-				<artifactId>lib-postman</artifactId>
-				<version>0.0.1-SNAPSHOT</version>
-			</dependency>
-		</dependencies>
-	</dependencyManagement>
 </project>

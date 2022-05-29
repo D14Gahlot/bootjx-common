@@ -2,11 +2,11 @@ package com.boot.jx.account.doc;
 
 import java.io.Serializable;
 
-import com.boot.jx.phonebook.model.PBAddress;
-import com.boot.jx.phonebook.model.PBEmail;
-import com.boot.jx.phonebook.model.PBPhone;
-import com.boot.jx.phonebook.model.PBTax;
-import com.boot.jx.phonebook.model.PBWebsite;
+import com.boot.jx.postman.pbook.PBAddress;
+import com.boot.jx.postman.pbook.PBEmail;
+import com.boot.jx.postman.pbook.PBPhone;
+import com.boot.jx.postman.pbook.PBTax;
+import com.boot.jx.postman.pbook.PBWebsite;
 
 public class CompanyDoc implements Serializable {
 

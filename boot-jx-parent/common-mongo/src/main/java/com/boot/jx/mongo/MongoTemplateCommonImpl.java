@@ -51,6 +51,10 @@ public class MongoTemplateCommonImpl extends MongoTemplate {
 		return mongoDBCredentials.getMongoTemplate();
 	}
 
+	public void setMongoDBCredentials(CommonMongoSource mongoDBCredentials) {
+		this.mongoDBCredentials = mongoDBCredentials;
+	}
+
 	@Override
 	public String getCollectionName(Class<?> entityClass) {
 		return getCommonMongoTemplate().getCollectionName(entityClass);
@@ -208,8 +212,7 @@ public class MongoTemplateCommonImpl extends MongoTemplate {
 	@Override
 	public <T> GroupByResults<T> group(Criteria criteria, String inputCollectionName, GroupBy groupBy,
 			Class<T> entityClass) {
-		return getCommonMongoTemplate().group(criteria, inputCollectionName, groupBy,
-				entityClass);
+		return getCommonMongoTemplate().group(criteria, inputCollectionName, groupBy, entityClass);
 	}
 
 	@Override
@@ -236,22 +239,20 @@ public class MongoTemplateCommonImpl extends MongoTemplate {
 	@Override
 	public <T> MapReduceResults<T> mapReduce(String inputCollectionName, String mapFunction, String reduceFunction,
 			Class<T> entityClass) {
-		return getCommonMongoTemplate().mapReduce(inputCollectionName, mapFunction,
-				reduceFunction, entityClass);
+		return getCommonMongoTemplate().mapReduce(inputCollectionName, mapFunction, reduceFunction, entityClass);
 	}
 
 	@Override
 	public <T> MapReduceResults<T> mapReduce(String inputCollectionName, String mapFunction, String reduceFunction,
 			MapReduceOptions mapReduceOptions, Class<T> entityClass) {
-		return getCommonMongoTemplate().mapReduce(inputCollectionName, mapFunction,
-				reduceFunction, mapReduceOptions, entityClass);
+		return getCommonMongoTemplate().mapReduce(inputCollectionName, mapFunction, reduceFunction, mapReduceOptions,
+				entityClass);
 	}
 
 	@Override
 	public <T> MapReduceResults<T> mapReduce(Query query, String inputCollectionName, String mapFunction,
 			String reduceFunction, Class<T> entityClass) {
-		return getCommonMongoTemplate().mapReduce(query, inputCollectionName, mapFunction,
-				reduceFunction, entityClass);
+		return getCommonMongoTemplate().mapReduce(query, inputCollectionName, mapFunction, reduceFunction, entityClass);
 	}
 
 	@Override
@@ -322,8 +323,7 @@ public class MongoTemplateCommonImpl extends MongoTemplate {
 
 	@Override
 	public <T> T findAndModify(Query query, Update update, Class<T> entityClass, String collectionName) {
-		return getCommonMongoTemplate().findAndModify(query, update, entityClass,
-				collectionName);
+		return getCommonMongoTemplate().findAndModify(query, update, entityClass, collectionName);
 	}
 
 	@Override
@@ -334,8 +334,7 @@ public class MongoTemplateCommonImpl extends MongoTemplate {
 	@Override
 	public <T> T findAndModify(Query query, Update update, FindAndModifyOptions options, Class<T> entityClass,
 			String collectionName) {
-		return getCommonMongoTemplate().findAndModify(query, update, options, entityClass,
-				collectionName);
+		return getCommonMongoTemplate().findAndModify(query, update, options, entityClass, collectionName);
 	}
 
 	@Override
@@ -425,8 +424,7 @@ public class MongoTemplateCommonImpl extends MongoTemplate {
 
 	@Override
 	public WriteResult updateFirst(Query query, Update update, Class<?> entityClass, String collectionName) {
-		return getCommonMongoTemplate().updateFirst(query, update, entityClass,
-				collectionName);
+		return getCommonMongoTemplate().updateFirst(query, update, entityClass, collectionName);
 	}
 
 	@Override
@@ -441,8 +439,7 @@ public class MongoTemplateCommonImpl extends MongoTemplate {
 
 	@Override
 	public WriteResult updateMulti(Query query, Update update, Class<?> entityClass, String collectionName) {
-		return getCommonMongoTemplate().updateMulti(query, update, entityClass,
-				collectionName);
+		return getCommonMongoTemplate().updateMulti(query, update, entityClass, collectionName);
 	}
 
 	@Override

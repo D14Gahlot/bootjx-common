@@ -5,7 +5,11 @@ import java.util.List;
 import com.boot.jx.mongo.CommonMongoQueryBuilder.DocQueryBuilder;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.MessageDoc;
+import com.boot.jx.postman.dto.ChatMessageDTO;
+import com.boot.jx.postman.service.ChatDTOUtil;
 import com.boot.jx.postman.store.MessageStore;
+import com.boot.jx.utils.PostManUtil;
+import com.boot.model.SafeKeyHashMap;
 
 public class ChatSessionQuery extends DocQueryBuilder<ChatSessionDoc> {
 
@@ -98,18 +102,32 @@ public class ChatSessionQuery extends DocQueryBuilder<ChatSessionDoc> {
 		this.doc.setLastInBoundMsg(lastInBoundMsg);
 		this.set("lastInBoundMsgId", lastInBoundMsg.getMessageId());
 		this.ref("lastInBoundMsg", lastInBoundMsg.getMessageId(), MessageStore.getCollectionName(contactType));
+		this.set("msg.lastInBoundMsg", ChatDTOUtil.getChatMessageDTO(lastInBoundMsg));
 		return this;
 	}
 
 	public ChatSessionQuery setLastOutBoundMsg(MessageDoc lastOutBoundMsg, String contactType) {
 		this.doc.setLastOutBoundMsg(lastOutBoundMsg);
 		this.ref("lastOutBoundMsg", lastOutBoundMsg.getMessageId(), MessageStore.getCollectionName(contactType));
+		this.set("msg.lastOutBoundMsg", ChatDTOUtil.getChatMessageDTO(lastOutBoundMsg));
+		return this;
+	}
+
+	public ChatSessionQuery setLastMsg(ChatMessageDTO msgDto) {
+		if (PostManUtil.isOutBound(msgDto.getType())) {
+			this.set("msg.lastOutBoundMsg", msgDto);
+			this.set("msg.lastMsg", msgDto);
+		} else if (PostManUtil.isInBound(msgDto.getType())) {
+			this.set("msg.lastInBoundMsg", msgDto);
+			this.set("msg.lastMsg", msgDto);
+		}
 		return this;
 	}
 
 	public ChatSessionQuery setLastMsg(MessageDoc lastMsg, String contactType) {
 		// this.doc.setLastMsg(lastMsg);
 		this.ref("lastMsg", lastMsg.getMessageId(), MessageStore.getCollectionName(contactType));
+		this.set("msg.lastMsg", ChatDTOUtil.getChatMessageDTO(lastMsg));
 		return this;
 	}
 
@@ -122,6 +140,14 @@ public class ChatSessionQuery extends DocQueryBuilder<ChatSessionDoc> {
 	public ChatSessionQuery setQueue(String queue) {
 		this.doc.setAssignedToQueue(queue);
 		this.set("assignedToQueue", queue);
+		return this;
+	}
+
+	public ChatSessionQuery read(String agent) {
+		String key = SafeKeyHashMap.sanitizeKey(agent);
+		long now = System.currentTimeMillis();
+		this.doc.read().put(key, now);
+		this.set("read." + key, now);
 		return this;
 	}
 

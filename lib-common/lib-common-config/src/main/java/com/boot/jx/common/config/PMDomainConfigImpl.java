@@ -43,11 +43,6 @@ public class PMDomainConfigImpl implements PMDomainConfig {
 	}
 
 	@Override
-	public PMConfigurationObject getResolveReply() {
-		return environment.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_AGENT_CHAT_AUTOREPLY_RESOLVED);
-	}
-
-	@Override
 	public String getDomainUrl() {
 		return String.format("https://%s.%s", AppContextUtil.getTenant(),
 				environment.keyEntry("mry.prop.service.domain").asString());
@@ -66,5 +61,10 @@ public class PMDomainConfigImpl implements PMDomainConfig {
 	@Override
 	public PMConfigurationObject getAgentHistoryCount() {
 		return environment.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_AGENT_TAB_HISTORY_LIMIT);
+	}
+
+	@Override
+	public PMConfigurationObject getChatIdleTimeout() {
+		return environment.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_CHAT_IDLE_TIMEOUT);
 	}
 }

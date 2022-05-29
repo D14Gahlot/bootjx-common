@@ -7,6 +7,7 @@ import java.util.Map;
 
 import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.MessageDefinitions.Contactable;
+import com.boot.jx.postman.pbook.PBVCard;
 import com.boot.jx.postman.model.MessageRouter;
 import com.boot.jx.postman.model.TagDocument;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -32,6 +33,7 @@ public class ChatMessageDTO implements Serializable {
 	private String type;
 	private TagDocument tags;
 	private List<Attachment> attachments;
+	private List<PBVCard> vccards;
 	public List<String> logs;
 	private String sender;
 	private String status;
@@ -247,5 +249,13 @@ public class ChatMessageDTO implements Serializable {
 			this.route = new MessageRouter();
 		}
 		return this.route;
+	}
+
+	public List<PBVCard> getVccards() {
+		return vccards;
+	}
+
+	public void setVccards(List<PBVCard> vccards) {
+		this.vccards = vccards;
 	}
 }

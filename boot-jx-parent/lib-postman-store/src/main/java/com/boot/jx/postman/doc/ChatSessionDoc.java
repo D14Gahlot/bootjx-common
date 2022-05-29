@@ -9,21 +9,35 @@ import java.util.Map;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.TypeAlias;
 import org.springframework.data.annotation.Version;
+import org.springframework.data.mongodb.core.index.CompoundIndex;
+import org.springframework.data.mongodb.core.index.CompoundIndexes;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import com.boot.jx.mongo.CommonDocInterfaces.TimeStampIndex.UpdatedTimeStampDoc;
 import com.boot.jx.mongo.CommonDocInterfaces.TimeStampIndex.UpdatedTimeStampIndexSupport;
+import com.boot.jx.postman.dto.ChatMessageDTO;
 import com.boot.jx.postman.model.MessageDefinitions.Contactable;
 import com.boot.jx.swagger.ApiMockModelProperty;
 import com.boot.utils.ArgUtil;
 
 @Document(collection = "CHAT_SESSION")
 @TypeAlias("ChatSessionDoc")
+@CompoundIndexes({
+		// route indexs
+		@CompoundIndex(name = "lastMsg_Stamp", def = "{ 'msg.lastMsg.timestamp': 1 }"),
+		@CompoundIndex(name = "route_sendMode", def = "{ 'msg.lastMsg.route.sendMode': 1 }"),
+		@CompoundIndex(name = "route_senderType", def = "{ 'msg.lastMsg.route.senderType': 1 }"),
+		@CompoundIndex(name = "lastOutBoundMsg_Stamp", def = "{ 'msg.lastOutBoundMsg.timestamp': 1 }"), })
 public class ChatSessionDoc extends UpdatedTimeStampDoc implements Serializable {
 
 	private static final long serialVersionUID = 1L;
+
+	public static final String FIRST_INBOUND_STAMP = "stamps.firstInBound";
+	public static final String LAST_INBOUND_STAMP = "stamps.lastInBound";
+	public static final String FIRST_OUTBOUND_STAMP = "stamps.firstOutBound";
+	public static final String LAST_OUTBOUND_STAMP = "stamps.lastOutBound";
 
 	@Id
 	private String sessionId;
@@ -111,6 +125,11 @@ public class ChatSessionDoc extends UpdatedTimeStampDoc implements Serializable 
 	private Map<String, Object> store;
 	private Map<String, Object> meta;
 
+	private Map<String, ChatMessageDTO> msg;
+	private Map<String, Long> stamps;
+	private Map<String, Long> read;
+	private Map<String, Object> feedback;
+
 	// MessageStats
 	@DBRef
 	private MessageDoc lastInBoundMsg;
@@ -118,7 +137,7 @@ public class ChatSessionDoc extends UpdatedTimeStampDoc implements Serializable 
 	@DBRef
 	private MessageDoc lastOutBoundMsg;
 
-	@DBRef
+	// @DBRef
 	private MessageDoc lastMsg;
 
 	public long getLastInComingStamp() {
@@ -514,4 +533,56 @@ public class ChatSessionDoc extends UpdatedTimeStampDoc implements Serializable 
 		this.ticketHash = ticketHash;
 	}
 
+	public Map<String, ChatMessageDTO> getMsg() {
+		return msg;
+	}
+
+	public void setMsg(Map<String, ChatMessageDTO> msg) {
+		this.msg = msg;
+	}
+
+	public Map<String, ChatMessageDTO> msg() {
+		if (this.msg == null) {
+			this.msg = new HashMap<String, ChatMessageDTO>();
+		}
+		return this.msg;
+	}
+
+	public Map<String, Long> getStamps() {
+		return stamps;
+	}
+
+	public void setStamps(Map<String, Long> stamps) {
+		this.stamps = stamps;
+	}
+
+	public Map<String, Long> stamps() {
+		if (this.stamps == null) {
+			this.stamps = new HashMap<String, Long>();
+		}
+		return this.stamps;
+	}
+
+	public Map<String, Long> getRead() {
+		return read;
+	}
+
+	public void setRead(Map<String, Long> read) {
+		this.read = read;
+	}
+
+	public Map<String, Long> read() {
+		if (this.read == null) {
+			this.read = new HashMap<String, Long>();
+		}
+		return this.read;
+	}
+
+	public Map<String, Object> getFeedback() {
+		return feedback;
+	}
+
+	public void setFeedback(Map<String, Object> feedback) {
+		this.feedback = feedback;
+	}
 }

@@ -503,6 +503,18 @@ public final class StringUtils {
 		return ArgUtil.isEmptyString(str);
 	}
 
+	public static boolean isNumeric(String strNum) {
+		if (strNum == null) {
+			return false;
+		}
+		try {
+			double d = Double.parseDouble(strNum);
+		} catch (NumberFormatException nfe) {
+			return false;
+		}
+		return true;
+	}
+
 	public static String maskIpAddress(String ipAddress) {
 		String[] slots = ipAddress.split(":|\\.");
 		return String.join("-", Arrays.copyOfRange(slots, 0, slots.length / 4 * 3));

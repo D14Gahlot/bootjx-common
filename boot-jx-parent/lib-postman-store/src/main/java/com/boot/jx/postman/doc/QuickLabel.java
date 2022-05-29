@@ -1,29 +1,32 @@
 package com.boot.jx.postman.doc;
 
 import java.io.Serializable;
-import java.util.List;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.TypeAlias;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import com.boot.jx.model.AuditCreateEntity;
-import com.boot.jx.mongo.CommonDocInterfaces.OldDocVersion;
+import com.boot.jx.model.AuditCreateEntity.AuditableEntity;
 
 @Document(collection = "DICT_QUICK_LABEL")
 @TypeAlias("QuickLabel")
-public class QuickLabel implements Serializable, OldDocVersion<QuickLabel>, AuditCreateEntity {
+public class QuickLabel implements Serializable, AuditableEntity {
 
 	private static final long serialVersionUID = 2845094878124818820L;
 	@Id
 	private String id;
 	private String title;
 	private String category;
+
+	@Indexed(unique = true, sparse = true)
 	private String code;
 
-	private List<QuickLabel> oldVersions;
 	private String createdBy;
 	private Long createdStamp;
+
+	private String updatedBy;
+	private Long updatedStamp;
 
 	public String getCategory() {
 		return category;
@@ -57,14 +60,6 @@ public class QuickLabel implements Serializable, OldDocVersion<QuickLabel>, Audi
 		this.code = code;
 	}
 
-	public List<QuickLabel> getOldVersions() {
-		return oldVersions;
-	}
-
-	public void setOldVersions(List<QuickLabel> oldVersions) {
-		this.oldVersions = oldVersions;
-	}
-
 	public String getCreatedBy() {
 		return createdBy;
 	}
@@ -79,5 +74,21 @@ public class QuickLabel implements Serializable, OldDocVersion<QuickLabel>, Audi
 
 	public void setCreatedStamp(Long createdStamp) {
 		this.createdStamp = createdStamp;
+	}
+
+	public String getUpdatedBy() {
+		return updatedBy;
+	}
+
+	public void setUpdatedBy(String updatedBy) {
+		this.updatedBy = updatedBy;
+	}
+
+	public Long getUpdatedStamp() {
+		return updatedStamp;
+	}
+
+	public void setUpdatedStamp(Long updatedStamp) {
+		this.updatedStamp = updatedStamp;
 	}
 }

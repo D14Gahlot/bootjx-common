@@ -42,14 +42,15 @@ import com.boot.jx.common.config.ConfigConstants;
 import com.boot.jx.common.dto.UserLoginToken;
 import com.boot.jx.common.service.EmpAuthService;
 import com.boot.jx.http.CommonHttpRequest;
-import com.boot.jx.phonebook.model.PBAddress;
-import com.boot.jx.phonebook.model.PBEmail;
-import com.boot.jx.phonebook.model.PBPhone;
 import com.boot.jx.postman.PMConstants;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PMEnvironment.PMCommonConfig;
+import com.boot.jx.postman.pbook.PBAddress;
+import com.boot.jx.postman.pbook.PBEmail;
+import com.boot.jx.postman.pbook.PBPhone;
 import com.boot.jx.scope.tnt.Tenants;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.Constants;
 import com.boot.utils.CryptoUtil;
 import com.boot.utils.JsonUtil;
 
@@ -127,10 +128,10 @@ public class PartnerController {
 					model.addAttribute("DOMAIN_NAME", userLoginToken.getDomainName());
 					model.addAttribute("DOMAIN_ID", userLoginToken.getDomainId());
 					model.addAttribute("DOMAIN_TOKEN", userLoginToken.getDomainToken());
+					model.addAttribute("DOMAIN_TOKEN_VALID", Constants.BLANK);
 				}
 			}
 		}
-
 		return "app-goto";
 	}
 

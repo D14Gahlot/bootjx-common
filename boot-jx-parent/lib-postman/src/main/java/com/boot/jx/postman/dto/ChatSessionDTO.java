@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.boot.jx.postman.model.MessageDefinitions.Contactable;
+import com.boot.model.TimeModels.ITimeStampIndex;
 import com.boot.utils.ArgUtil;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
@@ -56,6 +57,7 @@ public class ChatSessionDTO implements Serializable {
 
 	private String mode;
 	private String status;
+	private String state;
 	private List<String> tagId;
 
 	private Contactable contact;
@@ -63,6 +65,10 @@ public class ChatSessionDTO implements Serializable {
 	private List<ChatMessageDTO> messages;
 
 	private Map<String, ChatMessageDTO> msg;
+
+	private Map<String, Long> read;
+
+	private Map<String, Object> feedback;
 
 	public String getSessionId() {
 		return sessionId;
@@ -361,5 +367,46 @@ public class ChatSessionDTO implements Serializable {
 
 	public void setSubject(String subject) {
 		this.subject = subject;
+	}
+
+	public String getState() {
+		return state;
+	}
+
+	public void setState(String state) {
+		this.state = state;
+	}
+
+	public Map<String, Long> getRead() {
+		return read;
+	}
+
+	public void setRead(Map<String, Long> read) {
+		this.read = read;
+	}
+
+	public Map<String, Long> read() {
+		if (this.read == null) {
+			this.read = new HashMap<String, Long>();
+		}
+		return this.read;
+	}
+
+	private ITimeStampIndex updated;
+
+	public ITimeStampIndex getUpdated() {
+		return updated;
+	}
+
+	public void setUpdated(ITimeStampIndex updated) {
+		this.updated = updated;
+	}
+
+	public Map<String, Object> getFeedback() {
+		return feedback;
+	}
+
+	public void setFeedback(Map<String, Object> feedback) {
+		this.feedback = feedback;
 	}
 }

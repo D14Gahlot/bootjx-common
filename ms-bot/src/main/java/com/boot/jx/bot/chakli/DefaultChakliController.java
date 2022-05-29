@@ -89,5 +89,58 @@ public class DefaultChakliController extends CommonBotController {
 		}
 		return isNowInRange;
 	}
+	
+	
+	public boolean timeCheckV1(String switchTime,String starttime,String endtime) {
+		SafeKeyHashMap<Object> globalVars = pmEnvironment.local().globalVars();
+		boolean officeTimeFlag = globalVars.keyEntry(switchTime).asBoolean();
+		boolean isNowInRange = false;
+		if (officeTimeFlag) {
+			String startTime = globalVars.keyEntry(starttime).asString();
+			String endTime = globalVars.keyEntry(endtime).asString();
+			
+			int startHour=0;
+			int startMinu=0;
+			
+			int endHour=0;
+			int endMinu=0;
+			
+			if(startTime!=null) {
+				String[] hm =startTime.split(":");
+				if(hm!=null && hm.length>1) {
+					startHour=Integer.parseInt(hm[0]);
+					startMinu=Integer.parseInt(hm[1]);
+				}else {
+					startHour =Integer.parseInt(startTime);
+				}
+			}
+			
+			if(endTime!=null) {
+				String[] hm =endTime.split(":");
+				if(hm!=null && hm.length>1) {
+					endHour=Integer.parseInt(hm[0]);
+					endMinu=Integer.parseInt(hm[1]);
+				}else {
+					endHour =Integer.parseInt(endTime);
+				}
+			}
+			try {
+				LocalTime now = LocalTime.now(ZoneId.of("Asia/Kuwait"));
+				String isoTime = now.format(DateTimeFormatter.ISO_TIME);
+				LocalTime currTime = LocalTime.parse(isoTime, DateTimeFormatter.ISO_TIME);
+				LocalTime start = LocalTime.of(startHour, startMinu);
+				LocalTime stop = LocalTime.of(endHour, endMinu);
+
+				isNowInRange = (!currTime.isBefore(start)) && currTime.isBefore(stop);
+
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		} else {
+			isNowInRange = true;
+		}
+		return isNowInRange;
+	}
+
 
 }

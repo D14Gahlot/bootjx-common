@@ -14,6 +14,7 @@ import com.boot.jx.postman.model.MessageDefinitions.IMessage;
 import com.boot.jx.postman.model.MessageDefinitions.SessionMessage;
 import com.boot.jx.postman.query.ChatContactQuery;
 import com.boot.jx.postman.query.ChatSessionQuery;
+import com.boot.jx.postman.store.MessageContext;
 import com.boot.jx.postman.store.MessageStore;
 import com.boot.jx.postman.store.SessionStore;
 import com.boot.jx.utils.PostManUtil;
@@ -32,6 +33,12 @@ public class ChatSessionFactory {
 
 	@Autowired
 	private PMDomainConfig pmDomainConfig;
+
+	@Autowired
+	private MessageContext messageContext;
+
+	@Autowired
+	private ChatUtility chatUtility;
 
 	public ChatSessionDoc getChatSessionByContactId(String contactId, String ticketHash) {
 
@@ -145,6 +152,7 @@ public class ChatSessionFactory {
 		chatSessionDoc.setContactType(sessionMessage.contact().getContactType());
 		chatSessionDoc.setChannel(sessionMessage.contact().getChannelType());
 		chatSessionDoc.setLane(sessionMessage.contact().getLane());
+		chatSessionDoc.setMode(sessionMessage.session().getMode());
 		chatSessionDoc.setActive(true);
 		chatSessionDoc.setPrimary(true);
 		chatSessionDoc.contact().setName(chatContactDoc.getName());
@@ -169,10 +177,8 @@ public class ChatSessionFactory {
 			if (ArgUtil.isEmptyValue(chatSessionDoc.getFirstInComingStamp())) {
 				chatSessionDocQuery.setFirstInComingStamp(inboxMessage.getTimestamp());
 			}
-
 			// Assign Queue
-			if (ArgUtil.isEmptyValue(chatSessionDoc.getAssignedToQueue())) {
-
+			if (!chatUtility.inQueue(chatSessionDoc)) {
 				String defaultQueue = inboxMessage.route().getQueueCode();
 				if (!ArgUtil.is(defaultQueue)) {
 					defaultQueue = pmDomainConfig.getDefaultInboundQueue(inboxMessage.contact());
@@ -212,7 +218,7 @@ public class ChatSessionFactory {
 			chatContactQuery.setSessionId(chatSessionDoc.getSessionId());
 			sessionStore.updateFirst(chatContactQuery);
 		}
-		inboxMessage = sessionStore.updateMessageFromSession(chatSessionDoc, inboxMessage);
+		sessionStore.updateMessageFromSession(chatSessionDoc, inboxMessage);
 		return chatSessionDoc;
 	}
 
@@ -224,12 +230,41 @@ public class ChatSessionFactory {
 	public void push(MessageDoc msgDoc, IMessage iMessage) {
 		if (PostManUtil.isInBound(msgDoc.getType()) || PostManUtil.isOutBound(msgDoc.getType())) {
 			try {
-				ChatSessionQuery chatSessionDocQuery = new ChatSessionQuery(msgDoc.getSessionId());
+				ChatSessionQuery chatSessionDocQuery = messageContext.session();
+				long now = System.currentTimeMillis();
+
 				if (PostManUtil.isInBound(msgDoc.getType())) {
+
+					ChatSessionDoc session = chatSessionDocQuery.getDoc();
+					if (!session.stamps().containsKey(ChatSessionDoc.FIRST_INBOUND_STAMP)) {
+						chatSessionDocQuery.set(ChatSessionDoc.FIRST_INBOUND_STAMP, now);
+					}
+
+					String FIRST_INBOUND_STAMP_MODE = ChatSessionDoc.FIRST_INBOUND_STAMP + "_" + session.getMode();
+					if (!session.stamps().containsKey(FIRST_INBOUND_STAMP_MODE)) {
+						chatSessionDocQuery.set(FIRST_INBOUND_STAMP_MODE, now);
+					}
+					chatSessionDocQuery.set(ChatSessionDoc.LAST_INBOUND_STAMP, now);
+					chatSessionDocQuery.set(ChatSessionDoc.LAST_INBOUND_STAMP + "_" + session.getMode(), now);
+
 					chatSessionDocQuery.setLastInBoundMsg(msgDoc, iMessage.contact().getContactType());
+
 				} else if (PostManUtil.isOutBound(msgDoc.getType())) {
+					ChatSessionDoc session = chatSessionDocQuery.getDoc();
+					if (!session.stamps().containsKey(ChatSessionDoc.FIRST_OUTBOUND_STAMP)) {
+						chatSessionDocQuery.set(ChatSessionDoc.FIRST_OUTBOUND_STAMP, now);
+					}
+
+					String FIRST_INBOUND_STAMP_MODE = ChatSessionDoc.FIRST_OUTBOUND_STAMP + "_" + session.getMode();
+					if (!session.stamps().containsKey(FIRST_INBOUND_STAMP_MODE)) {
+						chatSessionDocQuery.set(FIRST_INBOUND_STAMP_MODE, now);
+					}
+					chatSessionDocQuery.set(ChatSessionDoc.LAST_OUTBOUND_STAMP, now);
+					chatSessionDocQuery.set(ChatSessionDoc.LAST_OUTBOUND_STAMP + "_" + session.getMode(), now);
+
 					chatSessionDocQuery.setLastOutBoundMsg(msgDoc, iMessage.contact().getContactType());
 				}
+
 				chatSessionDocQuery.setLastMsg(msgDoc, iMessage.contact().getContactType());
 				sessionStore.updateFirst(chatSessionDocQuery);
 			} catch (Exception e) {

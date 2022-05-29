@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.boot.jx.AppConfig;
 import com.boot.jx.AppConfigPackage.AppCommonConfig;
-import com.boot.jx.agent.AgentAuthProvider;
 import com.boot.jx.agent.AgentSessionBean;
 import com.boot.jx.agent.AgentSessionService;
 import com.boot.jx.api.ApiResponse;
@@ -27,8 +26,6 @@ import com.boot.jx.common.dto.AgentResponseAuthDto;
 import com.boot.jx.common.service.EmpAuthService;
 import com.boot.jx.http.CommonHttpRequest;
 import com.boot.jx.postman.PMEnvironment;
-import com.boot.jx.rest.RestService;
-import com.boot.jx.stomp.StompTunnelSessionManager;
 import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.Constants;
@@ -50,9 +47,6 @@ public class AgentAuthController {
 
 	@Autowired
 	private AgentSessionBean agentSession;
-
-	@Autowired
-	private RestService restService;
 
 	@Autowired
 	private AppCommonConfig appCommonConfig;
@@ -77,25 +71,98 @@ public class AgentAuthController {
 		return "app-unauthorized";
 	}
 
+	public AgentResponseAuthDto loginFromXToken(HttpServletRequest request, HttpServletResponse response,
+			String xRemSession) throws NoSuchAlgorithmException {
+		@SuppressWarnings("unchecked")
+		MapModel map = MapModel
+				.from(CryptoUtil.getEncoder().message(xRemSession).decrypt().decodeBase64().toObzect(Map.class));
+
+		String username = map.getString("username");
+		String password = map.getString("password");
+
+		if (ArgUtil.is(username) && ArgUtil.is(password)) {
+			ApiResponse<Map<String, Object>, AgentResponseAuthDto> x = this.login(map.getString("username"),
+					map.getString("password"), request);
+			if (ArgUtil.parseAsBoolean(x.getData().get("success"), false)) {
+				if (ArgUtil.is(x.getMeta())) {
+					if (ArgUtil.is(x.getRedirectUrl())) {
+						response.setHeader("Location", appConfig.getAppPrefix() + "/app/home");
+						response.setStatus(302);
+					}
+				}
+				return x.getMeta();
+			}
+		}
+
+		String domainUser = map.getString("domainUser");
+		String domainName = map.getString("domainName");
+		String domainId = map.getString("domainId");
+		String domainToken = map.getString("domainToken");
+
+		if (ArgUtil.is(domainToken)) {
+			AgentResponseAuthDto agent = authService.loginByDomainToken(domainUser, domainName, domainId, domainToken,
+					false);
+			if (ArgUtil.is(agent)) {
+				sessionService.login(request, agent, domainToken);
+				commonHttpRequest.setCookie("JXSESSIONID", xRemSession);
+				response.setHeader("Location", appConfig.getAppPrefix() + "/app/home");
+				response.setStatus(302);
+			}
+			return agent;
+		}
+		return null;
+	}
+
+	private String toHomePage(HttpServletResponse response) {
+		response.setHeader("Location", appConfig.getAppPrefix() + "/app/home");
+		response.setStatus(302);
+		return "redirect:/app/home" + "?_=" + System.currentTimeMillis();
+	}
+
 	@RequestMapping(value = { "/app/home", "/", "", "/app/**", "/auth/**" },
 			method = { RequestMethod.POST, RequestMethod.GET })
-	public String home(HttpServletRequest request, Model model, @RequestParam(required = false) String domainName,
-			@RequestParam(required = false) String domainId, @RequestParam(required = false) String domainToken,
-			@RequestParam(required = false) String domainUser) throws NoSuchAlgorithmException {
+	public String home(HttpServletRequest request, HttpServletResponse response, Model model,
+			@RequestParam(required = false) String domainName, @RequestParam(required = false) String domainId,
+			@RequestParam(required = false) String domainUser, @RequestParam(required = false) String domainToken,
+			@RequestParam(required = false) String domainTokenValid) throws NoSuchAlgorithmException {
 
 		if (!isAgentPanelActive()) {
 			return unauthorized(model);
 		}
 
 		model.addAttribute("APP_PLUG", ArgUtil.nonEmpty(commonHttpRequest.getRequestParam("plug"), "none"));
+		String xRemSession = ArgUtil.parseAsString(commonHttpRequest.get("JXSESSIONID"), Constants.BLANK);
 
 		if (ArgUtil.is(domainName) && ArgUtil.is(domainId) && ArgUtil.is(domainToken)) {
 			AgentResponseAuthDto agent = authService.loginByDomainToken(domainUser, domainName, domainId, domainToken,
 					false);
+
 			if (ArgUtil.is(agent)) {
 				sessionService.login(request, agent, domainToken);
+				xRemSession = CryptoUtil.getEncoder()
+						.obzect(MapBuilder.map().put("domainUser", domainUser).put("domainName", domainName)
+								.put("domainId", domainId).put("domainToken", domainToken).toMap())
+						.encodeBase64().encrypt().toString();
+				commonHttpRequest.setCookie("JXSESSIONID", xRemSession);
+				return toHomePage(response);
 			}
-			return "redirect:/app/home";
+			if (!ArgUtil.is(domainTokenValid)) {
+				model.addAllAttributes(appCommonConfig.appAttributes());
+				model.addAttribute("FORM_URL", "/agent/auth/login/direct?_=" + System.currentTimeMillis());
+				model.addAttribute("DOMAIN_USER", domainUser);
+				model.addAttribute("DOMAIN_NAME", domainName);
+				model.addAttribute("DOMAIN_ID", domainId);
+				model.addAttribute("DOMAIN_TOKEN", domainToken);
+				model.addAttribute("DOMAIN_TOKEN_VALID", domainToken);
+				return "app-goto";
+			}
+		} else if (!agentSession.isLoggedIn() && ArgUtil.is(xRemSession)) {
+			AgentResponseAuthDto agent = loginFromXToken(request, response, xRemSession);
+			if (ArgUtil.is(agent)) {
+				return toHomePage(response);
+			} else {
+				commonHttpRequest.deleteCookie("JXSESSIONID");
+			}
 		}
 
 		if (!ArgUtil.is(agentSession.getAgentCode())) {
@@ -238,19 +305,7 @@ public class AgentAuthController {
 			} else {
 				String xRemSession = ArgUtil.parseAsString(commonHttpRequest.get("JXSESSIONID"), Constants.BLANK);
 				if (ArgUtil.is(xRemSession)) {
-					@SuppressWarnings("unchecked")
-					MapModel map = MapModel.from(
-							CryptoUtil.getEncoder().message(xRemSession).decrypt().decodeBase64().toObzect(Map.class));
-					ApiResponse<Map<String, Object>, AgentResponseAuthDto> x = this.login(map.getString("username"),
-							map.getString("password"), request);
-					if (ArgUtil.parseAsBoolean(x.getData().get("success"), false)) {
-						if (ArgUtil.is(x.getMeta())) {
-							if (ArgUtil.is(x.getRedirectUrl())) {
-								httpServletResponse.setHeader("Location", x.getRedirectUrl());
-								httpServletResponse.setStatus(302);
-							}
-						}
-					}
+					AgentResponseAuthDto agent = loginFromXToken(request, httpServletResponse, xRemSession);
 				}
 			}
 		} catch (Exception e) {
@@ -267,13 +322,7 @@ public class AgentAuthController {
 	}
 
 	@Autowired
-	private AgentAuthProvider agentAuthProvider;
-
-	@Autowired
 	private AgentSessionService sessionService;
-
-	@Autowired
-	private StompTunnelSessionManager stompTunnelSessionManager;
 
 	@ResponseBody
 	@RequestMapping(value = "/auth/login/submit", method = { RequestMethod.POST })
@@ -285,17 +334,7 @@ public class AgentAuthController {
 			x.redirectUrl(appConfig.getAppPrefix() + "/app/home");
 			AgentResponseAuthDto agent = x.getMeta();
 			if (ArgUtil.is(agent)) {
-
 				sessionService.login(request, agent, password);
-//		UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(
-//			agent.getAgent_code(), password);
-//		token.setDetails(new WebAuthenticationDetails(request));
-//		Authentication authentication = agentAuthProvider.authenticate(token);
-//		SecurityContextHolder.getContext().setAuthentication(authentication);
-//		sessionService.updateLogin(agent);
-//		stompTunnelSessionManager.registerUser(agent.getAgent_code(), agent.getDept().getDept_code(),
-//			DEFAULT.NO_DEPT, StompQuery.PING_TAG);
-
 				boolean rememberme = ArgUtil.parseAsBoolean(commonHttpRequest.get("rememberme"), false);
 				if (rememberme) {
 					String xRemSession = CryptoUtil.getEncoder()

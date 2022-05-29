@@ -1,5 +1,6 @@
 package com.boot.jx.connectors;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -14,6 +15,7 @@ import com.boot.jx.dict.FileFormat;
 import com.boot.jx.dict.FileType;
 import com.boot.jx.exception.AmxApiException;
 import com.boot.jx.model.CommonFile;
+import com.boot.jx.model.CommonFileStream;
 import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.jx.postman.PMConstants.CHANNEL_TYPE;
 import com.boot.jx.postman.PMConstants.MESSAGE_COMPOSE_TYPE;
@@ -21,7 +23,6 @@ import com.boot.jx.postman.PMConstants.MESSAGE_FORMAT_TYPE;
 import com.boot.jx.postman.PMEnvironment.PMClientConfig;
 import com.boot.jx.postman.client.PMFileStoreClient;
 import com.boot.jx.postman.doc.ChatContactDoc;
-import com.boot.jx.postman.doc.tpo.WABAConversation;
 import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.Message.Status;
@@ -29,6 +30,16 @@ import com.boot.jx.postman.model.MessageBoxEvent;
 import com.boot.jx.postman.model.MessageReport;
 import com.boot.jx.postman.model.MessageReport.MessageReportError;
 import com.boot.jx.postman.model.OutboxMessage;
+import com.boot.jx.postman.pbook.PBAddress;
+import com.boot.jx.postman.pbook.PBDate;
+import com.boot.jx.postman.pbook.PBEmail;
+import com.boot.jx.postman.pbook.PBLocation;
+import com.boot.jx.postman.pbook.PBName;
+import com.boot.jx.postman.pbook.PBPhone;
+import com.boot.jx.postman.pbook.PBSocial;
+import com.boot.jx.postman.pbook.PBVCard;
+import com.boot.jx.postman.pbook.PBWebsite;
+import com.boot.jx.postman.pbook.PBWork;
 import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.postman.plugin.ChannelPluginProvider;
 import com.boot.jx.postman.plugin.WA360Plugin;
@@ -42,6 +53,7 @@ import com.boot.jx.postman.wa360.WA360InboundMedia;
 import com.boot.jx.rest.RestService;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.model.MapModel;
+import com.boot.model.MapModel.MapPathEntry;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.Constants;
 import com.boot.utils.JsonPath;
@@ -152,7 +164,20 @@ public class WA360Connector extends AbstractConnector<WA360ConfigDetails, WA360P
 		} else if ("sticker".equals(messageType)) {
 			inboxMessage.setFormatType(MESSAGE_FORMAT_TYPE.STICKER);
 			formatMedia(inboxMessage, map, channelConfig, InBoundWrapperPaths.STICKER, FileType.IMAGE);
+		} else if ("contacts".equals(messageType)) {
+			inboxMessage.setFormatType(MESSAGE_FORMAT_TYPE.CONTACTS);
+			extractContacts(map, inboxMessage);
+		} else if ("location".equals(messageType)) {
+			inboxMessage.setFormatType(MESSAGE_FORMAT_TYPE.LOCATION);
+			PBLocation pbLocation = new PBLocation();
+			pbLocation.setName(map.pathEntry("messages/[0]/location/name").asString());
+			pbLocation.setAddress(map.pathEntry("messages/[0]/location/address").asString());
+			pbLocation.setLatitude(map.pathEntry("messages/[0]/location/latitude").asString());
+			pbLocation.setLongitude(map.pathEntry("messages/[0]/location/longitude").asString());
+			pbLocation.setUrl(map.pathEntry("messages/[0]/location/url").asString());
+			inboxMessage.vccards().add(new PBVCard().locations(pbLocation));
 		}
+
 		inboxMessage.setFormatSubType(messageType);
 
 		String replyIdExt = map.entry(InBoundWrapperPaths.CONTEXT_ID).asString();
@@ -165,20 +190,105 @@ public class WA360Connector extends AbstractConnector<WA360ConfigDetails, WA360P
 		return inboxMessage;
 	}
 
+	private void extractContacts(MapModel map, InboxMessage inboxMessage) {
+		List<Map<String, Object>> cards = map.entry(InBoundWrapperPaths.VCARDS).asListOfMap();
+		for (Map<String, Object> card : cards) {
+			MapModel cardMap = MapModel.from(card);
+
+			PBVCard pbContact = new PBVCard();
+			PBName pbName = new PBName();
+			pbName.setFirstName(cardMap.pathEntry("/name/first_name").asString());
+			pbName.setLastName(cardMap.pathEntry("/name/last_name").asString());
+			pbName.setFormattedName(cardMap.pathEntry("/name/formatted_name").asString());
+			pbContact.setName(pbName);
+
+			List<Map<String, String>> phones = cardMap.keyEntry("phones").asListOfMapT();
+			for (Map<String, String> phone : phones) {
+				PBPhone pbPhone = new PBPhone();
+				pbPhone.setType(phone.get("type"));
+				pbPhone.setWhatsAppId(phone.get("wa_id"));
+				pbPhone.setPhone(phone.get("phone"));
+				pbContact.phones().add(pbPhone);
+			}
+
+			List<Map<String, String>> addresses = cardMap.keyEntry("addresses").asListOfMapT();
+			for (Map<String, String> address : addresses) {
+				PBAddress pbAddress = new PBAddress();
+				pbAddress.setType(address.get("type"));
+				pbAddress.setCity(address.get("city"));
+				pbAddress.setCountry(address.get("country"));
+				pbAddress.setCountryCode(address.get("country_code"));
+				pbAddress.setState(address.get("state"));
+				pbAddress.setStreet(address.get("street"));
+				pbAddress.setZip(address.get("zip"));
+				pbContact.addresses().add(pbAddress);
+			}
+
+			List<Map<String, String>> emails = cardMap.keyEntry("emails").asListOfMapT();
+			for (Map<String, String> email : emails) {
+				PBEmail pbEmail = new PBEmail();
+				pbEmail.setType(email.get("type"));
+				pbEmail.setEmail(email.get("email"));
+				pbContact.emails().add(pbEmail);
+			}
+
+			List<Map<String, String>> ims = cardMap.keyEntry("ims").asListOfMapT();
+			for (Map<String, String> im : ims) {
+				PBSocial pbSocial = new PBSocial();
+				pbSocial.setService(im.get("service"));
+				pbSocial.setUserid(im.get("user_id"));
+				pbContact.ims().add(pbSocial);
+			}
+
+			List<Map<String, String>> urls = cardMap.keyEntry("urls").asListOfMapT();
+			for (Map<String, String> url : urls) {
+				PBWebsite pnWebsite = new PBWebsite();
+				pnWebsite.setUrl(url.get("url"));
+				pnWebsite.setType(url.get("type"));
+				pbContact.urls().add(pnWebsite);
+			}
+
+			MapPathEntry workCompany = cardMap.pathEntry("/org/company");
+			MapPathEntry workDepartment = cardMap.pathEntry("/org/department");
+			MapPathEntry workTitle = cardMap.pathEntry("/org/title");
+
+			if (workCompany.exists() || workDepartment.exists() || workTitle.exists()) {
+				PBWork pbWork = new PBWork();
+				pbWork.setCompany(workCompany.asString());
+				pbWork.setDepartment(workDepartment.asString());
+				pbWork.setTitle(workTitle.asString());
+				pbContact.work().add(pbWork);
+			}
+
+			MapPathEntry birthday = cardMap.keyEntry("birthday");
+			if (birthday.exists()) {
+				PBDate pbDate = new PBDate();
+				pbDate.setType("birthday");
+				pbDate.setDate(birthday.asString());
+				pbContact.dates().add(pbDate);
+			}
+
+			inboxMessage.vccards().add(pbContact);
+		}
+	}
+
 	private void formatMedia(InboxMessage inboxMessage, MapModel map, ChannelConfig channelConfig, JsonPath path,
 			FileType fileType) {
-		WA360InboundMedia media = map.entry(path).as(WA360InboundMedia.class);
-		CommonFile srcFile = new CommonFile().url(WA360Constants.MEDIA_URL(media.getId())).fileType(fileType)
-				.format(FileFormat.from(media.getMimeType()))
-				.header(WA360Constants.D360_API_KEY, channelConfig.getWa360d().getApiKey())
-				.name(ArgUtil.nonEmpty(media.getFilename(), media.getCaption()));
+		try {
+			WA360InboundMedia media = map.entry(path).as(WA360InboundMedia.class);
+			CommonFileStream srcFile = new CommonFileStream().url(WA360Constants.MEDIA_URL(media.getId()))
+					.fileType(fileType).format(FileFormat.from(media.getMimeType()))
+					.header(WA360Constants.D360_API_KEY, channelConfig.getWa360d().getApiKey())
+					.name(ArgUtil.nonEmpty(media.getFilename(), media.getCaption()));
 
-		CommonFile dstFile = pmFileStoreClient.uploadSessionFileAsync(srcFile,
-				PostManUtil.createContactId(inboxMessage), inboxMessage.getMessageIdExt());
-
-		inboxMessage.attachment(new Attachment().mediaURL(dstFile.getUrl()).mediaType(dstFile.getFileType())
-				.mediaSrc(srcFile.getUrl()).mediaCaption(media.getCaption()).mediaName(media.getFilename())
-				.mediaMimeType(media.getMimeType()));
+			CommonFile dstFile = pmFileStoreClient.uploadSessionFileAsync(srcFile,
+					PostManUtil.createContactId(inboxMessage), inboxMessage.getMessageIdExt());
+			inboxMessage.attachment(new Attachment().mediaURL(dstFile.getUrl()).mediaType(dstFile.getFileType())
+					.mediaSrc(srcFile.getUrl()).mediaCaption(media.getCaption()).mediaName(media.getFilename())
+					.mediaMimeType(media.getMimeType()));
+		} catch (IOException e) {
+			logManager.error(inboxMessage, e);
+		}
 	}
 
 	@Override

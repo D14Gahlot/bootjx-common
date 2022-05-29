@@ -17,6 +17,8 @@ import com.boot.jx.account.doc.DomainDoc;
 import com.boot.jx.account.dto.AccountDashBoardResponseDto;
 import com.boot.jx.account.dto.ContactTypeSummaryDto;
 import com.boot.jx.account.dto.MonthDtlsDto;
+import com.boot.jx.account.dto.WabaSummaryDocDto;
+import com.boot.jx.account.dto.WabaSummaryDto;
 import com.boot.jx.account.manager.AccountDashBoardManager;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.http.CommonHttpRequest;
@@ -82,6 +84,14 @@ public class PartnerDashBoardController {
 		ContactTypeSummaryDto summary =dashBMgr.summaryV1(timestamp); 
 		return  ApiResponse.buildResult(summary);
 	}
+    
+    
+    @ResponseBody
+   	@RequestMapping(value = {"/pub/monthwise-summary/waba"}, method = { RequestMethod.GET })
+   	public ApiResponse<WabaSummaryDocDto, Object> getMonthWiseWabaSummary(long timestamp) {
+     	List<WabaSummaryDocDto> summary =dashBMgr.wabaSummary(timestamp);
+   		return  ApiResponse.buildResults(summary);
+   	}
 
     
 

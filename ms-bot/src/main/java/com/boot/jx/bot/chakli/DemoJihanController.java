@@ -22,6 +22,10 @@ public class DemoJihanController extends DefaultChakliController {
 		if (!ArgUtil.is(lang)) {
 			lang = ArgUtil.parseAsString(context().contact().getLang());
 		}
+		
+		if(!timeCheckV1("jd_switch","jd_start_time","jd_end_time")) {
+			 reply(new OutboxMessage().template("jd_working_hours_update"));
+		}else {
 		if (lang.equalsIgnoreCase("english") || (lang != null && lang.equalsIgnoreCase("en"))) {
 			context().contact().setLang("en");
 			context().commit();
@@ -38,7 +42,7 @@ public class DemoJihanController extends DefaultChakliController {
 			reply(new OutboxMessage().template("jd_question"));
 			next("select-question");
 		}
-	
+	}
 	}
 
 	@ChatMapping(key = "select-question")

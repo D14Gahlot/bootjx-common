@@ -283,21 +283,40 @@ public class CommonHttpRequest extends ACommonHttpRequest {
 	 * @param value
 	 * @param expiry - Sets the maximum age of the cookie in seconds.
 	 */
-	public void setCookie(String name, String value, int expiry) {
+	public void setCookie(String name, String value, String path, int expiry) {
 		Cookie kooky = new Cookie(name, value);
 		kooky.setMaxAge(expiry);
 		kooky.setHttpOnly(appConfig.isCookieHttpOnly());
 		kooky.setSecure(appConfig.isCookieSecure());
-		kooky.setPath("/");
+		kooky.setPath(path);
 		setCookie(kooky);
+	}
+
+	/**
+	 * 
+	 * @param name
+	 * @param value
+	 * @param expiry - Sets the maximum age of the cookie in seconds.
+	 */
+	public void setCookie(String name, String value, int expiry) {
+		setCookie(name, value, "/", expiry);
 	}
 
 	public void setCookie(String name, String value) {
 		setCookie(name, value, 31622400);
 	}
 
+	public void setSessionCookie(String value) {
+		setCookie(ArgUtil.nonEmpty(appConfig.getSessionCookieName(), AppConstants.SESSIONID), value,
+				appConfig.getAppPrefix(), 31622400);
+	}
+
 	public Cookie getCookie(String name) {
 		return WebUtils.getCookie(request, name);
+	}
+
+	public void deleteCookie(String name) {
+		setCookie(name, name, 0);
 	}
 
 	public String setBrowserId(String browserIdNew) {
