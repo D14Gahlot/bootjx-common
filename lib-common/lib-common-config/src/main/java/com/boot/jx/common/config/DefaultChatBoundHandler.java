@@ -247,7 +247,7 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 
 		InBoundWrapper wrap = new InBoundWrapper();
 		wrap.meta = new InBoundMeta().domain(AppContextUtil.getTenant())
-				.server(pmEnvironment.keyEntry(ConfigConstants.APP_KEY.PROP_SERVICE_DOMAIN).asString())
+				.server(pmEnvironment.keyEntry(ConfigConstants.APP_KEY.PROP_SERVICE_SERVER).asString())
 				.appId(clientAppId);
 
 		wrap.contacts = CollectionUtil.asList(contact);

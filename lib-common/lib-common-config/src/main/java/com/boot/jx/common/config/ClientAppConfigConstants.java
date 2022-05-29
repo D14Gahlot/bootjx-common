@@ -113,12 +113,12 @@ public class ClientAppConfigConstants {
 								+ " Selected template should have Item code in button code")
 						.group("About App"),
 
-				new ConfigMeta().title("Gallery Type").path("props.gallery_item_type").options(
+				new ConfigMeta().title("Item Type").path("props.gallery_item_type").options(
 						new ConfigOption("QUICK_MEDIA").label("QUICK_MEDIA"),
 						new ConfigOption("QUICK_ACTION").label("QUICK_ACTION"),
 						new ConfigOption("QUICK_REPLY").label("QUICK_REPLY")),
 
-				new ConfigMeta().title("Gallery Menu Template").path("props.gallery_menu_template").group("TEMPLATES")
+				new ConfigMeta().title("Category Menu Template").path("props.gallery_menu_template").group("TEMPLATES")
 						.optionsSource("getx:/api/tmpl/hsm").optionsKey("code").optionsLabel("code"),
 
 				new ConfigMeta().title("Item Menu Template").path("props.item_menu_template").group("TEMPLATES")

@@ -339,6 +339,8 @@ public class PMEnvironment {
 
 		public String getScriptusUrl();
 
+		public String getServiceServer();
+
 		public String getScriptusSecret();
 
 		public boolean isValidDomain();

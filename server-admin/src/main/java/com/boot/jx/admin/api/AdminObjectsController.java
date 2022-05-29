@@ -22,7 +22,7 @@ public class AdminObjectsController {
 	@Autowired
 	private MessageStore messageStore;
 
-	@RequestMapping(value = "/api/appscript/logs", method = { RequestMethod.GET })
+	@RequestMapping(value = "/api/objects/logs", method = { RequestMethod.GET })
 	@JsonView(PMEnvironment.PublicProperty.class)
 	public ApiResponse<MessageDocLogs, Object> getLogs(@RequestParam(required = false) String id,
 			@RequestParam(required = false, defaultValue = "0") int pageNo,
@@ -37,4 +37,5 @@ public class AdminObjectsController {
 		}
 		return ApiResponse.buildResults(messageStore.find(q));
 	}
+
 }
