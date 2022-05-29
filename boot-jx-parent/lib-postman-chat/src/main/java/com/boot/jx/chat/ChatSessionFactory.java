@@ -11,7 +11,6 @@ import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.model.MessageDefinitions.Contactable;
 import com.boot.jx.postman.model.MessageDefinitions.IMessage;
-import com.boot.jx.postman.model.MessageDefinitions.SessionMessage;
 import com.boot.jx.postman.query.ChatContactQuery;
 import com.boot.jx.postman.query.ChatSessionQuery;
 import com.boot.jx.postman.store.MessageContext;
@@ -186,6 +185,7 @@ public class ChatSessionFactory {
 				}
 				if (ArgUtil.is(defaultQueue)) {
 					chatSessionDocQuery.setQueue(defaultQueue);
+					chatSessionDocQuery.setMode(inboxMessage.route().getSendMode());
 				}
 			}
 
@@ -201,7 +201,7 @@ public class ChatSessionFactory {
 			ChatSessionQuery chatSessionDocQuery = new ChatSessionQuery(chatSessionDoc);
 
 			// Assign Queue
-			if (ArgUtil.isEmptyValue(chatSessionDoc.getAssignedToQueue())) {
+			if (!chatUtility.inQueue(chatSessionDoc)) {
 
 				String defaultQueue = inboxMessage.route().getQueueCode();
 				if (!ArgUtil.is(defaultQueue)) {
@@ -209,6 +209,7 @@ public class ChatSessionFactory {
 				}
 				if (ArgUtil.is(defaultQueue)) {
 					chatSessionDocQuery.setQueue(defaultQueue);
+					chatSessionDocQuery.setMode(inboxMessage.route().getSendMode());
 				}
 			}
 
