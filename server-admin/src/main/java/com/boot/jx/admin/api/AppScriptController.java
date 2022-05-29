@@ -78,7 +78,7 @@ public class AppScriptController {
 		data.put("appKey", app.getKey());
 		data.put("id", appId + AppContextUtil.getTenant());
 		return ApiResponse
-				.buildResults(restService.ajax(pmCommonConfig.getScriptusUrl() + "/bot/setBot").post(data).asMap());
+				.buildResults(restService.ajax(pmCommonConfig.getScriptusUrl() + "/bot/setBot").postJson(data.toMap()).asMap());
 
 	}
 
