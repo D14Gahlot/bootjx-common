@@ -55,8 +55,7 @@ public class TmplQuickController {
 
 	@RequestMapping(value = "/api/tmpl/quickreps", method = { RequestMethod.DELETE })
 	public ApiResponse<QuickReply, Object> deleteQuickReply(@RequestParam String id) {
-		QuickReply qr = mongoTemplate.findById(id, QuickReply.class);
-		mongoTemplate.trash(qr);
+		QuickReply qr = mongoTemplate.removeAndAudit(id, QuickReply.class);
 		return ApiResponse.buildResults(mongoTemplate.findAll(QuickReply.class)).data(qr).message("QuickReply deleted");
 	}
 
@@ -65,14 +64,7 @@ public class TmplQuickController {
 			@RequestParam String category, @RequestParam String title,
 			@RequestParam(required = false) String template) {
 
-		QuickReply newVersion = new QuickReply();
-		if (ArgUtil.is(id)) {
-			QuickReply oldVersion = mongoTemplate.findById(id, QuickReply.class);
-			if (ArgUtil.is(oldVersion)) {
-				mongoTemplate.archive(oldVersion);
-				newVersion.setId(id);
-			}
-		}
+		QuickReply newVersion = mongoTemplate.findByIdOrDefault(id, new QuickReply());
 
 		newVersion.setCategory(category);
 		newVersion.setTitle(title);
@@ -92,8 +84,7 @@ public class TmplQuickController {
 
 	@RequestMapping(value = "/api/tmpl/quickaxn", method = { RequestMethod.DELETE })
 	public ApiResponse<QuickAction, Object> deleteQuickAction(@RequestParam String id) {
-		QuickAction qr = mongoTemplate.findById(id, QuickAction.class);
-		mongoTemplate.trash(qr);
+		QuickAction qr = mongoTemplate.removeAndAudit(id, QuickAction.class);
 		return ApiResponse.buildResults(mongoTemplate.findAll(QuickAction.class)).data(qr)
 				.message("QuickAction deleted");
 	}
@@ -102,14 +93,7 @@ public class TmplQuickController {
 	public ApiResponse<QuickAction, Object> createQuickAction(@RequestParam(required = false) String id,
 			@RequestParam String category, @RequestParam String title, String code) {
 
-		QuickAction newVersion = new QuickAction();
-		if (ArgUtil.is(id)) {
-			QuickAction oldVersion = mongoTemplate.findById(id, QuickAction.class);
-			if (ArgUtil.is(oldVersion)) {
-				newVersion.oldVersion(oldVersion);
-				newVersion.setId(id);
-			}
-		}
+		QuickAction newVersion = mongoTemplate.findByIdOrDefault(id, new QuickAction());
 
 		newVersion.setCategory(category);
 		newVersion.setTitle(title);
@@ -128,22 +112,15 @@ public class TmplQuickController {
 
 	@RequestMapping(value = "/api/tmpl/quicklabels", method = { RequestMethod.DELETE })
 	public ApiResponse<QuickLabel, Object> deleteQuickTag(@RequestParam String id) {
-		QuickLabel qr = mongoTemplate.findById(id, QuickLabel.class);
-		mongoTemplate.trash(qr);
+		QuickLabel qr = mongoTemplate.removeAndAudit(id, QuickLabel.class);
 		return ApiResponse.buildResults(mongoTemplate.findAll(QuickLabel.class)).data(qr).message("QuickLabel deleted");
 	}
 
 	@RequestMapping(value = "/api/tmpl/quicklabels", method = { RequestMethod.POST })
 	public ApiResponse<QuickLabel, Object> createQuickTag(@RequestParam(required = false) String id,
 			@RequestParam String category, @RequestParam String title, String code) {
-		QuickLabel newVersion = new QuickLabel();
-		if (ArgUtil.is(id)) {
-			QuickLabel oldVersion = mongoTemplate.findById(id, QuickLabel.class);
-			if (ArgUtil.is(oldVersion)) {
-				newVersion.oldVersion(oldVersion);
-				newVersion.setId(id);
-			}
-		}
+
+		QuickLabel newVersion = mongoTemplate.findByIdOrDefault(id, new QuickLabel());
 
 		newVersion.setCategory(category);
 		newVersion.setTitle(title);
@@ -162,9 +139,8 @@ public class TmplQuickController {
 
 	@RequestMapping(value = "/api/tmpl/quickmedia", method = { RequestMethod.DELETE })
 	public ApiResponse<QuickMedia, Object> deleteQuickMedia(@RequestParam String id) {
-		QuickMedia quickMedia = mongoTemplate.findById(id, QuickMedia.class);
-		mongoTemplate.trash(quickMedia);
-		return ApiResponse.buildResults(mongoTemplate.findAll(QuickMedia.class)).data(quickMedia)
+		QuickMedia qr = mongoTemplate.removeAndAudit(id, QuickMedia.class);
+		return ApiResponse.buildResults(mongoTemplate.findAll(QuickMedia.class)).data(qr)
 				.message("Quick Media deleted");
 	}
 
@@ -184,14 +160,8 @@ public class TmplQuickController {
 		} else if (ArgUtil.isEmpty(url)) {
 			throw new IllegalStateException("Cannot upload empty file");
 		}
-		QuickMedia newVersion = new QuickMedia();
-		if (ArgUtil.is(id)) {
-			QuickMedia oldVersion = mongoTemplate.findById(id, QuickMedia.class);
-			if (ArgUtil.is(oldVersion)) {
-				mongoTemplate.archive(oldVersion);
-				newVersion.setId(id);
-			}
-		}
+
+		QuickMedia newVersion = mongoTemplate.findByIdOrDefault(id, new QuickMedia());
 
 		newVersion.setTitle(title);
 		newVersion.setType("IMAGE");
@@ -215,29 +185,19 @@ public class TmplQuickController {
 
 	@RequestMapping(value = "/api/tmpl/quicktags", method = { RequestMethod.DELETE })
 	public ApiResponse<QuickTag, Object> deleteQuickTagCategory(@RequestParam String id) {
-		QuickTag qr = mongoTemplate.findById(id, QuickTag.class);
-		mongoTemplate.trash(qr);
+		QuickTag qr = mongoTemplate.removeAndAudit(id, QuickTag.class);
 		return ApiResponse.buildResults(mongoTemplate.findAll(QuickTag.class)).data(qr).message("QuickTag deleted");
 	}
 
 	@RequestMapping(value = "/api/tmpl/quicktags", method = { RequestMethod.POST })
 	public ApiResponse<QuickTag, Object> createQuickTagCategory(@RequestParam(required = false) String id,
 			@RequestParam String category, @RequestParam String title, String code) {
-		QuickTag newVersion = new QuickTag();
-		if (ArgUtil.is(id)) {
-			QuickTag oldVersion = mongoTemplate.findById(id, QuickTag.class);
-			if (ArgUtil.is(oldVersion)) {
-				newVersion.oldVersion(oldVersion);
-				newVersion.setId(id);
-			}
-		}
-
-		newVersion.setCategory(category);
-		newVersion.setTitle(title);
-		newVersion.setCode(code);
-		auditDetailProvider.auditCreate(newVersion);
-		mongoTemplate.save(newVersion);
-		return ApiResponse.buildResults(mongoTemplate.findAll(QuickTag.class)).data(newVersion)
+		QuickTag quickTag = mongoTemplate.findByIdOrDefault(id, new QuickTag());
+		quickTag.setCategory(category);
+		quickTag.setTitle(title);
+		quickTag.setCode(code);
+		mongoTemplate.saveAndAudit(quickTag, ArgUtil.is(quickTag.getId()));
+		return ApiResponse.buildResults(mongoTemplate.findAll(QuickTag.class)).data(quickTag)
 				.message("QuickTag created");
 	}
 }

@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.boot.jx.AppConfig;
 import com.boot.jx.AppConfigPackage.AppCommonConfig;
-import com.boot.jx.agent.AgentAuthProvider;
 import com.boot.jx.agent.AgentSessionBean;
 import com.boot.jx.agent.AgentSessionService;
 import com.boot.jx.api.ApiResponse;
@@ -27,8 +26,6 @@ import com.boot.jx.common.dto.AgentResponseAuthDto;
 import com.boot.jx.common.service.EmpAuthService;
 import com.boot.jx.http.CommonHttpRequest;
 import com.boot.jx.postman.PMEnvironment;
-import com.boot.jx.rest.RestService;
-import com.boot.jx.stomp.StompTunnelSessionManager;
 import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.Constants;
@@ -50,9 +47,6 @@ public class AgentAuthController {
 
 	@Autowired
 	private AgentSessionBean agentSession;
-
-	@Autowired
-	private RestService restService;
 
 	@Autowired
 	private AppCommonConfig appCommonConfig;
@@ -328,13 +322,7 @@ public class AgentAuthController {
 	}
 
 	@Autowired
-	private AgentAuthProvider agentAuthProvider;
-
-	@Autowired
 	private AgentSessionService sessionService;
-
-	@Autowired
-	private StompTunnelSessionManager stompTunnelSessionManager;
 
 	@ResponseBody
 	@RequestMapping(value = "/auth/login/submit", method = { RequestMethod.POST })

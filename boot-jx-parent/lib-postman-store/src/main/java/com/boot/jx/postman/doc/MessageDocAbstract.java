@@ -17,6 +17,7 @@ import com.boot.jx.postman.model.Message.Status;
 import com.boot.jx.postman.model.MessageDefinitions.IMessageId;
 import com.boot.jx.postman.model.MessageRouter;
 import com.boot.jx.postman.model.TagDocument;
+import com.boot.jx.postman.pbook.PBVCard;
 import com.boot.utils.ArgUtil;
 
 @CompoundIndexes({ @CompoundIndex(name = "route_queueCode", def = "{ 'route.queueCode': 1 }"),
@@ -63,6 +64,7 @@ public abstract class MessageDocAbstract implements Serializable, Patchable<Mess
 	private Map<String, Object> model;
 	private Map<String, Object> meta;
 	private List<Attachment> attachments;
+	private List<PBVCard> vccards;
 
 	@Indexed
 	private String replyIdExt;
@@ -398,5 +400,20 @@ public abstract class MessageDocAbstract implements Serializable, Patchable<Mess
 
 	public void setSubject(String subject) {
 		this.subject = subject;
+	}
+
+	public List<PBVCard> getVccards() {
+		return vccards;
+	}
+
+	public void setVccards(List<PBVCard> vccards) {
+		this.vccards = vccards;
+	}
+
+	public List<PBVCard> vccards() {
+		if (vccards == null) {
+			this.vccards = new ArrayList<PBVCard>();
+		}
+		return this.vccards;
 	}
 }

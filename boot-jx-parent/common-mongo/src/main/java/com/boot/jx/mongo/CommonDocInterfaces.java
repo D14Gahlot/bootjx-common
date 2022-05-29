@@ -258,8 +258,11 @@ public class CommonDocInterfaces {
 
 	}
 
-	public interface AuditableByIdEntity extends AuditCreateEntity, AuditUpdateEntity {
+	public interface AuditIdEntity {
 		public String getId();
+	}
+
+	public interface AuditableByIdEntity extends AuditIdEntity, AuditCreateEntity, AuditUpdateEntity {
 	}
 
 	public static class TimeStampIndex implements Serializable, ITimeStampIndex {

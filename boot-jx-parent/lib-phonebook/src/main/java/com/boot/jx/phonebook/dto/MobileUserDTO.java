@@ -2,7 +2,7 @@ package com.boot.jx.phonebook.dto;
 
 import java.io.Serializable;
 
-import com.boot.jx.phonebook.model.PBName;
+import com.boot.jx.postman.pbook.PBName;
 import com.boot.jx.swagger.ApiMockModelProperty;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 

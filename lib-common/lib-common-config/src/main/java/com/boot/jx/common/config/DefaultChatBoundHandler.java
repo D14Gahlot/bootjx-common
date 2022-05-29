@@ -24,7 +24,7 @@ import com.boot.jx.postman.PMEnvironment.PMCommonConfig;
 import com.boot.jx.postman.PMEnvironment.PMConfigurationObject;
 import com.boot.jx.postman.PMEnvironment.PMDomainConfig;
 import com.boot.jx.postman.doc.ChatSessionDoc;
-import com.boot.jx.postman.manager.LogManager;
+import com.boot.jx.postman.manager.ChatLogger;
 import com.boot.jx.postman.mitel.MitelClient;
 import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.InboxMessage;
@@ -73,7 +73,7 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 	private RestService restService;
 
 	@Autowired
-	protected LogManager logManager;
+	protected ChatLogger logManager;
 
 	@Autowired
 	private MessageStore messageStore;
@@ -123,7 +123,12 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 						inboxMessage.setOriginalMessage(null);
 						chatClient.forward(defaultClient.getForward() + PATH.INBOUND_FRWRD, inboxMessage);
 					} else if (ArgUtil.is(defaultClient.getWebhook())) {
-						forward2Webhook(inboxMessage, defaultClient.getWebhook(), defaultClient.getId());
+						if (APP_TYPE.APP_SCRIPT.equals(appType)) {
+							forward2Webhook(inboxMessage, pmCommonConfig.getScriptusUrl() + PATH.APP_SCRIPT_FRWRD,
+									defaultClient.getId());
+						} else {
+							forward2Webhook(inboxMessage, defaultClient.getWebhook(), defaultClient.getId());
+						}
 					} else {
 						ApiResponseUtil.throwException("Forward URL missing");
 					}
@@ -242,7 +247,7 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 
 		InBoundWrapper wrap = new InBoundWrapper();
 		wrap.meta = new InBoundMeta().domain(AppContextUtil.getTenant())
-				.server(pmEnvironment.keyEntry(ConfigConstants.APP_KEY.PROP_SERVICE_DOMAIN).asString())
+				.server(pmEnvironment.keyEntry(ConfigConstants.APP_KEY.PROP_SERVICE_SERVER).asString())
 				.appId(clientAppId);
 
 		wrap.contacts = CollectionUtil.asList(contact);

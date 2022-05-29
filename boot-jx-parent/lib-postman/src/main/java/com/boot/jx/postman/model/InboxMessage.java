@@ -11,6 +11,7 @@ import com.boot.jx.postman.PMConstants;
 import com.boot.jx.postman.model.MessageDefinitions.Contactable;
 import com.boot.jx.postman.model.MessageDefinitions.IMessageExtended;
 import com.boot.jx.postman.model.MessageDefinitions.LogMessage;
+import com.boot.jx.postman.pbook.PBVCard;
 import com.boot.utils.StringUtils.StringMatcher;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -52,6 +53,7 @@ public class InboxMessage implements Serializable, IMessageExtended, LogMessage 
 	private Map<String, Object> replyTo = new HashMap<String, Object>();
 	protected TagDocument tags;
 	private List<Attachment> attachments = null;
+	private List<PBVCard> vccards = null;
 
 	private List<String> logs;
 
@@ -399,4 +401,18 @@ public class InboxMessage implements Serializable, IMessageExtended, LogMessage 
 		this.subject = subject;
 	}
 
+	public List<PBVCard> getVccards() {
+		return vccards;
+	}
+
+	public void setVccards(List<PBVCard> vccards) {
+		this.vccards = vccards;
+	}
+
+	public List<PBVCard> vccards() {
+		if (vccards == null) {
+			this.vccards = new ArrayList<PBVCard>();
+		}
+		return this.vccards;
+	}
 }

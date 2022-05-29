@@ -18,6 +18,7 @@ import com.boot.jx.AppConfig;
 import com.boot.jx.AppContextUtil;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.mongo.CommonMongoQueryBuilder;
+import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.jx.mongo.CommonMongoTemplateAbstract;
 import com.boot.jx.postman.doc.ContactDetailDoc;
 import com.boot.jx.postman.doc.MessageDoc;
@@ -53,6 +54,9 @@ public class MessageStore extends CommonMongoTemplateAbstract {
 	@Autowired
 	MongoTemplate mongoTemplate;
 
+	@Autowired
+	CommonMongoTemplate commonMongoTemplate;
+
 	@Value("${postman.chat.session.timeout}")
 	String chatSessionTimeout;
 
@@ -83,6 +87,7 @@ public class MessageStore extends CommonMongoTemplateAbstract {
 
 		// Additonals
 		doc.setAttachments(inboxMessage.getAttachments());
+		doc.setVccards(inboxMessage.getVccards());
 
 		return doc;
 	}
@@ -207,6 +212,7 @@ public class MessageStore extends CommonMongoTemplateAbstract {
 		doc.setMessage(outMessage.getMessage());
 		// }
 		doc.setAttachments(outMessage.getAttachments());
+		doc.setVccards(outMessage.getVccards());
 
 		doc.setSessionId(outMessage.getSessionId());
 		doc.setMessageIdRef(outMessage.getMessageIdRef());
@@ -435,6 +441,16 @@ public class MessageStore extends CommonMongoTemplateAbstract {
 		hold.setTimestamp(System.currentTimeMillis());
 		hold.setAppType(appConfig.getAppType());
 		mongoTemplate.save(hold, MessageHold.COLLECTION_REJECTED);
+	}
+
+	public void original(InboxMessage inboxMessageOriginal) {
+		String contactId = PostManUtil.CONTACT_ID(inboxMessageOriginal.contact());
+		MessageHold hold = new MessageHold();
+		hold.setInboxMessage(inboxMessageOriginal);
+		hold.setContactId(contactId);
+		hold.setTimestamp(System.currentTimeMillis());
+		hold.setAppType(appConfig.getAppType());
+		commonMongoTemplate.save(hold, MessageHold.COLLECTION_ORIGINAL);
 	}
 
 	public void hold(InboxMessage inboxMessageOriginal) {

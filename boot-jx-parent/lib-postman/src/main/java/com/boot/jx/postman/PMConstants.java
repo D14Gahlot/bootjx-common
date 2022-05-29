@@ -89,7 +89,7 @@ public class PMConstants {
 		// Agent Mdoes
 		MITEL(CHAT_MODE.AGENT),
 
-		FAQ(CHAT_MODE.BOT),
+		FAQ(CHAT_MODE.BOT), APP_SCRIPT(CHAT_MODE.WEBHOOK),
 
 		DEFAULT(CHAT_MODE.PUSH);
 
@@ -144,6 +144,7 @@ public class PMConstants {
 		public static final String IMAGE = "image";
 		public static final String STICKER = "sticker";
 		public static final String LOCATION = "location";
+		public static final String CONTACTS = "contacts";
 		public static final String VIDEO = "video";
 	}
 

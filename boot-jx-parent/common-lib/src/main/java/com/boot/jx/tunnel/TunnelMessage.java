@@ -15,6 +15,7 @@ public class TunnelMessage<M> implements Serializable {
 	long timestamp;
 	String id;
 	String topic;
+	String appType;
 
 	AppContext context;
 
@@ -80,6 +81,14 @@ public class TunnelMessage<M> implements Serializable {
 
 	private AppContext context() {
 		return JsonUtil.toObject(contextMap, AppContext.class);
+	}
+
+	public String getAppType() {
+		return appType;
+	}
+
+	public void setAppType(String appType) {
+		this.appType = appType;
 	}
 
 }

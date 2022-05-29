@@ -37,6 +37,7 @@ public class TenantClientResolver extends TenantResolver {
 	String tenantStatic;
 
 	public String resolve(String tnt) {
+		tnt = super.resolve(tnt);
 
 		if (ArgUtil.is(tenantStatic)) {
 			return tenantStatic;

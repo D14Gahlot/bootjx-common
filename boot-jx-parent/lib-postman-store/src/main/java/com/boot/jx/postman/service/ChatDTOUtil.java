@@ -93,6 +93,7 @@ public class ChatDTOUtil {
 
 		messageDto.setTags(messageDoc.getTags());
 		messageDto.setAttachments(messageDoc.getAttachments());
+		messageDto.setVccards(messageDoc.getVccards());
 		messageDto.setLogs(messageDoc.getLogs());
 		messageDto.setAction(messageDoc.getAction());
 		messageDto.setStatus(messageDoc.getStatus());

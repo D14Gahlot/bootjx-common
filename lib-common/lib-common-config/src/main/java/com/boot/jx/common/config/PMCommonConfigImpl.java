@@ -69,6 +69,15 @@ public class PMCommonConfigImpl implements PMCommonConfig {
 	@Value("${mry.agent.url}")
 	private String agentUrl;
 
+	@Value("${mry.scriptus.url}")
+	private String scriptusUrl;
+
+	@Value("${mry.scriptus.secret}")
+	private String scriptusSecret;
+
+	@Value("${mry.prop.service.server}")
+	private String serviceServer;
+
 	@Autowired
 	private CDNBuilder cdnBuilder;
 
@@ -212,7 +221,21 @@ public class PMCommonConfigImpl implements PMCommonConfig {
 	public String mainDomainRedirect(String path) {
 		return "redirect:" + String.format("https://app.%s/%s",
 				pmEnvironment.keyEntry("mry.prop.service.domain").asString(), path);
+	}
 
+	@Override
+	public String getScriptusUrl() {
+		return this.scriptusUrl;
+	}
+
+	@Override
+	public String getScriptusSecret() {
+		return scriptusSecret;
+	}
+
+	@Override
+	public String getServiceServer() {
+		return pmEnvironment.keyEntry(ConfigConstants.APP_KEY.PROP_SERVICE_SERVER).asString();
 	}
 
 }

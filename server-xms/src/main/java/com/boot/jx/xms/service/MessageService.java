@@ -21,6 +21,7 @@ import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.postman.store.SessionStore;
 import com.boot.jx.xms.XmsVendorConfigurer;
 import com.boot.jx.xms.dto.OutBoundMsgBasic.OutBoundMsg;
+import com.boot.model.MapModel.NodeEntry;
 import com.boot.jx.xms.dto.OutBoundReciept;
 import com.boot.utils.ArgUtil;
 
@@ -147,7 +148,8 @@ public class MessageService {
 		outboxMessage.route().setQueueCode(clientApp.getQueue());
 		outboxMessage.route().setSendMode(clientApp.getAppMode());
 		outboxMessage.route().setSenderApp(clientApp.getAppType());
-		outboxMessage.route().setSenderType(MESSAGE_SENDER_TYPE.API);
+		outboxMessage.route()
+				.setSenderType(ArgUtil.parseAsString(clientApp.props().get("sender_type"), MESSAGE_SENDER_TYPE.API));
 
 		ChatSessionDoc chatSessionDoc = chatSessionFactory.linkSession(outboxMessage);
 

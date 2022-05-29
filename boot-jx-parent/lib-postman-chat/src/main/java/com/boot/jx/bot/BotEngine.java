@@ -30,7 +30,7 @@ import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.doc.ChatPromise;
 import com.boot.jx.postman.doc.ChatPromise.State;
 import com.boot.jx.postman.doc.ChatSessionDoc;
-import com.boot.jx.postman.manager.LogManager;
+import com.boot.jx.postman.manager.ChatLogger;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.ext.InBoundEvent;
 import com.boot.jx.postman.store.MessageContext;
@@ -69,7 +69,7 @@ public class BotEngine {
 	private MessageContext messageContext;
 
 	@Autowired
-	private LogManager logManager;
+	private ChatLogger logManager;
 
 	private boolean chatBotDefined;
 

@@ -17,7 +17,6 @@ import com.boot.jx.scope.tnt.Tenants;
 import com.boot.model.MapModel.EntryMeta;
 import com.boot.model.MapModel.MapEntry;
 import com.boot.utils.ArgUtil;
-import com.boot.utils.TimeUtils;
 import com.boot.utils.TimeUtils.TimePeriod;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonView;
@@ -337,6 +336,12 @@ public class PMEnvironment {
 		public String getBotUrl();
 
 		public String getAgentUrl();
+
+		public String getScriptusUrl();
+
+		public String getServiceServer();
+
+		public String getScriptusSecret();
 
 		public boolean isValidDomain();
 

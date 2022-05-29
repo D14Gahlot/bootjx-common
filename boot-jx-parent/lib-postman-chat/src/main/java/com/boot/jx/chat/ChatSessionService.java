@@ -20,7 +20,7 @@ import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.dto.ChatUserProfileDTO;
 import com.boot.jx.postman.dto.ChatUserProfileDTO.ChatUserProfileRequest;
 import com.boot.jx.postman.manager.ChatSessionManager;
-import com.boot.jx.postman.manager.LogManager;
+import com.boot.jx.postman.manager.ChatLogger;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.model.PMArgs;
@@ -67,7 +67,7 @@ public class ChatSessionService {
 	private InBoundHandler inBoundHandler;
 
 	@Autowired
-	private LogManager logManager;
+	private ChatLogger logManager;
 
 	@Autowired
 	private ChatUtility chatUtility;
@@ -203,13 +203,13 @@ public class ChatSessionService {
 		}
 		if (status == PMConstants.CHAT_STATUS.RESOLVED) {
 			NodeEntry<InBoundEvent> eventEntry2 = chatSessionManager.resolveSession(sessionDoc);
-			if (ArgUtil.is(inBoundHandler)) {
+			if (ArgUtil.is(inBoundHandler) && eventEntry2.exists()) {
 				inBoundHandler.onSessionResolveAsync(eventEntry2.getValue(), sessionDoc);
 			}
 			return eventEntry2;
 		} else if (status == PMConstants.CHAT_STATUS.CLOSED) {
 			InBoundEvent event = chatSessionManager.closeSession(sessionDoc);
-			if (ArgUtil.is(inBoundHandler)) {
+			if (ArgUtil.is(inBoundHandler) && ArgUtil.is(event)) {
 				inBoundHandler.onSessionCloseAsync(event, sessionDoc);
 			}
 			return eventEntry.value(event);
