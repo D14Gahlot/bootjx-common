@@ -83,7 +83,7 @@ public class ChatSessionFactory {
 		return getChatSessionByContactId(chatSessionDoc.getContactId(), ticketHash);
 	}
 
-	public ChatSessionDoc getChatSession(SessionMessage sessionMessage) {
+	public ChatSessionDoc getChatSession(IMessage sessionMessage) {
 
 		String ticketHash = sessionMessage.session().getTicketHash();
 
@@ -152,7 +152,8 @@ public class ChatSessionFactory {
 		chatSessionDoc.setContactType(sessionMessage.contact().getContactType());
 		chatSessionDoc.setChannel(sessionMessage.contact().getChannelType());
 		chatSessionDoc.setLane(sessionMessage.contact().getLane());
-		chatSessionDoc.setMode(sessionMessage.session().getMode());
+		chatSessionDoc
+				.setMode(ArgUtil.nonEmpty(sessionMessage.session().getMode(), sessionMessage.route().getSendMode()));
 		chatSessionDoc.setActive(true);
 		chatSessionDoc.setPrimary(true);
 		chatSessionDoc.contact().setName(chatContactDoc.getName());
