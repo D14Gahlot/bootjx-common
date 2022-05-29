@@ -58,7 +58,7 @@ public class AppScriptController {
 		ClientApp app = pmEnvironment.local().clientApiKey(appId);
 
 		if (!ArgUtil.is(app) || !(APP_TYPE.APP_SCRIPT.name().equals(app.getAppType())
-				|| !APP_TYPE.WEBHOOK.name().equals(app.getAppType()))) {
+				|| APP_TYPE.WEBHOOK.name().equals(app.getAppType()))) {
 			ApiResponseUtil.throwAccessDeniedException("App Not found");
 		}
 
