@@ -209,6 +209,7 @@ public class ChatSessionFactory {
 					chatSessionDocQuery.setMode(inboxMessage.route().getSendMode());
 				} else {
 					defaultQueue = pmDomainConfig.getDefaultInboundQueue(inboxMessage.contact());
+					chatSessionDocQuery.setQueue(defaultQueue);
 				}
 			}
 
