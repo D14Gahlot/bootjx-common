@@ -57,7 +57,7 @@ public class AppScriptController {
 
 		return ApiResponse.buildResults(restService.ajax(pmCommonConfig.getScriptusUrl() + "/bot/getBot")
 				.queryParam("id", appId + AppContextUtil.getTenant()).queryParam("appId", appId)
-				.queryParam("domain", AppContextUtil.getTenant()).get().asMap()).meta(meta);
+				.queryParam("domain", AppContextUtil.getTenant()).get().asMap()).meta(meta.toMap());
 	}
 
 	@RequestMapping(value = "/api/objects/appscript/{appId}", method = { RequestMethod.POST })
