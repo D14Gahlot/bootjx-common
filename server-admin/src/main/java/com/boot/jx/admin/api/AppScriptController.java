@@ -52,7 +52,7 @@ public class AppScriptController {
 				|| APP_TYPE.WEBHOOK.name().equals(app.getAppType()))) {
 			ApiResponseUtil.throwAccessDeniedException("App Not found");
 		}
-		MapModel meta = MapModel.createInstance().put("appId", app.getQueue()).put("appQueue", app.getQueue())
+		MapModel meta = MapModel.createInstance().put("appId", app.getId()).put("appQueue", app.getQueue())
 				.put("appName", app.getKeyName()).put("appMode", app.getAppMode()).put("appType", app.getAppType());
 
 		return ApiResponse.buildResults(restService.ajax(pmCommonConfig.getScriptusUrl() + "/bot/getBot")
@@ -77,8 +77,8 @@ public class AppScriptController {
 		data.put("appId", app.getId());
 		data.put("appKey", app.getKey());
 		data.put("id", appId + AppContextUtil.getTenant());
-		return ApiResponse
-				.buildResults(restService.ajax(pmCommonConfig.getScriptusUrl() + "/bot/setBot").postJson(data.toMap()).asMap());
+		return ApiResponse.buildResults(
+				restService.ajax(pmCommonConfig.getScriptusUrl() + "/bot/setBot").postJson(data.toMap()).asMap());
 
 	}
 
