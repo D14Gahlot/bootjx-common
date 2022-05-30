@@ -43,8 +43,6 @@ import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
 import com.boot.utils.TimeUtils;
 
-import ch.qos.logback.core.Context;
-
 @Component
 public class ChatSessionManager {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ChatSessionManager.class);
@@ -273,34 +271,32 @@ public class ChatSessionManager {
 			criterias.add(new Criteria().orOperator(contactCriteris.toArray(new Criteria[contactCriteris.size()])));
 		}
 
-		if (pmDomainConfig.isAgentHistoryLazy().asBoolean(true)) {
-
-			if (query.contains(CHAT_ASSIGN_GROUP.ME)) {
-				primaryCriteria = primaryCriteria.and("mode").is("AGENT");
-				primaryCriteria = primaryCriteria.and("assignedToDept").is(agentDept);
-				criterias.add(new Criteria().orOperator(
-						// Assigned to Me
-						Criteria.where("assignedToAgent").is(agentCode),
-						// Assigned to None
-						Criteria.where("assignedToAgent").is(null), Criteria.where("assignedToAgent").exists(false)
-				//
-				));
-			} else if (query.contains(CHAT_ASSIGN_GROUP.TEAM)) {
-				primaryCriteria = primaryCriteria.and("mode").is("AGENT");
-				criterias.add(new Criteria().orOperator(
-						// Not Assigned to Me
-						Criteria.where("assignedToDept").is(agentDept).and("assignedToAgent").ne(agentCode)
-				//
-				));
-			} else if (query.contains(CHAT_ASSIGN_GROUP.ORG)) {
-				criterias.add(new Criteria().orOperator(
-						// Not Assigned to Me
-						Criteria.where("assignedToDept").ne(agentDept),
-						// Assigned to No-Org
-						Criteria.where("assignedToDept").is(null), Criteria.where("assignedToDept").exists(false)
-				//
-				));
-			}
+		if (query.contains(CHAT_ASSIGN_GROUP.ME)) {
+			primaryCriteria = primaryCriteria.and("mode").is("AGENT");
+			primaryCriteria = primaryCriteria.and("assignedToDept").is(agentDept);
+			criterias.add(new Criteria().orOperator(
+					// Assigned to Me
+					Criteria.where("assignedToAgent").is(agentCode),
+					// Assigned to None
+					Criteria.where("assignedToAgent").is(null), Criteria.where("assignedToAgent").exists(false)
+			//
+			));
+		} else if (query.contains(CHAT_ASSIGN_GROUP.TEAM)) {
+			primaryCriteria = primaryCriteria.and("mode").is("AGENT");
+			criterias.add(new Criteria().orOperator(
+					// Not Assigned to Me
+					Criteria.where("assignedToDept").is(agentDept).and("assignedToAgent").ne(agentCode)
+			//
+			));
+		} else if (query.contains(CHAT_ASSIGN_GROUP.ORG)) {
+			criterias.add(new Criteria().orOperator(
+					// Not Assigned to Me
+					Criteria.where("assignedToDept").ne(agentDept),
+					// Assigned to No-Org
+					Criteria.where("assignedToDept").is(null), Criteria.where("assignedToDept").exists(false)
+			//
+			));
+		}
 
 //			else if (query.contains(CHAT_ASSIGN_GROUP.HISTORY)) {
 //				primaryCriteria = primaryCriteria.and("mode").is("AGENT");
@@ -314,8 +310,6 @@ public class ChatSessionManager {
 //				//
 //				));
 //			}
-
-		}
 
 		int limit = Math.min(Math.max(50, query.limit), pmDomainConfig.getAgentHistoryCount().asInteger(150));
 		query2.addCriteria(

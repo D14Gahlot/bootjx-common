@@ -129,9 +129,6 @@ public class ConfigConstants {
 		POSTMAN_AGENT_TAB_ORG(new ConfigMeta("Agent can see Other Teams Chats", "postman.agent.tab.org")
 				.desc("Enables Other tab in Agent Panel").optionsOnOff().group(GROUP_AGENT)),
 
-		POSTMAN_AGENT_TAB_HISTORY_LAZY(new ConfigMeta("Lazy Load History", "postman.agent.tab.history.lazy")
-				.desc("Loads History Lazily").optionsOnOff().group(GROUP_AGENT).hidden()),
-
 		POSTMAN_AGENT_TAB_HISTORY_LIMIT(
 				new ConfigMeta("Show Chat Count Limit", "postman.agent.tab.history.limit")
 						.options(new ConfigOption(100).label("100 Chats"), new ConfigOption(150).label("150 Chats"),
