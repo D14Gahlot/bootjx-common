@@ -45,6 +45,8 @@ public class ChatSessionDoc extends UpdatedTimeStampDoc implements Serializable 
 	@Indexed
 	private String ticketHash;
 
+	private String routingId;
+
 	@Version
 	private Long version;
 
@@ -584,5 +586,13 @@ public class ChatSessionDoc extends UpdatedTimeStampDoc implements Serializable 
 
 	public void setFeedback(Map<String, Object> feedback) {
 		this.feedback = feedback;
+	}
+
+	public String getRoutingId() {
+		return routingId;
+	}
+
+	public void setRoutingId(String routingId) {
+		this.routingId = routingId;
 	}
 }

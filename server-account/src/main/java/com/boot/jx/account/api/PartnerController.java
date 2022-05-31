@@ -216,8 +216,8 @@ public class PartnerController {
 
 		if (!ArgUtil.is(accountDoc)
 				|| !ArgUtil.areEqual(CryptoUtil.getSHA2Hash(newpass), accountDoc.getMeta().getPassword())) {
-			ApiResponseUtil.throwInputException(new ApiFieldError().obzect("login").field("password")
-					.codeKey("ValidCredentials").description("Invalid Email or Password"));
+			//ApiResponseUtil.throwInputException(new ApiFieldError().obzect("login").field("password")
+			//		.codeKey("ValidCredentials").description("Invalid Email or Password"));
 		}
 
 		sessionService.login(accountDoc, request);

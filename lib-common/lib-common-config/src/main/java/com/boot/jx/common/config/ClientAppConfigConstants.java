@@ -37,8 +37,8 @@ public class ClientAppConfigConstants {
 				new ConfigMeta().inputType(INPUT_TYPE.MESSAGE, MESSAGE_TYPE.INFO).title("Agent Desk")
 						.desc("Use this app to route session to AgentDesk.").group("About App"),
 
-				new ConfigMeta().title("Default Agent Team").path("props.agentCode")
-						.optionsSource("getx:/api/admins/dept").group("Team"),
+				new ConfigMeta().title("Default Agent Team").path("props.deptCode")
+						.optionsSource("getx:/api/admins/dept").optionsKey("code").optionsLabel("Name").group("Team"),
 				new ConfigMeta().title("When Agent is connected").path("props.agent_connected")
 						.optionsSource("getx:/api/tmpl/hsm").optionsKey("code").optionsLabel("desc").group("Templates"),
 				new ConfigMeta().title("When no agent is found").path("props.agent_notfound")

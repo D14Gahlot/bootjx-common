@@ -42,6 +42,7 @@ import com.boot.model.MapModel.NodeEntry;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
 import com.boot.utils.TimeUtils;
+import com.boot.utils.UniqueID;
 
 @Component
 public class ChatSessionManager {
@@ -393,6 +394,9 @@ public class ChatSessionManager {
 				chatSessionDoc.setAssignedToQueue(queueCode);
 				APP_TYPE appType = APP_TYPE.from(apiKeyConfig.getAppType());
 				chatSessionDoc.setMode(appType.getMode().name());
+				inBoundEvent.sessionRouted.routingId = String.format("%s_%s_%s", chatSessionDoc.getSessionId(),
+						apiKeyConfig.getId(), UniqueID.generateString());
+				chatSessionDoc.setRoutingId(inBoundEvent.sessionRouted.routingId);
 			} else {
 				ApiResponseUtil.throwInputException(new ApiFieldError().field("queue").codeKey("INVALID_QUEUE")
 						.description("Invalid Queue Code " + queueCode));
@@ -405,6 +409,7 @@ public class ChatSessionManager {
 		CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder().whereId(chatSessionDoc.getSessionId());
 		builder.set("assignedToQueue", chatSessionDoc.getAssignedToQueue());
 		builder.set("mode", chatSessionDoc.getMode());
+		builder.set("routingId", chatSessionDoc.getRoutingId());
 		sessionStore.updateFirst(builder.getQuery(), builder.getUpdate(), ChatSessionDoc.class);
 
 		logManager.event(chatSessionDoc, messageContext.getActiveQueueCode(), EVENTS.ASGND_TO_QUEUE, queueCode);
