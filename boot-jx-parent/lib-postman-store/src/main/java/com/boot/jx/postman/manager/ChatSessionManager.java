@@ -27,8 +27,10 @@ import com.boot.jx.postman.PMConstants.CHAT_STATE;
 import com.boot.jx.postman.PMConstants.CHAT_STATUS;
 import com.boot.jx.postman.PMConstants.DEFAULT_VALUES;
 import com.boot.jx.postman.PMConstants.MESSAGE_SENDER_TYPE;
+import com.boot.jx.postman.PMConstants.PROPERTIES;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PMEnvironment.PMClientConfig;
+import com.boot.jx.postman.PMEnvironment.PMConfigurationObject;
 import com.boot.jx.postman.PMEnvironment.PMDomainConfig;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.QuickTag;
@@ -209,6 +211,7 @@ public class ChatSessionManager {
 		} else if (query.contains(CHAT_STATUS.RESOLVED)) {
 			criterias.add(Criteria.where("resolved").is(true));
 		} else if (query.contains(CHAT_STATE.OUTBOUND)) {
+			primaryCriteria = primaryCriteria.and("mode").is("AGENT");
 			criterias.add(Criteria.where("active").is(true).and("lastInBoundMsg").exists(false)
 					.orOperator(Criteria.where("resolved").exists(false), Criteria.where("resolved").is(false)));
 		} else if (query.contains(CHAT_STATE.EXPIRED) || query.contains(CHAT_STATUS.EXPIRED)) {
@@ -230,6 +233,7 @@ public class ChatSessionManager {
 			criterias.add(new Criteria().orOperator(Criteria.where("assignedToAgent").is(null),
 					Criteria.where("assignedToAgent").exists(false)));
 		} else if (query.contains(CHAT_STATE.ACTIVE)) {
+			primaryCriteria = primaryCriteria.and("mode").is("AGENT");
 			criterias.add(new Criteria() //
 					.andOperator(Criteria.where("active").is(true) //
 							.orOperator(Criteria.where("resolved").exists(false), Criteria.where("resolved").is(false)))
@@ -291,6 +295,9 @@ public class ChatSessionManager {
 			//
 			));
 		} else if (query.contains(CHAT_ASSIGN_GROUP.ORG)) {
+			if (!pmEnvironment.keyEntry(PROPERTIES.POSTMAN_AGENT_TAB_NONAGENT).asBoolean(false)) {
+				primaryCriteria = primaryCriteria.and("mode").is("AGENT");
+			}
 			criterias.add(new Criteria().orOperator(
 					// Not Assigned to Me
 					Criteria.where("assignedToDept").ne(agentDept),

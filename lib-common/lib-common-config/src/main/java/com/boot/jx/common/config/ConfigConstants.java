@@ -127,7 +127,10 @@ public class ConfigConstants {
 				.defaultValue(0).group(GROUP_AGENT)),
 
 		POSTMAN_AGENT_TAB_ORG(new ConfigMeta("Agent can see Other Teams Chats", "postman.agent.tab.org")
-				.desc("Enables Other tab in Agent Panel").optionsOnOff().group(GROUP_AGENT)),
+				.desc("Enables Org tab in Agent Panel").optionsOnOff().group(GROUP_AGENT)),
+
+		POSTMAN_AGENT_TAB_NONAGENT(new ConfigMeta("Agent can see Non-Agent Chats", "postman.agent.tab.nonagent")
+				.desc("Agents will see Bot and Webhook chats under Org tabs ").optionsOnOff().group(GROUP_AGENT)),
 
 		POSTMAN_AGENT_TAB_HISTORY_LIMIT(
 				new ConfigMeta("Show Chat Count Limit", "postman.agent.tab.history.limit")
