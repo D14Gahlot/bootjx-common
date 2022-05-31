@@ -17,6 +17,7 @@ public class ChatSessionDTO implements Serializable {
 
 	private String sessionId;
 	private String ticketHash;
+	private String routingId;
 	private String subject;
 	private String name;
 	private String contactType;
@@ -408,5 +409,13 @@ public class ChatSessionDTO implements Serializable {
 
 	public void setFeedback(Map<String, Object> feedback) {
 		this.feedback = feedback;
+	}
+
+	public String getRoutingId() {
+		return routingId;
+	}
+
+	public void setRoutingId(String routingId) {
+		this.routingId = routingId;
 	}
 }

@@ -2,7 +2,6 @@ package com.boot.jx.postman.model;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
 import java.util.StringJoiner;
 import java.util.TreeSet;
@@ -10,6 +9,7 @@ import java.util.stream.Collectors;
 
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.postman.PMConstants.CHAT_ASSIGN_GROUP;
+import com.boot.jx.postman.PMConstants.CHAT_MODE;
 import com.boot.jx.postman.PMConstants.CHAT_STATE;
 import com.boot.jx.postman.PMConstants.CHAT_STATUS;
 import com.boot.jx.postman.doc.QuickTag;
@@ -24,6 +24,7 @@ public class SessionSearchQuery {
 		IN // Me,Team,Others
 		, ON // Channels
 		, IS // State
+		, TO // AGENT,BOT,WEBHOOK
 		, STATUS
 	}
 
@@ -33,6 +34,7 @@ public class SessionSearchQuery {
 	public TreeSet<CHAT_STATE> states;
 	public TreeSet<CHAT_STATUS> status;
 	public TreeSet<QuickTag> tags;
+	public TreeSet<CHAT_MODE> modes;
 
 	public long fromStamp;
 	public long toStamp;
@@ -73,6 +75,13 @@ public class SessionSearchQuery {
 		return this.contactTypes;
 	}
 
+	public TreeSet<CHAT_MODE> modes() {
+		if (modes == null) {
+			this.modes = new TreeSet<CHAT_MODE>();
+		}
+		return this.modes;
+	}
+
 	public boolean contains(CHAT_ASSIGN_GROUP tab) {
 		return this.tabs().contains(tab);
 	}
@@ -94,32 +103,47 @@ public class SessionSearchQuery {
 		return this.status().contains(status);
 	}
 
+	public boolean contains(CHAT_MODE mode) {
+		return this.modes().contains(mode);
+	}
+
 	public boolean contains(ContactType contactType) {
 		return this.contactTypes().contains(contactType);
 	}
 
-	public void add(CHAT_ASSIGN_GROUP tab) {
+	public SessionSearchQuery add(CHAT_ASSIGN_GROUP tab) {
 		if (ArgUtil.is(tab)) {
 			this.tabs().add(tab);
 		}
+		return this;
 	}
 
-	public void add(CHAT_STATE state) {
+	public SessionSearchQuery add(CHAT_STATE state) {
 		if (ArgUtil.is(state)) {
 			this.states().add(state);
 		}
+		return this;
 	}
 
-	public void add(CHAT_STATUS status) {
+	public SessionSearchQuery add(CHAT_STATUS status) {
 		if (ArgUtil.is(status)) {
 			this.status().add(status);
 		}
+		return this;
 	}
 
-	public void add(ContactType contactType) {
+	public SessionSearchQuery add(ContactType contactType) {
 		if (ArgUtil.is(contactType)) {
 			this.contactTypes().add(contactType);
 		}
+		return this;
+	}
+
+	public SessionSearchQuery add(CHAT_MODE mode) {
+		if (ArgUtil.is(mode)) {
+			this.modes().add(mode);
+		}
+		return this;
 	}
 
 	public SessionSearchQuery parse(String query) {
@@ -162,6 +186,14 @@ public class SessionSearchQuery {
 						this.status().add(status);
 					}
 				}
+
+				if (ArgUtil.isEqual(tagType, null, TAG_TYPE.TO)) {
+					CHAT_MODE status = ArgUtil.parseAsEnumT(tokenStrs[1], CHAT_MODE.class);
+					if (status != null) {
+						this.modes().add(status);
+					}
+				}
+
 			} else {
 				sj.add(tokenStr);
 			}

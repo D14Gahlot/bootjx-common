@@ -52,15 +52,24 @@ public class WA360Client {
 			boolean isButton = false;
 			int buttonsCount = 0;
 			String bodyTextAppend = Constants.BLANK;
-			List<TmplElement> buttons = null;
+			List<TmplElement> buttons = new ArrayList<TmplElement>();
 			if (outboxMessage.options().containsKey("buttons")) {
-				buttons = new MapModel(outboxMessage.options()).entry("buttons").asList(TmplElement.class);
-				for (TmplElement b : buttons) {
+				List<TmplElement> allbuttons = new MapModel(outboxMessage.options()).entry("buttons")
+						.asList(TmplElement.class);
+				for (TmplElement b : allbuttons) {
 					if (ArgUtil.areEqual(b.getType(), TmplElement.TYPES.URL)) {
-						bodyTextAppend = bodyTextAppend + "\n*" + StringUtils.trim(b.getLabel()) + "*\n" + b.getUrl()
-								+ "\n";
+						bodyTextAppend = bodyTextAppend
+								+ StringUtils.wrap("\n" + WA360Constants.componentButtonSubTypesIconLink + " *",
+										StringUtils.trim(b.getLabel()), "*")
+								+ "\n" + b.getUrl() + "\n" + StringUtils.wrap(" _",b.getDesc(), "_\n");
+					} else if (ArgUtil.areEqual(b.getType(), TmplElement.TYPES.PHONE_NUMBER)) {
+						bodyTextAppend = bodyTextAppend
+								+ StringUtils.wrap("\n" + WA360Constants.componentButtonSubTypesIconPhone + " *",
+										StringUtils.trim(b.getLabel()), "*")
+								+ "\n" + b.getPhone() + "\n" + StringUtils.wrap(" _",b.getDesc(), "_\n");
 					} else {
 						buttonsCount++;
+						buttons.add(b);
 					}
 				}
 				isList = (buttonsCount > 0) && (buttonsCount > 3);
@@ -319,11 +328,11 @@ public class WA360Client {
 			}
 
 			Map<String, Object> row = new HashMap<String, Object>();
-			row.put("id", button.getName());
-			row.put("title", button.getLabel());
+			row.put("id", StringUtils.substring(button.getName(), 200));
+			row.put("title", StringUtils.substring(button.getLabel(), 24));
 			// row.put("description", button.getType());
 			if (ArgUtil.is(button.getDesc())) {
-				row.put("description", button.getDesc());
+				row.put("description", StringUtils.substring(button.getDesc(), 72));
 			}
 			rows.add(row);
 
@@ -382,8 +391,10 @@ public class WA360Client {
 		List<Object> rows = new ArrayList<Object>();
 		for (TmplElement button : buttons) {
 			rows.add(MapModel.createInstance().put("type", "reply")
-					.put(OutBoundWrapperPaths.INTERACTIVE_ACTION_REPLY_ID, button.getName())
-					.put(OutBoundWrapperPaths.INTERACTIVE_ACTION_REPLY_TITLE, button.getLabel()).toMap());
+					.put(OutBoundWrapperPaths.INTERACTIVE_ACTION_REPLY_ID, StringUtils.substring(button.getName(), 256))
+					.put(OutBoundWrapperPaths.INTERACTIVE_ACTION_REPLY_TITLE,
+							StringUtils.substring(button.getLabel(), 20))
+					.toMap());
 		}
 		req.put(OutBoundWrapperPaths.INTERACTIVE_ACTION_BUTTONS, rows);
 		return send(req, channelConfig);

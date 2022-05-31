@@ -33,6 +33,7 @@ public class InBoundEvent implements LoggableEntity, SessionInfo {
 	}
 
 	public static class SessionRouted {
+		public String routingId;
 		public String sourceQueue;
 		public String targetQueue;
 

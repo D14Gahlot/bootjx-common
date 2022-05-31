@@ -235,6 +235,7 @@ public class SessionStore extends CommonMongoTemplateAbstract {
 		iMessage.session().setDept(chatSessionDoc.getAssignedToDept());
 		iMessage.session().setMode(chatSessionDoc.getMode());
 		iMessage.session().setResolved(chatSessionDoc.isResolved());
+		iMessage.session().setRoutingId(chatSessionDoc.getRoutingId());
 		return iMessage;
 	}
 

@@ -17,6 +17,7 @@ public class MessageSession implements Serializable {
 	private boolean firstMessage;
 
 	private String ticketHash;
+	private String routingId;
 
 	public String getDept() {
 		return dept;
@@ -86,6 +87,14 @@ public class MessageSession implements Serializable {
 
 	public void setTicketHash(String ticketId) {
 		this.ticketHash = ticketId;
+	}
+
+	public String getRoutingId() {
+		return routingId;
+	}
+
+	public void setRoutingId(String routingId) {
+		this.routingId = routingId;
 	}
 
 }

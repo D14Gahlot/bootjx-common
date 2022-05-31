@@ -258,6 +258,20 @@ public final class StringUtils {
 		return value;
 	}
 
+	public static String wrap(String prefix, String str, String suffix) {
+		if (ArgUtil.is(str))
+			return prefix + str + suffix;
+		return Constants.BLANK;
+	}
+
+	public static String prefix(String prefix, String str) {
+		return wrap(prefix, str, Constants.BLANK);
+	}
+
+	public static String suffix(String str, String suffix) {
+		return wrap(Constants.BLANK, str, suffix);
+	}
+
 	public static String normalizeSpace(String src) {
 		return (src == null) ? src : src.trim().replaceAll(" +", " ");
 	}

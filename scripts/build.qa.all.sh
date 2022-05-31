@@ -1,8 +1,8 @@
 #!/bin/sh
-bash scripts/sync.master_production.sh
-bash scripts/build.xyz.sh account
-bash scripts/build.xyz.sh admin
-bash scripts/build.xyz.sh bot
-bash scripts/build.xyz.sh postman
-bash scripts/build.xyz.sh agent
-bash scripts/build.xyz.sh xms
+#bash scripts/sync.master_production.sh
+bash scripts/build.qa.sh account
+bash scripts/build.qa.sh admin
+bash scripts/build.qa.sh bot
+bash scripts/build.qa.sh postman
+bash scripts/build.qa.sh agent
+bash scripts/build.qa.sh xms

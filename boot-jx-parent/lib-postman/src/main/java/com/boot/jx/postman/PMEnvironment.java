@@ -367,7 +367,6 @@ public class PMEnvironment {
 
 		PMConfigurationObject getAgentHistoryCount();
 
-		PMConfigurationObject isAgentHistoryLazy();
 	}
 
 	public interface PMClientConfig {
