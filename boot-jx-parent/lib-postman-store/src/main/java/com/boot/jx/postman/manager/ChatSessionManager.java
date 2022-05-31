@@ -13,7 +13,6 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Component;
 
-import com.boot.jx.AppContextUtil;
 import com.boot.jx.api.ApiFieldError;
 import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.dict.ContactType;
@@ -23,6 +22,7 @@ import com.boot.jx.postman.PMConfiguration.PMConfigurationWrappper;
 import com.boot.jx.postman.PMConstants;
 import com.boot.jx.postman.PMConstants.APP_TYPE;
 import com.boot.jx.postman.PMConstants.CHAT_ASSIGN_GROUP;
+import com.boot.jx.postman.PMConstants.CHAT_MODE;
 import com.boot.jx.postman.PMConstants.CHAT_STATE;
 import com.boot.jx.postman.PMConstants.CHAT_STATUS;
 import com.boot.jx.postman.PMConstants.DEFAULT_VALUES;
@@ -30,7 +30,6 @@ import com.boot.jx.postman.PMConstants.MESSAGE_SENDER_TYPE;
 import com.boot.jx.postman.PMConstants.PROPERTIES;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PMEnvironment.PMClientConfig;
-import com.boot.jx.postman.PMEnvironment.PMConfigurationObject;
 import com.boot.jx.postman.PMEnvironment.PMDomainConfig;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.QuickTag;
@@ -211,7 +210,7 @@ public class ChatSessionManager {
 		} else if (query.contains(CHAT_STATUS.RESOLVED)) {
 			criterias.add(Criteria.where("resolved").is(true));
 		} else if (query.contains(CHAT_STATE.OUTBOUND)) {
-			primaryCriteria = primaryCriteria.and("mode").is("AGENT");
+			query.add(CHAT_MODE.AGENT);
 			criterias.add(Criteria.where("active").is(true).and("lastInBoundMsg").exists(false)
 					.orOperator(Criteria.where("resolved").exists(false), Criteria.where("resolved").is(false)));
 		} else if (query.contains(CHAT_STATE.EXPIRED) || query.contains(CHAT_STATUS.EXPIRED)) {
@@ -229,11 +228,11 @@ public class ChatSessionManager {
 									.and("msg.lastInBoundMsg").exists(true)//
 					));
 		} else if (query.contains(CHAT_ASSIGN_GROUP.UNASSIGNED)) {
-			primaryCriteria = primaryCriteria.and("mode").is("AGENT");
+			query.add(CHAT_MODE.AGENT);
 			criterias.add(new Criteria().orOperator(Criteria.where("assignedToAgent").is(null),
 					Criteria.where("assignedToAgent").exists(false)));
 		} else if (query.contains(CHAT_STATE.ACTIVE)) {
-			primaryCriteria = primaryCriteria.and("mode").is("AGENT");
+			query.add(CHAT_MODE.AGENT);
 			criterias.add(new Criteria() //
 					.andOperator(Criteria.where("active").is(true) //
 							.orOperator(Criteria.where("resolved").exists(false), Criteria.where("resolved").is(false)))
@@ -245,7 +244,7 @@ public class ChatSessionManager {
 		if (query.containsAny(CHAT_STATE.UNATTENDED, CHAT_STATE.WAITING_LONG, CHAT_STATE.WAITING,
 				CHAT_STATE.NEED_ATTENTION)) {
 
-			primaryCriteria = primaryCriteria.and("mode").is("AGENT");
+			query.add(CHAT_MODE.AGENT);
 
 			Calendar chatIdle = Calendar.getInstance();
 			chatIdle.setTimeInMillis(chatIdle.getTimeInMillis() - pmDomainConfig.getChatIdleTimeout().asMillis() * 2);
@@ -278,7 +277,7 @@ public class ChatSessionManager {
 		}
 
 		if (query.contains(CHAT_ASSIGN_GROUP.ME)) {
-			primaryCriteria = primaryCriteria.and("mode").is("AGENT");
+			query.add(CHAT_MODE.AGENT);
 			primaryCriteria = primaryCriteria.and("assignedToDept").is(agentDept);
 			criterias.add(new Criteria().orOperator(
 					// Assigned to Me
@@ -288,7 +287,7 @@ public class ChatSessionManager {
 			//
 			));
 		} else if (query.contains(CHAT_ASSIGN_GROUP.TEAM)) {
-			primaryCriteria = primaryCriteria.and("mode").is("AGENT");
+			query.add(CHAT_MODE.AGENT);
 			criterias.add(new Criteria().orOperator(
 					// Not Assigned to Me
 					Criteria.where("assignedToDept").is(agentDept).and("assignedToAgent").ne(agentCode)
@@ -296,7 +295,7 @@ public class ChatSessionManager {
 			));
 		} else if (query.contains(CHAT_ASSIGN_GROUP.ORG)) {
 			if (!pmEnvironment.keyEntry(PROPERTIES.POSTMAN_AGENT_TAB_NONAGENT).asBoolean(false)) {
-				primaryCriteria = primaryCriteria.and("mode").is("AGENT");
+				query.add(CHAT_MODE.AGENT);
 			}
 			criterias.add(new Criteria().orOperator(
 					// Not Assigned to Me
@@ -305,6 +304,10 @@ public class ChatSessionManager {
 					Criteria.where("assignedToDept").is(null), Criteria.where("assignedToDept").exists(false)
 			//
 			));
+		}
+
+		if (query.contains(CHAT_MODE.AGENT)) {
+			primaryCriteria = primaryCriteria.and("mode").is("AGENT");
 		}
 
 //			else if (query.contains(CHAT_ASSIGN_GROUP.HISTORY)) {
