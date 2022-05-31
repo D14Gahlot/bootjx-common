@@ -232,7 +232,7 @@ public class ChatSessionManager {
 			criterias.add(new Criteria().orOperator(Criteria.where("assignedToAgent").is(null),
 					Criteria.where("assignedToAgent").exists(false)));
 		} else if (query.contains(CHAT_STATE.ACTIVE)) {
-			query.add(CHAT_MODE.AGENT);
+			//query.add(CHAT_MODE.AGENT);
 			criterias.add(new Criteria() //
 					.andOperator(Criteria.where("active").is(true) //
 							.orOperator(Criteria.where("resolved").exists(false), Criteria.where("resolved").is(false)))
