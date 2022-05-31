@@ -39,6 +39,8 @@ public class ClientAppConfigConstants {
 
 				new ConfigMeta().title("Default Agent Team").path("props.deptCode")
 						.optionsSource("getx:/api/admins/dept").optionsKey("code").optionsLabel("Name").group("Team"),
+				new ConfigMeta().title("Default Agent").path("props.agentCode")
+						.optionsSource("getx:/api/admins/agent").optionsKey("code").optionsLabel("Name").group("Team"),
 				new ConfigMeta().title("When Agent is connected").path("props.agent_connected")
 						.optionsSource("getx:/api/tmpl/hsm").optionsKey("code").optionsLabel("desc").group("Templates"),
 				new ConfigMeta().title("When no agent is found").path("props.agent_notfound")

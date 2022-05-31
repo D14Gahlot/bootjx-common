@@ -13,6 +13,7 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Component;
 
+import com.boot.jx.AppContextUtil;
 import com.boot.jx.api.ApiFieldError;
 import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.dict.ContactType;
@@ -412,7 +413,7 @@ public class ChatSessionManager {
 		builder.set("routingId", chatSessionDoc.getRoutingId());
 		sessionStore.updateFirst(builder.getQuery(), builder.getUpdate(), ChatSessionDoc.class);
 
-		logManager.event(chatSessionDoc, messageContext.getActiveQueueCode(), EVENTS.ASGND_TO_QUEUE, queueCode);
+		logManager.event(chatSessionDoc, EVENTS.ASGND_TO_QUEUE, queueCode);
 
 		inBoundEvent.sessionRouted.targetQueue = chatSessionDoc.getAssignedToQueue();
 		sessionStore.updateMessageFromSession(chatSessionDoc, inBoundEvent);
