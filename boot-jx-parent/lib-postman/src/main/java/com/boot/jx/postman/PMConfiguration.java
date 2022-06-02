@@ -148,6 +148,25 @@ public interface PMConfiguration extends Serializable {
 			return this;
 		}
 
+		public PMConfiguration setPref(PMConfigurationObject map, String server) {
+			if (ArgUtil.is(map.getServer())) {
+				if (ArgUtil.is(map.getServer(), server)) {
+					this.prefs().put(map.getKey(), map);
+				} else {
+					// DO NOTHING
+				}
+				return this;
+			} else {
+				PMConfigurationObject pref = this.prefs().get(map.getKey());
+				if (!ArgUtil.is(pref)) {
+					this.prefs().put(map.getKey(), map);
+				} else if (!ArgUtil.is(pref.getServer())) {
+					this.prefs().put(map.getKey(), map);
+				}
+			}
+			return this;
+		}
+
 		public List<AChannelConfig> listChannels() {
 			List<AChannelConfig> list = new ArrayList<AChannelConfig>();
 			for (Entry<String, ChannelConfig> aChannelDetails : this.channels().entrySet()) {
