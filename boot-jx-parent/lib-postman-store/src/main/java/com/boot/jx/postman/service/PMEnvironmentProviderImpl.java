@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.boot.jx.AppConfigPackage.AppSharedConfig;
@@ -36,6 +37,9 @@ public class PMEnvironmentProviderImpl implements PMEnvironmentProvider, AppShar
 
 	@Autowired(required = false)
 	private ConfigStore configStore;
+
+	@Value("${mry.prop.service.server}")
+	private String serviceServer;
 
 	@Override
 	public PMConfigurationModel local() {
@@ -79,9 +83,14 @@ public class PMEnvironmentProviderImpl implements PMEnvironmentProvider, AppShar
 			if (Tenants.isDefault(tnt)) {
 				PMConfigurationDoc newSharedConfiguration = new PMConfigurationDoc();
 				for (Entry<String, PMConfigurationObject> entry : prefs.prefs().entrySet()) {
-					// if (entry.getValue().isShared()) {
-					newSharedConfiguration.setPref(entry.getValue());
-					// }
+					if (!ArgUtil.is(entry.getValue().getServer())) {
+						newSharedConfiguration.setPref(entry.getValue());
+					}
+				}
+				for (Entry<String, PMConfigurationObject> entry : prefs.prefs().entrySet()) {
+					if (ArgUtil.is(entry.getValue().getServer(), serviceServer)) {
+						newSharedConfiguration.setPref(entry.getValue());
+					}
 				}
 				List<ChannelConfigDoc> sandboxChannels = configStore.findAll(ChannelConfigDoc.class);
 				for (ChannelConfigDoc channel : sandboxChannels) {

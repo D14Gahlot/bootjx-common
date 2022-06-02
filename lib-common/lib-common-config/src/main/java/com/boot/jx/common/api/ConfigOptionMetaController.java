@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.checkerframework.checker.units.qual.A;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -142,6 +141,16 @@ public class ConfigOptionMetaController {
 	public ApiResponse<Map<String, Object>, Object> setConfig(@RequestBody PMConfigurationObject map) {
 		configManager.save(map);
 		return ApiResponse.buildResults(configManager.getSetupConfigs());
+	}
+
+	@RequestMapping(value = "/api/config", method = { RequestMethod.PUT })
+	public ApiResponse<Map<String, Object>, Object> setConfig(@RequestParam String key, @RequestParam String value,
+			@RequestParam(defaultValue = "false") boolean shared) {
+		PMConfigurationObject map = new PMConfigurationObject();
+		map.setKey(key);
+		map.setValue(value);
+		map.setShared(shared);
+		return setConfig(map);
 	}
 
 	@RequestMapping(value = "/api/config", method = { RequestMethod.GET })

@@ -12,39 +12,39 @@ import com.boot.utils.Constants;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ApiRequest {
 
-    public enum ResponeError {
-	OK, PROPAGATE, SUPPRESS, DEFAULT
-    }
+	public enum ResponeError {
+		OK, PROPAGATE, SUPPRESS, DEFAULT
+	}
 
-    RequestType type() default RequestType.DEFAULT;
+	RequestType type() default RequestType.DEFAULT;
 
-    String deprecated() default Constants.BLANK;
+	String deprecated() default Constants.BLANK;
 
-    boolean useAuthKey() default false;
+	boolean useAuthKey() default false;
 
-    boolean useAuthToken() default false;
+	boolean useAuthToken() default false;
 
-    String flow() default Constants.BLANK;
+	String flow() default Constants.BLANK;
 
-    String feature() default Constants.BLANK;
+	String feature() default Constants.BLANK;
 
-    String[] rules() default Constants.BLANK;
+	String[] rules() default Constants.BLANK;
 
-    String tracefilter() default Constants.BLANK;
+	String tracefilter() default Constants.BLANK;
 
-    boolean authenticateTenant() default false;
+	boolean authenticateTenant() default false;
 
-    ResponeError responeError() default ResponeError.DEFAULT;
+	ResponeError responeError() default ResponeError.DEFAULT;
 
-    Channel channel() default Channel.UNKNOWN;
+	Channel channel() default Channel.UNKNOWN;
 
-    /**
-     * To Reset the context Key
-     * 
-     * @return
-     */
-    boolean initFlow() default false;
+	/**
+	 * To Reset the context Key
+	 * 
+	 * @return
+	 */
+	boolean initFlow() default false;
 
-    boolean session() default false;
+	boolean session() default false;
 
 }

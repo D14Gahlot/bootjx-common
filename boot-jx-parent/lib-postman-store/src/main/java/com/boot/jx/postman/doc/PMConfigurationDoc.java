@@ -10,17 +10,17 @@ import com.boot.jx.postman.PMConfiguration.PMConfigurationModel;
 @TypeAlias("PMConfiguration")
 public class PMConfigurationDoc extends PMConfigurationModel {
 
-    private static final long serialVersionUID = 7942286016346691701L;
+	private static final long serialVersionUID = 7942286016346691701L;
 
-    @Id
-    private String tenant;
+	@Id
+	private String tenant;
 
-    public String getTenant() {
-	return tenant;
-    }
+	public String getTenant() {
+		return tenant;
+	}
 
-    public void setTenant(String tenant) {
-	this.tenant = tenant;
-    }
+	public void setTenant(String tenant) {
+		this.tenant = tenant;
+	}
 
 }
