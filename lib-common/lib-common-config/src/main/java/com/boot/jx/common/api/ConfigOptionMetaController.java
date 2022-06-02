@@ -184,9 +184,9 @@ public class ConfigOptionMetaController {
 
 		String domainServer = pmEnvironment.keyEntry(ConfigConstants.APP_KEY.PROP_SERVICE_SERVER).asString();
 
-		PMConfigurationObject config = pmEnvironment
-				.keyEntry(beta ? "mry.cdn.url.beta" : "mry.cdn.url." + domainServer);
+		PMConfigurationObject config = pmEnvironment.keyEntry(beta ? "mry.cdn.url.beta" : "mry.cdn.url");
 		String oldUrl = config.asString();
+		config.setServer(domainServer);
 
 		if (ArgUtil.is(version) && ArgUtil.is(oldUrl)) {
 			url = cdnBuilder.updateVersion(oldUrl, version);

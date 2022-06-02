@@ -97,13 +97,6 @@ public class PMCommonConfigImpl implements PMCommonConfig {
 				}
 			}
 		}
-
-		String domainServer = pmEnvironment.keyEntry(ConfigConstants.APP_KEY.PROP_SERVICE_SERVER).asString();
-
-		PMConfigurationObject envCDN = pmEnvironment.keyEntry("mry.cdn.url." + domainServer);
-		if (envCDN.exists()) {
-			return cdnBuilder.latest(envCDN.asString());
-		}
 		return cdnBuilder.latest(pmEnvironment.keyEntry("mry.cdn.url").asString(cdnUrl));
 	}
 
