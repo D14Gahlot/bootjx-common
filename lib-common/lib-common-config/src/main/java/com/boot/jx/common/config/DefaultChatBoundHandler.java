@@ -321,6 +321,7 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 					return;
 				} else if (CHAT_MODE.AGENT.equals(appType.getMode())) {
 					MapModel props = new MapModel(defaultClient.props());
+					AppContextUtil.setActorId(defaultClient.getQueue());
 					assignSessionToAgent(new PMArgs()
 							.assignToDeptCode(
 									ArgUtil.nonEmpty(pmArgs.getAssignToDeptCode(), props.getString("deptCode")))

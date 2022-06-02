@@ -22,10 +22,12 @@ import com.boot.jx.postman.PMConfiguration.PMConfigurationWrappper;
 import com.boot.jx.postman.PMConstants;
 import com.boot.jx.postman.PMConstants.APP_TYPE;
 import com.boot.jx.postman.PMConstants.CHAT_ASSIGN_GROUP;
+import com.boot.jx.postman.PMConstants.CHAT_MODE;
 import com.boot.jx.postman.PMConstants.CHAT_STATE;
 import com.boot.jx.postman.PMConstants.CHAT_STATUS;
 import com.boot.jx.postman.PMConstants.DEFAULT_VALUES;
 import com.boot.jx.postman.PMConstants.MESSAGE_SENDER_TYPE;
+import com.boot.jx.postman.PMConstants.PROPERTIES;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PMEnvironment.PMClientConfig;
 import com.boot.jx.postman.PMEnvironment.PMDomainConfig;
@@ -42,8 +44,7 @@ import com.boot.model.MapModel.NodeEntry;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
 import com.boot.utils.TimeUtils;
-
-import ch.qos.logback.core.Context;
+import com.boot.utils.UniqueID;
 
 @Component
 public class ChatSessionManager {
@@ -209,6 +210,7 @@ public class ChatSessionManager {
 		} else if (query.contains(CHAT_STATUS.RESOLVED)) {
 			criterias.add(Criteria.where("resolved").is(true));
 		} else if (query.contains(CHAT_STATE.OUTBOUND)) {
+			query.add(CHAT_MODE.AGENT);
 			criterias.add(Criteria.where("active").is(true).and("lastInBoundMsg").exists(false)
 					.orOperator(Criteria.where("resolved").exists(false), Criteria.where("resolved").is(false)));
 		} else if (query.contains(CHAT_STATE.EXPIRED) || query.contains(CHAT_STATUS.EXPIRED)) {
@@ -226,10 +228,11 @@ public class ChatSessionManager {
 									.and("msg.lastInBoundMsg").exists(true)//
 					));
 		} else if (query.contains(CHAT_ASSIGN_GROUP.UNASSIGNED)) {
-			primaryCriteria = primaryCriteria.and("mode").is("AGENT");
+			query.add(CHAT_MODE.AGENT);
 			criterias.add(new Criteria().orOperator(Criteria.where("assignedToAgent").is(null),
 					Criteria.where("assignedToAgent").exists(false)));
 		} else if (query.contains(CHAT_STATE.ACTIVE)) {
+			//query.add(CHAT_MODE.AGENT);
 			criterias.add(new Criteria() //
 					.andOperator(Criteria.where("active").is(true) //
 							.orOperator(Criteria.where("resolved").exists(false), Criteria.where("resolved").is(false)))
@@ -241,7 +244,7 @@ public class ChatSessionManager {
 		if (query.containsAny(CHAT_STATE.UNATTENDED, CHAT_STATE.WAITING_LONG, CHAT_STATE.WAITING,
 				CHAT_STATE.NEED_ATTENTION)) {
 
-			primaryCriteria = primaryCriteria.and("mode").is("AGENT");
+			query.add(CHAT_MODE.AGENT);
 
 			Calendar chatIdle = Calendar.getInstance();
 			chatIdle.setTimeInMillis(chatIdle.getTimeInMillis() - pmDomainConfig.getChatIdleTimeout().asMillis() * 2);
@@ -273,34 +276,39 @@ public class ChatSessionManager {
 			criterias.add(new Criteria().orOperator(contactCriteris.toArray(new Criteria[contactCriteris.size()])));
 		}
 
-		if (pmDomainConfig.isAgentHistoryLazy().asBoolean(true)) {
-
-			if (query.contains(CHAT_ASSIGN_GROUP.ME)) {
-				primaryCriteria = primaryCriteria.and("mode").is("AGENT");
-				primaryCriteria = primaryCriteria.and("assignedToDept").is(agentDept);
-				criterias.add(new Criteria().orOperator(
-						// Assigned to Me
-						Criteria.where("assignedToAgent").is(agentCode),
-						// Assigned to None
-						Criteria.where("assignedToAgent").is(null), Criteria.where("assignedToAgent").exists(false)
-				//
-				));
-			} else if (query.contains(CHAT_ASSIGN_GROUP.TEAM)) {
-				primaryCriteria = primaryCriteria.and("mode").is("AGENT");
-				criterias.add(new Criteria().orOperator(
-						// Not Assigned to Me
-						Criteria.where("assignedToDept").is(agentDept).and("assignedToAgent").ne(agentCode)
-				//
-				));
-			} else if (query.contains(CHAT_ASSIGN_GROUP.ORG)) {
-				criterias.add(new Criteria().orOperator(
-						// Not Assigned to Me
-						Criteria.where("assignedToDept").ne(agentDept),
-						// Assigned to No-Org
-						Criteria.where("assignedToDept").is(null), Criteria.where("assignedToDept").exists(false)
-				//
-				));
+		if (query.contains(CHAT_ASSIGN_GROUP.ME)) {
+			query.add(CHAT_MODE.AGENT);
+			primaryCriteria = primaryCriteria.and("assignedToDept").is(agentDept);
+			criterias.add(new Criteria().orOperator(
+					// Assigned to Me
+					Criteria.where("assignedToAgent").is(agentCode),
+					// Assigned to None
+					Criteria.where("assignedToAgent").is(null), Criteria.where("assignedToAgent").exists(false)
+			//
+			));
+		} else if (query.contains(CHAT_ASSIGN_GROUP.TEAM)) {
+			query.add(CHAT_MODE.AGENT);
+			criterias.add(new Criteria().orOperator(
+					// Not Assigned to Me
+					Criteria.where("assignedToDept").is(agentDept).and("assignedToAgent").ne(agentCode)
+			//
+			));
+		} else if (query.contains(CHAT_ASSIGN_GROUP.ORG)) {
+			if (!pmEnvironment.keyEntry(PROPERTIES.POSTMAN_AGENT_TAB_NONAGENT).asBoolean(false)) {
+				query.add(CHAT_MODE.AGENT);
 			}
+			criterias.add(new Criteria().orOperator(
+					// Not Assigned to Me
+					Criteria.where("assignedToDept").ne(agentDept),
+					// Assigned to No-Org
+					Criteria.where("assignedToDept").is(null), Criteria.where("assignedToDept").exists(false)
+			//
+			));
+		}
+
+		if (query.contains(CHAT_MODE.AGENT)) {
+			primaryCriteria = primaryCriteria.and("mode").is("AGENT");
+		}
 
 //			else if (query.contains(CHAT_ASSIGN_GROUP.HISTORY)) {
 //				primaryCriteria = primaryCriteria.and("mode").is("AGENT");
@@ -314,8 +322,6 @@ public class ChatSessionManager {
 //				//
 //				));
 //			}
-
-		}
 
 		int limit = Math.min(Math.max(50, query.limit), pmDomainConfig.getAgentHistoryCount().asInteger(150));
 		query2.addCriteria(
@@ -399,6 +405,9 @@ public class ChatSessionManager {
 				chatSessionDoc.setAssignedToQueue(queueCode);
 				APP_TYPE appType = APP_TYPE.from(apiKeyConfig.getAppType());
 				chatSessionDoc.setMode(appType.getMode().name());
+				inBoundEvent.sessionRouted.routingId = String.format("%s_%s_%s", chatSessionDoc.getSessionId(),
+						apiKeyConfig.getId(), UniqueID.generateString());
+				chatSessionDoc.setRoutingId(inBoundEvent.sessionRouted.routingId);
 			} else {
 				ApiResponseUtil.throwInputException(new ApiFieldError().field("queue").codeKey("INVALID_QUEUE")
 						.description("Invalid Queue Code " + queueCode));
@@ -411,9 +420,10 @@ public class ChatSessionManager {
 		CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder().whereId(chatSessionDoc.getSessionId());
 		builder.set("assignedToQueue", chatSessionDoc.getAssignedToQueue());
 		builder.set("mode", chatSessionDoc.getMode());
+		builder.set("routingId", chatSessionDoc.getRoutingId());
 		sessionStore.updateFirst(builder.getQuery(), builder.getUpdate(), ChatSessionDoc.class);
 
-		logManager.event(chatSessionDoc, messageContext.getActiveQueueCode(), EVENTS.ASGND_TO_QUEUE, queueCode);
+		logManager.event(chatSessionDoc, EVENTS.ASGND_TO_QUEUE, queueCode);
 
 		inBoundEvent.sessionRouted.targetQueue = chatSessionDoc.getAssignedToQueue();
 		sessionStore.updateMessageFromSession(chatSessionDoc, inBoundEvent);

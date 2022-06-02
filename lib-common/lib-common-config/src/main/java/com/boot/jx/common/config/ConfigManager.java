@@ -59,6 +59,9 @@ public class ConfigManager {
 	@Autowired
 	private PMClientConfig pmClientConfig;
 
+	@Autowired
+	private PMCommonConfigImpl pmCommonConfig;
+
 	public <T> T findById(Object id, Class<T> entityClass) {
 		return configStore.findById(id, entityClass);
 	}
@@ -165,17 +168,18 @@ public class ConfigManager {
 			configObject.setKey(config.getKey());
 			configObject.setValue(config.getValue());
 			configObject.setShared(config.isShared());
+			configObject.setDomain(AppContextUtil.getTenant());
+			configObject.setServer(pmCommonConfig.getServiceServer());
 
 			doc.setPref(configObject);
 
 			PrefsConfigDoc prefsConfigDoc = new PrefsConfigDoc();
-			prefsConfigDoc.setId(configObject.getKey());
+			prefsConfigDoc.setId(configObject.getKey() + "." + pmCommonConfig.getServiceServer());
 			prefsConfigDoc = EntityDtoUtil.dtoToEntity(configObject, prefsConfigDoc);
 			configStore.savePrefsConfig(prefsConfigDoc);
 
 			break;
 		}
-
 		configStore.saveConfiguration(doc);
 		this.refresh();
 	}

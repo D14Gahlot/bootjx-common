@@ -10,17 +10,17 @@ import com.boot.jx.postman.PMEnvironment.PMConfigurationObject;
 @TypeAlias("PrefsConfig")
 public class PrefsConfigDoc extends PMConfigurationObject {
 
-    private static final long serialVersionUID = -4251710793999219993L;
+	private static final long serialVersionUID = -4251710793999219993L;
 
-    @Id
-    private String id;
+	@Id
+	private String id;
 
-    public String getId() {
-	return id;
-    }
+	public String getId() {
+		return id;
+	}
 
-    public void setId(String id) {
-	this.id = id;
-    }
+	public void setId(String id) {
+		this.id = id;
+	}
 
 }

@@ -143,6 +143,12 @@ public class ChatSessionQuery extends DocQueryBuilder<ChatSessionDoc> {
 		return this;
 	}
 
+	public ChatSessionQuery setMode(String mode) {
+		this.doc.setMode(mode);
+		this.set("mode", mode);
+		return this;
+	}
+
 	public ChatSessionQuery read(String agent) {
 		String key = SafeKeyHashMap.sanitizeKey(agent);
 		long now = System.currentTimeMillis();
