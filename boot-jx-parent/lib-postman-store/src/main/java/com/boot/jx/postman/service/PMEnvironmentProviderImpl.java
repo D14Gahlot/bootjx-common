@@ -54,7 +54,7 @@ public class PMEnvironmentProviderImpl implements PMEnvironmentProvider, AppShar
 
 			List<PrefsConfigDoc> prefsConfigs = configStore.findAll(PrefsConfigDoc.class);
 			for (PrefsConfigDoc prefsConfig : prefsConfigs) {
-				prefs.setPref(prefsConfig,serviceServer);
+				prefs.setPref(prefsConfig, serviceServer);
 			}
 
 			List<ChannelConfigDoc> channels = configStore.findAll(ChannelConfigDoc.class);
@@ -84,7 +84,7 @@ public class PMEnvironmentProviderImpl implements PMEnvironmentProvider, AppShar
 			if (Tenants.isDefault(tnt)) {
 				PMConfigurationDoc newSharedConfiguration = new PMConfigurationDoc();
 				for (Entry<String, PMConfigurationObject> entry : prefs.prefs().entrySet()) {
-					newSharedConfiguration.setPref(entry.getValue(),serviceServer);
+					newSharedConfiguration.setPref(entry.getValue(), serviceServer);
 				}
 				List<ChannelConfigDoc> sandboxChannels = configStore.findAll(ChannelConfigDoc.class);
 				for (ChannelConfigDoc channel : sandboxChannels) {

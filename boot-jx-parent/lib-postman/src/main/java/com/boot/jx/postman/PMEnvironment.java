@@ -106,6 +106,9 @@ public class PMEnvironment {
 		private boolean isDisabled;
 
 		@JsonView(PMEnvironment.PublicProperty.class)
+		private String server;
+
+		@JsonView(PMEnvironment.PublicProperty.class)
 		protected String webhookUrl;
 
 		public AChannelConfig() {
@@ -206,6 +209,14 @@ public class PMEnvironment {
 
 		public void setChannelCode(String channelCode) {
 			this.channelCode = channelCode;
+		}
+
+		public String getServer() {
+			return server;
+		}
+
+		public void setServer(String server) {
+			this.server = server;
 		}
 
 	}
