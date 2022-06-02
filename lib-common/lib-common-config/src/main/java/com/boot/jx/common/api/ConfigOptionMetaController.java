@@ -137,12 +137,14 @@ public class ConfigOptionMetaController {
 	@Autowired
 	private ConfigManager configManager;
 
+	@ApiRequest(rules = { ACCESS_RULES.ONLY_DUPERUSER_FOR_MASTER_DOMAIN, ACCESS_RULES.ONLY_DOMAIN_ADMIN })
 	@RequestMapping(value = "/api/config", method = { RequestMethod.POST })
 	public ApiResponse<Map<String, Object>, Object> setConfig(@RequestBody PMConfigurationObject map) {
 		configManager.save(map);
 		return ApiResponse.buildResults(configManager.getSetupConfigs());
 	}
 
+	@ApiRequest(rules = { ACCESS_RULES.ONLY_DUPERUSER_FOR_MASTER_DOMAIN, ACCESS_RULES.ONLY_DOMAIN_ADMIN })
 	@RequestMapping(value = "/api/config", method = { RequestMethod.PUT })
 	public ApiResponse<Map<String, Object>, Object> setConfig(@RequestParam String key, @RequestParam String value,
 			@RequestParam(defaultValue = "false") boolean shared) {
