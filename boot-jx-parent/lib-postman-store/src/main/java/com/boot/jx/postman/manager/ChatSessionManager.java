@@ -332,9 +332,9 @@ public class ChatSessionManager {
 				// Limit
 				.with(new Sort(Direction.DESC, "updated.hour")).limit(limit);
 		// System.out.println(query2.toString());
-		if (LOGGER.isDebugEnabled()) {
+		//if (LOGGER.isDebugEnabled()) {
 			ApiResponseUtil.addLog(query2.toString());
-		}
+		//}
 		return sessionStore.find(
 				CommonMongoQueryBuilder.collection(ChatSessionDoc.class).query(query2).skipDBRefByNames("lastMsg"));
 	}
