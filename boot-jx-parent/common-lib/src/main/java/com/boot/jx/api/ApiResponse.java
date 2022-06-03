@@ -25,6 +25,8 @@ public class ApiResponse<T, M> extends AResponse<M> implements ApiDataMetaRespon
 	/** The data. */
 	protected List<T> results = null;
 
+	protected Object query = null;
+
 	public ApiResponse() {
 		super();
 		this.data = null;
@@ -293,6 +295,11 @@ public class ApiResponse<T, M> extends AResponse<M> implements ApiDataMetaRespon
 		return this;
 	}
 
+	public ApiResponse<T, M> query(Object query) {
+		this.query = query;
+		return this;
+	}
+
 	public T data() {
 		return this.data;
 	}
@@ -300,6 +307,14 @@ public class ApiResponse<T, M> extends AResponse<M> implements ApiDataMetaRespon
 	public ApiResponse<T, M> meta(M meta) {
 		this.meta = meta;
 		return this;
+	}
+
+	public Object getQuery() {
+		return query;
+	}
+
+	public void setQuery(Object query) {
+		this.query = query;
 	}
 
 }
