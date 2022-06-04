@@ -21,6 +21,7 @@ import com.boot.jx.agent.api.ControllerRequestDTOs.ChatTagUpdateRequest;
 import com.boot.jx.agent.api.ControllerRequestDTOs.SessionSearchRequest;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.api.ApiResponseUtil;
+import com.boot.jx.chat.ChatSessionFactory;
 import com.boot.jx.chat.ChatSessionService;
 import com.boot.jx.common.doc.AgentSessionDoc;
 import com.boot.jx.common.store.ChatArchiveService;
@@ -31,18 +32,21 @@ import com.boot.jx.postman.PMConstants.CHAT_ASSIGN_GROUP;
 import com.boot.jx.postman.PMConstants.CHAT_SESSION_ACTIONS;
 import com.boot.jx.postman.PMConstants.CHAT_STATE;
 import com.boot.jx.postman.PMConstants.DEFAULT;
-import com.boot.jx.postman.PMEnvironment;
+import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.dto.ChatMessageDTO;
 import com.boot.jx.postman.dto.ChatSessionDTO;
+import com.boot.jx.postman.dto.ContactDTO;
 import com.boot.jx.postman.manager.ChatSessionManager;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.model.SessionSearchQuery;
+import com.boot.jx.postman.model.MessageDefinitions.Contactable;
 import com.boot.jx.postman.query.ChatSessionQuery;
 import com.boot.jx.postman.service.ChatDTOUtil;
 import com.boot.jx.postman.store.MessageStore;
 import com.boot.jx.postman.store.SessionStore;
+import com.boot.jx.utils.PostManUtil;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.Constants;
 
@@ -77,7 +81,7 @@ public class AgentMsgController {
 	private AgentService agentService;
 
 	@Autowired
-	private PMEnvironment environment;
+	private ChatSessionFactory chatSessionFactory;
 
 	@ApiRequest(type = RequestType.POLL)
 	@RequestMapping(value = "/api/sessions/assignments", method = { RequestMethod.GET })
@@ -146,6 +150,22 @@ public class AgentMsgController {
 			chatSessionDto = chatArchive.withContact(chatSessionDto);
 			return resp.results(chatArchive.getMessages(chatSessionDto)).meta(chatSessionDto);
 		}
+	}
+
+	@RequestMapping(value = { "/api/session/compose" }, method = { RequestMethod.GET })
+	public ApiResponse<ChatSessionDTO, ContactDTO> sessionCompose(@RequestParam String contactId) {
+		ApiResponse<ChatSessionDTO, ContactDTO> resp = ApiResponse.build();
+		ChatContactDoc chatContactDoc = sessionStore.getContact(contactId);
+		Contactable contact = PostManUtil.getContactMeta(chatContactDoc);
+		resp.meta(ChatDTOUtil.getContactDTO(chatContactDoc));
+		if (!PostManUtil.IS_SINGLE_THREAD(contact.getChannelType())) {
+			ChatSessionDoc sessionDoc = chatSessionFactory.getChatSessionByContactId(contactId, null);
+			if (ArgUtil.is(sessionDoc)) {
+				ChatSessionDTO chatSessionDto = chatArchive.getChatSession(sessionDoc);
+				resp.result(chatSessionDto);
+			}
+		}
+		return resp;
 	}
 
 	@RequestMapping(value = { "/api/session/tag" }, method = { RequestMethod.POST })
