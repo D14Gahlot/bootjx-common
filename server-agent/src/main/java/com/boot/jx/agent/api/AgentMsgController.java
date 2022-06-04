@@ -158,7 +158,7 @@ public class AgentMsgController {
 		ChatContactDoc chatContactDoc = sessionStore.getContact(contactId);
 		Contactable contact = PostManUtil.getContactMeta(chatContactDoc);
 		resp.meta(ChatDTOUtil.getContactDTO(chatContactDoc));
-		if (!PostManUtil.IS_SINGLE_THREAD(contact.getChannelType())) {
+		if (PostManUtil.IS_SINGLE_THREAD(contact.getChannelType())) {
 			ChatSessionDoc sessionDoc = chatSessionFactory.getChatSessionByContactId(contactId, null);
 			if (ArgUtil.is(sessionDoc)) {
 				ChatSessionDTO chatSessionDto = chatArchive.getChatSession(sessionDoc);
