@@ -106,6 +106,9 @@ public class PMEnvironment {
 		private boolean isDisabled;
 
 		@JsonView(PMEnvironment.PublicProperty.class)
+		private String server;
+
+		@JsonView(PMEnvironment.PublicProperty.class)
 		protected String webhookUrl;
 
 		public AChannelConfig() {
@@ -208,6 +211,14 @@ public class PMEnvironment {
 			this.channelCode = channelCode;
 		}
 
+		public String getServer() {
+			return server;
+		}
+
+		public void setServer(String server) {
+			this.server = server;
+		}
+
 	}
 
 	public static class PMConfigurationObject extends MapEntry implements Serializable {
@@ -215,6 +226,8 @@ public class PMEnvironment {
 		private static final long serialVersionUID = 2678154770516185408L;
 		String key;
 		String description;
+		String domain;
+		String server;
 		boolean shared;
 
 		public PMConfigurationObject(String key, Object value) {
@@ -248,6 +261,22 @@ public class PMEnvironment {
 
 		public void setShared(boolean shared) {
 			this.shared = shared;
+		}
+
+		public String getDomain() {
+			return domain;
+		}
+
+		public void setDomain(String domain) {
+			this.domain = domain;
+		}
+
+		public String getServer() {
+			return server;
+		}
+
+		public void setServer(String server) {
+			this.server = server;
 		}
 
 	}
@@ -337,9 +366,9 @@ public class PMEnvironment {
 
 		public String getAgentUrl();
 
-		public String getScriptusUrl();
-
 		public String getServiceServer();
+
+		public String getScriptusUrl();
 
 		public String getScriptusSecret();
 
@@ -367,7 +396,6 @@ public class PMEnvironment {
 
 		PMConfigurationObject getAgentHistoryCount();
 
-		PMConfigurationObject isAgentHistoryLazy();
 	}
 
 	public interface PMClientConfig {

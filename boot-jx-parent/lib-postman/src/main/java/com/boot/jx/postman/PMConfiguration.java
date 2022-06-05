@@ -75,6 +75,21 @@ public interface PMConfiguration extends Serializable {
 			return this;
 		}
 
+		public PMConfiguration channels(ChannelConfig channel, String server) {
+			if (ArgUtil.is(channel.getServer())) {
+				if (ArgUtil.is(channel.getServer(), server)) {
+					return this.channels(channel);
+				}
+				return this;
+			} else {
+				ChannelConfig existing = this.channel(channel.getChannelId());
+				if (!ArgUtil.is(existing) || !ArgUtil.is(existing.getServer())) {
+					return this.channels(channel);
+				}
+			}
+			return this;
+		}
+
 		// All A:PI Ckeys
 		public SafeKeyHashMap<ClientApp> clientApiKeys() {
 			if (ArgUtil.isEmpty(clientApiKeys)) {
@@ -145,6 +160,21 @@ public interface PMConfiguration extends Serializable {
 
 		public PMConfiguration setPref(PMConfigurationObject map) {
 			this.prefs().put(map.getKey(), map);
+			return this;
+		}
+
+		public PMConfiguration setPref(PMConfigurationObject map, String server) {
+			if (ArgUtil.is(map.getServer())) {
+				if (ArgUtil.is(map.getServer(), server)) {
+					return this.setPref(map);
+				}
+				return this;
+			} else {
+				PMConfigurationObject existing = this.prefs().get(map.getKey());
+				if (!ArgUtil.is(existing) || !ArgUtil.is(existing.getServer())) {
+					return this.setPref(map);
+				}
+			}
 			return this;
 		}
 

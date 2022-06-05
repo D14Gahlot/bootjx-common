@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.checkerframework.checker.units.qual.A;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -138,10 +137,22 @@ public class ConfigOptionMetaController {
 	@Autowired
 	private ConfigManager configManager;
 
+	@ApiRequest(rules = { ACCESS_RULES.ONLY_DUPERUSER_FOR_MASTER_DOMAIN, ACCESS_RULES.ONLY_DOMAIN_ADMIN })
 	@RequestMapping(value = "/api/config", method = { RequestMethod.POST })
 	public ApiResponse<Map<String, Object>, Object> setConfig(@RequestBody PMConfigurationObject map) {
 		configManager.save(map);
 		return ApiResponse.buildResults(configManager.getSetupConfigs());
+	}
+
+	@ApiRequest(rules = { ACCESS_RULES.ONLY_DUPERUSER_FOR_MASTER_DOMAIN, ACCESS_RULES.ONLY_DOMAIN_ADMIN })
+	@RequestMapping(value = "/api/config", method = { RequestMethod.PUT })
+	public ApiResponse<Map<String, Object>, Object> setConfig(@RequestParam String key, @RequestParam String value,
+			@RequestParam(defaultValue = "false") boolean shared) {
+		PMConfigurationObject map = new PMConfigurationObject();
+		map.setKey(key);
+		map.setValue(value);
+		map.setShared(shared);
+		return setConfig(map);
 	}
 
 	@RequestMapping(value = "/api/config", method = { RequestMethod.GET })
@@ -173,9 +184,9 @@ public class ConfigOptionMetaController {
 
 		String domainServer = pmEnvironment.keyEntry(ConfigConstants.APP_KEY.PROP_SERVICE_SERVER).asString();
 
-		PMConfigurationObject config = pmEnvironment
-				.keyEntry(beta ? "mry.cdn.url.beta" : "mry.cdn.url." + domainServer);
+		PMConfigurationObject config = pmEnvironment.keyEntry(beta ? "mry.cdn.url.beta" : "mry.cdn.url");
 		String oldUrl = config.asString();
+		config.setServer(domainServer);
 
 		if (ArgUtil.is(version) && ArgUtil.is(oldUrl)) {
 			url = cdnBuilder.updateVersion(oldUrl, version);

@@ -33,6 +33,7 @@ public class CommonMongoQB<M extends CommonMongoQB<M, T>, T> implements MongoQue
 	Query query;
 	Update update;
 	Class<T> docClass;
+	private boolean skipUpdateStamp;
 
 	public Query query() {
 		if (this.query == null) {
@@ -101,6 +102,12 @@ public class CommonMongoQB<M extends CommonMongoQB<M, T>, T> implements MongoQue
 		int pageStart = pageNo * pageSize;
 		int pageEnd = pageStart + pageSize;
 		this.query().limit(pageSize).skip(pageStart);
+		return (M) this;
+	}
+
+	@SuppressWarnings("unchecked")
+	public M skipStampUpdate() {
+		this.skipUpdateStamp = true;
 		return (M) this;
 	}
 
@@ -236,7 +243,7 @@ public class CommonMongoQB<M extends CommonMongoQB<M, T>, T> implements MongoQue
 
 		if (isUpdatedTimeStampSupport || isCreatedTimeStampSupport) {
 			TimeStampIndex timeStampIndex = TimeStampIndex.from(updatedStamp);
-			if (isUpdatedTimeStampSupport) {
+			if (isUpdatedTimeStampSupport && !skipUpdateStamp) {
 				this.set("updated.stamp", timeStampIndex.getStamp());
 				this.set("updated.hour", timeStampIndex.getHour());
 				this.set("updated.day", timeStampIndex.getDay());

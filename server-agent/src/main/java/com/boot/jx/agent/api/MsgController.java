@@ -141,13 +141,15 @@ public class MsgController {
 	@ResponseBody
 	@RequestMapping(value = "/api/sessions/message/upload", method = { RequestMethod.POST })
 	public ApiResponse<ChatMessageDTO, Object> uploadSessionFile(@RequestParam String message,
-			@RequestParam(name = "file") MultipartFile file) throws InterruptedException {
+			@RequestParam(required = false) String caption, @RequestParam(name = "file") MultipartFile file)
+			throws InterruptedException {
 		OutboxMessage outboxMessage = JsonUtil.parse(message, OutboxMessage.class);
 
 		CommonFile f = pmFileStoreClient.uploadSessionFile(file, outboxMessage.getSessionId(),
 				outboxMessage.getMessageIdRef());
 
-		outboxMessage.attachment(new Attachment().mediaURL(f.getUrl()).mediaType(f.getFileType()));
+		outboxMessage
+				.attachment(new Attachment().mediaURL(f.getUrl()).mediaType(f.getFileType()).mediaCaption(caption));
 
 		return sendSessionMessage(outboxMessage);
 	}

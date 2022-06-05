@@ -95,6 +95,11 @@ public class ConfigConstants {
 				new ConfigMeta("Agent can initiate chat with new contact", "postman.agent.chat.init.contact")
 						.optionsOnOff().group(GROUP_AGENT)),
 
+		POSTMAN_AGENT_CHAT_CC_FREETEXT(
+				new ConfigMeta("Agent can send FreeText out of Customer Care Window", "postman.agent.chat.freetext.cc")
+						.desc("Message can fail if selected channel does not permit").optionsOnOff()
+						.group(GROUP_AGENT)),
+
 		POSTMAN_AGENT_CHAT_REASSIGNMENT_AUTO(
 				new ConfigMeta("Auto Re-Assign Session", "postman.agent.chat.reassignment.auto").optionsOnOff()
 						.group(GROUP_AGENT)),
@@ -127,10 +132,12 @@ public class ConfigConstants {
 				.defaultValue(0).group(GROUP_AGENT)),
 
 		POSTMAN_AGENT_TAB_ORG(new ConfigMeta("Agent can see Other Teams Chats", "postman.agent.tab.org")
-				.desc("Enables Other tab in Agent Panel").optionsOnOff().group(GROUP_AGENT)),
+				.desc("Enables Org tab in Agent Panel").optionsOnOff().group(GROUP_AGENT)),
 
-		POSTMAN_AGENT_TAB_HISTORY_LAZY(new ConfigMeta("Lazy Load History", "postman.agent.tab.history.lazy")
-				.desc("Loads History Lazily").optionsOnOff().group(GROUP_AGENT).hidden()),
+		POSTMAN_AGENT_TAB_NONAGENT(
+				new ConfigMeta("Agent can see Non-Agent Chats", PROPERTIES.POSTMAN_AGENT_TAB_NONAGENT)
+						.desc("Agents will see Bot and Webhook chats under Org tabs ").optionsOnOff()
+						.group(GROUP_AGENT)),
 
 		POSTMAN_AGENT_TAB_HISTORY_LIMIT(
 				new ConfigMeta("Show Chat Count Limit", "postman.agent.tab.history.limit")

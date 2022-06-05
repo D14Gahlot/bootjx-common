@@ -180,12 +180,12 @@ public class ChatSessionFactory {
 			// Assign Queue
 			if (!chatUtility.inQueue(chatSessionDoc)) {
 				String defaultQueue = inboxMessage.route().getQueueCode();
-				if (!ArgUtil.is(defaultQueue)) {
-					defaultQueue = pmDomainConfig.getDefaultInboundQueue(inboxMessage.contact());
-				}
 				if (ArgUtil.is(defaultQueue)) {
 					chatSessionDocQuery.setQueue(defaultQueue);
 					chatSessionDocQuery.setMode(inboxMessage.route().getSendMode());
+				} else {
+					defaultQueue = pmDomainConfig.getDefaultInboundQueue(inboxMessage.contact());
+					chatSessionDocQuery.setQueue(defaultQueue);
 				}
 			}
 
@@ -204,12 +204,12 @@ public class ChatSessionFactory {
 			if (!chatUtility.inQueue(chatSessionDoc)) {
 
 				String defaultQueue = inboxMessage.route().getQueueCode();
-				if (!ArgUtil.is(defaultQueue)) {
-					defaultQueue = pmDomainConfig.getDefaultInboundQueue(inboxMessage.contact());
-				}
 				if (ArgUtil.is(defaultQueue)) {
 					chatSessionDocQuery.setQueue(defaultQueue);
 					chatSessionDocQuery.setMode(inboxMessage.route().getSendMode());
+				} else {
+					defaultQueue = pmDomainConfig.getDefaultInboundQueue(inboxMessage.contact());
+					chatSessionDocQuery.setQueue(defaultQueue);
 				}
 			}
 
