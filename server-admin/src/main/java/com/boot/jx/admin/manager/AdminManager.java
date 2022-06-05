@@ -66,7 +66,7 @@ public class AdminManager {
 
 		AgentDoc oldAgent = commonMongoTemplate.findByIdString(agent.getId(), AgentDoc.class);
 		if (ArgUtil.is(oldAgent)) {
-			if (!oldAgent.getAgent_code().equals(agent.getAgent_code()))
+			if (!oldAgent.getAgent_code().equalsIgnoreCase(agent.getAgent_code()))
 				ApiResponseUtil.throwException("Agent Code cannot be Modified");
 
 			if (!ArgUtil.is(agent.getAgent_password())) {
