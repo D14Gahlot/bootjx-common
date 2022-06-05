@@ -29,7 +29,7 @@ import com.boot.jx.postman.model.ext.InBoundEvent;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.StringUtils.StringMatcher;
 
-@BotController(name = "AppFaq", code = { "bot_faqs" })
+@BotController(name = "AppFaq", code = { "bot_faq" })
 public class AppFaqBotController extends CommonBotController {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(DemoAlAamalController.class);
@@ -110,7 +110,7 @@ public class AppFaqBotController extends CommonBotController {
 				
 			}
 		}
-			buttons.add(new TmplElement().name("exit").label("Faq Menu"));
+			buttons.add(new TmplElement().name("exit").label("FAQ Menu"));
 		reply(new OutboxMessage().message("Select Category").options("buttons", buttons));
 		next("on_faq_parent_select");
 	}
@@ -157,7 +157,7 @@ public class AppFaqBotController extends CommonBotController {
 				
 			}
 		}
-		buttons.add(new TmplElement().name("exit").label("Faq Menu"));
+		buttons.add(new TmplElement().name("exit").label("FAQ Menu"));
 		reply(new OutboxMessage().message("Select Category").options("buttons", buttons));
 		next("on_faq_child_select");
 	}
@@ -183,7 +183,7 @@ public class AppFaqBotController extends CommonBotController {
 			return;
 	default:
 		List<TmplElement> buttons = new ArrayList<TmplElement>();
-		buttons.add(new TmplElement().name("exit").label("Faq Menu"));
+		buttons.add(new TmplElement().name("exit").label("FAQ Menu"));
 		List<AppFaqDoc>  faqChildValue = getChild(lang,replay_id.toUpperCase());
 		for (AppFaqDoc faq : faqChildValue) {
 			String parentkey = faq.getParent();
