@@ -87,6 +87,8 @@ public class SessionStore extends CommonMongoTemplateAbstract {
 			return false;
 		}
 
+		chatSessionDoc.refreshStamps();
+
 		if (!ArgUtil.isEmptyValue(chatSessionDoc.getLastInComingStamp())
 				&& (chatSessionDoc.getLastResponseStamp() > chatSessionDoc.getLastInComingStamp())) {
 			return !TimeUtils.isExpired(chatSessionDoc.getLastInComingStamp(), pmClientConfig.getChatSessionTimeout());
