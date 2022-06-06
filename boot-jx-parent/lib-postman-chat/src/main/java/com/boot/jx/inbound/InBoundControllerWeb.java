@@ -18,11 +18,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.boot.jx.AppConfig;
 import com.boot.jx.AppContextUtil;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.api.ApiResponseUtil;
+import com.boot.jx.aws.AWSFileStore;
 import com.boot.jx.chat.ChatStatusService;
 import com.boot.jx.connectors.WebConnector;
 import com.boot.jx.dict.ContactType;
@@ -30,13 +32,17 @@ import com.boot.jx.http.ApiRequest;
 import com.boot.jx.http.CommonHttpRequest;
 import com.boot.jx.http.RequestType;
 import com.boot.jx.logger.AuditService;
+import com.boot.jx.model.CommonFile;
+import com.boot.jx.model.CommonFileStream;
 import com.boot.jx.postman.PMAuditEvent;
 import com.boot.jx.postman.PMConfiguration;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PMEnvironment.PMCommonConfig;
+import com.boot.jx.postman.client.PMFileStoreClient;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.dto.ChatMessageDTO;
+import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.MessageBoxEvent;
 import com.boot.jx.postman.model.OutboxMessage;
@@ -48,6 +54,7 @@ import com.boot.jx.stomp.StompTunnelSessionManager;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.JsonUtil;
 import com.boot.utils.UniqueID;
 
 @Controller
@@ -184,14 +191,8 @@ public class InBoundControllerWeb {
 		return ApiResponse.buildResults(msgs);
 	}
 
-	@ApiRequest(session = true)
-	@ResponseBody
-	@RequestMapping(value = "/ext/plugin/inbound/v2/web/callback/{nounce}/{channelId}/{channelKey}",
-			method = { RequestMethod.POST })
-	public ApiResponse<InboxMessage, Object> inboundMessageBoxEvent(@PathVariable(required = false) String nounce,
-			@PathVariable(required = false) String channelId, @PathVariable(required = false) String channelKey,
-			@RequestBody Map<String, Object> data) {
-		MapModel map = MapModel.from(data);
+	private ApiResponse<InboxMessage, Object> inboundMessageBoxEventMethod(String channelId, String channelKey,
+			MapModel map, MultipartFile file) {
 		PMConfiguration config = pmEnvironment.config();
 		ChannelConfig channelConfig = config.channel(channelId);
 		// ConnectorHandler connector = connectorHandlerFactory.get(channelConfig);
@@ -206,7 +207,7 @@ public class InBoundControllerWeb {
 			}
 
 			MessageBoxEvent messageBoxEvent = connector.inboundMessageBoxEvent(channelConfig, map,
-					new MessageBoxEvent());
+					new MessageBoxEvent(), file);
 			if (ArgUtil.is(messageBoxEvent.getInboxMessages())) {
 				InboxMessage sessionMessage = new InboxMessage();
 
@@ -226,10 +227,30 @@ public class InBoundControllerWeb {
 				inBoundStatusService.update(messageBoxEvent.getMessageReports());
 			}
 		} catch (Exception e) {
-			auditService.excep(new PMAuditEvent(PMAuditEvent.Type.INBOUND_ERROR).data(data), LOGGER, e);
+			auditService.excep(new PMAuditEvent(PMAuditEvent.Type.INBOUND_ERROR).data(map.toMap()), LOGGER, e);
 		}
 
 		return ApiResponse.build();
+	}
+
+	@ApiRequest(session = true)
+	@ResponseBody
+	@RequestMapping(value = "/ext/plugin/inbound/v2/web/callback/{nounce}/{channelId}/{channelKey}",
+			method = { RequestMethod.POST })
+	public ApiResponse<InboxMessage, Object> inboundMessageBoxEvent(@PathVariable(required = false) String nounce,
+			@PathVariable(required = false) String channelId, @PathVariable(required = false) String channelKey,
+			@RequestBody Map<String, Object> data) {
+		MapModel map = MapModel.from(data);
+		return inboundMessageBoxEventMethod(channelId, channelKey, map, null);
+	}
+
+	@RequestMapping(value = "/ext/plugin/inbound/v2/web/callback/{nounce}/{channelId}/{channelKey}",
+			method = { RequestMethod.PUT })
+	public ApiResponse<InboxMessage, Object> inboundMediaBoxEvent(@PathVariable(required = false) String nounce,
+			@PathVariable(required = false) String channelId, @PathVariable(required = false) String channelKey,
+			@RequestParam String from, @RequestParam(name = "file") MultipartFile file) throws InterruptedException {
+		MapModel data = MapModel.createInstance().put("from", from);
+		return inboundMessageBoxEventMethod(channelId, channelKey, data, file);
 	}
 
 }
