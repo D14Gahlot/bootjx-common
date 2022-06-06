@@ -187,10 +187,12 @@ public class WebConnector extends DefaultConnector<WebConfigDetails, WebPlugin> 
 
 		CommonFileStream srcFile = new CommonFileStream().from(file);
 
-		CommonFile dstFile = pmFileStoreClient.uploadSessionFile(file, PostManUtil.createContactId(inboxMessage),
-				inboxMessage.getMessageIdExt());
-		inboxMessage.attachment(new Attachment().mediaURL(dstFile.getUrl()).mediaType(dstFile.getFileType())
-				.mediaSrc(srcFile.getUrl()).mediaName(srcFile.getName()).mediaMimeType(srcFile.getContentType()));
+		if (ArgUtil.is(file)) {
+			CommonFile dstFile = pmFileStoreClient.uploadSessionFile(file, PostManUtil.createContactId(inboxMessage),
+					inboxMessage.getMessageIdExt());
+			inboxMessage.attachment(new Attachment().mediaURL(dstFile.getUrl()).mediaType(dstFile.getFileType())
+					.mediaSrc(srcFile.getUrl()).mediaName(srcFile.getName()).mediaMimeType(srcFile.getContentType()));
+		}
 
 		return inboxMessage;
 	}
