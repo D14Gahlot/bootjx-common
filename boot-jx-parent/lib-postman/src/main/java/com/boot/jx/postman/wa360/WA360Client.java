@@ -110,9 +110,9 @@ public class WA360Client {
 
 						if (optipns.containsKey("more_option_title")) {
 							newButtons.add(new TmplElement().label(optipns.getString("more_option_title"))
-									.name(prompt.toString()));
+									.code(prompt.toString()));
 						} else {
-							newButtons.add(new TmplElement().label("More Options").name(prompt.toString()));
+							newButtons.add(new TmplElement().label("More Options").code(prompt.toString()));
 						}
 					}
 					if (optipns.containsKey("list_option_title")) {
@@ -328,7 +328,7 @@ public class WA360Client {
 			}
 
 			Map<String, Object> row = new HashMap<String, Object>();
-			row.put("id", StringUtils.substring(button.getName(), 200));
+			row.put("id", StringUtils.substring(button.getCode(), 200));
 			row.put("title", StringUtils.substring(button.getLabel(), 24));
 			// row.put("description", button.getType());
 			if (ArgUtil.is(button.getDesc())) {
@@ -391,7 +391,7 @@ public class WA360Client {
 		List<Object> rows = new ArrayList<Object>();
 		for (TmplElement button : buttons) {
 			rows.add(MapModel.createInstance().put("type", "reply")
-					.put(OutBoundWrapperPaths.INTERACTIVE_ACTION_REPLY_ID, StringUtils.substring(button.getName(), 256))
+					.put(OutBoundWrapperPaths.INTERACTIVE_ACTION_REPLY_ID, StringUtils.substring(button.getCode(), 256))
 					.put(OutBoundWrapperPaths.INTERACTIVE_ACTION_REPLY_TITLE,
 							StringUtils.substring(button.getLabel(), 20))
 					.toMap());
