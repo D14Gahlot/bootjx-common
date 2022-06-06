@@ -114,4 +114,8 @@ public class TmplElement implements Serializable {
 		this.phone = phone;
 		return this;
 	}
+
+	public TmplElement name(String string) {
+		return this.code(string);
+	}
 }
