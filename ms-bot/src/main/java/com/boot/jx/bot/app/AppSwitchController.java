@@ -62,7 +62,7 @@ public class AppSwitchController extends CommonBotController {
 		} else {
 			List<TmplElement> buttons = new ArrayList<TmplElement>();
 			for (ClientApp appTemp : apps) {
-				buttons.add(new TmplElement().name(appTemp.getQueue()).label(appTemp.getKeyName()));
+				buttons.add(new TmplElement().code(appTemp.getQueue()).label(appTemp.getKeyName()));
 			}
 			reply(new OutboxMessage().message("Select").options("buttons", buttons));
 		}

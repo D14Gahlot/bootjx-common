@@ -82,7 +82,7 @@ public class TmplClient {
 
 		for (Map<String, Object> map : buttonsModel) {
 			MapModel buttonMapModel = MapModel.from(map);
-			buttons.add(new TmplElement().name(buttonMapModel.getString("key")).label(buttonMapModel.getString("label"))
+			buttons.add(new TmplElement().code(buttonMapModel.getString("key")).label(buttonMapModel.getString("label"))
 					.desc(buttonMapModel.getString("desc")).type(buttonMapModel.getString("type"))
 					.url(buttonMapModel.getString("url")).phone(buttonMapModel.getString("phone_number")));
 		}
@@ -90,11 +90,11 @@ public class TmplClient {
 		for (Entry<String, Object> entry : file.getOptions().entrySet()) {
 			if (entry.getKey().indexOf("form-input-") == 0) {
 				String[] params = ArgUtil.parseAsString(entry.getValue()).split("\\|");
-				inputs.add(new TmplElement().name(entry.getKey().replace("form-input-", ""))
+				inputs.add(new TmplElement().code(entry.getKey().replace("form-input-", ""))
 						.label(CollectionUtil.get(params, 0)).type(CollectionUtil.get(params, 1)));
 			} else if (entry.getKey().indexOf("actions-button-") == 0) {
 				String[] params = ArgUtil.parseAsString(entry.getValue()).split("\\|");
-				buttons.add(new TmplElement().name(entry.getKey().replace("actions-button-", ""))
+				buttons.add(new TmplElement().code(entry.getKey().replace("actions-button-", ""))
 						.label(CollectionUtil.get(params, 0)).type(CollectionUtil.get(params, 1)));
 			} else {
 				options.put(entry.getKey(), entry.getValue());

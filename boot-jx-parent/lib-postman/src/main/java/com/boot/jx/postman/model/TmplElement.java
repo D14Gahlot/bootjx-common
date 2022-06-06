@@ -2,6 +2,8 @@ package com.boot.jx.postman.model;
 
 import java.io.Serializable;
 
+import com.boot.jx.swagger.ApiMockModelProperty;
+
 public class TmplElement implements Serializable {
 
 	private static final long serialVersionUID = 8844236002971255681L;
@@ -12,19 +14,35 @@ public class TmplElement implements Serializable {
 		public static final String PHONE_NUMBER = "PHONE_NUMBER";
 	}
 
-	private String name;
+	@ApiMockModelProperty(example = "occupation", value = "key to be used programmatically", required = false)
+	private String code;
+
+	@ApiMockModelProperty(example = "Occupation", value = "Display Text to be used programmatically", required = false)
 	private String label;
+
+	@ApiMockModelProperty(example = "QUICK_REPLY", value = "Display Text",
+			allowableValues = "QUICK_REPLY,URL,PHONE_NUMBER", required = false)
 	private String type;
+
+	@ApiMockModelProperty(example = "What occupation you have", value = "Description of of element", required = false)
 	private String desc;
+
+	@ApiMockModelProperty(example = "http://url", value = "If type is set to URL", required = false)
 	private String url;
+
+	@ApiMockModelProperty(example = "+91 9988776655", value = "If type is set to PHONE_NUMBER", required = false)
 	private String phone;
 
-	public String getName() {
-		return name;
+	public String getCode() {
+		return code;
 	}
 
-	public void setName(String name) {
-		this.name = name;
+	public String getName() {
+		return code;
+	}
+
+	public void setCode(String code) {
+		this.code = code;
 	}
 
 	public String getLabel() {
@@ -43,8 +61,8 @@ public class TmplElement implements Serializable {
 		this.type = type;
 	}
 
-	public TmplElement name(String name) {
-		this.name = name;
+	public TmplElement code(String code) {
+		this.code = code;
 		return this;
 	}
 

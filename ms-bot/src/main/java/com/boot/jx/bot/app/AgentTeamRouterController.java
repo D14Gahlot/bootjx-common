@@ -72,7 +72,7 @@ public class AgentTeamRouterController extends CommonBotController {
 		} else {
 			List<TmplElement> buttons = new ArrayList<TmplElement>();
 			for (DepartmentDoc team : teams) {
-				buttons.add(new TmplElement().name(team.getDept_code()).label(team.getDept_name()));
+				buttons.add(new TmplElement().code(team.getDept_code()).label(team.getDept_name()));
 			}
 			reply(new OutboxMessage().message("Select team").options("buttons", buttons));
 		}

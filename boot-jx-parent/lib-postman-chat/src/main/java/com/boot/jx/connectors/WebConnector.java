@@ -151,13 +151,13 @@ public class WebConnector extends DefaultConnector<WebConfigDetails, WebPlugin> 
 
 	List<TmplElement> inputs = new ArrayList<TmplElement>();
 	if (ArgUtil.isEmpty(chatContactDoc.getName())) {
-	    inputs.add(new TmplElement().name("name").label("Name").type("TEXT"));
+	    inputs.add(new TmplElement().code("name").label("Name").type("TEXT"));
 	    return (OutboxMessage) inboxMessage.replyMessage("Please fill below inputs to continue").option("inputs",
 		    inputs);
 	}
 
 	if (ArgUtil.isEmpty(chatContactDoc.getEmail())) {
-	    inputs.add(new TmplElement().name("email").label("Email").type("EMAIL"));
+	    inputs.add(new TmplElement().code("email").label("Email").type("EMAIL"));
 	    return (OutboxMessage) inboxMessage.replyMessage("Please fill below inputs to continue").option("inputs",
 		    inputs);
 	}
