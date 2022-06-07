@@ -105,7 +105,7 @@ public class InstagramClient implements MessageClient {
 				MapModel quickreplies = MapModel.createInstance();
 				for (TmplElement button : buttons) {
 					quickreplies.add(MapModel.createInstance().put("title", button.getLabel())
-							.put("content_type", "text").put("payload", button.getName()).toMap());
+							.put("content_type", "text").put("payload", button.getCode()).toMap());
 				}
 				messageModel.put("quick_replies", quickreplies.list());
 				reqMessage.put("message", messageModel.toMap());
@@ -136,7 +136,7 @@ public class InstagramClient implements MessageClient {
 								.put("type", "web_url").put("url", button.getUrl()).toMap());
 					} else {
 						elementButtons.add(MapModel.createInstance().put("title", button.getLabel())
-								.put("type", "postback").put("payload", button.getName()).toMap());
+								.put("type", "postback").put("payload", button.getCode()).toMap());
 					}
 				}
 				if (elementButtons.list().size() > 0) {

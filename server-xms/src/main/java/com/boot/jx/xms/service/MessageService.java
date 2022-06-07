@@ -137,6 +137,12 @@ public class MessageService {
 							.mediaCaption(message.getAudio().getCaption()).mediaType(FileType.AUDIO.toString()));
 		}
 
+		if (ArgUtil.is(message.getOptions())) {
+			if (ArgUtil.is(message.getOptions().buttons)) {
+				outboxMessage.option("buttons", message.getOptions().buttons);
+			}
+		}
+
 		ClientApp clientApp = XmsVendorConfigurer.getClientApp();
 
 		outboxMessage.contact().type(channel.getContactType());

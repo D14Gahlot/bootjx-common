@@ -68,6 +68,7 @@ public class ChatSessionDTO implements Serializable {
 	private Map<String, ChatMessageDTO> msg;
 
 	private Map<String, Long> read;
+	private Map<String, Long> stamps;
 
 	private Map<String, Object> feedback;
 
@@ -417,5 +418,13 @@ public class ChatSessionDTO implements Serializable {
 
 	public void setRoutingId(String routingId) {
 		this.routingId = routingId;
+	}
+
+	public Map<String, Long> getStamps() {
+		return stamps;
+	}
+
+	public void setStamps(Map<String, Long> stamps) {
+		this.stamps = stamps;
 	}
 }

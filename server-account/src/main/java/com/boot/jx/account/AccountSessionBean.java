@@ -9,22 +9,15 @@ import org.springframework.stereotype.Component;
 import com.boot.jx.account.doc.BusinessUserDoc;
 import com.boot.jx.common.config.AppCommonAuthFilter.AppCommonAuthUser;
 import com.boot.jx.logger.AuditDetailProvider;
+import com.boot.jx.postman.PMConstants;
 import com.boot.utils.ArgUtil;
 
 @Component
 @Scope(value = "session", proxyMode = ScopedProxyMode.TARGET_CLASS)
-public class AccountSessionBean extends AppCommonAuthUser implements AuditDetailProvider, Serializable {
+public class AccountSessionBean extends AppCommonAuthUser implements Serializable {
 
 	private static final long serialVersionUID = 3090820592497487481L;
 	private BusinessUserDoc account;
-
-	@Override
-	public String getAuditUser() {
-		if (ArgUtil.is(this.account)) {
-			return this.account.getContact().getEmail();
-		}
-		return null;
-	}
 
 	public BusinessUserDoc domainUser() {
 		return account;
@@ -32,6 +25,14 @@ public class AccountSessionBean extends AppCommonAuthUser implements AuditDetail
 
 	public void domainUser(BusinessUserDoc account) {
 		this.account = account;
+	}
+
+	@Override
+	public String getAuthUser() {
+		if (ArgUtil.is(this.account)) {
+			return this.account.getContact().getEmail();
+		}
+		return PMConstants.DEFAULT.NO_USER;
 	}
 
 }

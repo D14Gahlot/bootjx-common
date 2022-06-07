@@ -12,6 +12,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetails;
 import org.springframework.security.web.authentication.logout.LogoutHandler;
 import org.springframework.stereotype.Component;
+import org.springframework.web.context.request.RequestContextHolder;
 
 import com.boot.jx.AppConfig;
 import com.boot.jx.AppContextUtil;
@@ -19,18 +20,20 @@ import com.boot.jx.account.doc.BusinessUserDoc;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.common.config.PMCommonConfigImpl;
 import com.boot.jx.http.CommonHttpRequest;
+import com.boot.jx.logger.AuditDetailProvider;
 import com.boot.jx.postman.PMConstants;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.client.PostManClient;
 import com.boot.jx.postman.model.Email;
 import com.boot.jx.postman.model.MessageBox;
+import com.boot.jx.rest.AppRequestInterfaces.AppAuthUser;
 import com.boot.jx.rest.RestService;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
 import com.boot.utils.JsonUtil;
 
 @Component
-public class AccountAuthService implements LogoutHandler {
+public class AccountAuthService implements LogoutHandler, AuditDetailProvider {
 
 	/*
 	 * Below APIs are
@@ -169,6 +172,21 @@ public class AccountAuthService implements LogoutHandler {
 			updateLogout(ArgUtil.parseAsString(authentication.getPrincipal()));
 		}
 		commonHttpRequest.instance(request, response, appConfig).setCookie("ACCTSESSIONID", "ACCTSESSIONID", 0);
+	}
+
+	@Override
+	public AppAuthUser getAuthUser() {
+		return this.sessionBean;
+	}
+
+	@Override
+	public String getAuditUser() {
+		if (RequestContextHolder.getRequestAttributes() != null) {
+			if (ArgUtil.is(getAuthUser())) {
+				return getAuthUser().getAuthUser();
+			}
+		}
+		return PMConstants.DEFAULT.NO_USER;
 	}
 
 }

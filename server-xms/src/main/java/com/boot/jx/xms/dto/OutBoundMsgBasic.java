@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.boot.jx.model.CommonTemplateMeta;
 import com.boot.jx.postman.model.ext.CommonMsgLocation;
+import com.boot.jx.postman.model.ext.CommonMsgOptions;
 import com.boot.jx.postman.model.ext.CommonMsgText.OutBoundMsgText;
 import com.boot.jx.swagger.ApiMockModelProperty;
 import com.boot.model.UtilityModels.JsonIgnoreUnknown;
@@ -57,6 +58,9 @@ public class OutBoundMsgBasic implements Serializable, JsonIgnoreUnknown {
 
 		@ApiMockModelProperty(required = false)
 		public CommonTemplateMeta template;
+
+		@ApiMockModelProperty(required = false)
+		public CommonMsgOptions options;
 
 		public OutBoundMsgText getText() {
 			return text;
@@ -120,6 +124,14 @@ public class OutBoundMsgBasic implements Serializable, JsonIgnoreUnknown {
 
 		public void setTemplate(CommonTemplateMeta template) {
 			this.template = template;
+		}
+
+		public CommonMsgOptions getOptions() {
+			return options;
+		}
+
+		public void setOptions(CommonMsgOptions options) {
+			this.options = options;
 		}
 	}
 

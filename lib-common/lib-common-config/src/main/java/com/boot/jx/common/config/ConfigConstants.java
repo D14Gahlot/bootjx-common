@@ -95,6 +95,11 @@ public class ConfigConstants {
 				new ConfigMeta("Agent can initiate chat with new contact", "postman.agent.chat.init.contact")
 						.optionsOnOff().group(GROUP_AGENT)),
 
+		POSTMAN_AGENT_CHAT_CC_FREETEXT(
+				new ConfigMeta("Agent can send FreeText out of Customer Care Window", "postman.agent.chat.freetext.cc")
+						.desc("Message can fail if selected channel does not permit").optionsOnOff()
+						.group(GROUP_AGENT)),
+
 		POSTMAN_AGENT_CHAT_REASSIGNMENT_AUTO(
 				new ConfigMeta("Auto Re-Assign Session", "postman.agent.chat.reassignment.auto").optionsOnOff()
 						.group(GROUP_AGENT)),

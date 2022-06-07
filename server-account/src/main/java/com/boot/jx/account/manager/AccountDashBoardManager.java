@@ -366,7 +366,7 @@ public class AccountDashBoardManager {
 	
 	public List<WabaSummaryDocDto> wabaSummary(long timestamp) {
 		String tnt = AppContextUtil.getTenant();
-		List<String> lst = getListOfContactType();
+		//List<String> lst = getListOfContactType();
 		Date dateTi = new Date(timestamp);
 		String monthYear = new SimpleDateFormat(DateUtil.MMM_YYYY_FORMAT).format(dateTi);
 		Calendar cal = Calendar.getInstance();
@@ -384,6 +384,7 @@ public class AccountDashBoardManager {
 			
 			List<WABAConversation> wabaDocLst = mongoTemplate.find(query, WABAConversation.class, "TP_WABA_CONVERSATIONS");
 			for(WABAConversation waba:wabaDocLst) {
+				System.out.println("JSON :"+JsonUtil.toJson(waba));
 				WabaSummaryDocDto dto = new WabaSummaryDocDto();
 				String yyyyMMdd = DateUtil.foramtTimeStampDateAsString(waba.getCreated().getStamp(),
 						DateUtil.YYYYMMDD_DATE_FORMAT);

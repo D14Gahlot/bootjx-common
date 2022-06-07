@@ -240,4 +240,15 @@ public class PostManUtil {
 		return false;
 	}
 
+	public static boolean IS_MULTI_THREAD(String channelType) {
+		if (PMConstants.CHANNEL_TYPE.EMAIL.equals(channelType)) {
+			return true;
+		}
+		return false;
+	}
+
+	public static boolean IS_SINGLE_THREAD(String channelType) {
+		return !IS_MULTI_THREAD(channelType);
+	}
+
 }

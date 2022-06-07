@@ -28,6 +28,7 @@ public class CommonFileStream extends CommonFileAbstract<CommonFileStream> {
 	private static Logger LOGGER = LoggerService.getLogger(CommonFileStream.class);
 
 	private DataSource dataSource;
+	private MultipartFile multipartFile;
 
 	@Override
 	public MultipartFile toMultipartFile(InputStream inputStream) throws IOException, FileNotFoundException {
@@ -44,7 +45,7 @@ public class CommonFileStream extends CommonFileAbstract<CommonFileStream> {
 
 		UploadedMultipartFile multipartFile = new UploadedMultipartFile(file, file.length(), mimeType, "formParameter",
 				this.getName());
-		
+
 		return multipartFile;
 	}
 
@@ -52,6 +53,8 @@ public class CommonFileStream extends CommonFileAbstract<CommonFileStream> {
 	public InputStream toInputStream() throws IOException {
 		if (ArgUtil.is(dataSource)) {
 			return dataSource.getInputStream();
+		} else if (ArgUtil.is(multipartFile)) {
+			return multipartFile.getInputStream();
 		} else if (ArgUtil.is(this.url)) {
 			URL url = new URL(this.url);
 			URLConnection connection = url.openConnection();
@@ -79,6 +82,15 @@ public class CommonFileStream extends CommonFileAbstract<CommonFileStream> {
 			FileFormat format = FileFormat.from(dataSource.getContentType());
 			this.dataSource = dataSource;
 			this.fileType(format.getFileType()).format(format).name(dataSource.getName());
+		}
+		return this;
+	}
+
+	public CommonFileStream from(MultipartFile multipartFile) {
+		if (ArgUtil.is(multipartFile)) {
+			FileFormat format = FileFormat.from(multipartFile.getContentType());
+			this.multipartFile = multipartFile;
+			this.fileType(format.getFileType()).format(format).name(multipartFile.getName());
 		}
 		return this;
 	}

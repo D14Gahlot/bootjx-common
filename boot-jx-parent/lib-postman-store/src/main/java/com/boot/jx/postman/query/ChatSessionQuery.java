@@ -154,6 +154,7 @@ public class ChatSessionQuery extends DocQueryBuilder<ChatSessionDoc> {
 		long now = System.currentTimeMillis();
 		this.doc.read().put(key, now);
 		this.set("read." + key, now);
+		this.skipStampUpdate();
 		return this;
 	}
 

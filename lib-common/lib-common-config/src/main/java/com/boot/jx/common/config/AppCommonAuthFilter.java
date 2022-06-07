@@ -79,6 +79,7 @@ public class AppCommonAuthFilter implements AppAuthFilter {
 				this.domain.add(newDomain);
 			}
 		}
+
 	}
 
 	@Autowired(required = false)
@@ -90,12 +91,12 @@ public class AppCommonAuthFilter implements AppAuthFilter {
 			if (!ArgUtil.is(appCommonAuthUser)) {
 				return false;
 			}
-			return appCommonAuthUser.getRole().contains(PMConstants.USER_ROLE.DUPER_USER);
+			return appCommonAuthUser.role().contains(PMConstants.USER_ROLE.DUPER_USER);
 		} else if (apiRequest.getRules().contains(ACCESS_RULES.ONLY_DUPERUSER_FOR_MASTER_DOMAIN)
 				&& Tenants.isDefault(AppContextUtil.getTenant())) {
-			return appCommonAuthUser.getRole().contains(PMConstants.USER_ROLE.DUPER_USER);
+			return appCommonAuthUser.role().contains(PMConstants.USER_ROLE.DUPER_USER);
 		} else if (apiRequest.getRules().contains(ACCESS_RULES.ONLY_DOMAIN_ADMIN)) {
-			return appCommonAuthUser.getRole().contains(PMConstants.USER_ROLE.ADMIN);
+			return appCommonAuthUser.role().contains(PMConstants.USER_ROLE.ADMIN);
 		} else
 			return true;
 	}

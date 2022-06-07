@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 import com.boot.jx.logger.AuditDetailProvider;
 import com.boot.jx.postman.PMEnvironment.PMClientConfig;
 import com.boot.jx.postman.store.MessageContext;
+import com.boot.jx.rest.AppRequestInterfaces.AppAuthUser;
 import com.boot.utils.ArgUtil;
 
 @Component
@@ -28,6 +29,11 @@ public class BotSessionBean implements AuditDetailProvider, Serializable {
 			return user;
 		}
 		return pmClientConfig.getDefaultSender();
+	}
+
+	@Override
+	public AppAuthUser getAuthUser() {
+		return null;
 	}
 
 }

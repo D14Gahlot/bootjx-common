@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 
 import com.boot.jx.logger.AuditDetailProvider;
 import com.boot.jx.postman.ClientApp;
+import com.boot.jx.rest.AppRequestInterfaces.AppAuthUser;
 import com.boot.jx.swagger.MockParamBuilder;
 import com.boot.jx.swagger.MockParamBuilder.MockParam;
 import com.boot.utils.ArgUtil;
@@ -70,6 +71,11 @@ public class XmsSecurityConfig implements AuditDetailProvider {
 		if (ArgUtil.is(x)) {
 			return x.getKeyName();
 		}
+		return null;
+	}
+
+	@Override
+	public AppAuthUser getAuthUser() {
 		return null;
 	}
 

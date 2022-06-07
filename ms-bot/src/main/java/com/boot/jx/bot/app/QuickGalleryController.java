@@ -53,10 +53,10 @@ public class QuickGalleryController extends CommonBotController {
 
 	private <T extends QuickGalleryItem> void showGalleryMenu(List<T> items) {
 		List<TmplElement> buttons = new ArrayList<TmplElement>();
-		buttons.add(new TmplElement().name("*").label("^Exit"));
-		buttons.add(new TmplElement().name("#").label("#TalkToAgent"));
+		buttons.add(new TmplElement().code("*").label("^Exit"));
+		buttons.add(new TmplElement().code("#").label("#TalkToAgent"));
 		for (T item : items) {
-			buttons.add(new TmplElement().name(item.getCategory()).label(item.getCategory()));
+			buttons.add(new TmplElement().code(item.getCategory()).label(item.getCategory()));
 		}
 		reply(new OutboxMessage().message("Select Category").options("buttons", buttons));
 		next("on_category_select");
@@ -76,10 +76,10 @@ public class QuickGalleryController extends CommonBotController {
 		context().session().put("bot_quick_gallery_last_category", category);
 		List<QuickGalleryItem> items = commonMongoTemplate.findByCategory(category, getItemClass());
 		List<TmplElement> buttons = new ArrayList<TmplElement>();
-		buttons.add(new TmplElement().name("*").label("^MainMenu"));
-		buttons.add(new TmplElement().name("#").label("#TalkToAgent"));
+		buttons.add(new TmplElement().code("*").label("^MainMenu"));
+		buttons.add(new TmplElement().code("#").label("#TalkToAgent"));
 		for (QuickGalleryItem item : items) {
-			buttons.add(new TmplElement().name(ArgUtil.nonEmpty(item.getCode(), item.getId())).label(item.getTitle()));
+			buttons.add(new TmplElement().code(ArgUtil.nonEmpty(item.getCode(), item.getId())).label(item.getTitle()));
 		}
 		reply(new OutboxMessage().message("Please Select").options("buttons", buttons));
 		next("on_item_select");
