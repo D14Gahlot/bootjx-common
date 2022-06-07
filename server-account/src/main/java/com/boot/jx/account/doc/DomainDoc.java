@@ -4,6 +4,7 @@ import java.io.Serializable;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.TypeAlias;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import com.boot.jx.model.AuditCreateEntity;
@@ -23,6 +24,10 @@ public class DomainDoc implements IDocument, AuditCreateEntity, Serializable, Co
 
 	@ValidAlphaNum
 	private String domain;
+
+	@Indexed(sparse = true)
+	private String domainAlias;
+
 	private String server;
 
 	private String primaryOwner;
@@ -132,5 +137,13 @@ public class DomainDoc implements IDocument, AuditCreateEntity, Serializable, Co
 
 	public void setServer(String server) {
 		this.server = server;
+	}
+
+	public String getDomainAlias() {
+		return domainAlias;
+	}
+
+	public void setDomainAlias(String domainAlias) {
+		this.domainAlias = domainAlias;
 	}
 }
