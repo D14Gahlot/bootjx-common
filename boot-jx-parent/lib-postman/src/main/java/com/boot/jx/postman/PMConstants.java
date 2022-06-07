@@ -250,6 +250,12 @@ public class PMConstants {
 		public static final String POSTMAN_AGENT_TAB_NONAGENT = "postman.agent.tab.nonagent";
 	}
 
+	public static class ParamKeys {
+		public static final String X_API_ID = "x-api-id";
+		public static final String X_API_KEY = "x-api-key";
+
+	}
+
 	public static final String COLLECTION_NAME = "MESSAGE_";
 	public static final String CHAT_SESSION = "CHAT_SESSION";
 

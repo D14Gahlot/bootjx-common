@@ -12,6 +12,7 @@ import com.boot.jx.http.CommonHttpRequest;
 import com.boot.jx.http.CommonHttpRequest.ApiRequestDetail;
 import com.boot.jx.postman.ClientApp;
 import com.boot.jx.postman.PMConfiguration.PMConfigurationModel;
+import com.boot.jx.postman.PMConstants.ParamKeys;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PMEnvironment.PMCommonConfig;
 import com.boot.jx.scope.tnt.TenantAuthContext.TenantAuthFilter;
@@ -64,8 +65,8 @@ public class XmsVendorConfigurer implements TenantAuthFilter {
 			return false;
 		}
 
-		String apiKey = req.get(XmsConstants.X_API_KEY);
-		String apiId = req.get(XmsConstants.X_API_ID);
+		String apiKey = req.get(ParamKeys.X_API_KEY);
+		String apiId = req.get(ParamKeys.X_API_ID);
 
 		// For Swagger Handling
 		if (!ArgUtil.is(apiKey)) {
@@ -79,7 +80,7 @@ public class XmsVendorConfigurer implements TenantAuthFilter {
 		}
 
 		if (!ArgUtil.is(apiKey)) {
-			String message = "Missing " + XmsConstants.X_API_KEY;
+			String message = "Missing " + ParamKeys.X_API_KEY;
 			ApiResponseUtil.addError(message);
 			return false;
 		}
@@ -100,7 +101,7 @@ public class XmsVendorConfigurer implements TenantAuthFilter {
 				config = pmEnvironment.local();
 			}
 			if (!ArgUtil.is(apiKeyConfig)) {
-				String message = "Invalid " + XmsConstants.X_API_KEY;
+				String message = "Invalid " + ParamKeys.X_API_KEY;
 				ApiResponseUtil.addError(message);
 				return false;
 			}
