@@ -388,7 +388,13 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 	private void sendEventWebhook(InBoundEvent event, ClientApp defaultClient) {
 		LOGGER.debug("Forwarding Session Routing Event to Xternal Service ");
 		try {
-			if (ArgUtil.is(defaultClient.getWebhook())) {
+			APP_TYPE appType = APP_TYPE.from(defaultClient.getAppType());
+
+			String webhookUrl = APP_TYPE.APP_SCRIPT.equals(appType)
+					? (pmCommonConfig.getScriptusUrl() + PATH.APP_SCRIPT_FRWRD)
+					: defaultClient.getWebhook();
+
+			if (ArgUtil.is(webhookUrl)) {
 				InBoundContact contact = InBoundContact.from(event.contact());
 
 				InBoundWrapper wrap = new InBoundWrapper();
@@ -397,8 +403,7 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 						.appId(defaultClient.getId());
 				wrap.contacts = CollectionUtil.asList(contact);
 				wrap.events = CollectionUtil.asList(event);
-				restService.ajax(defaultClient.getWebhook()).cookie(ParamKeys.X_API_ID, defaultClient.getId())
-						.post(wrap).asNone();
+				restService.ajax(webhookUrl).cookie(ParamKeys.X_API_ID, defaultClient.getId()).post(wrap).asNone();
 			}
 		} catch (Exception e) {
 			logManager.error(event, e);
