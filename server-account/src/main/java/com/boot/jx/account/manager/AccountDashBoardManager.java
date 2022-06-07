@@ -247,9 +247,10 @@ public class AccountDashBoardManager {
 					dto.setDomain(tnt);
 					String id = getSummaryId(dto);
 					dto.setId(id);
-					
 					//LOGGER.info("datewaise data :" + JsonUtil.toJson(dto));
-					lstSummDto.add(dto);
+					if(ArgUtil.is(dto.getId())){
+						lstSummDto.add(dto);
+					}
 				}
 
 			}
