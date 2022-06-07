@@ -22,6 +22,7 @@ public class TenantClientResolver extends TenantResolver {
 
 	private static final String NODOMAIN = "nodomain";
 	public static final Map<String, String> tntMapping = new HashMap<String, String>();
+	public static final Map<String, String> dbMapping = new HashMap<String, String>();
 	public static final Pattern pattern = Pattern.compile("^(.+?)-(.+?)-(.+?)-(.+?)-(.+?)$");
 
 	@Autowired
@@ -96,7 +97,14 @@ public class TenantClientResolver extends TenantResolver {
 		tntMapping.put("ww", "app");
 		tntMapping.put("w", "app");
 		tntMapping.put("local", "local");
-		tntMapping.put("dhofartest", "dhofar");
+		// tntMapping.put("dhofartest", "dhofar");
 		tntMapping.put("a9db-2405-201-400f-de31-4554-9ae6-932b-8d3e", "pranjal");
+		// DB Mapping
+		dbMapping.put("dhofartest", "dhofar");
+	}
+
+	@Override
+	public String getDBName(String tnt) {
+		return dbMapping.getOrDefault(tnt, tnt);
 	}
 }

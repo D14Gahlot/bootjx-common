@@ -2,6 +2,7 @@ package com.boot.jx.mongo;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.mongodb.MongoDbFactory;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -12,6 +13,7 @@ import com.boot.jx.AppContextUtil;
 import com.boot.jx.scope.tnt.TenantScoped;
 import com.boot.jx.scope.tnt.TenantValue;
 import com.boot.jx.scope.tnt.Tenants;
+import com.boot.jx.scope.tnt.Tenants.TenantResolver;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.StringUtils;
 import com.mongodb.MongoClient;
@@ -41,6 +43,9 @@ public class CommonMongoSource {
 	@TenantValue("${spring.data.mongodb.password}")
 	String dataSourcePassword;
 
+	@Autowired(required = false)
+	TenantResolver tenantResolver;
+
 	public String getDataSourceUrl() {
 		return dataSourceUrl;
 	}
@@ -62,12 +67,12 @@ public class CommonMongoSource {
 
 	public MongoDbFactory getMongoDbFactory(String dataSourceUrl) {
 		String tnt = AppContextUtil.getTenant();
+		String dbtnt = ArgUtil.is(tenantResolver) ? tenantResolver.getDBName(tnt) : tnt;
 		MongoClientURI mongoClientURI = new MongoClientURI(dataSourceUrl);
 		String dataBaseName = (!ArgUtil.areEqual(StringUtils.trim(dataSourceUrl), StringUtils.trim(globalDataSourceUrl))
-				|| Tenants.isDefault(tnt)) ? mongoClientURI.getDatabase() : (globalDBProfix + "_" + tnt);
-		LOGGER.info("MONGODB: {}:{}", dataBaseName, Tenants.isDefault(tnt));
+				|| Tenants.isDefault(tnt)) ? mongoClientURI.getDatabase() : (globalDBProfix + "_" + dbtnt);
+		LOGGER.info("MONGODB: {}:{}:{}", dataBaseName, Tenants.isDefault(tnt), dbtnt);
 		return new SimpleMongoDbFactory(new MongoClient(mongoClientURI), dataBaseName);
-
 	}
 
 	public MongoDbFactory getMongoDbFactory() {

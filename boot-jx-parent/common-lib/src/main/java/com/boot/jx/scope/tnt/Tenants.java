@@ -74,6 +74,10 @@ public class Tenants {
 			return StringUtils.toLowerCase(tnt);
 		}
 
+		public String getDBName(String tnt) {
+			return StringUtils.toLowerCase(tnt);
+		}
+
 		public boolean isValid() {
 			return true;
 		}
