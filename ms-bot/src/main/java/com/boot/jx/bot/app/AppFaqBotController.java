@@ -82,10 +82,10 @@ public class AppFaqBotController extends CommonBotController {
 			onSessionRoute(null);
 			return;
 		case "m":
-			onSessionRoute(null);
+			routeSession("jazeera");
 			return;		
 		case "#":
-			//assignToDefaultAgent();
+			assignToDefaultAgent();
 			reply(new OutboxMessage().template("ja_cs_to_contact"));
 			return;
 	default:		
@@ -126,10 +126,10 @@ public class AppFaqBotController extends CommonBotController {
 			onSessionRoute(null);
 			return;
 		case "m":
-			onSessionRoute(null);
+			routeSession("jazeera");
 			return;		
 		case "#":
-			//assignToDefaultAgent();
+			assignToDefaultAgent();
 			reply(new OutboxMessage().template("ja_cs_to_contact"));
 			return;
 	default:		
@@ -175,10 +175,10 @@ public class AppFaqBotController extends CommonBotController {
 			onSessionRoute(null);
 			return;
 		case "m":
-			onSessionRoute(null);
+			routeSession("jazeera");
 			return;		
 		case "#":
-			//assignToDefaultAgent();
+			assignToDefaultAgent();
 			reply(new OutboxMessage().template("ja_cs_to_contact"));
 			return;
 	default:
