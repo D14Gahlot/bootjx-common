@@ -165,6 +165,16 @@ public class ClientAppConfigConstants {
 								new ConfigOption(MESSAGE_SENDER_TYPE.SYSTEM).label("System"))
 
 				});
+		
+		
+		APP_CONFIGS.put(APP_TYPE.FAQ,
+				new ConfigMeta[] { new ConfigMeta().inputType(INPUT_TYPE.MESSAGE, MESSAGE_TYPE.INFO).title("Faq")
+						.desc("Use this app  to tranfer from FAQ bot to Bot Builder Menu"//
+						).group("About App"),
+						new ConfigMeta().title("Bot Builder Template").path("props.template").group("TEMPLATES")
+								.optionsSource("getx:/api/tmpl/hsm").optionsKey("code").optionsLabel("code"),
+			
+				});
 	}
 
 }
