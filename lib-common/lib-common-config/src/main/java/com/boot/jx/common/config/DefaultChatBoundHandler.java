@@ -19,6 +19,7 @@ import com.boot.jx.postman.PMConstants.APP_TYPE;
 import com.boot.jx.postman.PMConstants.CHAT_MODE;
 import com.boot.jx.postman.PMConstants.MESSAGE_FORMAT_TYPE;
 import com.boot.jx.postman.PMConstants.PROPERTIES;
+import com.boot.jx.postman.PMConstants.ParamKeys;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PMEnvironment.PMCommonConfig;
 import com.boot.jx.postman.PMEnvironment.PMConfigurationObject;
@@ -249,10 +250,9 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 		wrap.meta = new InBoundMeta().domain(AppContextUtil.getTenant())
 				.server(pmEnvironment.keyEntry(ConfigConstants.APP_KEY.PROP_SERVICE_SERVER).asString())
 				.appId(clientAppId);
-
 		wrap.contacts = CollectionUtil.asList(contact);
 		wrap.messages = CollectionUtil.asList(msg);
-		restService.ajax(forwardUrl).post(wrap).asNone();
+		restService.ajax(forwardUrl).cookie(ParamKeys.X_API_ID, clientAppId).post(wrap).asNone();
 	}
 
 	@Override
@@ -397,7 +397,8 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 						.appId(defaultClient.getId());
 				wrap.contacts = CollectionUtil.asList(contact);
 				wrap.events = CollectionUtil.asList(event);
-				restService.ajax(defaultClient.getWebhook()).post(wrap).asNone();
+				restService.ajax(defaultClient.getWebhook()).cookie(ParamKeys.X_API_ID, defaultClient.getId())
+						.post(wrap).asNone();
 			}
 		} catch (Exception e) {
 			logManager.error(event, e);

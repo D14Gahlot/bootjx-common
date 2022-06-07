@@ -8,6 +8,7 @@ import java.lang.annotation.Target;
 import org.springframework.core.annotation.AliasFor;
 
 import com.boot.jx.http.ApiRequest;
+import com.boot.jx.postman.PMConstants.ParamKeys;
 import com.boot.jx.swagger.ApiMockParam;
 import com.boot.jx.swagger.ApiMockParams;
 import com.boot.jx.swagger.MockParamBuilder.MockParamType;
@@ -26,14 +27,11 @@ public class XmsConstants {
 			+ "* to fetch all session messages.\n"
 			+ "A session usually starts with first messages and stays active for 24 hours by default.";
 
-	public static final String X_API_KEY = "x-api-key";
-	public static final String X_API_ID = "x-api-id";
-
 	@Target({ ElementType.TYPE, ElementType.METHOD })
 	@Retention(RetentionPolicy.RUNTIME)
 	@ApiRequest(authenticateTenant = true)
-	@ApiMockParams({ @ApiMockParam(name = X_API_KEY, value = "API Key", paramType = MockParamType.HEADER),
-			@ApiMockParam(name = X_API_ID, value = "API Id", paramType = MockParamType.HEADER) })
+	@ApiMockParams({ @ApiMockParam(name = ParamKeys.X_API_KEY, value = "API Key", paramType = MockParamType.HEADER),
+			@ApiMockParam(name = ParamKeys.X_API_ID, value = "API Id", paramType = MockParamType.HEADER) })
 	@Api(authorizations = @Authorization("X_API_KEY"))
 	public @interface XMSClientAuth {
 //	@AliasFor(annotation = ApiOperation.class, attribute = "value")

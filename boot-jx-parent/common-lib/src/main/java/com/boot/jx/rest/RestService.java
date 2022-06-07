@@ -242,6 +242,11 @@ public class RestService {
 			return this;
 		}
 
+		public Ajax cookie(String cooKey, String cooValue) {
+			cookies.add(new Cookie(cooKey, cooValue));
+			return this;
+		}
+
 		public Ajax cookie(Cookie... cookieList) {
 			if (cookieList != null) {
 				for (Cookie cookie : cookieList) {
@@ -368,7 +373,7 @@ public class RestService {
 		public <T> Ajax postJson(T body) {
 			return this.header("content-type", "application/json").post(body);
 		}
-		
+
 		public <T> Ajax putJson(T body) {
 			return this.header("content-type", "application/json").put(body);
 		}
