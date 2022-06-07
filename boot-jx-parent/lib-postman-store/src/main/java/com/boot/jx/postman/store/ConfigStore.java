@@ -30,10 +30,27 @@ public class ConfigStore extends CommonMongoTemplateAbstract {
 		log(prefsConfigDoc, "updated");
 	}
 
+	public void saveChannelConfig(ChannelConfigDoc configDoc, String action) {
+		if ("disable".equalsIgnoreCase(action)) {
+			configDoc.disabled(true);
+		} else if ("enable".equalsIgnoreCase(action)) {
+			configDoc.disabled(false);
+		} else if ("sandbox_enable".equalsIgnoreCase(action)) {
+			configDoc.setSandbox(true);
+		} else if ("sandbox_disable".equalsIgnoreCase(action)) {
+			configDoc.setSandbox(false);
+		} else if ("shared_enable".equalsIgnoreCase(action)) {
+			configDoc.setShared(true);
+		} else if ("shared_disable".equalsIgnoreCase(action)) {
+			configDoc.setShared(false);
+		}
+		configDoc.getChannelKey(); // Populate Keys of not exists
+		save(configDoc);
+		log(configDoc, "updated", action);
+	}
+
 	public void saveChannelConfig(ChannelConfigDoc doc) {
-		doc.getChannelKey(); // Populate Keys of not exists
-		save(doc);
-		log(doc, "updated");
+		saveChannelConfig(doc, null);
 	}
 
 	public void saveClientKeyConfig(ClientAppConfigDoc clientApiKey) {

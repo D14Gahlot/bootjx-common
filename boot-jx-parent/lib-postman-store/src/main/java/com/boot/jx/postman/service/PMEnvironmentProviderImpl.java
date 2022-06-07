@@ -118,6 +118,7 @@ public class PMEnvironmentProviderImpl implements PMEnvironmentProvider, AppShar
 
 	@Override
 	public ChannelConfig addChannel(ChannelConfig config) {
+		config.setServer(serviceServer);
 		return configInternal(config);
 	}
 
@@ -130,24 +131,9 @@ public class PMEnvironmentProviderImpl implements PMEnvironmentProvider, AppShar
 				PMConfigurationDoc doc = getPMConfigurationDoc();
 				doc.channels().remove(config.getChannelId());
 				configStore.save(doc);
-			} else if ("disable".equalsIgnoreCase(action)) {
-				configDoc.disabled(true);
-				configStore.save(configDoc);
-			} else if ("enable".equalsIgnoreCase(action)) {
-				configDoc.disabled(false);
-				configStore.save(configDoc);
-			} else if ("sandbox_enable".equalsIgnoreCase(action)) {
-				configDoc.setSandbox(true);
-				configStore.save(configDoc);
-			} else if ("sandbox_disable".equalsIgnoreCase(action)) {
-				configDoc.setSandbox(false);
-				configStore.save(configDoc);
-			} else if ("shared_enable".equalsIgnoreCase(action)) {
-				configDoc.setShared(true);
-				configStore.save(configDoc);
-			} else if ("shared_disable".equalsIgnoreCase(action)) {
-				configDoc.setShared(false);
-				configStore.save(configDoc);
+			} else {
+				config.setServer(serviceServer);
+				configStore.saveChannelConfig(configDoc, action);
 			}
 		} else {
 			System.out.println("No Channel to delete");
