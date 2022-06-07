@@ -8,6 +8,7 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Component;
 
 import com.boot.jx.mongo.CommonMongoTemplateAbstract;
+import com.boot.utils.ArgUtil;
 
 @Component
 public class AccountStore extends CommonMongoTemplateAbstract {
@@ -35,15 +36,15 @@ public class AccountStore extends CommonMongoTemplateAbstract {
 	}
 
 	public DomainDoc findDomainByName(String domain) {
-		return findOneByKey("domain", domain, DomainDoc.class);
+		DomainDoc x = findOneByKey("domain", domain, DomainDoc.class);
+		if (ArgUtil.is(x)) {
+			return x;
+		}
+		return findOneByKey("domainAlias", domain, DomainDoc.class);
 	}
 
 	public List<DomainDoc> findAllDomainByServer(String server) {
 		return findByKey("server", server, DomainDoc.class);
-	}
-
-	public List<DomainDoc> findAllDomains(String domain) {
-		return findByKey("domain", domain, DomainDoc.class);
 	}
 
 	public DomainLicenseDoc findDomainLicenseByName(String domain) {
