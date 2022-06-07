@@ -247,12 +247,14 @@ public class AccountDashBoardManager {
 					dto.setDomain(tnt);
 					String id = getSummaryId(dto);
 					dto.setId(id);
-					
 					//LOGGER.info("datewaise data :" + JsonUtil.toJson(dto));
+					if(ArgUtil.is(dto.getId())) {
 					lstSummDto.add(dto);
+					}
 				}
 
 			}
+		
 			Map<Object, Long> summaryMap = new HashMap<>();
 			Map<String, Map<String, Long>> datwWiseCount = lstSummDto.stream().collect(Collectors.groupingBy(SummaryDocDto::getId, Collectors.groupingBy(SummaryDocDto::getType, Collectors.counting())));
 		
