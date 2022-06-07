@@ -2,9 +2,12 @@ package com.boot.jx.logger;
 
 import com.boot.jx.model.AuditCreateEntity;
 import com.boot.jx.model.AuditCreateEntity.AuditUpdateEntity;
+import com.boot.jx.rest.AppRequestInterfaces.AppAuthUser;
 import com.boot.utils.ArgUtil;
 
 public interface AuditDetailProvider {
+
+	public AppAuthUser getAuthUser();
 
 	public String getAuditUser();
 

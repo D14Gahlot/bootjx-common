@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 
 import com.boot.jx.logger.AuditDetailProvider;
 import com.boot.jx.postman.PMConstants.DEFAULT;
+import com.boot.jx.rest.AppRequestInterfaces.AppAuthUser;
 
 @Component
 public class PostManSessionBean implements AuditDetailProvider, Serializable {
@@ -19,6 +20,11 @@ public class PostManSessionBean implements AuditDetailProvider, Serializable {
 	@Override
 	public String getAuditUser() {
 		return DEFAULT.SYSTEM;
+	}
+
+	@Override
+	public AppAuthUser getAuthUser() {
+		return null;
 	}
 
 }

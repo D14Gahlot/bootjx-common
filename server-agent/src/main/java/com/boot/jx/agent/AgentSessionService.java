@@ -30,8 +30,10 @@ import com.boot.jx.http.CommonHttpRequest;
 import com.boot.jx.logger.AuditDetailProvider;
 import com.boot.jx.logger.LoggerService;
 import com.boot.jx.mongo.CommonMongoQueryBuilder;
+import com.boot.jx.postman.PMConstants;
 import com.boot.jx.postman.PMConstants.DEFAULT;
 import com.boot.jx.postman.PMEnvironment.PMClientConfig;
+import com.boot.jx.rest.AppRequestInterfaces.AppAuthUser;
 import com.boot.jx.stomp.StompQuery;
 import com.boot.jx.stomp.StompTunnelSessionManager;
 import com.boot.utils.ArgUtil;
@@ -129,6 +131,7 @@ public class AgentSessionService
 		agentSessionBean.setOnline(true);
 		agentSessionBean.setLastOnlineStamp(System.currentTimeMillis());
 		agentSessionBean.getAgentCode();
+		agentSessionBean.addRole(PMConstants.USER_ROLE.AGENT);
 		this.updateSession(true, agentSessionBean);
 	}
 
@@ -226,15 +229,16 @@ public class AgentSessionService
 	@Override
 	public String getAuditUser() {
 		if (RequestContextHolder.getRequestAttributes() != null) {
-			if (ArgUtil.is(agentSessionBean)) {
-				if (!ArgUtil.is(agentSessionBean.getAgentCode()) && ArgUtil.is(agentSessionBean.getProfile())) {
-					return agentSessionBean.getProfile().getAgent_code();
-				}
-				return agentSessionBean.getAgentCode();
+			if (ArgUtil.is(getAuthUser())) {
+				return getAuthUser().getAuthUser();
 			}
 		}
+		return PMConstants.DEFAULT.NO_USER;
+	}
 
-		return "_NOUSER_";
+	@Override
+	public AppAuthUser getAuthUser() {
+		return this.agentSessionBean;
 	}
 
 }

@@ -6,11 +6,15 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.stereotype.Component;
 
+import com.boot.jx.common.config.AppCommonAuthFilter.AppCommonAuthUser;
 import com.boot.jx.common.dto.AgentResponseAuthDto;
+import com.boot.jx.logger.AuditDetailProvider;
+import com.boot.jx.postman.PMConstants;
+import com.boot.utils.ArgUtil;
 
 @Component
 @Scope(value = "session", proxyMode = ScopedProxyMode.TARGET_CLASS)
-public class AgentSessionBean implements Serializable {
+public class AgentSessionBean extends AppCommonAuthUser implements Serializable {
 
 	private static final long serialVersionUID = 5850744656958653564L;
 	private String agentCode;
@@ -106,6 +110,16 @@ public class AgentSessionBean implements Serializable {
 
 	public void setAway(boolean isAway) {
 		this.isAway = isAway;
+	}
+
+	@Override
+	public String getAuthUser() {
+		if (ArgUtil.is(this.agentCode)) {
+			return this.agentCode;
+		} else if (ArgUtil.is(this.profile)) {
+			return this.profile.getAgent_code();
+		}
+		return PMConstants.DEFAULT.NO_USER;
 	}
 
 }

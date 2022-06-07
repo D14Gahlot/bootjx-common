@@ -4,47 +4,50 @@ import javax.servlet.http.HttpServletRequest;
 
 import com.boot.jx.http.CommonHttpRequest;
 import com.boot.jx.http.CommonHttpRequest.ApiRequestDetail;
+import com.boot.jx.rest.AppRequestInterfaces.AppAuthUser;
 import com.boot.utils.JsonUtil;
 
 public final class AppRequestInterfaces {
 
-    public interface AppAuthUser {
-	public boolean hasAccess(ApiRequestDetail apiRequest, CommonHttpRequest req);
-    }
+	public interface AppAuthUser {
+		public boolean hasAccess(ApiRequestDetail apiRequest, CommonHttpRequest req);
 
-    public interface AppAuthFilter {
-	public boolean filterAppRequest(ApiRequestDetail apiRequest, CommonHttpRequest req, String traceId);
-    }
-
-    public interface IMetaRequestInFilter<T extends ARequestMetaInfo> {
-
-	public Class<T> getMetaClass();
-
-	default T export(String metaString) {
-	    return JsonUtil.fromJson(metaString, getMetaClass());
+		public String getAuthUser();
 	}
 
-	/**
-	 * Meta Data Info you want to extract from incoming request
-	 * 
-	 * @param req
-	 * @throws Exception
-	 */
-	public void importMeta(T meta, HttpServletRequest req);
+	public interface AppAuthFilter {
+		public boolean filterAppRequest(ApiRequestDetail apiRequest, CommonHttpRequest req, String traceId);
+	}
 
-	public void inFilter(T requestMeta);
+	public interface IMetaRequestInFilter<T extends ARequestMetaInfo> {
 
-    }
+		public Class<T> getMetaClass();
 
-    public interface IMetaRequestOutFilter<T extends ARequestMetaInfo> {
+		default T export(String metaString) {
+			return JsonUtil.fromJson(metaString, getMetaClass());
+		}
 
-	/**
-	 * Meta Data Info you want to send with outgoing request
-	 * 
-	 * @param meta
-	 */
-	public void outFilter(T requestMeta);
+		/**
+		 * Meta Data Info you want to extract from incoming request
+		 * 
+		 * @param req
+		 * @throws Exception
+		 */
+		public void importMeta(T meta, HttpServletRequest req);
 
-    }
+		public void inFilter(T requestMeta);
+
+	}
+
+	public interface IMetaRequestOutFilter<T extends ARequestMetaInfo> {
+
+		/**
+		 * Meta Data Info you want to send with outgoing request
+		 * 
+		 * @param meta
+		 */
+		public void outFilter(T requestMeta);
+
+	}
 
 }
