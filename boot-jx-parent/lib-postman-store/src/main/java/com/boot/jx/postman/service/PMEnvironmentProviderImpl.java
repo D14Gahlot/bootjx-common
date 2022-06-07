@@ -90,7 +90,7 @@ public class PMEnvironmentProviderImpl implements PMEnvironmentProvider, AppShar
 				for (ChannelConfigDoc channel : sandboxChannels) {
 					channel.setDomain(tnt);
 					if (channel.isSandbox() || channel.isShared()) {
-						newSharedConfiguration.channels(channel);
+						newSharedConfiguration.channels(channel, serviceServer);
 					}
 				}
 

@@ -14,43 +14,43 @@ import com.boot.utils.ArgUtil;
 //@EnableSpringHttpSession
 public class SpringHttpSessionConfig {
 
-    @Value("${server.session.cookie.name:JSESSIONID}")
-    String cookieName;
+	@Value("${server.session.cookie.name:JSESSIONID}")
+	String cookieName;
 
-    @Value("${server.session.cookie.path:}")
-    String cookiePath;
+	@Value("${server.session.cookie.path:}")
+	String cookiePath;
 
-    @Value("${server.session.cookie.http-only:true}")
-    boolean useHttpOnlyCookie;
+	@Value("${server.session.cookie.http-only:true}")
+	boolean useHttpOnlyCookie;
 
-    @Value("${server.session.cookie.domain:}")
-    String domainNamePattern;
+	@Value("${server.session.cookie.domain:}")
+	String domainNamePattern;
 
-    @Value("${server.session.cookie.secure:true}")
-    boolean useSecureCookie;
+	@Value("${server.session.cookie.secure:true}")
+	boolean useSecureCookie;
 
-    @Bean
-    public MapSessionRepository sessionRepository() {
-	return new MapSessionRepository();
-    }
+	@Bean
+	public MapSessionRepository sessionRepository() {
+		return new MapSessionRepository();
+	}
 
-    @Bean
-    public HttpSessionStrategy httpSessionStrategy() {
-	HeaderHttpSessionStrategy headerSession = new HeaderHttpSessionStrategy();
-	CookieHttpSessionStrategy cookieSession = new CookieHttpSessionStrategy();
+	@Bean
+	public HttpSessionStrategy httpSessionStrategy() {
+		HeaderHttpSessionStrategy headerSession = new HeaderHttpSessionStrategy();
+		CookieHttpSessionStrategy cookieSession = new CookieHttpSessionStrategy();
 
-	DefaultCookieSerializer serializer = new DefaultCookieSerializer();
-	if (ArgUtil.is(cookieName))
-	    serializer.setCookieName(cookieName);
-	if (ArgUtil.is(cookiePath))
-	    serializer.setCookiePath(cookiePath);
-	if (ArgUtil.is(domainNamePattern))
-	    serializer.setDomainNamePattern(domainNamePattern);
-	serializer.setUseHttpOnlyCookie(useHttpOnlyCookie);
-	serializer.setUseSecureCookie(useSecureCookie);
+		DefaultCookieSerializer serializer = new DefaultCookieSerializer();
+		if (ArgUtil.is(cookieName))
+			serializer.setCookieName(cookieName);
+		if (ArgUtil.is(cookiePath))
+			serializer.setCookiePath(cookiePath);
+		if (ArgUtil.is(domainNamePattern))
+			serializer.setDomainNamePattern(domainNamePattern);
+		serializer.setUseHttpOnlyCookie(useHttpOnlyCookie);
+		serializer.setUseSecureCookie(useSecureCookie);
 
-	cookieSession.setCookieSerializer(serializer);
-	headerSession.setHeaderName("x-auth-token");
-	return new SmartHttpSessionStrategy(cookieSession, headerSession);
-    }
+		cookieSession.setCookieSerializer(serializer);
+		headerSession.setHeaderName("x-auth-token");
+		return new SmartHttpSessionStrategy(cookieSession, headerSession);
+	}
 }
