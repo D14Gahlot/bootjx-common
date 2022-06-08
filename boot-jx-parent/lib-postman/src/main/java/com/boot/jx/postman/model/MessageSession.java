@@ -15,6 +15,7 @@ public class MessageSession implements Serializable {
 	private String queue;
 	private boolean resolved;
 	private boolean firstMessage;
+	private long sessionStamp;
 
 	private String ticketHash;
 	private String routingId;
@@ -95,6 +96,14 @@ public class MessageSession implements Serializable {
 
 	public void setRoutingId(String routingId) {
 		this.routingId = routingId;
+	}
+
+	public long getSessionStamp() {
+		return sessionStamp;
+	}
+
+	public void setSessionStamp(long sessionStamp) {
+		this.sessionStamp = sessionStamp;
 	}
 
 }
