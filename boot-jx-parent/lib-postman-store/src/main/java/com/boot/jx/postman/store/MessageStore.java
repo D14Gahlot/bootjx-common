@@ -89,6 +89,8 @@ public class MessageStore extends CommonMongoTemplateAbstract {
 		doc.setAttachments(inboxMessage.getAttachments());
 		doc.setVccards(inboxMessage.getVccards());
 
+		doc.stamps().put("session", ArgUtil.parseAsLong(inboxMessage.session().getSessionStamp(), 0L));
+
 		return doc;
 	}
 
@@ -222,6 +224,7 @@ public class MessageStore extends CommonMongoTemplateAbstract {
 		doc.setStatus(ArgUtil.parseAsString(outMessage.getStatus()));
 
 		doc.stamps().putAll(outMessage.stamps());
+		doc.stamps().put("session", ArgUtil.parseAsLong(outMessage.session().getSessionStamp(), 0L));
 		doc.meta().putAll(outMessage.meta());
 
 		return doc;

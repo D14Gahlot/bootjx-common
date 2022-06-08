@@ -11,6 +11,8 @@ import com.boot.utils.ArgUtil;
 
 public class InBoundEvent implements LoggableEntity, SessionInfo {
 
+	private static final long serialVersionUID = -8470839812429749401L;
+
 	public static final String SESSION_ROUTED = "SESSION_ROUTED";
 
 	public static final String SESSION_INIT = "SESSION_INIT";

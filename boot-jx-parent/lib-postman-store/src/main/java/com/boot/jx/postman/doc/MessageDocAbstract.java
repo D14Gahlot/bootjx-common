@@ -416,4 +416,5 @@ public abstract class MessageDocAbstract implements Serializable, Patchable<Mess
 		}
 		return this.vccards;
 	}
+
 }
