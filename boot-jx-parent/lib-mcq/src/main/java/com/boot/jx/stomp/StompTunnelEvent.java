@@ -1,5 +1,6 @@
 package com.boot.jx.stomp;
 
+import com.boot.jx.AppParam;
 import com.boot.jx.tunnel.TunnelEvent;
 
 public class StompTunnelEvent extends TunnelEvent {
@@ -12,6 +13,7 @@ public class StompTunnelEvent extends TunnelEvent {
 	private String tenantToken;
 	private Object data;
 	private String appType;
+	private String originator;
 
 	public String getTopic() {
 		return topic;
@@ -69,4 +71,17 @@ public class StompTunnelEvent extends TunnelEvent {
 		this.appType = appType;
 	}
 
+	public String getOriginator() {
+		return originator;
+	}
+
+	public void setOriginator(String originator) {
+		this.originator = originator;
+	}
+
+	public static StompTunnelEvent createInstance() {
+		StompTunnelEvent instance = new StompTunnelEvent();
+		instance.setOriginator(AppParam.APP_INSTANCE_UID.getValue());
+		return instance;
+	}
 }

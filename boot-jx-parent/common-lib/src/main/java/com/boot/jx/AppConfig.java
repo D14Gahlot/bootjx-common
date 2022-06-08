@@ -34,6 +34,7 @@ import com.boot.utils.ArgUtil;
 import com.boot.utils.Constants;
 import com.boot.utils.CryptoUtil;
 import com.boot.utils.JsonUtil.JsonUtilConfigurable;
+import com.boot.utils.UniqueID;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ulisesbocchio.jasyptspringboot.annotation.EnableEncryptableProperties;
@@ -308,9 +309,11 @@ public class AppConfig {
 		}
 
 		try {
-			AppParam.APP_INSTANCE_ID
-					.setValue(CryptoUtil.getMD5Hash(String.format("%s#%s#%s#%s", AppParam.APP_ENV.getValue(),
-							AppParam.APP_GROUP.getValue(), AppParam.APP_NAME.getValue(), AppParam.APP_ID.getValue())));
+			String appInstanceId = String.format("%s#%s#%s#%s", AppParam.APP_ENV.getValue(),
+					AppParam.APP_GROUP.getValue(), AppParam.APP_NAME.getValue(), AppParam.APP_ID.getValue());
+			AppParam.APP_INSTANCE_ID.setValue(appInstanceId);
+			AppParam.APP_INSTANCE_HASH.setValue(CryptoUtil.getMD5Hash(appInstanceId));
+			AppParam.APP_INSTANCE_UID.setValue(appInstanceId + "#" + UniqueID.PREF);
 		} catch (NoSuchAlgorithmException e) {
 			e.printStackTrace();
 		}

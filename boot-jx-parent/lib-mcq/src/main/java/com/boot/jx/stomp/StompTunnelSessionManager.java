@@ -53,8 +53,8 @@ public class StompTunnelSessionManager {
 	@Autowired(required = false)
 	StompSessionCache stompSessionCache;
 
-	public static String getMSInstanceId() {
-		return AppParam.APP_INSTANCE_ID.getValue();
+	public static String getMSInstanceHash() {
+		return AppParam.APP_INSTANCE_HASH.getValue();
 	}
 
 	public String createSessionMapping(String wsSessionID, String xSessionId, String jSessionId, String gSessionId) {
@@ -67,7 +67,7 @@ public class StompTunnelSessionManager {
 			}
 
 			if (ArgUtil.isEmpty(gSessionId)) {
-				gSessionId = String.format("%s-%s-%s", getMSInstanceId(), xSessionId, wsSessionID);
+				gSessionId = String.format("%s-%s-%s", getMSInstanceHash(), xSessionId, wsSessionID);
 				http2GSessionIdMap.putSafe(xSessionId, gSessionId);
 				http2GSessionIdMap.putSafe(jSessionId, gSessionId);
 			}
@@ -129,7 +129,7 @@ public class StompTunnelSessionManager {
 	 */
 	public void mapHTTPSession(String stompUID, String xSessionId, String jSessionId, String... tags) {
 		StompSession stompSession = new StompSession();
-		stompSession.setPrefix(getMSInstanceId());
+		stompSession.setPrefix(getMSInstanceHash());
 		stompSession.setXsessionId(xSessionId);
 		stompSession.setJsessionId(jSessionId);
 

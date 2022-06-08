@@ -6,10 +6,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.messaging.core.MessageSendingOperations;
 
+import com.boot.jx.AppContextUtil;
 import com.boot.jx.AppParam;
 import com.boot.jx.tunnel.ITunnelSubscriber;
 import com.boot.jx.tunnel.TunnelEventMapping;
 import com.boot.jx.tunnel.TunnelEventXchange;
+import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
 
 @TunnelEventMapping(scheme = TunnelEventXchange.SHOUT_LISTNER, integrity = false)
@@ -30,7 +32,12 @@ public class StompTunnelToXSender implements ITunnelSubscriber<StompTunnelEvent>
 
 	@Override
 	public String getTopic() {
-		return getSendTopic(StompTunnelSessionManager.getMSInstanceId());
+		return getSendTopic(StompTunnelSessionManager.getMSInstanceHash());
+	}
+
+	public static MapModel getHeaders(StompTunnelEvent msg) {
+		return MapModel.createInstance().put("originated-by", msg.getOriginator())
+				.put("delivered-by", AppParam.APP_INSTANCE_UID.getValue()).put("traceid", AppContextUtil.getTraceId());
 	}
 
 	@Override
@@ -44,7 +51,8 @@ public class StompTunnelToXSender implements ITunnelSubscriber<StompTunnelEvent>
 		if (!ArgUtil.isEmpty(msg.getXsessionId())) {
 			String sessionUId = stompTunnelSessionManager.getSessionUId(msg.getXsessionId(), msg.getJsessionId());
 			if (!ArgUtil.isEmpty(sessionUId)) {
-				messagingTemplate.convertAndSend("/queue/" + sessionUId + msg.getTopic(), msg.getData());
+				messagingTemplate.convertAndSend("/queue/" + sessionUId + msg.getTopic(), msg.getData(),
+						StompTunnelToXSender.getHeaders(msg).toMap());
 			} else {
 				LOGGER.error("SessionUId is Missing for HttpSessionId:{}, Topic:{}", msg.getTopic());
 			}
