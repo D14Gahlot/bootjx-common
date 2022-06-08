@@ -82,7 +82,7 @@ public class AppFaqBotController extends CommonBotController {
 			onSessionRoute(null);
 			return;
 		case "m":
-			routeSession("jazeera");
+			routeSession("jazeera",lang);
 			return;		
 		case "#":
 			assignToDefaultAgent();
@@ -126,7 +126,7 @@ public class AppFaqBotController extends CommonBotController {
 			onSessionRoute(null);
 			return;
 		case "m":
-			routeSession("jazeera");
+			routeSession("jazeera",lang);
 			return;		
 		case "#":
 			assignToDefaultAgent();
@@ -175,7 +175,7 @@ public class AppFaqBotController extends CommonBotController {
 			onSessionRoute(null);
 			return;
 		case "m":
-			routeSession("jazeera");
+			routeSession("jazeera",lang);
 			return;		
 		case "#":
 			assignToDefaultAgent();
