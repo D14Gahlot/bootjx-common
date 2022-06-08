@@ -313,15 +313,15 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 	@Override
 	public void onSessionRoute(InBoundEvent event, ChatSessionDoc sessionDoc, PMArgs pmArgs) {
 		if (InBoundEvent.SESSION_ROUTED.equals(event.eventCode)) {
-			ClientApp defaultClient = context().clientApp(event.sessionRouted.targetQueue, null);
-			if (ArgUtil.is(defaultClient)) {
-				APP_TYPE appType = APP_TYPE.from(defaultClient.getAppType());
+			ClientApp targetAppQueue = context().clientApp(event.sessionRouted.targetQueue, null);
+			if (ArgUtil.is(targetAppQueue)) {
+				APP_TYPE appType = APP_TYPE.from(targetAppQueue.getAppType());
 				if (APP_TYPE.WEBHOOK.equals(appType)) {
-					sendEventWebhook(event, defaultClient);
+					sendEventWebhook(event, targetAppQueue);
 					return;
 				} else if (CHAT_MODE.AGENT.equals(appType.getMode())) {
-					MapModel props = new MapModel(defaultClient.props());
-					AppContextUtil.setActorId(defaultClient.getQueue());
+					MapModel props = new MapModel(targetAppQueue.props());
+					AppContextUtil.setActorId(targetAppQueue.getQueue());
 					assignSessionToAgent(new PMArgs()
 							.assignToDeptCode(
 									ArgUtil.nonEmpty(pmArgs.getAssignToDeptCode(), props.getString("deptCode")))
@@ -330,7 +330,7 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 							sessionDoc);
 					if (APP_TYPE.MITEL.equals(appType)) {
 						try {
-							mitelRouting(sessionDoc, defaultClient, 1);
+							mitelRouting(sessionDoc, targetAppQueue, 1);
 						} catch (Exception e) {
 							logManager.error(event, e);
 						}

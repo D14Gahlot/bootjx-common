@@ -174,6 +174,12 @@ public class ChatController {
 				new PMArgs().assignToQueueCode(queueCode).contact(session.contact()).sessionId(session.getSessionId()));
 	}
 
+	public void routeSession(String queueCode, Object params) {
+		ChatSessionDoc session = messageContext.session().getDoc();
+		chatSessionService.routeSession(session, new PMArgs().assignToQueueCode(queueCode).contact(session.contact())
+				.sessionId(session.getSessionId()).params(params));
+	}
+
 	public void routeSessionToDefaultQueue() {
 		ChatSessionDoc session = messageContext.session().getDoc();
 		chatSessionService.routeSession(session);
