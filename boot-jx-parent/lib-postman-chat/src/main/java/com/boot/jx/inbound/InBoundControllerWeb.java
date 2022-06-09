@@ -244,6 +244,7 @@ public class InBoundControllerWeb {
 		return inboundMessageBoxEventMethod(channelId, channelKey, map, null);
 	}
 
+	@ResponseBody
 	@RequestMapping(value = "/ext/plugin/inbound/v2/web/callback/{nounce}/{channelId}/{channelKey}",
 			method = { RequestMethod.PUT })
 	public ApiResponse<InboxMessage, Object> inboundMediaBoxEvent(@PathVariable(required = false) String nounce,
