@@ -53,7 +53,7 @@ public class StompTunnelToLocally {
 		try {
 			StompTunnelEvent event = StompTunnelEvent.createInstance();
 			event.setTopic(topic);
-			event.setTenantToken("*");
+			event.setTenantToken("_");
 
 			Map<String, Object> messageData = new HashMap<String, Object>();
 			messageData.put("data", message);
