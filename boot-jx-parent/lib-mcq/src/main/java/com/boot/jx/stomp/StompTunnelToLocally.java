@@ -65,7 +65,7 @@ public class StompTunnelToLocally {
 		}
 	}
 
-	@Scheduled(fixedDelay = 30000)
+	@Scheduled(fixedDelay = 30000, initialDelay = 30000)
 	public void healthMessage() {
 		sendToAll("/stomp/tunnel/health", MapModel.createInstance().put("message", "Happy Ping-Pong")
 				.put("timetamp", System.currentTimeMillis()).toMap());
