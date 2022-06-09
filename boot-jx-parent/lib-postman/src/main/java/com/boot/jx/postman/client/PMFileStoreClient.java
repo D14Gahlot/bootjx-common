@@ -56,8 +56,8 @@ public class PMFileStoreClient {
 	}
 
 	public CommonFile uploadSessionFile(MultipartFile srcFile, String sessionId, String fileId) {
-		sessionId = StringUtils.removeSpecialCharacter(sessionId);
-		fileId = StringUtils.removeSpecialCharacter(fileId);
+		sessionId = StringUtils.removeSpecialCharacter(ArgUtil.nonEmpty(sessionId,UniqueID.generateString()));
+		fileId = StringUtils.removeSpecialCharacter(ArgUtil.nonEmpty(fileId,UniqueID.generateString()));
 		String folderPath = String.format("%s/session/%s", AppContextUtil.getTenant(), sessionId);
 		String fileName = String.format("%s/%s", fileId, srcFile.getOriginalFilename());
 		return upload2(srcFile, folderPath, fileName);
