@@ -10,7 +10,6 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Component;
 
-import com.boot.jx.AppContextUtil;
 import com.boot.jx.chat.ChatCommands;
 import com.boot.jx.chat.ChatService;
 import com.boot.jx.chat.ChatSessionService;
@@ -32,8 +31,8 @@ import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.dto.ChatMessageDTO;
 import com.boot.jx.postman.dto.ChatSessionDTO;
-import com.boot.jx.postman.manager.ChatSessionManager;
 import com.boot.jx.postman.manager.ChatLogger;
+import com.boot.jx.postman.manager.ChatSessionManager;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.model.PMArgs;

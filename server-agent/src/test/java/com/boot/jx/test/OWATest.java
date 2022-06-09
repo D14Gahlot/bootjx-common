@@ -2,7 +2,6 @@ package com.boot.jx.test;
 
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.slf4j.Logger;

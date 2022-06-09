@@ -15,7 +15,7 @@ public class StompTunnelToAllSender implements ITunnelSubscriber<StompTunnelEven
 	public static final String STOMP_TO_ALL = "STOMP_TO_ALL";
 
 	@Autowired(required = false)
-	StompTunnelToLocally stompTunnelToLocally;
+	private StompTunnelToLocally stompTunnelToLocally;
 
 	@Override
 	public void onMessage(String channel, StompTunnelEvent msg) {

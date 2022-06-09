@@ -14,8 +14,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.boot.jx.agent.AgentChatHandlerImpl;
-import com.boot.jx.agent.AgentService;
 import com.boot.jx.agent.AgentSessionBean;
 import com.boot.jx.agent.AgentSessionService;
 import com.boot.jx.agent.api.ControllerRequestDTOs.SessionSearchRequest;
@@ -23,11 +21,9 @@ import com.boot.jx.api.ApiResponse;
 import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.chat.ChatSessionFactory;
 import com.boot.jx.common.doc.AgentSessionDoc;
-import com.boot.jx.common.store.ChatArchiveBuilder;
 import com.boot.jx.common.store.ChatArchiveService;
 import com.boot.jx.http.ApiRequest;
 import com.boot.jx.http.RequestType;
-import com.boot.jx.postman.PMConstants;
 import com.boot.jx.postman.PMConstants.CHAT_ASSIGN_GROUP;
 import com.boot.jx.postman.PMConstants.CHAT_STATE;
 import com.boot.jx.postman.PMConstants.CHAT_STATUS;
@@ -40,7 +36,6 @@ import com.boot.jx.postman.manager.ChatSessionManager;
 import com.boot.jx.postman.model.MessageDefinitions.Contactable;
 import com.boot.jx.postman.model.SessionSearchQuery;
 import com.boot.jx.postman.service.ChatDTOUtil;
-import com.boot.jx.postman.store.MessageStore;
 import com.boot.jx.postman.store.SessionStore;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.utils.ArgUtil;
@@ -49,9 +44,6 @@ import com.boot.utils.MapBuilder;
 
 @RestController
 public class AgMainController {
-
-	@Autowired
-	private MessageStore messageStore;
 
 	@Autowired
 	private SessionStore sessionStore;
@@ -67,15 +59,6 @@ public class AgMainController {
 
 	@Autowired
 	private ChatSessionManager chatSessionManager;
-
-	@Autowired
-	private AgentService agentService;
-
-	@Autowired
-	private ChatArchiveBuilder chatArchiveBuilder;
-
-	@Autowired
-	private AgentChatHandlerImpl agentChatHandlerImpl;
 
 	@Autowired
 	private ChatSessionFactory chatSessionFactory;

@@ -23,10 +23,10 @@ public class StompTunnelService {
 	public static Logger LOGGER = LoggerService.getLogger(StompTunnelService.class);
 
 	@Autowired
-	TunnelService tunnelService;
+	private TunnelService tunnelService;
 
 	@Autowired
-	StompTunnelSessionManager stompTunnelSessionManager;
+	private StompTunnelSessionManager stompTunnelSessionManager;
 
 	@Async
 	public void sendToAll(String topic, Object message) {
