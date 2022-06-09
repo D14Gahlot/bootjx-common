@@ -50,6 +50,7 @@ public class AppConfig {
 	private static final String PROP_SUFFIX = "}";
 	public static final Pattern pattern = Pattern.compile("^\\$\\{(.*)\\}$");
 	public static final String APP_ENV = "${app.env}";
+	public static final String APP_VENV = "${app.venv}";
 	public static final String APP_GROUP = "${app.group}";
 	public static final String APP_NAME = "${app.name}";
 	public static final String APP_TYPE = "${app.type}";
@@ -89,6 +90,10 @@ public class AppConfig {
 	@Value(APP_ENV)
 	@AppParamKey(AppParam.APP_ENV)
 	private String appEnv;
+
+	@Value(APP_VENV)
+	@AppParamKey(AppParam.APP_VENV)
+	private String appBranch;
 
 	@Value(APP_GROUP)
 	@AppParamKey(AppParam.APP_GROUP)
@@ -309,8 +314,9 @@ public class AppConfig {
 		}
 
 		try {
-			String appInstanceId = String.format("%s#%s#%s#%s", AppParam.APP_ENV.getValue(),
-					AppParam.APP_GROUP.getValue(), AppParam.APP_NAME.getValue(), AppParam.APP_ID.getValue());
+			String appInstanceId = String.format("%s#%s#%s#%s#%s", AppParam.APP_ENV.getValue(),
+					AppParam.APP_VENV.getValue(), AppParam.APP_GROUP.getValue(), AppParam.APP_NAME.getValue(),
+					AppParam.APP_ID.getValue());
 			AppParam.APP_INSTANCE_ID.setValue(appInstanceId);
 			AppParam.APP_INSTANCE_HASH.setValue(CryptoUtil.getMD5Hash(appInstanceId));
 			AppParam.APP_INSTANCE_UID.setValue(appInstanceId + "#" + UniqueID.PREF);
