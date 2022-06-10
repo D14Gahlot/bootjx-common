@@ -95,8 +95,10 @@ public class BulkMessageService extends BatchJobExecuter {
 			to = String.format("%s%s", phoneNumber.getCountryCode(), phoneNumber.getNationalNumber());
 			doc.getContact().setPhone(to);
 			doc.setMessage(bulkMessage.getMessage());
+			doc.setHsm(bulkMessage.getHsm());
 			doc.setTemplateId(bulkMessage.templateId());
 			doc.setTemplate(bulkMessage.templateCode());
+			doc.setAttachments(bulkMessage.getAttachments());
 
 			doc.route().setQueueCode(adminApp.getQueue());
 			doc.route().setSendMode(adminApp.getAppMode());
@@ -209,8 +211,10 @@ public class BulkMessageService extends BatchJobExecuter {
 			OutboxMessage outboxMessage = new OutboxMessage();
 			outboxMessage.setMessageId(msg.getMessageId());
 			outboxMessage.setMessage(msg.getMessage());
+			outboxMessage.setHsm(msg.getHsm());
 			outboxMessage.template(msg.getTemplate());
 			outboxMessage.templateId(msg.getTemplateId());
+			outboxMessage.setAttachments(msg.getAttachments());
 			outboxMessage.contact().type(contactType);
 			outboxMessage.contact().setChannelType(channelType);
 			outboxMessage.contact().setLane(lane);

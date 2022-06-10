@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import com.boot.jx.AppContext;
 import com.boot.jx.AppContextUtil;
+import com.boot.jx.AppParam;
 import com.boot.jx.logger.client.AuditServiceClient;
 import com.boot.jx.logger.events.RequestTrackEvent;
 import com.boot.jx.tunnel.ITunnelDefs.TunnelQueue;
@@ -215,7 +216,9 @@ public class TunnelService implements ITunnelService {
 			LOGGER.error("No Redissson Client Instance Available");
 			return null;
 		}
-		return new TunnelQueueImpl<T>(redisson.getQueue(queueName));
+		String newQueue = String.format("%s-%s-%s", AppParam.APP_ENV.getValue(), AppParam.APP_VENV.getValue(),
+				queueName);
+		return new TunnelQueueImpl<T>(redisson.getQueue(newQueue));
 	}
 
 }

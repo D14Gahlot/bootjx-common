@@ -4,6 +4,7 @@ import java.io.Serializable;
 
 import org.apache.commons.io.FilenameUtils;
 
+import com.boot.jx.model.CommonFile;
 import com.boot.jx.swagger.ApiMockModelProperty;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.Constants;
@@ -92,7 +93,10 @@ public class Attachment implements Serializable {
 	}
 
 	public String getMediaType() {
-		return mediaType;
+		if (!ArgUtil.is(this.mediaType) && ArgUtil.is(this.mediaURL)) {
+			this.mediaType = ArgUtil.parseAsString(new CommonFile().url(this.mediaURL).getFileType());
+		}
+		return this.mediaType;
 	}
 
 	public void setMediaType(String mediaType) {

@@ -238,7 +238,7 @@ public class CommonFileAbstract<C extends CommonFileAbstract<C>> implements Seri
 	public C url(String url) {
 		this.setUrl(url);
 		try {
-			if(ArgUtil.is(url)) {
+			if (ArgUtil.is(url)) {
 				URL urlObject = new URL(url);
 				if (!ArgUtil.is(this.extension)) {
 					this.extension = FilenameUtils.getExtension(urlObject.getPath());
@@ -250,7 +250,12 @@ public class CommonFileAbstract<C extends CommonFileAbstract<C>> implements Seri
 					this.title = FilenameUtils.getBaseName(urlObject.getPath());
 				}
 				if (!ArgUtil.is(this.fileFormat) && ArgUtil.is(this.name)) {
-					this.fileFormat = FileFormat.from(URLConnection.guessContentTypeFromName(name));
+					String mimeTye = URLConnection.guessContentTypeFromName(this.name);
+					if (ArgUtil.is(mimeTye)) {
+						this.fileFormat = FileFormat.from(mimeTye);
+					} else {
+						this.fileFormat = FileFormat.from(this.extension);
+					}
 				}
 			}
 		} catch (MalformedURLException e) {
