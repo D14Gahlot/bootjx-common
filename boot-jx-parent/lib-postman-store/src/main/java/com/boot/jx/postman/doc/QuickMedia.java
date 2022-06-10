@@ -23,8 +23,6 @@ public class QuickMedia implements Serializable, AuditableEntity, QuickGalleryIt
 	@Id
 	private String id;
 
-	private String type;
-
 	private String title;
 
 	@Indexed(unique = true, sparse = true)
@@ -35,6 +33,9 @@ public class QuickMedia implements Serializable, AuditableEntity, QuickGalleryIt
 	private String content;
 
 	private String url;
+	private String type;
+	private String format;
+	private String mimeType;
 
 	private Map<String, Object> meta;
 
@@ -155,5 +156,21 @@ public class QuickMedia implements Serializable, AuditableEntity, QuickGalleryIt
 
 	public void setUpdatedStamp(Long updatedStamp) {
 		this.updatedStamp = updatedStamp;
+	}
+
+	public String getFormat() {
+		return format;
+	}
+
+	public void setFormat(String format) {
+		this.format = format;
+	}
+
+	public String getMimeType() {
+		return mimeType;
+	}
+
+	public void setMimeType(String mimeType) {
+		this.mimeType = mimeType;
 	}
 }

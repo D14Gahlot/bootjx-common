@@ -13,7 +13,10 @@ import org.springframework.web.multipart.MultipartFile;
 import com.boot.jx.AppContextUtil;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.aws.AWSFileStore;
+import com.boot.jx.dict.FileFormat;
+import com.boot.jx.dict.FileType;
 import com.boot.jx.logger.AuditDetailProvider;
+import com.boot.jx.model.CommonFile;
 import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.jx.postman.doc.QuickAction;
 import com.boot.jx.postman.doc.QuickLabel;
@@ -150,13 +153,16 @@ public class TmplQuickController {
 	@RequestMapping(value = "/api/tmpl/quickmedia", method = { RequestMethod.POST })
 	public ApiResponse<QuickMedia, Object> createQuickMedia(@RequestParam(required = false) String id,
 			@RequestParam String category, @RequestParam String title, @RequestParam(required = false) String url,
-			@RequestParam String code, @RequestParam(name = "file", required = false) MultipartFile file) {
+			@RequestParam String code, @RequestParam(name = "file", required = false) MultipartFile file,
+			@RequestParam(required = false) FileType fileType, @RequestParam(required = false) FileFormat fileFormat) {
 
 		if (ArgUtil.isEmpty(url) && ArgUtil.is(file)) {
-			url = fileStore
-					.upload1(file, String.format("%s/quickmedia/%s", AppContextUtil.getTenant(), UUID.randomUUID()),
-							file.getOriginalFilename())
-					.getUrl();
+			CommonFile commonfile = fileStore.upload1(file,
+					String.format("%s/quickmedia/%s", AppContextUtil.getTenant(), UUID.randomUUID()),
+					file.getOriginalFilename());
+			fileType = commonfile.getFileType();
+			fileFormat = commonfile.getFileFormat();
+			url = commonfile.getUrl();
 		} else if (ArgUtil.isEmpty(url)) {
 			throw new IllegalStateException("Cannot upload empty file");
 		}
@@ -164,10 +170,14 @@ public class TmplQuickController {
 		QuickMedia newVersion = mongoTemplate.findByIdOrDefault(id, new QuickMedia());
 
 		newVersion.setTitle(title);
-		newVersion.setType("IMAGE");
 		newVersion.setCategory(category);
 		newVersion.setUrl(url);
 		newVersion.setCode(code);
+		newVersion.setType(ArgUtil.parseAsString(fileType));
+		if (ArgUtil.is(fileFormat)) {
+			newVersion.setFormat(fileFormat.name());
+			newVersion.setMimeType(fileFormat.getContentType());
+		}
 		auditDetailProvider.auditCreate(newVersion);
 		mongoTemplate.save(newVersion);
 
