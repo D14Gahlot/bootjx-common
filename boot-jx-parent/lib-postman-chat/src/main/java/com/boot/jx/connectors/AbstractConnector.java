@@ -2,12 +2,15 @@ package com.boot.jx.connectors;
 
 import java.util.List;
 
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.query.Criteria;
 
 import com.boot.jx.chat.ConnectorHandlerFactory;
 import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorHandler;
 import com.boot.jx.dict.ContactType;
+import com.boot.jx.exception.AmxApiException;
+import com.boot.jx.logger.LoggerService;
 import com.boot.jx.mongo.CommonMongoQueryBuilder;
 import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.jx.postman.PMConstants.MESSAGE_SEND_TYPE;
@@ -34,6 +37,8 @@ import com.boot.utils.ArgUtil;
 public abstract class AbstractConnector<CD extends AChannelDetails, P extends ChannelPlugin<CD>>
 		implements ConnectorHandler {
 
+	public static Logger LOGGER = LoggerService.getLogger(AbstractConnector.class);
+
 	abstract public P getPlugin();
 
 	public static abstract class DefaultConnector<CD extends AChannelDetails, P extends ChannelPlugin<CD>>
@@ -57,6 +62,24 @@ public abstract class AbstractConnector<CD extends AChannelDetails, P extends Ch
 
 	@Autowired
 	protected ChatLogger logManager;
+
+	@Override
+	public void onException(ChannelConfig channelConfig, ChatContactDoc chatContactDoc, OutboxMessage outboxMessage,
+			Exception e) {
+		try {
+			outboxMessage.updateStatus(Message.Status.SENT_ERR);
+			if (e instanceof AmxApiException) {
+				outboxMessage.logs().add(((AmxApiException) e).getErrorKey());
+			} else {
+				logManager.error(outboxMessage, e);
+			}
+			outboxMessage.logs().add(e.getMessage());
+			LOGGER.error("SEND ERROR", e);
+		} catch (Exception ex) {
+			LOGGER.error("SEND ERROR LOG EXCEPTION", ex);
+		}
+
+	}
 
 	public void registerWebhook(ChannelConfig channelConfig, String webhookUrl) {
 		ConnectorHandlerFactory.LOGGER.error("WEBHOOK REGISTRATION NOT DEFINED for URL");

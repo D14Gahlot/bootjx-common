@@ -13,8 +13,8 @@ import com.boot.jx.postman.PMConstants.CHANNEL_TYPE;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.fb.FacbookAttachment;
-import com.boot.jx.postman.fb.FacebookEntry;
 import com.boot.jx.postman.fb.FacebookConstants.InBoundWrapperPaths;
+import com.boot.jx.postman.fb.FacebookEntry;
 import com.boot.jx.postman.fb.FacebookHookRequest;
 import com.boot.jx.postman.fb.FacebookMessaging;
 import com.boot.jx.postman.fb.InstagramClient;
@@ -33,7 +33,6 @@ import com.boot.jx.postman.plugin.InstagramPlugin.InstagramConfig;
 import com.boot.jx.postman.query.ChatContactQuery;
 import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
-import com.boot.utils.JsonUtil;
 
 @Component
 @ConnectorMapping(contactType = ContactType.INSTAGRAM)
@@ -55,16 +54,10 @@ public class InstagramConnector extends AbstractConnector<InstagramConfig, Insta
 
 	@Override
 	public void onSend(ChannelConfig channelConfig, ChatContactDoc chatContactDoc, OutboxMessage outboxMessage) {
-		try {
-			//System.out.println("onSend=====" + JsonUtil.toJson(outboxMessage));
-			template(channelConfig, chatContactDoc, outboxMessage);
-			instaClient.send(channelConfig, outboxMessage);
-			outboxMessage.updateStatus(Message.Status.SENT);
-		} catch (Exception e) {
-			outboxMessage.updateStatus(OutboxMessage.Status.SENT_ERR);
-			outboxMessage.logs().add(e.getMessage());
-			LOGGER.error("SEND ERROR", e);
-		}
+		// System.out.println("onSend=====" + JsonUtil.toJson(outboxMessage));
+		template(channelConfig, chatContactDoc, outboxMessage);
+		instaClient.send(channelConfig, outboxMessage);
+		outboxMessage.updateStatus(Message.Status.SENT);
 	}
 
 	@Override
@@ -75,7 +68,7 @@ public class InstagramConnector extends AbstractConnector<InstagramConfig, Insta
 
 	@Override
 	public OutboxMessage initSession(ChatSessionDoc session, InboxMessage inboxMessage) {
-		//System.out.println("initSession=====" + JsonUtil.toJson(inboxMessage));
+		// System.out.println("initSession=====" + JsonUtil.toJson(inboxMessage));
 		ChannelConfig config = getChannelConfig(inboxMessage);
 		InstagramUserProfile profile = instaClient.getUserProfile(config, inboxMessage.contact());
 		ChatContactQuery contactQuery = messageContext.contact();
@@ -101,12 +94,12 @@ public class InstagramConnector extends AbstractConnector<InstagramConfig, Insta
 		event.to().add(m.getRecipient().get("id"));
 		event.contact().type(ContactType.INSTAGRAM);
 		event.contact().setLane(lane);
-		//System.out.println("toInboxMessage-------" + JsonUtil.toJson(m));
+		// System.out.println("toInboxMessage-------" + JsonUtil.toJson(m));
 		return event;
 	}
 
 	public InboxMessage toInboxMessage(FacebookMessaging m, ChannelConfig channelConfig) {
-		
+
 		// Create Default Message from Channel
 		InboxMessage inboxMessage = this.createInboxMessage(channelConfig);
 
@@ -118,8 +111,8 @@ public class InstagramConnector extends AbstractConnector<InstagramConfig, Insta
 		// Set Additional info
 		inboxMessage.setFrom(csid);
 		inboxMessage.to().add(m.getRecipient().get("id"));
-		
-		//System.out.println("toInboxMessage======" + JsonUtil.toJson(inboxMessage));
+
+		// System.out.println("toInboxMessage======" + JsonUtil.toJson(inboxMessage));
 
 		/**
 		 * https://developers.facebook.com/docs/messenger-platform/instagram/features/webhook
@@ -184,9 +177,9 @@ public class InstagramConnector extends AbstractConnector<InstagramConfig, Insta
 			report.setChangeStamp(m.getTimestamp());
 			report.setStatus(Status.DELTD);
 		}
-		
-		//System.out.println("toMessageReport======" + JsonUtil.toJson(report));
-		
+
+		// System.out.println("toMessageReport======" + JsonUtil.toJson(report));
+
 		return report;
 	}
 
@@ -217,7 +210,7 @@ public class InstagramConnector extends AbstractConnector<InstagramConfig, Insta
 				messageBoxEvent.addMessageReport(toMessageReport(m, channelConfig));
 			} else if (ArgUtil.is(m.getMessage()) || ArgUtil.is(m.getPostBack())) {
 				InboxMessage inboxMessage = toInboxMessage(m, channelConfig);
-				if(!ArgUtil.areEqual(channelConfig.getLane(), inboxMessage.contact().getCsid())) {
+				if (!ArgUtil.areEqual(channelConfig.getLane(), inboxMessage.contact().getCsid())) {
 					messageBoxEvent.addInboxMessage(inboxMessage);
 				}
 			}

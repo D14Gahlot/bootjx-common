@@ -58,15 +58,9 @@ public class TwitterConnector extends AbstractConnector<TwitterConfigDetails, Tw
 
 	@Override
 	public void onSend(ChannelConfig channelConfig, ChatContactDoc chatContactDoc, OutboxMessage outboxMessage) {
-		try {
-			template(channelConfig, chatContactDoc, outboxMessage);
-			twitterClient.send(channelConfig, outboxMessage);
-			outboxMessage.updateStatus(OutboxMessage.Status.SENT);
-		} catch (Exception e) {
-			outboxMessage.updateStatus(OutboxMessage.Status.SENT_ERR);
-			outboxMessage.logs().add(e.getMessage());
-			LOGGER.error("SEND ERROR", e);
-		}
+		template(channelConfig, chatContactDoc, outboxMessage);
+		twitterClient.send(channelConfig, outboxMessage);
+		outboxMessage.updateStatus(OutboxMessage.Status.SENT);
 	}
 
 	@Override

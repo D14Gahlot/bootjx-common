@@ -136,11 +136,16 @@ public class ConnectorHandlerFactory extends ScopedBeanFactory<String, Connector
 					break;
 				}
 			} catch (Exception e) {
-				outboxMessage.updateStatus(Message.Status.SENT_ERR);
-				outboxMessage.logs().add(e.getMessage());
-				LOGGER.error("SEND ERROR", e);
+				onException(channelConfig, chatContactDoc, outboxMessage, e);
 			}
 
+		}
+
+		default public void onException(ChannelConfig channelConfig, ChatContactDoc chatContactDoc,
+				OutboxMessage outboxMessage, Exception e) {
+			outboxMessage.updateStatus(Message.Status.SENT_ERR);
+			outboxMessage.logs().add(e.getMessage());
+			LOGGER.error("SEND ERROR", e);
 		}
 
 		void onSend(ChannelConfig channelConfig, ChatContactDoc chatContactDoc, OutboxMessage outboxMessage);

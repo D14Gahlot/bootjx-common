@@ -10,16 +10,15 @@ import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorMapping;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.dict.FileType;
 import com.boot.jx.postman.PMConstants.CHANNEL_TYPE;
-import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.client.PMFileStoreClient;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
+import com.boot.jx.postman.fb.FacbookAttachment;
 import com.boot.jx.postman.fb.FacebooClient;
 import com.boot.jx.postman.fb.FacebookEntry;
 import com.boot.jx.postman.fb.FacebookHookRequest;
-import com.boot.jx.postman.fb.FacebookUserProfile;
-import com.boot.jx.postman.fb.FacbookAttachment;
 import com.boot.jx.postman.fb.FacebookMessaging;
+import com.boot.jx.postman.fb.FacebookUserProfile;
 import com.boot.jx.postman.manager.ChatLogger;
 import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.InboxMessage;
@@ -33,7 +32,6 @@ import com.boot.jx.postman.plugin.ChannelPluginProvider;
 import com.boot.jx.postman.plugin.FacebookPlugin;
 import com.boot.jx.postman.plugin.FacebookPlugin.FacebookConfigDetails;
 import com.boot.jx.postman.query.ChatContactQuery;
-import com.boot.jx.utils.PostManUtil;
 import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
 
@@ -62,15 +60,9 @@ public class FacebookConnector extends AbstractConnector<FacebookConfigDetails, 
 	}
 
 	public void onSend(ChannelConfig channelConfig, ChatContactDoc chatContactDoc, OutboxMessage outboxMessage) {
-		try {
-			template(channelConfig, chatContactDoc, outboxMessage);
-			facebooClient.send(channelConfig, outboxMessage);
-			outboxMessage.updateStatus(Message.Status.SENT);
-		} catch (Exception e) {
-			outboxMessage.updateStatus(OutboxMessage.Status.SENT_ERR);
-			outboxMessage.logs().add(e.getMessage());
-			LOGGER.error("SEND ERROR", e);
-		}
+		template(channelConfig, chatContactDoc, outboxMessage);
+		facebooClient.send(channelConfig, outboxMessage);
+		outboxMessage.updateStatus(Message.Status.SENT);
 	}
 
 	@Override
@@ -209,7 +201,7 @@ public class FacebookConnector extends AbstractConnector<FacebookConfigDetails, 
 				messageBoxEvent.addMessageReport(toMessageReport(m, channelConfig));
 			} else if (ArgUtil.is(m.getMessage()) || ArgUtil.is(m.getPostBack())) {
 				InboxMessage inboxMessage = toInboxMessage(m, channelConfig);
-				if(!ArgUtil.areEqual(channelConfig.getLane(), inboxMessage.contact().getCsid())) {
+				if (!ArgUtil.areEqual(channelConfig.getLane(), inboxMessage.contact().getCsid())) {
 					messageBoxEvent.addInboxMessage(inboxMessage);
 				}
 			}

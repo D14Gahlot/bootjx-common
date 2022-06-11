@@ -1,5 +1,8 @@
 package com.boot.jx.connectors;
 
+import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.List;
 import java.util.Properties;
@@ -7,7 +10,6 @@ import java.util.regex.Pattern;
 
 import javax.activation.DataHandler;
 import javax.activation.DataSource;
-import javax.activation.FileDataSource;
 import javax.activation.URLDataSource;
 import javax.mail.BodyPart;
 import javax.mail.MessagingException;
@@ -249,14 +251,9 @@ public class EmailConnector extends AbstractConnector<EmailConfigDetails, EmailP
 				t.close();
 			}
 
-		} catch (Exception e) {
-			outboxMessage.updateStatus(OutboxMessage.Status.SENT_ERR);
-			String log = null;
-			if (e instanceof AmxApiException) {
-				outboxMessage.logs().add(((AmxApiException) e).getErrorKey());
-			}
-			outboxMessage.logs().add(e.getMessage());
-			LOGGER.error("SEND ERROR", e);
+		} catch (AmxApiException | MessagingException | MalformedURLException | UnsupportedEncodingException
+				| URISyntaxException e) {
+			onException(channelConfig, chatContactDoc, outboxMessage, e);
 		}
 	}
 
