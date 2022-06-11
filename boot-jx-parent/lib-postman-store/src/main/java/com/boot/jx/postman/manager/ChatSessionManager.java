@@ -3,6 +3,7 @@ package com.boot.jx.postman.manager;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+import java.util.Map.Entry;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,6 +13,8 @@ import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Component;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 
 import com.boot.jx.api.ApiFieldError;
 import com.boot.jx.api.ApiResponseUtil;
@@ -232,7 +235,7 @@ public class ChatSessionManager {
 			criterias.add(new Criteria().orOperator(Criteria.where("assignedToAgent").is(null),
 					Criteria.where("assignedToAgent").exists(false)));
 		} else if (query.contains(CHAT_STATE.ACTIVE)) {
-			//query.add(CHAT_MODE.AGENT);
+			// query.add(CHAT_MODE.AGENT);
 			criterias.add(new Criteria() //
 					.andOperator(Criteria.where("active").is(true) //
 							.orOperator(Criteria.where("resolved").exists(false), Criteria.where("resolved").is(false)))
@@ -274,6 +277,25 @@ public class ChatSessionManager {
 				contactCriteris.add(Criteria.where("contactType").is(contactType));
 			}
 			criterias.add(new Criteria().orOperator(contactCriteris.toArray(new Criteria[contactCriteris.size()])));
+		}
+
+		if (query.channels().size() > 0) {
+			List<Criteria> channelCriteris = new ArrayList<Criteria>();
+			for (String channel : query.channels()) {
+				String[] c = channel.split(":");
+				channelCriteris.add(Criteria.where("contact.channelType").is(c[0]).and("contact.lane").is(c[1]));
+			}
+			criterias.add(new Criteria().orOperator(channelCriteris.toArray(new Criteria[channelCriteris.size()])));
+		}
+
+		if (query.tags().size() > 0) {
+			MultiValueMap<String, String> tags = new LinkedMultiValueMap<String, String>();
+			for (QuickTag tag : query.tags()) {
+				tags.add(tag.getCategory(), tag.getId());
+			}
+			for (Entry<String, List<String>> tagEntry : tags.entrySet()) {
+				criterias.add(Criteria.where("tagId").in(tagEntry.getValue()));
+			}
 		}
 
 		if (query.contains(CHAT_ASSIGN_GROUP.ME)) {
@@ -332,9 +354,9 @@ public class ChatSessionManager {
 				// Limit
 				.with(new Sort(Direction.DESC, "updated.hour")).limit(limit);
 		// System.out.println(query2.toString());
-		//if (LOGGER.isDebugEnabled()) {
-			ApiResponseUtil.addLog(query2.toString());
-		//}
+		// if (LOGGER.isDebugEnabled()) {
+		ApiResponseUtil.addLog(query2.toString());
+		// }
 		return sessionStore.find(
 				CommonMongoQueryBuilder.collection(ChatSessionDoc.class).query(query2).skipDBRefByNames("lastMsg"));
 	}
