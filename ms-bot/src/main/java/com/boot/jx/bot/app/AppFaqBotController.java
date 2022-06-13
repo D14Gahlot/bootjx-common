@@ -65,7 +65,7 @@ public class AppFaqBotController extends CommonBotController {
 		        }
 			}
 		}
-		buttons.add(new TmplElement().name("exit").label("Faq Menu"));
+		buttons.add(new TmplElement().name("exit").label("FAQ Menu"));
 		reply(new OutboxMessage().message("Select Category").options("buttons", buttons));
 		next("on_faq_parent_select");
 		
