@@ -12,4 +12,6 @@ public class MsgSession {
 	@ApiMockModelProperty(example = "xsds34434", value = "SessionId")
 	public String sessionId;
 
+	@ApiMockModelProperty(example = "xsds34434-323-232", value = "RoutingId")
+	public String routingId;
 }

@@ -63,30 +63,11 @@ public class AgMainController {
 	@Autowired
 	private ChatSessionFactory chatSessionFactory;
 
-	@ApiRequest(type = RequestType.POLL)
-	@RequestMapping(value = "/api/sessions/assignments", method = { RequestMethod.GET })
-	public ApiResponse<ChatSessionDTO, AgentSessionDoc> getSessionsAssignments(
-			@RequestParam(defaultValue = "false") boolean withMessage, @RequestParam(required = false) Boolean status,
-			@RequestParam(required = false) Boolean away,
-			@RequestParam(required = false, defaultValue = "HISTORY") String tab,
-			@RequestParam(required = false) String search, @RequestParam(required = false) String searchStatus,
-			@RequestParam(required = false, defaultValue = "0") int limit) {
-
-		List<ChatSessionDTO> chatSessionDtos = new ArrayList<ChatSessionDTO>();
-		SessionSearchQuery query = new SessionSearchQuery();
+	private ApiResponse<ChatSessionDTO, AgentSessionDoc> getSessionAssignments(boolean withMessage, Boolean status,
+			Boolean away, List<ChatSessionDTO> chatSessionDtos, SessionSearchQuery query) {
 		if (agentSession.isLoggedIn() && ArgUtil.is(agentSession.getAgentDept())) {
-			List<ChatSessionDoc> sessions = null;
-
-			ApiResponseUtil.addLog("Search Results");
-
-			query.parse(search);
-			query.limit = limit;
-			query.add(ArgUtil.parseAsEnumT(tab, CHAT_ASSIGN_GROUP.class));
-			query.add(ArgUtil.parseAsEnumT(searchStatus, CHAT_STATE.class));
-
-			sessions = chatSessionManager.findChatSessionDocByAgentAndUnAssigned(query, agentSession.getAgentCode(),
-					agentSession.getAgentDept());
-
+			List<ChatSessionDoc> sessions = chatSessionManager.findChatSessionDocByAgentAndUnAssigned(query,
+					agentSession.getAgentCode(), agentSession.getAgentDept());
 			for (ChatSessionDoc chatSessionDoc : sessions) {
 				ChatSessionDTO chatSessionDto = chatArchive.getChatSession(chatSessionDoc);
 				// chatSessionDto = chatArchive.withContact(chatSessionDto);
@@ -107,6 +88,32 @@ public class AgMainController {
 		}
 		return new ApiResponse<ChatSessionDTO, AgentSessionDoc>().results(chatSessionDtos)
 				.details(agentSessionService.getAgentSessions()).query(query);
+	}
+
+	@ApiRequest(type = RequestType.POLL)
+	@RequestMapping(value = "/api/sessions/assignments", method = { RequestMethod.GET })
+	public ApiResponse<ChatSessionDTO, AgentSessionDoc> getSessionsAssignments(
+			@RequestParam(defaultValue = "false") boolean withMessage, @RequestParam(required = false) Boolean status,
+			@RequestParam(required = false) Boolean away,
+			@RequestParam(required = false, defaultValue = "HISTORY") String tab,
+			@RequestParam(required = false) String search, @RequestParam(required = false) String searchStatus,
+			@RequestParam(required = false, defaultValue = "0") int limit) {
+		SessionSearchQuery query = new SessionSearchQuery();
+		query.parse(search);
+		query.limit = limit;
+		query.add(ArgUtil.parseAsEnumT(tab, CHAT_ASSIGN_GROUP.class));
+		query.add(ArgUtil.parseAsEnumT(searchStatus, CHAT_STATE.class));
+		return getSessionAssignments(withMessage, status, away, new ArrayList<ChatSessionDTO>(), query);
+	}
+
+	@ApiRequest(type = RequestType.POLL)
+	@RequestMapping(value = "/api/sessions/assignments", method = { RequestMethod.POST })
+	public ApiResponse<ChatSessionDTO, AgentSessionDoc> getSessionsAssignments(@RequestBody SessionSearchQuery query,
+			@RequestParam(defaultValue = "false") boolean withMessage, @RequestParam(required = false) Boolean status,
+			@RequestParam(required = false) Boolean away, @RequestParam(required = false) String search) {
+		List<ChatSessionDTO> chatSessionDtos = new ArrayList<ChatSessionDTO>();
+		query.parse(search);
+		return getSessionAssignments(withMessage, status, away, new ArrayList<ChatSessionDTO>(), query);
 	}
 
 	@RequestMapping(value = { "/api/session/compose" }, method = { RequestMethod.GET })

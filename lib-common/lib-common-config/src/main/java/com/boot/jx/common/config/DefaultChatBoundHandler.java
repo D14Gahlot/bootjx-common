@@ -218,6 +218,7 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 		msg.contactId = contact.contactId;
 		msg.session = new MsgSession();
 		msg.session.sessionId = inboxMessage.getSessionId();
+		msg.session.routingId = inboxMessage.getSession().getRoutingId();
 
 		msg.timestamp = inboxMessage.getTimestamp();
 		msg.tags = inboxMessage.getTags();

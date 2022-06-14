@@ -25,7 +25,7 @@ public class SessionSearchQuery {
 		, ON // Channels
 		, IS // State
 		, TO // AGENT,BOT,WEBHOOK
-		, STATUS
+		, STATUS // Status
 	}
 
 	public String text;
@@ -33,8 +33,9 @@ public class SessionSearchQuery {
 	public TreeSet<ContactType> contactTypes;
 	public TreeSet<CHAT_STATE> states;
 	public TreeSet<CHAT_STATUS> status;
-	public TreeSet<QuickTag> tags;
 	public TreeSet<CHAT_MODE> modes;
+	public TreeSet<QuickTag> tags;
+	public TreeSet<String> channels;
 
 	public long fromStamp;
 	public long toStamp;
@@ -73,6 +74,13 @@ public class SessionSearchQuery {
 			this.contactTypes = new TreeSet<ContactType>();
 		}
 		return this.contactTypes;
+	}
+
+	public TreeSet<String> channels() {
+		if (channels == null) {
+			this.channels = new TreeSet<String>();
+		}
+		return this.channels;
 	}
 
 	public TreeSet<CHAT_MODE> modes() {
