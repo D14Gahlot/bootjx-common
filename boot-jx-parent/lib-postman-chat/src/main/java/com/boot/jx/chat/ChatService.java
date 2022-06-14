@@ -265,12 +265,13 @@ public class ChatService {
 		}
 		messageContext.setChatConext(doc);
 
-		if (!ArgUtil.is(doc.getMeta()) || !ArgUtil.is(doc.getMeta().getSessionId(), inboxMessage.getSessionId())
-				|| !ArgUtil.is(doc.getMeta().getQueueCode(), inboxMessage.session().getQueue())) {
+		if (!ArgUtil.is(doc.getMeta())
+				|| !ArgUtil.is(doc.getMeta().getRoutingId(), inboxMessage.session().getRoutingId())) {
 			LOGGER.debug("Loading chat conewxt:newSession");
 			doc.setMeta(new ChatMeta());
 			messageContext.chat().setQueueCode(inboxMessage.session().getQueue());
 			messageContext.chat().setSessionId(inboxMessage.getSessionId());
+			messageContext.chat().setRoutingId(inboxMessage.session().getRoutingId());
 		}
 
 		// messageStore.create(inboxMessage);
