@@ -54,7 +54,7 @@ public class InboundBottler extends ATaskLimiter {
 		String onhold = hold().get(contactId);
 
 		if (ArgUtil.isEqual(onhold, "QUEUING")) {
-			hold(contactId, new MessageHold().inboxMessage(inboxMessage));
+			queue(contactId, new MessageHold().inboxMessage(inboxMessage));
 			throttle(new TunnelTask().name("MESSAGE_DEQUEUE").id(contactId).intervalSeconds(1));
 		} else {
 			hold().put(contactId, "QUEUING");
@@ -63,7 +63,7 @@ public class InboundBottler extends ATaskLimiter {
 		}
 		onhold = hold().get(contactId);
 		if (!ArgUtil.isEqual(onhold, "QUEUING")) {
-			this.release(contactId);
+			this.dequeue(contactId);
 		}
 
 	}
@@ -73,7 +73,7 @@ public class InboundBottler extends ATaskLimiter {
 		String onhold = hold().get(contactId);
 
 		if (ArgUtil.isEqual(onhold, "QUEUING")) {
-			hold(contactId, new MessageHold().event(event).pmArgs(pmArgs));
+			queue(contactId, new MessageHold().event(event).pmArgs(pmArgs));
 			throttle(new TunnelTask().name("MESSAGE_DEQUEUE").id(contactId).intervalSeconds(1));
 		} else {
 			hold().put(contactId, "QUEUING");
@@ -82,13 +82,13 @@ public class InboundBottler extends ATaskLimiter {
 		}
 		onhold = hold().get(contactId);
 		if (!ArgUtil.isEqual(onhold, "QUEUING")) {
-			this.release(contactId);
+			this.dequeue(contactId);
 		}
 
 		return event;
 	}
 
-	private void release(String contactId) {
+	private void dequeue(String contactId) {
 		CommonMongoQueryBuilder builder2 = new CommonMongoQueryBuilder();
 		builder2.with(Criteria.where("contactId").is(contactId).and("appType").is(appConfig.getAppType()))
 				.sortBy("timestamp", Direction.ASC).limit(1);
@@ -104,7 +104,7 @@ public class InboundBottler extends ATaskLimiter {
 
 	}
 
-	private void hold(String contactId, MessageHold hold) {
+	private void queue(String contactId, MessageHold hold) {
 		hold.setContactId(contactId);
 		hold.setTimestamp(System.currentTimeMillis());
 		hold.setAppType(appConfig.getAppType());
@@ -116,7 +116,7 @@ public class InboundBottler extends ATaskLimiter {
 		if ("MESSAGE_DEQUEUE".equals(task.getName())) {
 			String contactId = task.getId();
 			hold().put(contactId, "DEQUEUING");
-			this.release(contactId);
+			this.dequeue(contactId);
 		}
 	}
 
