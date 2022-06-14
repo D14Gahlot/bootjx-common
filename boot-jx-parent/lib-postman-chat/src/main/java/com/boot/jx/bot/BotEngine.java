@@ -14,6 +14,7 @@ import java.util.regex.Pattern;
 
 import javax.annotation.PostConstruct;
 
+import org.redisson.api.RedissonClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.aop.framework.AopProxyUtils;
@@ -22,7 +23,9 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 import com.boot.jx.AppContextUtil;
+import com.boot.jx.cache.CacheBox;
 import com.boot.jx.chat.ChatService;
+import com.boot.jx.def.ICacheBox;
 import com.boot.jx.postman.ClientApp;
 import com.boot.jx.postman.PMConstants;
 import com.boot.jx.postman.PMConstants.APP_TYPE;
@@ -209,23 +212,6 @@ public class BotEngine {
 		return null;
 	}
 
-	/**
-	 * Invoke the methods with matching {@link ChatMapping#events()} and
-	 * {@link ChatMapping#pattern()} in events received from Slack/Facebook.
-	 *
-	 * @param event received from facebook
-	 */
-	@Async
-	public void invokeMethodsAsync(InboxMessage inboxMessageOriginal) {
-		invokeMethods(inboxMessageOriginal);
-	}
-
-	public void invokeMethods(InBoundEvent assignEvent) {
-		ChatSessionDoc session = messageContext.session().getDoc();
-		botService.loadChatContext(assignEvent.getContactId(), assignEvent);
-		invokeMethods(session, assignEvent);
-	}
-
 	public void invokeMethods(InboxMessage inboxMessageOriginal) {
 		String contactId = PostManUtil.createContactId(inboxMessageOriginal);
 		InboxMessage inboxMessage = EntityDtoUtil.entityToDto(inboxMessageOriginal, new InboxMessage());
@@ -359,6 +345,23 @@ public class BotEngine {
 			error("Error invoking controller: ", e);
 		}
 
+	}
+
+	/**
+	 * Invoke the methods with matching {@link ChatMapping#events()} and
+	 * {@link ChatMapping#pattern()} in events received from Slack/Facebook.
+	 *
+	 * @param event received from facebook
+	 */
+	@Async
+	public void invokeMethodsAsync(InboxMessage inboxMessageOriginal) {
+		invokeMethods(inboxMessageOriginal);
+	}
+
+	public void invokeMethods(InBoundEvent assignEvent) {
+		ChatSessionDoc session = messageContext.session().getDoc();
+		botService.loadChatContext(assignEvent.getContactId(), assignEvent);
+		invokeMethods(session, assignEvent);
 	}
 
 	private void error(String string, Throwable cause) {

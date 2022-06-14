@@ -138,7 +138,7 @@ public class InBoundService extends ATaskLimiter {
 	}
 
 	public void invokeMethodsRelease(InboxMessage inboxMessageOriginal) {
-		List<InboxMessage> msgs = messageStore.release(inboxMessageOriginal);
+		List<InboxMessage> msgs = messageStore.releaseBySession(inboxMessageOriginal);
 		for (InboxMessage inboxMessage : msgs) {
 			this.invokeMethodsInternalSafely(inboxMessage, false);
 		}

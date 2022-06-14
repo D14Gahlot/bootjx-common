@@ -265,11 +265,15 @@ public final class CollectionUtil {
 		return new ArrayList<T>();
 	}
 
-	public static <T> T getOne(List<T> list) {
+	public static <T> T first(List<T> list) {
 		if (ArgUtil.isEmpty(list)) {
 			return null;
 		}
 		return list.get(0);
+	}
+
+	public static <T> T getOne(List<T> list) {
+		return first(list);
 	}
 
 	public static <T> T first(Set<T> list) {

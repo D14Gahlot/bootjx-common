@@ -194,6 +194,10 @@ public class PostManUtil {
 		return CHAT_MODE.AGENT.toString().equals(inboxMessage.session().getMode());
 	}
 
+	public static String ROUTING_ID(String sessionId, String queueCode) {
+		return String.format("%s_%s_%s", sessionId, queueCode, UniqueID.generateString());
+	}
+
 	public static String CONTACT_ID(Contactable contactable) {
 		return createContactId(contactable);
 	}

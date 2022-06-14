@@ -60,6 +60,9 @@ public class InBoundController {
 	@Autowired
 	private ChatSessionService chatSessionService;
 
+	@Autowired
+	private InboundBottler inboundBottler;
+
 	@ApiVendorHeaders
 	@RequestMapping(value = "/int/inbound/callback", method = RequestMethod.POST)
 	public InboxMessage onInboundCallback(@RequestBody InboxMessage inboxMessage,
@@ -71,7 +74,7 @@ public class InBoundController {
 //	    ChannelConfig channelConfig = config.channel(channelId);
 //	    ConnectorHandler connector = connectorHandlerFactory.get(channelConfig);
 //	    connector.prompt(inboxMessage);
-			inBoundService.invokeMethods(inboxMessage);
+			inboundBottler.push(inboxMessage);
 		}
 		return inboxMessage;
 	}
@@ -111,7 +114,7 @@ public class InBoundController {
 	public InBoundEvent inboundEvent(@RequestBody MapModel map) {
 		PMArgs pmArgs = map.keyEntry("pmArgs").as(PMArgs.class);
 		InBoundEvent event = map.keyEntry("event").as(InBoundEvent.class);
-		return chatSessionService.sessionEvent(event, pmArgs);
+		return inboundBottler.sessionEvent(event, pmArgs);
 	}
 
 	@RequestMapping(value = "/ext/release/v2/", method = { RequestMethod.POST })

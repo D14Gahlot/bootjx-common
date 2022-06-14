@@ -43,6 +43,7 @@ import com.boot.jx.postman.model.ext.InBoundEvent.SessionRouted;
 import com.boot.jx.postman.store.MessageContext;
 import com.boot.jx.postman.store.MessageStore.EVENTS;
 import com.boot.jx.postman.store.SessionStore;
+import com.boot.jx.utils.PostManUtil;
 import com.boot.model.MapModel.NodeEntry;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
@@ -427,8 +428,10 @@ public class ChatSessionManager {
 				chatSessionDoc.setAssignedToQueue(queueCode);
 				APP_TYPE appType = APP_TYPE.from(apiKeyConfig.getAppType());
 				chatSessionDoc.setMode(appType.getMode().name());
-				inBoundEvent.sessionRouted.routingId = String.format("%s_%s_%s", chatSessionDoc.getSessionId(),
-						apiKeyConfig.getId(), UniqueID.generateString());
+
+				inBoundEvent.sessionRouted.routingId = PostManUtil.ROUTING_ID(chatSessionDoc.getSessionId(),
+						apiKeyConfig.getQueue());
+
 				chatSessionDoc.setRoutingId(inBoundEvent.sessionRouted.routingId);
 			} else {
 				ApiResponseUtil.throwInputException(new ApiFieldError().field("queue").codeKey("INVALID_QUEUE")

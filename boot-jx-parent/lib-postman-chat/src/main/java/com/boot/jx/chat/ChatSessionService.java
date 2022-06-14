@@ -115,6 +115,7 @@ public class ChatSessionService {
 				inboxMessage.session().setDept(session.getAssignedToDept());
 				inboxMessage.session().setAgent(session.getAssignedToAgent());
 				inboxMessage.session().setBot(session.getAssignedToBot());
+				inboxMessage.session().setRoutingId(session.getRoutingId());
 			}
 		}
 

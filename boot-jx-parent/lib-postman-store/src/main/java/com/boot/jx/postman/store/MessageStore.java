@@ -466,17 +466,16 @@ public class MessageStore extends CommonMongoTemplateAbstract {
 		mongoTemplate.save(hold);
 	}
 
-	public List<InboxMessage> release(InboxMessage inboxMessageOriginal) {
+	public List<InboxMessage> releaseBySession(InboxMessage inboxMessageOriginal) {
 		String contactId = PostManUtil.CONTACT_ID(inboxMessageOriginal.contact());
 		CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder();
-		builder.with(Criteria.where("contactId").is(contactId));
+		builder.with(Criteria.where("contactId").is(contactId).and("appType").is(appConfig.getAppType()));
 		builder.set("sessionId", inboxMessageOriginal.getSessionId());
 		mongoTemplate.updateMulti(builder.getQuery(), builder.getUpdate(), MessageHold.class);
 
 		CommonMongoQueryBuilder builder2 = new CommonMongoQueryBuilder();
-		builder2.with(
-				Criteria.where("contactId").is(contactId).and("sessionId").is(inboxMessageOriginal.getSessionId()))
-				.sortBy("timestamp");;
+		builder2.with(Criteria.where("contactId").is(contactId).and("sessionId").is(inboxMessageOriginal.getSessionId())
+				.and("appType").is(appConfig.getAppType())).sortBy("timestamp");;
 		List<MessageHold> docs = mongoTemplate.findAllAndRemove(builder2.getQuery(), MessageHold.class);
 		List<InboxMessage> x = docs.stream().map(d -> d.getInboxMessage()).collect(Collectors.toList());
 		return x;
