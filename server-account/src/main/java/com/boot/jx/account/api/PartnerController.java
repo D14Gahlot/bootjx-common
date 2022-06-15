@@ -1,6 +1,8 @@
 package com.boot.jx.account.api;
 
 import java.security.NoSuchAlgorithmException;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -13,6 +15,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -273,7 +276,8 @@ public class PartnerController {
 
 	@ResponseBody
 	@RequestMapping(value = { "/api/domain" }, method = { RequestMethod.GET })
-	public ApiResponse<DomainDoc, Object> getDomains(@RequestParam(required = false) String user) {
+	public ApiResponse<DomainDoc, Object> getDomains(@RequestParam(required = false) String user,
+			@RequestParam(required = false) String domain) {
 		BusinessUserDoc currentUser = userSessionBean.domainUser();
 
 		if (!ArgUtil.is(currentUser)) {
@@ -281,12 +285,17 @@ public class PartnerController {
 		}
 
 		BusinessUserDoc domainUser = currentUser;
+		Collection<DomainDoc> domainDocs = domainUser.getDomains();
 
-		if (userSessionBean.role().contains(PMConstants.USER_ROLE.DUPER_USER) && ArgUtil.is(user)) {
-			domainUser = accountStore.findUserByEmail(user);
+		if (userSessionBean.role().contains(PMConstants.USER_ROLE.DUPER_USER)) {
+			if (ArgUtil.is(user)) {
+				domainUser = accountStore.findUserByEmail(user);
+				domainDocs = domainUser.getDomains();
+			} else if (ArgUtil.is(domain)) {
+				domainDocs = accountStore.find(CommonMongoQueryBuilder.collection(DomainDoc.class)
+						.with(Criteria.where("domain").regex(domain, "i")));
+			}
 		}
-
-		Set<DomainDoc> domainDocs = domainUser.getDomains();
 
 		ApiResponse<DomainDoc, Object> resp = ApiResponse.instance(DomainDoc.class);
 
