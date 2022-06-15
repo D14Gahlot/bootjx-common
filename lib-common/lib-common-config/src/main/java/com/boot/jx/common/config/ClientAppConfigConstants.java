@@ -39,8 +39,8 @@ public class ClientAppConfigConstants {
 
 				new ConfigMeta().title("Default Agent Team").path("props.deptCode")
 						.optionsSource("getx:/api/admins/dept").optionsKey("code").optionsLabel("Name").group("Team"),
-				new ConfigMeta().title("Default Agent").path("props.agentCode")
-						.optionsSource("getx:/api/admins/agent").optionsKey("code").optionsLabel("Name").group("Team"),
+				new ConfigMeta().title("Default Agent").path("props.agentCode").optionsSource("getx:/api/admins/agent")
+						.optionsKey("code").optionsLabel("Name").group("Team"),
 				new ConfigMeta().title("When Agent is connected").path("props.agent_connected")
 						.optionsSource("getx:/api/tmpl/hsm").optionsKey("code").optionsLabel("desc").group("Templates"),
 				new ConfigMeta().title("When no agent is found").path("props.agent_notfound")
@@ -90,11 +90,11 @@ public class ClientAppConfigConstants {
 
 		APP_CONFIGS.put(APP_TYPE.APP_ROUTER, new ConfigMeta[] {
 
-				new ConfigMeta().inputType(INPUT_TYPE.MESSAGE, MESSAGE_TYPE.INFO).title("App Router")
+				new ConfigMeta().inputType(INPUT_TYPE.MESSAGE, MESSAGE_TYPE.INFO).title("Session based App Router")
 						.desc("Use this app to route session based on customer's session status").group("About App"),
 
 				new ConfigMeta().title("First-time customer").path("props.connect_first")
-						.desc("First customers, with not Last Conversation")
+						.desc("First time customers, with no Last Conversation hitsory")
 						.optionsSource("getx:/api/options/inbound_queue").optionsKey("code").optionsLabel("code")
 						.group("Apps"),
 				new ConfigMeta().title("Returning customer to start new conversation").path("props.connect_next")
@@ -111,8 +111,8 @@ public class ClientAppConfigConstants {
 		APP_CONFIGS.put(APP_TYPE.QUICK_GALLERY, new ConfigMeta[] {
 
 				new ConfigMeta().inputType(INPUT_TYPE.MESSAGE, MESSAGE_TYPE.INFO).title("Quick Gallery")
-						.desc("Use this app to giver user an option menu to Explore Quick Gallery."
-								+ " Selected template should have Item code in button code")
+						.desc("Use this app to give user an option menu to Explore Quick Gallery."
+								+ "\n Selected template should have Item code in button code")
 						.group("About App"),
 
 				new ConfigMeta().title("Item Type").path("props.gallery_item_type").options(
@@ -120,13 +120,21 @@ public class ClientAppConfigConstants {
 						new ConfigOption("QUICK_ACTION").label("QUICK_ACTION"),
 						new ConfigOption("QUICK_REPLY").label("QUICK_REPLY")),
 
-				new ConfigMeta().title("Category Menu Template").path("props.gallery_menu_template").group("TEMPLATES")
-						.optionsSource("getx:/api/tmpl/hsm").optionsKey("code").optionsLabel("code"),
+				new ConfigMeta().title("Category Menu Template")
+						.desc("If Set, will show this template instead of all categories, "
+								+ "Selected template should use category name as button code")
+						.path("props.gallery_menu_template").group("TEMPLATES").optionsSource("getx:/api/tmpl/hsm")
+						.optionsKey("code").optionsLabel("code").optional(),
 
-				new ConfigMeta().title("Item Menu Template").path("props.item_menu_template").group("TEMPLATES")
-						.optionsSource("getx:/api/tmpl/hsm").optionsKey("code").optionsLabel("code"),
+				new ConfigMeta().title("Item Menu Template")
+						.desc("If Set, will show this template instead of all categories, "
+								+ "Selected template should use Item Code name as button code")
+						.path("props.item_menu_template").group("TEMPLATES").optionsSource("getx:/api/tmpl/hsm")
+						.optionsKey("code").optionsLabel("code").optional(),
 
-				new ConfigMeta().title("Item Menu Category").path("props.item_menu_category")
+				new ConfigMeta().title("Item Menu Category")
+						.desc("if set, it will skip the category menu and display items in this category")
+						.path("props.item_menu_category").optional()
 
 		});
 
@@ -140,8 +148,10 @@ public class ClientAppConfigConstants {
 						+ "\n[ & QuickMedia] " //
 						+ "\n[ % QuickReply] "//
 				).group("About App"),
-				new ConfigMeta().title("First Options Template").path("props.template").group("TEMPLATES")
-						.optionsSource("getx:/api/tmpl/hsm").optionsKey("code").optionsLabel("code") });
+				new ConfigMeta().title("First Options Template")
+						.desc("Use coding convetions in template for this to work").path("props.template")
+						.group("TEMPLATES").optionsSource("getx:/api/tmpl/hsm").optionsKey("code")
+						.optionsLabel("code") });
 
 		APP_CONFIGS.put(APP_TYPE.FEEDBACK,
 				new ConfigMeta[] { new ConfigMeta().inputType(INPUT_TYPE.MESSAGE, MESSAGE_TYPE.INFO).title("Feedback")
@@ -165,15 +175,14 @@ public class ClientAppConfigConstants {
 								new ConfigOption(MESSAGE_SENDER_TYPE.SYSTEM).label("System"))
 
 				});
-		
-		
+
 		APP_CONFIGS.put(APP_TYPE.FAQ,
 				new ConfigMeta[] { new ConfigMeta().inputType(INPUT_TYPE.MESSAGE, MESSAGE_TYPE.INFO).title("Faq")
 						.desc("Use this app  to tranfer from FAQ bot to Bot Builder Menu"//
 						).group("About App"),
 						new ConfigMeta().title("Bot Builder Template").path("props.template").group("TEMPLATES")
 								.optionsSource("getx:/api/tmpl/hsm").optionsKey("code").optionsLabel("code"),
-			
+
 				});
 	}
 
