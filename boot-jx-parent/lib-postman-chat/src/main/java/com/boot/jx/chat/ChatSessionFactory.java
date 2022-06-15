@@ -159,7 +159,8 @@ public class ChatSessionFactory {
 		chatSessionDoc.contact().copyFrom(chatContactDoc);
 		chatSessionDoc.setTicketHash(sessionMessage.session().getTicketHash());
 		chatSessionDoc.setSubject(sessionMessage.getSubject());
-		chatSessionDoc.setRoutingId(PostManUtil.ROUTING_ID("", ""));
+		chatSessionDoc.setRoutingId(PostManUtil.ROUTING_ID("",
+				ArgUtil.nonEmpty(sessionMessage.route().getQueueCode(), sessionMessage.session().getQueue())));
 		sessionMessage.session().setFirstMessage(true);
 		return sessionStore.saveSession(chatSessionDoc);
 	}
