@@ -230,6 +230,12 @@ public final class CollectionUtil {
 		return elements.toArray(new String[elements.size()]);
 	}
 
+	public static String[] asArray(List<String> elements) {
+		if (elements == null)
+			return new String[0];
+		return elements.toArray(new String[elements.size()]);
+	}
+
 	@SafeVarargs
 	public static <T> T[] getArray(T... elements) {
 		return elements;
