@@ -87,7 +87,7 @@ public class CPanelController {
 	public ApiResponse<Object, Object> manageUserRol(
 			@ApiParam(allowableValues = USER_ROLE.ALLOWED) @RequestParam String role, @RequestParam String email,
 			@RequestParam boolean assign) {
-		BusinessUserDoc user = accountStore.findOneByEmail(email, BusinessUserDoc.class);
+		BusinessUserDoc user = accountStore.findUserByEmail(email);
 
 		if (!ArgUtil.is(user)) {
 			ApiResponseUtil.throwException("User Not found");

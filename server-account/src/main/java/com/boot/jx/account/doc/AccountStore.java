@@ -27,7 +27,7 @@ public class AccountStore extends CommonMongoTemplateAbstract {
 		return doc;
 	}
 
-	public BusinessUserDoc findOneByEmail(String email, Class<BusinessUserDoc> clazz) {
+	public BusinessUserDoc findUserByEmail(String email) {
 		return findOneByKey("contact.email", email, BusinessUserDoc.class);
 	}
 

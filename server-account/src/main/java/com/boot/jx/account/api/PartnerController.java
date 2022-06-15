@@ -2,6 +2,7 @@ package com.boot.jx.account.api;
 
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -38,10 +39,13 @@ import com.boot.jx.api.ApiFieldError;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.aws.AWSFileStore;
+import com.boot.jx.common.config.AppCommonAuthFilter.ACCESS_RULES;
 import com.boot.jx.common.config.ConfigConstants;
 import com.boot.jx.common.dto.UserLoginToken;
 import com.boot.jx.common.service.EmpAuthService;
+import com.boot.jx.http.ApiRequest;
 import com.boot.jx.http.CommonHttpRequest;
+import com.boot.jx.mongo.CommonMongoQueryBuilder;
 import com.boot.jx.postman.PMConstants;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PMEnvironment.PMCommonConfig;
@@ -145,7 +149,7 @@ public class PartnerController {
 	}
 
 	private BusinessUserDoc createUser(SignupContact signupContact) {
-		BusinessUserDoc account = accountStore.findOneByEmail(signupContact.getEmail(), BusinessUserDoc.class);
+		BusinessUserDoc account = accountStore.findUserByEmail(signupContact.getEmail());
 		if (ArgUtil.is(account)) {
 			ApiResponseUtil.throwDuplicateInputException("Email address already in use. Try reset password.",
 					new ApiFieldError().obzect("signupContact").field("email").codeKey("ValidEmailDuplicate")
@@ -193,7 +197,7 @@ public class PartnerController {
 	public ApiResponse<Object, Object> forgotPass(Model model, HttpServletRequest request,
 			HttpServletResponse httpServletResponse, @RequestParam String email) throws NoSuchAlgorithmException {
 
-		BusinessUserDoc accountDoc = accountStore.findOneByEmail(email, BusinessUserDoc.class);
+		BusinessUserDoc accountDoc = accountStore.findUserByEmail(email);
 
 		if (!ArgUtil.is(accountDoc)) {
 			ApiResponseUtil.throwException("Email not registered");
@@ -212,12 +216,13 @@ public class PartnerController {
 			HttpServletResponse httpServletResponse, @RequestParam String email, @RequestParam String password,
 			@RequestParam String newpass) throws NoSuchAlgorithmException {
 
-		BusinessUserDoc accountDoc = accountStore.findOneByEmail(email, BusinessUserDoc.class);
+		BusinessUserDoc accountDoc = accountStore.findUserByEmail(email);
 
 		if (!ArgUtil.is(accountDoc)
 				|| !ArgUtil.areEqual(CryptoUtil.getSHA2Hash(newpass), accountDoc.getMeta().getPassword())) {
-			//ApiResponseUtil.throwInputException(new ApiFieldError().obzect("login").field("password")
-			//		.codeKey("ValidCredentials").description("Invalid Email or Password"));
+			// ApiResponseUtil.throwInputException(new
+			// ApiFieldError().obzect("login").field("password")
+			// .codeKey("ValidCredentials").description("Invalid Email or Password"));
 		}
 
 		sessionService.login(accountDoc, request);
@@ -250,6 +255,15 @@ public class PartnerController {
 		return ApiResponse.build().message("Domain available");
 	}
 
+	@ApiRequest(rules = ACCESS_RULES.ONLY_DUPERUSER)
+	@ResponseBody
+	@RequestMapping(value = { "/api/users" }, method = { RequestMethod.GET })
+	public ApiResponse<Map<String, Object>, Object> getDomainUsers() {
+		List<BusinessUserDoc> domainUsers = accountStore
+				.find(CommonMongoQueryBuilder.collection(BusinessUserDoc.class).skipDBRef());
+		return ApiResponse.buildResults(domainUsers.stream().map(u -> u.toDTO()).collect(Collectors.toList()));
+	}
+
 	@ResponseBody
 	@RequestMapping(value = { "/pub/domain" }, method = { RequestMethod.GET })
 	public ApiResponse<DomainDoc, Object> getDomain(@RequestParam String domain) {
@@ -259,11 +273,17 @@ public class PartnerController {
 
 	@ResponseBody
 	@RequestMapping(value = { "/api/domain" }, method = { RequestMethod.GET })
-	public ApiResponse<DomainDoc, Object> getDomain() {
-		BusinessUserDoc domainUser = userSessionBean.domainUser();
+	public ApiResponse<DomainDoc, Object> getDomains(@RequestParam(required = false) String user) {
+		BusinessUserDoc currentUser = userSessionBean.domainUser();
 
-		if (!ArgUtil.is(domainUser)) {
+		if (!ArgUtil.is(currentUser)) {
 			ApiResponseUtil.throwException("Access Denied");
+		}
+
+		BusinessUserDoc domainUser = currentUser;
+
+		if (userSessionBean.role().contains(PMConstants.USER_ROLE.DUPER_USER) && ArgUtil.is(user)) {
+			domainUser = accountStore.findUserByEmail(user);
 		}
 
 		Set<DomainDoc> domainDocs = domainUser.getDomains();
@@ -380,7 +400,7 @@ public class PartnerController {
 					new ApiFieldError().field("domain").codeKey("ValidDomainNotFound").description("Domain Not found"));
 		}
 
-		BusinessUserDoc account = accountStore.findOneByEmail(email, BusinessUserDoc.class);
+		BusinessUserDoc account = accountStore.findUserByEmail(email);
 
 		if (!ArgUtil.is(account) && ArgUtil.is(email)) {
 			SignupContact newUser = new SignupContact();
