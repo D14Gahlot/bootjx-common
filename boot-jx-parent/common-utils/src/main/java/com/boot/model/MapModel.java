@@ -445,6 +445,11 @@ public class MapModel implements JsonSerializerType<Object> {
 		return this;
 	}
 
+	public MapModel put(String key) {
+		this.map().put(key, true);
+		return this;
+	}
+
 	public MapModel add(Object value) {
 		this.list().add(value);
 		return this;

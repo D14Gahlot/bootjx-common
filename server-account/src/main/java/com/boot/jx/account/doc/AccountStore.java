@@ -8,10 +8,23 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Component;
 
 import com.boot.jx.mongo.CommonMongoTemplateAbstract;
+import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.StringUtils;
 
 @Component
 public class AccountStore extends CommonMongoTemplateAbstract {
+
+	public static final MapModel NODOMAIN = MapModel.createInstance().put("domain").put("account").put("partner")
+			.put("front").put("cpanel").put("admin").put("agent").put("docs");
+
+	public boolean isValidDomainName(String domain) {
+		if (!ArgUtil.is(domain) || domain.length() < 4) {
+			return false;
+		}
+		domain = StringUtils.toLowerCase(domain);
+		return !NODOMAIN.containsKey(domain);
+	}
 
 	public <T> List<T> findByKey(String key, Object value, Class<T> clazz) {
 		Query query2 = new Query();
@@ -50,4 +63,5 @@ public class AccountStore extends CommonMongoTemplateAbstract {
 	public DomainLicenseDoc findDomainLicenseByName(String domain) {
 		return findOneByKey("domain", domain, DomainLicenseDoc.class);
 	}
+
 }

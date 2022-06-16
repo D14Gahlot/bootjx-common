@@ -246,6 +246,11 @@ public class PartnerController {
 	@RequestMapping(value = { "/api/domain/check", "/pub/domain/check" }, method = { RequestMethod.POST })
 	public ApiResponse<Object, Object> checkDomain(@RequestParam @Valid String domain) throws NoSuchAlgorithmException {
 
+		if (!accountStore.isValidDomainName(domain)) {
+			ApiResponseUtil.throwDuplicateInputException("Domain already taken. Try different", new ApiFieldError()
+					.field("domain").codeKey("ValidDomainDuplicate").description("Domain already taken."));
+		}
+
 		DomainDoc domainDoc = accountStore.findDomainByName(domain);
 
 		if (ArgUtil.is(domainDoc)) {
