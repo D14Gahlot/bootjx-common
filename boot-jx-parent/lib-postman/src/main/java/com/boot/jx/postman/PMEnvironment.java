@@ -101,6 +101,7 @@ public class PMEnvironment {
 		protected String name;
 		protected String inboundQueue;
 
+		private boolean isProxyEnabled;
 		private boolean isSandbox;
 		private boolean isShared;
 		private boolean isDisabled;
@@ -217,6 +218,14 @@ public class PMEnvironment {
 
 		public void setServer(String server) {
 			this.server = server;
+		}
+
+		public boolean isProxyEnabled() {
+			return isProxyEnabled;
+		}
+
+		public void setProxyEnabled(boolean isProxyEnabled) {
+			this.isProxyEnabled = isProxyEnabled;
 		}
 
 	}
