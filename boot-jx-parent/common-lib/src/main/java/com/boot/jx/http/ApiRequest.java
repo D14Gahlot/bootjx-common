@@ -24,6 +24,8 @@ public @interface ApiRequest {
 
 	boolean useAuthToken() default false;
 
+	String tenant() default Constants.BLANK;
+
 	String flow() default Constants.BLANK;
 
 	String feature() default Constants.BLANK;

@@ -10,6 +10,7 @@ import org.springframework.data.mongodb.core.SimpleMongoDbFactory;
 import org.springframework.stereotype.Component;
 
 import com.boot.jx.AppContextUtil;
+import com.boot.jx.http.CommonHttpRequest.ApiRequestDetail;
 import com.boot.jx.scope.tnt.TenantScoped;
 import com.boot.jx.scope.tnt.TenantValue;
 import com.boot.jx.scope.tnt.Tenants;
@@ -22,6 +23,9 @@ import com.mongodb.MongoClientURI;
 @Component
 @TenantScoped
 public class CommonMongoSource {
+
+	public static final String USE_DEFAULT_DB = "USE_DEFAULT_DB";
+	public static final String USE_NO_DB = "USE_NO_DB";
 
 	private final Logger LOGGER = LoggerFactory.getLogger(getClass());
 
@@ -69,8 +73,15 @@ public class CommonMongoSource {
 		String tnt = AppContextUtil.getTenant();
 		String dbtnt = ArgUtil.is(tenantResolver) ? tenantResolver.getDBName(tnt) : tnt;
 		MongoClientURI mongoClientURI = new MongoClientURI(dataSourceUrl);
-		String dataBaseName = (!ArgUtil.areEqual(StringUtils.trim(dataSourceUrl), StringUtils.trim(globalDataSourceUrl))
-				|| Tenants.isDefault(tnt)) ? mongoClientURI.getDatabase() : (globalDBProfix + "_" + dbtnt);
+		ApiRequestDetail apiDetails = AppContextUtil.getApiRequestDetail();
+
+		String dataBaseName = (globalDBProfix + "_" + dbtnt);
+		if (ArgUtil.is(apiDetails) && apiDetails.hasRule(USE_NO_DB)) {
+			dataBaseName = "nodb";
+		} else if ((!ArgUtil.areEqual(StringUtils.trim(dataSourceUrl), StringUtils.trim(globalDataSourceUrl))
+				|| Tenants.isDefault(tnt) || (ArgUtil.is(apiDetails) && apiDetails.hasRule(USE_DEFAULT_DB)))) {
+			dataBaseName = mongoClientURI.getDatabase();
+		}
 		LOGGER.info("MONGODB: {}:{}:{}", dataBaseName, Tenants.isDefault(tnt), dbtnt);
 		return new SimpleMongoDbFactory(new MongoClient(mongoClientURI), dataBaseName);
 	}

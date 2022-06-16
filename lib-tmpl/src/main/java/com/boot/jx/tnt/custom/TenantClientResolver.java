@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 
 import com.boot.jx.AppConfig;
 import com.boot.jx.AppContextUtil;
+import com.boot.jx.http.CommonHttpRequest.ApiRequestDetail;
 import com.boot.jx.rest.RestService;
 import com.boot.jx.scope.tnt.Tenants;
 import com.boot.jx.scope.tnt.Tenants.TenantResolver;
@@ -24,6 +25,8 @@ public class TenantClientResolver extends TenantResolver {
 	public static final Map<String, String> tntMapping = new HashMap<String, String>();
 	public static final Map<String, String> dbMapping = new HashMap<String, String>();
 	public static final Pattern pattern = Pattern.compile("^(.+?)-(.+?)-(.+?)-(.+?)-(.+?)$");
+
+	public static final String CHECK_VALID_DOMAIN = "CHECK_VALID_DOMAIN";
 
 	@Autowired
 	AppConfig appConfig;
@@ -39,6 +42,12 @@ public class TenantClientResolver extends TenantResolver {
 
 	public String resolve(String tnt) {
 		tnt = super.resolve(tnt);
+
+		ApiRequestDetail apiDetails = AppContextUtil.getApiRequestDetail();
+
+		if (ArgUtil.is(apiDetails) && ArgUtil.is(apiDetails.getTenant())) {
+			return apiDetails.getTenant();
+		}
 
 		if (ArgUtil.is(tenantStatic)) {
 			return tenantStatic;
@@ -61,7 +70,8 @@ public class TenantClientResolver extends TenantResolver {
 			}
 		}
 
-		if (ArgUtil.is(accountUrl) && !Tenants.isDefault(tnt) && false) {
+		if (ArgUtil.is(accountUrl) && !Tenants.isDefault(tnt)
+				&& (ArgUtil.is(apiDetails) && apiDetails.hasRule(CHECK_VALID_DOMAIN))) {
 			try {
 				MapModel resp = restService.ajax(accountUrl).path("/partner/pub/domain/exists")
 						.queryParam("tnt", Tenants.getDefault()).queryParam("domain", tnt).get().asMapModel();

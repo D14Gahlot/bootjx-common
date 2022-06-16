@@ -528,6 +528,7 @@ public class CommonHttpRequest extends ACommonHttpRequest {
 		ResponeError responeError;
 		boolean useAuthToken;
 		boolean useAuthKey;
+		String tenant;
 		String flow;
 		String feature;
 		Set<String> rules;
@@ -634,12 +635,27 @@ public class CommonHttpRequest extends ACommonHttpRequest {
 			this.rules = new HashSet<String>(Arrays.asList(rules));
 		}
 
+		public boolean hasRule(String rule) {
+			if (this.rules == null) {
+				return false;
+			}
+			return this.rules.contains(rule);
+		}
+
 		public boolean isSession() {
 			return session;
 		}
 
 		public void setSession(boolean session) {
 			this.session = session;
+		}
+
+		public String getTenant() {
+			return tenant;
+		}
+
+		public void setTenant(String tenant) {
+			this.tenant = tenant;
 		}
 
 	}
@@ -652,6 +668,7 @@ public class CommonHttpRequest extends ACommonHttpRequest {
 			detail.setUseAuthKey(x.useAuthKey());
 			detail.setUseAuthToken(x.useAuthToken());
 			detail.setFlow(x.flow());
+			detail.setTenant(x.tenant());
 			detail.setFeature(x.feature());
 			detail.setTraceFilter(x.tracefilter());
 			detail.setDeprecated(x.deprecated());

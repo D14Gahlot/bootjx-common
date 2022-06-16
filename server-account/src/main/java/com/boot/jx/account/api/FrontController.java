@@ -14,7 +14,9 @@ import com.boot.jx.account.AccountAuthService;
 import com.boot.jx.account.AccountSessionBean;
 import com.boot.jx.account.doc.AccountStore;
 import com.boot.jx.account.doc.DomainDoc;
+import com.boot.jx.http.ApiRequest;
 import com.boot.jx.http.CommonHttpRequest;
+import com.boot.jx.mongo.CommonMongoSource;
 import com.boot.jx.postman.PMEnvironment.PMCommonConfig;
 import com.boot.jx.scope.tnt.Tenants;
 import com.boot.jx.validation.AlphaNumValidator.ValidAlphaNum;
@@ -55,6 +57,7 @@ public class FrontController {
 		return "app-account";
 	}
 
+	@ApiRequest(rules = CommonMongoSource.USE_NO_DB)
 	@RequestMapping(value = { "/", "/front/", "/front/**" }, method = { RequestMethod.GET })
 	public String front(Model model) {
 		if (!pmCommonConfig.isValidDomain()) {
