@@ -2,6 +2,7 @@
 package com.boot.jx.bot.app;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -76,13 +77,15 @@ public class AppFaqBotController extends CommonBotController {
 		ClientApp app = context().clientApp();
 		String lang = ArgUtil.parseAsString(app.props().get("lang")==null?"en":app.props().get("lang"));
 		String replay_id =toReplyEnum(inboxMessage); 
+		Map<String,Object> langM=new HashMap<String,Object>();
+		langM.put("lang", lang);
 		LOGGER.info("Replay Id {===}"+replay_id);
 		switch (replay_id) {
 		case "exit":	
 			onSessionRoute(null);
 			return;
 		case "m":
-			routeSession("jazeera",lang);
+			routeSession("jazeera",langM);
 			return;		
 		case "#":
 			assignToDefaultAgent();
@@ -103,7 +106,7 @@ public class AppFaqBotController extends CommonBotController {
 		            String k = entry.getKey();
 		            String v = entry.getValue()==null?"":(String)entry.getValue();
 		             if(ArgUtil.is(v) && k.contains("shortDesc")) {
-		            	 LOGGER.info("Key :"+k+"\t value :"+v);
+		            	// LOGGER.info("Key :"+k+"\t value :"+v);
 		 	        	buttons.add(new TmplElement().name(code).label(v.toString()));
 		            }
 		        }
@@ -121,12 +124,15 @@ public class AppFaqBotController extends CommonBotController {
 		ClientApp app = context().clientApp();
 		String lang = ArgUtil.parseAsString(app.props().get("lang")==null?"en":app.props().get("lang"));
 		String replay_id = toReplyEnum(inboxMessage);
+		Map<String,Object> langM=new HashMap<String,Object>();
+		langM.put("lang", lang);
+		
 		switch (replay_id) {
 		case "exit":	
 			onSessionRoute(null);
 			return;
 		case "m":
-			routeSession("jazeera",lang);
+			routeSession("jazeera",langM);
 			return;		
 		case "#":
 			assignToDefaultAgent();
@@ -150,7 +156,7 @@ public class AppFaqBotController extends CommonBotController {
 		            String k = entry.getKey();
 		            String v = entry.getValue()==null?"":(String)entry.getValue();
 		             if(ArgUtil.is(v) && k.contains("shortDesc")) {
-		            	LOGGER.info("Key :"+k+"\t value :"+v);
+		            	//LOGGER.info("Key :"+k+"\t value :"+v);
 		            	buttons.add(new TmplElement().name(code).label(v.toString()));
 		            }
 		        }
@@ -169,13 +175,14 @@ public class AppFaqBotController extends CommonBotController {
 		String lang = ArgUtil.parseAsString(app.props().get("lang")==null?"en":app.props().get("lang"));
 		String replay_id = toReplyEnum(inboxMessage);
 		LOGGER.info("replay_id {====}:"+replay_id);
-		
+		Map<String,Object> langM=new HashMap<String,Object>();
+		langM.put("lang", lang);
 		switch (replay_id) {
 		case "exit":	
 			onSessionRoute(null);
 			return;
 		case "m":
-			routeSession("jazeera",lang);
+			routeSession("jazeera",langM);
 			return;		
 		case "#":
 			assignToDefaultAgent();
