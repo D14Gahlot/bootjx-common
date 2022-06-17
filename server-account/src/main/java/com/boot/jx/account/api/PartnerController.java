@@ -466,13 +466,20 @@ public class PartnerController {
 			HttpServletResponse httpServletResponse, @RequestParam String domain) throws NoSuchAlgorithmException {
 		BusinessUserDoc domainUser = userSessionBean.domainUser();
 
-		if (!ArgUtil.is(domainUser.getDomains())) {
-			ApiResponseUtil.throwInputException(
-					new ApiFieldError().field("domain").codeKey("ValidDomainNotFound").description("Domain Not found"));
+		Optional<DomainDoc> domaiNational = Optional.empty();
+		if (userSessionBean.role().contains(PMConstants.USER_ROLE.DUPER_USER)) {
+			DomainDoc domainDoc = accountStore.findDomainByName(domain);
+			if (ArgUtil.is(domainDoc)) {
+				domaiNational = Optional.of(domainDoc);
+			}
+		} else {
+			if (!ArgUtil.is(domainUser.getDomains())) {
+				ApiResponseUtil.throwInputException(new ApiFieldError().field("domain").codeKey("ValidDomainNotFound")
+						.description("Domain Not found"));
+			}
+			domaiNational = domainUser.getDomains().stream().filter(d -> d.getDomain().equals(domain)).findFirst();
 		}
 
-		Optional<DomainDoc> domaiNational = domainUser.getDomains().stream().filter(d -> d.getDomain().equals(domain))
-				.findFirst();
 		if (!domaiNational.isPresent() || !domaiNational.get().getDomain().equals(domain)) {
 			ApiResponseUtil.throwInputException(
 					new ApiFieldError().field("domain").codeKey("ValidDomainNotFound").description("Domain Not found"));
