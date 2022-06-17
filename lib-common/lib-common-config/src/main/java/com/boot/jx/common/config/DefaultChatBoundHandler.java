@@ -123,13 +123,11 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 						// production
 						inboxMessage.setOriginalMessage(null);
 						chatClient.forward(defaultClient.getForward() + PATH.INBOUND_FRWRD, inboxMessage);
+					} else if (APP_TYPE.APP_SCRIPT.equals(appType)) {
+						forward2Webhook(inboxMessage, pmCommonConfig.getScriptusUrl() + PATH.APP_SCRIPT_FRWRD,
+								defaultClient.getId());
 					} else if (ArgUtil.is(defaultClient.getWebhook())) {
-						if (APP_TYPE.APP_SCRIPT.equals(appType)) {
-							forward2Webhook(inboxMessage, pmCommonConfig.getScriptusUrl() + PATH.APP_SCRIPT_FRWRD,
-									defaultClient.getId());
-						} else {
-							forward2Webhook(inboxMessage, defaultClient.getWebhook(), defaultClient.getId());
-						}
+						forward2Webhook(inboxMessage, defaultClient.getWebhook(), defaultClient.getId());
 					} else {
 						ApiResponseUtil.throwException("Forward URL missing");
 					}
