@@ -60,13 +60,16 @@ public class AppFaqBotController extends CommonBotController {
 		            String k = entry.getKey();
 		            String v = entry.getValue()==null?"":(String)entry.getValue();
 			           if(ArgUtil.is(v) && k.contains("shortDesc")) {
-		            	LOGGER.info("Key :"+k+"\t value :"+v);
+		            	//LOGGER.info("Key :"+k+"\t value :"+v);
 		            	buttons.add(new TmplElement().name(code).label(v.toString()));
 		            }
 		        }
 			}
 		}
 		buttons.add(new TmplElement().name("exit").label("FAQ Menu"));
+		buttons.add(new TmplElement().name("m").label("Main Menu"));
+		buttons.add(new TmplElement().name("#").label("TalkToAgent"));
+
 		reply(new OutboxMessage().message("Select Category").options("buttons", buttons));
 		next("on_faq_parent_select");
 		
@@ -113,7 +116,9 @@ public class AppFaqBotController extends CommonBotController {
 				
 			}
 		}
-			buttons.add(new TmplElement().name("exit").label("FAQ Menu"));
+		buttons.add(new TmplElement().name("exit").label("FAQ Menu"));
+		buttons.add(new TmplElement().name("m").label("Main Menu"));
+		buttons.add(new TmplElement().name("#").label("TalkToAgent"));
 		reply(new OutboxMessage().message("Select Category").options("buttons", buttons));
 		next("on_faq_parent_select");
 	}
@@ -164,6 +169,8 @@ public class AppFaqBotController extends CommonBotController {
 			}
 		}
 		buttons.add(new TmplElement().name("exit").label("FAQ Menu"));
+		buttons.add(new TmplElement().name("m").label("Main Menu"));
+		buttons.add(new TmplElement().name("#").label("TalkToAgent"));
 		reply(new OutboxMessage().message("Select Category").options("buttons", buttons));
 		next("on_faq_child_select");
 	}
@@ -191,6 +198,8 @@ public class AppFaqBotController extends CommonBotController {
 	default:
 		List<TmplElement> buttons = new ArrayList<TmplElement>();
 		buttons.add(new TmplElement().name("exit").label("FAQ Menu"));
+		buttons.add(new TmplElement().name("m").label("Main Menu"));
+		buttons.add(new TmplElement().name("#").label("TalkToAgent"));
 		List<AppFaqDoc>  faqChildValue = getChild(lang,replay_id.toUpperCase());
 		for (AppFaqDoc faq : faqChildValue) {
 			String parentkey = faq.getParent();
