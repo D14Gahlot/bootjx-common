@@ -19,10 +19,11 @@ public class PMConstants {
 	public final class USER_ROLE {
 		public static final String DUPER_USER = "DUPER_USER";
 		public static final String SUPER_DEV = "SUPER_DEV";
+		public static final String BUSINESS_PARTNER = "BUSINESS_PARTNER";
 		public static final String BUSINESS_USER = "BUSINESS_USER";
 		public static final String ADMIN = "ADMIN";
 		public static final String AGENT = "AGENT";
-		public static final String ALLOWED = "DUPER_USER,SUPER_DEV,BUSINESS_USER,ADMIN,AGENT";
+		public static final String ALLOWED = "DUPER_USER,SUPER_DEV,BUSINESS_PARTNER,BUSINESS_USER,ADMIN,AGENT";
 	}
 
 	public static class MESSAGE_BOUND_TYPE {
