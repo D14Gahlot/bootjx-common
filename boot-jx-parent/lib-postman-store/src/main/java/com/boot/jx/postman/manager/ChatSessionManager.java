@@ -407,9 +407,10 @@ public class ChatSessionManager {
 		inBoundEvent.sessionRouted = new SessionRouted();
 		inBoundEvent.sessionId = chatSessionDoc.getSessionId();
 		inBoundEvent.contactId = chatSessionDoc.getContactId();
-		inBoundEvent.sessionRouted.sourceQueue = chatSessionDoc.getAssignedToQueue();
 		inBoundEvent.contact().copyFrom(chatSessionDoc.contact());
 		sessionStore.updateMessageFromSession(chatSessionDoc, inBoundEvent);
+
+		String sourceQueue = chatSessionDoc.getAssignedToQueue();
 
 		if (ArgUtil.is(chatSessionDoc.getContactId())) {
 			inBoundEvent.contact().setContactId(inBoundEvent.contactId);
@@ -450,7 +451,11 @@ public class ChatSessionManager {
 
 		logManager.event(chatSessionDoc, EVENTS.ASGND_TO_QUEUE, queueCode);
 
+		if (!ArgUtil.is(sourceQueue, chatSessionDoc.getAssignedToQueue())) {
+			inBoundEvent.sessionRouted.sourceQueue = sourceQueue;
+		}
 		inBoundEvent.sessionRouted.targetQueue = chatSessionDoc.getAssignedToQueue();
+
 		sessionStore.updateMessageFromSession(chatSessionDoc, inBoundEvent);
 
 		return inBoundEvent;
