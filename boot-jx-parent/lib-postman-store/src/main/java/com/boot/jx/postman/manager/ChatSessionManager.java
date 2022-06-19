@@ -453,6 +453,8 @@ public class ChatSessionManager {
 
 		if (!ArgUtil.is(sourceQueue, chatSessionDoc.getAssignedToQueue())) {
 			inBoundEvent.sessionRouted.sourceQueue = sourceQueue;
+		} else {
+			inBoundEvent.sessionRouted.sessionStart = true;
 		}
 		inBoundEvent.sessionRouted.targetQueue = chatSessionDoc.getAssignedToQueue();
 
