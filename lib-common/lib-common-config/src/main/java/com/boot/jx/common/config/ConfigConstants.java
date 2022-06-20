@@ -28,6 +28,7 @@ public class ConfigConstants {
 	public static final String GROUP_CUSTOMER_CHAT = "CUSTOMER CHAT";
 	public static final String GROUP_AGENT = "AGENT";
 	public static final String GROUP_NLP = "NLP";
+	public static final String GROUP_DEV = "DEVELOPMENT";
 
 	public static enum APP_KEY implements EntryMeta {
 
@@ -178,6 +179,9 @@ public class ConfigConstants {
 				.defaultValue(ConfigOption.OFF).group(GROUP_NLP)),
 		POSTMAN_NLP_LOCATIONS(new ConfigMeta("Enable Detect Locations", "postman.nlp.detect.locations").optionsOnOff()
 				.defaultValue(ConfigOption.OFF).group(GROUP_NLP)),
+
+		POSTMAN_DEBUG_CONTACT(
+				new ConfigMeta("Debugging is enabled for Contact", "postman.debug.contact").group(GROUP_DEV).hidden()),
 
 		// Ends here
 		;

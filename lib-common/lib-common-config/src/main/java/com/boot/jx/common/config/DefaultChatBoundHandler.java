@@ -248,7 +248,8 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 		InBoundWrapper wrap = new InBoundWrapper();
 		wrap.meta = new InBoundMeta().domain(AppContextUtil.getTenant())
 				.server(pmEnvironment.keyEntry(ConfigConstants.APP_KEY.PROP_SERVICE_SERVER).asString())
-				.appId(clientAppId);
+				.appId(clientAppId)
+				.debug(pmEnvironment.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_DEBUG_CONTACT).is(contact.contactId));
 		wrap.contacts = CollectionUtil.asList(contact);
 		wrap.messages = CollectionUtil.asList(msg);
 		restService.ajax(forwardUrl).cookie(ParamKeys.X_API_ID, clientAppId).post(wrap).asNone();
@@ -399,7 +400,8 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 				InBoundWrapper wrap = new InBoundWrapper();
 				wrap.meta = new InBoundMeta().domain(AppContextUtil.getTenant())
 						.server(pmEnvironment.keyEntry(ConfigConstants.APP_KEY.PROP_SERVICE_SERVER).asString())
-						.appId(defaultClient.getId());
+						.appId(defaultClient.getId()).debug(pmEnvironment
+								.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_DEBUG_CONTACT).is(contact.contactId));
 				wrap.contacts = CollectionUtil.asList(contact);
 				wrap.events = CollectionUtil.asList(event);
 				restService.ajax(webhookUrl).cookie(ParamKeys.X_API_ID, defaultClient.getId()).post(wrap).asNone();
