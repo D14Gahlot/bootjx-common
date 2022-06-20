@@ -83,10 +83,10 @@ public class PMClientConfigImpl implements PMClientConfig {
 		if (!ArgUtil.is(webhookUrl)) {
 			if (isLocalDummyBotEnabled()) {
 				webhookUrl = String.format("%s%s", commonHttpRequest.getServerHost(), appConfig.getAppPrefix(),
-						environment.keyEntry("mry.prop.service.domain").asString());
+						environment.keyEntry("mry.prop.service.server").asString());
 			} else {
 				webhookUrl = String.format("https://%s.%s/postman", AppContextUtil.getTenant(),
-						environment.keyEntry("mry.prop.service.domain").asString());
+						environment.keyEntry("mry.prop.service.server").asString());
 			}
 		}
 		return webhookUrl;
