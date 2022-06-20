@@ -62,8 +62,8 @@ public class SessionApiV1 {
 	@XMSClientAuth
 	@RequestMapping(value = "/api/v1/session/routing", method = { RequestMethod.POST })
 	public ApiResultsMetaCompactResponse<InBoundEvent, Object> sessionRouting(@RequestBody SessionQueueAssignment req) {
-		InBoundEvent event = chatSessionService.routeSession(req.sessionId,
-				new PMArgs().assignToQueueCode(req.queue).params(req.params));
+		InBoundEvent event = chatSessionService.routeSession(req.sessionId, new PMArgs().assignToQueueCode(req.queue)
+				.assignToAgentCode(req.agent).assignToDeptCode(req.team).params(req.params));
 		return ApiResponse.buildResults(event);
 	}
 
