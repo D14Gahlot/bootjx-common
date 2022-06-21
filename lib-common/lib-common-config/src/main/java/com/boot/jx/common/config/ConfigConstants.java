@@ -21,7 +21,9 @@ public class ConfigConstants {
 
 	public static final String[] APP_CONFIG_PREFIX = new String[] {
 			// PRefixe
-			"mry.prop.logo.", "mry.prop.service.", "mry.prop.social.", };
+			"mry.prop.logo.", "mry.prop.service.", "mry.prop.social.",
+			// Domain Specific
+			"mry.domain." };
 	public static final Map<String, String> APP_CONFIG = new ConcurrentHashMap<String, String>();
 	public static final List<ConfigMeta> SETUP_CONFIG_LIST = new ArrayList<ConfigMeta>();
 
@@ -33,7 +35,7 @@ public class ConfigConstants {
 	public static enum APP_KEY implements EntryMeta {
 
 		PROP_SERVICE_DOMAIN(new ConfigMeta("server", "mry.prop.service.domain")),
-		PROP_SERVICE_SERVER(new ConfigMeta("server", "mry.prop.service.server"))
+		PROP_SERVICE_SERVER(new ConfigMeta("server", "mry.prop.service.server")),
 		// Ends here
 		;
 
