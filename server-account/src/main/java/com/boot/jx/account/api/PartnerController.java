@@ -126,18 +126,15 @@ public class PartnerController {
 		model.addAttribute("FORM_URL", String.format("https://%s.%s/%s/auth/direct", domain,
 				env.keyEntry(ConfigConstants.APP_KEY.PROP_SERVICE_SERVER).asString(), panel));
 
-		if (ArgUtil.is(userSessionBean.domainUser())) {
-			for (DomainDoc domainDoc : userSessionBean.domainUser().getDomains()) {
-				if (ArgUtil.isEqual(domainDoc.getDomain(), domain)) {
-					UserLoginToken userLoginToken = empAuthService.createSuperLoginToken("superadmin", domain,
-							domainDoc.getId(), "admin");
-					model.addAttribute("DOMAIN_USER", userLoginToken.getDomainUser());
-					model.addAttribute("DOMAIN_NAME", userLoginToken.getDomainName());
-					model.addAttribute("DOMAIN_ID", userLoginToken.getDomainId());
-					model.addAttribute("DOMAIN_TOKEN", userLoginToken.getDomainToken());
-					model.addAttribute("DOMAIN_TOKEN_VALID", Constants.BLANK);
-				}
-			}
+		if (userSessionBean.hasAdminAccesTo(domain)) {
+			DomainDoc domainDoc = accountStore.findDomainByName(domain);
+			UserLoginToken userLoginToken = empAuthService.createSuperLoginToken("superadmin", domain,
+					domainDoc.getId(), "admin");
+			model.addAttribute("DOMAIN_USER", userLoginToken.getDomainUser());
+			model.addAttribute("DOMAIN_NAME", userLoginToken.getDomainName());
+			model.addAttribute("DOMAIN_ID", userLoginToken.getDomainId());
+			model.addAttribute("DOMAIN_TOKEN", userLoginToken.getDomainToken());
+			model.addAttribute("DOMAIN_TOKEN_VALID", Constants.BLANK);
 		}
 		return "app-goto";
 	}
