@@ -316,10 +316,10 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 			ClientApp targetAppQueue = context().clientApp(event.sessionRouted.targetQueue, null);
 			if (ArgUtil.is(targetAppQueue)) {
 				APP_TYPE appType = APP_TYPE.from(targetAppQueue.getAppType());
-				if (APP_TYPE.WEBHOOK.equals(appType)) {
+				if (appType.is(CHAT_MODE.WEBHOOK)) {
 					sendEventWebhook(event, targetAppQueue);
 					return;
-				} else if (CHAT_MODE.AGENT.equals(appType.getMode())) {
+				} else if (appType.is(CHAT_MODE.AGENT)) {
 					MapModel props = new MapModel(targetAppQueue.props());
 					AppContextUtil.setActorId(targetAppQueue.getQueue());
 					assignSessionToAgent(new PMArgs()
@@ -335,7 +335,7 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 							logManager.error(event, e);
 						}
 					}
-				} else if (CHAT_MODE.BOT.equals(appType.getMode())) {
+				} else if (appType.is(CHAT_MODE.BOT)) {
 					chatClient.sessionEvent(pmCommonConfig.getBotUrl(), event, pmArgs);
 				}
 			}

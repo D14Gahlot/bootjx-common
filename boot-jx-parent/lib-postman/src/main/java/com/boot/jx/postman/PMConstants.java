@@ -104,6 +104,10 @@ public class PMConstants {
 			return this.chatMode;
 		}
 
+		public boolean is(CHAT_MODE chatMode) {
+			return this.chatMode == chatMode;
+		}
+
 		public static APP_TYPE from(Object appType) {
 			return ArgUtil.parseAsEnumT(appType, APP_TYPE.class, APP_TYPE.DEFAULT);
 		}
