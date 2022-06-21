@@ -79,4 +79,16 @@ public class SessionApiV1 {
 		return ApiResponse.instance(InBoundEvent.class);
 	}
 
+	@ApiOperation(value = "Session Resolve", notes = "${swagger.SessionApiV1.sessionResolve.description}",
+			authorizations = @Authorization("X_API_KEY"))
+	@XMSClientAuth
+	@RequestMapping(value = "/api/v1/session/resolve", method = { RequestMethod.POST })
+	public ApiResultsMetaCompactResponse<InBoundEvent, Object> sessionResolve(@RequestBody SessionStatusClose req) {
+		NodeEntry<InBoundEvent> eventEntry = chatSessionService.resolveSession(req.sessionId);
+		if (eventEntry.exists()) {
+			return ApiResponse.buildResults(eventEntry.value());
+		}
+		return ApiResponse.instance(InBoundEvent.class);
+	}
+
 }

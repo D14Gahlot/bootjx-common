@@ -241,8 +241,12 @@ public class ChatSessionService {
 				eventEntry = updateSessionStatus(chatSessionDoc, PMConstants.CHAT_STATUS.RESOLVED);
 			}
 		}
-
 		return eventEntry;
+	}
+
+	public NodeEntry<InBoundEvent> resolveSession(String sessionId) {
+		ChatSessionDoc sessionDoc = sessionStore.getSession(sessionId);
+		return resolveSession(sessionDoc);
 	}
 
 	public NodeEntry<InBoundEvent> assignSessionToAgent(PMArgs params) {
