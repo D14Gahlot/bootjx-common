@@ -124,7 +124,7 @@ public class PartnerController {
 
 		model.addAllAttributes(appCommonConfig.appAttributes());
 		model.addAttribute("FORM_URL", String.format("https://%s.%s/%s/auth/direct", domain,
-				env.keyEntry("mry.prop.service.domain").asString(), panel));
+				env.keyEntry(ConfigConstants.APP_KEY.PROP_SERVICE_SERVER).asString(), panel));
 
 		if (ArgUtil.is(userSessionBean.domainUser())) {
 			for (DomainDoc domainDoc : userSessionBean.domainUser().getDomains()) {
