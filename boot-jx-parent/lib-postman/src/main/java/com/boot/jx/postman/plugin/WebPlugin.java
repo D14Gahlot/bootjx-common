@@ -30,11 +30,11 @@ public class WebPlugin implements DefaultChannelPlugin<WebConfigDetails> {
 		private String site;
 
 		@ConfigMetaProperty(path = "web.promptEmail", title = "Prompt Email", inputType = INPUT_TYPE.OPTIONS,
-				dataType = DATA_TYPE.SWITCH, converterType = CONVERT_TYPE.BOOLEAN)
+				dataType = DATA_TYPE.SWITCH, converterType = CONVERT_TYPE.BOOLEAN, defaultValue = "true")
 		private boolean promptEmail;
 
 		@ConfigMetaProperty(path = "web.promptPhone", title = "Prompt Phone", inputType = INPUT_TYPE.OPTIONS,
-				dataType = DATA_TYPE.SWITCH, converterType = CONVERT_TYPE.BOOLEAN)
+				dataType = DATA_TYPE.SWITCH, converterType = CONVERT_TYPE.BOOLEAN, defaultValue = "false")
 		private boolean promptPhone;
 
 		@Override
