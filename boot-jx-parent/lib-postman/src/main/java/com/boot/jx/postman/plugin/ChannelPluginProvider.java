@@ -148,6 +148,9 @@ public class ChannelPluginProvider {
 							&& annotation.converterType() == CONVERT_TYPE.BOOLEAN) {
 						cm.optionsOnOff();
 					}
+					if (ArgUtil.is(annotation.defaultValue())) {
+						cm.defaultValue(annotation.defaultValue());
+					}
 					configMetaList.add(cm);
 				}
 			}
