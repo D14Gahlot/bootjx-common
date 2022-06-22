@@ -148,8 +148,13 @@ public class ClientAppConfigConstants {
 						+ "\n[ & QuickMedia] " //
 						+ "\n[ % QuickReply] "//
 				).group("About App"),
+
 				new ConfigMeta().title("First Options Template")
 						.desc("Use coding convetions in template for this to work").path("props.template")
+						.group("TEMPLATES").optionsSource("getx:/api/tmpl/hsm").optionsKey("code").optionsLabel("code"),
+
+				new ConfigMeta().title("No/Wrong Options Template")
+						.desc("Use coding convetions in template for this to work").path("props.noption_template")
 						.group("TEMPLATES").optionsSource("getx:/api/tmpl/hsm").optionsKey("code")
 						.optionsLabel("code") });
 
