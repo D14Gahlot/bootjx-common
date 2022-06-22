@@ -82,4 +82,23 @@ public class AppScriptController {
 
 	}
 
+	@RequestMapping(value = "/api/objects/appscript/{appId}/logs", method = { RequestMethod.GET })
+	@JsonView(PMEnvironment.PublicProperty.class)
+	public ApiResponse<Map<String, Object>, Object> getAppScriptLogs(@PathVariable String appId,
+			@RequestParam(required = false, defaultValue = "0") int contactId,
+			@RequestParam(required = false, defaultValue = "0") int pageNo,
+			@RequestParam(required = false, defaultValue = "25") int pageSize,
+			@RequestParam(required = false) String sortBy,
+			@RequestParam(required = false, defaultValue = "asc") String sortDir) {
+
+		ClientApp app = pmEnvironment.local().clientApiKey(appId);
+		if (!ArgUtil.is(app) || !(APP_TYPE.APP_SCRIPT.name().equals(app.getAppType())
+				|| APP_TYPE.WEBHOOK.name().equals(app.getAppType()))) {
+			ApiResponseUtil.throwAccessDeniedException("App Not found");
+		}
+		return restService.ajax(pmCommonConfig.getScriptusUrl() + "/bot/getLogs").queryParam("app_id", appId)
+				.queryParam("contact_id", contactId).queryParam("domain", AppContextUtil.getTenant()).get()
+				.asAmxApiResponseOfMap();
+	}
+
 }

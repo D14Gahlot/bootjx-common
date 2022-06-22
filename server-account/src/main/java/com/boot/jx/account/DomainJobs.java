@@ -42,10 +42,12 @@ public class DomainJobs {
 	@Autowired
 	PMEnvironment pmEnvironment;
 
-	@Scheduled(fixedDelay = 5000)
+	@Scheduled(fixedDelay = 5000, initialDelay = 60000)
 	public void fetchEmailTask() throws InterruptedException {
 		// LOGGER.info("======= I am doing my Task @ {}", appConfig.getSpringAppName());
+		AppContextUtil.clear();
 		AppContextUtil.setTenant("app");
+		AppContextUtil.init();
 		LOGGER.debug("Searching Domains");
 
 		String serviceDomain = pmEnvironment.keyEntry(ConfigConstants.APP_KEY.PROP_SERVICE_SERVER).asString();
@@ -55,6 +57,7 @@ public class DomainJobs {
 				.collection(ChannelConfigDoc.class).where("contactType", ContactType.EMAIL.name());
 
 		for (DomainDoc domainDoc : domainDocs) {
+			AppContextUtil.clear();
 			AppContextUtil.setTenant(domainDoc.getDomain());
 			AppContextUtil.init();
 			LOGGER.debug("Searching Config {}", domainDoc.getDomain());
@@ -70,6 +73,7 @@ public class DomainJobs {
 					}
 				}
 			}
+			AppContextUtil.clear();
 		}
 	}
 
