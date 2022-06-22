@@ -207,13 +207,14 @@ public class PMCommonConfigImpl implements PMCommonConfig {
 	@Override
 	public String mainDomainRedirect() {
 		return "redirect:" + String.format("https://app.%s%s",
-				pmEnvironment.keyEntry("mry.prop.service.domain").asString(), commonHttpRequest.getRequestURI());
+				pmEnvironment.keyEntry(ConfigConstants.APP_KEY.PROP_SERVICE_SERVER).asString(),
+				commonHttpRequest.getRequestURI());
 	}
 
 	@Override
 	public String mainDomainRedirect(String path) {
 		return "redirect:" + String.format("https://app.%s/%s",
-				pmEnvironment.keyEntry("mry.prop.service.domain").asString(), path);
+				pmEnvironment.keyEntry(ConfigConstants.APP_KEY.PROP_SERVICE_SERVER).asString(), path);
 	}
 
 	@Override
