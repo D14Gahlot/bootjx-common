@@ -40,6 +40,18 @@ public class QuickMenuController extends CommonBotController {
 		}
 	}
 
+	private void showWrongOptionMenu() {
+		ClientApp app = context().clientApp();
+		String template = ArgUtil.parseAsString(app.props().get("noption_template"));
+		if (ArgUtil.is(template)) { // item_menu_template
+			reply(new OutboxMessage().template(template));
+			next("on_item_select");
+			return;
+		} else {
+			showDefaultMenu();
+		}
+	}
+
 	@Override
 	public void onSessionRoute(InBoundEvent assignEvent) {
 		super.onSessionRoute(assignEvent);
@@ -85,6 +97,8 @@ public class QuickMenuController extends CommonBotController {
 								|| ArgUtil.areEqual(StringUtils.toLowerCase(item.getId()), text)
 								|| ArgUtil.areEqual(StringUtils.toLowerCase(item.getTitle()), text)) {
 							sendQuickAction(item);
+							next("on_item_select");
+							return;
 						}
 					}
 				}
@@ -96,6 +110,8 @@ public class QuickMenuController extends CommonBotController {
 								|| ArgUtil.areEqual(StringUtils.toLowerCase(item.getId()), text)
 								|| ArgUtil.areEqual(StringUtils.toLowerCase(item.getTitle()), text)) {
 							sendQuickMedia(item);
+							next("on_item_select");
+							return;
 						}
 					}
 				}
@@ -107,14 +123,14 @@ public class QuickMenuController extends CommonBotController {
 								|| ArgUtil.areEqual(StringUtils.toLowerCase(item.getId()), text)
 								|| ArgUtil.areEqual(StringUtils.toLowerCase(item.getTitle()), text)) {
 							sendQuickReply(item);
+							next("on_item_select");
+							return;
 						}
 					}
 				}
 			}
 		}
-
-		next("on_item_select");
-
+		showWrongOptionMenu();
 	}
 
 	private void sendQuickMedia(QuickMedia media) {
