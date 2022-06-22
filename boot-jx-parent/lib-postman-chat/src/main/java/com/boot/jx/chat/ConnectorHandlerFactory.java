@@ -143,7 +143,7 @@ public class ConnectorHandlerFactory extends ScopedBeanFactory<String, Connector
 
 		default public void onException(ChannelConfig channelConfig, ChatContactDoc chatContactDoc,
 				OutboxMessage outboxMessage, Exception e) {
-			outboxMessage.updateStatus(Message.Status.SENT_ERR);
+			outboxMessage.updateStatus(Message.Status.SENT_EXC);
 			outboxMessage.logs().add(e.getMessage());
 			LOGGER.error("SEND ERROR", e);
 		}

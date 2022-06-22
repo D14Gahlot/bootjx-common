@@ -337,6 +337,8 @@ public class WA360Connector extends AbstractConnector<WA360ConfigDetails, WA360P
 			String errorCode = requestMap.pathEntry("errors/[0]/code").asString();
 			if (ArgUtil.areEqual(errorCode, "470")) {
 				report.setStatus(Status.CCWIN);
+			} else if (ArgUtil.areEqual(errorCode, "471")) {
+				report.setStatus(Status.LIMIT);
 			}
 			report.setReason("Code:" + errorCode);
 

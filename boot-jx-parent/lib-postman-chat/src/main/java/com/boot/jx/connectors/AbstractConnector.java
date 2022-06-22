@@ -10,6 +10,7 @@ import com.boot.jx.chat.ConnectorHandlerFactory;
 import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorHandler;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.exception.AmxApiException;
+import com.boot.jx.exception.ApiHttpExceptions.ApiStatusCodes;
 import com.boot.jx.logger.LoggerService;
 import com.boot.jx.mongo.CommonMongoQueryBuilder;
 import com.boot.jx.mongo.CommonMongoTemplate;
@@ -67,10 +68,15 @@ public abstract class AbstractConnector<CD extends AChannelDetails, P extends Ch
 	public void onException(ChannelConfig channelConfig, ChatContactDoc chatContactDoc, OutboxMessage outboxMessage,
 			Exception e) {
 		try {
-			outboxMessage.updateStatus(Message.Status.SENT_ERR);
 			if (e instanceof AmxApiException) {
-				outboxMessage.logs().add(((AmxApiException) e).getErrorKey());
+				String errorCode = ((AmxApiException) e).getErrorKey();
+				outboxMessage.updateStatus(Message.Status.SENT_ERR);
+				outboxMessage.logs().add(errorCode);
+				if (ApiStatusCodes.API_ERROR.toString().equalsIgnoreCase(errorCode)) {
+					logManager.error(outboxMessage, e);
+				}
 			} else {
+				outboxMessage.updateStatus(Message.Status.SENT_EXC);
 				logManager.error(outboxMessage, e);
 			}
 			outboxMessage.logs().add(e.getMessage());

@@ -61,12 +61,12 @@ public class WA360Client {
 						bodyTextAppend = bodyTextAppend
 								+ StringUtils.wrap("\n" + WA360Constants.componentButtonSubTypesIconLink + " *",
 										StringUtils.trim(b.getLabel()), "*")
-								+ "\n" + b.getUrl() + "\n" + StringUtils.wrap(" _",b.getDesc(), "_\n");
+								+ "\n" + b.getUrl() + "\n" + StringUtils.wrap(" _", b.getDesc(), "_\n");
 					} else if (ArgUtil.areEqual(b.getType(), TmplElement.TYPES.PHONE_NUMBER)) {
 						bodyTextAppend = bodyTextAppend
 								+ StringUtils.wrap("\n" + WA360Constants.componentButtonSubTypesIconPhone + " *",
 										StringUtils.trim(b.getLabel()), "*")
-								+ "\n" + b.getPhone() + "\n" + StringUtils.wrap(" _",b.getDesc(), "_\n");
+								+ "\n" + b.getPhone() + "\n" + StringUtils.wrap(" _", b.getDesc(), "_\n");
 					} else {
 						buttonsCount++;
 						buttons.add(b);
@@ -415,22 +415,6 @@ public class WA360Client {
 		}
 	}
 
-	public MapModel fetchContact(String contact, ChannelConfig channelConfig) {
-		try {
-			MapModel resp = restService.ajax(WA360Constants.BASE_URL).path("v1/contacts")
-					.header(WA360Constants.D360_API_KEY, channelConfig.getWa360d().getApiKey())
-					.post(MapModel.createInstance().put("blocking", "wait")
-							.put(OutBoundWrapperPaths.FETCH_CONTACTS_DETAILS, contact).toMap())
-					.asMapModel();
-			return resp.path(OutBoundWrapperPaths.FETCH_CONTACTS_DETAILS).asMapModel();
-		} catch (ApiHttpServerException e) {
-			return MapModel.from(e.getResponse().getBody()).put(OutBoundWrapperPaths.RESPONSE_ERROR_CODE,
-					e.getHttpStatus().value());
-		} catch (ApiHttpException e) {
-			return MapModel.from(e.getResponse().getBody());
-		}
-	}
-
 	private String getMessageId(MapModel resp) {
 		String id = resp.entry(OutBoundWrapperPaths.RESPONSE_MSG_ID).asString();
 		String errorCode = resp.entry(OutBoundWrapperPaths.RESPONSE_ERROR_CODE).asString();
@@ -447,10 +431,29 @@ public class WA360Client {
 				if ("unknown contact".equals(errorDetails)) {
 					error.field("to").code(PostManException.ErrorCode.CONTACT_NOTFOUND);
 				}
+			} else if("471".equals(errorCode)) {
+				error.setDescriptionKey("File or resource not found");
+				error.code(PostManException.ErrorCode.MESSAGE_LIMIT_EXCEEDED);
 			}
 			ApiResponseUtil.throwException(error);
 		}
 		return id;
+	}
+
+	public MapModel fetchContact(String contact, ChannelConfig channelConfig) {
+		try {
+			MapModel resp = restService.ajax(WA360Constants.BASE_URL).path("v1/contacts")
+					.header(WA360Constants.D360_API_KEY, channelConfig.getWa360d().getApiKey())
+					.post(MapModel.createInstance().put("blocking", "wait")
+							.put(OutBoundWrapperPaths.FETCH_CONTACTS_DETAILS, contact).toMap())
+					.asMapModel();
+			return resp.path(OutBoundWrapperPaths.FETCH_CONTACTS_DETAILS).asMapModel();
+		} catch (ApiHttpServerException e) {
+			return MapModel.from(e.getResponse().getBody()).put(OutBoundWrapperPaths.RESPONSE_ERROR_CODE,
+					e.getHttpStatus().value());
+		} catch (ApiHttpException e) {
+			return MapModel.from(e.getResponse().getBody());
+		}
 	}
 
 	public MapModel fetchTemplates(ChannelConfig channelConfig) {
