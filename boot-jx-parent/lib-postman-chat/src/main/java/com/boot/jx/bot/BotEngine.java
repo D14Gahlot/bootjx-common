@@ -14,7 +14,6 @@ import java.util.regex.Pattern;
 
 import javax.annotation.PostConstruct;
 
-import org.redisson.api.RedissonClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.aop.framework.AopProxyUtils;
@@ -23,9 +22,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 import com.boot.jx.AppContextUtil;
-import com.boot.jx.cache.CacheBox;
 import com.boot.jx.chat.ChatService;
-import com.boot.jx.def.ICacheBox;
 import com.boot.jx.postman.ClientApp;
 import com.boot.jx.postman.PMConstants;
 import com.boot.jx.postman.PMConstants.APP_TYPE;
@@ -332,7 +329,12 @@ public class BotEngine {
 				}
 				ChatController controller = filtersMap.get("botCode#" + botCode);
 				if (ArgUtil.is(controller)) {
-					controller.onSessionRoute(assignEvent);
+
+					if (assignEvent.sessionRouted.sessionStart) {
+						controller.onSessionStart(assignEvent);
+					} else {
+						controller.onSessionRoute(assignEvent);
+					}
 					botService.commitChatContext(sessionDoc, assignEvent);
 				} else {
 					warn("No Chat Controller Matched for botCode#" + botCode);

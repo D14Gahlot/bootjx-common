@@ -20,7 +20,6 @@ import com.boot.jx.connectors.AbstractConnector.DefaultConnector;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.model.CommonFile;
 import com.boot.jx.model.CommonFileStream;
-import com.boot.jx.postman.PMEnvironment.PMClientConfig;
 import com.boot.jx.postman.client.PMFileStoreClient;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
@@ -157,6 +156,9 @@ public class WebConnector extends DefaultConnector<WebConfigDetails, WebPlugin> 
 			if (ArgUtil.is(inboxMessage.getForm().get("email"))) {
 				contactQuery.setEmail(ArgUtil.parseAsString(inboxMessage.getForm().get("email")));
 			}
+			if (ArgUtil.is(inboxMessage.getForm().get("phone"))) {
+				contactQuery.setPhone(ArgUtil.parseAsString(inboxMessage.getForm().get("phone")));
+			}
 		}
 
 		List<TmplElement> inputs = new ArrayList<TmplElement>();
@@ -166,10 +168,22 @@ public class WebConnector extends DefaultConnector<WebConfigDetails, WebPlugin> 
 					inputs);
 		}
 
-		if (ArgUtil.isEmpty(chatContactDoc.getEmail())) {
-			inputs.add(new TmplElement().code("email").label("Email").type("EMAIL"));
-			return (OutboxMessage) inboxMessage.replyMessage("Please fill below inputs to continue").option("inputs",
-					inputs);
+		ChannelConfig channel = getChannelConfig(inboxMessage);
+
+		if (channel.getWeb().isPromptEmail()) {
+			if (ArgUtil.isEmpty(chatContactDoc.getEmail())) {
+				inputs.add(new TmplElement().code("email").label("Email").type("EMAIL"));
+				return (OutboxMessage) inboxMessage.replyMessage("Please fill below inputs to continue")
+						.option("inputs", inputs);
+			}
+		}
+
+		if (channel.getWeb().isPromptPhone()) {
+			if (ArgUtil.isEmpty(chatContactDoc.getPhone())) {
+				inputs.add(new TmplElement().code("phone").label("Phone").type("PHONE"));
+				return (OutboxMessage) inboxMessage.replyMessage("Please fill below inputs to continue")
+						.option("inputs", inputs);
+			}
 		}
 
 		return null;
