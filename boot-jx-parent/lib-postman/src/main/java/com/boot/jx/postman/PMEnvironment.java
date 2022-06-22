@@ -19,7 +19,9 @@ import com.boot.model.MapModel.MapEntry;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.TimeUtils.TimePeriod;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonView;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 @Component
 public class PMEnvironment {
@@ -83,6 +85,7 @@ public class PMEnvironment {
 	}
 
 	@JsonIgnoreProperties(ignoreUnknown = true)
+	@JsonInclude(Include.NON_NULL)
 	public static abstract class AChannelDetails implements ChannelDetails {
 		private static final long serialVersionUID = -5531902306230415784L;
 	}

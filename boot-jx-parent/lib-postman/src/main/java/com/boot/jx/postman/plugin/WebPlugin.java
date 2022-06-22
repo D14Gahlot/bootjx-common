@@ -9,6 +9,7 @@ import com.boot.jx.postman.PMConstants.CHANNEL_TYPE;
 import com.boot.jx.postman.PMEnvironment.AChannelDetails;
 import com.boot.jx.postman.plugin.ChannelPluginProvider.DefaultChannelPlugin;
 import com.boot.jx.postman.plugin.WebPlugin.WebConfigDetails;
+import com.boot.model.UtilityModels.JsonIgnoreNull;
 
 public class WebPlugin implements DefaultChannelPlugin<WebConfigDetails> {
 
