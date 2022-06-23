@@ -22,6 +22,7 @@ import com.boot.jx.common.store.ChatArchiveService;
 import com.boot.jx.common.store.DocumentUpdateListner;
 import com.boot.jx.logger.LoggerService;
 import com.boot.jx.mongo.CommonMongoQueryBuilder;
+import com.boot.jx.postman.ClientApp;
 import com.boot.jx.postman.PMConstants;
 import com.boot.jx.postman.PMConstants.CHAT_SESSION_ACTIONS;
 import com.boot.jx.postman.PMConstants.DEFAULT;
@@ -37,12 +38,15 @@ import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.model.PMArgs;
 import com.boot.jx.postman.service.ChatDTOUtil;
+import com.boot.jx.postman.store.MessageContext;
 import com.boot.jx.postman.store.MessageStore;
 import com.boot.jx.postman.store.SessionStore;
 import com.boot.jx.stomp.StompQuery;
 import com.boot.jx.stomp.StompTunnelService;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.model.MapModel;
+import com.boot.model.MapModel.MapEntry;
+import com.boot.model.MapModel.MapPathEntry;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
 
@@ -92,6 +96,9 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 
 	@Autowired
 	private PMClientConfig chatClientConfig;
+
+	@Autowired
+	MessageContext messageContext;
 
 	private AgentSessionDoc getAgentSessonAssigned(PMArgs inboxMessage) {
 
@@ -239,6 +246,13 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 				|| !ArgUtil.areEqual(chatSessionDoc.getAssignedToDept(), agentDept)) {
 
 			this.doAssign(chatSessionDoc, new PMArgs().assignToDeptCode(agentDept).assignToAgentCode(agentCode));
+
+			ClientApp app = messageContext.clientApp(chatSessionDoc.getAssignedToQueue(), chatSessionDoc.contact());
+			MapModel props = MapModel.from(app.props());
+			MapPathEntry templ = props.keyEntry("agent_transfer");
+			if (templ.exists()) {
+				chatService.send(chatSessionDoc, new OutboxMessage().template(templ.asString()));
+			}
 
 // 	    chatSessionService.assignSessionToAgent(chatSessionDoc);
 //	    MessageDoc messageDoc = logManager.event(chatSessionDoc, MessageStore.EVENTS.ASGND_TO_AGENT, agentCode,

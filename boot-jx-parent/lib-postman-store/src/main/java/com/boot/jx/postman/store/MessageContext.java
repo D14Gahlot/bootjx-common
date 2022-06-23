@@ -242,6 +242,10 @@ public class MessageContext {
 		return defaultClient;
 	}
 
+	public ClientApp clientApp(String assignedQueue) {
+		return this.clientApp(assignedQueue, null);
+	}
+
 	public ClientApp clientApp() {
 		if (ArgUtil.is(getMessage())) {
 			return this.clientApp(getQueueCode(), getContactable());

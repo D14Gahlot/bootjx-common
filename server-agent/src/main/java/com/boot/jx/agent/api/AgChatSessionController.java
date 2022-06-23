@@ -45,6 +45,7 @@ import com.boot.jx.postman.query.ChatSessionQuery;
 import com.boot.jx.postman.service.ChatDTOUtil;
 import com.boot.jx.postman.store.MessageStore;
 import com.boot.jx.postman.store.SessionStore;
+import com.boot.model.MapModel.MapEntry;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.JsonUtil;
 
@@ -232,7 +233,7 @@ public class AgChatSessionController {
 		} else if (ArgUtil.is(deptCode)) {
 			agentChatHandlerImpl.onAssign(chatSessionDoc, deptCode, agentCode);
 		}
-
+		
 		ChatSessionDTO chatSessionDto = chatArchiveBuilder.sessionDTO().from(chatSessionDoc).withContact()
 				.isAssigned(agentSession.getAgentCode()).withMessages().get();
 		return ApiResponse.buildResult(chatSessionDto);

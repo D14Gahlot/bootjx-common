@@ -130,7 +130,9 @@ public class PMEnvironmentProviderImpl implements PMEnvironmentProvider, AppShar
 
 	@Override
 	public ChannelConfig addChannel(ChannelConfig config) {
-		config.setServer(serviceServer);
+		if (!ArgUtil.is(config.getServer())) {
+			config.setServer(serviceServer);
+		}
 		return configInternal(config);
 	}
 
@@ -144,7 +146,9 @@ public class PMEnvironmentProviderImpl implements PMEnvironmentProvider, AppShar
 				doc.channels().remove(config.getChannelId());
 				configStore.save(doc);
 			} else {
-				config.setServer(serviceServer);
+				if (!ArgUtil.is(config.getServer())) {
+					config.setServer(serviceServer);
+				}
 				configStore.saveChannelConfig(configDoc, action);
 			}
 		} else {
