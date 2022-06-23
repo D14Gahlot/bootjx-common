@@ -21,7 +21,7 @@ public class ConfigConstants {
 
 	public static final String[] APP_CONFIG_PREFIX = new String[] {
 			// PRefixe
-			"mry.prop.logo.", "mry.prop.service.", "mry.prop.social.",
+			"mry.prop.logo.", "mry.prop.service.", "mry.prop.social.", "mry.prop.theme.",
 			// Domain Specific
 			"mry.domain." };
 	public static final Map<String, String> APP_CONFIG = new ConcurrentHashMap<String, String>();
