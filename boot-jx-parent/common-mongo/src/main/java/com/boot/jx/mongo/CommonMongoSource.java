@@ -88,7 +88,8 @@ public class CommonMongoSource {
 
 		String dataBaseName = (globalDBProfix + "_" + dbtnt);
 		if (hasRule(USE_NO_DB)) {
-			dataBaseName = "nodb";
+			//dataBaseName = "nodb";
+			dataBaseName = mongoClientURI.getDatabase();
 		} else if ((!ArgUtil.areEqual(StringUtils.trim(dataSourceUrl), StringUtils.trim(globalDataSourceUrl))
 				|| Tenants.isDefault(tnt) || (hasRule(USE_DEFAULT_DB)))) {
 			dataBaseName = mongoClientURI.getDatabase();
