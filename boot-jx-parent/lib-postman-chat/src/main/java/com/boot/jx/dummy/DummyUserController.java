@@ -73,6 +73,11 @@ public class DummyUserController {
 					ArgUtil.parseAsString(commonHttpRequest.get("CDN_URL"), pmCommonConfig.getCdnServer()));
 		}
 		ChannelConfig channelConfig = pmEnvironment.config().channel("web:" + pmCommonConfig.getServiceServer());
+		
+		if (!ArgUtil.is(channelConfig)) {
+			channelConfig = pmEnvironment.config().channel("web:page");
+		}
+		
 		if (ArgUtil.is(channelConfig)) {
 			model.addAttribute("CHANNEL_ID", channelConfig.getChannelId());
 			model.addAttribute("CHANNEL_KEY", channelConfig.getChannelKey());
