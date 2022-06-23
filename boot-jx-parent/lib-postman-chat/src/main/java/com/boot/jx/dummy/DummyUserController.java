@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.boot.jx.AppConfig;
-import com.boot.jx.common.config.ConfigConstants;
 import com.boot.jx.connectors.WebConnector;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.http.CommonHttpRequest;
