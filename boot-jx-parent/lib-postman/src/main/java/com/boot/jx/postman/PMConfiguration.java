@@ -303,24 +303,27 @@ public interface PMConfiguration extends Serializable {
 		@Override
 		public List<AChannelConfig> listChannels() {
 			List<AChannelConfig> list = this.local().listChannels();
-			List<AChannelConfig> cs = this.shared().listChannels();
-			for (AChannelConfig aChannelConfig : cs) {
-				if (aChannelConfig.isShared()
-						|| (aChannelConfig.isSandbox() && keyEntry("postman.chat.channel.sandbox").asBoolean())) {
-					list.add(aChannelConfig);
+			if (Tenants.isDefault(AppContextUtil.getTenant())) {
+				List<AChannelConfig> cs = this.shared().listChannels();
+				for (AChannelConfig aChannelConfig : cs) {
+					if (aChannelConfig.isShared()
+							|| (aChannelConfig.isSandbox() && keyEntry("postman.chat.channel.sandbox").asBoolean())) {
+						list.add(aChannelConfig);
+					}
 				}
 			}
-
 			return list;
 		}
 
 		@Override
 		public List<ClientApp> listApps() {
 			List<ClientApp> list = this.local().listApps();
-			List<ClientApp> cs = this.shared().listApps();
-			for (ClientApp aChannelConfig : cs) {
-				if (aChannelConfig.isShared()) {
-					list.add(aChannelConfig);
+			if (Tenants.isDefault(AppContextUtil.getTenant())) {
+				List<ClientApp> cs = this.shared().listApps();
+				for (ClientApp aChannelConfig : cs) {
+					if (aChannelConfig.isShared()) {
+						list.add(aChannelConfig);
+					}
 				}
 			}
 			return list;

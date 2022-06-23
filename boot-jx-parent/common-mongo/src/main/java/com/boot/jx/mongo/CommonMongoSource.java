@@ -172,7 +172,7 @@ public class CommonMongoSource {
 					}
 				}
 			} else {
-				LOGGER.error("mongoDbFactory = {}", mongoDbFactory.getDb().getName());
+				LOGGER.debug("mongoDbFactory = {}", mongoDbFactory.getDb().getName());
 			}
 			return mongoTemplate;
 		}
