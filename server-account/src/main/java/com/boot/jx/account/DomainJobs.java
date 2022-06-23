@@ -49,6 +49,9 @@ public class DomainJobs {
 		AppContextUtil.setTenant("app");
 		AppContextUtil.init();
 		LOGGER.debug("Searching Domains");
+		if(true) {
+			return;
+		}
 
 		String serviceDomain = pmEnvironment.keyEntry(ConfigConstants.APP_KEY.PROP_SERVICE_SERVER).asString();
 

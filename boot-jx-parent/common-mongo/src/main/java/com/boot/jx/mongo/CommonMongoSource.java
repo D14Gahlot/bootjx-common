@@ -62,24 +62,35 @@ public class CommonMongoSource {
 		return dataSourcePassword;
 	}
 
-	MongoTemplate mongoTemplate;
+	private static Object lock = new Object();
 	MongoDbFactory mongoDbFactory;
+	MongoTemplate mongoTemplate;
+
+	private static Object lockNoDb = new Object();
+	static MongoDbFactory mongoDbFactoryNoDb;
+	static MongoTemplate mongoTemplateNoDb;
+
+	private static Object lockDefault = new Object();
+	static MongoDbFactory mongoDbFactoryDefault;
+	static MongoTemplate mongoTemplateDefault;
 
 	boolean ready = false;
 
-	private static Object lock = new Object();
+	private boolean hasRule(String useNoDb) {
+		ApiRequestDetail apiDetails = AppContextUtil.getApiRequestDetail();
+		return ArgUtil.is(apiDetails) && apiDetails.hasRule(useNoDb);
+	}
 
 	public MongoDbFactory getMongoDbFactory(String dataSourceUrl) {
 		String tnt = AppContextUtil.getTenant();
 		String dbtnt = ArgUtil.is(tenantResolver) ? tenantResolver.getDBName(tnt) : tnt;
 		MongoClientURI mongoClientURI = new MongoClientURI(dataSourceUrl);
-		ApiRequestDetail apiDetails = AppContextUtil.getApiRequestDetail();
 
 		String dataBaseName = (globalDBProfix + "_" + dbtnt);
-		if (ArgUtil.is(apiDetails) && apiDetails.hasRule(USE_NO_DB)) {
+		if (hasRule(USE_NO_DB)) {
 			dataBaseName = "nodb";
 		} else if ((!ArgUtil.areEqual(StringUtils.trim(dataSourceUrl), StringUtils.trim(globalDataSourceUrl))
-				|| Tenants.isDefault(tnt) || (ArgUtil.is(apiDetails) && apiDetails.hasRule(USE_DEFAULT_DB)))) {
+				|| Tenants.isDefault(tnt) || (hasRule(USE_DEFAULT_DB)))) {
 			dataBaseName = mongoClientURI.getDatabase();
 		}
 		LOGGER.info("MONGODB: {}:{}:{}", dataBaseName, Tenants.isDefault(tnt), dbtnt);
@@ -87,30 +98,84 @@ public class CommonMongoSource {
 	}
 
 	public MongoDbFactory getMongoDbFactory() {
-		if (mongoDbFactory == null && ArgUtil.is(dataSourceUrl)) {
-			mongoDbFactory = getMongoDbFactory(dataSourceUrl);
-			LOGGER.debug("mongoTemplate was NULL So created One");
-			ready = true;
+		if (hasRule(USE_NO_DB)) {
+			if (mongoDbFactoryNoDb == null && ArgUtil.is(dataSourceUrl)) {
+				mongoDbFactoryNoDb = getMongoDbFactory(dataSourceUrl);
+				LOGGER.warn("mongoDbFactoryNoDb was NULL So created One");
+			}
+			return mongoDbFactoryNoDb;
+		} else if (hasRule(USE_DEFAULT_DB)) {
+			if (mongoDbFactoryDefault == null && ArgUtil.is(dataSourceUrl)) {
+				mongoDbFactoryDefault = getMongoDbFactory(dataSourceUrl);
+				LOGGER.warn("mongoDbFactoryNoDb was NULL So created One");
+			}
+			return mongoDbFactoryDefault;
+		} else {
+			if (mongoDbFactory == null && ArgUtil.is(dataSourceUrl)) {
+				mongoDbFactory = getMongoDbFactory(dataSourceUrl);
+				LOGGER.warn("mongoTemplate was NULL So created One");
+				ready = true;
+			}
+			return mongoDbFactory;
 		}
-		return mongoDbFactory;
 	}
 
 	public MongoTemplate getMongoTemplate() {
-		if (mongoTemplate == null) {
-			synchronized (lock) {
-				LOGGER.debug("mongoTemplate is NULL So creating One {} {}", getDataSourceUrl(),
-						getDataSourceUsername());
-				mongoDbFactory = getMongoDbFactory();
-				if (ArgUtil.is(mongoDbFactory)) {
-					mongoTemplate = new MongoTemplate(mongoDbFactory);
-					LOGGER.debug("mongoTemplate was NULL So created One");
-					ready = true;
-				} else {
-					LOGGER.error("mongoDbFactory was NULL So cannot create One");
+
+		if (hasRule(USE_NO_DB)) {
+			if (mongoTemplateNoDb == null) {
+				synchronized (lockNoDb) {
+					LOGGER.info("mongoTemplateNoDb is NULL So creating One {} {}", getDataSourceUrl(),
+							getDataSourceUsername());
+					mongoDbFactoryNoDb = getMongoDbFactory();
+					if (ArgUtil.is(mongoDbFactoryNoDb)) {
+						mongoTemplateNoDb = new MongoTemplate(mongoDbFactoryNoDb);
+						LOGGER.debug("mongoTemplateNoDb was NULL So created One");
+					} else {
+						LOGGER.error("mongoDbFactoryNoDb was NULL So cannot create One");
+					}
 				}
+			} else {
+				LOGGER.error("mongoDbFactoryNoDb = {}", mongoDbFactoryNoDb.getDb().getName());
 			}
+			return mongoTemplateNoDb;
+		} else if (hasRule(USE_DEFAULT_DB)) {
+			if (mongoTemplateDefault == null) {
+				synchronized (lockDefault) {
+					LOGGER.info("mongoTemplate is NULL So creating One {} {}", getDataSourceUrl(),
+							getDataSourceUsername());
+					mongoDbFactoryDefault = getMongoDbFactory();
+					if (ArgUtil.is(mongoDbFactoryDefault)) {
+						mongoTemplateDefault = new MongoTemplate(mongoDbFactoryDefault);
+						LOGGER.debug("mongoTemplateDefault was NULL So created One");
+						ready = true;
+					} else {
+						LOGGER.error("mongoDbFactoryDefault was NULL So cannot create One");
+					}
+				}
+			} else {
+				LOGGER.error("mongoDbFactoryDefault = {}", mongoTemplateNoDb.getDb().getName());
+			}
+			return mongoTemplateDefault;
+		} else {
+			if (mongoTemplate == null) {
+				synchronized (lock) {
+					LOGGER.info("mongoTemplate is NULL So creating One {} {}", getDataSourceUrl(),
+							getDataSourceUsername());
+					mongoDbFactory = getMongoDbFactory();
+					if (ArgUtil.is(mongoDbFactory)) {
+						mongoTemplate = new MongoTemplate(mongoDbFactory);
+						LOGGER.debug("mongoTemplate was NULL So created One");
+						ready = true;
+					} else {
+						LOGGER.error("mongoDbFactory was NULL So cannot create One");
+					}
+				}
+			} else {
+				LOGGER.error("mongoDbFactory = {}", mongoDbFactory.getDb().getName());
+			}
+			return mongoTemplate;
 		}
-		return mongoTemplate;
 	}
 
 	public boolean isReady() {

@@ -11,6 +11,8 @@ import org.springframework.stereotype.Component;
 
 import com.boot.jx.AppConfigPackage.AppSharedConfig;
 import com.boot.jx.AppContextUtil;
+import com.boot.jx.http.CommonHttpRequest.ApiRequestDetail;
+import com.boot.jx.mongo.CommonMongoSource;
 import com.boot.jx.postman.PMConfiguration.PMConfigurationModel;
 import com.boot.jx.postman.PMEnvironment.PMConfigurationObject;
 import com.boot.jx.postman.PMEnvironment.PMEnvironmentProvider;
@@ -41,11 +43,19 @@ public class PMEnvironmentProviderImpl implements PMEnvironmentProvider, AppShar
 	@Value("${mry.prop.service.server}")
 	private String serviceServer;
 
+	private boolean hasRule(String useNoDb) {
+		ApiRequestDetail apiDetails = AppContextUtil.getApiRequestDetail();
+		return ArgUtil.is(apiDetails) && apiDetails.hasRule(useNoDb);
+	}
+
 	@Override
 	public PMConfigurationModel local() {
 		String tnt = AppContextUtil.getTenant();
-		if (localConfigMap.containsKey(tnt)) {
-			return localConfigMap.get(tnt);
+
+		String mappedTo = hasRule(CommonMongoSource.USE_NO_DB) ? "nodb" : tnt;
+
+		if (localConfigMap.containsKey(mappedTo)) {
+			return localConfigMap.get(mappedTo);
 		}
 
 		if (ArgUtil.is(configStore)) {
@@ -58,6 +68,7 @@ public class PMEnvironmentProviderImpl implements PMEnvironmentProvider, AppShar
 			}
 
 			List<ChannelConfigDoc> channels = configStore.findAll(ChannelConfigDoc.class);
+			//System.out.println("TENE==" + tnt + "=====" + mappedTo + "====" + channels.size());
 			for (ChannelConfigDoc channel : channels) {
 				channel.setDomain(tnt);
 				prefs.channels(channel);
@@ -78,7 +89,7 @@ public class PMEnvironmentProviderImpl implements PMEnvironmentProvider, AppShar
 
 			if (ArgUtil.is(prefs)) {
 				prefs.setUpdateStamp(System.currentTimeMillis());
-				localConfigMap.put(tnt, prefs);
+				localConfigMap.put(mappedTo, prefs);
 			}
 
 			if (Tenants.isDefault(tnt)) {
