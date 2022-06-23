@@ -57,16 +57,6 @@ public class FrontController {
 		return "app-account";
 	}
 
-	@ApiRequest(rules = CommonMongoSource.USE_NO_DB)
-	@RequestMapping(value = { "/", "/front/", "/front/**" }, method = { RequestMethod.GET })
-	public String front(Model model) {
-		if (!pmCommonConfig.isValidDomain()) {
-			return pmCommonConfig.mainDomainRedirect();
-		}
-		String domainName = commonHttpRequest.get("domain");
-		return domainProfile(model, domainName, true, "front");
-	}
-
 	@RequestMapping(value = { "/content/", "/content/**" }, method = { RequestMethod.GET })
 	public String content(Model model) {
 		String domainName = commonHttpRequest.get("domain");
@@ -121,5 +111,15 @@ public class FrontController {
 	@RequestMapping(value = { "/@{domain}", "/{domain:^.*(?!swagger-ui.html)}" }, method = { RequestMethod.GET })
 	public String domain(Model model, @PathVariable @ValidAlphaNum String domain) {
 		return domainProfile(model, domain, false, "front");
+	}
+
+	@ApiRequest(tenant = "app")
+	@RequestMapping(value = { "/", "/front/", "/front/**" }, method = { RequestMethod.GET })
+	public String front(Model model) {
+		if (!pmCommonConfig.isValidDomain()) {
+			return pmCommonConfig.mainDomainRedirect();
+		}
+		String domainName = ArgUtil.nonEmpty(commonHttpRequest.get("domain"), commonHttpRequest.getSubDomain());
+		return domainProfile(model, domainName, Tenants.isDefault(domainName), "front");
 	}
 }

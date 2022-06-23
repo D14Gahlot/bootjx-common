@@ -68,7 +68,8 @@ public class PMEnvironmentProviderImpl implements PMEnvironmentProvider, AppShar
 			}
 
 			List<ChannelConfigDoc> channels = configStore.findAll(ChannelConfigDoc.class);
-			//System.out.println("TENE==" + tnt + "=====" + mappedTo + "====" + channels.size());
+			// System.out.println("TENE==" + tnt + "=====" + mappedTo + "====" +
+			// channels.size());
 			for (ChannelConfigDoc channel : channels) {
 				channel.setDomain(tnt);
 				prefs.channels(channel);
