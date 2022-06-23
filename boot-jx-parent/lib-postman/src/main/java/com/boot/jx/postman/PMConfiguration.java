@@ -303,7 +303,7 @@ public interface PMConfiguration extends Serializable {
 		@Override
 		public List<AChannelConfig> listChannels() {
 			List<AChannelConfig> list = this.local().listChannels();
-			if (Tenants.isDefault(AppContextUtil.getTenant())) {
+			if (!Tenants.isDefault(AppContextUtil.getTenant())) {
 				List<AChannelConfig> cs = this.shared().listChannels();
 				for (AChannelConfig aChannelConfig : cs) {
 					if (aChannelConfig.isShared()
@@ -318,7 +318,7 @@ public interface PMConfiguration extends Serializable {
 		@Override
 		public List<ClientApp> listApps() {
 			List<ClientApp> list = this.local().listApps();
-			if (Tenants.isDefault(AppContextUtil.getTenant())) {
+			if (!Tenants.isDefault(AppContextUtil.getTenant())) {
 				List<ClientApp> cs = this.shared().listApps();
 				for (ClientApp aChannelConfig : cs) {
 					if (aChannelConfig.isShared()) {
