@@ -42,10 +42,8 @@ public class AgentTeamRouterController extends CommonBotController {
 	@ChatMapping(key = AlexBotConstants.KEY.INITIATE + "*", pattern = "^*$")
 	public void greet(InboxMessage inboxMessage, StringMatcher matcher) {
 		LOGGER.debug("Loading chat :greet : isFM{}", inboxMessage.session().isFirstMessage());
-		if (!inboxMessage.session().isFirstMessage()) {
-			List<DepartmentDoc> teams = commonMongoTemplate.findAll(DepartmentDoc.class);
-			askTeam(teams);
-		}
+		List<DepartmentDoc> teams = commonMongoTemplate.findAll(DepartmentDoc.class);
+		askTeam(teams);
 	}
 
 	@ChatMapping(key = "on_team_select")

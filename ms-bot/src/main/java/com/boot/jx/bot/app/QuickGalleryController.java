@@ -127,9 +127,7 @@ public class QuickGalleryController extends CommonBotController {
 	@ChatMapping(key = AlexBotConstants.KEY.INITIATE + "*", pattern = "^*$")
 	public void greet(InboxMessage inboxMessage, StringMatcher matcher) {
 		// System.out.println("Nothing....");
-		if (!inboxMessage.session().isFirstMessage()) {
-			showDefaultMenu();
-		}
+		showDefaultMenu();
 	}
 
 	@ChatMapping(key = "on_category_select")

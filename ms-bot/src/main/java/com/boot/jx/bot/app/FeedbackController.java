@@ -37,9 +37,7 @@ public class FeedbackController extends CommonBotController {
 
 	@ChatMapping(key = AlexBotConstants.KEY.INITIATE + "*", pattern = "^*$")
 	public void greet(InboxMessage inboxMessage, StringMatcher matcher) {
-		if (!inboxMessage.session().isFirstMessage()) {
-			showFeedbackMenu();
-		}
+		showFeedbackMenu();
 	}
 
 	@ChatMapping(key = "feedback-onselect")

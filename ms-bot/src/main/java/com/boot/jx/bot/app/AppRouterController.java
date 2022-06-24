@@ -54,9 +54,7 @@ public class AppRouterController extends CommonBotController {
 
 	@ChatMapping(key = AlexBotConstants.KEY.INITIATE + "*", pattern = "^*$")
 	public void greet(InboxMessage inboxMessage, StringMatcher matcher) {
-		if (!inboxMessage.session().isFirstMessage()) {
-			routeApp(inboxMessage.contact());
-		}
+		routeApp(inboxMessage.contact());
 	}
 
 }
