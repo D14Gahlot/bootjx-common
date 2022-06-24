@@ -146,6 +146,12 @@ public class ConfigMeta implements Serializable {
 
 		CONVERT_TYPE converterType() default CONVERT_TYPE.NONE;
 
+		String optionsSource() default "";
+
+		String optionsLabel() default "";
+
+		String optionsKey() default "";
+
 		String defaultValue() default "";
 	}
 

@@ -38,6 +38,10 @@ public class WebPlugin implements DefaultChannelPlugin<WebConfigDetails> {
 				dataType = DATA_TYPE.SWITCH, converterType = CONVERT_TYPE.BOOLEAN, defaultValue = "false")
 		private boolean promptPhone;
 
+		@ConfigMetaProperty(path = "web.iceBreaker", title = "Ice Breaker Message", inputType = INPUT_TYPE.OPTIONS,
+				optionsSource = "getx:/api/tmpl/hsm", optionsKey = "code", optionsLabel = "desc")
+		private String iceBreaker;
+
 		@Override
 		public String getLane() {
 			return this.site;

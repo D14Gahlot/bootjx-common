@@ -1,6 +1,5 @@
 package com.boot.jx.postman.plugin;
 
-import java.beans.IntrospectionException;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -147,6 +146,9 @@ public class ChannelPluginProvider {
 					if (annotation.inputType() == INPUT_TYPE.OPTIONS && annotation.dataType() == DATA_TYPE.SWITCH
 							&& annotation.converterType() == CONVERT_TYPE.BOOLEAN) {
 						cm.optionsOnOff();
+					} else if (annotation.inputType() == INPUT_TYPE.OPTIONS && ArgUtil.is(annotation.optionsSource())) {
+						cm.optionsSource(annotation.optionsSource()).optionsKey(annotation.optionsKey())
+								.optionsLabel(annotation.optionsLabel());
 					}
 					if (ArgUtil.is(annotation.defaultValue())) {
 						cm.defaultValue(annotation.defaultValue());
