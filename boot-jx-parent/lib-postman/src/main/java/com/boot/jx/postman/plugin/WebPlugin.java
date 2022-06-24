@@ -27,7 +27,8 @@ public class WebPlugin implements DefaultChannelPlugin<WebConfigDetails> {
 
 		private static final long serialVersionUID = 8692015716138195462L;
 
-		@ConfigMetaProperty(path = "web.site", title = "Site", createonly = true)
+		@ConfigMetaProperty(path = "web.site", title = "SiteName", createonly = true,
+				desc = "Enter Website indeitifier, avoid special characters")
 		private String site;
 
 		@ConfigMetaProperty(path = "web.promptEmail", title = "Prompt Email", inputType = INPUT_TYPE.OPTIONS,

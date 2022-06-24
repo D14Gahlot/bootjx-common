@@ -128,6 +128,8 @@ public class ConfigMeta implements Serializable {
 	public @interface ConfigMetaProperty {
 		String title() default "";
 
+		String desc() default "";
+
 		String path() default "";
 
 		boolean hidden() default false;
