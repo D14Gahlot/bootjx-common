@@ -14,6 +14,7 @@ import com.boot.jx.AppContextUtil;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.common.config.ConfigConstants.SETUP_KEY;
+import com.boot.jx.exception.ApiHttpExceptions.ApiHttpClientException;
 import com.boot.jx.postman.ClientApp;
 import com.boot.jx.postman.PMConstants.APP_TYPE;
 import com.boot.jx.postman.PMEnvironment;
@@ -51,9 +52,15 @@ public class AppScriptController {
 		MapModel meta = MapModel.createInstance().put("appId", app.getId()).put("appQueue", app.getQueue())
 				.put("appName", app.getKeyName()).put("appMode", app.getAppMode()).put("appType", app.getAppType());
 
-		return ApiResponse.buildResults(restService.ajax(pmCommonConfig.getScriptusUrl() + "/bot/getBot")
-				.queryParam("id", appId + AppContextUtil.getTenant()).queryParam("appId", appId)
-				.queryParam("domain", AppContextUtil.getTenant()).get().asMap()).meta(meta.toMap());
+		Map<String, Object> mapp = null;
+		try {
+			mapp = restService.ajax(pmCommonConfig.getScriptusUrl() + "/bot/getBot")
+					.queryParam("id", appId + AppContextUtil.getTenant()).queryParam("appId", appId)
+					.queryParam("domain", AppContextUtil.getTenant()).get().asMap();
+		} catch (ApiHttpClientException e) {
+			ApiResponseUtil.addWarning("bot code not found");
+		}
+		return ApiResponse.buildResults(mapp).meta(meta.toMap());
 	}
 
 	@RequestMapping(value = "/api/objects/appscript/{appId}", method = { RequestMethod.POST })
