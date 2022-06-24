@@ -60,9 +60,7 @@ public class QuickMenuController extends CommonBotController {
 
 	@ChatMapping(key = AlexBotConstants.KEY.INITIATE + "*", pattern = "^*$")
 	public void greet(InboxMessage inboxMessage, StringMatcher matcher) {
-		if (!inboxMessage.session().isFirstMessage()) {
-			showDefaultMenu();
-		}
+		showDefaultMenu();
 	}
 
 	@ChatMapping(key = "on_item_select")
