@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.boot.jx.AppContextUtil;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.api.ApiResponseUtil;
+import com.boot.jx.common.config.ConfigConstants.SETUP_KEY;
 import com.boot.jx.postman.ClientApp;
 import com.boot.jx.postman.PMConstants.APP_TYPE;
 import com.boot.jx.postman.PMEnvironment;
@@ -80,7 +81,7 @@ public class AppScriptController {
 	@RequestMapping(value = "/api/objects/appscript/{appId}/logs", method = { RequestMethod.GET })
 	@JsonView(PMEnvironment.PublicProperty.class)
 	public ApiResponse<Map<String, Object>, Object> getAppScriptLogs(@PathVariable String appId,
-			@RequestParam(required = false, defaultValue = "0") int contactId,
+			@RequestParam(required = false) String contactId,
 			@RequestParam(required = false, defaultValue = "0") int pageNo,
 			@RequestParam(required = false, defaultValue = "25") int pageSize,
 			@RequestParam(required = false) String sortBy,
@@ -91,6 +92,11 @@ public class AppScriptController {
 				|| APP_TYPE.WEBHOOK.name().equals(app.getAppType()))) {
 			ApiResponseUtil.throwAccessDeniedException("App Not found");
 		}
+
+		if (!ArgUtil.is(contactId)) {
+			contactId = pmEnvironment.keyEntry(SETUP_KEY.POSTMAN_DEBUG_CONTACT).asString();
+		}
+
 		return restService.ajax(pmCommonConfig.getScriptusUrl() + "/bot/getLogs").queryParam("app_id", appId)
 				.queryParam("contact_id", contactId).queryParam("domain", AppContextUtil.getTenant()).get()
 				.asAmxApiResponseOfMap();

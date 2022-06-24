@@ -219,6 +219,7 @@ public class PMCommonConfigImpl implements PMCommonConfig {
 
 	@Override
 	public String getScriptusUrl() {
+		//return "http://localhost:8085/";
 		return this.scriptusUrl;
 	}
 
