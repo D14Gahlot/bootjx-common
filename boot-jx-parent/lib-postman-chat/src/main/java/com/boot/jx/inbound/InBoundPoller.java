@@ -31,6 +31,7 @@ import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.tunnel.ITunnelDefs.TunnelTask;
 import com.boot.jx.tunnel.task.ATaskLimiter;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.CloseUtil;
 
 @EnableScheduling
 @Component
@@ -84,18 +85,19 @@ public class InBoundPoller extends ATaskLimiter {
 			}
 
 			MessageBoxEvent messageBoxEvent = new MessageBoxEvent();
-
+			Folder folder = null;
+			Store store = null;
 			try {
 
 				// Get a Store object and connect to the current host
-				Store store = session.getStore("pop3s");
+				store = session.getStore("pop3s");
 				LOGGER.debug("store.connect {} {} {}", channel.getEmail().getPop3Host(),
 						channel.getEmail().getPop3User(), channel.getEmail().getPop3Pass());
 				store.connect(channel.getEmail().getPop3Host(), channel.getEmail().getPop3User(),
 						channel.getEmail().getPop3Pass());
 				// change the user and password accordingly
 
-				Folder folder = store.getFolder("inbox");
+				folder = store.getFolder("inbox");
 				if (!folder.exists()) {
 					LOGGER.warn("Inbox not found for task {} {}", task.getId(), channelId);
 					return;
@@ -136,14 +138,19 @@ public class InBoundPoller extends ATaskLimiter {
 						}
 
 					}
-					// close the store and folder objects
-					folder.close(true);
-					store.close();
 				}
-
+				// close the store and folder objects
+				closeAll(folder, store);
 			} catch (MessagingException e2) {
-				// TODO Auto-generated catch block
-				e2.printStackTrace();
+				LOGGER.error("For Channel {} {} {}", channel.getEmail().getPop3Host(), channel.getEmail().getPop3Port(),
+						channel.getEmail().getPop3User());
+				LOGGER.error("Eexception==e2", e2);
+			} catch (Exception e3) {
+				LOGGER.error("For Channel {} {} {}", channel.getEmail().getPop3Host(), channel.getEmail().getPop3Port(),
+						channel.getEmail().getPop3User());
+				LOGGER.error("Eexception==e3", e3);
+			} finally {
+				closeAll(folder, store);
 			}
 
 			if (ArgUtil.is(messageBoxEvent.getInboxMessages())) {
@@ -158,6 +165,23 @@ public class InBoundPoller extends ATaskLimiter {
 				inBoundStatusService.update(messageBoxEvent.getMessageReports());
 			}
 
+		}
+	}
+
+	private void closeAll(Folder folder, Store store) {
+		if (folder != null && folder.isOpen()) {
+			try {
+				folder.close(true);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+		if (store != null) {
+			try {
+				store.close();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 		}
 	}
 
