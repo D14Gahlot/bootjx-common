@@ -3,6 +3,7 @@ package com.boot.jx.postman.tg;
 import org.telegram.telegrambots.meta.api.methods.send.SendDocument;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
+import org.telegram.telegrambots.meta.api.methods.send.SendVideo;
 import org.telegram.telegrambots.meta.api.objects.InputFile;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -49,6 +50,25 @@ public class TelegramModels {
 			this.setPhoto(inputFile);
 			return this;
 		}
+
+		public TGSendPhoto photo(String inputFile) {
+			this.setPhoto(new InputFile(inputFile));
+			return this;
+		}
+	}
+
+	@JsonInclude(Include.NON_NULL)
+	@JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
+	public static class TGSendVideo extends SendVideo implements Caption<TGSendVideo> {
+		public TGSendVideo video(InputFile inputFile) {
+			this.setVideo(inputFile);
+			return this;
+		}
+
+		public TGSendVideo video(String inputFile) {
+			this.setVideo(new InputFile(inputFile));
+			return this;
+		}
 	}
 
 	@JsonInclude(Include.NON_NULL)
@@ -57,6 +77,11 @@ public class TelegramModels {
 
 		public TGSendDocument document(InputFile inputFile) {
 			this.setDocument(inputFile);
+			return this;
+		}
+
+		public TGSendDocument document(String inputFile) {
+			this.setDocument(new InputFile(inputFile));
 			return this;
 		}
 

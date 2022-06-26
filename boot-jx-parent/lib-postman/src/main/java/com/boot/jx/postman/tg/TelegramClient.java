@@ -15,6 +15,7 @@ import org.telegram.telegrambots.meta.api.methods.GetFile;
 import org.telegram.telegrambots.meta.api.methods.send.SendDocument;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
+import org.telegram.telegrambots.meta.api.methods.send.SendVideo;
 import org.telegram.telegrambots.meta.api.objects.ApiResponse;
 import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
@@ -33,6 +34,7 @@ import com.boot.jx.postman.tg.TelegramModels.TGMessage;
 import com.boot.jx.postman.tg.TelegramModels.TGSendDocument;
 import com.boot.jx.postman.tg.TelegramModels.TGSendMessage;
 import com.boot.jx.postman.tg.TelegramModels.TGSendPhoto;
+import com.boot.jx.postman.tg.TelegramModels.TGSendVideo;
 import com.boot.jx.rest.RestService;
 import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
@@ -99,6 +101,15 @@ public class TelegramClient implements MessageClient {
 				}).getResult();
 	}
 
+	public TGMessage sendVideo(ChannelConfig channelConfig, String id, String video, String caption) {
+		SendVideo message = new TGSendVideo() // Create a SendMessage object with mandatory fields
+				.chatId(id).video(video).caption(caption);
+		return restService.ajax(PATH.URL).path(PATH.BOT).path("/sendPhoto")
+				.pathParam("accessToken", channelConfig.getTelegram().getAccessToken()).post(message)
+				.as(new ParameterizedTypeReference<ApiResponse<TGMessage>>() {
+				}).getResult();
+	}
+
 	public TGMessage sendDocument(ChannelConfig channelConfig, String id, String document, String caption) {
 		SendDocument message = new TGSendDocument() // Create a SendMessage object with mandatory fields
 				.chatId(id).document(new InputFile(document)).caption(caption);
@@ -157,6 +168,10 @@ public class TelegramClient implements MessageClient {
 				if (ArgUtil.is(attachment.getMediaURL())) {
 					if (ArgUtil.areEqual(attachment.getMediaType(), FileType.IMAGE.toString())) {
 						resp = sendPhoto(channelConfig, to, attachment.getMediaURL(), attachment.getMediaCaption());
+						if (ArgUtil.is(resp.getMessageId()))
+							msgIds.add(ArgUtil.parseAsString(resp.getMessageId()));
+					} else if (ArgUtil.areEqual(attachment.getMediaType(), FileType.VIDEO.toString())) {
+						resp = sendVideo(channelConfig, to, attachment.getMediaURL(), attachment.getMediaCaption());
 						if (ArgUtil.is(resp.getMessageId()))
 							msgIds.add(ArgUtil.parseAsString(resp.getMessageId()));
 					} else {
