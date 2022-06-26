@@ -6,6 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.boot.jx.AppContextUtil;
+import com.boot.jx.exception.ApiHttpExceptions.ApiHttpException;
+import com.boot.jx.exception.ApiHttpExceptions.ApiHttpServerException;
 import com.boot.jx.logger.AuditDetailProvider;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.MessageDoc;
@@ -22,6 +24,7 @@ import com.boot.jx.postman.store.MessageStore;
 import com.boot.jx.postman.store.MessageStore.EVENTS;
 import com.boot.jx.postman.store.SessionStore;
 import com.boot.jx.utils.PostManUtil;
+import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
 
 @Component
@@ -69,7 +72,7 @@ public class ChatLogger {
 		}
 		doc.setAction(ArgUtil.parseAsString(eventName));
 		doc.setSessionId(inboxMessage.getSessionId());
-		doc.setAgent(ArgUtil.nonEmpty(actorAgent,AppContextUtil.getActorId()));
+		doc.setAgent(ArgUtil.nonEmpty(actorAgent, AppContextUtil.getActorId()));
 		messageStore.save(doc, inboxMessage.contact().type());
 		return doc;
 	}
@@ -99,13 +102,7 @@ public class ChatLogger {
 		doc.setTraceId(AppContextUtil.getTraceId());
 		doc.setMessage(e.getMessage());
 
-		StackTraceElement[] traces = e.getStackTrace();
-
-		if (traces.length > 0 && traces[0].toString().length() > 0) {
-			for (StackTraceElement trace : traces) {
-				doc.logs().add(trace.toString());
-			}
-		}
+		toLogs(e, doc);
 
 		messageStore.save(doc);
 		inboxMessage.logs().add(e.getMessage());
@@ -121,6 +118,11 @@ public class ChatLogger {
 		doc.setTraceId(AppContextUtil.getTraceId());
 		doc.setMessage(e.getMessage());
 
+		toLogs(e, doc);
+		messageStore.save(doc);
+	}
+
+	private void toLogs(Throwable e, MessageDocLogs doc) {
 		StackTraceElement[] traces = e.getStackTrace();
 
 		if (traces.length > 0 && traces[0].toString().length() > 0) {
@@ -128,7 +130,11 @@ public class ChatLogger {
 				doc.logs().add(trace.toString());
 			}
 		}
-		messageStore.save(doc);
+
+		if (e instanceof ApiHttpServerException || e instanceof ApiHttpException) {
+			doc.setHttpResp(MapModel.from(((ApiHttpException) e).getResponse().getBody()).toMap());
+		}
+
 	}
 
 	public void error(Throwable e) {
