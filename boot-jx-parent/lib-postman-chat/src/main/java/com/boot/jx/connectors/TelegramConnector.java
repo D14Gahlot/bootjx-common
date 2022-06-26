@@ -143,7 +143,7 @@ public class TelegramConnector extends AbstractConnector<TelegramConfigDetails, 
 		if (ArgUtil.is(update) && ArgUtil.is(update.getMessage()) && ArgUtil.is(update.getMessage().getFrom())
 				&& ArgUtil.is(update.getMessage().getContact())) {
 
-			if (ArgUtil.isEqual(update.getMessage().getFrom().getId(), update.getMessage().getContact().getUserID())) {
+			if (ArgUtil.isEqual(update.getMessage().getFrom().getId(), update.getMessage().getContact().getUserId())) {
 
 				ChatContactQuery contactQuery = messageContext.contact();
 

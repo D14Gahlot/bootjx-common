@@ -16,6 +16,7 @@ import org.telegram.telegrambots.meta.api.methods.send.SendDocument;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
 import org.telegram.telegrambots.meta.api.objects.ApiResponse;
+import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
@@ -30,6 +31,7 @@ import com.boot.jx.postman.tg.TelegramModels.TGFile;
 import com.boot.jx.postman.tg.TelegramModels.TGGetFile;
 import com.boot.jx.postman.tg.TelegramModels.TGMessage;
 import com.boot.jx.postman.tg.TelegramModels.TGSendDocument;
+import com.boot.jx.postman.tg.TelegramModels.TGSendMessage;
 import com.boot.jx.postman.tg.TelegramModels.TGSendPhoto;
 import com.boot.jx.rest.RestService;
 import com.boot.model.MapModel;
@@ -42,167 +44,166 @@ import com.ulisesbocchio.jasyptspringboot.annotation.EnableEncryptableProperties
 @EnableEncryptableProperties
 public class TelegramClient implements MessageClient {
 
-    boolean isRegistered;
+	boolean isRegistered;
 
-    @Value("${postman.telegram.webhook.url}")
-    private String telegramWebhookUrl;
-    @Value("${postman.telegram.webhook.path}")
-    private String telegramWebhooPath;
+	@Value("${postman.telegram.webhook.url}")
+	private String telegramWebhookUrl;
+	@Value("${postman.telegram.webhook.path}")
+	private String telegramWebhooPath;
 
-    @Value("${postman.telegram.default.lane}")
-    private String defaultLane;
+	@Value("${postman.telegram.default.lane}")
+	private String defaultLane;
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(TelegramClient.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(TelegramClient.class);
 
-    public static class PATH {
-	public static final String URL = "https://api.telegram.org";
-	public static final String BOT = "/bot{accessToken}";
-	public static final String BOT_SET_WEBHOOK = BOT + "/setWebHook";
-	public static final String BOT_SEND_MESSAGE = BOT + "/sendMessage";
-    }
-
-    @Autowired
-    private RestService restService;
-
-    public String registerWebHook(ChannelConfig channelConfig, String webhookUrl) {
-	return restService.ajax(PATH.URL).path(PATH.BOT_SET_WEBHOOK)
-		.pathParam("accessToken", channelConfig.getTelegram().getAccessToken()).field("url", webhookUrl)
-		.queryParam("url", webhookUrl).post().asString();
-    }
-
-    public TGMessage sendReply(ChannelConfig channelConfig, String id, SendMessage sendMessage) {
-	SendMessage message = sendMessage; // Create a SendMessage object with mandatory fields
-	sendMessage.setChatId(id);
-	return restService.ajax(PATH.URL).path(PATH.BOT_SEND_MESSAGE)
-		.pathParam("accessToken", channelConfig.getTelegram().getAccessToken()).post(message)
-		.as(new ParameterizedTypeReference<ApiResponse<TGMessage>>() {
-		}).getResult();
-    }
-
-    public TGMessage sendReply(ChannelConfig channelConfig, String id, String text) {
-	SendMessage message = new SendMessage() // Create a SendMessage object with mandatory fields
-		.setChatId(id).setText(text);
-	return restService.ajax(PATH.URL).path(PATH.BOT_SEND_MESSAGE)
-		.pathParam("accessToken", channelConfig.getTelegram().getAccessToken()).post(message)
-		.as(new ParameterizedTypeReference<ApiResponse<TGMessage>>() {
-		}).getResult();
-    }
-
-    public TGMessage sendPhoto(ChannelConfig channelConfig, String id, String photo, String caption) {
-	SendPhoto message = new TGSendPhoto() // Create a SendMessage object with mandatory fields
-		.setChatId(id).setPhoto(photo).setCaption(caption);
-	return restService.ajax(PATH.URL).path(PATH.BOT).path("/sendPhoto")
-		.pathParam("accessToken", channelConfig.getTelegram().getAccessToken()).post(message)
-		.as(new ParameterizedTypeReference<ApiResponse<TGMessage>>() {
-		}).getResult();
-    }
-
-    public TGMessage sendDocument(ChannelConfig channelConfig, String id, String document, String caption) {
-	SendDocument message = new TGSendDocument() // Create a SendMessage object with mandatory fields
-		.setChatId(id).setDocument(document).setCaption(caption);
-	return restService.ajax(PATH.URL).path(PATH.BOT).path("/sendDocument")
-		.pathParam("accessToken", channelConfig.getTelegram().getAccessToken()).post(message)
-		.as(new ParameterizedTypeReference<ApiResponse<TGMessage>>() {
-		}).getResult();
-    }
-
-    public TGFile getFile(ChannelConfig channelConfig, String fileId) {
-	GetFile getFile = new TGGetFile().setFileId(fileId);
-	String accessToken = channelConfig.getTelegram().getAccessToken();
-	return restService.ajax(PATH.URL).path(PATH.BOT).path("/getFile").pathParam("accessToken", accessToken)
-		.post(getFile).as(new ParameterizedTypeReference<ApiResponse<TGFile>>() {
-		}).getResult().updateFileUrl(accessToken);
-    }
-
-    public String promptShareNumber(ChannelConfig channelConfig, String id, String text) {
-	SendMessage message = new SendMessage() // Create a SendMessage object with mandatory fields
-		.setChatId(id);
-	message.setText(text);
-
-	// create keyboard
-	ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
-	message.setReplyMarkup(replyKeyboardMarkup);
-	replyKeyboardMarkup.setSelective(true);
-	replyKeyboardMarkup.setResizeKeyboard(true);
-	replyKeyboardMarkup.setOneTimeKeyboard(true);
-
-	// new list
-	List<KeyboardRow> keyboard = new ArrayList<>();
-
-	// first keyboard line
-	KeyboardRow keyboardFirstRow = new KeyboardRow();
-	KeyboardButton keyboardButton = new KeyboardButton();
-	keyboardButton.setText(text).setRequestContact(true);
-	keyboardFirstRow.add(keyboardButton);
-	// add array to list
-	keyboard.add(keyboardFirstRow);
-	// add list to our keyboard
-	replyKeyboardMarkup.setKeyboard(keyboard);
-
-	return restService.ajax(PATH.URL).path(PATH.BOT_SEND_MESSAGE)
-		.pathParam("accessToken", channelConfig.getTelegram().getAccessToken()).post(message).asString();
-
-    }
-
-    @Override
-    public OutboxMessage send(ChannelConfig channelConfig, OutboxMessage message) {
-	String to = CollectionUtil.getOne(message.getTo());
-
-	TGMessage resp = null;
-	StringJoiner msgIds = new StringJoiner(",");
-
-	if (ArgUtil.is(message.getAttachments())) {
-	    for (Attachment attachment : message.getAttachments()) {
-		if (ArgUtil.is(attachment.getMediaURL())) {
-		    if (ArgUtil.areEqual(attachment.getMediaType(), FileType.IMAGE.toString())) {
-			resp = sendPhoto(channelConfig, to, attachment.getMediaURL(), attachment.getMediaCaption());
-			if (ArgUtil.is(resp.getMessageId()))
-			    msgIds.add(ArgUtil.parseAsString(resp.getMessageId()));
-		    } else {
-			resp = sendDocument(channelConfig, to, attachment.getMediaURL(), attachment.getMediaCaption());
-			if (ArgUtil.is(resp.getMessageId()))
-			    msgIds.add(ArgUtil.parseAsString(resp.getMessageId()));
-		    }
-		}
-	    }
+	public static class PATH {
+		public static final String URL = "https://api.telegram.org";
+		public static final String BOT = "/bot{accessToken}";
+		public static final String BOT_SET_WEBHOOK = BOT + "/setWebHook";
+		public static final String BOT_SEND_MESSAGE = BOT + "/sendMessage";
 	}
 
-	if (ArgUtil.is(message.getMessage())) {
-	    SendMessage sendMessage = new SendMessage();
-	    sendMessage.setText(message.getMessage());
-	    if (message.options().containsKey("buttons")) {
-		List<TmplElement> buttons = new MapModel(message.options()).entry("buttons").asList(TmplElement.class);
+	@Autowired
+	private RestService restService;
+
+	public String registerWebHook(ChannelConfig channelConfig, String webhookUrl) {
+		return restService.ajax(PATH.URL).path(PATH.BOT_SET_WEBHOOK)
+				.pathParam("accessToken", channelConfig.getTelegram().getAccessToken()).field("url", webhookUrl)
+				.queryParam("url", webhookUrl).post().asString();
+	}
+
+	public TGMessage sendReply(ChannelConfig channelConfig, String id, SendMessage sendMessage) {
+		SendMessage message = sendMessage; // Create a SendMessage object with mandatory fields
+		sendMessage.setChatId(id);
+		return restService.ajax(PATH.URL).path(PATH.BOT_SEND_MESSAGE)
+				.pathParam("accessToken", channelConfig.getTelegram().getAccessToken()).post(message)
+				.as(new ParameterizedTypeReference<ApiResponse<TGMessage>>() {
+				}).getResult();
+	}
+
+	public TGMessage sendReply(ChannelConfig channelConfig, String id, String text) {
+		SendMessage message = new TGSendMessage()// Create a SendMessage object with mandatory fields
+				.chatId(id).text(text);
+		return restService.ajax(PATH.URL).path(PATH.BOT_SEND_MESSAGE)
+				.pathParam("accessToken", channelConfig.getTelegram().getAccessToken()).post(message)
+				.as(new ParameterizedTypeReference<ApiResponse<TGMessage>>() {
+				}).getResult();
+	}
+
+	public TGMessage sendPhoto(ChannelConfig channelConfig, String id, String photo, String caption) {
+		SendPhoto message = new TGSendPhoto() // Create a SendMessage object with mandatory fields
+				.chatId(id).photo(new InputFile(photo)).caption(caption);
+		return restService.ajax(PATH.URL).path(PATH.BOT).path("/sendPhoto")
+				.pathParam("accessToken", channelConfig.getTelegram().getAccessToken()).post(message)
+				.as(new ParameterizedTypeReference<ApiResponse<TGMessage>>() {
+				}).getResult();
+	}
+
+	public TGMessage sendDocument(ChannelConfig channelConfig, String id, String document, String caption) {
+		SendDocument message = new TGSendDocument() // Create a SendMessage object with mandatory fields
+				.chatId(id).document(new InputFile(document)).caption(caption);
+		return restService.ajax(PATH.URL).path(PATH.BOT).path("/sendDocument")
+				.pathParam("accessToken", channelConfig.getTelegram().getAccessToken()).post(message)
+				.as(new ParameterizedTypeReference<ApiResponse<TGMessage>>() {
+				}).getResult();
+	}
+
+	public TGFile getFile(ChannelConfig channelConfig, String fileId) {
+		GetFile getFile = new TGGetFile().fileId(fileId);
+		String accessToken = channelConfig.getTelegram().getAccessToken();
+		return restService.ajax(PATH.URL).path(PATH.BOT).path("/getFile").pathParam("accessToken", accessToken)
+				.post(getFile).as(new ParameterizedTypeReference<ApiResponse<TGFile>>() {
+				}).getResult().updateFileUrl(accessToken);
+	}
+
+	public String promptShareNumber(ChannelConfig channelConfig, String id, String text) {
+		SendMessage message = new TGSendMessage() // Create a SendMessage object with mandatory fields
+				.chatId(id).text(text);
+		// message.setText(text);
+
+		// create keyboard
 		ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
+		message.setReplyMarkup(replyKeyboardMarkup);
 		replyKeyboardMarkup.setSelective(true);
 		replyKeyboardMarkup.setResizeKeyboard(true);
 		replyKeyboardMarkup.setOneTimeKeyboard(true);
 
+		// new list
 		List<KeyboardRow> keyboard = new ArrayList<>();
-		KeyboardRow keyboardFirstRow = new KeyboardRow();
 
-		for (TmplElement button : buttons) {
-		    keyboardFirstRow.add(button.getLabel());
+		// first keyboard line
+		KeyboardRow keyboardFirstRow = new KeyboardRow();
+		KeyboardButton keyboardButton = KeyboardButton.builder().text(text).requestContact(true).build();
+		keyboardFirstRow.add(keyboardButton);
+		// add array to list
+		keyboard.add(keyboardFirstRow);
+		// add list to our keyboard
+		replyKeyboardMarkup.setKeyboard(keyboard);
+
+		return restService.ajax(PATH.URL).path(PATH.BOT_SEND_MESSAGE)
+				.pathParam("accessToken", channelConfig.getTelegram().getAccessToken()).post(message).asString();
+
+	}
+
+	@Override
+	public OutboxMessage send(ChannelConfig channelConfig, OutboxMessage message) {
+		String to = CollectionUtil.getOne(message.getTo());
+
+		TGMessage resp = null;
+		StringJoiner msgIds = new StringJoiner(",");
+
+		if (ArgUtil.is(message.getAttachments())) {
+			for (Attachment attachment : message.getAttachments()) {
+				if (ArgUtil.is(attachment.getMediaURL())) {
+					if (ArgUtil.areEqual(attachment.getMediaType(), FileType.IMAGE.toString())) {
+						resp = sendPhoto(channelConfig, to, attachment.getMediaURL(), attachment.getMediaCaption());
+						if (ArgUtil.is(resp.getMessageId()))
+							msgIds.add(ArgUtil.parseAsString(resp.getMessageId()));
+					} else {
+						resp = sendDocument(channelConfig, to, attachment.getMediaURL(), attachment.getMediaCaption());
+						if (ArgUtil.is(resp.getMessageId()))
+							msgIds.add(ArgUtil.parseAsString(resp.getMessageId()));
+					}
+				}
+			}
 		}
 
-		keyboard.add(keyboardFirstRow);
+		if (ArgUtil.is(message.getMessage())) {
+			SendMessage sendMessage = new SendMessage();
+			sendMessage.setText(message.getMessage());
+			if (message.options().containsKey("buttons")) {
+				List<TmplElement> buttons = new MapModel(message.options()).entry("buttons").asList(TmplElement.class);
+				ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
+				replyKeyboardMarkup.setSelective(true);
+				replyKeyboardMarkup.setResizeKeyboard(true);
+				replyKeyboardMarkup.setOneTimeKeyboard(true);
 
-		/**
-		 * KeyboardRow keyboardSecondRow = new KeyboardRow();
-		 * keyboardSecondRow.add(getAlertsCommand(language));
-		 * keyboardSecondRow.add(getBackCommand(language));
-		 * keyboard.add(keyboardSecondRow);
-		 **/
+				List<KeyboardRow> keyboard = new ArrayList<>();
+				KeyboardRow keyboardFirstRow = new KeyboardRow();
 
-		replyKeyboardMarkup.setKeyboard(keyboard);
-		sendMessage.setReplyMarkup(replyKeyboardMarkup);
-	    }
-	    resp = sendReply(channelConfig, to, sendMessage);
-	    if (ArgUtil.is(resp.getMessageId()))
-		msgIds.add(ArgUtil.parseAsString(resp.getMessageId()));
+				for (TmplElement button : buttons) {
+					keyboardFirstRow.add(button.getLabel());
+				}
+
+				keyboard.add(keyboardFirstRow);
+
+				/**
+				 * KeyboardRow keyboardSecondRow = new KeyboardRow();
+				 * keyboardSecondRow.add(getAlertsCommand(language));
+				 * keyboardSecondRow.add(getBackCommand(language));
+				 * keyboard.add(keyboardSecondRow);
+				 **/
+
+				replyKeyboardMarkup.setKeyboard(keyboard);
+				sendMessage.setReplyMarkup(replyKeyboardMarkup);
+			}
+			resp = sendReply(channelConfig, to, sendMessage);
+			if (ArgUtil.is(resp.getMessageId()))
+				msgIds.add(ArgUtil.parseAsString(resp.getMessageId()));
+		}
+		message.setMessageIdExt(msgIds.toString());
+
+		return message;
 	}
-	message.setMessageIdExt(msgIds.toString());
-
-	return message;
-    }
 
 }
