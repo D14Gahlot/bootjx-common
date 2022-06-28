@@ -34,7 +34,7 @@ import com.boot.utils.StringUtils.StringMatcher;
 public class AppFaqBotController extends CommonBotController {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(DemoAlAamalController.class);
-
+	public static final String TALKTOAGENT = "Talk to Agent";
 	@Autowired
 	private CommonMongoTemplate commonMongoTemplate;
 
@@ -68,7 +68,7 @@ public class AppFaqBotController extends CommonBotController {
 		}
 		buttons.add(new TmplElement().name("exit").label("FAQ Menu"));
 		buttons.add(new TmplElement().name("m").label("Main Menu"));
-		buttons.add(new TmplElement().name("#").label("TalkToAgent"));
+		buttons.add(new TmplElement().name("#").label(TALKTOAGENT));
 
 		reply(new OutboxMessage().message("Select Category").options("buttons", buttons));
 		next("on_faq_parent_select");
@@ -118,7 +118,7 @@ public class AppFaqBotController extends CommonBotController {
 		}
 		buttons.add(new TmplElement().name("exit").label("FAQ Menu"));
 		buttons.add(new TmplElement().name("m").label("Main Menu"));
-		buttons.add(new TmplElement().name("#").label("TalkToAgent"));
+		buttons.add(new TmplElement().name("#").label(TALKTOAGENT));
 		reply(new OutboxMessage().message("Select Category").options("buttons", buttons));
 		next("on_faq_parent_select");
 	}
@@ -170,7 +170,7 @@ public class AppFaqBotController extends CommonBotController {
 		}
 		buttons.add(new TmplElement().name("exit").label("FAQ Menu"));
 		buttons.add(new TmplElement().name("m").label("Main Menu"));
-		buttons.add(new TmplElement().name("#").label("TalkToAgent"));
+		buttons.add(new TmplElement().name("#").label(TALKTOAGENT));
 		reply(new OutboxMessage().message("Select Category").options("buttons", buttons));
 		next("on_faq_child_select");
 	}
@@ -199,7 +199,7 @@ public class AppFaqBotController extends CommonBotController {
 		List<TmplElement> buttons = new ArrayList<TmplElement>();
 		buttons.add(new TmplElement().name("exit").label("FAQ Menu"));
 		buttons.add(new TmplElement().name("m").label("Main Menu"));
-		buttons.add(new TmplElement().name("#").label("TalkToAgent"));
+		buttons.add(new TmplElement().name("#").label(TALKTOAGENT));
 		List<AppFaqDoc>  faqChildValue = getChild(lang,replay_id.toUpperCase());
 		for (AppFaqDoc faq : faqChildValue) {
 			String parentkey = faq.getParent();
