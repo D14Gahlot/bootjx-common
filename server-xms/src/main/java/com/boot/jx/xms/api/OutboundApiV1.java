@@ -1,6 +1,7 @@
 package com.boot.jx.xms.api;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -28,6 +29,7 @@ public class OutboundApiV1 {
 	@Autowired
 	private MessageService messageService;
 
+	@CrossOrigin(origins = "*")
 	@ApiOperation(value = "Send Message", notes = "${swagger.OutboundApiV1.sendMessage.description}",
 			authorizations = @Authorization("X_API_KEY"))
 	@XMSClientAuth
