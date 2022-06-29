@@ -66,7 +66,7 @@ public class AppFaqBotController extends CommonBotController {
 		        }
 			}
 		}
-		buttons.add(new TmplElement().name("exit").label("FAQ Menu"));
+		//buttons.add(new TmplElement().name("exit").label("FAQ Menu"));
 		buttons.add(new TmplElement().name("m").label("Main Menu"));
 		buttons.add(new TmplElement().name("#").label(TALKTOAGENT));
 
