@@ -35,4 +35,15 @@ public final class SessionRequestObjects {
 		public String sessionId;
 
 	}
+
+	@JsonIgnoreProperties(ignoreUnknown = true)
+	public static class ContactPrefsUpdate implements Serializable {
+		private static final long serialVersionUID = 6550916242164154457L;
+		@ApiMockModelProperty(example = "fb:12121212121", required = true, value = "Contact to update")
+		public String contactId;
+
+		@ApiMockModelProperty(example = "en_US", required = true, value = "Language to set")
+		public String lang;
+
+	}
 }

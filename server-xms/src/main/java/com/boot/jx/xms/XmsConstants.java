@@ -27,6 +27,9 @@ public class XmsConstants {
 			+ "* to fetch all session messages.\n"
 			+ "A session usually starts with first messages and stays active for 24 hours by default.";
 
+	public static final String CONTACT_MNGMNT_DESCRIPTION = "Contact API can be used:\n"
+			+ "* to modify contact details and prefs.\n";
+
 	@Target({ ElementType.TYPE, ElementType.METHOD })
 	@Retention(RetentionPolicy.RUNTIME)
 	@ApiRequest(authenticateTenant = true)
