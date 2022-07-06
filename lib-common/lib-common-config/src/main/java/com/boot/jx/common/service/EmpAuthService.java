@@ -262,7 +262,7 @@ public class EmpAuthService {
 	private HashBuilder getHashBuilder(String username, String email, String domainName, String domainId,
 			String authKey) {
 		String secret = appConfig.prop("mry.app.login.secret");
-		HashBuilder builder = new HashBuilder().interval(10000).secret(secret)
+		HashBuilder builder = new HashBuilder().interval(300000).secret(secret)
 				.message(String.format("%s@%s:%s#%s=%s", username, domainName, domainId, authKey, email));
 		return builder;
 	}
