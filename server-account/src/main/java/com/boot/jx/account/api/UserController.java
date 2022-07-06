@@ -51,7 +51,8 @@ public class UserController {
 	public ApiResponse<UserLoginToken, Object> agentLogin(@RequestParam String username, @RequestParam String password,
 			@RequestParam(required = false) String app, @RequestParam String tnt, @RequestParam String domainId)
 			throws NoSuchAlgorithmException {
-		return ApiResponse.buildData(empAuthService.createAgentLoginToken(username, password, tnt, domainId, app));
+		return ApiResponse
+				.buildData(empAuthService.createAgentLoginToken(username, username, password, tnt, domainId, app));
 	}
 
 }

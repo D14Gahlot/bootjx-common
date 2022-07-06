@@ -128,9 +128,10 @@ public class PartnerController {
 
 		if (userSessionBean.hasAdminAccesTo(domain)) {
 			DomainDoc domainDoc = accountStore.findDomainByName(domain);
-			UserLoginToken userLoginToken = empAuthService.createSuperLoginToken("superadmin", domain,
-					domainDoc.getId(), "admin");
+			UserLoginToken userLoginToken = empAuthService.createSuperLoginToken("superadmin",
+					userSessionBean.domainUser().contact().getEmail(), domain, domainDoc.getId(), "admin");
 			model.addAttribute("DOMAIN_USER", userLoginToken.getDomainUser());
+			model.addAttribute("DOMAIN_USER_EMAIL", userLoginToken.getDomainUserEmail());
 			model.addAttribute("DOMAIN_NAME", userLoginToken.getDomainName());
 			model.addAttribute("DOMAIN_ID", userLoginToken.getDomainId());
 			model.addAttribute("DOMAIN_TOKEN", userLoginToken.getDomainToken());

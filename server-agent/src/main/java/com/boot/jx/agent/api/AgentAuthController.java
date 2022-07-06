@@ -95,13 +95,14 @@ public class AgentAuthController {
 		}
 
 		String domainUser = map.getString("domainUser");
+		String domainUserEmail = map.getString("domainUserEmail");
 		String domainName = map.getString("domainName");
 		String domainId = map.getString("domainId");
 		String domainToken = map.getString("domainToken");
 
 		if (ArgUtil.is(domainToken)) {
-			AgentResponseAuthDto agent = authService.loginByDomainToken(domainUser, domainName, domainId, domainToken,
-					false);
+			AgentResponseAuthDto agent = authService.loginByDomainToken(domainUser, domainUserEmail, domainName,
+					domainId, domainToken, false);
 			if (ArgUtil.is(agent)) {
 				sessionService.login(request, agent, domainToken);
 				commonHttpRequest.setCookie("JXSESSIONID", xRemSession);
@@ -123,8 +124,9 @@ public class AgentAuthController {
 			method = { RequestMethod.POST, RequestMethod.GET })
 	public String home(HttpServletRequest request, HttpServletResponse response, Model model,
 			@RequestParam(required = false) String domainName, @RequestParam(required = false) String domainId,
-			@RequestParam(required = false) String domainUser, @RequestParam(required = false) String domainToken,
-			@RequestParam(required = false) String domainTokenValid) throws NoSuchAlgorithmException {
+			@RequestParam(required = false) String domainUser, @RequestParam(required = false) String domainUserEmail,
+			@RequestParam(required = false) String domainToken, @RequestParam(required = false) String domainTokenValid)
+			throws NoSuchAlgorithmException {
 
 		if (!isAgentPanelActive()) {
 			return unauthorized(model);
@@ -134,14 +136,15 @@ public class AgentAuthController {
 		String xRemSession = ArgUtil.parseAsString(commonHttpRequest.get("JXSESSIONID"), Constants.BLANK);
 
 		if (ArgUtil.is(domainName) && ArgUtil.is(domainId) && ArgUtil.is(domainToken)) {
-			AgentResponseAuthDto agent = authService.loginByDomainToken(domainUser, domainName, domainId, domainToken,
-					false);
+			AgentResponseAuthDto agent = authService.loginByDomainToken(domainUser, domainUserEmail, domainName,
+					domainId, domainToken, false);
 
 			if (ArgUtil.is(agent)) {
 				sessionService.login(request, agent, domainToken);
 				xRemSession = CryptoUtil.getEncoder()
-						.obzect(MapBuilder.map().put("domainUser", domainUser).put("domainName", domainName)
-								.put("domainId", domainId).put("domainToken", domainToken).toMap())
+						.obzect(MapBuilder.map().put("domainUser", domainUser).put("domainUserEmail", domainUserEmail)
+								.put("domainName", domainName).put("domainId", domainId).put("domainToken", domainToken)
+								.toMap())
 						.encodeBase64().encrypt().toString();
 				commonHttpRequest.setCookie("JXSESSIONID", xRemSession);
 				return toHomePage(response);
@@ -150,6 +153,7 @@ public class AgentAuthController {
 				model.addAllAttributes(appCommonConfig.appAttributes());
 				model.addAttribute("FORM_URL", "/agent/auth/login/direct?_=" + System.currentTimeMillis());
 				model.addAttribute("DOMAIN_USER", domainUser);
+				model.addAttribute("DOMAIN_USER_EMAIL", domainUserEmail);
 				model.addAttribute("DOMAIN_NAME", domainName);
 				model.addAttribute("DOMAIN_ID", domainId);
 				model.addAttribute("DOMAIN_TOKEN", domainToken);
