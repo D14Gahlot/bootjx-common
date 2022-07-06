@@ -38,6 +38,7 @@ public class AgentDoc implements IDocument, DocVersion {
 	private String isactive;
 	private boolean admin;
 	private boolean isSuperAdmin;
+	private boolean isDuperAdmin;
 	private boolean isDefaultValue;
 	private Boolean isEnabled;
 
@@ -235,6 +236,14 @@ public class AgentDoc implements IDocument, DocVersion {
 
 	public void setIsEnabled(Boolean isEnabled) {
 		this.isEnabled = isEnabled;
+	}
+
+	public boolean isDuperAdmin() {
+		return isDuperAdmin;
+	}
+
+	public void setDuperAdmin(boolean isDuperAdmin) {
+		this.isDuperAdmin = isDuperAdmin;
 	}
 
 }

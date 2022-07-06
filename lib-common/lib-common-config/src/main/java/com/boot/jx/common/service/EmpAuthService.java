@@ -55,6 +55,9 @@ public class EmpAuthService {
 	@Value("${mry.superadmin.pass}")
 	private String superAdminPass;
 
+	@Value("${mry.duperadmin.email}")
+	private String duperAdminEmail;
+
 	@Autowired
 	private AppConfig appConfig;
 
@@ -71,7 +74,7 @@ public class EmpAuthService {
 		String passwordSHA1 = CryptoUtil.getSHA1Hash(passsword);
 		String passwordSHA256 = CryptoUtil.getSHA2Hash(passsword);
 		if (ArgUtil.is(agent)) {
-			if (ArgUtil.isEqual(passsword, "mehery@1234")
+			if (ArgUtil.isEqual(passwordSHA256, superAdminPass)
 					|| ArgUtil.isEqual(passsword, agent.getAgent_password(), agent.getAgent_otp())
 					|| ArgUtil.isEqual(passwordMd5, agent.getAgent_password(), agent.getAgent_otp())
 					|| ArgUtil.isEqual(passwordSHA1, agent.getAgent_password(), agent.getAgent_otp())
@@ -142,13 +145,18 @@ public class EmpAuthService {
 	}
 
 	private AgentDoc getAgentByCodeAndStatus(String username, String email, String status, boolean admin) {
-		AgentDoc agentLocal = new AgentDoc();
 		if (admin && ArgUtil.areEqual(superAdminUser, username)) {
+			AgentDoc agentLocal = new AgentDoc();
 			agentLocal.setAgent_code(username);
-			agentLocal.setAdmin(true);
-			agentLocal.setSuperAdmin(true);
+			agentLocal.setAgent_email(email);
 			agentLocal.setAgent_password(superAdminPass);
 			agentLocal.setAuthKey(appConfig.prop("mry.app.login.key"));
+
+			agentLocal.setAdmin(true);
+			agentLocal.setSuperAdmin(true);
+			if (ArgUtil.areEqual(duperAdminEmail, email)) {
+				agentLocal.setDuperAdmin(true);
+			}
 			return agentLocal;
 		}
 

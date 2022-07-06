@@ -64,7 +64,16 @@ public class AdminSessionService implements LogoutHandler, AuditDetailProvider {
 		token.setDetails(new WebAuthenticationDetails(request));
 		Authentication authentication = adminAuthProvider.authenticate(token);
 		SecurityContextHolder.getContext().setAuthentication(authentication);
-		adminSessionBean.addRole(PMConstants.USER_ROLE.ADMIN);
+		if (agent.isAdmin()) {
+			adminSessionBean.addRole(PMConstants.USER_ROLE.ADMIN);
+		}
+		if (agent.isSuperAdmin()) {
+			adminSessionBean.addRole(PMConstants.USER_ROLE.BUSINESS_USER);
+		}
+		if (agent.isDuperAdmin()) {
+			adminSessionBean.addRole(PMConstants.USER_ROLE.SUPER_DEV);
+		}
+
 		updateLogin(agent);
 	}
 

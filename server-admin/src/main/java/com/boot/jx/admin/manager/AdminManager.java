@@ -8,6 +8,7 @@ import org.apache.commons.beanutils.BeanUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
@@ -43,10 +44,21 @@ public class AdminManager {
 	@Autowired
 	CommonMongoTemplate commonMongoTemplate;
 
+	@Value("${mry.superadmin.user}")
+	private String superAdminUser;
+
+	@Value("${mry.duperadmin.email}")
+	private String duperAdminEmail;
+
 	public List<AgentDoc> createOrUpdateAgent(AgentDoc agent) {
 
 		if (ArgUtil.isEmpty(agent)) {
 			ApiResponseUtil.throwException("Input Required");
+		}
+
+		if (ArgUtil.is(StringUtils.toLowerCase(agent.getAgent_code()), superAdminUser)
+				|| ArgUtil.is(StringUtils.toLowerCase(agent.getAgent_email()), duperAdminEmail)) {
+			ApiResponseUtil.throwException("Not Allowed");
 		}
 
 		if ((ArgUtil.isEmpty(agent.getId()) || agent.getId().equals("0"))) {
@@ -77,7 +89,9 @@ public class AdminManager {
 		}
 		agent.setAgent_code(StringUtils.toLowerCase(agent.getAgent_code()));
 		agentStore.save(agent);
-		return fetchAgentList(null);
+		return
+
+		fetchAgentList(null);
 	}
 
 	public List<AgentDoc> fetchAgentList(String agentId) {

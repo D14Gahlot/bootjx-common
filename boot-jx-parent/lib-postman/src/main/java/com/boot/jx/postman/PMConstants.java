@@ -17,10 +17,26 @@ public class PMConstants {
 	}
 
 	public final class USER_ROLE {
+
+		/**
+		 * Internal User, having full access to all domains
+		 */
 		public static final String DUPER_USER = "DUPER_USER";
+
+		/**
+		 * Internal Users, having Admin-Access to assigned/created domains
+		 */
 		public static final String SUPER_DEV = "SUPER_DEV";
+		/**
+		 * User who can create domains for clients and has Admin-Access to those domains
+		 */
 		public static final String BUSINESS_PARTNER = "BUSINESS_PARTNER";
+		/**
+		 * User who can login to domain manager and has Admin-Access to that one domain
+		 */
 		public static final String BUSINESS_USER = "BUSINESS_USER";
+		
+		
 		public static final String ADMIN = "ADMIN";
 		public static final String AGENT = "AGENT";
 		public static final String ALLOWED = "DUPER_USER,SUPER_DEV,BUSINESS_PARTNER,BUSINESS_USER,ADMIN,AGENT";
