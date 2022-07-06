@@ -105,6 +105,7 @@ public class AdminAuthController {
 		return null;
 	}
 
+	
 	@RequestMapping(value = { "/pub/**", "/app/**", "/auth/**", "/" },
 			method = { RequestMethod.GET, RequestMethod.POST })
 	public String home(Model model, HttpServletRequest request, HttpServletResponse response,
@@ -131,7 +132,7 @@ public class AdminAuthController {
 
 			if (!ArgUtil.is(domainTokenValid)) {
 				model.addAllAttributes(appCommonConfig.appAttributes());
-				model.addAttribute("FORM_URL", "/agent/auth/login/direct?_=" + System.currentTimeMillis());
+				model.addAttribute("FORM_URL", "/admin/auth/login/direct?_=" + System.currentTimeMillis());
 				model.addAttribute("DOMAIN_USER", domainUser);
 				model.addAttribute("DOMAIN_USER_EMAIL", domainUserEmail);
 				model.addAttribute("DOMAIN_NAME", domainName);
