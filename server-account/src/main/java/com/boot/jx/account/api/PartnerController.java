@@ -124,7 +124,9 @@ public class PartnerController {
 
 		model.addAllAttributes(appCommonConfig.appAttributes());
 		model.addAttribute("FORM_URL", String.format("https://%s.%s/%s/auth/direct", domain,
-				env.keyEntry(ConfigConstants.APP_KEY.PROP_SERVICE_SERVER).asString(), panel));
+				//"local.com"
+				env.keyEntry(ConfigConstants.APP_KEY.PROP_SERVICE_SERVER).asString()
+				, panel));
 
 		if (userSessionBean.hasAdminAccesTo(domain)) {
 			DomainDoc domainDoc = accountStore.findDomainByName(domain);

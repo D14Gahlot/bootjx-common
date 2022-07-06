@@ -120,7 +120,9 @@ public class AdminAuthController {
 			if (ArgUtil.is(agent)) {
 				sessionService.login(request, agent, domainToken);
 				xRemSession = CryptoUtil.getEncoder()
-						.obzect(MapBuilder.map().put("domainUser", domainUser).put("domainName", domainName)
+						.obzect(MapBuilder.map().put("domainUser", domainUser)
+								.put("domainUserEmail", domainUserEmail)
+								.put("domainName", domainName)
 								.put("domainId", domainId).put("domainToken", domainToken).toMap())
 						.encodeBase64().encrypt().toString();
 				commonHttpRequest.setCookie("JXSESSIONID", xRemSession);
