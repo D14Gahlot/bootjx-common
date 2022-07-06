@@ -149,6 +149,7 @@ public class EmpAuthService {
 			agentLocal.setSuperAdmin(true);
 			agentLocal.setAgent_password(superAdminPass);
 			agentLocal.setAuthKey(appConfig.prop("mry.app.login.key"));
+			return agentLocal;
 		}
 
 		Query query2 = new Query();
