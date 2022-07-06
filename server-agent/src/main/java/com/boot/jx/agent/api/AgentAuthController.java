@@ -30,6 +30,7 @@ import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.Constants;
 import com.boot.utils.CryptoUtil;
+import com.boot.utils.JsonUtil;
 import com.boot.utils.MapBuilder;
 import com.boot.utils.MapBuilder.BuilderMap;
 
@@ -177,6 +178,7 @@ public class AgentAuthController {
 
 		model.addAttribute("APP_USER", agentSession.getAgentCode());
 		model.addAttribute("APP_DEPT", agentSession.getAgentDept());
+		model.addAttribute("APP_USER_ROLE", JsonUtil.toJson(agentSession.getRole()));
 
 		return "app-agent";
 	}
@@ -229,6 +231,7 @@ public class AgentAuthController {
 		if (agentSession.isLoggedIn() && ArgUtil.is(agentSession.getAgentDept())) {
 			model.addAttribute("APP_USER", agentSession.getAgentCode());
 			model.addAttribute("APP_DEPT", agentSession.getAgentDept());
+			model.addAttribute("APP_USER_ROLE", JsonUtil.toJson(agentSession.getRole()));
 			return "app-agent";
 		}
 		return "app-agent-plugin";
@@ -245,6 +248,7 @@ public class AgentAuthController {
 		model.addAllAttributes(appCommonConfig.appAttributes());
 		model.addAttribute("APP_USER", agentSession.getAgentCode());
 		model.addAttribute("APP_DEPT", agentSession.getAgentDept());
+		model.addAttribute("APP_USER_ROLE", JsonUtil.toJson(agentSession.getRole()));
 		model.addAttribute("POSTMAN_CONTEXT", "/postman");
 		return "customer." + page;
 	}
@@ -259,6 +263,7 @@ public class AgentAuthController {
 		model.addAttribute("APP_PLUG", ArgUtil.nonEmpty(commonHttpRequest.getRequestParam("plug"), "none"));
 		model.addAllAttributes(appCommonConfig.appAttributes());
 		model.addAttribute("APP_USER", agentSession.getAgentCode());
+		model.addAttribute("APP_USER_ROLE", JsonUtil.toJson(agentSession.getRole()));
 		model.addAttribute("APP_DEPT", agentSession.getAgentDept());
 
 		String page = ArgUtil.parseAsString(commonHttpRequest.get("page"), "login");
