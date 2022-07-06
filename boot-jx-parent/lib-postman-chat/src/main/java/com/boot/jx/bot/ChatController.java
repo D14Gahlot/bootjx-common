@@ -187,8 +187,11 @@ public class ChatController {
 
 	public void assignToAgentDepartment(String deptCode) {
 		ChatSessionDoc session = messageContext.session().getDoc();
-		chatSessionService.routeSession(session, new PMArgs().assignToQueueCode(PMConstants.DEFAULT.AGENT_QUEUE_CODE)
-				.contact(session.contact()).sessionId(session.getSessionId()).assignToDeptCode(deptCode));
+		ClientApp thisApp = messageContext.clientApp();
+		String agent_queue = ArgUtil.parseAsString(thisApp.props().get("agent_queue"),
+				PMConstants.DEFAULT.AGENT_QUEUE_CODE);
+		chatSessionService.routeSession(session, new PMArgs().assignToQueueCode(agent_queue).contact(session.contact())
+				.sessionId(session.getSessionId()).assignToDeptCode(deptCode));
 
 	}
 
