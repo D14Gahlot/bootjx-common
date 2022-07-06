@@ -122,7 +122,7 @@ public class AccountAuthService implements LogoutHandler, AuditDetailProvider {
 				.template(emailTemplate).put("logo", pmEnvironment.keyEntry("mry.prop.logo.bg-x-icon").asString())
 				.put("website", pmEnvironment.keyEntry("mry.prop.service.website").asString())
 				.put("service", pmEnvironment.keyEntry("mry.prop.service.name").asString())
-				.put("servicedomain", pmEnvironment.keyEntry("mry.prop.service.domain").asString())
+				.put("servicedomain", pmEnvironment.keyEntry("mry.prop.service.server").asString())
 				.put("link",
 						String.format("https://app.%s/partner/auth/verify-link?code=%s&account=%s",
 								pmEnvironment.keyEntry("mry.prop.service.domain").asString(),
@@ -137,7 +137,7 @@ public class AccountAuthService implements LogoutHandler, AuditDetailProvider {
 				.put("logo", pmEnvironment.keyEntry("mry.prop.logo.bg-x-icon").asString())
 				.put("website", pmEnvironment.keyEntry("mry.prop.service.website").asString())
 				.put("service", pmEnvironment.keyEntry("mry.prop.service.name").asString())
-				.put("servicedomain", pmEnvironment.keyEntry("mry.prop.service.domain").asString())
+				.put("servicedomain", pmEnvironment.keyEntry("mry.prop.service.server").asString())
 				.put("contactName", accountDoc.getContact().getName()).put("email", accountDoc.getContact().getEmail())
 				.put("products", JsonUtil.toJson(accountDoc.getContact().getProducts()))
 				.put("phone", accountDoc.getContact().getPhone())

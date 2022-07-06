@@ -91,7 +91,8 @@ public class AppFaqBotController extends CommonBotController {
 			routeSession("jazeera",langM);
 			return;		
 		case "#":
-			assignToDefaultAgent();
+			//assignToDefaultAgent();
+			routeSession("jazeera",langM);
 			reply(new OutboxMessage().template("ja_cs_to_contact"));
 			return;
 	default:		
@@ -140,7 +141,8 @@ public class AppFaqBotController extends CommonBotController {
 			routeSession("jazeera",langM);
 			return;		
 		case "#":
-			assignToDefaultAgent();
+			//assignToDefaultAgent();
+			routeSession("jazeera",langM);
 			reply(new OutboxMessage().template("ja_cs_to_contact"));
 			return;
 	default:		
@@ -192,7 +194,8 @@ public class AppFaqBotController extends CommonBotController {
 			routeSession("jazeera",langM);
 			return;		
 		case "#":
-			assignToDefaultAgent();
+			//assignToDefaultAgent();
+			routeSession("jazeera",langM);
 			reply(new OutboxMessage().template("ja_cs_to_contact"));
 			return;
 	default:

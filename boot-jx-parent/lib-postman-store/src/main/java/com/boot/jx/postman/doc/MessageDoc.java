@@ -73,6 +73,9 @@ public class MessageDoc extends MessageDocAbstract {
 		@Id
 		private String logId;
 
+		private Object httpReq;
+		private Object httpResp;
+
 		private String messageId;
 
 		public String getMessageId() {
@@ -81,6 +84,22 @@ public class MessageDoc extends MessageDocAbstract {
 
 		public void setMessageId(String messageId) {
 			this.messageId = messageId;
+		}
+
+		public Object getHttpReq() {
+			return httpReq;
+		}
+
+		public void setHttpReq(Object httpReq) {
+			this.httpReq = httpReq;
+		}
+
+		public Object getHttpResp() {
+			return httpResp;
+		}
+
+		public void setHttpResp(Object httpResp) {
+			this.httpResp = httpResp;
 		}
 	}
 

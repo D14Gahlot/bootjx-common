@@ -9,6 +9,7 @@ import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorMapping;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.dict.FileType;
+import com.boot.jx.exception.ApiHttpExceptions.ApiHttpException;
 import com.boot.jx.postman.PMConstants.CHANNEL_TYPE;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
@@ -69,12 +70,16 @@ public class InstagramConnector extends AbstractConnector<InstagramConfig, Insta
 	@Override
 	public OutboxMessage initSession(ChatSessionDoc session, InboxMessage inboxMessage) {
 		// System.out.println("initSession=====" + JsonUtil.toJson(inboxMessage));
-		ChannelConfig config = getChannelConfig(inboxMessage);
-		InstagramUserProfile profile = instaClient.getUserProfile(config, inboxMessage.contact());
-		ChatContactQuery contactQuery = messageContext.contact();
-		contactQuery.setProfilePic(profile.getProfilePic());
-		contactQuery.setName(profile.getName());
-		contactQuery.setEmail(profile.getEmail());
+		try {
+			ChannelConfig config = getChannelConfig(inboxMessage);
+			InstagramUserProfile profile = instaClient.getUserProfile(config, inboxMessage.contact());
+			ChatContactQuery contactQuery = messageContext.contact();
+			contactQuery.setProfilePic(profile.getProfilePic());
+			contactQuery.setName(profile.getName());
+			contactQuery.setEmail(profile.getEmail());
+		} catch (ApiHttpException e) {
+			logManager.error(inboxMessage, e);
+		}
 		return null;
 	}
 

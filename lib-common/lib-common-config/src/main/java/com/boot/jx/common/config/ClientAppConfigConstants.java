@@ -71,7 +71,11 @@ public class ClientAppConfigConstants {
 						new ConfigMeta().inputType(INPUT_TYPE.MESSAGE, MESSAGE_TYPE.INFO).title("Bot")
 								.desc("Use this app to route session to default BOT flow").group("About App"),
 
-						new ConfigMeta().title("Bot Code").path("props.botCode").example("complaint_flow") });
+						new ConfigMeta().title("Bot Code").path("props.botCode").example("complaint_flow"),
+
+						new ConfigMeta().title("Default Agent Queue").path("props.agent_queue")
+								.desc("Default Agent App").optionsSource("getx:/api/options/agent_queue")
+								.optionsKey("code").optionsLabel("code") });
 
 		APP_CONFIGS.put(APP_TYPE.TEAM_ROUTER, new ConfigMeta[] { new ConfigMeta()
 				.inputType(INPUT_TYPE.MESSAGE, MESSAGE_TYPE.INFO).title("Team Router")
