@@ -90,6 +90,7 @@
 		<module>server-admin</module>
 		<module>server-xms</module>
 		<module>server-account</module>
+		<module>server-contak</module>
 	</modules>
 </project>
 

@@ -1,4 +1,4 @@
-package com.boot.jx.postman.phonebook;
+package com.boot.jx.contak.phonebook;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

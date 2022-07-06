@@ -20,6 +20,8 @@ public class InBoundEvent implements LoggableEntity, SessionInfo {
 	public static final String SESSION_STATUS = "SESSION_STATUS";
 
 	public static final String SESSION_ASSIGNED = "SESSION_ASSIGNED";
+	
+	public static final String CONTACT_UPDATE = "CONTACT_UPDATE";
 
 	@ApiMockModelProperty(example = "SESSION_ROUTED", value = "Event Triggered by App/Service")
 	public String eventCode;

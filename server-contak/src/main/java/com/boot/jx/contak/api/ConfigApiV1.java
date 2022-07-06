@@ -1,4 +1,4 @@
-package com.boot.jx.xms.api;
+package com.boot.jx.contak.api;
 
 import java.util.List;
 
@@ -14,6 +14,9 @@ import com.boot.jx.api.ApiFieldError;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.common.config.ConfigManager;
+import com.boot.jx.contak.ContakVendorConfigurer;
+import com.boot.jx.contak.ContakConstants.XMSClientAuth;
+import com.boot.jx.contak.dto.WebhookUrlRequest;
 import com.boot.jx.mongo.CommonMongoQB;
 import com.boot.jx.mongo.CommonMongoQB.CommonMongoQBimpl;
 import com.boot.jx.mongo.CommonMongoQueryBuilder;
@@ -26,9 +29,6 @@ import com.boot.jx.postman.doc.config.ClientAppConfigDoc;
 import com.boot.jx.postman.doc.config.CompanyVarsConfigDoc;
 import com.boot.jx.postman.model.ext.MsgChannel;
 import com.boot.jx.postman.store.ConfigStore;
-import com.boot.jx.xms.XmsConstants.XMSClientAuth;
-import com.boot.jx.xms.XmsVendorConfigurer;
-import com.boot.jx.xms.dto.WebhookUrlRequest;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
 import com.boot.utils.EntityDtoUtil;
@@ -62,7 +62,7 @@ public class ConfigApiV1 {
 	@RequestMapping(value = "/api/v1/config/webhook", method = { RequestMethod.POST })
 	public ApiResponse<ClientApp, Object> setWebhookUrl(@RequestBody WebhookUrlRequest req) {
 
-		ClientApp x = XmsVendorConfigurer.getClientApp();
+		ClientApp x = ContakVendorConfigurer.getClientApp();
 		if (ArgUtil.is(x)) {
 			ClientAppConfigDoc xo = configStore.findById(x.getId(), ClientAppConfigDoc.class);
 			if (ArgUtil.areEqual(xo.getAppType(), ClientApp.APP_TYPE_WEBHOOK)) {

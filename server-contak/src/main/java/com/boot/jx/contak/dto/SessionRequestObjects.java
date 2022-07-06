@@ -1,4 +1,4 @@
-package com.boot.jx.xms.dto;
+package com.boot.jx.contak.dto;
 
 import java.io.Serializable;
 
@@ -33,17 +33,6 @@ public final class SessionRequestObjects {
 		private static final long serialVersionUID = 6550916242164154457L;
 		@ApiMockModelProperty(example = "61f3810a02e14c0877fc1a32", required = true, value = "Session to be closed")
 		public String sessionId;
-
-	}
-
-	@JsonIgnoreProperties(ignoreUnknown = true)
-	public static class ContactPrefsUpdate implements Serializable {
-		private static final long serialVersionUID = 6550916242164154457L;
-		@ApiMockModelProperty(example = "fb:12121212121", required = true, value = "Contact to update")
-		public String contactId;
-
-		@ApiMockModelProperty(example = "en_US", required = true, value = "Language to set")
-		public String lang;
 
 	}
 }

@@ -1,4 +1,4 @@
-package com.boot.jx.xms;
+package com.boot.jx.contak;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -16,7 +16,7 @@ import com.boot.jx.swagger.MockParamBuilder.MockParamType;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.Authorization;
 
-public class XmsConstants {
+public class ContakConstants {
 
 	public static final String INBOUND_WEBHOOKS_DESCRIPTION = "Inbound Request (Webhooks) can be used for:\n"
 			+ "* Inbound Message Notifications: Use it to get a notification you when you have received a message.\n"
@@ -26,9 +26,6 @@ public class XmsConstants {
 	public static final String SESSION_MNGMNT_DESCRIPTION = "Session API can be used:\n"
 			+ "* to fetch all session messages.\n"
 			+ "A session usually starts with first messages and stays active for 24 hours by default.";
-
-	public static final String CONTACT_MNGMNT_DESCRIPTION = "Contact API can be used:\n"
-			+ "* to modify contact details and prefs.\n";
 
 	@Target({ ElementType.TYPE, ElementType.METHOD })
 	@Retention(RetentionPolicy.RUNTIME)
