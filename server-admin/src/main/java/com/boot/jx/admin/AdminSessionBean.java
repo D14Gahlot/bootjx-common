@@ -33,7 +33,11 @@ public class AdminSessionBean extends AppCommonAuthUser implements Serializable 
 	@Override
 	public String getAuthUser() {
 		if (ArgUtil.is(this.profile)) {
-			return this.profile.getAgent_code();
+			if (profile.isSuperAdmin()) {
+				return String.format("%s:%s", this.profile.getAgent_code(), this.profile.getAgent_email());
+			} else {
+				return this.profile.getAgent_code();
+			}
 		}
 		return PMConstants.DEFAULT.NO_USER;
 	}
