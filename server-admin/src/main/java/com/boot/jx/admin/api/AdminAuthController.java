@@ -33,6 +33,7 @@ import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.Constants;
 import com.boot.utils.CryptoUtil;
+import com.boot.utils.JsonUtil;
 import com.boot.utils.MapBuilder;
 
 @Controller
@@ -120,10 +121,9 @@ public class AdminAuthController {
 			if (ArgUtil.is(agent)) {
 				sessionService.login(request, agent, domainToken);
 				xRemSession = CryptoUtil.getEncoder()
-						.obzect(MapBuilder.map().put("domainUser", domainUser)
-								.put("domainUserEmail", domainUserEmail)
-								.put("domainName", domainName)
-								.put("domainId", domainId).put("domainToken", domainToken).toMap())
+						.obzect(MapBuilder.map().put("domainUser", domainUser).put("domainUserEmail", domainUserEmail)
+								.put("domainName", domainName).put("domainId", domainId).put("domainToken", domainToken)
+								.toMap())
 						.encodeBase64().encrypt().toString();
 				commonHttpRequest.setCookie("JXSESSIONID", xRemSession);
 				return toHomePage(response);
@@ -159,8 +159,10 @@ public class AdminAuthController {
 		if (ArgUtil.is(auth)) {
 			starterDocKit.domain();
 			model.addAttribute("APP_USER", auth.getName());
+			model.addAttribute("APP_USER_ROLE", JsonUtil.toJson(adminSession.getRole()));
 		} else {
 			model.addAttribute("APP_USER", "");
+			model.addAttribute("APP_USER_ROLE", "['GUEST']");
 		}
 		return "app-admin";
 	}
