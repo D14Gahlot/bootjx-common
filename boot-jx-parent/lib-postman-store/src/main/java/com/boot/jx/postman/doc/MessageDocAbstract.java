@@ -63,6 +63,7 @@ public abstract class MessageDocAbstract implements Serializable, Patchable<Mess
 	private TagDocument tags;
 	private Map<String, Object> model;
 	private Map<String, Object> meta;
+	protected Map<String, Object> form;
 	private List<Attachment> attachments;
 	private List<PBVCard> vccards;
 
@@ -415,6 +416,21 @@ public abstract class MessageDocAbstract implements Serializable, Patchable<Mess
 			this.vccards = new ArrayList<PBVCard>();
 		}
 		return this.vccards;
+	}
+
+	public Map<String, Object> getForm() {
+		return form;
+	}
+
+	public void setForm(Map<String, Object> form) {
+		this.form = form;
+	}
+
+	public Map<String, Object> form() {
+		if (form == null) {
+			this.form = new HashMap<String, Object>();
+		}
+		return this.form;
 	}
 
 }

@@ -89,6 +89,7 @@ public class MessageStore extends CommonMongoTemplateAbstract {
 		doc.setAttachments(inboxMessage.getAttachments());
 		doc.setVccards(inboxMessage.getVccards());
 
+		doc.form().putAll(inboxMessage.form());
 		doc.stamps().put("session", ArgUtil.parseAsLong(inboxMessage.session().getSessionStamp(), 0L));
 
 		return doc;
