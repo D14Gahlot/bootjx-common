@@ -100,6 +100,7 @@ public class ChatDTOUtil {
 		messageDto.setStamps(messageDoc.getStamps());
 		messageDto.setBulkSessionId(messageDoc.getBulkSessionId());
 		messageDto.setMeta(messageDoc.getMeta());
+		messageDto.setOptions(messageDoc.getOptions());
 		messageDto.setReplyTo(messageDoc.getReplyTo());
 
 		if (ArgUtil.is(messageDoc.getContact())) {

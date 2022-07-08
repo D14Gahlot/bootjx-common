@@ -41,6 +41,7 @@ public class ChatMessageDTO implements Serializable {
 	private Contactable contact;
 
 	private Map<String, Object> meta;
+	private Map<String, Object> options;
 	private Map<String, Object> replyTo;
 
 	private MessageRouter route;
@@ -257,5 +258,13 @@ public class ChatMessageDTO implements Serializable {
 
 	public void setVccards(List<PBVCard> vccards) {
 		this.vccards = vccards;
+	}
+
+	public Map<String, Object> getOptions() {
+		return options;
+	}
+
+	public void setOptions(Map<String, Object> options) {
+		this.options = options;
 	}
 }

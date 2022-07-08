@@ -227,6 +227,7 @@ public class MessageStore extends CommonMongoTemplateAbstract {
 		doc.stamps().putAll(outMessage.stamps());
 		doc.stamps().put("session", ArgUtil.parseAsLong(outMessage.session().getSessionStamp(), 0L));
 		doc.meta().putAll(outMessage.meta());
+		doc.options().putAll(outMessage.options());
 
 		return doc;
 	}

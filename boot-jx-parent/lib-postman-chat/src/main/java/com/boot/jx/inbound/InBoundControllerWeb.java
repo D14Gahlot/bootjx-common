@@ -36,6 +36,7 @@ import com.boot.jx.postman.PMAuditEvent;
 import com.boot.jx.postman.PMConfiguration;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PMEnvironment.PMCommonConfig;
+import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.dto.ChatMessageDTO;
@@ -44,6 +45,7 @@ import com.boot.jx.postman.model.MessageBoxEvent;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.postman.service.ChatDTOUtil;
+import com.boot.jx.postman.store.MessageContext;
 import com.boot.jx.postman.store.MessageStore;
 import com.boot.jx.postman.store.SessionStore;
 import com.boot.jx.stomp.StompTunnelSessionManager;
@@ -73,6 +75,9 @@ public class InBoundControllerWeb {
 
 	@Autowired
 	private MessageStore messageStore;
+
+	@Autowired
+	private MessageContext messageContext;
 
 	@Autowired
 	private WebConnector connector;
@@ -187,6 +192,13 @@ public class InBoundControllerWeb {
 		if (ArgUtil.is(channelConfig)) {
 			stompTunnelSessionManager.registerUser(ArgUtil.nonEmpty(user, csid), contactIdWeb, csid);
 		}
+
+		if (msgs.size() == 0 && ArgUtil.is(channelConfig.getWeb().getIceBreaker())) {
+			ChatContactDoc chatContactDoc = sessionStore.getContact(contactId);
+			OutboxMessage icebrakerMsg = dummyConnector.onIceBreak(channelConfig, chatContactDoc);
+			msgs.add(ChatDTOUtil.getChatMessageDTO(messageStore.createMessageDoc(icebrakerMsg)));
+		}
+
 		return ApiResponse.buildResults(msgs);
 	}
 

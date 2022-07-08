@@ -32,6 +32,7 @@ import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.postman.plugin.WebPlugin;
 import com.boot.jx.postman.plugin.WebPlugin.WebConfigDetails;
 import com.boot.jx.postman.query.ChatContactQuery;
+import com.boot.jx.postman.service.ChatDTOUtil;
 import com.boot.jx.stomp.StompTunnelService;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.model.MapModel;
@@ -108,6 +109,12 @@ public class WebConnector extends DefaultConnector<WebConfigDetails, WebPlugin> 
 		}
 	}
 
+	public OutboxMessage onIceBreak(ChannelConfig channelConfig, ChatContactDoc chatContactDoc) {
+		OutboxMessage icebrakerMsg = new OutboxMessage().template(channelConfig.getWeb().getIceBreaker());
+		template(channelConfig, chatContactDoc, icebrakerMsg);
+		return icebrakerMsg;
+	}
+
 	@Override
 	public InboxMessage assignToAgent(InboxMessage inboxMessage) {
 		this.reply(null, null, new OutboxMessage().message("Call us"), inboxMessage);
@@ -178,10 +185,6 @@ public class WebConnector extends DefaultConnector<WebConfigDetails, WebPlugin> 
 				return (OutboxMessage) inboxMessage.replyMessage("Please fill below inputs to continue")
 						.option("inputs", inputs);
 			}
-		}
-
-		if (ArgUtil.is(channel.getWeb().getIceBreaker())) {
-			return (OutboxMessage) inboxMessage.replyMessage("Welcome").template(channel.getWeb().getIceBreaker());
 		}
 
 		return null;
