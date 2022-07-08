@@ -17,11 +17,13 @@ import com.boot.jx.AppContextUtil;
 import com.boot.jx.common.impl.ConfigMeta;
 import com.boot.jx.http.CommonHttpRequest;
 import com.boot.jx.logger.LoggerService;
+import com.boot.jx.postman.PMConstants;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PMEnvironment.PMClientConfig;
 import com.boot.jx.postman.PMEnvironment.PMCommonConfig;
 import com.boot.jx.postman.PMEnvironment.PMConfigurationObject;
 import com.boot.jx.postman.PMEnvironment.PMDomainConfig;
+import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.scope.tnt.Tenants;
 import com.boot.jx.scope.tnt.Tenants.TenantResolver;
 import com.boot.model.SafeKeyHashMap;
@@ -117,6 +119,15 @@ public class PMCommonConfigImpl implements PMCommonConfig {
 		for (ConfigMeta config : ConfigConstants.SETUP_CONFIG_LIST) {
 			setup.put(config.getKey().toUpperCase(), pmEnvironment.keyEntry(config.getKey()).getValue());
 		}
+		PMConfigurationObject defaultWebChannel = pmEnvironment
+				.keyEntry(PMConstants.PROPERTIES.POSTMAN_CHAT_WEB_CHANNEL);
+		if (defaultWebChannel.exists()) {
+			ChannelConfig channelConfig = pmEnvironment.config().channel(defaultWebChannel.asString());
+			if (ArgUtil.is(channelConfig)) {
+				setup.put("POSTMAN_CHAT_WEB_CHANNEL_KEY", pmEnvironment.config().channel(agentUrl).getChannelKey());
+			}
+		}
+
 		return setup;
 	}
 
@@ -219,7 +230,7 @@ public class PMCommonConfigImpl implements PMCommonConfig {
 
 	@Override
 	public String getScriptusUrl() {
-		//return "http://localhost:8085/";
+		// return "http://localhost:8085/";
 		return this.scriptusUrl;
 	}
 
