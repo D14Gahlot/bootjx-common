@@ -121,11 +121,10 @@ public class PMCommonConfigImpl implements PMCommonConfig {
 		}
 		PMConfigurationObject defaultWebChannel = pmEnvironment
 				.keyEntry(PMConstants.PROPERTIES.POSTMAN_CHAT_WEB_CHANNEL);
-		if (defaultWebChannel.exists()) {
-			ChannelConfig channelConfig = pmEnvironment.config().channel(defaultWebChannel.asString());
-			if (ArgUtil.is(channelConfig)) {
-				setup.put("POSTMAN_CHAT_WEB_CHANNEL_KEY", pmEnvironment.config().channel(agentUrl).getChannelKey());
-			}
+		ChannelConfig channelConfig = pmEnvironment.config()
+				.channel(defaultWebChannel.asString("web:" + getServiceServer()));
+		if (ArgUtil.is(channelConfig)) {
+			setup.put("POSTMAN_CHAT_WEB_CHANNEL_KEY", channelConfig.getChannelKey());
 		}
 
 		return setup;
