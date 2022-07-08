@@ -168,7 +168,7 @@ public class InBoundControllerWeb {
 			@RequestParam(required = false) String channelId, @RequestParam(required = false) String channelKey)
 			throws InterruptedException {
 
-		String webSessionIdKey = SafeKeyHashMap.sanitizeKey(WEB_SESSION_ID + "_" + channelKey);
+		String webSessionIdKey = SafeKeyHashMap.sanitizeKey(WEB_SESSION_ID + "_" + channelId);
 
 		String webSessionId = commonHttpRequest.get(webSessionIdKey);
 		csid = ArgUtil.nonEmpty(csid, number);
@@ -211,7 +211,7 @@ public class InBoundControllerWeb {
 				ApiResponseUtil.throwAccessDeniedException("Invalid Channel");
 			}
 
-			String webSessionIdKey = SafeKeyHashMap.sanitizeKey(WEB_SESSION_ID + "_" + channelKey);
+			String webSessionIdKey = SafeKeyHashMap.sanitizeKey(WEB_SESSION_ID + "_" + channelId);
 
 			MessageBoxEvent messageBoxEvent = connector.inboundMessageBoxEvent(channelConfig, map,
 					new MessageBoxEvent(), file);
