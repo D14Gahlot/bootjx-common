@@ -21,6 +21,7 @@ public class Constants {
 
 	/** The Constant BLANK. */
 	public static final String BLANK = "";
+	public static final String UNDERSCORE = "_";
 
 	/** The Constant defaultBoolean. */
 	public static final Boolean DEFAULT_BOOLEAN = Boolean.FALSE;

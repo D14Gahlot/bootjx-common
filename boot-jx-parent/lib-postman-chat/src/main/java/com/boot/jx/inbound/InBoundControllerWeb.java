@@ -24,7 +24,6 @@ import com.boot.jx.AppConfig;
 import com.boot.jx.AppContextUtil;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.api.ApiResponseUtil;
-import com.boot.jx.aws.AWSFileStore;
 import com.boot.jx.chat.ChatStatusService;
 import com.boot.jx.connectors.WebConnector;
 import com.boot.jx.dict.ContactType;
@@ -33,17 +32,13 @@ import com.boot.jx.http.CommonHttpRequest;
 import com.boot.jx.http.Kooky;
 import com.boot.jx.http.RequestType;
 import com.boot.jx.logger.AuditService;
-import com.boot.jx.model.CommonFile;
-import com.boot.jx.model.CommonFileStream;
 import com.boot.jx.postman.PMAuditEvent;
 import com.boot.jx.postman.PMConfiguration;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PMEnvironment.PMCommonConfig;
-import com.boot.jx.postman.client.PMFileStoreClient;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.dto.ChatMessageDTO;
-import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.MessageBoxEvent;
 import com.boot.jx.postman.model.OutboxMessage;
@@ -54,9 +49,8 @@ import com.boot.jx.postman.store.SessionStore;
 import com.boot.jx.stomp.StompTunnelSessionManager;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.model.MapModel;
-import com.boot.model.SafeKeyHashMap;
 import com.boot.utils.ArgUtil;
-import com.boot.utils.JsonUtil;
+import com.boot.utils.StringUtils;
 import com.boot.utils.UniqueID;
 
 @Controller
@@ -168,7 +162,7 @@ public class InBoundControllerWeb {
 			@RequestParam(required = false) String channelId, @RequestParam(required = false) String channelKey)
 			throws InterruptedException {
 
-		String webSessionIdKey = SafeKeyHashMap.sanitizeKey(WEB_SESSION_ID + "_" + channelId);
+		String webSessionIdKey = StringUtils.sanitize(WEB_SESSION_ID + "_" + channelId);
 
 		String webSessionId = commonHttpRequest.get(webSessionIdKey);
 		csid = ArgUtil.nonEmpty(csid, number);
@@ -211,7 +205,7 @@ public class InBoundControllerWeb {
 				ApiResponseUtil.throwAccessDeniedException("Invalid Channel");
 			}
 
-			String webSessionIdKey = SafeKeyHashMap.sanitizeKey(WEB_SESSION_ID + "_" + channelId);
+			String webSessionIdKey = StringUtils.sanitize(WEB_SESSION_ID + "_" + channelId);
 
 			MessageBoxEvent messageBoxEvent = connector.inboundMessageBoxEvent(channelConfig, map,
 					new MessageBoxEvent(), file);

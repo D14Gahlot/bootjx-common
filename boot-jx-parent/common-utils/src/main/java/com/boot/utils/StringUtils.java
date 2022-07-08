@@ -480,7 +480,7 @@ public final class StringUtils {
 		return str.toUpperCase();
 	}
 
-	public static String sansanitize(String str, String replaceWith) {
+	public static String sanitize(String str, String replaceWith) {
 		if (str == null) {
 			return Constants.BLANK;
 		}
@@ -490,8 +490,8 @@ public final class StringUtils {
 		return (String) str;
 	}
 
-	public static String sansanitize(String str) {
-		return sansanitize(str, Constants.BLANK);
+	public static String sanitize(String str) {
+		return sanitize(str, Constants.UNDERSCORE);
 	}
 
 	public static String[] split(String str, String regex) {
