@@ -43,6 +43,10 @@ public class WebPlugin implements DefaultChannelPlugin<WebConfigDetails> {
 				optionsSource = "getx:/api/tmpl/hsm", optionsKey = "code", optionsLabel = "desc")
 		private String iceBreaker;
 
+		@ConfigMetaProperty(path = "web.welcome", title = "Welcome Back Message", inputType = INPUT_TYPE.OPTIONS,
+				optionsSource = "getx:/api/tmpl/hsm", optionsKey = "code", optionsLabel = "desc")
+		private String welcomeBack;
+
 		@Override
 		public String getLane() {
 			return this.site;
@@ -78,6 +82,14 @@ public class WebPlugin implements DefaultChannelPlugin<WebConfigDetails> {
 
 		public void setIceBreaker(String iceBreaker) {
 			this.iceBreaker = iceBreaker;
+		}
+
+		public String getWelcomeBack() {
+			return welcomeBack;
+		}
+
+		public void setWelcomeBack(String welcomeBack) {
+			this.welcomeBack = welcomeBack;
 		}
 
 	}

@@ -193,10 +193,12 @@ public class InBoundControllerWeb {
 			stompTunnelSessionManager.registerUser(ArgUtil.nonEmpty(user, csid), contactIdWeb, csid);
 		}
 
-		if (msgs.size() == 0 && ArgUtil.is(channelConfig.getWeb().getIceBreaker())) {
+		if (msgs.size() == 0) {
 			ChatContactDoc chatContactDoc = sessionStore.getContact(contactId);
 			OutboxMessage icebrakerMsg = dummyConnector.onIceBreak(channelConfig, chatContactDoc);
-			msgs.add(ChatDTOUtil.getChatMessageDTO(messageStore.createMessageDoc(icebrakerMsg)));
+			if (ArgUtil.is(icebrakerMsg)) {
+				msgs.add(ChatDTOUtil.getChatMessageDTO(messageStore.createMessageDoc(icebrakerMsg)));
+			}
 		}
 
 		return ApiResponse.buildResults(msgs);

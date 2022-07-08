@@ -110,8 +110,23 @@ public class WebConnector extends DefaultConnector<WebConfigDetails, WebPlugin> 
 	}
 
 	public OutboxMessage onIceBreak(ChannelConfig channelConfig, ChatContactDoc chatContactDoc) {
-		OutboxMessage icebrakerMsg = new OutboxMessage().template(channelConfig.getWeb().getIceBreaker());
-		template(channelConfig, chatContactDoc, icebrakerMsg);
+		OutboxMessage icebrakerMsg = null;
+		if (ArgUtil.is(chatContactDoc)) {
+			if (ArgUtil.is(channelConfig.getWeb().getIceBreaker())) {
+				InboxMessage inboxMessage = this.createInboxMessage(channelConfig);
+				icebrakerMsg = inboxMessage.replyMessage("Howdy").template(channelConfig.getWeb().getIceBreaker());
+				template(channelConfig, chatContactDoc, icebrakerMsg);
+			}
+		} else {
+			if (ArgUtil.is(channelConfig.getWeb().getWelcomeBack())) {
+				InboxMessage inboxMessage = this.createInboxMessage(channelConfig);
+				icebrakerMsg = inboxMessage.replyMessage("Welcome Back")
+						.template(channelConfig.getWeb().getWelcomeBack());
+				ChatContactDoc c = new ChatContactDoc();
+				c.copyFrom(inboxMessage.contact());
+				template(channelConfig, c, icebrakerMsg);
+			}
+		}
 		return icebrakerMsg;
 	}
 

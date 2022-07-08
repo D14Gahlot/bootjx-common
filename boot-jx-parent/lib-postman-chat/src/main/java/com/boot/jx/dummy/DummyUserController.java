@@ -18,8 +18,10 @@ import com.boot.jx.connectors.WebConnector;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.http.CommonHttpRequest;
 import com.boot.jx.inbound.InBoundService;
+import com.boot.jx.postman.PMConstants;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PMEnvironment.PMCommonConfig;
+import com.boot.jx.postman.PMEnvironment.PMConfigurationObject;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.plugin.ChannelConfig;
@@ -68,16 +70,28 @@ public class DummyUserController {
 
 		model.addAttribute("POSTMAN_AGENT_SCHEME_COLOR",
 				pmEnvironment.keyEntry("postman.agent.scheme.color").asString());
+
 		if (pmCommonConfig != null) {
 			model.addAttribute("CDN_URL",
 					ArgUtil.parseAsString(commonHttpRequest.get("CDN_URL"), pmCommonConfig.getCdnServer()));
 		}
-		ChannelConfig channelConfig = pmEnvironment.config().channel("web:" + pmCommonConfig.getServiceServer());
-		
+
+		PMConfigurationObject defaultWebChannel = pmEnvironment
+				.keyEntry(PMConstants.PROPERTIES.POSTMAN_CHAT_WEB_CHANNEL);
+
+		ChannelConfig channelConfig = null;
+		if (defaultWebChannel.exists()) {
+			channelConfig = pmEnvironment.config().channel(defaultWebChannel.asString());
+		}
+
+		if (!ArgUtil.is(channelConfig)) {
+			channelConfig = pmEnvironment.config().channel("web:" + pmCommonConfig.getServiceServer());
+		}
+
 		if (!ArgUtil.is(channelConfig)) {
 			channelConfig = pmEnvironment.config().channel("web:page");
 		}
-		
+
 		if (ArgUtil.is(channelConfig)) {
 			model.addAttribute("CHANNEL_ID", channelConfig.getChannelId());
 			model.addAttribute("CHANNEL_KEY", channelConfig.getChannelKey());

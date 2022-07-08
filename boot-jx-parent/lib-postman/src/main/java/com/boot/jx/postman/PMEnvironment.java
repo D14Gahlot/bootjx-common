@@ -228,6 +228,10 @@ public class PMEnvironment {
 			this.isProxyEnabled = isProxyEnabled;
 		}
 
+		public boolean equals(ContactType type) {
+			return this.contactType == type;
+		}
+
 	}
 
 	public static class PMConfigurationObject extends MapEntry implements Serializable {

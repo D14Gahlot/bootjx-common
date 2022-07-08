@@ -22,6 +22,7 @@ import com.boot.jx.common.config.ClientAppConfigConstants;
 import com.boot.jx.common.config.ConfigConstants;
 import com.boot.jx.common.config.ConfigManager;
 import com.boot.jx.common.impl.ConfigMeta;
+import com.boot.jx.dict.ContactType;
 import com.boot.jx.http.ApiRequest;
 import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.jx.postman.ClientApp;
@@ -102,7 +103,11 @@ public class ConfigOptionMetaController {
 
 	@JsonView(PMEnvironment.PublicProperty.class)
 	@RequestMapping(value = { "/api/options/channels" }, method = { RequestMethod.GET })
-	public ApiResponse<AChannelConfig, Object> listActiveLanes() {
+	public ApiResponse<AChannelConfig, Object> listActiveLanes(@RequestParam(required = false) ContactType type) {
+		if (ArgUtil.is(type)) {
+			return ApiResponse.buildResults(pmEnvironment.config().listChannels().stream()
+					.filter(channel -> channel.equals(type)).collect(Collectors.toList()));
+		}
 		return ApiResponse.buildResults(pmEnvironment.config().listChannels());
 	}
 

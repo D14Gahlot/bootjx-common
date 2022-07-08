@@ -8,6 +8,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import com.boot.jx.common.impl.ConfigMeta;
 import com.boot.jx.common.impl.ConfigMeta.ConfigOption;
 import com.boot.jx.common.impl.ConfigMeta.INPUT_TYPE;
+import com.boot.jx.dict.ContactType;
 import com.boot.jx.postman.PMConstants;
 import com.boot.jx.postman.PMConstants.APP_TYPE;
 import com.boot.jx.postman.PMConstants.PROPERTIES;
@@ -76,6 +77,9 @@ public class ConfigConstants {
 		POSTMAN_CHAT_CHANNEL_SANDBOX(new ConfigMeta("Enable Sandbox Channels", "postman.chat.channel.sandbox")
 				.desc("Sandbox channels are preconfigured communication channels").optionsOnOff()),
 
+		POSTMAN_CHAT_WEB_CHANNEL(new ConfigMeta("Default Web Channel", PROPERTIES.POSTMAN_CHAT_WEB_CHANNEL)
+				.desc("This channel will be connected your Page").optionsSource("getx:/api/options/channels")
+				.optionsKey("code").optionsLabel("code").filter("type", ContactType.WEBSITE)),
 		// Agent Properties
 		CHAT_TAG_ENABLED(
 				new ConfigMeta("Chat Session Tags Enabled", "chat.tag.enabled").optionsOnOff().group(GROUP_AGENT)),
