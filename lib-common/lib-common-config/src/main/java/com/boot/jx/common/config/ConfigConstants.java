@@ -79,7 +79,7 @@ public class ConfigConstants {
 
 		POSTMAN_CHAT_WEB_CHANNEL(new ConfigMeta("Default Web Channel", PROPERTIES.POSTMAN_CHAT_WEB_CHANNEL)
 				.desc("This channel will be connected your Page").optionsSource("getx:/api/options/channels")
-				.optionsKey("code").optionsLabel("code").filter("contactType", ContactType.WEBSITE)),
+				.optionsKey("id").optionsLabel("name").filter("contactType", ContactType.WEBSITE)),
 		// Agent Properties
 		CHAT_TAG_ENABLED(
 				new ConfigMeta("Chat Session Tags Enabled", "chat.tag.enabled").optionsOnOff().group(GROUP_AGENT)),
