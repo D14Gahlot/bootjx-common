@@ -480,6 +480,20 @@ public final class StringUtils {
 		return str.toUpperCase();
 	}
 
+	public static String sansanitize(String str, String replaceWith) {
+		if (str == null) {
+			return Constants.BLANK;
+		}
+		if (str instanceof String) {
+			return (ArgUtil.parseAsString(str, Constants.BLANK).replaceAll("[\\.@$:]", replaceWith));
+		}
+		return (String) str;
+	}
+
+	public static String sansanitize(String str) {
+		return sansanitize(str, Constants.BLANK);
+	}
+
 	public static String[] split(String str, String regex) {
 		if (str == null) {
 			return new String[0];
