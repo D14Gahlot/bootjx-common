@@ -100,13 +100,13 @@ public class ConfigOptionMetaController {
 	}
 
 	// Option APIS
-
 	@JsonView(PMEnvironment.PublicProperty.class)
 	@RequestMapping(value = { "/api/options/channels" }, method = { RequestMethod.GET })
-	public ApiResponse<AChannelConfig, Object> listActiveLanes(@RequestParam(required = false) ContactType type) {
-		if (ArgUtil.is(type)) {
+	public ApiResponse<AChannelConfig, Object> listActiveLanes(
+			@RequestParam(required = false) ContactType contactType) {
+		if (ArgUtil.is(contactType)) {
 			return ApiResponse.buildResults(pmEnvironment.config().listChannels().stream()
-					.filter(channel -> channel.equals(type)).collect(Collectors.toList()));
+					.filter(channel -> channel.equals(contactType)).collect(Collectors.toList()));
 		}
 		return ApiResponse.buildResults(pmEnvironment.config().listChannels());
 	}
