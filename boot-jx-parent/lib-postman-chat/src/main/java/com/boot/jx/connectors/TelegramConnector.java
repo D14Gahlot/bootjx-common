@@ -26,7 +26,6 @@ import com.boot.jx.postman.model.MessageBoxEvent;
 import com.boot.jx.postman.model.MessageDefinitions.Contactable;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.plugin.ChannelConfig;
-import com.boot.jx.postman.plugin.ChannelPluginProvider;
 import com.boot.jx.postman.plugin.TelegramPlugin;
 import com.boot.jx.postman.plugin.TelegramPlugin.TelegramConfigDetails;
 import com.boot.jx.postman.query.ChatContactQuery;
@@ -43,11 +42,6 @@ import com.boot.utils.JsonUtil;
 public class TelegramConnector extends AbstractConnector<TelegramConfigDetails, TelegramPlugin> {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(TelegramConnector.class);
-
-	@Override
-	public TelegramPlugin getPlugin() {
-		return ChannelPluginProvider.TELEGRAM;
-	}
 
 	@Autowired
 	private TelegramClient telegramClient;

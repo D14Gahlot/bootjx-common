@@ -35,8 +35,7 @@ public class PMConstants {
 		 * User who can login to domain manager and has Admin-Access to that one domain
 		 */
 		public static final String BUSINESS_USER = "BUSINESS_USER";
-		
-		
+
 		public static final String ADMIN = "ADMIN";
 		public static final String AGENT = "AGENT";
 		public static final String ALLOWED = "DUPER_USER,SUPER_DEV,BUSINESS_PARTNER,BUSINESS_USER,ADMIN,AGENT";
@@ -60,6 +59,7 @@ public class PMConstants {
 		public static final String WEB = "web";
 		public static final String INSTAGRAM = "ig";
 		public static final String EMAIL = "mailto";
+		public static final String SMS_TWILIO = "smstw";
 	}
 
 	public enum CHANNEL_TYPE_ENUM {

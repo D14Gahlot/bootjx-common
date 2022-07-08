@@ -46,7 +46,6 @@ import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.MessageBoxEvent;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.plugin.ChannelConfig;
-import com.boot.jx.postman.plugin.ChannelPluginProvider;
 import com.boot.jx.postman.plugin.EmailPlugin;
 import com.boot.jx.postman.plugin.EmailPlugin.EmailConfigDetails;
 import com.boot.jx.postman.wa360.WA360Client;
@@ -64,11 +63,6 @@ import com.boot.utils.Urly;
 @Component
 @ConnectorMapping(contactType = ContactType.EMAIL, channel = CHANNEL_TYPE.EMAIL)
 public class EmailConnector extends AbstractConnector<EmailConfigDetails, EmailPlugin> {
-
-	@Override
-	public EmailPlugin getPlugin() {
-		return ChannelPluginProvider.EMAIL;
-	}
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(EmailConnector.class);
 

@@ -232,6 +232,7 @@ public class ChannelPluginProvider {
 		register(WA_360D);
 		register(INSTAGRAM);
 		register(EMAIL);
+		register(new TwilioSMSPlugin());
 	}
 
 }

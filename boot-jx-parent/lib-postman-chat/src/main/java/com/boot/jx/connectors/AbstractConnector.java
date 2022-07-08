@@ -40,8 +40,6 @@ public abstract class AbstractConnector<CD extends AChannelDetails, P extends Ch
 
 	public static Logger LOGGER = LoggerService.getLogger(AbstractConnector.class);
 
-	abstract public P getPlugin();
-
 	public static abstract class DefaultConnector<CD extends AChannelDetails, P extends ChannelPlugin<CD>>
 			extends AbstractConnector<CD, P> {
 	}

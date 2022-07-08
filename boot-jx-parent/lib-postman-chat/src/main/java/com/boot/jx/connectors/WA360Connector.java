@@ -41,7 +41,6 @@ import com.boot.jx.postman.pbook.PBVCard;
 import com.boot.jx.postman.pbook.PBWebsite;
 import com.boot.jx.postman.pbook.PBWork;
 import com.boot.jx.postman.plugin.ChannelConfig;
-import com.boot.jx.postman.plugin.ChannelPluginProvider;
 import com.boot.jx.postman.plugin.WA360Plugin;
 import com.boot.jx.postman.plugin.WA360Plugin.WA360ConfigDetails;
 import com.boot.jx.postman.query.ChatContactQuery;
@@ -66,11 +65,6 @@ import com.google.i18n.phonenumbers.Phonenumber.PhoneNumber;
 public class WA360Connector extends AbstractConnector<WA360ConfigDetails, WA360Plugin> {
 
 	public static final PhoneNumberUtil PHONE_NUMBER_UTIL = PhoneNumberUtil.getInstance();
-
-	@Override
-	public WA360Plugin getPlugin() {
-		return ChannelPluginProvider.WA_360D;
-	}
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(WA360Connector.class);
 	@Autowired

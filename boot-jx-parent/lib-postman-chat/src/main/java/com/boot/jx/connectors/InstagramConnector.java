@@ -28,7 +28,6 @@ import com.boot.jx.postman.model.MessageBoxEvent;
 import com.boot.jx.postman.model.MessageReport;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.plugin.ChannelConfig;
-import com.boot.jx.postman.plugin.ChannelPluginProvider;
 import com.boot.jx.postman.plugin.InstagramPlugin;
 import com.boot.jx.postman.plugin.InstagramPlugin.InstagramConfig;
 import com.boot.jx.postman.query.ChatContactQuery;
@@ -39,11 +38,6 @@ import com.boot.utils.ArgUtil;
 @ConnectorMapping(contactType = ContactType.INSTAGRAM)
 public class InstagramConnector extends AbstractConnector<InstagramConfig, InstagramPlugin> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(InstagramConnector.class);
-
-	@Override
-	public InstagramPlugin getPlugin() {
-		return ChannelPluginProvider.INSTAGRAM;
-	}
 
 	@Autowired
 	private InstagramClient instaClient;

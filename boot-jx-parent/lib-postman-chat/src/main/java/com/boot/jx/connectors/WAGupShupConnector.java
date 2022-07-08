@@ -37,7 +37,6 @@ import com.boot.jx.postman.model.MessageDefinitions.IMessageExtended;
 import com.boot.jx.postman.model.MessageReport;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.plugin.ChannelConfig;
-import com.boot.jx.postman.plugin.ChannelPluginProvider;
 import com.boot.jx.postman.plugin.WAGupShupPlugin;
 import com.boot.jx.postman.plugin.WAGupShupPlugin.GupShupConfigDetails;
 import com.boot.jx.postman.query.ChatContactQuery;
@@ -53,11 +52,6 @@ import com.boot.utils.TimeUtils;
 public class WAGupShupConnector extends AbstractConnector<GupShupConfigDetails, WAGupShupPlugin> {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(WAGupShupConnector.class);
-
-	@Override
-	public WAGupShupPlugin getPlugin() {
-		return ChannelPluginProvider.WA_GUPSHUP;
-	}
 
 	@Autowired
 	private GupShupClientChat gupShupChatClient;

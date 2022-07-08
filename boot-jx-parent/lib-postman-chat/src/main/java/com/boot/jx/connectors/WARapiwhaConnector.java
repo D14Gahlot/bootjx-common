@@ -22,7 +22,6 @@ import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.MessageBoxEvent;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.plugin.ChannelConfig;
-import com.boot.jx.postman.plugin.ChannelPluginProvider;
 import com.boot.jx.postman.plugin.WebPlugin;
 import com.boot.jx.postman.plugin.WebPlugin.WebConfigDetails;
 import com.boot.jx.postman.query.ChatContactQuery;
@@ -39,11 +38,6 @@ import com.boot.utils.JsonUtil;
 public class WARapiwhaConnector extends AbstractConnector<WebConfigDetails, WebPlugin> {
 
 	private static Logger LOGGER = LoggerService.getLogger(WARapiwhaConnector.class);
-
-	@Override
-	public WebPlugin getPlugin() {
-		return ChannelPluginProvider.WEB;
-	}
 
 	@Autowired
 	private RestService restService;

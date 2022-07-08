@@ -29,7 +29,6 @@ import com.boot.jx.postman.model.MessageBoxEvent;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.model.TmplElement;
 import com.boot.jx.postman.plugin.ChannelConfig;
-import com.boot.jx.postman.plugin.ChannelPluginProvider;
 import com.boot.jx.postman.plugin.WebPlugin;
 import com.boot.jx.postman.plugin.WebPlugin.WebConfigDetails;
 import com.boot.jx.postman.query.ChatContactQuery;
@@ -51,11 +50,6 @@ public class WebConnector extends DefaultConnector<WebConfigDetails, WebPlugin> 
 
 	@Autowired
 	private PMFileStoreClient pmFileStoreClient;
-
-	@Override
-	public WebPlugin getPlugin() {
-		return ChannelPluginProvider.WEB;
-	}
 
 	public static class MessageQueue<T> {
 
@@ -184,6 +178,10 @@ public class WebConnector extends DefaultConnector<WebConfigDetails, WebPlugin> 
 				return (OutboxMessage) inboxMessage.replyMessage("Please fill below inputs to continue")
 						.option("inputs", inputs);
 			}
+		}
+
+		if (ArgUtil.is(channel.getWeb().getIceBreaker())) {
+			return (OutboxMessage) inboxMessage.replyMessage("Welcome").template(channel.getWeb().getIceBreaker());
 		}
 
 		return null;

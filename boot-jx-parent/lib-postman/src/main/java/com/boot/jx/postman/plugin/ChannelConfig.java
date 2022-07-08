@@ -5,6 +5,7 @@ import com.boot.jx.postman.plugin.EmailPlugin.EmailConfigDetails;
 import com.boot.jx.postman.plugin.FacebookPlugin.FacebookConfigDetails;
 import com.boot.jx.postman.plugin.InstagramPlugin.InstagramConfig;
 import com.boot.jx.postman.plugin.TelegramPlugin.TelegramConfigDetails;
+import com.boot.jx.postman.plugin.TwilioSMSPlugin.TwilioConfigDetails;
 import com.boot.jx.postman.plugin.TwitterPlugin.TwitterConfigDetails;
 import com.boot.jx.postman.plugin.WA360Plugin.WA360ConfigDetails;
 import com.boot.jx.postman.plugin.WAGupShupPlugin.GupShupConfigDetails;
@@ -23,6 +24,7 @@ public class ChannelConfig extends AChannelConfig {
 	private WA360ConfigDetails wa360d;
 	private WebConfigDetails web;
 	private EmailConfigDetails email;
+	private TwilioConfigDetails twilio;
 
 	private boolean isPushAllowed;
 	private boolean isPushOnlyApproved;
@@ -160,6 +162,14 @@ public class ChannelConfig extends AChannelConfig {
 
 	public void setEmail(EmailConfigDetails email) {
 		this.email = email;
+	}
+
+	public TwilioConfigDetails getTwilio() {
+		return twilio;
+	}
+
+	public void setTwilio(TwilioConfigDetails twilio) {
+		this.twilio = twilio;
 	}
 
 }

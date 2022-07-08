@@ -5,7 +5,6 @@ import java.io.Serializable;
 import com.boot.jx.swagger.ApiMockModelProperty;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
-
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class MobileUserLoginDTO implements Serializable {
 	private static final long serialVersionUID = 1281605084248923642L;

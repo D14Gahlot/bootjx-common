@@ -10,7 +10,6 @@ import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorMapping;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.dict.FileType;
 import com.boot.jx.exception.ApiHttpExceptions.ApiHttpException;
-import com.boot.jx.exception.ApiHttpExceptions.ApiHttpServerException;
 import com.boot.jx.postman.PMConstants.CHANNEL_TYPE;
 import com.boot.jx.postman.client.PMFileStoreClient;
 import com.boot.jx.postman.doc.ChatContactDoc;
@@ -30,11 +29,9 @@ import com.boot.jx.postman.model.MessageBoxEvent;
 import com.boot.jx.postman.model.MessageReport;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.plugin.ChannelConfig;
-import com.boot.jx.postman.plugin.ChannelPluginProvider;
 import com.boot.jx.postman.plugin.FacebookPlugin;
 import com.boot.jx.postman.plugin.FacebookPlugin.FacebookConfigDetails;
 import com.boot.jx.postman.query.ChatContactQuery;
-import com.boot.jx.postman.wa360.WA360Constants.OutBoundWrapperPaths;
 import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
 
@@ -42,11 +39,6 @@ import com.boot.utils.ArgUtil;
 @ConnectorMapping(contactType = ContactType.FACEBOOK)
 public class FacebookConnector extends AbstractConnector<FacebookConfigDetails, FacebookPlugin> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(FacebookConnector.class);
-
-	@Override
-	public FacebookPlugin getPlugin() {
-		return ChannelPluginProvider.FACEBOOK;
-	}
 
 	@Autowired
 	private FacebooClient facebooClient;

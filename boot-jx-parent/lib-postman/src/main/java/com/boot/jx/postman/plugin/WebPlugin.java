@@ -72,6 +72,14 @@ public class WebPlugin implements DefaultChannelPlugin<WebConfigDetails> {
 			this.promptPhone = promptPhone;
 		}
 
+		public String getIceBreaker() {
+			return iceBreaker;
+		}
+
+		public void setIceBreaker(String iceBreaker) {
+			this.iceBreaker = iceBreaker;
+		}
+
 	}
 
 	@Override

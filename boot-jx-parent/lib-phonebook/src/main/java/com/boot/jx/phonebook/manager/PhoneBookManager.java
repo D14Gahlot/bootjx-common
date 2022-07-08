@@ -16,18 +16,18 @@ import com.boot.jx.phonebook.doc.PhoneUserDoc;
 @Component
 public class PhoneBookManager {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(PhoneBookManager.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(PhoneBookManager.class);
 
-    @Autowired
-    private CommonMongoTemplate commonMongoTemplate;
+	@Autowired
+	private CommonMongoTemplate commonMongoTemplate;
 
-    public List<PhoneContactDoc> getContacts(String mobile) {
-	return commonMongoTemplate.find(
-		CommonMongoQueryBuilder.collection(PhoneContactDoc.class).with(Criteria.where("userId").is(mobile)));
-    }
+	public List<PhoneContactDoc> getContacts(String mobile) {
+		return commonMongoTemplate.find(
+				CommonMongoQueryBuilder.collection(PhoneContactDoc.class).with(Criteria.where("userId").is(mobile)));
+	}
 
-    public List<PhoneContactDoc> getContacts(PhoneUserDoc user) {
-	return getContacts(user.getMobile());
-    }
+	public List<PhoneContactDoc> getContacts(PhoneUserDoc user) {
+		return getContacts(user.getMobile());
+	}
 
 }

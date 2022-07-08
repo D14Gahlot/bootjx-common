@@ -30,6 +30,7 @@ import com.boot.jx.connectors.WebConnector;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.http.ApiRequest;
 import com.boot.jx.http.CommonHttpRequest;
+import com.boot.jx.http.Kooky;
 import com.boot.jx.http.RequestType;
 import com.boot.jx.logger.AuditService;
 import com.boot.jx.model.CommonFile;
@@ -53,6 +54,7 @@ import com.boot.jx.postman.store.SessionStore;
 import com.boot.jx.stomp.StompTunnelSessionManager;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.model.MapModel;
+import com.boot.model.SafeKeyHashMap;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.JsonUtil;
 import com.boot.utils.UniqueID;
@@ -165,7 +167,10 @@ public class InBoundControllerWeb {
 			@RequestParam(required = false) String number, @RequestParam(required = false) String csid,
 			@RequestParam(required = false) String channelId, @RequestParam(required = false) String channelKey)
 			throws InterruptedException {
-		String webSessionId = commonHttpRequest.get(WEB_SESSION_ID);
+
+		String webSessionIdKey = SafeKeyHashMap.sanitizeKey(WEB_SESSION_ID + "_" + channelKey);
+
+		String webSessionId = commonHttpRequest.get(webSessionIdKey);
 		csid = ArgUtil.nonEmpty(csid, number);
 		ChannelConfig channelConfig = pmEnvironment.config().channel(channelId);
 		String contactId = PostManUtil.CONTACT_ID(channelConfig, csid);
@@ -206,6 +211,8 @@ public class InBoundControllerWeb {
 				ApiResponseUtil.throwAccessDeniedException("Invalid Channel");
 			}
 
+			String webSessionIdKey = SafeKeyHashMap.sanitizeKey(WEB_SESSION_ID + "_" + channelKey);
+
 			MessageBoxEvent messageBoxEvent = connector.inboundMessageBoxEvent(channelConfig, map,
 					new MessageBoxEvent(), file);
 			if (ArgUtil.is(messageBoxEvent.getInboxMessages())) {
@@ -217,9 +224,9 @@ public class InBoundControllerWeb {
 					sessionMessage.setContact(sessionMessage.getContact());
 				});
 				connector.onReceiveInboxMessage(messageBoxEvent.getInboxMessages());
-				String webSessionId = commonHttpRequest.get(WEB_SESSION_ID);
+				String webSessionId = commonHttpRequest.get(webSessionIdKey);
 				if (!ArgUtil.is(webSessionId) || !webSessionId.equalsIgnoreCase(sessionMessage.getSessionId())) {
-					commonHttpRequest.setCookie(WEB_SESSION_ID, sessionMessage.getSessionId());
+					commonHttpRequest.setCookie(new Kooky().name(webSessionIdKey).value(sessionMessage.getSessionId()));
 				}
 				return ApiResponse.buildResults(messageBoxEvent.getInboxMessages());
 			} else if (ArgUtil.is(messageBoxEvent.getMessageReports())) {
@@ -244,6 +251,7 @@ public class InBoundControllerWeb {
 		return inboundMessageBoxEventMethod(channelId, channelKey, map, null);
 	}
 
+	@ApiRequest(session = true)
 	@ResponseBody
 	@RequestMapping(value = "/ext/plugin/inbound/v2/web/callback/{nounce}/{channelId}/{channelKey}",
 			method = { RequestMethod.PUT })

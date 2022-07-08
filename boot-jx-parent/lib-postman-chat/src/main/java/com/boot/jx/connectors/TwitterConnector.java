@@ -17,7 +17,6 @@ import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.MessageBoxEvent;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.plugin.ChannelConfig;
-import com.boot.jx.postman.plugin.ChannelPluginProvider;
 import com.boot.jx.postman.plugin.TwitterPlugin;
 import com.boot.jx.postman.plugin.TwitterPlugin.TwitterConfigDetails;
 import com.boot.jx.postman.query.ChatContactQuery;
@@ -39,11 +38,6 @@ import twitter4j.TwitterException;
 public class TwitterConnector extends AbstractConnector<TwitterConfigDetails, TwitterPlugin> {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(TwitterConnector.class);
-
-	@Override
-	public TwitterPlugin getPlugin() {
-		return ChannelPluginProvider.TWITTER;
-	}
 
 	@Autowired
 	private TwitterClient twitterClient;

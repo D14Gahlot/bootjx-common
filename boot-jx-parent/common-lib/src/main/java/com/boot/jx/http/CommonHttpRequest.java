@@ -277,6 +277,12 @@ public class CommonHttpRequest extends ACommonHttpRequest {
 		}
 	}
 
+	public void setCookie(Kooky kooky) {
+		if (response != null) {
+			response.addHeader("Set-Cookie", kooky.toString());
+		}
+	}
+
 	/**
 	 * 
 	 * @param name
