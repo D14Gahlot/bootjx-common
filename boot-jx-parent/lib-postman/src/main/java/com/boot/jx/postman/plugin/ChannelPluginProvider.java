@@ -143,7 +143,7 @@ public class ChannelPluginProvider {
 					ConfigMetaProperty annotation = field.getAnnotation(ConfigMetaProperty.class);
 					ConfigMeta cm = new ConfigMeta().path(annotation.path()).title(annotation.title())
 							.desc(annotation.desc()).createonly(annotation.createonly())
-							.writeonly(annotation.writeonly());
+							.writeonly(annotation.writeonly()).optional(annotation.optional());
 					if (annotation.inputType() == INPUT_TYPE.OPTIONS && annotation.dataType() == DATA_TYPE.SWITCH
 							&& annotation.converterType() == CONVERT_TYPE.BOOLEAN) {
 						cm.optionsOnOff();
@@ -154,6 +154,7 @@ public class ChannelPluginProvider {
 					if (ArgUtil.is(annotation.defaultValue())) {
 						cm.defaultValue(annotation.defaultValue());
 					}
+					
 					configMetaList.add(cm);
 				}
 			}

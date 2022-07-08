@@ -308,6 +308,11 @@ public class ConfigMeta implements Serializable {
 		return this;
 	}
 
+	public ConfigMeta optional(boolean optional) {
+		this.optional = optional;
+		return this;
+	}
+
 	public boolean isReadonly() {
 		return readonly;
 	}
@@ -548,4 +553,5 @@ public class ConfigMeta implements Serializable {
 		filter().put(key, value);
 		return this;
 	}
+
 }
