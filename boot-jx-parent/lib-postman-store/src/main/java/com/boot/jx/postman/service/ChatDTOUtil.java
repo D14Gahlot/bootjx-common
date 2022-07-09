@@ -47,6 +47,8 @@ public class ChatDTOUtil {
 			contact.setName(chatContactDoc.getName());
 			contact.setPhone(chatContactDoc.getPhone());
 			contact.setEmail(chatContactDoc.getEmail());
+			contact.setPhoneVerified(chatContactDoc.getPhoneVerified());
+			contact.setEmailVerified(chatContactDoc.getEmailVerified());
 			contact.setLabelId(chatContactDoc.getLabelId());
 			contact.setProfilePic(chatContactDoc.getProfilePic());
 			contact.setProfile(chatContactDoc.getProfile());
