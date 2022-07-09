@@ -171,9 +171,11 @@ public class WebConnector extends DefaultConnector<WebConfigDetails, WebPlugin> 
 			}
 			if (ArgUtil.is(inboxMessage.getForm().get("email"))) {
 				contactQuery.setEmail(ArgUtil.parseAsString(inboxMessage.getForm().get("email")));
+				contactQuery.setEmailVerified(false);
 			}
 			if (ArgUtil.is(inboxMessage.getForm().get("phone"))) {
 				contactQuery.setPhone(ArgUtil.parseAsString(inboxMessage.getForm().get("phone")));
+				contactQuery.setPhoneVerified(false);
 			}
 		}
 

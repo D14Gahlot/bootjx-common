@@ -48,6 +48,7 @@ import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.postman.plugin.EmailPlugin;
 import com.boot.jx.postman.plugin.EmailPlugin.EmailConfigDetails;
+import com.boot.jx.postman.query.ChatContactQuery;
 import com.boot.jx.postman.wa360.WA360Client;
 import com.boot.jx.postman.wa360.WA360Constants;
 import com.boot.jx.rest.RestService;
@@ -111,6 +112,18 @@ public class EmailConnector extends AbstractConnector<EmailConfigDetails, EmailP
 		properties.put("mail.smtp.host", emailConfig.getSmtpHost());
 		properties.put("mail.smtp.port", emailConfig.getSmtpPort());
 		return Session.getDefaultInstance(properties);
+	}
+
+	public OutboxMessage initSession(ChatSessionDoc session, InboxMessage inboxMessage) {
+		ChatContactQuery contactQuery = messageContext.contact();
+		ChatContactDoc chatContactDoc = messageContext.contact().getDoc();
+		if (chatContactDoc.getEmail() == null) {
+			contactQuery.setEmail(inboxMessage.contact().getEmail());
+		}
+		if (chatContactDoc.getEmailVerified() == null) {
+			contactQuery.setEmailVerified(true);
+		}
+		return null;
 	}
 
 	public InboxMessage toInboxMessage(ChannelConfig channelConfig, MimeMessageParser email) throws Exception {

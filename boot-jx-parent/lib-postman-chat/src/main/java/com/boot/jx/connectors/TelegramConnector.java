@@ -144,7 +144,7 @@ public class TelegramConnector extends AbstractConnector<TelegramConfigDetails, 
 				contactQuery.setName(update.getMessage().getFrom().getFirstName() + " "
 						+ update.getMessage().getFrom().getLastName());
 				contactQuery.setPhone(update.getMessage().getContact().getPhoneNumber());
-
+				contactQuery.setPhoneVerified(true);
 			}
 
 		}

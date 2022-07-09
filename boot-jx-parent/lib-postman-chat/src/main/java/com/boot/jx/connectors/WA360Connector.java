@@ -23,6 +23,7 @@ import com.boot.jx.postman.PMConstants.MESSAGE_FORMAT_TYPE;
 import com.boot.jx.postman.PMEnvironment.PMClientConfig;
 import com.boot.jx.postman.client.PMFileStoreClient;
 import com.boot.jx.postman.doc.ChatContactDoc;
+import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.Message.Status;
@@ -88,6 +89,18 @@ public class WA360Connector extends AbstractConnector<WA360ConfigDetails, WA360P
 		restService.ajax(WA360Constants.BASE_URL).path("v1/configs/webhook")
 				.header(WA360Constants.D360_API_KEY, channelConfig.getWa360d().getApiKey())
 				.post(MapModel.createInstance().put("url", webhookUrl).toMap()).asMap();
+	}
+
+	public OutboxMessage initSession(ChatSessionDoc session, InboxMessage inboxMessage) {
+		ChatContactQuery contactQuery = messageContext.contact();
+		ChatContactDoc chatContactDoc = messageContext.contact().getDoc();
+		if (chatContactDoc.getPhone() == null) {
+			contactQuery.setPhone(inboxMessage.contact().getPhone());
+		}
+		if (chatContactDoc.getPhoneVerified() == null) {
+			contactQuery.setPhoneVerified(true);
+		}
+		return null;
 	}
 
 	public InboxMessage toInboxMessage(ChannelConfig channelConfig, MapModel map) {

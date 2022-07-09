@@ -60,10 +60,12 @@ public class ChatContactDoc implements Serializable, Contactable, AuditCreateEnt
 	// @TextIndexed(weight = 1)
 	@Indexed
 	private String email;
+	private Boolean emailVerified;
 
 	// @TextIndexed(weight = 5)
 	@Indexed
 	private String phone;
+	private Boolean phoneVerified;
 
 	private String profilePic;
 	@Indexed
@@ -313,6 +315,22 @@ public class ChatContactDoc implements Serializable, Contactable, AuditCreateEnt
 			this.store = new HashMap<String, Object>();
 		}
 		return store;
+	}
+
+	public Boolean getEmailVerified() {
+		return emailVerified;
+	}
+
+	public void setEmailVerified(Boolean emailVerified) {
+		this.emailVerified = emailVerified;
+	}
+
+	public Boolean getPhoneVerified() {
+		return phoneVerified;
+	}
+
+	public void setPhoneVerified(Boolean phoneVerified) {
+		this.phoneVerified = phoneVerified;
 	}
 
 }

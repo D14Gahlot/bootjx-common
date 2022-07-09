@@ -168,6 +168,18 @@ public class ChatContactQuery extends DocQueryBuilder<ChatContactDoc> {
 		return this;
 	}
 
+	public ChatContactQuery setPhoneVerified(boolean phoneVerified) {
+		this.doc.setPhoneVerified(true);
+		this.set("phoneVerified", phoneVerified);
+		return this;
+	}
+
+	public ChatContactQuery setEmailVerified(boolean emailVerified) {
+		this.doc.setEmailVerified(true);
+		this.set("emailVerified", emailVerified);
+		return this;
+	}
+
 	public ChatContactQuery setProfilePic(String profilePic) {
 		this.doc.setProfilePic(profilePic);
 		this.set("profilePic", profilePic);
