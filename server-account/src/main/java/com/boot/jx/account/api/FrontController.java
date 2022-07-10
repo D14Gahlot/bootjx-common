@@ -108,18 +108,28 @@ public class FrontController {
 		return "app-front";
 	}
 
-	@RequestMapping(value = { "/@{domain}", "/{domain:^.*(?!swagger-ui.html)}" }, method = { RequestMethod.GET })
-	public String domain(Model model, @PathVariable @ValidAlphaNum String domain) {
-		return domainProfile(model, domain, false, "front");
-	}
-
 	@ApiRequest(tenant = "app")
-	@RequestMapping(value = { "/", "/front/", "/front/**" }, method = { RequestMethod.GET })
+	@RequestMapping(value = { "/front/", "/front/**" }, method = { RequestMethod.GET })
 	public String front(Model model) {
 		if (!pmCommonConfig.isValidDomain()) {
 			return pmCommonConfig.mainDomainRedirect();
 		}
 		String domainName = ArgUtil.nonEmpty(commonHttpRequest.get("domain"), commonHttpRequest.getSubDomain());
 		return domainProfile(model, domainName, Tenants.isDefault(domainName), "front");
+	}
+
+	@RequestMapping(value = { "/@{domain}", "/{domain:^.*(?!swagger-ui.html)}" }, method = { RequestMethod.GET })
+	public String domain(Model model, @PathVariable @ValidAlphaNum String domain) {
+		return domainProfile(model, domain, false, "page");
+	}
+
+	@ApiRequest(tenant = "app")
+	@RequestMapping(value = { "/", "/page/", "/page/**" }, method = { RequestMethod.GET })
+	public String page(Model model) {
+		if (!pmCommonConfig.isValidDomain()) {
+			return pmCommonConfig.mainDomainRedirect();
+		}
+		String domainName = ArgUtil.nonEmpty(commonHttpRequest.get("domain"), commonHttpRequest.getSubDomain());
+		return domainProfile(model, domainName, Tenants.isDefault(domainName), "page");
 	}
 }

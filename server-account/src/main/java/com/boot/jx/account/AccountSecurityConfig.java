@@ -41,7 +41,7 @@ public class AccountSecurityConfig extends WebSecurityConfigurerAdapter {
 	// public static final String[] CONTEXTS = new String[] { "common", "account",
 	// "partner", "front", "cpanel" };
 
-	public static final MapModel CONTEXTS_MAP = MapModel.createInstance().put("common", "front")
+	public static final MapModel CONTEXTS_MAP = MapModel.createInstance().put("common", "front").put("page", "front")
 			.put("account", "account").put("partner", "partner").put("front", "front").put("cpanel", "partner");
 
 	@Autowired
