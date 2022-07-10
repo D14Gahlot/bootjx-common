@@ -19,6 +19,7 @@ import com.boot.jx.http.CommonHttpRequest;
 import com.boot.jx.mongo.CommonMongoSource;
 import com.boot.jx.postman.PMEnvironment.PMCommonConfig;
 import com.boot.jx.scope.tnt.Tenants;
+import com.boot.jx.swagger.DefaultSwaggerConfig;
 import com.boot.jx.validation.AlphaNumValidator.ValidAlphaNum;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.Constants;
@@ -40,6 +41,9 @@ public class FrontController {
 
 	@Autowired
 	private PMCommonConfig pmCommonConfig;
+
+	@Autowired(required = false)
+	private DefaultSwaggerConfig defaultSwaggerConfig;
 
 	@RequestMapping(value = { "/account", "/account/**" }, method = { RequestMethod.GET })
 	public String account(Model model) {
@@ -92,6 +96,7 @@ public class FrontController {
 
 		String appView = ArgUtil.parseAsString(commonHttpRequest.get("APP_VIEW"), "DEFAULT");
 		commonHttpRequest.setCookie("APP_VIEW", appView);
+		commonHttpRequest.setCookie("APP_VIEW2", appView);
 
 		model.addAttribute("APP_VIEW", appView);
 
@@ -134,11 +139,17 @@ public class FrontController {
 		return domainProfile(model, domainName, Tenants.isDefault(domainName), page);
 	}
 
-	@RequestMapping(value = { "/dev", "/dev/**" }, method = { RequestMethod.GET })
+	@RequestMapping(value = { "/dev", "/dev/**" }, method = { RequestMethod.GET, RequestMethod.POST })
 	public String dev(Model model) {
+
+		if (defaultSwaggerConfig == null || !defaultSwaggerConfig.isLoggedIn()) {
+			return "swagger-login";
+		}
+
 		if (!pmCommonConfig.isValidDomain()) {
 			return pmCommonConfig.mainDomainRedirect();
 		}
+
 		String domainName = ArgUtil.nonEmpty(commonHttpRequest.get("domain"), commonHttpRequest.getSubDomain());
 		return domainProfile(model, domainName, Tenants.isDefault(domainName), "dev");
 	}

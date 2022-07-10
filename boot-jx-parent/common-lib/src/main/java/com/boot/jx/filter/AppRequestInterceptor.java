@@ -1,6 +1,8 @@
 package com.boot.jx.filter;
 
 import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -41,7 +43,7 @@ public class AppRequestInterceptor extends HandlerInterceptorAdapter {
 		if (setCookieHeaders == null || setCookieHeaders.isEmpty())
 			return;
 
-		setCookieHeaders.stream().filter(StringUtils::isNotBlank).map(header -> {
+		List<String> headers = setCookieHeaders.stream().filter(StringUtils::isNotBlank).map(header -> {
 			if (header.toLowerCase().contains("samesite")) {
 				return header;
 			} else {
@@ -53,6 +55,16 @@ public class AppRequestInterceptor extends HandlerInterceptorAdapter {
 			} else {
 				return header.concat(secureAttribute);
 			}
-		}).forEach(finalHeader -> response.setHeader(HttpHeaders.SET_COOKIE, finalHeader));
+		}).collect(Collectors.toList());
+
+		boolean isFirst = true;
+		for (String finalHeader : headers) {
+			if (isFirst) {
+				response.setHeader(HttpHeaders.SET_COOKIE, finalHeader);
+				isFirst = false;
+			} else
+				response.addHeader(HttpHeaders.SET_COOKIE, finalHeader);
+		}
+
 	}
 }
