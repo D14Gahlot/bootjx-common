@@ -130,6 +130,7 @@ public class FrontController {
 			return pmCommonConfig.mainDomainRedirect();
 		}
 		String domainName = ArgUtil.nonEmpty(commonHttpRequest.get("domain"), commonHttpRequest.getSubDomain());
-		return domainProfile(model, domainName, Tenants.isDefault(domainName), "page");
+		String page = Tenants.isDefault(domainName) ? "front" : "page";
+		return domainProfile(model, domainName, Tenants.isDefault(domainName), page);
 	}
 }
