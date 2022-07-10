@@ -42,8 +42,7 @@ public class AccountSecurityConfig extends WebSecurityConfigurerAdapter {
 	// "partner", "front", "cpanel" };
 
 	public static final MapModel CONTEXTS_MAP = MapModel.createInstance().put("common", "front").put("page", "front")
-			.put("dev", "front").put("account", "account").put("partner", "partner").put("front", "front")
-			.put("cpanel", "partner");
+			.put("account", "account").put("partner", "partner").put("front", "front").put("cpanel", "partner");
 
 	@Autowired
 	private LogoutHandler agentLogoutHandler;

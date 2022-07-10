@@ -134,7 +134,7 @@ public class FrontController {
 		return domainProfile(model, domainName, Tenants.isDefault(domainName), page);
 	}
 
-	@RequestMapping(value = { "/dev" }, method = { RequestMethod.GET })
+	@RequestMapping(value = { "/dev", "/dev/**" }, method = { RequestMethod.GET })
 	public String dev(Model model) {
 		if (!pmCommonConfig.isValidDomain()) {
 			return pmCommonConfig.mainDomainRedirect();
