@@ -48,10 +48,11 @@ public class App { // Noncompliant
 
 	private static Logger LOGGER = LoggerFactory.getLogger(App.class);
 
-	public static void main(String[] args) throws ExpressionException {
+	public static void mainx(String[] args) throws ExpressionException {
 		MDC.put(TenantContextHolder.TENANT, "heohooh");
 		LOGGER.info("Hello");
 	}
+
 	public static void main8(String[] args) throws ExpressionException {
 
 		StringMatcher matcher = new StringMatcher("DOCUMENT_DATE<");
@@ -63,11 +64,18 @@ public class App { // Noncompliant
 
 	}
 
-	public static void main7(String[] args) throws ExpressionException {
+	public static void main(String[] args) throws ExpressionException {
 		OTPDetails details = OTPUtils.genrateBasicOTP("512", "REMIT");
 		System.out.println(JsonUtil.toJson(details));
 		System.out.println(OTPUtils.validateBasicOTP(details.getId(), "512", "REMIT", details.getOtp()));
 		System.out.println(OTPUtils.validateBasicOTP(details.getId(), "512", "REMIT", "121218"));
+
+		OTPDetails detailsYinYang = OTPUtils.genrateBasicOTP("512", "REMIT");
+		System.out.println(JsonUtil.toJson(detailsYinYang));
+		System.out.println(new OTPDetails().yin(detailsYinYang.getYin()).yang(detailsYinYang.getYang())
+				.genrate("512", "REMIT").isValid(detailsYinYang.getOtp()));
+		System.out.println(new OTPDetails().yin(detailsYinYang.getYin()).yang(detailsYinYang.getYang())
+				.genrate("512", "REMIT").isValid("121218"));
 	}
 
 	/**
@@ -112,9 +120,9 @@ public class App { // Noncompliant
 
 	public static void main3(String[] args) {
 		String url = "/api/user/tranx/history";
-		System.out.println(url.toLowerCase().replace("pub", "b").replace("api", "p").replace("user", "")
-				.replace("get", "").replace("post", "").replace("save", "")
-				.replace("/", "").replaceAll("[AaEeIiOoUuYyWwHh]", ""));
+		System.out.println(
+				url.toLowerCase().replace("pub", "b").replace("api", "p").replace("user", "").replace("get", "")
+						.replace("post", "").replace("save", "").replace("/", "").replaceAll("[AaEeIiOoUuYyWwHh]", ""));
 	}
 
 	public static void main2(String[] args) throws MalformedURLException, URISyntaxException {

@@ -238,6 +238,14 @@ public class ApiResponseUtil {
 		throwInputException(ApiStatusCodes.PARAM_DUPLICATE);
 	}
 
+	public static void throwMissinInputException() {
+		throwInputException(ApiStatusCodes.PARAM_MISSING);
+	}
+
+	public static void throwMissinInputException(ApiFieldError error) {
+		throwInputException(ApiStatusCodes.PARAM_MISSING, error);
+	}
+
 	public static void throwUnAuthorizedException(String description) {
 		throwException(new ApiHttpArgException(ApiStatusCodes.UNAUTHORIZED, description));
 	}
