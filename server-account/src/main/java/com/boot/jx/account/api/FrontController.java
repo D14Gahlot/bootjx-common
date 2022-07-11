@@ -96,7 +96,6 @@ public class FrontController {
 
 		String appView = ArgUtil.parseAsString(commonHttpRequest.get("APP_VIEW"), "DEFAULT");
 		commonHttpRequest.setCookie("APP_VIEW", appView);
-		commonHttpRequest.setCookie("APP_VIEW2", appView);
 
 		model.addAttribute("APP_VIEW", appView);
 
