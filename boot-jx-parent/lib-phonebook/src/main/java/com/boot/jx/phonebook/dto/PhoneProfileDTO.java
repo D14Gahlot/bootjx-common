@@ -7,7 +7,7 @@ import com.boot.jx.swagger.ApiMockModelProperty;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class MobileUserDTO implements Serializable {
+public class PhoneProfileDTO implements Serializable {
     private static final long serialVersionUID = 1281605084248923642L;
 
     @ApiMockModelProperty(example = "202019806096786", required = false)

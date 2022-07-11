@@ -12,6 +12,7 @@ import com.boot.jx.mongo.CommonMongoQueryBuilder;
 import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.jx.phonebook.doc.PhoneContactDoc;
 import com.boot.jx.phonebook.doc.PhoneUserDoc;
+import com.boot.jx.phonebook.dto.PhoneProfileDTO;
 
 @Component
 public class PhoneBookManager {
@@ -27,7 +28,11 @@ public class PhoneBookManager {
 	}
 
 	public List<PhoneContactDoc> getContacts(PhoneUserDoc user) {
-		return getContacts(user.getMobile());
+		return getContacts(user.phoneId);
+	}
+
+	public PhoneProfileDTO getProfile(PhoneUserDoc user) {
+		return new PhoneProfileDTO();
 	}
 
 }
