@@ -298,7 +298,7 @@ public class PartnerController {
 				domainDocs = domainUser.getDomains();
 			} else if (ArgUtil.is(domain)) {
 				domainDocs = accountStore.find(CommonMongoQueryBuilder.collection(DomainDoc.class)
-						.with(Criteria.where("domain").regex(domain, "i")));
+						.where(Criteria.where("domain").regex(domain, "i")));
 			}
 		}
 

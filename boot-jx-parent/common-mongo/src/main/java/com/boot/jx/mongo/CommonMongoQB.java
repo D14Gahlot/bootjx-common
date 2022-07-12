@@ -20,13 +20,17 @@ import com.boot.utils.ArgUtil;
 
 public class CommonMongoQB<M extends CommonMongoQB<M, T>, T> implements MongoQueryBuilder<T> {
 
-	public static class CommonMongoCriteria extends Criteria {
+	public static class QueryCriteria extends Criteria {
 		public static Criteria whereId(Object id) {
 			return where("_id").is(id);
 		}
 
 		public static Criteria whereCode(Object code) {
 			return where("code").is(code);
+		}
+
+		public static Criteria where(Object key) {
+			return where(key);
 		}
 	}
 
@@ -56,7 +60,7 @@ public class CommonMongoQB<M extends CommonMongoQB<M, T>, T> implements MongoQue
 	}
 
 	@SuppressWarnings("unchecked")
-	public M with(Criteria criteria) {
+	public M where(Criteria criteria) {
 		query().addCriteria(criteria);
 		return (M) this;
 	}
@@ -124,15 +128,15 @@ public class CommonMongoQB<M extends CommonMongoQB<M, T>, T> implements MongoQue
 			Criteria altC = Criteria.where("_id").is(new ObjectId(idStr));
 			c = new Criteria().orOperator(c, altC);
 		}
-		return this.with(c);
+		return this.where(c);
 	}
 
 	public M whereId(Object id) {
-		return this.with(CommonMongoCriteria.whereId(id));
+		return this.where(QueryCriteria.whereId(id));
 	}
 
 	public M whereCode(Object code) {
-		return this.with(CommonMongoCriteria.whereCode(code));
+		return this.where(QueryCriteria.whereCode(code));
 	}
 
 	@SuppressWarnings("unchecked")

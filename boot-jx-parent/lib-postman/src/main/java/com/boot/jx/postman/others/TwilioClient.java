@@ -1,4 +1,4 @@
-package com.boot.jx.postman.twilio;
+package com.boot.jx.postman.others;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

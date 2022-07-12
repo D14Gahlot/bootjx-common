@@ -15,7 +15,7 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Component;
 
-import com.boot.jx.mongo.CommonMongoQB.CommonMongoCriteria;
+import com.boot.jx.mongo.CommonMongoQB.QueryCriteria;
 import com.boot.jx.mongo.CommonMongoQueryBuilder;
 import com.boot.jx.mongo.CommonMongoTemplateAbstract;
 import com.boot.jx.postman.PMConstants;
@@ -77,7 +77,7 @@ public class SessionStore extends CommonMongoTemplateAbstract {
 	}
 
 	public ChatSessionDoc getSessionPrimeByTicketHash(String contactId, String ticketHash) {
-		CommonMongoQueryBuilder cmqb = new CommonMongoQueryBuilder().with(
+		CommonMongoQueryBuilder cmqb = new CommonMongoQueryBuilder().where(
 				Criteria.where("contactId").is(contactId).and("ticketHash").is(ticketHash).and("primary").is(true));
 		return super.findOne(cmqb.getQuery(), ChatSessionDoc.class);
 	}
@@ -356,7 +356,7 @@ public class SessionStore extends CommonMongoTemplateAbstract {
 		if (offsetOur == 0) {
 			cal.add(Calendar.HOUR, -1 * (int) TimeUtils.toHours(pmClientConfig.getChatSessionTimeout()));
 			CommonMongoQueryBuilder cmqb = new CommonMongoQueryBuilder()
-					.with(Criteria.where("active").is(true).and("lastInComingStamp").lt(cal.getTimeInMillis())
+					.where(Criteria.where("active").is(true).and("lastInComingStamp").lt(cal.getTimeInMillis())
 							.andOperator(new Criteria().orOperator(Criteria.where("resolved").exists(false),
 									Criteria.where("resolved").is(false))))
 					.set("expired", true).set("active", false).set("closeSessionStamp", System.currentTimeMillis());
@@ -499,11 +499,11 @@ public class SessionStore extends CommonMongoTemplateAbstract {
 
 	public ChatSessionDoc deleteSession(ChatSessionDoc chatSessionDoc) {
 		CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder()
-				.with(CommonMongoCriteria.whereId(chatSessionDoc.getSessionId()).and("channel").is("IMPORT"));
+				.where(QueryCriteria.whereId(chatSessionDoc.getSessionId()).and("channel").is("IMPORT"));
 		super.remove(builder.getQuery(), ChatSessionDoc.class);
 
 		CommonMongoQueryBuilder builder2 = new CommonMongoQueryBuilder()
-				.with(CommonMongoCriteria.where("sessionId").is(chatSessionDoc.getSessionId()));
+				.where(QueryCriteria.where("sessionId").is(chatSessionDoc.getSessionId()));
 		super.remove(builder2.getQuery(), MessageDoc.class,
 				MessageStore.getCollectionName(chatSessionDoc.getContactType()));
 		return chatSessionDoc;
@@ -668,7 +668,7 @@ public class SessionStore extends CommonMongoTemplateAbstract {
 	}
 
 	public String getLastAssignedAgent(Contactable contact) {
-		CommonMongoQueryBuilder cmqb = new CommonMongoQueryBuilder().with(Criteria.where("contactId")
+		CommonMongoQueryBuilder cmqb = new CommonMongoQueryBuilder().where(Criteria.where("contactId")
 				.is(contact.getContactId()).and("assignedToAgent").exists(true).and("mode").is(CHAT_MODE.AGENT));
 		cmqb.sortBy("startSessionStamp", Direction.DESC).limit(1).skipDBRef();
 		ChatSessionDoc lastSession = super.findOne(cmqb.getQuery(), ChatSessionDoc.class);
@@ -680,7 +680,7 @@ public class SessionStore extends CommonMongoTemplateAbstract {
 
 	public ChatSessionDoc getPreviousSession(Contactable contact) {
 		CommonMongoQueryBuilder cmqb = new CommonMongoQueryBuilder()
-				.with(Criteria.where("contactId").is(contact.getContactId()));
+				.where(Criteria.where("contactId").is(contact.getContactId()));
 		cmqb.sortBy("startSessionStamp", Direction.DESC).limit(1).skip(1).skipDBRef();
 		return super.findOne(cmqb.getQuery(), ChatSessionDoc.class);
 	}

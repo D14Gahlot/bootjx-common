@@ -25,7 +25,7 @@ public class ContakConstants extends Constants {
 					paramType = MockParamType.HEADER),
 			@ApiMockParam(name = DEVICE_TOKEN_XKEY, value = "Device Token", defaultValue = "xx*ssqwqwqxxxx",
 					paramType = MockParamType.HEADER) })
-	public @interface ApiDeviceHeaders {
+	public @interface ApiPhoneDeviceHeaders {
 
 	}
 }

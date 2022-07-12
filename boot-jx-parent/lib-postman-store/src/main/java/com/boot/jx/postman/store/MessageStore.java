@@ -351,7 +351,7 @@ public class MessageStore extends CommonMongoTemplateAbstract {
 			builder.where("messageIdRef", messageReport.getMessageIdRef());
 		} else if (ArgUtil.is(messageReport.contact().getCsid()) && messageReport.getWatermarkStamp() > 0L) {
 			String contactId = PostManUtil.CONTACT_ID(messageReport.contact());
-			builder.with(
+			builder.where(
 					// Main Condition
 					Criteria.where("contactId").is(contactId).and("stamps." + messageReport.getStatus().toString())
 							.exists(false).andOperator(
@@ -471,12 +471,12 @@ public class MessageStore extends CommonMongoTemplateAbstract {
 	public List<InboxMessage> releaseBySession(InboxMessage inboxMessageOriginal) {
 		String contactId = PostManUtil.CONTACT_ID(inboxMessageOriginal.contact());
 		CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder();
-		builder.with(Criteria.where("contactId").is(contactId).and("appType").is(appConfig.getAppType()));
+		builder.where(Criteria.where("contactId").is(contactId).and("appType").is(appConfig.getAppType()));
 		builder.set("sessionId", inboxMessageOriginal.getSessionId());
 		mongoTemplate.updateMulti(builder.getQuery(), builder.getUpdate(), MessageHold.class);
 
 		CommonMongoQueryBuilder builder2 = new CommonMongoQueryBuilder();
-		builder2.with(Criteria.where("contactId").is(contactId).and("sessionId").is(inboxMessageOriginal.getSessionId())
+		builder2.where(Criteria.where("contactId").is(contactId).and("sessionId").is(inboxMessageOriginal.getSessionId())
 				.and("appType").is(appConfig.getAppType())).sortBy("timestamp");;
 		List<MessageHold> docs = mongoTemplate.findAllAndRemove(builder2.getQuery(), MessageHold.class);
 		List<InboxMessage> x = docs.stream().map(d -> d.getInboxMessage()).collect(Collectors.toList());

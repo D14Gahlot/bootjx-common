@@ -1,4 +1,4 @@
-package com.boot.jx.phonebook.dto;
+package com.boot.jx.contak.dto;
 
 import java.io.Serializable;
 
@@ -13,7 +13,10 @@ public class PhoneLoginDTO implements Serializable {
 	public String phone;
 
 	@ApiMockModelProperty(example = "xxxxxxxx", required = false)
-	public String authToken;
+	public String deviceId;
+
+	@ApiMockModelProperty(example = "xxxxxxxx", required = false)
+	public String deviceToken;
 
 	@ApiMockModelProperty(example = "if not authToken", required = false)
 	public String otp;
@@ -28,7 +31,7 @@ public class PhoneLoginDTO implements Serializable {
 		public String phone;
 
 		@ApiMockModelProperty(example = "xxxxxxxx", required = false)
-		public String authToken;
+		public String deviceToken;
 
 		@ApiMockModelProperty(example = "xxxxxxxx", required = false)
 		public String otpPrefix;

@@ -34,7 +34,7 @@ public class ThirdPartyTemplateManager {
 	List<WA360Template> wabaTemplates = resp.keyEntry("waba_templates").asList(WA360Template.class);
 
 	CommonMongoQBimpl<HSMTemplate3rdParty> cmqb = CommonMongoQueryBuilder.collection(HSMTemplate3rdParty.class)
-		.with(Criteria.where("channelId").is(channelConfig.getChannelId())).set("template.status", "deleted");
+		.where(Criteria.where("channelId").is(channelConfig.getChannelId())).set("template.status", "deleted");
 
 	commonMongoTemplate.update(cmqb);
 
@@ -84,7 +84,7 @@ public class ThirdPartyTemplateManager {
 
     public List<HSMTemplate3rdParty> getTemplates(ChannelConfig channelConfig, String code) {
 	CommonMongoQBimpl<HSMTemplate3rdParty> q = CommonMongoQB.collection(HSMTemplate3rdParty.class)
-		.with(Criteria.where("channelId").is(channelConfig.getChannelId()));
+		.where(Criteria.where("channelId").is(channelConfig.getChannelId()));
 
 	if (ArgUtil.is(code)) {
 	    q.where("code", code);

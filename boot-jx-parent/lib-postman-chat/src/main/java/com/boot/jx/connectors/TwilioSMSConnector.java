@@ -16,10 +16,10 @@ import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.MessageBoxEvent;
 import com.boot.jx.postman.model.OutboxMessage;
+import com.boot.jx.postman.others.TwilioClient;
 import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.postman.plugin.TwilioSMSPlugin;
 import com.boot.jx.postman.plugin.TwilioSMSPlugin.TwilioConfigDetails;
-import com.boot.jx.postman.twilio.TwilioClient;
 import com.boot.model.MapModel;
 
 @Component
