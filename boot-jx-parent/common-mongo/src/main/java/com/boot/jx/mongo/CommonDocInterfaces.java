@@ -268,6 +268,7 @@ public class CommonDocInterfaces {
 	public static class TimeStampIndex implements Serializable, ITimeStampIndex {
 
 		private static final long serialVersionUID = 9114924334759684396L;
+		@Indexed
 		private long stamp;
 		@Indexed
 		private long hour;
