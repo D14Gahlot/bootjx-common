@@ -77,6 +77,14 @@ public class OTPUtils {
 			}
 		}
 
+		public boolean validate(String otp, String otpHash) {
+			try {
+				return this.getHash().equals(CryptoUtil.getSHA1Hash(otp)) && this.getHash().equals(otpHash);
+			} catch (NoSuchAlgorithmException e) {
+				return false;
+			}
+		}
+
 		public String getYin() {
 			return yin;
 		}

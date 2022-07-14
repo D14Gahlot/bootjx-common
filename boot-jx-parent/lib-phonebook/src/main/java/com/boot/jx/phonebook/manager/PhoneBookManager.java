@@ -40,13 +40,13 @@ public class PhoneBookManager {
 	public List<PhoneNOTPDoc> fetchMessages(PhoneUserDoc user) {
 		TimeStampIndex deliveredAt = TimeStampIndex.from(System.currentTimeMillis());
 		commonMongoTemplate.update(CommonMongoQueryBuilder.collection(PhoneNOTPDoc.class).where( // FIND
-				CommonMongoQueryBuilder.QueryCriteria.whereId(user.getPhoneId()).and("deliveredAt").exists(false)
+				CommonMongoQueryBuilder.QueryCriteria.where("phoneId").is(user.getPhoneId()).and("deliveredAt").exists(false)
 						.and("expiredAt.hour").gte(deliveredAt.getHour() - 1))
 				// Update
 				.set("deliveredAt", deliveredAt));
 
 		return commonMongoTemplate.find(CommonMongoQueryBuilder.collection(PhoneNOTPDoc.class).where( // FIND
-				CommonMongoQueryBuilder.QueryCriteria.whereId(user.getPhoneId()).and("deliveredAt.stamp")
+				CommonMongoQueryBuilder.QueryCriteria.where("phoneId").is(user.getPhoneId()).and("deliveredAt.stamp")
 						.is(deliveredAt.getStamp())));
 	}
 

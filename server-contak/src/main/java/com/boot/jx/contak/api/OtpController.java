@@ -84,9 +84,23 @@ public class OtpController {
 		}
 
 		if (!isLoggedIn()) {
-			return "app-otp";
+			return "app-contak-login";
 		}
 		return "swagger-uix";
+	}
+
+	@ApiOperation(value = "Demo Page", hidden = true)
+	@RequestMapping(value = { "/demo" }, method = { RequestMethod.GET, RequestMethod.POST })
+	public String notp(Model model) {
+
+		model.addAttribute("APP_NAME", appConfig.getAppName());
+		model.addAttribute("APP_CONTEXT", appConfig.getAppPrefix());
+		model.addAttribute("CDN_URL", appConfig.getAppPrefix());
+		if (ArgUtil.is(appCommonConfig)) {
+			model.addAllAttributes(appCommonConfig.appAttributes());
+		}
+
+		return "app-contak";
 	}
 
 }
