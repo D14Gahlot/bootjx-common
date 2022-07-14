@@ -18,10 +18,10 @@ public class PhoneLoginDTO implements Serializable {
 	@ApiMockModelProperty(example = "xxxxxxxx", required = false)
 	public String deviceToken;
 
-	@ApiMockModelProperty(example = "if not authToken", required = false)
+	@ApiMockModelProperty(example = "888888", required = false, value = "if not authToken")
 	public String otp;
 
-	@ApiMockModelProperty(example = "Send if OTP", required = false)
+	@ApiMockModelProperty(example = "xxxxxxxx", required = false, value = "Send if OTP")
 	public String otpNounce;
 
 	public static class PhoneLoginResponseDTO implements Serializable {
