@@ -1,14 +1,13 @@
 package com.boot.jx.postman.doc.config;
 
+import java.util.Map;
+
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.TypeAlias;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import com.boot.jx.postman.PMEnvironment.PMConfigurationObject;
-import com.boot.jx.postman.PMEnvironment.ProtectedProperty;
-import com.boot.jx.postman.PMEnvironment.PublicProperty;
 import com.boot.utils.ArgUtil;
-import com.fasterxml.jackson.annotation.JsonView;
 
 @Document(collection = "CONFIG_VARS")
 @TypeAlias("VarsConfigDoc")
@@ -54,14 +53,18 @@ public class VarsConfigDoc extends PMConfigurationObject {
 
 	}
 
-	public static interface ProtectValue {
-		@JsonView(ProtectedProperty.class)
-		public Object getValue();
-	}
-
 	@Document(collection = "CONFIG_TOKEN_KEYS")
 	@TypeAlias("CompanyTokenKey")
-	public static class CompanyTokenKeyDoc extends VarsConfigDoc implements ProtectValue {
+	public static class CompanyTokenKeyDoc extends VarsConfigDoc {
 		private static final long serialVersionUID = -4251710793999219993L;
+		private Map<String, Object> secret;
+
+		public Map<String, Object> getSecret() {
+			return secret;
+		}
+
+		public void setSecret(Map<String, Object> secret) {
+			this.secret = secret;
+		}
 	}
 }
