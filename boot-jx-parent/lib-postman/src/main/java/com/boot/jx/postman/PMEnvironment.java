@@ -242,6 +242,7 @@ public class PMEnvironment {
 		String domain;
 		String server;
 		boolean shared;
+		boolean disabled;
 
 		public PMConfigurationObject(String key, Object value) {
 			super(value);
@@ -290,6 +291,14 @@ public class PMEnvironment {
 
 		public void setServer(String server) {
 			this.server = server;
+		}
+
+		public boolean isDisabled() {
+			return disabled;
+		}
+
+		public void setDisabled(boolean disabled) {
+			this.disabled = disabled;
 		}
 
 	}
