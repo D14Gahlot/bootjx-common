@@ -296,7 +296,6 @@ public class AgentAnalyticsManager {
 				dto.setGraphApiDetailsV1(timeStampWiseCount);
 				
 			}
-			System.out.println(dtf.format(LocalDateTime.now())+"Return");
 		    return dto;
 	}
 	
