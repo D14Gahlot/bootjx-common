@@ -24,7 +24,7 @@ import com.boot.jx.chat.ChatSessionService;
 import com.boot.jx.common.doc.ImportChatSessionDoc;
 import com.boot.jx.common.store.ChatArchiveService;
 import com.boot.jx.dict.ContactType;
-import com.boot.jx.mongo.CommonMongoQB.CommonMongoCriteria;
+import com.boot.jx.mongo.CommonMongoQB.QueryCriteria;
 import com.boot.jx.postman.PMConstants.CHAT_STATUS;
 import com.boot.jx.postman.doc.BulkSessionDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
@@ -187,7 +187,7 @@ public class AdminMsgController {
 			throws NumberParseException {
 		if (ArgUtil.is(bulkSessionId)) {
 			return ApiResponse.buildResults(mongoTemplate
-					.find(new Query().addCriteria(CommonMongoCriteria.whereId(bulkSessionId)), BulkSessionDoc.class));
+					.find(new Query().addCriteria(QueryCriteria.whereId(bulkSessionId)), BulkSessionDoc.class));
 		}
 		return ApiResponse.buildResults(mongoTemplate
 				.find(new Query().with(new Sort(Sort.Direction.DESC, "createdStamp")), BulkSessionDoc.class));
@@ -200,7 +200,7 @@ public class AdminMsgController {
 				BulkSessionDoc.class);
 
 		BulkSessionDoc session = CollectionUtil.getOne(mongoTemplate
-				.find(new Query().addCriteria(CommonMongoCriteria.whereId(bulkSessionId)), BulkSessionDoc.class));
+				.find(new Query().addCriteria(QueryCriteria.whereId(bulkSessionId)), BulkSessionDoc.class));
 		resp.setMeta(session);
 
 		if (ArgUtil.is(session)) {

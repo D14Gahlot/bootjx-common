@@ -4,13 +4,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.mongo.CommonMongoTemplateAbstract;
 import com.boot.jx.postman.doc.PMConfigurationDoc;
 import com.boot.jx.postman.doc.config.ChannelConfigDoc;
 import com.boot.jx.postman.doc.config.ClientAppConfigDoc;
-import com.boot.jx.postman.doc.config.CompanyVarsConfigDoc;
 import com.boot.jx.postman.doc.config.PrefsConfigDoc;
+import com.boot.jx.postman.doc.config.VarsConfigDoc;
+import com.boot.jx.postman.doc.config.VarsConfigDoc.CompanyTokenKeyDoc;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.utils.ArgUtil;
 import com.mongodb.WriteResult;
@@ -81,10 +81,18 @@ public class ConfigStore extends CommonMongoTemplateAbstract {
 		return r;
 	}
 
-	public void saveCompanyVar(CompanyVarsConfigDoc companyVarsConfig) {
+	public void saveCompanyVar(VarsConfigDoc refreshableConfigDoc) {
 		try {
-			save(companyVarsConfig);
-			log(companyVarsConfig, "updated");
+
+			VarsConfigDoc companyVarOld = mongoTemplate.findById(refreshableConfigDoc.getId(),
+					refreshableConfigDoc.getClass());
+			if (ArgUtil.is(companyVarOld)) {
+				if (refreshableConfigDoc.getValue() == null) {
+					refreshableConfigDoc.setValue(companyVarOld.getValue());
+				}
+			}
+			save(refreshableConfigDoc);
+			log(refreshableConfigDoc, "updated");
 		} catch (Exception e) {
 			LOGGER.error("saveClientKeyConfig", e);
 		}

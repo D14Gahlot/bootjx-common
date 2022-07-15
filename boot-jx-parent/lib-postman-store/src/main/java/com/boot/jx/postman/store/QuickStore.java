@@ -56,7 +56,7 @@ public class QuickStore extends CommonMongoTemplateAbstract {
 	}
 
 	public <T extends QuickGalleryItem> List<T> findByCategory(String category, Class<T> clazz) {
-		return find(CommonMongoQueryBuilder.collection(clazz).with(Criteria.where("category").regex(category, "i")));
+		return find(CommonMongoQueryBuilder.collection(clazz).where(Criteria.where("category").regex(category, "i")));
 	}
 
 	public <T extends QuickGalleryItem> List<T> findGalleryItems(String codeIdOrTitle, Class<T> clazz) {
@@ -70,7 +70,7 @@ public class QuickStore extends CommonMongoTemplateAbstract {
 		orList.add(Criteria.where("title").regex(codeIdOrTitle, "i"));
 
 		return find(CommonMongoQueryBuilder.collection(clazz)
-				.with(new Criteria().orOperator(orList.toArray(new Criteria[orList.size()]))));
+				.where(new Criteria().orOperator(orList.toArray(new Criteria[orList.size()]))));
 	}
 
 	public <T extends QuickGalleryItem> T findByCode(String code, Class<T> clazz) {
@@ -84,7 +84,7 @@ public class QuickStore extends CommonMongoTemplateAbstract {
 
 		return findOne(
 				CommonMongoQueryBuilder.collection(clazz)
-						.with(new Criteria().orOperator(orList.toArray(new Criteria[orList.size()]))).getQuery(),
+						.where(new Criteria().orOperator(orList.toArray(new Criteria[orList.size()]))).getQuery(),
 				clazz);
 	}
 

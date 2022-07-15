@@ -69,8 +69,8 @@ public class DomainJobs {
 			for (ChannelConfigDoc emailChannel : emailChannels) {
 				if (!emailChannel.isDisabled()) {
 					if (ArgUtil.is(emailChannels) && emailChannels.size() > 0) {
-						LOGGER.debug("Found Config {} ---> {}", domainDoc.getDomain(), emailChannel.getChannelId());
-						inBoundPoller.throttle(new TunnelTask().name(InBoundPoller.TASK_EMAIL_POLLER)
+						LOGGER.info("Found Config {} ---> {}", domainDoc.getDomain(), emailChannel.getChannelId());
+						inBoundPoller.doTask(new TunnelTask().name(InBoundPoller.TASK_EMAIL_POLLER)
 								.id(domainDoc.getDomain() + "_" + emailChannel.getChannelId()).intervalSeconds(15)
 								.data(MapModel.createInstance().put("channelId", emailChannel.getChannelId())));
 					}

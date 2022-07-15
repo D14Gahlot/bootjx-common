@@ -27,8 +27,8 @@ import com.boot.jx.postman.PMEnvironment.PMConfigurationObject;
 import com.boot.jx.postman.doc.PMConfigurationDoc;
 import com.boot.jx.postman.doc.config.ChannelConfigDoc;
 import com.boot.jx.postman.doc.config.ClientAppConfigDoc;
-import com.boot.jx.postman.doc.config.CompanyVarsConfigDoc;
 import com.boot.jx.postman.doc.config.PrefsConfigDoc;
+import com.boot.jx.postman.doc.config.VarsConfigDoc;
 import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.postman.plugin.ChannelPluginProvider;
 import com.boot.jx.postman.plugin.ChannelPluginProvider.ChannelPlugin;
@@ -204,13 +204,13 @@ public class ConfigManager {
 		return clientApiKey;
 	}
 
-	public CompanyVarsConfigDoc save(CompanyVarsConfigDoc companyVarsConfig) {
+	public <T extends VarsConfigDoc> T save(T companyVarsConfig) {
 		configStore.saveCompanyVar(companyVarsConfig);
 		this.refresh();
 		return companyVarsConfig;
 	}
 
-	public CompanyVarsConfigDoc remove(CompanyVarsConfigDoc companyVarsConfig) {
+	public <T extends VarsConfigDoc> T remove(T companyVarsConfig) {
 		configStore.remove(companyVarsConfig);
 		this.refresh();
 		return companyVarsConfig;

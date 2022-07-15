@@ -7,8 +7,8 @@ import org.springframework.stereotype.Component;
 @Component
 public class OtpService {
 
-    @Autowired
-    MongoTemplate mongoTemplate;
+	@Autowired
+	MongoTemplate mongoTemplate;
 
 
 }

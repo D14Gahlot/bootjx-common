@@ -7,7 +7,6 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import com.boot.jx.postman.pbook.PBName;
 import com.boot.jx.postman.pbook.PBPhone;
-import com.boot.jx.swagger.ApiMockModelProperty;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -16,49 +15,23 @@ public class PhoneUserDoc implements Serializable {
 	private static final long serialVersionUID = 1281605084248923642L;
 
 	@Id
-	private String mobile;
+	public String phoneId;
 
 	public PBName name;
 
 	public PBPhone phone;
+	public String deviceId;
 
-	@ApiMockModelProperty(example = "xxxxxxxx", required = false)
 	public String authToken;
+	public String otpHash;
+	public String otpNounce;
 
-	public Boolean positive;
-
-	public boolean syncRequired;
-
-	public String getAuthToken() {
-		return authToken;
+	public String getPhoneId() {
+		return phoneId;
 	}
 
-	public void setAuthToken(String authToken) {
-		this.authToken = authToken;
-	}
-
-	public Boolean getPositive() {
-		return positive;
-	}
-
-	public void setPositive(Boolean positive) {
-		this.positive = positive;
-	}
-
-	public boolean isSyncRequired() {
-		return syncRequired;
-	}
-
-	public void setSyncRequired(boolean syncRequired) {
-		this.syncRequired = syncRequired;
-	}
-
-	public String getMobile() {
-		return mobile;
-	}
-
-	public void setMobile(String mobile) {
-		this.mobile = mobile;
+	public void setPhoneId(String phoneId) {
+		this.phoneId = phoneId;
 	}
 
 	public PBName getName() {
@@ -69,4 +42,43 @@ public class PhoneUserDoc implements Serializable {
 		this.name = name;
 	}
 
+	public PBPhone getPhone() {
+		return phone;
+	}
+
+	public void setPhone(PBPhone phone) {
+		this.phone = phone;
+	}
+
+	public String getDeviceId() {
+		return deviceId;
+	}
+
+	public void setDeviceId(String deviceId) {
+		this.deviceId = deviceId;
+	}
+
+	public String getAuthToken() {
+		return authToken;
+	}
+
+	public void setAuthToken(String authToken) {
+		this.authToken = authToken;
+	}
+
+	public String getOtpHash() {
+		return otpHash;
+	}
+
+	public void setOtpHash(String otpHash) {
+		this.otpHash = otpHash;
+	}
+
+	public String getOtpNounce() {
+		return otpNounce;
+	}
+
+	public void setOtpNounce(String otpNounce) {
+		this.otpNounce = otpNounce;
+	}
 }

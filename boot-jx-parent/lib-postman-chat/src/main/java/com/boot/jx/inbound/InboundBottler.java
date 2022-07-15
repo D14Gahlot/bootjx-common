@@ -90,7 +90,7 @@ public class InboundBottler extends ATaskLimiter {
 
 	private void dequeue(String contactId) {
 		CommonMongoQueryBuilder builder2 = new CommonMongoQueryBuilder();
-		builder2.with(Criteria.where("contactId").is(contactId).and("appType").is(appConfig.getAppType()))
+		builder2.where(Criteria.where("contactId").is(contactId).and("appType").is(appConfig.getAppType()))
 				.sortBy("timestamp", Direction.ASC).limit(1);
 		MessageHold docs = CollectionUtil.first(
 				messageStore.findAllAndRemove(builder2.getQuery(), MessageHold.class, MessageHold.COLLECTION_QUEUED));

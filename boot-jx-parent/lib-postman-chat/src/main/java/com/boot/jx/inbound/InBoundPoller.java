@@ -31,7 +31,6 @@ import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.tunnel.ITunnelDefs.TunnelTask;
 import com.boot.jx.tunnel.task.ATaskLimiter;
 import com.boot.utils.ArgUtil;
-import com.boot.utils.CloseUtil;
 
 @EnableScheduling
 @Component
@@ -142,12 +141,12 @@ public class InBoundPoller extends ATaskLimiter {
 				// close the store and folder objects
 				closeAll(folder, store);
 			} catch (MessagingException e2) {
-				LOGGER.error("For Channel {} {} {}", channel.getEmail().getPop3Host(), channel.getEmail().getPop3Port(),
-						channel.getEmail().getPop3User());
+				LOGGER.error("For Channel {} {} {} {}", channel.getEmail().getPop3Host(), channel.getEmail().getPop3Port(),
+						channel.getEmail().getPop3User(),channel.getEmail().getPop3Pass());
 				LOGGER.error("Eexception==e2", e2);
 			} catch (Exception e3) {
-				LOGGER.error("For Channel {} {} {}", channel.getEmail().getPop3Host(), channel.getEmail().getPop3Port(),
-						channel.getEmail().getPop3User());
+				LOGGER.error("For Channel {} {} {} {}", channel.getEmail().getPop3Host(), channel.getEmail().getPop3Port(),
+						channel.getEmail().getPop3User(),channel.getEmail().getPop3Pass());
 				LOGGER.error("Eexception==e3", e3);
 			} finally {
 				closeAll(folder, store);

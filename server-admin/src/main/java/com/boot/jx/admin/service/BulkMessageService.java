@@ -18,7 +18,7 @@ import com.boot.jx.common.config.ConfigConstants;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.logger.AuditDetailProvider;
 import com.boot.jx.mongo.CommonMongoQueryBuilder;
-import com.boot.jx.mongo.CommonMongoQB.CommonMongoCriteria;
+import com.boot.jx.mongo.CommonMongoQB.QueryCriteria;
 import com.boot.jx.postman.ClientApp;
 import com.boot.jx.postman.PMConstants;
 import com.boot.jx.postman.PMConstants.MESSAGE_SENDER_TYPE;
@@ -140,7 +140,7 @@ public class BulkMessageService extends BatchJobExecuter {
 		CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder();
 
 		Query query = new Query().addCriteria(
-				CommonMongoCriteria.where("bulkSessionId").is(oldJob.getJobId()).and("stamps.SENT").exists(false));
+				QueryCriteria.where("bulkSessionId").is(oldJob.getJobId()).and("stamps.SENT").exists(false));
 		builder.set("status", Status.SCHLD.toString());
 
 		messageStore.updateMulti(query, builder.update(), MessageStore.getCollectionName(session.getContactType()));
@@ -159,7 +159,7 @@ public class BulkMessageService extends BatchJobExecuter {
 	@Override
 	public boolean read(BatchJob currentBatchJob) {
 		BulkSessionDoc doc = mongoTemplate.findById(currentBatchJob.getJobId(), BulkSessionDoc.class);
-		Query query = new Query().addCriteria(CommonMongoCriteria.where("bulkSessionId").is(currentBatchJob.getJobId())
+		Query query = new Query().addCriteria(QueryCriteria.where("bulkSessionId").is(currentBatchJob.getJobId())
 				.and("status").is(Status.SCHLD.toString())).limit(10);
 
 		ContactType contactType = doc.contactType();

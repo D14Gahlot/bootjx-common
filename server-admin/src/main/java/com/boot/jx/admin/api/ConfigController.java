@@ -18,7 +18,9 @@ import com.boot.jx.postman.ClientApp;
 import com.boot.jx.postman.PMConstants.CHANNEL_TYPE_ENUM;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.doc.config.ClientAppConfigDoc;
-import com.boot.jx.postman.doc.config.CompanyVarsConfigDoc;
+import com.boot.jx.postman.doc.config.VarsConfigDoc;
+import com.boot.jx.postman.doc.config.VarsConfigDoc.CompanyTokenKeyDoc;
+import com.boot.jx.postman.doc.config.VarsConfigDoc.CompanyVarsConfigDoc;
 import com.boot.jx.postman.plugin.ChannelConfig;
 import com.fasterxml.jackson.annotation.JsonView;
 
@@ -122,6 +124,33 @@ public class ConfigController {
 	@RequestMapping(value = { "/api/config/companyvar" }, method = { RequestMethod.DELETE })
 	public ApiResponse<CompanyVarsConfigDoc, Object> removeCompanyVars(@RequestParam String id) {
 		CompanyVarsConfigDoc companyVar = new CompanyVarsConfigDoc();
+		companyVar.setId(id);
+		return ApiResponse.buildResults(configManager.remove(companyVar));
+	}
+
+	/***************************
+	 * CompanyTokenKeys
+	 ***************************/
+
+	@JsonView(PMEnvironment.PublicProperty.class)
+	@ResponseBody
+	@RequestMapping(value = { "/api/config/tokenkey" }, method = { RequestMethod.GET })
+	public ApiResponse<CompanyTokenKeyDoc, Object> getCompanyTokenKeys() {
+		return ApiResponse.buildResults(mongoTemplate.findAll(CompanyTokenKeyDoc.class));
+	}
+
+	@JsonView(PMEnvironment.PublicProperty.class)
+	@ResponseBody
+	@RequestMapping(value = { "/api/config/tokenkey" }, method = { RequestMethod.POST })
+	public ApiResponse<CompanyTokenKeyDoc, Object> updateCompanyTokenKeys(@RequestBody CompanyTokenKeyDoc companyVar) {
+		return ApiResponse.buildData(configManager.save(companyVar));
+	}
+
+	@JsonView(PMEnvironment.PublicProperty.class)
+	@ResponseBody
+	@RequestMapping(value = { "/api/config/tokenkey" }, method = { RequestMethod.DELETE })
+	public ApiResponse<CompanyTokenKeyDoc, Object> removeCompanyTokenKeys(@RequestParam String id) {
+		CompanyTokenKeyDoc companyVar = new CompanyTokenKeyDoc();
 		companyVar.setId(id);
 		return ApiResponse.buildResults(configManager.remove(companyVar));
 	}

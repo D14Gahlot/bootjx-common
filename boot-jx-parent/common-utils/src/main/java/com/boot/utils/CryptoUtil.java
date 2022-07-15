@@ -615,7 +615,6 @@ public final class CryptoUtil {
 
 	public static class Encoder {
 		private String output;
-		private String hash;
 		private CrypToken token;
 
 		public Encoder message(String message) {
@@ -693,9 +692,18 @@ public final class CryptoUtil {
 			return this;
 		}
 
+		public Encoder sha1() {
+			try {
+				this.output = CryptoUtil.getSHA1Hash(this.output);
+			} catch (NoSuchAlgorithmException e) {
+				e.printStackTrace();
+			}
+			return this;
+		}
+
 		public Encoder sha2() {
 			try {
-				this.hash = CryptoUtil.getSHA2Hash(this.output);
+				this.output = CryptoUtil.getSHA2Hash(this.output);
 			} catch (NoSuchAlgorithmException e) {
 				e.printStackTrace();
 			}
@@ -704,7 +712,7 @@ public final class CryptoUtil {
 
 		public Encoder md5() {
 			try {
-				this.hash = CryptoUtil.getMD5Hash(this.output);
+				this.output = CryptoUtil.getMD5Hash(this.output);
 			} catch (NoSuchAlgorithmException e) {
 				e.printStackTrace();
 			}
@@ -724,7 +732,11 @@ public final class CryptoUtil {
 		}
 
 		public String hash() {
-			return this.hash;
+			return this.output;
+		}
+
+		public boolean is(String compaeTo) {
+			return ArgUtil.is(this.output, compaeTo);
 		}
 
 	}
