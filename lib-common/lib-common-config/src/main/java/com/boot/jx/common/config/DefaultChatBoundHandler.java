@@ -245,7 +245,7 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 			msg.text.setBody(inboxMessage.getMessage());
 		}
 
-		InBoundWrapper wrap = new InBoundWrapper();
+		InBoundWrapper wrap = new InBoundWrapper().type("messages");
 		wrap.meta = new InBoundMeta().domain(AppContextUtil.getTenant())
 				.server(pmEnvironment.keyEntry(ConfigConstants.APP_KEY.PROP_SERVICE_SERVER).asString())
 				.appId(clientAppId)
@@ -274,7 +274,7 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 						status.status = messageReport.getStatus();
 						status.errors = messageReport.getErrors();
 
-						InBoundWrapper wrap = new InBoundWrapper();
+						InBoundWrapper wrap = new InBoundWrapper().type("statuses");
 						wrap.meta = new InBoundMeta().domain(AppContextUtil.getTenant())
 								.server(pmEnvironment.keyEntry(ConfigConstants.APP_KEY.PROP_SERVICE_SERVER).asString())
 								.appId(defaultClient.getId());
@@ -397,7 +397,7 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 			if (ArgUtil.is(webhookUrl)) {
 				InBoundContact contact = InBoundContact.from(event.contact());
 
-				InBoundWrapper wrap = new InBoundWrapper();
+				InBoundWrapper wrap = new InBoundWrapper().type("events");
 				wrap.meta = new InBoundMeta().domain(AppContextUtil.getTenant())
 						.server(pmEnvironment.keyEntry(ConfigConstants.APP_KEY.PROP_SERVICE_SERVER).asString())
 						.appId(defaultClient.getId()).debug(pmEnvironment

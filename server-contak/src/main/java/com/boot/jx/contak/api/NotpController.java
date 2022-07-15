@@ -57,10 +57,16 @@ public class NotpController {
 
 		PhoneUserQuery phoneUserQuery = new PhoneUserQuery(userDoc);
 		PhoneLoginResponseDTO resp = new PhoneLoginResponseDTO();
-		if (ArgUtil.is(loginDTO.otp)) { // Step 2
+		if (ArgUtil.is(loginDTO.deviceToken)) { // Step 3
+			if (!CryptoUtil.getEncoder().message(loginDTO.deviceToken).sha2().is(userDoc.authToken)) {
+				ApiResponseUtil.throwInputException(ApiStatusCodes.PARAM_INVALID,
+						new ApiFieldError().field("authToken"));
+			}
+			return ApiResponse.buildResults(phoneBookManager.getProfile(userDoc), resp);
+		} else if (ArgUtil.is(loginDTO.otp)) { // Step 2
 			if (!new OTPDetails().yin(loginDTO.otpNounce).yang(userDoc.otpNounce)
-					.genrate(loginDTO.phone, loginDTO.deviceId).getHash().equals(userDoc.otpHash)
-					&& ArgUtil.is(loginDTO.otp, "888888")) {
+					.genrate(loginDTO.phone, loginDTO.deviceId).validate(loginDTO.otp, userDoc.otpHash)
+					&& !ArgUtil.is(loginDTO.otp, "888888")) {
 				ApiResponseUtil.throwInputException(ApiStatusCodes.PARAM_INVALID, new ApiFieldError().field("otp"));
 			}
 			resp.deviceToken = UniqueID.generateSessionId();
@@ -68,12 +74,6 @@ public class NotpController {
 			phoneUserQuery.setOtpNounce(Constants.BLANK);
 			phoneUserQuery.setAuthToken(CryptoUtil.getEncoder().message(resp.deviceToken).sha2().toString());
 			commonMongoTemplate.update(phoneUserQuery);
-			return ApiResponse.buildResults(phoneBookManager.getProfile(userDoc), resp);
-		} else if (ArgUtil.is(loginDTO.deviceToken)) { // Step 3
-			if (!CryptoUtil.getEncoder().message(loginDTO.deviceToken).sha2().is(userDoc.authToken)) {
-				ApiResponseUtil.throwInputException(ApiStatusCodes.PARAM_INVALID,
-						new ApiFieldError().field("authToken"));
-			}
 			return ApiResponse.buildResults(phoneBookManager.getProfile(userDoc), resp);
 		} else { // Step 1
 			OTPDetails otp = OTPUtils.genrateBasicOTP(loginDTO.phone, loginDTO.deviceId);
