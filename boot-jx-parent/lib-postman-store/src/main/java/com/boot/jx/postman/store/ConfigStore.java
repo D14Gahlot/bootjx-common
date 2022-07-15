@@ -90,7 +90,15 @@ public class ConfigStore extends CommonMongoTemplateAbstract {
 				if (refreshableConfigDoc.getValue() == null) {
 					refreshableConfigDoc.setValue(companyVarOld.getValue());
 				}
+
+				if (refreshableConfigDoc instanceof CompanyTokenKeyDoc) {
+					CompanyTokenKeyDoc companyTokenKeyDoc = (CompanyTokenKeyDoc) refreshableConfigDoc;
+					CompanyTokenKeyDoc companyTokenKeyDocOld = (CompanyTokenKeyDoc) companyVarOld;
+					companyTokenKeyDocOld.secret().putAll(companyTokenKeyDoc.secret());
+					companyTokenKeyDoc.secret().putAll(companyTokenKeyDocOld.secret());
+				}
 			}
+
 			save(refreshableConfigDoc);
 			log(refreshableConfigDoc, "updated");
 		} catch (Exception e) {

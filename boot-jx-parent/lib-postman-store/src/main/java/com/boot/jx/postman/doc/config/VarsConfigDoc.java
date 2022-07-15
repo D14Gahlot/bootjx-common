@@ -1,5 +1,6 @@
 package com.boot.jx.postman.doc.config;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.data.annotation.Id;
@@ -65,6 +66,13 @@ public class VarsConfigDoc extends PMConfigurationObject {
 
 		public void setSecret(Map<String, Object> secret) {
 			this.secret = secret;
+		}
+
+		public Map<String, Object> secret() {
+			if (this.secret == null) {
+				this.secret = new HashMap<String, Object>();
+			}
+			return secret;
 		}
 	}
 }
