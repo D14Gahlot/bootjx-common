@@ -318,7 +318,7 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 		stompTunnelService.sendToTag(inboxMessage.session().getDept(), "/message/receive/new", messageDto);
 		stompTunnelService.sendTo(StompQuery.toAll("/chat/session/delta").toSameOriginApp(), MapModel.createInstance()
 				.put("sessionId", messageDoc.getSessionId()).put("event", "new_message").toMap());
-		if (inboxMessage.toReplyEnum().equalsIgnoreCase("/exit_chat")) {
+		if ("/exit_chat".equalsIgnoreCase(inboxMessage.toReplyEnum())) {
 			ChatSessionDoc chatSessionDoc = sessionStore.getSession(inboxMessage.getSessionId());
 			exitAgentMode(chatSessionDoc, null);
 			logManager.event(inboxMessage, MessageStore.EVENTS.UNASGND);
