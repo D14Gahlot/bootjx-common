@@ -25,7 +25,7 @@ public class ChatCommands {
 			return strMapping.getOrDefault(outboxMessage.getAction(), outboxMessage.getAction());
 		} else if (ArgUtil.is(outboxMessage.getMessage())) {
 			return strMapping.get(outboxMessage.getMessage());
-		}
+		} 
 		return null;
 	}
 

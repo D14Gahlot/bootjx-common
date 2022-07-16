@@ -12,6 +12,7 @@ import com.boot.jx.postman.model.MessageDefinitions.Contactable;
 import com.boot.jx.postman.model.MessageDefinitions.IMessageExtended;
 import com.boot.jx.postman.model.MessageDefinitions.LogMessage;
 import com.boot.jx.postman.pbook.PBVCard;
+import com.boot.utils.ArgUtil;
 import com.boot.utils.StringUtils.StringMatcher;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -20,6 +21,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 public class InboxMessage implements Serializable, IMessageExtended, LogMessage {
 
 	private static final long serialVersionUID = -4488174520614920589L;
+	public static final String REPLY_ID = "reply_id";
 
 	private String messageId;
 	private String messageIdExt;
@@ -414,5 +416,13 @@ public class InboxMessage implements Serializable, IMessageExtended, LogMessage 
 			this.vccards = new ArrayList<PBVCard>();
 		}
 		return this.vccards;
+	}
+
+	public String toReplyEnum() {
+		String codeValue = this.form().get(REPLY_ID) == null ? this.getMessage() : this.form().get(REPLY_ID).toString();
+		if (ArgUtil.is(codeValue)) {
+			codeValue = codeValue.toLowerCase().trim();
+		}
+		return codeValue;
 	}
 }

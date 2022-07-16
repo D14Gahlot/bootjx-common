@@ -23,7 +23,7 @@ import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PMEnvironment.AChannelConfig;
 import com.boot.jx.postman.doc.HSMTemplateDoc;
 import com.boot.jx.postman.doc.config.ClientAppConfigDoc;
-import com.boot.jx.postman.doc.config.CompanyVarsConfigDoc;
+import com.boot.jx.postman.doc.config.VarsConfigDoc.CompanyVarsConfigDoc;
 import com.boot.jx.postman.model.ext.MsgChannel;
 import com.boot.jx.postman.store.ConfigStore;
 import com.boot.jx.xms.XmsConstants.XMSClientAuth;
