@@ -188,8 +188,11 @@ public class ConfigOptionMetaController {
 			@RequestParam(required = false, defaultValue = "false") boolean beta) {
 
 		String domainServer = pmEnvironment.keyEntry(ConfigConstants.APP_KEY.PROP_SERVICE_SERVER).asString();
+		String key = beta ? "mry.cdn.url.beta" : "mry.cdn.url";
 
-		PMConfigurationObject config = pmEnvironment.keyEntry(beta ? "mry.cdn.url.beta" : "mry.cdn.url");
+		PMConfigurationObject config = pmEnvironment.keyEntry(key);
+		config.setKey(key);
+		
 		String oldUrl = config.asString();
 		config.setServer(domainServer);
 
