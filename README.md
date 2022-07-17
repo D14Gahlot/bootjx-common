@@ -39,18 +39,26 @@ java -jar server-xms/target/server-xms-0.0.1-SNAPSHOT.jar
 ```
 
 
+### CONTAK
+```
+mvn package -pl server-contak -am -DskipTests
+// 
+java -jar server-contak/target/server-contak-0.0.1-SNAPSHOT.jar
+```
+
+
 ## URL mapping
 
 ### API
 * https://api.cherrybase.com/postman => 127.0.0.1:8082/postman
-* https://api.cherrybase.com/agent => 127.0.0.1:8083/agent
 * https://api.cherrybase.com/bot => 127.0.0.1:8084/bot
-* https://api.cherrybase.com/xms => 127.0.0.1:8084/xms
 
 ### SERVER
+* https://app.cherrybase.com/account => 127.0.0.1:8083/agent
 * https://app.cherrybase.com/agent => 127.0.0.1:8083/agent
 * https://app.cherrybase.com/admin => 127.0.0.1:8081/admin
 * https://app.cherrybase.com/xms => 127.0.0.1:8081/xms
+* https://app.cherrybase.com/contak => 127.0.0.1:8087/contak
 
 ### GUIDE
 [Application Properties](docs/application.properties.md)
