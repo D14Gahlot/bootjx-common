@@ -2,20 +2,26 @@ package com.boot.utils;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.regex.Pattern;
 
 /**
  * The Class Urly.
  */
 public class Urly {
 
+	private static final Pattern IP_PATTERN = Pattern
+			.compile("^(([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.){3}([01]?\\d\\d?|2[0-4]\\d|25[0-5])$");
+
+	public static boolean isIPAddress(final String ip) {
+		return IP_PATTERN.matcher(ip).matches();
+	}
+
 	/**
 	 * Gets the domain name.
 	 *
-	 * @param url
-	 *            the url
+	 * @param url the url
 	 * @return the domain name
-	 * @throws MalformedURLException
-	 *             the malformed URL exception
+	 * @throws MalformedURLException the malformed URL exception
 	 */
 	public static String getDomainName(String url) throws MalformedURLException {
 		if (!url.startsWith("http") && !url.startsWith("https")) {
@@ -32,11 +38,9 @@ public class Urly {
 	/**
 	 * Gets the sub domain name.
 	 *
-	 * @param url
-	 *            the url
+	 * @param url the url
 	 * @return the sub domain name
-	 * @throws MalformedURLException
-	 *             the malformed URL exception
+	 * @throws MalformedURLException the malformed URL exception
 	 */
 	public static String getSubDomainName(String url) throws MalformedURLException {
 		String[] names = url.split("\\.");
@@ -59,25 +63,11 @@ public class Urly {
 	/**
 	 * Parses the.
 	 *
-	 * @param urlString
-	 *            the url string
+	 * @param urlString the url string
 	 * @return the URL builder
-	 * @throws MalformedURLException
-	 *             the malformed URL exception
+	 * @throws MalformedURLException the malformed URL exception
 	 */
 	public static URLBuilder parse(String urlString) throws MalformedURLException {
-		URL url;
-		URLBuilder builder;
-		if (urlString.startsWith("/")) {
-			url = new URL("https://localhost/" + urlString);
-			builder = new URLBuilder();
-		} else {
-			url = new URL(urlString);
-			builder = new URLBuilder(url.getAuthority());
-			builder.setConnectionType(url.getProtocol());
-		}
-		builder.setPath(url.getPath());
-		builder.addParameter(url.getQuery());
-		return builder;
+		return URLBuilder.parse(urlString);
 	}
 }

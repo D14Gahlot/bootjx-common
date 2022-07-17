@@ -80,14 +80,18 @@ public class ChatUserProfileDTO implements Serializable {
 		@ApiMockModelProperty(example = "CUSTOMER_TYPE", value = "Unique LabelType")
 		String key;
 
-		@ApiMockModelProperty(example = "Customer Type", value = "Display LabelType, Labels with same name will be grouped together,"
-				+ " if not provided key will be used instead", required = false)
+		@ApiMockModelProperty(example = "Customer Type",
+				value = "Display LabelType, Labels with same name will be grouped together,"
+						+ " if not provided key will be used instead",
+				required = false)
 		String name;
 
-		@ApiMockModelProperty(example = "TEXT", value = "Type of Label", allowableValues = "TEXT,DATE,NUMBER,LIST", required = false)
+		@ApiMockModelProperty(example = "TEXT", value = "Type of Label", allowableValues = "TEXT,DATE,NUMBER,LIST",
+				required = false)
 		String type;
 
-		@ApiMockModelProperty(example = "MM/DD/YY", value = "Data Format", allowableValues = "MM/DD/YY", required = false)
+		@ApiMockModelProperty(example = "MM/DD/YY", value = "Data Format", allowableValues = "MM/DD/YY",
+				required = false)
 		String format;
 
 		@ApiMockModelProperty(example = "Platinum", value = "Value of Label Value")

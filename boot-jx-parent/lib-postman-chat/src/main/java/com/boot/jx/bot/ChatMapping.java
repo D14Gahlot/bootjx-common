@@ -38,4 +38,6 @@ public @interface ChatMapping {
 	int priority() default 0;
 
 	String next() default Constants.BLANK;
+
+	boolean onSessionRoute() default false;
 }

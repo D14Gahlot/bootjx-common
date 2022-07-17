@@ -6,6 +6,7 @@ import java.util.Map;
 
 import org.redisson.Redisson;
 import org.redisson.api.RedissonClient;
+import org.redisson.config.ClusterServersConfig;
 import org.redisson.config.Config;
 import org.redisson.config.SentinelServersConfig;
 import org.redisson.config.SingleServerConfig;
@@ -17,6 +18,7 @@ import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration;
 import org.springframework.boot.autoconfigure.data.redis.RedisProperties;
+import org.springframework.boot.autoconfigure.data.redis.RedisProperties.Cluster;
 import org.springframework.cache.CacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -26,6 +28,7 @@ import com.boot.jx.def.CacheForTenantKey;
 import com.boot.jx.def.CacheForThisKey;
 import com.boot.jx.def.CacheForUserKey;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.CollectionUtil;
 import com.boot.utils.JsonUtil;
 
 @Configuration
@@ -74,6 +77,12 @@ public class CacheRedisConfiguration
 			if (redisProperties.getPassword() != null) {
 				sentinelServersConfig.setPassword(redisProperties.getPassword());
 			}
+		} else if (redisProperties.getCluster() != null) {
+			ClusterServersConfig singleServerConfig = config.useClusterServers();
+			Cluster cluster = redisProperties.getCluster();
+			singleServerConfig.setScanInterval(2000) // cluster state scan interval in milliseconds
+					// use "rediss://" for SSL connection
+					.addNodeAddress(CollectionUtil.asArray(cluster.getNodes()));
 		} else { // single server
 			SingleServerConfig singleServerConfig = config.useSingleServer();
 			// format as redis://127.0.0.1:7181 or rediss://127.0.0.1:7181 for SSL

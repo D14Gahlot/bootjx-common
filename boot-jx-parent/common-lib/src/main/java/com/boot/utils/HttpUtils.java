@@ -54,6 +54,9 @@ public final class HttpUtils {
 
     public static String getSubDomain(HttpServletRequest request) {
 	try {
+	    if (Urly.isIPAddress(request.getServerName())) {
+		return null;
+	    }
 	    return Urly.getSubDomainName(request.getServerName());
 	} catch (MalformedURLException e) {
 	    return null;

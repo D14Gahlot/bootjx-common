@@ -7,18 +7,24 @@ import org.springframework.stereotype.Component;
 
 import com.boot.jx.logger.AuditDetailProvider;
 import com.boot.jx.postman.PMConstants.DEFAULT;
+import com.boot.jx.rest.AppRequestInterfaces.AppAuthUser;
 
 @Component
 public class PostManSessionBean implements AuditDetailProvider, Serializable {
 
-    private static final long serialVersionUID = 26049494178384497L;
+	private static final long serialVersionUID = 26049494178384497L;
 
-    @Autowired
-    private PMEnvironment environment;
+	@Autowired
+	private PMEnvironment environment;
 
-    @Override
-    public String getAuditUser() {
-	return DEFAULT.SYSTEM;
-    }
+	@Override
+	public String getAuditUser() {
+		return DEFAULT.SYSTEM;
+	}
+
+	@Override
+	public AppAuthUser getAuthUser() {
+		return null;
+	}
 
 }

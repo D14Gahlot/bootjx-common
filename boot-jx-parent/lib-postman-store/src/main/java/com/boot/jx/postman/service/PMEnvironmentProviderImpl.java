@@ -6,18 +6,21 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.boot.jx.AppConfigPackage.AppSharedConfig;
 import com.boot.jx.AppContextUtil;
+import com.boot.jx.http.CommonHttpRequest.ApiRequestDetail;
+import com.boot.jx.mongo.CommonMongoSource;
 import com.boot.jx.postman.PMConfiguration.PMConfigurationModel;
 import com.boot.jx.postman.PMEnvironment.PMConfigurationObject;
 import com.boot.jx.postman.PMEnvironment.PMEnvironmentProvider;
 import com.boot.jx.postman.doc.PMConfigurationDoc;
 import com.boot.jx.postman.doc.config.ChannelConfigDoc;
-import com.boot.jx.postman.doc.config.ClientKeyConfigDoc;
-import com.boot.jx.postman.doc.config.CompanyVarsConfigDoc;
+import com.boot.jx.postman.doc.config.ClientAppConfigDoc;
 import com.boot.jx.postman.doc.config.PrefsConfigDoc;
+import com.boot.jx.postman.doc.config.VarsConfigDoc.CompanyVarsConfigDoc;
 import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.postman.store.ConfigStore;
 import com.boot.jx.scope.tnt.Tenants;
@@ -30,149 +33,159 @@ import com.boot.utils.UniqueID;
 @Component
 public class PMEnvironmentProviderImpl implements PMEnvironmentProvider, AppSharedConfig {
 
-    private Map<String, PMConfigurationDoc> localConfigMap = new HashMap<String, PMConfigurationDoc>();
+	private Map<String, PMConfigurationDoc> localConfigMap = new HashMap<String, PMConfigurationDoc>();
 
-    PMConfigurationDoc sharedConfiguration = null;
+	PMConfigurationDoc sharedConfiguration = null;
 
-    @Autowired(required = false)
-    private ConfigStore configStore;
+	@Autowired(required = false)
+	private ConfigStore configStore;
 
-    @Override
-    public PMConfigurationModel local() {
-	String tnt = AppContextUtil.getTenant();
-	if (localConfigMap.containsKey(tnt)) {
-	    return localConfigMap.get(tnt);
+	@Value("${mry.prop.service.server}")
+	private String serviceServer;
+
+	private boolean hasRule(String useNoDb) {
+		ApiRequestDetail apiDetails = AppContextUtil.getApiRequestDetail();
+		return ArgUtil.is(apiDetails) && apiDetails.hasRule(useNoDb);
 	}
 
-	if (ArgUtil.is(configStore)) {
-	    PMConfigurationDoc prefs = getPMConfigurationDoc();
+	@Override
+	public PMConfigurationModel local() {
+		String tnt = AppContextUtil.getTenant();
 
-	    List<PrefsConfigDoc> prefsConfigs = configStore.findAll(PrefsConfigDoc.class);
-	    for (PrefsConfigDoc prefsConfig : prefsConfigs) {
-		prefs.setPref(prefsConfig);
-	    }
+		String mappedTo = hasRule(CommonMongoSource.USE_NO_DB) ? "nodb" : tnt;
 
-	    List<ChannelConfigDoc> channels = configStore.findAll(ChannelConfigDoc.class);
-	    for (ChannelConfigDoc channel : channels) {
-		channel.setDomain(tnt);
-		prefs.channels(channel);
-	    }
-
-	    List<ClientKeyConfigDoc> clientKeys = configStore.findAll(ClientKeyConfigDoc.class);
-	    for (ClientKeyConfigDoc clientKey : clientKeys) {
-		prefs.clientApiKey(clientKey);
-	    }
-
-	    List<CompanyVarsConfigDoc> companyVars = configStore.findAll(CompanyVarsConfigDoc.class);
-
-	    SafeKeyHashMap<Object> company = prefs.globalVars();
-
-	    for (CompanyVarsConfigDoc companyVar : companyVars) {
-		company.put(companyVar.getKey(), companyVar.getValue());
-	    }
-
-	    if (ArgUtil.is(prefs)) {
-		prefs.setUpdateStamp(System.currentTimeMillis());
-		localConfigMap.put(tnt, prefs);
-	    }
-
-	    if (Tenants.isDefault(tnt)) {
-		PMConfigurationDoc newSharedConfiguration = new PMConfigurationDoc();
-		for (Entry<String, PMConfigurationObject> entry : prefs.prefs().entrySet()) {
-		    // if (entry.getValue().isShared()) {
-		    newSharedConfiguration.setPref(entry.getValue());
-		    // }
-		}
-		List<ChannelConfigDoc> sandboxChannels = configStore.findAll(ChannelConfigDoc.class);
-		for (ChannelConfigDoc channel : sandboxChannels) {
-		    channel.setDomain(tnt);
-		    if (channel.isSandbox() || channel.isShared()) {
-			newSharedConfiguration.channels(channel);
-		    }
+		if (localConfigMap.containsKey(mappedTo)) {
+			return localConfigMap.get(mappedTo);
 		}
 
-		sharedConfiguration = newSharedConfiguration;
-	    }
+		if (ArgUtil.is(configStore)) {
+			PMConfigurationDoc prefs = getPMConfigurationDoc();
+			prefs.setPrefs(null);
 
-	    return prefs;
+			List<PrefsConfigDoc> prefsConfigs = configStore.findAll(PrefsConfigDoc.class);
+			for (PrefsConfigDoc prefsConfig : prefsConfigs) {
+				prefs.setPref(prefsConfig, serviceServer);
+			}
+
+			List<ChannelConfigDoc> channels = configStore.findAll(ChannelConfigDoc.class);
+			// System.out.println("TENE==" + tnt + "=====" + mappedTo + "====" +
+			// channels.size());
+			for (ChannelConfigDoc channel : channels) {
+				channel.setDomain(tnt);
+				prefs.channels(channel);
+			}
+
+			List<ClientAppConfigDoc> clientKeys = configStore.findAll(ClientAppConfigDoc.class);
+			for (ClientAppConfigDoc clientKey : clientKeys) {
+				prefs.clientApiKey(clientKey);
+			}
+
+			List<CompanyVarsConfigDoc> companyVars = configStore.findAll(CompanyVarsConfigDoc.class);
+
+			SafeKeyHashMap<Object> company = prefs.globalVars();
+
+			for (CompanyVarsConfigDoc companyVar : companyVars) {
+				company.put(companyVar.getKey(), companyVar.getValue());
+			}
+
+			if (ArgUtil.is(prefs)) {
+				prefs.setUpdateStamp(System.currentTimeMillis());
+				localConfigMap.put(mappedTo, prefs);
+			}
+
+			if (Tenants.isDefault(tnt)) {
+				PMConfigurationDoc newSharedConfiguration = new PMConfigurationDoc();
+				for (Entry<String, PMConfigurationObject> entry : prefs.prefs().entrySet()) {
+					newSharedConfiguration.setPref(entry.getValue(), serviceServer);
+				}
+				List<ChannelConfigDoc> sandboxChannels = configStore.findAll(ChannelConfigDoc.class);
+				for (ChannelConfigDoc channel : sandboxChannels) {
+					channel.setDomain(tnt);
+					if (channel.isSandbox() || channel.isShared()) {
+						newSharedConfiguration.channels(channel, serviceServer);
+					}
+				}
+
+				List<ClientAppConfigDoc> sharedApps = configStore.findAll(ClientAppConfigDoc.class);
+				for (ClientAppConfigDoc sharedApp : sharedApps) {
+					sharedApp.setDomain(tnt);
+					if (sharedApp.isShared()) {
+						newSharedConfiguration.clientApiKey(sharedApp);
+					}
+				}
+				sharedConfiguration = newSharedConfiguration;
+			}
+
+			return prefs;
+		}
+		return null;
 	}
-	return null;
-    }
 
-    public void configInternal(ChannelConfig config) {
-	ChannelConfigDoc doc = EntityDtoUtil.dtoToEntity(config, new ChannelConfigDoc());
-	doc.setId(StringUtils.toLowerCase(doc.getChannelId()));
-	configStore.saveChannelConfig(doc);
-    }
-
-    @Override
-    public void addChannel(ChannelConfig config) {
-	configInternal(config);
-    }
-
-    @Override
-    public void updateChannel(ChannelConfig config, String action) {
-	if (ArgUtil.is(config)) {
-	    ChannelConfigDoc configDoc = EntityDtoUtil.dtoToEntity(config, new ChannelConfigDoc());
-	    if ("remove".equalsIgnoreCase(action)) {
-		configStore.remove(configDoc);
-		PMConfigurationDoc doc = getPMConfigurationDoc();
-		doc.channels().remove(config.getChannelId());
-		configStore.save(doc);
-	    } else if ("disable".equalsIgnoreCase(action)) {
-		configDoc.disabled(true);
-		configStore.save(configDoc);
-	    } else if ("enable".equalsIgnoreCase(action)) {
-		configDoc.disabled(false);
-		configStore.save(configDoc);
-	    } else if ("sandbox_enable".equalsIgnoreCase(action)) {
-		configDoc.setSandbox(true);
-		configStore.save(configDoc);
-	    } else if ("sandbox_disable".equalsIgnoreCase(action)) {
-		configDoc.setSandbox(false);
-		configStore.save(configDoc);
-	    } else if ("shared_enable".equalsIgnoreCase(action)) {
-		configDoc.setShared(true);
-		configStore.save(configDoc);
-	    } else if ("shared_disable".equalsIgnoreCase(action)) {
-		configDoc.setShared(false);
-		configStore.save(configDoc);
-	    }
-	} else {
-	    System.out.println("No Channel to delete");
+	public ChannelConfig configInternal(ChannelConfig config) {
+		ChannelConfigDoc doc = EntityDtoUtil.dtoToEntity(config, new ChannelConfigDoc());
+		doc.setId(StringUtils.toLowerCase(doc.getChannelId()));
+		configStore.saveChannelConfig(doc);
+		return doc;
 	}
-    }
 
-    private PMConfigurationDoc getPMConfigurationDoc() {
-	PMConfigurationDoc doc = configStore.findById(AppContextUtil.getTenant(), PMConfigurationDoc.class);
-	if (ArgUtil.isEmpty(doc)) {
-	    doc = new PMConfigurationDoc();
-	    doc.setTenant(AppContextUtil.getTenant());
+	@Override
+	public ChannelConfig addChannel(ChannelConfig config) {
+		if (!ArgUtil.is(config.getServer())) {
+			config.setServer(serviceServer);
+		}
+		return configInternal(config);
 	}
-	return doc;
-    }
 
-    @Override
-    public PMConfigurationModel shared() {
-	return sharedConfiguration;
-    }
-
-    @Override
-    public void initConfig() {
-	String sessionId = UniqueID.generateString();
-	AppContextUtil.setSessionId(sessionId);
-	AppContextUtil.getTraceId(true, true);
-	AppContextUtil.resetTraceTime();
-	AppContextUtil.init();
-	local();
-    }
-
-    @Override
-    public void clear(Map<String, String> map) {
-	String tnt = AppContextUtil.getTenant();
-	localConfigMap.remove(tnt);
-	if (Tenants.isDefault(tnt)) {
-	    this.initConfig();
+	@Override
+	public void updateChannel(ChannelConfig config, String action) {
+		if (ArgUtil.is(config)) {
+			ChannelConfigDoc configDoc = EntityDtoUtil.dtoToEntity(config, new ChannelConfigDoc());
+			if ("remove".equalsIgnoreCase(action)) {
+				configStore.remove(configDoc);
+				PMConfigurationDoc doc = getPMConfigurationDoc();
+				doc.channels().remove(config.getChannelId());
+				configStore.save(doc);
+			} else {
+				if (!ArgUtil.is(config.getServer())) {
+					config.setServer(serviceServer);
+				}
+				configStore.saveChannelConfig(configDoc, action);
+			}
+		} else {
+			System.out.println("No Channel to delete");
+		}
 	}
-    }
+
+	private PMConfigurationDoc getPMConfigurationDoc() {
+		PMConfigurationDoc doc = configStore.findById(AppContextUtil.getTenant(), PMConfigurationDoc.class);
+		if (ArgUtil.isEmpty(doc)) {
+			doc = new PMConfigurationDoc();
+			doc.setTenant(AppContextUtil.getTenant());
+		}
+		return doc;
+	}
+
+	@Override
+	public PMConfigurationModel shared() {
+		return sharedConfiguration;
+	}
+
+	@Override
+	public void initConfig() {
+		String sessionId = UniqueID.generateString();
+		AppContextUtil.setSessionId(sessionId);
+		AppContextUtil.getTraceId(true, true);
+		AppContextUtil.resetTraceTime();
+		AppContextUtil.init();
+		local();
+	}
+
+	@Override
+	public void clear(Map<String, String> map) {
+		String tnt = AppContextUtil.getTenant();
+		localConfigMap.remove(tnt);
+		if (Tenants.isDefault(tnt)) {
+			this.initConfig();
+		}
+	}
 }

@@ -59,5 +59,8 @@ public class AdminDashBoardContoller {
 		TagDocumentDto lst = adminDbMgr.getTagDocumentDetails(req);
 		return ApiResponse.buildResults(lst.getLstTagDocument());
 	}
+	
+	
+	
 
 }

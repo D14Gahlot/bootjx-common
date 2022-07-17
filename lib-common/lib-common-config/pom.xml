@@ -70,6 +70,11 @@
 			<version>2.9.6</version>
 		</dependency>
 
+		<dependency>
+		    <groupId>org.springframework</groupId>
+		    <artifactId>spring-aspects</artifactId>
+		</dependency>
+
 	</dependencies>
 
 

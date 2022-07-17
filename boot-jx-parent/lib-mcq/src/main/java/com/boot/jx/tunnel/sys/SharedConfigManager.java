@@ -12,27 +12,27 @@ import com.boot.jx.tunnel.TunnelEventXchange;
 import com.boot.jx.tunnel.TunnelService;
 
 @TunnelEventMapping(topic = SysTunnelEventsDict.Names.SHARED_CONFIG_UPDATE, scheme = TunnelEventXchange.SHOUT_LISTNER,
-	integrity = false)
+		integrity = false)
 public class SharedConfigManager implements ITunnelSubscriber<DBEvent> {
 
-    private final Logger LOGGER = LoggerFactory.getLogger(getClass());
+	private final Logger LOGGER = LoggerFactory.getLogger(getClass());
 
-    @Autowired
-    TunnelService tunnelService;
+	@Autowired
+	TunnelService tunnelService;
 
-    @Autowired
-    AppConfigPackage appConfigPackage;
+	@Autowired
+	AppConfigPackage appConfigPackage;
 
-    @Override
-    public void onMessage(String channel, DBEvent brokerEvent) {
-	appConfigPackage.clear(brokerEvent.getData());
-    }
+	@Override
+	public void onMessage(String channel, DBEvent brokerEvent) {
+		appConfigPackage.clear(brokerEvent.getData());
+	}
 
-    public void clear() {
-	DBEvent e = new DBEvent();
-	e.setEventCode(SysTunnelEventsDict.Names.SHARED_CONFIG_UPDATE);
-	appConfigPackage.clear(e.getData());
-	tunnelService.shout(SysTunnelEventsDict.Names.SHARED_CONFIG_UPDATE, e);
-    }
+	public void clear() {
+		DBEvent e = new DBEvent();
+		e.setEventCode(SysTunnelEventsDict.Names.SHARED_CONFIG_UPDATE);
+		appConfigPackage.clear(e.getData());
+		tunnelService.shout(SysTunnelEventsDict.Names.SHARED_CONFIG_UPDATE, e);
+	}
 
 }

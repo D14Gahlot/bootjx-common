@@ -27,44 +27,44 @@ import io.swagger.annotations.ApiOperation;
 @RestController
 public class InboundWebhooks {
 
-    @Autowired
-    private RestService restService;
+	@Autowired
+	private RestService restService;
 
-    @Autowired
-    private PMEnvironment pmEnvironment;
+	@Autowired
+	private PMEnvironment pmEnvironment;
 
-    private void forwardDummy(Object req) {
-	ClientApp x = XmsVendorConfigurer.getClientApp();
-	if (ArgUtil.is(x) && ArgUtil.is(x.getWebhook())) {
-	    restService.ajax(x.getWebhook()).post(req).asMapModel();
+	private void forwardDummy(Object req) {
+		ClientApp x = XmsVendorConfigurer.getClientApp();
+		if (ArgUtil.is(x) && ArgUtil.is(x.getWebhook())) {
+			restService.ajax(x.getWebhook()).post(req).asMapModel();
+		}
 	}
-    }
 
-    @ApiOperation(value = "Receive Notifications", notes = "${swagger.InboundWebhooks.onMessageCallback.description}")
-    @ApiCallbacktParams
-    @RequestMapping(value = "/api/v1/message/receive", method = { RequestMethod.POST })
-    public InBoundWrapper onMessageCallback(@RequestBody InBoundWrapper inboxMessage) {
-	forwardDummy(inboxMessage);
-	return inboxMessage;
-    }
-
-    @ApiOperation(value = "Contact Information", notes = "${swagger.InboundWebhooks.onProfileCallback.description}")
-    @ApiCallbacktParams
-    @RequestMapping(value = "/api/v1/contact/info", method = { RequestMethod.POST })
-    public ContactInfoUpdate onProfileCallback(@RequestBody InBoundContact contactInfoRequest) {
-	PMConfigurationObject conatctUrlEntry = pmEnvironment.keyEntry(SETUP_KEY.POSTMAN_CONTACT_DETAILS_URL);
-	if (conatctUrlEntry.exists()) {
-	    return restService.ajax(conatctUrlEntry.asString()).post(contactInfoRequest).as(ContactInfoUpdate.class);
+	@ApiOperation(value = "Receive Notifications", notes = "${swagger.InboundWebhooks.onMessageCallback.description}")
+	@ApiCallbacktParams
+	@RequestMapping(value = "/api/v1/message/receive", method = { RequestMethod.POST })
+	public InBoundWrapper onMessageCallback(@RequestBody InBoundWrapper inboxMessage) {
+		forwardDummy(inboxMessage);
+		return inboxMessage;
 	}
-	return new ContactInfoUpdate();
-    }
 
-    @ApiOperation(value = "Receiving Events", notes = "${swagger.InboundWebhooks.onActionCallback.description}",
-	    hidden = true)
-    @ApiCallbacktParams
-    @RequestMapping(value = "/api/v1/action/event", method = { RequestMethod.POST })
-    public InBoundAction onActionCallback(@RequestBody InBoundAction actionInfo) {
-	return new InBoundAction();
-    }
+	@ApiOperation(value = "Contact Information", notes = "${swagger.InboundWebhooks.onProfileCallback.description}")
+	@ApiCallbacktParams
+	@RequestMapping(value = "/api/v1/contact/info", method = { RequestMethod.POST })
+	public ContactInfoUpdate onProfileCallback(@RequestBody InBoundContact contactInfoRequest) {
+		PMConfigurationObject conatctUrlEntry = pmEnvironment.keyEntry(SETUP_KEY.POSTMAN_CONTACT_DETAILS_URL);
+		if (conatctUrlEntry.exists()) {
+			return restService.ajax(conatctUrlEntry.asString()).post(contactInfoRequest).as(ContactInfoUpdate.class);
+		}
+		return new ContactInfoUpdate();
+	}
+
+	@ApiOperation(value = "Receiving Events", notes = "${swagger.InboundWebhooks.onActionCallback.description}",
+			hidden = true)
+	@ApiCallbacktParams
+	@RequestMapping(value = "/api/v1/action/event", method = { RequestMethod.POST })
+	public InBoundAction onActionCallback(@RequestBody InBoundAction actionInfo) {
+		return new InBoundAction();
+	}
 
 }

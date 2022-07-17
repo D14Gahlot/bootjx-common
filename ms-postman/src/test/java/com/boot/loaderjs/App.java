@@ -16,6 +16,9 @@ import com.boot.jx.postman.model.PushMessage;
 import com.boot.jx.scope.tnt.Tenants;
 import com.boot.jx.tmpl.TemplateUtils;
 import com.boot.utils.CryptoUtil.HashBuilder;
+import com.google.i18n.phonenumbers.NumberParseException;
+import com.google.i18n.phonenumbers.PhoneNumberUtil;
+import com.google.i18n.phonenumbers.Phonenumber.PhoneNumber;
 import com.boot.utils.MapBuilder;
 import com.boot.utils.Urly;
 
@@ -28,7 +31,24 @@ public class App { // Noncompliant
 	TemplateUtils templateUtils = new TemplateUtils();
 	public static final Pattern pattern = Pattern.compile("^(.*)<(.*)>$");
 
+	public static final PhoneNumberUtil PHONE_NUMBER_UTIL = PhoneNumberUtil.getInstance();
+
 	public static void main(String[] args) throws MalformedURLException, URISyntaxException {
+		phoneTest(args);
+	}
+
+	public static void phoneTest(String[] args) {
+		try {
+			PhoneNumber phoneNumber = PHONE_NUMBER_UTIL.parse("+919930104050", "IN");
+			System.out.println(String.format("+%s%s", phoneNumber.getCountryCode(), phoneNumber.getNationalNumber()));
+			System.out.println("==" + PHONE_NUMBER_UTIL.getRegionCodeForCountryCode(phoneNumber.getCountryCode()));
+		} catch (NumberParseException e) {
+			System.out.println("Errror");
+			e.printStackTrace();
+		}
+	}
+
+	public static void main7(String[] args) throws MalformedURLException, URISyntaxException {
 		long timestamp = System.currentTimeMillis();
 
 		System.out.println((timestamp));

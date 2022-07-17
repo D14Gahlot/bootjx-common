@@ -12,9 +12,11 @@ import javax.annotation.PostConstruct;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
+import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.model.TagDocument;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.FileUtil;
@@ -73,6 +75,9 @@ public class OpenNLPService {
 
 	private boolean initd;
 
+	@Autowired
+	PMEnvironment pmEnvironment;
+
 	@PostConstruct
 	public void init() throws FileNotFoundException, IOException {
 
@@ -129,21 +134,33 @@ public class OpenNLPService {
 
 	public TagDocument addTags(String userInput, TagDocument tagDocument) {
 
-		if (!initd) {
+		if (!initd || !pmEnvironment.keyEntry("postman.nlp.opennlp.enabled").asBoolean()) {
 			return tagDocument;
 		}
 
 		try {
-			String[] sentences = breakSentences(userInput);
 
-			LanguageDetectorME languageDetectorME = new LanguageDetectorME(languageDetectorModel);
-			Language[] langs = languageDetectorME.predictLanguages(userInput);
+			if (pmEnvironment.keyEntry("postman.nlp.detect.lang").asBoolean()) {
+				LanguageDetectorME languageDetectorME = new LanguageDetectorME(languageDetectorModel);
+				Language[] langs = languageDetectorME.predictLanguages(userInput);
 
-			if (ArgUtil.is(langs)) {
-				java.util.stream.IntStream.range(0, Math.min(3, langs.length))
-						.filter(i -> langs[i].getConfidence() > 0.01).mapToObj(i -> langs[i].getLang())
-						.collect(Collectors.toCollection(() -> tagDocument.langs()));
+				if (ArgUtil.is(langs)) {
+					java.util.stream.IntStream.range(0, Math.min(3, langs.length))
+							.filter(i -> langs[i].getConfidence() > 0.01).mapToObj(i -> langs[i].getLang())
+							.collect(Collectors.toCollection(() -> tagDocument.langs()));
+				}
 			}
+
+			boolean detectCategories = pmEnvironment.keyEntry("postman.nlp.detect.categories").asBoolean();
+			boolean detectPersons = pmEnvironment.keyEntry("postman.nlp.detect.persons").asBoolean();
+			boolean detectLocations = pmEnvironment.keyEntry("postman.nlp.detect.organizations").asBoolean();
+			boolean detectOrganizations = pmEnvironment.keyEntry("postman.nlp.detect.locations").asBoolean();
+
+			if (ArgUtil.none(detectCategories, detectPersons, detectLocations, detectOrganizations)) {
+				return tagDocument;
+			}
+
+			String[] sentences = breakSentences(userInput);
 
 			for (String sentence : sentences) {
 				// Separate words from each sentence using tokenizer.
@@ -158,27 +175,36 @@ public class OpenNLPService {
 				// Determine BEST category using lemmatized tokens used a mode that we trained
 				// at start.
 
-				tagDocument.categories().add(detectCategory(lemmas));
+				if (detectCategories) {
+					tagDocument.categories().add(detectCategory(lemmas));
+				}
 
 				String[] simpleTokens = SimpleTokenizer.INSTANCE.tokenize(sentence);
 
-				NameFinderME personFinderME = new NameFinderME(tokenNameFinderModelPerson);
-				String[] persons = Span.spansToStrings(personFinderME.find(simpleTokens), simpleTokens);
-				if (ArgUtil.is(persons)) {
-					tagDocument.persons().addAll(Arrays.asList(persons));
+				if (detectPersons) {
+					NameFinderME personFinderME = new NameFinderME(tokenNameFinderModelPerson);
+					String[] persons = Span.spansToStrings(personFinderME.find(simpleTokens), simpleTokens);
+					if (ArgUtil.is(persons)) {
+						tagDocument.persons().addAll(Arrays.asList(persons));
+					}
 				}
 
-				NameFinderME locationFinderME = new NameFinderME(tokenNameFinderModelLocation);
-				String[] locations = Span.spansToStrings(locationFinderME.find(simpleTokens), simpleTokens);
-				if (ArgUtil.is(locations)) {
-					tagDocument.locations().addAll(Arrays.asList(locations));
+				if (detectLocations) {
+					NameFinderME locationFinderME = new NameFinderME(tokenNameFinderModelLocation);
+					String[] locations = Span.spansToStrings(locationFinderME.find(simpleTokens), simpleTokens);
+					if (ArgUtil.is(locations)) {
+						tagDocument.locations().addAll(Arrays.asList(locations));
+					}
 				}
 
-				NameFinderME orgFinderME = new NameFinderME(tokenNameFinderModelOrganization);
-				String[] organizations = Span.spansToStrings(orgFinderME.find(simpleTokens), simpleTokens);
-				if (ArgUtil.is(organizations)) {
-					tagDocument.organizations().addAll(Arrays.asList(organizations));
+				if (detectOrganizations) {
+					NameFinderME orgFinderME = new NameFinderME(tokenNameFinderModelOrganization);
+					String[] organizations = Span.spansToStrings(orgFinderME.find(simpleTokens), simpleTokens);
+					if (ArgUtil.is(organizations)) {
+						tagDocument.organizations().addAll(Arrays.asList(organizations));
+					}
 				}
+
 			}
 
 		} catch (IOException e) {

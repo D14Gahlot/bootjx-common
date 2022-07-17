@@ -1,6 +1,7 @@
 package com.boot.jx.cache.test;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.slf4j.Logger;
@@ -14,10 +15,13 @@ import org.springframework.web.bind.annotation.RestController;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.api.BoolRespModel;
 import com.boot.jx.cache.test.RedisSampleTxCacheBox.RedisSampleData;
-import com.boot.jx.tunnel.TunnelDBEventLimiter;
+import com.boot.jx.tunnel.ITunnelDefs.ITaskLimiter;
+import com.boot.jx.tunnel.ITunnelDefs.TunnelTask;
 import com.boot.jx.tunnel.TunnelService;
 import com.boot.jx.tunnel.sys.SharedConfigManager;
 import com.boot.jx.tunnel.sys.SysTunnelEventsDict;
+import com.boot.model.MapModel;
+import com.boot.utils.ArgUtil;
 
 @RestController
 public class RedisController {
@@ -31,10 +35,13 @@ public class RedisController {
 	private TunnelService tunnelService;
 
 	@Autowired(required = false)
-	private TunnelDBEventLimiter dbEventLimiter;
+	private List<ITaskLimiter> dbEventLimiters;
 
 	@Autowired
 	SharedConfigManager sharedConfigManager;
+
+	@Autowired(required = false)
+	RedisSampleTaskLimiter redisSampleTaskLimiter;
 
 	@RequestMapping(value = "/pub/redis/test", method = RequestMethod.PUT)
 	public RedisSampleData cacheTestGet(@RequestBody RedisSampleData status) {
@@ -52,11 +59,28 @@ public class RedisController {
 		return tunnelService.shout(SysTunnelEventsDict.Names.TEST_TOPIC, status);
 	}
 
+	@RequestMapping(value = "/pub/redis/test/task/limiter", method = RequestMethod.POST)
+	public long cacheTestTaskLimiter(@RequestBody MapModel map) {
+		if (ArgUtil.is(redisSampleTaskLimiter)) {
+			redisSampleTaskLimiter
+					.debounce(new TunnelTask().id(map.getString("id")).name("DEBOUNCE").intervalSeconds(5));
+			redisSampleTaskLimiter
+					.throttle(new TunnelTask().id(map.getString("id")).name("THROTTLE").intervalSeconds(5));
+			return 1L;
+		}
+		return 0L;
+	}
+
 	@RequestMapping(value = "/pub/stats/tunnel-limiter", method = RequestMethod.GET)
 	public Map<String, Object> getStats() {
 		Map<String, Object> propMap = new HashMap<String, Object>();
-		if (dbEventLimiter != null) {
-			propMap = dbEventLimiter.getStats();
+		if (ArgUtil.is(dbEventLimiters)) {
+			for (ITaskLimiter iTunnelEventLimiter : dbEventLimiters) {
+				Map<String, Object> stats = iTunnelEventLimiter.getStats();
+				if (ArgUtil.is(stats)) {
+					propMap.put(iTunnelEventLimiter.getName(), stats);
+				}
+			}
 		}
 		return propMap;
 	}

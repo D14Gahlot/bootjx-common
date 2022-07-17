@@ -1,10 +1,6 @@
 package com.boot.jx.common.dto;
 
-import java.util.List;
-
 import com.boot.jx.mongo.CommonDocInterfaces.ADocumentDTO;
-import com.boot.utils.ArgUtil;
-import com.boot.utils.StringUtils;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class AgentResponseDto<T extends AgentResponseDto<T>> implements ADocumentDTO<T> {
@@ -14,12 +10,11 @@ public class AgentResponseDto<T extends AgentResponseDto<T>> implements ADocumen
 	private String id;
 	@JsonProperty("code")
 	private String agent_code;
+	@JsonProperty("email")
+	private String agent_email;
+
 	@JsonProperty("name")
 	private String agent_name;
-
-	@JsonProperty("agent_channels")
-	private String agent_channels;
-	private List<String> channels;
 
 	private String isactive;
 
@@ -30,6 +25,9 @@ public class AgentResponseDto<T extends AgentResponseDto<T>> implements ADocumen
 
 	@JsonProperty("superAdmin")
 	private boolean isSuperAdmin;
+
+	@JsonProperty("duperAdmin")
+	private boolean isDuperAdmin;
 
 	@JsonProperty("defaultValue")
 	private boolean isDefaultValue;
@@ -59,14 +57,6 @@ public class AgentResponseDto<T extends AgentResponseDto<T>> implements ADocumen
 
 	public void setAgent_name(String agent_name) {
 		this.agent_name = agent_name;
-	}
-
-	public String getAgent_channels() {
-		return agent_channels;
-	}
-
-	public void setAgent_channels(String agent_channels) {
-		this.agent_channels = agent_channels;
 	}
 
 	public String getIsactive() {
@@ -118,19 +108,24 @@ public class AgentResponseDto<T extends AgentResponseDto<T>> implements ADocumen
 		this.isDefaultValue = isDefaultValue;
 	}
 
-	public List<String> getChannels() {
-		if (!ArgUtil.is(channels)) {
-			channels = StringUtils.toList(agent_channels);
-		}
-		return channels;
-	}
-
-	public void setChannels(List<String> channels) {
-		this.channels = channels;
-	}
-
 	public void setEnabled(boolean isEnabled) {
 		this.isEnabled = isEnabled;
+	}
+
+	public String getAgent_email() {
+		return agent_email;
+	}
+
+	public void setAgent_email(String agent_email) {
+		this.agent_email = agent_email;
+	}
+
+	public boolean isDuperAdmin() {
+		return isDuperAdmin;
+	}
+
+	public void setDuperAdmin(boolean isDuperAdmin) {
+		this.isDuperAdmin = isDuperAdmin;
 	}
 
 }

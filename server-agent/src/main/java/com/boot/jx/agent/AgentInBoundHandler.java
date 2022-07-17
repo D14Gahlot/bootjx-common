@@ -7,70 +7,132 @@ import org.springframework.stereotype.Component;
 
 import com.boot.jx.chat.ChatService;
 import com.boot.jx.common.config.ConfigConstants;
-import com.boot.jx.inbound.InBound.InBoundHandler;
+import com.boot.jx.common.config.DefaultChatBoundHandler;
+import com.boot.jx.inbound.InBound.SessionAssginHandler;
+import com.boot.jx.postman.ClientApp;
+import com.boot.jx.postman.PMConstants.MESSAGE_SENDER_TYPE;
 import com.boot.jx.postman.PMEnvironment;
-import com.boot.jx.postman.PMEnvironment.PMCommonConfig;
-import com.boot.jx.postman.PMEnvironment.PMConfigurationObject;
-import com.boot.jx.postman.PMEnvironment.PMDomainConfig;
+import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.model.InboxMessage;
-import com.boot.jx.postman.model.MessageReport;
 import com.boot.jx.postman.model.OutboxMessage;
+import com.boot.jx.postman.model.PMArgs;
+import com.boot.jx.postman.model.ext.InBoundEvent;
+import com.boot.jx.postman.store.SessionStore;
+import com.boot.model.MapModel;
+import com.boot.model.MapModel.MapEntry;
+import com.boot.model.MapModel.NodeEntry;
 import com.boot.utils.ArgUtil;
 
 @Component
-public class AgentInBoundHandler implements InBoundHandler {
+public class AgentInBoundHandler extends DefaultChatBoundHandler {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AgentInBoundHandler.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(AgentInBoundHandler.class);
 
-    @Autowired
-    public PMEnvironment pmEnvironment;
+	@Autowired
+	private PMEnvironment pmEnvironment;
 
-    @Autowired
-    public PMDomainConfig pmDomainConfig;
+	@Autowired
+	private AgentChatHandler agentChatHandler;
 
-    @Autowired
-    public PMCommonConfig pmCommonConfig;
+	@Autowired(required = false)
+	private ChatService chatService;
 
-    @Autowired
-    private AgentChatHandler agentChatHandler;
+	// @Autowired
+	protected SessionAssginHandler sessionAssginHandler;
 
-    @Autowired(required = false)
-    private ChatService chatService;
+	@Autowired
+	private SessionStore sessionStore;
 
-    @Override
-    public void handle(InboxMessage inboxMessage) {
-	if (ArgUtil.isEmpty(inboxMessage.session().getMode())) {
-	    try {
-		InboxMessage agentAssignResp = agentChatHandler.onAssign(inboxMessage);
-		if (ArgUtil.is(agentAssignResp.session().getAgent())) {
-		    PMConfigurationObject transferReply = pmEnvironment
-			    .keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_AGENT_CHAT_AUTOREPLY_TALK2AGENT);
-		    if (transferReply.exists()) {
-			chatService.reply(inboxMessage, new OutboxMessage().templateId(transferReply.asString()));
-		    } else {
-			chatService.reply(inboxMessage, new OutboxMessage()
-				.message("Connecting you to one of our customer representatives. Give us a moment."));
-		    }
-		} else {
-		    chatService.reply(inboxMessage, new OutboxMessage().message(
-			    "All agents are busy or online, we will connect you whenever someone is available."));
+	/**
+	 * EVENTS
+	 */
+	@Override
+	public void onMessage(InboxMessage inboxMessage, ChatSessionDoc session) {
+		if (ArgUtil.isEmpty(inboxMessage.session().getMode()) && ArgUtil.isEmpty(inboxMessage.session().getQueue())) {
+			if (!ArgUtil.is(session)) {
+				session = sessionStore.getSession(inboxMessage.getSessionId());
+			}
+			// InBoundEvent assignEvent = assignSessionToAgent(session, null, null).value();
 		}
-	    } catch (Exception e) {
-		LOGGER.error("Error ONE while Connecting to Agent", e);
-		try {
-		    chatService.reply(inboxMessage, new OutboxMessage().message(
-			    "We are having some issues trying connect you to one of our customer representatives. Please be patient"));
-		} catch (InterruptedException e1) {
-		    LOGGER.error("Error TWO  while Sending Failure", e1);
-		}
-	    }
+		agentChatHandler.onMessageReceive(inboxMessage);
 	}
-	agentChatHandler.onMessageReceive(inboxMessage);
-    }
 
-    @Override
-    public void handle(MessageReport messageReport) {
-	LOGGER.debug("No Handling Required for Status on AgentSide");
-    }
+	private MapEntry getTemplate(MapModel props, String propKey, ConfigConstants.SETUP_KEY KEY) {
+		MapEntry talk2agent = props.keyEntry(propKey);
+		if (talk2agent.exists()) {
+			return talk2agent;
+		}
+		return pmEnvironment.keyEntry(KEY);
+	}
+
+	private void onAssign(ChatSessionDoc session, InBoundEvent assignEvent) {
+		OutboxMessage oMsg = new OutboxMessage();
+		try {
+			ClientApp app = this.context().clientApp();
+			MapModel props = MapModel.from(app.props());
+
+			oMsg.route().setQueueCode(app.getQueue());
+			oMsg.route().setSendMode(app.getAppMode());
+			oMsg.route().setSenderApp(app.getAppType());
+			oMsg.route().setSenderType(MESSAGE_SENDER_TYPE.SYSTEM);
+
+			if (!ArgUtil.is(assignEvent.sessionAssigned().oldAgent)
+					&& ArgUtil.is(assignEvent.sessionAssigned().newAgent)) {
+
+				MapEntry templ = getTemplate(props, "agent_connected",
+						ConfigConstants.SETUP_KEY.POSTMAN_AGENT_CHAT_AUTOREPLY_TALK2AGENT);
+				if (templ.exists()) {
+					chatService.reply(session, oMsg.template(templ.asString()));
+					return;
+				}
+			} else if (!ArgUtil.is(assignEvent.sessionAssigned().oldAgent)
+					&& !ArgUtil.is(assignEvent.sessionAssigned().newAgent)) {
+
+				MapEntry templ = getTemplate(props, "agent_notfound",
+						ConfigConstants.SETUP_KEY.POSTMAN_AGENT_CHAT_AUTOREPLY_NOAGENT);
+				if (templ.exists()) {
+					chatService.reply(session, oMsg.template(templ.asString()));
+					return;
+				}
+			} else {
+
+				MapEntry templ = props.keyEntry("agent_transfer");
+				if (templ.exists()) {
+					chatService.reply(session, oMsg.template(templ.asString()));
+					return;
+				}
+			}
+		} catch (Exception e) {
+			LOGGER.error("Error ONE while Connecting to Agent", e);
+			logManager.error(assignEvent, e);
+			try {
+				chatService.reply(session, oMsg.message(
+						"We are having some issues trying connect you to one of our customer representatives. Please be patient"));
+			} catch (InterruptedException e1) {
+				LOGGER.error("Error TWO  while Sending Failure", e1);
+				logManager.error(assignEvent, e1);
+			}
+		}
+	}
+
+	/**
+	 * METHODS/ACTION
+	 */
+	@Override
+	public NodeEntry<InBoundEvent> assignSessionToAgent(PMArgs params, ChatSessionDoc session) {
+		NodeEntry<InBoundEvent> eventEntry = new NodeEntry<InBoundEvent>();
+		InBoundEvent agentAssignEvent = new InBoundEvent();
+		agentAssignEvent.eventCode = InBoundEvent.SESSION_ASSIGNED;
+		agentAssignEvent.sessionId = session.getSessionId();
+		agentAssignEvent.sessionAssigned().oldAgent = session.getAssignedToAgent();
+		agentAssignEvent.sessionAssigned().oldDept = session.getAssignedToDept();
+		params = agentChatHandler.doAssign(session, params);
+		if (ArgUtil.is(params)) {
+			agentAssignEvent.sessionAssigned().newDept = params.getAssignToDeptCode();
+			agentAssignEvent.sessionAssigned().newAgent = params.getAssignToAgentCode();
+		}
+		onAssign(session, agentAssignEvent);
+		return eventEntry.value(agentAssignEvent);
+	}
 
 }

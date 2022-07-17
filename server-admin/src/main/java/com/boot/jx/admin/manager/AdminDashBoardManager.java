@@ -28,6 +28,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 import org.apache.commons.beanutils.PropertyUtils;
@@ -44,16 +45,28 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Component;
 
+import com.boot.jx.AppContextUtil;
+import com.boot.jx.admin.dto.ContactTypeCountDto;
+import com.boot.jx.admin.dto.ContactTypeSummaryDto;
 import com.boot.jx.admin.dto.DashBoardRequestDto;
 import com.boot.jx.admin.dto.DashBoardResponseDto;
 import com.boot.jx.admin.dto.LeadMessanger;
 import com.boot.jx.admin.dto.PeakLoadDto;
+import com.boot.jx.admin.dto.SummaryDocDto;
 import com.boot.jx.admin.dto.TagDocumentDto;
 import com.boot.jx.admin.dto.TagDocumentLst;
+import com.boot.jx.dict.ContactType;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.model.TagDocument;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.DateUtil;
+import com.boot.utils.JsonUtil;
+import com.mongodb.AggregationOptions;
+import com.mongodb.AggregationOptions.OutputMode;
+import com.mongodb.Cursor;
+import com.mongodb.DBCollection;
+import com.mongodb.DBObject;
 
 @Component
 public class AdminDashBoardManager {
@@ -637,8 +650,8 @@ public class AdminDashBoardManager {
 			List<MessageDoc> msgDocLst = getTotalMsgCount(contactType, dateRange1, dateRange2);
 			leasMsgLst.put(contactType, msgDocLst.size());
 		}
-	
-		if (leasMsgLst!=null && ArgUtil.is(leasMsgLst)) {
+
+		if (leasMsgLst != null && ArgUtil.is(leasMsgLst)) {
 			Object maxEntryKey = Collections.max(leasMsgLst.entrySet(), Map.Entry.comparingByValue()).getKey();
 			Integer maxEntryKeyValue = leasMsgLst.get(maxEntryKey);
 			Integer sumOfAllContactMsg = leasMsgLst.values().stream().mapToInt(i -> i).sum();
@@ -661,7 +674,7 @@ public class AdminDashBoardManager {
 
 		Query queryAll = new Query();
 		queryAll.addCriteria(Criteria.where("timestamp").gt(dateRange1).lt(dateRange2));
-		queryAll.addCriteria(Criteria.where("type").in("I","O"));
+		queryAll.addCriteria(Criteria.where("type").in("I", "O"));
 		queryAll.with(new Sort(new Order(Direction.ASC, "timestamp")));
 		agentAnaMgr.removeMsgFields(queryAll);
 		List<MessageDoc> totalMsgDoc = mongoTemplate.find(queryAll, MessageDoc.class, contactType.toString());
@@ -729,7 +742,7 @@ public class AdminDashBoardManager {
 			String formattedDateH = sdfH.format(date);
 			dateWithTimeList.add(dateWithTime);
 			hourList.add(Integer.parseInt(formattedDateH));
-			
+
 		}
 		Collections.sort(dateWithTimeList);
 
@@ -737,20 +750,20 @@ public class AdminDashBoardManager {
 		for (Object key : dateWithTimeWiseCount) {
 			mapLst.put(key, Collections.frequency(dateWithTimeList, key));
 		}
-		if (mapLst!=null && ArgUtil.is(mapLst) && !mapLst.isEmpty()) {
+		if (mapLst != null && ArgUtil.is(mapLst) && !mapLst.isEmpty()) {
 			Object maxEntryKey = Collections.max(mapLst.entrySet(), Map.Entry.comparingByValue()).getKey();
 			Integer maxEntryKeyValue = mapLst.get(maxEntryKey);
 			// System.out.println("Peak Load Date Time and Value:"+maxEntryKey +"-
 			// "+maxEntryKeyValue);
-			SimpleDateFormat df = new SimpleDateFormat("dd-MM-yyyy hh:mm"); 
+			SimpleDateFormat df = new SimpleDateFormat("dd-MM-yyyy hh:mm");
 			try {
-			    Date d = df.parse(maxEntryKey.toString());
-			    long milliseconds = d.getTime();
-			    if(milliseconds != 0) {
-			    	peakLoadResult.setEpochStamp(milliseconds);
-			    }
+				Date d = df.parse(maxEntryKey.toString());
+				long milliseconds = d.getTime();
+				if (milliseconds != 0) {
+					peakLoadResult.setEpochStamp(milliseconds);
+				}
 			} catch (Exception e) {
-			    e.printStackTrace();
+				e.printStackTrace();
 			}
 			peakLoadResult.setTimestamp(maxEntryKey);
 			peakLoadResult.setTotal(maxEntryKeyValue.longValue());
@@ -779,8 +792,8 @@ public class AdminDashBoardManager {
 	public List<MessageDoc> getUniqueConversation(Object contactType, long dateRange1, long dateRange2) {
 		Query query = new Query();
 		query.addCriteria(Criteria.where("timestamp").gt(dateRange1).lt(dateRange2));
-		query.addCriteria(Criteria.where("type").in("O","I"));
-		
+		query.addCriteria(Criteria.where("type").in("O", "I"));
+
 		List<MessageDoc> distinctIdList = mongoTemplate.getCollection(contactType.toString()).distinct("contactId",
 				query.getQueryObject());
 		return distinctIdList;
@@ -789,7 +802,7 @@ public class AdminDashBoardManager {
 	/** Timestamp **/
 
 	public Map<Object, Object> getHourWiseCount(List<MessageDoc> msgLst) {
-		//List<Long> hourList = new ArrayList<Long>();
+		// List<Long> hourList = new ArrayList<Long>();
 		List<String> hourList = new ArrayList<String>();
 		List<Object> dateWiseList = new ArrayList<Object>();
 		Map<Object, Object> mapLst = new HashMap<Object, Object>();
@@ -801,11 +814,11 @@ public class AdminDashBoardManager {
 			SimpleDateFormat sdfH = new SimpleDateFormat("hh aa");
 			String formattedDateH = sdfH.format(date);
 			dateWiseList.add(ddMMyyyyFormat);
-			//LOGGER.info("getHourWiseCount :"+formattedDateH);
+			// LOGGER.info("getHourWiseCount :"+formattedDateH);
 			/** 1 hr gap **/
-			//long hourTimeSamp = (long) (timeStamp / (60 * 1000));
-			//long hh = timeStamp / hourTimeSamp;
-			//hourList.add(hh);
+			// long hourTimeSamp = (long) (timeStamp / (60 * 1000));
+			// long hh = timeStamp / hourTimeSamp;
+			// hourList.add(hh);
 			// hourList.add(Long.parseLong(formattedDateH));// hour wise count
 			hourList.add(formattedDateH);
 		}
@@ -826,8 +839,8 @@ public class AdminDashBoardManager {
 		Map<Object, Object> mapLst = new HashMap<Object, Object>();
 		for (MessageDoc msg : msgLst) {
 			long timeStamp = msg.getTimestamp();
-			timeStamp =(timeStamp-(timeStamp%(1000*60*60)));
-			 hourList.add(timeStamp);// hour wise count
+			timeStamp = (timeStamp - (timeStamp % (1000 * 60 * 60)));
+			hourList.add(timeStamp);// hour wise count
 		}
 		Collections.sort(hourList);
 		Set<Object> hourWiseCount = new HashSet<Object>(hourList);
@@ -837,7 +850,7 @@ public class AdminDashBoardManager {
 
 		return mapLst;
 	}
-	
+
 	/** date wise count **/
 	public Map<Object, Object> getDateWiseCount(List<MessageDoc> msgLst) {
 		List<Object> dateWiseList = new ArrayList<Object>();
@@ -845,7 +858,7 @@ public class AdminDashBoardManager {
 		for (MessageDoc msg : msgLst) {
 			long timeStamp = msg.getTimestamp();
 			Date date = new Date(timeStamp);
-			//String ddMMyyyyFormat = new SimpleDateFormat("dd-MM-yyyy").format(date);
+			// String ddMMyyyyFormat = new SimpleDateFormat("dd-MM-yyyy").format(date);
 			String ddMMyyyyFormat = new SimpleDateFormat("d").format(date);
 			dateWiseList.add(ddMMyyyyFormat);
 		}
@@ -859,15 +872,14 @@ public class AdminDashBoardManager {
 
 		return mapLst;
 	}
-	
-	
+
 	/** date wise count **/
 	public Map<Object, Object> getTimeStampWiseCount(List<MessageDoc> msgLst) {
 		List<Object> dateWiseTimeStampList = new ArrayList<Object>();
 		Map<Object, Object> mapLst = new HashMap<Object, Object>();
 		for (MessageDoc msg : msgLst) {
 			long timeStamp = msg.getTimestamp();
-			timeStamp =(timeStamp-(timeStamp%(1000*60*60*24)));  
+			timeStamp = (timeStamp - (timeStamp % (1000 * 60 * 60 * 24)));
 			dateWiseTimeStampList.add(timeStamp);
 		}
 
@@ -888,15 +900,15 @@ public class AdminDashBoardManager {
 		for (MessageDoc msg : msgLst) {
 			long timeStamp = msg.getTimestamp();
 			Date date = new Date(timeStamp);
-			/*String ddMMyyyyFormat = new SimpleDateFormat("dd-MM-yyyy").format(date);
-			cal.setTime(date);
-			String month = cal.getDisplayName(Calendar.MONTH, Calendar.LONG, Locale.getDefault()).toUpperCase();
-			int weekOfMonth = cal.get(Calendar.WEEK_OF_MONTH);
-			// int weekOfYear = cal.get(Calendar.WEEK_OF_MONTH);
-			String str = month + "  " + weekOfMonth;
-			weekWiseList.add(str);
-		  */
-			String monthWise=new SimpleDateFormat("MMM").format(date);
+			/*
+			 * String ddMMyyyyFormat = new SimpleDateFormat("dd-MM-yyyy").format(date);
+			 * cal.setTime(date); String month = cal.getDisplayName(Calendar.MONTH,
+			 * Calendar.LONG, Locale.getDefault()).toUpperCase(); int weekOfMonth =
+			 * cal.get(Calendar.WEEK_OF_MONTH); // int weekOfYear =
+			 * cal.get(Calendar.WEEK_OF_MONTH); String str = month + "  " + weekOfMonth;
+			 * weekWiseList.add(str);
+			 */
+			String monthWise = new SimpleDateFormat("MMM").format(date);
 			weekWiseList.add(monthWise);
 		}
 
@@ -908,7 +920,7 @@ public class AdminDashBoardManager {
 
 		return mapLst;
 	}
-	
+
 	/** week wise count **/
 	public Map<Object, Object> getWeekWiseCountV1(List<MessageDoc> msgLst) {
 		List<Object> weekWiseList = new ArrayList<Object>();
@@ -916,7 +928,7 @@ public class AdminDashBoardManager {
 		Calendar cal = Calendar.getInstance();
 		for (MessageDoc msg : msgLst) {
 			long timeStamp = msg.getTimestamp();
-			timeStamp =(timeStamp-(timeStamp%(1000*60*60*24)));  
+			timeStamp = (timeStamp - (timeStamp % (1000 * 60 * 60 * 24)));
 			weekWiseList.add(timeStamp);
 		}
 
@@ -929,7 +941,6 @@ public class AdminDashBoardManager {
 
 		return mapLst;
 	}
-	
 
 	// Open conversation
 	public List<ChatSessionDoc> getOpenConversation(Object contactType, long dateRange1, long dateRange2) {
@@ -1089,4 +1100,5 @@ public class AdminDashBoardManager {
 		return list;
 	}
 
+	
 }

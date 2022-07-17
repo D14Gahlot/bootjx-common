@@ -22,36 +22,37 @@ import com.boot.utils.ArgUtil;
 @RequestMapping("/user")
 public class UserController {
 
-    @Autowired
-    private AppCommonConfig appCommonConfig;
+	@Autowired
+	private AppCommonConfig appCommonConfig;
 
-    @Autowired
-    private EmpAuthService empAuthService;
+	@Autowired
+	private EmpAuthService empAuthService;
 
-    @RequestMapping(value = { "/auth/**", "/app/**" }, method = { RequestMethod.GET })
-    public String home(Model model, @RequestParam(required = false) String theme) {
-	model.addAllAttributes(appCommonConfig.appAttributes());
+	@RequestMapping(value = { "/auth/**", "/app/**" }, method = { RequestMethod.GET })
+	public String home(Model model, @RequestParam(required = false) String theme) {
+		model.addAllAttributes(appCommonConfig.appAttributes());
 
-	Authentication auth = AccountAuthService.getAuthentication();
-	if (ArgUtil.is(auth)) {
-	    model.addAttribute("APP_USER", auth.getName());
-	    model.addAttribute("APP_USER_ROLE", "ACCOUNT_ADMIN");
-	} else {
-	    model.addAttribute("APP_USER", "");
-	    model.addAttribute("APP_USER_ROLE", "GUEST");
+		Authentication auth = AccountAuthService.getAuthentication();
+		if (ArgUtil.is(auth)) {
+			model.addAttribute("APP_USER", auth.getName());
+			model.addAttribute("APP_USER_ROLE", "ACCOUNT_ADMIN");
+		} else {
+			model.addAttribute("APP_USER", "");
+			model.addAttribute("APP_USER_ROLE", "GUEST");
+		}
+
+		model.addAttribute("APP", "account");
+
+		return "app-account";
 	}
 
-	model.addAttribute("APP", "account");
-
-	return "app-account";
-    }
-
-    @ResponseBody
-    @RequestMapping(value = "/pub/login", method = { RequestMethod.POST })
-    public ApiResponse<UserLoginToken, Object> agentLogin(@RequestParam String username, @RequestParam String password,
-	    @RequestParam(required = false) String app, @RequestParam String tnt, @RequestParam String domainId)
-	    throws NoSuchAlgorithmException {
-	return ApiResponse.buildData(empAuthService.createAgentLoginToken(username, password, tnt, domainId, app));
-    }
+	@ResponseBody
+	@RequestMapping(value = "/pub/login", method = { RequestMethod.POST })
+	public ApiResponse<UserLoginToken, Object> agentLogin(@RequestParam String username, @RequestParam String password,
+			@RequestParam(required = false) String app, @RequestParam String tnt, @RequestParam String domainId)
+			throws NoSuchAlgorithmException {
+		return ApiResponse
+				.buildData(empAuthService.createAgentLoginToken(username, username, password, tnt, domainId, app));
+	}
 
 }

@@ -29,32 +29,33 @@ import com.boot.utils.StringUtils.StringMatcher;
 @ControllerAdvice
 public class AppCommonAdvice extends AmxAdvice {
 
-    public HttpStatus getHttpStatus(AmxApiException exp) {
-	ApiRequestDetail apiRequestDetail = AppContextUtil.getApiRequestDetail();
-	if (apiRequestDetail.getResponeError() == ResponeError.PROPAGATE) {
-	    return exp.getHttpStatus();
+	public HttpStatus getHttpStatus(AmxApiException exp) {
+		ApiRequestDetail apiRequestDetail = AppContextUtil.getApiRequestDetail();
+		if (apiRequestDetail.getResponeError() == ResponeError.PROPAGATE) {
+			return exp.getHttpStatus();
+		}
+		return HttpStatus.OK;
 	}
-	return HttpStatus.OK;
-    }
 
-    public static final Pattern DUPLICATE_FIELD = Pattern.compile("index:\\ ([a-zA-Z0-9_]+)\\ dup key");
+	public static final Pattern DUPLICATE_FIELD = Pattern.compile(
+			"duplicate key error collection: [a-zA-Z0-9_\\.]+ index:\\ ([a-zA-Z0-9_]+)('; nested exception|\\ dup\\ key)");
 
-    @ExceptionHandler(DuplicateKeyException.class)
-    @ResponseBody
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ResponseEntity<AmxApiError> handle(DuplicateKeyException exception, HttpServletRequest request,
-	    HttpServletResponse response) {
-	List<ApiFieldError> errors = new ArrayList<ApiFieldError>();
-	ApiFieldError newError = new ApiFieldError();
+	@ExceptionHandler(DuplicateKeyException.class)
+	@ResponseBody
+	@ResponseStatus(HttpStatus.BAD_REQUEST)
+	public ResponseEntity<AmxApiError> handle(DuplicateKeyException exception, HttpServletRequest request,
+			HttpServletResponse response) {
+		List<ApiFieldError> errors = new ArrayList<ApiFieldError>();
+		ApiFieldError newError = new ApiFieldError();
 
-	StringMatcher matcher = new StringMatcher(exception.getMessage());
-	if (matcher.isMatch(DUPLICATE_FIELD)) {
-	    newError.setField(matcher.group(1));
-	    newError.setDescriptionKey("DUPLICATE_KEY");
-	    newError.setDescription(HttpUtils.sanitze(exception.getMessage()));
+		StringMatcher matcher = new StringMatcher(exception.getMessage());
+		if (matcher.isMatch(DUPLICATE_FIELD)) {
+			newError.setField(matcher.group(1));
+			newError.setDescriptionKey("DUPLICATE_KEY");
+			newError.setDescription(HttpUtils.sanitze("Duplicate Key: "+newError.getField()));
+		}
+		errors.add(newError);
+		return badRequest(exception, errors, request, response, ApiStatusCodes.PARAM_DUPLICATE);
 	}
-	errors.add(newError);
-	return badRequest(exception, errors, request, response, ApiStatusCodes.PARAM_DUPLICATE);
-    }
 
 }

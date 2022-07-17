@@ -22,6 +22,9 @@ public class PostmanInBoundProcessorImpl implements InBoundProcessor {
 	private CoreNLPService coreNLPService;
 
 	@Autowired
+	PMEnvironment pmEnvironment;
+
+	@Autowired
 	MessageStore messageStore;
 
 	@Override

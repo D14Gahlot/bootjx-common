@@ -5,68 +5,80 @@ import java.io.Serializable;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import com.boot.jx.phonebook.model.PBName;
-import com.boot.jx.phonebook.model.PBPhone;
-import com.boot.jx.swagger.ApiMockModelProperty;
+import com.boot.jx.postman.pbook.PBName;
+import com.boot.jx.postman.pbook.PBPhone;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Document(collection = "PHONE_USER")
 public class PhoneUserDoc implements Serializable {
-    private static final long serialVersionUID = 1281605084248923642L;
+	private static final long serialVersionUID = 1281605084248923642L;
 
-    @Id
-    private String mobile;
+	@Id
+	public String phoneId;
 
-    public PBName name;
+	public PBName name;
 
-    public PBPhone phone;
+	public PBPhone phone;
+	public String deviceId;
 
-    @ApiMockModelProperty(example = "xxxxxxxx", required = false)
-    public String authToken;
+	public String authToken;
+	public String otpHash;
+	public String otpNounce;
 
-    public Boolean positive;
+	public String getPhoneId() {
+		return phoneId;
+	}
 
-    public boolean syncRequired;
+	public void setPhoneId(String phoneId) {
+		this.phoneId = phoneId;
+	}
 
-    public String getAuthToken() {
-	return authToken;
-    }
+	public PBName getName() {
+		return name;
+	}
 
-    public void setAuthToken(String authToken) {
-	this.authToken = authToken;
-    }
+	public void setName(PBName name) {
+		this.name = name;
+	}
 
-    public Boolean getPositive() {
-	return positive;
-    }
+	public PBPhone getPhone() {
+		return phone;
+	}
 
-    public void setPositive(Boolean positive) {
-	this.positive = positive;
-    }
+	public void setPhone(PBPhone phone) {
+		this.phone = phone;
+	}
 
-    public boolean isSyncRequired() {
-	return syncRequired;
-    }
+	public String getDeviceId() {
+		return deviceId;
+	}
 
-    public void setSyncRequired(boolean syncRequired) {
-	this.syncRequired = syncRequired;
-    }
+	public void setDeviceId(String deviceId) {
+		this.deviceId = deviceId;
+	}
 
-    public String getMobile() {
-	return mobile;
-    }
+	public String getAuthToken() {
+		return authToken;
+	}
 
-    public void setMobile(String mobile) {
-	this.mobile = mobile;
-    }
+	public void setAuthToken(String authToken) {
+		this.authToken = authToken;
+	}
 
-    public PBName getName() {
-	return name;
-    }
+	public String getOtpHash() {
+		return otpHash;
+	}
 
-    public void setName(PBName name) {
-	this.name = name;
-    }
+	public void setOtpHash(String otpHash) {
+		this.otpHash = otpHash;
+	}
 
+	public String getOtpNounce() {
+		return otpNounce;
+	}
+
+	public void setOtpNounce(String otpNounce) {
+		this.otpNounce = otpNounce;
+	}
 }

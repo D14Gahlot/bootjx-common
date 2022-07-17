@@ -7,10 +7,10 @@
 <meta charset="utf-8">
 <meta name="viewport"
 	content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title th:text="${APP_TITLE}">Application</title>
+<title th:text="${CONFIG.PROP_SERVICE_NAME}">Application</title>
 
 
-<link rel="shortcut icon" th:href="${CDN_URL}+'/favicon.ico'" />
+<link rel="shortcut icon" th:href="${CONFIG.PROP_LOGO_BG_X_ICON}" />
 
 <link
 	href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i,800,800i&display=swap"
@@ -48,9 +48,8 @@
 						<div class="detailsh">
 							<p>
 								<img class="bigbrandlogo"
-									th:src="${CDN_URL}+'/logo/logo-long.png'"
-									alt="Enterprise.Social.Communication"> <span
-									class="bigbrandlogo_text">Enterprise.Social.Communication</span>
+									th:src="${CONFIG.PROP_LOGO_BG_X_LOGO}"
+									alt="Enterprise.Social.Communication">
 							</p>
 						</div>
 					</div>
@@ -58,9 +57,8 @@
 						<div class="detailsh  d-block d-md-none">
 							<p>
 								<img class="bigbrandlogo-o"
-									th:src="${CDN_URL}+'/logo/logo-long-o.png'"
-									alt="Enterprise.Social.Communication"> <span
-									class="bigbrandlogo-o_text">Enterprise.Social.Communication</span>
+									th:src="${CONFIG.PROP_LOGO_BG_X_LOGO_W}"
+									alt="Enterprise.Social.Communication">
 							</p>
 						</div>
 
@@ -232,15 +230,25 @@
 						<!--  SOCIAL LINKs -->
 						<div class="social-link">
 							<ul class="socil-icon">
-								<li><a target="_blank" href="https://www.instagram.com/mehery_soccom/"><i
+								<li><a target="_blank" 
+										th:if="${CONFIG.PROP_SOCIAL_INSTAGRAM != null}"
+										th:href="'https://www.instagram.com/'+ ${CONFIG.PROP_SOCIAL_INSTAGRAM}"><i
 										class="fab fa-instagram"></i></a></li>
-								<li><a target="_blank" href="https://www.facebook.com/MeherY.SocCom/"><i
+								<li><a target="_blank" 
+										th:if="${CONFIG.PROP_SOCIAL_FACEBOOK != null}"
+										th:href="'https://www.facebook.com/'+ ${CONFIG.PROP_SOCIAL_FACEBOOK}"><i
 										class="fab fa-facebook-f"></i></a></li>
-								<li><a target="_blank" href="https://twitter.com/mehery_soccom"><i
+								<li><a target="_blank" 
+										th:if="${CONFIG.PROP_SOCIAL_TWITTER != null}"
+										th:href="'https://twitter.com/'+ ${CONFIG.PROP_SOCIAL_TWITTER}"><i
 										class="fab fa-twitter"></i></a></li>
-								<li><a target="_blank" href="https://t.me/MeheryBot"><i
+								<li><a target="_blank" 
+										th:if="${CONFIG.PROP_SOCIAL_TELEGRAM != null}"
+										th:href="'https://t.me/'+ ${CONFIG.PROP_SOCIAL_TELEGRAM}"><i
 										class="fab fa-telegram-plane"></i></a></li>
-								<li><a target="_blank" href="https://wa.me/919082854885"><i
+								<li><a target="_blank" 
+										th:if="${CONFIG.PROP_SOCIAL_WHATSAPP != null}"
+										th:href="'https://wa.me/'+ ${CONFIG.PROP_SOCIAL_WHATSAPP}"><i
 										class="fab fa-whatsapp"></i></a></li>
 							</ul>
 						</div>
@@ -253,7 +261,7 @@
 
 	<footer>
 		<center>
-			<small> Copyright © MeherY SocCom. All Rights Reserved.<small>
+			<small> Copyright © [[${CONFIG.PROP_SERVICE_NAME}]]. All Rights Reserved.<small>
 		</center>
 	</footer>
 </body>

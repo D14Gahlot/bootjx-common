@@ -8,30 +8,37 @@ import org.springframework.stereotype.Component;
 
 import com.boot.jx.common.config.AppCommonAuthFilter.AppCommonAuthUser;
 import com.boot.jx.common.dto.AgentResponseAuthDto;
-import com.boot.jx.logger.AuditDetailProvider;
+import com.boot.jx.postman.PMConstants;
 import com.boot.utils.ArgUtil;
 
 @Component
 @Scope(value = "session", proxyMode = ScopedProxyMode.TARGET_CLASS)
-public class AdminSessionBean extends AppCommonAuthUser implements AuditDetailProvider, Serializable {
+public class AdminSessionBean extends AppCommonAuthUser implements Serializable {
 
-    private static final long serialVersionUID = 3090820592497487481L;
-    private AgentResponseAuthDto profile;
+	private static final long serialVersionUID = 3090820592497487481L;
+	private AgentResponseAuthDto profile;
 
-    public AgentResponseAuthDto getProfile() {
-	return profile;
-    }
-
-    public void setProfile(AgentResponseAuthDto profile) {
-	this.profile = profile;
-    }
-
-    @Override
-    public String getAuditUser() {
-	if (ArgUtil.is(this.profile)) {
-	    return this.profile.getAgent_code();
+	public AgentResponseAuthDto getProfile() {
+		return profile;
 	}
-	return null;
-    }
 
+	public void setProfile(AgentResponseAuthDto profile) {
+		this.profile = profile;
+	}
+
+	public boolean isLoggedIn() {
+		return ArgUtil.is(getProfile());
+	}
+
+	@Override
+	public String getAuthUser() {
+		if (ArgUtil.is(this.profile)) {
+			if (profile.isSuperAdmin()) {
+				return String.format("%s:%s", this.profile.getAgent_code(), this.profile.getAgent_email());
+			} else {
+				return this.profile.getAgent_code();
+			}
+		}
+		return PMConstants.DEFAULT.NO_USER;
+	}
 }

@@ -4,9 +4,15 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.boot.jx.AppContextUtil;
 import com.boot.model.MapModel;
 
 public abstract class JobTaskModel<T> implements Serializable {
+
+	public JobTaskModel() {
+		super();
+		this.tenant = AppContextUtil.getTenant();
+	}
 
 	private static final long serialVersionUID = -8178126816683098712L;
 
@@ -17,6 +23,7 @@ public abstract class JobTaskModel<T> implements Serializable {
 	private String tenant;
 	private String jobId;
 	private String batchId;
+	private Long version;
 
 	public String getBatchId() {
 		return batchId;
@@ -174,7 +181,7 @@ public abstract class JobTaskModel<T> implements Serializable {
 		}
 
 		public String taskUUID() {
-			return String.format("%s-%s-%s", this.getTenant(), this.getJobId(), this.getTaskId());
+			return String.format("%s-%s-%s-%s", this.getTenant(), this.getJobId(), this.getTaskId(), this.getVersion());
 		}
 
 		public Tasklet taskId(String taskId) {
@@ -189,11 +196,20 @@ public abstract class JobTaskModel<T> implements Serializable {
 		taslet.setTenant(job.getTenant());
 		taslet.setJobId(job.getJobId());
 		taslet.setBatchId(job.getBatchId());
+		taslet.setVersion(job.getVersion());
 		return taslet;
 	}
 
 	public static BatchJob newBatchJob() {
 		return new BatchJob();
+	}
+
+	public Long getVersion() {
+		return version;
+	}
+
+	public void setVersion(Long version) {
+		this.version = version;
 	}
 
 }

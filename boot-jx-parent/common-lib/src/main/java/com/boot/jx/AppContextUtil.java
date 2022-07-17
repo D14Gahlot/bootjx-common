@@ -67,6 +67,14 @@ public class AppContextUtil {
 		return getSessionId(true, defautSessionId);
 	}
 
+	public static void setJSessionId(Object jSessionId) {
+		ContextUtil.map().put(AppConstants.SESSION_JID_XKEY, jSessionId);
+	}
+
+	public static String getJSessionId() {
+		return ArgUtil.parseAsString(ContextUtil.map().get(AppConstants.SESSION_JID_XKEY));
+	}
+
 	/**
 	 * 
 	 * @param generate - create new token if absent

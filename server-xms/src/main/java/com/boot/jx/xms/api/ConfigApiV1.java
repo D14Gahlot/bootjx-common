@@ -22,7 +22,8 @@ import com.boot.jx.postman.ClientApp;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PMEnvironment.AChannelConfig;
 import com.boot.jx.postman.doc.HSMTemplateDoc;
-import com.boot.jx.postman.doc.config.ClientKeyConfigDoc;
+import com.boot.jx.postman.doc.config.ClientAppConfigDoc;
+import com.boot.jx.postman.doc.config.VarsConfigDoc.CompanyVarsConfigDoc;
 import com.boot.jx.postman.model.ext.MsgChannel;
 import com.boot.jx.postman.store.ConfigStore;
 import com.boot.jx.xms.XmsConstants.XMSClientAuth;
@@ -38,77 +39,94 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.Authorization;
 
 @Api(tags = "Configuration", description = "API's for configuration management",
-	authorizations = @Authorization("X_API_KEY"))
+		authorizations = @Authorization("X_API_KEY"))
 @RestController
 public class ConfigApiV1 {
 
-    @Autowired
-    private ConfigManager configManager;
+	@Autowired
+	private ConfigManager configManager;
 
-    @Autowired
-    private ConfigStore configStore;
+	@Autowired
+	private ConfigStore configStore;
 
-    @Autowired
-    private PMEnvironment pmEnvironment;
+	@Autowired
+	private PMEnvironment pmEnvironment;
 
-    @Autowired
-    private CommonMongoTemplate commonMongoTemplate;
+	@Autowired
+	private CommonMongoTemplate commonMongoTemplate;
 
-    @ApiOperation(value = "Set Webhook", notes = "${swagger.ConfigApiV1.setWebhookUrl.description}",
-	    authorizations = @Authorization("X_API_KEY"))
-    @XMSClientAuth
-    @JsonView(PMEnvironment.PublicProperty.class)
-    @RequestMapping(value = "/api/v1/config/webhook", method = { RequestMethod.POST })
-    public ApiResponse<ClientApp, Object> setWebhookUrl(@RequestBody WebhookUrlRequest req) {
+	@ApiOperation(value = "Set Webhook", notes = "${swagger.ConfigApiV1.setWebhookUrl.description}",
+			authorizations = @Authorization("X_API_KEY"))
+	@XMSClientAuth
+	@JsonView(PMEnvironment.PublicProperty.class)
+	@RequestMapping(value = "/api/v1/config/webhook", method = { RequestMethod.POST })
+	public ApiResponse<ClientApp, Object> setWebhookUrl(@RequestBody WebhookUrlRequest req) {
 
-	ClientApp x = XmsVendorConfigurer.getClientApp();
-	if (ArgUtil.is(x)) {
-	    ClientKeyConfigDoc xo = configStore.findById(x.getId(), ClientKeyConfigDoc.class);
-	    if (ArgUtil.areEqual(xo.getAppType(), ClientApp.APP_TYPE_WEBHOOK)) {
-		xo.setWebhook(req.url);
-		configManager.save(xo);
-		configManager.refresh();
-	    } else {
-		ApiResponseUtil.throwInputException(new ApiFieldError().field("appType").obzect("WebhookUrlRequest")
-			.codeKey("INCORRECT_APP_TYPE").description("ClientApp is not configured for Webhook type"));
-	    }
-	} else {
-	    ApiResponseUtil.throwInputException(new ApiFieldError().field("appType").obzect("WebhookUrlRequest")
-		    .codeKey("INCORRECT_APP_TYPE").description("ClientApp is not configured"));
-	}
-	return ApiResponse.buildResults(x).meta(req);
-    }
-
-    @ApiOperation(value = "Channels List", notes = "${swagger.ConfigApiV1.getChannels.description}",
-	    authorizations = @Authorization("X_API_KEY"))
-    @XMSClientAuth
-    @RequestMapping(value = "/api/v1/config/channels", method = { RequestMethod.GET })
-    @JsonView(PMEnvironment.PublicProperty.class)
-    public ApiResultsMetaCompactResponse<MsgChannel, Object> getChannels(
-	    @RequestParam(required = false, defaultValue = "false") boolean sabdnox) {
-	List<AChannelConfig> list = pmEnvironment.config().listChannels();
-	List<MsgChannel> newList = CollectionUtil.getList(MsgChannel.class);
-	for (AChannelConfig channelConfig : list) {
-	    MsgChannel channel = new MsgChannel();
-	    EntityDtoUtil.entityToDto(channelConfig, channel);
-	    newList.add(channel);
-	}
-	return ApiResponse.buildResults(newList);
-    }
-
-    @ApiOperation(value = "HSM Templates", notes = "${swagger.ConfigApiV1.getHSMTemplates.description}",
-	    authorizations = @Authorization("X_API_KEY"))
-    @XMSClientAuth
-    @RequestMapping(value = "/api/v1/config/tmpl/hsm", method = { RequestMethod.GET })
-    public ApiResponse<HSMTemplateDoc, Object> getHSMTemplates(@RequestParam(required = false) String channelId) {
-
-	CommonMongoQB<CommonMongoQBimpl<HSMTemplateDoc>, HSMTemplateDoc> cmq = CommonMongoQueryBuilder
-		.collection(HSMTemplateDoc.class);
-
-	if (ArgUtil.is(channelId)) {
-	    cmq.where("approved.channelId", channelId);
+		ClientApp x = XmsVendorConfigurer.getClientApp();
+		if (ArgUtil.is(x)) {
+			ClientAppConfigDoc xo = configStore.findById(x.getId(), ClientAppConfigDoc.class);
+			if (ArgUtil.areEqual(xo.getAppType(), ClientApp.APP_TYPE_WEBHOOK)) {
+				xo.setWebhook(req.url);
+				xo.setForward(req.forward);
+				configManager.save(xo);
+				configManager.refresh();
+			} else {
+				ApiResponseUtil.throwInputException(new ApiFieldError().field("appType").obzect("WebhookUrlRequest")
+						.codeKey("INCORRECT_APP_TYPE").description("ClientApp is not configured for Webhook type"));
+			}
+		} else {
+			ApiResponseUtil.throwInputException(new ApiFieldError().field("appType").obzect("WebhookUrlRequest")
+					.codeKey("INCORRECT_APP_TYPE").description("ClientApp is not configured"));
+		}
+		return ApiResponse.buildResults(x).meta(req);
 	}
 
-	return ApiResponse.buildResults(commonMongoTemplate.find(cmq));
-    }
+	@ApiOperation(value = "Channels List", notes = "${swagger.ConfigApiV1.getChannels.description}",
+			authorizations = @Authorization("X_API_KEY"))
+	@XMSClientAuth
+	@RequestMapping(value = "/api/v1/config/channels", method = { RequestMethod.GET })
+	@JsonView(PMEnvironment.PublicProperty.class)
+	public ApiResultsMetaCompactResponse<MsgChannel, Object> getChannels(
+			@RequestParam(required = false, defaultValue = "false") boolean sabdnox) {
+		List<AChannelConfig> list = pmEnvironment.config().listChannels();
+		List<MsgChannel> newList = CollectionUtil.getList(MsgChannel.class);
+		for (AChannelConfig channelConfig : list) {
+			MsgChannel channel = new MsgChannel();
+			EntityDtoUtil.entityToDto(channelConfig, channel);
+			newList.add(channel);
+		}
+		return ApiResponse.buildResults(newList);
+	}
+
+	@ApiOperation(value = "HSM Templates", notes = "${swagger.ConfigApiV1.getHSMTemplates.description}",
+			authorizations = @Authorization("X_API_KEY"))
+	@XMSClientAuth
+	@RequestMapping(value = "/api/v1/config/tmpl/hsm", method = { RequestMethod.GET })
+	public ApiResponse<HSMTemplateDoc, Object> getHSMTemplates(@RequestParam(required = false) String channelId) {
+
+		CommonMongoQB<CommonMongoQBimpl<HSMTemplateDoc>, HSMTemplateDoc> cmq = CommonMongoQueryBuilder
+				.collection(HSMTemplateDoc.class);
+
+		if (ArgUtil.is(channelId)) {
+			cmq.where("approved.channelId", channelId);
+		}
+
+		return ApiResponse.buildResults(commonMongoTemplate.find(cmq));
+	}
+
+	@ApiOperation(value = "Global Vars", notes = "${swagger.ConfigApiV1.getGlobalVars.description}",
+			authorizations = @Authorization("X_API_KEY"))
+	@XMSClientAuth
+	@RequestMapping(value = "/api/v1/config/global/vars", method = { RequestMethod.GET })
+	public ApiResponse<CompanyVarsConfigDoc, Object> getGlobalVars(@RequestParam(required = false) String channelId) {
+
+		CommonMongoQB<CommonMongoQBimpl<CompanyVarsConfigDoc>, CompanyVarsConfigDoc> cmq = CommonMongoQueryBuilder
+				.collection(CompanyVarsConfigDoc.class);
+
+		if (ArgUtil.is(channelId)) {
+			cmq.where("approved.channelId", channelId);
+		}
+
+		return ApiResponse.buildResults(commonMongoTemplate.find(cmq));
+	}
 }
