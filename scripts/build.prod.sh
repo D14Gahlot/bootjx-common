@@ -1,9 +1,9 @@
 #!/bin/sh
 
 git co production
-echo 'branch.service.domain=mehery.com' > lib-common/lib-common-config/src/main/resources/application.branch.properties
-git add lib-common/lib-common-config/src/main/resources/application.branch.properties
-git commit -m "File Upated"
+#echo 'branch.service.domain=mehery.com' > lib-common/lib-common-config/src/main/resources/application.branch.properties
+#git add lib-common/lib-common-config/src/main/resources/application.branch.properties
+#git commit -m "File Upated"
 
 git up && git pu
 

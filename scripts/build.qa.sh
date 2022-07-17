@@ -5,9 +5,9 @@ echo "input  $input"
 
 git co staging
 
-echo 'branch.service.domain=mehery.io' > lib-common/lib-common-config/src/main/resources/application.branch.properties
-git add lib-common/lib-common-config/src/main/resources/application.branch.properties
-git commit -m "File Upated"
+#echo 'branch.service.domain=mehery.io' > lib-common/lib-common-config/src/main/resources/application.branch.properties
+#git add lib-common/lib-common-config/src/main/resources/application.branch.properties
+#git commit -m "File Upated"
 
 git up && git pu
 
