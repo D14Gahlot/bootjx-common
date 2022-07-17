@@ -431,7 +431,7 @@ public class WA360Client {
 				if ("unknown contact".equals(errorDetails)) {
 					error.field("to").code(PostManException.ErrorCode.CONTACT_NOTFOUND);
 				}
-			} else if("471".equals(errorCode)) {
+			} else if ("471".equals(errorCode)) {
 				error.setDescriptionKey("File or resource not found");
 				error.code(PostManException.ErrorCode.MESSAGE_LIMIT_EXCEEDED);
 			}

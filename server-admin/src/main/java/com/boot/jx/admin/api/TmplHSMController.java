@@ -64,6 +64,11 @@ public class TmplHSMController {
 			@RequestParam(required = false) String templateCode,
 			@RequestParam(required = false, defaultValue = "false") boolean sync) {
 		ChannelConfig channelConfig = pmEnvironment.local().channel(channelId);
+
+		if (!ArgUtil.is(channelConfig)) {
+			return ApiResponse.build();
+		}
+
 		if (sync) {
 			thirdPartyTmplManager.refreshWA360Templates(channelConfig);
 		}
