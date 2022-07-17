@@ -41,7 +41,8 @@ public class PostManFile extends CommonFile {
 
 	@JsonIgnore
 	public void setITemplate(ITemplate template) {
-		this.template().setId(ArgUtil.parseAsString(template.toString()));
+		this.template().setId(ArgUtil.parseAsString(template));
+		this.template().setCode(template.getCode());
 	}
 
 	@JsonIgnore
