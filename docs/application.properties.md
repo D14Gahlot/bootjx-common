@@ -198,6 +198,34 @@ mry.xms.url=http://localhost:8085/xms
 mry.superadmin.emails=cherrybase786@gmail.com,xyz@gmail.com
 ```
 
+## CONTAK
+###### application.properties
+```application.properties
+###### App Identification  ########
+app.env=DEMO 					
+app.group=1  					
+app.id=CONT1
+
+###### Appplication ########
+server.port=8087
+
+###### DB Mongo ########
+spring.data.mongodb.uri=mongodb://localbot:localbot@10.28.42.30:27017/localbot
+
+###### DB Redis ########
+spring.redis.host=localhost
+spring.redis.port=6379
+server.connection-timeout=-1
+
+###### cherrybase ########
+mry.postman.url=http://localhost:8082/postman
+mry.agent.url=http://localhost:8083/agent
+mry.bot.url=http://localhost:8084/bot
+mry.admin.url=http://localhost:8081/admin
+mry.xms.url=http://localhost:8085/xms
+
+```
+
 
 ## TenantProperties for All Services
 ###### application.&lt;tnt&gt;.properties
