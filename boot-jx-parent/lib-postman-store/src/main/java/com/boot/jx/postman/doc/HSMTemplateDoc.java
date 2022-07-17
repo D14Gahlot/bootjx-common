@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.TypeAlias;
@@ -61,6 +62,7 @@ public class HSMTemplateDoc implements Serializable, BasicTemplate, AuditCreateE
 	public static class ApprovedChannels {
 		public String channelId;
 		public String templateId;
+		public String status;
 	}
 
 	private List<ApprovedChannels> approved;
@@ -269,20 +271,25 @@ public class HSMTemplateDoc implements Serializable, BasicTemplate, AuditCreateE
 		this.approved = approved;
 	}
 
-	public HSMTemplateDoc approved(String channelId, String templateId) {
+	public HSMTemplateDoc approved(String channelId, String templateId, String status) {
 		if (this.approved == null) {
 			this.approved = new ArrayList<ApprovedChannels>();
 		}
 		for (ApprovedChannels approvedChannels : approved) {
-			if (ArgUtil.areEqual(approvedChannels.channelId, channelId)) {
-				approvedChannels.templateId = templateId;
+			if (ArgUtil.areEqual(approvedChannels.channelId, channelId)
+					&& ArgUtil.areEqual(approvedChannels.templateId, templateId)) {
+				approvedChannels.status = status;
 				return this;
 			}
 		}
 		ApprovedChannels approvedChannel = new ApprovedChannels();
 		approvedChannel.channelId = channelId;
 		approvedChannel.templateId = templateId;
+		approvedChannel.status = status;
 		this.approved.add(approvedChannel);
+
+		this.approved = this.approved.stream().filter(link -> ArgUtil.is(link.status)).collect(Collectors.toList());;
+
 		return this;
 	}
 

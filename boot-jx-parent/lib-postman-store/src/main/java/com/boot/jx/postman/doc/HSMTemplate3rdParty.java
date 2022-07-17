@@ -14,125 +14,125 @@ import com.boot.jx.postman.model.ITemplates.BasicExternalTemplate;
 @TypeAlias("HSMTemplate3rdParty")
 public class HSMTemplate3rdParty implements Serializable, AuditCreateEntity, BasicExternalTemplate {
 
-    public static final String COLLECTION_NAME = "DICT_HSM_TEMPLATES_3RD";
-    public static final String COLLECTION_NAME_TRASH = "TRASH_DICT_HSM_TEMPLATES_3RD";
+	public static final String COLLECTION_NAME = "DICT_HSM_TEMPLATES_3RD";
+	public static final String COLLECTION_NAME_TRASH = "TRASH_DICT_HSM_TEMPLATES_3RD";
 
-    private static final long serialVersionUID = 5953299041958788771L;
+	private static final long serialVersionUID = 5953299041958788771L;
 
-    @Id
-    private String id;
+	@Id
+	private String id;
 
-    // Template Filters
-    private String channelId;
-    private String code;
-    private String lang;
-    private String category;
+	// Template Filters
+	private String channelId;
+	private String code;
+	private String lang;
+	private String category;
 
-    // Template Filters
-    private String hsmTemplateId;
-    private String channelType;
-    private String contactType;
+	// Template Filters
+	private String hsmTemplateId;
+	private String channelType;
+	private String contactType;
 
-    private Map<String, Object> template;
-    private Map<String, Object> varMap;
+	private Map<String, Object> template;
+	private Map<String, Object> varMap;
 
-    private String createdBy;
-    private Long createdStamp;
+	private String createdBy;
+	private Long createdStamp;
 
-    public String getId() {
-	return id;
-    }
+	public String getId() {
+		return id;
+	}
 
-    public void setId(String id) {
-	this.id = id;
-    }
+	public void setId(String id) {
+		this.id = id;
+	}
 
-    public Map<String, Object> getTemplate() {
-	return template;
-    }
+	public Map<String, Object> getTemplate() {
+		return template;
+	}
 
-    public void setTemplate(Map<String, Object> template) {
-	this.template = template;
-    }
+	public void setTemplate(Map<String, Object> template) {
+		this.template = template;
+	}
 
-    public String getCreatedBy() {
-	return createdBy;
-    }
+	public String getCreatedBy() {
+		return createdBy;
+	}
 
-    public void setCreatedBy(String createdBy) {
-	this.createdBy = createdBy;
-    }
+	public void setCreatedBy(String createdBy) {
+		this.createdBy = createdBy;
+	}
 
-    public Long getCreatedStamp() {
-	return createdStamp;
-    }
+	public Long getCreatedStamp() {
+		return createdStamp;
+	}
 
-    public void setCreatedStamp(Long createdStamp) {
-	this.createdStamp = createdStamp;
-    }
+	public void setCreatedStamp(Long createdStamp) {
+		this.createdStamp = createdStamp;
+	}
 
-    public String getChannelId() {
-	return channelId;
-    }
+	public String getChannelId() {
+		return channelId;
+	}
 
-    public void setChannelId(String channelId) {
-	this.channelId = channelId;
-    }
+	public void setChannelId(String channelId) {
+		this.channelId = channelId;
+	}
 
-    public String getHsmTemplateId() {
-	return hsmTemplateId;
-    }
+	public String getHsmTemplateId() {
+		return hsmTemplateId;
+	}
 
-    public void setHsmTemplateId(String hsmTemplateId) {
-	this.hsmTemplateId = hsmTemplateId;
-    }
+	public void setHsmTemplateId(String hsmTemplateId) {
+		this.hsmTemplateId = hsmTemplateId;
+	}
 
-    public String getChannelType() {
-	return channelType;
-    }
+	public String getChannelType() {
+		return channelType;
+	}
 
-    public void setChannelType(String channelType) {
-	this.channelType = channelType;
-    }
+	public void setChannelType(String channelType) {
+		this.channelType = channelType;
+	}
 
-    public String getContactType() {
-	return contactType;
-    }
+	public String getContactType() {
+		return contactType;
+	}
 
-    public void setContactType(String contactType) {
-	this.contactType = contactType;
-    }
+	public void setContactType(String contactType) {
+		this.contactType = contactType;
+	}
 
-    public Map<String, Object> getVarMap() {
-	return varMap;
-    }
+	public Map<String, Object> getVarMap() {
+		return varMap;
+	}
 
-    public void setVarMap(Map<String, Object> varMap) {
-	this.varMap = varMap;
-    }
+	public void setVarMap(Map<String, Object> varMap) {
+		this.varMap = varMap;
+	}
 
-    public String getLang() {
-	return lang;
-    }
+	public String getLang() {
+		return lang;
+	}
 
-    public void setLang(String lang) {
-	this.lang = lang;
-    }
+	public void setLang(String lang) {
+		this.lang = lang;
+	}
 
-    public String getCode() {
-	return code;
-    }
+	public String getCode() {
+		return code;
+	}
 
-    public void setCode(String code) {
-	this.code = code;
-    }
+	public void setCode(String code) {
+		this.code = code;
+	}
 
-    public String getCategory() {
-	return category;
-    }
+	public String getCategory() {
+		return category;
+	}
 
-    public void setCategory(String category) {
-	this.category = category;
-    }
+	public void setCategory(String category) {
+		this.category = category;
+	}
 
 }
