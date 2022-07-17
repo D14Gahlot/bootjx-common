@@ -142,7 +142,8 @@ public class ConfigManager {
 		default:
 			doc.prefs().remove(key);
 			PrefsConfigDoc prefsConfigDoc = new PrefsConfigDoc();
-			prefsConfigDoc.setId(key);
+			prefsConfigDoc.setKey(key);
+			prefsConfigDoc.setId(prefsConfigDoc.getKey() + "." + pmCommonConfig.getServiceServer());
 			configStore.remove(prefsConfigDoc);
 			break;
 		}

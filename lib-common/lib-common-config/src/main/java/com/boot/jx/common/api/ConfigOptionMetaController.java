@@ -165,7 +165,7 @@ public class ConfigOptionMetaController {
 		return ApiResponse.buildResults(configManager.getConfigs(key));
 	}
 
-	@ApiRequest(rules = { ACCESS_RULES.ONLY_DUPERUSER_FOR_MASTER_DOMAIN, ACCESS_RULES.ONLY_DOMAIN_ADMIN })
+	@ApiRequest(rules = { ACCESS_RULES.ONLY_DUPERUSER_FOR_MASTER_DOMAIN })
 	@RequestMapping(value = "/api/config", method = { RequestMethod.DELETE })
 	public ApiResponse<Map<String, Object>, Object> deleteConfig(@RequestParam(required = false) String key) {
 		configManager.deleteAdminConfigs(key);
