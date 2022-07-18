@@ -122,14 +122,16 @@ public class PartnerController {
 			return pmCommonConfig.mainDomainRedirect(commonHttpRequest.getRequestURI() + "/auth/direct");
 		}
 
+		DomainDoc domainDoc = accountStore.findDomainByName(domain);
+
 		model.addAllAttributes(appCommonConfig.appAttributes());
 		model.addAttribute("FORM_URL", String.format("https://%s.%s/%s/auth/direct", domain,
-				//"local.com"
-				env.keyEntry(ConfigConstants.APP_KEY.PROP_SERVICE_SERVER).asString()
-				, panel));
+				// "local.com"
+				ArgUtil.anyOf(domainDoc.getServer(),
+						env.keyEntry(ConfigConstants.APP_KEY.PROP_SERVICE_SERVER).asString()),
+				panel));
 
 		if (userSessionBean.hasAdminAccesTo(domain)) {
-			DomainDoc domainDoc = accountStore.findDomainByName(domain);
 			UserLoginToken userLoginToken = empAuthService.createSuperLoginToken("superadmin",
 					userSessionBean.domainUser().contact().getEmail(), domain, domainDoc.getId(), "admin");
 			model.addAttribute("DOMAIN_USER", userLoginToken.getDomainUser());

@@ -794,6 +794,14 @@ public final class ArgUtil {
 		return strA.equals(strB);
 	}
 
+
+	public static <T> T nonEmpty(T str1, T strs2) {
+		if (!isEmpty(str1)) {
+			return str1;
+		}
+		return strs2;
+	}
+	
 	/**
 	 * It will return the first Non-Empty value
 	 * 
@@ -801,7 +809,7 @@ public final class ArgUtil {
 	 * @param strs
 	 * @return
 	 */
-	public static <T> T nonEmpty(T... strs) {
+	public static <T> T anyOf(T... strs) {
 		for (T str : strs) {
 			if (!isEmpty(str)) {
 				return str;
@@ -809,12 +817,9 @@ public final class ArgUtil {
 		}
 		return null;
 	}
-
-	public static <T> T nonEmpty(T str1, T strs2) {
-		if (!isEmpty(str1)) {
-			return str1;
-		}
-		return strs2;
+	
+	public static <T> T nonEmpty(T... strs) {
+		return anyOf(strs);
 	}
 
 	@Deprecated
