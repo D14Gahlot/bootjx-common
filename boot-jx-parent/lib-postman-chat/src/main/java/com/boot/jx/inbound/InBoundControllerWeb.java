@@ -48,6 +48,7 @@ import com.boot.jx.postman.service.ChatDTOUtil;
 import com.boot.jx.postman.store.MessageContext;
 import com.boot.jx.postman.store.MessageStore;
 import com.boot.jx.postman.store.SessionStore;
+import com.boot.jx.stomp.StompSessionCache.StompSession;
 import com.boot.jx.stomp.StompTunnelSessionManager;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.model.MapModel;
@@ -189,8 +190,10 @@ public class InBoundControllerWeb {
 				}
 			}
 		}
+
+		StompSession stomp = null;
 		if (ArgUtil.is(channelConfig)) {
-			stompTunnelSessionManager.registerUser(ArgUtil.nonEmpty(user, csid), contactIdWeb, csid);
+			stomp = stompTunnelSessionManager.registerUser(ArgUtil.nonEmpty(user, csid), contactIdWeb, csid);
 		}
 
 		if (msgs.size() == 0) {
@@ -200,14 +203,16 @@ public class InBoundControllerWeb {
 				msgs.add(ChatDTOUtil.getChatMessageDTO(messageStore.createMessageDoc(icebrakerMsg)));
 			}
 		}
-
-		return ApiResponse.buildResults(msgs);
+		//In-Cognito Window does not support Cookies that is why it So important to  send these values to UI in advance for mapping,
+		//because if cookies cant be set, JSESSION cannot be created and be relied upon to store these values
+		return ApiResponse.buildResults(msgs, stomp);
 	}
 
 	private ApiResponse<InboxMessage, Object> inboundMessageBoxEventMethod(String channelId, String channelKey,
 			MapModel map, MultipartFile file) {
 		PMConfiguration config = pmEnvironment.config();
 		ChannelConfig channelConfig = config.channel(channelId);
+		MapModel meta = MapModel.createInstance();
 		// ConnectorHandler connector = connectorHandlerFactory.get(channelConfig);
 		try {
 
@@ -234,9 +239,13 @@ public class InBoundControllerWeb {
 				connector.onReceiveInboxMessage(messageBoxEvent.getInboxMessages());
 				String webSessionId = commonHttpRequest.get(webSessionIdKey);
 				if (!ArgUtil.is(webSessionId) || !webSessionId.equalsIgnoreCase(sessionMessage.getSessionId())) {
-					commonHttpRequest.setCookie(new Kooky().name(webSessionIdKey).value(sessionMessage.getSessionId()));
+					webSessionId = sessionMessage.getSessionId();
+					commonHttpRequest.setCookie(new Kooky().name(webSessionIdKey).value(webSessionId));
 				}
-				return ApiResponse.buildResults(messageBoxEvent.getInboxMessages());
+				meta.put("webSessionIdKey", webSessionIdKey);
+				meta.put("webSessionId", webSessionId);
+
+				return ApiResponse.buildResults(messageBoxEvent.getInboxMessages(), meta.toMap());
 			} else if (ArgUtil.is(messageBoxEvent.getMessageReports())) {
 				connector.onMessageReports(messageBoxEvent.getMessageReports());
 				inBoundStatusService.update(messageBoxEvent.getMessageReports());
@@ -245,7 +254,7 @@ public class InBoundControllerWeb {
 			auditService.excep(new PMAuditEvent(PMAuditEvent.Type.INBOUND_ERROR).data(map.toMap()), LOGGER, e);
 		}
 
-		return ApiResponse.build();
+		return ApiResponse.buildResult(null, meta.toMap());
 	}
 
 	@ApiRequest(session = true)

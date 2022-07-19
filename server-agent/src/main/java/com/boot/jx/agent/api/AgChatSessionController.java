@@ -211,7 +211,7 @@ public class AgChatSessionController {
 			return resp.result(chatArchive.createMessageDTO(m, chatSessionDto)).meta(chatSessionDto);
 		} else {
 			if (agentSession.isLoggedIn() && ArgUtil.is(agentSession.getAgentCode())) {
-				sessionStore.save(new ChatSessionQuery(sessionDoc).read(agentSession.getAgentCode()));
+				sessionStore.update(new ChatSessionQuery(sessionDoc).read(agentSession.getAgentCode()));
 			}
 			ChatSessionDTO chatSessionDto = chatArchive.getChatSession(sessionDoc);
 			chatSessionDto = chatArchive.withContact(chatSessionDto);

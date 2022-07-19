@@ -334,6 +334,7 @@ public class AppRequestFilter implements Filter {
 					req.getSession().setAttribute(AppConstants.FLOW_ID_XKEY, flowFix);
 					req.getSession().setAttribute(AppConstants.SESSION_ID_XKEY, sessionId);
 					req.getSession().setAttribute(TenantContextHolder.TENANT, tnt);
+					//localCommonHttpRequest.setCookie(AppConstants.SESSION_ID_XKEY, sessionId);
 				}
 			} else {
 				AppContextUtil.loadTraceId(traceId);

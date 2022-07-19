@@ -126,8 +126,9 @@ public class StompTunnelSessionManager {
 	 * @param stompUID   - only one session with one stompUID can exists, if you
 	 *                   want to support multiple, change accordingly
 	 * @param xSessionId
+	 * @return
 	 */
-	public void mapHTTPSession(String stompUID, String xSessionId, String jSessionId, String... tags) {
+	public StompSession mapHTTPSession(String stompUID, String xSessionId, String jSessionId, String... tags) {
 		StompSession stompSession = new StompSession();
 		stompSession.setPrefix(getMSInstanceHash());
 		stompSession.setXsessionId(xSessionId);
@@ -145,19 +146,21 @@ public class StompTunnelSessionManager {
 		http2stompUIdMap.putSafe(xSessionId, stompUID);
 		http2stompUIdMap.putSafe(jSessionId, stompUID);
 		stompSessionCache.putSafe(stompUID, stompSession);
+		return stompSession;
 	}
 
 	/**
 	 * Create Stomp Session for User, Prefer with prefix E:21,C:1212,T:3435
 	 * 
 	 * @param stompUID
+	 * @return
 	 */
-	public void registerUser(String stompUID) {
-		mapHTTPSession(stompUID, AppContextUtil.getSessionId(true), AppContextUtil.getJSessionId());
+	public StompSession registerUser(String stompUID) {
+		return mapHTTPSession(stompUID, AppContextUtil.getSessionId(true), AppContextUtil.getJSessionId());
 	}
 
-	public void registerUser(String stompUID, String... tags) {
-		mapHTTPSession(stompUID, AppContextUtil.getSessionId(true), AppContextUtil.getJSessionId(), tags);
+	public StompSession registerUser(String stompUID, String... tags) {
+		return mapHTTPSession(stompUID, AppContextUtil.getSessionId(true), AppContextUtil.getJSessionId(), tags);
 	}
 
 	public StompSession getStompSession(String stompUID) {

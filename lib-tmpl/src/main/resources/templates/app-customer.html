@@ -9,7 +9,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, shrink-to-fit=no,minimal-ui">
 <link rel="shortcut icon" th:href="${CDN_URL}+'/favicon.ico'" />
 
-
 <title>Support</title>
 
 <style type="text/css">
@@ -108,6 +107,8 @@ html.loadable.loading .fullloader {
 
 </style>
 
+<meta name=xsessionid th:content="${XSESSIONID}">
+<meta name=jsessionid th:content="${JSESSIONID}">
 
 <div th:switch="${CDN_DEBUG}" th:remove="tag">
 	<p th:case="'true'" th:remove="tag">
