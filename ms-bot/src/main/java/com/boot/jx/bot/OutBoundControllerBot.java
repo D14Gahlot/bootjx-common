@@ -47,7 +47,7 @@ public class OutBoundControllerBot {
 		ClientApp app = pmEnvironment.config().clientApiKey(appId);
 
 		if (app.equals(CHAT_MODE.BOT)) {
-			ChatController controller = botEngine.getBotByCode(botCode);
+			ChatController controller = botEngine.getBotByCode("bot_" + app.getAppType().toLowerCase());
 			if (ArgUtil.is(controller)) {
 				controller.externalOutboundMessage(map);
 			}

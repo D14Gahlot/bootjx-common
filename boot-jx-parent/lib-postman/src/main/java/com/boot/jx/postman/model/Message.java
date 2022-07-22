@@ -382,6 +382,10 @@ public class Message<T extends Message<T>> implements Serializable, MessageOptio
 		return (T) this;
 	}
 
+	public T buttons(List<TmplElement> buttons) {
+		return this.options("buttons", buttons);
+	}
+
 	public String getMessageIdExt() {
 		return messageIdExt;
 	}

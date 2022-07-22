@@ -251,6 +251,18 @@ public class MapModel implements JsonSerializerType<Object> {
 			return this;
 		}
 
+		public MapPathEntry keyEntry(String key) {
+			return new MapPathEntry().map(this.asMap()).key(key).load(null);
+		}
+
+		public MapPathEntry pathEntry(JsonPath path) {
+			return new MapPathEntry().map(this.asMap()).path(path).load(null);
+		}
+
+		public MapPathEntry pathEntry(String path) {
+			return this.pathEntry(new JsonPath(path));
+		}
+
 	}
 
 	protected Map<String, Object> map;

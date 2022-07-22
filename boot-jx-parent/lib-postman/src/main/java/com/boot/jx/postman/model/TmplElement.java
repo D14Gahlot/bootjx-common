@@ -1,6 +1,8 @@
 package com.boot.jx.postman.model;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.boot.jx.swagger.ApiMockModelProperty;
 
@@ -118,4 +120,9 @@ public class TmplElement implements Serializable {
 	public TmplElement name(String string) {
 		return this.code(string);
 	}
+
+	public static List<TmplElement> list() {
+		return new ArrayList<TmplElement>();
+	}
+
 }
