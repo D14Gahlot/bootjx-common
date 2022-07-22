@@ -22,6 +22,7 @@ import com.boot.jx.postman.model.PMArgs;
 import com.boot.jx.postman.model.ext.InBoundEvent;
 import com.boot.jx.postman.store.MessageContext;
 import com.boot.jx.postman.store.SessionStore;
+import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.JsonUtil;
 
@@ -213,6 +214,9 @@ public class ChatController {
 		logManager.debug(assignEvent,
 				String.format("%s -> %s", assignEvent.sessionRouted.sourceQueue, assignEvent.sessionRouted.targetQueue),
 				JsonUtil.toJson(assignEvent.sessionRouted));
+	}
+
+	public void externalOutboundMessage(MapModel mapModel) {
 	}
 
 	public MessageContext context() {

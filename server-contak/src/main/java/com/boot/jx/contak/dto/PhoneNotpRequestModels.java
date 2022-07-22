@@ -28,7 +28,7 @@ public final class PhoneNotpRequestModels {
 		@ApiMockModelProperty(example = "15", required = true, value = "Validity in seconds")
 		public long validity;
 
-		@ApiMockModelProperty(example = "AUTH,SIGNUP", required = false, value = "Tags to be attached for message")
+		@ApiMockModelProperty(example = "[AUTH,SIGNUP]", required = false, value = "Tags to be attached for message")
 		public List<String> tags;
 	}
 

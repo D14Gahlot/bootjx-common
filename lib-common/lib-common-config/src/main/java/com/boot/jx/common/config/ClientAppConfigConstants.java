@@ -193,6 +193,17 @@ public class ClientAppConfigConstants {
 								.optionsSource("getx:/api/tmpl/hsm").optionsKey("code").optionsLabel("code"),
 
 				});
+
+		APP_CONFIGS.put(APP_TYPE.AVAMO,
+				new ConfigMeta[] { new ConfigMeta().inputType(INPUT_TYPE.MESSAGE, MESSAGE_TYPE.INFO).title("Avaamo")
+						.desc("Use this app to integrate with Avaamo"//
+						).group("About App"), //
+						new ConfigMeta().title("Channel UUID").path("props.channel_uuid")
+								.example("6106ee72-81a1-49a7-9e10-df591d5194f3"),
+						new ConfigMeta().title("API endpoint").path("props.end_point").example(
+								"https://c6.avaamo.com/bot_connector_webhooks/02de0dde-c7ec-49a7-83f8-6106ee72/message.json")
+
+				});
 	}
 
 }

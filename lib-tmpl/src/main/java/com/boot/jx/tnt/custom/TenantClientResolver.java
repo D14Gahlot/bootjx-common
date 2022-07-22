@@ -107,10 +107,12 @@ public class TenantClientResolver extends TenantResolver {
 		tntMapping.put("ww", "app");
 		tntMapping.put("w", "app");
 		tntMapping.put("local", "local");
+		//tntMapping.put("mehery", "lalit");
 		// tntMapping.put("dhofartest", "dhofar");
 		tntMapping.put("a9db-2405-201-400f-de31-4554-9ae6-932b-8d3e", "pranjal");
 		// DB Mapping
 		dbMapping.put("dhofartest", "dhofar");
+		dbMapping.put("mehery", "lalit");
 	}
 
 	@Override

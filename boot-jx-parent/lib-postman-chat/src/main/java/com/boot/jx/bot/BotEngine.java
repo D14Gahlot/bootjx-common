@@ -77,6 +77,10 @@ public class BotEngine {
 		return chatBotDefined;
 	}
 
+	public ChatController getBotByCode(String botCode) {
+		return filtersMap.get("botCode#" + botCode);
+	}
+
 	@PostConstruct
 	public void mapping() {
 		if (ArgUtil.isEmpty(chatControllers)) {
@@ -327,7 +331,7 @@ public class BotEngine {
 						}
 					}
 				}
-				ChatController controller = filtersMap.get("botCode#" + botCode);
+				ChatController controller = getBotByCode(botCode);
 				if (ArgUtil.is(controller)) {
 
 					if (assignEvent.sessionRouted.sessionStart) {
