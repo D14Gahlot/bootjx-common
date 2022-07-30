@@ -47,7 +47,7 @@ public class ClientAppConfigDoc implements IDocument, AuditableByIdEntity, Clien
 	private String appMode;
 	private String appType;
 	private String webhook;
-	private String ouboundhook;
+	private String outboundhook;
 
 	private String forward;
 
@@ -235,12 +235,12 @@ public class ClientAppConfigDoc implements IDocument, AuditableByIdEntity, Clien
 		this.appMode = appMode;
 	}
 
-	public String getOuboundhook() {
-		return ouboundhook;
+	public String getOutboundhook() {
+		return outboundhook;
 	}
 
-	public void setOuboundhook(String ouboundhook) {
-		this.ouboundhook = ouboundhook;
+	public void setOutboundhook(String ouboundhook) {
+		this.outboundhook = ouboundhook;
 	}
 
 }

@@ -52,8 +52,8 @@ public class OutBoundControllerBot {
 
 		String isFrwrded = commonHttpRequest.get("X-Forwarded-Service");
 
-		if (!ArgUtil.is(isFrwrded) && ArgUtil.is(app.getOuboundhook())) {
-			restService.ajax(app.getOuboundhook()).header("X-Forwarded-Service", pmCommonConfig.getServiceServer())
+		if (!ArgUtil.is(isFrwrded) && ArgUtil.is(app.getOutboundhook())) {
+			restService.ajax(app.getOutboundhook()).header("X-Forwarded-Service", pmCommonConfig.getServiceServer())
 					.post(data).asNone();
 		} else if (app.equals(CHAT_MODE.BOT)) {
 			ChatController controller = botEngine.getBotByCode("bot_" + app.getAppType().toLowerCase());
