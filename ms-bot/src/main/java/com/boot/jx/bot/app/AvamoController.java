@@ -30,7 +30,7 @@ public class AvamoController extends CommonBotController {
 	public RestService restService;
 
 	@Override
-	public void externalOutboundMessage(MapModel mapModel) {
+	public void onPostOutboundMessage(MapModel mapModel) {
 		OutboxMessage outbox = new OutboxMessage();;
 		outbox.setContact(mapModel.pathEntry("user.custom_properties").as(ContactMeta.class));
 		outbox.route().setSenderCode(mapModel.keyEntry("sender").asString());

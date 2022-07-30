@@ -201,9 +201,9 @@ public class ClientAppConfigConstants {
 						new ConfigMeta().title("Channel UUID").path("props.channel_uuid")
 								.example("6106ee72-81a1-49a7-9e10-df591d5194f3"),
 						new ConfigMeta().title("API endpoint").path("props.end_point").example(
-								"https://c6.avaamo.com/bot_connector_webhooks/02de0dde-c7ec-49a7-83f8-6106ee72/message.json")
-
-				});
+								"https://c6.avaamo.com/bot_connector_webhooks/02de0dde-c7ec-49a7-83f8-6106ee72/message.json"),
+						new ConfigMeta().title("Outbound Hook").path("ouboundhook")
+								.example("https://my.localservice.com/request/from/avamo") });
 	}
 
 }

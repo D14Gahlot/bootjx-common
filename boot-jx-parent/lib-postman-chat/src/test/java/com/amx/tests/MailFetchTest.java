@@ -32,22 +32,30 @@ public class MailFetchTest { // Noncompliant
 
 	private void doTest() throws MessagingException, IOException {
 
-		final String username = "chatter@mehery.onmicrosoft.com";
-		final String passwd = "bqdzbpxkpfmtxqzy";
+		final String username = "chat2@mehery.com";
+		final String passwd = "cherry@Mup22501";
 		Properties props = new Properties();
-		props.put("mail.host", "outlook.office365.com");
-		props.put("mail.store.protocol", "pop3s");
-		// props.put("mail.pop3.ssl.enable", "true");
-		props.put("mail.pop3s", "outlook.office365.com");
-		props.put("mail.pop3s.starttls.enable", "true");
-		props.put("mail.pop3s.auth", "true");
-		props.put("mail.pop3s.port", "995");
-		props.put("mail.pop3s.disablecapa", "true");
 
-		props.put("mail.pop3", "outlook.office365.com");
-		// props.put("mail.pop3.starttls.enable", "true");
+		props.put("mail.store.protocol", "pop3");
+		
+//		props.put("mail.pop3s.ssl.enable", "false");
+//		props.put("mail.pop3s.host", "outlook.office365.com");
+//		props.put("mail.pop3s.starttls.enable", "false");
+//		props.put("mail.pop3s.auth", "true");
+//		props.put("mail.pop3s.port", "110");
+//		props.put("mail.pop3s.disablecapa", "true");
+		
+		props.put("mail.smtp.auth", "true");
+		props.put("mail.smtp.starttls.enable", "false");
+		props.put("mail.smtp.host", "smtp.office365.com");
+		props.put("mail.smtp.port", "25");
+
+		props.put("mail.host", "outlook.office365.com");
+		props.put("mail.pop3.ssl.enable", "false");
+		props.put("mail.pop3.starttls.enable", "false");
 		props.put("mail.pop3.auth", "true");
-		props.put("mail.pop3.port", "995");
+		props.put("mail.pop3.port", "110");
+		
 		props.put("mail.debug", "true");
 
 		System.out.println("=========" + CryptoUtil.getEncoder().message(
@@ -61,19 +69,19 @@ public class MailFetchTest { // Noncompliant
 
 		Session session = Session.getInstance(props, new javax.mail.Authenticator() {
 			protected PasswordAuthentication getPasswordAuthentication() {
+//
+//				StringJoiner sj = new StringJoiner(XAUTH_DELIMITER);
+//				sj.add("user=" + username);
+//				sj.add("auth=Bearer " + passwd);
+//				sj.add("").add("");
+//				System.out.println("pass  " + sj.toString());
+//
+//				String pass = CryptoUtil.getEncoder().message(sj.toString()).encodeBase64().toString();
+//
+//				System.out.println(
+//						"=========" + CryptoUtil.getEncoder().message(pass).decodeBase64().encodeURL().toString());
 
-				StringJoiner sj = new StringJoiner(XAUTH_DELIMITER);
-				sj.add("user=" + username);
-				sj.add("auth=Bearer " + passwd);
-				sj.add("").add("");
-				System.out.println("pass  " + sj.toString());
-
-				String pass = CryptoUtil.getEncoder().message(sj.toString()).encodeBase64().toString();
-
-				System.out.println(
-						"=========" + CryptoUtil.getEncoder().message(pass).decodeBase64().encodeURL().toString());
-
-				return new PasswordAuthentication(username, pass);
+				return new PasswordAuthentication(username, passwd);
 			}
 		});
 

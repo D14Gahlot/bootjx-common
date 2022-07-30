@@ -30,6 +30,8 @@ public interface ClientApp extends Serializable {
 
 	public String getWebhook();
 
+	public String getOuboundhook();
+
 	public String getForward();
 
 	public Map<String, Object> getProps();

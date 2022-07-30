@@ -216,7 +216,7 @@ public class ChatController {
 				JsonUtil.toJson(assignEvent.sessionRouted));
 	}
 
-	public void externalOutboundMessage(MapModel mapModel) {
+	public void onPostOutboundMessage(MapModel mapModel) {
 	}
 
 	public MessageContext context() {

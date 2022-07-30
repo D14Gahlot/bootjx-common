@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.chat.ChatClient.PATH;
+import com.boot.jx.http.CommonHttpRequest;
 import com.boot.jx.postman.ClientApp;
 import com.boot.jx.postman.PMConstants.CHAT_MODE;
 import com.boot.jx.postman.PMEnvironment;
@@ -39,6 +40,9 @@ public class OutBoundControllerBot {
 	@Autowired
 	private RestService restService;
 
+	@Autowired
+	CommonHttpRequest commonHttpRequest;
+
 	@ResponseBody
 	@RequestMapping(value = "/ext/app/{botCode}/{appId}/{appKeyHash}", method = { RequestMethod.POST })
 	public ApiResponse<Object, Object> inboundMessageBoxEvent(@PathVariable String botCode, @PathVariable String appId,
@@ -46,10 +50,15 @@ public class OutBoundControllerBot {
 		MapModel map = MapModel.from(data);
 		ClientApp app = pmEnvironment.config().clientApiKey(appId);
 
-		if (app.equals(CHAT_MODE.BOT)) {
+		String isFrwrded = commonHttpRequest.get("X-Forwarded-Service");
+
+		if (!ArgUtil.is(isFrwrded) && ArgUtil.is(app.getOuboundhook())) {
+			restService.ajax(app.getOuboundhook()).header("X-Forwarded-Service", pmCommonConfig.getServiceServer())
+					.post(data).asNone();
+		} else if (app.equals(CHAT_MODE.BOT)) {
 			ChatController controller = botEngine.getBotByCode("bot_" + app.getAppType().toLowerCase());
 			if (ArgUtil.is(controller)) {
-				controller.externalOutboundMessage(map);
+				controller.onPostOutboundMessage(map);
 			}
 		} else if (app.equals(CHAT_MODE.WEBHOOK)) {
 			String webhook = ArgUtil.is(app.getWebhook()) ? app.getWebhook()
