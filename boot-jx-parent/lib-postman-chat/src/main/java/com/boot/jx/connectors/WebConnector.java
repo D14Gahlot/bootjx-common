@@ -51,6 +51,12 @@ public class WebConnector extends DefaultConnector<WebConfigDetails, WebPlugin> 
 	@Autowired
 	private PMFileStoreClient pmFileStoreClient;
 
+	@Autowired(required = false)
+	RedissonClient redisson;
+
+	@Autowired
+	private StompTunnelService stompTunnelService;
+
 	public static class MessageQueue<T> {
 
 		private List<T> queue = new LinkedList<T>();
@@ -83,6 +89,23 @@ public class WebConnector extends DefaultConnector<WebConfigDetails, WebPlugin> 
 	}
 
 	private MessageQueue<OutboxMessage> messageQueue = new MessageQueue<OutboxMessage>(100);
+
+	public OutboxMessage pollUnreadMessage(String contactId) throws InterruptedException {
+		if (redisson == null) {
+			try {
+				return messageQueue.dequeue();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+		RBlockingQueue<String> messageQueue = redisson.getBlockingQueue(WEB_USER_MESSAGE_STR + contactId);
+		String x = messageQueue.poll(5, TimeUnit.SECONDS);
+
+		if (ArgUtil.is(x)) {
+			return JsonUtil.parse(x, OutboxMessage.class);
+		}
+		return null;
+	}
 
 	@Override
 	public void onSend(ChannelConfig channelConfig, ChatContactDoc chatContactDoc, OutboxMessage outboxMessage) {
@@ -133,29 +156,6 @@ public class WebConnector extends DefaultConnector<WebConfigDetails, WebPlugin> 
 	public InboxMessage assignToAgent(InboxMessage inboxMessage) {
 		this.reply(null, null, new OutboxMessage().message("Call us"), inboxMessage);
 		return inboxMessage;
-	}
-
-	@Autowired(required = false)
-	RedissonClient redisson;
-
-	@Autowired
-	private StompTunnelService stompTunnelService;
-
-	public OutboxMessage pollUnreadMessage(String contactId) throws InterruptedException {
-		if (redisson == null) {
-			try {
-				return messageQueue.dequeue();
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-		}
-		RBlockingQueue<String> messageQueue = redisson.getBlockingQueue(WEB_USER_MESSAGE_STR + contactId);
-		String x = messageQueue.poll(5, TimeUnit.SECONDS);
-
-		if (ArgUtil.is(x)) {
-			return JsonUtil.parse(x, OutboxMessage.class);
-		}
-		return null;
 	}
 
 	@Override
