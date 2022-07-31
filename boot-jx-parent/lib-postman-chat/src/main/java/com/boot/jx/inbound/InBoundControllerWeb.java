@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -134,6 +135,7 @@ public class InBoundControllerWeb {
 		return pluginCustomer(model, contacyType, "/ext/plugin/customer", request);
 	}
 
+	@Deprecated
 	@ApiRequest(type = RequestType.POLL, session = true)
 	@ResponseBody
 	@RequestMapping(value = { "/ext/outbound/web/callback", "/ext/plugin/outbound/web/callback" },
@@ -144,6 +146,18 @@ public class InBoundControllerWeb {
 		ChannelConfig channelConfig = pmEnvironment.config().channel(channelId);
 		return dummyConnector
 				.pollUnreadMessage(AppContextUtil.getTenant() + "/" + PostManUtil.CONTACT_ID(channelConfig, csid));
+	}
+
+	@ApiRequest(type = RequestType.POLL, session = true)
+	@ResponseBody
+	@RequestMapping(value = { "/ext/outbound/web/callback/v2", "/ext/plugin/outbound/web/callback/v2" },
+			method = RequestMethod.GET)
+	public ApiResponse<OutboxMessage, Object> onReceiveMessage2(@RequestParam(required = false) String number,
+			@RequestParam(required = false) String csid, @RequestParam(required = false) String channelId,
+			@RequestParam(required = false) String channelKey) throws InterruptedException {
+		ChannelConfig channelConfig = pmEnvironment.config().channel(channelId);
+		return ApiResponse.buildResults(dummyConnector
+				.pollAllUnreadMessage(AppContextUtil.getTenant() + "/" + PostManUtil.CONTACT_ID(channelConfig, csid)));
 	}
 
 	@ApiRequest(session = true)
@@ -203,8 +217,10 @@ public class InBoundControllerWeb {
 				msgs.add(ChatDTOUtil.getChatMessageDTO(messageStore.createMessageDoc(icebrakerMsg)));
 			}
 		}
-		//In-Cognito Window does not support Cookies that is why it So important to  send these values to UI in advance for mapping,
-		//because if cookies cant be set, JSESSION cannot be created and be relied upon to store these values
+		// In-Cognito Window does not support Cookies that is why it So important to
+		// send these values to UI in advance for mapping,
+		// because if cookies cant be set, JSESSION cannot be created and be relied upon
+		// to store these values
 		return ApiResponse.buildResults(msgs, stomp);
 	}
 

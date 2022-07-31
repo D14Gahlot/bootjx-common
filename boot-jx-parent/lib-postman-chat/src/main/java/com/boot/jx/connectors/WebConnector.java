@@ -107,6 +107,28 @@ public class WebConnector extends DefaultConnector<WebConfigDetails, WebPlugin> 
 		return null;
 	}
 
+	public List<OutboxMessage> pollAllUnreadMessage(String contactId) throws InterruptedException {
+		List<OutboxMessage> messages = new ArrayList<OutboxMessage>();
+		if (redisson == null) {
+			try {
+				OutboxMessage msg = messageQueue.dequeue();
+				if (ArgUtil.is(msg)) {
+					messages.add(msg);
+				}
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		} else {
+			RBlockingQueue<String> messageQueue = redisson.getBlockingQueue(WEB_USER_MESSAGE_STR + contactId);
+			String x = messageQueue.poll(5, TimeUnit.SECONDS);
+			while (ArgUtil.is(x)) {
+				messages.add(JsonUtil.parse(x, OutboxMessage.class));
+				x = messageQueue.poll();
+			}
+		}
+		return messages;
+	}
+
 	@Override
 	public void onSend(ChannelConfig channelConfig, ChatContactDoc chatContactDoc, OutboxMessage outboxMessage) {
 		String contactId = outboxMessage.contact().getContactId();
