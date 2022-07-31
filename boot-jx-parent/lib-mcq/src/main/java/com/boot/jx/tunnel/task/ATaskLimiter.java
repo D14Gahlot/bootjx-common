@@ -23,7 +23,6 @@ import com.boot.jx.tunnel.ITunnelDefs.ITaskLimiter;
 import com.boot.jx.tunnel.ITunnelDefs.TaskInfo;
 import com.boot.jx.tunnel.ITunnelDefs.TunnelTask;
 import com.boot.jx.tunnel.TunnelMessage;
-import com.boot.jx.tunnel.TunnelService;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.ClazzUtil;
 
@@ -40,10 +39,7 @@ public abstract class ATaskLimiter implements ITaskLimiter {
 			.maxIdle(10000);
 
 	@Autowired(required = false)
-	RedissonClient redisson;
-
-	@Autowired
-	TunnelService tunnelService;
+	private RedissonClient redisson;
 
 	private String taskLimiterName;
 
@@ -160,7 +156,7 @@ public abstract class ATaskLimiter implements ITaskLimiter {
 								AppContextUtil.setContext(latest.getContext());
 								AppContextUtil.init();
 								try {
-									logger.debug("===========EXECUTED======{} x {}",size,info.getKey());
+									logger.debug("===========EXECUTED======{} x {}", size, info.getKey());
 									this.doTask(latest.getData());
 								} catch (Exception e) {
 									logger.error("LIMITER TASK EXCEPTION:" + info.getInterval(), e);
@@ -212,7 +208,7 @@ public abstract class ATaskLimiter implements ITaskLimiter {
 		info.setKey(taskUid);
 		RQueue<TaskInfo> limiterQ = getQueue(1);
 		limiterQ.add(info);
-		logger.debug("===========debounce={}",info.getKey());
+		logger.debug("===========debounce={}", info.getKey());
 	}
 
 	@Async
@@ -242,7 +238,7 @@ public abstract class ATaskLimiter implements ITaskLimiter {
 		info.setKey(taskUid);
 		RQueue<TaskInfo> limiterQ = getQueue(1);
 		limiterQ.add(info);
-		logger.debug("===========throttle={}",info.getKey());
+		logger.debug("===========throttle={}", info.getKey());
 	}
 
 }

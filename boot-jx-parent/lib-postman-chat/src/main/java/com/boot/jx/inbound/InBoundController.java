@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.chat.ChatClient;
+import com.boot.jx.chat.ChatProxyManager;
 import com.boot.jx.chat.ChatSessionService;
 import com.boot.jx.chat.ChatStatusService;
 import com.boot.jx.chat.ConnectorHandlerFactory;
@@ -84,6 +85,9 @@ public class InBoundController {
 	@Autowired
 	private ChatStatusService inBoundStatusService;
 
+	@Autowired
+	private ChatProxyManager proxyManager;
+
 	@ApiVendorHeaders
 	@RequestMapping(value = "/int/status/callback", method = RequestMethod.POST)
 	public List<MessageReport> onStatusCallback() throws InterruptedException {
@@ -120,7 +124,8 @@ public class InBoundController {
 	@RequestMapping(value = "/ext/release/v2/", method = { RequestMethod.POST })
 	public ApiResponse<Contactable, Object> inboundMessageBoxRelease(@RequestBody Contactable contact) {
 		String contactId = PostManUtil.CONTACT_ID(contact);
-		inBoundService.hold().put(contactId, "RELEASING");
+		proxyManager.hold(contactId);
+		// inBoundService.hold().put(contactId, "RELEASING");
 		InboxMessage msg = new InboxMessage();
 		msg.setContact(contact);
 		inBoundService.invokeMethodsRelease(msg);

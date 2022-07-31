@@ -15,11 +15,10 @@ import com.boot.jx.AppConfig;
 import com.boot.jx.AppContextUtil;
 import com.boot.jx.bot.BotEngine;
 import com.boot.jx.bot.ChatMapping;
-import com.boot.jx.cache.CacheBox;
+import com.boot.jx.chat.ChatProxyManager;
 import com.boot.jx.chat.ChatSessionFactory;
 import com.boot.jx.chat.ChatSessionService;
 import com.boot.jx.chat.ChatStatusService;
-import com.boot.jx.def.ICacheBox;
 import com.boot.jx.inbound.InBound.InBoundFilter;
 import com.boot.jx.inbound.InBound.InBoundHandler;
 import com.boot.jx.inbound.InBound.InBoundProcessor;
@@ -86,22 +85,9 @@ public class InBoundService extends ATaskLimiter {
 
 	@Autowired(required = false)
 	private RedissonClient redisson;
-	private CacheBox<String> proxyManager;
-	private CacheBox<String> holdManager;
 
-	public ICacheBox<String> proxy() {
-		if (proxyManager == null) {
-			this.proxyManager = CacheBox.getInstance("InBoundService-Proxy", redisson);
-		}
-		return this.proxyManager;
-	}
-
-	public ICacheBox<String> hold() {
-		if (holdManager == null) {
-			this.holdManager = CacheBox.getInstance("InBoundService-Hold-v2", redisson);
-		}
-		return this.holdManager;
-	}
+	@Autowired
+	private ChatProxyManager proxyManager;
 
 	/**
 	 * Invoke the methods with matching {@link ChatMapping#events()} and
@@ -112,25 +98,27 @@ public class InBoundService extends ATaskLimiter {
 	@Async
 	public void pushMessageToInvokeAsync(InboxMessage inboxMessageOriginal) {
 		String contactId = PostManUtil.CONTACT_ID(inboxMessageOriginal.contact());
-		String onhold = hold().get(contactId);
+		boolean onhold = proxyManager.onhold(contactId);
 		// System.out.println("===>" + onhold);
 
 		messageStore.original(inboxMessageOriginal);
 
-		if (ArgUtil.isEqual(onhold, "HOLDING")) {
+		if (onhold) {
 			messageStore.hold(inboxMessageOriginal);
 			throttle(new TunnelTask().name("MESSAGE_RELEASE").id(contactId).intervalSeconds(10));
 		} else {
-			hold().put(contactId, "HOLDING");
+			proxyManager.hold(contactId);
+			// hold().put(contactId, "HOLDING");
 			// messageStore.hold(inboxMessageOriginal);
 			invokeMethodsInternalSafely(inboxMessageOriginal, true);
 			// if (inboxMessageOriginal.session().isFirstMessage()) {
 			// this.invokeMethodsRelease(inboxMessageOriginal);
 			// }
-			hold().put(contactId, "RELEASING");
+			proxyManager.release(contactId);
+			// hold().put(contactId, "RELEASING");
 		}
-		onhold = hold().get(contactId);
-		if (!ArgUtil.isEqual(onhold, "HOLDING")) {
+		onhold = proxyManager.onhold(contactId);
+		if (!onhold) {
 			// System.out.println("===<" + onhold);
 			this.invokeMethodsRelease(inboxMessageOriginal);
 		}
@@ -162,20 +150,20 @@ public class InBoundService extends ATaskLimiter {
 		PMConfigurationObject proxyConfig = pmEnvironment.keyEntry("mry.proxy.enabled");
 		String contactId = PostManUtil.CONTACT_ID(inboxMessageOriginal.contact());
 
-		if ((AppContextUtil.getTenant().equals("app") || proxyConfig.asBoolean()) && ArgUtil.is(redisson)) {
+		if ((AppContextUtil.getTenant().equals("app") || proxyConfig.asBoolean())) {
 			String proxy = null;
 			String message = ArgUtil.nonEmpty(inboxMessageOriginal.getMessage(), Constants.BLANK);
 
 			StringMatcher matcher = new StringMatcher(message);
 			if (matcher.isMatch(PROXY)) {
 				proxy = matcher.group(1);
-				proxy().put(contactId, proxy);
+				proxyManager.put(contactId, proxy);
 				return inboxMessageOriginal;
 			} else if (matcher.isMatch(UNPROXY)) {
-				proxy().fastRemove(contactId);
+				proxyManager.fastRemove(contactId);
 				return inboxMessageOriginal;
 			} else {
-				proxy = proxy().get(contactId);
+				proxy = proxyManager.get(contactId);
 			}
 
 			if (ArgUtil.is(proxy)) {
@@ -262,7 +250,7 @@ public class InBoundService extends ATaskLimiter {
 	public void doTask(TunnelTask task) {
 		if ("MESSAGE_RELEASE".equals(task.getName())) {
 			String contactId = task.getId();
-			hold().put(contactId, "RELEASING");
+			proxyManager.release(contactId);
 			InboxMessage msg = new InboxMessage();
 			msg.contact().setContactId(contactId);
 			msg.setContact(msg.contact());
