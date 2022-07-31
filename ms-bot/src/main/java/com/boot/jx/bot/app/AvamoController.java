@@ -11,7 +11,9 @@ import com.boot.jx.bot.BotController;
 import com.boot.jx.bot.ChatMapping;
 import com.boot.jx.bot.alex.AlexBotConstants;
 import com.boot.jx.bot.alex.CommonBotController;
+import com.boot.jx.dict.FileType;
 import com.boot.jx.postman.ClientApp;
+import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.ContactMeta;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.OutboxMessage;
@@ -35,7 +37,7 @@ public class AvamoController extends CommonBotController {
 		outbox.setContact(mapModel.pathEntry("user.custom_properties").as(ContactMeta.class));
 		outbox.route().setSenderCode(mapModel.keyEntry("sender").asString());
 		context().setOutboxMessage(outbox);
-		// System.out.println(mapModel.toJson());
+		System.out.println(mapModel.toJson());
 		reply(mapModel.pathEntry("message").asMap(), outbox);
 	}
 
@@ -81,11 +83,7 @@ public class AvamoController extends CommonBotController {
 	private void reply(Map<String, Object> map, OutboxMessage outboxMessage) {
 		MapModel botreply = MapModel.from(map);
 		MapPathEntry text = botreply.keyEntry("text");
-		if (text.exists()) {
-			send(outboxMessage.message(text.asString()));
-			return;
-		}
-
+		MapPathEntry quickReplyEntries = botreply.keyEntry("quick_replies");
 		MapPathEntry attachment = botreply.keyEntry("attachment");
 		if (attachment.exists()) {
 			if (attachment.keyEntry("type").is("template")) {
@@ -98,19 +96,100 @@ public class AvamoController extends CommonBotController {
 					MapPathEntry buttonEntries = payload.keyEntry("buttons");
 					if (buttonEntries.exists()) {
 						List<TmplElement> buttons = TmplElement.list();
-						for (Map<String, Object> buttonEntry : buttonEntries.asListOfMap()) {
-							MapModel button = MapModel.from(buttonEntry);
+						for (Map<String, Object> button : buttonEntries.asListOfMap()) {
+							MapModel buttonEntry = MapModel.from(button);
 							buttons.add(new TmplElement() //
-									.type(button.keyEntry("type").asString())//
-									.code(button.keyEntry("payload").asString()) //
-									.label(button.keyEntry("title").asString()));
+									.type(buttonEntry.keyEntry("type").asString())//
+									.code(buttonEntry.keyEntry("payload").asString()) //
+									.label(buttonEntry.keyEntry("title").asString()));
 						}
 						outboxMessage.buttons(buttons);
 					}
 
+				} else if (payload.keyEntry("template_type").is("list")) {
+					MapPathEntry elementEntries = payload.keyEntry("elements");
+					if (elementEntries.exists()) {
+						List<TmplElement> buttons = TmplElement.list();
+						for (Map<String, Object> element : elementEntries.asListOfMap()) {
+							MapModel elementEntry = MapModel.from(element);
+
+							outboxMessage.option("list_option_title", elementEntry.keyEntry("title").asString("Menu"));
+
+							MapPathEntry subtitle = elementEntry.keyEntry("subtitle");
+							if (subtitle.exists()) {
+								outboxMessage.message(text.asString());
+							}
+
+							MapPathEntry buttonEntries = elementEntry.keyEntry("buttons");
+							if (buttonEntries.exists()) {
+								for (Map<String, Object> button : buttonEntries.asListOfMap()) {
+									MapModel buttonEntry = MapModel.from(button);
+									buttons.add(new TmplElement() //
+											.type(buttonEntry.keyEntry("type").asString())//
+											.code(buttonEntry.keyEntry("payload").asString()) //
+											.label(buttonEntry.keyEntry("title").asString()));
+								}
+							}
+						}
+						outboxMessage.buttons(buttons);
+					}
+				} else if (payload.keyEntry("template_type").is("generic")) {
+					MapPathEntry elementEntries = payload.keyEntry("elements");
+					if (elementEntries.exists()) {
+						List<TmplElement> buttons = TmplElement.list();
+						for (Map<String, Object> element : elementEntries.asListOfMap()) {
+							MapModel elementEntry = MapModel.from(element);
+
+							outboxMessage.option("list_option_title", elementEntry.keyEntry("title").asString("Menu"));
+
+							MapPathEntry subtitle = elementEntry.keyEntry("subtitle");
+							MapPathEntry image = elementEntry.keyEntry("image_url");
+							if (image.exists()) {
+								Attachment attch = new Attachment().mediaURL(image.asString())
+										.mediaType(FileType.IMAGE);
+								if (subtitle.exists()) {
+									attch.mediaCaption(subtitle.asString());
+								}
+								outboxMessage.attachment(attch);
+							} else if (subtitle.exists()) {
+								outboxMessage.message(text.asString());
+							}
+
+							MapPathEntry buttonEntries = elementEntry.keyEntry("buttons");
+							if (buttonEntries.exists()) {
+								for (Map<String, Object> button : buttonEntries.asListOfMap()) {
+									MapModel buttonEntry = MapModel.from(button);
+									buttons.add(new TmplElement() //
+											.type(buttonEntry.keyEntry("type").asString())//
+											.code(buttonEntry.keyEntry("payload").asString()) //
+											.label(buttonEntry.keyEntry("title").asString()));
+								}
+							}
+
+						}
+						outboxMessage.buttons(buttons);
+					}
 				}
 			}
 			send(outboxMessage);
+			return;
+		} else if (quickReplyEntries.exists()) {
+			List<TmplElement> buttons = TmplElement.list();
+			for (Map<String, Object> quickReply : quickReplyEntries.asListOfMap()) {
+				MapModel quickReplyEntry = MapModel.from(quickReply);
+				buttons.add(new TmplElement() //
+						.type(quickReplyEntry.keyEntry("content_type").asString())//
+						.code(quickReplyEntry.keyEntry("payload").asString()) //
+						.label(quickReplyEntry.keyEntry("title").asString()));
+			}
+			outboxMessage.buttons(buttons);
+			if (text.exists()) {
+				outboxMessage.message(text.asString());
+			}
+			send(outboxMessage);
+			return;
+		} else if (text.exists()) {
+			send(outboxMessage.message(text.asString()));
 			return;
 		}
 	}
