@@ -7,7 +7,6 @@ import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.rest.RestService;
 import com.boot.model.MapModel;
-import com.boot.utils.CryptoUtil;
 
 @Component
 public class TextLocalClient {
