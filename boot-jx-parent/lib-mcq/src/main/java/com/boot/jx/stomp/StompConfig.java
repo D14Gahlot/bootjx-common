@@ -14,7 +14,7 @@ public class StompConfig {
 
 	static LocalCachedMapOptions<String, String> localCacheOptions = LocalCachedMapOptions.<String, String>defaults()
 			.evictionPolicy(EvictionPolicy.LRU).cacheSize(0).reconnectionStrategy(ReconnectionStrategy.CLEAR)
-			.syncStrategy(SyncStrategy.INVALIDATE).timeToLive(10000).maxIdle(10000);
+			.syncStrategy(SyncStrategy.INVALIDATE).timeToLive(60000).maxIdle(500000);
 
 	public class StompSessionCacheBox extends CacheBox<String> {
 
