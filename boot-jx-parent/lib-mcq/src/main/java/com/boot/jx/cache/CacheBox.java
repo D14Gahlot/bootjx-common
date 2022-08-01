@@ -45,6 +45,10 @@ public class CacheBox<T> implements ICacheBox<T> {
 		this.redisson = redisson;
 	}
 
+	public LocalCachedMapOptions<String, T> options() {
+		return localCacheOptions;
+	}
+
 	private RLocalCachedMap<String, T> cache = null;
 	private BlockingHashMap<String, T> locker = null;
 
@@ -57,7 +61,7 @@ public class CacheBox<T> implements ICacheBox<T> {
 					AppParam.APP_VENV.getValue(), (ArgUtil.isEmpty(getCahceName()) ? getClazzName() : getCahceName()),
 					CacheRedisConfiguration.CODEC_VERSION, version());
 			if (cache == null) {
-				cache = redisson.getLocalCachedMap(localCacheName, localCacheOptions);
+				cache = redisson.getLocalCachedMap(localCacheName, options());
 			}
 			return cache;
 		}

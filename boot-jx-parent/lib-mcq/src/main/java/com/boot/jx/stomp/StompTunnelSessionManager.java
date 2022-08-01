@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 
 import com.boot.jx.AppContextUtil;
 import com.boot.jx.AppParam;
-import com.boot.jx.cache.CacheBox.StringCacheBox;
+import com.boot.jx.stomp.StompConfig.StompSessionCacheBox;
 import com.boot.jx.stomp.StompSessionCache.StompSession;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CryptoUtil;
@@ -28,13 +28,13 @@ public class StompTunnelSessionManager {
 //	    .synchronizedMap(new HashMap<String, String>());
 //    
 	@Autowired
-	private StringCacheBox http2GSessionIdMap;
+	private StompSessionCacheBox http2GSessionIdMap;
 
 //    public static final Map<String, String> http2stompUIdMap = Collections
 //	    .synchronizedMap(new HashMap<String, String>());
 
 	@Autowired
-	private StringCacheBox http2stompUIdMap;
+	private StompSessionCacheBox http2stompUIdMap;
 
 	/*
 	 * Map for <wsSessionID, httpSessionId>
@@ -42,10 +42,10 @@ public class StompTunnelSessionManager {
 //    public static final Map<String, String> ws2httpMap = Collections.synchronizedMap(new HashMap<String, String>());
 
 	@Autowired
-	private StringCacheBox ws2xSessionMap;
+	private StompSessionCacheBox ws2xSessionMap;
 
 	@Autowired
-	private StringCacheBox ws2jSessionMap;
+	private StompSessionCacheBox ws2jSessionMap;
 
 	/*
 	 * Map for <stompUID, stompSession>
