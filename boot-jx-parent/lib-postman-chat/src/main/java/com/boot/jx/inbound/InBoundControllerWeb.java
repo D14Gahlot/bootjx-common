@@ -39,6 +39,7 @@ import com.boot.jx.postman.PMEnvironment.PMCommonConfig;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.MessageDoc;
+import com.boot.jx.postman.doc.VisitorActivityDoc;
 import com.boot.jx.postman.dto.ChatMessageDTO;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.MessageBoxEvent;
@@ -48,6 +49,7 @@ import com.boot.jx.postman.service.ChatDTOUtil;
 import com.boot.jx.postman.store.MessageContext;
 import com.boot.jx.postman.store.MessageStore;
 import com.boot.jx.postman.store.SessionStore;
+import com.boot.jx.postman.store.VisitorActivityStore;
 import com.boot.jx.stomp.StompConfig.StompSession;
 import com.boot.jx.stomp.StompTunnelSessionManager;
 import com.boot.jx.utils.PostManUtil;
@@ -76,6 +78,9 @@ public class InBoundControllerWeb {
 
 	@Autowired
 	private MessageStore messageStore;
+
+	@Autowired
+	VisitorActivityStore visitorActivityStore;
 
 	@Autowired
 	private MessageContext messageContext;
@@ -124,6 +129,12 @@ public class InBoundControllerWeb {
 		model.addAttribute("NOUNCE", nounce);
 		commonHttpRequest.setCookie("NOUNCE", nounce);
 		model.addAttribute("STOMP_ENABLED", stompEnabled);
+
+		model.addAttribute("VISITOR_ID", ArgUtil.parseAsString(commonHttpRequest.get("visitorId"), "NONE"));
+		model.addAttribute("VISIT_ID", ArgUtil.parseAsString(commonHttpRequest.get("visitId"), "NONE"));
+
+		visitorActivityStore.save(new VisitorActivityDoc().activity("WEBCHAT_PAGE"));
+
 		return "app-customer";
 	}
 
@@ -216,6 +227,9 @@ public class InBoundControllerWeb {
 				msgs.add(ChatDTOUtil.getChatMessageDTO(messageStore.createMessageDoc(icebrakerMsg)));
 			}
 		}
+
+		visitorActivityStore
+				.save(new VisitorActivityDoc().activity("WEBCHAT_AUTH").channelId(channelId).contactId(contactId));
 		// In-Cognito Window does not support Cookies that is why it So important to
 		// send these values to UI in advance for mapping,
 		// because if cookies cant be set, JSESSION cannot be created and be relied upon

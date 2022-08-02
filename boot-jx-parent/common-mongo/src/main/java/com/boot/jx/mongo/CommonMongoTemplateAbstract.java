@@ -48,7 +48,7 @@ public class CommonMongoTemplateAbstract extends CommonMongoTemplateDefault {
 
 		if (objectToSave instanceof CreatedTimeStampIndexSupport) {
 			CreatedTimeStampIndexSupport objectToSaveCreted = (CreatedTimeStampIndexSupport) objectToSave;
-			if (ArgUtil.isEmpty(objectToSaveCreted)) {
+			if (ArgUtil.isEmpty(objectToSaveCreted.getCreated())) {
 				objectToSaveCreted.setCreated(TimeStampIndex.now());
 			}
 		}
