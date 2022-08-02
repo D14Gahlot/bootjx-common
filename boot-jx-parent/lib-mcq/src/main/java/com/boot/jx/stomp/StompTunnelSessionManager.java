@@ -94,7 +94,7 @@ public class StompTunnelSessionManager {
 	}
 
 	public void delinkWs2Http(String xSessionId, String jSessionId, String wsSessionID) {
-		ws2xSessionMap.remove(wsSessionID);
+		ws2xSessionMap.fastRemove(wsSessionID);
 		boolean isExists = false;
 
 		if (ArgUtil.is(xSessionId)) {
@@ -104,12 +104,12 @@ public class StompTunnelSessionManager {
 				}
 			}
 			if (!isExists) {
-				http2GSessionIdMap.remove(xSessionId);
+				http2GSessionIdMap.fastRemove(xSessionId);
 			}
 		}
 
 		if (ArgUtil.is(jSessionId)) {
-			ws2jSessionMap.remove(wsSessionID);
+			ws2jSessionMap.fastRemove(wsSessionID);
 			isExists = false;
 			for (Entry<String, String> entry : ws2jSessionMap.readAllEntrySet()) {
 				if (entry.getValue().equals(jSessionId)) {
@@ -117,7 +117,7 @@ public class StompTunnelSessionManager {
 				}
 			}
 			if (!isExists) {
-				http2GSessionIdMap.remove(jSessionId);
+				http2GSessionIdMap.fastRemove(jSessionId);
 			}
 		}
 	}

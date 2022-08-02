@@ -52,9 +52,14 @@ public class WebSocketSessionListener {
 		if (!ArgUtil.isEmpty(sha.getSessionAttributes())) {
 			String xSessionId = ArgUtil.parseAsString(sha.getSessionAttributes().get(AppConstants.SESSION_ID_XKEY));
 			String jSessionId = ArgUtil.parseAsString(sha.getSessionAttributes().get(AppConstants.SESSION_JID_XKEY));
-			logger.info("WS_DESTROYED http:{}, ws:{}", sha.getSessionId(), xSessionId);
+			logger.info("WS_DESTROYED  xS:{}, jS:{}, wS:{}", xSessionId, jSessionId, sha.getSessionId());
 			if (ArgUtil.is(xSessionId)) {
-				stompTunnelSessionManager.delinkWs2Http(xSessionId, jSessionId, sha.getSessionId());
+				try {
+					stompTunnelSessionManager.delinkWs2Http(xSessionId, jSessionId, sha.getSessionId());
+				} catch (Exception e) {
+					logger.error("WS_DESTROY_EXCEPTION xS:{}, jS:{}, wS:{}", xSessionId, jSessionId,
+							sha.getSessionId());
+				}
 			}
 		}
 	}
