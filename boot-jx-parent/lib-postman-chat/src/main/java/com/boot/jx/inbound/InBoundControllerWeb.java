@@ -228,8 +228,16 @@ public class InBoundControllerWeb {
 			}
 		}
 
-		visitorActivityStore
-				.save(new VisitorActivityDoc().activity("WEBCHAT_AUTH").channelId(channelId).contactId(contactId));
+		VisitorActivityDoc visit = new VisitorActivityDoc().activity("WEBCHAT_AUTH").channelId(channelId)
+				.contactId(contactId);
+
+		if (stomp != null) {
+			visit.meta().put("jsessionId", stomp.getJsessionId());
+			visit.meta().put("xsessionId", stomp.getXsessionId());
+		}
+
+		visitorActivityStore.save(visit);
+
 		// In-Cognito Window does not support Cookies that is why it So important to
 		// send these values to UI in advance for mapping,
 		// because if cookies cant be set, JSESSION cannot be created and be relied upon
