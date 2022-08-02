@@ -12,6 +12,9 @@ public class ChatMeta implements Serializable {
 	String nextHandler;
 	String prevHandler;
 	boolean agentEnabled;
+	String queueCode;
+	String sessionId;
+	String routingId;
 
 	private Map<String, ChatPromise> promise;
 
@@ -60,6 +63,30 @@ public class ChatMeta implements Serializable {
 
 	public void setAgentEnabled(boolean agentEnabled) {
 		this.agentEnabled = agentEnabled;
+	}
+
+	public String getQueueCode() {
+		return queueCode;
+	}
+
+	public void setQueueCode(String queueCode) {
+		this.queueCode = queueCode;
+	}
+
+	public String getSessionId() {
+		return sessionId;
+	}
+
+	public void setSessionId(String sessionId) {
+		this.sessionId = sessionId;
+	}
+
+	public String getRoutingId() {
+		return routingId;
+	}
+
+	public void setRoutingId(String routingId) {
+		this.routingId = routingId;
 	}
 
 }

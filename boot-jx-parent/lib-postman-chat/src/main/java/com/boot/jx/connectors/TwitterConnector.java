@@ -7,19 +7,16 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Component;
 
 import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorMapping;
 import com.boot.jx.dict.ContactType;
-import com.boot.jx.postman.client.TmplClient;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.MessageBoxEvent;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.plugin.ChannelConfig;
-import com.boot.jx.postman.plugin.ChannelPluginProvider;
 import com.boot.jx.postman.plugin.TwitterPlugin;
 import com.boot.jx.postman.plugin.TwitterPlugin.TwitterConfigDetails;
 import com.boot.jx.postman.query.ChatContactQuery;
@@ -40,134 +37,118 @@ import twitter4j.TwitterException;
 @ConnectorMapping(contactType = ContactType.TWITTER)
 public class TwitterConnector extends AbstractConnector<TwitterConfigDetails, TwitterPlugin> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(TwitterConnector.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(TwitterConnector.class);
 
-    @Override
-    public TwitterPlugin getPlugin() {
-	return ChannelPluginProvider.TWITTER;
-    }
+	@Autowired
+	private TwitterClient twitterClient;
 
-    @Autowired
-    private TwitterClient twitterClient;
+	@Autowired
+	private TwitterClientExt twitterClientExt;
 
-    @Autowired
-    private MongoTemplate mongoTemplate;
-
-    @Autowired
-    private TmplClient tmplClient;
-
-    @Autowired
-    TwitterClientExt twitterClientExt;
-
-    @Override
-    public void registerWebhook(ChannelConfig channelConfig, String webhookUrl) {
-	twitterClient.registerWebhook(channelConfig, webhookUrl);
-    }
-
-    @Override
-    public void onSend(ChannelConfig channelConfig, ChatContactDoc chatContactDoc, OutboxMessage outboxMessage) {
-	try {
-	    template(channelConfig, chatContactDoc, outboxMessage);
-	    twitterClient.send(channelConfig, outboxMessage);
-	    outboxMessage.updateStatus(OutboxMessage.Status.SENT);
-	} catch (Exception e) {
-	    outboxMessage.updateStatus(OutboxMessage.Status.SENT_ERR);
-	    outboxMessage.logs().add(e.getMessage());
-	    LOGGER.error("SEND ERROR", e);
-	}
-    }
-
-    @Override
-    public InboxMessage assignToAgent(InboxMessage inboxMessage) {
-	return inboxMessage;
-    }
-
-    public InboxMessage toInboxMessage(DirectMessage dm, ChannelConfig channelConfig) {
-	InboxMessage ibm = this.createInboxMessage(channelConfig);
-	ibm.setMessageIdExt(String.valueOf(dm.getId()));
-	ibm.setMessage(dm.getText());
-	ibm.setFrom(String.valueOf(dm.getSenderId()));
-	ibm.to().add(String.valueOf(dm.getRecipientId()));
-	ibm.contact().setCsid(String.valueOf(dm.getSenderId()));
-
-	/**
-	 * NOTE:- Do not user original DirectMessageJsonImpl as it can throw
-	 * serialization error
-	 */
-	if (dm instanceof DirectMessageLocalImpl) {
-	    ibm.setOriginalMessage(dm);
+	@Override
+	public void registerWebhook(ChannelConfig channelConfig, String webhookUrl) {
+		twitterClient.registerWebhook(channelConfig, webhookUrl);
 	}
 
-	return ibm;
-    }
+	@Override
+	public void onSend(ChannelConfig channelConfig, ChatContactDoc chatContactDoc, OutboxMessage outboxMessage) {
+		template(channelConfig, chatContactDoc, outboxMessage);
+		twitterClient.send(channelConfig, outboxMessage);
+		outboxMessage.updateStatus(OutboxMessage.Status.SENT);
+	}
 
-    @Override
-    public OutboxMessage initSession(ChatSessionDoc session, InboxMessage inboxMessage) {
-	if (ArgUtil.is(inboxMessage.getOriginalMessage())) {
-	    try {
-		DirectMessageLocalImpl dm = JsonUtil.parse(inboxMessage.getOriginalMessage(),
-			DirectMessageLocalImpl.class);
-		ChatContactQuery contactQuery = messageContext.contact();
-		contactQuery.setProfilePic(dm.getSender().getProfileImageURLHttps());
-		contactQuery.setName(dm.getSender().getName());
+	@Override
+	public InboxMessage assignToAgent(InboxMessage inboxMessage) {
+		return inboxMessage;
+	}
+
+	public InboxMessage toInboxMessage(DirectMessage dm, ChannelConfig channelConfig) {
+		InboxMessage ibm = this.createInboxMessage(channelConfig);
+		ibm.setMessageIdExt(String.valueOf(dm.getId()));
+		ibm.setMessage(dm.getText());
+		ibm.setFrom(String.valueOf(dm.getSenderId()));
+		ibm.to().add(String.valueOf(dm.getRecipientId()));
+		ibm.contact().setCsid(String.valueOf(dm.getSenderId()));
+
+		/**
+		 * NOTE:- Do not user original DirectMessageJsonImpl as it can throw
+		 * serialization error
+		 */
+		if (dm instanceof DirectMessageLocalImpl) {
+			ibm.setOriginalMessage(dm);
+		}
+
+		return ibm;
+	}
+
+	@Override
+	public OutboxMessage initSession(ChatSessionDoc session, InboxMessage inboxMessage) {
+		if (ArgUtil.is(inboxMessage.getOriginalMessage())) {
+			try {
+				DirectMessageLocalImpl dm = JsonUtil.parse(inboxMessage.getOriginalMessage(),
+						DirectMessageLocalImpl.class);
+				ChatContactQuery contactQuery = messageContext.contact();
+				contactQuery.setProfilePic(dm.getSender().getProfileImageURLHttps());
+				contactQuery.setName(dm.getSender().getName());
 //		ChannelConfig config = getChannelConfig(inboxMessage);
 //		MapModel x = twitterClientExt.askInput(config, dm.getSenderId() + "");
 //		System.out.println(x.toJson());
-	    } catch (Exception e) {
-		LOGGER.error("Twitter Init Session Data Parse Errror", e);
-	    }
-	}
-	return null;
-    }
-
-    public List<InboxMessage> messageConverter(ResponseList<DirectMessage> dml, ChannelConfig channelConfig) {
-	List<InboxMessage> inboxMsg = new ArrayList<InboxMessage>();
-	if (ArgUtil.is(dml)) {
-	    for (DirectMessage dm : dml) {
-		InboxMessage ibm = toInboxMessage(dm, channelConfig);
-		inboxMsg.add(ibm);
-	    }
-	}
-	return inboxMsg;
-    }
-
-    public List<InboxMessage> fetch(ChannelConfig channelConfig) throws TwitterException {
-	DirectMessageList dml = twitterClient.pollDirectMessagesReceived(channelConfig);
-	return messageConverter(dml, channelConfig);
-    }
-
-    public List<InboxMessage> process(ChannelConfig channelConfig, Map<String, Object> update) throws TwitterException {
-	TwitterClientContext ctx = twitterClient.getContext(channelConfig);
-	DirectMessageList dml = DirectMessageLocalImpl.createDirectMessageList(update,
-		ctx.getTwitter().getConfiguration());
-	dml = ctx.removeDMsNotSentToMe(dml);
-	return messageConverter(dml, channelConfig);
-    }
-
-    @Override
-    public MessageBoxEvent inboundMessageBoxEvent(ChannelConfig channelConfig, MapModel requestMap,
-	    MessageBoxEvent messageBoxEvent) {
-	try {
-	    messageBoxEvent.addInboxMessage(process(channelConfig, requestMap.toMap()));
-	} catch (TwitterException e) {
-	    LOGGER.error("Exception while converting inbox message from twitter webhook", e);
-	}
-	return messageBoxEvent;
-    }
-
-    @Override
-    public List<InboxMessage> onReadInboxMessage(ChannelConfig channelConfig, List<InboxMessage> inboxMessages) {
-	if (inboxMessages != null && !inboxMessages.isEmpty()) {
-	    for (InboxMessage event : inboxMessages) {
-		try {
-		    twitterClient.getContext(channelConfig).getTwitter()
-			    .destroyDirectMessage(Long.parseLong(event.getMessageIdExt()));
-		} catch (NumberFormatException | TwitterException e) {
-		    LOGGER.error("Exception while processing after reading inbox message from twitter webhook", e);
+			} catch (Exception e) {
+				LOGGER.error("Twitter Init Session Data Parse Errror", e);
+			}
 		}
-	    }
+		return null;
 	}
-	return inboxMessages;
-    }
+
+	public List<InboxMessage> messageConverter(ResponseList<DirectMessage> dml, ChannelConfig channelConfig) {
+		List<InboxMessage> inboxMsg = new ArrayList<InboxMessage>();
+		if (ArgUtil.is(dml)) {
+			for (DirectMessage dm : dml) {
+				InboxMessage ibm = toInboxMessage(dm, channelConfig);
+				inboxMsg.add(ibm);
+			}
+		}
+		return inboxMsg;
+	}
+
+	public List<InboxMessage> fetch(ChannelConfig channelConfig) throws TwitterException {
+		DirectMessageList dml = twitterClient.pollDirectMessagesReceived(channelConfig);
+		return messageConverter(dml, channelConfig);
+	}
+
+	public List<InboxMessage> process(ChannelConfig channelConfig, Map<String, Object> update) throws TwitterException {
+		TwitterClientContext ctx = twitterClient.getContext(channelConfig);
+		DirectMessageList dml = DirectMessageLocalImpl.createDirectMessageList(update,
+				ctx.getTwitter().getConfiguration());
+		dml = ctx.removeDMsNotSentToMe(dml);
+		return messageConverter(dml, channelConfig);
+	}
+
+	@Override
+	public MessageBoxEvent inboundMessageBoxEvent(ChannelConfig channelConfig, MapModel requestMap,
+			MessageBoxEvent messageBoxEvent) {
+		try {
+			messageBoxEvent.addInboxMessage(process(channelConfig, requestMap.toMap()));
+		} catch (TwitterException e) {
+			LOGGER.error("Exception while converting inbox message from twitter webhook", e);
+		}
+		return messageBoxEvent;
+	}
+
+	@Override
+	public List<InboxMessage> onReceiveInboxMessage(List<InboxMessage> inboxMessages) {
+		if (inboxMessages != null && !inboxMessages.isEmpty()) {
+			for (InboxMessage event : inboxMessages) {
+				try {
+					ChannelConfig channelConfig = getChannelConfig(event);
+					twitterClient.getContext(channelConfig).getTwitter()
+							.destroyDirectMessage(Long.parseLong(event.getMessageIdExt()));
+				} catch (NumberFormatException | TwitterException e) {
+					LOGGER.error("Exception while processing after reading inbox message from twitter webhook", e);
+				}
+			}
+		}
+		return inboxMessages;
+	}
 
 }

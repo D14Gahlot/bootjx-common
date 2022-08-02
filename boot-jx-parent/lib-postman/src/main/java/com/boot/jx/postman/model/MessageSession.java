@@ -7,57 +7,103 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class MessageSession implements Serializable {
-    private static final long serialVersionUID = -5472557093277982501L;
-    private String dept;
-    private String agent;
-    private String mode;
-    private String queue;
-    private boolean resolved;
+	private static final long serialVersionUID = -5472557093277982501L;
+	private String dept;
+	private String agent;
+	private String bot;
+	private String mode;
+	private String queue;
+	private boolean resolved;
+	private boolean firstMessage;
+	private long sessionStamp;
 
-    public String getDept() {
-	return dept;
-    }
+	private String ticketHash;
+	private String routingId;
 
-    public void setDept(String dept) {
-	this.dept = dept;
-    }
-
-    public String getAgent() {
-	return agent;
-    }
-
-    public void setAgent(String agent) {
-	this.agent = agent;
-    }
-
-    public void ifNoAgent(String agent) {
-	if (ArgUtil.is(this.agent)) {
-	    this.agent = agent;
+	public String getDept() {
+		return dept;
 	}
-    }
 
-    public String getMode() {
-	return mode;
-    }
+	public void setDept(String dept) {
+		this.dept = dept;
+	}
 
-    public void setMode(String mode) {
-	this.mode = mode;
-    }
+	public String getAgent() {
+		return agent;
+	}
 
-    public boolean isResolved() {
-	return resolved;
-    }
+	public void setAgent(String agent) {
+		this.agent = agent;
+	}
 
-    public void setResolved(boolean resolved) {
-	this.resolved = resolved;
-    }
+	public void ifNoAgent(String agent) {
+		if (ArgUtil.is(this.agent)) {
+			this.agent = agent;
+		}
+	}
 
-    public String getQueue() {
-	return queue;
-    }
+	public String getMode() {
+		return mode;
+	}
 
-    public void setQueue(String queue) {
-	this.queue = queue;
-    }
+	public void setMode(String mode) {
+		this.mode = mode;
+	}
+
+	public boolean isResolved() {
+		return resolved;
+	}
+
+	public void setResolved(boolean resolved) {
+		this.resolved = resolved;
+	}
+
+	public String getQueue() {
+		return queue;
+	}
+
+	public void setQueue(String queue) {
+		this.queue = queue;
+	}
+
+	public String getBot() {
+		return bot;
+	}
+
+	public void setBot(String bot) {
+		this.bot = bot;
+	}
+
+	public boolean isFirstMessage() {
+		return firstMessage;
+	}
+
+	public void setFirstMessage(boolean firstMessage) {
+		this.firstMessage = firstMessage;
+	}
+
+	public String getTicketHash() {
+		return ticketHash;
+	}
+
+	public void setTicketHash(String ticketId) {
+		this.ticketHash = ticketId;
+	}
+
+	public String getRoutingId() {
+		return routingId;
+	}
+
+	public void setRoutingId(String routingId) {
+		this.routingId = routingId;
+	}
+
+	public long getSessionStamp() {
+		return sessionStamp;
+	}
+
+	public void setSessionStamp(long sessionStamp) {
+		this.sessionStamp = sessionStamp;
+	}
 
 }

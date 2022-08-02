@@ -3,15 +3,24 @@ package com.boot.jx.postman.doc;
 import java.io.Serializable;
 import java.util.Map;
 
+import org.springframework.data.mongodb.core.index.Indexed;
+import org.springframework.data.mongodb.core.mapping.Document;
+
 import com.boot.jx.postman.model.MessageDefinitions.Contactable;
 import com.boot.utils.ArgUtil;
 
+@Document
 public class ContactDetailDoc implements Serializable, Contactable {
 	private static final long serialVersionUID = -6046846959629225232L;
+
+	@Indexed
 	private String email;
 	private String userid;
 	private String mobile;
+	@Indexed
 	private String phone;
+
+	@Indexed
 	private String name;
 
 	private String contactType;

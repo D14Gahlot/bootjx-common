@@ -1,9 +1,11 @@
 package com.boot.jx.postman.plugin;
 
 import com.boot.jx.postman.PMEnvironment.AChannelConfig;
+import com.boot.jx.postman.plugin.EmailPlugin.EmailConfigDetails;
 import com.boot.jx.postman.plugin.FacebookPlugin.FacebookConfigDetails;
 import com.boot.jx.postman.plugin.InstagramPlugin.InstagramConfig;
 import com.boot.jx.postman.plugin.TelegramPlugin.TelegramConfigDetails;
+import com.boot.jx.postman.plugin.TwilioSMSPlugin.TwilioConfigDetails;
 import com.boot.jx.postman.plugin.TwitterPlugin.TwitterConfigDetails;
 import com.boot.jx.postman.plugin.WA360Plugin.WA360ConfigDetails;
 import com.boot.jx.postman.plugin.WAGupShupPlugin.GupShupConfigDetails;
@@ -11,145 +13,163 @@ import com.boot.jx.postman.plugin.WebPlugin.WebConfigDetails;
 
 public class ChannelConfig extends AChannelConfig {
 
-    private static final long serialVersionUID = -254797155595466825L;
-    private String lane;
+	private static final long serialVersionUID = -254797155595466825L;
+	private String lane;
 
-    private FacebookConfigDetails facebook;
-    private TwitterConfigDetails twitter;
-    private TelegramConfigDetails telegram;
-    private GupShupConfigDetails gupshup;
-    private InstagramConfig instagram;
-    private WA360ConfigDetails wa360d;
-    private WebConfigDetails web;
+	private FacebookConfigDetails facebook;
+	private TwitterConfigDetails twitter;
+	private TelegramConfigDetails telegram;
+	private GupShupConfigDetails gupshup;
+	private InstagramConfig instagram;
+	private WA360ConfigDetails wa360d;
+	private WebConfigDetails web;
+	private EmailConfigDetails email;
+	private TwilioConfigDetails twilio;
 
-    private boolean isPushAllowed;
-    private boolean isPushOnlyApproved;
-    private boolean isPushFreeTextAllowed;
-    private boolean isPushToNewContactAllowed;
-    private boolean isWebhookManual;
-    
-    private String callbackPath;
+	private boolean isPushAllowed;
+	private boolean isPushOnlyApproved;
+	private boolean isPushFreeTextAllowed;
+	private boolean isPushToNewContactAllowed;
+	private boolean isWebhookManual;
 
-    public String getLane() {
-	return lane;
-    }
+	private String callbackPath;
 
-    @Override
-    public boolean isPushAllowed() {
-	return this.isPushAllowed;
-    }
+	public String getLane() {
+		return lane;
+	}
 
-    @Override
-    public boolean isPushOnlyApproved() {
-	return this.isPushOnlyApproved;
-    }
+	@Override
+	public boolean isPushAllowed() {
+		return this.isPushAllowed;
+	}
 
-    @Override
-    public boolean isPushFreeTextAllowed() {
-	return this.isPushFreeTextAllowed;
-    }
+	@Override
+	public boolean isPushOnlyApproved() {
+		return this.isPushOnlyApproved;
+	}
 
-    @Override
-    public boolean isPushToNewContactAllowed() {
-	return this.isPushToNewContactAllowed;
-    }
+	@Override
+	public boolean isPushFreeTextAllowed() {
+		return this.isPushFreeTextAllowed;
+	}
 
-    public void setLane(String lane) {
-	this.lane = lane;
-    }
+	@Override
+	public boolean isPushToNewContactAllowed() {
+		return this.isPushToNewContactAllowed;
+	}
 
-    public FacebookConfigDetails getFacebook() {
-	return facebook;
-    }
+	public void setLane(String lane) {
+		this.lane = lane;
+	}
 
-    public void setFacebook(FacebookConfigDetails facebook) {
-	this.facebook = facebook;
-    }
+	public FacebookConfigDetails getFacebook() {
+		return facebook;
+	}
 
-    public InstagramConfig getInstagram() {
-	return instagram;
-    }
+	public void setFacebook(FacebookConfigDetails facebook) {
+		this.facebook = facebook;
+	}
 
-    public void setInstagram(InstagramConfig instagram) {
-	this.instagram = instagram;
-    }
+	public InstagramConfig getInstagram() {
+		return instagram;
+	}
 
-    public TwitterConfigDetails getTwitter() {
-	return twitter;
-    }
+	public void setInstagram(InstagramConfig instagram) {
+		this.instagram = instagram;
+	}
 
-    public void setTwitter(TwitterConfigDetails twitter) {
-	this.twitter = twitter;
-    }
+	public TwitterConfigDetails getTwitter() {
+		return twitter;
+	}
 
-    public TelegramConfigDetails getTelegram() {
-	return telegram;
-    }
+	public void setTwitter(TwitterConfigDetails twitter) {
+		this.twitter = twitter;
+	}
 
-    public void setTelegram(TelegramConfigDetails telegram) {
-	this.telegram = telegram;
-    }
+	public TelegramConfigDetails getTelegram() {
+		return telegram;
+	}
 
-    public GupShupConfigDetails getGupshup() {
-	return gupshup;
-    }
+	public void setTelegram(TelegramConfigDetails telegram) {
+		this.telegram = telegram;
+	}
 
-    public void setGupshup(GupShupConfigDetails gupshup) {
-	this.gupshup = gupshup;
-    }
+	public GupShupConfigDetails getGupshup() {
+		return gupshup;
+	}
 
-    public ChannelConfig disabled(boolean isDisabled) {
-	this.setDisabled(isDisabled);
-	return this;
-    }
+	public void setGupshup(GupShupConfigDetails gupshup) {
+		this.gupshup = gupshup;
+	}
 
-    public WA360ConfigDetails getWa360d() {
-	return wa360d;
-    }
+	public ChannelConfig disabled(boolean isDisabled) {
+		this.setDisabled(isDisabled);
+		return this;
+	}
 
-    public void setWa360d(WA360ConfigDetails wa360d) {
-	this.wa360d = wa360d;
-    }
+	public WA360ConfigDetails getWa360d() {
+		return wa360d;
+	}
 
-    public WebConfigDetails getWeb() {
-	return web;
-    }
+	public void setWa360d(WA360ConfigDetails wa360d) {
+		this.wa360d = wa360d;
+	}
 
-    public void setWeb(WebConfigDetails web) {
-	this.web = web;
-    }
+	public WebConfigDetails getWeb() {
+		return web;
+	}
 
-    public String getCallbackPath() {
-	return callbackPath;
-    }
+	public void setWeb(WebConfigDetails web) {
+		this.web = web;
+	}
 
-    public void setCallbackPath(String callbackPath) {
-	this.callbackPath = callbackPath;
-    }
+	public String getCallbackPath() {
+		return callbackPath;
+	}
 
-    public void setPushAllowed(boolean isPushAllowed) {
-	this.isPushAllowed = isPushAllowed;
-    }
+	public void setCallbackPath(String callbackPath) {
+		this.callbackPath = callbackPath;
+	}
 
-    public void setPushOnlyApproved(boolean isPushOnlyApproved) {
-	this.isPushOnlyApproved = isPushOnlyApproved;
-    }
+	public void setPushAllowed(boolean isPushAllowed) {
+		this.isPushAllowed = isPushAllowed;
+	}
 
-    public void setPushFreeTextAllowed(boolean isPushFreeTextAllowed) {
-	this.isPushFreeTextAllowed = isPushFreeTextAllowed;
-    }
+	public void setPushOnlyApproved(boolean isPushOnlyApproved) {
+		this.isPushOnlyApproved = isPushOnlyApproved;
+	}
 
-    public void setPushToNewContactAllowed(boolean isPushToNewContactAllowed) {
-	this.isPushToNewContactAllowed = isPushToNewContactAllowed;
-    }
+	public void setPushFreeTextAllowed(boolean isPushFreeTextAllowed) {
+		this.isPushFreeTextAllowed = isPushFreeTextAllowed;
+	}
 
-    @Override
-    public boolean isWebhookManual() {
-	return this.isWebhookManual;
-    }
+	public void setPushToNewContactAllowed(boolean isPushToNewContactAllowed) {
+		this.isPushToNewContactAllowed = isPushToNewContactAllowed;
+	}
 
-    public void setWebhookManual(boolean isWebhookManual) {
-	this.isWebhookManual = isWebhookManual;
-    }
+	@Override
+	public boolean isWebhookManual() {
+		return this.isWebhookManual;
+	}
+
+	public void setWebhookManual(boolean isWebhookManual) {
+		this.isWebhookManual = isWebhookManual;
+	}
+
+	public EmailConfigDetails getEmail() {
+		return email;
+	}
+
+	public void setEmail(EmailConfigDetails email) {
+		this.email = email;
+	}
+
+	public TwilioConfigDetails getTwilio() {
+		return twilio;
+	}
+
+	public void setTwilio(TwilioConfigDetails twilio) {
+		this.twilio = twilio;
+	}
 
 }

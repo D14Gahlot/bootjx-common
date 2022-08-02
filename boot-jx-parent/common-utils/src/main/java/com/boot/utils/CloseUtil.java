@@ -7,8 +7,6 @@ import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-
-
 /**
  * The Class CloseUtil.
  */
@@ -24,8 +22,7 @@ public final class CloseUtil {
 	/**
 	 * Close.
 	 *
-	 * @param closeable
-	 *            the closeable
+	 * @param closeable the closeable
 	 */
 	public static void close(Closeable closeable) {
 		try {
@@ -40,18 +37,20 @@ public final class CloseUtil {
 	/**
 	 * Close.
 	 *
-	 * @param hasCloseMethod
-	 *            the has close method
+	 * @param hasCloseMethod the has close method
 	 */
 	public static void close(Object hasCloseMethod) {
 		try {
+			if (hasCloseMethod == null) {
+				return;
+			}
 			Method method = hasCloseMethod.getClass().getMethod("close", new Class<?>[0]);
 			method.invoke(hasCloseMethod, new Object[0]);
 		} catch (Exception e) {
 			/* ignore */
 		}
 	}
-	
+
 	public static void close(CallableStatement cs, Connection connection) {
 		if (cs != null) {
 			try {

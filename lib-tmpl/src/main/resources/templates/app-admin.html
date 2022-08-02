@@ -8,7 +8,7 @@
 <meta name=viewport
 	content="width=device-width,initial-scale=1,shrink-to-fit=no">
 
-<link rel="shortcut icon" th:href="${CDN_URL}+'/favicon.ico'" />
+<link rel="shortcut icon" th:href="${CONFIG.PROP_LOGO_BG_X_ICON}" />
 
 <title>[[${CONFIG.PROP_SERVICE_NAME}]] - AdminDashboard</title>
 
@@ -49,7 +49,8 @@
 		CDN_URL : '[[${CDN_URL}]]', //
 		APP_CONTEXT : '[[${APP_CONTEXT}]]', //
 		remoteJsVersion :  '[[${CDN_VERSION}]]', //
-		CONTEXT: '[[${APP_CONTEXT}]]', "APP_USER" : '[[${APP_USER}]]',
+		CONTEXT: '[[${APP_CONTEXT}]]', APP_USER : '[[${APP_USER}]]',
+		APP_DEPT : '[[${APP_DEPT}]]', APP_USER_ROLE : ([(${APP_USER_ROLE})]),
 		CONFIG : [(${CONFIG_JSON})]
 	};
 </script>

@@ -7,18 +7,33 @@ import org.springframework.stereotype.Component;
 
 import com.boot.jx.logger.AuditDetailProvider;
 import com.boot.jx.postman.PMEnvironment.PMClientConfig;
+import com.boot.jx.postman.store.MessageContext;
+import com.boot.jx.rest.AppRequestInterfaces.AppAuthUser;
+import com.boot.utils.ArgUtil;
 
 @Component
 public class BotSessionBean implements AuditDetailProvider, Serializable {
 
-    private static final long serialVersionUID = 26049494178384497L;
+	private static final long serialVersionUID = 26049494178384497L;
 
-    @Autowired
-    PMClientConfig pmClientConfig;
+	@Autowired
+	PMClientConfig pmClientConfig;
 
-    @Override
-    public String getAuditUser() {
-	return pmClientConfig.getDefaultSender();
-    }
+	@Autowired
+	public MessageContext messageContext;
+
+	@Override
+	public String getAuditUser() {
+		String user = messageContext.getActiveQueueCode();
+		if (ArgUtil.is(user)) {
+			return user;
+		}
+		return pmClientConfig.getDefaultSender();
+	}
+
+	@Override
+	public AppAuthUser getAuthUser() {
+		return null;
+	}
 
 }

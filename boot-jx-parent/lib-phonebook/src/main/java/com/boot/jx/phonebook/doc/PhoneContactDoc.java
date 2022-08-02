@@ -6,11 +6,11 @@ import java.util.List;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import com.boot.jx.phonebook.model.PBAddress;
-import com.boot.jx.phonebook.model.PBEmail;
-import com.boot.jx.phonebook.model.PBName;
-import com.boot.jx.phonebook.model.PBPhone;
-import com.boot.jx.phonebook.model.PBWebsite;
+import com.boot.jx.postman.pbook.PBAddress;
+import com.boot.jx.postman.pbook.PBEmail;
+import com.boot.jx.postman.pbook.PBName;
+import com.boot.jx.postman.pbook.PBPhone;
+import com.boot.jx.postman.pbook.PBWebsite;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)

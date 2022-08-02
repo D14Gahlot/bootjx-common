@@ -8,9 +8,11 @@ import javax.annotation.PostConstruct;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
+import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.model.TagDocument;
 import com.boot.utils.ArgUtil;
 
@@ -31,6 +33,9 @@ public class CoreNLPService {
 	StanfordCoreNLP nerPipeline;
 
 	private boolean initd;
+
+	@Autowired
+	PMEnvironment pmEnvironment;
 
 	@PostConstruct
 	public void init() {
@@ -61,19 +66,30 @@ public class CoreNLPService {
 
 	public TagDocument addTags(String line, TagDocument tagDocument) {
 
-		if (!initd) {
+		if (!initd || !pmEnvironment.keyEntry("postman.nlp.corenlp.enabled").asBoolean()) {
+			return tagDocument;
+		}
+
+		boolean detectSentiment = pmEnvironment.keyEntry("postman.nlp.detect.sentiment").asBoolean();
+		boolean detectPersons = pmEnvironment.keyEntry("postman.nlp.detect.persons").asBoolean();
+		boolean detectCountries = pmEnvironment.keyEntry("postman.nlp.detect.countries").asBoolean();
+		boolean detectCities = pmEnvironment.keyEntry("postman.nlp.detect.cities").asBoolean();
+
+		if (ArgUtil.none(detectSentiment, detectPersons, detectCountries, detectCities)) {
 			return tagDocument;
 		}
 
 		try {
 
-			LOGGER.debug("SENTIMENT<");
-			CoreDocument sentimentDoc = this.tokenizerPipeline.processToCoreDocument(line);
-			sentimentPipeline.annotate(sentimentDoc);
-			// normal output
-			List<String> sencs = sentimentDoc.sentences().stream().map(mapper -> mapper.sentiment())
-					.collect(Collectors.toCollection(() -> tagDocument.sentiments()));
-			LOGGER.debug("SENTIMENT>");
+			if (detectSentiment) {
+				LOGGER.debug("SENTIMENT<");
+				CoreDocument sentimentDoc = this.tokenizerPipeline.processToCoreDocument(line);
+				sentimentPipeline.annotate(sentimentDoc);
+				// normal output
+				List<String> sencs = sentimentDoc.sentences().stream().map(mapper -> mapper.sentiment())
+						.collect(Collectors.toCollection(() -> tagDocument.sentiments()));
+				LOGGER.debug("SENTIMENT>");
+			}
 
 			if (ArgUtil.is(line)) {
 				// return;
@@ -83,17 +99,20 @@ public class CoreNLPService {
 			CoreDocument doc = nerPipeline.processToCoreDocument(line);
 			// pipeline2.annotate(doc);
 
-			if (ArgUtil.is(doc.entityMentions())) {
+			if (ArgUtil.is(doc.entityMentions()) && (detectPersons || detectCountries || detectCities)) {
 				for (CoreEntityMention em : doc.entityMentions()) {
 					switch (em.entityType()) {
 					case "PERSON":
-						tagDocument.persons().add(em.text());
+						if (detectPersons)
+							tagDocument.persons().add(em.text());
 						break;
 					case "COUNTRY":
-						tagDocument.countries().add(em.text());
+						if (detectCountries)
+							tagDocument.countries().add(em.text());
 						break;
 					case "CITY":
-						tagDocument.cities().add(em.text());
+						if (detectCities)
+							tagDocument.cities().add(em.text());
 						break;
 					default:
 						break;

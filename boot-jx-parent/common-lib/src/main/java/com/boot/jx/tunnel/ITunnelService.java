@@ -1,5 +1,7 @@
 package com.boot.jx.tunnel;
 
+import com.boot.jx.tunnel.ITunnelDefs.TunnelQueue;
+
 public interface ITunnelService {
 	public <T> long shout(String topic, T messagePayload);
 

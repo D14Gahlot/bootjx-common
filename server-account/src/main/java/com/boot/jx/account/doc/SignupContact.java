@@ -1,6 +1,7 @@
 package com.boot.jx.account.doc;
 
 import java.io.Serializable;
+import java.util.List;
 
 import javax.validation.constraints.NotNull;
 
@@ -9,74 +10,84 @@ import com.boot.jx.validation.ValidationAnnotations.ValidPhone;
 
 public class SignupContact implements Serializable {
 
-    private static final long serialVersionUID = 3140425278301607438L;
+	private static final long serialVersionUID = 3140425278301607438L;
 
-    @NotNull
-    private String name;
+	@NotNull
+	private String name;
 
-    @NotNull
-    @ValidEmail
-    private String email;
+	@NotNull
+	@ValidEmail
+	private String email;
 
-    @NotNull
-    @ValidPhone
-    private String phone;
+	@NotNull
+	@ValidPhone
+	private String phone;
 
-    @NotNull
-    private String company;
+	@NotNull
+	private String company;
 
-    @NotNull
-    private String role;
+	@NotNull
+	private String role;
 
-    @NotNull
-    private String country;
+	private List<Object> products;
 
-    public String getName() {
-	return name;
-    }
+	@NotNull
+	private String country;
 
-    public void setName(String name) {
-	this.name = name;
-    }
+	public String getName() {
+		return name;
+	}
 
-    public String getEmail() {
-	return email;
-    }
+	public void setName(String name) {
+		this.name = name;
+	}
 
-    public void setEmail(String email) {
-	this.email = email;
-    }
+	public String getEmail() {
+		return email;
+	}
 
-    public String getPhone() {
-	return phone;
-    }
+	public void setEmail(String email) {
+		this.email = email;
+	}
 
-    public void setPhone(String phone) {
-	this.phone = phone;
-    }
+	public String getPhone() {
+		return phone;
+	}
 
-    public String getCompany() {
-	return company;
-    }
+	public void setPhone(String phone) {
+		this.phone = phone;
+	}
 
-    public void setCompany(String company) {
-	this.company = company;
-    }
+	public String getCompany() {
+		return company;
+	}
 
-    public String getRole() {
-	return role;
-    }
+	public void setCompany(String company) {
+		this.company = company;
+	}
 
-    public void setRole(String role) {
-	this.role = role;
-    }
+	public String getRole() {
+		return role;
+	}
 
-    public String getCountry() {
-	return country;
-    }
+	public void setRole(String role) {
+		this.role = role;
+	}
 
-    public void setCountry(String country) {
-	this.country = country;
-    }
+	public String getCountry() {
+		return country;
+	}
+
+	public void setCountry(String country) {
+		this.country = country;
+	}
+
+	public List<Object> getProducts() {
+		return products;
+	}
+
+	public void setProducts(List<Object> products) {
+		this.products = products;
+	}
 
 }

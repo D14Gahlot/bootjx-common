@@ -21,242 +21,312 @@ import com.boot.utils.Random;
 
 public interface PMConfiguration extends Serializable {
 
-    public ChannelConfig channel(String channelId);
+	public ChannelConfig channel(String channelId);
 
-    public NodeEntry<Object> keyEntry(String string);
+	public ClientApp clientApiKey(String assignedQueue);
 
-    public List<AChannelConfig> listChannels();
+	public NodeEntry<Object> keyEntry(String string);
 
-    public static class PMConfigurationModel implements PMConfiguration {
+	public List<AChannelConfig> listChannels();
 
-	private static final long serialVersionUID = -5432956433673368768L;
+	public List<ClientApp> listApps();
 
-	private Map<String, ChannelConfig> channels;
-	private Map<String, ClientApp> clientApiKeys;
+	public static class PMConfigurationModel implements PMConfiguration {
 
-	private Map<String, PMConfigurationObject> prefs;
-	private Map<String, Object> globalVars;
+		private static final long serialVersionUID = -5432956433673368768L;
 
-	private AgentConfig agent;
-	private String accountKey;
-	private long updateStamp;
+		private Map<String, ChannelConfig> channels;
+		private Map<String, ClientApp> clientApiKeys;
 
-	// All Channels
-	public SafeKeyHashMap<ChannelConfig> channels() {
-	    if (ArgUtil.isEmpty(channels)) {
-		channels = new HashMap<String, ChannelConfig>();
-	    }
-	    return new SafeKeyHashMap<ChannelConfig>(channels);
-	}
+		private Map<String, PMConfigurationObject> prefs;
+		private Map<String, Object> globalVars;
 
-	public Map<String, ChannelConfig> getChannels() {
-	    return channels;
-	}
+		private AgentConfig agent;
+		private String accountKey;
+		private long updateStamp;
 
-	public void setChannels(Map<String, ChannelConfig> channels) {
-	    this.channels = channels;
-	}
-
-	public ChannelConfig channel(String channelId) {
-	    if (!ArgUtil.is(channelId)) {
-		return null;
-	    }
-	    return channels().get(channelId);
-	}
-
-	public PMConfiguration channels(ChannelConfig channel) {
-	    this.channels().put(channel.getChannelId(), channel);
-	    return this;
-	}
-
-	// All A:PI Ckeys
-	public SafeKeyHashMap<ClientApp> clientApiKeys() {
-	    if (ArgUtil.isEmpty(clientApiKeys)) {
-		clientApiKeys = new HashMap<String, ClientApp>();
-	    }
-	    return new SafeKeyHashMap<ClientApp>(clientApiKeys);
-	}
-
-	public ClientApp clientApiKey(String apiKey) {
-	    return clientApiKeys().get(apiKey);
-	}
-
-	public PMConfiguration clientApiKey(ClientApp clientApiKey) {
-	    this.clientApiKeys().put(clientApiKey.getKey(), clientApiKey);
-	    if (ArgUtil.is(clientApiKey.getQueue())) {
-		this.clientApiKeys().put(clientApiKey.getQueue(), clientApiKey);
-	    }
-	    if (ArgUtil.is(clientApiKey.getId())) {
-		this.clientApiKeys().put(clientApiKey.getId(), clientApiKey);
-	    }
-	    return this;
-	}
-
-	// Agent
-	public AgentConfig agent() {
-	    if (ArgUtil.isEmpty(agent)) {
-		agent = new AgentConfig();
-	    }
-	    return agent;
-	}
-
-	public AgentConfig getAgent() {
-	    return agent;
-	}
-
-	public void setAgent(AgentConfig agent) {
-	    this.agent = agent;
-	}
-
-	public PMConfiguration agent(AgentConfig agent) {
-	    this.agent = agent;
-	    return this;
-	}
-
-	// Config
-	public Map<String, PMConfigurationObject> getPrefs() {
-	    return prefs;
-	}
-
-	public void setPrefs(Map<String, PMConfigurationObject> prefs) {
-	    this.prefs = prefs;
-	}
-
-	public SafeKeyHashMap<PMConfigurationObject> prefs() {
-	    if (ArgUtil.isEmpty(prefs)) {
-		prefs = new HashMap<String, PMConfigurationObject>();
-	    }
-	    return new SafeKeyHashMap<PMConfigurationObject>(prefs);
-	}
-
-	public PMConfigurationObject keyEntry(String key) {
-	    return prefs().getOrDefault(key, new PMConfigurationObject(key, null));
-	}
-
-	public PMConfigurationObject getPref(String key, Object value) {
-	    return prefs().getOrDefault(key, new PMConfigurationObject(key, value));
-	}
-
-	public PMConfiguration setPref(PMConfigurationObject map) {
-	    this.prefs().put(map.getKey(), map);
-	    return this;
-	}
-
-	public List<AChannelConfig> listChannels() {
-	    List<AChannelConfig> list = new ArrayList<AChannelConfig>();
-	    for (Entry<String, ChannelConfig> aChannelDetails : this.channels().entrySet()) {
-		list.add(aChannelDetails.getValue());
-	    }
-	    return list;
-	}
-
-	public String getAccountKey() {
-	    if (!ArgUtil.is(this.accountKey)) {
-		this.accountKey = Random.randomAlphaNumeric(10);
-	    }
-	    return accountKey;
-	}
-
-	public void setAccountKey(String accountKey) {
-	    this.accountKey = accountKey;
-	}
-
-	public long getUpdateStamp() {
-	    return updateStamp;
-	}
-
-	public void setUpdateStamp(long updateStamp) {
-	    this.updateStamp = updateStamp;
-	}
-
-	public SafeKeyHashMap<Object> globalVars() {
-	    if (ArgUtil.isEmpty(globalVars)) {
-		globalVars = new HashMap<String, Object>();
-	    }
-	    return new SafeKeyHashMap<Object>(globalVars);
-	}
-    }
-
-    public static PMConfigurationModel instance() {
-	return new PMConfigurationModel();
-    }
-
-    public static class PMConfigurationWrappper implements PMConfiguration {
-
-	private static final long serialVersionUID = -5108277431528919820L;
-	private static PMConfigurationModel DEFAULT = PMConfiguration.instance();
-
-	private PMConfigurationModel local;
-	private PMConfigurationModel shared;
-
-	private AppConfig appConfig;
-
-	public PMConfigurationWrappper local(PMConfigurationModel local) {
-	    this.local = local;
-	    return this;
-	}
-
-	public PMConfigurationWrappper shared(PMConfigurationModel shared) {
-	    this.shared = shared;
-	    return this;
-	}
-
-	public PMConfigurationWrappper appConfig(AppConfig appConfig) {
-	    this.appConfig = appConfig;
-	    return this;
-	}
-
-	public PMConfigurationModel local() {
-	    return (this.local != null) ? this.local : DEFAULT;
-	}
-
-	public PMConfigurationModel shared() {
-	    return (this.shared != null) ? this.shared : DEFAULT;
-	}
-
-	@Override
-	public ChannelConfig channel(String channelId) {
-	    ChannelConfig x = this.local().channel(channelId);
-	    if (ArgUtil.is(x)) {
-		return x;
-	    }
-	    return this.shared().channel(channelId);
-	}
-
-	@Override
-	public PMConfigurationObject keyEntry(String key) {
-	    PMConfigurationObject configObject = this.local().prefs().get(key);
-	    String tnt = AppContextUtil.getTenant();
-	    if (ArgUtil.isEmpty(configObject) && !Tenants.isDefault(tnt)) {
-		PMConfigurationObject sharedConfigObject = this.shared().prefs().get(key);
-		if (ArgUtil.is(sharedConfigObject)) {
-		    return sharedConfigObject;
+		// All Channels
+		public SafeKeyHashMap<ChannelConfig> channels() {
+			if (ArgUtil.isEmpty(channels)) {
+				channels = new HashMap<String, ChannelConfig>();
+			}
+			return new SafeKeyHashMap<ChannelConfig>(channels);
 		}
-	    }
 
-	    if (ArgUtil.isEmpty(configObject)) {
-		String value = appConfig.prop(key);
-		configObject = new PMConfigurationObject(key, value);
-		// this.config().map().put(key, configObject);
-	    }
-
-	    return configObject;
-	}
-
-	@Override
-	public List<AChannelConfig> listChannels() {
-	    List<AChannelConfig> list = this.local().listChannels();
-	    List<AChannelConfig> cs = this.shared().listChannels();
-	    for (AChannelConfig aChannelConfig : cs) {
-		if (aChannelConfig.isShared()
-			|| (aChannelConfig.isSandbox() && keyEntry("postman.chat.channel.sandbox").asBoolean())) {
-		    list.add(aChannelConfig);
+		public Map<String, ChannelConfig> getChannels() {
+			return channels;
 		}
-	    }
 
-	    return list;
+		public void setChannels(Map<String, ChannelConfig> channels) {
+			this.channels = channels;
+		}
+
+		public ChannelConfig channel(String channelId) {
+			if (!ArgUtil.is(channelId)) {
+				return null;
+			}
+			return channels().get(channelId);
+		}
+
+		public PMConfiguration channels(ChannelConfig channel) {
+			this.channels().put(channel.getChannelId(), channel);
+			return this;
+		}
+
+		public PMConfiguration channels(ChannelConfig channel, String server) {
+			if (ArgUtil.is(channel.getServer())) {
+				if (ArgUtil.is(channel.getServer(), server)) {
+					return this.channels(channel);
+				}
+				return this;
+			} else {
+				ChannelConfig existing = this.channel(channel.getChannelId());
+				if (!ArgUtil.is(existing) || !ArgUtil.is(existing.getServer())) {
+					return this.channels(channel);
+				}
+			}
+			return this;
+		}
+
+		// All A:PI Ckeys
+		public SafeKeyHashMap<ClientApp> clientApiKeys() {
+			if (ArgUtil.isEmpty(clientApiKeys)) {
+				clientApiKeys = new HashMap<String, ClientApp>();
+			}
+			return new SafeKeyHashMap<ClientApp>(clientApiKeys);
+		}
+
+		public ClientApp clientApiKey(String apiKey) {
+			return clientApiKeys().get(apiKey);
+		}
+
+		public PMConfiguration clientApiKey(ClientApp clientApiKey) {
+			this.clientApiKeys().put(clientApiKey.getKey(), clientApiKey);
+			if (ArgUtil.is(clientApiKey.getQueue())) {
+				this.clientApiKeys().put(clientApiKey.getQueue(), clientApiKey);
+			}
+			if (ArgUtil.is(clientApiKey.getId())) {
+				this.clientApiKeys().put(clientApiKey.getId(), clientApiKey);
+			}
+			return this;
+		}
+
+		// Agent
+		public AgentConfig agent() {
+			if (ArgUtil.isEmpty(agent)) {
+				agent = new AgentConfig();
+			}
+			return agent;
+		}
+
+		public AgentConfig getAgent() {
+			return agent;
+		}
+
+		public void setAgent(AgentConfig agent) {
+			this.agent = agent;
+		}
+
+		public PMConfiguration agent(AgentConfig agent) {
+			this.agent = agent;
+			return this;
+		}
+
+		// Config
+		public Map<String, PMConfigurationObject> getPrefs() {
+			return prefs;
+		}
+
+		public void setPrefs(Map<String, PMConfigurationObject> prefs) {
+			this.prefs = prefs;
+		}
+
+		public SafeKeyHashMap<PMConfigurationObject> prefs() {
+			if (ArgUtil.isEmpty(prefs)) {
+				prefs = new HashMap<String, PMConfigurationObject>();
+			}
+			return new SafeKeyHashMap<PMConfigurationObject>(prefs);
+		}
+
+		public PMConfigurationObject keyEntry(String key) {
+			return prefs().getOrDefault(key, new PMConfigurationObject(key, null));
+		}
+
+		public PMConfigurationObject getPref(String key, Object value) {
+			return prefs().getOrDefault(key, new PMConfigurationObject(key, value));
+		}
+
+		public PMConfiguration setPref(PMConfigurationObject map) {
+			this.prefs().put(map.getKey(), map);
+			return this;
+		}
+
+		public PMConfiguration setPref(PMConfigurationObject map, String server) {
+			if (ArgUtil.is(map.getServer())) {
+				if (ArgUtil.is(map.getServer(), server)) {
+					return this.setPref(map);
+				}
+				return this;
+			} else {
+				PMConfigurationObject existing = this.prefs().get(map.getKey());
+				if (!ArgUtil.is(existing) || !ArgUtil.is(existing.getServer())) {
+					return this.setPref(map);
+				}
+			}
+			return this;
+		}
+
+		public List<AChannelConfig> listChannels() {
+			List<AChannelConfig> list = new ArrayList<AChannelConfig>();
+			for (Entry<String, ChannelConfig> aChannelDetails : this.channels().entrySet()) {
+				list.add(aChannelDetails.getValue());
+			}
+			return list;
+		}
+
+		@Override
+		public List<ClientApp> listApps() {
+			List<ClientApp> list = new ArrayList<ClientApp>();
+			for (Entry<String, ClientApp> aChannelDetails : this.clientApiKeys().entrySet()) {
+				if (!list.contains(aChannelDetails.getValue())) {
+					list.add(aChannelDetails.getValue());
+				}
+			}
+			return list;
+		}
+
+		public String getAccountKey() {
+			if (!ArgUtil.is(this.accountKey)) {
+				this.accountKey = Random.randomAlphaNumeric(10);
+			}
+			return accountKey;
+		}
+
+		public void setAccountKey(String accountKey) {
+			this.accountKey = accountKey;
+		}
+
+		public long getUpdateStamp() {
+			return updateStamp;
+		}
+
+		public void setUpdateStamp(long updateStamp) {
+			this.updateStamp = updateStamp;
+		}
+
+		public SafeKeyHashMap<Object> globalVars() {
+			if (ArgUtil.isEmpty(globalVars)) {
+				globalVars = new HashMap<String, Object>();
+			}
+			return new SafeKeyHashMap<Object>(globalVars);
+		}
+
 	}
 
-    }
+	public static PMConfigurationModel instance() {
+		return new PMConfigurationModel();
+	}
+
+	public static class PMConfigurationWrappper implements PMConfiguration {
+
+		private static final long serialVersionUID = -5108277431528919820L;
+		private static PMConfigurationModel DEFAULT = PMConfiguration.instance();
+
+		private PMConfigurationModel local;
+		private PMConfigurationModel shared;
+
+		private AppConfig appConfig;
+
+		public PMConfigurationWrappper local(PMConfigurationModel local) {
+			this.local = local;
+			return this;
+		}
+
+		public PMConfigurationWrappper shared(PMConfigurationModel shared) {
+			this.shared = shared;
+			return this;
+		}
+
+		public PMConfigurationWrappper appConfig(AppConfig appConfig) {
+			this.appConfig = appConfig;
+			return this;
+		}
+
+		public PMConfigurationModel local() {
+			return (this.local != null) ? this.local : DEFAULT;
+		}
+
+		public PMConfigurationModel shared() {
+			return (this.shared != null) ? this.shared : DEFAULT;
+		}
+
+		@Override
+		public ChannelConfig channel(String channelId) {
+			ChannelConfig x = this.local().channel(channelId);
+			if (ArgUtil.is(x)) {
+				return x;
+			}
+			return this.shared().channel(channelId);
+		}
+
+		@Override
+		public ClientApp clientApiKey(String assignedQueue) {
+			ClientApp x = this.local().clientApiKey(assignedQueue);
+			if (ArgUtil.is(x)) {
+				return x;
+			}
+			return this.shared().clientApiKey(assignedQueue);
+		}
+
+		@Override
+		public PMConfigurationObject keyEntry(String key) {
+			PMConfigurationObject configObject = this.local().prefs().get(key);
+			String tnt = AppContextUtil.getTenant();
+			if (ArgUtil.isEmpty(configObject) && !Tenants.isDefault(tnt)) {
+				PMConfigurationObject sharedConfigObject = this.shared().prefs().get(key);
+				if (ArgUtil.is(sharedConfigObject)) {
+					return sharedConfigObject;
+				}
+			}
+
+			if (ArgUtil.isEmpty(configObject)) {
+				String value = appConfig.prop(key);
+				configObject = new PMConfigurationObject(key, value);
+				// this.config().map().put(key, configObject);
+			}
+
+			return configObject;
+		}
+
+		@Override
+		public List<AChannelConfig> listChannels() {
+			List<AChannelConfig> list = this.local().listChannels();
+			if (!Tenants.isDefault(AppContextUtil.getTenant())) {
+				List<AChannelConfig> cs = this.shared().listChannels();
+				for (AChannelConfig aChannelConfig : cs) {
+					if (aChannelConfig.isShared()
+							|| (aChannelConfig.isSandbox() && keyEntry("postman.chat.channel.sandbox").asBoolean())) {
+						list.add(aChannelConfig);
+					}
+				}
+			}
+			return list;
+		}
+
+		@Override
+		public List<ClientApp> listApps() {
+			List<ClientApp> list = this.local().listApps();
+			if (!Tenants.isDefault(AppContextUtil.getTenant())) {
+				List<ClientApp> cs = this.shared().listApps();
+				for (ClientApp aChannelConfig : cs) {
+					if (aChannelConfig.isShared()) {
+						list.add(aChannelConfig);
+					}
+				}
+			}
+			return list;
+		}
+
+	}
 
 }

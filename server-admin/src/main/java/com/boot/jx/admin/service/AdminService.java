@@ -25,112 +25,119 @@ import com.boot.utils.EntityDtoUtil;
 @Service
 public class AdminService {
 
-    @Autowired
-    AdminManager adminManager;
+	@Autowired
+	AdminManager adminManager;
 
-    @Autowired
-    AgentStore agentStore;
+	@Autowired
+	AgentStore agentStore;
 
-    @Autowired
-    MongoTemplate mongoTemplate;
+	@Autowired
+	MongoTemplate mongoTemplate;
 
-    @Autowired
-    ConfigManager configManager;
+	@Autowired
+	ConfigManager configManager;
 
-    @Autowired
-    private EmpAuthService empAuthService;
+	@Autowired
+	private EmpAuthService empAuthService;
 
-    @Autowired
-    private DocumentUpdateListner documentUpdateListner;
+	@Autowired
+	private DocumentUpdateListner documentUpdateListner;
 
-    public List<AgentResponseAdminDto> fetchAgents(String agentId) {
-	List<AgentDoc> lstOfAgent = adminManager.fetchAgentList(agentId);
-	return buildAgentDto(lstOfAgent);
-    }
-
-    public List<AgentResponseAdminDto> createOrUpdateAgent(AgentResponseAdminDto reqDto) {
-	AgentDoc reqEntity = EntityDtoUtil.dtoToEntity(reqDto, new AgentDoc());
-	List<AgentDoc> lstOfAgent = adminManager.createOrUpdateAgent(reqEntity);
-	return buildAgentDto(lstOfAgent);
-    }
-
-    public List<DepartmentResponseAdminDto> createOrUpdateDept(DepartmentResponseAdminDto dto) {
-	DepartmentDoc reqEntity = EntityDtoUtil.dtoToEntity(dto, new DepartmentDoc());
-	return new DepartmentResponseAdminDto().importFrom(adminManager.createOrUpdateDepartment(reqEntity));
-    }
-
-    public List<DepartmentResponseAdminDto> fetchDepts(String deptId) {
-	List<DepartmentDoc> lstDept = adminManager.fetchDept(deptId);
-	return new DepartmentResponseAdminDto().importFrom(lstDept);
-    }
-
-    public List<AgentResponseAdminDto> updateAgentActive(String agentId, String status) {
-	agentStore.updateAgentActive(agentId, status);
-	documentUpdateListner.onAgentUpdate(agentId);
-	return buildAgentDto(agentStore.findAll());
-    }
-
-    public List<AgentResponseAdminDto> updateAgentAdmin(String agentId) {
-	return buildAgentDto(adminManager.updateAgentAdmin(agentId));
-    }
-
-    public List<DepartmentDoc> createAndUpdateDepartment(DepartmentDoc deptReqDto) {
-	List<DepartmentDoc> lstDept = adminManager.createOrUpdateDepartment(deptReqDto);
-	return lstDept;
-    }
-
-    public List<DepartmentDoc> updateDepartment(Integer deptId, String status) {
-	List<DepartmentDoc> lstDept = adminManager.updateDeptStatus(deptId, status);
-	return lstDept;
-    }
-
-    public List<AgentResponseAdminDto> updateAgentDefault(String agentId) {
-	agentStore.updateAgentDefault(agentId);
-
-	AgentDoc agent = agentStore.findById(agentId);
-	DepartmentDoc dept = agentStore.findDepartmentById(agent.getDept_id());
-	PMConfigurationDoc doc = mongoTemplate.findById(AppContextUtil.getTenant(), PMConfigurationDoc.class);
-	if (agent.isDefaultValue()) {
-	    doc.agent().defaultAgents().put(dept.getDept_code(), agent.getAgent_code());
-	} else {
-	    doc.agent().defaultAgents().remove(dept.getDept_code());
+	public List<AgentResponseAdminDto> fetchAgents(String agentId) {
+		List<AgentDoc> lstOfAgent = adminManager.fetchAgentList(agentId);
+		return buildAgentDto(lstOfAgent);
 	}
-	mongoTemplate.save(doc);
-	configManager.refresh();
 
-	return buildAgentDto(agentStore.findAll());
-    }
-
-    public List<DepartmentResponseAdminDto> updateDepartmentDefault(String deptId) {
-	agentStore.updateDepartmentDefault(deptId);
-	DepartmentDoc dept = agentStore.findDepartmentById(deptId);
-	PMConfigurationDoc doc = mongoTemplate.findById(AppContextUtil.getTenant(), PMConfigurationDoc.class);
-	if (dept.isDefaultValue()) {
-	    doc.agent().setDefaultTeamCode(dept.getDept_code());
-	} else {
-	    doc.agent().setDefaultTeamCode(null);
+	public List<AgentResponseAdminDto> createOrUpdateAgent(AgentResponseAdminDto reqDto) {
+		AgentDoc reqEntity = EntityDtoUtil.dtoToEntity(reqDto, new AgentDoc());
+		List<AgentDoc> lstOfAgent = adminManager.createOrUpdateAgent(reqEntity);
+		try {
+			if (!ArgUtil.is(reqEntity.getId())) {
+				empAuthService.resetPassword(reqEntity.getAgent_code(), false);
+			}
+		} catch (NoSuchAlgorithmException e) {
+			e.printStackTrace();
+		}
+		return buildAgentDto(lstOfAgent);
 	}
-	mongoTemplate.save(doc);
-	configManager.refresh();
-	return new DepartmentResponseAdminDto().importFrom(agentStore.findDepartmentAll());
-    }
 
-    private List<AgentResponseAdminDto> buildAgentDto(List<AgentDoc> lstOfAgent) {
-	List<AgentResponseAdminDto> agentList = new AgentResponseAdminDto().importFrom(lstOfAgent);
-	for (AgentResponseAdminDto agentResponseDto : agentList) {
-	    agentResponseDto.setAgent_password(null);
-	    if (ArgUtil.is(agentResponseDto.getId())) {
-		agentResponseDto.setDept(new DepartmentResponseAdminDto().importFrom(CollectionUtil
-			.getOne(adminManager.fetchDept(ArgUtil.parseAsString(agentResponseDto.getDept_id())))));
-	    }
+	public List<DepartmentResponseAdminDto> createOrUpdateDept(DepartmentResponseAdminDto dto) {
+		DepartmentDoc reqEntity = EntityDtoUtil.dtoToEntity(dto, new DepartmentDoc());
+		return new DepartmentResponseAdminDto().importFrom(adminManager.createOrUpdateDepartment(reqEntity));
 	}
-	return agentList;
-    }
 
-    public List<AgentResponseAdminDto> agentResetPass(String agentId) throws NoSuchAlgorithmException {
-	AgentDoc agent = agentStore.findById(agentId);
-	empAuthService.resetPassword(agent.getAgent_code(), agent.isAdmin());
-	return buildAgentDto(CollectionUtil.asList(agent));
-    }
+	public List<DepartmentResponseAdminDto> fetchDepts(String deptId) {
+		List<DepartmentDoc> lstDept = adminManager.fetchDept(deptId);
+		return new DepartmentResponseAdminDto().importFrom(lstDept);
+	}
+
+	public List<AgentResponseAdminDto> updateAgentActive(String agentId, String status) {
+		agentStore.updateAgentActive(agentId, status);
+		documentUpdateListner.onAgentUpdate(agentId);
+		return buildAgentDto(agentStore.findAll());
+	}
+
+	public List<AgentResponseAdminDto> updateAgentAdmin(String agentId) {
+		return buildAgentDto(adminManager.updateAgentAdmin(agentId));
+	}
+
+	public List<DepartmentDoc> createAndUpdateDepartment(DepartmentDoc deptReqDto) {
+		List<DepartmentDoc> lstDept = adminManager.createOrUpdateDepartment(deptReqDto);
+		return lstDept;
+	}
+
+	public List<DepartmentDoc> updateDepartment(Integer deptId, String status) {
+		List<DepartmentDoc> lstDept = adminManager.updateDeptStatus(deptId, status);
+		return lstDept;
+	}
+
+	public List<AgentResponseAdminDto> updateAgentDefault(String agentId) {
+		agentStore.updateAgentDefault(agentId);
+
+		AgentDoc agent = agentStore.findById(agentId);
+		DepartmentDoc dept = agentStore.findDepartmentById(agent.getDept_id());
+		PMConfigurationDoc doc = mongoTemplate.findById(AppContextUtil.getTenant(), PMConfigurationDoc.class);
+		if (agent.isDefaultValue()) {
+			doc.agent().defaultAgents().put(dept.getDept_code(), agent.getAgent_code());
+		} else {
+			doc.agent().defaultAgents().remove(dept.getDept_code());
+		}
+		mongoTemplate.save(doc);
+		configManager.refresh();
+
+		return buildAgentDto(agentStore.findAll());
+	}
+
+	public List<DepartmentResponseAdminDto> updateDepartmentDefault(String deptId) {
+		agentStore.updateDepartmentDefault(deptId);
+		DepartmentDoc dept = agentStore.findDepartmentById(deptId);
+		PMConfigurationDoc doc = mongoTemplate.findById(AppContextUtil.getTenant(), PMConfigurationDoc.class);
+		if (dept.isDefaultValue()) {
+			doc.agent().setDefaultTeamCode(dept.getDept_code());
+		} else {
+			doc.agent().setDefaultTeamCode(null);
+		}
+		mongoTemplate.save(doc);
+		configManager.refresh();
+		return new DepartmentResponseAdminDto().importFrom(agentStore.findDepartmentAll());
+	}
+
+	private List<AgentResponseAdminDto> buildAgentDto(List<AgentDoc> lstOfAgent) {
+		List<AgentResponseAdminDto> agentList = new AgentResponseAdminDto().importFrom(lstOfAgent);
+		for (AgentResponseAdminDto agentResponseDto : agentList) {
+			agentResponseDto.setAgent_password(null);
+			if (ArgUtil.is(agentResponseDto.getId())) {
+				agentResponseDto.setDept(new DepartmentResponseAdminDto().importFrom(CollectionUtil
+						.getOne(adminManager.fetchDept(ArgUtil.parseAsString(agentResponseDto.getDept_id())))));
+			}
+		}
+		return agentList;
+	}
+
+	public List<AgentResponseAdminDto> resetPassByAgentId(String agentId) throws NoSuchAlgorithmException {
+		AgentDoc agent = agentStore.findById(agentId);
+		empAuthService.resetPassword(agent.getAgent_code(), agent.isAdmin());
+		return buildAgentDto(CollectionUtil.asList(agent));
+	}
 
 }

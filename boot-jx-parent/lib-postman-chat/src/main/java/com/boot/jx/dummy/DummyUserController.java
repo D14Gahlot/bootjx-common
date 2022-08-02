@@ -18,8 +18,10 @@ import com.boot.jx.connectors.WebConnector;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.http.CommonHttpRequest;
 import com.boot.jx.inbound.InBoundService;
+import com.boot.jx.postman.PMConstants;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PMEnvironment.PMCommonConfig;
+import com.boot.jx.postman.PMEnvironment.PMConfigurationObject;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.plugin.ChannelConfig;
@@ -31,138 +33,154 @@ import io.swagger.annotations.ApiOperation;
 @Controller
 public class DummyUserController {
 
-    @Autowired
-    private InBoundService inBoundEngine;
+	@Autowired
+	private InBoundService inBoundEngine;
 
-    @Autowired(required = false)
-    private WebConnector dummyConnector;
+	@Autowired(required = false)
+	private WebConnector dummyConnector;
 
-    @Autowired
-    AppConfig appConfig;
+	@Autowired
+	AppConfig appConfig;
 
-    @Autowired
-    CommonHttpRequest commonHttpRequest;
+	@Autowired
+	CommonHttpRequest commonHttpRequest;
 
-    @Autowired(required = false)
-    private PMCommonConfig pmCommonConfig;
+	@Autowired(required = false)
+	private PMCommonConfig pmCommonConfig;
 
-    @Autowired
-    private PMEnvironment pmEnvironment;
+	@Autowired
+	private PMEnvironment pmEnvironment;
 
-    @Autowired
-    private InBoundService inBoundService;
+	@Autowired
+	private InBoundService inBoundService;
 
-    @RequestMapping(value = { "/dummy/user", "/pub/customer" }, method = RequestMethod.GET)
-    public String dummyUser(@RequestParam(required = false) String number, Model model) throws InterruptedException {
+	@RequestMapping(value = { "/dummy/user", "/pub/customer" }, method = RequestMethod.GET)
+	public String dummyUser(@RequestParam(required = false) String number, Model model) throws InterruptedException {
 
-	model.addAttribute("LOCAL_PATH", appConfig.getAppPrefix());
-	model.addAttribute("POSTMAN_CONTEXT", appConfig.getAppPrefix());
+		model.addAttribute("LOCAL_PATH", appConfig.getAppPrefix());
+		model.addAttribute("POSTMAN_CONTEXT", appConfig.getAppPrefix());
 
-	if (pmCommonConfig != null) {
-	    if (!pmCommonConfig.isValidDomain()) {
-		return pmCommonConfig.mainDomainRedirect();
-	    }
-	    model.addAllAttributes(pmCommonConfig.appAttributes());
-	}
-	model.addAttribute("APP", "CUSTOMER");
+		if (pmCommonConfig != null) {
+			if (!pmCommonConfig.isValidDomain()) {
+				return pmCommonConfig.mainDomainRedirect();
+			}
+			model.addAllAttributes(pmCommonConfig.appAttributes());
+		}
+		model.addAttribute("APP", "CUSTOMER");
 
-	model.addAttribute("POSTMAN_AGENT_SCHEME_COLOR",
-		pmEnvironment.keyEntry("postman.agent.scheme.color").asString());
-	if (pmCommonConfig != null) {
-	    model.addAttribute("CDN_URL",
-		    ArgUtil.parseAsString(commonHttpRequest.get("CDN_URL"), pmCommonConfig.getCdnServer()));
-	}
+		model.addAttribute("POSTMAN_AGENT_SCHEME_COLOR",
+				pmEnvironment.keyEntry("postman.agent.scheme.color").asString());
 
-	ChannelConfig channelConfig = pmEnvironment.config().channel("web:page");
-	if (ArgUtil.is(channelConfig)) {
-	    model.addAttribute("CHANNEL_ID", channelConfig.getChannelId());
-	    model.addAttribute("CHANNEL_KEY", channelConfig.getChannelKey());
-	}
-	return "dummyuser";
-    }
+		if (pmCommonConfig != null) {
+			model.addAttribute("CDN_URL",
+					ArgUtil.parseAsString(commonHttpRequest.get("CDN_URL"), pmCommonConfig.getCdnServer()));
+		}
 
-    @ResponseBody
-    @RequestMapping(value = "/dummy/messages", method = RequestMethod.GET)
-    public OutboxMessage onReceiveMessage(@RequestParam String number) throws InterruptedException {
-	return dummyConnector.pollUnreadMessage(number);
-    }
+		PMConfigurationObject defaultWebChannel = pmEnvironment
+				.keyEntry(PMConstants.PROPERTIES.POSTMAN_CHAT_WEB_CHANNEL);
 
-    @ResponseBody
-    @RequestMapping(value = "/dummy/messages", method = RequestMethod.POST)
-    public InboxMessage onReceiveMessage(@RequestParam String message, @RequestParam String number)
-	    throws InterruptedException {
-	InboxMessage event = new InboxMessage();
-	Cookie cookie = commonHttpRequest.getCookie("contactType");
+		ChannelConfig channelConfig = null;
+		if (defaultWebChannel.exists()) {
+			channelConfig = pmEnvironment.config().channel(defaultWebChannel.asString());
+		}
 
-	ContactType contactType = ContactType.WEBSITE;
-	if (ArgUtil.is(cookie)) {
-	    contactType = ArgUtil.parseAsEnumT(cookie.getValue(), contactType, ContactType.class);
+		if (!ArgUtil.is(channelConfig)) {
+			channelConfig = pmEnvironment.config().channel("web:" + pmCommonConfig.getServiceServer());
+		}
+
+		if (!ArgUtil.is(channelConfig)) {
+			channelConfig = pmEnvironment.config().channel("web:page");
+		}
+
+		if (ArgUtil.is(channelConfig)) {
+			model.addAttribute("CHANNEL_ID", channelConfig.getChannelId());
+			model.addAttribute("CHANNEL_KEY", channelConfig.getChannelKey());
+		}
+		return "dummyuser";
 	}
 
-	event.contact().setContactType(contactType.toString());
-	event.contact().setLane("DUMMY");
-	event.from(number);
-	event.setMessage(message);
-	inBoundEngine.invokeMethods(event);
-	return event;
-    }
-
-    @ResponseBody
-    @RequestMapping(value = "/ext/inbound/web/callback", method = RequestMethod.POST)
-    public InboxMessage onReceiveMessage(@RequestBody InboxMessage event) throws InterruptedException {
-	event.contact().setContactType(ContactType.WEBSITE.toString());
-	event.contact().setLane("MainSite");
-
-	// event.contact().setContactType(ContactType.TELEGRAM.toString());
-	// event.contact().setLane("MeheryDemoBot");
-	// event.setLane("919082854885");
-	// event.setChannel("GUPSHUPW");
-	// event.setFrom("919930104050");
-	// event.setFromName("Lalit Tanwar");
-
-	// Cleaning
-	// event.setSessionId("600edc822743742e916202b9");
-	event.setSessionId(null);
-	event.setMessageId(null);
-	event.contact().setCsid(event.getFrom());
-	event.session().setAgent(null);
-	event.session().setDept(null);
-	inBoundService.invokeMethods(event);
-
-	String webSessionId = commonHttpRequest.get("web-session-id");
-	if (!ArgUtil.is(webSessionId) || !webSessionId.equalsIgnoreCase(event.getSessionId())) {
-	    commonHttpRequest.setCookie("web-session-id", event.getSessionId());
+	@ResponseBody
+	@RequestMapping(value = "/dummy/messages", method = RequestMethod.GET)
+	public OutboxMessage onReceiveMessage(@RequestParam String number) throws InterruptedException {
+		return dummyConnector.pollUnreadMessage(number);
 	}
-	return event;
-    }
 
-    @RequestMapping(value = "/dummy/customer", method = RequestMethod.GET)
-    public String dummyCustomer(Model model, @RequestParam(required = false) String contacyType)
-	    throws InterruptedException {
-	commonHttpRequest.setCookie("contactType", ArgUtil.parseAsString(contacyType, ContactType.WEBSITE.toString()));
-	model.addAttribute("APP_CONTEXT", appConfig.getAppPrefix());
-	model.addAttribute("POSTMAN_CONTEXT", appConfig.getAppPrefix());
-	model.addAttribute("POSTMAN_AGENT_SCHEME_COLOR",
-		pmEnvironment.keyEntry("postman.agent.scheme.color").asString());
-	return "customer.plugin.bubble";
-    }
+	@ResponseBody
+	@RequestMapping(value = "/dummy/messages", method = RequestMethod.POST)
+	public InboxMessage onReceiveMessage(@RequestParam String message, @RequestParam String number)
+			throws InterruptedException {
+		InboxMessage event = new InboxMessage();
+		Cookie cookie = commonHttpRequest.getCookie("contactType");
 
-    @ApiOperation(value = "Try docs", hidden = true)
-    @RequestMapping(value = { "/docs" }, method = { RequestMethod.GET, RequestMethod.POST })
-    public String docs(Model model, @RequestParam(required = false) String path) {
-	return "redirect:" + pmEnvironment.keyEntry("mry.prop.service.docs.link").asString()
-		+ ArgUtil.nonEmpty(path, Constants.BLANK);
-    }
+		ContactType contactType = ContactType.WEBSITE;
+		if (ArgUtil.is(cookie)) {
+			contactType = ArgUtil.parseAsEnumT(cookie.getValue(), contactType, ContactType.class);
+		}
 
-    @ApiOperation(value = "Try docs", hidden = true)
-    @RequestMapping(value = { "/server-{xms}/**" }, method = { RequestMethod.GET, RequestMethod.POST })
-    public String serverXmsDocs(Model model, @PathVariable String xms, HttpServletRequest request) {
+		event.contact().setContactType(contactType.toString());
+		event.contact().setLane("DUMMY");
+		event.from(number);
+		event.setMessage(message);
+		inBoundEngine.invokeMethods(event);
+		return event;
+	}
 
-	String[] paths = request.getRequestURI().split(request.getContextPath()
-	// + "/server-"+ xms
-	);
-	String path = paths.length > 1 ? paths[1] : Constants.BLANK;
-	return "redirect:" + pmEnvironment.keyEntry("mry.prop.service.docs.link").asString()
-		+ ArgUtil.nonEmpty(path, Constants.BLANK);
-    }
+	@ResponseBody
+	@RequestMapping(value = "/ext/inbound/web/callback", method = RequestMethod.POST)
+	public InboxMessage onReceiveMessage(@RequestBody InboxMessage event) throws InterruptedException {
+		event.contact().setContactType(ContactType.WEBSITE.toString());
+		event.contact().setLane("MainSite");
+
+		// event.contact().setContactType(ContactType.TELEGRAM.toString());
+		// event.contact().setLane("MeheryDemoBot");
+		// event.setLane("919082854885");
+		// event.setChannel("GUPSHUPW");
+		// event.setFrom("919930104050");
+		// event.setFromName("Lalit Tanwar");
+
+		// Cleaning
+		// event.setSessionId("600edc822743742e916202b9");
+		event.setSessionId(null);
+		event.setMessageId(null);
+		event.contact().setCsid(event.getFrom());
+		event.session().setAgent(null);
+		event.session().setDept(null);
+		inBoundService.invokeMethods(event);
+
+		String webSessionId = commonHttpRequest.get("web-session-id");
+		if (!ArgUtil.is(webSessionId) || !webSessionId.equalsIgnoreCase(event.getSessionId())) {
+			commonHttpRequest.setCookie("web-session-id", event.getSessionId());
+		}
+		return event;
+	}
+
+	@RequestMapping(value = "/dummy/customer", method = RequestMethod.GET)
+	public String dummyCustomer(Model model, @RequestParam(required = false) String contacyType)
+			throws InterruptedException {
+		commonHttpRequest.setCookie("contactType", ArgUtil.parseAsString(contacyType, ContactType.WEBSITE.toString()));
+		model.addAttribute("APP_CONTEXT", appConfig.getAppPrefix());
+		model.addAttribute("POSTMAN_CONTEXT", appConfig.getAppPrefix());
+		model.addAttribute("POSTMAN_AGENT_SCHEME_COLOR",
+				pmEnvironment.keyEntry("postman.agent.scheme.color").asString());
+		return "customer.plugin.bubble";
+	}
+
+	@ApiOperation(value = "Try docs", hidden = true)
+	@RequestMapping(value = { "/docs" }, method = { RequestMethod.GET, RequestMethod.POST })
+	public String docs(Model model, @RequestParam(required = false) String path) {
+		return "redirect:" + pmEnvironment.keyEntry("mry.prop.service.docs.link").asString()
+				+ ArgUtil.nonEmpty(path, Constants.BLANK);
+	}
+
+	@ApiOperation(value = "Try docs", hidden = true)
+	@RequestMapping(value = { "/server-{xms}/**" }, method = { RequestMethod.GET, RequestMethod.POST })
+	public String serverXmsDocs(Model model, @PathVariable String xms, HttpServletRequest request) {
+
+		String[] paths = request.getRequestURI().split(request.getContextPath()
+		// + "/server-"+ xms
+		);
+		String path = paths.length > 1 ? paths[1] : Constants.BLANK;
+		return "redirect:" + pmEnvironment.keyEntry("mry.prop.service.docs.link").asString()
+				+ ArgUtil.nonEmpty(path, Constants.BLANK);
+	}
 }

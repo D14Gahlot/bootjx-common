@@ -4,6 +4,7 @@ import java.io.Serializable;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.TypeAlias;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import com.boot.jx.model.AuditCreateEntity;
@@ -16,99 +17,133 @@ import com.boot.utils.Constants;
 @TypeAlias("DomainDoc")
 public class DomainDoc implements IDocument, AuditCreateEntity, Serializable, Comparable<DomainDoc> {
 
-    private static final long serialVersionUID = -3354844112176554561L;
+	private static final long serialVersionUID = -3354844112176554561L;
 
-    @Id
-    private String id;
+	@Id
+	private String id;
 
-    @ValidAlphaNum
-    private String domain;
+	@ValidAlphaNum
+	private String domain;
 
-    private CompanyDoc company;
-    private SocialDoc social;
+	@Indexed(sparse = true)
+	private String domainAlias;
 
-    private Long createdStamp;
-    private String createdBy;
-    private Long modifiedStamp;
-    private String modifiedBy;
-    private Boolean isActive;
+	private String server;
 
-    public Long getCreatedStamp() {
-	return createdStamp;
-    }
+	private String primaryOwner;
 
-    public void setCreatedStamp(Long createdStamp) {
-	this.createdStamp = createdStamp;
-    }
+	private CompanyDoc company;
+	private SocialDoc social;
 
-    public Long getModifiedStamp() {
-	return modifiedStamp;
-    }
+	private Long createdStamp;
+	private String createdBy;
+	private Long modifiedStamp;
+	private String modifiedBy;
+	private Boolean isActive;
 
-    public void setModifiedStamp(Long modifiedStamp) {
-	this.modifiedStamp = modifiedStamp;
-    }
+	public Long getCreatedStamp() {
+		return createdStamp;
+	}
 
-    public String getId() {
-	return id;
-    }
+	public void setCreatedStamp(Long createdStamp) {
+		this.createdStamp = createdStamp;
+	}
 
-    public void setId(String id) {
-	this.id = id;
-    }
+	public Long getModifiedStamp() {
+		return modifiedStamp;
+	}
 
-    public Boolean getIsActive() {
-	return isActive;
-    }
+	public void setModifiedStamp(Long modifiedStamp) {
+		this.modifiedStamp = modifiedStamp;
+	}
 
-    public void setIsActive(Boolean isActive) {
-	this.isActive = isActive;
-    }
+	public String getId() {
+		return id;
+	}
 
-    public String getModifiedBy() {
-	return modifiedBy;
-    }
+	public void setId(String id) {
+		this.id = id;
+	}
 
-    public void setModifiedBy(String modifiedBy) {
-	this.modifiedBy = modifiedBy;
-    }
+	public Boolean getIsActive() {
+		return isActive;
+	}
 
-    public String getCreatedBy() {
-	return createdBy;
-    }
+	public void setIsActive(Boolean isActive) {
+		this.isActive = isActive;
+	}
 
-    public void setCreatedBy(String createdBy) {
-	this.createdBy = createdBy;
-    }
+	public String getModifiedBy() {
+		return modifiedBy;
+	}
 
-    public String getDomain() {
-	return domain;
-    }
+	public void setModifiedBy(String modifiedBy) {
+		this.modifiedBy = modifiedBy;
+	}
 
-    public void setDomain(String domain) {
-	this.domain = domain;
-    }
+	public String getCreatedBy() {
+		return createdBy;
+	}
 
-    public CompanyDoc getCompany() {
-	return company;
-    }
+	public void setCreatedBy(String createdBy) {
+		this.createdBy = createdBy;
+	}
 
-    public void setCompany(CompanyDoc company) {
-	this.company = company;
-    }
+	public String getDomain() {
+		return domain;
+	}
 
-    @Override
-    public int compareTo(DomainDoc o) {
-	return ArgUtil.parseAsString(this.domain, Constants.BLANK)
-		.compareTo(ArgUtil.parseAsString(o.getDomain(), Constants.BLANK));
-    }
+	public void setDomain(String domain) {
+		this.domain = domain;
+	}
 
-    public SocialDoc getSocial() {
-	return social;
-    }
+	public CompanyDoc getCompany() {
+		return company;
+	}
 
-    public void setSocial(SocialDoc social) {
-	this.social = social;
-    }
+	public void setCompany(CompanyDoc company) {
+		this.company = company;
+	}
 
+	@Override
+	public int compareTo(DomainDoc o) {
+		return ArgUtil.parseAsString(this.domain, Constants.BLANK)
+				.compareTo(ArgUtil.parseAsString(o.getDomain(), Constants.BLANK));
+	}
+
+	public SocialDoc getSocial() {
+		return social;
+	}
+
+	public void setSocial(SocialDoc social) {
+		this.social = social;
+	}
+
+	public String getPrimaryOwner() {
+		return primaryOwner;
+	}
+
+	public void setPrimaryOwner(String primaryOwner) {
+		this.primaryOwner = primaryOwner;
+	}
+
+	public String toString() {
+		return ArgUtil.parseAsString(this.domain, Constants.BLANK);
+	}
+
+	public String getServer() {
+		return server;
+	}
+
+	public void setServer(String server) {
+		this.server = server;
+	}
+
+	public String getDomainAlias() {
+		return domainAlias;
+	}
+
+	public void setDomainAlias(String domainAlias) {
+		this.domainAlias = domainAlias;
+	}
 }

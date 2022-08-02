@@ -28,216 +28,288 @@ import com.boot.jx.common.dto.AgentResponseAuthDto;
 import com.boot.jx.common.service.EmpAuthService;
 import com.boot.jx.http.CommonHttpRequest;
 import com.boot.jx.postman.PMEnvironment;
+import com.boot.jx.postman.manager.StarterDocKit;
 import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.Constants;
 import com.boot.utils.CryptoUtil;
+import com.boot.utils.JsonUtil;
 import com.boot.utils.MapBuilder;
 
 @Controller
 public class AdminAuthController {
 
-    @Autowired
-    private AppConfig appConfig;
+	@Autowired
+	private AppConfig appConfig;
 
-    @Autowired
-    private CommonHttpRequest commonHttpRequest;
+	@Autowired
+	private CommonHttpRequest commonHttpRequest;
 
-    @Autowired
-    private EmpAuthService authService;
+	@Autowired
+	private EmpAuthService authService;
 
-    @Autowired
-    private AppCommonConfig appCommonConfig;
+	@Autowired
+	private AppCommonConfig appCommonConfig;
 
-    @Autowired
-    private AdminSessionService sessionService;
+	@Autowired
+	private AdminSessionService sessionService;
 
-    @Autowired
-    private AdminSessionBean adminSession;
+	@Autowired
+	private AdminSessionBean adminSession;
 
-    @Autowired
-    private PMEnvironment pmEnvironment;
+	@Autowired
+	private PMEnvironment pmEnvironment;
 
-    @RequestMapping(value = { "/pub/**", "/app/**", "/auth/**", "/" },
-	    method = { RequestMethod.GET, RequestMethod.POST })
-    public String home(Model model, HttpServletRequest request, @RequestParam(required = false) String domainName,
-	    @RequestParam(required = false) String domainId, @RequestParam(required = false) String domainToken,
-	    @RequestParam(required = false) String domainUser) throws NoSuchAlgorithmException {
+	@Autowired
+	public StarterDocKit starterDocKit;
 
-	if (ArgUtil.is(domainName) && ArgUtil.is(domainId) && ArgUtil.is(domainToken)) {
-	    AgentResponseAuthDto agent = authService.loginByDomainToken(domainUser, domainName, domainId, domainToken,
-		    true);
-	    if (ArgUtil.is(agent)) {
-		sessionService.login(request, agent, domainToken);
-		return "redirect:/app/home";
-	    }
-	}
+	public AgentResponseAuthDto loginFromXToken(HttpServletRequest request, HttpServletResponse response,
+			String xRemSession) throws NoSuchAlgorithmException {
+		@SuppressWarnings("unchecked")
+		MapModel map = MapModel
+				.from(CryptoUtil.getEncoder().message(xRemSession).decrypt().decodeBase64().toObzect(Map.class));
 
-	if (!ArgUtil.is(adminSession.getProfile())) {
-	    return "redirect:/auth/logout";
-	}
+		String username = map.getString("username");
+		String password = map.getString("password");
 
-	model.addAllAttributes(appCommonConfig.appAttributes());
-	Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-	if (ArgUtil.is(auth)) {
-	    model.addAttribute("APP_USER", auth.getName());
-	} else {
-	    model.addAttribute("APP_USER", "");
-	}
-	return "app-admin";
-    }
-
-    @RequestMapping(value = { "/auth/login", "/auth/resetpass" }, method = { RequestMethod.POST, RequestMethod.GET })
-    public String login(Model model, HttpServletRequest request, HttpServletResponse httpServletResponse) {
-	model.addAllAttributes(appCommonConfig.appAttributes());
-
-	String page = ArgUtil.parseAsString(commonHttpRequest.get("page"), "login");
-	String action = ArgUtil.parseAsString(commonHttpRequest.get("action"), "login");
-	String status = Constants.BLANK;
-	Object message = Constants.BLANK;
-	try {
-	    if ("resetpass".equalsIgnoreCase(action)) {
-		String username = ArgUtil.parseAsString(commonHttpRequest.get("username"), Constants.BLANK);
-		ApiResponse<Map<String, Object>, String> x = authService.agentResetPass(username, true);
-		if (ArgUtil.parseAsBoolean(x.getData().get("success"), false)) {
-		    status = "SUCCESS";
-		    message = "Link to reset password sent on registered email.";
-		} else {
-		    status = "ERROR";
-		    message = x.getMessage();
-		}
-	    } else if ("setpass".equalsIgnoreCase(page)) {
-		String username = ArgUtil.parseAsString(commonHttpRequest.get("username"), Constants.BLANK);
-		String token = ArgUtil.parseAsString(commonHttpRequest.get("token"), Constants.BLANK);
-		String newpassword = ArgUtil.parseAsString(commonHttpRequest.get("newpassword"), Constants.BLANK);
-		String confirmpassword = ArgUtil.parseAsString(commonHttpRequest.get("confirmpassword"),
-			Constants.BLANK);
-		model.addAttribute("username", username);
-		model.addAttribute("token", token);
-
-		if ("setpass".equalsIgnoreCase(action)) {
-		    if (!ArgUtil.is(confirmpassword)) {
-			status = "ERROR";
-			message = "Please enter valid password";
-		    } else if (confirmpassword.equals(newpassword)) {
-			ApiResponse<Map<String, Object>, String> x = authService.agentSetPass(username, token,
-				newpassword, true);
+		if (ArgUtil.is(username) && ArgUtil.is(password)) {
+			ApiResponse<Map<String, Object>, AgentResponseAuthDto> x = this.login(username, password, request);
 			if (ArgUtil.parseAsBoolean(x.getData().get("success"), false)) {
-			    status = "SUCCESS";
-			    message = "Password has been reset successfully";
-			} else {
-			    status = "FAIL";
-			    message = x.getMessage();
+				if (ArgUtil.is(x.getMeta())) {
+					if (ArgUtil.is(x.getRedirectUrl())) {
+						response.setHeader("Location", appConfig.getAppPrefix() + "/app/home");
+						response.setStatus(302);
+					}
+				}
+				return x.getMeta();
 			}
-		    } else {
-			status = "ERROR";
-			message = "Password Mismatch";
-		    }
 		}
-	    } else {
+
+		String domainUser = map.getString("domainUser");
+		String domainUserEmail = map.getString("domainUserEmail");
+		String domainName = map.getString("domainName");
+		String domainId = map.getString("domainId");
+		String domainToken = map.getString("domainToken");
+
+		if (ArgUtil.is(domainToken)) {
+			AgentResponseAuthDto agent = authService.loginByDomainToken(domainUser, domainUserEmail, domainName,
+					domainId, domainToken, true);
+			if (ArgUtil.is(agent)) {
+				sessionService.login(request, agent, domainToken);
+				commonHttpRequest.setCookie("JXSESSIONID", xRemSession);
+				response.setHeader("Location", appConfig.getAppPrefix() + "/app/home");
+				response.setStatus(302);
+			}
+			return agent;
+		}
+		return null;
+	}
+
+	
+	@RequestMapping(value = { "/pub/**", "/app/**", "/auth/**", "/" },
+			method = { RequestMethod.GET, RequestMethod.POST })
+	public String home(Model model, HttpServletRequest request, HttpServletResponse response,
+			@RequestParam(required = false) String domainName, @RequestParam(required = false) String domainId,
+			@RequestParam(required = false) String domainUser, @RequestParam(required = false) String domainUserEmail,
+			@RequestParam(required = false) String domainToken, @RequestParam(required = false) String domainTokenValid)
+			throws NoSuchAlgorithmException {
+
 		String xRemSession = ArgUtil.parseAsString(commonHttpRequest.get("JXSESSIONID"), Constants.BLANK);
-		if (ArgUtil.is(xRemSession)) {
-		    @SuppressWarnings("unchecked")
-		    MapModel map = MapModel.from(
-			    CryptoUtil.getEncoder().message(xRemSession).decrypt().decodeBase64().toObzect(Map.class));
-		    ApiResponse<Map<String, Object>, AgentResponseAuthDto> x = this.login(map.getString("username"),
-			    map.getString("password"), request);
-		    if (ArgUtil.parseAsBoolean(x.getData().get("success"), false)) {
-			if (ArgUtil.is(x.getMeta())) {
-			    if (ArgUtil.is(x.getRedirectUrl())) {
-				httpServletResponse.setHeader("Location", x.getRedirectUrl());
-				httpServletResponse.setStatus(302);
-			    }
+		if (ArgUtil.is(domainName) && ArgUtil.is(domainId) && ArgUtil.is(domainToken)) {
+			AgentResponseAuthDto agent = authService.loginByDomainToken(domainUser, domainUserEmail, domainName,
+					domainId, domainToken, true);
+
+			if (ArgUtil.is(agent)) {
+				sessionService.login(request, agent, domainToken);
+				xRemSession = CryptoUtil.getEncoder()
+						.obzect(MapBuilder.map().put("domainUser", domainUser).put("domainUserEmail", domainUserEmail)
+								.put("domainName", domainName).put("domainId", domainId).put("domainToken", domainToken)
+								.toMap())
+						.encodeBase64().encrypt().toString();
+				commonHttpRequest.setCookie("JXSESSIONID", xRemSession);
+				return toHomePage(response);
 			}
-		    }
+
+			if (!ArgUtil.is(domainTokenValid)) {
+				model.addAllAttributes(appCommonConfig.appAttributes());
+				model.addAttribute("FORM_URL", "/admin/auth/login/direct?_=" + System.currentTimeMillis());
+				model.addAttribute("DOMAIN_USER", domainUser);
+				model.addAttribute("DOMAIN_USER_EMAIL", domainUserEmail);
+				model.addAttribute("DOMAIN_NAME", domainName);
+				model.addAttribute("DOMAIN_ID", domainId);
+				model.addAttribute("DOMAIN_TOKEN", domainToken);
+				model.addAttribute("DOMAIN_TOKEN_VALID", domainToken);
+				return "app-goto";
+			}
+
+		} else if (!adminSession.isLoggedIn() && ArgUtil.is(xRemSession)) {
+			AgentResponseAuthDto agent = loginFromXToken(request, response, xRemSession);
+			if (ArgUtil.is(agent)) {
+				return toHomePage(response);
+			} else {
+				commonHttpRequest.deleteCookie("JXSESSIONID");
+			}
 		}
-	    }
-	} catch (Exception e) {
-	    status = "FAIL";
-	    message = "Sorry some technical issues";
+
+		if (!adminSession.isLoggedIn()) {
+			return "redirect:/auth/logout";
+		}
+
+		model.addAllAttributes(appCommonConfig.appAttributes());
+		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+		if (ArgUtil.is(auth)) {
+			starterDocKit.domain();
+			model.addAttribute("APP_USER", auth.getName());
+			model.addAttribute("APP_USER_ROLE", JsonUtil.toJson(adminSession.getRole()));
+		} else {
+			model.addAttribute("APP_USER", "");
+			model.addAttribute("APP_USER_ROLE", "['GUEST']");
+		}
+		return "app-admin";
 	}
 
-	model.addAttribute("MESSAGE", message);
-	model.addAttribute("PAGE", page);
-	model.addAttribute("ACTION", action);
-	model.addAttribute("STATUS", status);
-	return "app-login";
-    }
-
-    @Autowired
-    private AdminAuthProvider adminAuthProvider;
-
-    @ResponseBody
-    @RequestMapping(value = "/auth/meta", method = { RequestMethod.GET })
-    public ApiResponse<String, String> meta(@RequestParam String username, @RequestParam String password,
-	    HttpServletRequest request) {
-	ApiResponse<String, String> x = ApiResponse.buildData("success", "success");
-
-	if (username.startsWith("agent") && password.equals("mehery@1234")) {
-	    x.redirectUrl(appConfig.getAppPrefix() + "/app/home");
-	    UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(username, password);
-	    token.setDetails(new WebAuthenticationDetails(request));
-	    Authentication authentication = adminAuthProvider.authenticate(token);
-	    SecurityContextHolder.getContext().setAuthentication(authentication);
-	} else {
-	    x.setData("error");
-	    x.setMeta("error");
-	    x.redirectUrl(appConfig.getAppPrefix() + "/auth/login?error");
+	private String toHomePage(HttpServletResponse response) {
+		response.setHeader("Location", appConfig.getAppPrefix() + "/app/home");
+		response.setStatus(302);
+		return "redirect:/app/home" + "?_=" + System.currentTimeMillis();
 	}
-	return x;
-    }
 
-    @ResponseBody
-    @RequestMapping(value = "/auth/login/submit", method = { RequestMethod.POST })
-    public ApiResponse<Map<String, Object>, AgentResponseAuthDto> login(@RequestParam String username,
-	    @RequestParam String password, HttpServletRequest request) throws NoSuchAlgorithmException {
-	username = ArgUtil.parseAsString(username, Constants.BLANK);
-	ApiResponse<Map<String, Object>, AgentResponseAuthDto> x = authService.empLogin(username, password, true);
-	if (ArgUtil.parseAsBoolean(x.getData().get("success"), false)) {
-	    x.redirectUrl(appConfig.getAppPrefix() + "/app/home");
+	@RequestMapping(value = { "/auth/login", "/auth/resetpass" }, method = { RequestMethod.POST, RequestMethod.GET })
+	public String login(Model model, HttpServletRequest request, HttpServletResponse httpServletResponse) {
+		model.addAllAttributes(appCommonConfig.appAttributes());
 
-	    sessionService.login(request, x.getMeta(), password);
-	    x.setStatusKey("SUCCESS");
+		String page = ArgUtil.parseAsString(commonHttpRequest.get("page"), "login");
+		String action = ArgUtil.parseAsString(commonHttpRequest.get("action"), "login");
+		String status = Constants.BLANK;
+		Object message = Constants.BLANK;
+		try {
+			if ("resetpass".equalsIgnoreCase(action)) {
+				String username = ArgUtil.parseAsString(commonHttpRequest.get("username"), Constants.BLANK);
+				ApiResponse<Map<String, Object>, String> x = authService.agentResetPass(username, true);
+				if (ArgUtil.parseAsBoolean(x.getData().get("success"), false)) {
+					status = "SUCCESS";
+					message = "Link to reset password sent on registered email.";
+				} else {
+					status = "ERROR";
+					message = x.getMessage();
+				}
+			} else if ("setpass".equalsIgnoreCase(page)) {
+				String username = ArgUtil.parseAsString(commonHttpRequest.get("username"), Constants.BLANK);
+				String token = ArgUtil.parseAsString(commonHttpRequest.get("token"), Constants.BLANK);
+				String newpassword = ArgUtil.parseAsString(commonHttpRequest.get("newpassword"), Constants.BLANK);
+				String confirmpassword = ArgUtil.parseAsString(commonHttpRequest.get("confirmpassword"),
+						Constants.BLANK);
+				model.addAttribute("username", username);
+				model.addAttribute("token", token);
 
-	    boolean rememberme = ArgUtil.parseAsBoolean(commonHttpRequest.get("rememberme"), false);
-	    if (rememberme) {
-		String xRemSession = CryptoUtil.getEncoder()
-			.obzect(MapBuilder.map().put("username", username).put("password", password).toMap())
-			.encodeBase64().encrypt().toString();
-		commonHttpRequest.setCookie("JXSESSIONID", xRemSession);
-	    }
+				if ("setpass".equalsIgnoreCase(action)) {
+					if (!ArgUtil.is(confirmpassword)) {
+						status = "ERROR";
+						message = "Please enter valid password";
+					} else if (confirmpassword.equals(newpassword)) {
+						ApiResponse<Map<String, Object>, String> x = authService.agentSetPass(username, token,
+								newpassword, true);
+						if (ArgUtil.parseAsBoolean(x.getData().get("success"), false)) {
+							status = "SUCCESS";
+							message = "Password has been reset successfully";
+						} else {
+							status = "FAIL";
+							message = x.getMessage();
+						}
+					} else {
+						status = "ERROR";
+						message = "Password Mismatch";
+					}
+				}
+			} else {
+				String xRemSession = ArgUtil.parseAsString(commonHttpRequest.get("JXSESSIONID"), Constants.BLANK);
+				if (ArgUtil.is(xRemSession)) {
+					AgentResponseAuthDto agent = loginFromXToken(request, httpServletResponse, xRemSession);
+				}
+			}
+		} catch (Exception e) {
+			status = "FAIL";
+			message = "Sorry some technical issues";
+		}
 
-	} else {
-	    x.redirectUrl(appConfig.getAppPrefix() + "/auth/login?error");
+		model.addAttribute("MESSAGE", message);
+		model.addAttribute("PAGE", page);
+		model.addAttribute("ACTION", action);
+		model.addAttribute("STATUS", status);
+		return "app-login";
 	}
-	return x;
-    }
 
-    // Agent APIS
+	@Autowired
+	private AdminAuthProvider adminAuthProvider;
 
-    @Deprecated
-    @ResponseBody
-    @RequestMapping(value = "/auth/agent/login", method = { RequestMethod.POST })
-    public ApiResponse<Map<String, Object>, AgentResponseAuthDto> agentLogin(@RequestParam String username,
-	    @RequestParam String password, @RequestParam(required = false) boolean admin)
-	    throws NoSuchAlgorithmException {
-	return authService.empLogin(username, password, admin);
-    }
+	@ResponseBody
+	@RequestMapping(value = "/auth/meta", method = { RequestMethod.GET })
+	public ApiResponse<String, String> meta(@RequestParam String username, @RequestParam String password,
+			HttpServletRequest request) {
+		ApiResponse<String, String> x = ApiResponse.buildData("success", "success");
 
-    @Deprecated
-    @ResponseBody
-    @RequestMapping(value = "/auth/agent/pass/reset", method = { RequestMethod.POST })
-    public ApiResponse<Map<String, Object>, String> agentResetPass(@RequestParam String username,
-	    @RequestParam(required = false) boolean admin) throws NoSuchAlgorithmException {
-	return authService.agentResetPass(username, admin);
-    }
+		if (username.startsWith("agent") && password.equals("mehery@1234")) {
+			x.redirectUrl(appConfig.getAppPrefix() + "/app/home");
+			UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(username, password);
+			token.setDetails(new WebAuthenticationDetails(request));
+			Authentication authentication = adminAuthProvider.authenticate(token);
+			SecurityContextHolder.getContext().setAuthentication(authentication);
+		} else {
+			x.setData("error");
+			x.setMeta("error");
+			x.redirectUrl(appConfig.getAppPrefix() + "/auth/login?error");
+		}
+		return x;
+	}
 
-    @Deprecated
-    @ResponseBody
-    @RequestMapping(value = "/auth/agent/pass/set", method = { RequestMethod.POST })
-    public ApiResponse<Map<String, Object>, String> agentSetPass(@RequestParam String username,
-	    @RequestParam String password, @RequestParam String newpassword,
-	    @RequestParam(required = false) boolean admin) throws NoSuchAlgorithmException {
-	return authService.agentSetPass(username, password, newpassword, admin);
-    }
+	@ResponseBody
+	@RequestMapping(value = "/auth/login/submit", method = { RequestMethod.POST })
+	public ApiResponse<Map<String, Object>, AgentResponseAuthDto> login(@RequestParam String username,
+			@RequestParam String password, HttpServletRequest request) throws NoSuchAlgorithmException {
+		username = ArgUtil.parseAsString(username, Constants.BLANK);
+		ApiResponse<Map<String, Object>, AgentResponseAuthDto> x = authService.empLogin(username, password, true);
+		if (ArgUtil.parseAsBoolean(x.getData().get("success"), false)) {
+			x.redirectUrl(appConfig.getAppPrefix() + "/app/home");
+			sessionService.login(request, x.getMeta(), password);
+			x.setStatusKey("SUCCESS");
+			boolean rememberme = ArgUtil.parseAsBoolean(commonHttpRequest.get("rememberme"), false);
+			if (rememberme) {
+				String xRemSession = CryptoUtil.getEncoder()
+						.obzect(MapBuilder.map().put("username", username).put("password", password).toMap())
+						.encodeBase64().encrypt().toString();
+				commonHttpRequest.setCookie("JXSESSIONID", xRemSession);
+			}
+		} else {
+			x.redirectUrl(appConfig.getAppPrefix() + "/auth/login?error");
+		}
+		return x;
+	}
+
+	// Agent APIS
+
+	@Deprecated
+	@ResponseBody
+	@RequestMapping(value = "/auth/agent/login", method = { RequestMethod.POST })
+	public ApiResponse<Map<String, Object>, AgentResponseAuthDto> agentLogin(@RequestParam String username,
+			@RequestParam String password, @RequestParam(required = false) boolean admin)
+			throws NoSuchAlgorithmException {
+		return authService.empLogin(username, password, admin);
+	}
+
+	@Deprecated
+	@ResponseBody
+	@RequestMapping(value = "/auth/agent/pass/reset", method = { RequestMethod.POST })
+	public ApiResponse<Map<String, Object>, String> agentResetPass(@RequestParam String username,
+			@RequestParam(required = false) boolean admin) throws NoSuchAlgorithmException {
+		return authService.agentResetPass(username, admin);
+	}
+
+	@Deprecated
+	@ResponseBody
+	@RequestMapping(value = "/auth/agent/pass/set", method = { RequestMethod.POST })
+	public ApiResponse<Map<String, Object>, String> agentSetPass(@RequestParam String username,
+			@RequestParam String password, @RequestParam String newpassword,
+			@RequestParam(required = false) boolean admin) throws NoSuchAlgorithmException {
+		return authService.agentSetPass(username, password, newpassword, admin);
+	}
 }

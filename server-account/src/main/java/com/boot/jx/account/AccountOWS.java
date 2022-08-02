@@ -7,6 +7,7 @@ import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.servlet.DelegatingFilterProxyRegistrationBean;
 import org.springframework.boot.web.servlet.ServletComponentScan;
+import org.springframework.boot.web.support.SpringBootServletInitializer;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -28,49 +29,44 @@ import org.springframework.web.context.request.RequestContextListener;
 @EnableMongoRepositories("com.boot.jx")
 public class AccountOWS {
 
-    /**
-     * The main method.
-     *
-     * @param args the arguments
-     */
-    public static void main(String[] args) {
-	SpringApplication.run(AccountOWS.class, args);
-    }
+	/**
+	 * The main method.
+	 *
+	 * @param args the arguments
+	 */
+	public static void main(String[] args) {
+		SpringApplication.run(AccountOWS.class, args);
+	}
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.springframework.boot.web.support.SpringBootServletInitializer#configure(
-     * org.springframework.boot.builder.SpringApplicationBuilder)
-     */
-    protected SpringApplicationBuilder configure(SpringApplicationBuilder applicationBuilder) {
-	return applicationBuilder.sources(AccountOWS.class);
-    }
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * org.springframework.boot.web.support.SpringBootServletInitializer#configure(
+	 * org.springframework.boot.builder.SpringApplicationBuilder)
+	 */
+	protected SpringApplicationBuilder configure(SpringApplicationBuilder applicationBuilder) {
+		return applicationBuilder.sources(AccountOWS.class);
+	}
 
-    public void run(String... args) {
-	System.out.println("\nfindById(1L)");
-	System.out.println("\nfindByName('Node')");
-    }
+	/**
+	 * Security filter chain registration.
+	 *
+	 * @param securityProperties the security properties
+	 * @return the delegating filter proxy registration bean
+	 */
+	@Bean
+	@ConditionalOnBean(name = "checkSession")
+	public DelegatingFilterProxyRegistrationBean securityFilterChainRegistration(
+			SecurityProperties securityProperties) {
+		DelegatingFilterProxyRegistrationBean registration = new DelegatingFilterProxyRegistrationBean("checkSession");
+		registration.setOrder(securityProperties.getFilterOrder());
+		return registration;
+	}
 
-    /**
-     * Security filter chain registration.
-     *
-     * @param securityProperties the security properties
-     * @return the delegating filter proxy registration bean
-     */
-    @Bean
-    @ConditionalOnBean(name = "checkSession")
-    public DelegatingFilterProxyRegistrationBean securityFilterChainRegistration(
-	    SecurityProperties securityProperties) {
-	DelegatingFilterProxyRegistrationBean registration = new DelegatingFilterProxyRegistrationBean("checkSession");
-	registration.setOrder(securityProperties.getFilter().getOrder());
-	return registration;
-    }
-
-    @Bean
-    public RequestContextListener requestContextListener() {
-	return new RequestContextListener();
-    }
+	@Bean
+	public RequestContextListener requestContextListener() {
+		return new RequestContextListener();
+	}
 
 }

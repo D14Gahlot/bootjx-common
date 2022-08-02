@@ -1,406 +1,557 @@
 package com.boot.jx.common.impl;
 
 import java.io.Serializable;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
+import com.boot.utils.ArgUtil;
 
 public class ConfigMeta implements Serializable {
 
-    public static enum OPTIONS_TYPE {
-	TEXT, OPTIONS, RANGE, NUMBER, COLOR, COLOR_PALLETE
-    }
-
-    public static enum DATA_TYPE {
-	TIMESPAN
-    }
-
-    public static enum CONVERT_TYPE {
-	TIME_MILLIS
-    }
-
-    public static class ConfigOption {
-
-	public static ConfigOption ON = new ConfigOption(Boolean.TRUE).label("ON");
-	public static ConfigOption OFF = new ConfigOption(Boolean.FALSE).label("OFF");
-
-	private String label;
-	private Object value;
-
-	public String getLabel() {
-	    return label;
+	public static enum INPUT_TYPE {
+		TEXT, OPTIONS, RANGE, NUMBER, COLOR, COLOR_PALLETE, NONE, MESSAGE;
 	}
 
-	public Object getValue() {
-	    return value;
+	public static enum DATA_TYPE {
+		TIMESPAN, SWITCH, NONE;
 	}
 
-	public ConfigOption(Object value) {
-	    this.value = value;
+	public static enum CONVERT_TYPE {
+		TIME_MILLIS, BOOLEAN, NONE
 	}
 
-	public ConfigOption label(String label) {
-	    this.label = label;
-	    return this;
-	}
-    }
-
-    public static class ColorPalette {
-	String primary;
-	String secondary;
-	String accent;
-
-	public ColorPalette() {
-	    this.primary = "#FFFFFF";
-	    this.secondary = "#FDFDFD";
-	    this.accent = "#1DC4E9";
+	public static enum MESSAGE_TYPE {
+		PRIMARY, SECONDARY, SUCCESS, DANGER, WARNING, INFO, DARK
 	}
 
-	public String getPrimary() {
-	    return primary;
+	public static class ConfigOption {
+
+		public static ConfigOption ON = new ConfigOption(Boolean.TRUE).label("ON");
+		public static ConfigOption OFF = new ConfigOption(Boolean.FALSE).label("OFF");
+
+		private String label;
+		private Object value;
+
+		public String getLabel() {
+			return label;
+		}
+
+		public Object getValue() {
+			return value;
+		}
+
+		public ConfigOption(Object value) {
+			this.value = value;
+		}
+
+		public ConfigOption label(String label) {
+			this.label = label;
+			return this;
+		}
 	}
 
-	public void setPrimary(String primary) {
-	    this.primary = primary;
+	public static class ColorPalette {
+		String primary;
+		String secondary;
+		String accent;
+
+		public ColorPalette() {
+			this.primary = "#FFFFFF";
+			this.secondary = "#FDFDFD";
+			this.accent = "#1DC4E9";
+		}
+
+		public String getPrimary() {
+			return primary;
+		}
+
+		public void setPrimary(String primary) {
+			this.primary = primary;
+		}
+
+		public String getSecondary() {
+			return secondary;
+		}
+
+		public void setSecondary(String secondary) {
+			this.secondary = secondary;
+		}
+
+		public String getAccent() {
+			return accent;
+		}
+
+		public void setAccent(String accent) {
+			this.accent = accent;
+		}
+
 	}
 
-	public String getSecondary() {
-	    return secondary;
+	private static final long serialVersionUID = -8418291522478302778L;
+
+	private String title;
+	private String key;
+	private String desc;
+	private String group;
+	private String path;
+	private Object defaultValue;
+	private Object example;
+	private boolean optional;
+	private boolean readonly;
+	private boolean createonly;
+	private boolean writeonly;
+	private boolean hidden;
+	private boolean deprecated;
+	private Integer order;
+	private Integer max;
+	private Integer min;
+
+	private INPUT_TYPE inputType;
+	private DATA_TYPE dataType;
+	private CONVERT_TYPE converterType;
+	private MESSAGE_TYPE messageType;
+
+	private List<ConfigOption> options;
+	private Map<String, Object> filter;
+	private String optionsKey;
+	private String optionsLabel;
+	private String optionsSource;
+
+	@Target({ ElementType.FIELD })
+	@Retention(RetentionPolicy.RUNTIME)
+	public @interface ConfigMetaProperty {
+		String title() default "";
+
+		String desc() default "";
+
+		String path() default "";
+
+		boolean hidden() default false;
+
+		boolean createonly() default false;
+
+		boolean writeonly() default false;
+
+		boolean optional() default false;
+
+		boolean readonly() default false;
+
+		INPUT_TYPE inputType() default INPUT_TYPE.NONE;
+
+		DATA_TYPE dataType() default DATA_TYPE.NONE;
+
+		CONVERT_TYPE converterType() default CONVERT_TYPE.NONE;
+
+		String optionsSource() default "";
+
+		String optionsLabel() default "";
+
+		String optionsKey() default "";
+
+		String defaultValue() default "";
 	}
 
-	public void setSecondary(String secondary) {
-	    this.secondary = secondary;
+	public ConfigMeta() {
+		this.messageType = MESSAGE_TYPE.PRIMARY;
 	}
 
-	public String getAccent() {
-	    return accent;
+	public ConfigMeta(String title, String key) {
+		super();
+		this.key = key;
+		this.title = title;
 	}
 
-	public void setAccent(String accent) {
-	    this.accent = accent;
+	public String getTitle() {
+		return title;
 	}
 
-    }
-
-    private static final long serialVersionUID = -8418291522478302778L;
-
-    private String title;
-    private String key;
-    private String desc;
-    private String group;
-    private String path;
-    private Object defaultValue;
-    private boolean optional;
-    private boolean readonly;
-    private boolean createonly;
-    private boolean writeonly;
-    private boolean hidden;
-    private boolean deprecated;
-    private Integer order;
-
-    private OPTIONS_TYPE inputType;
-    private DATA_TYPE dataType;
-    private CONVERT_TYPE converterType;
-
-    private List<ConfigOption> options;
-    private String optionsKey;
-    private String optionsLabel;
-    private String optionsSource;
-
-    public ConfigMeta() {
-    }
-
-    public ConfigMeta(String title, String key) {
-	this.key = key;
-	this.title = title;
-    }
-
-    public String getTitle() {
-	return title;
-    }
-
-    public void setTitle(String title) {
-	this.title = title;
-    }
-
-    public String getKey() {
-	return key;
-    }
-
-    public void setKey(String key) {
-	this.key = key;
-    }
-
-    public List<ConfigOption> getOptions() {
-	return options;
-    }
-
-    public void setOptions(List<ConfigOption> options) {
-	this.options = options;
-    }
-
-    public List<ConfigOption> options() {
-	if (this.inputType == null) {
-	    this.inputType = OPTIONS_TYPE.OPTIONS;
+	public void setTitle(String title) {
+		this.title = title;
 	}
-	if (this.options == null) {
-	    this.options = new ArrayList<ConfigOption>();
+
+	public String getKey() {
+		return key;
 	}
-	return this.options;
-    }
 
-    public ConfigMeta options(ConfigOption... options) {
-	this.options = this.options();
-	for (ConfigOption configOption : options) {
-	    this.options.add(configOption);
+	public void setKey(String key) {
+		this.key = key;
 	}
-	return this;
-    }
 
-    public ConfigMeta optionValues(Object... optionValues) {
-	this.options = this.options();
-	for (Object optionValue : optionValues) {
-	    this.options.add(new ConfigOption(optionValue));
+	public List<ConfigOption> getOptions() {
+		return options;
 	}
-	return this;
-    }
 
-    public ConfigMeta optionsSource(String src) {
-	this.options = this.options();
-	this.optionsSource = src;
-	return this;
-    }
+	public void setOptions(List<ConfigOption> options) {
+		this.options = options;
+	}
 
-    public String getOptionsSource() {
-	return optionsSource;
-    }
+	public List<ConfigOption> options() {
+		if (this.inputType == null) {
+			this.inputType = INPUT_TYPE.OPTIONS;
+		}
+		if (this.options == null) {
+			this.options = new ArrayList<ConfigOption>();
+		}
+		return this.options;
+	}
 
-    public void setOptionsSource(String src) {
-	this.optionsSource = src;
-    }
+	public ConfigMeta options(ConfigOption... options) {
+		this.options = this.options();
+		for (ConfigOption configOption : options) {
+			this.options.add(configOption);
+		}
+		return this;
+	}
 
-    public ConfigMeta optionsOnOff() {
-	return this.options(ConfigOption.ON, ConfigOption.OFF);
-    }
+	public ConfigMeta optionValues(Object... optionValues) {
+		this.options = this.options();
+		for (Object optionValue : optionValues) {
+			this.options.add(new ConfigOption(optionValue));
+		}
+		return this;
+	}
 
-    public OPTIONS_TYPE getInputType() {
-	return inputType;
-    }
+	public ConfigMeta optionsSource(String src) {
+		this.options = this.options();
+		this.optionsSource = src;
+		return this;
+	}
 
-    public void setInputType(OPTIONS_TYPE inputType) {
-	this.inputType = inputType;
-    }
+	public String getOptionsSource() {
+		return optionsSource;
+	}
 
-    public ConfigMeta inputType(OPTIONS_TYPE inputType) {
-	this.inputType = inputType;
-	return this;
-    }
+	public void setOptionsSource(String src) {
+		this.optionsSource = src;
+	}
 
-    public Object getDefaultValue() {
-	return defaultValue;
-    }
+	public ConfigMeta optionsOnOff() {
+		return this.options(ConfigOption.ON, ConfigOption.OFF);
+	}
 
-    public void setDefaultValue(Object defaultValue) {
-	this.defaultValue = defaultValue;
-    }
+	public INPUT_TYPE getInputType() {
+		return inputType;
+	}
 
-    public ConfigMeta defaultValue(Object defaultValue) {
-	this.defaultValue = defaultValue;
-	return this;
-    }
+	public void setInputType(INPUT_TYPE inputType) {
+		this.inputType = inputType;
+	}
 
-    public ConfigMeta defaultFalse() {
-	this.defaultValue = Boolean.FALSE;
-	return this;
-    }
+	public ConfigMeta inputType(INPUT_TYPE inputType) {
+		this.inputType = inputType;
+		return this;
+	}
 
-    public ConfigMeta defaultTrue() {
-	this.defaultValue = Boolean.TRUE;
-	return this;
-    }
+	public ConfigMeta inputType(INPUT_TYPE inputType, MESSAGE_TYPE messageType) {
+		this.inputType = inputType;
+		this.messageType = messageType;
+		return this;
+	}
 
-    public ConfigMeta title(String title) {
-	this.title = title;
-	return this;
-    }
+	public Object getDefaultValue() {
+		return defaultValue;
+	}
 
-    public ConfigMeta key(String key) {
-	this.key = key;
-	return this;
-    }
+	public void setDefaultValue(Object defaultValue) {
+		this.defaultValue = defaultValue;
+	}
 
-    public static List<ConfigMeta> createList() {
-	return new ArrayList<ConfigMeta>();
-    }
+	public ConfigMeta defaultValue(Object defaultValue) {
+		if (ArgUtil.is(defaultValue) && defaultValue instanceof ConfigOption) {
+			this.defaultValue = ((ConfigOption) defaultValue).getValue();
+		} else {
+			this.defaultValue = defaultValue;
+		}
+		return this;
+	}
 
-    public boolean isOptional() {
-	return optional;
-    }
+	public ConfigMeta defaultFalse() {
+		this.defaultValue(Boolean.FALSE);
+		return this;
+	}
 
-    public void setOptional(boolean optional) {
-	this.optional = optional;
-    }
+	public ConfigMeta defaultTrue() {
+		this.defaultValue(Boolean.TRUE);
+		return this;
+	}
 
-    public ConfigMeta optional() {
-	this.optional = true;
-	return this;
-    }
+	public ConfigMeta title(String title) {
+		this.title = title;
+		return this;
+	}
 
-    public boolean isReadonly() {
-	return readonly;
-    }
+	public ConfigMeta key(String key) {
+		this.key = key;
+		return this;
+	}
 
-    public void setReadonly(boolean readonly) {
-	this.readonly = readonly;
-    }
+	public static List<ConfigMeta> createList() {
+		return new ArrayList<ConfigMeta>();
+	}
 
-    public ConfigMeta readonly() {
-	this.readonly = true;
-	return this;
-    }
+	public boolean isOptional() {
+		return optional;
+	}
 
-    public boolean isHidden() {
-	return hidden;
-    }
+	public void setOptional(boolean optional) {
+		this.optional = optional;
+	}
 
-    public void setHidden(boolean hidden) {
-	this.hidden = hidden;
-    }
+	public ConfigMeta optional() {
+		this.optional = true;
+		return this;
+	}
 
-    public ConfigMeta hidden() {
-	this.hidden = true;
-	return this;
-    }
+	public ConfigMeta optional(boolean optional) {
+		this.optional = optional;
+		return this;
+	}
 
-    public String getPath() {
-	return path;
-    }
+	public boolean isReadonly() {
+		return readonly;
+	}
 
-    public void setPath(String path) {
-	this.path = path;
-    }
+	public void setReadonly(boolean readonly) {
+		this.readonly = readonly;
+	}
 
-    public ConfigMeta path(String path) {
-	this.path = path;
-	return this;
-    }
+	public ConfigMeta readonly() {
+		this.readonly = true;
+		return this;
+	}
 
-    public DATA_TYPE getDataType() {
-	return dataType;
-    }
+	public boolean isHidden() {
+		return hidden;
+	}
 
-    public void setDataType(DATA_TYPE dataType) {
-	this.dataType = dataType;
-    }
+	public void setHidden(boolean hidden) {
+		this.hidden = hidden;
+	}
 
-    public CONVERT_TYPE getConverterType() {
-	return converterType;
-    }
+	public ConfigMeta hidden() {
+		this.hidden = true;
+		return this;
+	}
 
-    public void setConverterType(CONVERT_TYPE converterType) {
-	this.converterType = converterType;
-    }
+	public String getPath() {
+		return path;
+	}
 
-    public boolean isDeprecated() {
-	return deprecated;
-    }
+	public void setPath(String path) {
+		this.path = path;
+	}
 
-    public void setDeprecated(boolean deprecated) {
-	this.deprecated = deprecated;
-    }
+	public ConfigMeta path(String path) {
+		this.path = path;
+		return this;
+	}
 
-    public ConfigMeta deprecated() {
-	this.deprecated = true;
-	return this;
-    }
+	public DATA_TYPE getDataType() {
+		return dataType;
+	}
 
-    public ConfigMeta createonly() {
-	this.createonly = true;
-	return this;
-    }
+	public void setDataType(DATA_TYPE dataType) {
+		this.dataType = dataType;
+	}
 
-    public boolean isCreateonly() {
-	return createonly;
-    }
+	public CONVERT_TYPE getConverterType() {
+		return converterType;
+	}
 
-    public void setCreateonly(boolean createonly) {
-	this.createonly = createonly;
-    }
+	public void setConverterType(CONVERT_TYPE converterType) {
+		this.converterType = converterType;
+	}
 
-    public boolean isWriteonly() {
-	return writeonly;
-    }
+	public boolean isDeprecated() {
+		return deprecated;
+	}
 
-    public void setWriteonly(boolean writeonly) {
-	this.writeonly = writeonly;
-    }
+	public void setDeprecated(boolean deprecated) {
+		this.deprecated = deprecated;
+	}
 
-    public ConfigMeta writeonly() {
-	this.writeonly = true;
-	return this;
-    }
+	public ConfigMeta deprecated() {
+		this.deprecated = true;
+		return this;
+	}
 
-    public String getDesc() {
-	return desc;
-    }
+	public ConfigMeta createonly() {
+		this.createonly = true;
+		return this;
+	}
 
-    public void setDesc(String desc) {
-	this.desc = desc;
-    }
+	public ConfigMeta createonly(boolean createonly) {
+		this.createonly = createonly;
+		return this;
+	}
 
-    public ConfigMeta desc(String desc) {
-	this.desc = desc;
-	return this;
-    }
+	public boolean isCreateonly() {
+		return createonly;
+	}
 
-    public String getGroup() {
-	return group;
-    }
+	public void setCreateonly(boolean createonly) {
+		this.createonly = createonly;
+	}
 
-    public void setGroup(String group) {
-	this.group = group;
-    }
+	public boolean isWriteonly() {
+		return writeonly;
+	}
 
-    public ConfigMeta group(String group) {
-	this.group = group;
-	return this;
-    }
+	public void setWriteonly(boolean writeonly) {
+		this.writeonly = writeonly;
+	}
 
-    public String getOptionsKey() {
-	return optionsKey;
-    }
+	public ConfigMeta writeonly() {
+		this.writeonly = true;
+		return this;
+	}
 
-    public void setOptionsKey(String optionKey) {
-	this.optionsKey = optionKey;
-    }
+	public String getDesc() {
+		return desc;
+	}
 
-    public ConfigMeta optionsKey(String optionKey) {
-	this.optionsKey = optionKey;
-	return this;
-    }
+	public void setDesc(String desc) {
+		this.desc = desc;
+	}
 
-    public Integer getOrder() {
-	return order;
-    }
+	public ConfigMeta desc(String desc) {
+		this.desc = desc;
+		return this;
+	}
 
-    public void setOrder(Integer order) {
-	this.order = order;
-    }
+	public String getGroup() {
+		return group;
+	}
 
-    public ConfigMeta order(Integer order) {
-	this.order = order;
-	return this;
-    }
+	public void setGroup(String group) {
+		this.group = group;
+	}
 
-    public String getOptionsLabel() {
-	return optionsLabel;
-    }
+	public ConfigMeta group(String group) {
+		this.group = group;
+		return this;
+	}
 
-    public void setOptionsLabel(String optionsLabel) {
-	this.optionsLabel = optionsLabel;
-    }
+	public String getOptionsKey() {
+		return optionsKey;
+	}
 
-    public ConfigMeta optionsLabel(String optionsLabel) {
-	this.optionsLabel = optionsLabel;
-	return this;
-    }
+	public void setOptionsKey(String optionKey) {
+		this.optionsKey = optionKey;
+	}
+
+	public ConfigMeta optionsKey(String optionKey) {
+		this.optionsKey = optionKey;
+		return this;
+	}
+
+	public Integer getOrder() {
+		return order;
+	}
+
+	public void setOrder(Integer order) {
+		this.order = order;
+	}
+
+	public ConfigMeta order(Integer order) {
+		this.order = order;
+		return this;
+	}
+
+	public String getOptionsLabel() {
+		return optionsLabel;
+	}
+
+	public void setOptionsLabel(String optionsLabel) {
+		this.optionsLabel = optionsLabel;
+	}
+
+	public ConfigMeta optionsLabel(String optionsLabel) {
+		this.optionsLabel = optionsLabel;
+		return this;
+	}
+
+	public Integer getMin() {
+		return min;
+	}
+
+	public void setMin(Integer min) {
+		this.min = min;
+	}
+
+	public Integer getMax() {
+		return max;
+	}
+
+	public void setMax(Integer max) {
+		this.max = max;
+	}
+
+	public ConfigMeta max(Integer max) {
+		this.max = max;
+		return this;
+	}
+
+	public ConfigMeta min(Integer min) {
+		this.min = min;
+		return this;
+	}
+
+	public ConfigMeta writeonly(boolean writeonly) {
+		this.writeonly = writeonly;
+		return this;
+	}
+
+	public Object getExample() {
+		return example;
+	}
+
+	public void setExample(Object example) {
+		this.example = example;
+	}
+
+	public ConfigMeta example(String example) {
+		this.example = example;
+		return this;
+	}
+
+	public MESSAGE_TYPE getMessageType() {
+		return messageType;
+	}
+
+	public void setMessageType(MESSAGE_TYPE messageType) {
+		this.messageType = messageType;
+	}
+
+	public ConfigMeta messageType(MESSAGE_TYPE messageType) {
+		this.messageType = messageType;
+		return this;
+	}
+
+	public Map<String, Object> getFilter() {
+		return filter;
+	}
+
+	public void setFilter(Map<String, Object> filter) {
+		this.filter = filter;
+	}
+
+	public Map<String, Object> filter() {
+		if (this.filter == null) {
+			this.filter = new HashMap<String, Object>();
+		}
+		return this.filter;
+	}
+
+	public ConfigMeta filter(String key, Object value) {
+		filter().put(key, value);
+		return this;
+	}
+
 }

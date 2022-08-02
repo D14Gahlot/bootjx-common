@@ -14,96 +14,96 @@ import com.fasterxml.jackson.annotation.JsonView;
 
 public class WA360Plugin implements ChannelPlugin<WA360ConfigDetails> {
 
-    @Override
-    public String getChannelType() {
-	return CHANNEL_TYPE.WA_360D;
-    }
-
-    @Override
-    public ContactType getContactType() {
-	return ContactType.WHATSAPP;
-    }
-
-    public static class WA360ConfigDetails extends AChannelDetails {
-
-	private static final long serialVersionUID = -2397678752642150000L;
-	private String number;
-
-	@JsonView(PMEnvironment.ProtectedProperty.class)
-	private String apiKey;
+	@Override
+	public String getChannelType() {
+		return CHANNEL_TYPE.WA_360D;
+	}
 
 	@Override
-	public String getLane() {
-	    return this.number;
+	public ContactType getContactType() {
+		return ContactType.WHATSAPP;
 	}
 
-	public String getNumber() {
-	    return number;
+	public static class WA360ConfigDetails extends AChannelDetails {
+
+		private static final long serialVersionUID = -2397678752642150000L;
+		private String number;
+
+		@JsonView(PMEnvironment.ProtectedProperty.class)
+		private String apiKey;
+
+		@Override
+		public String getLane() {
+			return this.number;
+		}
+
+		public String getNumber() {
+			return number;
+		}
+
+		public void setNumber(String number) {
+			this.number = number;
+		}
+
+		public String getApiKey() {
+			return apiKey;
+		}
+
+		public void setApiKey(String apiKey) {
+			this.apiKey = apiKey;
+		}
 	}
 
-	public void setNumber(String number) {
-	    this.number = number;
+	@Override
+	public void setDetails(ChannelConfig config, WA360ConfigDetails details) {
+		config.setWa360d(details);
 	}
 
-	public String getApiKey() {
-	    return apiKey;
+	@Override
+	public WA360ConfigDetails getDetails(ChannelConfig config) {
+		return config.getWa360d();
 	}
 
-	public void setApiKey(String apiKey) {
-	    this.apiKey = apiKey;
+	@Override
+	public WA360ConfigDetails newChannelDetails() {
+		return new WA360ConfigDetails();
 	}
-    }
 
-    @Override
-    public void setDetails(ChannelConfig config, WA360ConfigDetails details) {
-	config.setWa360d(details);
-    }
+	@Override
+	public void addConfigMeta(List<ConfigMeta> configMetaList) {
+		configMetaList.add(new ConfigMeta().path("wa360d.number").title("Number").createonly());
+		configMetaList.add(new ConfigMeta().path("wa360d.apiKey").title("API Key").writeonly());
+	}
 
-    @Override
-    public WA360ConfigDetails getDetails(ChannelConfig config) {
-	return config.getWa360d();
-    }
+	@Override
+	public void importChannelDetailsFromMap(WA360ConfigDetails channelDetails, MapModel map) {
+		channelDetails.setNumber(map.pathEntry("wa360d.number").asString(channelDetails.getNumber()));
+		channelDetails.setApiKey(map.pathEntry("wa360d.apiKey").asString(channelDetails.getApiKey()));
+	}
 
-    @Override
-    public WA360ConfigDetails newChannelDetails() {
-	return new WA360ConfigDetails();
-    }
+	@Override
+	public boolean isPushAllowed() {
+		return true;
+	}
 
-    @Override
-    public void addConfigMeta(List<ConfigMeta> configMetaList) {
-	configMetaList.add(new ConfigMeta().path("wa360d.number").title("Number").createonly());
-	configMetaList.add(new ConfigMeta().path("wa360d.apiKey").title("API Key").writeonly());
-    }
+	@Override
+	public boolean isPushOnlyApproved() {
+		return true;
+	}
 
-    @Override
-    public void importChannelDetailsFromMap(WA360ConfigDetails channelDetails, MapModel map) {
-	channelDetails.setNumber(map.pathEntry("wa360d.number").asString(channelDetails.getNumber()));
-	channelDetails.setApiKey(map.pathEntry("wa360d.apiKey").asString(channelDetails.getApiKey()));
-    }
+	@Override
+	public boolean isPushFreeTextAllowed() {
+		return false;
+	}
 
-    @Override
-    public boolean isPushAllowed() {
-	return true;
-    }
+	@Override
+	public boolean isPushToNewContactAllowed() {
+		return true;
+	}
 
-    @Override
-    public boolean isPushOnlyApproved() {
-	return true;
-    }
-
-    @Override
-    public boolean isPushFreeTextAllowed() {
-	return false;
-    }
-
-    @Override
-    public boolean isPushToNewContactAllowed() {
-	return true;
-    }
-
-    @Override
-    public boolean isWebhookManual() {
-	return false;
-    }
+	@Override
+	public boolean isWebhookManual() {
+		return false;
+	}
 
 }

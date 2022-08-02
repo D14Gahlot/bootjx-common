@@ -2,22 +2,25 @@ package com.boot.jx.model;
 
 public interface AuditCreateEntity {
 
-    String getCreatedBy();
+	String getCreatedBy();
 
-    void setCreatedBy(String createdBy);
+	void setCreatedBy(String createdBy);
 
-    Long getCreatedStamp();
+	Long getCreatedStamp();
 
-    void setCreatedStamp(Long createdStamp);
+	void setCreatedStamp(Long createdStamp);
 
-    public interface AuditUpdateEntity {
-	public Long getUpdatedStamp();
+	public interface AuditUpdateEntity {
+		public Long getUpdatedStamp();
 
-	void setUpdatedStamp(Long createdStamp);
+		void setUpdatedStamp(Long createdStamp);
 
-	public String getUpdatedBy();
+		public String getUpdatedBy();
 
-	void setUpdatedBy(String createdBy);
-    }
+		void setUpdatedBy(String createdBy);
+	}
+
+	public interface AuditableEntity extends AuditCreateEntity, AuditUpdateEntity {
+	}
 
 }

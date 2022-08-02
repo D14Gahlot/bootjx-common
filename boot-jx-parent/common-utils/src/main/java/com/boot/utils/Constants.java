@@ -21,6 +21,7 @@ public class Constants {
 
 	/** The Constant BLANK. */
 	public static final String BLANK = "";
+	public static final String UNDERSCORE = "_";
 
 	/** The Constant defaultBoolean. */
 	public static final Boolean DEFAULT_BOOLEAN = Boolean.FALSE;
@@ -163,6 +164,7 @@ public class Constants {
 	public static final String NONE = "NONE";
 	public static final String BRANCH = "BRANCH";
 
-
+	public static final String COLLECTION_NAME = "MESSAGE_";
+	
 
 }

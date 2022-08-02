@@ -19,7 +19,7 @@ public class ChatArchiveBuilder {
     @Autowired
     private ChatArchiveService chatArchive;
 
-    public ChatSessionDTOBuilder buildChatSessionDTO() {
+    public ChatSessionDTOBuilder sessionDTO() {
 	return new ChatSessionDTOBuilder().archive(chatArchive);
     }
 
@@ -38,6 +38,10 @@ public class ChatArchiveBuilder {
 	    this.chatSessionDoc = chatSessionDoc;
 	    this.chatSessionDTO = ChatDTOUtil.getChatSessionDTO(chatSessionDoc);
 	    return this;
+	}
+
+	public ChatSessionDTOBuilder from(String sessionId) {
+	    return this.from(archive.getChatSessionDoc(sessionId));
 	}
 
 	public ChatSessionDTOBuilder withMessages() {
@@ -62,7 +66,7 @@ public class ChatArchiveBuilder {
 	}
 
 	public ChatSessionDTOBuilder addMessage(MessageDoc messageDoc) {
-	    ChatMessageDTO messageDto = archive.getMessage(messageDoc, chatSessionDTO);
+	    ChatMessageDTO messageDto = archive.createMessageDTO(messageDoc, chatSessionDTO);
 	    if (!ArgUtil.is(chatSessionDTO.getMessages())) {
 		chatSessionDTO.setMessages(CollectionUtil.getList(messageDto));
 	    } else {

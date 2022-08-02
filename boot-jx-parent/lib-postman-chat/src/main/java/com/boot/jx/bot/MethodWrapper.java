@@ -12,13 +12,15 @@ public class MethodWrapper implements Comparable<MethodWrapper> {
 	private String controller;
 	private Method method;
 	private Pattern[] pattern;
-	private String[] tenant;
+	private String botName;
+	private String[] botCode;
 	private String lane;
 	private Matcher matcher;
 	private String next;
 	String key;
 	private int length;
 	private int priority;
+	private boolean onSessionRoute;
 
 	public Method getMethod() {
 		return method;
@@ -129,12 +131,28 @@ public class MethodWrapper implements Comparable<MethodWrapper> {
 		this.length = length;
 	}
 
-	public String[] getTenant() {
-		return tenant;
+	public String[] getBotCode() {
+		return botCode;
 	}
 
-	public void setTenant(String[] tenant) {
-		this.tenant = tenant;
+	public void setBotCode(String[] botCode) {
+		this.botCode = botCode;
+	}
+
+	public String getBotName() {
+		return botName;
+	}
+
+	public void setBotName(String botName) {
+		this.botName = botName;
+	}
+
+	public boolean isOnSessionRoute() {
+		return onSessionRoute;
+	}
+
+	public void setOnSessionRoute(boolean onSessionRoute) {
+		this.onSessionRoute = onSessionRoute;
 	}
 
 }

@@ -7,144 +7,168 @@ import org.springframework.stereotype.Component;
 import com.boot.jx.api.ApiFieldError;
 import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.chat.ChatService;
+import com.boot.jx.chat.ChatSessionFactory;
 import com.boot.jx.chat.ChatSessionService;
 import com.boot.jx.dict.FileType;
+import com.boot.jx.postman.ClientApp;
+import com.boot.jx.postman.PMConstants.APP_TYPE;
+import com.boot.jx.postman.PMConstants.MESSAGE_SENDER_TYPE;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.postman.store.SessionStore;
+import com.boot.jx.xms.XmsVendorConfigurer;
 import com.boot.jx.xms.dto.OutBoundMsgBasic.OutBoundMsg;
+import com.boot.model.MapModel.NodeEntry;
 import com.boot.jx.xms.dto.OutBoundReciept;
 import com.boot.utils.ArgUtil;
 
 @Component
 public class MessageService {
 
-    @Autowired
-    private MongoTemplate mongoTemplate;
+	@Autowired
+	private MongoTemplate mongoTemplate;
 
-    @Autowired
-    private ChatService chatService;
+	@Autowired
+	private ChatService chatService;
 
-    @Autowired
-    private ChatSessionService chatSessionService;
+	@Autowired
+	private ChatSessionService chatSessionService;
 
-    @Autowired
-    private SessionStore sessionStore;
+	@Autowired
+	private SessionStore sessionStore;
 
-    @Autowired
-    private PMEnvironment pmEnvironment;
+	@Autowired
+	private ChatSessionFactory chatSessionFactory;
 
-    public OutBoundReciept send(OutBoundMsg message) {
-	ChannelConfig channel = pmEnvironment.config().channel(message.getChannelId());
+	@Autowired
+	private PMEnvironment pmEnvironment;
 
-	if (!ArgUtil.is(channel)) {
-	    ApiResponseUtil.throwInputException(new ApiFieldError().field("channelId").obzect("OutBoundMsg")
-		    .codeKey("CHANNEL_NOT_FOUND").description("Channel : " + message.getChannelId() + " is Not Setup"));
+	public OutBoundReciept send(OutBoundMsg message) {
+		ChannelConfig channel = pmEnvironment.config().channel(message.getChannelId());
+
+		if (!ArgUtil.is(channel)) {
+			ApiResponseUtil.throwInputException(new ApiFieldError().field("channelId").obzect("OutBoundMsg")
+					.codeKey("CHANNEL_NOT_FOUND").description("Channel : " + message.getChannelId() + " is Not Setup"));
+		}
+
+		if (!ArgUtil.is(message.getType())) {
+			ApiResponseUtil.throwInputException(new ApiFieldError().field("type").obzect("OutBoundMsg")
+					.codeKey("TYPE_MISSING").description("Message Type is missing")
+					.possibleValues("text", "template", "audio", "video", "image", "document"));
+		}
+
+		OutboxMessage outboxMessage = new OutboxMessage();
+
+		if ("text".equalsIgnoreCase(message.getType())) {
+			if (!ArgUtil.is(message.getText()) || !ArgUtil.is(message.getText().getBody())) {
+				ApiResponseUtil.throwInputException(new ApiFieldError().field("text").obzect("OutBoundMsg")
+						.codeKey("TEXT_DETAILS_MISSING").description("Text Body is missing"));
+			}
+			outboxMessage.setMessage(message.getText().getBody());
+		}
+
+		if ("template".equalsIgnoreCase(message.getType())) {
+			if (!ArgUtil.is(message.getTemplate())) {
+				ApiResponseUtil.throwInputException(new ApiFieldError().field("template").obzect("OutBoundMsg")
+						.codeKey("TEMPLATE_DETAILS_MISSING").description("Template details is missing"));
+			}
+
+			if (!ArgUtil.is(message.getTemplate().getId()) && !ArgUtil.is(message.getTemplate().getCode())) {
+				ApiResponseUtil.throwInputException(
+						new ApiFieldError().field("template").obzect("OutBoundMsg").codeKey("TEMPLATE_DETAILS_MISSING")
+								.description("Either template.id or template.code is required"));
+			}
+
+			outboxMessage.setHsm(message.getTemplate());
+			outboxMessage.setModelData(message.getTemplate().data());
+		}
+
+		if ("document".equalsIgnoreCase(message.getType())) {
+			if (!ArgUtil.is(message.getDocument())) {
+				ApiResponseUtil.throwInputException(new ApiFieldError().field("document").obzect("OutBoundMsg")
+						.codeKey("DOCUMENT_DETAILS_MISSING").description("Document details is missing"));
+			}
+		}
+
+		if ("image".equalsIgnoreCase(message.getType())) {
+			if (!ArgUtil.is(message.getImage())) {
+				ApiResponseUtil.throwInputException(new ApiFieldError().field("image").obzect("OutBoundMsg")
+						.codeKey("IMAGE_DETAILS_MISSING").description("Image details is missing"));
+			}
+		}
+
+		if ("video".equalsIgnoreCase(message.getType())) {
+			if (!ArgUtil.is(message.getVideo())) {
+				ApiResponseUtil.throwInputException(new ApiFieldError().field("video").obzect("OutBoundMsg")
+						.codeKey("VIDEO_DETAILS_MISSING").description("Video details is missing"));
+			}
+		}
+
+		if ("audio".equalsIgnoreCase(message.getType())) {
+			if (!ArgUtil.is(message.getAudio())) {
+				ApiResponseUtil.throwInputException(new ApiFieldError().field("audio").obzect("OutBoundMsg")
+						.codeKey("AUDIO_DETAILS_MISSING").description("Audio details is missing"));
+			}
+		}
+
+		if (ArgUtil.is(message.getDocument())) {
+			outboxMessage.attachment(new Attachment().mediaURL(message.getDocument().getLink())
+					.mediaName(message.getDocument().getFilename()).mediaCaption(message.getDocument().getCaption())
+					.mediaType(FileType.DOCUMENT.toString()));
+		}
+
+		if (ArgUtil.is(message.getImage())) {
+			outboxMessage.attachment(
+					new Attachment().mediaURL(message.getImage().getLink()).mediaName(message.getImage().getFilename())
+							.mediaCaption(message.getImage().getCaption()).mediaType(FileType.IMAGE.toString()));
+		}
+		if (ArgUtil.is(message.getVideo())) {
+			outboxMessage.attachment(
+					new Attachment().mediaURL(message.getVideo().getLink()).mediaName(message.getVideo().getFilename())
+							.mediaCaption(message.getVideo().getCaption()).mediaType(FileType.VIDEO.toString()));
+		}
+
+		if (ArgUtil.is(message.getAudio())) {
+			outboxMessage.attachment(
+					new Attachment().mediaURL(message.getAudio().getLink()).mediaName(message.getAudio().getFilename())
+							.mediaCaption(message.getAudio().getCaption()).mediaType(FileType.AUDIO.toString()));
+		}
+
+		if (ArgUtil.is(message.getOptions())) {
+			if (ArgUtil.is(message.getOptions().buttons)) {
+				outboxMessage.option("buttons", message.getOptions().buttons);
+			}
+		}
+
+		ClientApp clientApp = XmsVendorConfigurer.getClientApp();
+
+		outboxMessage.contact().type(channel.getContactType());
+		outboxMessage.contact().setChannelType(channel.getChannelType());
+		outboxMessage.contact().setLane(channel.getLane());
+
+		outboxMessage.contact().copyFrom(message.getToContact());
+
+		outboxMessage.route().setQueueCode(clientApp.getQueue());
+		outboxMessage.route().setSendMode(clientApp.getAppMode());
+		outboxMessage.route().setSenderApp(clientApp.getAppType());
+		outboxMessage.route()
+				.setSenderType(ArgUtil.parseAsString(clientApp.props().get("sender_type"), MESSAGE_SENDER_TYPE.API));
+
+		ChatSessionDoc chatSessionDoc = chatSessionFactory.linkSession(outboxMessage);
+
+		if (ArgUtil.is(chatSessionDoc)) {
+			chatSessionService.initSession(outboxMessage, chatSessionDoc);
+			chatService.send(chatSessionDoc, outboxMessage);
+		} else {
+			ApiResponseUtil.throwInputException(
+					new ApiFieldError().field("to").obzect("OutBoundMsg").codeKey("INSUFFICIENT_CONTACT_DETAILS")
+							.description("Session Cannot be initialized for given contact"));
+		}
+		String messageId = outboxMessage.getMessageId();
+		return new OutBoundReciept().id(messageId);
 	}
-
-	if (!ArgUtil.is(message.getType())) {
-	    ApiResponseUtil.throwInputException(new ApiFieldError().field("type").obzect("OutBoundMsg")
-		    .codeKey("TYPE_MISSING").description("Message Type is missing")
-		    .possibleValues("text", "template", "audio", "video", "image", "document"));
-	}
-
-	OutboxMessage outboxMessage = new OutboxMessage();
-
-	if ("text".equalsIgnoreCase(message.getType())) {
-	    if (!ArgUtil.is(message.getText()) || !ArgUtil.is(message.getText().getBody())) {
-		ApiResponseUtil.throwInputException(new ApiFieldError().field("text").obzect("OutBoundMsg")
-			.codeKey("TEXT_DETAILS_MISSING").description("Text Body is missing"));
-	    }
-	    outboxMessage.setMessage(message.getText().getBody());
-	}
-
-	if ("template".equalsIgnoreCase(message.getType())) {
-	    if (!ArgUtil.is(message.getTemplate())) {
-		ApiResponseUtil.throwInputException(new ApiFieldError().field("template").obzect("OutBoundMsg")
-			.codeKey("TEMPLATE_DETAILS_MISSING").description("Template details is missing"));
-	    }
-
-	    if (!ArgUtil.is(message.getTemplate().getId()) && !ArgUtil.is(message.getTemplate().getCode())) {
-		ApiResponseUtil.throwInputException(
-			new ApiFieldError().field("template").obzect("OutBoundMsg").codeKey("TEMPLATE_DETAILS_MISSING")
-				.description("Either template.id or template.code is required"));
-	    }
-
-	    outboxMessage.setHsm(message.getTemplate());
-	    outboxMessage.setModelData(message.getTemplate().data());
-	}
-
-	if ("document".equalsIgnoreCase(message.getType())) {
-	    if (!ArgUtil.is(message.getDocument())) {
-		ApiResponseUtil.throwInputException(new ApiFieldError().field("document").obzect("OutBoundMsg")
-			.codeKey("DOCUMENT_DETAILS_MISSING").description("Document details is missing"));
-	    }
-	}
-
-	if ("image".equalsIgnoreCase(message.getType())) {
-	    if (!ArgUtil.is(message.getImage())) {
-		ApiResponseUtil.throwInputException(new ApiFieldError().field("image").obzect("OutBoundMsg")
-			.codeKey("IMAGE_DETAILS_MISSING").description("Image details is missing"));
-	    }
-	}
-
-	if ("video".equalsIgnoreCase(message.getType())) {
-	    if (!ArgUtil.is(message.getVideo())) {
-		ApiResponseUtil.throwInputException(new ApiFieldError().field("video").obzect("OutBoundMsg")
-			.codeKey("VIDEO_DETAILS_MISSING").description("Video details is missing"));
-	    }
-	}
-
-	if ("audio".equalsIgnoreCase(message.getType())) {
-	    if (!ArgUtil.is(message.getAudio())) {
-		ApiResponseUtil.throwInputException(new ApiFieldError().field("audio").obzect("OutBoundMsg")
-			.codeKey("AUDIO_DETAILS_MISSING").description("Audio details is missing"));
-	    }
-	}
-
-	if (ArgUtil.is(message.getDocument())) {
-	    outboxMessage.attachment(new Attachment().mediaURL(message.getDocument().getLink())
-		    .mediaName(message.getDocument().getFilename()).mediaCaption(message.getDocument().getCaption())
-		    .mediaType(FileType.DOCUMENT.toString()));
-	}
-
-	if (ArgUtil.is(message.getImage())) {
-	    outboxMessage.attachment(
-		    new Attachment().mediaURL(message.getImage().getLink()).mediaName(message.getImage().getFilename())
-			    .mediaCaption(message.getImage().getCaption()).mediaType(FileType.IMAGE.toString()));
-	}
-	if (ArgUtil.is(message.getVideo())) {
-	    outboxMessage.attachment(
-		    new Attachment().mediaURL(message.getVideo().getLink()).mediaName(message.getVideo().getFilename())
-			    .mediaCaption(message.getVideo().getCaption()).mediaType(FileType.VIDEO.toString()));
-	}
-
-	if (ArgUtil.is(message.getAudio())) {
-	    outboxMessage.attachment(
-		    new Attachment().mediaURL(message.getAudio().getLink()).mediaName(message.getAudio().getFilename())
-			    .mediaCaption(message.getAudio().getCaption()).mediaType(FileType.AUDIO.toString()));
-	}
-
-	outboxMessage.contact().type(channel.getContactType());
-	outboxMessage.contact().setChannelType(channel.getChannelType());
-	outboxMessage.contact().setLane(channel.getLane());
-
-	outboxMessage.contact().copyFrom(message.getToContact());
-
-	ChatSessionDoc chatSessionDoc = sessionStore.linkSession(outboxMessage);
-	if (ArgUtil.is(chatSessionDoc)) {
-	    chatSessionService.initSession(outboxMessage, chatSessionDoc);
-	    chatService.send(chatSessionDoc, outboxMessage);
-	} else {
-	    ApiResponseUtil.throwInputException(
-		    new ApiFieldError().field("to").obzect("OutBoundMsg").codeKey("INSUFFICIENT_CONTACT_DETAILS")
-			    .description("Session Cannot be initialized for given contact"));
-	}
-	String messageId = outboxMessage.getMessageId();
-	return new OutBoundReciept().id(messageId);
-    }
 
 }

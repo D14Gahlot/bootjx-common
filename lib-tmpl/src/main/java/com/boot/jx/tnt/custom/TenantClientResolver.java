@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 
 import com.boot.jx.AppConfig;
 import com.boot.jx.AppContextUtil;
+import com.boot.jx.http.CommonHttpRequest.ApiRequestDetail;
 import com.boot.jx.rest.RestService;
 import com.boot.jx.scope.tnt.Tenants;
 import com.boot.jx.scope.tnt.Tenants.TenantResolver;
@@ -20,77 +21,102 @@ import com.boot.utils.ArgUtil;
 @Component
 public class TenantClientResolver extends TenantResolver {
 
-    private static final String NODOMAIN = "nodomain";
-    public static final Map<String, String> tntMapping = new HashMap<String, String>();
-    public static final Pattern pattern = Pattern.compile("^(.+?)-(.+?)-(.+?)-(.+?)-(.+?)$");
+	private static final String NODOMAIN = "nodomain";
+	public static final Map<String, String> tntMapping = new HashMap<String, String>();
+	public static final Map<String, String> dbMapping = new HashMap<String, String>();
+	public static final Pattern pattern = Pattern.compile("^(.+?)-(.+?)-(.+?)-(.+?)-(.+?)$");
 
-    @Autowired
-    AppConfig appConfig;
+	public static final String CHECK_VALID_DOMAIN = "CHECK_VALID_DOMAIN";
 
-    @Autowired
-    RestService restService;
+	@Autowired
+	AppConfig appConfig;
 
-    @Value("${mry.account.url}")
-    String accountUrl;
+	@Autowired
+	RestService restService;
 
-    @Value("${default.tenant.static}")
-    String tenantStatic;
+	@Value("${mry.account.url}")
+	String accountUrl;
 
-    public String resolve(String tnt) {
+	@Value("${default.tenant.static}")
+	String tenantStatic;
 
-	if (ArgUtil.is(tenantStatic)) {
-	    return tenantStatic;
-	}
+	public String resolve(String tnt) {
+		tnt = super.resolve(tnt);
 
-	if (!ArgUtil.is(tnt)) {
-	    return NODOMAIN;
-	}
+		ApiRequestDetail apiDetails = AppContextUtil.getApiRequestDetail();
 
-	String mappedTnt = tntMapping.get(tnt);
-
-	if (ArgUtil.is(mappedTnt) && !NODOMAIN.equalsIgnoreCase(mappedTnt)) {
-	    return mappedTnt;
-	}
-
-	if (!appConfig.isProdMode() && ArgUtil.is(tnt)) {
-	    Matcher matcher = pattern.matcher(tnt);
-	    if (matcher.find()) {
-		return "demo";
-	    }
-	}
-
-	if (ArgUtil.is(accountUrl) && !Tenants.isDefault(tnt) && false) {
-	    try {
-		MapModel resp = restService.ajax(accountUrl).path("/partner/pub/domain/exists")
-			.queryParam("tnt", Tenants.getDefault()).queryParam("domain", tnt).get().asMapModel();
-		if (resp.keyEntry("meta").is(tnt)) {
-		    tntMapping.put(tnt, tnt);
-		    return tnt;
-		} else {
-		    tntMapping.put(tnt, NODOMAIN);
-		    return NODOMAIN;
+		if (ArgUtil.is(apiDetails) && ArgUtil.is(apiDetails.getTenant())) {
+			return apiDetails.getTenant();
 		}
-	    } catch (Exception e) {
-		e.printStackTrace();
-		tntMapping.put(tnt, NODOMAIN);
+
+		if (ArgUtil.is(tenantStatic)) {
+			return tenantStatic;
+		}
+
+		if (!ArgUtil.is(tnt)) {
+			return NODOMAIN;
+		}
+
+		String mappedTnt = tntMapping.get(tnt);
+
+		if (ArgUtil.is(mappedTnt) && !NODOMAIN.equalsIgnoreCase(mappedTnt)) {
+			return mappedTnt;
+		}
+
+		if (!appConfig.isProdMode() && ArgUtil.is(tnt)) {
+			Matcher matcher = pattern.matcher(tnt);
+			if (matcher.find()) {
+				return "demo";
+			}
+		}
+
+		if (ArgUtil.is(accountUrl) && !Tenants.isDefault(tnt)
+				&& (ArgUtil.is(apiDetails) && apiDetails.hasRule(CHECK_VALID_DOMAIN))) {
+			try {
+				MapModel resp = restService.ajax(accountUrl).path("/partner/pub/domain/exists")
+						.queryParam("tnt", Tenants.getDefault()).queryParam("domain", tnt).get().asMapModel();
+				if (resp.keyEntry("meta").is(tnt)) {
+					tntMapping.put(tnt, tnt);
+					return tnt;
+				} else {
+					tntMapping.put(tnt, NODOMAIN);
+					return NODOMAIN;
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+				tntMapping.put(tnt, NODOMAIN);
+				return tnt;
+			}
+		} else {
+			tntMapping.put(tnt, tnt);
+		}
 		return tnt;
-	    }
-	} else {
-	    tntMapping.put(tnt, tnt);
 	}
-	return tnt;
-    }
 
-    @Override
-    public boolean isValid() {
-	String tnt = AppContextUtil.getTenant();
-	String mappedTnt = tntMapping.get(tnt);
-	return ArgUtil.is(mappedTnt) && mappedTnt.equalsIgnoreCase(tnt);
-    }
+	@Override
+	public boolean isValid() {
+		String tnt = AppContextUtil.getTenant();
+		String mappedTnt = tntMapping.get(tnt);
+		return ArgUtil.is(mappedTnt) && mappedTnt.equalsIgnoreCase(tnt);
+	}
 
-    static {
-	tntMapping.put("app", "app");
-	tntMapping.put("api", "app");
-	tntMapping.put("local", "local");
-    }
+	static {
+		tntMapping.put("app", "app");
+		tntMapping.put("api", "app");
+		tntMapping.put("www", "app");
+		tntMapping.put("ww", "app");
+		tntMapping.put("w", "app");
+		tntMapping.put("local", "local");
+		// tntMapping.put("mehery", "lalit");
+		// tntMapping.put("dhofartest", "dhofar");
+		// tntMapping.put("a9db-2405-201-400f-de31-4554-9ae6-932b-8d3e", "pranjal");
+		// DB Mapping
+		dbMapping.put("dhofartest", "dhofar");
+		// dbMapping.put("mehery", "lalit");
+	}
+
+	@Override
+	public String getDBName(String tnt) {
+		return dbMapping.getOrDefault(tnt, tnt);
+	}
 }

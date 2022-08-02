@@ -22,60 +22,60 @@ import com.boot.jx.scope.vendor.VendorContext.ApiVendorHeaders;
 @RestController
 public class InBoundControllerFB {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(InBoundControllerFB.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(InBoundControllerFB.class);
 
-    @Autowired
-    private InBoundService inBoundService;
+	@Autowired
+	private InBoundService inBoundService;
 
-    @Autowired
-    private FacebooClient facebooClient;
+	@Autowired
+	private FacebooClient facebooClient;
 
-    @Autowired
-    private FacebookConnector facebookConnector;
+	@Autowired
+	private FacebookConnector facebookConnector;
 
-    @Autowired
-    private PMEnvironment pmEnvironment;
+	@Autowired
+	private PMEnvironment pmEnvironment;
 
-    @RequestMapping(value = { "/ext/inbound/v2/fb/callback/{accountKey}/{channelId}/{channelKey}" },
-	    method = RequestMethod.GET)
-    public Object get(@RequestParam(name = "hub.verify_token") String token,
-	    @RequestParam(name = "hub.challenge") String challenge,
-	    @RequestHeader(required = false, value = "X-Hub-Signature") String signature,
-	    @PathVariable(required = false) String accountKey, @PathVariable(required = false) String channelId,
-	    @PathVariable(required = false) String channelKey) {
-	ChannelConfig channelConfig = pmEnvironment.local().channel(channelId);
-	return facebooClient.registerWebhook(channelConfig, token, challenge);
-    }
+	@RequestMapping(value = { "/ext/inbound/v2/fb/callback/{accountKey}/{channelId}/{channelKey}" },
+			method = RequestMethod.GET)
+	public Object get(@RequestParam(name = "hub.verify_token") String token,
+			@RequestParam(name = "hub.challenge") String challenge,
+			@RequestHeader(required = false, value = "X-Hub-Signature") String signature,
+			@PathVariable(required = false) String accountKey, @PathVariable(required = false) String channelId,
+			@PathVariable(required = false) String channelKey) {
+		ChannelConfig channelConfig = pmEnvironment.local().channel(channelId);
+		return facebooClient.registerWebhook(channelConfig, token, challenge);
+	}
 
-    @Deprecated
-    // @ApiRequest(feature = "WA_GUPSHUP_INBOUND")
-    @ApiVendorHeaders
-    @RequestMapping(value = "/ext/inbound/fb/callback", method = RequestMethod.POST)
-    public FacebookHookRequest onReceiveMessage(@RequestBody FacebookHookRequest request,
-	    @RequestParam(required = false) String lane,
-	    @RequestHeader(required = false, value = "X-Hub-Signature") String signature) throws InterruptedException {
-	request.getEntry().forEach(pageEntry -> {
-	    pageEntry.getMessaging().forEach(m -> {
-		InboxMessage event = facebookConnector.toInboxMessage(m, pageEntry.getId());
-		inBoundService.invokeMethods(event);
-		// facebooClient.sendReply(event.getContactId(), "Helo", pageEntry.getId());
-	    });
-	});
-	return request;
-    }
+	@Deprecated
+	// @ApiRequest(feature = "WA_GUPSHUP_INBOUND")
+	@ApiVendorHeaders
+	@RequestMapping(value = "/ext/inbound/fb/callback", method = RequestMethod.POST)
+	public FacebookHookRequest onReceiveMessage(@RequestBody FacebookHookRequest request,
+			@RequestParam(required = false) String lane,
+			@RequestHeader(required = false, value = "X-Hub-Signature") String signature) throws InterruptedException {
+		request.getEntry().forEach(pageEntry -> {
+			pageEntry.getMessaging().forEach(m -> {
+				InboxMessage event = facebookConnector.toInboxMessage(m, pageEntry.getId());
+				inBoundService.invokeMethods(event);
+				// facebooClient.sendReply(event.getContactId(), "Helo", pageEntry.getId());
+			});
+		});
+		return request;
+	}
 
-    @Deprecated
-    @ApiVendorHeaders
-    @RequestMapping(value = "/ext/inbound/fb/callback/{lane}", method = RequestMethod.POST)
-    public FacebookHookRequest onReceiveMessageLane(@RequestBody FacebookHookRequest request, @PathVariable String lane)
-	    throws InterruptedException {
-	request.getEntry().forEach(pageEntry -> {
-	    pageEntry.getMessaging().forEach(m -> {
-		InboxMessage event = facebookConnector.toInboxMessage(m, pageEntry.getId());
-		inBoundService.invokeMethods(event);
-	    });
-	});
-	return request;
-    }
+	@Deprecated
+	@ApiVendorHeaders
+	@RequestMapping(value = "/ext/inbound/fb/callback/{lane}", method = RequestMethod.POST)
+	public FacebookHookRequest onReceiveMessageLane(@RequestBody FacebookHookRequest request, @PathVariable String lane)
+			throws InterruptedException {
+		request.getEntry().forEach(pageEntry -> {
+			pageEntry.getMessaging().forEach(m -> {
+				InboxMessage event = facebookConnector.toInboxMessage(m, pageEntry.getId());
+				inBoundService.invokeMethods(event);
+			});
+		});
+		return request;
+	}
 
 }

@@ -30,9 +30,9 @@
 		</dependency>
 
 		<dependency>
-			<groupId>org.thymeleaf.extras</groupId>
-			<artifactId>thymeleaf-extras-springsecurity4</artifactId>
-			<version>3.0.0.RELEASE</version>
+		    <groupId>org.thymeleaf.extras</groupId>
+		    <artifactId>thymeleaf-extras-springsecurity4</artifactId>
+		    <version>3.0.0.RELEASE</version>
 		</dependency>
 
 		<!-- /thymeleaf dependencies -->
@@ -83,6 +83,8 @@
 			<artifactId>lib-common-config</artifactId>
 			<version>${jax.version}</version>
 		</dependency>
+		
+		
 
 		<dependency>
 			<groupId>com.boot.jx</groupId>
@@ -103,7 +105,15 @@
 			<groupId>com.boot.jx</groupId>
 			<artifactId>common-mongo</artifactId>
 		</dependency>
+		
+		<dependency>
+			<groupId>com.boot.jx</groupId>
+			<artifactId>lib-phonebook</artifactId>
+		</dependency>
+		
 	</dependencies>
+	
+	
 
 	<build>
 		<plugins>
@@ -132,9 +142,13 @@
 	</build>
 
 	<repositories>
-		<repository>
+<!-- 		<repository>
 			<id>spring-milestone</id>
-			<url>https://repo.spring.io/libs-milestone</url>
+			<url>https://repo.spring.io/milestone</url>
+		</repository> -->
+		<repository>
+			<id>maven</id>
+			<url>https://repo1.maven.org/maven2/</url>
 		</repository>
 		<repository>
 			<snapshots>

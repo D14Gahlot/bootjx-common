@@ -394,5 +394,4 @@ public abstract class CommonMongoTemplateDefault {
     public MongoDatabase getDb() {
 	return getCommonMongoTemplate().getDb();
     }
-
 }

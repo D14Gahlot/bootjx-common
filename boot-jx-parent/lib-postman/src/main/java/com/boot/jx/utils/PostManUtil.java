@@ -16,6 +16,8 @@ import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.MessageDefinitions.Contactable;
 import com.boot.jx.postman.model.MessageDefinitions.IMessage;
 import com.boot.jx.postman.model.OutboxMessage;
+import com.boot.jx.postman.model.PMArgs;
+import com.boot.jx.postman.model.ext.InBoundEvent;
 import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CryptoUtil;
@@ -24,161 +26,233 @@ import com.boot.utils.UniqueID;
 
 public class PostManUtil {
 
-    public static ResponseEntity<byte[]> download(CommonFile file) {
-	return ResponseEntity.ok().contentLength(file.getBody().length)
-		.header("Content-Disposition", "attachment; filename=" + file.getName())
-		.contentType(MediaType.valueOf(file.getFileFormat().getContentType())).body(file.getBody());
-    }
-
-    public static ResponseEntity<byte[]> render(CommonFile file) {
-	return ResponseEntity.ok().contentLength(file.getBody().length)
-		.contentType(MediaType.valueOf(file.getFileFormat().getContentType())).body(file.getBody());
-    }
-
-    public static String createCsid(Contactable contact) {
-	if (ArgUtil.is(contact.getCsid())) {
-	    return contact.getCsid();
+	public static ResponseEntity<byte[]> download(CommonFile file) {
+		return ResponseEntity.ok().contentLength(file.getBody().length)
+				.header("Content-Disposition", "attachment; filename=" + file.getName())
+				.contentType(MediaType.valueOf(file.getFileFormat().getContentType())).body(file.getBody());
 	}
-	ContactType contactType = ArgUtil.parseAsEnumT(contact.getContactType(), ContactType.class);
-	if (ArgUtil.is(contactType)) {
-	    switch (contactType) {
-	    case WHATSAPP:
-	    case SMS:
-		return contact.getPhone();
-	    case EMAIL:
-		return contact.getEmail();
-	    default:
-		break;
-	    }
+
+	public static ResponseEntity<byte[]> render(CommonFile file) {
+		return ResponseEntity.ok().contentLength(file.getBody().length)
+				.contentType(MediaType.valueOf(file.getFileFormat().getContentType())).body(file.getBody());
 	}
-	return contact.getCsid();
-    }
 
-    private static String createContactId(ContactType contactType, String id, String lane) {
-	if (ContactType.WHATSAPP.equals(contactType)) {
-	    return "wa" + id + "_" + lane;
-	} else if (ContactType.FACEBOOK.equals(contactType)) {
-	    return "fb" + id + "_" + lane;
-	} else if (ContactType.TWITTER.equals(contactType)) {
-	    return "tw" + id + "_" + lane;
-	} else if (ContactType.TELEGRAM.equals(contactType)) {
-	    return "tg" + id + "_" + lane;
-	} else if (ArgUtil.is(contactType)) {
-	    return contactType.getShortCode() + id + "_" + lane;
+	public static String createCsid(Contactable contact) {
+		if (ArgUtil.is(contact.getCsid())) {
+			return contact.getCsid();
+		}
+		ContactType contactType = ArgUtil.parseAsEnumT(contact.getContactType(), ContactType.class);
+		if (ArgUtil.is(contactType)) {
+			switch (contactType) {
+			case WHATSAPP:
+			case SMS:
+				return contact.getPhone();
+			case EMAIL:
+				return contact.getEmail();
+			default:
+				break;
+			}
+		}
+		return contact.getCsid();
 	}
-	return id;
-    }
 
-    public static String createContactId(Contactable contact) {
-	if (ArgUtil.is(contact.getContactId())) {
-	    return contact.getContactId();
+	private static String createContactId(ContactType contactType, String id, String lane) {
+		if (ContactType.WHATSAPP.equals(contactType)) {
+			return "wa" + id + "_" + lane;
+		} else if (ContactType.FACEBOOK.equals(contactType)) {
+			return "fb" + id + "_" + lane;
+		} else if (ContactType.TWITTER.equals(contactType)) {
+			return "tw" + id + "_" + lane;
+		} else if (ContactType.TELEGRAM.equals(contactType)) {
+			return "tg" + id + "_" + lane;
+		} else if (ArgUtil.is(contactType)) {
+			return contactType.getShortCode() + id + "_" + lane;
+		}
+		return id;
 	}
-	String csid = createCsid(contact);
-	return createContactId(ArgUtil.parseAsEnumT(contact.getContactType(), ContactType.class), csid,
-		contact.getLane());
-    }
 
-    public static String createContactId(IMessage inboxMessage) {
-	return createContactId(inboxMessage.contact());
-    }
-
-    public static Contactable updateContactMeta(Contactable contact) {
-	if (!ArgUtil.is(contact.getCsid())) {
-	    contact.setCsid(createCsid(contact));
+	public static String createContactId(Contactable contact) {
+		if (ArgUtil.is(contact.getContactId())) {
+			return contact.getContactId();
+		}
+		String csid = createCsid(contact);
+		return createContactId(ArgUtil.parseAsEnumT(contact.getContactType(), ContactType.class), csid,
+				contact.getLane());
 	}
-	if (!ArgUtil.is(contact.getContactId()) // if ContactId is Missing
-		&& ArgUtil.is(contact.getContactType()) // ContactType is for contactId
-		&& ArgUtil.is(contact.getCsid()) // CSID is for contactId
-		&& ArgUtil.is(contact.getLane()) // Lane is for contactId
-	) {
-	    contact.setContactId(createContactId(contact));
+
+	public static String createContactId(IMessage inboxMessage) {
+		return createContactId(inboxMessage.contact());
 	}
-	return contact;
-    }
 
-    public static Contactable getContactMeta(Contactable contact) {
-	Contactable contactMeta = new ContactMeta();
-	contactMeta.copyFrom(contact);
-	return updateContactMeta(contactMeta);
-    }
-
-    public static String generateCheckSum(InboxMessage inboxMessage) {
-	String checkString = inboxMessage.contact().getContactId() + inboxMessage.getSessionId()
-		+ inboxMessage.getMessageId() + inboxMessage.getMessage();
-	try {
-	    return CryptoUtil.getMD5Hash(checkString);
-	} catch (NoSuchAlgorithmException e) {
-	    e.printStackTrace();
-	    return e.getMessage();
+	public static String createContactId(InBoundEvent assignEvent) {
+		if (ArgUtil.is(assignEvent.contactId)) {
+			return assignEvent.contactId;
+		}
+		return createContactId(assignEvent.contact());
 	}
-    }
 
-    public static boolean hasValidCheckSum(InboxMessage inboxMessage) {
-	return ArgUtil.areEqual(inboxMessage.getChecksum(), generateCheckSum(inboxMessage));
-    }
-
-    public static boolean isInBound(String type) {
-	return ArgUtil.isEqual(type, PMConstants.MESSAGE_BOUND_TYPE.INBOUND,
-		PMConstants.MESSAGE_BOUND_TYPE.INBOUND_IMPORTED);
-    }
-
-    public static boolean isInBound(IMessage inboxMessage) {
-	if (ArgUtil.is(inboxMessage.getType())) {
-	    return isInBound(inboxMessage.getType());
+	public static Contactable updateContactMeta(Contactable contact) {
+		if (!ArgUtil.is(contact.getCsid())) {
+			contact.setCsid(createCsid(contact));
+		}
+		if (!ArgUtil.is(contact.getContactId()) // if ContactId is Missing
+				&& ArgUtil.is(contact.getContactType()) // ContactType is for contactId
+				&& ArgUtil.is(contact.getCsid()) // CSID is for contactId
+				&& ArgUtil.is(contact.getLane()) // Lane is for contactId
+		) {
+			contact.setContactId(createContactId(contact));
+		}
+		return contact;
 	}
-	return inboxMessage instanceof InboxMessage;
-    }
 
-    public static boolean isOutBound(String type) {
-	return ArgUtil.isEqual(type, PMConstants.MESSAGE_BOUND_TYPE.OUTBOUND,
-		PMConstants.MESSAGE_BOUND_TYPE.OUTBOUND_IMPORTED);
-    }
-
-    public static boolean isOutBound(IMessage inboxMessage) {
-	if (ArgUtil.is(inboxMessage.getType())) {
-	    return isOutBound(inboxMessage.getType());
+	public static Contactable getContactMeta(Contactable contact) {
+		Contactable contactMeta = new ContactMeta();
+		contactMeta.copyFrom(contact);
+		return updateContactMeta(contactMeta);
 	}
-	return inboxMessage instanceof OutboxMessage;
-    }
 
-    public static boolean isBotMode(IMessage inboxMessage) {
-	return CHAT_MODE.BOT.toString().equals(inboxMessage.session().getMode());
-    }
-
-    public static boolean isAgentMode(IMessage inboxMessage) {
-	return CHAT_MODE.AGENT.toString().equals(inboxMessage.session().getMode());
-    }
-
-    public static String CONTACT_ID(Contactable contactable) {
-	return createContactId(contactable);
-    }
-
-    public static String CONTACT_ID(ChannelConfig channelConfig, String csid) {
-	return createContactId(channelConfig.getContactType(), csid, channelConfig.getLane());
-    }
-
-    public static String CHANNEL_ID(String chanelType, String lane) {
-	if (CHANNEL_TYPE.WA_GUPSHUP_LEGACY.equals(chanelType)) {
-	    chanelType = CHANNEL_TYPE.WA_GUPSHUP;
+	public static Contactable getContactMeta(Contactable contact, String contactId) {
+		Contactable contactMeta = getContactMeta(contact);
+		if (!ArgUtil.is(contactMeta.getContactId()) && ArgUtil.is(contactId)) {
+			contactMeta.setContactId(contactId);
+		}
+		return contactMeta;
 	}
-	return String.format("%s:%s", chanelType, lane).toLowerCase();
-    }
 
-    public static String CHANNEL_ID(Contactable contactable) {
-	return CHANNEL_ID(contactable.getChannelType(), contactable.getLane());
-    }
+	public static String generateCheckSum(InboxMessage inboxMessage) {
+		String checkString = inboxMessage.contact().getContactId() + inboxMessage.getSessionId()
+				+ inboxMessage.getMessageId() + inboxMessage.getMessage();
+		try {
+			return CryptoUtil.getMD5Hash(checkString);
+		} catch (NoSuchAlgorithmException e) {
+			e.printStackTrace();
+			return e.getMessage();
+		}
+	}
 
-    public static String UNIQUE_API_KEY() {
-	return String.format("%s%s", UniqueID.generateString(), Random.randomAlphaNumeric(10));
-    }
+	public static boolean hasValidCheckSum(InboxMessage inboxMessage) {
+		return ArgUtil.areEqual(inboxMessage.getChecksum(), generateCheckSum(inboxMessage));
+	}
 
-    public static String CHANNEL_CALLBACK_PATH(String accountKey, AChannelConfig channelConfig) {
-	return String.format("ext/inbound/v2/%s/callback/%s/%s/%s", channelConfig.getChannelType(), accountKey,
-		CHANNEL_ID(channelConfig.getChannelType(), channelConfig.getLane()), channelConfig.getChannelKey());
-    }
+	public static String generateCheckSum(PMArgs params) {
+		String checkString = params.contact().getContactId() + params.getSessionId();
+		try {
+			return CryptoUtil.getMD5Hash(checkString);
+		} catch (NoSuchAlgorithmException e) {
+			e.printStackTrace();
+			return e.getMessage();
+		}
+	}
 
-    public static String ON_DEPT_ASSIGN_TOPIC(String dept) {
-	return "/dept/onassign-" + dept;
-    }
+	public static boolean hasValidCheckSum(PMArgs params) {
+		return ArgUtil.areEqual(params.getChecksum(), generateCheckSum(params));
+	}
+
+	public static String generateCheckSum(InBoundEvent event) {
+		String checkString = event.contact().getContactId() + event.getSessionId() + event.eventCode;
+		try {
+			return CryptoUtil.getMD5Hash(checkString);
+		} catch (NoSuchAlgorithmException e) {
+			e.printStackTrace();
+			return e.getMessage();
+		}
+	}
+
+	public static boolean hasValidCheckSum(InBoundEvent event) {
+		return ArgUtil.areEqual(event.getChecksum(), generateCheckSum(event));
+	}
+
+	public static boolean isInBound(String type) {
+		return ArgUtil.isEqual(type, PMConstants.MESSAGE_BOUND_TYPE.INBOUND,
+				PMConstants.MESSAGE_BOUND_TYPE.INBOUND_IMPORTED);
+	}
+
+	public static boolean isInBound(IMessage inboxMessage) {
+		if (ArgUtil.is(inboxMessage.getType())) {
+			return isInBound(inboxMessage.getType());
+		}
+		return inboxMessage instanceof InboxMessage;
+	}
+
+	public static boolean isOutBound(String type) {
+		return ArgUtil.isEqual(type, PMConstants.MESSAGE_BOUND_TYPE.OUTBOUND,
+				PMConstants.MESSAGE_BOUND_TYPE.OUTBOUND_IMPORTED);
+	}
+
+	public static boolean isOutBound(IMessage inboxMessage) {
+		if (ArgUtil.is(inboxMessage.getType())) {
+			return isOutBound(inboxMessage.getType());
+		}
+		return inboxMessage instanceof OutboxMessage;
+	}
+
+	public static boolean isBotMode(IMessage inboxMessage) {
+		return CHAT_MODE.BOT.toString().equals(inboxMessage.session().getMode());
+	}
+
+	public static boolean isAgentMode(IMessage inboxMessage) {
+		return CHAT_MODE.AGENT.toString().equals(inboxMessage.session().getMode());
+	}
+
+	public static String ROUTING_ID(String sessionId, String queueCode) {
+		return String.format("%s_%s_%s", sessionId, queueCode, UniqueID.generateString());
+	}
+
+	public static String CONTACT_ID(Contactable contactable) {
+		return createContactId(contactable);
+	}
+
+	public static String CONTACT_ID(ChannelConfig channelConfig, String csid) {
+		return createContactId(channelConfig.getContactType(), csid, channelConfig.getLane());
+	}
+
+	public static String CHANNEL_ID(String contactType, String channelType, String lane) {
+		if (!ArgUtil.is(channelType)) {
+			channelType = PMConstants.CHANNEL_TYPE(contactType, channelType);
+		}
+		if (CHANNEL_TYPE.WA_GUPSHUP_LEGACY.equals(channelType)) {
+			channelType = CHANNEL_TYPE.WA_GUPSHUP;
+		}
+		return String.format("%s:%s", channelType, lane).toLowerCase();
+	}
+
+	public static String CHANNEL_ID(String channelType, String lane) {
+		return CHANNEL_ID(null, channelType, lane);
+	}
+
+	public static String CHANNEL_ID(Contactable contactable) {
+		return CHANNEL_ID(contactable.getContactType(), contactable.getChannelType(), contactable.getLane());
+	}
+
+	public static String UNIQUE_API_KEY() {
+		return String.format("%s%s", UniqueID.generateString(), Random.randomAlphaNumeric(10));
+	}
+
+	public static String CHANNEL_CALLBACK_PATH(String accountKey, AChannelConfig channelConfig) {
+		return String.format("ext/inbound/v2/%s/callback/%s/%s/%s", channelConfig.getChannelType(), accountKey,
+				CHANNEL_ID(channelConfig.getChannelType(), channelConfig.getLane()), channelConfig.getChannelKey());
+	}
+
+	public static String ON_DEPT_ASSIGN_TOPIC(String dept) {
+		return "/dept/onassign-" + dept;
+	}
+
+	public static boolean IS_TRACK_BY_REPLY_ID(String channelType) {
+		if (PMConstants.CHANNEL_TYPE.EMAIL.equals(channelType)) {
+			return true;
+		}
+		return false;
+	}
+
+	public static boolean IS_MULTI_THREAD(String channelType) {
+		if (PMConstants.CHANNEL_TYPE.EMAIL.equals(channelType)) {
+			return true;
+		}
+		return false;
+	}
+
+	public static boolean IS_SINGLE_THREAD(String channelType) {
+		return !IS_MULTI_THREAD(channelType);
+	}
 
 }
