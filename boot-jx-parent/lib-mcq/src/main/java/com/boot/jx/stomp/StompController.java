@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.boot.jx.AppConstants;
 import com.boot.jx.http.ApiRequest;
-import com.boot.jx.stomp.StompSessionCache.StompSession;
+import com.boot.jx.stomp.StompConfig.StompSession;
 import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.Constants;
