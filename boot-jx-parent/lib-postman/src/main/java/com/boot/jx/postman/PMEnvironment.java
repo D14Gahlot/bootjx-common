@@ -401,6 +401,7 @@ public class PMEnvironment {
 		public String mainDomainRedirect();
 
 		public String mainDomainRedirect(String path);
+
 	}
 
 	public interface PMDomainConfig {

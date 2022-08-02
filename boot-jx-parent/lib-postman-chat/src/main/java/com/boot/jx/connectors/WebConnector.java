@@ -20,6 +20,7 @@ import com.boot.jx.connectors.AbstractConnector.DefaultConnector;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.model.CommonFile;
 import com.boot.jx.model.CommonFileStream;
+import com.boot.jx.postman.PMConstants.PROPERTIES;
 import com.boot.jx.postman.client.PMFileStoreClient;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
@@ -107,24 +108,28 @@ public class WebConnector extends DefaultConnector<WebConfigDetails, WebPlugin> 
 		return null;
 	}
 
-	public List<OutboxMessage> pollAllUnreadMessage(String contactId) throws InterruptedException {
+	public List<OutboxMessage> pollAllUnreadMessage(String contactId) {
 		List<OutboxMessage> messages = new ArrayList<OutboxMessage>();
-		if (redisson == null) {
-			try {
-				OutboxMessage msg = messageQueue.dequeue();
-				if (ArgUtil.is(msg)) {
-					messages.add(msg);
+		try {
+			if (redisson == null) {
+				try {
+					OutboxMessage msg = messageQueue.dequeue();
+					if (ArgUtil.is(msg)) {
+						messages.add(msg);
+					}
+				} catch (InterruptedException e) {
+					e.printStackTrace();
 				}
-			} catch (InterruptedException e) {
-				e.printStackTrace();
+			} else if (environment.keyEntry(PROPERTIES.POSTMAN_CHAT_WEB_QUEUE).asBoolean()) {
+				RBlockingQueue<String> messageQueue = redisson.getBlockingQueue(WEB_USER_MESSAGE_STR + contactId);
+				String x = messageQueue.poll(5, TimeUnit.SECONDS);
+				while (ArgUtil.is(x)) {
+					messages.add(JsonUtil.parse(x, OutboxMessage.class));
+					x = messageQueue.poll();
+				}
 			}
-		} else {
-			RBlockingQueue<String> messageQueue = redisson.getBlockingQueue(WEB_USER_MESSAGE_STR + contactId);
-			String x = messageQueue.poll(5, TimeUnit.SECONDS);
-			while (ArgUtil.is(x)) {
-				messages.add(JsonUtil.parse(x, OutboxMessage.class));
-				x = messageQueue.poll();
-			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 		return messages;
 	}
@@ -144,7 +149,7 @@ public class WebConnector extends DefaultConnector<WebConfigDetails, WebPlugin> 
 				e.printStackTrace();
 			}
 		} else {
-			if (!stompEnabled) {
+			if (!stompEnabled && environment.keyEntry(PROPERTIES.POSTMAN_CHAT_WEB_QUEUE).asBoolean()) {
 				LOGGER.debug("sendReply to " + contactIdWeb);
 				RBlockingQueue<String> messageQueue = redisson.getBlockingQueue(WEB_USER_MESSAGE_STR + contactIdWeb);
 				messageQueue.add(JsonUtil.toJson(outboxMessage));
