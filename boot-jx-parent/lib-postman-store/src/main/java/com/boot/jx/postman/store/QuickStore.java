@@ -3,6 +3,7 @@ package com.boot.jx.postman.store;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,11 +14,10 @@ import org.springframework.stereotype.Component;
 import com.boot.jx.mongo.CommonMongoQueryBuilder;
 import com.boot.jx.mongo.CommonMongoTemplateAbstract;
 import com.boot.jx.postman.doc.QuickMedia;
-import com.mongodb.AggregationOptions;
-import com.mongodb.AggregationOptions.OutputMode;
 import com.mongodb.BasicDBObject;
-import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoCursor;
 
 @Component
 public class QuickStore extends CommonMongoTemplateAbstract {
@@ -36,19 +36,24 @@ public class QuickStore extends CommonMongoTemplateAbstract {
 
 	@SuppressWarnings("unchecked")
 	public <T extends QuickGalleryItem> List<T> groupByCategory(Class<T> clazz) {
-		List<DBObject> list = new ArrayList<DBObject>();
+		List<Document> list = new ArrayList<Document>();
 		// Equivalent to $project
 		DBObject projectFields = new BasicDBObject();
 		projectFields.put("_id", 0);
 		projectFields.put("category", "$_id");
-		DBObject project = new BasicDBObject("$project", projectFields);
+		Document project = new Document("$project", projectFields);
 		List<QuickMedia> other = new ArrayList<QuickMedia>();
-		list.add(Aggregation.group("category").count().as("count").toDBObject(Aggregation.DEFAULT_CONTEXT));
+		list.add(Aggregation.group("category").count().as("count").toDocument(Aggregation.DEFAULT_CONTEXT));
 		list.add(project);
 		try {
-			DBCollection col = mongoTemplate.getCollection(mongoTemplate.getCollectionName(clazz));
-			col.aggregate(list, AggregationOptions.builder().allowDiskUse(true).outputMode(OutputMode.CURSOR).build())
-					.forEachRemaining(doc -> other.add(new QuickMedia().from(doc)));
+			MongoCollection<Document> col = mongoTemplate.getCollection(mongoTemplate.getCollectionName(clazz));
+			MongoCursor<Document> cursor = col.aggregate(list).iterator();
+
+			while (cursor.hasNext()) {
+				Document doc = cursor.next();
+				other.add(new QuickMedia().from(doc));
+			}
+
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

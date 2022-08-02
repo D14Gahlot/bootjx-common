@@ -34,6 +34,7 @@ import com.boot.utils.CollectionUtil;
 import com.boot.utils.TimeUtils;
 import com.google.common.collect.Lists;
 import com.mongodb.WriteResult;
+import com.mongodb.client.result.UpdateResult;
 
 @Component
 public class MessageStore extends CommonMongoTemplateAbstract {
@@ -377,7 +378,7 @@ public class MessageStore extends CommonMongoTemplateAbstract {
 
 			String collectionName = getCollectionName(messageReport.contact().getContactType());
 
-			WriteResult result;
+			UpdateResult result;
 
 			if (multi) {
 				result = mongoTemplate.updateMulti(builder.getQuery(), builder.getUpdate(), MessageDoc.class,
@@ -387,8 +388,8 @@ public class MessageStore extends CommonMongoTemplateAbstract {
 						collectionName);
 			}
 
-			if (result.getN() > 1) {
-				builder.limit(result.getN());
+			if (result.isModifiedCountAvailable() && result.getModifiedCount() > 1) {
+				builder.limit(result.getModifiedCount());
 				List<MessageDoc> messsages = mongoTemplate.find(builder.getQuery(), MessageDoc.class, collectionName);
 				if (ArgUtil.is(messsages) && ArgUtil.is(messsages.get(0))) {
 					updateMessageReport(messageReport, messsages.get(0));
@@ -476,8 +477,9 @@ public class MessageStore extends CommonMongoTemplateAbstract {
 		mongoTemplate.updateMulti(builder.getQuery(), builder.getUpdate(), MessageHold.class);
 
 		CommonMongoQueryBuilder builder2 = new CommonMongoQueryBuilder();
-		builder2.where(Criteria.where("contactId").is(contactId).and("sessionId").is(inboxMessageOriginal.getSessionId())
-				.and("appType").is(appConfig.getAppType())).sortBy("timestamp");;
+		builder2.where(Criteria.where("contactId").is(contactId).and("sessionId")
+				.is(inboxMessageOriginal.getSessionId()).and("appType").is(appConfig.getAppType()))
+				.sortBy("timestamp");;
 		List<MessageHold> docs = mongoTemplate.findAllAndRemove(builder2.getQuery(), MessageHold.class);
 		List<InboxMessage> x = docs.stream().map(d -> d.getInboxMessage()).collect(Collectors.toList());
 		return x;

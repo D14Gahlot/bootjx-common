@@ -6,6 +6,7 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.bson.Document;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -16,13 +17,10 @@ import com.boot.jx.mongo.CommonMongoSource;
 import com.boot.jx.mongo.MongoTemplateCommonImpl;
 import com.boot.jx.postman.doc.QuickMedia;
 import com.boot.utils.JsonUtil;
-import com.mongodb.AggregationOptions;
-import com.mongodb.AggregationOutput;
-import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
-import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
-import com.mongodb.AggregationOptions.OutputMode;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoCursor;
 
 @SpringBootTest
 @TestPropertySource(locations = "classpath:application-test.properties")
@@ -61,7 +59,7 @@ public class ChatStoreTest { // Noncompliant
 	public void testLanguageEnumFromNumber() {
 		initMongo();
 
-		List<DBObject> list = new ArrayList<DBObject>();
+		List<Document> list = new ArrayList<Document>();
 //		list.add(Aggregation.match(Criteria.where("bulkSessionId").is((currentBatchJob.getJobId()))) // Match
 //				.toDBObject(Aggregation.DEFAULT_CONTEXT));
 
@@ -69,19 +67,23 @@ public class ChatStoreTest { // Noncompliant
 		DBObject projectFields = new BasicDBObject();
 		projectFields.put("_id", 0);
 		projectFields.put("category", "$_id");
-		DBObject project = new BasicDBObject("$project", projectFields);
+		Document project = new Document("$project", projectFields);
 
 		List<QuickMedia> other = new ArrayList<QuickMedia>();
-		list.add(Aggregation.group("category").count().as("count").toDBObject(Aggregation.DEFAULT_CONTEXT));
+		list.add(Aggregation.group("category").count().as("count").toDocument(Aggregation.DEFAULT_CONTEXT));
 		list.add(project);
 
 		try {
-			DBCollection col = mongoTemplate.getCollection(mongoTemplate.getCollectionName(QuickMedia.class));
-			
-			col.aggregate(list, AggregationOptions.builder().allowDiskUse(true).outputMode(OutputMode.CURSOR).build())
-			.forEachRemaining(doc -> other.add(new QuickMedia().from(doc)));
-			
-			
+			MongoCollection<Document> col = mongoTemplate
+					.getCollection(mongoTemplate.getCollectionName(QuickMedia.class));
+
+			MongoCursor<Document> cursor = col.aggregate(list).iterator();
+
+			while (cursor.hasNext()) {
+				Document doc = cursor.next();
+				other.add(new QuickMedia().from(doc));
+			}
+
 //			AggregationOutput output = col.aggregate(list);
 //			// .forEachRemaining(doc -> other.add(new QuickMedia().from(doc)));
 //

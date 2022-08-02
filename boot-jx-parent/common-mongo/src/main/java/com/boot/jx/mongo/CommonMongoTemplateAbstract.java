@@ -23,7 +23,8 @@ import com.boot.jx.mongo.CommonDocInterfaces.TimeStampIndex.CreatedTimeStampInde
 import com.boot.jx.mongo.CommonDocInterfaces.TimeStampIndex.UpdatedTimeStampIndexSupport;
 import com.boot.jx.mongo.CommonMongoQueryBuilder.DocQueryBuilder;
 import com.boot.utils.ArgUtil;
-import com.mongodb.WriteResult;
+import com.mongodb.client.result.DeleteResult;
+import com.mongodb.client.result.UpdateResult;
 
 public class CommonMongoTemplateAbstract extends CommonMongoTemplateDefault {
 
@@ -128,8 +129,8 @@ public class CommonMongoTemplateAbstract extends CommonMongoTemplateDefault {
 		return newVersion;
 	}
 
-	public WriteResult updateFirst(MongoQueryBuilder<?> builder) {
-		WriteResult ret = null;
+	public UpdateResult updateFirst(MongoQueryBuilder<?> builder) {
+		UpdateResult ret = null;
 		if (ArgUtil.is(builder.getUpdate())) {
 			try {
 				builder.updatedStamp();
@@ -146,8 +147,8 @@ public class CommonMongoTemplateAbstract extends CommonMongoTemplateDefault {
 		return ret;
 	}
 
-	public WriteResult update(MongoQueryBuilder<?> builder) {
-		WriteResult ret = null;
+	public UpdateResult update(MongoQueryBuilder<?> builder) {
+		UpdateResult ret = null;
 		if (ArgUtil.is(builder.getUpdate())) {
 			try {
 				builder.updatedStamp();
@@ -171,8 +172,8 @@ public class CommonMongoTemplateAbstract extends CommonMongoTemplateDefault {
 	 * @see MongoTemplate#upsert(Query,
 	 *      org.springframework.data.mongodb.core.query.Update, Class, String)
 	 */
-	public WriteResult upsert(MongoQueryBuilder<?> builder) {
-		WriteResult ret = null;
+	public UpdateResult upsert(MongoQueryBuilder<?> builder) {
+		UpdateResult ret = null;
 		if (ArgUtil.is(builder.getUpdate())) {
 			try {
 				builder.updatedStamp();
@@ -186,7 +187,7 @@ public class CommonMongoTemplateAbstract extends CommonMongoTemplateDefault {
 		return ret;
 	}
 
-	public WriteResult trash(Object object) {
+	public DeleteResult trash(Object object) {
 		if (object instanceof AuditCreateEntity && ArgUtil.is(auditDetailProvider)) {
 			String collectionName = "ZTRASH_" + mongoTemplate.getCollectionName(object.getClass());
 			auditDetailProvider.auditCreate((AuditCreateEntity) object);
@@ -252,6 +253,10 @@ public class CommonMongoTemplateAbstract extends CommonMongoTemplateDefault {
 	public <T> T removeAndAudit(String id, Class<T> clazz) {
 		T x = getCommonMongoTemplate().findById(id, clazz);
 		return removeAndAudit(x);
+	}
+
+	public <T> List<T> distinctAsList(String collectionName, String key, Class<T> clazz) {
+		return MongoUtils.distinct(getCollection(collectionName), key, clazz);
 	}
 
 }

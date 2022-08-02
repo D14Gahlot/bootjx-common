@@ -28,7 +28,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 import org.apache.commons.beanutils.PropertyUtils;
@@ -45,28 +44,17 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Component;
 
-import com.boot.jx.AppContextUtil;
-import com.boot.jx.admin.dto.ContactTypeCountDto;
-import com.boot.jx.admin.dto.ContactTypeSummaryDto;
 import com.boot.jx.admin.dto.DashBoardRequestDto;
 import com.boot.jx.admin.dto.DashBoardResponseDto;
 import com.boot.jx.admin.dto.LeadMessanger;
 import com.boot.jx.admin.dto.PeakLoadDto;
-import com.boot.jx.admin.dto.SummaryDocDto;
 import com.boot.jx.admin.dto.TagDocumentDto;
 import com.boot.jx.admin.dto.TagDocumentLst;
-import com.boot.jx.dict.ContactType;
+import com.boot.jx.mongo.MongoUtils;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.model.TagDocument;
 import com.boot.utils.ArgUtil;
-import com.boot.utils.DateUtil;
-import com.boot.utils.JsonUtil;
-import com.mongodb.AggregationOptions;
-import com.mongodb.AggregationOptions.OutputMode;
-import com.mongodb.Cursor;
-import com.mongodb.DBCollection;
-import com.mongodb.DBObject;
 
 @Component
 public class AdminDashBoardManager {
@@ -794,8 +782,8 @@ public class AdminDashBoardManager {
 		query.addCriteria(Criteria.where("timestamp").gt(dateRange1).lt(dateRange2));
 		query.addCriteria(Criteria.where("type").in("O", "I"));
 
-		List<MessageDoc> distinctIdList = mongoTemplate.getCollection(contactType.toString()).distinct("contactId",
-				query.getQueryObject());
+		List<MessageDoc> distinctIdList = MongoUtils.distinct(mongoTemplate.getCollection(contactType.toString()),
+				"contactId", MessageDoc.class);
 		return distinctIdList;
 	}
 
@@ -1100,5 +1088,4 @@ public class AdminDashBoardManager {
 		return list;
 	}
 
-	
 }

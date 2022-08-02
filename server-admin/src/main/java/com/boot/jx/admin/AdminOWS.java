@@ -7,7 +7,6 @@ import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.servlet.DelegatingFilterProxyRegistrationBean;
 import org.springframework.boot.web.servlet.ServletComponentScan;
-import org.springframework.boot.web.support.SpringBootServletInitializer;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -22,7 +21,7 @@ import org.springframework.web.context.request.RequestContextListener;
 @ComponentScan("com.boot.jx")
 @EnableAsync(proxyTargetClass = true)
 @EnableCaching
-public class AdminOWS extends SpringBootServletInitializer {
+public class AdminOWS {
 
 	/**
 	 * The main method.
@@ -55,7 +54,7 @@ public class AdminOWS extends SpringBootServletInitializer {
 	public DelegatingFilterProxyRegistrationBean securityFilterChainRegistration(
 			SecurityProperties securityProperties) {
 		DelegatingFilterProxyRegistrationBean registration = new DelegatingFilterProxyRegistrationBean("checkSession");
-		registration.setOrder(securityProperties.getFilterOrder());
+		registration.setOrder(securityProperties.getFilter().getOrder());
 		return registration;
 	}
 

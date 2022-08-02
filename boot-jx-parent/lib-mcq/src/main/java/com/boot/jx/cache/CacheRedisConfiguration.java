@@ -72,7 +72,7 @@ public class CacheRedisConfiguration
 			SentinelServersConfig sentinelServersConfig = config.useSentinelServers();
 			sentinelServersConfig.setMasterName(redisProperties.getSentinel().getMaster());
 			redisProperties.getSentinel().getNodes();
-			sentinelServersConfig.addSentinelAddress(redisProperties.getSentinel().getNodes().split(","));
+			sentinelServersConfig.addSentinelAddress(CollectionUtil.asArray(redisProperties.getSentinel().getNodes()));
 			sentinelServersConfig.setDatabase(redisProperties.getDatabase());
 			if (redisProperties.getPassword() != null) {
 				sentinelServersConfig.setPassword(redisProperties.getPassword());
