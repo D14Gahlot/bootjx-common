@@ -52,11 +52,15 @@ public class CacheBox<T> implements ICacheBox<T> {
 	private RLocalCachedMap<String, T> cache = null;
 	private BlockingHashMap<String, T> locker = null;
 
+	private BlockingHashMap<String, T> locker() {
+		if (this.locker == null) {
+			this.locker = new BlockingHashMap<String, T>();
+		}
+		return this.locker;
+	}
+
 	public RLocalCachedMap<String, T> map() {
 		if (redisson != null) {
-			if (locker == null) {
-				locker = new BlockingHashMap<String, T>();
-			}
 			String localCacheName = String.format("%s-%s-%s-%s.%s", AppParam.APP_ENV.getValue(),
 					AppParam.APP_VENV.getValue(), (ArgUtil.isEmpty(getCahceName()) ? getClazzName() : getCahceName()),
 					CacheRedisConfiguration.CODEC_VERSION, version());
@@ -230,7 +234,7 @@ public class CacheBox<T> implements ICacheBox<T> {
 		T item = this.map().get(key);
 		long waiting = unit.toSeconds(timeout);
 		while (item == null && waiting > 0) {
-			item = locker.take(key, 1, unit);
+			item = locker().take(key, 1, unit);
 			item = this.map().get(key);
 			waiting--;
 		}

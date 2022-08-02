@@ -34,7 +34,7 @@ public abstract class ATaskLimiter implements ITaskLimiter {
 	public static final int POLL_INTERVAL = 1 * 1000;
 
 	LocalCachedMapOptions<String, TunnelMessage<TunnelTask>> localCacheOptions = LocalCachedMapOptions
-			.<String, TunnelMessage<TunnelTask>>defaults().evictionPolicy(EvictionPolicy.NONE).cacheSize(5000)
+			.<String, TunnelMessage<TunnelTask>>defaults().evictionPolicy(EvictionPolicy.NONE).cacheSize(10000)
 			.reconnectionStrategy(ReconnectionStrategy.NONE).syncStrategy(SyncStrategy.INVALIDATE).timeToLive(10000)
 			.maxIdle(10000);
 

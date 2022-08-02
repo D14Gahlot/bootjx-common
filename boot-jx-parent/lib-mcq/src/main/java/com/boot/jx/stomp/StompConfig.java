@@ -9,12 +9,12 @@ import org.redisson.api.LocalCachedMapOptions.SyncStrategy;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import com.boot.jx.cache.CacheBox;
+import com.boot.jx.cache.MultiTenantCacheBox;
 
 @Configuration
 public class StompConfig {
 
-	public class CommonStompSessionCacheBox<T> extends CacheBox<T> {
+	public class CommonStompSessionCacheBox<T> extends MultiTenantCacheBox<T> {
 
 		LocalCachedMapOptions<String, T> localCacheOptions = LocalCachedMapOptions.<String, T>defaults()
 				.evictionPolicy(EvictionPolicy.LRU).cacheSize(0).reconnectionStrategy(ReconnectionStrategy.CLEAR)
