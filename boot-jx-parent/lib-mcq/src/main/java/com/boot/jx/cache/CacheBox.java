@@ -125,6 +125,9 @@ public class CacheBox<T> implements ICacheBox<T> {
 	@Override
 	public T get(String key) {
 		try {
+			if (key == null) {
+				return null;
+			}
 			return this.map().get(key);
 		} catch (Exception e) {
 
@@ -207,7 +210,7 @@ public class CacheBox<T> implements ICacheBox<T> {
 	@Override
 	public long fastRemove(String... keys) {
 		try {
-			if (keys.length == 0) {
+			if (keys.length == 0 || keys[0] == null) {
 				return 0L;
 			}
 			return this.map().fastRemove(keys);
@@ -226,6 +229,9 @@ public class CacheBox<T> implements ICacheBox<T> {
 	@Override
 	public boolean fastPut(String key, T value) {
 		try {
+			if (key == null || value == null) {
+				return false;
+			}
 			return this.map().fastPut(key, value);
 		} catch (Exception e) {
 			LOGGER.error("REDIS_FAST_SAVE_EXCEPTION KEY:" + key + " = " + JsonUtil.toJson(value), e);
