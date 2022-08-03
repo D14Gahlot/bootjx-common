@@ -26,7 +26,7 @@ import com.boot.utils.Constants;
 @ConditionalOnProperty("app.stomp")
 public class StompController {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(StompTunnelSessionManager.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(StompController.class);
 
 	@Autowired
 	StompTunnelSessionManager stompTunnelSessionManager;
