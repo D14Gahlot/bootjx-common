@@ -32,6 +32,7 @@ public class StompHttpHandshakeInterceptor implements HandshakeInterceptor {
 				attributes.put(AppConstants.SESSION_ID_XKEY, xSessionId);
 				attributes.put(AppConstants.SESSION_JID_XKEY, jSessionId);
 				attributes.put(AppConstants.SESSION_UID_XKEY, uSessionId);
+				attributes.put(AppConstants.SESSION_TNT_XKEY, AppContextUtil.getTenant());
 			}
 		}
 		return true;

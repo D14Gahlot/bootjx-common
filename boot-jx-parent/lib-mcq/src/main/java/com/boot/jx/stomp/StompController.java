@@ -16,11 +16,15 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.boot.jx.AppConstants;
+import com.boot.jx.AppContextUtil;
 import com.boot.jx.http.ApiRequest;
+import com.boot.jx.scope.tnt.TenantContextHolder;
+import com.boot.jx.scope.tnt.Tenants.TenantResolver;
 import com.boot.jx.stomp.StompConfig.StompSession;
 import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.Constants;
+import com.boot.utils.StringUtils;
 
 @Controller
 @ConditionalOnProperty("app.stomp")
@@ -34,10 +38,22 @@ public class StompController {
 	@Autowired
 	StompTunnelService stompTunnelService;
 
+	@Autowired(required = false)
+	TenantResolver tenantResolver;
+
 	@ApiRequest(session = true)
-	@SubscribeMapping("/stomp/tunnel/meta/{xSessionId}/{jSessionId}")
-	public Map<String, Object> meta(SimpMessageHeaderAccessor headerAccessor, @DestinationVariable String xSessionId,
-			@DestinationVariable String jSessionId) {
+	@SubscribeMapping("/stomp/tunnel/meta/{tnt}/{xSessionId}/{jSessionId}")
+	public Map<String, Object> meta(SimpMessageHeaderAccessor headerAccessor, @DestinationVariable String tnt,
+			@DestinationVariable String xSessionId, @DestinationVariable String jSessionId) {
+
+		if (ArgUtil.is(tenantResolver)) {
+			tnt = tenantResolver.resolve(tnt);
+		}
+
+		if (!StringUtils.isEmpty(tnt)) {
+			TenantContextHolder.setCurrent(tnt, null);
+		}
+
 		Map<String, Object> map = new HashMap<String, Object>();
 
 		if (!ArgUtil.is(xSessionId) && !ArgUtil.is(jSessionId)) {
@@ -74,15 +90,28 @@ public class StompController {
 	}
 
 	@ApiRequest(session = true)
+	@SubscribeMapping("/stomp/tunnel/meta/{xSessionId}/{jSessionId}")
+	public Map<String, Object> meta(SimpMessageHeaderAccessor headerAccessor, @DestinationVariable String xSessionId,
+			@DestinationVariable String jSessionId) {
+
+		String tnt = ArgUtil.parseAsString(headerAccessor.getSessionAttributes().get(AppConstants.SESSION_TNT_XKEY));
+
+		return meta(headerAccessor, tnt, xSessionId, jSessionId);
+	}
+
+	@ApiRequest(session = true)
 	@SubscribeMapping("/stomp/tunnel/meta")
 	public Map<String, Object> meta(SimpMessageHeaderAccessor headerAccessor) {
+
+		String tnt = ArgUtil.parseAsString(headerAccessor.getSessionAttributes().get(AppConstants.SESSION_TNT_XKEY));
+
 		String xSessionId = ArgUtil.parseAsString(
 				headerAccessor.getSessionAttributes().get(AppConstants.SESSION_ID_XKEY), Constants.BLANK);
 
 		String jSessionId = ArgUtil
 				.parseAsString(headerAccessor.getSessionAttributes().get(AppConstants.SESSION_JID_XKEY));
 
-		return meta(headerAccessor, xSessionId, jSessionId);
+		return meta(headerAccessor, tnt, xSessionId, jSessionId);
 	}
 
 	@MessageMapping("/ping")

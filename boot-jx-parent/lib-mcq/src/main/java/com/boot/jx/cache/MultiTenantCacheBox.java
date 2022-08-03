@@ -24,7 +24,7 @@ public class MultiTenantCacheBox<T> extends CacheBox<T> {
 	private static Logger LOGGER = LoggerService.getLogger(CacheBox.class);
 
 	LocalCachedMapOptions<String, T> localCacheOptions = LocalCachedMapOptions.<String, T>defaults()
-			.evictionPolicy(EvictionPolicy.NONE).cacheSize(1000).reconnectionStrategy(ReconnectionStrategy.NONE)
+			.evictionPolicy(EvictionPolicy.NONE).cacheSize(1000).reconnectionStrategy(ReconnectionStrategy.CLEAR)
 			.syncStrategy(SyncStrategy.INVALIDATE).timeToLive(10000).maxIdle(10000);
 
 	RemovalListener<String, RLocalCachedMap<String, T>> removalListener = new RemovalListener<String, RLocalCachedMap<String, T>>() {
