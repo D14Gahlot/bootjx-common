@@ -38,6 +38,7 @@ public class StompConfig {
 		String prefix;
 		String[] tags;
 		String tenantToken;
+		String tenant;
 
 		public String getPrefix() {
 			return prefix;
@@ -79,6 +80,14 @@ public class StompConfig {
 			this.jsessionId = jsessionId;
 		}
 
+		public String getTenant() {
+			return tenant;
+		}
+
+		public void setTenant(String tenant) {
+			this.tenant = tenant;
+		}
+
 	}
 
 	public class StompSessionIndexes extends CommonStompSessionCacheBox<String> {
@@ -92,7 +101,7 @@ public class StompConfig {
 		 * Instantiates a new logged in users.
 		 */
 		public StompSessionDetails(String name) {
-			super(StompSessionIndexes.class.getName() + "#" + name + "V4", 4);
+			super(StompSessionIndexes.class.getName() + "#" + name + "V5", 5);
 		}
 
 	}

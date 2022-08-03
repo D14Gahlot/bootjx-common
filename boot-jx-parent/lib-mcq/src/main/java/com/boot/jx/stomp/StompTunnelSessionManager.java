@@ -142,6 +142,7 @@ public class StompTunnelSessionManager {
 			}
 			stompSession.setTags(etags);
 		}
+		stompSession.setTenant(AppContextUtil.getTenant());
 		stompSession.setTenantToken(createTagId(AppContextUtil.getTenant()));
 
 		http2stompUIdMap.putSafe(xSessionId, stompUID);
