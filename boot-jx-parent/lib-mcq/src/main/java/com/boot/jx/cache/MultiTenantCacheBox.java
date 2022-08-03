@@ -38,8 +38,8 @@ public class MultiTenantCacheBox<T> extends CacheBox<T> {
 		}
 	};
 
-	private Cache<String, RLocalCachedMap<String, T>> perTenant = CacheBuilder.newBuilder().maximumSize(10000)
-			.expireAfterWrite(30, TimeUnit.MINUTES).removalListener(removalListener).build();
+	private Cache<String, RLocalCachedMap<String, T>> perTenant = CacheBuilder.newBuilder().maximumSize(1000)
+			.removalListener(removalListener).build();
 
 	public MultiTenantCacheBox(String name, int version) {
 		super(name, version);

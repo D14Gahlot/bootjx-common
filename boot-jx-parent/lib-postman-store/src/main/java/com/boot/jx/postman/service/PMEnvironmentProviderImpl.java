@@ -35,7 +35,7 @@ import com.google.common.cache.CacheBuilder;
 @Component
 public class PMEnvironmentProviderImpl implements PMEnvironmentProvider, AppSharedConfig {
 
-	private Cache<String, PMConfigurationDoc> localConfigMap = CacheBuilder.newBuilder().maximumSize(10000)
+	private Cache<String, PMConfigurationDoc> localConfigMap = CacheBuilder.newBuilder().maximumSize(1000)
 			.expireAfterWrite(1, TimeUnit.HOURS).build();
 
 	// private Map<String, PMConfigurationDoc> localConfigMap = new HashMap<String,
