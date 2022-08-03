@@ -718,7 +718,7 @@ public class CommonHttpRequest extends ACommonHttpRequest {
 		}
 
 		if (apiRequestConfig != null) {
-			return apiRequestConfig.from(req, reqType);
+			return ArgUtil.nonEmpty(apiRequestConfig.from(req, reqType), reqType);
 		}
 
 		return reqType;
