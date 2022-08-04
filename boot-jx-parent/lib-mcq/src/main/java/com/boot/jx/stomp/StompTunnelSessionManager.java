@@ -97,6 +97,9 @@ public class StompTunnelSessionManager {
 		ws2xSessionMap.fastRemove(wsSessionID);
 		boolean isExists = false;
 
+		//these are very coslty queries ignore no need to clear
+		//find alternate solution
+		/**
 		if (ArgUtil.is(xSessionId)) {
 			for (Entry<String, String> entry : ws2xSessionMap.readAllEntrySet()) {
 				if (entry.getValue().equals(xSessionId)) {
@@ -120,6 +123,7 @@ public class StompTunnelSessionManager {
 				http2GSessionIdMap.fastRemove(jSessionId);
 			}
 		}
+		**/
 	}
 
 	/**
