@@ -134,7 +134,6 @@ public class InBoundControllerWeb {
 		model.addAttribute("VISIT_ID", ArgUtil.parseAsString(commonHttpRequest.get("visitId"), "NONE"));
 
 		String channelId = commonHttpRequest.get("channelId");
-
 		if (ArgUtil.is(channelId)) {
 			model.addAttribute("WEB_CHANNEL_ID", channelId);
 			ChannelConfig channelConfig = pmEnvironment.config().channel(channelId);
@@ -143,9 +142,7 @@ public class InBoundControllerWeb {
 				model.addAttribute("WEB_CHANNEL_STYLESHEET", channelConfig.getWeb().getStylesheet());
 			}
 		}
-
 		visitorActivityStore.save(new VisitorActivityDoc().activity("WEBCHAT_PAGE"));
-
 		return "app-customer";
 	}
 
