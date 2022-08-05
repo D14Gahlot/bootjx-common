@@ -99,31 +99,29 @@ public class StompTunnelSessionManager {
 
 		//these are very coslty queries ignore no need to clear
 		//find alternate solution
-		/**
-		if (ArgUtil.is(xSessionId)) {
-			for (Entry<String, String> entry : ws2xSessionMap.readAllEntrySet()) {
-				if (entry.getValue().equals(xSessionId)) {
-					isExists = true;
-				}
-			}
-			if (!isExists) {
-				http2GSessionIdMap.fastRemove(xSessionId);
-			}
-		}
+//		if (ArgUtil.is(xSessionId)) {
+//			for (Entry<String, String> entry : ws2xSessionMap.readAllEntrySet()) {
+//				if (entry.getValue().equals(xSessionId)) {
+//					isExists = true;
+//				}
+//			}
+//			if (!isExists) {
+//				http2GSessionIdMap.fastRemove(xSessionId);
+//			}
+//		}
 
 		if (ArgUtil.is(jSessionId)) {
 			ws2jSessionMap.fastRemove(wsSessionID);
-			isExists = false;
-			for (Entry<String, String> entry : ws2jSessionMap.readAllEntrySet()) {
-				if (entry.getValue().equals(jSessionId)) {
-					isExists = true;
-				}
-			}
-			if (!isExists) {
-				http2GSessionIdMap.fastRemove(jSessionId);
-			}
+//			isExists = false;
+//			for (Entry<String, String> entry : ws2jSessionMap.readAllEntrySet()) {
+//				if (entry.getValue().equals(jSessionId)) {
+//					isExists = true;
+//				}
+//			}
+//			if (!isExists) {
+//				http2GSessionIdMap.fastRemove(jSessionId);
+//			}
 		}
-		**/
 	}
 
 	/**

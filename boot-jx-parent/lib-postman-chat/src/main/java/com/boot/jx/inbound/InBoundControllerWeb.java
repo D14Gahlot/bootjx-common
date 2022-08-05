@@ -24,6 +24,7 @@ import com.boot.jx.AppConfig;
 import com.boot.jx.AppContextUtil;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.api.ApiResponseUtil;
+import com.boot.jx.chat.ChatSessionFactory;
 import com.boot.jx.chat.ChatStatusService;
 import com.boot.jx.connectors.WebConnector;
 import com.boot.jx.dict.ContactType;
@@ -44,7 +45,9 @@ import com.boot.jx.postman.dto.ChatMessageDTO;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.MessageBoxEvent;
 import com.boot.jx.postman.model.OutboxMessage;
+import com.boot.jx.postman.model.MessageDefinitions.Contactable;
 import com.boot.jx.postman.plugin.ChannelConfig;
+import com.boot.jx.postman.query.ChatContactQuery;
 import com.boot.jx.postman.service.ChatDTOUtil;
 import com.boot.jx.postman.store.MessageContext;
 import com.boot.jx.postman.store.MessageStore;
@@ -75,6 +78,9 @@ public class InBoundControllerWeb {
 
 	@Autowired
 	private SessionStore sessionStore;
+
+	@Autowired
+	private ChatSessionFactory chatSessionFactory;
 
 	@Autowired
 	private MessageStore messageStore;
@@ -194,27 +200,59 @@ public class InBoundControllerWeb {
 
 	@ApiRequest(session = true)
 	@ResponseBody
-	@RequestMapping(value = "/ext/plugin/outbound/web/auth/v2", method = RequestMethod.GET)
+	@RequestMapping(value = "/ext/plugin/outbound/web/auth/v2", method = { RequestMethod.GET, RequestMethod.POST })
 	public ApiResponse<ChatMessageDTO, Object> onAuthV2(@RequestParam(required = false) String user,
-			@RequestParam(required = false) String number, @RequestParam(required = false) String csid,
-			@RequestParam(required = false) String channelId, @RequestParam(required = false) String channelKey)
-			throws InterruptedException {
+			@RequestParam(required = false) String number, @RequestParam(required = false) String browserfp,
+			@RequestParam(required = false) String channelId, @RequestParam(required = false) String channelKey,
+			@RequestParam(required = false) String userProfileId, // Id Set by DomainService
+			@RequestParam(required = false) String userProfileToken, // phone Set by DomainService
+			@RequestParam(required = false) String userName, // phone Set by DomainService
+			@RequestParam(required = false) String userEmail, // email Set by DomainService
+			@RequestParam(required = false) String userPhone // phone Set by DomainService,
+	) throws InterruptedException {
 
-		String webSessionIdKey = StringUtils.sanitize(WEB_SESSION_ID + "_" + channelId);
-
-		String webSessionId = commonHttpRequest.get(webSessionIdKey);
-		csid = ArgUtil.nonEmpty(csid, number);
+		String webSessionId = null;
+		String csid = null;
+		String contactId = null;
+		ChatSessionDoc session = null;
 		ChannelConfig channelConfig = pmEnvironment.config().channel(channelId);
-		String contactId = PostManUtil.CONTACT_ID(channelConfig, csid);
+		String webSessionIdKey = StringUtils.sanitize(WEB_SESSION_ID + "_" + channelId);
+		InboxMessage msg = connector.createInboxMessage(channelConfig);
+
+		if (ArgUtil.is(userProfileId)) {
+			csid = "u" + userProfileId;
+			msg.contact().setCsid(csid);
+			contactId = PostManUtil.CONTACT_ID(channelConfig, csid);
+			session = chatSessionFactory.getChatSessionByContactId(contactId, null);
+		} else {
+			webSessionId = commonHttpRequest.get(webSessionIdKey);
+			csid = "g" + ArgUtil.nonEmpty(browserfp, number);
+			msg.contact().setCsid(csid);
+			contactId = PostManUtil.CONTACT_ID(channelConfig, csid);
+			if (ArgUtil.is(webSessionId)) {
+				session = sessionStore.getValidSession(webSessionId);
+			}
+		}
+
+		Contactable contact = PostManUtil.getContactMeta(msg.contact());
+		contact.setName(userName);
+		contact.setEmail(userEmail);
+		contact.setPhone(userPhone);
+		ChatContactQuery chatContactQuery = new ChatContactQuery(contact.getContactId());
+		chatContactQuery.update(contact);
+		chatContactQuery.updateCreatedStamp();
+		if (ArgUtil.is(userProfileId)) {
+			chatContactQuery.setProfileId(userProfileId);
+		}
+		chatContactQuery.setProfileToken(userProfileToken);
+		sessionStore.upsert(chatContactQuery);
+
 		String contactIdWeb = AppContextUtil.getTenant() + "/" + contactId;
 
-		ChatSessionDoc session = null;
-		if (ArgUtil.is(webSessionId)) {
-			session = sessionStore.getValidSession(webSessionId);
-		}
 		List<ChatMessageDTO> msgs = new ArrayList<ChatMessageDTO>();
 		if (ArgUtil.is(session)) {
-			List<MessageDoc> messages = messageStore.findBySessionId(webSessionId, ContactType.WEBSITE.toString());
+			List<MessageDoc> messages = messageStore.findBySessionId(session.getSessionId(),
+					ContactType.WEBSITE.toString());
 			for (MessageDoc messageDoc : messages) {
 				ChatMessageDTO outboxMessage = ChatDTOUtil.getChatMessageDTO(messageDoc);
 				if (ArgUtil.isEqual(messageDoc.getType(), "I", "O")) {
@@ -222,6 +260,11 @@ public class InBoundControllerWeb {
 				}
 			}
 		}
+
+		MapModel meta = MapModel.createInstance();
+		meta.put("webSessionIdKey", webSessionIdKey);
+		meta.put("webSessionId", webSessionId);
+		meta.put("csid", csid);
 
 		StompSession stomp = null;
 		if (ArgUtil.is(channelConfig)) {
@@ -238,19 +281,18 @@ public class InBoundControllerWeb {
 
 		VisitorActivityDoc visit = new VisitorActivityDoc().activity("WEBCHAT_AUTH").channelId(channelId)
 				.contactId(contactId);
-
 		if (stomp != null) {
 			visit.meta().put("jsessionId", stomp.getJsessionId());
 			visit.meta().put("xsessionId", stomp.getXsessionId());
 		}
-
 		visitorActivityStore.save(visit);
 
 		// In-Cognito Window does not support Cookies that is why it So important to
 		// send these values to UI in advance for mapping,
 		// because if cookies cant be set, JSESSION cannot be created and be relied upon
 		// to store these values
-		return ApiResponse.buildResults(msgs, stomp);
+		meta.put("stomp", stomp);
+		return ApiResponse.buildResults(msgs, meta.toMap());
 	}
 
 	private ApiResponse<InboxMessage, Object> inboundMessageBoxEventMethod(String channelId, String channelKey,

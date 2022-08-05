@@ -52,8 +52,10 @@ public class ChatSessionFactory {
 
 		} else {
 			ChatContactDoc chatContactDoc = sessionStore.getContact(contactId);
-			String sessionId = chatContactDoc.getSessionId();
-			chatSessionDoc = sessionStore.getSession(sessionId);
+			if (ArgUtil.is(chatContactDoc)) {
+				String sessionId = chatContactDoc.getSessionId();
+				chatSessionDoc = sessionStore.getSession(sessionId);
+			}
 		}
 
 		if (sessionStore.isSessionValid(chatSessionDoc)) {

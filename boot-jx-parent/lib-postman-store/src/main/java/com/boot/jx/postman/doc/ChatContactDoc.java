@@ -76,6 +76,7 @@ public class ChatContactDoc implements Serializable, Contactable, AuditCreateEnt
 
 	@Indexed
 	private String profileId;
+	private String profileToken;
 
 	private Long createdStamp;
 	private String createdBy;
@@ -331,6 +332,14 @@ public class ChatContactDoc implements Serializable, Contactable, AuditCreateEnt
 
 	public void setPhoneVerified(Boolean phoneVerified) {
 		this.phoneVerified = phoneVerified;
+	}
+
+	public String getProfileToken() {
+		return profileToken;
+	}
+
+	public void setProfileToken(String profileToken) {
+		this.profileToken = profileToken;
 	}
 
 }
