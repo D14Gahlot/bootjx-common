@@ -300,11 +300,11 @@ public class WA360Client {
 		req.put(OutBoundWrapperPaths.MESSAGE_TYPE, "interactive");
 
 		req.put(new JsonPath("/interactive/type"), "list");
-
 		req.put(OutBoundWrapperPaths.INTERACTIVE_HEADER_TYPE, "text");
 		req.put(OutBoundWrapperPaths.INTERACTIVE_HEADER_TEXT,
 				ArgUtil.parseAsString(outboxMessage.getSubject(), Constants.BLANK));
-		req.put(OutBoundWrapperPaths.INTERACTIVE_BODY_TEXT, outboxMessage.getMessage());
+		req.put(OutBoundWrapperPaths.INTERACTIVE_BODY_TEXT,
+				ArgUtil.nonEmpty(outboxMessage.getMessage(), "---"));
 		req.put(OutBoundWrapperPaths.INTERACTIVE_FOOTER_TEXT,
 				ArgUtil.parseAsString(outboxMessage.getFooter(), Constants.BLANK));
 		req.put(OutBoundWrapperPaths.INTERACTIVE_ACTION_BUTTON, options.getString("list_option_title", "Menu"));
@@ -381,7 +381,7 @@ public class WA360Client {
 			intr.put(OutBoundWrapperPaths.MESSAGE_TEXT, ArgUtil.nonEmpty(outboxMessage.getSubject(), Constants.BLANK));
 		}
 
-		req.put(OutBoundWrapperPaths.INTERACTIVE_BODY_TEXT, outboxMessage.getMessage());
+		req.put(OutBoundWrapperPaths.INTERACTIVE_BODY_TEXT, ArgUtil.nonEmpty(outboxMessage.getMessage(), "---"));
 		req.put(OutBoundWrapperPaths.INTERACTIVE_FOOTER_TEXT,
 				ArgUtil.parseAsString(outboxMessage.getFooter(), Constants.BLANK));
 		req.put(OutBoundWrapperPaths.INTERACTIVE_ACTION_BUTTON, "menu");
@@ -429,7 +429,7 @@ public class WA360Client {
 				if ("unknown contact".equals(errorDetails)) {
 					error.field("to").code(PostManException.ErrorCode.CONTACT_NOTFOUND);
 				}
-			} else if("471".equals(errorCode)) {
+			} else if ("471".equals(errorCode)) {
 				error.setDescriptionKey("File or resource not found");
 				error.code(PostManException.ErrorCode.MESSAGE_LIMIT_EXCEEDED);
 			}

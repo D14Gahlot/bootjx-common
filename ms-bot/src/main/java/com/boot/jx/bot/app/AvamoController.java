@@ -37,7 +37,6 @@ public class AvamoController extends CommonBotController {
 		outbox.setContact(mapModel.pathEntry("user.custom_properties").as(ContactMeta.class));
 		outbox.route().setSenderCode(mapModel.keyEntry("sender").asString());
 		context().setOutboxMessage(outbox);
-		System.out.println(mapModel.toJson());
 		reply(mapModel.pathEntry("message").asMap(), outbox);
 	}
 
