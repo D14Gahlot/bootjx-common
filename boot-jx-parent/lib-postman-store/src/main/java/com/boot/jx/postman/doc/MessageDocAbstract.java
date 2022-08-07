@@ -75,7 +75,7 @@ public abstract class MessageDocAbstract implements Serializable, Patchable<Mess
 	private String mediaReplyId;
 
 	private Map<String, Long> stamps;
-	public List<String> logs;
+	public List<Object> logs;
 	private Map<String, Object> replyTo;
 
 	@Indexed
@@ -220,17 +220,17 @@ public abstract class MessageDocAbstract implements Serializable, Patchable<Mess
 		return patch;
 	}
 
-	public List<String> getLogs() {
+	public List<Object> getLogs() {
 		return logs;
 	}
 
-	public void setLogs(List<String> logs) {
+	public void setLogs(List<Object> logs) {
 		this.logs = logs;
 	}
 
-	public List<String> logs() {
+	public List<Object> logs() {
 		if (this.logs == null) {
-			this.logs = new ArrayList<String>();
+			this.logs = new ArrayList<Object>();
 		}
 		return this.logs;
 	}

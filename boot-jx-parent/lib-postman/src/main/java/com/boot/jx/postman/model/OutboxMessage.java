@@ -23,7 +23,7 @@ public class OutboxMessage extends Message<OutboxMessage>
 	private MessageSession session;
 	private MessageRouter route;
 	private MessagePrompt prompt;
-	private List<String> logs;
+	private List<Object> logs;
 
 	public OutboxMessage(ContactType contactType) {
 		super(contactType);
@@ -57,17 +57,17 @@ public class OutboxMessage extends Message<OutboxMessage>
 		return this.session;
 	}
 
-	public List<String> getLogs() {
+	public List<Object> getLogs() {
 		return logs;
 	}
 
-	public void setLogs(List<String> logs) {
+	public void setLogs(List<Object> logs) {
 		this.logs = logs;
 	}
 
-	public List<String> logs() {
+	public List<Object> logs() {
 		if (this.logs == null) {
-			this.logs = new ArrayList<String>();
+			this.logs = new ArrayList<Object>();
 		}
 		return this.logs;
 	}

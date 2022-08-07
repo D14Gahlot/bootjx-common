@@ -216,13 +216,13 @@ public class MessageDefinitions {
 	}
 
 	public interface LogMessage extends SessionMessage, IMessageId {
-		public List<String> getLogs();
+		public List<Object> getLogs();
 
-		public void setLogs(List<String> logs);
+		public void setLogs(List<Object> logs);
 
-		public default List<String> logs() {
+		public default List<Object> logs() {
 			if (this.getLogs() == null) {
-				this.setLogs(new ArrayList<String>());
+				this.setLogs(new ArrayList<Object>());
 			}
 			return this.getLogs();
 		}

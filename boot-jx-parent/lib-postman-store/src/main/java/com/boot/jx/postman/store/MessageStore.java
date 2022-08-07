@@ -47,6 +47,9 @@ public class MessageStore extends CommonMongoTemplateAbstract {
 		// OTHER ERROS
 		INBOUND_FORWARD_ERROR,
 
+		// Events
+		ON_SESSION_START, ON_SESSION_ROUTE,
+
 		// ENDS
 		DEFAULT;
 	}
@@ -476,8 +479,9 @@ public class MessageStore extends CommonMongoTemplateAbstract {
 		mongoTemplate.updateMulti(builder.getQuery(), builder.getUpdate(), MessageHold.class);
 
 		CommonMongoQueryBuilder builder2 = new CommonMongoQueryBuilder();
-		builder2.where(Criteria.where("contactId").is(contactId).and("sessionId").is(inboxMessageOriginal.getSessionId())
-				.and("appType").is(appConfig.getAppType())).sortBy("timestamp");;
+		builder2.where(Criteria.where("contactId").is(contactId).and("sessionId")
+				.is(inboxMessageOriginal.getSessionId()).and("appType").is(appConfig.getAppType()))
+				.sortBy("timestamp");;
 		List<MessageHold> docs = mongoTemplate.findAllAndRemove(builder2.getQuery(), MessageHold.class);
 		List<InboxMessage> x = docs.stream().map(d -> d.getInboxMessage()).collect(Collectors.toList());
 		return x;

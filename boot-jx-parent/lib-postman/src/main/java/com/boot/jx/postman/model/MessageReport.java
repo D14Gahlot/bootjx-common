@@ -24,7 +24,7 @@ public class MessageReport implements LogMessage, Serializable {
 	protected long watermarkStamp;
 	private Status status = null;
 	private String reason = null;
-	private List<String> logs;
+	private List<Object> logs;
 	private List<MessageReportError> errors;
 
 	private MessageSession session;
@@ -181,11 +181,11 @@ public class MessageReport implements LogMessage, Serializable {
 		this.session = session;
 	}
 
-	public List<String> getLogs() {
+	public List<Object> getLogs() {
 		return logs;
 	}
 
-	public void setLogs(List<String> logs) {
+	public void setLogs(List<Object> logs) {
 		this.logs = logs;
 	}
 

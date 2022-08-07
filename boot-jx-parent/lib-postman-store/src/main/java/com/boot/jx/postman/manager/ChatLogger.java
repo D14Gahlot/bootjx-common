@@ -16,7 +16,7 @@ import com.boot.jx.postman.doc.MessageDocAbstract;
 import com.boot.jx.postman.model.MessageDefinitions.IMessageExtended;
 import com.boot.jx.postman.model.MessageDefinitions.LogMessage;
 import com.boot.jx.postman.model.MessageDefinitions.LoggableEntity;
-import com.boot.jx.postman.model.MessageDefinitions.SessionMessage;
+import com.boot.jx.postman.model.MessageDefinitions.SessionInfo;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.model.ext.InBoundEvent;
 import com.boot.jx.postman.store.MessageContext;
@@ -60,13 +60,13 @@ public class ChatLogger {
 		return messageStore.note(outboxMessage, getCurrenUser());
 	}
 
-	public MessageDoc event(SessionMessage inboxMessage, String actorAgent, EVENTS eventName, String... logMessage) {
+	public MessageDoc event(SessionInfo inboxMessage, String actorAgent, EVENTS eventName, Object... logMessage) {
 		MessageDoc doc = new MessageDoc();
 		doc.setContactId(PostManUtil.createContactId(inboxMessage.contact()));
 		doc.setType("L");
 		doc.setTimestamp(System.currentTimeMillis());
 		if (ArgUtil.is(logMessage)) {
-			for (String string : logMessage) {
+			for (Object string : logMessage) {
 				doc.logs().add(string);
 			}
 		}
@@ -77,16 +77,16 @@ public class ChatLogger {
 		return doc;
 	}
 
-	public MessageDoc event(SessionMessage inboxMessage, EVENTS event, String... logs) {
+	public MessageDoc event(SessionInfo inboxMessage, EVENTS event, Object... logs) {
 		return event(inboxMessage, inboxMessage.session().getAgent(), event, logs);
 	}
 
-	public MessageDoc event(ChatSessionDoc sessionDoc, String auditAgent, EVENTS event, String... logs) {
+	public MessageDoc event(ChatSessionDoc sessionDoc, String auditAgent, EVENTS event, Object... logs) {
 		IMessageExtended inboxMessage = sessionStore.toSessionMessage(sessionDoc);
 		return event(inboxMessage, auditAgent, event, logs);
 	}
 
-	public MessageDoc event(ChatSessionDoc sessionDoc, EVENTS event, String... logs) {
+	public MessageDoc event(ChatSessionDoc sessionDoc, EVENTS event, Object... logs) {
 		return event(sessionDoc, getCurrenUser(), event, logs);
 	}
 

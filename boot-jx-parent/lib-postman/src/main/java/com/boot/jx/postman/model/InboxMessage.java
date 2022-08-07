@@ -57,7 +57,7 @@ public class InboxMessage implements Serializable, IMessageExtended, LogMessage 
 	private List<Attachment> attachments = null;
 	private List<PBVCard> vccards = null;
 
-	private List<String> logs;
+	private List<Object> logs;
 
 	private String replyId;
 	private String replyIdExt;
@@ -387,11 +387,11 @@ public class InboxMessage implements Serializable, IMessageExtended, LogMessage 
 		return this.route;
 	}
 
-	public List<String> getLogs() {
+	public List<Object> getLogs() {
 		return logs;
 	}
 
-	public void setLogs(List<String> logs) {
+	public void setLogs(List<Object> logs) {
 		this.logs = logs;
 	}
 
