@@ -275,8 +275,10 @@ public class InBoundControllerWeb {
 			ChatContactDoc chatContactDoc = sessionStore.getContact(contactId);
 			OutboxMessage icebrakerMsg = dummyConnector.onIceBreak(channelConfig, chatContactDoc);
 			if (ArgUtil.is(icebrakerMsg)) {
-				icebrakerMsg.setMessageId("icebrakerMsg");
-				msgs.add(ChatDTOUtil.getChatMessageDTO(messageStore.createMessageDoc(icebrakerMsg)));
+				ChatMessageDTO icebrakerMsgDto = ChatDTOUtil
+						.getChatMessageDTO(messageStore.createMessageDoc(icebrakerMsg));
+				icebrakerMsgDto.setMessageId("icebrakerMsg");
+				msgs.add(icebrakerMsgDto);
 			}
 		}
 
