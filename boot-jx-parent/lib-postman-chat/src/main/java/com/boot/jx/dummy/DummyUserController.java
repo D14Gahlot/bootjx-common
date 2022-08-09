@@ -97,15 +97,15 @@ public class DummyUserController {
 			model.addAttribute("CHANNEL_KEY", channelConfig.getChannelKey());
 		}
 
-		model.addAttribute("PROFILE_ID",
-				ArgUtil.parseAsString(commonHttpRequest.get("PROFILE_ID"), Constants.BLANK));
-		model.addAttribute("NAME",
+		model.addAttribute("USER_CODE",
+				ArgUtil.parseAsString(commonHttpRequest.get("CODE"), Constants.BLANK));
+		model.addAttribute("USER_NAME",
 				ArgUtil.parseAsString(commonHttpRequest.get("NAME"), Constants.BLANK));
-		model.addAttribute("EMAIL",
+		model.addAttribute("USER_EMAIL",
 				ArgUtil.parseAsString(commonHttpRequest.get("EMAIL"), Constants.BLANK));
-		model.addAttribute("PHONE",
+		model.addAttribute("USER_PHONE",
 				ArgUtil.parseAsString(commonHttpRequest.get("PHONE"), Constants.BLANK));
-		model.addAttribute("TOKEN",
+		model.addAttribute("USER_TOKEN",
 				ArgUtil.parseAsString(commonHttpRequest.get("TOKEN"), Constants.BLANK));
 		return "dummyuser";
 	}

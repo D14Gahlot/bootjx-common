@@ -174,9 +174,15 @@ public class ChatContactQuery extends DocQueryBuilder<ChatContactDoc> {
 		return this;
 	}
 
-	public ChatContactQuery setProfileToken(String profileToken) {
-		this.doc.setProfileToken(profileToken);
-		this.set("profileToken", profileToken);
+	public ChatContactQuery setUserToken(String userToken) {
+		this.doc.user().setToken(userToken);
+		this.set("user.token", userToken);
+		return this;
+	}
+
+	public ChatContactQuery setUserCode(String userCode) {
+		this.doc.user().setCode(userCode);
+		this.set("user.code", userCode);
 		return this;
 	}
 

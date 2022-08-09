@@ -204,8 +204,8 @@ public class InBoundControllerWeb {
 	public ApiResponse<ChatMessageDTO, Object> onAuthV2(@RequestParam(required = false) String user,
 			@RequestParam(required = false) String number, @RequestParam(required = false) String browserfp,
 			@RequestParam(required = false) String channelId, @RequestParam(required = false) String channelKey,
-			@RequestParam(required = false) String userProfileId, // Id Set by DomainService
-			@RequestParam(required = false) String userProfileToken, // phone Set by DomainService
+			@RequestParam(required = false) String userCode, // Id Set by DomainService
+			@RequestParam(required = false) String userToken, // phone Set by DomainService
 			@RequestParam(required = false) String userName, // phone Set by DomainService
 			@RequestParam(required = false) String userEmail, // email Set by DomainService
 			@RequestParam(required = false) String userPhone // phone Set by DomainService,
@@ -219,8 +219,8 @@ public class InBoundControllerWeb {
 		String webSessionIdKey = StringUtils.sanitize(WEB_SESSION_ID + "_" + channelId);
 		InboxMessage msg = connector.createInboxMessage(channelConfig);
 
-		if (ArgUtil.is(userProfileId)) {
-			csid = "u" + userProfileId;
+		if (ArgUtil.is(userCode)) {
+			csid = "u" + userCode;
 			msg.contact().setCsid(csid);
 			contactId = PostManUtil.CONTACT_ID(channelConfig, csid);
 			session = chatSessionFactory.getChatSessionByContactId(contactId, null);
@@ -241,10 +241,10 @@ public class InBoundControllerWeb {
 		ChatContactQuery chatContactQuery = new ChatContactQuery(contact.getContactId());
 		chatContactQuery.update(contact);
 		chatContactQuery.updateCreatedStamp();
-		if (ArgUtil.is(userProfileId)) {
-			chatContactQuery.setProfileId(userProfileId);
+		if (ArgUtil.is(userCode)) {
+			chatContactQuery.setUserCode(userCode);
 		}
-		chatContactQuery.setProfileToken(userProfileToken);
+		chatContactQuery.setUserToken(userToken);
 		sessionStore.upsert(chatContactQuery);
 
 		String contactIdWeb = AppContextUtil.getTenant() + "/" + contactId;
