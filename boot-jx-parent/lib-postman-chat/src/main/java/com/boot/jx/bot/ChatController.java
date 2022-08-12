@@ -210,7 +210,7 @@ public class ChatController {
 	}
 
 	public void onSessionStart(InBoundEvent assignEvent) {
-		logManager.event(assignEvent, EVENTS.ON_SESSION_ROUTE, assignEvent.sessionRouted);
+		logManager.event(assignEvent, EVENTS.ON_SESSION_START, assignEvent.sessionRouted);
 	}
 
 	public void onPostOutboundMessage(MapModel mapModel) {
