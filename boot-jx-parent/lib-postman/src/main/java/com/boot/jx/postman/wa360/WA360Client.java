@@ -51,9 +51,9 @@ public class WA360Client {
 			int buttonsCount = 0;
 			String bodyTextAppend = Constants.BLANK;
 			List<TmplElement> buttons = new ArrayList<TmplElement>();
-			if (outboxMessage.options().containsKey("buttons")) {
-				List<TmplElement> allbuttons = new MapModel(outboxMessage.options()).entry("buttons")
-						.asList(TmplElement.class);
+			MapModel options = MapModel.from(outboxMessage.options());
+			if (options.containsKey("buttons")) {
+				List<TmplElement> allbuttons = options.entry("buttons").asList(TmplElement.class);
 				for (TmplElement b : allbuttons) {
 					if (ArgUtil.areEqual(b.getType(), TmplElement.TYPES.URL)) {
 						bodyTextAppend = bodyTextAppend
@@ -73,6 +73,8 @@ public class WA360Client {
 				isList = (buttonsCount > 0) && (buttonsCount > 3);
 				isButton = (buttonsCount > 0) && (buttonsCount < 4);
 			}
+
+			isList = options.entry("is_list").asBoolean(isList);
 
 			if (ArgUtil.is(bodyTextAppend)) {
 				outboxMessage.setMessage(outboxMessage.getMessage() + "\n" + bodyTextAppend);
@@ -97,8 +99,6 @@ public class WA360Client {
 					int end = Math.min((start + 9), buttons.size());
 					List<TmplElement> newButtons;
 
-					MapModel optipns = MapModel.from(outboxMessage.options());
-
 					if (pending < 10) {
 						newButtons = buttons.subList(start, end);
 					} else if (pending == 10) {
@@ -106,18 +106,18 @@ public class WA360Client {
 					} else {
 						newButtons = buttons.subList(start, end);
 
-						if (optipns.containsKey("more_option_title")) {
-							newButtons.add(new TmplElement().label(optipns.getString("more_option_title"))
+						if (options.containsKey("more_option_title")) {
+							newButtons.add(new TmplElement().label(options.getString("more_option_title"))
 									.code(prompt.toString()));
 						} else {
 							newButtons.add(new TmplElement().label("More Options").code(prompt.toString()));
 						}
 					}
-					if (optipns.containsKey("list_option_title")) {
-						optipns.put("list_option_title",
-								optipns.getString("list_option_title") + (prompt.pageIndex + 1));
+					if (options.containsKey("list_option_title")) {
+						options.put("list_option_title",
+								options.getString("list_option_title") + (prompt.pageIndex + 1));
 					} else {
-						optipns.put("list_option_title", "List " + (prompt.pageIndex + 1));
+						options.put("list_option_title", "List " + (prompt.pageIndex + 1));
 					}
 					MapModel resp = sendList(channelConfig, outboxMessage, newButtons);
 					msgIds.add(getMessageId(resp));
@@ -303,8 +303,7 @@ public class WA360Client {
 		req.put(OutBoundWrapperPaths.INTERACTIVE_HEADER_TYPE, "text");
 		req.put(OutBoundWrapperPaths.INTERACTIVE_HEADER_TEXT,
 				ArgUtil.parseAsString(outboxMessage.getSubject(), Constants.BLANK));
-		req.put(OutBoundWrapperPaths.INTERACTIVE_BODY_TEXT,
-				ArgUtil.nonEmpty(outboxMessage.getMessage(), "---"));
+		req.put(OutBoundWrapperPaths.INTERACTIVE_BODY_TEXT, ArgUtil.nonEmpty(outboxMessage.getMessage(), "---"));
 		req.put(OutBoundWrapperPaths.INTERACTIVE_FOOTER_TEXT,
 				ArgUtil.parseAsString(outboxMessage.getFooter(), Constants.BLANK));
 		req.put(OutBoundWrapperPaths.INTERACTIVE_ACTION_BUTTON, options.getString("list_option_title", "Menu"));
