@@ -1,8 +1,15 @@
 package com.boot.jx.admin.service;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVParser;
+import org.apache.commons.csv.CSVRecord;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
@@ -10,6 +17,7 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.boot.jx.chat.ChatService;
 import com.boot.jx.chat.ChatSessionFactory;
@@ -291,5 +299,41 @@ public class BulkMessageService extends BatchJobExecuter {
 		mongoTemplate.save(doc);
 		return completed;
 	}
+	/** Parsing csv file **/
+	public BulkSessionDoc uploadFile(OutboxMessage bulkMessage ,MultipartFile file) throws NumberParseException {
+		try {
+			readFile(file.getInputStream());
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
+	}
+	public static String TYPE = "text/csv";
+	public static boolean hasCSVFormat(MultipartFile file) {
+	    if (!TYPE.equals(file.getContentType())) {
+	      return false;
+	    }
+	    return true;
+	  }
+	
+	public void readFile(InputStream is) {
+		try (BufferedReader fileReader = new BufferedReader(new InputStreamReader(is));
+		        CSVParser csvParser = new CSVParser(fileReader,
+		            CSVFormat.DEFAULT.withFirstRecordAsHeader().withIgnoreHeaderCase().withTrim());) {
+		     // List<Tutorial> tutorials = new ArrayList<Tutorial>();
+		      Iterable<CSVRecord> csvRecords = csvParser.getRecords();
+		      for (CSVRecord csvRecord : csvRecords) {
+		    	  System.out.println("id :"+ csvRecord.get("contacts"));
+		    	  //System.out.println("Title :"+ csvRecord.get("Title"));
+		    	  //System.out.println("Description :"+ csvRecord.get("Description"));
+		    	  //System.out.println("id :"+ csvRecord.get("Published"));
+		      
+		      }
+		   
+		    } catch (Exception e) {
+		      throw new RuntimeException("fail to parse CSV file: " + e.getMessage());
+		    }
+		  }
+	}
 
-}

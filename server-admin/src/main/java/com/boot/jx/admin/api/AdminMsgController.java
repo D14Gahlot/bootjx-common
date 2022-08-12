@@ -226,5 +226,13 @@ public class AdminMsgController {
 		}
 		return ApiResponse.buildResults(chatSessionDtos);
 	}
+	
+	/** upload csv file **/
+	@RequestMapping(value = "/pub/message/bulk/push/csv/send", method = { RequestMethod.POST }, consumes = {"application/json"})
+	public ApiResponse<BulkSessionDoc, Object> sendBulkCsvMessage(@RequestBody(required = false) OutboxMessage bulkMessage,@RequestParam("file") MultipartFile file)
+			throws NumberParseException {
+		System.out.println("CSV file ---");
+		return ApiResponse.buildResult(bulkMessageService.uploadFile(bulkMessage,file)).message("Bulk Message Job Created");
+	}
 
 }
