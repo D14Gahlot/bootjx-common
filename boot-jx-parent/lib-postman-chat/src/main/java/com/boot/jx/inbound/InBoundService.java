@@ -133,11 +133,13 @@ public class InBoundService extends ATaskLimiter {
 		logManager.trace(inboxMessageOriginal, "InBoundService:invokeMethodsRelease");
 		List<InboxMessage> msgs = messageStore.releaseBySession(inboxMessageOriginal);
 		for (InboxMessage inboxMessage : msgs) {
+			logManager.trace(inboxMessageOriginal, "InBoundService:invokeMethodsRelease:inLoop");
 			this.invokeMethodsInternalSafely(inboxMessage, false);
 		}
 	}
 
 	public InboxMessage invokeMethods(InboxMessage inboxMessageOriginal) {
+		logManager.trace(inboxMessageOriginal, "invokeMethods");
 		return this.invokeMethodsInternalSafely(inboxMessageOriginal, false);
 	}
 
