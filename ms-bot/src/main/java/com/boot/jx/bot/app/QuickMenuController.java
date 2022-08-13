@@ -23,6 +23,7 @@ import com.boot.utils.ArgUtil;
 import com.boot.utils.Constants;
 import com.boot.utils.StringUtils;
 import com.boot.utils.StringUtils.StringMatcher;
+import com.boot.utils.UniqueID;
 
 @BotController(name = "DemoBot", code = { "bot_quick_menu" })
 public class QuickMenuController extends CommonBotController {
@@ -66,7 +67,7 @@ public class QuickMenuController extends CommonBotController {
 
 	@ChatMapping(key = AlexBotConstants.KEY.INITIATE + "*", pattern = "^*$")
 	public void greet(InboxMessage inboxMessage, StringMatcher matcher) {
-		showDefaultMenu("mobile");
+		showDefaultMenu("mobile " + System.currentTimeMillis() + "  " + UniqueID.generateString62());
 	}
 
 	@ChatMapping(key = "on_item_select")
