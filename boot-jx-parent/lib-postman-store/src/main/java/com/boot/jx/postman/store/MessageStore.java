@@ -93,6 +93,8 @@ public class MessageStore extends CommonMongoTemplateAbstract {
 		doc.setAttachments(inboxMessage.getAttachments());
 		doc.setVccards(inboxMessage.getVccards());
 
+		doc.setTrace(inboxMessage.getTrace());
+		doc.setLogs(inboxMessage.getLogs());
 		doc.form().putAll(inboxMessage.form());
 		doc.stamps().put("session", ArgUtil.parseAsLong(inboxMessage.session().getSessionStamp(), 0L));
 
@@ -197,11 +199,19 @@ public class MessageStore extends CommonMongoTemplateAbstract {
 	}
 
 	public void setHandler(InboxMessage inboxMessage, String handler) {
-		MessageDoc doc = findOrCreateMessageDoc(inboxMessage);
-		doc.setHandler(handler);
-
-		mongoTemplate.save(doc, getCollectionName(inboxMessage.contact().type()));
-		inboxMessage.setMessageId(doc.getMessageId());
+		CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder();
+		if (ArgUtil.is(inboxMessage.getMessageId())) {
+			builder.whereIdSafe(inboxMessage.getMessageId());
+			builder.update().set("handler", handler);
+			builder.update().set("meta.handler", handler);
+			mongoTemplate.updateFirst(builder.getQuery(), builder.getUpdate(), MessageDoc.class,
+					MessageStore.getCollectionName(inboxMessage.contact().type()));
+		} else {
+			MessageDoc doc = findOrCreateMessageDoc(inboxMessage);
+			doc.setHandler(handler);
+			mongoTemplate.save(doc, getCollectionName(inboxMessage.contact().type()));
+			inboxMessage.setMessageId(doc.getMessageId());
+		}
 	}
 
 	// Out Going Messages
@@ -225,6 +235,7 @@ public class MessageStore extends CommonMongoTemplateAbstract {
 		doc.setSessionId(outMessage.getSessionId());
 		doc.setMessageIdRef(outMessage.getMessageIdRef());
 
+		doc.setTrace(outMessage.getTrace());
 		doc.setLogs(outMessage.getLogs());
 		doc.setMessageIdExt(outMessage.getMessageIdExt());
 		doc.setStatus(ArgUtil.parseAsString(outMessage.getStatus()));

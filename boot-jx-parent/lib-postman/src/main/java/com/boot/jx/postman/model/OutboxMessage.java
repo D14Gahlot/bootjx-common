@@ -24,6 +24,7 @@ public class OutboxMessage extends Message<OutboxMessage>
 	private MessageRouter route;
 	private MessagePrompt prompt;
 	private List<Object> logs;
+	private List<Object> trace;
 
 	public OutboxMessage(ContactType contactType) {
 		super(contactType);
@@ -124,4 +125,18 @@ public class OutboxMessage extends Message<OutboxMessage>
 		return null;
 	}
 
+	public List<Object> trace() {
+		if (this.trace == null) {
+			this.trace = new ArrayList<Object>();
+		}
+		return this.trace;
+	}
+
+	public List<Object> getTrace() {
+		return trace;
+	}
+
+	public void setTrace(List<Object> trace) {
+		this.trace = trace;
+	}
 }

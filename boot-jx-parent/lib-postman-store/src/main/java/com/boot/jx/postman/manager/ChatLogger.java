@@ -226,11 +226,18 @@ public class ChatLogger {
 			builder.whereIdSafe(inboxMessage.getMessageId());
 			for (Object string : msg) {
 				if (ArgUtil.is(string)) {
+					inboxMessage.trace().add(string);
 					builder.update().push("trace", string);
 				}
 			}
 			messageStore.updateFirst(builder.getQuery(), builder.getUpdate(), MessageDoc.class,
 					MessageStore.getCollectionName(inboxMessage.contact().type()));
+		} else {
+			for (Object string : msg) {
+				if (ArgUtil.is(string)) {
+					inboxMessage.trace().add(string);
+				}
+			}
 		}
 	}
 

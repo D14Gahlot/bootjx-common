@@ -130,6 +130,7 @@ public class InBoundService extends ATaskLimiter {
 	}
 
 	public void invokeMethodsRelease(InboxMessage inboxMessageOriginal) {
+		logManager.trace(inboxMessageOriginal, "InBoundService:invokeMethodsRelease");
 		List<InboxMessage> msgs = messageStore.releaseBySession(inboxMessageOriginal);
 		for (InboxMessage inboxMessage : msgs) {
 			this.invokeMethodsInternalSafely(inboxMessage, false);
@@ -142,6 +143,7 @@ public class InBoundService extends ATaskLimiter {
 
 	private InboxMessage invokeMethodsInternalSafely(InboxMessage inboxMessageOriginal, boolean newThread) {
 		try {
+			logManager.trace(inboxMessageOriginal, "InBoundService:invokeMethodsInternalSafely");
 			return this.invokeMethodsInternal(inboxMessageOriginal, newThread);
 		} catch (Exception e) {
 			messageStore.reject(inboxMessageOriginal);

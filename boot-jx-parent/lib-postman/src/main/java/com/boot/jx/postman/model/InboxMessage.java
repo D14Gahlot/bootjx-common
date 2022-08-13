@@ -61,6 +61,7 @@ public class InboxMessage implements Serializable, IMessageExtended, LogMessage 
 
 	private String replyId;
 	private String replyIdExt;
+	private List<Object> trace;
 
 	public InboxMessage() {
 		this.timestamp = System.currentTimeMillis();
@@ -424,5 +425,20 @@ public class InboxMessage implements Serializable, IMessageExtended, LogMessage 
 			codeValue = codeValue.toLowerCase().trim();
 		}
 		return codeValue;
+	}
+
+	public List<Object> trace() {
+		if (this.trace == null) {
+			this.trace = new ArrayList<Object>();
+		}
+		return this.trace;
+	}
+
+	public List<Object> getTrace() {
+		return trace;
+	}
+
+	public void setTrace(List<Object> trace) {
+		this.trace = trace;
 	}
 }
