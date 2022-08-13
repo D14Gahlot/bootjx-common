@@ -130,22 +130,18 @@ public class InBoundService extends ATaskLimiter {
 	}
 
 	public void invokeMethodsRelease(InboxMessage inboxMessageOriginal) {
-		logManager.trace(inboxMessageOriginal, "InBoundService:invokeMethodsRelease");
 		List<InboxMessage> msgs = messageStore.releaseBySession(inboxMessageOriginal);
 		for (InboxMessage inboxMessage : msgs) {
-			logManager.trace(inboxMessageOriginal, "InBoundService:invokeMethodsRelease:inLoop");
 			this.invokeMethodsInternalSafely(inboxMessage, false);
 		}
 	}
 
 	public InboxMessage invokeMethods(InboxMessage inboxMessageOriginal) {
-		logManager.trace(inboxMessageOriginal, "invokeMethods");
 		return this.invokeMethodsInternalSafely(inboxMessageOriginal, false);
 	}
 
 	private InboxMessage invokeMethodsInternalSafely(InboxMessage inboxMessageOriginal, boolean newThread) {
 		try {
-			logManager.trace(inboxMessageOriginal, "InBoundService:invokeMethodsInternalSafely");
 			return this.invokeMethodsInternal(inboxMessageOriginal, newThread);
 		} catch (Exception e) {
 			messageStore.reject(inboxMessageOriginal);
@@ -224,8 +220,6 @@ public class InBoundService extends ATaskLimiter {
 			}
 
 		}
-
-		logManager.trace(inboxMessageOriginal, "InBoundService:invokeMethodsInternal");
 
 		if (ArgUtil.isEmpty(inBoundFilter) || inBoundFilter.doFilter(inboxMessageOriginal)) {
 			if (ArgUtil.is(inBoundProcessor)) {

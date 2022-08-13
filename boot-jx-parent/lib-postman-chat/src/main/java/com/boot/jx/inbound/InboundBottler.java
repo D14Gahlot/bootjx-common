@@ -12,6 +12,7 @@ import com.boot.jx.chat.ChatSessionService;
 import com.boot.jx.def.ICacheBox;
 import com.boot.jx.mongo.CommonMongoQueryBuilder;
 import com.boot.jx.postman.doc.MessageHold;
+import com.boot.jx.postman.doc.MessageHold.MessageHoldQueue;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.PMArgs;
 import com.boot.jx.postman.model.ext.InBoundEvent;
@@ -21,6 +22,7 @@ import com.boot.jx.tunnel.task.ATaskLimiter;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
+import com.boot.utils.UniqueID;
 
 @Component
 public class InboundBottler extends ATaskLimiter {
@@ -54,7 +56,7 @@ public class InboundBottler extends ATaskLimiter {
 		String onhold = hold().get(contactId);
 
 		if (ArgUtil.isEqual(onhold, "QUEUING")) {
-			queue(contactId, new MessageHold().inboxMessage(inboxMessage));
+			queue(contactId, new MessageHoldQueue().inboxMessage(inboxMessage));
 			throttle(new TunnelTask().name("MESSAGE_DEQUEUE").id(contactId).intervalSeconds(1));
 		} else {
 			hold().put(contactId, "QUEUING");
@@ -73,7 +75,7 @@ public class InboundBottler extends ATaskLimiter {
 		String onhold = hold().get(contactId);
 
 		if (ArgUtil.isEqual(onhold, "QUEUING")) {
-			queue(contactId, new MessageHold().event(event).pmArgs(pmArgs));
+			queue(contactId, new MessageHoldQueue().event(event).pmArgs(pmArgs));
 			throttle(new TunnelTask().name("MESSAGE_DEQUEUE").id(contactId).intervalSeconds(1));
 		} else {
 			hold().put(contactId, "QUEUING");
@@ -89,11 +91,20 @@ public class InboundBottler extends ATaskLimiter {
 	}
 
 	private void dequeue(String contactId) {
-		CommonMongoQueryBuilder builder2 = new CommonMongoQueryBuilder();
-		builder2.where(Criteria.where("contactId").is(contactId).and("appType").is(appConfig.getAppType()))
+		String batch = UniqueID.generateString();
+		CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder();
+		builder.where(Criteria.where("contactId").is(contactId).and("appType").is(appConfig.getAppType()))
 				.sortBy("timestamp", Direction.ASC).limit(1);
-		MessageHold docs = CollectionUtil.first(
-				messageStore.findAllAndRemove(builder2.getQuery(), MessageHold.class, MessageHold.COLLECTION_QUEUED));
+		builder.set("batch", batch);
+		messageStore.updateFirst(builder.getQuery(), builder.update(), MessageHoldQueue.class,
+				MessageHoldQueue.COLLECTION_QUEUED);
+
+		CommonMongoQueryBuilder builder2 = new CommonMongoQueryBuilder();
+		builder2.where(Criteria.where("contactId").is(contactId).and("appType").is(appConfig.getAppType()).and("batch")
+				.is(batch)).sortBy("timestamp", Direction.ASC).limit(1);
+		MessageHoldQueue docs = CollectionUtil.first(messageStore.findAllAndRemove(builder2.getQuery(),
+				MessageHoldQueue.class, MessageHoldQueue.COLLECTION_QUEUED));
+
 		if (ArgUtil.is(docs)) {
 			if (ArgUtil.is(docs.getInboxMessage())) {
 				inBoundService.invokeMethods(docs.getInboxMessage());
@@ -108,7 +119,7 @@ public class InboundBottler extends ATaskLimiter {
 		hold.setContactId(contactId);
 		hold.setTimestamp(System.currentTimeMillis());
 		hold.setAppType(appConfig.getAppType());
-		messageStore.save(hold, MessageHold.COLLECTION_QUEUED);
+		messageStore.save(hold);
 	}
 
 	@Override

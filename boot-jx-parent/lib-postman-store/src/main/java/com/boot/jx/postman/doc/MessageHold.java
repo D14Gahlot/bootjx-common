@@ -18,8 +18,9 @@ public class MessageHold extends UpdatedTimeStampDoc implements Serializable {
 
 	private static final long serialVersionUID = -1916969779141145310L;
 
-	public static final String COLLECTION_ORIGINAL = "MESSAGE_ORIGINAL";
 	public static final String COLLECTION_NAME = "MESSAGE_HOLD";
+
+	public static final String COLLECTION_ORIGINAL = "MESSAGE_ORIGINAL";
 	public static final String COLLECTION_REJECTED = "MESSAGE_REJECTED";
 	public static final String COLLECTION_QUEUED = "MESSAGE_QUEUED";
 
@@ -34,6 +35,9 @@ public class MessageHold extends UpdatedTimeStampDoc implements Serializable {
 
 	@Indexed
 	private String appType;
+
+	@Indexed
+	private String batch;
 
 	private long timestamp;
 
@@ -121,4 +125,31 @@ public class MessageHold extends UpdatedTimeStampDoc implements Serializable {
 		this.inboxMessage = inboxMessage;
 		return this;
 	}
+
+	public String getBatch() {
+		return batch;
+	}
+
+	public void setBatch(String batch) {
+		this.batch = batch;
+	}
+
+	@Document(collection = COLLECTION_ORIGINAL)
+	@TypeAlias("MessageHoldOriginal")
+	public static class MessageHoldOriginal extends MessageHold {
+		private static final long serialVersionUID = -4164969609975765804L;
+	}
+
+	@Document(collection = COLLECTION_REJECTED)
+	@TypeAlias("MessageHoldRejected")
+	public static class MessageHoldRejected extends MessageHold {
+		private static final long serialVersionUID = 5700536999322313441L;
+	}
+
+	@Document(collection = COLLECTION_QUEUED)
+	@TypeAlias("MessageHoldQueue")
+	public static class MessageHoldQueue extends MessageHold {
+		private static final long serialVersionUID = 1137079051032041202L;
+	}
+
 }
