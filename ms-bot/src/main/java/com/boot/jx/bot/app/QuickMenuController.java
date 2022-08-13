@@ -36,7 +36,7 @@ public class QuickMenuController extends CommonBotController {
 		String template = ArgUtil.parseAsString(app.props().get("template"));
 		if (ArgUtil.is(template)) { // item_menu_template
 			OutboxMessage msg = new OutboxMessage().template(template);
-			msg.logs().add(log);
+			msg.trace().add(log);
 			reply(msg);
 			next("on_item_select");
 			return;
