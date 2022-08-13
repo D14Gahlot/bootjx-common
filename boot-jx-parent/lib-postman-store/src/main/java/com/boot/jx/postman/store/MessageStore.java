@@ -198,6 +198,7 @@ public class MessageStore extends CommonMongoTemplateAbstract {
 	public void setHandler(InboxMessage inboxMessage, String handler) {
 		MessageDoc doc = findOrCreateMessageDoc(inboxMessage);
 		doc.setHandler(handler);
+
 		mongoTemplate.save(doc, getCollectionName(inboxMessage.contact().type()));
 		inboxMessage.setMessageId(doc.getMessageId());
 	}

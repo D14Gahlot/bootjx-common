@@ -66,6 +66,10 @@ public class ChatController {
 		}
 		waMessage.route().setSenderType(MESSAGE_SENDER_TYPE.BOT);
 		waMessage.session().setAgent(chatService.getClientConfig().getDefaultSender());
+
+		if (ArgUtil.is(context().getCurrentHandler())) {
+			waMessage.meta().put("handler", context().getCurrentHandler());
+		}
 	}
 
 	public void reply(OutboxMessage message) {

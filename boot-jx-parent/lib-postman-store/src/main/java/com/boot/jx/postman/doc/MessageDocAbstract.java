@@ -146,6 +146,7 @@ public abstract class MessageDocAbstract implements Serializable, Patchable<Mess
 	}
 
 	public void setHandler(String handler) {
+		this.meta().put("handler", handler);
 		this.handler = handler;
 	}
 
