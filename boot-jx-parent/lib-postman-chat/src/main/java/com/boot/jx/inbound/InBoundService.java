@@ -28,6 +28,7 @@ import com.boot.jx.postman.PMEnvironment.PMConfigurationObject;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.ErrorObject;
 import com.boot.jx.postman.doc.MessageDoc;
+import com.boot.jx.postman.manager.ChatLogger;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.MessageReport;
 import com.boot.jx.postman.store.MessageContext;
@@ -88,6 +89,9 @@ public class InBoundService extends ATaskLimiter {
 
 	@Autowired
 	private ChatProxyManager proxyManager;
+
+	@Autowired
+	private ChatLogger logManager;
 
 	/**
 	 * Invoke the methods with matching {@link ChatMapping#events()} and
@@ -216,6 +220,8 @@ public class InBoundService extends ATaskLimiter {
 			}
 
 		}
+
+		logManager.trace(inboxMessageOriginal, "InBoundService:invokeMethodsInternal");
 
 		if (ArgUtil.isEmpty(inBoundFilter) || inBoundFilter.doFilter(inboxMessageOriginal)) {
 			if (ArgUtil.is(inBoundProcessor)) {

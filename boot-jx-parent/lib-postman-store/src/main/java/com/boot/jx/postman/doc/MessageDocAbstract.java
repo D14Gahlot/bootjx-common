@@ -76,6 +76,7 @@ public abstract class MessageDocAbstract implements Serializable, Patchable<Mess
 
 	private Map<String, Long> stamps;
 	public List<Object> logs;
+	public List<Object> trace;
 	private Map<String, Object> replyTo;
 
 	@Indexed
@@ -450,4 +451,18 @@ public abstract class MessageDocAbstract implements Serializable, Patchable<Mess
 		return this.options;
 	}
 
+	public List<Object> getTrace() {
+		return trace;
+	}
+
+	public void setTrace(List<Object> trace) {
+		this.trace = trace;
+	}
+
+	public List<Object> trace() {
+		if (this.trace == null) {
+			this.trace = new ArrayList<Object>();
+		}
+		return this.trace;
+	}
 }

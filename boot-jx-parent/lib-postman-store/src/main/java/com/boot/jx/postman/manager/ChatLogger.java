@@ -9,10 +9,12 @@ import com.boot.jx.AppContextUtil;
 import com.boot.jx.exception.ApiHttpExceptions.ApiHttpException;
 import com.boot.jx.exception.ApiHttpExceptions.ApiHttpServerException;
 import com.boot.jx.logger.AuditDetailProvider;
+import com.boot.jx.mongo.CommonMongoQueryBuilder;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.doc.MessageDoc.MessageDocLogs;
 import com.boot.jx.postman.doc.MessageDocAbstract;
+import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.MessageDefinitions.IMessageExtended;
 import com.boot.jx.postman.model.MessageDefinitions.LogMessage;
 import com.boot.jx.postman.model.MessageDefinitions.LoggableEntity;
@@ -212,6 +214,23 @@ public class ChatLogger {
 			this.log("W", messageDoc(messageContext.getInBoundEvent()), message, debugMessage);
 		} else {
 			this.log("W", messageDoc(new InBoundEvent()), message, debugMessage);
+		}
+	}
+
+	public void trace(InboxMessage inboxMessage, Object... msg) {
+		if (msg == null | msg.length == 0) {
+			return;
+		}
+		CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder();
+		if (ArgUtil.is(inboxMessage.getMessageId())) {
+			builder.whereIdSafe(inboxMessage.getMessageId());
+			for (Object string : msg) {
+				if (ArgUtil.is(string)) {
+					builder.update().push("trace", string);
+				}
+			}
+			messageStore.updateFirst(builder.getQuery(), builder.getUpdate(), MessageDoc.class,
+					MessageStore.getCollectionName(inboxMessage.contact().type()));
 		}
 	}
 

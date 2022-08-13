@@ -28,6 +28,7 @@ public class BotInBoundHandler extends DefaultChatBoundHandler {
 
 	@Override
 	public void onMessage(InboxMessage inboxMessage, ChatSessionDoc session) {
+		logManager.trace(inboxMessage, "BotInBoundHandler:onMessage");
 		botEngine.invokeMethodsAsync(inboxMessage);
 	}
 
