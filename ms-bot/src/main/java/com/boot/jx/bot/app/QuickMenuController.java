@@ -30,14 +30,20 @@ public class QuickMenuController extends CommonBotController {
 	@Autowired
 	private QuickStore commonMongoTemplate;
 
-	private void showDefaultMenu() {
+	private void showDefaultMenu(String log) {
 		ClientApp app = context().clientApp();
 		String template = ArgUtil.parseAsString(app.props().get("template"));
 		if (ArgUtil.is(template)) { // item_menu_template
-			reply(new OutboxMessage().template(template));
+			OutboxMessage msg = new OutboxMessage().template(template);
+			msg.logs().add(log);
+			reply(msg);
 			next("on_item_select");
 			return;
 		}
+	}
+
+	private void showDefaultMenu() {
+		showDefaultMenu(null);
 	}
 
 	private void showWrongOptionMenu() {
@@ -48,19 +54,19 @@ public class QuickMenuController extends CommonBotController {
 			next("on_item_select");
 			return;
 		} else {
-			showDefaultMenu();
+			showDefaultMenu("wrong");
 		}
 	}
 
 	@Override
 	public void onSessionRoute(InBoundEvent assignEvent) {
 		super.onSessionRoute(assignEvent);
-		showDefaultMenu();
+		showDefaultMenu("onSessionRoute");
 	}
 
 	@ChatMapping(key = AlexBotConstants.KEY.INITIATE + "*", pattern = "^*$")
 	public void greet(InboxMessage inboxMessage, StringMatcher matcher) {
-		showDefaultMenu();
+		showDefaultMenu("mobile");
 	}
 
 	@ChatMapping(key = "on_item_select")
