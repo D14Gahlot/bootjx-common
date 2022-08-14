@@ -93,8 +93,8 @@ public class InboundBottler extends ATaskLimiter {
 	private void dequeue(String contactId) {
 		String batch = UniqueID.generateString();
 		CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder();
-		builder.where(Criteria.where("contactId").is(contactId).and("appType").is(appConfig.getAppType()))
-				.sortBy("timestamp", Direction.ASC).limit(1);
+		builder.where(Criteria.where("contactId").is(contactId).and("appType").is(appConfig.getAppType()).and("batch")
+				.exists(false)).sortBy("timestamp", Direction.ASC).limit(1);
 		builder.set("batch", batch);
 		messageStore.updateFirst(builder.getQuery(), builder.update(), MessageHoldQueue.class,
 				MessageHoldQueue.COLLECTION_QUEUED);
