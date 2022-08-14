@@ -225,7 +225,7 @@ public class ChatLogger {
 		if (msg == null | msg.length == 0) {
 			return;
 		}
-		Object[] result = new Object[msg.length];
+		Object[] result = new Object[msg.length+1];
 		result[0] = appConfig.getAppType();
 		System.arraycopy(msg, 0, result, 1, msg.length);
 		CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder();

@@ -115,6 +115,9 @@ public class InBoundControllerWeb {
 	@Value("${app.stomp}")
 	boolean stompEnabled;
 
+	@Autowired
+	private InboundBottler inboundBottler;
+
 	@ApiRequest(session = true)
 	@RequestMapping(value = "/plugin/customer/**", method = RequestMethod.GET)
 	public String pluginCustomer(Model model, @RequestParam(required = false) String contacyType,
@@ -322,7 +325,8 @@ public class InBoundControllerWeb {
 				InboxMessage sessionMessage = new InboxMessage();
 
 				messageBoxEvent.getInboxMessages().forEach(inboxMessage -> {
-					inBoundService.invokeMethods(inboxMessage);
+					//inBoundService.invokeMethods(inboxMessage);
+					inboundBottler.push(inboxMessage);
 					sessionMessage.setSessionId(inboxMessage.getSessionId());
 					sessionMessage.setContact(sessionMessage.getContact());
 				});
