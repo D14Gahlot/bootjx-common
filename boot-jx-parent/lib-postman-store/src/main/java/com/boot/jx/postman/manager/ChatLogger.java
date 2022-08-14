@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.boot.jx.AppConfig;
 import com.boot.jx.AppContextUtil;
 import com.boot.jx.exception.ApiHttpExceptions.ApiHttpException;
 import com.boot.jx.exception.ApiHttpExceptions.ApiHttpServerException;
@@ -49,6 +50,9 @@ public class ChatLogger {
 
 	@Autowired
 	private MessageContext messageContext;
+
+	@Autowired
+	private AppConfig appConfig;
 
 	public MessageDoc note(ChatSessionDoc sessionDoc, OutboxMessage outboxMessage) {
 		outboxMessage.contact().setContactType(sessionDoc.getContactType());
@@ -221,23 +225,18 @@ public class ChatLogger {
 		if (msg == null | msg.length == 0) {
 			return;
 		}
+		Object[] result = new Object[msg.length];
+		result[0] = appConfig.getAppType();
+		System.arraycopy(msg, 0, result, 1, msg.length);
 		CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder();
 		if (ArgUtil.is(inboxMessage.getMessageId())) {
 			builder.whereIdSafe(inboxMessage.getMessageId());
-			for (Object string : msg) {
-				if (ArgUtil.is(string)) {
-					inboxMessage.trace().add(string);
-					builder.update().push("trace", string);
-				}
-			}
+			inboxMessage.trace().add(result);
+			builder.update().push("trace", result);
 			messageStore.updateFirst(builder.getQuery(), builder.getUpdate(), MessageDoc.class,
 					MessageStore.getCollectionName(inboxMessage.contact().type()));
 		} else {
-			for (Object string : msg) {
-				if (ArgUtil.is(string)) {
-					inboxMessage.trace().add(string);
-				}
-			}
+			inboxMessage.trace().add(result);
 		}
 	}
 
