@@ -216,8 +216,6 @@ public class BotEngine {
 
 	public void invokeMethods(InboxMessage inboxMessageOriginal) {
 
-		logManager.trace(inboxMessageOriginal, "invokeMethods(InboxMessage inboxMessageOriginal)");
-
 		String contactId = PostManUtil.createContactId(inboxMessageOriginal);
 		InboxMessage inboxMessage = EntityDtoUtil.entityToDto(inboxMessageOriginal, new InboxMessage());
 
@@ -280,8 +278,6 @@ public class BotEngine {
 
 	private String invokeMethods(String contactId, InboxMessage inboxMessage, String nextHandler) {
 		try {
-
-			logManager.trace(inboxMessage, "invokeMethods", contactId, nextHandler);
 
 			MethodWrapper matchedMethod = null;
 
@@ -367,7 +363,6 @@ public class BotEngine {
 	 */
 	@Async
 	public void invokeMethodsAsync(InboxMessage inboxMessageOriginal) {
-		logManager.trace(inboxMessageOriginal, "invokeMethodsAsync");
 		invokeMethods(inboxMessageOriginal);
 	}
 

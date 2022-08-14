@@ -16,8 +16,6 @@ import com.boot.jx.postman.model.PMArgs;
 import com.boot.jx.postman.model.ext.InBoundEvent;
 import com.boot.utils.ArgUtil;
 
-import ch.qos.logback.core.Context;
-
 @Component
 public class BotInBoundHandler extends DefaultChatBoundHandler {
 
@@ -28,7 +26,6 @@ public class BotInBoundHandler extends DefaultChatBoundHandler {
 
 	@Override
 	public void onMessage(InboxMessage inboxMessage, ChatSessionDoc session) {
-		logManager.trace(inboxMessage, "BotInBoundHandler:onMessage");
 		botEngine.invokeMethodsAsync(inboxMessage);
 	}
 
