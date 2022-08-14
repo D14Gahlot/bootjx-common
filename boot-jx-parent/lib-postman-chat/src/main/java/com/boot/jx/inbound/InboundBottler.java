@@ -13,6 +13,7 @@ import com.boot.jx.def.ICacheBox;
 import com.boot.jx.mongo.CommonMongoQueryBuilder;
 import com.boot.jx.postman.doc.MessageHold;
 import com.boot.jx.postman.doc.MessageHold.MessageHoldQueue;
+import com.boot.jx.postman.manager.ChatLogger;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.PMArgs;
 import com.boot.jx.postman.model.ext.InBoundEvent;
@@ -51,15 +52,21 @@ public class InboundBottler extends ATaskLimiter {
 	@Autowired
 	private MessageStore messageStore;
 
+	@Autowired
+	private ChatLogger logManager;
+
 	public void push(InboxMessage inboxMessage) {
 		String contactId = PostManUtil.CONTACT_ID(inboxMessage.contact());
 		String onhold = hold().get(contactId);
+
+		logManager.trace(inboxMessage, "InboundBottler:push");
 
 		if (ArgUtil.isEqual(onhold, "QUEUING")) {
 			queue(contactId, new MessageHoldQueue().inboxMessage(inboxMessage));
 			throttle(new TunnelTask().name("MESSAGE_DEQUEUE").id(contactId).intervalSeconds(1));
 		} else {
 			hold().put(contactId, "QUEUING");
+			logManager.trace(inboxMessage, "InboundBottler:push:invoked");
 			inBoundService.invokeMethods(inboxMessage);
 			hold().put(contactId, "DEQUEUING");
 		}
@@ -107,6 +114,7 @@ public class InboundBottler extends ATaskLimiter {
 
 		if (ArgUtil.is(docs)) {
 			if (ArgUtil.is(docs.getInboxMessage())) {
+				logManager.trace(docs.getInboxMessage(), "InboundBottler:dequeue:batch=" + batch);
 				inBoundService.invokeMethods(docs.getInboxMessage());
 			} else if (ArgUtil.is(docs.getEvent())) {
 				chatSessionService.sessionEvent(docs.getEvent(), docs.getPmArgs());
@@ -119,6 +127,9 @@ public class InboundBottler extends ATaskLimiter {
 		hold.setContactId(contactId);
 		hold.setTimestamp(System.currentTimeMillis());
 		hold.setAppType(appConfig.getAppType());
+		if (ArgUtil.is(hold.getInboxMessage())) {
+			logManager.trace(hold.getInboxMessage(), "InboundBottler:queue");
+		}
 		messageStore.save(hold);
 	}
 
