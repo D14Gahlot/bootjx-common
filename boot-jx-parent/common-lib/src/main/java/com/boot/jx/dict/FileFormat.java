@@ -5,6 +5,7 @@ import java.util.Map;
 
 import com.boot.utils.ArgUtil;
 import com.boot.utils.EnumType;
+import com.boot.utils.StringUtils;
 
 public enum FileFormat implements EnumType {
 	PDF("application/pdf", FileType.DOCUMENT, "pdf"), CSV("text/csv", FileType.DOCUMENT, "csv"),
@@ -19,9 +20,13 @@ public enum FileFormat implements EnumType {
 	// Audio
 	MP3("audio/mp3", FileType.AUDIO), aac("audio/aac", FileType.AUDIO, "aac"), AMR("audio/amr", FileType.AUDIO, "amr"),
 
-	OGG("audio/ogg", FileType.AUDIO, "ogg"), OGG_PLUS("audio/ogg; codecs=opus", FileType.AUDIO),
+	OGG("audio/ogg", FileType.AUDIO, "ogg"), OGG_PLUS("audio/ogg;codecs=opus", FileType.AUDIO),
 
 	AUDIO_MP4("audio/mp4", FileType.AUDIO, "m4a"), AUDIO_MPEG("audio/mpeg", FileType.AUDIO, "mp3"),
+
+	AUDIO_WEBM("audio/webm", FileType.AUDIO, "webm"),
+	AUDIO_OPUS("audio/opus", FileType.AUDIO, "opus"),
+	AUDIO_WEBM_OPUS("audio/webm;codecs=opus", FileType.AUDIO, "webm"),
 
 	// Video
 	MP4("video/mp4", FileType.VIDEO, "mp4"), VIDEO_3GPP("video/3gpp", FileType.VIDEO, "3gpp"),
@@ -63,12 +68,19 @@ public enum FileFormat implements EnumType {
 		this(contentType, FileType.DOCUMENT, null);
 	}
 
-	public static FileFormat from(String contentType) {
-		return TYPEMAP.getOrDefault(contentType, UNKNOWN);
+	public static FileFormat from(String contentType, FileFormat defaultValue) {
+		contentType = StringUtils.toLowerCase(StringUtils.removeSpaces(contentType));
+		if (!TYPEMAP.containsKey(contentType)) {
+			String[] contentTypes = StringUtils.split(contentType, ";");
+			if (TYPEMAP.containsKey(contentTypes[0])) {
+				return TYPEMAP.getOrDefault(contentTypes[0], ArgUtil.nonEmpty(defaultValue, UNKNOWN));
+			}
+		}
+		return TYPEMAP.getOrDefault(contentType, ArgUtil.nonEmpty(defaultValue, UNKNOWN));
 	}
 
-	public static FileFormat from(String contentType, FileFormat defaultValue) {
-		return TYPEMAP.getOrDefault(contentType, ArgUtil.nonEmpty(defaultValue, UNKNOWN));
+	public static FileFormat from(String contentType) {
+		return from(contentType, UNKNOWN);
 	}
 
 	/**

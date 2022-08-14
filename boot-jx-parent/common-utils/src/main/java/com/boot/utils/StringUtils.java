@@ -175,6 +175,9 @@ public final class StringUtils {
 	public static String removeSpecialCharacter(String inputString) {
 		return inputString.replaceAll("[^a-zA-Z0-9]+", "");
 	}
+	public static String removeSpaces(String inputString) {
+		return inputString.replaceAll("[\\ ]+", "");
+	}
 
 	// public static Map<String, String> getMapFromString(String splitter_char,
 	// String key_value_separator_char,
