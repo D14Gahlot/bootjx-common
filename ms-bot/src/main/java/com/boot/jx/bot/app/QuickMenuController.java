@@ -110,6 +110,10 @@ public class QuickMenuController extends CommonBotController {
 						this.closeSession();
 						return;
 					}
+					if ("resolve_chat".equals(code)) {
+						this.resolveSession();
+						return;
+					}
 				}
 			case "&":
 				if (ArgUtil.is(code)) {
