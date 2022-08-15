@@ -17,8 +17,10 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.boot.jx.admin.manager.CSVHelper;
 import com.boot.jx.admin.manager.ChatParserAndImportor;
 import com.boot.jx.admin.service.BulkMessageService;
+import com.boot.jx.admin.service.CSVService;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.chat.ChatSessionService;
 import com.boot.jx.common.doc.ImportChatSessionDoc;
@@ -66,6 +68,10 @@ public class AdminMsgController {
 
 	@Autowired
 	public StarterDocKit starterDocKit;
+	
+	@Autowired
+	 CSVService fileService;
+
 
 	@RequestMapping(value = "/api/message/session", method = { RequestMethod.GET })
 	public ApiResponse<ChatSessionDoc, Object> fetchSession(@RequestParam String startStamp,
@@ -228,11 +234,26 @@ public class AdminMsgController {
 	}
 	
 	/** upload csv file **/
-	@RequestMapping(value = "/pub/message/bulk/push/csv/send", method = { RequestMethod.POST }, consumes = {"application/json"})
-	public ApiResponse<BulkSessionDoc, Object> sendBulkCsvMessage(@RequestBody(required = false) OutboxMessage bulkMessage,@RequestParam("file") MultipartFile file)
+	@RequestMapping(value = "/pub/message/bulk/push/csv/read", method = { RequestMethod.POST })
+	public ApiResponse<List<Map<Object,Object>>, Object> sendBulkCsvMessage(@RequestParam("file") MultipartFile file)
 			throws NumberParseException {
-		System.out.println("CSV file ---");
-		return ApiResponse.buildResult(bulkMessageService.uploadFile(bulkMessage,file)).message("Bulk Message Job Created");
+		String message = "";
+		List<Map<Object,Object>> lst=null;
+	    if (CSVHelper.hasCSVFormat(file)) {
+	    	
+	    	try {
+	    	  lst = fileService.save(file);
+	        message = "Uploaded the file successfully: " + file.getOriginalFilename();
+	       
+		  return ApiResponse.buildResult(lst).message(message);
+	      } catch (Exception e) {
+		        message = "Could not upload the file: " + file.getOriginalFilename() + "!";
+		        return ApiResponse.buildResult(lst).message(message);
+	      }
+	    }else {
+	    	message = "Please upload a csv file!";
+	    	 return ApiResponse.buildResult(lst).message(message);
+	    }
 	}
 
 }
