@@ -325,8 +325,8 @@ public class InBoundControllerWeb {
 				InboxMessage sessionMessage = new InboxMessage();
 
 				messageBoxEvent.getInboxMessages().forEach(inboxMessage -> {
-					//inBoundService.invokeMethods(inboxMessage);
-					inboundBottler.push(inboxMessage);
+					inBoundService.invokeMethods(inboxMessage);
+					//inboundBottler.push(inboxMessage);
 					sessionMessage.setSessionId(inboxMessage.getSessionId());
 					sessionMessage.setContact(sessionMessage.getContact());
 				});
