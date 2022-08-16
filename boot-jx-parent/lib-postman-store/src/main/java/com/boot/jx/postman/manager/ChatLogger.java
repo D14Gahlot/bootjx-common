@@ -222,10 +222,10 @@ public class ChatLogger {
 	}
 
 	public void trace(InboxMessage inboxMessage, Object... msg) {
-		if (msg == null | msg.length == 0) {
+		if (msg == null || msg.length == 0 || inboxMessage == null) {
 			return;
 		}
-		Object[] result = new Object[msg.length+1];
+		Object[] result = new Object[msg.length + 1];
 		result[0] = appConfig.getAppType();
 		System.arraycopy(msg, 0, result, 1, msg.length);
 		CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder();

@@ -1,5 +1,7 @@
 package com.boot.jx.inbound;
 
+import java.util.List;
+
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort.Direction;
@@ -109,18 +111,19 @@ public class InboundBottler extends ATaskLimiter {
 		CommonMongoQueryBuilder builder2 = new CommonMongoQueryBuilder();
 		builder2.where(Criteria.where("contactId").is(contactId).and("appType").is(appConfig.getAppType()).and("batch")
 				.is(batch)).sortBy("timestamp", Direction.ASC).limit(1);
-		MessageHoldQueue docs = CollectionUtil.first(messageStore.findAllAndRemove(builder2.getQuery(),
-				MessageHoldQueue.class, MessageHoldQueue.COLLECTION_QUEUED));
+		List<MessageHoldQueue> docs = messageStore.findAllAndRemove(builder2.getQuery(), MessageHoldQueue.class,
+				MessageHoldQueue.COLLECTION_QUEUED);
 
-		if (ArgUtil.is(docs)) {
-			if (ArgUtil.is(docs.getInboxMessage())) {
-				logManager.trace(docs.getInboxMessage(), "InboundBottler:dequeue:batch=" + batch);
-				inBoundService.invokeMethods(docs.getInboxMessage());
-			} else if (ArgUtil.is(docs.getEvent())) {
-				chatSessionService.sessionEvent(docs.getEvent(), docs.getPmArgs());
+		for (MessageHoldQueue doc : docs) {
+			if (ArgUtil.is(doc)) {
+				if (ArgUtil.is(doc.getInboxMessage())) {
+					logManager.trace(doc.getInboxMessage(), "InboundBottler:dequeue:batch=" + batch);
+					inBoundService.invokeMethods(doc.getInboxMessage());
+				} else if (ArgUtil.is(doc.getEvent())) {
+					chatSessionService.sessionEvent(doc.getEvent(), doc.getPmArgs());
+				}
 			}
 		}
-
 	}
 
 	private void queue(String contactId, MessageHold hold) {
