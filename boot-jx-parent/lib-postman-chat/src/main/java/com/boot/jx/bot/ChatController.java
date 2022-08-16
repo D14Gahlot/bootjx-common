@@ -45,7 +45,7 @@ public class ChatController {
 	private SessionStore sessionStore;
 
 	@Autowired
-	private ChatLogger logManager;
+	protected ChatLogger logManager;
 
 	@Lazy
 	@Autowired

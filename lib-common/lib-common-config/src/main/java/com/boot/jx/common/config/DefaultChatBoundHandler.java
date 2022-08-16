@@ -148,7 +148,9 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 				// INTERNAL BOT HANDLING
 				if (CHAT_MODE.BOT.equals(appType.getMode()) && ArgUtil.is(pmCommonConfig.getBotUrl())) {
 					LOGGER.debug("Forwarding InboxMessage to internal Bot ");
-					chatClient.forward(pmCommonConfig.getBotUrl() + PATH.INBOUND_FRWRD, inboxMessage);
+					chatClient.forward(pmCommonConfig.getBotUrl()
+							// "http://127.0.0.1:8084/bot"
+							+ PATH.INBOUND_FRWRD, inboxMessage);
 					return;
 				}
 
