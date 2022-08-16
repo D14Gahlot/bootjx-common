@@ -103,14 +103,14 @@ public class InboundBottler extends ATaskLimiter {
 		String batch = UniqueID.generateString();
 		CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder();
 		builder.where(Criteria.where("contactId").is(contactId).and("appType").is(appConfig.getAppType()).and("batch")
-				.exists(false)).sortBy("timestamp", Direction.ASC).limit(1);
+				.exists(false)).sortBy("timestamp", Direction.ASC);
 		builder.set("batch", batch);
-		messageStore.updateFirst(builder.getQuery(), builder.update(), MessageHoldQueue.class,
+		messageStore.updateMulti(builder.getQuery(), builder.update(), MessageHoldQueue.class,
 				MessageHoldQueue.COLLECTION_QUEUED);
 
 		CommonMongoQueryBuilder builder2 = new CommonMongoQueryBuilder();
 		builder2.where(Criteria.where("contactId").is(contactId).and("appType").is(appConfig.getAppType()).and("batch")
-				.is(batch)).sortBy("timestamp", Direction.ASC).limit(1);
+				.is(batch)).sortBy("timestamp", Direction.ASC);
 		List<MessageHoldQueue> docs = messageStore.findAllAndRemove(builder2.getQuery(), MessageHoldQueue.class,
 				MessageHoldQueue.COLLECTION_QUEUED);
 
