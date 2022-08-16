@@ -65,7 +65,7 @@ public class InboundBottler extends ATaskLimiter {
 
 		if (ArgUtil.isEqual(onhold, "QUEUING")) {
 			queue(contactId, new MessageHoldQueue().inboxMessage(inboxMessage));
-			throttle(new TunnelTask().name("MESSAGE_DEQUEUE").id(contactId).intervalSeconds(1));
+			throttle(new TunnelTask().name("MESSAGE_DEQUEUE").id(contactId).intervalSeconds(2));
 		} else {
 			hold().put(contactId, "QUEUING");
 			logManager.trace(inboxMessage, "InboundBottler:push:invoked");
@@ -85,7 +85,7 @@ public class InboundBottler extends ATaskLimiter {
 
 		if (ArgUtil.isEqual(onhold, "QUEUING")) {
 			queue(contactId, new MessageHoldQueue().event(event).pmArgs(pmArgs));
-			throttle(new TunnelTask().name("MESSAGE_DEQUEUE").id(contactId).intervalSeconds(1));
+			throttle(new TunnelTask().name("MESSAGE_DEQUEUE").id(contactId).intervalSeconds(2));
 		} else {
 			hold().put(contactId, "QUEUING");
 			chatSessionService.sessionEvent(event, pmArgs);
