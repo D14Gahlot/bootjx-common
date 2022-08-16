@@ -51,6 +51,9 @@ public class ChatService {
 	private SessionStore sessionStore;
 
 	@Autowired
+	private ChatLogger chatLogger;
+
+	@Autowired
 	private ChatSessionFactory chatSessionFactory;
 
 	public InboxMessage getInboxMessage() {
@@ -268,10 +271,13 @@ public class ChatService {
 		if (!ArgUtil.is(doc.getMeta())
 				|| !ArgUtil.is(doc.getMeta().getRoutingId(), inboxMessage.session().getRoutingId())) {
 			LOGGER.debug("Loading chat conewxt:newSession");
+			chatLogger.trace(getInboxMessage(), "NewSession", doc.getMeta(), inboxMessage.session());
 			doc.setMeta(new ChatMeta());
 			messageContext.chat().setQueueCode(inboxMessage.session().getQueue());
 			messageContext.chat().setSessionId(inboxMessage.getSessionId());
 			messageContext.chat().setRoutingId(inboxMessage.session().getRoutingId());
+		} else {
+			chatLogger.trace(getInboxMessage(), "ContinueOldSession");
 		}
 
 		// messageStore.create(inboxMessage);
