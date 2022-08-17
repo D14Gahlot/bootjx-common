@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.boot.jx.admin.dto.CsvDto;
 import com.boot.jx.admin.manager.CSVHelper;
 import com.boot.jx.admin.manager.ChatParserAndImportor;
 import com.boot.jx.admin.service.BulkMessageService;
@@ -235,16 +236,13 @@ public class AdminMsgController {
 	
 	/** upload csv file **/
 	@RequestMapping(value = "/pub/message/bulk/push/csv/read", method = { RequestMethod.POST })
-	public ApiResponse<List<Map<Object,Object>>, Object> sendBulkCsvMessage(@RequestParam("file") MultipartFile file)
-			throws NumberParseException {
+	public ApiResponse<CsvDto, Object> sendBulkCsvMessage(@RequestParam("file") MultipartFile file) throws NumberParseException {
 		String message = "";
-		List<Map<Object,Object>> lst=null;
+		CsvDto lst=null;
 	    if (CSVHelper.hasCSVFormat(file)) {
-	    	
-	    	try {
-	    	  lst = fileService.save(file);
+	    try {
+	    	lst = fileService.save(file);
 	        message = "Uploaded the file successfully: " + file.getOriginalFilename();
-	       
 		  return ApiResponse.buildResult(lst).message(message);
 	      } catch (Exception e) {
 		        message = "Could not upload the file: " + file.getOriginalFilename() + "!";
