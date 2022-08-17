@@ -254,10 +254,9 @@ public class WA360Client {
 	private MapModel sendText(ChannelConfig channelConfig, OutboxMessage outboxMessage) {
 		MapModel req = MapModel.createInstance().put("recipient_type", "individual").put("to",
 				outboxMessage.contact().getCsid());
-
 		req.put(OutBoundWrapperPaths.MESSAGE_TYPE, "text");
-		req.put(OutBoundWrapperPaths.MESSAGE_TEXT_BODY, outboxMessage.getMessage());
-
+		req.put(OutBoundWrapperPaths.MESSAGE_TEXT_BODY,
+				StringUtils.wrap("*", outboxMessage.getSubject(), "*\n") + outboxMessage.getMessage());
 		return send(req, channelConfig);
 	}
 

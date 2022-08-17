@@ -102,6 +102,10 @@ public class ConfigConstants {
 				new ConfigMeta("Agent can initiate chat with new contact", "postman.agent.chat.init.contact")
 						.optionsOnOff().group(GROUP_AGENT)),
 
+		POSTMAN_AGENT_CHAT_PICK_BOT(
+				new ConfigMeta("Agent can INTERRUPT existing chat with bot", "postman.agent.chat.pick.bot")
+						.optionsOnOff().group(GROUP_AGENT)),
+
 		POSTMAN_AGENT_CHAT_CC_FREETEXT(
 				new ConfigMeta("Agent can send FreeText out of Customer Care Window", "postman.agent.chat.freetext.cc")
 						.desc("Message can fail if selected channel does not permit").optionsOnOff()
@@ -120,6 +124,9 @@ public class ConfigConstants {
 				.optionValues(PMConstants.CHAT_SESSION_STICKY.NONE, PMConstants.CHAT_SESSION_STICKY.ONAVAILABLE,
 						PMConstants.CHAT_SESSION_STICKY.STRICT)
 				.defaultValue(PMConstants.CHAT_SESSION_STICKY.NONE).group(GROUP_AGENT)),
+
+		POSTMAN_AGENT_HEADER(new ConfigMeta("Header of Messsage Sent by agent", "postman.agent.chat.header")
+				.desc("Use {{agent}} for agent name")),
 
 		POSTMAN_AGENT_SCHEME_COLOR(new ConfigMeta("Agent Panel Color Scheme", "postman.agent.scheme.color")
 				.inputType(INPUT_TYPE.COLOR).defaultValue("#4267b2").group(GROUP_AGENT)),
