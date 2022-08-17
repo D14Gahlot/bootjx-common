@@ -276,6 +276,7 @@ public class ChatService {
 			messageContext.chat().setQueueCode(inboxMessage.session().getQueue());
 			messageContext.chat().setSessionId(inboxMessage.getSessionId());
 			messageContext.chat().setRoutingId(inboxMessage.session().getRoutingId());
+			messageContext.commitChatContactQuery();
 		} else {
 			chatLogger.trace(inboxMessage, "ContinueOldSession", doc.getMeta());
 		}
