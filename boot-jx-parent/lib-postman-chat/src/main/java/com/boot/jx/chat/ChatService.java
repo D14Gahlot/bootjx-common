@@ -271,7 +271,7 @@ public class ChatService {
 		if (!ArgUtil.is(doc.getMeta())
 				|| !ArgUtil.is(doc.getMeta().getRoutingId(), inboxMessage.session().getRoutingId())) {
 			LOGGER.debug("Loading chat conewxt:newSession");
-			chatLogger.trace(getInboxMessage(), "NewSession", doc.getMeta(), inboxMessage.session());
+			chatLogger.trace(inboxMessage, "NewSession", doc.getMeta(), inboxMessage.session());
 			doc.setMeta(new ChatMeta());
 			messageContext.chat().setQueueCode(inboxMessage.session().getQueue());
 			messageContext.chat().setSessionId(inboxMessage.getSessionId());
