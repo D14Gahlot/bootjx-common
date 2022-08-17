@@ -348,7 +348,7 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 		} else {
 			PMConfigurationObject header = environment.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_AGENT_HEADER);
 			if (header.exists() && !ArgUtil.is(outboxMessage.getSubject())) {
-				tmplClient.process(header.asString(), outboxMessage.session());
+				outboxMessage.setSubject(tmplClient.process(header.asString(), outboxMessage.session()));
 			}
 			sessionStore.updateResponseTime(sessionDoc);
 			MessageDoc messageDoc = chatService.send(sessionDoc, outboxMessage);
