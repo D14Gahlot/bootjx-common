@@ -272,11 +272,10 @@ public class ChatService {
 				|| !ArgUtil.is(doc.getMeta().getRoutingId(), inboxMessage.session().getRoutingId())) {
 			LOGGER.debug("Loading chat conewxt:newSession");
 			chatLogger.trace(inboxMessage, "NewSession", doc.getMeta(), inboxMessage.session());
-			doc.setMeta(new ChatMeta());
+			messageContext.chat().setMeta(new ChatMeta());
 			messageContext.chat().setQueueCode(inboxMessage.session().getQueue());
 			messageContext.chat().setSessionId(inboxMessage.getSessionId());
 			messageContext.chat().setRoutingId(inboxMessage.session().getRoutingId());
-			messageContext.commitChatContactQuery();
 		} else {
 			chatLogger.trace(inboxMessage, "ContinueOldSession", doc.getMeta());
 		}
