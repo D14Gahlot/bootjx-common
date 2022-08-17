@@ -15,11 +15,11 @@ import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.doc.MessageDoc.MessageDocLogs;
 import com.boot.jx.postman.doc.MessageDocAbstract;
-import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.MessageDefinitions.IMessageExtended;
 import com.boot.jx.postman.model.MessageDefinitions.LogMessage;
 import com.boot.jx.postman.model.MessageDefinitions.LoggableEntity;
 import com.boot.jx.postman.model.MessageDefinitions.SessionInfo;
+import com.boot.jx.postman.model.MessageDefinitions.TraceMessage;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.model.ext.InBoundEvent;
 import com.boot.jx.postman.store.MessageContext;
@@ -221,7 +221,7 @@ public class ChatLogger {
 		}
 	}
 
-	public void trace(InboxMessage inboxMessage, Object... msg) {
+	public void trace(TraceMessage inboxMessage, Object... msg) {
 		if (msg == null || msg.length == 0 || inboxMessage == null) {
 			return;
 		}
@@ -229,8 +229,9 @@ public class ChatLogger {
 		result[0] = appConfig.getAppType();
 		System.arraycopy(msg, 0, result, 1, msg.length);
 		CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder();
-		if (ArgUtil.is(inboxMessage.getMessageId())) {
-			builder.whereIdSafe(inboxMessage.getMessageId());
+
+		if (ArgUtil.is(inboxMessage.id())) {
+			builder.whereIdSafe(inboxMessage.id());
 			inboxMessage.trace().add(result);
 			builder.update().push("trace", result);
 			messageStore.updateFirst(builder.getQuery(), builder.getUpdate(), MessageDoc.class,

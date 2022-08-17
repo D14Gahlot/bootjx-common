@@ -19,7 +19,7 @@ import com.boot.jx.postman.manager.ChatLogger;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.Message;
 import com.boot.jx.postman.model.MessageDefinitions.IMessageExtended;
-import com.boot.jx.postman.model.MessageDefinitions.SessionInfo;
+import com.boot.jx.postman.model.MessageDefinitions.TraceMessage;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.model.ext.InBoundEvent;
 import com.boot.jx.postman.store.MessageContext;
@@ -245,7 +245,7 @@ public class ChatService {
 		return true;
 	}
 
-	private MessageContext loadChatContextInternal(String contactId, SessionInfo inboxMessage) {
+	private MessageContext loadChatContextInternal(String contactId, TraceMessage inboxMessage) {
 		LOGGER.debug("Loading chat conewxt");
 		if (!ArgUtil.is(inboxMessage.session().getMode())) {
 			ChatSessionDoc sessionDoc = messageContext.session().getDoc();
@@ -277,7 +277,7 @@ public class ChatService {
 			messageContext.chat().setSessionId(inboxMessage.getSessionId());
 			messageContext.chat().setRoutingId(inboxMessage.session().getRoutingId());
 		} else {
-			chatLogger.trace(getInboxMessage(), "ContinueOldSession", doc.getMeta());
+			chatLogger.trace(inboxMessage, "ContinueOldSession", doc.getMeta());
 		}
 
 		// messageStore.create(inboxMessage);

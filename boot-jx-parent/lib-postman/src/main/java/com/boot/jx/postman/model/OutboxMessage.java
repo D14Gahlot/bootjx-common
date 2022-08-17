@@ -139,4 +139,5 @@ public class OutboxMessage extends Message<OutboxMessage>
 	public void setTrace(List<Object> trace) {
 		this.trace = trace;
 	}
+
 }
