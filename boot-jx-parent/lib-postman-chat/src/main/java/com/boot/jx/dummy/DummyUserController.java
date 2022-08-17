@@ -132,7 +132,7 @@ public class DummyUserController {
 		event.contact().setLane("DUMMY");
 		event.from(number);
 		event.setMessage(message);
-		inBoundEngine.invokeMethods(event);
+		inBoundEngine.invokeMethodsAsync(event);
 		return event;
 	}
 
@@ -156,7 +156,7 @@ public class DummyUserController {
 		event.contact().setCsid(event.getFrom());
 		event.session().setAgent(null);
 		event.session().setDept(null);
-		inBoundService.invokeMethods(event);
+		inBoundService.invokeMethodsAsync(event);
 
 		String webSessionId = commonHttpRequest.get("web-session-id");
 		if (!ArgUtil.is(webSessionId) || !webSessionId.equalsIgnoreCase(event.getSessionId())) {

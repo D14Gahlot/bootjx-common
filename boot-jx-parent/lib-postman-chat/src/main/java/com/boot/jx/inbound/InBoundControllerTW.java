@@ -76,7 +76,7 @@ public class InBoundControllerTW {
 	List<InboxMessage> tmr = twitterConnector.process(channelConfig, update);
 	if (tmr != null && !tmr.isEmpty()) {
 	    for (InboxMessage event : tmr) {
-		inBoundService.invokeMethods(event);
+		inBoundService.invokeMethodsAsync(event);
 		twitterClient.getContext(channelConfig).getTwitter()
 			.destroyDirectMessage(Long.parseLong(event.getMessageIdExt()));
 	    }
@@ -93,7 +93,7 @@ public class InBoundControllerTW {
 	List<InboxMessage> tmr = twitterConnector.fetch(channelConfig);
 	if (tmr != null && !tmr.isEmpty()) {
 	    for (InboxMessage event : tmr) {
-		inBoundService.invokeMethods(event);
+		inBoundService.invokeMethodsAsync(event);
 		ctx.getTwitter().destroyDirectMessage(Long.parseLong(event.getMessageIdExt()));
 	    }
 	}

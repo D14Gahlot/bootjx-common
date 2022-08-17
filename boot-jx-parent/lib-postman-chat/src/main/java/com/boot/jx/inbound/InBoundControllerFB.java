@@ -57,7 +57,7 @@ public class InBoundControllerFB {
 		request.getEntry().forEach(pageEntry -> {
 			pageEntry.getMessaging().forEach(m -> {
 				InboxMessage event = facebookConnector.toInboxMessage(m, pageEntry.getId());
-				inBoundService.invokeMethods(event);
+				inBoundService.invokeMethodsAsync(event);
 				// facebooClient.sendReply(event.getContactId(), "Helo", pageEntry.getId());
 			});
 		});
@@ -72,7 +72,7 @@ public class InBoundControllerFB {
 		request.getEntry().forEach(pageEntry -> {
 			pageEntry.getMessaging().forEach(m -> {
 				InboxMessage event = facebookConnector.toInboxMessage(m, pageEntry.getId());
-				inBoundService.invokeMethods(event);
+				inBoundService.invokeMethodsAsync(event);
 			});
 		});
 		return request;

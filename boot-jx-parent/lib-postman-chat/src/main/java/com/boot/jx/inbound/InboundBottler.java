@@ -69,7 +69,7 @@ public class InboundBottler extends ATaskLimiter {
 		} else {
 			hold().put(contactId, "QUEUING");
 			logManager.trace(inboxMessage, "InboundBottler:push:invoked");
-			inBoundService.invokeMethods(inboxMessage);
+			inBoundService.invokeMethodsSync(inboxMessage);
 			hold().put(contactId, "DEQUEUING");
 		}
 		onhold = hold().get(contactId);
@@ -118,7 +118,7 @@ public class InboundBottler extends ATaskLimiter {
 			if (ArgUtil.is(doc)) {
 				if (ArgUtil.is(doc.getInboxMessage())) {
 					logManager.trace(doc.getInboxMessage(), "InboundBottler:dequeue:batch=" + batch);
-					inBoundService.invokeMethods(doc.getInboxMessage());
+					inBoundService.invokeMethodsSync(doc.getInboxMessage());
 				} else if (ArgUtil.is(doc.getEvent())) {
 					chatSessionService.sessionEvent(doc.getEvent(), doc.getPmArgs());
 				}

@@ -114,7 +114,7 @@ public class InBoundService extends ATaskLimiter {
 			proxyManager.hold(contactId);
 			// hold().put(contactId, "HOLDING");
 			// messageStore.hold(inboxMessageOriginal);
-			invokeMethodsInternalSafely(inboxMessageOriginal, true);
+			invokeMethodsInternalSafely(inboxMessageOriginal, false);
 			// if (inboxMessageOriginal.session().isFirstMessage()) {
 			// this.invokeMethodsRelease(inboxMessageOriginal);
 			// }
@@ -136,20 +136,24 @@ public class InBoundService extends ATaskLimiter {
 		}
 	}
 
-	public InboxMessage invokeMethods(InboxMessage inboxMessageOriginal) {
+	public InboxMessage invokeMethodsAsync(InboxMessage inboxMessageOriginal) {
+		return this.invokeMethodsInternalSafely(inboxMessageOriginal, true);
+	}
+
+	public InboxMessage invokeMethodsSync(InboxMessage inboxMessageOriginal) {
 		return this.invokeMethodsInternalSafely(inboxMessageOriginal, false);
 	}
 
-	private InboxMessage invokeMethodsInternalSafely(InboxMessage inboxMessageOriginal, boolean newThread) {
+	private InboxMessage invokeMethodsInternalSafely(InboxMessage inboxMessageOriginal, boolean asyncMode) {
 		try {
-			return this.invokeMethodsInternal(inboxMessageOriginal, newThread);
+			return this.invokeMethodsInternal(inboxMessageOriginal, asyncMode);
 		} catch (Exception e) {
 			messageStore.reject(inboxMessageOriginal);
 		}
 		return inboxMessageOriginal;
 	}
 
-	private InboxMessage invokeMethodsInternal(InboxMessage inboxMessageOriginal, boolean newThread) {
+	private InboxMessage invokeMethodsInternal(InboxMessage inboxMessageOriginal, boolean asyncMode) {
 
 		PMConfigurationObject proxyConfig = pmEnvironment.keyEntry("mry.proxy.enabled");
 		String contactId = PostManUtil.CONTACT_ID(inboxMessageOriginal.contact());
@@ -228,10 +232,10 @@ public class InBoundService extends ATaskLimiter {
 			if (chatClientConfig.isLocalDummyBotEnabled()) {
 				botEngine.invokeMethodsAsync(inboxMessageOriginal);
 			} else if (ArgUtil.is(inBoundHandler)) {
-				if (newThread) {
-					inBoundHandler.onMessage(inboxMessageOriginal, session);
-				} else {
+				if (asyncMode) {
 					inBoundHandler.onMessageAsync(inboxMessageOriginal, session);
+				} else {
+					inBoundHandler.onMessage(inboxMessageOriginal, session);
 				}
 			} else if (botEngine.isChatBotDefined()) { // TODO:-- TO be removed
 				botEngine.invokeMethodsAsync(inboxMessageOriginal);
