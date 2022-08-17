@@ -126,7 +126,7 @@ public class ConfigConstants {
 				.defaultValue(PMConstants.CHAT_SESSION_STICKY.NONE).group(GROUP_AGENT)),
 
 		POSTMAN_AGENT_HEADER(new ConfigMeta("Header of Messsage Sent by agent", "postman.agent.chat.header")
-				.desc("Use {{agent}} for agent name")),
+				.desc("Use {{agent}} for agent name").group(GROUP_AGENT)),
 
 		POSTMAN_AGENT_SCHEME_COLOR(new ConfigMeta("Agent Panel Color Scheme", "postman.agent.scheme.color")
 				.inputType(INPUT_TYPE.COLOR).defaultValue("#4267b2").group(GROUP_AGENT)),
