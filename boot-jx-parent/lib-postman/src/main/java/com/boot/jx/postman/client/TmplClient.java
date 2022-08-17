@@ -106,4 +106,11 @@ public class TmplClient {
 		return outboxMessage;
 	}
 
+	public String process(String template, Object model) {
+		if (ArgUtil.is(iCommonTmplPackage)) {
+			return iCommonTmplPackage.process(template, model);
+		}
+		return template;
+	}
+
 }

@@ -14,7 +14,7 @@ public class AgentService {
 
 	@Autowired(required = false)
 	private AgentChatHandler agentChatHandler;
-
+	
 	public InboxMessage onMessage(InboxMessage inboxMessage) {
 		return agentChatHandler.onMessageReceive(inboxMessage);
 	}

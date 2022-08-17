@@ -28,6 +28,8 @@ import com.boot.jx.postman.PMConstants.CHAT_SESSION_ACTIONS;
 import com.boot.jx.postman.PMConstants.DEFAULT;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PMEnvironment.PMClientConfig;
+import com.boot.jx.postman.PMEnvironment.PMConfigurationObject;
+import com.boot.jx.postman.client.TmplClient;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.dto.ChatMessageDTO;
@@ -45,7 +47,6 @@ import com.boot.jx.stomp.StompQuery;
 import com.boot.jx.stomp.StompTunnelService;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.model.MapModel;
-import com.boot.model.MapModel.MapEntry;
 import com.boot.model.MapModel.MapPathEntry;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
@@ -99,6 +100,9 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 
 	@Autowired
 	MessageContext messageContext;
+
+	@Autowired
+	TmplClient tmplClient;
 
 	private AgentSessionDoc getAgentSessonAssigned(PMArgs inboxMessage) {
 
@@ -342,6 +346,10 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 				break;
 			}
 		} else {
+			PMConfigurationObject header = environment.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_AGENT_HEADER);
+			if (header.exists() && !ArgUtil.is(outboxMessage.getSubject())) {
+				tmplClient.process(outboxMessage.getSubject(), outboxMessage.session());
+			}
 			sessionStore.updateResponseTime(sessionDoc);
 			MessageDoc messageDoc = chatService.send(sessionDoc, outboxMessage);
 			return chatArchive.getMessage(messageDoc, sessionDoc);
