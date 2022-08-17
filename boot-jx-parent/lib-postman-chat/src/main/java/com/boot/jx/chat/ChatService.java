@@ -273,6 +273,7 @@ public class ChatService {
 			LOGGER.debug("Loading chat conewxt:newSession");
 			chatLogger.trace(inboxMessage, "NewSession", doc.getMeta(), inboxMessage.session());
 			messageContext.chat().setMeta(new ChatMeta());
+			messageContext.commitChatContextQuery();
 			messageContext.chat().setQueueCode(inboxMessage.session().getQueue());
 			messageContext.chat().setSessionId(inboxMessage.getSessionId());
 			messageContext.chat().setRoutingId(inboxMessage.session().getRoutingId());

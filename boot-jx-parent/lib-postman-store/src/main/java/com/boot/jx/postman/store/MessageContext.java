@@ -197,6 +197,12 @@ public class MessageContext {
 			commonMongoTemplate.updateFirst(this.chatContactQuery);
 		}
 	}
+	
+	public void commitChatContextQuery() {
+		if (this.chatContextQuery != null) {
+			commonMongoTemplate.updateFirst(this.chatContextQuery);
+		}
+	}
 
 	public ChatContactDoc commit() {
 		if (chatContactQuery != null) {

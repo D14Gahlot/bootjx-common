@@ -178,8 +178,8 @@ public class CommonMongoTemplateAbstract extends CommonMongoTemplateDefault {
 				builder.updatedStamp();
 				ret = mongoTemplate.upsert(builder.getQuery(), builder.getUpdate(), builder.getDocClass());
 			} catch (Exception e) {
-				LOGGER.debug("Query:{}", builder.getQuery().toString());
-				LOGGER.debug("Update:{}", builder.getUpdate().toString());
+				LOGGER.warn("Query:{}", builder.getQuery().toString());
+				LOGGER.warn("Update:{}", builder.getUpdate().toString());
 				throw e;
 			}
 		}
