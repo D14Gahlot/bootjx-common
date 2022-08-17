@@ -300,7 +300,7 @@ public class BulkMessageService extends BatchJobExecuter {
 		return completed;
 	}
 	/** Parsing csv file **/
-	public BulkSessionDoc uploadFile(OutboxMessage bulkMessage ,MultipartFile file) throws NumberParseException {
+	public BulkSessionDoc uploadFile(MultipartFile file) throws NumberParseException {
 		try {
 			readFile(file.getInputStream());
 		} catch (IOException e) {
