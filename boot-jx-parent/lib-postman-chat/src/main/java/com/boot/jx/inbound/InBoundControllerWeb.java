@@ -44,8 +44,8 @@ import com.boot.jx.postman.doc.VisitorActivityDoc;
 import com.boot.jx.postman.dto.ChatMessageDTO;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.MessageBoxEvent;
-import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.model.MessageDefinitions.Contactable;
+import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.postman.query.ChatContactQuery;
 import com.boot.jx.postman.service.ChatDTOUtil;
@@ -179,12 +179,13 @@ public class InBoundControllerWeb {
 	@ResponseBody
 	@RequestMapping(value = { "/ext/outbound/web/callback/v2", "/ext/plugin/outbound/web/callback/v2" },
 			method = RequestMethod.GET)
-	public ApiResponse<OutboxMessage, Object> onReceiveMessage2(@RequestParam(required = false) String number,
+	public ApiResponse<Object, Object> onReceiveMessage2(@RequestParam(required = false) String number,
 			@RequestParam(required = false) String csid, @RequestParam(required = false) String channelId,
-			@RequestParam(required = false) String channelKey) throws InterruptedException {
+			@RequestParam(required = false) String channelKey, @RequestParam(required = false) String sessionId)
+			throws InterruptedException {
 		ChannelConfig channelConfig = pmEnvironment.config().channel(channelId);
-		return ApiResponse.buildResults(dummyConnector
-				.pollAllUnreadMessage(AppContextUtil.getTenant() + "/" + PostManUtil.CONTACT_ID(channelConfig, csid)));
+		return ApiResponse.buildResults(dummyConnector.pollAllUnreadMessage(
+				AppContextUtil.getTenant() + "/" + PostManUtil.CONTACT_ID(channelConfig, csid), sessionId));
 	}
 
 	@ApiRequest(session = true)
@@ -326,7 +327,7 @@ public class InBoundControllerWeb {
 
 				messageBoxEvent.getInboxMessages().forEach(inboxMessage -> {
 					inBoundService.invokeMethodsAsync(inboxMessage);
-					//inboundBottler.push(inboxMessage);
+					// inboundBottler.push(inboxMessage);
 					sessionMessage.setSessionId(inboxMessage.getSessionId());
 					sessionMessage.setContact(sessionMessage.getContact());
 				});
