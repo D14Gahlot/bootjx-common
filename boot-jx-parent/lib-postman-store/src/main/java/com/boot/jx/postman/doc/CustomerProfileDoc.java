@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.List;
 
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import com.boot.jx.postman.pbook.PBAddress;
@@ -21,6 +22,7 @@ public class CustomerProfileDoc implements Serializable {
 	@Id
 	public String id;
 
+	@Indexed(sparse = true, unique = true)
 	public String userId;
 
 	public PBName name;
@@ -29,5 +31,7 @@ public class CustomerProfileDoc implements Serializable {
 	public List<PBEmail> emails;
 	public List<PBAddress> aaddresses;
 	public List<PBWebsite> urls;
+
+	public String rmAgentCode;
 
 }
