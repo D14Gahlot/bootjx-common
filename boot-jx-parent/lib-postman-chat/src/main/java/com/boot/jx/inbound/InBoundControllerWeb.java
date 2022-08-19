@@ -212,11 +212,11 @@ public class InBoundControllerWeb {
 			@RequestParam(required = false) String userToken, // phone Set by DomainService
 			@RequestParam(required = false) String userName, // phone Set by DomainService
 			@RequestParam(required = false) String userEmail, // email Set by DomainService
-			@RequestParam(required = false) String userPhone // phone Set by DomainService,
+			@RequestParam(required = false) String userPhone, // phone Set by DomainService,
+			@RequestParam(required = false) String csid // ForBackward
 	) throws InterruptedException {
 
 		String webSessionId = null;
-		String csid = null;
 		String contactId = null;
 		ChatSessionDoc session = null;
 		ChannelConfig channelConfig = pmEnvironment.config().channel(channelId);
@@ -230,7 +230,7 @@ public class InBoundControllerWeb {
 			session = chatSessionFactory.getChatSessionByContactId(contactId, null);
 		} else {
 			webSessionId = commonHttpRequest.get(webSessionIdKey);
-			csid = "g" + ArgUtil.nonEmpty(browserfp, number);
+			csid = "g" + ArgUtil.nonEmpty(browserfp, number, csid, UniqueID.generate());
 			msg.contact().setCsid(csid);
 			contactId = PostManUtil.CONTACT_ID(channelConfig, csid);
 			if (ArgUtil.is(webSessionId)) {
