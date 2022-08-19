@@ -217,6 +217,7 @@ public class InBoundControllerWeb {
 	) throws InterruptedException {
 
 		String webSessionId = null;
+		String webSessionIdValid = null;
 		String contactId = null;
 		ChatSessionDoc session = null;
 		ChannelConfig channelConfig = pmEnvironment.config().channel(channelId);
@@ -255,6 +256,7 @@ public class InBoundControllerWeb {
 
 		List<ChatMessageDTO> msgs = new ArrayList<ChatMessageDTO>();
 		if (ArgUtil.is(session)) {
+			webSessionIdValid = session.getSessionId();
 			List<MessageDoc> messages = messageStore.findBySessionId(session.getSessionId(),
 					ContactType.WEBSITE.toString());
 			for (MessageDoc messageDoc : messages) {
@@ -267,7 +269,7 @@ public class InBoundControllerWeb {
 
 		MapModel meta = MapModel.createInstance();
 		meta.put("webSessionIdKey", webSessionIdKey);
-		meta.put("webSessionId", webSessionId);
+		meta.put("webSessionId", webSessionIdValid);
 		meta.put("csid", csid);
 
 		StompSession stomp = null;
