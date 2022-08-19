@@ -1,6 +1,5 @@
 package com.boot.jx.chat;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import org.redisson.api.RedissonClient;
@@ -11,7 +10,9 @@ import com.boot.jx.AppConfigPackage.AppSharedConfig;
 import com.boot.jx.AppContextUtil;
 import com.boot.jx.cache.CacheBox;
 import com.boot.jx.def.ICacheBox;
+import com.boot.jx.postman.model.InboxMessage;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.JsonUtil;
 
 @Component
 public class ChatProxyManager implements AppSharedConfig {
@@ -19,12 +20,12 @@ public class ChatProxyManager implements AppSharedConfig {
 	@Autowired(required = false)
 	private RedissonClient redisson;
 
-	private Map<String, String> proxyManager;
+	private CacheBox<String> proxyManager;
 
-	public Map<String, String> proxy() {
+	public CacheBox<String> proxy() {
 		if (redisson != null && proxyManager == null) {
-			this.proxyManager = new HashMap<String, String>();
-			// this.proxyManager = CacheBox.getInstance("InBoundService-Proxy", redisson);
+			// this.proxyManager = new HashMap<String, String>();
+			this.proxyManager = CacheBox.getInstance("InBoundService-Proxy", redisson);
 		}
 		return this.proxyManager;
 	}
@@ -64,9 +65,36 @@ public class ChatProxyManager implements AppSharedConfig {
 		return ArgUtil.isEqual(status, "HOLDING");
 	}
 
+	// Holder
+	private CacheBox<String> firstMessage;
+
+	public ICacheBox<String> firstMessage() {
+		if (redisson != null && firstMessage == null) {
+			this.firstMessage = CacheBox.getInstance("InBoundService-firstMessage-v2", redisson);
+		}
+		return this.firstMessage;
+	}
+
+	public void first(InboxMessage inboxMessageOriginal) {
+		if (ArgUtil.is(inboxMessageOriginal.getSessionId())) {
+			this.firstMessage().put(inboxMessageOriginal.getSessionId(), JsonUtil.toJson(inboxMessageOriginal));
+		}
+	}
+
+	public InboxMessage first(String sessionId) {
+		if (ArgUtil.is(sessionId)) {
+			String x = this.firstMessage().remove(sessionId);
+			if (ArgUtil.is(x)) {
+				return JsonUtil.parse(x, InboxMessage.class);
+			}
+		}
+		return null;
+	}
+
 	@Override
 	public void clear(Map<String, String> map) {
 		String tnt = AppContextUtil.getTenant();
 
 	}
+
 }

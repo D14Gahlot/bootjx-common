@@ -19,6 +19,7 @@ import com.boot.jx.chat.ChatProxyManager;
 import com.boot.jx.chat.ChatSessionFactory;
 import com.boot.jx.chat.ChatSessionService;
 import com.boot.jx.chat.ChatStatusService;
+import com.boot.jx.dict.ContactType;
 import com.boot.jx.inbound.InBound.InBoundFilter;
 import com.boot.jx.inbound.InBound.InBoundHandler;
 import com.boot.jx.inbound.InBound.InBoundProcessor;
@@ -37,6 +38,7 @@ import com.boot.jx.tunnel.ITunnelDefs.TunnelTask;
 import com.boot.jx.tunnel.task.ATaskLimiter;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.CollectionUtil;
 import com.boot.utils.Constants;
 import com.boot.utils.StringUtils.StringMatcher;
 import com.boot.utils.UniqueID;
@@ -217,10 +219,19 @@ public class InBoundService extends ATaskLimiter {
 			boolean wasSessionInitd = session.isInitd();
 			boolean isSessionInitd = chatSessionService.initSession(inboxMessageOriginal, session);
 			if (!isSessionInitd) {
+				if (inboxMessageOriginal.session().isFirstMessage()) {
+					proxyManager.first(inboxMessageOriginal);
+				}
 				return inboxMessageOriginal;
 			}
+
 			if (isSessionInitd && (wasSessionInitd != isSessionInitd)) {
 				chatSessionService.initSessionPost(inboxMessageOriginal, session);
+				InboxMessage inboxMessageFirst = proxyManager.first(session.getSessionId());
+				if (ArgUtil.is(inboxMessageFirst)) {
+					inboxMessageOriginal = inboxMessageFirst;
+					messageContext.setInboxMessage(inboxMessageOriginal);
+				}
 			}
 
 		}
