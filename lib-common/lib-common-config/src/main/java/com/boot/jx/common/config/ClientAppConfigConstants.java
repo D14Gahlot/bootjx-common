@@ -159,8 +159,12 @@ public class ClientAppConfigConstants {
 
 				new ConfigMeta().title("No/Wrong Options Template")
 						.desc("Use coding convetions in template for this to work").path("props.noption_template")
-						.group("TEMPLATES").optionsSource("getx:/api/tmpl/hsm").optionsKey("code")
-						.optionsLabel("code") });
+						.group("TEMPLATES").optionsSource("getx:/api/tmpl/hsm").optionsKey("code").optionsLabel("code"),
+
+				new ConfigMeta().title("No/Wrong Options Actions").desc("Default action for No/Wrong option")
+						.path("props.noption_action").group("TEMPLATES")
+
+		});
 
 		APP_CONFIGS.put(APP_TYPE.FEEDBACK,
 				new ConfigMeta[] { new ConfigMeta().inputType(INPUT_TYPE.MESSAGE, MESSAGE_TYPE.INFO).title("Feedback")

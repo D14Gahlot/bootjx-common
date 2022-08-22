@@ -49,6 +49,14 @@ public class QuickMenuController extends CommonBotController {
 
 	private void showWrongOptionMenu() {
 		ClientApp app = context().clientApp();
+
+		String action = ArgUtil.parseAsString(app.props().get("noption_action"));
+		if (ArgUtil.is(action)) {
+			if (selectQuickOption(action)) {
+				return;
+			}
+		}
+
 		String template = ArgUtil.parseAsString(app.props().get("noption_template"));
 		if (ArgUtil.is(template)) { // item_menu_template
 			reply(new OutboxMessage().template(template));
@@ -73,6 +81,12 @@ public class QuickMenuController extends CommonBotController {
 	@ChatMapping(key = "on_item_select")
 	public void onItemSelect(InboxMessage inboxMessage, StringMatcher matcher) {
 		String text = toReplyEnum(inboxMessage);
+		if (!selectQuickOption(text)) {
+			showWrongOptionMenu();
+		}
+	}
+
+	private boolean selectQuickOption(String text) {
 		String[] texts = StringUtils.split(text, " ");
 		String commond = ArgUtil.parseAsString(StringUtils.trim(texts[0]), Constants.BLANK);
 		String sign = commond.substring(0, 1);
@@ -83,17 +97,17 @@ public class QuickMenuController extends CommonBotController {
 			case "!":
 				reply(new OutboxMessage().template(code));
 				next("on_item_select");
-				return;
+				return true;
 			case "#":
 				if (ArgUtil.is(code)) {
 					assignToAgentDepartment(code);
 				} else {
 					assignToDefaultAgent();
 				}
-				return;
+				return true;
 			case "@":
 				routeSession(code);
-				return;
+				return true;
 			case "/":
 				if (ArgUtil.is(code)) {
 					List<QuickAction> items = commonMongoTemplate.findGalleryItems(code, QuickAction.class);
@@ -103,16 +117,16 @@ public class QuickMenuController extends CommonBotController {
 								|| ArgUtil.areEqual(StringUtils.toLowerCase(item.getTitle()), text)) {
 							sendQuickAction(item);
 							next("on_item_select");
-							return;
+							return true;
 						}
 					}
 					if ("exit_chat".equals(code)) {
 						this.closeSession();
-						return;
+						return true;
 					}
 					if ("resolve_chat".equals(code)) {
 						this.resolveSession();
-						return;
+						return true;
 					}
 				}
 			case "&":
@@ -124,7 +138,7 @@ public class QuickMenuController extends CommonBotController {
 								|| ArgUtil.areEqual(StringUtils.toLowerCase(item.getTitle()), text)) {
 							sendQuickMedia(item);
 							next("on_item_select");
-							return;
+							return true;
 						}
 					}
 				}
@@ -137,13 +151,13 @@ public class QuickMenuController extends CommonBotController {
 								|| ArgUtil.areEqual(StringUtils.toLowerCase(item.getTitle()), text)) {
 							sendQuickReply(item);
 							next("on_item_select");
-							return;
+							return true;
 						}
 					}
 				}
 			}
 		}
-		showWrongOptionMenu();
+		return false;
 	}
 
 	private void sendQuickMedia(QuickMedia media) {
