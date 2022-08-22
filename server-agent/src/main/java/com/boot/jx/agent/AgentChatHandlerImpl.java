@@ -10,6 +10,7 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Component;
 
+import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.chat.ChatCommands;
 import com.boot.jx.chat.ChatService;
 import com.boot.jx.chat.ChatSessionService;
@@ -246,6 +247,15 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 	 * @param agentCode
 	 */
 	public void onAssign(ChatSessionDoc chatSessionDoc, String agentDept, String agentCode) {
+
+		if (ArgUtil.is(chatSessionDoc.getAssignedToAgent()) && !agentSession.isAdmin()) {
+			boolean canPickAssigned = environment.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_AGENT_CHAT_PICK_ASSIGNED)
+					.asBoolean(true);
+			if (!canPickAssigned) {
+				ApiResponseUtil.throwAccessDeniedException("Not Allowed, Contact Admin");
+			}
+		}
+
 		if (!ArgUtil.areEqual(chatSessionDoc.getAssignedToAgent(), agentCode)
 				|| !ArgUtil.areEqual(chatSessionDoc.getAssignedToDept(), agentDept)) {
 

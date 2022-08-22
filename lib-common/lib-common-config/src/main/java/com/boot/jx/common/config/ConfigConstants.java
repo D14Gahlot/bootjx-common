@@ -106,6 +106,10 @@ public class ConfigConstants {
 				new ConfigMeta("Agent can INTERRUPT existing chat with bot", "postman.agent.chat.pick.bot")
 						.optionsOnOff().group(GROUP_AGENT)),
 
+		POSTMAN_AGENT_CHAT_PICK_ASSIGNED(
+				new ConfigMeta("Agent can INTERRUPT existing chat with other agent", "postman.agent.chat.pick.assigned")
+						.optionsOnOff().group(GROUP_AGENT)),
+
 		POSTMAN_AGENT_CHAT_CC_FREETEXT(
 				new ConfigMeta("Agent can send FreeText out of Customer Care Window", "postman.agent.chat.freetext.cc")
 						.desc("Message can fail if selected channel does not permit").optionsOnOff()

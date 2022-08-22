@@ -224,6 +224,7 @@ public class AgChatSessionController {
 			@RequestParam(required = false) String agentId, @RequestParam(required = false) String agentCode,
 			@RequestParam(required = false) String deptCode, @RequestParam(required = false) String deptId) {
 		ChatSessionDoc chatSessionDoc = sessionStore.getSession(sessionId);
+
 		if (ArgUtil.is(agentId)) {
 			AgentDoc agent = agentStore.findById(agentId);
 			agentChatHandlerImpl.onAssign(agent, chatSessionDoc);
@@ -233,7 +234,7 @@ public class AgChatSessionController {
 		} else if (ArgUtil.is(deptCode)) {
 			agentChatHandlerImpl.onAssign(chatSessionDoc, deptCode, agentCode);
 		}
-		
+
 		ChatSessionDTO chatSessionDto = chatArchiveBuilder.sessionDTO().from(chatSessionDoc).withContact()
 				.isAssigned(agentSession.getAgentCode()).withMessages().get();
 		return ApiResponse.buildResult(chatSessionDto);
