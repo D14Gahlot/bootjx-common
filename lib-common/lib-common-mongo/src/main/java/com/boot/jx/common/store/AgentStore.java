@@ -49,15 +49,23 @@ public class AgentStore {
 		return mongoTemplate.findOne(builder.getQuery(), AgentDoc.class);
 	}
 
+	public List<DepartmentDoc> findDepartmentAll(boolean showInActive) {
+		if (showInActive) {
+			return mongoTemplate.findAll(DepartmentDoc.class);
+		}
+		CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder().where("isactive", "Y");
+		return mongoTemplate.find(builder.getQuery(), DepartmentDoc.class);
+	}
+
 	public List<DepartmentDoc> findDepartmentAll() {
-		return mongoTemplate.findAll(DepartmentDoc.class);
+		return findDepartmentAll(false);
 	}
 
 	public DepartmentDoc findDepartmentById(String deptId) {
 		CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder().whereId(deptId);
 		return mongoTemplate.findOne(builder.getQuery(), DepartmentDoc.class);
 	}
-	
+
 	public DepartmentDoc findDepartmentByCode(String deptCode) {
 		CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder().whereId(deptCode);
 		return mongoTemplate.findOne(builder.getQuery(), DepartmentDoc.class);
