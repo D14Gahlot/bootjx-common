@@ -43,8 +43,8 @@ public class AdminService {
 	@Autowired
 	private DocumentUpdateListner documentUpdateListner;
 
-	public List<AgentResponseAdminDto> fetchAgents(String agentId) {
-		List<AgentDoc> lstOfAgent = adminManager.fetchAgentList(agentId);
+	public List<AgentResponseAdminDto> fetchAgents(String agentId, boolean includeInActive) {
+		List<AgentDoc> lstOfAgent = adminManager.fetchAgentList(agentId,includeInActive);
 		return buildAgentDto(lstOfAgent);
 	}
 
@@ -66,8 +66,8 @@ public class AdminService {
 		return new DepartmentResponseAdminDto().importFrom(adminManager.createOrUpdateDepartment(reqEntity));
 	}
 
-	public List<DepartmentResponseAdminDto> fetchDepts(String deptId) {
-		List<DepartmentDoc> lstDept = adminManager.fetchDept(deptId);
+	public List<DepartmentResponseAdminDto> fetchDepts(String deptId, boolean includeInActive) {
+		List<DepartmentDoc> lstDept = adminManager.fetchDept(deptId, includeInActive);
 		return new DepartmentResponseAdminDto().importFrom(lstDept);
 	}
 

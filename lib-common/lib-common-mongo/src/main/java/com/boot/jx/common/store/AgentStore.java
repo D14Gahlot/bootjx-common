@@ -5,12 +5,14 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Component;
 
 import com.boot.jx.common.doc.AgentDoc;
 import com.boot.jx.common.doc.DepartmentDoc;
+import com.boot.jx.mongo.CommonMongoQB;
+import com.boot.jx.mongo.CommonMongoQB.CommonMongoQBimpl;
 import com.boot.jx.mongo.CommonMongoQueryBuilder;
+import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.utils.ArgUtil;
 
@@ -20,7 +22,7 @@ public class AgentStore {
 	private static final Logger LOGGER = LoggerFactory.getLogger(AgentStore.class);
 
 	@Autowired
-	MongoTemplate mongoTemplate;
+	CommonMongoTemplate mongoTemplate;
 
 	public void updateMulti(CommonMongoQueryBuilder builder, Class<?> entityClass) {
 		mongoTemplate.updateMulti(builder.getQuery(), builder.getUpdate(), entityClass);
@@ -34,9 +36,18 @@ public class AgentStore {
 		return mongoTemplate.findAll(AgentDoc.class);
 	}
 
+	public List<AgentDoc> findAllAgents(boolean includeInActive) {
+		CommonMongoQB<CommonMongoQBimpl<AgentDoc>, AgentDoc> builder = CommonMongoQueryBuilder
+				.collection(AgentDoc.class);
+		if (!includeInActive) {
+			builder.where("isactive", "Y");
+		}
+		builder.sortBy("agent_code");
+		return mongoTemplate.find(builder);
+	}
+
 	public List<AgentDoc> findAllActive() {
-		CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder().where("isactive", "Y");
-		return mongoTemplate.find(builder.getQuery(), AgentDoc.class);
+		return findAllAgents(false);
 	}
 
 	public AgentDoc findById(String agentId) {

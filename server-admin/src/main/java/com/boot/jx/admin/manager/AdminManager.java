@@ -94,16 +94,19 @@ public class AdminManager {
 		fetchAgentList(null);
 	}
 
-	public List<AgentDoc> fetchAgentList(String agentId) {
+	public List<AgentDoc> fetchAgentList(String agentId, boolean includeInActive) {
 		List<AgentDoc> agentList = new ArrayList<AgentDoc>();
 		if (ArgUtil.is(agentId)) {
 			AgentDoc agent = mongoTemplate.findOne(new Query(Criteria.where("_id").is(agentId)), AgentDoc.class);
 			agentList.add(agent);
 		} else {
-			agentList = commonMongoTemplate
-					.find(CommonMongoQueryBuilder.collection(AgentDoc.class).sortBy("agent_code"));
+			agentList = agentStore.findAllAgents(includeInActive);
 		}
 		return agentList;
+	}
+
+	private List<AgentDoc> fetchAgentList(String agentId) {
+		return fetchAgentList(agentId, true);
 	}
 
 	public List<AgentDoc> updateAgentActive(String agentId, String status) {
@@ -171,16 +174,20 @@ public class AdminManager {
 		return fetchDept(null);
 	}
 
-	public List<DepartmentDoc> fetchDept(String deptId) {
+	public List<DepartmentDoc> fetchDept(String deptId, boolean includeInActive) {
 		List<DepartmentDoc> lstDept = new ArrayList<DepartmentDoc>();
 		if (ArgUtil.is(deptId)) {
 			DepartmentDoc dept = mongoTemplate.findOne(new Query(Criteria.where("_id").is(deptId)),
 					DepartmentDoc.class);
 			lstDept.add(dept);
 		} else {
-			lstDept = mongoTemplate.findAll(DepartmentDoc.class);
+			lstDept = agentStore.findDepartmentAll(includeInActive);
 		}
 		return lstDept;
+	}
+
+	public List<DepartmentDoc> fetchDept(Object object) {
+		return fetchDept(duperAdminEmail, false);
 	}
 
 	public List<DepartmentDoc> updateDeptStatus(Integer deptId, String status) {
