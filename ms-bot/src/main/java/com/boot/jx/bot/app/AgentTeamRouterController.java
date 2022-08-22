@@ -58,6 +58,14 @@ public class AgentTeamRouterController extends CommonBotController {
 				return;
 			}
 		}
+
+		ClientApp app = context().clientApp();
+		String deptCode = ArgUtil.parseAsString(app.props().get("deptCode"));
+		if (ArgUtil.is(deptCode)) {
+			assignToAgentDepartment(deptCode);
+			return;
+		}
+
 		askTeam(teams);
 	}
 

@@ -75,7 +75,9 @@ public class ClientAppConfigConstants {
 
 						new ConfigMeta().title("Default Agent Queue").path("props.agent_queue")
 								.desc("Default Agent App").optionsSource("getx:/api/options/agent_queue")
-								.optionsKey("code").optionsLabel("code") });
+								.optionsKey("code").optionsLabel("code")
+
+				});
 
 		APP_CONFIGS.put(APP_TYPE.TEAM_ROUTER, new ConfigMeta[] { new ConfigMeta()
 				.inputType(INPUT_TYPE.MESSAGE, MESSAGE_TYPE.INFO).title("Team Router")
@@ -83,7 +85,15 @@ public class ClientAppConfigConstants {
 				.group("About App"),
 
 				new ConfigMeta().title("Team Options Template").path("props.template").group("TEMPLATES")
-						.optionsSource("getx:/api/tmpl/hsm").optionsKey("code").optionsLabel("desc") });
+						.optionsSource("getx:/api/tmpl/hsm").optionsKey("code").optionsLabel("desc"),
+
+				new ConfigMeta().title("Default Agent Team").path("props.deptCode")
+						.optionsSource("getx:/api/admins/dept").optionsKey("code").optionsLabel("Name").group("Team"),
+
+				new ConfigMeta().title("Default Agent Queue").path("props.agent_queue").desc("Default Agent App")
+						.optionsSource("getx:/api/options/agent_queue").optionsKey("code").optionsLabel("code"),
+
+		});
 
 		APP_CONFIGS.put(APP_TYPE.APP_SWITCH, new ConfigMeta[] { new ConfigMeta()
 				.inputType(INPUT_TYPE.MESSAGE, MESSAGE_TYPE.INFO).title("App Switch Menu")
