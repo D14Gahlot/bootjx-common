@@ -186,8 +186,8 @@ public class AdminManager {
 		return lstDept;
 	}
 
-	public List<DepartmentDoc> fetchDept(Object object) {
-		return fetchDept(duperAdminEmail, false);
+	public List<DepartmentDoc> fetchDept(String id) {
+		return fetchDept(id, true);
 	}
 
 	public List<DepartmentDoc> updateDeptStatus(Integer deptId, String status) {
