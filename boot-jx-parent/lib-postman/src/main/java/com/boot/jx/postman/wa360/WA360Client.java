@@ -28,6 +28,7 @@ import com.boot.jx.postman.wa360.WA360Constants.TmplComponent;
 import com.boot.jx.rest.RestService;
 import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.CollectionUtil;
 import com.boot.utils.Constants;
 import com.boot.utils.JsonPath;
 import com.boot.utils.StringUtils;
@@ -203,34 +204,33 @@ public class WA360Client {
 					components.add(bodyComponent.build().map());
 				}
 			} else if ("BUTTONS".equals(extTemplateComponentType)) {
-				if (varMap.containsKey("buttons")) {
+				List<Map<String, Object>> extTemplateComponentButtons = MapModel.from(extTemplateComponent)
+						.keyEntry("buttons").asListOfMap();
+				List<List<Map<String, Object>>> buttonsParametersVars = varMap.entry("buttons").asListListOfMap();
 
-					List<Map<String, Object>> extTemplateComponentButtons = MapModel.from(extTemplateComponent)
-							.keyEntry("buttons").asListOfMap();
-					List<Map<String, Object>> buttonsParametersVars = varMap.entry("buttons").asListOfMap();
-
-					for (int i = 0; i < extTemplateComponentButtons.size(); i++) {
-						Map<String, Object> extTemplateComponentButton = extTemplateComponentButtons.get(i);
-						Map<String, Object> buttonParameterVar = buttonsParametersVars.get(i);
-						String buttonType = (String) extTemplateComponentButton.get("type");
-						if ("URL".equals(buttonType)) {
-							if (buttonParameterVar.containsKey("path")) {
-								String path = (String) buttonParameterVar.get("path");
+				for (int i = 0; i < extTemplateComponentButtons.size(); i++) {
+					Map<String, Object> extTemplateComponentButton = extTemplateComponentButtons.get(i);
+					List<Map<String, Object>> buttonParameterVar = CollectionUtil.getArray(buttonsParametersVars, i);
+					String buttonType = (String) extTemplateComponentButton.get("type");
+					if ("URL".equals(buttonType)) {
+						for (Map<String, Object> buttonParameter : buttonParameterVar) {
+							if (buttonParameter.containsKey("path")) {
+								String path = (String) buttonParameter.get("path");
 								TmplComponent buttonComponent = TmplComponent.createInstance().button("url", i);
 								buttonComponent.parameter("text", model.pathEntry(path).asString());
 								components.add(buttonComponent.build().map());
 							}
-						} else if ("QUICK_REPLY".equals(buttonType)) {
-							if (buttonParameterVar.containsKey("path")) {
-								String path = (String) buttonParameterVar.get("path");
+						}
+					} else if ("QUICK_REPLY".equals(buttonType)) {
+						for (Map<String, Object> buttonParameter : buttonParameterVar) {
+							if (buttonParameter.containsKey("path")) {
+								String path = (String) buttonParameter.get("path");
 								TmplComponent buttonComponent = TmplComponent.createInstance().button("quick_reply", i);
 								buttonComponent.parameter("payLoad", model.pathEntry(path).asString());
 								components.add(buttonComponent.build().map());
 							}
-
 						}
 					}
-
 				}
 			}
 

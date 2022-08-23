@@ -37,7 +37,7 @@ public class TmplHSMController {
 
 	@RequestMapping(value = "/api/tmpl/hsm/link", method = { RequestMethod.POST })
 	public ApiResponse<HSMTemplate3rdParty, Object> linkWabaTemplates(@RequestParam String templateId,
-			@RequestParam String hsmTemplateId) {
+			@RequestParam(required = false) String hsmTemplateId) {
 		return new ApiResponse<HSMTemplate3rdParty, Object>()
 				.data(thirdPartyTmplManager.link(templateId, hsmTemplateId));
 	}

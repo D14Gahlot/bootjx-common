@@ -318,6 +318,7 @@ public class WA360Connector extends AbstractConnector<WA360ConfigDetails, WA360P
 		} catch (AmxApiException e) {
 			outboxMessage.updateStatus(OutboxMessage.Status.SENT_ERR);
 			outboxMessage.logs().add(((AmxApiException) e).getErrorKey());
+			outboxMessage.logs().add(e.getMessage());
 		}
 	}
 
