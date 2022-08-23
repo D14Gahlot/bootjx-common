@@ -107,6 +107,22 @@ public class CommonDocInterfaces {
 	public static interface IDocument {
 	}
 
+	@JsonIgnoreProperties(ignoreUnknown = true)
+	public static interface ResourceDocument {
+		public String getId();
+
+		public void setId(String id);
+
+		public void setCode(String code);
+
+		public String getCode();
+
+		public void setTitle(String title);
+
+		public String getTitle();
+
+	}
+
 	public interface ADocumentDTO<T extends ADocumentDTO<T>> extends IDocument, Serializable {
 
 		@SuppressWarnings("unchecked")
@@ -353,6 +369,43 @@ public class CommonDocInterfaces {
 				this.updated = updated;
 			}
 		}
+	}
+
+	public static class ResourceDocumentImpl implements ResourceDocument, ADocumentDTO<ResourceDocumentImpl> {
+		private static final long serialVersionUID = -2330556618187197003L;
+		private String id;
+		private String code;
+		private String title;
+
+		public String getId() {
+			return id;
+		}
+
+		public void setId(String id) {
+			this.id = id;
+		}
+
+		public String getCode() {
+			return code;
+		}
+
+		public void setCode(String code) {
+			this.code = code;
+		}
+
+		public String getTitle() {
+			return title;
+		}
+
+		public void setTitle(String title) {
+			this.title = title;
+		}
+
+		@Override
+		public ADocumentDTO<ResourceDocumentImpl> newInstance() {
+			return new ResourceDocumentImpl();
+		}
+
 	}
 
 }

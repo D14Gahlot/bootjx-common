@@ -10,6 +10,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import com.boot.jx.mongo.CommonDocInterfaces.DocVersion;
 import com.boot.jx.mongo.CommonDocInterfaces.IDocument;
+import com.boot.jx.mongo.CommonDocInterfaces.ResourceDocument;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.StringUtils;
 
@@ -41,6 +42,12 @@ public class AgentDoc implements IDocument, DocVersion {
 	private boolean isDuperAdmin;
 	private boolean isDefaultValue;
 	private Boolean isEnabled;
+
+	@Indexed
+	private List<ResourceDocument> quicktags;
+
+	@Indexed
+	private List<ResourceDocument> quicklabels;
 
 	private List<String> channels;
 	private String dept_id;
@@ -244,6 +251,22 @@ public class AgentDoc implements IDocument, DocVersion {
 
 	public void setDuperAdmin(boolean isDuperAdmin) {
 		this.isDuperAdmin = isDuperAdmin;
+	}
+
+	public List<ResourceDocument> getQuicktags() {
+		return quicktags;
+	}
+
+	public void setQuicktags(List<ResourceDocument> quicktags) {
+		this.quicktags = quicktags;
+	}
+
+	public List<ResourceDocument> getQuicklabels() {
+		return quicklabels;
+	}
+
+	public void setQuicklabels(List<ResourceDocument> quicklabels) {
+		this.quicklabels = quicklabels;
 	}
 
 }
