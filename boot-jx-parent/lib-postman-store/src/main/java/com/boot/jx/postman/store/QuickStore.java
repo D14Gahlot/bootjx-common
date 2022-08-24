@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 import com.boot.jx.mongo.CommonMongoQueryBuilder;
 import com.boot.jx.mongo.CommonMongoTemplateAbstract;
 import com.boot.jx.postman.doc.QuickMedia;
+import com.boot.model.UtilityModels.JsonIgnoreUnknown;
 import com.mongodb.AggregationOptions;
 import com.mongodb.AggregationOptions.OutputMode;
 import com.mongodb.BasicDBObject;
@@ -22,7 +23,7 @@ import com.mongodb.DBObject;
 @Component
 public class QuickStore extends CommonMongoTemplateAbstract {
 
-	public static interface QuickGalleryItem {
+	public static interface QuickGalleryItem extends JsonIgnoreUnknown {
 		String getId();
 
 		String getCategory();
