@@ -49,6 +49,9 @@ public class AgentDoc implements IDocument, DocVersion {
 	@Indexed
 	private List<ResourceDocument> quicklabels;
 
+	@Indexed
+	private List<ResourceDocument> quickskills;
+
 	private List<String> channels;
 	private String dept_id;
 
@@ -267,6 +270,14 @@ public class AgentDoc implements IDocument, DocVersion {
 
 	public void setQuicklabels(List<ResourceDocument> quicklabels) {
 		this.quicklabels = quicklabels;
+	}
+
+	public List<ResourceDocument> getQuickskills() {
+		return quickskills;
+	}
+
+	public void setQuickskills(List<ResourceDocument> quickskills) {
+		this.quickskills = quickskills;
 	}
 
 }

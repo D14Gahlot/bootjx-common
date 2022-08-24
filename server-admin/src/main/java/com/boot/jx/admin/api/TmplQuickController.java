@@ -76,7 +76,7 @@ public class TmplQuickController {
 		auditDetailProvider.auditCreate(newVersion);
 		mongoTemplate.save(newVersion);
 		return ApiResponse.buildResults(mongoTemplate.findAll(QuickReply.class)).data(newVersion)
-				.message("QuickReply created");
+				.message("QuickReply Saved");
 	}
 
 	// QuickAction
@@ -101,7 +101,7 @@ public class TmplQuickController {
 		auditDetailProvider.auditCreate(newVersion);
 		mongoTemplate.save(newVersion);
 		return ApiResponse.buildResults(mongoTemplate.findAll(QuickAction.class)).data(newVersion)
-				.message("QuickAction created");
+				.message("QuickAction Saved");
 	}
 
 	// QuickMedia
@@ -152,7 +152,7 @@ public class TmplQuickController {
 		mongoTemplate.save(newVersion);
 
 		return ApiResponse.buildResults(mongoTemplate.findAll(QuickMedia.class)).data(newVersion)
-				.message("Quick Media created");
+				.message("Quick Media Saved");
 	}
 
 	// QuickLabel
@@ -176,7 +176,7 @@ public class TmplQuickController {
 		auditDetailProvider.auditCreate(newVersion);
 		mongoTemplate.save(newVersion);
 		return ApiResponse.buildResults(mongoTemplate.findAll(QuickLabel.class)).data(newVersion)
-				.message("QuickLabel created");
+				.message("QuickLabel Saved");
 	}
 
 	/** for adding quick Tag category e.g flight,train ,etc */
@@ -200,8 +200,7 @@ public class TmplQuickController {
 		quickTag.setTitle(req.getTitle());
 		quickTag.setCode(req.getCode());
 		mongoTemplate.saveAndAudit(quickTag, ArgUtil.is(quickTag.getId()));
-		return ApiResponse.buildResults(mongoTemplate.findAll(QuickTag.class)).data(quickTag)
-				.message("QuickTag created");
+		return ApiResponse.buildResults(mongoTemplate.findAll(QuickTag.class)).data(quickTag).message("QuickTag Saved");
 	}
 
 	// QuickLabel
@@ -224,6 +223,6 @@ public class TmplQuickController {
 		quickTag.setCode(req.getCode());
 		mongoTemplate.saveAndAudit(quickTag, ArgUtil.is(quickTag.getId()));
 		return ApiResponse.buildResults(mongoTemplate.findAll(QuickSkill.class)).data(quickTag)
-				.message("QuickSkill created");
+				.message("QuickSkill Saved");
 	}
 }
