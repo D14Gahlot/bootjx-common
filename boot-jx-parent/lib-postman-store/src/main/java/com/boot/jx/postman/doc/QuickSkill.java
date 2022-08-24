@@ -13,10 +13,10 @@ import com.boot.jx.mongo.CommonDocInterfaces.ResourceDocument;
 import com.boot.jx.mongo.CommonDocInterfaces.ResourceDocumentKeyDeserializer;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
-@Document(collection = "DICT_QUICK_TAG")
-@TypeAlias("QuickTag")
-@JsonDeserialize(as = QuickTag.class, keyUsing = ResourceDocumentKeyDeserializer.class)
-public class QuickTag implements Serializable, AuditableEntity, ResourceDocument, ADocumentDTO<QuickTag> {
+@Document(collection = "DICT_QUICK_SKILL")
+@TypeAlias("QuickSkill")
+@JsonDeserialize(as = QuickSkill.class, keyUsing = ResourceDocumentKeyDeserializer.class)
+public class QuickSkill implements Serializable, AuditableEntity, ResourceDocument, ADocumentDTO<QuickSkill> {
 
 	private static final long serialVersionUID = 2845094878124818820L;
 	@Id
@@ -104,7 +104,7 @@ public class QuickTag implements Serializable, AuditableEntity, ResourceDocument
 	}
 
 	@Override
-	public ADocumentDTO<QuickTag> newInstance() {
-		return new QuickTag();
+	public ADocumentDTO<QuickSkill> newInstance() {
+		return new QuickSkill();
 	}
 }
