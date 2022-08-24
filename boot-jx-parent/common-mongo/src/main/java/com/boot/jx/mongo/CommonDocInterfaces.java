@@ -1,5 +1,6 @@
 package com.boot.jx.mongo;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -20,6 +21,10 @@ import com.boot.utils.JsonUtil;
 import com.boot.utils.TimeUtils;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.KeyDeserializer;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 public class CommonDocInterfaces {
 
@@ -107,6 +112,7 @@ public class CommonDocInterfaces {
 	public static interface IDocument {
 	}
 
+	@JsonDeserialize(as = ResourceDocumentImpl.class, keyUsing = ResourceDocumentKeyDeserializer.class)
 	@JsonIgnoreProperties(ignoreUnknown = true)
 	public static interface ResourceDocument {
 		public String getId();
@@ -408,4 +414,11 @@ public class CommonDocInterfaces {
 
 	}
 
+	public class ResourceDocumentKeyDeserializer extends KeyDeserializer {
+		@Override
+		public Object deserializeKey(String key, DeserializationContext deserializationContext)
+				throws IOException, JsonProcessingException {
+			return JsonUtil.getMapper().readValue(key, ResourceDocumentImpl.class);
+		}
+	}
 }
