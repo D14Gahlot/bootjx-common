@@ -26,10 +26,11 @@ import com.boot.jx.admin.dto.CsvDto;
 		    }
 		    return true;
 		  }
-		  public static CsvDto csvToTutorials(InputStream is) {
+		  public static CsvDto csvToTutorials(String templateId,InputStream is) {
 			  CsvDto dto = new CsvDto();
 			  List<Map<Object,Object>> lst = new ArrayList<>();
 			  List<String> lsterrors = new ArrayList<>();
+			  System.out.println("templateId :"+templateId);
 		    try (BufferedReader fileReader = new BufferedReader(new InputStreamReader(is, "UTF-8"));
 		    		//CSVParser csvParser = new CSVParser(fileReader,CSVFormat.DEFAULT.withFirstRecordAsHeader().withIgnoreHeaderCase().withTrim());
 		    		) 
@@ -56,12 +57,10 @@ import com.boot.jx.admin.dto.CsvDto;
 		        	Map<Object,Object> map = new HashMap<>();
 		        	for(int i = 0; i< columns.length; i++)
 		        	{	
-		        		
 		        		if(!StringUtils.isBlank(record.get(i))) {
 		        			map.put(columns[i].trim(), record.get(i).trim());
 		        		}else {
 		        			String str ="Row:"+row+" Column :"+(i+1)+" "+columns[i]+" value  is missing"; 
-		        			//System.out.println(str);
 		        			lsterrors.add(str);
 		        		}
 		        	}
