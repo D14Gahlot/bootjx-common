@@ -58,10 +58,8 @@ public class CSVHelper {
 
 			}
 		}
-		try (BufferedReader fileReader = new BufferedReader(new InputStreamReader(is, "UTF-8"));
-		// CSVParser csvParser = new
-		// CSVParser(fileReader,CSVFormat.DEFAULT.withFirstRecordAsHeader().withIgnoreHeaderCase().withTrim());
-		) {
+		try {
+			BufferedReader fileReader = new BufferedReader(new InputStreamReader(is, "UTF-8"));
 			String header = fileReader.readLine();
 			String[] columns = null;
 			if (header != null) {
