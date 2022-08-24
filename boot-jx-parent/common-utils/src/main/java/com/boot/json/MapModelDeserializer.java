@@ -21,50 +21,50 @@ import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 @JsonComponent
 public class MapModelDeserializer extends StdDeserializer<MapModel> {
 
-    private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
 
-    protected MapModelDeserializer(Class<?> vc) {
-	super(vc);
-    }
-
-    public MapModelDeserializer() {
-	this(null);
-    }
-
-    @Override
-    public MapModel deserialize(JsonParser jp, DeserializationContext ctxt)
-	    throws IOException, JsonProcessingException {
-	JsonNode jsonNode = jp.getCodec().readTree(jp);
-	String text = jsonNode.asText();
-	Map<String, Object> map = null;
-	if (ArgUtil.isEmpty(text)) {
-	    map = JsonUtil.getMapper().convertValue(jsonNode, new TypeReference<Map<String, Object>>() {
-	    });
-	}
-	return new MapModel(map);
-    }
-
-    public static class MapModelEditor extends PropertyEditorSupport {
-
-	private ObjectMapper objectMapper;
-
-	public MapModelEditor(ObjectMapper objectMapper) {
-	    this.objectMapper = objectMapper;
+	protected MapModelDeserializer(Class<?> vc) {
+		super(vc);
 	}
 
-	public MapModelEditor() {
+	public MapModelDeserializer() {
+		this(null);
 	}
 
 	@Override
-	public void setAsText(String text) throws IllegalArgumentException {
-	    if (StringUtils.isEmpty(text)) {
-		setValue(new MapModel());
-	    } else {
-		MapModel prod = JsonUtil.parse(text, MapModel.class);
-		setValue(prod);
-	    }
+	public MapModel deserialize(JsonParser jp, DeserializationContext ctxt)
+			throws IOException, JsonProcessingException {
+		JsonNode jsonNode = jp.getCodec().readTree(jp);
+		String text = jsonNode.asText();
+		Map<String, Object> map = null;
+		if (ArgUtil.isEmpty(text)) {
+			map = JsonUtil.getMapper().convertValue(jsonNode, new TypeReference<Map<String, Object>>() {
+			});
+		}
+		return new MapModel(map);
 	}
 
-    }
+	public static class MapModelEditor extends PropertyEditorSupport {
+
+		private ObjectMapper objectMapper;
+
+		public MapModelEditor(ObjectMapper objectMapper) {
+			this.objectMapper = objectMapper;
+		}
+
+		public MapModelEditor() {
+		}
+
+		@Override
+		public void setAsText(String text) throws IllegalArgumentException {
+			if (StringUtils.isEmpty(text)) {
+				setValue(new MapModel());
+			} else {
+				MapModel prod = JsonUtil.parse(text, MapModel.class);
+				setValue(prod);
+			}
+		}
+
+	}
 
 }
