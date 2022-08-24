@@ -44,8 +44,9 @@ public class AppFaqBotController extends CommonBotController {
 		if(assignEvent!=null) {
 		 super.onSessionRoute(assignEvent);
 		}
-		ClientApp app = context().clientApp();
-		String lang = ArgUtil.parseAsString(app.props().get("lang")==null?"en":app.props().get("lang"));
+		//ClientApp app = context().clientApp();
+		String lang =context().contact().getLang();
+		//ArgUtil.parseAsString(app.props().get("lang")==null?"en":app.props().get("lang"));
 		List<AppFaqDoc>  faqLst = getParents(lang,null);
 		List<TmplElement> buttons = new ArrayList<TmplElement>();
 		for (AppFaqDoc faq : faqLst) {
@@ -77,8 +78,7 @@ public class AppFaqBotController extends CommonBotController {
 
 	@ChatMapping(key = AlexBotConstants.KEY.INITIATE + "*", pattern = "^*$")
 	public void greet(InboxMessage inboxMessage, StringMatcher matcher) {
-		ClientApp app = context().clientApp();
-		String lang = ArgUtil.parseAsString(app.props().get("lang")==null?"en":app.props().get("lang"));
+		String lang =context().contact().getLang();
 		String replay_id =toReplyEnum(inboxMessage); 
 		Map<String,Object> langM=new HashMap<String,Object>();
 		langM.put("lang", lang);
@@ -127,8 +127,7 @@ public class AppFaqBotController extends CommonBotController {
 
 	@ChatMapping(key = "on_faq_parent_select")
 	public void onAppSelect(InboxMessage inboxMessage, StringMatcher matcher) {
-		ClientApp app = context().clientApp();
-		String lang = ArgUtil.parseAsString(app.props().get("lang")==null?"en":app.props().get("lang"));
+		String lang =context().contact().getLang();
 		String replay_id = toReplyEnum(inboxMessage);
 		Map<String,Object> langM=new HashMap<String,Object>();
 		langM.put("lang", lang);
@@ -141,8 +140,6 @@ public class AppFaqBotController extends CommonBotController {
 			routeSession("jazeera",langM);
 			return;		
 		case "#":
-			//assignToDefaultAgent();
-			//routeSession("jazeera",langM);
 			reply(new OutboxMessage().template("ja_cs_to_contact"));
 			return;
 	default:		
@@ -180,8 +177,7 @@ public class AppFaqBotController extends CommonBotController {
 	
 	@ChatMapping(key = "on_faq_child_select")
 	public void onChildSelect(InboxMessage inboxMessage, StringMatcher matcher) {
-		ClientApp app = context().clientApp();
-		String lang = ArgUtil.parseAsString(app.props().get("lang")==null?"en":app.props().get("lang"));
+		String lang =context().contact().getLang();
 		String replay_id = toReplyEnum(inboxMessage);
 		LOGGER.info("replay_id {====}:"+replay_id);
 		Map<String,Object> langM=new HashMap<String,Object>();
