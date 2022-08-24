@@ -3,7 +3,17 @@ package com.boot.jx.admin.dto;
 import java.util.List;
 import java.util.Map;
 
+import javax.validation.constraints.NotNull;
+
+import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.TypeAlias;
+import org.springframework.data.mongodb.core.mapping.Document;
+
+@Document(collection = "BULK_CSV")
+@TypeAlias("CsvDoc")
 public class CsvDto {
+	
+	@Id
 	String referenceKey;
 	List<Map<Object,Object>> lstMap;
 	Map<Object,List<Object>> csvMap;
