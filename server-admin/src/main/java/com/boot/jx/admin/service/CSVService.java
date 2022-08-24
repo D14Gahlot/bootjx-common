@@ -13,9 +13,9 @@ import com.boot.jx.admin.manager.CSVHelper;
 @Service
 public class CSVService {
 	
-	 public CsvDto save(MultipartFile file) {
+	 public CsvDto save(String templateId,MultipartFile file) {
 		    try {
-		    	CsvDto dto = CSVHelper.csvToTutorials(file.getInputStream());
+		    	CsvDto dto = CSVHelper.csvToTutorials(templateId,file.getInputStream());
 		    	 return dto;
 		    } catch (IOException e) {
 		      throw new RuntimeException("fail to store csv data: " + e.getMessage());
