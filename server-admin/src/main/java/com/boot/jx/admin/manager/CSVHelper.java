@@ -45,6 +45,7 @@ public class CSVHelper {
 		List<String> lsterrors = new ArrayList<>();
 		Pattern pattern = Pattern.compile("\\{\\{(.*?)\\}\\}");
 		List<String> templVarLst = new ArrayList<>();
+		templVarLst.add("contacts");
 
 		HSMTemplateDoc templateDoc = mongoTemplate.findById(templateId, HSMTemplateDoc.class);
 		if (templateDoc != null) {

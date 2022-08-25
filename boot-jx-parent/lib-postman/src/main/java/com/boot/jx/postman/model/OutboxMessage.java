@@ -25,6 +25,8 @@ public class OutboxMessage extends Message<OutboxMessage>
 	private MessagePrompt prompt;
 	private List<Object> logs;
 	private List<Object> trace;
+	/** csv refernce key**/
+	private String referenceKey;
 
 	public OutboxMessage(ContactType contactType) {
 		super(contactType);
@@ -138,6 +140,14 @@ public class OutboxMessage extends Message<OutboxMessage>
 
 	public void setTrace(List<Object> trace) {
 		this.trace = trace;
+	}
+
+	public String getReferenceKey() {
+		return referenceKey;
+	}
+
+	public void setReferenceKey(String referenceKey) {
+		this.referenceKey = referenceKey;
 	}
 
 }

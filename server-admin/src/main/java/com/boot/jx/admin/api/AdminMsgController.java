@@ -236,7 +236,7 @@ public class AdminMsgController {
 	
 	/** upload csv file **/
 	@RequestMapping(value = "/pub/message/bulk/push/csv/read", method = { RequestMethod.POST })
-	public ApiResponse<CsvDto, Object> sendBulkCsvMessage(@RequestParam(required = false) String  templateId,@RequestParam("file") MultipartFile file) throws NumberParseException {
+	public ApiResponse<CsvDto, Object> sendBulkCsvMessage(@RequestParam(required = true) String  templateId,@RequestParam("file") MultipartFile file) throws NumberParseException {
 		String message = "";
 		CsvDto lst=null;
 	    if (CSVHelper.hasCSVFormat(file)) {

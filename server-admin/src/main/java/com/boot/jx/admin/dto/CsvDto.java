@@ -12,7 +12,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Document(collection = "BULK_CSV")
 @TypeAlias("CsvDoc")
 public class CsvDto {
-	
+	/** csv refernce key**/
 	@Id
 	String referenceKey;
 	List<Map<Object,Object>> lstMap;
