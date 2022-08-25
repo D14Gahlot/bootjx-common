@@ -118,6 +118,11 @@ public class CommonMongoTemplateAbstract extends CommonMongoTemplateDefault {
 		return find(builder.getQuery(), builder.getDocClass());
 	}
 
+	public <T> T findOne(MongoQueryBuilder<T> builder) {
+		// System.out.println("+++"+builder.getQuery());
+		return findOne(builder.getQuery(), builder.getDocClass());
+	}
+
 	public <T extends DocVersion> T creatNewDocuemnt(String id, Class<T> clazz, T newVersion) {
 		if (ArgUtil.is(id)) {
 			T oldVersion = getCommonMongoTemplate().findOne(new Query(Criteria.where("_id").is(id)), clazz);
