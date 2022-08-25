@@ -84,14 +84,12 @@ public class AdminManager {
 			if (!ArgUtil.is(agent.getAgent_password())) {
 				agent.setAgent_password(oldAgent.getAgent_password());
 			}
-
-			agent.oldVersion(oldAgent);
+			agent.setOldVersions(null);
 		}
 		agent.setAgent_code(StringUtils.toLowerCase(agent.getAgent_code()));
 		agentStore.save(agent);
-		return
 
-		fetchAgentList(null);
+		return fetchAgentList(null);
 	}
 
 	public List<AgentDoc> fetchAgentList(String agentId, boolean includeInActive) {

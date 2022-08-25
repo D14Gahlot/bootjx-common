@@ -2,8 +2,6 @@ package com.boot.jx.common.dto;
 
 import java.util.List;
 
-import org.springframework.data.mongodb.core.index.Indexed;
-
 import com.boot.jx.mongo.CommonDocInterfaces.ADocumentDTO;
 import com.boot.jx.mongo.CommonDocInterfaces.ResourceDocument;
 import com.fasterxml.jackson.annotation.JsonProperty;

@@ -201,6 +201,16 @@ public class ChatController {
 
 	}
 
+	public void assignToAgentSkill(String... skillCode) {
+		ChatSessionDoc session = messageContext.session().getDoc();
+		ClientApp thisApp = messageContext.clientApp();
+		String agent_queue = ArgUtil.parseAsString(thisApp.props().get("agent_queue"),
+				PMConstants.DEFAULT.AGENT_QUEUE_CODE);
+		chatSessionService.routeSession(session, new PMArgs().assignToQueueCode(agent_queue).contact(session.contact())
+				.sessionId(session.getSessionId()).assignToSkillCode(skillCode));
+
+	}
+
 	public void assignToDefaultAgent() {
 		assignToAgentDepartment(null);
 	}

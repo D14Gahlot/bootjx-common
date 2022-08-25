@@ -83,6 +83,7 @@ public class AgentSessionService
 		builder.set("isAway", agentSession.isAway());
 		builder.set("lastOnlineStamp", agentSession.getLastOnlineStamp());
 		builder.set("domain", AppContextUtil.getTenant());
+		builder.set("profile", agentSession.getProfile());
 
 		if (ArgUtil.is(agentSession.getProfile())) {
 			builder.set("isEnabled", agentSession.getProfile().isEnabled());

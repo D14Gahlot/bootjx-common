@@ -297,9 +297,10 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 
 	@Override
 	public NodeEntry<InBoundEvent> assignSessionToAgent(PMArgs params, ChatSessionDoc session) {
-		return new NodeEntry<InBoundEvent>().value(chatClient.assignToAgentV2(new PMArgs()
-				.sessionId(session.getSessionId()).contact(session.contact())
-				.assignToDeptCode(params.getAssignToDeptCode()).assignToAgentCode(params.getAssignToAgentCode())));
+		return new NodeEntry<InBoundEvent>().value(
+				chatClient.assignToAgentV2(new PMArgs().sessionId(session.getSessionId()).contact(session.contact())
+						.assignToDeptCode(params.getAssignToDeptCode()).assignToAgentCode(params.getAssignToAgentCode())
+						.assignToSkillCodes(params.getAssignToSkillCodes())));
 	}
 
 	@Override
@@ -328,8 +329,8 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 							.assignToDeptCode(
 									ArgUtil.nonEmpty(pmArgs.getAssignToDeptCode(), props.getString("deptCode")))
 							.assignToAgentCode(
-									ArgUtil.nonEmpty(pmArgs.getAssignToAgentCode(), props.getString("agentCode"))),
-							sessionDoc);
+									ArgUtil.nonEmpty(pmArgs.getAssignToAgentCode(), props.getString("agentCode")))
+							.assignToSkillCodes(pmArgs.getAssignToSkillCodes()), sessionDoc);
 					if (APP_TYPE.MITEL.equals(appType)) {
 						try {
 							mitelRouting(sessionDoc, targetAppQueue, 1);

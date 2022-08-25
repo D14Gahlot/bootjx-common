@@ -24,6 +24,15 @@ public class AgentStore {
 	@Autowired
 	CommonMongoTemplate mongoTemplate;
 
+	public void logAgentUpdate(AgentDoc agent) {
+		mongoTemplate.log(agent, "updated");
+	}
+
+	public void logAgentUpdate(String id) {
+		AgentDoc agent = findById(id);
+		logAgentUpdate(agent);
+	}
+
 	public void updateMulti(CommonMongoQueryBuilder builder, Class<?> entityClass) {
 		mongoTemplate.updateMulti(builder.getQuery(), builder.getUpdate(), entityClass);
 	}
@@ -97,6 +106,7 @@ public class AgentStore {
 		CommonMongoQueryBuilder cqb2 = new CommonMongoQueryBuilder().whereId(agentId).set("isEnabled", isEnabled)
 				.set("isactive", status);
 		updateFirst(cqb2, AgentDoc.class);
+		logAgentUpdate(agentId);
 	}
 
 	public void updateAgentDefault(String agentId) {
@@ -109,6 +119,7 @@ public class AgentStore {
 		CommonMongoQueryBuilder cqb2 = new CommonMongoQueryBuilder().whereId(agentId).set("isDefaultValue",
 				!agent.isDefaultValue());
 		updateMulti(cqb2, AgentDoc.class);
+		logAgentUpdate(agent);
 	}
 
 	public void updateDepartmentDefault(String deptId) {
@@ -122,7 +133,8 @@ public class AgentStore {
 
 	public void save(AgentDoc agent) {
 		agent.setAuthKey(PostManUtil.UNIQUE_API_KEY());
-		mongoTemplate.save(agent);
+		// mongoTemplate.save(agent);
+		mongoTemplate.saveAndAudit(agent, ArgUtil.is(agent.getId()));
 	}
 
 }
