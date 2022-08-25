@@ -1,28 +1,35 @@
 package com.boot.jx;
 
 import static org.junit.Assert.assertTrue;
+import static org.springframework.data.mongodb.core.aggregation.Aggregation.match;
+import static org.springframework.data.mongodb.core.aggregation.Aggregation.*;
 
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
+import org.springframework.data.mongodb.core.aggregation.Fields;
+import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.test.context.TestPropertySource;
 
 import com.boot.jx.mongo.CommonMongoSource;
+import com.boot.jx.mongo.CommonMongoUtils;
 import com.boot.jx.mongo.MongoTemplateCommonImpl;
 import com.boot.jx.postman.doc.QuickMedia;
+import com.boot.utils.ArgUtil;
+import com.boot.utils.Constants;
 import com.boot.utils.JsonUtil;
 import com.mongodb.AggregationOptions;
-import com.mongodb.AggregationOutput;
-import com.mongodb.BasicDBList;
+import com.mongodb.AggregationOptions.OutputMode;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
-import com.mongodb.AggregationOptions.OutputMode;
 
 @SpringBootTest
 @TestPropertySource(locations = "classpath:application-test.properties")
@@ -57,7 +64,60 @@ public class ChatStoreTest { // Noncompliant
 //		}
 	}
 
+	public static class LuckAgent {
+		public Object agentCode;
+		public Object quickskills;
+		public Object noOfMatches;
+		public long lastAssignStamp;
+		public long lastOnlineStamp;
+
+		LuckAgent from(DBObject doc) {
+			this.lastAssignStamp = ArgUtil.parseAsLong(doc.get("lastAssignStamp"), Constants.DEFAULT_LONG);
+			this.lastOnlineStamp = ArgUtil.parseAsLong(doc.get("lastOnlineStamp"), Constants.DEFAULT_LONG);
+			this.agentCode = doc.get("_id");
+			this.noOfMatches = doc.get("noOfMatches");
+			return this;
+		}
+	}
+
 	@Test
+	public void testSkillMatch() {
+		initMongo();
+		System.out.println("=testSkillMatch==");
+		List<String> list = new ArrayList<String>();
+		list.add("dental");
+		list.add("ortho");
+
+		List<DBObject> agg = CommonMongoUtils.newAggregation(//
+				match(Criteria.where("profile.quickskills.code").in(list)) //
+				, project(bind("quickskills", "profile.quickskills.code").and("lastAssignStamp").and("lastOnlineStamp")
+						.and("tags", "1"))//
+				, unwind("quickskills")//
+				, match(Criteria.where("quickskills").in(list)) //
+				, group("_id").count().as("noOfMatches")//
+						.first("lastAssignStamp").as("lastAssignStamp")//
+						.first("lastOnlineStamp").as("lastOnlineStamp")//
+				, sort(Direction.DESC, "noOfMatches").and(Direction.ASC, "lastOnlineStamp")
+		//
+		);
+		System.out.println("=========================================");
+		System.out.println("====" + JsonUtil.toJson(agg));
+		System.out.println("=========================================");
+
+		List<LuckAgent> other = new ArrayList<LuckAgent>();
+
+//		AggregationResults<Result> groupResults = mongoTemplate.aggregate(agg, "AGENT_SESSION", Result.class);
+//		groupResults.getMappedResults().forEach(doc -> other.add(doc));
+
+		DBCollection col = mongoTemplate.getCollection("AGENT_SESSION");
+		col.aggregate(agg, AggregationOptions.builder().allowDiskUse(true).outputMode(OutputMode.CURSOR).build())
+				.forEachRemaining(doc -> other.add(new LuckAgent().from(doc)));
+		System.out.println("=========================================");
+		System.out.println("====" + JsonUtil.toJson(other));
+		System.out.println("=========================================");
+	}
+
+	// @Test
 	public void testLanguageEnumFromNumber() {
 		initMongo();
 
@@ -77,11 +137,10 @@ public class ChatStoreTest { // Noncompliant
 
 		try {
 			DBCollection col = mongoTemplate.getCollection(mongoTemplate.getCollectionName(QuickMedia.class));
-			
+
 			col.aggregate(list, AggregationOptions.builder().allowDiskUse(true).outputMode(OutputMode.CURSOR).build())
-			.forEachRemaining(doc -> other.add(new QuickMedia().from(doc)));
-			
-			
+					.forEachRemaining(doc -> other.add(new QuickMedia().from(doc)));
+
 //			AggregationOutput output = col.aggregate(list);
 //			// .forEachRemaining(doc -> other.add(new QuickMedia().from(doc)));
 //
