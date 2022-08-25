@@ -203,16 +203,16 @@ public class CommonMongoTemplateAbstract extends CommonMongoTemplateDefault {
 		return oldDocument;
 	}
 
-	public void log(Object oldDocument, String activity, String comment) {
-		String collectionName = mongoTemplate.getCollectionName(oldDocument.getClass());
-		AuditActivityDoc oldDocumentArchived = new AuditActivityDoc().collection(collectionName).doc(oldDocument)
+	public void log(Object copyOfDocument, String activity, String comment) {
+		String collectionName = mongoTemplate.getCollectionName(copyOfDocument.getClass());
+		AuditActivityDoc oldDocumentArchived = new AuditActivityDoc().collection(collectionName).doc(copyOfDocument)
 				.activity(activity).comment(comment);
 		auditDetailProvider.auditCreate(oldDocumentArchived);
 		mongoTemplate.save(oldDocumentArchived, "ZACTIVITY_LOGS");
 	}
 
-	public void log(Object oldDocument, String activity) {
-		this.log(oldDocument, activity, null);
+	public void log(Object copyOfDocument, String activity) {
+		this.log(copyOfDocument, activity, null);
 	}
 
 	@SuppressWarnings("unchecked")

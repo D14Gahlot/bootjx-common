@@ -84,6 +84,10 @@ public class ClientAppConfigConstants {
 				.desc("Use this app to route session to Team based on customer's input. Selected template should have team code in button code")
 				.group("About App"),
 
+				new ConfigMeta().title("Options Type").path("props.options_type").options(
+						new ConfigOption("QUICK_SKILL").label("QUICK_SKILL"),
+						new ConfigOption("AGENT_TEAM").label("AGENT_TEAM")),
+
 				new ConfigMeta().title("Team Options Template").path("props.template").group("TEMPLATES")
 						.optionsSource("getx:/api/tmpl/hsm").optionsKey("code").optionsLabel("desc"),
 
