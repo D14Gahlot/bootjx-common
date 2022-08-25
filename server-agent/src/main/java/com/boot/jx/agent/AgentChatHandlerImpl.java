@@ -1,5 +1,13 @@
 package com.boot.jx.agent;
 
+import static org.springframework.data.mongodb.core.aggregation.Aggregation.bind;
+import static org.springframework.data.mongodb.core.aggregation.Aggregation.group;
+import static org.springframework.data.mongodb.core.aggregation.Aggregation.match;
+import static org.springframework.data.mongodb.core.aggregation.Aggregation.project;
+import static org.springframework.data.mongodb.core.aggregation.Aggregation.sort;
+import static org.springframework.data.mongodb.core.aggregation.Aggregation.unwind;
+
+import java.util.ArrayList;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -23,6 +31,7 @@ import com.boot.jx.common.store.ChatArchiveService;
 import com.boot.jx.common.store.DocumentUpdateListner;
 import com.boot.jx.logger.LoggerService;
 import com.boot.jx.mongo.CommonMongoQueryBuilder;
+import com.boot.jx.mongo.CommonMongoUtils;
 import com.boot.jx.postman.ClientApp;
 import com.boot.jx.postman.PMConstants;
 import com.boot.jx.postman.PMConstants.CHAT_SESSION_ACTIONS;
@@ -51,6 +60,10 @@ import com.boot.model.MapModel;
 import com.boot.model.MapModel.MapPathEntry;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
+import com.mongodb.AggregationOptions;
+import com.mongodb.AggregationOptions.OutputMode;
+import com.mongodb.DBCollection;
+import com.mongodb.DBObject;
 
 @Component
 public class AgentChatHandlerImpl implements AgentChatHandler {
@@ -153,28 +166,63 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 		}
 
 		if (PMConstants.ASSIGNMENT_RULE.ROUND_ROBIN.equals(assignmentRule)) {
-			Query query = new Query();
-			Criteria c = Criteria.where("isOnline").is(true).and("isLoggedIn").is(true).and("lastOnlineStamp")
-					.gt(timeThen).and("isEnabled").is(true);
+
+			Criteria onlineActiveAgents = Criteria.where("isOnline").is(true).and("isLoggedIn").is(true)
+					.and("lastOnlineStamp").gt(timeThen).and("isEnabled").is(true);
+
 			if (ArgUtil.is(inboxMessage.getAssignToDeptCode())) {
-				c.and("agentDept").is(assignedDept);
+				onlineActiveAgents.and("agentDept").is(assignedDept);
 			}
-			query.addCriteria(c).with(new Sort(Direction.ASC, "lastAssignStamp")).limit(1);
 
-			List<AgentSessionDoc> agents = sessionStore.find(query, AgentSessionDoc.class);
+			if (ArgUtil.is(inboxMessage.getAssignToSkillCodes())) {
 
-			AgentSessionDoc avaialbleAgent = CollectionUtil.getOne(agents);
+				List<DBObject> agg = CommonMongoUtils.newAggregation(//
+						match(Criteria.where("profile.quickskills.code").in(inboxMessage.getAssignToSkillCodes())) //
+						, project(bind("quickskills", "profile.quickskills.code").and("lastAssignStamp")
+								.and("lastOnlineStamp").and("tags", "1"))//
+						, unwind("quickskills")//
+						, match(Criteria.where("quickskills").in(inboxMessage.getAssignToSkillCodes())) //
+						, group("_id").count().as("noOfMatches")//
+								.first("lastAssignStamp").as("lastAssignStamp")//
+								.first("lastOnlineStamp").as("lastOnlineStamp")//
+						, sort(Direction.DESC, "noOfMatches").and(Direction.ASC, "lastAssignStamp")
+				//
+				);
 
-			String defAgentCode = environment.local().agent().defaultAgent(inboxMessage.getAssignToDeptCode());
-			if (ArgUtil.is(defAgentCode)) {
-				for (AgentSessionDoc agentSessionDoc : agents) {
-					if (defAgentCode.equals(agentSessionDoc.getAgentCode())) {
-						avaialbleAgent = agentSessionDoc;
-						break;
+				List<DBObject> luckyAgents = new ArrayList<DBObject>();
+				DBCollection col = sessionStore.getCollection("AGENT_SESSION");
+				col.aggregate(agg,
+						AggregationOptions.builder().allowDiskUse(true).outputMode(OutputMode.CURSOR).build())
+						.forEachRemaining(doc -> luckyAgents.add(doc));
+				DBObject luckyAgent = CollectionUtil.getOne(luckyAgents);
+				if (ArgUtil.is(luckyAgent)) {
+					AgentSessionDoc avaialbleAgent = sessionStore.findByIdSafeCheck(luckyAgent.get("_id"),
+							AgentSessionDoc.class);
+					if (ArgUtil.is(avaialbleAgent)) {
+						return avaialbleAgent;
 					}
 				}
+
 			}
-			return avaialbleAgent;
+
+			{ // Default Team based Round Robin
+				Query query = new Query();
+				query.addCriteria(onlineActiveAgents).with(new Sort(Direction.ASC, "lastAssignStamp")).limit(1);
+				List<AgentSessionDoc> agents = sessionStore.find(query, AgentSessionDoc.class);
+
+				AgentSessionDoc avaialbleAgent = CollectionUtil.getOne(agents);
+
+				String defAgentCode = environment.local().agent().defaultAgent(inboxMessage.getAssignToDeptCode());
+				if (ArgUtil.is(defAgentCode)) {
+					for (AgentSessionDoc agentSessionDoc : agents) {
+						if (defAgentCode.equals(agentSessionDoc.getAgentCode())) {
+							avaialbleAgent = agentSessionDoc;
+							break;
+						}
+					}
+				}
+				return avaialbleAgent;
+			}
 		}
 
 		return null;
