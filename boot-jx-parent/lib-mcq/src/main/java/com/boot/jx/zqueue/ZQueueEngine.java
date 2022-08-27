@@ -65,7 +65,7 @@ public class ZQueueEngine extends ATaskLimiter {
 	private ZQueueStore zQStore;
 
 	@Autowired(required = false)
-	private ZQueue zQueue;
+	private ZQueueImpl zQueue;
 
 	@Override
 	public void doTask(TunnelTask task) {
@@ -80,7 +80,7 @@ public class ZQueueEngine extends ATaskLimiter {
 						ZQueueElement elemtn = zQStore.dequeue(task.getName(), task.getId());
 						if (ArgUtil.is(elemtn)) {
 							method.invoke(controller, elemtn);
-							zQueue.pushAsync(elemtn);
+							zQueue.pushBackAsync(task);
 						}
 					}
 				} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {

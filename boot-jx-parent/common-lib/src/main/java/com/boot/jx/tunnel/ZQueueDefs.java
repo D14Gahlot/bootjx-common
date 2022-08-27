@@ -63,8 +63,6 @@ public class ZQueueDefs {
 
 	public interface ZQueue {
 		public void push(ZQueueElement element);
-
-		void pushAsync(ZQueueElement element);
 	}
 
 	public interface ZQueueStore {

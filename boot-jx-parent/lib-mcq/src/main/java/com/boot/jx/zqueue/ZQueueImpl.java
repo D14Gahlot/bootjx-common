@@ -32,9 +32,9 @@ public class ZQueueImpl implements ZQueue {
 		}
 	}
 
-	@Override
 	@Async
-	public void pushAsync(ZQueueElement element) {
-		this.push(element);
+	public void pushBackAsync(TunnelTask task) {
+		this.zQueueEngine.throttle(task);
 	}
+
 }
