@@ -2,6 +2,7 @@ package com.boot.jx.zqueue;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 import com.boot.jx.tunnel.ITunnelDefs.TunnelTask;
@@ -31,4 +32,9 @@ public class ZQueueImpl implements ZQueue {
 		}
 	}
 
+	@Override
+	@Async
+	public void pushAsync(ZQueueElement element) {
+		this.push(element);
+	}
 }

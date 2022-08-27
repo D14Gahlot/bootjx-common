@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 
 import com.boot.jx.tunnel.ITunnelDefs.TunnelTask;
 import com.boot.jx.tunnel.ZQueueDefs.ZQMethodWrapper;
+import com.boot.jx.tunnel.ZQueueDefs.ZQueue;
 import com.boot.jx.tunnel.ZQueueDefs.ZQueueElement;
 import com.boot.jx.tunnel.ZQueueDefs.ZQueueStore;
 import com.boot.jx.tunnel.ZQueueDefs.Zqueuelized;
@@ -63,6 +64,9 @@ public class ZQueueEngine extends ATaskLimiter {
 	@Autowired(required = false)
 	private ZQueueStore zQStore;
 
+	@Autowired(required = false)
+	private ZQueue zQueue;
+
 	@Override
 	public void doTask(TunnelTask task) {
 		ZQMethodWrapper matchedMethod = methodNameMap.get(task.getName());
@@ -76,6 +80,7 @@ public class ZQueueEngine extends ATaskLimiter {
 						ZQueueElement elemtn = zQStore.dequeue(task.getName(), task.getId());
 						if (ArgUtil.is(elemtn)) {
 							method.invoke(controller, elemtn);
+							zQueue.pushAsync(elemtn);
 						}
 					}
 				} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
