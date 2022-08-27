@@ -34,7 +34,7 @@ public class ZQueueImpl implements ZQueue {
 
 	@Async
 	public void pushBackAsync(TunnelTask task) {
-		this.zQueueEngine.throttle(task);
+		this.zQueueEngine.throttle(new TunnelTask().name(task.getName()).id(task.getId()).intervalSeconds(1));
 	}
 
 }
