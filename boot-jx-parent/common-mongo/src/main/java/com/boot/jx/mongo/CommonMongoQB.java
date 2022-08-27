@@ -90,6 +90,12 @@ public class CommonMongoQB<M extends CommonMongoQB<M, T>, T> implements MongoQue
 	}
 
 	@SuppressWarnings("unchecked")
+	public M sortBy(Sort sort) {
+		this.query().with(sort);
+		return (M) this;
+	}
+
+	@SuppressWarnings("unchecked")
 	public M limit(int limit) {
 		this.query().limit(limit);
 		return (M) this;

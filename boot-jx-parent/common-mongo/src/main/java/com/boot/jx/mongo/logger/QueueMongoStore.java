@@ -3,6 +3,7 @@ package com.boot.jx.mongo.logger;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.stereotype.Component;
@@ -39,7 +40,7 @@ public class QueueMongoStore extends CommonMongoTemplateAbstract implements ZQue
 				.and("queueType").is(queueType)//
 				.and("queueId").is(queueId)//
 				.and("batchId").exists(false))//
-				.sortBy("itemOrder", Direction.ASC).limit(1);
+				.sortBy(new Sort(Direction.ASC, "itemOrder").and(new Sort(Direction.ASC, "timestamp"))).limit(1);
 		builder.set("batchId", batchId);
 		updateMulti(builder.getQuery(), builder.update(), QueueElementDoc.class);
 
