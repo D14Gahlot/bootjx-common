@@ -11,6 +11,7 @@ import com.boot.jx.bot.ChatMapping;
 import com.boot.jx.bot.alex.AlexBotConstants;
 import com.boot.jx.bot.alex.CommonBotController;
 import com.boot.jx.dict.FileType;
+import com.boot.jx.mongo.logger.QueueElementDoc;
 import com.boot.jx.postman.ClientApp;
 import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.ContactMeta;
@@ -19,23 +20,48 @@ import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.model.TmplElement;
 import com.boot.jx.postman.model.ext.InBoundEvent;
 import com.boot.jx.rest.RestService;
+import com.boot.jx.tunnel.ZQueueDefs.ZQueue;
+import com.boot.jx.tunnel.ZQueueDefs.ZQueueElement;
+import com.boot.jx.tunnel.ZQueueDefs.Zqueuelized;
+import com.boot.jx.tunnel.ZQueueDefs.Zqueuelizer;
 import com.boot.model.MapModel;
 import com.boot.model.MapModel.MapPathEntry;
 import com.boot.utils.StringUtils.StringMatcher;
 
 @BotController(name = "AvamoBot", code = { "bot_avamo" })
-public class AvamoController extends CommonBotController {
+public class AvamoController extends CommonBotController implements Zqueuelizer {
 
 	@Autowired
 	public RestService restService;
 
+	@Autowired
+	public ZQueue zQueue;
+
 	@Override
 	public void onPostOutboundMessage(MapModel mapModel) {
-		OutboxMessage outbox = new OutboxMessage();;
-		outbox.setContact(mapModel.pathEntry("user.custom_properties").as(ContactMeta.class));
+		long msgSeq = mapModel.pathEntry("message.sequence").asLong(0L);
+		ContactMeta c = mapModel.pathEntry("user.custom_properties").as(ContactMeta.class);
+		OutboxMessage outbox = new OutboxMessage();
+		outbox.setContact(c);
 		outbox.route().setSenderCode(mapModel.keyEntry("sender").asString());
+		Map<String, Object> message = mapModel.pathEntry("message").asMap();
+		if (msgSeq > 1L) {
+			zQueue.push(new QueueElementDoc().queueType("AVAMO_RESP_SEQ").queueId(c.getContactId()).itemOrder(msgSeq)
+					.item(MapModel.createInstance().put("outbox", outbox).put("message", message).toMap()));
+		} else {
+			context().setOutboxMessage(outbox);
+			reply(message, outbox);
+		}
+
+	}
+
+	@Zqueuelized("AVAMO_RESP_SEQ")
+	public void reply(ZQueueElement element) {
+		MapModel mapModel = MapModel.from(element.getItem());
+		OutboxMessage outbox = mapModel.pathEntry("outbox").as(OutboxMessage.class);
+		Map<String, Object> message = mapModel.pathEntry("message").asMap();
 		context().setOutboxMessage(outbox);
-		reply(mapModel.pathEntry("message").asMap(), outbox);
+		reply(message, outbox);
 	}
 
 	@Override

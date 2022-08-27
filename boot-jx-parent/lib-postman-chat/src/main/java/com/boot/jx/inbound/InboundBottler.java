@@ -24,7 +24,6 @@ import com.boot.jx.tunnel.ITunnelDefs.TunnelTask;
 import com.boot.jx.tunnel.task.ATaskLimiter;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.utils.ArgUtil;
-import com.boot.utils.CollectionUtil;
 import com.boot.utils.UniqueID;
 
 @Component
