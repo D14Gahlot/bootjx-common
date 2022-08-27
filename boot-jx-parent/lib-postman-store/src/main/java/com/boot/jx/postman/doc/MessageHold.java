@@ -1,6 +1,7 @@
 package com.boot.jx.postman.doc;
 
 import java.io.Serializable;
+import java.util.Map;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.TypeAlias;
@@ -46,6 +47,8 @@ public class MessageHold extends UpdatedTimeStampDoc implements Serializable {
 	private InBoundEvent event;
 
 	private PMArgs pmArgs;
+
+	private Map<String, Object> map;
 
 	public String getTempId() {
 		return tempId;
@@ -151,5 +154,4 @@ public class MessageHold extends UpdatedTimeStampDoc implements Serializable {
 	public static class MessageHoldQueue extends MessageHold {
 		private static final long serialVersionUID = 1137079051032041202L;
 	}
-
 }

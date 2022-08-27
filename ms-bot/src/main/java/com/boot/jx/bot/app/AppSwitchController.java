@@ -36,7 +36,8 @@ public class AppSwitchController extends CommonBotController {
 
 	@ChatMapping(key = AlexBotConstants.KEY.INITIATE + "*", pattern = "^*$")
 	public void greet(InboxMessage inboxMessage, StringMatcher matcher) {
-
+		List<ClientApp> apps = env.config().listApps();;
+		askApp(apps);
 	}
 
 	@ChatMapping(key = "on_app_select")

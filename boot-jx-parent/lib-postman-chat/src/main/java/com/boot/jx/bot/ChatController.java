@@ -229,7 +229,7 @@ public class ChatController {
 
 	public void onPostOutboundMessage(MapModel mapModel) {
 	}
-
+	
 	public MessageContext context() {
 		return this.messageContext;
 	}
