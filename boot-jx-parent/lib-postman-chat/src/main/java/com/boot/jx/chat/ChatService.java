@@ -21,6 +21,7 @@ import com.boot.jx.postman.model.Message;
 import com.boot.jx.postman.model.MessageDefinitions.IMessageExtended;
 import com.boot.jx.postman.model.MessageDefinitions.TraceMessage;
 import com.boot.jx.postman.model.OutboxMessage;
+import com.boot.jx.postman.model.Message.Status;
 import com.boot.jx.postman.model.ext.InBoundEvent;
 import com.boot.jx.postman.store.MessageContext;
 import com.boot.jx.postman.store.MessageStore;
@@ -96,6 +97,7 @@ public class ChatService {
 			throw new PostManException("Destination Not Specified : chatContactDoc Empty");
 		}
 
+		outboxMessage.updateStatus(Status.RECEIVD);
 		outboxMessage.updateStatus(Message.Status.INIT);
 		outboxMessage.contact().setContactType(chatContactDoc.getContactType());
 		outboxMessage.contact().setChannelType(chatContactDoc.getChannelType());

@@ -97,7 +97,7 @@ public class ZQueueDefs {
 		 * 
 		 * @return
 		 */
-		long delay() default 1000L;
+		long delay() default 500L;
 	}
 
 	public static class ZQMethodWrapper implements Serializable {

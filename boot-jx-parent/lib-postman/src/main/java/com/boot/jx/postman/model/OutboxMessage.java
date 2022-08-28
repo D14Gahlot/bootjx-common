@@ -30,6 +30,7 @@ public class OutboxMessage extends Message<OutboxMessage>
 
 	public OutboxMessage(ContactType contactType) {
 		super(contactType);
+		this.updateStatus(Status.SCHLD);
 	}
 
 	public OutboxMessage() {

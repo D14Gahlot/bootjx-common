@@ -45,7 +45,7 @@ public class AvamoController extends CommonBotController implements Zqueuelizer 
 		outbox.setContact(c);
 		outbox.route().setSenderCode(mapModel.keyEntry("sender").asString());
 		Map<String, Object> message = mapModel.pathEntry("message").asMap();
-		if (msgSeq > 1L) {
+		if (msgSeq > 0L) {
 			zQueue.push(new QueueElementDoc().queueType("AVAMO_RESP_SEQ").queueId(c.getContactId()).itemOrder(msgSeq)
 					.item(MapModel.createInstance().put("outbox", outbox).put("message", message).toMap()));
 		} else {
