@@ -7,6 +7,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.Method;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.stereotype.Controller;
@@ -69,6 +70,8 @@ public class ZQueueDefs {
 		public void enqueue(ZQueueElement element);
 
 		public ZQueueElement dequeue(String queueType, String queueId);
+
+		public List<? extends ZQueueElement> dequeueAll(String queueType, String queueId);
 	}
 
 	public static interface Zqueuelizer {

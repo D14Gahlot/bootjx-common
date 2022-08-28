@@ -27,14 +27,14 @@ public class ZQueueImpl implements ZQueue {
 			zQStore.enqueue(element);
 			if (ArgUtil.is(zQueueEngine)) {
 				zQueueEngine.throttle(
-						new TunnelTask().name(element.getQueueType()).id(element.getQueueId()).intervalSeconds(1));
+						new TunnelTask().name(element.getQueueType()).id(element.getQueueId()).intervalMillis(500));
 			}
 		}
 	}
 
 	@Async
 	public void pushBackAsync(TunnelTask task) {
-		this.zQueueEngine.throttle(new TunnelTask().name(task.getName()).id(task.getId()).intervalSeconds(1));
+		this.zQueueEngine.throttle(new TunnelTask().name(task.getName()).id(task.getId()).intervalMillis(500));
 	}
 
 }

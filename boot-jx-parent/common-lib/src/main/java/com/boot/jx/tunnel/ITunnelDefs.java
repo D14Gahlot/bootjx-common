@@ -77,6 +77,11 @@ public class ITunnelDefs {
 			return this;
 		}
 
+		public TunnelTask intervalMillis(long milliseconds) {
+			this.setInterval(milliseconds);
+			return this;
+		}
+
 		public TunnelTask id(String id) {
 			this.setId(id);
 			return this;

@@ -15,7 +15,6 @@ import org.springframework.stereotype.Component;
 
 import com.boot.jx.tunnel.ITunnelDefs.TunnelTask;
 import com.boot.jx.tunnel.ZQueueDefs.ZQMethodWrapper;
-import com.boot.jx.tunnel.ZQueueDefs.ZQueue;
 import com.boot.jx.tunnel.ZQueueDefs.ZQueueElement;
 import com.boot.jx.tunnel.ZQueueDefs.ZQueueStore;
 import com.boot.jx.tunnel.ZQueueDefs.Zqueuelized;
@@ -77,9 +76,11 @@ public class ZQueueEngine extends ATaskLimiter {
 			if (prmTyps.contains(ZQueueElement.class)) {
 				try {
 					if (ArgUtil.is(zQStore)) {
-						ZQueueElement elemtn = zQStore.dequeue(task.getName(), task.getId());
-						if (ArgUtil.is(elemtn)) {
-							method.invoke(controller, elemtn);
+						List<? extends ZQueueElement> elemtns = zQStore.dequeueAll(task.getName(), task.getId());
+						if (ArgUtil.is(elemtns)) {
+							for (ZQueueElement elemtn : elemtns) {
+								method.invoke(controller, elemtn);
+							}
 							zQueue.pushBackAsync(task);
 						}
 					}
