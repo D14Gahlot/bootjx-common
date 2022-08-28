@@ -55,7 +55,7 @@ public class AvamoController extends CommonBotController implements Zqueuelizer 
 
 	}
 
-	@Zqueuelized(value = "AVAMO_RESP_SEQ", delay = 1000)
+	@Zqueuelized(value = "AVAMO_RESP_SEQ", delay = 500)
 	public void reply(ZQueueElement element) {
 		MapModel mapModel = MapModel.from(element.getItem());
 		OutboxMessage outbox = mapModel.pathEntry("outbox").as(OutboxMessage.class);
