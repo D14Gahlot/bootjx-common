@@ -26,7 +26,7 @@ public class ZQueueImpl implements ZQueue {
 		if (ArgUtil.is(zQStore)) {
 			zQStore.enqueue(element);
 			if (ArgUtil.is(zQueueEngine)) {
-				zQueueEngine.throttle(
+				zQueueEngine.throttleQ(
 						new TunnelTask().name(element.getQueueType()).id(element.getQueueId()).intervalMillis(500));
 			}
 		}
