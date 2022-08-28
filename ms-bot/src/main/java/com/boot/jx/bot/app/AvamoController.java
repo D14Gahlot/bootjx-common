@@ -39,7 +39,7 @@ public class AvamoController extends CommonBotController implements Zqueuelizer 
 
 	@Override
 	public void onPostOutboundMessage(MapModel mapModel) {
-		long msgSeq = mapModel.pathEntry("message.sequence").asLong(0L);
+		long msgSeq = mapModel.pathEntry("message.sequence").asLong(1L);
 		ContactMeta c = mapModel.pathEntry("user.custom_properties").as(ContactMeta.class);
 		OutboxMessage outbox = new OutboxMessage();
 		outbox.setContact(c);
@@ -55,7 +55,7 @@ public class AvamoController extends CommonBotController implements Zqueuelizer 
 
 	}
 
-	@Zqueuelized(value = "AVAMO_RESP_SEQ", delay = 500)
+	@Zqueuelized(value = "AVAMO_RESP_SEQ", delay = 1000)
 	public void reply(ZQueueElement element) {
 		MapModel mapModel = MapModel.from(element.getItem());
 		OutboxMessage outbox = mapModel.pathEntry("outbox").as(OutboxMessage.class);

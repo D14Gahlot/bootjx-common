@@ -84,6 +84,7 @@ public class ZQueueEngine extends ATaskLimiter {
 							for (ZQueueElement elemtn : elemtns) {
 								method.invoke(controller, elemtn);
 							}
+							zQueue.pushBackAsync(task);
 							return false;
 						}
 					}
