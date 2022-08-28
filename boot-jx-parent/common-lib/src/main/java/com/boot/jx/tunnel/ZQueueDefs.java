@@ -84,13 +84,27 @@ public class ZQueueDefs {
 	@Documented
 	@Controller
 	public @interface Zqueuelized {
+		/**
+		 * Type of Queue. This is for the categorization, executions will happen per
+		 * queueId,
+		 * 
+		 * @return
+		 */
 		String value();
+
+		/**
+		 * Minimum delay or gap between two consecutive executions. (in milli-seconds)
+		 * 
+		 * @return
+		 */
+		long delay() default 500L;
 	}
 
 	public static class ZQMethodWrapper implements Serializable {
 		private static final long serialVersionUID = 7112166704689180115L;
 		private String controller;
 		private Method method;
+		private long delay;
 
 		public String getController() {
 			return controller;
@@ -106,6 +120,14 @@ public class ZQueueDefs {
 
 		public void setMethod(Method method) {
 			this.method = method;
+		}
+
+		public long getDelay() {
+			return delay;
+		}
+
+		public void setDelay(long delay) {
+			this.delay = delay;
 		}
 
 	}

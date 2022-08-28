@@ -32,7 +32,6 @@ public class QueueMongoStore extends CommonMongoTemplateAbstract implements ZQue
 		save(element);
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public ZQueueElement dequeue(String queueType, String queueId) {
 		String batchId = UniqueID.generateString();

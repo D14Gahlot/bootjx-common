@@ -11,6 +11,7 @@ import javax.annotation.PostConstruct;
 
 import org.springframework.aop.framework.AopProxyUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 import com.boot.jx.tunnel.ITunnelDefs.TunnelTask;
@@ -49,11 +50,13 @@ public class ZQueueEngine extends ATaskLimiter {
 					ZQMethodWrapper methodWrapper = new ZQMethodWrapper();
 					methodWrapper.setMethod(method);
 					methodWrapper.setController(controllerName);
+					methodWrapper.setDelay(zqueuelized.delay());
 					methodNameMap.put(zqueuelized.value(), methodWrapper);
 				} else if ("zqueuelized".equals(method.getName()) && zqueuelizedDefault != null) {
 					ZQMethodWrapper methodWrapper = new ZQMethodWrapper();
 					methodWrapper.setMethod(method);
 					methodWrapper.setController(controllerName);
+					methodWrapper.setDelay(zqueuelizedDefault.delay());
 					methodNameMap.put(zqueuelizedDefault.value(), methodWrapper);
 				}
 			}
@@ -89,6 +92,15 @@ public class ZQueueEngine extends ATaskLimiter {
 				}
 			}
 		}
+	}
+
+	@Async
+	public void throttleQ(TunnelTask task) {
+		ZQMethodWrapper matchedMethod = methodNameMap.get(task.getName());
+		if (ArgUtil.is(matchedMethod)) {
+			this.throttle(task.intervalMillis(matchedMethod.getDelay()));
+		}
+
 	}
 
 }
