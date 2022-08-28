@@ -80,7 +80,7 @@ public class ZQueueEngine extends ATaskLimiter {
 				try {
 					if (ArgUtil.is(zQStore)) {
 						List<? extends ZQueueElement> elemtns = zQStore.dequeueAll(task.getName(), task.getId());
-						if (ArgUtil.is(elemtns)) {
+						if (ArgUtil.is(elemtns) && elemtns.size() > 0) {
 							for (ZQueueElement elemtn : elemtns) {
 								method.invoke(controller, elemtn);
 							}
