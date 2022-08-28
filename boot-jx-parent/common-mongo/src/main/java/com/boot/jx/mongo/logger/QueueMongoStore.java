@@ -42,7 +42,7 @@ public class QueueMongoStore extends CommonMongoTemplateAbstract implements ZQue
 				.and("batchId").exists(false))//
 				.sortBy(new Sort(Direction.ASC, "itemOrder").and(new Sort(Direction.ASC, "timestamp"))).limit(1);
 		builder.set("batchId", batchId);
-		updateFirst(builder.getQuery(), builder.update(), QueueElementDoc.class);
+		findAndModify(builder.getQuery(), builder.update(), QueueElementDoc.class);
 
 		CommonMongoQueryBuilder builder2 = new CommonMongoQueryBuilder();
 		builder2.where(Criteria.where("appType").is(appConfig.getAppType())//
@@ -60,12 +60,13 @@ public class QueueMongoStore extends CommonMongoTemplateAbstract implements ZQue
 		builder.where(Criteria.where("appType").is(appConfig.getAppType())//
 				.and("queueType").is(queueType)//
 				.and("queueId").is(queueId)//
-				.and("batchId").exists(false))//
-				.sortBy(new Sort(Direction.ASC, "itemOrder").and(new Sort(Direction.ASC, "timestamp")));//.limit(1);
+				.and("batchId").exists(false));//
+		// builder.sortBy(new Sort(Direction.ASC, "itemOrder").and(new
+		// Sort(Direction.ASC, "timestamp"))).limit(1);
 		builder.set("batchId", batchId);
-		
-		findAndModify(builder.getQuery(), builder.update(), QueueElementDoc.class);
-		//updateFirst(builder.getQuery(), builder.update(), QueueElementDoc.class);
+
+		// findAndModify(builder.getQuery(), builder.update(), QueueElementDoc.class);
+		updateMulti(builder.getQuery(), builder.update(), QueueElementDoc.class);
 
 		CommonMongoQueryBuilder builder2 = new CommonMongoQueryBuilder();
 		builder2.where(Criteria.where("appType").is(appConfig.getAppType())//
