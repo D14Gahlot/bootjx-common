@@ -266,7 +266,7 @@ public class InBoundService extends ATaskLimiter {
 	}
 
 	@Override
-	public void doTask(TunnelTask task) {
+	public void doTaskSafely(TunnelTask task) {
 		if ("MESSAGE_RELEASE".equals(task.getName())) {
 			String contactId = task.getId();
 			proxyManager.release(contactId);

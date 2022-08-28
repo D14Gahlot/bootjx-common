@@ -70,7 +70,7 @@ public class ZQueueEngine extends ATaskLimiter {
 	private ZQueueImpl zQueue;
 
 	@Override
-	public void doTask(TunnelTask task) {
+	public boolean doTask(TunnelTask task) {
 		ZQMethodWrapper matchedMethod = methodNameMap.get(task.getName());
 		if (ArgUtil.is(matchedMethod)) {
 			Method method = matchedMethod.getMethod();
@@ -84,7 +84,7 @@ public class ZQueueEngine extends ATaskLimiter {
 							for (ZQueueElement elemtn : elemtns) {
 								method.invoke(controller, elemtn);
 							}
-							zQueue.pushBackAsync(task);
+							return false;
 						}
 					}
 				} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
@@ -92,17 +92,20 @@ public class ZQueueEngine extends ATaskLimiter {
 				}
 			}
 		}
+		return true;
 	}
 
 	@Async
 	public void throttleQ(TunnelTask task) {
-		ZQMethodWrapper matchedMethod = methodNameMap.get(task.getName());
-		if (ArgUtil.is(matchedMethod)) {
-			this.throttle(task.intervalMillis(matchedMethod.getDelay()));
-		} else {
-			this.throttle(task);
-		}
+		if (ArgUtil.isEmptyValue(task.getInterval())) {
+			ZQMethodWrapper matchedMethod = methodNameMap.get(task.getName());
+			if (ArgUtil.is(matchedMethod)) {
+				this.throttle(task.intervalMillis(matchedMethod.getDelay()));
+				return;// exit
+			}
 
+		}
+		this.throttle(task);
 	}
 
 }

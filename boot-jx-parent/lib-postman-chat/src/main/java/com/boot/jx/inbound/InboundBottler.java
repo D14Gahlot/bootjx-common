@@ -136,7 +136,7 @@ public class InboundBottler extends ATaskLimiter {
 	}
 
 	@Override
-	public void doTask(TunnelTask task) {
+	public void doTaskSafely(TunnelTask task) {
 		if ("MESSAGE_DEQUEUE".equals(task.getName())) {
 			String contactId = task.getId();
 			hold().put(contactId, "DEQUEUING");

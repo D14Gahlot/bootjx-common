@@ -34,7 +34,7 @@ public class SessionRouter extends ATaskLimiter {
 	private ChatSessionService chatSessionService;
 
 	@Override
-	public void doTask(TunnelTask task) {
+	public void doTaskSafely(TunnelTask task) {
 
 		switch (task.getName()) {
 		case "MITEL_ROUTER":

@@ -16,6 +16,8 @@ public class ITunnelDefs {
 		String getName();
 
 		void doTask(int pollQNum, int pushQNum, int batchSize);
+
+		public boolean doTask(TunnelTask task);
 	}
 
 	public static class TunnelTask implements ITunnelEvent {

@@ -39,6 +39,7 @@ public class QueueElementDoc implements Serializable, ZQueueElement {
 	@Indexed
 	private String batchId;
 
+	@Indexed
 	private long timestamp;
 
 	private Map<String, Object> item;

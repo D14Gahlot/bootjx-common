@@ -79,7 +79,7 @@ public class InBoundPoller extends ATaskLimiter {
 	}
 
 	@Override
-	public void doTask(TunnelTask task) {
+	public void doTaskSafely(TunnelTask task) {
 		if (ArgUtil.is(task.getName(), TASK_EMAIL_POLLER)) {
 			String channelId = task.data().getString("channelId");
 			ChannelConfig channel = env.local().channel(channelId);
