@@ -99,6 +99,8 @@ public class ZQueueEngine extends ATaskLimiter {
 		ZQMethodWrapper matchedMethod = methodNameMap.get(task.getName());
 		if (ArgUtil.is(matchedMethod)) {
 			this.throttle(task.intervalMillis(matchedMethod.getDelay()));
+		} else {
+			this.throttle(task);
 		}
 
 	}
