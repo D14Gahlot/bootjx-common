@@ -27,13 +27,13 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 @AutoConfigureAfter(RedisAutoConfiguration.class)
 public class RedisSessionConfig {
 
-    private static final Logger LOGGER = LoggerService.getLogger(RedisSessionConfig.class);
+	private static final Logger LOGGER = LoggerService.getLogger(RedisSessionConfig.class);
 
-    @Value("${spring.session.store-type}")
-    private String sessionStoreType;
+	@Value("${spring.session.store-type}")
+	private String sessionStoreType;
 
-    @Autowired
-    private RedisProperties redisProperties;
+	@Autowired
+	private RedisProperties redisProperties;
 
 //    @Bean
 //    public LettuceConnectionFactory redisConnectionFactory() {
@@ -58,28 +58,28 @@ public class RedisSessionConfig {
 //	}
 //    }
 
-    @Bean
-    ObjectMapper redisObjectMapper() {
-	ObjectMapper objectMapper = new ObjectMapper();
-	objectMapper.registerModule(new JavaTimeModule());
-	// objectMapper.registerModule(new Jdk8Module());
-	objectMapper.setTimeZone(TimeZone.getTimeZone("GMT+1:00"));
-	objectMapper.setDateFormat(new ISO8601DateFormat());
-	objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-	objectMapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
-	return objectMapper;
-    }
+	@Bean
+	ObjectMapper redisObjectMapper() {
+		ObjectMapper objectMapper = new ObjectMapper();
+		objectMapper.registerModule(new JavaTimeModule());
+		// objectMapper.registerModule(new Jdk8Module());
+		objectMapper.setTimeZone(TimeZone.getTimeZone("GMT+1:00"));
+		objectMapper.setDateFormat(new ISO8601DateFormat());
+		objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+		objectMapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
+		return objectMapper;
+	}
 
-    @Bean
-    public ConfigureRedisAction configureRedisAction() {
-	LOGGER.info("Preventing auto-configuration in secured environments.");
-	return ConfigureRedisAction.NO_OP;
-    }
+	@Bean
+	public ConfigureRedisAction configureRedisAction() {
+		LOGGER.info("Preventing auto-configuration in secured environments.");
+		return ConfigureRedisAction.NO_OP;
+	}
 
-    @PostConstruct
-    public void init() {
-	LOGGER.info("spring.session.store-type=none turns spring session off.");
-	LOGGER.info("Redis Session Replication is turned {}.", sessionStoreType.equals("redis") ? "ON" : "OFF");
-    }
+	@PostConstruct
+	public void init() {
+		LOGGER.info("spring.session.store-type=none turns spring session off.");
+		LOGGER.info("Redis Session Replication is turned {}.", sessionStoreType.equals("redis") ? "ON" : "OFF");
+	}
 
 }

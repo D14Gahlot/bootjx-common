@@ -28,40 +28,40 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 @EnableMongoHttpSession
 public class MongoSessionConfig {
 
-    private static final Logger LOGGER = LoggerService.getLogger(MongoSessionConfig.class);
+	private static final Logger LOGGER = LoggerService.getLogger(MongoSessionConfig.class);
 
-    @Value("${spring.session.store-type}")
-    private String sessionStoreType;
+	@Value("${spring.session.store-type}")
+	private String sessionStoreType;
 
-    @Bean
-    public JdkMongoSessionConverter jdkMongoSessionConverter() {
-	return new JdkMongoSessionConverter(Duration.ofMinutes(30));
-    }
+	@Bean
+	public JdkMongoSessionConverter jdkMongoSessionConverter() {
+		return new JdkMongoSessionConverter(Duration.ofMinutes(30));
+	}
 
-    // @Bean
-    public AbstractMongoSessionConverter mongoSessionConverter() {
-	// List<Module> securityModules =
-	// SecurityJackson2Modules.getModules(getClass().getClassLoader());
-	// return new JacksonMongoSessionConverter(securityModules);
-	return new JacksonMongoSessionConverter();
-    }
+	// @Bean
+	public AbstractMongoSessionConverter mongoSessionConverter() {
+		// List<Module> securityModules =
+		// SecurityJackson2Modules.getModules(getClass().getClassLoader());
+		// return new JacksonMongoSessionConverter(securityModules);
+		return new JacksonMongoSessionConverter();
+	}
 
-    public Iterable<Module> getJacksonModules() {
-	return Collections
-		.<Module>singletonList(new SimpleModule("forMongoSession", new Version(1, 0, 0, null, null, null)));
-    }
+	public Iterable<Module> getJacksonModules() {
+		return Collections
+				.<Module>singletonList(new SimpleModule("forMongoSession", new Version(1, 0, 0, null, null, null)));
+	}
 
-    // @Bean
-    public ObjectMapper objectMapper() {
-	ObjectMapper mapper = JsonUtil.createMapper("forMongoSession");
-	mapper.registerModule(new CoreJackson2Module());
-	return mapper;
-    }
+	// @Bean
+	public ObjectMapper objectMapper() {
+		ObjectMapper mapper = JsonUtil.createMapper("forMongoSession");
+		mapper.registerModule(new CoreJackson2Module());
+		return mapper;
+	}
 
-    @PostConstruct
-    public void init() {
-	LOGGER.info("spring.session.store-type=none turns spring session off.");
-	LOGGER.info("Monog Session Replication is turned {}.", sessionStoreType.equals("mongodb") ? "ON" : "OFF");
-    }
+	@PostConstruct
+	public void init() {
+		LOGGER.info("spring.session.store-type=none turns spring session off.");
+		LOGGER.info("Monog Session Replication is turned {}.", sessionStoreType.equals("mongodb") ? "ON" : "OFF");
+	}
 
 }

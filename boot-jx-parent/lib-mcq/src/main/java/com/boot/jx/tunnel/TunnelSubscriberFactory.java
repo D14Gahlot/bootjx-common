@@ -52,8 +52,8 @@ public class TunnelSubscriberFactory {
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public TunnelSubscriberFactory(List<ITunnelSubscriber> listeners,
-			@Autowired(required = false) RedissonClient redisson, @Autowired(required = true) AppConfig appConfigLocal,
-			@Autowired AppParam loadAppParams) {
+			@Autowired(required = false) RedissonClient redisson,
+			@Autowired(required = true) AppConfig appConfigLocal) {
 		appConfig = appConfigLocal;
 		LOGGER.info("Subscribing {} tunnel events in {}", listeners.size(), appConfigLocal.getAppEnv());
 		if (redisson == null) {

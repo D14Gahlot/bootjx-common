@@ -1,13 +1,13 @@
-package com.boot.jx.session;
+package com.boot.jx.session.custom;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
-import org.springframework.session.MapSessionRepository;
-import org.springframework.session.web.http.CookieHttpSessionStrategy;
-import org.springframework.session.web.http.DefaultCookieSerializer;
-import org.springframework.session.web.http.HeaderHttpSessionStrategy;
-import org.springframework.session.web.http.HttpSessionStrategy;
 
+import com.boot.jx.session.bc.CookieHttpSessionStrategy;
+import com.boot.jx.session.bc.DefaultCookieSerializer;
+import com.boot.jx.session.bc.HeaderHttpSessionStrategy;
+import com.boot.jx.session.bc.HttpSessionStrategy;
+import com.boot.jx.session.bc.MapSessionRepository;
 import com.boot.utils.ArgUtil;
 
 //@Configuration

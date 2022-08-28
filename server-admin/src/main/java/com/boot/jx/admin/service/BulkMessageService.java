@@ -7,11 +7,10 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.bson.Document;
-import org.bson.Document;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
+import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
@@ -19,6 +18,7 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.boot.jx.chat.ChatService;
 import com.boot.jx.chat.ChatSessionFactory;
@@ -26,8 +26,8 @@ import com.boot.jx.chat.ChatSessionService;
 import com.boot.jx.common.config.ConfigConstants;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.logger.AuditDetailProvider;
-import com.boot.jx.mongo.CommonMongoQueryBuilder;
 import com.boot.jx.mongo.CommonMongoQB.QueryCriteria;
+import com.boot.jx.mongo.CommonMongoQueryBuilder;
 import com.boot.jx.postman.ClientApp;
 import com.boot.jx.postman.PMConstants;
 import com.boot.jx.postman.PMConstants.MESSAGE_SENDER_TYPE;
@@ -51,11 +51,6 @@ import com.google.i18n.phonenumbers.NumberParseException;
 import com.google.i18n.phonenumbers.Phonenumber.PhoneNumber;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
-import com.mongodb.AggregationOptions;
-import com.mongodb.AggregationOptions.OutputMode;
-import com.mongodb.Cursor;
-import com.mongodb.DBCollection;
-import com.mongodb.DBObject;
 
 @Component
 public class BulkMessageService extends BatchJobExecuter {
@@ -248,7 +243,7 @@ public class BulkMessageService extends BatchJobExecuter {
 	public boolean tally(BatchJob currentBatchJob) {
 		BulkSessionDoc doc = mongoTemplate.findById(currentBatchJob.getJobId(), BulkSessionDoc.class);
 
-	ContactType contactType = currentBatchJob.data().entry("contactType").asEnum(ContactType.class);
+		ContactType contactType = currentBatchJob.data().entry("contactType").asEnum(ContactType.class);
 
 //		Aggregation agg = Aggregation.newAggregation(
 //				Aggregation.match(Criteria.where("bulkSessionId").is((currentBatchJob.getJobId()))), // Match
@@ -257,51 +252,52 @@ public class BulkMessageService extends BatchJobExecuter {
 //		AggregationResults<Map> results = mongoTemplate.aggregate(agg, MessageStore.getCollectionName(contactType),
 //				Map.class);
 
-	List<Document> list = new ArrayList<Document>();
-	list.add(Aggregation.match(Criteria.where("bulkSessionId").is((currentBatchJob.getJobId()))) // Match
-		.toDocument(Aggregation.DEFAULT_CONTEXT));
-	list.add(Aggregation.group("status").count().as("count").toDocument(Aggregation.DEFAULT_CONTEXT));
+		List<Document> list = new ArrayList<Document>();
+		list.add(Aggregation.match(Criteria.where("bulkSessionId").is((currentBatchJob.getJobId()))) // Match
+				.toDocument(Aggregation.DEFAULT_CONTEXT));
+		list.add(Aggregation.group("status").count().as("count").toDocument(Aggregation.DEFAULT_CONTEXT));
 
-	MongoCollection<Document> col = mongoTemplate.getCollection(MessageStore.getCollectionName(contactType));
-	MongoCursor<Document> cursor = col.aggregate(list).iterator();
+		MongoCollection<Document> col = mongoTemplate.getCollection(MessageStore.getCollectionName(contactType));
+		MongoCursor<Document> cursor = col.aggregate(list).iterator();
 
-	long totalCount = 0;
-	long doneCount = 0;
-	// for (Map map : results) {
-	while (cursor.hasNext()) {
-	    Document object = cursor.next();
-	    if (ArgUtil.is(object)) {
-		Status status = ArgUtil.parseAsEnumT(object.get("_id"), Status.class);
-		if (ArgUtil.is(status)) {
-		    long count = ArgUtil.parseAsLong(object.get("count"), 0L);
-		    doc.stats().put(ArgUtil.parseAsString(status), count);
-		    totalCount = (totalCount + count);
-		    // Done Count
-		    if (status.ordinal() > Status.INIT.ordinal()) {
-			doneCount = (doneCount + count);
-		    }
+		long totalCount = 0;
+		long doneCount = 0;
+		// for (Map map : results) {
+		while (cursor.hasNext()) {
+			Document object = cursor.next();
+			if (ArgUtil.is(object)) {
+				Status status = ArgUtil.parseAsEnumT(object.get("_id"), Status.class);
+				if (ArgUtil.is(status)) {
+					long count = ArgUtil.parseAsLong(object.get("count"), 0L);
+					doc.stats().put(ArgUtil.parseAsString(status), count);
+					totalCount = (totalCount + count);
+					// Done Count
+					if (status.ordinal() > Status.INIT.ordinal()) {
+						doneCount = (doneCount + count);
+					}
+				}
+			}
+
 		}
-	    }
+		// }
 
-	}
-	// }
+		// System.out.println("TALLY : " + (totalCount == doneCount) + " -- "
+		// +currentBatchJob.getDonePercent());
+		boolean completed = (totalCount == doneCount) && (currentBatchJob.getDonePercent() == 100);
 
-	// System.out.println("TALLY : " + (totalCount == doneCount) + " -- "
-	// +currentBatchJob.getDonePercent());
-	boolean completed = (totalCount == doneCount) && (currentBatchJob.getDonePercent() == 100);
+		if (completed) {
+			doc.setCompletedStamp(System.currentTimeMillis());
+		}
+		if (!ArgUtil.areEqual(currentBatchJob.getStatus(), doc.getStatus())) {
+			doc.setStatus(currentBatchJob.getStatus().toString());
+			if (completed) {
+				doc.setStatus(JOB_STATUS.COMPLETED.toString());
+			}
+		}
+		mongoTemplate.save(doc);
+		return completed;
+	}
 
-	if (completed) {
-	    doc.setCompletedStamp(System.currentTimeMillis());
-	}
-	if (!ArgUtil.areEqual(currentBatchJob.getStatus(), doc.getStatus())) {
-	    doc.setStatus(currentBatchJob.getStatus().toString());
-	    if (completed) {
-		doc.setStatus(JOB_STATUS.COMPLETED.toString());
-	    }
-	}
-	mongoTemplate.save(doc);
-	return completed;
-    }
 	/** Parsing csv file **/
 	public BulkSessionDoc uploadFile(MultipartFile file) throws NumberParseException {
 		try {
@@ -312,31 +308,32 @@ public class BulkMessageService extends BatchJobExecuter {
 		}
 		return null;
 	}
+
 	public static String TYPE = "text/csv";
+
 	public static boolean hasCSVFormat(MultipartFile file) {
-	    if (!TYPE.equals(file.getContentType())) {
-	      return false;
-	    }
-	    return true;
-	  }
-	
-	public void readFile(InputStream is) {
-		try (BufferedReader fileReader = new BufferedReader(new InputStreamReader(is));
-		        CSVParser csvParser = new CSVParser(fileReader,
-		            CSVFormat.DEFAULT.withFirstRecordAsHeader().withIgnoreHeaderCase().withTrim());) {
-		     // List<Tutorial> tutorials = new ArrayList<Tutorial>();
-		      Iterable<CSVRecord> csvRecords = csvParser.getRecords();
-		      for (CSVRecord csvRecord : csvRecords) {
-		    	  System.out.println("id :"+ csvRecord.get("contacts"));
-		    	  //System.out.println("Title :"+ csvRecord.get("Title"));
-		    	  //System.out.println("Description :"+ csvRecord.get("Description"));
-		    	  //System.out.println("id :"+ csvRecord.get("Published"));
-		      
-		      }
-		   
-		    } catch (Exception e) {
-		      throw new RuntimeException("fail to parse CSV file: " + e.getMessage());
-		    }
-		  }
+		if (!TYPE.equals(file.getContentType())) {
+			return false;
+		}
+		return true;
 	}
 
+	public void readFile(InputStream is) {
+		try (BufferedReader fileReader = new BufferedReader(new InputStreamReader(is));
+				CSVParser csvParser = new CSVParser(fileReader,
+						CSVFormat.DEFAULT.withFirstRecordAsHeader().withIgnoreHeaderCase().withTrim());) {
+			// List<Tutorial> tutorials = new ArrayList<Tutorial>();
+			Iterable<CSVRecord> csvRecords = csvParser.getRecords();
+			for (CSVRecord csvRecord : csvRecords) {
+				System.out.println("id :" + csvRecord.get("contacts"));
+				// System.out.println("Title :"+ csvRecord.get("Title"));
+				// System.out.println("Description :"+ csvRecord.get("Description"));
+				// System.out.println("id :"+ csvRecord.get("Published"));
+
+			}
+
+		} catch (Exception e) {
+			throw new RuntimeException("fail to parse CSV file: " + e.getMessage());
+		}
+	}
+}
