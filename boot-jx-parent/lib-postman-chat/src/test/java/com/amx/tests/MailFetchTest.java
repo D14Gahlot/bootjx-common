@@ -32,7 +32,7 @@ public class MailFetchTest { // Noncompliant
 
 	private void doTest() throws MessagingException, IOException {
 
-		final String username = "chat2@mehery.com";
+		final String username = "chat@mehery.com";
 		final String passwd = "cherry@Mup22501";
 		Properties props = new Properties();
 

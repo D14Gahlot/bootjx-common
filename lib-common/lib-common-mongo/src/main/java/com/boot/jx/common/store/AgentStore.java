@@ -5,12 +5,14 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Component;
 
 import com.boot.jx.common.doc.AgentDoc;
 import com.boot.jx.common.doc.DepartmentDoc;
+import com.boot.jx.mongo.CommonMongoQB;
+import com.boot.jx.mongo.CommonMongoQB.CommonMongoQBimpl;
 import com.boot.jx.mongo.CommonMongoQueryBuilder;
+import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.utils.ArgUtil;
 
@@ -20,7 +22,16 @@ public class AgentStore {
 	private static final Logger LOGGER = LoggerFactory.getLogger(AgentStore.class);
 
 	@Autowired
-	MongoTemplate mongoTemplate;
+	CommonMongoTemplate mongoTemplate;
+
+	public void logAgentUpdate(AgentDoc agent) {
+		mongoTemplate.log(agent, "updated");
+	}
+
+	public void logAgentUpdate(String id) {
+		AgentDoc agent = findById(id);
+		logAgentUpdate(agent);
+	}
 
 	public void updateMulti(CommonMongoQueryBuilder builder, Class<?> entityClass) {
 		mongoTemplate.updateMulti(builder.getQuery(), builder.getUpdate(), entityClass);
@@ -34,9 +45,18 @@ public class AgentStore {
 		return mongoTemplate.findAll(AgentDoc.class);
 	}
 
+	public List<AgentDoc> findAllAgents(boolean includeInActive) {
+		CommonMongoQB<CommonMongoQBimpl<AgentDoc>, AgentDoc> builder = CommonMongoQueryBuilder
+				.collection(AgentDoc.class);
+		if (!includeInActive) {
+			builder.where("isactive", "Y");
+		}
+		builder.sortBy("agent_code");
+		return mongoTemplate.find(builder);
+	}
+
 	public List<AgentDoc> findAllActive() {
-		CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder().where("isactive", "Y");
-		return mongoTemplate.find(builder.getQuery(), AgentDoc.class);
+		return findAllAgents(false);
 	}
 
 	public AgentDoc findById(String agentId) {
@@ -49,15 +69,23 @@ public class AgentStore {
 		return mongoTemplate.findOne(builder.getQuery(), AgentDoc.class);
 	}
 
+	public List<DepartmentDoc> findDepartmentAll(boolean showInActive) {
+		if (showInActive) {
+			return mongoTemplate.findAll(DepartmentDoc.class);
+		}
+		CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder().where("isactive", "Y");
+		return mongoTemplate.find(builder.getQuery(), DepartmentDoc.class);
+	}
+
 	public List<DepartmentDoc> findDepartmentAll() {
-		return mongoTemplate.findAll(DepartmentDoc.class);
+		return findDepartmentAll(false);
 	}
 
 	public DepartmentDoc findDepartmentById(String deptId) {
 		CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder().whereId(deptId);
 		return mongoTemplate.findOne(builder.getQuery(), DepartmentDoc.class);
 	}
-	
+
 	public DepartmentDoc findDepartmentByCode(String deptCode) {
 		CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder().whereId(deptCode);
 		return mongoTemplate.findOne(builder.getQuery(), DepartmentDoc.class);
@@ -78,6 +106,7 @@ public class AgentStore {
 		CommonMongoQueryBuilder cqb2 = new CommonMongoQueryBuilder().whereId(agentId).set("isEnabled", isEnabled)
 				.set("isactive", status);
 		updateFirst(cqb2, AgentDoc.class);
+		logAgentUpdate(agentId);
 	}
 
 	public void updateAgentDefault(String agentId) {
@@ -90,6 +119,7 @@ public class AgentStore {
 		CommonMongoQueryBuilder cqb2 = new CommonMongoQueryBuilder().whereId(agentId).set("isDefaultValue",
 				!agent.isDefaultValue());
 		updateMulti(cqb2, AgentDoc.class);
+		logAgentUpdate(agent);
 	}
 
 	public void updateDepartmentDefault(String deptId) {
@@ -103,7 +133,8 @@ public class AgentStore {
 
 	public void save(AgentDoc agent) {
 		agent.setAuthKey(PostManUtil.UNIQUE_API_KEY());
-		mongoTemplate.save(agent);
+		// mongoTemplate.save(agent);
+		mongoTemplate.saveAndAudit(agent, ArgUtil.is(agent.getId()));
 	}
 
 }

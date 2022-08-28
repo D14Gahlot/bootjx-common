@@ -148,7 +148,9 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 				// INTERNAL BOT HANDLING
 				if (CHAT_MODE.BOT.equals(appType.getMode()) && ArgUtil.is(pmCommonConfig.getBotUrl())) {
 					LOGGER.debug("Forwarding InboxMessage to internal Bot ");
-					chatClient.forward(pmCommonConfig.getBotUrl() + PATH.INBOUND_FRWRD, inboxMessage);
+					chatClient.forward(pmCommonConfig.getBotUrl()
+							// "http://127.0.0.1:8084/bot"
+							+ PATH.INBOUND_FRWRD, inboxMessage);
 					return;
 				}
 
@@ -295,9 +297,10 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 
 	@Override
 	public NodeEntry<InBoundEvent> assignSessionToAgent(PMArgs params, ChatSessionDoc session) {
-		return new NodeEntry<InBoundEvent>().value(chatClient.assignToAgentV2(new PMArgs()
-				.sessionId(session.getSessionId()).contact(session.contact())
-				.assignToDeptCode(params.getAssignToDeptCode()).assignToAgentCode(params.getAssignToAgentCode())));
+		return new NodeEntry<InBoundEvent>().value(
+				chatClient.assignToAgentV2(new PMArgs().sessionId(session.getSessionId()).contact(session.contact())
+						.assignToDeptCode(params.getAssignToDeptCode()).assignToAgentCode(params.getAssignToAgentCode())
+						.assignToSkillCodes(params.getAssignToSkillCodes())));
 	}
 
 	@Override
@@ -326,8 +329,8 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 							.assignToDeptCode(
 									ArgUtil.nonEmpty(pmArgs.getAssignToDeptCode(), props.getString("deptCode")))
 							.assignToAgentCode(
-									ArgUtil.nonEmpty(pmArgs.getAssignToAgentCode(), props.getString("agentCode"))),
-							sessionDoc);
+									ArgUtil.nonEmpty(pmArgs.getAssignToAgentCode(), props.getString("agentCode")))
+							.assignToSkillCodes(pmArgs.getAssignToSkillCodes()), sessionDoc);
 					if (APP_TYPE.MITEL.equals(appType)) {
 						try {
 							mitelRouting(sessionDoc, targetAppQueue, 1);

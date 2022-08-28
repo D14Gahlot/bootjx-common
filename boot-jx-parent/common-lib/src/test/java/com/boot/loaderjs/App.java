@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import com.boot.jx.AppConstants;
 import com.boot.jx.AppContext;
 import com.boot.jx.AppContextUtil;
+import com.boot.jx.dict.FileFormat;
 import com.boot.jx.dict.UserClient.AppType;
 import com.boot.jx.dict.UserClient.DeviceType;
 import com.boot.jx.dict.UserClient.UserDeviceClient;
@@ -48,6 +49,12 @@ public class App { // Noncompliant
 
 	private static Logger LOGGER = LoggerFactory.getLogger(App.class);
 
+	public static void main(String[] args) throws ExpressionException {
+		System.out.println(FileFormat.from("audio/webm;codecs=opus"));
+		System.out.println(FileFormat.from("audio/webm; codecs=opus"));
+		System.out.println(FileFormat.from("audio/webm"));
+	}
+
 	public static void mainx(String[] args) throws ExpressionException {
 		MDC.put(TenantContextHolder.TENANT, "heohooh");
 		LOGGER.info("Hello");
@@ -64,7 +71,7 @@ public class App { // Noncompliant
 
 	}
 
-	public static void main(String[] args) throws ExpressionException {
+	public static void main9(String[] args) throws ExpressionException {
 		OTPDetails details = OTPUtils.genrateBasicOTP("512", "REMIT");
 		System.out.println(JsonUtil.toJson(details));
 		System.out.println(OTPUtils.validateBasicOTP(details.getId(), "512", "REMIT", details.getOtp()));

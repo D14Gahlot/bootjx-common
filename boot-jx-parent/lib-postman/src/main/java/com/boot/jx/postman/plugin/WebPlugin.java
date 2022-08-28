@@ -48,6 +48,9 @@ public class WebPlugin implements DefaultChannelPlugin<WebConfigDetails> {
 				optionsLabel = "desc")
 		private String welcomeBack;
 
+		@ConfigMetaProperty(path = "web.stylesheet", title = "Stylesheet Url", optional = true)
+		private String stylesheet;
+
 		@Override
 		public String getLane() {
 			return this.site;
@@ -91,6 +94,14 @@ public class WebPlugin implements DefaultChannelPlugin<WebConfigDetails> {
 
 		public void setWelcomeBack(String welcomeBack) {
 			this.welcomeBack = welcomeBack;
+		}
+
+		public String getStylesheet() {
+			return stylesheet;
+		}
+
+		public void setStylesheet(String stylesheet) {
+			this.stylesheet = stylesheet;
 		}
 
 	}

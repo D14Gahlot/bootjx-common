@@ -17,8 +17,11 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.boot.jx.admin.dto.CsvDto;
+import com.boot.jx.admin.manager.CSVHelper;
 import com.boot.jx.admin.manager.ChatParserAndImportor;
 import com.boot.jx.admin.service.BulkMessageService;
+import com.boot.jx.admin.service.CSVService;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.chat.ChatSessionService;
 import com.boot.jx.common.doc.ImportChatSessionDoc;
@@ -66,6 +69,10 @@ public class AdminMsgController {
 
 	@Autowired
 	public StarterDocKit starterDocKit;
+	
+	@Autowired
+	 CSVService fileService;
+
 
 	@RequestMapping(value = "/api/message/session", method = { RequestMethod.GET })
 	public ApiResponse<ChatSessionDoc, Object> fetchSession(@RequestParam String startStamp,
@@ -225,6 +232,26 @@ public class AdminMsgController {
 			chatSessionDtos.add(chatSessionDto);
 		}
 		return ApiResponse.buildResults(chatSessionDtos);
+	}
+	
+	/** upload csv file **/
+	@RequestMapping(value = "/pub/message/bulk/push/csv/read", method = { RequestMethod.POST })
+	public ApiResponse<CsvDto, Object> sendBulkCsvMessage(@RequestParam(required = true) String  templateId,@RequestParam("file") MultipartFile file) throws NumberParseException {
+		String message = "";
+		CsvDto lst=null;
+	    if (CSVHelper.hasCSVFormat(file)) {
+	    try {
+	    	lst = fileService.save(templateId,file);
+	        message = "Uploaded the file successfully: " + file.getOriginalFilename();
+		  return ApiResponse.buildResult(lst).message(message);
+	      } catch (Exception e) {
+		        message = "Could not upload the file: " + file.getOriginalFilename() + "!";
+		        return ApiResponse.buildResult(lst).message(message);
+	      }
+	    }else {
+	    	message = "Please upload a csv file!";
+	    	 return ApiResponse.buildResult(lst).message(message);
+	    }
 	}
 
 }

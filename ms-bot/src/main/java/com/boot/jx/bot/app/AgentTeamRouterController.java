@@ -15,6 +15,7 @@ import com.boot.jx.common.doc.DepartmentDoc;
 import com.boot.jx.logger.LoggerService;
 import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.jx.postman.ClientApp;
+import com.boot.jx.postman.doc.QuickSkill;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.model.TmplElement;
@@ -35,15 +36,23 @@ public class AgentTeamRouterController extends CommonBotController {
 	public void onSessionRoute(InBoundEvent assignEvent) {
 		LOGGER.debug("Loading chat :onSessionRoute");
 		super.onSessionRoute(assignEvent);
-		List<DepartmentDoc> teams = commonMongoTemplate.findAll(DepartmentDoc.class);
-		askTeam(teams);
+		askOptions();
 	}
 
 	@ChatMapping(key = AlexBotConstants.KEY.INITIATE + "*", pattern = "^*$")
 	public void greet(InboxMessage inboxMessage, StringMatcher matcher) {
 		LOGGER.debug("Loading chat :greet : isFM{}", inboxMessage.session().isFirstMessage());
-		List<DepartmentDoc> teams = commonMongoTemplate.findAll(DepartmentDoc.class);
-		askTeam(teams);
+		askOptions();
+	}
+
+	private void askOptions() {
+		ClientApp app = context().clientApp();
+		String optionType = ArgUtil.parseAsString(app.props().get("options_type"));
+		if ("QUICK_SKILL".equalsIgnoreCase(optionType)) {
+			askSkill(null);
+		} else {
+			askTeam(null);
+		}
 	}
 
 	@ChatMapping(key = "on_team_select")
@@ -58,6 +67,14 @@ public class AgentTeamRouterController extends CommonBotController {
 				return;
 			}
 		}
+
+		ClientApp app = context().clientApp();
+		String deptCode = ArgUtil.parseAsString(app.props().get("deptCode"));
+		if (ArgUtil.is(deptCode)) {
+			assignToAgentDepartment(deptCode);
+			return;
+		}
+
 		askTeam(teams);
 	}
 
@@ -68,6 +85,8 @@ public class AgentTeamRouterController extends CommonBotController {
 		if (ArgUtil.is(template)) {
 			reply(new OutboxMessage().template(template));
 		} else {
+			if (teams == null)
+				teams = commonMongoTemplate.findAll(DepartmentDoc.class);
 			List<TmplElement> buttons = new ArrayList<TmplElement>();
 			for (DepartmentDoc team : teams) {
 				buttons.add(new TmplElement().code(team.getDept_code()).label(team.getDept_name()));
@@ -75,6 +94,45 @@ public class AgentTeamRouterController extends CommonBotController {
 			reply(new OutboxMessage().message("Select team").options("buttons", buttons));
 		}
 		next("on_team_select");
+	}
+
+	@ChatMapping(key = "on_skill_select")
+	public void onSkillSelect(InboxMessage inboxMessage, StringMatcher matcher) {
+		String text = toReplyEnum(inboxMessage);
+		List<QuickSkill> teams = commonMongoTemplate.findAll(QuickSkill.class);
+		for (QuickSkill team : teams) {
+			if (ArgUtil.areEqual(StringUtils.toLowerCase(team.getCode()), text)
+					|| ArgUtil.areEqual(StringUtils.toLowerCase(team.getTitle()), text)
+					|| ArgUtil.areEqual(StringUtils.toLowerCase(team.getId()), text)) {
+				assignToAgentSkill(team.getCode());
+				return;
+			}
+		}
+		ClientApp app = context().clientApp();
+		String deptCode = ArgUtil.parseAsString(app.props().get("deptCode"));
+		if (ArgUtil.is(deptCode)) {
+			assignToAgentDepartment(deptCode);
+			return;
+		}
+		askSkill(teams);
+	}
+
+	private void askSkill(List<QuickSkill> skills) {
+		LOGGER.debug("Loading chat :askTeam");
+		ClientApp app = context().clientApp();
+		String template = ArgUtil.parseAsString(app.props().get("template"));
+		if (ArgUtil.is(template)) {
+			reply(new OutboxMessage().template(template));
+		} else {
+			if (skills == null)
+				skills = commonMongoTemplate.findAll(QuickSkill.class);
+			List<TmplElement> buttons = new ArrayList<TmplElement>();
+			for (QuickSkill skill : skills) {
+				buttons.add(new TmplElement().code(skill.getCode()).label(skill.getTitle()));
+			}
+			reply(new OutboxMessage().message("Select team").options("buttons", buttons));
+		}
+		next("on_skill_select");
 	}
 
 }

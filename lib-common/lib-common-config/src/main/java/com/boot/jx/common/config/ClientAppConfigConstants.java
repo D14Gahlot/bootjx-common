@@ -75,15 +75,29 @@ public class ClientAppConfigConstants {
 
 						new ConfigMeta().title("Default Agent Queue").path("props.agent_queue")
 								.desc("Default Agent App").optionsSource("getx:/api/options/agent_queue")
-								.optionsKey("code").optionsLabel("code") });
+								.optionsKey("code").optionsLabel("code")
+
+				});
 
 		APP_CONFIGS.put(APP_TYPE.TEAM_ROUTER, new ConfigMeta[] { new ConfigMeta()
 				.inputType(INPUT_TYPE.MESSAGE, MESSAGE_TYPE.INFO).title("Team Router")
 				.desc("Use this app to route session to Team based on customer's input. Selected template should have team code in button code")
 				.group("About App"),
 
+				new ConfigMeta().title("Options Type").path("props.options_type").options(
+						new ConfigOption("QUICK_SKILL").label("QUICK_SKILL"),
+						new ConfigOption("AGENT_TEAM").label("AGENT_TEAM")),
+
 				new ConfigMeta().title("Team Options Template").path("props.template").group("TEMPLATES")
-						.optionsSource("getx:/api/tmpl/hsm").optionsKey("code").optionsLabel("desc") });
+						.optionsSource("getx:/api/tmpl/hsm").optionsKey("code").optionsLabel("desc"),
+
+				new ConfigMeta().title("Default Agent Team").path("props.deptCode")
+						.optionsSource("getx:/api/admins/dept").optionsKey("code").optionsLabel("Name").group("Team"),
+
+				new ConfigMeta().title("Default Agent Queue").path("props.agent_queue").desc("Default Agent App")
+						.optionsSource("getx:/api/options/agent_queue").optionsKey("code").optionsLabel("code"),
+
+		});
 
 		APP_CONFIGS.put(APP_TYPE.APP_SWITCH, new ConfigMeta[] { new ConfigMeta()
 				.inputType(INPUT_TYPE.MESSAGE, MESSAGE_TYPE.INFO).title("App Switch Menu")
@@ -159,8 +173,12 @@ public class ClientAppConfigConstants {
 
 				new ConfigMeta().title("No/Wrong Options Template")
 						.desc("Use coding convetions in template for this to work").path("props.noption_template")
-						.group("TEMPLATES").optionsSource("getx:/api/tmpl/hsm").optionsKey("code")
-						.optionsLabel("code") });
+						.group("TEMPLATES").optionsSource("getx:/api/tmpl/hsm").optionsKey("code").optionsLabel("code"),
+
+				new ConfigMeta().title("No/Wrong Options Actions").desc("Default action for No/Wrong option")
+						.path("props.noption_action").group("TEMPLATES")
+
+		});
 
 		APP_CONFIGS.put(APP_TYPE.FEEDBACK,
 				new ConfigMeta[] { new ConfigMeta().inputType(INPUT_TYPE.MESSAGE, MESSAGE_TYPE.INFO).title("Feedback")

@@ -153,6 +153,12 @@ html.loadable.loading .fullloader {
 		POSTMAN : '[[${POSTMAN_CONTEXT}]]',
 		NOUNCE : '[[${NOUNCE}]]', STOMP_ENABLED : none([[${STOMP_ENABLED}]]),
 		APP_USER : '[[${APP_USER}]]',
+		
+		VISITOR_ID : '[[${VISITOR_ID}]]',
+		VISIT_ID : '[[${VISIT_ID}]]',
+		
+		WEB_CHANNEL_ID : '[[${WEB_CHANNEL_ID}]]',
+		WEB_CHANNEL_STYLESHEET : '[[${WEB_CHANNEL_STYLESHEET}]]',
 	};
 	var initFingerprintJS = function initFingerprintJS() {
 		FingerprintJS.load().then(fp => {

@@ -147,6 +147,7 @@ public class MessageDefinitions {
 			setMessageIdExt(message.getMessageIdExt());
 			setMessageIdRef(message.getMessageIdRef());
 		}
+
 	}
 
 	@JsonIgnoreProperties(ignoreUnknown = true)
@@ -162,6 +163,8 @@ public class MessageDefinitions {
 		public MessageSession session();
 
 		public Contactable contact();
+
+		public List<Object> trace();
 	}
 
 	// External attributes
@@ -216,15 +219,32 @@ public class MessageDefinitions {
 	}
 
 	public interface LogMessage extends SessionMessage, IMessageId {
-		public List<String> getLogs();
+		public List<Object> getLogs();
 
-		public void setLogs(List<String> logs);
+		public void setLogs(List<Object> logs);
 
-		public default List<String> logs() {
+		public default List<Object> logs() {
 			if (this.getLogs() == null) {
-				this.setLogs(new ArrayList<String>());
+				this.setLogs(new ArrayList<Object>());
 			}
 			return this.getLogs();
 		}
+	}
+
+	public interface TraceMessage extends SessionInfo {
+		public List<Object> getTrace();
+
+		public void setTrace(List<Object> trace);
+
+		public default List<Object> trace() {
+			if (this.getTrace() == null) {
+				this.setTrace(new ArrayList<Object>());
+			}
+			return this.getTrace();
+		}
+
+		public String id();
+
+		public void id(String id);
 	}
 }

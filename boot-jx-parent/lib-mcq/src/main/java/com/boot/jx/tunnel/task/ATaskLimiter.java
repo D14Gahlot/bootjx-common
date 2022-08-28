@@ -34,7 +34,7 @@ public abstract class ATaskLimiter implements ITaskLimiter {
 	public static final int POLL_INTERVAL = 1 * 1000;
 
 	LocalCachedMapOptions<String, TunnelMessage<TunnelTask>> localCacheOptions = LocalCachedMapOptions
-			.<String, TunnelMessage<TunnelTask>>defaults().evictionPolicy(EvictionPolicy.NONE).cacheSize(5000)
+			.<String, TunnelMessage<TunnelTask>>defaults().evictionPolicy(EvictionPolicy.NONE).cacheSize(10000)
 			.reconnectionStrategy(ReconnectionStrategy.NONE).syncStrategy(SyncStrategy.INVALIDATE).timeToLive(10000)
 			.maxIdle(10000);
 
@@ -155,15 +155,21 @@ public abstract class ATaskLimiter implements ITaskLimiter {
 							} else if (latest.getData().getMatureStamp() <= now) {
 								AppContextUtil.setContext(latest.getContext());
 								AppContextUtil.init();
+								boolean passed = true;
 								try {
 									logger.debug("===========EXECUTED======{} x {}", size, info.getKey());
-									this.doTask(latest.getData());
+									passed = this.doTask(latest.getData());
 								} catch (Exception e) {
 									logger.error("LIMITER TASK EXCEPTION:" + info.getInterval(), e);
 								}
 								logger.debug("Q:{}, Bi:{} T:{} Tk:{}", pollQNum, i, latest.getTopic(), info.getKey());
+								if (passed) {
+									cache.fastRemove(info.getKey());
+								} else {
+									cache.putIfAbsent(info.getKey(), latest);
+									getQueue(pushQNum).add(info);
+								}
 								AppContextUtil.clear();
-								cache.fastRemove(info.getKey());
 							} else {
 								cache.putIfAbsent(info.getKey(), latest);
 							}
@@ -181,7 +187,26 @@ public abstract class ATaskLimiter implements ITaskLimiter {
 		}
 	}
 
-	public abstract void doTask(TunnelTask task);
+	/**
+	 * 
+	 * 
+	 * @param task
+	 */
+	public void doTaskSafely(TunnelTask task) {
+
+	}
+
+	/**
+	 * 
+	 * @param task
+	 * @return - should return false in case task has failed and you want it to be
+	 *         re-attempted till it passes. Warning - use carefully - if task keeps
+	 *         failing it can cause infinite look.
+	 */
+	public boolean doTask(TunnelTask task) {
+		this.doTaskSafely(task);
+		return true;
+	}
 
 	@Async
 	public void debounce(TunnelTask task) {

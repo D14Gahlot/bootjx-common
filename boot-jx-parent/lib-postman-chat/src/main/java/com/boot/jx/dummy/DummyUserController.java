@@ -96,6 +96,17 @@ public class DummyUserController {
 			model.addAttribute("CHANNEL_ID", channelConfig.getChannelId());
 			model.addAttribute("CHANNEL_KEY", channelConfig.getChannelKey());
 		}
+
+		model.addAttribute("USER_CODE",
+				ArgUtil.parseAsString(commonHttpRequest.get("CODE"), Constants.BLANK));
+		model.addAttribute("USER_NAME",
+				ArgUtil.parseAsString(commonHttpRequest.get("NAME"), Constants.BLANK));
+		model.addAttribute("USER_EMAIL",
+				ArgUtil.parseAsString(commonHttpRequest.get("EMAIL"), Constants.BLANK));
+		model.addAttribute("USER_PHONE",
+				ArgUtil.parseAsString(commonHttpRequest.get("PHONE"), Constants.BLANK));
+		model.addAttribute("USER_TOKEN",
+				ArgUtil.parseAsString(commonHttpRequest.get("TOKEN"), Constants.BLANK));
 		return "dummyuser";
 	}
 
@@ -121,7 +132,7 @@ public class DummyUserController {
 		event.contact().setLane("DUMMY");
 		event.from(number);
 		event.setMessage(message);
-		inBoundEngine.invokeMethods(event);
+		inBoundEngine.invokeMethodsAsync(event);
 		return event;
 	}
 
@@ -145,7 +156,7 @@ public class DummyUserController {
 		event.contact().setCsid(event.getFrom());
 		event.session().setAgent(null);
 		event.session().setDept(null);
-		inBoundService.invokeMethods(event);
+		inBoundService.invokeMethodsAsync(event);
 
 		String webSessionId = commonHttpRequest.get("web-session-id");
 		if (!ArgUtil.is(webSessionId) || !webSessionId.equalsIgnoreCase(event.getSessionId())) {

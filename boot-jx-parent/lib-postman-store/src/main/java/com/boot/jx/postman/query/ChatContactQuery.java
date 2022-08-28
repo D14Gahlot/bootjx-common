@@ -168,6 +168,24 @@ public class ChatContactQuery extends DocQueryBuilder<ChatContactDoc> {
 		return this;
 	}
 
+	public ChatContactQuery setProfileId(String profileId) {
+		this.doc.setProfileId(profileId);
+		this.set("profileId", profileId);
+		return this;
+	}
+
+	public ChatContactQuery setUserToken(String userToken) {
+		this.doc.user().setToken(userToken);
+		this.set("user.token", userToken);
+		return this;
+	}
+
+	public ChatContactQuery setUserCode(String userCode) {
+		this.doc.user().setCode(userCode);
+		this.set("user.code", userCode);
+		return this;
+	}
+
 	public ChatContactQuery setPhoneVerified(boolean phoneVerified) {
 		this.doc.setPhoneVerified(true);
 		this.set("phoneVerified", phoneVerified);

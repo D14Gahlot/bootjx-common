@@ -8,10 +8,15 @@ import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import com.boot.jx.model.AuditCreateEntity.AuditableEntity;
+import com.boot.jx.mongo.CommonDocInterfaces.ADocumentDTO;
+import com.boot.jx.mongo.CommonDocInterfaces.ResourceDocument;
+import com.boot.jx.mongo.CommonDocInterfaces.ResourceDocumentKeyDeserializer;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 @Document(collection = "DICT_QUICK_TAG")
 @TypeAlias("QuickTag")
-public class QuickTag implements Serializable, AuditableEntity {
+@JsonDeserialize(as = QuickTag.class, keyUsing = ResourceDocumentKeyDeserializer.class)
+public class QuickTag implements Serializable, AuditableEntity, ResourceDocument, ADocumentDTO<QuickTag> {
 
 	private static final long serialVersionUID = 2845094878124818820L;
 	@Id
@@ -36,26 +41,32 @@ public class QuickTag implements Serializable, AuditableEntity {
 		this.category = category;
 	}
 
+	@Override
 	public String getTitle() {
 		return title;
 	}
 
+	@Override
 	public void setTitle(String title) {
 		this.title = title;
 	}
 
+	@Override
 	public String getId() {
 		return id;
 	}
 
+	@Override
 	public void setId(String id) {
 		this.id = id;
 	}
 
+	@Override
 	public String getCode() {
 		return code;
 	}
 
+	@Override
 	public void setCode(String code) {
 		this.code = code;
 	}
@@ -90,5 +101,10 @@ public class QuickTag implements Serializable, AuditableEntity {
 
 	public void setUpdatedBy(String updatedBy) {
 		this.updatedBy = updatedBy;
+	}
+
+	@Override
+	public ADocumentDTO<QuickTag> newInstance() {
+		return new QuickTag();
 	}
 }

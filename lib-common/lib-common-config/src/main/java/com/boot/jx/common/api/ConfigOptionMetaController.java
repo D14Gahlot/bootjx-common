@@ -192,7 +192,7 @@ public class ConfigOptionMetaController {
 
 		PMConfigurationObject config = pmEnvironment.keyEntry(key);
 		config.setKey(key);
-		
+
 		String oldUrl = config.asString();
 		config.setServer(domainServer);
 

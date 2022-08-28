@@ -10,7 +10,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -25,6 +24,7 @@ import com.boot.jx.AppConfig;
 import com.boot.jx.AppContextUtil;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.api.ApiResponseUtil;
+import com.boot.jx.chat.ChatSessionFactory;
 import com.boot.jx.chat.ChatStatusService;
 import com.boot.jx.connectors.WebConnector;
 import com.boot.jx.dict.ContactType;
@@ -40,16 +40,20 @@ import com.boot.jx.postman.PMEnvironment.PMCommonConfig;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.MessageDoc;
+import com.boot.jx.postman.doc.VisitorActivityDoc;
 import com.boot.jx.postman.dto.ChatMessageDTO;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.MessageBoxEvent;
+import com.boot.jx.postman.model.MessageDefinitions.Contactable;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.plugin.ChannelConfig;
+import com.boot.jx.postman.query.ChatContactQuery;
 import com.boot.jx.postman.service.ChatDTOUtil;
 import com.boot.jx.postman.store.MessageContext;
 import com.boot.jx.postman.store.MessageStore;
 import com.boot.jx.postman.store.SessionStore;
-import com.boot.jx.stomp.StompSessionCache.StompSession;
+import com.boot.jx.postman.store.VisitorActivityStore;
+import com.boot.jx.stomp.StompConfig.StompSession;
 import com.boot.jx.stomp.StompTunnelSessionManager;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.model.MapModel;
@@ -76,7 +80,13 @@ public class InBoundControllerWeb {
 	private SessionStore sessionStore;
 
 	@Autowired
+	private ChatSessionFactory chatSessionFactory;
+
+	@Autowired
 	private MessageStore messageStore;
+
+	@Autowired
+	VisitorActivityStore visitorActivityStore;
 
 	@Autowired
 	private MessageContext messageContext;
@@ -105,6 +115,9 @@ public class InBoundControllerWeb {
 	@Value("${app.stomp}")
 	boolean stompEnabled;
 
+	@Autowired
+	private InboundBottler inboundBottler;
+
 	@ApiRequest(session = true)
 	@RequestMapping(value = "/plugin/customer/**", method = RequestMethod.GET)
 	public String pluginCustomer(Model model, @RequestParam(required = false) String contacyType,
@@ -125,6 +138,20 @@ public class InBoundControllerWeb {
 		model.addAttribute("NOUNCE", nounce);
 		commonHttpRequest.setCookie("NOUNCE", nounce);
 		model.addAttribute("STOMP_ENABLED", stompEnabled);
+
+		model.addAttribute("VISITOR_ID", ArgUtil.parseAsString(commonHttpRequest.get("visitorId"), "NONE"));
+		model.addAttribute("VISIT_ID", ArgUtil.parseAsString(commonHttpRequest.get("visitId"), "NONE"));
+
+		String channelId = commonHttpRequest.get("channelId");
+		if (ArgUtil.is(channelId)) {
+			model.addAttribute("WEB_CHANNEL_ID", channelId);
+			ChannelConfig channelConfig = pmEnvironment.config().channel(channelId);
+			if (ArgUtil.is(channelConfig) && ArgUtil.is(channelConfig.getWeb())
+					&& ArgUtil.is(channelConfig.getWeb().getStylesheet())) {
+				model.addAttribute("WEB_CHANNEL_STYLESHEET", channelConfig.getWeb().getStylesheet());
+			}
+		}
+		visitorActivityStore.save(new VisitorActivityDoc().activity("WEBCHAT_PAGE"));
 		return "app-customer";
 	}
 
@@ -152,12 +179,13 @@ public class InBoundControllerWeb {
 	@ResponseBody
 	@RequestMapping(value = { "/ext/outbound/web/callback/v2", "/ext/plugin/outbound/web/callback/v2" },
 			method = RequestMethod.GET)
-	public ApiResponse<OutboxMessage, Object> onReceiveMessage2(@RequestParam(required = false) String number,
+	public ApiResponse<Object, Object> onReceiveMessage2(@RequestParam(required = false) String number,
 			@RequestParam(required = false) String csid, @RequestParam(required = false) String channelId,
-			@RequestParam(required = false) String channelKey) throws InterruptedException {
+			@RequestParam(required = false) String channelKey, @RequestParam(required = false) String sessionId)
+			throws InterruptedException {
 		ChannelConfig channelConfig = pmEnvironment.config().channel(channelId);
-		return ApiResponse.buildResults(dummyConnector
-				.pollAllUnreadMessage(AppContextUtil.getTenant() + "/" + PostManUtil.CONTACT_ID(channelConfig, csid)));
+		return ApiResponse.buildResults(dummyConnector.pollAllUnreadMessage(
+				AppContextUtil.getTenant() + "/" + PostManUtil.CONTACT_ID(channelConfig, csid), sessionId));
 	}
 
 	@ApiRequest(session = true)
@@ -176,27 +204,61 @@ public class InBoundControllerWeb {
 
 	@ApiRequest(session = true)
 	@ResponseBody
-	@RequestMapping(value = "/ext/plugin/outbound/web/auth/v2", method = RequestMethod.GET)
+	@RequestMapping(value = "/ext/plugin/outbound/web/auth/v2", method = { RequestMethod.GET, RequestMethod.POST })
 	public ApiResponse<ChatMessageDTO, Object> onAuthV2(@RequestParam(required = false) String user,
-			@RequestParam(required = false) String number, @RequestParam(required = false) String csid,
-			@RequestParam(required = false) String channelId, @RequestParam(required = false) String channelKey)
-			throws InterruptedException {
+			@RequestParam(required = false) String number, @RequestParam(required = false) String browserfp,
+			@RequestParam(required = false) String channelId, @RequestParam(required = false) String channelKey,
+			@RequestParam(required = false) String userCode, // Id Set by DomainService
+			@RequestParam(required = false) String userToken, // phone Set by DomainService
+			@RequestParam(required = false) String userName, // phone Set by DomainService
+			@RequestParam(required = false) String userEmail, // email Set by DomainService
+			@RequestParam(required = false) String userPhone, // phone Set by DomainService,
+			@RequestParam(required = false) String csid // ForBackward
+	) throws InterruptedException {
 
-		String webSessionIdKey = StringUtils.sanitize(WEB_SESSION_ID + "_" + channelId);
-
-		String webSessionId = commonHttpRequest.get(webSessionIdKey);
-		csid = ArgUtil.nonEmpty(csid, number);
+		String webSessionId = null;
+		String webSessionIdValid = null;
+		String contactId = null;
+		ChatSessionDoc session = null;
 		ChannelConfig channelConfig = pmEnvironment.config().channel(channelId);
-		String contactId = PostManUtil.CONTACT_ID(channelConfig, csid);
+		String webSessionIdKey = StringUtils.sanitize(WEB_SESSION_ID + "_" + channelId);
+		InboxMessage msg = connector.createInboxMessage(channelConfig);
+
+		if (ArgUtil.is(userCode)) {
+			csid = "u" + userCode;
+			msg.contact().setCsid(csid);
+			contactId = PostManUtil.CONTACT_ID(channelConfig, csid);
+			session = chatSessionFactory.getChatSessionByContactId(contactId, null);
+		} else {
+			webSessionId = commonHttpRequest.get(webSessionIdKey);
+			csid = "g" + ArgUtil.nonEmpty(browserfp, number, csid, UniqueID.generate());
+			msg.contact().setCsid(csid);
+			contactId = PostManUtil.CONTACT_ID(channelConfig, csid);
+			if (ArgUtil.is(webSessionId)) {
+				session = sessionStore.getValidSession(webSessionId);
+			}
+		}
+
+		Contactable contact = PostManUtil.getContactMeta(msg.contact());
+		contact.setName(userName);
+		contact.setEmail(userEmail);
+		contact.setPhone(userPhone);
+		ChatContactQuery chatContactQuery = new ChatContactQuery(contact.getContactId());
+		chatContactQuery.update(contact);
+		chatContactQuery.updateCreatedStamp();
+		if (ArgUtil.is(userCode)) {
+			chatContactQuery.setUserCode(userCode);
+		}
+		chatContactQuery.setUserToken(userToken);
+		sessionStore.upsert(chatContactQuery);
+
 		String contactIdWeb = AppContextUtil.getTenant() + "/" + contactId;
 
-		ChatSessionDoc session = null;
-		if (ArgUtil.is(webSessionId)) {
-			session = sessionStore.getValidSession(webSessionId);
-		}
 		List<ChatMessageDTO> msgs = new ArrayList<ChatMessageDTO>();
 		if (ArgUtil.is(session)) {
-			List<MessageDoc> messages = messageStore.findBySessionId(webSessionId, ContactType.WEBSITE.toString());
+			webSessionIdValid = session.getSessionId();
+			List<MessageDoc> messages = messageStore.findBySessionId(session.getSessionId(),
+					ContactType.WEBSITE.toString());
 			for (MessageDoc messageDoc : messages) {
 				ChatMessageDTO outboxMessage = ChatDTOUtil.getChatMessageDTO(messageDoc);
 				if (ArgUtil.isEqual(messageDoc.getType(), "I", "O")) {
@@ -204,6 +266,11 @@ public class InBoundControllerWeb {
 				}
 			}
 		}
+
+		MapModel meta = MapModel.createInstance();
+		meta.put("webSessionIdKey", webSessionIdKey);
+		meta.put("webSessionId", webSessionIdValid);
+		meta.put("csid", csid);
 
 		StompSession stomp = null;
 		if (ArgUtil.is(channelConfig)) {
@@ -214,14 +281,27 @@ public class InBoundControllerWeb {
 			ChatContactDoc chatContactDoc = sessionStore.getContact(contactId);
 			OutboxMessage icebrakerMsg = dummyConnector.onIceBreak(channelConfig, chatContactDoc);
 			if (ArgUtil.is(icebrakerMsg)) {
-				msgs.add(ChatDTOUtil.getChatMessageDTO(messageStore.createMessageDoc(icebrakerMsg)));
+				ChatMessageDTO icebrakerMsgDto = ChatDTOUtil
+						.getChatMessageDTO(messageStore.createMessageDoc(icebrakerMsg));
+				icebrakerMsgDto.setMessageId("icebrakerMsg");
+				msgs.add(icebrakerMsgDto);
 			}
 		}
+
+		VisitorActivityDoc visit = new VisitorActivityDoc().activity("WEBCHAT_AUTH").channelId(channelId)
+				.contactId(contactId);
+		if (stomp != null) {
+			visit.meta().put("jsessionId", stomp.getJsessionId());
+			visit.meta().put("xsessionId", stomp.getXsessionId());
+		}
+		visitorActivityStore.save(visit);
+
 		// In-Cognito Window does not support Cookies that is why it So important to
 		// send these values to UI in advance for mapping,
 		// because if cookies cant be set, JSESSION cannot be created and be relied upon
 		// to store these values
-		return ApiResponse.buildResults(msgs, stomp);
+		meta.put("stomp", stomp);
+		return ApiResponse.buildResults(msgs, meta.toMap());
 	}
 
 	private ApiResponse<InboxMessage, Object> inboundMessageBoxEventMethod(String channelId, String channelKey,
@@ -248,7 +328,8 @@ public class InBoundControllerWeb {
 				InboxMessage sessionMessage = new InboxMessage();
 
 				messageBoxEvent.getInboxMessages().forEach(inboxMessage -> {
-					inBoundService.invokeMethods(inboxMessage);
+					inBoundService.invokeMethodsAsync(inboxMessage);
+					// inboundBottler.push(inboxMessage);
 					sessionMessage.setSessionId(inboxMessage.getSessionId());
 					sessionMessage.setContact(sessionMessage.getContact());
 				});

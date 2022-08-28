@@ -23,10 +23,14 @@ public class OutboxMessage extends Message<OutboxMessage>
 	private MessageSession session;
 	private MessageRouter route;
 	private MessagePrompt prompt;
-	private List<String> logs;
+	private List<Object> logs;
+	private List<Object> trace;
+	/** csv refernce key**/
+	private String referenceKey;
 
 	public OutboxMessage(ContactType contactType) {
 		super(contactType);
+		this.updateStatus(Status.SCHLD);
 	}
 
 	public OutboxMessage() {
@@ -57,17 +61,17 @@ public class OutboxMessage extends Message<OutboxMessage>
 		return this.session;
 	}
 
-	public List<String> getLogs() {
+	public List<Object> getLogs() {
 		return logs;
 	}
 
-	public void setLogs(List<String> logs) {
+	public void setLogs(List<Object> logs) {
 		this.logs = logs;
 	}
 
-	public List<String> logs() {
+	public List<Object> logs() {
 		if (this.logs == null) {
-			this.logs = new ArrayList<String>();
+			this.logs = new ArrayList<Object>();
 		}
 		return this.logs;
 	}
@@ -122,6 +126,29 @@ public class OutboxMessage extends Message<OutboxMessage>
 	@Override
 	public Message<?> replyMessage(String message) {
 		return null;
+	}
+
+	public List<Object> trace() {
+		if (this.trace == null) {
+			this.trace = new ArrayList<Object>();
+		}
+		return this.trace;
+	}
+
+	public List<Object> getTrace() {
+		return trace;
+	}
+
+	public void setTrace(List<Object> trace) {
+		this.trace = trace;
+	}
+
+	public String getReferenceKey() {
+		return referenceKey;
+	}
+
+	public void setReferenceKey(String referenceKey) {
+		this.referenceKey = referenceKey;
 	}
 
 }

@@ -52,11 +52,15 @@ public class CacheBox<T> implements ICacheBox<T> {
 	private RLocalCachedMap<String, T> cache = null;
 	private BlockingHashMap<String, T> locker = null;
 
+	private BlockingHashMap<String, T> locker() {
+		if (this.locker == null) {
+			this.locker = new BlockingHashMap<String, T>();
+		}
+		return this.locker;
+	}
+
 	public RLocalCachedMap<String, T> map() {
 		if (redisson != null) {
-			if (locker == null) {
-				locker = new BlockingHashMap<String, T>();
-			}
 			String localCacheName = String.format("%s-%s-%s-%s.%s", AppParam.APP_ENV.getValue(),
 					AppParam.APP_VENV.getValue(), (ArgUtil.isEmpty(getCahceName()) ? getClazzName() : getCahceName()),
 					CacheRedisConfiguration.CODEC_VERSION, version());
@@ -121,6 +125,9 @@ public class CacheBox<T> implements ICacheBox<T> {
 	@Override
 	public T get(String key) {
 		try {
+			if (key == null) {
+				return null;
+			}
 			return this.map().get(key);
 		} catch (Exception e) {
 
@@ -156,6 +163,9 @@ public class CacheBox<T> implements ICacheBox<T> {
 	@Override
 	public T remove(String key) {
 		try {
+			if (key == null) {
+				return null;
+			}
 			return this.map().remove(key);
 		} catch (Exception e) {
 			LOGGER.error("REDIS_REMOVE_EXCEPTION KEY:" + key, e);
@@ -199,16 +209,33 @@ public class CacheBox<T> implements ICacheBox<T> {
 
 	@Override
 	public long fastRemove(String... keys) {
-		return this.map().fastRemove(keys);
+		try {
+			if (keys.length == 0 || keys[0] == null) {
+				return 0L;
+			}
+			return this.map().fastRemove(keys);
+		} catch (Exception e) {
+			LOGGER.error("REDIS_REMOVE_EXCEPTION KEY:" + keys[0], e);
+			ApiFieldError w = new ApiFieldError();
+			w.code(MCQStatusCodes.DATA_REMOVE_ERROR);
+			w.setDescription("REDIS_REMOVE_EXCEPTION KEY");
+			w.setField(keys[0]);
+			ApiResponseUtil.addWarning(w);
+			return 0L;
+		}
+
 	}
 
 	@Override
 	public boolean fastPut(String key, T value) {
 		try {
+			if (key == null || value == null) {
+				return false;
+			}
 			return this.map().fastPut(key, value);
 		} catch (Exception e) {
 			LOGGER.error("REDIS_FAST_SAVE_EXCEPTION KEY:" + key + " = " + JsonUtil.toJson(value), e);
-			throw new MCQStatusError(MCQStatusCodes.DATA_SAVE_ERROR, "REDIS_SAVE_EXCEPTION KEY:" + key);
+			throw new MCQStatusError(MCQStatusCodes.DATA_SAVE_ERROR, "REDIS_FAST_SAVE_EXCEPTION KEY:" + key);
 		}
 	}
 
@@ -230,7 +257,7 @@ public class CacheBox<T> implements ICacheBox<T> {
 		T item = this.map().get(key);
 		long waiting = unit.toSeconds(timeout);
 		while (item == null && waiting > 0) {
-			item = locker.take(key, 1, unit);
+			item = locker().take(key, 1, unit);
 			item = this.map().get(key);
 			waiting--;
 		}

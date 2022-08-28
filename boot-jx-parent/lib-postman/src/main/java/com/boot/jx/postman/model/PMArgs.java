@@ -1,6 +1,8 @@
 package com.boot.jx.postman.model;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.boot.jx.postman.model.MessageDefinitions.Contactable;
 import com.boot.jx.postman.model.MessageDefinitions.SessionId;
@@ -15,6 +17,7 @@ public class PMArgs implements SessionId, Serializable {
 	private String assignToDeptCode;
 	private String assignToAgentCode;
 	private String assignToBotCode;
+	private List<String> assignToSkillCodes;
 	private Contactable contact;
 	private MapModel data;
 	private Object params;
@@ -140,4 +143,31 @@ public class PMArgs implements SessionId, Serializable {
 		this.assignToBotCode = assignToBotCode;
 	}
 
+	public List<String> assignToSkillCodes() {
+		if (this.assignToSkillCodes == null) {
+			this.assignToSkillCodes = new ArrayList<String>();
+		}
+		return this.assignToSkillCodes;
+	}
+
+	public List<String> getAssignToSkillCodes() {
+		return assignToSkillCodes;
+	}
+
+	public void setAssignToSkillCodes(List<String> assignToSkillCodes) {
+		this.assignToSkillCodes = assignToSkillCodes;
+	}
+
+	public PMArgs assignToSkillCode(String... skillCode) {
+		this.assignToSkillCodes();
+		for (String string : skillCode) {
+			this.assignToSkillCodes.add(string);
+		}
+		return this;
+	}
+
+	public PMArgs assignToSkillCodes(List<String> skillCodes) {
+		this.assignToSkillCodes = skillCodes;
+		return this;
+	}
 }

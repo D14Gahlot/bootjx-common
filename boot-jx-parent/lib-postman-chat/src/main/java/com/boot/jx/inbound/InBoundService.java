@@ -19,6 +19,7 @@ import com.boot.jx.chat.ChatProxyManager;
 import com.boot.jx.chat.ChatSessionFactory;
 import com.boot.jx.chat.ChatSessionService;
 import com.boot.jx.chat.ChatStatusService;
+import com.boot.jx.dict.ContactType;
 import com.boot.jx.inbound.InBound.InBoundFilter;
 import com.boot.jx.inbound.InBound.InBoundHandler;
 import com.boot.jx.inbound.InBound.InBoundProcessor;
@@ -28,6 +29,7 @@ import com.boot.jx.postman.PMEnvironment.PMConfigurationObject;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.ErrorObject;
 import com.boot.jx.postman.doc.MessageDoc;
+import com.boot.jx.postman.manager.ChatLogger;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.MessageReport;
 import com.boot.jx.postman.store.MessageContext;
@@ -36,6 +38,7 @@ import com.boot.jx.tunnel.ITunnelDefs.TunnelTask;
 import com.boot.jx.tunnel.task.ATaskLimiter;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.CollectionUtil;
 import com.boot.utils.Constants;
 import com.boot.utils.StringUtils.StringMatcher;
 import com.boot.utils.UniqueID;
@@ -89,6 +92,9 @@ public class InBoundService extends ATaskLimiter {
 	@Autowired
 	private ChatProxyManager proxyManager;
 
+	@Autowired
+	private ChatLogger logManager;
+
 	/**
 	 * Invoke the methods with matching {@link ChatMapping#events()} and
 	 * {@link ChatMapping#pattern()} in events received from Slack/Facebook.
@@ -110,7 +116,7 @@ public class InBoundService extends ATaskLimiter {
 			proxyManager.hold(contactId);
 			// hold().put(contactId, "HOLDING");
 			// messageStore.hold(inboxMessageOriginal);
-			invokeMethodsInternalSafely(inboxMessageOriginal, true);
+			invokeMethodsInternalSafely(inboxMessageOriginal, false);
 			// if (inboxMessageOriginal.session().isFirstMessage()) {
 			// this.invokeMethodsRelease(inboxMessageOriginal);
 			// }
@@ -132,20 +138,24 @@ public class InBoundService extends ATaskLimiter {
 		}
 	}
 
-	public InboxMessage invokeMethods(InboxMessage inboxMessageOriginal) {
+	public InboxMessage invokeMethodsAsync(InboxMessage inboxMessageOriginal) {
+		return this.invokeMethodsInternalSafely(inboxMessageOriginal, true);
+	}
+
+	public InboxMessage invokeMethodsSync(InboxMessage inboxMessageOriginal) {
 		return this.invokeMethodsInternalSafely(inboxMessageOriginal, false);
 	}
 
-	private InboxMessage invokeMethodsInternalSafely(InboxMessage inboxMessageOriginal, boolean newThread) {
+	private InboxMessage invokeMethodsInternalSafely(InboxMessage inboxMessageOriginal, boolean asyncMode) {
 		try {
-			return this.invokeMethodsInternal(inboxMessageOriginal, newThread);
+			return this.invokeMethodsInternal(inboxMessageOriginal, asyncMode);
 		} catch (Exception e) {
 			messageStore.reject(inboxMessageOriginal);
 		}
 		return inboxMessageOriginal;
 	}
 
-	private InboxMessage invokeMethodsInternal(InboxMessage inboxMessageOriginal, boolean newThread) {
+	private InboxMessage invokeMethodsInternal(InboxMessage inboxMessageOriginal, boolean asyncMode) {
 
 		PMConfigurationObject proxyConfig = pmEnvironment.keyEntry("mry.proxy.enabled");
 		String contactId = PostManUtil.CONTACT_ID(inboxMessageOriginal.contact());
@@ -209,10 +219,19 @@ public class InBoundService extends ATaskLimiter {
 			boolean wasSessionInitd = session.isInitd();
 			boolean isSessionInitd = chatSessionService.initSession(inboxMessageOriginal, session);
 			if (!isSessionInitd) {
+				if (inboxMessageOriginal.session().isFirstMessage()) {
+					proxyManager.first(inboxMessageOriginal);
+				}
 				return inboxMessageOriginal;
 			}
+
 			if (isSessionInitd && (wasSessionInitd != isSessionInitd)) {
 				chatSessionService.initSessionPost(inboxMessageOriginal, session);
+				InboxMessage inboxMessageFirst = proxyManager.first(session.getSessionId());
+				if (ArgUtil.is(inboxMessageFirst)) {
+					inboxMessageOriginal = inboxMessageFirst;
+					messageContext.setInboxMessage(inboxMessageOriginal);
+				}
 			}
 
 		}
@@ -224,10 +243,10 @@ public class InBoundService extends ATaskLimiter {
 			if (chatClientConfig.isLocalDummyBotEnabled()) {
 				botEngine.invokeMethodsAsync(inboxMessageOriginal);
 			} else if (ArgUtil.is(inBoundHandler)) {
-				if (newThread) {
-					inBoundHandler.onMessage(inboxMessageOriginal, session);
-				} else {
+				if (asyncMode) {
 					inBoundHandler.onMessageAsync(inboxMessageOriginal, session);
+				} else {
+					inBoundHandler.onMessage(inboxMessageOriginal, session);
 				}
 			} else if (botEngine.isChatBotDefined()) { // TODO:-- TO be removed
 				botEngine.invokeMethodsAsync(inboxMessageOriginal);
@@ -247,7 +266,7 @@ public class InBoundService extends ATaskLimiter {
 	}
 
 	@Override
-	public void doTask(TunnelTask task) {
+	public void doTaskSafely(TunnelTask task) {
 		if ("MESSAGE_RELEASE".equals(task.getName())) {
 			String contactId = task.getId();
 			proxyManager.release(contactId);

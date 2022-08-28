@@ -4,9 +4,8 @@ import java.util.Map;
 
 import com.boot.jx.mongo.CommonMongoQueryBuilder.DocQueryBuilder;
 import com.boot.jx.postman.doc.ChatContextDoc;
+import com.boot.jx.postman.doc.ChatMeta;
 import com.boot.jx.postman.doc.ChatPromise;
-import com.boot.jx.postman.model.Message;
-import com.boot.jx.postman.model.OutboxMessage;
 
 public class ChatContextQuery extends DocQueryBuilder<ChatContextDoc> {
 
@@ -28,6 +27,11 @@ public class ChatContextQuery extends DocQueryBuilder<ChatContextDoc> {
 		ChatContextDoc doc = new ChatContextDoc();
 		doc.setContactId(id);
 		return doc;
+	}
+
+	public void setMeta(ChatMeta chatMeta) {
+		this.doc.setMeta(chatMeta);
+		this.set("meta", chatMeta);
 	}
 
 	public void setPrevHandler(String prevHandler) {

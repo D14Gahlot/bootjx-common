@@ -117,6 +117,8 @@ public class WA360Constants {
 
 		public TmplComponent button(String subType, int index) {
 			this.put("type", "button");
+			this.put("sub_type", subType);
+			this.put("index", index);
 			this.parameters = MapModel.createInstance();
 			return this;
 		}

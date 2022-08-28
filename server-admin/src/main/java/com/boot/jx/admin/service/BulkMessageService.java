@@ -1,9 +1,17 @@
 package com.boot.jx.admin.service;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.bson.Document;
+import org.bson.Document;
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVParser;
+import org.apache.commons.csv.CSVRecord;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
@@ -18,8 +26,8 @@ import com.boot.jx.chat.ChatSessionService;
 import com.boot.jx.common.config.ConfigConstants;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.logger.AuditDetailProvider;
-import com.boot.jx.mongo.CommonMongoQB.QueryCriteria;
 import com.boot.jx.mongo.CommonMongoQueryBuilder;
+import com.boot.jx.mongo.CommonMongoQB.QueryCriteria;
 import com.boot.jx.postman.ClientApp;
 import com.boot.jx.postman.PMConstants;
 import com.boot.jx.postman.PMConstants.MESSAGE_SENDER_TYPE;
@@ -43,6 +51,11 @@ import com.google.i18n.phonenumbers.NumberParseException;
 import com.google.i18n.phonenumbers.Phonenumber.PhoneNumber;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
+import com.mongodb.AggregationOptions;
+import com.mongodb.AggregationOptions.OutputMode;
+import com.mongodb.Cursor;
+import com.mongodb.DBCollection;
+import com.mongodb.DBObject;
 
 @Component
 public class BulkMessageService extends BatchJobExecuter {
@@ -289,5 +302,41 @@ public class BulkMessageService extends BatchJobExecuter {
 	mongoTemplate.save(doc);
 	return completed;
     }
+	/** Parsing csv file **/
+	public BulkSessionDoc uploadFile(MultipartFile file) throws NumberParseException {
+		try {
+			readFile(file.getInputStream());
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
+	}
+	public static String TYPE = "text/csv";
+	public static boolean hasCSVFormat(MultipartFile file) {
+	    if (!TYPE.equals(file.getContentType())) {
+	      return false;
+	    }
+	    return true;
+	  }
+	
+	public void readFile(InputStream is) {
+		try (BufferedReader fileReader = new BufferedReader(new InputStreamReader(is));
+		        CSVParser csvParser = new CSVParser(fileReader,
+		            CSVFormat.DEFAULT.withFirstRecordAsHeader().withIgnoreHeaderCase().withTrim());) {
+		     // List<Tutorial> tutorials = new ArrayList<Tutorial>();
+		      Iterable<CSVRecord> csvRecords = csvParser.getRecords();
+		      for (CSVRecord csvRecord : csvRecords) {
+		    	  System.out.println("id :"+ csvRecord.get("contacts"));
+		    	  //System.out.println("Title :"+ csvRecord.get("Title"));
+		    	  //System.out.println("Description :"+ csvRecord.get("Description"));
+		    	  //System.out.println("id :"+ csvRecord.get("Published"));
+		      
+		      }
+		   
+		    } catch (Exception e) {
+		      throw new RuntimeException("fail to parse CSV file: " + e.getMessage());
+		    }
+		  }
+	}
 
-}

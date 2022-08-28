@@ -49,7 +49,7 @@ public class CommonMongoTemplateAbstract extends CommonMongoTemplateDefault {
 
 		if (objectToSave instanceof CreatedTimeStampIndexSupport) {
 			CreatedTimeStampIndexSupport objectToSaveCreted = (CreatedTimeStampIndexSupport) objectToSave;
-			if (ArgUtil.isEmpty(objectToSaveCreted)) {
+			if (ArgUtil.isEmpty(objectToSaveCreted.getCreated())) {
 				objectToSaveCreted.setCreated(TimeStampIndex.now());
 			}
 		}
@@ -119,6 +119,11 @@ public class CommonMongoTemplateAbstract extends CommonMongoTemplateDefault {
 		return find(builder.getQuery(), builder.getDocClass());
 	}
 
+	public <T> T findOne(MongoQueryBuilder<T> builder) {
+		// System.out.println("+++"+builder.getQuery());
+		return findOne(builder.getQuery(), builder.getDocClass());
+	}
+
 	public <T extends DocVersion> T creatNewDocuemnt(String id, Class<T> clazz, T newVersion) {
 		if (ArgUtil.is(id)) {
 			T oldVersion = getCommonMongoTemplate().findOne(new Query(Criteria.where("_id").is(id)), clazz);
@@ -179,8 +184,8 @@ public class CommonMongoTemplateAbstract extends CommonMongoTemplateDefault {
 				builder.updatedStamp();
 				ret = mongoTemplate.upsert(builder.getQuery(), builder.getUpdate(), builder.getDocClass());
 			} catch (Exception e) {
-				LOGGER.debug("Query:{}", builder.getQuery().toString());
-				LOGGER.debug("Update:{}", builder.getUpdate().toString());
+				LOGGER.warn("Query:{}", builder.getQuery().toString());
+				LOGGER.warn("Update:{}", builder.getUpdate().toString());
 				throw e;
 			}
 		}
@@ -204,16 +209,16 @@ public class CommonMongoTemplateAbstract extends CommonMongoTemplateDefault {
 		return oldDocument;
 	}
 
-	public void log(Object oldDocument, String activity, String comment) {
-		String collectionName = mongoTemplate.getCollectionName(oldDocument.getClass());
-		AuditActivityDoc oldDocumentArchived = new AuditActivityDoc().collection(collectionName).doc(oldDocument)
+	public void log(Object copyOfDocument, String activity, String comment) {
+		String collectionName = mongoTemplate.getCollectionName(copyOfDocument.getClass());
+		AuditActivityDoc oldDocumentArchived = new AuditActivityDoc().collection(collectionName).doc(copyOfDocument)
 				.activity(activity).comment(comment);
 		auditDetailProvider.auditCreate(oldDocumentArchived);
 		mongoTemplate.save(oldDocumentArchived, "ZACTIVITY_LOGS");
 	}
 
-	public void log(Object oldDocument, String activity) {
-		this.log(oldDocument, activity, null);
+	public void log(Object copyOfDocument, String activity) {
+		this.log(copyOfDocument, activity, null);
 	}
 
 	@SuppressWarnings("unchecked")

@@ -35,6 +35,7 @@ import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PMEnvironment.PMClientConfig;
 import com.boot.jx.postman.PMEnvironment.PMDomainConfig;
 import com.boot.jx.postman.doc.ChatSessionDoc;
+import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.doc.QuickTag;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.SessionSearchQuery;
@@ -459,6 +460,16 @@ public class ChatSessionManager {
 		inBoundEvent.sessionRouted.targetQueue = chatSessionDoc.getAssignedToQueue();
 
 		sessionStore.updateMessageFromSession(chatSessionDoc, inBoundEvent);
+
+		if (inBoundEvent.sessionRouted.sessionStart) {
+			MessageDoc doc = logManager.event(inBoundEvent, queueCode, EVENTS.ON_SESSION_START,
+					inBoundEvent.sessionRouted);
+			inBoundEvent.setEventId(doc.getMessageId());
+		} else {
+			MessageDoc doc = logManager.event(inBoundEvent, queueCode, EVENTS.ON_SESSION_ROUTE,
+					inBoundEvent.sessionRouted);
+			inBoundEvent.setEventId(doc.getMessageId());
+		}
 
 		return inBoundEvent;
 

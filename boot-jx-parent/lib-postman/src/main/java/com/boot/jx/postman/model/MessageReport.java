@@ -6,11 +6,12 @@ import java.util.List;
 import com.boot.jx.postman.model.Message.Status;
 import com.boot.jx.postman.model.MessageDefinitions.Contactable;
 import com.boot.jx.postman.model.MessageDefinitions.LogMessage;
+import com.boot.jx.postman.model.MessageDefinitions.TraceMessage;
 import com.boot.jx.swagger.ApiMockModelProperty;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class MessageReport implements LogMessage, Serializable {
+public class MessageReport implements LogMessage, Serializable, TraceMessage {
 
 	private static final long serialVersionUID = -9039777977577457215L;
 
@@ -24,7 +25,8 @@ public class MessageReport implements LogMessage, Serializable {
 	protected long watermarkStamp;
 	private Status status = null;
 	private String reason = null;
-	private List<String> logs;
+	private List<Object> logs;
+	private List<Object> trace;
 	private List<MessageReportError> errors;
 
 	private MessageSession session;
@@ -181,11 +183,11 @@ public class MessageReport implements LogMessage, Serializable {
 		this.session = session;
 	}
 
-	public List<String> getLogs() {
+	public List<Object> getLogs() {
 		return logs;
 	}
 
-	public void setLogs(List<String> logs) {
+	public void setLogs(List<Object> logs) {
 		this.logs = logs;
 	}
 
@@ -202,6 +204,22 @@ public class MessageReport implements LogMessage, Serializable {
 	@Override
 	public String getReplyIdExt() {
 		return null;
+	}
+
+	public String id() {
+		return this.getMessageId();
+	}
+
+	public void id(String id) {
+		this.setMessageId(id);
+	}
+
+	public List<Object> getTrace() {
+		return trace;
+	}
+
+	public void setTrace(List<Object> trace) {
+		this.trace = trace;
 	}
 
 }

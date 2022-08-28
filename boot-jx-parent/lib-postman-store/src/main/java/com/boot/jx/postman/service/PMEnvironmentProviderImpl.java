@@ -1,9 +1,9 @@
 package com.boot.jx.postman.service;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.TimeUnit;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -29,11 +29,17 @@ import com.boot.utils.ArgUtil;
 import com.boot.utils.EntityDtoUtil;
 import com.boot.utils.StringUtils;
 import com.boot.utils.UniqueID;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 
 @Component
 public class PMEnvironmentProviderImpl implements PMEnvironmentProvider, AppSharedConfig {
 
-	private Map<String, PMConfigurationDoc> localConfigMap = new HashMap<String, PMConfigurationDoc>();
+	private Cache<String, PMConfigurationDoc> localConfigMap = CacheBuilder.newBuilder().maximumSize(1000)
+			.expireAfterWrite(1, TimeUnit.HOURS).build();
+
+	// private Map<String, PMConfigurationDoc> localConfigMap = new HashMap<String,
+	// PMConfigurationDoc>();
 
 	PMConfigurationDoc sharedConfiguration = null;
 
@@ -54,8 +60,10 @@ public class PMEnvironmentProviderImpl implements PMEnvironmentProvider, AppShar
 
 		String mappedTo = hasRule(CommonMongoSource.USE_NO_DB) ? "nodb" : tnt;
 
-		if (localConfigMap.containsKey(mappedTo)) {
-			return localConfigMap.get(mappedTo);
+		PMConfigurationModel presentConfig = localConfigMap.getIfPresent(mappedTo);
+
+		if (presentConfig != null) {
+			return presentConfig;
 		}
 
 		if (ArgUtil.is(configStore)) {
@@ -183,7 +191,7 @@ public class PMEnvironmentProviderImpl implements PMEnvironmentProvider, AppShar
 	@Override
 	public void clear(Map<String, String> map) {
 		String tnt = AppContextUtil.getTenant();
-		localConfigMap.remove(tnt);
+		localConfigMap.invalidate(tnt);
 		if (Tenants.isDefault(tnt)) {
 			this.initConfig();
 		}

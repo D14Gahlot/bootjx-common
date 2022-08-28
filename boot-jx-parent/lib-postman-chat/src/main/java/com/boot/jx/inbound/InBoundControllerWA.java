@@ -150,7 +150,7 @@ public class InBoundControllerWA {
 				event = waGupShupAgentConnector.toInboxMessage(JsonUtil.toObject(inboundMap, GupShupInboundV2.class));
 			}
 			event.setOriginalMessage(inboundMap);
-			inBoundService.invokeMethods(event);
+			inBoundService.invokeMethodsAsync(event);
 			return event;
 		} catch (Exception e) {
 			LOGGER.error("INBOUND", e);

@@ -19,8 +19,9 @@ import com.boot.jx.postman.manager.ChatLogger;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.Message;
 import com.boot.jx.postman.model.MessageDefinitions.IMessageExtended;
-import com.boot.jx.postman.model.MessageDefinitions.SessionInfo;
+import com.boot.jx.postman.model.MessageDefinitions.TraceMessage;
 import com.boot.jx.postman.model.OutboxMessage;
+import com.boot.jx.postman.model.Message.Status;
 import com.boot.jx.postman.model.ext.InBoundEvent;
 import com.boot.jx.postman.store.MessageContext;
 import com.boot.jx.postman.store.MessageStore;
@@ -49,6 +50,9 @@ public class ChatService {
 
 	@Autowired
 	private SessionStore sessionStore;
+
+	@Autowired
+	private ChatLogger chatLogger;
 
 	@Autowired
 	private ChatSessionFactory chatSessionFactory;
@@ -93,6 +97,7 @@ public class ChatService {
 			throw new PostManException("Destination Not Specified : chatContactDoc Empty");
 		}
 
+		outboxMessage.updateStatus(Status.RECEIVD);
 		outboxMessage.updateStatus(Message.Status.INIT);
 		outboxMessage.contact().setContactType(chatContactDoc.getContactType());
 		outboxMessage.contact().setChannelType(chatContactDoc.getChannelType());
@@ -242,7 +247,7 @@ public class ChatService {
 		return true;
 	}
 
-	private MessageContext loadChatContextInternal(String contactId, SessionInfo inboxMessage) {
+	private MessageContext loadChatContextInternal(String contactId, TraceMessage inboxMessage) {
 		LOGGER.debug("Loading chat conewxt");
 		if (!ArgUtil.is(inboxMessage.session().getMode())) {
 			ChatSessionDoc sessionDoc = messageContext.session().getDoc();
@@ -268,10 +273,14 @@ public class ChatService {
 		if (!ArgUtil.is(doc.getMeta())
 				|| !ArgUtil.is(doc.getMeta().getRoutingId(), inboxMessage.session().getRoutingId())) {
 			LOGGER.debug("Loading chat conewxt:newSession");
-			doc.setMeta(new ChatMeta());
+			chatLogger.trace(inboxMessage, "NewSession", doc.getMeta(), inboxMessage.session());
+			messageContext.chat().setMeta(new ChatMeta());
+			messageContext.commitChatContextQuery();
 			messageContext.chat().setQueueCode(inboxMessage.session().getQueue());
 			messageContext.chat().setSessionId(inboxMessage.getSessionId());
 			messageContext.chat().setRoutingId(inboxMessage.session().getRoutingId());
+		} else {
+			chatLogger.trace(inboxMessage, "ContinueOldSession", doc.getMeta());
 		}
 
 		// messageStore.create(inboxMessage);

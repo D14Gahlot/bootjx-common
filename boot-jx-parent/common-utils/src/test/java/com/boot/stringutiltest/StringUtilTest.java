@@ -25,6 +25,14 @@ public class StringUtilTest {
 	}
 
 	@Test
+	public void removeSpaces() {
+		assertEquals("N1", StringUtils.removeSpaces("Lalit Tanwar"), "LalitTanwar");
+		assertEquals("N2", StringUtils.removeSpaces("Lalit    Tanwar"), "LalitTanwar");
+		assertEquals("N3", StringUtils.removeSpaces("   Lalit   Tanwar"), "LalitTanwar");
+		assertEquals("N4", StringUtils.removeSpaces(" Lalit  Tanwar  "), "LalitTanwar");
+	}
+
+	@Test
 	public void replaceDot() {
 		System.out.println("3e3.343.34343.343".replaceAll("\\.", "/"));
 	}

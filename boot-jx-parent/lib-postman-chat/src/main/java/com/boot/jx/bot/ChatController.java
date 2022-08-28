@@ -22,6 +22,7 @@ import com.boot.jx.postman.model.PMArgs;
 import com.boot.jx.postman.model.ext.InBoundEvent;
 import com.boot.jx.postman.store.MessageContext;
 import com.boot.jx.postman.store.SessionStore;
+import com.boot.jx.postman.store.MessageStore.EVENTS;
 import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.JsonUtil;
@@ -44,7 +45,7 @@ public class ChatController {
 	private SessionStore sessionStore;
 
 	@Autowired
-	private ChatLogger logManager;
+	protected ChatLogger logManager;
 
 	@Lazy
 	@Autowired
@@ -65,6 +66,10 @@ public class ChatController {
 		}
 		waMessage.route().setSenderType(MESSAGE_SENDER_TYPE.BOT);
 		waMessage.session().setAgent(chatService.getClientConfig().getDefaultSender());
+
+		if (ArgUtil.is(context().getCurrentHandler())) {
+			waMessage.meta().put("handler", context().getCurrentHandler());
+		}
 	}
 
 	public void reply(OutboxMessage message) {
@@ -196,6 +201,16 @@ public class ChatController {
 
 	}
 
+	public void assignToAgentSkill(String... skillCode) {
+		ChatSessionDoc session = messageContext.session().getDoc();
+		ClientApp thisApp = messageContext.clientApp();
+		String agent_queue = ArgUtil.parseAsString(thisApp.props().get("agent_queue"),
+				PMConstants.DEFAULT.AGENT_QUEUE_CODE);
+		chatSessionService.routeSession(session, new PMArgs().assignToQueueCode(agent_queue).contact(session.contact())
+				.sessionId(session.getSessionId()).assignToSkillCode(skillCode));
+
+	}
+
 	public void assignToDefaultAgent() {
 		assignToAgentDepartment(null);
 	}
@@ -205,20 +220,16 @@ public class ChatController {
 	}
 
 	public void onSessionRoute(InBoundEvent assignEvent) {
-		logManager.debug(assignEvent,
-				String.format("%s -> %s", assignEvent.sessionRouted.sourceQueue, assignEvent.sessionRouted.targetQueue),
-				JsonUtil.toJson(assignEvent.sessionRouted));
+		logManager.trace(assignEvent, EVENTS.ON_SESSION_ROUTE, assignEvent.sessionRouted);
 	}
 
 	public void onSessionStart(InBoundEvent assignEvent) {
-		logManager.debug(assignEvent,
-				String.format("%s -> %s", assignEvent.sessionRouted.sourceQueue, assignEvent.sessionRouted.targetQueue),
-				JsonUtil.toJson(assignEvent.sessionRouted));
+		logManager.trace(assignEvent, EVENTS.ON_SESSION_START, assignEvent.sessionRouted);
 	}
 
 	public void onPostOutboundMessage(MapModel mapModel) {
 	}
-
+	
 	public MessageContext context() {
 		return this.messageContext;
 	}

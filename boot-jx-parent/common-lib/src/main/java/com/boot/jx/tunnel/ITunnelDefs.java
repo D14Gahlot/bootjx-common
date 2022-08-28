@@ -16,6 +16,8 @@ public class ITunnelDefs {
 		String getName();
 
 		void doTask(int pollQNum, int pushQNum, int batchSize);
+
+		public boolean doTask(TunnelTask task);
 	}
 
 	public static class TunnelTask implements ITunnelEvent {
@@ -74,6 +76,11 @@ public class ITunnelDefs {
 		 */
 		public TunnelTask intervalSeconds(long seconds) {
 			this.setInterval(seconds * 1000L);
+			return this;
+		}
+
+		public TunnelTask intervalMillis(long milliseconds) {
+			this.setInterval(milliseconds);
 			return this;
 		}
 
@@ -150,4 +157,5 @@ public class ITunnelDefs {
 		}
 
 	}
+
 }

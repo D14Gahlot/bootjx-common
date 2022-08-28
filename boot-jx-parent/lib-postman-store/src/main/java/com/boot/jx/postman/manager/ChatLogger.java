@@ -5,10 +5,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.boot.jx.AppConfig;
 import com.boot.jx.AppContextUtil;
 import com.boot.jx.exception.ApiHttpExceptions.ApiHttpException;
 import com.boot.jx.exception.ApiHttpExceptions.ApiHttpServerException;
 import com.boot.jx.logger.AuditDetailProvider;
+import com.boot.jx.mongo.CommonMongoQueryBuilder;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.doc.MessageDoc.MessageDocLogs;
@@ -16,7 +18,8 @@ import com.boot.jx.postman.doc.MessageDocAbstract;
 import com.boot.jx.postman.model.MessageDefinitions.IMessageExtended;
 import com.boot.jx.postman.model.MessageDefinitions.LogMessage;
 import com.boot.jx.postman.model.MessageDefinitions.LoggableEntity;
-import com.boot.jx.postman.model.MessageDefinitions.SessionMessage;
+import com.boot.jx.postman.model.MessageDefinitions.SessionInfo;
+import com.boot.jx.postman.model.MessageDefinitions.TraceMessage;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.model.ext.InBoundEvent;
 import com.boot.jx.postman.store.MessageContext;
@@ -48,6 +51,9 @@ public class ChatLogger {
 	@Autowired
 	private MessageContext messageContext;
 
+	@Autowired
+	private AppConfig appConfig;
+
 	public MessageDoc note(ChatSessionDoc sessionDoc, OutboxMessage outboxMessage) {
 		outboxMessage.contact().setContactType(sessionDoc.getContactType());
 		outboxMessage.contact().setChannelType(sessionDoc.getChannel());
@@ -60,13 +66,13 @@ public class ChatLogger {
 		return messageStore.note(outboxMessage, getCurrenUser());
 	}
 
-	public MessageDoc event(SessionMessage inboxMessage, String actorAgent, EVENTS eventName, String... logMessage) {
+	public MessageDoc event(SessionInfo inboxMessage, String actorAgent, EVENTS eventName, Object... logMessage) {
 		MessageDoc doc = new MessageDoc();
 		doc.setContactId(PostManUtil.createContactId(inboxMessage.contact()));
 		doc.setType("L");
 		doc.setTimestamp(System.currentTimeMillis());
 		if (ArgUtil.is(logMessage)) {
-			for (String string : logMessage) {
+			for (Object string : logMessage) {
 				doc.logs().add(string);
 			}
 		}
@@ -77,16 +83,16 @@ public class ChatLogger {
 		return doc;
 	}
 
-	public MessageDoc event(SessionMessage inboxMessage, EVENTS event, String... logs) {
+	public MessageDoc event(SessionInfo inboxMessage, EVENTS event, Object... logs) {
 		return event(inboxMessage, inboxMessage.session().getAgent(), event, logs);
 	}
 
-	public MessageDoc event(ChatSessionDoc sessionDoc, String auditAgent, EVENTS event, String... logs) {
+	public MessageDoc event(ChatSessionDoc sessionDoc, String auditAgent, EVENTS event, Object... logs) {
 		IMessageExtended inboxMessage = sessionStore.toSessionMessage(sessionDoc);
 		return event(inboxMessage, auditAgent, event, logs);
 	}
 
-	public MessageDoc event(ChatSessionDoc sessionDoc, EVENTS event, String... logs) {
+	public MessageDoc event(ChatSessionDoc sessionDoc, EVENTS event, Object... logs) {
 		return event(sessionDoc, getCurrenUser(), event, logs);
 	}
 
@@ -212,6 +218,26 @@ public class ChatLogger {
 			this.log("W", messageDoc(messageContext.getInBoundEvent()), message, debugMessage);
 		} else {
 			this.log("W", messageDoc(new InBoundEvent()), message, debugMessage);
+		}
+	}
+
+	public void trace(TraceMessage inboxMessage, Object... msg) {
+		if (msg == null || msg.length == 0 || inboxMessage == null) {
+			return;
+		}
+		Object[] result = new Object[msg.length + 1];
+		result[0] = appConfig.getAppType();
+		System.arraycopy(msg, 0, result, 1, msg.length);
+		CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder();
+
+		if (ArgUtil.is(inboxMessage.id())) {
+			builder.whereIdSafe(inboxMessage.id());
+			inboxMessage.trace().add(result);
+			builder.update().push("trace", result);
+			messageStore.updateFirst(builder.getQuery(), builder.getUpdate(), MessageDoc.class,
+					MessageStore.getCollectionName(inboxMessage.contact().type()));
+		} else {
+			inboxMessage.trace().add(result);
 		}
 	}
 

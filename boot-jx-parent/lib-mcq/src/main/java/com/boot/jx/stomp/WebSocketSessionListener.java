@@ -12,9 +12,12 @@ import org.springframework.web.socket.messaging.SessionConnectedEvent;
 import org.springframework.web.socket.messaging.SessionDisconnectEvent;
 
 import com.boot.jx.AppConstants;
+import com.boot.jx.scope.tnt.TenantContextHolder;
+import com.boot.jx.scope.tnt.Tenants.TenantResolver;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.Constants;
 import com.boot.utils.JsonPath;
+import com.boot.utils.StringUtils;
 
 @Component
 @ConditionalOnProperty("app.stomp")
@@ -30,6 +33,9 @@ public class WebSocketSessionListener {
 
 	@Autowired
 	StompTunnelSessionManager stompTunnelSessionManager;
+
+	@Autowired(required = false)
+	TenantResolver tenantResolver;
 
 	@EventListener
 	public void connectionEstablished(SessionConnectedEvent sce) {
@@ -52,9 +58,24 @@ public class WebSocketSessionListener {
 		if (!ArgUtil.isEmpty(sha.getSessionAttributes())) {
 			String xSessionId = ArgUtil.parseAsString(sha.getSessionAttributes().get(AppConstants.SESSION_ID_XKEY));
 			String jSessionId = ArgUtil.parseAsString(sha.getSessionAttributes().get(AppConstants.SESSION_JID_XKEY));
-			logger.info("WS_DESTROYED http:{}, ws:{}", sha.getSessionId(), xSessionId);
+			String tenantId = ArgUtil.parseAsString(sha.getSessionAttributes().get(AppConstants.SESSION_TNT_XKEY));
+
+			if (ArgUtil.is(tenantResolver)) {
+				tenantId = tenantResolver.resolve(tenantId);
+			}
+
+			if (!StringUtils.isEmpty(tenantId)) {
+				TenantContextHolder.setCurrent(tenantId, null);
+			}
+
+			logger.info("WS_DESTROYED  xS:{}, jS:{}, wS:{}", xSessionId, jSessionId, sha.getSessionId());
 			if (ArgUtil.is(xSessionId)) {
-				stompTunnelSessionManager.delinkWs2Http(xSessionId, jSessionId, sha.getSessionId());
+				try {
+					stompTunnelSessionManager.delinkWs2Http(xSessionId, jSessionId, sha.getSessionId());
+				} catch (Exception e) {
+					logger.error("WS_DESTROY_EXCEPTION xS:{}, jS:{}, wS:{}", xSessionId, jSessionId,
+							sha.getSessionId());
+				}
 			}
 		}
 	}

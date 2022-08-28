@@ -10,8 +10,9 @@ import org.springframework.stereotype.Service;
 
 import com.boot.jx.AppContextUtil;
 import com.boot.jx.AppParam;
-import com.boot.jx.stomp.StompConfig.StompSessionCacheBox;
-import com.boot.jx.stomp.StompSessionCache.StompSession;
+import com.boot.jx.stomp.StompConfig.StompSession;
+import com.boot.jx.stomp.StompConfig.StompSessionDetails;
+import com.boot.jx.stomp.StompConfig.StompSessionIndexes;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CryptoUtil;
 
@@ -28,13 +29,13 @@ public class StompTunnelSessionManager {
 //	    .synchronizedMap(new HashMap<String, String>());
 //    
 	@Autowired
-	private StompSessionCacheBox http2GSessionIdMap;
+	private StompSessionIndexes http2GSessionIdMap;
 
 //    public static final Map<String, String> http2stompUIdMap = Collections
 //	    .synchronizedMap(new HashMap<String, String>());
 
 	@Autowired
-	private StompSessionCacheBox http2stompUIdMap;
+	private StompSessionIndexes http2stompUIdMap;
 
 	/*
 	 * Map for <wsSessionID, httpSessionId>
@@ -42,16 +43,16 @@ public class StompTunnelSessionManager {
 //    public static final Map<String, String> ws2httpMap = Collections.synchronizedMap(new HashMap<String, String>());
 
 	@Autowired
-	private StompSessionCacheBox ws2xSessionMap;
+	private StompSessionIndexes ws2xSessionMap;
 
 	@Autowired
-	private StompSessionCacheBox ws2jSessionMap;
+	private StompSessionIndexes ws2jSessionMap;
 
 	/*
 	 * Map for <stompUID, stompSession>
 	 */
 	@Autowired(required = false)
-	StompSessionCache stompSessionCache;
+	StompSessionDetails stompSessionDetails;
 
 	public static String getMSInstanceHash() {
 		return AppParam.APP_INSTANCE_HASH.getValue();
@@ -93,31 +94,33 @@ public class StompTunnelSessionManager {
 	}
 
 	public void delinkWs2Http(String xSessionId, String jSessionId, String wsSessionID) {
-		ws2xSessionMap.remove(wsSessionID);
+		ws2xSessionMap.fastRemove(wsSessionID);
 		boolean isExists = false;
 
-		if (ArgUtil.is(xSessionId)) {
-			for (Entry<String, String> entry : ws2xSessionMap.readAllEntrySet()) {
-				if (entry.getValue().equals(xSessionId)) {
-					isExists = true;
-				}
-			}
-			if (!isExists) {
-				http2GSessionIdMap.remove(xSessionId);
-			}
-		}
+		//these are very coslty queries ignore no need to clear
+		//find alternate solution
+//		if (ArgUtil.is(xSessionId)) {
+//			for (Entry<String, String> entry : ws2xSessionMap.readAllEntrySet()) {
+//				if (entry.getValue().equals(xSessionId)) {
+//					isExists = true;
+//				}
+//			}
+//			if (!isExists) {
+//				http2GSessionIdMap.fastRemove(xSessionId);
+//			}
+//		}
 
 		if (ArgUtil.is(jSessionId)) {
-			ws2jSessionMap.remove(wsSessionID);
-			isExists = false;
-			for (Entry<String, String> entry : ws2jSessionMap.readAllEntrySet()) {
-				if (entry.getValue().equals(jSessionId)) {
-					isExists = true;
-				}
-			}
-			if (!isExists) {
-				http2GSessionIdMap.remove(jSessionId);
-			}
+			ws2jSessionMap.fastRemove(wsSessionID);
+//			isExists = false;
+//			for (Entry<String, String> entry : ws2jSessionMap.readAllEntrySet()) {
+//				if (entry.getValue().equals(jSessionId)) {
+//					isExists = true;
+//				}
+//			}
+//			if (!isExists) {
+//				http2GSessionIdMap.fastRemove(jSessionId);
+//			}
 		}
 	}
 
@@ -141,11 +144,12 @@ public class StompTunnelSessionManager {
 			}
 			stompSession.setTags(etags);
 		}
+		stompSession.setTenant(AppContextUtil.getTenant());
 		stompSession.setTenantToken(createTagId(AppContextUtil.getTenant()));
 
 		http2stompUIdMap.putSafe(xSessionId, stompUID);
 		http2stompUIdMap.putSafe(jSessionId, stompUID);
-		stompSessionCache.putSafe(stompUID, stompSession);
+		stompSessionDetails.putSafe(stompUID, stompSession);
 		return stompSession;
 	}
 
@@ -164,7 +168,7 @@ public class StompTunnelSessionManager {
 	}
 
 	public StompSession getStompSession(String stompUID) {
-		return stompSessionCache.get(stompUID);
+		return stompSessionDetails.get(stompUID);
 	}
 
 	public StompSession getStompSessionByHttpSessionId(String xSessionId, String jSessionId) {
@@ -173,7 +177,7 @@ public class StompTunnelSessionManager {
 			bothIdEmpty = false;
 			String stompUID = http2stompUIdMap.get(xSessionId);
 			if (ArgUtil.is(stompUID)) {
-				return stompSessionCache.get(stompUID);
+				return stompSessionDetails.get(stompUID);
 			}
 		}
 
@@ -181,7 +185,7 @@ public class StompTunnelSessionManager {
 			bothIdEmpty = false;
 			String stompUID = http2stompUIdMap.get(jSessionId);
 			if (ArgUtil.is(stompUID)) {
-				return stompSessionCache.get(stompUID);
+				return stompSessionDetails.get(stompUID);
 			}
 		}
 

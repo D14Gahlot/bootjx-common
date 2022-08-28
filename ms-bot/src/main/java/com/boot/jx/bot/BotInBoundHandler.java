@@ -16,8 +16,6 @@ import com.boot.jx.postman.model.PMArgs;
 import com.boot.jx.postman.model.ext.InBoundEvent;
 import com.boot.utils.ArgUtil;
 
-import ch.qos.logback.core.Context;
-
 @Component
 public class BotInBoundHandler extends DefaultChatBoundHandler {
 

@@ -11,6 +11,7 @@ import com.boot.jx.postman.PMConstants;
 import com.boot.jx.postman.model.MessageDefinitions.Contactable;
 import com.boot.jx.postman.model.MessageDefinitions.IMessageExtended;
 import com.boot.jx.postman.model.MessageDefinitions.LogMessage;
+import com.boot.jx.postman.model.MessageDefinitions.TraceMessage;
 import com.boot.jx.postman.pbook.PBVCard;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.StringUtils.StringMatcher;
@@ -18,7 +19,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class InboxMessage implements Serializable, IMessageExtended, LogMessage {
+public class InboxMessage implements Serializable, IMessageExtended, LogMessage, TraceMessage {
 
 	private static final long serialVersionUID = -4488174520614920589L;
 	public static final String REPLY_ID = "reply_id";
@@ -57,10 +58,11 @@ public class InboxMessage implements Serializable, IMessageExtended, LogMessage 
 	private List<Attachment> attachments = null;
 	private List<PBVCard> vccards = null;
 
-	private List<String> logs;
+	private List<Object> logs;
 
 	private String replyId;
 	private String replyIdExt;
+	private List<Object> trace;
 
 	public InboxMessage() {
 		this.timestamp = System.currentTimeMillis();
@@ -387,11 +389,11 @@ public class InboxMessage implements Serializable, IMessageExtended, LogMessage 
 		return this.route;
 	}
 
-	public List<String> getLogs() {
+	public List<Object> getLogs() {
 		return logs;
 	}
 
-	public void setLogs(List<String> logs) {
+	public void setLogs(List<Object> logs) {
 		this.logs = logs;
 	}
 
@@ -425,4 +427,30 @@ public class InboxMessage implements Serializable, IMessageExtended, LogMessage 
 		}
 		return codeValue;
 	}
+
+	public List<Object> trace() {
+		if (this.trace == null) {
+			this.trace = new ArrayList<Object>();
+		}
+		return this.trace;
+	}
+
+	public List<Object> getTrace() {
+		return trace;
+	}
+
+	public void setTrace(List<Object> trace) {
+		this.trace = trace;
+	}
+
+	@Override
+	public String id() {
+		return this.getMessageId();
+	}
+
+	@Override
+	public void id(String id) {
+		this.setMessageId(id);
+	}
+
 }
