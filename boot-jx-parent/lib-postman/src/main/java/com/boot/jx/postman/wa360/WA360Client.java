@@ -211,23 +211,26 @@ public class WA360Client {
 				for (int i = 0; i < extTemplateComponentButtons.size(); i++) {
 					Map<String, Object> extTemplateComponentButton = extTemplateComponentButtons.get(i);
 					List<Map<String, Object>> buttonParameterVar = CollectionUtil.getArray(buttonsParametersVars, i);
-					String buttonType = (String) extTemplateComponentButton.get("type");
-					if ("URL".equals(buttonType)) {
-						for (Map<String, Object> buttonParameter : buttonParameterVar) {
-							if (buttonParameter.containsKey("path")) {
-								String path = (String) buttonParameter.get("path");
-								TmplComponent buttonComponent = TmplComponent.createInstance().button("url", i);
-								buttonComponent.parameter("text", model.pathEntry(path).asString());
-								components.add(buttonComponent.build().map());
+					if (ArgUtil.is(buttonParameterVar)) {
+						String buttonType = (String) extTemplateComponentButton.get("type");
+						if ("URL".equals(buttonType)) {
+							for (Map<String, Object> buttonParameter : buttonParameterVar) {
+								if (buttonParameter.containsKey("path")) {
+									String path = (String) buttonParameter.get("path");
+									TmplComponent buttonComponent = TmplComponent.createInstance().button("url", i);
+									buttonComponent.parameter("text", model.pathEntry(path).asString());
+									components.add(buttonComponent.build().map());
+								}
 							}
-						}
-					} else if ("QUICK_REPLY".equals(buttonType)) {
-						for (Map<String, Object> buttonParameter : buttonParameterVar) {
-							if (buttonParameter.containsKey("path")) {
-								String path = (String) buttonParameter.get("path");
-								TmplComponent buttonComponent = TmplComponent.createInstance().button("quick_reply", i);
-								buttonComponent.parameter("payLoad", model.pathEntry(path).asString());
-								components.add(buttonComponent.build().map());
+						} else if ("QUICK_REPLY".equals(buttonType)) {
+							for (Map<String, Object> buttonParameter : buttonParameterVar) {
+								if (buttonParameter.containsKey("path")) {
+									String path = (String) buttonParameter.get("path");
+									TmplComponent buttonComponent = TmplComponent.createInstance().button("quick_reply",
+											i);
+									buttonComponent.parameter("payLoad", model.pathEntry(path).asString());
+									components.add(buttonComponent.build().map());
+								}
 							}
 						}
 					}
