@@ -40,38 +40,54 @@ public class TaskLimiterService {
 		return propMap;
 	}
 
-	public void doTask(int pollQNum, int pushQNum, int batchSize) {
+	public void doTask(int pollQNum, int pushQNum, int pushQ10Num, int batchSize) {
 		if (redisson == null) {
 			return;
 		}
 		for (ITaskLimiter aTaskLimiter : aTaskLimiters) {
-			aTaskLimiter.doTask(pollQNum, pushQNum, batchSize);
+			aTaskLimiter.doTask(pollQNum, pushQNum, pushQ10Num, batchSize);
 		}
 	}
 
+	// FAST TASKS
 	@Scheduled(fixedDelay = POLL_INTERVAL * 1)
 	public void doTask1() throws IOException {
-		doTask(1, 2, 5);
+		doTask(1, 2, 10, 5);
 	}
 
 	@Scheduled(fixedDelay = POLL_INTERVAL * 3)
 	public void doTask2() throws IOException {
-		doTask(2, 3, 5);
+		doTask(2, 3, 10, 5);
 	}
 
 	@Scheduled(fixedDelay = POLL_INTERVAL * 1)
 	public void doTask3() throws IOException {
-		doTask(3, 4, 5);
+		doTask(3, 4, 10, 5);
 	}
 
 	@Scheduled(fixedDelay = POLL_INTERVAL * 3)
 	public void doTask4() throws IOException {
-		doTask(4, 5, 5);
+		doTask(4, 5, 10, 5);
 	}
 
 	@Scheduled(fixedDelay = POLL_INTERVAL * 1)
 	public void doTask5() throws IOException {
-		doTask(5, 6, 5);
+		doTask(5, 6, 10, 5);
 	}
 
+	// SLOW TASKS
+	@Scheduled(fixedDelay = POLL_INTERVAL * 10)
+	public void doTask10() throws IOException {
+		doTask(10, 4, 20, 5);
+	}
+
+	@Scheduled(fixedDelay = POLL_INTERVAL * 20)
+	public void doTask20() throws IOException {
+		doTask(20, 4, 30, 5);
+	}
+
+	@Scheduled(fixedDelay = POLL_INTERVAL * 30)
+	public void doTask30() throws IOException {
+		doTask(30, 4, 10, 5);
+	}
 }

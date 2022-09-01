@@ -1,5 +1,6 @@
 package com.boot.jx.tunnel.task;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -31,7 +32,7 @@ public abstract class ATaskLimiter implements ITaskLimiter {
 	private static final String TUNNE_LIMITER_MAP = "task-limiter-map3-";
 	private static final String TUNNE_LIMITER_Q = "task-limiter-q3-";
 	Logger logger = LoggerService.getLogger(ATaskLimiter.class);
-	public static final int POLL_INTERVAL = 1 * 1000;
+	public static final int POLL_INTERVAL_MIN = 60 * 1000;
 
 	LocalCachedMapOptions<String, TunnelMessage<TunnelTask>> localCacheOptions = LocalCachedMapOptions
 			.<String, TunnelMessage<TunnelTask>>defaults().evictionPolicy(EvictionPolicy.NONE).cacheSize(10000)
@@ -56,11 +57,9 @@ public abstract class ATaskLimiter implements ITaskLimiter {
 	}
 
 	private RLocalCachedMap<String, TunnelMessage<TunnelTask>> cache;
-	private RQueue<TaskInfo> queue;
-	private RQueue<TaskInfo> queue2;
-	private RQueue<TaskInfo> queue3;
-	private RQueue<TaskInfo> queue4;
-	private RQueue<TaskInfo> queue5;
+
+	private Map<Integer, RQueue<TaskInfo>> queues = Collections
+			.synchronizedMap(new HashMap<Integer, RQueue<TaskInfo>>());
 
 	public String getVersion() {
 		return "3";
@@ -75,38 +74,20 @@ public abstract class ATaskLimiter implements ITaskLimiter {
 	}
 
 	private RQueue<TaskInfo> getQueue(int num) {
-		switch (num) {
-		case 2:
-			if (queue2 == null) {
-				queue2 = redisson
-						.getQueue(AppParam.APP_ENV.getValue() + TUNNE_LIMITER_Q + getVersion() + "2-" + this.getName());
-			}
-			return queue2;
-		case 3:
-			if (queue3 == null) {
-				queue3 = redisson
-						.getQueue(AppParam.APP_ENV.getValue() + TUNNE_LIMITER_Q + getVersion() + "3-" + this.getName());
-			}
-			return queue3;
-		case 4:
-			if (queue4 == null) {
-				queue4 = redisson
-						.getQueue(AppParam.APP_ENV.getValue() + TUNNE_LIMITER_Q + getVersion() + "4-" + this.getName());
-			}
-			return queue4;
-		case 5:
-			if (queue5 == null) {
-				queue5 = redisson
-						.getQueue(AppParam.APP_ENV.getValue() + TUNNE_LIMITER_Q + getVersion() + "5-" + this.getName());
-			}
-			return queue5;
-		default:
-			if (queue == null) {
-				queue = redisson
-						.getQueue(AppParam.APP_ENV.getValue() + TUNNE_LIMITER_Q + getVersion() + this.getName());
-			}
-			return queue;
+		RQueue<TaskInfo> queue = queues.get(num);
+		if (!ArgUtil.is(queue)) {
+			queue = redisson.getQueue(
+					AppParam.APP_ENV.getValue() + TUNNE_LIMITER_Q + getVersion() + num + "-" + this.getName());
+			queues.put(num, queue);
 		}
+		return queue;
+	}
+
+	private RQueue<TaskInfo> getQueue(int fastQ, int slowQ, long diff) {
+		if (diff > POLL_INTERVAL_MIN) {
+			return getQueue(slowQ);
+		} else
+			return getQueue(fastQ);
 	}
 
 	@Override
@@ -120,7 +101,7 @@ public abstract class ATaskLimiter implements ITaskLimiter {
 		return propMap;
 	}
 
-	public void doTask(int pollQNum, int pushQNum, int batchSize) {
+	public void doTask(int pollQNum, int pushQNum, int pushQ10Num, int batchSize) {
 
 		if (!isWorker()) {
 			return;
@@ -179,7 +160,7 @@ public abstract class ATaskLimiter implements ITaskLimiter {
 					}
 
 				} else {
-					getQueue(pushQNum).add(info);
+					getQueue(pushQNum, pushQ10Num, info.getMatureStamp() - now).add(info);
 				}
 			} else {
 				break;
