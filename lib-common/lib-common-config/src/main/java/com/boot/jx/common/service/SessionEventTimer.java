@@ -55,6 +55,26 @@ public class SessionEventTimer extends ATaskLimiter {
 	@Autowired
 	private ChatSessionEvents chatSessionEvents;
 
+	public void setChatOutIdleTimeout(String sessionid) {
+		long timeout = pmEnvironment.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_AGENT_CHAT_OUT_IDLE_TIMEOUT_INTERVAL)
+				.asLong(0L);
+		if (timeout > 0L) {
+			TunnelTask task = new TunnelTask().name(SessionEventTimer.CHAT_OUT_IDLE_TIMEOUT).id(sessionid)
+					.intervalMinutes(timeout);
+			this.debounce(task);
+		}
+	}
+
+	public void setChatInIdleTimeout(String sessionid) {
+		long timeout = pmEnvironment.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_AGENT_CHAT_IN_IDLE_TIMEOUT_INTERVAL)
+				.asLong(0L);
+		if (timeout > 0L) {
+			TunnelTask task = new TunnelTask().name(SessionEventTimer.CHAT_IN_IDLE_TIMEOUT).id(sessionid)
+					.intervalMinutes(timeout);
+			this.debounce(task);
+		}
+	}
+
 	@Override
 	public void doTaskSafely(TunnelTask task) {
 
