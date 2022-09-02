@@ -597,6 +597,14 @@ public class ChatSessionDoc extends UpdatedTimeStampDoc implements Serializable 
 		this.routingId = routingId;
 	}
 
+	public ChatMessageDTO lastMsg() {
+		return this.msg().get("lastMsg");
+	}
+
+	public ChatMessageDTO lastOutBoundMsg() {
+		return this.msg().get("lastOutBoundMsg");
+	}
+
 	public void refreshStamps() {
 		if (!ArgUtil.is(this.lastOutGoingStamp)) {
 			if (this.lastOutBoundMsg != null && PostManUtil.isOutBound(lastOutBoundMsg.getType())) {

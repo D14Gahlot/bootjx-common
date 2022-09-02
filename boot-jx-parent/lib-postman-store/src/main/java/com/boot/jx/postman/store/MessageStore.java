@@ -49,7 +49,7 @@ public class MessageStore extends CommonMongoTemplateAbstract {
 		INBOUND_FORWARD_ERROR,
 
 		// Events
-		ON_SESSION_START, ON_SESSION_ROUTE,
+		ON_SESSION_START, ON_SESSION_ROUTE, ON_SESSION_IDLE,
 
 		// ENDS
 		DEFAULT;

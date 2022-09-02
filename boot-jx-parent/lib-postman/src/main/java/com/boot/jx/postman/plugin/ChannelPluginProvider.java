@@ -154,7 +154,7 @@ public class ChannelPluginProvider {
 					if (ArgUtil.is(annotation.defaultValue())) {
 						cm.defaultValue(annotation.defaultValue());
 					}
-					
+
 					configMetaList.add(cm);
 				}
 			}

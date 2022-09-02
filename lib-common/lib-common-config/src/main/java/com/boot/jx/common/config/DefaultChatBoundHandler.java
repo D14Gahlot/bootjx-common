@@ -147,10 +147,11 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 					}
 
 					long timeout = pmEnvironment
-							.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_AGENT_CHAT_IN_IDLE_TIMEOUT_INTERVAL).asLong(0L);
-					if (timeout > 0) {
-						TunnelTask task = new TunnelTask().name("CHAT_IN_IDLE_TIMEOUT").id(session.getSessionId())
-								.intervalMinutes(timeout);
+							.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_AGENT_CHAT_OUT_IDLE_TIMEOUT_INTERVAL)
+							.asLong(0L);
+					if (timeout > 0L) {
+						TunnelTask task = new TunnelTask().name(SessionEventTimer.CHAT_OUT_IDLE_TIMEOUT)
+								.id(session.getSessionId()).intervalMinutes(timeout);
 						task.data().put("sessionId", session.getSessionId()).put("queue", defaultClient.getQueue());
 						sessionEventTimer.debounce(task);
 					}

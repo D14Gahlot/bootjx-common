@@ -10,19 +10,26 @@ import com.boot.jx.postman.ClientApp;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PMEnvironment.PMConfigurationObject;
 import com.boot.jx.postman.doc.ChatSessionDoc;
+import com.boot.jx.postman.dto.ChatMessageDTO;
+import com.boot.jx.postman.manager.ChatLogger;
 import com.boot.jx.postman.mitel.MitelClient;
 import com.boot.jx.postman.model.PMArgs;
 import com.boot.jx.postman.query.ChatSessionQuery;
 import com.boot.jx.postman.store.MessageContext;
+import com.boot.jx.postman.store.MessageStore.EVENTS;
 import com.boot.jx.postman.store.SessionStore;
 import com.boot.jx.tunnel.ITunnelDefs.TunnelTask;
 import com.boot.jx.tunnel.task.ATaskLimiter;
+import com.boot.jx.utils.PostManUtil;
 import com.boot.model.MapModel;
 import com.boot.model.MapModel.MapPathEntry;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.TimeUtils;
 
 @Component
 public class SessionEventTimer extends ATaskLimiter {
+
+	public static final String CHAT_OUT_IDLE_TIMEOUT = "CHAT_OUT_IDLE_TIMEOUT";
 
 	@Autowired
 	private MitelClient mitelClient;
@@ -40,6 +47,9 @@ public class SessionEventTimer extends ATaskLimiter {
 	@Autowired
 	private PMEnvironment pmEnvironment;
 
+	@Autowired
+	protected ChatLogger logManager;
+
 	@Override
 	public void doTaskSafely(TunnelTask task) {
 
@@ -50,8 +60,8 @@ public class SessionEventTimer extends ATaskLimiter {
 		case "MITEL_CLOSE_CHECK":
 			doMitelClosing(task);
 			break;
-		case "CHAT_IN_IDLE_TIMEOUT":
-			doChatInIdelTimeout(task);
+		case CHAT_OUT_IDLE_TIMEOUT:
+			doChatOutIdelTimeout(task);
 			break;
 		default:
 			break;
@@ -59,15 +69,28 @@ public class SessionEventTimer extends ATaskLimiter {
 
 	}
 
-	private void doChatInIdelTimeout(TunnelTask task) {
+	private void doChatOutIdelTimeout(TunnelTask task) {
 		MapModel data = task.data();
 		ChatSessionDoc session = sessionStore.getSession(data.getString("sessionId"));
 
+		logManager.event(session, EVENTS.ON_SESSION_IDLE);
+
 		if (sessionStore.isSessionValid(session)) {
-			PMConfigurationObject frwrdQueue = pmEnvironment
-					.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_AGENT_CHAT_IN_IDLE_TIMEOUT_QUEUE);
-			if (frwrdQueue.exists()) {
-				chatSessionService.routeSession(session, new PMArgs().assignToQueueCode(frwrdQueue.asString()));
+			ChatMessageDTO lastMsg = session.lastMsg();
+			ChatMessageDTO lastOutBoundMsg = session.lastOutBoundMsg();
+			long timeout = pmEnvironment
+					.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_AGENT_CHAT_OUT_IDLE_TIMEOUT_INTERVAL).asLong(0L);
+			if (ArgUtil.is(lastMsg) && PostManUtil.isInBound(lastMsg.getType()) // last message is also inbound
+					&& (!ArgUtil.is(lastOutBoundMsg) // And ther is no outbound
+							|| TimeUtils.isExpired(lastOutBoundMsg.getTimestamp(), timeout * 60000) // OR is older than
+																									// interval
+					)) {
+				PMConfigurationObject frwrdQueue = pmEnvironment
+						.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_AGENT_CHAT_OUT_IDLE_TIMEOUT_QUEUE);
+				if (frwrdQueue.exists()) {
+					logManager.event(session, EVENTS.ON_SESSION_IDLE, frwrdQueue.asString());
+					chatSessionService.routeSession(session, new PMArgs().assignToQueueCode(frwrdQueue.asString()));
+				}
 			}
 		}
 
