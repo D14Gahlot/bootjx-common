@@ -199,7 +199,8 @@ public abstract class ATaskLimiter implements ITaskLimiter {
 		String taskUid = String.format("%s/%s/%s", context.getTenant(), task.getName(),
 				ArgUtil.nonEmpty(task.getId(), context.getTraceId()));
 
-		task.setMatureStamp(System.currentTimeMillis() + (task.getInterval()));
+		long now = System.currentTimeMillis();
+		task.setMatureStamp(now + (task.getInterval()));
 
 		TunnelMessage<TunnelTask> tunnelMessage = new TunnelMessage<TunnelTask>(task, context);
 		tunnelMessage.setTopic(task.getName());
@@ -212,7 +213,7 @@ public abstract class ATaskLimiter implements ITaskLimiter {
 		info.setInterval(task.getInterval());
 		info.setMatureStamp(task.getMatureStamp());
 		info.setKey(taskUid);
-		RQueue<TaskInfo> limiterQ = getQueue(1);
+		RQueue<TaskInfo> limiterQ = getQueue(1, 10, task.getMatureStamp() - now);
 		limiterQ.add(info);
 		logger.debug("===========debounce={}", info.getKey());
 	}
@@ -225,8 +226,9 @@ public abstract class ATaskLimiter implements ITaskLimiter {
 		// Push to Map
 		AppContext context = AppContextUtil.getContext();
 
-		task.setMatureStamp(
-				((System.currentTimeMillis() + task.getInterval()) / task.getInterval() * task.getInterval()));
+		long now = System.currentTimeMillis();
+
+		task.setMatureStamp(((now + task.getInterval()) / task.getInterval() * task.getInterval()));
 
 		String taskUid = String.format("%s/%s/%s/%d", context.getTenant(), task.getName(),
 				ArgUtil.nonEmpty(task.getId(), context.getTraceId()), task.getMatureStamp());
@@ -242,7 +244,7 @@ public abstract class ATaskLimiter implements ITaskLimiter {
 		info.setInterval(task.getInterval());
 		info.setMatureStamp(task.getMatureStamp());
 		info.setKey(taskUid);
-		RQueue<TaskInfo> limiterQ = getQueue(1);
+		RQueue<TaskInfo> limiterQ = getQueue(1, 10, task.getMatureStamp() - now);
 		limiterQ.add(info);
 		logger.debug("===========throttle={}", info.getKey());
 	}
