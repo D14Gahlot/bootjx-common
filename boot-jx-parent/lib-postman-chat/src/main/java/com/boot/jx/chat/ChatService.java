@@ -2,9 +2,11 @@ package com.boot.jx.chat;
 
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Component;
 
+import com.boot.jx.inbound.InBound.MessageEvents;
 import com.boot.jx.logger.LoggerService;
 import com.boot.jx.postman.PMConstants;
 import com.boot.jx.postman.PMConstants.MESSAGE_COMPOSE_TYPE;
@@ -18,10 +20,10 @@ import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.manager.ChatLogger;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.Message;
+import com.boot.jx.postman.model.Message.Status;
 import com.boot.jx.postman.model.MessageDefinitions.IMessageExtended;
 import com.boot.jx.postman.model.MessageDefinitions.TraceMessage;
 import com.boot.jx.postman.model.OutboxMessage;
-import com.boot.jx.postman.model.Message.Status;
 import com.boot.jx.postman.model.ext.InBoundEvent;
 import com.boot.jx.postman.store.MessageContext;
 import com.boot.jx.postman.store.MessageStore;
@@ -57,6 +59,10 @@ public class ChatService {
 	@Autowired
 	private ChatSessionFactory chatSessionFactory;
 
+	@Lazy
+	@Autowired(required = false)
+	private MessageEvents messageEvents;
+
 	public InboxMessage getInboxMessage() {
 		return messageContext.getInboxMessage();
 	}
@@ -85,6 +91,11 @@ public class ChatService {
 		connectorHandlerFactory.message(new MessageContext().from(context()), messageType, chatContactDoc,
 				outboxMessage, inboxMessage);
 		chatSessionFactory.push(messageDoc, outboxMessage);
+
+		if (messageEvents != null) {
+			messageEvents.onMessageOutbound(outboxMessage);
+		}
+
 		return messageDoc;
 	}
 

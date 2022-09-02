@@ -6,14 +6,13 @@ import org.springframework.stereotype.Component;
 
 import com.boot.jx.chat.ChatSessionService;
 import com.boot.jx.common.config.ConfigConstants;
+import com.boot.jx.inbound.InBound.ChatSessionEvents;
 import com.boot.jx.postman.ClientApp;
 import com.boot.jx.postman.PMEnvironment;
-import com.boot.jx.postman.PMEnvironment.PMConfigurationObject;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.dto.ChatMessageDTO;
 import com.boot.jx.postman.manager.ChatLogger;
 import com.boot.jx.postman.mitel.MitelClient;
-import com.boot.jx.postman.model.PMArgs;
 import com.boot.jx.postman.query.ChatSessionQuery;
 import com.boot.jx.postman.store.MessageContext;
 import com.boot.jx.postman.store.MessageStore.EVENTS;
@@ -30,6 +29,8 @@ import com.boot.utils.TimeUtils;
 public class SessionEventTimer extends ATaskLimiter {
 
 	public static final String CHAT_OUT_IDLE_TIMEOUT = "CHAT_OUT_IDLE_TIMEOUT";
+
+	public static final String CHAT_IN_IDLE_TIMEOUT = "CHAT_IN_IDLE_TIMEOUT";
 
 	@Autowired
 	private MitelClient mitelClient;
@@ -48,7 +49,11 @@ public class SessionEventTimer extends ATaskLimiter {
 	private PMEnvironment pmEnvironment;
 
 	@Autowired
-	protected ChatLogger logManager;
+	private ChatLogger logManager;
+
+	@Lazy
+	@Autowired
+	private ChatSessionEvents chatSessionEvents;
 
 	@Override
 	public void doTaskSafely(TunnelTask task) {
@@ -61,7 +66,10 @@ public class SessionEventTimer extends ATaskLimiter {
 			doMitelClosing(task);
 			break;
 		case CHAT_OUT_IDLE_TIMEOUT:
-			doChatOutIdelTimeout(task);
+			doChatOutIdleTimeout(task);
+			break;
+		case CHAT_IN_IDLE_TIMEOUT:
+			doChatInIdleTimeout(task);
 			break;
 		default:
 			break;
@@ -69,12 +77,8 @@ public class SessionEventTimer extends ATaskLimiter {
 
 	}
 
-	private void doChatOutIdelTimeout(TunnelTask task) {
-		MapModel data = task.data();
-		ChatSessionDoc session = sessionStore.getSession(data.getString("sessionId"));
-
-		logManager.event(session, EVENTS.ON_SESSION_IDLE);
-
+	private void doChatOutIdleTimeout(TunnelTask task) {
+		ChatSessionDoc session = sessionStore.getSession(task.getId());
 		if (sessionStore.isSessionValid(session)) {
 			ChatMessageDTO lastMsg = session.lastMsg();
 			ChatMessageDTO lastOutBoundMsg = session.lastOutBoundMsg();
@@ -85,11 +89,30 @@ public class SessionEventTimer extends ATaskLimiter {
 							|| TimeUtils.isExpired(lastOutBoundMsg.getTimestamp(), timeout * 60000) // OR is older than
 																									// interval
 					)) {
-				PMConfigurationObject frwrdQueue = pmEnvironment
-						.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_AGENT_CHAT_OUT_IDLE_TIMEOUT_QUEUE);
-				if (frwrdQueue.exists()) {
-					logManager.event(session, EVENTS.ON_SESSION_IDLE, frwrdQueue.asString());
-					chatSessionService.routeSession(session, new PMArgs().assignToQueueCode(frwrdQueue.asString()));
+
+				logManager.event(session, EVENTS.ON_SESSION_IDLE);
+				if (chatSessionEvents != null) {
+					chatSessionEvents.onSessionIdleOutBound(session);
+				}
+			}
+		}
+	}
+
+	private void doChatInIdleTimeout(TunnelTask task) {
+		ChatSessionDoc session = sessionStore.getSession(task.getId());
+		if (sessionStore.isSessionValid(session)) {
+			ChatMessageDTO lastMsg = session.lastMsg();
+			ChatMessageDTO lastInBoundMsg = session.lastInBoundMsg();
+			long timeout = pmEnvironment.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_AGENT_CHAT_IN_IDLE_TIMEOUT_INTERVAL)
+					.asLong(0L);
+			if (ArgUtil.is(lastMsg) && PostManUtil.isOutBound(lastMsg.getType()) // last message is also inbound
+					&& (!ArgUtil.is(lastInBoundMsg) // And ther is no outbound
+							|| TimeUtils.isExpired(lastInBoundMsg.getTimestamp(), timeout * 60000) // OR is older than
+																									// interval
+					)) {
+				logManager.event(session, EVENTS.ON_SESSION_IDLE);
+				if (chatSessionEvents != null) {
+					chatSessionEvents.onSessionIdleInBound(session);
 				}
 			}
 		}

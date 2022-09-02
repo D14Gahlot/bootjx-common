@@ -18,6 +18,10 @@ public class ITunnelDefs {
 		void doTask(int pollQNum, int pushQNum, int pushQ10Num, int batchSize);
 
 		public boolean doTask(TunnelTask task);
+
+		void debounce(TunnelTask task);
+
+		void throttle(TunnelTask task);
 	}
 
 	public static class TunnelTask implements ITunnelEvent {

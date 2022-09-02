@@ -190,6 +190,7 @@ public abstract class ATaskLimiter implements ITaskLimiter {
 	}
 
 	@Async
+	@Override
 	public void debounce(TunnelTask task) {
 		if (redisson == null) {
 			throw new AmxException("No Redisson Avaialble");
@@ -219,6 +220,7 @@ public abstract class ATaskLimiter implements ITaskLimiter {
 	}
 
 	@Async
+	@Override
 	public void throttle(TunnelTask task) {
 		if (redisson == null) {
 			throw new AmxException("No Redisson Avaialble");

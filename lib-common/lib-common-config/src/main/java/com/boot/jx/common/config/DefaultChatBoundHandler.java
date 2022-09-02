@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 
 import com.boot.jx.AppContextUtil;
-import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.chat.ChatClient;
 import com.boot.jx.chat.ChatClient.PATH;
 import com.boot.jx.chat.ChatService;
@@ -14,6 +13,7 @@ import com.boot.jx.chat.ChatSessionService;
 import com.boot.jx.common.service.SessionEventTimer;
 import com.boot.jx.common.store.ChatArchiveBuilder;
 import com.boot.jx.inbound.InBound.InBoundHandler;
+import com.boot.jx.inbound.InBound.MessageEvents;
 import com.boot.jx.postman.ClientApp;
 import com.boot.jx.postman.PMConstants.APP_TYPE;
 import com.boot.jx.postman.PMConstants.CHAT_MODE;
@@ -98,6 +98,10 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 	@Autowired(required = false)
 	private ChatSessionService chatSessionService;
 
+	@Lazy
+	@Autowired(required = false)
+	private MessageEvents messageEvents;
+
 	@Autowired(required = false)
 	private MessageContext messageContext;
 
@@ -145,16 +149,6 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 					if (ArgUtil.is(session) && APP_TYPE.MITEL.equals(appType)) {
 						mitelRouting(session, defaultClient, 5);
 					}
-
-					long timeout = pmEnvironment
-							.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_AGENT_CHAT_OUT_IDLE_TIMEOUT_INTERVAL)
-							.asLong(0L);
-					if (timeout > 0L) {
-						TunnelTask task = new TunnelTask().name(SessionEventTimer.CHAT_OUT_IDLE_TIMEOUT)
-								.id(session.getSessionId()).intervalMinutes(timeout);
-						task.data().put("sessionId", session.getSessionId()).put("queue", defaultClient.getQueue());
-						sessionEventTimer.debounce(task);
-					}
 					return;
 				}
 
@@ -178,6 +172,13 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 			chatClient.forward(pmCommonConfig.getAgentUrl() + PATH.INBOUND_FRWRD, inboxMessage);
 		} else {
 			chatClient.forward(pmCommonConfig.getBotUrl() + PATH.INBOUND_FRWRD, inboxMessage);
+		}
+	}
+
+	@Override
+	public void afterMessage(InboxMessage inboxMessage, ChatSessionDoc session) {
+		if (messageEvents != null) {
+			messageEvents.postMessageInBound(inboxMessage);
 		}
 	}
 

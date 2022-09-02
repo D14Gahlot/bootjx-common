@@ -605,6 +605,10 @@ public class ChatSessionDoc extends UpdatedTimeStampDoc implements Serializable 
 		return this.msg().get("lastOutBoundMsg");
 	}
 
+	public ChatMessageDTO lastInBoundMsg() {
+		return this.msg().get("lastInBoundMsg");
+	}
+
 	public void refreshStamps() {
 		if (!ArgUtil.is(this.lastOutGoingStamp)) {
 			if (this.lastOutBoundMsg != null && PostManUtil.isOutBound(lastOutBoundMsg.getType())) {

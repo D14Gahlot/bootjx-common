@@ -5,6 +5,7 @@ import org.springframework.scheduling.annotation.Async;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.MessageReport;
+import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.model.PMArgs;
 import com.boot.jx.postman.model.ext.InBoundEvent;
 import com.boot.jx.postman.store.MessageContext;
@@ -28,9 +29,18 @@ public class InBound {
 
 		public void onMessage(InboxMessage inboxMessage, ChatSessionDoc session);
 
+		default public void afterMessage(InboxMessage inboxMessage, ChatSessionDoc session) {
+		}
+
+		default public void onMessageSync(InboxMessage inboxMessage, ChatSessionDoc session) {
+			this.onMessage(inboxMessage, session);
+			this.afterMessage(inboxMessage, session);
+		}
+
 		@Async
 		default public void onMessageAsync(InboxMessage inboxMessage, ChatSessionDoc session) {
 			this.onMessage(inboxMessage, session);
+			this.afterMessage(inboxMessage, session);
 		}
 
 		public void doHandle(MessageReport messageReport);
@@ -66,6 +76,26 @@ public class InBound {
 
 	public interface SessionAssginHandler {
 		public NodeEntry<InBoundEvent> doAssignAgent(PMArgs pmParams);
+	}
+
+	public interface ChatSessionEvents {
+
+		public NodeEntry<InBoundEvent> onSessionIdleOutBound(ChatSessionDoc session);
+
+		public NodeEntry<InBoundEvent> onSessionIdleInBound(ChatSessionDoc session);
+
+	}
+
+	public interface MessageEvents {
+
+		public NodeEntry<InBoundEvent> preMessageOutBound(OutboxMessage message);
+
+		public NodeEntry<InBoundEvent> onMessageOutbound(OutboxMessage message);
+
+		public NodeEntry<InBoundEvent> postMessageOutBound(OutboxMessage message);
+
+		public NodeEntry<InBoundEvent> postMessageInBound(InboxMessage message);
+
 	}
 
 }
