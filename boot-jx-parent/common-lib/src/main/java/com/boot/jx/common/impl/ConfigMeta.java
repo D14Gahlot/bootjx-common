@@ -97,6 +97,7 @@ public class ConfigMeta implements Serializable {
 
 	private String title;
 	private String key;
+	private String superKey;
 	private String desc;
 	private String group;
 	private String path;
@@ -554,4 +555,16 @@ public class ConfigMeta implements Serializable {
 		return this;
 	}
 
+	public String getSuperKey() {
+		return superKey;
+	}
+
+	public void setSuperKey(String superKey) {
+		this.superKey = superKey;
+	}
+
+	public ConfigMeta superKey(String superKey) {
+		this.superKey = superKey;
+		return this;
+	}
 }

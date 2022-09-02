@@ -79,6 +79,11 @@ public class ITunnelDefs {
 			return this;
 		}
 
+		public TunnelTask intervalMinutes(long minutes) {
+			this.setInterval(minutes * 60 * 1000L);
+			return this;
+		}
+
 		public TunnelTask intervalMillis(long milliseconds) {
 			this.setInterval(milliseconds);
 			return this;

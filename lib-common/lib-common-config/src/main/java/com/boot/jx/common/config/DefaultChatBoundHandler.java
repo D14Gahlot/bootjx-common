@@ -11,7 +11,7 @@ import com.boot.jx.chat.ChatClient;
 import com.boot.jx.chat.ChatClient.PATH;
 import com.boot.jx.chat.ChatService;
 import com.boot.jx.chat.ChatSessionService;
-import com.boot.jx.common.service.SessionRouter;
+import com.boot.jx.common.service.SessionEventTimer;
 import com.boot.jx.common.store.ChatArchiveBuilder;
 import com.boot.jx.inbound.InBound.InBoundHandler;
 import com.boot.jx.postman.ClientApp;
@@ -89,7 +89,7 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 	private MitelClient mitelClient;
 
 	@Autowired
-	private SessionRouter sessionRouter;
+	private SessionEventTimer sessionEventTimer;
 
 	@Autowired(required = false)
 	private ChatService chatService;
@@ -126,12 +126,12 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 					} else if (ArgUtil.is(defaultClient.getWebhook())) {
 						forward2Webhook(inboxMessage, defaultClient.getWebhook(), defaultClient.getId());
 					} else {
-						//if (APP_TYPE.APP_SCRIPT.equals(appType)) {
-							forward2Webhook(inboxMessage, pmCommonConfig.getScriptusUrl() + PATH.APP_SCRIPT_FRWRD,
-									defaultClient.getId());
-						//} else {
-						//	ApiResponseUtil.throwException("Forward URL missing");
-						//}
+						// if (APP_TYPE.APP_SCRIPT.equals(appType)) {
+						forward2Webhook(inboxMessage, pmCommonConfig.getScriptusUrl() + PATH.APP_SCRIPT_FRWRD,
+								defaultClient.getId());
+						// } else {
+						// ApiResponseUtil.throwException("Forward URL missing");
+						// }
 					}
 
 					updateStatus(inboxMessage, Status.FORWARDED);
@@ -144,6 +144,15 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 					chatClient.forward(pmCommonConfig.getAgentUrl() + PATH.INBOUND_FRWRD, inboxMessage);
 					if (ArgUtil.is(session) && APP_TYPE.MITEL.equals(appType)) {
 						mitelRouting(session, defaultClient, 5);
+					}
+
+					long timeout = pmEnvironment
+							.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_AGENT_CHAT_IN_IDLE_TIMEOUT_INTERVAL).asLong(0L);
+					if (timeout > 0) {
+						TunnelTask task = new TunnelTask().name("CHAT_IN_IDLE_TIMEOUT").id(session.getSessionId())
+								.intervalMinutes(timeout);
+						task.data().put("sessionId", session.getSessionId()).put("queue", defaultClient.getQueue());
+						sessionEventTimer.debounce(task);
 					}
 					return;
 				}
@@ -177,14 +186,14 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 		String omid = omidEntry.asString();
 		TunnelTask task = new TunnelTask().name("MITEL_ROUTER").id(session.getSessionId()).intervalSeconds(delay);
 		task.data().put("sessionId", session.getSessionId()).put("omid", omid).put("queue", defaultClient.getQueue());
-		sessionRouter.debounce(task);
+		sessionEventTimer.debounce(task);
 		// sessionRouter.doTask(task);
 
 		TunnelTask closeTask = new TunnelTask().name("MITEL_CLOSE_CHECK").id(session.getSessionId())
 				.intervalSeconds(60 * 10);
 		closeTask.data().put("sessionId", session.getSessionId()).put("omid", omid).put("queue",
 				defaultClient.getQueue());
-		sessionRouter.debounce(closeTask);
+		sessionEventTimer.debounce(closeTask);
 		// sessionRouter.doTask(closeTask);
 	}
 
