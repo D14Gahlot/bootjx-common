@@ -72,7 +72,7 @@ public class TaskLimiterService {
 
 	@Scheduled(fixedDelay = POLL_INTERVAL * 1)
 	public void doTask5() throws IOException {
-		doTask(5, 6, 10, 5);
+		doTask(5, 1, 10, 5);
 	}
 
 	// SLOW TASKS
