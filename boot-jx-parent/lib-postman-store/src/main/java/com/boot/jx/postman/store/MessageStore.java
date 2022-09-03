@@ -450,6 +450,9 @@ public class MessageStore extends CommonMongoTemplateAbstract {
 	}
 
 	public MessageDoc save(MessageDoc msg, ContactType contactType) {
+		if (!ArgUtil.is(msg.getAppType())) {
+			msg.setAppType(appConfig.getAppType());
+		}
 		mongoTemplate.save(msg, MessageStore.getCollectionName(contactType));
 		return msg;
 	}

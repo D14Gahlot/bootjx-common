@@ -36,7 +36,7 @@ public class QueueMongoStore extends CommonMongoTemplateAbstract implements ZQue
 	public ZQueueElement dequeue(String queueType, String queueId) {
 		String batchId = UniqueID.generateString();
 		CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder();
-		builder.where(Criteria.where("appType").is(appConfig.getAppType() + "temp")//
+		builder.where(Criteria.where("appType").is(appConfig.getAppType())//
 				.and("queueType").is(queueType)//
 				.and("queueId").is(queueId)//
 				.and("batchId").exists(false))//
