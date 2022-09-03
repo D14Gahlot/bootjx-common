@@ -27,9 +27,7 @@ public class MessageEventsImpl implements MessageEvents {
 	@Override
 	public NodeEntry<InBoundEvent> postMessageInBound(InboxMessage message) {
 		ClientApp app = messageContext.clientApp();
-		if (app.isAgentApp()) {
-			sessionEventTimer.setChatOutIdleTimeout(message.getSessionId());
-		}
+		sessionEventTimer.setChatOutIdleTimeout(message.getSessionId(), app);
 		return null;
 	}
 
@@ -47,9 +45,7 @@ public class MessageEventsImpl implements MessageEvents {
 	@Override
 	public NodeEntry<InBoundEvent> postMessageOutBound(OutboxMessage message) {
 		ClientApp app = messageContext.clientApp();
-		if (app.isAgentApp()) {
-			sessionEventTimer.setChatInIdleTimeout(message.getSessionId());
-		}
+		sessionEventTimer.setChatInIdleTimeout(message.getSessionId(), app);
 		return null;
 	}
 

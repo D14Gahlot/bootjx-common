@@ -49,9 +49,18 @@ public class InBound {
 
 		public void onSessionRoute(InBoundEvent inBoundEvent, ChatSessionDoc sessionDoc, PMArgs pmArgs);
 
+		default public void afterSessionRoute(InBoundEvent inBoundEvent, ChatSessionDoc sessionDoc, PMArgs pmArgs) {
+		}
+
+		default public void onSessionRouteSync(InBoundEvent inBoundEvent, ChatSessionDoc sessionDoc, PMArgs pmArgs) {
+			this.onSessionRoute(inBoundEvent, sessionDoc, pmArgs);
+			this.afterSessionRoute(inBoundEvent, sessionDoc, pmArgs);
+		}
+
 		@Async
 		default public void onSessionRouteAsync(InBoundEvent inBoundEvent, ChatSessionDoc sessionDoc, PMArgs pmArgs) {
 			this.onSessionRoute(inBoundEvent, sessionDoc, pmArgs);
+			this.afterSessionRoute(inBoundEvent, sessionDoc, pmArgs);
 		}
 
 		public void onSessionResolve(InBoundEvent event, ChatSessionDoc chatSessionDoc);

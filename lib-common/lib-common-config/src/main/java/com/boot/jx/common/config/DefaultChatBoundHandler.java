@@ -12,6 +12,7 @@ import com.boot.jx.chat.ChatService;
 import com.boot.jx.chat.ChatSessionService;
 import com.boot.jx.common.service.SessionEventTimer;
 import com.boot.jx.common.store.ChatArchiveBuilder;
+import com.boot.jx.inbound.InBound.ChatSessionEvents;
 import com.boot.jx.inbound.InBound.InBoundHandler;
 import com.boot.jx.inbound.InBound.MessageEvents;
 import com.boot.jx.postman.ClientApp;
@@ -182,6 +183,14 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 		}
 	}
 
+	@Override
+	public void afterSessionRoute(InBoundEvent inBoundEvent, ChatSessionDoc sessionDoc, PMArgs pmArgs) {
+		if (sessionEventTimer != null) {
+			ClientApp defaultClient = context().clientApp(inBoundEvent.sessionRouted.targetQueue);
+			sessionEventTimer.setChatOutIdleTimeout(inBoundEvent.getSessionId(), defaultClient);
+		}
+	}
+
 	private void mitelRouting(ChatSessionDoc session, ClientApp defaultClient, int delay) {
 		MapModel meta = new MapModel(session.getMeta());
 		MapPathEntry omidEntry = meta.pathEntry("mitel.omid");
@@ -322,7 +331,7 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 		context().setInBoundEvent(event);
 		if (InBoundEvent.SESSION_ROUTED.equals(event.eventCode)) {
 			ChatSessionDoc sessionDoc = context().session().getDoc();
-			this.onSessionRoute(event, sessionDoc, pmArgs);
+			this.onSessionRouteSync(event, sessionDoc, pmArgs);
 		}
 		return event;
 	}

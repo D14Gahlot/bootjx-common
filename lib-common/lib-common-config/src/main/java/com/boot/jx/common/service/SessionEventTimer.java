@@ -2,8 +2,10 @@ package com.boot.jx.common.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
+import com.boot.jx.AppConfig;
 import com.boot.jx.chat.ChatSessionService;
 import com.boot.jx.common.config.ConfigConstants;
 import com.boot.jx.inbound.InBound.ChatSessionEvents;
@@ -51,27 +53,41 @@ public class SessionEventTimer extends ATaskLimiter {
 	@Autowired
 	private ChatLogger logManager;
 
+	@Autowired
+	AppConfig appConfig;
+
 	@Lazy
 	@Autowired
 	private ChatSessionEvents chatSessionEvents;
 
-	public void setChatOutIdleTimeout(String sessionid) {
-		long timeout = pmEnvironment.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_AGENT_CHAT_OUT_IDLE_TIMEOUT_INTERVAL)
-				.asLong(0L);
-		if (timeout > 0L) {
-			TunnelTask task = new TunnelTask().name(SessionEventTimer.CHAT_OUT_IDLE_TIMEOUT).id(sessionid)
-					.intervalMinutes(timeout);
-			this.debounce(task);
+	@Override
+	public boolean isWorker() {
+		return ArgUtil.isEqual(appConfig.getAppType(), "POSTMAN", "AGENT", "BOT");
+	}
+
+	@Async
+	public void setChatOutIdleTimeout(String sessionid, ClientApp app) {
+		if (app.isAgentApp()) {
+			long timeout = pmEnvironment
+					.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_AGENT_CHAT_OUT_IDLE_TIMEOUT_INTERVAL).asLong(0L);
+			if (timeout > 0L) {
+				TunnelTask task = new TunnelTask().name(SessionEventTimer.CHAT_OUT_IDLE_TIMEOUT).id(sessionid)
+						.intervalMinutes(timeout);
+				this.debounce(task);
+			}
 		}
 	}
 
-	public void setChatInIdleTimeout(String sessionid) {
-		long timeout = pmEnvironment.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_AGENT_CHAT_IN_IDLE_TIMEOUT_INTERVAL)
-				.asLong(0L);
-		if (timeout > 0L) {
-			TunnelTask task = new TunnelTask().name(SessionEventTimer.CHAT_IN_IDLE_TIMEOUT).id(sessionid)
-					.intervalMinutes(timeout);
-			this.debounce(task);
+	@Async
+	public void setChatInIdleTimeout(String sessionid, ClientApp app) {
+		if (app.isAgentApp()) {
+			long timeout = pmEnvironment.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_AGENT_CHAT_IN_IDLE_TIMEOUT_INTERVAL)
+					.asLong(0L);
+			if (timeout > 0L) {
+				TunnelTask task = new TunnelTask().name(SessionEventTimer.CHAT_IN_IDLE_TIMEOUT).id(sessionid)
+						.intervalMinutes(timeout);
+				this.debounce(task);
+			}
 		}
 	}
 
