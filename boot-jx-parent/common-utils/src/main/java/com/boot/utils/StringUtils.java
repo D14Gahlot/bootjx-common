@@ -175,6 +175,7 @@ public final class StringUtils {
 	public static String removeSpecialCharacter(String inputString) {
 		return inputString.replaceAll("[^a-zA-Z0-9]+", "");
 	}
+
 	public static String removeSpaces(String inputString) {
 		return inputString.replaceAll("[\\ ]+", "");
 	}

@@ -14,6 +14,7 @@ import com.boot.jx.mongo.CommonMongoQueryBuilder;
 import com.boot.jx.mongo.CommonMongoTemplateAbstract;
 import com.boot.jx.postman.doc.QuickMedia;
 import com.boot.model.UtilityModels.JsonIgnoreUnknown;
+import com.boot.utils.PatternUtil;
 import com.mongodb.AggregationOptions;
 import com.mongodb.AggregationOptions.OutputMode;
 import com.mongodb.BasicDBObject;
@@ -57,7 +58,8 @@ public class QuickStore extends CommonMongoTemplateAbstract {
 	}
 
 	public <T extends QuickGalleryItem> List<T> findByCategory(String category, Class<T> clazz) {
-		return find(CommonMongoQueryBuilder.collection(clazz).where(Criteria.where("category").regex(category, "i")));
+		return find(CommonMongoQueryBuilder.collection(clazz)
+				.where(Criteria.where("category").regex(PatternUtil.equalsIgnoreCase(category))));
 	}
 
 	public <T extends QuickGalleryItem> List<T> findGalleryItems(String codeIdOrTitle, Class<T> clazz) {
@@ -68,7 +70,7 @@ public class QuickStore extends CommonMongoTemplateAbstract {
 		if (codeIdOrTitle != null && ObjectId.isValid(codeIdOrTitle)) {
 			orList.add(Criteria.where("id").is(new ObjectId(codeIdOrTitle)));
 		}
-		orList.add(Criteria.where("title").regex(codeIdOrTitle, "i"));
+		orList.add(Criteria.where("title").regex(PatternUtil.equalsIgnoreCase(codeIdOrTitle)));
 
 		return find(CommonMongoQueryBuilder.collection(clazz)
 				.where(new Criteria().orOperator(orList.toArray(new Criteria[orList.size()]))));
