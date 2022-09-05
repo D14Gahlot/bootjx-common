@@ -139,12 +139,12 @@ public class ConfigConstants {
 				new ConfigMeta("Agent-Chat Outbound Idle Timeout Config", "postman.agent.chat.out.idle.timeout")
 						.superKey("postman.agent.chat.out.idle.timeout")
 						.desc("Chat gets timed-out if agent does not respond for this interval in Minutes")
-						.inputType(INPUT_TYPE.NUMBER).min(5).group(GROUP_AGENT)),
+						.optionsOnOff().group(GROUP_AGENT)),
 
 		POSTMAN_AGENT_CHAT_OUT_IDLE_TIMEOUT_INTERVAL(new ConfigMeta("Agent-Chat Outbound Idle Timeout Interval",
 				"postman.agent.chat.out.idle.timeout.interval").superKey("postman.agent.chat.out.idle.timeout")
 						.desc("Chat gets timed-out if agent does not respond for this interval in Minutes")
-						.optionsOnOff().group(GROUP_AGENT)),
+						.inputType(INPUT_TYPE.NUMBER).min(5).group(GROUP_AGENT)),
 
 		POSTMAN_AGENT_CHAT_OUT_IDLE_TIMEOUT_QUEUE(
 				new ConfigMeta("Agent-Chat Outbound Idle Timeout Queue", "postman.agent.chat.out.idle.timeout.queue")
