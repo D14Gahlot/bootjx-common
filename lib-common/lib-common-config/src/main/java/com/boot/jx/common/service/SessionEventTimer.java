@@ -68,12 +68,16 @@ public class SessionEventTimer extends ATaskLimiter {
 	@Async
 	public void setChatOutIdleTimeout(String sessionid, ClientApp app) {
 		if (app.isAgentApp()) {
-			long timeout = pmEnvironment
-					.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_AGENT_CHAT_OUT_IDLE_TIMEOUT_INTERVAL).asLong(0L);
-			if (timeout > 0L) {
-				TunnelTask task = new TunnelTask().name(SessionEventTimer.CHAT_OUT_IDLE_TIMEOUT).id(sessionid)
-						.intervalMinutes(timeout);
-				this.debounce(task);
+			boolean timeoutEnabled = pmEnvironment
+					.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_AGENT_CHAT_OUT_IDLE_TIMEOUT).asBoolean(false);
+			if (timeoutEnabled) {
+				long timeout = pmEnvironment
+						.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_AGENT_CHAT_OUT_IDLE_TIMEOUT_INTERVAL).asLong(0L);
+				if (timeout > 0L) {
+					TunnelTask task = new TunnelTask().name(SessionEventTimer.CHAT_OUT_IDLE_TIMEOUT).id(sessionid)
+							.intervalMinutes(timeout);
+					this.debounce(task);
+				}
 			}
 		}
 	}
@@ -81,12 +85,16 @@ public class SessionEventTimer extends ATaskLimiter {
 	@Async
 	public void setChatInIdleTimeout(String sessionid, ClientApp app) {
 		if (app.isAgentApp()) {
-			long timeout = pmEnvironment.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_AGENT_CHAT_IN_IDLE_TIMEOUT_INTERVAL)
-					.asLong(0L);
-			if (timeout > 0L) {
-				TunnelTask task = new TunnelTask().name(SessionEventTimer.CHAT_IN_IDLE_TIMEOUT).id(sessionid)
-						.intervalMinutes(timeout);
-				this.debounce(task);
+			boolean timeoutEnabled = pmEnvironment
+					.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_AGENT_CHAT_IN_IDLE_TIMEOUT).asBoolean(false);
+			if (timeoutEnabled) {
+				long timeout = pmEnvironment
+						.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_AGENT_CHAT_IN_IDLE_TIMEOUT_INTERVAL).asLong(0L);
+				if (timeout > 0L) {
+					TunnelTask task = new TunnelTask().name(SessionEventTimer.CHAT_IN_IDLE_TIMEOUT).id(sessionid)
+							.intervalMinutes(timeout);
+					this.debounce(task);
+				}
 			}
 		}
 	}

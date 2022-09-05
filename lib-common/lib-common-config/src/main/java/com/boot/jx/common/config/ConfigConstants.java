@@ -135,10 +135,16 @@ public class ConfigConstants {
 		POSTMAN_AGENT_SCHEME_COLOR(new ConfigMeta("Agent Panel Color Scheme", "postman.agent.scheme.color")
 				.inputType(INPUT_TYPE.COLOR).defaultValue("#4267b2").group(GROUP_AGENT)),
 
+		POSTMAN_AGENT_CHAT_OUT_IDLE_TIMEOUT(
+				new ConfigMeta("Agent-Chat Outbound Idle Timeout Config", "postman.agent.chat.out.idle.timeout")
+						.superKey("postman.agent.chat.out.idle.timeout")
+						.desc("Chat gets timed-out if agent does not respond for this interval in Minutes")
+						.inputType(INPUT_TYPE.NUMBER).min(5).group(GROUP_AGENT)),
+
 		POSTMAN_AGENT_CHAT_OUT_IDLE_TIMEOUT_INTERVAL(new ConfigMeta("Agent-Chat Outbound Idle Timeout Interval",
 				"postman.agent.chat.out.idle.timeout.interval").superKey("postman.agent.chat.out.idle.timeout")
 						.desc("Chat gets timed-out if agent does not respond for this interval in Minutes")
-						.inputType(INPUT_TYPE.NUMBER).min(5).group(GROUP_AGENT)),
+						.optionsOnOff().group(GROUP_AGENT)),
 
 		POSTMAN_AGENT_CHAT_OUT_IDLE_TIMEOUT_QUEUE(
 				new ConfigMeta("Agent-Chat Outbound Idle Timeout Queue", "postman.agent.chat.out.idle.timeout.queue")
@@ -146,6 +152,12 @@ public class ConfigConstants {
 						.desc("Timed-out chat gets re-assigned to this queue")
 						.optionsSource("getx:/api/options/inbound_queue").optionsKey("code").optionsLabel("code")
 						.group(GROUP_AGENT)),
+
+		POSTMAN_AGENT_CHAT_IN_IDLE_TIMEOUT(
+				new ConfigMeta("Agent-Chat Inbound Idle Timeout Config", "postman.agent.chat.in.idle.timeout")
+						.superKey("postman.agent.chat.in.idle.timeout")
+						.desc("Chat gets timed-out if customer does not respond for this interval in Minutes")
+						.optionsOnOff().group(GROUP_AGENT)),
 
 		POSTMAN_AGENT_CHAT_IN_IDLE_TIMEOUT_INTERVAL(new ConfigMeta("Agent-Chat Inbound Idle Timeout Interval",
 				"postman.agent.chat.in.idle.timeout.interval").superKey("postman.agent.chat.in.idle.timeout")
