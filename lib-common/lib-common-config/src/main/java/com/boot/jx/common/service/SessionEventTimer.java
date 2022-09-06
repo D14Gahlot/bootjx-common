@@ -67,7 +67,7 @@ public class SessionEventTimer extends ATaskLimiter {
 
 	@Async
 	public void setChatOutIdleTimeout(String sessionid, ClientApp app) {
-		if (app.isAgentApp()) {
+		if (app != null && app.isAgentApp()) {
 			boolean timeoutEnabled = pmEnvironment
 					.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_AGENT_CHAT_OUT_IDLE_TIMEOUT).asBoolean(false);
 			if (timeoutEnabled) {
@@ -84,7 +84,7 @@ public class SessionEventTimer extends ATaskLimiter {
 
 	@Async
 	public void setChatInIdleTimeout(String sessionid, ClientApp app) {
-		if (app.isAgentApp()) {
+		if (app != null && app.isAgentApp()) {
 			boolean timeoutEnabled = pmEnvironment
 					.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_AGENT_CHAT_IN_IDLE_TIMEOUT).asBoolean(false);
 			if (timeoutEnabled) {
