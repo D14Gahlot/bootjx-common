@@ -45,7 +45,7 @@ public class PMDomainConfigImpl implements PMDomainConfig {
 	@Override
 	public String getDomainUrl() {
 		return String.format("https://%s.%s", AppContextUtil.getTenant(),
-				environment.keyEntry("mry.prop.service.domain").asString());
+				environment.keyEntry("mry.prop.service.server").asString());
 	}
 
 	@Override
