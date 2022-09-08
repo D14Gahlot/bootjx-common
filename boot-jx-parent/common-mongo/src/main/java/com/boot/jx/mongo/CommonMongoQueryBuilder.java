@@ -1,5 +1,7 @@
 package com.boot.jx.mongo;
 
+import com.boot.jx.mongo.CommonDocInterfaces.ResourceDocumentImpl;
+import com.boot.jx.mongo.CommonDocInterfaces.SimpleDocument;
 import com.boot.jx.mongo.CommonDocInterfaces.TimeStampIndex.CreatedTimeStampIndexSupport;
 import com.boot.jx.mongo.CommonDocInterfaces.TimeStampIndex.UpdatedTimeStampIndexSupport;
 import com.boot.utils.ArgUtil;
@@ -75,6 +77,34 @@ public class CommonMongoQueryBuilder extends CommonMongoQB<CommonMongoQueryBuild
 			return null;
 		}
 
+	}
+
+	public static class SimpleDocQueryBuilder extends DocQueryBuilder<SimpleDocument> {
+
+		public SimpleDocQueryBuilder(SimpleDocument doc) {
+			super(doc);
+		}
+
+		@Override
+		public SimpleDocument newDoc(String id) {
+			SimpleDocument doc = new ResourceDocumentImpl();
+			doc.setId(id);
+			return doc;
+		}
+
+		@Override
+		public String getId(SimpleDocument doc) {
+			return doc.getId();
+		}
+
+		public static SimpleDocQueryBuilder doc(SimpleDocument doc) {
+			return new SimpleDocQueryBuilder(doc);
+		}
+
+	}
+
+	public static SimpleDocQueryBuilder doc(SimpleDocument doc) {
+		return SimpleDocQueryBuilder.doc(doc);
 	}
 
 }

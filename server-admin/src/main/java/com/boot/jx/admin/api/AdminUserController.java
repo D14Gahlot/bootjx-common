@@ -36,7 +36,7 @@ public class AdminUserController {
 	public ApiResponse<AgentResponseAdminDto, Object> fetchAgents(
 			@RequestParam(value = "agent_id", required = false) String agent_id,
 			@RequestParam(required = false, defaultValue = "false") boolean includeInActive) {
-		return ApiResponse.buildResults(adminService.fetchAgents(agent_id,includeInActive));
+		return ApiResponse.buildResults(adminService.fetchAgents(agent_id, includeInActive));
 	}
 
 	@RequestMapping(value = "/api/admins/agent", method = { RequestMethod.POST })
@@ -115,6 +115,5 @@ public class AdminUserController {
 		} else {
 			return new ApiResponse<ContactDTO, Object>();
 		}
-
 	}
 }

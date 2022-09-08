@@ -2,15 +2,29 @@ package com.boot.jx.postman.pbook;
 
 import java.io.Serializable;
 
+import com.boot.utils.ArgUtil;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class PBEmail implements Serializable {
+public class PBEmail implements Serializable,Comparable<PBEmail> {
 
 	private static final long serialVersionUID = 13406808264190167L;
 	public String email;
 	public String type;
 	public String label;
+
+	@Override
+	public String toString() {
+		return email;
+	}
+
+	@Override
+	public int compareTo(PBEmail o) {
+		if (o == null) {
+			return 1;
+		}
+		return this.toString().compareTo(o.toString());
+	}
 
 	public String getEmail() {
 		return email;
@@ -50,4 +64,15 @@ public class PBEmail implements Serializable {
 		this.label = label;
 		return this;
 	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o)
+			return true;
+		if (o == null || getClass() != o.getClass())
+			return false;
+		PBEmail that = (PBEmail) o;
+		return ArgUtil.equalsIgnoreCase(this.email, that.email);
+	}
+
 }

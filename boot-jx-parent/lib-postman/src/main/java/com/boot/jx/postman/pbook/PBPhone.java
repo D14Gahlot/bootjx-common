@@ -5,7 +5,7 @@ import java.io.Serializable;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class PBPhone implements Serializable {
+public class PBPhone implements Serializable, Comparable<PBPhone> {
 
 	private static final long serialVersionUID = 1772318013635615811L;
 	public String phone;
@@ -16,6 +16,19 @@ public class PBPhone implements Serializable {
 	public String countryCallingCode;
 	public String nationalNumber;
 	public String ext;
+
+	@Override
+	public String toString() {
+		return countryCallingCode + nationalNumber + ext;
+	}
+
+	@Override
+	public int compareTo(PBPhone o) {
+		if (o == null) {
+			return 1;
+		}
+		return this.toString().compareTo(o.toString());
+	}
 
 	// Social
 	public String whatsAppId;
@@ -87,6 +100,20 @@ public class PBPhone implements Serializable {
 	public PBPhone phone(String phone) {
 		this.phone = phone;
 		return this;
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o)
+			return true;
+		if (o == null || getClass() != o.getClass())
+			return false;
+		PBPhone that = (PBPhone) o;
+		if ((this.countryCallingCode != that.countryCallingCode) || (this.nationalNumber != that.nationalNumber)
+				|| (this.ext != that.ext)) {
+			return false;
+		}
+		return true;
 	}
 
 }

@@ -114,10 +114,15 @@ public class CommonDocInterfaces {
 
 	@JsonDeserialize(as = ResourceDocumentImpl.class, keyUsing = ResourceDocumentKeyDeserializer.class)
 	@JsonIgnoreProperties(ignoreUnknown = true)
-	public static interface ResourceDocument {
+	public static interface SimpleDocument extends IDocument {
 		public String getId();
 
 		public void setId(String id);
+	}
+
+	@JsonDeserialize(as = ResourceDocumentImpl.class, keyUsing = ResourceDocumentKeyDeserializer.class)
+	@JsonIgnoreProperties(ignoreUnknown = true)
+	public static interface ResourceDocument extends SimpleDocument {
 
 		public void setCode(String code);
 

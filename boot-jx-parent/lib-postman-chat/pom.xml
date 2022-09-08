@@ -81,12 +81,6 @@
 			<version>1.5</version>
 		</dependency>
 
-		<dependency>
-			<groupId>com.googlecode.libphonenumber</groupId>
-			<artifactId>libphonenumber</artifactId>
-			<version>8.10.5</version>
-		</dependency>
-
 		<!-- https://mvnrepository.com/artifact/org.jsoup/jsoup -->
 		<dependency>
 			<groupId>org.jsoup</groupId>
