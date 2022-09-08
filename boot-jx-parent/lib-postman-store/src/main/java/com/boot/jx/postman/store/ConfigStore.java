@@ -13,6 +13,7 @@ import com.boot.jx.postman.doc.config.VarsConfigDoc;
 import com.boot.jx.postman.doc.config.VarsConfigDoc.CompanyTokenKeyDoc;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.CryptoUtil;
 import com.mongodb.WriteResult;
 
 @Component
@@ -63,6 +64,10 @@ public class ConfigStore extends CommonMongoTemplateAbstract {
 				ClientAppConfigDoc oldDoc = findByIdString(clientApiKey.getId(), ClientAppConfigDoc.class);
 				clientApiKey.setKey(oldDoc.getKey());
 			}
+
+			clientApiKey.setAppHook(String.format("https://{{domain}}.{{server}}/bot/ext/app/%s/{{id}}/%s",
+					clientApiKey.getQueue(), CryptoUtil.getMD5Hash(clientApiKey.getKey())));
+
 			save(clientApiKey);
 			log(clientApiKey, "updated");
 			if (generated == false) {

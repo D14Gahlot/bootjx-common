@@ -18,6 +18,11 @@ public interface ClientApp extends Serializable {
 	@JsonView(PMEnvironment.OneTimeVisibleProperty.class)
 	public String getKey();
 
+	@JsonView(PMEnvironment.OneTimeVisibleProperty.class)
+	public String getAppHook();
+
+	public String getAppHookFrwrd();
+
 	public String getKeyName();
 
 	public String getQueue();
@@ -29,8 +34,6 @@ public interface ClientApp extends Serializable {
 	public String getAppMode();
 
 	public String getWebhook();
-
-	public String getOutboundhook();
 
 	public String getForward();
 
