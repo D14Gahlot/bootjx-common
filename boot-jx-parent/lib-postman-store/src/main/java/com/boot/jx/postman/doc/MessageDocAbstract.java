@@ -79,6 +79,7 @@ public abstract class MessageDocAbstract implements Serializable, Patchable<Mess
 	public List<Object> trace;
 	private Map<String, Object> replyTo;
 	private String appType;
+	private String appVenv;
 
 	@Indexed
 	private String contactId;
@@ -474,4 +475,13 @@ public abstract class MessageDocAbstract implements Serializable, Patchable<Mess
 	public void setAppType(String appType) {
 		this.appType = appType;
 	}
+
+	public String getAppVenv() {
+		return appVenv;
+	}
+
+	public void setAppVenv(String appVenv) {
+		this.appVenv = appVenv;
+	}
+
 }

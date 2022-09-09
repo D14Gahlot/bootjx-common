@@ -123,6 +123,7 @@ public class ChatLogger {
 		doc.setTimestamp(System.currentTimeMillis());
 		doc.setTraceId(AppContextUtil.getTraceId());
 		doc.setMessage(e.getMessage());
+		doc.setQueue(inBoundEvent.session().getQueue());
 
 		toLogs(e, doc);
 		messageStore.save(doc);
@@ -226,7 +227,7 @@ public class ChatLogger {
 			return;
 		}
 		Object[] result = new Object[msg.length + 1];
-		result[0] = appConfig.getAppType();
+		result[0] = appConfig.getAppInstanceType();
 		System.arraycopy(msg, 0, result, 1, msg.length);
 		CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder();
 

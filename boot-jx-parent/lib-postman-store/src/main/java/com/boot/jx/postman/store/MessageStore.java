@@ -17,12 +17,14 @@ import org.springframework.stereotype.Component;
 
 import com.boot.jx.AppConfig;
 import com.boot.jx.AppContextUtil;
+import com.boot.jx.AppParam;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.mongo.CommonMongoQueryBuilder;
 import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.jx.mongo.CommonMongoTemplateAbstract;
 import com.boot.jx.postman.doc.ContactDetailDoc;
 import com.boot.jx.postman.doc.MessageDoc;
+import com.boot.jx.postman.doc.MessageDocAbstract;
 import com.boot.jx.postman.doc.MessageHold;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.Message.Status;
@@ -453,7 +455,21 @@ public class MessageStore extends CommonMongoTemplateAbstract {
 		if (!ArgUtil.is(msg.getAppType())) {
 			msg.setAppType(appConfig.getAppType());
 		}
+		if (!ArgUtil.is(msg.getAppVenv())) {
+			msg.setAppVenv(msg.getAppVenv());
+		}
 		mongoTemplate.save(msg, MessageStore.getCollectionName(contactType));
+		return msg;
+	}
+
+	public MessageDocAbstract save(MessageDocAbstract msg) {
+		if (!ArgUtil.is(msg.getAppType())) {
+			msg.setAppType(appConfig.getAppType());
+		}
+		if (!ArgUtil.is(msg.getAppVenv())) {
+			msg.setAppVenv(msg.getAppVenv());
+		}
+		mongoTemplate.save(msg);
 		return msg;
 	}
 

@@ -198,7 +198,6 @@ public class ChatController {
 				PMConstants.DEFAULT.AGENT_QUEUE_CODE);
 		chatSessionService.routeSession(session, new PMArgs().assignToQueueCode(agent_queue).contact(session.contact())
 				.sessionId(session.getSessionId()).assignToDeptCode(deptCode));
-
 	}
 
 	public void assignToAgentSkill(String... skillCode) {
@@ -229,7 +228,7 @@ public class ChatController {
 
 	public void onPostOutboundMessage(MapModel mapModel) {
 	}
-	
+
 	public MessageContext context() {
 		return this.messageContext;
 	}
