@@ -134,7 +134,7 @@ public class SessionEventTimer extends ATaskLimiter {
 																									// interval
 					)) {
 
-				logManager.event(session, EVENTS.ON_SESSION_IDLE);
+				logManager.event(session, EVENTS.ON_SESSION_IDLE, session.getMode());
 				if (chatSessionEvents != null) {
 					chatSessionEvents.onSessionIdleOutBound(session);
 				}
@@ -154,7 +154,7 @@ public class SessionEventTimer extends ATaskLimiter {
 							|| TimeUtils.isExpired(lastInBoundMsg.getTimestamp(), timeout * 60000) // OR is older than
 																									// interval
 					)) {
-				logManager.event(session, EVENTS.ON_SESSION_IDLE);
+				logManager.event(session, EVENTS.ON_SESSION_IDLE, "CUSTOMER");
 				if (chatSessionEvents != null) {
 					chatSessionEvents.onSessionIdleInBound(session);
 				}
