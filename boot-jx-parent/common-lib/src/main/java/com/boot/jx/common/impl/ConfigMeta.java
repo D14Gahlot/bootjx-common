@@ -109,6 +109,9 @@ public class ConfigMeta implements Serializable {
 	private boolean writeonly;
 	private boolean hidden;
 	private boolean deprecated;
+	private boolean searchable;
+	private boolean clearable;
+	private boolean filterable;
 	private Integer order;
 	private Integer max;
 	private Integer min;
@@ -160,6 +163,9 @@ public class ConfigMeta implements Serializable {
 
 	public ConfigMeta() {
 		this.messageType = MESSAGE_TYPE.PRIMARY;
+		this.searchable = true;
+		this.clearable = true;
+		this.filterable = true;
 	}
 
 	public ConfigMeta(String title, String key) {
@@ -565,6 +571,45 @@ public class ConfigMeta implements Serializable {
 
 	public ConfigMeta superKey(String superKey) {
 		this.superKey = superKey;
+		return this;
+	}
+
+	public boolean isSearchable() {
+		return searchable;
+	}
+
+	public void setSearchable(boolean searchable) {
+		this.searchable = searchable;
+	}
+
+	public boolean isClearable() {
+		return clearable;
+	}
+
+	public void setClearable(boolean clearable) {
+		this.clearable = clearable;
+	}
+
+	public boolean isFilterable() {
+		return filterable;
+	}
+
+	public void setFilterable(boolean filterable) {
+		this.filterable = filterable;
+	}
+
+	public ConfigMeta searchable(boolean searchable) {
+		this.searchable = searchable;
+		return this;
+	}
+
+	public ConfigMeta filterable(boolean filterable) {
+		this.filterable = filterable;
+		return this;
+	}
+
+	public ConfigMeta clearable(boolean clearable) {
+		this.clearable = true;
 		return this;
 	}
 }

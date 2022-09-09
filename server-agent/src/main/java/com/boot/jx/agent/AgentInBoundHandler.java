@@ -11,6 +11,7 @@ import com.boot.jx.common.config.DefaultChatBoundHandler;
 import com.boot.jx.common.service.SessionEventTimer;
 import com.boot.jx.inbound.InBound.SessionAssginHandler;
 import com.boot.jx.postman.ClientApp;
+import com.boot.jx.postman.PMConstants;
 import com.boot.jx.postman.PMConstants.MESSAGE_SENDER_TYPE;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.doc.ChatSessionDoc;
@@ -19,7 +20,6 @@ import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.model.PMArgs;
 import com.boot.jx.postman.model.ext.InBoundEvent;
 import com.boot.jx.postman.store.SessionStore;
-import com.boot.jx.tunnel.ITunnelDefs.TunnelTask;
 import com.boot.model.MapModel;
 import com.boot.model.MapModel.MapEntry;
 import com.boot.model.MapModel.NodeEntry;
@@ -74,6 +74,12 @@ public class AgentInBoundHandler extends DefaultChatBoundHandler {
 		OutboxMessage oMsg = new OutboxMessage();
 		try {
 			ClientApp app = this.context().clientApp();
+
+			if (ArgUtil.not(app)) {
+				logManager.trace(assignEvent, "NoQueueFound", session.contact());
+				app = this.context().clientApp(PMConstants.DEFAULT.AGENT_QUEUE_CODE, session.contact());
+			}
+
 			MapModel props = MapModel.from(app.props());
 
 			oMsg.route().setQueueCode(app.getQueue());
