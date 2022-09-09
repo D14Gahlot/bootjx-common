@@ -452,7 +452,7 @@ public class ChatSessionManager {
 
 		logManager.event(chatSessionDoc, EVENTS.ASGND_TO_QUEUE, queueCode);
 
-		if (!ArgUtil.is(sourceQueue, chatSessionDoc.getAssignedToQueue())) {
+		if (ArgUtil.not(sourceQueue) || !ArgUtil.is(sourceQueue, chatSessionDoc.getAssignedToQueue())) {
 			inBoundEvent.sessionRouted.sourceQueue = sourceQueue;
 		} else {
 			inBoundEvent.sessionRouted.sessionStart = true;

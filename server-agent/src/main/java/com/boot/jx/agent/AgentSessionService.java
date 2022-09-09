@@ -33,6 +33,7 @@ import com.boot.jx.mongo.CommonMongoQueryBuilder;
 import com.boot.jx.postman.PMConstants;
 import com.boot.jx.postman.PMConstants.DEFAULT;
 import com.boot.jx.postman.PMEnvironment.PMClientConfig;
+import com.boot.jx.postman.store.MessageContext;
 import com.boot.jx.rest.AppRequestInterfaces.AppAuthUser;
 import com.boot.jx.stomp.StompQuery;
 import com.boot.jx.stomp.StompTunnelSessionManager;
@@ -49,6 +50,9 @@ public class AgentSessionService
 
 	@Autowired
 	private PMClientConfig chatClientConfig;
+
+	@Autowired
+	public MessageContext messageContext;
 
 	/*
 	 * Below APIs are
@@ -234,7 +238,12 @@ public class AgentSessionService
 				return getAuthUser().getAuthUser();
 			}
 		}
-		return PMConstants.DEFAULT.NO_USER;
+		String user = messageContext.getActiveQueueCode();
+		if (ArgUtil.is(user)) {
+			return user;
+		}
+
+		return ArgUtil.anyOf(chatClientConfig.getDefaultSender(), PMConstants.DEFAULT.NO_USER);
 	}
 
 	@Override
