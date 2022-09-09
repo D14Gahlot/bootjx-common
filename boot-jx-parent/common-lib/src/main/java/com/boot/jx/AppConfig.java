@@ -93,7 +93,7 @@ public class AppConfig {
 
 	@Value(APP_VENV)
 	@AppParamKey(AppParam.APP_VENV)
-	private String appBranch;
+	private String appVenv;
 
 	@Value(APP_GROUP)
 	@AppParamKey(AppParam.APP_GROUP)
@@ -473,6 +473,10 @@ public class AppConfig {
 
 	public String getSessionCookieName() {
 		return sessionCookieName;
+	}
+
+	public String getAppVenv() {
+		return appVenv;
 	}
 
 }
