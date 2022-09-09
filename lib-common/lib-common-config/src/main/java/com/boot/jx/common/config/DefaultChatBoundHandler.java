@@ -45,6 +45,7 @@ import com.boot.jx.postman.model.ext.InBoundWrapper;
 import com.boot.jx.postman.model.ext.MsgSession;
 import com.boot.jx.postman.store.MessageContext;
 import com.boot.jx.postman.store.MessageStore;
+import com.boot.jx.postman.store.MessageStore.EVENTS;
 import com.boot.jx.rest.RestService;
 import com.boot.jx.stomp.StompTunnelService;
 import com.boot.jx.tunnel.ITunnelDefs.TunnelTask;
@@ -112,6 +113,11 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 	}
 
 	@Override
+	public CHAT_MODE mode() {
+		return CHAT_MODE.NONE;
+	}
+
+	@Override
 	public void onMessage(InboxMessage inboxMessage, ChatSessionDoc session) {
 
 		ClientApp defaultClient = context().clientApp(inboxMessage.session().getQueue(), inboxMessage.contact());
@@ -147,9 +153,6 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 				if (CHAT_MODE.AGENT.equals(appType.getMode()) && ArgUtil.is(pmCommonConfig.getAgentUrl())) {
 					LOGGER.debug("Forwarding InboxMessage to internal Agent ");
 					chatClient.forward(pmCommonConfig.getAgentUrl() + PATH.INBOUND_FRWRD, inboxMessage);
-					if (ArgUtil.is(session) && APP_TYPE.MITEL.equals(appType)) {
-						mitelRouting(session, defaultClient, 5);
-					}
 					return;
 				}
 
@@ -181,31 +184,6 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 		if (messageEvents != null) {
 			messageEvents.postMessageInBound(inboxMessage);
 		}
-	}
-
-	@Override
-	public void afterSessionRoute(InBoundEvent inBoundEvent, ChatSessionDoc sessionDoc, PMArgs pmArgs) {
-		if (sessionEventTimer != null) {
-			ClientApp defaultClient = context().clientApp(inBoundEvent.sessionRouted.targetQueue);
-			sessionEventTimer.setChatOutIdleTimeout(inBoundEvent.getSessionId(), defaultClient);
-		}
-	}
-
-	private void mitelRouting(ChatSessionDoc session, ClientApp defaultClient, int delay) {
-		MapModel meta = new MapModel(session.getMeta());
-		MapPathEntry omidEntry = meta.pathEntry("mitel.omid");
-		String omid = omidEntry.asString();
-		TunnelTask task = new TunnelTask().name("MITEL_ROUTER").id(session.getSessionId()).intervalSeconds(delay);
-		task.data().put("sessionId", session.getSessionId()).put("omid", omid).put("queue", defaultClient.getQueue());
-		sessionEventTimer.debounce(task);
-		// sessionRouter.doTask(task);
-
-		TunnelTask closeTask = new TunnelTask().name("MITEL_CLOSE_CHECK").id(session.getSessionId())
-				.intervalSeconds(60 * 10);
-		closeTask.data().put("sessionId", session.getSessionId()).put("omid", omid).put("queue",
-				defaultClient.getQueue());
-		sessionEventTimer.debounce(closeTask);
-		// sessionRouter.doTask(closeTask);
 	}
 
 	private void updateStatus(InboxMessage inboxMessage, Status status, Exception e) {
@@ -337,30 +315,31 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 	}
 
 	@Override
-	public void onSessionRoute(InBoundEvent event, ChatSessionDoc sessionDoc, PMArgs pmArgs) {
+	public void onSessionRoute(InBoundEvent inBoundEvent, ChatSessionDoc sessionDoc, PMArgs pmArgs) {
+		logManager.trace(inBoundEvent, EVENTS.ON_SESSION_ROUTE, "NO_ACTION");
+	}
+
+	@Override
+	public void afterSessionRoute(InBoundEvent inBoundEvent, ChatSessionDoc sessionDoc, PMArgs pmArgs) {
+		if (sessionEventTimer != null) {
+			ClientApp defaultClient = context().clientApp(inBoundEvent.sessionRouted.targetQueue);
+			sessionEventTimer.setChatOutIdleTimeout(inBoundEvent.getSessionId(), defaultClient);
+		}
+	}
+
+	@Override
+	public void onSessionRouteWrapper(InBoundEvent event, ChatSessionDoc sessionDoc, PMArgs pmArgs) {
 		if (InBoundEvent.SESSION_ROUTED.equals(event.eventCode)) {
 			ClientApp targetAppQueue = context().clientApp(event.sessionRouted.targetQueue, null);
 			if (ArgUtil.is(targetAppQueue)) {
 				APP_TYPE appType = APP_TYPE.from(targetAppQueue.getAppType());
-				if (appType.is(CHAT_MODE.WEBHOOK)) {
+				if (appType.is(mode())) {
+					this.onSessionRoute(event, sessionDoc, pmArgs);
+				} else if (appType.is(CHAT_MODE.WEBHOOK)) {
 					sendEventWebhook(event, targetAppQueue);
 					return;
 				} else if (appType.is(CHAT_MODE.AGENT)) {
-					MapModel props = new MapModel(targetAppQueue.props());
-					AppContextUtil.setActorId(targetAppQueue.getQueue());
-					assignSessionToAgent(new PMArgs()
-							.assignToDeptCode(
-									ArgUtil.nonEmpty(pmArgs.getAssignToDeptCode(), props.getString("deptCode")))
-							.assignToAgentCode(
-									ArgUtil.nonEmpty(pmArgs.getAssignToAgentCode(), props.getString("agentCode")))
-							.assignToSkillCodes(pmArgs.getAssignToSkillCodes()), sessionDoc);
-					if (APP_TYPE.MITEL.equals(appType)) {
-						try {
-							mitelRouting(sessionDoc, targetAppQueue, 1);
-						} catch (Exception e) {
-							logManager.error(event, e);
-						}
-					}
+					chatClient.sessionEvent(pmCommonConfig.getAgentUrl(), event, pmArgs);
 				} else if (appType.is(CHAT_MODE.BOT)) {
 					chatClient.sessionEvent(pmCommonConfig.getBotUrl(), event, pmArgs);
 				}

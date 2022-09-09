@@ -43,7 +43,7 @@ public class ChatSessionEventsImpl implements ChatSessionEvents {
 	@Override
 	public NodeEntry<InBoundEvent> onSessionIdleInBound(ChatSessionDoc session) {
 		PMConfigurationObject frwrdQueue = pmEnvironment
-				.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_AGENT_CHAT_IN_IDLE_TIMEOUT_QUEUE);
+				.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_AGENT_CHAT_OUT_IDLE_TIMEOUT_QUEUE);
 		assignToQueue(session, frwrdQueue);
 		return null;
 	}
