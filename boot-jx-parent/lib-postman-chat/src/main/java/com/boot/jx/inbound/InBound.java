@@ -42,6 +42,8 @@ public class InBound {
 
 		@Async
 		default public void onMessageAsync(InboxMessage inboxMessage, ChatSessionDoc session) {
+			context().setInboxMessage(inboxMessage);
+			context().session(session);
 			this.onMessage(inboxMessage, session);
 			this.afterMessage(inboxMessage, session);
 		}
@@ -64,6 +66,8 @@ public class InBound {
 
 		@Async
 		default public void onSessionRouteAsync(InBoundEvent inBoundEvent, ChatSessionDoc sessionDoc, PMArgs pmArgs) {
+			context().setInBoundEvent(inBoundEvent);
+			context().session(sessionDoc);
 			this.onSessionRouteWrapper(inBoundEvent, sessionDoc, pmArgs);
 			this.afterSessionRoute(inBoundEvent, sessionDoc, pmArgs);
 		}
