@@ -334,6 +334,8 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 			if (ArgUtil.is(targetAppQueue)) {
 				APP_TYPE appType = APP_TYPE.from(targetAppQueue.getAppType());
 				if (appType.is(mode())) {
+					context().setInBoundEvent(event);
+					context().session(sessionDoc);
 					this.onSessionRoute(event, sessionDoc, pmArgs);
 				} else if (appType.is(CHAT_MODE.WEBHOOK)) {
 					sendEventWebhook(event, targetAppQueue);
