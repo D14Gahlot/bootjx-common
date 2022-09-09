@@ -1,7 +1,5 @@
 package com.boot.jx.cache;
 
-import java.util.concurrent.TimeUnit;
-
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.redisson.api.LocalCachedMapOptions;
 import org.redisson.api.LocalCachedMapOptions.EvictionPolicy;

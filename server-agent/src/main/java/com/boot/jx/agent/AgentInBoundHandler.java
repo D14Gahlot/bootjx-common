@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 import com.boot.jx.chat.ChatService;
 import com.boot.jx.common.config.ConfigConstants;
 import com.boot.jx.common.config.DefaultChatBoundHandler;
+import com.boot.jx.common.service.SessionEventTimer;
 import com.boot.jx.inbound.InBound.SessionAssginHandler;
 import com.boot.jx.postman.ClientApp;
 import com.boot.jx.postman.PMConstants.MESSAGE_SENDER_TYPE;
@@ -18,6 +19,7 @@ import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.model.PMArgs;
 import com.boot.jx.postman.model.ext.InBoundEvent;
 import com.boot.jx.postman.store.SessionStore;
+import com.boot.jx.tunnel.ITunnelDefs.TunnelTask;
 import com.boot.model.MapModel;
 import com.boot.model.MapModel.MapEntry;
 import com.boot.model.MapModel.NodeEntry;
@@ -30,6 +32,9 @@ public class AgentInBoundHandler extends DefaultChatBoundHandler {
 
 	@Autowired
 	private PMEnvironment pmEnvironment;
+
+	@Autowired
+	private SessionEventTimer sessionEventTimer;
 
 	@Autowired
 	private AgentChatHandler agentChatHandler;

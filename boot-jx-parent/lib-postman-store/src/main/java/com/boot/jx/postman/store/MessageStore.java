@@ -50,7 +50,7 @@ public class MessageStore extends CommonMongoTemplateAbstract {
 		INBOUND_FORWARD_ERROR,
 
 		// Events
-		ON_SESSION_START, ON_SESSION_ROUTE,
+		ON_SESSION_START, ON_SESSION_ROUTE, ON_SESSION_IDLE,
 
 		// ENDS
 		DEFAULT;
@@ -451,6 +451,9 @@ public class MessageStore extends CommonMongoTemplateAbstract {
 	}
 
 	public MessageDoc save(MessageDoc msg, ContactType contactType) {
+		if (!ArgUtil.is(msg.getAppType())) {
+			msg.setAppType(appConfig.getAppType());
+		}
 		mongoTemplate.save(msg, MessageStore.getCollectionName(contactType));
 		return msg;
 	}
@@ -462,6 +465,7 @@ public class MessageStore extends CommonMongoTemplateAbstract {
 		hold.setContactId(contactId);
 		hold.setTimestamp(System.currentTimeMillis());
 		hold.setAppType(appConfig.getAppType());
+		hold.setAppVenv(appConfig.getAppVenv());
 		mongoTemplate.save(hold, MessageHold.COLLECTION_REJECTED);
 	}
 
@@ -472,6 +476,7 @@ public class MessageStore extends CommonMongoTemplateAbstract {
 		hold.setContactId(contactId);
 		hold.setTimestamp(System.currentTimeMillis());
 		hold.setAppType(appConfig.getAppType());
+		hold.setAppVenv(appConfig.getAppVenv());
 		commonMongoTemplate.save(hold, MessageHold.COLLECTION_ORIGINAL);
 	}
 
@@ -482,13 +487,15 @@ public class MessageStore extends CommonMongoTemplateAbstract {
 		hold.setContactId(contactId);
 		hold.setTimestamp(System.currentTimeMillis());
 		hold.setAppType(appConfig.getAppType());
+		hold.setAppVenv(appConfig.getAppVenv());
 		mongoTemplate.save(hold);
 	}
 
 	public List<InboxMessage> releaseBySession(InboxMessage inboxMessageOriginal) {
 		String contactId = PostManUtil.CONTACT_ID(inboxMessageOriginal.contact());
 		CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder();
-		builder.where(Criteria.where("contactId").is(contactId).and("appType").is(appConfig.getAppType()));
+		builder.where(Criteria.where("contactId").is(contactId).and("appType").is(appConfig.getAppType()).and("appVenv")
+				.is(appConfig.getAppVenv()));
 		builder.set("sessionId", inboxMessageOriginal.getSessionId());
 		mongoTemplate.updateMulti(builder.getQuery(), builder.getUpdate(), MessageHold.class);
 

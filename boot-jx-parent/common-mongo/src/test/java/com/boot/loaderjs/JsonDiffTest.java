@@ -13,31 +13,31 @@ import com.google.common.collect.Maps;
 
 public class JsonDiffTest { // Noncompliant
 
-    /**
-     * This is just a test method
-     * 
-     * @param args
-     * @throws ParseException
-     * @throws IOException
-     */
-    public static void main(String[] args) throws ParseException, IOException {
-	InputStream leftStream = FileUtil.getExternalOrInternalResourceAsStream("dummy/json-1.json",
-		JsonDiffTest.class);
-	InputStream rightStream = FileUtil.getExternalOrInternalResourceAsStream("dummy/json-2.json",
-		JsonDiffTest.class);
+	/**
+	 * This is just a test method
+	 * 
+	 * @param args
+	 * @throws ParseException
+	 * @throws IOException
+	 */
+	public static void main(String[] args) throws ParseException, IOException {
+		InputStream leftStream = FileUtil.getExternalOrInternalResourceAsStream("dummy/json-1.json",
+				JsonDiffTest.class);
+		InputStream rightStream = FileUtil.getExternalOrInternalResourceAsStream("dummy/json-2.json",
+				JsonDiffTest.class);
 
-	String leftJson = IoUtils.inputstream_to_string(leftStream);
+		String leftJson = IoUtils.inputstream_to_string(leftStream);
 
-	String rightJson = IoUtils.inputstream_to_string(rightStream);
+		String rightJson = IoUtils.inputstream_to_string(rightStream);
 
-	Map<String, Object> leftMap = JsonUtil.fromJsonToMap(leftJson);
+		Map<String, Object> leftMap = JsonUtil.fromJsonToMap(leftJson);
 
-	Map<String, Object> rightMap = JsonUtil.fromJsonToMap(rightJson);
+		Map<String, Object> rightMap = JsonUtil.fromJsonToMap(rightJson);
 
-	MapDifference<String, Object> difference = Maps.difference(leftMap, rightMap);
+		MapDifference<String, Object> difference = Maps.difference(leftMap, rightMap);
 
-	System.out.println(JsonUtil.toJson(difference.entriesDiffering()));
+		System.out.println(JsonUtil.toJson(difference.entriesDiffering()));
 
-    }
+	}
 
 }

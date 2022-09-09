@@ -78,6 +78,7 @@ public abstract class MessageDocAbstract implements Serializable, Patchable<Mess
 	public List<Object> logs;
 	public List<Object> trace;
 	private Map<String, Object> replyTo;
+	private String appType;
 
 	@Indexed
 	private String contactId;
@@ -464,5 +465,13 @@ public abstract class MessageDocAbstract implements Serializable, Patchable<Mess
 			this.trace = new ArrayList<Object>();
 		}
 		return this.trace;
+	}
+
+	public String getAppType() {
+		return appType;
+	}
+
+	public void setAppType(String appType) {
+		this.appType = appType;
 	}
 }

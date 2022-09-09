@@ -47,9 +47,11 @@ public class ClientAppConfigDoc implements IDocument, AuditableByIdEntity, Clien
 	private String appMode;
 	private String appType;
 	private String webhook;
-	private String outboundhook;
 
 	private String forward;
+
+	private String appHook;
+	private String appHookFrwrd;
 
 	private Map<String, Object> secret;
 	private Map<String, Object> props;
@@ -235,12 +237,20 @@ public class ClientAppConfigDoc implements IDocument, AuditableByIdEntity, Clien
 		this.appMode = appMode;
 	}
 
-	public String getOutboundhook() {
-		return outboundhook;
+	public String getAppHook() {
+		return appHook;
 	}
 
-	public void setOutboundhook(String ouboundhook) {
-		this.outboundhook = ouboundhook;
+	public void setAppHook(String appHook) {
+		this.appHook = appHook;
+	}
+
+	public String getAppHookFrwrd() {
+		return appHookFrwrd;
+	}
+
+	public void setAppHookFrwrd(String appHookFrwrd) {
+		this.appHookFrwrd = appHookFrwrd;
 	}
 
 }

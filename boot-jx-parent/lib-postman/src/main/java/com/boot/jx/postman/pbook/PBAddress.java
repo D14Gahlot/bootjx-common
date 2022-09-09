@@ -2,18 +2,61 @@ package com.boot.jx.postman.pbook;
 
 import java.io.Serializable;
 
+import com.boot.utils.ArgUtil;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class PBAddress implements Serializable {
+public class PBAddress implements Serializable, Comparable<PBAddress> {
 	private static final long serialVersionUID = -1967541446184852363L;
+	public String type;
+	public String street;
 	public String city;
+	public String state;
+	public String zip;
 	public String country;
 	public String countryCode;
-	public String state;
-	public String street;
-	public String type;
-	public String zip;
+
+	@Override
+	public String toString() {
+		return street + city + state + zip + country + countryCode;
+	}
+
+	@Override
+	public int compareTo(PBAddress o) {
+		if (o == null) {
+			return 1;
+		}
+		return this.toString().compareTo(o.toString());
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o)
+			return true;
+		if (o == null || getClass() != o.getClass())
+			return false;
+		PBAddress that = (PBAddress) o;
+
+		if (ArgUtil.equalsIgnoreCase(this.city, that.city)) {
+			return false;
+		}
+		if (ArgUtil.equalsIgnoreCase(this.country, that.country)) {
+			return false;
+		}
+		if (ArgUtil.equalsIgnoreCase(this.countryCode, that.countryCode)) {
+			return false;
+		}
+		if (ArgUtil.equalsIgnoreCase(this.state, that.state)) {
+			return false;
+		}
+		if (ArgUtil.equalsIgnoreCase(this.street, that.street)) {
+			return false;
+		}
+		if (ArgUtil.equalsIgnoreCase(this.zip, that.zip)) {
+			return false;
+		}
+		return true;
+	}
 
 	public String getCity() {
 		return city;
@@ -75,4 +118,5 @@ public class PBAddress implements Serializable {
 		this.country = country;
 		return this;
 	}
+
 }

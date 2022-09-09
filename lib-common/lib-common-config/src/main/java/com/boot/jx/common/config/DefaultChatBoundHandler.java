@@ -6,14 +6,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 
 import com.boot.jx.AppContextUtil;
-import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.chat.ChatClient;
 import com.boot.jx.chat.ChatClient.PATH;
 import com.boot.jx.chat.ChatService;
 import com.boot.jx.chat.ChatSessionService;
-import com.boot.jx.common.service.SessionRouter;
+import com.boot.jx.common.service.SessionEventTimer;
 import com.boot.jx.common.store.ChatArchiveBuilder;
+import com.boot.jx.inbound.InBound.ChatSessionEvents;
 import com.boot.jx.inbound.InBound.InBoundHandler;
+import com.boot.jx.inbound.InBound.MessageEvents;
 import com.boot.jx.postman.ClientApp;
 import com.boot.jx.postman.PMConstants.APP_TYPE;
 import com.boot.jx.postman.PMConstants.CHAT_MODE;
@@ -89,7 +90,7 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 	private MitelClient mitelClient;
 
 	@Autowired
-	private SessionRouter sessionRouter;
+	private SessionEventTimer sessionEventTimer;
 
 	@Autowired(required = false)
 	private ChatService chatService;
@@ -97,6 +98,10 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 	@Lazy
 	@Autowired(required = false)
 	private ChatSessionService chatSessionService;
+
+	@Lazy
+	@Autowired(required = false)
+	private MessageEvents messageEvents;
 
 	@Autowired(required = false)
 	private MessageContext messageContext;
@@ -123,14 +128,17 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 						// production
 						inboxMessage.setOriginalMessage(null);
 						chatClient.forward(defaultClient.getForward() + PATH.INBOUND_FRWRD, inboxMessage);
-					} else if (APP_TYPE.APP_SCRIPT.equals(appType)) {
-						forward2Webhook(inboxMessage, pmCommonConfig.getScriptusUrl() + PATH.APP_SCRIPT_FRWRD,
-								defaultClient.getId());
 					} else if (ArgUtil.is(defaultClient.getWebhook())) {
 						forward2Webhook(inboxMessage, defaultClient.getWebhook(), defaultClient.getId());
 					} else {
-						ApiResponseUtil.throwException("Forward URL missing");
+						// if (APP_TYPE.APP_SCRIPT.equals(appType)) {
+						forward2Webhook(inboxMessage, pmCommonConfig.getScriptusUrl() + PATH.APP_SCRIPT_FRWRD,
+								defaultClient.getId());
+						// } else {
+						// ApiResponseUtil.throwException("Forward URL missing");
+						// }
 					}
+
 					updateStatus(inboxMessage, Status.FORWARDED);
 					return;
 				}
@@ -168,20 +176,35 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 		}
 	}
 
+	@Override
+	public void afterMessage(InboxMessage inboxMessage, ChatSessionDoc session) {
+		if (messageEvents != null) {
+			messageEvents.postMessageInBound(inboxMessage);
+		}
+	}
+
+	@Override
+	public void afterSessionRoute(InBoundEvent inBoundEvent, ChatSessionDoc sessionDoc, PMArgs pmArgs) {
+		if (sessionEventTimer != null) {
+			ClientApp defaultClient = context().clientApp(inBoundEvent.sessionRouted.targetQueue);
+			sessionEventTimer.setChatOutIdleTimeout(inBoundEvent.getSessionId(), defaultClient);
+		}
+	}
+
 	private void mitelRouting(ChatSessionDoc session, ClientApp defaultClient, int delay) {
 		MapModel meta = new MapModel(session.getMeta());
 		MapPathEntry omidEntry = meta.pathEntry("mitel.omid");
 		String omid = omidEntry.asString();
 		TunnelTask task = new TunnelTask().name("MITEL_ROUTER").id(session.getSessionId()).intervalSeconds(delay);
 		task.data().put("sessionId", session.getSessionId()).put("omid", omid).put("queue", defaultClient.getQueue());
-		sessionRouter.debounce(task);
+		sessionEventTimer.debounce(task);
 		// sessionRouter.doTask(task);
 
 		TunnelTask closeTask = new TunnelTask().name("MITEL_CLOSE_CHECK").id(session.getSessionId())
 				.intervalSeconds(60 * 10);
 		closeTask.data().put("sessionId", session.getSessionId()).put("omid", omid).put("queue",
 				defaultClient.getQueue());
-		sessionRouter.debounce(closeTask);
+		sessionEventTimer.debounce(closeTask);
 		// sessionRouter.doTask(closeTask);
 	}
 
@@ -308,7 +331,7 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 		context().setInBoundEvent(event);
 		if (InBoundEvent.SESSION_ROUTED.equals(event.eventCode)) {
 			ChatSessionDoc sessionDoc = context().session().getDoc();
-			this.onSessionRoute(event, sessionDoc, pmArgs);
+			this.onSessionRouteSync(event, sessionDoc, pmArgs);
 		}
 		return event;
 	}

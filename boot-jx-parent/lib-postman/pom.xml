@@ -65,6 +65,12 @@
 		</dependency>
 		<!-- file upload libs ends -->
 
+		<dependency>
+			<groupId>com.googlecode.libphonenumber</groupId>
+			<artifactId>libphonenumber</artifactId>
+			<version>8.10.5</version>
+		</dependency>
+
 	</dependencies>
 	<repositories>
 		<repository>

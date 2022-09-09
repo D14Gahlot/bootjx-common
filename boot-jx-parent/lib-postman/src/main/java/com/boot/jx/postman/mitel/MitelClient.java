@@ -41,8 +41,8 @@ public class MitelClient {
 		Ajax ajax = restService.ajax(endPoint).path("/AuthorizationServer/Token").field("grant_type", grantType);
 
 		if (ArgUtil.areEqual(grantType, "password")) {
-			String username = ArgUtil.parseAsString(defaultClient.props().get("username"));
-			String password = ArgUtil.parseAsString(defaultClient.secret().get("password"));
+			String username = ArgUtil.parseAsString(defaultClient.props().get("client_id"));
+			String password = ArgUtil.parseAsString(defaultClient.secret().get("client_secret"));
 			ajax.field("username", username).field("password", password);
 		} else {
 			String clientId = ArgUtil.parseAsString(defaultClient.props().get("client_id"));

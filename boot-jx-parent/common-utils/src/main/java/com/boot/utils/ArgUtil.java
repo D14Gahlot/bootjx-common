@@ -747,6 +747,14 @@ public final class ArgUtil {
 		return !ArgUtil.isEmpty(object);
 	}
 
+	public static boolean blank(Object object) {
+		return !ArgUtil.isEmpty(object);
+	}
+
+	public static boolean not(Object object) {
+		return !ArgUtil.isEmptyValue(object);
+	}
+
 	public static boolean isNotEmpty(Object object) {
 		return !isEmpty(object);
 	}
@@ -785,7 +793,7 @@ public final class ArgUtil {
 		return arr.length == 0;
 	}
 
-	public static boolean areEqual(Object a, Object b) {
+	public static boolean equals(Object a, Object b) {
 		if (a == null || b == null) {
 			return (a == null && b == null);
 		}
@@ -794,6 +802,18 @@ public final class ArgUtil {
 		return strA.equals(strB);
 	}
 
+	public static boolean equalsIgnoreCase(Object a, Object b) {
+		if (a == null || b == null) {
+			return (a == null && b == null);
+		}
+		String strA = parseAsString(a, Constants.BLANK);
+		String strB = parseAsString(b, Constants.BLANK);
+		return strA.equalsIgnoreCase(strB);
+	}
+
+	public static boolean areEqual(Object a, Object b) {
+		return equals(a, b);
+	}
 
 	public static <T> T nonEmpty(T str1, T strs2) {
 		if (!isEmpty(str1)) {
@@ -801,7 +821,7 @@ public final class ArgUtil {
 		}
 		return strs2;
 	}
-	
+
 	/**
 	 * It will return the first Non-Empty value
 	 * 
@@ -817,7 +837,7 @@ public final class ArgUtil {
 		}
 		return null;
 	}
-	
+
 	public static <T> T nonEmpty(T... strs) {
 		return anyOf(strs);
 	}

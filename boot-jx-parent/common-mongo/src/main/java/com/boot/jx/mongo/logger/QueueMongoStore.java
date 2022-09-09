@@ -28,6 +28,7 @@ public class QueueMongoStore extends CommonMongoTemplateAbstract implements ZQue
 			QueueElementDoc elementDoc = (QueueElementDoc) element;
 			elementDoc.setTimestamp(System.currentTimeMillis());
 			elementDoc.setAppType(appConfig.getAppType());
+			elementDoc.setAppVenv(appConfig.getAppVenv());
 		}
 		save(element);
 	}
@@ -36,7 +37,8 @@ public class QueueMongoStore extends CommonMongoTemplateAbstract implements ZQue
 	public ZQueueElement dequeue(String queueType, String queueId) {
 		String batchId = UniqueID.generateString();
 		CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder();
-		builder.where(Criteria.where("appType").is(appConfig.getAppType() + "temp")//
+		builder.where(Criteria.where("appType").is(appConfig.getAppType())//
+				.and("appVenv").is(appConfig.getAppVenv())//
 				.and("queueType").is(queueType)//
 				.and("queueId").is(queueId)//
 				.and("batchId").exists(false))//
@@ -46,6 +48,7 @@ public class QueueMongoStore extends CommonMongoTemplateAbstract implements ZQue
 
 		CommonMongoQueryBuilder builder2 = new CommonMongoQueryBuilder();
 		builder2.where(Criteria.where("appType").is(appConfig.getAppType())//
+				.and("appVenv").is(appConfig.getAppVenv())//
 				.and("queueType").is(queueType)//
 				.and("queueId").is(queueId)//
 				.and("batchId").is(batchId));//
@@ -58,6 +61,7 @@ public class QueueMongoStore extends CommonMongoTemplateAbstract implements ZQue
 		String batchId = UniqueID.generateString();
 		CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder();
 		builder.where(Criteria.where("appType").is(appConfig.getAppType())//
+				.and("appVenv").is(appConfig.getAppVenv())//
 				.and("queueType").is(queueType)//
 				.and("queueId").is(queueId)//
 				.and("batchId").exists(false));//
@@ -70,6 +74,7 @@ public class QueueMongoStore extends CommonMongoTemplateAbstract implements ZQue
 
 		CommonMongoQueryBuilder builder2 = new CommonMongoQueryBuilder();
 		builder2.where(Criteria.where("appType").is(appConfig.getAppType())//
+				.and("appVenv").is(appConfig.getAppVenv())//
 				.and("queueType").is(queueType)//
 				.and("queueId").is(queueId)//
 				.and("batchId").is(batchId));//

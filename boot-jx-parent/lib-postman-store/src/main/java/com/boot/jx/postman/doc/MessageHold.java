@@ -36,6 +36,9 @@ public class MessageHold extends UpdatedTimeStampDoc implements Serializable {
 
 	@Indexed
 	private String appType;
+	
+	@Indexed
+	private String appVenv;
 
 	@Indexed
 	private String batch;
@@ -153,5 +156,13 @@ public class MessageHold extends UpdatedTimeStampDoc implements Serializable {
 	@TypeAlias("MessageHoldQueue")
 	public static class MessageHoldQueue extends MessageHold {
 		private static final long serialVersionUID = 1137079051032041202L;
+	}
+
+	public String getAppVenv() {
+		return appVenv;
+	}
+
+	public void setAppVenv(String appVenv) {
+		this.appVenv = appVenv;
 	}
 }

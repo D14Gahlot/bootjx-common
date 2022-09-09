@@ -246,7 +246,7 @@ public class InBoundService extends ATaskLimiter {
 				if (asyncMode) {
 					inBoundHandler.onMessageAsync(inboxMessageOriginal, session);
 				} else {
-					inBoundHandler.onMessage(inboxMessageOriginal, session);
+					inBoundHandler.onMessageSync(inboxMessageOriginal, session);
 				}
 			} else if (botEngine.isChatBotDefined()) { // TODO:-- TO be removed
 				botEngine.invokeMethodsAsync(inboxMessageOriginal);

@@ -34,6 +34,9 @@ public class QueueElementDoc implements Serializable, ZQueueElement {
 	private long itemOrder;
 
 	@Indexed
+	private String appVenv;
+
+	@Indexed
 	private String appType;
 
 	@Indexed
@@ -124,6 +127,14 @@ public class QueueElementDoc implements Serializable, ZQueueElement {
 
 	public void setDocId(String docId) {
 		this.docId = docId;
+	}
+
+	public String getAppVenv() {
+		return appVenv;
+	}
+
+	public void setAppVenv(String appVenv) {
+		this.appVenv = appVenv;
 	}
 
 }
