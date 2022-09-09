@@ -456,7 +456,7 @@ public class MessageStore extends CommonMongoTemplateAbstract {
 			msg.setAppType(appConfig.getAppType());
 		}
 		if (!ArgUtil.is(msg.getAppVenv())) {
-			msg.setAppVenv(msg.getAppVenv());
+			msg.setAppVenv(appConfig.getAppVenv());
 		}
 		mongoTemplate.save(msg, MessageStore.getCollectionName(contactType));
 		return msg;
@@ -467,7 +467,7 @@ public class MessageStore extends CommonMongoTemplateAbstract {
 			msg.setAppType(appConfig.getAppType());
 		}
 		if (!ArgUtil.is(msg.getAppVenv())) {
-			msg.setAppVenv(msg.getAppVenv());
+			msg.setAppVenv(appConfig.getAppVenv());
 		}
 		mongoTemplate.save(msg);
 		return msg;
