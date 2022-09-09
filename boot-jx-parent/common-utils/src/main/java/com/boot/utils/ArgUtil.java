@@ -748,11 +748,11 @@ public final class ArgUtil {
 	}
 
 	public static boolean blank(Object object) {
-		return !ArgUtil.isEmpty(object);
+		return ArgUtil.isEmpty(object);
 	}
 
 	public static boolean not(Object object) {
-		return !ArgUtil.isEmptyValue(object);
+		return ArgUtil.isEmptyValue(object);
 	}
 
 	public static boolean isNotEmpty(Object object) {
