@@ -412,6 +412,7 @@ public class ChatSessionManager {
 		sessionStore.updateMessageFromSession(chatSessionDoc, inBoundEvent);
 
 		String sourceQueue = chatSessionDoc.getAssignedToQueue();
+		String chatStatus = chatSessionDoc.getStatus();
 
 		if (ArgUtil.is(chatSessionDoc.getContactId())) {
 			inBoundEvent.contact().setContactId(inBoundEvent.contactId);
@@ -435,6 +436,7 @@ public class ChatSessionManager {
 						apiKeyConfig.getQueue());
 
 				chatSessionDoc.setRoutingId(inBoundEvent.sessionRouted.routingId);
+				chatSessionDoc.setStatus(CHAT_STATUS.OPEN.toString());
 			} else {
 				ApiResponseUtil.throwInputException(new ApiFieldError().field("queue").codeKey("INVALID_QUEUE")
 						.description("Invalid Queue Code " + queueCode));
@@ -448,15 +450,17 @@ public class ChatSessionManager {
 		builder.set("assignedToQueue", chatSessionDoc.getAssignedToQueue());
 		builder.set("mode", chatSessionDoc.getMode());
 		builder.set("routingId", chatSessionDoc.getRoutingId());
+		builder.set("status", chatSessionDoc.getStatus());
 		sessionStore.updateFirst(builder.getQuery(), builder.getUpdate(), ChatSessionDoc.class);
 
 		logManager.event(chatSessionDoc, EVENTS.ASGND_TO_QUEUE, queueCode);
 
-		if (ArgUtil.not(sourceQueue) || !ArgUtil.is(sourceQueue, chatSessionDoc.getAssignedToQueue())) {
-			inBoundEvent.sessionRouted.sourceQueue = sourceQueue;
-		} else {
+		if (ArgUtil.not(sourceQueue) || !ArgUtil.is(chatStatus)) {
 			inBoundEvent.sessionRouted.sessionStart = true;
+		} else {
+			inBoundEvent.sessionRouted.sourceQueue = sourceQueue;
 		}
+
 		inBoundEvent.sessionRouted.targetQueue = chatSessionDoc.getAssignedToQueue();
 
 		sessionStore.updateMessageFromSession(chatSessionDoc, inBoundEvent);

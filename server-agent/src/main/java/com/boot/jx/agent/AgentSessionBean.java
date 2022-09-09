@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.stereotype.Component;
 
+import com.boot.jx.AppContextUtil;
 import com.boot.jx.common.config.AppCommonAuthFilter.AppCommonAuthUser;
 import com.boot.jx.common.dto.AgentResponseAuthDto;
 import com.boot.jx.postman.PMConstants;
@@ -118,7 +119,7 @@ public class AgentSessionBean extends AppCommonAuthUser implements Serializable 
 		} else if (ArgUtil.is(this.profile)) {
 			return this.profile.getAgent_code();
 		}
-		return PMConstants.DEFAULT.NO_USER;
+		return ArgUtil.anyOf(AppContextUtil.getActorId(), PMConstants.DEFAULT.NO_USER);
 	}
 
 }

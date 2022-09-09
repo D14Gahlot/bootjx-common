@@ -242,7 +242,6 @@ public class AgentSessionService
 		if (ArgUtil.is(user)) {
 			return user;
 		}
-
 		return ArgUtil.anyOf(chatClientConfig.getDefaultSender(), PMConstants.DEFAULT.NO_USER);
 	}
 
