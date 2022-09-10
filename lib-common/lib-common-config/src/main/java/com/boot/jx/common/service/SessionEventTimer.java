@@ -11,6 +11,7 @@ import com.boot.jx.common.config.ConfigConstants;
 import com.boot.jx.inbound.InBound.ChatSessionEvents;
 import com.boot.jx.postman.ClientApp;
 import com.boot.jx.postman.PMEnvironment;
+import com.boot.jx.postman.PMEnvironment.PMConfigurationObject;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.dto.ChatMessageDTO;
 import com.boot.jx.postman.manager.ChatLogger;
@@ -70,7 +71,11 @@ public class SessionEventTimer extends ATaskLimiter {
 		if (app != null && app.isAgentApp()) {
 			boolean timeoutEnabled = pmEnvironment
 					.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_AGENT_CHAT_OUT_IDLE_TIMEOUT).asBoolean(false);
-			if (timeoutEnabled) {
+
+			PMConfigurationObject frwrdQueue = pmEnvironment
+					.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_AGENT_CHAT_OUT_IDLE_TIMEOUT_QUEUE);
+
+			if (timeoutEnabled && frwrdQueue.not(frwrdQueue)) {
 				long timeout = pmEnvironment
 						.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_AGENT_CHAT_OUT_IDLE_TIMEOUT_INTERVAL).asLong(0L);
 				if (timeout > 0L) {
@@ -87,7 +92,11 @@ public class SessionEventTimer extends ATaskLimiter {
 		if (app != null && app.isAgentApp()) {
 			boolean timeoutEnabled = pmEnvironment
 					.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_AGENT_CHAT_IN_IDLE_TIMEOUT).asBoolean(false);
-			if (timeoutEnabled) {
+
+			PMConfigurationObject frwrdQueue = pmEnvironment
+					.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_AGENT_CHAT_IN_IDLE_TIMEOUT_QUEUE);
+
+			if (timeoutEnabled && frwrdQueue.not(frwrdQueue)) {
 				long timeout = pmEnvironment
 						.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_AGENT_CHAT_IN_IDLE_TIMEOUT_INTERVAL).asLong(0L);
 				if (timeout > 0L) {

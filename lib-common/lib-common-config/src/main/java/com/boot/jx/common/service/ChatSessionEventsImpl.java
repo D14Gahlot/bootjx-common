@@ -51,13 +51,14 @@ public class ChatSessionEventsImpl implements ChatSessionEvents {
 	private void assignToQueue(ChatSessionDoc session, PMConfigurationObject frwrdQueue) {
 		if (frwrdQueue.exists()) {
 			ClientApp targetApp = pmEnvironment.config().clientApiKey(frwrdQueue.asString());
-			String targetDept = null;
+			PMArgs pmArgs = new PMArgs().assignToQueueCode(frwrdQueue.asString());
 			if (targetApp.isAgentApp()) {
-				targetDept = ArgUtil.parseAsString(targetApp.props().get("deptCode"), session.getAssignedToDept());
+				String targetDept = ArgUtil.parseAsString(targetApp.props().get("deptCode"),
+						session.getAssignedToDept());
 				sessionStore.assignToAgent(session, null, null);
+				pmArgs.assignToDeptCode(targetDept);
 			}
-			chatSessionService.routeSession(session,
-					new PMArgs().assignToQueueCode(frwrdQueue.asString()).assignToDeptCode(targetDept));
+			chatSessionService.routeSession(session, pmArgs);
 		}
 	}
 
