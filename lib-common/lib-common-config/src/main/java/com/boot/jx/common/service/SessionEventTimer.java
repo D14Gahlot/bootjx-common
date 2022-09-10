@@ -75,7 +75,7 @@ public class SessionEventTimer extends ATaskLimiter {
 			PMConfigurationObject frwrdQueue = pmEnvironment
 					.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_AGENT_CHAT_OUT_IDLE_TIMEOUT_QUEUE);
 
-			if (timeoutEnabled && frwrdQueue.not(frwrdQueue)) {
+			if (timeoutEnabled && frwrdQueue.not(app.getQueue())) {
 				long timeout = pmEnvironment
 						.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_AGENT_CHAT_OUT_IDLE_TIMEOUT_INTERVAL).asLong(0L);
 				if (timeout > 0L) {
@@ -96,7 +96,7 @@ public class SessionEventTimer extends ATaskLimiter {
 			PMConfigurationObject frwrdQueue = pmEnvironment
 					.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_AGENT_CHAT_IN_IDLE_TIMEOUT_QUEUE);
 
-			if (timeoutEnabled && frwrdQueue.not(frwrdQueue)) {
+			if (timeoutEnabled && frwrdQueue.not(app.getQueue())) {
 				long timeout = pmEnvironment
 						.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_AGENT_CHAT_IN_IDLE_TIMEOUT_INTERVAL).asLong(0L);
 				if (timeout > 0L) {
