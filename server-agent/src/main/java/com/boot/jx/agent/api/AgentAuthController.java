@@ -24,8 +24,10 @@ import com.boot.jx.api.ApiResponse;
 import com.boot.jx.common.doc.AgentSessionDoc;
 import com.boot.jx.common.dto.AgentResponseAuthDto;
 import com.boot.jx.common.service.EmpAuthService;
+import com.boot.jx.http.ApiRequest;
 import com.boot.jx.http.CommonHttpRequest;
 import com.boot.jx.postman.PMEnvironment;
+import com.boot.jx.tnt.custom.TenantClientResolver;
 import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.Constants;
@@ -64,6 +66,7 @@ public class AgentAuthController {
 				&& pmEnvironment.keyEntry("mry.domain.agent.active").asBoolean();
 	}
 
+	@ApiRequest(rules = { TenantClientResolver.CHECK_VALID_DOMAIN })
 	@RequestMapping(value = { "/app/unauthorized", "/app/unauthorized/**" },
 			method = { RequestMethod.POST, RequestMethod.GET })
 	public String unauthorized(Model model) {
@@ -121,6 +124,7 @@ public class AgentAuthController {
 		return "redirect:/app/home" + "?_=" + System.currentTimeMillis();
 	}
 
+	@ApiRequest(rules = { TenantClientResolver.CHECK_VALID_DOMAIN })
 	@RequestMapping(value = { "/app/home", "/", "", "/app/**", "/auth/**" },
 			method = { RequestMethod.POST, RequestMethod.GET })
 	public String home(HttpServletRequest request, HttpServletResponse response, Model model,
@@ -183,6 +187,7 @@ public class AgentAuthController {
 		return "app-agent";
 	}
 
+	@ApiRequest(rules = { TenantClientResolver.CHECK_VALID_DOMAIN })
 	@RequestMapping(value = { "/plug/**", "/plug", "/plug_{plug}/**", "/plug_{plug}" },
 			method = { RequestMethod.POST, RequestMethod.GET })
 	public String plugOlin(HttpServletRequest request, Model model, @PathVariable(required = false) String plug)
@@ -243,6 +248,7 @@ public class AgentAuthController {
 //		return this.plugOlin(request, model, "mitle");
 //	}
 
+	@ApiRequest(rules = { TenantClientResolver.CHECK_VALID_DOMAIN })
 	@RequestMapping(value = "/pub/customer/{page}", method = { RequestMethod.POST, RequestMethod.GET })
 	public String customertest(Model model, @RequestParam String page) {
 		model.addAllAttributes(appCommonConfig.appAttributes());
@@ -253,6 +259,7 @@ public class AgentAuthController {
 		return "customer." + page;
 	}
 
+	@ApiRequest(rules = { TenantClientResolver.CHECK_VALID_DOMAIN })
 	@RequestMapping(value = { "/auth/login", "/auth/resetpass" }, method = { RequestMethod.POST, RequestMethod.GET })
 	public String login(Model model, HttpServletRequest request, HttpServletResponse httpServletResponse) {
 
