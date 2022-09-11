@@ -2,6 +2,7 @@ package com.boot.jx.tnt.custom;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -17,12 +18,21 @@ import com.boot.jx.scope.tnt.Tenants;
 import com.boot.jx.scope.tnt.Tenants.TenantResolver;
 import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
 
 @Component
 public class TenantClientResolver extends TenantResolver {
 
 	private static final String NODOMAIN = "nodomain";
 	public static final Map<String, String> tntMapping = new HashMap<String, String>();
+	private static final Cache<String, String> tntCaching = CacheBuilder.newBuilder().maximumSize(1000)
+			.expireAfterWrite(2, TimeUnit.MINUTES).build(new CacheLoader<String, String>() {
+				public String load(String key) throws Exception {
+					return tntMapping.get(key);
+				}
+			});
 	public static final Map<String, String> dbMapping = new HashMap<String, String>();
 	public static final Pattern pattern = Pattern.compile("^(.+?)-(.+?)-(.+?)-(.+?)-(.+?)$");
 
@@ -72,25 +82,34 @@ public class TenantClientResolver extends TenantResolver {
 
 		if (ArgUtil.is(accountUrl) && !Tenants.isDefault(tnt)
 				&& (ArgUtil.is(apiDetails) && apiDetails.hasRule(CHECK_VALID_DOMAIN))) {
-			try {
-				MapModel resp = restService.ajax(accountUrl).path("/partner/pub/domain/exists")
-						.queryParam("tnt", Tenants.getDefault()).queryParam("domain", tnt).get().asMapModel();
-				if (resp.keyEntry("meta").is(tnt)) {
-					tntMapping.put(tnt, tnt);
-					return tnt;
-				} else {
-					tntMapping.put(tnt, NODOMAIN);
-					return NODOMAIN;
-				}
-			} catch (Exception e) {
-				e.printStackTrace();
-				tntMapping.put(tnt, NODOMAIN);
-				return tnt;
-			}
+			return resolveByDomain(tnt);
 		} else {
 			tntMapping.put(tnt, tnt);
 		}
 		return tnt;
+	}
+
+	private String resolveByDomain(String tnt) {
+		try {
+			String nodomain = tntCaching.getIfPresent(tnt);
+
+			if (nodomain != null) {
+				return nodomain;
+			}
+
+			MapModel resp = restService.ajax(accountUrl).path("/partner/pub/domain/exists")
+					.queryParam("tnt", Tenants.getDefault()).queryParam("domain", tnt).get().asMapModel();
+			if (resp.keyEntry("meta").is(tnt)) {
+				tntMapping.put(tnt, tnt);
+				return tnt;
+			} else {
+				tntCaching.put(tnt, NODOMAIN);
+				return NODOMAIN;
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			return tnt;
+		}
 	}
 
 	@Override
