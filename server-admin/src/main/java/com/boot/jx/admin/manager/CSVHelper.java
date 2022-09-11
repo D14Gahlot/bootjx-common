@@ -97,9 +97,6 @@ public class CSVHelper {
 			if (lst != null && !lst.isEmpty()) {
 				Map<Object, List<Object>> combined = lst.stream().flatMap(m -> m.entrySet().stream()).collect(
 						Collectors.groupingBy(Entry::getKey, Collectors.mapping(Entry::getValue, Collectors.toList())));
-
-				// combined.entrySet().forEach(System.out::println);
-
 				dto.setCsvMap(combined);
 			}
 			dto.setLstErrors(lsterrors);
