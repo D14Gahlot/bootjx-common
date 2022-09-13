@@ -2,21 +2,26 @@ package com.boot.jx.tmpl;
 
 import java.io.IOException;
 
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.boot.jx.dict.ContactType;
+import com.boot.jx.logger.LoggerService;
 import com.boot.jx.model.CommonFile;
 import com.boot.jx.postman.PostmanPackages.ICommonTmplPackage;
 import com.boot.jx.postman.PostmanPackages.TemplateResolver;
 import com.boot.jx.postman.model.ITemplates.BasicTemplate;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.JsonUtil;
 import com.boot.utils.StringUtils;
 import com.github.jknack.handlebars.Handlebars;
 import com.github.jknack.handlebars.Template;
 
 @Component
 public class CommonTmpPackageImpl implements ICommonTmplPackage {
+
+	public static Logger LOGGER = LoggerService.getLogger(CommonTmpPackageImpl.class);
 
 	@Autowired
 	private TemplateService templateService;
@@ -33,6 +38,15 @@ public class CommonTmpPackageImpl implements ICommonTmplPackage {
 			if (ArgUtil.is(basicTemplate)) {
 				String content = this.process(basicTemplate.getTemplate(), file.getModel());
 				file.options().putAll(basicTemplate.options());
+
+				try {
+					String optionsString = JsonUtil.toJson(file.options());
+					optionsString = this.process(optionsString, file.getModel());
+					file.setOptions(JsonUtil.toJsonMap(optionsString));
+				} catch (Exception e) {
+					LOGGER.error("CommonTmpPackageImpl.process", e);
+				}
+
 				if (ArgUtil.is(content)) {
 					String[] x = content.split("---options---");
 					file.setContent(x[0]);
