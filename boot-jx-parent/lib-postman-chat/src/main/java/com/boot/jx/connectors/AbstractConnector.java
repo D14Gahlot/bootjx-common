@@ -171,30 +171,37 @@ public abstract class AbstractConnector<CD extends AChannelDetails, P extends Ch
 		}
 
 		tmplClient.process(outboxMessage);
-		if (ArgUtil.is(outboxMessage.templateId())) {
 
-			if (MESSAGE_SEND_TYPE.PUSH_MESSAGE.equals(outboxMessage.messageMetaWrapper().sendType())
+		if (ArgUtil.is(outboxMessage.templateId())) {
+			List<HSMTemplate3rdParty> temps = null;
+
+			if (ArgUtil.is(outboxMessage.hsm().getLinked())) {
+				temps = commonMongoTemplate.find(CommonMongoQueryBuilder.collection(HSMTemplate3rdParty.class)
+						.where(Criteria.where("hsmTemplateId").is(outboxMessage.templateId()).and("channelId")
+								.is(channelConfig.getChannelId()).and("code").is(outboxMessage.hsm().getLinked())));
+			} else if (MESSAGE_SEND_TYPE.PUSH_MESSAGE.equals(outboxMessage.messageMetaWrapper().sendType())
 					&& channelConfig.isPushAllowed() && channelConfig.isPushOnlyApproved()) {
-				List<HSMTemplate3rdParty> temps = commonMongoTemplate.find(CommonMongoQueryBuilder
-						.collection(HSMTemplate3rdParty.class).where(Criteria.where("hsmTemplateId")
-								.is(outboxMessage.templateId()).and("channelId").is(channelConfig.getChannelId())));
-				if (ArgUtil.is(temps)) {
-					HSMTemplate3rdParty resolvedTemplate = null;
-					if (temps.size() > 1) {
-						for (HSMTemplate3rdParty hsmTemplate3rdParty : temps) {
-							if (ArgUtil.areEqual(hsmTemplate3rdParty.getLang(), outboxMessage.hsm().getLang())) {
-								resolvedTemplate = hsmTemplate3rdParty;
-								break;
-							} else if (ArgUtil.is(hsmTemplate3rdParty.getLang())) {
-								resolvedTemplate = hsmTemplate3rdParty;
-							}
+				temps = commonMongoTemplate.find(CommonMongoQueryBuilder.collection(HSMTemplate3rdParty.class)
+						.where(Criteria.where("hsmTemplateId").is(outboxMessage.templateId()).and("channelId")
+								.is(channelConfig.getChannelId())));
+			}
+
+			if (ArgUtil.is(temps)) {
+				HSMTemplate3rdParty resolvedTemplate = null;
+				if (temps.size() > 1) {
+					for (HSMTemplate3rdParty hsmTemplate3rdParty : temps) {
+						if (ArgUtil.areEqual(hsmTemplate3rdParty.getLang(), outboxMessage.hsm().getLang())) {
+							resolvedTemplate = hsmTemplate3rdParty;
+							break;
+						} else if (ArgUtil.is(hsmTemplate3rdParty.getLang())) {
+							resolvedTemplate = hsmTemplate3rdParty;
 						}
-					} else {
-						resolvedTemplate = temps.get(0);
 					}
-					outboxMessage.setTemplateExt(resolvedTemplate);
-					return outboxMessage;
+				} else {
+					resolvedTemplate = temps.get(0);
 				}
+				outboxMessage.setTemplateExt(resolvedTemplate);
+				return outboxMessage;
 			}
 		}
 		return outboxMessage;
