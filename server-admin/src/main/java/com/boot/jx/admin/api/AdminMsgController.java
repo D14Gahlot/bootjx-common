@@ -182,10 +182,7 @@ public class AdminMsgController {
 			throws NumberParseException {
 		if(ArgUtil.is(bulkMessage.getReferenceKey())) {
 		List<OutboxMessage> lstOutBoxMsg =  getCsvData(bulkMessage);
-		BulkSessionDoc bulkDoc =null;
-		  for(OutboxMessage bulkMsg:lstOutBoxMsg) {
-			  bulkDoc =bulkMessageService.send(bulkMsg);
-		  }
+		BulkSessionDoc bulkDoc =bulkMessageService.sendMultiple(lstOutBoxMsg);
 		  if(ArgUtil.is(bulkDoc)) {
 		   return ApiResponse.buildResult(bulkDoc).message("Bulk Message Job Created");
 		  }else {
