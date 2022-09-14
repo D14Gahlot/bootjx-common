@@ -1,6 +1,7 @@
 package com.boot.jx.tmpl;
 
 import java.io.IOException;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +16,7 @@ import com.boot.jx.postman.model.ITemplates.BasicTemplate;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.JsonUtil;
 import com.boot.utils.StringUtils;
+import com.github.jknack.handlebars.EscapingStrategy;
 import com.github.jknack.handlebars.Handlebars;
 import com.github.jknack.handlebars.Template;
 
@@ -30,6 +32,7 @@ public class CommonTmpPackageImpl implements ICommonTmplPackage {
 	private TemplateResolver templateResolver;
 
 	public static final Handlebars HANDLEBARS = new Handlebars();
+	public static final Handlebars HANDLEBARS_JS = new Handlebars().with(EscapingStrategy.JS);
 
 	@Override
 	public CommonFile process(CommonFile file, ContactType contactType) {
@@ -41,8 +44,10 @@ public class CommonTmpPackageImpl implements ICommonTmplPackage {
 
 				try {
 					String optionsString = JsonUtil.toJson(file.options());
-					optionsString = this.process(optionsString, file.getModel());
-					file.setOptions(JsonUtil.toJsonMap(optionsString));
+					optionsString = this.process(optionsString, file.getModel(), HANDLEBARS_JS);
+					Map<String, Object> options = JsonUtil.fromJsonToMap(optionsString);
+					if (options != null)
+						file.setOptions(options);
 				} catch (Exception e) {
 					LOGGER.error("CommonTmpPackageImpl.process", e);
 				}
@@ -65,15 +70,19 @@ public class CommonTmpPackageImpl implements ICommonTmplPackage {
 		return templateService.process(file, contactType);
 	}
 
-	@Override
-	public String process(String templateContent, Object contact) {
+	public String process(String templateContent, Object context, Handlebars hb) {
 		try {
-			Template template = HANDLEBARS.compileInline(templateContent);
-			return template.apply(contact);
+			Template template = hb.compileInline(templateContent);
+			return template.apply(context);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 		return templateContent;
+	}
+
+	@Override
+	public String process(String templateContent, Object context) {
+		return this.process(templateContent, context, HANDLEBARS);
 	}
 
 }
