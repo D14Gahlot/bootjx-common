@@ -2,7 +2,11 @@ package com.boot.jx.postman.pbook;
 
 import java.io.Serializable;
 
+import org.apache.commons.lang.builder.EqualsBuilder;
+import org.apache.commons.lang.builder.HashCodeBuilder;
+
 import com.boot.model.UtilityModels.JsonIgnoreUnknown;
+import com.boot.utils.ArgUtil;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -17,19 +21,6 @@ public class PBPhone implements Serializable, Comparable<PBPhone>, JsonIgnoreUnk
 	public String countryCallingCode;
 	public String nationalNumber;
 	public String ext;
-
-	@Override
-	public String toString() {
-		return countryCallingCode + nationalNumber + ext;
-	}
-
-	@Override
-	public int compareTo(PBPhone o) {
-		if (o == null) {
-			return 1;
-		}
-		return this.toString().compareTo(o.toString());
-	}
 
 	// Social
 	public String whatsAppId;
@@ -110,11 +101,28 @@ public class PBPhone implements Serializable, Comparable<PBPhone>, JsonIgnoreUnk
 		if (o == null || getClass() != o.getClass())
 			return false;
 		PBPhone that = (PBPhone) o;
-		if ((this.countryCallingCode != that.countryCallingCode) || (this.nationalNumber != that.nationalNumber)
-				|| (this.ext != that.ext)) {
-			return false;
+		return new EqualsBuilder().
+		// if deriving: appendSuper(super.equals(obj)).
+				append(this.countryCallingCode, that.countryCallingCode)
+				.append(this.nationalNumber, that.nationalNumber).append(this.ext, that.ext).isEquals();
+	}
+
+	@Override
+	public String toString() {
+		return countryCallingCode + nationalNumber + ext;
+	}
+
+	@Override
+	public int hashCode() {
+		return new HashCodeBuilder(17, 31).append(countryCallingCode).append(nationalNumber).append(ext).toHashCode();
+	}
+
+	@Override
+	public int compareTo(PBPhone o) {
+		if (o == null) {
+			return 1;
 		}
-		return true;
+		return this.toString().compareTo(o.toString());
 	}
 
 }

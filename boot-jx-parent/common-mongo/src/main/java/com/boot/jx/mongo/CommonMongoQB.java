@@ -153,13 +153,19 @@ public class CommonMongoQB<M extends CommonMongoQB<M, T>, T> implements MongoQue
 
 	@SuppressWarnings("unchecked")
 	public M set(String key, Object o) {
-		update().set(key, o);
+		if (o == null) {
+			update().unset(key);
+		} else
+			update().set(key, o);
 		return (M) this;
 	}
 
 	@SuppressWarnings("unchecked")
 	public M setOnInsert(String key, Object o) {
-		update().setOnInsert(key, o);
+		if (o == null) {
+			update().unset(key);
+		} else
+			update().setOnInsert(key, o);
 		return (M) this;
 	}
 

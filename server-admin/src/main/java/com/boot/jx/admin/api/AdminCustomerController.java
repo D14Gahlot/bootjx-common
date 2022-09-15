@@ -48,6 +48,13 @@ public class AdminCustomerController {
 		return ApiResponse.buildResult(req);
 	}
 
+	@RequestMapping(value = "/profile", method = { RequestMethod.DELETE })
+	@JsonView(PMEnvironment.PublicProperty.class)
+	public ApiResponse<CustomerProfileDoc, Object> deleteProfiles(@RequestBody CustomerProfileDoc req) {
+		contactStore.remove(req);
+		return ApiResponse.buildResult(req);
+	}
+
 	@RequestMapping(value = "/profile", method = { RequestMethod.PATCH })
 	@JsonView(PMEnvironment.PublicProperty.class)
 	public ApiResponse<CustomerProfileDoc, Object> modifyProfiles(@RequestBody ModelPatch req) {

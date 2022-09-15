@@ -2,6 +2,8 @@ package com.boot.jx.postman.pbook;
 
 import java.io.Serializable;
 
+import org.apache.commons.lang.builder.HashCodeBuilder;
+
 import com.boot.model.UtilityModels.JsonIgnoreUnknown;
 import com.boot.utils.ArgUtil;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -16,48 +18,6 @@ public class PBAddress implements Serializable, Comparable<PBAddress>, JsonIgnor
 	public String zip;
 	public String country;
 	public String countryCode;
-
-	@Override
-	public String toString() {
-		return street + city + state + zip + country + countryCode;
-	}
-
-	@Override
-	public int compareTo(PBAddress o) {
-		if (o == null) {
-			return 1;
-		}
-		return this.toString().compareTo(o.toString());
-	}
-
-	@Override
-	public boolean equals(Object o) {
-		if (this == o)
-			return true;
-		if (o == null || getClass() != o.getClass())
-			return false;
-		PBAddress that = (PBAddress) o;
-
-		if (ArgUtil.equalsIgnoreCase(this.city, that.city)) {
-			return false;
-		}
-		if (ArgUtil.equalsIgnoreCase(this.country, that.country)) {
-			return false;
-		}
-		if (ArgUtil.equalsIgnoreCase(this.countryCode, that.countryCode)) {
-			return false;
-		}
-		if (ArgUtil.equalsIgnoreCase(this.state, that.state)) {
-			return false;
-		}
-		if (ArgUtil.equalsIgnoreCase(this.street, that.street)) {
-			return false;
-		}
-		if (ArgUtil.equalsIgnoreCase(this.zip, that.zip)) {
-			return false;
-		}
-		return true;
-	}
 
 	public String getCity() {
 		return city;
@@ -120,4 +80,50 @@ public class PBAddress implements Serializable, Comparable<PBAddress>, JsonIgnor
 		return this;
 	}
 
+	@Override
+	public String toString() {
+		return street + city + state + zip + country + countryCode;
+	}
+
+	@Override
+	public int hashCode() {
+		return new HashCodeBuilder(17, 31).append(this.toString()).toHashCode();
+	}
+
+	@Override
+	public int compareTo(PBAddress o) {
+		if (o == null) {
+			return 1;
+		}
+		return this.toString().compareTo(o.toString());
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o)
+			return true;
+		if (o == null || getClass() != o.getClass())
+			return false;
+		PBAddress that = (PBAddress) o;
+
+		if (ArgUtil.equalsIgnoreCase(this.city, that.city)) {
+			return false;
+		}
+		if (ArgUtil.equalsIgnoreCase(this.country, that.country)) {
+			return false;
+		}
+		if (ArgUtil.equalsIgnoreCase(this.countryCode, that.countryCode)) {
+			return false;
+		}
+		if (ArgUtil.equalsIgnoreCase(this.state, that.state)) {
+			return false;
+		}
+		if (ArgUtil.equalsIgnoreCase(this.street, that.street)) {
+			return false;
+		}
+		if (ArgUtil.equalsIgnoreCase(this.zip, that.zip)) {
+			return false;
+		}
+		return true;
+	}
 }
