@@ -425,6 +425,14 @@ public class Message<T extends Message<T>> implements Serializable, MessageOptio
 		return (T) this;
 	}
 
+	@SuppressWarnings("unchecked")
+	public T attachment(List<Attachment> attachments) {
+		for (Attachment file : attachments) {
+			this.attachments().add(file);
+		}
+		return (T) this;
+	}
+
 	public String getType() {
 		return type;
 	}
@@ -481,6 +489,12 @@ public class Message<T extends Message<T>> implements Serializable, MessageOptio
 			this.contact = new ContactMeta();
 		}
 		return this.contact;
+	}
+
+	@SuppressWarnings("unchecked")
+	public T contact(Contactable contact) {
+		this.setContact(contact);
+		return (T) this;
 	}
 
 	public Map<String, Object> getMeta() {
