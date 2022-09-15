@@ -2,10 +2,11 @@ package com.boot.jx.postman.pbook;
 
 import java.io.Serializable;
 
+import com.boot.model.UtilityModels.JsonIgnoreUnknown;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class PBName implements Serializable {
+public class PBName implements Serializable, JsonIgnoreUnknown {
 	private static final long serialVersionUID = -2023402204499331768L;
 	public String firstName;
 	public String formattedName;
