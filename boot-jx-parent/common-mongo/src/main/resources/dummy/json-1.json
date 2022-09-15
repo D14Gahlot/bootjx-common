@@ -1,20 +1,18 @@
 {
+  "emails": [
+    {
+      "email": "string",
+      "label": "string",
+      "type": "string"
+    }
+  ],
   "name": {
-    "first": "John",
-    "last": "Doe"
+    "firstName": "Lalit",
+    "lastName": "Tanwar"
   },
-  "address": null,
-  "birthday": "1980-01-01",
-  "company": "Acme",
-  "occupation": "Software engineer",
   "phones": [
     {
-      "number": "000000000",
-      "type": "home"
-    },
-    {
-      "number": "999999999",
-      "type": "mobile"
+      "phone": "919930104050"
     }
   ]
 }
