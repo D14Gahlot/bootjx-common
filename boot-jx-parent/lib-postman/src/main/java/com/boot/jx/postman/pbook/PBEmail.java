@@ -2,6 +2,8 @@ package com.boot.jx.postman.pbook;
 
 import java.io.Serializable;
 
+import org.apache.commons.lang.builder.HashCodeBuilder;
+
 import com.boot.model.UtilityModels.JsonIgnoreUnknown;
 import com.boot.utils.ArgUtil;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -13,19 +15,6 @@ public class PBEmail implements Serializable, Comparable<PBEmail>, JsonIgnoreUnk
 	public String email;
 	public String type;
 	public String label;
-
-	@Override
-	public String toString() {
-		return email;
-	}
-
-	@Override
-	public int compareTo(PBEmail o) {
-		if (o == null) {
-			return 1;
-		}
-		return this.toString().compareTo(o.toString());
-	}
 
 	public String getEmail() {
 		return email;
@@ -74,6 +63,24 @@ public class PBEmail implements Serializable, Comparable<PBEmail>, JsonIgnoreUnk
 			return false;
 		PBEmail that = (PBEmail) o;
 		return ArgUtil.equalsIgnoreCase(this.email, that.email);
+	}
+
+	@Override
+	public String toString() {
+		return email;
+	}
+
+	@Override
+	public int hashCode() {
+		return new HashCodeBuilder(17, 31).append(email).toHashCode();
+	}
+
+	@Override
+	public int compareTo(PBEmail o) {
+		if (o == null) {
+			return 1;
+		}
+		return this.toString().compareTo(o.toString());
 	}
 
 }

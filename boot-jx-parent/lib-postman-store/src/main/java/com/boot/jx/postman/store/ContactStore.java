@@ -73,6 +73,7 @@ public class ContactStore extends CommonMongoTemplateAbstract {
 	}
 
 	public static <T> Set<T> patch(ModelPatchCommand command, Set<T> items, T item) {
+
 		switch (command) {
 		case ADD:
 			items.add(item);
@@ -145,7 +146,8 @@ public class ContactStore extends CommonMongoTemplateAbstract {
 		default:
 			break;
 		}
-		return doc;
+		update(qb);
+		return findById(req.getId(), CustomerProfileDoc.class);
 	}
 
 }
