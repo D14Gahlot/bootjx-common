@@ -2,11 +2,12 @@ package com.boot.jx.postman.pbook;
 
 import java.io.Serializable;
 
+import com.boot.model.UtilityModels.JsonIgnoreUnknown;
 import com.boot.utils.ArgUtil;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class PBAddress implements Serializable, Comparable<PBAddress> {
+public class PBAddress implements Serializable, Comparable<PBAddress>, JsonIgnoreUnknown {
 	private static final long serialVersionUID = -1967541446184852363L;
 	public String type;
 	public String street;
