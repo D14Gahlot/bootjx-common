@@ -313,11 +313,6 @@ public class AdminMsgController {
 			}
 			
 		}
-		
-		System.out.println("============");
-		for(OutboxMessage obj:listOfOutboxMsg) {
-		System.out.println("JSON OutboxMessage "+JsonUtil.toJson(obj));	
-		}
 		return listOfOutboxMsg;
 	}
 	
