@@ -46,16 +46,16 @@ public class CSVHelper {
 		Pattern pattern = Pattern.compile("\\{\\{(.*?)\\}\\}");
 		List<String> templVarLst = new ArrayList<>();
 		templVarLst.add("contacts");
-
+		dto.setTemplateId(templateId);	
 		HSMTemplateDoc templateDoc = mongoTemplate.findById(templateId, HSMTemplateDoc.class);
 		if (templateDoc != null) {
 			String template = templateDoc.getTemplate();
 			Matcher matcher = pattern.matcher(template);
 			while (matcher.find()) {
 				String headerName = matcher.group(1);
-				if (!headerName.contains("contact")) {
+				//if (!headerName.contains("contact")) {
 					templVarLst.add(StringUtils.substring(headerName, (headerName.indexOf(".") + 1)));
-				}
+				//}
 
 			}
 		}
