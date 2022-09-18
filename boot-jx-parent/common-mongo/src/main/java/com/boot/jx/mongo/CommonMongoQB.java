@@ -152,7 +152,7 @@ public class CommonMongoQB<M extends CommonMongoQB<M, T>, T> implements MongoQue
 	}
 
 	@SuppressWarnings("unchecked")
-	public M set(String key, Object o) {
+	public M setunset(String key, Object o) {
 		if (o == null) {
 			update().unset(key);
 		} else
@@ -161,11 +161,14 @@ public class CommonMongoQB<M extends CommonMongoQB<M, T>, T> implements MongoQue
 	}
 
 	@SuppressWarnings("unchecked")
+	public M set(String key, Object o) {
+		update().set(key, o);
+		return (M) this;
+	}
+
+	@SuppressWarnings("unchecked")
 	public M setOnInsert(String key, Object o) {
-		if (o == null) {
-			update().unset(key);
-		} else
-			update().setOnInsert(key, o);
+		update().setOnInsert(key, o);
 		return (M) this;
 	}
 

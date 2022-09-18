@@ -116,32 +116,32 @@ public class ContactStore extends CommonMongoTemplateAbstract {
 		case "email":
 		case "emails":
 			PBEmail email = req.value().as(PBEmail.class);
-			qb.set("emails", patch(req.getCommand(), doc.emails(), email));
+			qb.setunset("emails", patch(req.getCommand(), doc.emails(), email));
 			break;
 		case "phone":
 		case "phones":
 			PBPhone phone = parsePhone(req.value().as(PBPhone.class));
-			qb.set("phones", patch(req.getCommand(), doc.phones(), phone));
+			qb.setunset("phones", patch(req.getCommand(), doc.phones(), phone));
 			break;
 		case "address":
 		case "addresses":
 			PBAddress address = req.value().as(PBAddress.class);
-			qb.set("addresses", patch(req.getCommand(), doc.addresses(), address));
+			qb.setunset("addresses", patch(req.getCommand(), doc.addresses(), address));
 			break;
 		case "url":
 		case "urls":
 			PBWebsite url = req.value().as(PBWebsite.class);
-			qb.set("urls", patch(req.getCommand(), doc.urls(), url));
+			qb.setunset("urls", patch(req.getCommand(), doc.urls(), url));
 			break;
 		case "name":
 			PBName name = req.value().as(PBName.class);
-			qb.set("name", name);
+			qb.setunset("name", name);
 			break;
 		case "code":
-			qb.set("code", req.value().asString());
+			qb.setunset("code", req.value().asString());
 			break;
 		case "rmCode":
-			qb.set("rmCode", req.value().asString());
+			qb.setunset("rmCode", req.value().asString());
 			break;
 		default:
 			break;
