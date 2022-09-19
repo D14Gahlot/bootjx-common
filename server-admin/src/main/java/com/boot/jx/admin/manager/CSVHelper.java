@@ -54,8 +54,9 @@ public class CSVHelper {
 			while (matcher.find()) {
 				String headerName = matcher.group(1);
 				//if (!headerName.contains("contact")) {
-					templVarLst.add(StringUtils.substring(headerName, (headerName.indexOf(".") + 1)));
-				//}
+					//templVarLst.add(StringUtils.substring(headerName, (headerName.indexOf(".") + 1)));
+					templVarLst.add(headerName);
+					//}
 
 			}
 		}
@@ -83,7 +84,10 @@ public class CSVHelper {
 				Map<Object, Object> map = new HashMap<>();
 				for (int i = 0; i < columns.length; i++) {
 					if (!StringUtils.isBlank(record.get(i))) {
-						map.put(columns[i].trim(), record.get(i).trim());
+						String columnName = StringUtils.substring(columns[i].trim(), (columns[i].trim().indexOf(".") + 1));
+						//map.put(columns[i].trim(), record.get(i).trim());
+						map.put(columnName, record.get(i).trim());
+						
 					} else {
 						String str = "Row:" + row + " Column :" + (i + 1) + " " + columns[i] + " value  is missing";
 						lsterrors.add(str);
