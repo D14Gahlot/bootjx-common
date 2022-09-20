@@ -280,6 +280,16 @@ public final class StringUtils {
 		return (src == null) ? src : src.trim().replaceAll(" +", " ");
 	}
 
+	public static String join(String delimter, String... strs) {
+		StringJoiner sj = new StringJoiner(delimter);
+		for (String string : strs) {
+			if (ArgUtil.is(string)) {
+				sj.add(string);
+			}
+		}
+		return sj.toString();
+	}
+
 	/**
 	 * 
 	 * @param src

@@ -135,7 +135,7 @@ public class ContactStore extends CommonMongoTemplateAbstract {
 			break;
 		case "name":
 			PBName name = req.value().as(PBName.class);
-			qb.setunset("name", name);
+			qb.setunset("name", name.fix());
 			break;
 		case "code":
 			qb.setunset("code", req.value().asString());
