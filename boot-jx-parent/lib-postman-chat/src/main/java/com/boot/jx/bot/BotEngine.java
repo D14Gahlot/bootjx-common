@@ -294,7 +294,7 @@ public class BotEngine {
 				Method method = matchedMethod.getMethod();
 				ChatController controller = filtersMap.get("controllerName#" + matchedMethod.getController());
 				// LOGGER.info("Target Handler : " + method.getName());
-				logManager.trace(inboxMessage, "invokeMethods", matchedMethod.getController());
+				logManager.addTrace(inboxMessage, "invokeMethods", matchedMethod.getController());
 				List<Class<?>> prmTyps = Arrays.asList(method.getParameterTypes());
 				if (prmTyps.contains(InboxMessage.class) && prmTyps.contains(StringMatcher.class)) {
 					method.invoke(controller, inboxMessage, inboxMessage.getMatcher());

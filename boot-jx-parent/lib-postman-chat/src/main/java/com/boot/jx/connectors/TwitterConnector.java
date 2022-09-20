@@ -13,6 +13,7 @@ import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorMapping;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
+import com.boot.jx.postman.manager.ChatLogger;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.MessageBoxEvent;
 import com.boot.jx.postman.model.OutboxMessage;
@@ -20,6 +21,7 @@ import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.postman.plugin.TwitterPlugin;
 import com.boot.jx.postman.plugin.TwitterPlugin.TwitterConfigDetails;
 import com.boot.jx.postman.query.ChatContactQuery;
+import com.boot.jx.postman.tw.StatusCode;
 import com.boot.jx.postman.tw.TwitterClient;
 import com.boot.jx.postman.tw.TwitterClientContext;
 import com.boot.jx.postman.tw.TwitterClientExt;
@@ -45,9 +47,14 @@ public class TwitterConnector extends AbstractConnector<TwitterConfigDetails, Tw
 	@Autowired
 	private TwitterClientExt twitterClientExt;
 
+	@Autowired
+	ChatLogger chatLogger;
+
 	@Override
 	public void registerWebhook(ChannelConfig channelConfig, String webhookUrl) {
-		twitterClient.registerWebhook(channelConfig, webhookUrl);
+		StatusCode status = twitterClient.registerWebhook(channelConfig, webhookUrl);
+		chatLogger.debug("registerWebhook", String.format("isError:%s httpCode:%s", status.isError, status.httpCode),
+				status.message);
 	}
 
 	@Override
