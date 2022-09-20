@@ -51,7 +51,9 @@ public class AdminCustomerController {
 
 	@RequestMapping(value = "/profile", method = { RequestMethod.DELETE })
 	@JsonView(PMEnvironment.PublicProperty.class)
-	public ApiResponse<CustomerProfileDoc, Object> deleteProfiles(@RequestBody CustomerProfileDoc req) {
+	public ApiResponse<CustomerProfileDoc, Object> deleteProfiles(@RequestParam String id) {
+		CustomerProfileDoc req = new CustomerProfileDoc();
+		req.setId(id);
 		contactStore.remove(req);
 		return ApiResponse.buildResult(req);
 	}
