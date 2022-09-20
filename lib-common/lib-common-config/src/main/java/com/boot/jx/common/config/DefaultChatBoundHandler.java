@@ -316,7 +316,7 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 
 	@Override
 	public void onSessionRoute(InBoundEvent inBoundEvent, ChatSessionDoc sessionDoc, PMArgs pmArgs) {
-		logManager.trace(inBoundEvent, EVENTS.ON_SESSION_ROUTE, "NO_ACTION");
+		logManager.addTrace(inBoundEvent, EVENTS.ON_SESSION_ROUTE, "NO_ACTION");
 	}
 
 	@Override

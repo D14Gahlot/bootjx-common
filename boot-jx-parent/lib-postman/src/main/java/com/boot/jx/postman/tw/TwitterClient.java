@@ -64,7 +64,7 @@ public class TwitterClient implements MessageClient {
 
 	@Autowired
 	RestService restService;
-
+	
 	public TwitterClientContext getContext(ChannelConfig channelConfig) {
 		// lane = ArgUtil.nonEmpty(lane, defaultLane);
 

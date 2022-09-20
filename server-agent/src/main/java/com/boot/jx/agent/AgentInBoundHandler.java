@@ -91,7 +91,7 @@ public class AgentInBoundHandler extends DefaultChatBoundHandler {
 			ClientApp app = this.context().clientApp();
 
 			if (ArgUtil.not(app)) {
-				logManager.trace(assignEvent, "NoQueueFound", session.contact());
+				logManager.addTrace(assignEvent, "NoQueueFound", session.contact());
 				app = this.context().clientApp(PMConstants.DEFAULT.AGENT_QUEUE_CODE, session.contact());
 			}
 

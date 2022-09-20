@@ -159,7 +159,7 @@ public class ChatLogger {
 		}
 	}
 
-	private void log(String type, MessageDocAbstract doc, String message, Object[] debugMessage) {
+	private void log(MessageDocAbstract doc, String message, Object[] debugMessage) {
 		doc.setTimestamp(System.currentTimeMillis());
 		doc.setTraceId(AppContextUtil.getTraceId());
 		doc.setMessage(message);
@@ -171,7 +171,7 @@ public class ChatLogger {
 		messageStore.save(doc);
 	}
 
-	private MessageDocAbstract messageDoc(LoggableEntity inBoundEvent) {
+	private MessageDocAbstract messageDoc(String type, LoggableEntity inBoundEvent) {
 		MessageDocLogs doc = new MessageDocLogs();
 		if (ArgUtil.is(inBoundEvent)) {
 			doc.setSessionId(inBoundEvent.getSessionId());
@@ -180,8 +180,9 @@ public class ChatLogger {
 		return doc;
 	}
 
-	private MessageDocAbstract messageDoc(LogMessage message) {
+	private MessageDocAbstract messageDoc(String type, LogMessage message) {
 		MessageDocAbstract doc = new MessageDocLogs();
+		doc.setType(type);
 		if (ArgUtil.is(message)) {
 			doc.setSessionId(message.getSessionId());
 			doc.setMessageId(message.getMessageId());
@@ -196,33 +197,33 @@ public class ChatLogger {
 		if (!LOGGER.isDebugEnabled())
 			return;
 		if (ArgUtil.is(messageContext.getMessage())) {
-			this.log("D", messageDoc(messageContext.getMessage()), message, debugMessage);
+			this.log(messageDoc("D", messageContext.getMessage()), message, debugMessage);
 		} else if (ArgUtil.is(messageContext.getInBoundEvent())) {
-			this.log("D", messageDoc(messageContext.getInBoundEvent()), message, debugMessage);
+			this.log(messageDoc("D", messageContext.getInBoundEvent()), message, debugMessage);
 		} else {
-			this.log("D", messageDoc(new InBoundEvent()), message, debugMessage);
+			this.log(messageDoc("D", new InBoundEvent()), message, debugMessage);
 		}
 	}
 
 	public void debug(InBoundEvent assignEvent, String message, Object... debugMessage) {
 		if (!LOGGER.isDebugEnabled())
 			return;
-		this.log("D", messageDoc(assignEvent), message, debugMessage);
+		this.log(messageDoc("D", assignEvent), message, debugMessage);
 	}
 
 	public void warn(String message, Object... debugMessage) {
 		if (!LOGGER.isWarnEnabled())
 			return;
 		if (ArgUtil.is(messageContext.getMessage())) {
-			this.log("W", messageDoc(messageContext.getMessage()), message, debugMessage);
+			this.log(messageDoc("W", messageContext.getMessage()), message, debugMessage);
 		} else if (ArgUtil.is(messageContext.getInBoundEvent())) {
-			this.log("W", messageDoc(messageContext.getInBoundEvent()), message, debugMessage);
+			this.log(messageDoc("W", messageContext.getInBoundEvent()), message, debugMessage);
 		} else {
-			this.log("W", messageDoc(new InBoundEvent()), message, debugMessage);
+			this.log(messageDoc("W", new InBoundEvent()), message, debugMessage);
 		}
 	}
 
-	public void trace(TraceMessage inboxMessage, Object... msg) {
+	public void addTrace(TraceMessage inboxMessage, Object... msg) {
 		if (msg == null || msg.length == 0 || inboxMessage == null) {
 			return;
 		}

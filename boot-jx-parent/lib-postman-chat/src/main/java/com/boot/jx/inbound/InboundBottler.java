@@ -60,14 +60,14 @@ public class InboundBottler extends ATaskLimiter {
 		String contactId = PostManUtil.CONTACT_ID(inboxMessage.contact());
 		String onhold = hold().get(contactId);
 
-		logManager.trace(inboxMessage, "InboundBottler:push");
+		logManager.addTrace(inboxMessage, "InboundBottler:push");
 
 		if (ArgUtil.isEqual(onhold, "QUEUING")) {
 			queue(contactId, new MessageHoldQueue().inboxMessage(inboxMessage));
 			throttle(new TunnelTask().name("MESSAGE_DEQUEUE").id(contactId).intervalSeconds(2));
 		} else {
 			hold().put(contactId, "QUEUING");
-			logManager.trace(inboxMessage, "InboundBottler:push:invoked");
+			logManager.addTrace(inboxMessage, "InboundBottler:push:invoked");
 			inBoundService.invokeMethodsSync(inboxMessage);
 			hold().put(contactId, "DEQUEUING");
 		}
@@ -116,7 +116,7 @@ public class InboundBottler extends ATaskLimiter {
 		for (MessageHoldQueue doc : docs) {
 			if (ArgUtil.is(doc)) {
 				if (ArgUtil.is(doc.getInboxMessage())) {
-					logManager.trace(doc.getInboxMessage(), "InboundBottler:dequeue:batch=" + batch);
+					logManager.addTrace(doc.getInboxMessage(), "InboundBottler:dequeue:batch=" + batch);
 					inBoundService.invokeMethodsSync(doc.getInboxMessage());
 				} else if (ArgUtil.is(doc.getEvent())) {
 					chatSessionService.sessionEvent(doc.getEvent(), doc.getPmArgs());
@@ -130,7 +130,7 @@ public class InboundBottler extends ATaskLimiter {
 		hold.setTimestamp(System.currentTimeMillis());
 		hold.setAppType(appConfig.getAppType());
 		if (ArgUtil.is(hold.getInboxMessage())) {
-			logManager.trace(hold.getInboxMessage(), "InboundBottler:queue");
+			logManager.addTrace(hold.getInboxMessage(), "InboundBottler:queue");
 		}
 		messageStore.save(hold);
 	}

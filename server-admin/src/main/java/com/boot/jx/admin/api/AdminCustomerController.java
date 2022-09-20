@@ -18,7 +18,8 @@ import com.boot.jx.postman.store.ContactStore;
 import com.boot.utils.ArgUtil;
 import com.fasterxml.jackson.annotation.JsonView;
 
-@RestController("/api/cusomter")
+@RestController("Profile Controller")
+@RequestMapping("/api/cusomter")
 public class AdminCustomerController {
 
 	@Autowired
