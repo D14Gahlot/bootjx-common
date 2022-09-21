@@ -5,13 +5,15 @@ import java.io.Serializable;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 
 import com.boot.model.UtilityModels.JsonIgnoreUnknown;
+import com.boot.model.UtilityModels.UniqueIndex;
 import com.boot.utils.ArgUtil;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class PBEmail implements Serializable, Comparable<PBEmail>, JsonIgnoreUnknown {
+public class PBEmail implements Serializable, Comparable<PBEmail>, JsonIgnoreUnknown, UniqueIndex {
 
 	private static final long serialVersionUID = 13406808264190167L;
+	public String uuid;
 	public String email;
 	public String type;
 	public String label;
@@ -81,6 +83,27 @@ public class PBEmail implements Serializable, Comparable<PBEmail>, JsonIgnoreUnk
 			return 1;
 		}
 		return this.toString().compareTo(o.toString());
+	}
+
+	public String getUuid() {
+		return uuid;
+	}
+
+	public void setUuid(String uuid) {
+		this.uuid = uuid;
+	}
+
+	@Override
+	public String uuid() {
+		return this.uuid;
+	}
+
+	@Override
+	public String uuid(String uuid) {
+		if (ArgUtil.not(this.uuid)) {
+			this.uuid = uuid;
+		}
+		return this.uuid;
 	}
 
 }

@@ -6,15 +6,17 @@ import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 
 import com.boot.model.UtilityModels.JsonIgnoreUnknown;
+import com.boot.model.UtilityModels.UniqueIndex;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.Constants;
 import com.boot.utils.StringUtils;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class PBPhone implements Serializable, Comparable<PBPhone>, JsonIgnoreUnknown {
+public class PBPhone implements Serializable, Comparable<PBPhone>, JsonIgnoreUnknown, UniqueIndex {
 
 	private static final long serialVersionUID = 1772318013635615811L;
+	public String uuid;
 	public String phone;
 	public String type;
 	public String label;
@@ -127,4 +129,24 @@ public class PBPhone implements Serializable, Comparable<PBPhone>, JsonIgnoreUnk
 		return this.toString().compareTo(o.toString());
 	}
 
+	public String getUuid() {
+		return uuid;
+	}
+
+	public void setUuid(String uuid) {
+		this.uuid = uuid;
+	}
+
+	@Override
+	public String uuid() {
+		return this.uuid;
+	}
+
+	@Override
+	public String uuid(String uuid) {
+		if (ArgUtil.not(this.uuid)) {
+			this.uuid = uuid;
+		}
+		return this.uuid;
+	}
 }

@@ -5,13 +5,15 @@ import java.io.Serializable;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 
 import com.boot.model.UtilityModels.JsonIgnoreUnknown;
+import com.boot.model.UtilityModels.UniqueIndex;
 import com.boot.utils.ArgUtil;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class PBWebsite implements Serializable, Comparable<PBWebsite>, JsonIgnoreUnknown {
+public class PBWebsite implements Serializable, Comparable<PBWebsite>, JsonIgnoreUnknown, UniqueIndex {
 
 	private static final long serialVersionUID = -7496133827194014822L;
+	public String uuid;
 	public String url;
 	public String type;
 	public String label;
@@ -69,5 +71,26 @@ public class PBWebsite implements Serializable, Comparable<PBWebsite>, JsonIgnor
 			return false;
 		}
 		return true;
+	}
+
+	@Override
+	public String uuid() {
+		return this.uuid;
+	}
+
+	public String getUuid() {
+		return uuid;
+	}
+
+	public void setUuid(String uuid) {
+		this.uuid = uuid;
+	}
+
+	@Override
+	public String uuid(String uuid) {
+		if (ArgUtil.not(this.uuid)) {
+			this.uuid = uuid;
+		}
+		return this.uuid;
 	}
 }

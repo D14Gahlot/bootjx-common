@@ -26,7 +26,9 @@ import com.boot.jx.postman.pbook.PBName;
 import com.boot.jx.postman.pbook.PBPhone;
 import com.boot.jx.postman.pbook.PBWebsite;
 import com.boot.jx.utils.PostManUtil;
+import com.boot.model.UtilityModels.UniqueIndex;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.UniqueID;
 import com.google.i18n.phonenumbers.NumberParseException;
 import com.google.i18n.phonenumbers.PhoneNumberUtil;
 import com.google.i18n.phonenumbers.Phonenumber.PhoneNumber;
@@ -73,10 +75,11 @@ public class ContactStore extends CommonMongoTemplateAbstract {
 
 	}
 
-	public static <T> Set<T> patch(ModelPatchCommand command, Set<T> items, T item) {
+	public static <T extends UniqueIndex> Set<T> patch(ModelPatchCommand command, Set<T> items, T item) {
 
 		switch (command) {
 		case ADD:
+			item.uuid(UniqueID.generateString());
 			items.add(item);
 			break;
 		case REMOVE:
