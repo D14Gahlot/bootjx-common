@@ -1,6 +1,7 @@
 package com.boot.jx.postman.store;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import org.slf4j.Logger;
@@ -75,11 +76,19 @@ public class ContactStore extends CommonMongoTemplateAbstract {
 
 	}
 
-	public static <T extends UniqueIndex> Set<T> patch(ModelPatchCommand command, Set<T> items, T item) {
-
+	public static <T extends UniqueIndex<T>> Set<T> patch(ModelPatchCommand command, Set<T> items, T item) {
 		switch (command) {
 		case ADD:
-			item.uuid(UniqueID.generateString());
+		case UPDATE:
+			Optional<T> found = Optional.empty();
+			if (ArgUtil.is(item.uuid())) {
+				found = items.stream().filter(itm -> ArgUtil.is(item.uuid(), itm.uuid())).findFirst();
+			}
+			if (found.isPresent()) {
+				found.get().update(item);
+			} else {
+				item.uuid(UniqueID.generateString());
+			}
 			items.add(item);
 			break;
 		case REMOVE:

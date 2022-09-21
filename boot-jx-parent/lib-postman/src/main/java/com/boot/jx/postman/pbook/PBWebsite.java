@@ -10,7 +10,7 @@ import com.boot.utils.ArgUtil;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class PBWebsite implements Serializable, Comparable<PBWebsite>, JsonIgnoreUnknown, UniqueIndex {
+public class PBWebsite implements Serializable, Comparable<PBWebsite>, JsonIgnoreUnknown, UniqueIndex<PBWebsite> {
 
 	private static final long serialVersionUID = -7496133827194014822L;
 	public String uuid;
@@ -92,5 +92,13 @@ public class PBWebsite implements Serializable, Comparable<PBWebsite>, JsonIgnor
 			this.uuid = uuid;
 		}
 		return this.uuid;
+	}
+
+	@Override
+	public PBWebsite update(PBWebsite fromObject) {
+		this.url = fromObject.getUrl();
+		this.type = fromObject.getType();
+		this.label = fromObject.getLabel();
+		return this;
 	}
 }

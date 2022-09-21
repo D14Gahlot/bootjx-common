@@ -13,7 +13,7 @@ import com.boot.utils.StringUtils;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class PBPhone implements Serializable, Comparable<PBPhone>, JsonIgnoreUnknown, UniqueIndex {
+public class PBPhone implements Serializable, Comparable<PBPhone>, JsonIgnoreUnknown, UniqueIndex<PBPhone> {
 
 	private static final long serialVersionUID = 1772318013635615811L;
 	public String uuid;
@@ -148,5 +148,18 @@ public class PBPhone implements Serializable, Comparable<PBPhone>, JsonIgnoreUnk
 			this.uuid = uuid;
 		}
 		return this.uuid;
+	}
+
+	@Override
+	public PBPhone update(PBPhone fromObject) {
+		this.phone = fromObject.getPhone();
+		this.type = fromObject.getType();
+		this.label = fromObject.getLabel();
+
+		this.country = fromObject.getCountry();
+		this.countryCallingCode = fromObject.getCountryCallingCode();
+		this.nationalNumber = fromObject.getNationalNumber();
+		this.ext = fromObject.getExt();
+		return this;
 	}
 }
