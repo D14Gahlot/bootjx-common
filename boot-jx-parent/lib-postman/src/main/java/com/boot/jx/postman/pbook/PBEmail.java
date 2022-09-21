@@ -10,7 +10,7 @@ import com.boot.utils.ArgUtil;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class PBEmail implements Serializable, Comparable<PBEmail>, JsonIgnoreUnknown, UniqueIndex {
+public class PBEmail implements Serializable, Comparable<PBEmail>, JsonIgnoreUnknown, UniqueIndex<PBEmail> {
 
 	private static final long serialVersionUID = 13406808264190167L;
 	public String uuid;
@@ -104,6 +104,14 @@ public class PBEmail implements Serializable, Comparable<PBEmail>, JsonIgnoreUnk
 			this.uuid = uuid;
 		}
 		return this.uuid;
+	}
+
+	@Override
+	public PBEmail update(PBEmail fromObject) {
+		this.email = fromObject.getEmail();
+		this.type = fromObject.getType();
+		this.label = fromObject.getLabel();
+		return this;
 	}
 
 }

@@ -12,7 +12,7 @@ import com.boot.utils.StringUtils;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class PBAddress implements Serializable, Comparable<PBAddress>, JsonIgnoreUnknown, UniqueIndex {
+public class PBAddress implements Serializable, Comparable<PBAddress>, JsonIgnoreUnknown, UniqueIndex<PBAddress> {
 	private static final long serialVersionUID = -1967541446184852363L;
 	public String uuid;
 	public String type;
@@ -150,5 +150,17 @@ public class PBAddress implements Serializable, Comparable<PBAddress>, JsonIgnor
 			this.uuid = uuid;
 		}
 		return this.uuid;
+	}
+
+	@Override
+	public PBAddress update(PBAddress fromObject) {
+		this.type = fromObject.getType();
+		this.street = fromObject.getStreet();
+		this.city = fromObject.getCity();
+		this.state = fromObject.getState();
+		this.zip = fromObject.getZip();
+		this.country = fromObject.getCountry();
+		this.countryCode = fromObject.getCountryCode();
+		return this;
 	}
 }
