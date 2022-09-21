@@ -6,6 +6,8 @@ import org.apache.commons.lang.builder.HashCodeBuilder;
 
 import com.boot.model.UtilityModels.JsonIgnoreUnknown;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.Constants;
+import com.boot.utils.StringUtils;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -82,7 +84,7 @@ public class PBAddress implements Serializable, Comparable<PBAddress>, JsonIgnor
 
 	@Override
 	public String toString() {
-		return street + city + state + zip + country + countryCode;
+		return StringUtils.join(Constants.BLANK, street, city, state, zip, country, countryCode);
 	}
 
 	@Override

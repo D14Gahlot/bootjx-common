@@ -7,6 +7,8 @@ import org.apache.commons.lang.builder.HashCodeBuilder;
 
 import com.boot.model.UtilityModels.JsonIgnoreUnknown;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.Constants;
+import com.boot.utils.StringUtils;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -109,7 +111,7 @@ public class PBPhone implements Serializable, Comparable<PBPhone>, JsonIgnoreUnk
 
 	@Override
 	public String toString() {
-		return countryCallingCode + nationalNumber + ext;
+		return StringUtils.join(Constants.BLANK, countryCallingCode, nationalNumber, ext);
 	}
 
 	@Override
