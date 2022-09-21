@@ -16,6 +16,12 @@ public class UtilityModels {
 		public String id();
 	}
 
+	public interface UniqueIndex {
+		public String uuid();
+
+		public String uuid(String uuid);
+	}
+
 	/**
 	 * While De-Serialization
 	 * 

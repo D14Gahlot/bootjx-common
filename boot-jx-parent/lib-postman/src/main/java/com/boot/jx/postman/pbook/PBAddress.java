@@ -5,14 +5,16 @@ import java.io.Serializable;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 
 import com.boot.model.UtilityModels.JsonIgnoreUnknown;
+import com.boot.model.UtilityModels.UniqueIndex;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.Constants;
 import com.boot.utils.StringUtils;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class PBAddress implements Serializable, Comparable<PBAddress>, JsonIgnoreUnknown {
+public class PBAddress implements Serializable, Comparable<PBAddress>, JsonIgnoreUnknown, UniqueIndex {
 	private static final long serialVersionUID = -1967541446184852363L;
+	public String uuid;
 	public String type;
 	public String street;
 	public String city;
@@ -127,5 +129,26 @@ public class PBAddress implements Serializable, Comparable<PBAddress>, JsonIgnor
 			return false;
 		}
 		return true;
+	}
+
+	public String getUuid() {
+		return uuid;
+	}
+
+	public void setUuid(String uuid) {
+		this.uuid = uuid;
+	}
+
+	@Override
+	public String uuid() {
+		return uuid;
+	}
+
+	@Override
+	public String uuid(String uuid) {
+		if (ArgUtil.not(this.uuid)) {
+			this.uuid = uuid;
+		}
+		return this.uuid;
 	}
 }
