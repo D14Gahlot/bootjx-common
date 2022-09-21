@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.boot.jx.api.ApiResponse;
-import com.boot.jx.model.ModelPatch;
+import com.boot.jx.model.ModelPatch.ModelPatches;
 import com.boot.jx.mongo.CommonMongoQB.CommonMongoQBimpl;
 import com.boot.jx.mongo.CommonMongoQueryBuilder;
 import com.boot.jx.postman.PMEnvironment;
@@ -60,7 +60,7 @@ public class AdminCustomerController {
 
 	@RequestMapping(value = "/profile", method = { RequestMethod.PATCH })
 	@JsonView(PMEnvironment.PublicProperty.class)
-	public ApiResponse<CustomerProfileDoc, Object> modifyProfiles(@RequestBody ModelPatch req) {
+	public ApiResponse<CustomerProfileDoc, Object> modifyProfiles(@RequestBody ModelPatches req) {
 		return ApiResponse.buildResult(contactStore.patchCustomerProfile(req));
 	}
 

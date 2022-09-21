@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 
 import com.boot.jx.model.ModelPatch;
 import com.boot.jx.model.ModelPatch.ModelPatchCommand;
+import com.boot.jx.model.ModelPatch.ModelPatches;
 import com.boot.jx.mongo.CommonMongoQueryBuilder.SimpleDocQueryBuilder;
 import com.boot.jx.mongo.CommonMongoTemplateAbstract;
 import com.boot.jx.postman.PMEnvironment;
@@ -108,46 +109,50 @@ public class ContactStore extends CommonMongoTemplateAbstract {
 		return pbPhone;
 	}
 
-	public CustomerProfileDoc patchCustomerProfile(ModelPatch req) {
+	public CustomerProfileDoc patchCustomerProfile(ModelPatches req) {
 		CustomerProfileDoc doc = findById(req.getId(), CustomerProfileDoc.class);
 		SimpleDocQueryBuilder qb = SimpleDocQueryBuilder.doc(doc);
 
-		switch (req.getField()) {
-		case "email":
-		case "emails":
-			PBEmail email = req.value().as(PBEmail.class);
-			qb.setunset("emails", patch(req.getCommand(), doc.emails(), email));
-			break;
-		case "phone":
-		case "phones":
-			PBPhone phone = parsePhone(req.value().as(PBPhone.class));
-			qb.setunset("phones", patch(req.getCommand(), doc.phones(), phone));
-			break;
-		case "address":
-		case "addresses":
-			PBAddress address = req.value().as(PBAddress.class);
-			qb.setunset("addresses", patch(req.getCommand(), doc.addresses(), address));
-			break;
-		case "url":
-		case "urls":
-			PBWebsite url = req.value().as(PBWebsite.class);
-			qb.setunset("urls", patch(req.getCommand(), doc.urls(), url));
-			break;
-		case "name":
-			PBName name = req.value().as(PBName.class);
-			qb.setunset("name", name.fix());
-			break;
-		case "code":
-			qb.setunset("code", req.value().asString());
-			break;
-		case "rmCode":
-			qb.setunset("rmCode", req.value().asString());
-			break;
-		default:
-			break;
+		for (ModelPatch patch : req.getPatches()) {
+			switch (patch.getField()) {
+			case "email":
+			case "emails":
+				PBEmail email = patch.value().as(PBEmail.class);
+				qb.setunset("emails", patch(patch.getCommand(), doc.emails(), email));
+				break;
+			case "phone":
+			case "phones":
+				PBPhone phone = parsePhone(patch.value().as(PBPhone.class));
+				qb.setunset("phones", patch(patch.getCommand(), doc.phones(), phone));
+				break;
+			case "address":
+			case "addresses":
+				PBAddress address = patch.value().as(PBAddress.class);
+				qb.setunset("addresses", patch(patch.getCommand(), doc.addresses(), address));
+				break;
+			case "url":
+			case "urls":
+				PBWebsite url = patch.value().as(PBWebsite.class);
+				qb.setunset("urls", patch(patch.getCommand(), doc.urls(), url));
+				break;
+			case "name":
+				PBName name = patch.value().as(PBName.class);
+				qb.setunset("name", name.fix());
+				break;
+			case "code":
+				qb.setunset("code", patch.value().asString());
+				break;
+			case "rmCode":
+				qb.setunset("rmCode", patch.value().asString());
+				break;
+			default:
+				break;
+			}
+			update(qb);
+			doc = findById(req.getId(), CustomerProfileDoc.class);
 		}
-		update(qb);
-		return findById(req.getId(), CustomerProfileDoc.class);
+
+		return doc;
 	}
 
 }
