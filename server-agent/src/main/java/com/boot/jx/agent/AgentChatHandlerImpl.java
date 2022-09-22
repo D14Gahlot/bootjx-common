@@ -30,7 +30,7 @@ import com.boot.jx.common.store.ChatArchiveBuilder;
 import com.boot.jx.common.store.ChatArchiveService;
 import com.boot.jx.common.store.DocumentUpdateListner;
 import com.boot.jx.logger.LoggerService;
-import com.boot.jx.mongo.CommonMongoQueryBuilder;
+import com.boot.jx.mongo.CommonMongoQB.MongoQueryBuilder;
 import com.boot.jx.mongo.CommonMongoUtils;
 import com.boot.jx.postman.ClientApp;
 import com.boot.jx.postman.PMConstants;
@@ -242,7 +242,8 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 	public void assignToAgent(ChatSessionDoc chatSessionDoc, String agentDept, String agentCode) {
 		sessionStore.assignToAgent(chatSessionDoc, agentDept, agentCode);
 		if (ArgUtil.is(agentCode)) {
-			CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder().whereId(agentCode);
+			MongoQueryBuilder<AgentSessionDoc> builder = MongoQueryBuilder.collection(AgentSessionDoc.class)
+					.whereId(agentCode);
 			builder.set("lastAssignStamp", System.currentTimeMillis());
 			sessionStore.upsert(builder.getQuery(), builder.getUpdate(), AgentSessionDoc.class);
 			documentUpdateListner.onAgentSessionUpdate(agentCode);

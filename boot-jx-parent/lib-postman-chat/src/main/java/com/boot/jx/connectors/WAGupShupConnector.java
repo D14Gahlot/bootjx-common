@@ -22,6 +22,7 @@ import com.boot.jx.postman.client.PMFileStoreClient;
 import com.boot.jx.postman.client.TmplClient;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
+import com.boot.jx.postman.doc.CustomerProfileDoc;
 import com.boot.jx.postman.gupshup.GupShupClientChat;
 import com.boot.jx.postman.gupshup.GupShupClientNotify;
 import com.boot.jx.postman.gupshup.GupShupDeliveryResp;
@@ -121,6 +122,11 @@ public class WAGupShupConnector extends AbstractConnector<GupShupConfigDetails, 
 	@Override
 	public InboxMessage assignToAgent(InboxMessage inboxMessage) {
 		return inboxMessage;
+	}
+
+	@Override
+	public CustomerProfileDoc findProfile(ChatContactDoc chatContactDoc) {
+		return contactStore.findProfileByPhone(chatContactDoc.getPhone());
 	}
 
 	@Override

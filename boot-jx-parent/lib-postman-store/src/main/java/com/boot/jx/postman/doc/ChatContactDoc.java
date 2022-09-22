@@ -349,4 +349,11 @@ public class ChatContactDoc implements Serializable, Contactable, AuditCreateEnt
 		}
 		return user;
 	}
+
+	public ChatUserProfileDTO profile() {
+		if (this.profile == null) {
+			this.profile = new ChatUserProfileDTO();
+		}
+		return profile;
+	}
 }

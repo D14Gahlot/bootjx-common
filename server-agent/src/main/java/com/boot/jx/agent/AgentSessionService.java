@@ -29,7 +29,7 @@ import com.boot.jx.common.store.DocumentUpdateListner;
 import com.boot.jx.http.CommonHttpRequest;
 import com.boot.jx.logger.AuditDetailProvider;
 import com.boot.jx.logger.LoggerService;
-import com.boot.jx.mongo.CommonMongoQueryBuilder;
+import com.boot.jx.mongo.CommonMongoQB.MongoQueryBuilder;
 import com.boot.jx.postman.PMConstants;
 import com.boot.jx.postman.PMConstants.DEFAULT;
 import com.boot.jx.postman.PMEnvironment.PMClientConfig;
@@ -73,13 +73,15 @@ public class AgentSessionService
 	private StompTunnelSessionManager stompTunnelSessionManager;
 
 	public List<AgentSessionDoc> getAgentSessions() {
-		CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder().where("isEnabled", true);
+		MongoQueryBuilder<AgentSessionDoc> builder = MongoQueryBuilder.collection(AgentSessionDoc.class)
+				.where("isEnabled", true);
 		return mongoTemplate.find(builder.getQuery(), AgentSessionDoc.class);
 	}
 
 	public void updateSession(boolean publish, AgentSessionBean agentSession) {
 
-		CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder().whereId(agentSession.getAgentCode());
+		MongoQueryBuilder<AgentSessionDoc> builder = MongoQueryBuilder.collection(AgentSessionDoc.class)
+				.whereId(agentSession.getAgentCode());
 		builder.set("agentCode", agentSession.getAgentCode());
 		builder.set("agentDept", agentSession.getAgentDept());
 		builder.set("isLoggedIn", agentSession.isLoggedIn());

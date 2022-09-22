@@ -14,9 +14,7 @@ import com.boot.jx.api.ApiFieldError;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.common.config.ConfigManager;
-import com.boot.jx.mongo.CommonMongoQB;
-import com.boot.jx.mongo.CommonMongoQB.CommonMongoQBimpl;
-import com.boot.jx.mongo.CommonMongoQueryBuilder;
+import com.boot.jx.mongo.CommonMongoQB.MongoQueryBuilder;
 import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.jx.postman.ClientApp;
 import com.boot.jx.postman.PMEnvironment;
@@ -104,8 +102,7 @@ public class ConfigApiV1 {
 	@RequestMapping(value = "/api/v1/config/tmpl/hsm", method = { RequestMethod.GET })
 	public ApiResponse<HSMTemplateDoc, Object> getHSMTemplates(@RequestParam(required = false) String channelId) {
 
-		CommonMongoQB<CommonMongoQBimpl<HSMTemplateDoc>, HSMTemplateDoc> cmq = CommonMongoQueryBuilder
-				.collection(HSMTemplateDoc.class);
+		MongoQueryBuilder<HSMTemplateDoc> cmq = MongoQueryBuilder.collection(HSMTemplateDoc.class);
 
 		if (ArgUtil.is(channelId)) {
 			cmq.where("approved.channelId", channelId);
@@ -120,8 +117,7 @@ public class ConfigApiV1 {
 	@RequestMapping(value = "/api/v1/config/global/vars", method = { RequestMethod.GET })
 	public ApiResponse<CompanyVarsConfigDoc, Object> getGlobalVars(@RequestParam(required = false) String channelId) {
 
-		CommonMongoQB<CommonMongoQBimpl<CompanyVarsConfigDoc>, CompanyVarsConfigDoc> cmq = CommonMongoQueryBuilder
-				.collection(CompanyVarsConfigDoc.class);
+		MongoQueryBuilder<CompanyVarsConfigDoc> cmq = MongoQueryBuilder.collection(CompanyVarsConfigDoc.class);
 
 		if (ArgUtil.is(channelId)) {
 			cmq.where("approved.channelId", channelId);

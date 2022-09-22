@@ -28,7 +28,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 public class CommonDocInterfaces {
 
-	public static interface MongoQueryBuilder<T> {
+	public static interface IMongoQueryBuilder<T> {
 		public boolean isUpdatedTimeStampSupport();
 
 		public boolean isCreatedTimeStampSupport();

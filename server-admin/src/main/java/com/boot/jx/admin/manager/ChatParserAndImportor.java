@@ -23,6 +23,7 @@ import com.boot.jx.api.ApiResponse;
 import com.boot.jx.common.doc.ImportChatSessionDoc;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.logger.AuditDetailProvider;
+import com.boot.jx.mongo.CommonMongoQB.MongoQueryBuilder;
 import com.boot.jx.mongo.CommonMongoQB.QueryCriteria;
 import com.boot.jx.mongo.CommonMongoQueryBuilder;
 import com.boot.jx.mongo.CommonMongoTemplate;
@@ -263,8 +264,8 @@ public class ChatParserAndImportor {
 
 		meta.put("importDetails", importChatSession);
 
-		CommonMongoQueryBuilder qb = new CommonMongoQueryBuilder().where(
-				QueryCriteria.where("fileMD5").is(importChatSession.getFileMD5()).and("status").is("COMPLETED"));
+		MongoQueryBuilder<ImportChatSessionDoc> qb = MongoQueryBuilder.collection(ImportChatSessionDoc.class)
+				.where(QueryCriteria.where("fileMD5").is(importChatSession.getFileMD5()).and("status").is("COMPLETED"));
 		List<ImportChatSessionDoc> duplicates = mongoTemplate.find(qb.getQuery(), ImportChatSessionDoc.class);
 		if (ArgUtil.is(duplicates)) {
 			meta.put("duplicates", importChatSession);

@@ -17,7 +17,7 @@ import com.boot.jx.model.AuditCreateEntity.AuditUpdateEntity;
 import com.boot.jx.mongo.CommonDocInterfaces.AuditActivityDoc;
 import com.boot.jx.mongo.CommonDocInterfaces.AuditableByIdEntity;
 import com.boot.jx.mongo.CommonDocInterfaces.DocVersion;
-import com.boot.jx.mongo.CommonDocInterfaces.MongoQueryBuilder;
+import com.boot.jx.mongo.CommonDocInterfaces.IMongoQueryBuilder;
 import com.boot.jx.mongo.CommonDocInterfaces.TimeStampIndex;
 import com.boot.jx.mongo.CommonDocInterfaces.TimeStampIndex.CreatedTimeStampIndexSupport;
 import com.boot.jx.mongo.CommonDocInterfaces.TimeStampIndex.UpdatedTimeStampIndexSupport;
@@ -109,16 +109,16 @@ public class CommonMongoTemplateAbstract extends CommonMongoTemplateDefault {
 		return null;
 	}
 
-	public <T> List<T> find(MongoQueryBuilder<T> builder, Class<T> clazz) {
+	public <T> List<T> find(IMongoQueryBuilder<T> builder, Class<T> clazz) {
 		return find(builder.getQuery(), clazz);
 	}
 
-	public <T> List<T> find(MongoQueryBuilder<T> builder) {
+	public <T> List<T> find(IMongoQueryBuilder<T> builder) {
 		// System.out.println("+++"+builder.getQuery());
 		return find(builder.getQuery(), builder.getDocClass());
 	}
 
-	public <T> T findOne(MongoQueryBuilder<T> builder) {
+	public <T> T findOne(IMongoQueryBuilder<T> builder) {
 		// System.out.println("+++"+builder.getQuery());
 		return findOne(builder.getQuery(), builder.getDocClass());
 	}
@@ -133,7 +133,7 @@ public class CommonMongoTemplateAbstract extends CommonMongoTemplateDefault {
 		return newVersion;
 	}
 
-	public WriteResult updateFirst(MongoQueryBuilder<?> builder) {
+	public WriteResult updateFirst(IMongoQueryBuilder<?> builder) {
 		WriteResult ret = null;
 		if (ArgUtil.is(builder.getUpdate())) {
 			try {
@@ -151,7 +151,7 @@ public class CommonMongoTemplateAbstract extends CommonMongoTemplateDefault {
 		return ret;
 	}
 
-	public WriteResult update(MongoQueryBuilder<?> builder) {
+	public WriteResult update(IMongoQueryBuilder<?> builder) {
 		WriteResult ret = null;
 		if (ArgUtil.is(builder.getUpdate())) {
 			try {
@@ -176,7 +176,7 @@ public class CommonMongoTemplateAbstract extends CommonMongoTemplateDefault {
 	 * @see MongoTemplate#upsert(Query,
 	 *      org.springframework.data.mongodb.core.query.Update, Class, String)
 	 */
-	public WriteResult upsert(MongoQueryBuilder<?> builder) {
+	public WriteResult upsert(IMongoQueryBuilder<?> builder) {
 		WriteResult ret = null;
 		if (ArgUtil.is(builder.getUpdate())) {
 			try {
