@@ -19,6 +19,7 @@ import org.springframework.util.MultiValueMap;
 import com.boot.jx.api.ApiFieldError;
 import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.dict.ContactType;
+import com.boot.jx.mongo.CommonMongoQB.MongoQueryBuilder;
 import com.boot.jx.mongo.CommonMongoQueryBuilder;
 import com.boot.jx.postman.ClientApp;
 import com.boot.jx.postman.PMConfiguration.PMConfigurationWrappper;
@@ -49,7 +50,6 @@ import com.boot.model.MapModel.NodeEntry;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
 import com.boot.utils.TimeUtils;
-import com.boot.utils.UniqueID;
 
 @Component
 public class ChatSessionManager {
@@ -446,7 +446,8 @@ public class ChatSessionManager {
 			chatSessionDoc.setAssignedToQueue(null);
 			chatSessionDoc.setMode(null);
 		}
-		CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder().whereId(chatSessionDoc.getSessionId());
+		MongoQueryBuilder<ChatSessionDoc> builder = MongoQueryBuilder.collection(ChatSessionDoc.class)
+				.whereId(chatSessionDoc.getSessionId());
 		builder.set("assignedToQueue", chatSessionDoc.getAssignedToQueue());
 		builder.set("mode", chatSessionDoc.getMode());
 		builder.set("routingId", chatSessionDoc.getRoutingId());
