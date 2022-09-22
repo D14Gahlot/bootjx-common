@@ -5,7 +5,6 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.EnableScheduling;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import com.boot.jx.AppConfig;
@@ -16,8 +15,7 @@ import com.boot.jx.common.config.ConfigConstants;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.inbound.InBoundPoller;
 import com.boot.jx.logger.LoggerService;
-import com.boot.jx.mongo.CommonMongoQB.CommonMongoQBimpl;
-import com.boot.jx.mongo.CommonMongoQueryBuilder;
+import com.boot.jx.mongo.CommonMongoQB.MongoQueryBuilder;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.doc.config.ChannelConfigDoc;
 import com.boot.jx.tunnel.ITunnelDefs.TunnelTask;
@@ -53,8 +51,8 @@ public class DomainJobs {
 		String serviceDomain = pmEnvironment.keyEntry(ConfigConstants.APP_KEY.PROP_SERVICE_SERVER).asString();
 
 		List<DomainDoc> domainDocs = accountStore.findAllDomainByServer(serviceDomain);
-		CommonMongoQBimpl<ChannelConfigDoc> emailChannelsQuery = CommonMongoQueryBuilder
-				.collection(ChannelConfigDoc.class).where("contactType", ContactType.EMAIL.name());
+		MongoQueryBuilder<ChannelConfigDoc> emailChannelsQuery = MongoQueryBuilder.collection(ChannelConfigDoc.class)
+				.where("contactType", ContactType.EMAIL.name());
 
 		for (DomainDoc domainDoc : domainDocs) {
 			AppContextUtil.clear();

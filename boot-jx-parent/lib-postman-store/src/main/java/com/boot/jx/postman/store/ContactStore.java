@@ -14,6 +14,11 @@ import org.springframework.stereotype.Component;
 import com.boot.jx.model.ModelPatch;
 import com.boot.jx.model.ModelPatch.ModelPatchCommand;
 import com.boot.jx.model.ModelPatch.ModelPatches;
+import com.boot.jx.mongo.CommonDocInterfaces.IMongoQueryBuilder;
+import com.boot.jx.mongo.CommonMongoQB;
+import com.boot.jx.mongo.CommonMongoQB.CommonMongoQBimpl;
+import com.boot.jx.mongo.CommonMongoQB.MongoQueryBuilder;
+import com.boot.jx.mongo.CommonMongoQueryBuilder;
 import com.boot.jx.mongo.CommonMongoQueryBuilder.SimpleDocQueryBuilder;
 import com.boot.jx.mongo.CommonMongoTemplateAbstract;
 import com.boot.jx.postman.PMEnvironment;
@@ -74,6 +79,16 @@ public class ContactStore extends CommonMongoTemplateAbstract {
 				.addCriteria(c);
 		return find(query, ChatContactDoc.class);
 
+	}
+
+	public CustomerProfileDoc findProfileByPhone(String phone) {
+		MongoQueryBuilder<CustomerProfileDoc> qb = CommonMongoQueryBuilder.collection(CustomerProfileDoc.class);
+		return null;
+	}
+
+	public CustomerProfileDoc findProfileByEmail(String email) {
+		MongoQueryBuilder<CustomerProfileDoc> qb = CommonMongoQueryBuilder.collection(CustomerProfileDoc.class);
+		return null;
 	}
 
 	public static <T extends UniqueIndex<T>> Set<T> patch(ModelPatchCommand command, Set<T> items, T item) {

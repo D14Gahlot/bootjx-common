@@ -224,6 +224,8 @@ public class ConnectorHandlerFactory extends ScopedBeanFactory<String, Connector
 
 		void prompt(InboxMessage inboxMessage);
 
+		void linkProfile(ChatSessionDoc session, InboxMessage inboxMessage);
+
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)

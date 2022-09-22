@@ -20,6 +20,8 @@ import com.boot.jx.postman.PMEnvironment.AChannelDetails;
 import com.boot.jx.postman.PMEnvironment.PMClientConfig;
 import com.boot.jx.postman.client.TmplClient;
 import com.boot.jx.postman.doc.ChatContactDoc;
+import com.boot.jx.postman.doc.ChatSessionDoc;
+import com.boot.jx.postman.doc.CustomerProfileDoc;
 import com.boot.jx.postman.doc.HSMTemplate3rdParty;
 import com.boot.jx.postman.manager.ChatLogger;
 import com.boot.jx.postman.model.InboxMessage;
@@ -29,7 +31,9 @@ import com.boot.jx.postman.model.MessagePrompt;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.postman.plugin.ChannelPluginProvider.ChannelPlugin;
+import com.boot.jx.postman.query.ChatContactQuery;
 import com.boot.jx.postman.service.ChatDTOUtil;
+import com.boot.jx.postman.store.ContactStore;
 import com.boot.jx.postman.store.MessageContext;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.model.MapModel;
@@ -62,6 +66,9 @@ public abstract class AbstractConnector<CD extends AChannelDetails, P extends Ch
 
 	@Autowired
 	protected ChatLogger logManager;
+
+	@Autowired
+	protected ContactStore contactStore;
 
 	@Override
 	public void onException(ChannelConfig channelConfig, ChatContactDoc chatContactDoc, OutboxMessage outboxMessage,
@@ -123,6 +130,23 @@ public abstract class AbstractConnector<CD extends AChannelDetails, P extends Ch
 	@Override
 	public ChatContactDoc getChatContact(IMessage iMessage) {
 		return messageContext.contact().getDoc();
+	}
+
+	protected CustomerProfileDoc findProfile(ChatContactDoc chatContactDoc) {
+		return null;
+	}
+
+	@Override
+	public void linkProfile(ChatSessionDoc session, InboxMessage inboxMessage) {
+		ChatContactQuery contactQuery = context().contact();
+		ChatContactDoc chatContactDoc = contactQuery.getDoc();
+		if (!ArgUtil.is(chatContactDoc.profile().getId())) {
+			CustomerProfileDoc profile = findProfile(chatContactDoc);
+			if (profile != null) {
+				contactQuery.set("profile.id", profile.getId());
+				contactQuery.set("profile.code", profile.code);
+			}
+		}
 	}
 
 	@Override
