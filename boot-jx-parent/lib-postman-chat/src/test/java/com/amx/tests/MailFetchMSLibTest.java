@@ -1,7 +1,6 @@
 package com.amx.tests;
 
 import java.math.BigDecimal;
-import java.net.URI;
 
 import com.boot.jx.scope.tnt.Tenants;
 import com.boot.utils.CryptoUtil;

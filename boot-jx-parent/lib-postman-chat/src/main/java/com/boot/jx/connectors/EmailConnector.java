@@ -40,6 +40,7 @@ import com.boot.jx.postman.PMEnvironment.PMClientConfig;
 import com.boot.jx.postman.client.PMFileStoreClient;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
+import com.boot.jx.postman.doc.CustomerProfileDoc;
 import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.InboxMessage;
@@ -112,6 +113,11 @@ public class EmailConnector extends AbstractConnector<EmailConfigDetails, EmailP
 		properties.put("mail.smtp.host", emailConfig.getSmtpHost());
 		properties.put("mail.smtp.port", emailConfig.getSmtpPort());
 		return Session.getDefaultInstance(properties);
+	}
+
+	@Override
+	public CustomerProfileDoc findProfile(ChatContactDoc chatContactDoc) {
+		return contactStore.findProfileByEmail(chatContactDoc.getEmail());
 	}
 
 	public OutboxMessage initSession(ChatSessionDoc session, InboxMessage inboxMessage) {
