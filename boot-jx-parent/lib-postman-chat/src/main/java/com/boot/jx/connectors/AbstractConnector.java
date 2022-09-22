@@ -34,6 +34,7 @@ import com.boot.jx.postman.store.MessageContext;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.JsonUtil;
 
 public abstract class AbstractConnector<CD extends AChannelDetails, P extends ChannelPlugin<CD>>
 		implements ConnectorHandler {
@@ -164,7 +165,7 @@ public abstract class AbstractConnector<CD extends AChannelDetails, P extends Ch
 		data.putAll(model.keyEntry(Message.DATA_KEY).asMap());
 		data.putAll(outboxMessage.hsm().data());
 		model.put(Message.DATA_KEY, data.toMap());
-		outboxMessage.setModel(model.toMap());
+		outboxMessage.setModel(JsonUtil.deepCopy(model.toMap()));
 
 		if (ArgUtil.isEmpty(outboxMessage.hsm().getLang())) {
 			outboxMessage.hsm().lang(chatContactDoc.prefs().getLang());
