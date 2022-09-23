@@ -14,6 +14,7 @@ import com.boot.jx.postman.PMEnvironment.AChannelConfig;
 import com.boot.jx.postman.PMEnvironment.PMConfigurationObject;
 import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.scope.tnt.Tenants;
+import com.boot.model.MapModel.EntryMeta;
 import com.boot.model.MapModel.NodeEntry;
 import com.boot.model.SafeKeyHashMap;
 import com.boot.utils.ArgUtil;
@@ -150,6 +151,10 @@ public interface PMConfiguration extends Serializable {
 
 		public PMConfigurationObject keyEntry(String key) {
 			return prefs().getOrDefault(key, new PMConfigurationObject(key, null));
+		}
+
+		public PMConfigurationObject keyEntry(EntryMeta entry) {
+			return this.keyEntry(entry.getKey());
 		}
 
 		public PMConfigurationObject getPref(String key, Object value) {

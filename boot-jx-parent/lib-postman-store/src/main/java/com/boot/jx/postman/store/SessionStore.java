@@ -57,6 +57,12 @@ public class SessionStore extends CommonMongoTemplateAbstract {
 	@Autowired
 	private PMDomainConfig pmDomainConfig;
 
+	public ChatContactDoc getContact(Contactable contactable) {
+		String contactId = PostManUtil.createContactId(contactable);
+		ChatContactDoc chatContactDoc = super.findById(contactId, ChatContactDoc.class);
+		return chatContactDoc;
+	}
+
 	public ChatContactDoc getContact(IMessage inboxMessage) {
 		String contactId = PostManUtil.createContactId(inboxMessage);
 		ChatContactDoc chatContactDoc = super.findById(contactId, ChatContactDoc.class);

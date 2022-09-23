@@ -124,6 +124,10 @@ public class ConfigConstants {
 						PMConstants.ASSIGNMENT_RULE.STRICT_DEFAULT)
 				.defaultValue(PMConstants.ASSIGNMENT_RULE.ROUND_ROBIN).group(GROUP_AGENT)),
 
+		POSTMAN_AGENT_CHAT_STICKY_RMAGENT(new ConfigMeta("Agent Assignment RM", "postman.agent.chat.sticky.rmagent")
+				.optionValues(PMConstants.CHAT_SESSION_STICKY.ONAVAILABLE, PMConstants.CHAT_SESSION_STICKY.STRICT)
+				.defaultValue(PMConstants.CHAT_SESSION_STICKY.STRICT).group(GROUP_AGENT)),
+
 		POSTMAN_AGENT_CHAT_STICKYSESSION(new ConfigMeta("Sticky Session", "postman.agent.chat.stickysession")
 				.optionValues(PMConstants.CHAT_SESSION_STICKY.NONE, PMConstants.CHAT_SESSION_STICKY.ONAVAILABLE,
 						PMConstants.CHAT_SESSION_STICKY.STRICT)
@@ -240,15 +244,23 @@ public class ConfigConstants {
 		;
 
 		private String key;
+		private Object defaultValue;
 
 		SETUP_KEY(ConfigMeta defaultFalse) {
 			this.key = defaultFalse.getKey();
 			ConfigConstants.SETUP_CONFIG_LIST.add(defaultFalse);
+			defaultValue = defaultFalse.getDefaultValue();
 		}
 
 		public String getKey() {
 			return key;
 		}
+
+		@SuppressWarnings("unchecked")
+		public <T> T getDefaultValue() {
+			return (T) defaultValue;
+		}
+
 	}
 
 	static {

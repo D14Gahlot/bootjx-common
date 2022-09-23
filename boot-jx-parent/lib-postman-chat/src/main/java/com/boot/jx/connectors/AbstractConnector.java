@@ -138,14 +138,19 @@ public abstract class AbstractConnector<CD extends AChannelDetails, P extends Ch
 
 	@Override
 	public void linkProfile(ChatSessionDoc session, InboxMessage inboxMessage) {
-		ChatContactQuery contactQuery = context().contact();
-		ChatContactDoc chatContactDoc = contactQuery.getDoc();
-		if (!ArgUtil.is(chatContactDoc.profile().getId())) {
-			CustomerProfileDoc profile = findProfile(chatContactDoc);
-			if (profile != null) {
-				contactQuery.set("profile.id", profile.getId());
-				contactQuery.set("profile.code", profile.code);
+		try {
+			ChatContactQuery contactQuery = context().contact();
+			ChatContactDoc chatContactDoc = contactQuery.getDoc();
+			if (!ArgUtil.is(chatContactDoc.profile().getId())) {
+				CustomerProfileDoc profile = findProfile(chatContactDoc);
+				if (profile != null) {
+					contactQuery.set("profile.id", profile.getId());
+					contactQuery.set("profile.code", profile.code);
+					contactQuery.set("profile.name", profile.name.getFormattedName());
+				}
 			}
+		} catch (Exception e) {
+			logManager.error(e);
 		}
 	}
 

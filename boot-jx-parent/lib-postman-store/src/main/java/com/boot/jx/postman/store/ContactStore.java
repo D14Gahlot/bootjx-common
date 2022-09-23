@@ -52,6 +52,25 @@ public class ContactStore extends CommonMongoTemplateAbstract {
 	@Autowired
 	protected PMEnvironment environment;
 
+	public PBPhone parsePhone(PBPhone pbPhone) {
+		String defaultRegion = environment.keyEntry("postman.phonebook.region").asString("IN");
+		if (ArgUtil.not(pbPhone.phone)) {
+			pbPhone.phone = String.format("+%s%s", pbPhone.countryCallingCode, pbPhone.nationalNumber);
+		}
+		pbPhone.phone = pbPhone.phone.replace(" ", "").replaceAll("^[\\+0\\s]+(?!$)", "").trim();
+		try {
+			PhoneNumber phoneNumber = PHONE_NUMBER_UTIL.parse("+" + pbPhone.phone, defaultRegion);
+			pbPhone.nationalNumber = ArgUtil.parseAsString(phoneNumber.getNationalNumber());
+			pbPhone.countryCallingCode = ArgUtil.parseAsString(phoneNumber.getCountryCode());
+			pbPhone.phone = String.format("+%s%s", phoneNumber.getCountryCode(), phoneNumber.getNationalNumber());
+			pbPhone.country = PHONE_NUMBER_UTIL.getRegionCodeForCountryCode(phoneNumber.getCountryCode());
+		} catch (NumberParseException e) {
+
+		}
+
+		return pbPhone;
+	}
+
 	public ChatContactDoc findContact(Contactable contactMeta) {
 		Contactable contact = PostManUtil.getContactMeta(contactMeta);
 		if (ArgUtil.isEmpty(contact.getContactId())) {
@@ -82,13 +101,17 @@ public class ContactStore extends CommonMongoTemplateAbstract {
 	}
 
 	public CustomerProfileDoc findProfileByPhone(String phone) {
-		MongoQueryBuilder<CustomerProfileDoc> qb = CommonMongoQueryBuilder.collection(CustomerProfileDoc.class);
-		return null;
+		PBPhone ph = parsePhone(new PBPhone().phone(phone));
+		MongoQueryBuilder<CustomerProfileDoc> qb = CommonMongoQueryBuilder.collection(CustomerProfileDoc.class)
+				.where(Criteria.where("phones").elemMatch(Criteria.where("nationalNumber").is(ph.nationalNumber)
+						.and("countryCallingCode").is(ph.countryCallingCode)));
+		return findOne(qb);
 	}
 
 	public CustomerProfileDoc findProfileByEmail(String email) {
-		MongoQueryBuilder<CustomerProfileDoc> qb = CommonMongoQueryBuilder.collection(CustomerProfileDoc.class);
-		return null;
+		MongoQueryBuilder<CustomerProfileDoc> qb = CommonMongoQueryBuilder.collection(CustomerProfileDoc.class)
+				.where(Criteria.where("emails").elemMatch(Criteria.where("email").is(email)));
+		return findOne(qb);
 	}
 
 	public static <T extends UniqueIndex<T>> Set<T> patch(ModelPatchCommand command, Set<T> items, T item) {
@@ -115,25 +138,6 @@ public class ContactStore extends CommonMongoTemplateAbstract {
 			break;
 		}
 		return items;
-	}
-
-	public PBPhone parsePhone(PBPhone pbPhone) {
-		String defaultRegion = environment.keyEntry("postman.phonebook.region").asString("IN");
-		if (ArgUtil.not(pbPhone.phone)) {
-			pbPhone.phone = String.format("+%s%s", pbPhone.countryCallingCode, pbPhone.nationalNumber);
-		}
-		pbPhone.phone = pbPhone.phone.replace(" ", "").replaceAll("^[\\+0\\s]+(?!$)", "").trim();
-		try {
-			PhoneNumber phoneNumber = PHONE_NUMBER_UTIL.parse("+" + pbPhone.phone, defaultRegion);
-			pbPhone.nationalNumber = ArgUtil.parseAsString(phoneNumber.getNationalNumber());
-			pbPhone.countryCallingCode = ArgUtil.parseAsString(phoneNumber.getCountryCode());
-			pbPhone.phone = String.format("+%s%s", phoneNumber.getCountryCode(), phoneNumber.getNationalNumber());
-			pbPhone.country = PHONE_NUMBER_UTIL.getRegionCodeForCountryCode(phoneNumber.getCountryCode());
-		} catch (NumberParseException e) {
-
-		}
-
-		return pbPhone;
 	}
 
 	public CustomerProfileDoc patchCustomerProfile(ModelPatches req) {

@@ -1,12 +1,15 @@
 package com.boot.jx;
 
 import static org.junit.Assert.assertTrue;
+import static org.springframework.data.mongodb.core.aggregation.Aggregation.bind;
+import static org.springframework.data.mongodb.core.aggregation.Aggregation.group;
 import static org.springframework.data.mongodb.core.aggregation.Aggregation.match;
-import static org.springframework.data.mongodb.core.aggregation.Aggregation.*;
+import static org.springframework.data.mongodb.core.aggregation.Aggregation.project;
+import static org.springframework.data.mongodb.core.aggregation.Aggregation.sort;
+import static org.springframework.data.mongodb.core.aggregation.Aggregation.unwind;
 
 import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import org.junit.Test;
@@ -14,17 +17,23 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
-import org.springframework.data.mongodb.core.aggregation.Fields;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.test.context.TestPropertySource;
 
+import com.boot.jx.mongo.CommonMongoQB.MongoQueryBuilder;
+import com.boot.jx.mongo.CommonMongoQueryBuilder;
 import com.boot.jx.mongo.CommonMongoSource;
 import com.boot.jx.mongo.CommonMongoUtils;
 import com.boot.jx.mongo.MongoTemplateCommonImpl;
+import com.boot.jx.postman.doc.CustomerProfileDoc;
 import com.boot.jx.postman.doc.QuickMedia;
+import com.boot.jx.postman.pbook.PBPhone;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.Constants;
 import com.boot.utils.JsonUtil;
+import com.google.i18n.phonenumbers.NumberParseException;
+import com.google.i18n.phonenumbers.PhoneNumberUtil;
+import com.google.i18n.phonenumbers.Phonenumber.PhoneNumber;
 import com.mongodb.AggregationOptions;
 import com.mongodb.AggregationOptions.OutputMode;
 import com.mongodb.BasicDBObject;
@@ -35,14 +44,17 @@ import com.mongodb.DBObject;
 @TestPropertySource(locations = "classpath:application-test.properties")
 public class ChatStoreTest { // Noncompliant
 
+	public static final PhoneNumberUtil PHONE_NUMBER_UTIL = PhoneNumberUtil.getInstance();
+
 	@Value("${spring.data.mongodb.uri}")
 	private String secondProperty;
 
 	private MongoTemplateCommonImpl mongoTemplate;
 
 	private void initMongo() {
-		AppContextUtil.setTenant("demo");
+		AppContextUtil.setTenant("lalit");
 		String connectionString = System.getProperty("spring.data.mongodb.uri");
+		System.out.println(connectionString);
 		CommonMongoSource commonMongoSource = new CommonMongoSource();
 		commonMongoSource.setDataSourceUrl(connectionString);
 		commonMongoSource.setGlobalDataSourceUrl(connectionString);
@@ -50,6 +62,25 @@ public class ChatStoreTest { // Noncompliant
 
 		mongoTemplate = new MongoTemplateCommonImpl(commonMongoSource.getMongoDbFactory());
 		mongoTemplate.setMongoDBCredentials(commonMongoSource);
+	}
+
+	public PBPhone parsePhone(PBPhone pbPhone) {
+		String defaultRegion = "IN";
+		if (ArgUtil.not(pbPhone.phone)) {
+			pbPhone.phone = String.format("+%s%s", pbPhone.countryCallingCode, pbPhone.nationalNumber);
+		}
+		pbPhone.phone = pbPhone.phone.replace(" ", "").replaceAll("^[\\+0\\s]+(?!$)", "").trim();
+		try {
+			PhoneNumber phoneNumber = PHONE_NUMBER_UTIL.parse("+" + pbPhone.phone, defaultRegion);
+			pbPhone.nationalNumber = ArgUtil.parseAsString(phoneNumber.getNationalNumber());
+			pbPhone.countryCallingCode = ArgUtil.parseAsString(phoneNumber.getCountryCode());
+			pbPhone.phone = String.format("+%s%s", phoneNumber.getCountryCode(), phoneNumber.getNationalNumber());
+			pbPhone.country = PHONE_NUMBER_UTIL.getRegionCodeForCountryCode(phoneNumber.getCountryCode());
+		} catch (NumberParseException e) {
+
+		}
+
+		return pbPhone;
 	}
 
 	public static void main(String[] args) throws ParseException {
@@ -81,6 +112,25 @@ public class ChatStoreTest { // Noncompliant
 	}
 
 	@Test
+	public void profile() {
+		initMongo();
+		PBPhone ph = parsePhone(new PBPhone().phone("91993104050"));
+		MongoQueryBuilder<CustomerProfileDoc> qb = CommonMongoQueryBuilder.collection(CustomerProfileDoc.class)
+				.where(Criteria.where("phones").elemMatch(Criteria.where("nationalNumber").is(ph.nationalNumber)
+						.and("countryCallingCode").is(ph.countryCallingCode)));
+
+		System.out.println("====" + qb.getQuery().toString());
+
+		List<CustomerProfileDoc> profiles = mongoTemplate.find(qb.getQuery(), CustomerProfileDoc.class);
+
+		System.out.println("=========================================");
+		for (CustomerProfileDoc customerProfileDoc : profiles) {
+			System.out.println("====" + JsonUtil.toJson(customerProfileDoc));
+		}
+		System.out.println("=========================================");
+	}
+
+	// @Test
 	public void testSkillMatch() {
 		initMongo();
 		System.out.println("=testSkillMatch==");
