@@ -133,7 +133,7 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 		LOGGER.debug("CHAT_RM_STICKY : {}", rmStickyLogic);
 		if (!PMConstants.CHAT_SESSION_STICKY.NONE.equals(rmStickyLogic)) {
 			ChatContactDoc c = sessionStore.getContact(params.contact());
-			if (ArgUtil.is(c.profile().getId())) {
+			if (ArgUtil.is(c) && ArgUtil.is(c.profile().getId())) {
 				CustomerProfileDoc profile = sessionStore.findById(c.profile().getId(), CustomerProfileDoc.class);
 				if (profile != null && ArgUtil.is(profile.rmCode)) {
 					rmAgent = profile.rmCode;
@@ -355,7 +355,8 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 		if (!ArgUtil.areEqual(chatSessionDoc.getAssignedToAgent(), agentCode)
 				|| !ArgUtil.areEqual(chatSessionDoc.getAssignedToDept(), agentDept)) {
 
-			this.doAssign(chatSessionDoc, new PMArgs().assignToDeptCode(agentDept).assignToAgentCode(agentCode));
+			this.doAssign(chatSessionDoc, new PMArgs().contact(chatSessionDoc.contact()).assignToDeptCode(agentDept)
+					.assignToAgentCode(agentCode));
 
 			ClientApp app = messageContext.clientApp(chatSessionDoc.getAssignedToQueue(), chatSessionDoc.contact());
 			MapModel props = MapModel.from(app.props());

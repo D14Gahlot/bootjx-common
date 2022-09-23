@@ -172,6 +172,7 @@ public class AgentInBoundHandler extends DefaultChatBoundHandler {
 		MapModel props = new MapModel(targetAppQueue.props());
 		AppContextUtil.setActorId(targetAppQueue.getQueue());
 		assignSessionToAgent(new PMArgs()
+				.contact(pmArgs.contact())
 				.assignToDeptCode(ArgUtil.nonEmpty(pmArgs.getAssignToDeptCode(), props.getString("deptCode")))
 				.assignToAgentCode(ArgUtil.nonEmpty(pmArgs.getAssignToAgentCode(), props.getString("agentCode")))
 				.assignToSkillCodes(pmArgs.getAssignToSkillCodes()), sessionDoc);
