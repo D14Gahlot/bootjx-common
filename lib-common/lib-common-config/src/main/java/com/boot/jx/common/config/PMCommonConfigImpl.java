@@ -201,12 +201,12 @@ public class PMCommonConfigImpl implements PMCommonConfig {
 	}
 
 	public String getBotUrl() {
-		return botUrl;
+		return pmEnvironment.keyEntry(ConfigConstants.APP_KEY.PROP_BOT_URL).asString(this.botUrl);
 	}
 
 	@Override
 	public String getAgentUrl() {
-		return agentUrl;
+		return pmEnvironment.keyEntry(ConfigConstants.APP_KEY.PROP_AGENT_URL).asString(this.agentUrl);
 	}
 
 	@Override

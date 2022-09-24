@@ -38,6 +38,8 @@ public class ConfigConstants {
 		PROP_SERVICE_DOMAIN(new ConfigMeta("server", "mry.prop.service.domain")),
 		PROP_SERVICE_SERVER(new ConfigMeta("server", "mry.prop.service.server")),
 		PROP_SCRIPTUS_URL(new ConfigMeta("server", "mry.scriptus.url")),
+		PROP_AGENT_URL(new ConfigMeta("server", "mry.agent.url")),
+		PROP_BOT_URL(new ConfigMeta("server", "mry.bot.url")),
 		// Ends here
 		;
 
