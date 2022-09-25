@@ -128,7 +128,7 @@ public class ContactStore extends CommonMongoTemplateAbstract {
 		}
 
 		if (ArgUtil.is(contact.user().getCode())) {
-			orOperator.add(Criteria.where("emails").elemMatch(Criteria.where("email").is(contact.getEmail())));
+			orOperator.add(Criteria.where("code").is(contact.user().getCode()));
 		}
 
 		if (ArgUtil.is(contact.user().getEmail())) {
@@ -136,7 +136,7 @@ public class ContactStore extends CommonMongoTemplateAbstract {
 		}
 
 		if (ArgUtil.is(contact.user().getMobile())) {
-			PBPhone ph = parsePhone(new PBPhone().phone(contact.getPhone()));
+			PBPhone ph = parsePhone(new PBPhone().phone(contact.user().getMobile()));
 			orOperator.add(Criteria.where("phones").elemMatch(Criteria.where("nationalNumber").is(ph.nationalNumber)
 					.and("countryCallingCode").is(ph.countryCallingCode)));
 		}
