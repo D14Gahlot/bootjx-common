@@ -72,6 +72,11 @@ public class AppFaqController {
 		return ApiResponse.buildResults(getFaqByCode(lang,parent,code));
 	}
 	
+	@RequestMapping(value = "/pub/app/faq/all", method = { RequestMethod.GET })
+	public ApiResponse<AppFaqDoc, Object> getAllFaq(@RequestParam(required = false) String lang) {
+		return ApiResponse.buildResults(fetchAllFaq(lang));
+	}
+	
 	public List<AppFaqDoc> getParents(String lang){
 		Query query = new Query();
 		if(ArgUtil.is(lang)) {
@@ -95,5 +100,11 @@ public class AppFaqController {
 		}
 		List<AppFaqDoc> faqParentLst = mongoTemplate.find(query, AppFaqDoc.class);
 	   return faqParentLst;
+	}
+	
+	public List<AppFaqDoc> fetchAllFaq(String lang){
+		Query query = new Query();
+		List<AppFaqDoc> faqLst = mongoTemplate.find(query, AppFaqDoc.class);
+	    return faqLst;
 	}
 }
