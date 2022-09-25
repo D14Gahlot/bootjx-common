@@ -142,7 +142,7 @@ public class ContactStore extends CommonMongoTemplateAbstract {
 		}
 
 		MongoQueryBuilder<CustomerProfileDoc> qb = CommonMongoQueryBuilder.collection(CustomerProfileDoc.class)
-				.where(new Criteria().orOperator(new Criteria[orOperator.size()]));
+				.where(new Criteria().orOperator(orOperator.toArray(new Criteria[orOperator.size()])));
 		return find(qb);
 	}
 
