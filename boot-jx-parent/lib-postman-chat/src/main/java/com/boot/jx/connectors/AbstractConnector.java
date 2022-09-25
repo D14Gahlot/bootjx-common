@@ -144,9 +144,7 @@ public abstract class AbstractConnector<CD extends AChannelDetails, P extends Ch
 			if (!ArgUtil.is(chatContactDoc.profile().getId())) {
 				CustomerProfileDoc profile = findProfile(chatContactDoc);
 				if (profile != null) {
-					contactQuery.set("profile.id", profile.getId());
-					contactQuery.set("profile.code", profile.code);
-					contactQuery.set("profile.name", profile.name.getFormattedName());
+					contactStore.linkProfile(contactQuery, profile);
 				}
 			}
 		} catch (Exception e) {
