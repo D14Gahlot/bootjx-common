@@ -156,9 +156,10 @@ public class ContactStore extends CommonMongoTemplateAbstract {
 		CustomerProfileDoc profile = findById(profileId, CustomerProfileDoc.class);
 		ChatContactDoc contact = findById(contactId, ChatContactDoc.class);
 		ChatContactQuery query = new ChatContactQuery(contact);
-		query.set("profile.id", profile.getId());
-		query.set("profile.code", profile.code);
-		query.set("profile.name", profile.name.getFormattedName());
+		contact.profile().setId(profile.getId());
+		contact.profile().setCode(profile.code);
+		contact.profile().setName(profile.name.getFormattedName());
+		query.set("profile", contact.profile());
 		linkProfile(query, profile);
 		update(query);
 		return contact;
@@ -168,6 +169,7 @@ public class ContactStore extends CommonMongoTemplateAbstract {
 		ChatContactDoc contact = findById(contactId, ChatContactDoc.class);
 		ChatContactQuery query = new ChatContactQuery(contact);
 		query.unset("profile");
+		contact.setProfile(null);
 		update(query);
 		return contact;
 	}
