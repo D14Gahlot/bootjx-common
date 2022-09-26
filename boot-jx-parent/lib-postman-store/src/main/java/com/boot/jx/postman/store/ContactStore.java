@@ -147,19 +147,17 @@ public class ContactStore extends CommonMongoTemplateAbstract {
 	}
 
 	public void linkProfile(ChatContactQuery contactQuery, CustomerProfileDoc profile) {
-		contactQuery.set("profile.id", profile.getId());
-		contactQuery.set("profile.code", profile.code);
-		contactQuery.set("profile.name", profile.name.getFormattedName());
+		ChatContactDoc contact = contactQuery.getDoc();
+		contact.profile().setId(profile.getId());
+		contact.profile().setCode(profile.code);
+		contact.profile().setName(profile.name.getFormattedName());
+		contactQuery.set("profile", contact.profile());
 	}
 
 	public ChatContactDoc linkProfile(String contactId, String profileId) {
 		CustomerProfileDoc profile = findById(profileId, CustomerProfileDoc.class);
 		ChatContactDoc contact = findById(contactId, ChatContactDoc.class);
 		ChatContactQuery query = new ChatContactQuery(contact);
-		contact.profile().setId(profile.getId());
-		contact.profile().setCode(profile.code);
-		contact.profile().setName(profile.name.getFormattedName());
-		query.set("profile", contact.profile());
 		linkProfile(query, profile);
 		update(query);
 		return contact;
