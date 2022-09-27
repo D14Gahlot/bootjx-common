@@ -9,6 +9,9 @@ import org.springframework.stereotype.Component;
 
 import com.boot.jx.common.doc.AgentDoc;
 import com.boot.jx.common.doc.DepartmentDoc;
+import com.boot.jx.mongo.CommonDocInterfaces.IMongoQueryBuilder;
+import com.boot.jx.mongo.CommonMongoQB;
+import com.boot.jx.mongo.CommonMongoQB.MQB;
 import com.boot.jx.mongo.CommonMongoQB.MongoQueryBuilder;
 import com.boot.jx.mongo.CommonMongoQueryBuilder;
 import com.boot.jx.mongo.CommonMongoTemplate;
@@ -32,11 +35,11 @@ public class AgentStore {
 		logAgentUpdate(agent);
 	}
 
-	public void updateMulti(MongoQueryBuilder<?> builder, Class<?> entityClass) {
+	public void updateMulti(IMongoQueryBuilder<?> builder, Class<?> entityClass) {
 		mongoTemplate.updateMulti(builder.getQuery(), builder.getUpdate(), entityClass);
 	}
 
-	public void updateFirst(MongoQueryBuilder<?> builder, Class<?> entityClass) {
+	public void updateFirst(IMongoQueryBuilder<?> builder, Class<?> entityClass) {
 		mongoTemplate.updateFirst(builder.getQuery(), builder.getUpdate(), entityClass);
 	}
 
@@ -86,7 +89,7 @@ public class AgentStore {
 	}
 
 	public DepartmentDoc findDepartmentByCode(String deptCode) {
-		MongoQueryBuilder<DepartmentDoc> builder = MongoQueryBuilder.collection(DepartmentDoc.class).whereId(deptCode);
+		MQB<DepartmentDoc> builder = MQB.select(DepartmentDoc.class).whereId(deptCode);
 		return mongoTemplate.findOne(builder.getQuery(), DepartmentDoc.class);
 	}
 
@@ -102,8 +105,8 @@ public class AgentStore {
 
 	public void updateAgentActive(String agentId, String status) {
 		boolean isEnabled = "Y".equalsIgnoreCase(status);
-		MongoQueryBuilder<AgentDoc> cqb2 = MongoQueryBuilder.collection(AgentDoc.class).set("isEnabled", isEnabled)
-				.set("isactive", status);
+		MQB<AgentDoc> cqb2 = MQB.select(AgentDoc.class).whereId(agentId).set("isEnabled", isEnabled).set("isactive",
+				status);
 		updateFirst(cqb2, AgentDoc.class);
 		logAgentUpdate(agentId);
 	}

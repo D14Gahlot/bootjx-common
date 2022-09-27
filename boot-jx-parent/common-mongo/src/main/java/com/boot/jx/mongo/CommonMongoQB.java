@@ -279,6 +279,10 @@ public class CommonMongoQB<M extends CommonMongoQB<M, T>, T> implements IMongoQu
 
 	}
 
+	public static class MQB<R> extends CommonMongoQB<MQB<R>, R> {
+
+	}
+
 	public static class MongoQBimpl<R> extends MongoQueryBuilder<R> {
 
 	}
@@ -289,6 +293,12 @@ public class CommonMongoQB<M extends CommonMongoQB<M, T>, T> implements IMongoQu
 
 	public static <T> MongoQueryBuilder<T> collection(Class<T> docClass) {
 		MongoQueryBuilder<T> x = new MongoQueryBuilder<T>();
+		x.setDocClass(docClass);
+		return x;
+	}
+
+	public static <T> MQB<T> select(Class<T> docClass) {
+		MQB<T> x = new MQB<T>();
 		x.setDocClass(docClass);
 		return x;
 	}
