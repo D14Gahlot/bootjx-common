@@ -1,5 +1,6 @@
 package com.boot.jx.postman.store;
 
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -14,9 +15,6 @@ import org.springframework.stereotype.Component;
 import com.boot.jx.model.ModelPatch;
 import com.boot.jx.model.ModelPatch.ModelPatchCommand;
 import com.boot.jx.model.ModelPatch.ModelPatches;
-import com.boot.jx.mongo.CommonDocInterfaces.IMongoQueryBuilder;
-import com.boot.jx.mongo.CommonMongoQB;
-import com.boot.jx.mongo.CommonMongoQB.CommonMongoQBimpl;
 import com.boot.jx.mongo.CommonMongoQB.MongoQueryBuilder;
 import com.boot.jx.mongo.CommonMongoQueryBuilder;
 import com.boot.jx.mongo.CommonMongoQueryBuilder.SimpleDocQueryBuilder;
@@ -31,6 +29,7 @@ import com.boot.jx.postman.pbook.PBEmail;
 import com.boot.jx.postman.pbook.PBName;
 import com.boot.jx.postman.pbook.PBPhone;
 import com.boot.jx.postman.pbook.PBWebsite;
+import com.boot.jx.postman.query.ChatContactQuery;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.model.UtilityModels.UniqueIndex;
 import com.boot.utils.ArgUtil;
@@ -112,6 +111,65 @@ public class ContactStore extends CommonMongoTemplateAbstract {
 		MongoQueryBuilder<CustomerProfileDoc> qb = CommonMongoQueryBuilder.collection(CustomerProfileDoc.class)
 				.where(Criteria.where("emails").elemMatch(Criteria.where("email").is(email)));
 		return findOne(qb);
+	}
+
+	public List<CustomerProfileDoc> findProfileByContactId(String contactId) {
+		ChatContactDoc contact = findById(contactId, ChatContactDoc.class);
+
+		List<Criteria> orOperator = new LinkedList<Criteria>();
+
+		if (ArgUtil.is(contact.getEmail())) {
+			orOperator.add(Criteria.where("emails").elemMatch(Criteria.where("email").is(contact.getEmail())));
+		}
+		if (ArgUtil.is(contact.getPhone())) {
+			PBPhone ph = parsePhone(new PBPhone().phone(contact.getPhone()));
+			orOperator.add(Criteria.where("phones").elemMatch(Criteria.where("nationalNumber").is(ph.nationalNumber)
+					.and("countryCallingCode").is(ph.countryCallingCode)));
+		}
+
+		if (ArgUtil.is(contact.user().getCode())) {
+			orOperator.add(Criteria.where("code").is(contact.user().getCode()));
+		}
+
+		if (ArgUtil.is(contact.user().getEmail())) {
+			orOperator.add(Criteria.where("emails").elemMatch(Criteria.where("email").is(contact.user().getEmail())));
+		}
+
+		if (ArgUtil.is(contact.user().getMobile())) {
+			PBPhone ph = parsePhone(new PBPhone().phone(contact.user().getMobile()));
+			orOperator.add(Criteria.where("phones").elemMatch(Criteria.where("nationalNumber").is(ph.nationalNumber)
+					.and("countryCallingCode").is(ph.countryCallingCode)));
+		}
+
+		MongoQueryBuilder<CustomerProfileDoc> qb = CommonMongoQueryBuilder.collection(CustomerProfileDoc.class)
+				.where(new Criteria().orOperator(orOperator.toArray(new Criteria[orOperator.size()])));
+		return find(qb);
+	}
+
+	public void linkProfile(ChatContactQuery contactQuery, CustomerProfileDoc profile) {
+		ChatContactDoc contact = contactQuery.getDoc();
+		contact.profile().setId(profile.getId());
+		contact.profile().setCode(profile.code);
+		contact.profile().setName(profile.name.getFormattedName());
+		contactQuery.set("profile", contact.profile());
+	}
+
+	public ChatContactDoc linkProfile(String contactId, String profileId) {
+		CustomerProfileDoc profile = findById(profileId, CustomerProfileDoc.class);
+		ChatContactDoc contact = findById(contactId, ChatContactDoc.class);
+		ChatContactQuery query = new ChatContactQuery(contact);
+		linkProfile(query, profile);
+		update(query);
+		return contact;
+	}
+
+	public ChatContactDoc delinkProfile(String contactId) {
+		ChatContactDoc contact = findById(contactId, ChatContactDoc.class);
+		ChatContactQuery query = new ChatContactQuery(contact);
+		query.unset("profile");
+		contact.setProfile(null);
+		update(query);
+		return contact;
 	}
 
 	public static <T extends UniqueIndex<T>> Set<T> patch(ModelPatchCommand command, Set<T> items, T item) {

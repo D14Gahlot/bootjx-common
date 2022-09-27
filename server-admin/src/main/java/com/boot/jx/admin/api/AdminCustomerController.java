@@ -12,6 +12,7 @@ import com.boot.jx.api.ApiResponse;
 import com.boot.jx.model.ModelPatch.ModelPatches;
 import com.boot.jx.mongo.CommonMongoQB.MongoQueryBuilder;
 import com.boot.jx.postman.PMEnvironment;
+import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.CustomerProfileDoc;
 import com.boot.jx.postman.store.ContactStore;
 import com.boot.utils.ArgUtil;
@@ -31,10 +32,16 @@ public class AdminCustomerController {
 			@RequestParam(required = false, defaultValue = "0") int pageNo,
 			@RequestParam(required = false, defaultValue = "25") int pageSize,
 			@RequestParam(required = false) String sortBy,
-			@RequestParam(required = false, defaultValue = "asc") String sortDir) {
+			@RequestParam(required = false, defaultValue = "asc") String sortDir,
+			@RequestParam(required = false) String contactId) {
+		if (ArgUtil.is(contactId)) {
+			return ApiResponse.buildResults(contactStore.findProfileByContactId(contactId));
+		}
 		MongoQueryBuilder<CustomerProfileDoc> q = MongoQueryBuilder.collection(CustomerProfileDoc.class).page(pageNo,
 				pageSize);
-
+		if (ArgUtil.is(id)) {
+			q = q.whereId(id);
+		}
 		if (ArgUtil.is(sortBy)) {
 			q = q.sortBy(sortBy, Direction.fromString(sortDir));
 		}
@@ -61,6 +68,19 @@ public class AdminCustomerController {
 	@JsonView(PMEnvironment.PublicProperty.class)
 	public ApiResponse<CustomerProfileDoc, Object> modifyProfiles(@RequestBody ModelPatches req) {
 		return ApiResponse.buildResult(contactStore.patchCustomerProfile(req));
+	}
+
+	@RequestMapping(value = "/profile/link", method = { RequestMethod.POST })
+	@JsonView(PMEnvironment.PublicProperty.class)
+	public ApiResponse<ChatContactDoc, Object> linkProfile(@RequestParam String profileId,
+			@RequestParam String contactId) {
+		return ApiResponse.buildResult(contactStore.linkProfile(contactId, profileId));
+	}
+
+	@RequestMapping(value = "/profile/link", method = { RequestMethod.DELETE })
+	@JsonView(PMEnvironment.PublicProperty.class)
+	public ApiResponse<ChatContactDoc, Object> linkProfile(@RequestParam String contactId) {
+		return ApiResponse.buildResult(contactStore.delinkProfile(contactId));
 	}
 
 }
