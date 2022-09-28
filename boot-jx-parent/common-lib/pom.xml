@@ -87,10 +87,11 @@
 			<artifactId>spring-boot-starter-test</artifactId>
 		</dependency>
 
+		<!-- https://mvnrepository.com/artifact/com.github.gianluca-nitti/java-expr-eval -->
 		<dependency>
-			<groupId>com.github.gianluca-nitti</groupId>
-			<artifactId>java-expr-eval</artifactId>
-			<version>v3.1</version>
+		    <groupId>com.github.gianluca-nitti</groupId>
+		    <artifactId>java-expr-eval</artifactId>
+		    <version>v3.1</version>
 		</dependency>
 
 		<!-- https://stackoverflow.com/questions/61501810/javadoc-error-datatypeconverter-doesnot-exist -->
