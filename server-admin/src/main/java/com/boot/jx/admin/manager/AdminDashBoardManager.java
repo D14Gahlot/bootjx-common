@@ -854,6 +854,7 @@ public class AdminDashBoardManager {
 	/** date wise count **/
 	public Map<Object, Object> getDateWiseCount(List<MessageDoc> msgLst) {
 		List<Object> dateWiseList = new ArrayList<Object>();
+		List<Long> dateWiseLongList = new ArrayList<Long>();
 		Map<Object, Object> mapLst = new HashMap<Object, Object>();
 		for (MessageDoc msg : msgLst) {
 			long timeStamp = msg.getTimestamp();
@@ -861,9 +862,11 @@ public class AdminDashBoardManager {
 			// String ddMMyyyyFormat = new SimpleDateFormat("dd-MM-yyyy").format(date);
 			String ddMMyyyyFormat = new SimpleDateFormat("d").format(date);
 			dateWiseList.add(ddMMyyyyFormat);
+			dateWiseLongList.add(Long.parseLong(ddMMyyyyFormat));
 		}
 		Collections.sort(dateWiseLongList);
 		// Datewise count
+
 		Set<Object> dateWiseCount = new HashSet<Object>(dateWiseLongList);
 		for (Object key : dateWiseCount) {
 			mapLst.put(key, Collections.frequency(dateWiseLongList, key));
@@ -1100,5 +1103,4 @@ public class AdminDashBoardManager {
 		return list;
 	}
 
-	
 }
