@@ -17,6 +17,7 @@ import com.boot.jx.mongo.CommonDocInterfaces.TimeStampIndex;
 import com.boot.jx.mongo.CommonDocInterfaces.TimeStampIndex.CreatedTimeStampIndexSupport;
 import com.boot.jx.mongo.CommonDocInterfaces.TimeStampIndex.UpdatedTimeStampIndexSupport;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.PatternUtil;
 
 public class CommonMongoQB<M extends CommonMongoQB<M, T>, T> implements IMongoQueryBuilder<T> {
 
@@ -68,6 +69,14 @@ public class CommonMongoQB<M extends CommonMongoQB<M, T>, T> implements IMongoQu
 	@SuppressWarnings("unchecked")
 	public M where(String key, Object o) {
 		query().addCriteria(Criteria.where(key).is(o));
+		return (M) this;
+	}
+
+	@SuppressWarnings("unchecked")
+	public M search(String key, String o) {
+		if (ArgUtil.is(o)) {
+			query().addCriteria(Criteria.where(key).regex(PatternUtil.equalsIgnoreCase(o)));
+		}
 		return (M) this;
 	}
 

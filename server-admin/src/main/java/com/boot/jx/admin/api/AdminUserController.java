@@ -37,6 +37,7 @@ public class AdminUserController {
 			@RequestParam(value = "agent_id", required = false) String agent_id,
 			@RequestParam(required = false, defaultValue = "false") boolean includeInActive) {
 		return ApiResponse.buildResults(adminService.fetchAgents(agent_id, includeInActive));
+		
 	}
 
 	@RequestMapping(value = "/api/admins/agent", method = { RequestMethod.POST })
