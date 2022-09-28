@@ -2,7 +2,6 @@ package com.boot.jx.admin.api;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,7 +19,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.amazonaws.services.cloudhsmv2.model.Hsm;
 import com.boot.jx.admin.dto.CsvDto;
 import com.boot.jx.admin.manager.CSVHelper;
 import com.boot.jx.admin.manager.ChatParserAndImportor;
@@ -36,7 +34,6 @@ import com.boot.jx.mongo.CommonMongoQB.QueryCriteria;
 import com.boot.jx.postman.PMConstants.CHAT_STATUS;
 import com.boot.jx.postman.doc.BulkSessionDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
-import com.boot.jx.postman.doc.HSMTemplateDoc;
 import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.dto.ChatMessageDTO;
 import com.boot.jx.postman.dto.ChatSessionDTO;
@@ -47,13 +44,9 @@ import com.boot.jx.postman.model.ext.InBoundEvent;
 import com.boot.jx.postman.service.ChatDTOUtil;
 import com.boot.jx.postman.store.MessageStore;
 import com.boot.jx.postman.store.SessionStore;
-import com.boot.jx.tunnel.task.JobTaskModel.BatchJob;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
-import com.boot.utils.JsonUtil;
 import com.google.i18n.phonenumbers.NumberParseException;
-
-import springfox.documentation.spring.web.json.Json;
 
 @RestController
 public class AdminMsgController {

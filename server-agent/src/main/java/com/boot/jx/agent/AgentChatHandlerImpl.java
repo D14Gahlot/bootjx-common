@@ -35,7 +35,6 @@ import com.boot.jx.mongo.CommonMongoUtils;
 import com.boot.jx.postman.ClientApp;
 import com.boot.jx.postman.PMConstants;
 import com.boot.jx.postman.PMConstants.CHAT_SESSION_ACTIONS;
-import com.boot.jx.postman.PMConstants.CHAT_SESSION_STICKY;
 import com.boot.jx.postman.PMConstants.DEFAULT;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PMEnvironment.PMClientConfig;

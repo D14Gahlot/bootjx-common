@@ -45,7 +45,6 @@ import com.boot.jx.postman.query.ChatSessionQuery;
 import com.boot.jx.postman.service.ChatDTOUtil;
 import com.boot.jx.postman.store.MessageStore;
 import com.boot.jx.postman.store.SessionStore;
-import com.boot.model.MapModel.MapEntry;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.JsonUtil;
 
