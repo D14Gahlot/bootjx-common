@@ -48,7 +48,7 @@ public class AdminCustomerController {
 			q = q.whereId(id);
 		}
 
-		q.search("name", searchName).search("code", searchCode).search("emails.email", searchEmail)
+		q.search("name.formattedName", searchName).search("code", searchCode).search("emails.email", searchEmail)
 				.search("phones.phone", searchPhone);
 
 		if (ArgUtil.is(sortBy)) {

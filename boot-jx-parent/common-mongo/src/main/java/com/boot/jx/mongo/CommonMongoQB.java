@@ -75,7 +75,7 @@ public class CommonMongoQB<M extends CommonMongoQB<M, T>, T> implements IMongoQu
 	@SuppressWarnings("unchecked")
 	public M search(String key, String o) {
 		if (ArgUtil.is(o)) {
-			query().addCriteria(Criteria.where(key).regex(PatternUtil.equalsIgnoreCase(o)));
+			query().addCriteria(Criteria.where(key).regex(PatternUtil.contains(o)));
 		}
 		return (M) this;
 	}
