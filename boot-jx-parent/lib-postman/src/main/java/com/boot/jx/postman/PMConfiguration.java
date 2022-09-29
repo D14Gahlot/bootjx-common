@@ -151,7 +151,7 @@ public interface PMConfiguration extends Serializable {
 		}
 
 		public SafeKeyHashMap<PMConfigurationObject> perms() {
-			if (ArgUtil.isEmpty(setPerm(null, null))) {
+			if (ArgUtil.isEmpty(perms)) {
 				perms = new HashMap<String, PMConfigurationObject>();
 			}
 			return new SafeKeyHashMap<PMConfigurationObject>(perms);
