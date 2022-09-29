@@ -5,6 +5,7 @@ import org.springframework.data.annotation.TypeAlias;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import com.boot.jx.postman.PMConfiguration.PMConfigurationModel;
+import com.boot.jx.postman.doc.config.PermsConfigDoc;
 
 @Document(collection = "CONNECTOR_CONFIG")
 @TypeAlias("PMConfiguration")

@@ -27,6 +27,7 @@ public class ConfigConstants {
 			"mry.domain." };
 	public static final Map<String, String> APP_CONFIG = new ConcurrentHashMap<String, String>();
 	public static final List<ConfigMeta> SETUP_CONFIG_LIST = new ArrayList<ConfigMeta>();
+	public static final List<ConfigMeta> PERMS_CONFIG_LIST = new ArrayList<ConfigMeta>();
 
 	public static final String GROUP_CUSTOMER_CHAT = "CUSTOMER CHAT";
 	public static final String GROUP_AGENT = "AGENT";
@@ -265,8 +266,34 @@ public class ConfigConstants {
 
 	}
 
+	public static enum PERMS_KEY implements EntryMeta {
+
+		CONTACT_CENTER(new ConfigMeta("Contact Center", "perms.contact.center").optionsOnOff()),
+		// Ends here
+		;
+
+		private String key;
+		private Object defaultValue;
+
+		PERMS_KEY(ConfigMeta defaultFalse) {
+			this.key = defaultFalse.getKey();
+			ConfigConstants.PERMS_CONFIG_LIST.add(defaultFalse);
+			defaultValue = defaultFalse.getDefaultValue();
+		}
+
+		public String getKey() {
+			return key;
+		}
+
+		@SuppressWarnings("unchecked")
+		public <T> T getDefaultValue() {
+			return (T) defaultValue;
+		}
+	}
+
 	static {
 		ConfigConstants.SETUP_KEY.values();
+		ConfigConstants.PERMS_KEY.values();
 	}
 
 }
