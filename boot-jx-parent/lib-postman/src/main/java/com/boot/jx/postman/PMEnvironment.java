@@ -369,6 +369,27 @@ public class PMEnvironment {
 		return keyEntry(entryMeta.getKey());
 	}
 
+	public PMConfigurationObject permEntry(String key) {
+		PMConfigurationObject configObject = this.local().perms().get(key);
+		String tnt = AppContextUtil.getTenant();
+		if (ArgUtil.isEmpty(configObject) && !Tenants.isDefault(tnt)) {
+			PMConfigurationObject sharedConfigObject = this.shared().perms().get(key);
+			if (ArgUtil.is(sharedConfigObject)) {
+				return sharedConfigObject;
+			}
+		}
+		if (ArgUtil.isEmpty(configObject)) {
+			String value = appConfig.prop(key);
+			configObject = new PMConfigurationObject(key, value);
+			// this.config().map().put(key, configObject);
+		}
+		return configObject;
+	}
+
+	public PMConfigurationObject permEntry(EntryMeta entryMeta) {
+		return permEntry(entryMeta.getKey());
+	}
+
 	public void addChannel(ChannelConfig config) {
 		if (ArgUtil.is(provider)) {
 			provider.addChannel(config);

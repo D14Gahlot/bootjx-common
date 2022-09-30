@@ -18,7 +18,6 @@ import com.boot.jx.postman.ClientApp;
 import com.boot.jx.postman.PMConstants.CHANNEL_TYPE_ENUM;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.doc.config.ClientAppConfigDoc;
-import com.boot.jx.postman.doc.config.VarsConfigDoc;
 import com.boot.jx.postman.doc.config.VarsConfigDoc.CompanyTokenKeyDoc;
 import com.boot.jx.postman.doc.config.VarsConfigDoc.CompanyVarsConfigDoc;
 import com.boot.jx.postman.plugin.ChannelConfig;

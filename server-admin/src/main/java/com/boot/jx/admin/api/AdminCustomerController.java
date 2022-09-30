@@ -33,7 +33,12 @@ public class AdminCustomerController {
 			@RequestParam(required = false, defaultValue = "25") int pageSize,
 			@RequestParam(required = false) String sortBy,
 			@RequestParam(required = false, defaultValue = "asc") String sortDir,
-			@RequestParam(required = false) String contactId) {
+			@RequestParam(required = false) String contactId,
+
+			@RequestParam(required = false, value = "search.name") String searchName,
+			@RequestParam(required = false, value = "search.code") String searchCode,
+			@RequestParam(required = false, value = "search.phones") String searchPhone,
+			@RequestParam(required = false, value = "search.emails") String searchEmail) {
 		if (ArgUtil.is(contactId)) {
 			return ApiResponse.buildResults(contactStore.findProfileByContactId(contactId));
 		}
@@ -42,6 +47,10 @@ public class AdminCustomerController {
 		if (ArgUtil.is(id)) {
 			q = q.whereId(id);
 		}
+
+		q.search("name.formattedName", searchName).search("code", searchCode).search("emails.email", searchEmail)
+				.search("phones.phone", searchPhone);
+
 		if (ArgUtil.is(sortBy)) {
 			q = q.sortBy(sortBy, Direction.fromString(sortDir));
 		}

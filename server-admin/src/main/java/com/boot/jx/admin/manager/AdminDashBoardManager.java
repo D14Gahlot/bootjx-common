@@ -28,7 +28,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 import org.apache.commons.beanutils.PropertyUtils;
@@ -45,28 +44,16 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Component;
 
-import com.boot.jx.AppContextUtil;
-import com.boot.jx.admin.dto.ContactTypeCountDto;
-import com.boot.jx.admin.dto.ContactTypeSummaryDto;
 import com.boot.jx.admin.dto.DashBoardRequestDto;
 import com.boot.jx.admin.dto.DashBoardResponseDto;
 import com.boot.jx.admin.dto.LeadMessanger;
 import com.boot.jx.admin.dto.PeakLoadDto;
-import com.boot.jx.admin.dto.SummaryDocDto;
 import com.boot.jx.admin.dto.TagDocumentDto;
 import com.boot.jx.admin.dto.TagDocumentLst;
-import com.boot.jx.dict.ContactType;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.model.TagDocument;
 import com.boot.utils.ArgUtil;
-import com.boot.utils.DateUtil;
-import com.boot.utils.JsonUtil;
-import com.mongodb.AggregationOptions;
-import com.mongodb.AggregationOptions.OutputMode;
-import com.mongodb.Cursor;
-import com.mongodb.DBCollection;
-import com.mongodb.DBObject;
 
 @Component
 public class AdminDashBoardManager {

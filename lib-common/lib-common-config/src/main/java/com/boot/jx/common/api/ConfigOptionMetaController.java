@@ -20,6 +20,7 @@ import com.boot.jx.common.config.AppCommonAuthFilter.ACCESS_RULES;
 import com.boot.jx.common.config.CDNBuilder;
 import com.boot.jx.common.config.ClientAppConfigConstants;
 import com.boot.jx.common.config.ConfigConstants;
+import com.boot.jx.common.config.ConfigConstants.PERMS_KEY;
 import com.boot.jx.common.config.ConfigManager;
 import com.boot.jx.common.impl.ConfigMeta;
 import com.boot.jx.dict.ContactType;
@@ -40,6 +41,7 @@ import com.boot.jx.postman.doc.HSMContentType;
 import com.boot.jx.postman.doc.HSMLanguage;
 import com.boot.jx.postman.doc.HSMMessageType;
 import com.boot.jx.postman.doc.HSMTemplateDoc;
+import com.boot.jx.postman.doc.config.PermsConfigDoc;
 import com.boot.jx.postman.plugin.ChannelPluginProvider;
 import com.boot.jx.postman.plugin.ChannelPluginProvider.ChannelPlugin;
 import com.boot.utils.ArgUtil;
@@ -142,6 +144,7 @@ public class ConfigOptionMetaController {
 	@Autowired
 	private ConfigManager configManager;
 
+	// PREFS
 	@ApiRequest(rules = { ACCESS_RULES.ONLY_DUPERUSER_FOR_MASTER_DOMAIN, ACCESS_RULES.ONLY_DOMAIN_ADMIN })
 	@RequestMapping(value = "/api/config", method = { RequestMethod.POST })
 	public ApiResponse<Map<String, Object>, Object> setConfig(@RequestBody PMConfigurationObject map) {
@@ -206,6 +209,48 @@ public class ConfigOptionMetaController {
 		}
 
 		return ApiResponse.buildResults(config);
+	}
+
+	/**************
+	 * PERMS
+	 ************/
+
+	@ApiRequest(rules = { ACCESS_RULES.ONLY_DUPERUSER })
+	@RequestMapping(value = "/api/perm", method = { RequestMethod.POST })
+	public ApiResponse<Map<String, Object>, Object> setPerm(@RequestBody PermsConfigDoc map) {
+		configManager.save(map);
+		return ApiResponse.buildResults(configManager.getPerms());
+	}
+
+	@ApiRequest(rules = { ACCESS_RULES.ONLY_DUPERUSER })
+	@RequestMapping(value = "/api/perm", method = { RequestMethod.PUT })
+	public ApiResponse<Map<String, Object>, Object> setPerm(@RequestParam PERMS_KEY key, @RequestParam String value,
+			@RequestParam(defaultValue = "false") boolean shared) {
+		PermsConfigDoc map = new PermsConfigDoc();
+		map.setKey(key.getKey());
+		map.setValue(value);
+		map.setShared(shared);
+		return setPerm(map);
+	}
+
+	@ApiRequest(rules = { ACCESS_RULES.ONLY_DUPERUSER })
+	@RequestMapping(value = "/api/perm/{key}", method = { RequestMethod.POST })
+	public ApiResponse<Map<String, Object>, Object> setPerm(@PathVariable("key") PERMS_KEY key,
+			@RequestBody PermsConfigDoc map) {
+		map.setKey(key.getKey());
+		return setPerm(map);
+	}
+
+	@RequestMapping(value = "/api/perm", method = { RequestMethod.GET })
+	public ApiResponse<Map<String, Object>, Object> getPerm(@RequestParam(required = false) PERMS_KEY key) {
+		return ApiResponse.buildResults(configManager.getPerm(key));
+	}
+
+	@ApiRequest(rules = { ACCESS_RULES.ONLY_DUPERUSER })
+	@RequestMapping(value = "/api/perm", method = { RequestMethod.DELETE })
+	public ApiResponse<Map<String, Object>, Object> deletePerm(@RequestParam(required = false) PERMS_KEY key) {
+		configManager.deletePerm(key);
+		return ApiResponse.buildResults(configManager.getPerms());
 	}
 
 	@RequestMapping(value = "/api/meta/chat_states", method = { RequestMethod.GET })
