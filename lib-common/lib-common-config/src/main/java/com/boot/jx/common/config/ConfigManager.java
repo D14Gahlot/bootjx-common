@@ -320,16 +320,16 @@ public class ConfigManager {
 		configObject.setDomain(AppContextUtil.getTenant());
 		configObject.setServer(pmCommonConfig.getServiceServer());
 
-		PrefsConfigDoc prefsConfigDoc = new PrefsConfigDoc();
+		PermsConfigDoc prefsConfigDoc = new PermsConfigDoc();
 		prefsConfigDoc.setId(configObject.getKey() + "." + pmCommonConfig.getServiceServer());
 		prefsConfigDoc = EntityDtoUtil.dtoToEntity(configObject, prefsConfigDoc);
-		configStore.savePrefsConfig(prefsConfigDoc);
+		configStore.savePermConfig(prefsConfigDoc);
 		this.refresh();
 	}
 
 	public void deletePerm(PERMS_KEY key) {
 		pmEnvironment.local().perms().remove(key);
-		PrefsConfigDoc prefsConfigDoc = new PrefsConfigDoc();
+		PermsConfigDoc prefsConfigDoc = new PermsConfigDoc();
 		prefsConfigDoc.setKey(key.getKey());
 		prefsConfigDoc.setId(prefsConfigDoc.getKey() + "." + pmCommonConfig.getServiceServer());
 		configStore.remove(prefsConfigDoc);

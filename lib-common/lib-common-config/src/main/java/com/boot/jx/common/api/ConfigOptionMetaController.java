@@ -218,7 +218,7 @@ public class ConfigOptionMetaController {
 	@ApiRequest(rules = { ACCESS_RULES.ONLY_DUPERUSER })
 	@RequestMapping(value = "/api/perm", method = { RequestMethod.POST })
 	public ApiResponse<Map<String, Object>, Object> setPerm(@RequestBody PermsConfigDoc map) {
-		configManager.save(map);
+		configManager.savePerm(map);
 		return ApiResponse.buildResults(configManager.getPerms());
 	}
 
