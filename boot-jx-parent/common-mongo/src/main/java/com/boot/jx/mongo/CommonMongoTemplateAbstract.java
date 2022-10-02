@@ -2,6 +2,7 @@ package com.boot.jx.mongo;
 
 import java.util.List;
 
+import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,16 +19,17 @@ import com.boot.jx.mongo.CommonDocInterfaces.AuditActivityDoc;
 import com.boot.jx.mongo.CommonDocInterfaces.AuditableByIdEntity;
 import com.boot.jx.mongo.CommonDocInterfaces.DocVersion;
 import com.boot.jx.mongo.CommonDocInterfaces.IMongoQueryBuilder;
-import com.boot.jx.mongo.CommonDocInterfaces.MongoQueryBuilder;
 import com.boot.jx.mongo.CommonDocInterfaces.TimeStampIndex;
 import com.boot.jx.mongo.CommonDocInterfaces.TimeStampIndex.CreatedTimeStampIndexSupport;
 import com.boot.jx.mongo.CommonDocInterfaces.TimeStampIndex.UpdatedTimeStampIndexSupport;
 import com.boot.jx.mongo.CommonMongoQueryBuilder.DocQueryBuilder;
+import com.boot.jx.mongo.MongoUtils.MongoResultProcessor;
 import com.boot.utils.ArgUtil;
 import com.mongodb.client.result.DeleteResult;
 import com.mongodb.client.result.UpdateResult;
 
-public class CommonMongoTemplateAbstract extends CommonMongoTemplateDefault {
+public class CommonMongoTemplateAbstract<TStore extends CommonMongoTemplateAbstract<TStore>>
+		extends CommonMongoTemplateDefault {
 
 	public static final Logger LOGGER = LoggerService.getLogger(CommonMongoTemplateAbstract.class);
 
@@ -41,6 +43,20 @@ public class CommonMongoTemplateAbstract extends CommonMongoTemplateDefault {
 
 	protected MongoTemplate getCommonMongoTemplate() {
 		return mongoTemplate;
+	}
+
+	@SuppressWarnings("unchecked")
+	public TStore using(MongoTemplate mongoTemplate) {
+		this.mongoTemplate = mongoTemplate;
+		return (TStore) this;
+	}
+
+	public TStore using(CommonMongoSource commonMongoSource) {
+		return this.using(new MongoTemplateCommonImpl(commonMongoSource.getMongoDbFactory()).using(commonMongoSource));
+	}
+
+	public MongoResultProcessor<Document> collection(String collection) {
+		return new MongoResultProcessor<Document>().using(this.getCommonMongoTemplate()).collection(collection);
 	}
 
 	public void beforeSaveInternal(Object objectToSave, String collectionName) {

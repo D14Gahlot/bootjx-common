@@ -39,7 +39,7 @@ import com.google.i18n.phonenumbers.PhoneNumberUtil;
 import com.google.i18n.phonenumbers.Phonenumber.PhoneNumber;
 
 @Component
-public class ContactStore extends CommonMongoTemplateAbstract {
+public class ContactStore extends CommonMongoTemplateAbstract<ContactStore> {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(ContactStore.class);
 

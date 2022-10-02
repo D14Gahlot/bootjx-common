@@ -7,12 +7,10 @@ import org.springframework.stereotype.Component;
 
 import com.boot.jx.model.CommonTemplateMeta;
 import com.boot.jx.mongo.CommonMongoQueryBuilder;
-import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.jx.postman.PostmanPackages.TemplateResolver;
 import com.boot.jx.postman.doc.HSMTemplateDoc;
 import com.boot.jx.postman.doc.QuickReply;
 import com.boot.jx.postman.model.ITemplates.BasicTemplate;
-import com.boot.jx.postman.model.ITemplates.TemplateGeneric;
 import com.boot.utils.ArgUtil;
 
 @Component
