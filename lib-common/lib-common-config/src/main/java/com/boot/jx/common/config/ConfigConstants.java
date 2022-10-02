@@ -42,6 +42,9 @@ public class ConfigConstants {
 		PROP_AGENT_URL(new ConfigMeta("server", "mry.agent.url")),
 		PROP_BOT_URL(new ConfigMeta("server", "mry.bot.url")),
 		// Ends here
+
+		MITEL_SYNC_TIMER(new ConfigMeta("server", "mry.domain.mitel.sync.timer")),
+		// Actually Ends Here
 		;
 
 		private String key;
