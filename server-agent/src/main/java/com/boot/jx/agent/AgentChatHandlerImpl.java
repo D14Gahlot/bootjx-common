@@ -7,6 +7,7 @@ import static org.springframework.data.mongodb.core.aggregation.Aggregation.proj
 import static org.springframework.data.mongodb.core.aggregation.Aggregation.sort;
 import static org.springframework.data.mongodb.core.aggregation.Aggregation.unwind;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.bson.Document;
@@ -30,8 +31,8 @@ import com.boot.jx.common.store.ChatArchiveBuilder;
 import com.boot.jx.common.store.ChatArchiveService;
 import com.boot.jx.common.store.DocumentUpdateListner;
 import com.boot.jx.logger.LoggerService;
-import com.boot.jx.mongo.CommonMongoQueryBuilder;
-import com.boot.jx.mongo.MongoUtils;
+import com.boot.jx.mongo.CommonMongoQB.MongoQueryBuilder;
+import com.boot.jx.mongo.CommonMongoUtils;
 import com.boot.jx.postman.ClientApp;
 import com.boot.jx.postman.PMConstants;
 import com.boot.jx.postman.PMConstants.CHAT_SESSION_ACTIONS;
@@ -40,7 +41,9 @@ import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PMEnvironment.PMClientConfig;
 import com.boot.jx.postman.PMEnvironment.PMConfigurationObject;
 import com.boot.jx.postman.client.TmplClient;
+import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
+import com.boot.jx.postman.doc.CustomerProfileDoc;
 import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.dto.ChatMessageDTO;
 import com.boot.jx.postman.dto.ChatSessionDTO;
@@ -60,7 +63,10 @@ import com.boot.model.MapModel;
 import com.boot.model.MapModel.MapPathEntry;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
-import com.mongodb.client.MongoCollection;
+import com.mongodb.AggregationOptions;
+import com.mongodb.AggregationOptions.OutputMode;
+import com.mongodb.DBCollection;
+import com.mongodb.DBObject;
 
 @Component
 public class AgentChatHandlerImpl implements AgentChatHandler {
@@ -115,26 +121,67 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 	@Autowired
 	TmplClient tmplClient;
 
-	private AgentSessionDoc getAgentSessonAssigned(PMArgs inboxMessage) {
+	private AgentSessionDoc getAgentSessonAssigned(PMArgs params) {
 
 		String stickyLogic = environment.local().keyEntry("postman.agent.chat.stickysession")
 				.asString(PMConstants.CHAT_SESSION_STICKY.NONE);
 		long timeThen = System.currentTimeMillis() - chatClientConfig.getAgentSessionTimeout().toMillis();
 
+		// Relationship Manager Agent Sticky Logic
+		String rmStickyLogic = environment.local().keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_AGENT_CHAT_STICKY_RMAGENT)
+				.asString(PMConstants.CHAT_SESSION_STICKY.NONE);
+		String rmAgent = null;
+
+		LOGGER.debug("CHAT_RM_STICKY : {}", rmStickyLogic);
+		if (!PMConstants.CHAT_SESSION_STICKY.NONE.equals(rmStickyLogic)) {
+			ChatContactDoc c = sessionStore.getContact(params.contact());
+			if (ArgUtil.is(c) && ArgUtil.is(c.profile().getId())) {
+				CustomerProfileDoc profile = sessionStore.findById(c.profile().getId(), CustomerProfileDoc.class);
+				if (profile != null && ArgUtil.is(profile.rmCode)) {
+					rmAgent = profile.rmCode;
+				}
+			}
+			if (ArgUtil.is(rmAgent)) {
+				LOGGER.debug("CHAT_RM_STICKY : lastAgent found {}", rmAgent);
+				AgentSessionDoc agent = sessionStore.findById(rmAgent, AgentSessionDoc.class);
+				if (ArgUtil.is(agent)) {
+					LOGGER.debug("CHAT_RM_STICKY : has session {}", agent);
+					if (PMConstants.CHAT_SESSION_STICKY.STRICT.equals(rmStickyLogic)) {
+						LOGGER.debug("CHAT_SESSION_STICKY : because its strictly {}", agent);
+						return agent;
+					}
+					if (PMConstants.CHAT_SESSION_STICKY.ONAVAILABLE.equals(rmStickyLogic)) {
+						if (ArgUtil.nullAsFalse(agent.getIsOnline()) && ArgUtil.nullAsFalse(agent.getIsLoggedIn())
+								&& (agent.getLastOnlineStamp() > timeThen)) {
+							LOGGER.debug("CHAT_RM_STICKY : because its availanle {}", agent);
+							return agent;
+						}
+					}
+				}
+
+			}
+
+		}
+
+		// Last Session Agent Sticky Logic
+		String lastStickyLogic = environment.local()
+				.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_AGENT_CHAT_STICKYSESSION)
+				.asString(PMConstants.CHAT_SESSION_STICKY.NONE);
 		String lastAgent = null;
-		LOGGER.debug("CHAT_SESSION_STICKY : {}", stickyLogic);
-		if (!PMConstants.CHAT_SESSION_STICKY.NONE.equals(stickyLogic)) {
-			lastAgent = sessionStore.getLastAssignedAgent(inboxMessage.contact());
+
+		LOGGER.debug("CHAT_SESSION_STICKY : {}", lastStickyLogic);
+		if (!PMConstants.CHAT_SESSION_STICKY.NONE.equals(lastStickyLogic)) {
+			lastAgent = sessionStore.getLastAssignedAgent(params.contact());
 			if (ArgUtil.is(lastAgent)) {
 				LOGGER.debug("CHAT_SESSION_STICKY : lastAgent found {}", lastAgent);
 				AgentSessionDoc agent = sessionStore.findById(lastAgent, AgentSessionDoc.class);
 				if (ArgUtil.is(agent)) {
 					LOGGER.debug("CHAT_SESSION_STICKY : has session {}", agent);
-					if (PMConstants.CHAT_SESSION_STICKY.STRICT.equals(stickyLogic)) {
+					if (PMConstants.CHAT_SESSION_STICKY.STRICT.equals(lastStickyLogic)) {
 						LOGGER.debug("CHAT_SESSION_STICKY : because its strictly {}", agent);
 						return agent;
 					}
-					if (PMConstants.CHAT_SESSION_STICKY.ONAVAILABLE.equals(stickyLogic)) {
+					if (PMConstants.CHAT_SESSION_STICKY.ONAVAILABLE.equals(lastStickyLogic)) {
 						if (ArgUtil.nullAsFalse(agent.getIsOnline()) && ArgUtil.nullAsFalse(agent.getIsLoggedIn())
 								&& (agent.getLastOnlineStamp() > timeThen)) {
 							LOGGER.debug("CHAT_SESSION_STICKY : because its availanle {}", agent);
@@ -146,12 +193,12 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 			}
 		}
 
-		String assignmentRule = environment.local().keyEntry("postman.agent.chat.assignment")
+		String assignmentRule = environment.local().keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_AGENT_CHAT_ASSIGNMENT)
 				.asString(PMConstants.ASSIGNMENT_RULE.ROUND_ROBIN);
 
-		String assignedDept = ArgUtil.nonEmpty(inboxMessage.getAssignToDeptCode(),
+		String assignedDept = ArgUtil.nonEmpty(params.getAssignToDeptCode(),
 				environment.local().agent().getDefaultTeamCode(), DEFAULT.NO_DEPT);
-		inboxMessage.setAssignToDeptCode(assignedDept);
+		params.setAssignToDeptCode(assignedDept);
 
 		LOGGER.debug("ASSIGNMENT_RULE : No Assignment {} {}", assignmentRule, assignedDept);
 
@@ -167,18 +214,18 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 			Criteria onlineActiveAgents = Criteria.where("isOnline").is(true).and("isLoggedIn").is(true)
 					.and("lastOnlineStamp").gt(timeThen).and("isEnabled").is(true);
 
-			if (ArgUtil.is(inboxMessage.getAssignToDeptCode())) {
+			if (ArgUtil.is(params.getAssignToDeptCode())) {
 				onlineActiveAgents.and("agentDept").is(assignedDept);
 			}
 
-			if (ArgUtil.is(inboxMessage.getAssignToSkillCodes())) {
+			if (ArgUtil.is(params.getAssignToSkillCodes())) {
 
-				List<Document> agg = MongoUtils.newAggregation(//
-						match(Criteria.where("profile.quickskills.code").in(inboxMessage.getAssignToSkillCodes())) //
+				List<DBObject> agg = CommonMongoUtils.newAggregation(//
+						match(Criteria.where("profile.quickskills.code").in(params.getAssignToSkillCodes())) //
 						, project(bind("quickskills", "profile.quickskills.code").and("lastAssignStamp")
 								.and("lastOnlineStamp").and("tags", "1"))//
 						, unwind("quickskills")//
-						, match(Criteria.where("quickskills").in(inboxMessage.getAssignToSkillCodes())) //
+						, match(Criteria.where("quickskills").in(params.getAssignToSkillCodes())) //
 						, group("_id").count().as("noOfMatches")//
 								.first("lastAssignStamp").as("lastAssignStamp")//
 								.first("lastOnlineStamp").as("lastOnlineStamp")//
@@ -186,9 +233,12 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 				//
 				);
 
-				MongoCollection<Document> col = sessionStore.getCollection("AGENT_SESSION");
-				List<Document> luckyAgents = CollectionUtil.asList(col.aggregate(agg));
-				Document luckyAgent = CollectionUtil.getOne(luckyAgents);
+				List<DBObject> luckyAgents = new ArrayList<DBObject>();
+				DBCollection col = sessionStore.getCollection("AGENT_SESSION");
+				col.aggregate(agg,
+						AggregationOptions.builder().allowDiskUse(true).outputMode(OutputMode.CURSOR).build())
+						.forEachRemaining(doc -> luckyAgents.add(doc));
+				DBObject luckyAgent = CollectionUtil.getOne(luckyAgents);
 				if (ArgUtil.is(luckyAgent)) {
 					AgentSessionDoc avaialbleAgent = sessionStore.findByIdSafeCheck(luckyAgent.get("_id"),
 							AgentSessionDoc.class);
@@ -206,7 +256,7 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 
 				AgentSessionDoc avaialbleAgent = CollectionUtil.getOne(agents);
 
-				String defAgentCode = environment.local().agent().defaultAgent(inboxMessage.getAssignToDeptCode());
+				String defAgentCode = environment.local().agent().defaultAgent(params.getAssignToDeptCode());
 				if (ArgUtil.is(defAgentCode)) {
 					for (AgentSessionDoc agentSessionDoc : agents) {
 						if (defAgentCode.equals(agentSessionDoc.getAgentCode())) {
@@ -236,7 +286,8 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 	public void assignToAgent(ChatSessionDoc chatSessionDoc, String agentDept, String agentCode) {
 		sessionStore.assignToAgent(chatSessionDoc, agentDept, agentCode);
 		if (ArgUtil.is(agentCode)) {
-			CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder().whereId(agentCode);
+			MongoQueryBuilder<AgentSessionDoc> builder = MongoQueryBuilder.collection(AgentSessionDoc.class)
+					.whereId(agentCode);
 			builder.set("lastAssignStamp", System.currentTimeMillis());
 			sessionStore.upsert(builder.getQuery(), builder.getUpdate(), AgentSessionDoc.class);
 			documentUpdateListner.onAgentSessionUpdate(agentCode);
@@ -257,15 +308,20 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 			logManager.event(chatSessionDoc, MessageStore.EVENTS.ASGND_TO_AGENT, params.getAssignToDeptCode(),
 					params.getAssignToAgentCode());
 		} else {
+			String agentCode = null;
+			String agentDept = null;
+
 			AgentSessionDoc avaialbleAgent = getAgentSessonAssignedAndActive(params);
+			if (avaialbleAgent != null) {
+				agentDept = avaialbleAgent.getAgentDept();
+				agentCode = avaialbleAgent.getAgentCode();
+			}
 
-			if (ArgUtil.is(avaialbleAgent)) {
-				assignToAgent(chatSessionDoc, avaialbleAgent.getAgentDept(), avaialbleAgent.getAgentCode());
-				logManager.event(chatSessionDoc, MessageStore.EVENTS.ASGND_TO_AGENT, avaialbleAgent.getAgentCode(),
-						avaialbleAgent.getAgentDept());
-
-				params.setAssignToAgentCode(avaialbleAgent.getAgentCode());
-				params.setAssignToDeptCode(avaialbleAgent.getAgentDept());
+			if (ArgUtil.is(agentCode)) {
+				assignToAgent(chatSessionDoc, agentDept, agentCode);
+				logManager.event(chatSessionDoc, MessageStore.EVENTS.ASGND_TO_AGENT, agentCode, agentDept);
+				params.setAssignToAgentCode(agentCode);
+				params.setAssignToDeptCode(agentDept);
 			} else {
 				assignToAgent(chatSessionDoc, params.getAssignToDeptCode(), null);
 				logManager.event(chatSessionDoc, MessageStore.EVENTS.ASGND_TO_DEPT, params.getAssignToDeptCode());
@@ -301,7 +357,8 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 		if (!ArgUtil.areEqual(chatSessionDoc.getAssignedToAgent(), agentCode)
 				|| !ArgUtil.areEqual(chatSessionDoc.getAssignedToDept(), agentDept)) {
 
-			this.doAssign(chatSessionDoc, new PMArgs().assignToDeptCode(agentDept).assignToAgentCode(agentCode));
+			this.doAssign(chatSessionDoc, new PMArgs().contact(chatSessionDoc.contact()).assignToDeptCode(agentDept)
+					.assignToAgentCode(agentCode));
 
 			ClientApp app = messageContext.clientApp(chatSessionDoc.getAssignedToQueue(), chatSessionDoc.contact());
 			MapModel props = MapModel.from(app.props());

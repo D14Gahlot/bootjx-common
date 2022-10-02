@@ -56,6 +56,11 @@
 
 			<dependency>
 				<groupId>com.boot.jx</groupId>
+				<artifactId>common-table</artifactId>
+				<version>${boot.jx.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.boot.jx</groupId>
 				<artifactId>common-tmpl</artifactId>
 				<version>${boot.jx.version}</version>
 			</dependency>
@@ -175,6 +180,7 @@
 		<!-- Common Libs -->
 		<module>common-utils</module>
 		<module>common-lib</module>
+		<module>common-table</module>
 		<module>common-db</module>
 		<module>common-mongo</module>
 		<module>common-tmpl</module>

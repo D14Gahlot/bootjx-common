@@ -13,6 +13,7 @@ import com.boot.jx.logger.LoggerService;
 import com.boot.jx.postman.PMConstants.CHANNEL_TYPE;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
+import com.boot.jx.postman.doc.CustomerProfileDoc;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.MessageBoxEvent;
 import com.boot.jx.postman.model.OutboxMessage;
@@ -42,6 +43,11 @@ public class TwilioSMSConnector extends AbstractConnector<TwilioConfigDetails, T
 			outboxMessage.updateStatus(OutboxMessage.Status.SENT_ERR);
 			outboxMessage.logs().add(((AmxApiException) e).getErrorKey());
 		}
+	}
+
+	@Override
+	public CustomerProfileDoc findProfile(ChatContactDoc chatContactDoc) {
+		return contactStore.findProfileByPhone(chatContactDoc.getPhone());
 	}
 
 	@Override

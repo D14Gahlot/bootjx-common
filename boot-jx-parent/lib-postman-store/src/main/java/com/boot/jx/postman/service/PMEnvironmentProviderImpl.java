@@ -19,6 +19,7 @@ import com.boot.jx.postman.PMEnvironment.PMEnvironmentProvider;
 import com.boot.jx.postman.doc.PMConfigurationDoc;
 import com.boot.jx.postman.doc.config.ChannelConfigDoc;
 import com.boot.jx.postman.doc.config.ClientAppConfigDoc;
+import com.boot.jx.postman.doc.config.PermsConfigDoc;
 import com.boot.jx.postman.doc.config.PrefsConfigDoc;
 import com.boot.jx.postman.doc.config.VarsConfigDoc.CompanyVarsConfigDoc;
 import com.boot.jx.postman.plugin.ChannelConfig;
@@ -67,12 +68,17 @@ public class PMEnvironmentProviderImpl implements PMEnvironmentProvider, AppShar
 		}
 
 		if (ArgUtil.is(configStore)) {
-			PMConfigurationDoc prefs = getPMConfigurationDoc();
-			prefs.setPrefs(null);
+			PMConfigurationDoc localConfiguration = getPMConfigurationDoc();
+			localConfiguration.setPrefs(null);
 
 			List<PrefsConfigDoc> prefsConfigs = configStore.findAll(PrefsConfigDoc.class);
 			for (PrefsConfigDoc prefsConfig : prefsConfigs) {
-				prefs.setPref(prefsConfig, serviceServer);
+				localConfiguration.setPref(prefsConfig, serviceServer);
+			}
+
+			List<PermsConfigDoc> permsConfigs = configStore.findAll(PermsConfigDoc.class);
+			for (PermsConfigDoc permsConfig : permsConfigs) {
+				localConfiguration.setPerm(permsConfig, serviceServer);
 			}
 
 			List<ChannelConfigDoc> channels = configStore.findAll(ChannelConfigDoc.class);
@@ -80,31 +86,34 @@ public class PMEnvironmentProviderImpl implements PMEnvironmentProvider, AppShar
 			// channels.size());
 			for (ChannelConfigDoc channel : channels) {
 				channel.setDomain(tnt);
-				prefs.channels(channel);
+				localConfiguration.channels(channel);
 			}
 
 			List<ClientAppConfigDoc> clientKeys = configStore.findAll(ClientAppConfigDoc.class);
 			for (ClientAppConfigDoc clientKey : clientKeys) {
-				prefs.clientApiKey(clientKey);
+				localConfiguration.clientApiKey(clientKey);
 			}
 
 			List<CompanyVarsConfigDoc> companyVars = configStore.findAll(CompanyVarsConfigDoc.class);
 
-			SafeKeyHashMap<Object> company = prefs.globalVars();
+			SafeKeyHashMap<Object> company = localConfiguration.globalVars();
 
 			for (CompanyVarsConfigDoc companyVar : companyVars) {
 				company.put(companyVar.getKey(), companyVar.getValue());
 			}
 
-			if (ArgUtil.is(prefs)) {
-				prefs.setUpdateStamp(System.currentTimeMillis());
-				localConfigMap.put(mappedTo, prefs);
+			if (ArgUtil.is(localConfiguration)) {
+				localConfiguration.setUpdateStamp(System.currentTimeMillis());
+				localConfigMap.put(mappedTo, localConfiguration);
 			}
 
 			if (Tenants.isDefault(tnt)) {
 				PMConfigurationDoc newSharedConfiguration = new PMConfigurationDoc();
-				for (Entry<String, PMConfigurationObject> entry : prefs.prefs().entrySet()) {
+				for (Entry<String, PMConfigurationObject> entry : localConfiguration.prefs().entrySet()) {
 					newSharedConfiguration.setPref(entry.getValue(), serviceServer);
+				}
+				for (Entry<String, PMConfigurationObject> entry : localConfiguration.perms().entrySet()) {
+					newSharedConfiguration.setPerm(entry.getValue(), serviceServer);
 				}
 				List<ChannelConfigDoc> sandboxChannels = configStore.findAll(ChannelConfigDoc.class);
 				for (ChannelConfigDoc channel : sandboxChannels) {
@@ -124,7 +133,7 @@ public class PMEnvironmentProviderImpl implements PMEnvironmentProvider, AppShar
 				sharedConfiguration = newSharedConfiguration;
 			}
 
-			return prefs;
+			return localConfiguration;
 		}
 		return null;
 	}

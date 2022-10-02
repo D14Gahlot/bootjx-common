@@ -28,6 +28,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 import org.apache.commons.beanutils.PropertyUtils;
@@ -44,10 +45,14 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Component;
 
+import com.boot.jx.AppContextUtil;
+import com.boot.jx.admin.dto.ContactTypeCountDto;
+import com.boot.jx.admin.dto.ContactTypeSummaryDto;
 import com.boot.jx.admin.dto.DashBoardRequestDto;
 import com.boot.jx.admin.dto.DashBoardResponseDto;
 import com.boot.jx.admin.dto.LeadMessanger;
 import com.boot.jx.admin.dto.PeakLoadDto;
+import com.boot.jx.admin.dto.SummaryDocDto;
 import com.boot.jx.admin.dto.TagDocumentDto;
 import com.boot.jx.admin.dto.TagDocumentLst;
 import com.boot.jx.mongo.MongoUtils;
@@ -55,6 +60,13 @@ import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.model.TagDocument;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.DateUtil;
+import com.boot.utils.JsonUtil;
+import com.mongodb.AggregationOptions;
+import com.mongodb.AggregationOptions.OutputMode;
+import com.mongodb.Cursor;
+import com.mongodb.DBCollection;
+import com.mongodb.DBObject;
 
 @Component
 public class AdminDashBoardManager {
@@ -842,6 +854,7 @@ public class AdminDashBoardManager {
 	/** date wise count **/
 	public Map<Object, Object> getDateWiseCount(List<MessageDoc> msgLst) {
 		List<Object> dateWiseList = new ArrayList<Object>();
+		List<Long> dateWiseLongList = new ArrayList<Long>();
 		Map<Object, Object> mapLst = new HashMap<Object, Object>();
 		for (MessageDoc msg : msgLst) {
 			long timeStamp = msg.getTimestamp();
@@ -849,12 +862,14 @@ public class AdminDashBoardManager {
 			// String ddMMyyyyFormat = new SimpleDateFormat("dd-MM-yyyy").format(date);
 			String ddMMyyyyFormat = new SimpleDateFormat("d").format(date);
 			dateWiseList.add(ddMMyyyyFormat);
+			dateWiseLongList.add(Long.parseLong(ddMMyyyyFormat));
 		}
-
+		Collections.sort(dateWiseLongList);
 		// Datewise count
-		Set<Object> dateWiseCount = new HashSet<Object>(dateWiseList);
+
+		Set<Object> dateWiseCount = new HashSet<Object>(dateWiseLongList);
 		for (Object key : dateWiseCount) {
-			mapLst.put(key, Collections.frequency(dateWiseList, key));
+			mapLst.put(key, Collections.frequency(dateWiseLongList, key));
 			// System.out.println(key + ": " + Collections.frequency(dateWiseList, key));
 		}
 
@@ -1088,4 +1103,5 @@ public class AdminDashBoardManager {
 		return list;
 	}
 
+	
 }

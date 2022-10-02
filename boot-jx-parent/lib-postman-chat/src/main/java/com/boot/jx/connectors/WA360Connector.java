@@ -24,6 +24,7 @@ import com.boot.jx.postman.PMEnvironment.PMClientConfig;
 import com.boot.jx.postman.client.PMFileStoreClient;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
+import com.boot.jx.postman.doc.CustomerProfileDoc;
 import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.Message.Status;
@@ -93,7 +94,7 @@ public class WA360Connector extends AbstractConnector<WA360ConfigDetails, WA360P
 
 	public OutboxMessage initSession(ChatSessionDoc session, InboxMessage inboxMessage) {
 		ChatContactQuery contactQuery = messageContext.contact();
-		ChatContactDoc chatContactDoc = messageContext.contact().getDoc();
+		ChatContactDoc chatContactDoc = contactQuery.getDoc();
 		if (chatContactDoc.getPhone() == null) {
 			contactQuery.setPhone(inboxMessage.contact().getPhone());
 		}
@@ -101,6 +102,11 @@ public class WA360Connector extends AbstractConnector<WA360ConfigDetails, WA360P
 			contactQuery.setPhoneVerified(true);
 		}
 		return null;
+	}
+
+	@Override
+	protected CustomerProfileDoc findProfile(ChatContactDoc chatContactDoc) {
+		return contactStore.findProfileByPhone(chatContactDoc.getPhone());
 	}
 
 	public InboxMessage toInboxMessage(ChannelConfig channelConfig, MapModel map) {

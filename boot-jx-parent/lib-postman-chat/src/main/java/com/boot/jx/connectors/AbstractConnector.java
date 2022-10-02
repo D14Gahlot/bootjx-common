@@ -20,6 +20,8 @@ import com.boot.jx.postman.PMEnvironment.AChannelDetails;
 import com.boot.jx.postman.PMEnvironment.PMClientConfig;
 import com.boot.jx.postman.client.TmplClient;
 import com.boot.jx.postman.doc.ChatContactDoc;
+import com.boot.jx.postman.doc.ChatSessionDoc;
+import com.boot.jx.postman.doc.CustomerProfileDoc;
 import com.boot.jx.postman.doc.HSMTemplate3rdParty;
 import com.boot.jx.postman.manager.ChatLogger;
 import com.boot.jx.postman.model.InboxMessage;
@@ -29,11 +31,14 @@ import com.boot.jx.postman.model.MessagePrompt;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.postman.plugin.ChannelPluginProvider.ChannelPlugin;
+import com.boot.jx.postman.query.ChatContactQuery;
 import com.boot.jx.postman.service.ChatDTOUtil;
+import com.boot.jx.postman.store.ContactStore;
 import com.boot.jx.postman.store.MessageContext;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.JsonUtil;
 
 public abstract class AbstractConnector<CD extends AChannelDetails, P extends ChannelPlugin<CD>>
 		implements ConnectorHandler {
@@ -61,6 +66,9 @@ public abstract class AbstractConnector<CD extends AChannelDetails, P extends Ch
 
 	@Autowired
 	protected ChatLogger logManager;
+
+	@Autowired
+	protected ContactStore contactStore;
 
 	@Override
 	public void onException(ChannelConfig channelConfig, ChatContactDoc chatContactDoc, OutboxMessage outboxMessage,
@@ -124,6 +132,26 @@ public abstract class AbstractConnector<CD extends AChannelDetails, P extends Ch
 		return messageContext.contact().getDoc();
 	}
 
+	protected CustomerProfileDoc findProfile(ChatContactDoc chatContactDoc) {
+		return null;
+	}
+
+	@Override
+	public void linkProfile(ChatSessionDoc session, InboxMessage inboxMessage) {
+		try {
+			ChatContactQuery contactQuery = context().contact();
+			ChatContactDoc chatContactDoc = contactQuery.getDoc();
+			if (!ArgUtil.is(chatContactDoc.profile().getId())) {
+				CustomerProfileDoc profile = findProfile(chatContactDoc);
+				if (profile != null) {
+					contactStore.linkProfile(contactQuery, profile);
+				}
+			}
+		} catch (Exception e) {
+			logManager.error(e);
+		}
+	}
+
 	@Override
 	public OutboxMessage template(ChannelConfig channelConfig, ChatContactDoc chatContactDoc,
 			OutboxMessage outboxMessage) {
@@ -164,37 +192,44 @@ public abstract class AbstractConnector<CD extends AChannelDetails, P extends Ch
 		data.putAll(model.keyEntry(Message.DATA_KEY).asMap());
 		data.putAll(outboxMessage.hsm().data());
 		model.put(Message.DATA_KEY, data.toMap());
-		outboxMessage.setModel(model.toMap());
+		outboxMessage.setModel(JsonUtil.deepCopy(model.toMap()));
 
 		if (ArgUtil.isEmpty(outboxMessage.hsm().getLang())) {
 			outboxMessage.hsm().lang(chatContactDoc.prefs().getLang());
 		}
 
 		tmplClient.process(outboxMessage);
-		if (ArgUtil.is(outboxMessage.templateId())) {
 
-			if (MESSAGE_SEND_TYPE.PUSH_MESSAGE.equals(outboxMessage.messageMetaWrapper().sendType())
+		if (ArgUtil.is(outboxMessage.templateId())) {
+			List<HSMTemplate3rdParty> temps = null;
+
+			if (ArgUtil.is(outboxMessage.hsm().getLinked())) {
+				temps = commonMongoTemplate.find(CommonMongoQueryBuilder.collection(HSMTemplate3rdParty.class)
+						.where(Criteria.where("hsmTemplateId").is(outboxMessage.templateId()).and("channelId")
+								.is(channelConfig.getChannelId()).and("code").is(outboxMessage.hsm().getLinked())));
+			} else if (MESSAGE_SEND_TYPE.PUSH_MESSAGE.equals(outboxMessage.messageMetaWrapper().sendType())
 					&& channelConfig.isPushAllowed() && channelConfig.isPushOnlyApproved()) {
-				List<HSMTemplate3rdParty> temps = commonMongoTemplate.find(CommonMongoQueryBuilder
-						.collection(HSMTemplate3rdParty.class).where(Criteria.where("hsmTemplateId")
-								.is(outboxMessage.templateId()).and("channelId").is(channelConfig.getChannelId())));
-				if (ArgUtil.is(temps)) {
-					HSMTemplate3rdParty resolvedTemplate = null;
-					if (temps.size() > 1) {
-						for (HSMTemplate3rdParty hsmTemplate3rdParty : temps) {
-							if (ArgUtil.areEqual(hsmTemplate3rdParty.getLang(), outboxMessage.hsm().getLang())) {
-								resolvedTemplate = hsmTemplate3rdParty;
-								break;
-							} else if (ArgUtil.is(hsmTemplate3rdParty.getLang())) {
-								resolvedTemplate = hsmTemplate3rdParty;
-							}
+				temps = commonMongoTemplate.find(CommonMongoQueryBuilder.collection(HSMTemplate3rdParty.class)
+						.where(Criteria.where("hsmTemplateId").is(outboxMessage.templateId()).and("channelId")
+								.is(channelConfig.getChannelId())));
+			}
+
+			if (ArgUtil.is(temps)) {
+				HSMTemplate3rdParty resolvedTemplate = null;
+				if (temps.size() > 1) {
+					for (HSMTemplate3rdParty hsmTemplate3rdParty : temps) {
+						if (ArgUtil.areEqual(hsmTemplate3rdParty.getLang(), outboxMessage.hsm().getLang())) {
+							resolvedTemplate = hsmTemplate3rdParty;
+							break;
+						} else if (ArgUtil.is(hsmTemplate3rdParty.getLang())) {
+							resolvedTemplate = hsmTemplate3rdParty;
 						}
-					} else {
-						resolvedTemplate = temps.get(0);
 					}
-					outboxMessage.setTemplateExt(resolvedTemplate);
-					return outboxMessage;
+				} else {
+					resolvedTemplate = temps.get(0);
 				}
+				outboxMessage.setTemplateExt(resolvedTemplate);
+				return outboxMessage;
 			}
 		}
 		return outboxMessage;

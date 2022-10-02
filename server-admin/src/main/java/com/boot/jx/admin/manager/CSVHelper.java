@@ -46,16 +46,17 @@ public class CSVHelper {
 		Pattern pattern = Pattern.compile("\\{\\{(.*?)\\}\\}");
 		List<String> templVarLst = new ArrayList<>();
 		templVarLst.add("contacts");
-
+		dto.setTemplateId(templateId);	
 		HSMTemplateDoc templateDoc = mongoTemplate.findById(templateId, HSMTemplateDoc.class);
 		if (templateDoc != null) {
 			String template = templateDoc.getTemplate();
 			Matcher matcher = pattern.matcher(template);
 			while (matcher.find()) {
 				String headerName = matcher.group(1);
-				if (!headerName.contains("contact")) {
-					templVarLst.add(StringUtils.substring(headerName, (headerName.indexOf(".") + 1)));
-				}
+				//if (!headerName.contains("contact")) {
+					//templVarLst.add(StringUtils.substring(headerName, (headerName.indexOf(".") + 1)));
+					templVarLst.add(headerName);
+					//}
 
 			}
 		}
@@ -83,7 +84,10 @@ public class CSVHelper {
 				Map<Object, Object> map = new HashMap<>();
 				for (int i = 0; i < columns.length; i++) {
 					if (!StringUtils.isBlank(record.get(i))) {
-						map.put(columns[i].trim(), record.get(i).trim());
+						String columnName = StringUtils.substring(columns[i].trim(), (columns[i].trim().indexOf(".") + 1));
+						//map.put(columns[i].trim(), record.get(i).trim());
+						map.put(columnName, record.get(i).trim());
+						
 					} else {
 						String str = "Row:" + row + " Column :" + (i + 1) + " " + columns[i] + " value  is missing";
 						lsterrors.add(str);
@@ -97,9 +101,6 @@ public class CSVHelper {
 			if (lst != null && !lst.isEmpty()) {
 				Map<Object, List<Object>> combined = lst.stream().flatMap(m -> m.entrySet().stream()).collect(
 						Collectors.groupingBy(Entry::getKey, Collectors.mapping(Entry::getValue, Collectors.toList())));
-
-				// combined.entrySet().forEach(System.out::println);
-
 				dto.setCsvMap(combined);
 			}
 			dto.setLstErrors(lsterrors);

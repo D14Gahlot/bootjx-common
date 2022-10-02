@@ -16,6 +16,7 @@ import com.boot.jx.logger.LoggerService;
 import com.boot.jx.postman.client.TmplClient;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
+import com.boot.jx.postman.doc.CustomerProfileDoc;
 import com.boot.jx.postman.doc.QuickMedia;
 import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.InboxMessage;
@@ -78,6 +79,11 @@ public class WARapiwhaConnector extends AbstractConnector<WebConfigDetails, WebP
 	@Override
 	public InboxMessage assignToAgent(InboxMessage inboxMessage) {
 		return inboxMessage;
+	}
+
+	@Override
+	public CustomerProfileDoc findProfile(ChatContactDoc chatContactDoc) {
+		return contactStore.findProfileByPhone(chatContactDoc.getPhone());
 	}
 
 	@Override

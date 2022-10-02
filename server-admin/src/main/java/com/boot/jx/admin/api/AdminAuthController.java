@@ -26,9 +26,11 @@ import com.boot.jx.admin.AdminSessionService;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.common.dto.AgentResponseAuthDto;
 import com.boot.jx.common.service.EmpAuthService;
+import com.boot.jx.http.ApiRequest;
 import com.boot.jx.http.CommonHttpRequest;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.manager.StarterDocKit;
+import com.boot.jx.tnt.custom.TenantClientResolver;
 import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.Constants;
@@ -105,7 +107,7 @@ public class AdminAuthController {
 		return null;
 	}
 
-	
+	@ApiRequest(rules = { TenantClientResolver.CHECK_VALID_DOMAIN })
 	@RequestMapping(value = { "/pub/**", "/app/**", "/auth/**", "/" },
 			method = { RequestMethod.GET, RequestMethod.POST })
 	public String home(Model model, HttpServletRequest request, HttpServletResponse response,
@@ -174,6 +176,7 @@ public class AdminAuthController {
 		return "redirect:/app/home" + "?_=" + System.currentTimeMillis();
 	}
 
+	@ApiRequest(rules = { TenantClientResolver.CHECK_VALID_DOMAIN })
 	@RequestMapping(value = { "/auth/login", "/auth/resetpass" }, method = { RequestMethod.POST, RequestMethod.GET })
 	public String login(Model model, HttpServletRequest request, HttpServletResponse httpServletResponse) {
 		model.addAllAttributes(appCommonConfig.appAttributes());

@@ -1,6 +1,8 @@
 package com.boot.jx.admin.api;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -27,6 +29,7 @@ import com.boot.jx.chat.ChatSessionService;
 import com.boot.jx.common.doc.ImportChatSessionDoc;
 import com.boot.jx.common.store.ChatArchiveService;
 import com.boot.jx.dict.ContactType;
+import com.boot.jx.model.CommonTemplateMeta;
 import com.boot.jx.mongo.CommonMongoQB.QueryCriteria;
 import com.boot.jx.postman.PMConstants.CHAT_STATUS;
 import com.boot.jx.postman.doc.BulkSessionDoc;
@@ -41,7 +44,6 @@ import com.boot.jx.postman.model.ext.InBoundEvent;
 import com.boot.jx.postman.service.ChatDTOUtil;
 import com.boot.jx.postman.store.MessageStore;
 import com.boot.jx.postman.store.SessionStore;
-import com.boot.jx.tunnel.task.JobTaskModel.BatchJob;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
 import com.google.i18n.phonenumbers.NumberParseException;
@@ -171,7 +173,17 @@ public class AdminMsgController {
 	@RequestMapping(value = "/api/message/bulk/push/send", method = { RequestMethod.POST })
 	public ApiResponse<BulkSessionDoc, Object> sendBulkMessage(@RequestBody OutboxMessage bulkMessage)
 			throws NumberParseException {
-		return ApiResponse.buildResult(bulkMessageService.send(bulkMessage)).message("Bulk Message Job Created");
+		if(ArgUtil.is(bulkMessage.getReferenceKey())) {
+		List<OutboxMessage> lstOutBoxMsg =  getCsvData(bulkMessage);
+		BulkSessionDoc bulkDoc =bulkMessageService.sendMultiple(lstOutBoxMsg);
+		  if(ArgUtil.is(bulkDoc)) {
+		   return ApiResponse.buildResult(bulkDoc).message("Bulk Message Job Created");
+		  }else {
+			  return ApiResponse.buildResult(bulkDoc).message("Bulk Message Job Failed");
+		  }
+		}else {
+		 return ApiResponse.buildResult(bulkMessageService.send(bulkMessage)).message("Bulk Message Job Created");
+		}
 	}
 
 	@RequestMapping(value = "/api/message/bulk/push/retry", method = { RequestMethod.POST })
@@ -243,6 +255,9 @@ public class AdminMsgController {
 	    try {
 	    	lst = fileService.save(templateId,file);
 	        message = "Uploaded the file successfully: " + file.getOriginalFilename();
+	        OutboxMessage outboxMessage =new OutboxMessage();
+	        outboxMessage.setReferenceKey(lst.getReferenceKey());
+	        //getCsvData(outboxMessage);
 		  return ApiResponse.buildResult(lst).message(message);
 	      } catch (Exception e) {
 		        message = "Could not upload the file: " + file.getOriginalFilename() + "!";
@@ -253,5 +268,46 @@ public class AdminMsgController {
 	    	 return ApiResponse.buildResult(lst).message(message);
 	    }
 	}
+	
+	public List<OutboxMessage> getCsvData(OutboxMessage outboxMessage){
+		List<OutboxMessage> listOfOutboxMsg = new ArrayList<>();
+		if(outboxMessage!=null) {
+			String csvRefKeyId = outboxMessage.getReferenceKey();
+			OutboxMessage otBoxMsg =outboxMessage;
+			String hsmId = otBoxMsg.getHsm().getId();
+			CsvDto csvDoc = mongoTemplate.findById(csvRefKeyId, CsvDto.class);
+			if(ArgUtil.is(csvDoc)) {
+				List<Map<Object,Object>> lstMap = csvDoc.getLstMap();
+				for (Map<Object, Object> map : lstMap) {
+					OutboxMessage outboxMsg = new OutboxMessage();
+					CommonTemplateMeta hsmTemp = new CommonTemplateMeta();
+					hsmTemp.setId(hsmId);
+					outboxMsg.setMessage(otBoxMsg.getMessage());
+					outboxMsg.setAttachments(otBoxMsg.getAttachments());
+					outboxMsg.setContact(otBoxMsg.getContact());
+					Map<String, Object> data = new HashMap<>();
+					for (Map.Entry<Object, Object> entry : map.entrySet()) {
+						String k =ArgUtil.parseAsString(entry.getKey());
+						String v = ArgUtil.parseAsString(entry.getValue());
+				    	if(ArgUtil.parseAsString(k).equalsIgnoreCase("contacts")) {
+				    		outboxMsg.setTo(Arrays.asList(v.toString()));
+				    	}else if(ArgUtil.is(k)){
+				    	data.put(ArgUtil.parseAsString(k), v);
+				    	}
+					}
+					   if(data!=null && !data.isEmpty()) {
+						 hsmTemp.setData(data);
+				      }
+					outboxMsg.setHsm(hsmTemp);
+					
+				    listOfOutboxMsg.add(outboxMsg);
+				} //end of listOfOutboxMsg
+				
+			}
+			
+		}
+		return listOfOutboxMsg;
+	}
+	
 
 }

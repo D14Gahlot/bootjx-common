@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 
 import com.boot.jx.AppConfig;
 import com.boot.jx.AppContextUtil;
+import com.boot.jx.common.config.ConfigConstants.PERMS_KEY;
 import com.boot.jx.common.impl.ConfigMeta;
 import com.boot.jx.http.CommonHttpRequest;
 import com.boot.jx.logger.LoggerService;
@@ -114,6 +115,14 @@ public class PMCommonConfigImpl implements PMCommonConfig {
 		return map;
 	}
 
+	private SafeKeyHashMap<Object> permsConfigAttributes() {
+		SafeKeyHashMap<Object> setup = new SafeKeyHashMap<Object>();
+		for (PERMS_KEY config : ConfigConstants.PERMS_KEY.values()) {
+			setup.put(config.name(), pmEnvironment.permEntry(config.getKey()).getValue());
+		}
+		return setup;
+	}
+
 	private SafeKeyHashMap<Object> setupConfigAttributes() {
 		SafeKeyHashMap<Object> setup = new SafeKeyHashMap<Object>();
 		for (ConfigMeta config : ConfigConstants.SETUP_CONFIG_LIST) {
@@ -149,6 +158,7 @@ public class PMCommonConfigImpl implements PMCommonConfig {
 		Map<String, Object> map = commonAttributes();
 		map.putAll(appConfigAttributes());
 		map.put("SETUP", setupConfigAttributes());
+		map.put("PERMS", permsConfigAttributes());
 		map.put("timestamp", System.currentTimeMillis());
 		return map;
 	}
@@ -201,12 +211,12 @@ public class PMCommonConfigImpl implements PMCommonConfig {
 	}
 
 	public String getBotUrl() {
-		return botUrl;
+		return pmEnvironment.keyEntry(ConfigConstants.APP_KEY.PROP_BOT_URL).asString(this.botUrl);
 	}
 
 	@Override
 	public String getAgentUrl() {
-		return agentUrl;
+		return pmEnvironment.keyEntry(ConfigConstants.APP_KEY.PROP_AGENT_URL).asString(this.agentUrl);
 	}
 
 	@Override

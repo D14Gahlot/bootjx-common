@@ -6,11 +6,11 @@ import java.util.regex.Pattern;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.expression.ExpressionException;
 
 import com.boot.jx.postman.PMConstants.CHAT_MODE;
 import com.boot.jx.postman.model.SessionSearchQuery;
 import com.boot.utils.JsonUtil;
-import com.github.gianlucanitti.javaexpreval.ExpressionException;
 
 public class OWATest { // Noncompliant
 

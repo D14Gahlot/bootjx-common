@@ -216,6 +216,8 @@ public class AppConfig {
 	@Value("${app.session}")
 	private boolean appSessionEnabled;
 
+	private String originApp;
+
 	public boolean isAppSessionEnabled() {
 		return appSessionEnabled;
 	}
@@ -320,6 +322,7 @@ public class AppConfig {
 			AppParam.APP_INSTANCE_ID.setValue(appInstanceId);
 			AppParam.APP_INSTANCE_HASH.setValue(CryptoUtil.getMD5Hash(appInstanceId));
 			AppParam.APP_INSTANCE_UID.setValue(appInstanceId + "#" + UniqueID.PREF);
+			AppParam.APP_INSTANCE_TYPE.setValue(AppParam.APP_VENV.getValue() + "/" + AppParam.APP_TYPE.getValue());
 		} catch (NoSuchAlgorithmException e) {
 			e.printStackTrace();
 		}
@@ -477,6 +480,10 @@ public class AppConfig {
 
 	public String getAppVenv() {
 		return appVenv;
+	}
+
+	public String getAppInstanceType() {
+		return AppParam.APP_INSTANCE_TYPE.getValue();
 	}
 
 }

@@ -234,6 +234,7 @@ public class PartnerController {
 		return ApiResponse.build().message("Login Success");
 	}
 
+	@ResponseBody
 	@RequestMapping(value = { "/api/domain/exists", "/pub/domain/exists" }, method = { RequestMethod.GET })
 	public ApiResponse<Object, Object> sisExists(@RequestParam @Valid String domain) throws NoSuchAlgorithmException {
 		AppContextUtil.setTenant(Tenants.getDefault());

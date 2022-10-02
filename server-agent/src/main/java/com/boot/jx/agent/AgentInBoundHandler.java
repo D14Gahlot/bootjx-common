@@ -5,12 +5,15 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.boot.jx.AppContextUtil;
 import com.boot.jx.chat.ChatService;
 import com.boot.jx.common.config.ConfigConstants;
 import com.boot.jx.common.config.DefaultChatBoundHandler;
 import com.boot.jx.common.service.SessionEventTimer;
 import com.boot.jx.inbound.InBound.SessionAssginHandler;
 import com.boot.jx.postman.ClientApp;
+import com.boot.jx.postman.PMConstants;
+import com.boot.jx.postman.PMConstants.CHAT_MODE;
 import com.boot.jx.postman.PMConstants.MESSAGE_SENDER_TYPE;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.doc.ChatSessionDoc;
@@ -19,7 +22,6 @@ import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.model.PMArgs;
 import com.boot.jx.postman.model.ext.InBoundEvent;
 import com.boot.jx.postman.store.SessionStore;
-import com.boot.jx.tunnel.ITunnelDefs.TunnelTask;
 import com.boot.model.MapModel;
 import com.boot.model.MapModel.MapEntry;
 import com.boot.model.MapModel.NodeEntry;
@@ -53,6 +55,8 @@ public class AgentInBoundHandler extends DefaultChatBoundHandler {
 	 */
 	@Override
 	public void onMessage(InboxMessage inboxMessage, ChatSessionDoc session) {
+		ClientApp defaultClient = context().clientApp(inboxMessage.session().getQueue(), inboxMessage.contact());
+
 		if (ArgUtil.isEmpty(inboxMessage.session().getMode()) && ArgUtil.isEmpty(inboxMessage.session().getQueue())) {
 			if (!ArgUtil.is(session)) {
 				session = sessionStore.getSession(inboxMessage.getSessionId());
@@ -74,6 +78,12 @@ public class AgentInBoundHandler extends DefaultChatBoundHandler {
 		OutboxMessage oMsg = new OutboxMessage();
 		try {
 			ClientApp app = this.context().clientApp();
+
+			if (ArgUtil.not(app)) {
+				logManager.addTrace(assignEvent, "NoQueueFound", session.contact());
+				app = this.context().clientApp(PMConstants.DEFAULT.AGENT_QUEUE_CODE, session.contact());
+			}
+
 			MapModel props = MapModel.from(app.props());
 
 			oMsg.route().setQueueCode(app.getQueue());
@@ -138,6 +148,23 @@ public class AgentInBoundHandler extends DefaultChatBoundHandler {
 		}
 		onAssign(session, agentAssignEvent);
 		return eventEntry.value(agentAssignEvent);
+	}
+
+	@Override
+	public CHAT_MODE mode() {
+		return CHAT_MODE.AGENT;
+	}
+
+	@Override
+	public void onSessionRoute(InBoundEvent inBoundEvent, ChatSessionDoc sessionDoc, PMArgs pmArgs) {
+		ClientApp targetAppQueue = context().clientApp(inBoundEvent.sessionRouted.targetQueue, null);
+		MapModel props = new MapModel(targetAppQueue.props());
+		AppContextUtil.setActorId(targetAppQueue.getQueue());
+		assignSessionToAgent(new PMArgs().contact(pmArgs.contact())
+				.assignToDeptCode(ArgUtil.nonEmpty(pmArgs.getAssignToDeptCode(), props.getString("deptCode")))
+				.assignToAgentCode(ArgUtil.nonEmpty(pmArgs.getAssignToAgentCode(), props.getString("agentCode")))
+				.assignToSkillCodes(pmArgs.getAssignToSkillCodes()), sessionDoc);
+		sessionEventTimer.setMitelRoutingCheck(sessionDoc.getSessionId(), targetAppQueue);
 	}
 
 }

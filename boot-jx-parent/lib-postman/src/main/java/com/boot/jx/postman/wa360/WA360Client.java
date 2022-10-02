@@ -83,6 +83,8 @@ public class WA360Client {
 
 			if (isList) {
 				if (buttons.size() <= 10) {
+					checkAndSendMedia(channelConfig, new OutboxMessage().contact(outboxMessage.contact())
+							.attachment(outboxMessage.attachments()), msgIds, Constants.BLANK);
 					MapModel resp = sendList(channelConfig, outboxMessage, buttons);
 					msgIds.add(getMessageId(resp));
 				} else {
@@ -120,6 +122,11 @@ public class WA360Client {
 					} else {
 						options.put("list_option_title", "List " + (prompt.pageIndex + 1));
 					}
+
+					if (prompt.pageIndex == 0) {
+						checkAndSendMedia(channelConfig, new OutboxMessage().contact(outboxMessage.contact())
+								.attachment(outboxMessage.attachments()), msgIds, Constants.BLANK);
+					}
 					MapModel resp = sendList(channelConfig, outboxMessage, newButtons);
 					msgIds.add(getMessageId(resp));
 				}
@@ -128,17 +135,7 @@ public class WA360Client {
 				msgIds.add(getMessageId(resp));
 			} else {
 				String textMessage = outboxMessage.getMessage();
-				if (ArgUtil.is(outboxMessage.getAttachments())) {
-					for (Attachment attachment : outboxMessage.getAttachments()) {
-						if (ArgUtil.is(textMessage) && ArgUtil.isEqual(attachment.getMediaType(),
-								FileType.IMAGE.toString(), FileType.VIDEO.toString())) {
-							attachment.setMediaCaption(textMessage);
-							textMessage = null;
-						}
-						MapModel resp = sendMedia(channelConfig, outboxMessage, attachment);
-						msgIds.add(getMessageId(resp));
-					}
-				}
+				textMessage = checkAndSendMedia(channelConfig, outboxMessage, msgIds, textMessage);
 
 				if (ArgUtil.is(textMessage)) {
 					MapModel resp = sendText(channelConfig, outboxMessage);
@@ -149,6 +146,22 @@ public class WA360Client {
 
 		outboxMessage.setMessageIdExt(msgIds.toString());
 		return outboxMessage;
+	}
+
+	private String checkAndSendMedia(ChannelConfig channelConfig, OutboxMessage outboxMessage, StringJoiner msgIds,
+			String textMessage) {
+		if (ArgUtil.is(outboxMessage.getAttachments())) {
+			for (Attachment attachment : outboxMessage.getAttachments()) {
+				if (ArgUtil.is(textMessage) && ArgUtil.isEqual(attachment.getMediaType(), FileType.IMAGE.toString(),
+						FileType.VIDEO.toString())) {
+					attachment.setMediaCaption(textMessage);
+					textMessage = null;
+				}
+				MapModel resp = sendMedia(channelConfig, outboxMessage, attachment);
+				msgIds.add(getMessageId(resp));
+			}
+		}
+		return textMessage;
 	}
 
 	private MapModel sendTemplate(ChannelConfig channelConfig, OutboxMessage outboxMessage) {
@@ -245,7 +258,7 @@ public class WA360Client {
 
 	private WA360OutBoundMedia createMedia(String mediaType, Attachment attachment) {
 		WA360OutBoundMedia wa360OutBoundMedia = new WA360OutBoundMedia();
-		wa360OutBoundMedia.setCaption(ArgUtil.nonEmpty(attachment.getMediaCaption()));
+		wa360OutBoundMedia.setCaption(attachment.getMediaCaption());
 		wa360OutBoundMedia.setLink(attachment.getMediaURL());
 		wa360OutBoundMedia.setFilename(attachment.getMediaName());
 		if (mediaType.equalsIgnoreCase("image")) {

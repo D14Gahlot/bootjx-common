@@ -2,6 +2,7 @@ package com.boot.jx.inbound;
 
 import org.springframework.scheduling.annotation.Async;
 
+import com.boot.jx.postman.PMConstants.CHAT_MODE;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.MessageReport;
@@ -25,6 +26,8 @@ public class InBound {
 
 	public interface InBoundHandler {
 
+		public CHAT_MODE mode();
+
 		public MessageContext context();
 
 		public void onMessage(InboxMessage inboxMessage, ChatSessionDoc session);
@@ -39,6 +42,8 @@ public class InBound {
 
 		@Async
 		default public void onMessageAsync(InboxMessage inboxMessage, ChatSessionDoc session) {
+			context().setInboxMessage(inboxMessage);
+			context().session(session);
 			this.onMessage(inboxMessage, session);
 			this.afterMessage(inboxMessage, session);
 		}
@@ -47,19 +52,23 @@ public class InBound {
 
 		public InBoundEvent onSessionEvent(InBoundEvent inBoundEvent, PMArgs pmArgs);
 
+		public void onSessionRouteWrapper(InBoundEvent inBoundEvent, ChatSessionDoc sessionDoc, PMArgs pmArgs);
+
 		public void onSessionRoute(InBoundEvent inBoundEvent, ChatSessionDoc sessionDoc, PMArgs pmArgs);
 
 		default public void afterSessionRoute(InBoundEvent inBoundEvent, ChatSessionDoc sessionDoc, PMArgs pmArgs) {
 		}
 
 		default public void onSessionRouteSync(InBoundEvent inBoundEvent, ChatSessionDoc sessionDoc, PMArgs pmArgs) {
-			this.onSessionRoute(inBoundEvent, sessionDoc, pmArgs);
+			this.onSessionRouteWrapper(inBoundEvent, sessionDoc, pmArgs);
 			this.afterSessionRoute(inBoundEvent, sessionDoc, pmArgs);
 		}
 
 		@Async
 		default public void onSessionRouteAsync(InBoundEvent inBoundEvent, ChatSessionDoc sessionDoc, PMArgs pmArgs) {
-			this.onSessionRoute(inBoundEvent, sessionDoc, pmArgs);
+			context().setInBoundEvent(inBoundEvent);
+			context().session(sessionDoc);
+			this.onSessionRouteWrapper(inBoundEvent, sessionDoc, pmArgs);
 			this.afterSessionRoute(inBoundEvent, sessionDoc, pmArgs);
 		}
 

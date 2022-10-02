@@ -748,11 +748,11 @@ public final class ArgUtil {
 	}
 
 	public static boolean blank(Object object) {
-		return !ArgUtil.isEmpty(object);
+		return ArgUtil.isEmpty(object);
 	}
 
 	public static boolean not(Object object) {
-		return !ArgUtil.isEmptyValue(object);
+		return ArgUtil.isEmptyValue(object);
 	}
 
 	public static boolean isNotEmpty(Object object) {
@@ -829,7 +829,13 @@ public final class ArgUtil {
 	 * @param strs
 	 * @return
 	 */
-	public static <T> T anyOf(T... strs) {
+	public static <T> T anyOf(T first, T second, T... strs) {
+		if (!isEmpty(first)) {
+			return first;
+		}
+		if (!isEmpty(second)) {
+			return second;
+		}
 		for (T str : strs) {
 			if (!isEmpty(str)) {
 				return str;
@@ -838,13 +844,13 @@ public final class ArgUtil {
 		return null;
 	}
 
-	public static <T> T nonEmpty(T... strs) {
-		return anyOf(strs);
+	public static <T> T nonEmpty(T first, T second, T... strs) {
+		return anyOf(first, second, strs);
 	}
 
 	@Deprecated
-	public static <T> T ifNotEmpty(T... strs) {
-		return nonEmpty(strs);
+	public static <T> T ifNotEmpty(T first, T second, T... strs) {
+		return nonEmpty(first, second, strs);
 	}
 
 	/**
@@ -853,8 +859,8 @@ public final class ArgUtil {
 	 * @param strs
 	 * @return
 	 */
-	public static boolean areEmpty(Object... strs) {
-		return ArgUtil.isEmpty(ArgUtil.nonEmpty(strs));
+	public static boolean areEmpty(Object first, Object second, Object... strs) {
+		return ArgUtil.isEmpty(ArgUtil.nonEmpty(first, second, strs));
 	}
 
 	public static boolean nullAsFalse(Boolean a) {

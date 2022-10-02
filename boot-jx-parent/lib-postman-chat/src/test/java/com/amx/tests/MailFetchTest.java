@@ -3,7 +3,6 @@ package com.amx.tests;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.Properties;
-import java.util.StringJoiner;
 
 import javax.mail.Folder;
 import javax.mail.Message;

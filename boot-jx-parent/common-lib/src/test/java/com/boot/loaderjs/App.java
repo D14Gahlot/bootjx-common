@@ -4,10 +4,8 @@ import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.log4j.MDC;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,20 +16,12 @@ import com.boot.jx.dict.FileFormat;
 import com.boot.jx.dict.UserClient.AppType;
 import com.boot.jx.dict.UserClient.DeviceType;
 import com.boot.jx.dict.UserClient.UserDeviceClient;
-import com.boot.jx.scope.tnt.TenantContextHolder;
 import com.boot.jx.tunnel.TunnelMessage;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.ContextUtil;
 import com.boot.utils.JsonUtil;
-import com.boot.utils.OTPUtils;
-import com.boot.utils.OTPUtils.OTPDetails;
-import com.boot.utils.StringUtils.StringMatcher;
 import com.boot.utils.TimeUtils;
-import com.boot.utils.UniqueID;
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.github.gianlucanitti.javaexpreval.Expression;
-import com.github.gianlucanitti.javaexpreval.ExpressionContext;
-import com.github.gianlucanitti.javaexpreval.ExpressionException;
 
 public class App { // Noncompliant
 
@@ -49,73 +39,10 @@ public class App { // Noncompliant
 
 	private static Logger LOGGER = LoggerFactory.getLogger(App.class);
 
-	public static void main(String[] args) throws ExpressionException {
+	public static void main(String[] args) {
 		System.out.println(FileFormat.from("audio/webm;codecs=opus"));
 		System.out.println(FileFormat.from("audio/webm; codecs=opus"));
 		System.out.println(FileFormat.from("audio/webm"));
-	}
-
-	public static void mainx(String[] args) throws ExpressionException {
-		MDC.put(TenantContextHolder.TENANT, "heohooh");
-		LOGGER.info("Hello");
-	}
-
-	public static void main8(String[] args) throws ExpressionException {
-
-		StringMatcher matcher = new StringMatcher("DOCUMENT_DATE<");
-
-		if (matcher.isMatch(OPERATOR_FILTER_DOUBLE) || matcher.isMatch(OPERATOR_FILTER_SINGLE)) {
-			System.out.println(matcher.group(1));
-			System.out.println(matcher.group(2));
-		}
-
-	}
-
-	public static void main9(String[] args) throws ExpressionException {
-		OTPDetails details = OTPUtils.genrateBasicOTP("512", "REMIT");
-		System.out.println(JsonUtil.toJson(details));
-		System.out.println(OTPUtils.validateBasicOTP(details.getId(), "512", "REMIT", details.getOtp()));
-		System.out.println(OTPUtils.validateBasicOTP(details.getId(), "512", "REMIT", "121218"));
-
-		OTPDetails detailsYinYang = OTPUtils.genrateBasicOTP("512", "REMIT");
-		System.out.println(JsonUtil.toJson(detailsYinYang));
-		System.out.println(new OTPDetails().yin(detailsYinYang.getYin()).yang(detailsYinYang.getYang())
-				.genrate("512", "REMIT").isValid(detailsYinYang.getOtp()));
-		System.out.println(new OTPDetails().yin(detailsYinYang.getYin()).yang(detailsYinYang.getYang())
-				.genrate("512", "REMIT").isValid("121218"));
-	}
-
-	/**
-	 * This is just a test method
-	 * 
-	 * @param args
-	 * @throws ExpressionException
-	 * @throws MalformedURLException
-	 * @throws URISyntaxException
-	 */
-
-	public static void main6(String[] args) throws ExpressionException {
-		AppContextUtil.getSessionId(true);
-		String traceId = AppContextUtil.getTraceId();
-
-		System.out.println("traceId  " + traceId);
-		Matcher matcher = UniqueID.SYSTEM_STRING_PATTERN.matcher(traceId);
-		if (matcher.find()) {
-			System.out.println("=" + matcher.group(1) + "-" + matcher.group(2) + "-" + matcher.group(3));
-		}
-		Matcher matcher2 = UniqueID.SYSTEM_STRING_PATTERN_V2.matcher(traceId);
-		if (matcher2.find()) {
-			System.out.println("==" + matcher2.group(1) + "-" + matcher2.group(2) + "-" + matcher2.group(3));
-		}
-	}
-
-	public static void main5(String[] args) throws ExpressionException {
-		ExpressionContext c = new ExpressionContext();
-		c.setVariable("x", ArgUtil.parseAsDouble("2.04", Double.valueOf(0)));
-		c.setVariable("y", ArgUtil.parseAsDouble("3.0", Double.valueOf(0)));
-		Expression expr = Expression.parse("x*y");
-		double result = expr.eval(c);
-		System.out.println("Z=" + result);
 	}
 
 	public static void main4(String[] args) {

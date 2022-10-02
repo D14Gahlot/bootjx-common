@@ -8,6 +8,7 @@ import com.boot.jx.mongo.CommonMongoTemplateAbstract;
 import com.boot.jx.postman.doc.PMConfigurationDoc;
 import com.boot.jx.postman.doc.config.ChannelConfigDoc;
 import com.boot.jx.postman.doc.config.ClientAppConfigDoc;
+import com.boot.jx.postman.doc.config.PermsConfigDoc;
 import com.boot.jx.postman.doc.config.PrefsConfigDoc;
 import com.boot.jx.postman.doc.config.VarsConfigDoc;
 import com.boot.jx.postman.doc.config.VarsConfigDoc.CompanyTokenKeyDoc;
@@ -27,6 +28,11 @@ public class ConfigStore extends CommonMongoTemplateAbstract {
 	}
 
 	public void savePrefsConfig(PrefsConfigDoc prefsConfigDoc) {
+		save(prefsConfigDoc);
+		log(prefsConfigDoc, "updated");
+	}
+
+	public void savePermConfig(PermsConfigDoc prefsConfigDoc) {
 		save(prefsConfigDoc);
 		log(prefsConfigDoc, "updated");
 	}

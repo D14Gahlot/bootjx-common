@@ -17,6 +17,7 @@ import com.boot.jx.model.AuditCreateEntity.AuditUpdateEntity;
 import com.boot.jx.mongo.CommonDocInterfaces.AuditActivityDoc;
 import com.boot.jx.mongo.CommonDocInterfaces.AuditableByIdEntity;
 import com.boot.jx.mongo.CommonDocInterfaces.DocVersion;
+import com.boot.jx.mongo.CommonDocInterfaces.IMongoQueryBuilder;
 import com.boot.jx.mongo.CommonDocInterfaces.MongoQueryBuilder;
 import com.boot.jx.mongo.CommonDocInterfaces.TimeStampIndex;
 import com.boot.jx.mongo.CommonDocInterfaces.TimeStampIndex.CreatedTimeStampIndexSupport;
@@ -110,16 +111,16 @@ public class CommonMongoTemplateAbstract extends CommonMongoTemplateDefault {
 		return null;
 	}
 
-	public <T> List<T> find(MongoQueryBuilder<T> builder, Class<T> clazz) {
+	public <T> List<T> find(IMongoQueryBuilder<T> builder, Class<T> clazz) {
 		return find(builder.getQuery(), clazz);
 	}
 
-	public <T> List<T> find(MongoQueryBuilder<T> builder) {
+	public <T> List<T> find(IMongoQueryBuilder<T> builder) {
 		// System.out.println("+++"+builder.getQuery());
 		return find(builder.getQuery(), builder.getDocClass());
 	}
 
-	public <T> T findOne(MongoQueryBuilder<T> builder) {
+	public <T> T findOne(IMongoQueryBuilder<T> builder) {
 		// System.out.println("+++"+builder.getQuery());
 		return findOne(builder.getQuery(), builder.getDocClass());
 	}
@@ -134,7 +135,7 @@ public class CommonMongoTemplateAbstract extends CommonMongoTemplateDefault {
 		return newVersion;
 	}
 
-	public UpdateResult updateFirst(MongoQueryBuilder<?> builder) {
+	public UpdateResult updateFirst(IMongoQueryBuilder<?> builder) {
 		UpdateResult ret = null;
 		if (ArgUtil.is(builder.getUpdate())) {
 			try {
@@ -152,7 +153,7 @@ public class CommonMongoTemplateAbstract extends CommonMongoTemplateDefault {
 		return ret;
 	}
 
-	public UpdateResult update(MongoQueryBuilder<?> builder) {
+	public UpdateResult update(IMongoQueryBuilder<?> builder) {
 		UpdateResult ret = null;
 		if (ArgUtil.is(builder.getUpdate())) {
 			try {
@@ -177,7 +178,7 @@ public class CommonMongoTemplateAbstract extends CommonMongoTemplateDefault {
 	 * @see MongoTemplate#upsert(Query,
 	 *      org.springframework.data.mongodb.core.query.Update, Class, String)
 	 */
-	public UpdateResult upsert(MongoQueryBuilder<?> builder) {
+	public UpdateResult upsert(IMongoQueryBuilder<?> builder) {
 		UpdateResult ret = null;
 		if (ArgUtil.is(builder.getUpdate())) {
 			try {

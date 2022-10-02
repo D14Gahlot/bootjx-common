@@ -27,6 +27,7 @@ public class ConfigConstants {
 			"mry.domain." };
 	public static final Map<String, String> APP_CONFIG = new ConcurrentHashMap<String, String>();
 	public static final List<ConfigMeta> SETUP_CONFIG_LIST = new ArrayList<ConfigMeta>();
+	public static final List<ConfigMeta> PERMS_CONFIG_LIST = new ArrayList<ConfigMeta>();
 
 	public static final String GROUP_CUSTOMER_CHAT = "CUSTOMER CHAT";
 	public static final String GROUP_AGENT = "AGENT";
@@ -38,7 +39,12 @@ public class ConfigConstants {
 		PROP_SERVICE_DOMAIN(new ConfigMeta("server", "mry.prop.service.domain")),
 		PROP_SERVICE_SERVER(new ConfigMeta("server", "mry.prop.service.server")),
 		PROP_SCRIPTUS_URL(new ConfigMeta("server", "mry.scriptus.url")),
+		PROP_AGENT_URL(new ConfigMeta("server", "mry.agent.url")),
+		PROP_BOT_URL(new ConfigMeta("server", "mry.bot.url")),
 		// Ends here
+
+		MITEL_SYNC_TIMER(new ConfigMeta("server", "mry.domain.mitel.sync.timer")),
+		// Actually Ends Here
 		;
 
 		private String key;
@@ -123,6 +129,10 @@ public class ConfigConstants {
 				.optionValues(PMConstants.ASSIGNMENT_RULE.ROUND_ROBIN, PMConstants.ASSIGNMENT_RULE.MANUAL,
 						PMConstants.ASSIGNMENT_RULE.STRICT_DEFAULT)
 				.defaultValue(PMConstants.ASSIGNMENT_RULE.ROUND_ROBIN).group(GROUP_AGENT)),
+
+		POSTMAN_AGENT_CHAT_STICKY_RMAGENT(new ConfigMeta("Agent Assignment RM", "postman.agent.chat.sticky.rmagent")
+				.optionValues(PMConstants.CHAT_SESSION_STICKY.ONAVAILABLE, PMConstants.CHAT_SESSION_STICKY.STRICT)
+				.defaultValue(PMConstants.CHAT_SESSION_STICKY.STRICT).group(GROUP_AGENT)),
 
 		POSTMAN_AGENT_CHAT_STICKYSESSION(new ConfigMeta("Sticky Session", "postman.agent.chat.stickysession")
 				.optionValues(PMConstants.CHAT_SESSION_STICKY.NONE, PMConstants.CHAT_SESSION_STICKY.ONAVAILABLE,
@@ -240,19 +250,53 @@ public class ConfigConstants {
 		;
 
 		private String key;
+		private Object defaultValue;
 
 		SETUP_KEY(ConfigMeta defaultFalse) {
 			this.key = defaultFalse.getKey();
 			ConfigConstants.SETUP_CONFIG_LIST.add(defaultFalse);
+			defaultValue = defaultFalse.getDefaultValue();
 		}
 
 		public String getKey() {
 			return key;
 		}
+
+		@SuppressWarnings("unchecked")
+		public <T> T getDefaultValue() {
+			return (T) defaultValue;
+		}
+
+	}
+
+	public static enum PERMS_KEY implements EntryMeta {
+
+		CONTACT_CENTER(new ConfigMeta("Contact Center", "perms.contact.center").optionsOnOff()),
+		// Ends here
+		;
+
+		private String key;
+		private Object defaultValue;
+
+		PERMS_KEY(ConfigMeta defaultFalse) {
+			this.key = defaultFalse.getKey();
+			ConfigConstants.PERMS_CONFIG_LIST.add(defaultFalse);
+			defaultValue = defaultFalse.getDefaultValue();
+		}
+
+		public String getKey() {
+			return key;
+		}
+
+		@SuppressWarnings("unchecked")
+		public <T> T getDefaultValue() {
+			return (T) defaultValue;
+		}
 	}
 
 	static {
 		ConfigConstants.SETUP_KEY.values();
+		ConfigConstants.PERMS_KEY.values();
 	}
 
 }
