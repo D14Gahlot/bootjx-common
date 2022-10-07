@@ -9,6 +9,7 @@ public class SummaryDocDto {
 	String channel;
 	String type;
     Map<String, Object> meta;
+    Map<Object,Map<String,Long>> hourWiseCount;
 	public String getId() {
 		return id;
 	}
@@ -44,6 +45,12 @@ public class SummaryDocDto {
 	}
 	public void setMeta(Map<String, Object> meta) {
 		this.meta = meta;
+	}
+	public Map<Object, Map<String, Long>> getHourWiseCount() {
+		return hourWiseCount;
+	}
+	public void setHourWiseCount(Map<Object, Map<String, Long>> hourWiseCount) {
+		this.hourWiseCount = hourWiseCount;
 	}
 	
 

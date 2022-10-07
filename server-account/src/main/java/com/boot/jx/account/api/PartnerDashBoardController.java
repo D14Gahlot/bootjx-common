@@ -93,6 +93,12 @@ public class PartnerDashBoardController {
    		return  ApiResponse.buildResults(summary);
    	}
 
+    @ResponseBody
+   	@RequestMapping(value = {"/pub/hourwise-summary"}, method = { RequestMethod.GET })
+   	public ApiResponse<ContactTypeSummaryDto, Object> getHourWiseSummary(@RequestParam(required = false) long timestamp,long hr) {
+   		ContactTypeSummaryDto summary =dashBMgr.hourWisesummary(timestamp,hr); 
+   		return  ApiResponse.buildResult(summary);
+   	}
     
 
 }
