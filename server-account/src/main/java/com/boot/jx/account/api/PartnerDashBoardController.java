@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.boot.jx.AppConfig;
@@ -92,6 +93,13 @@ public class PartnerDashBoardController {
      	List<WabaSummaryDocDto> summary =dashBMgr.wabaSummary(timestamp);
    		return  ApiResponse.buildResults(summary);
    	}
+    
+    @ResponseBody
+	@RequestMapping(value = {"/pub/hourwise-summary"}, method = { RequestMethod.GET })
+	public ApiResponse<ContactTypeSummaryDto, Object> getHourWiseSummary(@RequestParam(required = false) long timestamp,long hr) {
+		ContactTypeSummaryDto summary =dashBMgr.hourWisesummary(timestamp,hr); 
+		return  ApiResponse.buildResult(summary);
+	}
 
     
 

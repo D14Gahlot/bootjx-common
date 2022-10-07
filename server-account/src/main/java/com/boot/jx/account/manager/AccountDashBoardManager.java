@@ -47,6 +47,7 @@ import com.boot.jx.account.dto.WabaSummaryDocDto;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.account.dto.ContactTypeCountDto;
 import com.boot.jx.account.dto.ContactTypeSummaryDto;
+import com.boot.jx.account.dto.DateWiseHourCountDto;
 import com.boot.jx.account.dto.MonthDtlsDto;
 import com.boot.jx.account.dto.SummaryDocDto;
 import com.boot.jx.postman.PMConstants;
@@ -229,7 +230,9 @@ public class AccountDashBoardManager {
 			long monthMinTimeStamp = DateUtil.getStartTimestamp(month, year).getTime();
 			long monthMaxTimeStamp = DateUtil.getEndTimestamp(month, year).getTime();
 			List<SummaryDocDto> lstSummDto = new ArrayList<>();
-
+			List<Long> hourList = new ArrayList<Long>();
+			List<String> hourListH = new ArrayList<String>();
+			List<DateWiseHourCountDto> hourCntLst = new ArrayList<>();
 			for (String contactType : lst) {
 				Query query = new Query();
 				query.addCriteria(Criteria.where("timestamp").gt(monthMinTimeStamp).lt(monthMaxTimeStamp));
@@ -238,6 +241,8 @@ public class AccountDashBoardManager {
 				List<MessageDoc> msgDocLst = mongoTemplate.find(query, MessageDoc.class, contactType.toString());
 				for (MessageDoc doc : msgDocLst) {
 					SummaryDocDto dto = new SummaryDocDto();
+					DateWiseHourCountDto hrDto = new DateWiseHourCountDto();
+					long timeStamp = doc.getTimestamp();
 					String yyyyMMdd = DateUtil.foramtTimeStampDateAsString(doc.getTimestamp(),
 							DateUtil.YYYYMMDD_DATE_FORMAT);
 					dto.setDate(yyyyMMdd);
@@ -252,15 +257,37 @@ public class AccountDashBoardManager {
 					if(ArgUtil.is(dto.getId())) {
 					lstSummDto.add(dto);
 					}
+					Date date=new Date(timeStamp);
+					SimpleDateFormat sdfH = new SimpleDateFormat("kk");
+					String formattedDateH = sdfH.format(date);
+					//System.out.println("yyyyMMdd "+yyyyMMdd+"\t formattedDateH "+formattedDateH);
+					hourListH.add(formattedDateH);
+					hrDto.setDate(yyyyMMdd);
+					hrDto.setHour(formattedDateH);
+					if(hrDto!=null) {
+						hourCntLst.add(hrDto);
+					}
 				}
 
 			}
+			
+		//System.out.println("hourList "+JsonUtil.toJson(hourList));
+		Map<Object, Object> hourWisemapLst = new HashMap<Object, Object>();
+		Collections.sort(hourListH);
+		Set<Object> hourWiseCount = new HashSet<Object>(hourListH);
+		for (Object key : hourWiseCount) {
+			hourWisemapLst.put(key, Collections.frequency(hourListH, key));
+		}
+		//System.out.println("hourWisemapLst "+hourWisemapLst);
 		
 			Map<Object, Long> summaryMap = new HashMap<>();
 			Map<String, Map<String, Long>> datwWiseCount = lstSummDto.stream().collect(Collectors.groupingBy(SummaryDocDto::getId, Collectors.groupingBy(SummaryDocDto::getType, Collectors.counting())));
 		
 			Map<Object,Map<Object,Object>> dateWiseCountMap = new HashMap<>();
+			/** hour wise count **/
+			Map<String, Map<String, Long>> hourWiseCountMap = hourCntLst.stream().collect(Collectors.groupingBy(DateWiseHourCountDto::getDate, Collectors.groupingBy(DateWiseHourCountDto::getHour, Collectors.counting())));
 			
+			System.out.println("hourWiseCountMap :"+hourWiseCountMap);
 			for(Map.Entry<String, Map<String,Long>> keyValue:datwWiseCount.entrySet()) {
 				String key =keyValue.getKey();
 				Map<Object,Object> dateWiseCnt = new HashMap<>();
@@ -273,7 +300,7 @@ public class AccountDashBoardManager {
 				dateWiseCnt.put("domain", ArgUtil.parseAsString(keyId[0], Constants.BLANK));
 				dateWiseCnt.put("date", ArgUtil.parseAsString(keyId[1], Constants.BLANK));
 				dateWiseCnt.put("channel",ArgUtil.parseAsString(keyId[2], Constants.BLANK));
-				
+				System.out.println("key:"+key+"\t ===dateWiseCnt {}"+dateWiseCnt);
 				dateWiseCountMap.put(key, dateWiseCnt);
 				
 			}
@@ -290,6 +317,7 @@ public class AccountDashBoardManager {
 			//dto.setDateWiseSummaryCount(datwWiseCount);
 			dto.setDateWiseCountMap(dateWiseCountMap);
 			dto.setSummaryCount(summaryMap);
+			dto.setHourWiseCountMap(hourWiseCountMap);
 			saveDomainSummary(dto);
 			return dto;
 		}
@@ -333,6 +361,7 @@ public class AccountDashBoardManager {
 		DomainSummaryMessageDoc domSumMsgDoc =domSumMetaStore.findDomainAndByName(dto.getTenant(),dto.getMonth());
 		if(ArgUtil.is(domSumMsgDoc)) {
 			domSumMsgDoc.setDateWiseSummaryCount(dto.getDateWiseSummaryCount());
+			domSumMsgDoc.setDateWiseCountMap(dto.getDateWiseCountMap());
 			domSumMsgDoc.setSummaryCount(dto.getSummaryCount());
 			mongoTemplate.save(domSumMsgDoc);
 			saveAndUpdateDomainSummaryMeta(dto);
@@ -342,6 +371,7 @@ public class AccountDashBoardManager {
 			domSumMsgDoc.setDate(dto.getMonth());
 			domSumMsgDoc.setDateWiseSummaryCount(dto.getDateWiseSummaryCount());
 			domSumMsgDoc.setSummaryCount(dto.getSummaryCount());
+			domSumMsgDoc.setDateWiseCountMap(dto.getDateWiseCountMap());
 			mongoTemplate.save(domSumMsgDoc);
 			saveAndUpdateDomainSummaryMeta(dto);
 		}
@@ -411,5 +441,115 @@ public class AccountDashBoardManager {
 			//System.out.println("waba summary:"+datwWiseCount);
 		return wabaLst;
 	}
+	
+	public ContactTypeSummaryDto hourWisesummary(long timestamp,long hr) {
+		String tnt = AppContextUtil.getTenant();
+		List<String> lst = getListOfContactType();
+		long currentTs=System.currentTimeMillis();
+		long hour=0;
+		if(hr>0) {
+			hour =hr*60*60*1000;
+		}else {
+			hour =12*60*60*1000;
+		}
+	// System.out.println("Current timestamp:"+currentTs);	
+	// System.out.println("last ("+hr+") hour timestamp:"+hour);
+	 long lasthrTimeStmp=currentTs-hour;
+	// System.out.println("last ("+hr+") hour timestamp:"+lasthrTimeStmp);	 
+		Calendar cal = Calendar.getInstance();
+		Date dateTi =new Date();
+		if(timestamp>0) {
+			cal.setTimeInMillis(timestamp);
+			dateTi =new Date(timestamp);
+			}else {
+				cal.setTimeInMillis(currentTs);
+				dateTi =new Date(currentTs);
+			}
+		String monthYear = new SimpleDateFormat(DateUtil.MMM_YYYY_FORMAT).format(dateTi);
+		
+		int month = cal.get(Calendar.MONTH);
+		int year = cal.get(Calendar.YEAR);
+		//long monthMinTimeStamp = DateUtil.getStartTimestamp(month, year).getTime();
+		//long monthMaxTimeStamp = DateUtil.getEndTimestamp(month, year).getTime();
+		List<SummaryDocDto> lstSummDto = new ArrayList<>();
+		List<Long> hourList = new ArrayList<Long>();
+		List<String> hourListH = new ArrayList<String>();
+		List<DateWiseHourCountDto> hourCntLst = new ArrayList<>();
+		for (String contactType : lst) {
+			Query query = new Query();
+			query.addCriteria(Criteria.where("timestamp").gt(lasthrTimeStmp).lt(currentTs));
+			query.with(new Sort(new Order(Direction.DESC, "timestamp")));
+			query.fields().include("timestamp").include("type").include("meta");
+			List<MessageDoc> msgDocLst = mongoTemplate.find(query, MessageDoc.class, contactType.toString());
+			for (MessageDoc doc : msgDocLst) {
+				SummaryDocDto dto = new SummaryDocDto();
+				DateWiseHourCountDto hrDto = new DateWiseHourCountDto();
+				long timeStamp = doc.getTimestamp();
+				String yyyyMMdd = DateUtil.foramtTimeStampDateAsString(doc.getTimestamp(),
+						DateUtil.YYYYMMDD_DATE_FORMAT);
+				dto.setDate(yyyyMMdd);
+				dto.setType(doc.getType());
+				dto.setChannel(contactType.toString());
+				dto.setMeta(doc.getMeta());
+				dto.setDomain(tnt);
+				String id = getSummaryId(dto);
+				dto.setId(id);
+				System.out.println("Id:"+id);
+				//LOGGER.info("datewaise data :" + JsonUtil.toJson(dto));
+				if(ArgUtil.is(dto.getId())) {
+				lstSummDto.add(dto);
+				}
+				Date date=new Date(timeStamp);
+				SimpleDateFormat sdfH = new SimpleDateFormat("kk");
+				String formattedDateH = sdfH.format(date);
+				hourListH.add(formattedDateH);
+				hrDto.setDate(yyyyMMdd);
+				hrDto.setHour(formattedDateH);
+				hrDto.setChannel(id);
+				if(hrDto!=null) {
+					hourCntLst.add(hrDto);
+				}
+			}
+
+		}
+		Map<Object, Long> summaryMap = new HashMap<>();
+		Map<String, Map<String, Long>> datwWiseCount = lstSummDto.stream().collect(Collectors.groupingBy(SummaryDocDto::getId, Collectors.groupingBy(SummaryDocDto::getType, Collectors.counting())));
+	
+		Map<Object,Map<Object,Object>> dateWiseCountMap = new HashMap<>();
+		/** hour wise count **/
+		Map<String, Map<String, Long>> hourWiseCountMap = hourCntLst.stream().collect(Collectors.groupingBy(DateWiseHourCountDto::getChannel, Collectors.groupingBy(DateWiseHourCountDto::getHour, Collectors.counting())));
+		
+		System.out.println("hourWiseCountMap :"+hourWiseCountMap);
+		for(Map.Entry<String, Map<String,Long>> keyValue:datwWiseCount.entrySet()) {
+			String key =keyValue.getKey();
+			Map<Object,Object> dateWiseCnt = new HashMap<>();
+			for(Map.Entry<String, Long> keyValueCount:keyValue.getValue().entrySet() ) {
+				String keyType = keyValueCount.getKey();
+				Object count = keyValueCount.getValue();
+				dateWiseCnt.put(keyType, count);
+			}
+			String[] keyId=key.split("_");
+			dateWiseCnt.put("domain", ArgUtil.parseAsString(keyId[0], Constants.BLANK));
+			dateWiseCnt.put("date", ArgUtil.parseAsString(keyId[1], Constants.BLANK));
+			dateWiseCnt.put("channel",ArgUtil.parseAsString(keyId[2], Constants.BLANK));
+			System.out.println("key:"+key+"\t ===dateWiseCnt {}"+dateWiseCnt);
+			dateWiseCountMap.put(key, dateWiseCnt);
+			
+		}
+		
+		
+		summaryMap = lstSummDto.stream().collect(Collectors.groupingBy(SummaryDocDto::getType,Collectors.counting()));
+		
+		
+		ContactTypeSummaryDto dto = new ContactTypeSummaryDto();
+		dto.setTenant(tnt);
+		dto.setMonth(monthYear);
+		//dto.setDateWiseCountMap(dateWiseCountMap);
+		dto.setSummaryCount(summaryMap);
+		dto.setHourWiseCountMap(hourWiseCountMap);
+		
+		return dto;
+	}
+
 	
 }

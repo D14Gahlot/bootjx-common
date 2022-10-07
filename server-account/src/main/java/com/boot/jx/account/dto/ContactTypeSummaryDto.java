@@ -15,6 +15,8 @@ public class ContactTypeSummaryDto {
 	
 	Map<Object,Map<Object,Object>> dateWiseCountMap = new HashMap<>();
 	
+	Map<String, Map<String, Long>> hourWiseCountMap = new HashMap<>();
+	
 	public String getTenant() {
 		return tenant;
 	}
@@ -63,5 +65,12 @@ public class ContactTypeSummaryDto {
 	public void setDateWiseCountMap(Map<Object, Map<Object, Object>> dateWiseCountMap) {
 		this.dateWiseCountMap = dateWiseCountMap;
 	}
+	public Map<String, Map<String, Long>> getHourWiseCountMap() {
+		return hourWiseCountMap;
+	}
+	public void setHourWiseCountMap(Map<String, Map<String, Long>> hourWiseCountMap) {
+		this.hourWiseCountMap = hourWiseCountMap;
+	}
+	
 	
 }
