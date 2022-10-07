@@ -71,6 +71,11 @@
 			</dependency>
 			<dependency>
 				<groupId>com.boot.jx</groupId>
+				<artifactId>lib-postman-basic</artifactId>
+				<version>${boot.jx.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.boot.jx</groupId>
 				<artifactId>lib-postman</artifactId>
 				<version>${boot.jx.version}</version>
 			</dependency>
@@ -189,6 +194,7 @@
 		<module>../boot-ext-jar</module>
 		<module>lib-mcq</module>
 		<module>lib-aws</module>
+		<module>lib-postman-basic</module>
 		<module>lib-postman</module>
 		<module>lib-phonebook</module>
 		<module>lib-postman-store</module>

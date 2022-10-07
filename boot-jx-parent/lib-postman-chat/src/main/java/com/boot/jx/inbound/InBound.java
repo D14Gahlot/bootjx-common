@@ -8,6 +8,7 @@ import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.MessageReport;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.model.PMArgs;
+import com.boot.jx.postman.model.TagDocument;
 import com.boot.jx.postman.model.ext.InBoundEvent;
 import com.boot.jx.postman.store.MessageContext;
 import com.boot.model.MapModel.NodeEntry;
@@ -15,7 +16,6 @@ import com.boot.model.MapModel.NodeEntry;
 public class InBound {
 
 	public interface InBoundProcessor {
-
 		public InboxMessage process(InboxMessage inboxMessage);
 	}
 
