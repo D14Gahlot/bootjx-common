@@ -281,6 +281,10 @@ public class AccountDashBoardManager {
 		Map<String, Map<String, Long>> hourWiseCountMap = hourCntLst.stream()
 				.collect(Collectors.groupingBy(DateWiseHourCountDto::getDate,
 						Collectors.groupingBy(DateWiseHourCountDto::getHour, Collectors.counting())));
+		
+		
+		
+		
 
 		for (Map.Entry<String, Map<String, Long>> keyValue : datwWiseCount.entrySet()) {
 			String key = keyValue.getKey();
@@ -332,6 +336,25 @@ public class AccountDashBoardManager {
 		}
 		return null;
 	}
+	
+	
+	public String getSummaryWithChannelId(SummaryDocDto dto) {
+		String tenant = dto.getDomain();
+		if (dto.getChannel().contains(ContactType.WHATSAPP.name())) {
+			return tenant + "_"+ "wa";
+		} else if (dto.getChannel().contains(ContactType.FACEBOOK.name())) {
+			return tenant + "_" + "fb";
+		} else if (dto.getChannel().contains(ContactType.TWITTER.name())) {
+			return tenant + "_" + "tw";
+		} else if (dto.getChannel().contains(ContactType.TELEGRAM.name())) {
+			return tenant + "_" + "tg";
+		} else if (dto.getChannel().contains(ContactType.INSTAGRAM.name())) {
+			return tenant + "_"  + "ig";
+		} else if (dto.getChannel().contains(ContactType.WEBSITE.name())) {
+			return tenant + "_" + "web";
+		}
+		return null;
+	}
 
 	public List<String> getListOfContactType() {
 		List<String> listContactType = new ArrayList<String>();
@@ -355,6 +378,7 @@ public class AccountDashBoardManager {
 		if (ArgUtil.is(domSumMsgDoc)) {
 			domSumMsgDoc.setDateWiseSummaryCount(dto.getDateWiseSummaryCount());
 			domSumMsgDoc.setSummaryCount(dto.getSummaryCount());
+			domSumMsgDoc.setDateWiseCountMap(dto.getDateWiseCountMap());
 			mongoTemplate.save(domSumMsgDoc);
 			saveAndUpdateDomainSummaryMeta(dto);
 		} else {
@@ -363,6 +387,7 @@ public class AccountDashBoardManager {
 			domSumMsgDoc.setDate(dto.getMonth());
 			domSumMsgDoc.setDateWiseSummaryCount(dto.getDateWiseSummaryCount());
 			domSumMsgDoc.setSummaryCount(dto.getSummaryCount());
+			domSumMsgDoc.setDateWiseCountMap(dto.getDateWiseCountMap());
 			mongoTemplate.save(domSumMsgDoc);
 			saveAndUpdateDomainSummaryMeta(dto);
 		}
@@ -435,11 +460,11 @@ public class AccountDashBoardManager {
 		if (hr > 0) {
 			hour = hr * 60 * 60 * 1000;
 		} else {
-			hour = 12 * 60 * 60 * 1000;
+			hour = 24 * 60 * 60 * 1000;
 		}
 		long lasthrTimeStmp = currentTs - hour;
-		long curHr = getHour(currentTs);
-		long lastHr = getHour(lasthrTimeStmp);
+		String curHr = getHour(currentTs);
+		String lastHr = getHour(lasthrTimeStmp);
 		System.out.println("curHr :" + curHr + "\t lastHr :" + lastHr);
 
 		Calendar cal = Calendar.getInstance();
@@ -472,11 +497,8 @@ public class AccountDashBoardManager {
 				dto.setChannel(contactType.toString());
 				dto.setMeta(doc.getMeta());
 				dto.setDomain(tnt);
-				String id = getSummaryId(dto);
-				dto.setId(id);
-				if (ArgUtil.is(dto.getId())) {
-					lstSummDto.add(dto);
-				}
+				String id = getSummaryWithChannelId(dto);
+				dto.setId(id);				
 				Date date = new Date(timeStamp);
 				SimpleDateFormat sdfH = new SimpleDateFormat("kk");
 				String formattedDateH = sdfH.format(date);
@@ -501,6 +523,49 @@ public class AccountDashBoardManager {
 						Collectors.groupingBy(DateWiseHourCountDto::getHour, Collectors.counting())));
 
 		System.out.println("hourWiseCountMap :" + hourWiseCountMap);
+		Map<String, Map<String, Long>> hourWiseCount = new HashMap<>();
+		
+		Map<String, Long> hoCntMapNew =new HashMap<>();
+		
+		
+		
+		
+		for(Map.Entry<String, Map<String, Long>> keyValue : hourWiseCountMap.entrySet()) {
+			Map<String, Long> hoCntMapAll =new HashMap<>();
+			String key = keyValue.getKey();
+			//System.out.println("key:"+key);
+			 Map<String, Long> hoCntMap =hourWiseCountMap.get(key);
+			 //System.out.println("hoCntMap { } "+hoCntMap);
+			
+				hoCntMapNew =new HashMap<>();
+				int currHrInt = Integer.parseInt(curHr);
+				int lastHrInt = Integer.parseInt(lastHr);
+				if(currHrInt<12) {
+					currHrInt =currHrInt+24; 
+				}
+				for(int i=lastHrInt;i<=currHrInt;i++) {
+				//for(int i=1;i<=24;i++) {
+					int k=i;
+					if(i>24) {
+						k=i-24;
+						
+					}
+					String keyS=String.valueOf(k);
+					if(keyS.length()==1) {
+						keyS="0"+keyS;
+					}
+				
+					if(!hoCntMap.containsKey(keyS)) {
+						hoCntMapNew.put(keyS, new Long(0));
+					}
+				}
+				hoCntMapAll.putAll(hoCntMapNew);
+				hoCntMapAll.putAll(hoCntMap);
+				hourWiseCount.put(key, hoCntMapAll);
+		}
+		
+	
+		
 		for (Map.Entry<String, Map<String, Long>> keyValue : datwWiseCount.entrySet()) {
 			String key = keyValue.getKey();
 			Map<Object, Object> dateWiseCnt = new HashMap<>();
@@ -522,16 +587,16 @@ public class AccountDashBoardManager {
 		dto.setTenant(tnt);
 		dto.setMonth(monthYear);
 		dto.setSummaryCount(summaryMap);
-		dto.setHourWiseCountMap(hourWiseCountMap);
+		//dto.setHourWiseCountMap(hourWiseCountMap);
+		dto.setHourWiseCountMap(hourWiseCount);
 		return dto;
 	}
 
-	public long getHour(long timeStamp) {
+	public String getHour(long timeStamp) {
 		Date date = new Date(timeStamp);
 		SimpleDateFormat sdfH = new SimpleDateFormat("kk");
 		String formattedDateH = sdfH.format(date);
-		System.out.println("formattedDateH :" + formattedDateH);
-		return Long.parseLong(formattedDateH);
+		return formattedDateH;
 
 	}
 
