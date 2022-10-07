@@ -6,6 +6,7 @@ import static org.springframework.data.mongodb.core.aggregation.Aggregation.newA
 import static org.springframework.data.mongodb.core.aggregation.Aggregation.project;
 import static org.springframework.data.mongodb.core.aggregation.Aggregation.sort;
 
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -434,6 +435,7 @@ public class AccountDashBoardManager {
 		String tnt = AppContextUtil.getTenant();
 		List<String> lst = getListOfContactType();
 		long currentTs=System.currentTimeMillis();
+		
 		long hour=0;
 		if(hr>0) {
 			hour =hr*60*60*1000;
@@ -441,6 +443,9 @@ public class AccountDashBoardManager {
 			hour =12*60*60*1000;
 		}
 	 long lasthrTimeStmp=currentTs-hour;
+	 long curHr=getHour(currentTs);
+	 long lastHr=getHour(lasthrTimeStmp);
+	 System.out.println("curHr :"+curHr+"\t lastHr :"+lastHr);
 	
 		Calendar cal = Calendar.getInstance();
 		Date dateTi =new Date();
@@ -524,6 +529,14 @@ public class AccountDashBoardManager {
 		return dto;
 	}
 
+	public long getHour(long timeStamp) {
+		Date date= new Date(timeStamp);
+		SimpleDateFormat sdfH = new SimpleDateFormat("kk");
+		String formattedDateH = sdfH.format(date);
+		System.out.println("formattedDateH :"+formattedDateH);
+		return Long.parseLong(formattedDateH);
+		
+	}
 
 	
 }
