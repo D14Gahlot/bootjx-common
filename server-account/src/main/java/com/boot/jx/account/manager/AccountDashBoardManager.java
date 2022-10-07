@@ -452,11 +452,7 @@ public class AccountDashBoardManager {
 				dateTi =new Date(currentTs);
 			}
 		String monthYear = new SimpleDateFormat(DateUtil.MMM_YYYY_FORMAT).format(dateTi);
-		
-		int month = cal.get(Calendar.MONTH);
-		int year = cal.get(Calendar.YEAR);
 		List<SummaryDocDto> lstSummDto = new ArrayList<>();
-		List<Long> hourList = new ArrayList<Long>();
 		List<String> hourListH = new ArrayList<String>();
 		List<DateWiseHourCountDto> hourCntLst = new ArrayList<>();
 		for (String contactType : lst) {
