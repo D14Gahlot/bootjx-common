@@ -224,6 +224,11 @@ public class SessionEventTimer extends ATaskLimiter {
 
 		MapModel data = task.data();
 		ChatSessionDoc session = sessionStore.getSession(data.getString("sessionId"));
+
+		if (!sessionStore.isSessionValid(session)) {
+			return;
+		}
+
 		ClientApp defaultClient = messageContext.clientApp(data.getString("queue"), null);
 
 		MapModel meta = new MapModel(session.getMeta());
