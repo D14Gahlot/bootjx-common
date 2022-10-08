@@ -214,7 +214,7 @@ public class SessionEventTimer extends ATaskLimiter {
 
 		if (!ArgUtil.is(mitel) || !mitel.keyEntry("id").exists()) {
 			chatSessionService.closeSession(session);
-		} else if (counter < 3) {
+		} else if (counter < 5) {
 			long closeCheckTime = pmEnvironment.keyEntry(ConfigConstants.APP_KEY.MITEL_SYNC_TIMER).asLong(0L);
 			this.setMitelClosingCheck(session.getSessionId(), defaultClient, closeCheckTime * 2, counter++);
 		}
@@ -224,6 +224,11 @@ public class SessionEventTimer extends ATaskLimiter {
 
 		MapModel data = task.data();
 		ChatSessionDoc session = sessionStore.getSession(data.getString("sessionId"));
+
+		if (!sessionStore.isSessionValid(session)) {
+			return;
+		}
+
 		ClientApp defaultClient = messageContext.clientApp(data.getString("queue"), null);
 
 		MapModel meta = new MapModel(session.getMeta());
