@@ -99,5 +99,11 @@ public class PartnerDashBoardController {
    		return  ApiResponse.buildResult(summary);
    	}
     
+    @ResponseBody
+   	@RequestMapping(value = {"/pub/daywise-summary"}, method = { RequestMethod.GET })
+   	public ApiResponse<ContactTypeSummaryDto, Object> getDayWiseSummary(@RequestParam(required = false) long timestamp,int days) {
+   		ContactTypeSummaryDto summary =dashBMgr.dayChannelWiseWisesummary(timestamp,days); 
+   		return  ApiResponse.buildResult(summary);
+   	}
 
 }
