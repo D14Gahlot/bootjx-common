@@ -445,8 +445,6 @@ public class AccountDashBoardManager {
 		long lasthrTimeStmp = currentTs - hour;
 		String curHr = getHour(currentTs);
 		String lastHr = getHour(lasthrTimeStmp);
-		System.out.println("curHr :" + curHr + "\t lastHr :" + lastHr);
-
 		Calendar cal = Calendar.getInstance();
 		Date dateTi = new Date();
 		if (timestamp > 0) {
@@ -495,8 +493,6 @@ public class AccountDashBoardManager {
 		Map<Object, Long> summaryMap = new HashMap<>();
 		Map<String, Map<String, Long>> datwWiseCount = lstSummDto.stream().collect(Collectors.groupingBy(
 				SummaryDocDto::getId, Collectors.groupingBy(SummaryDocDto::getType, Collectors.counting())));
-
-		Map<Object, Map<Object, Object>> dateWiseCountMap = new HashMap<>();
 		/** hour wise count **/
 		Map<String, Map<String, Long>> hourWiseCountMap = hourCntLst.stream()
 				.collect(Collectors.groupingBy(DateWiseHourCountDto::getChannel,
@@ -683,8 +679,6 @@ public class AccountDashBoardManager {
 			mapHr.put(keyS, new Long(0));
 		
 		}
-		
-		//Sorting Map
 		  Map<String, Long> result = mapHr.entrySet().stream()
 	                .sorted(Map.Entry.comparingByKey())
 	                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue,
