@@ -18,6 +18,7 @@ import com.mongodb.client.AggregateIterable;
 import com.mongodb.client.DistinctIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
+import com.mongodb.client.MongoIterable;
 
 public class MongoUtils {
 
@@ -44,7 +45,7 @@ public class MongoUtils {
 	public static class MongoResultProcessor<T> {
 		protected MongoTemplate mongoTemplate;
 		protected MongoCollection<Document> col;
-		protected AggregateIterable<T> aggregate;
+		protected MongoIterable<T> results;
 
 		public MongoResultProcessor<T> using(MongoTemplate mongoTemplate) {
 			this.mongoTemplate = mongoTemplate;
@@ -56,28 +57,38 @@ public class MongoUtils {
 			return this;
 		}
 
-		public MongoResultProcessor<T> aggregate(List<Document> aggreQuery, Class<T> resultClass) {
-			aggregate = col.aggregate(aggreQuery, resultClass);
+		public MongoResultProcessor<T> results(MongoIterable<T> aggregate) {
+			this.results = aggregate;
 			return this;
 		}
 
-		public MongoResultProcessor<T> aggregate(AggregateIterable<T> aggregate) {
-			this.aggregate = aggregate;
+		public MongoResultProcessor<T> aggregate(List<Document> aggreQuery, Class<T> resultClass) {
+			results = col.aggregate(aggreQuery, resultClass);
 			return this;
 		}
 
 		public MongoResultProcessor<Document> aggregate(List<Document> aggreQuery) {
 			SimpleMongoResultProcessor newP = new SimpleMongoResultProcessor();
-			return newP.aggregate(col.aggregate(aggreQuery));
+			return newP.results(col.aggregate(aggreQuery));
+		}
+
+		public MongoResultProcessor<T> distinct(String fieldkey, Class<T> fieldkeyType) {
+			results = col.distinct(fieldkey, fieldkeyType);
+			return this;
+		}
+
+		public MongoResultProcessor<String> distinct(String fieldkey) {
+			MongoResultProcessor<String> newP = new MongoResultProcessor<String>();
+			return newP.results(col.distinct(fieldkey, String.class));
 		}
 
 		public MongoResultProcessor<T> forEach(Consumer<? super T> action) {
-			this.aggregate.forEach(action);
+			this.results.forEach(action);
 			return this;
 		}
 
 		public List<T> asList(List<T> list) {
-			MongoCursor<T> cursor = this.aggregate.iterator();
+			MongoCursor<T> cursor = this.results.iterator();
 			while (cursor.hasNext()) {
 				T object = cursor.next();
 				if (ArgUtil.is(object)) {
@@ -92,9 +103,6 @@ public class MongoUtils {
 			return asList(new LinkedList<T>());
 		}
 
-		public <TField> List<TField> distinctValues(String fieldKey, Class<TField> fieldClazz) {
-			return CollectionUtil.asList(col.distinct(fieldKey, fieldClazz));
-		}
 	}
 
 	public static class SimpleMongoResultProcessor extends MongoResultProcessor<Document> {

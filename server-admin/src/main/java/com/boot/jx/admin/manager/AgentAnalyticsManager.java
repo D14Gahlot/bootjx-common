@@ -296,7 +296,7 @@ public class AgentAnalyticsManager {
 	}
 
 	public List<String> getAgentList() {
-		List<String> distinceAgentList = mongoTemplate.distinctAsList("CHAT_SESSION", "assignedToAgent", String.class);
+		List<String> distinceAgentList = mongoTemplate.distinctValues("CHAT_SESSION", "assignedToAgent", String.class);
 		return distinceAgentList;
 	}
 
@@ -304,7 +304,7 @@ public class AgentAnalyticsManager {
 		Query query = new Query();
 		query.addCriteria(Criteria.where("assignedAgentStamp").gt(dateRange1).lt(dateRange2));
 
-		List<String> distinceAgentList = mongoTemplate.distinctAsList("CHAT_SESSION", "assignedToAgent", String.class);
+		List<String> distinceAgentList = mongoTemplate.distinctValues("CHAT_SESSION", "assignedToAgent", String.class);
 
 		if (distinceAgentList == null || distinceAgentList.isEmpty()) {
 			distinceAgentList = getDefaultAgent(dateRange1, dateRange2);
@@ -316,7 +316,7 @@ public class AgentAnalyticsManager {
 		Query query = new Query();
 		query.addCriteria(Criteria.where("startSessionStamp").gt(dateRange1).lt(dateRange2));
 
-		List<String> distinceAgentList = mongoTemplate.distinctAsList("CHAT_SESSION", "mode", String.class);
+		List<String> distinceAgentList = mongoTemplate.distinctValues("CHAT_SESSION", "mode", String.class);
 		return distinceAgentList;
 	}
 
@@ -324,7 +324,7 @@ public class AgentAnalyticsManager {
 		Query query = new Query();
 		query.addCriteria(Criteria.where("startSessionStamp").gt(dateRange1).lt(dateRange2));
 		removeChatSessField(query);
-		List<String> distinceAgentList = mongoTemplate.distinctAsList("CHAT_SESSION", "contactId", String.class);
+		List<String> distinceAgentList = mongoTemplate.distinctValues("CHAT_SESSION", "contactId", String.class);
 		return distinceAgentList;
 	}
 
@@ -334,7 +334,7 @@ public class AgentAnalyticsManager {
 		query.addCriteria(Criteria.where("assignedToAgent").is(agent));
 		query.addCriteria(Criteria.where("assignedAgentStamp").gt(dateRange1).lt(dateRange2));
 		removeChatSessField(query);
-		List<String> distinctIdList = mongoTemplate.distinctAsList(CHAT_SESSION, "contactId", String.class);
+		List<String> distinctIdList = mongoTemplate.distinctValues(CHAT_SESSION, "contactId", String.class);
 
 		if (distinctIdList == null || distinctIdList.isEmpty()) {
 			distinctIdList = getDefaultDistinctContact(dateRange1, dateRange2);

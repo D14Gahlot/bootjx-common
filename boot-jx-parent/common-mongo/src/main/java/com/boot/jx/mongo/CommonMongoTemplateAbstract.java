@@ -25,7 +25,6 @@ import com.boot.jx.mongo.CommonDocInterfaces.TimeStampIndex.UpdatedTimeStampInde
 import com.boot.jx.mongo.CommonMongoQueryBuilder.DocQueryBuilder;
 import com.boot.jx.mongo.MongoUtils.MongoResultProcessor;
 import com.boot.utils.ArgUtil;
-import com.boot.utils.CollectionUtil;
 import com.mongodb.client.result.DeleteResult;
 import com.mongodb.client.result.UpdateResult;
 
@@ -58,6 +57,10 @@ public class CommonMongoTemplateAbstract<TStore extends CommonMongoTemplateAbstr
 
 	public MongoResultProcessor<Document> collection(String collection) {
 		return new MongoResultProcessor<Document>().using(this.getCommonMongoTemplate()).collection(collection);
+	}
+
+	public <TResult> MongoResultProcessor<TResult> collection(String collection, Class<TResult> clazz) {
+		return new MongoResultProcessor<TResult>().using(this.getCommonMongoTemplate()).collection(collection);
 	}
 
 	public void beforeSaveInternal(Object objectToSave, String collectionName) {
@@ -278,8 +281,8 @@ public class CommonMongoTemplateAbstract<TStore extends CommonMongoTemplateAbstr
 		return removeAndAudit(x);
 	}
 
-	public <T> List<T> distinctAsList(String collectionName, String key, Class<T> clazz) {
-		return CollectionUtil.asList(getCollection(collectionName).distinct(key, clazz));
+	public <T> List<T> distinctValues(String collectionName, String key, Class<T> clazz) {
+		return collection(collectionName, clazz).distinct(key, clazz).asList();
 	}
 
 }

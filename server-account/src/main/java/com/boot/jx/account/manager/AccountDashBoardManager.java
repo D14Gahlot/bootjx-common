@@ -82,7 +82,7 @@ public class AccountDashBoardManager {
 		Query query = new Query();
 		query.with(new Sort(new Order(Direction.DESC, "startSessionStamp")));
 		query.fields().include("startSessionStamp");
-		List<Long> msgDocLst = mongoTemplate.distinctAsList("CHAT_SESSION", "startSessionStamp", Long.class);
+		List<Long> msgDocLst = mongoTemplate.distinctValues("CHAT_SESSION", "startSessionStamp", Long.class);
 		List<MonthDtlsDto> listofMonth = new ArrayList<>();
 		for (Long docTimeStamp : msgDocLst) {
 			long timestamp = (docTimeStamp - (docTimeStamp % (DateUtil.ONEDAY)));

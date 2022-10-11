@@ -795,7 +795,7 @@ public class AdminDashBoardManager {
 		query.addCriteria(Criteria.where("timestamp").gt(dateRange1).lt(dateRange2));
 		query.addCriteria(Criteria.where("type").in("O", "I"));
 
-		List<String> distinctIdList = mongoTemplate.distinctAsList(contactType.toString(), "contactId", String.class);
+		List<String> distinctIdList = mongoTemplate.distinctValues(contactType.toString(), "contactId", String.class);
 		return distinctIdList;
 	}
 
