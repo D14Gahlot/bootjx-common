@@ -177,7 +177,7 @@ public class AgentAnalyticsManager {
 		dto.setAgentName(agent == null ? MY_BOT : agent);
 		/** Unique agent list **/
 
-		List<ChatSessionDoc> distinctContactLst = getUniqueAgentWiseContactList(agent, dateRange1, dateRange2);
+		List<String> distinctContactLst = getUniqueAgentWiseContactList(agent, dateRange1, dateRange2);
 		if (ArgUtil.is(distinctContactLst)) {
 			dto.setUniqueConversation(distinctContactLst.size());
 		}
@@ -320,23 +320,21 @@ public class AgentAnalyticsManager {
 		return distinceAgentList;
 	}
 
-	public List<ChatSessionDoc> getDefaultDistinctContact(long dateRange1, long dateRange2) {
+	public List<String> getDefaultDistinctContact(long dateRange1, long dateRange2) {
 		Query query = new Query();
 		query.addCriteria(Criteria.where("startSessionStamp").gt(dateRange1).lt(dateRange2));
 		removeChatSessField(query);
-		List<ChatSessionDoc> distinceAgentList = mongoTemplate.distinctAsList("CHAT_SESSION", "contactId",
-				ChatSessionDoc.class);
+		List<String> distinceAgentList = mongoTemplate.distinctAsList("CHAT_SESSION", "contactId", String.class);
 		return distinceAgentList;
 	}
 
-	public List<ChatSessionDoc> getUniqueAgentWiseContactList(String agent, long dateRange1, long dateRange2) {
+	public List<String> getUniqueAgentWiseContactList(String agent, long dateRange1, long dateRange2) {
 
 		Query query = new Query();
 		query.addCriteria(Criteria.where("assignedToAgent").is(agent));
 		query.addCriteria(Criteria.where("assignedAgentStamp").gt(dateRange1).lt(dateRange2));
 		removeChatSessField(query);
-		List<ChatSessionDoc> distinctIdList = mongoTemplate.distinctAsList(CHAT_SESSION, "contactId",
-				ChatSessionDoc.class);
+		List<String> distinctIdList = mongoTemplate.distinctAsList(CHAT_SESSION, "contactId", String.class);
 
 		if (distinctIdList == null || distinctIdList.isEmpty()) {
 			distinctIdList = getDefaultDistinctContact(dateRange1, dateRange2);
@@ -395,7 +393,7 @@ public class AgentAnalyticsManager {
 	public long getConversationDuration(String agent, long startTime, long endTime) {
 		Map<String, Long> conVerMsgLst = new HashMap<String, Long>();
 		Long maxEntryKeyValue = new Long(0);
-		List<ChatSessionDoc> uniquContactIdLst = getUniqueAgentWiseContactList(agent, startTime, endTime);
+		List<String> uniquContactIdLst = getUniqueAgentWiseContactList(agent, startTime, endTime);
 		for (Object chatSession : uniquContactIdLst) {
 			String conId = (String) chatSession;
 			Query query = new Query();
@@ -423,7 +421,7 @@ public class AgentAnalyticsManager {
 		double startLag = 0.0d;
 		double percentageWithDecimal = 0.0d;
 
-		List<ChatSessionDoc> uniquContactIdLst = getUniqueAgentWiseContactList(agent, dateRange1, dateRange2);
+		List<String> uniquContactIdLst = getUniqueAgentWiseContactList(agent, dateRange1, dateRange2);
 		for (Object chatSession : uniquContactIdLst) {
 			String conId = (String) chatSession;
 			Query query = new Query();
@@ -655,11 +653,10 @@ public class AgentAnalyticsManager {
 
 	// Get Total Msg from
 
-	public List<MessageDoc> getTotalMessageAgentAndContactWise(List<ChatSessionDoc> lstChatSession, long dateRange1,
+	public List<MessageDoc> getTotalMessageAgentAndContactWise(List<String> lstChatSession, long dateRange1,
 			long dateRange2) {
 		List<MessageDoc> totalMsgDocLst = new ArrayList<MessageDoc>();
-		for (Object chatSession : lstChatSession) {
-			String contactId = (String) chatSession;
+		for (String contactId : lstChatSession) {
 			List<MessageDoc> msgDocLst = getMsgCountAgentContactWise(contactId, dateRange1, dateRange2);
 			totalMsgDocLst.addAll(msgDocLst);
 		}

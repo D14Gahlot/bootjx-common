@@ -25,10 +25,6 @@ public class MongoUtils {
 		return CollectionUtil.asList(distinctIterable);
 	}
 
-	public static <T> List<T> distinct(MongoCollection<Document> collection, String key, Class<T> clazz) {
-		return CollectionUtil.asList(collection.distinct(key, clazz));
-	}
-
 	public static List<Document> newAggregation(AggregationOperation... aggOperations) {
 		List<Document> agg = new ArrayList<Document>();
 		for (AggregationOperation aggOperation : aggOperations) {
@@ -94,6 +90,10 @@ public class MongoUtils {
 
 		public List<T> asList() {
 			return asList(new LinkedList<T>());
+		}
+
+		public <TField> List<TField> distinctValues(String fieldKey, Class<TField> fieldClazz) {
+			return CollectionUtil.asList(col.distinct(fieldKey, fieldClazz));
 		}
 	}
 
