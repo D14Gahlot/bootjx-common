@@ -42,7 +42,6 @@ import com.boot.jx.admin.dto.DashBoardResponseDto;
 import com.boot.jx.admin.dto.LeadMessanger;
 import com.boot.jx.admin.dto.PeakLoadDto;
 import com.boot.jx.mongo.CommonMongoTemplate;
-import com.boot.jx.mongo.MongoUtils;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.model.Message;
@@ -72,7 +71,7 @@ public class AgentAnalyticsManager {
 		LOGGER.info("getAgentWiseAnalytics {} :" + JsonUtil.toJson(req));
 		List<DashBoardResponseDto> lstDto = new ArrayList<>();
 		DashBoardResponseDto dto = null;
-		List<ChatSessionDoc> allAgent = null;
+		List<String> allAgent = null;
 		long date1 = 0;
 		long date2 = 0;
 		if (ArgUtil.is(req.getDateRange1()) && req.getDateRange1() > 0) {
@@ -296,19 +295,16 @@ public class AgentAnalyticsManager {
 		return dto;
 	}
 
-	public List<ChatSessionDoc> getAgentList() {
-		List<ChatSessionDoc> distinceAgentList = MongoUtils.distinct(mongoTemplate.getCollection("CHAT_SESSION"),
-				"assignedToAgent", ChatSessionDoc.class);
-
+	public List<String> getAgentList() {
+		List<String> distinceAgentList = mongoTemplate.distinctAsList("CHAT_SESSION", "assignedToAgent", String.class);
 		return distinceAgentList;
 	}
 
-	public List<ChatSessionDoc> getAgentList(long dateRange1, long dateRange2) {
+	public List<String> getAgentList(long dateRange1, long dateRange2) {
 		Query query = new Query();
 		query.addCriteria(Criteria.where("assignedAgentStamp").gt(dateRange1).lt(dateRange2));
 
-		List<ChatSessionDoc> distinceAgentList = MongoUtils.distinct(mongoTemplate.getCollection("CHAT_SESSION"),
-				"assignedToAgent", ChatSessionDoc.class);
+		List<String> distinceAgentList = mongoTemplate.distinctAsList("CHAT_SESSION", "assignedToAgent", String.class);
 
 		if (distinceAgentList == null || distinceAgentList.isEmpty()) {
 			distinceAgentList = getDefaultAgent(dateRange1, dateRange2);
@@ -316,12 +312,11 @@ public class AgentAnalyticsManager {
 		return distinceAgentList;
 	}
 
-	public List<ChatSessionDoc> getDefaultAgent(long dateRange1, long dateRange2) {
+	public List<String> getDefaultAgent(long dateRange1, long dateRange2) {
 		Query query = new Query();
 		query.addCriteria(Criteria.where("startSessionStamp").gt(dateRange1).lt(dateRange2));
 
-		List<ChatSessionDoc> distinceAgentList = MongoUtils.distinct(mongoTemplate.getCollection("CHAT_SESSION"),
-				"mode", ChatSessionDoc.class);
+		List<String> distinceAgentList = mongoTemplate.distinctAsList("CHAT_SESSION", "mode", String.class);
 		return distinceAgentList;
 	}
 
