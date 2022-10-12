@@ -137,6 +137,11 @@ public class SessionEventTimer extends ATaskLimiter {
 		}
 	}
 
+	public void setChatViewIdleTimeout(ChatSessionDoc sessionDoc) {
+		ClientApp app = messageContext.clientApp(sessionDoc.getAssignedToQueue());
+		this.setMitelClosingCheck(sessionDoc.getSessionId(), app);
+	}
+
 	@Override
 	public void doTaskSafely(TunnelTask task) {
 
@@ -212,7 +217,8 @@ public class SessionEventTimer extends ATaskLimiter {
 		String omid = omidEntry.asString();
 		MapModel mitel = mitelClient.openMediaGetActive(defaultClient, session.contact(), session.getSessionId(), omid);
 
-		if (!ArgUtil.is(mitel) || !mitel.keyEntry("id").exists()) {
+		if (!ArgUtil.is(mitel)
+				|| (mitel.keyEntry("id").exists() && mitel.keyEntry("conversationState").in("Ended", "Abandoned"))) {
 			chatSessionService.closeSession(session);
 		} else if (counter < 5) {
 			long closeCheckTime = pmEnvironment.keyEntry(ConfigConstants.APP_KEY.MITEL_SYNC_TIMER).asLong(0L);
