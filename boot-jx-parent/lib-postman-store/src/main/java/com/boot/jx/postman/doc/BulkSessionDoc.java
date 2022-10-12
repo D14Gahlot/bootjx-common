@@ -10,6 +10,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.model.AuditCreateEntity;
+import com.boot.jx.tunnel.task.JobTaskModel.BatchJob;
 import com.boot.utils.ArgUtil;
 
 @Document(collection = "BULK_SESSION")
@@ -40,6 +41,8 @@ public class BulkSessionDoc implements AuditCreateEntity, Serializable {
 
 	private Map<String, Long> stats;
 	private Long completedStamp;
+
+	private BatchJob job;
 
 	@Override
 	public String getCreatedBy() {
@@ -174,6 +177,14 @@ public class BulkSessionDoc implements AuditCreateEntity, Serializable {
 
 	public void setChannelId(String channelId) {
 		this.channelId = channelId;
+	}
+
+	public BatchJob getJob() {
+		return job;
+	}
+
+	public void setJob(BatchJob job) {
+		this.job = job;
 	}
 
 }

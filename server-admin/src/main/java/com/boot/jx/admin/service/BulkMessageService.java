@@ -132,8 +132,7 @@ public class BulkMessageService extends BatchJobExecuter {
 
 		return session;
 	}
-	
-	
+
 	public BulkSessionDoc sendMultiple(List<OutboxMessage> bulkMessages) throws NumberParseException {
 
 		OutboxMessage bulkMessage = bulkMessages.get(0);
@@ -158,7 +157,7 @@ public class BulkMessageService extends BatchJobExecuter {
 		List<MessageDoc> docs = new ArrayList<MessageDoc>();
 		for (OutboxMessage bulkMsg : bulkMessages) {
 			MessageDoc doc = messageStore.createMessageDoc(bulkMsg);
-			String to =bulkMsg.getTo().get(0); 
+			String to = bulkMsg.getTo().get(0);
 			doc.setContactId(null);
 			doc.updateStatus(Status.SCHLD);
 			doc.setBulkSessionId(session.getBulkSessionId());
@@ -195,8 +194,6 @@ public class BulkMessageService extends BatchJobExecuter {
 
 		return session;
 	}
-
-	
 
 	@Override
 	public BatchJob resetJob(String jobId) {
@@ -361,9 +358,11 @@ public class BulkMessageService extends BatchJobExecuter {
 				doc.setStatus(JOB_STATUS.COMPLETED.toString());
 			}
 		}
+		doc.setJob(currentBatchJob);
 		mongoTemplate.save(doc);
 		return completed;
 	}
+
 	/** Parsing csv file **/
 	public BulkSessionDoc uploadFile(MultipartFile file) throws NumberParseException {
 		try {
@@ -374,31 +373,32 @@ public class BulkMessageService extends BatchJobExecuter {
 		}
 		return null;
 	}
+
 	public static String TYPE = "text/csv";
+
 	public static boolean hasCSVFormat(MultipartFile file) {
-	    if (!TYPE.equals(file.getContentType())) {
-	      return false;
-	    }
-	    return true;
-	  }
-	
-	public void readFile(InputStream is) {
-		try (BufferedReader fileReader = new BufferedReader(new InputStreamReader(is));
-		        CSVParser csvParser = new CSVParser(fileReader,
-		            CSVFormat.DEFAULT.withFirstRecordAsHeader().withIgnoreHeaderCase().withTrim());) {
-		     // List<Tutorial> tutorials = new ArrayList<Tutorial>();
-		      Iterable<CSVRecord> csvRecords = csvParser.getRecords();
-		      for (CSVRecord csvRecord : csvRecords) {
-		    	  System.out.println("id :"+ csvRecord.get("contacts"));
-		    	  //System.out.println("Title :"+ csvRecord.get("Title"));
-		    	  //System.out.println("Description :"+ csvRecord.get("Description"));
-		    	  //System.out.println("id :"+ csvRecord.get("Published"));
-		      
-		      }
-		   
-		    } catch (Exception e) {
-		      throw new RuntimeException("fail to parse CSV file: " + e.getMessage());
-		    }
-		  }
+		if (!TYPE.equals(file.getContentType())) {
+			return false;
+		}
+		return true;
 	}
 
+	public void readFile(InputStream is) {
+		try (BufferedReader fileReader = new BufferedReader(new InputStreamReader(is));
+				CSVParser csvParser = new CSVParser(fileReader,
+						CSVFormat.DEFAULT.withFirstRecordAsHeader().withIgnoreHeaderCase().withTrim());) {
+			// List<Tutorial> tutorials = new ArrayList<Tutorial>();
+			Iterable<CSVRecord> csvRecords = csvParser.getRecords();
+			for (CSVRecord csvRecord : csvRecords) {
+				System.out.println("id :" + csvRecord.get("contacts"));
+				// System.out.println("Title :"+ csvRecord.get("Title"));
+				// System.out.println("Description :"+ csvRecord.get("Description"));
+				// System.out.println("id :"+ csvRecord.get("Published"));
+
+			}
+
+		} catch (Exception e) {
+			throw new RuntimeException("fail to parse CSV file: " + e.getMessage());
+		}
+	}
+}
