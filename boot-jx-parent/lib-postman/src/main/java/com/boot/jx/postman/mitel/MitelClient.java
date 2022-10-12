@@ -1,6 +1,7 @@
 package com.boot.jx.postman.mitel;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.ResourceAccessException;
@@ -74,7 +75,11 @@ public class MitelClient {
 			} catch (ResourceAccessException e) {
 				return null;
 			} catch (HttpClientErrorException e) {
-				return null;
+				if (HttpStatus.NOT_FOUND == e.getStatusCode()) {
+					return null;
+				} else {
+					throw e;
+				}
 			}
 		}
 		return null;
