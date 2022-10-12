@@ -2,6 +2,7 @@ package com.boot.jx.postman.mitel;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.ResourceAccessException;
 
 import com.boot.jx.postman.ClientApp;
@@ -72,6 +73,8 @@ public class MitelClient {
 				}
 			} catch (ResourceAccessException e) {
 				return null;
+			} catch (HttpClientErrorException e) {
+				return null;
 			}
 		}
 		return null;
@@ -108,7 +111,7 @@ public class MitelClient {
 		return restService.ajax(endPoint).path("/MiccSdk/api/v1/openmedia/{id}").pathParam("id", openmediaId)
 				.header("Authorization", "Bearer " + accessToken)
 				.putJson(MapModel.createInstance().put("action", action).toMap()).asMapModel();
-		
+
 	}
 
 }
