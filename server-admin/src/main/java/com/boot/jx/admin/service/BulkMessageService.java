@@ -130,8 +130,7 @@ public class BulkMessageService extends BatchJobExecuter {
 
 		return session;
 	}
-	
-	
+
 	public BulkSessionDoc sendMultiple(List<OutboxMessage> bulkMessages) throws NumberParseException {
 
 		OutboxMessage bulkMessage = bulkMessages.get(0);
@@ -156,7 +155,7 @@ public class BulkMessageService extends BatchJobExecuter {
 		List<MessageDoc> docs = new ArrayList<MessageDoc>();
 		for (OutboxMessage bulkMsg : bulkMessages) {
 			MessageDoc doc = messageStore.createMessageDoc(bulkMsg);
-			String to =bulkMsg.getTo().get(0); 
+			String to = bulkMsg.getTo().get(0);
 			doc.setContactId(null);
 			doc.updateStatus(Status.SCHLD);
 			doc.setBulkSessionId(session.getBulkSessionId());
@@ -193,8 +192,6 @@ public class BulkMessageService extends BatchJobExecuter {
 
 		return session;
 	}
-
-	
 
 	@Override
 	public BatchJob resetJob(String jobId) {
@@ -359,6 +356,7 @@ public class BulkMessageService extends BatchJobExecuter {
 				doc.setStatus(JOB_STATUS.COMPLETED.toString());
 			}
 		}
+		doc.setJob(currentBatchJob);
 		mongoTemplate.save(doc);
 		return completed;
 	}

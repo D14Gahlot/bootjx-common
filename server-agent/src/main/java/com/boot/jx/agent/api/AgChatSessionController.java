@@ -22,11 +22,13 @@ import com.boot.jx.chat.ChatSessionService;
 import com.boot.jx.common.config.ConfigConstants;
 import com.boot.jx.common.doc.AgentDoc;
 import com.boot.jx.common.doc.AgentSessionDoc;
+import com.boot.jx.common.service.SessionEventTimer;
 import com.boot.jx.common.store.AgentStore;
 import com.boot.jx.common.store.ChatArchiveBuilder;
 import com.boot.jx.common.store.ChatArchiveService;
 import com.boot.jx.common.store.DocumentUpdateListner;
 import com.boot.jx.model.CommonFile;
+import com.boot.jx.postman.ClientApp;
 import com.boot.jx.postman.PMConstants;
 import com.boot.jx.postman.PMConstants.APP_TYPE;
 import com.boot.jx.postman.PMConstants.CHAT_MODE;
@@ -43,6 +45,7 @@ import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.query.ChatSessionQuery;
 import com.boot.jx.postman.service.ChatDTOUtil;
+import com.boot.jx.postman.store.MessageContext;
 import com.boot.jx.postman.store.MessageStore;
 import com.boot.jx.postman.store.SessionStore;
 import com.boot.utils.ArgUtil;
@@ -95,6 +98,12 @@ public class AgChatSessionController {
 
 	@Autowired
 	private AgentStore agentStore;
+
+	@Autowired
+	private SessionEventTimer sessionEventTimer;
+
+	@Autowired
+	private MessageContext messageContext;
 
 	@ResponseBody
 	@RequestMapping(value = "/api/sessions/message/send", method = { RequestMethod.POST })
@@ -195,6 +204,16 @@ public class AgChatSessionController {
 		return ApiResponse.buildData(ChatDTOUtil.getChatSessionDTO(sessionDoc));
 	}
 
+	@RequestMapping(value = { "/api/session/watch" }, method = { RequestMethod.GET })
+	public ApiResponse<ChatSessionDTO, ?> sessionWatch(@RequestParam String sessionId) {
+		ApiResponse<ChatSessionDTO, ?> resp = ApiResponse.build();
+		ChatSessionDoc sessionDoc = sessionStore.getSession(sessionId);
+		sessionEventTimer.setChatViewIdleTimeout(sessionDoc);
+		ChatSessionDTO chatSessionDto = chatArchive.getChatSession(sessionDoc);
+		chatSessionDto = chatArchive.withContact(chatSessionDto);
+		return resp.result(chatSessionDto);
+	}
+
 	@RequestMapping(value = { "/api/session/messages" }, method = { RequestMethod.GET })
 	public ApiResponse<ChatMessageDTO, ChatSessionDTO> messageApi(@RequestParam String sessionId,
 			@RequestParam(required = false) String messageId, @RequestParam(required = false) String messageIdExt) {
@@ -212,6 +231,7 @@ public class AgChatSessionController {
 			if (agentSession.isLoggedIn() && ArgUtil.is(agentSession.getAgentCode())) {
 				sessionStore.update(new ChatSessionQuery(sessionDoc).read(agentSession.getAgentCode()));
 			}
+			sessionEventTimer.setChatViewIdleTimeout(sessionDoc);
 			ChatSessionDTO chatSessionDto = chatArchive.getChatSession(sessionDoc);
 			chatSessionDto = chatArchive.withContact(chatSessionDto);
 			return resp.results(chatArchive.getMessages(chatSessionDto)).meta(chatSessionDto);

@@ -29,6 +29,8 @@ import com.boot.model.MapModel.MapPathEntry;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.TimeUtils;
 
+import io.reactivex.internal.observers.ForEachWhileObserver;
+
 @Component
 public class SessionEventTimer extends ATaskLimiter {
 
@@ -137,6 +139,11 @@ public class SessionEventTimer extends ATaskLimiter {
 		}
 	}
 
+	public void setChatViewIdleTimeout(ChatSessionDoc sessionDoc) {
+		ClientApp app = messageContext.clientApp(sessionDoc.getAssignedToQueue());
+		this.setMitelClosingCheck(sessionDoc.getSessionId(), app);
+	}
+
 	@Override
 	public void doTaskSafely(TunnelTask task) {
 
@@ -212,7 +219,8 @@ public class SessionEventTimer extends ATaskLimiter {
 		String omid = omidEntry.asString();
 		MapModel mitel = mitelClient.openMediaGetActive(defaultClient, session.contact(), session.getSessionId(), omid);
 
-		if (!ArgUtil.is(mitel) || !mitel.keyEntry("id").exists()) {
+		if (!ArgUtil.is(mitel)
+				|| (mitel.keyEntry("id").exists() && mitel.keyEntry("conversationState").in("Ended", "Abandoned"))) {
 			chatSessionService.closeSession(session);
 		} else if (counter < 5) {
 			long closeCheckTime = pmEnvironment.keyEntry(ConfigConstants.APP_KEY.MITEL_SYNC_TIMER).asLong(0L);
@@ -241,7 +249,14 @@ public class SessionEventTimer extends ATaskLimiter {
 			ChatSessionQuery q = new ChatSessionQuery(session);
 			omidEntry.save(newomid);
 			session.setMeta(meta.map());
-			q.set("meta.mitel.omid", newomid).set("meta.mitel.queue_id", mitel.getString("queueId"));
+			q.set("meta.mitel.omid", newomid).set("meta.mitel.queueId", mitel.getString("queueId"));
+			String[] mitelKeys = { "queueName", "queueId", "agentName", "agentId", "conversationState" };
+
+			for (String mitelKey : mitelKeys) {
+				String mitelValue = mitel.getString(mitelKey);
+				q.set("meta.mitel." + mitelKey, mitelValue);
+			}
+
 			sessionStore.updateFirst(q);
 		}
 
