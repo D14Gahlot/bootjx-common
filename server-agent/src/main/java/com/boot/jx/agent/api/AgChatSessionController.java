@@ -228,10 +228,10 @@ public class AgChatSessionController {
 			MessageDoc m = messageStore.findOneByMessageIdExt(messageIdExt, sessionDoc.contact().getContactType());
 			return resp.result(chatArchive.createMessageDTO(m, chatSessionDto)).meta(chatSessionDto);
 		} else {
+			sessionEventTimer.setChatViewIdleTimeout(sessionDoc);
 			if (agentSession.isLoggedIn() && ArgUtil.is(agentSession.getAgentCode())) {
 				sessionStore.update(new ChatSessionQuery(sessionDoc).read(agentSession.getAgentCode()));
 			}
-			sessionEventTimer.setChatViewIdleTimeout(sessionDoc);
 			ChatSessionDTO chatSessionDto = chatArchive.getChatSession(sessionDoc);
 			chatSessionDto = chatArchive.withContact(chatSessionDto);
 			return resp.results(chatArchive.getMessages(chatSessionDto)).meta(chatSessionDto);
