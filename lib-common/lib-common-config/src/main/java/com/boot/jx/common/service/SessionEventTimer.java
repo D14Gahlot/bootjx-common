@@ -29,6 +29,8 @@ import com.boot.model.MapModel.MapPathEntry;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.TimeUtils;
 
+import io.reactivex.internal.observers.ForEachWhileObserver;
+
 @Component
 public class SessionEventTimer extends ATaskLimiter {
 
@@ -247,7 +249,14 @@ public class SessionEventTimer extends ATaskLimiter {
 			ChatSessionQuery q = new ChatSessionQuery(session);
 			omidEntry.save(newomid);
 			session.setMeta(meta.map());
-			q.set("meta.mitel.omid", newomid).set("meta.mitel.queue_id", mitel.getString("queueId"));
+			q.set("meta.mitel.omid", newomid).set("meta.mitel.queueId", mitel.getString("queueId"));
+			String[] mitelKeys = { "queueName", "queueId", "agentName", "agentId", "conversationState" };
+
+			for (String mitelKey : mitelKeys) {
+				String mitelValue = mitel.getString(mitelKey);
+				q.set("meta.mitel." + mitelKey, mitelValue);
+			}
+
 			sessionStore.updateFirst(q);
 		}
 
