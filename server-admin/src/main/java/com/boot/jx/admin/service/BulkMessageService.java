@@ -27,6 +27,7 @@ import com.boot.jx.dict.ContactType;
 import com.boot.jx.logger.AuditDetailProvider;
 import com.boot.jx.mongo.CommonMongoQB.QueryCriteria;
 import com.boot.jx.mongo.CommonMongoQueryBuilder;
+import com.boot.jx.mongo.QA;
 import com.boot.jx.postman.ClientApp;
 import com.boot.jx.postman.PMConstants;
 import com.boot.jx.postman.PMConstants.MESSAGE_SENDER_TYPE;
@@ -319,7 +320,11 @@ public class BulkMessageService extends BatchJobExecuter {
 		List<DBObject> list = new ArrayList<DBObject>();
 		list.add(Aggregation.match(Criteria.where("bulkSessionId").is((currentBatchJob.getJobId()))) // Match
 				.toDBObject(Aggregation.DEFAULT_CONTEXT));
-		list.add(Aggregation.group("status").count().as("count").toDBObject(Aggregation.DEFAULT_CONTEXT));
+		
+		list.add(QA.project("statuss", QA.objectToArray("stamps")));
+		list.add(Aggregation.unwind("statuss").toDBObject(Aggregation.DEFAULT_CONTEXT));
+		list.add(Aggregation.group("statuss.k").count().as("count").toDBObject(Aggregation.DEFAULT_CONTEXT));
+		//list.add(Aggregation.group("status").count().as("count").toDBObject(Aggregation.DEFAULT_CONTEXT));
 
 		DBCollection col = mongoTemplate.getCollection(MessageStore.getCollectionName(contactType));
 		Cursor cursor = col.aggregate(list,
