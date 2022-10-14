@@ -502,8 +502,6 @@ public class AccountDashBoardManager {
 		Map<String, Long> hourCntMap= getHourRange(currentTs,lasthrTimeStmp);
 		
 		
-		
-		
 		for(Map.Entry<String, Map<String, Long>> keyValue : hourWiseCountMap.entrySet()) {
 			Map<String, Long> hoCntMapAll =new HashMap<>();
 			String key = keyValue.getKey();
@@ -526,6 +524,11 @@ public class AccountDashBoardManager {
 				}
 			 
 				hourWiseCount.put(key, hoCntMapAll);
+		}
+		if(hourWiseCount==null || hourWiseCount.isEmpty()){
+			for(String channel:channelLst) {
+				hourWiseCount.put(tnt+"_"+channel, hourCntMap);
+			}
 		}
 	
 		summaryMap = lstSummDto.stream().collect(Collectors.groupingBy(SummaryDocDto::getType, Collectors.counting()));
