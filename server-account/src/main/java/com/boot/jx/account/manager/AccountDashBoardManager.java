@@ -11,6 +11,7 @@ import java.text.SimpleDateFormat;
 import java.time.LocalTime;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
@@ -23,6 +24,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -67,6 +69,8 @@ import com.mongodb.Cursor;
 import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
 import com.mongodb.AggregationOptions.OutputMode;
+import com.boot.jx.postman.model.Message.Status;
+import com.boot.jx.postman.model.Message;
 
 @Component
 public class AccountDashBoardManager {
@@ -734,6 +738,8 @@ public class AccountDashBoardManager {
 			// Match condtion
 			list.add(Aggregation.match(new Criteria("timestamp").gt(lasthrTimeStmp).lt(currentTs))
 					.toDBObject(Aggregation.DEFAULT_CONTEXT));
+			list.add(Aggregation.match(new Criteria("bulkSessionId").exists(true))
+					.toDBObject(Aggregation.DEFAULT_CONTEXT));
 			list.add(Aggregation.group("stamps").count().as("count").toDBObject(Aggregation.DEFAULT_CONTEXT));
 
 			DBCollection col = mongoTemplate.getCollection(contactType);
@@ -778,6 +784,10 @@ public class AccountDashBoardManager {
 		Map<String, Long> hourCntMap= getHourRange(currentTs,lasthrTimeStmp);
 		
 		Map<String, Map<String, Long>> hourWiseCount = addDefaultHour(hourWiseCountMap, hourCntMap);
+		
+	
+		hourWiseCount = fetchAndAddAllMsgStatus(hourWiseCount,hourCntMap);
+		
 		
 		dto.setTenant(tnt);
 		dto.setMap(map);
@@ -876,6 +886,9 @@ public class AccountDashBoardManager {
 		
 		Map<String, Map<String, Long>> dateWiseSummary = addDefaultHour(dateWiseCountMap, dateRanMap);
 		
+		dateWiseSummary = fetchAndAddAllMsgStatus(dateWiseSummary,dateRanMap);
+		
+		
 		ContactTypeSummaryDto dto = new ContactTypeSummaryDto();
 		dto.setTenant(tnt);
 		dto.setMap(map);
@@ -913,6 +926,22 @@ public class AccountDashBoardManager {
 		}
 		
 		return countSummary;
+	}
+	
+	/** add default msg status **/
+	public Map<String, Map<String, Long>> fetchAndAddAllMsgStatus(Map<String, Map<String, Long>> hourWiseCount,Map<String, Long> hourCntMap){
+		
+		Message.Status[] msgSta = Message.Status.values();
+		
+		for(Message.Status stsobj:msgSta) {
+			String sts =ArgUtil.parseAsString(stsobj);
+			if(sts!=null && (hourWiseCount==null || hourWiseCount.isEmpty())) {
+				hourWiseCount.put(sts.toString(), hourCntMap);
+			}else if(sts!=null && hourWiseCount!=null && !hourWiseCount.containsKey(sts)) {
+				hourWiseCount.put(sts.toString(), hourCntMap);
+			}
+		}
+		return hourWiseCount;
 	}
 	
 	public List<String> getListChannelCongig() {
