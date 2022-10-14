@@ -212,20 +212,24 @@ public class SessionEventTimer extends ATaskLimiter {
 		MapModel data = task.data();
 		int counter = data.getInteger("counter", 0);
 		ChatSessionDoc session = sessionStore.getSession(data.getString("sessionId"));
-		ClientApp defaultClient = messageContext.clientApp(data.getString("queue"), null);
+		ClientApp defaultClient = messageContext.clientApp(data.getString("queue", session.getAssignedToQueue()));
 
 		MapModel meta = new MapModel(session.getMeta());
 		MapPathEntry omidEntry = meta.pathEntry("mitel.omid");
-		String omid = omidEntry.asString();
-		MapModel mitel = mitelClient.openMediaGetActive(defaultClient, session.contact(), session.getSessionId(), omid);
+		if (omidEntry.exists()) {
+			String omid = omidEntry.asString();
+			MapModel mitel = mitelClient.openMediaGetActive(defaultClient, session.contact(), session.getSessionId(),
+					omid);
 
-		if (!ArgUtil.is(mitel)
-				|| (mitel.keyEntry("id").exists() && mitel.keyEntry("conversationState").in("Ended", "Abandoned"))) {
-			chatSessionService.closeSession(session);
-		} else if (counter < 5) {
-			long closeCheckTime = pmEnvironment.keyEntry(ConfigConstants.APP_KEY.MITEL_SYNC_TIMER).asLong(0L);
-			this.setMitelClosingCheck(session.getSessionId(), defaultClient, closeCheckTime * 2, counter++);
+			if (!ArgUtil.is(mitel) || (mitel.keyEntry("id").exists()
+					&& mitel.keyEntry("conversationState").in("Ended", "Abandoned"))) {
+				chatSessionService.closeSession(session);
+			} else if (counter < 5) {
+				long closeCheckTime = pmEnvironment.keyEntry(ConfigConstants.APP_KEY.MITEL_SYNC_TIMER).asLong(0L);
+				this.setMitelClosingCheck(session.getSessionId(), defaultClient, closeCheckTime * 2, counter++);
+			}
 		}
+
 	}
 
 	private void doMitelRouting(TunnelTask task) {

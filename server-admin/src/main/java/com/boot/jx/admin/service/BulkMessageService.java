@@ -12,7 +12,6 @@ import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
@@ -28,6 +27,8 @@ import com.boot.jx.dict.ContactType;
 import com.boot.jx.logger.AuditDetailProvider;
 import com.boot.jx.mongo.CommonMongoQB.QueryCriteria;
 import com.boot.jx.mongo.CommonMongoQueryBuilder;
+import com.boot.jx.mongo.CommonMongoTemplate;
+import com.boot.jx.mongo.QA;
 import com.boot.jx.postman.ClientApp;
 import com.boot.jx.postman.PMConstants;
 import com.boot.jx.postman.PMConstants.MESSAGE_SENDER_TYPE;
@@ -49,14 +50,13 @@ import com.boot.utils.ArgUtil;
 import com.boot.utils.UniqueID;
 import com.google.i18n.phonenumbers.NumberParseException;
 import com.google.i18n.phonenumbers.Phonenumber.PhoneNumber;
-import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 
 @Component
 public class BulkMessageService extends BatchJobExecuter {
 
 	@Autowired
-	private MongoTemplate mongoTemplate;
+	private CommonMongoTemplate mongoTemplate;
 
 	@Autowired
 	private MessageStore messageStore;
@@ -314,13 +314,16 @@ public class BulkMessageService extends BatchJobExecuter {
 //		AggregationResults<Map> results = mongoTemplate.aggregate(agg, MessageStore.getCollectionName(contactType),
 //				Map.class);
 
-		List<Document> list = new ArrayList<Document>();
-		list.add(Aggregation.match(Criteria.where("bulkSessionId").is((currentBatchJob.getJobId()))) // Match
-				.toDocument(Aggregation.DEFAULT_CONTEXT));
-		list.add(Aggregation.group("status").count().as("count").toDocument(Aggregation.DEFAULT_CONTEXT));
+		QA list = new QA().add(Aggregation.match(Criteria.where("bulkSessionId").is((currentBatchJob.getJobId()))),
+				QA.project("statuss", QA.objectToArray("stamps")), Aggregation.unwind("statuss"),
+				Aggregation.group("statuss.k").count().as("count"));;
 
-		MongoCollection<Document> col = mongoTemplate.getCollection(MessageStore.getCollectionName(contactType));
-		MongoCursor<Document> cursor = col.aggregate(list).iterator();
+		// list.add(Aggregation.group("status").count().as("count").toDBObject(Aggregation.DEFAULT_CONTEXT));
+//				MongoCollection<Document> col = mongoTemplate.getCollection(MessageStore.getCollectionName(contactType));
+//				MongoCursor<Document> cursor = col.aggregate(list).iterator();
+
+		MongoCursor<Document> cursor = mongoTemplate.collection(MessageStore.getCollectionName(contactType))
+				.aggregate(list).iterator();
 
 		long totalCount = 0;
 		long doneCount = 0;
@@ -339,7 +342,6 @@ public class BulkMessageService extends BatchJobExecuter {
 					}
 				}
 			}
-
 		}
 		// }
 

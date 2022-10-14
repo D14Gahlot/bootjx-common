@@ -1,3 +1,4 @@
+
 package com.boot.jx.mongo;
 
 import java.util.ArrayList;
@@ -14,7 +15,6 @@ import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
-import com.mongodb.client.AggregateIterable;
 import com.mongodb.client.DistinctIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
@@ -62,14 +62,23 @@ public class MongoUtils {
 			return this;
 		}
 
-		public MongoResultProcessor<T> aggregate(List<Document> aggreQuery, Class<T> resultClass) {
-			results = col.aggregate(aggreQuery, resultClass);
-			return this;
+		public <TResult> MongoResultProcessor<TResult> aggregate(List<Document> aggreQuery,
+				Class<TResult> resultClass) {
+			MongoResultProcessor<TResult> newP = new MongoResultProcessor<TResult>();
+			return newP.results(col.aggregate(aggreQuery, resultClass));
 		}
 
 		public MongoResultProcessor<Document> aggregate(List<Document> aggreQuery) {
 			SimpleMongoResultProcessor newP = new SimpleMongoResultProcessor();
 			return newP.results(col.aggregate(aggreQuery));
+		}
+
+		public <TResult> MongoResultProcessor<TResult> aggregate(QA aggreQuery, Class<TResult> resultClass) {
+			return this.aggregate(aggreQuery.piplines(), resultClass);
+		}
+
+		public MongoResultProcessor<Document> aggregate(QA aggreQuery) {
+			return this.aggregate(aggreQuery.piplines());
 		}
 
 		public MongoResultProcessor<T> distinct(String fieldkey, Class<T> fieldkeyType) {
@@ -85,6 +94,10 @@ public class MongoUtils {
 		public MongoResultProcessor<T> forEach(Consumer<? super T> action) {
 			this.results.forEach(action);
 			return this;
+		}
+
+		public MongoCursor<T> iterator() {
+			return this.results.iterator();
 		}
 
 		public List<T> asList(List<T> list) {
