@@ -741,16 +741,18 @@ public class AccountDashBoardManager {
 				DBObject object = cursor.next();
 				if (ArgUtil.is(object)) {
 					String type = ArgUtil.parseAsString(object.get("_id"));
+					if(ArgUtil.is(type)) {
 					Map<String,Object> mapValue = JsonUtil.fromJsonToMap(type);
 					long count = ArgUtil.parseAsLong(object.get("count"), 0L);
 					contactDto.setType(type);
 					contactDto.setTotalCount(count);
 					lstMap.add(mapValue);
+					}
 				}
 				messageTypeLst.add(contactDto);
 			}
 		}
-		
+
 		for(Map<String,Object> mapv:lstMap) {
 			for (Map.Entry<String, Object> keyValueCount : mapv.entrySet()) {
 				DateWiseHourCountDto daySummDto =new DateWiseHourCountDto();
@@ -764,6 +766,7 @@ public class AccountDashBoardManager {
 			}
 			
 		}
+		
 		/** Hour wise couunt **/
 		Map<String, Map<String, Long>> hourWiseCountMap = hourCntLst.stream()
 				.collect(Collectors.groupingBy(DateWiseHourCountDto::getMsgType,
