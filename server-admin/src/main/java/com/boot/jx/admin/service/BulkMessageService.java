@@ -355,7 +355,8 @@ public class BulkMessageService extends BatchJobExecuter {
 			doc.setCompletedStamp(System.currentTimeMillis());
 		}
 		if (!ArgUtil.areEqual(currentBatchJob.getStatus(), doc.getStatus())) {
-			doc.setStatus(currentBatchJob.getStatus().toString());
+			doc.setStatus(
+					ArgUtil.parseAsString(currentBatchJob.getStatus()));
 			if (completed) {
 				doc.setStatus(JOB_STATUS.COMPLETED.toString());
 			}
