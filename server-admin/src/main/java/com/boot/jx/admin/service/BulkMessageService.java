@@ -320,11 +320,11 @@ public class BulkMessageService extends BatchJobExecuter {
 		List<DBObject> list = new ArrayList<DBObject>();
 		list.add(Aggregation.match(Criteria.where("bulkSessionId").is((currentBatchJob.getJobId()))) // Match
 				.toDBObject(Aggregation.DEFAULT_CONTEXT));
-		
+
 		list.add(QA.project("statuss", QA.objectToArray("stamps")));
 		list.add(Aggregation.unwind("statuss").toDBObject(Aggregation.DEFAULT_CONTEXT));
 		list.add(Aggregation.group("statuss.k").count().as("count").toDBObject(Aggregation.DEFAULT_CONTEXT));
-		//list.add(Aggregation.group("status").count().as("count").toDBObject(Aggregation.DEFAULT_CONTEXT));
+		// list.add(Aggregation.group("status").count().as("count").toDBObject(Aggregation.DEFAULT_CONTEXT));
 
 		DBCollection col = mongoTemplate.getCollection(MessageStore.getCollectionName(contactType));
 		Cursor cursor = col.aggregate(list,
@@ -358,7 +358,7 @@ public class BulkMessageService extends BatchJobExecuter {
 			doc.setCompletedStamp(System.currentTimeMillis());
 		}
 		if (!ArgUtil.areEqual(currentBatchJob.getStatus(), doc.getStatus())) {
-			doc.setStatus(currentBatchJob.getStatus().toString());
+			doc.setStatus(ArgUtil.parseAsString(currentBatchJob.getStatus()));
 			if (completed) {
 				doc.setStatus(JOB_STATUS.COMPLETED.toString());
 			}
