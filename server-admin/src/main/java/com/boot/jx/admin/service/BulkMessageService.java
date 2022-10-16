@@ -46,6 +46,7 @@ import com.boot.jx.tunnel.task.JobTaskModel.JOB_STATUS;
 import com.boot.jx.tunnel.task.JobTaskModel.Tasklet;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.JsonUtil;
 import com.boot.utils.UniqueID;
 import com.google.i18n.phonenumbers.NumberParseException;
 import com.google.i18n.phonenumbers.Phonenumber.PhoneNumber;
@@ -326,6 +327,7 @@ public class BulkMessageService extends BatchJobExecuter {
 		list.add(Aggregation.group("statuss.k").count().as("count").toDBObject(Aggregation.DEFAULT_CONTEXT));
 		// list.add(Aggregation.group("status").count().as("count").toDBObject(Aggregation.DEFAULT_CONTEXT));
 
+		//System.out.println(JsonUtil.toJson(list));
 		DBCollection col = mongoTemplate.getCollection(MessageStore.getCollectionName(contactType));
 		Cursor cursor = col.aggregate(list,
 				AggregationOptions.builder().allowDiskUse(true).outputMode(OutputMode.CURSOR).build());
@@ -340,10 +342,12 @@ public class BulkMessageService extends BatchJobExecuter {
 				if (ArgUtil.is(status)) {
 					long count = ArgUtil.parseAsLong(object.get("count"), 0L);
 					doc.stats().put(ArgUtil.parseAsString(status), count);
-					totalCount = (totalCount + count);
+					if (ArgUtil.isEqual(status, Status.SCHLD)) {
+						totalCount = Math.max(totalCount, count);
+					}
 					// Done Count
-					if (status.ordinal() > Status.INIT.ordinal()) {
-						doneCount = (doneCount + count);
+					if (ArgUtil.isEqual(status, Status.CRTD, Status.INIT, Status.SENT)) {
+						doneCount = Math.max(doneCount, count);
 					}
 				}
 			}
@@ -352,13 +356,15 @@ public class BulkMessageService extends BatchJobExecuter {
 
 		// System.out.println("TALLY : " + (totalCount == doneCount) + " -- "
 		// +currentBatchJob.getDonePercent());
-		boolean completed = (totalCount == doneCount) && (currentBatchJob.getDonePercent() == 100);
+		boolean completed = (totalCount == doneCount);
 
 		if (completed) {
 			doc.setCompletedStamp(System.currentTimeMillis());
 		}
-		if (!ArgUtil.areEqual(currentBatchJob.getStatus(), doc.getStatus())) {
-			doc.setStatus(ArgUtil.parseAsString(currentBatchJob.getStatus()));
+		if (!ArgUtil.areEqual(currentBatchJob.getStatus(), doc.getStatus())
+				|| !ArgUtil.is(doc.getStatus(), JOB_STATUS.COMPLETED.toString())
+		){
+			doc.setStatus(ArgUtil.parseAsString(currentBatchJob.getStatus(),doc.getStatus()));
 			if (completed) {
 				doc.setStatus(JOB_STATUS.COMPLETED.toString());
 			}
