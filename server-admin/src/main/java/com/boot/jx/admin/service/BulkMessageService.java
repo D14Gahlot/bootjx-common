@@ -47,6 +47,7 @@ import com.boot.jx.tunnel.task.JobTaskModel.JOB_STATUS;
 import com.boot.jx.tunnel.task.JobTaskModel.Tasklet;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.JsonUtil;
 import com.boot.utils.UniqueID;
 import com.google.i18n.phonenumbers.NumberParseException;
 import com.google.i18n.phonenumbers.Phonenumber.PhoneNumber;
@@ -321,6 +322,7 @@ public class BulkMessageService extends BatchJobExecuter {
 		// list.add(Aggregation.group("status").count().as("count").toDBObject(Aggregation.DEFAULT_CONTEXT));
 //				MongoCollection<Document> col = mongoTemplate.getCollection(MessageStore.getCollectionName(contactType));
 //				MongoCursor<Document> cursor = col.aggregate(list).iterator();
+//				System.out.println(JsonUtil.toJson(list.piplines()));
 
 		MongoCursor<Document> cursor = mongoTemplate.collection(MessageStore.getCollectionName(contactType))
 				.aggregate(list).iterator();

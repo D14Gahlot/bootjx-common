@@ -25,7 +25,7 @@ public class QA {
 		for (Object aggOperation : aggOperations) {
 			if (aggOperation instanceof AggregationOperation) {
 				piplines.add(((AggregationOperation) aggOperation).toDocument(Aggregation.DEFAULT_CONTEXT));
-			} else if (aggOperation instanceof AggregationOperation) {
+			} else if (aggOperation instanceof Document) {
 				piplines.add((Document) aggOperation);
 			}
 		}
