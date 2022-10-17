@@ -46,7 +46,6 @@ import com.boot.jx.tunnel.task.JobTaskModel.JOB_STATUS;
 import com.boot.jx.tunnel.task.JobTaskModel.Tasklet;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.utils.ArgUtil;
-import com.boot.utils.JsonUtil;
 import com.boot.utils.UniqueID;
 import com.google.i18n.phonenumbers.NumberParseException;
 import com.google.i18n.phonenumbers.Phonenumber.PhoneNumber;

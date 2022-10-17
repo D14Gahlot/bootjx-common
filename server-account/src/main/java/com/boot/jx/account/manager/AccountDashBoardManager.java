@@ -6,15 +6,12 @@ import static org.springframework.data.mongodb.core.aggregation.Aggregation.newA
 import static org.springframework.data.mongodb.core.aggregation.Aggregation.project;
 import static org.springframework.data.mongodb.core.aggregation.Aggregation.sort;
 
-import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.time.LocalTime;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -22,9 +19,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeMap;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,37 +35,34 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Component;
 
 import com.boot.jx.AppContextUtil;
-import com.boot.jx.account.doc.AccountStore;
 import com.boot.jx.account.doc.DomainDoc;
 import com.boot.jx.account.doc.DomainSummaryMessageDoc;
 import com.boot.jx.account.doc.DomainSummaryMetaDoc;
 import com.boot.jx.account.doc.DomainSummaryMetaStore;
 import com.boot.jx.account.dto.AccountDashBoardRequestDto;
 import com.boot.jx.account.dto.AccountDashBoardResponseDto;
-import com.boot.jx.account.dto.TypeCount;
-import com.boot.jx.account.dto.WabaSummaryDocDto;
-import com.boot.jx.dict.ContactType;
 import com.boot.jx.account.dto.ContactTypeCountDto;
 import com.boot.jx.account.dto.ContactTypeSummaryDto;
 import com.boot.jx.account.dto.DateWiseHourCountDto;
 import com.boot.jx.account.dto.MonthDtlsDto;
 import com.boot.jx.account.dto.SummaryDocDto;
+import com.boot.jx.account.dto.TypeCount;
+import com.boot.jx.account.dto.WabaSummaryDocDto;
+import com.boot.jx.dict.ContactType;
 import com.boot.jx.postman.PMConstants;
-import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.doc.config.ChannelConfigDoc;
 import com.boot.jx.postman.doc.tpo.WABAConversation;
+import com.boot.jx.postman.model.Message;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.Constants;
 import com.boot.utils.DateUtil;
 import com.boot.utils.JsonUtil;
 import com.mongodb.AggregationOptions;
+import com.mongodb.AggregationOptions.OutputMode;
 import com.mongodb.Cursor;
 import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
-import com.mongodb.AggregationOptions.OutputMode;
-import com.boot.jx.postman.model.Message.Status;
-import com.boot.jx.postman.model.Message;
 
 @Component
 public class AccountDashBoardManager {
