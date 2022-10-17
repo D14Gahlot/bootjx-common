@@ -465,6 +465,7 @@ public class AccountDashBoardManager {
 				dto.setMeta(doc.getMeta());
 				dto.setDomain(tnt);
 				String id = getSummaryWithChannelId(dto);
+				if(ArgUtil.is(id)) {
 				dto.setId(id);
 				Date date = new Date(timeStamp);
 				SimpleDateFormat sdfH = new SimpleDateFormat("kk");
@@ -475,6 +476,7 @@ public class AccountDashBoardManager {
 				hrDto.setChannel(id);
 				if (hrDto != null) {
 					hourCntLst.add(hrDto);
+				}
 				}
 			}
 
@@ -577,10 +579,12 @@ public class AccountDashBoardManager {
 					lstSummDto.add(dto);
 				}
 				String channelid = getSummaryWithChannelId(dto);
+				if(ArgUtil.is(channelid)) {
 				daySummDto.setDate(yyyyMMdd);
 				daySummDto.setChannel(channelid);
 				if (daySummDto != null) {
 					hourCntLst.add(daySummDto);
+				}
 				}
 
 			}
