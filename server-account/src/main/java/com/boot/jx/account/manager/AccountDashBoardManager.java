@@ -6,12 +6,15 @@ import static org.springframework.data.mongodb.core.aggregation.Aggregation.newA
 import static org.springframework.data.mongodb.core.aggregation.Aggregation.project;
 import static org.springframework.data.mongodb.core.aggregation.Aggregation.sort;
 
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.time.LocalTime;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -19,7 +22,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,12 +40,16 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Component;
 
 import com.boot.jx.AppContextUtil;
+import com.boot.jx.account.doc.AccountStore;
 import com.boot.jx.account.doc.DomainDoc;
 import com.boot.jx.account.doc.DomainSummaryMessageDoc;
 import com.boot.jx.account.doc.DomainSummaryMetaDoc;
 import com.boot.jx.account.doc.DomainSummaryMetaStore;
 import com.boot.jx.account.dto.AccountDashBoardRequestDto;
 import com.boot.jx.account.dto.AccountDashBoardResponseDto;
+import com.boot.jx.account.dto.TypeCount;
+import com.boot.jx.account.dto.WabaSummaryDocDto;
+import com.boot.jx.dict.ContactType;
 import com.boot.jx.account.dto.ContactTypeCountDto;
 import com.boot.jx.account.dto.ContactTypeSummaryDto;
 import com.boot.jx.account.dto.DateWiseHourCountDto;
@@ -50,6 +59,7 @@ import com.boot.jx.account.dto.TypeCount;
 import com.boot.jx.account.dto.WabaSummaryDocDto;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.postman.PMConstants;
+import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.doc.config.ChannelConfigDoc;
 import com.boot.jx.postman.doc.tpo.WABAConversation;
@@ -63,6 +73,9 @@ import com.mongodb.AggregationOptions.OutputMode;
 import com.mongodb.Cursor;
 import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
+import com.mongodb.AggregationOptions.OutputMode;
+import com.boot.jx.postman.model.Message.Status;
+import com.boot.jx.postman.model.Message;
 
 @Component
 public class AccountDashBoardManager {
@@ -882,19 +895,23 @@ public class AccountDashBoardManager {
 		for (Map.Entry<String, Map<String, Long>> keyValue : hourWiseCountMap.entrySet()) {
 			Map<String, Long> hoCntMapAll = new HashMap<>();
 			String key = keyValue.getKey();
-			defaultMap = hourWiseCountMap.get(key);
+			if (ArgUtil.is(key)) {
+				defaultMap = hourWiseCountMap.get(key);
 
-			for (Map.Entry<String, Long> keyValueCount : hourCntMap.entrySet()) {
-				String keydt = keyValueCount.getKey();
-				Long count = keyValueCount.getValue();
-				if (defaultMap.containsKey(keydt)) {
-					hoCntMapAll.put(keydt, defaultMap.get(keydt));
-				} else {
-					hoCntMapAll.put(keydt, count);
+				for (Map.Entry<String, Long> keyValueCount : hourCntMap.entrySet()) {
+					String keydt = keyValueCount.getKey();
+					if (ArgUtil.is(keydt)) {
+						Long count = keyValueCount.getValue();
+						if (defaultMap.containsKey(keydt)) {
+							hoCntMapAll.put(keydt, defaultMap.get(keydt));
+						} else {
+							hoCntMapAll.put(keydt, count);
+						}
+					}
 				}
-			}
 
-			countSummary.put(key, hoCntMapAll);
+				countSummary.put(key, hoCntMapAll);
+			}
 		}
 
 		return countSummary;
