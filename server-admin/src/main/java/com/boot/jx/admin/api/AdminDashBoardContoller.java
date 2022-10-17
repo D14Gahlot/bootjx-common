@@ -6,8 +6,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.boot.jx.admin.dto.ContactTypeSummaryDto;
 import com.boot.jx.admin.dto.DashBoardRequestDto;
 import com.boot.jx.admin.dto.DashBoardResponseDto;
 import com.boot.jx.admin.dto.TagDocumentDto;
@@ -60,6 +63,35 @@ public class AdminDashBoardContoller {
 		return ApiResponse.buildResults(lst.getLstTagDocument());
 	}
 	
+	
+	@ResponseBody
+   	@RequestMapping(value = {"/admin/hourwise-summary"}, method = { RequestMethod.GET })
+   	public ApiResponse<ContactTypeSummaryDto, Object> getHourWiseSummary() {
+   		ContactTypeSummaryDto summary =adminDbMgr.hourWisesummary(); 
+   		return  ApiResponse.buildResult(summary);
+   	}
+    
+    @ResponseBody
+   	@RequestMapping(value = {"/admin/daywise-summary"}, method = { RequestMethod.GET })
+   	public ApiResponse<ContactTypeSummaryDto, Object> getDayWiseSummary() {
+   		ContactTypeSummaryDto summary =adminDbMgr.dayChannelWiseWisesummary(); 
+   		return  ApiResponse.buildResult(summary);
+   	}
+
+    @ResponseBody
+   	@RequestMapping(value = {"/pub/hourwise-msg-status-summary"}, method = { RequestMethod.GET })
+   	public ApiResponse<ContactTypeSummaryDto, Object> getHourWiseMsgStatusSummary(@RequestParam(required = false) long timestamp,long hr) {
+   		ContactTypeSummaryDto summary =adminDbMgr.getHourWiseMsgStatusSummary(timestamp,hr); 
+   		return  ApiResponse.buildResult(summary);
+   	}
+    
+    @ResponseBody
+   	@RequestMapping(value = {"/pub/datewise-msg-status-summary"}, method = { RequestMethod.GET })
+   	public ApiResponse<ContactTypeSummaryDto, Object> getDayWiseMsgStatusSummary(@RequestParam(required = false) long timestamp,int days) {
+   		ContactTypeSummaryDto summary =adminDbMgr.getDayWiseMsgStatusSummary(timestamp,days); 
+   		return  ApiResponse.buildResult(summary);
+   	}
+    
 	
 	
 

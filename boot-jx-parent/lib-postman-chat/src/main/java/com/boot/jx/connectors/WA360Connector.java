@@ -319,6 +319,7 @@ public class WA360Connector extends AbstractConnector<WA360ConfigDetails, WA360P
 				outboxMessage.updateStatus(OutboxMessage.Status.SENT);
 			} else {
 				outboxMessage.logs().add(String.format("Invalid Contact for %s", chatContactDoc));
+				outboxMessage.updateStatus(OutboxMessage.Status.SENT_ERR);
 			}
 
 		} catch (AmxApiException e) {

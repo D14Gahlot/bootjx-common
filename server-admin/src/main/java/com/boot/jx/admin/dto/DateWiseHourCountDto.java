@@ -1,4 +1,4 @@
-package com.boot.jx.account.dto;
+package com.boot.jx.admin.dto;
 
 public class DateWiseHourCountDto {
 	String date;

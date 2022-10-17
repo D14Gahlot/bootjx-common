@@ -31,6 +31,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.domain.Sort.Order;
+import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
 import org.springframework.data.mongodb.core.aggregation.AggregationResults;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -339,9 +340,7 @@ public class AgentAnalyticsManager {
 		if (distinctIdList == null || distinctIdList.isEmpty()) {
 			distinctIdList = getDefaultDistinctContact(dateRange1, dateRange2);
 		}
-		for (Object chat : distinctIdList) {
-			LOGGER.debug("Chat doc :" + (String) chat);
-		}
+
 		return distinctIdList;
 	}
 
@@ -653,10 +652,11 @@ public class AgentAnalyticsManager {
 
 	// Get Total Msg from
 
-	public List<MessageDoc> getTotalMessageAgentAndContactWise(List<String> lstChatSession, long dateRange1,
+	public List<MessageDoc> getTotalMessageAgentAndContactWise(List<ChatSessionDoc> lstChatSession, long dateRange1,
 			long dateRange2) {
 		List<MessageDoc> totalMsgDocLst = new ArrayList<MessageDoc>();
-		for (String contactId : lstChatSession) {
+		for (Object chatSession : lstChatSession) {
+			String contactId = (String) chatSession;
 			List<MessageDoc> msgDocLst = getMsgCountAgentContactWise(contactId, dateRange1, dateRange2);
 			totalMsgDocLst.addAll(msgDocLst);
 		}
