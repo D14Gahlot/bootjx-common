@@ -333,6 +333,7 @@ public class AgentAnalyticsManager {
 	}
 	
 	
+	@SuppressWarnings("unchecked")
 	public List<ChatSessionDoc> getUniqueAgentWiseContactList(String agent,long dateRange1, long dateRange2){
 		
 		Query query = new Query();
@@ -343,9 +344,7 @@ public class AgentAnalyticsManager {
 		if(distinctIdList==null || distinctIdList.isEmpty()) {
 			distinctIdList =getDefaultDistinctContact(dateRange1, dateRange2);
 		}
-		for(Object chat :distinctIdList) {
-			LOGGER.debug("Chat doc :"+(String)chat);
-		}
+		
 		return distinctIdList;
 	}
 	
