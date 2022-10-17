@@ -4,6 +4,7 @@ public class DateWiseHourCountDto {
 	String date;
 	String hour;
 	String channel;
+	String msgType;
 	public String getDate() {
 		return date;
 	}
@@ -21,6 +22,12 @@ public class DateWiseHourCountDto {
 	}
 	public void setChannel(String channel) {
 		this.channel = channel;
+	}
+	public String getMsgType() {
+		return msgType;
+	}
+	public void setMsgType(String msgType) {
+		this.msgType = msgType;
 	}
 
 }
