@@ -78,14 +78,14 @@ public class AdminDashBoardContoller {
    	}
 
     @ResponseBody
-   	@RequestMapping(value = {"/pub/hourwise-msg-status-summary"}, method = { RequestMethod.GET })
+   	@RequestMapping(value = {"/admin/hourwise-msg-status-summary"}, method = { RequestMethod.GET })
    	public ApiResponse<ContactTypeSummaryDto, Object> getHourWiseMsgStatusSummary(@RequestParam(required = false) long timestamp,long hr) {
    		ContactTypeSummaryDto summary =adminDbMgr.getHourWiseMsgStatusSummary(timestamp,hr); 
    		return  ApiResponse.buildResult(summary);
    	}
     
     @ResponseBody
-   	@RequestMapping(value = {"/pub/datewise-msg-status-summary"}, method = { RequestMethod.GET })
+   	@RequestMapping(value = {"/admin/datewise-msg-status-summary"}, method = { RequestMethod.GET })
    	public ApiResponse<ContactTypeSummaryDto, Object> getDayWiseMsgStatusSummary(@RequestParam(required = false) long timestamp,int days) {
    		ContactTypeSummaryDto summary =adminDbMgr.getDayWiseMsgStatusSummary(timestamp,days); 
    		return  ApiResponse.buildResult(summary);
