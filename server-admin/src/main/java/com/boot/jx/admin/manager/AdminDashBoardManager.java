@@ -1173,25 +1173,29 @@ public class AdminDashBoardManager {
 		for (Map.Entry<String, Map<String, Long>> keyValue : hourWiseCountMap.entrySet()) {
 			Map<String, Long> hoCntMapAll = new HashMap<>();
 			String key = keyValue.getKey();
+			if (ArgUtil.is(key)) {
 
-			for (String channel : channelLst) {
-				if (!key.contains(channel)) {
-					hourWiseCount.put(tnt + "_" + channel, hourCntMap);
+				for (String channel : channelLst) {
+					if (!key.contains(channel)) {
+						hourWiseCount.put(tnt + "_" + channel, hourCntMap);
+					}
 				}
-			}
-			Map<String, Long> hoCntMap = hourWiseCountMap.get(key);
+				Map<String, Long> hoCntMap = hourWiseCountMap.get(key);
 
-			for (Map.Entry<String, Long> keyValueCount : hourCntMap.entrySet()) {
-				String keydt = keyValueCount.getKey();
-				Long count = keyValueCount.getValue();
-				if (hoCntMap.containsKey(keydt)) {
-					hoCntMapAll.put(keydt, hoCntMap.get(keydt));
-				} else {
-					hoCntMapAll.put(keydt, count);
+				for (Map.Entry<String, Long> keyValueCount : hourCntMap.entrySet()) {
+					String keydt = keyValueCount.getKey();
+					if (ArgUtil.is(keydt)) {
+						Long count = keyValueCount.getValue();
+						if (hoCntMap.containsKey(keydt)) {
+							hoCntMapAll.put(keydt, hoCntMap.get(keydt));
+						} else {
+							hoCntMapAll.put(keydt, count);
+						}
+					}
 				}
-			}
 
-			hourWiseCount.put(key, hoCntMapAll);
+				hourWiseCount.put(key, hoCntMapAll);
+			}
 		}
 
 		summaryMap = lstSummDto.stream().collect(Collectors.groupingBy(SummaryDocDto::getType, Collectors.counting()));
@@ -1271,27 +1275,29 @@ public class AdminDashBoardManager {
 
 		for (Map.Entry<String, Map<String, Long>> keyValue : dayWiseCountMap.entrySet()) {
 			String key = keyValue.getKey();
-
-			for (String channel : channelLst) {
-				if (!key.contains(channel)) {
-					dayWiseMap.put(tnt + "_" + channel, dateRanMap);
-				}
-			}
-
-			Map<String, Long> dateWiseCnt = new HashMap<>();
-			Map<String, Long> dayCntMap = dayWiseCountMap.get(key);
-			// dateRanMap
-			for (Map.Entry<String, Long> keyValueCount : dateRanMap.entrySet()) {
-				String keydt = keyValueCount.getKey();
-				Long count = keyValueCount.getValue();
-				if (dayCntMap.containsKey(keydt)) {
-					dateWiseCnt.put(keydt, dayCntMap.get(keydt));
-				} else {
-					dateWiseCnt.put(keydt, count);
+			if (ArgUtil.is(key)) {
+				for (String channel : channelLst) {
+					if (!key.contains(channel)) {
+						dayWiseMap.put(tnt + "_" + channel, dateRanMap);
+					}
 				}
 
+				Map<String, Long> dateWiseCnt = new HashMap<>();
+				Map<String, Long> dayCntMap = dayWiseCountMap.get(key);
+				// dateRanMap
+				for (Map.Entry<String, Long> keyValueCount : dateRanMap.entrySet()) {
+					String keydt = keyValueCount.getKey();
+					if (ArgUtil.is(keydt)) {
+						Long count = keyValueCount.getValue();
+						if (dayCntMap.containsKey(keydt)) {
+							dateWiseCnt.put(keydt, dayCntMap.get(keydt));
+						} else {
+							dateWiseCnt.put(keydt, count);
+						}
+					}
+				}
+				dayWiseMap.put(key, dateWiseCnt);
 			}
-			dayWiseMap.put(key, dateWiseCnt);
 		}
 		summaryMap = lstSummDto.stream().collect(Collectors.groupingBy(SummaryDocDto::getType, Collectors.counting()));
 
@@ -1500,19 +1506,23 @@ public class AdminDashBoardManager {
 		for (Map.Entry<String, Map<String, Long>> keyValue : hourWiseCountMap.entrySet()) {
 			Map<String, Long> hoCntMapAll = new HashMap<>();
 			String key = keyValue.getKey();
-			defaultMap = hourWiseCountMap.get(key);
+			if (ArgUtil.is(key)) {
+				defaultMap = hourWiseCountMap.get(key);
 
-			for (Map.Entry<String, Long> keyValueCount : hourCntMap.entrySet()) {
-				String keydt = keyValueCount.getKey();
-				Long count = keyValueCount.getValue();
-				if (defaultMap.containsKey(keydt)) {
-					hoCntMapAll.put(keydt, defaultMap.get(keydt));
-				} else {
-					hoCntMapAll.put(keydt, count);
+				for (Map.Entry<String, Long> keyValueCount : hourCntMap.entrySet()) {
+					String keydt = keyValueCount.getKey();
+					if (ArgUtil.is(keydt)) {
+						Long count = keyValueCount.getValue();
+						if (defaultMap.containsKey(keydt)) {
+							hoCntMapAll.put(keydt, defaultMap.get(keydt));
+						} else {
+							hoCntMapAll.put(keydt, count);
+						}
+					}
 				}
-			}
 
-			countSummary.put(key, hoCntMapAll);
+				countSummary.put(key, hoCntMapAll);
+			}
 		}
 
 		return countSummary;
@@ -1526,10 +1536,12 @@ public class AdminDashBoardManager {
 
 		for (Message.Status stsobj : msgSta) {
 			String sts = ArgUtil.parseAsString(stsobj);
-			if (sts != null && (hourWiseCount == null || hourWiseCount.isEmpty())) {
-				hourWiseCount.put(sts.toString(), hourCntMap);
-			} else if (sts != null && hourWiseCount != null && !hourWiseCount.containsKey(sts)) {
-				hourWiseCount.put(sts.toString(), hourCntMap);
+			if (ArgUtil.is(sts)) {
+				if (sts != null && (hourWiseCount == null || hourWiseCount.isEmpty())) {
+					hourWiseCount.put(sts.toString(), hourCntMap);
+				} else if (sts != null && hourWiseCount != null && !hourWiseCount.containsKey(sts)) {
+					hourWiseCount.put(sts.toString(), hourCntMap);
+				}
 			}
 		}
 		return hourWiseCount;
