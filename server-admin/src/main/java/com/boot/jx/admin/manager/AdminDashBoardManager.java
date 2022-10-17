@@ -1290,12 +1290,14 @@ public class AdminDashBoardManager {
 			 //dateRanMap
 			 for (Map.Entry<String, Long> keyValueCount : dateRanMap.entrySet()) {
 					String keydt = keyValueCount.getKey();
+					if(ArgUtil.is(keydt)) {
 					Long count = keyValueCount.getValue();
 					if(dayCntMap.containsKey(keydt)){
 						dateWiseCnt.put(keydt, dayCntMap.get(keydt));
 					}else {
 						dateWiseCnt.put(keydt, count);
 					}
+				   }
 					
 				}
 			 dayWiseMap.put(key, dateWiseCnt);
@@ -1524,19 +1526,23 @@ public class AdminDashBoardManager {
 		for(Map.Entry<String, Map<String, Long>> keyValue : hourWiseCountMap.entrySet()) {
 			Map<String, Long> hoCntMapAll =new HashMap<>();
 			String key = keyValue.getKey();
+			if(ArgUtil.is(key)) {
 			 defaultMap =hourWiseCountMap.get(key);
 			 
 			 for (Map.Entry<String, Long> keyValueCount : hourCntMap.entrySet()) {
 					String keydt = keyValueCount.getKey();
 					Long count = keyValueCount.getValue();
+					if(ArgUtil.is(keydt)) {
 					if(defaultMap.containsKey(keydt)){
 						hoCntMapAll.put(keydt, defaultMap.get(keydt));
 					}else {
 						hoCntMapAll.put(keydt, count);
 					}
+				  }
 				}
 			 
 			 countSummary.put(key, hoCntMapAll);
+			}
 		}
 		
 		return countSummary;

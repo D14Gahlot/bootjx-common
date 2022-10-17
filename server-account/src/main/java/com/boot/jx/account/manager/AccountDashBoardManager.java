@@ -910,19 +910,23 @@ public class AccountDashBoardManager {
 		for(Map.Entry<String, Map<String, Long>> keyValue : hourWiseCountMap.entrySet()) {
 			Map<String, Long> hoCntMapAll =new HashMap<>();
 			String key = keyValue.getKey();
+			if(ArgUtil.is(key)) {
 			 defaultMap =hourWiseCountMap.get(key);
 			 
 			 for (Map.Entry<String, Long> keyValueCount : hourCntMap.entrySet()) {
 					String keydt = keyValueCount.getKey();
+					if(ArgUtil.is(keydt)) {
 					Long count = keyValueCount.getValue();
 					if(defaultMap.containsKey(keydt)){
 						hoCntMapAll.put(keydt, defaultMap.get(keydt));
 					}else {
 						hoCntMapAll.put(keydt, count);
 					}
+					}
 				}
 			 
 			 countSummary.put(key, hoCntMapAll);
+			}
 		}
 		
 		return countSummary;
