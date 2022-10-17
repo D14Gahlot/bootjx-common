@@ -31,7 +31,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.domain.Sort.Order;
-import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
 import org.springframework.data.mongodb.core.aggregation.AggregationResults;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -652,11 +651,10 @@ public class AgentAnalyticsManager {
 
 	// Get Total Msg from
 
-	public List<MessageDoc> getTotalMessageAgentAndContactWise(List<ChatSessionDoc> lstChatSession, long dateRange1,
+	public List<MessageDoc> getTotalMessageAgentAndContactWise(List<String> contactIds, long dateRange1,
 			long dateRange2) {
 		List<MessageDoc> totalMsgDocLst = new ArrayList<MessageDoc>();
-		for (Object chatSession : lstChatSession) {
-			String contactId = (String) chatSession;
+		for (String contactId : contactIds) {
 			List<MessageDoc> msgDocLst = getMsgCountAgentContactWise(contactId, dateRange1, dateRange2);
 			totalMsgDocLst.addAll(msgDocLst);
 		}

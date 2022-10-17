@@ -28,7 +28,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.domain.Sort.Order;
-import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
 import org.springframework.data.mongodb.core.aggregation.AggregationResults;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -60,11 +59,8 @@ import com.boot.utils.ArgUtil;
 import com.boot.utils.Constants;
 import com.boot.utils.DateUtil;
 import com.boot.utils.JsonUtil;
-import com.mongodb.AggregationOptions;
-import com.mongodb.AggregationOptions.OutputMode;
-import com.mongodb.Cursor;
-import com.mongodb.DBCollection;
-import com.mongodb.DBObject;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoCursor;
 
 @Component
 public class AccountDashBoardManager {
@@ -713,20 +709,18 @@ public class AccountDashBoardManager {
 		List<Map<String, Object>> lstMap = new ArrayList<>();
 		for (String contactType : lst) {
 			List<ContactTypeCountDto> messageTypeLst = new ArrayList<ContactTypeCountDto>();
-			List<DBObject> list = new ArrayList<DBObject>();
+			List<Document> list = new ArrayList<Document>();
 			// Match condtion
 			list.add(Aggregation.match(new Criteria("timestamp").gt(lasthrTimeStmp).lt(currentTs))
-					.toDBObject(Aggregation.DEFAULT_CONTEXT));
+					.toDocument(Aggregation.DEFAULT_CONTEXT));
 			list.add(Aggregation.match(new Criteria("bulkSessionId").exists(true))
-					.toDBObject(Aggregation.DEFAULT_CONTEXT));
-			list.add(Aggregation.group("stamps").count().as("count").toDBObject(Aggregation.DEFAULT_CONTEXT));
+					.toDocument(Aggregation.DEFAULT_CONTEXT));
+			list.add(Aggregation.group("stamps").count().as("count").toDocument(Aggregation.DEFAULT_CONTEXT));
 
-			DBCollection col = mongoTemplate.getCollection(contactType);
-			Cursor cursor = col.aggregate(list,
-					AggregationOptions.builder().allowDiskUse(true).outputMode(OutputMode.CURSOR).build());
+			MongoCursor<Document> cursor = mongoTemplate.collection(contactType).aggregate(list).iterator();
 			while (cursor.hasNext()) {
 				ContactTypeCountDto contactDto = new ContactTypeCountDto();
-				DBObject object = cursor.next();
+				Document object = cursor.next();
 				if (ArgUtil.is(object)) {
 					String type = ArgUtil.parseAsString(object.get("_id"));
 					if (ArgUtil.is(type)) {
@@ -809,18 +803,16 @@ public class AccountDashBoardManager {
 		List<Map<String, Object>> lstMap = new ArrayList<>();
 		for (String contactType : lst) {
 			List<ContactTypeCountDto> messageTypeLst = new ArrayList<ContactTypeCountDto>();
-			List<DBObject> list = new ArrayList<DBObject>();
+			List<Document> list = new ArrayList<Document>();
 			// Match condtion
 			list.add(Aggregation.match(new Criteria("timestamp").gt(lasDayTimeStmp).lt(currentTs))
-					.toDBObject(Aggregation.DEFAULT_CONTEXT));
-			list.add(Aggregation.group("stamps").count().as("count").toDBObject(Aggregation.DEFAULT_CONTEXT));
+					.toDocument(Aggregation.DEFAULT_CONTEXT));
+			list.add(Aggregation.group("stamps").count().as("count").toDocument(Aggregation.DEFAULT_CONTEXT));
 
-			DBCollection col = mongoTemplate.getCollection(contactType);
-			Cursor cursor = col.aggregate(list,
-					AggregationOptions.builder().allowDiskUse(true).outputMode(OutputMode.CURSOR).build());
+			MongoCursor<Document> cursor = mongoTemplate.collection(contactType).aggregate(list).iterator();
 			while (cursor.hasNext()) {
 				ContactTypeCountDto contactDto = new ContactTypeCountDto();
-				DBObject object = cursor.next();
+				Document object = cursor.next();
 				if (ArgUtil.is(object)) {
 					String type = ArgUtil.parseAsString(object.get("_id"));
 					if (ArgUtil.is(type)) {
