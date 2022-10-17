@@ -1557,10 +1557,12 @@ public class AdminDashBoardManager {
 		
 		for(Message.Status stsobj:msgSta) {
 			String sts =ArgUtil.parseAsString(stsobj);
+			if(ArgUtil.is(sts)) {
 			if(sts!=null && (hourWiseCount==null || hourWiseCount.isEmpty())) {
 				hourWiseCount.put(sts.toString(), hourCntMap);
 			}else if(sts!=null && hourWiseCount!=null && !hourWiseCount.containsKey(sts)) {
 				hourWiseCount.put(sts.toString(), hourCntMap);
+			}
 			}
 		}
 		return hourWiseCount;
