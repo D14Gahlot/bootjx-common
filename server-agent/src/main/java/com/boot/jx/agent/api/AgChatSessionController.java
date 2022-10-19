@@ -231,9 +231,12 @@ public class AgChatSessionController {
 		} else if (previous) {
 			ChatSessionDoc prevSession = sessionStore.getPreviousSession(sessionDoc.contact(),
 					sessionDoc.getStartSessionStamp());
-			ChatSessionDTO chatSessionDto = chatArchive.getChatSession(prevSession);
-			chatSessionDto = chatArchive.withContact(chatSessionDto);
-			return resp.results(chatArchive.getMessages(chatSessionDto)).meta(chatSessionDto);
+			if (ArgUtil.is(prevSession)) {
+				ChatSessionDTO chatSessionDto = chatArchive.getChatSession(prevSession);
+				chatSessionDto = chatArchive.withContact(chatSessionDto);
+				return resp.results(chatArchive.getMessages(chatSessionDto)).meta(chatSessionDto);
+			}
+			return resp.meta(null);
 		} else {
 			sessionEventTimer.setChatViewIdleTimeout(sessionDoc, true);
 			if (agentSession.isLoggedIn() && ArgUtil.is(agentSession.getAgentCode())) {
