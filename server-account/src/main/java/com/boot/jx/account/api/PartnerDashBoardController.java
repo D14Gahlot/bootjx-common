@@ -101,8 +101,9 @@ public class PartnerDashBoardController {
     
     @ResponseBody
    	@RequestMapping(value = {"/pub/daywise-summary"}, method = { RequestMethod.GET })
-   	public ApiResponse<ContactTypeSummaryDto, Object> getDayWiseSummary(@RequestParam(required = false) long timestamp,int days) {
-   		ContactTypeSummaryDto summary =dashBMgr.dayChannelWiseWisesummary(timestamp,days); 
+   	public ApiResponse<ContactTypeSummaryDto, Object> getDayWiseSummary(@RequestParam(required = false) long dateRange1,
+   			@RequestParam(required = false) long dateRange2,int days) {
+   		ContactTypeSummaryDto summary =dashBMgr.dayChannelWiseWisesummary(dateRange1,dateRange2,days); 
    		return  ApiResponse.buildResult(summary);
    	}
     
@@ -116,8 +117,8 @@ public class PartnerDashBoardController {
     
     @ResponseBody
    	@RequestMapping(value = {"/pub/datewise-msg-status-summary"}, method = { RequestMethod.GET })
-   	public ApiResponse<ContactTypeSummaryDto, Object> getDayWiseMsgStatusSummary(@RequestParam(required = false) long timestamp,int days) {
-   		ContactTypeSummaryDto summary =dashBMgr.getDayWiseMsgStatusSummary(timestamp,days); 
+   	public ApiResponse<ContactTypeSummaryDto, Object> getDayWiseMsgStatusSummary(long dateRange1,long dateRange2,int days) {
+   		ContactTypeSummaryDto summary =dashBMgr.getDayWiseMsgStatusSummary(dateRange1,dateRange2,days); 
    		return  ApiResponse.buildResult(summary);
    	}
     

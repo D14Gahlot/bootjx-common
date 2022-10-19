@@ -1211,7 +1211,7 @@ public class AdminDashBoardManager {
 	}
 
 	/** day and channel wise summary **/
-	public ContactTypeSummaryDto dayChannelWiseWisesummary() {
+	public ContactTypeSummaryDto dayChannelWiseWisesummary(long dateRange1,long dateRange2) {
 		String tnt = AppContextUtil.getTenant();
 		List<String> lst = getListOfContactType();
 		List<String> channelLst = getListChannelCongig();
@@ -1226,6 +1226,14 @@ public class AdminDashBoardManager {
 		}
 		// use the same datetime to create the end of the day using the maximum time for
 		long lasDayTimeStmp = noOfdaysTstamp.toInstant().toEpochMilli();
+		
+		if(dateRange1>0) {
+			lasDayTimeStmp =dateRange1; 
+		}
+		if(dateRange2>0) {
+			currentTs =dateRange2;
+		}
+		
 
 		Map<String, Long> dateRanMap = getDatesRange(currentTs, lasDayTimeStmp);
 
@@ -1408,7 +1416,7 @@ public class AdminDashBoardManager {
 	}
 
 	@SuppressWarnings("unused")
-	public ContactTypeSummaryDto getDayWiseMsgStatusSummary(long timestamp, int days) {
+	public ContactTypeSummaryDto getDayWiseMsgStatusSummary(long dateRange1,long dateRange2, int days) {
 		String tnt = AppContextUtil.getTenant();
 		List<String> lst = getListOfContactType();
 
@@ -1424,10 +1432,17 @@ public class AdminDashBoardManager {
 		}
 		// use the same datetime to create the end of the day using the maximum time for
 		long lasDayTimeStmp = noOfdaysTstamp.toInstant().toEpochMilli();
+		
+		if(dateRange1>0) {
+			lasDayTimeStmp =dateRange1; 
+		}
+		if(dateRange2>0) {
+			currentTs =dateRange2;
+		}
 
 		String monthYear = new SimpleDateFormat(DateUtil.MMM_YYYY_FORMAT).format(currentTs);
 		Calendar cal = Calendar.getInstance();
-		cal.setTimeInMillis(timestamp);
+		cal.setTimeInMillis(currentTs);
 		int month = cal.get(Calendar.MONTH);
 		int year = cal.get(Calendar.YEAR);
 		long monthMinTimeStamp = DateUtil.getStartTimestamp(month, year).getTime();
