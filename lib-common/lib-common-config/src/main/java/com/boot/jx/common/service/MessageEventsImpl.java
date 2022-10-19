@@ -29,7 +29,7 @@ public class MessageEventsImpl implements MessageEvents {
 		ClientApp app = messageContext.clientApp();
 		sessionEventTimer.setChatOutIdleTimeout(message.getSessionId(), app);
 		sessionEventTimer.setMitelRoutingCheck(message.getSessionId(), app);
-		sessionEventTimer.setMitelClosingCheck(message.getSessionId(), app);
+		sessionEventTimer.setMitelClosingCheck(message.getSessionId(), app, false);
 		return null;
 	}
 
@@ -48,7 +48,7 @@ public class MessageEventsImpl implements MessageEvents {
 	public NodeEntry<InBoundEvent> postMessageOutBound(OutboxMessage message) {
 		ClientApp app = messageContext.clientApp();
 		sessionEventTimer.setChatInIdleTimeout(message.getSessionId(), app);
-		sessionEventTimer.setMitelClosingCheck(message.getSessionId(), app);
+		sessionEventTimer.setMitelClosingCheck(message.getSessionId(), app, false);
 		return null;
 	}
 

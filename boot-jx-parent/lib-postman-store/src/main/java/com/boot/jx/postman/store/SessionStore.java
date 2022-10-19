@@ -701,4 +701,11 @@ public class SessionStore extends CommonMongoTemplateAbstract {
 		return super.findOne(cmqb.getQuery(), ChatSessionDoc.class);
 	}
 
+	public ChatSessionDoc getPreviousSession(Contactable contact, long timestamp) {
+		MongoQueryBuilder<ChatSessionDoc> cmqb = MongoQueryBuilder.collection(ChatSessionDoc.class)
+				.where(Criteria.where("contactId").is(contact.getContactId()).and("startSessionStamp").lt(timestamp));
+		cmqb.sortBy("startSessionStamp", Direction.DESC).limit(1).skip(1).skipDBRef();
+		return super.findOne(cmqb.getQuery(), ChatSessionDoc.class);
+	}
+
 }

@@ -115,22 +115,6 @@ public class SessionEventTimer extends ATaskLimiter {
 		}
 	}
 
-	public void setMitelClosingCheck(String sessionid, ClientApp app) {
-		if (app != null && app.equals(APP_TYPE.MITEL)) {
-			long closeCheckTime = pmEnvironment.keyEntry(ConfigConstants.APP_KEY.MITEL_SYNC_TIMER).asLong(0L);
-			setMitelClosingCheck(sessionid, app, closeCheckTime, 0);
-		}
-	}
-
-	private void setMitelClosingCheck(String sessionid, ClientApp app, long closeCheckTime, int counter) {
-		if (closeCheckTime > 0L) {
-			TunnelTask closeTask = new TunnelTask().name(SessionEventTimer.MITEL_CLOSE_CHECK).id(sessionid)
-					.intervalSeconds(closeCheckTime);
-			closeTask.data().put("sessionId", sessionid).put("queue", app.getQueue()).put("counter", counter);
-			this.debounce(closeTask);
-		}
-	}
-
 	public void setMitelRoutingCheck(String sessionid, ClientApp app) {
 		if (app != null && app.equals(APP_TYPE.MITEL)) {
 			TunnelTask task = new TunnelTask().name(SessionEventTimer.MITEL_ROUTER).id(sessionid).intervalSeconds(1L);
@@ -139,9 +123,25 @@ public class SessionEventTimer extends ATaskLimiter {
 		}
 	}
 
-	public void setChatViewIdleTimeout(ChatSessionDoc sessionDoc) {
+	private void setMitelClosingCheck(String sessionid, ClientApp app, long closeCheckTime, int counter, boolean now) {
+		if (closeCheckTime > 0L || now) {
+			TunnelTask closeTask = new TunnelTask().name(SessionEventTimer.MITEL_CLOSE_CHECK).id(sessionid)
+					.intervalSeconds(now ? 0 : closeCheckTime);
+			closeTask.data().put("sessionId", sessionid).put("queue", app.getQueue()).put("counter", counter);
+			this.debounce(closeTask);
+		}
+	}
+
+	public void setMitelClosingCheck(String sessionid, ClientApp app, boolean now) {
+		if (app != null && app.equals(APP_TYPE.MITEL)) {
+			long closeCheckTime = pmEnvironment.keyEntry(ConfigConstants.APP_KEY.MITEL_SYNC_TIMER).asLong(0L);
+			setMitelClosingCheck(sessionid, app, closeCheckTime, 0, now);
+		}
+	}
+
+	public void setChatViewIdleTimeout(ChatSessionDoc sessionDoc, boolean now) {
 		ClientApp app = messageContext.clientApp(sessionDoc.getAssignedToQueue());
-		this.setMitelClosingCheck(sessionDoc.getSessionId(), app);
+		this.setMitelClosingCheck(sessionDoc.getSessionId(), app, now);
 	}
 
 	@Override
@@ -226,7 +226,7 @@ public class SessionEventTimer extends ATaskLimiter {
 				chatSessionService.closeSession(session);
 			} else if (counter < 5) {
 				long closeCheckTime = pmEnvironment.keyEntry(ConfigConstants.APP_KEY.MITEL_SYNC_TIMER).asLong(0L);
-				this.setMitelClosingCheck(session.getSessionId(), defaultClient, closeCheckTime * 2, counter++);
+				this.setMitelClosingCheck(session.getSessionId(), defaultClient, closeCheckTime * 2, counter++, false);
 			}
 		}
 
