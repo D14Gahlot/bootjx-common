@@ -207,7 +207,7 @@ public class AgChatSessionController {
 	public ApiResponse<ChatSessionDTO, ?> sessionWatch(@RequestParam String sessionId) {
 		ApiResponse<ChatSessionDTO, ?> resp = ApiResponse.build();
 		ChatSessionDoc sessionDoc = sessionStore.getSession(sessionId);
-		sessionEventTimer.setChatViewIdleTimeout(sessionDoc);
+		sessionEventTimer.setChatViewIdleTimeout(sessionDoc, false);
 		ChatSessionDTO chatSessionDto = chatArchive.getChatSession(sessionDoc);
 		chatSessionDto = chatArchive.withContact(chatSessionDto);
 		return resp.result(chatSessionDto);
@@ -215,7 +215,8 @@ public class AgChatSessionController {
 
 	@RequestMapping(value = { "/api/session/messages" }, method = { RequestMethod.GET })
 	public ApiResponse<ChatMessageDTO, ChatSessionDTO> messageApi(@RequestParam String sessionId,
-			@RequestParam(required = false) String messageId, @RequestParam(required = false) String messageIdExt) {
+			@RequestParam(required = false) String messageId, @RequestParam(required = false) String messageIdExt,
+			@RequestParam(required = false, defaultValue = "false") boolean previous) {
 		ApiResponse<ChatMessageDTO, ChatSessionDTO> resp = ApiResponse.build();
 		ChatSessionDoc sessionDoc = sessionStore.getSession(sessionId);
 		if (ArgUtil.is(messageId)) {
@@ -226,8 +227,17 @@ public class AgChatSessionController {
 			ChatSessionDTO chatSessionDto = chatArchive.getChatSession(sessionDoc);
 			MessageDoc m = messageStore.findOneByMessageIdExt(messageIdExt, sessionDoc.contact().getContactType());
 			return resp.result(chatArchive.createMessageDTO(m, chatSessionDto)).meta(chatSessionDto);
+		} else if (previous) {
+			ChatSessionDoc prevSession = sessionStore.getPreviousSession(sessionDoc.contact(),
+					sessionDoc.getStartSessionStamp());
+			if (ArgUtil.is(prevSession)) {
+				ChatSessionDTO chatSessionDto = chatArchive.getChatSession(prevSession);
+				chatSessionDto = chatArchive.withContact(chatSessionDto);
+				return resp.results(chatArchive.getMessages(chatSessionDto)).meta(chatSessionDto);
+			}
+			return resp.meta(null);
 		} else {
-			sessionEventTimer.setChatViewIdleTimeout(sessionDoc);
+			sessionEventTimer.setChatViewIdleTimeout(sessionDoc, true);
 			if (agentSession.isLoggedIn() && ArgUtil.is(agentSession.getAgentCode())) {
 				sessionStore.update(new ChatSessionQuery(sessionDoc).read(agentSession.getAgentCode()));
 			}
