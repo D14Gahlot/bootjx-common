@@ -146,12 +146,16 @@ public class InBoundControllerWeb {
 		if (ArgUtil.is(channelId)) {
 			model.addAttribute("WEB_CHANNEL_ID", channelId);
 			ChannelConfig channelConfig = pmEnvironment.config().channel(channelId);
-			if (ArgUtil.is(channelConfig) && ArgUtil.is(channelConfig.getWeb())
-					&& ArgUtil.is(channelConfig.getWeb().getStylesheet())) {
-				model.addAttribute("WEB_CHANNEL_STYLESHEET", channelConfig.getWeb().getStylesheet());
+			if (ArgUtil.is(channelConfig) && ArgUtil.is(channelConfig.getWeb())) {
+				if (ArgUtil.is(channelConfig.getWeb().getStylesheet())) {
+					model.addAttribute("WEB_CHANNEL_STYLESHEET", channelConfig.getWeb().getStylesheet());
+				}
+				if (ArgUtil.is(channelConfig.getWeb().getTitle())) {
+					model.addAttribute("WEB_CHANNEL_TITLE", channelConfig.getWeb().getTitle());
+				}
 			}
 		}
-		visitorActivityStore.save(new VisitorActivityDoc().activity("WEBCHAT_PAGE"));
+		visitorActivityStore.save(new VisitorActivityDoc().activity("WEBCHAT_PAGE").channelId(channelId));
 		return "app-customer";
 	}
 

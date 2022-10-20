@@ -49,7 +49,7 @@ public class WebPlugin implements DefaultChannelPlugin<WebConfigDetails> {
 		private String welcomeBack;
 
 		@ConfigMetaProperty(path = "web.title", title = "ChatBox Title")
-		private boolean title;
+		private String title;
 
 		@ConfigMetaProperty(path = "web.stylesheet", title = "Stylesheet Url", optional = true)
 		private String stylesheet;
@@ -107,11 +107,11 @@ public class WebPlugin implements DefaultChannelPlugin<WebConfigDetails> {
 			this.stylesheet = stylesheet;
 		}
 
-		public boolean isTitle() {
+		public String getTitle() {
 			return title;
 		}
 
-		public void setTitle(boolean title) {
+		public void setTitle(String title) {
 			this.title = title;
 		}
 
