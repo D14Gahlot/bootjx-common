@@ -107,6 +107,14 @@ public class WebPlugin implements DefaultChannelPlugin<WebConfigDetails> {
 			this.stylesheet = stylesheet;
 		}
 
+		public boolean isTitle() {
+			return title;
+		}
+
+		public void setTitle(boolean title) {
+			this.title = title;
+		}
+
 	}
 
 	@Override
