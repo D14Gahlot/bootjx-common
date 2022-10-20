@@ -193,6 +193,12 @@ public class MessageContext {
 		return null;
 	}
 
+	public void commitChatSessionQuery() {
+		if (this.chatSessionQuery != null) {
+			commonMongoTemplate.updateFirst(this.chatSessionQuery);
+		}
+	}
+
 	public void commitChatContactQuery() {
 		if (this.chatContactQuery != null) {
 			commonMongoTemplate.updateFirst(this.chatContactQuery);

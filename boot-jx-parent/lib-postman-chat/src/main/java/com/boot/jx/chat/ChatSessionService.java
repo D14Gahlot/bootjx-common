@@ -99,6 +99,13 @@ public class ChatSessionService {
 					connector.linkProfile(session, inboxMessage);
 				}
 				messageContext.commitChatContactQuery();
+				try {
+					messageContext.commitChatSessionQuery();
+					messageContext.session().update(messageContext.contact().getDoc());
+					messageContext.commitChatSessionQuery();
+				} catch (Exception e) {
+					logManager.error(inboxMessage, e);
+				}
 			}
 
 			if (initd) { // Inbound Init Method

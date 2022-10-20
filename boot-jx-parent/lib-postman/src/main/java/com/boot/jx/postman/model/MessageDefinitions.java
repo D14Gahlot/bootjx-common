@@ -94,16 +94,32 @@ public class MessageDefinitions {
 
 		public default void copyFrom(Contactable contactable) {
 			// Contact
-			this.setName(contactable.getName());
-			this.setPhone(contactable.getPhone());
-			this.setEmail(contactable.getEmail());
+			if (ArgUtil.is(contactable.getName())) {
+				this.setName(contactable.getName());
+			}
+			if (ArgUtil.is(contactable.getPhone())) {
+				this.setPhone(contactable.getPhone());
+			}
+			if (ArgUtil.is(contactable.getEmail())) {
+				this.setEmail(contactable.getEmail());
+			}
 			// ContactID
-			this.setContactId(contactable.getContactId());
+			if (ArgUtil.is(contactable.getContactId())) {
+				this.setContactId(contactable.getContactId());
+			}
 			// Contactable
-			this.setContactType(contactable.getContactType());
-			this.setChannelType(contactable.getChannelType());
-			this.setLane(contactable.getLane());
-			this.setCsid(contactable.getCsid());
+			if (ArgUtil.is(contactable.getContactType())) {
+				this.setContactType(contactable.getContactType());
+			}
+			if (ArgUtil.is(contactable.getChannelType())) {
+				this.setChannelType(contactable.getChannelType());
+			}
+			if (ArgUtil.is(contactable.getLane())) {
+				this.setLane(contactable.getLane());
+			}
+			if (ArgUtil.is(contactable.getCsid())) {
+				this.setCsid(contactable.getCsid());
+			}
 		}
 
 		public static Contactable instance() {

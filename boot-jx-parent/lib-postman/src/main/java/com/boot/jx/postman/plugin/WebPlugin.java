@@ -48,6 +48,9 @@ public class WebPlugin implements DefaultChannelPlugin<WebConfigDetails> {
 				optionsLabel = "desc")
 		private String welcomeBack;
 
+		@ConfigMetaProperty(path = "web.title", title = "ChatBox Title")
+		private boolean title;
+
 		@ConfigMetaProperty(path = "web.stylesheet", title = "Stylesheet Url", optional = true)
 		private String stylesheet;
 
