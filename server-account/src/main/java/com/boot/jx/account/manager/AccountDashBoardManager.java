@@ -19,9 +19,13 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Spliterator;
+import java.util.Spliterators;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 import org.bson.Document;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -660,12 +664,26 @@ public class AccountDashBoardManager {
 		return dto;
 	}
 
-	public String getHour(long timeStamp) {
+	public Long getHour(long timeStamp) {
 		Date date = new Date(timeStamp);
-		/** kk-24 hr , HH-24 hr **/
+		/** kk-24 hr , HH-24 hr 
 		SimpleDateFormat sdfH = new SimpleDateFormat("kk");
 		String formattedDateH = sdfH.format(date);
 		return formattedDateH;
+		*/
+		
+		SimpleDateFormat sdfm = new SimpleDateFormat("mm");
+		String min = sdfm.format(date);
+		int m=Integer.parseInt(min);
+		long tStamp =timeStamp;
+		if(m>30) {
+		 tStamp =timeStamp-((m-30)*60*1000L); 
+		}else {
+			tStamp =timeStamp-(m*60*1000L); 
+		}
+		long tStampWmS = (tStamp - (tStamp % (1000* 60 )));
+		
+		return tStampWmS;
 	}
 
 	public Map<Object, Long> getDatesRange(long curTiStmp, long lasDayTiStmp) {
@@ -768,13 +786,6 @@ public class AccountDashBoardManager {
 		for (String contactType : lst) {
 			List<ContactTypeCountDto> messageTypeLst = new ArrayList<ContactTypeCountDto>();
 			List<Document> list = new ArrayList<Document>();
-//			List<Document> list = new ArrayList<Document>();
-//			// Match condtion
-//			list.add(Aggregation.match(new Criteria("timestamp").gt(lasthrTimeStmp).lt(currentTs))
-//					.toDocument(Aggregation.DEFAULT_CONTEXT));
-//			list.add(Aggregation.match(new Criteria("bulkSessionId").exists(true))
-//					.toDocument(Aggregation.DEFAULT_CONTEXT));
-//		list.add(Aggregation.group("stamps").count().as("count").toDocument(Aggregation.DEFAULT_CONTEXT));
 			list = getAggregationMatchForMsgStatus(lasthrTimeStmp,currentTs);
 
 			MongoCursor<Document> cursor = mongoTemplate.collection(contactType).aggregate(list).iterator();
@@ -782,11 +793,10 @@ public class AccountDashBoardManager {
 				ContactTypeCountDto contactDto = new ContactTypeCountDto();
 				Document object = cursor.next();
 				if (ArgUtil.is(object)) {
-					String type = ArgUtil.parseAsString(object.get("_id"));
-					LOGGER.info("Type :"+type);
+					JSONObject jsonObject = new JSONObject(JsonUtil.toJson(object));
+					String type = ArgUtil.parseAsString(jsonObject.get("_id"));
 					if (ArgUtil.is(type)) {
 						Map<String, Object> mapValue = JsonUtil.fromJsonToMap(type);
-						LOGGER.info("mapValue :"+mapValue);
 						long count = ArgUtil.parseAsLong(object.get("count"), 0L);
 						contactDto.setType(type);
 						contactDto.setTotalCount(count);
@@ -802,9 +812,9 @@ public class AccountDashBoardManager {
 				DateWiseHourCountDto daySummDto = new DateWiseHourCountDto();
 				String key = keyValueCount.getKey();
 				if (ArgUtil.is(key) && !key.equalsIgnoreCase("session")) {
-					String value = getHour((Long) keyValueCount.getValue());
+					long value = getHour((Long)keyValueCount.getValue());
 					daySummDto.setMsgType(key);
-					daySummDto.setHour(value);
+					daySummDto.setHourStamp(value);
 					hourCntLst.add(daySummDto);
 				}
 			}
@@ -812,9 +822,9 @@ public class AccountDashBoardManager {
 		}
 
 	//	/** Hour wise couunt 
-		Map<String, Map<String, Long>> hourWiseCountMap = hourCntLst.stream()
+		Map<String, Map<Object, Long>> hourWiseCountMap = hourCntLst.stream()
 				.collect(Collectors.groupingBy(DateWiseHourCountDto::getMsgType,
-						Collectors.groupingBy(DateWiseHourCountDto::getHour, Collectors.counting())));
+						Collectors.groupingBy(DateWiseHourCountDto::getHourStamp, Collectors.counting())));
 		///** default hour 
 		//Map<String, Long> hourCntMap = getHourRange(currentTs, lasthrTimeStmp);
 		
@@ -874,17 +884,14 @@ public class AccountDashBoardManager {
 		for (String contactType : lst) {
 			List<ContactTypeCountDto> messageTypeLst = new ArrayList<ContactTypeCountDto>();
 			List<Document> list = new ArrayList<Document>();
-			// Match condtion
-//			list.add(Aggregation.match(new Criteria("timestamp").gt(lasDayTimeStmp).lt(currentTs))
-//					.toDocument(Aggregation.DEFAULT_CONTEXT));
-//			list.add(Aggregation.group("stamps").count().as("count").toDocument(Aggregation.DEFAULT_CONTEXT));
 			list = getAggregationMatchForMsgStatus(lasDayTimeStmp, currentTs);
 			MongoCursor<Document> cursor = mongoTemplate.collection(contactType).aggregate(list).iterator();
 			while (cursor.hasNext()) {
 				ContactTypeCountDto contactDto = new ContactTypeCountDto();
 				Document object = cursor.next();
 				if (ArgUtil.is(object)) {
-					String type = ArgUtil.parseAsString(object.get("_id"));
+					JSONObject jsonObject = new JSONObject(JsonUtil.toJson(object));
+					String type = ArgUtil.parseAsString(jsonObject.get("_id"));
 					if (ArgUtil.is(type)) {
 						Map<String, Object> mapValue = JsonUtil.fromJsonToMap(type);
 						long count = ArgUtil.parseAsLong(object.get("count"), 0L);
@@ -912,7 +919,7 @@ public class AccountDashBoardManager {
 
 		}
 	//	/** Hour wise couunt
-		Map<String, Map<String, Long>> dateWiseCountMap = dayCntLst.stream()
+		Map<String, Map<Object, Long>> dateWiseCountMap = dayCntLst.stream()
 				.collect(Collectors.groupingBy(DateWiseHourCountDto::getMsgType,
 						Collectors.groupingBy(DateWiseHourCountDto::getDate, Collectors.counting())));
 		///** default hour 
@@ -937,12 +944,12 @@ public class AccountDashBoardManager {
 
 	/** add default hour **/
 
-	public Map<String, Map<Object, Long>> addDefaultHour(Map<String, Map<String, Long>> hourWiseCountMap,
+	public Map<String, Map<Object, Long>> addDefaultHour(Map<String, Map<Object, Long>> hourWiseCountMap,
 			Map<Object, Long> hourCntMap) {
 		Map<String, Map<Object, Long>> countSummary = new HashMap<>();
-		Map<String, Long> defaultMap = null;
+		Map<Object, Long> defaultMap = null;
 
-		for (Map.Entry<String, Map<String, Long>> keyValue : hourWiseCountMap.entrySet()) {
+		for (Map.Entry<String, Map<Object, Long>> keyValue : hourWiseCountMap.entrySet()) {
 			Map<Object, Long> hoCntMapAll = new HashMap<>();
 			String key = keyValue.getKey();
 			if (ArgUtil.is(key)) {
@@ -996,8 +1003,13 @@ public class AccountDashBoardManager {
 		// Match condtion
 		list.add(Aggregation.match(new Criteria("type").is("O"))
 				.toDocument(Aggregation.DEFAULT_CONTEXT));
-		list.add(Aggregation.match(new Criteria("meta").is(metaQry))
+		//list.add(Aggregation.match(new Criteria("meta").is(metaQry))
+		//		.toDocument(Aggregation.DEFAULT_CONTEXT));
+		list.add(Aggregation.match(new Criteria("meta.composeType").is("N"))
 				.toDocument(Aggregation.DEFAULT_CONTEXT));
+		list.add(Aggregation.match(new Criteria("meta.sendType").is("PM"))
+				.toDocument(Aggregation.DEFAULT_CONTEXT));
+		
 		list.add(Aggregation.match(new Criteria("timestamp").gt(lasthrTimeStmp).lt(currentTs))
 				.toDocument(Aggregation.DEFAULT_CONTEXT));
 		list.add(Aggregation.group("stamps").count().as("count").toDocument(Aggregation.DEFAULT_CONTEXT));
