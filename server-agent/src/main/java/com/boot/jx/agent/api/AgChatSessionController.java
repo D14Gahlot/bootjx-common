@@ -49,6 +49,7 @@ import com.boot.jx.postman.store.MessageContext;
 import com.boot.jx.postman.store.MessageStore;
 import com.boot.jx.postman.store.SessionStore;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.CryptoUtil;
 import com.boot.utils.JsonUtil;
 
 @RestController
@@ -163,6 +164,10 @@ public class AgChatSessionController {
 
 		CommonFile f = pmFileStoreClient.uploadSessionFile(file, outboxMessage.getSessionId(),
 				outboxMessage.getMessageIdRef());
+
+		if (ArgUtil.is(caption)) {
+			caption = new CryptoUtil.Encoder().message(caption).decodeURL().toString();
+		}
 
 		outboxMessage
 				.attachment(new Attachment().mediaURL(f.getUrl()).mediaType(f.getFileType()).mediaCaption(caption));
