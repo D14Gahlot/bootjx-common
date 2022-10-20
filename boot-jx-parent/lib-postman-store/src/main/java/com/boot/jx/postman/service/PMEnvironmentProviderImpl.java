@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
 
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Component;
 import com.boot.jx.AppConfigPackage.AppSharedConfig;
 import com.boot.jx.AppContextUtil;
 import com.boot.jx.http.CommonHttpRequest.ApiRequestDetail;
+import com.boot.jx.logger.LoggerService;
 import com.boot.jx.mongo.CommonMongoSource;
 import com.boot.jx.postman.PMConfiguration.PMConfigurationModel;
 import com.boot.jx.postman.PMEnvironment.PMConfigurationObject;
@@ -35,6 +37,7 @@ import com.google.common.cache.CacheBuilder;
 
 @Component
 public class PMEnvironmentProviderImpl implements PMEnvironmentProvider, AppSharedConfig {
+	private static final Logger LOGGER = LoggerService.getLogger(PMEnvironmentProviderImpl.class);
 
 	private Cache<String, PMConfigurationDoc> localConfigMap = CacheBuilder.newBuilder().maximumSize(1000)
 			.expireAfterWrite(1, TimeUnit.HOURS).build();
@@ -189,6 +192,7 @@ public class PMEnvironmentProviderImpl implements PMEnvironmentProvider, AppShar
 
 	@Override
 	public void initConfig() {
+		LOGGER.info("=======================initConfig");
 		String sessionId = UniqueID.generateString();
 		AppContextUtil.setSessionId(sessionId);
 		AppContextUtil.getTraceId(true, true);

@@ -200,6 +200,7 @@ public class PMCommonConfigImpl implements PMCommonConfig {
 	@EventListener(ApplicationReadyEvent.class)
 	public void onApplicationReady() {
 		try {
+			LOGGER.info("=======================ApplicationReadyEvent");
 			pmEnvironment.initConfig();
 		} catch (Exception e) {
 			LOGGER.error("pmEnvironment.reload", e);
