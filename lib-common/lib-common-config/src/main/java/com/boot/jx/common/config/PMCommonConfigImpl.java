@@ -137,8 +137,13 @@ public class PMCommonConfigImpl implements PMCommonConfig {
 		if (ArgUtil.is(channelConfig)) {
 			setup.put("POSTMAN_CHAT_WEB_CHANNEL", channelConfig.getChannelId());
 			setup.put("POSTMAN_CHAT_WEB_CHANNEL_KEY", channelConfig.getChannelKey());
-			if (ArgUtil.is(channelConfig.getWeb()) && ArgUtil.is(channelConfig.getWeb().getStylesheet())) {
-				setup.put("POSTMAN_CHAT_WEB_CHANNEL_STYLESHEET", channelConfig.getWeb().getStylesheet());
+			if (ArgUtil.is(channelConfig.getWeb())) {
+				if (ArgUtil.is(channelConfig.getWeb().getTitle())) {
+					setup.put("POSTMAN_CHAT_WEB_CHANNEL_TITLE", channelConfig.getWeb().getTitle());
+				}
+				if (ArgUtil.is(channelConfig.getWeb().getStylesheet())) {
+					setup.put("POSTMAN_CHAT_WEB_CHANNEL_STYLESHEET", channelConfig.getWeb().getStylesheet());
+				}
 			}
 		}
 		return setup;
