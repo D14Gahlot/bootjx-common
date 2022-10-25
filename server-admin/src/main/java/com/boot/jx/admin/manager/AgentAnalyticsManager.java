@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -178,6 +179,7 @@ public class AgentAnalyticsManager {
 		/** Unique agent list **/
 
 		List<String> distinctContactLst = getUniqueAgentWiseContactList(agent, dateRange1, dateRange2);
+		
 		if (ArgUtil.is(distinctContactLst)) {
 			dto.setUniqueConversation(distinctContactLst.size());
 		}
@@ -303,7 +305,6 @@ public class AgentAnalyticsManager {
 	public List<String> getAgentList(long dateRange1, long dateRange2) {
 		Query query = new Query();
 		query.addCriteria(Criteria.where("assignedAgentStamp").gt(dateRange1).lt(dateRange2));
-
 		List<String> distinceAgentList = mongoTemplate.distinctValues("CHAT_SESSION", "assignedToAgent", String.class);
 
 		if (distinceAgentList == null || distinceAgentList.isEmpty()) {
@@ -323,8 +324,13 @@ public class AgentAnalyticsManager {
 	public List<String> getDefaultDistinctContact(long dateRange1, long dateRange2) {
 		Query query = new Query();
 		query.addCriteria(Criteria.where("startSessionStamp").gt(dateRange1).lt(dateRange2));
-		removeChatSessField(query);
-		List<String> distinceAgentList = mongoTemplate.distinctValues("CHAT_SESSION", "contactId", String.class);
+		//removeChatSessField(query);
+		query.fields().include("assignedAgentStamp").include("contactId");
+		//List<String> distinceAgentList = mongoTemplate.distinctValues("CHAT_SESSION", "contactId", String.class);
+		
+		List<ChatSessionDoc> chatSessDocLst = mongoTemplate.find(query, ChatSessionDoc.class, CHAT_SESSION);
+		List<String> distinceAgentList =getDistinct(chatSessDocLst); 
+		
 		return distinceAgentList;
 	}
 
@@ -333,11 +339,31 @@ public class AgentAnalyticsManager {
 		Query query = new Query();
 		query.addCriteria(Criteria.where("assignedToAgent").is(agent));
 		query.addCriteria(Criteria.where("assignedAgentStamp").gt(dateRange1).lt(dateRange2));
-		removeChatSessField(query);
-		List<String> distinctIdList = mongoTemplate.distinctValues(CHAT_SESSION, "contactId", String.class);
-
+		query.fields().include("assignedToAgent")
+		.include("assignedAgentStamp").include("contactId");
+		//removeChatSessField(query);
+		List<String> distinctIdList=new ArrayList<>();
+		//List<String> distinctIdList = mongoTemplate.distinctValues("CHAT_SESSION", "contactId", String.class);
+		List<ChatSessionDoc> chatSessDocLst = mongoTemplate.find(query, ChatSessionDoc.class, CHAT_SESSION);
+		
+		distinctIdList =getDistinct(chatSessDocLst); 
+		
 		if (distinctIdList == null || distinctIdList.isEmpty()) {
 			distinctIdList = getDefaultDistinctContact(dateRange1, dateRange2);
+		}
+
+		return distinctIdList;
+	}
+	
+	public List<String>  getDistinct(List<ChatSessionDoc> chatSessDocLst){
+		List<String> distinctIdList=new ArrayList<>();
+		for(ChatSessionDoc doc :chatSessDocLst) {
+			if(ArgUtil.is(doc.getContactId())){
+			 distinctIdList.add(doc.getContactId());
+			}
+		}
+		if(distinctIdList!=null && !distinctIdList.isEmpty()) {
+			distinctIdList =distinctIdList.stream().distinct().collect(Collectors.toList());
 		}
 
 		return distinctIdList;
