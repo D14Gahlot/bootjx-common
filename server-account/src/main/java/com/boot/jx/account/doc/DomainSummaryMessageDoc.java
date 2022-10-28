@@ -23,7 +23,7 @@ public class DomainSummaryMessageDoc implements Serializable {
 	String date;
 	String channel;
 	private Map<String, Object> messageType;
-	Map<String, Map<Object, Long>> dateWiseSummaryCount;
+	Map<Object, Map<Object, Long>> dateWiseSummaryCount;
 	Map<Object,Long> summaryCount;
 	Map<Object,Map<Object,Object>> dateWiseCountMap = new HashMap<>();
 	public String getId() {
@@ -62,10 +62,10 @@ public class DomainSummaryMessageDoc implements Serializable {
 	public void setSummaryCount(Map<Object, Long> summaryCount) {
 		this.summaryCount = summaryCount;
 	}
-	public Map<String, Map<Object, Long>> getDateWiseSummaryCount() {
+	public Map<Object, Map<Object, Long>> getDateWiseSummaryCount() {
 		return dateWiseSummaryCount;
 	}
-	public void setDateWiseSummaryCount(Map<String, Map<Object, Long>> dateWiseSummaryCount) {
+	public void setDateWiseSummaryCount(Map<Object, Map<Object, Long>> dateWiseSummaryCount) {
 		this.dateWiseSummaryCount = dateWiseSummaryCount;
 	}
 	public Map<Object, Map<Object, Object>> getDateWiseCountMap() {

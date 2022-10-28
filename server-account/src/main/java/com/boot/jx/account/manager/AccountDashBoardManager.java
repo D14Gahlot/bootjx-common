@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Spliterator;
 import java.util.Spliterators;
+import java.util.TreeMap;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -505,7 +506,7 @@ public class AccountDashBoardManager {
 						Collectors.groupingBy(DateWiseHourCountDto::getHourStamp, Collectors.counting())));
 
 		
-		Map<String, Map<Object, Long>> hourWiseCount = new HashMap<>();
+		Map<Object, Map<Object, Long>> hourWiseCount = new HashMap<>();
 
 		Map<Object, Long> hourCntMap = getHourRange(currentTs, lasthrTimeStmp);
 
@@ -542,9 +543,9 @@ public class AccountDashBoardManager {
 				hourWiseCount.put(tnt + "_" + channel, hourCntMap);
 			}
 		}
-
-		summaryMap = lstSummDto.stream().collect(Collectors.groupingBy(SummaryDocDto::getType, Collectors.counting()));
-
+		
+		hourWiseCount = sortMap(hourWiseCount);
+		
 		ContactTypeSummaryDto dto = new ContactTypeSummaryDto();
 		dto.setTenant(tnt);
 		dto.setMonth(monthYear);
@@ -624,7 +625,7 @@ public class AccountDashBoardManager {
 				.collect(Collectors.groupingBy(DateWiseHourCountDto::getChannel,
 						Collectors.groupingBy(DateWiseHourCountDto::getDate, Collectors.counting())));
 
-		Map<String, Map<Object, Long>> dayWiseMap = new HashMap<>();
+		Map<Object, Map<Object, Long>> dayWiseMap = new HashMap<>();
 
 		for (Map.Entry<String, Map<String, Long>> keyValue : dayWiseCountMap.entrySet()) {
 			String key = keyValue.getKey();
@@ -654,6 +655,9 @@ public class AccountDashBoardManager {
 				dayWiseMap.put(key, dateWiseCnt);
 			}
 		}
+		
+		dayWiseMap = sortMap(dayWiseMap);
+		
 		summaryMap = lstSummDto.stream().collect(Collectors.groupingBy(SummaryDocDto::getType, Collectors.counting()));
 
 		ContactTypeSummaryDto dto = new ContactTypeSummaryDto();
@@ -692,11 +696,8 @@ public class AccountDashBoardManager {
 			String ds = DateUtil.foramtTimeStampDateAsString(lasDayTiSt, DateUtil.YYYYMMDD_DATE_FORMAT);
 			mapDt.put(ds, new Long(0));
 		}
-		// Sorting Map
-//		Map<String, Long> result = mapDt.entrySet().stream().collect(Collectors
-//				.toMap(Map.Entry::getKey, Map.Entry::getValue, (oldValue, newValue) -> oldValue, LinkedHashMap::new));
-
-		return mapDt;
+		Map<Object, Long> result  = new TreeMap<Object, Long>(mapDt);
+		return result;
 	}
 
 	public Map<Object, Long> getHourRange(long currentTStamp, long lastTimeStamp) {
@@ -741,12 +742,9 @@ public class AccountDashBoardManager {
 					mapMinWise.put(lastTS, new Long(0));
 				}
 		
+				Map<Object, Long> result = new TreeMap<Object, Long>(mapMinWise);
 		
 		
-		
-		
-		Map<Object, Long> result = mapMinWise.entrySet().stream().collect(Collectors
-				.toMap(Map.Entry::getKey, Map.Entry::getValue, (oldValue, newValue) -> oldValue, LinkedHashMap::new));
 		
 
 		return result;
@@ -822,7 +820,7 @@ public class AccountDashBoardManager {
 		}
 
 	//	/** Hour wise couunt 
-		Map<String, Map<Object, Long>> hourWiseCountMap = hourCntLst.stream()
+		Map<Object, Map<Object, Long>> hourWiseCountMap = hourCntLst.stream()
 				.collect(Collectors.groupingBy(DateWiseHourCountDto::getMsgType,
 						Collectors.groupingBy(DateWiseHourCountDto::getHourStamp, Collectors.counting())));
 		///** default hour 
@@ -830,9 +828,10 @@ public class AccountDashBoardManager {
 		
 		Map<Object, Long> hourCntMap = getHourRange(currentTs, lasthrTimeStmp);
 
-		Map<String, Map<Object, Long>> hourWiseCount = addDefaultHour(hourWiseCountMap, hourCntMap);
+		Map<Object, Map<Object, Long>> hourWiseCount = addDefaultHour(hourWiseCountMap, hourCntMap);
 
 		hourWiseCount = fetchAndAddAllMsgStatus(hourWiseCount, hourCntMap);
+		hourWiseCount = sortMap(hourWiseCount);
 
 		dto.setTenant(tnt);
 		dto.setMap(map);
@@ -919,17 +918,20 @@ public class AccountDashBoardManager {
 
 		}
 	//	/** Hour wise couunt
-		Map<String, Map<Object, Long>> dateWiseCountMap = dayCntLst.stream()
+		Map<Object, Map<Object, Long>> dateWiseCountMap = dayCntLst.stream()
 				.collect(Collectors.groupingBy(DateWiseHourCountDto::getMsgType,
 						Collectors.groupingBy(DateWiseHourCountDto::getDate, Collectors.counting())));
 		///** default hour 
 		Map<Object, Long> dateRanMap = getDatesRange(currentTs, lasDayTimeStmp);
 
-		Map<String, Map<Object, Long>> dateWiseSummary = addDefaultHour(dateWiseCountMap, dateRanMap);
+		Map<Object, Map<Object, Long>> dateWiseSummary = addDefaultHour(dateWiseCountMap, dateRanMap);
 
 		dateWiseSummary = fetchAndAddAllMsgStatus(dateWiseSummary, dateRanMap);
 
 		ContactTypeSummaryDto dto = new ContactTypeSummaryDto();
+		
+		dateWiseSummary = sortMap(dateWiseSummary);
+		
 		dto.setTenant(tnt);
 		dto.setMap(map);
 		dto.setMonth(monthYear);
@@ -944,14 +946,14 @@ public class AccountDashBoardManager {
 
 	/** add default hour **/
 
-	public Map<String, Map<Object, Long>> addDefaultHour(Map<String, Map<Object, Long>> hourWiseCountMap,
+	public Map<Object, Map<Object, Long>> addDefaultHour(Map<Object, Map<Object, Long>> hourWiseCountMap,
 			Map<Object, Long> hourCntMap) {
-		Map<String, Map<Object, Long>> countSummary = new HashMap<>();
+		Map<Object, Map<Object, Long>> countSummary = new HashMap<>();
 		Map<Object, Long> defaultMap = null;
 
-		for (Map.Entry<String, Map<Object, Long>> keyValue : hourWiseCountMap.entrySet()) {
+		for (Map.Entry<Object, Map<Object, Long>> keyValue : hourWiseCountMap.entrySet()) {
 			Map<Object, Long> hoCntMapAll = new HashMap<>();
-			String key = keyValue.getKey();
+			Object key = keyValue.getKey();
 			if (ArgUtil.is(key)) {
 				defaultMap = hourWiseCountMap.get(key);
 
@@ -974,7 +976,7 @@ public class AccountDashBoardManager {
 	}
 
 	/** add default msg status **/
-	public Map<String, Map<Object, Long>> fetchAndAddAllMsgStatus(Map<String, Map<Object, Long>> hourWiseCount,
+	public Map<Object, Map<Object, Long>> fetchAndAddAllMsgStatus(Map<Object, Map<Object, Long>> hourWiseCount,
 			Map<Object, Long> hourCntMap) {
 
 		Message.Status[] msgSta = Message.Status.values();
@@ -1015,6 +1017,18 @@ public class AccountDashBoardManager {
 		list.add(Aggregation.group("stamps").count().as("count").toDocument(Aggregation.DEFAULT_CONTEXT));
 		
 		return list;
+	}
+	
+	
+	public Map<Object, Map<Object, Long>>  sortMap(Map<Object, Map<Object, Long>> map) {
+		Map<Object, Map<Object, Long>> sortedMap = new HashMap<>();
+		for (Map.Entry<Object, Map<Object, Long>> entry : map.entrySet()) {
+			Object k = entry.getKey();
+			Map<Object, Long> v = new TreeMap<>(entry.getValue());
+			sortedMap.put(k, v);
+		}
+		return sortedMap;
+		
 	}
 	
 

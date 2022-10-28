@@ -65,15 +65,16 @@ public class AdminDashBoardContoller {
 	
 	@ResponseBody
    	@RequestMapping(value = {"/admin/hourwise-summary"}, method = { RequestMethod.GET })
-   	public ApiResponse<ContactTypeSummaryDto, Object> getHourWiseSummary() {
-   		ContactTypeSummaryDto summary =adminDbMgr.hourWisesummary(); 
+   	public ApiResponse<ContactTypeSummaryDto, Object> getHourWiseSummary(@RequestParam(required = false) long timestamp,long hr) {
+   		ContactTypeSummaryDto summary =adminDbMgr.hourWisesummary(timestamp,hr); 
    		return  ApiResponse.buildResult(summary);
    	}
     
     @ResponseBody
    	@RequestMapping(value = {"/admin/daywise-summary"}, method = { RequestMethod.GET })
-   	public ApiResponse<ContactTypeSummaryDto, Object> getDayWiseSummary(long dateRange1,long dateRange2) {
-   		ContactTypeSummaryDto summary =adminDbMgr.dayChannelWiseWisesummary(dateRange1,dateRange2); 
+   	public ApiResponse<ContactTypeSummaryDto, Object>  getDayWiseSummary(@RequestParam(required = false) long dateRange1,
+   			@RequestParam(required = false) long dateRange2,int days) {
+   		ContactTypeSummaryDto summary =adminDbMgr.dayChannelWiseWisesummary(dateRange1,dateRange2,days); 
    		return  ApiResponse.buildResult(summary);
    	}
 
