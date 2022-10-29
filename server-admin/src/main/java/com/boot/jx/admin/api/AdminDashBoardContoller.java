@@ -10,9 +10,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+
 import com.boot.jx.admin.dto.ContactTypeSummaryDto;
 import com.boot.jx.admin.dto.DashBoardRequestDto;
 import com.boot.jx.admin.dto.DashBoardResponseDto;
+import com.boot.jx.admin.dto.MonthDtlsDto;
 import com.boot.jx.admin.dto.TagDocumentDto;
 import com.boot.jx.admin.dto.TagDocumentLst;
 import com.boot.jx.admin.manager.AdminDashBoardManager;
@@ -92,7 +94,12 @@ public class AdminDashBoardContoller {
    		return  ApiResponse.buildResult(summary);
    	}
     
-	
+    @ResponseBody
+    @RequestMapping(value = {"/admin/fetch-month"}, method = { RequestMethod.GET })
+	public ApiResponse<MonthDtlsDto, Object> getMonthLst() {
+		List<MonthDtlsDto> listofMonth = adminDbMgr.fetchUniqueMonth(); 
+		return  ApiResponse.buildResults(listofMonth);
+	}
 	
 
 }

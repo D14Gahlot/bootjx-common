@@ -53,6 +53,7 @@ import com.boot.jx.admin.dto.DashBoardRequestDto;
 import com.boot.jx.admin.dto.DashBoardResponseDto;
 import com.boot.jx.admin.dto.DateWiseHourCountDto;
 import com.boot.jx.admin.dto.LeadMessanger;
+import com.boot.jx.admin.dto.MonthDtlsDto;
 import com.boot.jx.admin.dto.PeakLoadDto;
 import com.boot.jx.admin.dto.SummaryDocDto;
 import com.boot.jx.admin.dto.TagDocumentDto;
@@ -1723,6 +1724,38 @@ public class AdminDashBoardManager {
 		listOfChannelConfig = new ArrayList<>(new HashSet<>(listOfChannelConfig));
 
 		return listOfChannelConfig;
+	}
+	
+	
+	
+	@SuppressWarnings("unchecked")
+	public List<MonthDtlsDto> fetchUniqueMonth() {
+
+		Map<Long, Object> map = new HashMap<Long, Object>();
+		Query query = new Query();
+		query.with(new Sort(new Order(Direction.DESC, "startSessionStamp")));
+		query.fields().include("startSessionStamp");
+		List<Long> msgDocLst = mongoTemplate.distinctValues("CHAT_SESSION", "startSessionStamp", Long.class);
+		List<MonthDtlsDto> listofMonth = new ArrayList<>();
+		for (Long docTimeStamp : msgDocLst) {
+			long timestamp = (docTimeStamp - (docTimeStamp % (DateUtil.ONEDAY)));
+			String monthStr = DateUtil.foramtTimeStampDateAsString(timestamp, null);
+			if (!map.containsValue(monthStr)) {
+				map.put(timestamp, monthStr);
+			}
+		}
+		ArrayList<Long> sortedKeys = new ArrayList<Long>(map.keySet());
+		Collections.sort(sortedKeys, Collections.reverseOrder());
+
+		// Display the TreeMap which is naturally sorted
+		for (Long x : sortedKeys) {
+			MonthDtlsDto dto = new MonthDtlsDto();
+			dto.setTimestamp(x);
+			dto.setMonthStr(map.get(x).toString());
+			listofMonth.add(dto);
+		}
+
+		return listofMonth;
 	}
 
 	public String getSummaryWithChannelId(SummaryDocDto dto) {
