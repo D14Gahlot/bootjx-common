@@ -12,6 +12,7 @@ import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -22,6 +23,7 @@ import java.util.Set;
 import java.util.Spliterator;
 import java.util.Spliterators;
 import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -1030,6 +1032,101 @@ public class AccountDashBoardManager {
 		return sortedMap;
 		
 	}
+	
+	public ContactTypeSummaryDto getNonWhatsUpSummary(long dateRange1,long dateRange2) {
+		
+		List<String> lst = getListOfContactType();
+		lst.remove("MESSAGE_WHATSAPP");
+		lst.remove("MESSAGE_REJECTED");
+		lst.remove("MESSAGE_QUEUED");
+		lst.remove("MESSAGE_HOLD");
+		
+		String tnt = AppContextUtil.getTenant();
+		List<SummaryDocDto> lstSummDto = new ArrayList<>();
+		
+		for (String contactType : lst) {
+			LOGGER.info("contactType :"+contactType);
+//			
+//			List<Document> list = new ArrayList<Document>();
+//			list = getAggregationMatchForMsgStatus(dateRange1, dateRange2);
+//			MongoCursor<Document> cursor = mongoTemplate.collection(contactType).aggregate(list).iterator();
+//			while (cursor.hasNext()) {
+//				ContactTypeCountDto contactDto = new ContactTypeCountDto();
+//				Document object = cursor.next();
+//				if (ArgUtil.is(object)) {
+//					JSONObject jsonObject = new JSONObject(JsonUtil.toJson(object));
+//					String type = ArgUtil.parseAsString(jsonObject.get("_id"));
+//					if (ArgUtil.is(type)) {
+//						Map<String, Object> mapValue = JsonUtil.fromJsonToMap(type);
+//						long count = ArgUtil.parseAsLong(object.get("count"), 0L);
+//						contactDto.setType(type);
+//						contactDto.setTotalCount(count);
+//						
+//					}
+//				}
+//			
+//			}
+//		
+			
+			Query query = new Query();
+			query.addCriteria(Criteria.where("timestamp").gt(dateRange1).lt(dateRange2));
+			query.with(new Sort(new Order(Direction.DESC, "timestamp")));
+			query.fields().include("timestamp").include("contactId");
+			List<MessageDoc> msgDocLst = mongoTemplate.find(query, MessageDoc.class, contactType.toString());
+			for (MessageDoc doc : msgDocLst) {
+				SummaryDocDto dto = new SummaryDocDto();
+				DateWiseHourCountDto daySummDto = new DateWiseHourCountDto();
+				String yyyyMMdd = DateUtil.foramtTimeStampDateAsString(doc.getTimestamp(),
+						DateUtil.YYYYMMDD_DATE_FORMAT);
+				dto.setDate(yyyyMMdd);
+				dto.setUniqueContactId(doc.getContactId());
+				dto.setChannel(contactType.toString());
+				dto.setDomain(tnt);
+				String id = getSummaryWithChannelId(dto);
+				dto.setId(id);
+				if (ArgUtil.is(dto.getId())) {
+					lstSummDto.add(dto);
+				}
+			}
+		}
+		
+		
+		
+		
+		  Set<SummaryDocDto> uniqueStudentSet = lstSummDto
+	                .stream() // get stream for original list
+	                .collect(Collectors.toCollection(//distinct elements stored into new SET
+	                    () -> new TreeSet<>(Comparator.comparing(SummaryDocDto::getUniqueContactId)))
+	                        ); //Id comparison
+		  
+	
+		  List<SummaryDocDto> uniqueList = uniqueStudentSet
+	                .stream() // get stream for unique SET
+	                .sorted(Comparator.comparing(SummaryDocDto::getDate)) // rank comparing
+	                .collect(Collectors.toList()); // elements stored to new list
+		
+		Map<Object, Map<Object, Long>> datwWiseCount = uniqueList.stream().collect(Collectors.groupingBy(
+				SummaryDocDto::getId, Collectors.groupingBy(SummaryDocDto::getDate, Collectors.counting())));
+		
+		ContactTypeSummaryDto dto = new ContactTypeSummaryDto();
+		dto.setDateWiseSummaryCount(datwWiseCount);
+		
+		return dto;
+	}
+	
+	
+	/** Agreegration Query to fetch msg status **/
+	public List<Document> getAggregationMatchForNonWhatsUpContactId(long lasthrTimeStmp,long currentTs) {
+		
+		List<Document> list = new ArrayList<Document>();
+		// Match condtion
+		list.add(Aggregation.match(new Criteria("timestamp").gt(lasthrTimeStmp).lt(currentTs))
+				.toDocument(Aggregation.DEFAULT_CONTEXT));
+		list.add(Aggregation.group("timestamp","contactId").count().as("count").toDocument(Aggregation.DEFAULT_CONTEXT));
+		
+		return list;
+	}
+	
 	
 
 	public List<String> getListChannelCongig() {
