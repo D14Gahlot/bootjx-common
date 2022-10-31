@@ -86,7 +86,7 @@ public class PartnerController {
 
 	@Autowired
 	private EmpAuthService empAuthService;
-
+	
 	@RequestMapping(value = { "", "/", "/**", "/auth/**", "/app/**" }, method = { RequestMethod.GET })
 	public String home(Model model, @RequestParam(required = false) String theme) {
 		String tnt = AppContextUtil.getTenant();

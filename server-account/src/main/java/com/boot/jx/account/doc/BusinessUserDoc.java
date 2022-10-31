@@ -35,6 +35,7 @@ public class BusinessUserDoc implements IDocument, DocVersion, AuditCreateEntity
 	private Long modifiedStamp;
 	private String modifiedBy;
 	private Boolean isActive;
+	private Set<String> wabaChannels;
 
 	@DBRef
 	private Set<DomainDoc> domains;
@@ -167,6 +168,21 @@ public class BusinessUserDoc implements IDocument, DocVersion, AuditCreateEntity
 
 	public Map<String, Object> toDTO() {
 		return MapModel.createInstance().put("contact", this.contact).put("role", this.role).toMap();
+	}
+
+	public Set<String> getWabaChannels() {
+		return wabaChannels;
+	}
+
+	public void setWabaChannels(Set<String> wabaChannels) {
+		this.wabaChannels = wabaChannels;
+	}
+
+	public Set<String> wabaChannels() {
+		if (!ArgUtil.is(wabaChannels)) {
+			this.wabaChannels = new TreeSet<String>();
+		}
+		return this.wabaChannels;
 	}
 
 }
