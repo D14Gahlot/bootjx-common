@@ -167,7 +167,7 @@ public class WabaPartnerController {
 	}
 
 	@ResponseBody
-	@RequestMapping(value = "/pub/waba/login", method = { RequestMethod.POST, RequestMethod.GET })
+	@RequestMapping(value = {"/pub/waba/login","/api/waba/login"}, method = { RequestMethod.POST, RequestMethod.GET })
 	public ApiResponse<Map<String, Object>, Object> webhook(@RequestParam String username,
 			@RequestParam String password, @RequestParam(required = false) String partnerId)
 			throws NoSuchAlgorithmException {
@@ -213,7 +213,7 @@ public class WabaPartnerController {
 	}
 
 	@ResponseBody
-	@RequestMapping(value = "/pub/waba/clients", method = RequestMethod.GET)
+	@RequestMapping(value = { "/pub/waba/clients", "/api/waba/clients"}, method = RequestMethod.GET)
 	public ApiResponse<WabaPartnerDoc, Object> clients(
 			@RequestParam(required = false, defaultValue = "false") boolean refresh) throws NoSuchAlgorithmException {
 		if (refresh) {
@@ -245,7 +245,7 @@ public class WabaPartnerController {
 	}
 
 	@ResponseBody
-	@RequestMapping(value = "/pub/waba/clients/balance", method = RequestMethod.GET)
+	@RequestMapping(value = {"/pub/waba/clients/balance","/api/waba/clients/balance"}, method = RequestMethod.GET)
 	public ApiResponse<WabaPartnerDoc, Object> clientBalance(
 			@RequestParam(required = false, defaultValue = "false") boolean refresh, @RequestParam String clientId)
 			throws NoSuchAlgorithmException {
@@ -277,7 +277,7 @@ public class WabaPartnerController {
 	}
 
 	@ResponseBody
-	@RequestMapping(value = "/pub/waba/channels", method = RequestMethod.GET)
+	@RequestMapping(value = { "/pub/waba/channels", "/api/waba/channels" }, method = RequestMethod.GET)
 	public ApiResponse<WabaChannelDoc, Object> channels(
 			@RequestParam(required = false, defaultValue = "false") boolean refresh) throws NoSuchAlgorithmException {
 		BusinessUserDoc currentUser = userSessionBean.domainUser();
