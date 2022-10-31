@@ -63,6 +63,26 @@ public class AppCommonAuthFilter implements AppAuthFilter {
 			}
 		}
 
+		public boolean hasRoleAny(String... roles) {
+			this.role = this.role();
+			for (String newRole : roles) {
+				if (this.role.contains(newRole)) {
+					return true;
+				}
+			}
+			return false;
+		}
+
+		public boolean hasRoleAll(String... roles) {
+			this.role = this.role();
+			for (String newRole : roles) {
+				if (!this.role.contains(newRole)) {
+					return false;
+				}
+			}
+			return true;
+		}
+
 		public Set<String> getDomain() {
 			return domain;
 		}

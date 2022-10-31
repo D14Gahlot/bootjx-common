@@ -25,102 +25,97 @@ import com.boot.jx.http.CommonHttpRequest;
 @Controller
 @RequestMapping("/partnerdashboard")
 public class PartnerDashBoardController {
-	
+
 	@Autowired
-    private AppConfig appConfig;
+	private AppConfig appConfig;
 
-    @Autowired
-    private CommonHttpRequest commonHttpRequest;
+	@Autowired
+	private CommonHttpRequest commonHttpRequest;
 
-    @Autowired
-    private AppCommonConfig appCommonConfig;
+	@Autowired
+	private AppCommonConfig appCommonConfig;
 
+	@Autowired
+	private AccountSessionBean adminSessionBean;
 
+	@Autowired
+	private AccountStore accountStore;
 
-    @Autowired
-    private AccountSessionBean adminSessionBean;
+	@Autowired
+	private AccountDashBoardManager dashBMgr;
 
-    @Autowired
-    private AccountStore accountStore;
+	@ResponseBody
+	@RequestMapping(value = { "/pub/domain" }, method = { RequestMethod.GET })
+	public ApiResponse<DomainDoc, Object> getDomain() {
+		List<DomainDoc> domainDocLst = dashBMgr.getAllDomainAccount();
+		return ApiResponse.buildResults(domainDocLst);
+	}
 
-    @Autowired
-    AccountDashBoardManager dashBMgr;
-  
-
-    
-    @ResponseBody
-    @RequestMapping(value = { "/pub/domain" }, method = { RequestMethod.GET })
-    public ApiResponse<DomainDoc, Object> getDomain() {
-	List<DomainDoc> domainDocLst =dashBMgr.getAllDomainAccount();
-	return ApiResponse.buildResults(domainDocLst);
-    }
-    
-    @ResponseBody
-    @RequestMapping(value = {"/pub/admin/fetch-month"}, method = { RequestMethod.GET })
+	@ResponseBody
+	@RequestMapping(value = { "/pub/admin/fetch-month" }, method = { RequestMethod.GET })
 	public ApiResponse<MonthDtlsDto, Object> getMonthLst() {
-		List<MonthDtlsDto> listofMonth = dashBMgr.fetchUniqueMonth(); 
-		return  ApiResponse.buildResults(listofMonth);
+		List<MonthDtlsDto> listofMonth = dashBMgr.fetchUniqueMonth();
+		return ApiResponse.buildResults(listofMonth);
 	}
-    @ResponseBody
-	@RequestMapping(value = {"/pub/admin/monthwise-summary-count"}, method = { RequestMethod.GET })
+
+	@ResponseBody
+	@RequestMapping(value = { "/pub/admin/monthwise-summary-count" }, method = { RequestMethod.GET })
 	public ApiResponse<ContactTypeSummaryDto, Object> getMonthWiseSummary(long timestamp) {
-		ContactTypeSummaryDto summary =dashBMgr.getMonthWiseCount(timestamp); 
-		return  ApiResponse.buildResult(summary);
+		ContactTypeSummaryDto summary = dashBMgr.getMonthWiseCount(timestamp);
+		return ApiResponse.buildResult(summary);
 	}
 
-    
-    
-    @ResponseBody
-    @RequestMapping(value = { "/pub/account/dashboard" }, method = { RequestMethod.GET })
-    public ApiResponse<AccountDashBoardResponseDto, Object> getAccountDashboardDetils() {
-	AccountDashBoardResponseDto response =null;//dashBMgr.getAccountDashBoardDetails();
-	return ApiResponse.buildResult(response);
-    }
-   
-    @ResponseBody
-	@RequestMapping(value = {"/pub/monthwise-summary-save"}, method = { RequestMethod.GET })
+	@ResponseBody
+	@RequestMapping(value = { "/pub/account/dashboard" }, method = { RequestMethod.GET })
+	public ApiResponse<AccountDashBoardResponseDto, Object> getAccountDashboardDetils() {
+		AccountDashBoardResponseDto response = null;// dashBMgr.getAccountDashBoardDetails();
+		return ApiResponse.buildResult(response);
+	}
+
+	@ResponseBody
+	@RequestMapping(value = { "/pub/monthwise-summary-save" }, method = { RequestMethod.GET })
 	public ApiResponse<ContactTypeSummaryDto, Object> getMonthWiseSaving(long timestamp) {
-		ContactTypeSummaryDto summary =dashBMgr.summaryV1(timestamp); 
-		return  ApiResponse.buildResult(summary);
+		ContactTypeSummaryDto summary = dashBMgr.summaryV1(timestamp);
+		return ApiResponse.buildResult(summary);
 	}
-    
-    
-    @ResponseBody
-   	@RequestMapping(value = {"/pub/monthwise-summary/waba"}, method = { RequestMethod.GET })
-   	public ApiResponse<WabaSummaryDocDto, Object> getMonthWiseWabaSummary(long timestamp) {
-     	List<WabaSummaryDocDto> summary =dashBMgr.wabaSummary(timestamp);
-   		return  ApiResponse.buildResults(summary);
-   	}
 
-    @ResponseBody
-   	@RequestMapping(value = {"/pub/hourwise-summary"}, method = { RequestMethod.GET })
-   	public ApiResponse<ContactTypeSummaryDto, Object> getHourWiseSummary(@RequestParam(required = false) long timestamp,long hr) {
-   		ContactTypeSummaryDto summary =dashBMgr.hourWisesummary(timestamp,hr); 
-   		return  ApiResponse.buildResult(summary);
-   	}
-    
-    @ResponseBody
-   	@RequestMapping(value = {"/pub/daywise-summary"}, method = { RequestMethod.GET })
-   	public ApiResponse<ContactTypeSummaryDto, Object> getDayWiseSummary(@RequestParam(required = false) long timestamp,int days) {
-   		ContactTypeSummaryDto summary =dashBMgr.dayChannelWiseWisesummary(timestamp,days); 
-   		return  ApiResponse.buildResult(summary);
-   	}
-    
-    
-    @ResponseBody
-   	@RequestMapping(value = {"/pub/hourwise-msg-status-summary"}, method = { RequestMethod.GET })
-   	public ApiResponse<ContactTypeSummaryDto, Object> getHourWiseMsgStatusSummary(@RequestParam(required = false) long timestamp,long hr) {
-   		ContactTypeSummaryDto summary =dashBMgr.getHourWiseMsgStatusSummary(timestamp,hr); 
-   		return  ApiResponse.buildResult(summary);
-   	}
-    
-    @ResponseBody
-   	@RequestMapping(value = {"/pub/datewise-msg-status-summary"}, method = { RequestMethod.GET })
-   	public ApiResponse<ContactTypeSummaryDto, Object> getDayWiseMsgStatusSummary(@RequestParam(required = false) long timestamp,int days) {
-   		ContactTypeSummaryDto summary =dashBMgr.getDayWiseMsgStatusSummary(timestamp,days); 
-   		return  ApiResponse.buildResult(summary);
-   	}
-    
-    
+	@ResponseBody
+	@RequestMapping(value = { "/pub/monthwise-summary/waba" }, method = { RequestMethod.GET })
+	public ApiResponse<WabaSummaryDocDto, Object> getMonthWiseWabaSummary(long timestamp) {
+		List<WabaSummaryDocDto> summary = dashBMgr.wabaSummary(timestamp);
+		return ApiResponse.buildResults(summary);
+	}
+
+	@ResponseBody
+	@RequestMapping(value = { "/pub/hourwise-summary" }, method = { RequestMethod.GET })
+	public ApiResponse<ContactTypeSummaryDto, Object> getHourWiseSummary(@RequestParam(required = false) long timestamp,
+			long hr) {
+		ContactTypeSummaryDto summary = dashBMgr.hourWisesummary(timestamp, hr);
+		return ApiResponse.buildResult(summary);
+	}
+
+	@ResponseBody
+	@RequestMapping(value = { "/pub/daywise-summary" }, method = { RequestMethod.GET })
+	public ApiResponse<ContactTypeSummaryDto, Object> getDayWiseSummary(@RequestParam(required = false) long timestamp,
+			int days) {
+		ContactTypeSummaryDto summary = dashBMgr.dayChannelWiseWisesummary(timestamp, days);
+		return ApiResponse.buildResult(summary);
+	}
+
+	@ResponseBody
+	@RequestMapping(value = { "/pub/hourwise-msg-status-summary" }, method = { RequestMethod.GET })
+	public ApiResponse<ContactTypeSummaryDto, Object> getHourWiseMsgStatusSummary(
+			@RequestParam(required = false) long timestamp, long hr) {
+		ContactTypeSummaryDto summary = dashBMgr.getHourWiseMsgStatusSummary(timestamp, hr);
+		return ApiResponse.buildResult(summary);
+	}
+
+	@ResponseBody
+	@RequestMapping(value = { "/pub/datewise-msg-status-summary" }, method = { RequestMethod.GET })
+	public ApiResponse<ContactTypeSummaryDto, Object> getDayWiseMsgStatusSummary(
+			@RequestParam(required = false) long timestamp, int days) {
+		ContactTypeSummaryDto summary = dashBMgr.getDayWiseMsgStatusSummary(timestamp, days);
+		return ApiResponse.buildResult(summary);
+	}
 
 }

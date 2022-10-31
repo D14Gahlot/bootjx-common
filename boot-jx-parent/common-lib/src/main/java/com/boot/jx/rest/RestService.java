@@ -343,12 +343,10 @@ public class RestService {
 			return this;
 		}
 
-		public <T> Ajax put(T body) {
-			return this.put(new HttpEntity<T>(body, processdHeaders()));
-		}
-
-		public Ajax put() {
-			return this.put(new HttpEntity<Object>(null, processdHeaders()));
+		public Ajax patch(HttpEntity<?> requestEntity) {
+			this.method = HttpMethod.PATCH;
+			this.requestEntity = requestEntity;
+			return this;
 		}
 
 		public Ajax put(HttpEntity<?> requestEntity) {
@@ -365,6 +363,22 @@ public class RestService {
 			return this.post(new HttpEntity<Object>(null, processdHeaders()));
 		}
 
+		public <T> Ajax put(T body) {
+			return this.put(new HttpEntity<T>(body, processdHeaders()));
+		}
+
+		public Ajax put() {
+			return this.put(new HttpEntity<Object>(null, processdHeaders()));
+		}
+
+		public <T> Ajax patch(T body) {
+			return this.patch(new HttpEntity<T>(body, processdHeaders()));
+		}
+
+		public Ajax patch() {
+			return this.patch(new HttpEntity<Object>(null, processdHeaders()));
+		}
+
 		public Ajax postForm() {
 			this.isForm = true;
 			return this.post(new HttpEntity<MultiValueMap<String, Object>>(parameters, processdHeaders()));
@@ -376,6 +390,10 @@ public class RestService {
 
 		public <T> Ajax putJson(T body) {
 			return this.header("content-type", "application/json").put(body);
+		}
+
+		public <T> Ajax patchJson(T body) {
+			return this.header("content-type", "application/json").patch(body);
 		}
 
 		public Ajax get(HttpEntity<?> requestEntity) {
