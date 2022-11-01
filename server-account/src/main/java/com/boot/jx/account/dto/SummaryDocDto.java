@@ -8,6 +8,7 @@ public class SummaryDocDto {
 	String date;
 	String channel;
 	String type;
+	String uniqueContactId;
     Map<String, Object> meta;
     Map<Object,Map<String,Long>> hourWiseCount;
 	public String getId() {
@@ -51,6 +52,12 @@ public class SummaryDocDto {
 	}
 	public void setHourWiseCount(Map<Object, Map<String, Long>> hourWiseCount) {
 		this.hourWiseCount = hourWiseCount;
+	}
+	public String getUniqueContactId() {
+		return uniqueContactId;
+	}
+	public void setUniqueContactId(String uniqueContactId) {
+		this.uniqueContactId = uniqueContactId;
 	}
 	
 

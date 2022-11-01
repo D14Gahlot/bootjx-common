@@ -3,6 +3,7 @@ package com.boot.jx.admin.dto;
 public class DateWiseHourCountDto {
 	String date;
 	String hour;
+	long hourStamp;
 	String channel;
 	String msgType;
 	public String getDate() {
@@ -28,6 +29,12 @@ public class DateWiseHourCountDto {
 	}
 	public void setMsgType(String msgType) {
 		this.msgType = msgType;
+	}
+	public long getHourStamp() {
+		return hourStamp;
+	}
+	public void setHourStamp(long hourStamp) {
+		this.hourStamp = hourStamp;
 	}
 
 }

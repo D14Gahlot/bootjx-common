@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.boot.jx.admin.dto.ContactTypeSummaryDto;
 import com.boot.jx.admin.dto.DashBoardRequestDto;
 import com.boot.jx.admin.dto.DashBoardResponseDto;
+import com.boot.jx.admin.dto.MonthDtlsDto;
 import com.boot.jx.admin.dto.TagDocumentDto;
 import com.boot.jx.admin.dto.TagDocumentLst;
 import com.boot.jx.admin.manager.AdminDashBoardManager;
@@ -66,31 +67,39 @@ public class AdminDashBoardContoller {
 	
 	@ResponseBody
    	@RequestMapping(value = {"/admin/hourwise-summary"}, method = { RequestMethod.GET })
-   	public ApiResponse<ContactTypeSummaryDto, Object> getHourWiseSummary() {
-   		ContactTypeSummaryDto summary =adminDbMgr.hourWisesummary(); 
+   	public ApiResponse<ContactTypeSummaryDto, Object> getHourWiseSummary(@RequestParam(required = false) long timestamp,long hr) {
+   		ContactTypeSummaryDto summary =adminDbMgr.hourWisesummary(timestamp,hr); 
    		return  ApiResponse.buildResult(summary);
    	}
     
     @ResponseBody
    	@RequestMapping(value = {"/admin/daywise-summary"}, method = { RequestMethod.GET })
-   	public ApiResponse<ContactTypeSummaryDto, Object> getDayWiseSummary() {
-   		ContactTypeSummaryDto summary =adminDbMgr.dayChannelWiseWisesummary(); 
+   	public ApiResponse<ContactTypeSummaryDto, Object>  getDayWiseSummary(@RequestParam(required = false) long dateRange1,
+   			@RequestParam(required = false) long dateRange2,int days) {
+   		ContactTypeSummaryDto summary =adminDbMgr.dayChannelWiseWisesummary(dateRange1,dateRange2,days); 
    		return  ApiResponse.buildResult(summary);
    	}
 
     @ResponseBody
-   	@RequestMapping(value = {"/pub/hourwise-msg-status-summary"}, method = { RequestMethod.GET })
+   	@RequestMapping(value = {"/admin/hourwise-msg-status-summary"}, method = { RequestMethod.GET })
    	public ApiResponse<ContactTypeSummaryDto, Object> getHourWiseMsgStatusSummary(@RequestParam(required = false) long timestamp,long hr) {
    		ContactTypeSummaryDto summary =adminDbMgr.getHourWiseMsgStatusSummary(timestamp,hr); 
    		return  ApiResponse.buildResult(summary);
    	}
     
     @ResponseBody
-   	@RequestMapping(value = {"/pub/datewise-msg-status-summary"}, method = { RequestMethod.GET })
-   	public ApiResponse<ContactTypeSummaryDto, Object> getDayWiseMsgStatusSummary(@RequestParam(required = false) long timestamp,int days) {
-   		ContactTypeSummaryDto summary =adminDbMgr.getDayWiseMsgStatusSummary(timestamp,days); 
+   	@RequestMapping(value = {"/admin/datewise-msg-status-summary"}, method = { RequestMethod.GET })
+   	public ApiResponse<ContactTypeSummaryDto, Object> getDayWiseMsgStatusSummary(long dateRange1,long dateRange2,int days) {
+   		ContactTypeSummaryDto summary =adminDbMgr.getDayWiseMsgStatusSummary(dateRange1,dateRange2,days); 
    		return  ApiResponse.buildResult(summary);
    	}
+    
+    @ResponseBody
+    @RequestMapping(value = {"/admin/fetch-month"}, method = { RequestMethod.GET })
+	public ApiResponse<MonthDtlsDto, Object> getMonthLst() {
+		List<MonthDtlsDto> listofMonth = adminDbMgr.fetchUniqueMonth(); 
+		return  ApiResponse.buildResults(listofMonth);
+	}
     
 	
 	
