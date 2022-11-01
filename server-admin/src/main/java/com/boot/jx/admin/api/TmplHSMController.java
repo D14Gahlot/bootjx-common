@@ -81,9 +81,11 @@ public class TmplHSMController {
 			temp = mongoTemplate.findById(extTemplate.getId(), HSMTemplate3rdParty.class);
 			if (ArgUtil.is(temp)) {
 				String status = ArgUtil.parseAsString(temp.getTemplate().get("status"), Constants.BLANK);
-				if ("approved".equalsIgnoreCase(status) || "pending".equalsIgnoreCase(status)
-						|| "submitted".equalsIgnoreCase(status)) {
+				if ("pending".equalsIgnoreCase(status) || "submitted".equalsIgnoreCase(status)) {
 					editable = false;
+				}
+				if(ArgUtil.is(extTemplate.getTemplate())) {
+					extTemplate.getTemplate().put("status", status);
 				}
 			}
 		}

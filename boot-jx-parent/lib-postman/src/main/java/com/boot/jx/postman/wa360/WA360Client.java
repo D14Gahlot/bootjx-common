@@ -481,6 +481,23 @@ public class WA360Client {
 		return resp;
 	}
 
+	public MapModel updateTemplates(ChannelConfig channelConfig, MapModel req) {
+		try {
+			String templateName = req.getString("name");
+			MapModel resp = restService.ajax(WA360Constants.BASE_URL).path("v1/configs/templates/{templateName}")
+					.header(WA360Constants.D360_API_KEY, channelConfig.getWa360d().getApiKey())
+					.pathParam("templateName", templateName).post(req.toMap()).asMapModel();
+
+			return resp;
+		} catch (HttpStatusCodeException | ApiHttpException e) {
+			if (e instanceof HttpStatusCodeException)
+				ApiResponseUtil.addError(((HttpStatusCodeException) e).getResponseBodyAsString());
+			else
+				ApiResponseUtil.addError(((ApiHttpException) e));
+			throw e;
+		}
+	}
+
 	public MapModel createTemplates(ChannelConfig channelConfig, MapModel req) {
 		try {
 			MapModel resp = restService.ajax(WA360Constants.BASE_URL).path("v1/configs/templates")
@@ -495,7 +512,6 @@ public class WA360Client {
 				ApiResponseUtil.addError(((ApiHttpException) e));
 			throw e;
 		}
-
 	}
 
 }
