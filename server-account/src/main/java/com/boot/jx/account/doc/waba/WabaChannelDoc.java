@@ -10,6 +10,8 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import com.boot.jx.model.AuditCreateEntity;
 import com.boot.jx.mongo.CommonDocInterfaces.IDocument;
+import com.boot.jx.postman.PMEnvironment;
+import com.fasterxml.jackson.annotation.JsonView;
 
 @Document(collection = "PARTNER_WABA_CHANNELS")
 @TypeAlias("WabaChannel")
@@ -31,6 +33,9 @@ public class WabaChannelDoc implements IDocument, AuditCreateEntity, Serializabl
 	private Boolean isActive;
 	private Boolean isSyncd;
 	private Long syncdStamp;
+
+	@JsonView(PMEnvironment.ProtectedProperty.class)
+	private Map<String, Object> key;
 
 	public Long getCreatedStamp() {
 		return createdStamp;
@@ -110,6 +115,14 @@ public class WabaChannelDoc implements IDocument, AuditCreateEntity, Serializabl
 
 	public void setChannel(Map<String, Object> channel) {
 		this.channel = channel;
+	}
+
+	public Map<String, Object> getKey() {
+		return key;
+	}
+
+	public void setKey(Map<String, Object> key) {
+		this.key = key;
 	}
 
 }

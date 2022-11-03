@@ -42,6 +42,7 @@ import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CryptoUtil;
 import com.boot.utils.URLBuilder;
+import com.fasterxml.jackson.annotation.JsonView;
 
 @Controller
 @RequestMapping("/partner")
@@ -167,7 +168,8 @@ public class WabaPartnerController {
 	}
 
 	@ResponseBody
-	@RequestMapping(value = {"/pub/waba/login","/api/waba/login"}, method = { RequestMethod.POST, RequestMethod.GET })
+	@RequestMapping(value = { "/pub/waba/login", "/api/waba/login" },
+			method = { RequestMethod.POST, RequestMethod.GET })
 	public ApiResponse<Map<String, Object>, Object> webhook(@RequestParam String username,
 			@RequestParam String password, @RequestParam(required = false) String partnerId)
 			throws NoSuchAlgorithmException {
@@ -213,7 +215,7 @@ public class WabaPartnerController {
 	}
 
 	@ResponseBody
-	@RequestMapping(value = { "/pub/waba/clients", "/api/waba/clients"}, method = RequestMethod.GET)
+	@RequestMapping(value = { "/pub/waba/clients", "/api/waba/clients" }, method = RequestMethod.GET)
 	public ApiResponse<WabaPartnerDoc, Object> clients(
 			@RequestParam(required = false, defaultValue = "false") boolean refresh) throws NoSuchAlgorithmException {
 		if (refresh) {
@@ -245,7 +247,7 @@ public class WabaPartnerController {
 	}
 
 	@ResponseBody
-	@RequestMapping(value = {"/pub/waba/clients/balance","/api/waba/clients/balance"}, method = RequestMethod.GET)
+	@RequestMapping(value = { "/pub/waba/clients/balance", "/api/waba/clients/balance" }, method = RequestMethod.GET)
 	public ApiResponse<WabaPartnerDoc, Object> clientBalance(
 			@RequestParam(required = false, defaultValue = "false") boolean refresh, @RequestParam String clientId)
 			throws NoSuchAlgorithmException {
@@ -276,6 +278,7 @@ public class WabaPartnerController {
 		return ApiResponse.buildResults(clientDocs);
 	}
 
+	@JsonView(PMEnvironment.PublicProperty.class)
 	@ResponseBody
 	@RequestMapping(value = { "/pub/waba/channels", "/api/waba/channels" }, method = RequestMethod.GET)
 	public ApiResponse<WabaChannelDoc, Object> channels(
@@ -323,5 +326,44 @@ public class WabaPartnerController {
 					.find(MQB.collection(WabaChannelDoc.class).where(Criteria.where("_id").in(allowedChannels)));
 		}
 		return ApiResponse.buildResults(channelDocs);
+	}
+
+	@ResponseBody
+	@RequestMapping(value = { "/api/waba/clients/channels/{channel_id}/api_keys" }, method = RequestMethod.GET)
+	public ApiResponse<Object, Object> generateKey(@PathVariable(name = "channel_id") String channelId)
+			throws NoSuchAlgorithmException {
+
+		BusinessUserDoc currentUser = userSessionBean.domainUser();
+		if (!ArgUtil.is(currentUser)) {
+			ApiResponseUtil.throwException("Access Denied");
+		}
+
+		BusinessUserDoc domainUser = currentUser;
+		Collection<String> allowedChannels = domainUser.wabaChannels();
+
+		if (userSessionBean.hasRoleAny(PMConstants.USER_ROLE.DUPER_USER, PMConstants.USER_ROLE.SUPER_DEV)
+				|| allowedChannels.contains(channelId)) {
+			String wabaserver = wabaServer();
+			WabaPartnerDoc partner = getPartnerWabaDoc(null);
+			MapModel resp = restService.ajax(wabaserver)
+					.path("/partners/" + partner.getPartnerId() + "/channels/" + channelId + "/api_keys")
+					.header("Authorization", String.format("%s %s", partner.getAuthorization().get("token_type"),
+							partner.getAuthorization().get("access_token")))
+					.post().acceptJson().asMapModel();
+
+			WabaChannelDoc channelDoc = mongoTemplate.findByIdSafeCheck(channelId, WabaChannelDoc.class);
+			if (ArgUtil.not(channelDoc)) {
+				channelDoc = new WabaChannelDoc();
+			}
+			channelDoc.setId(channelId);
+			channelDoc.setKey(resp.toMap());
+			mongoTemplate.save(channelDoc);
+			return ApiResponse.buildResult(resp.toMap());
+		} else {
+			if (!ArgUtil.is(currentUser)) {
+				ApiResponseUtil.throwException("Access Denied");
+			}
+		}
+		return ApiResponse.build();
 	}
 }
