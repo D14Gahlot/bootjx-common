@@ -1469,7 +1469,6 @@ public class AdminDashBoardManager {
 			List<ContactTypeCountDto> messageTypeLst = new ArrayList<ContactTypeCountDto>();
 			List<DBObject> list = new ArrayList<DBObject>();
 			list = getAggregationMatchForMsgStatus(lasthrTimeStmp,currentTs);
-			//MongoCursor<Document> cursor = mongoTemplate.collection(contactType).aggregate(list).iterator();
 			DBCollection col = mongoTemplate.getCollection(contactType);
 			Cursor cursor = col.aggregate(list,AggregationOptions.builder().allowDiskUse(true).outputMode(OutputMode.CURSOR).build());
 			while (cursor.hasNext()) {
@@ -1569,7 +1568,6 @@ public class AdminDashBoardManager {
 			List<ContactTypeCountDto> messageTypeLst = new ArrayList<ContactTypeCountDto>();
 			List<DBObject> list = new ArrayList<DBObject>();
 			list = getAggregationMatchForMsgStatus(lasDayTimeStmp, currentTs);
-			//MongoCursor<Document> cursor = mongoTemplate.collection(contactType).aggregate(list).iterator();
 			DBCollection col = mongoTemplate.getCollection(contactType);
 			Cursor cursor = col.aggregate(list,AggregationOptions.builder().allowDiskUse(true).outputMode(OutputMode.CURSOR).build());
 		
