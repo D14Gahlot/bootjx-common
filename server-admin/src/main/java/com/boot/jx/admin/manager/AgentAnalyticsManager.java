@@ -119,8 +119,8 @@ public class AgentAnalyticsManager {
 		double botClosure = 0.0d;
 		double totalStartLag = 0.0d;
 		int teamSize = dtoLst.size();
-		long totSatisScore=0;
-		long totSatisFeedback=0;
+		long totSatisScore = 0;
+		long totSatisFeedback = 0;
 		Map<Object, Object> graphApiMap = new HashMap<Object, Object>();
 		Map<Object, Object> graphApiMapV1 = new HashMap<Object, Object>();
 
@@ -149,12 +149,12 @@ public class AgentAnalyticsManager {
 			if (ArgUtil.is(dt.getPeakLoad()) && dt.getPeakLoad().getTotal() > dto.getPeakLoad().getTotal()) {
 				dto.setPeakLoad(dt.getPeakLoad());
 			}
-			
-			if(dt.getSatisfactionScore()>0) {
-				totSatisFeedback +=1;
-				totSatisScore+=dt.getSatisfactionScore();
+
+			if (dt.getSatisfactionScore() > 0) {
+				totSatisFeedback += 1;
+				totSatisScore += dt.getSatisfactionScore();
 			}
-			
+
 		}
 		dto.setTotalInMsgExchanged(totalInMsg);
 		dto.setTotalOutMsgExchanged(totalOutMsg);
@@ -174,10 +174,10 @@ public class AgentAnalyticsManager {
 		if (graphApiMapV1 != null && !graphApiMapV1.isEmpty()) {
 			dto.setGraphApiDetailsV1(graphApiMapV1);
 		}
-		if(totSatisScore>0) {
-			dto.setSatisfactionScore(totSatisScore/totSatisFeedback);
+		if (totSatisScore > 0) {
+			dto.setSatisfactionScore(totSatisScore / totSatisFeedback);
 		}
-		
+
 		LOGGER.debug("\n\n get Summary ========:" + JsonUtil.toJson(dto));
 		return dto;
 	}
@@ -275,9 +275,9 @@ public class AgentAnalyticsManager {
 
 		double botClosure = getBotClosure(dateRange1, dateRange2, dto.getTotalMsgExchanged());
 		dto.setBotClosure(botClosure);
-		
-		/** Satisfaction  score **/
-		double satisfactionScore = getSatisfactionScore(dateRange1, dateRange2,agent);
+
+		/** Satisfaction score **/
+		double satisfactionScore = getSatisfactionScore(dateRange1, dateRange2, agent);
 		dto.setSatisfactionScore(satisfactionScore);
 
 		/** find the date diff between two dates **/
@@ -743,10 +743,10 @@ public class AgentAnalyticsManager {
 		}
 		return botClosure;
 	}
-	
+
 	/** get Satisfaction Score **/
-	 public double getSatisfactionScore(long dateRange1, long dateRange2,String agent) {
-			
+	public double getSatisfactionScore(long dateRange1, long dateRange2, String agent) {
+
 		double satisfactionScore = 0;
 		double totSatisScore = 0;
 		Query query = new Query();
@@ -756,18 +756,17 @@ public class AgentAnalyticsManager {
 		query.addCriteria(Criteria.where("startSessionStamp").gt(dateRange1).lt(dateRange2));
 		removeChatSessFieldForSatisScore(query);
 		List<ChatSessionDoc> botLst = mongoTemplate.find(query, ChatSessionDoc.class, CHAT_SESSION);
-		if(botLst!=null && !botLst.isEmpty()) {
-			for(ChatSessionDoc doc:botLst) {
-			 totSatisScore +=doc.getFeedback().get("score")==null?0:(double)doc.getFeedback().get("score");
+		if (botLst != null && !botLst.isEmpty()) {
+			for (ChatSessionDoc doc : botLst) {
+				totSatisScore += doc.getFeedback().get("score") == null ? 0 : (double) doc.getFeedback().get("score");
 			}
-			if(totSatisScore>0) {
-				satisfactionScore =totSatisScore/botLst.size(); 
+			if (totSatisScore > 0) {
+				satisfactionScore = totSatisScore / botLst.size();
 			}
 		}
-		
-		
+
 		return satisfactionScore;
-		}
+	}
 
 	public void removeMsgFields(Query query2) {
 		query2.fields().exclude("model").exclude("meta").exclude("stamps").exclude("contact").exclude("tags")
@@ -777,10 +776,9 @@ public class AgentAnalyticsManager {
 	private void removeChatSessField(Query query2) {
 		query2.fields().exclude("updated").exclude("lastInBoundMsg").exclude("lastMsg").exclude("lastBotReply");
 	}
-	
-	private void  removeChatSessFieldForSatisScore(Query query2) {
-		query2.fields().exclude("updated").exclude("lastInBoundMsg").
-		exclude("lastMsg").exclude("lastBotReply").exclude("msg")
-		.exclude("stamps").exclude("contact");
+
+	private void removeChatSessFieldForSatisScore(Query query2) {
+		query2.fields().exclude("updated").exclude("lastInBoundMsg").exclude("lastMsg").exclude("lastBotReply")
+				.exclude("msg").exclude("stamps").exclude("contact");
 	}
 }

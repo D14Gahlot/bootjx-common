@@ -1154,48 +1154,45 @@ public class AdminDashBoardManager {
 				dto.setMeta(doc.getMeta());
 				dto.setDomain(tnt);
 				String id = getSummaryWithChannelId(dto);
-				if(ArgUtil.is(id)) {
-				dto.setId(id);
-				Date date = new Date(timeStamp);
-				SimpleDateFormat sdfH = new SimpleDateFormat(DateUtil.DEFAULT_DATE_TIME_FORMAT);
-				String formattedDateHm = sdfH.format(date);
-				SimpleDateFormat sdfm = new SimpleDateFormat("mm");
-				String min = sdfm.format(date);
-				int m=Integer.parseInt(min);
-				long tStamp =timeStamp;
-				if(m>30) {
-				 tStamp =timeStamp-((m-30)*60*1000L); 
-				}else {
-					tStamp =timeStamp-(m*60*1000L); 
-				}
-				long tStampWmS = (tStamp - (tStamp % (1000* 60 )));
-				
-				hourListH.add(formattedDateHm);
-				hrDto.setDate(yyyyMMdd);
-				hrDto.setHour(formattedDateHm);
-				hrDto.setHourStamp(tStampWmS);
-				hrDto.setChannel(id);
-				if (hrDto != null) {
-					hourCntLst.add(hrDto);
-				}
+				if (ArgUtil.is(id)) {
+					dto.setId(id);
+					Date date = new Date(timeStamp);
+					SimpleDateFormat sdfH = new SimpleDateFormat(DateUtil.DEFAULT_DATE_TIME_FORMAT);
+					String formattedDateHm = sdfH.format(date);
+					SimpleDateFormat sdfm = new SimpleDateFormat("mm");
+					String min = sdfm.format(date);
+					int m = Integer.parseInt(min);
+					long tStamp = timeStamp;
+					if (m > 30) {
+						tStamp = timeStamp - ((m - 30) * 60 * 1000L);
+					} else {
+						tStamp = timeStamp - (m * 60 * 1000L);
+					}
+					long tStampWmS = (tStamp - (tStamp % (1000 * 60)));
+
+					hourListH.add(formattedDateHm);
+					hrDto.setDate(yyyyMMdd);
+					hrDto.setHour(formattedDateHm);
+					hrDto.setHourStamp(tStampWmS);
+					hrDto.setChannel(id);
+					if (hrDto != null) {
+						hourCntLst.add(hrDto);
+					}
 				}
 			}
 
 		}
 		Map<Object, Long> summaryMap = new HashMap<>();
-		
+
 		/** hour wise count **/
 		Map<String, Map<Object, Long>> hourWiseCountMap = hourCntLst.stream()
 				.collect(Collectors.groupingBy(DateWiseHourCountDto::getChannel,
 						Collectors.groupingBy(DateWiseHourCountDto::getHourStamp, Collectors.counting())));
 
-		
 		Map<Object, Map<Object, Long>> hourWiseCount = new HashMap<>();
 
 		Map<Object, Long> hourCntMap = getHourRange(currentTs, lasthrTimeStmp);
 
-	
-		
 		for (Map.Entry<String, Map<Object, Long>> keyValue : hourWiseCountMap.entrySet()) {
 			Map<Object, Long> hoCntMapAll = new HashMap<>();
 			String key = keyValue.getKey();
@@ -1227,9 +1224,9 @@ public class AdminDashBoardManager {
 				hourWiseCount.put(tnt + "_" + channel, hourCntMap);
 			}
 		}
-		
+
 		hourWiseCount = sortMap(hourWiseCount);
-		
+
 		ContactTypeSummaryDto dto = new ContactTypeSummaryDto();
 		dto.setTenant(tnt);
 		dto.setMonth(monthYear);
@@ -1239,12 +1236,12 @@ public class AdminDashBoardManager {
 	}
 
 	/** day and channel wise summary **/
-	public ContactTypeSummaryDto dayChannelWiseWisesummary(long dateRange1,long dateRange2, int days) {
+	public ContactTypeSummaryDto dayChannelWiseWisesummary(long dateRange1, long dateRange2, int days) {
 		String tnt = AppContextUtil.getTenant();
 		List<String> lst = getListOfContactType();
 		List<String> channelLst = getListChannelCongig();
 		long currentTs = System.currentTimeMillis();
-		
+
 		ZonedDateTime noOfdaysTstamp = null;
 
 		if (days > 0) {
@@ -1254,11 +1251,11 @@ public class AdminDashBoardManager {
 		}
 		// use the same datetime to create the end of the day using the maximum time for
 		long lasDayTimeStmp = noOfdaysTstamp.toInstant().toEpochMilli();
-		if(dateRange1>0) {
-			lasDayTimeStmp =dateRange1; 
+		if (dateRange1 > 0) {
+			lasDayTimeStmp = dateRange1;
 		}
-		if(dateRange2>0) {
-			currentTs =dateRange2;
+		if (dateRange2 > 0) {
+			currentTs = dateRange2;
 		}
 
 		Map<Object, Long> dateRanMap = getDatesRange(currentTs, lasDayTimeStmp);
@@ -1289,12 +1286,12 @@ public class AdminDashBoardManager {
 					lstSummDto.add(dto);
 				}
 				String channelid = getSummaryWithChannelId(dto);
-				if(ArgUtil.is(channelid)) {
-				daySummDto.setDate(yyyyMMdd);
-				daySummDto.setChannel(channelid);
-				if (daySummDto != null) {
-					hourCntLst.add(daySummDto);
-				}
+				if (ArgUtil.is(channelid)) {
+					daySummDto.setDate(yyyyMMdd);
+					daySummDto.setChannel(channelid);
+					if (daySummDto != null) {
+						hourCntLst.add(daySummDto);
+					}
 				}
 
 			}
@@ -1339,9 +1336,9 @@ public class AdminDashBoardManager {
 				dayWiseMap.put(key, dateWiseCnt);
 			}
 		}
-		
+
 		dayWiseMap = sortMap(dayWiseMap);
-		
+
 		summaryMap = lstSummDto.stream().collect(Collectors.groupingBy(SummaryDocDto::getType, Collectors.counting()));
 
 		ContactTypeSummaryDto dto = new ContactTypeSummaryDto();
@@ -1354,23 +1351,22 @@ public class AdminDashBoardManager {
 
 	public Long getHour(long timeStamp) {
 		Date date = new Date(timeStamp);
-		/** kk-24 hr , HH-24 hr 
-		SimpleDateFormat sdfH = new SimpleDateFormat("kk");
-		String formattedDateH = sdfH.format(date);
-		return formattedDateH;
-		*/
-		
+		/**
+		 * kk-24 hr , HH-24 hr SimpleDateFormat sdfH = new SimpleDateFormat("kk");
+		 * String formattedDateH = sdfH.format(date); return formattedDateH;
+		 */
+
 		SimpleDateFormat sdfm = new SimpleDateFormat("mm");
 		String min = sdfm.format(date);
-		int m=Integer.parseInt(min);
-		long tStamp =timeStamp;
-		if(m>30) {
-		 tStamp =timeStamp-((m-30)*60*1000L); 
-		}else {
-			tStamp =timeStamp-(m*60*1000L); 
+		int m = Integer.parseInt(min);
+		long tStamp = timeStamp;
+		if (m > 30) {
+			tStamp = timeStamp - ((m - 30) * 60 * 1000L);
+		} else {
+			tStamp = timeStamp - (m * 60 * 1000L);
 		}
-		long tStampWmS = (tStamp - (tStamp % (1000* 60 )));
-		
+		long tStampWmS = (tStamp - (tStamp % (1000 * 60)));
+
 		return tStampWmS;
 	}
 
@@ -1380,62 +1376,50 @@ public class AdminDashBoardManager {
 			String ds = DateUtil.foramtTimeStampDateAsString(lasDayTiSt, DateUtil.YYYYMMDD_DATE_FORMAT);
 			mapDt.put(ds, new Long(0));
 		}
-		Map<Object, Long> result  = new TreeMap<Object, Long>(mapDt);
+		Map<Object, Long> result = new TreeMap<Object, Long>(mapDt);
 		return result;
 	}
 
 	public Map<Object, Long> getHourRange(long currentTStamp, long lastTimeStamp) {
 		Map<String, Long> mapHr = new HashMap<>();
-		
+
 		Map<Object, Long> mapMinWise = new HashMap<>();
 		Date date = new Date(lastTimeStamp);
 		SimpleDateFormat sdfHM = new SimpleDateFormat("mm");
 		String formattedHM = sdfHM.format(date);
-	   	long lastTimeStampWm = lastTimeStamp-Integer.parseInt(formattedHM)*60*1000L;
-	   	lastTimeStampWm = (lastTimeStampWm - (lastTimeStampWm % (1000* 60 )));
-	   
-		
-		/** adding Hour to last time **/ 
-		/*String curHr = getHour(currentTStamp);
-		String lastHr = getHour(lastTimeStamp);
+		long lastTimeStampWm = lastTimeStamp - Integer.parseInt(formattedHM) * 60 * 1000L;
+		lastTimeStampWm = (lastTimeStampWm - (lastTimeStampWm % (1000 * 60)));
 
-		int currHrInt = Integer.parseInt(curHr);
-		int lastHrInt = Integer.parseInt(lastHr);
-		if (currHrInt < 12) {
-			currHrInt = currHrInt + 24;
-		}
-		for (int i = lastHrInt; i <= currHrInt; i++) {
-			int k = i;
-			if (i > 24) {
-				k = i - 24;
-			}
-			String keyS = String.valueOf(k);
-			if (keyS.length() == 1) {
-				keyS = "0" + keyS;
-			}
-			mapHr.put(keyS, new Long(0));
+		/** adding Hour to last time **/
+		/*
+		 * String curHr = getHour(currentTStamp); String lastHr =
+		 * getHour(lastTimeStamp);
+		 * 
+		 * int currHrInt = Integer.parseInt(curHr); int lastHrInt =
+		 * Integer.parseInt(lastHr); if (currHrInt < 12) { currHrInt = currHrInt + 24; }
+		 * for (int i = lastHrInt; i <= currHrInt; i++) { int k = i; if (i > 24) { k = i
+		 * - 24; } String keyS = String.valueOf(k); if (keyS.length() == 1) { keyS = "0"
+		 * + keyS; } mapHr.put(keyS, new Long(0));
+		 * 
+		 * }
+		 * 
+		 * Map<String, Long> result =
+		 * mapHr.entrySet().stream().sorted(Map.Entry.comparingByKey()).collect(
+		 * Collectors .toMap(Map.Entry::getKey, Map.Entry::getValue, (oldValue,
+		 * newValue) -> oldValue, LinkedHashMap::new));
+		 */
 
+		for (long lastTS = lastTimeStampWm; lastTS <= currentTStamp; lastTS = lastTS + DateUtil.MIN_30) {
+			mapMinWise.put(lastTS, new Long(0));
 		}
-		
-		Map<String, Long> result = mapHr.entrySet().stream().sorted(Map.Entry.comparingByKey()).collect(Collectors
-				.toMap(Map.Entry::getKey, Map.Entry::getValue, (oldValue, newValue) -> oldValue, LinkedHashMap::new));
-		*/
-		
-				
-				for(long lastTS=lastTimeStampWm;lastTS<=currentTStamp;lastTS=lastTS+DateUtil.MIN_30) {
-					mapMinWise.put(lastTS, new Long(0));
-				}
-		
-				Map<Object, Long> result = new TreeMap<Object, Long>(mapMinWise);
-		
-		
-		
+
+		Map<Object, Long> result = new TreeMap<Object, Long>(mapMinWise);
 
 		return result;
 	}
 
 	/** Read ,Unread,sent,deliver msg count Hour Wise */
-	
+
 	@SuppressWarnings("unused")
 	public ContactTypeSummaryDto getHourWiseMsgStatusSummary(long timestamp, long hr) {
 		String tnt = AppContextUtil.getTenant();
@@ -1468,9 +1452,10 @@ public class AdminDashBoardManager {
 		for (String contactType : lst) {
 			List<ContactTypeCountDto> messageTypeLst = new ArrayList<ContactTypeCountDto>();
 			List<DBObject> list = new ArrayList<DBObject>();
-			list = getAggregationMatchForMsgStatus(lasthrTimeStmp,currentTs);
+			list = getAggregationMatchForMsgStatus(lasthrTimeStmp, currentTs);
 			DBCollection col = mongoTemplate.getCollection(contactType);
-			Cursor cursor = col.aggregate(list,AggregationOptions.builder().allowDiskUse(true).outputMode(OutputMode.CURSOR).build());
+			Cursor cursor = col.aggregate(list,
+					AggregationOptions.builder().allowDiskUse(true).outputMode(OutputMode.CURSOR).build());
 			while (cursor.hasNext()) {
 				ContactTypeCountDto contactDto = new ContactTypeCountDto();
 				DBObject object = cursor.next();
@@ -1494,7 +1479,7 @@ public class AdminDashBoardManager {
 				DateWiseHourCountDto daySummDto = new DateWiseHourCountDto();
 				String key = keyValueCount.getKey();
 				if (ArgUtil.is(key) && !key.equalsIgnoreCase("session")) {
-					long value = getHour((Long)keyValueCount.getValue());
+					long value = getHour((Long) keyValueCount.getValue());
 					daySummDto.setMsgType(key);
 					daySummDto.setHourStamp(value);
 					hourCntLst.add(daySummDto);
@@ -1503,13 +1488,13 @@ public class AdminDashBoardManager {
 
 		}
 
-	//	/** Hour wise couunt 
+		// /** Hour wise couunt
 		Map<Object, Map<Object, Long>> hourWiseCountMap = hourCntLst.stream()
 				.collect(Collectors.groupingBy(DateWiseHourCountDto::getMsgType,
 						Collectors.groupingBy(DateWiseHourCountDto::getHourStamp, Collectors.counting())));
-		///** default hour 
-		//Map<String, Long> hourCntMap = getHourRange(currentTs, lasthrTimeStmp);
-		
+		/// ** default hour
+		// Map<String, Long> hourCntMap = getHourRange(currentTs, lasthrTimeStmp);
+
 		Map<Object, Long> hourCntMap = getHourRange(currentTs, lasthrTimeStmp);
 
 		Map<Object, Map<Object, Long>> hourWiseCount = addDefaultHour(hourWiseCountMap, hourCntMap);
@@ -1529,7 +1514,7 @@ public class AdminDashBoardManager {
 	}
 
 	@SuppressWarnings("unused")
-	public ContactTypeSummaryDto getDayWiseMsgStatusSummary(long dateRange1,long dateRange2, int days) {
+	public ContactTypeSummaryDto getDayWiseMsgStatusSummary(long dateRange1, long dateRange2, int days) {
 		String tnt = AppContextUtil.getTenant();
 		List<String> lst = getListOfContactType();
 
@@ -1545,11 +1530,11 @@ public class AdminDashBoardManager {
 		}
 		// use the same datetime to create the end of the day using the maximum time for
 		long lasDayTimeStmp = noOfdaysTstamp.toInstant().toEpochMilli();
-		if(dateRange1>0) {
-			lasDayTimeStmp =dateRange1; 
+		if (dateRange1 > 0) {
+			lasDayTimeStmp = dateRange1;
 		}
-		if(dateRange2>0) {
-			currentTs =dateRange2;
+		if (dateRange2 > 0) {
+			currentTs = dateRange2;
 		}
 
 		String monthYear = new SimpleDateFormat(DateUtil.MMM_YYYY_FORMAT).format(currentTs);
@@ -1569,8 +1554,9 @@ public class AdminDashBoardManager {
 			List<DBObject> list = new ArrayList<DBObject>();
 			list = getAggregationMatchForMsgStatus(lasDayTimeStmp, currentTs);
 			DBCollection col = mongoTemplate.getCollection(contactType);
-			Cursor cursor = col.aggregate(list,AggregationOptions.builder().allowDiskUse(true).outputMode(OutputMode.CURSOR).build());
-		
+			Cursor cursor = col.aggregate(list,
+					AggregationOptions.builder().allowDiskUse(true).outputMode(OutputMode.CURSOR).build());
+
 			while (cursor.hasNext()) {
 				ContactTypeCountDto contactDto = new ContactTypeCountDto();
 				DBObject object = cursor.next();
@@ -1603,11 +1589,11 @@ public class AdminDashBoardManager {
 			}
 
 		}
-	//	/** Hour wise couunt
+		// /** Hour wise couunt
 		Map<Object, Map<Object, Long>> dateWiseCountMap = dayCntLst.stream()
 				.collect(Collectors.groupingBy(DateWiseHourCountDto::getMsgType,
 						Collectors.groupingBy(DateWiseHourCountDto::getDate, Collectors.counting())));
-		///** default hour 
+		/// ** default hour
 		Map<Object, Long> dateRanMap = getDatesRange(currentTs, lasDayTimeStmp);
 
 		Map<Object, Map<Object, Long>> dateWiseSummary = addDefaultHour(dateWiseCountMap, dateRanMap);
@@ -1615,9 +1601,9 @@ public class AdminDashBoardManager {
 		dateWiseSummary = fetchAndAddAllMsgStatus(dateWiseSummary, dateRanMap);
 
 		ContactTypeSummaryDto dto = new ContactTypeSummaryDto();
-		
+
 		dateWiseSummary = sortMap(dateWiseSummary);
-		
+
 		dto.setTenant(tnt);
 		dto.setMap(map);
 		dto.setMonth(monthYear);
@@ -1628,7 +1614,6 @@ public class AdminDashBoardManager {
 		return dto;
 
 	}
-
 
 	/** add default hour **/
 
@@ -1679,34 +1664,29 @@ public class AdminDashBoardManager {
 		}
 		return hourWiseCount;
 	}
-	
+
 	/** Agreegration Query to fetch msg status **/
-	public List<DBObject> getAggregationMatchForMsgStatus(long lasthrTimeStmp,long currentTs) {
-		String metaQry = "{\"categoryType\" : \"AUTO_REPLY\",\r\n"
-						 + "\"composeType\" : \"N\",\r\n"
-						 + "\"sendType\" : \"PM\"}";
-		//queryFilter = "{'FirstName':'Ian'}";
-		
+	public List<DBObject> getAggregationMatchForMsgStatus(long lasthrTimeStmp, long currentTs) {
+		String metaQry = "{\"categoryType\" : \"AUTO_REPLY\",\r\n" + "\"composeType\" : \"N\",\r\n"
+				+ "\"sendType\" : \"PM\"}";
+		// queryFilter = "{'FirstName':'Ian'}";
+
 		List<DBObject> list = new ArrayList<DBObject>();
 		// Match condtion
-		list.add(Aggregation.match(new Criteria("type").is("O"))
-				.toDBObject(Aggregation.DEFAULT_CONTEXT));
-		//list.add(Aggregation.match(new Criteria("meta").is(metaQry))
-		//		.toDocument(Aggregation.DEFAULT_CONTEXT));
-		list.add(Aggregation.match(new Criteria("meta.composeType").is("N"))
-				.toDBObject(Aggregation.DEFAULT_CONTEXT));
-		list.add(Aggregation.match(new Criteria("meta.sendType").is("PM"))
-				.toDBObject(Aggregation.DEFAULT_CONTEXT));
-		
+		list.add(Aggregation.match(new Criteria("type").is("O")).toDBObject(Aggregation.DEFAULT_CONTEXT));
+		// list.add(Aggregation.match(new Criteria("meta").is(metaQry))
+		// .toDocument(Aggregation.DEFAULT_CONTEXT));
+		list.add(Aggregation.match(new Criteria("meta.composeType").is("N")).toDBObject(Aggregation.DEFAULT_CONTEXT));
+		list.add(Aggregation.match(new Criteria("meta.sendType").is("PM")).toDBObject(Aggregation.DEFAULT_CONTEXT));
+
 		list.add(Aggregation.match(new Criteria("timestamp").gt(lasthrTimeStmp).lt(currentTs))
 				.toDBObject(Aggregation.DEFAULT_CONTEXT));
 		list.add(Aggregation.group("stamps").count().as("count").toDBObject(Aggregation.DEFAULT_CONTEXT));
-		
+
 		return list;
 	}
-	
-	
-	public Map<Object, Map<Object, Long>>  sortMap(Map<Object, Map<Object, Long>> map) {
+
+	public Map<Object, Map<Object, Long>> sortMap(Map<Object, Map<Object, Long>> map) {
 		Map<Object, Map<Object, Long>> sortedMap = new HashMap<>();
 		for (Map.Entry<Object, Map<Object, Long>> entry : map.entrySet()) {
 			Object k = entry.getKey();
@@ -1714,9 +1694,8 @@ public class AdminDashBoardManager {
 			sortedMap.put(k, v);
 		}
 		return sortedMap;
-		
+
 	}
-	
 
 	public List<String> getListChannelCongig() {
 		List<String> listOfChannelConfig = new ArrayList<String>();
@@ -1732,8 +1711,7 @@ public class AdminDashBoardManager {
 
 		return listOfChannelConfig;
 	}
-	
-	
+
 	@SuppressWarnings("unchecked")
 	public List<MonthDtlsDto> fetchUniqueMonth() {
 
@@ -1741,7 +1719,8 @@ public class AdminDashBoardManager {
 		Query query = new Query();
 		query.with(new Sort(new Order(Direction.DESC, "startSessionStamp")));
 		query.fields().include("startSessionStamp");
-		List<Long> msgDocLst = mongoTemplate.getCollection("CHAT_SESSION").distinct("startSessionStamp",query.getQueryObject());
+		List<Long> msgDocLst = mongoTemplate.getCollection("CHAT_SESSION").distinct("startSessionStamp",
+				query.getQueryObject());
 		List<MonthDtlsDto> listofMonth = new ArrayList<>();
 		for (Long docTimeStamp : msgDocLst) {
 			long timestamp = (docTimeStamp - (docTimeStamp % (DateUtil.ONEDAY)));
@@ -1761,10 +1740,8 @@ public class AdminDashBoardManager {
 			listofMonth.add(dto);
 		}
 
-
 		return listofMonth;
 	}
-
 
 	public String getSummaryWithChannelId(SummaryDocDto dto) {
 		String tenant = dto.getDomain();
@@ -1783,7 +1760,7 @@ public class AdminDashBoardManager {
 		}
 		return null;
 	}
-	
+
 	public String getSummaryId(SummaryDocDto dto) {
 		String tenant = dto.getDomain();
 		if (dto.getChannel().contains(ContactType.WHATSAPP.name())) {
@@ -1801,6 +1778,5 @@ public class AdminDashBoardManager {
 		}
 		return null;
 	}
-
 
 }
