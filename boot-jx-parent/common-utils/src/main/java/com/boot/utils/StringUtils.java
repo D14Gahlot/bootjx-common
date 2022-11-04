@@ -526,6 +526,9 @@ public final class StringUtils {
 		if (str == null) {
 			return new String[0];
 		}
+		if (str.startsWith("[") && str.endsWith("]")) {
+			str = str.trim().substring(1, str.length() - 1);
+		}
 		return str.split(",");
 	}
 
