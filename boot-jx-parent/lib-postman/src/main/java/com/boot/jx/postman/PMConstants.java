@@ -42,7 +42,7 @@ public class PMConstants {
 
 		public static final String ADMIN = "ADMIN";
 		public static final String AGENT = "AGENT";
-		public static final String ALLOWED = "DUPER_USER,SUPER_DEV,BUSINESS_PARTNER,BUSINESS_USER,ADMIN,AGENT";
+		public static final String ALLOWED = "DUPER_USER,SUPER_DEV,WABA_MANAGER,BUSINESS_PARTNER,BUSINESS_USER,ADMIN,AGENT";
 	}
 
 	public static class MESSAGE_BOUND_TYPE {
