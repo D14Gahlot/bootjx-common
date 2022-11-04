@@ -28,6 +28,10 @@ public class PMConstants {
 		 */
 		public static final String SUPER_DEV = "SUPER_DEV";
 		/**
+		 * Internal Users, having WABA-Access to assigned/created waba channels
+		 */
+		public static final String WABA_MANAGER = "WABA_MANAGER";
+		/**
 		 * User who can create domains for clients and has Admin-Access to those domains
 		 */
 		public static final String BUSINESS_PARTNER = "BUSINESS_PARTNER";
