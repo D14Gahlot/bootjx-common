@@ -34,6 +34,7 @@ public class WabaPartnerDoc implements IDocument, AuditCreateEntity, Serializabl
 	private String clientId;
 	private Map<String, Object> client;
 	private Map<String, Object> balance;
+	
 	private String domainUserId;
 	private List<String> allowedChannel;
 	private List<String> revokedChannel;
@@ -45,6 +46,7 @@ public class WabaPartnerDoc implements IDocument, AuditCreateEntity, Serializabl
 	private Boolean isActive;
 	private Boolean isSyncd;
 	private Long syncdStamp;
+	private Long balanceStamp;
 
 	public Long getCreatedStamp() {
 		return createdStamp;
@@ -204,6 +206,14 @@ public class WabaPartnerDoc implements IDocument, AuditCreateEntity, Serializabl
 
 	public void setPassword(String password) {
 		this.password = password;
+	}
+
+	public Long getBalanceStamp() {
+		return balanceStamp;
+	}
+
+	public void setBalanceStamp(Long balanceStamp) {
+		this.balanceStamp = balanceStamp;
 	}
 
 }
