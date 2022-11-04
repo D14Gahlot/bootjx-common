@@ -35,6 +35,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.domain.Sort.Order;
+import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
 import org.springframework.data.mongodb.core.aggregation.AggregationResults;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -62,10 +63,16 @@ import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.doc.config.ChannelConfigDoc;
 import com.boot.jx.postman.doc.tpo.WABAConversation;
 import com.boot.jx.postman.model.Message;
+import com.boot.jx.postman.store.MessageStore;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.Constants;
 import com.boot.utils.DateUtil;
 import com.boot.utils.JsonUtil;
+import com.mongodb.AggregationOptions;
+import com.mongodb.AggregationOptions.OutputMode;
+import com.mongodb.Cursor;
+import com.mongodb.DBCollection;
+import com.mongodb.DBObject;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 
@@ -78,6 +85,9 @@ public class AccountDashBoardManager {
 
 	@Autowired
 	private DomainSummaryMetaStore domSumMetaStore;
+
+	@Autowired
+	private MessageStore messageStore;
 
 	public List<DomainDoc> getAllDomainAccount() {
 		Query query = new Query();
@@ -708,25 +718,6 @@ public class AccountDashBoardManager {
 		long lastTimeStampWm = lastTimeStamp - Integer.parseInt(formattedHM) * 60 * 1000L;
 		lastTimeStampWm = (lastTimeStampWm - (lastTimeStampWm % (1000 * 60)));
 
-		/** adding Hour to last time **/
-		/*
-		 * String curHr = getHour(currentTStamp); String lastHr =
-		 * getHour(lastTimeStamp);
-		 * 
-		 * int currHrInt = Integer.parseInt(curHr); int lastHrInt =
-		 * Integer.parseInt(lastHr); if (currHrInt < 12) { currHrInt = currHrInt + 24; }
-		 * for (int i = lastHrInt; i <= currHrInt; i++) { int k = i; if (i > 24) { k = i
-		 * - 24; } String keyS = String.valueOf(k); if (keyS.length() == 1) { keyS = "0"
-		 * + keyS; } mapHr.put(keyS, new Long(0));
-		 * 
-		 * }
-		 * 
-		 * Map<String, Long> result =
-		 * mapHr.entrySet().stream().sorted(Map.Entry.comparingByKey()).collect(
-		 * Collectors .toMap(Map.Entry::getKey, Map.Entry::getValue, (oldValue,
-		 * newValue) -> oldValue, LinkedHashMap::new));
-		 */
-
 		for (long lastTS = lastTimeStampWm; lastTS <= currentTStamp; lastTS = lastTS + DateUtil.MIN_30) {
 			mapMinWise.put(lastTS, new Long(0));
 		}
@@ -771,6 +762,9 @@ public class AccountDashBoardManager {
 			List<ContactTypeCountDto> messageTypeLst = new ArrayList<ContactTypeCountDto>();
 			List<Document> list = new ArrayList<Document>();
 			list = getAggregationMatchForMsgStatus(lasthrTimeStmp, currentTs);
+//			DBCollection col = mongoTemplate.getCollection(contactType);
+//			Cursor cursor = col.aggregate(list,
+//					AggregationOptions.builder().allowDiskUse(true).outputMode(OutputMode.CURSOR).build());
 
 			MongoCursor<Document> cursor = mongoTemplate.collection(contactType).aggregate(list).iterator();
 			while (cursor.hasNext()) {
@@ -1024,28 +1018,6 @@ public class AccountDashBoardManager {
 
 		for (String contactType : lst) {
 			LOGGER.info("contactType :" + contactType);
-//			
-//			List<Document> list = new ArrayList<Document>();
-//			list = getAggregationMatchForMsgStatus(dateRange1, dateRange2);
-//			MongoCursor<Document> cursor = mongoTemplate.collection(contactType).aggregate(list).iterator();
-//			while (cursor.hasNext()) {
-//				ContactTypeCountDto contactDto = new ContactTypeCountDto();
-//				Document object = cursor.next();
-//				if (ArgUtil.is(object)) {
-//					JSONObject jsonObject = new JSONObject(JsonUtil.toJson(object));
-//					String type = ArgUtil.parseAsString(jsonObject.get("_id"));
-//					if (ArgUtil.is(type)) {
-//						Map<String, Object> mapValue = JsonUtil.fromJsonToMap(type);
-//						long count = ArgUtil.parseAsLong(object.get("count"), 0L);
-//						contactDto.setType(type);
-//						contactDto.setTotalCount(count);
-//						
-//					}
-//				}
-//			
-//			}
-//		
-
 			Query query = new Query();
 			query.addCriteria(Criteria.where("timestamp").gt(dateRange1).lt(dateRange2));
 			query.with(new Sort(new Order(Direction.DESC, "timestamp")));

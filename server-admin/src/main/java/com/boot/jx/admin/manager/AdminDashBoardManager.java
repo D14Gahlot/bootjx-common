@@ -25,6 +25,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -40,6 +41,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.domain.Sort.Order;
+import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
 import org.springframework.data.mongodb.core.aggregation.AggregationResults;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -68,6 +70,11 @@ import com.boot.jx.postman.model.TagDocument;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.DateUtil;
 import com.boot.utils.JsonUtil;
+import com.mongodb.AggregationOptions;
+import com.mongodb.AggregationOptions.OutputMode;
+import com.mongodb.Cursor;
+import com.mongodb.DBCollection;
+import com.mongodb.DBObject;
 import com.mongodb.client.MongoCursor;
 
 @Component
@@ -1414,7 +1421,6 @@ public class AdminDashBoardManager {
 	}
 
 	/** Read ,Unread,sent,deliver msg count Hour Wise */
-
 	@SuppressWarnings("unused")
 	public ContactTypeSummaryDto getHourWiseMsgStatusSummary(long timestamp, long hr) {
 		String tnt = AppContextUtil.getTenant();

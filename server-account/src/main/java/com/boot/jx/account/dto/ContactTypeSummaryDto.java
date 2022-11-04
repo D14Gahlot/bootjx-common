@@ -63,14 +63,6 @@ public class ContactTypeSummaryDto {
 		this.summaryCount = summaryCount;
 	}
 
-	public Map<Object, Map<Object, Long>> getDateWiseSummaryCount() {
-		return dateWiseSummaryCount;
-	}
-
-	public void setDateWiseSummaryCount(Map<Object, Map<Object, Long>> dateWiseSummaryCount) {
-		this.dateWiseSummaryCount = dateWiseSummaryCount;
-	}
-
 	public Map<Object, Map<Object, Object>> getDateWiseCountMap() {
 		return dateWiseCountMap;
 	}
@@ -85,6 +77,14 @@ public class ContactTypeSummaryDto {
 
 	public void setHourWiseCountMap(Map<Object, Map<Object, Long>> hourWiseCountMap) {
 		this.hourWiseCountMap = hourWiseCountMap;
+	}
+
+	public Map<Object, Map<Object, Long>> getDateWiseSummaryCount() {
+		return dateWiseSummaryCount;
+	}
+
+	public void setDateWiseSummaryCount(Map<Object, Map<Object, Long>> dateWiseSummaryCount) {
+		this.dateWiseSummaryCount = dateWiseSummaryCount;
 	}
 
 }
