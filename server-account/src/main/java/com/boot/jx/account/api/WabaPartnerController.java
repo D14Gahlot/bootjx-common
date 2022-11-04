@@ -45,6 +45,7 @@ import com.boot.utils.Constants;
 import com.boot.utils.CryptoUtil;
 import com.boot.utils.JsonUtil;
 import com.boot.utils.StringUtils;
+import com.boot.utils.TimeUtils;
 import com.boot.utils.URLBuilder;
 import com.fasterxml.jackson.annotation.JsonView;
 
@@ -255,14 +256,15 @@ public class WabaPartnerController {
 
 	@ResponseBody
 	@RequestMapping(value = { "/pub/waba/clients/balance", "/api/waba/clients/balance" }, method = RequestMethod.GET)
-	public ApiResponse<WabaPartnerDoc, Object> clientBalance(
+	public ApiResponse<WabaUsageDoc, WabaPartnerDoc> clientBalance(
 			@RequestParam(required = false, defaultValue = "false") boolean refresh, @RequestParam String clientId)
 			throws NoSuchAlgorithmException {
-		if (refresh) {
+		WabaPartnerDoc clientDoc = mongoTemplate.findByIdSafeCheck(clientId, WabaPartnerDoc.class);
+		if (refresh && TimeUtils.isExpired(clientDoc.getBalanceStamp(), "5min")) {
 			String wabaserver = wabaServer();
 			WabaPartnerDoc partner = getPartnerWabaDoc(null);
 			MapModel resp = restService.ajax(wabaserver)
-					.path("/partners/" + partner.getPartnerId() + "/clients/" + clientId)
+					.path("/partners/" + partner.getPartnerId() + "/clients/" + clientId + "/info/balance")
 					.header("Authorization",
 							String.format("%s %s", partner.getAuthorization().get("token_type"),
 									partner.getAuthorization().get("access_token")))
@@ -277,12 +279,13 @@ public class WabaPartnerController {
 				usageDoc.setSyncdStamp(System.currentTimeMillis());
 				mongoTemplate.save(usageDoc);
 			}
-			WabaPartnerDoc clientDoc = mongoTemplate.findByIdSafeCheck(clientId, WabaPartnerDoc.class);
 			clientDoc.setBalance(resp.remove("usage").toMap());
+			clientDoc.setBalanceStamp(System.currentTimeMillis());
 			mongoTemplate.save(clientDoc);
 		}
-		List<WabaPartnerDoc> clientDocs = mongoTemplate.findAll(WabaPartnerDoc.class);
-		return ApiResponse.buildResults(clientDocs);
+		List<WabaUsageDoc> usageDocs = mongoTemplate
+				.find(MQB.collection(WabaUsageDoc.class).where("clientId", clientId));
+		return ApiResponse.buildResults(usageDocs, clientDoc);
 	}
 
 	@JsonView(PMEnvironment.PublicProperty.class)
