@@ -88,7 +88,7 @@ public class PartnerController {
 
 	@Autowired
 	private EmpAuthService empAuthService;
-	
+
 	@RequestMapping(value = { "", "/", "/**", "/auth/**", "/app/**" }, method = { RequestMethod.GET })
 	public String home(Model model, @RequestParam(required = false) String theme) {
 		String tnt = AppContextUtil.getTenant();
@@ -225,9 +225,8 @@ public class PartnerController {
 
 		if (!ArgUtil.is(accountDoc)
 				|| !ArgUtil.areEqual(CryptoUtil.getSHA2Hash(newpass), accountDoc.getMeta().getPassword())) {
-			// ApiResponseUtil.throwInputException(new
-			// ApiFieldError().obzect("login").field("password")
-			// .codeKey("ValidCredentials").description("Invalid Email or Password"));
+			ApiResponseUtil.throwInputException(new ApiFieldError().obzect("login").field("password")
+					.codeKey("ValidCredentials").description("Invalid Email or Password"));
 		}
 
 		sessionService.login(accountDoc, request);

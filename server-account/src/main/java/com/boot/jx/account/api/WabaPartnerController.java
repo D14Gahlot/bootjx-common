@@ -260,7 +260,7 @@ public class WabaPartnerController {
 			@RequestParam(required = false, defaultValue = "false") boolean refresh, @RequestParam String clientId)
 			throws NoSuchAlgorithmException {
 		WabaPartnerDoc clientDoc = mongoTemplate.findByIdSafeCheck(clientId, WabaPartnerDoc.class);
-		if (refresh && TimeUtils.isExpired(clientDoc.getBalanceStamp(), "5min")) {
+		if (refresh || TimeUtils.isExpired(ArgUtil.parseAsLong(clientDoc.getBalanceStamp(), 0L), "5min")) {
 			String wabaserver = wabaServer();
 			WabaPartnerDoc partner = getPartnerWabaDoc(null);
 			MapModel resp = restService.ajax(wabaserver)
