@@ -40,7 +40,11 @@ import com.boot.jx.postman.PMEnvironment.PMCommonConfig;
 import com.boot.jx.rest.RestService;
 import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.CollectionUtil;
+import com.boot.utils.Constants;
 import com.boot.utils.CryptoUtil;
+import com.boot.utils.JsonUtil;
+import com.boot.utils.StringUtils;
 import com.boot.utils.URLBuilder;
 import com.fasterxml.jackson.annotation.JsonView;
 
@@ -124,8 +128,8 @@ public class WabaPartnerController {
 
 	@RequestMapping(value = { "/app/waba/redirect", "/app/waba/redirect/{ticketid}" }, method = { RequestMethod.GET })
 	public String redirected(Model model, @PathVariable(required = false, value = "ticketid") String ticketid,
-			@RequestParam(required = false) String client, @RequestParam(required = false) List<String> channels,
-			@RequestParam(required = false) List<String> revoked) {
+			@RequestParam(required = false) String client, @RequestParam(required = false) String channels,
+			@RequestParam(required = false) String revoked) {
 		model.addAllAttributes(appCommonConfig.appAttributes());
 		ticketid = ArgUtil.parseAsString(commonHttpRequest.getRequestParam("ticketid"), ticketid);
 		if (ArgUtil.not(ticketid)) {
@@ -144,14 +148,17 @@ public class WabaPartnerController {
 			ApiResponseUtil.throwException("Access Denied");
 		}
 
-		if (ArgUtil.is(channels)) {
-			for (String channelId : channels) {
+		List<String> channelList = StringUtils.toList(channels);
+		// StringUtils.toList(channels);
+
+		if (ArgUtil.is(channelList)) {
+			for (String channelId : channelList) {
 				currentUser.wabaChannels().add(channelId);
 			}
 		}
-
-		if (ArgUtil.is(revoked)) {
-			for (String channelId : revoked) {
+		List<String> revokedList = StringUtils.toList(revoked);
+		if (ArgUtil.is(revokedList)) {
+			for (String channelId : revokedList) {
 				currentUser.wabaChannels().remove(channelId);
 			}
 		}
@@ -160,8 +167,8 @@ public class WabaPartnerController {
 
 		log.eventType("WABA_LINK_REDIRECT");
 		log.setClientId(client);
-		log.setAllowedChannel(channels);
-		log.setRevokedChannel(revoked);
+		log.setAllowedChannel(channelList);
+		log.setRevokedChannel(revokedList);
 		mongoTemplate.save(log);
 		model.addAttribute("MESSAGE", "TICKET :" + log.getId() + " : " + log.getClientId());
 		return "redirect:/partner/app/waba";
