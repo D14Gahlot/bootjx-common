@@ -6,6 +6,7 @@ import org.springframework.context.annotation.PropertySource;
 
 import com.boot.jx.AppContextUtil;
 import com.boot.jx.postman.PMConstants.CHAT_MODE;
+import com.boot.jx.postman.PMConstants;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PMEnvironment.PMConfigurationObject;
 import com.boot.jx.postman.PMEnvironment.PMDomainConfig;
@@ -31,7 +32,8 @@ public class PMDomainConfigImpl implements PMDomainConfig {
 	@Override
 	public String getDefaultInboundQueue(String channelId, CHAT_MODE mode) {
 		if (CHAT_MODE.AGENT.equals(mode)) {
-			return environment.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_CHAT_AGENT_QUEUE).asString();
+			return environment.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_CHAT_AGENT_QUEUE)
+					.asString(PMConstants.DEFAULT.AGENT_QUEUE_CODE);
 		} else {
 			ChannelConfig channel = environment.config().channel(channelId);
 			if (ArgUtil.is(channel) && ArgUtil.is(channel.getInboundQueue())) {
