@@ -16,16 +16,12 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.Spliterator;
-import java.util.Spliterators;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 import org.bson.Document;
 import org.json.JSONObject;
@@ -715,16 +711,16 @@ public class AccountDashBoardManager {
 		Date date = new Date(lastTimeStamp);
 		SimpleDateFormat sdfHM = new SimpleDateFormat("mm");
 		String formattedHM = sdfHM.format(date);
-		long lastTimeStampWm = lastTimeStamp - Integer.parseInt(formattedHM) * 60 * 1000L;
-		lastTimeStampWm = (lastTimeStampWm - (lastTimeStampWm % (1000 * 60)));
-
-		for (long lastTS = lastTimeStampWm; lastTS <= currentTStamp; lastTS = lastTS + DateUtil.MIN_30) {
-			mapMinWise.put(lastTS, new Long(0));
-		}
-
-		Map<Object, Long> result = new TreeMap<Object, Long>(mapMinWise);
-
-		return result;
+	   	long lastTimeStampWm = lastTimeStamp-Integer.parseInt(formattedHM)*60*1000L;
+	   	lastTimeStampWm = (lastTimeStampWm - (lastTimeStampWm % (1000* 60 )));
+	   
+		
+			for(long lastTS=lastTimeStampWm;lastTS<=currentTStamp;lastTS=lastTS+DateUtil.MIN_30) {
+				mapMinWise.put(lastTS, new Long(0));
+			}
+		
+				Map<Object, Long> result = new TreeMap<Object, Long>(mapMinWise);
+	      return result;
 	}
 
 	/** Read ,Unread,sent,deliver msg count Hour Wise */
