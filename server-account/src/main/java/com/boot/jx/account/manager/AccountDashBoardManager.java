@@ -484,14 +484,15 @@ public class AccountDashBoardManager {
 					String formattedDateHm = sdfH.format(date);
 					SimpleDateFormat sdfm = new SimpleDateFormat("mm");
 					String min = sdfm.format(date);
-					int m = Integer.parseInt(min);
-					long tStamp = timeStamp;
-					if (m > 30) {
-						tStamp = timeStamp - ((m - 30) * 60 * 1000L);
-					} else {
-						tStamp = timeStamp - (m * 60 * 1000L);
-					}
-					long tStampWmS = (tStamp - (tStamp % (1000 * 60)));
+					//int m = Integer.parseInt(min);
+					//long tStamp = timeStamp;
+//					if (m > 30) {
+//						tStamp = timeStamp + ((60 - m) * 60 * 1000L);
+//					} else {
+//						tStamp = timeStamp + ((30-m) * 60 * 1000L);
+//					}
+//					long tStampWmS = (tStamp - (tStamp % (1000 * 60)));
+					long tStampWmS = getHour(timeStamp);
 
 					hourListH.add(formattedDateHm);
 					hrDto.setDate(yyyyMMdd);
@@ -683,11 +684,17 @@ public class AccountDashBoardManager {
 		String min = sdfm.format(date);
 		int m = Integer.parseInt(min);
 		long tStamp = timeStamp;
+//		if (m > 30) {
+//			tStamp = timeStamp - ((m - 30) * 60 * 1000L);
+//		} else {
+//			tStamp = timeStamp - (m * 60 * 1000L);
+//		}
 		if (m > 30) {
-			tStamp = timeStamp - ((m - 30) * 60 * 1000L);
+			tStamp = timeStamp + ((60 - m) * 60 * 1000L);
 		} else {
-			tStamp = timeStamp - (m * 60 * 1000L);
+			tStamp = timeStamp + ((30-m) * 60 * 1000L);
 		}
+		
 		long tStampWmS = (tStamp - (tStamp % (1000 * 60)));
 
 		return tStampWmS;
@@ -710,16 +717,21 @@ public class AccountDashBoardManager {
 		Date date = new Date(lastTimeStamp);
 		SimpleDateFormat sdfHM = new SimpleDateFormat("mm");
 		String formattedHM = sdfHM.format(date);
-	   	long lastTimeStampWm = lastTimeStamp-Integer.parseInt(formattedHM)*60*1000L;
-	   	lastTimeStampWm = (lastTimeStampWm - (lastTimeStampWm % (1000* 60 )));
-	   
-		
-			for(long lastTS=lastTimeStampWm;lastTS<=currentTStamp;lastTS=lastTS+DateUtil.MIN_30) {
-				mapMinWise.put(lastTS, new Long(0));
-			}
-		
-				Map<Object, Long> result = new TreeMap<Object, Long>(mapMinWise);
-	      return result;
+		int m =Integer.parseInt(formattedHM);
+		if(m>30) {
+			m = 60-m;
+		}else {
+			m = 30-m;
+		}
+	    long currTimeStM=currentTStamp+(m * 60 * 1000L);
+		long lastTimeStampWm = lastTimeStamp +m * 60 * 1000L;
+		lastTimeStampWm = (lastTimeStampWm - (lastTimeStampWm % (1000 * 60)));
+		for (long lastTS = lastTimeStampWm; lastTS <= currTimeStM; lastTS = lastTS + DateUtil.MIN_30) {
+			mapMinWise.put(lastTS, new Long(0));
+		}
+		Map<Object, Long> result = new TreeMap<Object, Long>(mapMinWise);
+
+		return result;
 	}
 
 	/** Read ,Unread,sent,deliver msg count Hour Wise */
