@@ -412,7 +412,6 @@ public class AccountDashBoardManager {
 		query.with(new Sort(new Order(Direction.DESC, "created.stamp")));
 		List<WABAConversation> wabaDocLst = mongoTemplate.find(query, WABAConversation.class, "TP_WABA_CONVERSATIONS");
 		for (WABAConversation waba : wabaDocLst) {
-			System.out.println("JSON :" + JsonUtil.toJson(waba));
 			WabaSummaryDocDto dto = new WabaSummaryDocDto();
 			String yyyyMMdd = DateUtil.foramtTimeStampDateAsString(waba.getCreated().getStamp(),
 					DateUtil.YYYYMMDD_DATE_FORMAT);
