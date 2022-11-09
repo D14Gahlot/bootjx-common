@@ -4,6 +4,7 @@ import java.io.Serializable;
 
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 import com.boot.jx.AppConfig;
@@ -28,7 +29,7 @@ import com.fasterxml.jackson.annotation.JsonView;
 public class PMEnvironment {
 
 	private static final Logger LOGGER = LoggerService.getLogger(PMEnvironment.class);
-	
+
 	public static interface PublicProperty {
 	}
 
@@ -308,6 +309,7 @@ public class PMEnvironment {
 
 	}
 
+	@Lazy
 	@Autowired(required = false)
 	private PMEnvironmentProvider provider;
 
