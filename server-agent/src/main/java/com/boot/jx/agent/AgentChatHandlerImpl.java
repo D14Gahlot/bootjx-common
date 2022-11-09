@@ -343,7 +343,10 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 	 */
 	public void onAssign(ChatSessionDoc chatSessionDoc, String agentDept, String agentCode) {
 
-		if (ArgUtil.is(chatSessionDoc.getAssignedToAgent()) && !agentSession.isAdmin()) {
+		String agentCodeOld = chatSessionDoc.getAssignedToAgent();
+		String agentDeptOld = chatSessionDoc.getAssignedToDept();
+
+		if (ArgUtil.is(agentCodeOld) && !agentSession.isAdmin()) {
 			boolean canPickAssigned = environment.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_AGENT_CHAT_PICK_ASSIGNED)
 					.asBoolean(true);
 			if (!canPickAssigned) {
@@ -351,17 +354,18 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 			}
 		}
 
-		if (!ArgUtil.areEqual(chatSessionDoc.getAssignedToAgent(), agentCode)
-				|| !ArgUtil.areEqual(chatSessionDoc.getAssignedToDept(), agentDept)) {
+		if (!ArgUtil.areEqual(agentCodeOld, agentCode) || !ArgUtil.areEqual(agentDeptOld, agentDept)) {
 
 			this.doAssign(chatSessionDoc, new PMArgs().contact(chatSessionDoc.contact()).assignToDeptCode(agentDept)
 					.assignToAgentCode(agentCode));
 
-			ClientApp app = messageContext.clientApp(chatSessionDoc.getAssignedToQueue(), chatSessionDoc.contact());
-			MapModel props = MapModel.from(app.props());
-			MapPathEntry templ = props.keyEntry("agent_transfer");
-			if (templ.exists()) {
-				chatService.send(chatSessionDoc, new OutboxMessage().template(templ.asString()));
+			if (ArgUtil.is(agentCodeOld)) {
+				ClientApp app = messageContext.clientApp(chatSessionDoc.getAssignedToQueue(), chatSessionDoc.contact());
+				MapModel props = MapModel.from(app.props());
+				MapPathEntry templ = props.keyEntry("agent_transfer");
+				if (templ.exists()) {
+					chatService.send(chatSessionDoc, new OutboxMessage().template(templ.asString()));
+				}
 			}
 
 // 	    chatSessionService.assignSessionToAgent(chatSessionDoc);
