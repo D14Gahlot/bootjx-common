@@ -310,7 +310,7 @@ public class PMEnvironment {
 	}
 
 	@Lazy
-	@Autowired(required = false)
+	@Autowired
 	private PMEnvironmentProvider provider;
 
 	public PMConfigurationModel local() {
