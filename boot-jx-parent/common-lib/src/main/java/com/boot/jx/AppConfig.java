@@ -412,6 +412,7 @@ public class AppConfig {
 		if (defaultTenant != null) {
 			Tenants.setDefault(defaultTenant);
 		}
+		this.loadAppParams();
 	}
 
 	public String getDefaultTenant() {
