@@ -181,6 +181,8 @@ public class MessageDefinitions {
 		public Contactable contact();
 
 		public List<Object> trace();
+
+		public MessageRouter route();
 	}
 
 	// External attributes
@@ -201,8 +203,6 @@ public class MessageDefinitions {
 		public String getFormatType();
 
 		public String getFormatSubType();
-
-		public MessageRouter route();
 
 	}
 
