@@ -59,13 +59,16 @@ import com.boot.jx.admin.dto.PeakLoadDto;
 import com.boot.jx.admin.dto.SummaryDocDto;
 import com.boot.jx.admin.dto.TagDocumentDto;
 import com.boot.jx.admin.dto.TagDocumentLst;
+import com.boot.jx.admin.dto.WabaSummaryDocDto;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.doc.config.ChannelConfigDoc;
+import com.boot.jx.postman.doc.tpo.WABAConversation;
 import com.boot.jx.postman.model.Message;
 import com.boot.jx.postman.model.TagDocument;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.Constants;
 import com.boot.utils.DateUtil;
 import com.boot.utils.JsonUtil;
 import com.mongodb.AggregationOptions;
@@ -1778,5 +1781,129 @@ public class AdminDashBoardManager {
 		}
 		return null;
 	}
+	
+	
+public ContactTypeSummaryDto summaryV1(long timestamp) {
+	String tnt = AppContextUtil.getTenant();
+	List<String> lst = getListOfContactType();
+	Date dateTi = new Date(timestamp);
+	String monthYear = new SimpleDateFormat(DateUtil.MMM_YYYY_FORMAT).format(dateTi);
+	Calendar cal = Calendar.getInstance();
+	cal.setTimeInMillis(timestamp);
+
+	int month = cal.get(Calendar.MONTH);
+	int year = cal.get(Calendar.YEAR);
+	long monthMinTimeStamp = DateUtil.getStartTimestamp(month, year).getTime();
+	long monthMaxTimeStamp = DateUtil.getEndTimestamp(month, year).getTime();
+	List<SummaryDocDto> lstSummDto = new ArrayList<>();
+	List<String> hourListH = new ArrayList<String>();
+	List<DateWiseHourCountDto> hourCntLst = new ArrayList<>();
+
+	for (String contactType : lst) {
+		Query query = new Query();
+		query.addCriteria(Criteria.where("timestamp").gt(monthMinTimeStamp).lt(monthMaxTimeStamp));
+		query.with(new Sort(new Order(Direction.DESC, "timestamp")));
+		query.fields().include("timestamp").include("type").include("meta");
+		List<MessageDoc> msgDocLst = mongoTemplate.find(query, MessageDoc.class, contactType.toString());
+		for (MessageDoc doc : msgDocLst) {
+			SummaryDocDto dto = new SummaryDocDto();
+			DateWiseHourCountDto hrDto = new DateWiseHourCountDto();
+			String yyyyMMdd = DateUtil.foramtTimeStampDateAsString(doc.getTimestamp(),
+					DateUtil.YYYYMMDD_DATE_FORMAT);
+			dto.setDate(yyyyMMdd);
+			dto.setType(doc.getType());
+			dto.setChannel(contactType.toString());
+			dto.setMeta(doc.getMeta());
+			dto.setDomain(tnt);
+			String id = getSummaryId(dto);
+			dto.setId(id);
+			if (ArgUtil.is(dto.getId())) {
+				lstSummDto.add(dto);
+			}
+
+		}
+
+	}
+
+	Map<Object, Long> summaryMap = new HashMap<>();
+	Map<String, Map<String, Long>> datwWiseCount = lstSummDto.stream().collect(Collectors.groupingBy(
+			SummaryDocDto::getId, Collectors.groupingBy(SummaryDocDto::getType, Collectors.counting())));
+
+	Map<Object, Map<Object, Object>> dateWiseCountMap = new HashMap<>();
+
+	for (Map.Entry<String, Map<String, Long>> keyValue : datwWiseCount.entrySet()) {
+		String key = keyValue.getKey();
+		Map<Object, Object> dateWiseCnt = new HashMap<>();
+		for (Map.Entry<String, Long> keyValueCount : keyValue.getValue().entrySet()) {
+			String keyType = keyValueCount.getKey();
+			Object count = keyValueCount.getValue();
+			dateWiseCnt.put(keyType, count);
+		}
+		String[] keyId = key.split("_");
+		dateWiseCnt.put("domain", ArgUtil.parseAsString(keyId[0], Constants.BLANK));
+		dateWiseCnt.put("date", ArgUtil.parseAsString(keyId[1], Constants.BLANK));
+		dateWiseCnt.put("channel", ArgUtil.parseAsString(keyId[2], Constants.BLANK));
+
+		dateWiseCountMap.put(key, dateWiseCnt);
+
+	}
+
+	summaryMap = lstSummDto.stream().collect(Collectors.groupingBy(SummaryDocDto::getType, Collectors.counting()));
+
+	// printing the count based on the designation and gender.
+	// LOGGER.info("Group by on multiple properties" + datwWiseCount);
+
+	ContactTypeSummaryDto dto = new ContactTypeSummaryDto();
+	dto.setTenant(tnt);
+	dto.setMonth(monthYear);
+	// dto.setDateWiseSummaryCount(datwWiseCount);
+	dto.setDateWiseCountMap(dateWiseCountMap);
+	dto.setSummaryCount(summaryMap);
+	//saveDomainSummary(dto);
+	return dto;
+}
+
+public List<WabaSummaryDocDto> wabaSummary(long timestamp) {
+	String tnt = AppContextUtil.getTenant();
+	Date dateTi = new Date(timestamp);
+	String monthYear = new SimpleDateFormat(DateUtil.MMM_YYYY_FORMAT).format(dateTi);
+	Calendar cal = Calendar.getInstance();
+	cal.setTimeInMillis(timestamp);
+	int month = cal.get(Calendar.MONTH);
+	int year = cal.get(Calendar.YEAR);
+	long monthMinTimeStamp = DateUtil.getStartTimestamp(month, year).getTime();
+	long monthMaxTimeStamp = DateUtil.getEndTimestamp(month, year).getTime();
+
+	List<WabaSummaryDocDto> wabaLst = new ArrayList<>();
+	Query query = new Query();
+	query.addCriteria(Criteria.where("created.stamp").gt(monthMinTimeStamp).lt(monthMaxTimeStamp));
+	query.with(new Sort(new Order(Direction.DESC, "created.stamp")));
+	List<WABAConversation> wabaDocLst = mongoTemplate.find(query, WABAConversation.class, "TP_WABA_CONVERSATIONS");
+	for (WABAConversation waba : wabaDocLst) {
+		System.out.println("JSON :" + JsonUtil.toJson(waba));
+		WabaSummaryDocDto dto = new WabaSummaryDocDto();
+		String yyyyMMdd = DateUtil.foramtTimeStampDateAsString(waba.getCreated().getStamp(),
+				DateUtil.YYYYMMDD_DATE_FORMAT);
+		dto.setId(yyyyMMdd);
+		dto.setDate(monthYear);
+		if (waba.getMeta() != null && waba.getMeta().get("to_country") != null) {
+			dto.setCountry(waba.getMeta().get("to_country").toString());
+		}
+		dto.setLane(waba.getContact().getLane());
+		Map<String, Object> typeMap = (Map<String, Object>) waba.getConversation().get("origin");
+		if (typeMap != null && !typeMap.isEmpty()) {
+			dto.setType(typeMap.get("type") == null ? "" : typeMap.get("type").toString());
+		}
+		dto.setChannel(waba.getContact().getContactType());
+		dto.setDomain(tnt);
+		dto.setPricing(waba.getPricing());
+		wabaLst.add(dto);
+	}
+
+	return wabaLst;
+}
+
+
+
 
 }
