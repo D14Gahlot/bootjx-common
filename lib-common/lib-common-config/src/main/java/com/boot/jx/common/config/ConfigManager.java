@@ -88,7 +88,10 @@ public class ConfigManager {
 
 				break;
 			default:
-				list.add(MapBuilder.map().put("meta", meta).put("config", pmEnvironment.keyEntry(meta.getKey()))
+				list.add(MapBuilder.map().put("meta", meta)
+						.put("domain", this.pmEnvironment.local().keyEntry(meta.getKey())) // Domain
+						.put("shared", this.pmEnvironment.shared().keyEntry(meta.getKey())) // Shared
+						.put("config", pmEnvironment.keyEntry(meta.getKey())) // Resolved
 						.toMap());
 				break;
 			}
