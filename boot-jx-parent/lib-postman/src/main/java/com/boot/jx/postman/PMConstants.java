@@ -98,6 +98,11 @@ public class PMConstants {
 
 			return false;
 		}
+
+		public static CHAT_MODE from(String chatMode) {
+			return ArgUtil.parseAsEnumT(chatMode, CHAT_MODE.class, null);
+		}
+
 	}
 
 	public static enum APP_TYPE {

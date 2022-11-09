@@ -7,6 +7,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class MessageRouter implements Serializable {
 	private static final long serialVersionUID = 1875887497925865671L;
+	String routerId;
 	String queueCode;
 	String senderCode;
 	String senderType;
@@ -51,6 +52,14 @@ public class MessageRouter implements Serializable {
 
 	public void setSenderApp(String senderApp) {
 		this.senderApp = senderApp;
+	}
+
+	public String getRouterId() {
+		return routerId;
+	}
+
+	public void setRouterId(String routerId) {
+		this.routerId = routerId;
 	}
 
 }

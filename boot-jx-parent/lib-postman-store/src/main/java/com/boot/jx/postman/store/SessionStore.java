@@ -246,6 +246,10 @@ public class SessionStore extends CommonMongoTemplateAbstract {
 		iMessage.session().setRoutingId(chatSessionDoc.getRoutingId());
 
 		iMessage.session().setSessionStamp(chatSessionDoc.getUpdated().getStamp());
+
+		// Router
+		iMessage.route().setRouterId(chatSessionDoc.getRoutingId());
+
 		return iMessage;
 	}
 

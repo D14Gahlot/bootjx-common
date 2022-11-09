@@ -3,6 +3,7 @@ package com.boot.jx.postman.model.ext;
 import java.util.List;
 
 import com.boot.jx.postman.model.ContactMeta;
+import com.boot.jx.postman.model.MessageRouter;
 import com.boot.jx.postman.model.MessageDefinitions.Contactable;
 import com.boot.jx.postman.model.MessageDefinitions.LoggableEntity;
 import com.boot.jx.postman.model.MessageDefinitions.SessionInfo;
@@ -66,6 +67,7 @@ public class InBoundEvent implements LoggableEntity, SessionInfo, TraceMessage {
 
 	public Contactable contact;
 	private MessageSession session;
+	private MessageRouter route;
 	private List<Object> trace;
 
 	public Contactable contact() {
@@ -148,4 +150,19 @@ public class InBoundEvent implements LoggableEntity, SessionInfo, TraceMessage {
 		this.setEventId(id);
 	}
 
+	public MessageRouter getRoute() {
+		return route;
+	}
+
+	public void setRoute(MessageRouter route) {
+		this.route = route;
+	}
+
+	@Override
+	public MessageRouter route() {
+		if (route == null) {
+			this.route = new MessageRouter();
+		}
+		return this.route;
+	}
 }

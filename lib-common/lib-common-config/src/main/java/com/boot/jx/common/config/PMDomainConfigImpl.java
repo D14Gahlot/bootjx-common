@@ -5,6 +5,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 
 import com.boot.jx.AppContextUtil;
+import com.boot.jx.postman.PMConstants.CHAT_MODE;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PMEnvironment.PMConfigurationObject;
 import com.boot.jx.postman.PMEnvironment.PMDomainConfig;
@@ -28,18 +29,27 @@ public class PMDomainConfigImpl implements PMDomainConfig {
 	}
 
 	@Override
-	public String getDefaultInboundQueue(String channelId) {
-		ChannelConfig channel = environment.config().channel(channelId);
-		if (ArgUtil.is(channel) && ArgUtil.is(channel.getInboundQueue())) {
-			return channel.getInboundQueue();
+	public String getDefaultInboundQueue(String channelId, CHAT_MODE mode) {
+		if (CHAT_MODE.AGENT.equals(mode)) {
+			return environment.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_CHAT_AGENT_QUEUE).asString();
 		} else {
-			return getDefaultInboundQueue();
+			ChannelConfig channel = environment.config().channel(channelId);
+			if (ArgUtil.is(channel) && ArgUtil.is(channel.getInboundQueue())) {
+				return channel.getInboundQueue();
+			} else {
+				return getDefaultInboundQueue();
+			}
 		}
 	}
 
 	@Override
 	public String getDefaultInboundQueue(Contactable contact) {
-		return getDefaultInboundQueue(PostManUtil.CHANNEL_ID(contact));
+		return getDefaultInboundQueue(PostManUtil.CHANNEL_ID(contact), null);
+	}
+
+	@Override
+	public String getDefaultInboundQueue(Contactable contact, CHAT_MODE mode) {
+		return getDefaultInboundQueue(PostManUtil.CHANNEL_ID(contact), mode);
 	}
 
 	@Override
