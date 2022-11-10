@@ -17,6 +17,8 @@ import org.springframework.stereotype.Component;
 import com.boot.jx.AppConfig;
 import com.boot.jx.AppContextUtil;
 import com.boot.jx.dict.ContactType;
+import com.boot.jx.exception.ApiHttpExceptions.ApiHttpException;
+import com.boot.jx.exception.ApiHttpExceptions.ApiHttpServerException;
 import com.boot.jx.mongo.CommonMongoQueryBuilder;
 import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.jx.mongo.CommonMongoTemplateAbstract;
@@ -30,6 +32,7 @@ import com.boot.jx.postman.model.MessageReport;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.model.TagDocument;
 import com.boot.jx.utils.PostManUtil;
+import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
 import com.boot.utils.TimeUtils;
@@ -471,7 +474,7 @@ public class MessageStore extends CommonMongoTemplateAbstract {
 		return msg;
 	}
 
-	public void reject(InboxMessage inboxMessageOriginal) {
+	public void reject(InboxMessage inboxMessageOriginal, Throwable e) {
 		String contactId = PostManUtil.CONTACT_ID(inboxMessageOriginal.contact());
 		MessageHold hold = new MessageHold();
 		hold.setInboxMessage(inboxMessageOriginal);
@@ -479,6 +482,18 @@ public class MessageStore extends CommonMongoTemplateAbstract {
 		hold.setTimestamp(System.currentTimeMillis());
 		hold.setAppType(appConfig.getAppType());
 		hold.setAppVenv(appConfig.getAppVenv());
+
+		StackTraceElement[] traces = e.getStackTrace();
+		if (traces.length > 0 && traces[0].toString().length() > 0) {
+			for (StackTraceElement trace : traces) {
+				hold.logs().add(trace.toString());
+			}
+		}
+
+		if (e instanceof ApiHttpServerException || e instanceof ApiHttpException) {
+			hold.setHttpResp(MapModel.from(((ApiHttpException) e).getResponse().getBody()).toMap());
+		}
+
 		mongoTemplate.save(hold, MessageHold.COLLECTION_REJECTED);
 	}
 

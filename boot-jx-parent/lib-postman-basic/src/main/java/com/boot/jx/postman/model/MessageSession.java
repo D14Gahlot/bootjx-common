@@ -15,6 +15,7 @@ public class MessageSession implements Serializable {
 	private String queue;
 	private boolean resolved;
 	private boolean firstMessage;
+	private boolean initMessage;
 	private long sessionStamp;
 
 	private String ticketHash;
@@ -104,6 +105,14 @@ public class MessageSession implements Serializable {
 
 	public void setSessionStamp(long sessionStamp) {
 		this.sessionStamp = sessionStamp;
+	}
+
+	public boolean isInitMessage() {
+		return initMessage;
+	}
+
+	public void setInitMessage(boolean initMessage) {
+		this.initMessage = initMessage;
 	}
 
 }
