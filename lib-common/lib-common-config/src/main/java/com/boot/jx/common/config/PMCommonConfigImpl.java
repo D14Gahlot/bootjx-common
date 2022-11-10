@@ -126,7 +126,8 @@ public class PMCommonConfigImpl implements PMCommonConfig {
 	private SafeKeyHashMap<Object> setupConfigAttributes() {
 		SafeKeyHashMap<Object> setup = new SafeKeyHashMap<Object>();
 		for (ConfigMeta config : ConfigConstants.SETUP_CONFIG_LIST) {
-			setup.put(config.getKey().toUpperCase(), pmEnvironment.keyEntry(config.getKey()).getValue());
+			setup.put(config.getKey().toUpperCase(),
+					ArgUtil.nonEmpty(pmEnvironment.keyEntry(config.getKey()).getValue(), config.getDefaultValue()));
 		}
 
 		// Default Web Channel

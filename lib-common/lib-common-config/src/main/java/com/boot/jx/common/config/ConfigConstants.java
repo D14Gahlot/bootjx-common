@@ -271,6 +271,8 @@ public class ConfigConstants {
 
 	public static enum PERMS_KEY implements EntryMeta {
 
+		BUILD_VERSION(
+				new ConfigMeta("BUILD_VERSION", "perms.build.version").inputType(INPUT_TYPE.NUMBER).defaultValue(3)),
 		CONTACT_CENTER(new ConfigMeta("Contact Center", "perms.contact.center").optionsOnOff()),
 		// Ends here
 		;
