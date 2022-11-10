@@ -148,7 +148,7 @@ public class InBoundService extends ATaskLimiter {
 		try {
 			return this.invokeMethodsInternal(inboxMessageOriginal, asyncMode);
 		} catch (Exception e) {
-			messageStore.reject(inboxMessageOriginal);
+			messageStore.reject(inboxMessageOriginal,e);
 		}
 		return inboxMessageOriginal;
 	}
@@ -227,6 +227,7 @@ public class InBoundService extends ATaskLimiter {
 				chatSessionService.initSessionPost(inboxMessageOriginal, session);
 				InboxMessage inboxMessageFirst = proxyManager.first(session.getSessionId());
 				if (ArgUtil.is(inboxMessageFirst)) {
+					inboxMessageFirst.setSession(inboxMessageOriginal.session());
 					inboxMessageOriginal = inboxMessageFirst;
 					messageContext.setInboxMessage(inboxMessageOriginal);
 				}

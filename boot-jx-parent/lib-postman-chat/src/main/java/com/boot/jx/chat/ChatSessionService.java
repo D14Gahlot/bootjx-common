@@ -96,6 +96,7 @@ public class ChatSessionService {
 					logManager.error(inboxMessage, e);
 				}
 				if (initd) {
+					inboxMessage.session().setInitMessage(true);
 					connector.linkProfile(session, inboxMessage);
 				}
 				messageContext.commitChatContactQuery();
@@ -118,7 +119,7 @@ public class ChatSessionService {
 
 		if (initd) {
 			if (chatUtility.isPushOnly(session)) {
-				this.routeSession(session);
+				InBoundEvent routEvent = this.routeSession(session);
 				inboxMessage.session().setQueue(session.getAssignedToQueue());
 				inboxMessage.session().setDept(session.getAssignedToDept());
 				inboxMessage.session().setAgent(session.getAssignedToAgent());
