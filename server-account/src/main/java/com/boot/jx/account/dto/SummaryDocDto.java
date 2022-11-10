@@ -9,6 +9,7 @@ public class SummaryDocDto {
 	String channel;
 	String type;
 	String uniqueContactId;
+	String lane;
     Map<String, Object> meta;
     Map<Object,Map<String,Long>> hourWiseCount;
 	public String getId() {
@@ -58,6 +59,12 @@ public class SummaryDocDto {
 	}
 	public void setUniqueContactId(String uniqueContactId) {
 		this.uniqueContactId = uniqueContactId;
+	}
+	public String getLane() {
+		return lane;
+	}
+	public void setLane(String lane) {
+		this.lane = lane;
 	}
 	
 

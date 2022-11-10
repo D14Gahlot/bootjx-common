@@ -113,7 +113,7 @@ public class AdminDashBoardContoller {
 	}
 	
 	@ResponseBody
-	@RequestMapping(value = { "/pub/monthwise-summary/waba" }, method = { RequestMethod.GET })
+	@RequestMapping(value = { "/admin/monthwise-summary/waba" }, method = { RequestMethod.GET })
 	public ApiResponse<WabaSummaryDocDto, Object> getMonthWiseWabaSummary(long timestamp) {
 		List<WabaSummaryDocDto> summary = adminDbMgr.wabaSummary(timestamp);
 		return ApiResponse.buildResults(summary);
