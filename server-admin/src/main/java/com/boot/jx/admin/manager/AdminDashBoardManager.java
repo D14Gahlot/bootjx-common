@@ -1145,7 +1145,7 @@ public class AdminDashBoardManager {
 			Query query = new Query();
 			query.addCriteria(Criteria.where("timestamp").gt(lasthrTimeStmp).lt(currentTs));
 			query.with(new Sort(new Order(Direction.DESC, "timestamp")));
-			query.fields().include("timestamp").include("type").include("meta");
+			query.fields().include("timestamp").include("type").include("meta").include("contactId");
 			List<MessageDoc> msgDocLst = mongoTemplate.find(query, MessageDoc.class, contactType.toString());
 			for (MessageDoc doc : msgDocLst) {
 				SummaryDocDto dto = new SummaryDocDto();
@@ -1158,6 +1158,7 @@ public class AdminDashBoardManager {
 				dto.setChannel(contactType.toString());
 				dto.setMeta(doc.getMeta());
 				dto.setDomain(tnt);
+				dto.setLane(getLane(doc.getContactId()));
 				String id = getSummaryWithChannelId(dto);
 				if (ArgUtil.is(id)) {
 					dto.setId(id);
@@ -1263,7 +1264,7 @@ public class AdminDashBoardManager {
 			Query query = new Query();
 			query.addCriteria(Criteria.where("timestamp").gt(lasDayTimeStmp).lt(currentTs));
 			query.with(new Sort(new Order(Direction.DESC, "timestamp")));
-			query.fields().include("timestamp").include("type").include("meta");
+			query.fields().include("timestamp").include("type").include("meta").include("contactId");
 			List<MessageDoc> msgDocLst = mongoTemplate.find(query, MessageDoc.class, contactType.toString());
 			for (MessageDoc doc : msgDocLst) {
 				SummaryDocDto dto = new SummaryDocDto();
@@ -1275,6 +1276,7 @@ public class AdminDashBoardManager {
 				dto.setChannel(contactType.toString());
 				dto.setMeta(doc.getMeta());
 				dto.setDomain(tnt);
+				dto.setLane(getLane(doc.getContactId()));
 				String id = getSummaryId(dto);
 				dto.setId(id);
 				if (ArgUtil.is(dto.getId())) {
@@ -1397,6 +1399,10 @@ public class AdminDashBoardManager {
 
 		return result;
 	}
+
+
+
+	/** Read ,Unread,sent,deliver msg count Hour Wise */
 
 
 	/** Read ,Unread,sent,deliver msg count Hour Wise */
@@ -1846,7 +1852,7 @@ public class AdminDashBoardManager {
 	public String getSummaryWithChannelId(SummaryDocDto dto) {
 		String tenant = dto.getDomain();
 		if (dto.getChannel().contains(ContactType.WHATSAPP.name())) {
-			return tenant + "_" + "wa";
+			return tenant + "_" + "wa"+"_"+dto.getLane();
 		} else if (dto.getChannel().contains(ContactType.FACEBOOK.name())) {
 			return tenant + "_" + "fb";
 		} else if (dto.getChannel().contains(ContactType.TWITTER.name())) {
@@ -1878,8 +1884,17 @@ public class AdminDashBoardManager {
 		}
 		return null;
 	}
-	
-	
+
+public String getLane(String contactid) {
+	String lane=null;
+	if(ArgUtil.is(contactid)) {
+		String[] contactids =contactid.split("_");
+		if(contactids!=null && contactids[1]!=null) {
+			lane =contactids[1];
+		}
+	}
+	return lane;
+}
 
 
 }

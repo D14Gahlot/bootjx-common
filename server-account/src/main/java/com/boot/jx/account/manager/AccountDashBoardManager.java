@@ -325,7 +325,7 @@ public class AccountDashBoardManager {
 	public String getSummaryWithChannelId(SummaryDocDto dto) {
 		String tenant = dto.getDomain();
 		if (dto.getChannel().contains(ContactType.WHATSAPP.name())) {
-			return tenant + "_" + "wa";
+			return tenant + "_" + "wa"+"_"+dto.getLane();
 		} else if (dto.getChannel().contains(ContactType.FACEBOOK.name())) {
 			return tenant + "_" + "fb";
 		} else if (dto.getChannel().contains(ContactType.TWITTER.name())) {
@@ -463,7 +463,7 @@ public class AccountDashBoardManager {
 			Query query = new Query();
 			query.addCriteria(Criteria.where("timestamp").gt(lasthrTimeStmp).lt(currentTs));
 			query.with(new Sort(new Order(Direction.DESC, "timestamp")));
-			query.fields().include("timestamp").include("type").include("meta");
+			query.fields().include("timestamp").include("type").include("meta").include("contactId");
 			List<MessageDoc> msgDocLst = mongoTemplate.find(query, MessageDoc.class, contactType.toString());
 			for (MessageDoc doc : msgDocLst) {
 				SummaryDocDto dto = new SummaryDocDto();
@@ -471,9 +471,12 @@ public class AccountDashBoardManager {
 				long timeStamp = doc.getTimestamp();
 				String yyyyMMdd = DateUtil.foramtTimeStampDateAsString(doc.getTimestamp(),
 						DateUtil.YYYYMMDD_DATE_FORMAT);
+				String contactid = doc.getContactId();
+				dto.setChannel(contactType.toString());
+				String lane = getLane(contactid);
+				dto.setLane(lane);
 				dto.setDate(yyyyMMdd);
 				dto.setType(doc.getType());
-				dto.setChannel(contactType.toString());
 				dto.setMeta(doc.getMeta());
 				dto.setDomain(tnt);
 				String id = getSummaryWithChannelId(dto);
@@ -484,14 +487,7 @@ public class AccountDashBoardManager {
 					String formattedDateHm = sdfH.format(date);
 					SimpleDateFormat sdfm = new SimpleDateFormat("mm");
 					String min = sdfm.format(date);
-					//int m = Integer.parseInt(min);
-					//long tStamp = timeStamp;
-//					if (m > 30) {
-//						tStamp = timeStamp + ((60 - m) * 60 * 1000L);
-//					} else {
-//						tStamp = timeStamp + ((30-m) * 60 * 1000L);
-//					}
-//					long tStampWmS = (tStamp - (tStamp % (1000 * 60)));
+
 					long tStampWmS = getHour(timeStamp);
 
 					hourListH.add(formattedDateHm);
@@ -592,17 +588,19 @@ public class AccountDashBoardManager {
 			Query query = new Query();
 			query.addCriteria(Criteria.where("timestamp").gt(lasDayTimeStmp).lt(currentTs));
 			query.with(new Sort(new Order(Direction.DESC, "timestamp")));
-			query.fields().include("timestamp").include("type").include("meta");
+			query.fields().include("timestamp").include("type").include("meta").include("contactId");
 			List<MessageDoc> msgDocLst = mongoTemplate.find(query, MessageDoc.class, contactType.toString());
 			for (MessageDoc doc : msgDocLst) {
 				SummaryDocDto dto = new SummaryDocDto();
 				DateWiseHourCountDto daySummDto = new DateWiseHourCountDto();
 				String yyyyMMdd = DateUtil.foramtTimeStampDateAsString(doc.getTimestamp(),
 						DateUtil.YYYYMMDD_DATE_FORMAT);
+				String lane = getLane(doc.getContactId());
 				dto.setDate(yyyyMMdd);
 				dto.setType(doc.getType());
 				dto.setChannel(contactType.toString());
 				dto.setMeta(doc.getMeta());
+				dto.setLane(lane);
 				dto.setDomain(tnt);
 				String id = getSummaryId(dto);
 				dto.setId(id);
@@ -1083,12 +1081,23 @@ public class AccountDashBoardManager {
 		query.addCriteria(Criteria.where("isDisabled").is(false));
 		List<ChannelConfigDoc> cofigDocLst = mongoTemplate.find(query, ChannelConfigDoc.class, "CONFIG_CHANNEL");
 		for (ChannelConfigDoc cofigDoc : cofigDocLst) {
-			listOfChannelConfig.add(cofigDoc.getChannelType());
-		}
+				 listOfChannelConfig.add(cofigDoc.getChannelType());
+			}
 
 		listOfChannelConfig = new ArrayList<>(new HashSet<>(listOfChannelConfig));
 
 		return listOfChannelConfig;
+	}
+	
+	public String getLane(String contactid) {
+		String lane=null;
+		if(ArgUtil.is(contactid)) {
+			String[] contactids =contactid.split("_");
+			if(contactids!=null && contactids[1]!=null) {
+				lane =contactids[1];
+			}
+		}
+		return lane;
 	}
 
 }
