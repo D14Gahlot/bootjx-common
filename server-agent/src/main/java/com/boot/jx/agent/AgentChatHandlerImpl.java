@@ -25,6 +25,8 @@ import com.boot.jx.chat.ChatSessionService;
 import com.boot.jx.common.config.ConfigConstants;
 import com.boot.jx.common.doc.AgentDoc;
 import com.boot.jx.common.doc.AgentSessionDoc;
+import com.boot.jx.common.doc.DepartmentDoc;
+import com.boot.jx.common.dto.AgentResponseAuthDto;
 import com.boot.jx.common.store.AgentStore;
 import com.boot.jx.common.store.ChatArchiveBuilder;
 import com.boot.jx.common.store.ChatArchiveService;
@@ -364,7 +366,7 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 				MapModel props = MapModel.from(app.props());
 				MapPathEntry templ = props.keyEntry("agent_transfer");
 				if (templ.exists()) {
-					chatService.send(chatSessionDoc, new OutboxMessage().template(templ.asString()));
+					doSend(chatSessionDoc, new OutboxMessage().template(templ.asString()));
 				}
 			}
 
@@ -406,7 +408,7 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 		chatSessionService.resolveSession(chatSessionDoc);
 		MessageDoc messageDoc = null;
 		if (ArgUtil.is(outboxMessage)) {
-			messageDoc = chatService.send(chatSessionDoc, outboxMessage);
+			messageDoc = doSend(chatSessionDoc, outboxMessage);
 		}
 		return chatArchive.getMessage(messageDoc, chatSessionDoc);
 	}
@@ -461,10 +463,46 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 				outboxMessage.setSubject(tmplClient.process(header.asString(), outboxMessage.session()));
 			}
 			sessionStore.updateResponseTime(sessionDoc);
-			MessageDoc messageDoc = chatService.send(sessionDoc, outboxMessage);
+			MessageDoc messageDoc = doSend(sessionDoc, outboxMessage);
 			return chatArchive.getMessage(messageDoc, sessionDoc);
 		}
 		return new ChatMessageDTO();
+	}
+
+	private void beforeSend(ChatSessionDoc chatSessionDoc, OutboxMessage outboxMessage) {
+		if (ArgUtil.is(outboxMessage.hsm().getCode())) {
+			AgentResponseAuthDto p = agentSession.getProfile();
+			if (ArgUtil.is(p)
+					&& ArgUtil.is(agentSession.getProfile().getAgent_code(), chatSessionDoc.getAssignedToAgent())) {
+				OutboxMessage.AGENT_NAME.save(outboxMessage.model(), agentSession.getProfile().getAgent_name());
+				OutboxMessage.AGENT_CODE.save(outboxMessage.model(), agentSession.getProfile().getAgent_code());
+				OutboxMessage.TEAM_NAME.save(outboxMessage.model(), agentSession.getProfile().getDept().getDept_name());
+				OutboxMessage.TEAM_CODE.save(outboxMessage.model(), agentSession.getProfile().getDept().getDept_code());
+			} else {
+				if (ArgUtil.is(chatSessionDoc.getAssignedToAgent())) {
+					AgentDoc agent = agentStore.findByCode(chatSessionDoc.getAssignedToAgent());
+					OutboxMessage.AGENT_NAME.save(outboxMessage.model(), agent.getAgent_name());
+					OutboxMessage.AGENT_CODE.save(outboxMessage.model(), agent.getAgent_code());
+				}
+				if (ArgUtil.is(chatSessionDoc.getAssignedToDept())) {
+					DepartmentDoc deptDoc = agentStore.findDepartmentByCode(chatSessionDoc.getAssignedToDept());
+					OutboxMessage.TEAM_NAME.save(outboxMessage.model(), deptDoc.getDept_name());
+					OutboxMessage.TEAM_CODE.save(outboxMessage.model(), deptDoc.getDept_code());
+				}
+			}
+		}
+	}
+
+	@Override
+	public MessageDoc doSend(ChatSessionDoc chatSessionDoc, OutboxMessage outboxMessage) {
+		beforeSend(chatSessionDoc, outboxMessage);
+		return chatService.send(chatSessionDoc, outboxMessage);
+	}
+
+	@Override
+	public MessageDoc doReply(ChatSessionDoc chatSessionDoc, OutboxMessage outboxMessage) throws InterruptedException {
+		beforeSend(chatSessionDoc, outboxMessage);
+		return chatService.reply(chatSessionDoc, outboxMessage);
 	}
 
 	public ChatMessageDTO addStickyNote(ChatSessionDoc chatSessionDoc, OutboxMessage outboxMessage) {

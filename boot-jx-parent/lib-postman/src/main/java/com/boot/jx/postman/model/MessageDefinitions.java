@@ -8,6 +8,7 @@ import java.util.List;
 
 import com.boot.jx.dict.ContactType;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.JsonPath;
 import com.boot.utils.JsonUtil;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -176,6 +177,12 @@ public class MessageDefinitions {
 
 	@JsonIgnoreProperties(ignoreUnknown = true)
 	public interface SessionInfo extends SessionId, Serializable {
+
+		public static final JsonPath AGENT_NAME = new JsonPath("session/agent/name");
+		public static final JsonPath AGENT_CODE = new JsonPath("session/agent/code");
+		public static final JsonPath TEAM_NAME = new JsonPath("session/team/name");
+		public static final JsonPath TEAM_CODE = new JsonPath("session/team/code");
+
 		public MessageSession session();
 
 		public Contactable contact();

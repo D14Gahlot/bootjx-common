@@ -97,7 +97,7 @@ public class AgentInBoundHandler extends DefaultChatBoundHandler {
 				MapEntry templ = getTemplate(props, "agent_connected",
 						ConfigConstants.SETUP_KEY.POSTMAN_AGENT_CHAT_AUTOREPLY_TALK2AGENT);
 				if (templ.exists()) {
-					chatService.reply(session, oMsg.template(templ.asString()));
+					agentChatHandler.doReply(session, oMsg.template(templ.asString()));
 					return;
 				}
 			} else if (!ArgUtil.is(assignEvent.sessionAssigned().oldAgent)
@@ -106,14 +106,14 @@ public class AgentInBoundHandler extends DefaultChatBoundHandler {
 				MapEntry templ = getTemplate(props, "agent_notfound",
 						ConfigConstants.SETUP_KEY.POSTMAN_AGENT_CHAT_AUTOREPLY_NOAGENT);
 				if (templ.exists()) {
-					chatService.reply(session, oMsg.template(templ.asString()));
+					agentChatHandler.doReply(session, oMsg.template(templ.asString()));
 					return;
 				}
 			} else {
 
 				MapEntry templ = props.keyEntry("agent_transfer");
 				if (templ.exists()) {
-					chatService.reply(session, oMsg.template(templ.asString()));
+					agentChatHandler.doReply(session, oMsg.template(templ.asString()));
 					return;
 				}
 			}
@@ -121,7 +121,7 @@ public class AgentInBoundHandler extends DefaultChatBoundHandler {
 			LOGGER.error("Error ONE while Connecting to Agent", e);
 			logManager.error(assignEvent, e);
 			try {
-				chatService.reply(session, oMsg.message(
+				agentChatHandler.doReply(session, oMsg.message(
 						"We are having some issues trying connect you to one of our customer representatives. Please be patient"));
 			} catch (InterruptedException e1) {
 				LOGGER.error("Error TWO  while Sending Failure", e1);
