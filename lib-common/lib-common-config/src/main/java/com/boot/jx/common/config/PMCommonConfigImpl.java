@@ -29,6 +29,7 @@ import com.boot.jx.scope.tnt.Tenants;
 import com.boot.jx.scope.tnt.Tenants.TenantResolver;
 import com.boot.model.SafeKeyHashMap;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.CryptoUtil;
 import com.boot.utils.JsonUtil;
 import com.boot.utils.TimeUtils;
 import com.boot.utils.UniqueID;
@@ -101,6 +102,14 @@ public class PMCommonConfigImpl implements PMCommonConfig {
 			}
 		}
 		return cdnBuilder.latest(pmEnvironment.keyEntry("mry.cdn.url").asString(cdnUrl));
+	}
+
+	public String getCdnServerDebug() {
+		String debugCdnUrl = commonHttpRequest.get("CDN_URL");
+		if (ArgUtil.is(debugCdnUrl) && !(debugCdnUrl.startsWith("http://") || debugCdnUrl.startsWith("https://"))) {
+			debugCdnUrl = CryptoUtil.getEncoder().message(debugCdnUrl).decodeBase64().toString();
+		}
+		return ArgUtil.parseAsString(debugCdnUrl, getCdnServer());
 	}
 
 	private long getVersion() {
@@ -176,8 +185,9 @@ public class PMCommonConfigImpl implements PMCommonConfig {
 		map.put("CONFIG", config);
 		map.put("CONFIG_JSON", JsonUtil.toJson(config));
 		map.put("APP", app);
-		String debugCdnUrl = commonHttpRequest.get("CDN_URL");
-		map.put("CDN_URL", ArgUtil.parseAsString(debugCdnUrl, getCdnServer()));
+		String debugCdnUrl = getCdnServerDebug();
+
+		map.put("CDN_URL", debugCdnUrl);
 
 		if (ArgUtil.is(debugCdnUrl) && (debugCdnUrl.contains("127.0.0.1") || debugCdnUrl.contains("localhost"))) {
 			map.put("CDN_DEBUG", ArgUtil.parseAsString(commonHttpRequest.get("CDN_DEBUG"), "true"));

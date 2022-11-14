@@ -12,6 +12,7 @@ import com.boot.jx.postman.model.ITemplates.BasicExternalTemplate;
 import com.boot.jx.postman.model.ITemplates.ITemplate;
 import com.boot.jx.postman.model.MessageDefinitions.Contactable;
 import com.boot.jx.postman.pbook.PBVCard;
+import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
 import com.boot.utils.JsonUtil;
@@ -113,6 +114,10 @@ public class Message<T extends Message<T>> implements Serializable, MessageOptio
 			this.model = new HashMap<String, Object>();
 		}
 		return model;
+	}
+
+	public MapModel modelMap() {
+		return MapModel.from(this.model());
 	}
 
 	@SuppressWarnings("unchecked")

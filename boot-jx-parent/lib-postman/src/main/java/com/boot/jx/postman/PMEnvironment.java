@@ -411,6 +411,8 @@ public class PMEnvironment {
 	}
 
 	public interface PMCommonConfig extends AppCommonConfig {
+		public String getCdnServerDebug();
+
 		public String getCdnServer();
 
 		public String getBotUrl();
