@@ -1,32 +1,57 @@
 package com.boot.jx.contak.api;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.io.UnsupportedEncodingException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.UUID;
+
+import com.amazonaws.services.appflow.model.FileType;
+import com.boot.jx.AppContextUtil;
 import com.boot.jx.api.ApiFieldError;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.api.ApiResponseUtil;
+import com.boot.jx.aws.AWSFileStore;
+import com.boot.jx.contak.dto.CompanyDTO;
+import com.boot.jx.contak.dto.CompanyDoc;
 import com.boot.jx.contak.dto.PhoneLoginDTO;
 import com.boot.jx.contak.dto.PhoneLoginDTO.PhoneLoginResponseDTO;
 import com.boot.jx.contak.dto.PhoneNotpRequestModels.PhoneNotpDto;
+import com.boot.jx.contak.dto.UserRegistrationDTO;
+import com.boot.jx.contak.dto.UserRegistrationDoc;
+import com.boot.jx.contak.manager.FirebaseManager;
+import com.boot.jx.contak.manager.UserRegistrationManager;
+import com.boot.jx.dict.FileFormat;
 import com.boot.jx.exception.ApiHttpExceptions.ApiStatusCodes;
+import com.boot.jx.filter.AppRequestUtil;
 import com.boot.jx.http.CommonHttpRequest;
+import com.boot.jx.model.CommonFile;
 import com.boot.jx.mongo.CommonDocInterfaces.TimeStampIndex;
+import com.boot.jx.mongo.CommonMongoQueryBuilder;
 import com.boot.jx.mongo.CommonMongoTemplate;
+import com.boot.jx.phonebook.doc.PhoneContactDoc;
 import com.boot.jx.phonebook.doc.PhoneNOTPDoc;
 import com.boot.jx.phonebook.doc.PhoneUserDoc;
 import com.boot.jx.phonebook.doc.PhoneUserQuery;
 import com.boot.jx.phonebook.dto.PhoneProfileDTO;
 import com.boot.jx.phonebook.manager.PhoneBookManager;
+import com.boot.model.TimeModels.TimeStampIndexKeyDeserializer;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.Constants;
 import com.boot.utils.CryptoUtil;
 import com.boot.utils.OTPUtils;
 import com.boot.utils.OTPUtils.OTPDetails;
 import com.boot.utils.UniqueID;
+
 
 @RestController
 @RequestMapping("/notp")
@@ -40,6 +65,16 @@ public class NotpController {
 
 	@Autowired
 	PhoneBookManager phoneBookManager;
+	
+	@Autowired
+	UserRegistrationManager userRegistrationManager;
+	
+	
+	@Autowired
+	FirebaseManager firebaseManager;
+	
+	@Autowired
+	AWSFileStore fileStore;
 
 	@RequestMapping(value = "/api/v1/login", method = { RequestMethod.POST })
 	public ApiResponse<PhoneProfileDTO, PhoneLoginResponseDTO> login(@RequestBody PhoneLoginDTO loginDTO) {
@@ -94,7 +129,10 @@ public class NotpController {
 		PhoneUserDoc userDoc = commonMongoTemplate.findById(loginDTO.phone, PhoneUserDoc.class);
 		if (!ArgUtil.is(userDoc)) {
 			ApiResponseUtil.throwInputException(ApiStatusCodes.UNAUTHORIZED, new ApiFieldError().field("phone"));
-		}
+		}	
+		PhoneUserQuery phoneUserQuery = new PhoneUserQuery(userDoc);
+		phoneUserQuery.setLastTimeActiveAt(TimeStampIndex.now());
+		commonMongoTemplate.update(phoneUserQuery);
 
 		if (ArgUtil.is(loginDTO.deviceToken)) { // Step 3
 			if (!CryptoUtil.getEncoder().message(loginDTO.deviceToken).sha2().is(userDoc.authToken)) {
@@ -107,7 +145,12 @@ public class NotpController {
 
 	@RequestMapping(value = "/api/v1/messages/send", method = { RequestMethod.POST })
 	public ApiResponse<PhoneNOTPDoc, Object> send(@RequestBody PhoneNotpDto msg) {
-
+		
+		CompanyDoc compoc = commonMongoTemplate.findOne(
+				CommonMongoQueryBuilder.collection(CompanyDoc.class).where(Criteria.where("apiKey").is(msg.apiKey)));
+		if(!ArgUtil.is(compoc)) {
+			ApiResponseUtil.throwException("The request to send message is unauthorized");
+		}
 		if (!ArgUtil.is(msg.apiKey) || !ArgUtil.is(msg.domain)) {
 			ApiResponseUtil.throwInputException(ApiStatusCodes.UNAUTHORIZED, new ApiFieldError().field("apiKey"));
 		}
@@ -117,10 +160,31 @@ public class NotpController {
 		}
 
 		PhoneUserDoc userDoc = commonMongoTemplate.findById(msg.phone, PhoneUserDoc.class);
+		
 
 		if (!ArgUtil.is(userDoc)) {
 			ApiResponseUtil.throwInputException(ApiStatusCodes.USER_NOT_FOUND, new ApiFieldError().field("phone"));
 		}
+		
+		
+		String title = msg.domain;
+		String body = "You have received a notification from "+msg.domain;
+		HashMap<String,String> data = new HashMap<>();
+		if(msg.companyName != null) {
+			data.put("companyName", msg.companyName);
+		}
+		if(msg.companyId != null) {
+			data.put("companyId", msg.companyId);
+		}
+		if(msg.pubKey != null) {
+			data.put("pubKey", msg.pubKey);
+		}
+		if(msg.type != null) {
+			data.put("type", msg.type);
+		}
+		
+		
+		firebaseManager.sendNotification(msg.phone, title, body, data);
 
 		PhoneNOTPDoc newPhoneNOTPDoc = new PhoneNOTPDoc();
 		newPhoneNOTPDoc.setDomain(msg.domain);
@@ -128,10 +192,50 @@ public class NotpController {
 		newPhoneNOTPDoc.setOtp(msg.otp);
 		newPhoneNOTPDoc.setTitle(msg.title);
 		newPhoneNOTPDoc.setTags(msg.tags);
-		newPhoneNOTPDoc.setCreatedAt(TimeStampIndex.now());
+		newPhoneNOTPDoc.setCreatedAt(TimeStampIndex.from(msg.createdAt));
+		newPhoneNOTPDoc.setRelayedAt(TimeStampIndex.now());
 		newPhoneNOTPDoc.setExpiredAt(TimeStampIndex.from(System.currentTimeMillis() + msg.validity * 1000));
+		newPhoneNOTPDoc.setType(msg.type);
+		newPhoneNOTPDoc.setPubKey(msg.pubKey);
+		newPhoneNOTPDoc.setMsgGenId(msg.msgGenId);
+		newPhoneNOTPDoc.setCompanyId(msg.companyId);
+		newPhoneNOTPDoc.setCompanyName(msg.companyName);
+		newPhoneNOTPDoc.setLogoUrl(msg.logoUrl);
 		commonMongoTemplate.save(newPhoneNOTPDoc);
 		return ApiResponse.buildResults(newPhoneNOTPDoc);
+	}
+	
+	
+	
+	
+	@RequestMapping(value = "/api/v1/user/key/reg/fetch", method = { RequestMethod.POST })
+	public ApiResponse<UserRegistrationDoc, Object> read(@RequestBody HashMap<String,String> msg) {
+		AppRequestUtil.log("MESSAGE APIKEY", msg);
+		String name = msg.get("name");
+		if (!ArgUtil.is(name)) {
+			ApiResponseUtil.throwMissinInputException(new ApiFieldError().field("name"));
+		}
+		CompanyDoc  compoc = commonMongoTemplate.findOne(
+				CommonMongoQueryBuilder.collection(CompanyDoc.class).where(Criteria.where("apiKey").is(msg.get("apiKey"))));
+		if (!ArgUtil.is(compoc)) {
+			ApiResponseUtil.throwInputException(ApiStatusCodes.UNAUTHORIZED, new ApiFieldError().field("apiKey"));
+		}
+		
+		return ApiResponse.buildResults(userRegistrationManager.fetchRegistrations(compoc.companyId));
+	}
+	
+	@RequestMapping(value = "/api/v1/user/key/reg", method = {RequestMethod.POST})
+	public ApiResponse<UserRegistrationDoc, Object> save(@RequestBody UserRegistrationDTO msg){
+		UserRegistrationDoc userRegistrationDoc = new UserRegistrationDoc();
+		userRegistrationDoc.setCompanyId(msg.companyId);
+		userRegistrationDoc.setCompanyName(msg.companyName);
+		userRegistrationDoc.setCreatedAt(TimeStampIndex.now());
+		userRegistrationDoc.setExpiredAt(TimeStampIndex.from(System.currentTimeMillis() + 60000));
+		userRegistrationDoc.setUserPhoneNumber(msg.userPhoneNumber);
+		userRegistrationDoc.setUserPubKey(msg.userPubKey);
+		commonMongoTemplate.save(userRegistrationDoc);
+		
+		return ApiResponse.buildResult(userRegistrationDoc);
 	}
 
 }

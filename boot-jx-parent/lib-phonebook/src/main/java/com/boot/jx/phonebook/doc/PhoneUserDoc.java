@@ -5,6 +5,7 @@ import java.io.Serializable;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import com.boot.jx.mongo.CommonDocInterfaces.TimeStampIndex;
 import com.boot.jx.postman.pbook.PBName;
 import com.boot.jx.postman.pbook.PBPhone;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -16,15 +17,13 @@ public class PhoneUserDoc implements Serializable {
 
 	@Id
 	public String phoneId;
-
 	public PBName name;
-
 	public PBPhone phone;
 	public String deviceId;
-
 	public String authToken;
 	public String otpHash;
 	public String otpNounce;
+	public TimeStampIndex lastActiveAt;
 
 	public String getPhoneId() {
 		return phoneId;
@@ -81,4 +80,14 @@ public class PhoneUserDoc implements Serializable {
 	public void setOtpNounce(String otpNounce) {
 		this.otpNounce = otpNounce;
 	}
+
+	public TimeStampIndex getLastActiveAt() {
+		return lastActiveAt;
+	}
+
+	public void setLastActiveAt(TimeStampIndex lastActiveAt) {
+		this.lastActiveAt = lastActiveAt;
+	}
+	
+	
 }

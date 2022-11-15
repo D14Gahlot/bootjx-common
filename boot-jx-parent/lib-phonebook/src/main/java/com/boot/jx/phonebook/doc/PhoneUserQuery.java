@@ -1,5 +1,6 @@
 package com.boot.jx.phonebook.doc;
 
+import com.boot.jx.mongo.CommonDocInterfaces.TimeStampIndex;
 import com.boot.jx.mongo.CommonMongoQueryBuilder.DocQueryBuilder;
 
 public class PhoneUserQuery extends DocQueryBuilder<PhoneUserDoc> {
@@ -35,6 +36,12 @@ public class PhoneUserQuery extends DocQueryBuilder<PhoneUserDoc> {
 	public PhoneUserQuery setAuthToken(String authToken) {
 		doc.setAuthToken(authToken);
 		this.set("authToken", authToken);
+		return this;
+	}
+	
+	public PhoneUserQuery setLastTimeActiveAt(TimeStampIndex timeStampIndex) {
+		doc.setLastActiveAt(timeStampIndex);
+		this.set("lastActiveAt", timeStampIndex);
 		return this;
 	}
 }

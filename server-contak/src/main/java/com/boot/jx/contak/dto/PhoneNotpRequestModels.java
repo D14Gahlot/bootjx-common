@@ -1,7 +1,10 @@
 package com.boot.jx.contak.dto;
 
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.List;
+
+import org.apache.commons.collections.map.HashedMap;
 
 import com.boot.jx.swagger.ApiMockModelProperty;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -10,6 +13,11 @@ public final class PhoneNotpRequestModels {
 	@JsonIgnoreProperties(ignoreUnknown = true)
 	public static class PhoneNotpDto implements Serializable {
 		private static final long serialVersionUID = 4064758284063588819L;
+		
+		
+		@ApiMockModelProperty(example = "1", required = true, value = "Company Id")
+		public long domainId;
+		
 		@ApiMockModelProperty(example = "abcorp", required = true, value = "Organization domain")
 		public String domain;
 
@@ -30,6 +38,29 @@ public final class PhoneNotpRequestModels {
 
 		@ApiMockModelProperty(example = "[AUTH,SIGNUP]", required = false, value = "Tags to be attached for message")
 		public List<String> tags;
+		
+		
+		@ApiMockModelProperty(example = "OTP", required = true, value = "Type of message")
+		public String type;		
+		
+		@ApiMockModelProperty(example = "XXXXXXXXXXXXXXX", required = false, value = "Public key from the client")
+		public String pubKey;
+		
+		@ApiMockModelProperty(example = "1", required = true, value = "Message Gen Id")
+		public long msgGenId;
+		
+		@ApiMockModelProperty(example = "1", required = true, value = "Company Id")
+		public String companyId;
+		
+		@ApiMockModelProperty(example = "Acme Inc.", required = true, value = "Company Name")
+		public String companyName;
+		
+		@ApiMockModelProperty(example = "www.google.com/abc.png", required = false, value = "Company Logo Url")
+		public String logoUrl;
+		
+		@ApiMockModelProperty(example = "231241123123", required = false, value = "Created at timestamp")
+		public long createdAt;
+		
 	}
 
 }

@@ -1,6 +1,7 @@
 package com.boot.jx.phonebook.doc;
 
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.List;
 
 import org.springframework.data.annotation.Id;
@@ -25,6 +26,8 @@ public class PhoneNOTPDoc implements Serializable {
 	public String domain;
 
 	public TimeStampIndex createdAt;
+	
+	public TimeStampIndex relayedAt;
 
 	public TimeStampIndex expiredAt;
 
@@ -37,6 +40,12 @@ public class PhoneNOTPDoc implements Serializable {
 	public String message;
 
 	public String otp;
+	public String type;
+	public String pubKey;
+	public long msgGenId;
+	public String companyId;
+	public String companyName;
+	public String logoUrl;
 
 	private List<String> tags;
 
@@ -127,5 +136,64 @@ public class PhoneNOTPDoc implements Serializable {
 	public void setDeliveredAt(TimeStampIndex deliveredAt) {
 		this.deliveredAt = deliveredAt;
 	}
+
+	public String getType() {
+		return type;
+	}
+
+	public void setType(String type) {
+		this.type = type;
+	}
+
+	public String getPubKey() {
+		return pubKey;
+	}
+
+	public void setPubKey(String pubKey) {
+		this.pubKey = pubKey;
+	}
+	
+	
+	public long getMsgGenId() {
+		return msgGenId;
+	}
+
+	public void setMsgGenId(long msgGenId) {
+		this.msgGenId = msgGenId;
+	}
+
+	public String getCompanyId() {
+		return companyId;
+	}
+
+	public void setCompanyId(String companyId) {
+		this.companyId = companyId;
+	}
+
+	public String getCompanyName() {
+		return companyName;
+	}
+
+	public void setCompanyName(String companyName) {
+		this.companyName = companyName;
+	}
+
+	public String getLogoUrl() {
+		return logoUrl;
+	}
+
+	public void setLogoUrl(String logoUrl) {
+		this.logoUrl = logoUrl;
+	}
+
+	public TimeStampIndex getRelayedAt() {
+		return relayedAt;
+	}
+
+	public void setRelayedAt(TimeStampIndex relayedAt) {
+		this.relayedAt = relayedAt;
+	}
+	
+	
 
 }
