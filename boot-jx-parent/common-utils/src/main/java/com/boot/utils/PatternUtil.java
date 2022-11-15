@@ -71,4 +71,8 @@ public class PatternUtil {
 	public static Pattern equalsIgnoreCase(String string) {
 		return PatternUtil.toPattern("^" + string + "$", "i");
 	}
+
+	public static Pattern contains(String string) {
+		return PatternUtil.toPattern("" + string + "", "i");
+	}
 }

@@ -1,18 +1,15 @@
 package com.boot.jx.postman.plugin;
 
-import java.util.List;
-
-import com.boot.jx.common.impl.ConfigMeta;
+import com.boot.jx.common.impl.ConfigMeta.ConfigMetaProperty;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.postman.PMConstants.CHANNEL_TYPE;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PMEnvironment.AChannelDetails;
-import com.boot.jx.postman.plugin.ChannelPluginProvider.ChannelPlugin;
+import com.boot.jx.postman.plugin.ChannelPluginProvider.DefaultChannelPlugin;
 import com.boot.jx.postman.plugin.WA360Plugin.WA360ConfigDetails;
-import com.boot.model.MapModel;
 import com.fasterxml.jackson.annotation.JsonView;
 
-public class WA360Plugin implements ChannelPlugin<WA360ConfigDetails> {
+public class WA360Plugin implements DefaultChannelPlugin<WA360ConfigDetails> {
 
 	@Override
 	public String getChannelType() {
@@ -27,8 +24,12 @@ public class WA360Plugin implements ChannelPlugin<WA360ConfigDetails> {
 	public static class WA360ConfigDetails extends AChannelDetails {
 
 		private static final long serialVersionUID = -2397678752642150000L;
+
+		@ConfigMetaProperty(path = "wa360d.number", title = "Number", createonly = true,
+				desc = "Eneter WABA number with country code")
 		private String number;
 
+		@ConfigMetaProperty(path = "wa360d.apiKey", title = "API Key", writeonly = true, desc = "Enter Your WABA Key")
 		@JsonView(PMEnvironment.ProtectedProperty.class)
 		private String apiKey;
 
@@ -69,17 +70,17 @@ public class WA360Plugin implements ChannelPlugin<WA360ConfigDetails> {
 		return new WA360ConfigDetails();
 	}
 
-	@Override
-	public void addConfigMeta(List<ConfigMeta> configMetaList) {
-		configMetaList.add(new ConfigMeta().path("wa360d.number").title("Number").createonly());
-		configMetaList.add(new ConfigMeta().path("wa360d.apiKey").title("API Key").writeonly());
-	}
+//	@Override
+//	public void addConfigMeta(List<ConfigMeta> configMetaList) {
+//		configMetaList.add(new ConfigMeta().path("wa360d.number").title("Number").createonly());
+//		configMetaList.add(new ConfigMeta().path("wa360d.apiKey").title("API Key").writeonly());
+//	}
 
-	@Override
-	public void importChannelDetailsFromMap(WA360ConfigDetails channelDetails, MapModel map) {
-		channelDetails.setNumber(map.pathEntry("wa360d.number").asString(channelDetails.getNumber()));
-		channelDetails.setApiKey(map.pathEntry("wa360d.apiKey").asString(channelDetails.getApiKey()));
-	}
+//	@Override
+//	public void importChannelDetailsFromMap(WA360ConfigDetails channelDetails, MapModel map) {
+//		channelDetails.setNumber(map.pathEntry("wa360d.number").asString(channelDetails.getNumber()));
+//		channelDetails.setApiKey(map.pathEntry("wa360d.apiKey").asString(channelDetails.getApiKey()));
+//	}
 
 	@Override
 	public boolean isPushAllowed() {

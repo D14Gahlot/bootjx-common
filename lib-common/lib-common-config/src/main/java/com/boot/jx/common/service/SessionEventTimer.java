@@ -10,6 +10,7 @@ import com.boot.jx.chat.ChatSessionService;
 import com.boot.jx.common.config.ConfigConstants;
 import com.boot.jx.inbound.InBound.ChatSessionEvents;
 import com.boot.jx.postman.ClientApp;
+import com.boot.jx.postman.PMConstants.APP_TYPE;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PMEnvironment.PMConfigurationObject;
 import com.boot.jx.postman.doc.ChatSessionDoc;
@@ -28,8 +29,14 @@ import com.boot.model.MapModel.MapPathEntry;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.TimeUtils;
 
+import io.reactivex.internal.observers.ForEachWhileObserver;
+
 @Component
 public class SessionEventTimer extends ATaskLimiter {
+
+	public static final String MITEL_ROUTER = "MITEL_ROUTER";
+
+	public static final String MITEL_CLOSE_CHECK = "MITEL_CLOSE_CHECK";
 
 	public static final String CHAT_OUT_IDLE_TIMEOUT = "CHAT_OUT_IDLE_TIMEOUT";
 
@@ -108,14 +115,43 @@ public class SessionEventTimer extends ATaskLimiter {
 		}
 	}
 
+	public void setMitelRoutingCheck(String sessionid, ClientApp app) {
+		if (app != null && app.equals(APP_TYPE.MITEL)) {
+			TunnelTask task = new TunnelTask().name(SessionEventTimer.MITEL_ROUTER).id(sessionid).intervalSeconds(1L);
+			task.data().put("sessionId", sessionid).put("queue", app.getQueue());
+			this.debounce(task);
+		}
+	}
+
+	private void setMitelClosingCheck(String sessionid, ClientApp app, long closeCheckTime, int counter, boolean now) {
+		if (closeCheckTime > 0L || now) {
+			TunnelTask closeTask = new TunnelTask().name(SessionEventTimer.MITEL_CLOSE_CHECK).id(sessionid)
+					.intervalSeconds(now ? 0 : closeCheckTime);
+			closeTask.data().put("sessionId", sessionid).put("queue", app.getQueue()).put("counter", counter);
+			this.debounce(closeTask);
+		}
+	}
+
+	public void setMitelClosingCheck(String sessionid, ClientApp app, boolean now) {
+		if (app != null && app.equals(APP_TYPE.MITEL)) {
+			long closeCheckTime = pmEnvironment.keyEntry(ConfigConstants.APP_KEY.MITEL_SYNC_TIMER).asLong(0L);
+			setMitelClosingCheck(sessionid, app, closeCheckTime, 0, now);
+		}
+	}
+
+	public void setChatViewIdleTimeout(ChatSessionDoc sessionDoc, boolean now) {
+		ClientApp app = messageContext.clientApp(sessionDoc.getAssignedToQueue());
+		this.setMitelClosingCheck(sessionDoc.getSessionId(), app, now);
+	}
+
 	@Override
 	public void doTaskSafely(TunnelTask task) {
 
 		switch (task.getName()) {
-		case "MITEL_ROUTER":
+		case MITEL_ROUTER:
 			doMitelRouting(task);
 			break;
-		case "MITEL_CLOSE_CHECK":
+		case MITEL_CLOSE_CHECK:
 			doMitelClosing(task);
 			break;
 		case CHAT_OUT_IDLE_TIMEOUT:
@@ -174,23 +210,37 @@ public class SessionEventTimer extends ATaskLimiter {
 
 	private void doMitelClosing(TunnelTask task) {
 		MapModel data = task.data();
+		int counter = data.getInteger("counter", 0);
 		ChatSessionDoc session = sessionStore.getSession(data.getString("sessionId"));
-		ClientApp defaultClient = messageContext.clientApp(data.getString("queue"), null);
+		ClientApp defaultClient = messageContext.clientApp(data.getString("queue", session.getAssignedToQueue()));
 
 		MapModel meta = new MapModel(session.getMeta());
 		MapPathEntry omidEntry = meta.pathEntry("mitel.omid");
-		String omid = omidEntry.asString();
-		MapModel mitel = mitelClient.openMediaGetActive(defaultClient, session.contact(), session.getSessionId(), omid);
+		if (omidEntry.exists()) {
+			String omid = omidEntry.asString();
+			MapModel mitel = mitelClient.openMediaGetActive(defaultClient, session.contact(), session.getSessionId(),
+					omid);
 
-		if (!ArgUtil.is(mitel) || mitel.keyEntry("id").exists()) {
-			chatSessionService.closeSession(session);
+			if (!ArgUtil.is(mitel) || (mitel.keyEntry("id").exists()
+					&& mitel.keyEntry("conversationState").in("Ended", "Abandoned"))) {
+				chatSessionService.closeSession(session);
+			} else if (counter < 5) {
+				long closeCheckTime = pmEnvironment.keyEntry(ConfigConstants.APP_KEY.MITEL_SYNC_TIMER).asLong(0L);
+				this.setMitelClosingCheck(session.getSessionId(), defaultClient, closeCheckTime * 2, counter++, false);
+			}
 		}
+
 	}
 
 	private void doMitelRouting(TunnelTask task) {
 
 		MapModel data = task.data();
 		ChatSessionDoc session = sessionStore.getSession(data.getString("sessionId"));
+
+		if (!sessionStore.isSessionValid(session)) {
+			return;
+		}
+
 		ClientApp defaultClient = messageContext.clientApp(data.getString("queue"), null);
 
 		MapModel meta = new MapModel(session.getMeta());
@@ -203,7 +253,14 @@ public class SessionEventTimer extends ATaskLimiter {
 			ChatSessionQuery q = new ChatSessionQuery(session);
 			omidEntry.save(newomid);
 			session.setMeta(meta.map());
-			q.set("meta.mitel.omid", newomid).set("meta.mitel.queue_id", mitel.getString("queueId"));
+			q.set("meta.mitel.omid", newomid).set("meta.mitel.queueId", mitel.getString("queueId"));
+			String[] mitelKeys = { "queueName", "queueId", "agentName", "agentId", "conversationState" };
+
+			for (String mitelKey : mitelKeys) {
+				String mitelValue = mitel.getString(mitelKey);
+				q.set("meta.mitel." + mitelKey, mitelValue);
+			}
+
 			sessionStore.updateFirst(q);
 		}
 

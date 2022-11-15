@@ -8,6 +8,7 @@ import java.util.List;
 
 import com.boot.jx.dict.ContactType;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.JsonPath;
 import com.boot.utils.JsonUtil;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -94,16 +95,32 @@ public class MessageDefinitions {
 
 		public default void copyFrom(Contactable contactable) {
 			// Contact
-			this.setName(contactable.getName());
-			this.setPhone(contactable.getPhone());
-			this.setEmail(contactable.getEmail());
+			if (ArgUtil.is(contactable.getName())) {
+				this.setName(contactable.getName());
+			}
+			if (ArgUtil.is(contactable.getPhone())) {
+				this.setPhone(contactable.getPhone());
+			}
+			if (ArgUtil.is(contactable.getEmail())) {
+				this.setEmail(contactable.getEmail());
+			}
 			// ContactID
-			this.setContactId(contactable.getContactId());
+			if (ArgUtil.is(contactable.getContactId())) {
+				this.setContactId(contactable.getContactId());
+			}
 			// Contactable
-			this.setContactType(contactable.getContactType());
-			this.setChannelType(contactable.getChannelType());
-			this.setLane(contactable.getLane());
-			this.setCsid(contactable.getCsid());
+			if (ArgUtil.is(contactable.getContactType())) {
+				this.setContactType(contactable.getContactType());
+			}
+			if (ArgUtil.is(contactable.getChannelType())) {
+				this.setChannelType(contactable.getChannelType());
+			}
+			if (ArgUtil.is(contactable.getLane())) {
+				this.setLane(contactable.getLane());
+			}
+			if (ArgUtil.is(contactable.getCsid())) {
+				this.setCsid(contactable.getCsid());
+			}
 		}
 
 		public static Contactable instance() {
@@ -160,11 +177,19 @@ public class MessageDefinitions {
 
 	@JsonIgnoreProperties(ignoreUnknown = true)
 	public interface SessionInfo extends SessionId, Serializable {
+
+		public static final JsonPath AGENT_NAME = new JsonPath("session/agent/name");
+		public static final JsonPath AGENT_CODE = new JsonPath("session/agent/code");
+		public static final JsonPath TEAM_NAME = new JsonPath("session/team/name");
+		public static final JsonPath TEAM_CODE = new JsonPath("session/team/code");
+
 		public MessageSession session();
 
 		public Contactable contact();
 
 		public List<Object> trace();
+
+		public MessageRouter route();
 	}
 
 	// External attributes
@@ -185,8 +210,6 @@ public class MessageDefinitions {
 		public String getFormatType();
 
 		public String getFormatSubType();
-
-		public MessageRouter route();
 
 	}
 

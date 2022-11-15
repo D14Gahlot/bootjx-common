@@ -9,8 +9,10 @@ import org.springframework.stereotype.Component;
 
 import com.boot.jx.common.doc.AgentDoc;
 import com.boot.jx.common.doc.DepartmentDoc;
+import com.boot.jx.mongo.CommonDocInterfaces.IMongoQueryBuilder;
 import com.boot.jx.mongo.CommonMongoQB;
-import com.boot.jx.mongo.CommonMongoQB.CommonMongoQBimpl;
+import com.boot.jx.mongo.CommonMongoQB.MQB;
+import com.boot.jx.mongo.CommonMongoQB.MongoQueryBuilder;
 import com.boot.jx.mongo.CommonMongoQueryBuilder;
 import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.jx.utils.PostManUtil;
@@ -33,11 +35,11 @@ public class AgentStore {
 		logAgentUpdate(agent);
 	}
 
-	public void updateMulti(CommonMongoQueryBuilder builder, Class<?> entityClass) {
+	public void updateMulti(IMongoQueryBuilder<?> builder, Class<?> entityClass) {
 		mongoTemplate.updateMulti(builder.getQuery(), builder.getUpdate(), entityClass);
 	}
 
-	public void updateFirst(CommonMongoQueryBuilder builder, Class<?> entityClass) {
+	public void updateFirst(IMongoQueryBuilder<?> builder, Class<?> entityClass) {
 		mongoTemplate.updateFirst(builder.getQuery(), builder.getUpdate(), entityClass);
 	}
 
@@ -46,8 +48,7 @@ public class AgentStore {
 	}
 
 	public List<AgentDoc> findAllAgents(boolean includeInActive) {
-		CommonMongoQB<CommonMongoQBimpl<AgentDoc>, AgentDoc> builder = CommonMongoQueryBuilder
-				.collection(AgentDoc.class);
+		MongoQueryBuilder<AgentDoc> builder = MongoQueryBuilder.collection(AgentDoc.class);
 		if (!includeInActive) {
 			builder.where("isactive", "Y");
 		}
@@ -60,12 +61,13 @@ public class AgentStore {
 	}
 
 	public AgentDoc findById(String agentId) {
-		CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder().whereId(agentId);
+		MongoQueryBuilder<AgentDoc> builder = MongoQueryBuilder.collection(AgentDoc.class).whereId(agentId);
 		return mongoTemplate.findOne(builder.getQuery(), AgentDoc.class);
 	}
 
 	public AgentDoc findByCode(String agentCode) {
-		CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder().where("agent_code", agentCode);
+		MongoQueryBuilder<AgentDoc> builder = MongoQueryBuilder.collection(AgentDoc.class).where("agent_code",
+				agentCode);
 		return mongoTemplate.findOne(builder.getQuery(), AgentDoc.class);
 	}
 
@@ -73,7 +75,7 @@ public class AgentStore {
 		if (showInActive) {
 			return mongoTemplate.findAll(DepartmentDoc.class);
 		}
-		CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder().where("isactive", "Y");
+		MongoQueryBuilder<Object> builder = new CommonMongoQueryBuilder().where("isactive", "Y");
 		return mongoTemplate.find(builder.getQuery(), DepartmentDoc.class);
 	}
 
@@ -82,12 +84,12 @@ public class AgentStore {
 	}
 
 	public DepartmentDoc findDepartmentById(String deptId) {
-		CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder().whereId(deptId);
+		MongoQueryBuilder<DepartmentDoc> builder = MongoQueryBuilder.collection(DepartmentDoc.class).whereId(deptId);
 		return mongoTemplate.findOne(builder.getQuery(), DepartmentDoc.class);
 	}
 
 	public DepartmentDoc findDepartmentByCode(String deptCode) {
-		CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder().whereId(deptCode);
+		MQB<DepartmentDoc> builder = MQB.select(DepartmentDoc.class).where("dept_code",deptCode);
 		return mongoTemplate.findOne(builder.getQuery(), DepartmentDoc.class);
 	}
 
@@ -103,8 +105,8 @@ public class AgentStore {
 
 	public void updateAgentActive(String agentId, String status) {
 		boolean isEnabled = "Y".equalsIgnoreCase(status);
-		CommonMongoQueryBuilder cqb2 = new CommonMongoQueryBuilder().whereId(agentId).set("isEnabled", isEnabled)
-				.set("isactive", status);
+		MQB<AgentDoc> cqb2 = MQB.select(AgentDoc.class).whereId(agentId).set("isEnabled", isEnabled).set("isactive",
+				status);
 		updateFirst(cqb2, AgentDoc.class);
 		logAgentUpdate(agentId);
 	}
@@ -112,12 +114,12 @@ public class AgentStore {
 	public void updateAgentDefault(String agentId) {
 		AgentDoc agent = findById(agentId);
 		if (!agent.isDefaultValue()) {
-			CommonMongoQueryBuilder cqb = new CommonMongoQueryBuilder().where("dept_id", agent.getDept_id())
+			MongoQueryBuilder<?> cqb = new CommonMongoQueryBuilder().where("dept_id", agent.getDept_id())
 					.set("isDefaultValue", false);
 			updateMulti(cqb, AgentDoc.class);
 		}
-		CommonMongoQueryBuilder cqb2 = new CommonMongoQueryBuilder().whereId(agentId).set("isDefaultValue",
-				!agent.isDefaultValue());
+		MongoQueryBuilder<AgentDoc> cqb2 = MongoQueryBuilder.collection(AgentDoc.class).whereId(agentId)
+				.set("isDefaultValue", !agent.isDefaultValue());
 		updateMulti(cqb2, AgentDoc.class);
 		logAgentUpdate(agent);
 	}

@@ -28,7 +28,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 public class CommonDocInterfaces {
 
-	public static interface MongoQueryBuilder<T> {
+	public static interface IMongoQueryBuilder<T> {
 		public boolean isUpdatedTimeStampSupport();
 
 		public boolean isCreatedTimeStampSupport();
@@ -112,7 +112,6 @@ public class CommonDocInterfaces {
 	public static interface IDocument {
 	}
 
-	@JsonDeserialize(as = ResourceDocumentImpl.class, keyUsing = ResourceDocumentKeyDeserializer.class)
 	@JsonIgnoreProperties(ignoreUnknown = true)
 	public static interface SimpleDocument extends IDocument {
 		public String getId();

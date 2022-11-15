@@ -59,7 +59,7 @@ public class FeedbackController extends CommonBotController {
 		if (ArgUtil.is(template)) { // item_menu_template
 			reply(new OutboxMessage().template(template));
 		}
-		logManager.trace(inboxMessage, "FeedbackController.feedback", "closeSession");
+		logManager.addTrace(inboxMessage, "FeedbackController.feedback", "closeSession");
 		closeSession();
 	}
 

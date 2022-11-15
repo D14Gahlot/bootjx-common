@@ -19,6 +19,7 @@ import com.boot.jx.scope.tnt.Tenants;
 import com.boot.jx.swagger.MockParamBuilder.MockParam;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
+import com.boot.utils.Constants;
 import com.boot.utils.StringUtils;
 import com.boot.utils.UniqueID;
 import com.boot.utils.CryptoUtil.HashBuilder;
@@ -134,7 +135,7 @@ public class DefaultSwaggerConfig {
 	@ConditionalOnProperty(value = "swagger.tenant.enabled", havingValue = "true")
 	public MockParam tenantParam() {
 		return new MockParamBuilder().name(TenantContextHolder.TENANT).description("Tenant Country")
-				.defaultValue(Tenants.DEFAULT_STR).parameterType(MockParamBuilder.MockParamType.HEADER).required(false)
+				.defaultValue(Constants.BLANK).parameterType(MockParamBuilder.MockParamType.HEADER).required(false)
 				.build();
 	}
 
@@ -211,8 +212,7 @@ public class DefaultSwaggerConfig {
 
 		if (ArgUtil.areEqual(username, swaggerAuthUsername) && ArgUtil.areEqual(password, swaggerAuthPassword)) {
 			token = builder.toHmac().output();
-			commonHttpRequest.setCookie(
-					new Kooky().name("swagger_auth_token").value(token));
+			commonHttpRequest.setCookie(new Kooky().name("swagger_auth_token").value(token));
 			return true;
 		}
 

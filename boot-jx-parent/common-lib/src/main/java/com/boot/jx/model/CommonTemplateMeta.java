@@ -31,6 +31,8 @@ public class CommonTemplateMeta implements Serializable, JsonIgnoreUnknown {
 					+ "\n Kindly note Template may be rejected in case it does not match the approved format")
 	private Map<String, Object> data;
 
+	private String linked;
+
 	public String getCode() {
 		return code;
 	}
@@ -91,6 +93,19 @@ public class CommonTemplateMeta implements Serializable, JsonIgnoreUnknown {
 
 	public CommonTemplateMeta data(Map<String, Object> data) {
 		this.data = data;
+		return this;
+	}
+
+	public String getLinked() {
+		return linked;
+	}
+
+	public void setLinked(String linked) {
+		this.linked = linked;
+	}
+
+	public CommonTemplateMeta linked(String linked) {
+		this.linked = linked;
 		return this;
 	}
 

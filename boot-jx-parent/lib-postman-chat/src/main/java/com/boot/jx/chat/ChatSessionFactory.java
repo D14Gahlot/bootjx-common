@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.boot.jx.postman.PMConstants.CHAT_MODE;
 import com.boot.jx.postman.PMEnvironment.PMDomainConfig;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
@@ -212,7 +213,8 @@ public class ChatSessionFactory {
 					chatSessionDocQuery.setQueue(defaultQueue);
 					chatSessionDocQuery.setMode(inboxMessage.route().getSendMode());
 				} else {
-					defaultQueue = pmDomainConfig.getDefaultInboundQueue(inboxMessage.contact());
+					defaultQueue = pmDomainConfig.getDefaultInboundQueue(inboxMessage.contact(),
+							CHAT_MODE.from(inboxMessage.route().getSendMode()));
 					chatSessionDocQuery.setQueue(defaultQueue);
 				}
 			}

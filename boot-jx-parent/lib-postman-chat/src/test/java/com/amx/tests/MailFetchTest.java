@@ -3,7 +3,6 @@ package com.amx.tests;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.Properties;
-import java.util.StringJoiner;
 
 import javax.mail.Folder;
 import javax.mail.Message;
@@ -33,7 +32,7 @@ public class MailFetchTest { // Noncompliant
 	private void doTest() throws MessagingException, IOException {
 
 		final String username = "chat@mehery.com";
-		final String passwd = "cherry@Mup22501";
+		final String passwd = "Gur29470";
 		Properties props = new Properties();
 
 		props.put("mail.store.protocol", "pop3");

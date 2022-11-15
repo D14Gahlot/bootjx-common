@@ -34,7 +34,6 @@ import com.boot.jx.postman.manager.ChatLogger;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.ext.InBoundEvent;
 import com.boot.jx.postman.store.MessageContext;
-import com.boot.jx.postman.store.MessageStore;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.ClazzUtil;
@@ -294,7 +293,7 @@ public class BotEngine {
 				Method method = matchedMethod.getMethod();
 				ChatController controller = filtersMap.get("controllerName#" + matchedMethod.getController());
 				// LOGGER.info("Target Handler : " + method.getName());
-				logManager.trace(inboxMessage, "invokeMethods", matchedMethod.getController());
+				logManager.addTrace(inboxMessage, "invokeMethods", matchedMethod.getController());
 				List<Class<?>> prmTyps = Arrays.asList(method.getParameterTypes());
 				if (prmTyps.contains(InboxMessage.class) && prmTyps.contains(StringMatcher.class)) {
 					method.invoke(controller, inboxMessage, inboxMessage.getMatcher());

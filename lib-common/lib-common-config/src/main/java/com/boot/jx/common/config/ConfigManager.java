@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import com.boot.jx.AppContextUtil;
 import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.chat.ConnectorHandlerFactory;
+import com.boot.jx.common.config.ConfigConstants.PERMS_KEY;
 import com.boot.jx.common.impl.ConfigMeta;
 import com.boot.jx.exception.ApiHttpExceptions.ApiStatusCodes;
 import com.boot.jx.postman.ClientApp;
@@ -27,6 +28,7 @@ import com.boot.jx.postman.PMEnvironment.PMConfigurationObject;
 import com.boot.jx.postman.doc.PMConfigurationDoc;
 import com.boot.jx.postman.doc.config.ChannelConfigDoc;
 import com.boot.jx.postman.doc.config.ClientAppConfigDoc;
+import com.boot.jx.postman.doc.config.PermsConfigDoc;
 import com.boot.jx.postman.doc.config.PrefsConfigDoc;
 import com.boot.jx.postman.doc.config.VarsConfigDoc;
 import com.boot.jx.postman.plugin.ChannelConfig;
@@ -280,6 +282,58 @@ public class ConfigManager {
 			return channelConfig;
 		}
 		return null;
+	}
+
+	public List<Map<String, Object>> getPerms() {
+		List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
+		for (ConfigMeta meta : ConfigConstants.PERMS_CONFIG_LIST) {
+			list.add(MapBuilder.map().put("meta", meta).put("config", pmEnvironment.permEntry(meta.getKey())).toMap());
+		}
+		return list;
+	}
+
+	public List<Map<String, Object>> getPerm(PERMS_KEY key) {
+		if (!ArgUtil.is(key)) {
+			return this.getPerms();
+		}
+		List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
+		BuilderMap mapBuilder = MapBuilder.map();
+		mapBuilder.put("meta", new ConfigMeta().key(key.getKey()));
+		for (ConfigMeta meta : ConfigConstants.PERMS_CONFIG_LIST) {
+			if (meta.getKey().equals(key)) {
+				mapBuilder.put("meta", meta);
+			}
+		}
+		mapBuilder.put("domain", this.pmEnvironment.local().permEntry(key)) // Domain
+				.put("shared", this.pmEnvironment.shared().permEntry(key)) // Shared
+				.put("config", this.pmEnvironment.permEntry(key)) // Resolved
+		;
+		list.add(mapBuilder.toMap());
+		return list;
+	}
+
+	public void savePerm(PermsConfigDoc config) {
+		PMConfigurationObject configObject = pmEnvironment.local().permEntry(config.getKey());
+		configObject.setKey(config.getKey());
+		configObject.setValue(config.getValue());
+		configObject.setShared(config.isShared());
+		configObject.setDomain(AppContextUtil.getTenant());
+		configObject.setServer(pmCommonConfig.getServiceServer());
+
+		PermsConfigDoc prefsConfigDoc = new PermsConfigDoc();
+		prefsConfigDoc.setId(configObject.getKey() + "." + pmCommonConfig.getServiceServer());
+		prefsConfigDoc = EntityDtoUtil.dtoToEntity(configObject, prefsConfigDoc);
+		configStore.savePermConfig(prefsConfigDoc);
+		this.refresh();
+	}
+
+	public void deletePerm(PERMS_KEY key) {
+		pmEnvironment.local().perms().remove(key);
+		PermsConfigDoc prefsConfigDoc = new PermsConfigDoc();
+		prefsConfigDoc.setKey(key.getKey());
+		prefsConfigDoc.setId(prefsConfigDoc.getKey() + "." + pmCommonConfig.getServiceServer());
+		configStore.remove(prefsConfigDoc);
+		this.refresh();
 	}
 
 	public void refresh() {

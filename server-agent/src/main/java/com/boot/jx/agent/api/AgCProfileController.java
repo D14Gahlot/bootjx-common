@@ -51,13 +51,13 @@ public class AgCProfileController {
 		List<String> removedItems = new ArrayList<String>(oldList);
 		removedItems.removeAll(newList);
 		if (ArgUtil.is(removedItems)) {
-			logManager.event(sessionDoc, EVENTS.LABEL_REMOVED, removedItems.toArray(new String[0]));
+			logManager.event(sessionDoc, EVENTS.LABEL_REMOVED, removedItems.toArray(new Object[0]));
 		}
 
 		List<String> addedItems = new ArrayList<String>(newList);
 		addedItems.removeAll(oldList);
 		if (ArgUtil.is(addedItems)) {
-			logManager.event(sessionDoc, EVENTS.LABEL_ADDED, addedItems.toArray(new String[0]));
+			logManager.event(sessionDoc, EVENTS.LABEL_ADDED, addedItems.toArray(new Object[0]));
 		}
 		return ApiResponse.buildData(ChatDTOUtil.getContactDTO(contact));
 	}

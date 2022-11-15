@@ -35,6 +35,7 @@ import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.postman.plugin.WebPlugin;
 import com.boot.jx.postman.plugin.WebPlugin.WebConfigDetails;
 import com.boot.jx.postman.query.ChatContactQuery;
+import com.boot.jx.postman.query.ChatSessionQuery;
 import com.boot.jx.postman.service.ChatDTOUtil;
 import com.boot.jx.postman.store.MessageStore;
 import com.boot.jx.stomp.StompTunnelService;
@@ -208,10 +209,12 @@ public class WebConnector extends DefaultConnector<WebConfigDetails, WebPlugin> 
 
 		if (ArgUtil.is(inboxMessage.getForm())) {
 			if (ArgUtil.is(inboxMessage.getForm().get("name"))) {
-				contactQuery.setName(ArgUtil.parseAsString(inboxMessage.getForm().get("name")));
+				String name = ArgUtil.parseAsString(inboxMessage.getForm().get("name"));
+				contactQuery.setName(name);
 			}
 			if (ArgUtil.is(inboxMessage.getForm().get("email"))) {
-				contactQuery.setEmail(ArgUtil.parseAsString(inboxMessage.getForm().get("email")));
+				String email = ArgUtil.parseAsString(inboxMessage.getForm().get("email"));
+				contactQuery.setEmail(email);
 				contactQuery.setEmailVerified(false);
 			}
 			if (ArgUtil.is(inboxMessage.getForm().get("phone"))) {

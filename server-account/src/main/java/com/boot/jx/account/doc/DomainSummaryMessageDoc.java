@@ -1,6 +1,7 @@
 package com.boot.jx.account.doc;
 
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -25,8 +26,9 @@ public class DomainSummaryMessageDoc implements Serializable {
 	String date;
 	String channel;
 	private Map<String, Object> messageType;
-	Map<String, Map<String, Long>> dateWiseSummaryCount;
+	Map<Object, Map<Object, Long>> dateWiseSummaryCount;
 	Map<Object,Long> summaryCount;
+	Map<Object,Map<Object,Object>> dateWiseCountMap = new HashMap<>();
 	public String getId() {
 		return id;
 	}
@@ -63,11 +65,17 @@ public class DomainSummaryMessageDoc implements Serializable {
 	public void setSummaryCount(Map<Object, Long> summaryCount) {
 		this.summaryCount = summaryCount;
 	}
-	public Map<String, Map<String, Long>> getDateWiseSummaryCount() {
+	public Map<Object, Map<Object, Long>> getDateWiseSummaryCount() {
 		return dateWiseSummaryCount;
 	}
-	public void setDateWiseSummaryCount(Map<String, Map<String, Long>> dateWiseSummaryCount) {
+	public void setDateWiseSummaryCount(Map<Object, Map<Object, Long>> dateWiseSummaryCount) {
 		this.dateWiseSummaryCount = dateWiseSummaryCount;
+	}
+	public Map<Object, Map<Object, Object>> getDateWiseCountMap() {
+		return dateWiseCountMap;
+	}
+	public void setDateWiseCountMap(Map<Object, Map<Object, Object>> dateWiseCountMap) {
+		this.dateWiseCountMap = dateWiseCountMap;
 	}
 	
 }

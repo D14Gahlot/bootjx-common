@@ -20,6 +20,7 @@ public class DashBoardResponseDto {
 	double startLag;
 	long botScore=0;
 	double botClosure=0;
+	double satisfactionScore=0;
 	PeakLoadDto peakLoad;
 	Map<Object,Object> graphApiDetails;
 	Map<Object,Object> graphApiDetailsV1;
@@ -180,6 +181,14 @@ public class DashBoardResponseDto {
 
 	public void setGraphApiDetailsV1(Map<Object, Object> graphApiDetailsV1) {
 		this.graphApiDetailsV1 = graphApiDetailsV1;
+	}
+
+	public double getSatisfactionScore() {
+		return satisfactionScore;
+	}
+
+	public void setSatisfactionScore(double satisfactionScore) {
+		this.satisfactionScore = satisfactionScore;
 	}
 
 	

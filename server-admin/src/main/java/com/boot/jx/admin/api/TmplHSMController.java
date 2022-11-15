@@ -13,8 +13,8 @@ import com.boot.jx.api.ApiResponse;
 import com.boot.jx.logger.AuditDetailProvider;
 import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.jx.postman.PMEnvironment;
-import com.boot.jx.postman.doc.HSMTemplateDoc;
 import com.boot.jx.postman.doc.HSMTemplate3rdParty;
+import com.boot.jx.postman.doc.HSMTemplateDoc;
 import com.boot.jx.postman.manager.ThirdPartyTemplateManager;
 import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.utils.ArgUtil;
@@ -81,9 +81,11 @@ public class TmplHSMController {
 			temp = mongoTemplate.findById(extTemplate.getId(), HSMTemplate3rdParty.class);
 			if (ArgUtil.is(temp)) {
 				String status = ArgUtil.parseAsString(temp.getTemplate().get("status"), Constants.BLANK);
-				if ("approved".equalsIgnoreCase(status) || "pending".equalsIgnoreCase(status)
-						|| "submitted".equalsIgnoreCase(status)) {
+				if ("pending".equalsIgnoreCase(status) || "submitted".equalsIgnoreCase(status)) {
 					editable = false;
+				}
+				if(ArgUtil.is(extTemplate.getTemplate())) {
+					extTemplate.getTemplate().put("status", status);
 				}
 			}
 		}

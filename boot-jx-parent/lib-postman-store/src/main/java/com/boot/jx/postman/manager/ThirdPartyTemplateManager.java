@@ -7,9 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.stereotype.Component;
 
-import com.boot.jx.mongo.CommonMongoQB;
-import com.boot.jx.mongo.CommonMongoQB.CommonMongoQBimpl;
-import com.boot.jx.mongo.CommonMongoQueryBuilder;
+import com.boot.jx.mongo.CommonMongoQB.MongoQueryBuilder;
 import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.jx.postman.doc.HSMTemplate3rdParty;
 import com.boot.jx.postman.doc.HSMTemplateDoc;
@@ -35,7 +33,7 @@ public class ThirdPartyTemplateManager {
 
 		List<WA360Template> wabaTemplates = resp.keyEntry("waba_templates").asList(WA360Template.class);
 
-		CommonMongoQBimpl<HSMTemplate3rdParty> cmqb = CommonMongoQueryBuilder.collection(HSMTemplate3rdParty.class)
+		MongoQueryBuilder<HSMTemplate3rdParty> cmqb = MongoQueryBuilder.collection(HSMTemplate3rdParty.class)
 				.where(Criteria.where("channelId").is(channelConfig.getChannelId())).set("template.status", "deleted");
 
 		commonMongoTemplate.update(cmqb);
@@ -71,7 +69,14 @@ public class ThirdPartyTemplateManager {
 
 	public HSMTemplate3rdParty createhWA360Templates(ChannelConfig channelConfig,
 			Map<String, Object> templateStructure) {
-		MapModel resp = wa360Client.createTemplates(channelConfig, MapModel.from(templateStructure));
+		String status = ArgUtil.parseAsString(templateStructure.get("status"), Constants.BLANK);
+		MapModel resp = null;
+		if ("approved".equalsIgnoreCase(status) || "rejected".equalsIgnoreCase(status)
+				|| "paused".equalsIgnoreCase(status)) {
+			resp = wa360Client.updateTemplates(channelConfig, MapModel.from(templateStructure));
+		} else {
+			resp = wa360Client.createTemplates(channelConfig, MapModel.from(templateStructure));
+		}
 		return toHSM3rdParty(channelConfig, resp.as(WA360Template.class));
 	}
 
@@ -87,7 +92,7 @@ public class ThirdPartyTemplateManager {
 	}
 
 	public List<HSMTemplate3rdParty> getTemplates(ChannelConfig channelConfig, String code) {
-		CommonMongoQBimpl<HSMTemplate3rdParty> q = CommonMongoQB.collection(HSMTemplate3rdParty.class)
+		MongoQueryBuilder<HSMTemplate3rdParty> q = MongoQueryBuilder.collection(HSMTemplate3rdParty.class)
 				.where(Criteria.where("channelId").is(channelConfig.getChannelId()));
 
 		if (ArgUtil.is(code)) {

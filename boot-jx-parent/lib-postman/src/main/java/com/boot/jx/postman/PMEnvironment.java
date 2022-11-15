@@ -11,6 +11,7 @@ import com.boot.jx.AppContextUtil;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.postman.PMConfiguration.PMConfigurationModel;
 import com.boot.jx.postman.PMConfiguration.PMConfigurationWrappper;
+import com.boot.jx.postman.PMConstants.CHAT_MODE;
 import com.boot.jx.postman.model.MessageDefinitions.Contactable;
 import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.scope.tnt.Tenants;
@@ -369,6 +370,27 @@ public class PMEnvironment {
 		return keyEntry(entryMeta.getKey());
 	}
 
+	public PMConfigurationObject permEntry(String key) {
+		PMConfigurationObject configObject = this.local().perms().get(key);
+		String tnt = AppContextUtil.getTenant();
+		if (ArgUtil.isEmpty(configObject) && !Tenants.isDefault(tnt)) {
+			PMConfigurationObject sharedConfigObject = this.shared().perms().get(key);
+			if (ArgUtil.is(sharedConfigObject)) {
+				return sharedConfigObject;
+			}
+		}
+		if (ArgUtil.isEmpty(configObject)) {
+			String value = appConfig.prop(key);
+			configObject = new PMConfigurationObject(key, value);
+			// this.config().map().put(key, configObject);
+		}
+		return configObject;
+	}
+
+	public PMConfigurationObject permEntry(EntryMeta entryMeta) {
+		return permEntry(entryMeta.getKey());
+	}
+
 	public void addChannel(ChannelConfig config) {
 		if (ArgUtil.is(provider)) {
 			provider.addChannel(config);
@@ -382,6 +404,8 @@ public class PMEnvironment {
 	}
 
 	public interface PMCommonConfig extends AppCommonConfig {
+		public String getCdnServerDebug();
+
 		public String getCdnServer();
 
 		public String getBotUrl();
@@ -407,7 +431,7 @@ public class PMEnvironment {
 	public interface PMDomainConfig {
 		public String getDefaultInboundQueue();
 
-		public String getDefaultInboundQueue(String channelId);
+		public String getDefaultInboundQueue(String channelId, CHAT_MODE mode);
 
 		public String getDefaultInboundQueue(Contactable contact);
 
@@ -418,6 +442,8 @@ public class PMEnvironment {
 		PMConfigurationObject getChatIdleTimeout();
 
 		PMConfigurationObject getAgentHistoryCount();
+
+		String getDefaultInboundQueue(Contactable contact, CHAT_MODE mode);
 
 	}
 

@@ -3,8 +3,6 @@ package com.boot.jx.admin.dto;
 import java.util.List;
 import java.util.Map;
 
-import javax.validation.constraints.NotNull;
-
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.TypeAlias;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -15,6 +13,7 @@ public class CsvDto {
 	/** csv refernce key**/
 	@Id
 	String referenceKey;
+	String templateId;
 	List<Map<Object,Object>> lstMap;
 	Map<Object,List<Object>> csvMap;
 	List<String> lstErrors;
@@ -41,5 +40,11 @@ public class CsvDto {
 	}
 	public void setReferenceKey(String referenceKey) {
 		this.referenceKey = referenceKey;
+	}
+	public String getTemplateId() {
+		return templateId;
+	}
+	public void setTemplateId(String templateId) {
+		this.templateId = templateId;
 	}
 }

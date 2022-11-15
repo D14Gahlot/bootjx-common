@@ -20,6 +20,7 @@ import com.boot.jx.model.CommonFileStream;
 import com.boot.jx.postman.client.PMFileStoreClient;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
+import com.boot.jx.postman.doc.CustomerProfileDoc;
 import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.MessageBoxEvent;
@@ -127,6 +128,11 @@ public class TelegramConnector extends AbstractConnector<TelegramConfigDetails, 
 			}
 		}
 		return inboxMessage;
+	}
+
+	@Override
+	protected CustomerProfileDoc findProfile(ChatContactDoc chatContactDoc) {
+		return contactStore.findProfileByPhone(chatContactDoc.getPhone());
 	}
 
 	@Override

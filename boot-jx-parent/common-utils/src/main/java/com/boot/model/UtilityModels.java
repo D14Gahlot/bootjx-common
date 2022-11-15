@@ -16,6 +16,14 @@ public class UtilityModels {
 		public String id();
 	}
 
+	public interface UniqueIndex<T> {
+		public String uuid();
+
+		public String uuid(String uuid);
+
+		public T update(T fromObject);
+	}
+
 	/**
 	 * While De-Serialization
 	 * 

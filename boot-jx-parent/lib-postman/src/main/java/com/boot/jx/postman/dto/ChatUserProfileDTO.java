@@ -213,6 +213,9 @@ public class ChatUserProfileDTO implements Serializable {
 		}
 	}
 
+	String id;
+	String code;
+
 	String contactId;
 
 	String profileId;
@@ -303,6 +306,22 @@ public class ChatUserProfileDTO implements Serializable {
 
 	public void setProfileId(String profileId) {
 		this.profileId = profileId;
+	}
+
+	public String getId() {
+		return id;
+	}
+
+	public void setId(String id) {
+		this.id = id;
+	}
+
+	public String getCode() {
+		return code;
+	}
+
+	public void setCode(String code) {
+		this.code = code;
 	}
 
 }

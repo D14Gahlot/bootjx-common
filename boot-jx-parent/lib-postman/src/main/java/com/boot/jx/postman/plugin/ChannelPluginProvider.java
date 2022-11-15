@@ -24,6 +24,7 @@ import com.boot.jx.postman.PMEnvironment.ChannelTypeSpecificProps;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.StringUtils;
 
 public class ChannelPluginProvider {
 
@@ -51,7 +52,7 @@ public class ChannelPluginProvider {
 		public default ChannelConfig updateChannelConfig(ChannelConfig config, AChannelDetails details) {
 			updatePluginSpecs(config);
 			// Channel Specific Properties
-			config.setLane(details.getLane());
+			config.setLane(StringUtils.removeSpecialCharacter(details.getLane()));
 
 			setDetails(config, (C) details);
 			return config;

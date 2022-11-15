@@ -280,6 +280,16 @@ public final class StringUtils {
 		return (src == null) ? src : src.trim().replaceAll(" +", " ");
 	}
 
+	public static String join(String delimter, String... strs) {
+		StringJoiner sj = new StringJoiner(delimter);
+		for (String string : strs) {
+			if (ArgUtil.is(string)) {
+				sj.add(string);
+			}
+		}
+		return sj.toString();
+	}
+
 	/**
 	 * 
 	 * @param src
@@ -515,6 +525,9 @@ public final class StringUtils {
 	public static String[] toArray(String str) {
 		if (str == null) {
 			return new String[0];
+		}
+		if (str.startsWith("[") && str.endsWith("]")) {
+			str = str.trim().substring(1, str.length() - 1);
 		}
 		return str.split(",");
 	}

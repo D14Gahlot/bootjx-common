@@ -66,6 +66,7 @@ public class FacebookConnector extends AbstractConnector<FacebookConfigDetails, 
 		return inboxMessage;
 	}
 
+	
 	@Override
 	public OutboxMessage initSession(ChatSessionDoc session, InboxMessage inboxMessage) {
 		ChannelConfig config = getChannelConfig(inboxMessage);

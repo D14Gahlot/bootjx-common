@@ -4,9 +4,10 @@ import com.boot.jx.mongo.CommonDocInterfaces.ResourceDocumentImpl;
 import com.boot.jx.mongo.CommonDocInterfaces.SimpleDocument;
 import com.boot.jx.mongo.CommonDocInterfaces.TimeStampIndex.CreatedTimeStampIndexSupport;
 import com.boot.jx.mongo.CommonDocInterfaces.TimeStampIndex.UpdatedTimeStampIndexSupport;
+import com.boot.jx.mongo.CommonMongoQB.MongoQueryBuilder;
 import com.boot.utils.ArgUtil;
 
-public class CommonMongoQueryBuilder extends CommonMongoQB<CommonMongoQueryBuilder, Object> {
+public class CommonMongoQueryBuilder extends MongoQueryBuilder<Object> {
 
 	public static abstract class DocQueryBuilder<T> extends CommonMongoQB<DocQueryBuilder<T>, T> {
 
@@ -106,5 +107,4 @@ public class CommonMongoQueryBuilder extends CommonMongoQB<CommonMongoQueryBuild
 	public static SimpleDocQueryBuilder doc(SimpleDocument doc) {
 		return SimpleDocQueryBuilder.doc(doc);
 	}
-
 }

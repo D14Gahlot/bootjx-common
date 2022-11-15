@@ -28,6 +28,10 @@ public class PMConstants {
 		 */
 		public static final String SUPER_DEV = "SUPER_DEV";
 		/**
+		 * Internal Users, having WABA-Access to assigned/created waba channels
+		 */
+		public static final String WABA_MANAGER = "WABA_MANAGER";
+		/**
 		 * User who can create domains for clients and has Admin-Access to those domains
 		 */
 		public static final String BUSINESS_PARTNER = "BUSINESS_PARTNER";
@@ -38,7 +42,7 @@ public class PMConstants {
 
 		public static final String ADMIN = "ADMIN";
 		public static final String AGENT = "AGENT";
-		public static final String ALLOWED = "DUPER_USER,SUPER_DEV,BUSINESS_PARTNER,BUSINESS_USER,ADMIN,AGENT";
+		public static final String ALLOWED = "DUPER_USER,SUPER_DEV,WABA_MANAGER,BUSINESS_PARTNER,BUSINESS_USER,ADMIN,AGENT";
 	}
 
 	public static class MESSAGE_BOUND_TYPE {
@@ -94,6 +98,11 @@ public class PMConstants {
 
 			return false;
 		}
+
+		public static CHAT_MODE from(String chatMode) {
+			return ArgUtil.parseAsEnumT(chatMode, CHAT_MODE.class, null);
+		}
+
 	}
 
 	public static enum APP_TYPE {
