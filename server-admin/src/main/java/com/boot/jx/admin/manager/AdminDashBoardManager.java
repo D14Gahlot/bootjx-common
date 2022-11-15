@@ -1302,17 +1302,14 @@ public class AdminDashBoardManager {
 						Collectors.groupingBy(DateWiseHourCountDto::getDate, Collectors.counting())));
 
 		Map<Object, Map<Object, Long>> dayWiseMap = new HashMap<>();
-
+		for (String channel : channelLst) {
 		for (Map.Entry<String, Map<String, Long>> keyValue : dayWiseCountMap.entrySet()) {
 			String key = keyValue.getKey();
 			if (ArgUtil.is(key)) {
-
-				for (String channel : channelLst) {
-					if (!key.contains(channel)) {
-						dayWiseMap.put(tnt + "_" + channel, dateRanMap);
+				String  tnt_channel=tnt + "_" + channel; 
+					if (!key.contains(tnt_channel)) {
+						dayWiseMap.put(tnt_channel, dateRanMap);
 					}
-				}
-
 				Map<Object, Long> dateWiseCnt = new HashMap<>();
 				Map<String, Long> dayCntMap = dayWiseCountMap.get(key);
 				// dateRanMap
@@ -1330,6 +1327,7 @@ public class AdminDashBoardManager {
 				}
 				dayWiseMap.put(key, dateWiseCnt);
 			}
+		}
 		}
 
 		dayWiseMap = sortMap(dayWiseMap);
@@ -1858,7 +1856,6 @@ public List<WabaSummaryDocDto> wabaSummary(long timestamp) {
 	query.with(new Sort(new Order(Direction.DESC, "created.stamp")));
 	List<WABAConversation> wabaDocLst = mongoTemplate.find(query, WABAConversation.class, "TP_WABA_CONVERSATIONS");
 	for (WABAConversation waba : wabaDocLst) {
-		System.out.println("JSON :" + JsonUtil.toJson(waba));
 		WabaSummaryDocDto dto = new WabaSummaryDocDto();
 		String yyyyMMdd = DateUtil.foramtTimeStampDateAsString(waba.getCreated().getStamp(),
 				DateUtil.YYYYMMDD_DATE_FORMAT);
@@ -1882,7 +1879,7 @@ public List<WabaSummaryDocDto> wabaSummary(long timestamp) {
 }
 
 public String getLane(String contactid) {
-	String lane=null;
+	String lane="";
 	if(ArgUtil.is(contactid)) {
 		String[] contactids =contactid.split("_");
 		if(contactids!=null && contactids[1]!=null) {
