@@ -678,11 +678,6 @@ public class AccountDashBoardManager {
 		String min = sdfm.format(date);
 		int m = Integer.parseInt(min);
 		long tStamp = timeStamp;
-//		if (m > 30) {
-//			tStamp = timeStamp - ((m - 30) * 60 * 1000L);
-//		} else {
-//			tStamp = timeStamp - (m * 60 * 1000L);
-//		}
 		if (m > 30) {
 			tStamp = timeStamp + ((60 - m) * 60 * 1000L);
 		} else {
@@ -718,9 +713,12 @@ public class AccountDashBoardManager {
 			m = 30-m;
 		}
 	    long currTimeStM=currentTStamp+(m * 60 * 1000L);
-		long lastTimeStampWm = lastTimeStamp +m * 60 * 1000L;
+		long lastTimeStampWm = lastTimeStamp +((m+30) * 60 * 1000L);
+		System.out.println("currTimeStM ** :"+lastTimeStampWm);
 		lastTimeStampWm = (lastTimeStampWm - (lastTimeStampWm % (1000 * 60)));
-		for (long lastTS = lastTimeStampWm; lastTS <= currTimeStM; lastTS = lastTS + DateUtil.MIN_30) {
+		System.out.println("currTimeStM :"+currTimeStM+"\t lastTimeStampWm :"+lastTimeStampWm);
+		for (long lastTS = lastTimeStampWm; lastTS <=currTimeStM; lastTS = lastTS + DateUtil.MIN_30) {
+			
 			mapMinWise.put(lastTS, new Long(0));
 		}
 		Map<Object, Long> result = new TreeMap<Object, Long>(mapMinWise);
