@@ -1,6 +1,5 @@
 package com.boot.jx.postman.store;
 
-import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -17,7 +16,6 @@ import org.springframework.stereotype.Component;
 
 import com.boot.jx.AppConfig;
 import com.boot.jx.AppContextUtil;
-import com.boot.jx.AppParam;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.exception.ApiHttpExceptions.ApiHttpException;
 import com.boot.jx.exception.ApiHttpExceptions.ApiHttpServerException;
@@ -39,7 +37,7 @@ import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
 import com.boot.utils.TimeUtils;
 import com.google.common.collect.Lists;
-import com.mongodb.WriteResult;
+import com.mongodb.client.result.UpdateResult;
 
 @Component
 public class MessageStore extends CommonMongoTemplateAbstract {
@@ -398,7 +396,7 @@ public class MessageStore extends CommonMongoTemplateAbstract {
 
 			String collectionName = getCollectionName(messageReport.contact().getContactType());
 
-			WriteResult result;
+			UpdateResult result;
 
 			if (multi) {
 				result = mongoTemplate.updateMulti(builder.getQuery(), builder.getUpdate(), MessageDoc.class,
@@ -408,8 +406,8 @@ public class MessageStore extends CommonMongoTemplateAbstract {
 						collectionName);
 			}
 
-			if (result.getN() > 1) {
-				builder.limit(result.getN());
+			if (result.isModifiedCountAvailable() && result.getModifiedCount() > 1) {
+				builder.limit(result.getModifiedCount());
 				List<MessageDoc> messsages = mongoTemplate.find(builder.getQuery(), MessageDoc.class, collectionName);
 				if (ArgUtil.is(messsages) && ArgUtil.is(messsages.get(0))) {
 					updateMessageReport(messageReport, messsages.get(0));

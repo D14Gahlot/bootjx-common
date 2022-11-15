@@ -111,6 +111,12 @@ public class CommonMongoQB<M extends CommonMongoQB<M, T>, T> implements IMongoQu
 	}
 
 	@SuppressWarnings("unchecked")
+	public M limit(long modifiedCount) {
+		this.query().limit(ArgUtil.parseAsInteger(modifiedCount));
+		return (M) this;
+	}
+
+	@SuppressWarnings("unchecked")
 	public M skip(int skip) {
 		this.query().skip(skip);
 		return (M) this;

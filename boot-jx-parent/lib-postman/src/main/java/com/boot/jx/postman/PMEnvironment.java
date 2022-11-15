@@ -2,13 +2,16 @@ package com.boot.jx.postman;
 
 import java.io.Serializable;
 
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 import com.boot.jx.AppConfig;
 import com.boot.jx.AppConfigPackage.AppCommonConfig;
 import com.boot.jx.AppContextUtil;
 import com.boot.jx.dict.ContactType;
+import com.boot.jx.logger.LoggerService;
 import com.boot.jx.postman.PMConfiguration.PMConfigurationModel;
 import com.boot.jx.postman.PMConfiguration.PMConfigurationWrappper;
 import com.boot.jx.postman.PMConstants.CHAT_MODE;
@@ -24,6 +27,8 @@ import com.fasterxml.jackson.annotation.JsonView;
 
 @Component
 public class PMEnvironment {
+
+	private static final Logger LOGGER = LoggerService.getLogger(PMEnvironment.class);
 
 	public static interface PublicProperty {
 	}
@@ -304,7 +309,8 @@ public class PMEnvironment {
 
 	}
 
-	@Autowired(required = false)
+	@Lazy
+	@Autowired
 	private PMEnvironmentProvider provider;
 
 	public PMConfigurationModel local() {
@@ -339,6 +345,7 @@ public class PMEnvironment {
 
 	public void initConfig() {
 		if (ArgUtil.is(provider)) {
+			LOGGER.info("=======================initConfig");
 			provider.initConfig();
 		}
 	}

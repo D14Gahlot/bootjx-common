@@ -15,7 +15,7 @@ import org.springframework.core.io.InputStreamSource;
 import org.springframework.stereotype.Component;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
-import org.thymeleaf.spring4.SpringTemplateEngine;
+import org.thymeleaf.spring5.SpringTemplateEngine;
 
 import com.boot.jx.AppConfig;
 import com.boot.jx.AppContextUtil;

@@ -19,9 +19,9 @@ import com.boot.jx.rbac.docs.RbacUser;
 @Component
 public class RbacUserDetailsService implements UserDetailsService {
 
-    @Autowired
+    @Autowired(required = false)
     private RbacUserRepository userRepository;
-    @Autowired
+    @Autowired(required = false)
     private RbacRoleRepository roleRepository;
 
     public RbacUser findByUsername(String username) {

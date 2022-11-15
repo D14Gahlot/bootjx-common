@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,6 +43,7 @@ import com.boot.jx.admin.dto.DashBoardRequestDto;
 import com.boot.jx.admin.dto.DashBoardResponseDto;
 import com.boot.jx.admin.dto.LeadMessanger;
 import com.boot.jx.admin.dto.PeakLoadDto;
+import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.model.Message;
@@ -62,7 +64,7 @@ public class AgentAnalyticsManager {
 	public static final String MY_BOT = "BOT";
 
 	@Autowired
-	MongoTemplate mongoTemplate;
+	CommonMongoTemplate mongoTemplate;
 
 	@Autowired
 	AdminDashBoardManager adminDbMgr;
@@ -71,7 +73,7 @@ public class AgentAnalyticsManager {
 		LOGGER.info("getAgentWiseAnalytics {} :" + JsonUtil.toJson(req));
 		List<DashBoardResponseDto> lstDto = new ArrayList<>();
 		DashBoardResponseDto dto = null;
-		List<ChatSessionDoc> allAgent = null;
+		List<String> allAgent = null;
 		long date1 = 0;
 		long date2 = 0;
 		if (ArgUtil.is(req.getDateRange1()) && req.getDateRange1() > 0) {
@@ -189,7 +191,8 @@ public class AgentAnalyticsManager {
 		dto.setAgentName(agent == null ? MY_BOT : agent);
 		/** Unique agent list **/
 
-		List<ChatSessionDoc> distinctContactLst = getUniqueAgentWiseContactList(agent, dateRange1, dateRange2);
+		List<String> distinctContactLst = getUniqueAgentWiseContactList(agent, dateRange1, dateRange2);
+
 		if (ArgUtil.is(distinctContactLst)) {
 			dto.setUniqueConversation(distinctContactLst.size());
 		}
@@ -311,51 +314,74 @@ public class AgentAnalyticsManager {
 		return dto;
 	}
 
-	public List<ChatSessionDoc> getAgentList() {
-		List<ChatSessionDoc> distinceAgentList = mongoTemplate.getCollection("CHAT_SESSION")
-				.distinct("assignedToAgent");
+	public List<String> getAgentList() {
+		List<String> distinceAgentList = mongoTemplate.distinctValues("CHAT_SESSION", "assignedToAgent", String.class);
 		return distinceAgentList;
 	}
 
-	public List<ChatSessionDoc> getAgentList(long dateRange1, long dateRange2) {
+	public List<String> getAgentList(long dateRange1, long dateRange2) {
 		Query query = new Query();
 		query.addCriteria(Criteria.where("assignedAgentStamp").gt(dateRange1).lt(dateRange2));
-		List<ChatSessionDoc> distinceAgentList = mongoTemplate.getCollection("CHAT_SESSION").distinct("assignedToAgent",
-				query.getQueryObject());
+		List<String> distinceAgentList = mongoTemplate.distinctValues("CHAT_SESSION", "assignedToAgent", String.class);
+
 		if (distinceAgentList == null || distinceAgentList.isEmpty()) {
 			distinceAgentList = getDefaultAgent(dateRange1, dateRange2);
 		}
 		return distinceAgentList;
 	}
 
-	public List<ChatSessionDoc> getDefaultAgent(long dateRange1, long dateRange2) {
+	public List<String> getDefaultAgent(long dateRange1, long dateRange2) {
 		Query query = new Query();
 		query.addCriteria(Criteria.where("startSessionStamp").gt(dateRange1).lt(dateRange2));
-		List<ChatSessionDoc> distinceAgentList = mongoTemplate.getCollection("CHAT_SESSION").distinct("mode",
-				query.getQueryObject());
+
+		List<String> distinceAgentList = mongoTemplate.distinctValues("CHAT_SESSION", "mode", String.class);
 		return distinceAgentList;
 	}
 
-	public List<ChatSessionDoc> getDefaultDistinctContact(long dateRange1, long dateRange2) {
+	public List<String> getDefaultDistinctContact(long dateRange1, long dateRange2) {
 		Query query = new Query();
 		query.addCriteria(Criteria.where("startSessionStamp").gt(dateRange1).lt(dateRange2));
-		removeChatSessField(query);
-		List<ChatSessionDoc> distinceAgentList = mongoTemplate.getCollection("CHAT_SESSION").distinct("contactId",
-				query.getQueryObject());
+		// removeChatSessField(query);
+		query.fields().include("assignedAgentStamp").include("contactId");
+		// List<String> distinceAgentList = mongoTemplate.distinctValues("CHAT_SESSION",
+		// "contactId", String.class);
+
+		List<ChatSessionDoc> chatSessDocLst = mongoTemplate.find(query, ChatSessionDoc.class, CHAT_SESSION);
+		List<String> distinceAgentList = getDistinct(chatSessDocLst);
+
 		return distinceAgentList;
 	}
 
-	@SuppressWarnings("unchecked")
-	public List<ChatSessionDoc> getUniqueAgentWiseContactList(String agent, long dateRange1, long dateRange2) {
+	public List<String> getUniqueAgentWiseContactList(String agent, long dateRange1, long dateRange2) {
 
 		Query query = new Query();
 		query.addCriteria(Criteria.where("assignedToAgent").is(agent));
 		query.addCriteria(Criteria.where("assignedAgentStamp").gt(dateRange1).lt(dateRange2));
-		removeChatSessField(query);
-		List<ChatSessionDoc> distinctIdList = mongoTemplate.getCollection(CHAT_SESSION).distinct("contactId",
-				query.getQueryObject());
+		query.fields().include("assignedToAgent").include("assignedAgentStamp").include("contactId");
+		// removeChatSessField(query);
+		List<String> distinctIdList = new ArrayList<>();
+		// List<String> distinctIdList = mongoTemplate.distinctValues("CHAT_SESSION",
+		// "contactId", String.class);
+		List<ChatSessionDoc> chatSessDocLst = mongoTemplate.find(query, ChatSessionDoc.class, CHAT_SESSION);
+
+		distinctIdList = getDistinct(chatSessDocLst);
+
 		if (distinctIdList == null || distinctIdList.isEmpty()) {
 			distinctIdList = getDefaultDistinctContact(dateRange1, dateRange2);
+		}
+
+		return distinctIdList;
+	}
+
+	public List<String> getDistinct(List<ChatSessionDoc> chatSessDocLst) {
+		List<String> distinctIdList = new ArrayList<>();
+		for (ChatSessionDoc doc : chatSessDocLst) {
+			if (ArgUtil.is(doc.getContactId())) {
+				distinctIdList.add(doc.getContactId());
+			}
+		}
+		if (distinctIdList != null && !distinctIdList.isEmpty()) {
+			distinctIdList = distinctIdList.stream().distinct().collect(Collectors.toList());
 		}
 
 		return distinctIdList;
@@ -409,7 +435,7 @@ public class AgentAnalyticsManager {
 	public long getConversationDuration(String agent, long startTime, long endTime) {
 		Map<String, Long> conVerMsgLst = new HashMap<String, Long>();
 		Long maxEntryKeyValue = new Long(0);
-		List<ChatSessionDoc> uniquContactIdLst = getUniqueAgentWiseContactList(agent, startTime, endTime);
+		List<String> uniquContactIdLst = getUniqueAgentWiseContactList(agent, startTime, endTime);
 		for (Object chatSession : uniquContactIdLst) {
 			String conId = (String) chatSession;
 			Query query = new Query();
@@ -437,7 +463,7 @@ public class AgentAnalyticsManager {
 		double startLag = 0.0d;
 		double percentageWithDecimal = 0.0d;
 
-		List<ChatSessionDoc> uniquContactIdLst = getUniqueAgentWiseContactList(agent, dateRange1, dateRange2);
+		List<String> uniquContactIdLst = getUniqueAgentWiseContactList(agent, dateRange1, dateRange2);
 		for (Object chatSession : uniquContactIdLst) {
 			String conId = (String) chatSession;
 			Query query = new Query();
@@ -669,11 +695,10 @@ public class AgentAnalyticsManager {
 
 	// Get Total Msg from
 
-	public List<MessageDoc> getTotalMessageAgentAndContactWise(List<ChatSessionDoc> lstChatSession, long dateRange1,
+	public List<MessageDoc> getTotalMessageAgentAndContactWise(List<String> contactIds, long dateRange1,
 			long dateRange2) {
 		List<MessageDoc> totalMsgDocLst = new ArrayList<MessageDoc>();
-		for (Object chatSession : lstChatSession) {
-			String contactId = (String) chatSession;
+		for (String contactId : contactIds) {
 			List<MessageDoc> msgDocLst = getMsgCountAgentContactWise(contactId, dateRange1, dateRange2);
 			totalMsgDocLst.addAll(msgDocLst);
 		}

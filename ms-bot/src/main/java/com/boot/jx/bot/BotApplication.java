@@ -7,10 +7,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.admin.SpringApplicationAdminJmxAutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.jmx.JmxAutoConfiguration;
-import org.springframework.boot.autoconfigure.mobile.SitePreferenceAutoConfiguration;
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.boot.autoconfigure.validation.ValidationAutoConfiguration;
-import org.springframework.boot.autoconfigure.websocket.WebSocketAutoConfiguration;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.servlet.DelegatingFilterProxyRegistrationBean;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -23,9 +21,8 @@ import org.springframework.web.context.request.RequestContextListener;
 @SpringBootApplication
 @ComponentScan(value = "com.boot.jx")
 @EnableTransactionManagement
-@EnableAutoConfiguration(
-	exclude = { JmxAutoConfiguration.class, WebSocketAutoConfiguration.class, SitePreferenceAutoConfiguration.class,
-		SpringApplicationAdminJmxAutoConfiguration.class, ValidationAutoConfiguration.class })
+@EnableAutoConfiguration(exclude = { JmxAutoConfiguration.class, SpringApplicationAdminJmxAutoConfiguration.class,
+	ValidationAutoConfiguration.class })
 @EnableAsync(proxyTargetClass = true)
 public class BotApplication {
 
@@ -47,7 +44,7 @@ public class BotApplication {
     public DelegatingFilterProxyRegistrationBean securityFilterChainRegistration(
 	    SecurityProperties securityProperties) {
 	DelegatingFilterProxyRegistrationBean registration = new DelegatingFilterProxyRegistrationBean("checkSession");
-	registration.setOrder(securityProperties.getFilterOrder());
+	registration.setOrder(securityProperties.getFilter().getOrder());
 	return registration;
     }
 

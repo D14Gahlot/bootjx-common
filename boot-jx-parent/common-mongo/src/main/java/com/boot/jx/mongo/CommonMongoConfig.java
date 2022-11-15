@@ -11,14 +11,14 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 @PropertySource("classpath:application-mongo.properties")
 public class CommonMongoConfig {
 
-	@Value("${spring.data.mongodb.uri}")
-	String dataSourceUrl;
+    @Value("${spring.data.mongodb.uri}")
+    String dataSourceUrl;
 
-	@Autowired
-	private CommonMongoSource commonMongoSource;
+    @Autowired
+    private CommonMongoSource commonMongoSource;
 
-	@Bean
-	public MongoTemplate mongoTemplate() {
-		return new MongoTemplateCommonImpl(commonMongoSource.getMongoDbFactory(dataSourceUrl));
-	}
+    @Bean
+    public MongoTemplate mongoTemplate() {
+	return new MongoTemplateCommonImpl(commonMongoSource.getMongoDbFactory());
+    }
 }

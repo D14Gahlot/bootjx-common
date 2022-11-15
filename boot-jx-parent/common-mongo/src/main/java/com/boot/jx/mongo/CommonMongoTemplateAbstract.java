@@ -2,6 +2,7 @@ package com.boot.jx.mongo;
 
 import java.util.List;
 
+import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,10 +23,13 @@ import com.boot.jx.mongo.CommonDocInterfaces.TimeStampIndex;
 import com.boot.jx.mongo.CommonDocInterfaces.TimeStampIndex.CreatedTimeStampIndexSupport;
 import com.boot.jx.mongo.CommonDocInterfaces.TimeStampIndex.UpdatedTimeStampIndexSupport;
 import com.boot.jx.mongo.CommonMongoQueryBuilder.DocQueryBuilder;
+import com.boot.jx.mongo.MongoUtils.MongoResultProcessor;
 import com.boot.utils.ArgUtil;
-import com.mongodb.WriteResult;
+import com.mongodb.client.result.DeleteResult;
+import com.mongodb.client.result.UpdateResult;
 
-public class CommonMongoTemplateAbstract extends CommonMongoTemplateDefault {
+public class CommonMongoTemplateAbstract<TStore extends CommonMongoTemplateAbstract<TStore>>
+		extends CommonMongoTemplateDefault {
 
 	public static final Logger LOGGER = LoggerService.getLogger(CommonMongoTemplateAbstract.class);
 
@@ -39,6 +43,24 @@ public class CommonMongoTemplateAbstract extends CommonMongoTemplateDefault {
 
 	protected MongoTemplate getCommonMongoTemplate() {
 		return mongoTemplate;
+	}
+
+	@SuppressWarnings("unchecked")
+	public TStore using(MongoTemplate mongoTemplate) {
+		this.mongoTemplate = mongoTemplate;
+		return (TStore) this;
+	}
+
+	public TStore using(CommonMongoSource commonMongoSource) {
+		return this.using(new MongoTemplateCommonImpl(commonMongoSource.getMongoDbFactory()).using(commonMongoSource));
+	}
+
+	public MongoResultProcessor<Document> collection(String collection) {
+		return new MongoResultProcessor<Document>().using(this.getCommonMongoTemplate()).collection(collection);
+	}
+
+	public <TResult> MongoResultProcessor<TResult> collection(String collection, Class<TResult> clazz) {
+		return new MongoResultProcessor<TResult>().using(this.getCommonMongoTemplate()).collection(collection);
 	}
 
 	public void beforeSaveInternal(Object objectToSave, String collectionName) {
@@ -133,8 +155,8 @@ public class CommonMongoTemplateAbstract extends CommonMongoTemplateDefault {
 		return newVersion;
 	}
 
-	public WriteResult updateFirst(IMongoQueryBuilder<?> builder) {
-		WriteResult ret = null;
+	public UpdateResult updateFirst(IMongoQueryBuilder<?> builder) {
+		UpdateResult ret = null;
 		if (ArgUtil.is(builder.getUpdate())) {
 			try {
 				builder.updatedStamp();
@@ -151,8 +173,8 @@ public class CommonMongoTemplateAbstract extends CommonMongoTemplateDefault {
 		return ret;
 	}
 
-	public WriteResult update(IMongoQueryBuilder<?> builder) {
-		WriteResult ret = null;
+	public UpdateResult update(IMongoQueryBuilder<?> builder) {
+		UpdateResult ret = null;
 		if (ArgUtil.is(builder.getUpdate())) {
 			try {
 				builder.updatedStamp();
@@ -176,8 +198,8 @@ public class CommonMongoTemplateAbstract extends CommonMongoTemplateDefault {
 	 * @see MongoTemplate#upsert(Query,
 	 *      org.springframework.data.mongodb.core.query.Update, Class, String)
 	 */
-	public WriteResult upsert(IMongoQueryBuilder<?> builder) {
-		WriteResult ret = null;
+	public UpdateResult upsert(IMongoQueryBuilder<?> builder) {
+		UpdateResult ret = null;
 		if (ArgUtil.is(builder.getUpdate())) {
 			try {
 				builder.updatedStamp();
@@ -191,7 +213,7 @@ public class CommonMongoTemplateAbstract extends CommonMongoTemplateDefault {
 		return ret;
 	}
 
-	public WriteResult trash(Object object) {
+	public DeleteResult trash(Object object) {
 		if (object instanceof AuditCreateEntity && ArgUtil.is(auditDetailProvider)) {
 			String collectionName = "ZTRASH_" + mongoTemplate.getCollectionName(object.getClass());
 			auditDetailProvider.auditCreate((AuditCreateEntity) object);
@@ -257,6 +279,10 @@ public class CommonMongoTemplateAbstract extends CommonMongoTemplateDefault {
 	public <T> T removeAndAudit(String id, Class<T> clazz) {
 		T x = getCommonMongoTemplate().findById(id, clazz);
 		return removeAndAudit(x);
+	}
+
+	public <T> List<T> distinctValues(String collectionName, String key, Class<T> clazz) {
+		return collection(collectionName, clazz).distinct(key, clazz).asList();
 	}
 
 }

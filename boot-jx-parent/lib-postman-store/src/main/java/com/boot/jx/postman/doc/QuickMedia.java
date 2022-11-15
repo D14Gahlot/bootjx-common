@@ -137,11 +137,6 @@ public class QuickMedia implements Serializable, AuditableEntity, QuickGalleryIt
 		return this;
 	}
 
-	public QuickMedia from(DBObject doc) {
-		this.category = ArgUtil.parseAsString(doc.get("category"));
-		return this;
-	}
-
 	public String getUpdatedBy() {
 		return updatedBy;
 	}
@@ -172,5 +167,15 @@ public class QuickMedia implements Serializable, AuditableEntity, QuickGalleryIt
 
 	public void setMimeType(String mimeType) {
 		this.mimeType = mimeType;
+	}
+
+	public QuickMedia from(DBObject doc) {
+		this.category = ArgUtil.parseAsString(doc.get("category"));
+		return this;
+	}
+
+	public QuickMedia from(org.bson.Document doc) {
+		this.category = ArgUtil.parseAsString(doc.get("category"));
+		return this;
 	}
 }

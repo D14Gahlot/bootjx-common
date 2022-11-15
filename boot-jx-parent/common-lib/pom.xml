@@ -43,6 +43,7 @@
 		<dependency>
 			<groupId>org.springframework.mobile</groupId>
 			<artifactId>spring-mobile-device</artifactId>
+			<version>2.0.0.M3</version>
 		</dependency>
 
 		<dependency>
@@ -87,6 +88,12 @@
 			<artifactId>spring-boot-starter-test</artifactId>
 		</dependency>
 
+		<dependency>
+			<groupId>com.github.gianluca-nitti</groupId>
+			<artifactId>java-expr-eval</artifactId>
+			<version>v3.1</version>
+		</dependency>
+
 		<!-- https://stackoverflow.com/questions/61501810/javadoc-error-datatypeconverter-doesnot-exist -->
 		<dependency>
 			<groupId>jakarta.xml.bind</groupId>
@@ -113,6 +120,18 @@
 			<id>jcenter-snapshots</id>
 			<name>jcenter</name>
 			<url>https://jcenter.bintray.com/</url>
+		</repository>
+		<repository>
+			<id>jitpack.io</id>
+			<url>https://jitpack.io</url>
+		</repository>
+		<repository>
+			<id>spring-milestones</id>
+			<name>Spring Milestones</name>
+			<url>https://repo.spring.io/libs-milestone</url>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
 		</repository>
 	</repositories>
 

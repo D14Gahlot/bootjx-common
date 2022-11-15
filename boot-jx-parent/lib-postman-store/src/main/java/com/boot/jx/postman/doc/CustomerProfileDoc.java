@@ -16,7 +16,6 @@ import com.boot.jx.postman.pbook.PBPhone;
 import com.boot.jx.postman.pbook.PBWebsite;
 import com.boot.model.UtilityModels.JsonIgnoreNull;
 import com.boot.model.UtilityModels.JsonIgnoreUnknown;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @Document(collection = "CUSTOMER_PROFILE")
 public class CustomerProfileDoc implements Serializable, SimpleDocument, JsonIgnoreUnknown, JsonIgnoreNull {

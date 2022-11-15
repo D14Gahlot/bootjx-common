@@ -46,7 +46,7 @@ public class AdminDashBoardContoller {
 	}
 
 	@RequestMapping(value = "/admin/fetch-agent-chat-session-list", method = { RequestMethod.GET })
-	public List<ChatSessionDoc> getAgentList() {
+	public List<String> getAgentList() {
 		return agentAnaMgr.getAgentList();
 	}
 

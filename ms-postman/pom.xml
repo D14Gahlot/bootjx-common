@@ -17,8 +17,6 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<thymeleaf.version>3.0.2.RELEASE</thymeleaf.version>
-		<thymeleaf-layout-dialect.version>2.1.1</thymeleaf-layout-dialect.version>
 		<itext.version>7.1.1</itext.version>
 		<itext.pdfhtml.version>2.0.1</itext.pdfhtml.version>
 		<itext.pdfcalligraph.version>2.0.0</itext.pdfcalligraph.version>
@@ -41,11 +39,6 @@
 			<groupId>org.thymeleaf.extras</groupId>
 			<artifactId>thymeleaf-extras-springsecurity4</artifactId>
 			<version>3.0.0.RELEASE</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.springframework.session</groupId>
-			<artifactId>spring-session</artifactId>
 		</dependency>
 
 		<dependency>
@@ -89,8 +82,7 @@
 			<artifactId>lib-postman-chat</artifactId>
 		</dependency>
 
-
-		<dependency>
+ 		<dependency>
 			<groupId>com.boot.jx</groupId>
 			<artifactId>lib-postman-nlp</artifactId>
 		</dependency>
@@ -198,11 +190,6 @@
 			<groupId>com.ibm.icu</groupId>
 			<artifactId>icu4j</artifactId>
 			<version>58.1</version>
-		</dependency>
-
-		<dependency>
-			<groupId>commons-beanutils</groupId>
-			<artifactId>commons-beanutils</artifactId>
 		</dependency>
 
 		<!-- GEOIP -->

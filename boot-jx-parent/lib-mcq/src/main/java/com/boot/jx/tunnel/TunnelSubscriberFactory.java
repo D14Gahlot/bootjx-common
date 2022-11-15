@@ -52,14 +52,27 @@ public class TunnelSubscriberFactory {
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public TunnelSubscriberFactory(List<ITunnelSubscriber> listeners,
-			@Autowired(required = false) RedissonClient redisson, @Autowired(required = true) AppConfig appConfigLocal,
-			@Autowired AppParam loadAppParams) {
+			@Autowired(required = false) RedissonClient redisson, @Autowired(required = true) AppConfig appConfigLocal
+	/**
+	 * This is important as params should be loaded before we can subscribe to with
+	 * ENV events
+	 */
+	// , @Autowired AppParam loadAppParams
+	) {
 		appConfig = appConfigLocal;
+
+		if (appConfig == null) {
+			LOGGER.error("App COnfig is Undefiend");
+		}
+
 		LOGGER.info("Subscribing {} tunnel events in {}", listeners.size(), appConfigLocal.getAppEnv());
 		if (redisson == null) {
 			LOGGER.warn("Redisson Not avaiable for {} Listeners", listeners.size());
 		} else {
 			for (ITunnelSubscriber listener : listeners) {
+				if (listener == null) {
+					LOGGER.error("NULL LISTENR IN LIST");
+				}
 				Class<?> c = AopProxyUtils.ultimateTargetClass(listener);
 				ITunnelSubscriber listenerTarget = (ITunnelSubscriber) AopProxyUtils.getSingletonTarget(listener);
 				// System.out.println("====="+c.getName());

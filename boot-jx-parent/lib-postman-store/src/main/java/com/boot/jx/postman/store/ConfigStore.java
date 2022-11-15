@@ -15,10 +15,10 @@ import com.boot.jx.postman.doc.config.VarsConfigDoc.CompanyTokenKeyDoc;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CryptoUtil;
-import com.mongodb.WriteResult;
+import com.mongodb.client.result.DeleteResult;
 
 @Component
-public class ConfigStore extends CommonMongoTemplateAbstract {
+public class ConfigStore extends CommonMongoTemplateAbstract<ConfigStore> {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(ConfigStore.class);
 
@@ -86,8 +86,8 @@ public class ConfigStore extends CommonMongoTemplateAbstract {
 		}
 	}
 
-	public WriteResult remove(Object object) {
-		WriteResult r = super.remove(object);
+	public DeleteResult remove(Object object) {
+		DeleteResult r = super.remove(object);
 		log(object, "deleted");
 		return r;
 	}

@@ -23,6 +23,7 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
+import org.bson.Document;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,6 +53,7 @@ import com.boot.jx.account.dto.SummaryDocDto;
 import com.boot.jx.account.dto.TypeCount;
 import com.boot.jx.account.dto.WabaSummaryDocDto;
 import com.boot.jx.dict.ContactType;
+import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.jx.postman.PMConstants;
 import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.doc.config.ChannelConfigDoc;
@@ -67,13 +69,15 @@ import com.mongodb.AggregationOptions.OutputMode;
 import com.mongodb.Cursor;
 import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoCursor;
 
 @Component
 public class AccountDashBoardManager {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(AccountDashBoardManager.class);
 	@Autowired
-	MongoTemplate mongoTemplate;
+	CommonMongoTemplate mongoTemplate;
 
 	@Autowired
 	private DomainSummaryMetaStore domSumMetaStore;
@@ -95,8 +99,7 @@ public class AccountDashBoardManager {
 		Query query = new Query();
 		query.with(new Sort(new Order(Direction.DESC, "startSessionStamp")));
 		query.fields().include("startSessionStamp");
-		List<Long> msgDocLst = mongoTemplate.getCollection("CHAT_SESSION").distinct("startSessionStamp",
-				query.getQueryObject());
+		List<Long> msgDocLst = mongoTemplate.distinctValues("CHAT_SESSION", "startSessionStamp", Long.class);
 		List<MonthDtlsDto> listofMonth = new ArrayList<>();
 		for (Long docTimeStamp : msgDocLst) {
 			long timestamp = (docTimeStamp - (docTimeStamp % (DateUtil.ONEDAY)));
@@ -136,18 +139,17 @@ public class AccountDashBoardManager {
 		Map<Object, List<ContactTypeCountDto>> map = new HashMap<>();
 		for (String contactType : lst) {
 			List<ContactTypeCountDto> messageTypeLst = new ArrayList<ContactTypeCountDto>();
-			List<DBObject> list = new ArrayList<DBObject>();
+			List<Document> list = new ArrayList<Document>();
 			// Match condtion
 			list.add(Aggregation.match(new Criteria("timestamp").gt(monthMinTimeStamp).lt(monthMaxTimeStamp))
-					.toDBObject(Aggregation.DEFAULT_CONTEXT));
-			list.add(Aggregation.group("type").count().as("count").toDBObject(Aggregation.DEFAULT_CONTEXT));
+					.toDocument(Aggregation.DEFAULT_CONTEXT));
+			list.add(Aggregation.group("type").count().as("count").toDocument(Aggregation.DEFAULT_CONTEXT));
 
-			DBCollection col = mongoTemplate.getCollection(contactType);
-			Cursor cursor = col.aggregate(list,
-					AggregationOptions.builder().allowDiskUse(true).outputMode(OutputMode.CURSOR).build());
+			MongoCollection<Document> col = mongoTemplate.getCollection(contactType);
+			MongoCursor<Document> cursor = col.aggregate(list).iterator();
 			while (cursor.hasNext()) {
 				ContactTypeCountDto contactDto = new ContactTypeCountDto();
-				DBObject object = cursor.next();
+				Document object = cursor.next();
 				if (ArgUtil.is(object)) {
 					String type = ArgUtil.parseAsString(object.get("_id"));
 					long count = ArgUtil.parseAsLong(object.get("count"), 0L);
@@ -484,7 +486,10 @@ public class AccountDashBoardManager {
 					SimpleDateFormat sdfH = new SimpleDateFormat(DateUtil.DEFAULT_DATE_TIME_FORMAT);
 					String formattedDateHm = sdfH.format(date);
 					SimpleDateFormat sdfm = new SimpleDateFormat("mm");
+					String min = sdfm.format(date);
+
 					long tStampWmS = getHour(timeStamp);
+
 					hourListH.add(formattedDateHm);
 					hrDto.setDate(yyyyMMdd);
 					hrDto.setHour(formattedDateHm);
@@ -597,7 +602,6 @@ public class AccountDashBoardManager {
 				dto.setMeta(doc.getMeta());
 				dto.setLane(lane);
 				dto.setDomain(tnt);
-				dto.setLane(getLane(doc.getContactId()));
 				String id = getSummaryId(dto);
 				dto.setId(id);
 				if (ArgUtil.is(dto.getId())) {
@@ -761,15 +765,16 @@ public class AccountDashBoardManager {
 		List<Map<String, Object>> lstMap = new ArrayList<>();
 		for (String contactType : lst) {
 			List<ContactTypeCountDto> messageTypeLst = new ArrayList<ContactTypeCountDto>();
-			List<DBObject> list = new ArrayList<DBObject>();
+			List<Document> list = new ArrayList<Document>();
 			list = getAggregationMatchForMsgStatus(lasthrTimeStmp, currentTs);
-			DBCollection col = mongoTemplate.getCollection(contactType);
-			Cursor cursor = col.aggregate(list,
-					AggregationOptions.builder().allowDiskUse(true).outputMode(OutputMode.CURSOR).build());
+//			DBCollection col = mongoTemplate.getCollection(contactType);
+//			Cursor cursor = col.aggregate(list,
+//					AggregationOptions.builder().allowDiskUse(true).outputMode(OutputMode.CURSOR).build());
 
+			MongoCursor<Document> cursor = mongoTemplate.collection(contactType).aggregate(list).iterator();
 			while (cursor.hasNext()) {
 				ContactTypeCountDto contactDto = new ContactTypeCountDto();
-				DBObject object = cursor.next();
+				Document object = cursor.next();
 				if (ArgUtil.is(object)) {
 					JSONObject jsonObject = new JSONObject(JsonUtil.toJson(object));
 					String type = ArgUtil.parseAsString(jsonObject.get("_id"));
@@ -862,15 +867,12 @@ public class AccountDashBoardManager {
 		List<Map<String, Object>> lstMap = new ArrayList<>();
 		for (String contactType : lst) {
 			List<ContactTypeCountDto> messageTypeLst = new ArrayList<ContactTypeCountDto>();
-			List<DBObject> list = new ArrayList<DBObject>();
+			List<Document> list = new ArrayList<Document>();
 			list = getAggregationMatchForMsgStatus(lasDayTimeStmp, currentTs);
-			DBCollection col = mongoTemplate.getCollection(contactType);
-			Cursor cursor = col.aggregate(list,
-					AggregationOptions.builder().allowDiskUse(true).outputMode(OutputMode.CURSOR).build());
-
+			MongoCursor<Document> cursor = mongoTemplate.collection(contactType).aggregate(list).iterator();
 			while (cursor.hasNext()) {
 				ContactTypeCountDto contactDto = new ContactTypeCountDto();
-				DBObject object = cursor.next();
+				Document object = cursor.next();
 				if (ArgUtil.is(object)) {
 					JSONObject jsonObject = new JSONObject(JsonUtil.toJson(object));
 					String type = ArgUtil.parseAsString(jsonObject.get("_id"));
@@ -977,22 +979,22 @@ public class AccountDashBoardManager {
 	}
 
 	/** Agreegration Query to fetch msg status **/
-	public List<DBObject> getAggregationMatchForMsgStatus(long lasthrTimeStmp, long currentTs) {
+	public List<Document> getAggregationMatchForMsgStatus(long lasthrTimeStmp, long currentTs) {
 		String metaQry = "{\"categoryType\" : \"AUTO_REPLY\",\r\n" + "\"composeType\" : \"N\",\r\n"
 				+ "\"sendType\" : \"PM\"}";
 		// queryFilter = "{'FirstName':'Ian'}";
 
-		List<DBObject> list = new ArrayList<DBObject>();
+		List<Document> list = new ArrayList<Document>();
 		// Match condtion
-		list.add(Aggregation.match(new Criteria("type").is("O")).toDBObject(Aggregation.DEFAULT_CONTEXT));
+		list.add(Aggregation.match(new Criteria("type").is("O")).toDocument(Aggregation.DEFAULT_CONTEXT));
 		// list.add(Aggregation.match(new Criteria("meta").is(metaQry))
 		// .toDocument(Aggregation.DEFAULT_CONTEXT));
-		list.add(Aggregation.match(new Criteria("meta.composeType").is("N")).toDBObject(Aggregation.DEFAULT_CONTEXT));
-		list.add(Aggregation.match(new Criteria("meta.sendType").is("PM")).toDBObject(Aggregation.DEFAULT_CONTEXT));
+		list.add(Aggregation.match(new Criteria("meta.composeType").is("N")).toDocument(Aggregation.DEFAULT_CONTEXT));
+		list.add(Aggregation.match(new Criteria("meta.sendType").is("PM")).toDocument(Aggregation.DEFAULT_CONTEXT));
 
 		list.add(Aggregation.match(new Criteria("timestamp").gt(lasthrTimeStmp).lt(currentTs))
-				.toDBObject(Aggregation.DEFAULT_CONTEXT));
-		list.add(Aggregation.group("stamps").count().as("count").toDBObject(Aggregation.DEFAULT_CONTEXT));
+				.toDocument(Aggregation.DEFAULT_CONTEXT));
+		list.add(Aggregation.group("stamps").count().as("count").toDocument(Aggregation.DEFAULT_CONTEXT));
 
 		return list;
 	}
@@ -1061,14 +1063,14 @@ public class AccountDashBoardManager {
 	}
 
 	/** Agreegration Query to fetch msg status **/
-	public List<DBObject> getAggregationMatchForNonWhatsUpContactId(long lasthrTimeStmp, long currentTs) {
+	public List<Document> getAggregationMatchForNonWhatsUpContactId(long lasthrTimeStmp, long currentTs) {
 
-		List<DBObject> list = new ArrayList<DBObject>();
+		List<Document> list = new ArrayList<Document>();
 		// Match condtion
 		list.add(Aggregation.match(new Criteria("timestamp").gt(lasthrTimeStmp).lt(currentTs))
-				.toDBObject(Aggregation.DEFAULT_CONTEXT));
+				.toDocument(Aggregation.DEFAULT_CONTEXT));
 		list.add(Aggregation.group("timestamp", "contactId").count().as("count")
-				.toDBObject(Aggregation.DEFAULT_CONTEXT));
+				.toDocument(Aggregation.DEFAULT_CONTEXT));
 
 		return list;
 	}

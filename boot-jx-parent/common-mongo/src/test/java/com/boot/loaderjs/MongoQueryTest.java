@@ -5,6 +5,7 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.bson.Document;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
 import org.springframework.data.mongodb.core.query.Criteria;
 
@@ -24,12 +25,12 @@ public class MongoQueryTest { // Noncompliant
 	 * @throws IOException
 	 */
 	public static void main(String[] args) throws ParseException, IOException {
-		List<DBObject> list = new ArrayList<DBObject>();
+		List<Document> list = new ArrayList<Document>();
 		list.add(Aggregation.match(Criteria.where("sessionId").is("622753392ce8572032037399")) // Match
-				.toDBObject(Aggregation.DEFAULT_CONTEXT));
+				.toDocument(Aggregation.DEFAULT_CONTEXT));
 		list.add(QA.project("statuss", QA.objectToArray("stamps")));
-		list.add(Aggregation.unwind("statuss").toDBObject(Aggregation.DEFAULT_CONTEXT));
-		list.add(Aggregation.group("statuss.k").count().as("count").toDBObject(Aggregation.DEFAULT_CONTEXT));
+		list.add(Aggregation.unwind("statuss").toDocument(Aggregation.DEFAULT_CONTEXT));
+		list.add(Aggregation.group("statuss.k").count().as("count").toDocument(Aggregation.DEFAULT_CONTEXT));
 
 		System.out.println(JsonUtil.toJson(list));
 

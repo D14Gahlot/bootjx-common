@@ -302,6 +302,20 @@ public class MapBuilder {
 		public String toString() {
 			return this.map.toString();
 		}
+
+		@Override
+		public void addAll(K key, List<? extends V> values) {
+			for (V v : values) {
+				this.add(key, v);
+			}
+		}
+
+		@Override
+		public void addAll(MultiValueMap<K, V> values) {
+			for (Entry<K, List<V>> entry : values.entrySet()) {
+				addAll(entry.getKey(), entry.getValue());
+			}
+		}
 	}
 
 	@Deprecated

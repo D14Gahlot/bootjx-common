@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -217,6 +218,15 @@ public final class CollectionUtil {
 	@SafeVarargs
 	public static <T> List<T> asList(T... elements) {
 		return getList(elements);
+	}
+
+	public static <T> List<T> asList(Iterable<T> listable) {
+		Iterator<T> cursor = listable.iterator();
+		List<T> list = new ArrayList<T>();
+		while (cursor.hasNext()) {
+			list.add(cursor.next());
+		}
+		return list;
 	}
 
 	@SafeVarargs

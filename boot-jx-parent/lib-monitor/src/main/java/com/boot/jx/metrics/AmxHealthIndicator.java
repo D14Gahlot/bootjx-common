@@ -13,7 +13,7 @@ import com.boot.jx.def.IndicatorListner;
 import com.boot.jx.def.IndicatorListner.GaugeIndicator;
 import com.boot.utils.ArgUtil;
 
-import io.prometheus.client.Gauge;
+//import io.prometheus.client.Gauge;
 
 @Component
 public class AmxHealthIndicator extends AbstractHealthIndicator {
@@ -21,10 +21,10 @@ public class AmxHealthIndicator extends AbstractHealthIndicator {
 	@Autowired(required = false)
 	List<IndicatorListner> listners;
 
-	private static final Gauge statusGauge = Gauge.build()
-			.name("amx_gauge")
-			.labelNames("status")
-			.help("Amx Custom Gauge Values").register();
+//	private static final Gauge statusGauge = Gauge.build()
+//			.name("amx_gauge")
+//			.labelNames("status")
+//			.help("Amx Custom Gauge Values").register();
 
 	@Override
 	protected void doHealthCheck(Health.Builder builder) throws Exception {
@@ -40,9 +40,10 @@ public class AmxHealthIndicator extends AbstractHealthIndicator {
 					builder.withDetail(indicatorListner.getKey(), indicatorListner.getValue());
 				}
 			}
-			for (Entry<String, Double> gauge : gaugeIndicator.toMap().entrySet()) {
-				statusGauge.labels(gauge.getKey()).set(gauge.getValue());
-			}
+//			
+//			for (Entry<String, Double> gauge : gaugeIndicator.toMap().entrySet()) {
+//				statusGauge.labels(gauge.getKey()).set(gauge.getValue());
+//			}
 
 		}
 	}

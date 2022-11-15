@@ -10,6 +10,7 @@ import static org.springframework.data.mongodb.core.aggregation.Aggregation.unwi
 import java.util.ArrayList;
 import java.util.List;
 
+import org.bson.Document;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
@@ -33,7 +34,7 @@ import com.boot.jx.common.store.ChatArchiveService;
 import com.boot.jx.common.store.DocumentUpdateListner;
 import com.boot.jx.logger.LoggerService;
 import com.boot.jx.mongo.CommonMongoQB.MongoQueryBuilder;
-import com.boot.jx.mongo.CommonMongoUtils;
+import com.boot.jx.mongo.MongoUtils;
 import com.boot.jx.postman.ClientApp;
 import com.boot.jx.postman.PMConstants;
 import com.boot.jx.postman.PMConstants.CHAT_SESSION_ACTIONS;
@@ -64,10 +65,6 @@ import com.boot.model.MapModel;
 import com.boot.model.MapModel.MapPathEntry;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
-import com.mongodb.AggregationOptions;
-import com.mongodb.AggregationOptions.OutputMode;
-import com.mongodb.DBCollection;
-import com.mongodb.DBObject;
 
 @Component
 public class AgentChatHandlerImpl implements AgentChatHandler {
@@ -124,6 +121,8 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 
 	private AgentSessionDoc getAgentSessonAssigned(PMArgs params) {
 
+		String stickyLogic = environment.local().keyEntry("postman.agent.chat.stickysession")
+				.asString(PMConstants.CHAT_SESSION_STICKY.NONE);
 		long timeThen = System.currentTimeMillis() - chatClientConfig.getAgentSessionTimeout().toMillis();
 
 		// Relationship Manager Agent Sticky Logic
@@ -219,7 +218,7 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 
 			if (ArgUtil.is(params.getAssignToSkillCodes())) {
 
-				List<DBObject> agg = CommonMongoUtils.newAggregation(//
+				List<Document> agg = MongoUtils.newAggregation(//
 						match(Criteria.where("profile.quickskills.code").in(params.getAssignToSkillCodes())) //
 						, project(bind("quickskills", "profile.quickskills.code").and("lastAssignStamp")
 								.and("lastOnlineStamp").and("tags", "1"))//
@@ -232,12 +231,9 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 				//
 				);
 
-				List<DBObject> luckyAgents = new ArrayList<DBObject>();
-				DBCollection col = sessionStore.getCollection("AGENT_SESSION");
-				col.aggregate(agg,
-						AggregationOptions.builder().allowDiskUse(true).outputMode(OutputMode.CURSOR).build())
-						.forEachRemaining(doc -> luckyAgents.add(doc));
-				DBObject luckyAgent = CollectionUtil.getOne(luckyAgents);
+				List<Document> luckyAgents = new ArrayList<Document>();
+				sessionStore.collection("AGENT_SESSION").aggregate(agg).forEach(doc -> luckyAgents.add(doc));
+				Document luckyAgent = CollectionUtil.getOne(luckyAgents);
 				if (ArgUtil.is(luckyAgent)) {
 					AgentSessionDoc avaialbleAgent = sessionStore.findByIdSafeCheck(luckyAgent.get("_id"),
 							AgentSessionDoc.class);

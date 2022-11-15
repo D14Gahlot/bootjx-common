@@ -12,6 +12,7 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.bson.Document;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -23,8 +24,8 @@ import org.springframework.test.context.TestPropertySource;
 import com.boot.jx.mongo.CommonMongoQB.MongoQueryBuilder;
 import com.boot.jx.mongo.CommonMongoQueryBuilder;
 import com.boot.jx.mongo.CommonMongoSource;
-import com.boot.jx.mongo.CommonMongoUtils;
-import com.boot.jx.mongo.MongoTemplateCommonImpl;
+import com.boot.jx.mongo.CommonMongoTemplate;
+import com.boot.jx.mongo.MongoUtils;
 import com.boot.jx.postman.doc.CustomerProfileDoc;
 import com.boot.jx.postman.doc.QuickMedia;
 import com.boot.jx.postman.pbook.PBPhone;
@@ -34,11 +35,10 @@ import com.boot.utils.JsonUtil;
 import com.google.i18n.phonenumbers.NumberParseException;
 import com.google.i18n.phonenumbers.PhoneNumberUtil;
 import com.google.i18n.phonenumbers.Phonenumber.PhoneNumber;
-import com.mongodb.AggregationOptions;
-import com.mongodb.AggregationOptions.OutputMode;
 import com.mongodb.BasicDBObject;
-import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoCursor;
 
 @SpringBootTest
 @TestPropertySource(locations = "classpath:application-test.properties")
@@ -49,7 +49,7 @@ public class ChatStoreTest { // Noncompliant
 	@Value("${spring.data.mongodb.uri}")
 	private String secondProperty;
 
-	private MongoTemplateCommonImpl mongoTemplate;
+	private CommonMongoTemplate mongoTemplate;
 
 	private void initMongo() {
 		AppContextUtil.setTenant("lalit");
@@ -60,8 +60,7 @@ public class ChatStoreTest { // Noncompliant
 		commonMongoSource.setGlobalDataSourceUrl(connectionString);
 		commonMongoSource.setGlobalDBProfix("tnt");
 
-		mongoTemplate = new MongoTemplateCommonImpl(commonMongoSource.getMongoDbFactory());
-		mongoTemplate.setMongoDBCredentials(commonMongoSource);
+		mongoTemplate = new CommonMongoTemplate().using(commonMongoSource);
 	}
 
 	public PBPhone parsePhone(PBPhone pbPhone) {
@@ -102,7 +101,7 @@ public class ChatStoreTest { // Noncompliant
 		public long lastAssignStamp;
 		public long lastOnlineStamp;
 
-		LuckAgent from(DBObject doc) {
+		LuckAgent from(Document doc) {
 			this.lastAssignStamp = ArgUtil.parseAsLong(doc.get("lastAssignStamp"), Constants.DEFAULT_LONG);
 			this.lastOnlineStamp = ArgUtil.parseAsLong(doc.get("lastOnlineStamp"), Constants.DEFAULT_LONG);
 			this.agentCode = doc.get("_id");
@@ -111,7 +110,7 @@ public class ChatStoreTest { // Noncompliant
 		}
 	}
 
-	@Test
+	// @Test
 	public void profile() {
 		initMongo();
 		PBPhone ph = parsePhone(new PBPhone().phone("91993104050"));
@@ -130,7 +129,7 @@ public class ChatStoreTest { // Noncompliant
 		System.out.println("=========================================");
 	}
 
-	// @Test
+	@Test
 	public void testSkillMatch() {
 		initMongo();
 		System.out.println("=testSkillMatch==");
@@ -138,7 +137,7 @@ public class ChatStoreTest { // Noncompliant
 		list.add("dental");
 		list.add("ortho");
 
-		List<DBObject> agg = CommonMongoUtils.newAggregation(//
+		List<Document> agg = MongoUtils.newAggregation(//
 				match(Criteria.where("profile.quickskills.code").in(list)) //
 				, project(bind("quickskills", "profile.quickskills.code").and("lastAssignStamp").and("lastOnlineStamp")
 						.and("tags", "1"))//
@@ -150,28 +149,30 @@ public class ChatStoreTest { // Noncompliant
 				, sort(Direction.DESC, "noOfMatches").and(Direction.ASC, "lastOnlineStamp")
 		//
 		);
-		System.out.println("=========================================");
-		System.out.println("====" + JsonUtil.toJson(agg));
-		System.out.println("=========================================");
+		try {
+			System.out.println("=========================================");
+			System.out.println("====>" + JsonUtil.toJson(agg));
+			System.out.println("=========================================");
 
-		List<LuckAgent> other = new ArrayList<LuckAgent>();
+			List<LuckAgent> other = new ArrayList<LuckAgent>();
 
-//		AggregationResults<Result> groupResults = mongoTemplate.aggregate(agg, "AGENT_SESSION", Result.class);
-//		groupResults.getMappedResults().forEach(doc -> other.add(doc));
+			mongoTemplate.collection("AGENT_SESSION").aggregate(agg)
+					.forEach(doc -> other.add(new LuckAgent().from(doc)));
 
-		DBCollection col = mongoTemplate.getCollection("AGENT_SESSION");
-		col.aggregate(agg, AggregationOptions.builder().allowDiskUse(true).outputMode(OutputMode.CURSOR).build())
-				.forEachRemaining(doc -> other.add(new LuckAgent().from(doc)));
-		System.out.println("=========================================");
-		System.out.println("====" + JsonUtil.toJson(other));
-		System.out.println("=========================================");
+			System.out.println("=========================================");
+			System.out.println("====|" + JsonUtil.toJson(other));
+			System.out.println("=========================================");
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
 	}
 
 	// @Test
 	public void testLanguageEnumFromNumber() {
 		initMongo();
 
-		List<DBObject> list = new ArrayList<DBObject>();
+		List<Document> list = new ArrayList<Document>();
 //		list.add(Aggregation.match(Criteria.where("bulkSessionId").is((currentBatchJob.getJobId()))) // Match
 //				.toDBObject(Aggregation.DEFAULT_CONTEXT));
 
@@ -179,17 +180,22 @@ public class ChatStoreTest { // Noncompliant
 		DBObject projectFields = new BasicDBObject();
 		projectFields.put("_id", 0);
 		projectFields.put("category", "$_id");
-		DBObject project = new BasicDBObject("$project", projectFields);
+		Document project = new Document("$project", projectFields);
 
 		List<QuickMedia> other = new ArrayList<QuickMedia>();
-		list.add(Aggregation.group("category").count().as("count").toDBObject(Aggregation.DEFAULT_CONTEXT));
+		list.add(Aggregation.group("category").count().as("count").toDocument(Aggregation.DEFAULT_CONTEXT));
 		list.add(project);
 
 		try {
-			DBCollection col = mongoTemplate.getCollection(mongoTemplate.getCollectionName(QuickMedia.class));
+			MongoCollection<Document> col = mongoTemplate
+					.getCollection(mongoTemplate.getCollectionName(QuickMedia.class));
 
-			col.aggregate(list, AggregationOptions.builder().allowDiskUse(true).outputMode(OutputMode.CURSOR).build())
-					.forEachRemaining(doc -> other.add(new QuickMedia().from(doc)));
+			MongoCursor<Document> cursor = col.aggregate(list).iterator();
+
+			while (cursor.hasNext()) {
+				Document doc = cursor.next();
+				other.add(new QuickMedia().from(doc));
+			}
 
 //			AggregationOutput output = col.aggregate(list);
 //			// .forEachRemaining(doc -> other.add(new QuickMedia().from(doc)));

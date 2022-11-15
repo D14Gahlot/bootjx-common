@@ -44,7 +44,7 @@ import com.boot.utils.EntityDtoUtil;
 import com.boot.utils.TimeUtils;
 
 @Component
-public class SessionStore extends CommonMongoTemplateAbstract {
+public class SessionStore extends CommonMongoTemplateAbstract<SessionStore> {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(SessionStore.class);
 
