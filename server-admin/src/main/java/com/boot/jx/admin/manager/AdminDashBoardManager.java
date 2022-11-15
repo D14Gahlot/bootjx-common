@@ -1390,7 +1390,7 @@ public class AdminDashBoardManager {
 			m = 30-m;
 		}
 	    long currTimeStM=currentTStamp+(m * 60 * 1000L);
-		long lastTimeStampWm = lastTimeStamp +m * 60 * 1000L;
+		long lastTimeStampWm = lastTimeStamp +((m+30) * 60 * 1000L);
 		lastTimeStampWm = (lastTimeStampWm - (lastTimeStampWm % (1000 * 60)));
 		for (long lastTS = lastTimeStampWm; lastTS <= currTimeStM; lastTS = lastTS + DateUtil.MIN_30) {
 			mapMinWise.put(lastTS, new Long(0));
