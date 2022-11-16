@@ -109,6 +109,13 @@ public class CommonMongoTemplateAbstract<TStore extends CommonMongoTemplateAbstr
 		return doc;
 	}
 
+	public <T> T findById(Object id, Class<T> clazz) {
+		if (id != null) {
+			return getCommonMongoTemplate().findById(id, clazz);
+		}
+		return null;
+	}
+
 	public <T> T findByIdString(String id, Class<T> clazz) {
 		if (ArgUtil.is(id)) {
 			Criteria c = Criteria.where("_id").is(id);
