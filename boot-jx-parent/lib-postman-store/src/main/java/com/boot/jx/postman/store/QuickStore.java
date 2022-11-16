@@ -22,7 +22,7 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 
 @Component
-public class QuickStore extends CommonMongoTemplateAbstract {
+public class QuickStore extends CommonMongoTemplateAbstract<QuickStore> {
 
 	public static interface QuickGalleryItem extends JsonIgnoreUnknown {
 		String getId();

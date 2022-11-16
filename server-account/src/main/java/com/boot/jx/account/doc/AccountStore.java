@@ -13,7 +13,7 @@ import com.boot.utils.ArgUtil;
 import com.boot.utils.StringUtils;
 
 @Component
-public class AccountStore extends CommonMongoTemplateAbstract {
+public class AccountStore extends CommonMongoTemplateAbstract<AccountStore> {
 
 	public static final MapModel NODOMAIN = MapModel.createInstance().put("domain").put("account").put("partner")
 			.put("front").put("cpanel").put("admin").put("agent").put("docs");
