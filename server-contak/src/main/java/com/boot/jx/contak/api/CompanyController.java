@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.boot.jx.AppContextUtil;
 import com.boot.jx.api.ApiFieldError;
@@ -54,59 +55,73 @@ public class CompanyController {
 	
 	
 	@RequestMapping(value = "/api/v1/company/register", method = { RequestMethod.POST })
-	public ApiResponse<CompanyDoc,Object> save(@RequestBody CompanyDTO msg){
+	public ApiResponse<CompanyDoc,Object> save(@RequestParam(name = "coiFile") MultipartFile coiFile,
+			@RequestParam(name = "gstFile") MultipartFile gstFile,
+			@RequestParam(name = "panFile") MultipartFile panFile,
+			@RequestParam(name = "logoUrl") MultipartFile logoUrl,
+			@RequestParam String number,
+			@RequestParam String legalBusinessName,
+			@RequestParam String displayName,
+			@RequestParam String countryOfOperation,
+			@RequestParam String address,
+			@RequestParam String websiteUrl,
+			@RequestParam String contactPersonName,
+			@RequestParam String contactPhoneNumber,
+			@RequestParam String contactPersonEmailId,
+			@RequestParam String timezone,		
+			@RequestParam String password){
 		CompanyDoc  compoc = commonMongoTemplate.findOne(
-				CommonMongoQueryBuilder.collection(CompanyDoc.class).where(Criteria.where("number").is(msg.number)));
+				CommonMongoQueryBuilder.collection(CompanyDoc.class).where(Criteria.where("number").is(number)));
 		if(ArgUtil.is(compoc)) {
 			ApiResponseUtil.throwDuplicateInputException(new ApiFieldError().field("number"));
 		}
 		CompanyDoc companyDoc = new CompanyDoc();
 		companyDoc.setActive(true);
-		companyDoc.setLegalBusinessName(msg.legalBusinessName);
-		companyDoc.setDisplayName(msg.displayName);
-		companyDoc.setCountryOfOperation(msg.countryOfOperation);
-		companyDoc.setAddress(msg.address);
-		companyDoc.setWebsiteUrl(msg.websiteUrl);
+		companyDoc.setLegalBusinessName(legalBusinessName);
+		companyDoc.setDisplayName(displayName);
+		companyDoc.setCountryOfOperation(countryOfOperation);
+		companyDoc.setAddress(address);
+		companyDoc.setWebsiteUrl(websiteUrl);
 		
-		if(ArgUtil.is(msg.coiFile)) {	
-			CommonFile commonfile = fileStore.upload1(msg.coiFile,
-					String.format("%s/quickmedia/%s", AppContextUtil.getTenant(), UUID.randomUUID()),
-					msg.coiFile.getOriginalFilename());
+		if(ArgUtil.is(coiFile)) {	
+			CommonFile commonfile = fileStore.upload1(coiFile,
+					String.format("%s/oafiles/%s", AppContextUtil.getTenant(), UUID.randomUUID()),
+					coiFile.getOriginalFilename());
 			com.boot.jx.dict.FileType fileType = commonfile.getFileType();
 			FileFormat fileFormat = commonfile.getFileFormat();
 			String url = commonfile.getUrl();
 			companyDoc.setCoiFileUrl(url);
 		}
 		
-		if(ArgUtil.is(msg.gstFile)) {	
-			CommonFile commonfile = fileStore.upload1(msg.gstFile,
-					String.format("%s/quickmedia/%s", AppContextUtil.getTenant(), UUID.randomUUID()),
-					msg.gstFile.getOriginalFilename());
+		if(ArgUtil.is(gstFile)) {	
+			CommonFile commonfile = fileStore.upload1(gstFile,
+					String.format("%s/oafiles/%s", AppContextUtil.getTenant(), UUID.randomUUID()),
+					gstFile.getOriginalFilename());
 			com.boot.jx.dict.FileType fileType = commonfile.getFileType();
 			FileFormat fileFormat = commonfile.getFileFormat();
 			String url = commonfile.getUrl();
 			companyDoc.setGstFileUrl(url);
 		}
 		
-		if(ArgUtil.is(msg.panFile)) {	
-			CommonFile commonfile = fileStore.upload1(msg.panFile,
-					String.format("%s/quickmedia/%s", AppContextUtil.getTenant(), UUID.randomUUID()),
-					msg.panFile.getOriginalFilename());
+		if(ArgUtil.is(panFile)) {	
+			CommonFile commonfile = fileStore.upload1(panFile,
+					String.format("%s/oafiles/%s", AppContextUtil.getTenant(), UUID.randomUUID()),
+					panFile.getOriginalFilename());
 			com.boot.jx.dict.FileType fileType = commonfile.getFileType();
 			FileFormat fileFormat = commonfile.getFileFormat();
 			String url = commonfile.getUrl();
 			companyDoc.setPanFileUrl(url);
 		}
 		
-		companyDoc.setContactPersonName(msg.contactPersonName);
-		companyDoc.setContactPhoneNumber(msg.contactPhoneNumber);
-		companyDoc.setContactPersonEmailId(msg.contactPersonEmailId);
+		companyDoc.setContactPersonName(contactPersonName);
+		companyDoc.setContactPhoneNumber(contactPhoneNumber);
+		companyDoc.setContactPersonEmailId(contactPersonEmailId);
 		
 		
 
 		try {
 	        java.security.MessageDigest md = java.security.MessageDigest.getInstance("MD5");
-	        byte[] array = md.digest(msg.password.getBytes());
+	        byte[] array = md.digest(password.getBytes());
 	        StringBuffer sb = new StringBuffer();
 	        for (int i = 0; i < array.length; ++i) {
 	          sb.append(Integer.toHexString((array[i] & 0xFF) | 0x100).substring(1,3));
@@ -119,10 +134,18 @@ public class CompanyController {
 		
 		
 		companyDoc.setApiKey(UUID.randomUUID().toString());
-		companyDoc.setCompanyTimeZone(msg.timezone);
+		companyDoc.setCompanyTimeZone(timezone);
 		companyDoc.setCreatedAt(TimeStampIndex.now());
-		companyDoc.setNumber(msg.number);	
-		companyDoc.setLogoUrl(msg.logoUrl);
+		companyDoc.setNumber(number);	
+		if(ArgUtil.is(logoUrl)) {	
+			CommonFile commonfile = fileStore.upload1(logoUrl,
+					String.format("%s/oafiles/%s", AppContextUtil.getTenant(), UUID.randomUUID()),
+					logoUrl.getOriginalFilename());
+			com.boot.jx.dict.FileType fileType = commonfile.getFileType();
+			FileFormat fileFormat = commonfile.getFileFormat();
+			String url = commonfile.getUrl();
+			companyDoc.setLogoUrl(url);
+		}
 		commonMongoTemplate.save(companyDoc);
 		return ApiResponse.buildResult(companyDoc);
 	}
