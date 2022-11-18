@@ -27,16 +27,6 @@ public class CompanyDTO implements Serializable {
 	@ApiMockModelProperty(example = "https://www.google.com", required = true)
 	public String websiteUrl;
 	
-	
-	@ApiMockModelProperty(example = "https://www.google.com", required = true)
-	public MultipartFile coiFile;
-	
-	@ApiMockModelProperty(example = "https://www.google.com", required = true)
-	public MultipartFile gstFile;
-	
-	@ApiMockModelProperty(example = "https://www.google.com", required = true)
-	public MultipartFile panFile;
-	
 	@ApiMockModelProperty(example = "John Doe", required = true)
 	public String contactPersonName;
 	
