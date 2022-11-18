@@ -6,7 +6,6 @@ import java.util.Set;
 
 import org.bson.Document;
 import org.springframework.data.geo.GeoResults;
-import org.springframework.data.mongodb.MongoDbFactory;
 import org.springframework.data.mongodb.core.BulkOperations;
 import org.springframework.data.mongodb.core.BulkOperations.BulkMode;
 import org.springframework.data.mongodb.core.CollectionCallback;

@@ -95,8 +95,7 @@ public class ConfigStore extends CommonMongoTemplateAbstract<ConfigStore> {
 	public void saveCompanyVar(VarsConfigDoc refreshableConfigDoc) {
 		try {
 
-			VarsConfigDoc companyVarOld = mongoTemplate.findById(refreshableConfigDoc.getId(),
-					refreshableConfigDoc.getClass());
+			VarsConfigDoc companyVarOld = findById(refreshableConfigDoc.getId(), refreshableConfigDoc.getClass());
 			if (ArgUtil.is(companyVarOld)) {
 				if (refreshableConfigDoc.getValue() == null) {
 					refreshableConfigDoc.setValue(companyVarOld.getValue());
