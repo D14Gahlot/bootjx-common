@@ -25,7 +25,7 @@ public class FirebaseManager {
 		LOGGER.debug("IN FIREBASE ");
 		LOGGER.info("IN FIREBASE INFO");
 		HashMap< String, Object> bodyObject = new HashMap<>();
-		bodyObject.put("to", "dMErF0dFK0K-j0oCZ2P9K0:APA91bFFbpNu9JdRYWqNR9yZgtU34G__k7Gzb0EQ_yvEtdQNTbrPxe-mK76U5lelPN4jtHoNNhn0BPcQrN7qGenVpcaDYiXLZjW-Q79aSeZruPKuUC3J0bXEhCBAJsGrmJbOoMMBRYh4");
+		bodyObject.put("to", "/topics/oa_"+number);
 		HashMap<String ,String> notification =  new HashMap<>();
 		notification.put("title", title);
 		notification.put("body",body);
