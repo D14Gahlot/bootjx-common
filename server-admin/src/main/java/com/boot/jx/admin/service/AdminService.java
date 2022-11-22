@@ -54,7 +54,7 @@ public class AdminService {
 		AgentDoc reqEntity = EntityDtoUtil.dtoToEntity(reqDto, new AgentDoc());
 		List<AgentDoc> lstOfAgent = adminManager.createOrUpdateAgent(reqEntity);
 		try {
-			if (!ArgUtil.is(reqEntity.getId())) {
+			if (!ArgUtil.is(reqDto.getId()) && ArgUtil.is(reqEntity.getId())) {
 				empAuthService.resetPassword(reqEntity.getAgent_code(), false);
 			}
 		} catch (NoSuchAlgorithmException e) {

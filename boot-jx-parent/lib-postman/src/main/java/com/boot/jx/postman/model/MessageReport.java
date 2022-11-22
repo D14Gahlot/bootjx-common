@@ -30,6 +30,7 @@ public class MessageReport implements LogMessage, Serializable, TraceMessage {
 	private List<MessageReportError> errors;
 
 	private MessageSession session;
+	private MessageRouter route;
 
 	public String getMessageId() {
 		return messageId;
@@ -220,6 +221,28 @@ public class MessageReport implements LogMessage, Serializable, TraceMessage {
 
 	public void setTrace(List<Object> trace) {
 		this.trace = trace;
+	}
+
+	@Override
+	public List<Object> trace() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public MessageRouter route() {
+		if (route == null) {
+			this.route = new MessageRouter();
+		}
+		return this.route;
+	}
+
+	public MessageRouter getRoute() {
+		return route;
+	}
+
+	public void setRoute(MessageRouter route) {
+		this.route = route;
 	}
 
 }

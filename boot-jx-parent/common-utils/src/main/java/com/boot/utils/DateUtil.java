@@ -45,7 +45,7 @@ public final class DateUtil {
 	private static final String DEFAULT_DATE_FORMAT_EVENT = "dd-MMM-yyyy";
 
 	/** The Constant DEFAULT_DATE_TIME_FORMAT. */
-	private static final String DEFAULT_DATE_TIME_FORMAT = "dd/MM/yyyy HH:mm";
+	public static final String DEFAULT_DATE_TIME_FORMAT = "dd/MM/yyyy HH:mm";
 
 	/** The Constant DATE_FORMAT. */
 	private static final String DATE_FORMAT = "dd MMM yyyy";
@@ -91,6 +91,8 @@ public final class DateUtil {
 	public static final long DAYS_IN_YEAR = 365;
 
 	public static final long DAYS_IN_WEEK = 7;
+	
+	public static final long MIN_30 = 30 * 60 * 1000L;
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(DateUtil.class);
 

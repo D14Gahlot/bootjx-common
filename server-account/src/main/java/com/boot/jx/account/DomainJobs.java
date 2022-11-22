@@ -5,6 +5,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import com.boot.jx.AppConfig;
@@ -40,7 +41,7 @@ public class DomainJobs {
 	@Autowired
 	PMEnvironment pmEnvironment;
 
-	// @Scheduled(fixedDelay = 5000, initialDelay = 60000)
+	@Scheduled(fixedDelay = 5000, initialDelay = 60000)
 	public void fetchEmailTask() throws InterruptedException {
 		// LOGGER.info("======= I am doing my Task @ {}", appConfig.getSpringAppName());
 		AppContextUtil.clear();

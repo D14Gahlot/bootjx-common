@@ -3,9 +3,11 @@ package com.boot.jx.postman.query;
 import java.util.List;
 
 import com.boot.jx.mongo.CommonMongoQueryBuilder.DocQueryBuilder;
+import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.dto.ChatMessageDTO;
+import com.boot.jx.postman.model.MessageDefinitions.Contactable;
 import com.boot.jx.postman.service.ChatDTOUtil;
 import com.boot.jx.postman.store.MessageStore;
 import com.boot.jx.utils.PostManUtil;
@@ -155,6 +157,11 @@ public class ChatSessionQuery extends DocQueryBuilder<ChatSessionDoc> {
 		this.doc.read().put(key, now);
 		this.set("read." + key, now);
 		this.skipStampUpdate();
+		return this;
+	}
+
+	public ChatSessionQuery update(Contactable contactable) {
+		this.doc.contact().copyFrom(contactable);
 		return this;
 	}
 

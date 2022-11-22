@@ -71,6 +71,7 @@ public class ChatSessionDTO implements Serializable {
 	private Map<String, Long> stamps;
 
 	private Map<String, Object> feedback;
+	private Map<String, Object> meta;
 
 	public String getSessionId() {
 		return sessionId;
@@ -426,5 +427,13 @@ public class ChatSessionDTO implements Serializable {
 
 	public void setStamps(Map<String, Long> stamps) {
 		this.stamps = stamps;
+	}
+
+	public Map<String, Object> getMeta() {
+		return meta;
+	}
+
+	public void setMeta(Map<String, Object> meta) {
+		this.meta = meta;
 	}
 }

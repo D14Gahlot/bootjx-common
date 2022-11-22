@@ -1,17 +1,17 @@
-package com.boot.jx.account.dto;
+package com.boot.jx.admin.dto;
 
 import java.util.Map;
 
-public class SummaryDocDto {
+public class WabaSummaryDocDto {
 	String id;
 	String domain;
 	String date;
 	String channel;
 	String type;
-	String uniqueContactId;
+	String country;
 	String lane;
+	private Map<String, Object> pricing;
     Map<String, Object> meta;
-    Map<Object,Map<String,Long>> hourWiseCount;
 	public String getId() {
 		return id;
 	}
@@ -48,23 +48,23 @@ public class SummaryDocDto {
 	public void setMeta(Map<String, Object> meta) {
 		this.meta = meta;
 	}
-	public Map<Object, Map<String, Long>> getHourWiseCount() {
-		return hourWiseCount;
+	public String getCountry() {
+		return country;
 	}
-	public void setHourWiseCount(Map<Object, Map<String, Long>> hourWiseCount) {
-		this.hourWiseCount = hourWiseCount;
-	}
-	public String getUniqueContactId() {
-		return uniqueContactId;
-	}
-	public void setUniqueContactId(String uniqueContactId) {
-		this.uniqueContactId = uniqueContactId;
+	public void setCountry(String country) {
+		this.country = country;
 	}
 	public String getLane() {
 		return lane;
 	}
 	public void setLane(String lane) {
 		this.lane = lane;
+	}
+	public Map<String, Object> getPricing() {
+		return pricing;
+	}
+	public void setPricing(Map<String, Object> pricing) {
+		this.pricing = pricing;
 	}
 	
 

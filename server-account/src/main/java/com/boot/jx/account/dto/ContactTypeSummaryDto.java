@@ -7,16 +7,14 @@ import java.util.Map;
 public class ContactTypeSummaryDto {
 	String tenant;
 	String month;
-	long  monthMinTimeStamp;
-	long  monthMaxTimeStamp;
-	Map<Object,Long> summaryCount;
-	Map<Object,List<ContactTypeCountDto>> map;
-	Map<String, Map<String, Long>> dateWiseSummaryCount;
-	
-	Map<Object,Map<Object,Object>> dateWiseCountMap = new HashMap<>();
-	
-	Map<String, Map<String, Long>> hourWiseCountMap = new HashMap<>();
-	
+	long monthMinTimeStamp;
+	long monthMaxTimeStamp;
+	Map<Object, Long> summaryCount;
+	Map<Object, List<ContactTypeCountDto>> map;
+	Map<Object, Map<Object, Long>> dateWiseSummaryCount;
+	Map<Object, Map<Object, Object>> dateWiseCountMap = new HashMap<>();
+	Map<Object, Map<Object, Long>> hourWiseCountMap = new HashMap<>();
+
 	public String getTenant() {
 		return tenant;
 	}
@@ -53,24 +51,28 @@ public class ContactTypeSummaryDto {
 	public void setSummaryCount(Map<Object, Long> summaryCount) {
 		this.summaryCount = summaryCount;
 	}
-	public Map<String, Map<String, Long>> getDateWiseSummaryCount() {
-		return dateWiseSummaryCount;
-	}
-	public void setDateWiseSummaryCount(Map<String, Map<String, Long>> dateWiseSummaryCount) {
-		this.dateWiseSummaryCount = dateWiseSummaryCount;
-	}
+	
 	public Map<Object, Map<Object, Object>> getDateWiseCountMap() {
 		return dateWiseCountMap;
 	}
 	public void setDateWiseCountMap(Map<Object, Map<Object, Object>> dateWiseCountMap) {
 		this.dateWiseCountMap = dateWiseCountMap;
 	}
-	public Map<String, Map<String, Long>> getHourWiseCountMap() {
+
+	public Map<Object, Map<Object, Long>> getHourWiseCountMap() {
 		return hourWiseCountMap;
 	}
-	public void setHourWiseCountMap(Map<String, Map<String, Long>> hourWiseCountMap) {
+
+	public void setHourWiseCountMap(Map<Object, Map<Object, Long>> hourWiseCountMap) {
 		this.hourWiseCountMap = hourWiseCountMap;
 	}
-	
-	
+
+	public Map<Object, Map<Object, Long>> getDateWiseSummaryCount() {
+		return dateWiseSummaryCount;
+	}
+
+	public void setDateWiseSummaryCount(Map<Object, Map<Object, Long>> dateWiseSummaryCount) {
+		this.dateWiseSummaryCount = dateWiseSummaryCount;
+	}
+
 }

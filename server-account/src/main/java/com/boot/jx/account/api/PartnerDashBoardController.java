@@ -86,21 +86,50 @@ public class PartnerDashBoardController {
 		return  ApiResponse.buildResult(summary);
 	}
     
-    
-    @ResponseBody
-   	@RequestMapping(value = {"/pub/monthwise-summary/waba"}, method = { RequestMethod.GET })
-   	public ApiResponse<WabaSummaryDocDto, Object> getMonthWiseWabaSummary(long timestamp) {
-     	List<WabaSummaryDocDto> summary =dashBMgr.wabaSummary(timestamp);
-   		return  ApiResponse.buildResults(summary);
-   	}
-    
-    @ResponseBody
-	@RequestMapping(value = {"/pub/hourwise-summary"}, method = { RequestMethod.GET })
-	public ApiResponse<ContactTypeSummaryDto, Object> getHourWiseSummary(@RequestParam(required = false) long timestamp,long hr) {
-		ContactTypeSummaryDto summary =dashBMgr.hourWisesummary(timestamp,hr); 
-		return  ApiResponse.buildResult(summary);
+	@ResponseBody
+	@RequestMapping(value = { "/pub/monthwise-summary/waba" }, method = { RequestMethod.GET })
+	public ApiResponse<WabaSummaryDocDto, Object> getMonthWiseWabaSummary(long timestamp) {
+		List<WabaSummaryDocDto> summary = dashBMgr.wabaSummary(timestamp);
+		return ApiResponse.buildResults(summary);
 	}
 
-    
+	@ResponseBody
+	@RequestMapping(value = { "/pub/hourwise-summary" }, method = { RequestMethod.GET })
+	public ApiResponse<ContactTypeSummaryDto, Object> getHourWiseSummary(@RequestParam(required = false) long timestamp,
+			long hr) {
+		ContactTypeSummaryDto summary = dashBMgr.hourWisesummary(timestamp, hr);
+		return ApiResponse.buildResult(summary);
+	}
+
+	@ResponseBody
+	@RequestMapping(value = { "/pub/daywise-summary" }, method = { RequestMethod.GET })
+	public ApiResponse<ContactTypeSummaryDto, Object> getDayWiseSummary(@RequestParam(required = false) long dateRange1,
+			@RequestParam(required = false) long dateRange2, int days) {
+		ContactTypeSummaryDto summary = dashBMgr.dayChannelWiseWisesummary(dateRange1, dateRange2, days);
+		return ApiResponse.buildResult(summary);
+	}
+
+	@ResponseBody
+	@RequestMapping(value = { "/pub/hourwise-msg-status-summary" }, method = { RequestMethod.GET })
+	public ApiResponse<ContactTypeSummaryDto, Object> getHourWiseMsgStatusSummary(
+			@RequestParam(required = false) long timestamp, long hr) {
+		ContactTypeSummaryDto summary = dashBMgr.getHourWiseMsgStatusSummary(timestamp, hr);
+		return ApiResponse.buildResult(summary);
+	}
+
+	@ResponseBody
+	@RequestMapping(value = { "/pub/datewise-msg-status-summary" }, method = { RequestMethod.GET })
+	public ApiResponse<ContactTypeSummaryDto, Object> getDayWiseMsgStatusSummary(long dateRange1, long dateRange2,
+			int days) {
+		ContactTypeSummaryDto summary = dashBMgr.getDayWiseMsgStatusSummary(dateRange1, dateRange2, days);
+		return ApiResponse.buildResult(summary);
+	}
+
+	@ResponseBody
+	@RequestMapping(value = { "/pub/non-whatsup-msg-summary" }, method = { RequestMethod.GET })
+	public ApiResponse<ContactTypeSummaryDto, Object> getNonWhatsUpSummary(long dateRange1, long dateRange2) {
+		ContactTypeSummaryDto summary = dashBMgr.getNonWhatsUpSummary(dateRange1, dateRange2);
+		return ApiResponse.buildResult(summary);
+	}
 
 }

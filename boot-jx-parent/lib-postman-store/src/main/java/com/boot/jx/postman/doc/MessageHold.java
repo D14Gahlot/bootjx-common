@@ -1,6 +1,8 @@
 package com.boot.jx.postman.doc;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.data.annotation.Id;
@@ -36,7 +38,7 @@ public class MessageHold extends UpdatedTimeStampDoc implements Serializable {
 
 	@Indexed
 	private String appType;
-	
+
 	@Indexed
 	private String appVenv;
 
@@ -52,6 +54,10 @@ public class MessageHold extends UpdatedTimeStampDoc implements Serializable {
 	private PMArgs pmArgs;
 
 	private Map<String, Object> map;
+	private List<Object> logs;
+
+	private Object httpReq;
+	private Object httpResp;
 
 	public String getTempId() {
 		return tempId;
@@ -164,5 +170,36 @@ public class MessageHold extends UpdatedTimeStampDoc implements Serializable {
 
 	public void setAppVenv(String appVenv) {
 		this.appVenv = appVenv;
+	}
+
+	public List<Object> getLogs() {
+		return logs;
+	}
+
+	public void setLogs(List<Object> logs) {
+		this.logs = logs;
+	}
+
+	public List<Object> logs() {
+		if (this.getLogs() == null) {
+			this.setLogs(new ArrayList<Object>());
+		}
+		return this.getLogs();
+	}
+
+	public Object getHttpReq() {
+		return httpReq;
+	}
+
+	public void setHttpReq(Object httpReq) {
+		this.httpReq = httpReq;
+	}
+
+	public Object getHttpResp() {
+		return httpResp;
+	}
+
+	public void setHttpResp(Object httpResp) {
+		this.httpResp = httpResp;
 	}
 }

@@ -27,6 +27,7 @@ import com.boot.jx.dict.ContactType;
 import com.boot.jx.logger.AuditDetailProvider;
 import com.boot.jx.mongo.CommonMongoQB.QueryCriteria;
 import com.boot.jx.mongo.CommonMongoQueryBuilder;
+import com.boot.jx.mongo.QA;
 import com.boot.jx.postman.ClientApp;
 import com.boot.jx.postman.PMConstants;
 import com.boot.jx.postman.PMConstants.MESSAGE_SENDER_TYPE;
@@ -132,8 +133,7 @@ public class BulkMessageService extends BatchJobExecuter {
 
 		return session;
 	}
-	
-	
+
 	public BulkSessionDoc sendMultiple(List<OutboxMessage> bulkMessages) throws NumberParseException {
 
 		OutboxMessage bulkMessage = bulkMessages.get(0);
@@ -158,7 +158,7 @@ public class BulkMessageService extends BatchJobExecuter {
 		List<MessageDoc> docs = new ArrayList<MessageDoc>();
 		for (OutboxMessage bulkMsg : bulkMessages) {
 			MessageDoc doc = messageStore.createMessageDoc(bulkMsg);
-			String to =bulkMsg.getTo().get(0); 
+			String to = bulkMsg.getTo().get(0);
 			doc.setContactId(null);
 			doc.updateStatus(Status.SCHLD);
 			doc.setBulkSessionId(session.getBulkSessionId());
@@ -195,8 +195,6 @@ public class BulkMessageService extends BatchJobExecuter {
 
 		return session;
 	}
-
-	
 
 	@Override
 	public BatchJob resetJob(String jobId) {
@@ -322,8 +320,13 @@ public class BulkMessageService extends BatchJobExecuter {
 		List<DBObject> list = new ArrayList<DBObject>();
 		list.add(Aggregation.match(Criteria.where("bulkSessionId").is((currentBatchJob.getJobId()))) // Match
 				.toDBObject(Aggregation.DEFAULT_CONTEXT));
-		list.add(Aggregation.group("status").count().as("count").toDBObject(Aggregation.DEFAULT_CONTEXT));
 
+		list.add(QA.project("statuss", QA.objectToArray("stamps")));
+		list.add(Aggregation.unwind("statuss").toDBObject(Aggregation.DEFAULT_CONTEXT));
+		list.add(Aggregation.group("statuss.k").count().as("count").toDBObject(Aggregation.DEFAULT_CONTEXT));
+		// list.add(Aggregation.group("status").count().as("count").toDBObject(Aggregation.DEFAULT_CONTEXT));
+
+		//System.out.println(JsonUtil.toJson(list));
 		DBCollection col = mongoTemplate.getCollection(MessageStore.getCollectionName(contactType));
 		Cursor cursor = col.aggregate(list,
 				AggregationOptions.builder().allowDiskUse(true).outputMode(OutputMode.CURSOR).build());
@@ -338,10 +341,12 @@ public class BulkMessageService extends BatchJobExecuter {
 				if (ArgUtil.is(status)) {
 					long count = ArgUtil.parseAsLong(object.get("count"), 0L);
 					doc.stats().put(ArgUtil.parseAsString(status), count);
-					totalCount = (totalCount + count);
+					if (ArgUtil.isEqual(status, Status.SCHLD)) {
+						totalCount = Math.max(totalCount, count);
+					}
 					// Done Count
-					if (status.ordinal() > Status.INIT.ordinal()) {
-						doneCount = (doneCount + count);
+					if (ArgUtil.isEqual(status, Status.CRTD, Status.INIT, Status.SENT)) {
+						doneCount = Math.max(doneCount, count);
 					}
 				}
 			}
@@ -350,20 +355,24 @@ public class BulkMessageService extends BatchJobExecuter {
 
 		// System.out.println("TALLY : " + (totalCount == doneCount) + " -- "
 		// +currentBatchJob.getDonePercent());
-		boolean completed = (totalCount == doneCount) && (currentBatchJob.getDonePercent() == 100);
+		boolean completed = (totalCount == doneCount);
 
 		if (completed) {
 			doc.setCompletedStamp(System.currentTimeMillis());
 		}
-		if (!ArgUtil.areEqual(currentBatchJob.getStatus(), doc.getStatus())) {
-			doc.setStatus(currentBatchJob.getStatus().toString());
+		if (!ArgUtil.areEqual(currentBatchJob.getStatus(), doc.getStatus())
+				|| !ArgUtil.is(doc.getStatus(), JOB_STATUS.COMPLETED.toString())
+		){
+			doc.setStatus(ArgUtil.parseAsString(currentBatchJob.getStatus(),doc.getStatus()));
 			if (completed) {
 				doc.setStatus(JOB_STATUS.COMPLETED.toString());
 			}
 		}
+		doc.setJob(currentBatchJob);
 		mongoTemplate.save(doc);
 		return completed;
 	}
+
 	/** Parsing csv file **/
 	public BulkSessionDoc uploadFile(MultipartFile file) throws NumberParseException {
 		try {
@@ -374,31 +383,32 @@ public class BulkMessageService extends BatchJobExecuter {
 		}
 		return null;
 	}
+
 	public static String TYPE = "text/csv";
+
 	public static boolean hasCSVFormat(MultipartFile file) {
-	    if (!TYPE.equals(file.getContentType())) {
-	      return false;
-	    }
-	    return true;
-	  }
-	
-	public void readFile(InputStream is) {
-		try (BufferedReader fileReader = new BufferedReader(new InputStreamReader(is));
-		        CSVParser csvParser = new CSVParser(fileReader,
-		            CSVFormat.DEFAULT.withFirstRecordAsHeader().withIgnoreHeaderCase().withTrim());) {
-		     // List<Tutorial> tutorials = new ArrayList<Tutorial>();
-		      Iterable<CSVRecord> csvRecords = csvParser.getRecords();
-		      for (CSVRecord csvRecord : csvRecords) {
-		    	  System.out.println("id :"+ csvRecord.get("contacts"));
-		    	  //System.out.println("Title :"+ csvRecord.get("Title"));
-		    	  //System.out.println("Description :"+ csvRecord.get("Description"));
-		    	  //System.out.println("id :"+ csvRecord.get("Published"));
-		      
-		      }
-		   
-		    } catch (Exception e) {
-		      throw new RuntimeException("fail to parse CSV file: " + e.getMessage());
-		    }
-		  }
+		if (!TYPE.equals(file.getContentType())) {
+			return false;
+		}
+		return true;
 	}
 
+	public void readFile(InputStream is) {
+		try (BufferedReader fileReader = new BufferedReader(new InputStreamReader(is));
+				CSVParser csvParser = new CSVParser(fileReader,
+						CSVFormat.DEFAULT.withFirstRecordAsHeader().withIgnoreHeaderCase().withTrim());) {
+			// List<Tutorial> tutorials = new ArrayList<Tutorial>();
+			Iterable<CSVRecord> csvRecords = csvParser.getRecords();
+			for (CSVRecord csvRecord : csvRecords) {
+				System.out.println("id :" + csvRecord.get("contacts"));
+				// System.out.println("Title :"+ csvRecord.get("Title"));
+				// System.out.println("Description :"+ csvRecord.get("Description"));
+				// System.out.println("id :"+ csvRecord.get("Published"));
+
+			}
+
+		} catch (Exception e) {
+			throw new RuntimeException("fail to parse CSV file: " + e.getMessage());
+		}
+	}
+}

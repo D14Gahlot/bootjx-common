@@ -12,7 +12,6 @@ import com.boot.jx.chat.ChatService;
 import com.boot.jx.chat.ChatSessionService;
 import com.boot.jx.common.service.SessionEventTimer;
 import com.boot.jx.common.store.ChatArchiveBuilder;
-import com.boot.jx.inbound.InBound.ChatSessionEvents;
 import com.boot.jx.inbound.InBound.InBoundHandler;
 import com.boot.jx.inbound.InBound.MessageEvents;
 import com.boot.jx.postman.ClientApp;
@@ -48,7 +47,6 @@ import com.boot.jx.postman.store.MessageStore;
 import com.boot.jx.postman.store.MessageStore.EVENTS;
 import com.boot.jx.rest.RestService;
 import com.boot.jx.stomp.StompTunnelService;
-import com.boot.jx.tunnel.ITunnelDefs.TunnelTask;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.model.MapModel;
 import com.boot.model.MapModel.MapPathEntry;
@@ -381,7 +379,10 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 			} else if (APP_TYPE.MITEL.equals(appType)) {
 				try {
 					MapModel meta = new MapModel(sessionDoc.getMeta());
-					mitelClient.openMediaAction(defaultClient, meta.pathEntry("mitel.omid").asString(), "Complete");
+					MapPathEntry omid = meta.pathEntry("mitel.omid");
+					if (omid.exists()) {
+						mitelClient.openMediaAction(defaultClient, omid.asString(), "Complete");
+					}
 				} catch (Exception e) {
 					logManager.error(event, e);
 				}

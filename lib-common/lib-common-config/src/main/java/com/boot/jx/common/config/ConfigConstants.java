@@ -42,6 +42,9 @@ public class ConfigConstants {
 		PROP_AGENT_URL(new ConfigMeta("server", "mry.agent.url")),
 		PROP_BOT_URL(new ConfigMeta("server", "mry.bot.url")),
 		// Ends here
+
+		MITEL_SYNC_TIMER(new ConfigMeta("server", "mry.domain.mitel.sync.timer")),
+		// Actually Ends Here
 		;
 
 		private String key;
@@ -268,6 +271,8 @@ public class ConfigConstants {
 
 	public static enum PERMS_KEY implements EntryMeta {
 
+		BUILD_VERSION(
+				new ConfigMeta("BUILD_VERSION", "perms.build.version").inputType(INPUT_TYPE.NUMBER).defaultValue(3)),
 		CONTACT_CENTER(new ConfigMeta("Contact Center", "perms.contact.center").optionsOnOff()),
 		// Ends here
 		;

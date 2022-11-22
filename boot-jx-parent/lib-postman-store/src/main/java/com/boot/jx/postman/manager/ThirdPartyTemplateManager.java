@@ -69,7 +69,14 @@ public class ThirdPartyTemplateManager {
 
 	public HSMTemplate3rdParty createhWA360Templates(ChannelConfig channelConfig,
 			Map<String, Object> templateStructure) {
-		MapModel resp = wa360Client.createTemplates(channelConfig, MapModel.from(templateStructure));
+		String status = ArgUtil.parseAsString(templateStructure.get("status"), Constants.BLANK);
+		MapModel resp = null;
+		if ("approved".equalsIgnoreCase(status) || "rejected".equalsIgnoreCase(status)
+				|| "paused".equalsIgnoreCase(status)) {
+			resp = wa360Client.updateTemplates(channelConfig, MapModel.from(templateStructure));
+		} else {
+			resp = wa360Client.createTemplates(channelConfig, MapModel.from(templateStructure));
+		}
 		return toHSM3rdParty(channelConfig, resp.as(WA360Template.class));
 	}
 

@@ -11,6 +11,7 @@ import com.boot.jx.AppContextUtil;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.postman.PMConfiguration.PMConfigurationModel;
 import com.boot.jx.postman.PMConfiguration.PMConfigurationWrappper;
+import com.boot.jx.postman.PMConstants.CHAT_MODE;
 import com.boot.jx.postman.model.MessageDefinitions.Contactable;
 import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.scope.tnt.Tenants;
@@ -403,6 +404,8 @@ public class PMEnvironment {
 	}
 
 	public interface PMCommonConfig extends AppCommonConfig {
+		public String getCdnServerDebug();
+
 		public String getCdnServer();
 
 		public String getBotUrl();
@@ -428,7 +431,7 @@ public class PMEnvironment {
 	public interface PMDomainConfig {
 		public String getDefaultInboundQueue();
 
-		public String getDefaultInboundQueue(String channelId);
+		public String getDefaultInboundQueue(String channelId, CHAT_MODE mode);
 
 		public String getDefaultInboundQueue(Contactable contact);
 
@@ -439,6 +442,8 @@ public class PMEnvironment {
 		PMConfigurationObject getChatIdleTimeout();
 
 		PMConfigurationObject getAgentHistoryCount();
+
+		String getDefaultInboundQueue(Contactable contact, CHAT_MODE mode);
 
 	}
 

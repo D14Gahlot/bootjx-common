@@ -76,6 +76,7 @@ public class InBoundController {
 //	    ConnectorHandler connector = connectorHandlerFactory.get(channelConfig);
 //	    connector.prompt(inboxMessage);
 			inboundBottler.push(inboxMessage);
+			// inBoundService.invokeMethodsAsync(inboxMessage);
 		}
 		return inboxMessage;
 	}

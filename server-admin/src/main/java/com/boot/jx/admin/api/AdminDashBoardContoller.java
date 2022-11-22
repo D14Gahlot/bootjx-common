@@ -6,12 +6,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.boot.jx.admin.dto.ContactTypeSummaryDto;
 import com.boot.jx.admin.dto.DashBoardRequestDto;
 import com.boot.jx.admin.dto.DashBoardResponseDto;
+import com.boot.jx.admin.dto.MonthDtlsDto;
 import com.boot.jx.admin.dto.TagDocumentDto;
 import com.boot.jx.admin.dto.TagDocumentLst;
+import com.boot.jx.admin.dto.WabaSummaryDocDto;
 import com.boot.jx.admin.manager.AdminDashBoardManager;
 import com.boot.jx.admin.manager.AgentAnalyticsManager;
 import com.boot.jx.api.ApiResponse;
@@ -59,8 +64,60 @@ public class AdminDashBoardContoller {
 		TagDocumentDto lst = adminDbMgr.getTagDocumentDetails(req);
 		return ApiResponse.buildResults(lst.getLstTagDocument());
 	}
+
+	@ResponseBody
+	@RequestMapping(value = { "/admin/hourwise-summary" }, method = { RequestMethod.GET })
+	public ApiResponse<ContactTypeSummaryDto, Object> getHourWiseSummary(@RequestParam(required = false) long timestamp,
+			long hr) {
+		ContactTypeSummaryDto summary = adminDbMgr.hourWisesummary(timestamp, hr);
+		return ApiResponse.buildResult(summary);
+	}
+
+	@ResponseBody
+	@RequestMapping(value = { "/admin/daywise-summary" }, method = { RequestMethod.GET })
+	public ApiResponse<ContactTypeSummaryDto, Object> getDayWiseSummary(@RequestParam(required = false) long dateRange1,
+			@RequestParam(required = false) long dateRange2, int days) {
+		ContactTypeSummaryDto summary = adminDbMgr.dayChannelWiseWisesummary(dateRange1, dateRange2, days);
+		return ApiResponse.buildResult(summary);
+	}
+
+	@ResponseBody
+	@RequestMapping(value = { "/admin/hourwise-msg-status-summary" }, method = { RequestMethod.GET })
+	public ApiResponse<ContactTypeSummaryDto, Object> getHourWiseMsgStatusSummary(
+			@RequestParam(required = false) long timestamp, long hr) {
+		ContactTypeSummaryDto summary = adminDbMgr.getHourWiseMsgStatusSummary(timestamp, hr);
+		return ApiResponse.buildResult(summary);
+	}
+
+	@ResponseBody
+	@RequestMapping(value = { "/admin/datewise-msg-status-summary" }, method = { RequestMethod.GET })
+	public ApiResponse<ContactTypeSummaryDto, Object> getDayWiseMsgStatusSummary(long dateRange1, long dateRange2,
+			int days) {
+		ContactTypeSummaryDto summary = adminDbMgr.getDayWiseMsgStatusSummary(dateRange1, dateRange2, days);
+		return ApiResponse.buildResult(summary);
+	}
+
+	@ResponseBody
+	@RequestMapping(value = { "/admin/fetch-month" }, method = { RequestMethod.GET })
+	public ApiResponse<MonthDtlsDto, Object> getMonthLst() {
+		List<MonthDtlsDto> listofMonth = adminDbMgr.fetchUniqueMonth();
+		return ApiResponse.buildResults(listofMonth);
+	}
 	
 	
+	@ResponseBody
+	@RequestMapping(value = { "/admin/monthwise-summary-save" }, method = { RequestMethod.GET })
+	public ApiResponse<ContactTypeSummaryDto, Object> getMonthWiseSaving(long timestamp) {
+		ContactTypeSummaryDto summary = adminDbMgr.summaryV1(timestamp);
+		return ApiResponse.buildResult(summary);
+	}
 	
+	@ResponseBody
+	@RequestMapping(value = { "/admin/monthwise-summary/waba" }, method = { RequestMethod.GET })
+	public ApiResponse<WabaSummaryDocDto, Object> getMonthWiseWabaSummary(long timestamp) {
+		List<WabaSummaryDocDto> summary = adminDbMgr.wabaSummary(timestamp);
+		return ApiResponse.buildResults(summary);
+	}
+
 
 }

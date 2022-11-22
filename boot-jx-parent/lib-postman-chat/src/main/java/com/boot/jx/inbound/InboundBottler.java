@@ -29,6 +29,8 @@ import com.boot.utils.UniqueID;
 @Component
 public class InboundBottler extends ATaskLimiter {
 
+	private static final String MESSAGE_DEQUEUE = "MESSAGE_DEQUEUE";
+
 	private CacheBox<String> holdManager;
 
 	@Autowired(required = false)
@@ -36,7 +38,7 @@ public class InboundBottler extends ATaskLimiter {
 
 	public ICacheBox<String> hold() {
 		if (holdManager == null) {
-			this.holdManager = CacheBox.getInstance("BotEngine-Hold-v2", redisson);
+			this.holdManager = CacheBox.getInstance("InboundBottler-" + appConfig.getAppType() + "-Hold-", redisson);
 		}
 		return this.holdManager;
 	}
@@ -64,7 +66,7 @@ public class InboundBottler extends ATaskLimiter {
 
 		if (ArgUtil.isEqual(onhold, "QUEUING")) {
 			queue(contactId, new MessageHoldQueue().inboxMessage(inboxMessage));
-			throttle(new TunnelTask().name("MESSAGE_DEQUEUE").id(contactId).intervalSeconds(2));
+			throttle(new TunnelTask().name(MESSAGE_DEQUEUE).id(contactId).intervalSeconds(2));
 		} else {
 			hold().put(contactId, "QUEUING");
 			logManager.addTrace(inboxMessage, "InboundBottler:push:invoked");
@@ -84,7 +86,7 @@ public class InboundBottler extends ATaskLimiter {
 
 		if (ArgUtil.isEqual(onhold, "QUEUING")) {
 			queue(contactId, new MessageHoldQueue().event(event).pmArgs(pmArgs));
-			throttle(new TunnelTask().name("MESSAGE_DEQUEUE").id(contactId).intervalSeconds(2));
+			throttle(new TunnelTask().name(MESSAGE_DEQUEUE).id(contactId).intervalSeconds(2));
 		} else {
 			hold().put(contactId, "QUEUING");
 			chatSessionService.sessionEvent(event, pmArgs);
@@ -137,7 +139,7 @@ public class InboundBottler extends ATaskLimiter {
 
 	@Override
 	public void doTaskSafely(TunnelTask task) {
-		if ("MESSAGE_DEQUEUE".equals(task.getName())) {
+		if (MESSAGE_DEQUEUE.equals(task.getName())) {
 			String contactId = task.getId();
 			hold().put(contactId, "DEQUEUING");
 			this.dequeue(contactId);

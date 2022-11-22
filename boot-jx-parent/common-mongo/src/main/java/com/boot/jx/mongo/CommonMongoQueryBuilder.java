@@ -107,5 +107,4 @@ public class CommonMongoQueryBuilder extends MongoQueryBuilder<Object> {
 	public static SimpleDocQueryBuilder doc(SimpleDocument doc) {
 		return SimpleDocQueryBuilder.doc(doc);
 	}
-
 }

@@ -246,6 +246,10 @@ public class SessionStore extends CommonMongoTemplateAbstract {
 		iMessage.session().setRoutingId(chatSessionDoc.getRoutingId());
 
 		iMessage.session().setSessionStamp(chatSessionDoc.getUpdated().getStamp());
+
+		// Router
+		iMessage.route().setRouterId(chatSessionDoc.getRoutingId());
+
 		return iMessage;
 	}
 
@@ -697,6 +701,13 @@ public class SessionStore extends CommonMongoTemplateAbstract {
 	public ChatSessionDoc getPreviousSession(Contactable contact) {
 		MongoQueryBuilder<ChatSessionDoc> cmqb = MongoQueryBuilder.collection(ChatSessionDoc.class)
 				.where(Criteria.where("contactId").is(contact.getContactId()));
+		cmqb.sortBy("startSessionStamp", Direction.DESC).limit(1).skip(1).skipDBRef();
+		return super.findOne(cmqb.getQuery(), ChatSessionDoc.class);
+	}
+
+	public ChatSessionDoc getPreviousSession(Contactable contact, long timestamp) {
+		MongoQueryBuilder<ChatSessionDoc> cmqb = MongoQueryBuilder.collection(ChatSessionDoc.class)
+				.where(Criteria.where("contactId").is(contact.getContactId()).and("startSessionStamp").lt(timestamp));
 		cmqb.sortBy("startSessionStamp", Direction.DESC).limit(1).skip(1).skipDBRef();
 		return super.findOne(cmqb.getQuery(), ChatSessionDoc.class);
 	}

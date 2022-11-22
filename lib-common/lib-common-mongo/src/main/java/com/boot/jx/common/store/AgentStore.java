@@ -89,7 +89,7 @@ public class AgentStore {
 	}
 
 	public DepartmentDoc findDepartmentByCode(String deptCode) {
-		MQB<DepartmentDoc> builder = MQB.select(DepartmentDoc.class).whereId(deptCode);
+		MQB<DepartmentDoc> builder = MQB.select(DepartmentDoc.class).where("dept_code",deptCode);
 		return mongoTemplate.findOne(builder.getQuery(), DepartmentDoc.class);
 	}
 
