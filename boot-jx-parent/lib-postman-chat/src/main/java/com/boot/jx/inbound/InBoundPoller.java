@@ -34,10 +34,13 @@ import com.boot.jx.chat.ChatStatusService;
 import com.boot.jx.connectors.EmailConnector;
 import com.boot.jx.logger.LoggerService;
 import com.boot.jx.postman.PMEnvironment;
+import com.boot.jx.postman.doc.config.ChannelConfigDoc;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.MessageBoxEvent;
 import com.boot.jx.postman.plugin.ChannelConfig;
+import com.boot.jx.postman.store.ConfigStore;
 import com.boot.jx.tunnel.ITunnelDefs.TunnelTask;
+import com.boot.jx.tunnel.sys.SharedConfigManager;
 import com.boot.jx.tunnel.task.ATaskLimiter;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CloseUtil;
@@ -68,6 +71,12 @@ public class InBoundPoller extends ATaskLimiter {
 	@Autowired
 	private AWSConfig awsConfig;
 
+	@Autowired
+	ConfigStore configStore;
+
+	@Autowired
+	private SharedConfigManager sharedConfigManager;
+
 	@Override
 	public String getVersion() {
 		return "6";
@@ -88,10 +97,32 @@ public class InBoundPoller extends ATaskLimiter {
 				LOGGER.warn("No Channel found {}", channelId);
 				return;
 			}
+
+			if (channel.isDisabled()) {
+				LOGGER.warn("Channel Disabled {}", channelId);
+				return;
+			}
+
 			MessageBoxEvent messageBoxEvent = new MessageBoxEvent();
 
-			readPop3Emails(task, channelId, channel, messageBoxEvent);
-
+			String error = readPop3Emails(task, channelId, channel, messageBoxEvent);
+			if (ArgUtil.is(error)) {
+				ChannelConfigDoc channelDoc = configStore.findById(channelId, ChannelConfigDoc.class);
+				boolean isDisabled = ArgUtil.is(channelDoc.getError()) && ArgUtil.is(channelDoc.getError(), error);
+				if (isDisabled) {
+					channelDoc.setDisabled(isDisabled);
+					LOGGER.warn("Channel will be Disabled {}", channelId);
+				}
+				channelDoc.setError(error);
+				configStore.save(channelDoc);
+				sharedConfigManager.clear();
+			} else if (channel.isDisabled() && ArgUtil.is(channel.getError())) {
+				ChannelConfigDoc channelDoc = configStore.findById(channelId, ChannelConfigDoc.class);
+				channelDoc.setDisabled(false);
+				channelDoc.setError(null);
+				configStore.save(channelDoc);
+				sharedConfigManager.clear();
+			}
 			if (ArgUtil.is(messageBoxEvent.getInboxMessages())) {
 				emailConnector.beforeReceiveInboxMessage(messageBoxEvent.getInboxMessages());
 				messageBoxEvent.getInboxMessages().forEach(inboxMessage -> {
@@ -143,12 +174,12 @@ public class InBoundPoller extends ATaskLimiter {
 		return message;
 	}
 
-	private void readPop3Emails(TunnelTask task, String channelId, ChannelConfig channel,
+	private String readPop3Emails(TunnelTask task, String channelId, ChannelConfig channel,
 			MessageBoxEvent messageBoxEvent) {
 		Session session = emailConnector.getMailSession(channel);
 		if (!ArgUtil.is(session)) {
 			LOGGER.warn("No Session Created for {}", channelId);
-			return;
+			return "NO_SESSION_CREATED";
 		}
 
 		Folder folder = null;
@@ -166,7 +197,7 @@ public class InBoundPoller extends ATaskLimiter {
 			folder = store.getFolder("inbox");
 			if (!folder.exists()) {
 				LOGGER.warn("Inbox not found for task {} {}", task.getId(), channelId);
-				return;
+				return "NO_INBOX_FOUND";
 			}
 
 			folder.open(Folder.READ_WRITE);
@@ -207,17 +238,21 @@ public class InBoundPoller extends ATaskLimiter {
 			}
 			// close the store and folder objects
 			closeAll(folder, store);
+			return null;
 		} catch (MessagingException e2) {
 			LOGGER.error("For Channel {} {} {} {}", channel.getEmail().getPop3Host(), channel.getEmail().getPop3Port(),
 					channel.getEmail().getPop3User(), channel.getEmail().getPop3Pass());
 			LOGGER.error("Eexception==e2", e2);
+			return e2.getMessage();
 		} catch (Exception e3) {
 			LOGGER.error("For Channel {} {} {} {}", channel.getEmail().getPop3Host(), channel.getEmail().getPop3Port(),
 					channel.getEmail().getPop3User(), channel.getEmail().getPop3Pass());
 			LOGGER.error("Eexception==e3", e3);
+			return e3.getMessage();
 		} finally {
 			closeAll(folder, store);
 		}
+
 	}
 
 	private void closeAll(Folder folder, Store store) {

@@ -1,5 +1,4 @@
 package com.boot.jx.account.dto;
-
 public class DateWiseHourCountDto {
 	String date;
 	String hour;
