@@ -37,6 +37,7 @@ public class ContakSecurityConfig implements AuditDetailProvider {
 
 	}
 
+
 	@Configuration
 	@EnableWebSecurity
 	@Order(99)
