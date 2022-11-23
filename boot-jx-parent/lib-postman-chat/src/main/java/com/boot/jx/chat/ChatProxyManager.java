@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.boot.jx.AppConfigPackage.AppSharedConfig;
+import com.boot.jx.AppConfig;
 import com.boot.jx.AppContextUtil;
 import com.boot.jx.cache.CacheBox;
 import com.boot.jx.def.ICacheBox;
@@ -22,10 +23,14 @@ public class ChatProxyManager implements AppSharedConfig {
 
 	private CacheBox<String> proxyManager;
 
+	@Autowired
+	private AppConfig appConfig;
+
 	public CacheBox<String> proxy() {
 		if (redisson != null && proxyManager == null) {
 			// this.proxyManager = new HashMap<String, String>();
-			this.proxyManager = CacheBox.getInstance("InBoundService-Proxy", redisson);
+			this.proxyManager = CacheBox.getInstance("ChatProxyManager-" + appConfig.getAppType() + "-Proxy-",
+					redisson);
 		}
 		return this.proxyManager;
 	}
@@ -47,7 +52,7 @@ public class ChatProxyManager implements AppSharedConfig {
 
 	public ICacheBox<String> hold() {
 		if (redisson != null && holdManager == null) {
-			this.holdManager = CacheBox.getInstance("InBoundService-Hold-v2", redisson);
+			this.holdManager = CacheBox.getInstance("ChatProxyManager-" + appConfig.getAppType() + "-Hold-", redisson);
 		}
 		return this.holdManager;
 	}
@@ -70,7 +75,8 @@ public class ChatProxyManager implements AppSharedConfig {
 
 	public ICacheBox<String> firstMessage() {
 		if (redisson != null && firstMessage == null) {
-			this.firstMessage = CacheBox.getInstance("InBoundService-firstMessage-v2", redisson);
+			this.firstMessage = CacheBox.getInstance("ChatProxyManager-" + appConfig.getAppType() + "-first-",
+					redisson);
 		}
 		return this.firstMessage;
 	}
