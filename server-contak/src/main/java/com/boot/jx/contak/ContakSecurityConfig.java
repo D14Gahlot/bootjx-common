@@ -14,12 +14,8 @@ import org.springframework.security.web.authentication.SimpleUrlAuthenticationSu
 import org.springframework.security.web.authentication.logout.LogoutHandler;
 import org.springframework.stereotype.Component;
 
-import com.boot.jx.logger.AuditDetailProvider;
-import com.boot.jx.postman.ClientApp;
-import com.boot.jx.rest.AppRequestInterfaces.AppAuthUser;
 import com.boot.jx.swagger.MockParamBuilder;
 import com.boot.jx.swagger.MockParamBuilder.MockParam;
-import com.boot.utils.ArgUtil;
 
 @Component
 public class ContakSecurityConfig {
@@ -52,12 +48,12 @@ public class ContakSecurityConfig {
 					.and().authorizeRequests().antMatchers("/app/**").authenticated().and().authorizeRequests()
 					.antMatchers("**").authenticated().and().authorizeRequests().antMatchers("/.**").authenticated()
 					// Login Forms
-					.and().formLogin().loginPage("/auth/login").successHandler(successHandler).permitAll()
-					.failureUrl("/auth/login?error").permitAll()
+					.and().formLogin().loginPage("/panel/auth/login").successHandler(successHandler).permitAll()
+					.failureUrl("/panel/auth/login?error").permitAll()
 					// .loginProcessingUrl("/auth/login/submit").permitAll()
 					// Logout Pages
-					.and().logout().permitAll().addLogoutHandler(logoutHandler).logoutUrl("/auth/logout")
-					.logoutSuccessUrl("/auth/login?logout")
+					.and().logout().permitAll().addLogoutHandler(logoutHandler).logoutUrl("/panel/auth/logout")
+					.logoutSuccessUrl("/panel/auth/login?logout")
 					.deleteCookies("JSESSIONID", "JXSESSIONID", "CONTAKSESSIONID").invalidateHttpSession(true)
 					.permitAll().and().exceptionHandling().accessDeniedPage("/403")
 					// Gen stuff
