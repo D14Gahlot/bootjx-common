@@ -22,7 +22,7 @@ import com.boot.jx.swagger.MockParamBuilder.MockParam;
 import com.boot.utils.ArgUtil;
 
 @Component
-public class ContakSecurityConfig implements AuditDetailProvider {
+public class ContakSecurityConfig {
 
 	@Configuration
 	@EnableWebSecurity
@@ -119,20 +119,6 @@ public class ContakSecurityConfig implements AuditDetailProvider {
 		return new MockParamBuilder().id("X_API_KEY").name("x-api-key").description("API Key").defaultValue("")
 				.parameterType(MockParamBuilder.MockParamType.HEADER).securityScheme("X_API_KEY").build();
 
-	}
-
-	@Override
-	public String getAuditUser() {
-		ClientApp x = ContakVendorConfigurer.getClientApp();
-		if (ArgUtil.is(x)) {
-			return x.getKeyName();
-		}
-		return null;
-	}
-
-	@Override
-	public AppAuthUser getAuthUser() {
-		return null;
 	}
 
 }

@@ -4,8 +4,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -15,8 +13,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 
 import com.boot.jx.AppConfig;
-import com.boot.jx.AppContextUtil;
-import com.boot.jx.api.ApiResponse;
 import com.boot.jx.common.config.PMCommonConfigImpl;
 import com.boot.jx.contak.doc.ContakUserDoc;
 import com.boot.jx.http.CommonHttpRequest;
@@ -51,9 +47,6 @@ public class ContakAuthService implements LogoutHandler, AuditDetailProvider {
 
 	@Autowired
 	private PMCommonConfigImpl appCommonConfig;
-
-	@Value("${mry.app.url}")
-	private String appServiceUrl;
 
 	public void updateSession() {
 	}
@@ -91,23 +84,6 @@ public class ContakAuthService implements LogoutHandler, AuditDetailProvider {
 		Authentication authentication = adminAuthProvider.authenticate(token);
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 		updateLogin(account);
-	}
-
-	public boolean validateCpanelUser(String domainId, String domainToken, HttpServletRequest request) {
-		if (ArgUtil.is(domainId) && ArgUtil.is(domainToken)) {
-			ApiResponse<ContakUserDoc, String> resp = restService.ajax(appServiceUrl).path("/account/pub/auth")
-					.header("tnt", "app").field("tnt", "app").field("domain", AppContextUtil.getTenant())
-					.field("domainId", domainId).field("domainToken", domainToken).post()
-					.as(new ParameterizedTypeReference<ApiResponse<ContakUserDoc, String>>() {
-					});
-			login(resp.getResult(), request);
-		}
-
-		if (!ArgUtil.is(sessionBean.domainUser())) {
-			return true;
-		}
-
-		return false;
 	}
 
 	@Autowired
