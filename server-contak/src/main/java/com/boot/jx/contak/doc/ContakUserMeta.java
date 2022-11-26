@@ -1,8 +1,8 @@
-package com.boot.jx.account.doc;
+package com.boot.jx.contak.doc;
 
 import java.io.Serializable;
 
-public class AccountMeta implements Serializable {
+public class ContakUserMeta implements Serializable {
 
 	private static final long serialVersionUID = 6990839577469827351L;
 

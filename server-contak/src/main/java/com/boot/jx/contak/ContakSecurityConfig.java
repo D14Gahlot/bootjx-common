@@ -41,11 +41,8 @@ public class ContakSecurityConfig implements AuditDetailProvider {
 					// Permit all
 					// Publics Calls
 					.and().authorizeRequests().antMatchers("/pub/**").permitAll() // Public URLs
-					.and().authorizeRequests().antMatchers("/plug_mitel/**").permitAll() // Public URLs
-					.and().authorizeRequests().antMatchers("/plug/**").permitAll() // Public URLs
 					.and().authorizeRequests().antMatchers("/ext/**").permitAll() // External URLS
 					.and().authorizeRequests().antMatchers("/int/**").permitAll() // Internal URLs
-					.and().authorizeRequests().antMatchers("/stomp-tunnel/**").permitAll() // Stomp Calls
 					.and().authorizeRequests().antMatchers("/swagger-ui.html").permitAll() // Swagger UI
 					// Login Calls
 					.and().authorizeRequests().antMatchers("/auth/**").permitAll()
@@ -60,8 +57,9 @@ public class ContakSecurityConfig implements AuditDetailProvider {
 					// .loginProcessingUrl("/auth/login/submit").permitAll()
 					// Logout Pages
 					.and().logout().permitAll().addLogoutHandler(logoutHandler).logoutUrl("/auth/logout")
-					.logoutSuccessUrl("/auth/login?logout").deleteCookies("JSESSIONID", "JXSESSIONID", "AGENTSESSIONID")
-					.invalidateHttpSession(true).permitAll().and().exceptionHandling().accessDeniedPage("/403")
+					.logoutSuccessUrl("/auth/login?logout")
+					.deleteCookies("JSESSIONID", "JXSESSIONID", "CONTAKSESSIONID").invalidateHttpSession(true)
+					.permitAll().and().exceptionHandling().accessDeniedPage("/403")
 					// Gen stuff
 					.and().csrf().disable().headers().disable();
 		}

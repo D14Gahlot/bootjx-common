@@ -1,6 +1,5 @@
 package com.boot.jx.contak.dto;
 
-
 import java.io.Serializable;
 import java.util.List;
 
@@ -23,41 +22,28 @@ public class CompanyDoc implements Serializable {
 	@Indexed
 	public String legalBusinessName;
 
-
 	public String displayName;
-	
-	
+
 	public String countryOfOperation;
-	
-	
-	
+
 	public String address;
-	
-	
+
 	public String websiteUrl;
-	
-	
-	
+
 	public String coiFileUrl;
-	
-	
+
 	public String gstFileUrl;
-	
-	
+
 	public String panFileUrl;
-	
-	
+
 	public String contactPersonName;
-	
-	
+
 	public String contactPhoneNumber;
-	
-	
+
 	public String contactPersonEmailId;
-	
-	
+
 	public String password;
-	
+
 	public String companyTimeZone;
 
 	public TimeStampIndex createdAt;
@@ -66,10 +52,10 @@ public class CompanyDoc implements Serializable {
 
 	@Indexed
 	public String number;
-	
+
 	@Indexed
 	public String apiKey;
-	
+
 	public String logoUrl;
 
 	public String getCompanyId() {
@@ -223,9 +209,5 @@ public class CompanyDoc implements Serializable {
 	public void setLogoUrl(String logoUrl) {
 		this.logoUrl = logoUrl;
 	}
-
-
-	
-	
 
 }
