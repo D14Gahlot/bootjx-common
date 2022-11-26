@@ -810,6 +810,7 @@ public class AdminDashBoardManager {
 		return distinctIdList;
 	}
 
+
 	/** Timestamp **/
 
 	public Map<Object, Object> getHourWiseCount(List<MessageDoc> msgLst) {
@@ -957,23 +958,22 @@ public class AdminDashBoardManager {
 	}
 
 	// Open conversation
-	public List<ChatSessionDoc> getOpenConversation(Object contactType, long dateRange1, long dateRange2) {
+		public List<ChatSessionDoc> getOpenConversation(Object contactType, long dateRange1, long dateRange2) {
 
-		List<String> uniqueConvesationLst = getUniqueConversation(contactType, dateRange1, dateRange2);
-		List<ChatSessionDoc> chatSessionLst = new ArrayList<ChatSessionDoc>();
+			List<String> uniqueConvesationLst = getUniqueConversation(contactType, dateRange1, dateRange2);
+			List<ChatSessionDoc> chatSessionLst = new ArrayList<ChatSessionDoc>();
 
-		for (Object msgDoc : uniqueConvesationLst) {
-			String strConId = (String) msgDoc;
-			// System.out.println("Open Conversation :"+strConId);
-			Query query = new Query();
-			query.addCriteria(Criteria.where("contactId").is(strConId).and("active").is(true));
-			List<ChatSessionDoc> chatSessionValue = mongoTemplate.find(query, ChatSessionDoc.class,
-					AgentAnalyticsManager.CHAT_SESSION);
-			chatSessionLst.addAll(chatSessionValue);
+			for (Object msgDoc : uniqueConvesationLst) {
+				String strConId = (String) msgDoc;
+				// System.out.println("Open Conversation :"+strConId);
+				Query query = new Query();
+				query.addCriteria(Criteria.where("contactId").is(strConId).and("active").is(true));
+				List<ChatSessionDoc> chatSessionValue = mongoTemplate.find(query, ChatSessionDoc.class,
+						AgentAnalyticsManager.CHAT_SESSION);
+				chatSessionLst.addAll(chatSessionValue);
+			}
+			return chatSessionLst;
 		}
-		return chatSessionLst;
-	}
-
 	public TagDocumentDto getTagDocumentDetails(DashBoardRequestDto req) {
 		long dateRange1 = 0;
 		long dateRange2 = 0;
@@ -1304,14 +1304,17 @@ public class AdminDashBoardManager {
 						Collectors.groupingBy(DateWiseHourCountDto::getDate, Collectors.counting())));
 
 		Map<Object, Map<Object, Long>> dayWiseMap = new HashMap<>();
-		for (String channel : channelLst) {
+
 		for (Map.Entry<String, Map<String, Long>> keyValue : dayWiseCountMap.entrySet()) {
 			String key = keyValue.getKey();
 			if (ArgUtil.is(key)) {
-				String  tnt_channel=tnt + "_" + channel; 
-					if (!key.contains(tnt_channel)) {
-						dayWiseMap.put(tnt_channel, dateRanMap);
+
+				for (String channel : channelLst) {
+					if (!key.contains(channel)) {
+						dayWiseMap.put(tnt + "_" + channel, dateRanMap);
 					}
+				}
+
 				Map<Object, Long> dateWiseCnt = new HashMap<>();
 				Map<String, Long> dayCntMap = dayWiseCountMap.get(key);
 				// dateRanMap
@@ -1329,7 +1332,6 @@ public class AdminDashBoardManager {
 				}
 				dayWiseMap.put(key, dateWiseCnt);
 			}
-		}
 		}
 
 		dayWiseMap = sortMap(dayWiseMap);
@@ -1399,9 +1401,7 @@ public class AdminDashBoardManager {
 	}
 
 
-
 	/** Read ,Unread,sent,deliver msg count Hour Wise */
-
 
 	/** Read ,Unread,sent,deliver msg count Hour Wise */
 	@SuppressWarnings("unused")
@@ -1594,7 +1594,6 @@ public class AdminDashBoardManager {
 		return dto;
 
 	}
-
 	/** add default hour **/
 
 	public Map<Object, Map<Object, Long>> addDefaultHour(Map<Object, Map<Object, Long>> hourWiseCountMap,
@@ -1665,7 +1664,6 @@ public class AdminDashBoardManager {
 
 		return list;
 	}
-
 	public Map<Object, Map<Object, Long>> sortMap(Map<Object, Map<Object, Long>> map) {
 		Map<Object, Map<Object, Long>> sortedMap = new HashMap<>();
 		for (Map.Entry<Object, Map<Object, Long>> entry : map.entrySet()) {
@@ -1722,131 +1720,6 @@ public class AdminDashBoardManager {
 		return listofMonth;
 	}
 	
-	
-	public ContactTypeSummaryDto summaryV1(long timestamp) {
-		String tnt = AppContextUtil.getTenant();
-		List<String> lst = getListOfContactType();
-		Date dateTi = new Date(timestamp);
-		String monthYear = new SimpleDateFormat(DateUtil.MMM_YYYY_FORMAT).format(dateTi);
-		Calendar cal = Calendar.getInstance();
-		cal.setTimeInMillis(timestamp);
-
-		int month = cal.get(Calendar.MONTH);
-		int year = cal.get(Calendar.YEAR);
-		long monthMinTimeStamp = DateUtil.getStartTimestamp(month, year).getTime();
-		long monthMaxTimeStamp = DateUtil.getEndTimestamp(month, year).getTime();
-		List<SummaryDocDto> lstSummDto = new ArrayList<>();
-		List<String> hourListH = new ArrayList<String>();
-		List<DateWiseHourCountDto> hourCntLst = new ArrayList<>();
-
-		for (String contactType : lst) {
-			Query query = new Query();
-			query.addCriteria(Criteria.where("timestamp").gt(monthMinTimeStamp).lt(monthMaxTimeStamp));
-			query.with(new Sort(new Order(Direction.DESC, "timestamp")));
-			query.fields().include("timestamp").include("type").include("meta");
-			List<MessageDoc> msgDocLst = mongoTemplate.find(query, MessageDoc.class, contactType.toString());
-			for (MessageDoc doc : msgDocLst) {
-				SummaryDocDto dto = new SummaryDocDto();
-				DateWiseHourCountDto hrDto = new DateWiseHourCountDto();
-				String yyyyMMdd = DateUtil.foramtTimeStampDateAsString(doc.getTimestamp(),
-						DateUtil.YYYYMMDD_DATE_FORMAT);
-				dto.setDate(yyyyMMdd);
-				dto.setType(doc.getType());
-				dto.setChannel(contactType.toString());
-				dto.setMeta(doc.getMeta());
-				dto.setDomain(tnt);
-				String id = getSummaryId(dto);
-				dto.setId(id);
-				if (ArgUtil.is(dto.getId())) {
-					lstSummDto.add(dto);
-				}
-
-			}
-
-		}
-
-		Map<Object, Long> summaryMap = new HashMap<>();
-		Map<String, Map<String, Long>> datwWiseCount = lstSummDto.stream().collect(Collectors.groupingBy(
-				SummaryDocDto::getId, Collectors.groupingBy(SummaryDocDto::getType, Collectors.counting())));
-
-		Map<Object, Map<Object, Object>> dateWiseCountMap = new HashMap<>();
-
-		for (Map.Entry<String, Map<String, Long>> keyValue : datwWiseCount.entrySet()) {
-			String key = keyValue.getKey();
-			Map<Object, Object> dateWiseCnt = new HashMap<>();
-			for (Map.Entry<String, Long> keyValueCount : keyValue.getValue().entrySet()) {
-				String keyType = keyValueCount.getKey();
-				Object count = keyValueCount.getValue();
-				dateWiseCnt.put(keyType, count);
-			}
-			String[] keyId = key.split("_");
-			dateWiseCnt.put("domain", ArgUtil.parseAsString(keyId[0], Constants.BLANK));
-			dateWiseCnt.put("date", ArgUtil.parseAsString(keyId[1], Constants.BLANK));
-			dateWiseCnt.put("channel", ArgUtil.parseAsString(keyId[2], Constants.BLANK));
-
-			dateWiseCountMap.put(key, dateWiseCnt);
-
-		}
-
-		summaryMap = lstSummDto.stream().collect(Collectors.groupingBy(SummaryDocDto::getType, Collectors.counting()));
-
-		// printing the count based on the designation and gender.
-		// LOGGER.info("Group by on multiple properties" + datwWiseCount);
-
-		ContactTypeSummaryDto dto = new ContactTypeSummaryDto();
-		dto.setTenant(tnt);
-		dto.setMonth(monthYear);
-		// dto.setDateWiseSummaryCount(datwWiseCount);
-		dto.setDateWiseCountMap(dateWiseCountMap);
-		dto.setSummaryCount(summaryMap);
-		//saveDomainSummary(dto);
-		return dto;
-	}
-	
-	
-	/** WABA summary count **/
-
-	public List<WabaSummaryDocDto> wabaSummary(long timestamp) {
-		String tnt = AppContextUtil.getTenant();
-		// List<String> lst = getListOfContactType();
-		Date dateTi = new Date(timestamp);
-		String monthYear = new SimpleDateFormat(DateUtil.MMM_YYYY_FORMAT).format(dateTi);
-		Calendar cal = Calendar.getInstance();
-		cal.setTimeInMillis(timestamp);
-		int month = cal.get(Calendar.MONTH);
-		int year = cal.get(Calendar.YEAR);
-		long monthMinTimeStamp = DateUtil.getStartTimestamp(month, year).getTime();
-		long monthMaxTimeStamp = DateUtil.getEndTimestamp(month, year).getTime();
-
-		List<WabaSummaryDocDto> wabaLst = new ArrayList<>();
-		Query query = new Query();
-		query.addCriteria(Criteria.where("created.stamp").gt(monthMinTimeStamp).lt(monthMaxTimeStamp));
-		query.with(new Sort(new Order(Direction.DESC, "created.stamp")));
-		List<WABAConversation> wabaDocLst = mongoTemplate.find(query, WABAConversation.class, "TP_WABA_CONVERSATIONS");
-		for (WABAConversation waba : wabaDocLst) {
-			System.out.println("JSON :" + JsonUtil.toJson(waba));
-			WabaSummaryDocDto dto = new WabaSummaryDocDto();
-			String yyyyMMdd = DateUtil.foramtTimeStampDateAsString(waba.getCreated().getStamp(),
-					DateUtil.YYYYMMDD_DATE_FORMAT);
-			dto.setId(yyyyMMdd);
-			dto.setDate(monthYear);
-			if (waba.getMeta() != null && waba.getMeta().get("to_country") != null) {
-				dto.setCountry(waba.getMeta().get("to_country").toString());
-			}
-			dto.setLane(waba.getContact().getLane());
-			Map<String, Object> typeMap = (Map<String, Object>) waba.getConversation().get("origin");
-			if (typeMap != null && !typeMap.isEmpty()) {
-				dto.setType(typeMap.get("type") == null ? "" : typeMap.get("type").toString());
-			}
-			dto.setChannel(waba.getContact().getContactType());
-			dto.setDomain(tnt);
-			dto.setPricing(waba.getPricing());
-			wabaLst.add(dto);
-		}
-
-		return wabaLst;
-	}
-
 	public String getSummaryWithChannelId(SummaryDocDto dto) {
 		String tenant = dto.getDomain();
 		if (dto.getChannel().contains(ContactType.WHATSAPP.name())) {
@@ -1882,6 +1755,126 @@ public class AdminDashBoardManager {
 		}
 		return null;
 	}
+	
+	
+public ContactTypeSummaryDto summaryV1(long timestamp) {
+	String tnt = AppContextUtil.getTenant();
+	List<String> lst = getListOfContactType();
+	Date dateTi = new Date(timestamp);
+	String monthYear = new SimpleDateFormat(DateUtil.MMM_YYYY_FORMAT).format(dateTi);
+	Calendar cal = Calendar.getInstance();
+	cal.setTimeInMillis(timestamp);
+
+	int month = cal.get(Calendar.MONTH);
+	int year = cal.get(Calendar.YEAR);
+	long monthMinTimeStamp = DateUtil.getStartTimestamp(month, year).getTime();
+	long monthMaxTimeStamp = DateUtil.getEndTimestamp(month, year).getTime();
+	List<SummaryDocDto> lstSummDto = new ArrayList<>();
+	List<String> hourListH = new ArrayList<String>();
+	List<DateWiseHourCountDto> hourCntLst = new ArrayList<>();
+
+	for (String contactType : lst) {
+		Query query = new Query();
+		query.addCriteria(Criteria.where("timestamp").gt(monthMinTimeStamp).lt(monthMaxTimeStamp));
+		query.with(new Sort(new Order(Direction.DESC, "timestamp")));
+		query.fields().include("timestamp").include("type").include("meta");
+		List<MessageDoc> msgDocLst = mongoTemplate.find(query, MessageDoc.class, contactType.toString());
+		for (MessageDoc doc : msgDocLst) {
+			SummaryDocDto dto = new SummaryDocDto();
+			DateWiseHourCountDto hrDto = new DateWiseHourCountDto();
+			String yyyyMMdd = DateUtil.foramtTimeStampDateAsString(doc.getTimestamp(),
+					DateUtil.YYYYMMDD_DATE_FORMAT);
+			dto.setDate(yyyyMMdd);
+			dto.setType(doc.getType());
+			dto.setChannel(contactType.toString());
+			dto.setMeta(doc.getMeta());
+			dto.setDomain(tnt);
+			String id = getSummaryId(dto);
+			dto.setId(id);
+			if (ArgUtil.is(dto.getId())) {
+				lstSummDto.add(dto);
+			}
+
+		}
+
+	}
+
+	Map<Object, Long> summaryMap = new HashMap<>();
+	Map<String, Map<String, Long>> datwWiseCount = lstSummDto.stream().collect(Collectors.groupingBy(
+			SummaryDocDto::getId, Collectors.groupingBy(SummaryDocDto::getType, Collectors.counting())));
+
+	Map<Object, Map<Object, Object>> dateWiseCountMap = new HashMap<>();
+
+	for (Map.Entry<String, Map<String, Long>> keyValue : datwWiseCount.entrySet()) {
+		String key = keyValue.getKey();
+		Map<Object, Object> dateWiseCnt = new HashMap<>();
+		for (Map.Entry<String, Long> keyValueCount : keyValue.getValue().entrySet()) {
+			String keyType = keyValueCount.getKey();
+			Object count = keyValueCount.getValue();
+			dateWiseCnt.put(keyType, count);
+		}
+		String[] keyId = key.split("_");
+		dateWiseCnt.put("domain", ArgUtil.parseAsString(keyId[0], Constants.BLANK));
+		dateWiseCnt.put("date", ArgUtil.parseAsString(keyId[1], Constants.BLANK));
+		dateWiseCnt.put("channel", ArgUtil.parseAsString(keyId[2], Constants.BLANK));
+
+		dateWiseCountMap.put(key, dateWiseCnt);
+
+	}
+
+	summaryMap = lstSummDto.stream().collect(Collectors.groupingBy(SummaryDocDto::getType, Collectors.counting()));
+
+	// printing the count based on the designation and gender.
+	// LOGGER.info("Group by on multiple properties" + datwWiseCount);
+
+	ContactTypeSummaryDto dto = new ContactTypeSummaryDto();
+	dto.setTenant(tnt);
+	dto.setMonth(monthYear);
+	// dto.setDateWiseSummaryCount(datwWiseCount);
+	dto.setDateWiseCountMap(dateWiseCountMap);
+	dto.setSummaryCount(summaryMap);
+	//saveDomainSummary(dto);
+	return dto;
+}
+
+public List<WabaSummaryDocDto> wabaSummary(long timestamp) {
+	String tnt = AppContextUtil.getTenant();
+	Date dateTi = new Date(timestamp);
+	String monthYear = new SimpleDateFormat(DateUtil.MMM_YYYY_FORMAT).format(dateTi);
+	Calendar cal = Calendar.getInstance();
+	cal.setTimeInMillis(timestamp);
+	int month = cal.get(Calendar.MONTH);
+	int year = cal.get(Calendar.YEAR);
+	long monthMinTimeStamp = DateUtil.getStartTimestamp(month, year).getTime();
+	long monthMaxTimeStamp = DateUtil.getEndTimestamp(month, year).getTime();
+
+	List<WabaSummaryDocDto> wabaLst = new ArrayList<>();
+	Query query = new Query();
+	query.addCriteria(Criteria.where("created.stamp").gt(monthMinTimeStamp).lt(monthMaxTimeStamp));
+	query.with(new Sort(new Order(Direction.DESC, "created.stamp")));
+	List<WABAConversation> wabaDocLst = mongoTemplate.find(query, WABAConversation.class, "TP_WABA_CONVERSATIONS");
+	for (WABAConversation waba : wabaDocLst) {
+		WabaSummaryDocDto dto = new WabaSummaryDocDto();
+		String yyyyMMdd = DateUtil.foramtTimeStampDateAsString(waba.getCreated().getStamp(),
+				DateUtil.YYYYMMDD_DATE_FORMAT);
+		dto.setId(yyyyMMdd);
+		dto.setDate(monthYear);
+		if (waba.getMeta() != null && waba.getMeta().get("to_country") != null) {
+			dto.setCountry(waba.getMeta().get("to_country").toString());
+		}
+		dto.setLane(waba.getContact().getLane());
+		Map<String, Object> typeMap = (Map<String, Object>) waba.getConversation().get("origin");
+		if (typeMap != null && !typeMap.isEmpty()) {
+			dto.setType(typeMap.get("type") == null ? "" : typeMap.get("type").toString());
+		}
+		dto.setChannel(waba.getContact().getContactType());
+		dto.setDomain(tnt);
+		dto.setPricing(waba.getPricing());
+		wabaLst.add(dto);
+	}
+
+	return wabaLst;
+}
 
 public String getLane(String contactid) {
 	String lane="";
@@ -1893,6 +1886,7 @@ public String getLane(String contactid) {
 	}
 	return lane;
 }
+
 
 
 }

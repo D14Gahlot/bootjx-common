@@ -1,6 +1,7 @@
 package com.boot.jx.account.api;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -18,6 +19,7 @@ import com.boot.jx.account.dto.AccountDashBoardResponseDto;
 import com.boot.jx.account.dto.ContactTypeSummaryDto;
 import com.boot.jx.account.dto.MonthDtlsDto;
 import com.boot.jx.account.dto.WabaSummaryDocDto;
+import com.boot.jx.account.dto.WabaSummaryDto;
 import com.boot.jx.account.manager.AccountDashBoardManager;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.http.CommonHttpRequest;
@@ -25,60 +27,65 @@ import com.boot.jx.http.CommonHttpRequest;
 @Controller
 @RequestMapping("/partnerdashboard")
 public class PartnerDashBoardController {
-
+	
 	@Autowired
-	private AppConfig appConfig;
+    private AppConfig appConfig;
 
-	@Autowired
-	private CommonHttpRequest commonHttpRequest;
+    @Autowired
+    private CommonHttpRequest commonHttpRequest;
 
-	@Autowired
-	private AppCommonConfig appCommonConfig;
+    @Autowired
+    private AppCommonConfig appCommonConfig;
 
-	@Autowired
-	private AccountSessionBean adminSessionBean;
 
-	@Autowired
-	private AccountStore accountStore;
 
-	@Autowired
-	AccountDashBoardManager dashBMgr;
+    @Autowired
+    private AccountSessionBean adminSessionBean;
 
-	@ResponseBody
-	@RequestMapping(value = { "/pub/domain" }, method = { RequestMethod.GET })
-	public ApiResponse<DomainDoc, Object> getDomain() {
-		List<DomainDoc> domainDocLst = dashBMgr.getAllDomainAccount();
-		return ApiResponse.buildResults(domainDocLst);
-	}
+    @Autowired
+    private AccountStore accountStore;
 
-	@ResponseBody
-	@RequestMapping(value = { "/pub/admin/fetch-month" }, method = { RequestMethod.GET })
+    @Autowired
+    AccountDashBoardManager dashBMgr;
+  
+
+    
+    @ResponseBody
+    @RequestMapping(value = { "/pub/domain" }, method = { RequestMethod.GET })
+    public ApiResponse<DomainDoc, Object> getDomain() {
+	List<DomainDoc> domainDocLst =dashBMgr.getAllDomainAccount();
+	return ApiResponse.buildResults(domainDocLst);
+    }
+    
+    @ResponseBody
+    @RequestMapping(value = {"/pub/admin/fetch-month"}, method = { RequestMethod.GET })
 	public ApiResponse<MonthDtlsDto, Object> getMonthLst() {
-		List<MonthDtlsDto> listofMonth = dashBMgr.fetchUniqueMonth();
-		return ApiResponse.buildResults(listofMonth);
+		List<MonthDtlsDto> listofMonth = dashBMgr.fetchUniqueMonth(); 
+		return  ApiResponse.buildResults(listofMonth);
 	}
-
-	@ResponseBody
-	@RequestMapping(value = { "/pub/admin/monthwise-summary-count" }, method = { RequestMethod.GET })
+    @ResponseBody
+	@RequestMapping(value = {"/pub/admin/monthwise-summary-count"}, method = { RequestMethod.GET })
 	public ApiResponse<ContactTypeSummaryDto, Object> getMonthWiseSummary(long timestamp) {
-		ContactTypeSummaryDto summary = dashBMgr.getMonthWiseCount(timestamp);
-		return ApiResponse.buildResult(summary);
+		ContactTypeSummaryDto summary =dashBMgr.getMonthWiseCount(timestamp); 
+		return  ApiResponse.buildResult(summary);
 	}
 
-	@ResponseBody
-	@RequestMapping(value = { "/pub/account/dashboard" }, method = { RequestMethod.GET })
-	public ApiResponse<AccountDashBoardResponseDto, Object> getAccountDashboardDetils() {
-		AccountDashBoardResponseDto response = null;// dashBMgr.getAccountDashBoardDetails();
-		return ApiResponse.buildResult(response);
-	}
-
-	@ResponseBody
-	@RequestMapping(value = { "/pub/monthwise-summary-save" }, method = { RequestMethod.GET })
+    
+    
+    @ResponseBody
+    @RequestMapping(value = { "/pub/account/dashboard" }, method = { RequestMethod.GET })
+    public ApiResponse<AccountDashBoardResponseDto, Object> getAccountDashboardDetils() {
+	AccountDashBoardResponseDto response =null;//dashBMgr.getAccountDashBoardDetails();
+	return ApiResponse.buildResult(response);
+    }
+   
+    @ResponseBody
+	@RequestMapping(value = {"/pub/monthwise-summary-save"}, method = { RequestMethod.GET })
 	public ApiResponse<ContactTypeSummaryDto, Object> getMonthWiseSaving(long timestamp) {
-		ContactTypeSummaryDto summary = dashBMgr.summaryV1(timestamp);
-		return ApiResponse.buildResult(summary);
+		ContactTypeSummaryDto summary =dashBMgr.summaryV1(timestamp); 
+		return  ApiResponse.buildResult(summary);
 	}
-
+    
 	@ResponseBody
 	@RequestMapping(value = { "/pub/monthwise-summary/waba" }, method = { RequestMethod.GET })
 	public ApiResponse<WabaSummaryDocDto, Object> getMonthWiseWabaSummary(long timestamp) {
