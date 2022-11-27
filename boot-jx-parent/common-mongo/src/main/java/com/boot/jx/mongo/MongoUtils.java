@@ -9,6 +9,7 @@ import java.util.function.Consumer;
 import org.bson.Document;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
 import org.springframework.data.mongodb.core.aggregation.AggregationOperation;
+import org.springframework.data.mongodb.core.query.Criteria;
 
 import com.boot.jx.mongo.CommonDocInterfaces.IMongoQueryBuilder;
 import com.boot.jx.mongo.CommonMongoQB.MQB;
@@ -86,6 +87,11 @@ public class MongoUtils {
 
 		public MongoResultProcessor<T> where(String field, Object value) {
 			this.qb().where(field, value);
+			return this;
+		}
+
+		public MongoResultProcessor<T> where(Criteria criteria) {
+			this.qb().where(criteria);
 			return this;
 		}
 
