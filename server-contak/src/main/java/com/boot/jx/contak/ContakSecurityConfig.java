@@ -36,16 +36,16 @@ public class ContakSecurityConfig {
 			httpSecurity.antMatcher("/panel/**").sessionManagement().sessionCreationPolicy(SessionCreationPolicy.ALWAYS)
 					// Permit all
 					// Publics Calls
-					.and().authorizeRequests().antMatchers("/pub/**").permitAll() // Public URLs
-					.and().authorizeRequests().antMatchers("/ext/**").permitAll() // External URLS
-					.and().authorizeRequests().antMatchers("/int/**").permitAll() // Internal URLs
-					.and().authorizeRequests().antMatchers("/swagger-ui.html").permitAll() // Swagger UI
+					.and().authorizeRequests().antMatchers("/panel/pub/**").permitAll() // Public URLs
+					.and().authorizeRequests().antMatchers("/panel/ext/**").permitAll() // External URLS
+					.and().authorizeRequests().antMatchers("/panel/int/**").permitAll() // Internal URLs
+					.and().authorizeRequests().antMatchers("/panel/swagger-ui.html").permitAll() // Swagger UI
 					// Login Calls
-					.and().authorizeRequests().antMatchers("/auth/**").permitAll()
+					.and().authorizeRequests().antMatchers("/panel/auth/**").permitAll()
 					// API Calls
-					.and().authorizeRequests().antMatchers("/api/**").authenticated()
+					.and().authorizeRequests().antMatchers("/panel/api/**").authenticated()
 					// App Pages
-					.and().authorizeRequests().antMatchers("/app/**").authenticated().and().authorizeRequests()
+					.and().authorizeRequests().antMatchers("/panel/app/**").authenticated().and().authorizeRequests()
 					.antMatchers("**").authenticated().and().authorizeRequests().antMatchers("/.**").authenticated()
 					// Login Forms
 					.and().formLogin().loginPage("/panel/auth/login").successHandler(successHandler).permitAll()
@@ -58,6 +58,13 @@ public class ContakSecurityConfig {
 					.permitAll().and().exceptionHandling().accessDeniedPage("/403")
 					// Gen stuff
 					.and().csrf().disable().headers().disable();
+		}
+
+		@Override
+		public void configure(WebSecurity web) throws Exception {
+			web.ignoring().antMatchers("/resources/**", "/static/**", "/css/**", "/js/**", "/images/**", "/assets/**",
+					"/v2/**", "/configuration/ui", "/swagger-resources/**", "/configuration/security",
+					"/swagger-ui.html", "/webjars/**", "/favicon.ico");
 		}
 
 	}

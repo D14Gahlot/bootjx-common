@@ -90,7 +90,7 @@ public class OtpController {
 	}
 
 	@ApiOperation(value = "Page", hidden = true)
-	@RequestMapping(value = { "/demo", "/panel", "/panel/**" }, method = { RequestMethod.GET, RequestMethod.POST })
+	@RequestMapping(value = { "/demo" }, method = { RequestMethod.GET, RequestMethod.POST })
 	public String notp(Model model) {
 
 		model.addAttribute("APP_NAME", appConfig.getAppName());

@@ -1,12 +1,16 @@
 package com.boot.jx.contak;
 
+import java.util.List;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.web.authentication.WebAuthenticationDetails;
 import org.springframework.security.web.authentication.logout.LogoutHandler;
 import org.springframework.stereotype.Component;
@@ -14,9 +18,11 @@ import org.springframework.web.context.request.RequestContextHolder;
 
 import com.boot.jx.AppConfig;
 import com.boot.jx.common.config.PMCommonConfigImpl;
+import com.boot.jx.contak.doc.ContakMembershipDoc;
 import com.boot.jx.contak.doc.ContakUserDoc;
 import com.boot.jx.http.CommonHttpRequest;
 import com.boot.jx.logger.AuditDetailProvider;
+import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.jx.postman.PMConstants;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.client.PostManClient;
@@ -26,6 +32,7 @@ import com.boot.jx.rest.AppRequestInterfaces.AppAuthUser;
 import com.boot.jx.rest.RestService;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
+import com.boot.utils.CryptoUtil;
 
 @Component
 public class ContakAuthService implements LogoutHandler, AuditDetailProvider {
@@ -48,7 +55,30 @@ public class ContakAuthService implements LogoutHandler, AuditDetailProvider {
 	@Autowired
 	private PMCommonConfigImpl appCommonConfig;
 
+	@Autowired
+	private CommonMongoTemplate commonMongoTemplate;
+
+	@Value("${mry.duperadmin.email}")
+	private String duperEmail;
+
+	@Value("${mry.superadmin.pass}")
+	private String duperPass;
+
 	public void updateSession() {
+	}
+
+	public ContakUserDoc loadUserByUsername(String username) throws UsernameNotFoundException {
+		ContakUserDoc user = null;
+		if (duperEmail.equalsIgnoreCase(username)) {
+			user = new ContakUserDoc();
+			user.setName("DuperAdmin");
+			user.setEmail(duperEmail);
+			user.meta().setPassword(duperPass);
+			user.setActive(true);
+		} else {
+			user = commonMongoTemplate.collection(ContakUserDoc.class).where("email", username).find().asFirst();
+		}
+		return user;
 	}
 
 	/**
@@ -63,6 +93,9 @@ public class ContakAuthService implements LogoutHandler, AuditDetailProvider {
 		if (ArgUtil.areEqual(appCommonConfig.getDuperEmail(), account.getEmail())) {
 			sessionBean.addRole(PMConstants.USER_ROLE.DUPER_USER);
 		}
+		List<ContakMembershipDoc> m = commonMongoTemplate.collection(ContakMembershipDoc.class)
+				.where("user.id", account.getId()).find().asList();
+		sessionBean.memberships(m);
 		this.updateSession();
 	}
 
@@ -84,6 +117,20 @@ public class ContakAuthService implements LogoutHandler, AuditDetailProvider {
 		Authentication authentication = adminAuthProvider.authenticate(token);
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 		updateLogin(account);
+	}
+
+	public ContakUserDoc authenticate(String username, String password, HttpServletRequest request) {
+		ContakUserDoc user = loadUserByUsername(username);
+		if (user == null || !CryptoUtil.getEncoder().message(password).sha2().is(user.meta().getPassword())) {
+			username = null;
+			password = null;
+		}
+		UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(username, password);
+		token.setDetails(new WebAuthenticationDetails(request));
+		Authentication authentication = adminAuthProvider.authenticate(token);
+		SecurityContextHolder.getContext().setAuthentication(authentication);
+		updateLogin(user);
+		return user;
 	}
 
 	@Autowired

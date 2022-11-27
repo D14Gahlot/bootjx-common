@@ -30,6 +30,7 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.data.util.CloseableIterator;
 
+import com.boot.jx.mongo.CommonDocInterfaces.IMongoQueryBuilder;
 import com.mongodb.ReadPreference;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
@@ -386,4 +387,9 @@ public abstract class CommonMongoTemplateDefault {
 		return getCommonMongoTemplate().getDb();
 	}
 
+	public abstract <T> T findOne(IMongoQueryBuilder<T> builder);
+
+	public abstract <T> List<T> find(IMongoQueryBuilder<T> builder);
+
+	public abstract <T> List<T> find(IMongoQueryBuilder<T> builder, Class<T> clazz);
 }

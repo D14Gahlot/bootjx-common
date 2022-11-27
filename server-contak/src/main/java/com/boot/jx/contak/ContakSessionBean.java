@@ -29,6 +29,10 @@ public class ContakSessionBean extends AppCommonAuthUser implements Serializable
 		this.account = account;
 	}
 
+	public void memberships(List<ContakMembershipDoc> memberships) {
+		this.memberships = memberships;
+	}
+
 	@Override
 	public String getAuthUser() {
 		if (ArgUtil.is(this.account)) {
