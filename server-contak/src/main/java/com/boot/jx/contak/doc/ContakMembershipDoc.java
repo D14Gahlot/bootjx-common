@@ -24,7 +24,7 @@ public class ContakMembershipDoc implements IDocument, Serializable {
 	private ContakUserDoc user;
 	private CompanyDoc company;
 
-	private String role;
+	private String membershipType;
 
 	private boolean active;
 
@@ -60,14 +60,6 @@ public class ContakMembershipDoc implements IDocument, Serializable {
 		this.company = company;
 	}
 
-	public String getRole() {
-		return role;
-	}
-
-	public void setRole(String role) {
-		this.role = role;
-	}
-
 	public String getUserId() {
 		return userId;
 	}
@@ -82,6 +74,14 @@ public class ContakMembershipDoc implements IDocument, Serializable {
 
 	public void setCompanyId(String companyId) {
 		this.companyId = companyId;
+	}
+
+	public String getMembershipType() {
+		return membershipType;
+	}
+
+	public void setMembershipType(String membershipType) {
+		this.membershipType = membershipType;
 	}
 
 }

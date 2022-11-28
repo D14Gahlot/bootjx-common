@@ -84,7 +84,7 @@ public class PanelController {
 	@ResponseBody
 	@RequestMapping(value = { "/api/v1/memberships" }, method = { RequestMethod.POST })
 	public ApiResponse<ContakMembershipDoc, Object> addmember(Model model, @RequestParam String companyId,
-			@RequestParam String username, @RequestParam(required = false) String role) {
+			@RequestParam String username, @RequestParam(required = false) String membershipType) {
 
 		if (!sessionBean.hasAdminAccesTo(companyId)) {
 			ApiResponseUtil.throwInputException(
@@ -112,8 +112,8 @@ public class PanelController {
 			m.setCompany(company);
 			m.setUser(user);
 		}
-		m.setActive(ArgUtil.is(role));
-		m.setRole(role);
+		m.setActive(ArgUtil.is(membershipType));
+		m.setMembershipType(membershipType);
 		commonMongoTemplate.save(m);
 		return ApiResponse.buildResult(m);
 	}

@@ -51,8 +51,10 @@ public class ContakSessionBean extends AppCommonAuthUser implements Serializable
 			return true;
 		}
 
-		for (ContakMembershipDoc domainDoc : this.memberships) {
-			if (ArgUtil.isEqual(domainDoc.getCompany().companyId, companyId)) {
+		for (ContakMembershipDoc membership : this.memberships) {
+			if (ArgUtil.isEqual(membership.getCompany().companyId, companyId)
+					&& ArgUtil.is(membership.getMembershipType(), PMConstants.USER_SHIP_TYPE.OA_ADMIN,
+							PMConstants.USER_SHIP_TYPE.OA_OWNER)) {
 				return true;
 			}
 		}
@@ -60,4 +62,24 @@ public class ContakSessionBean extends AppCommonAuthUser implements Serializable
 		return false;
 	}
 
+	public boolean isMemberOf(String companyId) {
+
+		if (!ArgUtil.is(this.domainUser())) {
+			return false;
+		}
+
+		if (this.role().contains(PMConstants.USER_ROLE.DUPER_USER)) {
+			return true;
+		}
+
+		for (ContakMembershipDoc membership : this.memberships) {
+			if (ArgUtil.isEqual(membership.getCompany().companyId, companyId)
+					&& ArgUtil.is(membership.getMembershipType(), PMConstants.USER_SHIP_TYPE.OA_MEMBER,
+							PMConstants.USER_SHIP_TYPE.OA_ADMIN, PMConstants.USER_SHIP_TYPE.OA_OWNER)) {
+				return true;
+			}
+		}
+
+		return false;
+	}
 }
