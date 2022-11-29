@@ -7,6 +7,8 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -28,6 +30,7 @@ import com.boot.jx.mongo.CommonMongoQB.QueryCriteria;
 import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.JsonUtil;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -52,13 +55,23 @@ public class PanelController {
 	private ContakSessionBean sessionBean;
 
 	@ApiOperation(value = "Page", hidden = true)
-	@RequestMapping(path = { "",  "/", "/**" }, method = { RequestMethod.GET, RequestMethod.POST })
+	@RequestMapping(path = { "", "/", "/**" }, method = { RequestMethod.GET, RequestMethod.POST })
 	public String defaultPage(Model model) {
 		model.addAttribute("APP_NAME", appConfig.getAppName());
 		model.addAttribute("APP_CONTEXT", appConfig.getAppPrefix());
 		model.addAttribute("CDN_URL", appConfig.getAppPrefix());
 		if (ArgUtil.is(appCommonConfig)) {
 			model.addAllAttributes(appCommonConfig.appAttributes());
+		}
+		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+		if (ArgUtil.is(auth)) {
+			model.addAttribute("APP_USER", auth.getName());
+			model.addAttribute("APP_USER_NAME", sessionBean.domainUser().getName());
+			model.addAttribute("APP_USER_ROLE", JsonUtil.toJson(sessionBean.getRole()));
+		} else {
+			model.addAttribute("APP_USER", "");
+			model.addAttribute("APP_USER_NAME", "User");
+			model.addAttribute("APP_USER_ROLE", "['GUEST']");
 		}
 		return "app-contak";
 	}
