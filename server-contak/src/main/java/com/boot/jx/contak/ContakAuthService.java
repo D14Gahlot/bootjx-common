@@ -180,7 +180,7 @@ public class ContakAuthService implements LogoutHandler, AuditDetailProvider {
 		if (ArgUtil.is(authentication)) {
 			updateLogout(ArgUtil.parseAsString(authentication.getPrincipal()));
 		}
-		commonHttpRequest.instance(request, response, appConfig).setCookie("ACCTSESSIONID", "ACCTSESSIONID", 0);
+		commonHttpRequest.instance(request, response, appConfig).setCookie("CONTAKSESSIONID", "CONTAKSESSIONID", 0);
 	}
 
 	@Override
