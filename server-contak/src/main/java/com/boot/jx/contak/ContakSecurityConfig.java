@@ -45,8 +45,10 @@ public class ContakSecurityConfig {
 					// API Calls
 					.and().authorizeRequests().antMatchers("/panel/api/**").authenticated()
 					// App Pages
-					.and().authorizeRequests().antMatchers("/panel/app/**").authenticated().and().authorizeRequests()
-					.antMatchers("**").authenticated().and().authorizeRequests().antMatchers("/.**").authenticated()
+					.and().authorizeRequests().antMatchers("/panel/app/**").authenticated()
+					// App Request
+					.and().authorizeRequests().antMatchers("/panel/**").authenticated() //
+					.and().authorizeRequests().antMatchers("/panel/.**").authenticated()
 					// Login Forms
 					.and().formLogin().loginPage("/panel/auth/login").successHandler(successHandler).permitAll()
 					.failureUrl("/panel/auth/login?error").permitAll()
