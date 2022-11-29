@@ -222,13 +222,13 @@ public class AppConfig {
 		return appSessionEnabled;
 	}
 
-	@Value("${server.session.cookie.http-only}")
+	@Value("${server.servlet.session.cookie.http-only}")
 	private boolean cookieHttpOnly;
 
-	@Value("${server.session.cookie.name:JSESSIONID}")
+	@Value("${server.servlet.session.cookie.name:JSESSIONID}")
 	private String sessionCookieName;
 
-	@Value("${server.session.cookie.secure}")
+	@Value("${server.servlet.session.cookie.secure}")
 	private boolean cookieSecure;
 
 	@Value("${spring.profiles.active}")

@@ -14,19 +14,19 @@ import com.boot.utils.ArgUtil;
 //@EnableSpringHttpSession
 public class SpringHttpSessionConfig {
 
-	@Value("${server.session.cookie.name:JSESSIONID}")
+	@Value("${server.servlet.session.cookie.name:JSESSIONID}")
 	String cookieName;
 
-	@Value("${server.session.cookie.path:}")
+	@Value("${server.servlet.session.cookie.path:}")
 	String cookiePath;
 
-	@Value("${server.session.cookie.http-only:true}")
+	@Value("${server.servlet.session.cookie.http-only:true}")
 	boolean useHttpOnlyCookie;
 
-	@Value("${server.session.cookie.domain:}")
+	@Value("${server.servlet.session.cookie.domain:}")
 	String domainNamePattern;
 
-	@Value("${server.session.cookie.secure:true}")
+	@Value("${server.servlet.session.cookie.secure:true}")
 	boolean useSecureCookie;
 
 	@Bean

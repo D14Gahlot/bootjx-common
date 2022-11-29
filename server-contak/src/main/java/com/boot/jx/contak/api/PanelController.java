@@ -52,7 +52,7 @@ public class PanelController {
 	private ContakSessionBean sessionBean;
 
 	@ApiOperation(value = "Page", hidden = true)
-	@RequestMapping(path = { "/", "/**" }, method = { RequestMethod.GET, RequestMethod.POST })
+	@RequestMapping(path = { "",  "/", "/**" }, method = { RequestMethod.GET, RequestMethod.POST })
 	public String defaultPage(Model model) {
 		model.addAttribute("APP_NAME", appConfig.getAppName());
 		model.addAttribute("APP_CONTEXT", appConfig.getAppPrefix());

@@ -1,5 +1,7 @@
 package com.boot.jx.contak;
 
+import java.util.Collections;
+
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -26,12 +28,12 @@ public class ContakAuthProvider implements AuthenticationProvider {
 		} else if (ArgUtil.isEmpty(password)) {
 			throw new BadCredentialsException("invalid login details");
 		}
-//
-//		UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(username, password,
-//				Collections.emptyList());
-//		token.setDetails(auth.getDetails());
-//		return token;
-		return auth;
+
+		UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(username, password,
+				Collections.emptyList());
+		token.setDetails(auth.getDetails());
+		return token;
+//		return auth;
 	}
 
 	@Override
