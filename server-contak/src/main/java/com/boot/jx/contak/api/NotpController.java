@@ -107,6 +107,7 @@ public class NotpController {
 			resp.deviceToken = UniqueID.generateSessionId();
 			phoneUserQuery.setOtpHash(Constants.BLANK);
 			phoneUserQuery.setOtpNounce(Constants.BLANK);
+			phoneUserQuery.setLoginToken(String.valueOf(System.currentTimeMillis()));
 			phoneUserQuery.setAuthToken(CryptoUtil.getEncoder().message(resp.deviceToken).sha2().toString());
 			commonMongoTemplate.update(phoneUserQuery);
 			return ApiResponse.buildResults(phoneBookManager.getProfile(userDoc), resp);
@@ -145,6 +146,8 @@ public class NotpController {
 
 	@RequestMapping(value = "/api/v1/messages/send", method = { RequestMethod.POST })
 	public ApiResponse<PhoneNOTPDoc, Object> send(@RequestBody PhoneNotpDto msg) {
+				
+		
 		
 		CompanyDoc compoc = commonMongoTemplate.findOne(
 				CommonMongoQueryBuilder.collection(CompanyDoc.class).where(Criteria.where("apiKey").is(msg.apiKey)));
@@ -164,6 +167,11 @@ public class NotpController {
 
 		if (!ArgUtil.is(userDoc)) {
 			ApiResponseUtil.throwInputException(ApiStatusCodes.USER_NOT_FOUND, new ApiFieldError().field("phone"));
+		}
+		
+		String loginToken = userDoc.getLoginToken();
+		if(msg.userLoginToken != loginToken) {
+			ApiResponseUtil.throwInputException(ApiStatusCodes.HANDSHAKE_REQUIRED, new ApiFieldError().field("userLoginToken"));
 		}
 		
 		

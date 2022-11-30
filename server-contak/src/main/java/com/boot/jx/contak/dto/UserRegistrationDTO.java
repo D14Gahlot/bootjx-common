@@ -23,6 +23,9 @@ public class UserRegistrationDTO {
 	@ApiMockModelProperty(example = "XXXXXXXX", required = false)
 	public String userPubKey;
 	
+	@ApiMockModelProperty(example = "XXXXXXXX", required = false)
+	public String loginToken;
+	
 	
 }
 

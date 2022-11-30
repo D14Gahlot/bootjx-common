@@ -38,6 +38,7 @@ public class UserRegistrationDoc implements Serializable {
 	
 	
 	public String userPubKey;
+	public String loginToken;
 
 
 	public String getUserRegistrationId() {
@@ -127,6 +128,16 @@ public class UserRegistrationDoc implements Serializable {
 
 	public void setCompanyId(String companyId) {
 		this.companyId = companyId;
+	}
+
+
+	public String getLoginToken() {
+		return loginToken;
+	}
+
+
+	public void setLoginToken(String loginToken) {
+		this.loginToken = loginToken;
 	}
 	
 	

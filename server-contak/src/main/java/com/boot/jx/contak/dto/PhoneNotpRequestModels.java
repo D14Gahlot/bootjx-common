@@ -61,6 +61,9 @@ public final class PhoneNotpRequestModels {
 		@ApiMockModelProperty(example = "231241123123", required = false, value = "Created at timestamp")
 		public long createdAt;
 		
+		@ApiMockModelProperty(example = "XXXXXX", required = true, value = "Login token")
+		public String userLoginToken;
+		
 	}
 
 }

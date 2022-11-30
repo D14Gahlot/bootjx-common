@@ -39,6 +39,12 @@ public class PhoneUserQuery extends DocQueryBuilder<PhoneUserDoc> {
 		return this;
 	}
 	
+	public PhoneUserQuery setLoginToken(String loginToken) {
+		doc.setLoginToken(loginToken);
+		this.set("loginToken", loginToken);
+		return this;
+	}
+	
 	public PhoneUserQuery setLastTimeActiveAt(TimeStampIndex timeStampIndex) {
 		doc.setLastActiveAt(timeStampIndex);
 		this.set("lastActiveAt", timeStampIndex);
