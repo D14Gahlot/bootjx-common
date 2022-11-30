@@ -15,6 +15,7 @@ import org.springframework.data.mongodb.core.query.Update;
 import com.boot.jx.model.AuditCreateEntity;
 import com.boot.jx.model.AuditCreateEntity.AuditUpdateEntity;
 import com.boot.model.TimeModels.ITimeStampIndex;
+import com.boot.model.TimeModels.TimeStampIndexKeyDeserializer;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.EntityDtoUtil;
 import com.boot.utils.JsonUtil;
@@ -291,6 +292,7 @@ public class CommonDocInterfaces {
 	public interface AuditableByIdEntity extends AuditIdEntity, AuditCreateEntity, AuditUpdateEntity {
 	}
 
+	@JsonDeserialize(as = TimeStampIndex.class, keyUsing = TimeStampIndexKeyDeserializer.class)
 	public static class TimeStampIndex implements Serializable, ITimeStampIndex {
 
 		private static final long serialVersionUID = 9114924334759684396L;

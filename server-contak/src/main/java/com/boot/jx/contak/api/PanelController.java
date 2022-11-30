@@ -34,6 +34,7 @@ import com.boot.jx.contak.dto.CompanyDoc;
 import com.boot.jx.mongo.CommonMongoQB.QueryCriteria;
 import com.boot.jx.mongo.CommonMongoQueryBuilder;
 import com.boot.jx.mongo.CommonMongoTemplate;
+import com.boot.jx.postman.model.MessageDefinitions.Contactable;
 import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.Constants;
@@ -167,7 +168,7 @@ public class PanelController {
 		m.setCompany(companyDoc);
 		m.setUser(user);
 		commonMongoTemplate.save(m);
-
+		
 		return ApiResponse.buildResult(companyDoc);
 	}
 
