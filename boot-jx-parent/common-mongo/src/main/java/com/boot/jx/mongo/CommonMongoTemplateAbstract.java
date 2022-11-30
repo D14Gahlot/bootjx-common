@@ -56,11 +56,15 @@ public class CommonMongoTemplateAbstract<TStore extends CommonMongoTemplateAbstr
 	}
 
 	public MongoResultProcessor<Document> collection(String collection) {
-		return new MongoResultProcessor<Document>().using(this.getCommonMongoTemplate()).collection(collection);
+		return new MongoResultProcessor<Document>().using(this).collection(collection);
 	}
 
 	public <TResult> MongoResultProcessor<TResult> collection(String collection, Class<TResult> clazz) {
-		return new MongoResultProcessor<TResult>().using(this.getCommonMongoTemplate()).collection(collection);
+		return new MongoResultProcessor<TResult>().using(this).collection(collection);
+	}
+
+	public <TResult> MongoResultProcessor<TResult> collection(Class<TResult> clazz) {
+		return new MongoResultProcessor<TResult>().using(this).collection(clazz);
 	}
 
 	public void beforeSaveInternal(Object objectToSave, String collectionName) {
@@ -138,15 +142,18 @@ public class CommonMongoTemplateAbstract<TStore extends CommonMongoTemplateAbstr
 		return null;
 	}
 
+	@Override
 	public <T> List<T> find(IMongoQueryBuilder<T> builder, Class<T> clazz) {
 		return find(builder.getQuery(), clazz);
 	}
 
+	@Override
 	public <T> List<T> find(IMongoQueryBuilder<T> builder) {
 		// System.out.println("+++"+builder.getQuery());
 		return find(builder.getQuery(), builder.getDocClass());
 	}
 
+	@Override
 	public <T> T findOne(IMongoQueryBuilder<T> builder) {
 		// System.out.println("+++"+builder.getQuery());
 		return findOne(builder.getQuery(), builder.getDocClass());

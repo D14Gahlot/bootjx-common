@@ -45,6 +45,12 @@ public class PMConstants {
 		public static final String ALLOWED = "DUPER_USER,SUPER_DEV,WABA_MANAGER,BUSINESS_PARTNER,BUSINESS_USER,ADMIN,AGENT";
 	}
 
+	public final class USER_SHIP_TYPE {
+		public static final String OA_OWNER = "OA_OWNER";
+		public static final String OA_ADMIN = "OA_ADMIN";
+		public static final String OA_MEMBER = "OA_MEMBER";
+	}
+
 	public static class MESSAGE_BOUND_TYPE {
 		public static final String INBOUND = "I";
 		public static final String INBOUND_IMPORTED = "Ii";

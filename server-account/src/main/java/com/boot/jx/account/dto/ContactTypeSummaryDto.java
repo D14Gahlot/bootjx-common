@@ -18,55 +18,43 @@ public class ContactTypeSummaryDto {
 	public String getTenant() {
 		return tenant;
 	}
-
 	public void setTenant(String tenant) {
 		this.tenant = tenant;
 	}
-
 	public String getMonth() {
 		return month;
 	}
-
 	public void setMonth(String month) {
 		this.month = month;
 	}
-
 	public long getMonthMinTimeStamp() {
 		return monthMinTimeStamp;
 	}
-
 	public void setMonthMinTimeStamp(long monthMinTimeStamp) {
 		this.monthMinTimeStamp = monthMinTimeStamp;
 	}
-
 	public long getMonthMaxTimeStamp() {
 		return monthMaxTimeStamp;
 	}
-
 	public void setMonthMaxTimeStamp(long monthMaxTimeStamp) {
 		this.monthMaxTimeStamp = monthMaxTimeStamp;
 	}
-
 	public Map<Object, List<ContactTypeCountDto>> getMap() {
 		return map;
 	}
-
 	public void setMap(Map<Object, List<ContactTypeCountDto>> map) {
 		this.map = map;
 	}
-
 	public Map<Object, Long> getSummaryCount() {
 		return summaryCount;
 	}
-
 	public void setSummaryCount(Map<Object, Long> summaryCount) {
 		this.summaryCount = summaryCount;
 	}
-
+	
 	public Map<Object, Map<Object, Object>> getDateWiseCountMap() {
 		return dateWiseCountMap;
 	}
-
 	public void setDateWiseCountMap(Map<Object, Map<Object, Object>> dateWiseCountMap) {
 		this.dateWiseCountMap = dateWiseCountMap;
 	}

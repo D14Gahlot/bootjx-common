@@ -89,7 +89,7 @@ public class OtpController {
 		return "swagger-uix";
 	}
 
-	@ApiOperation(value = "Demo Page", hidden = true)
+	@ApiOperation(value = "Page", hidden = true)
 	@RequestMapping(value = { "/demo" }, method = { RequestMethod.GET, RequestMethod.POST })
 	public String notp(Model model) {
 

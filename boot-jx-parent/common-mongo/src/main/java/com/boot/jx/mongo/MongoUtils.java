@@ -7,10 +7,13 @@ import java.util.List;
 import java.util.function.Consumer;
 
 import org.bson.Document;
-import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
 import org.springframework.data.mongodb.core.aggregation.AggregationOperation;
+import org.springframework.data.mongodb.core.query.Criteria;
 
+import com.boot.jx.mongo.CommonDocInterfaces.IMongoQueryBuilder;
+import com.boot.jx.mongo.CommonMongoQB.MQB;
+import com.boot.jx.mongo.CommonMongoQB.MongoQueryBuilder;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
 import com.mongodb.BasicDBObject;
@@ -43,34 +46,78 @@ public class MongoUtils {
 	}
 
 	public static class MongoResultProcessor<T> {
-		protected MongoTemplate mongoTemplate;
+		protected CommonMongoTemplateDefault mongoTemplate;
+		protected String collection;
+		protected Class<T> collectionClass;
 		protected MongoCollection<Document> col;
-		protected MongoIterable<T> results;
+		protected MongoIterable<T> iterableResults;
+		private List<T> results;
+		private MongoQueryBuilder<T> qb;
 
-		public MongoResultProcessor<T> using(MongoTemplate mongoTemplate) {
+		public MongoCollection<Document> collection() {
+			if (this.col == null) {
+				this.col = mongoTemplate.getCollection(collection);
+			}
+			return this.col;
+		}
+
+		public MongoQueryBuilder<T> qb() {
+			if (this.qb == null) {
+				this.qb = MQB.collection(collectionClass);
+			}
+			return this.qb;
+		}
+
+		public MongoResultProcessor<T> using(CommonMongoTemplateDefault mongoTemplate) {
 			this.mongoTemplate = mongoTemplate;
 			return this;
 		}
 
 		public MongoResultProcessor<T> collection(String collection) {
-			this.col = mongoTemplate.getCollection(collection);
+			this.collection = collection;
+			// this.col = mongoTemplate.getCollection(collection);
 			return this;
 		}
 
+		public MongoResultProcessor<T> collection(Class<T> clazz) {
+			this.collectionClass = clazz;
+			this.collection = mongoTemplate.getCollectionName(clazz);
+			return this;
+		}
+
+		public MongoResultProcessor<T> where(String field, Object value) {
+			this.qb().where(field, value);
+			return this;
+		}
+
+		public MongoResultProcessor<T> where(Criteria criteria) {
+			this.qb().where(criteria);
+			return this;
+		}
+
+		public MongoResultProcessor<T> find(IMongoQueryBuilder<T> builder) {
+			this.results = mongoTemplate.find(builder);
+			return this;
+		}
+
+		public MongoResultProcessor<T> find() {
+			return this.find(qb);
+		}
+
 		public MongoResultProcessor<T> results(MongoIterable<T> aggregate) {
-			this.results = aggregate;
+			this.iterableResults = aggregate;
 			return this;
 		}
 
 		public <TResult> MongoResultProcessor<TResult> aggregate(List<Document> aggreQuery,
 				Class<TResult> resultClass) {
 			MongoResultProcessor<TResult> newP = new MongoResultProcessor<TResult>();
-			return newP.results(col.aggregate(aggreQuery, resultClass));
+			return newP.results(collection().aggregate(aggreQuery, resultClass));
 		}
 
 		public MongoResultProcessor<Document> aggregate(List<Document> aggreQuery) {
 			SimpleMongoResultProcessor newP = new SimpleMongoResultProcessor();
-			return newP.results(col.aggregate(aggreQuery));
+			return newP.results(collection().aggregate(aggreQuery));
 		}
 
 		public <TResult> MongoResultProcessor<TResult> aggregate(QA aggreQuery, Class<TResult> resultClass) {
@@ -82,26 +129,26 @@ public class MongoUtils {
 		}
 
 		public MongoResultProcessor<T> distinct(String fieldkey, Class<T> fieldkeyType) {
-			results = col.distinct(fieldkey, fieldkeyType);
+			iterableResults = collection().distinct(fieldkey, fieldkeyType);
 			return this;
 		}
 
 		public MongoResultProcessor<String> distinct(String fieldkey) {
 			MongoResultProcessor<String> newP = new MongoResultProcessor<String>();
-			return newP.results(col.distinct(fieldkey, String.class));
+			return newP.results(collection().distinct(fieldkey, String.class));
 		}
 
 		public MongoResultProcessor<T> forEach(Consumer<? super T> action) {
-			this.results.forEach(action);
+			this.iterableResults.forEach(action);
 			return this;
 		}
 
 		public MongoCursor<T> iterator() {
-			return this.results.iterator();
+			return this.iterableResults.iterator();
 		}
 
 		public List<T> asList(List<T> list) {
-			MongoCursor<T> cursor = this.results.iterator();
+			MongoCursor<T> cursor = this.iterableResults.iterator();
 			while (cursor.hasNext()) {
 				T object = cursor.next();
 				if (ArgUtil.is(object)) {
@@ -113,7 +160,14 @@ public class MongoUtils {
 		}
 
 		public List<T> asList() {
-			return asList(new LinkedList<T>());
+			if (this.iterableResults != null) {
+				return asList(new LinkedList<T>());
+			}
+			return this.results;
+		}
+
+		public T asFirst() {
+			return CollectionUtil.first(asList());
 		}
 
 	}

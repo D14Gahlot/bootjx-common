@@ -44,13 +44,16 @@
 
 <script>
     function none(n){ return !!n;}
+    function ok(n){ return n;}
 	window.CONST = {
 		TENANT : '[[${TENANT}]]',
 		dev : '[[${CDN_DEBUG}]]',
 		CDN_URL : '[[${CDN_URL}]]', //
-		APP_CONTEXT : '[[${APP_CONTEXT}]]', //
-		remoteJsVersion :  '[[${CDN_VERSION}]]', //
-		CONTEXT: '[[${APP_CONTEXT}]]', APP_USER : '[[${APP_USER}]]'
+		APP_CONTEXT : '[[${APP_CONTEXT}]]',//
+		remoteJsVersion : '[[${CDN_VERSION}]]', //
+		CONTEXT: '[[${APP_CONTEXT}]]', APP_USER : '[[${APP_USER}]]', APP_USER_NAME : '[[${APP_USER_NAME}]]',
+		APP_DEPT : '[[${APP_DEPT}]]', APP_USER_ROLE : ok([(${APP_USER_ROLE})]),
+		CONFIG : [(${CONFIG_JSON})]
 	};
 	var initFingerprintJS = function initFingerprintJS() {
 		FingerprintJS.load().then(fp => {

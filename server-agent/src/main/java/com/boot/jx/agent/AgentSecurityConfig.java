@@ -50,8 +50,9 @@ public class AgentSecurityConfig extends WebSecurityConfigurerAdapter {
 				// Logout Pages
 				.and().logout().permitAll().addLogoutHandler(logoutHandler).logoutUrl("/auth/logout")
 				.logoutSuccessUrl("/auth/login?logout").deleteCookies("JSESSIONID", "JXSESSIONID", "AGENTSESSIONID")
-				.invalidateHttpSession(true).permitAll().and().exceptionHandling().accessDeniedPage("/403").and().csrf()
-				.disable().headers().disable();
+				.invalidateHttpSession(true).permitAll().and().exceptionHandling().accessDeniedPage("/403")
+				// Gen stuff
+				.and().csrf().disable().headers().disable();
 	}
 
 	@Bean

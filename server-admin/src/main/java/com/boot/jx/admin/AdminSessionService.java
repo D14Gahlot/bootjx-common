@@ -73,7 +73,6 @@ public class AdminSessionService implements LogoutHandler, AuditDetailProvider {
 		if (agent.isDuperAdmin()) {
 			adminSessionBean.addRole(PMConstants.USER_ROLE.DUPER_USER);
 		}
-
 		updateLogin(agent);
 	}
 

@@ -32,6 +32,8 @@ public class ChannelConfig extends AChannelConfig {
 	private boolean isPushToNewContactAllowed;
 	private boolean isWebhookManual;
 
+	private Object error;
+
 	private String callbackPath;
 
 	public String getLane() {
@@ -170,6 +172,14 @@ public class ChannelConfig extends AChannelConfig {
 
 	public void setTwilio(TwilioConfigDetails twilio) {
 		this.twilio = twilio;
+	}
+
+	public Object getError() {
+		return error;
+	}
+
+	public void setError(Object error) {
+		this.error = error;
 	}
 
 }
