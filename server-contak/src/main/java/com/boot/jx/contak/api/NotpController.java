@@ -176,7 +176,7 @@ public class NotpController {
 		
 		String loginToken = userDoc.getLoginToken();
 		if(msg.loginToken != null) {
-			if(msg.loginToken.equalsIgnoreCase(loginToken)) {
+			if(!msg.loginToken.equalsIgnoreCase(loginToken)) {
 				ApiResponseUtil.throwInputException(ApiStatusCodes.HANDSHAKE_REQUIRED, new ApiFieldError().field("userLoginToken : "+msg.loginToken+" "+loginToken));
 			}
 		}
