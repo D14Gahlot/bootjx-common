@@ -1,6 +1,7 @@
 package com.boot.jx.contak.api;
 
 import java.util.List;
+import java.util.UUID;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -11,29 +12,33 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.boot.jx.AppConfig;
 import com.boot.jx.AppConfigPackage.AppCommonConfig;
+import com.boot.jx.AppContextUtil;
 import com.boot.jx.api.ApiFieldError;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.api.ApiResponseUtil;
+import com.boot.jx.aws.AWSFileStore;
 import com.boot.jx.contak.ContakAuthService;
 import com.boot.jx.contak.ContakSessionBean;
 import com.boot.jx.contak.doc.ContakMembershipDoc;
 import com.boot.jx.contak.doc.ContakUserDoc;
 import com.boot.jx.contak.dto.CompanyDoc;
 import com.boot.jx.mongo.CommonMongoQB.QueryCriteria;
+import com.boot.jx.mongo.CommonMongoQueryBuilder;
 import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.Constants;
 import com.boot.utils.JsonUtil;
 
-import io.netty.util.Constant;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
@@ -55,6 +60,9 @@ public class PanelController {
 
 	@Autowired
 	private ContakSessionBean sessionBean;
+
+	@Autowired
+	AWSFileStore fileStore;
 
 	@ApiOperation(value = "Page", hidden = true)
 	@RequestMapping(path = { "", "/", "/**" }, method = { RequestMethod.GET, RequestMethod.POST })
@@ -131,5 +139,76 @@ public class PanelController {
 		m.setMembershipType(membershipType);
 		commonMongoTemplate.save(m);
 		return ApiResponse.buildResult(m);
+	}
+
+	@ResponseBody
+	@RequestMapping(value = { "/api/v1/company" }, method = { RequestMethod.POST })
+	public ApiResponse<CompanyDoc, Object> addOrg(Model model, @RequestBody CompanyDoc newComp) {
+		CompanyDoc compoc = commonMongoTemplate.findOne(CommonMongoQueryBuilder.collection(CompanyDoc.class)
+				.where(Criteria.where("number").is(newComp.getNumber())));
+		if (ArgUtil.is(compoc)) {
+			ApiResponseUtil.throwDuplicateInputException(new ApiFieldError().field("number"));
+		}
+		CompanyDoc companyDoc = new CompanyDoc();
+		companyDoc.setActive(true);
+		companyDoc.setLegalBusinessName(newComp.getLegalBusinessName());
+		companyDoc.setDisplayName(newComp.getDisplayName());
+		companyDoc.setCountryOfOperation(newComp.getCountryOfOperation());
+		companyDoc.setAddress(newComp.getAddress());
+		companyDoc.setWebsiteUrl(newComp.getWebsiteUrl());
+
+		companyDoc.setContactPersonName(newComp.getContactPersonName());
+		companyDoc.setContactPhoneNumber(newComp.getContactPhoneNumber());
+		companyDoc.setContactPersonEmailId(newComp.getContactPersonEmailId());
+		commonMongoTemplate.save(companyDoc);
+
+		ContakUserDoc user = sessionBean.domainUser();
+		ContakMembershipDoc m = new ContakMembershipDoc();
+		m.setCompany(companyDoc);
+		m.setUser(user);
+		commonMongoTemplate.save(m);
+
+		return ApiResponse.buildResult(companyDoc);
+	}
+
+	@ResponseBody
+	@RequestMapping(value = { "/api/v1/company" }, method = { RequestMethod.PUT })
+	public ApiResponse<CompanyDoc, Object> updateOrg(Model model, @RequestBody CompanyDoc newComp) {
+		CompanyDoc compoc = commonMongoTemplate.findOne(CommonMongoQueryBuilder.collection(CompanyDoc.class)
+				.where(Criteria.where("number").is(newComp.getNumber())));
+		if (ArgUtil.is(compoc)) {
+			ApiResponseUtil.throwDuplicateInputException(new ApiFieldError().field("number"));
+		}
+		CompanyDoc companyDoc = new CompanyDoc();
+		companyDoc.setActive(true);
+		companyDoc.setLegalBusinessName(newComp.getLegalBusinessName());
+		companyDoc.setDisplayName(newComp.getDisplayName());
+		companyDoc.setCountryOfOperation(newComp.getCountryOfOperation());
+		companyDoc.setAddress(newComp.getAddress());
+		companyDoc.setWebsiteUrl(newComp.getWebsiteUrl());
+
+		companyDoc.setContactPersonName(newComp.getContactPersonName());
+		companyDoc.setContactPhoneNumber(newComp.getContactPhoneNumber());
+		companyDoc.setContactPersonEmailId(newComp.getContactPersonEmailId());
+		commonMongoTemplate.save(companyDoc);
+
+		ContakUserDoc user = sessionBean.domainUser();
+		ContakMembershipDoc m = new ContakMembershipDoc();
+		m.setCompany(companyDoc);
+		m.setUser(user);
+		commonMongoTemplate.save(m);
+
+		return ApiResponse.buildResult(companyDoc);
+	}
+
+	@ResponseBody
+	@RequestMapping(value = "/api/v1/logo", method = { RequestMethod.POST })
+	public ApiResponse<String, Object> uploadFile(@RequestParam(name = "file", required = false) MultipartFile file) {
+		ContakUserDoc user = sessionBean.domainUser();
+		String domainUserId = user.getId();
+		String url = fileStore.upload1(file,
+				String.format("%s/docs/%s/logo/%s", AppContextUtil.getTenant(), domainUserId, UUID.randomUUID()),
+				file.getOriginalFilename()).getUrl();
+		return ApiResponse.buildResults(url).message("Logo uplodaed");
 	}
 }
