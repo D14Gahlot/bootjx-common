@@ -945,4 +945,10 @@ public final class ArgUtil {
 		return !all(condition);
 	}
 
+	public static <T> T ifNull(T value, T defaultValue) {
+		if (value == null) {
+			return defaultValue;
+		}
+		return value;
+	}
 }
