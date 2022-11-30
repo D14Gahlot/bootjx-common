@@ -30,8 +30,10 @@ import com.boot.jx.mongo.CommonMongoQB.QueryCriteria;
 import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.Constants;
 import com.boot.utils.JsonUtil;
 
+import io.netty.util.Constant;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
@@ -64,9 +66,9 @@ public class PanelController {
 			model.addAllAttributes(appCommonConfig.appAttributes());
 		}
 		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-		if (ArgUtil.is(auth)) {
+		if (ArgUtil.is(auth) && ArgUtil.is(sessionBean.domainUser())) {
 			model.addAttribute("APP_USER", auth.getName());
-			model.addAttribute("APP_USER_NAME", sessionBean.domainUser().getName());
+			model.addAttribute("APP_USER_NAME", ArgUtil.ifNull(sessionBean.domainUser().getName(), Constants.BLANK));
 			model.addAttribute("APP_USER_ROLE", JsonUtil.toJson(sessionBean.getRole()));
 		} else {
 			model.addAttribute("APP_USER", "");
