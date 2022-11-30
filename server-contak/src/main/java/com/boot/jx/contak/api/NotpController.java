@@ -239,6 +239,7 @@ public class NotpController {
 		userRegistrationDoc.setCompanyName(msg.companyName);
 		userRegistrationDoc.setCreatedAt(TimeStampIndex.now());
 		userRegistrationDoc.setExpiredAt(TimeStampIndex.from(System.currentTimeMillis() + 60000));
+		userRegistrationDoc.setLoginToken(msg.loginToken);
 		userRegistrationDoc.setUserPhoneNumber(msg.userPhoneNumber);
 		userRegistrationDoc.setUserPubKey(msg.userPubKey);
 		commonMongoTemplate.save(userRegistrationDoc);
