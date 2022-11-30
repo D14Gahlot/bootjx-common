@@ -1,5 +1,6 @@
 package com.boot.jx.contak.api;
 
+import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.UUID;
 
@@ -28,16 +29,18 @@ import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.aws.AWSFileStore;
 import com.boot.jx.contak.ContakAuthService;
 import com.boot.jx.contak.ContakSessionBean;
+import com.boot.jx.contak.doc.ContakApiKey;
 import com.boot.jx.contak.doc.ContakMembershipDoc;
 import com.boot.jx.contak.doc.ContakUserDoc;
 import com.boot.jx.contak.dto.CompanyDoc;
+import com.boot.jx.mongo.CommonMongoQB.MQB;
 import com.boot.jx.mongo.CommonMongoQB.QueryCriteria;
 import com.boot.jx.mongo.CommonMongoQueryBuilder;
 import com.boot.jx.mongo.CommonMongoTemplate;
-import com.boot.jx.postman.model.MessageDefinitions.Contactable;
 import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.Constants;
+import com.boot.utils.CryptoUtil;
 import com.boot.utils.JsonUtil;
 
 import io.swagger.annotations.Api;
@@ -145,61 +148,71 @@ public class PanelController {
 	@ResponseBody
 	@RequestMapping(value = { "/api/v1/company" }, method = { RequestMethod.POST })
 	public ApiResponse<CompanyDoc, Object> addOrg(Model model, @RequestBody CompanyDoc newComp) {
-		CompanyDoc compoc = commonMongoTemplate.findOne(CommonMongoQueryBuilder.collection(CompanyDoc.class)
-				.where(Criteria.where("number").is(newComp.getNumber())));
-		if (ArgUtil.is(compoc)) {
-			ApiResponseUtil.throwDuplicateInputException(new ApiFieldError().field("number"));
-		}
-		CompanyDoc companyDoc = new CompanyDoc();
-		companyDoc.setActive(true);
-		companyDoc.setLegalBusinessName(newComp.getLegalBusinessName());
-		companyDoc.setDisplayName(newComp.getDisplayName());
-		companyDoc.setCountryOfOperation(newComp.getCountryOfOperation());
-		companyDoc.setAddress(newComp.getAddress());
-		companyDoc.setWebsiteUrl(newComp.getWebsiteUrl());
 
-		companyDoc.setContactPersonName(newComp.getContactPersonName());
-		companyDoc.setContactPhoneNumber(newComp.getContactPhoneNumber());
-		companyDoc.setContactPersonEmailId(newComp.getContactPersonEmailId());
-		commonMongoTemplate.save(companyDoc);
+		CompanyDoc compoc = null;
+		if (ArgUtil.is(newComp.getCompanyId())) {
+			if (!sessionBean.hasAdminAccesTo(newComp.getCompanyId())) {
+				ApiResponseUtil.throwInputException(
+						new ApiFieldError().field("companyId").codeKey("AccessDenied").description("Access Denied"));
+			} else {
+				compoc = commonMongoTemplate.findById(newComp.getCompanyId(), CompanyDoc.class);
+			}
+		} else {
+			compoc = commonMongoTemplate.findOne(CommonMongoQueryBuilder.collection(CompanyDoc.class)
+					.where(Criteria.where("number").is(newComp.getNumber())));
+			if (ArgUtil.is(compoc)) {
+				ApiResponseUtil.throwDuplicateInputException(new ApiFieldError().field("number"));
+			}
+		}
+
+		if (!ArgUtil.is(compoc)) {
+			compoc = new CompanyDoc();
+		}
+
+		compoc.setActive(true);
+		compoc.setLegalBusinessName(newComp.getLegalBusinessName());
+		compoc.setDisplayName(newComp.getDisplayName());
+		compoc.setCountryOfOperation(newComp.getCountryOfOperation());
+		compoc.setAddress(newComp.getAddress());
+		compoc.setWebsiteUrl(newComp.getWebsiteUrl());
+
+		compoc.setContactPersonName(newComp.getContactPersonName());
+		compoc.setContactPhoneNumber(newComp.getContactPhoneNumber());
+		compoc.setContactPersonEmailId(newComp.getContactPersonEmailId());
+		commonMongoTemplate.save(compoc);
 
 		ContakUserDoc user = sessionBean.domainUser();
 		ContakMembershipDoc m = new ContakMembershipDoc();
-		m.setCompany(companyDoc);
+		m.setCompany(compoc);
 		m.setUser(user);
 		commonMongoTemplate.save(m);
-		
-		return ApiResponse.buildResult(companyDoc);
+
+		return ApiResponse.buildResult(compoc);
 	}
 
 	@ResponseBody
-	@RequestMapping(value = { "/api/v1/company" }, method = { RequestMethod.PUT })
-	public ApiResponse<CompanyDoc, Object> updateOrg(Model model, @RequestBody CompanyDoc newComp) {
-		CompanyDoc compoc = commonMongoTemplate.findOne(CommonMongoQueryBuilder.collection(CompanyDoc.class)
-				.where(Criteria.where("number").is(newComp.getNumber())));
-		if (ArgUtil.is(compoc)) {
-			ApiResponseUtil.throwDuplicateInputException(new ApiFieldError().field("number"));
+	@RequestMapping(value = { "/api/v1/company/key" }, method = { RequestMethod.POST })
+	public ApiResponse<ContakApiKey, Object> resetKey(Model model, @RequestParam String companyId)
+			throws NoSuchAlgorithmException {
+		if (!sessionBean.hasAdminAccesTo(companyId)) {
+			ApiResponseUtil.throwInputException(
+					new ApiFieldError().field("companyId").codeKey("AccessDenied").description("Access Denied"));
 		}
-		CompanyDoc companyDoc = new CompanyDoc();
-		companyDoc.setActive(true);
-		companyDoc.setLegalBusinessName(newComp.getLegalBusinessName());
-		companyDoc.setDisplayName(newComp.getDisplayName());
-		companyDoc.setCountryOfOperation(newComp.getCountryOfOperation());
-		companyDoc.setAddress(newComp.getAddress());
-		companyDoc.setWebsiteUrl(newComp.getWebsiteUrl());
 
-		companyDoc.setContactPersonName(newComp.getContactPersonName());
-		companyDoc.setContactPhoneNumber(newComp.getContactPhoneNumber());
-		companyDoc.setContactPersonEmailId(newComp.getContactPersonEmailId());
-		commonMongoTemplate.save(companyDoc);
+		commonMongoTemplate.update(MQB.select(ContakApiKey.class)
+				.where(QueryCriteria.where("companyId").is(companyId).and("active").is(false)).set("active", false));
 
-		ContakUserDoc user = sessionBean.domainUser();
-		ContakMembershipDoc m = new ContakMembershipDoc();
-		m.setCompany(companyDoc);
-		m.setUser(user);
-		commonMongoTemplate.save(m);
-
-		return ApiResponse.buildResult(companyDoc);
+		CompanyDoc compoc = commonMongoTemplate.findById(companyId, CompanyDoc.class);
+		String newKeyString = UUID.randomUUID().toString();
+		ContakApiKey newKey = new ContakApiKey();
+		newKey.setUserId(sessionBean.domainUser().getId());
+		newKey.setKey(CryptoUtil.getSHA2Hash(newKeyString));
+		newKey.setCompanyId(companyId);
+		newKey.setActive(true);
+		commonMongoTemplate.save(newKey);
+		compoc.setApi(newKey);
+		commonMongoTemplate.save(compoc);
+		return ApiResponse.buildResult(newKey).meta(newKeyString);
 	}
 
 	@ResponseBody

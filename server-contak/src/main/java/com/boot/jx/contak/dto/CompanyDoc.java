@@ -1,14 +1,14 @@
 package com.boot.jx.contak.dto;
 
 import java.io.Serializable;
-import java.util.List;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
+import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import com.boot.jx.contak.doc.ContakApiKey;
 import com.boot.jx.mongo.CommonDocInterfaces.TimeStampIndex;
-import com.boot.jx.swagger.ApiMockModelProperty;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -55,6 +55,9 @@ public class CompanyDoc implements Serializable {
 
 	@Indexed
 	public String apiKey;
+
+	@DBRef
+	private ContakApiKey api;
 
 	public String logoUrl;
 
@@ -208,6 +211,14 @@ public class CompanyDoc implements Serializable {
 
 	public void setLogoUrl(String logoUrl) {
 		this.logoUrl = logoUrl;
+	}
+
+	public ContakApiKey getApi() {
+		return api;
+	}
+
+	public void setApi(ContakApiKey api) {
+		this.api = api;
 	}
 
 }

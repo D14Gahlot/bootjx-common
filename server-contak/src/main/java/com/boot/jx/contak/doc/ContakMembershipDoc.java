@@ -4,6 +4,7 @@ import java.io.Serializable;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.TypeAlias;
+import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import com.boot.jx.contak.dto.CompanyDoc;
@@ -21,7 +22,10 @@ public class ContakMembershipDoc implements IDocument, Serializable {
 	private String userId;
 	private String companyId;
 
+	@DBRef
 	private ContakUserDoc user;
+
+	@DBRef
 	private CompanyDoc company;
 
 	private String membershipType;
