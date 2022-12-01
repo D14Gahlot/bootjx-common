@@ -97,6 +97,10 @@ public class PanelController {
 	public ApiResponse<Object, Object> login(Model model, @RequestParam String username, @RequestParam String password,
 			HttpServletRequest request, HttpServletResponse response) {
 		ContakUserDoc user = authService.authenticate(username, password, request);
+		if (ArgUtil.not(user)) {
+			ApiResponseUtil.throwInputException(new ApiFieldError().field("password").codeKey("InvalidCredentials")
+					.description("Invalid username or password"));
+		}
 		return ApiResponse.build().meta(MapModel.createInstance().put("username", user.getName()).toMap());
 	}
 
@@ -161,7 +165,7 @@ public class PanelController {
 					new ApiFieldError().field("varifyCode").codeKey("InvalidLink").description("Invalid Link"));
 		}
 		user.meta().setEmailVerificationCode(Constants.BLANK);
-		user.meta().setPassword(passsword);
+		user.meta().setPassword(CryptoUtil.getEncoder().message(passsword).sha2().toString());
 		commonMongoTemplate.save(user);
 		// authService.authenticate(email, passsword, request);
 		return ApiResponse.build()

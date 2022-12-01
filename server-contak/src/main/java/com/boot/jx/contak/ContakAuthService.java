@@ -122,8 +122,7 @@ public class ContakAuthService implements LogoutHandler, AuditDetailProvider {
 	public ContakUserDoc authenticate(String username, String password, HttpServletRequest request) {
 		ContakUserDoc user = loadUserByUsername(username);
 		if (user == null || !CryptoUtil.getEncoder().message(password).sha2().is(user.meta().getPassword())) {
-			username = null;
-			password = null;
+			return null;
 		}
 		UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(username, password);
 		token.setDetails(new WebAuthenticationDetails(request));
