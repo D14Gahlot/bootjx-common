@@ -36,6 +36,7 @@ import com.boot.jx.contak.doc.ContakUserDoc;
 import com.boot.jx.contak.dto.CompanyDoc;
 import com.boot.jx.mongo.CommonMongoQB.MQB;
 import com.boot.jx.mongo.CommonMongoQB.QueryCriteria;
+import com.boot.jx.postman.PMConstants;
 import com.boot.jx.mongo.CommonMongoQueryBuilder;
 import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.model.MapModel;
@@ -260,11 +261,8 @@ public class PanelController {
 		compoc.setContactPersonEmailId(newComp.getContactPersonEmailId());
 		commonMongoTemplate.save(compoc);
 
-		ContakUserDoc user = sessionBean.domainUser();
-		ContakMembershipDoc m = new ContakMembershipDoc();
-		m.setCompany(compoc);
-		m.setUser(user);
-		commonMongoTemplate.save(m);
+		addmember(model, compoc.getCompanyId(), sessionBean.domainUser().getEmail(),
+				PMConstants.USER_SHIP_TYPE.OA_OWNER);
 
 		return ApiResponse.buildResult(compoc);
 	}
