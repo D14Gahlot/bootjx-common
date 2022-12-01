@@ -17,6 +17,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 
 import com.boot.jx.AppConfig;
+import com.boot.jx.AppContextUtil;
 import com.boot.jx.common.config.PMCommonConfigImpl;
 import com.boot.jx.contak.doc.ContakMembershipDoc;
 import com.boot.jx.contak.doc.ContakUserDoc;
@@ -144,10 +145,9 @@ public class ContakAuthService implements LogoutHandler, AuditDetailProvider {
 				.put("website", pmEnvironment.keyEntry("mry.prop.service.website").asString())
 				.put("service", pmEnvironment.keyEntry("mry.prop.service.name").asString())
 				.put("servicedomain", pmEnvironment.keyEntry("mry.prop.service.server").asString())
-				.put("link",
-						String.format("https://app.%s/contak/panel/auth/verify-link?code=%s&account=%s",
-								pmEnvironment.keyEntry("mry.prop.service.server").asString(), verifyCode,
-								accountDoc.getEmail()))
+				.put("link", String.format("https://%s.%s/contak/panel/auth/verify-link?code=%s&account=%s",
+						AppContextUtil.getTenant(), pmEnvironment.keyEntry("mry.prop.service.server").asString(),
+						verifyCode, accountDoc.getEmail()))
 				.put("contactName", accountDoc.getName())));
 
 	}
