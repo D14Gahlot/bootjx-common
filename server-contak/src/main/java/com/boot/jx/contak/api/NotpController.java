@@ -82,14 +82,17 @@ public class NotpController {
 		if (!ArgUtil.is(loginDTO.phone)) {
 			ApiResponseUtil.throwMissinInputException(new ApiFieldError().field("phone"));
 		}
+		
+		String loginToken = String.valueOf(System.currentTimeMillis());
 
 		PhoneUserDoc userDoc = commonMongoTemplate.findById(loginDTO.phone, PhoneUserDoc.class);
 		if (!ArgUtil.is(userDoc)) {
 			userDoc = new PhoneUserDoc();
 			userDoc.phoneId = loginDTO.phone;
+			userDoc.loginToken = loginToken;
 			commonMongoTemplate.save(userDoc);
 		}
-
+		
 		PhoneUserQuery phoneUserQuery = new PhoneUserQuery(userDoc);
 		PhoneLoginResponseDTO resp = new PhoneLoginResponseDTO();
 		if (ArgUtil.is(loginDTO.deviceToken)) { // Step 3
@@ -97,6 +100,9 @@ public class NotpController {
 				ApiResponseUtil.throwInputException(ApiStatusCodes.PARAM_INVALID,
 						new ApiFieldError().field("authToken"));
 			}
+			resp.loginToken = loginToken;
+			phoneUserQuery.setLoginToken(resp.loginToken);
+			commonMongoTemplate.update(phoneUserQuery);
 			return ApiResponse.buildResults(phoneBookManager.getProfile(userDoc), resp);
 		} else if (ArgUtil.is(loginDTO.otp)) { // Step 2
 			if (!new OTPDetails().yin(loginDTO.otpNounce).yang(userDoc.otpNounce)
@@ -105,9 +111,11 @@ public class NotpController {
 				ApiResponseUtil.throwInputException(ApiStatusCodes.PARAM_INVALID, new ApiFieldError().field("otp"));
 			}
 			resp.deviceToken = UniqueID.generateSessionId();
+			resp.loginToken = loginToken;
+			
 			phoneUserQuery.setOtpHash(Constants.BLANK);
 			phoneUserQuery.setOtpNounce(Constants.BLANK);
-			phoneUserQuery.setLoginToken(String.valueOf(System.currentTimeMillis()));
+			phoneUserQuery.setLoginToken(resp.loginToken);
 			phoneUserQuery.setAuthToken(CryptoUtil.getEncoder().message(resp.deviceToken).sha2().toString());
 			commonMongoTemplate.update(phoneUserQuery);
 			return ApiResponse.buildResults(phoneBookManager.getProfile(userDoc), resp);
@@ -170,8 +178,10 @@ public class NotpController {
 		}
 		
 		String loginToken = userDoc.getLoginToken();
-		if(msg.userLoginToken != loginToken) {
-			ApiResponseUtil.throwInputException(ApiStatusCodes.HANDSHAKE_REQUIRED, new ApiFieldError().field("userLoginToken"));
+		if(msg.loginToken != null) {
+			if(!msg.loginToken.equalsIgnoreCase(loginToken)) {
+				ApiResponseUtil.throwInputException(ApiStatusCodes.HANDSHAKE_REQUIRED, new ApiFieldError().field("userLoginToken : "+msg.loginToken+" "+loginToken));
+			}
 		}
 		
 		

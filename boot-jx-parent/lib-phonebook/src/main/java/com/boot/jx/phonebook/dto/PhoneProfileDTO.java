@@ -18,6 +18,9 @@ public class PhoneProfileDTO implements Serializable {
 
     @ApiMockModelProperty(example = "xxxxxxxx", required = false)
     public String authToken;
+    
+    @ApiMockModelProperty(example = "xxxxxxxx", required = false)
+    public String loginToken;
 
     public String getMobile() {
 	return mobile;
@@ -42,5 +45,15 @@ public class PhoneProfileDTO implements Serializable {
     public void setName(PBName name) {
 	this.name = name;
     }
+
+	public String getLoginToken() {
+		return loginToken;
+	}
+
+	public void setLoginToken(String loginToken) {
+		this.loginToken = loginToken;
+	}
+    
+    
 
 }
