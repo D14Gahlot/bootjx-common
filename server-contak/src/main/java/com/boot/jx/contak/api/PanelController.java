@@ -7,6 +7,7 @@ import java.util.UUID;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.security.core.Authentication;
@@ -42,6 +43,7 @@ import com.boot.utils.ArgUtil;
 import com.boot.utils.Constants;
 import com.boot.utils.CryptoUtil;
 import com.boot.utils.JsonUtil;
+import com.boot.utils.Random;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -99,6 +101,75 @@ public class PanelController {
 	}
 
 	@ResponseBody
+	@RequestMapping(value = { "/auth/v1/signup" }, method = { RequestMethod.GET, RequestMethod.POST })
+	public ApiResponse<Object, Object> signup(Model model, @RequestParam String name, @RequestParam String email,
+			@RequestParam String phone, HttpServletRequest request, HttpServletResponse response)
+			throws NoSuchAlgorithmException {
+		ContakUserDoc user = authService.loadUserByUsername(email);
+
+		if (ArgUtil.is(user)) {
+			ApiResponseUtil.throwInputException(new ApiFieldError().field("username").codeKey("InvalidUsername")
+					.description("User Already Registered"));
+		}
+
+		String verifyCode = Random.randomAlphaNumeric(10);
+		user = new ContakUserDoc();
+		user.setEmail(email);
+		user.setName(name);
+		user.setPhone(phone);
+		user.meta().setEmailVerificationCode(CryptoUtil.getSHA2Hash(verifyCode));
+		commonMongoTemplate.save(user);
+		authService.sendResetMail(user, "tenant-verify-email", verifyCode);
+
+		return ApiResponse.build()
+				.meta(MapModel.createInstance().put("email", user.getEmail()).put("name", user.getName()).toMap());
+	}
+
+	@ResponseBody
+	@RequestMapping(value = { "/auth/v1/resetpass" }, method = { RequestMethod.GET, RequestMethod.POST })
+	public ApiResponse<Object, Object> forgotpass(Model model, @RequestParam String email, HttpServletRequest request,
+			HttpServletResponse response) throws NoSuchAlgorithmException {
+		ContakUserDoc user = authService.loadUserByUsername(email);
+
+		if (!ArgUtil.is(user)) {
+			ApiResponseUtil.throwInputException(
+					new ApiFieldError().field("username").codeKey("InvalidUsername").description("User Not Found"));
+		}
+		String verifyCode = Random.randomAlphaNumeric(10);
+		user.meta().setEmailVerificationCode(CryptoUtil.getSHA2Hash(verifyCode));
+		commonMongoTemplate.save(user);
+
+		authService.sendResetMail(user, "tenant-reset-pass", verifyCode);
+
+		return ApiResponse.build()
+				.meta(MapModel.createInstance().put("email", user.getEmail()).put("name", user.getName()).toMap())
+				.message("Reset password link sent to email");
+	}
+
+	@ResponseBody
+	@RequestMapping(value = { "/auth/v1/setpass" }, method = { RequestMethod.GET, RequestMethod.POST })
+	public ApiResponse<Object, Object> setpass(Model model, @RequestParam String email, @RequestParam String varifyCode,
+			String passsword, HttpServletRequest request, HttpServletResponse response) {
+		ContakUserDoc user = authService.loadUserByUsername(email);
+
+		if (!ArgUtil.is(user)) {
+			ApiResponseUtil.throwInputException(
+					new ApiFieldError().field("username").codeKey("InvalidUsername").description("User Not Found"));
+		}
+		if (!CryptoUtil.getEncoder().message(varifyCode).sha2().is(user.meta().getEmailVerificationCode())) {
+			ApiResponseUtil.throwInputException(
+					new ApiFieldError().field("varifyCode").codeKey("InvalidLink").description("Invalid Link"));
+		}
+		user.meta().setEmailVerificationCode(Constants.BLANK);
+		user.meta().setPassword(passsword);
+		commonMongoTemplate.save(user);
+		// authService.authenticate(email, passsword, request);
+		return ApiResponse.build()
+				.meta(MapModel.createInstance().put("email", user.getEmail()).put("name", user.getName()).toMap())
+				.message("Password is has been reset");
+	}
+
+	@ResponseBody
 	@RequestMapping(value = { "/api/v1/companys" }, method = { RequestMethod.GET })
 	public ApiResponse<ContakMembershipDoc, Object> organization(Model model) {
 		List<ContakMembershipDoc> m = commonMongoTemplate.collection(ContakMembershipDoc.class)
@@ -132,12 +203,16 @@ public class PanelController {
 					new ApiFieldError().field("companyId").codeKey("InvalidCompany").description("Company not found"));
 		}
 
-		ContakMembershipDoc m = commonMongoTemplate.collection(ContakMembershipDoc.class)
-				.where(QueryCriteria.where("userId").is(user.getId()).and("companyId").is(companyId)).find().asFirst();
+		ContakMembershipDoc m = commonMongoTemplate
+				.collection(ContakMembershipDoc.class).where(QueryCriteria.where("user.$id")
+						.is(new ObjectId(user.getId())).and("company.$id").is(new ObjectId(companyId)))
+				.find().asFirst();
 		if (ArgUtil.not(m)) {
 			m = new ContakMembershipDoc();
 			m.setCompany(company);
 			m.setUser(user);
+			m.setCompanyId(companyId);
+			m.setUserId(user.getId());
 		}
 		m.setActive(ArgUtil.is(membershipType));
 		m.setMembershipType(membershipType);
