@@ -5,6 +5,7 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -21,9 +22,11 @@ import com.boot.jx.AppContextUtil;
 import com.boot.jx.common.config.PMCommonConfigImpl;
 import com.boot.jx.contak.doc.ContakMembershipDoc;
 import com.boot.jx.contak.doc.ContakUserDoc;
+import com.boot.jx.contak.dto.CompanyDoc;
 import com.boot.jx.http.CommonHttpRequest;
 import com.boot.jx.logger.AuditDetailProvider;
 import com.boot.jx.mongo.CommonMongoTemplate;
+import com.boot.jx.mongo.CommonMongoQB.QueryCriteria;
 import com.boot.jx.postman.PMConstants;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.client.PostManClient;
@@ -80,6 +83,24 @@ public class ContakAuthService implements LogoutHandler, AuditDetailProvider {
 			user = commonMongoTemplate.collection(ContakUserDoc.class).where("email", username).find().asFirst();
 		}
 		return user;
+	}
+
+	public ContakMembershipDoc addMembership(ContakUserDoc user, CompanyDoc company, String membershipType) {
+		ContakMembershipDoc m = commonMongoTemplate
+				.collection(ContakMembershipDoc.class).where(QueryCriteria.where("user.$id")
+						.is(new ObjectId(user.getId())).and("company.$id").is(new ObjectId(company.getCompanyId())))
+				.find().asFirst();
+		if (ArgUtil.not(m)) {
+			m = new ContakMembershipDoc();
+			m.setCompany(company);
+			m.setUser(user);
+			m.setCompanyId(company.getCompanyId());
+			m.setUserId(user.getId());
+		}
+		m.setActive(ArgUtil.is(membershipType));
+		m.setMembershipType(membershipType);
+		commonMongoTemplate.save(m);
+		return m;
 	}
 
 	/**

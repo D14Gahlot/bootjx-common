@@ -208,20 +208,7 @@ public class PanelController {
 					new ApiFieldError().field("companyId").codeKey("InvalidCompany").description("Company not found"));
 		}
 
-		ContakMembershipDoc m = commonMongoTemplate
-				.collection(ContakMembershipDoc.class).where(QueryCriteria.where("user.$id")
-						.is(new ObjectId(user.getId())).and("company.$id").is(new ObjectId(companyId)))
-				.find().asFirst();
-		if (ArgUtil.not(m)) {
-			m = new ContakMembershipDoc();
-			m.setCompany(company);
-			m.setUser(user);
-			m.setCompanyId(companyId);
-			m.setUserId(user.getId());
-		}
-		m.setActive(ArgUtil.is(membershipType));
-		m.setMembershipType(membershipType);
-		commonMongoTemplate.save(m);
+		ContakMembershipDoc m = authService.addMembership(user, company, membershipType);
 		return ApiResponse.buildResult(m);
 	}
 
@@ -241,7 +228,8 @@ public class PanelController {
 			compoc = commonMongoTemplate.findOne(CommonMongoQueryBuilder.collection(CompanyDoc.class)
 					.where(Criteria.where("displayName").is(newComp.getDisplayName())));
 			if (ArgUtil.is(compoc)) {
-				ApiResponseUtil.throwDuplicateInputException(new ApiFieldError().field("displayName"));
+				ApiResponseUtil.throwDuplicateInputException(
+						new ApiFieldError().field("displayName").description("Invalid Display Name"));
 			}
 		}
 
@@ -260,9 +248,8 @@ public class PanelController {
 		compoc.setContactPhoneNumber(newComp.getContactPhoneNumber());
 		compoc.setContactPersonEmailId(newComp.getContactPersonEmailId());
 		commonMongoTemplate.save(compoc);
-
-		addmember(model, compoc.getCompanyId(), sessionBean.domainUser().getEmail(),
-				PMConstants.USER_SHIP_TYPE.OA_OWNER);
+		authService.addMembership(sessionBean.domainUser(), compoc, PMConstants.USER_SHIP_TYPE.OA_OWNER);
+		authService.updateLogin(sessionBean.domainUser());
 
 		return ApiResponse.buildResult(compoc);
 	}
