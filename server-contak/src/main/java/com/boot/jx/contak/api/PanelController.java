@@ -239,9 +239,9 @@ public class PanelController {
 			}
 		} else {
 			compoc = commonMongoTemplate.findOne(CommonMongoQueryBuilder.collection(CompanyDoc.class)
-					.where(Criteria.where("number").is(newComp.getNumber())));
+					.where(Criteria.where("displayName").is(newComp.getDisplayName())));
 			if (ArgUtil.is(compoc)) {
-				ApiResponseUtil.throwDuplicateInputException(new ApiFieldError().field("number"));
+				ApiResponseUtil.throwDuplicateInputException(new ApiFieldError().field("displayName"));
 			}
 		}
 
