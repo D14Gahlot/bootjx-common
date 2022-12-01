@@ -12,7 +12,7 @@ import com.boot.jx.mongo.CommonDocInterfaces.TimeStampIndex;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-@Document(collection = "COMPANY_NOTP")
+@Document(collection = "CONTAK_COMPANY")
 public class CompanyDoc implements Serializable {
 	private static final long serialVersionUID = 1281605084248923642L;
 
