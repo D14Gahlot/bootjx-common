@@ -100,6 +100,9 @@ public class NotpController {
 				ApiResponseUtil.throwInputException(ApiStatusCodes.PARAM_INVALID,
 						new ApiFieldError().field("authToken"));
 			}
+			resp.loginToken = loginToken;
+			phoneUserQuery.setLoginToken(resp.loginToken);
+			commonMongoTemplate.update(phoneUserQuery);
 			return ApiResponse.buildResults(phoneBookManager.getProfile(userDoc), resp);
 		} else if (ArgUtil.is(loginDTO.otp)) { // Step 2
 			if (!new OTPDetails().yin(loginDTO.otpNounce).yang(userDoc.otpNounce)
