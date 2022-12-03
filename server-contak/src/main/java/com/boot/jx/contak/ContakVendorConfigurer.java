@@ -50,11 +50,6 @@ public class ContakVendorConfigurer implements TenantAuthFilter {
 	@Override
 	public boolean filterTenantRequest(ApiRequestDetail apiRequest, CommonHttpRequest req, String traceId) {
 
-		if (!tenantResolver.isValid()) {
-			ApiResponseUtil.addError("Invalid Domain");
-			return false;
-		}
-
 		if (!pmEnvironment.config().keyEntry("mry.domain.active").asBoolean()) {
 			ApiResponseUtil.addError("Domain not Active. Please contact support");
 			return false;

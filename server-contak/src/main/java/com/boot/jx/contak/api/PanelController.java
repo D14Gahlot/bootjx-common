@@ -276,7 +276,7 @@ public class PanelController {
 		commonMongoTemplate.save(newKey);
 		compoc.setApi(newKey);
 		commonMongoTemplate.save(compoc);
-		return ApiResponse.buildResult(newKey).meta(newKeyString);
+		return ApiResponse.buildResult(newKey).meta(newKey.getId() + "-" + newKeyString);
 	}
 
 	@ResponseBody
