@@ -35,7 +35,6 @@ import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.postman.plugin.WebPlugin;
 import com.boot.jx.postman.plugin.WebPlugin.WebConfigDetails;
 import com.boot.jx.postman.query.ChatContactQuery;
-import com.boot.jx.postman.query.ChatSessionQuery;
 import com.boot.jx.postman.service.ChatDTOUtil;
 import com.boot.jx.postman.store.MessageStore;
 import com.boot.jx.stomp.StompTunnelService;
@@ -226,8 +225,8 @@ public class WebConnector extends DefaultConnector<WebConfigDetails, WebPlugin> 
 		List<TmplElement> inputs = new ArrayList<TmplElement>();
 		if (ArgUtil.isEmpty(chatContactDoc.getName())) {
 			inputs.add(new TmplElement().code("name").label("Name").type("TEXT"));
-			return (OutboxMessage) inboxMessage.replyMessage("Please fill below inputs to continue").option("inputs",
-					inputs);
+//			return (OutboxMessage) inboxMessage.replyMessage("Please fill below inputs to continue").option("inputs",
+//					inputs);
 		}
 
 		ChannelConfig channel = getChannelConfig(inboxMessage);
@@ -235,17 +234,22 @@ public class WebConnector extends DefaultConnector<WebConfigDetails, WebPlugin> 
 		if (channel.getWeb().isPromptEmail()) {
 			if (ArgUtil.isEmpty(chatContactDoc.getEmail())) {
 				inputs.add(new TmplElement().code("email").label("Email").type("EMAIL"));
-				return (OutboxMessage) inboxMessage.replyMessage("Please fill below inputs to continue")
-						.option("inputs", inputs);
+//				return (OutboxMessage) inboxMessage.replyMessage("Please fill below inputs to continue")
+//						.option("inputs", inputs);
 			}
 		}
 
 		if (channel.getWeb().isPromptPhone()) {
 			if (ArgUtil.isEmpty(chatContactDoc.getPhone())) {
 				inputs.add(new TmplElement().code("phone").label("Phone").type("PHONE"));
-				return (OutboxMessage) inboxMessage.replyMessage("Please fill below inputs to continue")
-						.option("inputs", inputs);
+//				return (OutboxMessage) inboxMessage.replyMessage("Please fill below inputs to continue")
+//						.option("inputs", inputs);
 			}
+		}
+
+		if (ArgUtil.is(inputs) && inputs.size() > 0) {
+			return (OutboxMessage) inboxMessage.replyMessage("Please fill below inputs to continue").option("inputs",
+					inputs);
 		}
 
 		return null;
