@@ -1,6 +1,7 @@
 package com.boot.jx.contak.dto;
 
 import java.io.Serializable;
+import java.util.List;
 
 public class ContakTemplate implements Serializable {
 
@@ -11,12 +12,20 @@ public class ContakTemplate implements Serializable {
 		public String variant;
 	}
 
+	public static class ContakTemplateCTA {
+		public String label;
+		public String phone;
+		public String url;
+		public String variant;
+	}
+
 	public ContakTemplateHeader header;
 
 	public String type;
 	public String title;
 	public String body;
 	public String footer;
+	public List<ContakTemplateCTA> cta;
 
 	public ContakModel model;
 	public String modelEncrypted;
