@@ -7,7 +7,6 @@ import java.util.UUID;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.security.core.Authentication;
@@ -32,13 +31,14 @@ import com.boot.jx.contak.ContakAuthService;
 import com.boot.jx.contak.ContakSessionBean;
 import com.boot.jx.contak.doc.ContakApiKey;
 import com.boot.jx.contak.doc.ContakMembershipDoc;
+import com.boot.jx.contak.doc.ContakTemplateDoc;
 import com.boot.jx.contak.doc.ContakUserDoc;
 import com.boot.jx.contak.dto.CompanyDoc;
 import com.boot.jx.mongo.CommonMongoQB.MQB;
 import com.boot.jx.mongo.CommonMongoQB.QueryCriteria;
-import com.boot.jx.postman.PMConstants;
 import com.boot.jx.mongo.CommonMongoQueryBuilder;
 import com.boot.jx.mongo.CommonMongoTemplate;
+import com.boot.jx.postman.PMConstants;
 import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.Constants;
@@ -288,5 +288,45 @@ public class PanelController {
 				String.format("%s/docs/%s/logo/%s", AppContextUtil.getTenant(), domainUserId, UUID.randomUUID()),
 				file.getOriginalFilename()).getUrl();
 		return ApiResponse.buildResults(url).message("Logo uplodaed");
+	}
+
+	@ResponseBody
+	@RequestMapping(value = { "/api/v1/hsm/tmpl" }, method = { RequestMethod.POST })
+	public ApiResponse<ContakTemplateDoc, Object> hsmTemplate(Model model, @RequestBody ContakTemplateDoc template)
+			throws NoSuchAlgorithmException {
+		if (ArgUtil.is(template.templateId)) {
+			ApiResponseUtil.throwInputException(new ApiFieldError().field("templateId").codeKey("AccessDenied")
+					.description("Template Cannot be modified"));
+		}
+
+		if (!ArgUtil.is(template.companyId)) {
+			ApiResponseUtil.throwInputException(
+					new ApiFieldError().field("companyId").codeKey("AccessDenied").description("Select Organization"));
+		}
+
+		if (!sessionBean.hasAdminAccesTo(template.companyId)) {
+			ApiResponseUtil.throwInputException(
+					new ApiFieldError().field("companyId").codeKey("AccessDenied").description("Access Denied"));
+		}
+		commonMongoTemplate.save(template);
+		return ApiResponse.buildResult(template);
+	}
+
+	@ResponseBody
+	@RequestMapping(value = { "/api/v1/hsm/tmpl" }, method = { RequestMethod.GET })
+	public ApiResponse<ContakTemplateDoc, Object> hsmTemplate(Model model, @RequestParam String companyId)
+			throws NoSuchAlgorithmException {
+
+		if (!ArgUtil.is(companyId)) {
+			ApiResponseUtil.throwInputException(
+					new ApiFieldError().field("companyId").codeKey("AccessDenied").description("Select Organization"));
+		}
+
+		if (!sessionBean.hasAdminAccesTo(companyId)) {
+			ApiResponseUtil.throwInputException(
+					new ApiFieldError().field("companyId").codeKey("AccessDenied").description("Access Denied"));
+		}
+		return ApiResponse.buildResults(
+				commonMongoTemplate.collection(ContakTemplateDoc.class).where("companyId", companyId).find().asList());
 	}
 }

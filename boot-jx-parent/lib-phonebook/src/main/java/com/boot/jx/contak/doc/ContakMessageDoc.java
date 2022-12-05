@@ -1,19 +1,21 @@
-package com.boot.jx.phonebook.doc;
+package com.boot.jx.contak.doc;
 
 import java.io.Serializable;
-import java.util.HashMap;
 import java.util.List;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import com.boot.jx.contak.dto.ContakModel;
+import com.boot.jx.contak.dto.ContakTemplate;
 import com.boot.jx.mongo.CommonDocInterfaces.TimeStampIndex;
+import com.boot.utils.ArgUtil;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-@Document(collection = "PHONE_NOTP")
-public class PhoneNOTPDoc implements Serializable {
+@Document(collection = "CONTAK_MESSAGES")
+public class ContakMessageDoc implements Serializable {
 	private static final long serialVersionUID = 1281605084248923642L;
 
 	@Id
@@ -26,7 +28,7 @@ public class PhoneNOTPDoc implements Serializable {
 	public String domain;
 
 	public TimeStampIndex createdAt;
-	
+
 	public TimeStampIndex relayedAt;
 
 	public TimeStampIndex expiredAt;
@@ -40,12 +42,15 @@ public class PhoneNOTPDoc implements Serializable {
 	public String message;
 
 	public String otp;
-	public String type;
+	public String type; // OTP,TRAN,PROM
 	public String pubKey;
 	public long msgGenId;
 	public String companyId;
 	public String companyName;
 	public String logoUrl;
+
+	public ContakModel model;
+	public ContakTemplate template;
 
 	private List<String> tags;
 
@@ -152,8 +157,7 @@ public class PhoneNOTPDoc implements Serializable {
 	public void setPubKey(String pubKey) {
 		this.pubKey = pubKey;
 	}
-	
-	
+
 	public long getMsgGenId() {
 		return msgGenId;
 	}
@@ -193,7 +197,34 @@ public class PhoneNOTPDoc implements Serializable {
 	public void setRelayedAt(TimeStampIndex relayedAt) {
 		this.relayedAt = relayedAt;
 	}
-	
-	
 
+	public ContakTemplate getTemplate() {
+		return template;
+	}
+
+	public void setTemplate(ContakTemplate template) {
+		this.template = template;
+	}
+
+	public ContakTemplate template() {
+		if (!ArgUtil.is(this.template)) {
+			this.template = new ContakTemplate();
+		}
+		return this.template;
+	}
+
+	public ContakModel getModel() {
+		return model;
+	}
+
+	public void setModel(ContakModel model) {
+		this.model = model;
+	}
+
+	public ContakModel model() {
+		if (!ArgUtil.is(this.model)) {
+			this.model = new ContakModel();
+		}
+		return this.model;
+	}
 }
