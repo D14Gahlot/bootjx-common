@@ -701,6 +701,7 @@ public class AccountDashBoardManager {
 		return result;
 	}
 
+
 	public Map<Object, Long> getHourRange(long currentTStamp, long lastTimeStamp) {
 		Map<String, Long> mapHr = new HashMap<>();
 
@@ -709,20 +710,26 @@ public class AccountDashBoardManager {
 		SimpleDateFormat sdfHM = new SimpleDateFormat("mm");
 		String formattedHM = sdfHM.format(date);
 		int m =Integer.parseInt(formattedHM);
+		/** for Upper round **/
+//		if(m>30) {
+//			m = 60-m;
+//		}else {
+//			m = 30-m;
+//		}
+		
+	    //long currTimeStM=currentTStamp+(m * 60 * 1000L);
+		//long lastTimeStampWm = lastTimeStamp +((m+30) * 60 * 1000L);
+		
 		if(m>30) {
-			m = 60-m;
-		}else {
-			m = 30-m;
+			m = m-30;
 		}
-	    long currTimeStM=currentTStamp+(m * 60 * 1000L);
-		long lastTimeStampWm = lastTimeStamp +((m+30) * 60 * 1000L);
+		long currTimeStM=currentTStamp-(m * 60 * 1000L);
+	    long lastTimeStampWm = lastTimeStamp -(m * 60 * 1000L);
 		lastTimeStampWm = (lastTimeStampWm - (lastTimeStampWm % (1000 * 60)));
-		for (long lastTS = lastTimeStampWm; lastTS <=currTimeStM; lastTS = lastTS + DateUtil.MIN_30) {
-			
+		for (long lastTS = lastTimeStampWm; lastTS <currTimeStM; lastTS = lastTS + DateUtil.MIN_30) {
 			mapMinWise.put(lastTS, new Long(0));
 		}
 		Map<Object, Long> result = new TreeMap<Object, Long>(mapMinWise);
-
 		return result;
 	}
 
