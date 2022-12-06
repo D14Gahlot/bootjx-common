@@ -58,7 +58,7 @@ public class NotpController {
 	PhoneBookManager phoneBookManager;
 
 	@Autowired
-	ContakMessageManager phoneMessageManager;
+	ContakMessageManager contakMessageManager;
 
 	@Autowired
 	UserRegistrationManager userRegistrationManager;
@@ -145,7 +145,7 @@ public class NotpController {
 						new ApiFieldError().field("authToken"));
 			}
 		}
-		return ApiResponse.buildResults(phoneMessageManager.fetchMessages(userDoc));
+		return ApiResponse.buildResults(contakMessageManager.fetchMessages(userDoc));
 	}
 
 	@RequestMapping(value = "/api/v1/messages/send", method = { RequestMethod.POST })
