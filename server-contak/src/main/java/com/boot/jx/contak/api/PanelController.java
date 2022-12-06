@@ -308,6 +308,7 @@ public class PanelController {
 			ApiResponseUtil.throwInputException(
 					new ApiFieldError().field("companyId").codeKey("AccessDenied").description("Access Denied"));
 		}
+		template.templateId = String.format("%s:%s", template.companyId, template.code);
 		commonMongoTemplate.save(template);
 		return ApiResponse.buildResult(template);
 	}
