@@ -5,6 +5,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import com.boot.jx.contak.dto.PhoneNotpRequestModels.PhoneNotpDto;
 import com.boot.jx.contak.doc.ContakMessageDoc;
@@ -14,6 +15,7 @@ import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.jx.mongo.CommonDocInterfaces.TimeStampIndex;
 import com.boot.jx.phonebook.doc.PhoneUserDoc;
 
+@Component
 public class ContakMessageManager {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(UserRegistrationManager.class);
