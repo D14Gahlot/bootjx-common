@@ -594,7 +594,6 @@ public class AccountDashBoardManager {
 		List<DateWiseHourCountDto> hourCntLst = new ArrayList<>();
 
 		for (String contactType : lst) {
-			System.out.println("contactType :"+contactType);
 			Query query = new Query();
 			query.addCriteria(Criteria.where("timestamp").gt(lasDayTimeStmp).lt(currentTs));
 			query.with(new Sort(new Order(Direction.DESC, "timestamp")));
@@ -622,7 +621,7 @@ public class AccountDashBoardManager {
 					lstSummDto.add(dto);
 				}
 				String channelid = getSummaryWithChannelId(dto);
-				System.out.println("contactType :"+contactType+"\t yyyyMMdd "+yyyyMMdd+"\t doctimestamp :"+doctimestamp+"\t channelid :"+channelid);
+				//System.out.println("contactType :"+contactType+"\t yyyyMMdd "+yyyyMMdd+"\t doctimestamp :"+doctimestamp+"\t channelid :"+channelid);
 				if (ArgUtil.is(channelid)) {
 					daySummDto.setDate(yyyyMMdd);
 					daySummDto.setChannel(channelid);
