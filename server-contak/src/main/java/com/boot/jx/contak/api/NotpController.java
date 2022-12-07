@@ -157,7 +157,8 @@ public class NotpController {
 	@RequestMapping(value = "/api/v1/messages/send", method = { RequestMethod.POST })
 	public ApiResponse<ContakMessageDoc, Object> send(@RequestBody PhoneNotpDto msg) {
 
-		CompanyDoc compoc = apiContext.getCompany();
+		CompanyDoc compoc = commonMongoTemplate.findOne(CommonMongoQueryBuilder.collection(CompanyDoc.class)
+				.where(Criteria.where("apiKey").is(msg.apiKey)));
 
 		if (!ArgUtil.is(compoc)) {
 			ApiResponseUtil.throwException("The request to send message is unauthorized");
