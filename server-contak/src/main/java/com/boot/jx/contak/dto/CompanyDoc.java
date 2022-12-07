@@ -24,6 +24,9 @@ public class CompanyDoc implements Serializable {
 
 	public String displayName;
 
+	@Indexed(unique = true, sparse = true)
+	public String domain;
+
 	public String countryOfOperation;
 
 	public String address;
@@ -219,6 +222,14 @@ public class CompanyDoc implements Serializable {
 
 	public void setApi(ContakApiKey api) {
 		this.api = api;
+	}
+
+	public String getDomain() {
+		return domain;
+	}
+
+	public void setDomain(String domain) {
+		this.domain = domain;
 	}
 
 }

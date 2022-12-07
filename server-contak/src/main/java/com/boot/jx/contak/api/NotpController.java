@@ -13,13 +13,17 @@ import com.boot.jx.api.ApiFieldError;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.aws.AWSFileStore;
+import com.boot.jx.contak.doc.ContakMessageDoc;
+import com.boot.jx.contak.doc.ContakTemplateDoc;
 import com.boot.jx.contak.dto.CompanyDoc;
+import com.boot.jx.contak.dto.ContakTemplate;
 import com.boot.jx.contak.dto.PhoneLoginDTO;
 import com.boot.jx.contak.dto.PhoneLoginDTO.PhoneLoginResponseDTO;
 import com.boot.jx.contak.dto.PhoneNotpRequestModels.PhoneNotpDto;
 import com.boot.jx.contak.dto.UserRegistrationDTO;
 import com.boot.jx.contak.dto.UserRegistrationDoc;
 import com.boot.jx.contak.manager.ContakApiContext;
+import com.boot.jx.contak.manager.ContakMessageManager;
 import com.boot.jx.contak.manager.FirebaseManager;
 import com.boot.jx.contak.manager.UserRegistrationManager;
 import com.boot.jx.exception.ApiHttpExceptions.ApiStatusCodes;
@@ -28,7 +32,6 @@ import com.boot.jx.http.CommonHttpRequest;
 import com.boot.jx.mongo.CommonDocInterfaces.TimeStampIndex;
 import com.boot.jx.mongo.CommonMongoQueryBuilder;
 import com.boot.jx.mongo.CommonMongoTemplate;
-import com.boot.jx.phonebook.doc.PhoneNOTPDoc;
 import com.boot.jx.phonebook.doc.PhoneUserDoc;
 import com.boot.jx.phonebook.doc.PhoneUserQuery;
 import com.boot.jx.phonebook.dto.PhoneProfileDTO;
@@ -36,6 +39,7 @@ import com.boot.jx.phonebook.manager.PhoneBookManager;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.Constants;
 import com.boot.utils.CryptoUtil;
+import com.boot.utils.EntityDtoUtil;
 import com.boot.utils.OTPUtils;
 import com.boot.utils.OTPUtils.OTPDetails;
 import com.boot.utils.UniqueID;
@@ -52,6 +56,9 @@ public class NotpController {
 
 	@Autowired
 	PhoneBookManager phoneBookManager;
+
+	@Autowired
+	ContakMessageManager contakMessageManager;
 
 	@Autowired
 	UserRegistrationManager userRegistrationManager;
@@ -120,7 +127,7 @@ public class NotpController {
 	}
 
 	@RequestMapping(value = "/api/v1/messages/fetch", method = { RequestMethod.POST })
-	public ApiResponse<PhoneNOTPDoc, Object> read(@RequestBody PhoneLoginDTO loginDTO) {
+	public ApiResponse<ContakMessageDoc, Object> read(@RequestBody PhoneLoginDTO loginDTO) {
 		if (!ArgUtil.is(loginDTO.phone)) {
 			ApiResponseUtil.throwMissinInputException(new ApiFieldError().field("phone"));
 		}
@@ -144,18 +151,18 @@ public class NotpController {
 						new ApiFieldError().field("authToken"));
 			}
 		}
-		return ApiResponse.buildResults(phoneBookManager.fetchMessages(userDoc));
+		return ApiResponse.buildResults(contakMessageManager.fetchMessages(userDoc));
 	}
 
 	@RequestMapping(value = "/api/v1/messages/send", method = { RequestMethod.POST })
-	public ApiResponse<PhoneNOTPDoc, Object> send(@RequestBody PhoneNotpDto msg) {
+	public ApiResponse<ContakMessageDoc, Object> send(@RequestBody PhoneNotpDto msg) {
 
 		CompanyDoc compoc = apiContext.getCompany();
 
 		if (!ArgUtil.is(compoc)) {
 			ApiResponseUtil.throwException("The request to send message is unauthorized");
 		}
-		if (!ArgUtil.is(msg.apiKey) || !ArgUtil.is(msg.domain)) {
+		if (!ArgUtil.is(msg.apiKey)) {
 			ApiResponseUtil.throwInputException(ApiStatusCodes.UNAUTHORIZED, new ApiFieldError().field("apiKey"));
 		}
 
@@ -177,26 +184,8 @@ public class NotpController {
 			}
 		}
 
-		String title = msg.domain;
-		String body = "You have received a notification from " + msg.domain;
-		HashMap<String, String> data = new HashMap<>();
-		if (msg.companyName != null) {
-			data.put("companyName", msg.companyName);
-		}
-		if (msg.companyId != null) {
-			data.put("companyId", msg.companyId);
-		}
-		if (msg.pubKey != null) {
-			data.put("pubKey", msg.pubKey);
-		}
-		if (msg.type != null) {
-			data.put("type", msg.type);
-		}
-
-		firebaseManager.sendNotification(msg.phone, title, body, data);
-
-		PhoneNOTPDoc newPhoneNOTPDoc = new PhoneNOTPDoc();
-		newPhoneNOTPDoc.setDomain(msg.domain);
+		ContakMessageDoc newPhoneNOTPDoc = new ContakMessageDoc();
+		newPhoneNOTPDoc.setDomain(compoc.getDisplayName());
 		newPhoneNOTPDoc.setPhoneId(msg.phone);
 		newPhoneNOTPDoc.setOtp(msg.otp);
 		newPhoneNOTPDoc.setTitle(msg.title);
@@ -210,7 +199,40 @@ public class NotpController {
 		newPhoneNOTPDoc.setCompanyId(msg.companyId);
 		newPhoneNOTPDoc.setCompanyName(msg.companyName);
 		newPhoneNOTPDoc.setLogoUrl(msg.logoUrl);
+
+		if (ArgUtil.is(msg.template) && ArgUtil.is(msg.template.code)) {
+			ContakTemplate tmpl = commonMongoTemplate.collection(ContakTemplateDoc.class)
+					.find(Criteria.where("code").is(msg.template.code).and("companyId").is(compoc.getCompanyId()))
+					.asFirst(new ContakTemplate());
+			if (ArgUtil.is(tmpl)) {
+				ApiResponseUtil
+						.throwInputException(new ApiFieldError().field("template").description("Invalid Template"));
+			}
+			tmpl.modelEncrypted = msg.template.modelEncrypted;
+			tmpl.model = msg.template.model;
+			newPhoneNOTPDoc.setTemplate(tmpl);
+			newPhoneNOTPDoc.setType(tmpl.type);
+		}
 		commonMongoTemplate.save(newPhoneNOTPDoc);
+
+		// Notification
+		String title = compoc.getDisplayName();
+		String body = "You have received a notification from " + compoc.getDisplayName();
+		HashMap<String, String> data = new HashMap<>();
+		if (msg.companyName != null) {
+			data.put("companyName", compoc.getDomain());
+		}
+		if (msg.companyId != null) {
+			data.put("companyId", compoc.getCompanyId());
+		}
+		if (msg.pubKey != null) {
+			data.put("pubKey", msg.pubKey);
+		}
+		if (msg.type != null) {
+			data.put("type", msg.type);
+		}
+		firebaseManager.sendNotification(msg.phone, title, body, data);
+
 		return ApiResponse.buildResults(newPhoneNOTPDoc);
 	}
 
