@@ -124,7 +124,13 @@ public class NotpController {
 		if (!ArgUtil.is(loginDTO.phone)) {
 			ApiResponseUtil.throwMissinInputException(new ApiFieldError().field("phone"));
 		}
-		PhoneUserDoc userDoc = commonMongoTemplate.findById(loginDTO.phone, PhoneUserDoc.class);
+		PhoneUserDoc userDoc = commonMongoTemplate.findById(loginDTO.phone, PhoneUserDoc.class);		
+		if (ArgUtil.is(loginDTO.deviceId)) { // Step 3
+			if (!loginDTO.deviceId.equalsIgnoreCase(userDoc.deviceId)) {
+				ApiResponseUtil.throwInputException(ApiStatusCodes.UNAUTHORIZED,
+						new ApiFieldError().field("deviceId"));
+			}
+		} 
 		if (!ArgUtil.is(userDoc)) {
 			ApiResponseUtil.throwInputException(ApiStatusCodes.UNAUTHORIZED, new ApiFieldError().field("phone"));
 		}
@@ -226,6 +232,15 @@ public class NotpController {
 
 	@RequestMapping(value = "/api/v1/user/key/reg", method = { RequestMethod.POST })
 	public ApiResponse<UserRegistrationDoc, Object> save(@RequestBody UserRegistrationDTO msg) {
+		
+		PhoneUserDoc userDoc = commonMongoTemplate.findById(msg.userPhoneNumber, PhoneUserDoc.class);
+		if (ArgUtil.is(msg.deviceToken)) { // Step 3
+			if (!msg.deviceToken.equalsIgnoreCase(userDoc.deviceId)) {
+				ApiResponseUtil.throwInputException(ApiStatusCodes.UNAUTHORIZED,
+						new ApiFieldError().field("deviceId"));
+			}
+		} 
+		
 		UserRegistrationDoc userRegistrationDoc = new UserRegistrationDoc();
 		userRegistrationDoc.setCompanyId(msg.companyId);
 		userRegistrationDoc.setCompanyName(msg.companyName);
