@@ -30,7 +30,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.domain.Sort.Order;
-import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
 import org.springframework.data.mongodb.core.aggregation.AggregationResults;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -38,10 +37,14 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Component;
 
 import com.boot.jx.AppContextUtil;
+import com.boot.jx.account.AccountSessionBean;
+import com.boot.jx.account.doc.AccountStore;
+import com.boot.jx.account.doc.BusinessUserDoc;
 import com.boot.jx.account.doc.DomainDoc;
 import com.boot.jx.account.doc.DomainSummaryMessageDoc;
 import com.boot.jx.account.doc.DomainSummaryMetaDoc;
 import com.boot.jx.account.doc.DomainSummaryMetaStore;
+import com.boot.jx.account.doc.SignupContact;
 import com.boot.jx.account.dto.AccountDashBoardRequestDto;
 import com.boot.jx.account.dto.AccountDashBoardResponseDto;
 import com.boot.jx.account.dto.ContactTypeCountDto;
@@ -59,15 +62,11 @@ import com.boot.jx.postman.doc.config.ChannelConfigDoc;
 import com.boot.jx.postman.doc.tpo.WABAConversation;
 import com.boot.jx.postman.model.Message;
 import com.boot.jx.postman.store.MessageStore;
+import com.boot.jx.scope.tnt.Tenants;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.Constants;
 import com.boot.utils.DateUtil;
 import com.boot.utils.JsonUtil;
-import com.mongodb.AggregationOptions;
-import com.mongodb.AggregationOptions.OutputMode;
-import com.mongodb.Cursor;
-import com.mongodb.DBCollection;
-import com.mongodb.DBObject;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 
@@ -83,6 +82,13 @@ public class AccountDashBoardManager {
 
 	@Autowired
 	private MessageStore messageStore;
+	
+	@Autowired
+	private AccountSessionBean userSessionBean;
+	
+	@Autowired
+	private AccountStore accountStore;
+
 
 	public List<DomainDoc> getAllDomainAccount() {
 		Query query = new Query();
@@ -559,24 +565,28 @@ public class AccountDashBoardManager {
 		String tnt = AppContextUtil.getTenant();
 		List<String> lst = getListOfContactType();
 		List<String> channelLst = getListChannelCongig();
+		LOGGER.info("dayChannelWiseWisesummary dateRange1 :"+dateRange1+"\t dateRange2 :"+dateRange2);
+		
 		long currentTs = System.currentTimeMillis();
 
+		long offsetts= countryTimeZoneOffset(tnt);
 		ZonedDateTime noOfdaysTstamp = null;
-
-		if (days > 0) {
-			noOfdaysTstamp = ZonedDateTime.now().minusDays(days).with(LocalTime.MIN);
-		} else {
-			noOfdaysTstamp = ZonedDateTime.now().minusDays(12).with(LocalTime.MIN);
-		}
-		// use the same datetime to create the end of the day using the maximum time for
-		long lasDayTimeStmp = noOfdaysTstamp.toInstant().toEpochMilli();
+		long lasDayTimeStmp =0;
 		if (dateRange1 > 0) {
-			lasDayTimeStmp = dateRange1;
+			lasDayTimeStmp = dateRange1+offsetts;
 		}
 		if (dateRange2 > 0) {
-			currentTs = dateRange2;
+			currentTs = dateRange2+offsetts;
 		}
 
+		if (lasDayTimeStmp==0  && days > 0) {
+			noOfdaysTstamp = ZonedDateTime.now().minusDays(days).with(LocalTime.MIN);
+			lasDayTimeStmp = noOfdaysTstamp.toInstant().toEpochMilli();
+		} 
+		
+		 
+		
+		
 		Map<Object, Long> dateRanMap = getDatesRange(currentTs, lasDayTimeStmp);
 
 		String monthYear = new SimpleDateFormat(DateUtil.MMM_YYYY_FORMAT).format(currentTs);
@@ -584,6 +594,7 @@ public class AccountDashBoardManager {
 		List<DateWiseHourCountDto> hourCntLst = new ArrayList<>();
 
 		for (String contactType : lst) {
+			System.out.println("contactType :"+contactType);
 			Query query = new Query();
 			query.addCriteria(Criteria.where("timestamp").gt(lasDayTimeStmp).lt(currentTs));
 			query.with(new Sort(new Order(Direction.DESC, "timestamp")));
@@ -592,8 +603,11 @@ public class AccountDashBoardManager {
 			for (MessageDoc doc : msgDocLst) {
 				SummaryDocDto dto = new SummaryDocDto();
 				DateWiseHourCountDto daySummDto = new DateWiseHourCountDto();
-				String yyyyMMdd = DateUtil.foramtTimeStampDateAsString(doc.getTimestamp(),
+				long doctimestamp = doc.getTimestamp();
+				///doctimestamp =doctimestamp+offsetts;  
+				String yyyyMMdd = DateUtil.foramtTimeStampDateAsString(doctimestamp,
 						DateUtil.YYYYMMDD_DATE_FORMAT);
+				
 				String lane = getLane(doc.getContactId());
 				dto.setDate(yyyyMMdd);
 				dto.setType(doc.getType());
@@ -602,11 +616,13 @@ public class AccountDashBoardManager {
 				dto.setLane(lane);
 				dto.setDomain(tnt);
 				String id = getSummaryId(dto);
+				
 				dto.setId(id);
 				if (ArgUtil.is(dto.getId())) {
 					lstSummDto.add(dto);
 				}
 				String channelid = getSummaryWithChannelId(dto);
+				System.out.println("contactType :"+contactType+"\t yyyyMMdd "+yyyyMMdd+"\t doctimestamp :"+doctimestamp+"\t channelid :"+channelid);
 				if (ArgUtil.is(channelid)) {
 					daySummDto.setDate(yyyyMMdd);
 					daySummDto.setChannel(channelid);
@@ -710,23 +726,29 @@ public class AccountDashBoardManager {
 		SimpleDateFormat sdfHM = new SimpleDateFormat("mm");
 		String formattedHM = sdfHM.format(date);
 		int m =Integer.parseInt(formattedHM);
+		long currTimeStM=currentTStamp;
+		long lastTimeStampWm=lastTimeStamp;
 		/** for Upper round **/
-//		if(m>30) {
-//			m = 60-m;
-//		}else {
-//			m = 30-m;
-//		}
+		if(m>30) {
+			m = 60-m;
+			currTimeStM=currentTStamp+(m * 60 * 1000L);
+			lastTimeStampWm = lastTimeStamp -((30-m) * 60 * 1000L);
+		}else {
+			lastTimeStampWm = lastTimeStamp -(m* 60 * 1000L);
+			m = 30-m;
+			currTimeStM=currentTStamp+(m * 60 * 1000L);
+		}
 		
 	    //long currTimeStM=currentTStamp+(m * 60 * 1000L);
 		//long lastTimeStampWm = lastTimeStamp +((m+30) * 60 * 1000L);
 		
-		if(m>30) {
-			m = m-30;
-		}
-		long currTimeStM=currentTStamp-(m * 60 * 1000L);
-	    long lastTimeStampWm = lastTimeStamp -(m * 60 * 1000L);
+//		if(m>30) {
+//			m = m-30;
+//		}
+//		long currTimeStM=currentTStamp-(m * 60 * 1000L);
+	   // long lastTimeStampWm = lastTimeStamp -(lts * 60 * 1000L);
 		lastTimeStampWm = (lastTimeStampWm - (lastTimeStampWm % (1000 * 60)));
-		for (long lastTS = lastTimeStampWm; lastTS <currTimeStM; lastTS = lastTS + DateUtil.MIN_30) {
+		for (long lastTS = lastTimeStampWm; lastTS <=currTimeStM; lastTS = lastTS + DateUtil.MIN_30) {
 			mapMinWise.put(lastTS, new Long(0));
 		}
 		Map<Object, Long> result = new TreeMap<Object, Long>(mapMinWise);
@@ -834,25 +856,25 @@ public class AccountDashBoardManager {
 	public ContactTypeSummaryDto getDayWiseMsgStatusSummary(long dateRange1, long dateRange2, int days) {
 		String tnt = AppContextUtil.getTenant();
 		List<String> lst = getListOfContactType();
-
 		List<DateWiseHourCountDto> dayCntLst = new ArrayList<>();
+		LOGGER.info("getDayWiseMsgStatusSummary :"+dateRange1+"\t dateRange2 :"+dateRange2);
+		
+		long offsetts= countryTimeZoneOffset(tnt);
 
 		long currentTs = System.currentTimeMillis();
+		
 		ZonedDateTime noOfdaysTstamp = null;
-
-		if (days > 0) {
-			noOfdaysTstamp = ZonedDateTime.now().minusDays(days).with(LocalTime.MIN);
-		} else {
-			noOfdaysTstamp = ZonedDateTime.now().minusDays(12).with(LocalTime.MIN);
-		}
-		// use the same datetime to create the end of the day using the maximum time for
-		long lasDayTimeStmp = noOfdaysTstamp.toInstant().toEpochMilli();
+		long lasDayTimeStmp =0;
 		if (dateRange1 > 0) {
-			lasDayTimeStmp = dateRange1;
+			lasDayTimeStmp = dateRange1+offsetts;
 		}
 		if (dateRange2 > 0) {
-			currentTs = dateRange2;
+			currentTs = dateRange2+offsetts;
 		}
+		if (lasDayTimeStmp==0  && days > 0) {
+			noOfdaysTstamp = ZonedDateTime.now().minusDays(days).with(LocalTime.MIN);
+			lasDayTimeStmp = noOfdaysTstamp.toInstant().toEpochMilli();
+		} 
 
 		String monthYear = new SimpleDateFormat(DateUtil.MMM_YYYY_FORMAT).format(currentTs);
 		Calendar cal = Calendar.getInstance();
@@ -1099,6 +1121,26 @@ public class AccountDashBoardManager {
 			}
 		}
 		return lane;
+	}
+	
+	public Long countryTimeZoneOffset(String domain) {
+		AppContextUtil.setTenant(Tenants.getDefault());
+		DomainDoc domainDoc = accountStore.findDomainByName(domain);
+		AppContextUtil.setTenant(domain);
+		long offsettimestamp =0;
+		String offset =null;
+		if(ArgUtil.is(domainDoc)) {
+			offset = domainDoc.getTimeZoneOffSet();
+		}
+		
+		if(ArgUtil.is(offset)) {
+			String hrStr = offset.substring(offset.indexOf('+')+1);
+			String[] hrMin = hrStr.split(":");
+			int hr =Integer.parseInt(hrMin[0]);
+			int  min =Integer.parseInt(hrMin[1]); 
+			offsettimestamp = hr*DateUtil.ONE_HR+min*DateUtil.MIN;
+		}
+		return offsettimestamp;
 	}
 
 }

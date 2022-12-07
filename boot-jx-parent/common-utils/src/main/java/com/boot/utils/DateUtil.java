@@ -93,7 +93,12 @@ public final class DateUtil {
 	public static final long DAYS_IN_WEEK = 7;
 	
 	public static final long MIN_30 = 30 * 60 * 1000L;
-
+	
+	public static final long ONE_HR =60 * 60 * 1000L;
+	
+	public static final long MIN = 60 * 1000L;
+	
+	
 	private static final Logger LOGGER = LoggerFactory.getLogger(DateUtil.class);
 
 	private DateUtil() {

@@ -374,6 +374,7 @@ public class PartnerController {
 		domainDoc.setCompany(domain.getCompany());
 		domainDoc.setSocial(domain.getSocial());
 		domainDoc.setServer(env.keyEntry(ConfigConstants.APP_KEY.PROP_SERVICE_SERVER).asString());
+		domainDoc.setTimeZoneOffSet(domain.getTimeZoneOffSet());
 
 		accountStore.save(domainDoc);
 
@@ -390,7 +391,6 @@ public class PartnerController {
 			HttpServletResponse httpServletResponse, @RequestParam String email, @RequestParam String domain,
 			@RequestParam(required = false, defaultValue = "false") boolean remove,
 			@RequestParam(required = false) String name, @RequestParam(required = false) String company
-
 	) throws NoSuchAlgorithmException {
 
 		BusinessUserDoc domainUser = userSessionBean.domainUser();
