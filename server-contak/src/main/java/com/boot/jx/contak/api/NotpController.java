@@ -255,13 +255,20 @@ public class NotpController {
 	@RequestMapping(value = "/api/v1/user/key/reg", method = { RequestMethod.POST })
 	public ApiResponse<UserRegistrationDoc, Object> save(@RequestBody UserRegistrationDTO msg) {
 		
-		PhoneUserDoc userDoc = commonMongoTemplate.findById(msg.userPhoneNumber, PhoneUserDoc.class);
+		PhoneUserDoc userDoc = commonMongoTemplate.findById(msg.userPhoneNumber, PhoneUserDoc.class);		
+//		if (ArgUtil.is(msg.deviceToken)) { // Step 3
+//			if (!msg.deviceToken.equalsIgnoreCase(userDoc.deviceId)) {
+//				ApiResponseUtil.throwInputException(ApiStatusCodes.UNAUTHORIZED,
+//						new ApiFieldError().field("deviceId"+userDoc.deviceId));
+//			}
+//		} 
+		
 		if (ArgUtil.is(msg.deviceToken)) { // Step 3
-			if (!msg.deviceToken.equalsIgnoreCase(userDoc.deviceId)) {
+			if (!CryptoUtil.getEncoder().message(msg.deviceToken).sha2().is(userDoc.authToken)) {
 				ApiResponseUtil.throwInputException(ApiStatusCodes.UNAUTHORIZED,
-						new ApiFieldError().field("deviceId"));
+						new ApiFieldError().field("authToken"));
 			}
-		} 
+		}
 		
 		UserRegistrationDoc userRegistrationDoc = new UserRegistrationDoc();
 		userRegistrationDoc.setCompanyId(msg.companyId);
