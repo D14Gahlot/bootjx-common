@@ -159,9 +159,8 @@ public class NotpController {
 
 		CompanyDoc compoc = commonMongoTemplate.findOne(CommonMongoQueryBuilder.collection(CompanyDoc.class)
 				.where(Criteria.where("apiKey").is(msg.apiKey)));
-
 		if (!ArgUtil.is(compoc)) {
-			ApiResponseUtil.throwException("The request to send message is unauthorized");
+			ApiResponseUtil.throwInputException(ApiStatusCodes.UNAUTHORIZED, new ApiFieldError().field("apiKey"));
 		}
 		if (!ArgUtil.is(msg.apiKey)) {
 			ApiResponseUtil.throwInputException(ApiStatusCodes.UNAUTHORIZED, new ApiFieldError().field("apiKey"));
