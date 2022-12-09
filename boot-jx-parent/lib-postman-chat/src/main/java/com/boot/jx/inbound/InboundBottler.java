@@ -64,10 +64,10 @@ public class InboundBottler extends ATaskLimiter {
 
 		logManager.addTrace(inboxMessage, "InboundBottler:push");
 
-		if (ArgUtil.isEqual(onhold, "QUEUING")) {
+		if (ArgUtil.isEqual(onhold, "QUEUING")) { //QUEING
 			queue(contactId, new MessageHoldQueue().inboxMessage(inboxMessage));
 			throttle(new TunnelTask().name(MESSAGE_DEQUEUE).id(contactId).intervalSeconds(2));
-		} else {
+		} else { //DEQUEING
 			hold().put(contactId, "QUEUING");
 			logManager.addTrace(inboxMessage, "InboundBottler:push:invoked");
 			inBoundService.invokeMethodsSync(inboxMessage);

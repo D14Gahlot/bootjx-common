@@ -21,6 +21,7 @@ public class ContakTemplate implements Serializable {
 
 	public ContakTemplateHeader header;
 
+	public String category;
 	public String type;
 	public String title;
 	public String body;
