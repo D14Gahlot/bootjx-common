@@ -38,6 +38,7 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Component;
 
 import com.boot.jx.AppContextUtil;
+import com.boot.jx.account.doc.AccountStore;
 import com.boot.jx.account.doc.DomainDoc;
 import com.boot.jx.account.doc.DomainSummaryMessageDoc;
 import com.boot.jx.account.doc.DomainSummaryMetaDoc;
@@ -58,6 +59,7 @@ import com.boot.jx.postman.doc.config.ChannelConfigDoc;
 import com.boot.jx.postman.doc.tpo.WABAConversation;
 import com.boot.jx.postman.model.Message;
 import com.boot.jx.postman.store.MessageStore;
+import com.boot.jx.scope.tnt.Tenants;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.Constants;
 import com.boot.utils.DateUtil;
@@ -79,7 +81,7 @@ public class AccountDashBoardManager {
 	private DomainSummaryMetaStore domSumMetaStore;
 
 	@Autowired
-	private MessageStore messageStore;
+	private AccountStore accountStore;
 
 	public List<DomainDoc> getAllDomainAccount() {
 		Query query = new Query();
@@ -557,22 +559,21 @@ public class AccountDashBoardManager {
 		List<String> channelLst = getListChannelCongig();
 		long currentTs = System.currentTimeMillis();
 
+		long offsetts= countryTimeZoneOffset(tnt);
 		ZonedDateTime noOfdaysTstamp = null;
-
-		if (days > 0) {
-			noOfdaysTstamp = ZonedDateTime.now().minusDays(days).with(LocalTime.MIN);
-		} else {
-			noOfdaysTstamp = ZonedDateTime.now().minusDays(12).with(LocalTime.MIN);
-		}
-		// use the same datetime to create the end of the day using the maximum time for
-		long lasDayTimeStmp = noOfdaysTstamp.toInstant().toEpochMilli();
+		long lasDayTimeStmp =0;
 		if (dateRange1 > 0) {
-			lasDayTimeStmp = dateRange1;
+			lasDayTimeStmp = dateRange1+offsetts;
 		}
 		if (dateRange2 > 0) {
-			currentTs = dateRange2;
+			currentTs = dateRange2+offsetts;
 		}
 
+		if (lasDayTimeStmp==0  && days > 0) {
+			noOfdaysTstamp = ZonedDateTime.now().minusDays(days).with(LocalTime.MIN);
+			lasDayTimeStmp = noOfdaysTstamp.toInstant().toEpochMilli();
+		} 
+		
 		Map<Object, Long> dateRanMap = getDatesRange(currentTs, lasDayTimeStmp);
 
 		String monthYear = new SimpleDateFormat(DateUtil.MMM_YYYY_FORMAT).format(currentTs);
@@ -700,29 +701,25 @@ public class AccountDashBoardManager {
 
 	public Map<Object, Long> getHourRange(long currentTStamp, long lastTimeStamp) {
 		Map<String, Long> mapHr = new HashMap<>();
-
 		Map<Object, Long> mapMinWise = new HashMap<>();
 		Date date = new Date(lastTimeStamp);
 		SimpleDateFormat sdfHM = new SimpleDateFormat("mm");
 		String formattedHM = sdfHM.format(date);
 		int m =Integer.parseInt(formattedHM);
+		long currTimeStM=currentTStamp;
+		long lastTimeStampWm=lastTimeStamp;
 		/** for Upper round **/
-//		if(m>30) {
-//			m = 60-m;
-//		}else {
-//			m = 30-m;
-//		}
-		
-	    //long currTimeStM=currentTStamp+(m * 60 * 1000L);
-		//long lastTimeStampWm = lastTimeStamp +((m+30) * 60 * 1000L);
-		
 		if(m>30) {
-			m = m-30;
+			m = 60-m;
+			currTimeStM=currentTStamp+(m * 60 * 1000L);
+			lastTimeStampWm = lastTimeStamp -((30-m) * 60 * 1000L);
+		}else {
+			lastTimeStampWm = lastTimeStamp -(m* 60 * 1000L);
+			m = 30-m;
+			currTimeStM=currentTStamp+(m * 60 * 1000L);
 		}
-		long currTimeStM=currentTStamp-(m * 60 * 1000L);
-	    long lastTimeStampWm = lastTimeStamp -(m * 60 * 1000L);
 		lastTimeStampWm = (lastTimeStampWm - (lastTimeStampWm % (1000 * 60)));
-		for (long lastTS = lastTimeStampWm; lastTS <currTimeStM; lastTS = lastTS + DateUtil.MIN_30) {
+		for (long lastTS = lastTimeStampWm; lastTS <=currTimeStM; lastTS = lastTS + DateUtil.MIN_30) {
 			mapMinWise.put(lastTS, new Long(0));
 		}
 		Map<Object, Long> result = new TreeMap<Object, Long>(mapMinWise);
@@ -832,22 +829,23 @@ public class AccountDashBoardManager {
 
 		List<DateWiseHourCountDto> dayCntLst = new ArrayList<>();
 
-		long currentTs = System.currentTimeMillis();
-		ZonedDateTime noOfdaysTstamp = null;
+		
+		long offsetts= countryTimeZoneOffset(tnt);
 
-		if (days > 0) {
-			noOfdaysTstamp = ZonedDateTime.now().minusDays(days).with(LocalTime.MIN);
-		} else {
-			noOfdaysTstamp = ZonedDateTime.now().minusDays(12).with(LocalTime.MIN);
-		}
-		// use the same datetime to create the end of the day using the maximum time for
-		long lasDayTimeStmp = noOfdaysTstamp.toInstant().toEpochMilli();
+		long currentTs = System.currentTimeMillis();
+		
+		ZonedDateTime noOfdaysTstamp = null;
+		long lasDayTimeStmp =0;
 		if (dateRange1 > 0) {
-			lasDayTimeStmp = dateRange1;
+			lasDayTimeStmp = dateRange1+offsetts;
 		}
 		if (dateRange2 > 0) {
-			currentTs = dateRange2;
+			currentTs = dateRange2+offsetts;
 		}
+		if (lasDayTimeStmp==0  && days > 0) {
+			noOfdaysTstamp = ZonedDateTime.now().minusDays(days).with(LocalTime.MIN);
+			lasDayTimeStmp = noOfdaysTstamp.toInstant().toEpochMilli();
+		} 
 
 		String monthYear = new SimpleDateFormat(DateUtil.MMM_YYYY_FORMAT).format(currentTs);
 		Calendar cal = Calendar.getInstance();
@@ -1097,6 +1095,26 @@ public class AccountDashBoardManager {
 			}
 		}
 		return lane;
+	}
+	
+	public Long countryTimeZoneOffset(String domain) {
+		AppContextUtil.setTenant(Tenants.getDefault());
+		DomainDoc domainDoc = accountStore.findDomainByName(domain);
+		AppContextUtil.setTenant(domain);
+		long offsettimestamp =0;
+		String offset =null;
+		if(ArgUtil.is(domainDoc)) {
+			offset = domainDoc.getTimeZoneOffSet();
+		}
+		
+		if(ArgUtil.is(offset)) {
+			String hrStr = offset.substring(offset.indexOf('+')+1);
+			String[] hrMin = hrStr.split(":");
+			int hr =Integer.parseInt(hrMin[0]);
+			int  min =Integer.parseInt(hrMin[1]); 
+			offsettimestamp = hr*DateUtil.ONE_HR+min*DateUtil.MIN;
+		}
+		return offsettimestamp;
 	}
 
 }

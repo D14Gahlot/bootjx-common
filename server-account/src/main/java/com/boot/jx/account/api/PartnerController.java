@@ -376,7 +376,7 @@ public class PartnerController {
 		domainDoc.setCompany(domain.getCompany());
 		domainDoc.setSocial(domain.getSocial());
 		domainDoc.setServer(env.keyEntry(ConfigConstants.APP_KEY.PROP_SERVICE_SERVER).asString());
-
+		domainDoc.setTimeZoneOffSet(domain.getTimeZoneOffSet());
 		accountStore.save(domainDoc);
 
 		domainUser.domains().add(domainDoc);
