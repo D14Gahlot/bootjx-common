@@ -263,7 +263,7 @@ public class NotpController {
 //			}
 //		} 
 		
-		if (ArgUtil.is(msg.deviceToken)) { // Step 3
+		if (ArgUtil.is(msg.deviceToken)) { 
 			if (!CryptoUtil.getEncoder().message(msg.deviceToken).sha2().is(userDoc.authToken)) {
 				ApiResponseUtil.throwInputException(ApiStatusCodes.UNAUTHORIZED,
 						new ApiFieldError().field("authToken"));

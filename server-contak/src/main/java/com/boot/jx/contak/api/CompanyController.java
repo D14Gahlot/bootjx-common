@@ -158,6 +158,16 @@ public class CompanyController {
 		return ApiResponse.buildResult(compoc);
 	}
 	
+	@RequestMapping(value = "/api/v1/company/get/auth", method = { RequestMethod.GET })
+	public ApiResponse<CompanyDoc,Object> getByAuthKey(@RequestParam String authKey){	
+		CompanyDoc  compoc = commonMongoTemplate.findOne(
+				CommonMongoQueryBuilder.collection(CompanyDoc.class).where(Criteria.where("apiKey").is(authKey)));
+		if(!ArgUtil.is(compoc)) {
+			ApiResponseUtil.throwException("Company does not exists");
+		}
+		return ApiResponse.buildResult(compoc);
+	}
+	
 	
 	@RequestMapping(value = "/api/v1/company", method = { RequestMethod.GET })
 	public ApiResponse<List<CompanyDoc>,Object> get(){	
