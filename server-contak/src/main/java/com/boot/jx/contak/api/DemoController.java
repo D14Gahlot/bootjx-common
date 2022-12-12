@@ -28,7 +28,7 @@ import io.swagger.annotations.ApiOperation;
 
 @Api(tags = "XMS ViewConroller", description = "API's for Messaging", hidden = true)
 @Controller
-public class OtpController {
+public class DemoController {
 	@Autowired
 	AppConfig appConfig;
 

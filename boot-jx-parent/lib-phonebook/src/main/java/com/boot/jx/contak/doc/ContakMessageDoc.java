@@ -50,6 +50,7 @@ public class ContakMessageDoc implements Serializable {
 	public String logoUrl;
 
 	public ContakModel model;
+	public String modelEncrypted;
 	public ContakTemplate template;
 
 	private List<String> tags;

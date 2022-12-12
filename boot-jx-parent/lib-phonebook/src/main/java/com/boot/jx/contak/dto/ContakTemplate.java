@@ -28,6 +28,4 @@ public class ContakTemplate implements Serializable {
 	public String footer;
 	public List<ContakTemplateCTA> cta;
 
-	public ContakModel model;
-	public String modelEncrypted;
 }
