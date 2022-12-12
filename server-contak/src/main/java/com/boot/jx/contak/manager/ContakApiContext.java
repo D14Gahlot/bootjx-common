@@ -2,6 +2,7 @@ package com.boot.jx.contak.manager;
 
 import java.util.concurrent.TimeUnit;
 
+import org.bson.types.ObjectId;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -34,8 +35,8 @@ public class ContakApiContext {
 		CompanyDoc comp = localConfigMap.getIfPresent(keys[0]);
 
 		if (comp == null) {
-			comp = commonMongoTemplate
-					.findOne(MQB.select(CompanyDoc.class).where(QueryCriteria.where("api.$id").is(keys[0])));
+			comp = commonMongoTemplate.findOne(
+					MQB.select(CompanyDoc.class).where(QueryCriteria.where("api.$id").is(new ObjectId(keys[0]))));
 			if (comp != null) {
 				localConfigMap.put(keys[0], comp);
 			} else {
