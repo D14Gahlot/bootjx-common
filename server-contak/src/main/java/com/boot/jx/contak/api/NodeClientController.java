@@ -61,18 +61,18 @@ public class NodeClientController {
 	@Autowired
 	private FirebaseManager firebaseManager;
 
+	@Autowired
+	private ContakApiContext apiContext;
+
 	@ApiRequest(authenticateTenant = true)
 	@ApiMockParams({ @ApiMockParam(name = ParamKeys.X_API_KEY, value = "API Key", paramType = MockParamType.HEADER),
 			@ApiMockParam(name = ParamKeys.X_API_ID, value = "API Id", paramType = MockParamType.HEADER) })
 	@RequestMapping(value = "/api/v1/messages/send", method = { RequestMethod.POST })
 	public ApiResponse<ContakMessageDoc, Object> send(@RequestBody PhoneNotpDto msg) {
 
-		CompanyDoc compoc = commonMongoTemplate.findOne(
-				CommonMongoQueryBuilder.collection(CompanyDoc.class).where(Criteria.where("apiKey").is(msg.apiKey)));
+		CompanyDoc compoc = apiContext.getCompany();
+
 		if (!ArgUtil.is(compoc)) {
-			ApiResponseUtil.throwInputException(ApiStatusCodes.UNAUTHORIZED, new ApiFieldError().field("apiKey"));
-		}
-		if (!ArgUtil.is(msg.apiKey)) {
 			ApiResponseUtil.throwInputException(ApiStatusCodes.UNAUTHORIZED, new ApiFieldError().field("apiKey"));
 		}
 

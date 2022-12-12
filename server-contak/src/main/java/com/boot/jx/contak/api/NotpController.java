@@ -22,13 +22,11 @@ import com.boot.jx.contak.dto.PhoneLoginDTO.PhoneLoginResponseDTO;
 import com.boot.jx.contak.dto.PhoneNotpRequestModels.PhoneNotpDto;
 import com.boot.jx.contak.dto.UserRegistrationDTO;
 import com.boot.jx.contak.dto.UserRegistrationDoc;
-import com.boot.jx.contak.manager.ContakApiContext;
 import com.boot.jx.contak.manager.ContakMessageManager;
 import com.boot.jx.contak.manager.FirebaseManager;
 import com.boot.jx.contak.manager.UserRegistrationManager;
 import com.boot.jx.exception.ApiHttpExceptions.ApiStatusCodes;
 import com.boot.jx.filter.AppRequestUtil;
-import com.boot.jx.http.ApiRequest;
 import com.boot.jx.http.CommonHttpRequest;
 import com.boot.jx.mongo.CommonDocInterfaces.TimeStampIndex;
 import com.boot.jx.mongo.CommonMongoQueryBuilder;
@@ -37,19 +35,12 @@ import com.boot.jx.phonebook.doc.PhoneUserDoc;
 import com.boot.jx.phonebook.doc.PhoneUserQuery;
 import com.boot.jx.phonebook.dto.PhoneProfileDTO;
 import com.boot.jx.phonebook.manager.PhoneBookManager;
-import com.boot.jx.postman.PMConstants.ParamKeys;
-import com.boot.jx.swagger.ApiMockParam;
-import com.boot.jx.swagger.ApiMockParams;
-import com.boot.jx.swagger.MockParamBuilder.MockParamType;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.Constants;
 import com.boot.utils.CryptoUtil;
 import com.boot.utils.OTPUtils;
 import com.boot.utils.OTPUtils.OTPDetails;
 import com.boot.utils.UniqueID;
-
-import io.swagger.annotations.Api;
-import io.swagger.annotations.Authorization;
 
 @Deprecated
 @RestController
@@ -76,9 +67,6 @@ public class NotpController {
 
 	@Autowired
 	AWSFileStore fileStore;
-
-	@Autowired
-	ContakApiContext apiContext;
 
 	@RequestMapping(value = "/api/v1/login", method = { RequestMethod.POST })
 	public ApiResponse<PhoneProfileDTO, PhoneLoginResponseDTO> login(@RequestBody PhoneLoginDTO loginDTO) {
