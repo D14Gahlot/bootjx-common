@@ -18,6 +18,7 @@ import com.boot.jx.account.doc.DomainDoc;
 import com.boot.jx.account.dto.AccountDashBoardResponseDto;
 import com.boot.jx.account.dto.ContactTypeSummaryDto;
 import com.boot.jx.account.dto.MonthDtlsDto;
+import com.boot.jx.account.dto.TimeZoneOfSet;
 import com.boot.jx.account.dto.WabaSummaryDocDto;
 import com.boot.jx.account.dto.WabaSummaryDto;
 import com.boot.jx.account.manager.AccountDashBoardManager;
@@ -103,8 +104,8 @@ public class PartnerDashBoardController {
 
 	@ResponseBody
 	@RequestMapping(value = { "/pub/daywise-summary" }, method = { RequestMethod.GET })
-	public ApiResponse<ContactTypeSummaryDto, Object> getDayWiseSummary(@RequestParam(required = false) long dateRange1,
-			@RequestParam(required = false) long dateRange2, int days) {
+	public ApiResponse<ContactTypeSummaryDto, Object> getDayWiseSummary(@RequestParam(required = false) String dateRange1,
+			@RequestParam(required = false) String dateRange2, int days) {
 		ContactTypeSummaryDto summary = dashBMgr.dayChannelWiseWisesummary(dateRange1, dateRange2, days);
 		return ApiResponse.buildResult(summary);
 	}
@@ -119,7 +120,7 @@ public class PartnerDashBoardController {
 
 	@ResponseBody
 	@RequestMapping(value = { "/pub/datewise-msg-status-summary" }, method = { RequestMethod.GET })
-	public ApiResponse<ContactTypeSummaryDto, Object> getDayWiseMsgStatusSummary(long dateRange1, long dateRange2,
+	public ApiResponse<ContactTypeSummaryDto, Object> getDayWiseMsgStatusSummary(String dateRange1, String dateRange2,
 			int days) {
 		ContactTypeSummaryDto summary = dashBMgr.getDayWiseMsgStatusSummary(dateRange1, dateRange2, days);
 		return ApiResponse.buildResult(summary);
@@ -130,6 +131,15 @@ public class PartnerDashBoardController {
 	public ApiResponse<ContactTypeSummaryDto, Object> getNonWhatsUpSummary(long dateRange1, long dateRange2) {
 		ContactTypeSummaryDto summary = dashBMgr.getNonWhatsUpSummary(dateRange1, dateRange2);
 		return ApiResponse.buildResult(summary);
+	}
+	
+	
+	
+	@ResponseBody
+	@RequestMapping(value = { "/pub/timezone-offset" }, method = { RequestMethod.GET })
+	public ApiResponse<TimeZoneOfSet, Object> getTimeZoneOffset() {
+		TimeZoneOfSet timeZ = dashBMgr.getTimeZoneOffset();
+		return ApiResponse.buildResult(timeZ);
 	}
 
 }
