@@ -20,4 +20,28 @@ public class ContakTemplateDoc extends ContakTemplate {
 	@Indexed
 	public String code;
 
+	public String getTemplateId() {
+		return templateId;
+	}
+
+	public void setTemplateId(String templateId) {
+		this.templateId = templateId;
+	}
+
+	public String getCompanyId() {
+		return companyId;
+	}
+
+	public void setCompanyId(String companyId) {
+		this.companyId = companyId;
+	}
+
+	public String getCode() {
+		return code;
+	}
+
+	public void setCode(String code) {
+		this.code = code;
+	}
+
 }
