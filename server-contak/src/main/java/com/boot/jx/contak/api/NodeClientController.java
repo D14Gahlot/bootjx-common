@@ -12,44 +12,24 @@ import org.springframework.web.bind.annotation.RestController;
 import com.boot.jx.api.ApiFieldError;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.api.ApiResponseUtil;
-import com.boot.jx.aws.AWSFileStore;
 import com.boot.jx.contak.doc.ContakMessageDoc;
 import com.boot.jx.contak.doc.ContakTemplateDoc;
 import com.boot.jx.contak.dto.CompanyDoc;
 import com.boot.jx.contak.dto.ContakTemplate;
-import com.boot.jx.contak.dto.PhoneLoginDTO;
-import com.boot.jx.contak.dto.PhoneLoginDTO.PhoneLoginResponseDTO;
+import com.boot.jx.contak.dto.PhoneNotpRequestModels.ContakMessgaeTemplate;
 import com.boot.jx.contak.dto.PhoneNotpRequestModels.PhoneNotpDto;
-import com.boot.jx.contak.dto.UserRegistrationDTO;
-import com.boot.jx.contak.dto.UserRegistrationDoc;
 import com.boot.jx.contak.manager.ContakApiContext;
-import com.boot.jx.contak.manager.ContakMessageManager;
 import com.boot.jx.contak.manager.FirebaseManager;
-import com.boot.jx.contak.manager.UserRegistrationManager;
 import com.boot.jx.exception.ApiHttpExceptions.ApiStatusCodes;
-import com.boot.jx.filter.AppRequestUtil;
 import com.boot.jx.http.ApiRequest;
-import com.boot.jx.http.CommonHttpRequest;
 import com.boot.jx.mongo.CommonDocInterfaces.TimeStampIndex;
-import com.boot.jx.mongo.CommonMongoQueryBuilder;
 import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.jx.phonebook.doc.PhoneUserDoc;
-import com.boot.jx.phonebook.doc.PhoneUserQuery;
-import com.boot.jx.phonebook.dto.PhoneProfileDTO;
-import com.boot.jx.phonebook.manager.PhoneBookManager;
 import com.boot.jx.postman.PMConstants.ParamKeys;
 import com.boot.jx.swagger.ApiMockParam;
 import com.boot.jx.swagger.ApiMockParams;
 import com.boot.jx.swagger.MockParamBuilder.MockParamType;
 import com.boot.utils.ArgUtil;
-import com.boot.utils.Constants;
-import com.boot.utils.CryptoUtil;
-import com.boot.utils.OTPUtils;
-import com.boot.utils.OTPUtils.OTPDetails;
-import com.boot.utils.UniqueID;
-
-import io.swagger.annotations.Api;
-import io.swagger.annotations.Authorization;
 
 @RestController
 @RequestMapping("/client")
@@ -146,4 +126,18 @@ public class NodeClientController {
 		return ApiResponse.buildResults(newPhoneNOTPDoc);
 	}
 
+	@ApiRequest(authenticateTenant = true)
+	@ApiMockParams({ @ApiMockParam(name = ParamKeys.X_API_KEY, value = "API Key", paramType = MockParamType.HEADER),
+			@ApiMockParam(name = ParamKeys.X_API_ID, value = "API Id", paramType = MockParamType.HEADER) })
+	@RequestMapping(value = "/api/v1/messages/template", method = { RequestMethod.POST })
+	public ApiResponse<ContakTemplate, Object> template(@RequestBody ContakMessgaeTemplate template) {
+		CompanyDoc compoc = apiContext.getCompany();
+		ContakTemplate tmpl = commonMongoTemplate.collection(ContakTemplateDoc.class)
+				.find(Criteria.where("code").is(template.code).and("companyId").is(compoc.getCompanyId()))
+				.asFirst(new ContakTemplate());
+		if (ArgUtil.is(tmpl)) {
+			ApiResponseUtil.throwInputException(new ApiFieldError().field("template").description("Invalid Template"));
+		}
+		return ApiResponse.buildResults(tmpl);
+	}
 }

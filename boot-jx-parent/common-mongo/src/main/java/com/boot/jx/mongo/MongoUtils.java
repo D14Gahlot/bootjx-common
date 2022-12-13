@@ -96,14 +96,14 @@ public class MongoUtils {
 			return this;
 		}
 
-		public MongoResultProcessor<T> find(Criteria criteria) {
-			this.qb().where(criteria);
-			return this;
-		}
-
 		public MongoResultProcessor<T> find(IMongoQueryBuilder<T> builder) {
 			this.results = mongoTemplate.find(builder);
 			return this;
+		}
+
+		public MongoResultProcessor<T> find(Criteria criteria) {
+			this.qb().where(criteria);
+			return this.find(qb);
 		}
 
 		public MongoResultProcessor<T> find() {
