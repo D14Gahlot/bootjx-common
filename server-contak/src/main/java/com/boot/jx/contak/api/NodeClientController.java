@@ -94,7 +94,7 @@ public class NodeClientController {
 			ContakTemplate tmpl = commonMongoTemplate.collection(ContakTemplateDoc.class)
 					.find(Criteria.where("code").is(msg.template.code).and("companyId").is(compoc.getCompanyId()))
 					.asFirst(new ContakTemplate());
-			if (ArgUtil.is(tmpl)) {
+			if (ArgUtil.not(tmpl)) {
 				ApiResponseUtil
 						.throwInputException(new ApiFieldError().field("template").description("Invalid Template"));
 			}
@@ -135,7 +135,7 @@ public class NodeClientController {
 		ContakTemplate tmpl = commonMongoTemplate.collection(ContakTemplateDoc.class)
 				.find(Criteria.where("code").is(template.code).and("companyId").is(compoc.getCompanyId()))
 				.asFirst(new ContakTemplate());
-		if (ArgUtil.is(tmpl)) {
+		if (ArgUtil.not(tmpl)) {
 			ApiResponseUtil.throwInputException(new ApiFieldError().field("template").description("Invalid Template"));
 		}
 		return ApiResponse.buildResults(tmpl);
