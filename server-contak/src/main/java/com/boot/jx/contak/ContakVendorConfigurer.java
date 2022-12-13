@@ -46,6 +46,7 @@ public class ContakVendorConfigurer implements TenantAuthFilter {
 		if (ArgUtil.not(company)) {
 			String message = "Invalid " + ParamKeys.X_API_KEY;
 			ApiResponseUtil.addError(message);
+			return false;
 		}
 
 		return true;

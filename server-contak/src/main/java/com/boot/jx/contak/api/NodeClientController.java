@@ -110,7 +110,7 @@ public class NodeClientController {
 		newPhoneNOTPDoc.setCompanyName(msg.companyName);
 		newPhoneNOTPDoc.setLogoUrl(msg.logoUrl);
 
-		if (ArgUtil.is(msg.template) && ArgUtil.is(msg.template.code)) {
+		if (ArgUtil.is(msg.template) && ArgUtil.is(msg.template.code) && !ArgUtil.is(msg.type,"HANDSHAKE")) {
 			ContakTemplate tmpl = commonMongoTemplate.collection(ContakTemplateDoc.class)
 					.find(Criteria.where("code").is(msg.template.code).and("companyId").is(compoc.getCompanyId()))
 					.asFirst(new ContakTemplate());
