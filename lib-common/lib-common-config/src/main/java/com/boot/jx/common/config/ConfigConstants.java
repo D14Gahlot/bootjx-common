@@ -14,6 +14,7 @@ import com.boot.jx.postman.PMConstants.APP_TYPE;
 import com.boot.jx.postman.PMConstants.PROPERTIES;
 import com.boot.model.MapModel.EntryMeta;
 import com.boot.utils.TimeUtils;
+import com.boot.utils.TimeZoneUtil;
 import com.google.i18n.phonenumbers.PhoneNumberUtil;
 
 public class ConfigConstants {
@@ -212,6 +213,9 @@ public class ConfigConstants {
 		POSTMAN_PHONEBOOK_REGION(new ConfigMeta("Default ISD Country", "postman.phonebook.region")
 				.optionValues(PHONE_NUMBER_UTIL.getSupportedRegions().toArray()).defaultValue("IN")),
 
+		POSTMAN_TIMEZONE_OFFSET(new ConfigMeta("Timezone OffSet", "postman.timezone.offset")
+				.optionValues(TimeZoneUtil.getTimeZoneDtoLst().toArray()).defaultValue("Asia/Kolkata::GMT+5:30")),
+		
 		POSTMAN_AGENT_CHAT_AUTOREPLY_TALK2AGENT(new ConfigMeta("Message to customer while chat is transferred to agent",
 				"postman.agent.chat.autoreply.talk2agent").optionsSource("getx:/api/tmpl/hsm").optionsKey("code")
 						.optionsLabel("desc").group(GROUP_AGENT)),
