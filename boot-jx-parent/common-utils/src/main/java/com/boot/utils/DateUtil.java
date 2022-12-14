@@ -10,8 +10,10 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.YearMonth;
 import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.TemporalAdjuster;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.SimpleTimeZone;
@@ -84,6 +86,9 @@ public final class DateUtil {
 	/** yyyyMMdd format **/
 	public static final String YYYYMMDD_DATE_FORMAT = "yyyyMMdd";
 
+	/** YYYY-MM-DD format **/
+	public static final String YYYY_MM_DD_DATE_FORMAT = "YYYY-MM-dd";
+	public static final String EEEE_MM_DD_YYYY = "EEE MM/dd/yyyy";
 
 	/**
 	 * Instantiates a new date util.
@@ -1155,5 +1160,25 @@ public final class DateUtil {
 		}
 		return Integer.parseInt(monthNumber);
 	}
+	
+	
+	public static long getDateMinAndMaxTime(String dateStr,int hr,int min,String strZone,TemporalAdjuster lt) {
+	    dateStr=dateStr+"T00:00:00.00";
+	    LocalDateTime ldt= LocalDateTime.parse(dateStr);
+       // create ZoneOffset
+        ZoneOffset zoneOffset= ZoneOffset.ofHoursMinutes(3, 0);
+        
+        // create a ZonID
+        ZoneId zone= ZoneId.of(strZone);
+        
+        ZonedDateTime todayStartTime = ZonedDateTime.ofInstant(ldt, zoneOffset, zone);
+        
+		// use the same datetime to create the end of the day using the maximum time for
+		ZonedDateTime endToday = todayStartTime.with(lt);
+		long timeStamp = endToday.toInstant().toEpochMilli();
+		
+		return timeStamp;
+}
+
 	
 }

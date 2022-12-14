@@ -19,8 +19,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TimeZone;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import org.json.JSONObject;
@@ -50,6 +52,7 @@ import com.boot.jx.account.dto.ContactTypeSummaryDto;
 import com.boot.jx.account.dto.DateWiseHourCountDto;
 import com.boot.jx.account.dto.MonthDtlsDto;
 import com.boot.jx.account.dto.SummaryDocDto;
+import com.boot.jx.account.dto.TimeZoneOfSet;
 import com.boot.jx.account.dto.TypeCount;
 import com.boot.jx.account.dto.WabaSummaryDocDto;
 import com.boot.jx.dict.ContactType;
@@ -553,7 +556,7 @@ public class AccountDashBoardManager {
 	}
 
 	/** day and channel wise summary **/
-	public ContactTypeSummaryDto dayChannelWiseWisesummary(long dateRange1, long dateRange2, int days) {
+	public ContactTypeSummaryDto dayChannelWiseWisesummary(String dateRange1, String dateRange2, int days) {
 		String tnt = AppContextUtil.getTenant();
 		List<String> lst = getListOfContactType();
 		List<String> channelLst = getListChannelCongig();
@@ -562,17 +565,42 @@ public class AccountDashBoardManager {
 		long offsetts= countryTimeZoneOffset(tnt);
 		ZonedDateTime noOfdaysTstamp = null;
 		long lasDayTimeStmp =0;
-		if (dateRange1 > 0) {
-			lasDayTimeStmp = dateRange1+offsetts;
+//		if (dateRange1 > 0) {
+//			lasDayTimeStmp = dateRange1+offsetts;
+//		}
+//		if (dateRange2 > 0) {
+//			currentTs = dateRange2+offsetts;
+//		}
+		
+		
+		DomainDoc dDoc = getDomainTimeZone(tnt);
+		String zone = getTimeZone(dDoc.getTimeZoneOffSet());
+		String offset= getOffSet(dDoc.getTimeZoneOffSet());
+		String[] hm = offset.split(":");
+		
+		int hr = ArgUtil.parseAsInteger(hm[0]);
+		int mm = ArgUtil.parseAsInteger(hm[1]);
+		
+		if (ArgUtil.is(dateRange1)) {
+			//lasDayTimeStmp = dateRange1+offsetts;
+			lasDayTimeStmp=DateUtil.getDateMinAndMaxTime(getCovertDate(dateRange1), hr, mm, zone, LocalTime.MIN);
+			lasDayTimeStmp =lasDayTimeStmp+offsetts;
+			
 		}
-		if (dateRange2 > 0) {
-			currentTs = dateRange2+offsetts;
+		if (ArgUtil.is(dateRange2)) {
+			//currentTs = dateRange2+offsetts;
+			currentTs =DateUtil.getDateMinAndMaxTime(getCovertDate(dateRange2), hr, mm, zone, LocalTime.MAX);
+			currentTs = currentTs+offsetts;
 		}
+		
+		
 
 		if (lasDayTimeStmp==0  && days > 0) {
 			noOfdaysTstamp = ZonedDateTime.now().minusDays(days).with(LocalTime.MIN);
 			lasDayTimeStmp = noOfdaysTstamp.toInstant().toEpochMilli();
 		} 
+		
+		 
 		
 		Map<Object, Long> dateRanMap = getDatesRange(currentTs, lasDayTimeStmp);
 
@@ -823,24 +851,36 @@ public class AccountDashBoardManager {
 	}
 
 	@SuppressWarnings("unused")
-	public ContactTypeSummaryDto getDayWiseMsgStatusSummary(long dateRange1, long dateRange2, int days) {
+	public ContactTypeSummaryDto getDayWiseMsgStatusSummary(String dateRange1, String dateRange2, int days) {
 		String tnt = AppContextUtil.getTenant();
 		List<String> lst = getListOfContactType();
 
 		List<DateWiseHourCountDto> dayCntLst = new ArrayList<>();
 
 		
-		long offsetts= countryTimeZoneOffset(tnt);
+long offsetts= countryTimeZoneOffset(tnt);
+		
+		DomainDoc doc = getDomainTimeZone(tnt);
+		String zone = getTimeZone(doc.getTimeZoneOffSet());
+		String offset= getOffSet(doc.getTimeZoneOffSet());
+		String[] hm = offset.split(":");
+		
+		int hr = ArgUtil.parseAsInteger(hm[0]);
+		int mm = ArgUtil.parseAsInteger(hm[1]);
 
 		long currentTs = System.currentTimeMillis();
 		
 		ZonedDateTime noOfdaysTstamp = null;
 		long lasDayTimeStmp =0;
-		if (dateRange1 > 0) {
-			lasDayTimeStmp = dateRange1+offsetts;
+		if (ArgUtil.is(dateRange1)) {
+			//lasDayTimeStmp = dateRange1+offsetts;
+			lasDayTimeStmp=DateUtil.getDateMinAndMaxTime(getCovertDate(dateRange1), hr, mm, zone, LocalTime.MIN);
+			lasDayTimeStmp = lasDayTimeStmp+offsetts;
 		}
-		if (dateRange2 > 0) {
-			currentTs = dateRange2+offsetts;
+		if (ArgUtil.is(dateRange2)) {
+			//currentTs = dateRange2+offsetts;
+			currentTs =DateUtil.getDateMinAndMaxTime(getCovertDate(dateRange2), hr, mm, zone, LocalTime.MAX);
+			currentTs = currentTs+offsetts;
 		}
 		if (lasDayTimeStmp==0  && days > 0) {
 			noOfdaysTstamp = ZonedDateTime.now().minusDays(days).with(LocalTime.MIN);
@@ -1115,6 +1155,81 @@ public class AccountDashBoardManager {
 			offsettimestamp = hr*DateUtil.ONE_HR+min*DateUtil.MIN;
 		}
 		return offsettimestamp;
+	}
+	
+	public DomainDoc getDomainTimeZone(String domain) {
+		AppContextUtil.setTenant(Tenants.getDefault());
+		DomainDoc domainDoc = accountStore.findDomainByName(domain);
+		AppContextUtil.setTenant(domain);
+		return domainDoc;
+	}
+	
+	public String getTimeZone(String toffset) {
+		String timeZone = java.util.TimeZone.getDefault().getID();
+		if(ArgUtil.is(toffset)) {
+			String[] hrStr =toffset.split("::");
+			if(ArgUtil.is(hrStr)) {
+				timeZone =hrStr[0]; 
+			}
+		}
+		return timeZone;
+	}
+	
+	public String getOffSet(String toffset) {
+		String offset = "00:00";
+		if(ArgUtil.is(toffset)) {
+			String[] hrStr =toffset.split("::");
+			if(ArgUtil.is(hrStr)) {
+				offset =hrStr[1].substring(hrStr[1].indexOf('+')+1);
+			}
+		}
+		return offset;
+	}
+	
+	
+	
+	public TimeZoneOfSet getTimeZoneOffset(){
+		TimeZoneOfSet tzo = new TimeZoneOfSet();
+		Map<String,String> hm = new HashMap<>();
+		String[] ids = TimeZone.getAvailableIDs();
+		for (String id : ids) {
+		 TimeZone tz=TimeZone.getTimeZone(id);
+		long hours = TimeUnit.MILLISECONDS.toHours(tz.getRawOffset());
+		long minutes = TimeUnit.MILLISECONDS.toMinutes(tz.getRawOffset()) 
+                                  - TimeUnit.HOURS.toMinutes(hours);
+		// avoid -4:-30 issue
+		minutes = Math.abs(minutes);
+
+		String key = null;
+		String contry=null;
+		String timezoffset=null;
+		
+		if (hours > 0) {
+			contry = tz.getID();
+			timezoffset =  String.format("GMT+%d:%02d",hours, minutes);
+			key = contry+"::"+timezoffset;
+			
+			hm.put(key, contry);
+		} else {
+			contry = tz.getID();
+			timezoffset =  String.format("GMT+%d:%02d",hours, minutes);
+			key = contry+"::"+timezoffset;
+			hm.put(key, contry);
+		}
+		
+		}
+		tzo.setTimeZmap(hm);
+		
+		return tzo;
+	}
+	
+	public String getCovertDate(String date) {
+		String dt = null;
+		if(ArgUtil.is(date)){
+			String[] dtStr = date.split("/");
+			dt =dtStr[2]+"-"+dtStr[1]+"-"+dtStr[0]; 
+		}
+		return dt;
 	}
 
 }
