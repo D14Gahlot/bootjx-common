@@ -562,7 +562,7 @@ public class AccountDashBoardManager {
 		
 		long currentTs = System.currentTimeMillis();
 
-		//long offsetts= countryTimeZoneOffset(tnt);
+		long offsetts= countryTimeZoneOffset(tnt);
 		ZonedDateTime noOfdaysTstamp = null;
 		long lasDayTimeStmp =0;
 //		if (dateRange1 > 0) {
@@ -584,11 +584,13 @@ public class AccountDashBoardManager {
 		if (ArgUtil.is(dateRange1)) {
 			//lasDayTimeStmp = dateRange1+offsetts;
 			lasDayTimeStmp=DateUtil.getDateMinAndMaxTime(getCovertDate(dateRange1), hr, mm, zone, LocalTime.MIN);
-			//int hr,int min,String strZone,TemporalAdjuster lt) {
+			lasDayTimeStmp =lasDayTimeStmp+offsetts;
+			
 		}
 		if (ArgUtil.is(dateRange2)) {
 			//currentTs = dateRange2+offsetts;
 			currentTs =DateUtil.getDateMinAndMaxTime(getCovertDate(dateRange2), hr, mm, zone, LocalTime.MAX);
+			currentTs = currentTs+offsetts;
 		}
 		
 		
@@ -873,7 +875,7 @@ public class AccountDashBoardManager {
 		List<DateWiseHourCountDto> dayCntLst = new ArrayList<>();
 		LOGGER.info("getDayWiseMsgStatusSummary :"+dateRange1+"\t dateRange2 :"+dateRange2);
 		
-		//long offsetts= countryTimeZoneOffset(tnt);
+		long offsetts= countryTimeZoneOffset(tnt);
 		
 		DomainDoc doc = getDomainTimeZone(tnt);
 		String zone = getTimeZone(doc.getTimeZoneOffSet());
@@ -890,11 +892,12 @@ public class AccountDashBoardManager {
 		if (ArgUtil.is(dateRange1)) {
 			//lasDayTimeStmp = dateRange1+offsetts;
 			lasDayTimeStmp=DateUtil.getDateMinAndMaxTime(getCovertDate(dateRange1), hr, mm, zone, LocalTime.MIN);
-			//int hr,int min,String strZone,TemporalAdjuster lt) {
+			lasDayTimeStmp = lasDayTimeStmp+offsetts;
 		}
 		if (ArgUtil.is(dateRange2)) {
 			//currentTs = dateRange2+offsetts;
 			currentTs =DateUtil.getDateMinAndMaxTime(getCovertDate(dateRange2), hr, mm, zone, LocalTime.MAX);
+			currentTs = currentTs+offsetts;
 		}
 		if (lasDayTimeStmp==0  && days > 0) {
 			noOfdaysTstamp = ZonedDateTime.now().minusDays(days).with(LocalTime.MIN);
