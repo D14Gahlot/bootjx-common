@@ -500,6 +500,7 @@ public class WA360Client {
 
 	public MapModel createTemplates(ChannelConfig channelConfig, MapModel req) {
 		try {
+			req.remove("status");
 			MapModel resp = restService.ajax(WA360Constants.BASE_URL).path("v1/configs/templates")
 					.header(WA360Constants.D360_API_KEY, channelConfig.getWa360d().getApiKey()).post(req.toMap())
 					.asMapModel();
