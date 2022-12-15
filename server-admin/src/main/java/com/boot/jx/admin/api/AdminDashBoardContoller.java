@@ -75,8 +75,8 @@ public class AdminDashBoardContoller {
 
 	@ResponseBody
 	@RequestMapping(value = { "/admin/daywise-summary" }, method = { RequestMethod.GET })
-	public ApiResponse<ContactTypeSummaryDto, Object> getDayWiseSummary(@RequestParam(required = false) long dateRange1,
-			@RequestParam(required = false) long dateRange2, int days) {
+	public ApiResponse<ContactTypeSummaryDto, Object> getDayWiseSummary(@RequestParam(required = false) String dateRange1,
+			@RequestParam(required = false) String dateRange2, int days) {
 		ContactTypeSummaryDto summary = adminDbMgr.dayChannelWiseWisesummary(dateRange1, dateRange2, days);
 		return ApiResponse.buildResult(summary);
 	}
@@ -91,7 +91,7 @@ public class AdminDashBoardContoller {
 
 	@ResponseBody
 	@RequestMapping(value = { "/admin/datewise-msg-status-summary" }, method = { RequestMethod.GET })
-	public ApiResponse<ContactTypeSummaryDto, Object> getDayWiseMsgStatusSummary(long dateRange1, long dateRange2,
+	public ApiResponse<ContactTypeSummaryDto, Object> getDayWiseMsgStatusSummary(String dateRange1, String dateRange2,
 			int days) {
 		ContactTypeSummaryDto summary = adminDbMgr.getDayWiseMsgStatusSummary(dateRange1, dateRange2, days);
 		return ApiResponse.buildResult(summary);
