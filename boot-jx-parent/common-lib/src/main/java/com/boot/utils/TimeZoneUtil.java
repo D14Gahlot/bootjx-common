@@ -33,6 +33,7 @@ public class TimeZoneUtil {
 	}
 	
 	static List<TimeZoneDto> timeZoneDtoLst=new ArrayList<>();
+	static List<String> timeZoneLst=new ArrayList<>();
 	
 	static {
 		String[] ids = TimeZone.getAvailableIDs();
@@ -68,6 +69,7 @@ public class TimeZoneUtil {
 			dto.setTitle(key);
 		}
 		timeZoneDtoLst.add(dto);
+		timeZoneLst.add(key);
 		}
 	}
 
@@ -77,6 +79,14 @@ public class TimeZoneUtil {
 
 	public static void setTimeZoneDtoLst(List<TimeZoneDto> timeZoneDtoLst) {
 		TimeZoneUtil.timeZoneDtoLst = timeZoneDtoLst;
+	}
+
+	public static List<String> getTimeZoneLst() {
+		return timeZoneLst;
+	}
+
+	public static void setTimeZoneLst(List<String> timeZoneLst) {
+		TimeZoneUtil.timeZoneLst = timeZoneLst;
 	}
 	
 }

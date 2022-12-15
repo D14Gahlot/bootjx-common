@@ -1195,4 +1195,37 @@ public final class DateUtil {
 			return timeStamp;
 	}
 	
+	public static String getCovertDate(String date) {
+		String dt = null;
+		if(ArgUtil.is(date)){
+			String[] dtStr = date.split("/");
+			dt =dtStr[2]+"-"+dtStr[1]+"-"+dtStr[0]; 
+		}
+		return dt;
+	}
+	
+	public static String getTimeZone(String toffset) {
+		String timeZone = java.util.TimeZone.getDefault().getID();
+		if(ArgUtil.is(toffset)) {
+			String[] hrStr =toffset.split("::");
+			if(ArgUtil.is(hrStr)) {
+				timeZone =hrStr[0]; 
+			}
+		}
+		return timeZone;
+	}
+	
+	public static  String getOffSetd(String toffset) {
+		String offset = "00:00";
+		if(ArgUtil.is(toffset)) {
+			String[] hrStr =toffset.split("::");
+			if(ArgUtil.is(hrStr)) {
+				offset =hrStr[1].substring(hrStr[1].indexOf('+')+1);
+			}
+		}
+		return offset;
+	}
+	
+	
+	
 }

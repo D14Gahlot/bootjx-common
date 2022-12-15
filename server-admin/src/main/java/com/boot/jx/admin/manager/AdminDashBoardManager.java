@@ -14,6 +14,7 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.Month;
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoField;
 import java.time.temporal.ChronoUnit;
@@ -25,7 +26,6 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -41,7 +41,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.domain.Sort.Order;
-import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
 import org.springframework.data.mongodb.core.aggregation.AggregationResults;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -61,8 +60,11 @@ import com.boot.jx.admin.dto.SummaryDocDto;
 import com.boot.jx.admin.dto.TagDocumentDto;
 import com.boot.jx.admin.dto.TagDocumentLst;
 import com.boot.jx.admin.dto.WabaSummaryDocDto;
+import com.boot.jx.common.config.ConfigConstants;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.mongo.CommonMongoTemplate;
+import com.boot.jx.postman.PMEnvironment;
+import com.boot.jx.postman.PMEnvironment.PMConfigurationObject;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.doc.config.ChannelConfigDoc;
@@ -73,11 +75,6 @@ import com.boot.utils.ArgUtil;
 import com.boot.utils.Constants;
 import com.boot.utils.DateUtil;
 import com.boot.utils.JsonUtil;
-import com.mongodb.AggregationOptions;
-import com.mongodb.AggregationOptions.OutputMode;
-import com.mongodb.Cursor;
-import com.mongodb.DBCollection;
-import com.mongodb.DBObject;
 import com.mongodb.client.MongoCursor;
 
 @Component
@@ -95,6 +92,11 @@ public class AdminDashBoardManager {
 
 	@Autowired
 	AgentAnalyticsManager agentAnaMgr;
+	
+	@Autowired
+	private PMEnvironment environment;
+	
+
 
 	private String getCollectionName(Object contactType) {
 		return (MessageDoc.COLLECTION_NAME + "_" + ArgUtil.parseAsString(contactType, "OTHERS"));
@@ -1232,27 +1234,52 @@ public class AdminDashBoardManager {
 	}
 
 	/** day and channel wise summary **/
-	public ContactTypeSummaryDto dayChannelWiseWisesummary(long dateRange1, long dateRange2, int days) {
+	public ContactTypeSummaryDto dayChannelWiseWisesummary(String dateRange1, String dateRange2, int days) {
 		String tnt = AppContextUtil.getTenant();
 		List<String> lst = getListOfContactType();
 		List<String> channelLst = getListChannelCongig();
 		long currentTs = System.currentTimeMillis();
 
 		ZonedDateTime noOfdaysTstamp = null;
+		String offset= environment.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_TIMEZONE_OFFSET).asString();
+		
+		long offsetts= countryTimeZoneOffset(offset);
+		String zone = DateUtil.getTimeZone(offset);
+		long lasDayTimeStmp =0;
+		int hr =0;
+		int mm=0;		
+		
+		
+		if (ArgUtil.is(dateRange1)) {
+			lasDayTimeStmp=DateUtil.getDateMinAndMaxTime(DateUtil.getCovertDate(dateRange1), hr, mm, zone, LocalTime.MIN);
+			lasDayTimeStmp =lasDayTimeStmp+offsetts;
+			
+		}
+		if (ArgUtil.is(dateRange2)) {
+			currentTs =DateUtil.getDateMinAndMaxTime(DateUtil.getCovertDate(dateRange2), hr, mm, zone, LocalTime.MAX);
+			currentTs = currentTs+offsetts;
+		}
+		
 
-		if (days > 0) {
+		if (lasDayTimeStmp==0  && days > 0) {
 			noOfdaysTstamp = ZonedDateTime.now().minusDays(days).with(LocalTime.MIN);
-		} else {
-			noOfdaysTstamp = ZonedDateTime.now().minusDays(12).with(LocalTime.MIN);
-		}
-		// use the same datetime to create the end of the day using the maximum time for
-		long lasDayTimeStmp = noOfdaysTstamp.toInstant().toEpochMilli();
-		if (dateRange1 > 0) {
-			lasDayTimeStmp = dateRange1;
-		}
-		if (dateRange2 > 0) {
-			currentTs = dateRange2;
-		}
+			lasDayTimeStmp = noOfdaysTstamp.toInstant().toEpochMilli();
+		} 
+		
+
+//		if (days > 0) {
+//			noOfdaysTstamp = ZonedDateTime.now().minusDays(days).with(LocalTime.MIN);
+//		} else {
+//			noOfdaysTstamp = ZonedDateTime.now().minusDays(12).with(LocalTime.MIN);
+//		}
+//		// use the same datetime to create the end of the day using the maximum time for
+//		long lasDayTimeStmp = noOfdaysTstamp.toInstant().toEpochMilli();
+//		if (dateRange1 > 0) {
+//			lasDayTimeStmp = dateRange1;
+//		}
+//		if (dateRange2 > 0) {
+//			currentTs = dateRange2;
+//		}
 
 		Map<Object, Long> dateRanMap = getDatesRange(currentTs, lasDayTimeStmp);
 
@@ -1502,28 +1529,41 @@ public class AdminDashBoardManager {
 	}
 
 	@SuppressWarnings("unused")
-	public ContactTypeSummaryDto getDayWiseMsgStatusSummary(long dateRange1, long dateRange2, int days) {
+	public ContactTypeSummaryDto getDayWiseMsgStatusSummary(String dateRange1, String dateRange2, int days) {
 		String tnt = AppContextUtil.getTenant();
 		List<String> lst = getListOfContactType();
 
 		List<DateWiseHourCountDto> dayCntLst = new ArrayList<>();
-
+		
+		
 		long currentTs = System.currentTimeMillis();
 		ZonedDateTime noOfdaysTstamp = null;
 
-		if (days > 0) {
+		String offset= environment.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_TIMEZONE_OFFSET).asString();
+		
+		long offsetts= countryTimeZoneOffset(offset);
+		String zone = DateUtil.getTimeZone(offset);
+		long lasDayTimeStmp =0;
+		int hr =0;
+		int mm=0;		
+		
+		
+		if (ArgUtil.is(dateRange1)) {
+			lasDayTimeStmp=DateUtil.getDateMinAndMaxTime(DateUtil.getCovertDate(dateRange1), hr, mm, zone, LocalTime.MIN);
+			lasDayTimeStmp =lasDayTimeStmp+offsetts;
+			
+		}
+		if (ArgUtil.is(dateRange2)) {
+			currentTs =DateUtil.getDateMinAndMaxTime(DateUtil.getCovertDate(dateRange2), hr, mm, zone, LocalTime.MAX);
+			currentTs = currentTs+offsetts;
+		}
+		
+
+		if (lasDayTimeStmp==0  && days > 0) {
 			noOfdaysTstamp = ZonedDateTime.now().minusDays(days).with(LocalTime.MIN);
-		} else {
-			noOfdaysTstamp = ZonedDateTime.now().minusDays(12).with(LocalTime.MIN);
-		}
-		// use the same datetime to create the end of the day using the maximum time for
-		long lasDayTimeStmp = noOfdaysTstamp.toInstant().toEpochMilli();
-		if (dateRange1 > 0) {
-			lasDayTimeStmp = dateRange1;
-		}
-		if (dateRange2 > 0) {
-			currentTs = dateRange2;
-		}
+			lasDayTimeStmp = noOfdaysTstamp.toInstant().toEpochMilli();
+		} 
+		
 
 		String monthYear = new SimpleDateFormat(DateUtil.MMM_YYYY_FORMAT).format(currentTs);
 		Calendar cal = Calendar.getInstance();
@@ -1892,6 +1932,21 @@ public String getLane(String contactid) {
 	return lane;
 }
 
+public Long countryTimeZoneOffset(String offset) {
+	
+	long offsettimestamp =0;
+	
+	if(ArgUtil.is(offset)) {
+		String hrStr = offset.substring(offset.indexOf('+')+1);
+		String[] hrMin = hrStr.split(":");
+		int hr =Integer.parseInt(hrMin[0]);
+		int  min =Integer.parseInt(hrMin[1]); 
+		offsettimestamp = hr*DateUtil.ONE_HR+min*DateUtil.MIN;
+	}else {
+		offsettimestamp = DateUtil.getOffSet(java.util.TimeZone.getDefault().getID());
+	}
+	return offsettimestamp;
+}
 
 
 }
