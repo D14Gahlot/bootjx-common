@@ -71,13 +71,13 @@ public class NodeClientController {
 
 		if (!ArgUtil.is(userDoc)) {
 			ApiResponseUtil.throwInputException(ApiStatusCodes.USER_NOT_FOUND, new ApiFieldError().field("phone"));
-		}
-
-		String loginToken = userDoc.getLoginToken();
-		if (msg.loginToken != null) {
-			if (!msg.loginToken.equalsIgnoreCase(loginToken)) {
-				ApiResponseUtil.throwInputException(ApiStatusCodes.HANDSHAKE_REQUIRED,
-						new ApiFieldError().field("userLoginToken : " + msg.loginToken + " " + loginToken));
+		} else {
+			String loginToken = userDoc.getLoginToken();
+			if (msg.loginToken != null) {
+				if (!msg.loginToken.equalsIgnoreCase(loginToken)) {
+					ApiResponseUtil.throwInputException(ApiStatusCodes.HANDSHAKE_REQUIRED,
+							new ApiFieldError().field("userLoginToken : " + msg.loginToken + " " + loginToken));
+				}
 			}
 		}
 
