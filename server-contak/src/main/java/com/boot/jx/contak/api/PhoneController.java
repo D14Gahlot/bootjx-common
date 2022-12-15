@@ -65,10 +65,7 @@ public class PhoneController {
 	PhoneBookManager phoneBookManager;
 
 	@Autowired
-	ContakMessageManager contakMessageManager;
-
-	@Autowired
-	UserRegistrationManager userRegistrationManager;
+	ContakMessageManager contakMessageManager;	
 
 	@Autowired
 	FirebaseManager firebaseManager;
@@ -160,21 +157,7 @@ public class PhoneController {
 		return ApiResponse.buildResults(contakMessageManager.fetchMessages(userDoc));
 	}
 
-	@RequestMapping(value = "/api/v1/user/key/reg/fetch", method = { RequestMethod.POST })
-	public ApiResponse<UserRegistrationDoc, Object> read(@RequestBody HashMap<String, String> msg) {
-		AppRequestUtil.log("MESSAGE APIKEY", msg);
-		String name = msg.get("name");
-		if (!ArgUtil.is(name)) {
-			ApiResponseUtil.throwMissinInputException(new ApiFieldError().field("name"));
-		}
-		CompanyDoc compoc = commonMongoTemplate.findOne(CommonMongoQueryBuilder.collection(CompanyDoc.class)
-				.where(Criteria.where("apiKey").is(msg.get("apiKey"))));
-		if (!ArgUtil.is(compoc)) {
-			ApiResponseUtil.throwInputException(ApiStatusCodes.UNAUTHORIZED, new ApiFieldError().field("apiKey"));
-		}
-
-		return ApiResponse.buildResults(userRegistrationManager.fetchRegistrations(compoc.companyId));
-	}
+	
 
 	@RequestMapping(value = "/api/v1/user/key/reg", method = { RequestMethod.POST })
 	public ApiResponse<UserRegistrationDoc, Object> save(@RequestBody UserRegistrationDTO msg) {

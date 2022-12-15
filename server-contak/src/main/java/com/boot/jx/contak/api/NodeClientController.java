@@ -16,13 +16,17 @@ import com.boot.jx.contak.doc.ContakMessageDoc;
 import com.boot.jx.contak.doc.ContakTemplateDoc;
 import com.boot.jx.contak.dto.CompanyDoc;
 import com.boot.jx.contak.dto.ContakTemplate;
+import com.boot.jx.contak.dto.UserRegistrationDoc;
 import com.boot.jx.contak.dto.PhoneNotpRequestModels.ContakMessgaeTemplate;
 import com.boot.jx.contak.dto.PhoneNotpRequestModels.PhoneNotpDto;
 import com.boot.jx.contak.manager.ContakApiContext;
 import com.boot.jx.contak.manager.FirebaseManager;
+import com.boot.jx.contak.manager.UserRegistrationManager;
 import com.boot.jx.exception.ApiHttpExceptions.ApiStatusCodes;
+import com.boot.jx.filter.AppRequestUtil;
 import com.boot.jx.http.ApiRequest;
 import com.boot.jx.mongo.CommonDocInterfaces.TimeStampIndex;
+import com.boot.jx.mongo.CommonMongoQueryBuilder;
 import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.jx.phonebook.doc.PhoneUserDoc;
 import com.boot.jx.postman.PMConstants.ParamKeys;
@@ -43,6 +47,9 @@ public class NodeClientController {
 
 	@Autowired
 	private ContakApiContext apiContext;
+	
+	@Autowired
+	UserRegistrationManager userRegistrationManager;
 
 	@ApiRequest(authenticateTenant = true)
 	@ApiMockParams({ @ApiMockParam(name = ParamKeys.X_API_KEY, value = "API Key", paramType = MockParamType.HEADER),
@@ -91,9 +98,11 @@ public class NodeClientController {
 		newPhoneNOTPDoc.setLogoUrl(msg.logoUrl);
 
 		if (ArgUtil.is(msg.template) && ArgUtil.is(msg.template.code) && !ArgUtil.is(msg.type,"HANDSHAKE")) {
-			ContakTemplate tmpl = commonMongoTemplate.collection(ContakTemplateDoc.class)
-					.find(Criteria.where("code").is(msg.template.code).and("companyId").is(compoc.getCompanyId()))
-					.asFirst(new ContakTemplate());
+			ContakTemplate tmpl = commonMongoTemplate.findOne(
+					CommonMongoQueryBuilder.collection(ContakTemplateDoc.class).where(Criteria.where("code").is(msg.template.code).and("companyId").is(compoc.getCompanyId())));
+//			ContakTemplate tmpl = commonMongoTemplate.collection(ContakTemplateDoc.class)
+//					.find(Criteria.where("code").is(msg.template.code).and("companyId").is(compoc.getCompanyId()))
+//					.asFirst(new ContakTemplate());
 			if (ArgUtil.not(tmpl)) {
 				ApiResponseUtil
 						.throwInputException(new ApiFieldError().field("template").description("Invalid Template"));
@@ -124,6 +133,22 @@ public class NodeClientController {
 		firebaseManager.sendNotification(msg.phone, title, body, data);
 
 		return ApiResponse.buildResults(newPhoneNOTPDoc);
+	}
+	
+	@ApiRequest(authenticateTenant = true)	
+	@RequestMapping(value = "/api/v1/user/key/reg/fetch", method = { RequestMethod.POST })
+	public ApiResponse<UserRegistrationDoc, Object> read(@RequestBody HashMap<String, String> msg) {
+		AppRequestUtil.log("MESSAGE APIKEY", msg);
+		String name = msg.get("name");
+		if (!ArgUtil.is(name)) {
+			ApiResponseUtil.throwMissinInputException(new ApiFieldError().field("name"));
+		}
+		CompanyDoc compoc = apiContext.getCompany();
+		if (!ArgUtil.is(compoc)) {
+			ApiResponseUtil.throwInputException(ApiStatusCodes.UNAUTHORIZED, new ApiFieldError().field("apiKey"));
+		}
+
+		return ApiResponse.buildResults(userRegistrationManager.fetchRegistrations(compoc.companyId));
 	}
 
 	@ApiRequest(authenticateTenant = true)

@@ -17,13 +17,19 @@ import com.boot.jx.api.ApiResponse;
 import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.aws.AWSFileStore;
 import com.boot.jx.contak.dto.CompanyDoc;
+import com.boot.jx.contak.manager.ContakApiContext;
 import com.boot.jx.contak.manager.FirebaseManager;
 import com.boot.jx.contak.manager.UserRegistrationManager;
 import com.boot.jx.dict.FileFormat;
+import com.boot.jx.http.ApiRequest;
 import com.boot.jx.http.CommonHttpRequest;
 import com.boot.jx.model.CommonFile;
 import com.boot.jx.mongo.CommonDocInterfaces.TimeStampIndex;
 import com.boot.jx.phonebook.manager.PhoneBookManager;
+import com.boot.jx.postman.PMConstants.ParamKeys;
+import com.boot.jx.swagger.ApiMockParam;
+import com.boot.jx.swagger.ApiMockParams;
+import com.boot.jx.swagger.MockParamBuilder.MockParamType;
 import com.boot.jx.mongo.CommonMongoQueryBuilder;
 import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.utils.ArgUtil;
@@ -50,6 +56,9 @@ public class CompanyController {
 	
 	@Autowired
 	AWSFileStore fileStore;
+	
+	@Autowired
+	private ContakApiContext apiContext;
 	
 	
 	@RequestMapping(value = "/api/v1/company/register", method = { RequestMethod.POST })
@@ -158,6 +167,7 @@ public class CompanyController {
 		return ApiResponse.buildResult(compoc);
 	}
 	
+	@Deprecated
 	@RequestMapping(value = "/api/v1/company/get/auth", method = { RequestMethod.GET })
 	public ApiResponse<CompanyDoc,Object> getByAuthKey(@RequestParam String authKey){	
 		CompanyDoc  compoc = commonMongoTemplate.findOne(
@@ -167,6 +177,20 @@ public class CompanyController {
 		}
 		return ApiResponse.buildResult(compoc);
 	}
+	
+	@ApiRequest(authenticateTenant = true)
+	@ApiMockParams({ @ApiMockParam(name = ParamKeys.X_API_KEY, value = "API Key", paramType = MockParamType.HEADER),
+		@ApiMockParam(name = ParamKeys.X_API_ID, value = "API Id", paramType = MockParamType.HEADER) })
+	@RequestMapping(value = "/api/v1/company/get/auth/v1", method = { RequestMethod.GET })
+	public ApiResponse<CompanyDoc,Object> getByAuthKeyV1(@RequestParam String authKey){	
+		CompanyDoc compoc = apiContext.getCompany();
+//		CompanyDoc  compoc = commonMongoTemplate.findOne(
+//				CommonMongoQueryBuilder.collection(CompanyDoc.class).where(Criteria.where("apiKey").is(authKey)));
+		if(!ArgUtil.is(compoc)) {
+			ApiResponseUtil.throwException("Company does not exists");
+		}
+		return ApiResponse.buildResult(compoc);
+	}	
 	
 	
 	@RequestMapping(value = "/api/v1/company", method = { RequestMethod.GET })
