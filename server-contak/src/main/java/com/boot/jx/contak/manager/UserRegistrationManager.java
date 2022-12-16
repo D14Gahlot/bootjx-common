@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 
 import com.boot.jx.contak.dto.UserRegistrationDoc;
 import com.boot.jx.mongo.CommonDocInterfaces.TimeStampIndex;
+import com.boot.jx.postman.client.PostManClient;
 import com.boot.jx.mongo.CommonMongoQueryBuilder;
 import com.boot.jx.mongo.CommonMongoTemplate;
 
@@ -21,9 +22,12 @@ public class UserRegistrationManager {
 	@Autowired
 	private CommonMongoTemplate commonMongoTemplate;
 
+	@Autowired
+	private PostManClient postManClient;
+
 	public List<UserRegistrationDoc> getContacts(String mobile) {
-		return commonMongoTemplate.find(
-				CommonMongoQueryBuilder.collection(UserRegistrationDoc.class).where(Criteria.where("userPhoneNumber").is(mobile)));
+		return commonMongoTemplate.find(CommonMongoQueryBuilder.collection(UserRegistrationDoc.class)
+				.where(Criteria.where("userPhoneNumber").is(mobile)));
 	}
 
 	public List<UserRegistrationDoc> fetchRegistrations(String companyId) {
@@ -37,6 +41,11 @@ public class UserRegistrationManager {
 		return commonMongoTemplate.find(CommonMongoQueryBuilder.collection(UserRegistrationDoc.class).where( // FIND
 				CommonMongoQueryBuilder.QueryCriteria.where("companyId").is(companyId).and("deliveredAt.stamp")
 						.is(deliveredAt.getStamp())));
+	}
+
+	public List<UserRegistrationDoc> sendVerificationOtp(String mobile, String otp) {
+		return commonMongoTemplate.find(CommonMongoQueryBuilder.collection(UserRegistrationDoc.class)
+				.where(Criteria.where("userPhoneNumber").is(mobile)));
 	}
 
 }

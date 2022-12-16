@@ -121,10 +121,15 @@ public class PhoneController {
 			return ApiResponse.buildResults(phoneBookManager.getProfile(userDoc), resp);
 		} else { // Step 1
 			OTPDetails otp = OTPUtils.genrateBasicOTP(loginDTO.phone, loginDTO.deviceId);
+			
+			otp.getOtp();
+			
 			resp.otpPrefix = otp.getPrefix();
 			resp.otpNounce = otp.getYin();
 			phoneUserQuery.setOtpNounce(otp.getYang());
 			phoneUserQuery.setOtpHash(otp.getHash());
+			
+			
 			commonMongoTemplate.update(phoneUserQuery);
 			return ApiResponse.buildResults(phoneBookManager.getProfile(userDoc), resp);
 		}
