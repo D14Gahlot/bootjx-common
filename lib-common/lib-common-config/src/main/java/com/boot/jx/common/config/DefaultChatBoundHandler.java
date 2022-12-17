@@ -1,5 +1,7 @@
 package com.boot.jx.common.config;
 
+import java.util.ArrayList;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -244,6 +246,11 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 			} else {
 				msg.type = MESSAGE_FORMAT_TYPE.DOCUMENT;
 				msg.document = media;
+			}
+			msg.attachments = new ArrayList<InBoundMsgMedia>();
+			for (Attachment thisAttach : inboxMessage.attachments()) {
+				InBoundMsgMedia thisMedia = InBoundMsgMedia.from(thisAttach);
+				msg.attachments.add(thisMedia);
 			}
 		} else {
 			msg.type = MESSAGE_FORMAT_TYPE.TEXT;
