@@ -55,8 +55,10 @@ import com.boot.jx.account.dto.SummaryDocDto;
 import com.boot.jx.account.dto.TimeZoneOfSet;
 import com.boot.jx.account.dto.TypeCount;
 import com.boot.jx.account.dto.WabaSummaryDocDto;
+import com.boot.jx.common.config.ConfigConstants;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.postman.PMConstants;
+import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.doc.config.ChannelConfigDoc;
 import com.boot.jx.postman.doc.tpo.WABAConversation;
@@ -85,6 +87,9 @@ public class AccountDashBoardManager {
 
 	@Autowired
 	private AccountStore accountStore;
+	
+	@Autowired
+	private PMEnvironment environment;
 
 	public List<DomainDoc> getAllDomainAccount() {
 		Query query = new Query();
@@ -565,30 +570,23 @@ public class AccountDashBoardManager {
 		long offsetts= countryTimeZoneOffset(tnt);
 		ZonedDateTime noOfdaysTstamp = null;
 		long lasDayTimeStmp =0;
-//		if (dateRange1 > 0) {
-//			lasDayTimeStmp = dateRange1+offsetts;
-//		}
-//		if (dateRange2 > 0) {
-//			currentTs = dateRange2+offsetts;
-//		}
-		
-		
+		String offsett= environment.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_TIMEZONE_OFFSET).asString();
+		LOGGER.info("dayChannelWiseWisesummary dateRange1 :"+dateRange1+"\t dateRange2 :"+dateRange2 +"\t offsett :"+offsett);
+	
 		DomainDoc dDoc = getDomainTimeZone(tnt);
-		String zone = getTimeZone(dDoc.getTimeZoneOffSet());
-		String offset= getOffSet(dDoc.getTimeZoneOffSet());
+		String zone = getTimeZone(offsett==null?dDoc.getTimeZoneOffSet():offsett);
+		String offset= getOffSet(offsett==null?dDoc.getTimeZoneOffSet():offsett);
 		String[] hm = offset.split(":");
 		
 		int hr = ArgUtil.parseAsInteger(hm[0]);
 		int mm = ArgUtil.parseAsInteger(hm[1]);
 		
 		if (ArgUtil.is(dateRange1)) {
-			//lasDayTimeStmp = dateRange1+offsetts;
 			lasDayTimeStmp=DateUtil.getDateMinAndMaxTime(getCovertDate(dateRange1), hr, mm, zone, LocalTime.MIN);
 			lasDayTimeStmp =lasDayTimeStmp+offsetts;
 			
 		}
 		if (ArgUtil.is(dateRange2)) {
-			//currentTs = dateRange2+offsetts;
 			currentTs =DateUtil.getDateMinAndMaxTime(getCovertDate(dateRange2), hr, mm, zone, LocalTime.MAX);
 			currentTs = currentTs+offsetts;
 		}
@@ -858,11 +856,13 @@ public class AccountDashBoardManager {
 		List<DateWiseHourCountDto> dayCntLst = new ArrayList<>();
 
 		
-long offsetts= countryTimeZoneOffset(tnt);
-		
+		long offsetts= countryTimeZoneOffset(tnt);
+		String offsett= environment.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_TIMEZONE_OFFSET).asString();
+		LOGGER.info("dayChannelWiseWisesummary dateRange1 :"+dateRange1+"\t dateRange2 :"+dateRange2 +"\t offsett :"+offsett);
+	
 		DomainDoc doc = getDomainTimeZone(tnt);
-		String zone = getTimeZone(doc.getTimeZoneOffSet());
-		String offset= getOffSet(doc.getTimeZoneOffSet());
+		String zone = getTimeZone(offsett==null?doc.getTimeZoneOffSet():offsett);
+		String offset= getOffSet(offsett==null?doc.getTimeZoneOffSet():offsett);
 		String[] hm = offset.split(":");
 		
 		int hr = ArgUtil.parseAsInteger(hm[0]);

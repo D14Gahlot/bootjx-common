@@ -214,7 +214,7 @@ public class ConfigConstants {
 		POSTMAN_PHONEBOOK_REGION(new ConfigMeta("Default ISD Country", "postman.phonebook.region")
 				.optionValues(PHONE_NUMBER_UTIL.getSupportedRegions().toArray()).defaultValue("IN")),
 
-		POSTMAN_TIMEZONE_OFFSET(new ConfigMeta("Timezone OffSet", "postman.timezone.offset")
+		POSTMAN_TIMEZONE_OFFSET(new ConfigMeta("Time Zone", "postman.timezone.offset")
 				.optionValues(TimeZoneUtil.getTimeZoneLst().toArray()).defaultValue("Asia/Kolkata::GMT+5:30")),
 		
 		POSTMAN_AGENT_CHAT_AUTOREPLY_TALK2AGENT(new ConfigMeta("Message to customer while chat is transferred to agent",
