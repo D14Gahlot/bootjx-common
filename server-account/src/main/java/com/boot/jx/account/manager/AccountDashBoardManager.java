@@ -54,9 +54,11 @@ import com.boot.jx.account.dto.SummaryDocDto;
 import com.boot.jx.account.dto.TimeZoneOfSet;
 import com.boot.jx.account.dto.TypeCount;
 import com.boot.jx.account.dto.WabaSummaryDocDto;
+import com.boot.jx.common.config.ConfigConstants;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.jx.postman.PMConstants;
+import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.doc.config.ChannelConfigDoc;
 import com.boot.jx.postman.doc.tpo.WABAConversation;
@@ -81,6 +83,9 @@ public class AccountDashBoardManager {
 	
 	@Autowired
 	private AccountStore accountStore;
+	
+	@Autowired
+	private PMEnvironment environment;
 
 
 	public List<DomainDoc> getAllDomainAccount() {
@@ -558,24 +563,19 @@ public class AccountDashBoardManager {
 		String tnt = AppContextUtil.getTenant();
 		List<String> lst = getListOfContactType();
 		List<String> channelLst = getListChannelCongig();
-		LOGGER.info("dayChannelWiseWisesummary dateRange1 :"+dateRange1+"\t dateRange2 :"+dateRange2);
-		
+	
 		long currentTs = System.currentTimeMillis();
 
 		long offsetts= countryTimeZoneOffset(tnt);
 		ZonedDateTime noOfdaysTstamp = null;
 		long lasDayTimeStmp =0;
-//		if (dateRange1 > 0) {
-//			lasDayTimeStmp = dateRange1+offsetts;
-//		}
-//		if (dateRange2 > 0) {
-//			currentTs = dateRange2+offsetts;
-//		}
-		
+
+		String offsett= environment.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_TIMEZONE_OFFSET).asString();
+		LOGGER.info("dayChannelWiseWisesummary dateRange1 :"+dateRange1+"\t dateRange2 :"+dateRange2 +"\t offsett :"+offsett);
 		
 		DomainDoc dDoc = getDomainTimeZone(tnt);
-		String zone = getTimeZone(dDoc.getTimeZoneOffSet());
-		String offset= getOffSet(dDoc.getTimeZoneOffSet());
+		String zone = getTimeZone(offsett==null?dDoc.getTimeZoneOffSet():offsett);
+		String offset= getOffSet(offsett==null?dDoc.getTimeZoneOffSet():offsett);
 		String[] hm = offset.split(":");
 		
 		int hr = ArgUtil.parseAsInteger(hm[0]);
@@ -868,18 +868,20 @@ public class AccountDashBoardManager {
 	}
 
 	@SuppressWarnings("unused")
-	//public ContactTypeSummaryDto getDayWiseMsgStatusSummary(long dateRange1, long dateRange2, int days) {
 	public ContactTypeSummaryDto getDayWiseMsgStatusSummary(String dateRange1, String dateRange2, int days) {
 		String tnt = AppContextUtil.getTenant();
 		List<String> lst = getListOfContactType();
 		List<DateWiseHourCountDto> dayCntLst = new ArrayList<>();
-		LOGGER.info("getDayWiseMsgStatusSummary :"+dateRange1+"\t dateRange2 :"+dateRange2);
+		
 		
 		long offsetts= countryTimeZoneOffset(tnt);
 		
+		String offsett= environment.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_TIMEZONE_OFFSET).asString();
+		LOGGER.info("dayChannelWiseWisesummary dateRange1 :"+dateRange1+"\t dateRange2 :"+dateRange2 +"\t offsett :"+offsett);
+		
 		DomainDoc doc = getDomainTimeZone(tnt);
-		String zone = getTimeZone(doc.getTimeZoneOffSet());
-		String offset= getOffSet(doc.getTimeZoneOffSet());
+		String zone = getTimeZone(offsett==null?doc.getTimeZoneOffSet():offsett);
+		String offset= getOffSet(offsett==null?doc.getTimeZoneOffSet():offsett);
 		String[] hm = offset.split(":");
 		
 		int hr = ArgUtil.parseAsInteger(hm[0]);
@@ -1194,7 +1196,7 @@ public class AccountDashBoardManager {
 		String offset = "00:00";
 		if(ArgUtil.is(toffset)) {
 			String[] hrStr =toffset.split("::");
-			if(ArgUtil.is(hrStr)) {
+			if(ArgUtil.is(hrStr) && hrStr.length>1) {
 				offset =hrStr[1].substring(hrStr[1].indexOf('+')+1);
 			}
 		}
