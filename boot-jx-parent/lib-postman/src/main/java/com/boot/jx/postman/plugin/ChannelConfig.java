@@ -4,6 +4,7 @@ import com.boot.jx.postman.PMEnvironment.AChannelConfig;
 import com.boot.jx.postman.plugin.EmailPlugin.EmailConfigDetails;
 import com.boot.jx.postman.plugin.FacebookPlugin.FacebookConfigDetails;
 import com.boot.jx.postman.plugin.InstagramPlugin.InstagramConfig;
+import com.boot.jx.postman.plugin.SMSPlugin.SMSConfigDetails;
 import com.boot.jx.postman.plugin.TelegramPlugin.TelegramConfigDetails;
 import com.boot.jx.postman.plugin.TwilioSMSPlugin.TwilioConfigDetails;
 import com.boot.jx.postman.plugin.TwitterPlugin.TwitterConfigDetails;
@@ -25,6 +26,7 @@ public class ChannelConfig extends AChannelConfig {
 	private WebConfigDetails web;
 	private EmailConfigDetails email;
 	private TwilioConfigDetails twilio;
+	private SMSConfigDetails sms;
 
 	private boolean isPushAllowed;
 	private boolean isPushOnlyApproved;
@@ -180,6 +182,14 @@ public class ChannelConfig extends AChannelConfig {
 
 	public void setError(Object error) {
 		this.error = error;
+	}
+
+	public SMSConfigDetails getSms() {
+		return sms;
+	}
+
+	public void setSms(SMSConfigDetails sms) {
+		this.sms = sms;
 	}
 
 }

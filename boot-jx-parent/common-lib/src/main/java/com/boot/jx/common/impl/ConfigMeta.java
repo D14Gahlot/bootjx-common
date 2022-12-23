@@ -15,7 +15,7 @@ import com.boot.utils.ArgUtil;
 public class ConfigMeta implements Serializable {
 
 	public static enum INPUT_TYPE {
-		TEXT, OPTIONS, RANGE, NUMBER, COLOR, COLOR_PALLETE, NONE, MESSAGE;
+		TEXT, OPTIONS, RANGE, NUMBER, COLOR, COLOR_PALLETE, NONE, MESSAGE, TEXTAREA, JSON;
 	}
 
 	public static enum DATA_TYPE {

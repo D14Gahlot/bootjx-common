@@ -70,6 +70,7 @@ public class PMConstants {
 		public static final String INSTAGRAM = "ig";
 		public static final String EMAIL = "mailto";
 		public static final String SMS_TWILIO = "smstw";
+		public static final String SMS = "sms";
 	}
 
 	public enum CHANNEL_TYPE_ENUM {

@@ -1,6 +1,7 @@
 package com.boot.jx.postman.plugin;
 
 import java.beans.PropertyDescriptor;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -23,6 +24,7 @@ import com.boot.jx.postman.PMEnvironment.AChannelDetails;
 import com.boot.jx.postman.PMEnvironment.ChannelTypeSpecificProps;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.model.MapModel;
+import com.boot.model.UtilityModels.Stringable;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.StringUtils;
 
@@ -190,11 +192,20 @@ public class ChannelPluginProvider {
 							} else if (type instanceof Class && ((Class<?>) type).isEnum()) {
 								setter.invoke(channelDetails, map.pathEntry(annotation.path())
 										.asEnum(ArgUtil.parseAsEnum(currentValue, type), type));
+							} else if (Stringable.class.isAssignableFrom((Class<?>) type)
+									|| ((Class<?>) type).isAssignableFrom(Stringable.class)) {
+								Class<?> cl = Class.forName(typeName);
+								Constructor<?> cons = cl.getConstructor();
+								Stringable o = (Stringable) cons.newInstance();
+								o.fromString(map.pathEntry(annotation.path()).asString());
+								setter.invoke(channelDetails, o);
 							} else {
 								setter.invoke(channelDetails,
 										map.pathEntry(annotation.path()).defaultValue(currentValue));
 							}
-						} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+						} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException
+								| ClassNotFoundException | NoSuchMethodException | SecurityException
+								| InstantiationException e) {
 							e.printStackTrace();
 						}
 					}

@@ -309,6 +309,16 @@ public final class CollectionUtil {
 		return null;
 	}
 
+	public static <T> T get(List<T> list, int index) {
+		if (ArgUtil.isEmpty(list)) {
+			return null;
+		}
+		if (index < list.size()) {
+			return list.get(index);
+		}
+		return null;
+	}
+
 	public static <T> T first(T[] list) {
 		return get(list, 0);
 	}

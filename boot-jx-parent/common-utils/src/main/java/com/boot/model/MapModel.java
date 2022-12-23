@@ -29,7 +29,7 @@ public class MapModel implements JsonSerializerType<Object> {
 	}
 
 	public static class NodeEntry<T> {
-		private T value;
+		protected T value;
 
 		public NodeEntry() {
 			this.value = null;
