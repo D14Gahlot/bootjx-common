@@ -16,6 +16,8 @@ import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.OutboxMessage;
+import com.boot.jx.postman.pbook.PBLocation;
+import com.boot.jx.postman.pbook.PBVCard;
 import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.postman.store.SessionStore;
 import com.boot.jx.xms.XmsVendorConfigurer;
@@ -112,6 +114,13 @@ public class MessageService {
 			}
 		}
 
+		if ("location".equalsIgnoreCase(message.getType())) {
+			if (!ArgUtil.is(message.getLocation())) {
+				ApiResponseUtil.throwInputException(new ApiFieldError().field("location").obzect("OutBoundMsg")
+						.codeKey("LOCATION_DETAILS_MISSING").description("Location details is missing"));
+			}
+		}
+
 		if (ArgUtil.is(message.getDocument())) {
 			outboxMessage.attachment(new Attachment().mediaURL(message.getDocument().getLink())
 					.mediaName(message.getDocument().getFilename()).mediaCaption(message.getDocument().getCaption())
@@ -133,6 +142,16 @@ public class MessageService {
 			outboxMessage.attachment(
 					new Attachment().mediaURL(message.getAudio().getLink()).mediaName(message.getAudio().getFilename())
 							.mediaCaption(message.getAudio().getCaption()).mediaType(FileType.AUDIO.toString()));
+		}
+
+		if (ArgUtil.is(message.getLocation())) {
+			PBLocation pbLocation = new PBLocation();
+			pbLocation.setName(message.getLocation().name);
+			pbLocation.setAddress(message.getLocation().address);
+			pbLocation.setLatitude(message.getLocation().latitude);
+			pbLocation.setLongitude(message.getLocation().longitude);
+			pbLocation.setUrl(message.getLocation().url);
+			outboxMessage.vccards().add(new PBVCard().locations(pbLocation));
 		}
 
 		if (ArgUtil.is(message.getOptions())) {

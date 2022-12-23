@@ -53,7 +53,7 @@ public class OutBoundMsgBasic implements Serializable, JsonIgnoreUnknown {
 		@ApiMockModelProperty(hidden = true)
 		public List<CommonMsgContactCard> contacts;
 
-		@ApiMockModelProperty(hidden = true)
+		@ApiMockModelProperty(hidden = false)
 		public CommonMsgLocation location;
 
 		@ApiMockModelProperty(required = false)
