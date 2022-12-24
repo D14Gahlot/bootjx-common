@@ -3,10 +3,8 @@ package com.boot.jx.account.dto;
 import java.util.HashMap;
 import java.util.Map;
 
-
-
 public class TimeZoneOfSet {
-	Map<String ,String> timeZmap = new HashMap<>();
+	Map<String, String> timeZmap = new HashMap<>();
 
 	public Map<String, String> getTimeZmap() {
 		return timeZmap;

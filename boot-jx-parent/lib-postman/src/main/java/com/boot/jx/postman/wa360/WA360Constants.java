@@ -78,7 +78,13 @@ public class WA360Constants {
 		public static final JsonPath TEMPLATE_COMPONENTS = new JsonPath("template/components");
 
 		public static final JsonPath FETCH_CONTACTS_DETAILS = new JsonPath("contacts/[0]");
+		public static final JsonPath NAME_FIRST_NAME = new JsonPath("name/first_name");
+		public static final JsonPath NAME_LAST_NAME = new JsonPath("name/last_name");
+		public static final JsonPath NAME_FORMATTED_NAME = new JsonPath("name/formatted_name");
 
+		public static final JsonPath ORG_COMPANY = new JsonPath("org/company");
+		public static final JsonPath ORG_DEPARTMENT = new JsonPath("org/department");
+		public static final JsonPath ORG_TITLE = new JsonPath("org/title");
 	}
 
 	public static final String[] componentTypes = { "header", "body", "button" };

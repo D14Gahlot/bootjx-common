@@ -1,5 +1,6 @@
 package com.boot.jx.xms.service;
 
+import org.redisson.MapWriterTask.Add;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Component;
@@ -16,11 +17,22 @@ import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.OutboxMessage;
+import com.boot.jx.postman.pbook.PBDate;
 import com.boot.jx.postman.pbook.PBLocation;
+import com.boot.jx.postman.pbook.PBName;
+import com.boot.jx.postman.pbook.PBSocial;
 import com.boot.jx.postman.pbook.PBVCard;
+import com.boot.jx.postman.pbook.PBWebsite;
+import com.boot.jx.postman.pbook.PBWork;
 import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.postman.store.SessionStore;
 import com.boot.jx.xms.XmsVendorConfigurer;
+import com.boot.jx.xms.dto.CommonMsgContactCard;
+import com.boot.jx.xms.dto.CommonMsgContactCard.OutBoundMsgContactAddress;
+import com.boot.jx.xms.dto.CommonMsgContactCard.OutBoundMsgContactEmail;
+import com.boot.jx.xms.dto.CommonMsgContactCard.OutBoundMsgContactPhone;
+import com.boot.jx.xms.dto.CommonMsgContactCard.OutBoundMsgContactSocial;
+import com.boot.jx.xms.dto.CommonMsgContactCard.OutBoundMsgContactUrl;
 import com.boot.jx.xms.dto.OutBoundMsgBasic.OutBoundMsg;
 import com.boot.jx.xms.dto.OutBoundReciept;
 import com.boot.utils.ArgUtil;
@@ -121,6 +133,13 @@ public class MessageService {
 			}
 		}
 
+		if ("contacts".equalsIgnoreCase(message.getType())) {
+			if (!ArgUtil.is(message.getContacts())) {
+				ApiResponseUtil.throwInputException(new ApiFieldError().field("contacts").obzect("OutBoundMsg")
+						.codeKey("CONTACTS_DETAILS_MISSING").description("Contacts details is missing"));
+			}
+		}
+
 		if (ArgUtil.is(message.getDocument())) {
 			outboxMessage.attachment(new Attachment().mediaURL(message.getDocument().getLink())
 					.mediaName(message.getDocument().getFilename()).mediaCaption(message.getDocument().getCaption())
@@ -152,6 +171,70 @@ public class MessageService {
 			pbLocation.setLongitude(message.getLocation().longitude);
 			pbLocation.setUrl(message.getLocation().url);
 			outboxMessage.vccards().add(new PBVCard().locations(pbLocation));
+		}
+
+		if (ArgUtil.is(message.getContacts())) {
+			for (CommonMsgContactCard contact : message.getContacts()) {
+				PBVCard pbVCard = new PBVCard();
+
+				if (ArgUtil.is(contact.name)) {
+					PBName pbName = new PBName();
+					pbName.setFirstName(contact.name.first_name);
+					pbName.setLastName(contact.name.last_name);
+					pbName.setFormattedName(contact.name.formatted_name);
+					pbVCard.setName(pbName);
+				}
+
+				if (ArgUtil.is(contact.emails)) {
+					for (OutBoundMsgContactEmail email : contact.emails) {
+						pbVCard.emails().add(email.toEmail());
+					}
+				}
+				if (ArgUtil.is(contact.phones)) {
+					for (OutBoundMsgContactPhone phone : contact.phones) {
+						pbVCard.phones().add(phone.toPhone());
+					}
+				}
+
+				if (ArgUtil.is(contact.addresses)) {
+					for (OutBoundMsgContactAddress address : contact.addresses) {
+						pbVCard.addresses().add(address.toAddress());
+					}
+				}
+
+				if (ArgUtil.is(contact.birthday)) {
+					PBDate pbDate = new PBDate();
+					pbDate.setType("birthday");
+					pbDate.setDate(contact.birthday);
+					pbVCard.dates().add(pbDate);
+				}
+
+				if (ArgUtil.is(contact.org)) {
+					PBWork pbWork = new PBWork();
+					pbWork.setCompany(contact.org.company);
+					pbWork.setDepartment(contact.org.department);
+					pbWork.setTitle(contact.org.title);
+					pbVCard.work().add(pbWork);
+				}
+
+				if (ArgUtil.is(contact.urls)) {
+					for (OutBoundMsgContactUrl url : contact.urls) {
+						PBWebsite pnWebsite = new PBWebsite();
+						pnWebsite.setUrl(url.url);
+						pnWebsite.setType(url.type);
+						pbVCard.urls().add(pnWebsite);
+					}
+				}
+				if (ArgUtil.is(contact.ims)) {
+					for (OutBoundMsgContactSocial ims : contact.ims) {
+						PBSocial pnWebsite = new PBSocial();
+						pnWebsite.setService(ims.service);
+						pnWebsite.setUserid(ims.userid);
+						pbVCard.ims().add(pnWebsite);
+					}
+				}
+				outboxMessage.vccards().add(pbVCard);
+			}
 		}
 
 		if (ArgUtil.is(message.getOptions())) {
