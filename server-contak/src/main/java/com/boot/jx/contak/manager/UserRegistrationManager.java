@@ -24,8 +24,6 @@ public class UserRegistrationManager {
 
 	@Autowired
 	private PostManClient postManClient;
-	
-	@Autowired
 
 	public List<UserRegistrationDoc> getContacts(String mobile) {
 		return commonMongoTemplate.find(CommonMongoQueryBuilder.collection(UserRegistrationDoc.class)
@@ -46,8 +44,7 @@ public class UserRegistrationManager {
 	}
 
 	public List<UserRegistrationDoc> sendVerificationOtp(String mobile, String otp) {
-		
-		
+
 		return commonMongoTemplate.find(CommonMongoQueryBuilder.collection(UserRegistrationDoc.class)
 				.where(Criteria.where("userPhoneNumber").is(mobile)));
 	}
