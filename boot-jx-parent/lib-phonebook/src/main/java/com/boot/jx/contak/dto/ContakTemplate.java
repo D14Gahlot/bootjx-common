@@ -9,6 +9,7 @@ public class ContakTemplate implements Serializable {
 
 	public static class ContakTemplateHeader implements Serializable {
 		private static final long serialVersionUID = 825821221048380985L;
+
 		public String label;
 		public String variant;
 
@@ -27,6 +28,7 @@ public class ContakTemplate implements Serializable {
 		public void setVariant(String variant) {
 			this.variant = variant;
 		}
+
 	}
 
 	public static class ContakTemplateCTA implements Serializable {
@@ -72,6 +74,7 @@ public class ContakTemplate implements Serializable {
 	public ContakTemplateHeader header;
 
 	public String category;
+	public String categoryTitle;
 	public String type;
 	public String title;
 	public String body;
@@ -132,6 +135,14 @@ public class ContakTemplate implements Serializable {
 
 	public void setCta(List<ContakTemplateCTA> cta) {
 		this.cta = cta;
+	}
+
+	public String getCategoryTitle() {
+		return categoryTitle;
+	}
+
+	public void setCategoryTitle(String categoryTitle) {
+		this.categoryTitle = categoryTitle;
 	}
 
 }
