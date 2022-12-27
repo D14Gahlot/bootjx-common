@@ -144,9 +144,10 @@ public class ChannelPluginProvider {
 			for (Field field : clazz.getDeclaredFields()) {
 				if (field.isAnnotationPresent(ConfigMetaProperty.class)) {
 					ConfigMetaProperty annotation = field.getAnnotation(ConfigMetaProperty.class);
-					ConfigMeta cm = new ConfigMeta().path(annotation.path()).title(annotation.title())
-							.desc(annotation.desc()).createonly(annotation.createonly())
-							.writeonly(annotation.writeonly()).optional(annotation.optional());
+					ConfigMeta cm = new ConfigMeta().path(annotation.path()).pathRaw(annotation.pathRaw())
+							.title(annotation.title()).desc(annotation.desc()).createonly(annotation.createonly())
+							.writeonly(annotation.writeonly()).optional(annotation.optional())
+							.inputType(annotation.inputType());
 					if (annotation.inputType() == INPUT_TYPE.OPTIONS && annotation.dataType() == DATA_TYPE.SWITCH
 							&& annotation.converterType() == CONVERT_TYPE.BOOLEAN) {
 						cm.optionsOnOff();
@@ -176,6 +177,7 @@ public class ChannelPluginProvider {
 						Method getter = pd.getReadMethod();
 						Type type = field.getGenericType();
 						String typeName = type.getTypeName();
+						// Class<?> componentType = ((Class<?>) type).getComponentType();
 						try {
 							Object currentValue = getter.invoke(channelDetails);
 							if ("java.lang.String".equals(typeName)) {
@@ -192,12 +194,15 @@ public class ChannelPluginProvider {
 							} else if (type instanceof Class && ((Class<?>) type).isEnum()) {
 								setter.invoke(channelDetails, map.pathEntry(annotation.path())
 										.asEnum(ArgUtil.parseAsEnum(currentValue, type), type));
+							} else if (typeName.startsWith("java.util.Map<java.lang.String")) {
+								setter.invoke(channelDetails, map.pathEntry(annotation.path()).asMap());
 							} else if (Stringable.class.isAssignableFrom((Class<?>) type)
 									|| ((Class<?>) type).isAssignableFrom(Stringable.class)) {
 								Class<?> cl = Class.forName(typeName);
 								Constructor<?> cons = cl.getConstructor();
 								Stringable o = (Stringable) cons.newInstance();
-								o.fromString(map.pathEntry(annotation.path()).asString());
+								o.fromString(map.pathEntry(ArgUtil.nonEmpty(annotation.pathRaw(), annotation.path()))
+										.asString());
 								setter.invoke(channelDetails, o);
 							} else {
 								setter.invoke(channelDetails,
@@ -245,6 +250,7 @@ public class ChannelPluginProvider {
 		register(WA_360D);
 		register(INSTAGRAM);
 		register(EMAIL);
+		register(new SMSPlugin());
 		register(new TwilioSMSPlugin());
 	}
 

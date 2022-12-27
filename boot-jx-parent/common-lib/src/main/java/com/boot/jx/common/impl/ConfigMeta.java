@@ -101,6 +101,7 @@ public class ConfigMeta implements Serializable {
 	private String desc;
 	private String group;
 	private String path;
+	private String pathRaw;
 	private Object defaultValue;
 	private Object example;
 	private boolean optional;
@@ -135,6 +136,8 @@ public class ConfigMeta implements Serializable {
 		String desc() default "";
 
 		String path() default "";
+
+		String pathRaw() default "";
 
 		boolean hidden() default false;
 
@@ -610,6 +613,19 @@ public class ConfigMeta implements Serializable {
 
 	public ConfigMeta clearable(boolean clearable) {
 		this.clearable = true;
+		return this;
+	}
+
+	public String getPathRaw() {
+		return pathRaw;
+	}
+
+	public void setPathRaw(String pathRaw) {
+		this.pathRaw = pathRaw;
+	}
+
+	public ConfigMeta pathRaw(String pathRaw) {
+		this.pathRaw = pathRaw;
 		return this;
 	}
 }

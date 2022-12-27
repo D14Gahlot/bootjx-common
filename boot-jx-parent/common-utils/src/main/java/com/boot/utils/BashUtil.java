@@ -191,6 +191,7 @@ public abstract class BashUtil {
 
 	public static class CurlCommand implements Serializable, Stringable {
 		private static final long serialVersionUID = 2226272517915004544L;
+		private String bash;
 		private String command;
 		private String method;
 		private String url;
@@ -200,6 +201,10 @@ public abstract class BashUtil {
 
 		@Override
 		public void fromString(String text) {
+			if (!ArgUtil.is(text)) {
+				return;
+			}
+			this.bash = text;
 			List<String> args = tokenize(text);
 			for (int i = 0; i < args.size(); i++) {
 				String option = args.get(i);
@@ -237,6 +242,11 @@ public abstract class BashUtil {
 			CurlCommand req = new CurlCommand();
 			req.fromString(text);
 			return req;
+		}
+
+		@Override
+		public String toString() {
+			return this.bash;
 		}
 
 		public String getCommand() {
@@ -301,6 +311,14 @@ public abstract class BashUtil {
 
 		public void setUrl(String url) {
 			this.url = url;
+		}
+
+		public String getBash() {
+			return bash;
+		}
+
+		public void setBash(String bash) {
+			this.bash = bash;
 		}
 
 	}

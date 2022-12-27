@@ -45,8 +45,9 @@ public class SMSPlugin implements DefaultChannelPlugin<SMSConfigDetails> {
 				desc = "A json with all secret keys to be used in api request", inputType = INPUT_TYPE.JSON)
 		private Map<String, Object> secret;
 
-		@ConfigMetaProperty(path = "sms.request", writeonly = false, title = "Request Object", hidden = true,
-				desc = "Request in curl format", inputType = INPUT_TYPE.TEXTAREA)
+		@ConfigMetaProperty(path = "sms.request", pathRaw = "sms.request.bash", writeonly = false,
+				title = "Request Object", hidden = true, desc = "Request in curl format",
+				inputType = INPUT_TYPE.TEXTAREA)
 		private CurlCommand request;
 
 		@Override
