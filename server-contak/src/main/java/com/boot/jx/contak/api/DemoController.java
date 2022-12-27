@@ -26,7 +26,7 @@ import com.boot.utils.CryptoUtil.HashBuilder;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
-@Api(tags = "XMS ViewConroller", description = "API's for Messaging", hidden = true)
+@Api(tags = "DemoConroller", description = "API's for Messaging", hidden = true)
 @Controller
 public class DemoController {
 	@Autowired
@@ -140,4 +140,5 @@ public class DemoController {
 
 		return ApiResponse.buildResults(config);
 	}
+
 }

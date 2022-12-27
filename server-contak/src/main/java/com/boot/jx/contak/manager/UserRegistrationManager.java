@@ -22,9 +22,6 @@ public class UserRegistrationManager {
 	@Autowired
 	private CommonMongoTemplate commonMongoTemplate;
 
-	@Autowired
-	private PostManClient postManClient;
-
 	public List<UserRegistrationDoc> getContacts(String mobile) {
 		return commonMongoTemplate.find(CommonMongoQueryBuilder.collection(UserRegistrationDoc.class)
 				.where(Criteria.where("userPhoneNumber").is(mobile)));
@@ -41,12 +38,6 @@ public class UserRegistrationManager {
 		return commonMongoTemplate.find(CommonMongoQueryBuilder.collection(UserRegistrationDoc.class).where( // FIND
 				CommonMongoQueryBuilder.QueryCriteria.where("companyId").is(companyId).and("deliveredAt.stamp")
 						.is(deliveredAt.getStamp())));
-	}
-
-	public List<UserRegistrationDoc> sendVerificationOtp(String mobile, String otp) {
-
-		return commonMongoTemplate.find(CommonMongoQueryBuilder.collection(UserRegistrationDoc.class)
-				.where(Criteria.where("userPhoneNumber").is(mobile)));
 	}
 
 }
