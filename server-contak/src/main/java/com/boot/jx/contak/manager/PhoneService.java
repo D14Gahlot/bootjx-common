@@ -1,7 +1,6 @@
 package com.boot.jx.contak.manager;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Component;
 
 import com.boot.jx.api.ApiFieldError;
@@ -14,7 +13,6 @@ import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.plugin.ChannelConfig;
-import com.boot.jx.postman.store.SessionStore;
 import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
 
@@ -22,16 +20,10 @@ import com.boot.utils.ArgUtil;
 public class PhoneService {
 
 	@Autowired
-	private MongoTemplate mongoTemplate;
-
-	@Autowired
 	private ChatService chatService;
 
 	@Autowired
 	private ChatSessionService chatSessionService;
-
-	@Autowired
-	private SessionStore sessionStore;
 
 	@Autowired
 	private ChatSessionFactory chatSessionFactory;
@@ -60,11 +52,19 @@ public class PhoneService {
 		return outboxMessage;
 	}
 
-	public OutboxMessage sendOtp(String phone, String otp) {
+	public OutboxMessage sendPhoneOTP(String phone, String otp) {
 		OutboxMessage ob = new OutboxMessage();
 		ob.contact().setPhone(phone);
 		ob.setHsm(new CommonTemplateMeta().code("verification_otp")
 				.data(MapModel.createInstance().put("otp", otp).toMap()));
 		return send("sms:mehotp", ob);
+	}
+
+	public OutboxMessage sendEmailOTP(String email, String otp) {
+		OutboxMessage ob = new OutboxMessage();
+		ob.contact().setEmail(email);
+		ob.setHsm(new CommonTemplateMeta().code("verification_otp")
+				.data(MapModel.createInstance().put("otp", otp).toMap()));
+		return send("mailto:meheryxyzgmailcom", ob);
 	}
 }

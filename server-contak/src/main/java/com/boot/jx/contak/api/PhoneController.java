@@ -109,7 +109,7 @@ public class PhoneController {
 		} else { // Step 1
 			OTPDetails otp = OTPUtils.genrateBasicOTP(loginDTO.phone, loginDTO.deviceId);
 
-			phoneService.sendOtp(loginDTO.phone, otp.getOtp());
+			phoneService.sendPhoneOTP(loginDTO.phone, otp.getOtp());
 
 			resp.otpPrefix = otp.getPrefix();
 			resp.otpNounce = otp.getYin();
