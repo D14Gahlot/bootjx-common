@@ -7,6 +7,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.boot.jx.AppConfig;
 import com.boot.jx.AppConfigPackage.AppCommonConfig;
@@ -115,6 +116,7 @@ public class DemoController {
 		return "app-contak";
 	}
 
+	@ResponseBody
 	@RequestMapping(value = "/pub/config/cdn", method = { RequestMethod.POST })
 	public ApiResponse<PMConfigurationObject, Object> updateCDN(@RequestParam(required = false) String url,
 			@RequestParam(required = false) String version,
