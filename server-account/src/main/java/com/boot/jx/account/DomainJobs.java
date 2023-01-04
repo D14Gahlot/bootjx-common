@@ -11,16 +11,14 @@ import org.springframework.stereotype.Component;
 
 import com.boot.jx.AppConfig;
 import com.boot.jx.AppContextUtil;
-import com.boot.jx.account.doc.AccountStore;
-import com.boot.jx.account.doc.DomainDoc;
 import com.boot.jx.common.config.ConfigConstants;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.inbound.InBoundPoller;
 import com.boot.jx.logger.LoggerService;
 import com.boot.jx.mongo.CommonMongoQB.MongoQueryBuilder;
 import com.boot.jx.postman.PMEnvironment;
-import com.boot.jx.postman.doc.config.ChannelConfigDoc;
 import com.boot.jx.postman.doc.config.ChannelConfigDupsDoc;
+import com.boot.jx.postman.store.ConfigMaster;
 import com.boot.jx.tunnel.ITunnelDefs.TunnelTask;
 import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
@@ -38,7 +36,7 @@ public class DomainJobs {
 	InBoundPoller inBoundPoller;
 
 	@Autowired
-	AccountStore accountStore;
+	ConfigMaster configMaster;
 
 	@Autowired
 	PMEnvironment pmEnvironment;
@@ -56,7 +54,7 @@ public class DomainJobs {
 		MongoQueryBuilder<ChannelConfigDupsDoc> emailChannelsQuery = MongoQueryBuilder
 				.collection(ChannelConfigDupsDoc.class)
 				.where(Criteria.where("contactType").is(ContactType.EMAIL.name()).and("server").is(serviceDomain));
-		List<ChannelConfigDupsDoc> emailChannels = accountStore.find(emailChannelsQuery);
+		List<ChannelConfigDupsDoc> emailChannels = configMaster.find(emailChannelsQuery);
 
 		for (ChannelConfigDupsDoc emailChannel : emailChannels) {
 			LOGGER.debug("Searching Config {}", emailChannel.getId());
