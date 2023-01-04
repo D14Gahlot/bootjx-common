@@ -85,7 +85,7 @@ public class CommonMongoSource {
 		String tnt = AppContextUtil.getTenant();
 		String dbtnt = ArgUtil.is(tenantResolver) ? tenantResolver.getDBName(tnt) : tnt;
 		MongoClientURI mongoClientURI = new MongoClientURI(dataSourceUrl);
-
+		
 		String dataBaseName = (globalDBProfix + "_" + dbtnt);
 		if (hasRule(USE_NO_DB)) {
 			// dataBaseName = "nodb";

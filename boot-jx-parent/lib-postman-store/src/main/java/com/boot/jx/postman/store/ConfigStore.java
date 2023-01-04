@@ -2,19 +2,25 @@ package com.boot.jx.postman.store;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
+import com.boot.jx.AppContextUtil;
 import com.boot.jx.mongo.CommonMongoTemplateAbstract;
+import com.boot.jx.postman.PMEnvironment.PMConfigurationObject;
 import com.boot.jx.postman.doc.PMConfigurationDoc;
 import com.boot.jx.postman.doc.config.ChannelConfigDoc;
+import com.boot.jx.postman.doc.config.ChannelConfigDupsDoc;
 import com.boot.jx.postman.doc.config.ClientAppConfigDoc;
 import com.boot.jx.postman.doc.config.PermsConfigDoc;
 import com.boot.jx.postman.doc.config.PrefsConfigDoc;
 import com.boot.jx.postman.doc.config.VarsConfigDoc;
 import com.boot.jx.postman.doc.config.VarsConfigDoc.CompanyTokenKeyDoc;
+import com.boot.jx.scope.tnt.Tenants;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CryptoUtil;
+import com.boot.utils.EntityDtoUtil;
 import com.mongodb.WriteResult;
 
 @Component
@@ -54,6 +60,7 @@ public class ConfigStore extends CommonMongoTemplateAbstract {
 		configDoc.getChannelKey(); // Populate Keys of not exists
 		save(configDoc);
 		log(configDoc, "updated", action);
+
 	}
 
 	public void saveChannelConfig(ChannelConfigDoc doc) {
@@ -115,6 +122,35 @@ public class ConfigStore extends CommonMongoTemplateAbstract {
 		} catch (Exception e) {
 			LOGGER.error("saveClientKeyConfig", e);
 		}
+	}
+
+	@Async
+	public void saveMaster(ChannelConfigDoc configDoc) {
+		ChannelConfigDupsDoc masterDoc = EntityDtoUtil.dtoToEntity(configDoc, new ChannelConfigDupsDoc());
+		masterDoc.setId(masterDoc.getDomain() + ":" + masterDoc.getId());
+		masterDoc.setChannelId(configDoc.getChannelId());
+		AppContextUtil.clear();
+		AppContextUtil.setTenant(Tenants.getDefault());
+		AppContextUtil.init();
+		save(masterDoc);
+	}
+
+	public void saveMaster(PrefsConfigDoc prefsConfigDoc) {
+		PrefsConfigDoc masterDoc = EntityDtoUtil.dtoToEntity(prefsConfigDoc, new PrefsConfigDoc());
+		masterDoc.setId(masterDoc.getDomain() + ":" + masterDoc.getId());
+		AppContextUtil.clear();
+		AppContextUtil.setTenant(Tenants.getDefault());
+		AppContextUtil.init();
+		save(masterDoc, "DUPS_CONFIG_PREFS");
+	}
+
+	public void saveMaster(PermsConfigDoc permConfigDoc) {
+		PermsConfigDoc masterDoc = EntityDtoUtil.dtoToEntity(permConfigDoc, new PermsConfigDoc());
+		masterDoc.setId(masterDoc.getDomain() + ":" + masterDoc.getId());
+		AppContextUtil.clear();
+		AppContextUtil.setTenant(Tenants.getDefault());
+		AppContextUtil.init();
+		save(masterDoc, "DUPS_CONFIG_PERMS");
 	}
 
 }

@@ -34,7 +34,7 @@ import com.boot.jx.postman.doc.config.VarsConfigDoc;
 import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.postman.plugin.ChannelPluginProvider;
 import com.boot.jx.postman.plugin.ChannelPluginProvider.ChannelPlugin;
-import com.boot.jx.postman.store.ConfigStore;
+import com.boot.jx.postman.store.ConfigMaster;
 import com.boot.jx.tunnel.sys.SharedConfigManager;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.model.MapModel;
@@ -47,7 +47,7 @@ import com.boot.utils.MapBuilder.BuilderMap;
 public class ConfigManager {
 
 	@Autowired
-	public ConfigStore configStore;
+	public ConfigMaster configStore;
 
 	@Autowired
 	private SharedConfigManager sharedConfigManager;

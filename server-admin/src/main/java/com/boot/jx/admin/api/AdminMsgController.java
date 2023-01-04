@@ -75,7 +75,7 @@ public class AdminMsgController {
 	public StarterDocKit starterDocKit;
 
 	@Autowired
-	CSVService fileService;
+	public CSVService fileService;
 
 	@RequestMapping(value = "/api/message/session", method = { RequestMethod.GET })
 	public ApiResponse<ChatSessionDoc, Object> fetchSession(@RequestParam String startStamp,

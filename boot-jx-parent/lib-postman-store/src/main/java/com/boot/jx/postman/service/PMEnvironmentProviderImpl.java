@@ -23,7 +23,7 @@ import com.boot.jx.postman.doc.config.PermsConfigDoc;
 import com.boot.jx.postman.doc.config.PrefsConfigDoc;
 import com.boot.jx.postman.doc.config.VarsConfigDoc.CompanyVarsConfigDoc;
 import com.boot.jx.postman.plugin.ChannelConfig;
-import com.boot.jx.postman.store.ConfigStore;
+import com.boot.jx.postman.store.ConfigMaster;
 import com.boot.jx.scope.tnt.Tenants;
 import com.boot.model.SafeKeyHashMap;
 import com.boot.utils.ArgUtil;
@@ -45,7 +45,7 @@ public class PMEnvironmentProviderImpl implements PMEnvironmentProvider, AppShar
 	PMConfigurationDoc sharedConfiguration = null;
 
 	@Autowired(required = false)
-	private ConfigStore configStore;
+	private ConfigMaster configStore;
 
 	@Value("${mry.prop.service.server}")
 	private String serviceServer;
