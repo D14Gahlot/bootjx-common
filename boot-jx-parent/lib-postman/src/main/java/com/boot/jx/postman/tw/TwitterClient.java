@@ -64,7 +64,7 @@ public class TwitterClient implements MessageClient {
 
 	@Autowired
 	RestService restService;
-	
+
 	public TwitterClientContext getContext(ChannelConfig channelConfig) {
 		// lane = ArgUtil.nonEmpty(lane, defaultLane);
 
@@ -148,7 +148,8 @@ public class TwitterClient implements MessageClient {
 								.put("url", button.getUrl()).toMap());
 					} else {
 						options.add(MapModel.createInstance().put("label", button.getLabel())
-								.put("description", button.getDesc()).put("metadata", button.getCode()).toMap());
+								.put("description", ArgUtil.nonEmpty(button.getDesc(), button.getLabel()))
+								.put("metadata", button.getCode()).toMap());
 					}
 				}
 
