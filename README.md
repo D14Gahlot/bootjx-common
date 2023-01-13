@@ -62,3 +62,4 @@ java -jar server-contak/target/server-contak-0.0.1-SNAPSHOT.jar
 
 ### GUIDE
 [Application Properties](docs/application.properties.md)
+
