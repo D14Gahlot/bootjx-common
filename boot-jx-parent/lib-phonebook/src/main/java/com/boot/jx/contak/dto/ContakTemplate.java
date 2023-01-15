@@ -33,6 +33,7 @@ public class ContakTemplate implements Serializable {
 
 	public static class ContakTemplateCTA implements Serializable {
 		private static final long serialVersionUID = -2966964156450843043L;
+		public String type;
 		public String label;
 		public String phone;
 		public String url;
@@ -68,6 +69,14 @@ public class ContakTemplate implements Serializable {
 
 		public void setVariant(String variant) {
 			this.variant = variant;
+		}
+
+		public String getType() {
+			return type;
+		}
+
+		public void setType(String type) {
+			this.type = type;
 		}
 	}
 
