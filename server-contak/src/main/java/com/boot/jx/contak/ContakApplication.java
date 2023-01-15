@@ -14,6 +14,11 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.web.context.request.RequestContextListener;
 
+import springfox.documentation.builders.PathSelectors;
+import springfox.documentation.builders.RequestHandlerSelectors;
+import springfox.documentation.spi.DocumentationType;
+import springfox.documentation.spring.web.plugins.Docket;
+
 /**
  * The Class WebApplication.
  */
@@ -62,5 +67,13 @@ public class ContakApplication extends SpringBootServletInitializer {
 	@Bean
 	public RequestContextListener requestContextListener() {
 		return new RequestContextListener();
+	}
+
+	@Bean
+	public Docket api2() {
+		return new Docket(DocumentationType.SWAGGER_2).groupName("clientnode").select()
+				.apis(RequestHandlerSelectors.basePackage("com.boot.jx.contak.nodedocs"))
+				// .paths(PathSelectors.ant("/api/products/**"))
+				.build();
 	}
 }

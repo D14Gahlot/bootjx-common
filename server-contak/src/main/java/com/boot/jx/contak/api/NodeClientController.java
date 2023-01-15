@@ -16,6 +16,7 @@ import com.boot.jx.contak.doc.ContakMessageDoc;
 import com.boot.jx.contak.doc.ContakTemplateDoc;
 import com.boot.jx.contak.dto.CompanyDoc;
 import com.boot.jx.contak.dto.ContakTemplate;
+import com.boot.jx.contak.dto.PhoneNotpRequestModels;
 import com.boot.jx.contak.dto.UserRegistrationDoc;
 import com.boot.jx.contak.dto.PhoneNotpRequestModels.ContakMessgaeTemplate;
 import com.boot.jx.contak.dto.PhoneNotpRequestModels.PhoneNotpDto;
@@ -47,7 +48,7 @@ public class NodeClientController {
 
 	@Autowired
 	private ContakApiContext apiContext;
-	
+
 	@Autowired
 	UserRegistrationManager userRegistrationManager;
 
@@ -97,9 +98,10 @@ public class NodeClientController {
 		newPhoneNOTPDoc.setCompanyName(msg.companyName);
 		newPhoneNOTPDoc.setLogoUrl(msg.logoUrl);
 
-		if (ArgUtil.is(msg.template) && ArgUtil.is(msg.template.code) && !ArgUtil.is(msg.type,"HANDSHAKE")) {
-			ContakTemplate tmpl = commonMongoTemplate.findOne(
-					CommonMongoQueryBuilder.collection(ContakTemplateDoc.class).where(Criteria.where("code").is(msg.template.code).and("companyId").is(compoc.getCompanyId())));
+		if (ArgUtil.is(msg.template) && ArgUtil.is(msg.template.code) && !ArgUtil.is(msg.type, "HANDSHAKE")) {
+			ContakTemplate tmpl = commonMongoTemplate
+					.findOne(CommonMongoQueryBuilder.collection(ContakTemplateDoc.class).where(
+							Criteria.where("code").is(msg.template.code).and("companyId").is(compoc.getCompanyId())));
 //			ContakTemplate tmpl = commonMongoTemplate.collection(ContakTemplateDoc.class)
 //					.find(Criteria.where("code").is(msg.template.code).and("companyId").is(compoc.getCompanyId()))
 //					.asFirst(new ContakTemplate());
@@ -134,8 +136,8 @@ public class NodeClientController {
 
 		return ApiResponse.buildResults(newPhoneNOTPDoc);
 	}
-	
-	@ApiRequest(authenticateTenant = true)	
+
+	@ApiRequest(authenticateTenant = true)
 	@RequestMapping(value = "/api/v1/user/key/reg/fetch", method = { RequestMethod.POST })
 	public ApiResponse<UserRegistrationDoc, Object> read(@RequestBody HashMap<String, String> msg) {
 		AppRequestUtil.log("MESSAGE APIKEY", msg);
