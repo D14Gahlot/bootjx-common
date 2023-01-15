@@ -1,9 +1,12 @@
 package com.boot.jx.contak.doc;
 
+import java.util.Map;
+
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import com.boot.jx.contak.dto.ContakModel;
 import com.boot.jx.contak.dto.ContakTemplate;
 
 @Document(collection = "CONTAK_TEMPLATE")
@@ -21,6 +24,8 @@ public class ContakTemplateDoc extends ContakTemplate {
 	public String code;
 
 	public boolean deleted;
+
+	public ContakModel model;
 
 	public String getTemplateId() {
 		return templateId;
@@ -52,6 +57,14 @@ public class ContakTemplateDoc extends ContakTemplate {
 
 	public void setDeleted(boolean deleted) {
 		this.deleted = deleted;
+	}
+
+	public ContakModel getModel() {
+		return model;
+	}
+
+	public void setModel(ContakModel model) {
+		this.model = model;
 	}
 
 }
