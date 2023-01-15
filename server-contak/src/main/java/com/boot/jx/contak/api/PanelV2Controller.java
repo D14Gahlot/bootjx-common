@@ -50,7 +50,7 @@ import com.boot.utils.Random;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
-@Api(tags = "Contak Panel", description = "API's for Panel", hidden = true)
+@Api(tags = "Contak Panel V2", description = "API's for Panel", hidden = true)
 @Controller
 @RequestMapping("/panel")
 public class PanelV2Controller {
