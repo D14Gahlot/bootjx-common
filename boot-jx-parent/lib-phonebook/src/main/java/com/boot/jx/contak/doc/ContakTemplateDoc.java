@@ -20,6 +20,8 @@ public class ContakTemplateDoc extends ContakTemplate {
 	@Indexed
 	public String code;
 
+	public boolean deleted;
+
 	public String getTemplateId() {
 		return templateId;
 	}
@@ -42,6 +44,14 @@ public class ContakTemplateDoc extends ContakTemplate {
 
 	public void setCode(String code) {
 		this.code = code;
+	}
+
+	public boolean isDeleted() {
+		return deleted;
+	}
+
+	public void setDeleted(boolean deleted) {
+		this.deleted = deleted;
 	}
 
 }

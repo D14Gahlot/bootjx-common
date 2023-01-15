@@ -330,4 +330,5 @@ public class PanelController {
 		return ApiResponse.buildResults(
 				commonMongoTemplate.collection(ContakTemplateDoc.class).where("companyId", companyId).find().asList());
 	}
+
 }

@@ -96,6 +96,16 @@ public class MongoUtils {
 			return this;
 		}
 
+		public MongoResultProcessor<T> with(Criteria criteria) {
+			this.qb().where(criteria);
+			return this;
+		}
+
+		public MongoResultProcessor<T> set(String key, Object o) {
+			this.qb().set(key, o);
+			return this;
+		}
+
 		public MongoResultProcessor<T> find(IMongoQueryBuilder<T> builder) {
 			this.results = mongoTemplate.find(builder);
 			return this;
