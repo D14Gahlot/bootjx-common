@@ -1,4 +1,4 @@
-
+package com.boot.jx.account.dto;
 import java.util.HashMap;
 import java.util.Map;
 
