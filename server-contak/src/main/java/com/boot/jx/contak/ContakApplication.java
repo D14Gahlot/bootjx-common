@@ -69,11 +69,4 @@ public class ContakApplication extends SpringBootServletInitializer {
 		return new RequestContextListener();
 	}
 
-	@Bean
-	public Docket api2() {
-		return new Docket(DocumentationType.SWAGGER_2).groupName("clientnode").select()
-				.apis(RequestHandlerSelectors.basePackage("com.boot.jx.contak.nodedocs"))
-				// .paths(PathSelectors.ant("/api/products/**"))
-				.build();
-	}
 }

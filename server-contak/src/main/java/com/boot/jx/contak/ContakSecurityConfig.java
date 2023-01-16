@@ -1,5 +1,8 @@
 package com.boot.jx.contak;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -16,6 +19,14 @@ import org.springframework.stereotype.Component;
 
 import com.boot.jx.swagger.MockParamBuilder;
 import com.boot.jx.swagger.MockParamBuilder.MockParam;
+import com.boot.utils.ArgUtil;
+import com.boot.utils.StringUtils;
+
+import springfox.documentation.builders.RequestHandlerSelectors;
+import springfox.documentation.service.ApiKey;
+import springfox.documentation.service.SecurityScheme;
+import springfox.documentation.spi.DocumentationType;
+import springfox.documentation.spring.web.plugins.Docket;
 
 @Component
 public class ContakSecurityConfig {
@@ -123,7 +134,17 @@ public class ContakSecurityConfig {
 	public MockParam swaggerApiKeyParam() {
 		return new MockParamBuilder().id("X_API_KEY").name("x-api-key").description("API Key").defaultValue("")
 				.parameterType(MockParamBuilder.MockParamType.HEADER).securityScheme("X_API_KEY").build();
+	}
 
+	@Bean
+	public Docket api2() {
+		List<SecurityScheme> securitySchemes = new ArrayList<SecurityScheme>();
+		securitySchemes.add(new ApiKey("X_API_KEY", "x-api-key",
+				StringUtils.toLowerCase(ArgUtil.parseAsString(MockParamBuilder.MockParamType.HEADER))));
+		return new Docket(DocumentationType.SWAGGER_2).groupName("clientnode").select()
+				.apis(RequestHandlerSelectors.basePackage("com.boot.jx.contak.nodedocs"))
+				// .paths(PathSelectors.ant("/api/products/**"))
+				.build().securitySchemes(securitySchemes);
 	}
 
 }
