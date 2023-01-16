@@ -30,6 +30,9 @@ public class AgentSecurityConfig extends WebSecurityConfigurerAdapter {
 				// .sessionFixation().none()
 				// Publics Calls
 				.and().authorizeRequests().antMatchers("/pub/**").permitAll() // Public URLs
+				.and().authorizeRequests().antMatchers("/assets/**").permitAll() // Public URLs
+				.and().authorizeRequests().antMatchers("/static/**").permitAll() // Public URLs
+				.and().authorizeRequests().antMatchers("/resources/**").permitAll() // Public URLs
 				.and().authorizeRequests().antMatchers("/plug_mitel/**").permitAll() // Public URLs
 				.and().authorizeRequests().antMatchers("/plug/**").permitAll() // Public URLs
 				.and().authorizeRequests().antMatchers("/ext/**").permitAll() // External URLS
@@ -39,6 +42,7 @@ public class AgentSecurityConfig extends WebSecurityConfigurerAdapter {
 				// Login Calls
 				.and().authorizeRequests().antMatchers("/auth/**").permitAll()
 				// API Calls
+				.and().authorizeRequests().antMatchers("/gallery/**").authenticated() // Public URLs
 				.and().authorizeRequests().antMatchers("/api/**").authenticated()
 				// App Pages
 				.and().authorizeRequests().antMatchers("/app/**").authenticated().and().authorizeRequests()
@@ -66,11 +70,7 @@ public class AgentSecurityConfig extends WebSecurityConfigurerAdapter {
 	public void configure(AuthenticationManagerBuilder auth) throws Exception {
 		auth.inMemoryAuthentication()
 				// Agent 1
-				.withUser("agent1").password(passwordEncoder().encode("agent1")).roles("AGENT").and()
-				// Agent 2
-				.withUser("agent2").password(passwordEncoder().encode("agent2")).roles("AGENT").and()
-				// Agent 3
-				.withUser("agent3").password(passwordEncoder().encode("agent3")).roles("AGENT");
+				.withUser("agent1").password(passwordEncoder().encode("agent1")).roles("AGENT");
 	}
 
 	@Bean

@@ -169,6 +169,7 @@ public class AgentSessionService
 		stompTunnelSessionManager.registerUser(agent.getAgent_code(), agent.getDept().getDept_code(), DEFAULT.NO_DEPT,
 				StompQuery.PING_TAG);
 		updateLogin(agent);
+		
 	}
 
 	@Autowired
