@@ -50,10 +50,10 @@ public class OutBoundMsgBasic implements Serializable, JsonIgnoreUnknown {
 		@ApiMockModelProperty(required = false)
 		public OutBoundMsgMedia video;
 
-		@ApiMockModelProperty(hidden = true)
+		@ApiMockModelProperty(hidden = false)
 		public List<CommonMsgContactCard> contacts;
 
-		@ApiMockModelProperty(hidden = true)
+		@ApiMockModelProperty(hidden = false)
 		public CommonMsgLocation location;
 
 		@ApiMockModelProperty(required = false)

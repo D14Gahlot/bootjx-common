@@ -16,4 +16,7 @@ public class CommonMsgLocation {
 	@ApiMockModelProperty(example = "Main Building", value = "location-name")
 	public String name;
 
+	@ApiMockModelProperty(example = "Location URL", value = "location-url")
+	public String url;
+
 }

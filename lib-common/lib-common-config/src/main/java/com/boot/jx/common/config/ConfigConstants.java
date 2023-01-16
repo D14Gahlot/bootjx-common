@@ -92,8 +92,9 @@ public class ConfigConstants {
 		CHAT_TAG_ENABLED(
 				new ConfigMeta("Chat Session Tags Enabled", "chat.tag.enabled").optionsOnOff().group(GROUP_AGENT)),
 
-		POSTMAN_CHAT_SESSION_TIMEOUT(new ConfigMeta("Chat Session Timeout", "postman.chat.session.timeout")
-				.optionValues("8hr", "12hr", "16hr", "20hr", "24hr", "2d", "5d", "3d", "7d")
+		POSTMAN_CHAT_SESSION_TIMEOUT(new ConfigMeta("Default Chat Session Idle Duration", "postman.chat.session.timeout")
+				.desc("Use 2hr,3hr,4hr etc for hours and 2d,3d,4d etc for days." )
+				//.optionValues("1hr", "2hr", "4hr", "8hr", "12hr", "16hr", "20hr", "24hr", "2d", "5d", "3d", "7d")
 				.group(GROUP_CUSTOMER_CHAT)),
 
 		POSTMAN_CHAT_IDLE_TIMEOUT(new ConfigMeta("Chat Alert Timer", "postman.chat.idle.timeout")

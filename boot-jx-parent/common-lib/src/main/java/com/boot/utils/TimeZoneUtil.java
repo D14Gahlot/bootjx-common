@@ -1,75 +1,78 @@
-package com.boot.utils;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 
-
 public class TimeZoneUtil {
-		
-	public static class TimeZoneDto{
+
+	public static class TimeZoneDto {
 		String id;
 		String code;
 		String title;
+
 		public String getId() {
 			return id;
 		}
+
 		public void setId(String id) {
 			this.id = id;
 		}
+
 		public String getCode() {
 			return code;
 		}
+
 		public void setCode(String code) {
 			this.code = code;
 		}
+
 		public String getTitle() {
 			return title;
 		}
+
 		public void setTitle(String title) {
 			this.title = title;
 		}
 	}
-	
-	static List<TimeZoneDto> timeZoneDtoLst=new ArrayList<>();
-	static List<String> timeZoneLst=new ArrayList<>();
-	
+
+	static List<TimeZoneDto> timeZoneDtoLst = new ArrayList<>();
+	static List<String> timeZoneLst = new ArrayList<>();
+
 	static {
 		String[] ids = TimeZone.getAvailableIDs();
 		for (String id : ids) {
 			TimeZoneDto dto = new TimeZoneDto();
-			TimeZone tz=TimeZone.getTimeZone(id);
+			TimeZone tz = TimeZone.getTimeZone(id);
 			long hours = TimeUnit.MILLISECONDS.toHours(tz.getRawOffset());
-			long minutes = TimeUnit.MILLISECONDS.toMinutes(tz.getRawOffset()) 
-                                  - TimeUnit.HOURS.toMinutes(hours);
-		// avoid -4:-30 issue
-		minutes = Math.abs(minutes);
+			long minutes = TimeUnit.MILLISECONDS.toMinutes(tz.getRawOffset()) - TimeUnit.HOURS.toMinutes(hours);
+			// avoid -4:-30 issue
+			minutes = Math.abs(minutes);
 
-		String key = null;
-		String contry=null;
-		String timezoffset=null;
-		
-		if (hours > 0) {
-			contry = tz.getID();
-			timezoffset =  String.format("GMT+%d:%02d",hours, minutes);
-			key = contry+"::"+timezoffset;
-			System.out.println("contry "+contry+"\t timezoffset :"+timezoffset);
-			dto.setId(key);
-			dto.setCode(contry);
-			dto.setTitle(key);
-		} else {
-			contry = tz.getID();
-			timezoffset =  String.format("GMT+%d:%02d",hours, minutes);
-			key = contry+"::"+timezoffset;
-			
-			System.out.println("contry "+contry+"\t timezoffset :"+timezoffset);
-			dto.setId(key);
-			dto.setCode(contry);
-			dto.setTitle(key);
-		}
-		timeZoneDtoLst.add(dto);
-		timeZoneLst.add(key);
+			String key = null;
+			String contry = null;
+			String timezoffset = null;
+
+			if (hours > 0) {
+				contry = tz.getID();
+				timezoffset = String.format("GMT+%d:%02d", hours, minutes);
+				key = contry + "::" + timezoffset;
+				// System.out.println("contry "+contry+"\t timezoffset :"+timezoffset);
+				dto.setId(key);
+				dto.setCode(contry);
+				dto.setTitle(key);
+			} else {
+				contry = tz.getID();
+				timezoffset = String.format("GMT+%d:%02d", hours, minutes);
+				key = contry + "::" + timezoffset;
+
+				// System.out.println("contry "+contry+"\t timezoffset :"+timezoffset);
+				dto.setId(key);
+				dto.setCode(contry);
+				dto.setTitle(key);
+			}
+			timeZoneDtoLst.add(dto);
+			timeZoneLst.add(key);
 		}
 	}
 
@@ -88,5 +91,5 @@ public class TimeZoneUtil {
 	public static void setTimeZoneLst(List<String> timeZoneLst) {
 		TimeZoneUtil.timeZoneLst = timeZoneLst;
 	}
-	
+
 }

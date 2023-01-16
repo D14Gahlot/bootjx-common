@@ -85,10 +85,10 @@ public class CommonMongoSource {
 		String tnt = AppContextUtil.getTenant();
 		String dbtnt = ArgUtil.is(tenantResolver) ? tenantResolver.getDBName(tnt) : tnt;
 		MongoClientURI mongoClientURI = new MongoClientURI(dataSourceUrl);
-
+		
 		String dataBaseName = (globalDBProfix + "_" + dbtnt);
 		if (hasRule(USE_NO_DB)) {
-			//dataBaseName = "nodb";
+			// dataBaseName = "nodb";
 			dataBaseName = mongoClientURI.getDatabase();
 		} else if ((!ArgUtil.areEqual(StringUtils.trim(dataSourceUrl), StringUtils.trim(globalDataSourceUrl))
 				|| Tenants.isDefault(tnt) || (hasRule(USE_DEFAULT_DB)))) {
@@ -161,7 +161,7 @@ public class CommonMongoSource {
 		} else {
 			if (mongoTemplate == null) {
 				synchronized (lock) {
-					LOGGER.info("mongoTemplate is NULL So creating One {} {}", getDataSourceUrl(),
+					LOGGER.debug("mongoTemplate is NULL So creating One {} {}", getDataSourceUrl(),
 							getDataSourceUsername());
 					mongoDbFactory = getMongoDbFactory();
 					if (ArgUtil.is(mongoDbFactory)) {

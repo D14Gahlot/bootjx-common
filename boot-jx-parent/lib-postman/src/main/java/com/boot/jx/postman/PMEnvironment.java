@@ -111,6 +111,7 @@ public class PMEnvironment {
 		private boolean isSandbox;
 		private boolean isShared;
 		private boolean isDisabled;
+		private boolean isDeleted;
 
 		@JsonView(PMEnvironment.PublicProperty.class)
 		private String server;
@@ -236,6 +237,14 @@ public class PMEnvironment {
 
 		public boolean equals(ContactType type) {
 			return this.contactType == type;
+		}
+
+		public boolean isDeleted() {
+			return isDeleted;
+		}
+
+		public void setDeleted(boolean isDeleted) {
+			this.isDeleted = isDeleted;
 		}
 
 	}

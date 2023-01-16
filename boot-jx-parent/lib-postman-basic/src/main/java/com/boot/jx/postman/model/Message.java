@@ -645,4 +645,11 @@ public class Message<T extends Message<T>> implements Serializable, MessageOptio
 	public void setVccards(List<PBVCard> vccards) {
 		this.vccards = vccards;
 	}
+
+	public List<PBVCard> vccards() {
+		if (vccards == null) {
+			this.vccards = new ArrayList<PBVCard>();
+		}
+		return this.vccards;
+	}
 }

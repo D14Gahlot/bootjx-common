@@ -23,7 +23,7 @@ import com.boot.jx.postman.doc.HSMTemplateDoc;
 import com.boot.jx.postman.doc.config.ClientAppConfigDoc;
 import com.boot.jx.postman.doc.config.VarsConfigDoc.CompanyVarsConfigDoc;
 import com.boot.jx.postman.model.ext.MsgChannel;
-import com.boot.jx.postman.store.ConfigStore;
+import com.boot.jx.postman.store.ConfigMaster;
 import com.boot.jx.xms.XmsConstants.XMSClientAuth;
 import com.boot.jx.xms.XmsVendorConfigurer;
 import com.boot.jx.xms.dto.WebhookUrlRequest;
@@ -45,7 +45,7 @@ public class ConfigApiV1 {
 	private ConfigManager configManager;
 
 	@Autowired
-	private ConfigStore configStore;
+	private ConfigMaster configMaster;
 
 	@Autowired
 	private PMEnvironment pmEnvironment;
@@ -62,7 +62,7 @@ public class ConfigApiV1 {
 
 		ClientApp x = XmsVendorConfigurer.getClientApp();
 		if (ArgUtil.is(x)) {
-			ClientAppConfigDoc xo = configStore.findById(x.getId(), ClientAppConfigDoc.class);
+			ClientAppConfigDoc xo = configMaster.findById(x.getId(), ClientAppConfigDoc.class);
 			if (ArgUtil.areEqual(xo.getAppType(), ClientApp.APP_TYPE_WEBHOOK)) {
 				xo.setWebhook(req.url);
 				xo.setForward(req.forward);

@@ -502,4 +502,22 @@ public class MapModel implements JsonSerializerType<Object> {
 		return 0;
 	}
 
+	public MapModel map2list() {
+		this.list().add(this.map());
+		this.map = null;
+		return this;
+	}
+
+	public MapModel list2map(String key) {
+		this.map().put(key, this.list());
+		this.list = null;
+		return this;
+	}
+
+	public MapModel map2map(String key) {
+		Map<String, Object> child = this.map();
+		this.map = null;
+		this.map().put(key, child);
+		return this;
+	}
 }

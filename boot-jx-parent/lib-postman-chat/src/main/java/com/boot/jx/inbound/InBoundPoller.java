@@ -38,7 +38,7 @@ import com.boot.jx.postman.doc.config.ChannelConfigDoc;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.MessageBoxEvent;
 import com.boot.jx.postman.plugin.ChannelConfig;
-import com.boot.jx.postman.store.ConfigStore;
+import com.boot.jx.postman.store.ConfigMaster;
 import com.boot.jx.tunnel.ITunnelDefs.TunnelTask;
 import com.boot.jx.tunnel.sys.SharedConfigManager;
 import com.boot.jx.tunnel.task.ATaskLimiter;
@@ -72,7 +72,7 @@ public class InBoundPoller extends ATaskLimiter {
 	private AWSConfig awsConfig;
 
 	@Autowired
-	ConfigStore configStore;
+	ConfigMaster configMaster;
 
 	@Autowired
 	private SharedConfigManager sharedConfigManager;
@@ -107,20 +107,20 @@ public class InBoundPoller extends ATaskLimiter {
 
 			String error = readPop3Emails(task, channelId, channel, messageBoxEvent);
 			if (ArgUtil.is(error)) {
-				ChannelConfigDoc channelDoc = configStore.findById(channelId, ChannelConfigDoc.class);
+				ChannelConfigDoc channelDoc = configMaster.findById(channelId, ChannelConfigDoc.class);
 				boolean isDisabled = ArgUtil.is(channelDoc.getError()) && ArgUtil.is(channelDoc.getError(), error);
 				if (isDisabled) {
 					channelDoc.setDisabled(isDisabled);
 					LOGGER.warn("Channel will be Disabled {}", channelId);
 				}
 				channelDoc.setError(error);
-				configStore.save(channelDoc);
+				configMaster.save(channelDoc);
 				sharedConfigManager.clear();
 			} else if (channel.isDisabled() && ArgUtil.is(channel.getError())) {
-				ChannelConfigDoc channelDoc = configStore.findById(channelId, ChannelConfigDoc.class);
+				ChannelConfigDoc channelDoc = configMaster.findById(channelId, ChannelConfigDoc.class);
 				channelDoc.setDisabled(false);
 				channelDoc.setError(null);
-				configStore.save(channelDoc);
+				configMaster.save(channelDoc);
 				sharedConfigManager.clear();
 			}
 			if (ArgUtil.is(messageBoxEvent.getInboxMessages())) {

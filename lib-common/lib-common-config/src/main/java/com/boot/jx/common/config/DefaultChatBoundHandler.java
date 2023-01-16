@@ -1,5 +1,7 @@
 package com.boot.jx.common.config;
 
+import java.util.ArrayList;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -227,17 +229,28 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 			Attachment atth = inboxMessage.attachments().get(0);
 			InBoundMsgMedia media = InBoundMsgMedia.from(atth);
 			if (MESSAGE_FORMAT_TYPE.IMAGE.equals(inboxMessage.getFormatType())) {
+				msg.type = MESSAGE_FORMAT_TYPE.IMAGE;
 				msg.image = media;
 			} else if (MESSAGE_FORMAT_TYPE.STICKER.equals(inboxMessage.getFormatType())) {
+				msg.type = MESSAGE_FORMAT_TYPE.STICKER;
 				msg.sticker = media;
 			} else if (MESSAGE_FORMAT_TYPE.VIDEO.equals(inboxMessage.getFormatType())) {
 				msg.video = media;
+				msg.type = MESSAGE_FORMAT_TYPE.VIDEO;
 			} else if (MESSAGE_FORMAT_TYPE.AUDIO.equals(inboxMessage.getFormatType())) {
 				msg.audio = media;
+				msg.type = MESSAGE_FORMAT_TYPE.AUDIO;
 			} else if (MESSAGE_FORMAT_TYPE.VOICE.equals(inboxMessage.getFormatType())) {
 				msg.voice = media;
+				msg.type = MESSAGE_FORMAT_TYPE.VOICE;
 			} else {
+				msg.type = MESSAGE_FORMAT_TYPE.DOCUMENT;
 				msg.document = media;
+			}
+			msg.attachments = new ArrayList<InBoundMsgMedia>();
+			for (Attachment thisAttach : inboxMessage.attachments()) {
+				InBoundMsgMedia thisMedia = InBoundMsgMedia.from(thisAttach);
+				msg.attachments.add(thisMedia);
 			}
 		} else {
 			msg.type = MESSAGE_FORMAT_TYPE.TEXT;
