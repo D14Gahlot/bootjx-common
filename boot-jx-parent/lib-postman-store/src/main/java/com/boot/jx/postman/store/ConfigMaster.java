@@ -10,10 +10,10 @@ import com.boot.jx.postman.doc.config.ClientAppConfigDoc;
 import com.boot.jx.postman.doc.config.PermsConfigDoc;
 import com.boot.jx.postman.doc.config.PrefsConfigDoc;
 import com.boot.jx.postman.doc.config.VarsConfigDoc;
-import com.mongodb.WriteResult;
+import com.mongodb.client.result.DeleteResult;
 
 @Component
-public class ConfigMaster extends CommonMongoTemplateAbstract {
+public class ConfigMaster extends CommonMongoTemplateAbstract<ConfigMaster> {
 
 	@Autowired(required = false)
 	private ConfigStore configStore;
@@ -28,8 +28,8 @@ public class ConfigMaster extends CommonMongoTemplateAbstract {
 		configStore.saveMaster(configDoc);
 	}
 
-	public WriteResult remove(ChannelConfigDoc configDoc) {
-		WriteResult r = configStore.remove(configDoc);
+	public DeleteResult remove(ChannelConfigDoc configDoc) {
+		DeleteResult r = configStore.remove(configDoc);
 		configDoc.setDeleted(true);
 		configDoc.setDisabled(true);
 		configStore.saveMaster(configDoc);

@@ -7,7 +7,6 @@ import org.springframework.stereotype.Component;
 
 import com.boot.jx.AppContextUtil;
 import com.boot.jx.mongo.CommonMongoTemplateAbstract;
-import com.boot.jx.postman.PMEnvironment.PMConfigurationObject;
 import com.boot.jx.postman.doc.PMConfigurationDoc;
 import com.boot.jx.postman.doc.config.ChannelConfigDoc;
 import com.boot.jx.postman.doc.config.ChannelConfigDupsDoc;
@@ -21,10 +20,10 @@ import com.boot.jx.utils.PostManUtil;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CryptoUtil;
 import com.boot.utils.EntityDtoUtil;
-import com.mongodb.WriteResult;
+import com.mongodb.client.result.DeleteResult;
 
 @Component
-public class ConfigStore extends CommonMongoTemplateAbstract {
+public class ConfigStore extends CommonMongoTemplateAbstract<ConfigStore> {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(ConfigStore.class);
 
