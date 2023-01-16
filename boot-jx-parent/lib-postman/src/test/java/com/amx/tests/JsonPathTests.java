@@ -9,13 +9,20 @@ import org.junit.Test;
 import com.boot.jx.postman.wa360.WA360Constants.InBoundWrapperPaths;
 import com.boot.jx.postman.wa360.WA360Template;
 import com.boot.model.MapModel;
+import com.boot.utils.BashUtil.CurlCommand;
 import com.boot.utils.FileUtil;
 import com.boot.utils.JsonUtil;
 
 public class JsonPathTests {
 
 	public static void main(String[] arg) {
-		new JsonPathTests().wa360Templates();
+		new JsonPathTests().curl();
+	}
+
+	public void curl() {
+		URL url = FileUtil.getResource("sample/curl_test.txt", JsonPathTests.class);
+		String text = FileUtil.read(url);
+		System.out.println(JsonUtil.toJson(CurlCommand.parse(text)));
 	}
 
 	// @Test

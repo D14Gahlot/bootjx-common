@@ -379,9 +379,13 @@ public class RestService {
 			return this.patch(new HttpEntity<Object>(null, processdHeaders()));
 		}
 
-		public Ajax postForm() {
+		public Ajax submit() {
 			this.isForm = true;
 			return this.post(new HttpEntity<MultiValueMap<String, Object>>(parameters, processdHeaders()));
+		}
+
+		public Ajax postForm() {
+			return this.submit();
 		}
 
 		public <T> Ajax postJson(T body) {

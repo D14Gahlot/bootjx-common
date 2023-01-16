@@ -149,13 +149,13 @@ public class CommonMongoTemplateAbstract<TStore extends CommonMongoTemplateAbstr
 
 	@Override
 	public <T> List<T> find(IMongoQueryBuilder<T> builder) {
-		// System.out.println("+++"+builder.getQuery());
+		//System.out.println("+++"+builder.getQuery());
 		return find(builder.getQuery(), builder.getDocClass());
 	}
 
 	@Override
 	public <T> T findOne(IMongoQueryBuilder<T> builder) {
-		// System.out.println("+++"+builder.getQuery());
+		//System.out.println("+++"+builder.getQuery());
 		return findOne(builder.getQuery(), builder.getDocClass());
 	}
 

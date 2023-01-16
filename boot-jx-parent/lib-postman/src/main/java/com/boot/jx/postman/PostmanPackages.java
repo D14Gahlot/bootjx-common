@@ -9,20 +9,20 @@ import com.boot.jx.postman.plugin.ChannelConfig;
 
 public class PostmanPackages {
 
-    public static interface ICommonTmplPackage {
-	public CommonFile process(CommonFile file, ContactType contactType);
+	public static interface ICommonTmplPackage {
+		public CommonFile process(CommonFile file, ContactType contactType);
 
-	public String process(String templateContent, Object contact);
-    }
+		public String process(String templateContent, Object contact);
+	}
 
-    public static interface TemplateResolver {
-	public BasicTemplate get(String templateId);
+	public static interface TemplateResolver {
+		public BasicTemplate get(String templateId);
 
-	public BasicTemplate get(CommonTemplateMeta template);
-    }
+		public BasicTemplate get(CommonTemplateMeta template);
+	}
 
-    public static interface MessageClient {
-	public OutboxMessage send(ChannelConfig channelConfig, OutboxMessage outboxMessage);
-    }
+	public static interface MessageClient {
+		public OutboxMessage send(ChannelConfig channelConfig, OutboxMessage outboxMessage);
+	}
 
 }

@@ -6,12 +6,19 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.boot.jx.AppConfig;
 import com.boot.jx.AppConfigPackage.AppCommonConfig;
+import com.boot.jx.api.ApiResponse;
+import com.boot.jx.common.config.CDNBuilder;
+import com.boot.jx.common.config.ConfigConstants;
+import com.boot.jx.common.config.ConfigManager;
 import com.boot.jx.http.CommonHttpRequest;
 import com.boot.jx.postman.ClientApp;
 import com.boot.jx.postman.PMEnvironment;
+import com.boot.jx.postman.PMEnvironment.PMConfigurationObject;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CryptoUtil;
 import com.boot.utils.CryptoUtil.CrypToken;
@@ -20,9 +27,9 @@ import com.boot.utils.CryptoUtil.HashBuilder;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
-@Api(tags = "XMS ViewConroller", description = "API's for Messaging", hidden = true)
+@Api(tags = "DemoConroller", description = "API's for Messaging", hidden = true)
 @Controller
-public class OtpController {
+public class DemoController {
 	@Autowired
 	AppConfig appConfig;
 
@@ -37,6 +44,12 @@ public class OtpController {
 
 	@Value("${swagger.auth.password}")
 	String swaggerAuthPassword;
+
+	@Autowired
+	private ConfigManager configManager;
+
+	@Autowired
+	private CDNBuilder cdnBuilder;
 
 	private boolean isLoggedIn() {
 		String apiId = commonHttpRequest.get("swagger.auth.apiId");
@@ -101,6 +114,33 @@ public class OtpController {
 		}
 
 		return "app-contak";
+	}
+
+	@ResponseBody
+	@RequestMapping(value = "/pub/config/cdn", method = { RequestMethod.POST })
+	public ApiResponse<PMConfigurationObject, Object> updateCDN(@RequestParam(required = false) String url,
+			@RequestParam(required = false) String version,
+			@RequestParam(required = false, defaultValue = "false") boolean beta) {
+
+		String domainServer = pmEnvironment.keyEntry(ConfigConstants.APP_KEY.PROP_SERVICE_SERVER).asString();
+		String key = beta ? "mry.cdn.url.beta" : "mry.cdn.url";
+
+		PMConfigurationObject config = pmEnvironment.keyEntry(key);
+		config.setKey(key);
+
+		String oldUrl = config.asString();
+		config.setServer(domainServer);
+
+		if (ArgUtil.is(version) && ArgUtil.is(oldUrl)) {
+			url = cdnBuilder.updateVersion(oldUrl, version);
+		}
+
+		if (ArgUtil.is(url)) {
+			config.setValue(url);
+			configManager.save(config);
+		}
+
+		return ApiResponse.buildResults(config);
 	}
 
 }

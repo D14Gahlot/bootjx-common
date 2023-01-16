@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 
 import com.boot.jx.contak.dto.UserRegistrationDoc;
 import com.boot.jx.mongo.CommonDocInterfaces.TimeStampIndex;
+import com.boot.jx.postman.client.PostManClient;
 import com.boot.jx.mongo.CommonMongoQueryBuilder;
 import com.boot.jx.mongo.CommonMongoTemplate;
 
@@ -22,8 +23,8 @@ public class UserRegistrationManager {
 	private CommonMongoTemplate commonMongoTemplate;
 
 	public List<UserRegistrationDoc> getContacts(String mobile) {
-		return commonMongoTemplate.find(
-				CommonMongoQueryBuilder.collection(UserRegistrationDoc.class).where(Criteria.where("userPhoneNumber").is(mobile)));
+		return commonMongoTemplate.find(CommonMongoQueryBuilder.collection(UserRegistrationDoc.class)
+				.where(Criteria.where("userPhoneNumber").is(mobile)));
 	}
 
 	public List<UserRegistrationDoc> fetchRegistrations(String companyId) {

@@ -14,6 +14,11 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.web.context.request.RequestContextListener;
 
+import springfox.documentation.builders.PathSelectors;
+import springfox.documentation.builders.RequestHandlerSelectors;
+import springfox.documentation.spi.DocumentationType;
+import springfox.documentation.spring.web.plugins.Docket;
+
 /**
  * The Class WebApplication.
  */
@@ -63,4 +68,5 @@ public class ContakApplication extends SpringBootServletInitializer {
 	public RequestContextListener requestContextListener() {
 		return new RequestContextListener();
 	}
+
 }

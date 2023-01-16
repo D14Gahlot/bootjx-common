@@ -52,7 +52,8 @@ public class ContakSessionBean extends AppCommonAuthUser implements Serializable
 		}
 
 		for (ContakMembershipDoc membership : this.memberships) {
-			if (ArgUtil.isEqual(membership.getCompany().companyId, companyId)
+			if (ArgUtil.is(membership.getCompany())
+					&& ArgUtil.isEqual(membership.getCompany().companyId, companyId)
 					&& ArgUtil.is(membership.getMembershipType(), PMConstants.USER_SHIP_TYPE.OA_ADMIN,
 							PMConstants.USER_SHIP_TYPE.OA_OWNER)) {
 				return true;

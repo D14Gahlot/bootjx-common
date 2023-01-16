@@ -7,7 +7,6 @@ import java.util.UUID;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.security.core.Authentication;
@@ -32,12 +31,14 @@ import com.boot.jx.contak.ContakAuthService;
 import com.boot.jx.contak.ContakSessionBean;
 import com.boot.jx.contak.doc.ContakApiKey;
 import com.boot.jx.contak.doc.ContakMembershipDoc;
+import com.boot.jx.contak.doc.ContakTemplateDoc;
 import com.boot.jx.contak.doc.ContakUserDoc;
 import com.boot.jx.contak.dto.CompanyDoc;
 import com.boot.jx.mongo.CommonMongoQB.MQB;
 import com.boot.jx.mongo.CommonMongoQB.QueryCriteria;
 import com.boot.jx.mongo.CommonMongoQueryBuilder;
 import com.boot.jx.mongo.CommonMongoTemplate;
+import com.boot.jx.postman.PMConstants;
 import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.Constants;
@@ -97,6 +98,10 @@ public class PanelController {
 	public ApiResponse<Object, Object> login(Model model, @RequestParam String username, @RequestParam String password,
 			HttpServletRequest request, HttpServletResponse response) {
 		ContakUserDoc user = authService.authenticate(username, password, request);
+		if (ArgUtil.not(user)) {
+			ApiResponseUtil.throwInputException(new ApiFieldError().field("password").codeKey("InvalidCredentials")
+					.description("Invalid username or password"));
+		}
 		return ApiResponse.build().meta(MapModel.createInstance().put("username", user.getName()).toMap());
 	}
 
@@ -161,7 +166,7 @@ public class PanelController {
 					new ApiFieldError().field("varifyCode").codeKey("InvalidLink").description("Invalid Link"));
 		}
 		user.meta().setEmailVerificationCode(Constants.BLANK);
-		user.meta().setPassword(passsword);
+		user.meta().setPassword(CryptoUtil.getEncoder().message(passsword).sha2().toString());
 		commonMongoTemplate.save(user);
 		// authService.authenticate(email, passsword, request);
 		return ApiResponse.build()
@@ -203,20 +208,7 @@ public class PanelController {
 					new ApiFieldError().field("companyId").codeKey("InvalidCompany").description("Company not found"));
 		}
 
-		ContakMembershipDoc m = commonMongoTemplate
-				.collection(ContakMembershipDoc.class).where(QueryCriteria.where("user.$id")
-						.is(new ObjectId(user.getId())).and("company.$id").is(new ObjectId(companyId)))
-				.find().asFirst();
-		if (ArgUtil.not(m)) {
-			m = new ContakMembershipDoc();
-			m.setCompany(company);
-			m.setUser(user);
-			m.setCompanyId(companyId);
-			m.setUserId(user.getId());
-		}
-		m.setActive(ArgUtil.is(membershipType));
-		m.setMembershipType(membershipType);
-		commonMongoTemplate.save(m);
+		ContakMembershipDoc m = authService.addMembership(user, company, membershipType);
 		return ApiResponse.buildResult(m);
 	}
 
@@ -234,9 +226,10 @@ public class PanelController {
 			}
 		} else {
 			compoc = commonMongoTemplate.findOne(CommonMongoQueryBuilder.collection(CompanyDoc.class)
-					.where(Criteria.where("number").is(newComp.getNumber())));
+					.where(Criteria.where("displayName").is(newComp.getDisplayName())));
 			if (ArgUtil.is(compoc)) {
-				ApiResponseUtil.throwDuplicateInputException(new ApiFieldError().field("number"));
+				ApiResponseUtil.throwDuplicateInputException(
+						new ApiFieldError().field("displayName").description("Invalid Display Name"));
 			}
 		}
 
@@ -255,12 +248,8 @@ public class PanelController {
 		compoc.setContactPhoneNumber(newComp.getContactPhoneNumber());
 		compoc.setContactPersonEmailId(newComp.getContactPersonEmailId());
 		commonMongoTemplate.save(compoc);
-
-		ContakUserDoc user = sessionBean.domainUser();
-		ContakMembershipDoc m = new ContakMembershipDoc();
-		m.setCompany(compoc);
-		m.setUser(user);
-		commonMongoTemplate.save(m);
+		authService.addMembership(sessionBean.domainUser(), compoc, PMConstants.USER_SHIP_TYPE.OA_OWNER);
+		authService.updateLogin(sessionBean.domainUser());
 
 		return ApiResponse.buildResult(compoc);
 	}
@@ -287,7 +276,7 @@ public class PanelController {
 		commonMongoTemplate.save(newKey);
 		compoc.setApi(newKey);
 		commonMongoTemplate.save(compoc);
-		return ApiResponse.buildResult(newKey).meta(newKeyString);
+		return ApiResponse.buildResult(newKey).meta(newKey.getId() + "-" + newKeyString);
 	}
 
 	@ResponseBody
@@ -300,4 +289,46 @@ public class PanelController {
 				file.getOriginalFilename()).getUrl();
 		return ApiResponse.buildResults(url).message("Logo uplodaed");
 	}
+
+	@ResponseBody
+	@RequestMapping(value = { "/api/v1/hsm/tmpl" }, method = { RequestMethod.POST })
+	public ApiResponse<ContakTemplateDoc, Object> hsmTemplate(Model model, @RequestBody ContakTemplateDoc template)
+			throws NoSuchAlgorithmException {
+		if (ArgUtil.is(template.templateId)) {
+			ApiResponseUtil.throwInputException(new ApiFieldError().field("templateId").codeKey("AccessDenied")
+					.description("Template Cannot be modified"));
+		}
+
+		if (!ArgUtil.is(template.companyId)) {
+			ApiResponseUtil.throwInputException(
+					new ApiFieldError().field("companyId").codeKey("AccessDenied").description("Select Organization"));
+		}
+
+		if (!sessionBean.hasAdminAccesTo(template.companyId)) {
+			ApiResponseUtil.throwInputException(
+					new ApiFieldError().field("companyId").codeKey("AccessDenied").description("Access Denied"));
+		}
+		template.templateId = String.format("%s:%s", template.companyId, template.code);
+		commonMongoTemplate.save(template);
+		return ApiResponse.buildResult(template);
+	}
+
+	@ResponseBody
+	@RequestMapping(value = { "/api/v1/hsm/tmpl" }, method = { RequestMethod.GET })
+	public ApiResponse<ContakTemplateDoc, Object> hsmTemplate(Model model, @RequestParam String companyId)
+			throws NoSuchAlgorithmException {
+
+		if (!ArgUtil.is(companyId)) {
+			ApiResponseUtil.throwInputException(
+					new ApiFieldError().field("companyId").codeKey("AccessDenied").description("Select Organization"));
+		}
+
+		if (!sessionBean.hasAdminAccesTo(companyId)) {
+			ApiResponseUtil.throwInputException(
+					new ApiFieldError().field("companyId").codeKey("AccessDenied").description("Access Denied"));
+		}
+		return ApiResponse.buildResults(
+				commonMongoTemplate.collection(ContakTemplateDoc.class).where("companyId", companyId).find().asList());
+	}
+
 }

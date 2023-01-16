@@ -5,6 +5,7 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -17,12 +18,15 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 
 import com.boot.jx.AppConfig;
+import com.boot.jx.AppContextUtil;
 import com.boot.jx.common.config.PMCommonConfigImpl;
 import com.boot.jx.contak.doc.ContakMembershipDoc;
 import com.boot.jx.contak.doc.ContakUserDoc;
+import com.boot.jx.contak.dto.CompanyDoc;
 import com.boot.jx.http.CommonHttpRequest;
 import com.boot.jx.logger.AuditDetailProvider;
 import com.boot.jx.mongo.CommonMongoTemplate;
+import com.boot.jx.mongo.CommonMongoQB.QueryCriteria;
 import com.boot.jx.postman.PMConstants;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.client.PostManClient;
@@ -81,6 +85,24 @@ public class ContakAuthService implements LogoutHandler, AuditDetailProvider {
 		return user;
 	}
 
+	public ContakMembershipDoc addMembership(ContakUserDoc user, CompanyDoc company, String membershipType) {
+		ContakMembershipDoc m = commonMongoTemplate
+				.collection(ContakMembershipDoc.class).where(QueryCriteria.where("user.$id")
+						.is(new ObjectId(user.getId())).and("company.$id").is(new ObjectId(company.getCompanyId())))
+				.find().asFirst();
+		if (ArgUtil.not(m)) {
+			m = new ContakMembershipDoc();
+			m.setCompany(company);
+			m.setUser(user);
+			m.setCompanyId(company.getCompanyId());
+			m.setUserId(user.getId());
+		}
+		m.setActive(ArgUtil.is(membershipType));
+		m.setMembershipType(membershipType);
+		commonMongoTemplate.save(m);
+		return m;
+	}
+
 	/**
 	 * Refreshes login status for currently logged in agent
 	 * 
@@ -122,8 +144,7 @@ public class ContakAuthService implements LogoutHandler, AuditDetailProvider {
 	public ContakUserDoc authenticate(String username, String password, HttpServletRequest request) {
 		ContakUserDoc user = loadUserByUsername(username);
 		if (user == null || !CryptoUtil.getEncoder().message(password).sha2().is(user.meta().getPassword())) {
-			username = null;
-			password = null;
+			return null;
 		}
 		UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(username, password);
 		token.setDetails(new WebAuthenticationDetails(request));
@@ -145,10 +166,9 @@ public class ContakAuthService implements LogoutHandler, AuditDetailProvider {
 				.put("website", pmEnvironment.keyEntry("mry.prop.service.website").asString())
 				.put("service", pmEnvironment.keyEntry("mry.prop.service.name").asString())
 				.put("servicedomain", pmEnvironment.keyEntry("mry.prop.service.server").asString())
-				.put("link",
-						String.format("https://app.%s/contak/panel/auth/verify-link?code=%s&account=%s",
-								pmEnvironment.keyEntry("mry.prop.service.server").asString(), verifyCode,
-								accountDoc.getEmail()))
+				.put("link", String.format("https://%s.%s/contak/panel/auth/verify-link?code=%s&account=%s",
+						AppContextUtil.getTenant(), pmEnvironment.keyEntry("mry.prop.service.server").asString(),
+						verifyCode, accountDoc.getEmail()))
 				.put("contactName", accountDoc.getName())));
 
 	}

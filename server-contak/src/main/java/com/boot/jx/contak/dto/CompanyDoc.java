@@ -12,7 +12,7 @@ import com.boot.jx.mongo.CommonDocInterfaces.TimeStampIndex;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-@Document(collection = "COMPANY_NOTP")
+@Document(collection = "CONTAK_COMPANY")
 public class CompanyDoc implements Serializable {
 	private static final long serialVersionUID = 1281605084248923642L;
 
@@ -23,6 +23,9 @@ public class CompanyDoc implements Serializable {
 	public String legalBusinessName;
 
 	public String displayName;
+
+	@Indexed(unique = true, sparse = true)
+	public String domain;
 
 	public String countryOfOperation;
 
@@ -219,6 +222,14 @@ public class CompanyDoc implements Serializable {
 
 	public void setApi(ContakApiKey api) {
 		this.api = api;
+	}
+
+	public String getDomain() {
+		return domain;
+	}
+
+	public void setDomain(String domain) {
+		this.domain = domain;
 	}
 
 }

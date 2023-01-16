@@ -16,6 +16,7 @@ import com.boot.jx.mongo.CommonMongoQB.MQB;
 import com.boot.jx.mongo.CommonMongoQB.MongoQueryBuilder;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
+import com.boot.utils.EntityDtoUtil;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 import com.mongodb.client.DistinctIterable;
@@ -95,9 +96,24 @@ public class MongoUtils {
 			return this;
 		}
 
+		public MongoResultProcessor<T> with(Criteria criteria) {
+			this.qb().where(criteria);
+			return this;
+		}
+
+		public MongoResultProcessor<T> set(String key, Object o) {
+			this.qb().set(key, o);
+			return this;
+		}
+
 		public MongoResultProcessor<T> find(IMongoQueryBuilder<T> builder) {
 			this.results = mongoTemplate.find(builder);
 			return this;
+		}
+
+		public MongoResultProcessor<T> find(Criteria criteria) {
+			this.qb().where(criteria);
+			return this.find(qb);
 		}
 
 		public MongoResultProcessor<T> find() {
@@ -168,6 +184,14 @@ public class MongoUtils {
 
 		public T asFirst() {
 			return CollectionUtil.first(asList());
+		}
+
+		public <DTO> DTO asFirst(DTO dto) {
+			T x = asFirst();
+			if (!ArgUtil.is(x)) {
+				return null;
+			}
+			return EntityDtoUtil.entityToDto(x, dto);
 		}
 
 	}
