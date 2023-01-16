@@ -22,8 +22,7 @@ public class ClientDocController {
 	@ApiRequest(authenticateTenant = true)
 	@ApiOperation(value = "Send Message", notes = "${swagger.ClientDocController.sendCustomerNote.description}",
 			authorizations = @Authorization("X_API_KEY"))
-	// @ApiMockParams({ @ApiMockParam(name = ParamKeys.X_API_KEY, value = "API Key",
-	// paramType = MockParamType.HEADER) })
+	@ApiMockParams({ @ApiMockParam(name = ParamKeys.X_API_KEY, value = "API Key", paramType = MockParamType.HEADER) })
 	@RequestMapping(value = "/send", method = { RequestMethod.POST })
 	public ApiResponse<CustomerNote, Object> sendCustomerNote(@RequestBody CustomerNote msg) {
 		return ApiResponse.buildResult(msg);
