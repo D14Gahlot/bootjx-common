@@ -12,10 +12,12 @@ import com.boot.jx.swagger.ApiMockParam;
 import com.boot.jx.swagger.ApiMockParams;
 import com.boot.jx.swagger.MockParamBuilder.MockParamType;
 
+import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.Authorization;
 
 @RestController
+@Api(tags = "BCS Messages", description = "API's to send OutBound Messages")
 @RequestMapping("/entoc")
 public class ClientDocController {
 
