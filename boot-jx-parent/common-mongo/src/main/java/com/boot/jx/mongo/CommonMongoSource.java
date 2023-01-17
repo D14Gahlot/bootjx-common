@@ -7,60 +7,41 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.mongodb.MongoDbFactory;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.SimpleMongoDbFactory;
-import org.springframework.stereotype.Component;
 
 import com.boot.jx.AppContextUtil;
 import com.boot.jx.http.CommonHttpRequest.ApiRequestDetail;
-import com.boot.jx.scope.tnt.TenantScoped;
 import com.boot.jx.scope.tnt.TenantValue;
 import com.boot.jx.scope.tnt.Tenants;
 import com.boot.jx.scope.tnt.Tenants.TenantResolver;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.StringUtils;
 import com.mongodb.MongoClient;
+import com.mongodb.MongoClientOptions;
 import com.mongodb.MongoClientURI;
 
-@Component
-@TenantScoped
 public class CommonMongoSource {
 
 	public static final String USE_DEFAULT_DB = "USE_DEFAULT_DB";
 	public static final String USE_NO_DB = "USE_NO_DB";
+	public static final String READ_ONLY_DB = "READ_ONLY_DB";
 
 	private final Logger LOGGER = LoggerFactory.getLogger(getClass());
 
-	@TenantValue("${spring.data.mongodb.database}")
-	String dataSourceDatabase;
+	private String dataSourceUrl;
 
-	@TenantValue("${spring.data.mongodb.uri}")
-	String dataSourceUrl;
+	private String globalDataSourceUrl;
 
-	@Value("${spring.data.mongodb.uri}")
-	String globalDataSourceUrl;
+	private String globalDBProfix;
 
-	@Value("${spring.data.mongodb.prefix}")
-	String globalDBProfix;
-
-	@TenantValue("${spring.data.mongodb.username}")
-	String dataSourceUsername;
-
-	@TenantValue("${spring.data.mongodb.password}")
-	String dataSourcePassword;
-
-	@Autowired(required = false)
-	TenantResolver tenantResolver;
+	private String tenant;
+	private String tenantDB;
 
 	public String getDataSourceUrl() {
 		return dataSourceUrl;
 	}
 
-	public String getDataSourceUsername() {
-		return dataSourceUsername;
-	}
-
-	public String getDataSourcePassword() {
-		return dataSourcePassword;
-	}
+	private static Object lockClient = new Object();
+	private static MongoClient sharedMongoClient;
 
 	private static Object lock = new Object();
 	MongoDbFactory mongoDbFactory;
@@ -76,16 +57,28 @@ public class CommonMongoSource {
 
 	boolean ready = false;
 
-	private boolean hasRule(String useNoDb) {
+	public static boolean hasRule(String useNoDb) {
 		ApiRequestDetail apiDetails = AppContextUtil.getApiRequestDetail();
 		return ArgUtil.is(apiDetails) && apiDetails.hasRule(useNoDb);
 	}
 
+	public static boolean isReadOnly() {
+		return hasRule(READ_ONLY_DB);
+	}
+
 	public MongoDbFactory getMongoDbFactory(String dataSourceUrl) {
-		String tnt = AppContextUtil.getTenant();
-		String dbtnt = ArgUtil.is(tenantResolver) ? tenantResolver.getDBName(tnt) : tnt;
+		String tnt = tenant;
+		String dbtnt = tenantDB;
 		MongoClientURI mongoClientURI = new MongoClientURI(dataSourceUrl);
-		
+
+		synchronized (lockClient) {
+			if (sharedMongoClient == null) {
+				sharedMongoClient = new MongoClient(mongoClientURI);
+				MongoClientOptions o = sharedMongoClient.getMongoClientOptions();
+				LOGGER.info("MONGODB: MongoClient:{}:{}   {}", tnt, dbtnt, o.getConnectionsPerHost());
+			}
+		}
+
 		String dataBaseName = (globalDBProfix + "_" + dbtnt);
 		if (hasRule(USE_NO_DB)) {
 			// dataBaseName = "nodb";
@@ -95,7 +88,8 @@ public class CommonMongoSource {
 			dataBaseName = mongoClientURI.getDatabase();
 		}
 		LOGGER.info("MONGODB: {}:{}:{}", dataBaseName, Tenants.isDefault(tnt), dbtnt);
-		return new SimpleMongoDbFactory(new MongoClient(mongoClientURI), dataBaseName);
+
+		return new SimpleMongoDbFactory(sharedMongoClient, dataBaseName);
 	}
 
 	public MongoDbFactory getMongoDbFactory() {
@@ -126,8 +120,7 @@ public class CommonMongoSource {
 		if (hasRule(USE_NO_DB)) {
 			if (mongoTemplateNoDb == null) {
 				synchronized (lockNoDb) {
-					LOGGER.info("mongoTemplateNoDb is NULL So creating One {} {}", getDataSourceUrl(),
-							getDataSourceUsername());
+					LOGGER.info("mongoTemplateNoDb is NULL So creating One {} {}", getDataSourceUrl());
 					mongoDbFactoryNoDb = getMongoDbFactory();
 					if (ArgUtil.is(mongoDbFactoryNoDb)) {
 						mongoTemplateNoDb = new MongoTemplate(mongoDbFactoryNoDb);
@@ -143,8 +136,7 @@ public class CommonMongoSource {
 		} else if (hasRule(USE_DEFAULT_DB)) {
 			if (mongoTemplateDefault == null) {
 				synchronized (lockDefault) {
-					LOGGER.info("mongoTemplate is NULL So creating One {} {}", getDataSourceUrl(),
-							getDataSourceUsername());
+					LOGGER.info("mongoTemplate is NULL So creating One {} {}", getDataSourceUrl());
 					mongoDbFactoryDefault = getMongoDbFactory();
 					if (ArgUtil.is(mongoDbFactoryDefault)) {
 						mongoTemplateDefault = new MongoTemplate(mongoDbFactoryDefault);
@@ -161,8 +153,7 @@ public class CommonMongoSource {
 		} else {
 			if (mongoTemplate == null) {
 				synchronized (lock) {
-					LOGGER.debug("mongoTemplate is NULL So creating One {} {}", getDataSourceUrl(),
-							getDataSourceUsername());
+					LOGGER.debug("mongoTemplate is NULL So creating One {} {}", getDataSourceUrl());
 					mongoDbFactory = getMongoDbFactory();
 					if (ArgUtil.is(mongoDbFactory)) {
 						mongoTemplate = new MongoTemplate(mongoDbFactory);
@@ -181,14 +172,6 @@ public class CommonMongoSource {
 
 	public boolean isReady() {
 		return ready;
-	}
-
-	public String getDataSourceDatabase() {
-		return dataSourceDatabase;
-	}
-
-	public void setDataSourceDatabase(String dataSourceDatabase) {
-		this.dataSourceDatabase = dataSourceDatabase;
 	}
 
 	public String getGlobalDataSourceUrl() {
@@ -211,12 +194,20 @@ public class CommonMongoSource {
 		this.dataSourceUrl = dataSourceUrl;
 	}
 
-	public void setDataSourceUsername(String dataSourceUsername) {
-		this.dataSourceUsername = dataSourceUsername;
+	public String getTenant() {
+		return tenant;
 	}
 
-	public void setDataSourcePassword(String dataSourcePassword) {
-		this.dataSourcePassword = dataSourcePassword;
+	public void setTenant(String tenant) {
+		this.tenant = tenant;
+	}
+
+	public String getTenantDB() {
+		return tenantDB;
+	}
+
+	public void setTenantDB(String tenantDB) {
+		this.tenantDB = tenantDB;
 	}
 
 }

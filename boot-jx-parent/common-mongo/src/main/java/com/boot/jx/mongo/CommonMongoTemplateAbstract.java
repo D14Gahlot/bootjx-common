@@ -51,8 +51,9 @@ public class CommonMongoTemplateAbstract<TStore extends CommonMongoTemplateAbstr
 		return (TStore) this;
 	}
 
-	public TStore using(CommonMongoSource commonMongoSource) {
-		return this.using(new MongoTemplateCommonImpl(commonMongoSource.getMongoDbFactory()).using(commonMongoSource));
+	public TStore using(CommonMongoSourceProvider commonMongoSourceProvider) {
+		return this.using(new MongoTemplateCommonImpl(commonMongoSourceProvider.getSource().getMongoDbFactory())
+				.using(commonMongoSourceProvider));
 	}
 
 	public MongoResultProcessor<Document> collection(String collection) {
@@ -149,13 +150,13 @@ public class CommonMongoTemplateAbstract<TStore extends CommonMongoTemplateAbstr
 
 	@Override
 	public <T> List<T> find(IMongoQueryBuilder<T> builder) {
-		//System.out.println("+++"+builder.getQuery());
+		// System.out.println("+++"+builder.getQuery());
 		return find(builder.getQuery(), builder.getDocClass());
 	}
 
 	@Override
 	public <T> T findOne(IMongoQueryBuilder<T> builder) {
-		//System.out.println("+++"+builder.getQuery());
+		// System.out.println("+++"+builder.getQuery());
 		return findOne(builder.getQuery(), builder.getDocClass());
 	}
 
