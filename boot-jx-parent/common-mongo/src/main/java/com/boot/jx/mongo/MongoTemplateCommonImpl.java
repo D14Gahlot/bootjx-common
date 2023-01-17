@@ -41,18 +41,18 @@ import com.mongodb.client.result.UpdateResult;
 public class MongoTemplateCommonImpl extends MongoTemplate {
 
 	@Autowired
-	public CommonMongoSource mongoDBCredentials;
+	public CommonMongoSourceProvider commonMongoSourceProvider;
 
 	public MongoTemplateCommonImpl(MongoDbFactory mongoDbFactory) {
 		super(mongoDbFactory);
 	}
 
 	protected MongoTemplate getCommonMongoTemplate() {
-		return mongoDBCredentials.getMongoTemplate();
+		return commonMongoSourceProvider.getSource().getMongoTemplate();
 	}
 
-	public void setMongoDBCredentials(CommonMongoSource mongoDBCredentials) {
-		this.mongoDBCredentials = mongoDBCredentials;
+	public void setMongoSourceProvider(CommonMongoSourceProvider commonMongoSourceProvider) {
+		this.commonMongoSourceProvider = commonMongoSourceProvider;
 	}
 
 	@Override
