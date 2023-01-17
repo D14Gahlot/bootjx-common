@@ -480,8 +480,8 @@ public class MongoTemplateCommonImpl extends MongoTemplate {
 		return getCommonMongoTemplate().getDb();
 	}
 
-	public MongoTemplateCommonImpl using(CommonMongoSource mongoDBCredentials) {
-		this.setMongoDBCredentials(mongoDBCredentials);
+	public MongoTemplateCommonImpl using(CommonMongoSourceProvider commonMongoSourceProvider) {
+		this.setMongoSourceProvider(commonMongoSourceProvider);
 		return this;
 	}
 }
