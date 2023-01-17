@@ -164,7 +164,11 @@ public class ConfigOptionMetaController {
 	}
 
 	@RequestMapping(value = "/api/config", method = { RequestMethod.GET })
-	public ApiResponse<Map<String, Object>, Object> getConfig(@RequestParam(required = false) String key) {
+	public ApiResponse<Map<String, Object>, Object> getConfig(@RequestParam(required = false) String key,
+			@RequestParam(required = false) boolean refresh) {
+		if (refresh) {
+			configManager.refresh();
+		}
 		return ApiResponse.buildResults(configManager.getConfigs(key));
 	}
 

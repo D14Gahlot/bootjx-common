@@ -48,6 +48,8 @@ public class WA360Constants {
 
 		public static final JsonPath CONTEXT_ID = new JsonPath("messages/[0]/context/id");
 
+		public static final JsonPath STATUS_RECIPIENT = new JsonPath("message/recipient_id");
+
 	}
 
 	public static class OutBoundWrapperPaths {
