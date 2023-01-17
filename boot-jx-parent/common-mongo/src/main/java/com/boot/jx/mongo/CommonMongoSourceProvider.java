@@ -30,13 +30,13 @@ public class CommonMongoSourceProvider {
 	// READER
 	private static Object READER = new Object();
 	private CommonMongoSource reader;
-	@TenantValue("${spring.data.mongodb.uri}")
+	@TenantValue("${spring.ro.data.mongodb.uri}")
 	private String dataSourceUrlReadOnly;
 
-	@Value("${spring.data.mongodb.uri}")
+	@Value("${spring.ro.data.mongodb.uri}")
 	private String globalDataSourceUrlReadOnly;
 
-	@Value("${spring.data.mongodb.prefix}")
+	@Value("${spring.ro.data.mongodb.prefix}")
 	private String globalDBProfixReadOnly;
 
 	@Autowired(required = false)

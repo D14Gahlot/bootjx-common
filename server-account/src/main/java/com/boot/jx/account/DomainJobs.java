@@ -13,9 +13,11 @@ import com.boot.jx.AppConfig;
 import com.boot.jx.AppContextUtil;
 import com.boot.jx.common.config.ConfigConstants;
 import com.boot.jx.dict.ContactType;
+import com.boot.jx.http.CommonHttpRequest.ApiRequestDetail;
 import com.boot.jx.inbound.InBoundPoller;
 import com.boot.jx.logger.LoggerService;
 import com.boot.jx.mongo.CommonMongoQB.MongoQueryBuilder;
+import com.boot.jx.mongo.CommonMongoSource;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.doc.config.ChannelConfigDupsDoc;
 import com.boot.jx.postman.store.ConfigMaster;
@@ -48,6 +50,9 @@ public class DomainJobs {
 		AppContextUtil.setTenant("app");
 		AppContextUtil.init();
 		LOGGER.debug("Searching Domains");
+		ApiRequestDetail detail = new ApiRequestDetail();
+		detail.setRules(new String[] { CommonMongoSource.READ_ONLY_DB });
+		AppContextUtil.setApiRequestDetail(detail);
 
 		String serviceDomain = pmEnvironment.keyEntry(ConfigConstants.APP_KEY.PROP_SERVICE_SERVER).asString();
 
