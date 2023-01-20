@@ -1243,6 +1243,8 @@ public class AdminDashBoardManager {
 		ZonedDateTime noOfdaysTstamp = null;
 		String offset= environment.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_TIMEZONE_OFFSET).asString();
 		
+		LOGGER.info("ADMIN dayChannelWiseWisesummary {}"+offset+"\t dateRange1:"+dateRange1+"\t dateRange2 :"+dateRange2);
+		
 		long offsetts= countryTimeZoneOffset(offset);
 		String zone = DateUtil.getTimeZone(offset);
 		long lasDayTimeStmp =0;
@@ -1540,6 +1542,8 @@ public class AdminDashBoardManager {
 		ZonedDateTime noOfdaysTstamp = null;
 
 		String offset= environment.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_TIMEZONE_OFFSET).asString();
+		
+		LOGGER.info("getDayWiseMsgStatusSummary {}"+offset +"\t dateRange1 :"+dateRange1 +"\t dateRange2 :"+dateRange1);
 		
 		long offsetts= countryTimeZoneOffset(offset);
 		String zone = DateUtil.getTimeZone(offset);
