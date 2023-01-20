@@ -317,6 +317,7 @@ public class AgentAnalyticsManager {
 		return distinceAgentList;
 	}
 
+	@SuppressWarnings("unchecked")
 	public List<ChatSessionDoc> getAgentList(long dateRange1, long dateRange2) {
 		Query query = new Query();
 		query.addCriteria(Criteria.where("assignedAgentStamp").gt(dateRange1).lt(dateRange2));
@@ -492,23 +493,17 @@ public class AgentAnalyticsManager {
 			String formattedDateH = sdfH.format(date);
 			dateWithTimeList.add(dateWithTime);
 			hourList.add(Integer.parseInt(formattedDateH));
-			// System.out.println(" timeStamp :"+timeStamp+"\t long to date :"+date+"\t str
-			// :"+dateWithTime+"\t ddMMyyyyFormat :"+ddMMyyyyFormat+"\t formattedDateH
-			// :"+formattedDateH);
 		}
 		Collections.sort(dateWithTimeList);
 
 		Set<Object> dateWithTimeWiseCount = new HashSet<Object>(dateWithTimeList);
 		for (Object key : dateWithTimeWiseCount) {
 			mapLst.put(key, Collections.frequency(dateWithTimeList, key));
-			// System.out.println("Peak Load :"+ key + ": " +
-			// Collections.frequency(dateWithTimeList, key));
+			
 		}
 		if (mapLst != null && ArgUtil.is(mapLst) && !mapLst.isEmpty()) {
 			Object maxEntryKey = Collections.max(mapLst.entrySet(), Map.Entry.comparingByValue()).getKey();
 			Integer maxEntryKeyValue = mapLst.get(maxEntryKey);
-			// System.out.println("Peak Load Date Time and Value:"+maxEntryKey +"-
-			// "+maxEntryKeyValue);
 			peakLoadResult.setTimestamp(maxEntryKey);
 			peakLoadResult.setTotal(maxEntryKeyValue.longValue());
 
