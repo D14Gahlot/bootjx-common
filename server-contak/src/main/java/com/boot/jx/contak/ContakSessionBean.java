@@ -41,6 +41,15 @@ public class ContakSessionBean extends AppCommonAuthUser implements Serializable
 		return PMConstants.DEFAULT.NO_USER;
 	}
 
+	public ContakMembershipDoc getMenbership(String companyId) {
+		for (ContakMembershipDoc membership : this.memberships) {
+			if (ArgUtil.is(membership.getCompany()) && ArgUtil.isEqual(membership.getCompany().companyId, companyId)) {
+				return membership;
+			}
+		}
+		return null;
+	}
+
 	public boolean hasAdminAccesTo(String companyId) {
 
 		if (!ArgUtil.is(this.domainUser())) {
@@ -51,13 +60,11 @@ public class ContakSessionBean extends AppCommonAuthUser implements Serializable
 			return true;
 		}
 
-		for (ContakMembershipDoc membership : this.memberships) {
-			if (ArgUtil.is(membership.getCompany())
-					&& ArgUtil.isEqual(membership.getCompany().companyId, companyId)
-					&& ArgUtil.is(membership.getMembershipType(), PMConstants.USER_SHIP_TYPE.OA_ADMIN,
-							PMConstants.USER_SHIP_TYPE.OA_OWNER)) {
-				return true;
-			}
+		ContakMembershipDoc membership = getMenbership(companyId);
+		if (ArgUtil.is(membership) && ArgUtil.isEqual(membership.getCompany().companyId, companyId)
+				&& ArgUtil.is(membership.getMembershipType(), PMConstants.USER_SHIP_TYPE.OA_ADMIN,
+						PMConstants.USER_SHIP_TYPE.OA_OWNER)) {
+			return true;
 		}
 
 		return false;
@@ -73,12 +80,11 @@ public class ContakSessionBean extends AppCommonAuthUser implements Serializable
 			return true;
 		}
 
-		for (ContakMembershipDoc membership : this.memberships) {
-			if (ArgUtil.isEqual(membership.getCompany().companyId, companyId)
-					&& ArgUtil.is(membership.getMembershipType(), PMConstants.USER_SHIP_TYPE.OA_MEMBER,
-							PMConstants.USER_SHIP_TYPE.OA_ADMIN, PMConstants.USER_SHIP_TYPE.OA_OWNER)) {
-				return true;
-			}
+		ContakMembershipDoc membership = getMenbership(companyId);
+		if (ArgUtil.is(membership) && ArgUtil.isEqual(membership.getCompany().companyId, companyId)
+				&& ArgUtil.is(membership.getMembershipType(), PMConstants.USER_SHIP_TYPE.OA_MEMBER,
+						PMConstants.USER_SHIP_TYPE.OA_ADMIN, PMConstants.USER_SHIP_TYPE.OA_OWNER)) {
+			return true;
 		}
 
 		return false;

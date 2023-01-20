@@ -13,6 +13,10 @@ public class ContakTemplate implements Serializable {
 		public String label;
 		public String variant;
 
+		public String mediaType;
+		public String mediaThumb;
+		public String mediaUrl;
+
 		public String getLabel() {
 			return label;
 		}
@@ -27,6 +31,30 @@ public class ContakTemplate implements Serializable {
 
 		public void setVariant(String variant) {
 			this.variant = variant;
+		}
+
+		public String getMediaType() {
+			return mediaType;
+		}
+
+		public void setMediaType(String mediaType) {
+			this.mediaType = mediaType;
+		}
+
+		public String getMediaThumb() {
+			return mediaThumb;
+		}
+
+		public void setMediaThumb(String mediaThumb) {
+			this.mediaThumb = mediaThumb;
+		}
+
+		public String getMediaUrl() {
+			return mediaUrl;
+		}
+
+		public void setMediaUrl(String mediaUrl) {
+			this.mediaUrl = mediaUrl;
 		}
 
 	}
