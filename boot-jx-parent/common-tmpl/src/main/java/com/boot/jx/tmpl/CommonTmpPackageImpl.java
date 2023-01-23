@@ -34,6 +34,15 @@ public class CommonTmpPackageImpl implements ICommonTmplPackage {
 	public static final Handlebars HANDLEBARS = new Handlebars();
 	public static final Handlebars HANDLEBARS_JS = new Handlebars().with(EscapingStrategy.JS);
 
+	public static void registerHelpers(Handlebars hb) {
+		hb.registerHelpers(new HelperSource());
+	}
+
+	static {
+		registerHelpers(HANDLEBARS);
+		registerHelpers(HANDLEBARS_JS);
+	}
+
 	@Override
 	public CommonFile process(CommonFile file, ContactType contactType) {
 		if (ArgUtil.is(templateResolver) && ArgUtil.is(file.getTemplate())) {
