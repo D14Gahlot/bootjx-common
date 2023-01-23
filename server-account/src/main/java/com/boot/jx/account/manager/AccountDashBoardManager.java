@@ -570,7 +570,7 @@ public class AccountDashBoardManager {
 		long offsetts= countryTimeZoneOffset(tnt);
 		ZonedDateTime noOfdaysTstamp = null;
 		long lasDayTimeStmp =0;
-		String offsett= environment.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_TIMEZONE_OFFSET).asString();
+		String offsett= getTimeZoneFromSetup();
 		LOGGER.info("dayChannelWiseWisesummary dateRange1 :"+dateRange1+"\t dateRange2 :"+dateRange2 +"\t offsett :"+offsett);
 	
 		DomainDoc dDoc = getDomainTimeZone(tnt);
@@ -1230,6 +1230,11 @@ public class AccountDashBoardManager {
 			dt =dtStr[2]+"-"+dtStr[1]+"-"+dtStr[0]; 
 		}
 		return dt;
+	}
+	
+	public String getTimeZoneFromSetup() {
+		String offset= environment.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_TIMEZONE_OFFSET).asString();
+		return offset;
 	}
 
 }

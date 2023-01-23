@@ -1245,7 +1245,7 @@ public class AdminDashBoardManager {
 		ZonedDateTime noOfdaysTstamp = null;
 
 
-		String offset= environment.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_TIMEZONE_OFFSET).asString();
+		String offset= getTimeZoneFromSetup();
 		
 		LOGGER.info("ADMIN dayChannelWiseWisesummary {}"+offset+"\t dateRange1:"+dateRange1+"\t dateRange2 :"+dateRange2);
 		
@@ -1524,7 +1524,7 @@ public class AdminDashBoardManager {
 		long currentTs = System.currentTimeMillis();
 		ZonedDateTime noOfdaysTstamp = null;
 		
-		String offset= environment.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_TIMEZONE_OFFSET).asString();
+		String offset= getTimeZoneFromSetup();
 		
 		LOGGER.info("ADMIN getDayWiseMsgStatusSummary {}"+offset+"\t dateRange1:"+dateRange1+"\t dateRange2 :"+dateRange2);
 		
@@ -1939,6 +1939,11 @@ public Long countryTimeZoneOffset(String offset) {
 		offsettimestamp = DateUtil.getOffSet(java.util.TimeZone.getDefault().getID());
 	}
 	return offsettimestamp;
+}
+
+public String getTimeZoneFromSetup() {
+	String offset= environment.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_TIMEZONE_OFFSET).asString();
+	return offset;
 }
 
 }
