@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.boot.jx.AppConfigPackage.AppSharedConfig;
+import com.boot.jx.AppContext;
 import com.boot.jx.AppContextUtil;
 import com.boot.jx.http.CommonHttpRequest.ApiRequestDetail;
 import com.boot.jx.logger.LoggerService;
@@ -46,6 +47,7 @@ public class PMEnvironmentProviderImpl implements PMEnvironmentProvider, AppShar
 	// PMConfigurationDoc>();
 
 	PMConfigurationDoc sharedConfiguration = null;
+	PMConfigurationDoc defaultConfiguration = null;
 
 	@Autowired(required = false)
 	private ConfigMaster configStore;
@@ -64,10 +66,15 @@ public class PMEnvironmentProviderImpl implements PMEnvironmentProvider, AppShar
 
 		String mappedTo = hasRule(CommonMongoSource.USE_NO_DB) ? "nodb" : tnt;
 
-		PMConfigurationModel presentConfig = localConfigMap.getIfPresent(mappedTo);
-
-		if (presentConfig != null) {
-			return presentConfig;
+		if (Tenants.isDefault(tnt)) {
+			if (defaultConfiguration != null && sharedConfiguration != null) {
+				return defaultConfiguration;
+			}
+		} else {
+			PMConfigurationModel presentConfig = localConfigMap.getIfPresent(mappedTo);
+			if (presentConfig != null) {
+				return presentConfig;
+			}
 		}
 
 		if (ArgUtil.is(configStore)) {
@@ -107,7 +114,11 @@ public class PMEnvironmentProviderImpl implements PMEnvironmentProvider, AppShar
 
 			if (ArgUtil.is(localConfiguration)) {
 				localConfiguration.setUpdateStamp(System.currentTimeMillis());
-				localConfigMap.put(mappedTo, localConfiguration);
+				if (!Tenants.isDefault(tnt)) {
+					localConfigMap.put(mappedTo, localConfiguration);
+				} else {
+					defaultConfiguration = localConfiguration;
+				}
 			}
 
 			if (Tenants.isDefault(tnt)) {
