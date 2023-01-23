@@ -294,7 +294,10 @@ public class WA360Client {
 						List<Map<String, Object>> headerParametersTemp = varMap.entry("header").asListOfMap();
 						for (Map<String, Object> headerParameter : headerParametersTemp) {
 							String path = (String) headerParameter.get("path");
-							headerComponentReq.parameter("text", model.pathEntry(path).asString());
+							String path2 = (String) headerParameter.get("path2");
+							String defaultValue = (String) headerParameter.get("defaultValue");
+							headerComponentReq.parameter("text",
+									model.pathEntry(path).pathEntrySafe(path2).asString(defaultValue));
 						}
 						if (headerComponentReq.parameters().size() > 0) {
 							components.add(headerComponentReq.build().map());
@@ -315,7 +318,10 @@ public class WA360Client {
 					TmplComponent bodyComponent = TmplComponent.createInstance().body();
 					for (Map<String, Object> bodyParameter : bodyParametersTemp) {
 						String path = (String) bodyParameter.get("path");
-						bodyComponent.parameter("text", model.pathEntry(path).asString());
+						String path2 = (String) bodyParameter.get("path2");
+						String defaultValue = (String) bodyParameter.get("defaultValue");
+						bodyComponent.parameter("text",
+								model.pathEntry(path).pathEntrySafe(path2).asString(defaultValue));
 					}
 					components.add(bodyComponent.build().map());
 				}
@@ -333,8 +339,11 @@ public class WA360Client {
 							for (Map<String, Object> buttonParameter : buttonParameterVar) {
 								if (buttonParameter.containsKey("path")) {
 									String path = (String) buttonParameter.get("path");
+									String path2 = (String) buttonParameter.get("path2");
+									String defaultValue = (String) buttonParameter.get("defaultValue");
 									TmplComponent buttonComponent = TmplComponent.createInstance().button("url", i);
-									buttonComponent.parameter("text", model.pathEntry(path).asString());
+									buttonComponent.parameter("text",
+											model.pathEntry(path).pathEntrySafe(path2).asString(defaultValue));
 									components.add(buttonComponent.build().map());
 								}
 							}
@@ -342,9 +351,12 @@ public class WA360Client {
 							for (Map<String, Object> buttonParameter : buttonParameterVar) {
 								if (buttonParameter.containsKey("path")) {
 									String path = (String) buttonParameter.get("path");
+									String path2 = (String) buttonParameter.get("path2");
+									String defaultValue = (String) buttonParameter.get("defaultValue");
 									TmplComponent buttonComponent = TmplComponent.createInstance().button("quick_reply",
 											i);
-									buttonComponent.parameter("payLoad", model.pathEntry(path).asString());
+									buttonComponent.parameter("payLoad",
+											model.pathEntry(path).pathEntrySafe(path2).asString(defaultValue));
 									components.add(buttonComponent.build().map());
 								}
 							}
