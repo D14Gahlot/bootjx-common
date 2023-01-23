@@ -19,6 +19,9 @@ import com.boot.jx.api.ApiResponse;
 import com.boot.jx.common.doc.AgentSessionDoc;
 import com.boot.jx.common.dto.DepartmentResponseAuthDto;
 import com.boot.jx.common.store.AgentStore;
+import com.boot.jx.http.ApiRequest;
+import com.boot.jx.mongo.CommonMongoSource;
+import com.boot.jx.mongo.CommonMongoSourceProvider;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.doc.HSMTemplateDoc;
 import com.boot.jx.postman.doc.QuickAction;
@@ -53,18 +56,21 @@ public class AgentMetaController {
 	@Autowired
 	private ContactStore contactStore;
 
+	@ApiRequest(rules = CommonMongoSource.READ_ONLY_DB)
 	@ResponseBody
 	@RequestMapping(value = { "/api/options/agents" }, method = { RequestMethod.GET })
 	public ApiResponse<AgentResponseAgentDto, Object> listAgents() {
 		return ApiResponse.buildResults(new AgentResponseAgentDto().importFrom(agentStore.findAllActive()));
 	}
 
+	@ApiRequest(rules = CommonMongoSource.READ_ONLY_DB)
 	@ResponseBody
 	@RequestMapping(value = { "/api/options/agent_teams" }, method = { RequestMethod.GET })
 	public ApiResponse<DepartmentResponseAuthDto, Object> listTeams() {
 		return ApiResponse.buildResults(new DepartmentResponseAuthDto().importFrom(agentStore.findDepartmentAll()));
 	}
 
+	@ApiRequest(rules = CommonMongoSource.READ_ONLY_DB)
 	@ResponseBody
 	@RequestMapping(value = { "/api/options/contacts" }, method = { RequestMethod.GET })
 	public ApiResponse<ContactDTO, Object> searchContacts(@RequestParam String search, @RequestParam String lane) {
@@ -74,12 +80,14 @@ public class AgentMetaController {
 				));
 	}
 
+	@ApiRequest(rules = CommonMongoSource.READ_ONLY_DB)
 	@ResponseBody
 	@RequestMapping(value = { "/api/options/agents/status" }, method = { RequestMethod.GET })
 	public ApiResponse<AgentSessionDoc, Object> listAgentsOnline() {
 		return ApiResponse.buildResults(agentSessionService.getAgentSessions());
 	}
 
+	@ApiRequest(rules = CommonMongoSource.READ_ONLY_DB)
 	@ResponseBody
 	@RequestMapping(value = "/category/map/smart_reply", method = { RequestMethod.GET })
 	public List<QuickReply> listSmartReply(@RequestParam(value = "value", required = false) List<String> categories) {
@@ -91,30 +99,35 @@ public class AgentMetaController {
 		return mongoTemplate.findAll(QuickReply.class);
 	}
 
+	@ApiRequest(rules = CommonMongoSource.READ_ONLY_DB)
 	@ResponseBody
 	@RequestMapping(value = "/gallery/map/media_reply", method = { RequestMethod.GET })
 	public List<QuickMedia> listMediaReply() {
 		return mongoTemplate.findAll(QuickMedia.class);
 	}
 
+	@ApiRequest(rules = CommonMongoSource.READ_ONLY_DB)
 	@ResponseBody
 	@RequestMapping(value = "/gallery/map/quick_actions", method = { RequestMethod.GET })
 	public List<QuickAction> listQuickActions() {
 		return mongoTemplate.findAll(QuickAction.class);
 	}
 
+	@ApiRequest(rules = CommonMongoSource.READ_ONLY_DB)
 	@ResponseBody
 	@RequestMapping(value = { "/gallery/map/quick_labels" }, method = { RequestMethod.GET })
 	public List<QuickLabel> listQuickTags() {
 		return mongoTemplate.findAll(QuickLabel.class);
 	}
 
+	@ApiRequest(rules = CommonMongoSource.READ_ONLY_DB)
 	@ResponseBody
 	@RequestMapping(value = { "/gallery/map/quick_tags" }, method = { RequestMethod.GET })
 	public List<QuickTag> listQuickTagsCategory() {
 		return mongoTemplate.findAll(QuickTag.class);
 	}
 
+	@ApiRequest(rules = CommonMongoSource.READ_ONLY_DB)
 	@ResponseBody
 	@RequestMapping(value = "/api/tmpl/pushtemplate", method = { RequestMethod.GET })
 	public ApiResponse<HSMTemplateDoc, Object> listPushTemplates(@RequestParam String channelId) {

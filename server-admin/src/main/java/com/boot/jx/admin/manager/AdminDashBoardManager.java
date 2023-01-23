@@ -1524,7 +1524,7 @@ public class AdminDashBoardManager {
 		long currentTs = System.currentTimeMillis();
 		ZonedDateTime noOfdaysTstamp = null;
 		
-		String offset= getTimeZoneFromSetup();
+		String offset= environment.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_TIMEZONE_OFFSET).asString();
 		
 		LOGGER.info("ADMIN getDayWiseMsgStatusSummary {}"+offset+"\t dateRange1:"+dateRange1+"\t dateRange2 :"+dateRange2);
 		
@@ -1928,13 +1928,17 @@ public String getLane(String contactid) {
 public Long countryTimeZoneOffset(String offset) {
 	
 	long offsettimestamp =0;
+	int hr =0;
+	int min =0;		
 	
 	if(ArgUtil.is(offset)) {
 		String hrStr = offset.substring(offset.indexOf('+')+1);
 		String[] hrMin = hrStr.split(":");
-		int hr =Integer.parseInt(hrMin[0]);
-		int  min =Integer.parseInt(hrMin[1]); 
-		offsettimestamp = hr*DateUtil.ONE_HR+min*DateUtil.MIN;
+		if(ArgUtil.is(hrStr) && hrMin.length>1) {
+		  hr =Integer.parseInt(hrMin[0]);
+		  min =Integer.parseInt(hrMin[1]); 
+		  offsettimestamp = hr*DateUtil.ONE_HR+min*DateUtil.MIN;
+		}
 	}else {
 		offsettimestamp = DateUtil.getOffSet(java.util.TimeZone.getDefault().getID());
 	}
@@ -1942,7 +1946,7 @@ public Long countryTimeZoneOffset(String offset) {
 }
 
 public String getTimeZoneFromSetup() {
-	String offset= environment.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_TIMEZONE_OFFSET).asString();
+	String offset= environment.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_TIMEZONE_OFFSET).asString("Asia/Kolkata::GMT+5:30");
 	return offset;
 }
 

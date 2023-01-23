@@ -22,7 +22,7 @@ import org.springframework.test.context.TestPropertySource;
 
 import com.boot.jx.mongo.CommonMongoQB.MongoQueryBuilder;
 import com.boot.jx.mongo.CommonMongoQueryBuilder;
-import com.boot.jx.mongo.CommonMongoSource;
+import com.boot.jx.mongo.CommonMongoSourceProvider;
 import com.boot.jx.mongo.CommonMongoUtils;
 import com.boot.jx.mongo.MongoTemplateCommonImpl;
 import com.boot.jx.postman.doc.CustomerProfileDoc;
@@ -55,13 +55,13 @@ public class ChatStoreTest { // Noncompliant
 		AppContextUtil.setTenant("lalit");
 		String connectionString = System.getProperty("spring.data.mongodb.uri");
 		System.out.println(connectionString);
-		CommonMongoSource commonMongoSource = new CommonMongoSource();
+		CommonMongoSourceProvider commonMongoSource = new CommonMongoSourceProvider();
 		commonMongoSource.setDataSourceUrl(connectionString);
 		commonMongoSource.setGlobalDataSourceUrl(connectionString);
 		commonMongoSource.setGlobalDBProfix("tnt");
 
-		mongoTemplate = new MongoTemplateCommonImpl(commonMongoSource.getMongoDbFactory());
-		mongoTemplate.setMongoDBCredentials(commonMongoSource);
+		mongoTemplate = new MongoTemplateCommonImpl(commonMongoSource.getSource().getMongoDbFactory());
+		mongoTemplate.setMongoSourceProvider(commonMongoSource);
 	}
 
 	public PBPhone parsePhone(PBPhone pbPhone) {
