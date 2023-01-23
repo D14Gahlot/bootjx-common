@@ -15,10 +15,10 @@ public class CommonMongoConfig {
 	String dataSourceUrl;
 
 	@Autowired
-	private CommonMongoSource commonMongoSource;
+	private CommonMongoSourceProvider commonMongoSourceProvider;
 
 	@Bean
 	public MongoTemplate mongoTemplate() {
-		return new MongoTemplateCommonImpl(commonMongoSource.getMongoDbFactory(dataSourceUrl));
+		return new MongoTemplateCommonImpl(commonMongoSourceProvider.getSource().getMongoDbFactory(dataSourceUrl));
 	}
 }
