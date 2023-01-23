@@ -1226,11 +1226,6 @@ public class AccountDashBoardManager {
 	}
 
 	public String getTimeZoneFromSetup() {
-		String offset = environment.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_TIMEZONE_OFFSET).asString();
-		return offset;
-	}
-
-	public String getTimeZoneFromSetup() {
 		String offset = environment.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_TIMEZONE_OFFSET)
 				.asString("Asia/Kolkata::GMT+5:30");
 		return offset;
