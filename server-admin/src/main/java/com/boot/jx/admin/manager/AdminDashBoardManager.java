@@ -1536,8 +1536,8 @@ public class AdminDashBoardManager {
 
 		String offset = getTimeZoneFromSetup();
 
-		LOGGER.info("getDayWiseMsgStatusSummary {}" + offset + "\t dateRange1 :" + dateRange1 + "\t dateRange2 :"
-				+ dateRange1);
+		LOGGER.info("==={}===getDayWiseMsgStatusSummary {}" + offset + "\t dateRange1 :" + dateRange1
+				+ "\t dateRange2 :" + dateRange1);
 
 		long offsetts = countryTimeZoneOffset(offset);
 		String zone = DateUtil.getTimeZone(offset);
@@ -1922,7 +1922,7 @@ public class AdminDashBoardManager {
 		String lane = "";
 		if (ArgUtil.is(contactid)) {
 			String[] contactids = contactid.split("_");
-			if (contactids != null && contactids[1] != null) {
+			if (contactids != null && contactids.length > 0) {
 				lane = contactids[1];
 			}
 		}

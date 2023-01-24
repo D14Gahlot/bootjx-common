@@ -10,7 +10,6 @@ import org.springframework.stereotype.Component;
 
 import com.boot.jx.contak.dto.UserRegistrationDoc;
 import com.boot.jx.mongo.CommonDocInterfaces.TimeStampIndex;
-import com.boot.jx.postman.client.PostManClient;
 import com.boot.jx.mongo.CommonMongoQueryBuilder;
 import com.boot.jx.mongo.CommonMongoTemplate;
 

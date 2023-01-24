@@ -10,7 +10,6 @@ import org.springframework.web.socket.config.annotation.AbstractWebSocketMessage
 import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 
-import com.boot.jx.filter.AppParamController;
 import com.boot.jx.http.RequestType;
 
 @Configuration

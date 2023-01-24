@@ -19,7 +19,6 @@ import com.boot.jx.account.dto.ContactTypeSummaryDto;
 import com.boot.jx.account.dto.MonthDtlsDto;
 import com.boot.jx.account.dto.TimeZoneOfSet;
 import com.boot.jx.account.dto.WabaSummaryDocDto;
-import com.boot.jx.account.dto.WabaSummaryDto;
 import com.boot.jx.account.manager.AccountDashBoardManager;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.http.CommonHttpRequest;

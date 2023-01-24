@@ -13,7 +13,6 @@ import com.boot.jx.mongo.CommonMongoQB.MongoQueryBuilder;
 import com.boot.jx.mongo.CommonMongoQueryBuilder;
 import com.boot.jx.mongo.QA;
 import com.boot.utils.JsonUtil;
-import com.mongodb.DBObject;
 
 public class MongoQueryTest { // Noncompliant
 

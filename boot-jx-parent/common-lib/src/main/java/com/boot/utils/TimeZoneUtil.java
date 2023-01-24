@@ -57,7 +57,6 @@ public class TimeZoneUtil {
 				contry = tz.getID();
 				timezoffset = String.format("GMT+%d:%02d", hours, minutes);
 				key = contry + "::" + timezoffset;
-				// System.out.println("contry "+contry+"\t timezoffset :"+timezoffset);
 				dto.setId(key);
 				dto.setCode(contry);
 				dto.setTitle(key);
@@ -65,8 +64,6 @@ public class TimeZoneUtil {
 				contry = tz.getID();
 				timezoffset = String.format("GMT+%d:%02d", hours, minutes);
 				key = contry + "::" + timezoffset;
-
-				// System.out.println("contry "+contry+"\t timezoffset :"+timezoffset);
 				dto.setId(key);
 				dto.setCode(contry);
 				dto.setTitle(key);

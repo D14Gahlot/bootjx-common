@@ -60,7 +60,6 @@ import com.boot.utils.HttpUtils;
 import com.boot.utils.JsonUtil;
 import com.boot.utils.StringUtils;
 import com.boot.utils.UniqueID;
-import com.boot.utils.Urly;
 
 @Component
 @Order(Ordered.HIGHEST_PRECEDENCE)
