@@ -1,7 +1,6 @@
 package com.boot.utils;
 
 import java.io.Serializable;
-import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -13,8 +12,6 @@ import java.util.Set;
 import org.springframework.util.Assert;
 import org.springframework.util.MultiValueMap;
 
-import com.boot.json.JsonSerializerType;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.JsonNode;
 
 /**

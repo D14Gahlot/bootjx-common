@@ -27,7 +27,6 @@ import com.boot.jx.phonebook.doc.PhoneUserDoc;
 import com.boot.jx.phonebook.doc.PhoneUserQuery;
 import com.boot.jx.phonebook.dto.PhoneProfileDTO;
 import com.boot.jx.phonebook.manager.PhoneBookManager;
-import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.Constants;
 import com.boot.utils.CryptoUtil;
