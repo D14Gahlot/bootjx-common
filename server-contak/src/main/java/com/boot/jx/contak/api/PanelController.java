@@ -34,6 +34,7 @@ import com.boot.jx.contak.doc.ContakMembershipDoc;
 import com.boot.jx.contak.doc.ContakTemplateDoc;
 import com.boot.jx.contak.doc.ContakUserDoc;
 import com.boot.jx.contak.dto.CompanyDoc;
+import com.boot.jx.model.CommonFile;
 import com.boot.jx.mongo.CommonMongoQB.MQB;
 import com.boot.jx.mongo.CommonMongoQB.QueryCriteria;
 import com.boot.jx.mongo.CommonMongoQueryBuilder;
@@ -282,12 +283,13 @@ public class PanelController {
 
 	@ResponseBody
 	@RequestMapping(value = "/api/v1/logo", method = { RequestMethod.POST })
-	public ApiResponse<String, Object> uploadFile(@RequestParam(name = "file", required = false) MultipartFile file) {
+	public ApiResponse<CommonFile, Object> uploadFile(
+			@RequestParam(name = "file", required = false) MultipartFile file) {
 		ContakUserDoc user = sessionBean.domainUser();
 		String domainUserId = user.getId();
-		String url = fileStore.upload1(file,
+		CommonFile url = fileStore.upload1(file,
 				String.format("%s/docs/%s/logo/%s", AppContextUtil.getTenant(), domainUserId, UUID.randomUUID()),
-				file.getOriginalFilename()).getUrl();
+				file.getOriginalFilename());
 		return ApiResponse.buildResults(url).message("Logo uplodaed");
 	}
 
