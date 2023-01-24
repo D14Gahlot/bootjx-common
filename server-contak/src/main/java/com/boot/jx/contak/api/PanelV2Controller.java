@@ -77,15 +77,14 @@ public class PanelV2Controller {
 	}
 
 	@ResponseBody
-	@RequestMapping(value = "/api/v2/org/{companyId}/hsm/tmpl/{templateId}/media", method = { RequestMethod.POST })
+	@RequestMapping(value = "/api/v2/org/{companyId}/hsm/tmpl/{templateCode}/media", method = { RequestMethod.POST })
 	public ApiResponse<CommonFile, Object> uploadFile(@RequestParam(name = "file", required = false) MultipartFile file,
-			@PathVariable String companyId, @PathVariable String templateId) {
+			@PathVariable String companyId, @PathVariable String templateCode) {
 		validateCompany(companyId);
 		ContakUserDoc user = sessionBean.domainUser();
 		String domainUserId = user.getId();
-		CommonFile f = fileStore.upload1(file,
-				String.format("%s/tmpl/%s/%s/img/%s", companyId, templateId, domainUserId, System.currentTimeMillis()),
-				file.getOriginalFilename());
+		CommonFile f = fileStore.upload1(file, String.format("%s/tmpl/%s/%s/img/%s", companyId, templateCode,
+				domainUserId, System.currentTimeMillis()), file.getOriginalFilename());
 		return ApiResponse.buildResults(f).message("Header Uplodaed");
 	}
 }

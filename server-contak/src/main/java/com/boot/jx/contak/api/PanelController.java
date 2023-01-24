@@ -243,6 +243,7 @@ public class PanelController {
 		compoc.setCountryOfOperation(newComp.getCountryOfOperation());
 		compoc.setAddress(newComp.getAddress());
 		compoc.setWebsiteUrl(newComp.getWebsiteUrl());
+		compoc.setLogoUrl(newComp.getLogoUrl());
 
 		compoc.setContactPersonName(newComp.getContactPersonName());
 		compoc.setContactPhoneNumber(newComp.getContactPhoneNumber());
