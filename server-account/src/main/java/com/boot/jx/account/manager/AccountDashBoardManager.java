@@ -63,7 +63,6 @@ import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.doc.config.ChannelConfigDoc;
 import com.boot.jx.postman.doc.tpo.WABAConversation;
 import com.boot.jx.postman.model.Message;
-import com.boot.jx.postman.store.MessageStore;
 import com.boot.jx.scope.tnt.Tenants;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.Constants;

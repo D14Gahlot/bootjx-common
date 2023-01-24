@@ -2,14 +2,11 @@ package com.boot.jx.account.doc;
 
 import java.io.Serializable;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.TypeAlias;
 import org.springframework.data.mongodb.core.mapping.Document;
-
-import com.boot.jx.account.dto.ContactTypeCountDto;
 
 @Document(collection = "DOMAIN_SUMMARY_MESSAGE")
 @TypeAlias("DomainSummaryMessageDoc")

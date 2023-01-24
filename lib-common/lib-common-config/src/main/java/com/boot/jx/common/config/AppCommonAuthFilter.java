@@ -13,7 +13,6 @@ import com.boot.jx.postman.PMConstants;
 import com.boot.jx.rest.AppRequestInterfaces.AppAuthFilter;
 import com.boot.jx.rest.AppRequestInterfaces.AppAuthUser;
 import com.boot.jx.scope.tnt.Tenants;
-import com.boot.jx.scope.tnt.Tenants.Tenant;
 import com.boot.utils.ArgUtil;
 
 @Component

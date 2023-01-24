@@ -5,8 +5,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 
 import com.boot.jx.AppContextUtil;
-import com.boot.jx.postman.PMConstants.CHAT_MODE;
 import com.boot.jx.postman.PMConstants;
+import com.boot.jx.postman.PMConstants.CHAT_MODE;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PMEnvironment.PMConfigurationObject;
 import com.boot.jx.postman.PMEnvironment.PMDomainConfig;

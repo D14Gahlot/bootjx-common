@@ -8,7 +8,6 @@ import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
-import org.springframework.stereotype.Component;
 
 import com.boot.jx.logger.LoggerService;
 import com.boot.utils.ArgUtil;

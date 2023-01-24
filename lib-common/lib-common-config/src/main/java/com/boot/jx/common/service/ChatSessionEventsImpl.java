@@ -13,11 +13,9 @@ import com.boot.jx.postman.PMEnvironment.PMConfigurationObject;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.model.PMArgs;
 import com.boot.jx.postman.model.ext.InBoundEvent;
-import com.boot.jx.postman.query.ChatSessionQuery;
 import com.boot.jx.postman.store.SessionStore;
 import com.boot.model.MapModel.NodeEntry;
 import com.boot.utils.ArgUtil;
-import com.boot.utils.Constants;
 
 @Component
 public class ChatSessionEventsImpl implements ChatSessionEvents {

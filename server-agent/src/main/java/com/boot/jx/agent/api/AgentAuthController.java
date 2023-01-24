@@ -29,7 +29,6 @@ import com.boot.jx.exception.ApiHttpExceptions.ApiStatusCodes;
 import com.boot.jx.http.ApiRequest;
 import com.boot.jx.http.CommonHttpRequest;
 import com.boot.jx.postman.PMEnvironment;
-import com.boot.jx.postman.PMConstants.MESSAGE_COMPOSE_TYPE;
 import com.boot.jx.postman.manager.ChatLogger;
 import com.boot.jx.postman.model.Message;
 import com.boot.jx.postman.model.OutboxMessage;

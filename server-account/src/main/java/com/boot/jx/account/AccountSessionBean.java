@@ -9,11 +9,8 @@ import org.springframework.stereotype.Component;
 import com.boot.jx.account.doc.BusinessUserDoc;
 import com.boot.jx.account.doc.DomainDoc;
 import com.boot.jx.common.config.AppCommonAuthFilter.AppCommonAuthUser;
-import com.boot.jx.common.dto.UserLoginToken;
-import com.boot.jx.logger.AuditDetailProvider;
 import com.boot.jx.postman.PMConstants;
 import com.boot.utils.ArgUtil;
-import com.boot.utils.Constants;
 
 @Component
 @Scope(value = "session", proxyMode = ScopedProxyMode.TARGET_CLASS)
