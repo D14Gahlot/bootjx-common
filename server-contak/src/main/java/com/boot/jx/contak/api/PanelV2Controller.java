@@ -72,7 +72,6 @@ public class PanelV2Controller {
 		validateCompany(companyId);
 		commonMongoTemplate.collection(ContakTemplateDoc.class)
 				.with(Criteria.where("companyId").is(companyId).and("templateId").is(templateId)).set("deleted", true);
-
 		return ApiResponse.build().message("Template has been deleted");
 	}
 
@@ -83,8 +82,8 @@ public class PanelV2Controller {
 		validateCompany(companyId);
 		ContakUserDoc user = sessionBean.domainUser();
 		String domainUserId = user.getId();
-		CommonFile f = fileStore.upload1(file, String.format("%s/tmpl/%s/%s/img/%s", companyId, templateCode,
-				domainUserId, System.currentTimeMillis()), file.getOriginalFilename());
+		CommonFile f = fileStore.upload1(file, String.format("%s/%s/tmpl/%s/%s/img/%s", AppContextUtil.getTenant(),
+				companyId, templateCode, domainUserId, System.currentTimeMillis()), file.getOriginalFilename());
 		return ApiResponse.buildResults(f).message("Header Uplodaed");
 	}
 }
