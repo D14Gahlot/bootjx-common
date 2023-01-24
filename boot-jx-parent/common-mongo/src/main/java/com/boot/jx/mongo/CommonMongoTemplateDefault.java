@@ -13,6 +13,7 @@ import org.springframework.data.mongodb.core.CollectionOptions;
 import org.springframework.data.mongodb.core.DbCallback;
 import org.springframework.data.mongodb.core.DocumentCallbackHandler;
 import org.springframework.data.mongodb.core.FindAndModifyOptions;
+import org.springframework.data.mongodb.core.IndexOperations;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.ScriptOperations;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
@@ -74,6 +75,11 @@ public abstract class CommonMongoTemplateDefault {
 
 	public <T> T execute(String collectionName, CollectionCallback<T> action) {
 		return getCommonMongoTemplate().execute(collectionName, action);
+	}
+
+	@SuppressWarnings("deprecation")
+	public <T> T executeInSession(DbCallback<T> action) {
+		return getCommonMongoTemplate().executeInSession(action);
 	}
 
 	public <T> CloseableIterator<T> stream(Query query, Class<T> entityType) {

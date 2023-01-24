@@ -3,11 +3,11 @@ package com.boot.jx.postman.model.ext;
 import java.util.List;
 
 import com.boot.jx.postman.model.ContactMeta;
-import com.boot.jx.postman.model.MessageRouter;
 import com.boot.jx.postman.model.MessageDefinitions.Contactable;
 import com.boot.jx.postman.model.MessageDefinitions.LoggableEntity;
 import com.boot.jx.postman.model.MessageDefinitions.SessionInfo;
 import com.boot.jx.postman.model.MessageDefinitions.TraceMessage;
+import com.boot.jx.postman.model.MessageRouter;
 import com.boot.jx.postman.model.MessageSession;
 import com.boot.jx.swagger.ApiMockModelProperty;
 import com.boot.jx.utils.PostManUtil;

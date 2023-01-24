@@ -630,4 +630,31 @@ public class WA360Client {
 		}
 	}
 
+	public MapModel mock(MapModel req) {
+		try {
+			MapModel resp = restService
+					.ajax("https://requestly.dev/api/mockv2/v1/messages?rq_uid=EaRk251ISeNyNfNTHKZ4ifiZbGv1")
+					.header("user-agent",
+							"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.99 Safari/537.36")
+					.get().asMapModel();
+			return resp;
+		} catch (ApiHttpServerException e) {
+			throw e;
+//			return MapModel.from(e.getResponse().getBody()).put(OutBoundWrapperPaths.RESPONSE_ERROR_CODE,
+//					e.getHttpStatus().value());
+		} catch (ApiHttpException e) {
+			return MapModel.from(e.getResponse().getBody());
+		}
+	}
+
+	@Retryable(value = ApiHttpServerException.class, maxAttempts = 3, backoff = @Backoff(delay = 3000))
+	public OutboxMessage mock(OutboxMessage outboxMessage) {
+		StringJoiner msgIds = new StringJoiner(",");
+		MapModel req = MapModel.createInstance().put("recipient_type", "individual").put("to",
+				outboxMessage.contact().getCsid());
+		MapModel resp = mock(req);
+		msgIds.add(getMessageId(resp));
+		outboxMessage.setMessageIdExt(msgIds.toString());
+		return outboxMessage;
+	}
 }

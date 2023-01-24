@@ -11,7 +11,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.boot.jx.AppConfigPackage.AppSharedConfig;
-import com.boot.jx.AppContext;
 import com.boot.jx.AppContextUtil;
 import com.boot.jx.http.CommonHttpRequest.ApiRequestDetail;
 import com.boot.jx.logger.LoggerService;

@@ -34,7 +34,8 @@ public class JarUtil {
 	 * </p>
 	 *
 	 * @param c The class whose location is desired.
-	 * @see FileUtils#urlToFile(URL) to convert the result to a {@link File}.
+	 * @see FileUtils#urlToFile(java.net.URL) to convert the result to a
+	 *      {@link File}.
 	 */
 	public static java.net.URL getLocation(final Class<?> c) {
 		if (c == null)
@@ -87,7 +88,7 @@ public class JarUtil {
 	}
 
 	/**
-	 * Converts the given {@link URL} to its corresponding {@link File}.
+	 * Converts the given {@link java.net.URL} to its corresponding {@link File}.
 	 * <p>
 	 * This method is similar to calling {@code new File(url.toURI())} except that
 	 * it also handles "jar:file:" URLs, returning the path to the JAR file.
@@ -138,8 +139,7 @@ public class JarUtil {
 			Runtime.getRuntime().exec(getCommand(jarPath, args));
 		} catch (Exception ex) {
 			ex.printStackTrace();
-		}
-		;
+		} ;
 		System.exit(0);
 	}
 
