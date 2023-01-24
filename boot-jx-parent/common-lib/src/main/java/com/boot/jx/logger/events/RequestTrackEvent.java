@@ -16,6 +16,7 @@ import org.springframework.http.client.ClientHttpResponse;
 
 import com.boot.jx.AppConstants;
 import com.boot.jx.AppContext;
+import com.boot.jx.exception.ApiHttpExceptions.ApiStatusCodes;
 import com.boot.jx.logger.AbstractEvent;
 import com.boot.jx.logger.AuditEvent;
 import com.boot.jx.tunnel.TunnelEventXchange;
@@ -320,7 +321,7 @@ public class RequestTrackEvent extends AuditEvent<RequestTrackEvent> implements 
 		}
 
 		try {
-			HttpStatus status = response.getStatusCode();
+			HttpStatus status = ApiStatusCodes.getHttpStatus(response);
 			this.status = ArgUtil.parseAsString(status);
 			if (ArgUtil.is(status) && (status.is5xxServerError() || status.is4xxClientError())) {
 				this.result = Result.ERROR;

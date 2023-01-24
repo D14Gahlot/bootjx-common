@@ -75,6 +75,7 @@ public class MessageDoc extends MessageDocAbstract {
 
 		private Object httpReq;
 		private Object httpResp;
+		private int httpStatusCode;
 
 		private String messageId;
 
@@ -100,6 +101,14 @@ public class MessageDoc extends MessageDocAbstract {
 
 		public void setHttpResp(Object httpResp) {
 			this.httpResp = httpResp;
+		}
+
+		public int getHttpStatusCode() {
+			return httpStatusCode;
+		}
+
+		public void setHttpStatusCode(int httpStatusCode) {
+			this.httpStatusCode = httpStatusCode;
 		}
 	}
 

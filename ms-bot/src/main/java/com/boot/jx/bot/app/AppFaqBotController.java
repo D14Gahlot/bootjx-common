@@ -22,7 +22,6 @@ import com.boot.jx.bot.alex.CommonBotController;
 import com.boot.jx.bot.chakli.DemoAlAamalController;
 import com.boot.jx.common.doc.AppFaqDoc;
 import com.boot.jx.mongo.CommonMongoTemplate;
-import com.boot.jx.postman.ClientApp;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.model.TmplElement;

@@ -12,7 +12,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpStatusCodeException;
 
 import com.boot.jx.dict.FileType;
-import com.boot.jx.exception.AmxException;
 import com.boot.jx.exception.ApiHttpExceptions.ApiHttpException;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PostmanPackages.MessageClient;

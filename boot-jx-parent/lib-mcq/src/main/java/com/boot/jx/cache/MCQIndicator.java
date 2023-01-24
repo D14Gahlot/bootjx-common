@@ -10,7 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.boot.jx.AppConfig;
-import com.boot.jx.AppParam;
 import com.boot.jx.cache.test.RedisSampleCacheBox;
 import com.boot.jx.def.IndicatorListner;
 import com.boot.jx.tunnel.TunnelSubscriberFactory;

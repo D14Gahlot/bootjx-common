@@ -3,7 +3,6 @@ package com.boot.jx.postman.query;
 import java.util.List;
 
 import com.boot.jx.mongo.CommonMongoQueryBuilder.DocQueryBuilder;
-import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.dto.ChatMessageDTO;

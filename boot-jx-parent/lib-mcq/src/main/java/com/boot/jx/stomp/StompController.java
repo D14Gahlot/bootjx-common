@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.boot.jx.AppConstants;
-import com.boot.jx.AppContextUtil;
 import com.boot.jx.http.ApiRequest;
 import com.boot.jx.scope.tnt.TenantContextHolder;
 import com.boot.jx.scope.tnt.Tenants.TenantResolver;

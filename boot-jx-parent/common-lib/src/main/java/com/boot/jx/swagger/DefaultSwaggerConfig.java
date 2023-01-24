@@ -15,14 +15,13 @@ import com.boot.jx.AppContextUtil;
 import com.boot.jx.http.CommonHttpRequest;
 import com.boot.jx.http.Kooky;
 import com.boot.jx.scope.tnt.TenantContextHolder;
-import com.boot.jx.scope.tnt.Tenants;
 import com.boot.jx.swagger.MockParamBuilder.MockParam;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
 import com.boot.utils.Constants;
+import com.boot.utils.CryptoUtil.HashBuilder;
 import com.boot.utils.StringUtils;
 import com.boot.utils.UniqueID;
-import com.boot.utils.CryptoUtil.HashBuilder;
 
 import springfox.documentation.builders.ParameterBuilder;
 import springfox.documentation.builders.RequestHandlerSelectors;
