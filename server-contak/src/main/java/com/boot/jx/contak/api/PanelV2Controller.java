@@ -78,12 +78,21 @@ public class PanelV2Controller {
 	@ResponseBody
 	@RequestMapping(value = "/api/v2/org/{companyId}/hsm/tmpl/{templateCode}/media", method = { RequestMethod.POST })
 	public ApiResponse<CommonFile, Object> uploadFile(@RequestParam(name = "file", required = false) MultipartFile file,
-			@PathVariable String companyId, @PathVariable String templateCode) {
+			@RequestParam(name = "thumbnail", required = false) MultipartFile thumbnail, @PathVariable String companyId,
+			@PathVariable String templateCode) {
 		validateCompany(companyId);
 		ContakUserDoc user = sessionBean.domainUser();
 		String domainUserId = user.getId();
-		CommonFile f = fileStore.upload1(file, String.format("%s/%s/tmpl/%s/%s/img/%s", AppContextUtil.getTenant(),
-				companyId, templateCode, domainUserId, System.currentTimeMillis()), file.getOriginalFilename());
+		CommonFile f = fileStore.upload1(file,
+				String.format("%s_%s/tmpl/%s/%s", AppContextUtil.getTenant(), companyId, templateCode),
+				file.getOriginalFilename());
+		if (ArgUtil.is(thumbnail)) {
+			CommonFile thumb = fileStore.upload1(file,
+					String.format("%s_%s/tmpl/%s/%s/th", AppContextUtil.getTenant(), companyId, templateCode),
+					file.getOriginalFilename());
+			f.setThumb(thumb.getUrl());
+		}
+
 		return ApiResponse.buildResults(f).message("Header Uplodaed");
 	}
 }

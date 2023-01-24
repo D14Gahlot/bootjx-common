@@ -65,6 +65,8 @@ public class AWSFileStore {
 			throw new IllegalStateException("File uploaded is not an accepted format");
 		}
 
+		dstFile.setContentLength(file.getSize());
+
 		// get file metadata
 		ObjectMetadata objectMetadata = new ObjectMetadata();
 		objectMetadata.setContentType(file.getContentType());
