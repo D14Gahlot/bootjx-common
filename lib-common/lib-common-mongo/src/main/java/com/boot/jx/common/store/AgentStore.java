@@ -10,7 +10,6 @@ import org.springframework.stereotype.Component;
 import com.boot.jx.common.doc.AgentDoc;
 import com.boot.jx.common.doc.DepartmentDoc;
 import com.boot.jx.mongo.CommonDocInterfaces.IMongoQueryBuilder;
-import com.boot.jx.mongo.CommonMongoQB;
 import com.boot.jx.mongo.CommonMongoQB.MQB;
 import com.boot.jx.mongo.CommonMongoQB.MongoQueryBuilder;
 import com.boot.jx.mongo.CommonMongoQueryBuilder;

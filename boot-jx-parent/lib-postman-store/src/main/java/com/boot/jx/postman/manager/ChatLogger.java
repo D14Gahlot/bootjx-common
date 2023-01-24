@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 
 import com.boot.jx.AppConfig;
 import com.boot.jx.AppContextUtil;
+import com.boot.jx.exception.AmxApiError;
 import com.boot.jx.exception.ApiHttpExceptions.ApiHttpException;
 import com.boot.jx.exception.ApiHttpExceptions.ApiHttpServerException;
 import com.boot.jx.logger.AuditDetailProvider;
@@ -139,7 +140,9 @@ public class ChatLogger {
 		}
 
 		if (e instanceof ApiHttpServerException || e instanceof ApiHttpException) {
-			doc.setHttpResp(MapModel.from(((ApiHttpException) e).getResponse().getBody()).toMap());
+			AmxApiError r = ((ApiHttpException) e).getResponse();
+			doc.setHttpResp(MapModel.from(r.getBody()).toMap());
+			doc.setHttpStatusCode(r.getRawStatusCode());
 		}
 
 	}

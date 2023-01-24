@@ -27,7 +27,6 @@ import com.boot.jx.postman.model.PostManFile;
 import com.boot.jx.postman.model.PushMessage;
 import com.boot.jx.postman.model.SMS;
 import com.boot.jx.postman.model.SupportEmail;
-import com.boot.jx.postman.model.TGMessage;
 import com.boot.jx.postman.model.WAMessage;
 import com.boot.utils.ContextUtil;
 

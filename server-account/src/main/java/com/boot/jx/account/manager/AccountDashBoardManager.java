@@ -63,7 +63,6 @@ import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.doc.config.ChannelConfigDoc;
 import com.boot.jx.postman.doc.tpo.WABAConversation;
 import com.boot.jx.postman.model.Message;
-import com.boot.jx.postman.store.MessageStore;
 import com.boot.jx.scope.tnt.Tenants;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.Constants;
@@ -87,7 +86,7 @@ public class AccountDashBoardManager {
 
 	@Autowired
 	private AccountStore accountStore;
-	
+
 	@Autowired
 	private PMEnvironment environment;
 
@@ -315,7 +314,7 @@ public class AccountDashBoardManager {
 	public String getSummaryId(SummaryDocDto dto) {
 		String tenant = dto.getDomain();
 		if (dto.getChannel().contains(ContactType.WHATSAPP.name())) {
-			return tenant + "_" + dto.getDate() + "_" + "wa"+"_"+dto.getLane();
+			return tenant + "_" + dto.getDate() + "_" + "wa" + "_" + dto.getLane();
 		} else if (dto.getChannel().contains(ContactType.FACEBOOK.name())) {
 			return tenant + "_" + dto.getDate() + "_" + "fb";
 		} else if (dto.getChannel().contains(ContactType.TWITTER.name())) {
@@ -333,7 +332,7 @@ public class AccountDashBoardManager {
 	public String getSummaryWithChannelId(SummaryDocDto dto) {
 		String tenant = dto.getDomain();
 		if (dto.getChannel().contains(ContactType.WHATSAPP.name())) {
-			return tenant + "_" + "wa"+"_"+dto.getLane();
+			return tenant + "_" + "wa" + "_" + dto.getLane();
 		} else if (dto.getChannel().contains(ContactType.FACEBOOK.name())) {
 			return tenant + "_" + "fb";
 		} else if (dto.getChannel().contains(ContactType.TWITTER.name())) {
@@ -567,39 +566,36 @@ public class AccountDashBoardManager {
 		List<String> channelLst = getListChannelCongig();
 		long currentTs = System.currentTimeMillis();
 
-		long offsetts= countryTimeZoneOffset(tnt);
+		long offsetts = countryTimeZoneOffset(tnt);
 		ZonedDateTime noOfdaysTstamp = null;
-		long lasDayTimeStmp =0;
-		String offsett= getTimeZoneFromSetup();
-		LOGGER.info("dayChannelWiseWisesummary dateRange1 :"+dateRange1+"\t dateRange2 :"+dateRange2 +"\t offsett :"+offsett);
-	
+		long lasDayTimeStmp = 0;
+		String offsett = getTimeZoneFromSetup();
+		LOGGER.info("dayChannelWiseWisesummary dateRange1 :" + dateRange1 + "\t dateRange2 :" + dateRange2
+				+ "\t offsett :" + offsett);
+
 		DomainDoc dDoc = getDomainTimeZone(tnt);
-		String zone = getTimeZone(offsett==null?dDoc.getTimeZoneOffSet():offsett);
-		String offset= getOffSet(offsett==null?dDoc.getTimeZoneOffSet():offsett);
+		String zone = getTimeZone(offsett == null ? dDoc.getTimeZoneOffSet() : offsett);
+		String offset = getOffSet(offsett == null ? dDoc.getTimeZoneOffSet() : offsett);
 		String[] hm = offset.split(":");
-		
+
 		int hr = ArgUtil.parseAsInteger(hm[0]);
 		int mm = ArgUtil.parseAsInteger(hm[1]);
-		
+
 		if (ArgUtil.is(dateRange1)) {
-			lasDayTimeStmp=DateUtil.getDateMinAndMaxTime(getCovertDate(dateRange1), hr, mm, zone, LocalTime.MIN);
-			lasDayTimeStmp =lasDayTimeStmp+offsetts;
-			
+			lasDayTimeStmp = DateUtil.getDateMinAndMaxTime(getCovertDate(dateRange1), hr, mm, zone, LocalTime.MIN);
+			lasDayTimeStmp = lasDayTimeStmp + offsetts;
+
 		}
 		if (ArgUtil.is(dateRange2)) {
-			currentTs =DateUtil.getDateMinAndMaxTime(getCovertDate(dateRange2), hr, mm, zone, LocalTime.MAX);
-			currentTs = currentTs+offsetts;
+			currentTs = DateUtil.getDateMinAndMaxTime(getCovertDate(dateRange2), hr, mm, zone, LocalTime.MAX);
+			currentTs = currentTs + offsetts;
 		}
-		
-		
 
-		if (lasDayTimeStmp==0  && days > 0) {
+		if (lasDayTimeStmp == 0 && days > 0) {
 			noOfdaysTstamp = ZonedDateTime.now().minusDays(days).with(LocalTime.MIN);
 			lasDayTimeStmp = noOfdaysTstamp.toInstant().toEpochMilli();
-		} 
-		
-		 
-		
+		}
+
 		Map<Object, Long> dateRanMap = getDatesRange(currentTs, lasDayTimeStmp);
 
 		String monthYear = new SimpleDateFormat(DateUtil.MMM_YYYY_FORMAT).format(currentTs);
@@ -653,32 +649,32 @@ public class AccountDashBoardManager {
 
 		Map<Object, Map<Object, Long>> dayWiseMap = new HashMap<>();
 		for (String channel : channelLst) {
-		for (Map.Entry<String, Map<String, Long>> keyValue : dayWiseCountMap.entrySet()) {
-			String key = keyValue.getKey();
-			if (ArgUtil.is(key)) {
+			for (Map.Entry<String, Map<String, Long>> keyValue : dayWiseCountMap.entrySet()) {
+				String key = keyValue.getKey();
+				if (ArgUtil.is(key)) {
 //				//for (String channel : channelLst) {
-				String  tnt_channel=tnt + "_" + channel; 
-				if (!key.contains(tnt_channel)) {
+					String tnt_channel = tnt + "_" + channel;
+					if (!key.contains(tnt_channel)) {
 						dayWiseMap.put(tnt_channel, dateRanMap);
 					}
-				Map<Object, Long> dateWiseCnt = new HashMap<>();
-				Map<String, Long> dayCntMap = dayWiseCountMap.get(key);
-				// dateRanMap
-				for (Map.Entry<Object, Long> keyValueCount : dateRanMap.entrySet()) {
-					Object keydt = keyValueCount.getKey();
-					if (ArgUtil.is(keydt)) {
-						Long count = keyValueCount.getValue();
-						if (dayCntMap.containsKey(keydt)) {
-							dateWiseCnt.put(keydt, dayCntMap.get(keydt));
-						} else {
-							dateWiseCnt.put(keydt, count);
+					Map<Object, Long> dateWiseCnt = new HashMap<>();
+					Map<String, Long> dayCntMap = dayWiseCountMap.get(key);
+					// dateRanMap
+					for (Map.Entry<Object, Long> keyValueCount : dateRanMap.entrySet()) {
+						Object keydt = keyValueCount.getKey();
+						if (ArgUtil.is(keydt)) {
+							Long count = keyValueCount.getValue();
+							if (dayCntMap.containsKey(keydt)) {
+								dateWiseCnt.put(keydt, dayCntMap.get(keydt));
+							} else {
+								dateWiseCnt.put(keydt, count);
+							}
 						}
-					}
 
+					}
+					dayWiseMap.put(key, dateWiseCnt);
 				}
-				dayWiseMap.put(key, dateWiseCnt);
 			}
-		}
 		}
 
 		dayWiseMap = sortMap(dayWiseMap);
@@ -707,9 +703,9 @@ public class AccountDashBoardManager {
 		if (m > 30) {
 			tStamp = timeStamp + ((60 - m) * 60 * 1000L);
 		} else {
-			tStamp = timeStamp + ((30-m) * 60 * 1000L);
+			tStamp = timeStamp + ((30 - m) * 60 * 1000L);
 		}
-		
+
 		long tStampWmS = (tStamp - (tStamp % (1000 * 60)));
 
 		return tStampWmS;
@@ -731,21 +727,21 @@ public class AccountDashBoardManager {
 		Date date = new Date(lastTimeStamp);
 		SimpleDateFormat sdfHM = new SimpleDateFormat("mm");
 		String formattedHM = sdfHM.format(date);
-		int m =Integer.parseInt(formattedHM);
-		long currTimeStM=currentTStamp;
-		long lastTimeStampWm=lastTimeStamp;
+		int m = Integer.parseInt(formattedHM);
+		long currTimeStM = currentTStamp;
+		long lastTimeStampWm = lastTimeStamp;
 		/** for Upper round **/
-		if(m>30) {
-			m = 60-m;
-			currTimeStM=currentTStamp+(m * 60 * 1000L);
-			lastTimeStampWm = lastTimeStamp -((30-m) * 60 * 1000L);
-		}else {
-			lastTimeStampWm = lastTimeStamp -(m* 60 * 1000L);
-			m = 30-m;
-			currTimeStM=currentTStamp+(m * 60 * 1000L);
+		if (m > 30) {
+			m = 60 - m;
+			currTimeStM = currentTStamp + (m * 60 * 1000L);
+			lastTimeStampWm = lastTimeStamp - ((30 - m) * 60 * 1000L);
+		} else {
+			lastTimeStampWm = lastTimeStamp - (m * 60 * 1000L);
+			m = 30 - m;
+			currTimeStM = currentTStamp + (m * 60 * 1000L);
 		}
 		lastTimeStampWm = (lastTimeStampWm - (lastTimeStampWm % (1000 * 60)));
-		for (long lastTS = lastTimeStampWm; lastTS <=currTimeStM; lastTS = lastTS + DateUtil.MIN_30) {
+		for (long lastTS = lastTimeStampWm; lastTS <= currTimeStM; lastTS = lastTS + DateUtil.MIN_30) {
 			mapMinWise.put(lastTS, new Long(0));
 		}
 		Map<Object, Long> result = new TreeMap<Object, Long>(mapMinWise);
@@ -855,37 +851,37 @@ public class AccountDashBoardManager {
 
 		List<DateWiseHourCountDto> dayCntLst = new ArrayList<>();
 
-		
-		long offsetts= countryTimeZoneOffset(tnt);
-		String offsett= getTimeZoneFromSetup();
-		LOGGER.info("dayChannelWiseWisesummary dateRange1 :"+dateRange1+"\t dateRange2 :"+dateRange2 +"\t offsett :"+offsett);
-	
+		long offsetts = countryTimeZoneOffset(tnt);
+		String offsett = getTimeZoneFromSetup();
+		LOGGER.info("dayChannelWiseWisesummary dateRange1 :" + dateRange1 + "\t dateRange2 :" + dateRange2
+				+ "\t offsett :" + offsett);
+
 		DomainDoc doc = getDomainTimeZone(tnt);
-		String zone = getTimeZone(offsett==null?doc.getTimeZoneOffSet():offsett);
-		String offset= getOffSet(offsett==null?doc.getTimeZoneOffSet():offsett);
+		String zone = getTimeZone(offsett == null ? doc.getTimeZoneOffSet() : offsett);
+		String offset = getOffSet(offsett == null ? doc.getTimeZoneOffSet() : offsett);
 		String[] hm = offset.split(":");
-		
+
 		int hr = ArgUtil.parseAsInteger(hm[0]);
 		int mm = ArgUtil.parseAsInteger(hm[1]);
 
 		long currentTs = System.currentTimeMillis();
-		
+
 		ZonedDateTime noOfdaysTstamp = null;
-		long lasDayTimeStmp =0;
+		long lasDayTimeStmp = 0;
 		if (ArgUtil.is(dateRange1)) {
-			//lasDayTimeStmp = dateRange1+offsetts;
-			lasDayTimeStmp=DateUtil.getDateMinAndMaxTime(getCovertDate(dateRange1), hr, mm, zone, LocalTime.MIN);
-			lasDayTimeStmp = lasDayTimeStmp+offsetts;
+			// lasDayTimeStmp = dateRange1+offsetts;
+			lasDayTimeStmp = DateUtil.getDateMinAndMaxTime(getCovertDate(dateRange1), hr, mm, zone, LocalTime.MIN);
+			lasDayTimeStmp = lasDayTimeStmp + offsetts;
 		}
 		if (ArgUtil.is(dateRange2)) {
-			//currentTs = dateRange2+offsetts;
-			currentTs =DateUtil.getDateMinAndMaxTime(getCovertDate(dateRange2), hr, mm, zone, LocalTime.MAX);
-			currentTs = currentTs+offsetts;
+			// currentTs = dateRange2+offsetts;
+			currentTs = DateUtil.getDateMinAndMaxTime(getCovertDate(dateRange2), hr, mm, zone, LocalTime.MAX);
+			currentTs = currentTs + offsetts;
 		}
-		if (lasDayTimeStmp==0  && days > 0) {
+		if (lasDayTimeStmp == 0 && days > 0) {
 			noOfdaysTstamp = ZonedDateTime.now().minusDays(days).with(LocalTime.MIN);
 			lasDayTimeStmp = noOfdaysTstamp.toInstant().toEpochMilli();
-		} 
+		}
 
 		String monthYear = new SimpleDateFormat(DateUtil.MMM_YYYY_FORMAT).format(currentTs);
 		Calendar cal = Calendar.getInstance();
@@ -1118,129 +1114,120 @@ public class AccountDashBoardManager {
 		query.addCriteria(Criteria.where("isDisabled").is(false));
 		List<ChannelConfigDoc> cofigDocLst = mongoTemplate.find(query, ChannelConfigDoc.class, "CONFIG_CHANNEL");
 		for (ChannelConfigDoc cofigDoc : cofigDocLst) {
-				 listOfChannelConfig.add(cofigDoc.getChannelType());
-			}
+			listOfChannelConfig.add(cofigDoc.getChannelType());
+		}
 
 		listOfChannelConfig = new ArrayList<>(new HashSet<>(listOfChannelConfig));
 
 		return listOfChannelConfig;
 	}
-	
+
 	public String getLane(String contactid) {
-		String lane="";
-		if(ArgUtil.is(contactid)) {
-			String[] contactids =contactid.split("_");
-			if(contactids!=null && contactids[1]!=null) {
-				lane =contactids[1];
+		String lane = "";
+		if (ArgUtil.is(contactid)) {
+			String[] contactids = contactid.split("_");
+			if (contactids != null && contactids[1] != null) {
+				lane = contactids[1];
 			}
 		}
 		return lane;
 	}
-	
+
 	public Long countryTimeZoneOffset(String domain) {
 		AppContextUtil.setTenant(Tenants.getDefault());
 		DomainDoc domainDoc = accountStore.findDomainByName(domain);
 		AppContextUtil.setTenant(domain);
-		long offsettimestamp =0;
-		String offset =null;
-		if(ArgUtil.is(domainDoc)) {
+		long offsettimestamp = 0;
+		String offset = null;
+		if (ArgUtil.is(domainDoc)) {
 			offset = domainDoc.getTimeZoneOffSet();
 		}
-		
-		if(ArgUtil.is(offset)) {
-			String hrStr = offset.substring(offset.indexOf('+')+1);
+
+		if (ArgUtil.is(offset)) {
+			String hrStr = offset.substring(offset.indexOf('+') + 1);
 			String[] hrMin = hrStr.split(":");
-			int hr =Integer.parseInt(hrMin[0]);
-			int  min =Integer.parseInt(hrMin[1]); 
-			offsettimestamp = hr*DateUtil.ONE_HR+min*DateUtil.MIN;
+			int hr = Integer.parseInt(hrMin[0]);
+			int min = Integer.parseInt(hrMin[1]);
+			offsettimestamp = hr * DateUtil.ONE_HR + min * DateUtil.MIN;
 		}
 		return offsettimestamp;
 	}
-	
+
 	public DomainDoc getDomainTimeZone(String domain) {
 		AppContextUtil.setTenant(Tenants.getDefault());
 		DomainDoc domainDoc = accountStore.findDomainByName(domain);
 		AppContextUtil.setTenant(domain);
 		return domainDoc;
 	}
-	
+
 	public String getTimeZone(String toffset) {
 		String timeZone = java.util.TimeZone.getDefault().getID();
-		if(ArgUtil.is(toffset)) {
-			String[] hrStr =toffset.split("::");
-			if(ArgUtil.is(hrStr)) {
-				timeZone =hrStr[0]; 
+		if (ArgUtil.is(toffset)) {
+			String[] hrStr = toffset.split("::");
+			if (ArgUtil.is(hrStr)) {
+				timeZone = hrStr[0];
 			}
 		}
 		return timeZone;
 	}
-	
+
 	public String getOffSet(String toffset) {
 		String offset = "00:00";
-		if(ArgUtil.is(toffset)) {
-			String[] hrStr =toffset.split("::");
-			if(ArgUtil.is(hrStr)) {
-				offset =hrStr[1].substring(hrStr[1].indexOf('+')+1);
+		if (ArgUtil.is(toffset)) {
+			String[] hrStr = toffset.split("::");
+			if (ArgUtil.is(hrStr)) {
+				offset = hrStr[1].substring(hrStr[1].indexOf('+') + 1);
 			}
 		}
 		return offset;
 	}
-	
-	
-	
-	public TimeZoneOfSet getTimeZoneOffset(){
+
+	public TimeZoneOfSet getTimeZoneOffset() {
 		TimeZoneOfSet tzo = new TimeZoneOfSet();
-		Map<String,String> hm = new HashMap<>();
+		Map<String, String> hm = new HashMap<>();
 		String[] ids = TimeZone.getAvailableIDs();
 		for (String id : ids) {
-		 TimeZone tz=TimeZone.getTimeZone(id);
-		long hours = TimeUnit.MILLISECONDS.toHours(tz.getRawOffset());
-		long minutes = TimeUnit.MILLISECONDS.toMinutes(tz.getRawOffset()) 
-                                  - TimeUnit.HOURS.toMinutes(hours);
-		// avoid -4:-30 issue
-		minutes = Math.abs(minutes);
+			TimeZone tz = TimeZone.getTimeZone(id);
+			long hours = TimeUnit.MILLISECONDS.toHours(tz.getRawOffset());
+			long minutes = TimeUnit.MILLISECONDS.toMinutes(tz.getRawOffset()) - TimeUnit.HOURS.toMinutes(hours);
+			// avoid -4:-30 issue
+			minutes = Math.abs(minutes);
 
-		String key = null;
-		String contry=null;
-		String timezoffset=null;
-		
-		if (hours > 0) {
-			contry = tz.getID();
-			timezoffset =  String.format("GMT+%d:%02d",hours, minutes);
-			key = contry+"::"+timezoffset;
-			
-			hm.put(key, contry);
-		} else {
-			contry = tz.getID();
-			timezoffset =  String.format("GMT+%d:%02d",hours, minutes);
-			key = contry+"::"+timezoffset;
-			hm.put(key, contry);
-		}
-		
+			String key = null;
+			String contry = null;
+			String timezoffset = null;
+
+			if (hours > 0) {
+				contry = tz.getID();
+				timezoffset = String.format("GMT+%d:%02d", hours, minutes);
+				key = contry + "::" + timezoffset;
+
+				hm.put(key, contry);
+			} else {
+				contry = tz.getID();
+				timezoffset = String.format("GMT+%d:%02d", hours, minutes);
+				key = contry + "::" + timezoffset;
+				hm.put(key, contry);
+			}
+
 		}
 		tzo.setTimeZmap(hm);
-		
+
 		return tzo;
 	}
-	
+
 	public String getCovertDate(String date) {
 		String dt = null;
-		if(ArgUtil.is(date)){
+		if (ArgUtil.is(date)) {
 			String[] dtStr = date.split("/");
-			dt =dtStr[2]+"-"+dtStr[1]+"-"+dtStr[0]; 
+			dt = dtStr[2] + "-" + dtStr[1] + "-" + dtStr[0];
 		}
 		return dt;
 	}
-	
+
 	public String getTimeZoneFromSetup() {
-		String offset= environment.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_TIMEZONE_OFFSET).asString();
+		String offset = environment.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_TIMEZONE_OFFSET)
+				.asString("Asia/Kolkata::GMT+5:30");
 		return offset;
 	}
-
-	
-
-public String getTimeZoneFromSetup() {
-	String offset= environment.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_TIMEZONE_OFFSET).asString("Asia/Kolkata::GMT+5:30");
-	return offset;
-}
 }

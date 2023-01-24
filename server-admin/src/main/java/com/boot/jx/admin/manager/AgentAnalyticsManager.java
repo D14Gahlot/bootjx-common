@@ -499,7 +499,7 @@ public class AgentAnalyticsManager {
 		Set<Object> dateWithTimeWiseCount = new HashSet<Object>(dateWithTimeList);
 		for (Object key : dateWithTimeWiseCount) {
 			mapLst.put(key, Collections.frequency(dateWithTimeList, key));
-			
+
 		}
 		if (mapLst != null && ArgUtil.is(mapLst) && !mapLst.isEmpty()) {
 			Object maxEntryKey = Collections.max(mapLst.entrySet(), Map.Entry.comparingByValue()).getKey();
