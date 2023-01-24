@@ -9,6 +9,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.util.StreamUtils;
 
+import com.boot.jx.exception.ApiHttpExceptions.ApiStatusCodes;
+
 public final class BufferingClientHttpResponseWrapper implements ClientHttpResponse {
 
 	private final ClientHttpResponse response;
@@ -20,7 +22,7 @@ public final class BufferingClientHttpResponseWrapper implements ClientHttpRespo
 	}
 
 	public HttpStatus getStatusCode() throws IOException {
-		return this.response.getStatusCode();
+		return ApiStatusCodes.getHttpStatus(this.response);
 	}
 
 	public int getRawStatusCode() throws IOException {

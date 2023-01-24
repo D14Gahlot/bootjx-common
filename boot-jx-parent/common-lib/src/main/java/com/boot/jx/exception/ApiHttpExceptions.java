@@ -1,6 +1,9 @@
 package com.boot.jx.exception;
 
+import java.io.IOException;
+
 import org.springframework.http.HttpStatus;
+import org.springframework.http.client.ClientHttpResponse;
 
 import com.boot.utils.ArgUtil;
 
@@ -39,6 +42,17 @@ public class ApiHttpExceptions {
 		@Override
 		public int getStatusCode() {
 			return this.statusCode;
+		}
+
+		public static HttpStatus getHttpStatus(ClientHttpResponse response) throws IOException {
+			int code = response.getRawStatusCode();
+			for (HttpStatus status : HttpStatus.values()) {
+				if (status.value() == code) {
+					return status;
+				}
+			}
+			code = (code / 100) * 100;
+			return HttpStatus.valueOf(code);
 		}
 
 	}

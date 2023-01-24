@@ -24,9 +24,16 @@ import com.boot.jx.api.ApiResponse;
 import com.boot.jx.common.doc.AgentSessionDoc;
 import com.boot.jx.common.dto.AgentResponseAuthDto;
 import com.boot.jx.common.service.EmpAuthService;
+import com.boot.jx.exception.AmxApiException;
+import com.boot.jx.exception.ApiHttpExceptions.ApiStatusCodes;
 import com.boot.jx.http.ApiRequest;
 import com.boot.jx.http.CommonHttpRequest;
 import com.boot.jx.postman.PMEnvironment;
+import com.boot.jx.postman.PMConstants.MESSAGE_COMPOSE_TYPE;
+import com.boot.jx.postman.manager.ChatLogger;
+import com.boot.jx.postman.model.Message;
+import com.boot.jx.postman.model.OutboxMessage;
+import com.boot.jx.postman.wa360.WA360Client;
 import com.boot.jx.tnt.custom.TenantClientResolver;
 import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
@@ -377,4 +384,50 @@ public class AgentAuthController {
 		return ApiResponse.buildResults(sessionService.getAgentSessions(), meta.toMap());
 	}
 
+	@Autowired
+	private WA360Client wa360Client;
+	
+	@Autowired
+	protected ChatLogger logManager;
+
+	@ResponseBody
+	@RequestMapping(value = "/pub/send/mock", method = { RequestMethod.POST })
+	public ApiResponse<OutboxMessage, Object> mock() {
+		OutboxMessage outboxMessage = new OutboxMessage();
+		try {
+			try {
+				// generic
+				outboxMessage = wa360Client.mock(outboxMessage);
+				outboxMessage.updateStatus(OutboxMessage.Status.SENT);
+			} catch (AmxApiException e) {
+				outboxMessage.updateStatus(OutboxMessage.Status.SENT_ERR);
+				outboxMessage.logs().add(((AmxApiException) e).getErrorKey());
+				outboxMessage.logs().add(e.getMessage());
+			}
+		} catch (Exception e) {
+			try {
+				if (e instanceof AmxApiException) {
+					String errorCode = ((AmxApiException) e).getErrorKey();
+					outboxMessage.updateStatus(Message.Status.SENT_ERR);
+					outboxMessage.logs().add(errorCode);
+					if (ApiStatusCodes.API_ERROR.toString().equalsIgnoreCase(errorCode)) {
+						logManager.error(outboxMessage, e);
+					}
+				} else {
+					outboxMessage.updateStatus(Message.Status.SENT_EXC);
+					logManager.error(outboxMessage, e);
+				}
+				outboxMessage.logs().add(e.getMessage());
+				//LOGGER.error("SEND ERROR", e);
+				System.out.println("3.LOGGER.error(\"SEND ERROR\", e)");
+				e.printStackTrace();
+			} catch (Exception ex) {
+				//LOGGER.error("SEND ERROR LOG EXCEPTION", ex);
+				System.out.println("4.LOGGER.error(\"SEND ERROR LOG EXCEPTION\", ex)");
+				ex.printStackTrace();
+			}
+		}
+
+		return ApiResponse.buildResults(outboxMessage);
+	}
 }
