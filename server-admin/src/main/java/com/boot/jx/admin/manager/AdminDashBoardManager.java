@@ -1524,7 +1524,7 @@ public class AdminDashBoardManager {
 		long currentTs = System.currentTimeMillis();
 		ZonedDateTime noOfdaysTstamp = null;
 		
-		String offset= environment.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_TIMEZONE_OFFSET).asString();
+		String offset=getTimeZoneFromSetup();// environment.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_TIMEZONE_OFFSET).asString();
 		
 		LOGGER.info("ADMIN getDayWiseMsgStatusSummary {}"+offset+"\t dateRange1:"+dateRange1+"\t dateRange2 :"+dateRange2);
 		
@@ -1918,7 +1918,7 @@ public String getLane(String contactid) {
 	String lane="";
 	if(ArgUtil.is(contactid)) {
 		String[] contactids =contactid.split("_");
-		if(contactids!=null && contactids[1]!=null) {
+		if(contactids!=null  && contactids.length>0) {
 			lane =contactids[1];
 		}
 	}
