@@ -189,20 +189,20 @@ public class ConfigConstants {
 				new ConfigMeta("Inbound Idle Timeout Config", "postman.any.chat.in.idle.timeout")
 						.superKey("postman.any.chat.in.idle.timeout")
 						.desc("Chat gets timed-out if customer does not respond for this interval in Minutes")
-						.optionsOnOff().group(GROUP_AGENT)),
+						.optionsOnOff().group(GROUP_CUSTOMER_CHAT)),
 
 		POSTMAN_ANY_CHAT_IN_IDLE_TIMEOUT_INTERVAL(
 				new ConfigMeta("Inbound Idle Timeout Interval", "postman.any.chat.in.idle.timeout.interval")
 						.superKey("postman.any.chat.in.idle.timeout")
 						.desc("Chat gets timed-out if customer does not respond for this interval in Minutes")
-						.inputType(INPUT_TYPE.NUMBER).min(5).group(GROUP_AGENT)),
+						.inputType(INPUT_TYPE.NUMBER).min(5).group(GROUP_CUSTOMER_CHAT)),
 
 		POSTMAN_ANY_CHAT_IN_IDLE_TIMEOUT_QUEUE(
 				new ConfigMeta("In-bound Idle Timeout Queue", "postman.any.chat.in.idle.timeout.queue")
 						.superKey("postman.any.chat.in.idle.timeout")
 						.desc("Timed-out chat gets re-assigned to this queue")
 						.optionsSource("getx:/api/options/inbound_queue").optionsKey("code").optionsLabel("code")
-						.group(GROUP_AGENT)),
+						.group(GROUP_CUSTOMER_CHAT)),
 
 //	POSTMAN_UI_BETA(new ConfigMeta("Enable Beta UI", "postman.ui.beta").optionsOnOff()
 //		.defaultValue(ConfigOption.OFF).group(GROUP_AGENT)),
