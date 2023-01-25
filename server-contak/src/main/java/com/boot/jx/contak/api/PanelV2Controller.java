@@ -71,7 +71,8 @@ public class PanelV2Controller {
 			@PathVariable String templateId) throws NoSuchAlgorithmException {
 		validateCompany(companyId);
 		commonMongoTemplate.collection(ContakTemplateDoc.class)
-				.with(Criteria.where("companyId").is(companyId).and("templateId").is(templateId)).set("deleted", true);
+				.with(Criteria.where("companyId").is(companyId).and("templateId").is(templateId)).set("deleted", true)
+				.update();
 		return ApiResponse.build().message("Template has been deleted");
 	}
 
