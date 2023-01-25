@@ -14,6 +14,7 @@ import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.model.PMArgs;
 import com.boot.jx.postman.model.ext.InBoundEvent;
 import com.boot.jx.postman.store.SessionStore;
+import com.boot.model.MapModel.MapEntry;
 import com.boot.model.MapModel.NodeEntry;
 import com.boot.utils.ArgUtil;
 
@@ -40,13 +41,16 @@ public class ChatSessionEventsImpl implements ChatSessionEvents {
 
 	@Override
 	public NodeEntry<InBoundEvent> onSessionIdleInBound(ChatSessionDoc session) {
-		PMConfigurationObject frwrdQueue = pmEnvironment
-				.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_AGENT_CHAT_IN_IDLE_TIMEOUT_QUEUE);
+		ClientApp clientApp = pmEnvironment.config().clientApiKey(session.getAssignedToQueue());
+		MapEntry frwrdQueue = clientApp.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_AGENT_CHAT_IN_IDLE_TIMEOUT_QUEUE);
+		if (!frwrdQueue.exists()) {
+			frwrdQueue = pmEnvironment.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_AGENT_CHAT_IN_IDLE_TIMEOUT_QUEUE);
+		}
 		assignToQueue(session, frwrdQueue);
 		return null;
 	}
 
-	private void assignToQueue(ChatSessionDoc session, PMConfigurationObject frwrdQueue) {
+	private void assignToQueue(ChatSessionDoc session, MapEntry frwrdQueue) {
 		if (frwrdQueue.exists()) {
 			ClientApp targetApp = pmEnvironment.config().clientApiKey(frwrdQueue.asString());
 			PMArgs pmArgs = new PMArgs().assignToQueueCode(frwrdQueue.asString());

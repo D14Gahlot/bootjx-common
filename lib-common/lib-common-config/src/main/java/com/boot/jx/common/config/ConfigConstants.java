@@ -13,6 +13,7 @@ import com.boot.jx.postman.PMConstants;
 import com.boot.jx.postman.PMConstants.APP_TYPE;
 import com.boot.jx.postman.PMConstants.PROPERTIES;
 import com.boot.model.MapModel.EntryMeta;
+import com.boot.model.SafeKeyHashMap;
 import com.boot.utils.TimeUtils;
 import com.boot.utils.TimeZoneUtil;
 import com.google.i18n.phonenumbers.PhoneNumberUtil;
@@ -49,13 +50,20 @@ public class ConfigConstants {
 		;
 
 		private String key;
+		private String ukey;
 
 		APP_KEY(ConfigMeta defaultFalse) {
 			this.key = defaultFalse.getKey();
+			this.ukey = SafeKeyHashMap.sanitizeKey(defaultFalse.getKey());
 		}
 
 		public String getKey() {
 			return key;
+		}
+
+		@Override
+		public String getUkey() {
+			return ukey;
 		}
 	}
 
@@ -92,10 +100,12 @@ public class ConfigConstants {
 		CHAT_TAG_ENABLED(
 				new ConfigMeta("Chat Session Tags Enabled", "chat.tag.enabled").optionsOnOff().group(GROUP_AGENT)),
 
-		POSTMAN_CHAT_SESSION_TIMEOUT(new ConfigMeta("Default Chat Session Idle Duration", "postman.chat.session.timeout")
-				.desc("Use 2hr,3hr,4hr etc for hours and 2d,3d,4d etc for days." )
-				//.optionValues("1hr", "2hr", "4hr", "8hr", "12hr", "16hr", "20hr", "24hr", "2d", "5d", "3d", "7d")
-				.group(GROUP_CUSTOMER_CHAT)),
+		POSTMAN_CHAT_SESSION_TIMEOUT(
+				new ConfigMeta("Default Chat Session Idle Duration", "postman.chat.session.timeout")
+						.desc("Use 2hr,3hr,4hr etc for hours and 2d,3d,4d etc for days.")
+						// .optionValues("1hr", "2hr", "4hr", "8hr", "12hr", "16hr", "20hr", "24hr",
+						// "2d", "5d", "3d", "7d")
+						.group(GROUP_CUSTOMER_CHAT)),
 
 		POSTMAN_CHAT_IDLE_TIMEOUT(new ConfigMeta("Chat Alert Timer", "postman.chat.idle.timeout")
 				.optionValues("5min", "10min", "15min", "20min", "25min", "30min").group(GROUP_AGENT)),
@@ -216,7 +226,7 @@ public class ConfigConstants {
 
 		POSTMAN_TIMEZONE_OFFSET(new ConfigMeta("Time Zone", "postman.timezone.offset")
 				.optionValues(TimeZoneUtil.getTimeZoneLst().toArray()).defaultValue("Asia/Kolkata::GMT+5:30")),
-		
+
 		POSTMAN_AGENT_CHAT_AUTOREPLY_TALK2AGENT(new ConfigMeta("Message to customer while chat is transferred to agent",
 				"postman.agent.chat.autoreply.talk2agent").optionsSource("getx:/api/tmpl/hsm").optionsKey("code")
 						.optionsLabel("desc").group(GROUP_AGENT)),
@@ -255,10 +265,14 @@ public class ConfigConstants {
 		;
 
 		private String key;
+		private String ukey;
 		private Object defaultValue;
+		private ConfigMeta configMeta;
 
 		SETUP_KEY(ConfigMeta defaultFalse) {
+			this.configMeta = defaultFalse;
 			this.key = defaultFalse.getKey();
+			this.ukey = SafeKeyHashMap.sanitizeKey(defaultFalse.getKey());
 			ConfigConstants.SETUP_CONFIG_LIST.add(defaultFalse);
 			defaultValue = defaultFalse.getDefaultValue();
 		}
@@ -270,6 +284,14 @@ public class ConfigConstants {
 		@SuppressWarnings("unchecked")
 		public <T> T getDefaultValue() {
 			return (T) defaultValue;
+		}
+
+		public ConfigMeta getConfigMeta() {
+			return configMeta;
+		}
+
+		public String getUkey() {
+			return ukey;
 		}
 
 	}
@@ -284,9 +306,11 @@ public class ConfigConstants {
 
 		private String key;
 		private Object defaultValue;
+		private String ukey;
 
 		PERMS_KEY(ConfigMeta defaultFalse) {
 			this.key = defaultFalse.getKey();
+			this.ukey = SafeKeyHashMap.sanitizeKey(defaultFalse.getKey());
 			ConfigConstants.PERMS_CONFIG_LIST.add(defaultFalse);
 			defaultValue = defaultFalse.getDefaultValue();
 		}
@@ -298,6 +322,10 @@ public class ConfigConstants {
 		@SuppressWarnings("unchecked")
 		public <T> T getDefaultValue() {
 			return (T) defaultValue;
+		}
+
+		public String getUkey() {
+			return ukey;
 		}
 	}
 

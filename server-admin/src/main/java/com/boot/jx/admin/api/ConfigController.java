@@ -79,6 +79,14 @@ public class ConfigController {
 		return ApiResponse.buildData(configManager.save(clientApiKey));
 	}
 
+	@JsonView(PMEnvironment.OneTimeVisibleProperty.class)
+	@ResponseBody
+	@RequestMapping(value = { "/api/config/clientapikey/{id}/config" }, method = { RequestMethod.PATCH })
+	public ApiResponse<ClientAppConfigDoc, Object> createClientApiKey(@PathVariable String id, @RequestParam String key,
+			@RequestParam Object value) {
+		return ApiResponse.buildData(configManager.updateClientAppConfig(pmEnvironment.config().clientApiKey(id), key, value));
+	}
+
 	@JsonView(PMEnvironment.PublicProperty.class)
 	@ResponseBody
 	@RequestMapping(value = { "/api/config/clientapikey/{id}" }, method = { RequestMethod.DELETE })
