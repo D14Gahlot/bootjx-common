@@ -84,7 +84,7 @@ public class PanelV2Controller {
 		ContakUserDoc user = sessionBean.domainUser();
 		String domainUserId = user.getId();
 		CommonFile f = fileStore.upload1(file,
-				String.format("%s_%s/tmpl/%s/%s", AppContextUtil.getTenant(), companyId, templateCode),
+				String.format("%s_%s/tmpl/%s", AppContextUtil.getTenant(), companyId, templateCode),
 				file.getOriginalFilename());
 		if (ArgUtil.is(thumbnail)) {
 			CommonFile thumb = fileStore.upload1(file,
