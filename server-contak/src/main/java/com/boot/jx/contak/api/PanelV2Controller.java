@@ -87,7 +87,7 @@ public class PanelV2Controller {
 				String.format("%s_%s/tmpl/%s", AppContextUtil.getTenant(), companyId, templateCode),
 				file.getOriginalFilename());
 		if (ArgUtil.is(thumbnail)) {
-			CommonFile thumb = fileStore.upload1(file,
+			CommonFile thumb = fileStore.upload1(thumbnail,
 					String.format("%s_%s/tmpl/%s/th", AppContextUtil.getTenant(), companyId, templateCode),
 					file.getOriginalFilename());
 			f.setThumb(thumb.getUrl());
