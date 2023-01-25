@@ -94,20 +94,38 @@ public class SessionEventTimer extends ATaskLimiter {
 
 	@Async
 	public void setChatInIdleTimeout(String sessionid, ClientApp app) {
-		if (app != null && app.isAgentApp()) {
-			boolean timeoutEnabled = pmEnvironment
-					.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_AGENT_CHAT_IN_IDLE_TIMEOUT).asBoolean(false);
+		if (app != null) {
+			if (app.isAgentApp()) {
+				boolean timeoutEnabled = pmEnvironment
+						.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_AGENT_CHAT_IN_IDLE_TIMEOUT).asBoolean(false);
 
-			PMConfigurationObject frwrdQueue = pmEnvironment
-					.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_AGENT_CHAT_IN_IDLE_TIMEOUT_QUEUE);
+				PMConfigurationObject frwrdQueue = pmEnvironment
+						.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_AGENT_CHAT_IN_IDLE_TIMEOUT_QUEUE);
 
-			if (timeoutEnabled && frwrdQueue.not(app.getQueue())) {
-				long timeout = pmEnvironment
-						.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_AGENT_CHAT_IN_IDLE_TIMEOUT_INTERVAL).asLong(0L);
-				if (timeout > 0L) {
-					TunnelTask task = new TunnelTask().name(SessionEventTimer.CHAT_IN_IDLE_TIMEOUT).id(sessionid)
-							.intervalMinutes(timeout);
-					this.debounce(task);
+				if (timeoutEnabled && frwrdQueue.not(app.getQueue())) {
+					long timeout = pmEnvironment
+							.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_AGENT_CHAT_IN_IDLE_TIMEOUT_INTERVAL).asLong(0L);
+					if (timeout > 0L) {
+						TunnelTask task = new TunnelTask().name(SessionEventTimer.CHAT_IN_IDLE_TIMEOUT).id(sessionid)
+								.intervalMinutes(timeout);
+						this.debounce(task);
+					}
+				}
+			} else {
+				boolean timeoutEnabled = pmEnvironment
+						.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_ANY_CHAT_IN_IDLE_TIMEOUT).asBoolean(false);
+
+				PMConfigurationObject frwrdQueue = pmEnvironment
+						.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_ANY_CHAT_IN_IDLE_TIMEOUT_QUEUE);
+
+				if (timeoutEnabled && frwrdQueue.not(app.getQueue())) {
+					long timeout = pmEnvironment
+							.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_ANY_CHAT_IN_IDLE_TIMEOUT_INTERVAL).asLong(0L);
+					if (timeout > 0L) {
+						TunnelTask task = new TunnelTask().name(SessionEventTimer.CHAT_IN_IDLE_TIMEOUT).id(sessionid)
+								.intervalMinutes(timeout);
+						this.debounce(task);
+					}
 				}
 			}
 		}

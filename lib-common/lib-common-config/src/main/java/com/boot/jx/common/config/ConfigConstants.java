@@ -92,10 +92,12 @@ public class ConfigConstants {
 		CHAT_TAG_ENABLED(
 				new ConfigMeta("Chat Session Tags Enabled", "chat.tag.enabled").optionsOnOff().group(GROUP_AGENT)),
 
-		POSTMAN_CHAT_SESSION_TIMEOUT(new ConfigMeta("Default Chat Session Idle Duration", "postman.chat.session.timeout")
-				.desc("Use 2hr,3hr,4hr etc for hours and 2d,3d,4d etc for days." )
-				//.optionValues("1hr", "2hr", "4hr", "8hr", "12hr", "16hr", "20hr", "24hr", "2d", "5d", "3d", "7d")
-				.group(GROUP_CUSTOMER_CHAT)),
+		POSTMAN_CHAT_SESSION_TIMEOUT(
+				new ConfigMeta("Default Chat Session Idle Duration", "postman.chat.session.timeout")
+						.desc("Use 2hr,3hr,4hr etc for hours and 2d,3d,4d etc for days.")
+						// .optionValues("1hr", "2hr", "4hr", "8hr", "12hr", "16hr", "20hr", "24hr",
+						// "2d", "5d", "3d", "7d")
+						.group(GROUP_CUSTOMER_CHAT)),
 
 		POSTMAN_CHAT_IDLE_TIMEOUT(new ConfigMeta("Chat Alert Timer", "postman.chat.idle.timeout")
 				.optionValues("5min", "10min", "15min", "20min", "25min", "30min").group(GROUP_AGENT)),
@@ -183,6 +185,25 @@ public class ConfigConstants {
 						.optionsSource("getx:/api/options/inbound_queue").optionsKey("code").optionsLabel("code")
 						.group(GROUP_AGENT)),
 
+		POSTMAN_ANY_CHAT_IN_IDLE_TIMEOUT(
+				new ConfigMeta("Inbound Idle Timeout Config", "postman.any.chat.in.idle.timeout")
+						.superKey("postman.any.chat.in.idle.timeout")
+						.desc("Chat gets timed-out if customer does not respond for this interval in Minutes")
+						.optionsOnOff().group(GROUP_AGENT)),
+
+		POSTMAN_ANY_CHAT_IN_IDLE_TIMEOUT_INTERVAL(
+				new ConfigMeta("Inbound Idle Timeout Interval", "postman.any.chat.in.idle.timeout.interval")
+						.superKey("postman.any.chat.in.idle.timeout")
+						.desc("Chat gets timed-out if customer does not respond for this interval in Minutes")
+						.inputType(INPUT_TYPE.NUMBER).min(5).group(GROUP_AGENT)),
+
+		POSTMAN_ANY_CHAT_IN_IDLE_TIMEOUT_QUEUE(
+				new ConfigMeta("In-bound Idle Timeout Queue", "postman.any.chat.in.idle.timeout.queue")
+						.superKey("postman.any.chat.in.idle.timeout")
+						.desc("Timed-out chat gets re-assigned to this queue")
+						.optionsSource("getx:/api/options/inbound_queue").optionsKey("code").optionsLabel("code")
+						.group(GROUP_AGENT)),
+
 //	POSTMAN_UI_BETA(new ConfigMeta("Enable Beta UI", "postman.ui.beta").optionsOnOff()
 //		.defaultValue(ConfigOption.OFF).group(GROUP_AGENT)),
 //	POSTMAN_AGENT_SCHEME2_COLOR(new ConfigMeta("Agent Color Scheme 2", "postman.agent.scheme2.color")
@@ -216,7 +237,7 @@ public class ConfigConstants {
 
 		POSTMAN_TIMEZONE_OFFSET(new ConfigMeta("Time Zone", "postman.timezone.offset")
 				.optionValues(TimeZoneUtil.getTimeZoneLst().toArray()).defaultValue("Asia/Kolkata::GMT+5:30")),
-		
+
 		POSTMAN_AGENT_CHAT_AUTOREPLY_TALK2AGENT(new ConfigMeta("Message to customer while chat is transferred to agent",
 				"postman.agent.chat.autoreply.talk2agent").optionsSource("getx:/api/tmpl/hsm").optionsKey("code")
 						.optionsLabel("desc").group(GROUP_AGENT)),
