@@ -3,6 +3,7 @@ package com.boot.jx.common.config;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.boot.jx.common.config.ConfigConstants.SETUP_KEY;
 import com.boot.jx.common.impl.ConfigMeta;
 import com.boot.jx.common.impl.ConfigMeta.ConfigOption;
 import com.boot.jx.common.impl.ConfigMeta.INPUT_TYPE;
@@ -16,6 +17,10 @@ public class ClientAppConfigConstants {
 			// PRefixe
 			"mry.props.logo.", "mry.props.service.", "mry.props.social.", };
 	public static final Map<APP_TYPE, ConfigMeta[]> APP_CONFIGS = new ConcurrentHashMap<APP_TYPE, ConfigMeta[]>();
+	public static final ConfigMeta[] APP_CONFIGS_COMMON = new ConfigMeta[] {
+			SETUP_KEY.POSTMAN_AGENT_CHAT_IN_IDLE_TIMEOUT.getConfigMeta(),
+			SETUP_KEY.POSTMAN_AGENT_CHAT_IN_IDLE_TIMEOUT_INTERVAL.getConfigMeta(),
+			SETUP_KEY.POSTMAN_AGENT_CHAT_IN_IDLE_TIMEOUT_QUEUE.getConfigMeta() };
 
 	static {
 

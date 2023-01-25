@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.boot.jx.mongo.CommonMongoTemplateAbstract;
+import com.boot.jx.postman.ClientApp;
 import com.boot.jx.postman.doc.PMConfigurationDoc;
 import com.boot.jx.postman.doc.config.ChannelConfigDoc;
 import com.boot.jx.postman.doc.config.ClientAppConfigDoc;
@@ -49,6 +50,14 @@ public class ConfigMaster extends CommonMongoTemplateAbstract<ConfigMaster> {
 		configStore.saveClientKeyConfig(clientApiKey);
 	}
 
+	public ClientAppConfigDoc updateClientAppConfig(ClientApp clientApp, String key, Object value) {
+		ClientAppConfigDoc clientAppDoc = configStore.findById(clientApp.getId(), ClientAppConfigDoc.class);
+		clientAppDoc.config().put(key, value);
+		clientApp.config().putAll(clientAppDoc.config());
+		saveClientKeyConfig(clientAppDoc);
+		return clientAppDoc;
+	}
+
 	public <T extends VarsConfigDoc> void saveCompanyVar(T companyVarsConfig) {
 		configStore.saveCompanyVar(companyVarsConfig);
 	}
@@ -57,4 +66,5 @@ public class ConfigMaster extends CommonMongoTemplateAbstract<ConfigMaster> {
 		configStore.savePermConfig(permConfigDoc);
 		configStore.saveMaster(permConfigDoc);
 	}
+
 }

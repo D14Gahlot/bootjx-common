@@ -55,6 +55,7 @@ public class ClientAppConfigDoc implements IDocument, AuditableByIdEntity, Clien
 
 	private Map<String, Object> secret;
 	private Map<String, Object> props;
+	private Map<String, Object> config;
 
 	private String domain;
 	private boolean isShared;
@@ -251,6 +252,22 @@ public class ClientAppConfigDoc implements IDocument, AuditableByIdEntity, Clien
 
 	public void setAppHookFrwrd(String appHookFrwrd) {
 		this.appHookFrwrd = appHookFrwrd;
+	}
+
+	public Map<String, Object> getConfig() {
+		return config;
+	}
+
+	public void setConfig(Map<String, Object> config) {
+		this.config = config;
+	}
+
+	@Override
+	public Map<String, Object> config() {
+		if (this.config == null) {
+			this.config = new HashMap<String, Object>();
+		}
+		return config;
 	}
 
 }

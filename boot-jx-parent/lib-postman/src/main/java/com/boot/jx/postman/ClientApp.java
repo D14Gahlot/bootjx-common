@@ -5,6 +5,8 @@ import java.util.Map;
 
 import com.boot.jx.postman.PMConstants.APP_TYPE;
 import com.boot.jx.postman.PMConstants.CHAT_MODE;
+import com.boot.model.MapModel.EntryMeta;
+import com.boot.model.MapModel.MapPathEntry;
 import com.fasterxml.jackson.annotation.JsonView;
 
 public interface ClientApp extends Serializable {
@@ -55,5 +57,13 @@ public interface ClientApp extends Serializable {
 	boolean equals(CHAT_MODE mode);
 
 	boolean equals(APP_TYPE appType);
+
+	public Map<String, Object> getConfig();
+
+	public Map<String, Object> config();
+
+	public default MapPathEntry keyEntry(EntryMeta metaKey) {
+		return new MapPathEntry().map(this.config()).key(metaKey.getUkey()).load(null);
+	}
 
 }
