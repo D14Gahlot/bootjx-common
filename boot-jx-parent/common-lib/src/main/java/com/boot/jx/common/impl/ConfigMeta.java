@@ -10,12 +10,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.boot.model.SafeKeyHashMap;
 import com.boot.utils.ArgUtil;
 
 public class ConfigMeta implements Serializable {
 
 	public static enum INPUT_TYPE {
-		TEXT, OPTIONS, RANGE, NUMBER, COLOR, COLOR_PALLETE, NONE, MESSAGE;
+		TEXT, OPTIONS, RANGE, NUMBER, COLOR, COLOR_PALLETE, NONE, MESSAGE, TEXTAREA, JSON;
 	}
 
 	public static enum DATA_TYPE {
@@ -97,10 +98,12 @@ public class ConfigMeta implements Serializable {
 
 	private String title;
 	private String key;
+	private String ukey;
 	private String superKey;
 	private String desc;
 	private String group;
 	private String path;
+	private String pathRaw;
 	private Object defaultValue;
 	private Object example;
 	private boolean optional;
@@ -135,6 +138,8 @@ public class ConfigMeta implements Serializable {
 		String desc() default "";
 
 		String path() default "";
+
+		String pathRaw() default "";
 
 		boolean hidden() default false;
 
@@ -171,6 +176,7 @@ public class ConfigMeta implements Serializable {
 	public ConfigMeta(String title, String key) {
 		super();
 		this.key = key;
+		this.ukey = SafeKeyHashMap.sanitizeKey(key);
 		this.title = title;
 	}
 
@@ -295,6 +301,7 @@ public class ConfigMeta implements Serializable {
 
 	public ConfigMeta key(String key) {
 		this.key = key;
+		this.ukey = SafeKeyHashMap.sanitizeKey(key);
 		return this;
 	}
 
@@ -611,5 +618,26 @@ public class ConfigMeta implements Serializable {
 	public ConfigMeta clearable(boolean clearable) {
 		this.clearable = true;
 		return this;
+	}
+
+	public String getPathRaw() {
+		return pathRaw;
+	}
+
+	public void setPathRaw(String pathRaw) {
+		this.pathRaw = pathRaw;
+	}
+
+	public ConfigMeta pathRaw(String pathRaw) {
+		this.pathRaw = pathRaw;
+		return this;
+	}
+
+	public String getUkey() {
+		return ukey;
+	}
+
+	public void setUkey(String ukey) {
+		this.ukey = ukey;
 	}
 }
