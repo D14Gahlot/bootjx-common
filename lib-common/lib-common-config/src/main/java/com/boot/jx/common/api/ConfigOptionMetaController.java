@@ -101,6 +101,11 @@ public class ConfigOptionMetaController {
 		return ApiResponse.buildResults(ClientAppConfigConstants.APP_CONFIGS.getOrDefault(appType, new ConfigMeta[0]));
 	}
 
+	@RequestMapping(value = "/api/meta/app_types/common/config", method = { RequestMethod.GET })
+	public ApiResponse<ConfigMeta, Object> appTypeConfigCommon() {
+		return ApiResponse.buildResults(ClientAppConfigConstants.APP_CONFIGS_COMMON);
+	}
+
 	// Option APIS
 	@JsonView(PMEnvironment.PublicProperty.class)
 	@RequestMapping(value = { "/api/options/channels" }, method = { RequestMethod.GET })

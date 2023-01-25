@@ -200,6 +200,15 @@ public class ConfigManager {
 		return clientApiKey;
 	}
 
+	public ClientAppConfigDoc updateClientAppConfig(ClientApp app, String key, Object value) {
+		if (ArgUtil.is(app) && app.isReadOnly()) {
+			ApiResponseUtil.throwUnAuthorizedException("ReadOnly App");
+		}
+		ClientAppConfigDoc clientApiKey = configStore.updateClientAppConfig(app, key, value);
+		this.refresh();
+		return clientApiKey;
+	}
+
 	public ClientAppConfigDoc remove(ClientAppConfigDoc clientApiKey) {
 		ClientApp app = pmEnvironment.config().clientApiKey(clientApiKey.getId());
 		if (ArgUtil.is(app) && app.isReadOnly()) {
