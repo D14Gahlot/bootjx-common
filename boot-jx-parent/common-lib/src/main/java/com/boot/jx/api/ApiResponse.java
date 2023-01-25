@@ -120,6 +120,11 @@ public class ApiResponse<T, M> extends AResponse<M> implements ApiDataMetaRespon
 		return this;
 	}
 
+	public ApiResponse<T, M> results(T[] resultList) {
+		this.setResults(CollectionUtil.asList(resultList));
+		return this;
+	}
+
 	public static <TS, MS> ApiResponse<TS, MS> build() {
 		return new ApiResponse<TS, MS>();
 	}

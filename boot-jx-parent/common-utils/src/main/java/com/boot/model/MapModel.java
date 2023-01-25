@@ -10,6 +10,7 @@ import java.util.Map.Entry;
 
 import com.boot.json.JsonSerializerType;
 import com.boot.json.MapModelDeserializer;
+import com.boot.model.MapModel.EntryMeta;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.Constants;
 import com.boot.utils.JsonPath;
@@ -26,6 +27,8 @@ public class MapModel implements JsonSerializerType<Object> {
 
 	public static interface EntryMeta {
 		public String getKey();
+
+		public String getUkey();
 	}
 
 	public static class NodeEntry<T> {
@@ -312,6 +315,10 @@ public class MapModel implements JsonSerializerType<Object> {
 
 	public MapPathEntry keyEntry(String key) {
 		return this.entry(key);
+	}
+
+	public MapPathEntry keyEntry(EntryMeta metaKey) {
+		return this.entry(metaKey.getKey());
 	}
 
 	public MapPathEntry pathEntry(String path) {

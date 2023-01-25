@@ -13,6 +13,7 @@ import com.boot.jx.postman.PMConstants;
 import com.boot.jx.postman.PMConstants.APP_TYPE;
 import com.boot.jx.postman.PMConstants.PROPERTIES;
 import com.boot.model.MapModel.EntryMeta;
+import com.boot.model.SafeKeyHashMap;
 import com.boot.utils.TimeUtils;
 import com.boot.utils.TimeZoneUtil;
 import com.google.i18n.phonenumbers.PhoneNumberUtil;
@@ -49,13 +50,20 @@ public class ConfigConstants {
 		;
 
 		private String key;
+		private String ukey;
 
 		APP_KEY(ConfigMeta defaultFalse) {
 			this.key = defaultFalse.getKey();
+			this.ukey = SafeKeyHashMap.sanitizeKey(defaultFalse.getKey());
 		}
 
 		public String getKey() {
 			return key;
+		}
+
+		@Override
+		public String getUkey() {
+			return ukey;
 		}
 	}
 
@@ -185,25 +193,6 @@ public class ConfigConstants {
 						.optionsSource("getx:/api/options/inbound_queue").optionsKey("code").optionsLabel("code")
 						.group(GROUP_AGENT)),
 
-		POSTMAN_ANY_CHAT_IN_IDLE_TIMEOUT(
-				new ConfigMeta("Inbound Idle Timeout Config", "postman.any.chat.in.idle.timeout")
-						.superKey("postman.any.chat.in.idle.timeout")
-						.desc("Chat gets timed-out if customer does not respond for this interval in Minutes")
-						.optionsOnOff().group(GROUP_CUSTOMER_CHAT)),
-
-		POSTMAN_ANY_CHAT_IN_IDLE_TIMEOUT_INTERVAL(
-				new ConfigMeta("Inbound Idle Timeout Interval", "postman.any.chat.in.idle.timeout.interval")
-						.superKey("postman.any.chat.in.idle.timeout")
-						.desc("Chat gets timed-out if customer does not respond for this interval in Minutes")
-						.inputType(INPUT_TYPE.NUMBER).min(5).group(GROUP_CUSTOMER_CHAT)),
-
-		POSTMAN_ANY_CHAT_IN_IDLE_TIMEOUT_QUEUE(
-				new ConfigMeta("In-bound Idle Timeout Queue", "postman.any.chat.in.idle.timeout.queue")
-						.superKey("postman.any.chat.in.idle.timeout")
-						.desc("Timed-out chat gets re-assigned to this queue")
-						.optionsSource("getx:/api/options/inbound_queue").optionsKey("code").optionsLabel("code")
-						.group(GROUP_CUSTOMER_CHAT)),
-
 //	POSTMAN_UI_BETA(new ConfigMeta("Enable Beta UI", "postman.ui.beta").optionsOnOff()
 //		.defaultValue(ConfigOption.OFF).group(GROUP_AGENT)),
 //	POSTMAN_AGENT_SCHEME2_COLOR(new ConfigMeta("Agent Color Scheme 2", "postman.agent.scheme2.color")
@@ -276,10 +265,14 @@ public class ConfigConstants {
 		;
 
 		private String key;
+		private String ukey;
 		private Object defaultValue;
+		private ConfigMeta configMeta;
 
 		SETUP_KEY(ConfigMeta defaultFalse) {
+			this.configMeta = defaultFalse;
 			this.key = defaultFalse.getKey();
+			this.ukey = SafeKeyHashMap.sanitizeKey(defaultFalse.getKey());
 			ConfigConstants.SETUP_CONFIG_LIST.add(defaultFalse);
 			defaultValue = defaultFalse.getDefaultValue();
 		}
@@ -291,6 +284,14 @@ public class ConfigConstants {
 		@SuppressWarnings("unchecked")
 		public <T> T getDefaultValue() {
 			return (T) defaultValue;
+		}
+
+		public ConfigMeta getConfigMeta() {
+			return configMeta;
+		}
+
+		public String getUkey() {
+			return ukey;
 		}
 
 	}
@@ -305,9 +306,11 @@ public class ConfigConstants {
 
 		private String key;
 		private Object defaultValue;
+		private String ukey;
 
 		PERMS_KEY(ConfigMeta defaultFalse) {
 			this.key = defaultFalse.getKey();
+			this.ukey = SafeKeyHashMap.sanitizeKey(defaultFalse.getKey());
 			ConfigConstants.PERMS_CONFIG_LIST.add(defaultFalse);
 			defaultValue = defaultFalse.getDefaultValue();
 		}
@@ -319,6 +322,10 @@ public class ConfigConstants {
 		@SuppressWarnings("unchecked")
 		public <T> T getDefaultValue() {
 			return (T) defaultValue;
+		}
+
+		public String getUkey() {
+			return ukey;
 		}
 	}
 

@@ -95,32 +95,29 @@ public class SessionEventTimer extends ATaskLimiter {
 	@Async
 	public void setChatInIdleTimeout(String sessionid, ClientApp app) {
 		if (app != null) {
-			if (app.isAgentApp()) {
-				boolean timeoutEnabled = pmEnvironment
-						.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_AGENT_CHAT_IN_IDLE_TIMEOUT).asBoolean(false);
-
-				PMConfigurationObject frwrdQueue = pmEnvironment
+			boolean timeoutEnabledApp = app.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_AGENT_CHAT_IN_IDLE_TIMEOUT)
+					.asBoolean(false);
+			if (timeoutEnabledApp) {
+				MapPathEntry frwrdQueue = app
 						.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_AGENT_CHAT_IN_IDLE_TIMEOUT_QUEUE);
-
-				if (timeoutEnabled && frwrdQueue.not(app.getQueue())) {
-					long timeout = pmEnvironment
-							.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_AGENT_CHAT_IN_IDLE_TIMEOUT_INTERVAL).asLong(0L);
+				if (frwrdQueue.not(app.getQueue())) {
+					long timeout = app.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_AGENT_CHAT_IN_IDLE_TIMEOUT_INTERVAL)
+							.asLong(0L);
 					if (timeout > 0L) {
 						TunnelTask task = new TunnelTask().name(SessionEventTimer.CHAT_IN_IDLE_TIMEOUT).id(sessionid)
 								.intervalMinutes(timeout);
 						this.debounce(task);
 					}
 				}
-			} else {
+			} else if (app.isAgentApp()) {
 				boolean timeoutEnabled = pmEnvironment
-						.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_ANY_CHAT_IN_IDLE_TIMEOUT).asBoolean(false);
-
+						.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_AGENT_CHAT_IN_IDLE_TIMEOUT).asBoolean(false);
 				PMConfigurationObject frwrdQueue = pmEnvironment
-						.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_ANY_CHAT_IN_IDLE_TIMEOUT_QUEUE);
+						.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_AGENT_CHAT_IN_IDLE_TIMEOUT_QUEUE);
 
 				if (timeoutEnabled && frwrdQueue.not(app.getQueue())) {
 					long timeout = pmEnvironment
-							.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_ANY_CHAT_IN_IDLE_TIMEOUT_INTERVAL).asLong(0L);
+							.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_AGENT_CHAT_IN_IDLE_TIMEOUT_INTERVAL).asLong(0L);
 					if (timeout > 0L) {
 						TunnelTask task = new TunnelTask().name(SessionEventTimer.CHAT_IN_IDLE_TIMEOUT).id(sessionid)
 								.intervalMinutes(timeout);
@@ -208,10 +205,14 @@ public class SessionEventTimer extends ATaskLimiter {
 		if (sessionStore.isSessionValid(session)) {
 			ChatMessageDTO lastMsg = session.lastMsg();
 			ChatMessageDTO lastInBoundMsg = session.lastInBoundMsg();
-			long timeout = pmEnvironment.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_AGENT_CHAT_IN_IDLE_TIMEOUT_INTERVAL)
-					.asLong(0L);
-			if (ArgUtil.is(lastMsg) && PostManUtil.isOutBound(lastMsg.getType()) // last message is also inbound
-					&& (!ArgUtil.is(lastInBoundMsg) // And ther is no outbound
+
+			ClientApp clientApp = pmEnvironment.config().clientApiKey(session.getAssignedToQueue());
+			long timeout = clientApp.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_AGENT_CHAT_IN_IDLE_TIMEOUT_INTERVAL)
+					.asLong(pmEnvironment
+							.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_AGENT_CHAT_IN_IDLE_TIMEOUT_INTERVAL)
+							.asLong(0L));
+			if (ArgUtil.is(lastMsg) && PostManUtil.isOutBound(lastMsg.getType()) // last message is also outbound
+					&& (!ArgUtil.is(lastInBoundMsg) // And ther is no inbound
 							|| TimeUtils.isExpired(lastInBoundMsg.getTimestamp(), timeout * 60000) // OR is older than
 																									// interval
 					)) {
