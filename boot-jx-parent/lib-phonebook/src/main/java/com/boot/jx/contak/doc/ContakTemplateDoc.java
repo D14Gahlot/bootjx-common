@@ -6,9 +6,11 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import com.boot.jx.contak.dto.ContakModel;
 import com.boot.jx.contak.dto.ContakTemplate;
+import com.boot.jx.mongo.CommonDocInterfaces.TimeStampIndex;
+import com.boot.jx.mongo.CommonDocInterfaces.TimeStampIndex.UpdatedTimeStampIndexSupport;
 
 @Document(collection = "CONTAK_TEMPLATE")
-public class ContakTemplateDoc extends ContakTemplate {
+public class ContakTemplateDoc extends ContakTemplate implements UpdatedTimeStampIndexSupport {
 
 	private static final long serialVersionUID = 8829109079862522347L;
 
@@ -24,6 +26,8 @@ public class ContakTemplateDoc extends ContakTemplate {
 	public boolean deleted;
 
 	public ContakModel model;
+
+	private TimeStampIndex updated;
 
 	public String getTemplateId() {
 		return templateId;
@@ -63,6 +67,14 @@ public class ContakTemplateDoc extends ContakTemplate {
 
 	public void setModel(ContakModel model) {
 		this.model = model;
+	}
+
+	public TimeStampIndex getUpdated() {
+		return updated;
+	}
+
+	public void setUpdated(TimeStampIndex updated) {
+		this.updated = updated;
 	}
 
 }

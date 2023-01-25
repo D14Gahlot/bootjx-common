@@ -286,6 +286,10 @@ public class CommonMongoTemplateAbstract<TStore extends CommonMongoTemplateAbstr
 		return saveAndAudit(objectToSave, true);
 	}
 
+	public <T> T createAndAudit(T objectToSave) {
+		return saveAndAudit(objectToSave, false);
+	}
+
 	public <T> T removeAndAudit(T objectToSave) {
 		if (ArgUtil.is(objectToSave)) {
 			getCommonMongoTemplate().remove(objectToSave);

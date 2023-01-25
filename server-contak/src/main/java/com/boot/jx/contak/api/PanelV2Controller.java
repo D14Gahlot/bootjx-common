@@ -1,7 +1,6 @@
 package com.boot.jx.contak.api;
 
 import java.security.NoSuchAlgorithmException;
-import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -70,9 +69,10 @@ public class PanelV2Controller {
 	public ApiResponse<Object, Object> hsmTemplate(Model model, @PathVariable String companyId,
 			@PathVariable String templateId) throws NoSuchAlgorithmException {
 		validateCompany(companyId);
-		commonMongoTemplate.collection(ContakTemplateDoc.class)
-				.with(Criteria.where("companyId").is(companyId).and("templateId").is(templateId)).set("deleted", true)
-				.update();
+		ContakTemplateDoc template = commonMongoTemplate.collection(ContakTemplateDoc.class)
+				.with(Criteria.where("companyId").is(companyId).and("templateId").is(templateId)).find().asFirst();
+		template.setDeleted(true);
+		commonMongoTemplate.saveAndAudit(template);
 		return ApiResponse.build().message("Template has been deleted");
 	}
 
