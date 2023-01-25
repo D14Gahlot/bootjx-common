@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.boot.model.SafeKeyHashMap;
 import com.boot.utils.ArgUtil;
 
 public class ConfigMeta implements Serializable {
@@ -97,6 +98,7 @@ public class ConfigMeta implements Serializable {
 
 	private String title;
 	private String key;
+	private String ukey;
 	private String superKey;
 	private String desc;
 	private String group;
@@ -174,6 +176,7 @@ public class ConfigMeta implements Serializable {
 	public ConfigMeta(String title, String key) {
 		super();
 		this.key = key;
+		this.ukey = SafeKeyHashMap.sanitizeKey(key);
 		this.title = title;
 	}
 
@@ -298,6 +301,7 @@ public class ConfigMeta implements Serializable {
 
 	public ConfigMeta key(String key) {
 		this.key = key;
+		this.ukey = SafeKeyHashMap.sanitizeKey(key);
 		return this;
 	}
 
@@ -627,5 +631,13 @@ public class ConfigMeta implements Serializable {
 	public ConfigMeta pathRaw(String pathRaw) {
 		this.pathRaw = pathRaw;
 		return this;
+	}
+
+	public String getUkey() {
+		return ukey;
+	}
+
+	public void setUkey(String ukey) {
+		this.ukey = ukey;
 	}
 }
