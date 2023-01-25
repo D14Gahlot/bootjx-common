@@ -120,6 +120,11 @@ public class MongoUtils {
 			return this.find(qb);
 		}
 
+		public MongoResultProcessor<T> update() {
+			mongoTemplate.update(qb);
+			return this;
+		}
+
 		public MongoResultProcessor<T> results(MongoIterable<T> aggregate) {
 			this.iterableResults = aggregate;
 			return this;

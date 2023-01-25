@@ -392,4 +392,17 @@ public abstract class CommonMongoTemplateDefault {
 	public abstract <T> List<T> find(IMongoQueryBuilder<T> builder);
 
 	public abstract <T> List<T> find(IMongoQueryBuilder<T> builder, Class<T> clazz);
+
+	/**
+	 * @param builder
+	 * @return
+	 * 
+	 * @see MongoTemplate#upsert(Query,
+	 *      org.springframework.data.mongodb.core.query.Update, Class, String)
+	 */
+	public abstract <T> UpdateResult upsert(IMongoQueryBuilder<T> builder);
+
+	public abstract <T> UpdateResult update(IMongoQueryBuilder<T> builder);
+
+	public abstract <T> UpdateResult updateFirst(IMongoQueryBuilder<T> builder);
 }

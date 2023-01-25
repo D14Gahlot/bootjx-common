@@ -170,7 +170,8 @@ public class CommonMongoTemplateAbstract<TStore extends CommonMongoTemplateAbstr
 		return newVersion;
 	}
 
-	public UpdateResult updateFirst(IMongoQueryBuilder<?> builder) {
+	@Override
+	public <T> UpdateResult updateFirst(IMongoQueryBuilder<T> builder) {
 		UpdateResult ret = null;
 		if (ArgUtil.is(builder.getUpdate())) {
 			try {
@@ -188,7 +189,8 @@ public class CommonMongoTemplateAbstract<TStore extends CommonMongoTemplateAbstr
 		return ret;
 	}
 
-	public UpdateResult update(IMongoQueryBuilder<?> builder) {
+	@Override
+	public <T> UpdateResult update(IMongoQueryBuilder<T> builder) {
 		UpdateResult ret = null;
 		if (ArgUtil.is(builder.getUpdate())) {
 			try {
@@ -213,7 +215,8 @@ public class CommonMongoTemplateAbstract<TStore extends CommonMongoTemplateAbstr
 	 * @see MongoTemplate#upsert(Query,
 	 *      org.springframework.data.mongodb.core.query.Update, Class, String)
 	 */
-	public UpdateResult upsert(IMongoQueryBuilder<?> builder) {
+	@Override
+	public <T> UpdateResult upsert(IMongoQueryBuilder<T> builder) {
 		UpdateResult ret = null;
 		if (ArgUtil.is(builder.getUpdate())) {
 			try {
