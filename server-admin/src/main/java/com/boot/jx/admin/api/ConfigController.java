@@ -21,6 +21,7 @@ import com.boot.jx.postman.doc.config.ClientAppConfigDoc;
 import com.boot.jx.postman.doc.config.VarsConfigDoc.CompanyTokenKeyDoc;
 import com.boot.jx.postman.doc.config.VarsConfigDoc.CompanyVarsConfigDoc;
 import com.boot.jx.postman.plugin.ChannelConfig;
+import com.boot.utils.ArgUtil;
 import com.fasterxml.jackson.annotation.JsonView;
 
 @RestController
@@ -81,8 +82,11 @@ public class ConfigController {
 
 	@JsonView(PMEnvironment.PublicProperty.class)
 	@ResponseBody
-	@RequestMapping(value = { "/api/config/clientapikey/{id}" }, method = { RequestMethod.DELETE })
-	public ApiResponse<ClientAppConfigDoc, Object> deleteClientApiKey(@PathVariable String id) {
+	@RequestMapping(value = { "/api/config/clientapikey/{appId}", "/api/config/clientapikey" },
+			method = { RequestMethod.DELETE })
+	public ApiResponse<ClientAppConfigDoc, Object> deleteClientApiKey(@PathVariable(required = false) String appId,
+			@RequestParam(required = false) String id) {
+		id = ArgUtil.nonEmpty(id, appId);
 		ClientAppConfigDoc clientApiKey = new ClientAppConfigDoc();
 		clientApiKey.setId(id);
 		return ApiResponse.buildResults(configManager.remove(clientApiKey));
