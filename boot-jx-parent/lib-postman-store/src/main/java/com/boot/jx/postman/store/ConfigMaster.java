@@ -50,14 +50,6 @@ public class ConfigMaster extends CommonMongoTemplateAbstract {
 		configStore.saveClientKeyConfig(clientApiKey);
 	}
 
-	public ClientAppConfigDoc updateClientAppConfig(ClientApp clientApp, String key, Object value) {
-		ClientAppConfigDoc clientAppDoc = configStore.findById(clientApp.getId(), ClientAppConfigDoc.class);
-		clientAppDoc.config().put(key, value);
-		clientApp.config().putAll(clientAppDoc.config());
-		saveClientKeyConfig(clientAppDoc);
-		return clientAppDoc;
-	}
-
 	public <T extends VarsConfigDoc> void saveCompanyVar(T companyVarsConfig) {
 		configStore.saveCompanyVar(companyVarsConfig);
 	}
