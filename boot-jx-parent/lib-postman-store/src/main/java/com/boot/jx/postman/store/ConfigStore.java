@@ -134,6 +134,7 @@ public class ConfigStore extends CommonMongoTemplateAbstract {
 		save(masterDoc);
 	}
 
+	@Async
 	public void saveMaster(PrefsConfigDoc prefsConfigDoc) {
 		PrefsConfigDoc masterDoc = EntityDtoUtil.dtoToEntity(prefsConfigDoc, new PrefsConfigDoc());
 		masterDoc.setId(masterDoc.getDomain() + ":" + masterDoc.getId());
@@ -143,6 +144,7 @@ public class ConfigStore extends CommonMongoTemplateAbstract {
 		save(masterDoc, "DUPS_CONFIG_PREFS");
 	}
 
+	@Async
 	public void saveMaster(PermsConfigDoc permConfigDoc) {
 		PermsConfigDoc masterDoc = EntityDtoUtil.dtoToEntity(permConfigDoc, new PermsConfigDoc());
 		masterDoc.setId(masterDoc.getDomain() + ":" + masterDoc.getId());
