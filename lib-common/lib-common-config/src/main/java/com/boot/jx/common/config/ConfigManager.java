@@ -195,8 +195,10 @@ public class ConfigManager {
 		if (ArgUtil.is(app) && app.isReadOnly()) {
 			ApiResponseUtil.throwUnAuthorizedException("ReadOnly App");
 		}
-		app.secret().putAll(clientApiKey.secret());
-		clientApiKey.secret().putAll(app.secret());
+		if (ArgUtil.is(app)) {
+			app.secret().putAll(clientApiKey.secret());
+			clientApiKey.secret().putAll(app.secret());
+		}
 		configStore.saveClientKeyConfig(clientApiKey);
 		this.refresh();
 		return clientApiKey;
