@@ -13,7 +13,6 @@ import com.boot.jx.postman.PMConstants;
 import com.boot.jx.postman.PMConstants.APP_TYPE;
 import com.boot.jx.postman.PMConstants.PROPERTIES;
 import com.boot.model.MapModel.EntryMeta;
-import com.boot.model.SafeKeyHashMap;
 import com.boot.utils.TimeUtils;
 import com.boot.utils.TimeZoneUtil;
 import com.google.i18n.phonenumbers.PhoneNumberUtil;
@@ -54,7 +53,7 @@ public class ConfigConstants {
 
 		APP_KEY(ConfigMeta defaultFalse) {
 			this.key = defaultFalse.getKey();
-			this.ukey = SafeKeyHashMap.sanitizeKey(defaultFalse.getKey());
+			this.ukey = defaultFalse.getUkey();
 		}
 
 		public String getKey() {
@@ -272,7 +271,7 @@ public class ConfigConstants {
 		SETUP_KEY(ConfigMeta defaultFalse) {
 			this.configMeta = defaultFalse;
 			this.key = defaultFalse.getKey();
-			this.ukey = SafeKeyHashMap.sanitizeKey(defaultFalse.getKey());
+			this.ukey = defaultFalse.getUkey();
 			ConfigConstants.SETUP_CONFIG_LIST.add(defaultFalse);
 			defaultValue = defaultFalse.getDefaultValue();
 		}
@@ -310,7 +309,7 @@ public class ConfigConstants {
 
 		PERMS_KEY(ConfigMeta defaultFalse) {
 			this.key = defaultFalse.getKey();
-			this.ukey = SafeKeyHashMap.sanitizeKey(defaultFalse.getKey());
+			this.ukey = defaultFalse.getUkey();
 			ConfigConstants.PERMS_CONFIG_LIST.add(defaultFalse);
 			defaultValue = defaultFalse.getDefaultValue();
 		}
