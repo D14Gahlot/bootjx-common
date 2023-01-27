@@ -28,7 +28,7 @@ public class TwitterPlugin implements ChannelPlugin<TwitterConfigDetails> {
 
 		private static final long serialVersionUID = -2397678752642150000L;
 		private String handler;
-		private String numbericId;
+		private String numericId;
 		private String type;
 		private String envName;
 
@@ -102,12 +102,12 @@ public class TwitterPlugin implements ChannelPlugin<TwitterConfigDetails> {
 			return this.handler;
 		}
 
-		public String getNumbericId() {
-			return numbericId;
+		public String getNumericId() {
+			return numericId;
 		}
 
-		public void setNumbericId(String numbericId) {
-			this.numbericId = numbericId;
+		public void setNumericId(String numericId) {
+			this.numericId = numericId;
 		}
 
 	}
@@ -130,7 +130,7 @@ public class TwitterPlugin implements ChannelPlugin<TwitterConfigDetails> {
 	@Override
 	public void addConfigMeta(List<ConfigMeta> configMetaList) {
 		configMetaList.add(new ConfigMeta().path("twitter.handler").title("Handler").createonly());
-		configMetaList.add(new ConfigMeta().path("twitter.numeric_id").title("Numberic Id"));
+		configMetaList.add(new ConfigMeta().path("twitter.numericId").title("Numberic Id").optional());
 		configMetaList.add(new ConfigMeta().path("twitter.type").title("Type").hidden());
 		configMetaList.add(new ConfigMeta().path("twitter.envName").title("Env").optional());
 		configMetaList.add(new ConfigMeta().path("twitter.accessToken").title("Access Token").writeonly());
@@ -142,7 +142,7 @@ public class TwitterPlugin implements ChannelPlugin<TwitterConfigDetails> {
 	@Override
 	public void importChannelDetailsFromMap(TwitterConfigDetails channelDetails, MapModel map) {
 		channelDetails.setHandler(map.pathEntry("twitter.handler").asString(channelDetails.getHandler()));
-		channelDetails.setNumbericId(map.pathEntry("twitter.numeric_id").asString(channelDetails.getNumbericId()));
+		channelDetails.setNumericId(map.pathEntry("twitter.numericId").asString(channelDetails.getNumericId()));
 		channelDetails.setType(map.pathEntry("twitter.type").asString(channelDetails.getType()));
 		channelDetails.setEnvName(map.pathEntry("twitter.envName").asString(channelDetails.getEnvName()));
 		channelDetails.setAccessToken(map.pathEntry("twitter.accessToken").asString(channelDetails.getAccessToken()));
