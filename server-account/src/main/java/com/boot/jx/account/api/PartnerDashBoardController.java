@@ -21,6 +21,7 @@ import com.boot.jx.account.dto.TimeZoneOfSet;
 import com.boot.jx.account.dto.WabaSummaryDocDto;
 import com.boot.jx.account.manager.AccountDashBoardManager;
 import com.boot.jx.api.ApiResponse;
+import com.boot.jx.api.EventCountSummary;
 import com.boot.jx.http.CommonHttpRequest;
 
 @Controller
@@ -131,6 +132,14 @@ public class PartnerDashBoardController {
 	public ApiResponse<TimeZoneOfSet, Object> getTimeZoneOffset() {
 		TimeZoneOfSet timeZ = dashBMgr.getTimeZoneOffset();
 		return ApiResponse.buildResult(timeZ);
+	}
+	
+	@ResponseBody
+	@RequestMapping(value = { "/pub/event-summary" }, method = { RequestMethod.GET })
+	public ApiResponse<EventCountSummary, Object> getEventCountSummary(String dateRange1, String dateRange2,
+			int days) {
+		EventCountSummary summary = dashBMgr.getEventCountSummary(dateRange1, dateRange2, days);
+		return ApiResponse.buildResult(summary);
 	}
 
 }
