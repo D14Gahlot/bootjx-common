@@ -41,6 +41,9 @@ public class Attachment implements Serializable {
 	@ApiMockModelProperty(example = "TransactionReceipt.pdf", value = "File Name")
 	String mediaName;
 
+	@ApiMockModelProperty(example = "ABC_PROMO", value = "QuickMedia Code")
+	String mediaCode;
+
 	public String getMediaURL() {
 		return mediaURL;
 	}
@@ -149,6 +152,14 @@ public class Attachment implements Serializable {
 
 	public void setMediaSubType(String mediaSubType) {
 		this.mediaSubType = mediaSubType;
+	}
+
+	public String getMediaCode() {
+		return mediaCode;
+	}
+
+	public void setMediaCode(String mediaCode) {
+		this.mediaCode = mediaCode;
 	}
 
 }

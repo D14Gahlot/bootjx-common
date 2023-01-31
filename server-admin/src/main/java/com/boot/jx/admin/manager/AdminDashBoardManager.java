@@ -60,6 +60,8 @@ import com.boot.jx.admin.dto.SummaryDocDto;
 import com.boot.jx.admin.dto.TagDocumentDto;
 import com.boot.jx.admin.dto.TagDocumentLst;
 import com.boot.jx.admin.dto.WabaSummaryDocDto;
+import com.boot.jx.api.EventCountDto;
+import com.boot.jx.api.EventCountSummary;
 import com.boot.jx.common.config.ConfigConstants;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.postman.PMEnvironment;
@@ -1947,5 +1949,141 @@ public class AdminDashBoardManager {
 				.asString("Asia/Kolkata::GMT+5:30");
 		return offset;
 	}
+
+/** day wise event count summary **/
+public EventCountSummary getEventCountSummary(String dateRange1, String dateRange2, int days) {
+	EventCountSummary eventCountSummary = new EventCountSummary();
+			String tnt = AppContextUtil.getTenant();
+			List<String> lst = getListOfContactType();
+		
+			List<DateWiseHourCountDto> dayCntLst = new ArrayList<>();
+			
+			long currentTs = System.currentTimeMillis();
+			ZonedDateTime noOfdaysTstamp = null;
+		
+			String offset= getTimeZoneFromSetup();
+			long offsetts= countryTimeZoneOffset(offset);
+			String zone = DateUtil.getTimeZone(offset);
+			long lasDayTimeStmp =0;
+			int hr =0;
+			int mm=0;	
+			if (ArgUtil.is(dateRange1)) {
+				lasDayTimeStmp=DateUtil.getDateMinAndMaxTime(DateUtil.getCovertDate(dateRange1), hr, mm, zone, LocalTime.MIN);
+				lasDayTimeStmp =lasDayTimeStmp+offsetts;
+				
+			}
+			if (ArgUtil.is(dateRange2)) {
+				currentTs =DateUtil.getDateMinAndMaxTime(DateUtil.getCovertDate(dateRange2), hr, mm, zone, LocalTime.MAX);
+				currentTs = currentTs+offsetts;
+			}
+
+			if (lasDayTimeStmp==0  && days > 0) {
+				noOfdaysTstamp = ZonedDateTime.now().minusDays(days).with(LocalTime.MIN);
+				lasDayTimeStmp = noOfdaysTstamp.toInstant().toEpochMilli();
+			} 
+			
+
+			String monthYear = new SimpleDateFormat(DateUtil.MMM_YYYY_FORMAT).format(currentTs);
+			Calendar cal = Calendar.getInstance();
+			cal.setTimeInMillis(currentTs);
+			int month = cal.get(Calendar.MONTH);
+			int year = cal.get(Calendar.YEAR);
+			
+			/** langage summary count **/
+			List<EventCountDto> lstLangSummary = new ArrayList<>();
+			
+			for (String contactType : lst) {
+				
+				List<MessageDoc>  msgDocLst = getLanguageCount(contactType,lasDayTimeStmp,currentTs);
+				for(MessageDoc msg : msgDocLst) {
+					EventCountDto entLang = new EventCountDto();
+					if(msg.getForm()!=null && !msg.getForm().isEmpty()) {
+					entLang.setLanguage(msg.getForm().get("reply_title").toString());
+					}
+					if(msg.getContact()!=null && msg.getContact().getContactType()!=null) {
+						entLang.setChannel(msg.getContact().getContactType());
+					}
+					if(ArgUtil.is(entLang) && ArgUtil.is(entLang.getChannel()) &&  ArgUtil.is(entLang.getLanguage())) {
+					lstLangSummary.add(entLang);
+					}
+					}
+				}
+			
+			
+			Map<Object, Map<Object, Long>> langWiseCountMap = lstLangSummary.stream()
+					.collect(Collectors.groupingBy(EventCountDto::getChannel,
+							Collectors.groupingBy(EventCountDto::getLanguage, Collectors.counting())));
+			
+			eventCountSummary.setLangWiseCountMap(langWiseCountMap);
+			
+			List<EventCountDto> lstEventSummary = new ArrayList<>();
+				for (String contactType : lst) {
+				List<MessageDoc>  msgDocLst = getEventCount(contactType,lasDayTimeStmp,currentTs);
+				for(MessageDoc msg : msgDocLst) {
+					EventCountDto entLang = new EventCountDto();
+					if(msg.getForm()!=null && !msg.getForm().isEmpty()) {
+						entLang.setEvent(msg.getForm().get("reply_title").toString());
+					}
+					if(msg.getContact()!=null && msg.getContact().getContactType()!=null) {
+						entLang.setChannel(msg.getContact().getContactType());
+					}
+					
+					String yyyyMMdd = DateUtil.foramtTimeStampDateAsString(msg.getTimestamp(),
+							DateUtil.YYYYMMDD_DATE_FORMAT);
+					entLang.setDate(yyyyMMdd);
+					if(ArgUtil.is(entLang) && ArgUtil.is(entLang.getChannel()) &&  ArgUtil.is(entLang.getEvent())) {
+						lstEventSummary.add(entLang);
+					}
+					}
+				}
+				
+				Map<Object, Map<Object, Long>> eventWiseCountMap = lstEventSummary.stream()
+						.collect(Collectors.groupingBy(EventCountDto::getChannel,
+								Collectors.groupingBy(EventCountDto::getEvent, Collectors.counting())));
+				
+				eventCountSummary.setEventWiseCountMap(eventWiseCountMap);
+			
+	
+			eventCountSummary.setTenant(tnt);	
+			eventCountSummary.setMonth(monthYear);
+
+			return eventCountSummary;
+	
+	
+}
+
+/** Agreegration Query to event msg status **/
+
+
+public List<MessageDoc> getLanguageCount(Object contactType, long dateRange1, long dateRange2) {
+	// List<MessageDoc> msgDocLst =null;
+	Query query = new Query();
+	query.addCriteria(Criteria.where("form").exists(true));
+	query.addCriteria(Criteria.where("form.reply_id").in("en","ar"));
+	query.addCriteria(Criteria.where("timestamp").gt(dateRange1).lt(dateRange2));
+	includeMsgFields(query);
+	List<MessageDoc> msgDocLst = mongoTemplate.find(query, MessageDoc.class, contactType.toString());
+	return msgDocLst;
+}
+
+public List<MessageDoc> getEventCount(Object contactType, long dateRange1, long dateRange2) {
+	// List<MessageDoc> msgDocLst =null;
+	Query query = new Query();
+	query.addCriteria(Criteria.where("form").exists(true));
+	query.addCriteria(Criteria.where("form.reply_id").nin("en","ar"));
+	query.addCriteria(Criteria.where("timestamp").gt(dateRange1).lt(dateRange2));
+	includeMsgFieldsEvent(query);
+	List<MessageDoc> msgDocLst = mongoTemplate.find(query, MessageDoc.class, contactType.toString());
+	return msgDocLst;
+}
+
+public void includeMsgFields(Query query) {
+	query.fields().include("form.reply_title").include("contactId").include("contact.contactType");
+}
+
+
+public void includeMsgFieldsEvent(Query query) {
+	query.fields().include("form.reply_title").include("contactId").include("contact.contactType").include("timestamp");
+}
 
 }

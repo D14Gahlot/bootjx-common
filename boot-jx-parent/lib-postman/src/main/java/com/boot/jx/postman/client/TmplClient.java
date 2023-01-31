@@ -17,6 +17,7 @@ import com.boot.jx.dict.ContactType;
 import com.boot.jx.model.CommonFile;
 import com.boot.jx.postman.PostManException;
 import com.boot.jx.postman.PostmanPackages.ICommonTmplPackage;
+import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.model.PostManFile;
 import com.boot.jx.postman.model.TmplElement;
@@ -102,6 +103,13 @@ public class TmplClient {
 		}
 		options.put("inputs", inputs);
 		options.put("buttons", buttons);
+
+		Attachment defaultAttachment = optionsModel.keyEntry("attachment").as(Attachment.class);
+		if (ArgUtil.is(defaultAttachment) &&
+				outboxMessage.attachments().size() == 0) {
+			outboxMessage.attachments().add(defaultAttachment);
+		}
+
 		outboxMessage.options().putAll(options);
 		return outboxMessage;
 	}

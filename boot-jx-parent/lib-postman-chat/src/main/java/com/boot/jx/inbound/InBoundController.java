@@ -8,7 +8,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -24,9 +24,11 @@ import com.boot.jx.chat.ChatStatusService;
 import com.boot.jx.chat.ConnectorHandlerFactory;
 import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorHandler;
 import com.boot.jx.logger.AuditService;
+import com.boot.jx.mongo.CommonMongoQB.MQB;
 import com.boot.jx.postman.PMAuditEvent;
 import com.boot.jx.postman.PMConfiguration;
 import com.boot.jx.postman.PMEnvironment;
+import com.boot.jx.postman.doc.config.ChannelConfigDupsDoc;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.Message;
 import com.boot.jx.postman.model.MessageBoxEvent;
@@ -35,6 +37,7 @@ import com.boot.jx.postman.model.MessageReport;
 import com.boot.jx.postman.model.PMArgs;
 import com.boot.jx.postman.model.ext.InBoundEvent;
 import com.boot.jx.postman.plugin.ChannelConfig;
+import com.boot.jx.postman.store.ConfigStore;
 import com.boot.jx.scope.vendor.VendorContext.ApiVendorHeaders;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.model.MapModel;
@@ -163,8 +166,14 @@ public class InBoundController {
 		return ApiResponse.build();
 	}
 
-	@Scheduled(fixedDelay = 1000 * 60)
-	public void inboundMessageBoxPoll() {
+	@Autowired
+	ConfigStore configStore;
 
+	@RequestMapping(value = "/ext/inbound/v2/{channelType}/callback/{accountKey}", method = { RequestMethod.POST })
+	public ApiResponse<Object, Object> inboundMessageBoxEventAll(@PathVariable(required = false) String channelType,
+			@PathVariable(required = false) String accountKey, @RequestBody Map<String, Object> data) {
+		// configStore.find(MQB.collection(ChannelConfigDupsDoc.class).where(Criteria.where(accountKey)))
+		return ApiResponse.build();
 	}
+
 }
