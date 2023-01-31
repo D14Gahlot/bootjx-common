@@ -105,7 +105,8 @@ public class TmplClient {
 		options.put("buttons", buttons);
 
 		Attachment defaultAttachment = optionsModel.keyEntry("attachment").as(Attachment.class);
-		if (outboxMessage.attachments().size() == 0) {
+		if (ArgUtil.is(defaultAttachment) &&
+				outboxMessage.attachments().size() == 0) {
 			outboxMessage.attachments().add(defaultAttachment);
 		}
 
