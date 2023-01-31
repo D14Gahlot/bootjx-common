@@ -22,62 +22,62 @@ import com.boot.jx.scope.vendor.VendorContext.ApiVendorHeaders;
 @RestController
 public class InBoundControllerIG {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(InBoundControllerIG.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(InBoundControllerIG.class);
 
-    @Autowired
-    private InBoundService inBoundService;
+	@Autowired
+	private InBoundService inBoundService;
 
-    @Autowired
-    private InstagramClient instaClient;
+	@Autowired
+	private InstagramClient instaClient;
 
-    @Autowired
-    private InstagramConnector instaConnector;
+	@Autowired
+	private InstagramConnector instaConnector;
 
-    @Autowired
-    private PMEnvironment pmEnvironment;
+	@Autowired
+	private PMEnvironment pmEnvironment;
 
-    @RequestMapping(
-	    value = { "/ext/inbound/ig/callback", "/ext/inbound/v2/ig/callback/{accountKey}/{channelId}/{channelKey}" },
-	    method = RequestMethod.GET)
-    public Object get(@RequestParam(name = "hub.verify_token") String token,
-	    @RequestParam(name = "hub.challenge") String challenge, @RequestParam(required = false) String lane,
-	    @RequestHeader(required = false, value = "X-Hub-Signature") String signature,
-	    // V2Params
-	    @PathVariable(required = false) String channelType, @PathVariable(required = false) String accountKey,
-	    @PathVariable(required = false) String channelId, @PathVariable(required = false) String channelKey) {
-	ChannelConfig channelConfig = pmEnvironment.local().channel(channelId);
-	return instaClient.registerWebhook(channelConfig, token, challenge);
-    }
+	@RequestMapping(
+			value = { "/ext/inbound/ig/callback", "/ext/inbound/v2/ig/callback/{accountKey}/{channelId}/{channelKey}" },
+			method = RequestMethod.GET)
+	public Object get(@RequestParam(name = "hub.verify_token") String token,
+			@RequestParam(name = "hub.challenge") String challenge, @RequestParam(required = false) String lane,
+			@RequestHeader(required = false, value = "X-Hub-Signature") String signature,
+			// V2Params
+			@PathVariable(required = false) String channelType, @PathVariable(required = false) String accountKey,
+			@PathVariable(required = false) String channelId, @PathVariable(required = false) String channelKey) {
+		ChannelConfig channelConfig = pmEnvironment.local().channel(channelId);
+		return instaClient.registerWebhook(channelConfig, token, challenge);
+	}
 
-    @Deprecated
-    // @ApiRequest(feature = "WA_GUPSHUP_INBOUND")
-    @ApiVendorHeaders
-    @RequestMapping(value = "/ext/inbound/ig/callback", method = RequestMethod.POST)
-    public FacebookHookRequest onReceiveMessage(@RequestBody FacebookHookRequest request,
-	    @RequestParam(required = false) String lane,
-	    @RequestHeader(required = false, value = "X-Hub-Signature") String signature) throws InterruptedException {
-	request.getEntry().forEach(pageEntry -> {
-	    pageEntry.getMessaging().forEach(m -> {
-		InboxMessage event = instaConnector.toInboxMessage(m, pageEntry.getId());
-		inBoundService.invokeMethodsAsync(event);
-		// facebooClient.sendReply(event.getContactId(), "Helo", pageEntry.getId());
-	    });
-	});
-	return request;
-    }
+	@Deprecated
+	// @ApiRequest(feature = "WA_GUPSHUP_INBOUND")
+	@ApiVendorHeaders
+	@RequestMapping(value = "/ext/inbound/ig/callback", method = RequestMethod.POST)
+	public FacebookHookRequest onReceiveMessage(@RequestBody FacebookHookRequest request,
+			@RequestParam(required = false) String lane,
+			@RequestHeader(required = false, value = "X-Hub-Signature") String signature) throws InterruptedException {
+		request.getEntry().forEach(pageEntry -> {
+			pageEntry.getMessaging().forEach(m -> {
+				InboxMessage event = instaConnector.toInboxMessage(m, pageEntry.getId());
+				inBoundService.invokeMethodsAsync(event);
+				// facebooClient.sendReply(event.getContactId(), "Helo", pageEntry.getId());
+			});
+		});
+		return request;
+	}
 
-    @Deprecated
-    @ApiVendorHeaders
-    @RequestMapping(value = "/ext/inbound/ig/callback/{lane}", method = RequestMethod.POST)
-    public FacebookHookRequest onReceiveMessageLane(@RequestBody FacebookHookRequest request, @PathVariable String lane)
-	    throws InterruptedException {
-	request.getEntry().forEach(pageEntry -> {
-	    pageEntry.getMessaging().forEach(m -> {
-		InboxMessage event = instaConnector.toInboxMessage(m, pageEntry.getId());
-		inBoundService.invokeMethodsAsync(event);
-	    });
-	});
-	return request;
-    }
+	@Deprecated
+	@ApiVendorHeaders
+	@RequestMapping(value = "/ext/inbound/ig/callback/{lane}", method = RequestMethod.POST)
+	public FacebookHookRequest onReceiveMessageLane(@RequestBody FacebookHookRequest request, @PathVariable String lane)
+			throws InterruptedException {
+		request.getEntry().forEach(pageEntry -> {
+			pageEntry.getMessaging().forEach(m -> {
+				InboxMessage event = instaConnector.toInboxMessage(m, pageEntry.getId());
+				inBoundService.invokeMethodsAsync(event);
+			});
+		});
+		return request;
+	}
 
 }
