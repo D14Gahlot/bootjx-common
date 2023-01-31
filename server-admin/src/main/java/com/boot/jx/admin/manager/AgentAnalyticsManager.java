@@ -752,14 +752,17 @@ public class AgentAnalyticsManager {
 		removeChatSessFieldForSatisScore(query);
 		List<ChatSessionDoc> botLst = mongoTemplate.find(query, ChatSessionDoc.class, CHAT_SESSION);
 		if (botLst != null && !botLst.isEmpty()) {
+			LOGGER.info("getSatisfactionScore :"+botLst.size());
 			for (ChatSessionDoc doc : botLst) {
+				if(doc.getFeedback()!=null) {
 				totSatisScore += doc.getFeedback().get("score") == null ? 0 : (double) doc.getFeedback().get("score");
+				}
 			}
+			LOGGER.info("totSatisScore :"+totSatisScore);
 			if (totSatisScore > 0) {
 				satisfactionScore = totSatisScore / botLst.size();
 			}
 		}
-
 		return satisfactionScore;
 	}
 
