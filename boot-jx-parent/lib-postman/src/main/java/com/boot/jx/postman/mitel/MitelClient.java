@@ -107,9 +107,7 @@ public class MitelClient {
 				.header("Authorization", "Bearer " + accessToken)
 				.postJson(MapModel.createInstance().put("targetUri", url).put("targetUriEmbedded", true)
 						.put("previewUrl", url).put("historyUrl", url).put("queue", queue).put("from", from)
-						.put("to", to).put("subject", 
-								
-								contactable.getName()).toMap())
+						.put("to", to).put("subject", contactable.getName() + " " + contactable.getCsid()).toMap())
 				.asMapModel();
 	}
 
