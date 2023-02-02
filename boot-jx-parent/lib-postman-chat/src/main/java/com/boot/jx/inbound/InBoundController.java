@@ -18,30 +18,23 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.boot.jx.AppContextUtil;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.chat.ChatClient;
 import com.boot.jx.chat.ChatProxyManager;
 import com.boot.jx.chat.ChatSessionService;
 import com.boot.jx.chat.ChatStatusService;
-import com.boot.jx.chat.ConnectorHandlerFactory;
-import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorHandler;
-import com.boot.jx.logger.AuditService;
 import com.boot.jx.mongo.CommonMongoQB.MQB;
-import com.boot.jx.postman.PMAuditEvent;
-import com.boot.jx.postman.PMConfiguration;
 import com.boot.jx.postman.PMConstants.CHANNEL_TYPE;
-import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.doc.PMConfigurationDoc;
 import com.boot.jx.postman.doc.config.ChannelConfigDupsDoc;
 import com.boot.jx.postman.fb.FacebookHookRequest;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.Message;
-import com.boot.jx.postman.model.MessageBoxEvent;
 import com.boot.jx.postman.model.MessageDefinitions.Contactable;
 import com.boot.jx.postman.model.MessageReport;
 import com.boot.jx.postman.model.PMArgs;
 import com.boot.jx.postman.model.ext.InBoundEvent;
-import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.postman.store.ConfigStore;
 import com.boot.jx.scope.vendor.VendorContext.ApiVendorHeaders;
 import com.boot.jx.utils.PostManUtil;
@@ -64,19 +57,13 @@ public class InBoundController {
 	private InBoundService inBoundService;
 
 	@Autowired
-	private PMEnvironment pmEnvironment;
-
-	@Autowired
-	private ConnectorHandlerFactory connectorHandlerFactory;
-
-	@Autowired
-	private AuditService auditService;
-
-	@Autowired
 	private ChatSessionService chatSessionService;
 
 	@Autowired
 	private InboundBottler inboundBottler;
+
+	@Autowired
+	private InBoundRouter inBoundRouter;
 
 	@ApiVendorHeaders
 	@RequestMapping(value = "/int/inbound/callback", method = RequestMethod.POST)
@@ -152,28 +139,7 @@ public class InBoundController {
 	public ApiResponse<Object, Object> inboundMessageBoxEvent(@PathVariable(required = false) String channelType,
 			@PathVariable(required = false) String accountKey, @PathVariable(required = false) String channelId,
 			@PathVariable(required = false) String channelKey, @RequestBody Map<String, Object> data) {
-		MapModel map = MapModel.from(data);
-		PMConfiguration config = pmEnvironment.config();
-		ChannelConfig channelConfig = config.channel(channelId);
-		ConnectorHandler connector = connectorHandlerFactory.get(channelConfig);
-
-		try {
-			MessageBoxEvent messageBoxEvent = connector.inboundMessageBoxEvent(channelConfig, map,
-					new MessageBoxEvent());
-			if (ArgUtil.is(messageBoxEvent.getInboxMessages())) {
-				messageBoxEvent.getInboxMessages().forEach(inboxMessage -> {
-					connector.prompt(inboxMessage);
-					inBoundService.pushMessageToInvokeAsync(inboxMessage);
-				});
-				connector.onReceiveInboxMessage(messageBoxEvent.getInboxMessages());
-			} else if (ArgUtil.is(messageBoxEvent.getMessageReports())) {
-				connector.onMessageReports(messageBoxEvent.getMessageReports());
-				inBoundStatusService.update(messageBoxEvent.getMessageReports());
-			}
-		} catch (Exception e) {
-			auditService.excep(new PMAuditEvent(PMAuditEvent.Type.INBOUND_ERROR).data(data), LOGGER, e);
-		}
-
+		inBoundRouter.inboundMessageEvent(channelId, data);
 		return ApiResponse.build();
 	}
 
@@ -198,16 +164,17 @@ public class InBoundController {
 						ArrayList<Object> entry = new ArrayList<Object>();
 						entry.add(pageEntry);
 						newData.put("entry", JsonUtil.toJsonMap(entry));
-						inboundMessageBoxEvent(channelType, accountKey, channel.getChannelId(), channel.getChannelKey(),
-								newData.map());
+						AppContextUtil.clear();
+						AppContextUtil.setTenant(channel.getDomain());
+						AppContextUtil.init();
+						inBoundRouter.inboundMessageEventAsync(channel.getChannelId(), newData.map());
+						AppContextUtil.clear();
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
 				}
-
 			});
 		}
-		//
 		return ApiResponse.build();
 	}
 
