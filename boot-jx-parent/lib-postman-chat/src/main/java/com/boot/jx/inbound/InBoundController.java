@@ -50,7 +50,7 @@ public class InBoundController {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(InBoundController.class);
 
-	private Cache<String, PMConfigurationDoc> channelConfig = CacheBuilder.newBuilder().maximumSize(1000)
+	private Cache<String, List<ChannelConfigDupsDoc>> channelList = CacheBuilder.newBuilder().maximumSize(1000)
 			.expireAfterWrite(1, TimeUnit.HOURS).build();
 
 	@Autowired
@@ -162,9 +162,14 @@ public class InBoundController {
 				newData.put("entry", entry);
 
 				String pageId = pageEntry.getId();
-				List<ChannelConfigDupsDoc> channels = configStore.find(MQB.collection(ChannelConfigDupsDoc.class)
-						.where(Criteria.where("lane").is(pageId).and("isDisabled").is(false).and("isDeleted").is(false)
-								.and("channelType").is(channelType)));
+
+				List<ChannelConfigDupsDoc> channels = channelList.getIfPresent(pageId);
+				if (!ArgUtil.is(channels) || channels.size() < 1) {
+					channels = configStore.find(MQB.collection(ChannelConfigDupsDoc.class)
+							.where(Criteria.where("lane").is(pageId).and("isDisabled").is(false).and("isDeleted")
+									.is(false).and("channelType").is(channelType)));
+				}
+
 				for (ChannelConfigDupsDoc channel : channels) {
 					try {
 						AppContextUtil.clear();
