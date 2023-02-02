@@ -348,6 +348,7 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 					context().setInBoundEvent(event);
 					context().session(sessionDoc);
 					this.onSessionRoute(event, sessionDoc, pmArgs);
+					sessionEventTimer.setChatOnRoute(sessionDoc.getSessionId(), targetAppQueue);
 				} else if (appType.is(CHAT_MODE.WEBHOOK)) {
 					sendEventWebhook(event, targetAppQueue);
 					return;
