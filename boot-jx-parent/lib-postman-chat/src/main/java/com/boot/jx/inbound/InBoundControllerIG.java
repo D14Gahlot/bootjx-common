@@ -37,7 +37,8 @@ public class InBoundControllerIG {
 	private PMEnvironment pmEnvironment;
 
 	@RequestMapping(
-			value = { "/ext/inbound/ig/callback", "/ext/inbound/v2/ig/callback/{accountKey}/{channelId}/{channelKey}" },
+			value = { "/ext/inbound/ig/callback", "/ext/inbound/v2/ig/callback/{accountKey}/{channelId}/{channelKey}",
+					"/ext/inbound/v2/ig/callback/{accountKey}" },
 			method = RequestMethod.GET)
 	public Object get(@RequestParam(name = "hub.verify_token") String token,
 			@RequestParam(name = "hub.challenge") String challenge, @RequestParam(required = false) String lane,

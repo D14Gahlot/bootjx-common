@@ -36,8 +36,8 @@ public class InBoundControllerFB {
 	@Autowired
 	private PMEnvironment pmEnvironment;
 
-	@RequestMapping(value = { "/ext/inbound/v2/fb/callback/{accountKey}/{channelId}/{channelKey}" },
-			method = RequestMethod.GET)
+	@RequestMapping(value = { "/ext/inbound/v2/fb/callback/{accountKey}/{channelId}/{channelKey}",
+			"/ext/inbound/v2/fb/callback/{accountKey}" }, method = RequestMethod.GET)
 	public Object get(@RequestParam(name = "hub.verify_token") String token,
 			@RequestParam(name = "hub.challenge") String challenge,
 			@RequestHeader(required = false, value = "X-Hub-Signature") String signature,
