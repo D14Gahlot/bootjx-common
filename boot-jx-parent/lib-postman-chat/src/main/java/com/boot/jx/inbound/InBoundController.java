@@ -162,8 +162,8 @@ public class InBoundController {
 						MapModel newData = MapModel.createInstance();
 						newData.put("object", request.getObject());
 						ArrayList<Object> entry = new ArrayList<Object>();
-						entry.add(pageEntry);
-						newData.put("entry", JsonUtil.toJsonMap(entry));
+						entry.add(JsonUtil.toJsonMap(pageEntry));
+						newData.put("entry", entry);
 						AppContextUtil.clear();
 						AppContextUtil.setTenant(channel.getDomain());
 						AppContextUtil.init();
