@@ -26,7 +26,6 @@ import com.boot.jx.chat.ChatSessionService;
 import com.boot.jx.chat.ChatStatusService;
 import com.boot.jx.mongo.CommonMongoQB.MQB;
 import com.boot.jx.postman.PMConstants.CHANNEL_TYPE;
-import com.boot.jx.postman.doc.PMConfigurationDoc;
 import com.boot.jx.postman.doc.config.ChannelConfigDupsDoc;
 import com.boot.jx.postman.fb.FacebookHookRequest;
 import com.boot.jx.postman.model.InboxMessage;
@@ -168,19 +167,24 @@ public class InBoundController {
 					channels = configStore.find(MQB.collection(ChannelConfigDupsDoc.class)
 							.where(Criteria.where("lane").is(pageId).and("isDisabled").is(false).and("isDeleted")
 									.is(false).and("channelType").is(channelType)));
-				}
-
-				for (ChannelConfigDupsDoc channel : channels) {
-					try {
-						AppContextUtil.clear();
-						AppContextUtil.setTenant(channel.getDomain());
-						AppContextUtil.init();
-						inBoundRouter.inboundMessageEventAsync(channel.getChannelId(), newData.map());
-						AppContextUtil.clear();
-					} catch (Exception e) {
-						e.printStackTrace();
+					if (ArgUtil.is(channels)) {
+						channelList.put(accountKey, channels);
 					}
 				}
+				if (ArgUtil.is(channels)) {
+					for (ChannelConfigDupsDoc channel : channels) {
+						try {
+							AppContextUtil.clear();
+							AppContextUtil.setTenant(channel.getDomain());
+							AppContextUtil.init();
+							inBoundRouter.inboundMessageEventAsync(channel.getChannelId(), newData.map());
+							AppContextUtil.clear();
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
+					}
+				}
+
 			});
 		}
 		return ApiResponse.build();
