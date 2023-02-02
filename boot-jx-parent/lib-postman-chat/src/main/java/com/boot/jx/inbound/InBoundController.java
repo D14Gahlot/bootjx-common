@@ -1,8 +1,10 @@
 package com.boot.jx.inbound;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.slf4j.Logger;
@@ -27,8 +29,11 @@ import com.boot.jx.logger.AuditService;
 import com.boot.jx.mongo.CommonMongoQB.MQB;
 import com.boot.jx.postman.PMAuditEvent;
 import com.boot.jx.postman.PMConfiguration;
+import com.boot.jx.postman.PMConstants.CHANNEL_TYPE;
 import com.boot.jx.postman.PMEnvironment;
+import com.boot.jx.postman.doc.PMConfigurationDoc;
 import com.boot.jx.postman.doc.config.ChannelConfigDupsDoc;
+import com.boot.jx.postman.fb.FacebookHookRequest;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.Message;
 import com.boot.jx.postman.model.MessageBoxEvent;
@@ -42,12 +47,18 @@ import com.boot.jx.scope.vendor.VendorContext.ApiVendorHeaders;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.JsonUtil;
 import com.boot.utils.Random;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 
 @RestController
 public class InBoundController {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(InBoundController.class);
+
+	private Cache<String, PMConfigurationDoc> channelConfig = CacheBuilder.newBuilder().maximumSize(1000)
+			.expireAfterWrite(1, TimeUnit.HOURS).build();
 
 	@Autowired
 	private InBoundService inBoundService;
@@ -167,12 +178,36 @@ public class InBoundController {
 	}
 
 	@Autowired
-	ConfigStore configStore;
+	private ConfigStore configStore;
 
 	@RequestMapping(value = "/ext/inbound/v2/{channelType}/callback/{accountKey}", method = { RequestMethod.POST })
 	public ApiResponse<Object, Object> inboundMessageBoxEventAll(@PathVariable(required = false) String channelType,
 			@PathVariable(required = false) String accountKey, @RequestBody Map<String, Object> data) {
-		// configStore.find(MQB.collection(ChannelConfigDupsDoc.class).where(Criteria.where(accountKey)))
+		if (ArgUtil.is(channelType, CHANNEL_TYPE.FACEBOOK, CHANNEL_TYPE.INSTAGRAM)) {
+			MapModel requestMap = MapModel.from(data);
+			FacebookHookRequest request = requestMap.as(FacebookHookRequest.class);
+			requestMap.toJson();
+			request.getEntry().forEach(pageEntry -> {
+				String pageId = pageEntry.getId();
+				List<ChannelConfigDupsDoc> channels = configStore
+						.find(MQB.collection(ChannelConfigDupsDoc.class).where(Criteria.where("lane").is(pageId)));
+				for (ChannelConfigDupsDoc channel : channels) {
+					try {
+						MapModel newData = MapModel.createInstance();
+						newData.put("object", request.getObject());
+						ArrayList<Object> entry = new ArrayList<Object>();
+						entry.add(pageEntry);
+						newData.put("entry", JsonUtil.toJsonMap(entry));
+						inboundMessageBoxEvent(channelType, accountKey, channel.getChannelId(), channel.getChannelKey(),
+								newData.map());
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+				}
+
+			});
+		}
+		//
 		return ApiResponse.build();
 	}
 
