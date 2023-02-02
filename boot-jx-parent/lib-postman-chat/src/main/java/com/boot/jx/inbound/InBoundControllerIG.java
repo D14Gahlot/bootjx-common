@@ -12,12 +12,14 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.boot.jx.connectors.InstagramConnector;
+import com.boot.jx.http.CommonHttpRequest;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.fb.FacebookHookRequest;
 import com.boot.jx.postman.fb.InstagramClient;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.scope.vendor.VendorContext.ApiVendorHeaders;
+import com.boot.utils.ArgUtil;
 
 @RestController
 public class InBoundControllerIG {
@@ -36,6 +38,9 @@ public class InBoundControllerIG {
 	@Autowired
 	private PMEnvironment pmEnvironment;
 
+	@Autowired
+	private CommonHttpRequest commonHttpRequest;
+
 	@RequestMapping(
 			value = { "/ext/inbound/ig/callback", "/ext/inbound/v2/ig/callback/{accountKey}/{channelId}/{channelKey}",
 					"/ext/inbound/v2/ig/callback/{accountKey}" },
@@ -46,6 +51,9 @@ public class InBoundControllerIG {
 			// V2Params
 			@PathVariable(required = false) String channelType, @PathVariable(required = false) String accountKey,
 			@PathVariable(required = false) String channelId, @PathVariable(required = false) String channelKey) {
+		if (!ArgUtil.is(channelId)) {
+			channelId = commonHttpRequest.getRequestParam("channelId");
+		}
 		ChannelConfig channelConfig = pmEnvironment.local().channel(channelId);
 		return instaClient.registerWebhook(channelConfig, token, challenge);
 	}

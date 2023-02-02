@@ -12,12 +12,14 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.boot.jx.connectors.FacebookConnector;
+import com.boot.jx.http.CommonHttpRequest;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.fb.FacebooClient;
 import com.boot.jx.postman.fb.FacebookHookRequest;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.scope.vendor.VendorContext.ApiVendorHeaders;
+import com.boot.utils.ArgUtil;
 
 @RestController
 public class InBoundControllerFB {
@@ -36,6 +38,9 @@ public class InBoundControllerFB {
 	@Autowired
 	private PMEnvironment pmEnvironment;
 
+	@Autowired
+	private CommonHttpRequest commonHttpRequest;
+
 	@RequestMapping(value = { "/ext/inbound/v2/fb/callback/{accountKey}/{channelId}/{channelKey}",
 			"/ext/inbound/v2/fb/callback/{accountKey}" }, method = RequestMethod.GET)
 	public Object get(@RequestParam(name = "hub.verify_token") String token,
@@ -43,6 +48,9 @@ public class InBoundControllerFB {
 			@RequestHeader(required = false, value = "X-Hub-Signature") String signature,
 			@PathVariable(required = false) String accountKey, @PathVariable(required = false) String channelId,
 			@PathVariable(required = false) String channelKey) {
+		if (!ArgUtil.is(channelId)) {
+			channelId = commonHttpRequest.getRequestParam("channelId");
+		}
 		ChannelConfig channelConfig = pmEnvironment.local().channel(channelId);
 		return facebooClient.registerWebhook(channelConfig, token, challenge);
 	}
