@@ -154,16 +154,19 @@ public class InBoundController {
 			FacebookHookRequest request = requestMap.as(FacebookHookRequest.class);
 			requestMap.toJson();
 			request.getEntry().forEach(pageEntry -> {
+
+				MapModel newData = MapModel.createInstance();
+				newData.put("object", request.getObject());
+				ArrayList<Object> entry = new ArrayList<Object>();
+				entry.add(JsonUtil.toJsonMap(pageEntry));
+				newData.put("entry", entry);
+
 				String pageId = pageEntry.getId();
-				List<ChannelConfigDupsDoc> channels = configStore
-						.find(MQB.collection(ChannelConfigDupsDoc.class).where(Criteria.where("lane").is(pageId)));
+				List<ChannelConfigDupsDoc> channels = configStore.find(MQB.collection(ChannelConfigDupsDoc.class)
+						.where(Criteria.where("lane").is(pageId).and("isDisabled").is(false).and("isDeleted").is(false)
+								.and("channelType").is(channelType)));
 				for (ChannelConfigDupsDoc channel : channels) {
 					try {
-						MapModel newData = MapModel.createInstance();
-						newData.put("object", request.getObject());
-						ArrayList<Object> entry = new ArrayList<Object>();
-						entry.add(JsonUtil.toJsonMap(pageEntry));
-						newData.put("entry", entry);
 						AppContextUtil.clear();
 						AppContextUtil.setTenant(channel.getDomain());
 						AppContextUtil.init();
