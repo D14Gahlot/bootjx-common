@@ -202,6 +202,7 @@ public class InBoundControllerWA {
 	@Autowired
 	private AuditService auditService;
 
+	@Deprecated
 	@RequestMapping(value = "/ext/inbound/wa360/callback/{accountKey}/{channelId}/{channelKey}",
 			method = { RequestMethod.POST })
 	public ApiResponse<Object, Object> onWA360Message(@PathVariable(required = false) String accountKey,
