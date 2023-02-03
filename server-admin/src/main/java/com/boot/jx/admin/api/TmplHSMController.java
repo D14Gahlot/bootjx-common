@@ -75,6 +75,7 @@ public class TmplHSMController {
 	public ApiResponse<HSMTemplate3rdParty, Object> createWabaTemplates(@RequestBody HSMTemplate3rdParty extTemplate) {
 		ChannelConfig channelConfig = pmEnvironment.local().channel(extTemplate.getChannelId());
 
+		String successMessage = null;
 		HSMTemplate3rdParty temp = null;
 		boolean editable = true;
 		if (ArgUtil.is(extTemplate.getId())) {
@@ -84,7 +85,7 @@ public class TmplHSMController {
 				if ("pending".equalsIgnoreCase(status) || "submitted".equalsIgnoreCase(status)) {
 					editable = false;
 				}
-				if(ArgUtil.is(extTemplate.getTemplate())) {
+				if (ArgUtil.is(extTemplate.getTemplate())) {
 					extTemplate.getTemplate().put("status", status);
 				}
 			}
@@ -93,6 +94,7 @@ public class TmplHSMController {
 		if (editable && ArgUtil.is(extTemplate.getTemplate())) {
 			HSMTemplate3rdParty createTemplate = thirdPartyTmplManager.createhWA360Templates(channelConfig,
 					extTemplate.getTemplate());
+			successMessage = "Template submitted to waba";
 			extTemplate.setId(createTemplate.getId());
 			thirdPartyTmplManager.refreshWA360Templates(channelConfig);
 		}
@@ -105,8 +107,11 @@ public class TmplHSMController {
 			if (ArgUtil.is(extTemplate.getVarMap())) {
 				thirdPartyTmplManager.varMap(temp.getId(), extTemplate.getVarMap());
 			}
+			if (!ArgUtil.is(successMessage)) {
+				successMessage = "Template Updated";
+			}
 		}
-		return new ApiResponse<HSMTemplate3rdParty, Object>().result(temp).message("Template submitted to waba");
+		return new ApiResponse<HSMTemplate3rdParty, Object>().result(temp).message(successMessage);
 	}
 
 	@RequestMapping(value = "/api/tmpl/hsm/waba_templates", method = { RequestMethod.DELETE })
