@@ -54,6 +54,10 @@ public class InBoundRouter {
 		ChannelConfig channelConfig = config.channel(channelId);
 		ConnectorHandler connector = connectorHandlerFactory.get(channelConfig);
 
+		if (!ArgUtil.is(connector)) {
+			LOGGER.error("Channel Not Found for " + channelId);
+		}
+
 		try {
 			MessageBoxEvent messageBoxEvent = connector.inboundMessageBoxEvent(channelConfig, map,
 					new MessageBoxEvent());

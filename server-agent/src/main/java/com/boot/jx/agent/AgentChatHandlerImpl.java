@@ -481,13 +481,17 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 			} else {
 				if (ArgUtil.is(chatSessionDoc.getAssignedToAgent())) {
 					AgentDoc agent = agentStore.findByCode(chatSessionDoc.getAssignedToAgent());
-					OutboxMessage.AGENT_NAME.save(outboxMessage.model(), agent.getAgent_name());
-					OutboxMessage.AGENT_CODE.save(outboxMessage.model(), agent.getAgent_code());
+					if (ArgUtil.is(agent)) {
+						OutboxMessage.AGENT_NAME.save(outboxMessage.model(), agent.getAgent_name());
+						OutboxMessage.AGENT_CODE.save(outboxMessage.model(), agent.getAgent_code());
+					}
 				}
 				if (ArgUtil.is(chatSessionDoc.getAssignedToDept())) {
 					DepartmentDoc deptDoc = agentStore.findDepartmentByCode(chatSessionDoc.getAssignedToDept());
-					OutboxMessage.TEAM_NAME.save(outboxMessage.model(), deptDoc.getDept_name());
-					OutboxMessage.TEAM_CODE.save(outboxMessage.model(), deptDoc.getDept_code());
+					if (ArgUtil.is(deptDoc)) {
+						OutboxMessage.TEAM_NAME.save(outboxMessage.model(), deptDoc.getDept_name());
+						OutboxMessage.TEAM_CODE.save(outboxMessage.model(), deptDoc.getDept_code());
+					}
 				}
 			}
 		}
