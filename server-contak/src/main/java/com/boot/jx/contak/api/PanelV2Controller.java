@@ -71,9 +71,9 @@ public class PanelV2Controller {
 		validateCompany(companyId);
 		ContakTemplateDoc template = commonMongoTemplate.collection(ContakTemplateDoc.class)
 				.with(Criteria.where("companyId").is(companyId).and("templateId").is(templateId)).find().asFirst();
-		template.setDeleted(!template.getDeleted());
+		template.setDeleted(!template.isDeleted());
 		commonMongoTemplate.saveAndAudit(template);
-		return ApiResponse.build().message("Template has been deleted");
+		return ApiResponse.build().message("Template has been " + (template.isDeleted() ? "deleted" : "restored"));
 	}
 
 	@ResponseBody
