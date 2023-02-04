@@ -53,7 +53,7 @@ import io.swagger.annotations.ApiOperation;
 @Api(tags = "Contak Panel", description = "API's for Panel", hidden = true)
 @Controller
 @RequestMapping("/panel")
-public class PanelController {
+public class PanelV1Controller {
 	@Autowired
 	private AppConfig appConfig;
 
