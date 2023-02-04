@@ -128,6 +128,11 @@ public class SessionEventTimer extends ATaskLimiter {
 		}
 	}
 
+	@Async
+	public void setChatOnRoute(String sessionid, ClientApp app) {
+		setMitelRoutingCheck(sessionid, app);
+	}
+
 	public void setMitelRoutingCheck(String sessionid, ClientApp app) {
 		if (app != null && app.equals(APP_TYPE.MITEL)) {
 			TunnelTask task = new TunnelTask().name(SessionEventTimer.MITEL_ROUTER).id(sessionid).intervalSeconds(1L);

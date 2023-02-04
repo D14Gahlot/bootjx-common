@@ -47,7 +47,7 @@ public class AdminDashBoardContoller {
 	}
 
 	@RequestMapping(value = "/admin/fetch-agent-chat-session-list", method = { RequestMethod.GET })
-	public List<String> getAgentList() {
+	public List<ChatSessionDoc> getAgentList() {
 		return agentAnaMgr.getAgentList();
 	}
 
@@ -120,7 +120,6 @@ public class AdminDashBoardContoller {
 		return ApiResponse.buildResults(summary);
 	}
 	
-	
 	@ResponseBody
 	@RequestMapping(value = { "/admin/event-summary" }, method = { RequestMethod.GET })
 	public ApiResponse<EventCountSummary, Object> getEventCountSummary(String dateRange1, String dateRange2,
@@ -128,6 +127,5 @@ public class AdminDashBoardContoller {
 		EventCountSummary summary = adminDbMgr.getEventCountSummary(dateRange1, dateRange2, days);
 		return ApiResponse.buildResult(summary);
 	}
-
 
 }

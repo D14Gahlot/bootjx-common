@@ -104,8 +104,9 @@ public class InstagramClient implements MessageClient {
 				}
 				MapModel quickreplies = MapModel.createInstance();
 				for (TmplElement button : buttons) {
-					quickreplies.add(MapModel.createInstance().put("title", button.getLabel())
-							.put("content_type", "text").put("payload", button.getCode()).toMap());
+					quickreplies
+							.add(MapModel.createInstance().put("title", button.getLabel()).put("content_type", "text")
+									.put("payload", ArgUtil.nonEmpty(button.getCode(), button.getLabel())).toMap());
 				}
 				messageModel.put("quick_replies", quickreplies.list());
 				reqMessage.put("message", messageModel.toMap());

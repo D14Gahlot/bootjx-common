@@ -161,6 +161,7 @@ public class ChatSessionQuery extends DocQueryBuilder<ChatSessionDoc> {
 
 	public ChatSessionQuery update(Contactable contactable) {
 		this.doc.contact().copyFrom(contactable);
+		this.set("contact", this.doc.contact());
 		return this;
 	}
 

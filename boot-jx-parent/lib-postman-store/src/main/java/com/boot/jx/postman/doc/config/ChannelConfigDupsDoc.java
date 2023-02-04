@@ -4,7 +4,11 @@ import java.io.Serializable;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.TypeAlias;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
+
+import com.boot.jx.postman.PMEnvironment;
+import com.fasterxml.jackson.annotation.JsonView;
 
 @Document(collection = "DUPS_CONFIG_CHANNEL")
 @TypeAlias("ChannelConfigDups")
@@ -14,10 +18,16 @@ public class ChannelConfigDupsDoc implements Serializable {
 
 	@Id
 	private String id;
+
+	@Indexed
 	private String domain;
 	private String lane;
+	@Indexed
 	private String channelType;
 	private String channelId;
+
+	@JsonView(PMEnvironment.ProtectedProperty.class)
+	protected String channelKey;
 
 	private boolean isProxyEnabled;
 	private boolean isSandbox;
@@ -112,6 +122,14 @@ public class ChannelConfigDupsDoc implements Serializable {
 
 	public void setChannelId(String channelId) {
 		this.channelId = channelId;
+	}
+
+	public String getChannelKey() {
+		return channelKey;
+	}
+
+	public void setChannelKey(String channelKey) {
+		this.channelKey = channelKey;
 	}
 
 }
