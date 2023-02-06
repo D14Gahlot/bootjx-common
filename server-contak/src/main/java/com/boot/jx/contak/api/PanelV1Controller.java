@@ -245,6 +245,7 @@ public class PanelV1Controller {
 		compoc.setAddress(newComp.getAddress());
 		compoc.setWebsiteUrl(newComp.getWebsiteUrl());
 		compoc.setLogoUrl(newComp.getLogoUrl());
+		compoc.setPrefs(newComp.getPrefs());
 
 		compoc.setContactPersonName(newComp.getContactPersonName());
 		compoc.setContactPhoneNumber(newComp.getContactPhoneNumber());

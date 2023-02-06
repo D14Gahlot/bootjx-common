@@ -64,6 +64,8 @@ public class CompanyDoc implements Serializable {
 
 	public String logoUrl;
 
+	public CompanyPref prefs;
+
 	public String getCompanyId() {
 		return companyId;
 	}
@@ -230,6 +232,14 @@ public class CompanyDoc implements Serializable {
 
 	public void setDomain(String domain) {
 		this.domain = domain;
+	}
+
+	public CompanyPref getPrefs() {
+		return prefs;
+	}
+
+	public void setPrefs(CompanyPref prefs) {
+		this.prefs = prefs;
 	}
 
 }
