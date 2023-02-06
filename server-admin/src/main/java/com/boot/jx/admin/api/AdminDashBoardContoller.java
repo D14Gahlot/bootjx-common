@@ -20,6 +20,8 @@ import com.boot.jx.admin.dto.WabaSummaryDocDto;
 import com.boot.jx.admin.manager.AdminDashBoardManager;
 import com.boot.jx.admin.manager.AgentAnalyticsManager;
 import com.boot.jx.api.ApiResponse;
+import com.boot.jx.api.EventCountSummary;
+import com.boot.jx.postman.doc.ChatSessionDoc;
 
 @RestController
 public class AdminDashBoardContoller {
@@ -45,7 +47,7 @@ public class AdminDashBoardContoller {
 	}
 
 	@RequestMapping(value = "/admin/fetch-agent-chat-session-list", method = { RequestMethod.GET })
-	public List<String> getAgentList() {
+	public List<ChatSessionDoc> getAgentList() {
 		return agentAnaMgr.getAgentList();
 	}
 
@@ -117,6 +119,13 @@ public class AdminDashBoardContoller {
 		List<WabaSummaryDocDto> summary = adminDbMgr.wabaSummary(timestamp);
 		return ApiResponse.buildResults(summary);
 	}
-
+	
+	@ResponseBody
+	@RequestMapping(value = { "/admin/event-summary" }, method = { RequestMethod.GET })
+	public ApiResponse<EventCountSummary, Object> getEventCountSummary(String dateRange1, String dateRange2,
+			int days) {
+		EventCountSummary summary = adminDbMgr.getEventCountSummary(dateRange1, dateRange2, days);
+		return ApiResponse.buildResult(summary);
+	}
 
 }

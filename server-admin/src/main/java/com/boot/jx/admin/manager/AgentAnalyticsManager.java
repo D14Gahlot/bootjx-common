@@ -777,18 +777,22 @@ public class AgentAnalyticsManager {
 		query.addCriteria(Criteria.where("mode").is("BOT"));
 		query.addCriteria(Criteria.where("assignedToQueue").is("feedback"));
 		query.addCriteria(Criteria.where("assignedToAgent").is(agent));
+		query.addCriteria(Criteria.where("feedback").is(true));
 		query.addCriteria(Criteria.where("startSessionStamp").gt(dateRange1).lt(dateRange2));
 		removeChatSessFieldForSatisScore(query);
 		List<ChatSessionDoc> botLst = mongoTemplate.find(query, ChatSessionDoc.class, CHAT_SESSION);
 		if (botLst != null && !botLst.isEmpty()) {
+			LOGGER.info("getSatisfactionScore :"+botLst.size());
 			for (ChatSessionDoc doc : botLst) {
+				if(doc.getFeedback()!=null) {
 				totSatisScore += doc.getFeedback().get("score") == null ? 0 : (double) doc.getFeedback().get("score");
+				}
 			}
+			LOGGER.info("totSatisScore :"+totSatisScore);
 			if (totSatisScore > 0) {
 				satisfactionScore = totSatisScore / botLst.size();
 			}
 		}
-
 		return satisfactionScore;
 	}
 

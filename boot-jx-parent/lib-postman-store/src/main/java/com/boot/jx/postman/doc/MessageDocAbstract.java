@@ -38,6 +38,8 @@ public abstract class MessageDocAbstract implements Serializable, Patchable<Mess
 	private String bulkSessionId;
 
 	private String collapseId;
+
+	@Indexed
 	private long timestamp;
 	private String type;
 	private String template;
