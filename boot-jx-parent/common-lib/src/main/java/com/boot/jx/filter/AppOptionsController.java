@@ -16,7 +16,7 @@ public class AppOptionsController {
 		return ApiResponse.buildResults(TimeZoneUtil.getTimeZoneDtoLst());
 	}
 
-	@RequestMapping(value = "/pub/meta/options/timezone/key", method = { RequestMethod.GET })
+	@RequestMapping(value = "/pub/meta/options/timezonekey", method = { RequestMethod.GET })
 	public ApiResponse<String, Object> getTimeZoneKeys() {
 		return ApiResponse.buildResults(TimeZoneUtil.getTimeZoneLst());
 	}
