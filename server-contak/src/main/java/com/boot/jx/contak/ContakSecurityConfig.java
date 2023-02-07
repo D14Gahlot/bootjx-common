@@ -21,7 +21,9 @@ import com.boot.jx.swagger.MockParamBuilder;
 import com.boot.jx.swagger.MockParamBuilder.MockParam;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.StringUtils;
+import com.google.common.base.Predicates;
 
+import springfox.documentation.builders.PathSelectors;
 import springfox.documentation.builders.RequestHandlerSelectors;
 import springfox.documentation.service.ApiKey;
 import springfox.documentation.service.SecurityScheme;
@@ -141,10 +143,31 @@ public class ContakSecurityConfig {
 		List<SecurityScheme> securitySchemes = new ArrayList<SecurityScheme>();
 		securitySchemes.add(new ApiKey("X_API_KEY", "x-api-key",
 				StringUtils.toLowerCase(ArgUtil.parseAsString(MockParamBuilder.MockParamType.HEADER))));
-		return new Docket(DocumentationType.SWAGGER_2).groupName("clientnode").select()
+		return new Docket(DocumentationType.SWAGGER_2).groupName("clientdocs").select()
 				.apis(RequestHandlerSelectors.basePackage("com.boot.jx.contak.nodedocs"))
 				// .paths(PathSelectors.ant("/api/products/**"))
 				.build().securitySchemes(securitySchemes);
+	}
+
+	@Bean
+	public Docket apisForClientNode() {
+		return new Docket(DocumentationType.SWAGGER_2).groupName("clientnode").select()
+				.apis(RequestHandlerSelectors.basePackage("com.boot.jx.contak.api"))
+				.paths(Predicates.or(PathSelectors.ant("/panel/**"), PathSelectors.ant("/pub/meta/**"))).build();
+	}
+
+	@Bean
+	public Docket apisForCustomer() {
+		return new Docket(DocumentationType.SWAGGER_2).groupName("customer").select()
+				.apis(RequestHandlerSelectors.basePackage("com.boot.jx.contak.api"))
+				.paths(PathSelectors.ant("/phone/**")).build();
+	}
+
+	@Bean
+	public Docket apisForPanel() {
+		return new Docket(DocumentationType.SWAGGER_2).groupName("panel").select()
+				.apis(RequestHandlerSelectors.basePackage("com.boot.jx.contak.api"))
+				.paths(Predicates.or(PathSelectors.ant("/panel/**"), PathSelectors.ant("/pub/meta/**"))).build();
 	}
 
 }
