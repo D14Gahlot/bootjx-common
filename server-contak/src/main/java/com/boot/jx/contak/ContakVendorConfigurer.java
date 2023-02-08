@@ -49,6 +49,24 @@ public class ContakVendorConfigurer implements TenantAuthFilter {
 			return false;
 		}
 
+		if (!isIPAddressAllowed(company, req)) {
+			ApiResponseUtil.addError("IP Address not allowed");
+			return false;
+		} ;
+
+		return true;
+	}
+
+	private boolean isIPAddressAllowed(CompanyDoc company, CommonHttpRequest req) {
+		if (ArgUtil.is(company.getPrefs()) && ArgUtil.is(company.getPrefs().getAllowedIPAddresses())
+				&& company.getPrefs().getAllowedIPAddresses().size() > 0) {
+			for (String ipAddress : company.getPrefs().getAllowedIPAddresses()) {
+				if (ArgUtil.is(req.getIPAddress(), ipAddress)) {
+					return true;
+				}
+			}
+			return false;
+		}
 		return true;
 	}
 
