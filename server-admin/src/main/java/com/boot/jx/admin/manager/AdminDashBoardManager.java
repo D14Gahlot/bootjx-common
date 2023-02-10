@@ -75,6 +75,7 @@ import com.boot.utils.ArgUtil;
 import com.boot.utils.Constants;
 import com.boot.utils.DateUtil;
 import com.boot.utils.JsonUtil;
+import com.boot.utils.MapUtils;
 import com.mongodb.AggregationOptions;
 import com.mongodb.AggregationOptions.OutputMode;
 import com.mongodb.Cursor;
@@ -1324,34 +1325,7 @@ public class AdminDashBoardManager {
 						Collectors.groupingBy(DateWiseHourCountDto::getDate, Collectors.counting())));
 
 		Map<Object, Map<Object, Long>> dayWiseMap = new HashMap<>();
-		for (String channel : channelLst) {
-		for (Map.Entry<String, Map<String, Long>> keyValue : dayWiseCountMap.entrySet()) {
-			String key = keyValue.getKey();
-			if (ArgUtil.is(key)) {
-				String  tnt_channel=tnt + "_" + channel; 
-					if (!key.contains(tnt_channel)) {
-						dayWiseMap.put(tnt_channel, dateRanMap);
-					}
-				Map<Object, Long> dateWiseCnt = new HashMap<>();
-				Map<String, Long> dayCntMap = dayWiseCountMap.get(key);
-				// dateRanMap
-				for (Map.Entry<Object, Long> keyValueCount : dateRanMap.entrySet()) {
-					Object keydt = keyValueCount.getKey();
-					if (ArgUtil.is(keydt)) {
-						Long count = keyValueCount.getValue();
-						if (dayCntMap.containsKey(keydt)) {
-							dateWiseCnt.put(keydt, dayCntMap.get(keydt));
-						} else {
-							dateWiseCnt.put(keydt, count);
-						}
-					}
-
-				}
-				dayWiseMap.put(key, dateWiseCnt);
-			}
-		}
-		}
-
+		dayWiseMap = MapUtils.defaultValue(dayWiseCountMap,channelLst,dateRanMap,tnt);
 		dayWiseMap = sortMap(dayWiseMap);
 
 		summaryMap = lstSummDto.stream().collect(Collectors.groupingBy(SummaryDocDto::getType, Collectors.counting()));
