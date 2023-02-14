@@ -25,7 +25,6 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -40,7 +39,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.domain.Sort.Order;
-import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
 import org.springframework.data.mongodb.core.aggregation.AggregationResults;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -64,6 +62,7 @@ import com.boot.jx.api.EventCountDto;
 import com.boot.jx.api.EventCountSummary;
 import com.boot.jx.common.config.ConfigConstants;
 import com.boot.jx.dict.ContactType;
+import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.MessageDoc;
@@ -93,12 +92,11 @@ public class AdminDashBoardManager {
 	public static final String DEFAULT_TEAM = "TEAM";
 
 	@Autowired
-	MongoTemplate mongoTemplate;
+	CommonMongoTemplate mongoTemplate;
 
 	@Autowired
 	AgentAnalyticsManager agentAnaMgr;
-	
-	
+
 	@Autowired
 	private PMEnvironment environment;
 
@@ -203,7 +201,7 @@ public class AdminDashBoardManager {
 			dto.setTotalMsgExchanged(totalMsgDoc.size());
 		}
 		/** Get the distinct stuff from MongoDB **/
-		List<MessageDoc> distinctIdList = getUniqueConversation(contactType, dateRange1, dateRange2);
+		List<String> distinctIdList = getUniqueConversation(contactType, dateRange1, dateRange2);
 		if (ArgUtil.is(distinctIdList)) {
 			dto.setUniqueConversation(distinctIdList.size());
 		}
@@ -287,7 +285,7 @@ public class AdminDashBoardManager {
 		// To fetch all the records for a collection
 		List<MessageDoc> totalMsgDoc = getTotalMsgCount(contactType, longTodayStartTime, longTodayendTime);
 		// Get the distinct stuff from MongoDB
-		List<MessageDoc> distinctIdList = getUniqueConversation(contactType, longTodayStartTime, longTodayendTime);
+		List<String> distinctIdList = getUniqueConversation(contactType, longTodayStartTime, longTodayendTime);
 		// System.out.println("distinctIdList :" + distinctIdList.size());
 
 		PeakLoadDto peakLoadResult = getPeakLoadMsgCount(totalMsgDoc);
@@ -347,7 +345,7 @@ public class AdminDashBoardManager {
 		// To fetch all the records for a collection
 		List<MessageDoc> totalMsgDoc = getTotalMsgCount(contactType, longTodayStartTime, longTodayendTime);
 		// Get the distinct stuff from MongoDB
-		List<MessageDoc> distinctIdList = getUniqueConversation(contactType, longTodayStartTime, longTodayendTime);
+		List<String> distinctIdList = getUniqueConversation(contactType, longTodayStartTime, longTodayendTime);
 		Map<Object, Object> hourWiseCount = getHourWiseCount(totalMsgDoc);
 
 		PeakLoadDto peakLoadResult = getPeakLoadMsgCount(totalMsgDoc);
@@ -413,7 +411,7 @@ public class AdminDashBoardManager {
 		// To fetch all the records for a collection
 		List<MessageDoc> totalMsgDoc = getTotalMsgCount(contactType, longWStartTime, longTodayendTime);
 		// Get the distinct stuff from MongoDB
-		List<MessageDoc> distinctIdList = getUniqueConversation(contactType, longWStartTime, longTodayendTime);
+		List<String> distinctIdList = getUniqueConversation(contactType, longWStartTime, longTodayendTime);
 
 		Map<Object, Object> dateWiseCount = getDateWiseCount(totalMsgDoc);
 
@@ -475,7 +473,7 @@ public class AdminDashBoardManager {
 		List<MessageDoc> totalMsgDoc = getTotalMsgCount(contactType, monthStartDateEpocTime, longTodayendTime);
 
 		// Get the distinct stuff from MongoDB
-		List<MessageDoc> distinctIdList = getUniqueConversation(contactType, monthStartDateEpocTime, longTodayendTime);
+		List<String> distinctIdList = getUniqueConversation(contactType, monthStartDateEpocTime, longTodayendTime);
 		// System.out.println("distinctIdList :" + distinctIdList.size());
 
 		Map<Object, Object> dateWiseCount = getDateWiseCount(totalMsgDoc);
@@ -535,7 +533,7 @@ public class AdminDashBoardManager {
 		// To fetch all the records for a collection
 		List<MessageDoc> totalMsgDoc = getTotalMsgCount(contactType, quaterStratDateTime, longTodayendTime);
 		// Get the distinct stuff from MongoDB
-		List<MessageDoc> distinctIdList = getUniqueConversation(contactType, quaterStratDateTime, longTodayendTime);
+		List<String> distinctIdList = getUniqueConversation(contactType, quaterStratDateTime, longTodayendTime);
 		// System.out.println("distinctIdList :" + distinctIdList.size());
 		PeakLoadDto peakLoadResult = getPeakLoadMsgCount(totalMsgDoc);
 
@@ -598,7 +596,7 @@ public class AdminDashBoardManager {
 		// To fetch all the records for a collection
 		List<MessageDoc> totalMsgDoc = getTotalMsgCount(contactType, dateRange1, dateRange2);
 		// Get the distinct stuff from MongoDB
-		List<MessageDoc> distinctIdList = getUniqueConversation(contactType, dateRange1, dateRange1);
+		List<String> distinctIdList = getUniqueConversation(contactType, dateRange1, dateRange1);
 
 		PeakLoadDto peakLoadResult = getPeakLoadMsgCount(totalMsgDoc);
 		/** lead Messanger **/
@@ -807,13 +805,12 @@ public class AdminDashBoardManager {
 
 	// To fetch unique conversation
 	@SuppressWarnings("unchecked")
-	public List<MessageDoc> getUniqueConversation(Object contactType, long dateRange1, long dateRange2) {
+	public List<String> getUniqueConversation(Object contactType, long dateRange1, long dateRange2) {
 		Query query = new Query();
 		query.addCriteria(Criteria.where("timestamp").gt(dateRange1).lt(dateRange2));
 		query.addCriteria(Criteria.where("type").in("O", "I"));
 
-		List<MessageDoc> distinctIdList = mongoTemplate.getCollection(contactType.toString()).distinct("contactId",
-				query.getQueryObject());
+		List<String> distinctIdList = mongoTemplate.collection(contactType.toString()).distinct("contactId").asList();
 		return distinctIdList;
 	}
 
@@ -966,7 +963,7 @@ public class AdminDashBoardManager {
 	// Open conversation
 	public List<ChatSessionDoc> getOpenConversation(Object contactType, long dateRange1, long dateRange2) {
 
-		List<MessageDoc> uniqueConvesationLst = getUniqueConversation(contactType, dateRange1, dateRange2);
+		List<String> uniqueConvesationLst = getUniqueConversation(contactType, dateRange1, dateRange2);
 		List<ChatSessionDoc> chatSessionLst = new ArrayList<ChatSessionDoc>();
 
 		for (Object msgDoc : uniqueConvesationLst) {
@@ -1247,34 +1244,33 @@ public class AdminDashBoardManager {
 
 		ZonedDateTime noOfdaysTstamp = null;
 
+		String offset = getTimeZoneFromSetup();
 
-		String offset= getTimeZoneFromSetup();
-		
-		LOGGER.info("ADMIN dayChannelWiseWisesummary {}"+offset+"\t dateRange1:"+dateRange1+"\t dateRange2 :"+dateRange2);
-		
-		long offsetts= countryTimeZoneOffset(offset);
+		LOGGER.info("ADMIN dayChannelWiseWisesummary {}" + offset + "\t dateRange1:" + dateRange1 + "\t dateRange2 :"
+				+ dateRange2);
+
+		long offsetts = countryTimeZoneOffset(offset);
 		String zone = DateUtil.getTimeZone(offset);
-		long lasDayTimeStmp =0;
-		int hr =0;
-		int mm=0;		
-		
-		
+		long lasDayTimeStmp = 0;
+		int hr = 0;
+		int mm = 0;
+
 		if (ArgUtil.is(dateRange1)) {
-			lasDayTimeStmp=DateUtil.getDateMinAndMaxTime(DateUtil.getCovertDate(dateRange1), hr, mm, zone, LocalTime.MIN);
-			lasDayTimeStmp =lasDayTimeStmp+offsetts;
-			
+			lasDayTimeStmp = DateUtil.getDateMinAndMaxTime(DateUtil.getCovertDate(dateRange1), hr, mm, zone,
+					LocalTime.MIN);
+			lasDayTimeStmp = lasDayTimeStmp + offsetts;
+
 		}
 		if (ArgUtil.is(dateRange2)) {
-			currentTs =DateUtil.getDateMinAndMaxTime(DateUtil.getCovertDate(dateRange2), hr, mm, zone, LocalTime.MAX);
-			currentTs = currentTs+offsetts;
+			currentTs = DateUtil.getDateMinAndMaxTime(DateUtil.getCovertDate(dateRange2), hr, mm, zone, LocalTime.MAX);
+			currentTs = currentTs + offsetts;
 		}
-		
 
-		if (lasDayTimeStmp==0  && days > 0) {
+		if (lasDayTimeStmp == 0 && days > 0) {
 			noOfdaysTstamp = ZonedDateTime.now().minusDays(days).with(LocalTime.MIN);
 			lasDayTimeStmp = noOfdaysTstamp.toInstant().toEpochMilli();
-		} 
-		
+		}
+
 		Map<Object, Long> dateRanMap = getDatesRange(currentTs, lasDayTimeStmp);
 
 		String monthYear = new SimpleDateFormat(DateUtil.MMM_YYYY_FORMAT).format(currentTs);
@@ -1325,7 +1321,7 @@ public class AdminDashBoardManager {
 						Collectors.groupingBy(DateWiseHourCountDto::getDate, Collectors.counting())));
 
 		Map<Object, Map<Object, Long>> dayWiseMap = new HashMap<>();
-		dayWiseMap = MapUtils.defaultValue(dayWiseCountMap,channelLst,dateRanMap,tnt);
+		dayWiseMap = MapUtils.defaultValue(dayWiseCountMap, channelLst, dateRanMap, tnt);
 
 		dayWiseMap = sortMap(dayWiseMap);
 
@@ -1353,7 +1349,7 @@ public class AdminDashBoardManager {
 		if (m > 30) {
 			tStamp = timeStamp + ((60 - m) * 60 * 1000L);
 		} else {
-			tStamp = timeStamp + ((30-m) * 60 * 1000L);
+			tStamp = timeStamp + ((30 - m) * 60 * 1000L);
 		}
 		long tStampWmS = (tStamp - (tStamp % (1000 * 60)));
 
@@ -1376,26 +1372,27 @@ public class AdminDashBoardManager {
 		Date date = new Date(lastTimeStamp);
 		SimpleDateFormat sdfHM = new SimpleDateFormat("mm");
 		String formattedHM = sdfHM.format(date);
-		int m =Integer.parseInt(formattedHM);
-		long currTimeStM=currentTStamp;
-		long lastTimeStampWm=lastTimeStamp;
+		int m = Integer.parseInt(formattedHM);
+		long currTimeStM = currentTStamp;
+		long lastTimeStampWm = lastTimeStamp;
 		/** for Upper round **/
-		if(m>30) {
-			m = 60-m;
-			currTimeStM=currentTStamp+(m * 60 * 1000L);
-			lastTimeStampWm = lastTimeStamp -((30-m) * 60 * 1000L);
-		}else {
-			lastTimeStampWm = lastTimeStamp -(m* 60 * 1000L);
-			m = 30-m;
-			currTimeStM=currentTStamp+(m * 60 * 1000L);
+		if (m > 30) {
+			m = 60 - m;
+			currTimeStM = currentTStamp + (m * 60 * 1000L);
+			lastTimeStampWm = lastTimeStamp - ((30 - m) * 60 * 1000L);
+		} else {
+			lastTimeStampWm = lastTimeStamp - (m * 60 * 1000L);
+			m = 30 - m;
+			currTimeStM = currentTStamp + (m * 60 * 1000L);
 		}
 		lastTimeStampWm = (lastTimeStampWm - (lastTimeStampWm % (1000 * 60)));
-		for (long lastTS = lastTimeStampWm; lastTS <=currTimeStM; lastTS = lastTS + DateUtil.MIN_30) {
+		for (long lastTS = lastTimeStampWm; lastTS <= currTimeStM; lastTS = lastTS + DateUtil.MIN_30) {
 			mapMinWise.put(lastTS, new Long(0));
 		}
 		Map<Object, Long> result = new TreeMap<Object, Long>(mapMinWise);
 		return result;
 	}
+
 	/** Read ,Unread,sent,deliver msg count Hour Wise */
 
 	@SuppressWarnings("unused")
@@ -1500,35 +1497,34 @@ public class AdminDashBoardManager {
 
 		long currentTs = System.currentTimeMillis();
 		ZonedDateTime noOfdaysTstamp = null;
-		
-		String offset=getTimeZoneFromSetup();
-		
-		LOGGER.info("ADMIN getDayWiseMsgStatusSummary {}"+offset+"\t dateRange1:"+dateRange1+"\t dateRange2 :"+dateRange2);
-		
-		
-		long offsetts= countryTimeZoneOffset(offset);
+
+		String offset = getTimeZoneFromSetup();
+
+		LOGGER.info("ADMIN getDayWiseMsgStatusSummary {}" + offset + "\t dateRange1:" + dateRange1 + "\t dateRange2 :"
+				+ dateRange2);
+
+		long offsetts = countryTimeZoneOffset(offset);
 		String zone = DateUtil.getTimeZone(offset);
-		long lasDayTimeStmp =0;
-		int hr =0;
-		int mm=0;		
-		
-		
+		long lasDayTimeStmp = 0;
+		int hr = 0;
+		int mm = 0;
+
 		if (ArgUtil.is(dateRange1)) {
-			lasDayTimeStmp=DateUtil.getDateMinAndMaxTime(DateUtil.getCovertDate(dateRange1), hr, mm, zone, LocalTime.MIN);
-			lasDayTimeStmp =lasDayTimeStmp+offsetts;
-			
+			lasDayTimeStmp = DateUtil.getDateMinAndMaxTime(DateUtil.getCovertDate(dateRange1), hr, mm, zone,
+					LocalTime.MIN);
+			lasDayTimeStmp = lasDayTimeStmp + offsetts;
+
 		}
 		if (ArgUtil.is(dateRange2)) {
-			currentTs =DateUtil.getDateMinAndMaxTime(DateUtil.getCovertDate(dateRange2), hr, mm, zone, LocalTime.MAX);
-			currentTs = currentTs+offsetts;
+			currentTs = DateUtil.getDateMinAndMaxTime(DateUtil.getCovertDate(dateRange2), hr, mm, zone, LocalTime.MAX);
+			currentTs = currentTs + offsetts;
 		}
-		
 
-		if (lasDayTimeStmp==0  && days > 0) {
+		if (lasDayTimeStmp == 0 && days > 0) {
 			noOfdaysTstamp = ZonedDateTime.now().minusDays(days).with(LocalTime.MIN);
 			lasDayTimeStmp = noOfdaysTstamp.toInstant().toEpochMilli();
-		} 
-		
+		}
+
 		String monthYear = new SimpleDateFormat(DateUtil.MMM_YYYY_FORMAT).format(currentTs);
 		Calendar cal = Calendar.getInstance();
 		cal.setTimeInMillis(currentTs);
@@ -1711,8 +1707,8 @@ public class AdminDashBoardManager {
 		Query query = new Query();
 		query.with(new Sort(new Order(Direction.DESC, "startSessionStamp")));
 		query.fields().include("startSessionStamp");
-		List<Long> msgDocLst = mongoTemplate.getCollection("CHAT_SESSION").distinct("startSessionStamp",
-				query.getQueryObject());
+		List<Long> msgDocLst = mongoTemplate.collection("CHAT_SESSION", Long.class)
+				.distinct("startSessionStamp", Long.class).asList();
 		List<MonthDtlsDto> listofMonth = new ArrayList<>();
 		for (Long docTimeStamp : msgDocLst) {
 			long timestamp = (docTimeStamp - (docTimeStamp % (DateUtil.ONEDAY)));
@@ -1738,7 +1734,7 @@ public class AdminDashBoardManager {
 	public String getSummaryWithChannelId(SummaryDocDto dto) {
 		String tenant = dto.getDomain();
 		if (dto.getChannel().contains(ContactType.WHATSAPP.name())) {
-			return tenant + "_" + "wa"+"_"+dto.getLane();
+			return tenant + "_" + "wa" + "_" + dto.getLane();
 		} else if (dto.getChannel().contains(ContactType.FACEBOOK.name())) {
 			return tenant + "_" + "fb";
 		} else if (dto.getChannel().contains(ContactType.TWITTER.name())) {
@@ -1770,297 +1766,291 @@ public class AdminDashBoardManager {
 		}
 		return null;
 	}
-	
-	
-public ContactTypeSummaryDto summaryV1(long timestamp) {
-	String tnt = AppContextUtil.getTenant();
-	List<String> lst = getListOfContactType();
-	Date dateTi = new Date(timestamp);
-	String monthYear = new SimpleDateFormat(DateUtil.MMM_YYYY_FORMAT).format(dateTi);
-	Calendar cal = Calendar.getInstance();
-	cal.setTimeInMillis(timestamp);
 
-	int month = cal.get(Calendar.MONTH);
-	int year = cal.get(Calendar.YEAR);
-	long monthMinTimeStamp = DateUtil.getStartTimestamp(month, year).getTime();
-	long monthMaxTimeStamp = DateUtil.getEndTimestamp(month, year).getTime();
-	List<SummaryDocDto> lstSummDto = new ArrayList<>();
-	List<String> hourListH = new ArrayList<String>();
-	List<DateWiseHourCountDto> hourCntLst = new ArrayList<>();
+	public ContactTypeSummaryDto summaryV1(long timestamp) {
+		String tnt = AppContextUtil.getTenant();
+		List<String> lst = getListOfContactType();
+		Date dateTi = new Date(timestamp);
+		String monthYear = new SimpleDateFormat(DateUtil.MMM_YYYY_FORMAT).format(dateTi);
+		Calendar cal = Calendar.getInstance();
+		cal.setTimeInMillis(timestamp);
 
-	for (String contactType : lst) {
+		int month = cal.get(Calendar.MONTH);
+		int year = cal.get(Calendar.YEAR);
+		long monthMinTimeStamp = DateUtil.getStartTimestamp(month, year).getTime();
+		long monthMaxTimeStamp = DateUtil.getEndTimestamp(month, year).getTime();
+		List<SummaryDocDto> lstSummDto = new ArrayList<>();
+		List<String> hourListH = new ArrayList<String>();
+		List<DateWiseHourCountDto> hourCntLst = new ArrayList<>();
+
+		for (String contactType : lst) {
+			Query query = new Query();
+			query.addCriteria(Criteria.where("timestamp").gt(monthMinTimeStamp).lt(monthMaxTimeStamp));
+			query.with(new Sort(new Order(Direction.DESC, "timestamp")));
+			query.fields().include("timestamp").include("type").include("meta");
+			List<MessageDoc> msgDocLst = mongoTemplate.find(query, MessageDoc.class, contactType.toString());
+			for (MessageDoc doc : msgDocLst) {
+				SummaryDocDto dto = new SummaryDocDto();
+				DateWiseHourCountDto hrDto = new DateWiseHourCountDto();
+				String yyyyMMdd = DateUtil.foramtTimeStampDateAsString(doc.getTimestamp(),
+						DateUtil.YYYYMMDD_DATE_FORMAT);
+				dto.setDate(yyyyMMdd);
+				dto.setType(doc.getType());
+				dto.setChannel(contactType.toString());
+				dto.setMeta(doc.getMeta());
+				dto.setDomain(tnt);
+				String id = getSummaryId(dto);
+				dto.setId(id);
+				if (ArgUtil.is(dto.getId())) {
+					lstSummDto.add(dto);
+				}
+
+			}
+
+		}
+
+		Map<Object, Long> summaryMap = new HashMap<>();
+		Map<String, Map<String, Long>> datwWiseCount = lstSummDto.stream().collect(Collectors.groupingBy(
+				SummaryDocDto::getId, Collectors.groupingBy(SummaryDocDto::getType, Collectors.counting())));
+
+		Map<Object, Map<Object, Object>> dateWiseCountMap = new HashMap<>();
+
+		for (Map.Entry<String, Map<String, Long>> keyValue : datwWiseCount.entrySet()) {
+			String key = keyValue.getKey();
+			Map<Object, Object> dateWiseCnt = new HashMap<>();
+			for (Map.Entry<String, Long> keyValueCount : keyValue.getValue().entrySet()) {
+				String keyType = keyValueCount.getKey();
+				Object count = keyValueCount.getValue();
+				dateWiseCnt.put(keyType, count);
+			}
+			String[] keyId = key.split("_");
+			dateWiseCnt.put("domain", ArgUtil.parseAsString(keyId[0], Constants.BLANK));
+			dateWiseCnt.put("date", ArgUtil.parseAsString(keyId[1], Constants.BLANK));
+			dateWiseCnt.put("channel", ArgUtil.parseAsString(keyId[2], Constants.BLANK));
+
+			dateWiseCountMap.put(key, dateWiseCnt);
+
+		}
+
+		summaryMap = lstSummDto.stream().collect(Collectors.groupingBy(SummaryDocDto::getType, Collectors.counting()));
+
+		// printing the count based on the designation and gender.
+		// LOGGER.info("Group by on multiple properties" + datwWiseCount);
+
+		ContactTypeSummaryDto dto = new ContactTypeSummaryDto();
+		dto.setTenant(tnt);
+		dto.setMonth(monthYear);
+		// dto.setDateWiseSummaryCount(datwWiseCount);
+		dto.setDateWiseCountMap(dateWiseCountMap);
+		dto.setSummaryCount(summaryMap);
+		// saveDomainSummary(dto);
+		return dto;
+	}
+
+	public List<WabaSummaryDocDto> wabaSummary(long timestamp) {
+		String tnt = AppContextUtil.getTenant();
+		Date dateTi = new Date(timestamp);
+		String monthYear = new SimpleDateFormat(DateUtil.MMM_YYYY_FORMAT).format(dateTi);
+		Calendar cal = Calendar.getInstance();
+		cal.setTimeInMillis(timestamp);
+		int month = cal.get(Calendar.MONTH);
+		int year = cal.get(Calendar.YEAR);
+		long monthMinTimeStamp = DateUtil.getStartTimestamp(month, year).getTime();
+		long monthMaxTimeStamp = DateUtil.getEndTimestamp(month, year).getTime();
+
+		List<WabaSummaryDocDto> wabaLst = new ArrayList<>();
 		Query query = new Query();
-		query.addCriteria(Criteria.where("timestamp").gt(monthMinTimeStamp).lt(monthMaxTimeStamp));
-		query.with(new Sort(new Order(Direction.DESC, "timestamp")));
-		query.fields().include("timestamp").include("type").include("meta");
-		List<MessageDoc> msgDocLst = mongoTemplate.find(query, MessageDoc.class, contactType.toString());
-		for (MessageDoc doc : msgDocLst) {
-			SummaryDocDto dto = new SummaryDocDto();
-			DateWiseHourCountDto hrDto = new DateWiseHourCountDto();
-			String yyyyMMdd = DateUtil.foramtTimeStampDateAsString(doc.getTimestamp(),
+		query.addCriteria(Criteria.where("created.stamp").gt(monthMinTimeStamp).lt(monthMaxTimeStamp));
+		query.with(new Sort(new Order(Direction.DESC, "created.stamp")));
+		List<WABAConversation> wabaDocLst = mongoTemplate.find(query, WABAConversation.class, "TP_WABA_CONVERSATIONS");
+		for (WABAConversation waba : wabaDocLst) {
+			WabaSummaryDocDto dto = new WabaSummaryDocDto();
+			String yyyyMMdd = DateUtil.foramtTimeStampDateAsString(waba.getCreated().getStamp(),
 					DateUtil.YYYYMMDD_DATE_FORMAT);
-			dto.setDate(yyyyMMdd);
-			dto.setType(doc.getType());
-			dto.setChannel(contactType.toString());
-			dto.setMeta(doc.getMeta());
+			dto.setId(yyyyMMdd);
+			dto.setDate(monthYear);
+			if (waba.getMeta() != null && waba.getMeta().get("to_country") != null) {
+				dto.setCountry(waba.getMeta().get("to_country").toString());
+			}
+			dto.setLane(waba.getContact().getLane());
+			Map<String, Object> typeMap = (Map<String, Object>) waba.getConversation().get("origin");
+			if (typeMap != null && !typeMap.isEmpty()) {
+				dto.setType(typeMap.get("type") == null ? "" : typeMap.get("type").toString());
+			}
+			dto.setChannel(waba.getContact().getContactType());
 			dto.setDomain(tnt);
-			String id = getSummaryId(dto);
-			dto.setId(id);
-			if (ArgUtil.is(dto.getId())) {
-				lstSummDto.add(dto);
+			dto.setPricing(waba.getPricing());
+			wabaLst.add(dto);
+		}
+
+		return wabaLst;
+	}
+
+	public String getLane(String contactid) {
+		String lane = "";
+		if (ArgUtil.is(contactid)) {
+			String[] contactids = contactid.split("_");
+			if (contactids != null && contactids.length > 0) {
+				lane = contactids[1];
 			}
-
 		}
-
+		return lane;
 	}
 
-	Map<Object, Long> summaryMap = new HashMap<>();
-	Map<String, Map<String, Long>> datwWiseCount = lstSummDto.stream().collect(Collectors.groupingBy(
-			SummaryDocDto::getId, Collectors.groupingBy(SummaryDocDto::getType, Collectors.counting())));
+	public Long countryTimeZoneOffset(String offset) {
 
-	Map<Object, Map<Object, Object>> dateWiseCountMap = new HashMap<>();
+		long offsettimestamp = 0;
+		int hr = 0;
+		int min = 0;
 
-	for (Map.Entry<String, Map<String, Long>> keyValue : datwWiseCount.entrySet()) {
-		String key = keyValue.getKey();
-		Map<Object, Object> dateWiseCnt = new HashMap<>();
-		for (Map.Entry<String, Long> keyValueCount : keyValue.getValue().entrySet()) {
-			String keyType = keyValueCount.getKey();
-			Object count = keyValueCount.getValue();
-			dateWiseCnt.put(keyType, count);
-		}
-		String[] keyId = key.split("_");
-		dateWiseCnt.put("domain", ArgUtil.parseAsString(keyId[0], Constants.BLANK));
-		dateWiseCnt.put("date", ArgUtil.parseAsString(keyId[1], Constants.BLANK));
-		dateWiseCnt.put("channel", ArgUtil.parseAsString(keyId[2], Constants.BLANK));
-
-		dateWiseCountMap.put(key, dateWiseCnt);
-
-	}
-
-	summaryMap = lstSummDto.stream().collect(Collectors.groupingBy(SummaryDocDto::getType, Collectors.counting()));
-
-	// printing the count based on the designation and gender.
-	// LOGGER.info("Group by on multiple properties" + datwWiseCount);
-
-	ContactTypeSummaryDto dto = new ContactTypeSummaryDto();
-	dto.setTenant(tnt);
-	dto.setMonth(monthYear);
-	// dto.setDateWiseSummaryCount(datwWiseCount);
-	dto.setDateWiseCountMap(dateWiseCountMap);
-	dto.setSummaryCount(summaryMap);
-	//saveDomainSummary(dto);
-	return dto;
-}
-
-public List<WabaSummaryDocDto> wabaSummary(long timestamp) {
-	String tnt = AppContextUtil.getTenant();
-	Date dateTi = new Date(timestamp);
-	String monthYear = new SimpleDateFormat(DateUtil.MMM_YYYY_FORMAT).format(dateTi);
-	Calendar cal = Calendar.getInstance();
-	cal.setTimeInMillis(timestamp);
-	int month = cal.get(Calendar.MONTH);
-	int year = cal.get(Calendar.YEAR);
-	long monthMinTimeStamp = DateUtil.getStartTimestamp(month, year).getTime();
-	long monthMaxTimeStamp = DateUtil.getEndTimestamp(month, year).getTime();
-
-	List<WabaSummaryDocDto> wabaLst = new ArrayList<>();
-	Query query = new Query();
-	query.addCriteria(Criteria.where("created.stamp").gt(monthMinTimeStamp).lt(monthMaxTimeStamp));
-	query.with(new Sort(new Order(Direction.DESC, "created.stamp")));
-	List<WABAConversation> wabaDocLst = mongoTemplate.find(query, WABAConversation.class, "TP_WABA_CONVERSATIONS");
-	for (WABAConversation waba : wabaDocLst) {
-		WabaSummaryDocDto dto = new WabaSummaryDocDto();
-		String yyyyMMdd = DateUtil.foramtTimeStampDateAsString(waba.getCreated().getStamp(),
-				DateUtil.YYYYMMDD_DATE_FORMAT);
-		dto.setId(yyyyMMdd);
-		dto.setDate(monthYear);
-		if (waba.getMeta() != null && waba.getMeta().get("to_country") != null) {
-			dto.setCountry(waba.getMeta().get("to_country").toString());
-		}
-		dto.setLane(waba.getContact().getLane());
-		Map<String, Object> typeMap = (Map<String, Object>) waba.getConversation().get("origin");
-		if (typeMap != null && !typeMap.isEmpty()) {
-			dto.setType(typeMap.get("type") == null ? "" : typeMap.get("type").toString());
-		}
-		dto.setChannel(waba.getContact().getContactType());
-		dto.setDomain(tnt);
-		dto.setPricing(waba.getPricing());
-		wabaLst.add(dto);
-	}
-
-	return wabaLst;
-}
-
-public String getLane(String contactid) {
-	String lane="";
-	if(ArgUtil.is(contactid)) {
-		String[] contactids =contactid.split("_");
-		if(contactids!=null  && contactids.length>0) {
-			lane =contactids[1];
-		}
-	}
-	return lane;
-}
-
-public Long countryTimeZoneOffset(String offset) {
-	
-	long offsettimestamp =0;
-	int hr =0;
-	int min =0;		
-	
-	if(ArgUtil.is(offset)) {
-		String hrStr = offset.substring(offset.indexOf('+')+1);
-		String[] hrMin = hrStr.split(":");
-		if(ArgUtil.is(hrStr) && hrMin.length>1) {
-		  hr =Integer.parseInt(hrMin[0]);
-		  min =Integer.parseInt(hrMin[1]); 
-		  offsettimestamp = hr*DateUtil.ONE_HR+min*DateUtil.MIN;
-		}
-	}else {
-		offsettimestamp = DateUtil.getOffSet(java.util.TimeZone.getDefault().getID());
-	}
-	return offsettimestamp;
-}
-
-public String getTimeZoneFromSetup() {
-	String offset= environment.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_TIMEZONE_OFFSET).asString("Asia/Kolkata::GMT+5:30");
-	return offset;
-}
-
-/** day wise event count summary **/
-public EventCountSummary getEventCountSummary(String dateRange1, String dateRange2, int days) {
-	EventCountSummary eventCountSummary = new EventCountSummary();
-			String tnt = AppContextUtil.getTenant();
-			List<String> lst = getListOfContactType();
-		
-			List<DateWiseHourCountDto> dayCntLst = new ArrayList<>();
-			
-			long currentTs = System.currentTimeMillis();
-			ZonedDateTime noOfdaysTstamp = null;
-		
-			String offset= getTimeZoneFromSetup();
-			long offsetts= countryTimeZoneOffset(offset);
-			String zone = DateUtil.getTimeZone(offset);
-			long lasDayTimeStmp =0;
-			int hr =0;
-			int mm=0;	
-			if (ArgUtil.is(dateRange1)) {
-				lasDayTimeStmp=DateUtil.getDateMinAndMaxTime(DateUtil.getCovertDate(dateRange1), hr, mm, zone, LocalTime.MIN);
-				lasDayTimeStmp =lasDayTimeStmp+offsetts;
-				
+		if (ArgUtil.is(offset)) {
+			String hrStr = offset.substring(offset.indexOf('+') + 1);
+			String[] hrMin = hrStr.split(":");
+			if (ArgUtil.is(hrStr) && hrMin.length > 1) {
+				hr = Integer.parseInt(hrMin[0]);
+				min = Integer.parseInt(hrMin[1]);
+				offsettimestamp = hr * DateUtil.ONE_HR + min * DateUtil.MIN;
 			}
-			if (ArgUtil.is(dateRange2)) {
-				currentTs =DateUtil.getDateMinAndMaxTime(DateUtil.getCovertDate(dateRange2), hr, mm, zone, LocalTime.MAX);
-				currentTs = currentTs+offsetts;
-			}
+		} else {
+			offsettimestamp = DateUtil.getOffSet(java.util.TimeZone.getDefault().getID());
+		}
+		return offsettimestamp;
+	}
 
-			if (lasDayTimeStmp==0  && days > 0) {
-				noOfdaysTstamp = ZonedDateTime.now().minusDays(days).with(LocalTime.MIN);
-				lasDayTimeStmp = noOfdaysTstamp.toInstant().toEpochMilli();
-			} 
-			
+	public String getTimeZoneFromSetup() {
+		String offset = environment.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_TIMEZONE_OFFSET)
+				.asString("Asia/Kolkata::GMT+5:30");
+		return offset;
+	}
 
-			String monthYear = new SimpleDateFormat(DateUtil.MMM_YYYY_FORMAT).format(currentTs);
-			Calendar cal = Calendar.getInstance();
-			cal.setTimeInMillis(currentTs);
-			int month = cal.get(Calendar.MONTH);
-			int year = cal.get(Calendar.YEAR);
-			
-			/** langage summary count **/
-			List<EventCountDto> lstLangSummary = new ArrayList<>();
-			
-			for (String contactType : lst) {
-				
-				List<MessageDoc>  msgDocLst = getLanguageCount(contactType,lasDayTimeStmp,currentTs);
-				for(MessageDoc msg : msgDocLst) {
-					EventCountDto entLang = new EventCountDto();
-					if(msg.getForm()!=null && !msg.getForm().isEmpty()) {
+	/** day wise event count summary **/
+	public EventCountSummary getEventCountSummary(String dateRange1, String dateRange2, int days) {
+		EventCountSummary eventCountSummary = new EventCountSummary();
+		String tnt = AppContextUtil.getTenant();
+		List<String> lst = getListOfContactType();
+
+		List<DateWiseHourCountDto> dayCntLst = new ArrayList<>();
+
+		long currentTs = System.currentTimeMillis();
+		ZonedDateTime noOfdaysTstamp = null;
+
+		String offset = getTimeZoneFromSetup();
+		long offsetts = countryTimeZoneOffset(offset);
+		String zone = DateUtil.getTimeZone(offset);
+		long lasDayTimeStmp = 0;
+		int hr = 0;
+		int mm = 0;
+		if (ArgUtil.is(dateRange1)) {
+			lasDayTimeStmp = DateUtil.getDateMinAndMaxTime(DateUtil.getCovertDate(dateRange1), hr, mm, zone,
+					LocalTime.MIN);
+			lasDayTimeStmp = lasDayTimeStmp + offsetts;
+
+		}
+		if (ArgUtil.is(dateRange2)) {
+			currentTs = DateUtil.getDateMinAndMaxTime(DateUtil.getCovertDate(dateRange2), hr, mm, zone, LocalTime.MAX);
+			currentTs = currentTs + offsetts;
+		}
+
+		if (lasDayTimeStmp == 0 && days > 0) {
+			noOfdaysTstamp = ZonedDateTime.now().minusDays(days).with(LocalTime.MIN);
+			lasDayTimeStmp = noOfdaysTstamp.toInstant().toEpochMilli();
+		}
+
+		String monthYear = new SimpleDateFormat(DateUtil.MMM_YYYY_FORMAT).format(currentTs);
+		Calendar cal = Calendar.getInstance();
+		cal.setTimeInMillis(currentTs);
+		int month = cal.get(Calendar.MONTH);
+		int year = cal.get(Calendar.YEAR);
+
+		/** langage summary count **/
+		List<EventCountDto> lstLangSummary = new ArrayList<>();
+
+		for (String contactType : lst) {
+
+			List<MessageDoc> msgDocLst = getLanguageCount(contactType, lasDayTimeStmp, currentTs);
+			for (MessageDoc msg : msgDocLst) {
+				EventCountDto entLang = new EventCountDto();
+				if (msg.getForm() != null && !msg.getForm().isEmpty()) {
 					entLang.setLanguage(msg.getForm().get("reply_title").toString());
-					}
-					if(msg.getContact()!=null && msg.getContact().getContactType()!=null) {
-						entLang.setChannel(msg.getContact().getContactType());
-					}
-					if(ArgUtil.is(entLang) && ArgUtil.is(entLang.getChannel()) &&  ArgUtil.is(entLang.getLanguage())) {
+				}
+				if (msg.getContact() != null && msg.getContact().getContactType() != null) {
+					entLang.setChannel(msg.getContact().getContactType());
+				}
+				if (ArgUtil.is(entLang) && ArgUtil.is(entLang.getChannel()) && ArgUtil.is(entLang.getLanguage())) {
 					lstLangSummary.add(entLang);
-					}
-					}
 				}
-			
-			
-			Map<Object, Map<Object, Long>> langWiseCountMap = lstLangSummary.stream()
-					.collect(Collectors.groupingBy(EventCountDto::getChannel,
-							Collectors.groupingBy(EventCountDto::getLanguage, Collectors.counting())));
-			
-			eventCountSummary.setLangWiseCountMap(langWiseCountMap);
-			
-			List<EventCountDto> lstEventSummary = new ArrayList<>();
-				for (String contactType : lst) {
-				List<MessageDoc>  msgDocLst = getEventCount(contactType,lasDayTimeStmp,currentTs);
-				for(MessageDoc msg : msgDocLst) {
-					EventCountDto entLang = new EventCountDto();
-					if(msg.getForm()!=null && !msg.getForm().isEmpty()) {
-						entLang.setEvent(msg.getForm().get("reply_title").toString());
-					}
-					if(msg.getContact()!=null && msg.getContact().getContactType()!=null) {
-						entLang.setChannel(msg.getContact().getContactType());
-					}
-					
-					String yyyyMMdd = DateUtil.foramtTimeStampDateAsString(msg.getTimestamp(),
-							DateUtil.YYYYMMDD_DATE_FORMAT);
-					entLang.setDate(yyyyMMdd);
-					if(ArgUtil.is(entLang) && ArgUtil.is(entLang.getChannel()) &&  ArgUtil.is(entLang.getEvent())) {
-						lstEventSummary.add(entLang);
-					}
-					}
+			}
+		}
+
+		Map<Object, Map<Object, Long>> langWiseCountMap = lstLangSummary.stream().collect(Collectors.groupingBy(
+				EventCountDto::getChannel, Collectors.groupingBy(EventCountDto::getLanguage, Collectors.counting())));
+
+		eventCountSummary.setLangWiseCountMap(langWiseCountMap);
+
+		List<EventCountDto> lstEventSummary = new ArrayList<>();
+		for (String contactType : lst) {
+			List<MessageDoc> msgDocLst = getEventCount(contactType, lasDayTimeStmp, currentTs);
+			for (MessageDoc msg : msgDocLst) {
+				EventCountDto entLang = new EventCountDto();
+				if (msg.getForm() != null && !msg.getForm().isEmpty()) {
+					entLang.setEvent(msg.getForm().get("reply_title").toString());
 				}
-				
-				Map<Object, Map<Object, Long>> eventWiseCountMap = lstEventSummary.stream()
-						.collect(Collectors.groupingBy(EventCountDto::getChannel,
-								Collectors.groupingBy(EventCountDto::getEvent, Collectors.counting())));
-				
-				eventCountSummary.setEventWiseCountMap(eventWiseCountMap);
-			
-	
-			eventCountSummary.setTenant(tnt);	
-			eventCountSummary.setMonth(monthYear);
+				if (msg.getContact() != null && msg.getContact().getContactType() != null) {
+					entLang.setChannel(msg.getContact().getContactType());
+				}
 
-			return eventCountSummary;
-	
-	
-}
+				String yyyyMMdd = DateUtil.foramtTimeStampDateAsString(msg.getTimestamp(),
+						DateUtil.YYYYMMDD_DATE_FORMAT);
+				entLang.setDate(yyyyMMdd);
+				if (ArgUtil.is(entLang) && ArgUtil.is(entLang.getChannel()) && ArgUtil.is(entLang.getEvent())) {
+					lstEventSummary.add(entLang);
+				}
+			}
+		}
 
-/** Agreegration Query to event msg status **/
+		Map<Object, Map<Object, Long>> eventWiseCountMap = lstEventSummary.stream().collect(Collectors.groupingBy(
+				EventCountDto::getChannel, Collectors.groupingBy(EventCountDto::getEvent, Collectors.counting())));
 
+		eventCountSummary.setEventWiseCountMap(eventWiseCountMap);
 
-public List<MessageDoc> getLanguageCount(Object contactType, long dateRange1, long dateRange2) {
-	// List<MessageDoc> msgDocLst =null;
-	Query query = new Query();
-	query.addCriteria(Criteria.where("form").exists(true));
-	query.addCriteria(Criteria.where("form.reply_id").in("en","ar"));
-	query.addCriteria(Criteria.where("timestamp").gt(dateRange1).lt(dateRange2));
-	includeMsgFields(query);
-	List<MessageDoc> msgDocLst = mongoTemplate.find(query, MessageDoc.class, contactType.toString());
-	return msgDocLst;
-}
+		eventCountSummary.setTenant(tnt);
+		eventCountSummary.setMonth(monthYear);
 
-public List<MessageDoc> getEventCount(Object contactType, long dateRange1, long dateRange2) {
-	// List<MessageDoc> msgDocLst =null;
-	Query query = new Query();
-	query.addCriteria(Criteria.where("form").exists(true));
-	query.addCriteria(Criteria.where("form.reply_id").nin("en","ar"));
-	query.addCriteria(Criteria.where("timestamp").gt(dateRange1).lt(dateRange2));
-	includeMsgFieldsEvent(query);
-	List<MessageDoc> msgDocLst = mongoTemplate.find(query, MessageDoc.class, contactType.toString());
-	return msgDocLst;
-}
+		return eventCountSummary;
 
-public void includeMsgFields(Query query) {
-	query.fields().include("form.reply_title").include("contactId").include("contact.contactType");
-}
+	}
 
+	/** Agreegration Query to event msg status **/
 
-public void includeMsgFieldsEvent(Query query) {
-	query.fields().include("form.reply_title").include("contactId").include("contact.contactType").include("timestamp");
-}
+	public List<MessageDoc> getLanguageCount(Object contactType, long dateRange1, long dateRange2) {
+		// List<MessageDoc> msgDocLst =null;
+		Query query = new Query();
+		query.addCriteria(Criteria.where("form").exists(true));
+		query.addCriteria(Criteria.where("form.reply_id").in("en", "ar"));
+		query.addCriteria(Criteria.where("timestamp").gt(dateRange1).lt(dateRange2));
+		includeMsgFields(query);
+		List<MessageDoc> msgDocLst = mongoTemplate.find(query, MessageDoc.class, contactType.toString());
+		return msgDocLst;
+	}
+
+	public List<MessageDoc> getEventCount(Object contactType, long dateRange1, long dateRange2) {
+		// List<MessageDoc> msgDocLst =null;
+		Query query = new Query();
+		query.addCriteria(Criteria.where("form").exists(true));
+		query.addCriteria(Criteria.where("form.reply_id").nin("en", "ar"));
+		query.addCriteria(Criteria.where("timestamp").gt(dateRange1).lt(dateRange2));
+		includeMsgFieldsEvent(query);
+		List<MessageDoc> msgDocLst = mongoTemplate.find(query, MessageDoc.class, contactType.toString());
+		return msgDocLst;
+	}
+
+	public void includeMsgFields(Query query) {
+		query.fields().include("form.reply_title").include("contactId").include("contact.contactType");
+	}
+
+	public void includeMsgFieldsEvent(Query query) {
+		query.fields().include("form.reply_title").include("contactId").include("contact.contactType")
+				.include("timestamp");
+	}
 
 }

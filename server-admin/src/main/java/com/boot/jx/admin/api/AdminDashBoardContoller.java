@@ -51,6 +51,7 @@ public class AdminDashBoardContoller {
 		return agentAnaMgr.getAgentList();
 	}
 
+	
 	@RequestMapping(value = "/admin/agent-dashboard-analytics", method = { RequestMethod.POST })
 	public ApiResponse<DashBoardResponseDto, Object> getAgentWiseAnalytics(@RequestBody DashBoardRequestDto req) {
 		ApiResponse<DashBoardResponseDto, Object> resp = new ApiResponse<DashBoardResponseDto, Object>();
