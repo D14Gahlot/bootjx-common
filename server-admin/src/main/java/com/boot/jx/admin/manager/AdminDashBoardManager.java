@@ -32,6 +32,7 @@ import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 import org.apache.commons.beanutils.PropertyUtils;
+import org.bson.Document;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -80,6 +81,7 @@ import com.mongodb.AggregationOptions.OutputMode;
 import com.mongodb.Cursor;
 import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
+import com.mongodb.client.MongoCursor;
 
 @Component
 public class AdminDashBoardManager {
@@ -1426,14 +1428,19 @@ public class AdminDashBoardManager {
 		List<Map<String, Object>> lstMap = new ArrayList<>();
 		for (String contactType : lst) {
 			List<ContactTypeCountDto> messageTypeLst = new ArrayList<ContactTypeCountDto>();
-			List<DBObject> list = new ArrayList<DBObject>();
-			list = getAggregationMatchForMsgStatus(lasthrTimeStmp, currentTs);
-			DBCollection col = mongoTemplate.getCollection(contactType);
-			Cursor cursor = col.aggregate(list,
-					AggregationOptions.builder().allowDiskUse(true).outputMode(OutputMode.CURSOR).build());
+
+			List<Document> list = getAggregationMatchForMsgStatus(lasthrTimeStmp, currentTs);
+
+//			List<DBObject> list = new ArrayList<DBObject>();
+//			list = getAggregationMatchForMsgStatus(lasthrTimeStmp, currentTs);
+//			DBCollection col = mongoTemplate.getCollection(contactType);
+//			Cursor cursor = col.aggregate(list,
+//					AggregationOptions.builder().allowDiskUse(true).outputMode(OutputMode.CURSOR).build());
+
+			MongoCursor<Document> cursor = mongoTemplate.collection(contactType).aggregate(list).iterator();
 			while (cursor.hasNext()) {
 				ContactTypeCountDto contactDto = new ContactTypeCountDto();
-				DBObject object = cursor.next();
+				Document object = cursor.next();
 				if (ArgUtil.is(object)) {
 					JSONObject jsonObject = new JSONObject(JsonUtil.toJson(object));
 					String type = ArgUtil.parseAsString(jsonObject.get("_id"));
@@ -1539,15 +1546,15 @@ public class AdminDashBoardManager {
 		List<Map<String, Object>> lstMap = new ArrayList<>();
 		for (String contactType : lst) {
 			List<ContactTypeCountDto> messageTypeLst = new ArrayList<ContactTypeCountDto>();
-			List<DBObject> list = new ArrayList<DBObject>();
-			list = getAggregationMatchForMsgStatus(lasDayTimeStmp, currentTs);
-			DBCollection col = mongoTemplate.getCollection(contactType);
-			Cursor cursor = col.aggregate(list,
-					AggregationOptions.builder().allowDiskUse(true).outputMode(OutputMode.CURSOR).build());
+			List<Document> list = getAggregationMatchForMsgStatus(lasDayTimeStmp, currentTs);
+//			DBCollection col = mongoTemplate.getCollection(contactType);
+//			Cursor cursor = col.aggregate(list,
+//					AggregationOptions.builder().allowDiskUse(true).outputMode(OutputMode.CURSOR).build());
 
+			MongoCursor<Document> cursor = mongoTemplate.collection(contactType).aggregate(list).iterator();
 			while (cursor.hasNext()) {
 				ContactTypeCountDto contactDto = new ContactTypeCountDto();
-				DBObject object = cursor.next();
+				Document object = cursor.next();
 				if (ArgUtil.is(object)) {
 					JSONObject jsonObject = new JSONObject(JsonUtil.toJson(object));
 					String type = ArgUtil.parseAsString(jsonObject.get("_id"));
@@ -1654,22 +1661,22 @@ public class AdminDashBoardManager {
 	}
 
 	/** Agreegration Query to fetch msg status **/
-	public List<DBObject> getAggregationMatchForMsgStatus(long lasthrTimeStmp, long currentTs) {
+	public List<Document> getAggregationMatchForMsgStatus(long lasthrTimeStmp, long currentTs) {
 		String metaQry = "{\"categoryType\" : \"AUTO_REPLY\",\r\n" + "\"composeType\" : \"N\",\r\n"
 				+ "\"sendType\" : \"PM\"}";
 		// queryFilter = "{'FirstName':'Ian'}";
 
-		List<DBObject> list = new ArrayList<DBObject>();
+		List<Document> list = new ArrayList<Document>();
 		// Match condtion
-		list.add(Aggregation.match(new Criteria("type").is("O")).toDBObject(Aggregation.DEFAULT_CONTEXT));
+		list.add(Aggregation.match(new Criteria("type").is("O")).toDocument(Aggregation.DEFAULT_CONTEXT));
 		// list.add(Aggregation.match(new Criteria("meta").is(metaQry))
 		// .toDocument(Aggregation.DEFAULT_CONTEXT));
-		list.add(Aggregation.match(new Criteria("meta.composeType").is("N")).toDBObject(Aggregation.DEFAULT_CONTEXT));
-		list.add(Aggregation.match(new Criteria("meta.sendType").is("PM")).toDBObject(Aggregation.DEFAULT_CONTEXT));
+		list.add(Aggregation.match(new Criteria("meta.composeType").is("N")).toDocument(Aggregation.DEFAULT_CONTEXT));
+		list.add(Aggregation.match(new Criteria("meta.sendType").is("PM")).toDocument(Aggregation.DEFAULT_CONTEXT));
 
 		list.add(Aggregation.match(new Criteria("timestamp").gt(lasthrTimeStmp).lt(currentTs))
-				.toDBObject(Aggregation.DEFAULT_CONTEXT));
-		list.add(Aggregation.group("stamps").count().as("count").toDBObject(Aggregation.DEFAULT_CONTEXT));
+				.toDocument(Aggregation.DEFAULT_CONTEXT));
+		list.add(Aggregation.group("stamps").count().as("count").toDocument(Aggregation.DEFAULT_CONTEXT));
 
 		return list;
 	}
