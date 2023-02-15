@@ -184,7 +184,7 @@ public class QuickMenuController extends CommonBotController {
 			case "$":
 				if (ArgUtil.is(code)) {
 					String itemCode = (texts.length > 0
-							? ArgUtil.parseAsString(StringUtils.trim(texts[0]), Constants.BLANK)
+							? ArgUtil.parseAsString(StringUtils.trim(texts[1]), Constants.BLANK)
 							: Constants.BLANK).toLowerCase();
 					if (ArgUtil.is(itemCode)) {
 						switch (code) {
