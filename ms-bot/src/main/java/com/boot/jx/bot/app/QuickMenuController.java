@@ -12,13 +12,17 @@ import com.boot.jx.bot.alex.CommonBotController;
 import com.boot.jx.dict.FileType;
 import com.boot.jx.postman.ClientApp;
 import com.boot.jx.postman.doc.QuickAction;
+import com.boot.jx.postman.doc.QuickLocation;
 import com.boot.jx.postman.doc.QuickMedia;
 import com.boot.jx.postman.doc.QuickReply;
 import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.model.ext.InBoundEvent;
+import com.boot.jx.postman.pbook.PBLocation;
+import com.boot.jx.postman.pbook.PBVCard;
 import com.boot.jx.postman.store.QuickStore;
+import com.boot.jx.postman.store.QuickStore.QuickGalleryItem;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.Constants;
 import com.boot.utils.StringUtils;
@@ -30,6 +34,28 @@ public class QuickMenuController extends CommonBotController {
 
 	@Autowired
 	private QuickStore commonMongoTemplate;
+
+	@SuppressWarnings("unchecked")
+	private <T extends QuickGalleryItem> Class<T> getItemClass(String itemType) {
+		switch (itemType) {
+		case "QUICK_MEDIA":
+		case "media":
+			return (Class<T>) QuickMedia.class;
+		case "QUICK_ACTION":
+		case "action":
+			return (Class<T>) QuickAction.class;
+		case "QUICK_REPLY":
+		case "reply":
+			return (Class<T>) QuickReply.class;
+		case "QUICK_LOCATION":
+		case "location":
+		case "loc":
+			return (Class<T>) QuickLocation.class;
+		default:
+			break;
+		}
+		return (Class<T>) QuickReply.class;
+	}
 
 	private void showDefaultMenu(String log) {
 		ClientApp app = context().clientApp();
@@ -90,7 +116,7 @@ public class QuickMenuController extends CommonBotController {
 		String[] texts = StringUtils.split(text, " ");
 		String commond = ArgUtil.parseAsString(StringUtils.trim(texts[0]), Constants.BLANK);
 		String sign = commond.substring(0, 1);
-		String code = commond.length() > 0 ? commond.substring(1) : null;
+		String code = (commond.length() > 0 ? commond.substring(1) : Constants.BLANK).toLowerCase();
 
 		if (ArgUtil.is(sign)) {
 			switch (sign) {
@@ -155,6 +181,41 @@ public class QuickMenuController extends CommonBotController {
 						}
 					}
 				}
+			case "$":
+				if (ArgUtil.is(code)) {
+					String itemCode = (texts.length > 0
+							? ArgUtil.parseAsString(StringUtils.trim(texts[0]), Constants.BLANK)
+							: Constants.BLANK).toLowerCase();
+					if (ArgUtil.is(itemCode)) {
+						switch (code) {
+						case "hsm":
+							reply(new OutboxMessage().template(itemCode));
+							next("on_item_select");
+							return true;
+						default: {
+							List<QuickGalleryItem> items = commonMongoTemplate.findGalleryItems(itemCode,
+									getItemClass(code));
+							for (QuickGalleryItem item : items) {
+								if (ArgUtil.areEqual(StringUtils.toLowerCase(item.getCode()), itemCode)
+										|| ArgUtil.areEqual(StringUtils.toLowerCase(item.getId()), itemCode)
+										|| ArgUtil.areEqual(StringUtils.toLowerCase(item.getTitle()), itemCode)) {
+									if (item instanceof QuickMedia) {
+										sendQuickMedia((QuickMedia) item);
+									} else if (item instanceof QuickAction) {
+										sendQuickAction((QuickAction) item);
+									} else if (item instanceof QuickReply) {
+										sendQuickReply((QuickReply) item);
+									} else if (item instanceof QuickLocation) {
+										sendQuickLocation((QuickLocation) item);
+									}
+									next("on_item_select");
+									return true;
+								}
+							}
+						}
+						}
+					}
+				}
 			}
 		}
 		return false;
@@ -178,4 +239,15 @@ public class QuickMenuController extends CommonBotController {
 		reply(msg);
 	}
 
+	private void sendQuickLocation(QuickLocation item) {
+		OutboxMessage msg = new OutboxMessage();
+		PBLocation pbLocation = new PBLocation();
+		pbLocation.setName(item.getTitle());
+		pbLocation.setAddress(item.getAddress());
+		pbLocation.setLatitude(item.getLatitude());
+		pbLocation.setLongitude(item.getLongitude());
+		pbLocation.setUrl(item.getUrl());
+		msg.vccards().add(new PBVCard().locations(pbLocation));
+		reply(msg);
+	}
 }

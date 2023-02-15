@@ -21,11 +21,15 @@ import com.boot.jx.model.CommonFile;
 import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.jx.postman.doc.QuickAction;
 import com.boot.jx.postman.doc.QuickLabel;
+import com.boot.jx.postman.doc.QuickLocation;
 import com.boot.jx.postman.doc.QuickMedia;
 import com.boot.jx.postman.doc.QuickReply;
 import com.boot.jx.postman.doc.QuickSkill;
 import com.boot.jx.postman.doc.QuickTag;
+import com.boot.jx.postman.store.QuickStore;
+import com.boot.jx.postman.store.QuickStore.QuickGalleryItem;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.EntityDtoUtil;
 
 @RestController
 public class TmplQuickController {
@@ -35,6 +39,9 @@ public class TmplQuickController {
 
 	@Autowired
 	private AuditDetailProvider auditDetailProvider;
+
+	@Autowired
+	private QuickStore quickStore;
 
 	// QuickReply
 	@RequestMapping(value = "/category/map/smart_reply", method = { RequestMethod.POST })
@@ -224,5 +231,25 @@ public class TmplQuickController {
 		mongoTemplate.saveAndAudit(quickTag, ArgUtil.is(quickTag.getId()));
 		return ApiResponse.buildResults(mongoTemplate.findAll(QuickSkill.class)).data(quickTag)
 				.message("QuickSkill Saved");
+	}
+
+	// QuickLocations
+	@RequestMapping(value = "/api/tmpl/quick/location", method = { RequestMethod.GET })
+	public ApiResponse<QuickLocation, Object> listQuickLocations() {
+		return ApiResponse.buildResults(mongoTemplate.findAll(QuickLocation.class));
+	}
+
+	@RequestMapping(value = "/api/tmpl/quick/location", method = { RequestMethod.DELETE })
+	public ApiResponse<QuickLocation, Object> deleteQuickLocations(@RequestParam String id) {
+		QuickLocation qr = mongoTemplate.removeAndAudit(id, QuickLocation.class);
+		return ApiResponse.buildResults(mongoTemplate.findAll(QuickLocation.class)).data(qr)
+				.message("QuickLocation deleted");
+	}
+
+	@RequestMapping(value = "/api/tmpl/quick/location", method = { RequestMethod.POST })
+	public ApiResponse<QuickLocation, Object> createQuickLocation(@RequestBody QuickLocation req) {
+		QuickLocation quickTag = quickStore.createGalleryItem(req, new QuickLocation());
+		return ApiResponse.buildResults(mongoTemplate.findAll(QuickLocation.class)).data(quickTag)
+				.message("QuickLocations Saved");
 	}
 }
