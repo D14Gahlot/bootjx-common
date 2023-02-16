@@ -47,10 +47,11 @@ public class AdminDashBoardContoller {
 	}
 
 	@RequestMapping(value = "/admin/fetch-agent-chat-session-list", method = { RequestMethod.GET })
-	public List<ChatSessionDoc> getAgentList() {
+	public List<String> getAgentList() {
 		return agentAnaMgr.getAgentList();
 	}
 
+	
 	@RequestMapping(value = "/admin/agent-dashboard-analytics", method = { RequestMethod.POST })
 	public ApiResponse<DashBoardResponseDto, Object> getAgentWiseAnalytics(@RequestBody DashBoardRequestDto req) {
 		ApiResponse<DashBoardResponseDto, Object> resp = new ApiResponse<DashBoardResponseDto, Object>();
