@@ -95,7 +95,6 @@ public class PhoneController {
 			}
 			resp.loginToken = loginToken;
 			phoneUserQuery.setLoginToken(resp.loginToken);
-			phoneUserQuery.setOtpCounter(0L);
 			commonMongoTemplate.update(phoneUserQuery);
 			return ApiResponse.buildResults(phoneBookManager.getProfile(userDoc), resp);
 		} else if (ArgUtil.is(step, "VALIDATE") || (noStep && ArgUtil.is(loginDTO.otp))) { // Step 2
@@ -111,6 +110,7 @@ public class PhoneController {
 			phoneUserQuery.setOtpNounce(Constants.BLANK);
 			phoneUserQuery.setLoginToken(resp.loginToken);
 			phoneUserQuery.setAuthToken(CryptoUtil.getEncoder().message(resp.deviceToken).sha2().toString());
+			phoneUserQuery.setOtpCounter(0L);
 			commonMongoTemplate.update(phoneUserQuery);
 			return ApiResponse.buildResults(phoneBookManager.getProfile(userDoc), resp);
 		} else { // Step 1
