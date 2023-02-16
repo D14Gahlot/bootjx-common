@@ -111,6 +111,7 @@ public class PhoneController {
 			phoneUserQuery.setLoginToken(resp.loginToken);
 			phoneUserQuery.setAuthToken(CryptoUtil.getEncoder().message(resp.deviceToken).sha2().toString());
 			phoneUserQuery.setOtpCounter(0L);
+			phoneUserQuery.setOtpStamp(0L);
 			commonMongoTemplate.update(phoneUserQuery);
 			return ApiResponse.buildResults(phoneBookManager.getProfile(userDoc), resp);
 		} else { // Step 1
