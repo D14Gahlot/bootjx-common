@@ -16,7 +16,7 @@ public class PhoneLoginDTO implements Serializable {
 	public String deviceId;
 
 	@ApiMockModelProperty(example = "xxxxxxxx", required = false)
-	public String deviceToken;	
+	public String deviceToken;
 
 	@ApiMockModelProperty(example = "888888", required = false, value = "if not authToken")
 	public String otp;
@@ -38,7 +38,7 @@ public class PhoneLoginDTO implements Serializable {
 
 		@ApiMockModelProperty(example = "xxxxxxxx", required = false)
 		public String otpNounce;
-		
+
 		@ApiMockModelProperty(example = "xxxxxxxx", required = false)
 		public String loginToken;
 

@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.boot.jx.api.ApiFieldError;
@@ -32,7 +33,10 @@ import com.boot.utils.Constants;
 import com.boot.utils.CryptoUtil;
 import com.boot.utils.OTPUtils;
 import com.boot.utils.OTPUtils.OTPDetails;
+import com.boot.utils.TimeUtils;
 import com.boot.utils.UniqueID;
+
+import io.swagger.annotations.ApiParam;
 
 @RestController
 @RequestMapping("/phone")
@@ -63,7 +67,9 @@ public class PhoneController {
 	PhoneService phoneService;
 
 	@RequestMapping(value = "/api/v1/login", method = { RequestMethod.POST })
-	public ApiResponse<PhoneProfileDTO, PhoneLoginResponseDTO> login(@RequestBody PhoneLoginDTO loginDTO) {
+	public ApiResponse<PhoneProfileDTO, PhoneLoginResponseDTO> login(
+			@ApiParam(allowableValues = "SEND,VALIDATE,VERIFY", required = false)
+			@RequestParam(required = false) String step, @RequestBody PhoneLoginDTO loginDTO) {
 
 		if (!ArgUtil.is(loginDTO.phone)) {
 			ApiResponseUtil.throwMissinInputException(new ApiFieldError().field("phone"));
@@ -79,18 +85,20 @@ public class PhoneController {
 			commonMongoTemplate.save(userDoc);
 		}
 
+		boolean noStep = ArgUtil.not(step);
 		PhoneUserQuery phoneUserQuery = new PhoneUserQuery(userDoc);
 		PhoneLoginResponseDTO resp = new PhoneLoginResponseDTO();
-		if (ArgUtil.is(loginDTO.deviceToken)) { // Step 3
+		if (ArgUtil.is(step, "VERIFY") || (noStep && ArgUtil.is(loginDTO.deviceToken))) { // Step 3
 			if (!CryptoUtil.getEncoder().message(loginDTO.deviceToken).sha2().is(userDoc.authToken)) {
 				ApiResponseUtil.throwInputException(ApiStatusCodes.PARAM_INVALID,
 						new ApiFieldError().field("authToken"));
 			}
 			resp.loginToken = loginToken;
 			phoneUserQuery.setLoginToken(resp.loginToken);
+			phoneUserQuery.setOtpCounter(0L);
 			commonMongoTemplate.update(phoneUserQuery);
 			return ApiResponse.buildResults(phoneBookManager.getProfile(userDoc), resp);
-		} else if (ArgUtil.is(loginDTO.otp)) { // Step 2
+		} else if (ArgUtil.is(step, "VALIDATE") || (noStep && ArgUtil.is(loginDTO.otp))) { // Step 2
 			if (!new OTPDetails().yin(loginDTO.otpNounce).yang(userDoc.otpNounce)
 					.genrate(loginDTO.phone, loginDTO.deviceId).validate(loginDTO.otp, userDoc.otpHash)
 					&& !ArgUtil.is(loginDTO.otp, "888888")) {
@@ -106,6 +114,22 @@ public class PhoneController {
 			commonMongoTemplate.update(phoneUserQuery);
 			return ApiResponse.buildResults(phoneBookManager.getProfile(userDoc), resp);
 		} else { // Step 1
+
+			long currentCounter = userDoc.getOtpCounter();
+			boolean moreThan1stWait = TimeUtils.isExpired(userDoc.getOtpStamp(), "1m");
+			boolean moreThan2ndWait = TimeUtils.isExpired(userDoc.getOtpStamp(), "2m");
+			boolean moreThan3rdWait = TimeUtils.isExpired(userDoc.getOtpStamp(), "24hrs");
+
+			if (currentCounter == 1L && !moreThan1stWait) {
+				ApiResponseUtil.throwAccessDeniedException("Try again later in 1 minute");
+			} else if (currentCounter == 2L && !moreThan2ndWait) {
+				ApiResponseUtil.throwAccessDeniedException("Try again later in 2 minutes");
+			} else if (currentCounter > 2L && !moreThan3rdWait) {
+				ApiResponseUtil.throwAccessDeniedException("Try again later in 24 hours");
+			} else if (moreThan3rdWait) {
+				currentCounter = 0;
+			}
+
 			OTPDetails otp = OTPUtils.genrateBasicOTP(loginDTO.phone, loginDTO.deviceId);
 
 			phoneService.sendPhoneOTP(loginDTO.phone, otp.getOtp());
@@ -114,6 +138,8 @@ public class PhoneController {
 			resp.otpNounce = otp.getYin();
 			phoneUserQuery.setOtpNounce(otp.getYang());
 			phoneUserQuery.setOtpHash(otp.getHash());
+			phoneUserQuery.setOtpStamp(System.currentTimeMillis());
+			phoneUserQuery.setOtpCounter(currentCounter);
 
 			commonMongoTemplate.update(phoneUserQuery);
 			return ApiResponse.buildResults(phoneBookManager.getProfile(userDoc), resp);

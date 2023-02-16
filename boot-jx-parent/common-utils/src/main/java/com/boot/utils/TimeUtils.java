@@ -28,10 +28,10 @@ public class TimeUtils {
 
 	public static enum TimeUnits {
 		SECONDS(TimeUnit.SECONDS, "s", "sec", "second", "seconds"),
-		MINUTES(TimeUnit.MINUTES, "mi", "min", "minute", "minutes"), HOUR(TimeUnit.HOURS, "h", "hr", "hour", "hours"),
-		DAYS(TimeUnit.DAYS, "d", "days", "day"), WEEK(TimeUnit.DAYS, 7, "w", "week", "wk", "weeks"),
-		MONTH(TimeUnit.DAYS, 31, "mo", "mon", "month", "months"), YEAR(TimeUnit.DAYS, 365, "y", "yr", "year"),
-		MIDNIGHT(TimeUnit.DAYS, "mid", "midnight") {
+		MINUTES(TimeUnit.MINUTES, "mi", "min", "minute", "minutes"),
+		HOUR(TimeUnit.HOURS, "h", "hr", "hrs", "hour", "hours"), DAYS(TimeUnit.DAYS, "d", "days", "day"),
+		WEEK(TimeUnit.DAYS, 7, "w", "week", "wk", "weeks"), MONTH(TimeUnit.DAYS, 31, "mo", "mon", "month", "months"),
+		YEAR(TimeUnit.DAYS, 365, "y", "yr", "year"), MIDNIGHT(TimeUnit.DAYS, "mid", "midnight") {
 			public long toMillis(long days) {
 				long todaysMillis = System.currentTimeMillis() - TimeUtils.getTodayStart().getTimeInMillis();
 				return todaysMillis + TimeUnit.DAYS.toMillis(Math.max(days, 1) - this.getCount());

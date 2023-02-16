@@ -23,6 +23,8 @@ public class PhoneUserDoc implements Serializable {
 	public String authToken;
 	public String otpHash;
 	public String otpNounce;
+	public long otpStamp;
+	public long otpCounter;
 	public TimeStampIndex lastActiveAt;
 	public String loginToken;
 
@@ -97,5 +99,21 @@ public class PhoneUserDoc implements Serializable {
 	public void setLoginToken(String loginToken) {
 		this.loginToken = loginToken;
 	}
-	
+
+	public long getOtpStamp() {
+		return otpStamp;
+	}
+
+	public void setOtpStamp(long otpStamp) {
+		this.otpStamp = otpStamp;
+	}
+
+	public long getOtpCounter() {
+		return otpCounter;
+	}
+
+	public void setOtpCounter(long otpCounter) {
+		this.otpCounter = otpCounter;
+	}
+
 }
