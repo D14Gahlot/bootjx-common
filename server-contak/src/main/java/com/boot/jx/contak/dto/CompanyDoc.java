@@ -65,6 +65,7 @@ public class CompanyDoc implements Serializable {
 	public String logoUrl;
 
 	public CompanyPref prefs;
+	public CompanyMeta meta;
 
 	public String getCompanyId() {
 		return companyId;
@@ -240,6 +241,21 @@ public class CompanyDoc implements Serializable {
 
 	public void setPrefs(CompanyPref prefs) {
 		this.prefs = prefs;
+	}
+
+	public CompanyMeta getMeta() {
+		return meta;
+	}
+
+	public CompanyMeta meta() {
+		if (this.meta == null) {
+			this.meta = new CompanyMeta();
+		}
+		return meta;
+	}
+
+	public void setMeta(CompanyMeta meta) {
+		this.meta = meta;
 	}
 
 }

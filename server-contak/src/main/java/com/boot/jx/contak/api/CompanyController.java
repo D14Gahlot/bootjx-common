@@ -37,7 +37,7 @@ import com.boot.utils.ArgUtil;
 @RestController
 @RequestMapping("/comp")
 public class CompanyController {
-	
+
 	@Autowired
 	CommonHttpRequest commonHttpRequest;
 
@@ -46,40 +46,31 @@ public class CompanyController {
 
 	@Autowired
 	PhoneBookManager phoneBookManager;
-	
+
 	@Autowired
 	UserRegistrationManager userRegistrationManager;
-	
-	
+
 	@Autowired
 	FirebaseManager firebaseManager;
-	
+
 	@Autowired
 	AWSFileStore fileStore;
-	
+
 	@Autowired
 	private ContakApiContext apiContext;
-	
-	
+
 	@RequestMapping(value = "/api/v1/company/register", method = { RequestMethod.POST })
-	public ApiResponse<CompanyDoc,Object> save(@RequestParam(name = "coiFile") MultipartFile coiFile,
+	public ApiResponse<CompanyDoc, Object> save(@RequestParam(name = "coiFile") MultipartFile coiFile,
 			@RequestParam(name = "gstFile") MultipartFile gstFile,
 			@RequestParam(name = "panFile") MultipartFile panFile,
-			@RequestParam(name = "logoUrl") MultipartFile logoUrl,
-			@RequestParam String number,
-			@RequestParam String legalBusinessName,
-			@RequestParam String displayName,
-			@RequestParam String countryOfOperation,
-			@RequestParam String address,
-			@RequestParam String websiteUrl,
-			@RequestParam String contactPersonName,
-			@RequestParam String contactPhoneNumber,
-			@RequestParam String contactPersonEmailId,
-			@RequestParam String timezone,		
-			@RequestParam String password){
-		CompanyDoc  compoc = commonMongoTemplate.findOne(
+			@RequestParam(name = "logoUrl") MultipartFile logoUrl, @RequestParam String number,
+			@RequestParam String legalBusinessName, @RequestParam String displayName,
+			@RequestParam String countryOfOperation, @RequestParam String address, @RequestParam String websiteUrl,
+			@RequestParam String contactPersonName, @RequestParam String contactPhoneNumber,
+			@RequestParam String contactPersonEmailId, @RequestParam String timezone, @RequestParam String password) {
+		CompanyDoc compoc = commonMongoTemplate.findOne(
 				CommonMongoQueryBuilder.collection(CompanyDoc.class).where(Criteria.where("number").is(number)));
-		if(ArgUtil.is(compoc)) {
+		if (ArgUtil.is(compoc)) {
 			ApiResponseUtil.throwDuplicateInputException(new ApiFieldError().field("number"));
 		}
 		CompanyDoc companyDoc = new CompanyDoc();
@@ -89,8 +80,8 @@ public class CompanyController {
 		companyDoc.setCountryOfOperation(countryOfOperation);
 		companyDoc.setAddress(address);
 		companyDoc.setWebsiteUrl(websiteUrl);
-		
-		if(ArgUtil.is(coiFile)) {	
+
+		if (ArgUtil.is(coiFile)) {
 			CommonFile commonfile = fileStore.upload1(coiFile,
 					String.format("%s/oafiles/%s", AppContextUtil.getTenant(), UUID.randomUUID()),
 					coiFile.getOriginalFilename());
@@ -99,8 +90,8 @@ public class CompanyController {
 			String url = commonfile.getUrl();
 			companyDoc.setCoiFileUrl(url);
 		}
-		
-		if(ArgUtil.is(gstFile)) {	
+
+		if (ArgUtil.is(gstFile)) {
 			CommonFile commonfile = fileStore.upload1(gstFile,
 					String.format("%s/oafiles/%s", AppContextUtil.getTenant(), UUID.randomUUID()),
 					gstFile.getOriginalFilename());
@@ -109,8 +100,8 @@ public class CompanyController {
 			String url = commonfile.getUrl();
 			companyDoc.setGstFileUrl(url);
 		}
-		
-		if(ArgUtil.is(panFile)) {	
+
+		if (ArgUtil.is(panFile)) {
 			CommonFile commonfile = fileStore.upload1(panFile,
 					String.format("%s/oafiles/%s", AppContextUtil.getTenant(), UUID.randomUUID()),
 					panFile.getOriginalFilename());
@@ -119,32 +110,28 @@ public class CompanyController {
 			String url = commonfile.getUrl();
 			companyDoc.setPanFileUrl(url);
 		}
-		
+
 		companyDoc.setContactPersonName(contactPersonName);
 		companyDoc.setContactPhoneNumber(contactPhoneNumber);
 		companyDoc.setContactPersonEmailId(contactPersonEmailId);
-		
-		
 
 		try {
-	        java.security.MessageDigest md = java.security.MessageDigest.getInstance("MD5");
-	        byte[] array = md.digest(password.getBytes());
-	        StringBuffer sb = new StringBuffer();
-	        for (int i = 0; i < array.length; ++i) {
-	          sb.append(Integer.toHexString((array[i] & 0xFF) | 0x100).substring(1,3));
-	       }
-	        companyDoc.setPassword(sb.toString());
-	    } catch (java.security.NoSuchAlgorithmException e) {
-	    	
-	    }
-		
-		
-		
+			java.security.MessageDigest md = java.security.MessageDigest.getInstance("MD5");
+			byte[] array = md.digest(password.getBytes());
+			StringBuffer sb = new StringBuffer();
+			for (int i = 0; i < array.length; ++i) {
+				sb.append(Integer.toHexString((array[i] & 0xFF) | 0x100).substring(1, 3));
+			}
+			companyDoc.setPassword(sb.toString());
+		} catch (java.security.NoSuchAlgorithmException e) {
+
+		}
+
 		companyDoc.setApiKey(UUID.randomUUID().toString());
 		companyDoc.setCompanyTimeZone(timezone);
 		companyDoc.setCreatedAt(TimeStampIndex.now());
-		companyDoc.setNumber(number);	
-		if(ArgUtil.is(logoUrl)) {	
+		companyDoc.setNumber(number);
+		if (ArgUtil.is(logoUrl)) {
 			CommonFile commonfile = fileStore.upload1(logoUrl,
 					String.format("%s/oafiles/%s", AppContextUtil.getTenant(), UUID.randomUUID()),
 					logoUrl.getOriginalFilename());
@@ -156,45 +143,44 @@ public class CompanyController {
 		commonMongoTemplate.save(companyDoc);
 		return ApiResponse.buildResult(companyDoc);
 	}
-	
+
 	@RequestMapping(value = "/api/v1/company/get", method = { RequestMethod.GET })
-	public ApiResponse<CompanyDoc,Object> getById(@RequestParam String id){	
-		CompanyDoc  compoc = commonMongoTemplate.findOne(
+	public ApiResponse<CompanyDoc, Object> getById(@RequestParam String id) {
+		CompanyDoc compoc = commonMongoTemplate.findOne(
 				CommonMongoQueryBuilder.collection(CompanyDoc.class).where(Criteria.where("companyId").is(id)));
-		if(!ArgUtil.is(compoc)) {
+		if (!ArgUtil.is(compoc)) {
 			ApiResponseUtil.throwException("Company does not exists");
 		}
 		return ApiResponse.buildResult(compoc);
 	}
-	
+
 	@Deprecated
 	@RequestMapping(value = "/api/v1/company/get/auth", method = { RequestMethod.GET })
-	public ApiResponse<CompanyDoc,Object> getByAuthKey(@RequestParam String authKey){	
-		CompanyDoc  compoc = commonMongoTemplate.findOne(
+	public ApiResponse<CompanyDoc, Object> getByAuthKey(@RequestParam String authKey) {
+		CompanyDoc compoc = commonMongoTemplate.findOne(
 				CommonMongoQueryBuilder.collection(CompanyDoc.class).where(Criteria.where("apiKey").is(authKey)));
-		if(!ArgUtil.is(compoc)) {
+		if (!ArgUtil.is(compoc)) {
 			ApiResponseUtil.throwException("Company does not exists");
 		}
 		return ApiResponse.buildResult(compoc);
 	}
-	
+
 	@ApiRequest(authenticateTenant = true)
 	@ApiMockParams({ @ApiMockParam(name = ParamKeys.X_API_KEY, value = "API Key", paramType = MockParamType.HEADER),
-		@ApiMockParam(name = ParamKeys.X_API_ID, value = "API Id", paramType = MockParamType.HEADER) })
+			@ApiMockParam(name = ParamKeys.X_API_ID, value = "API Id", paramType = MockParamType.HEADER) })
 	@RequestMapping(value = "/api/v1/company/get/auth/v1", method = { RequestMethod.GET })
-	public ApiResponse<CompanyDoc,Object> getByAuthKeyV1(@RequestParam String authKey){	
+	public ApiResponse<CompanyDoc, Object> getByAuthKeyV1(@RequestParam String authKey) {
 		CompanyDoc compoc = apiContext.getCompany();
 //		CompanyDoc  compoc = commonMongoTemplate.findOne(
 //				CommonMongoQueryBuilder.collection(CompanyDoc.class).where(Criteria.where("apiKey").is(authKey)));
-		if(!ArgUtil.is(compoc)) {
+		if (!ArgUtil.is(compoc)) {
 			ApiResponseUtil.throwException("Company does not exists");
 		}
 		return ApiResponse.buildResult(compoc);
-	}	
-	
-	
+	}
+
 	@RequestMapping(value = "/api/v1/company", method = { RequestMethod.GET })
-	public ApiResponse<List<CompanyDoc>,Object> get(){	
+	public ApiResponse<List<CompanyDoc>, Object> get() {
 		List<CompanyDoc> companyDocList = commonMongoTemplate.findAll(CompanyDoc.class);
 		return ApiResponse.buildResult(companyDocList);
 	}

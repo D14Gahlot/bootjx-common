@@ -34,6 +34,7 @@ import com.boot.jx.contak.doc.ContakMembershipDoc;
 import com.boot.jx.contak.doc.ContakTemplateDoc;
 import com.boot.jx.contak.doc.ContakUserDoc;
 import com.boot.jx.contak.dto.CompanyDoc;
+import com.boot.jx.contak.dto.CompanyMeta;
 import com.boot.jx.model.CommonFile;
 import com.boot.jx.mongo.CommonMongoQB.MQB;
 import com.boot.jx.mongo.CommonMongoQB.QueryCriteria;
@@ -250,6 +251,8 @@ public class PanelV1Controller {
 		compoc.setContactPersonName(newComp.getContactPersonName());
 		compoc.setContactPhoneNumber(newComp.getContactPhoneNumber());
 		compoc.setContactPersonEmailId(newComp.getContactPersonEmailId());
+		compoc.meta().setUpdateStamp(System.currentTimeMillis());
+
 		commonMongoTemplate.save(compoc);
 		authService.addMembership(sessionBean.domainUser(), compoc, PMConstants.USER_SHIP_TYPE.OA_OWNER);
 		authService.updateLogin(sessionBean.domainUser());

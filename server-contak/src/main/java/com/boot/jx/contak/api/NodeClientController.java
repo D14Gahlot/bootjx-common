@@ -82,7 +82,7 @@ public class NodeClientController {
 		}
 
 		ContakMessageDoc newPhoneNOTPDoc = new ContakMessageDoc();
-		newPhoneNOTPDoc.setDomain(compoc.getDisplayName());
+		newPhoneNOTPDoc.setDomain(ArgUtil.anyOf(compoc.getDomain(), compoc.getDisplayName()));
 		newPhoneNOTPDoc.setPhoneId(msg.phone);
 		newPhoneNOTPDoc.setOtp(msg.otp);
 		newPhoneNOTPDoc.setTitle(msg.title);
@@ -94,7 +94,8 @@ public class NodeClientController {
 		newPhoneNOTPDoc.setPubKey(msg.pubKey);
 		newPhoneNOTPDoc.setMsgGenId(msg.msgGenId);
 		newPhoneNOTPDoc.setCompanyId(msg.companyId);
-		newPhoneNOTPDoc.setCompanyName(msg.companyName);
+		newPhoneNOTPDoc.setCompanyName(ArgUtil.anyOf(compoc.getDisplayName(), msg.companyName));
+		newPhoneNOTPDoc.setCompanyStamp(compoc.meta().getUpdateStamp());
 		newPhoneNOTPDoc.setLogoUrl(msg.logoUrl);
 
 		if (ArgUtil.is(msg.template) && ArgUtil.is(msg.template.code) && !ArgUtil.is(msg.type, "HANDSHAKE")) {

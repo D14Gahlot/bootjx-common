@@ -47,6 +47,7 @@ public class ContakMessageDoc implements Serializable {
 	public long msgGenId;
 	public String companyId;
 	public String companyName;
+	public long companyStamp;
 	public String logoUrl;
 
 	public ContakModel model;
@@ -227,5 +228,13 @@ public class ContakMessageDoc implements Serializable {
 			this.model = new ContakModel();
 		}
 		return this.model;
+	}
+
+	public long getCompanyStamp() {
+		return companyStamp;
+	}
+
+	public void setCompanyStamp(long companyStamp) {
+		this.companyStamp = companyStamp;
 	}
 }
