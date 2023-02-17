@@ -21,6 +21,7 @@ public class TimeUtils {
 	public static Map<String, TimeUnits> MAP = new HashMap<String, TimeUnits>();
 
 	public static class Constants {
+		public static long MILLIS_IN_MIN = 60 * 1000;
 		public static long MILLIS_IN_HOUR = 3600 * 1000;
 		public static long MILLIS_IN_DAY = 24 * MILLIS_IN_HOUR;
 		public static long MILLIS_IN_WEEK = MILLIS_IN_DAY * 7;

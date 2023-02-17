@@ -42,6 +42,8 @@ import io.swagger.annotations.ApiParam;
 @RequestMapping("/phone")
 public class PhoneController {
 
+	private static final int TIME_24_HOURS = 24 * 3600 * 1000;
+
 	@Autowired
 	CommonHttpRequest commonHttpRequest;
 
@@ -117,34 +119,58 @@ public class PhoneController {
 		} else { // Step 1
 
 			long currentCounter = userDoc.getOtpCounter();
-			boolean moreThan1stWait = TimeUtils.isExpired(userDoc.getOtpStamp(), "1m");
-			boolean moreThan2ndWait = TimeUtils.isExpired(userDoc.getOtpStamp(), "2m");
-			boolean moreThan3rdWait = TimeUtils.isExpired(userDoc.getOtpStamp(), "24hrs");
+			long nextStamp = userDoc.getOtpStamp();
 
-			if (currentCounter == 1L && !moreThan1stWait) {
-				ApiResponseUtil.throwAccessDeniedException("Try again later in 1 minute");
-			} else if (currentCounter == 2L && !moreThan2ndWait) {
-				ApiResponseUtil.throwAccessDeniedException("Try again later in 2 minutes");
-			} else if (currentCounter > 2L && !moreThan3rdWait) {
-				ApiResponseUtil.throwAccessDeniedException("Try again later in 24 hours");
-			} else if (moreThan3rdWait) {
+			long activeAfter = 0L;
+
+			nextStamp = getNextStamp(userDoc.getOtpStamp(), currentCounter);
+			activeAfter = nextStamp - System.currentTimeMillis();
+
+			if (activeAfter > 0) {
+				if (activeAfter > TimeUtils.Constants.MILLIS_IN_HOUR) {
+					ApiResponseUtil.throwAccessDeniedException(
+							"Try again later in " + (activeAfter / TimeUtils.Constants.MILLIS_IN_HOUR) + " hours");
+				} else if (activeAfter > TimeUtils.Constants.MILLIS_IN_MIN) {
+					ApiResponseUtil.throwAccessDeniedException(
+							"Try again later in " + (activeAfter / TimeUtils.Constants.MILLIS_IN_MIN) + " minutes");
+				} else {
+					ApiResponseUtil
+							.throwAccessDeniedException("Try again later in " + (activeAfter / 1000) + " seconds");
+				}
+			} else if (currentCounter > 2l) {
 				currentCounter = 0;
 			}
 
+			currentCounter++;
 			OTPDetails otp = OTPUtils.genrateBasicOTP(loginDTO.phone, loginDTO.deviceId);
 
 			phoneService.sendPhoneOTP(loginDTO.phone, otp.getOtp());
 
+			long otpStamp = System.currentTimeMillis();
+
 			resp.otpPrefix = otp.getPrefix();
 			resp.otpNounce = otp.getYin();
+			resp.otpCounter = currentCounter;
+			resp.otpWait = getNextStamp(otpStamp, currentCounter);
+
 			phoneUserQuery.setOtpNounce(otp.getYang());
 			phoneUserQuery.setOtpHash(otp.getHash());
-			phoneUserQuery.setOtpStamp(System.currentTimeMillis());
-			phoneUserQuery.setOtpCounter(currentCounter + 1);
-
+			phoneUserQuery.setOtpStamp(otpStamp);
+			phoneUserQuery.setOtpCounter(currentCounter);
 			commonMongoTemplate.update(phoneUserQuery);
 			return ApiResponse.buildResults(phoneBookManager.getProfile(userDoc), resp);
 		}
+	}
+
+	private long getNextStamp(long lastStamp, long currentCounter) {
+		if (currentCounter < 2L) {
+			return lastStamp + TimeUtils.Constants.MILLIS_IN_MIN;
+		} else if (currentCounter == 2L) {
+			return lastStamp + TimeUtils.Constants.MILLIS_IN_MIN * 2;
+		} else if (currentCounter > 2L) {
+			return lastStamp + TimeUtils.Constants.MILLIS_IN_DAY;
+		}
+		return lastStamp;
 	}
 
 	@RequestMapping(value = "/api/v1/messages/fetch", method = { RequestMethod.POST })

@@ -42,6 +42,12 @@ public class PhoneLoginDTO implements Serializable {
 		@ApiMockModelProperty(example = "xxxxxxxx", required = false)
 		public String loginToken;
 
+		@ApiMockModelProperty(example = "1", required = false)
+		public long otpCounter;
+
+		@ApiMockModelProperty(example = "1", required = false,
+				value = "milliseconds to wait before next otp send request can be sent")
+		public long otpWait;
 	}
 
 }
