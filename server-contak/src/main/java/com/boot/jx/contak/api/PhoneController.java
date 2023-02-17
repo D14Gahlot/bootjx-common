@@ -147,11 +147,13 @@ public class PhoneController {
 			phoneService.sendPhoneOTP(loginDTO.phone, otp.getOtp());
 
 			long otpStamp = System.currentTimeMillis();
+			nextStamp = getNextStamp(userDoc.getOtpStamp(), currentCounter);
+			activeAfter = nextStamp - otpStamp;
 
 			resp.otpPrefix = otp.getPrefix();
 			resp.otpNounce = otp.getYin();
 			resp.otpCounter = currentCounter;
-			resp.otpWait = getNextStamp(otpStamp, currentCounter);
+			resp.otpWait = activeAfter;
 
 			phoneUserQuery.setOtpNounce(otp.getYang());
 			phoneUserQuery.setOtpHash(otp.getHash());
