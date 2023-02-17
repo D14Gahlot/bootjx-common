@@ -140,7 +140,7 @@ public class PhoneController {
 			phoneUserQuery.setOtpNounce(otp.getYang());
 			phoneUserQuery.setOtpHash(otp.getHash());
 			phoneUserQuery.setOtpStamp(System.currentTimeMillis());
-			phoneUserQuery.setOtpCounter(currentCounter);
+			phoneUserQuery.setOtpCounter(currentCounter + 1);
 
 			commonMongoTemplate.update(phoneUserQuery);
 			return ApiResponse.buildResults(phoneBookManager.getProfile(userDoc), resp);
