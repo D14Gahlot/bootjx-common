@@ -20,10 +20,11 @@ public class ContakApiKey implements IDocument, Serializable {
 	private String id;
 
 	@Indexed
-	private String key;
+	private String secretHash;
 
 	private String userId;
 	private String companyId;
+	private String clientId;
 
 	private boolean active;
 
@@ -53,14 +54,6 @@ public class ContakApiKey implements IDocument, Serializable {
 		this.userId = userId;
 	}
 
-	public String getKey() {
-		return key;
-	}
-
-	public void setKey(String key) {
-		this.key = key;
-	}
-
 	public TimeStampIndex getCreatedAt() {
 		return createdAt;
 	}
@@ -75,6 +68,22 @@ public class ContakApiKey implements IDocument, Serializable {
 
 	public void setCompanyId(String companyId) {
 		this.companyId = companyId;
+	}
+
+	public String getClientId() {
+		return clientId;
+	}
+
+	public void setClientId(String clientId) {
+		this.clientId = clientId;
+	}
+
+	public String getSecretHash() {
+		return secretHash;
+	}
+
+	public void setSecretHash(String secretHash) {
+		this.secretHash = secretHash;
 	}
 
 }

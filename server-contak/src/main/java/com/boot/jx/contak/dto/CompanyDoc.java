@@ -25,6 +25,9 @@ public class CompanyDoc implements Serializable {
 	public String displayName;
 
 	@Indexed(unique = true, sparse = true)
+	public String clientId;
+
+	@Indexed(unique = true, sparse = true)
 	public String domain;
 
 	public String countryOfOperation;
@@ -265,6 +268,14 @@ public class CompanyDoc implements Serializable {
 
 	public void setProfile(CompanyProfile profile) {
 		this.profile = profile;
+	}
+
+	public String getClientId() {
+		return clientId;
+	}
+
+	public void setClientId(String clientId) {
+		this.clientId = clientId;
 	}
 
 }

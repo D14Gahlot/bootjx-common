@@ -29,16 +29,26 @@ public class ContakApiContext {
 	private static Cache<String, CompanyDoc> localConfigMap = CacheBuilder.newBuilder().maximumSize(1000)
 			.expireAfterWrite(5, TimeUnit.MINUTES).build();
 
-	public CompanyDoc loadKey(String apiKey) {
+	public CompanyDoc loadKey(String apiKey, boolean withSessionKey) {
 		String[] keys = apiKey.split("\\-", 2);
+
+		if (keys.length != 3) {
+			return null;
+		}
+		String[] apiIndex = keys[0].split("\\:", 2);
+
+		String clientId = apiIndex[0];
+		String apiId = apiIndex[1];
+		String apiSecret = keys[1];
+
 		@Nullable
-		CompanyDoc comp = localConfigMap.getIfPresent(keys[0]);
+		CompanyDoc comp = localConfigMap.getIfPresent(apiId);
 
 		if (comp == null) {
-			comp = commonMongoTemplate.findOne(
-					MQB.select(CompanyDoc.class).where(QueryCriteria.where("api.$id").is(new ObjectId(keys[0]))));
+			comp = commonMongoTemplate.findOne(MQB.select(CompanyDoc.class)
+					.where(QueryCriteria.where("api.$id").is(new ObjectId(apiId)).and("clientId").is(clientId)));
 			if (comp != null) {
-				localConfigMap.put(keys[0], comp);
+				localConfigMap.put(apiId, comp);
 			} else {
 				return null;
 			}
@@ -48,10 +58,16 @@ public class ContakApiContext {
 			return null;
 		}
 
-		if (!CryptoUtil.getEncoder().message(keys[1]).sha2().is(comp.getApi().getKey())) {
+		currentCompany = comp;
+
+		if (withSessionKey && ArgUtil.is(apiSecret, comp.getApi().getSecretHash())) {
+			return comp;
+		}
+
+		if (!CryptoUtil.getEncoder().message(apiSecret).sha2().is(comp.getApi().getSecretHash())) {
 			return null;
 		}
-		currentCompany = comp;
+
 		return comp;
 	}
 

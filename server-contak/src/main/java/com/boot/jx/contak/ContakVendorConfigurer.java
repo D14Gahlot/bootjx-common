@@ -41,7 +41,7 @@ public class ContakVendorConfigurer implements TenantAuthFilter {
 			return false;
 		}
 
-		CompanyDoc company = apiContext.loadKey(apiKey);
+		CompanyDoc company = apiContext.loadKey(apiKey, apiRequest.hasRule("VALID_SESSION"));
 
 		if (ArgUtil.not(company)) {
 			String message = "Invalid " + ParamKeys.X_API_KEY;

@@ -158,7 +158,7 @@ public class NodeClientController {
 		return ApiResponse.buildResults(userRegistrationManager.fetchRegistrations(compoc.companyId));
 	}
 
-	@ApiRequest(authenticateTenant = true)
+	@ApiRequest(authenticateTenant = true, rules = { "VALID_SESSION" })
 	@RequestMapping(value = "/api/v1/messages/inbound/fetch", method = { RequestMethod.POST })
 	public ApiResponse<ContakInboundDoc, Object> messageInboundFetch(@RequestBody HashMap<String, String> msg) {
 		AppRequestUtil.log("MESSAGE APIKEY", msg);
@@ -172,24 +172,6 @@ public class NodeClientController {
 		}
 
 		List<ContakInboundDoc> inbounds = inboundManager.fetchInbounds(compoc.companyId);
-
-//		List<UserRegistrationDoc> userRegs = userRegistrationManager.fetchRegistrations(compoc.companyId);
-//		if (ArgUtil.is(userRegs)) {
-//			for (UserRegistrationDoc userReg : userRegs) {
-//				ContakInboundDoc inbound = new ContakInboundDoc();
-//				inbound.setInboundId("ur_" + userReg.getUserRegistrationId());
-//				inbound.setInboundType("USER_REG");
-//
-//				inbound.setPhoneId(userReg.getUserPhoneNumber());
-//				inbound.setCompanyId(userReg.getCompanyId());
-//
-//				inbound.setCreatedAt(userReg.getCreatedAt());
-//				inbound.setDeliveredAt(userReg.getDeliveredAt());
-//
-//				inbound.setInboundPayload(userReg);
-//				inbounds.add(inbound);
-//			}
-//		}
 
 		return ApiResponse.buildResults(inbounds);
 	}

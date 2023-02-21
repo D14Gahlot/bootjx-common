@@ -34,7 +34,6 @@ import com.boot.jx.contak.doc.ContakMembershipDoc;
 import com.boot.jx.contak.doc.ContakTemplateDoc;
 import com.boot.jx.contak.doc.ContakUserDoc;
 import com.boot.jx.contak.dto.CompanyDoc;
-import com.boot.jx.contak.dto.CompanyMeta;
 import com.boot.jx.model.CommonFile;
 import com.boot.jx.mongo.CommonMongoQB.MQB;
 import com.boot.jx.mongo.CommonMongoQB.QueryCriteria;
@@ -263,8 +262,8 @@ public class PanelV1Controller {
 
 	@ResponseBody
 	@RequestMapping(value = { "/api/v1/company/key" }, method = { RequestMethod.POST })
-	public ApiResponse<ContakApiKey, Object> resetKey(Model model, @RequestParam String companyId)
-			throws NoSuchAlgorithmException {
+	public ApiResponse<ContakApiKey, Object> resetKey(Model model, @RequestParam String companyId,
+			@RequestParam String clientId) throws NoSuchAlgorithmException {
 		if (!sessionBean.hasAdminAccesTo(companyId)) {
 			ApiResponseUtil.throwInputException(
 					new ApiFieldError().field("companyId").codeKey("AccessDenied").description("Access Denied"));
@@ -274,14 +273,22 @@ public class PanelV1Controller {
 				.where(QueryCriteria.where("companyId").is(companyId).and("active").is(false)).set("active", false));
 
 		CompanyDoc compoc = commonMongoTemplate.findById(companyId, CompanyDoc.class);
+
+		if (ArgUtil.is(compoc.getClientId()) && !ArgUtil.is(compoc.getClientId(), clientId)) {
+			ApiResponseUtil.throwInputException(new ApiFieldError().field("clientId").codeKey("NotAllowed")
+					.description("Not Allowed to change ClientId"));
+		}
+
 		String newKeyString = UUID.randomUUID().toString();
 		ContakApiKey newKey = new ContakApiKey();
 		newKey.setUserId(sessionBean.domainUser().getId());
-		newKey.setKey(CryptoUtil.getSHA2Hash(newKeyString));
+		newKey.setClientId(clientId);
+		newKey.setSecretHash(CryptoUtil.getSHA2Hash(newKeyString));
 		newKey.setCompanyId(companyId);
 		newKey.setActive(true);
 		commonMongoTemplate.save(newKey);
 		compoc.setApi(newKey);
+		compoc.setClientId(clientId);
 		commonMongoTemplate.save(compoc);
 		return ApiResponse.buildResult(newKey).meta(newKey.getId() + "-" + newKeyString);
 	}
