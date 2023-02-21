@@ -5,6 +5,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.stereotype.Component;
 
 import com.boot.jx.contak.dto.ContakInboundDoc;
@@ -21,16 +22,20 @@ public class ContakInboundManager {
 	private CommonMongoTemplate commonMongoTemplate;
 
 	public List<ContakInboundDoc> fetchInbounds(String companyId) {
-		TimeStampIndex deliveredAt = TimeStampIndex.from(System.currentTimeMillis());
+		TimeStampIndex notifiedAt = TimeStampIndex.from(System.currentTimeMillis());
 		commonMongoTemplate.update(CommonMongoQueryBuilder.collection(ContakInboundDoc.class).where( // FIND
-				CommonMongoQueryBuilder.QueryCriteria.where("companyId").is(companyId).and("deliveredAt").exists(false)
-						.and("expiredAt.hour").gte(deliveredAt.getHour() - 1))
+				CommonMongoQueryBuilder.QueryCriteria.where("companyId").is(companyId)
+						// only if it has not been notified yet
+						.and("notifiedAt").exists(false)
+						// Consider expiry of inbound only if it was defined at the time of creation
+						.orOperator(Criteria.where("expiredAt.hour").gte(notifiedAt.getHour() - 1),
+								Criteria.where("expiredAt").exists(false)))
 				// Update
-				.set("deliveredAt", deliveredAt));
+				.set("notifiedAt", notifiedAt));
 
 		return commonMongoTemplate.find(CommonMongoQueryBuilder.collection(ContakInboundDoc.class).where( // FIND
-				CommonMongoQueryBuilder.QueryCriteria.where("companyId").is(companyId).and("deliveredAt.stamp")
-						.is(deliveredAt.getStamp())));
+				CommonMongoQueryBuilder.QueryCriteria.where("companyId").is(companyId).and("notifiedAt.stamp")
+						.is(notifiedAt.getStamp())));
 	}
 
 }

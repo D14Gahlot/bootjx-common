@@ -28,7 +28,9 @@ public class ContakInboundDoc implements Serializable {
 
 	public TimeStampIndex createdAt;
 
-	public TimeStampIndex deliveredAt;
+	public TimeStampIndex notifiedAt;
+
+	public TimeStampIndex expiredAt;
 
 	public Object inboundPayload;
 
@@ -64,14 +66,6 @@ public class ContakInboundDoc implements Serializable {
 		this.createdAt = createdAt;
 	}
 
-	public TimeStampIndex getDeliveredAt() {
-		return deliveredAt;
-	}
-
-	public void setDeliveredAt(TimeStampIndex deliveredAt) {
-		this.deliveredAt = deliveredAt;
-	}
-
 	public String getInboundType() {
 		return inboundType;
 	}
@@ -86,6 +80,22 @@ public class ContakInboundDoc implements Serializable {
 
 	public void setInboundPayload(Object inboundPayload) {
 		this.inboundPayload = inboundPayload;
+	}
+
+	public TimeStampIndex getNotifiedAt() {
+		return notifiedAt;
+	}
+
+	public void setNotifiedAt(TimeStampIndex notifiedAt) {
+		this.notifiedAt = notifiedAt;
+	}
+
+	public TimeStampIndex getExpiredAt() {
+		return expiredAt;
+	}
+
+	public void setExpiredAt(TimeStampIndex expiredAt) {
+		this.expiredAt = expiredAt;
 	}
 
 }

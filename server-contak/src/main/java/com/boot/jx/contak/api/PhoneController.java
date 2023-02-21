@@ -236,7 +236,8 @@ public class PhoneController {
 		inbound.setPhoneId(userRegistrationDoc.getUserPhoneNumber());
 		inbound.setCompanyId(userRegistrationDoc.getCompanyId());
 		inbound.setCreatedAt(userRegistrationDoc.getCreatedAt());
-		inbound.setDeliveredAt(userRegistrationDoc.getDeliveredAt());
+		inbound.setNotifiedAt(userRegistrationDoc.getDeliveredAt());
+		inbound.setExpiredAt(userRegistrationDoc.getExpiredAt());
 		inbound.setInboundPayload(userRegistrationDoc);
 		commonMongoTemplate.save(inbound);
 
