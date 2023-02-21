@@ -8,6 +8,7 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.boot.jx.api.ApiFieldError;
@@ -56,6 +57,19 @@ public class NodeClientController {
 
 	@Autowired
 	private ContakInboundManager inboundManager;
+
+	@ApiRequest(authenticateTenant = true)
+	@ApiMockParams({ @ApiMockParam(name = ParamKeys.X_API_KEY, value = "API Key", paramType = MockParamType.HEADER),
+			@ApiMockParam(name = ParamKeys.X_API_ID, value = "API Id", paramType = MockParamType.HEADER) })
+	@RequestMapping(value = "/api/v1/auth", method = { RequestMethod.GET })
+	public ApiResponse<CompanyDoc, Object> getByAuthKeyV1(@RequestParam String authKey) {
+		CompanyDoc compoc = apiContext.getCompany();
+		if (!ArgUtil.is(compoc)) {
+			ApiResponseUtil.throwException("Company does not exists");
+		}
+		compoc.getApi().setSessionKey(compoc.getApi().sessionKey());
+		return ApiResponse.buildResult(compoc);
+	}
 
 	@ApiRequest(authenticateTenant = true)
 	@ApiMockParams({ @ApiMockParam(name = ParamKeys.X_API_KEY, value = "API Key", paramType = MockParamType.HEADER),
@@ -159,7 +173,7 @@ public class NodeClientController {
 	}
 
 	@ApiRequest(authenticateTenant = true, rules = { "VALID_SESSION" })
-	@RequestMapping(value = "/api/v1/messages/inbound/fetch", method = { RequestMethod.POST })
+	@RequestMapping(value = "/api/v1/inbound/fetch", method = { RequestMethod.POST })
 	public ApiResponse<ContakInboundDoc, Object> messageInboundFetch(@RequestBody HashMap<String, String> msg) {
 		AppRequestUtil.log("MESSAGE APIKEY", msg);
 		String name = msg.get("name");

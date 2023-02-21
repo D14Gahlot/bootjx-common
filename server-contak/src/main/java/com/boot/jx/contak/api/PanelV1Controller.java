@@ -290,7 +290,7 @@ public class PanelV1Controller {
 		compoc.setApi(newKey);
 		compoc.setClientId(clientId);
 		commonMongoTemplate.save(compoc);
-		return ApiResponse.buildResult(newKey).meta(newKey.getId() + "-" + newKeyString);
+		return ApiResponse.buildResult(newKey).meta(clientId + ":" + newKey.getId() + "-" + newKeyString);
 	}
 
 	@ResponseBody

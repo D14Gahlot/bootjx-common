@@ -22,6 +22,8 @@ public class ContakApiKey implements IDocument, Serializable {
 	@Indexed
 	private String secretHash;
 
+	private String sessionKey;
+
 	private String userId;
 	private String companyId;
 	private String clientId;
@@ -84,6 +86,21 @@ public class ContakApiKey implements IDocument, Serializable {
 
 	public void setSecretHash(String secretHash) {
 		this.secretHash = secretHash;
+	}
+
+	public String getSessionKey() {
+		return sessionKey;
+	}
+
+	public void setSessionKey(String sessionKey) {
+		this.sessionKey = sessionKey;
+	}
+
+	public String sessionKey() {
+		if (sessionKey == null) {
+			this.sessionKey = (this.clientId + ":" + this.id + "-" + this.secretHash);
+		}
+		return sessionKey;
 	}
 
 }
