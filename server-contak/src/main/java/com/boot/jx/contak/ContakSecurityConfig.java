@@ -151,14 +151,14 @@ public class ContakSecurityConfig {
 
 	@Bean
 	public Docket apisForClientNode() {
-		return new Docket(DocumentationType.SWAGGER_2).groupName("clientnode").select()
+		return new Docket(DocumentationType.SWAGGER_2).groupName("client").select()
 				.apis(RequestHandlerSelectors.basePackage("com.boot.jx.contak.api"))
-				.paths(Predicates.or(PathSelectors.ant("/panel/**"), PathSelectors.ant("/pub/meta/**"))).build();
+				.paths(Predicates.or(PathSelectors.ant("/client/**"), PathSelectors.ant("/pub/meta/**"))).build();
 	}
 
 	@Bean
 	public Docket apisForCustomer() {
-		return new Docket(DocumentationType.SWAGGER_2).groupName("customer").select()
+		return new Docket(DocumentationType.SWAGGER_2).groupName("phone").select()
 				.apis(RequestHandlerSelectors.basePackage("com.boot.jx.contak.api"))
 				.paths(PathSelectors.ant("/phone/**")).build();
 	}
