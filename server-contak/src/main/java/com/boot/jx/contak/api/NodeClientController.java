@@ -1,6 +1,7 @@
 package com.boot.jx.contak.api;
 
 import java.util.HashMap;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -15,11 +16,13 @@ import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.contak.doc.ContakMessageDoc;
 import com.boot.jx.contak.doc.ContakTemplateDoc;
 import com.boot.jx.contak.dto.CompanyDoc;
+import com.boot.jx.contak.dto.ContakInboundDoc;
 import com.boot.jx.contak.dto.ContakTemplate;
 import com.boot.jx.contak.dto.PhoneNotpRequestModels.ContakMessgaeTemplate;
 import com.boot.jx.contak.dto.PhoneNotpRequestModels.PhoneNotpDto;
 import com.boot.jx.contak.dto.UserRegistrationDoc;
 import com.boot.jx.contak.manager.ContakApiContext;
+import com.boot.jx.contak.manager.ContakInboundManager;
 import com.boot.jx.contak.manager.FirebaseManager;
 import com.boot.jx.contak.manager.UserRegistrationManager;
 import com.boot.jx.exception.ApiHttpExceptions.ApiStatusCodes;
@@ -49,7 +52,10 @@ public class NodeClientController {
 	private ContakApiContext apiContext;
 
 	@Autowired
-	UserRegistrationManager userRegistrationManager;
+	private UserRegistrationManager userRegistrationManager;
+
+	@Autowired
+	private ContakInboundManager inboundManager;
 
 	@ApiRequest(authenticateTenant = true)
 	@ApiMockParams({ @ApiMockParam(name = ParamKeys.X_API_KEY, value = "API Key", paramType = MockParamType.HEADER),
@@ -149,8 +155,43 @@ public class NodeClientController {
 		if (!ArgUtil.is(compoc)) {
 			ApiResponseUtil.throwInputException(ApiStatusCodes.UNAUTHORIZED, new ApiFieldError().field("apiKey"));
 		}
-
 		return ApiResponse.buildResults(userRegistrationManager.fetchRegistrations(compoc.companyId));
+	}
+
+	@ApiRequest(authenticateTenant = true)
+	@RequestMapping(value = "/api/v1/messages/inbound/fetch", method = { RequestMethod.POST })
+	public ApiResponse<ContakInboundDoc, Object> messageInboundFetch(@RequestBody HashMap<String, String> msg) {
+		AppRequestUtil.log("MESSAGE APIKEY", msg);
+		String name = msg.get("name");
+		if (!ArgUtil.is(name)) {
+			ApiResponseUtil.throwMissinInputException(new ApiFieldError().field("name"));
+		}
+		CompanyDoc compoc = apiContext.getCompany();
+		if (!ArgUtil.is(compoc)) {
+			ApiResponseUtil.throwInputException(ApiStatusCodes.UNAUTHORIZED, new ApiFieldError().field("apiKey"));
+		}
+
+		List<ContakInboundDoc> inbounds = inboundManager.fetchInbounds(compoc.companyId);
+		List<UserRegistrationDoc> userRegs = userRegistrationManager.fetchRegistrations(compoc.companyId);
+
+		if (ArgUtil.is(userRegs)) {
+			for (UserRegistrationDoc userReg : userRegs) {
+				ContakInboundDoc inbound = new ContakInboundDoc();
+				inbound.setInboundId("ur_" + userReg.getUserRegistrationId());
+				inbound.setInboundType("USER_REG");
+
+				inbound.setPhoneId(userReg.getUserPhoneNumber());
+				inbound.setCompanyId(userReg.getCompanyId());
+
+				inbound.setCreatedAt(userReg.getCreatedAt());
+				inbound.setDeliveredAt(userReg.getDeliveredAt());
+
+				inbound.setInboundPayload(userReg);
+				inbounds.add(inbound);
+			}
+		}
+
+		return ApiResponse.buildResults(inbounds);
 	}
 
 	@ApiRequest(authenticateTenant = true)
