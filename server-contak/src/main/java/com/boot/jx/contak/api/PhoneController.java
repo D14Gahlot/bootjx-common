@@ -12,6 +12,7 @@ import com.boot.jx.api.ApiResponse;
 import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.aws.AWSFileStore;
 import com.boot.jx.contak.doc.ContakMessageDoc;
+import com.boot.jx.contak.dto.ContakInboundDoc;
 import com.boot.jx.contak.dto.PhoneLoginDTO;
 import com.boot.jx.contak.dto.PhoneLoginDTO.PhoneLoginResponseDTO;
 import com.boot.jx.contak.dto.UserRegistrationDTO;
@@ -229,6 +230,15 @@ public class PhoneController {
 		userRegistrationDoc.setUserPhoneNumber(msg.userPhoneNumber);
 		userRegistrationDoc.setUserPubKey(msg.userPubKey);
 		commonMongoTemplate.save(userRegistrationDoc);
+
+		ContakInboundDoc inbound = new ContakInboundDoc();
+		inbound.setInboundType("USER_REG");
+		inbound.setPhoneId(userRegistrationDoc.getUserPhoneNumber());
+		inbound.setCompanyId(userRegistrationDoc.getCompanyId());
+		inbound.setCreatedAt(userRegistrationDoc.getCreatedAt());
+		inbound.setDeliveredAt(userRegistrationDoc.getDeliveredAt());
+		inbound.setInboundPayload(userRegistrationDoc);
+		commonMongoTemplate.save(inbound);
 
 		return ApiResponse.buildResult(userRegistrationDoc);
 	}

@@ -172,24 +172,24 @@ public class NodeClientController {
 		}
 
 		List<ContakInboundDoc> inbounds = inboundManager.fetchInbounds(compoc.companyId);
-		List<UserRegistrationDoc> userRegs = userRegistrationManager.fetchRegistrations(compoc.companyId);
 
-		if (ArgUtil.is(userRegs)) {
-			for (UserRegistrationDoc userReg : userRegs) {
-				ContakInboundDoc inbound = new ContakInboundDoc();
-				inbound.setInboundId("ur_" + userReg.getUserRegistrationId());
-				inbound.setInboundType("USER_REG");
-
-				inbound.setPhoneId(userReg.getUserPhoneNumber());
-				inbound.setCompanyId(userReg.getCompanyId());
-
-				inbound.setCreatedAt(userReg.getCreatedAt());
-				inbound.setDeliveredAt(userReg.getDeliveredAt());
-
-				inbound.setInboundPayload(userReg);
-				inbounds.add(inbound);
-			}
-		}
+//		List<UserRegistrationDoc> userRegs = userRegistrationManager.fetchRegistrations(compoc.companyId);
+//		if (ArgUtil.is(userRegs)) {
+//			for (UserRegistrationDoc userReg : userRegs) {
+//				ContakInboundDoc inbound = new ContakInboundDoc();
+//				inbound.setInboundId("ur_" + userReg.getUserRegistrationId());
+//				inbound.setInboundType("USER_REG");
+//
+//				inbound.setPhoneId(userReg.getUserPhoneNumber());
+//				inbound.setCompanyId(userReg.getCompanyId());
+//
+//				inbound.setCreatedAt(userReg.getCreatedAt());
+//				inbound.setDeliveredAt(userReg.getDeliveredAt());
+//
+//				inbound.setInboundPayload(userReg);
+//				inbounds.add(inbound);
+//			}
+//		}
 
 		return ApiResponse.buildResults(inbounds);
 	}
