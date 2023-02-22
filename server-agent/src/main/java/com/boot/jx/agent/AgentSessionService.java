@@ -26,6 +26,7 @@ import com.boot.jx.AppContextUtil;
 import com.boot.jx.common.doc.AgentSessionDoc;
 import com.boot.jx.common.dto.AgentResponseAuthDto;
 import com.boot.jx.common.store.DocumentUpdateListner;
+import com.boot.jx.common.store.UserActivityStore;
 import com.boot.jx.http.CommonHttpRequest;
 import com.boot.jx.logger.AuditDetailProvider;
 import com.boot.jx.logger.LoggerService;
@@ -72,6 +73,9 @@ public class AgentSessionService
 	@Autowired
 	private StompTunnelSessionManager stompTunnelSessionManager;
 
+	@Autowired
+	UserActivityStore userActivityStore;
+
 	public List<AgentSessionDoc> getAgentSessions() {
 		MongoQueryBuilder<AgentSessionDoc> builder = MongoQueryBuilder.collection(AgentSessionDoc.class)
 				.where("isEnabled", true);
@@ -114,7 +118,11 @@ public class AgentSessionService
 	}
 
 	public void setAway(boolean isAway) {
+		boolean oldIsAway = agentSessionBean.isAway();
 		agentSessionBean.setAway(isAway);
+		if (oldIsAway != isAway) {
+			userActivityStore.log(agentSessionBean.getAgentCode(), isAway ? "USER_OFFSCREEN" : "USER_ONSCREEN");
+		}
 	}
 
 	public void setOnline(boolean isOnline) {
@@ -123,6 +131,7 @@ public class AgentSessionService
 		agentSessionBean.setLastOnlineStamp(System.currentTimeMillis());
 		if (oldOnline != isOnline) {
 			this.updateSession(true, agentSessionBean);
+			userActivityStore.log(agentSessionBean.getAgentCode(), isOnline ? "USER_ONLINE" : "USER_OFFLINE");
 		} else {
 			this.updateSession(false, agentSessionBean);
 		}
@@ -155,6 +164,7 @@ public class AgentSessionService
 		agentSession.setAgentCode(agentPrincipal.getAgentCode());
 		// agentSessionBean.setAgentDept("ONLINE");
 		this.updateSession(true, agentSession);
+		userActivityStore.log(agentPrincipal.getAgentCode(), "USER_LOGOUT");
 	}
 
 	public void login(HttpServletRequest request, AgentResponseAuthDto agent, String passhash) {
@@ -169,7 +179,7 @@ public class AgentSessionService
 		stompTunnelSessionManager.registerUser(agent.getAgent_code(), agent.getDept().getDept_code(), DEFAULT.NO_DEPT,
 				StompQuery.PING_TAG);
 		updateLogin(agent);
-		
+		userActivityStore.log(agent.getAgent_code(), "USER_LOGIN");
 	}
 
 	@Autowired
