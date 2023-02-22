@@ -121,7 +121,8 @@ public class AgentSessionService
 		boolean oldIsAway = agentSessionBean.isAway();
 		agentSessionBean.setAway(isAway);
 		if (oldIsAway != isAway) {
-			userActivityStore.log(agentSessionBean.getAgentCode(), isAway ? "USER_OFFSCREEN" : "USER_ONSCREEN");
+			userActivityStore.log(agentSessionBean.getAgentCode(),
+					isAway ? "USERSESSION_AWAY_START" : "USERSESSION_AWAY_END");
 		}
 	}
 
@@ -131,7 +132,8 @@ public class AgentSessionService
 		agentSessionBean.setLastOnlineStamp(System.currentTimeMillis());
 		if (oldOnline != isOnline) {
 			this.updateSession(true, agentSessionBean);
-			userActivityStore.log(agentSessionBean.getAgentCode(), isOnline ? "USER_ONLINE" : "USER_OFFLINE");
+			userActivityStore.log(agentSessionBean.getAgentCode(),
+					isOnline ? "USERSESSION_ONLINE" : "USERSESSION_OFFLINE");
 		} else {
 			this.updateSession(false, agentSessionBean);
 		}
@@ -164,7 +166,7 @@ public class AgentSessionService
 		agentSession.setAgentCode(agentPrincipal.getAgentCode());
 		// agentSessionBean.setAgentDept("ONLINE");
 		this.updateSession(true, agentSession);
-		userActivityStore.log(agentPrincipal.getAgentCode(), "USER_LOGOUT");
+		userActivityStore.log(agentPrincipal.getAgentCode(), "USERSESSION_LOGOUT");
 	}
 
 	public void login(HttpServletRequest request, AgentResponseAuthDto agent, String passhash) {
@@ -179,7 +181,7 @@ public class AgentSessionService
 		stompTunnelSessionManager.registerUser(agent.getAgent_code(), agent.getDept().getDept_code(), DEFAULT.NO_DEPT,
 				StompQuery.PING_TAG);
 		updateLogin(agent);
-		userActivityStore.log(agent.getAgent_code(), "USER_LOGIN");
+		userActivityStore.log(agent.getAgent_code(), "USERSESSION_LOGIN");
 	}
 
 	@Autowired
