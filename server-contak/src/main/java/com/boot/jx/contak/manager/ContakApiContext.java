@@ -32,7 +32,7 @@ public class ContakApiContext {
 	public CompanyDoc loadKey(String apiKey, boolean withSessionKey) {
 		String[] keys = apiKey.split("\\-", 2);
 
-		if (keys.length != 3) {
+		if (keys.length != 2) {
 			return null;
 		}
 		String[] apiIndex = keys[0].split("\\:", 2);

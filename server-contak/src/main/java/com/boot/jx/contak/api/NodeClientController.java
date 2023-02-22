@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -59,10 +60,9 @@ public class NodeClientController {
 	private ContakInboundManager inboundManager;
 
 	@ApiRequest(authenticateTenant = true)
-	@ApiMockParams({ @ApiMockParam(name = ParamKeys.X_API_KEY, value = "API Key", paramType = MockParamType.HEADER),
-			@ApiMockParam(name = ParamKeys.X_API_ID, value = "API Id", paramType = MockParamType.HEADER) })
+	@ApiMockParams({ @ApiMockParam(name = ParamKeys.X_API_KEY, value = "API Key", paramType = MockParamType.HEADER) })
 	@RequestMapping(value = "/api/v1/auth", method = { RequestMethod.GET })
-	public ApiResponse<CompanyDoc, Object> getByAuthKeyV1(@RequestParam String authKey) {
+	public ApiResponse<CompanyDoc, Object> getByAuthKeyV1() {
 		CompanyDoc compoc = apiContext.getCompany();
 		if (!ArgUtil.is(compoc)) {
 			ApiResponseUtil.throwException("Company does not exists");
@@ -72,8 +72,7 @@ public class NodeClientController {
 	}
 
 	@ApiRequest(authenticateTenant = true)
-	@ApiMockParams({ @ApiMockParam(name = ParamKeys.X_API_KEY, value = "API Key", paramType = MockParamType.HEADER),
-			@ApiMockParam(name = ParamKeys.X_API_ID, value = "API Id", paramType = MockParamType.HEADER) })
+	@ApiMockParams({ @ApiMockParam(name = ParamKeys.X_API_KEY, value = "API Key", paramType = MockParamType.HEADER) })
 	@RequestMapping(value = "/api/v1/messages/send", method = { RequestMethod.POST })
 	public ApiResponse<ContakMessageDoc, Object> send(@RequestBody PhoneNotpDto msg) {
 
@@ -157,6 +156,8 @@ public class NodeClientController {
 		return ApiResponse.buildResults(newPhoneNOTPDoc);
 	}
 
+	@Deprecated
+	@ApiMockParams({ @ApiMockParam(name = ParamKeys.X_API_KEY, value = "API Key", paramType = MockParamType.HEADER) })
 	@ApiRequest(authenticateTenant = true)
 	@RequestMapping(value = "/api/v1/user/key/reg/fetch", method = { RequestMethod.POST })
 	public ApiResponse<UserRegistrationDoc, Object> read(@RequestBody HashMap<String, String> msg) {
@@ -172,6 +173,7 @@ public class NodeClientController {
 		return ApiResponse.buildResults(userRegistrationManager.fetchRegistrations(compoc.companyId));
 	}
 
+	@ApiMockParams({ @ApiMockParam(name = ParamKeys.X_API_KEY, value = "API Key", paramType = MockParamType.HEADER) })
 	@ApiRequest(authenticateTenant = true, rules = { "VALID_SESSION" })
 	@RequestMapping(value = "/api/v1/inbound/fetch", method = { RequestMethod.POST })
 	public ApiResponse<ContakInboundDoc, Object> messageInboundFetch(@RequestBody HashMap<String, String> msg) {
@@ -191,8 +193,7 @@ public class NodeClientController {
 	}
 
 	@ApiRequest(authenticateTenant = true)
-	@ApiMockParams({ @ApiMockParam(name = ParamKeys.X_API_KEY, value = "API Key", paramType = MockParamType.HEADER),
-			@ApiMockParam(name = ParamKeys.X_API_ID, value = "API Id", paramType = MockParamType.HEADER) })
+	@ApiMockParams({ @ApiMockParam(name = ParamKeys.X_API_KEY, value = "API Key", paramType = MockParamType.HEADER) })
 	@RequestMapping(value = "/api/v1/messages/template", method = { RequestMethod.POST })
 	public ApiResponse<ContakTemplate, Object> template(@RequestBody ContakMessgaeTemplate template) {
 		CompanyDoc compoc = apiContext.getCompany();
