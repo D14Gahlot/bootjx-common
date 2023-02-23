@@ -649,7 +649,7 @@ public class AccountDashBoardManager {
 						Collectors.groupingBy(DateWiseHourCountDto::getDate, Collectors.counting())));
 
 		Map<Object, Map<Object, Long>> dayWiseMap = new HashMap<>();
-		dayWiseMap = MapUtils.defaultValue(dayWiseCountMap,channelLst,dateRanMap,tnt);
+		dayWiseMap = MapUtils.defaultValue(dayWiseCountMap, channelLst, dateRanMap, tnt);
 
 		dayWiseMap = sortMap(dayWiseMap);
 
