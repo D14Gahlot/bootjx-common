@@ -42,6 +42,8 @@ public class CommonDocInterfaces {
 		public Query getQuery();
 
 		public Class<T> getDocClass();
+
+		public IMongoQueryBuilder<T> build();
 	}
 
 	public static interface Patchable<T extends Patchable<T>> {
