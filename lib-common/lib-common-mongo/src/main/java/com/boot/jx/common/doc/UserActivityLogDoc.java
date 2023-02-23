@@ -20,7 +20,7 @@ public class UserActivityLogDoc {
 	private String userType;
 
 	@Indexed
-	private String userName;
+	private String user;
 
 	@Indexed
 	private String activity;
@@ -56,14 +56,6 @@ public class UserActivityLogDoc {
 		this.userType = userType;
 	}
 
-	public String getUserName() {
-		return userName;
-	}
-
-	public void setUserName(String userName) {
-		this.userName = userName;
-	}
-
 	public String getActivity() {
 		return activity;
 	}
@@ -86,6 +78,14 @@ public class UserActivityLogDoc {
 
 	public void setCreatedAt(TimeStampIndex createdAt) {
 		this.createdAt = createdAt;
+	}
+
+	public String getUser() {
+		return user;
+	}
+
+	public void setUser(String user) {
+		this.user = user;
 	}
 
 }
