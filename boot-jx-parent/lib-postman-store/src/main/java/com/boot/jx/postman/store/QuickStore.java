@@ -12,8 +12,11 @@ import org.springframework.stereotype.Component;
 
 import com.boot.jx.mongo.CommonMongoQueryBuilder;
 import com.boot.jx.mongo.CommonMongoTemplateAbstract;
+import com.boot.jx.postman.doc.QuickLocation;
 import com.boot.jx.postman.doc.QuickMedia;
 import com.boot.model.UtilityModels.JsonIgnoreUnknown;
+import com.boot.utils.ArgUtil;
+import com.boot.utils.EntityDtoUtil;
 import com.boot.utils.PatternUtil;
 import com.mongodb.AggregationOptions;
 import com.mongodb.AggregationOptions.OutputMode;
@@ -27,11 +30,14 @@ public class QuickStore extends CommonMongoTemplateAbstract {
 	public static interface QuickGalleryItem extends JsonIgnoreUnknown {
 		String getId();
 
+		void setId(String id);
+
 		String getCategory();
 
 		String getCode();
 
 		String getTitle();
+
 	}
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(QuickStore.class);
@@ -89,6 +95,15 @@ public class QuickStore extends CommonMongoTemplateAbstract {
 				CommonMongoQueryBuilder.collection(clazz)
 						.where(new Criteria().orOperator(orList.toArray(new Criteria[orList.size()]))).getQuery(),
 				clazz);
+	}
+
+	public <T extends QuickGalleryItem> T createGalleryItem(T src, T dest) {
+		QuickGalleryItem quickTag = findByIdOrDefault(src.getId(), new QuickLocation());
+		String id = quickTag.getId();
+		EntityDtoUtil.copyProperties(quickTag, src);
+		quickTag.setId(id);
+		saveAndAudit(quickTag, ArgUtil.is(quickTag.getId()));
+		return dest;
 	}
 
 }

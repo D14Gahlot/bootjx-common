@@ -1326,6 +1326,7 @@ public class AdminDashBoardManager {
 
 		Map<Object, Map<Object, Long>> dayWiseMap = new HashMap<>();
 		dayWiseMap = MapUtils.defaultValue(dayWiseCountMap,channelLst,dateRanMap,tnt);
+
 		dayWiseMap = sortMap(dayWiseMap);
 
 		summaryMap = lstSummDto.stream().collect(Collectors.groupingBy(SummaryDocDto::getType, Collectors.counting()));

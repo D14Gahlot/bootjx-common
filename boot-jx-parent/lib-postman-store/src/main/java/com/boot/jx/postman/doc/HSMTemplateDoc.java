@@ -16,11 +16,12 @@ import com.boot.jx.model.AuditCreateEntity;
 import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.ITemplates.BasicTemplate;
 import com.boot.jx.postman.model.ResourceMeta;
+import com.boot.jx.postman.store.QuickStore.QuickGalleryItem;
 import com.boot.utils.ArgUtil;
 
 @Document(collection = HSMTemplateDoc.COLLECTION_NAME)
 @TypeAlias("HSMTemplate")
-public class HSMTemplateDoc implements Serializable, BasicTemplate, AuditCreateEntity, ResourceMeta {
+public class HSMTemplateDoc implements Serializable, BasicTemplate, AuditCreateEntity, ResourceMeta, QuickGalleryItem {
 
 	public static final String COLLECTION_NAME = "DICT_HSM_TEMPLATES";
 	public static final String COLLECTION_NAME_TRASH = "TRASH_DICT_HSM_TEMPLATES";
@@ -291,6 +292,11 @@ public class HSMTemplateDoc implements Serializable, BasicTemplate, AuditCreateE
 		this.approved = this.approved.stream().filter(link -> ArgUtil.is(link.status)).collect(Collectors.toList());;
 
 		return this;
+	}
+
+	@Override
+	public String getTitle() {
+		return this.desc;
 	}
 
 }
