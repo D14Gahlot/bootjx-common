@@ -1204,7 +1204,4 @@ public class AccountDashBoardManager {
 				.asString("Asia/Kolkata::GMT+5:30");
 		return offset;
 	}
-	
-	
-	
 }
