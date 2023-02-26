@@ -36,6 +36,7 @@ public class CommonMongoQB<M extends CommonMongoQB<M, T>, T> implements IMongoQu
 	}
 
 	Query query;
+	Criteria currentCriteria;
 	Update update;
 	Class<T> docClass;
 	private boolean skipUpdateStamp;
@@ -57,6 +58,25 @@ public class CommonMongoQB<M extends CommonMongoQB<M, T>, T> implements IMongoQu
 	@SuppressWarnings("unchecked")
 	public M query(Query query) {
 		this.query = query;
+		return (M) this;
+	}
+
+	public Criteria criteria(String key) {
+		if (currentCriteria == null) {
+			currentCriteria = Criteria.where(key);
+		} else {
+			currentCriteria = currentCriteria.and(key);
+		}
+		return currentCriteria;
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public M build() {
+		if (currentCriteria != null) {
+			query().addCriteria(currentCriteria);
+			this.currentCriteria = null;
+		}
 		return (M) this;
 	}
 
@@ -85,6 +105,27 @@ public class CommonMongoQB<M extends CommonMongoQB<M, T>, T> implements IMongoQu
 		query().addCriteria(Criteria.where(key).exists(true));
 		return (M) this;
 	}
+
+	// <--- Where Queries----
+	@SuppressWarnings("unchecked")
+	public M where(String key) {
+		criteria(key);
+		return (M) this;
+	}
+
+	@SuppressWarnings("unchecked")
+	public M and(String key) {
+		criteria(key);
+		return (M) this;
+	}
+
+	@SuppressWarnings("unchecked")
+	public M is(Object value) {
+		this.currentCriteria.is(value);
+		return (M) this;
+	}
+
+	// --- Where Queries---->
 
 	@SuppressWarnings("unchecked")
 	public M sortBy(String byField) {

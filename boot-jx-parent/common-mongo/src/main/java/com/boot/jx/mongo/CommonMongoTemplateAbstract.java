@@ -145,19 +145,19 @@ public class CommonMongoTemplateAbstract<TStore extends CommonMongoTemplateAbstr
 
 	@Override
 	public <T> List<T> find(IMongoQueryBuilder<T> builder, Class<T> clazz) {
-		return find(builder.getQuery(), clazz);
+		return find(builder.build().getQuery(), clazz);
 	}
 
 	@Override
 	public <T> List<T> find(IMongoQueryBuilder<T> builder) {
 		// System.out.println("+++"+builder.getQuery());
-		return find(builder.getQuery(), builder.getDocClass());
+		return find(builder.build().getQuery(), builder.getDocClass());
 	}
 
 	@Override
 	public <T> T findOne(IMongoQueryBuilder<T> builder) {
 		// System.out.println("+++"+builder.getQuery());
-		return findOne(builder.getQuery(), builder.getDocClass());
+		return findOne(builder.build().getQuery(), builder.getDocClass());
 	}
 
 	public <T extends DocVersion> T creatNewDocuemnt(String id, Class<T> clazz, T newVersion) {
@@ -174,6 +174,7 @@ public class CommonMongoTemplateAbstract<TStore extends CommonMongoTemplateAbstr
 		UpdateResult ret = null;
 		if (ArgUtil.is(builder.getUpdate())) {
 			try {
+				builder.build();
 				builder.updatedStamp();
 				// LOGGER.info("Query:{}", builder.getQuery().toString());
 				// LOGGER.info("Update:{}", builder.getUpdate().toString());
@@ -192,6 +193,7 @@ public class CommonMongoTemplateAbstract<TStore extends CommonMongoTemplateAbstr
 		UpdateResult ret = null;
 		if (ArgUtil.is(builder.getUpdate())) {
 			try {
+				builder.build();
 				builder.updatedStamp();
 				// LOGGER.info("Query:{}", builder.getQuery().toString());
 				// LOGGER.info("Update:{}", builder.getUpdate().toString());
@@ -217,6 +219,7 @@ public class CommonMongoTemplateAbstract<TStore extends CommonMongoTemplateAbstr
 		UpdateResult ret = null;
 		if (ArgUtil.is(builder.getUpdate())) {
 			try {
+				builder.build();
 				builder.updatedStamp();
 				ret = mongoTemplate.upsert(builder.getQuery(), builder.getUpdate(), builder.getDocClass());
 			} catch (Exception e) {
