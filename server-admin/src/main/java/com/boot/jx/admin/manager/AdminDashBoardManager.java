@@ -76,11 +76,6 @@ import com.boot.utils.Constants;
 import com.boot.utils.DateUtil;
 import com.boot.utils.JsonUtil;
 import com.boot.utils.MapUtils;
-import com.mongodb.AggregationOptions;
-import com.mongodb.AggregationOptions.OutputMode;
-import com.mongodb.Cursor;
-import com.mongodb.DBCollection;
-import com.mongodb.DBObject;
 import com.mongodb.client.MongoCursor;
 
 @Component
