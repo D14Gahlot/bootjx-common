@@ -220,7 +220,6 @@ public class AgChatSessionController {
 		return resp.result(chatSessionDto);
 	}
 
-	@ApiRequest(rules = CommonMongoSource.READ_ONLY_DB)
 	@RequestMapping(value = { "/api/session/messages" }, method = { RequestMethod.GET })
 	public ApiResponse<ChatMessageDTO, ChatSessionDTO> messageApi(@RequestParam String sessionId,
 			@RequestParam(required = false) String messageId, @RequestParam(required = false) String messageIdExt,
