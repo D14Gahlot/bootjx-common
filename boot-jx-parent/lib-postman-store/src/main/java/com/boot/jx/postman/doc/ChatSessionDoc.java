@@ -127,6 +127,7 @@ public class ChatSessionDoc extends UpdatedTimeStampDoc implements Serializable 
 
 	private Map<String, Object> store;
 	private Map<String, Object> meta;
+	private Map<String, Object> summary;
 
 	private Map<String, ChatMessageDTO> msg;
 	private Map<String, Long> stamps;
@@ -641,5 +642,20 @@ public class ChatSessionDoc extends UpdatedTimeStampDoc implements Serializable 
 				}
 			}
 		}
+	}
+
+	public Map<String, Object> getSummary() {
+		return summary;
+	}
+
+	public void setSummary(Map<String, Object> summary) {
+		this.summary = summary;
+	}
+
+	public Map<String, Object> summary() {
+		if (this.summary == null) {
+			this.summary = new HashMap<String, Object>();
+		}
+		return summary;
 	}
 }
