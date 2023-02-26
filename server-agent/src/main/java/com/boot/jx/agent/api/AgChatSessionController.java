@@ -27,7 +27,9 @@ import com.boot.jx.common.store.AgentStore;
 import com.boot.jx.common.store.ChatArchiveBuilder;
 import com.boot.jx.common.store.ChatArchiveService;
 import com.boot.jx.common.store.DocumentUpdateListner;
+import com.boot.jx.http.ApiRequest;
 import com.boot.jx.model.CommonFile;
+import com.boot.jx.mongo.CommonMongoSource;
 import com.boot.jx.postman.PMConstants;
 import com.boot.jx.postman.PMConstants.APP_TYPE;
 import com.boot.jx.postman.PMConstants.CHAT_MODE;
@@ -218,6 +220,7 @@ public class AgChatSessionController {
 		return resp.result(chatSessionDto);
 	}
 
+	@ApiRequest(rules = CommonMongoSource.READ_ONLY_DB)
 	@RequestMapping(value = { "/api/session/messages" }, method = { RequestMethod.GET })
 	public ApiResponse<ChatMessageDTO, ChatSessionDTO> messageApi(@RequestParam String sessionId,
 			@RequestParam(required = false) String messageId, @RequestParam(required = false) String messageIdExt,
