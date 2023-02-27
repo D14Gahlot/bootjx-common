@@ -36,6 +36,10 @@ public class SMSPlugin implements DefaultChannelPlugin<SMSConfigDetails> {
 				inputType = INPUT_TYPE.OPTIONS, optionsSource = "data:/config/sms_provider")
 		private String provider;
 
+		@ConfigMetaProperty(path = "sms.country", title = "SMS Country", defaultValue = "IN",
+				inputType = INPUT_TYPE.OPTIONS, optionsSource = "getx:/pub/meta/options/isdcode")
+		private String country;
+
 		@ConfigMetaProperty(path = "sms.pub", writeonly = false, title = "Identifiers JSON", hidden = true,
 				desc = "A json with all public identifiers to be used in api request", inputType = INPUT_TYPE.JSON)
 		private Map<String, Object> pub;
@@ -52,7 +56,7 @@ public class SMSPlugin implements DefaultChannelPlugin<SMSConfigDetails> {
 
 		@Override
 		public String getLane() {
-			return number;
+			return number + "@" + provider + "@" + country;
 		}
 
 		public String getNumber() {
@@ -93,6 +97,14 @@ public class SMSPlugin implements DefaultChannelPlugin<SMSConfigDetails> {
 
 		public void setPub(Map<String, Object> pub) {
 			this.pub = pub;
+		}
+
+		public String getCountry() {
+			return country;
+		}
+
+		public void setCountry(String country) {
+			this.country = country;
 		}
 
 	}

@@ -1,5 +1,7 @@
 package com.boot.jx.contak.manager;
 
+import java.util.Map.Entry;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -15,9 +17,14 @@ import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
+import com.google.i18n.phonenumbers.NumberParseException;
+import com.google.i18n.phonenumbers.PhoneNumberUtil;
+import com.google.i18n.phonenumbers.Phonenumber.PhoneNumber;
 
 @Component
 public class PhoneService {
+
+	public static final PhoneNumberUtil PHONE_NUMBER_UTIL = PhoneNumberUtil.getInstance();
 
 	@Autowired
 	private ChatService chatService;
@@ -31,9 +38,7 @@ public class PhoneService {
 	@Autowired
 	private PMEnvironment pmEnvironment;
 
-	public OutboxMessage send(String channelId, OutboxMessage outboxMessage) {
-		ChannelConfig channel = pmEnvironment.config().channel(channelId);
-
+	private OutboxMessage send(ChannelConfig channel, OutboxMessage outboxMessage) {
 		outboxMessage.contact().type(channel.getContactType());
 		outboxMessage.contact().setChannelType(channel.getChannelType());
 		outboxMessage.contact().setLane(channel.getLane());
@@ -52,12 +57,35 @@ public class PhoneService {
 		return outboxMessage;
 	}
 
+	public OutboxMessage send(String channelId, OutboxMessage outboxMessage) {
+		ChannelConfig channel = pmEnvironment.config().channel(channelId);
+		return send(channel, outboxMessage);
+	}
+
 	public OutboxMessage sendPhoneOTP(String phone, String otp) {
 		OutboxMessage ob = new OutboxMessage();
 		ob.contact().setPhone(phone);
 		ob.setHsm(new CommonTemplateMeta().code("verification_otp")
 				.data(MapModel.createInstance().put("otp", otp).toMap()));
-		return send("sms:mehotp", ob);
+
+		String countryCode = "IN";
+		try {
+			phone = phone.replace(" ", "").replaceAll("^[\\+0\\s]+(?!$)", "").trim();
+			PhoneNumber phoneNumber = PHONE_NUMBER_UTIL.parse("+" + phone, countryCode);
+			phone = String.format("+%s%s", phoneNumber.getCountryCode(), phoneNumber.getNationalNumber());
+			countryCode = PHONE_NUMBER_UTIL.getRegionCodeForCountryCode(phoneNumber.getCountryCode());
+		} catch (NumberParseException e) {
+			phone = String.format("+%s", phone);
+		}
+
+		for (Entry<String, ChannelConfig> channel : pmEnvironment.config().local().channels().entrySet()) {
+			if (ArgUtil.is(channel.getValue().getSms())
+					&& ArgUtil.is(channel.getValue().getSms().getCountry(), countryCode)) {
+				return send(channel.getValue().getChannelId(), ob);
+			}
+		}
+
+		return null;
 	}
 
 	public OutboxMessage sendEmailOTP(String email, String otp) {

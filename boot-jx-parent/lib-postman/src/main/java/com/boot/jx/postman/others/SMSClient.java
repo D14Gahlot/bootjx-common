@@ -11,6 +11,7 @@ import com.boot.jx.postman.plugin.SMSPlugin.SMSConfigDetails;
 import com.boot.jx.rest.RestService;
 import com.boot.jx.rest.RestService.Ajax;
 import com.boot.model.MapModel;
+import com.boot.utils.CryptoUtil;
 import com.boot.utils.JsonPath;
 
 @Component
@@ -20,8 +21,15 @@ public class SMSClient {
 	public static final String TEXTLOCAL_URL = "https://api.textlocal.in/send";
 	public static final JsonPath TEXTLOCAL_URL_RESPONSE_MSG_ID = new JsonPath("messages/[0]/id");
 
+	public static final String TWILIO = "TWILIO";
+	public static final String TWILIO_URL = "https://api.twilio.com/2010-04-01/";
+	public static final JsonPath TWILIO_URL_RESPONSE_MSG_ID = new JsonPath("sid");
+
 	@Autowired
 	private RestService restService;
+
+	@Autowired
+	TwilioClient twilioClient;
 
 	public OutboxMessage sendSMS(ChannelConfig channelConfig, OutboxMessage outboxMessage) {
 		SMSConfigDetails sms = channelConfig.getSms();
@@ -34,7 +42,17 @@ public class SMSClient {
 					.field("sender", channelConfig.getSms().getNumber())
 					.field("numbers", outboxMessage.contact().getCsid()).field("message", outboxMessage.getMessage())
 					.submit().asMapModel();
-			outboxMessage.setMessageIdExt(resp.entry(TEXTLOCAL_URL_RESPONSE_MSG_ID).asString());
+			outboxMessage.setMessageIdExt(resp.path(TEXTLOCAL_URL_RESPONSE_MSG_ID).asString());
+		} else if (TWILIO.equalsIgnoreCase(sms.getProvider())) {
+			String sid = pub.entry("sid").asString();
+			String apiKey = secret.entry("apikey").asString();
+			MapModel resp = restService.ajax(TWILIO_URL).path("/Accounts/{sid}/Messages.json").pathParam("sid", sid)
+					.field("From", "+" + channelConfig.getSms().getNumber())
+					.field("To", "+" + outboxMessage.contact().getCsid()).field("Body", outboxMessage.getMessage())
+					.header("Authorization",
+							"Basic " + CryptoUtil.getEncoder().message(sid + ":" + apiKey).encodeBase64().toString())
+					.postForm().asMapModel();
+			outboxMessage.setMessageIdExt(resp.keyEntry("sid").asString());
 		} else {
 			Ajax ajax = restService.ajax(sms.getRequest().getUrl());
 			if (sms.getRequest().getHeaders() != null) {
