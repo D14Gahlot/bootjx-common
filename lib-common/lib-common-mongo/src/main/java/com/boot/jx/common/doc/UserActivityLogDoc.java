@@ -30,6 +30,9 @@ public class UserActivityLogDoc {
 	public TimeStampIndex createdAt;
 
 	@Indexed
+	private String sessionId;
+
+	@Indexed
 	private String appType;
 
 	public String getId() {
@@ -86,6 +89,14 @@ public class UserActivityLogDoc {
 
 	public void setUser(String user) {
 		this.user = user;
+	}
+
+	public String getSessionId() {
+		return sessionId;
+	}
+
+	public void setSessionId(String sessionId) {
+		this.sessionId = sessionId;
 	}
 
 }

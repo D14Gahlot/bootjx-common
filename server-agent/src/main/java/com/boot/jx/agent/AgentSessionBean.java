@@ -1,6 +1,8 @@
 package com.boot.jx.agent;
 
 import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
@@ -30,6 +32,8 @@ public class AgentSessionBean extends AppCommonAuthUser implements Serializable 
 	private long lastSyncStamp;
 
 	private boolean isDirty;
+
+	private Map<String, Object> stamps;
 
 	private AgentResponseAuthDto profile;
 
@@ -120,6 +124,21 @@ public class AgentSessionBean extends AppCommonAuthUser implements Serializable 
 			return this.profile.getAgent_code();
 		}
 		return ArgUtil.anyOf(AppContextUtil.getActorId(), PMConstants.DEFAULT.NO_USER);
+	}
+
+	public Map<String, Object> getStamps() {
+		return stamps;
+	}
+
+	public void setStamps(Map<String, Object> stamps) {
+		this.stamps = stamps;
+	}
+
+	public Map<String, Object> stamps() {
+		if (this.stamps == null) {
+			this.stamps = new HashMap<String, Object>();
+		}
+		return this.stamps;
 	}
 
 }
