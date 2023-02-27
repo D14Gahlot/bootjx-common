@@ -22,6 +22,7 @@ import com.boot.jx.exception.ApiHttpExceptions.ApiHttpServerException;
 import com.boot.jx.mongo.CommonMongoQueryBuilder;
 import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.jx.mongo.CommonMongoTemplateAbstract;
+import com.boot.jx.mongo.CommonDocInterfaces.TimeStampIndex;
 import com.boot.jx.postman.doc.ContactDetailDoc;
 import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.doc.MessageDocAbstract;
@@ -111,6 +112,7 @@ public class MessageStore extends CommonMongoTemplateAbstract {
 		doc.setContactId(PostManUtil.createContactId(inboxMessage));
 		doc.setType("I");
 		doc.setTimestamp(System.currentTimeMillis());
+		doc.setTime(TimeStampIndex.now());
 
 		doc.setFormatType(inboxMessage.getFormatType());
 		doc.setFormatSubType(inboxMessage.getFormatSubType());
@@ -263,6 +265,7 @@ public class MessageStore extends CommonMongoTemplateAbstract {
 			doc.setType(ArgUtil.nonEmpty(outMessage.getType(), "O"));
 		}
 		doc.setTimestamp(System.currentTimeMillis());
+		doc.setTime(TimeStampIndex.now());
 
 		String to = CollectionUtil.getOne(outMessage.getTo());
 		doc.setContactId(PostManUtil.createContactId(outMessage));
@@ -470,6 +473,11 @@ public class MessageStore extends CommonMongoTemplateAbstract {
 		if (!ArgUtil.is(msg.getAppVenv())) {
 			msg.setAppVenv(appConfig.getAppVenv());
 		}
+
+		if (msg.getTime() == null) {
+			msg.setTime(TimeStampIndex.now());
+		}
+
 		mongoTemplate.save(msg);
 		return msg;
 	}

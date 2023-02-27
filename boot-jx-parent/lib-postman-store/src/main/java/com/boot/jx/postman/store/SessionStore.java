@@ -493,6 +493,7 @@ public class SessionStore extends CommonMongoTemplateAbstract<SessionStore> {
 		builder.set("resolveSessionStamp", chatSessionDoc.getResolveSessionStamp());
 		builder.set("resolved", chatSessionDoc.isResolved());
 		builder.set("status", PMConstants.CHAT_STATUS.RESOLVED);
+		builder.set("summary.assignedToAtResolve", chatSessionDoc.getAssignedToAgent());
 		super.updateFirst(builder.getQuery(), builder.getUpdate(), ChatSessionDoc.class);
 		return chatSessionDoc;
 	}
@@ -506,6 +507,7 @@ public class SessionStore extends CommonMongoTemplateAbstract<SessionStore> {
 		builder.set("closeSessionStamp", chatSessionDoc.getCloseSessionStamp());
 		builder.set("active", chatSessionDoc.isActive());
 		builder.set("status", PMConstants.CHAT_STATUS.CLOSED);
+		builder.set("summary.assignedToAtClose", chatSessionDoc.getAssignedToAgent());
 		super.updateFirst(builder.getQuery(), builder.getUpdate(), ChatSessionDoc.class);
 
 		return chatSessionDoc;

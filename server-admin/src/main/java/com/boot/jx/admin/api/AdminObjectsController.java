@@ -2,12 +2,14 @@ package com.boot.jx.admin.api;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort.Direction;
+import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.boot.jx.api.ApiResponse;
+import com.boot.jx.common.doc.UserActivityLogDoc;
 import com.boot.jx.mongo.CommonMongoQB.MongoQueryBuilder;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.doc.MessageDoc.MessageDocLogs;
@@ -29,6 +31,30 @@ public class AdminObjectsController {
 			@RequestParam(required = false) String sortBy,
 			@RequestParam(required = false, defaultValue = "asc") String sortDir) {
 		MongoQueryBuilder<MessageDocLogs> q = MongoQueryBuilder.collection(MessageDocLogs.class).page(pageNo, pageSize);
+
+		if (ArgUtil.is(sortBy)) {
+			q = q.sortBy(sortBy, Direction.fromString(sortDir));
+		}
+		return ApiResponse.buildResults(messageStore.find(q));
+	}
+
+	@RequestMapping(value = "/api/objects/user_activities", method = { RequestMethod.GET })
+	@JsonView(PMEnvironment.PublicProperty.class)
+	public ApiResponse<UserActivityLogDoc, Object> getActivityLogs(@RequestParam(required = false) String id,
+			@RequestParam(required = false, defaultValue = "0") int pageNo,
+			@RequestParam(required = false, defaultValue = "25") int pageSize,
+			@RequestParam(required = false, defaultValue = "createdAt.stamp") String sortBy,
+			@RequestParam(required = false, defaultValue = "desc") String sortDir,
+			@RequestParam(required = false) String appType, @RequestParam(required = false) String user) {
+		MongoQueryBuilder<UserActivityLogDoc> q = MongoQueryBuilder.collection(UserActivityLogDoc.class).page(pageNo,
+				pageSize);
+
+		if (ArgUtil.is(appType)) {
+			q.where("appType").is(appType);
+		}
+		if (ArgUtil.is(user)) {
+			q.where("user").is(user);
+		}
 
 		if (ArgUtil.is(sortBy)) {
 			q = q.sortBy(sortBy, Direction.fromString(sortDir));

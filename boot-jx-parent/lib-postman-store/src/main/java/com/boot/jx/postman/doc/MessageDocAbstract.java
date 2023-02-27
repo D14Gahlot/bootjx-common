@@ -12,6 +12,7 @@ import org.springframework.data.mongodb.core.index.Indexed;
 
 import com.boot.jx.model.CommonTemplateMeta;
 import com.boot.jx.mongo.CommonDocInterfaces.Patchable;
+import com.boot.jx.mongo.CommonDocInterfaces.TimeStampIndex;
 import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.Message.Status;
 import com.boot.jx.postman.model.MessageDefinitions.IMessageId;
@@ -41,6 +42,9 @@ public abstract class MessageDocAbstract implements Serializable, Patchable<Mess
 
 	@Indexed
 	private long timestamp;
+
+	public TimeStampIndex time;
+
 	private String type;
 	private String template;
 	private String templateId;
@@ -484,6 +488,14 @@ public abstract class MessageDocAbstract implements Serializable, Patchable<Mess
 
 	public void setAppVenv(String appVenv) {
 		this.appVenv = appVenv;
+	}
+
+	public TimeStampIndex getTime() {
+		return time;
+	}
+
+	public void setTime(TimeStampIndex time) {
+		this.time = time;
 	}
 
 }
