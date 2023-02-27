@@ -1196,37 +1196,39 @@ public class AdminDashBoardManager {
 
 		Map<Object, Long> hourCntMap = getHourRange(currentTs, lasthrTimeStmp);
 
-		for (Map.Entry<String, Map<Object, Long>> keyValue : hourWiseCountMap.entrySet()) {
-			Map<Object, Long> hoCntMapAll = new HashMap<>();
-			String key = keyValue.getKey();
-			if (ArgUtil.is(key)) {
-				for (String channel : channelLst) {
-					if (!key.contains(channel)) {
-						hourWiseCount.put(tnt + "_" + channel, hourCntMap);
-					}
-				}
-				Map<Object, Long> hoCntMap = hourWiseCountMap.get(key);
-
-				for (Map.Entry<Object, Long> keyValueCount : hourCntMap.entrySet()) {
-					Object keydt = keyValueCount.getKey();
-					if (ArgUtil.is(keydt)) {
-						Long count = keyValueCount.getValue();
-						if (hoCntMap.containsKey(keydt)) {
-							hoCntMapAll.put(keydt, hoCntMap.get(keydt));
-						} else {
-							hoCntMapAll.put(keydt, count);
-						}
-					}
-				}
-
-				hourWiseCount.put(key, hoCntMapAll);
-			}
-		}
-		if (hourWiseCount == null || hourWiseCount.isEmpty()) {
-			for (String channel : channelLst) {
-				hourWiseCount.put(tnt + "_" + channel, hourCntMap);
-			}
-		}
+//		for (Map.Entry<String, Map<Object, Long>> keyValue : hourWiseCountMap.entrySet()) {
+//			Map<Object, Long> hoCntMapAll = new HashMap<>();
+//			String key = keyValue.getKey();
+//			if (ArgUtil.is(key)) {
+//				for (String channel : channelLst) {
+//					if (!key.contains(channel)) {
+//						hourWiseCount.put(tnt + "_" + channel, hourCntMap);
+//					}
+//				}
+//				Map<Object, Long> hoCntMap = hourWiseCountMap.get(key);
+//
+//				for (Map.Entry<Object, Long> keyValueCount : hourCntMap.entrySet()) {
+//					Object keydt = keyValueCount.getKey();
+//					if (ArgUtil.is(keydt)) {
+//						Long count = keyValueCount.getValue();
+//						if (hoCntMap.containsKey(keydt)) {
+//							hoCntMapAll.put(keydt, hoCntMap.get(keydt));
+//						} else {
+//							hoCntMapAll.put(keydt, count);
+//						}
+//					}
+//				}
+//
+//				hourWiseCount.put(key, hoCntMapAll);
+//			}
+//		}
+//		if (hourWiseCount == null || hourWiseCount.isEmpty()) {
+//			for (String channel : channelLst) {
+//				hourWiseCount.put(tnt + "_" + channel, hourCntMap);
+//			}
+//		}
+		
+		hourWiseCount = MapUtils.getHourdefaultValue(hourWiseCountMap, channelLst, hourCntMap, tnt);
 
 		hourWiseCount = sortMap(hourWiseCount);
 
