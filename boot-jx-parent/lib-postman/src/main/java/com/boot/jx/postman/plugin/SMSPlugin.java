@@ -36,8 +36,8 @@ public class SMSPlugin implements DefaultChannelPlugin<SMSConfigDetails> {
 				inputType = INPUT_TYPE.OPTIONS, optionsSource = "data:/config/sms_provider")
 		private String provider;
 
-		@ConfigMetaProperty(path = "sms.country", title = "SMS Country", defaultValue = "IN",
-				inputType = INPUT_TYPE.OPTIONS, optionsSource = "getx:/pub/meta/options/isdcode")
+		@ConfigMetaProperty(path = "sms.country", title = "SMS Country", defaultValue = "IN", searchable = true,
+				filterable = true, inputType = INPUT_TYPE.OPTIONS, optionsSource = "getx:/pub/meta/options/isdcode")
 		private String country;
 
 		@ConfigMetaProperty(path = "sms.pub", writeonly = false, title = "Identifiers JSON", hidden = true,

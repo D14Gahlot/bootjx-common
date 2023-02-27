@@ -143,13 +143,21 @@ public class ConfigMeta implements Serializable {
 
 		boolean hidden() default false;
 
+		boolean readonly() default false;
+
 		boolean createonly() default false;
 
 		boolean writeonly() default false;
 
-		boolean optional() default false;
+		boolean deprecated() default false;
 
-		boolean readonly() default false;
+		boolean searchable() default false;
+
+		boolean clearable() default false;
+
+		boolean filterable() default false;
+
+		boolean optional() default false;
 
 		INPUT_TYPE inputType() default INPUT_TYPE.NONE;
 
