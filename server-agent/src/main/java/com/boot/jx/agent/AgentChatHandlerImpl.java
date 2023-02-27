@@ -471,7 +471,7 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 
 	private void beforeSend(ChatSessionDoc chatSessionDoc, OutboxMessage outboxMessage) {
 		if (ArgUtil.is(outboxMessage.hsm().getCode())) {
-			AgentResponseAuthDto p = agentSession.getProfile();
+			AgentResponseAuthDto p = ArgUtil.is(agentSession) ? agentSession.getProfile() : null;
 			if (ArgUtil.is(p)
 					&& ArgUtil.is(agentSession.getProfile().getAgent_code(), chatSessionDoc.getAssignedToAgent())) {
 				OutboxMessage.AGENT_NAME.save(outboxMessage.model(), agentSession.getProfile().getAgent_name());
