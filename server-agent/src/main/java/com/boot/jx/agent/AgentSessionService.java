@@ -38,6 +38,7 @@ import com.boot.jx.postman.store.MessageContext;
 import com.boot.jx.rest.AppRequestInterfaces.AppAuthUser;
 import com.boot.jx.stomp.StompQuery;
 import com.boot.jx.stomp.StompTunnelSessionManager;
+import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.TimeUtils;
 
@@ -121,8 +122,18 @@ public class AgentSessionService
 		boolean oldIsAway = agentSessionBean.isAway();
 		agentSessionBean.setAway(isAway);
 		if (oldIsAway != isAway) {
+			MapModel data = MapModel.createInstance();
+			if (isAway) {
+				agentSessionBean.stamps().put("USERSESSION_AWAY_START", System.currentTimeMillis());
+			} else {
+				long awayStamp = MapModel.from(agentSessionBean.stamps()).keyEntry("USERSESSION_AWAY_START").asLong(0L);
+				if (awayStamp > 0L) {
+					long awayGap = System.currentTimeMillis() - awayStamp;
+					data.put("awayGap", awayGap);
+				}
+			}
 			userActivityStore.log(agentSessionBean.getAgentCode(),
-					isAway ? "USERSESSION_AWAY_START" : "USERSESSION_AWAY_END");
+					isAway ? "USERSESSION_AWAY_START" : "USERSESSION_AWAY_END", data.toMap());
 		}
 	}
 
@@ -132,8 +143,19 @@ public class AgentSessionService
 		agentSessionBean.setLastOnlineStamp(System.currentTimeMillis());
 		if (oldOnline != isOnline) {
 			this.updateSession(true, agentSessionBean);
-			userActivityStore.log(agentSessionBean.getAgentCode(),
-					isOnline ? "USERSESSION_ONLINE" : "USERSESSION_OFFLINE");
+			String status = isOnline ? "USERSESSION_ONLINE" : "USERSESSION_OFFLINE";
+			MapModel data = MapModel.createInstance();
+			if (!isOnline) {
+				agentSessionBean.stamps().put("USERSESSION_OFFLINE", System.currentTimeMillis());
+			} else {
+				long offlineStamp = MapModel.from(agentSessionBean.stamps()).keyEntry("USERSESSION_OFFLINE").asLong(0L);
+				if (offlineStamp > 0L) {
+					long offlineGap = System.currentTimeMillis() - offlineStamp;
+					data.put("offlineGap", offlineGap);
+				}
+			}
+			userActivityStore.log(agentSessionBean.getAgentCode(), status, data.toMap());
+
 		} else {
 			this.updateSession(false, agentSessionBean);
 		}
