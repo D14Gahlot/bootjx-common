@@ -54,7 +54,7 @@ public class ChannelPluginProvider {
 		public default ChannelConfig updateChannelConfig(ChannelConfig config, AChannelDetails details) {
 			updatePluginSpecs(config);
 			// Channel Specific Properties
-			config.setLane(StringUtils.removeSpecialCharacter(details.getLane()));
+			config.setLane(details.getLane().replaceAll("[^a-zA-Z0-9\\_]+", ""));
 
 			setDetails(config, (C) details);
 			return config;

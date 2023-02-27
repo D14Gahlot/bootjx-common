@@ -50,13 +50,13 @@ public class SMSPlugin implements DefaultChannelPlugin<SMSConfigDetails> {
 		private Map<String, Object> secret;
 
 		@ConfigMetaProperty(path = "sms.request", pathRaw = "sms.request.bash", writeonly = false,
-				title = "Request Object", hidden = true, desc = "Request in curl format",
+				title = "Request Object", hidden = true, desc = "Request in curl format", optional = true,
 				inputType = INPUT_TYPE.TEXTAREA)
 		private CurlCommand request;
 
 		@Override
 		public String getLane() {
-			return number + "@" + provider + "@" + country;
+			return number + "_" + provider + "_" + country;
 		}
 
 		public String getNumber() {
