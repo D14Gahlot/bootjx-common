@@ -10,7 +10,9 @@ import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PMEnvironment.AChannelDetails;
 import com.boot.jx.postman.plugin.ChannelPluginProvider.DefaultChannelPlugin;
 import com.boot.jx.postman.plugin.SMSPlugin.SMSConfigDetails;
+import com.boot.utils.ArgUtil;
 import com.boot.utils.BashUtil.CurlCommand;
+import com.boot.utils.Constants;
 import com.fasterxml.jackson.annotation.JsonView;
 
 public class SMSPlugin implements DefaultChannelPlugin<SMSConfigDetails> {
@@ -56,7 +58,7 @@ public class SMSPlugin implements DefaultChannelPlugin<SMSConfigDetails> {
 
 		@Override
 		public String getLane() {
-			return number + "_" + provider + "_" + country;
+			return number + "_" + provider + "_" + ArgUtil.parseAsString(country, Constants.BLANK);
 		}
 
 		public String getNumber() {

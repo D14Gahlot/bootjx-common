@@ -39,6 +39,9 @@ public class PhoneService {
 	private PMEnvironment pmEnvironment;
 
 	private OutboxMessage send(ChannelConfig channel, OutboxMessage outboxMessage) {
+		if (!ArgUtil.is(channel)) {
+			return outboxMessage;
+		}
 		outboxMessage.contact().type(channel.getContactType());
 		outboxMessage.contact().setChannelType(channel.getChannelType());
 		outboxMessage.contact().setLane(channel.getLane());
@@ -78,14 +81,16 @@ public class PhoneService {
 			phone = String.format("+%s", phone);
 		}
 
+		String defchannelId = null;
 		for (Entry<String, ChannelConfig> channel : pmEnvironment.config().local().channels().entrySet()) {
 			if (ArgUtil.is(channel.getValue().getSms())
 					&& ArgUtil.is(channel.getValue().getSms().getCountry(), countryCode)) {
 				return send(channel.getValue().getChannelId(), ob);
+			} else if (ArgUtil.not(channel.getValue().getSms().getCountry())) {
+				defchannelId = channel.getValue().getChannelId();
 			}
 		}
-
-		return null;
+		return send(defchannelId, ob);
 	}
 
 	public OutboxMessage sendEmailOTP(String email, String otp) {
